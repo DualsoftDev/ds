@@ -12,3 +12,4 @@
   - Port 와 Relay 간의 I/F 매개체 (시스템에 따라 다양한 값의 형태를 가질 수 있음)
 - Relay
   - 자식 행위를 인과대로 처리하기위한 부모 Segment의 SR, RR, ER bit memory flag 기능
+  - Source, Target Segment에 각 자식들을 명령 및 관찰 가능한 시작, 리셋, 끝에 해당하는 릴레이를 부여

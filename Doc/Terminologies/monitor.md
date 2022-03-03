@@ -21,4 +21,3 @@
     | Maintenance      |‘H’ 상태에서 Reset CMD off 변경 시 Stop 발동|
     | Timeout       |Segment 의 시간(평균 Going 시간 x배) 지연 시 Stop 발동|
     | Condition |모든    Segments 의 정의 인과위반시 Stop 발동|
-

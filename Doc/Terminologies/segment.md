@@ -8,7 +8,7 @@
   - S/R/E 각각 존재할 수도 있고, 존재하지 않을 수도 있다.
   - S/R/E 각각 존재하더라도 특정 시스템에서 특정 port는 접근이 안될 수도 있다.
 
-- F# 순수 함수 기능 (차이점 시작전 초기값에 따라 다름)
+- $\approx$ F# 순수 함수 기능 (차이점 시작전 초기값에 따라 다름)
 - 외부에서 EP Flag 를 살펴 봄으로써 On/Off 인지 확인할 수 있다.
 - 모든 Segment 는, 특정 DsSystem 내에 유일하게 소속된다.
 - 하나의 Segment 는 유일한 부모 Segment 를 가진다.
@@ -16,7 +16,7 @@
   
 ## RealSegment
 
-- F# 멤버 함수 정의
+- $\approx$ F# 멤버 함수 정의
 - 내부에 상태변수를 가지며, 값은 Homing(H), Ready(R), Going(G), Finish(F) 4가지 중 하나의 상태로 존재
 - 외부 명령(Cmd) 수신 시의 예상 상태 변화
   - Command Start On 시 R → G → F
@@ -38,9 +38,25 @@
 
 ## CallSegment (호출행위 타 시스템 DAG 실행)
 
-- F# pipe 함수 정의
+- $\approx$ C#/F# 함수 호출
 - 자식 Segment 를 가질 수 없다.
-- CallSegment 상태값은 CMD와 Value 값으로 추정한다.
+- Target을 가진다.
+  - Target = 호출 대상. (Segment or DAG)
+  - 타 시스템의 toplevel RealSegment 혹은 toplevel 의 DAG.
+  - Target 이 CallSegment 일 수는 없다.
+
+  - Target은 해당 시스템 toplevel에 DAG(directed acyclic graph 유향비순환) 형태로 존재해야 하며,
+    - 호출한 Segment 와 호출된 Segment 가 속한 system 은 반드시 다르다.
+    - 호출시작은 호출된 DAG의 Head Node(Segment)들의 Start Port에 접근 가능한 Start TAG를 사용
+    - 호출결과는 호출된 DAG의 Tail Node(Segment)들의 End Port에 접근 가능한 End Tag를 사용
+
+
+- CallSegment 의 End 값은
+  - 부모가 시키지 않았음에도 단순히 Target 의 End 값만 켜진 경우와 (Relay**E**)
+  - 부모가 시킨 이후 Target 의 End 값을 확인한 경우는 구분해야 한다. (Relay**C**, completed)
+    - RelayC 는 Start ON 상태에서 End 값을 확인한 경우에 ON 되며, reset 에 의해서만 clear 된다.
+- S/R/E 에 더해 추가적으로 C 의 relay 를 가진다.
+- CallSegment 상태값은 Start/Reset 의 CMD와 RealyC 의 Value 값으로 추정한다.
 
 - Call 시퀀스(상태 추정값*)
   <!-- | CMD  | Out Value | Segment Status |
@@ -50,7 +66,7 @@
   | Reset(OFF) |1|Finish* |
   | Reset(ON) |1|Homing* |   -->
 
-  | Start | Reset | End | Segment Status |
+  | Start | Reset | Completed | Segment Status |
   | ----- | ----  | ----| --- |
   | 0     | -     | 0   | Ready |
   | 1     | 0     | 0   | Going |
@@ -58,11 +74,10 @@
   | 0     | 1     | 1   | Homing |
   | 1     | 1     | -   | Error |
 
+#### CallSegment 관련 원위치
+- 부모 segment 가 child 의 CallSegment 들의 원위치 확인을 수행할 때에는 RealyC 대신 RelayE 를 이용해서 확인한다.
+- 원위치 확인시, Target 의 reset 관계가 반영되어야 한다.
 
 
 
 
-- 실제 호출하고 있는 대상 Segment는 root에 DAG(directed acyclic graph 유향비순환) 형태로 존재해야 하며,
-  - 호출한 Segment 와 호출된 Segment 가 속한 system 은 반드시 다르다.
-  - 호출시작은 호출된 DAG의 Head Node(Segment)들의 Start Port에 접근 가능한 Start TAG를 사용
-  - 호출결과는 호출된 DAG의 Tail Node(Segment)들의 End Port에 접근 가능한 End Tag를 사용

@@ -28,7 +28,7 @@
 
 - TopLevelSegment 는 다른 segment 에 의해서 피참조될 수 있다.
 
-## RefSegment (참조/Referencing segment)
+## CallSegment (참조/Referencing segment)
 
 - $\approx$ C# 멤버 함수 호출
 - 자식 segment 를 가질 수 없다.

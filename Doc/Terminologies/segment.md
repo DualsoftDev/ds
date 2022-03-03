@@ -36,10 +36,10 @@
 - Call 시퀀스(상태 추정값*)
   | CMD  | Out Value | Segment Status |
   | ----- | ----  | ---- |
-  | Start |0|Ready*  |
-  | Start |0|Going*  |
-  | Reset |1|Finish* |
-  | Reset |1|Homing* |
+  | Start(OFF) |0|Ready*  |
+  | Start(ON) |0|Going*  |
+  | Reset(OFF) |1|Finish* |
+  | Reset(ON) |1|Homing* |
 - 실제 호출하고 있는 대상 Segment는 root에 DAG(directed acyclic graph 유향비순환) 형태로 존재해야 하며,
   - 호출한 Segment 와 호출된 Segment 가 속한 system 은 반드시 다르다.
   - 호출시작은 호출된 DAG의 Head Node(Segment)들의 Start Port에 접근 가능한 Start TAG를 사용

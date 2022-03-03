@@ -45,10 +45,10 @@
 - Call 시퀀스(상태 추정값*)
   <!-- | CMD  | Out Value | Segment Status |
   | ----- | ----  | ---- |
-  | Start |0|Ready*  |
-  | Start |0|Going*  |
-  | Reset |1|Finish* |
-  | Reset |1|Homing* | -->
+  | Start(OFF) |0|Ready*  |
+  | Start(ON) |0|Going*  |
+  | Reset(OFF) |1|Finish* |
+  | Reset(ON) |1|Homing* |   -->
 
   | Start | Reset | End | Segment Status |
   | ----- | ----  | ----| --- |

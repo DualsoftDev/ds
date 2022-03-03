@@ -1,8 +1,13 @@
 # 1. Segment (행위단위)
 
+<!-- 확인:  `외부` : 부모를 포함한 상부를 의미.  타 시스템을 의미하는 것이 아님 -->
+
 - 외부 작용(Start/Reset)을 통해 정해진 고유 행위(작업)를 수행하며 자기 유사성을 지니는 기본 단위
 - 외부 인터페이스 Start/Reset/End Port(flag) 를 갖는 행위(작업)의 단위 (**S**P/**R**P/**E**P)
   - [flag.md](flag.md) 참고
+  - S/R/E 각각 존재할 수도 있고, 존재하지 않을 수도 있다.
+  - S/R/E 각각 존재하더라도 특정 시스템에서 특정 port는 접근이 안될 수도 있다.
+
 - F# 순수 함수 기능 (차이점 시작전 초기값에 따라 다름)
 - 외부에서 EP Flag 를 살펴 봄으로써 On/Off 인지 확인할 수 있다.
 - 모든 Segment 는, 특정 DsSystem 내에 유일하게 소속된다.
@@ -13,8 +18,12 @@
 
 - F# 멤버 함수 정의
 - 내부에 상태변수를 가지며, 값은 Homing(H), Ready(R), Going(G), Finish(F) 4가지 중 하나의 상태로 존재
-- 외부 명령(Cmd)   : Command Start On은 (R → G → F) Command Reset On은 (F → H → R)
-- 외부 값(Value)     : Value On은 (F, H) 상태 Value Off은 (R, G, H) 상태
+- 외부 명령(Cmd) 수신 시의 예상 상태 변화
+  - Command Start On 시 R → G → F
+  - Command Reset On 시 F → H → R
+- 외부 표출 값(Value) : (외부에서 나의 segment 상태를 해석하는 방법)
+  - Value On은 (F, H) 상태
+  - Value Off은 (R, G) 상태
   - Homing은 Value On/Off 두개상태에서 가능 (부모입장에서는 언제나 가능)
 - 정상 시퀀스
     | Segment Status | Out Value |
@@ -34,12 +43,23 @@
 - CallSegment 상태값은 CMD와 Value 값으로 추정한다.
 
 - Call 시퀀스(상태 추정값*)
-  | CMD  | Out Value | Segment Status |
+  <!-- | CMD  | Out Value | Segment Status |
   | ----- | ----  | ---- |
   | Start |0|Ready*  |
   | Start |0|Going*  |
   | Reset |1|Finish* |
-  | Reset |1|Homing* |
+  | Reset |1|Homing* | -->
+
+  | Start | Reset | End | Segment Status |
+  | ----- | ----  | ----| --- |
+  | 0     | -     | 0   | Ready |
+  | 1     | 0     | 0   | Going |
+  | -     | 0     | 1   | Finish|
+  | 0     | 1     | 1   | Homing |
+  | 1     | 1     | -   | Error |
+
+
+
 
 
 - 실제 호출하고 있는 대상 Segment는 root에 DAG(directed acyclic graph 유향비순환) 형태로 존재해야 하며,

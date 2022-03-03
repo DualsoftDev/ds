@@ -1,6 +1,6 @@
 # Edge
 
-#### 공통
+## 공통
 
 - Segment 내부에 Source, Target 2개의 Segment를 Start 또는 Reset 속성으로 연결
 - 자식에 배치된 Start Edges 반드시 DAG(Directed acyclic graph) 기준을 따라야함
@@ -12,12 +12,12 @@
 
   - Children 원위치 찾기 : Going Edges의 Start DAG 기준으로
   - Child의 Reset이 뒤에서 오면 OFF
-  - Child의 Reset이 앞에서 오면 ON 
+  - Child의 Reset이 앞에서 오면 ON
   - Child의 Reset이 방향을 모르면 None
 
 - Children 원위치 공식 : 행위는 복수개의 고유 값(원위치)를 가짐
   
-#### MEdge (modeling edge)
+## MEdge (modeling edge)
 
 - Segment 와 Segment 간 연결
 - Peer segment 간 연결만 허용
@@ -25,9 +25,9 @@
   - 즉 다른 segment 의 child segment 와 바로 연결할 수 없다.
   - 자신의 child segment 와도 연결할 수 없다.
 
-#### CEdge (compiled edge)
+## CEdge (compiled edge)
 
-#### 기타
+## 기타
 
 - Going Edge Set  : 행위 진행에 관한 자식간 내부 연결정보
 - Homing Edge Set : 행위 복귀에 관한 자식간 내부 연결정보

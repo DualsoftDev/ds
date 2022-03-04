@@ -2,6 +2,8 @@
 
 ## 용법
 
+- [sre.pptx](./ppt/SRE.pptx) 참고
+
 - Port
   - Call/Real Segment 의 S/R/E Port 에 해당
   - SP  : 자신을 시작 시키려는 TAG들 값을 'or' 연산 한다.

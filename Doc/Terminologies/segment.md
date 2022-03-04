@@ -72,7 +72,7 @@
   | 1     | 0     | 0   | Going |
   | -     | 0     | 1   | Finish|
   | 0     | 1     | 1   | Homing |
-  | 1     | 1     | -   | Error |
+  | 1     | 1     | -   | Error(todo 우선순위 속성필요) |
 
 #### CallSegment 관련 원위치
 - 부모 segment 가 child 의 CallSegment 들의 원위치 확인을 수행할 때에는 RealyC 대신 RelayE 를 이용해서 확인한다.

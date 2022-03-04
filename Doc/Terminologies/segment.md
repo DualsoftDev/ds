@@ -33,6 +33,8 @@
     |Finish |1|
     |Homing |1|
 
+-[Status타임차트](./ppt/Status.pptx)
+
 - 내부에 자식 Segment 들을 가질 수 있다.
   - 자식 Segment 는 RealSegment 이거나, 호출가능한 CallSegment 이다.
 

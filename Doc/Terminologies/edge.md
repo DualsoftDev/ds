@@ -16,7 +16,7 @@
   - Child의 Reset이 방향을 모르면 None
 
 - Children 원위치 공식 : 행위는 복수개의 고유 값(원위치)를 가짐
-  
+- [origin고유값공식](./ppt/origin고유값공식.pptx)  
 ## MEdge (modeling edge)
 
 - Segment 와 Segment 간 연결

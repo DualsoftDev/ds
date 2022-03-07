@@ -53,12 +53,7 @@
     - 호출결과는 호출된 DAG의 Tail Node(Segment)들의 End Port에 접근 가능한 End Tag를 사용
 
 
-- CallSegment 의 End 값은
-  - ~~부모가 시키지 않았음에도 단순히 Target 의 End 값만 켜진 경우와 (Relay**E**)~~ 부모가 관찰은 End Port (EP)
-  - ~~부모가 시킨 이후 Target 의 End 값을 확인한 경우는 구분해야 한다. (Relay**C**, completed)~~ 부모가 수행완료는 End Relay (ER)
-    - ~~RelayC~~ ER 는 Start ON 상태에서 End 값을 확인한 경우에 ON 되며, reset 에 의해서만 clear 된다.
-- ~~S/R/E 에 더해 추가적으로 C 의 relay 를 가진다.~~
-- CallSegment 상태값은 Start/Reset 의 CMD와 Value(EP) 값으로 추정한다.
+
 
 - Call 시퀀스(상태 추정값*)
   <!-- | CMD  | Out Value | Segment Status |
@@ -68,18 +63,13 @@
   | Reset(OFF) |1|Finish* |
   | Reset(ON) |1|Homing* |   -->
 
-  | Start | Reset |~~Completed~~ | Segment Status |
-  | ----- | ----  | ----| --- |
-  | 0     | -     | 0   | Ready |
-  | 1     | 0     | 0   | Going |
-  | -     | 0     | 1   | Finish|
-  | 0     | 1     | 1   | Homing |
-  | 1     | 1     | -   | Error(todo 우선순위 속성필요) |
-
-#### ~~CallSegment 관련 원위치~~  - [edge.md](edge.md) 참고
-- ~~부모 segment 가 child 의 CallSegment 들의 원위치 확인을 수행할 때에는 RealyC 대신 RelayE 를 이용해서 확인한다.~~
-- ~~원위치 확인시, Target 의 reset 관계가 반영되어야 한다.~~
-
+  | Start | Reset | Segment Status |
+  | ----- | ----  | --- |
+  | 0     | -     | Ready |
+  | 1     | 0     | Going |
+  | -     | 0     | Finish|
+  | 0     | 1     | Homing |
+  | 1     | 1     | Error(todo 우선순위 속성필요) |
 
 
 

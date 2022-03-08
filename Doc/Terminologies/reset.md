@@ -66,17 +66,19 @@ children 을 reset 안전인과 순서를 감안하여 reset 시켜나가는 과
 
 - default reset 인과 적용 기준
 - Example1
-    seg reset 시 B+ -> B- 가 수행되어서는 안되나, 수행 되므로 
+    seg reset 시 B+ -> B- 가 수행되어서는 안되나, 수행 되므로
     강제 ON/OFF 기능필요
 
 ```
-seg = {seg1; seg2}
-    [arrG]seg1 = {A.+ > B.+ > B.-}
-    [arrG]seg2 = {A.- > B.+ > B.-}
-   
-    [arrG] = {seg1 > seg2}
-             {seg1 <!> seg2}
-A = {+; -}
-    [arrG] = {+ <!> -}
-    ...
+[Sys]sys1 = 
+    [arrG] {seg1 > seg2}
+    [arrR] {seg1 <!> seg2}
+    seg1 = [arrG] {A.+ > B.+ > B.-}
+    seg2 = [arrG] {A.+ > B.+ > B.-}
+        
+  
+[Sys]A = [arrR] {+ <!> -}
+[Sys]B = [arrR] {+ <!> -}
+
 ```
+

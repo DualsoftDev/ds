@@ -31,16 +31,16 @@
 #### Start ON 시
 children 을 start 인과 순서대로 작업을 완료시켜 나가는 과정
 1. 자신의 상태 검사
-    - Ready -> children 이 원위치 상태인지 검사.  아니면 error
+    - Ready -> children 이 원위치 상태인지 검사.  아니면 error. (Violation)
         <!-- - Children 의 모든 RelayRC 를 off 시킴 -->
         - 자신의 children 의 모든 relay 가 clean 한 상태
-        - 자신의 상태를 Ht 로 변경 후, Ht step 수행
-    - Going -> (Start 가 꺼졌다 다시 ON 되었을 때, 자신의 상태가 Ht 임)
+        - 자신의 상태를 Going 로 변경 후, Going step 수행
+    - Going -> (Start 가 꺼졌다 다시 ON 되었을 때, 자신의 상태가 이미 Going 임)
         <!-- - 모든 children 의 RelayRC 를 off -->
         - Start 인과 순서대로 검사.
             - 이미 수행한 child 는 skip 하고 다음 child 인과 수행
             - Terminal children 까지 모두 수행완료 되면
-                - 자신을 HT 로 변경해서 End marking 하고 Finish
+                - 자신을 Finish 로 변경
     - Finish -> 이미 finish 상태이므로 skip
     - Homing -> (Reset 진행 중 멈춘 상태임)
         - ~~Ht 상태로 변경 후, 위의 Ht step 수행~~
@@ -51,13 +51,34 @@ children 을 reset 안전인과 순서를 감안하여 reset 시켜나가는 과
 1. 자신의 상태 검사
     - Ready -> 이미 ready 상태이므로 skip
     - Going -> (Start 진행 중 멈춘 상태임)
-        - **G**oing pause -> **H**oming 상태 변환이므로, 모든 child 의 작업 완료 flag reset
-        - hT 상태로 변경 후, 아래의 hT step 수행
+        - ~~**G**oing pause -> **H**oming 상태 변환이므로, 모든 child 의 작업 완료 flag reset~~
+        - ~~Homing 상태로 변경 후, 아래의 Homing step 수행~~
     - Finish -> children 이 last 상태인지 검사.  (아니면 error?)
-        - **F**inish -> **H**oming 상태 변환이므로, 모든 child 의 작업 완료 flag reset
-        - 자신의 상태를 hT 로 변경 후, hT step 수행
-    - Homing -> (Reset 이 꺼졌다 다시 ON 되었을 때, 자신의 상태가 hT 임)
-        - Reset 인과 순서대로 검사.
-            - 이미 수행한 child 는 skip 하고 다음 child reset 인과 수행
-            - Terminal children 모두 수행완료 되면
-                - 자신을 ht 로 변경하고 사용된 모든 children 의 flag reset
+        - ~~**F**inish -> **H**oming 상태 변환이므로, 모든 child 의 작업 완료 flag reset~~
+        - ~~자신의 상태를 hT 로 변경 후, hT step 수행~~
+        - 자신의 상태를 Finish 로 유지한 채, Homing 수행
+    - Homing -> (Reset 이 꺼졌다 다시 ON 되었을 때, 자신의 상태가 Homing 임)
+        - 모든 children 의 초기 상태 검사 : [origin.md](origin.md) : 원위치 찾기
+        - 원위치 ON 인 child segment 에 대해서 Start 시킴
+        - 원위치 OFF 인 child segment 에 대해서 Reset 시킴
+        - 원위치 Unknown 인 child 는 skip
+        - Terminal children 모두 수행완료 되면
+            - 자신을 Ready 로 변경하고 사용된 모든 children 의 flag reset
+
+
+
+#### Counter examples
+- default reset 인과 적용 기준
+- Example1 
+    seg reset 시 B+ -> B- 가 수행되어서는 안되나, 수행 됨
+```
+seg = {seg1; seg2}
+    seg1 = {A.+ > B.+ > B.-}
+    seg2 = {A.- > B.+ > B.-}
+    [arrH] = {seg1 <!> seg2}
+    [arrG] = {seg1 > seg2}
+A = {+; -}
+    [arrH] = {+ <!> -}
+    ...
+```
+

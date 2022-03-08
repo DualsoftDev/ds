@@ -6,17 +6,12 @@
 - 자식에 배치된 Start Edges 반드시 DAG(Directed acyclic graph) 기준을 따라야함
 
 - StartEdge : 이전 행위 결과(F)가 나를 시작하는 것을 나타내는 방식
-  - F# 함수 호출 조건
-- ResetEdge : 이전 행위 진행(G)이 나를 리셋하는 것을 나타내는 방식
+  - $\approx$ F# 함수 호출 조건
+- ResetEdge : ~~이전~~ 특정 행위 진행(G)이 나를 리셋하는 것을 나타내는 방식
+  - 선행 및 후행 행위의 진행이 모두 reset 가능
 - Segment 당 자식 Edge로는 Going Edges, Homing Edges 2세트 할당 (Homing Edges :기본은 원위치 동시 수행)
 
-  - Children 원위치 찾기 : Going Edges의 Start DAG 기준으로
-  - Child의 Reset이 뒤에서 오면 OFF
-  - Child의 Reset이 앞에서 오면 ON
-  - Child의 Reset이 방향을 모르면 None
-
-- Children 원위치 공식 : 행위는 복수개의 고유 값(원위치)를 가짐
-- [OriginCalc](PPT/OriginCalc.pptx)  
+  - [origin.md](origin.md) : 원위치 찾기
 
 ## MEdge (modeling edge)
 

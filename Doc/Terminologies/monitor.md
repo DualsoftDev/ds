@@ -22,4 +22,5 @@
     | Timeout       |Segment 의 시간(평균 Going 시간 x배) 지연 시 Stop 발동|
     | Violation |모든    Segments 의 정의 인과위반시 Stop 발동|
 
-<!-- 여기서 말하는 CMD 는 HMI 만을 위한 것인지, 자동으로 동작하고 있을 때를 포함하고 있는 것인지? -->
+<!-- 여기서 말하는 CMD 는 HMI 만을 위한 것인지, 자동으로 동작하고 있을 때를 포함하고 있는 것인지? 
+ Pause, Maintenance 는 수동에 한하여 발생하고 Timeout, Violation 는 자동수동 전부 발생예상합니다.-->

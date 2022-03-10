@@ -24,18 +24,17 @@ Call Segment 정의 방법 : indent (\t) 이후 이름 = { System.SegA, System.S
 [Sys]sys1 = {seg0}
     [accS] {Valve}
     [accE] {Sensor}
-    seg0 = {seg1 > seg2;seg1 <!> seg2}
+    seg0 = {seg1 > seg2;seg1 <|> seg2}
       [arrH] {seg2 > seg1}
-    seg1 = { Valve.V+, Valve.Open >> Sensor.S+ }
-    seg2 = { Valve.V-, Valve.Open >> Sensor.S- }
-        
+      seg1 = { Valve.V+, Valve.Open >> Sensor.S+ }
+      seg2 = { Valve.V-, Valve.Open >> Sensor.S- }
 
-[Sys]Valve  = {V+ <!> V-;Open}
+[Sys]Valve  = {V+ <|> V-;Open}
 [Sys]Sensor = {S+;S-}
 [Sys]Cylinder =  { Valve.V+ >P+ > Sensor.S+
                    Valve.V- >P- > Sensor.S-
-                   P+ <!> Sensor.S-
-                   P- <!> Sensor.S+
+                   P+ |> Sensor.S-
+                   P- |> Sensor.S+
                  }
     [accS] {Sensor}
     [accE] {Valve}

@@ -69,4 +69,5 @@ Call Segment 정의 방법 : indent (\t) 이후 이름 = { System.SegA, System.S
         - e.g `Sys1.A, Sys2.A > X`
   - 주석.  `//` 로 시작하는 line comment or `/*` 와 `*/` 의 block comment
 
-- [elevator.md](../Samples/elevator.md) 참고 (수정중)
+- [elevator.md](../Samples/elevator.md) 참고 (old)
+- [elevator-callSeg.md](../Samples/elevator-callSeg.md) 참고 (new)

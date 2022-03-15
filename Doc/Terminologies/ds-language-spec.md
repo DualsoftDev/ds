@@ -85,7 +85,7 @@ Call Segment 정의 방법 : indent (\t) 이후 이름 = { System.SegA, System.S
       - brace '{}' 내부의 child 구분자는 `;` or line break
       - child segment 하부의 segment 는 위 목록에 기술하지 않음.  해당 child segment 정의에서 기술
     - indent 후 하부에 child segment 에 대한 세부 정의 및 속성 정의
-    - indent 는 TAB만 지원 스페이스 안됨
+    - indent 는 스페이스만 사용할 것을 권장.  TAB 혼재될 경우, 하나의 TAB 은 항상 space 4개로 해석한다.
   - (Child) Segment Edges (Real Segment는 Root에만 존재 가능)
     - SegmentName = {children segments edge List} (edge없을시 ';' 로 구분하여 행위만 나열)
     - CallSegment : <타시스템 이름>.<타시스템 대상 root segment>

@@ -19,6 +19,8 @@ Call Segment 정의 방법 : indent (\t) 이후 이름 = { System.SegA, System.S
 
 - Ex) CallSeg1 = {Sys.A,Sys.C >> Sys.B}  (A,C 동시 실행후 B 완료관찰)
 
+기본예제
+
 ```ex)
 
 [Sys]sys1 = {seg0}
@@ -40,6 +42,41 @@ Call Segment 정의 방법 : indent (\t) 이후 이름 = { System.SegA, System.S
     [accE] {Valve}
     
 ```
+
+자동해석
+
+ 1. [Sys] 영역에 Edge 정의시 ','  로 구분시 And로 해석
+
+ ```ex
+ [Sys]my = {SegA, SegB > SegC}
+ 
+ 자동해석 : SegA & SegB > SegC 
+ (SegA와 SegB가 행위완료 성립시 SegC Start)
+ ```
+
+ 2. [Sys] 영역에 Edge 정의시 '\n' 로 구분시 Or 로 해석
+
+  ```ex
+  [Sys]my = {SegA > SegC 
+             SegB > SegC}
+             
+ 자동해석 : SegA | SegB > SegC
+  (SegA 또는 SegB가 행위완료 성립시 SegC Start)
+ ```
+
+구문에러
+
+ 1. Real Segment Edge 영역에 Or 의미 부여 (다른 Real Segment 만들어  OR 표현가능)
+
+  ```ex
+수정전
+  RealSeg1 = {SegA > SegC 
+              SegB > SegC} //에러 
+
+수정후
+  RealSeg1 = {SegA > SegC}     
+  RealSeg2 = {SegB > SegC}     
+ ```
 
 - 구성 요소
   - DsSystem : Root Segment Edges

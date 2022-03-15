@@ -7,7 +7,7 @@
 [Sys]My = {
         [accE] = {B; S}
         [accS] = {M}
-        [macro] = {
+        [macro=T] = {  //층간 이송 행위 Task
             12 = M.U ~ S.2U
             12 = M.U ~ S.2U
             23 = M.U ~ S.3U
@@ -18,27 +18,27 @@
               }
 
         //호출 Set기억 
-        B.1 > Set1F <| M_21
-        B.2 > Set2F <| M_32
-              Set2F <| M_12
-        B.3 > Set3F <| M_23
-              Set3F <| M_43
-        B.4 > Set4F <| M_34  
+        B.1 > Set1F <| T.21
+        B.2 > Set2F <| T.32
+              Set2F <| T.12
+        B.3 > Set3F <| T.23
+              Set3F <| T.43
+        B.4 > Set4F <| T.34  
         
         //층간 상하강 행위간 인터락
         
         
-        M_12 |> M_21 |> M_32 |> M_43 |> M_34 |> M_23 |> M_12
-        M_43 <| M_32 <| M_21 <| M_12 <| M_23 <| M_34 <| M_43
+        T.12 |> T.21 |> T.32 |> T.43 |> T.34 |> T.23 |> T.12
+        T.43 <| T.32 <| T.21 <| T.12 <| T.23 <| T.34 <| T.43
        
 
         //호출에 따른 층간 상하강 행위   
-        M_12 < (Set2F | Set3F | Set4F) & M_21
-        M_23 < (Set3F | Set4F) & (M_12 | M_32) 
-        M_34 <  Set4F & (M_43 | M_23) > M_34
-        M_43 < (Set1F | Set2F | Set3F) & M_34 
-        M_23 < (Set1F | Set2F) & (M_32 | M_12)
-        M_21 <  Set1F & (M_12 | M_32)
+        T.12 < (Set2F | Set3F | Set4F) & T.21
+        T.23 < (Set3F | Set4F) & (T.12 | T.32) 
+        T.34 <  Set4F & (T.43 | T.23) > T.34
+        T.43 < (Set1F | Set2F | Set3F) & T.34 
+        T.23 < (Set1F | Set2F) & (T.32 | T.12)
+        T.21 <  Set1F & (T.12 | T.32)
 
 
 }

@@ -11,13 +11,15 @@ Edge Reset 기호 '|>', '<|', '<|>'
 
 Real Segment 정의 방법 : indent (\t) 이후 이름 = {edge1;edge2;...;edgeN} 형식으로 정의
 
-- Ex) RealSeg1 = {Seg1 > Seg2; Seg1 > Seg3; Seg1 <!> Seg2 }
+- Ex) RealSeg1 = {Seg1 > Seg2; Seg1 > Seg3; Seg1 <|> Seg2 }
 - Real Segment 는 CallSegment를 Child로 등록 가능하다. (CallSegement는 주로 라이브러리 형태로 미리제공예정)
 - 예약어 [arrH] 입력 받으시 Homing 인과로 추가해석 (Start Edge 만 가능)
 
-Call Segment 정의 방법 : indent (\t) 이후 이름 = { System.SegA, System.SegB>>System.SegC } 형식으로 정의
+Call Segment 정의 방법 : indent (\t) 이후 이름 = { System.SegA, System.SegB~System.SegC } 형식으로 정의
 
-- Ex) CallSeg1 = {Sys.A,Sys.C >> Sys.B}  (A,C 동시 실행후 B 완료관찰)
+- Ex) CallSeg1 = {Sys.A,Sys.C ~ Sys.B}  (A,C 동시 실행후 B 완료관찰)
+
+Macro 추가 - [macro.md](macro.md) 참고
 
 기본예제
 
@@ -28,8 +30,8 @@ Call Segment 정의 방법 : indent (\t) 이후 이름 = { System.SegA, System.S
     [accE] {Sensor}
     seg0 = {seg1 > seg2;seg1 <|> seg2}
       [arrH] {seg2 > seg1}
-      seg1 = { Valve.V+, Valve.Open >> Sensor.S+ }
-      seg2 = { Valve.V-, Valve.Open >> Sensor.S- }
+      seg1 = { Valve.V+, Valve.Open ~ Sensor.S+ }
+      seg2 = { Valve.V-, Valve.Open ~ Sensor.S- }
 
 [Sys]Valve  = {V+ <|> V-;Open}
 [Sys]Sensor = {S+;S-}
@@ -45,7 +47,7 @@ Call Segment 정의 방법 : indent (\t) 이후 이름 = { System.SegA, System.S
 
 자동해석
 
- 1. [Sys] 영역에 Edge 정의시 ','  로 구분시 And로 해석
+1. [Sys] 영역에 Edge 정의시 ','  로 구분시 And로 해석
 
  ```ex
  [Sys]my = {SegA, SegB > SegC}
@@ -54,7 +56,7 @@ Call Segment 정의 방법 : indent (\t) 이후 이름 = { System.SegA, System.S
  (SegA와 SegB가 행위완료 성립시 SegC Start)
  ```
 
- 2. [Sys] 영역에 Edge 정의시 '\n' 로 구분시 Or 로 해석
+2. [Sys] 영역에 Edge 정의시 '\n' 로 구분시 Or 로 해석
 
   ```ex
   [Sys]my = {SegA > SegC 
@@ -64,9 +66,7 @@ Call Segment 정의 방법 : indent (\t) 이후 이름 = { System.SegA, System.S
   (SegA 또는 SegB가 행위완료 성립시 SegC Start)
  ```
 
-
-
- 3. Real Segment Edge 영역에 Or 의미 부여 (다른 Real Segment 만들어  OR 표현가능)
+3. Real Segment Edge 영역에 Or 의미 부여 (다른 Real Segment 만들어  OR 표현가능)
 
   ```ex
 [Sys]my = {RealSeg1 > RealSeg2} 
@@ -90,8 +90,8 @@ Call Segment 정의 방법 : indent (\t) 이후 이름 = { System.SegA, System.S
     - SegmentName = {children segments edge List} (edge없을시 ';' 로 구분하여 행위만 나열)
     - CallSegment : <타시스템 이름>.<타시스템 대상 root segment>
       - e.g : `Cylinder.Adv` : Cylinder 시스템의 전진 segment
-      - Child 가 DAG 인 경우의 정의 방법  ( '>>' 기호로 참고 )
-        - dag1 =   { Valve.V+, Valve.Open >> Sensor.S+ }
+      - Child 가 DAG 인 경우의 정의 방법  ( '~' 기호로 참고 )
+        - dag1 =   { Valve.V+, Valve.Open ~ Sensor.S+ }
   - Properties
     - [bracket 내부에 속성 명 정의] = {속성 세부 사항}
     - 현재 정의된 속성명

@@ -53,10 +53,10 @@
     - 호출결과는 호출된 DAG의 Tail Node(Segment)들의 End Port에 접근 가능한 End Tag를 사용
 
 - Call 시퀀스(상태 추정값*)
-  | Start | Reset | Segment Status |
-  | ----- | ----  | --- |
-  | 0     | -     | Ready |
-  | 1     | 0     | Going |
-  | -     | 0     | Finish|
-  | 0     | 1     | Homing |
-  | 1     | 1     | Error(todo 우선순위 속성필요)|
+  | Start | Reset  | Out Value | Segment Status |
+  | ----- | ----   | --- | --- |
+  | 0     | -      | OFF | Ready |
+  | 1     | 0      | OFF | Going |
+  | -     | 0      | ON | Finish|
+  | 0     | 1      | ON | Homing |
+  | 1     | 1      | - | Error(todo 우선순위 속성필요)|

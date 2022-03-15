@@ -37,7 +37,7 @@
         T.23 < (Set3F | Set4F) & (T.12 | T.32) 
         T.34 <  Set4F & (T.43 | T.23) > T.34
         T.43 < (Set1F | Set2F | Set3F) & T.34 
-        T.32 < (Set1F | Set2F) & (T.32 | T.12)
+        T.32 < (Set1F | Set2F) & (T.23 | T.43)
         T.21 <  Set1F & (T.12 | T.32)
 
 

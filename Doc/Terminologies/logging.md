@@ -22,10 +22,9 @@ $\underbrace{
     $\varphi_{0_i} = \phi(case_i) = \mathit{case}_i / 2^n \times 2\pi$
 
 - $\varphi_\theta : \theta$ 진행 중의 $\varphi$ 값
-    - $\mathit{state}_\theta = b_1 b_2 \cdots  b_n | \theta$ : $\theta$ 만큼 진행한 상태에서의 모든 child segment 의 상태 값
 
     - $\mathit{c\_state}_\theta = [b'_1 b'_2 \cdots  b'_n ]_\theta$
-        - casality $C_{i, \theta}$ 를 고려한 state 값        
+        - $\theta$ 만큼 진행한 상태에서의 모든 child segment 의 casality $C_{i, \theta}$ 를 고려한 state 값        
 
         where
                 $b'_i = 0$ for non causal

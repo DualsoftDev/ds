@@ -64,9 +64,9 @@ children 을 reset 안전인과 순서를 감안하여 reset 시켜나가는 과
 
 #### default reset
 
-- RootSegement 에 존재하는 Segment는 리셋정보 사용자 정의 없을시
-  - 자신을 조건으로 사용하는 Segment Going에 의한 Reset
-  - 자신을 조건으로 사용없음 Segment 자신 End 시에 Reset
+- RootSegement 에 존재하는 Segment는 리셋정보를 입력하지 않는다.
+  - 자신을 조건으로 사용하는 Segment Going에 의한 Reset 자동처리
+  - 자신을 조건으로 사용없음 Segment 자신 End 시에 Reset 자동처리(외부리셋은 예외)
 - RealSegment 에 내부에 존재하는 Segment에 리셋정보 사용자 정의 없을시
   - 다른System에서 알아서 하므로 무시
   

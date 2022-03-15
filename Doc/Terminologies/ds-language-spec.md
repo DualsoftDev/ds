@@ -64,18 +64,19 @@ Call Segment 정의 방법 : indent (\t) 이후 이름 = { System.SegA, System.S
   (SegA 또는 SegB가 행위완료 성립시 SegC Start)
  ```
 
-구문에러
 
- 1. Real Segment Edge 영역에 Or 의미 부여 (다른 Real Segment 만들어  OR 표현가능)
+
+ 3. Real Segment Edge 영역에 Or 의미 부여 (다른 Real Segment 만들어  OR 표현가능)
 
   ```ex
-수정전
-  RealSeg1 = {SegA > SegC 
-              SegB > SegC} //에러 
+[Sys]my = {RealSeg1 > RealSeg2} 
+    RealSeg1 = {SegA > SegC 
+                SegB > SegC} //구문 에러 
 
 수정후
-  RealSeg1 = {SegA > SegC}     
-  RealSeg2 = {SegB > SegC}     
+[Sys]my = {(RealSeg1_1 | RealSeg1_2) > RealSeg2} 
+    RealSeg1_1 = {SegA > SegC}     
+    RealSeg1_2 = {SegB > SegC}     
  ```
 
 - 구성 요소

@@ -62,23 +62,27 @@ children 을 reset 안전인과 순서를 감안하여 reset 시켜나가는 과
         - Terminal children 모두 수행완료 되면
             - 사용된 모든 children 의 flag off 자신을 Ready 로 변경
 
-#### Counter examples
+#### default reset
 
-- default reset 인과 적용 기준
-- Example1
-    seg reset 시 B+ -> B- 가 수행되어서는 안되나, 수행 되므로
-    강제 ON/OFF 기능필요
-
-```
-[Sys]sys1 = 
-    [arrG] {seg1 > seg2}
-    [arrR] {seg1 <!> seg2}
-    seg1 = [arrG] {A.+ > B.+ > B.-}
-    seg2 = [arrG] {A.+ > B.+ > B.-}
-        
+- RootSegement 에 존재하는 Segment는 리셋정보 사용자 정의 없을시
+  - 자신을 조건으로 사용하는 Segment Going에 의한 Reset
+  - 자신을 조건으로 사용없음 Segment 자신 End 시에 Reset
+- RealSegment 에 내부에 존재하는 Segment에 리셋정보 사용자 정의 없을시
+  - 다른System에서 알아서 하므로 무시
   
-[Sys]A = [arrR] {+ <!> -}
-[Sys]B = [arrR] {+ <!> -}
+```ex)
+
+사용자 정의
+
+[Sys]sys1 = {seg1 > seg2}
+    seg1 = {A.+ > B.+ > B.-}
+  
+[Sys]A = {+ <!> -}
+[Sys]B = {+ <!> -}
+
+사용자 정의 + 시스템 default reset 추가 해석 
+
+[Sys]sys1 = {seg1 > seg2} + {seg1 <| seg2}
+
 
 ```
-

@@ -12,8 +12,8 @@
 
 - Tag (ST, RT, ET)
   - Port 와 Relay 간의 I/F 매개체 (시스템에 따라 다양한 값의 형태를 가질 수 있음)
-  - ST  : 시작 Relay의 On/Off 상태에에 따라 ST의 상태가 결정된다.
-  - RT  : 리셋 Relay의 On/Off 상태에에 따라 RT의 상태가 결정된다.
+  - ST  : 시작 Relay의 On/Off 상태에 따라 ST의 상태가 결정된다.
+  - RT  : 리셋 Relay의 On/Off 상태에 따라 RT의 상태가 결정된다.
   - ET  : 자신이 ON/OFF 되면 자신 결과 TAG들을 ON/OFF
   
 - Relay (SR, RR, ER)

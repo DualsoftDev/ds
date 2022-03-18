@@ -73,8 +73,8 @@ flowchart LR
 
     F1:::floor & OR234 --> T.12
     F2:::floor & OR34 --> T.23
-    F3:::floor & OR4 --> T.34
+    F3:::floor & Set4F --> T.34
     F4:::floor & OR123 --> T.43
-    F3:::floor & OR12 --> T.32
+    F3:::floor & OR12 --> T.32    
     F2:::floor & Set1F --> T.21
 ```

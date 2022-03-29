@@ -46,7 +46,7 @@
 | Item | Unit | Example| Desc | Extenstion |
 |:----|:--:|:---:|:----|:---|
 |Copy | [macro]<- | (C <- B)  | Copy B to C. |(C <- 0)|
-|initialize|[macro]= |(A = 65)| Initialize A. |[Sys]A = 65 //초기화 |
+|Initialize|[macro]= |(A = 65)| Initialize A. |[Sys]A = 65 //초기화 |
 
 </BR>
 

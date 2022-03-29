@@ -7,7 +7,7 @@
 
 ### Segment 정의
 #### Segment는 행위, 작업, 기능 등을 의미한다.
-![about](IMG/About.PNG)
+![about](IMG/About.png)
 
 게임 속 캐릭터가 동작 명령을 기다리고 있다. 지정된 버튼을 누르고 있으면 캐릭터가 정해진 행동을 수행한다. 단, 플레이어는 이 캐릭터가 움직이는 과정을 볼 수 없다. 대신 행동을 모두 마친 캐릭터는 자신이 해야 할 일을 끝마쳤다는 신호를 보내고 초기 상태로 돌아갈 준비를 한다. 재시작 버튼을 누르면 캐릭터는 다시 처음 명령을 기다리는 단계로 이동한다.
 
@@ -34,7 +34,7 @@ Segment는 크게 8가지의 Case가 있다.
 
 ### Case1 : Normal Segment Interface
 
-![case1](IMG/Case1.PNG)
+![case1](IMG/Case1.png)
 
 
 ### Case2 : Reset not exist Interface

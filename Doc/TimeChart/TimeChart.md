@@ -75,9 +75,9 @@
 
 ## Macro
 
-### Macro - Start Reset
+### Macro - Start Reset Priority
 ![CFS](IMG/MacroSR.PNG)
-### Macro - Reset Start
+### Macro - Reset Start Priority
 ![CFS](IMG/MacroRS.PNG)
 ### Macro - Reset Not Exist Interface
 ![CFS](IMG/MacroRNE.PNG)

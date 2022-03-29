@@ -86,7 +86,8 @@ children 을 reset 안전인과 순서를 감안하여 reset 시켜나가는 과
 
 사용자 정의 + 시스템 default reset 추가 해석 
 
-[Sys]sys1 = {seg1 > seg2} + {seg1 <| seg2}
+[Sys]sys1 = {seg1 > seg2}
+            {seg1 <| seg2}
 
 
 ```

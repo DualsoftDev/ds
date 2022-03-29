@@ -1,0 +1,1 @@
+# DS text language table

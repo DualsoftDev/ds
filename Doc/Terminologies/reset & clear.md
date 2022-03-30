@@ -1,4 +1,9 @@
-#### Assumption
+
+## Reset vs Clear 
+ - Reset : 행위의 상태를 초기(Start Point)로 돌리는 것
+ - Clear : 행위 인과처리에 사용된 Relay를 (SR/RR/ER) False로 초기화
+
+## Assumption
 
 - Start 와 Reset 은 양립할 수 없다.
 - Start/Reset 진행 중 멈춤 및 재시작 가능해야 한다.
@@ -60,34 +65,38 @@ children 을 reset 안전인과 순서를 감안하여 reset 시켜나가는 과
         - 원위치 OFF 인 child segment 에 대해서 OFF 시킴
         - 원위치 Unknown 인 child 는 skip
         - 모든 sink children 수행 완료되면
-            - 사용된 모든 children 의 flag off
+            - 사용된 모든 children 의 relay Clear
             - 자신을 Ready 로 변경
 
-#### default reset
+ #### Reset Define
 
-- RootSegement 에 존재하는 Segment는 리셋정보를 입력하지 않는다.
-  - ~~자신을 조건으로 사용하는 Segment Going에 의한 Reset 자동처리 (default 후행 reset)~~
-  - ~~자신을 조건으로 사용없음 Segment 자신 End 시에 Reset 자동처리(외부리셋은 예외)~~
-  - 세부 재정의 필요
-    - 주어진 segment 의 모든 outgoing segments 들의 Going 확인 후, 스스로 reset
+ - Root에 존재하는 Segment만 Reset 정의가 가능하다.
+ - RealSegment 내부에 Children callSegment 는 사용자가 Reset 정의 불가
+    - 타시스템 Root Segement 간 리셋관계로 유추한다.
 
-- RealSegment 의 내부에 존재하는 Segment에 리셋정보 사용자 정의 없을시
-  - 다른 System에서 알아서 하므로 무시
-  
+#### Default Reset 
+ - Root에 존재하는 Segment만 Start Edge기준으로 반대로 생성
+    - ex) A>B 정의시에 B|>A 자동생성
+
+#### Clear 동작
+
+ - Clear는 정의 불가 : DS에서 신뢰 행위를 위해서 Relay를 살리듯 지우는것도 내부에서 자동처리
+ - RealSegment 내부 Relay clear 방법
+    - 자신이 Reset 신호를 받으면 사용된 SR/RR/ER 전부 Off
+ - RootSegment Relay clear 방법
+    - 자신이 Reset 신호를 받으면 자신을 위해 사용된 SR 릴레이 OFF
+    - RootSegment의 SR 릴레이 키는 방법은 RealSegment 방식과 같음 (RootSegment의 가상부모 필요)
+
+
 ```ex)
+default reset 예시
 
 사용자 정의
+[Sys]sys1 = {seg1 > seg2 > seg3; seg3 |> seg1}
 
-[Sys]sys1 = {seg1 > seg2}
-    seg1 = {A.+ > B.+ > B.-}
-  
-[Sys]A = {+ <|> -}
-[Sys]B = {+ <|> -}
-
-사용자 정의 + 시스템 default reset 추가 해석 
-
-[Sys]sys1 = {seg1 > seg2
-             seg1 <| seg2}
+사용자 정의 + 시스템 default reset 추가 해석
+[Sys]sys1 = {seg1 > seg2 > seg3; seg3 |> seg1; seg3 |> seg2}
+//seg1의 reset은 사용자에 의해 재정의 받으므로 default 생성 무시 
 
 
 ```

@@ -7,9 +7,9 @@
 |Id| Item | Unit |Example|   Desc |  GUI | 
 |:---|:----|:--:|:---:|:----|:---|:---|
 |Seq1|Start Causal|>| A > B > C |B be caused by A |  <code><div class="mermaid">graph LR;A((A)) --> B((B)) --> C((C));</div><code> |
-|Seq2|Reset Causal| \|> | A > B <\| C|B is initialized to A | 
-|Seq3|And Causal|,|A,B,C > D | C be caused by A & B | 
-|Seq4|Or Causal|\\n| A,B>D<p>C>D | C be caused by A or B |
+|Seq2|Reset Causal| \|> | A > B <\| C|B is initialized to A | |
+|Seq3|And Causal|,|A,B,C > D | C be caused by A & B | |
+|Seq4|Or Causal|\\n| A,B>D<p>C>D | C be caused by A or B ||
 
 </BR>
 

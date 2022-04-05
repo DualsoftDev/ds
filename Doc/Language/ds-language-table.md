@@ -148,3 +148,20 @@
 ## 5. System
 
 
+### 5.1  System Bit
+
+|Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
+|:---:|:----|:--:|:---:|:----|:---|:---|
+|Sys1|Always On | [macro]_On | (_On) > A  | A be caused by Always On |
+|Sys2|Always Off |[macro]_Off | (_Off) > A| A be caused by Always Off |
+|Sys3|Running Flag |[macro]_Run | (_Run) > A| A be caused by System Run |
+|Sys4|Stop Flag |[macro]_Run | (_Stop) > A| A be caused by System Stop |
+
+
+
+### 5.2  System timer
+
+|Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
+|:---:|:----|:--:|:---:|:----|:---|:---|
+|Sys5|toggle #s | [macro]_T | (_T 50ms) > A  | A occurs at periodic intervals of 50 msec |
+

@@ -177,5 +177,5 @@
 
 |Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
 |:---:|:----|:--:|:---:|:----|:---|:---|
-|Sys7|toggle #s | [macro]_T | (_T 50ms) > A  | A occurs at periodic intervals of 50 msec | T > A
+|Sys7|toggle #s | [macro]_T | (_T 50ms) > A  | A occurs at periodic intervals of 50 msec | T1 <\|> T2; T1 (50ms)> T2 ; T2 (50ms)> T1; (T2.E) > A |
 

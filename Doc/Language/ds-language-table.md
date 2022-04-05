@@ -129,6 +129,25 @@
 
 
 ## 4. Interface
+
+### 4.1 Priority operation
+
+|Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
+|:---:|:----|:--:|:---:|:----|:---|:---|
+|If1|Start Priority | [macro]StartFirst | A > (StartFirst B) <\|C  | The B start value overrides the B reset value. |
+|If2|Last Priority  | [macro]LastFirst  | A >  (LastFirst B) <\|C | During startup/reset, last occurrence takes precedence | 
+
+
+### 4.2  Sustain operation
+
+|Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
+|:---:|:----|:--:|:---:|:----|:---|:---|
+|If3|Start Sustain | [macro]SusS | A > (SusS B)  | Sustain until B is Homing |
+|If4|Reset Sustain |[macro]SusR |A > (SusR B)| Sustain until B is Going | 
+|If5|SR Sustain | [macro]SusSR | A > (SusSR B) | Start/Reset Sustain  | 
+
+
+
 ## 5. System
 
 

@@ -32,7 +32,7 @@
 |Op3|Greater than |[macro]>|(B > 3) > A)| A be caused by if B GT 3. |(B > 3) \| (C > D) > A|
 |Op4|Less than|[macro]<|(B < 3) > A)| A be caused by if B LT 3. |(B < 3) \| (C > D) > A|
 |Op5|Greater Equals than |[macro]>=|(B >= 3) > A)| A be caused by if B GE 3. |(B >= 3) \| (C > D) > A|
-|Op6|Less Equals than|[macro]<=|(B <= 3) > A)| A be caused by if B LE 3. |(B <=> 3) \| (C > D) > A|
+|Op6|Less Equals than|[macro]<=|(B <= 3) > A)| A be caused by if B LE 3. |(B <= 3) \| (C > D) > A|
 
 
 </BR>

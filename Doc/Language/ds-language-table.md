@@ -3,10 +3,10 @@
 ### 1.1 Causal
 |Id| Item | Unit |Example|   Desc |  GUI | 
 |:---:|:----|:--:|:---:|:----|:---|
-|Seq1|Start Causal|>| A > B > C |B be caused by A | <div class="mermaid">graph LR;A((A)) --> B((B)) --> C((C));</div>
-|Seq2|Reset Causal| \|> | A > B <\| C|B is initialized to A | <div class="mermaid">graph LR;A((A)) --> B((B)); C((C)) .-> B((B));</div>
-|Seq3|And Causal|,|A,B,C > D | C be caused by A & B | <div class="mermaid">graph LR;A((A)) & B((B)) & C((C)) --> D((D));</div>
-|Seq4|Or Causal|\\n| A,B>D<p>C>D | C be caused by A or B | <div class="mermaid">graph LR;A((A)) & B((B)) --> D((D)); C((C)) --> D2((D))</div>
+|Seq1|Start Causal|>| A > B > C |B be caused by A | <div class="mermaid">flowchart LR;A((A)) --> B((B)) --> C((C));</div>
+|Seq2|Reset Causal| \|> | A > B <\| C|B is initialized to A | <div class="mermaid">flowchart LR;A((A)) --> B((B)); C((C)) .-> B((B));</div>
+|Seq3|And Causal|,|A,B,C > D | C be caused by A & B | <div class="mermaid">flowchart LR;A((A)) & B((B)) & C((C)) --> D((D));</div>
+|Seq4|Or Causal|\\n| A,B>D<p>C>D | C be caused by A or B | <div class="mermaid">flowchart LR;A((A)) & B((B)) --> D((D)); C((C)) --> D2((D))</div>
 
 </BR>
 
@@ -14,8 +14,8 @@
 
 |Id| Item | Unit | Example | Desc |   GUI | 
 |:---:|:----|:--:|:----|:---|:---|
-|Seq5|Call | ~ |A ~ B |  B be called by A ||
-|Seq6|And Call|,| A,B,C ~ D,E|D & E be Called by A & B & C ||
+|Seq5|Call | ~ |A ~ B |  B be called by A |<div class="mermaid">flowchart LR;A((A)) --o call([Call]) --> B((B));</div>
+|Seq6|And Call|,| A,B,C ~ D,E|D & E be Called by A & B & C |<div class="mermaid">flowchart LR;A((A)) & B((B)) & C((C)) --o call([Call]) --> D((D));call([Call]) --> E((E))</div>
 
 </BR>
 

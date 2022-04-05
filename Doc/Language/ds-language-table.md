@@ -1,12 +1,11 @@
 # DS text language table
-
 ## 1. Sequence
 
 ### 1.1 Causal
 
 | Item | Unit | Example| Desc | Extenstion | Extenstion GUI |
 |:----|:--:|:---:|:----|:---|:---|
-|Start Causal|>|A > B| B be caused by A | A > B > C > D|
+|Start Causal|>|A > B| B be caused by A | A > B > C |<div class="mermaid">graph LR;A((A))-->B((B))-->C((C))</div> |
 |Reset Causal| \|> |A \|> B| B is initialized to A | A > B <\| C|
 |And Causal|,|A,B > C| C be caused by A & B | |
 |Or Causal|\\n|A>C<p>B>C| C be caused by A or B | |
@@ -110,5 +109,7 @@
 |Sin|[macro]SIN |(SIN A)| Calculate the Sin of A. | 
 |Round | [macro]ROUND | (ROUND A) | Calculate the rounding of A.  | 
 |...|
+
+
 
 

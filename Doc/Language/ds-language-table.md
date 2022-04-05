@@ -139,7 +139,7 @@
 
 |Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
 |:---:|:----|:--:|:---:|:----|:---|:---|
-|If3|Start Sustain | [macro]SusS | A > (SusS B)  | Sustain until B is Homing | A > B.TS > B<p> C \|> B.Ts , B | <div class="mermaid">flowchart LR;A((A)) --> B.TS[B.TS] --> B((B));C((C)) .->  B.TS[B.TS] & B((B));</div> 
+|If3|Start Sustain | [macro]SusS | A > (SusS B)  | Sustain until B is Homing | A > B.TS > B<p> C \|> B.Ts , B | <div class="mermaid">flowchart LR;A((A)) --> B.TS((B.TS)) --> B((B));C((C)) .->  B.TS((B.TS)) & B((B));</div> 
 |If4|Reset Sustain |[macro]SusR |A > (SusR B)| Sustain until B is Going | 
 |If5|SR Sustain | [macro]SusSR | A > (SusSR B) | Start/Reset Sustain  | 
 

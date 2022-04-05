@@ -144,6 +144,14 @@
 |If5|SR Sustain | [macro]SusSR | A > (SusSR B) | Start/Reset Sustain  | 
 
 
+### 4.3 Single  operation
+
+|Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
+|:---:|:----|:--:|:---:|:----|:---|:---|
+|If6|Start Single  | [macro]OnlyS | A > (OnlyS B) | The B reset value is B Start not |
+|If7|Reset Single  | [macro]OnlyR | A > (OnlyR B) | The B start value is B reset not | 
+
+
 
 ## 5. System
 
@@ -163,5 +171,5 @@
 
 |Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
 |:---:|:----|:--:|:---:|:----|:---|:---|
-|Sys5|toggle #s | [macro]_T | (_T 50ms) > A  | A occurs at periodic intervals of 50 msec |
+|Sys5|toggle #s | [macro]_T | (_T 50ms) > A  | A occurs at periodic intervals of 50 msec | T > A
 

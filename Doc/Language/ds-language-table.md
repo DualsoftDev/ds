@@ -14,8 +14,8 @@
 
 |Id| Item | Unit | Example | Desc |   GUI | 
 |:---:|:----|:--:|:----|:---|:---|
-|Seq5|Call | ~ |A ~ B |  B be called by A |<div class="mermaid">flowchart LR;A((A)) --o call([Call]) --> B((B));</div>
-|Seq6|And Call|,| A,B,C ~ D,E|D & E be Called by A & B & C |<div class="mermaid">flowchart LR;A((A)) & B((B)) & C((C)) --o call([Call]) --> D((D));call([Call]) --> E((E))</div>
+|Seq5|Call | ~ |A ~ B |  B be called by A |<div class="mermaid">flowchart LR;A((A)) --> call([Call]) --> B((B));</div>
+|Seq6|And Call|,| A,B,C ~ D,E|D & E be Called by A & B & C |<div class="mermaid">flowchart LR;A((A)) & B((B)) & C((C)) --> call([Call]) --> D((D));call([Call]) --> E((E))</div>
 
 </BR>
 

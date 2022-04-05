@@ -1,14 +1,15 @@
 # DS text language table
+
+
+
 ## 1. Sequence
-
 ### 1.1 Causal
-
-| Item | Unit | Example| Desc | Extenstion | Extenstion GUI |
+| Item | Unit | Example| Desc | Extenstion | Extenstion GUI | 
 |:----|:--:|:---:|:----|:---|:---|
-|Start Causal|>|A > B| B be caused by A | A > B > C |<div class="mermaid">graph LR;A((A))-->B((B))-->C((C))</div> |
+|Start Causal|>|A > B| B be caused by A | A > B > C | <code><div class="mermaid">graph LR;A((A)) --> B((B)) --> C((C));</div><code> |
 |Reset Causal| \|> |A \|> B| B is initialized to A | A > B <\| C|
-|And Causal|,|A,B > C| C be caused by A & B | |
-|Or Causal|\\n|A>C<p>B>C| C be caused by A or B | |
+|And Causal|,|A,B > C| C be caused by A & B | A,B,C > D |
+|Or Causal|\\n|A>C<p>B>C| C be caused by A or B | A,B>D<p>C>D |
 
 </BR>
 

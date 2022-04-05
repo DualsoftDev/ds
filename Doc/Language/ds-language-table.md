@@ -106,9 +106,11 @@
 
 |Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
 |:---:|:----|:--:|:---:|:----|:---|:---|
-|Op26|Value |[macro].V | (A.V)> B  | B be caused by A End Value    |A> (Start First _A) <\| (Reset A);  _A > B ||
-|Op27|Going|[macro].G |(A.G)> B | B be caused by A Going Value     |||
-|Op28|Homing|[macro].H |(A.H)> B | B be caused by A Homing Value     |||
+|Op26|End Value |[macro].E | (A.E)> B  | B be caused by A End Value    |A> (Start First _A) <\| (Reset A);  _A > B ||
+|Op27|Start Value |[macro].S | (A.S)> B  | B be caused by A Start Value    |||
+|Op28|Reset Value |[macro].R | (A.R)> B  | B be caused by A Reset Value    |||
+|Op29|Going Status|[macro].G |(A.G)> B | B be caused by A Going Value     |||
+|Op30|Homing Status|[macro].H |(A.H)> B | B be caused by A Homing Value     |||
 
 
 
@@ -118,9 +120,9 @@
 
 |Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
 |:---:|:----|:--:|:---:|:----|:---|:---|
-|Abs | [macro]ABS | (ABS A)  | Calculate the absolute value of A. |
-|Op30|Sin|[macro]SIN |(SIN A)| Calculate the Sin of A. | 
-|Op31|Round | [macro]ROUND | (ROUND A) | Calculate the rounding of A.  | 
+|Op31|Abs | [macro]ABS | (ABS A)  | Calculate the absolute value of A. |
+|Op32|Sin|[macro]SIN |(SIN A)| Calculate the Sin of A. | 
+|Op33|Round | [macro]ROUND | (ROUND A) | Calculate the rounding of A.  | 
 |Op##|...|
 
 

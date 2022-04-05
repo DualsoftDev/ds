@@ -27,12 +27,12 @@
 
 |Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
 |:---:|:----|:--:|:---:|:----|:---|:---|
-|Op1|Equals|[macro]=|(B = 3) > A)| A be caused by if B EQ 3. | (B = 3) \| (C > D) > A|
-|Op2|Not equals |[macro]!=|(B != 3) > A)| A be caused by if B NE 3. |(B ! 3) \| (C > D) > A|
-|Op3|Greater than |[macro]>|(B > 3) > A)| A be caused by if B GT 3. |(B > 3) \| (C > D) > A|
-|Op4|Less than|[macro]<|(B < 3) > A)| A be caused by if B LT 3. |(B < 3) \| (C > D) > A|
-|Op5|Greater Equals than |[macro]>=|(B >= 3) > A)| A be caused by if B GE 3. |(B >= 3) \| (C > D) > A|
-|Op6|Less Equals than|[macro]<=|(B <= 3) > A)| A be caused by if B LE 3. |(B <= 3) \| (C > D) > A|
+|Op1|Equals|[macro]=|(B = 3) > A)| A be caused by if B EQ 3. | (B = 3) \| (C > D) > A| <div class="mermaid">flowchart LR;M1[B = 3] --> A((A));M2[C > D] --> A2((A))</div>
+|Op2|Not equals |[macro]!=|(B != 3) > A)| A be caused by if B NE 3. |(B != 3) \| (C > D) > A| <div class="mermaid">flowchart LR;M1[B != 3] --> A((A));M2[C > D] --> A2((A))</div>
+|Op3|Greater than |[macro]>|(B > 3) > A)| A be caused by if B GT 3. |(B > 3) \| (C > D) > A| <div class="mermaid">flowchart LR;M1[B > 3] --> A((A));M2[C > D] --> A2((A))</div>
+|Op4|Less than|[macro]<|(B < 3) > A)| A be caused by if B LT 3. |(B < 3) \| (C > D) > A| <div class="mermaid">flowchart LR;M1[B < 3] --> A((A));M2[C > D] --> A2((A))</div>
+|Op5|Greater Equals than |[macro]>=|(B >= 3) > A)| A be caused by if B GE 3. |(B >= 3) \| (C > D) > A| <div class="mermaid">flowchart LR;M1[B >= 3] --> A((A));M2[C > D] --> A2((A))</div>
+|Op6|Less Equals than|[macro]<=|(B <= 3) > A)| A be caused by if B LE 3. |(B <= 3) \| (C > D) > A| <div class="mermaid">flowchart LR;M1[B <= 3] --> A((A));M2[C > D] --> A2((A))</div>
 
 
 </BR>
@@ -43,8 +43,8 @@
 
 |Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
 |:---:|:----|:--:|:---:|:----|:---|:---|
-|Op7|Copy | [macro]<- | (C <- B)  | Copy B to C. |(C <- 0)|
-|Op8|Initialize|[macro]= |(A = 65)| Initialize A. |[Sys]A = 65 //초기화 |
+|Op7|Copy | [macro]<- | (C <- B)  | Copy B to C. |(C <- 0)| <div class="mermaid">flowchart LR;M[C <- 0]</div>
+|Op8|Initialize|[macro]= |(A = 65)| Initialize A. |[Sys]A = 65 //초기화 |<div class="mermaid">flowchart LR;Sys[A = 65]</div>
 
 </BR>
 
@@ -139,7 +139,7 @@
 
 |Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
 |:---:|:----|:--:|:---:|:----|:---|:---|
-|If3|Start Sustain | [macro]SusS | A > (SusS B)  | Sustain until B is Homing |
+|If3|Start Sustain | [macro]SusS | A > (SusS B)  | Sustain until B is Homing | A > B.TS > B<p> C \|> B.Ts , B | <div class="mermaid">flowchart LR;A((A)) --> B.TS[B.TS] --> B((B));C((C)) .->  B.TS[B.TS] & B((B));</div> 
 |If4|Reset Sustain |[macro]SusR |A > (SusR B)| Sustain until B is Going | 
 |If5|SR Sustain | [macro]SusSR | A > (SusSR B) | Start/Reset Sustain  | 
 
@@ -148,8 +148,8 @@
 
 |Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
 |:---:|:----|:--:|:---:|:----|:---|:---|
-|If6|Start Single  | [macro]OnlyS | A > (OnlyS B) | The B reset value is B Start not |
-|If7|Reset Single  | [macro]OnlyR | A > (OnlyR B) | The B start value is B reset not | 
+|If6|Start Single  | [macro]OnlyS | A > (OnlyS B) | The B reset value is B Start not | A > B <\| (!A) | <div class="mermaid">flowchart LR;A((A)) --> B((B));NotA[!A] .-> B((B));</div> 
+|If7|Reset Single  | [macro]OnlyR | A > (OnlyR B) | The B start value is B reset not | A \|> B < (!A) | <div class="mermaid">flowchart LR;A((A)) .-> B((B));NotA[!A] --> B((B));</div> 
 
 
 

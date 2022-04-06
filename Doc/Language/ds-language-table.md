@@ -19,6 +19,14 @@
 
 </BR>
 
+### 1.3 Root
+
+|Id| Item | Unit | Example | Desc |   GUI | 
+|:---:|:----|:--:|:----|:---|:---|
+|Seq7|Root | [Sys]= |  [Sys]A = {S1}| processing S1  |<div class="mermaid">flowchart LR;A((start)) --> Root([Root]);  B((reset)) .-> Root([S1]);</div>
+
+</BR>
+
 ## 2. Data
 
 </BR>

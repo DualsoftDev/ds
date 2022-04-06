@@ -14,8 +14,8 @@
 
 |Id| Item | Unit | Example | Desc |   GUI | 
 |:---:|:----|:--:|:----|:---|:---|
-|Seq5|Call | ~ |A ~ B |  B be called by A |<div class="mermaid">flowchart LR;A((A)) --o call([Call]) --> B((B));</div>
-|Seq6|And Call|,| A,B,C ~ D,E|D & E be Called by A & B & C |<div class="mermaid">flowchart LR;A((A)) & B((B)) & C((C)) --o call([Call]) --> D((D));call([Call]) --> E((E))</div>
+|Seq5|Call | ~ |A ~ B |  B be called by A |<div class="mermaid">flowchart LR;A((A)) --> call([Call]) --> B((B));</div>
+|Seq6|And Call|,| A,B,C ~ D,E|D & E be Called by A & B & C |<div class="mermaid">flowchart LR;A((A)) & B((B)) & C((C)) --> call([Call]) --> D((D)) & E((E))</div>
 
 </BR>
 
@@ -139,8 +139,8 @@
 
 |Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
 |:---:|:----|:--:|:---:|:----|:---|:---|
-|If3|Start Sustain | [macro]SusS | A > (SusS B)  | Sustain until B is Homing | A > B.TS > B<p> C \|> B.Ts , B | <div class="mermaid">flowchart LR;A((A)) --> B.TS((B.TS)) --> B((B));C((C)) .->  B.TS((B.TS)) & B((B));</div> 
-|If4|Reset Sustain |[macro]SusR |A > (SusR B)| Sustain until B is Going | 
+|If3|Start Sustain | [macro]SusS | A > (SusS B)  | Sustain until B is Homing | A > B.TS > B<p> B.Ts <\| B | <div class="mermaid">flowchart LR;A((A)) --> B.TS((B.TS)) --> B((B));B((B)) .->  B.TS((B.TS));</div> 
+|If4|Reset Sustain |[macro]SusR |A > (SusR B)| Sustain until B is Going | A \|> B.TS \|> B<p> B.Ts < B | <div class="mermaid">flowchart LR;A((A)) .-> B.TR((B.TR)) .-> B((B));B((B)) -->  B.TR((B.TR));</div> 
 |If5|SR Sustain | [macro]SusSR | A > (SusSR B) | Start/Reset Sustain  | 
 
 
@@ -159,23 +159,23 @@
 
 |Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
 |:---:|:----|:--:|:---:|:----|:---|:---|
-|Sys1|Numeric | [macro]# | (#3 + B) > A  | A be caused by B add 56 | #3 = ~ Numeric.Bit0, Numeric.Bit1 |
-|Sys2|String |[macro]$ | ($A = B) > A| A be caused by B Equal to 'A' | $A = ~ String.Bit0, String.Bit6 |
+|Sys1|Numeric | [macro]# | (#3 + B) > A  | A be caused by B add 56 | #3 = ~ Numeric.Bit0, Numeric.Bit1 |<div class="mermaid">flowchart LR;Hash3((#3)) --> call([Call]) --> Bit0((Numeric.Bit0)) & Bit1((Numeric.Bit1))</div>
+|Sys2|String |[macro]$ | ($A = B) > A| A be caused by B Equal to 'A' | $A = ~ String.Bit0, String.Bit6 |<div class="mermaid">flowchart LR;A((&A)) --> call([Call]) --> Bit0((Numeric.Bit0)) & Bit6((Numeric.Bit6))</div>
 
 
 ### 5.2  System Bit
 
 |Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
 |:---:|:----|:--:|:---:|:----|:---|:---|
-|Sys3|Always On | [macro]_On | (_On) > A  | A be caused by Always On | Numeric.Bit0 > On |
-|Sys4|Always Off |[macro]_Off | (_Off) > A| A be caused by Always Off | (! Numeric.Bit0) > Off |
-|Sys5|Running Flag |[macro]_Run | (_Run) > A| A be caused by System Run | (SystemRoot.S) > (OnlyS Run) |
-|Sys6|Stop Flag |[macro]_Run | (_Stop) > A| A be caused by System Stop | (SystemRoot.R) > (OnlyS Stop) |
+|Sys3|Always On | [macro]_On | (_On) > A  | A be caused by Always On | Numeric.Bit0 > On |<div class="mermaid">flowchart LR;S1((Numeric.Bit0)) --> S2[On]</div>
+|Sys4|Always Off |[macro]_Off | (_Off) > A| A be caused by Always Off | (! Numeric.Bit0) > Off |<div class="mermaid">flowchart LR;S1[! Numeric.Bit0] --> S2[Off]</div>
+|Sys5|Running Flag |[macro]_Run | (_Run) > A| A be caused by System Run | (SystemRoot.S) > (OnlyS Run) |<div class="mermaid">flowchart LR;S1[SystemRoot.S] --> S2[OnlyS Run]</div>
+|Sys6|Stop Flag |[macro]_Run | (_Stop) > A| A be caused by System Stop | (SystemRoot.R) > (OnlyS Stop) | <div class="mermaid">flowchart LR;S1[SystemRoot.R] --> S2[OnlyS Stop]</div>
 
 
 ### 5.3  System timer
 
 |Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
 |:---:|:----|:--:|:---:|:----|:---|:---|
-|Sys7|toggle #s | [macro]_T | (_T 50ms) > A  | A occurs at periodic intervals of 50 msec | T1 <\|> T2; T1 (50ms)> T2 ; T2 (50ms)> T1; (T2.E) > A |
+|Sys7|toggle #s | [macro]_T | (_T 50ms) > A  | A occurs at periodic intervals of 50 msec | T1 <\|> T2; T1 (50ms)> T2 ; T2 (50ms)> T1; (T2.E) > A | <div class="mermaid">flowchart LR;T1((T1)) .-> T2((T2)) .-> T1((T1));T1((T1)) -- 50ms --> T2((T2)) -- 50ms--> T1((T1));T2.E-->A((A))</div> 
 

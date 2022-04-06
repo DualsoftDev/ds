@@ -306,7 +306,7 @@ $f(x)$ 수행 결과 return type T 일때, VAR 로 사전에 정의되어 있어
 |:---:|:----|:--:|:---:|:----|:---|:---|
 |If6|Start Single  | [macro]OnlyS | A > (OnlyS B) | The B reset value is B Start not | A > B <\| (!A) | <div class="mermaid">flowchart LR;A((A)) --> B((B));NotA[!A] .-> B((B));</div> 
 |If7|Reset Single  | [macro]OnlyR | A > (OnlyR B) | The B start value is B reset not | A \|> B < (!A) | <div class="mermaid">flowchart LR;A((A)) .-> B((B));NotA[!A] --> B((B));</div> 
-|If8|Self Start  | [macro]SelfS | A \|> (SelfS B) | The B start value is B not end Value | (!B) > (SusS B) <\| A | |
+|If8|Parent Reset  | [macro]ParentR | A > (ParentR B) | The B reset value is B parent Homing Value |  B <\| B.Parent.H | |
 |If9|Self Reset  | [macro]SelfR | A > (SelfR B) | The B reset value is B end Value | A > (SusR B) <\| (B.E) | |
 
 
@@ -318,7 +318,7 @@ $f(x)$ 수행 결과 return type T 일때, VAR 로 사전에 정의되어 있어
 |Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
 |:---:|:----|:--:|:---:|:----|:---|:---|
 |Sys1|Numeric | [macro]# | (#3 + B) > A  | A be caused by B add 56 | #3 = ~ Numeric.Bit0, Numeric.Bit1 |<div class="mermaid">flowchart LR;Hash3((#3)) --> call([Call]) --> Bit0((Numeric.Bit0)) & Bit1((Numeric.Bit1))</div>
-|Sys2|String |[macro]$ | ($A = B) > A| A be caused by B Equal to 'A' | $A = ~ String.Bit0, String.Bit6 |<div class="mermaid">flowchart LR;A((&A)) --> call([Call]) --> Bit0((Numeric.Bit0)) & Bit6((Numeric.Bit6))</div>
+|Sys2|String |[macro]$ | ($A = B) > A| A be caused by B Equal to 'A' | $A = ~ String.Bit0, String.Bit6 |<div class="mermaid">flowchart LR;A((&A)) --> call([Call]) --> Bit0((String.Bit0)) & Bit6((String.Bit6))</div>
 
 
 ### 5.2  System Bit

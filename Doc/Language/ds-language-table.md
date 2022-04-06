@@ -325,3 +325,34 @@ RSLT <- (ABS value)
 |:---:|:----|:--:|:---:|:----|:---|:---|
 |Sys8|toggle #s | [macro]_T | (_T 50ms) > A  | On/Off occurs at periodic intervals of 50msec. | T1 <\|> T2; T1 (50ms)> T2 ; T2 (50ms)> T1; (T2.E) > A | <div class="mermaid">flowchart LR;T1((T1)) .-> T2((T2)) .-> T1((T1));T1((T1)) -- 50ms --> T2((T2)) -- 50ms--> T1((T1));T2.E-->A((A))</div> 
 
+
+
+## GtiLab mermaid table test 
+
+### 5.3 System timer
+
+<table>
+<thead>
+<tr>
+<th>Id</th>
+<th>Item</th>
+<th>Unit</th>
+<th>Example</th>
+<th>Desc</th>
+<th>Extension</th>
+<th>Extension</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sys8</td>
+<td>toggle #s </td>
+<td> [macro]_T </td>
+<td> (_T 50ms) > A  </td>
+<td>On/Off occurs at periodic intervals of 50msec. </td>
+<td> T1 <\|> T2; T1 (50ms)> T2 ; T2 (50ms)> T1; (T2.E) > A </td>
+<td><div class="mermaid">flowchart LR;T1((T1)) .-> T2((T2)) .-> T1((T1));T1((T1)) -- 50ms --> T2((T2)) -- 50ms--> T1((T1));T2.E-->A((A))</div> </td>
+</tr>
+
+</tbody>
+</table

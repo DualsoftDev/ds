@@ -329,11 +329,12 @@ $f(x)$ 수행 결과 return type T 일때, VAR 로 사전에 정의되어 있어
 |Sys4|Always Off |[macro]_Off | (_Off) > A| A be caused by Always Off | (! Numeric.Bit0) > Off |<div class="mermaid">flowchart LR;S1[! Numeric.Bit0] --> S2[Off]</div>
 |Sys5|Running Flag |[macro]_Run | (_Run) > A| A be caused by System Run | (SystemRoot.S) > (OnlyS Run) |<div class="mermaid">flowchart LR;S1[SystemRoot.S] --> S2[OnlyS Run]</div>
 |Sys6|Stop Flag |[macro]_Run | (_Stop) > A| A be caused by System Stop | (SystemRoot.R) > (OnlyS Stop) | <div class="mermaid">flowchart LR;S1[SystemRoot.R] --> S2[OnlyS Stop]</div>
+|Sys7|Running Rising |[macro]_RunRising | (_RunRising) > A | A be caused by System Run Rising | (SystemRoot.S) > (OnlyS Run) | <div class="mermaid">flowchart LR;S1[SystemRoot.S.G] --> S2[OnlyS RunRising]</div>
 
 
 ### 5.3  System timer
 
 |Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
 |:---:|:----|:--:|:---:|:----|:---|:---|
-|Sys7|toggle #s | [macro]_T | (_T 50ms) > A  | A occurs at periodic intervals of 50 msec | T1 <\|> T2; T1 (50ms)> T2 ; T2 (50ms)> T1; (T2.E) > A | <div class="mermaid">flowchart LR;T1((T1)) .-> T2((T2)) .-> T1((T1));T1((T1)) -- 50ms --> T2((T2)) -- 50ms--> T1((T1));T2.E-->A((A))</div> 
+|Sys8|toggle #s | [macro]_T | (_T 50ms) > A  | On/Off occurs at periodic intervals of 50msec. | T1 <\|> T2; T1 (50ms)> T2 ; T2 (50ms)> T1; (T2.E) > A | <div class="mermaid">flowchart LR;T1((T1)) .-> T2((T2)) .-> T1((T1));T1((T1)) -- 50ms --> T2((T2)) -- 50ms--> T1((T1));T2.E-->A((A))</div> 
 

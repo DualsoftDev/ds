@@ -295,9 +295,9 @@ $f(x)$ 수행 결과 return type T 일때, VAR 로 사전에 정의되어 있어
 
 |Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
 |:---:|:----|:--:|:---:|:----|:---|:---|
-|If3|Start Sustain | [macro]SusS | A > (SusS B)  | Sustain until B is Homing | A > B.TS > B<p> B.Ts <\| B | <div class="mermaid">flowchart LR;A((A)) --> B.TS((B.TS)) --> B((B));B((B)) .->  B.TS((B.TS));</div> 
-|If4|Reset Sustain |[macro]SusR |A > (SusR B)| Sustain until B is Going | A \|> B.TS \|> B<p> B.Ts < B | <div class="mermaid">flowchart LR;A((A)) .-> B.TR((B.TR)) .-> B((B));B((B)) -->  B.TR((B.TR));</div> 
-|If5|SR Sustain | [macro]SusSR | A > (SusSR B) | Start/Reset Sustain  | 
+|If3|Start Sustain | [macro]SusS | A > (SusS B)  | Sustain until B is Homing | A > (!(B.H))| <div class="mermaid">flowchart LR;A((A)) --> Macro[! B.H]</div>
+|If4|Reset Sustain |[macro]SusR |A > (SusR B)| Sustain until B is Going | A > (!(B.G)) | <div class="mermaid">flowchart LR;A((A)) --> Macro[! B.G]</div>
+|If5|SR Sustain | [macro]SusSR | A > (SusSR B) | Start/Reset Sustain  |  |
 
 
 ### 4.3 Single  operation

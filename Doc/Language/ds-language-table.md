@@ -351,7 +351,18 @@ RSLT <- (ABS value)
 <td> (_T 50ms) > A  </td>
 <td>On/Off occurs at periodic intervals of 50msec. </td>
 <td> T1 <\|> T2; T1 (50ms)> T2 ; T2 (50ms)> T1; (T2.E) > A </td>
-<td><div class="mermaid">flowchart LR;T1((T1)) .-> T2((T2)) .-> T1((T1));T1((T1)) -- 50ms --> T2((T2)) -- 50ms--> T1((T1));T2.E-->A((A))</div> </td>
+<td>
+
+```mermaid
+    graph LR;
+        subgraph "(AND A B)"
+        A("(A)")-->R((R));
+        B("(B)")-->R;
+        NA("(!A)") .->R3((R))
+        NB("(!B)") .->R4((R))
+        end
+  ```
+</td>
 </tr>
 
 </tbody>

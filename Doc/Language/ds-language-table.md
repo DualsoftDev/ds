@@ -328,6 +328,160 @@ RSLT <- (ABS value)
 
 
 ## GtiLab mermaid table test 
+## 5. System
+
+### 5.1  Constain
+
+<table>
+<thead>
+<tr>
+<th>Id</th>
+<th>Item</th>
+<th>Unit</th>
+<th>Example</th>
+<th>Desc</th>
+<th>Extension</th>
+<th>Extension</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>Sys1</td>
+<td>Numeric</td>
+<td>[macro]#</td>
+<td>(#3 + B) > A</td>
+<td>A be caused by B add 56</td>
+<td>#3 = ~ Numeric.Bit0, Numeric.Bit1</td>
+
+<td>
+
+```mermaid
+    graph LR;
+    Hash3((#3)) --> call([Call]) --> Bit0((Numeric.Bit0)) & Bit1((Numeric.Bit1))
+```
+
+</td>
+</tr>
+
+<tr>
+<td>Sys2</td>
+<td>String</td>
+<td>[macro]$</td>
+<td>($A = B) > A</td>
+<td>A be caused by B Equal to 'A'</td>
+<td>$A = ~ String.Bit0, String.Bit6</td>
+<td>
+
+```mermaid
+    flowchart LR;
+    A((&A)) --> call([Call]) --> Bit0((String.Bit0)) & Bit6((String.Bit6))
+```
+
+</td>
+</tr>
+
+</tbody>
+
+</table>
+
+### 5.2  System Bit
+
+<table>
+<thead>
+<tr>
+<th>Id</th>
+<th>Item</th>
+<th>Unit</th>
+<th>Example</th>
+<th>Desc</th>
+<th>Extension</th>
+<th>Extension</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr>
+<td>Sys3</td>
+<td>Always On</td>
+<td>[macro]_On</td>
+<td>(_On) > A</td>
+<td>A be caused by Always On</td>
+<td>Numeric.Bit0 > On</td>
+<td>
+
+```mermaid
+    flowchart LR;S1[Numeric.Bit0] --> S2((On))
+```
+
+</td>
+</tr>
+
+<tr>
+<td>Sys4</td>
+<td>Always Off</td>
+<td>[macro]_Off</td>
+<td>(_Off) > A</td>
+<td>A be caused by Always Off</td>
+<td>(! Numeric.Bit0) > Off</td>
+<td>
+
+```mermaid
+    flowchart LR;S1[! Numeric.Bit0] --> S2[Off]
+```
+</td>
+</tr>
+
+<tr>
+<td>Sys5</td>
+<td>Running Flag</td>
+<td>[macro]_Run</td>
+<td>(_Run) > A</td>
+<td>A be caused by System Run</td>
+<td>(SystemRoot.S) > (OnlyS Run)</td>
+<td>
+
+```mermaid
+flowchart LR;S1[SystemRoot.S] --> S2[OnlyS Run]
+```
+</td>
+</tr>
+
+<tr>
+<td>Sys6</td>
+<td>Stop Flag</td>
+<td>[macro]_Run</td>
+<td>(_Stop) > A</td>
+<td>A be caused by System Stop</td>
+<td>(SystemRoot.R) > (OnlyS Stop)</td>
+<td>
+
+```mermaid
+flowchart LR;S1[SystemRoot.R] --> S2[OnlyS Stop]
+```
+
+</td>
+</tr>
+
+<tr>
+<td>Sys7</td>
+<td>Running Rising</td>
+<td>[macro]_RunRising</td>
+<td>(_RunRising) > A</td>
+<td>A be caused by System Run Rising</td>
+<td>(SystemRoot.S) > (OnlyS Run)</td>
+<td>
+
+```mermaid
+flowchart LR;S1[SystemRoot.S.G] --> S2[OnlyS RunRising]
+```
+</td>
+</tr>
+
+</tbody>
+
+</table>
 
 ### 5.3 System timer
 
@@ -343,6 +497,7 @@ RSLT <- (ABS value)
 <th>Extension</th>
 </tr>
 </thead>
+
 <tbody>
 <tr>
 <td>Sys8</td>
@@ -362,8 +517,46 @@ RSLT <- (ABS value)
 
 </td>
 </tr>
-
 </tbody>
+
 </table>
 
 
+<!--
+
+<table>
+<thead>
+<tr>
+<th>Id</th>
+<th>Item</th>
+<th>Unit</th>
+<th>Example</th>
+<th>Desc</th>
+<th>Extension</th>
+<th>Extension</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>
+
+```mermaid
+    
+```
+
+</td>
+</tr>
+
+</tbody>
+
+</table>
+
+-->

@@ -306,7 +306,8 @@ $f(x)$ 수행 결과 return type T 일때, VAR 로 사전에 정의되어 있어
 |:---:|:----|:--:|:---:|:----|:---|:---|
 |If6|Start Single  | [macro]OnlyS | A > (OnlyS B) | The B reset value is B Start not | A > B <\| (!A) | <div class="mermaid">flowchart LR;A((A)) --> B((B));NotA[!A] .-> B((B));</div> 
 |If7|Reset Single  | [macro]OnlyR | A > (OnlyR B) | The B start value is B reset not | A \|> B < (!A) | <div class="mermaid">flowchart LR;A((A)) .-> B((B));NotA[!A] --> B((B));</div> 
-|If8|Self Reset  | [macro]SelfR | A > (SelfR B) | The B reset value is B end Value | A > (SusR B) <\| (B.E) | |
+|If8|Self Start  | [macro]SelfS | A \|> (SelfS B) | The B start value is B not end Value | (!B) > (SusS B) <\| A | |
+|If9|Self Reset  | [macro]SelfR | A > (SelfR B) | The B reset value is B end Value | A > (SusR B) <\| (B.E) | |
 
 
 

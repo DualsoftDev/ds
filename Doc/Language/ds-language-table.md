@@ -3,7 +3,7 @@
 ### 1.1 Causal
 |Id| Item | Unit |Example|   Desc |  GUI | 
 |:---:|:----|:--:|:---:|:----|:---|
-|Seq1|Start Causal|>| A > B > C |B be caused by A | <div class="mermaid">flowchart LR;A((A)) --> B((B)) --> C((C));</div>
+|Seq1|Start Causal|>| A > B > C |B be caused by A | <code class="mermaid">flowchart LR;A((A)) --> B((B)) --> C((C));</code>
 |Seq2|Reset Causal| \|> | A > B <\| C|B is initialized to A | <div class="mermaid">flowchart LR;A((A)) --> B((B)); C((C)) .-> B((B));</div>
 |Seq3|And Causal|,|A,B,C > D | C be caused by A & B | <div class="mermaid">flowchart LR;A((A)) & B((B)) & C((C)) --> D((D));</div>
 |Seq4|Or Causal|\\n| A,B>D<p>C>D | C be caused by A or B | <div class="mermaid">flowchart LR;A((A)) & B((B)) --> D((D)); C((C)) --> D2((D))</div>

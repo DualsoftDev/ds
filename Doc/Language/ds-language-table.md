@@ -129,22 +129,6 @@
     (AND (!A) (B))) 
   ```    
 
-
-```mermaid
-    graph LR;
-        subgraph "(XOR A B)"
-        A("(A)")-->t1;
-        NotB("(!B)")-->t1;
-
-        NotA("(!A)")-->t2;
-        B("(B)")-->t2;
-
-        t1 --> R1(R);
-        t2 --> R2(R);
-        end
-  ```
-
-
 ##### NXOR
 (NXOR A B)
 ```mermaid
@@ -176,26 +160,11 @@
 </BR>
 
 
-### 3.x 시스템 콜
-$f(x)$ 의 return type 이 T 일 경우 (void type 은 제외)
-사전에 변수 등록
-```
- [VAR] myInstance = ...
-```
-(SYSTEM_CALL($f(x)$)) 에서 
-$f(x)$ 수행 결과 return type T 일때, VAR 로 사전에 정의되어 있어야 한다.
-아래 예는 $f(x)$ 수행 결과를 myInstance 에 저장
-```mermaid
-    graph LR;
-        subgraph "(System call)"
-        x((prev))-->T((_T))-->X("(SYSTEM_CALL myInstance (f x))")-->y((next)).->T
+### 3.x MACRO Segment
+- Macro 를 포함하는 segment
+- $f(x)$ 의 return type 이 T 일 경우 (void type 은 제외)
+  segment 내에 T type 변수 (.RESULT)를 가지는 segment  
 
-        end
-  ```
-##### SYSTEM_CALL.SYSVALUE
-```
-    MYVAR <- (SYSVALUE myInstance)  // assign
-  ```
 
 ### 3.2 Time operation
 
@@ -205,28 +174,24 @@ $f(x)$ 수행 결과 return type T 일때, VAR 로 사전에 정의되어 있어
 |Op25|Off Delay|[macro]#s!> |(!A) (5s)> B| B be caused by not End A 5sec delay    |(!A) (5ms)> B |
 
 ##### DELAY
-(DELAY delay)
+![IMG](https://realpars.com/wp-content/uploads/2021/05/PLC-timers.jpg)
+
+
+(TON instanceName delay S R E) // ON DELAY
 ```mermaid
     graph LR;
-        subgraph "(DELAY delay)"
-        X("(SYSTEM_CALL _ (TIMER delay))")
+        subgraph "(TON instanceName delay S R E)"
+        id("(S)") --> X(("instanceName<br>RESULT <- (DELAY delay)")) --> E((E))
+        R("(R)") .-> X
         end
   ```
 
-(ONDELAY A delay)
-- A 수행 후, 값 관찰? or 수행하지 않고 값 관찰?
+(TOF instanceName delay S R E)   // OFF DELAY
 ```mermaid
     graph LR;
-        subgraph "(ONDELAY A delay) > B"
-        id("(A)") --> R((_R)) --> X("(DELAY delay)") --> B((B)) .-> R
-        end
-  ```
-
-(OFFDELAY A delay)
-```mermaid
-    graph LR;
-        subgraph "(OFFDELAY A delay) > B"
-        id("(! A)") --> R((_R)) --> X("(DELAY delay)") --> B((B)) .-> R
+        subgraph "(TOF instanceName delay S R E)"
+        id("(!S)") --> X(("instanceName<br>RESULT <- (DELAY delay)")) --> E((E))
+        R("(R)") .-> X
         end
   ```
 
@@ -256,6 +221,7 @@ $f(x)$ 수행 결과 return type T 일때, VAR 로 사전에 정의되어 있어
        
 ##### HOMING
 (HOMING A)
+- A.{S, R, E} 가 read access 접근 가능할 때에 한함.
 1. A가 Start 우선인 경우
     (AND (!A.S) (AND (A.R) (A.E)))
 1. A가 Reset 우선인 경우
@@ -275,10 +241,22 @@ $f(x)$ 수행 결과 return type T 일때, VAR 로 사전에 정의되어 있어
 |Op##|...|
 
 ##### ABS
-(ABS A)
+RSLT <- (ABS value)
+```mermaid
+    graph LR;
+        subgraph "(RSLT <- (ABS value))"
+        X("(RSLT <- (ABS value))")
+        end
+  ```
 
-= (SYSTEM_CALL Result (ABS (A)))
-  (SYSVALUE Result)
+(ABS instanceName value S R E)
+```mermaid
+    graph LR;
+        subgraph "(ABS instanceName value S R E)"
+        id("(S)") --> X(("instanceName </br> RESULT <- (ABS value)")) --> E((E))
+        R("(R)") .-> X
+        end
+  ```
 
 
 ## 4. Interface

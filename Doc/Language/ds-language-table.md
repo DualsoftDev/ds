@@ -88,7 +88,114 @@
 |Op22| NAND | [macro]NAND | (NAND B, C) > A | A is NAND (B end, C end) |
 |Op23| NOR | [macro]NOR | (NOR B, C) > A | A is NOR (B end, C end) |
 
+##### AND
+(AND A B)
+```mermaid
+    graph LR;
+        subgraph "(AND A B)"
+        A("(A)")-->R((R));
+        B("(B)")-->R;
+        NA("(!A)") .->R3((R))
+        NB("(!B)") .->R4((R))
+        end
+  ```
+
+##### OR
+(OR A B)
+```mermaid
+    graph LR;
+        subgraph "(OR A B)"
+        A("(A)")-->R1((R));
+        B("(B)")-->R2((R));
+        NA("(AND (!A) (!B))") .->R3((R))
+        end
+  ```
+
+##### NOT
+(NOT A)
+```mermaid
+    graph LR;
+        subgraph "(NOT A)"
+        A("(A)") .->NOT;
+        ON("ON(VCC)")-->NOT((NOT));
+        end
+  ```
+
+##### XOR
+(XOR A B) : Ver1
+```
+= (OR
+    (AND (A) (!B))
+    (AND (!A) (B))) 
+  ```    
+
+
+```mermaid
+    graph LR;
+        subgraph "(XOR A B)"
+        A("(A)")-->t1;
+        NotB("(!B)")-->t1;
+
+        NotA("(!A)")-->t2;
+        B("(B)")-->t2;
+
+        t1 --> R1(R);
+        t2 --> R2(R);
+        end
+  ```
+
+
+##### NXOR
+(NXOR A B)
+```mermaid
+    graph LR;
+        subgraph "(NXOR A B)"
+        id("(! (XOR A B))")
+        end
+  ```
+
+
+##### NAND
+(NAND A B)
+```mermaid
+    graph LR;
+        subgraph "(NAND A B)"
+        id("(! (AND A B))")
+        end
+  ```
+
+##### NOR
+(NOR A B)
+```mermaid
+    graph LR;
+        subgraph "(NOR A B)"
+        id("(! (OR A B))")
+        end
+  ```
+
 </BR>
+
+
+### 3.x 시스템 콜
+$f(x)$ 의 return type 이 T 일 경우 (void type 은 제외)
+사전에 변수 등록
+```
+ [VAR] myInstance = ...
+```
+(SYSTEM_CALL($f(x)$)) 에서 
+$f(x)$ 수행 결과 return type T 일때, VAR 로 사전에 정의되어 있어야 한다.
+아래 예는 $f(x)$ 수행 결과를 myInstance 에 저장
+```mermaid
+    graph LR;
+        subgraph "(System call)"
+        x((prev))-->T((_T))-->X("(SYSTEM_CALL myInstance (f x))")-->y((next)).->T
+
+        end
+  ```
+##### SYSTEM_CALL.SYSVALUE
+```
+    MYVAR <- (SYSVALUE myInstance)  // assign
+  ```
 
 ### 3.2 Time operation
 
@@ -96,6 +203,32 @@
 |:---:|:----|:--:|:---:|:----|:---|:---|
 |Op24|On Delay | [macro]#s> | A (5s)> B  | B be caused by A 5sec delay    |A (5ms)> B|
 |Op25|Off Delay|[macro]#s!> |(!A) (5s)> B| B be caused by not End A 5sec delay    |(!A) (5ms)> B |
+
+##### DELAY
+(DELAY delay)
+```mermaid
+    graph LR;
+        subgraph "(DELAY delay)"
+        X("(SYSTEM_CALL _ (TIMER delay))")
+        end
+  ```
+
+(ONDELAY A delay)
+- A 수행 후, 값 관찰? or 수행하지 않고 값 관찰?
+```mermaid
+    graph LR;
+        subgraph "(ONDELAY A delay) > B"
+        id("(A)") --> R((_R)) --> X("(DELAY delay)") --> B((B)) .-> R
+        end
+  ```
+
+(OFFDELAY A delay)
+```mermaid
+    graph LR;
+        subgraph "(OFFDELAY A delay) > B"
+        id("(! A)") --> R((_R)) --> X("(DELAY delay)") --> B((B)) .-> R
+        end
+  ```
 
 </BR>
 
@@ -108,6 +241,25 @@
 |Op28|Reset Value |[macro].R | (A.R)> B  | B be caused by A Reset Value    |||
 |Op29|Going Status|[macro].G |(A.G)> B | B be caused by A Going Value     |||
 |Op30|Homing Status|[macro].H |(A.H)> B | B be caused by A Homing Value     |||
+
+##### VALUE
+(VALUE A)
+- PRIMITIVE : A.End
+
+##### GOING
+(GOING A)
+- A.{S, R, E} 가 read access 접근 가능할 때에 한함.
+1. A가 Start 우선인 경우
+    (AND (A.S) (!A.E))
+1. A가 Reset 우선인 경우
+    (AND (!A.R) (AND (A.S) (!A.E)))
+       
+##### HOMING
+(HOMING A)
+1. A가 Start 우선인 경우
+    (AND (!A.S) (AND (A.R) (A.E)))
+1. A가 Reset 우선인 경우
+    (AND (A.R) (A.E))
 
 
 
@@ -122,7 +274,11 @@
 |Op33|Round | [macro]ROUND | (ROUND A) | Calculate the rounding of A.  | 
 |Op##|...|
 
+##### ABS
+(ABS A)
 
+= (SYSTEM_CALL Result (ABS (A)))
+  (SYSVALUE Result)
 
 
 ## 4. Interface
@@ -150,6 +306,7 @@
 |:---:|:----|:--:|:---:|:----|:---|:---|
 |If6|Start Single  | [macro]OnlyS | A > (OnlyS B) | The B reset value is B Start not | A > B <\| (!A) | <div class="mermaid">flowchart LR;A((A)) --> B((B));NotA[!A] .-> B((B));</div> 
 |If7|Reset Single  | [macro]OnlyR | A > (OnlyR B) | The B start value is B reset not | A \|> B < (!A) | <div class="mermaid">flowchart LR;A((A)) .-> B((B));NotA[!A] --> B((B));</div> 
+|If8|Self Reset  | [macro]SelfR | A > (SelfR B) | The B reset value is B end Value | A > (SusR B) <\| (B.E) | |
 
 
 

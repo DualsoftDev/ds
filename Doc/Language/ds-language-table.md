@@ -355,15 +355,15 @@ RSLT <- (ABS value)
 
 ```mermaid
     graph LR;
-        subgraph "(AND A B)"
-        A("(A)")-->R((R));
-        B("(B)")-->R;
-        NA("(!A)") .->R3((R))
-        NB("(!B)") .->R4((R))
-        end
-  ```
+        T1((T1)) .-> T2((T2)) .-> T1((T1));
+        T1((T1)) -- 50ms --> T2((T2)) -- 50ms--> T1((T1));
+        T2.E-->A((A))
+```
+
 </td>
 </tr>
 
 </tbody>
-</table
+</table>
+
+

@@ -86,7 +86,7 @@
 
 ### A > B HandShake
 
-
+![ABchart](IMG/ABTimeChart.PNG)
 
 #### Rule
 1. A의 value가 On으로 변하면 B를 On 한다.

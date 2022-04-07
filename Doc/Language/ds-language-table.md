@@ -304,8 +304,8 @@ RSLT <- (ABS value)
 
 |Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
 |:---:|:----|:--:|:---:|:----|:---|:---|
-|Sys1|Numeric | [macro]# | (#3 + B) > A  | A be caused by B add 56 | #3 = ~ Numeric.Bit0, Numeric.Bit1 |<div class="mermaid">flowchart LR;Hash3((#3)) --> call([Call]) --> Bit0((Numeric.Bit0)) & Bit1((Numeric.Bit1))</div>
-|Sys2|String |[macro]$ | ($A = B) > A| A be caused by B Equal to 'A' | $A = ~ String.Bit0, String.Bit6 |<div class="mermaid">flowchart LR;A((&A)) --> call([Call]) --> Bit0((String.Bit0)) & Bit6((String.Bit6))</div>
+|Sys1|Numeric | [macro]# | (#3 + B) > A  | A be caused by B add 56 | #3 = ~ Numeric.Bit0, Numeric.Bit1 |<div class="mermaid">flowchart LR;Hash3((#3)) --> call([Call]) --> Bit0[Numeric.Bit0] & Bit1[Numeric.Bit1]</div>
+|Sys2|String |[macro]$ | ($A = B) > A| A be caused by B Equal to 'A' | $A = ~ String.Bit0, String.Bit6 |<div class="mermaid">flowchart LR;A((&A)) --> call([Call]) --> Bit0[String.Bit0] & Bit6[String.Bit6]</div>
 
 
 ### 5.2  System Bit
@@ -358,7 +358,7 @@ RSLT <- (ABS value)
 
 ```mermaid
     graph LR;
-    Hash3((#3)) --> call([Call]) --> Bit0((Numeric.Bit0)) & Bit1((Numeric.Bit1))
+    Hash3((#3)) --> call([Call]) --> Bit0[Numeric.Bit0] & Bit1[Numeric.Bit1]
 ```
 
 </td>
@@ -375,7 +375,7 @@ RSLT <- (ABS value)
 
 ```mermaid
     flowchart LR;
-    A((&A)) --> call([Call]) --> Bit0((String.Bit0)) & Bit6((String.Bit6))
+    A((&A)) --> call([Call]) --> Bit0[Numeric.Bit0] & Bit6[Numeric.Bit6]
 ```
 
 </td>

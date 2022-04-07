@@ -293,11 +293,12 @@ RSLT <- (ABS value)
 |:---:|:----|:--:|:---:|:----|:---|:---|
 |If6|Start Single  | [macro]OnlyS | A > (OnlyS B) | The B reset value is B Start not | A > B <\| (!A) | <div class="mermaid">flowchart LR;A((A)) --> B((B));NotA[!A] .-> B((B));</div> 
 |If7|Reset Single  | [macro]OnlyR | A > (OnlyR B) | The B start value is B reset not | A \|> B < (!A) | <div class="mermaid">flowchart LR;A((A)) .-> B((B));NotA[!A] --> B((B));</div> 
+|If8|Self Reset  | [macro]SelfR | A > (SelfR B) | The B reset value is B end Value | A > (SusR B) <\| (B.E) | |
+
+<!--
 |If8|Parent Clear  | [macro]ParentR | A > (ParentR B) | The B reset value is B parent Homing Value |  B <\| B.Parent.H | |
 |If9|Parent Reset  | [macro]ParentR | A > (ParentR B) | The B reset value is B end Relay Value |  B <\| B.ER | |
-|If10|Self Reset  | [macro]SelfR | A > (SelfR B) | The B reset value is B end Value | A > (SusR B) <\| (B.E) | |
-
-
+-->
 
 ## 5. System
 

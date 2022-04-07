@@ -275,16 +275,16 @@ RSLT <- (ABS value)
 |Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
 |:---:|:----|:--:|:---:|:----|:---|:---|
 |If1|Start Priority | [macro]StartFirst | A > (StartFirst B) <\|C  | The B start value overrides the B reset value. | A > B <p> C,(!A) \|> B |<div class="mermaid">flowchart LR;A((A)) --> B((B)); C((C)) & NotA[!A] .->B((B))</div>
-|If2|Last Priority  | [macro]LastFirst  | A >  (LastFirst B) <\|C | During startup/reset, last occurrence takes precedence | C <\| A > B  <p> (C) > B |<div class="mermaid">flowchart LR;A((A)) --> B((B));A((A)) .-> C((C)); C.value[C] .->B((B))</div> 
+|If2|Last Priority  | [macro]LastFirst  | A >  (LastFirst B) <\|C | During startup/reset, last occurrence takes precedence | C > CT <\| A  <p> A > B <\| (CT) | <div class="mermaid">flowchart LR;A((A)) --> B((B)); A((A)) .-> CT((CT)); C((C)) --> CT((CT)); CT2[CT] .->B((B))</div>
 
 
 ### 4.2  Sustain operation
 
 |Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
 |:---:|:----|:--:|:---:|:----|:---|:---|
-|If3|Start Sustain | [macro]SusS | A > (SusS B)  | Sustain until B is Homing | A > (!(B.H))| <div class="mermaid">flowchart LR;A((A)) --> Macro[! B.H]</div>
-|If4|Reset Sustain |[macro]SusR |A > (SusR B)| Sustain until B is Going | A > (!(B.G)) | <div class="mermaid">flowchart LR;A((A)) --> Macro[! B.G]</div>
-|If5|SR Sustain | [macro]SusSR | A > (SusSR B) | Start/Reset Sustain  |  |
+|If3|Start Sustain | [macro]SusS | A > (SusS B)  | Sustain until B is Homing | A > (SusS B) <\| C | <div class="mermaid">flowchart LR; A((A)) --> M1[SusS B];C((C)) .-> M1[SusS B]</div>
+|If4|Reset Sustain |[macro]SusR |A > (SusR B)| Sustain until B is Going | A > (SusR B) <\| C | <div class="mermaid">flowchart LR; A((A)) --> M1[SusR B];C((C)) .-> M1[SusR B]</div> 
+|If5|SR Sustain | [macro]SusSR | A > (SusSR B) | Start/Reset Sustain  | A > (SusSR B) <\| C | <div class="mermaid">flowchart LR; A((A)) --> M1[SusSR B];C((C)) .-> M1[SusSR B]</div>
 
 
 ### 4.3 Single  operation
@@ -293,7 +293,7 @@ RSLT <- (ABS value)
 |:---:|:----|:--:|:---:|:----|:---|:---|
 |If6|Start Single  | [macro]OnlyS | A > (OnlyS B) | The B reset value is B Start not | A > B <\| (!A) | <div class="mermaid">flowchart LR;A((A)) --> B((B));NotA[!A] .-> B((B));</div> 
 |If7|Reset Single  | [macro]OnlyR | A > (OnlyR B) | The B start value is B reset not | A \|> B < (!A) | <div class="mermaid">flowchart LR;A((A)) .-> B((B));NotA[!A] --> B((B));</div> 
-|If8|Self Reset  | [macro]SelfR | A > (SelfR B) | The B reset value is B end Value | A > (SusR B) <\| (B.E) | |
+|If8|Self Reset  | [macro]SelfR | A > (SelfR B) | The B reset value is B end Value | A > (SusR B) <\| (B.E) |<div class="mermaid">flowchart LR;A((A)) --> susRB[SusR B];B.E[B.E] .-> susRB[SusR B];</div> 
 
 <!--
 |If8|Parent Clear  | [macro]ParentR | A > (ParentR B) | The B reset value is B parent Homing Value |  B <\| B.Parent.H | |

@@ -342,7 +342,7 @@ RSLT <- (ABS value)
 <th>Example</th>
 <th>Desc</th>
 <th>Extension</th>
-<th>Extension</th>
+<th>Extension GUI</th>
 </tr>
 </thead>
 
@@ -397,7 +397,7 @@ RSLT <- (ABS value)
 <th>Example</th>
 <th>Desc</th>
 <th>Extension</th>
-<th>Extension</th>
+<th>Extension GUI</th>
 </tr>
 </thead>
 
@@ -495,7 +495,7 @@ flowchart LR;S1[SystemRoot.S.G] --> S2[OnlyS RunRising]
 <th>Example</th>
 <th>Desc</th>
 <th>Extension</th>
-<th>Extension</th>
+<th>Extension GUI</th>
 </tr>
 </thead>
 
@@ -534,7 +534,7 @@ flowchart LR;S1[SystemRoot.S.G] --> S2[OnlyS RunRising]
 <th>Example</th>
 <th>Desc</th>
 <th>Extension</th>
-<th>Extension</th>
+<th>Extension GUI</th>
 </tr>
 </thead>
 

@@ -168,10 +168,11 @@
 </BR>
 
 
-### 3.x MACRO Segment
-- Macro 를 포함하는 segment
+### 3.x Function Segment
+- Function 를 포함하는 segment
 - $f(x)$ 의 return type 이 T 일 경우 (void type 은 제외)
-  segment 내에 T type 변수 (.RESULT)를 가지는 segment  
+  segment 내에 T type 변수 (.RESULT)를 가지는 segment
+- $f(x)$ 평가에 시간이 소요되는 경우, S,R,E 를 통해 인과 제어 가능  
 
 
 ### 3.2 Time operation
@@ -182,7 +183,7 @@
 |Op25|Off Delay|[macro]#s!> |(!A) (5s)> B| B be caused by not End A 5sec delay    |(!A) (5ms)> B |
 
 ##### DELAY
-![IMG](https://realpars.com/wp-content/uploads/2021/05/PLC-timers.jpg)
+<!-- ![IMG](https://realpars.com/wp-content/uploads/2021/05/PLC-timers.jpg) -->
 
 
 (TON instanceName delay S R E) // ON DELAY

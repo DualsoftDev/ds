@@ -84,7 +84,7 @@
 
 
 
-### A > B HandShake
+## A > B 2-Way HandShake
 
 ![ABchart](IMG/ABTimeChart.PNG)
 #### Rule

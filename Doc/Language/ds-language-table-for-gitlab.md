@@ -107,7 +107,6 @@
 </td>
 </tr>
 
-tr>
 <td>Seq6</td>
 <td>And Call</td>
 <td>,</td>

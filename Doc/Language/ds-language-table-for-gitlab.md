@@ -166,14 +166,108 @@
 
 ### 2.1 Comparision operation
 
-|Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
-|:---:|:----|:--:|:---:|:----|:---|:---|
-|Op1|Equals|[macro]=|(B = 3) > A)| A be caused by if B EQ 3. | (B = 3) \| (C > D) > A| <div class="mermaid">flowchart LR;M1[B = 3] --> A((A));M2[C > D] --> A2((A))</div>
-|Op2|Not equals |[macro]!=|(B != 3) > A)| A be caused by if B NE 3. |(B != 3) \| (C > D) > A| <div class="mermaid">flowchart LR;M1[B != 3] --> A((A));M2[C > D] --> A2((A))</div>
-|Op3|Greater than |[macro]>|(B > 3) > A)| A be caused by if B GT 3. |(B > 3) \| (C > D) > A| <div class="mermaid">flowchart LR;M1[B > 3] --> A((A));M2[C > D] --> A2((A))</div>
-|Op4|Less than|[macro]<|(B < 3) > A)| A be caused by if B LT 3. |(B < 3) \| (C > D) > A| <div class="mermaid">flowchart LR;M1[B < 3] --> A((A));M2[C > D] --> A2((A))</div>
-|Op5|Greater Equals than |[macro]>=|(B >= 3) > A)| A be caused by if B GE 3. |(B >= 3) \| (C > D) > A| <div class="mermaid">flowchart LR;M1[B >= 3] --> A((A));M2[C > D] --> A2((A))</div>
-|Op6|Less Equals than|[macro]<=|(B <= 3) > A)| A be caused by if B LE 3. |(B <= 3) \| (C > D) > A| <div class="mermaid">flowchart LR;M1[B <= 3] --> A((A));M2[C > D] --> A2((A))</div>
+<table>
+<thead>
+<tr>
+<th>Id</th>
+<th>Item</th>
+<th>Unit</th>
+<th>Example</th>
+<th>Desc</th>
+<th>Extension</th>
+<th>Extension GUI</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr>
+<td>Op1</td>
+<td>Equals</td>
+<td>[macro]=</td>
+<td>(B = 3) > A</td>
+<td> A be caused by if B EQ 3.</td>
+<td>(B = 3) \| (C > D) > A</td>
+<td>
+
+```mermaid
+   flowchart LR;M1[B = 3] --> A((A));M2[C > D] --> A2((A)); 
+```
+
+</td>
+</tr>
+<tr>
+<td>Op2</td>
+<td>Not equals</td>
+<td>[macro]!=</td>
+<td>(B != 3) > A</td>
+<td>A be caused by if B NE 3.</td>
+<td>(B != 3) \| (C > D) > A</td>
+<td>
+
+```mermaid
+    flowchart LR;M1[B != 3] --> A((A));M2[C > D] --> A2((A))
+```
+
+</td>
+</tr><tr>
+<td>Op3</td>
+<td>Greater than</td>
+<td>[macro]></td>
+<td>(B > 3) > A</td>
+<td>A be caused by if B GT 3.</td>
+<td>(B > 3) \| (C > D) > A</td>
+<td>
+
+```mermaid
+    flowchart LR;M1[B > 3] --> A((A));M2[C > D] --> A2((A));
+```
+</td>
+</tr><tr>
+<td>Op4</td>
+<td>Less than</td>
+<td>[macro]<</td>
+<td>(B < 3) > A</td>
+<td>A be caused by if B LT 3.</td>
+<td>(B < 3) \| (C > D) > A</td>
+<td>
+
+```mermaid
+    flowchart LR;M1[B < 3] --> A((A));M2[C > D] --> A2((A))
+```
+</td>
+</tr><tr>
+<td>Op5</td>
+<td>Greater Equals than</td>
+<td>[macro]>=</td>
+<td>(B >= 3) > A</td>
+<td>A be caused by if B GE 3.</td>
+<td>(B >= 3) \| (C > D) > A</td>
+<td>
+
+```mermaid
+    flowchart LR;M1[B >= 3] --> A((A));M2[C > D] --> A2((A))
+```
+
+</td>
+</tr><tr>
+<td>Op6</td>
+<td>Less Equals than</td>
+<td>[macro]<=</td>
+<td>(B <= 3) > A</td>
+<td>A be caused by if B LE 3.</td>
+<td>(B <= 3) \| (C > D) > A</td>
+<td>
+
+```mermaid
+    flowchart LR;M1[B <= 3] --> A((A));M2[C > D] --> A2((A))
+```
+
+</td>
+</tr>
+</tbody>
+
+</table>
 
 
 </BR>
@@ -182,10 +276,56 @@
 
 </BR>
 
-|Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
-|:---:|:----|:--:|:---:|:----|:---|:---|
-|Op7|Copy | [macro]<- | (C <- B)  | Copy B to C. |(C <- 0)| <div class="mermaid">flowchart LR;M[C <- 0]</div>
-|Op8|Initialize|[macro]= |(A = 65)| Initialize A. |[Sys]A = 65 //초기화 |<div class="mermaid">flowchart LR;Sys[A = 65]</div>
+<table>
+<thead>
+<tr>
+<th>Id</th>
+<th>Item</th>
+<th>Unit</th>
+<th>Example</th>
+<th>Desc</th>
+<th>Extension</th>
+<th>Extension GUI</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr>
+<td>Op7</td>
+<td>Copy</td>
+<td>[macro]<- </td>
+<td>(C <- B)</td>
+<td>Copy B to C.</td>
+<td>(C <- 0)</td>
+<td>
+
+```mermaid
+  flowchart LR;M[C <- 0]  
+```
+
+</td>
+</tr>
+
+<tr>
+<td>Op8</td>
+<td>Initialize</td>
+<td>[macro]=</td>
+<td>(A = 65)</td>
+<td>Initialize A.</td>
+<td>[Sys]A = 65 //초기화</td>
+<td>
+
+```mermaid
+    flowchart LR;Sys[A = 65]
+```
+
+</td>
+</tr>
+
+</tbody>
+
+</table>
 
 </BR>
 
@@ -499,18 +639,32 @@ flowchart LR;A((A)) --> B((B)); A((A)) .-> CT((CT)); C((C)) --> CT((CT)); CT2[CT
 <td>Reset Sustain</td>
 <td>[macro]SusR</td>
 <td>A > (SusR B)</td>
-<td>During startup/reset, last occurrence takes precedence</td>
-<td>C > CT <| A
-A > B <| (CT)</td>
+<td>Sustain until B is Going</td>
+<td>A > (SusR B) <| C</td>
 <td>
 
 ```mermaid
-flowchart LR;A((A)) --> B((B)); A((A)) .-> CT((CT)); C((C)) --> CT((CT)); CT2[CT] .->B((B))
+    flowchart LR; A((A)) --> M1[SusR B];C((C)) .-> M1[SusR B]
 ```
 
 </td>
 </tr>
 
+<tr>
+<td>If5</td>
+<td>SR Sustain</td>
+<td>[macro]SusSR</td>
+<td> A > (SusSR B)</td>
+<td>Start/Reset Sustain</td>
+<td>A > (SusSR B) <| C</td>
+<td>
+
+```mermaid
+    flowchart LR; A((A)) --> M1[SusSR B];C((C)) .-> M1[SusSR B]
+```
+
+</td>
+</tr>
 </tbody>
 
 </table>
@@ -518,13 +672,72 @@ flowchart LR;A((A)) --> B((B)); A((A)) .-> CT((CT)); C((C)) --> CT((CT)); CT2[CT
 
 ### 4.3 Single  operation
 
-|Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
-|:---:|:----|:--:|:---:|:----|:---|:---|
-|If6|Start Single  | [macro]OnlyS | A > (OnlyS B) | The B reset value is B Start not | A > B <\| (!A) | <div class="mermaid">flowchart LR;A((A)) --> B((B));NotA[!A] .-> B((B));</div> 
-|If7|Reset Single  | [macro]OnlyR | A > (OnlyR B) | The B start value is B reset not | A \|> B < (!A) | <div class="mermaid">flowchart LR;A((A)) .-> B((B));NotA[!A] --> B((B));</div> 
-|If8|Parent Clear  | [macro]ParentR | A > (ParentR B) | The B reset value is B parent Homing Value |  B <\| B.Parent.H | |
-|If9|Parent Reset  | [macro]ParentR | A > (ParentR B) | The B reset value is B end Relay Value |  B <\| B.ER | |
-|If10|Self Reset  | [macro]SelfR | A > (SelfR B) | The B reset value is B end Value | A > (SusR B) <\| (B.E) | |
+<table>
+
+<thead>
+<tr>
+<th>Id</th>
+<th>Item</th>
+<th>Unit</th>
+<th>Example</th>
+<th>Desc</th>
+<th>Extension</th>
+<th>Extension GUI</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>If6</td>
+<td>Start Single</td>
+<td>[macro]OnlyS</td>
+<td>A > (OnlyS B)</td>
+<td>The B reset value is B Start not</td>
+<td> A > B <| (!A)</td>
+
+<td>
+
+```mermaid
+    flowchart LR;A((A)) --> B((B));NotA[!A] .-> B((B));
+```
+
+</td>
+</tr>
+
+<tr>
+<td>If7</td>
+<td>Reset Single</td>
+<td>[macro]OnlyR</td>
+<td>A > (OnlyR B)</td>
+<td>The B start value is B reset not</td>
+<td>A \|> B < (!A)</td>
+<td>
+
+```mermaid
+    flowchart LR;A((A)) .-> B((B));NotA[!A] --> B((B));
+```
+
+</td>
+</tr>
+
+<tr>
+<td>If8</td>
+<td>Self Reset</td>
+<td>[macro]SelfR</td>
+<td>A > (SelfR B)</td>
+<td>The B reset value is B end Value</td>
+<td>A > (SusR B) <| (B.E)</td>
+<td>
+
+```mermaid
+    flowchart LR;A((A)) --> susRB[SusR B];B.E[B.E] .-> susRB[SusR B];
+```
+
+</td>
+</tr>
+</tbody>
+
+</table>
 
  
 ## 5. System
@@ -704,7 +917,7 @@ flowchart LR;S1[SystemRoot.S.G] --> S2[OnlyS RunRising]
 <td> [macro]_T </td>
 <td> (_T 50ms) > A  </td>
 <td>On/Off occurs at periodic intervals of 50msec. </td>
-<td> T1 <\|> T2; T1 (50ms)> T2 ; T2 (50ms)> T1; (T2.E) > A </td>
+<td> T1 <|> T2; T1 (50ms)> T2 ; T2 (50ms)> T1; (T2.E) > A </td>
 <td>
 
 ```mermaid

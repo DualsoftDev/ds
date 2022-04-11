@@ -54,3 +54,20 @@
     - 호출한 Segment 와 호출된 Segment 가 속한 system 은 반드시 다르다.
     - 호출시작은 호출된 DAG의 Head Node(Segment)들의 Start Port에 접근 가능한 Start TAG를 사용
     - 호출결과는 호출된 DAG의 Tail Node(Segment)들의 End Port에 접근 가능한 End Tag를 사용
+
+- Call 시퀀스(상태 추정값*)
+  | Start | Reset  | Out Value | Segment Status |
+  | ----- | ----   | --- | --- |
+  | 0     | -      | OFF | Ready |
+  | 1     | 0      | OFF | Going |
+  | -     | 0      | ON | Finish|
+  | 0     | 1      | ON | Homing |
+  | 1     | 1      | - | Error(todo 우선순위 속성필요)|
+
+## FunctionSegment
+- System 함수 계산을 내부에 포함하고 있는 segment
+  - Return 값이 존재하는 함수 : (e.g. Sin, Cos, Abs, ...)
+  - Return 값이 없는 함수 : Delay
+  
+
+

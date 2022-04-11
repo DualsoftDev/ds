@@ -405,19 +405,115 @@ RSLT <- (ABS value)
 
 ### 4.1 Priority operation
 
-|Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
-|:---:|:----|:--:|:---:|:----|:---|:---|
-|If1|Start Priority | [macro]StartFirst | A > (StartFirst B) <\|C  | The B start value overrides the B reset value. | A > B <p> C,(!A) \|> B |<div class="mermaid">flowchart LR;A((A)) --> B((B)); C((C)) & NotA[!A] .->B((B))</div>
-|If2|Last Priority  | [macro]LastFirst  | A >  (LastFirst B) <\|C | During startup/reset, last occurrence takes precedence | C <\| A > B  <p> (C) > B |<div class="mermaid">flowchart LR;A((A)) --> B((B));A((A)) .-> C((C)); C.value[C] .->B((B))</div> 
+<table>
+
+<thead>
+<tr>
+<th>Id</th>
+<th>Item</th>
+<th>Unit</th>
+<th>Example</th>
+<th>Desc</th>
+<th>Extension</th>
+<th>Extension GUI</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>If1</td>
+<td>Start Priority</td>
+<td>[macro]StartFirst</td>
+<td>A > (StartFirst B) <|C</td>
+<td>The B start value overrides the B reset value.</td>
+<td>A > B
+C,(!A) |> B</td>
+
+<td>
+
+```mermaid
+    flowchart LR;A((A)) --> B((B)); C((C)) & NotA[!A] .->B((B))
+```
+
+</td>
+</tr>
+
+<tr>
+<td>If2</td>
+<td>Last Priority</td>
+<td>[macro]LastFirst</td>
+<td>A > (LastFirst B) <|C</td>
+<td>During startup/reset, last occurrence takes precedence</td>
+<td>C > CT <| A
+A > B <| (CT)</td>
+<td>
+
+```mermaid
+flowchart LR;A((A)) --> B((B)); A((A)) .-> CT((CT)); C((C)) --> CT((CT)); CT2[CT] .->B((B))
+```
+
+</td>
+</tr>
+
+</tbody>
+
+</table>
 
 
 ### 4.2  Sustain operation
 
-|Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
-|:---:|:----|:--:|:---:|:----|:---|:---|
-|If3|Start Sustain | [macro]SusS | A > (SusS B)  | Sustain until B is Homing | A > (!(B.H))| <div class="mermaid">flowchart LR;A((A)) --> Macro[! B.H]</div>
-|If4|Reset Sustain |[macro]SusR |A > (SusR B)| Sustain until B is Going | A > (!(B.G)) | <div class="mermaid">flowchart LR;A((A)) --> Macro[! B.G]</div>
-|If5|SR Sustain | [macro]SusSR | A > (SusSR B) | Start/Reset Sustain  |  |
+<table>
+
+<thead>
+<tr>
+<th>Id</th>
+<th>Item</th>
+<th>Unit</th>
+<th>Example</th>
+<th>Desc</th>
+<th>Extension</th>
+<th>Extension GUI</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>If3</td>
+<td>Start Sustain</td>
+<td>[macro]SusS</td>
+<td>A > (SusS B)</td>
+<td>Sustain until B is Homing</td>
+<td>A > (SusS B) <| C</td>
+
+<td>
+
+```mermaid
+    flowchart LR; A((A)) --> M1[SusS B];C((C)) .-> M1[SusS B]
+```
+
+</td>
+</tr>
+
+<tr>
+<td>If4</td>
+<td>Reset Sustain</td>
+<td>[macro]SusR</td>
+<td>A > (SusR B)</td>
+<td>During startup/reset, last occurrence takes precedence</td>
+<td>C > CT <| A
+A > B <| (CT)</td>
+<td>
+
+```mermaid
+flowchart LR;A((A)) --> B((B)); A((A)) .-> CT((CT)); C((C)) --> CT((CT)); CT2[CT] .->B((B))
+```
+
+</td>
+</tr>
+
+</tbody>
+
+</table>
 
 
 ### 4.3 Single  operation

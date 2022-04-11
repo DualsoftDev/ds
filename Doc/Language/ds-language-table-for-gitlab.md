@@ -294,10 +294,10 @@
 <tr>
 <td>Op7</td>
 <td>Copy</td>
-<td>[macro]<- </td>
-<td>(C <- B)</td>
+<td><div>[macro]<-</div></td>
+<td>(C <-> B)</td>
 <td>Copy B to C.</td>
-<td>(C <- 0)</td>
+<td>(C <-> 0)</td>
 <td>
 
 ```mermaid

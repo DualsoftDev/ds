@@ -1,5 +1,5 @@
 
-# Dualsoft language rules
+# Dualsoft language 4 rules
 
 
 ## 1. 인과행위(Edge) 법칙

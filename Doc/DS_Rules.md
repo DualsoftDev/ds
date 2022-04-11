@@ -10,10 +10,7 @@
 
 ## 2. 상태관찰(Segment) 법칙
   - Segment(child)는 능동(Active) 행위(Parent)에 의해 행위 값(Value)를 4가지 단일 상태(Ready, Going, Homimg, Finish)로 관찰한다.
-    - Ready =   Parent Reset(On or Off)  & Child Value OFF 
-    - Going =   Parent Start(On)      & Child Value OFF 
-    - Finish =  Parent Start(On or Off)  & Child Value ON 
-    - Homing =  Parent Reset(On)      & Child Value ON 
+    - [Segment Status 참고](/Terminologies/segment.md)
 <img src="IMG/Rule2.png">
 
 ## 3. 고유행위(Processing) 법칙
@@ -21,5 +18,5 @@
 <img src="IMG/Rule3.png">
 
 ## 4. 우선리셋(Interface) 법칙
-  - Segment는 연속 입력이 유지되어야 정상 동작하며 시작(Start)과 복귀(Reset)가 동시에 입력될 때 무조건 Reset 명령을 우선한다.
+  - Segment는 Interface 입력이 유지되어야 동작하며, 시작(Start)과 복귀(Reset)가 동시에 입력될 때 무조건 Reset 명령을 우선한다.
 <img src="IMG/Rule4.png">

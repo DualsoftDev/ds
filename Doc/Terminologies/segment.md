@@ -13,6 +13,14 @@
 - 모든 Segment 는, 특정 DsSystem 내에 유일하게 소속된다.
 - 하나의 Segment 는 유일한 부모 Segment 를 가진다.
   - 예외) TopLevel에 존재하는 RootSegment를 동시 호출하는 DsSystem의 유일한 SystemSegment는 제외
+  
+- Status None  에서 상태평가를 통해 정상 상태 해석
+  | Start | Reset  | Out Value | Segment Status |
+  | ----- | ----   | --- | --- |
+  | 0     | 0      | OFF | Ready |
+  | 1     | 0      | OFF | Going |
+  | -     | 0      | ON | Finish|
+  | -     | 1      | ON | Homing |
 
 ## RealSegment
 
@@ -26,13 +34,6 @@
   - Value On은 (F, H) 상태
   - Value Off은 (R, G) 상태
   - 초기 접속시 행위 상태는 값과 상관없이 평가불가 (Status None)
-- Status None  에서 상태평가를 통해 정상 상태 해석
-  | Start | Reset  | Out Value | Segment Status |
-  | ----- | ----   | --- | --- |
-  | 0     | 0      | OFF | Ready |
-  | 1     | 0      | OFF | Going |
-  | -     | 0      | ON | Finish|
-  | -     | 1      | ON | Homing |
 
 
 -[Status타임차트](./ppt/Status.pptx)

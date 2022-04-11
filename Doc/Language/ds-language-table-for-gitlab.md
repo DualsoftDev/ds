@@ -187,7 +187,7 @@
 <td>[macro]=</td>
 <td>(B = 3) > A</td>
 <td> A be caused by if B EQ 3.</td>
-<td>(B = 3) \| (C > D) > A</td>
+<td>(B = 3) | (C > D) > A</td>
 <td>
 
 ```mermaid
@@ -202,7 +202,7 @@
 <td>[macro]!=</td>
 <td>(B != 3) > A</td>
 <td>A be caused by if B NE 3.</td>
-<td>(B != 3) \| (C > D) > A</td>
+<td>(B != 3) | (C > D) > A</td>
 <td>
 
 ```mermaid
@@ -216,7 +216,7 @@
 <td>[macro]></td>
 <td>(B > 3) > A</td>
 <td>A be caused by if B GT 3.</td>
-<td>(B > 3) \| (C > D) > A</td>
+<td>(B > 3) | (C > D) > A</td>
 <td>
 
 ```mermaid
@@ -229,7 +229,7 @@
 <td>[macro]<</td>
 <td>(B < 3) > A</td>
 <td>A be caused by if B LT 3.</td>
-<td>(B < 3) \| (C > D) > A</td>
+<td>(B < 3) | (C > D) > A</td>
 <td>
 
 ```mermaid
@@ -242,7 +242,7 @@
 <td>[macro]>=</td>
 <td>(B >= 3) > A</td>
 <td>A be caused by if B GE 3.</td>
-<td>(B >= 3) \| (C > D) > A</td>
+<td>(B >= 3) | (C > D) > A</td>
 <td>
 
 ```mermaid
@@ -256,7 +256,7 @@
 <td>[macro]<=</td>
 <td>(B <= 3) > A</td>
 <td>A be caused by if B LE 3.</td>
-<td>(B <= 3) \| (C > D) > A</td>
+<td>(B <= 3) | (C > D) > A</td>
 <td>
 
 ```mermaid
@@ -710,7 +710,7 @@ flowchart LR;A((A)) --> B((B)); A((A)) .-> CT((CT)); C((C)) --> CT((CT)); CT2[CT
 <td>[macro]OnlyR</td>
 <td>A > (OnlyR B)</td>
 <td>The B start value is B reset not</td>
-<td>A \|> B < (!A)</td>
+<td>A |> B < (!A)</td>
 <td>
 
 ```mermaid

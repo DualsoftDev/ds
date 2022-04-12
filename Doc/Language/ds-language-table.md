@@ -35,12 +35,12 @@
 
 |Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
 |:---:|:----|:--:|:---:|:----|:---|:---|
-|Op1|Equals|[macro]=|(B = 3) > A| A be caused by if B EQ 3. | (B = 3) \| (C > D) > A| <div class="mermaid">flowchart LR;M1[B = 3] --> A((A));M2[C > D] --> A2((A))</div>
-|Op2|Not equals |[macro]!=|(B != 3) > A| A be caused by if B NE 3. |(B != 3) \| (C > D) > A| <div class="mermaid">flowchart LR;M1[B != 3] --> A((A));M2[C > D] --> A2((A))</div>
-|Op3|Greater than |[macro]>|(B > 3) > A| A be caused by if B GT 3. |(B > 3) \| (C > D) > A| <div class="mermaid">flowchart LR;M1[B > 3] --> A((A));M2[C > D] --> A2((A))</div>
-|Op4|Less than|[macro]<|(B < 3) > A| A be caused by if B LT 3. |(B < 3) \| (C > D) > A| <div class="mermaid">flowchart LR;M1[B < 3] --> A((A));M2[C > D] --> A2((A))</div>
-|Op5|Greater Equals than |[macro]>=|(B >= 3) > A| A be caused by if B GE 3. |(B >= 3) \| (C > D) > A| <div class="mermaid">flowchart LR;M1[B >= 3] --> A((A));M2[C > D] --> A2((A))</div>
-|Op6|Less Equals than|[macro]<=|(B <= 3) > A| A be caused by if B LE 3. |(B <= 3) \| (C > D) > A| <div class="mermaid">flowchart LR;M1[B <= 3] --> A((A));M2[C > D] --> A2((A))</div>
+|Op1|Equals|[func]=|(B = 3) > A| A be caused by if B EQ 3. | (B = 3) \| (C > D) > A| <div class="mermaid">flowchart LR;M1[B = 3] --> A((A));M2[C > D] --> A2((A))</div>
+|Op2|Not equals |[func]!=|(B != 3) > A| A be caused by if B NE 3. |(B != 3) \| (C > D) > A| <div class="mermaid">flowchart LR;M1[B != 3] --> A((A));M2[C > D] --> A2((A))</div>
+|Op3|Greater than |[func]>|(B > 3) > A| A be caused by if B GT 3. |(B > 3) \| (C > D) > A| <div class="mermaid">flowchart LR;M1[B > 3] --> A((A));M2[C > D] --> A2((A))</div>
+|Op4|Less than|[func]<|(B < 3) > A| A be caused by if B LT 3. |(B < 3) \| (C > D) > A| <div class="mermaid">flowchart LR;M1[B < 3] --> A((A));M2[C > D] --> A2((A))</div>
+|Op5|Greater Equals than |[func]>=|(B >= 3) > A| A be caused by if B GE 3. |(B >= 3) \| (C > D) > A| <div class="mermaid">flowchart LR;M1[B >= 3] --> A((A));M2[C > D] --> A2((A))</div>
+|Op6|Less Equals than|[func]<=|(B <= 3) > A| A be caused by if B LE 3. |(B <= 3) \| (C > D) > A| <div class="mermaid">flowchart LR;M1[B <= 3] --> A((A));M2[C > D] --> A2((A))</div>
 
 
 </BR>
@@ -51,8 +51,8 @@
 
 |Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
 |:---:|:----|:--:|:---:|:----|:---|:---|
-|Op7|Copy | [macro]<- | (C <- B)  | Copy B to C. |(C <- 0)| <div class="mermaid">flowchart LR;M[C <- 0]</div>
-|Op8|Initialize|[macro]= |(A = 65)| Initialize A. |[Sys]A = 65 //초기화 |<div class="mermaid">flowchart LR;Sys[A = 65]</div>
+|Op7|Copy | [func]<- | (C <- B)  | Copy B to C. |(C <- 0)| <div class="mermaid">flowchart LR;M[C <- 0]</div>
+|Op8|Initialize|[func]= |(A = 65)| Initialize A. |[Sys]A = 65 //초기화 |<div class="mermaid">flowchart LR;Sys[A = 65]</div>
 
 </BR>
 
@@ -60,10 +60,10 @@
 
 |Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
 |:---:|:----|:--:|:---:|:----|:---|:---|
-|Op9|Addition | [macro]+ | (B + 3)  | B plus 3. |(C <- (B + 3)) > A|
-|Op10|Subtraction|[macro]- |(B - 3)| B minus 3. | |
-|Op11|Multiplication | [macro]* | (B * 3)  | B multiplied by 3. |((A + 3) * 3)|
-|Op12|Division|[macro]/ |(B / 3)| B divided by 3. | |
+|Op9|Addition | [func]+ | (B + 3)  | B plus 3. |(C <- (B + 3)) > A|
+|Op10|Subtraction|[func]- |(B - 3)| B minus 3. | |
+|Op11|Multiplication | [func]* | (B * 3)  | B multiplied by 3. |((A + 3) * 3)|
+|Op12|Division|[func]/ |(B / 3)| B divided by 3. | |
 
 </BR>
 
@@ -71,10 +71,10 @@
 
 |Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
 |:---:|:----|:--:|:---:|:----|:---|:---|
-|Op13| Numeric  | [macro]NUM  | (C <- (NUM B))  | C converts B to Numeric.  | B = 65 //초기화 |
-|Op14| String  | [macro]STR  | (C <- (STR B))  | C converts B to String.  | [Sys]C <- STR(B) //C에 'A' Setting |
-|Op15| BCD  | [macro]BCD  | (C <- (BCD B))  | C converts B to BCD.  |
-|Op16| BIN  | [macro]BIN  | (C <- (BIN B))  | C converts B to BIN.  |
+|Op13| Numeric  | [func]NUM  | (C <- (NUM B))  | C converts B to Numeric.  | B = 65 //초기화 |
+|Op14| String  | [func]STR  | (C <- (STR B))  | C converts B to String.  | [Sys]C <- STR(B) //C에 'A' Setting |
+|Op15| BCD  | [func]BCD  | (C <- (BCD B))  | C converts B to BCD.  |
+|Op16| BIN  | [func]BIN  | (C <- (BIN B))  | C converts B to BIN.  |
 
 </BR>
 
@@ -88,13 +88,13 @@
 
 |Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
 |:---:|:----|:--:|:---:|:----|:---|:---|
-|Op17| And | [macro]& | (A&B) > C | C be caused by A end  & B end |
-|Op18| Or | [macro]\| | (A\|B) > C | C be caused by A end or B end | 
-|Op19| Not | [macro]! | (!A) > B | B be caused by not end A | (!A \|> B) |
-|Op20| XOR | [macro]XOR | (XOR B, C) > A | A is exclusive or (B end, C end) |
-|Op21| NXOR | [macro]NXOR | (NXOR B, C) > A | A is NXOR (B end, C end) |
-|Op22| NAND | [macro]NAND | (NAND B, C) > A | A is NAND (B end, C end) |
-|Op23| NOR | [macro]NOR | (NOR B, C) > A | A is NOR (B end, C end) |
+|Op17| And | [func]& | (A&B) > C | C be caused by A end  & B end |
+|Op18| Or | [func]\| | (A\|B) > C | C be caused by A end or B end | 
+|Op19| Not | [func]! | (!A) > B | B be caused by not end A | (!A \|> B) |
+|Op20| XOR | [func]XOR | (XOR B, C) > A | A is exclusive or (B end, C end) |
+|Op21| NXOR | [func]NXOR | (NXOR B, C) > A | A is NXOR (B end, C end) |
+|Op22| NAND | [func]NAND | (NAND B, C) > A | A is NAND (B end, C end) |
+|Op23| NOR | [func]NOR | (NOR B, C) > A | A is NOR (B end, C end) |
 
 ##### AND
 (AND A B)
@@ -179,8 +179,8 @@
 
 |Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
 |:---:|:----|:--:|:---:|:----|:---|:---|
-|Op24|On Delay | [macro]#s> | A (5s)> B  | B be caused by A 5sec delay    |A (5ms)> B|
-|Op25|Off Delay|[macro]#s!> |(!A) (5s)> B| B be caused by not End A 5sec delay    |(!A) (5ms)> B |
+|Op24|On Delay | [func]#s> | A (5s)> B  | B be caused by A 5sec delay    |A (5ms)> B|
+|Op25|Off Delay|[func]#s!> |(!A) (5s)> B| B be caused by not End A 5sec delay    |(!A) (5ms)> B |
 
 ##### DELAY
 <!-- ![IMG](https://realpars.com/wp-content/uploads/2021/05/PLC-timers.jpg) -->
@@ -210,11 +210,11 @@
 
 |Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
 |:---:|:----|:--:|:---:|:----|:---|:---|
-|Op26|End Value |[macro].E | (A.E)> B  | B be caused by A End Value    |A> (Start First _A) <\| (Reset A);  _A > B ||
-|Op27|Start Value |[macro].S | (A.S)> B  | B be caused by A Start Value    |||
-|Op28|Reset Value |[macro].R | (A.R)> B  | B be caused by A Reset Value    |||
-|Op29|Going Status|[macro].G |(A.G)> B | B be caused by A Going Value     |||
-|Op30|Homing Status|[macro].H |(A.H)> B | B be caused by A Homing Value     |||
+|Op26|End Value |[func].E | (A.E)> B  | B be caused by A End Value    |A> (Start First _A) <\| (Reset A);  _A > B ||
+|Op27|Start Value |[func].S | (A.S)> B  | B be caused by A Start Value    |||
+|Op28|Reset Value |[func].R | (A.R)> B  | B be caused by A Reset Value    |||
+|Op29|Going Status|[func].G |(A.G)> B | B be caused by A Going Value     |||
+|Op30|Homing Status|[func].H |(A.H)> B | B be caused by A Homing Value     |||
 
 ##### VALUE
 (VALUE A)
@@ -244,9 +244,9 @@
 
 |Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
 |:---:|:----|:--:|:---:|:----|:---|:---|
-|Op31|Abs | [macro]ABS | (ABS A)  | Calculate the absolute value of A. |
-|Op32|Sin|[macro]SIN |(SIN A)| Calculate the Sin of A. | 
-|Op33|Round | [macro]ROUND | (ROUND A) | Calculate the rounding of A.  | 
+|Op31|Abs | [func]ABS | (ABS A)  | Calculate the absolute value of A. |
+|Op32|Sin|[func]SIN |(SIN A)| Calculate the Sin of A. | 
+|Op33|Round | [func]ROUND | (ROUND A) | Calculate the rounding of A.  | 
 |Op##|...|
 
 ##### ABS

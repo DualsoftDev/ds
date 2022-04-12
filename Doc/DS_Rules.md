@@ -8,14 +8,18 @@
 <img src="IMG/Rule1.png">
 
 ## 2. 상태관찰(Segment) 법칙
-  - Segment(child)는 능동(Active) 행위(Parent)에 의해 행위 값(Value)를 4가지 단일 상태(Ready, Going, Homimg, Finish)로 관찰한다.
-     [segment Status](/Terminologies/segment.md)
+  - Segment(Child/passive)는 행위(Parent/Active)에 의해 Child 값(Value)를 4가지 상태(R/G/F/H)로 해석 된다.
+  - 4가지 단일 상태(Ready, Going, Homimg, Finish)
+     [segment Status](Terminologies/segment.md)
 <img src="IMG/Rule2.png">
 
 ## 3. 고유행위(Processing) 법칙
   - Segment는 시공간을 무시한 인과 논리 처리를 기본으로 하며, 내부 자식 행위들은 복수의 초기값이 정해진 고유한 과정(Processing)을 가진다.
+  - 초기값 참고 [Start Point](Terminologies/logging.md) 
+
 <img src="IMG/Rule3.png">
 
 ## 4. 우선리셋(Interface) 법칙
   - Segment는 Interface 입력이 유지되어야 동작하며, 시작(Start)과 복귀(Reset)가 동시에 입력될 때 무조건 Reset 명령을 우선한다.
+  - 인터페이스 메크로 참고 [interface Macro](Language/ds-language-table.md) 
 <img src="IMG/Rule4.png">

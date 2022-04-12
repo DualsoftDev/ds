@@ -19,7 +19,7 @@
 
 <img src="IMG/Rule3.png">
 
-## 4. 우선리셋(Interface) 법칙
+## 4. 리셋우선(Interface) 법칙
   - Segment는 Interface 입력이 유지되어야 동작하며, 시작(Start)과 복귀(Reset)가 동시에 입력될 때 무조건 Reset 명령을 우선한다.
   - 인터페이스 메크로 참고 [interface Macro](Language/ds-language-table.md) 
 <img src="IMG/Rule4.png">

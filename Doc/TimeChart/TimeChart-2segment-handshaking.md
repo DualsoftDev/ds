@@ -1,5 +1,4 @@
 
-
 ## A > B 2-Way HandShake
 
 ![ABchart](IMG/ABTimeChart.PNG)
@@ -17,7 +16,7 @@
 
 
 
-## Extension - A > B 2-Way HandShake inversion
+## Extension - A > B 2-Way HandShake Inversion
 
 ![ABchart](IMG/ABTimeChart2.PNG)
 

@@ -9,7 +9,7 @@
 
 ## 2. 상태관찰(Segment) 법칙
   - Segment(child)는 능동(Active) 행위(Parent)에 의해 행위 값(Value)를 4가지 단일 상태(Ready, Going, Homimg, Finish)로 관찰한다.
-     [segment Status](/Terminologies/segment.md)
+    - [segment Status](Terminologies/segment.md) 참고
 <img src="IMG/Rule2.png">
 
 ## 3. 고유행위(Processing) 법칙

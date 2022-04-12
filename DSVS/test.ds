@@ -1,4 +1,3 @@
-
 [Sys]M = {U; D}  // Motor up / down
 [Sys]B = {F1; F2; F3; F4}    // Button.층 호출버튼
 [Sys]S = {S1D; S2D; S2U; S3D; S3U; S4U, xxx.a.b.c}    // Sensor Up, Down

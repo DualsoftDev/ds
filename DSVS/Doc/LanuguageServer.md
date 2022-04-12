@@ -1,12 +1,15 @@
 
 - 따라 해 볼 만한 vs code 공식 문서
-[Example language server - vscode-docs](https://vscode-docs.readthedocs.io/en/stable/extensions/example-language-server/)
+    - [Example language server - vscode-docs](https://vscode-docs.readthedocs.io/en/stable/extensions/example-language-server/)
+        - [GitHub - microsoft/vscode-languageserver-node: Language server protocol implementation for VSCode. This allows implementing language services in JS/TS running on node.js](https://github.com/microsoft/vscode-languageserver-node)
+        - [vscode-extension-samples/lsp-sample at main · microsoft/vscode-extension-samples](https://github.com/microsoft/vscode-extension-samples/tree/main/lsp-sample)
+            - 간단한 language client/server sample
 
-[Language Server Extension Guide](https://code.visualstudio.com/api/language-extensions/language-server-extension-guide)
+- [Language Server Extension Guide](https://code.visualstudio.com/api/language-extensions/language-server-extension-guide)
 
 
 
-[Extending VSCode: Write Your Own Language Server in VSCode](https://www.youtube.com/watch?v=H0p7tcUuJm0)
+- [Extending VSCode: Write Your Own Language Server in VSCode](https://www.youtube.com/watch?v=H0p7tcUuJm0)
 
 
 ANTLR

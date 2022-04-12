@@ -13,14 +13,17 @@
 - 모든 Segment 는, 특정 DsSystem 내에 유일하게 소속된다.
 - 하나의 Segment 는 유일한 부모 Segment 를 가진다.
   - 예외) TopLevel에 존재하는 RootSegment를 동시 호출하는 DsSystem의 유일한 SystemSegment는 제외
-  
+
 - Status None  에서 상태평가를 통해 정상 상태 해석
+  - 초기 접속시 행위 상태는 값과 상관없이 평가불가 (Status None)
+  - 초기 접속이거나 진행중 Reset 명령은 Force Homing에 해당
+
   | Start | Reset  | Out Value | Segment Status |
   | ----- | ----   | --- | --- |
   | 0     | 0      | OFF | Ready |
   | 1     | 0      | OFF | Going |
   | -     | 0      | ON | Finish|
-  | -     | 1      | ON | Homing |
+  | -     | 1(0)      | ON | Homing(forceHoming) |
 
 ## RealSegment
 
@@ -33,7 +36,6 @@
 - 외부 표출 값(Value) : (외부에서 나의 segment 상태를 해석하는 방법)
   - Value On은 (F, H) 상태
   - Value Off은 (R, G) 상태
-  - 초기 접속시 행위 상태는 값과 상관없이 평가불가 (Status None)
 
 
 -[Status타임차트](./ppt/Status.pptx)

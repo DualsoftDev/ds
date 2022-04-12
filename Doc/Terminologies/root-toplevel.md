@@ -1,13 +1,13 @@
 Fill me!!!
-
+<!-- 
 root segment 내의 dag 를 구성하는 segment 는 모두 call segment 로 해석한다.
 그래야 그나마 RGFH 에 대한 해석이 일부 가능해 진다.
 
 
 system root 가 다음과 같은 경우,
-```mermaid
+``` mermaid
 flowchart LR
-    a --> b
+    a - -> b
 ```
 
 - b 가 call segment 가 아니라면
@@ -21,7 +21,7 @@ flowchart LR
 - b 가 call segment 이고, b 의 refrenced segment 가 다른 곳에서 사용되지 않는다면,
     - call segment 를 this system 에서 관리하므로, RGFH 상태를 가늠할 수 있다.
     - a 를 적절한 시점에, 후행 reset 시킬 수 있다.
-        - a 의 모든 outgoing 이 R->G 상태변화 있으면 reset
+        - a 의 모든 outgoing 이 R->G 상태변화 있으면 reset -->
 
 - 기본은 후행 reset
 - sink segment 는 외부 reset

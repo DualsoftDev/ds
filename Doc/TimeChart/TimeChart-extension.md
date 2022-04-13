@@ -27,12 +27,12 @@
 
 
 ### Case2 : Reset not exist Interface
-[macro 4.Interface If6](/Language/ds-language-table.md)
+[macro 4.Interface If6](Language/ds-language-table.md)
 ![case2](IMG/Case2.PNG)
 
 
 ### Case3 : Start not exist Interface
-[macro 4.Interface If7](/Language/ds-language-table.md)
+[macro 4.Interface If7](Language/ds-language-table.md)
 ![case3](IMG/Case3.PNG)
 
 ### Case4 : Start/Reset not exist Interface
@@ -40,14 +40,14 @@
 
 
 ### Case5 : End not exist Interface
-[function 3.2 Time Operation Op24](/Language/ds-language-table.md)
+[function 3.2 Time Operation Op24](Language/ds-language-table.md)
 ![case5](IMG/Case5.PNG)
 
 ### Case6 : Reset/End not exist Interface
-[function 3.2 Time Operation Op24](/Language/ds-language-table.md)
+[function 3.2 Time Operation Op24](Language/ds-language-table.md)
 ![case6](IMG/Case6.PNG)
 ### Case7 : Start/End not exist Interface
-[function 3.2 Time Operation Op24](/Language/ds-language-table.md)
+[function 3.2 Time Operation Op24](Language/ds-language-table.md)
 ![case7](IMG/Case7.PNG)
 ### Case8 : S/R/E not exist Interface
 ![case8](IMG/Case8.PNG)

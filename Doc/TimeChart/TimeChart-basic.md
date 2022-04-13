@@ -39,68 +39,19 @@
 ![case1](IMG/Case1.PNG)
 
 
-### Case2 : Reset not exist Interface
-[macro 4.Interface If6](/Language/ds-language-table.md)
-![case2](IMG/Case2.PNG)
-
-
-### Case3 : Start not exist Interface
-[macro 4.Interface If7](/Language/ds-language-table.md)
-![case3](IMG/Case3.PNG)
-
-### Case4 : Start/Reset not exist Interface
-![case4](IMG/Case4.PNG)
-
-
-### Case5 : End not exist Interface
-[function 3.2 Time Operation Op24](/Language/ds-language-table.md)
-![case5](IMG/Case5.PNG)
-
-### Case6 : Reset/End not exist Interface
-[function 3.2 Time Operation Op24](/Language/ds-language-table.md)
-![case6](IMG/Case6.PNG)
-### Case7 : Start/End not exist Interface
-[function 3.2 Time Operation Op24](/Language/ds-language-table.md)
-![case7](IMG/Case7.PNG)
-### Case8 : S/R/E not exist Interface
-![case8](IMG/Case8.PNG)
-
-## Causal Model
-
-### Causal Start Children
-![CSC](IMG/CausalSChildren.PNG)
-### Causal Reset Children
-![CSC](IMG/CausalRChildren.PNG)
-
-### Causal DAG Children
-
-![CDC](IMG/CausalDAGChildren.PNG)
-
-### Causal Fractal System
-
-![CFS](IMG/CausalFractalSys.PNG)
-
-## Macro
-
-### Macro - Start Reset Priority
-![CFS](IMG/MacroSR.PNG)
-### Macro - Reset Start Priority
-![CFS](IMG/MacroRS.PNG)
-### Macro - Reset Not Exist Interface
-![CFS](IMG/MacroRNE.PNG)
-
-
-
 ## A > B 2-Way HandShake
 
 ![ABchart](IMG/ABTimeChart.PNG)
-#### Rule
+#### Simple Rule
 1. A의 value가 On으로 변하면 B를 On 한다.
 2. A의 value가 Off로 변하면 B를 Off한다.
-
-
-#### Extension Rule
+   
+#### Rule
+##### A
+1. A는 B의 value가 0일때 자신의 value를 상승할 수 있다.
+2. A는 B의 value가 1일때 자신의 value를 하강할 수 있다.
+##### B
 1. B는 A의 value가 상승해야 자신의 value를 상승할 수 있다.
 2. B는 A의 value가 하강해야 자신의 value를 상승할 수 있다.
-3. A는 B의 value가 0일때 자신의 value를 상승할 수 있다.
-4. A는 B의 value가 1일때 자신의 value를 하강할 수 있다.
+
+

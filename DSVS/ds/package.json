@@ -2,7 +2,9 @@
     "name": "ds",
     "displayName": "ds",
     "description": "DS language",
-    "version": "0.0.1",
+    "icon": "logo.png",
+    "version": "0.0.2",
+    "publisher": "dualsoft",
     "engines": {
         "vscode": "^1.66.0"
     },

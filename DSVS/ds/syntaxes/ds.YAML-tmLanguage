@@ -7,7 +7,6 @@ fileTypes: [ds, ds]
 foldingStartMarker: '\{\s*$'
 foldingStopMarker: '^\s*\}'
 
-# https://git.wfxlabs.com/sen/tm-lang/src/branch/master/sehn.tmLanguage.yaml
 # foldingStartMarker: '^\s*[{\[\`](?!.*[}\]\`],?\s*$)|[{\[\`]\s*$'
 # foldingStopMarker: '^\s*[}\]\`]'
 
@@ -62,14 +61,14 @@ repository:
     - name: comment.block.ds
       begin: (/\*)
       beginCaptures:
-        '1': { name: 'punctuation.definition.comment.ink' }
+        '1': { name: 'punctuation.definition.comment.ds' }
       end: (\*/)
       endCaptures:
-        '1': { name: 'punctuation.definition.comment.ink' }
+        '1': { name: 'punctuation.definition.comment.ds' }
     - name: comment.line.ds
       begin: (\/\/)
       beginCaptures:
-        '1': { name: 'punctuation.definition.comment.ink' }
+        '1': { name: 'punctuation.definition.comment.ds' }
       end: (?=$)
 
 #   devices:

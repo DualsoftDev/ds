@@ -18,7 +18,7 @@
         34 = { M.U ~ S.S4U }
         43 = { M.D ~ S.S3D }
         32 = { M.D ~ S.S2D }
-        21 = { M.D ~ S.S1D }
+        21 = { M.D ~ S.S1D, S.S2U }    // comma test
     }
     // 호출 Set기억 
     B.F1 > Set1F <| T.21

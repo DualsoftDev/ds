@@ -175,7 +175,8 @@ repository:
       - name: 'constant.character.escape.untitled'
         match: '\\.'
 
-
-
-
+  comma:
+    comment: Commas - used in certain expressions
+    name: punctuation.separator.terraform
+    match: \,
 ...

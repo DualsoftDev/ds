@@ -28,27 +28,13 @@ variables:
 
 #   segmentName: '[:alpha]([:alnum])*(.[:alnum]+){1}'
 
-# - include: '#import'
-# - include: '#declaration'
-# - include: '#knot'
-# - include: '#stitch'
-# - include: '#choice'
-# - include: '#divert'
-# - include: '#gather'
-# - include: '#logic'
-# - include: '#glue'
-# - include: '#interpolevaluablock'
-
-# - include: '#todo'
-# - include: '#property'
 patterns:
 - include: '#comments'
-- include: '#systems'
-# - include: '#definitions'
-# - include: '#segments'
-# - include: '#sample_keywords'
-# - include: '#segment'
-# - include: '#properties'
+- include: '#devices'
+- include: '#segments'
+- include: '#sample_keywords'
+- include: '#segment'
+- include: '#properties'
 - include: '#dquoted'
 
 repository:
@@ -72,8 +58,17 @@ repository:
         '1': { name: 'punctuation.definition.comment.ds' }
       end: (?=$)
 
-#   devices:
-#     patterns:
+  devices:
+    - name: device.definition.ds
+      begin: ((\[[^\]]*\])?\s*([a-zA-Z_][a-zA-Z_0-9]*)\s*=\s*\{([^\}]*\}))
+      end: (\})
+      # patterns:
+      #   - include: '#properties'
+      #   - name: punctuation.separator.define.ds
+      #   - match: '{{properties}}{{segment}}\s*={{segments}}\b'
+      #   - include: '#segments'
+
+
 
 #   todo:
 #     patterns: # # tag content • Cannot exist within a comment.
@@ -84,104 +79,16 @@ repository:
 #       end: (?=$)
 #       patterns:
 #         - include: '#comment'
-  systems:
-    patterns:
-      - comment: multi-line
-        name: system.multi.ds
-        begin: \[\s*(Sys)\s*\]\s*([a-zA-Z_][a-zA-Z_0-9]*)\s*=\s*(\{)(?=[^\}]*$)
-        beginCaptures:
-          '1': {name: keyword.control.ds}
-          '2': {name: keyword.control.ds}
-        end: (\})
-        endCaptures:
-          '1': {name: punctuation.brace.end.ds}
-        patterns:          
-        - include: '#comments'
-        - include: '#accessDefs'
-        - include: '#macroDefs'
-        # - include: '#braceLists'
-      - comment: single-line
-        name: system.single.ds
-        begin: \[\s*(Sys)\s*\]\s*([a-zA-Z_][a-zA-Z_0-9]*)\s*=\s*\{
-        beginCaptures:
-          '1': {name: keyword.control.ds}
-          '2': {name: keyword.control.ds}
-        end: \}
-        patterns:          
-        - name: punctuation.separator.array.ds
-          match: ";"
-        - include: '#segment'
-        - name: invalid.illegal.expected-array-separator.json
-          match: '[^\s\}]'
-        # - include: '#comments'
-
-  braceLists:
-    patterns:
-      - name: system.braceLists.ds
-        begin: (\{)
-        beginCaptures:
-          '1': {name: punctuation.brace.start.ds}
-        end: (\})
-        endCaptures:
-          '1': {name: punctuation.brace.end.ds}
-        patterns:
-          - include: '#comments'
-          # - include: '#accessDefs'
-          # - include: '#macroDefs'
-          - include: '#segment'
-          - name: punctuation.brace.separator.ds
-            match: ;
-
-  accessDefs:
-    patterns:
-    - name: access.ds
-      begin: \[\s*(accSRE|accSR|accRE|accSE|accS|accR|accE)\s*\]\s*=\s*(\{)
-      beginCaptures:
-        '1': {name: keyword.control.accessSRE.ds}      
-      end: (\})
-      patterns:
-        - name: punctuation.brace.separator.ds
-          match: ;
-        - include: '#segment'
-        - include: '#comments'
-    - include: '#comments'
-    - include: $self
-
-  macroDefs:
-    patterns:
-    - name: macro.ds
-      begin: \[\s*(macro)\s*\]\s*=\s*(\{)
-      beginCaptures:
-        '1': {name: keyword.control.macro.ds}      
-      end: (\})
-      patterns:
-        - name: punctuation.brace.separator.ds
-          match: ;
-        - include: '#segment'
-        - include: '#comments'
-    - name: macro.ds
-      begin: \[\s*(macro)\s*=\s*([a-zA-Z_][a-zA-Z_0-9]*)\s*\]\s*=\s*(\{)
-      beginCaptures:
-        '1': {name: keyword.control.macro.ds}      
-        '2': {name: keyword.control.macro.ds}      
-      end: (\})
-      patterns:
-        - name: punctuation.brace.separator.ds
-          match: ;
-        - include: '#segment'
-        - include: '#comments'
-    - include: '#comments'
 
 
   properties:
     patterns:
-    - comment: macro # [macro=A]={}
-      name: punctuation.macro.definition.area.ds
-      begin: (?:\[\s*)(macro)\s*=\s*([^\]]*)\s*=\s*(?=\{)
+    - name: punctuation.definition.macro1111.ds
+      begin: (?:\[\s*)(macro)\s*=\s*([^\]]*)
       beginCaptures:
-        '2': { name: keyword.control.macro2 }
-        '3': { name: keyword.control.macro3 }
-      end: (?=\})
+        '1': { name: keyword.control.macro2 }
+        '2': { name: keyword.control.macro3 }
+      end: (?:\])
 
     - name: punctuation.definition.macro.ds
       begin: (?:\[)
@@ -225,7 +132,6 @@ repository:
       # match: '{{segmentName}}'
       # match: '([a-zA-Z_][:alnum:]*)|([a-zA-Z_][:alnum:]*\.[a-zA-Z_][:alnum:]*)'
       match: '\b[a-zA-Z_][a-zA-Z_0-9]*\b'
-    - include: '#comments'
     - name: invalid.illegal.expected-array-separator.json
       match: '[^\s\{\};=<>\|&~\(\)]'
 
@@ -245,16 +151,6 @@ repository:
         match: '[^\s\]]'
       - include: '#comments'
       - include: '#segment'
-
-  segmentListsSeparatedBySemiColon:
-    - name: segments
-    -
-  definitions:
-    patterns:
-      - include: '#properties'
-      - name: punctuation.separator.define.ds
-      - match: '{{properties}}{{segment}}\s*={{segments}}\b'
-      - include: '#segments'
 
 
   dquoted:

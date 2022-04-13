@@ -2,7 +2,7 @@
 작성 후 문서 나눌것
 -->
 
-# Segment Timing Chart (Ripple)
+# Segment Timing Chart
 
 
 ## Segment 정의
@@ -17,20 +17,12 @@
 
 ## Interface Timing Chart Case
 
-##### Segment Port(S/R/E)에 접근(Access)가능 여부에 따른 인터페이스 경우의 수는 8가지의 Case가 있다.
-    - Interface Case1 경우를 제외하고 정상적인 행위조작이 불가
-    - Case2~7은 정상 조작하기 위한 interface Macro 제공
+    - Normal Segment에서만 정상적인 행위조작이 가능하다
+    - 그 외의 Case는 매크로가 제공된다.
 
-| Interface Case | Start | Reset| End | using|
-|:--|:--:|:--:|:--:|:--:|
-|**Case1**|O|O|O|normal|
-|**Case2**|O|X|O|macro|
-|**Case3**|X|O|O|macro|
-|**Case4**|X|X|O|normal|
-|**Case5**|O|O|X|function|
-|**Case6**|O|X|X|function|
-|**Case7**|X|O|X|function|
-|**Case8**|X|X|X|not Use|
+| Interface Case | Start | Reset| End |
+|:--|:--:|:--:|:--:|
+|**Normal**|O|O|O|
 
 
 
@@ -47,9 +39,11 @@
 2. A의 value가 Off로 변하면 B를 Off한다.
    
 #### Rule
+
 ##### A
 1. A는 B의 value가 0일때 자신의 value를 상승할 수 있다.
 2. A는 B의 value가 1일때 자신의 value를 하강할 수 있다.
+   
 ##### B
 1. B는 A의 value가 상승해야 자신의 value를 상승할 수 있다.
 2. B는 A의 value가 하강해야 자신의 value를 상승할 수 있다.

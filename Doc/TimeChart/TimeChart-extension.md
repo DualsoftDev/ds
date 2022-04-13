@@ -2,9 +2,9 @@
 작성 후 문서 나눌것
 -->
 
-# Segment Timing Chart (Ripple)
+# Segment Timing Chart
 
-## Interface Timing Chart Case
+## Interface Timing Chart Case(Extension)
 
 ##### Segment Port(S/R/E)에 접근(Access)가능 여부에 따른 인터페이스 경우의 수는 8가지의 Case가 있다.
     - Interface Case1 경우를 제외하고 정상적인 행위조작이 불가
@@ -20,16 +20,6 @@
 |**Case6**|O|X|X|function|
 |**Case7**|X|O|X|function|
 |**Case8**|X|X|X|not Use|
-
-## Macro
-
-### Macro - Start Reset Priority
-![CFS](IMG/MacroSR.PNG)
-### Macro - Reset Start Priority
-![CFS](IMG/MacroRS.PNG)
-### Macro - Reset Not Exist Interface
-![CFS](IMG/MacroRNE.PNG)
-
 
 ### Case1 : Normal Segment Interface
 
@@ -78,3 +68,11 @@
 ![CFS](IMG/CausalFractalSys.PNG)
 
 
+## Macro
+
+### Macro - Start Reset Priority
+![CFS](IMG/MacroSR.PNG)
+### Macro - Reset Start Priority
+![CFS](IMG/MacroRS.PNG)
+### Macro - Reset Not Exist Interface
+![CFS](IMG/MacroRNE.PNG)

@@ -29,19 +29,33 @@
      - TODO: aaaa
      */
     [accS] = {a; /* */ B}
-    [macro] = { A; B}
     [accS] = {a; /* */ B}
 
 
-
     [macro=T] = {  //층간 이송 행위 Task
-        T.A = { M.U ~ S.S2U }
         A23 = { M.U ~ S.S3U }
         A34 = { M.U ~ S.S4U }
         A43 = { M.D ~ S.S3D }
         A32 = { M.D ~ S.S2D }
         A21 = { M.D ~ S.S1D }
     }
+
+    [macro=T] = {  //층간 이송 행위 Task
+        A23 = { A.B, /**/ M.U ~ S.S3U, A.abc }
+        A34 = { M.U ~ S.S4U }
+        A43 = { M.D ~ S.S3D }
+        A32 = { M.D ~ S.S2D }
+        A21 = { M.D ~ S.S1D }
+    }
+
+    [macro] = { //aaa
+        A = { M.U ~ S.S2U }
+        B = { M.U ~ S.S2U }
+    }
+
+
+
+
     // 호출 Set기억 
     B.F1 > Set1F <| T.21
     B.F2 > Set2F <| T.32

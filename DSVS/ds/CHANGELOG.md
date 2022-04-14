@@ -8,3 +8,4 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 - v 0.0.1 Initial release
 - v 0.0.2 Bug fix
+- v 0.0.3 Callsegment delimiter(comma) bug fix

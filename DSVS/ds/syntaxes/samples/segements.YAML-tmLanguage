@@ -1,0 +1,15 @@
+  segments:
+    - name: meta.structure.array.ds
+      begin: (\{)
+      beginCaptures:
+        '1': { name: 'punctuation.definition.macro.start.ds' }
+      end: (\})
+      endCaptures:
+        '1': { name: 'punctuation.definition.macro.end.ds' } 
+      patterns:
+      - name: punctuation.separator.array.ds
+        match: ";"
+      - name: invalid.illegal.expected-array-separator.json
+        match: '[^\s\]]'
+      - include: '#comments'
+      - include: '#segment'

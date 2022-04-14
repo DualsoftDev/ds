@@ -2,40 +2,41 @@
 
 ```ex
 [Sys]M = {U; D}  // Motor up / down
-[Sys]B = {1; 2; 3; 4}    // Button.층 호출버튼
-[Sys]S = {1D; 2D; 2U; 3D; 3U; 4U}    // Sensor Up, Down
-[Sys]My =
+[Sys]B = { /* */ F1; F2; F3; F4 }   // Button.층 호출버튼
+[Sys]S = {S1D; S2D; S2U; S3D; S3U; S4U}    // Sensor Up, Down
+[Sys]My = {
     [accE] = {B; S}
     [accS] = {M}
     [macro=T] = {  //층간 이송 행위 Task
-        12 = { M.U ~ S.2U }
-        23 = { M.U ~ S.3U }
-        34 = { M.U ~ S.4U }
-        43 = { M.D ~ S.3D }
-        32 = { M.D ~ S.2D }
-        21 = { M.D ~ S.1D }
+        A12 = { M.U ~ S.S2U }
+        A23 = { M.U ~ S.S3U }
+        A34 = { M.U ~ S.S4U }
+        A43 = { M.D ~ S.S3D }
+        A32 = { M.D ~ S.S2D }
+        A21 = { M.D ~ S.S1D }
     }
     // 호출 Set기억 
-    B.1 > Set1F <| T.21
-    B.2 > Set2F <| T.32
-          Set2F <| T.12
-    B.3 > Set3F <| T.23
-          Set3F <| T.43
-    B.4 > Set4F <| T.34  
+    B.F1 > Set1F <| T.A21;
+    B.F2 > Set2F <| T.A32;
+          Set2F <| T.A12;
+    B.F3 > Set3F <| T.A23;
+          Set3F <| T.A43;
+    B.F4 > Set4F <| T.A34;
     
     // 층간 상하강 행위간 인터락
     
-    T.12 <|> T.21
-    T.34 |> T.23 <|> T.32 <| T.21
-    T.34 <|> T.43
+    T.A12 <|> T.A21;
+    T.A34 |> T.A23 <|> T.A32 <| T.A21;
+    T.A34 <|> T.A43;
     
     //호출에 따른 층간 상하강 행위   
-    T.12 < (Set2F | Set3F | Set4F) & T.21
-    T.23 < (Set3F | Set4F) & (T.12 | T.32) 
-    T.34 <  Set4F & (T.43 | T.23)
-    T.43 < (Set1F | Set2F | Set3F) & T.34 
-    T.32 < (Set1F | Set2F) & (T.23 | T.43)
-    T.21 <  Set1F & (T.12 | T.32)
+    T.A12 < (Set2F | Set3F | Set4F) & T.A21;
+    T.A23 < (Set3F | Set4F) & (T.A12 | T.A32);
+    T.A34 <  Set4F & (T.A43 | T.A23);
+    T.A43 < (Set1F | Set2F | Set3F) & T.A34;
+    T.A32 < (Set1F | Set2F) & (T.A23 | T.A43);
+    T.A21 <  Set1F & (T.A12 | T.A32);
+}
 ```
 
 

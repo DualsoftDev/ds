@@ -3,6 +3,7 @@ import { dsLexer } from './dsLexer';
 import { dsParser, ProgramContext, SystemContext } from './dsParser';
 import { dsVisitor } from './dsVisitor';
 import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
+import { CaseSimpleSysBlockContext, CaseComplexSysBlockContext } from './dsParser';
 
 class ProgramTreeWalker extends AbstractParseTreeVisitor<number> implements dsVisitor<number> {
 	protected defaultResult(): number {
@@ -19,7 +20,11 @@ class ProgramTreeWalker extends AbstractParseTreeVisitor<number> implements dsVi
 	//visitSystem?: ((ctx: SystemContext) => number) | undefined;
 }
 
-export function testParseText(text:string) {
+/**
+ * Parse DS model text
+ * @param text DS model document obeying DS language rule.
+ */
+export function parseDSDocument(text:string) {
 	// Create the lexer and parser
 	const inputStream = new ANTLRInputStream(text);
 	const lexer = new dsLexer(inputStream);
@@ -30,7 +35,15 @@ export function testParseText(text:string) {
 	// Parse the input, where `compilationUnit` is whatever entry point you defined
 	const tree = parser.program();
 	for (const system of tree.system()) {
-		console.log(`system: ${system.text}`);
+		const sysBlock = system.sysBlock();
+		if (sysBlock instanceof CaseSimpleSysBlockContext)
+			console.log(`system: ${system.text}`);
+		else if (sysBlock instanceof CaseComplexSysBlockContext)
+		{
+			const complex = sysBlock as CaseComplexSysBlockContext;
+			console.log(`-----------${complex.childCount}`);
+			console.log(`system: ${system.text}`);
+		}			
 	}
 	// const visitor = new ProgramTreeWalker();
 	// const count = visitor.visit(tree);

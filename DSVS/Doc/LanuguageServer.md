@@ -38,15 +38,17 @@ ANTLR
 As of VSCode 1.15, you *have to use* textmate grammars for syntax highlighting. There's an feature request open that tracks what you are after: https://github.com/Microsoft/vscode/issues/1967
 
 
-[Syntax Highlight Guide](https://code.visualstudio.com/api/language-extensions/syntax-highlight-guide)
+- [Syntax Highlight Guide](https://code.visualstudio.com/api/language-extensions/syntax-highlight-guide)
 VS Code's tokenization engine is powered by TextMate grammars. TextMate grammars are a structured collection of regular expressions and are written as a plist (XML) or JSON files. VS Code extensions can contribute grammars through the grammars contribution point.
 
 Starting with release 1.43, VS Code also allows extensions to provide tokenization through a Semantic Token Provider. 
-
-[Semantic Highlight Guide](https://code.visualstudio.com/api/language-extensions/semantic-highlight-guide)
 
 
 
 
 #### Sample
 [GitHub - kaby76/uni-vscode: From an Antlr4 grammar to a VSCode extension in less than a minute.](https://github.com/kaby76/uni-vscode)
+
+
+- Spell checker : client + server
+    - [GitHub - streetsidesoftware/vscode-spell-checker: A simple source code spell checker for code](https://github.com/streetsidesoftware/vscode-spell-checker)

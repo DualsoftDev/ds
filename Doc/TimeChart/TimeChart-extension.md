@@ -15,7 +15,7 @@
 |**Case1**|O|O|O|normal|
 |**Case2**|O|X|O|macro|
 |**Case3**|X|O|O|macro|
-|**Case4**|X|X|O|normal|
+|**Case4**|X|X|O|macro|
 |**Case5**|O|O|X|function|
 |**Case6**|O|X|X|function|
 |**Case7**|X|O|X|function|

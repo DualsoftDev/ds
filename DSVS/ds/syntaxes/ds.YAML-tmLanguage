@@ -1,9 +1,9 @@
 ---
-# from INK
 
 name: ds
+comment: DS language syntax.  Do *NOT* modify auto-generated JSON file.
 scopeName: source.ds
-fileTypes: [ds, ds]
+fileTypes: [ds]
 foldingStartMarker: '\{\s*$'
 foldingStopMarker: '^\s*\}'
 
@@ -13,49 +13,13 @@ foldingStopMarker: '^\s*\}'
 # 원본 참조
 # https://github.com/inkle/ink-tmlanguage/blob/master/grammars/Ink.YAML-tmLanguage
 
-variables:
-#   # # Identifier can't start with a number…
-#   indentifierBeginCharacter: '[a-zA-Z_\x{0100}-\x{017F}\x{0180}-\x{024F}\x{0600}-\x{06FF}\x{0530}-\x{058F}\x{0400}-\x{04FF}\x{0370}-\x{03FF}\x{0590}-\x{05FF}]'
-#   # Identifier characters can anything within these unicode blocks
-#   indentifierCharacter: '[a-zA-Z0-9_\x{0100}-\x{017F}\x{0180}-\x{024F}\x{0600}-\x{06FF}\x{0530}-\x{058F}\x{0400}-\x{04FF}\x{0370}-\x{03FF}\x{0590}-\x{05FF}]'
 
-#   anyNonIdentifierCharacter: '[^a-zA-Z_\x{0100}-\x{017F}\x{0180}-\x{024F}\x{0600}-\x{06FF}\x{0530}-\x{058F}\x{0400}-\x{04FF}\x{0370}-\x{03FF}\x{0590}-\x{05FF}]'
-#   validIdentifier: '{{indentifierCharacter}}*{{indentifierBeginCharacter}}{{indentifierCharacter}}*'
 
-#   standardFunctions: 'LIST_COUNT|LIST_MIN|LIST_MAX|LIST_ALL|LIST_INVERT|LIST_RANDOM|CHOICE_COUNT|TURNS_SINCE|LIST_RANGE|TURNS|POW|FLOOR|CEILING|INT|FLOAT'
-  whitespace: '[^\S\n\r]'
-  accSRE: 'accSRE|accSR|accRE|accSE|accS|accR|accE'
-
-#   segmentName: '[:alpha]([:alnum])*(.[:alnum]+){1}'
-
-# - include: '#import'
-# - include: '#declaration'
-# - include: '#knot'
-# - include: '#stitch'
-# - include: '#choice'
-# - include: '#divert'
-# - include: '#gather'
-# - include: '#logic'
-# - include: '#glue'
-# - include: '#interpolevaluablock'
-
-# - include: '#todo'
-# - include: '#property'
 patterns:
 - include: '#comments'
 - include: '#systems'
-# - include: '#definitions'
-# - include: '#segments'
-# - include: '#segment'
-# - include: '#properties'
-- include: '#dquoted'
 
 repository:
-
-# ##############################################################################
-# Comments
-# ##############################################################################
-
   comments: # Inline (//) and block (/* */) comments. Comments can happen anywhere.
     patterns:
     - name: comment.block.ds
@@ -77,7 +41,7 @@ repository:
         name: system.multi.ds
         begin: \[\s*(Sys)\s*\]\s*([a-zA-Z_][a-zA-Z_0-9]*)\s*=\s*(\{)(?=[^\}]*$)
         beginCaptures:
-          '1': {name: keyword.control.ds}
+          '1': {name: keyword.other.ds}
           '2': {name: keyword.control.ds}
         end: (\})
         endCaptures:
@@ -86,12 +50,12 @@ repository:
         - include: '#comments'
         - include: '#accessDefs'
         - include: '#macros'
-        # - include: '#braceLists'
+        - include: '#causals'
       - comment: single-line
         name: system.single.ds
         begin: \[\s*(Sys)\s*\]\s*([a-zA-Z_][a-zA-Z_0-9]*)\s*=\s*\{
         beginCaptures:
-          '1': {name: keyword.control.ds}
+          '1': {name: keyword.other.ds}
           '2': {name: keyword.control.ds}
         end: \}
         patterns:          
@@ -100,28 +64,13 @@ repository:
         - include: '#segment'
         - name: invalid.illegal.expected-array-separator.json
           match: '[^\s\}]'
-        # - include: '#comments'
-
-  braceLists:
-    patterns:
-      - name: system.braceLists.ds
-        begin: (\{)
-        beginCaptures:
-          '1': {name: punctuation.brace.start.ds}
-        end: (\})
-        endCaptures:
-          '1': {name: punctuation.brace.end.ds}
-        patterns:
-          - include: '#segment'
-          - name: punctuation.brace.separator.ds
-            match: ;
 
   accessDefs:
     patterns:
     - name: access.ds
       begin: \[\s*(accSRE|accSR|accRE|accSE|accS|accR|accE)\s*\]\s*=\s*(\{)
       beginCaptures:
-        '1': {name: keyword.control.accessSRE.ds}      
+        '1': {name: keyword.other.accessSRE.ds}      
       end: (\})
       patterns:
         - name: punctuation.brace.separator.ds
@@ -136,12 +85,10 @@ repository:
     - name: macro2.ds
       begin: \[\s*(macro)\s*(=\s*([a-zA-Z_][a-zA-Z_0-9]*))?\s*\]\s*=\s*(\{)
       beginCaptures:
-        '1': {name: keyword.control.macro2.ds}      
+        '1': {name: keyword.other.macro2.ds}      
         '3': {name: keyword.control.macro.var.ds}      
       end: (\})
       patterns:
-        #- name: punctuation.brace.separator.ds
-        #   match: ;
         - include: '#callSegmentDefs'
         - include: '#comments'
 
@@ -155,20 +102,21 @@ repository:
       patterns:
         - name: punctuation.comma.ds
           match: ','
-        - name: punctuation.tilde.ds
+        - name: keyword.other.callSegment.ds
           match: '~'
         - include: '#segment'
 
+  causals:
+    patterns:
+      - include: '#segment'
+      - name: keyword.other.causal.ds
+        match: '(<\|>)|(<\|)|(\|>)|<|>'
 
   segment:
     patterns:
     - name: 'variable.other.segment.withdot.ds'
-      # match: '\b\w+(\.\w+)\b'
       match: '\b[a-zA-Z_][a-zA-Z_0-9]*\.[a-zA-Z_][a-zA-Z_0-9]*\b'
     - name: 'variable.other.segment.ds'
-      # match: '\b\w+\b'
-      # match: '{{segmentName}}'
-      # match: '([a-zA-Z_][:alnum:]*)|([a-zA-Z_][:alnum:]*\.[a-zA-Z_][:alnum:]*)'
       match: '\b[a-zA-Z_][a-zA-Z_0-9]*\b'
     - include: '#comments'
     - name: invalid.illegal.expected-array-separator.json
@@ -191,23 +139,6 @@ repository:
       - include: '#comments'
       - include: '#segment'
 
-
-  # definitions:
-  #   patterns:
-  #     - include: '#properties'
-  #     - name: punctuation.separator.define.ds
-  #     - match: '{{properties}}{{segment}}\s*={{segments}}\b'
-  #     - include: '#segments'
-
-
-  dquoted:
-    patterns:
-    - name: 'string.quoted.double.untitled'
-      begin: (")
-      end: (")
-      patterns:
-      - name: 'constant.character.escape.untitled'
-        match: '\\.'
 
 
 

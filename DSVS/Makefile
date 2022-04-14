@@ -19,5 +19,5 @@ antlr:
 
 g4:
 	cd dsvse/server
-	yarn antlr4ts -o src src/ds.g4
+	yarn antlr4ts -visitor -o src src/ds.g4
 

@@ -5,31 +5,57 @@
 
 grammar ds;
 
-program: system* EOF;
+IDENTIFIER: VALID_ID_START VALID_ID_CHAR*;
+fragment VALID_ID_START
+   : ('a' .. 'z') | ('A' .. 'Z') | '_'
+   ;
 
 
-system: syshdr segname '=' sysBlock;
+fragment VALID_ID_CHAR
+   : VALID_ID_START | ('0' .. '9')
+   ;
+
+program: (system|comment)* EOF;
 
 
-syshdr: '[Sys]';
+system: sysHdr segment '=' sysBlock;
+
+
+sysHdr: LBRACKET sys RBRACKET;
 sysBlock
-    : simpleSysBlock        #simpleSysBlock
-    | complexSysBlock       #complexSysBlock
+    : simpleSysBlock        #caseSimpleSysBlock
+    | complexSysBlock       #caseComplexSysBlock
     ;
-simpleSysBlock: '{' segname (';' segname)* '}';
+simpleSysBlock: '{' segment (';' segment)* '}';
 complexSysBlock: '{' (acc|macro|causal)* '}';
 
-acc: '[' 'acc' ('SRE'|'SR'|'RE'|'SE'|'S'|'R'|'E') ']' '=' '{' segname (';' segname)* '}';
-macro: '[macro]' '=' '{' segname (';' segname)* '}';
-causal: segname causalOperator segname;
+acc: '[' 'acc' ('SRE'|'SR'|'RE'|'SE'|'S'|'R'|'E') ']' '=' '{' segment (';' segment)* '}';
+macro: '[macro]' '=' '{' segment (';' segment)* '}';
+causal: segment causalOperator segment;
 causalOperator: '<' | '>' | '<|>';
+
+segment: WS* IDENTIFIER WS*;
+
+comment: BLOCK_COMMENT | LINE_COMMENT;
+BLOCK_COMMENT : '/*' (BLOCK_COMMENT|.)*? '*/' -> channel(HIDDEN) ;
+LINE_COMMENT  : '//' .*? ('\n'|EOF) -> channel(HIDDEN) ;
+
+
+// COMMENT
+//     : '/*' .*? '*/' -> skip
+// ;
+
+// LINE_COMMENT
+//     : '//' ~[\r\n]* -> skip
+// ;
+
+sys: 'Sys';
+LBRACKET: '[';
+RBRACKET: ']';
+
 
 WS: [ \t\r\n]+ -> skip;
 
-IDENTIFIER: [a-zA-Z_][a-zA-Z0-9_]*;
-segname: IDENTIFIER;
-
-
-TOKEN
-   : ('0' .. '9' | 'a' .. 'z' | 'A' .. 'Z' | '-' | ' ' | '/' | '_' | ':' | ',')+
-   ;
+// TOKEN
+//    : ('0' .. '9' | 'a' .. 'z' | 'A' .. 'Z' | '-' | ' ' | '/' | '_' | ':' | ',')+
+//    ;

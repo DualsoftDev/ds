@@ -1,0 +1,9 @@
+
+  dquoted:
+    patterns:
+    - name: 'string.quoted.double.untitled'
+      begin: (")
+      end: (")
+      patterns:
+      - name: 'constant.character.escape.untitled'
+        match: '\\.'

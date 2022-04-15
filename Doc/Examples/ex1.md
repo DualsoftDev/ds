@@ -1,16 +1,14 @@
 :smile: Welcome to the DS world  :smile:
 # Example 1 
 
-## Light bulb system :bulb:
+## action system :raising_hand:
 
 
  ![AAA](./ex1.dio.png)
  
   - action list 
-    1. ON
-    1. OFF
-    1. Light
-    
+    1. DoAction
+
 
 
 ```
@@ -20,14 +18,7 @@
           3. Action value(True/False) is End Sensing
      */
 
-     //Light bulb system 
-     [Sys]Light bulb  = {ON > LightOn <| OFF}
+     //action system 
+     [Sys]action  = {Start > DoAction <| Reset}
 ```
 
-- DS Segment(action)  interface    
-
-| interface | Desc | 
-|:--:|:--:
-|Start In|:fist:→:point_up:|
-|Reset In|:fist:→:metal:|
-|End Out|:fist:→:thumbsup:|

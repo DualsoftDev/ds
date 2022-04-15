@@ -1,6 +1,6 @@
 :smile: Welcome to the DS world  :smile:
 # DS Language FAQ 
-####frequently asked question
+`frequently asked question`
 
 1. Causal (인과 정의)
 

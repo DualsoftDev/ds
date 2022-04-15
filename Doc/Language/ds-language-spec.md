@@ -1,5 +1,7 @@
 # DS text language spec
 
+- [Antlr (`g4`) spec](../../DSVS/dsvse/server/src/ds.g4)
+
 Edge Start 기호  '>', '<'
 
 - Ex) A > B  의미 : A 완료(Finish) 후에 B Start
@@ -104,7 +106,8 @@ Macro 추가 - [macro.md](macro.md) 참고
       - `>` or `<` 인과 순서
       - `|>` or `<|` or `<|>` reset 인과
       - `,` 는 and(&) 관계.  인과 방향성보다 우선순위가 높음
-        - e.g `Sys1.A, Sys2.A > X`
+        - e.g `Sys1.A, Sys2.A > X;`
+      - 인과 정의의 마지막은 semicolon(`';'`) 로 끝나야 한다.
   - 주석.  `//` 로 시작하는 line comment or `/*` 와 `*/` 의 block comment
 
 - [elevator.md](../Samples/elevator.md) 참고 (old)

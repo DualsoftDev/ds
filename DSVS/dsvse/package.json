@@ -1,14 +1,14 @@
 {
-	"name": "lsp-sample",
-	"description": "A language server example",
-	"author": "Microsoft Corporation",
+	"name": "ds-language-server-protocol",
+	"description": "DS language server protocol",
+	"author": "dualsoft",
 	"license": "MIT",
 	"version": "1.0.0",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/Microsoft/vscode-extension-samples"
 	},
-	"publisher": "vscode-samples",
+	"publisher": "dualsoft",
 	"categories": [],
 	"keywords": [
 		"multi-root ready"
@@ -41,7 +41,7 @@
 						"messages",
 						"verbose"
 					],
-					"default": "off",
+					"default": "verbose",
 					"description": "Traces the communication between VS Code and the language server."
 				}
 			}

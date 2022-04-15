@@ -1,10 +1,10 @@
 :smile: Welcome to the DS world  :smile:
-# Example 2 
+# Example 4
 
-## coffee machine system :coffee:
+## Traffic light system :traffic_light:
 
 
- ![AAA](./ex2.dio.png)
+ ![AAA](./ex4.dio.png)
  
   - action list 
     1. MakeCoffee

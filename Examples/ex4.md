@@ -10,12 +10,11 @@
     1. RedLight
     2. GreenLight
     3. Walk
-    4. Button
 
 
 ```
-     [Sys]trafficlight  = { RedLight <| Button > Walk
-                            RedLight < (_RisingRun)
-          Walk = {GreenLight > Delay(30 Sec) > RedLight } 
+     [Sys]trafficlight  = { RedLight <| (Button) > Walk
+                            RedLight < _RisingRun
+          Walk = { GreenLight > Delay(30 Sec) > RedLight } 
      }
 ```

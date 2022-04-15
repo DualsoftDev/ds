@@ -9,11 +9,10 @@
   - action list 
     1. Open
     2. Close
-    3. Detecting
 
 ```
  [Sys]door  = { Open <|> Close
-               Detecting > Open, CloseDelay(10Sec)  > Close
+               (Detect) > Open, CloseDelay(10Sec)  > Close
                CloseDelay(10Sec) <| Close
   }
 ```

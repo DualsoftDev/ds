@@ -13,12 +13,12 @@
 
 ```
      /* DS Language Unit
-          1. '>'  is Start Edge
-          2. '|>' is Reset Edge
-          3. Action value(True/False) is End Sensing
+          1. '>'  is Start
+          2. '|>' is Reset
+          3. Action value(True/False) is End
      */
 
      //action system 
-     [Sys]action  = {Start > DoAction <| Reset}
+     [Sys]action  = {(Start) > DoAction <| (Reset)}
 ```
 

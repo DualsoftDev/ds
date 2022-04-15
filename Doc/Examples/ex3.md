@@ -10,7 +10,6 @@
     1. Open
     2. Close
     3. Detecting
-    3. Delay10Sec
 
 ```
  [Sys]door  = { Open <|> Close

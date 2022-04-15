@@ -35,8 +35,8 @@ system: sysHdr segment1_ '=' sysBlock;    // [Sys] Seg = {..}
 
 sysHdr: LBRACKET sys_ RBRACKET;  // [Sys]
 sysBlock
-    : simpleSysBlock        #caseSimpleSysBlock
-    | complexSysBlock       #caseComplexSysBlock
+    : simpleSysBlock        //#caseSimpleSysBlock
+    | complexSysBlock       //#caseComplexSysBlock
     ;
 simpleSysBlock:  LBRACE segment1_ (';' segment1_)* RBRACE;
 complexSysBlock: LBRACE (acc|macro|causal)* RBRACE;

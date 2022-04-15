@@ -6,4 +6,4 @@ ds.tokens
 dsListener.ts
 dsParser.ts
 dsVisitor.ts
-.antlr/*
+.antlr

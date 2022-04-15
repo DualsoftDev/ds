@@ -4,7 +4,7 @@
 ## action system :raising_hand:
 
 
- ![AAA](./ex1.dio.png)
+ ![AAA](./png/ex1.dio.png)
  
   - action list 
     1. DoAction

@@ -4,7 +4,7 @@
 ## Automatic door system :door:
 
 
- ![AAA](./ex3.dio.png)
+ ![AAA](./png/ex3.dio.png)
  
   - action list 
     1. Open

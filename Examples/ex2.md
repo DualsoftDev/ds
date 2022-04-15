@@ -4,7 +4,7 @@
 ## coffee machine system :coffee:
 
 
- ![AAA](./ex2.dio.png)
+ ![AAA](./png/ex2.dio.png)
  
   - action list 
      1. PutCup

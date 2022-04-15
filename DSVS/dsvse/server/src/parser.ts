@@ -37,29 +37,34 @@ function parserFromDocument(text:string) {
 }
 
 
-// { https://segmentfault.com/a/1190000040176753/en
-export default class DsErrorListener implements ANTLRErrorListener<any>{
-    private errors: Diagnostic[] = [];
-    syntaxError(recognizer: Recognizer<any, any>, offendingSymbol: any, line: number, charPositionInLine: number, message: string, e: RecognitionException | undefined): void {
+// // { https://segmentfault.com/a/1190000040176753/en
+// export default class DsErrorListener implements ANTLRErrorListener<any>{
+//     private errors: Diagnostic[] = [];
+//     syntaxError(recognizer: Recognizer<any, any>, offendingSymbol: any, line: number, charPositionInLine: number, message: string, e: RecognitionException | undefined): void {
         
-        this.errors.push(
-            {
-				severity: DiagnosticSeverity.Warning,
-				range: {
-					start: {line:line, character:charPositionInLine},
-					end: {line:line, character:charPositionInLine + 5},
-				},
-				message,
-				source: 'ex'	
-            }
-        );
-    }
+//         this.errors.push(
+//             {
+// 				severity: DiagnosticSeverity.Warning,
+// 				range: {
+// 					start: {line:line, character:charPositionInLine},
+// 					end: {line:line, character:charPositionInLine + 5},
+// 				},
+// 				message,
+// 				source: 'ex'	
+//             }
+//         );
+//     }
 
-    getErrors() { return this.errors; }
-}
+//     getErrors() { return this.errors; }
+// }
 
 
-export function diagnoseDSDocument(text:string, onError:(diagnostic:{line:number, position:number, length:number, message:string}) => void) {
+/**
+ * 
+ * @param text DS document contents
+ * @param onError Error 발생시 수행할 함수
+ */
+export function diagnoseDSDocument(text:string, onError:(diagnostic:any) => void) {
 	const parser = parserFromDocument(text);
 
 	// https://github.com/tunnelvisionlabs/antlr4ts/issues/430
@@ -73,7 +78,6 @@ export function diagnoseDSDocument(text:string, onError:(diagnostic:{line:number
 			line: number, charPositionInLine: number,
 			msg: string, e: RecognitionException | undefined): void =>
 		{
-			console.log(e);
 			console.log(`${offendingSymbol} in ${line}:${charPositionInLine} : ${msg}`);
 			const offending:any = offendingSymbol;
 			const pseudoDiagnostic = {
@@ -82,7 +86,7 @@ export function diagnoseDSDocument(text:string, onError:(diagnostic:{line:number
 				length: offending.text.length,
 				message: msg
 			};
-		
+
 			console.log(pseudoDiagnostic);
 			onError(pseudoDiagnostic);
         },
@@ -91,8 +95,9 @@ export function diagnoseDSDocument(text:string, onError:(diagnostic:{line:number
 
 	/// force span all the parser to collect errors
 	const _ = parser.program();
-	console.log('Parsed..');
 }
+
+
 /**
  * Parse DS model text
  * @param text DS model document obeying DS language rule.

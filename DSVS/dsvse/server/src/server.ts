@@ -150,7 +150,7 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 	//parseDSDocument(text);
 
 	const diagnostics: Diagnostic[] = [];
-	const onError = (d: {line:number, position:number, length:number, message:string}) => {
+	const onError = (d:any) => {
 		console.log(`Sending diagnostic:${d.message}, ${d.line}, ${d.position}+${d.length}`);
 		const diagnostic: Diagnostic = {
 			severity: DiagnosticSeverity.Warning,
@@ -163,7 +163,6 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 		};
 
 		diagnostics.push(diagnostic);
-		//connection.sendDiagnostics({ uri: textDocument.uri, diagnostics:[diagnostic] });
 	};
 	diagnoseDSDocument(text, onError);
 

@@ -4,7 +4,7 @@
 ## Traffic light system :traffic_light:
 
 
- ![AAA](./ex4.dio.png)
+ ![AAA](./png/ex4.dio.png)
  
   - action list 
     1. RedLight

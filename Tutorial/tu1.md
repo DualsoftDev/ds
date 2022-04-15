@@ -4,7 +4,7 @@
 ## Elevator system :jeans:
 
 
- ![AAA](./png/ex5.dio.png)
+ ![AAA](./png/tu1.dio.png)
  
   - action list 
     1. X

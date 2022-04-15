@@ -153,13 +153,13 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 	const onError = (d:any) => {
 		console.log(`Sending diagnostic:${d.message}, ${d.line}, ${d.position}+${d.length}`);
 		const diagnostic: Diagnostic = {
-			severity: DiagnosticSeverity.Warning,
+			severity: DiagnosticSeverity.Error,
 			range: {
 				start: {line:d.line, character:d.position},
 				end: {line:d.line, character:d.position+d.length},
 			},
 			message: d.message,
-			source: 'ex'
+			source: '(ERROR)'
 		};
 
 		diagnostics.push(diagnostic);

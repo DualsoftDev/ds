@@ -2,10 +2,12 @@
 
 
 DIR=/c/Users/kwak/.vscode/extensions
-copy:
+copy: g4
 	cp ds/syntaxes/ds.JSON-tmLanguage ds/syntaxes/ds.tmLanguage.json
 	cp -r ds $(DIR)/
 	rm -f ds/syntaxes/ds.tmLanguage.json
+
+	cp -r dsvse $(DIR)/
 
 
 # https://github.com/tunnelvisionlabs/antlr4ts

@@ -11,22 +11,22 @@
      COMMENT
      - TODO: aaaa
      */
-    [accS] = {a, B}
+    [accS] = {a, B}    //의도적인 , 에러
     [macro=T] = {  //층간 이송 행위 Task
-        T.12 = { M.U ~ S.S2U }
-        23 = { M.U ~ S.S3U }
-        34 = { M.U ~ S.S4U }
-        43 = { M.D ~ S.S3D }
-        32 = { M.D ~ S.S2D }
-        21 = { M.D ~ S.S1D }
+        T12 = { M.U ~ S.S2U }
+        ll23 = { M.U ~ S.S3U }
+        T34 = { M.U ~ S.S4U }
+        T43 = { M.D ~ S.S3D }
+        T32 = { M.D ~ S.S2D ; A < B |> C}        //의도적인 에러 - ;, <, >, |
+        T21 = { M.D ~ S.S1D, S.S2U }    // comma test
     }
     // 호출 Set기억 
-    B.F1 > Set1F <| T.21
-    B.F2 > Set2F <| T.32
-           Set2F <| T.12
-    B.F3 > Set3F <| T.23
-           Set3F <| T.43
-    B.F4 > Set4F <| T.34  
+    B.F1 > Set1F <| T.21;
+    B.F2 > Set2F <| T.32;
+           Set2F <| T.12;
+    B.F3 > Set3F <| T.23;
+           Set3F <| T.43;
+    B.F4 > Set4F <| T.34;  
     
     // 층간 상하강 행위간 인터락
     

@@ -1,26 +1,9 @@
-// aaa
 
-/*
-*/
-
-/*
-*/
-
-// bbb
-
-
-[Sys] M = {    // hello
-    U; D
-}  // Motor up / down
-
-[Sys]B = { /* */ F1; F2; F3; F4 }
-
-[Sys]B = {F1; F2; F3; F4}
-
+[Sys]M = {U; D}  // Motor up / down
 [Sys]B = {F1; F2; F3; F4}    // Button.층 호출버튼
 [Sys]S = {S1D; S2D; S2U; S3D; S3U; S4U, xxx.a.b.c}    // Sensor Up, Down
-[Sys]My = {
-    [accSRE] = {B;    S}
+[Sys]My ={
+    [accSRE] = {B; S}
     [accE] = {B; S}
     [accS] = {M}
     // - TODO: todo some thing "abcd"
@@ -28,42 +11,23 @@
      COMMENT
      - TODO: aaaa
      */
-    [accS] = {a; /* */ B}
-    [accS] = {a; /* */ B}
-
-
+    [accS] = {a, B}    //의도적인 , 에러
     [macro=T] = {  //층간 이송 행위 Task
-        A23 = { M.U ~ S.S3U }
-        A34 = { M.U ~ S.S4U }
-        A43 = { M.D ~ S.S3D }
-        A32 = { M.D ~ S.S2D }
-        A21 = { M.D ~ S.S1D }
+        T12 = { M.U ~ S.S2U }
+        ll23 = { M.U ~ S.S3U }
+        T34 = { M.U ~ S.S4U }
+        T43 = { M.D ~ S.S3D }
+        T32 = { M.D ~ S.S2D ; A < B |> C}        //의도적인 에러 - ;, <, >, |
+        T21 = { M.D ~ S.S1D, S.S2U }    // comma test
     }
-
-    [macro=T] = {  //층간 이송 행위 Task
-        A23 = { A.B, /**/ M.U ~ S.S3U, A.abc }
-        A34 = { M.U ~ S.S4U }
-        A43 = { M.D ~ S.S3D }
-        A32 = { M.D ~ S.S2D }
-        A21 = { M.D ~ S.S1D }
-    }
-
-    [macro] = { //aaa
-        A = { M.U ~ S.S2U }
-        B = { M.U ~ S.S2U }
-    }
-
-
-
-
     // 호출 Set기억 
-    B.F1 > Set1F <| T.21
-    B.F2 > Set2F <| T.32
-           Set2F <| T.12
-    B.F3 > Set3F <| T.23
-           Set3F <| T.43
-    B.F4 > Set4F <| T.34  
-    d
+    B.F1 > Set1F <| T.21;
+    B.F2 > Set2F <| T.32;
+           Set2F <| T.12;
+    B.F3 > Set3F <| T.23;
+           Set3F <| T.43;
+    B.F4 > Set4F <| T.34;  
+    
     // 층간 상하강 행위간 인터락
     
     T.12 <|> T.21
@@ -77,19 +41,4 @@
     T.43 < (Set1F | Set2F | Set3F) & T.34 
     T.32 < (Set1F | Set2F) & (T.23 | T.43)
     T.21 <  Set1F & (T.12 | T.32)
-}
-
-
-[xxx]=
-
-[
-    /* comment */
-    xxx
-]={}
-
-system M = 
-
-
-[macro] = {
-    X;
 }

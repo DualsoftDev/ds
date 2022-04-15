@@ -188,6 +188,10 @@
             },
             {
               "include": "#segment"
+            },
+            {
+              "name": "invalid.illegal.expected-array-separator.json",
+              "match": "[;<>\\|]"
             }
           ]
         }

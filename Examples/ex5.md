@@ -15,7 +15,7 @@
                (Detect) > Open, CloseDelay(10Sec)  > Close
                CloseDelay(10Sec) <| Close
 
-      Open = { Out1 ~ In1 }
+      Open = { Out1 ~ In1, In2 }
       Close = { Out2 ~  }
   }
 ```

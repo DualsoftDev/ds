@@ -1,9 +1,9 @@
 {
     "name": "ds",
-    "displayName": "ds",
-    "description": "DS language",
+    "displayName": "DS - Digital Twin Segment Language",
+    "description": "Syntaxes for DS language. DS mean Digital Twin Segment Language",
     "icon": "logo.png",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "publisher": "dualsoft",
     "engines": {
         "vscode": "^1.66.0"

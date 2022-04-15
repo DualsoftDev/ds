@@ -105,6 +105,8 @@ repository:
         - name: keyword.other.callSegment.ds
           match: '~'
         - include: '#segment'
+        - name: invalid.illegal.expected-array-separator.json
+          match: '[;<>\|]'
 
   causals:
     patterns:

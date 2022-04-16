@@ -23,16 +23,18 @@ export function initializeWebview(context: vscode.ExtensionContext)
             'dsview',
             'DS view',
             vscode.ViewColumn.One,
-            {}
+            { enableScripts: true}  //  because the document's frame is sandboxed and the 'allow-scripts' permission is not set
           );
 
           const text = vscode.window.activeTextEditor.document.getText();
     
           // And set its HTML content
-          panel.webview.html = getWebviewContent(text);
+          panel.webview.html = getWebviewContent2(text);
         })
     );
 }
+
+// <script src="https://d3js.org/d3.v4.js"></script>
 
 function getWebviewContent(text:string) {
     return `<!DOCTYPE html>
@@ -48,7 +50,8 @@ function getWebviewContent(text:string) {
     </svg>
     <p>${text}</p>
   </body>
-  <script src="https://d3js.org/d3.v4.js"></script>
+  <script src="https://d3js.org/d3.v3.min.js"></script>
+
   <script>
     d3
       .select(".target")  // select the elements that have the class 'target'
@@ -105,7 +108,7 @@ text {
     </svg>  
     <script src="https://d3js.org/d3.v3.min.js"></script>
     <script>
-
+        console.log('I m d3');
         // http://blog.thomsonreuters.com/index.php/mobile-patent-suits-graphic-of-the-day/
         var links = [
         {source: "Microsoft", target: "Amazon", type: "licensing"},

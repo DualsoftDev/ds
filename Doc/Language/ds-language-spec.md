@@ -73,10 +73,10 @@ Macro 추가 - [macro.md](macro.md) 참고
   ```ex
 [Sys]my = {RealSeg1 > RealSeg2} 
     RealSeg1 = {SegA > SegC 
-                SegB > SegC} //구문 에러 
+                SegB > SegC} //Real 내부는 OR 표현 불가 (구문 에러)
 
 수정후
-[Sys]my = {(RealSeg1_1 | RealSeg1_2) > RealSeg2} 
+[Sys]my = { RealSeg1_1 > RealSeg2;  RealSeg1_2 > RealSeg2} 
     RealSeg1_1 = {SegA > SegC}     
     RealSeg1_2 = {SegB > SegC}     
  ```

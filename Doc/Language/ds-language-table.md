@@ -4,9 +4,9 @@
 |Id| Item | Unit |Example|   Desc |  GUI | 
 |:---:|:----|:--:|:---:|:----|:---|
 |Seq1|Start Causal|>| `A > B > C` |B be caused by A | ![AAA](./png/Seq1.dio.png)|
-|Seq2|Reset Causal| \|> | `A > B <| C`|B is initialized to A | ![AAA](./png/Seq2.dio.png)|
+|Seq2|Reset Causal| \|> | `A > B <\| C`|B is initialized to A | ![AAA](./png/Seq2.dio.png)|
 |Seq3|And Causal|,|`A,B,C > D` | C be caused by A & B |  ![AAA](./png/Seq3.dio.png)|
-|Seq4|Or Causal|\\n| `A,B>D`<p>`C>D` | D be caused by A and B, or C | ![AAA](./png/Seq4.dio.png)|
+|Seq4|Or Causal|\\n| `A,B > D`<p>`C > D` | D be caused by A and B, or C | ![AAA](./png/Seq4.dio.png)|
 
 </BR>
 

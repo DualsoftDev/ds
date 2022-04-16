@@ -10,6 +10,12 @@ copy: g4
 	cp -r dsvse $(DIR)/
 
 
+choco:
+	choco install nodejs.install
+	choco install yarn
+	choco install jdk8
+	npm install typescript
+
 # https://github.com/tunnelvisionlabs/antlr4ts
 antlr:
 	cd dsvse/server

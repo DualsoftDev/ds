@@ -1,6 +1,12 @@
+- [vscode-webview-ui-toolkit/getting-started.md at main · microsoft/vscode-webview-ui-toolkit](https://github.com/microsoft/vscode-webview-ui-toolkit/blob/main/docs/getting-started.md)
+
+
+
 - [https://betterprogramming.pub/how-to-add-webviews-to-a-visual-studio-code-extension-69884706f056](https://betterprogramming.pub/how-to-add-webviews-to-a-visual-studio-code-extension-69884706f056)
 
 - [Webview API](https://code.visualstudio.com/api/extension-guides/webview)
+
+- [vscode-extension-samples/webview-sample at main · microsoft/vscode-extension-samples](https://github.com/microsoft/vscode-extension-samples/tree/main/webview-sample)
 
 
 - [Webview UI Toolkit for Visual Studio Code](https://code.visualstudio.com/blogs/2021/10/11/webview-ui-toolkit)

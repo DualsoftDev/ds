@@ -3,10 +3,10 @@
 ### 1.1 Causal
 |Id| Item | Unit |Example|   Desc |  GUI | 
 |:---:|:----|:--:|:---:|:----|:---|
-|Seq1|Start Causal|>| `A > B > C` |B be caused by A | ![AAA](./png/Seq1.dio.png)|
-|Seq2|Reset Causal| \|> | `A > B <\| C`|B is initialized to A | ![AAA](./png/Seq2.dio.png)|
-|Seq3|And Causal|,|`A,B,C > D` | C be caused by A & B |  ![AAA](./png/Seq3.dio.png)|
-|Seq4|Or Causal|\\n| `A,B > D`<p>`C > D` | D be caused by A and B, or C | ![AAA](./png/Seq4.dio.png)|
+|Seq1|Start Causal|>| `A > B > C` |Action B is caused by action A, action C is caused by action B  <p>`B행위는 A행위으로, C행위는 B행위으로 인해 수행`| ![AAA](./png/Seq1.dio.png)|
+|Seq2|Reset Causal| \|> | `A > B <\| C`|Action B is caused by action A, B is initialized to action A <p>`B행위는 A행위으로 인해 발생 하며 B행위는 A행위으로 복귀`| ![AAA](./png/Seq2.dio.png)|
+|Seq3|And Causal|,|`A,B,C > D` | D be caused by action (A & B & C) <p>`D행위는 A행위, B행위, C행위에 의해 수행`|  ![AAA](./png/Seq3.dio.png)|
+|Seq4|Or Causal|\\n| `A,B > D`<p>`C > D` | D be caused by A and B, or C <p>`D행위는 A행위, B행위에 의해 수행하거나, C 행위에 의해 수행`| ![AAA](./png/Seq4.dio.png)|
 
 </BR>
 
@@ -14,8 +14,8 @@
 
 |Id| Item | Unit | Example | Desc |   GUI | 
 |:---:|:----|:--:|:----|:---|:---|
-|Seq5|Call | ~ |`C = A ~ B` |  B be called by A | ![AAA](./png/Seq5.dio.png)|
-|Seq6|And Call|,| `C = A,B,C ~ D,E`|D & E be Called by A & B & C | ![AAA](./png/Seq6.dio.png)|
+|Seq5|Call | ~ |`C = A ~ B` | Action C indicates the end state of B by executing A<p>`C행위는 A를 수행시킴으로 B의 종료상태를 관찰`| ![AAA](./png/Seq5.dio.png)|
+|Seq6|And Call|,| `F = A,B,C ~ D,E`|Action F indicates the end state of D, E by executing A, B, C<p>`F행위는 A, B, C를 수행시킴으로 D, E의 종료상태를 관찰`| ![AAA](./png/Seq6.dio.png)|
 
 </BR>
 
@@ -23,9 +23,8 @@
 
 |Id| Item | Unit | Example | Desc |   GUI | 
 |:---:|:----|:--:|:----|:---|:---|
-|Seq7|System Parent | [Sys]= |  `[Sys]C = A > B <\| C`| causal process C  | ![AAA](./png/Seq7.dio.png)|
-|Seq8|Segement Parent| = |  `C = A > B <\| C`| causal step C  | ![AAA](./png/Seq8.dio.png)|
-
+|Seq7|System Parent | [Sys]= |  `[Sys]C = A > B <\| C`| System C processes that causality concurrently <p>` 시스템 C는 해당 인과를 동시적으로 처리`  | ![AAA](./png/Seq7.dio.png)|
+|Seq8|Segement Parent| = |  `C = A > B <\| C`| Action C processes its causal relationship sequentially <p>` 행위 C는 해당 인과를 순차적으로 처리` | ![AAA](./png/Seq8.dio.png)|
 </BR>
 
 ## 2. Data

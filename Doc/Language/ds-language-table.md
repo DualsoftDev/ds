@@ -23,8 +23,8 @@
 
 |Id| Item | Unit | Example | Desc |   GUI | 
 |:---:|:----|:--:|:----|:---|:---|
-|Seq7|System Parent | [Sys]= |  `[Sys]C = A > B <| C`| causal process C  | ![AAA](./png/Seq7.dio.png)|
-|Seq8|Segement Parent| = |  `C = A > B <| C`| causal step C  | ![AAA](./png/Seq8.dio.png)|
+|Seq7|System Parent | [Sys]= |  `[Sys]C = A > B <\| C`| causal process C  | ![AAA](./png/Seq7.dio.png)|
+|Seq8|Segement Parent| = |  `C = A > B <\| C`| causal step C  | ![AAA](./png/Seq8.dio.png)|
 
 </BR>
 

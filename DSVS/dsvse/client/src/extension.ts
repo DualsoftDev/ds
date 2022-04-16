@@ -5,6 +5,7 @@
 
 import * as path from 'path';
 import { workspace, ExtensionContext } from 'vscode';
+import {initializeWebview} from './dsWebView';
 
 import {
 	LanguageClient,
@@ -16,6 +17,9 @@ import {
 let client: LanguageClient;
 
 export function activate(context: ExtensionContext) {
+	console.log('client extension activated.');
+	initializeWebview(context);
+
 	// The server is implemented in node
 	const serverModule = context.asAbsolutePath(
 		path.join('server', 'out', 'server.js')

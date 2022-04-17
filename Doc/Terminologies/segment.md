@@ -79,9 +79,13 @@
 
 
 ## FunctionSegment
-- System 함수 계산을 내부에 포함하고 있는 segment
+- System 함수 계산을 내부에 포함하고 있는 segment(Function 를 포함하는 segment)
   - Return 값이 존재하는 함수 : (e.g. Sin, Cos, Abs, ...)
   - Return 값이 없는 함수 : Delay
-  
+  - $f(x)$ 의 return type 이 T 일 경우 (void type 은 제외)
+  - segment 내에 T type 변수 (.RESULT)를 가지는 segment
+  - $f(x)$ 평가에 시간이 소요되는 경우, S,R,E 를 통해 인과 제어 가능  
+
+
 
 

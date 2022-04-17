@@ -3,10 +3,10 @@
 ### 1.1 Causal(원인결과 정의)
 |Id| Item | Unit |Example|   Desc |  GUI | 
 |:---:|:----|:--:|:---:|:----|:---|
-|Seq1|Start Causal|>| `A > B > C` |Action B is caused by action A, action C is caused by action B  <p>`B행위는 A행위으로, C행위는 B행위으로 인해 수행`| ![AAA](./png/Seq1.dio.png)|
-|Seq2|Reset Causal| \|> | `A > B <\| C`|Action B is caused by action A, B is initialized to action A <p>`B행위는 A행위으로 인해 발생 하며 B행위는 A행위으로 복귀`| ![AAA](./png/Seq2.dio.png)|
-|Seq3|And Causal|,|`A,B,C > D` | D be caused by action (A & B & C) <p>`D행위는 A행위, B행위, C행위에 의해 수행`|  ![AAA](./png/Seq3.dio.png)|
-|Seq4|Or Causal|\\n| `A,B > D`<p>`C > D` | D be caused by A and B, or C <p>`D행위는 A행위, B행위에 의해 수행하거나, C 행위에 의해 수행`| ![AAA](./png/Seq4.dio.png)|
+|SEQ1|Start Causal|>| `A > B > C` |Action B is caused by action A, action C is caused by action B  <p>`B행위는 A행위으로, C행위는 B행위으로 인해 수행`| ![AAA](./png/Seq1.dio.png)|
+|SEQ2|Reset Causal| \|> | `A > B <\| C`|Action B is caused by action A, B is initialized to action A <p>`B행위는 A행위으로 인해 발생 하며 B행위는 A행위으로 복귀`| ![AAA](./png/Seq2.dio.png)|
+|SEQ3|And Causal|,|`A,B,C > D` | D be caused by action (A & B & C) <p>`D행위는 A행위, B행위, C행위에 의해 수행`|  ![AAA](./png/Seq3.dio.png)|
+|SEQ4|Or Causal|\\n| `A,B > D`<p>`C > D` | D be caused by A and B, or C <p>`D행위는 A행위, B행위에 의해 수행하거나, C 행위에 의해 수행`| ![AAA](./png/Seq4.dio.png)|
 
 </BR>
 
@@ -14,8 +14,8 @@
 
 |Id| Item | Unit | Example | Desc |   GUI | 
 |:---:|:----|:--:|:----|:---|:---|
-|Seq5|Call | ~ |`C = A ~ B` | Action C indicates the end state of B by executing A<p>`C행위는 A를 수행시킴으로 B의 종료상태를 관찰`| ![AAA](./png/Seq5.dio.png)|
-|Seq6|And Call|,| `F = A,B,C ~ D,E`|Action F indicates the end state of D, E by executing A, B, C<p>`F행위는 A, B, C를 수행시킴으로 D, E의 종료상태를 관찰`| ![AAA](./png/Seq6.dio.png)|
+|SEQ5|Call | ~ |`C = A ~ B` | Action C indicates the end state of B by executing A<p>`C행위는 A를 수행시킴으로 B의 종료상태를 관찰`| ![AAA](./png/Seq5.dio.png)|
+|SEQ6|And Call|,| `F = A,B,C ~ D,E`|Action F indicates the end state of D, E by executing A, B, C<p>`F행위는 A, B, C를 수행시킴으로 D, E의 종료상태를 관찰`| ![AAA](./png/Seq6.dio.png)|
 
 </BR>
 
@@ -34,11 +34,11 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|Op1|End Value | .E | Seg.E> B  | B be caused by Seg End Value    |
-|Op2|Start Value |.S | Seg.S> B  | B be caused by Seg Start Value    |
-|Op3|Reset Value |.R | Seg.R> B  | B be caused by Seg Reset Value    |
-|Op4|Going Status|.G |Seg.G> B | B be caused by Seg Going Value     |
-|Op5|Homing Status|.H |Seg.H> B | B be caused by Seg Homing Value     |
+|OP1|End Value | .E | Seg.E> B  | B be caused by Seg End Value    |
+|OP2|Start Value |.S | Seg.S> B  | B be caused by Seg Start Value    |
+|OP3|Reset Value |.R | Seg.R> B  | B be caused by Seg Reset Value    |
+|OP4|Going Status|.G |Seg.G> B | B be caused by Seg Going Value     |
+|OP5|Homing Status|.H |Seg.H> B | B be caused by Seg Homing Value     |
 
 
 
@@ -48,12 +48,12 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|Op6|Equals|=|(B = 3) > A| A be caused by if B EQ(equal) 3. | (B = 3) \| (C > D) > A| 
-|Op7|Not equals |!=|(B != 3) > A| A be caused by if B NE(not equal) 3. |(B != 3) \| (C > D) > A|
-|Op8|Greater than |>|(B > 3) > A| A be caused by if B GT(greater than) 3. |(B > 3) \| (C > D) > A| 
-|Op9|Less than|<|(B < 3) > A| A be caused by if B LT(less than) 3. |(B < 3) \| (C > D) > A| 
-|Op10|Greater Equals than |>=|(B >= 3) > A| A be caused by if B GE(greater than or equal ) 3. |(B >= 3) \| (C > D) > A|
-|Op11|Less Equals than|<=|(B <= 3) > A| A be caused by if B LE(less than or equal ) 3. |(B <= 3) \| (C > D) > A|
+|OP6|Equals|=|(B = 3) > A| A be caused by if B EQ(equal) 3. | (B = 3) \| (C > D) > A| 
+|OP7|Not equals |!=|(B != 3) > A| A be caused by if B NE(not equal) 3. |(B != 3) \| (C > D) > A|
+|OP8|Greater than |>|(B > 3) > A| A be caused by if B GT(greater than) 3. |(B > 3) \| (C > D) > A| 
+|OP9|Less than|<|(B < 3) > A| A be caused by if B LT(less than) 3. |(B < 3) \| (C > D) > A| 
+|OP10|Greater Equals than |>=|(B >= 3) > A| A be caused by if B GE(greater than or equal ) 3. |(B >= 3) \| (C > D) > A|
+|OP11|Less Equals than|<=|(B <= 3) > A| A be caused by if B LE(less than or equal ) 3. |(B <= 3) \| (C > D) > A|
 
 </BR>
 
@@ -63,10 +63,10 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|Op12|Addition | + | (B + 3)  | B plus 3. |(C <- (B + 3)) > A|
-|Op13|Subtraction|- |(B - 3)| B minus 3. | |
-|Op14|Multiplication | * | (B * 3)  | B multiplied by 3. |((A + 3) * 3)|
-|Op15|Division|/ |(B / 3)| B divided by 3. | |
+|OP12|Addition | + | (B + 3)  | B plus 3. |(C <- (B + 3)) > A|
+|OP13|Subtraction|- |(B - 3)| B minus 3. | |
+|OP14|Multiplication | * | (B * 3)  | B multiplied by 3. |((A + 3) * 3)|
+|OP15|Division|/ |(B / 3)| B divided by 3. | |
 
 </BR>
 
@@ -76,13 +76,13 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|Op16| And | & | (A&B) > C | C be caused by A end  & B end |
-|Op17| Or | \| | (A\|B) > C | C be caused by A end or B end | 
-|Op18| Not | ! | (!A) > B | B be caused by not end A | (!A \|> B) |
-|Op19| XOR | XOR | (XOR B, C) > A | A is exclusive or (B end, C end) |
-|Op20| NXOR | NXOR | (NXOR B, C) > A | A is NXOR (B end, C end) |
-|Op21| NAND | NAND | (NAND B, C) > A | A is NAND (B end, C end) |
-|Op22| NOR | NOR | (NOR B, C) > A | A is NOR (B end, C end) |
+|OP16| And | & | (A&B) > C | C be caused by A end  & B end |
+|OP17| Or | \| | (A\|B) > C | C be caused by A end or B end | 
+|OP18| Not | ! | (!A) > B | B be caused by not end A | (!A \|> B) |
+|OP19| XOR | XOR | (XOR B, C) > A | A is exclusive or (B end, C end) |
+|OP20| NXOR | NXOR | (NXOR B, C) > A | A is NXOR (B end, C end) |
+|OP21| NAND | NAND | (NAND B, C) > A | A is NAND (B end, C end) |
+|OP22| NOR | NOR | (NOR B, C) > A | A is NOR (B end, C end) |
 
 
 ### 2.5 Data operation(데이터 처리)
@@ -91,26 +91,26 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|Op23|Copy | `<-` | `C <- B`  | Copy B to C. |(C <- 0)|
-|Op24|Initialize|= |A = 65| Initialize A. |[Sys]A = 65 //초기화 |
+|OP23|Copy | `<-` | `C <- B`  | Copy B to C. |(C <- 0)|
+|OP24|Initialize|= |A = 65| Initialize A. |[Sys]A = 65 //초기화 |
 
 
 ### 2.6 Time operation(시간연산)
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|Op25|On Delay(Start Edge Only) | TON#| A > TON500ms > B  | B be caused by A finish 500 msec delay    |A (5ms)> B|
-|Op26|Off Delay |None || Use TON    |(!A) (5ms)> B |
+|OP25|On Delay(Start Edge Only) | TON#| A > TON500ms > B  | B be caused by A finish 500 msec delay    |A (5ms)> B|
+|OP26|Off Delay |None || Use TON    |(!A) (5ms)> B |
 
 </BR>
 ### 2.6 Data conversion(값 형식 변환)
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|Op13| Numeric  | (NUM)  | (C <- (NUM) B  | C converts B to Numeric.  | B = 65 //초기화 |
-|Op14| String  |(STR)  | (C <- (STR) B  | C converts B to String.  | [Sys]C <- STR(B) //C에 'A' Setting |
-|Op15| BCD  | (BCD)  | (C <- (BCD) B  | C converts B to BCD.  |
-|Op16| BIN  | (BIN)  | (C <- (BIN) B  | C converts B to BIN.  |
+|OP13| Numeric  | (NUM)  | (C <- (NUM) B  | C converts B to Numeric.  | B = 65 //초기화 |
+|OP14| String  |(STR)  | (C <- (STR) B  | C converts B to String.  | [Sys]C <- STR(B) //C에 'A' Setting |
+|OP15| BCD  | (BCD)  | (C <- (BCD) B  | C converts B to BCD.  |
+|OP16| BIN  | (BIN)  | (C <- (BIN) B  | C converts B to BIN.  |
 
 </BR>
 
@@ -121,21 +121,13 @@
 
 ## 3. Application
 
-
-### 3.x Function Segment
-- Function 를 포함하는 segment
-- $f(x)$ 의 return type 이 T 일 경우 (void type 은 제외)
-  segment 내에 T type 변수 (.RESULT)를 가지는 segment
-- $f(x)$ 평가에 시간이 소요되는 경우, S,R,E 를 통해 인과 제어 가능  
-
-
 ### 3.1 Calculation operation
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|fun1|Abs | (ABS SysX)| (ABS A)  | Calculate the absolute value of A. |
-|fun2|Sin| (SIN SysX)|(SIN A)| Calculate the Sin of A. | 
-|fun3|Round | (ROUND SysX)| (ROUND A) | Calculate the rounding of A.  | 
+|FUN1|Abs | (ABS SysX)| (ABS A)  | Calculate the absolute value of A. |
+|FUN2|Sin| (SIN SysX)|(SIN A)| Calculate the Sin of A. | 
+|FUN3|Round | (ROUND SysX)| (ROUND A) | Calculate the rounding of A.  | 
 
 
 
@@ -173,23 +165,23 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|Sys1|Numeric | # | (#3 + B) > A  | A be caused by B add 56 | #3 = ~ Numeric.Bit0, Numeric.Bit1 |
-|Sys2|String |$ | ($A = B) > A| A be caused by B Equal to 'A' | $A = ~ String.Bit0, String.Bit6 |
+|SYS1|Numeric | # | (#3 + B) > A  | A be caused by B add 56 | #3 = ~ Numeric.Bit0, Numeric.Bit1 |
+|SYS2|String |$ | ($A = B) > A| A be caused by B Equal to 'A' | $A = ~ String.Bit0, String.Bit6 |
 
 
 ### 5.2  System Bit
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|Sys3|Always On | _On | _On > A  | A be caused by Always On | Numeric.Bit0 > On |
-|Sys4|Always Off |_Off | _Off > A| A be caused by Always Off | (! Numeric.Bit0) > Off |
-|Sys5|Running Flag _Run | _Run > A| A be caused by System Run | (SystemRoot.S) > (OnlyS Run) |
-|Sys6|Stop Flag |_Run | _Stop > A| A be caused by System Stop | (SystemRoot.R) > (OnlyS Stop) | 
-|Sys7|Running Rising |_RisingRun | _RisingRun > A | A be caused by System Run Rising | (SystemRoot.S) > (OnlyS Run) | 
+|SYS3|Always On | _On | _On > A  | A be caused by Always On | Numeric.Bit0 > On |
+|SYS4|Always Off |_Off | _Off > A| A be caused by Always Off | (! Numeric.Bit0) > Off |
+|SYS5|Running Flag _Run | _Run > A| A be caused by System Run | (SystemRoot.S) > (OnlyS Run) |
+|SYS6|Stop Flag |_Run | _Stop > A| A be caused by System Stop | (SystemRoot.R) > (OnlyS Stop) | 
+|SYS7|Running Rising |_RisingRun | _RisingRun > A | A be caused by System Run Rising | (SystemRoot.S) > (OnlyS Run) | 
 
 
 ### 5.3  System timer
 
 |Id| Item | Unit | Example| Desc | GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|Sys8|toggle #s | _T | _T50ms > A  | On/Off occurs at periodic intervals of 50msec. | T1 <\|> T2; T1 (50ms)> T2 ; T2 (50ms)> T1; (T2.E) > A |
+|SYS8|toggle #s | _T | _T50ms > A  | On/Off occurs at periodic intervals of 50msec. | T1 <\|> T2; T1 (50ms)> T2 ; T2 (50ms)> T1; (T2.E) > A |

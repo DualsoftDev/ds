@@ -1,6 +1,6 @@
 # DS text language table
 ## 1. Sequence
-### 1.1 Causal
+### 1.1 Causal(원인결과 정의)
 |Id| Item | Unit |Example|   Desc |  GUI | 
 |:---:|:----|:--:|:---:|:----|:---|
 |Seq1|Start Causal|>| `A > B > C` |Action B is caused by action A, action C is caused by action B  <p>`B행위는 A행위으로, C행위는 B행위으로 인해 수행`| ![AAA](./png/Seq1.dio.png)|
@@ -10,7 +10,7 @@
 
 </BR>
 
-### 1.2 Call
+### 1.2 Call(행위 부르기)
 
 |Id| Item | Unit | Example | Desc |   GUI | 
 |:---:|:----|:--:|:----|:---|:---|
@@ -19,7 +19,7 @@
 
 </BR>
 
-### 1.3 Parent
+### 1.3 Parent(행위 부모 할당)
 
 |Id| Item | Unit | Example | Desc |   GUI | 
 |:---:|:----|:--:|:----|:---|:---|
@@ -29,72 +29,97 @@
 
 ## 2. Data
 
-</BR>
 
-### 2.1 Comparision operation
-
-|Id| Item | Unit | Example| Desc |  GUI |
-|:---:|:----|:--:|:---:|:----|:---|
-|Op1|Equals|[func]=|(B = 3) > A| A be caused by if B EQ 3. | (B = 3) \| (C > D) > A| 
-|Op2|Not equals |[func]!=|(B != 3) > A| A be caused by if B NE 3. |(B != 3) \| (C > D) > A|
-|Op3|Greater than |[func]>|(B > 3) > A| A be caused by if B GT 3. |(B > 3) \| (C > D) > A| 
-|Op4|Less than|[func]<|(B < 3) > A| A be caused by if B LT 3. |(B < 3) \| (C > D) > A| 
-|Op5|Greater Equals than |[func]>=|(B >= 3) > A| A be caused by if B GE 3. |(B >= 3) \| (C > D) > A|
-|Op6|Less Equals than|[func]<=|(B <= 3) > A| A be caused by if B LE 3. |(B <= 3) \| (C > D) > A|
-
-
-</BR>
-
-### 2.2 Data transfer
-
-</BR>
+### 2.1 Value operation (행위 값)
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|Op7|Copy | [func]<- | (C <- B)  | Copy B to C. |(C <- 0)|
-|Op8|Initialize|[func]= |(A = 65)| Initialize A. |[Sys]A = 65 //초기화 |
+|Op1|End Value | .E | Seg.E> B  | B be caused by Seg End Value    |
+|Op2|Start Value |.S | Seg.S> B  | B be caused by Seg Start Value    |
+|Op3|Reset Value |.R | Seg.R> B  | B be caused by Seg Reset Value    |
+|Op4|Going Status|.G |Seg.G> B | B be caused by Seg Going Value     |
+|Op5|Homing Status|.H |Seg.H> B | B be caused by Seg Homing Value     |
+
+
 
 </BR>
 
-### 2.3 Arithmetic operation
+### 2.2 Comparision operation (비교연산) - system level only -
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|Op9|Addition | [func]+ | (B + 3)  | B plus 3. |(C <- (B + 3)) > A|
-|Op10|Subtraction|[func]- |(B - 3)| B minus 3. | |
-|Op11|Multiplication | [func]* | (B * 3)  | B multiplied by 3. |((A + 3) * 3)|
-|Op12|Division|[func]/ |(B / 3)| B divided by 3. | |
+|Op6|Equals|=|(B = 3) > A| A be caused by if B EQ(equal) 3. | (B = 3) \| (C > D) > A| 
+|Op7|Not equals |!=|(B != 3) > A| A be caused by if B NE(not equal) 3. |(B != 3) \| (C > D) > A|
+|Op8|Greater than |>|(B > 3) > A| A be caused by if B GT(greater than) 3. |(B > 3) \| (C > D) > A| 
+|Op9|Less than|<|(B < 3) > A| A be caused by if B LT(less than) 3. |(B < 3) \| (C > D) > A| 
+|Op10|Greater Equals than |>=|(B >= 3) > A| A be caused by if B GE(greater than or equal ) 3. |(B >= 3) \| (C > D) > A|
+|Op11|Less Equals than|<=|(B <= 3) > A| A be caused by if B LE(less than or equal ) 3. |(B <= 3) \| (C > D) > A|
 
 </BR>
 
-### 2.4 Data conversion
+</BR>
+
+### 2.3 Arithmetic operation(산술연산)
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|Op13| Numeric  | [func]NUM  | (C <- (NUM B))  | C converts B to Numeric.  | B = 65 //초기화 |
-|Op14| String  | [func]STR  | (C <- (STR B))  | C converts B to String.  | [Sys]C <- STR(B) //C에 'A' Setting |
-|Op15| BCD  | [func]BCD  | (C <- (BCD B))  | C converts B to BCD.  |
-|Op16| BIN  | [func]BIN  | (C <- (BIN B))  | C converts B to BIN.  |
+|Op12|Addition | + | (B + 3)  | B plus 3. |(C <- (B + 3)) > A|
+|Op13|Subtraction|- |(B - 3)| B minus 3. | |
+|Op14|Multiplication | * | (B * 3)  | B multiplied by 3. |((A + 3) * 3)|
+|Op15|Division|/ |(B / 3)| B divided by 3. | |
 
 </BR>
+
+
+
+### 2.4 Logical operation(논리연산)
+
+|Id| Item | Unit | Example| Desc |  GUI |
+|:---:|:----|:--:|:---:|:----|:---|
+|Op16| And | & | (A&B) > C | C be caused by A end  & B end |
+|Op17| Or | \| | (A\|B) > C | C be caused by A end or B end | 
+|Op18| Not | ! | (!A) > B | B be caused by not end A | (!A \|> B) |
+|Op19| XOR | XOR | (XOR B, C) > A | A is exclusive or (B end, C end) |
+|Op20| NXOR | NXOR | (NXOR B, C) > A | A is NXOR (B end, C end) |
+|Op21| NAND | NAND | (NAND B, C) > A | A is NAND (B end, C end) |
+|Op22| NOR | NOR | (NOR B, C) > A | A is NOR (B end, C end) |
+
+
+### 2.5 Data operation(데이터 처리)
+
+</BR>
+
+|Id| Item | Unit | Example| Desc |  GUI |
+|:---:|:----|:--:|:---:|:----|:---|
+|Op23|Copy | `<-` | `C <- B`  | Copy B to C. |(C <- 0)|
+|Op24|Initialize|= |A = 65| Initialize A. |[Sys]A = 65 //초기화 |
+
+
+### 2.6 Time operation(시간연산)
+
+|Id| Item | Unit | Example| Desc |  GUI |
+|:---:|:----|:--:|:---:|:----|:---|
+|Op25|On Delay(Start Edge Only) | TON#| A > TON500ms > B  | B be caused by A finish 500 msec delay    |A (5ms)> B|
+|Op26|Off Delay |None || Use TON    |(!A) (5ms)> B |
+
+</BR>
+### 2.6 Data conversion(값 형식 변환)
+
+|Id| Item | Unit | Example| Desc |  GUI |
+|:---:|:----|:--:|:---:|:----|:---|
+|Op13| Numeric  | (NUM)  | (C <- (NUM) B  | C converts B to Numeric.  | B = 65 //초기화 |
+|Op14| String  |(STR)  | (C <- (STR) B  | C converts B to String.  | [Sys]C <- STR(B) //C에 'A' Setting |
+|Op15| BCD  | (BCD)  | (C <- (BCD) B  | C converts B to BCD.  |
+|Op16| BIN  | (BIN)  | (C <- (BIN) B  | C converts B to BIN.  |
+
+</BR>
+
+
+
 
 
 
 ## 3. Application
-
-</BR>
-
-### 3.1 Logical operation
-
-|Id| Item | Unit | Example| Desc |  GUI |
-|:---:|:----|:--:|:---:|:----|:---|
-|Op17| And | [func]& | (A&B) > C | C be caused by A end  & B end |
-|Op18| Or | [func]\| | (A\|B) > C | C be caused by A end or B end | 
-|Op19| Not | [func]! | (!A) > B | B be caused by not end A | (!A \|> B) |
-|Op20| XOR | [func]XOR | (XOR B, C) > A | A is exclusive or (B end, C end) |
-|Op21| NXOR | [func]NXOR | (NXOR B, C) > A | A is NXOR (B end, C end) |
-|Op22| NAND | [func]NAND | (NAND B, C) > A | A is NAND (B end, C end) |
-|Op23| NOR | [func]NOR | (NOR B, C) > A | A is NOR (B end, C end) |
 
 
 ### 3.x Function Segment
@@ -104,39 +129,14 @@
 - $f(x)$ 평가에 시간이 소요되는 경우, S,R,E 를 통해 인과 제어 가능  
 
 
-### 3.2 Time operation
+### 3.1 Calculation operation
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|Op24|On Delay | [func]#s> | A (5s)> B  | B be caused by A 5sec delay    |A (5ms)> B|
-|Op25|Off Delay|[func]#s!> |(!A) (5s)> B| B be caused by not End A 5sec delay    |(!A) (5ms)> B |
+|fun1|Abs | (ABS SysX)| (ABS A)  | Calculate the absolute value of A. |
+|fun2|Sin| (SIN SysX)|(SIN A)| Calculate the Sin of A. | 
+|fun3|Round | (ROUND SysX)| (ROUND A) | Calculate the rounding of A.  | 
 
-
-
-</BR>
-
-### 3.3 Value operation
-
-|Id| Item | Unit | Example| Desc |  GUI |
-|:---:|:----|:--:|:---:|:----|:---|
-|Op26|End Value |[func]Seg.E | (A.E)> B  | B be caused by A End Value    |
-|Op27|Start Value |[func]Seg.S | (A.S)> B  | B be caused by A Start Value    |
-|Op28|Reset Value |[func]Seg.R | (A.R)> B  | B be caused by A Reset Value    |
-|Op29|Going Status|[func]Seg.G |(A.G)> B | B be caused by A Going Value     |
-|Op30|Homing Status|[func]Seg.H |(A.H)> B | B be caused by A Homing Value     |
-
-
-
-</BR>
-
-### 3.4 Calculation operation
-
-|Id| Item | Unit | Example| Desc |  GUI |
-|:---:|:----|:--:|:---:|:----|:---|
-|Op31|Abs | [func]ABS | (ABS A)  | Calculate the absolute value of A. |
-|Op32|Sin|[func]SIN |(SIN A)| Calculate the Sin of A. | 
-|Op33|Round | [func]ROUND | (ROUND A) | Calculate the rounding of A.  | 
-|Op##|...|
 
 
 ## 4. Interface
@@ -145,27 +145,26 @@
 
 |Id| Item | Unit | Example| Desc | GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|If1|Start Priority | [macro]StartFirst | A > (StartFirst B) <\|C  | The B start value overrides the B reset value. | A > B <p> C,(!A) \|> B |<div class="mermaid">flowchart LR;A((A)) --> B((B)); C((C)) & NotA[!A] .->B((B))</div>
-|If2|Last Priority  | [macro]LastFirst  | A >  (LastFirst B) <\|C | During startup/reset, last occurrence takes precedence | C > CT <\| A  <p> A > B <\| (CT) | <div class="mermaid">flowchart LR;A((A)) --> B((B)); A((A)) .-> CT((CT)); C((C)) --> CT((CT)); CT2[CT] .->B((B))</div>
-|If2|Last Priority  | [macro]LastFirst  | A >  (LastFirst B) <\|C | During startup/reset, last occurrence takes precedence | C > CT <\| A  <p> A > B <\| (CT) | ![](../Examples/ex1.dio.png)
+|IF1|Start Priority | (StartFirst SegX)<p> or (IF1 SegX) | A > (StartFirst B) <\|C  | The B start value overrides the B reset value. | A > B <p> C,(!A) \|> B |<div class="mermaid">flowchart LR;A((A)) --> B((B)); C((C)) & NotA[!A] .->B((B))</div>
+|IF2|Last Priority  | (LastFirst  SegX)<p> or (IF2 SegX)  | A >  (LastFirst B) <\|C | During startup/reset, last occurrence takes precedence | C > CT <\| A  <p> A > B <\| (CT) | <div class="mermaid">flowchart LR;A((A)) --> B((B)); A((A)) .-> CT((CT)); C((C)) --> CT((CT)); CT2[CT] .->B((B))</div>
 
 
 ### 4.2  Sustain operation
 
 |Id| Item | Unit | Example| Desc | GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|If3|Start Sustain | [macro]SusS | A > (SusS B)  | Sustain until B is Homing | A > (SusS B) <\| C | <div class="mermaid">flowchart LR; A((A)) --> M1[SusS B];C((C)) .-> M1[SusS B]</div>
-|If4|Reset Sustain |[macro]SusR |A > (SusR B)| Sustain until B is Going | A > (SusR B) <\| C | <div class="mermaid">flowchart LR; A((A)) --> M1[SusR B];C((C)) .-> M1[SusR B]</div> 
-|If5|SR Sustain | [macro]SusSR | A > (SusSR B) | Start/Reset Sustain  | A > (SusSR B) <\| C | <div class="mermaid">flowchart LR; A((A)) --> M1[SusSR B];C((C)) .-> M1[SusSR B]</div>
+|IF3|Start Sustain | (SusS SegX)<p> or (IF3 SegX)| A > (SusS B)  | Sustain until B is Homing | A > (SusS B) <\| C | <div class="mermaid">flowchart LR; A((A)) --> M1[SusS B];C((C)) .-> M1[SusS B]</div>
+|IF4|Reset Sustain |(SusR SegX)<p> or (IF4 SegX) |A > (SusR B)| Sustain until B is Going | A > (SusR B) <\| C | <div class="mermaid">flowchart LR; A((A)) --> M1[SusR B];C((C)) .-> M1[SusR B]</div> 
+|IF5|SR Sustain | (SusSR SegX) <p> or (IF5 SegX)| A > (SusSR B) | Start/Reset Sustain  | A > (SusSR B) <\| C | <div class="mermaid">flowchart LR; A((A)) --> M1[SusSR B];C((C)) .-> M1[SusSR B]</div>
 
 
 ### 4.3 Single  operation
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|If6|Start Single  | [macro]OnlyS | A > (OnlyS B) | The B reset value is B Start not | A > B <\| (!A) | 
-|If7|Reset Single  | [macro]OnlyR | A > (OnlyR B) | The B start value is B reset not | A \|> B < (!A) | 
-|If8|Self Reset  | [macro]SelfR | A > (SelfR B) | The B reset value is B end Value | A > (SusR B) <\| (B.E) |
+|IF6|Start Single  | (OnlyS SegX) <p> or (IF6 SegX)| A > (OnlyS B) | The B reset value is B Start not | A > B <\| (!A) | 
+|IF7|Reset Single  | (OnlyR SegX)<p> or (IF7 SegX) | A > (OnlyR B) | The B start value is B reset not | A \|> B < (!A) | 
+|IF8|Self Reset  | (SelfR SegX)<p> or (IF8 SegX) | A > (SelfR B) | The B reset value is B end Value | A > (SusR B) <\| (B.E) |
 
 
 ## 5. System
@@ -174,23 +173,23 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|Sys1|Numeric | [macro]# | (#3 + B) > A  | A be caused by B add 56 | #3 = ~ Numeric.Bit0, Numeric.Bit1 |
-|Sys2|String |[macro]$ | ($A = B) > A| A be caused by B Equal to 'A' | $A = ~ String.Bit0, String.Bit6 |
+|Sys1|Numeric | # | (#3 + B) > A  | A be caused by B add 56 | #3 = ~ Numeric.Bit0, Numeric.Bit1 |
+|Sys2|String |$ | ($A = B) > A| A be caused by B Equal to 'A' | $A = ~ String.Bit0, String.Bit6 |
 
 
 ### 5.2  System Bit
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|Sys3|Always On | [macro]_On | (_On) > A  | A be caused by Always On | Numeric.Bit0 > On |
-|Sys4|Always Off |[macro]_Off | (_Off) > A| A be caused by Always Off | (! Numeric.Bit0) > Off |
-|Sys5|Running Flag |[macro]_Run | (_Run) > A| A be caused by System Run | (SystemRoot.S) > (OnlyS Run) |
-|Sys6|Stop Flag |[macro]_Run | (_Stop) > A| A be caused by System Stop | (SystemRoot.R) > (OnlyS Stop) | 
-|Sys7|Running Rising |[macro]_RisingRun | (_RisingRun) > A | A be caused by System Run Rising | (SystemRoot.S) > (OnlyS Run) | 
+|Sys3|Always On | _On | _On > A  | A be caused by Always On | Numeric.Bit0 > On |
+|Sys4|Always Off |_Off | _Off > A| A be caused by Always Off | (! Numeric.Bit0) > Off |
+|Sys5|Running Flag _Run | _Run > A| A be caused by System Run | (SystemRoot.S) > (OnlyS Run) |
+|Sys6|Stop Flag |_Run | _Stop > A| A be caused by System Stop | (SystemRoot.R) > (OnlyS Stop) | 
+|Sys7|Running Rising |_RisingRun | _RisingRun > A | A be caused by System Run Rising | (SystemRoot.S) > (OnlyS Run) | 
 
 
 ### 5.3  System timer
 
 |Id| Item | Unit | Example| Desc | GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|Sys8|toggle #s | [macro]_T | (_T 50ms) > A  | On/Off occurs at periodic intervals of 50msec. | T1 <\|> T2; T1 (50ms)> T2 ; T2 (50ms)> T1; (T2.E) > A |
+|Sys8|toggle #s | _T | _T50ms > A  | On/Off occurs at periodic intervals of 50msec. | T1 <\|> T2; T1 (50ms)> T2 ; T2 (50ms)> T1; (T2.E) > A |

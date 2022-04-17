@@ -103,7 +103,8 @@
 |OP26|Off Delay |None || Use TON    |(!A) (5ms)> B |
 
 </BR>
-### 2.6 Data conversion(값 형식 변환)
+
+### 2.7 Data conversion(값 형식 변환)
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|

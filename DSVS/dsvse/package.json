@@ -57,14 +57,14 @@
 				"extensions": [
 					".ds"
 				],
-				"configuration": "./ds/language-configuration.json"
+				"configuration": "./ds.syntax/language-configuration.json"
 			}
 		],
 		"grammars": [
 			{
 				"language": "ds",
 				"scopeName": "source.ds",
-				"path": "./ds/syntaxes/ds.tmLanguage.json"
+				"path": "./ds.syntax/syntaxes/ds.tmLanguage.json"
 			}
 		],
 		"commands": [

@@ -24,3 +24,7 @@
 
 
 - ?? [Simplifying VS Code Webview Development with vscode-page](https://dev.to/foxgem/simplifying-vs-code-webview-development-with-vscode-page-13c3)
+
+
+## debugging webview
+- command palette : Open Webview Developer Tools

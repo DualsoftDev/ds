@@ -185,23 +185,25 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|SYS1|Numeric |   | 3 + B > A  | A be caused by B add 56 | #3 = ~ Numeric.Bit0, Numeric.Bit1 |
-|SYS2|String |' ' | ['C' = B] > A| A be caused by B Equal to 'A' | $A = ~ String.Bit0, String.Bit6 |
+|SYS1|Numeric |   | 3 + B > A  | A be caused by B add 56 ||
+|SYS2|String |' ' | ['C' = B] > A| A be caused by B Equal to 'A'||
 
 
 ### 5.2  System Bit
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|SYS3|Always On | _On | _On > A  | A be caused by Always On | Numeric.Bit0 > On |
-|SYS4|Always Off |_Off | _Off > A| A be caused by Always Off | (! Numeric.Bit0) > Off |
-|SYS5|Running Flag |_Run | _Run > A| A be caused by System Run | (SystemRoot.S) > (OnlyS Run) |
-|SYS6|Stop Flag |_Run | _Stop > A| A be caused by System Stop | (SystemRoot.R) > (OnlyS Stop) | 
-|SYS7|Running Rising |_RisingRun | _RisingRun > A | A be caused by System Run Rising | (SystemRoot.S) > (OnlyS Run) | 
+|SYS3|Always On | _On | _On > A  | A be caused by Always On ||
+|SYS4|Always Off |_Off | _Off > A| A be caused by Always Off ||
+|SYS5|Running Flag |_Run | _Run > A| A be caused by System Run ||
+|SYS6|Stop Flag |_Stop | _Stop > A| A be caused by System Stop||
+|SYS7|Running Rising |_RR | _RR > A | A be caused by System Run Rising||
+|SYS8|Running Falling |_RF | _RF > A | A be caused by System Run Rising ||
+
 
 
 ### 5.3  System timer
 
 |Id| Item | Unit | Example| Desc | GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|SYS8|toggle #s | _T | _T50ms > A  | On/Off occurs at periodic intervals of 50msec. | T1 <\|> T2; T1 (50ms)> T2 ; T2 (50ms)> T1; (T2.E) > A |
+|SYS9|toggle #s | _T | _T50ms > A  | On/Off occurs at periodic intervals of 50msec. | |

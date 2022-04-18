@@ -23,8 +23,8 @@
 
 |Id| Item | Unit | Example | Desc |   GUI | 
 |:---:|:----|:--:|:----|:---|:---|
-|Seq7|System Parent | [Sys]= |  `[Sys]C = A > B <\| C`| System C processes that causality concurrently <p>` 시스템 C는 해당 인과를 동시적으로 처리`  | ![AAA](./png/Seq7.dio.png)|
-|Seq8|Segement Parent| = |  `C = A > B <\| C`| Action C processes its causal relationship sequentially <p>` 행위 C는 해당 인과를 순차적으로 처리` | ![AAA](./png/Seq8.dio.png)|
+|Seq7|System Parent | [Sys]= |  `[Sys]D = { A > B <\| C }`| System C processes that causality concurrently <p>` 시스템 C는 해당 인과를 동시적으로 처리`  | ![AAA](./png/Seq7.dio.png)|
+|Seq8|Segement Parent| = |  `D = A > B <\| C`| Action C processes its causal relationship sequentially <p>` 행위 C는 해당 인과를 순차적으로 처리` | ![AAA](./png/Seq8.dio.png)|
 </BR>
 
 ## 2. Data
@@ -48,7 +48,7 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|OP6|Equals|=|(B = 3) > A| A be caused by if B EQ(equal) 3. | (B = 3) \| (C > D) > A| 
+|OP6|Equals|==|(B == 3) > A| A be caused by if B EQ(equal) 3. | (B = 3) \| (C > D) > A| 
 |OP7|Not equals |!=|(B != 3) > A| A be caused by if B NE(not equal) 3. |(B != 3) \| (C > D) > A|
 |OP8|Greater than |>|(B > 3) > A| A be caused by if B GT(greater than) 3. |(B > 3) \| (C > D) > A| 
 |OP9|Less than|<|(B < 3) > A| A be caused by if B LT(less than) 3. |(B < 3) \| (C > D) > A| 
@@ -168,8 +168,8 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|SYS1|Numeric | # | (#3 + B) > A  | A be caused by B add 56 | #3 = ~ Numeric.Bit0, Numeric.Bit1 |
-|SYS2|String |$ | ($A = B) > A| A be caused by B Equal to 'A' | $A = ~ String.Bit0, String.Bit6 |
+|SYS1|Numeric |   | (3 + B) > A  | A be caused by B add 56 | #3 = ~ Numeric.Bit0, Numeric.Bit1 |
+|SYS2|String |' ' | ('C' = B) > A| A be caused by B Equal to 'A' | $A = ~ String.Bit0, String.Bit6 |
 
 
 ### 5.2  System Bit

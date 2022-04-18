@@ -4,12 +4,14 @@
 
 1. Causal (인과 정의)
 
-| Num | Question :question:  | Answer     :exclamation: 
-|:--:| :-----: | ---- | 
+| Num | Question :question:  | Answer     :exclamation: | Reference |
+|:--:| :-----: | ---- |  ---- | 
 |1.1 |A > B | After action A, action B <p>`A행위 후 B행위`|
 |1.2 |(A) > B | Action B if A value is true <p>`A 값이 true인 경우 B 행위`|
-|1.3 |A \|> B | Reset B at the start of action A <p>`A행위 시작시에 B리셋`|
-|1.4 |(A) \|> B | Reset B if A value is true <p>`A 값이 true인 경우 B리셋`|
+|1.3 |@OnlyS(A, B) | Action B if A value is true, Reset B if A value is false  <p>`A 값이 true인 경우 B 행위실행, A 값이 false인 경우 B행위복귀`| IF6 -[4.3 Single  operation](../Language/ds-language-table.md/)|
+|1.4 |A \|> B | Reset B at the start of action A <p>`A행위 시작시에 B리셋`|
+|1.5 |(A) \|> B | Reset B if A value is true <p>`A 값이 true인 경우 B리셋`|
+|1.6 |@OnlyR(A, B) | Action B if A value is false, Reset B if A value is true  <p>`A 값이 false인 경우 B 행위실행, A 값이 true인 경우 B행위복귀`| IF8 - [4.3 Single  operation](../Language/ds-language-table.md/)|
 
 2. Call (행위 호출)
 

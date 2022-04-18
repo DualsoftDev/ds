@@ -4,7 +4,7 @@
 |Id| Item | Unit |Example|   Desc |  GUI | 
 |:---:|:----|:--:|:---:|:----|:---|
 |SEQ1|Start Causal|`>`| `A > B > C` |Action B is caused by action A, action C is caused by action B  <p>`B행위는 A행위으로, C행위는 B행위으로 인해 수행`| ![AAA](./png/Seq1.dio.png)|
-|SEQ2|Reset Causal| \|> | A > B <\| C|Action B is caused by action A, B is initialized(reset) to action A <p>`B행위는 A행위으로 인해 발생 하며 B행위는 A행위으로 복귀`| ![AAA](./png/Seq2.dio.png)|
+|SEQ2|Reset Causal| \|> | A > B <\| C|Action B is caused by action A, B is initialized(reset) to action A <p>`B행위는 A행위으로 인해 발생 하며 B행위는 C행위으로 복귀`| ![AAA](./png/Seq2.dio.png)|
 |SEQ3|And Causal|`,`|`A,B,C > D,E` | D, E be caused by action (A and B and C) <p>`D, E행위는 A행위, B행위, C행위에 의해 수행`|  ![AAA](./png/Seq3.dio.png)|
 |SEQ4|Or Causal|\|\|| A, B \|\| C > D | D be caused by (A and B) or C <p>`D행위는 A행위, B행위에 의해 수행하거나, C 행위에 의해 수행`| ![AAA](./png/Seq4.dio.png)|
 |SEQ5|List Causal|`;`| `A,B > D;C > D` | D be caused by A and B<p> D be caused by C <p>`D행위는 A행위, B행위에 의해 수행하거나, C 행위에 의해 수행`| ![AAA](./png/Seq5.dio.png)|
@@ -24,8 +24,8 @@
 
 |Id| Item | Unit | Example | Desc |   GUI | 
 |:---:|:----|:--:|:----|:---|:---|
-|SEQ8|System Parent | `[Sys]=` |  `[Sys]D = { A > B <| C }`| System D processes that causality concurrently <p>` 시스템 D는 해당 인과를 동시적으로 처리`  | ![AAA](./png/Seq8.dio.png)|
-|SEQ9|Segement Parent| `=` |  `D = { A > B <| C }`| Action D processes its causal relationship sequentially <p>` 행위 D는 해당 인과를 순차적으로 처리` | ![AAA](./png/Seq9.dio.png)|
+|SEQ8|System Parent | `[Sys]=` |  [Sys]D = { A > B <\| C } | System D processes that causality concurrently <p>` 시스템 D는 해당 인과를 동시적으로 처리`  | ![AAA](./png/Seq8.dio.png)|
+|SEQ9|Segement Parent| `=` |  D = { A > B <\| C } | Action D processes its causal relationship sequentially <p>` 행위 D는 해당 인과를 순차적으로 처리` | ![AAA](./png/Seq9.dio.png)|
 </BR>
 
 
@@ -34,7 +34,7 @@
 |Id| Item | Unit | Example | Desc |   GUI | 
 |:---:|:----|:--:|:----|:---|:---|
 |SEQ10| mutual interlock | <\|\|> |  `A <||> B` <p>is equal to `A <| B ; A |> B`| Action A and Action B are mutually interlocked <p>` A 행위와 B 행위는 상호 인터락`  | ![AAA](./png/Seq10.dio.png)|
-|SEQ11| resetStart | \|>> |  `A |>> B` <p>is equal to `A > B ; A |> B`| Action C processes its causal relationship sequentially <p>` 행위 C는 해당 인과를 순차적으로 처리` | ![AAA](./png/Seq11.dio.png)|
+|SEQ11| resetStart | \|>> |  `A |>> B` <p>is equal to `A > B ; A |> B`| Action B is caused by action A, B is initialized(reset) to action A <p>`B행위는 A행위으로 인해 수행 하며 B행위는 A행위으로 복귀` | ![AAA](./png/Seq11.dio.png)|
 
 </BR>
 
@@ -46,11 +46,11 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|OP1|End  Value | () | `(Seg) > B`  | B be caused by Seg End Port(Sensor OUT) value <p>` 행위 B는 Seg의 End Port(sensor) 값이 'True' 일 경우 인해 수행`    |
-|OP2|End Rising Value | @RISING()| `@RISING(Seg) > B` | B be caused by Seg End Port rising value <p>` 행위 B는 Seg의 End Port(sensor) 값이 'RISING' 일 경우 인해 수행`      |
-|OP3|End Falling Value |@FALLING() | `@FALLING(Seg) > B` | B be caused by Seg Reset Port falling value <p>` 행위 B는 Seg의 End Port(sensor) 값이 'FALLING' 일 경우 인해 수행`    |
-|OP4|Going Status|@G() |`@G(Seg) > B`| B be caused by Seg Going Value<p>` 행위 B는 Seg가 Going 경우 인해 수행`      |
-|OP5|Homing Status|@H() |`@H(Seg) > B` | B be caused by Seg Homing Value <p>` 행위 B는 Seg가 Homing 경우 인해 수행`     |
+|OP1|End  Value | ( ) | `(Seg), A > B`  | B be caused by action A when the Seg End Port (sensor) value is 'True'. <p>` 행위 B는 Seg의 End Port(sensor) 값이 'True' 일 경우에서 행위 A가 수헹되었을때 수행`    |![AAA](./png/Op1.dio.png)|
+|OP2|End Set Value | @SET( )| `@SET(Seg) > B` | B be caused by Seg End Port latch value(auto reset by @G(B)) <p>` 행위 B는 Seg의 End Port(sensor) 값이 'True' 면 값 유지(B행위 Going 시에 자동 값 리셋)`      |![AAA](./png/Op2.dio.png)|
+|OP3|End  Value | @LATCH( , )| `@LATCH(SegA, @G(SegB)) > B` | B be caused by Seg End Port latch value(auto reset by @G(B)) <p>` 행위 B는 Seg의 End Port(sensor) 값이 'True' 면 값 유지(설정 값에 의한 리셋)`  |![AAA](./png/Op3.dio.png)|
+|OP4|Going Status|@G( ) |`@G(Seg) > B`| B be caused by Seg Going Value<p>` 행위 B는 Seg가 Going 경우 인해 수행`      |![AAA](./png/Op4.dio.png)|
+|OP5|Homing Status|@H( ) |`@H(Seg) > B` | B be caused by Seg Homing Value <p>` 행위 B는 Seg가 Homing 경우 인해 수행`     |![AAA](./png/Op5.dio.png)|
 
 
 
@@ -60,12 +60,12 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|OP6|Equals|==|(B == 3) > A| A be caused by if B EQ(equal) 3. | (B = 3) \| (C > D) > A| 
-|OP7|Not equals |!=|(B != 3) > A| A be caused by if B NE(not equal) 3. |(B != 3) \| (C > D) > A|
-|OP8|Greater than |>|(B > 3) > A| A be caused by if B GT(greater than) 3. |(B > 3) \| (C > D) > A| 
-|OP9|Less than|<|(B < 3) > A| A be caused by if B LT(less than) 3. |(B < 3) \| (C > D) > A| 
-|OP10|Greater Equals than |>=|(B >= 3) > A| A be caused by if B GE(greater than or equal ) 3. |(B >= 3) \| (C > D) > A|
-|OP11|Less Equals than|<=|(B <= 3) > A| A be caused by if B LE(less than or equal ) 3. |(B <= 3) \| (C > D) > A|
+|OP6|Equals|[ == ]|[B == 3] > A| A be caused by if B EQ(equal) 3. |    ![AAA](./png/Op6.dio.png)|
+|OP7|Not equals |[ != ]|[B != 3] > A| A be caused by if B NE(not equal) 3. |    ![AAA](./png/Op6.dio.png)|
+|OP8|Greater than |[ > ]|[B > 3] > A| A be caused by if B GT(greater than) 3. |    ![AAA](./png/Op6.dio.png)|
+|OP9|Less than|[ < ]|[B < 3] > A| A be caused by if B LT(less than) 3. |    ![AAA](./png/Op6.dio.png)|
+|OP10|Greater Equals than |[ >= ]|[B >= 3] > A| A be caused by if B GE(greater than or equal ) 3.|    ![AAA](./png/Op6.dio.png)|
+|OP11|Less Equals than|[ <= ]|[B <= 3] > A| A be caused by if B LE(less than or equal ) 3. |    ![AAA](./png/Op6.dio.png)|
 
 </BR>
 
@@ -75,10 +75,10 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|OP12|Addition | + | (B + 3)  | B plus 3. |(C <- (B + 3)) > A|
-|OP13|Subtraction|- |(B - 3)| B minus 3. | |
-|OP14|Multiplication | * | (B * 3)  | B multiplied by 3. |((A + 3) * 3)|
-|OP15|Division|/ |(B / 3)| B divided by 3. | |
+|OP12|Addition | + | B + 3 | B plus 3. ||
+|OP13|Subtraction|- |B - 3| B minus 3. | |
+|OP14|Multiplication | * | B * 3  | B multiplied by 3. ||
+|OP15|Division|/ |B / 3| B divided by 3. | |
 
 </BR>
 
@@ -88,13 +88,13 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|OP16| And | & | (A&B) > C | C be caused by A end  & B end |
-|OP17| Or | \| | (A\|B) > C | C be caused by A end or B end | 
-|OP18| Not | ! | (!A) > B | B be caused by not end A | (!A \|> B) |
-|OP19| XOR | @XOR() | (XOR B, C) > A | A is exclusive or (B end, C end) |
-|OP20| NXOR | @NXOR() | (NXOR B, C) > A | A is NXOR (B end, C end) |
-|OP21| NAND | @NAND() | (NAND B, C) > A | A is NAND (B end, C end) |
-|OP22| NOR | @NOR() | (NOR B, C) > A | A is NOR (B end, C end) |
+|OP16| And | & | A&B > C | C be caused by A end  & B end |
+|OP17| Or | \| | A\|B > C | C be caused by A end or B end | 
+|OP18| Not | ! | !A > B | B be caused by not end A | |
+|OP19| XOR | @XOR( , ) | @XOR(B, C) > A | A is exclusive or (B end, C end) |
+|OP20| NXOR | @NXOR( , ) | @NXOR(B, C) > A | A is NXOR (B end, C end) |
+|OP21| NAND | @NAND( , ) | @NAND(B, C) > A | A is NAND (B end, C end) |
+|OP22| NOR | @NOR( , ) | @NOR(B, C) > A | A is NOR (B end, C end) |
 </BR>
 
 
@@ -103,8 +103,8 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|OP23|Copy | `<-` | `C <- B`  | Copy B to C. |(C <- 0)|
-|OP24|Initialize|`=` |`A = 65`| Initialize A. |[Sys]A = 65 //초기화 |
+|OP23|Copy | `<-` | `C <- B`  | Copy B to C. ||
+|OP24|Initialize|`=` |`A = 65`| Initialize A. ||
 
 </BR>
 
@@ -113,7 +113,7 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|OP25|On Delay(Start Edge Only) | @ms, @s| A > @500ms > B  | B be caused by A finish 500 msec delay    |A @5ms> B|
+|OP25|On Delay(Start Edge Only) | @ms, @s| A > @500ms > B  | B be caused by A finish 500 msec delay    ||
 |OP26|Off Delay |None || Use On Delay    ||
 
 </BR>
@@ -122,10 +122,10 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|OP27| Numeric  | @NUM()  | C <- @NUM(B)  | C converts B to Numeric.  | |
-|OP28| String  |@STR()  | C <- @STR(B)  | C converts B to String.  |  |
-|OP29| BCD  | @BCD()  | C <- @BCD(B)  | C converts B to BCD.  |
-|OP30| BIN  | @BIN()  | C <- @BIN(B)  | C converts B to BIN.  |
+|OP27| Numeric  | @NUM( )  |` C <- @NUM(B) ` | C converts B to Numeric.  | |
+|OP28| String  |@STR( )  | `C <- @STR(B) ` | C converts B to String.  |  |
+|OP29| BCD  | @BCD( )  | `C <- @BCD(B)`  | C converts B to BCD.  |
+|OP30| BIN  | @BIN( )  |` C <- @BIN(B)`  | C converts B to BIN.  |
 
 </BR>
 
@@ -140,9 +140,9 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|FUN1|Abs | @ABS() | @ABS (A)  | Calculate the absolute value of A. |
-|FUN2|Sin| @SIN()|@SIN (A)| Calculate the Sin of A. | 
-|FUN3|Round | @ROUND()| @ROUND (A) | Calculate the rounding of A.  | 
+|FUN1|Abs | @ABS( ) | @ABS (A)  | Calculate the absolute value of A. |
+|FUN2|Sin| @SIN( )|@SIN (A)| Calculate the Sin of A. | 
+|FUN3|Round | @ROUND( )| @ROUND (A) | Calculate the rounding of A.  | 
 
 
 
@@ -180,8 +180,8 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|SYS1|Numeric |   | (3 + B) > A  | A be caused by B add 56 | #3 = ~ Numeric.Bit0, Numeric.Bit1 |
-|SYS2|String |' ' | ('C' = B) > A| A be caused by B Equal to 'A' | $A = ~ String.Bit0, String.Bit6 |
+|SYS1|Numeric |   | 3 + B > A  | A be caused by B add 56 | #3 = ~ Numeric.Bit0, Numeric.Bit1 |
+|SYS2|String |' ' | 'C' = [B > A]| A be caused by B Equal to 'A' | $A = ~ String.Bit0, String.Bit6 |
 
 
 ### 5.2  System Bit

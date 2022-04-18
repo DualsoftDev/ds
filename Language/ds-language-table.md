@@ -34,11 +34,11 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|OP1|End Value | .E | Seg.E> B  | B be caused by Seg End Value    |
-|OP2|Start Value |.S | Seg.S> B  | B be caused by Seg Start Value    |
-|OP3|Reset Value |.R | Seg.R> B  | B be caused by Seg Reset Value    |
-|OP4|Going Status|.G |Seg.G> B | B be caused by Seg Going Value     |
-|OP5|Homing Status|.H |Seg.H> B | B be caused by Seg Homing Value     |
+|OP1|End Port | .EP  <p> or () | `Seg.EP > B`<p>`or (Seg)> B`  | B be caused by Seg End Port(sensor) Value <p>` 행위 B는 Seg의 End Port(sensor) 값이 'ON' 일 경우 인해 수행`    |
+|OP2|End Relay | .ER | `Seg.ER > B` | B be caused by Seg End Relay(Memory Flag) Value <p>` 행위 B는 Seg의 End Relay(Memory Flag) 값이 'ON' 일 경우 인해 수행`    |
+|OP3|End Tag | .ET | `Seg.ET > B`  | B be caused by Seg End Tag(Interface) Value  <p>` 행위 B는 Seg의 End Tag 값이 'Interface able Value'   일 경우 인해 수행`    |
+|OP4|Going Status|.G |`Seg.G > B` | B be caused by Seg Going Value     <p>` 행위 B는 Seg가 Going 상태일 때 수행`   |
+|OP5|Homing Status|.H |`Seg.H > B` | B be caused by Seg Homing Value    <p>` 행위 B는 Seg가 Homing 상태일 때 수행`      |
 
 
 

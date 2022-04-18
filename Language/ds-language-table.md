@@ -34,9 +34,9 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|OP1|End  Value | .E  <p> or () | `Seg.E > B`<p>`or (Seg) > B`  | B be caused by Seg End Port(Sensor OUT) Value <p>` 행위 B는 Seg의 End Port(sensor) 값이 'True' 일 경우 인해 수행`    |
-|OP2|Start Value |.S | `Seg.S > B` | B be caused by Seg Start Port(Command IN) Value <p>` 행위 B는 Seg의 End Port(sensor) 값이 'True' 일 경우 인해 수행`     |
-|OP3|Reset Value |.R | `Seg.R > B` | B be caused by Seg Reset Port(Command IN) Value <p>` 행위 B는 Seg의 End Port(sensor) 값이 'True' 일 경우 인해 수행`    |
+|OP1|End  Value | .E  <p> or () | `Seg.E > B`<p>`or (Seg) > B`  | B be caused by Seg End Port(Sensor OUT) value <p>` 행위 B는 Seg의 End Port(sensor) 값이 'True' 일 경우 인해 수행`    |
+|OP2|End Rising Value |.RISING| `Seg.RISING > B` | B be caused by Seg End Port rising value <p>` 행위 B는 Seg의 End Port(sensor) 값이 'RISING' 일 경우 인해 수행`      |
+|OP3|End Falling Value |.FALLING | `Seg.FALLING > B` | B be caused by Seg Reset Port falling value <p>` 행위 B는 Seg의 End Port(sensor) 값이 'FALLING' 일 경우 인해 수행`    |
 |OP4|Going Status|.G |`Seg.G > B`| B be caused by Seg Going Value<p>` 행위 B는 Seg가 Going 경우 인해 수행`      |
 |OP5|Homing Status|.H |`Seg.H > B` | B be caused by Seg Homing Value <p>` 행위 B는 Seg가 Homing 경우 인해 수행`     |
 
@@ -83,16 +83,18 @@
 |OP20| NXOR | NXOR | (NXOR B, C) > A | A is NXOR (B end, C end) |
 |OP21| NAND | NAND | (NAND B, C) > A | A is NAND (B end, C end) |
 |OP22| NOR | NOR | (NOR B, C) > A | A is NOR (B end, C end) |
+</BR>
 
 
 ### 2.5 Data operation(데이터 처리)
 
-</BR>
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
 |OP23|Copy | `<-` | `C <- B`  | Copy B to C. |(C <- 0)|
-|OP24|Initialize|= |A = 65| Initialize A. |[Sys]A = 65 //초기화 |
+|OP24|Initialize|`=` |`A = 65`| Initialize A. |[Sys]A = 65 //초기화 |
+
+</BR>
 
 
 ### 2.6 Time operation(시간연산)
@@ -103,14 +105,15 @@
 |OP26|Off Delay |None || Use TON    |(!A) (5ms)> B |
 
 </BR>
-### 2. Data conversion(값 형식 변환)
+
+### 2.7 Data conversion(값 형식 변환)
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|OP13| Numeric  | (NUM)  | (C <- (NUM) B  | C converts B to Numeric.  | B = 65 //초기화 |
-|OP14| String  |(STR)  | (C <- (STR) B  | C converts B to String.  | [Sys]C <- STR(B) //C에 'A' Setting |
-|OP15| BCD  | (BCD)  | (C <- (BCD) B  | C converts B to BCD.  |
-|OP16| BIN  | (BIN)  | (C <- (BIN) B  | C converts B to BIN.  |
+|OP27| Numeric  | (NUM)  | (C <- (NUM) B  | C converts B to Numeric.  | B = 65 //초기화 |
+|OP28| String  |(STR)  | (C <- (STR) B  | C converts B to String.  | [Sys]C <- STR(B) //C에 'A' Setting |
+|OP29| BCD  | (BCD)  | (C <- (BCD) B  | C converts B to BCD.  |
+|OP30| BIN  | (BIN)  | (C <- (BIN) B  | C converts B to BIN.  |
 
 </BR>
 

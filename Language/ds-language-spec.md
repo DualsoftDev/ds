@@ -104,7 +104,7 @@ Macro 추가 - [macro.md](macro.md) 참고
       - ?? exportXYZ : XYZ 는 S/R/E 의 조합.   타 시스템이 해당 segment 의 S/R/E 를 볼 수 있는지 여부
     - 인과 정의
       - `>` or `<` 인과 순서
-      - `|>` or `<|` or `<|>` reset 인과
+      - `|>` or `<|` or `<||>` reset 인과
       - `,` 는 and(&) 관계.  인과 방향성보다 우선순위가 높음
         - e.g `Sys1.A, Sys2.A > X;`
       - 인과 정의의 마지막은 semicolon(`';'`) 로 끝나야 한다.

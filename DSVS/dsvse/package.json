@@ -71,9 +71,29 @@
 			{
 				"command": "ds.dsview",
 				"category": "DS",
-				"title": "DS view"
+				"title": "DS view",
+				"icon": {
+					"light": "./media/preview-right-light.svg",
+					"dark": "./media/preview-right-dark.svg"
+				}		  
 			}
-		]
+		],
+		"menus": {
+			"editor/context": [
+			  {
+				"command": "ds.dsview",
+				"when": "editorLangId == ds",
+				"group": "markdown-preview-enhanced"
+			  }
+			],
+			"editor/title": [
+			  {
+				"command": "ds.dsview",
+				"when": "editorLangId == ds",
+				"group": "navigation"
+			  }
+			]
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile && cd server && yarn antlr4ts -visitor -o src src/ds.g4",

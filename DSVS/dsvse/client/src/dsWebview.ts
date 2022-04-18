@@ -27,11 +27,20 @@ export function initializeWebview(context: vscode.ExtensionContext)
           );
 
           const text = vscode.window.activeTextEditor.document.getText();
-          parseDSDocument(text);
-          console.log('finished parseDSDocument on client side.');
+
+          // {source: "Microsoft", target: "Amazon", type: "licensing"},
+          const arrows =
+            Array.from(parseDSDocument(text))
+            .map(causal => {
+                const edge = (causal.op == '>') ? 'resolved' : 'suit';
+                return `{source: "${causal.left}", target: "${causal.right}", type: "${edge}"}`;
+            })
+            .join(',')
+            ;
+          console.log('finished parseDSDocument on client side.' + arrows);
 
           // And set its HTML content
-          panel.webview.html = getWebviewContent2(text);
+          panel.webview.html = getWebviewContent2(arrows);
         })
     );
 }
@@ -104,7 +113,7 @@ text {
 }
 
 </style>
-<body>
+<body style="background-color:white;">
     <svg> 
         <circle class="target" style="fill: #69b3a2" stroke="black" cx=50 cy=50 r=40></circle>
     </svg>  
@@ -113,34 +122,35 @@ text {
         console.log('I m d3');
         // http://blog.thomsonreuters.com/index.php/mobile-patent-suits-graphic-of-the-day/
         var links = [
-        {source: "Microsoft", target: "Amazon", type: "licensing"},
-        {source: "Microsoft", target: "HTC", type: "licensing"},
-        {source: "Samsung", target: "Apple", type: "suit"},
-        {source: "Motorola", target: "Apple", type: "suit"},
-        {source: "Nokia", target: "Apple", type: "resolved"},
-        {source: "HTC", target: "Apple", type: "suit"},
-        {source: "Kodak", target: "Apple", type: "suit"},
-        {source: "Microsoft", target: "Barnes & Noble", type: "suit"},
-        {source: "Microsoft", target: "Foxconn", type: "suit"},
-        {source: "Oracle", target: "Google", type: "suit"},
-        {source: "Apple", target: "HTC", type: "suit"},
-        {source: "Microsoft", target: "Inventec", type: "suit"},
-        {source: "Samsung", target: "Kodak", type: "resolved"},
-        {source: "LG", target: "Kodak", type: "resolved"},
-        {source: "RIM", target: "Kodak", type: "suit"},
-        {source: "Sony", target: "LG", type: "suit"},
-        {source: "Kodak", target: "LG", type: "resolved"},
-        {source: "Apple", target: "Nokia", type: "resolved"},
-        {source: "Qualcomm", target: "Nokia", type: "resolved"},
-        {source: "Apple", target: "Motorola", type: "suit"},
-        {source: "Microsoft", target: "Motorola", type: "suit"},
-        {source: "Motorola", target: "Microsoft", type: "suit"},
-        {source: "Huawei", target: "ZTE", type: "suit"},
-        {source: "Ericsson", target: "ZTE", type: "suit"},
-        {source: "Kodak", target: "Samsung", type: "resolved"},
-        {source: "Apple", target: "Samsung", type: "suit"},
-        {source: "Kodak", target: "RIM", type: "suit"},
-        {source: "Nokia", target: "Qualcomm", type: "suit"}
+          ${text}
+        // {source: "Microsoft", target: "Amazon", type: "licensing"},
+        // {source: "Microsoft", target: "HTC", type: "licensing"},
+        // {source: "Samsung", target: "Apple", type: "suit"},
+        // {source: "Motorola", target: "Apple", type: "suit"},
+        // {source: "Nokia", target: "Apple", type: "resolved"},
+        // {source: "HTC", target: "Apple", type: "suit"},
+        // {source: "Kodak", target: "Apple", type: "suit"},
+        // {source: "Microsoft", target: "Barnes & Noble", type: "suit"},
+        // {source: "Microsoft", target: "Foxconn", type: "suit"},
+        // {source: "Oracle", target: "Google", type: "suit"},
+        // {source: "Apple", target: "HTC", type: "suit"},
+        // {source: "Microsoft", target: "Inventec", type: "suit"},
+        // {source: "Samsung", target: "Kodak", type: "resolved"},
+        // {source: "LG", target: "Kodak", type: "resolved"},
+        // {source: "RIM", target: "Kodak", type: "suit"},
+        // {source: "Sony", target: "LG", type: "suit"},
+        // {source: "Kodak", target: "LG", type: "resolved"},
+        // {source: "Apple", target: "Nokia", type: "resolved"},
+        // {source: "Qualcomm", target: "Nokia", type: "resolved"},
+        // {source: "Apple", target: "Motorola", type: "suit"},
+        // {source: "Microsoft", target: "Motorola", type: "suit"},
+        // {source: "Motorola", target: "Microsoft", type: "suit"},
+        // {source: "Huawei", target: "ZTE", type: "suit"},
+        // {source: "Ericsson", target: "ZTE", type: "suit"},
+        // {source: "Kodak", target: "Samsung", type: "resolved"},
+        // {source: "Apple", target: "Samsung", type: "suit"},
+        // {source: "Kodak", target: "RIM", type: "suit"},
+        // {source: "Nokia", target: "Qualcomm", type: "suit"}
         ];
 
         var nodes = {};
@@ -190,7 +200,7 @@ text {
         var circle = svg.append("g").selectAll("circle")
             .data(force.nodes())
         .enter().append("circle")
-            .attr("r", 6)
+            .attr("r", 10)    // 6
             .call(force.drag);
 
         var text = svg.append("g").selectAll("text")

@@ -25,4 +25,5 @@ choco:
 g4:
 	cd dsvse/server
 	yarn antlr4ts -visitor -o src src/ds.g4
+	cp src/ds*.ts ../client/src/server-bundle/
 

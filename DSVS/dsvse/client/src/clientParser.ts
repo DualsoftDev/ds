@@ -41,7 +41,7 @@ function parserFromDocument(text:string) {
  * Parse DS model text
  * @param text DS model document obeying DS language rule.
  */
-export function parseDSDocument(text:string) {
+export function *parseDSDocument(text:string) {
 	console.log('In parsing module.');
 	const parser = parserFromDocument(text);
 
@@ -65,7 +65,23 @@ export function parseDSDocument(text:string) {
 			for (const macro of complex.macro())
 				console.log(`\tmacro: ${macro.text}`);
 			for (const causal of complex.causal())
+			{
 				console.log(`\tcausal: ${causal.text}`);
+				const l = causal.expression()[0];
+				const r = causal.expression()[1];
+				const op = causal.causalOperator().text;
+				switch(op) {
+					case '>':
+					case '<':
+						yield {left:l.text, right:r.text, op};
+						console.log(`${l.text} ${op}=> ${r.text}`);
+						break;
+				}
+				// causal.expression().map(exp => {
+				// 	else.
+				// });
+				
+			}
 
 			console.log(`system: ${system.text}`);
 		}			

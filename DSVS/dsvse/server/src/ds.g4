@@ -63,7 +63,7 @@ segment2s_: segment2_ (COMMA segment2_)*;
 
 // B.F1 > Set1F <| T.A21;
 causal
-    : expression causalOperator expression (causalOperator expression)* SEIMCOLON
+    : expression causalOperator expression SEIMCOLON
     // | expression causalOperator expression SEIMCOLON
     ;
 //causal: expression causalOperator causal SEIMCOLON;
@@ -81,6 +81,7 @@ segmentAny_: (segment1_ | segment2_);
  */
 expression
     : segmentAny_
+    | expression causalOperator expression
     | expression logicalBinaryOperator expression
     | LPARENTHESIS expression RPARENTHESIS
     ;

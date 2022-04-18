@@ -1,78 +1,58 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
-import {parseDSDocument} from './clientParser';
-export function initializeWebview(context: vscode.ExtensionContext)
-{
+import { parseDSDocument } from './clientParser';
+
+let panel: vscode.WebviewPanel | null = null;
+export function initializeWebview(context: vscode.ExtensionContext) {
     console.log('=== initializing webview for ds.');
 
-    // const panel = vscode.window.createWebviewPanel(
-    //   'dsview',
-    //   'DS view',
-    //   vscode.ViewColumn.One,
-    //   {}
-    // );
+    context.subscriptions.push(
+        vscode.workspace.onDidChangeTextDocument((event) => {
+            console.log('Modification detected.' + event);
+            updateDSView();
+        }),
+    );
 
-    // // And set its HTML content
-    // panel.webview.html = getWebviewContent();
+    function updateDSView() {
 
+        if (panel == null) {
+            // Create and show panel
+            panel = vscode.window.createWebviewPanel(
+                'dsview',
+                'DS view',
+                vscode.ViewColumn.Two,
+                { enableScripts: true }  //  because the document's frame is sandboxed and the 'allow-scripts' permission is not set
+            );
+        }
+
+        const text = vscode.window.activeTextEditor.document.getText();
+
+        // {source: "Microsoft", target: "Amazon", type: "licensing"},
+        const connections =
+            Array.from(parseDSDocument(text))
+                .map(causal => {
+                    const edge = (causal.op == '>') ? 'resolved' : 'suit';
+                    return `{source: "${causal.left}", target: "${causal.right}", type: "${edge}"}`;
+                })
+                .join(',')
+            ;
+        console.log('finished parseDSDocument on client side.' + connections);
+
+        // And set its HTML content
+        panel.webview.html = getWebviewContent(connections);
+
+    }
 
     context.subscriptions.push(
-        vscode.commands.registerCommand('ds.dsview', () => {
-          // Create and show panel
-          const panel = vscode.window.createWebviewPanel(
-            'dsview',
-            'DS view',
-            vscode.ViewColumn.One,
-            { enableScripts: true}  //  because the document's frame is sandboxed and the 'allow-scripts' permission is not set
-          );
-
-          const text = vscode.window.activeTextEditor.document.getText();
-
-          // {source: "Microsoft", target: "Amazon", type: "licensing"},
-          const arrows =
-            Array.from(parseDSDocument(text))
-            .map(causal => {
-                const edge = (causal.op == '>') ? 'resolved' : 'suit';
-                return `{source: "${causal.left}", target: "${causal.right}", type: "${edge}"}`;
-            })
-            .join(',')
-            ;
-          console.log('finished parseDSDocument on client side.' + arrows);
-
-          // And set its HTML content
-          panel.webview.html = getWebviewContent2(arrows);
-        })
+        vscode.commands.registerCommand('ds.dsview', () => { updateDSView(); })
     );
 }
 
 // <script src="https://d3js.org/d3.v4.js"></script>
 
-function getWebviewContent(text:string) {
+
+function getWebviewContent(connections: string) {
     return `<!DOCTYPE html>
-  <html lang="en">
-  <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Cat Coding</title>
-  </head>
-  <body>
-    <svg> 
-      <circle class="target" style="fill: #69b3a2" stroke="black" cx=50 cy=50 r=40></circle>
-    </svg>
-    <p>${text}</p>
-  </body>
-  <script src="https://d3js.org/d3.v3.min.js"></script>
-
-  <script>
-    d3
-      .select(".target")  // select the elements that have the class 'target'
-      .style("stroke-width", 8) // change their style: stroke width is not equal to 8 pixels
-  </script>
-  </html>`;
-}
-
-function getWebviewContent2(text:string) {
-return `<!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="UTF-8">
@@ -114,15 +94,12 @@ text {
 
 </style>
 <body style="background-color:white;">
-    <svg> 
-        <circle class="target" style="fill: #69b3a2" stroke="black" cx=50 cy=50 r=40></circle>
-    </svg>  
     <script src="https://d3js.org/d3.v3.min.js"></script>
     <script>
         console.log('I m d3');
         // http://blog.thomsonreuters.com/index.php/mobile-patent-suits-graphic-of-the-day/
         var links = [
-          ${text}
+          ${connections}
         // {source: "Microsoft", target: "Amazon", type: "licensing"},
         // {source: "Microsoft", target: "HTC", type: "licensing"},
         // {source: "Samsung", target: "Apple", type: "suit"},

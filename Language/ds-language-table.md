@@ -56,6 +56,7 @@
 
 </BR>
 
+##GUI 작업중 2.2 ~
 ### 2.2 Comparision operation (비교연산) - system level only -
 
 |Id| Item | Unit | Example| Desc |  GUI |
@@ -69,7 +70,6 @@
 
 </BR>
 
-</BR>
 
 ### 2.3 Arithmetic operation(산술연산)
 
@@ -152,26 +152,31 @@
 
 |Id| Item | Unit | Example| Desc | GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|IF1|Start Priority | (StartFirst SegX)<p> or (IF1 SegX) | A > (StartFirst B) <\|C  | The B start value overrides the B reset value. | A > B <p> C,(!A) \|> B |<div class="mermaid">flowchart LR;A((A)) --> B((B)); C((C)) & NotA[!A] .->B((B))</div>
-|IF2|Last Priority  | (LastFirst  SegX)<p> or (IF2 SegX)  | A >  (LastFirst B) <\|C | During startup/reset, last occurrence takes precedence | C > CT <\| A  <p> A > B <\| (CT) | <div class="mermaid">flowchart LR;A((A)) --> B((B)); A((A)) .-> CT((CT)); C((C)) --> CT((CT)); CT2[CT] .->B((B))</div>
-
+|IF1|Start Priority | @SF( )  | A > @SF(B) <\|C  | The B start value overrides the B reset value. | ![AAA](./png/IF1.dio.png)|
+|IF2|Last Priority  |  @LF( )  | A > @LF(B) <\|C | During startup/reset, last occurrence takes precedence | ![AAA](./png/IF2.dio.png)|
+</BR>
 
 ### 4.2  Sustain operation
 
 |Id| Item | Unit | Example| Desc | GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|IF3|Start Sustain | (SusS SegX)<p> or (IF3 SegX)| A > (SusS B)  | Sustain until B is Homing | A > (SusS B) <\| C | <div class="mermaid">flowchart LR; A((A)) --> M1[SusS B];C((C)) .-> M1[SusS B]</div>
-|IF4|Reset Sustain |(SusR SegX)<p> or (IF4 SegX) |A > (SusR B)| Sustain until B is Going | A > (SusR B) <\| C | <div class="mermaid">flowchart LR; A((A)) --> M1[SusR B];C((C)) .-> M1[SusR B]</div> 
-|IF5|SR Sustain | (SusSR SegX) <p> or (IF5 SegX)| A > (SusSR B) | Start/Reset Sustain  | A > (SusSR B) <\| C | <div class="mermaid">flowchart LR; A((A)) --> M1[SusSR B];C((C)) .-> M1[SusSR B]</div>
+|IF3|Start Sustain | @SusS ( ) | A > @SusS (B)  | B start signal Sustain until B is Finish |  ![AAA](./png/IF3.dio.png)|
+|IF4|Reset Sustain | @SusR ( ) | A > @SusR (B)  | B reset signal Sustain until B is Ready |  ![AAA](./png/IF4.dio.png)|
+|IF5|SR Sustain | @SusSR ( ) | A > @SusSR (B)  <\| C | B start signal Sustain until B is Finish and <p>  B reset signal Sustain until B is Ready  |  ![AAA](./png/IF5.dio.png)|
+
+</BR>
+
 
 
 ### 4.3 Single  operation
 
-|Id| Item | Unit | Example| Desc |  GUI |
+|Id| Item | Unit | Example| Desc | GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|IF6|Start Single  | (OnlyS SegX) <p> or (IF6 SegX)| A > (OnlyS B) | The B reset value is B Start not | A > B <\| (!A) | 
-|IF7|Reset Single  | (OnlyR SegX)<p> or (IF7 SegX) | A > (OnlyR B) | The B start value is B reset not | A \|> B < (!A) | 
-|IF8|Self Reset  | (SelfR SegX)<p> or (IF8 SegX) | A > (SelfR B) | The B reset value is B end Value | A > (SusR B) <\| (B.E) |
+|IF6|Start Single | @OnlyS ( ) | A > @OnlyS (B)  | The B reset value is B start not |  ![AAA](./png/IF6.dio.png)|
+|IF7|Reset Single | @OnlyR ( ) | A > @OnlyR (B)  | The B start value is B reset not |  ![AAA](./png/IF7.dio.png)|
+|IF8|Self Reset | @SelfR ( ) | A > @SelfR (B)    | The B reset value is B end Value |  ![AAA](./png/IF8.dio.png)|
+
+</BR>
 
 
 ## 5. System
@@ -181,7 +186,7 @@
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
 |SYS1|Numeric |   | 3 + B > A  | A be caused by B add 56 | #3 = ~ Numeric.Bit0, Numeric.Bit1 |
-|SYS2|String |' ' | 'C' = [B > A]| A be caused by B Equal to 'A' | $A = ~ String.Bit0, String.Bit6 |
+|SYS2|String |' ' | ['C' = B] > A| A be caused by B Equal to 'A' | $A = ~ String.Bit0, String.Bit6 |
 
 
 ### 5.2  System Bit
@@ -190,7 +195,7 @@
 |:---:|:----|:--:|:---:|:----|:---|
 |SYS3|Always On | _On | _On > A  | A be caused by Always On | Numeric.Bit0 > On |
 |SYS4|Always Off |_Off | _Off > A| A be caused by Always Off | (! Numeric.Bit0) > Off |
-|SYS5|Running Flag _Run | _Run > A| A be caused by System Run | (SystemRoot.S) > (OnlyS Run) |
+|SYS5|Running Flag |_Run | _Run > A| A be caused by System Run | (SystemRoot.S) > (OnlyS Run) |
 |SYS6|Stop Flag |_Run | _Stop > A| A be caused by System Stop | (SystemRoot.R) > (OnlyS Stop) | 
 |SYS7|Running Rising |_RisingRun | _RisingRun > A | A be caused by System Run Rising | (SystemRoot.S) > (OnlyS Run) | 
 

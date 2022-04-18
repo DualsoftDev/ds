@@ -34,11 +34,11 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|OP1|End  Value | .E  <p> or () | `Seg.E > B`<p>`or (Seg)> B`  | B be caused by Seg End Port(Sensor OUT) Value <p>` 행위 B는 Seg의 End Port(sensor) 값이 'True' 일 경우 인해 수행`    |
-|OP2|Start Value |.S | Seg.S> B  | B be caused by Seg Start Port(Command IN) Value <p>` 행위 B는 Seg의 End Port(sensor) 값이 'True' 일 경우 인해 수행`     |
-|OP3|Reset Value |.R | Seg.R> B  | B be caused by Seg Reset Port(Command IN) Value <p>` 행위 B는 Seg의 End Port(sensor) 값이 'True' 일 경우 인해 수행`    |
-|OP4|Going Status|.G |Seg.G> B | B be caused by Seg Going Value<p>` 행위 B는 Seg가 Going 경우 인해 수행`      |
-|OP5|Homing Status|.H |Seg.H> B | B be caused by Seg Homing Value <p>` 행위 B는 Seg가 Homing 경우 인해 수행`     |
+|OP1|End  Value | .E  <p> or () | `Seg.E > B`<p>`or (Seg) > B`  | B be caused by Seg End Port(Sensor OUT) Value <p>` 행위 B는 Seg의 End Port(sensor) 값이 'True' 일 경우 인해 수행`    |
+|OP2|Start Value |.S | `Seg.S > B` | B be caused by Seg Start Port(Command IN) Value <p>` 행위 B는 Seg의 End Port(sensor) 값이 'True' 일 경우 인해 수행`     |
+|OP3|Reset Value |.R | `Seg.R > B` | B be caused by Seg Reset Port(Command IN) Value <p>` 행위 B는 Seg의 End Port(sensor) 값이 'True' 일 경우 인해 수행`    |
+|OP4|Going Status|.G |`Seg.G > B`| B be caused by Seg Going Value<p>` 행위 B는 Seg가 Going 경우 인해 수행`      |
+|OP5|Homing Status|.H |`Seg.H > B` | B be caused by Seg Homing Value <p>` 행위 B는 Seg가 Homing 경우 인해 수행`     |
 
 
 

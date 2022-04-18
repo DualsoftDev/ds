@@ -1,24 +1,10 @@
-:smile: Welcome to the DS world  :smile:
-# Example 1 
+# 나의 일과 
 
-## action system :raising_hand:
-
-
- ![AAA](./png/ex1.dio.png)
- 
-  - action list 
-    1. DoAction
-
-
+ ![AAA](/MySystem/img/my1.gif)
+ ![AAA](/MySystem/png/my1.dio.png)
 
 ```
-     /* DS Language Unit
-          1. '>'  is Start
-          2. '|>' is Reset
-          3. Action value(True/False) is End
-     */
-
-     //action system 
-     [Sys]action  = {(Start) > DoAction <| (Reset)}
+ [Sys]나의일과  = { 축입사 > 출근; 출근 <||> 퇴근;
+               출근 > @INFSec > 퇴근 > @10sec > 출근
+  }
 ```
-

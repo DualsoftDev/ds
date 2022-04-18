@@ -135,7 +135,7 @@ documents.onDidChangeContent(change => {
 });
 
 
-import { parseDSDocument, diagnoseDSDocument } from './parser';
+import { diagnoseDSDocument } from './serverParser';
 
 async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 	// In this simple example we get the settings for every validate run.
@@ -147,7 +147,6 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 	let m: RegExpExecArray | null;
 
 	console.log('Server got validation request.');	// + text);
-	//parseDSDocument(text);
 
 	const diagnostics: Diagnostic[] = [];
 	const onError = (d:any) => {

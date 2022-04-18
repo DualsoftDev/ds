@@ -1,9 +1,9 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
-
+import {parseDSDocument} from './clientParser';
 export function initializeWebview(context: vscode.ExtensionContext)
 {
-    console.log('--- initializing webview for ds.');
+    console.log('=== initializing webview for ds.');
 
     // const panel = vscode.window.createWebviewPanel(
     //   'dsview',
@@ -27,7 +27,9 @@ export function initializeWebview(context: vscode.ExtensionContext)
           );
 
           const text = vscode.window.activeTextEditor.document.getText();
-    
+          parseDSDocument(text);
+          console.log('finished parseDSDocument on client side.');
+
           // And set its HTML content
           panel.webview.html = getWebviewContent2(text);
         })

@@ -103,6 +103,7 @@ export function diagnoseDSDocument(text:string, onError:(diagnostic:any) => void
  * @param text DS model document obeying DS language rule.
  */
 export function parseDSDocument(text:string) {
+	console.log('In parsing module.');
 	const parser = parserFromDocument(text);
 
 

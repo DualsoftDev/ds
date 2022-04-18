@@ -33,8 +33,8 @@
 
 |Id| Item | Unit | Example | Desc |   GUI | 
 |:---:|:----|:--:|:----|:---|:---|
-|SEQ10| mutual interlock | <\|\|> |  `A <||> B` <p>is equal to `A <| B ; A |> B`| Action A and Action B are mutually interlocked <p>` A 행위와 B 행위는 상호 인터락`  | ![AAA](./png/Seq10.dio.png)|
-|SEQ11| resetStart | \|>> |  `A |>> B` <p>is equal to `A > B ; A |> B`| Action B is caused by action A, B is initialized(reset) to action A <p>`B행위는 A행위으로 인해 수행 하며 B행위는 A행위으로 복귀` | ![AAA](./png/Seq11.dio.png)|
+|SEQ10| mutual interlock | <\|\|> |  A <\|\|> B <p>is equal to A <\| B ; A \|> B| Action A and Action B are mutually interlocked <p>` A 행위와 B 행위는 상호 인터락`  | ![AAA](./png/Seq10.dio.png)|
+|SEQ11| resetStart | \|>> |  A \|>> B <p>is equal to A > B ; A \|> B| Action B is caused by action A, B is initialized(reset) to action A <p>`B행위는 A행위으로 인해 수행 하며 B행위는 A행위으로 복귀` | ![AAA](./png/Seq11.dio.png)|
 
 </BR>
 

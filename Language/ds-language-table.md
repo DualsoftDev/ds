@@ -62,11 +62,11 @@
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
 |OP6|Equals|[ == ]|[B == 3] > A| A be caused by if B EQ(equal) 3. |    ![AAA](./png/Op6.dio.png)|
-|OP7|Not equals |[ != ]|[B != 3] > A| A be caused by if B NE(not equal) 3. |    ![AAA](./png/Op6.dio.png)|
-|OP8|Greater than |[ > ]|[B > 3] > A| A be caused by if B GT(greater than) 3. |    ![AAA](./png/Op6.dio.png)|
-|OP9|Less than|[ < ]|[B < 3] > A| A be caused by if B LT(less than) 3. |    ![AAA](./png/Op6.dio.png)|
-|OP10|Greater Equals than |[ >= ]|[B >= 3] > A| A be caused by if B GE(greater than or equal ) 3.|    ![AAA](./png/Op6.dio.png)|
-|OP11|Less Equals than|[ <= ]|[B <= 3] > A| A be caused by if B LE(less than or equal ) 3. |    ![AAA](./png/Op6.dio.png)|
+|OP7|Not equals |[ != ]|[B != 3] > A| A be caused by if B NE(not equal) 3. |    ![AAA](./png/Op7.dio.png)|
+|OP8|Greater than |[ > ]|[B > 3] > A| A be caused by if B GT(greater than) 3. |    ![AAA](./png/Op8.dio.png)|
+|OP9|Less than|[ < ]|[B < 3] > A| A be caused by if B LT(less than) 3. |    ![AAA](./png/Op9.dio.png)|
+|OP10|Greater Equals than |[ >= ]|[B >= 3] > A| A be caused by if B GE(greater than or equal ) 3.|    ![AAA](./png/Op10.dio.png)|
+|OP11|Less Equals than|[ <= ]|[B <= 3] > A| A be caused by if B LE(less than or equal ) 3. |    ![AAA](./png/Op11.dio.png)|
 
 </BR>
 
@@ -75,10 +75,10 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|OP12|Addition | + | B + 3 | B plus 3. ||
-|OP13|Subtraction|- |B - 3| B minus 3. | |
-|OP14|Multiplication | * | B * 3  | B multiplied by 3. ||
-|OP15|Division|/ |B / 3| B divided by 3. | |
+|OP12|Addition | + | B + 3 | B plus 3. | ![AAA](./png/Op12.dio.png)|
+|OP13|Subtraction|- |B - 3| B minus 3. |  ![AAA](./png/Op13.dio.png)|
+|OP14|Multiplication | * | B * 3  | B multiplied by 3. | ![AAA](./png/Op14.dio.png)|
+|OP15|Division|/ |B / 3| B divided by 3. | ![AAA](./png/Op15.dio.png)|
 
 </BR>
 
@@ -88,13 +88,13 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|OP16| And | & | A&B > C | C be caused by A end  & B end |
-|OP17| Or | \| | A\|B > C | C be caused by A end or B end | 
-|OP18| Not | ! | !A > B | B be caused by not end A | |
-|OP19| XOR | @XOR( , ) | @XOR(B, C) > A | A is exclusive or (B end, C end) |
-|OP20| NXOR | @NXOR( , ) | @NXOR(B, C) > A | A is NXOR (B end, C end) |
-|OP21| NAND | @NAND( , ) | @NAND(B, C) > A | A is NAND (B end, C end) |
-|OP22| NOR | @NOR( , ) | @NOR(B, C) > A | A is NOR (B end, C end) |
+|OP16| And | & | A&B > C | C be caused by A end  & B end | ![AAA](./png/Op16.dio.png)|
+|OP17| Or | \| | A\|B > C | C be caused by A end or B end | ![AAA](./png/Op17.dio.png)|
+|OP18| Not | ! | !A > B | B be caused by not end A | |![AAA](./png/Op18.dio.png)|
+|OP19| XOR | @XOR( , ) | @XOR(B, C) > A | A is exclusive or (B end, C end) |![AAA](./png/Op19.dio.png)|
+|OP20| NXOR | @NXOR( , ) | @NXOR(B, C) > A | A is NXOR (B end, C end) |![AAA](./png/Op20.dio.png)|
+|OP21| NAND | @NAND( , ) | @NAND(B, C) > A | A is NAND (B end, C end) |![AAA](./png/Op21.dio.png)|
+|OP22| NOR | @NOR( , ) | @NOR(B, C) > A | A is NOR (B end, C end) |![AAA](./png/Op22.dio.png)|
 </BR>
 
 
@@ -103,8 +103,8 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|OP23|Copy | `<-` | `C <- B`  | Copy B to C. ||
-|OP24|Initialize|`=` |`A = 65`| Initialize A. ||
+|OP23|Copy | `<-` | `C <- B`  | Copy B to C. |![AAA](./png/Op23.dio.png)|
+|OP24|Initialize|`=` |`A = 65`| Initialize A. |![AAA](./png/Op24.dio.png)|
 
 </BR>
 
@@ -113,7 +113,7 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|OP25|On Delay(Start Edge Only) | @ms, @s| A > @500ms > B  | B be caused by A finish 500 msec delay    ||
+|OP25|On Delay(Start Edge Only) | @ms, @s| A > @500ms > B  | B be caused by A finish 500 msec delay    |![AAA](./png/Op25.dio.png)|
 |OP26|Off Delay |None || Use On Delay    ||
 
 </BR>

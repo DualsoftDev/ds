@@ -3,10 +3,10 @@
 ### 1.1 Causal(원인결과 정의)
 |Id| Item | Unit |Example|   Desc |  GUI | 
 |:---:|:----|:--:|:---:|:----|:---|
-|SEQ1|Start Causal|>| `A > B > C` |Action B is caused by action A, action C is caused by action B  <p>`B행위는 A행위으로, C행위는 B행위으로 인해 수행`| ![AAA](./png/Seq1.dio.png)|
-|SEQ2|Reset Causal| \|> | `A > B <\| C`|Action B is caused by action A, B is initialized to action A <p>`B행위는 A행위으로 인해 발생 하며 B행위는 A행위으로 복귀`| ![AAA](./png/Seq2.dio.png)|
-|SEQ3|And Causal|,|`A,B,C > D` | D be caused by action (A & B & C) <p>`D행위는 A행위, B행위, C행위에 의해 수행`|  ![AAA](./png/Seq3.dio.png)|
-|SEQ4|Or Causal|\\n| `A,B > D`<p>`C > D` | D be caused by A and B, or C <p>`D행위는 A행위, B행위에 의해 수행하거나, C 행위에 의해 수행`| ![AAA](./png/Seq4.dio.png)|
+|SEQ1|Start Causal|`>`| `A > B > C` |Action B is caused by action A, action C is caused by action B  <p>`B행위는 A행위으로, C행위는 B행위으로 인해 수행`| ![AAA](./png/Seq1.dio.png)|
+|SEQ2|Reset Causal| `|>` | `A > B <| C`|Action B is caused by action A, B is initialized(reset) to action A <p>`B행위는 A행위으로 인해 발생 하며 B행위는 A행위으로 복귀`| ![AAA](./png/Seq2.dio.png)|
+|SEQ3|And Causal|`,`|`A,B,C > D` | D be caused by action (A & B & C) <p>`D행위는 A행위, B행위, C행위에 의해 수행`|  ![AAA](./png/Seq3.dio.png)|
+|SEQ4|Or Causal|`;`| `A,B > D`<p>`C > D` | D be caused by A and B, or C <p>`D행위는 A행위, B행위에 의해 수행하거나, C 행위에 의해 수행`| ![AAA](./png/Seq4.dio.png)|
 
 </BR>
 
@@ -14,8 +14,8 @@
 
 |Id| Item | Unit | Example | Desc |   GUI | 
 |:---:|:----|:--:|:----|:---|:---|
-|SEQ5|Call | ~ |`C = A ~ B` | Action C indicates the end state of B by executing A<p>`C행위는 A를 수행시킴으로 B의 종료상태를 관찰`| ![AAA](./png/Seq5.dio.png)|
-|SEQ6|And Call|,| `F = A,B,C ~ D,E`|Action F indicates the end state of D, E by executing A, B, C<p>`F행위는 A, B, C를 수행시킴으로 D, E의 종료상태를 관찰`| ![AAA](./png/Seq6.dio.png)|
+|SEQ5|Call | `~` |`C = A ~ B` | Action C indicates the end state of B by executing A<p>`C행위는 A를 수행시킴으로 B의 종료상태를 관찰`| ![AAA](./png/Seq5.dio.png)|
+|SEQ6|And Call|`,`| `F = A,B,C ~ D,E`|Action F indicates the end state of D, E by executing A, B, C<p>`F행위는 A, B, C를 수행시킴으로 D, E의 종료상태를 관찰`| ![AAA](./png/Seq6.dio.png)|
 
 </BR>
 
@@ -23,9 +23,20 @@
 
 |Id| Item | Unit | Example | Desc |   GUI | 
 |:---:|:----|:--:|:----|:---|:---|
-|Seq7|System Parent | [Sys]= |  `[Sys]D = { A > B <\| C }`| System C processes that causality concurrently <p>` 시스템 C는 해당 인과를 동시적으로 처리`  | ![AAA](./png/Seq7.dio.png)|
-|Seq8|Segement Parent| = |  `D = A > B <\| C`| Action C processes its causal relationship sequentially <p>` 행위 C는 해당 인과를 순차적으로 처리` | ![AAA](./png/Seq8.dio.png)|
+|SEQ7|System Parent | `[Sys]=` |  `[Sys]D = { A > B <| C }`| System C processes that causality concurrently <p>` 시스템 C는 해당 인과를 동시적으로 처리`  | ![AAA](./png/Seq7.dio.png)|
+|SEQ8|Segement Parent| `=` |  `D = A > B <| C`| Action C processes its causal relationship sequentially <p>` 행위 C는 해당 인과를 순차적으로 처리` | ![AAA](./png/Seq8.dio.png)|
 </BR>
+
+
+### 1.4 Causal Extension (행위 확장)
+
+|Id| Item | Unit | Example | Desc |   GUI | 
+|:---:|:----|:--:|:----|:---|:---|
+|SEQ9| mutual interlock | `<||>` |  `A <||> B` <p>is equal to `A <| B ; A |> B`| Action A and Action B are mutually interlocked <p>` A 행위와 B 행위는 상호 인터락`  | ![AAA](./png/Seq9.dio.png)|
+|SEQ10| resetStart | `|>>` |  `A |>> B` <p>is equal to `A > B ; A |> B`| Action C processes its causal relationship sequentially <p>` 행위 C는 해당 인과를 순차적으로 처리` | ![AAA](./png/Seq10.dio.png)|
+
+</BR>
+
 
 ## 2. Data
 
@@ -34,11 +45,11 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|OP1|End  Value | .E  <p> or () | `Seg.E > B`<p>`or (Seg) > B`  | B be caused by Seg End Port(Sensor OUT) value <p>` 행위 B는 Seg의 End Port(sensor) 값이 'True' 일 경우 인해 수행`    |
-|OP2|End Rising Value |.RISING| `Seg.RISING > B` | B be caused by Seg End Port rising value <p>` 행위 B는 Seg의 End Port(sensor) 값이 'RISING' 일 경우 인해 수행`      |
-|OP3|End Falling Value |.FALLING | `Seg.FALLING > B` | B be caused by Seg Reset Port falling value <p>` 행위 B는 Seg의 End Port(sensor) 값이 'FALLING' 일 경우 인해 수행`    |
-|OP4|Going Status|.G |`Seg.G > B`| B be caused by Seg Going Value<p>` 행위 B는 Seg가 Going 경우 인해 수행`      |
-|OP5|Homing Status|.H |`Seg.H > B` | B be caused by Seg Homing Value <p>` 행위 B는 Seg가 Homing 경우 인해 수행`     |
+|OP1|End  Value | () | `(Seg) > B`  | B be caused by Seg End Port(Sensor OUT) value <p>` 행위 B는 Seg의 End Port(sensor) 값이 'True' 일 경우 인해 수행`    |
+|OP2|End Rising Value | @RISING()| `@RISING(Seg) > B` | B be caused by Seg End Port rising value <p>` 행위 B는 Seg의 End Port(sensor) 값이 'RISING' 일 경우 인해 수행`      |
+|OP3|End Falling Value |@FALLING() | `@FALLING(Seg) > B` | B be caused by Seg Reset Port falling value <p>` 행위 B는 Seg의 End Port(sensor) 값이 'FALLING' 일 경우 인해 수행`    |
+|OP4|Going Status|@G() |`@G(Seg) > B`| B be caused by Seg Going Value<p>` 행위 B는 Seg가 Going 경우 인해 수행`      |
+|OP5|Homing Status|@H() |`@H(Seg) > B` | B be caused by Seg Homing Value <p>` 행위 B는 Seg가 Homing 경우 인해 수행`     |
 
 
 
@@ -79,10 +90,10 @@
 |OP16| And | & | (A&B) > C | C be caused by A end  & B end |
 |OP17| Or | \| | (A\|B) > C | C be caused by A end or B end | 
 |OP18| Not | ! | (!A) > B | B be caused by not end A | (!A \|> B) |
-|OP19| XOR | XOR | (XOR B, C) > A | A is exclusive or (B end, C end) |
-|OP20| NXOR | NXOR | (NXOR B, C) > A | A is NXOR (B end, C end) |
-|OP21| NAND | NAND | (NAND B, C) > A | A is NAND (B end, C end) |
-|OP22| NOR | NOR | (NOR B, C) > A | A is NOR (B end, C end) |
+|OP19| XOR | @XOR() | (XOR B, C) > A | A is exclusive or (B end, C end) |
+|OP20| NXOR | @NXOR() | (NXOR B, C) > A | A is NXOR (B end, C end) |
+|OP21| NAND | @NAND() | (NAND B, C) > A | A is NAND (B end, C end) |
+|OP22| NOR | @NOR() | (NOR B, C) > A | A is NOR (B end, C end) |
 </BR>
 
 
@@ -101,8 +112,8 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|OP25|On Delay(Start Edge Only) | TON#| A > TON500ms > B  | B be caused by A finish 500 msec delay    |A (5ms)> B|
-|OP26|Off Delay |None || Use TON    |(!A) (5ms)> B |
+|OP25|On Delay(Start Edge Only) | @ms, @s| A > @500ms > B  | B be caused by A finish 500 msec delay    |A @5ms> B|
+|OP26|Off Delay |None || Use On Delay    ||
 
 </BR>
 
@@ -110,10 +121,10 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|OP27| Numeric  | (NUM)  | (C <- (NUM) B  | C converts B to Numeric.  | B = 65 //초기화 |
-|OP28| String  |(STR)  | (C <- (STR) B  | C converts B to String.  | [Sys]C <- STR(B) //C에 'A' Setting |
-|OP29| BCD  | (BCD)  | (C <- (BCD) B  | C converts B to BCD.  |
-|OP30| BIN  | (BIN)  | (C <- (BIN) B  | C converts B to BIN.  |
+|OP27| Numeric  | @NUM()  | C <- @NUM(B)  | C converts B to Numeric.  | |
+|OP28| String  |@STR()  | C <- @STR(B)  | C converts B to String.  |  |
+|OP29| BCD  | @BCD()  | C <- @BCD(B)  | C converts B to BCD.  |
+|OP30| BIN  | @BIN()  | C <- @BIN(B)  | C converts B to BIN.  |
 
 </BR>
 
@@ -128,13 +139,13 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|FUN1|Abs | (ABS SysX)| (ABS A)  | Calculate the absolute value of A. |
-|FUN2|Sin| (SIN SysX)|(SIN A)| Calculate the Sin of A. | 
-|FUN3|Round | (ROUND SysX)| (ROUND A) | Calculate the rounding of A.  | 
+|FUN1|Abs | @ABS() | @ABS (A)  | Calculate the absolute value of A. |
+|FUN2|Sin| @SIN()|@SIN (A)| Calculate the Sin of A. | 
+|FUN3|Round | @ROUND()| @ROUND (A) | Calculate the rounding of A.  | 
 
 
 
-## 4. Interface
+## 4. Interface  
 
 ### 4.1 Priority operation
 

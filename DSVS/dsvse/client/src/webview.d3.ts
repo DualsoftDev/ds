@@ -4,9 +4,19 @@
 /**
  * D3 를 이용해서 webview contents 생성
  * @param connections 
+        const edge = (causal.op == '>') ? 'resolved' : 'suit';
+        return `{source: "${causal.left}", target: "${causal.right}", type: "${edge}"}`;
  * @returns 
  */
-export function getWebviewContentD3(connections: string) {
+export function getWebviewContentD3(connections: {source:string, target:string, solid:boolean}[]) {
+    let text = connections.map(c => {
+        const type = c.solid ? 'resolved' : 'suit';
+        return `{source: '${c.source}', target: '${c.target}', type: '${type}'}`})
+        .join(',')
+    ;
+    text = `[ ${text} ]`;
+    console.log('text=', text);
+    
     return `<!DOCTYPE html>
 <html lang="en">
     <head>
@@ -53,38 +63,7 @@ text {
     <script>
         console.log('I m d3');
         // http://blog.thomsonreuters.com/index.php/mobile-patent-suits-graphic-of-the-day/
-        var links = [
-          ${connections}
-        // {source: "Microsoft", target: "Amazon", type: "licensing"},
-        // {source: "Microsoft", target: "HTC", type: "licensing"},
-        // {source: "Samsung", target: "Apple", type: "suit"},
-        // {source: "Motorola", target: "Apple", type: "suit"},
-        // {source: "Nokia", target: "Apple", type: "resolved"},
-        // {source: "HTC", target: "Apple", type: "suit"},
-        // {source: "Kodak", target: "Apple", type: "suit"},
-        // {source: "Microsoft", target: "Barnes & Noble", type: "suit"},
-        // {source: "Microsoft", target: "Foxconn", type: "suit"},
-        // {source: "Oracle", target: "Google", type: "suit"},
-        // {source: "Apple", target: "HTC", type: "suit"},
-        // {source: "Microsoft", target: "Inventec", type: "suit"},
-        // {source: "Samsung", target: "Kodak", type: "resolved"},
-        // {source: "LG", target: "Kodak", type: "resolved"},
-        // {source: "RIM", target: "Kodak", type: "suit"},
-        // {source: "Sony", target: "LG", type: "suit"},
-        // {source: "Kodak", target: "LG", type: "resolved"},
-        // {source: "Apple", target: "Nokia", type: "resolved"},
-        // {source: "Qualcomm", target: "Nokia", type: "resolved"},
-        // {source: "Apple", target: "Motorola", type: "suit"},
-        // {source: "Microsoft", target: "Motorola", type: "suit"},
-        // {source: "Motorola", target: "Microsoft", type: "suit"},
-        // {source: "Huawei", target: "ZTE", type: "suit"},
-        // {source: "Ericsson", target: "ZTE", type: "suit"},
-        // {source: "Kodak", target: "Samsung", type: "resolved"},
-        // {source: "Apple", target: "Samsung", type: "suit"},
-        // {source: "Kodak", target: "RIM", type: "suit"},
-        // {source: "Nokia", target: "Qualcomm", type: "suit"}
-        ];
-
+        var links = ${text}
         var nodes = {};
 
         // Compute the distinct nodes from the links.

@@ -2,6 +2,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { parseDSDocument } from './clientParser';
 import { getWebviewContentD3 } from './webview.d3';
+import { getWebviewContentCytoscape } from './webview.cytoscape';
 
 let panel: vscode.WebviewPanel | null = null;
 export function initializeWebview(context: vscode.ExtensionContext) {
@@ -32,15 +33,16 @@ export function initializeWebview(context: vscode.ExtensionContext) {
         const connections =
             Array.from(parseDSDocument(text))
                 .map(causal => {
-                    const edge = (causal.op == '>') ? 'resolved' : 'suit';
-                    return `{source: "${causal.left}", target: "${causal.right}", type: "${edge}"}`;
+                    const edge = causal.op == '>';
+                    return {source: causal.left, target: causal.right, solid: edge};
                 })
-                .join(',')
+                //.join(',')
             ;
         console.log('finished parseDSDocument on client side.' + connections);
 
         // And set its HTML content
-        panel.webview.html = getWebviewContentD3(connections);
+        // panel.webview.html = getWebviewContentD3(connections);
+        panel.webview.html = getWebviewContentCytoscape(connections);
 
     }
 

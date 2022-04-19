@@ -1,3 +1,6 @@
+~/tmp/cytoscape.js/documentation/demos/compound-nodes
+
+
 - [Getting started with Cytoscape.js &middot; Cytoscape.js](https://blog.js.cytoscape.org/2016/05/24/getting-started/)
 
 

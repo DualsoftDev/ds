@@ -38,7 +38,7 @@
     
 ```
 ![language-table](./png/spec.dio.png)
-기본 예제 참고  - [예제](/Examples/ex1.md) 참고
+- 기본 예제 참고  - [예제](/Examples/ex1.md) 참고
 
 </BR>
 
@@ -47,24 +47,24 @@
 ### 2 모델링 확장 유닛
 
 
-Edge Reset 기호 '|>', '<|', '<|>'
+- Edge Reset 기호 '|>', '<|', '<|>'
+  - Ex) A |> B  의미 : A실행(Going)시 B Reset
+  - Ex) A <|> B 의미 : A실행(Going)시 B Reset, B실행(Going)시 C Reset
 
-- Ex) A |> B  의미 : A실행(Going)시 B Reset
-- Ex) A <|> B 의미 : A실행(Going)시 B Reset, B실행(Going)시 C Reset
+ - Real Segment 정의 방법 : indent (\t) 이후 이름 = {edge1;edge2;...;edgeN} 형식으로 정의
 
-Real Segment 정의 방법 : indent (\t) 이후 이름 = {edge1;edge2;...;edgeN} 형식으로 정의
+    - Ex) RealSeg1 = {Seg1 > Seg2; Seg1 > Seg3; Seg1 <|> Seg2 }
+    - Real Segment 는 CallSegment를 Child로 등록 가능하다. (CallSegement는 주로 라이브러리 형태로 미리제공예정)
+    - 예약어 [arrH] 입력 받으시 Homing 인과로 추가해석 (Start Edge 만 가능)
 
-- Ex) RealSeg1 = {Seg1 > Seg2; Seg1 > Seg3; Seg1 <|> Seg2 }
-- Real Segment 는 CallSegment를 Child로 등록 가능하다. (CallSegement는 주로 라이브러리 형태로 미리제공예정)
-- 예약어 [arrH] 입력 받으시 Homing 인과로 추가해석 (Start Edge 만 가능)
+ - Call Segment 정의 방법 : indent (\t) 이후 이름 = { System.SegA, System.SegB~System.SegC } 형식으로 정의
 
-Call Segment 정의 방법 : indent (\t) 이후 이름 = { System.SegA, System.SegB~System.SegC } 형식으로 정의
+    - Ex) CallSeg1 = {Sys.A,Sys.C ~ Sys.B}  (A,C 동시 실행후 B 완료관찰)
+</BR>
 
-- Ex) CallSeg1 = {Sys.A,Sys.C ~ Sys.B}  (A,C 동시 실행후 B 완료관찰)
-
-Macro 확장 가능 - [macro.md](/Doc/Terminologies/macro.md) 참고
-확장 예제 참고  - [예제](/Examples/ex5.md) 참고
-
+- Macro 확장 가능 - [macro.md](/Doc/Terminologies/macro.md) 참고
+- 확장 예제 참고  - [예제](/Examples/ex5.md) 참고
+</BR>
 - 구성 요소
   - DsSystem : Root Segment Edges
     - indent 없이 [Sys]SystemName = {children segments edge List} (edge없을시 ';' 로 구분하여 행위만 나열)

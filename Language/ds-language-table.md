@@ -24,7 +24,7 @@
 
 |Id| Item | Unit | Example | Desc |   GUI | 
 |:---:|:----|:--:|:----|:---|:---|
-|SEQ8|System Parent | `[Sys]=` |  [Sys]D = { A > B <\| C } | System D processes that causality concurrently <p>` 시스템 D는 해당 인과를 동시적으로 처리`  | ![AAA](./png/Seq8.dio.png)|
+|SEQ8|system Parent | `[sys]=` |  [sys]D = { A > B <\| C } | system D processes that causality concurrently <p>` 시스템 D는 해당 인과를 동시적으로 처리`  | ![AAA](./png/Seq8.dio.png)|
 |SEQ9|Segement Parent| `=` |  D = { A > B <\| C } | Action D processes its causal relationship sequentially <p>` 행위 D는 해당 인과를 순차적으로 처리` | ![AAA](./png/Seq9.dio.png)|
 </BR>
 
@@ -47,10 +47,10 @@
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:-------:|:---:|:----|:---|
 |OP1|End  Value | ( ) | `(Seg), A > B`  | B be caused by action A when the Seg End Port (sensor) value is 'True'. <p>` 행위 B는 Seg의 End Port(sensor) 값이 'True' 일 경우에서 행위 A가 수헹되었을때 수행`    |![AAA](./png/Op1.dio.png)|
-|OP2|End Set Value | @SET( )| `@SET(Seg) > B` | B be caused by Seg End Port latch value(auto reset by @G(B)) <p>` 행위 B는 Seg의 End Port(sensor) 값이 'True' 면 값 유지(B행위 Going 시에 자동 값 리셋)`      |![AAA](./png/Op2.dio.png)|
-|OP3|End  Value | @LATCH( , )| `@LATCH(SegA, @G(SegB)) > B` | B be caused by Seg End Port latch value(auto reset by @G(B)) <p>` 행위 B는 Seg의 End Port(sensor) 값이 'True' 면 값 유지(설정 값에 의한 리셋)`  |![AAA](./png/Op3.dio.png)|
-|OP4|Going Status|@G( ) |`@G(Seg) > B`| B be caused by Seg Going Value<p>` 행위 B는 Seg가 Going 경우 인해 수행`      |![AAA](./png/Op4.dio.png)|
-|OP5|Homing Status|@H( ) |`@H(Seg) > B` | B be caused by Seg Homing Value <p>` 행위 B는 Seg가 Homing 경우 인해 수행`     |![AAA](./png/Op5.dio.png)|
+|OP2|End Set Value | @set( )| `@set(Seg) > B` | B be caused by Seg End Port latch value(auto reset by @g(B)) <p>` 행위 B는 Seg의 End Port(sensor) 값이 'True' 면 값 유지(B행위 Going 시에 자동 값 리셋)`      |![AAA](./png/Op2.dio.png)|
+|OP3|End  Value | @latch( , )| `@latch(SegA, @g(SegB)) > B` | B be caused by Seg End Port latch value(auto reset by @g(B)) <p>` 행위 B는 Seg의 End Port(sensor) 값이 'True' 면 값 유지(설정 값에 의한 리셋)`  |![AAA](./png/Op3.dio.png)|
+|OP4|Going Status|@g( ) |`@g(Seg) > B`| B be caused by Seg Going Value<p>` 행위 B는 Seg가 Going 경우 인해 수행`      |![AAA](./png/Op4.dio.png)|
+|OP5|Homing Status|@h( ) |`@h(Seg) > B` | B be caused by Seg Homing Value <p>` 행위 B는 Seg가 Homing 경우 인해 수행`     |![AAA](./png/Op5.dio.png)|
 
 
 
@@ -90,11 +90,11 @@
 |:---:|:----|:--:|:---:|:----|:---|
 |OP16| And | & | A&B > C | C be caused by A end  & B end | ![AAA](./png/Op16.dio.png)|
 |OP17| Or | \| | A\|B > C | C be caused by A end or B end | ![AAA](./png/Op17.dio.png)|
-|OP18| Not | ! | !A > B | B be caused by not end A | |![AAA](./png/Op18.dio.png)|
-|OP19| XOR | @XOR( , ) | @XOR(B, C) > A | A is exclusive or (B end, C end) |![AAA](./png/Op19.dio.png)|
-|OP20| NXOR | @NXOR( , ) | @NXOR(B, C) > A | A is NXOR (B end, C end) |![AAA](./png/Op20.dio.png)|
-|OP21| NAND | @NAND( , ) | @NAND(B, C) > A | A is NAND (B end, C end) |![AAA](./png/Op21.dio.png)|
-|OP22| NOR | @NOR( , ) | @NOR(B, C) > A | A is NOR (B end, C end) |![AAA](./png/Op22.dio.png)|
+|OP18| Not | ! | !A > B | B be caused by not end A | ![AAA](./png/Op18.dio.png)|
+|OP19| XOR | @xor( , ) | @xor(B, C) > A | A is exclusive or (B end, C end) |![AAA](./png/Op19.dio.png)|
+|OP20| NXOR | @nxor( , ) | @nxor(B, C) > A | A is NXOR (B end, C end) |![AAA](./png/Op20.dio.png)|
+|OP21| NAND | @nand( , ) | @nand(B, C) > A | A is NAND (B end, C end) |![AAA](./png/Op21.dio.png)|
+|OP22| NOR | @nor( , ) | @nor(B, C) > A | A is NOR (B end, C end) |![AAA](./png/Op22.dio.png)|
 </BR>
 
 
@@ -122,10 +122,10 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|OP27| Numeric  | @NUM( )  |` C <- @NUM(B) ` | C converts B to Numeric.  | |
-|OP28| String  |@STR( )  | `C <- @STR(B) ` | C converts B to String.  |  |
-|OP29| BCD  | @BCD( )  | `C <- @BCD(B)`  | C converts B to BCD.  |
-|OP30| BIN  | @BIN( )  |` C <- @BIN(B)`  | C converts B to BIN.  |
+|OP27| Numeric  | @num( )  |` C <- @num(B) ` | C converts B to Numeric.  | |
+|OP28| String  |@str( )  | `C <- @str(B) ` | C converts B to String.  |  |
+|OP29| BCD  | @bcd( )  | `C <- @bcd(B)`  | C converts B to BCD.  |
+|OP30| BIN  | @bin( )  |` C <- @bin(B)`  | C converts B to BIN.  |
 
 </BR>
 
@@ -140,9 +140,9 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|FUN1|Abs | @ABS( ) | @ABS (A)  | Calculate the absolute value of A. |
-|FUN2|Sin| @SIN( )|@SIN (A)| Calculate the Sin of A. | 
-|FUN3|Round | @ROUND( )| @ROUND (A) | Calculate the rounding of A.  | 
+|FUN1|Abs | @abs( ) | @abs (A)  | Calculate the absolute value of A. |
+|FUN2|Sin| @sin( )|@sin (A)| Calculate the Sin of A. | 
+|FUN3|Round | @round( )| @round (A) | Calculate the rounding of A.  | 
 
 
 
@@ -152,17 +152,17 @@
 
 |Id| Item | Unit | Example| Desc | GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|IF1|Start Priority | @SF( )  | A > @SF(B) <\|C  | The B start value overrides the B reset value. | ![AAA](./png/IF1.dio.png)|
-|IF2|Last Priority  |  @LF( )  | A > @LF(B) <\|C | During startup/reset, last occurrence takes precedence | ![AAA](./png/IF2.dio.png)|
+|IF1|Start Priority | @sf( )  | A > @sf(B) <\|C  | The B start value overrides the B reset value. | ![AAA](./png/IF1.dio.png)|
+|IF2|Last Priority  |  @lf( )  | A > @lf(B) <\|C | During startup/reset, last occurrence takes precedence | ![AAA](./png/IF2.dio.png)|
 </BR>
 
 ### 4.2  Sustain operation
 
 |Id| Item | Unit | Example| Desc | GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|IF3|Start Sustain | @SusS ( ) | A > @SusS (B)  | B start signal Sustain until B is Finish |  ![AAA](./png/IF3.dio.png)|
-|IF4|Reset Sustain | @SusR ( ) | A > @SusR (B)  | B reset signal Sustain until B is Ready |  ![AAA](./png/IF4.dio.png)|
-|IF5|SR Sustain | @SusSR ( ) | A > @SusSR (B)  <\| C | B start signal Sustain until B is Finish and <p>  B reset signal Sustain until B is Ready  |  ![AAA](./png/IF5.dio.png)|
+|IF3|Start Sustain | @pushs ( ) | A > @pushs (B)  | B start signal Sustain until B is Finish |  ![AAA](./png/IF3.dio.png)|
+|IF4|Reset Sustain | @pushr ( ) | A > @pushr (B)  | B reset signal Sustain until B is Ready |  ![AAA](./png/IF4.dio.png)|
+|IF5|SR Sustain | @pushsr ( ) | A > @pushsr (B)  <\| C | B start signal Sustain until B is Finish and <p>  B reset signal Sustain until B is Ready  |  ![AAA](./png/IF5.dio.png)|
 
 </BR>
 
@@ -172,14 +172,14 @@
 
 |Id| Item | Unit | Example| Desc | GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|IF6|Start Single | @OnlyS ( ) | A > @OnlyS (B)  | The B reset value is B start not |  ![AAA](./png/IF6.dio.png)|
-|IF7|Reset Single | @OnlyR ( ) | A > @OnlyR (B)  | The B start value is B reset not |  ![AAA](./png/IF7.dio.png)|
-|IF8|Self Reset | @SelfR ( ) | A > @SelfR (B)    | The B reset value is B end Value |  ![AAA](./png/IF8.dio.png)|
+|IF6|Start Single | @onlys ( ) | A > @onlys (B)  | The B reset value is B start not |  ![AAA](./png/IF6.dio.png)|
+|IF7|Reset Single | @onlyr ( ) | A > @onlyr (B)  | The B start value is B reset not |  ![AAA](./png/IF7.dio.png)|
+|IF8|Self Reset | @selfr ( ) | A > @selfr (B)    | The B reset value is B end Value |  ![AAA](./png/IF8.dio.png)|
 
 </BR>
 
 
-## 5. System
+## 5. system
 
 ### 5.1  Constain
 
@@ -189,21 +189,21 @@
 |SYS2|String |' ' | ['C' = B] > A| A be caused by B Equal to 'A'||
 
 
-### 5.2  System Bit
+### 5.2  system Bit
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|SYS3|Always On | _On | _On > A  | A be caused by Always On ||
-|SYS4|Always Off |_Off | _Off > A| A be caused by Always Off ||
-|SYS5|Running Flag |_Run | _Run > A| A be caused by System Run ||
-|SYS6|Stop Flag |_Stop | _Stop > A| A be caused by System Stop||
-|SYS7|Running Rising |_RR | _RR > A | A be caused by System Run Rising||
-|SYS8|Running Falling |_RF | _RF > A | A be caused by System Run Rising ||
+|SYS3|Always On | _on | _on > A  | A be caused by Always On ||
+|SYS4|Always Off |_off | _off > A| A be caused by Always Off ||
+|SYS5|Running Flag |_run | _run > A| A be caused by system Run ||
+|SYS6|Stop Flag |_stop | _stop > A| A be caused by system Stop||
+|SYS7|Running Rising |_rr | _rr > A | A be caused by system Run Rising||
+|SYS8|Running Falling |_rf | _rf > A | A be caused by system Run Rising ||
 
 
 
-### 5.3  System timer
+### 5.3  system timer
 
 |Id| Item | Unit | Example| Desc | GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|SYS9|toggle #s | _T | _T50ms > A  | On/Off occurs at periodic intervals of 50msec. | |
+|SYS9|Toggle #s | _t | _t50ms > A  | On/Off occurs at periodic intervals of 50msec. | |

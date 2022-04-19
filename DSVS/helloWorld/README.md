@@ -1,6 +1,6 @@
-# dsvse README
+# helloworldtypescript README
 
-This is the README for your extension "dsvse". After writing up a brief description, we recommend including the following sections.
+This is the README for your extension "helloworldtypescript". After writing up a brief description, we recommend including the following sections.
 
 ## Features
 

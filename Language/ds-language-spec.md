@@ -1,10 +1,50 @@
 # DS text language spec
 
-- [Antlr (`g4`) spec](../../DSVS/dsvse/server/src/ds.g4)
 
-Edge Start 기호  '>', '<'
+## 주요스펙 
 
-- Ex) A > B  의미 : A 완료(Finish) 후에 B Start
+### 1 모델링 기본 유닛
+  - 모든 유닛 참고 [language-table](./ds-language-table.md)
+
+| Item | Unit |Example|   Desc | 
+|:---:|:----:|:--:|:---:|
+|최소단위 Segment(행위) 정의|call = { `~` } |A = {O1 ~ I1}| A 행위는 Q를 시켜 T를 관찰|
+|Segment(행위)레벨 인과 정의|real = { `>` } |R1 = {A > B}| R 행위는 A행위 수행후 B 행위를 수행|
+|System(시스템)레벨 인과 정의|[sys]name = { `>` } | S = {R1 > R2}| S 시스템은 R1행위 관찰 후 R2 시작명령|
+
+ - Segment(행위)레벨 행위 절차  :  정의된 내부 각자행위들을 순차(Step)적으로 1회 수행함
+ - System(시스템)레벨 행위 절차 :  정의된 내부 각자행위들을 조건(Condition)으로 수행함
+</BR>
+ - text edit 처리 규칙 참고 [Antlr (`g4`) spec](/DSVS/dsvse/server/src/ds.g4)
+ ```
+1. 모든 행위 이름 및 시스템 예약어 대소문자 구분   ex) test <> Test, [Sys] <> [SYS] 서로 다름
+2. 띄어쓰기 대신 '_' 사용                         ex) 가공 작업 => 가공_작업
+3. 이름시작에 '_' 및 숫자 금지                    ex) _test (X), 1cycle (X)
+4. 라인 종료시에 ';' 기술                         ex)  R1 =  {A > B};
+ ```
+</BR>
+
+```ex)
+
+[Sys]sys1 = {R1 > R2;
+   R1 =  {A > B};
+   R2 =  {C > D};
+          A = {O1 ~ I1};
+          B = {O2 ~ I2};
+          C = {O3 ~ I3};
+          D = {O4 ~ I4};
+      };
+    
+```
+![language-table](./png/spec.dio.png)
+기본 예제 참고  - [예제](/Examples/ex1.md) 참고
+
+</BR>
+
+
+
+### 2 모델링 확장 유닛
+
 
 Edge Reset 기호 '|>', '<|', '<|>'
 
@@ -21,65 +61,8 @@ Call Segment 정의 방법 : indent (\t) 이후 이름 = { System.SegA, System.S
 
 - Ex) CallSeg1 = {Sys.A,Sys.C ~ Sys.B}  (A,C 동시 실행후 B 완료관찰)
 
-Macro 추가 - [macro.md](macro.md) 참고
-
-기본예제
-
-```ex)
-
-[Sys]sys1 = {seg0}
-    [accS] {Valve}
-    [accE] {Sensor}
-    seg0 = {seg1 > seg2;seg1 <|> seg2}
-      [arrH] {seg2 > seg1}
-      seg1 = { Valve.V+, Valve.Open ~ Sensor.S+ }
-      seg2 = { Valve.V-, Valve.Open ~ Sensor.S- }
-
-[Sys]Valve  = {V+ <|> V-;Open}
-[Sys]Sensor = {S+;S-}
-[Sys]Cylinder =  { Valve.V+ >P+ > Sensor.S+
-                   Valve.V- >P- > Sensor.S-
-                   P+ |> Sensor.S-
-                   P- |> Sensor.S+
-                 }
-    [accS] {Sensor}
-    [accE] {Valve}
-    
-```
-
-자동해석
-
-1. [Sys] 영역에 Edge 정의시 ','  로 구분시 And로 해석
-
- ```ex
- [Sys]my = {SegA, SegB > SegC}
- 
- 자동해석 : SegA & SegB > SegC 
- (SegA와 SegB가 행위완료 성립시 SegC Start)
- ```
-
-2. [Sys] 영역에 Edge 정의시 '\n' 로 구분시 Or 로 해석
-
-  ```ex
-  [Sys]my = {SegA > SegC 
-             SegB > SegC}
-             
- 자동해석 : SegA | SegB > SegC
-  (SegA 또는 SegB가 행위완료 성립시 SegC Start)
- ```
-
-3. Real Segment Edge 영역에 Or 의미 부여 (다른 Real Segment 만들어  OR 표현가능)
-
-  ```ex
-[Sys]my = {RealSeg1 > RealSeg2} 
-    RealSeg1 = {SegA > SegC 
-                SegB > SegC} //Real 내부는 OR 표현 불가 (구문 에러)
-
-수정후
-[Sys]my = { RealSeg1_1 > RealSeg2;  RealSeg1_2 > RealSeg2} 
-    RealSeg1_1 = {SegA > SegC}     
-    RealSeg1_2 = {SegB > SegC}     
- ```
+Macro 확장 가능 - [macro.md](/Doc/Terminologies/macro.md) 참고
+확장 예제 참고  - [예제](/Examples/ex5.md) 참고
 
 - 구성 요소
   - DsSystem : Root Segment Edges
@@ -110,5 +93,3 @@ Macro 추가 - [macro.md](macro.md) 참고
       - 인과 정의의 마지막은 semicolon(`';'`) 로 끝나야 한다.
   - 주석.  `//` 로 시작하는 line comment or `/*` 와 `*/` 의 block comment
 
-- [elevator.md](../Samples/elevator.md) 참고 (old)
-- [elevator-callSeg.md](../Samples/elevator-callSeg.md) 참고 (new)

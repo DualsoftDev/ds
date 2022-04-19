@@ -11,7 +11,7 @@
     2. Close
 
 ```
- [Sys]door  = { Open <||> Close
+ [Sys]door  = { Open <||> Close;
                (Detect) > Open, @10sec  > Close;
                @10 sec <| Close;
 

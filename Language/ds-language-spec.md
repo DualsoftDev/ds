@@ -8,7 +8,7 @@
 
 | Item | Unit |Example|   Desc | 
 |:---:|:----:|:--:|:---:|
-|최소단위 Segment(행위) 정의|call = { `~` } |A = {O1 ~ I1}| A 행위는 Q를 시켜 I를 관찰|
+|최소단위 Segment(행위) 정의|call = { `~` } |A = {O1 ~ I1}| A 행위는 Q 를 시켜 I 를 관찰|
 |Segment(행위)레벨 인과 정의|real = { `>` } |R1 = {A > B}| R 행위는 A행위 수행후 B 행위를 수행|
 |System(시스템)레벨 인과 정의|[sys]name = { `>` } | S = {R1 > R2}| S 시스템은 R1행위 관찰 후 R2 시작명령|
  - 해석 규칙

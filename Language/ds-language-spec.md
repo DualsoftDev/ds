@@ -65,6 +65,7 @@
 - Macro 확장 가능 - [macro.md](/Doc/Terminologies/macro.md) 참고
 - 확장 예제 참고  - [예제](/Examples/ex5.md) 참고
 </BR>
+
 - 구성 요소
   - DsSystem : Root Segment Edges
     - indent 없이 [Sys]SystemName = {children segments edge List} (edge없을시 ';' 로 구분하여 행위만 나열)

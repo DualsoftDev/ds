@@ -70,11 +70,25 @@ export function *parseDSDocument(text:string) {
 				const l = causal.expression()[0];
 				const r = causal.expression()[1];
 				const op = causal.causalOperator().text;
+				console.log(`${l.text} ${op} ${r.text}`);
 				switch(op) {
 					case '>':
-					case '<':
+					case '|>':
 						yield {left:l.text, right:r.text, op};
-						console.log(`${l.text} ${op}=> ${r.text}`);
+						break;
+					case '>|>':
+						yield {left:l.text, right:r.text, op:'>'};
+						yield {left:l.text, right:r.text, op:'|>'};
+						break;
+
+					case '<':
+					case '<|':
+						yield {left:r.text, right:l.text, op};
+						break;
+
+					case '<||>':
+						yield {left:l.text, right:r.text, op:'|>'};
+						yield {left:r.text, right:l.text, op:'<|'};
 						break;
 				}
 				// causal.expression().map(exp => {

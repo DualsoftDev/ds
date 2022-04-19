@@ -75,7 +75,7 @@ export function getWebviewContentCytoscape(connections: {source:string, target:s
                     'text-outline-width': 2,
                     'label': 'data(id)',
                     'font-size' : '25px',
-                    'background-color': 'red'
+                    'background-color': 'green'
                 }
             },
             {

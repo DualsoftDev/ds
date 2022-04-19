@@ -32,7 +32,16 @@ export function initializeWebview(context: vscode.ExtensionContext) {
         // {source: "Microsoft", target: "Amazon", type: "licensing"},
         const connections =
             Array.from(parseDSDocument(text))
-                .map(causal => {
+                .flatMap(causal => {
+                    const c = causal;
+                    switch(causal.op)
+                    {
+                        case '>': return {source: c.left, target: c.right, solid: true};
+                        case '<': return {source: c.right, target: c.left, solid: true};
+                        case '|>': return {source: c.left, target: c.right, solid: true};
+                        case '<|': return {source: c.right, target: c.left, solid: true};
+
+                    }
                     const edge = causal.op == '>';
                     return {source: causal.left, target: causal.right, solid: edge};
                 })

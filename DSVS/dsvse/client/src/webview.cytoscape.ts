@@ -4,13 +4,31 @@
  * @returns 
  */
 export function getWebviewContentCytoscape(connections: {source:string, target:string, solid:boolean}[]) {
-    let text = connections.map(c => {
+    let elements = connections.map(c => {
         const type = c.solid ? 'resolved' : 'suit';
-        return `{source: '${c.source}', target: '${c.target}', type: '${type}'}`})
-        .join(',')
+        return `{source: '${c.source}', target: '${c.target}', type: '${type}'}`;
+    }).join(',')
     ;
-    text = `[ ${text} ]`;
-    console.log('text=', text);
+    function *generateElements()
+    {
+        const nodes =
+            connections
+            .flatMap(c => [c.source, c.target])
+            .filter((v, i, a) => a.indexOf(v) === i)
+        ;
+        yield nodes.map(n => `{ data: {id: '${n}', label: '${n}'}}`);
+
+        yield connections.map(c =>
+`{ data: {
+    id: '${c.source}${c.target}',
+    source: '${c.source}',
+    target: '${c.target}'}}
+`);
+    }
+
+    const els = Array.from(generateElements()).join(",");
+    elements = `[ ${els} ]`;
+    console.log('TEXT=', els);
 
     return `<!DOCTYPE html>
 <html lang="en">
@@ -33,28 +51,41 @@ export function getWebviewContentCytoscape(connections: {source:string, target:s
 
 <body>
     <div id="cy"></div>
-    <script nonce="2726c7f26c">
+    <script>
         var cy = cytoscape({
+        wheelSensitivity: 0.1,
         container: document.getElementById('cy'),
-        elements: [
-            { data: { id: 'a' } },
-            { data: { id: 'b' } },
+        elements: ${elements},
+        style: [
             {
-            data: {
-                id: 'ab',
-                source: 'a',
-                target: 'b'
+                selector: 'node',
+                style: {
+                    'shape': 'round-rectangle',
+                    'color':"white",        // text color
+            
+                    "border-width": 2,
+                    "border-color": "white",
+                    "border-style": "solid",   //"dotted",
+                    
+                    
+                    // 'background-color': 'data(background_color)',
+                    'text-outline-color': 'data(background_color)',
+            
+                    // 'text-outline-color': 'orange'
+                    'text-outline-width': 2,
+                    'label': 'data(id)',
+                    'font-size' : '25px',
+                    'background-color': 'red'
+                }
+            },
+            {
+                selector: 'edge',
+                style: {
+                    'curve-style': 'bezier',
+                    'target-arrow-shape': 'triangle'
+                }
             }
-            }],
-            style: [
-                {
-                    selector: 'node',
-                    style: {
-                        shape: 'hexagon',
-                        'background-color': 'red'
-                    }
-                }]      
-        });
+        ]});
 
     </script>
 </body>

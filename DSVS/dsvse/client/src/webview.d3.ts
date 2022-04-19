@@ -11,8 +11,8 @@
 export function getWebviewContentD3(connections: {source:string, target:string, solid:boolean}[]) {
     let text = connections.map(c => {
         const type = c.solid ? 'resolved' : 'suit';
-        return `{source: '${c.source}', target: '${c.target}', type: '${type}'}`})
-        .join(',')
+        return `{source: '${c.source}', target: '${c.target}', type: '${type}'}`;
+    }).join(',')
     ;
     text = `[ ${text} ]`;
     console.log('text=', text);

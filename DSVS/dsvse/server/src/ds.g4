@@ -57,34 +57,78 @@ simpleMacroHeader: 'macro';
 namedMacroHeader: 'macro' EQ segment1;
 
 // A23 = { M.U ~ S.S3U }
-call: segment1 EQ LBRACE segment2s_ TILDE segment2s_ RBRACE;
+call: segment1 EQ LBRACE segments TILDE segments RBRACE;
 // M.U, M.D
-segment2s_: segment2 (COMMA segment2)*;
-
-// B.F1 > Set1F <| T.A21;
-causal
-    : expression causalOperator expression SEIMCOLON
-    // | expression causalOperator expression SEIMCOLON
-    ;
-//causal: expression causalOperator causal SEIMCOLON;
-
-causalOperator: '<' | '>' | '<|' | '|>' | '<|>';
-logicalBinaryOperator: '&' | '|';
-
+segments: segment (COMMA segment)*;
 segment1: IDENTIFIER;
 segment2: segment1 DOT segment1;
 segment: (segment1 | segment2);
 
 
+// B.F1 > Set1F <| T.A21;
+causal
+    : expression causalFwdOperator causalExpression SEIMCOLON
+    | causalExpression causalBwdOperator expression SEIMCOLON
+    | causalExpression causalOperator causalExpression SEIMCOLON
+    ;
+//causal: expression causalOperator causal SEIMCOLON;
+
+logicalBinaryOperator: '&' | '|';
+ 
+/*
+ * Causal Expression
+    A, B |> C
+    (A & B) |> C
+ */
+causalExpression
+    : segments
+    | causalExpression  causalOperator      causalExpression
+    | expression        causalFwdOperator   causalExpression
+    | causalExpression  causalBwdOperator   expression
+    ;
 /*
  * Expression
  */
 expression
     : segment
-    | expression causalOperator expression
     | expression logicalBinaryOperator expression
     | LPARENTHESIS expression RPARENTHESIS
     ;
+
+
+causalOperator
+    : causalFwdOperator
+    | causalBwdOperator
+    | causalFBOperator
+    ;
+
+causalFwdOperator
+    : CAUSAL_FWD
+    | CAUSAL_RESET_FWD
+    | CAUSAL_FWD_AND_RESET_FWD  // '>|>' | '|>>';
+    ;
+causalBwdOperator
+    : CAUSAL_BWD
+    | CAUSAL_RESET_BWD
+    | CAUSAL_BWD_AND_RESET_BWD  // '<<|' | '<|<';
+    ;
+causalFBOperator
+    : CAUSAL_RESET_FB           // <||>
+    | CAUSAL_FWD_AND_RESET_BWD  // '><|';
+    | CAUSAL_BWD_AND_RESET_FWD  // '|><';
+    ;
+
+
+
+CAUSAL_FWD: '>';
+CAUSAL_BWD: '<';
+CAUSAL_RESET_FWD: '|>';
+CAUSAL_RESET_BWD: '<|';
+CAUSAL_RESET_FB: '<||>';
+CAUSAL_FWD_AND_RESET_BWD: '><|';
+CAUSAL_FWD_AND_RESET_FWD: '>|>' | '|>>';
+CAUSAL_BWD_AND_RESET_BWD: '<<|' | '<|<';
+CAUSAL_BWD_AND_RESET_FWD: '|><';
 
 comment: BLOCK_COMMENT | LINE_COMMENT;
 BLOCK_COMMENT : '/*' (BLOCK_COMMENT|.)*? '*/' -> channel(HIDDEN) ;

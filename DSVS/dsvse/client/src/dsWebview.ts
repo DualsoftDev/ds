@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import { parseDSDocument } from './clientParser';
 import { getWebviewContentD3 } from './webview.d3';
 import { getWebviewContentCytoscape } from './webview.cytoscape';
+import { assert } from 'console';
 
 let panel: vscode.WebviewPanel | null = null;
 export function initializeWebview(context: vscode.ExtensionContext) {
@@ -36,22 +37,25 @@ export function initializeWebview(context: vscode.ExtensionContext) {
                     const c = causal;
                     switch(causal.op)
                     {
-                        case '>': return {source: c.left, target: c.right, solid: true};
-                        case '<': return {source: c.right, target: c.left, solid: true};
-                        case '|>': return {source: c.left, target: c.right, solid: true};
-                        case '<|': return {source: c.right, target: c.left, solid: true};
-
+                        case '>': return {source: c.l, target: c.r, solid: true};
+                        case '<': return {source: c.r, target: c.l, solid: true};
+                        case '|>': return {source: c.l, target: c.r, solid: false};
+                        case '<|': return {source: c.r, target: c.l, solid: false};
+                        default:
+                            assert(false);
+                            break;
                     }
                     const edge = causal.op == '>';
-                    return {source: causal.left, target: causal.right, solid: edge};
+                    return {source: causal.l, target: causal.r, solid: edge};
                 })
                 //.join(',')
             ;
         console.log('finished parseDSDocument on client side.' + connections);
 
         // And set its HTML content
-        // panel.webview.html = getWebviewContentD3(connections);
-        panel.webview.html = getWebviewContentCytoscape(connections);
+        // const html = getWebviewContentD3(connections);
+        const html = getWebviewContentCytoscape(connections);
+        panel.webview.html = html;
 
     }
 

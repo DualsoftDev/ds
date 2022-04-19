@@ -18,12 +18,14 @@ export function getWebviewContentCytoscape(connections: {source:string, target:s
         ;
         yield nodes.map(n => `{ data: {id: '${n}', label: '${n}'}}`);
 
-        yield connections.map(c =>
-`{ data: {
-    id: '${c.source}${c.target}',
-    source: '${c.source}',
-    target: '${c.target}'}}
-`);
+        yield connections.map(c => {
+            const dashStyle = c.solid ? 'solid' : 'dashed';
+            return `{ data: {
+                id: '${c.source}${c.target}${c.solid}',
+                source: '${c.source}',
+                target: '${c.target}',
+                'line-style': '${dashStyle}' }}
+            `;});
     }
 
     const els = Array.from(generateElements()).join(",");
@@ -53,39 +55,46 @@ export function getWebviewContentCytoscape(connections: {source:string, target:s
     <div id="cy"></div>
     <script>
         var cy = cytoscape({
-        wheelSensitivity: 0.1,
-        container: document.getElementById('cy'),
-        elements: ${elements},
-        style: [
-            {
-                selector: 'node',
-                style: {
-                    'shape': 'round-rectangle',
-                    'color':"white",        // text color
-            
-                    "border-width": 2,
-                    "border-color": "white",
-                    "border-style": "solid",   //"dotted",
-                    
-                    
-                    // 'background-color': 'data(background_color)',
-                    'text-outline-color': 'data(background_color)',
-            
-                    // 'text-outline-color': 'orange'
-                    'text-outline-width': 2,
-                    'label': 'data(id)',
-                    'font-size' : '25px',
-                    'background-color': 'green'
+            wheelSensitivity: 0.1,
+            container: document.getElementById('cy'),
+            elements: ${elements},
+            style: [
+                {
+                    selector: 'node',
+                    style: {
+                        'shape': 'round-rectangle',
+                        'color':"white",        // text color
+                
+                        "border-width": 2,
+                        "border-color": "white",
+                        "border-style": "solid",   //"dotted",
+                        
+                        
+                        // 'background-color': 'data(background_color)',
+                        'text-outline-color': 'data(background_color)',
+                
+                        // 'text-outline-color': 'orange'
+                        'text-outline-width': 2,
+                        'label': 'data(id)',
+                        'font-size' : '25px',
+                        'background-color': 'green'
+                    }
+                },
+                {
+                    selector: 'edge',
+                    style: {
+                        'curve-style': 'bezier',
+                        'target-arrow-shape': 'triangle'
+                    }
                 }
-            },
-            {
-                selector: 'edge',
-                style: {
-                    'curve-style': 'bezier',
-                    'target-arrow-shape': 'triangle'
-                }
-            }
-        ]});
+            ]
+        });
+
+        cy.edges()
+            .filter((e, i) => e.isEdge() && e.data('line-style') == 'dashed')
+            .style('line-style', 'dashed')
+            .update()
+            ;
 
     </script>
 </body>

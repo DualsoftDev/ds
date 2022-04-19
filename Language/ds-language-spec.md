@@ -27,7 +27,7 @@
 
 ```ex)
 
-[Sys]sys1 = {R1 > R2;
+[sys]S = {R1 > R2;
    R1 =  {A > B};
    R2 =  {C > D};
           A = {O1 ~ I1};

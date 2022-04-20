@@ -23,7 +23,14 @@ choco:
 
 
 g4:
+	pushd dsvse/ds.syntax/syntaxes
+	cp ds.JSON-tmLanguage ds.tmLanguage.json
+	popd
+
 	cd dsvse/server
 	yarn antlr4ts -visitor -o src src/ds.g4
 	cp src/ds*.ts ../client/src/server-bundle/
 
+esbuild:
+	cd dsvse
+	npm run esbuild

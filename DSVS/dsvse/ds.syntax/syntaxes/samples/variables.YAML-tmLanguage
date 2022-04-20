@@ -9,5 +9,5 @@ variables:
 
 #   standardFunctions: 'LIST_COUNT|LIST_MIN|LIST_MAX|LIST_ALL|LIST_INVERT|LIST_RANDOM|CHOICE_COUNT|TURNS_SINCE|LIST_RANGE|TURNS|POW|FLOOR|CEILING|INT|FLOAT'
   whitespace: '[^\S\n\r]'
-  accSRE: 'accSRE|accSR|accRE|accSE|accS|accR|accE'
+  accsre: 'accsre|accsr|accre|accse|accs|accr|acce'
 #   segmentName: '[:alpha]([:alnum])*(.[:alnum]+){1}'

@@ -22,10 +22,10 @@ import dsFunctions;
 program: (system|comment)* EOF;
 
 
-system: sysHdr segment1 '=' sysBlock;    // [Sys] Seg = {..}
+system: sysHdr segment1 '=' sysBlock;    // [sys] Seg = {..}
 
 
-sysHdr: LBRACKET sys_ RBRACKET;  // [Sys]
+sysHdr: LBRACKET sys_ RBRACKET;  // [sys]
 sysBlock
     : simpleSysBlock        //#caseSimpleSysBlock
     | complexSysBlock       //#caseComplexSysBlock
@@ -33,7 +33,7 @@ sysBlock
 simpleSysBlock:  LBRACE segment1 (';' segment1)* RBRACE;
 complexSysBlock: LBRACE (acc|macro|causal)* RBRACE;
 
-acc: LBRACKET accSRE RBRACKET EQ LBRACE segment1 (SEIMCOLON segment1)* RBRACE;    // [accSRE] = { A; B }
+acc: LBRACKET accsre RBRACKET EQ LBRACE segment1 (SEIMCOLON segment1)* RBRACE;    // [accsre] = { A; B }
 
 
 /*
@@ -119,10 +119,10 @@ CAUSAL_BWD_AND_RESET_BWD: '<<|' | '<|<';
 CAUSAL_BWD_AND_RESET_FWD: '|><';
 
 
-sys_: 'Sys';
+sys_: 'sys';
 
 
-accSRE: ('accSRE'|'accSR'|'accRE'|'accSE'|'accS'|'accR'|'accE');
+accsre: ('accsre'|'accsr'|'accre'|'accse'|'accs'|'accr'|'acce');
 
 
 // TOKEN

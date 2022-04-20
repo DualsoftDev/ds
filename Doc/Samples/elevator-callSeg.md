@@ -5,8 +5,8 @@
 [sys]B = { /* */ F1; F2; F3; F4 }   // Button.층 호출버튼
 [sys]S = {S1D; S2D; S2U; S3D; S3U; S4U}    // Sensor Up, Down
 [sys]My = {
-    [accE] = {B; S}
-    [accS] = {M}
+    [acce] = {B; S}
+    [accs] = {M}
     [macro=T] = {  //층간 이송 행위 Task
         A12 = { M.U ~ S.S2U }
         A23 = { M.U ~ S.S3U }

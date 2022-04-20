@@ -8,27 +8,27 @@
 
 // bbb
 
-[Sys] M = {    // hello
+[sys] M = {    // hello
     U; D
 }  // Motor up / down
 
-[Sys]B = { /* */ F1; F2; F3; F4 }   // Button.층 호출버튼
+[sys]B = { /* */ F1; F2; F3; F4 }   // Button.층 호출버튼
 
-[Sys]B = {F1; F2; F3; F4}
+[sys]B = {F1; F2; F3; F4}
 
-[Sys]B = {F1; F2; F3; F4}    // Button.층 호출버튼
-[Sys]S = {S1D; S2D; S2U; S3D; S3U; S4U}    // Sensor Up, Down
-[Sys]My = {
-    [accSRE] = {B;    S}
-    [accE] = {B; S}
-    [accS] = {M}
+[sys]B = {F1; F2; F3; F4}    // Button.층 호출버튼
+[sys]S = {S1D; S2D; S2U; S3D; S3U; S4U}    // Sensor Up, Down
+[sys]My = {
+    [accsre] = {B;    S}
+    [acce] = {B; S}
+    [accs] = {M}
     // - TODO: todo some thing "abcd"
     /*
      COMMENT
      - TODO: aaaa
      */
-    [accS] = {a; /* */ B}
-    [accS] = {a; /* */ B}
+    [accs] = {a; /* */ B}
+    [accs] = {a; /* */ B}
 
 
     [macro=T] = {  //층간 이송 행위 Task

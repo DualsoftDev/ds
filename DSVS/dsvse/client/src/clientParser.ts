@@ -7,7 +7,7 @@ import { ParseTree, ParseTreeListener, TerminalNode, ErrorNode } from 'antlr4ts/
 import { assert } from 'console';
 import { link } from 'fs';
 import { dsLexer } from './server-bundle/dsLexer';
-import { dsParser, MacroContext, CausalContext, CausalExpressionContext, ExpressionContext, ProgramContext, SystemContext } from './server-bundle/dsParser';
+import { dsParser, MacroContext, CausalContext, CausalExpressionContext, ExpressionContext, ProcContext, ProgramContext, SystemContext, ProcSleepMsContext } from './server-bundle/dsParser';
 // import { dsVisitor } from './dsVisitor';
 // import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
 //import { SimpleSysBlockContext, ComplexSysBlockContext } from './dsParser';
@@ -46,7 +46,7 @@ interface Link {
 }
 
 function isTerminalNode(ctx:ParseTree) {
-	if (ctx instanceof TerminalNode || ctx instanceof ExpressionContext)
+	if (ctx instanceof TerminalNode || ctx instanceof ExpressionContext || ctx instanceof ProcContext)
 		return true;
 	if (ctx instanceof ParserRuleContext && ctx.childCount == 1)
 		return isTerminalNode(ctx.getChild(0));
@@ -67,6 +67,8 @@ function getTerminalTokens(exp: ParseTree): Token[]
 			.map(c => c.text)
 			;
 	}
+	else if (exp instanceof CausalExpressionContext && exp.childCount == 1 && exp.children[0] instanceof ProcContext)
+		return getSegmentTokens(exp.children[0].children[0]);
 
 	return getSegmentTokens(exp);
 }
@@ -79,6 +81,8 @@ function getSegmentTokens(exp: ParseTree)
 			.filter(c => ! (c instanceof TerminalNode))
 			.map(c => c.text)
 			;
+	else if (exp instanceof ProcSleepMsContext)
+		return [exp.text];
 	return null;
 }
 

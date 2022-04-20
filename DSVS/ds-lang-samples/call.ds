@@ -1,10 +1,10 @@
-[Sys]My = {
+[sys]My = {
     // A > B > C > D > E;
     // P |> Q;
     // Q |> R;
     // X <||> Y;
 
-    !A > C;
+    (!A) > C;
     // (@xor(A, B) & D|E) > C;
     // @set(AB) > X;
 

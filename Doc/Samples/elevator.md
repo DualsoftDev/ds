@@ -5,8 +5,8 @@ L = {1; 2; 3; 4}    // Lamp.  층 호출램프
 S = {1D; 1U; 2D; 2U; 3D; 3U; 4D; 4U}    // Sensor
 // Physics.  U15 = 1층에서 1.5층으로 상승.  U20 = 1.5층에서 2층으로 상승, ..
 P = {U15; U20; U25; U30; U35; U40; D35; D30; D25; D20; D15; D10}
-    [accE] = {M}
-    [accSRE] = {S}
+    [acce] = {M}
+    [accsre] = {S}
     [arrG] = {
         M.U > U15 < S.1D
               U15 !> S.1D
@@ -39,8 +39,8 @@ P = {U15; U20; U25; U30; U35; U40; D35; D30; D25; D20; D15; D10}
 // 1 : 1층 감지단.  1 = S.1D & S.1U
 // T1 : 목적층이 1층인지 여부
 Elevator = {12; 23; 34; 43; 32; 21; 1; 2; 3; 4; T1; T2; T3; T4}
-    [accE] = {S; B}
-    [accS] = {M; L}   // accSR ?
+    [acce] = {S; B}
+    [accs] = {M; L}   // accsr ?
     [arrG] = {
         // 층감지단
         S.1D, S.1U > 1

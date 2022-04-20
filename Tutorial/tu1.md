@@ -17,8 +17,8 @@
 [sys]B = {1; 2; 3; 4}    // Button.층 호출버튼
 [sys]S = {1D; 2D; 2U; 3D; 3U; 4U}    // Sensor Up, Down
 [sys]My =
-    [accE] = {B; S}
-    [accS] = {M}
+    [acce] = {B; S}
+    [accs] = {M}
     [macro=T] = {  //층간 이송 행위 Task
         12 = { M.U ~ S.2U }
         23 = { M.U ~ S.3U }

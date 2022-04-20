@@ -15,8 +15,8 @@
 
 ```ex
 [sys]My = {
-    [accE] = {B; S}
-    [accS] = {M}
+    [acce] = {B; S}
+    [accs] = {M}
     [macro] = {
         12 = { M.U ~ S.2U }   // 정의된 이름이 System 내에서 중복되지 않아야 한다.
         23 = { M.U ~ S.3U }
@@ -37,8 +37,8 @@
 or 
 ```
 [sys]My = {
-    [accE] = {B; S}
-    [accS] = {M}
+    [acce] = {B; S}
+    [accs] = {M}
     [macro=K] = {             // 정의된 macro 명 K 가 system 내에서 중복되지 않아야 한다.
         12 = { M.U ~ S.2U }
         23 = { M.U ~ S.3U }

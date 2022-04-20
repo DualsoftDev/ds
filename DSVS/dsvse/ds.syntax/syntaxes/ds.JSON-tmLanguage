@@ -50,7 +50,7 @@
         {
           "comment": "multi-line",
           "name": "system.multi.ds",
-          "begin": "\\[\\s*(Sys)\\s*\\]\\s*([a-zA-Z_][a-zA-Z_0-9]*)\\s*=\\s*(\\{)(?=[^\\}]*$)",
+          "begin": "\\[\\s*(sys)\\s*\\]\\s*([a-zA-Z_][a-zA-Z_0-9]*)\\s*=\\s*(\\{)(?=[^\\}]*$)",
           "beginCaptures": {
             "1": {
               "name": "keyword.other.ds"
@@ -83,7 +83,7 @@
         {
           "comment": "single-line",
           "name": "system.single.ds",
-          "begin": "\\[\\s*(Sys)\\s*\\]\\s*([a-zA-Z_][a-zA-Z_0-9]*)\\s*=\\s*\\{",
+          "begin": "\\[\\s*(sys)\\s*\\]\\s*([a-zA-Z_][a-zA-Z_0-9]*)\\s*=\\s*\\{",
           "beginCaptures": {
             "1": {
               "name": "keyword.other.ds"
@@ -113,7 +113,7 @@
       "patterns": [
         {
           "name": "access.ds",
-          "begin": "\\[\\s*(accSRE|accSR|accRE|accSE|accS|accR|accE)\\s*\\]\\s*=\\s*(\\{)",
+          "begin": "\\[\\s*(accsre|accsr|accre|accse|accs|accr|acce)\\s*\\]\\s*=\\s*(\\{)",
           "beginCaptures": {
             "1": {
               "name": "keyword.other.accessSRE.ds"

@@ -85,7 +85,7 @@
   - Properties
     - [bracket 내부에 속성 명 정의] = {속성 세부 사항}
     - 현재 정의된 속성명
-      - accxyz : XYZ 는 S/R/E 의 조합.  e.g accS, accSRE, accRE, ... 등 총 7가지
+      - accxyz : XYZ 는 S/R/E 의 조합.  e.g accs, accsre, accRE, ... 등 총 7가지
       - arrg : Going 인과 : 행위 Start Edge / 행위 Reset Edge 혼용  [arrG] 생략가능
       - arrh : Homing 인과(안전복귀인과)  : 행위 Start Edge 전용
     - 추가 확장 필요한 속성명

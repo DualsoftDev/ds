@@ -33,10 +33,14 @@ func
 
 proc
     : procAssign
+    | procSleepMs
+    | procSleepS
     ;
 procAssign: AT LPARENTHESIS segment EQ value RPARENTHESIS;    // @(C = #sin(#num(B)))
 procSleepMs: AT MS LPARENTHESIS (INTEGER|value) RPARENTHESIS;    // @ms(500)
-procSleepS: AT S LPARENTHESIS (INTEGER|value) RPARENTHESIS;    // @ms(500)
+procSleepS: AT S LPARENTHESIS (INTEGER|value) RPARENTHESIS;    // @s(2)
+
+
 MS: 'ms';
 S: 's';
 INTEGER: [1-9][0-9]*;

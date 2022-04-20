@@ -1,10 +1,10 @@
 /* */
-[Sys] M = {    // hello
+[sys] M = {    // hello
     U; D
 }  // Motor up / down
 
-[Sys]B = { /* */ F1; F2; F3; F4 }
+[sys]B = { /* */ F1; F2; F3; F4 }
 
-[Sys]B = {F1; F2; F3; F4}
+[sys]B = {F1; F2; F3; F4}
 
-[Sys]B = {F1; F2; F3; F4}    // Button.층 호출버튼
+[sys]B = {F1; F2; F3; F4}    // Button.층 호출버튼

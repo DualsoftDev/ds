@@ -49,7 +49,7 @@
 |:---:|:----|:-------:|:---:|:----|:---|
 |OP1|End  Value | ( ) | `(Seg), A > B`  | B be caused by action A when the Seg End Port (sensor) value is 'True'. <p>` 행위 B는 Seg의 End Port(sensor) 값이 'True' 일 경우에서 행위 A가 수헹되었을때 수행`    |![AAA](./png/Op1.dio.png)|
 |OP2|End Set Value | #set| `#set (Seg) > B` | B be caused by Seg End Port latch value(auto reset by #g(B)) <p>` 행위 B는 Seg의 End Port(sensor) 값이 'True' 면 값 유지(B행위 Going 시에 자동 값 리셋)`      |![AAA](./png/Op2.dio.png)|
-|OP3|End  Value | #latch( , )| `#latch((SegA), #g (SegB)) > B` | B be caused by Seg End Port latch value(auto reset by #g(B)) <p>` 행위 B는 Seg의 End Port(sensor) 값이 'True' 면 값 유지(설정 값에 의한 리셋)`  |![AAA](./png/Op3.dio.png)|
+|OP3|End Latch Unlatch | #latch( , )| `#latch((SegA), #g (SegB)) > B` | B be caused by Seg End Port latch value(auto reset by #g(B)) <p>` 행위 B는 Seg의 End Port(sensor) 값이 'True' 면 값 유지(설정 값에 의한 리셋)`  |![AAA](./png/Op3.dio.png)|
 |OP4|Going Status|#g |`#g(Seg) > B`| B be caused by Seg Going Value<p>` 행위 B는 Seg가 Going 경우 인해 수행`      |![AAA](./png/Op4.dio.png)|
 |OP5|Homing Status|#h |`#h(Seg) > B` | B be caused by Seg Homing Value <p>` 행위 B는 Seg가 Homing 경우 인해 수행`     |![AAA](./png/Op5.dio.png)|
 

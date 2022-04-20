@@ -67,9 +67,9 @@ segment: (segment1 | segment2);
 
 // B.F1 > Set1F <| T.A21;
 causal
-    : expression causalFwdOperator causalExpression SEIMCOLON
+    : causalExpression causalOperator causalExpression SEIMCOLON
     | causalExpression causalBwdOperator expression SEIMCOLON
-    | causalExpression causalOperator causalExpression SEIMCOLON
+    | expression causalFwdOperator causalExpression SEIMCOLON
     ;
 //causal: expression causalOperator causal SEIMCOLON;
 

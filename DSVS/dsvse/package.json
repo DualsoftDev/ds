@@ -1,9 +1,11 @@
 {
-	"name": "ds-language-server-protocol",
-	"description": "DS language server protocol",
+	"name": "ds",
+	"displayName": "DS - Digital Twin Segment Language",
 	"author": "dualsoft",
 	"license": "MIT",
-	"version": "1.0.0",
+	"description": "Syntaxes for DS language. DS mean Digital Twin Segment Language",
+	"icon": "logo.png",
+	"version": "1.0.1",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/Microsoft/vscode-extension-samples"
@@ -123,6 +125,7 @@
 		"eslint": "^8.11.0",
 		"glob": "^7.2.0",
 		"makefile": "^0.0.2",
-		"mocha": "^9.2.2"
+		"mocha": "^9.2.2",
+		"yarn": "^1.22.18"
 	}
 }

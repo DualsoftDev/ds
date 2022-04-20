@@ -42,7 +42,7 @@ export function initializeWebview(context: vscode.ExtensionContext) {
                         case '|>': return {source: c.l, target: c.r, solid: false};
                         case '<|': return {source: c.r, target: c.l, solid: false};
                         default:
-                            assert(false);
+                            assert(false, `invalid operator: ${causal.op}`);
                             break;
                     }
                     const edge = causal.op == '>';

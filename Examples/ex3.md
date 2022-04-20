@@ -12,7 +12,6 @@
 
 ```
  [sys]door  = { Open <||> Close;
-               (Detect) > Open, @s(10)  > Close;
-               @s(10) <| Close
+               (Detect) > @sf (Open) > @s(10)  > Close;
   }
 ```

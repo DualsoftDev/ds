@@ -68,6 +68,7 @@ logicalBinaryOperator: '&' | '|';
  */
 causalExpression
     : segments
+    | proc
     | causalExpression  causalOperator      causalExpression
     | expression        causalFwdOperator   causalExpression
     | causalExpression  causalBwdOperator   expression

@@ -35,6 +35,7 @@ COMMA: ',';
 AND: '&';
 OR: '|';
 AT: '@';
+POUND: '#';
 //NEWLINE: '\r'? '\n';
 WS: [ \t\r\n]+ -> skip;
 

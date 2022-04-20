@@ -2,7 +2,7 @@
  * DS language parsing/traversing 을 위한 코드
  */
 
-import { ANTLRInputStream, RecognitionException, Recognizer, CharStream, Parser, CommonTokenStream } from 'antlr4ts';
+import { ANTLRInputStream, RecognitionException, Recognizer, CharStream, Parser, ParserRuleContext, CommonTokenStream } from 'antlr4ts';
 import { ParseTree, ParseTreeListener, TerminalNode, ErrorNode } from 'antlr4ts/tree';
 import { assert } from 'console';
 import { link } from 'fs';
@@ -45,10 +45,20 @@ interface Link {
 	op: string
 }
 
-type Token = string;
+function isTerminalNode(ctx:ParseTree) {
+	if (ctx instanceof TerminalNode || ctx instanceof ExpressionContext)
+		return true;
+	if (ctx instanceof ParserRuleContext && ctx.childCount == 1)
+		return isTerminalNode(ctx.getChild(0));
 
+	return false;
+}
+
+
+type Token = string;
 function getTerminalTokens(exp: ParseTree): Token[]
 {
+	assert(isTerminalNode(exp), 'Expected terminal node');
 	if (exp instanceof ExpressionContext)
 	{
 		const lexp = exp as ExpressionContext;
@@ -57,30 +67,45 @@ function getTerminalTokens(exp: ParseTree): Token[]
 			.map(c => c.text)
 			;
 	}
-	else if (exp instanceof CausalExpressionContext)
-	{
-		const cexp = exp as CausalExpressionContext;
-		assert(cexp.causalOperator() == null);
-		return cexp.segments().children
+
+	return getSegmentTokens(exp);
+}
+
+function getSegmentTokens(exp: ParseTree)
+{
+	if (exp instanceof CausalExpressionContext && exp.segments() != null)
+		return exp.segments()
+			.children
 			.filter(c => ! (c instanceof TerminalNode))
 			.map(c => c.text)
 			;
-	}
+	return null;
 }
+
+
+function _getDeepTokens(exp: ParseTree, leftmost:boolean)
+{
+	if (exp instanceof CausalExpressionContext || exp instanceof CausalContext)
+	{
+		const segments = getSegmentTokens(exp);
+		if (segments)
+			return segments;
+	
+		const [l, op_, r] = [exp.children[0], exp.children[1], exp.children[2]];
+		return _getDeepTokens(leftmost ? l : r, leftmost);
+	}
+	else if (exp instanceof ExpressionContext)
+		return [exp.text];
+	else
+		return null;
+}
+
+const getLeftmostTokens = (exp) => _getDeepTokens(exp, true);
+const getRightmostTokens = (exp) => _getDeepTokens(exp, false);
+
 
 function parseExpressionContext(exp: ParseTree, links:Link[]) : Token[]
 {
-	function getLeftOpRight(exp:CausalContext | CausalExpressionContext | ExpressionContext)
-	{
-		return [exp.children[0], exp.children[1], exp.children[2]];
-		// const lexp = exp as ExpressionContext;
-		// const cexp = exp as CausalExpressionContext;
-		// const causal = exp as CausalContext;
-		// if (causal)
-		// 	return causal.children[0], causal.causalOperator().text, causal.children[2];	
-	}
-
-
 	function addLinks(ls:string[], op:string, rs:string[], links:Link[]) : void
 	{
 		ls.forEach(l => {
@@ -89,51 +114,63 @@ function parseExpressionContext(exp: ParseTree, links:Link[]) : Token[]
 			});
 		});
 	}
-	
+
 
 	if (exp instanceof CausalExpressionContext || exp instanceof CausalContext)
 	{
-		const cexp = exp as CausalExpressionContext;
-		if (exp instanceof CausalExpressionContext && cexp.segments() != null)
-			return cexp.segments()
-				.children
-				.filter(c => ! (c instanceof TerminalNode))
-				.map(c => c.text)
-				;
+		const segments = getSegmentTokens(exp);
+		if (segments)
+			return segments;
 		else
 		{
-			const [l, op_, r] = getLeftOpRight(exp);
-			// const children = cexp.children;
-			// const l = children[0];
-			// const op = children[1].text;
-			// const r = children[2];
-			/// 왼쪽 트리의 마지막 token 들
-			const lTokens = parseExpressionContext(l, links);
-			const rTokens = getTerminalTokens(r);
+			const [l, op_, r] = [exp.children[0], exp.children[1], exp.children[2]];
+			const x = isTerminalNode(l);
+			const y = isTerminalNode(r);
+			let lTokens:string[] = null;
+			let rTokens:string[] = null;
+
+			if (isTerminalNode(l))
+			{
+				/// 왼쪽 트리의 마지막 token 들
+				lTokens = getTerminalTokens(l);
+				parseExpressionContext(r, links);
+				rTokens = getLeftmostTokens(r);
+			}
+			else
+			{
+				/// 왼쪽 트리의 마지막 token 들
+				lTokens = getRightmostTokens(l);
+				parseExpressionContext(l, links);
+				rTokens = getTerminalTokens(r);
+			}
 			const op = op_.text;
 			switch(op) {
 				case '>':
+				case '<':
 				case '|>':
+				case '<|':
 					addLinks(lTokens, op, rTokens, links);
 					break;
+
 				case '>|>':
 				case '|>>':
 					addLinks(lTokens, '>', rTokens, links);
 					addLinks(lTokens, '|>', rTokens, links);
 					break;
 
-				case '<':
-				case '<|':
-					addLinks(rTokens, op, lTokens, links);
+
+				case '<|<':
+				case '<<|':
+					addLinks(lTokens, '<', rTokens, links);
+					addLinks(lTokens, '<|', rTokens, links);
 					break;
+
 
 				case '<||>':
 					addLinks(lTokens, '|>', rTokens, links);
-					addLinks(rTokens, '<|', lTokens, links);
+					addLinks(lTokens, '<|', rTokens, links);
 					break;
 			}
-
-			return rTokens;
 		}
 	}
 	else if (exp instanceof ExpressionContext)

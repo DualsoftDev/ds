@@ -17,15 +17,7 @@
 
 grammar ds;
 
-IDENTIFIER: VALID_ID_START VALID_ID_CHAR*;
-fragment VALID_ID_START
-   : ('a' .. 'z') | ('A' .. 'Z') | '_'
-   ;
-
-
-fragment VALID_ID_CHAR
-   : VALID_ID_START | ('0' .. '9')
-   ;
+import dsFunctions;
 
 program: (system|comment)* EOF;
 
@@ -58,12 +50,6 @@ namedMacroHeader: 'macro' EQ segment1;
 
 // A23 = { M.U ~ S.S3U }
 call: segment1 EQ LBRACE segments TILDE segments RBRACE;
-// M.U, M.D
-segments: segment (COMMA segment)*;
-segment1: IDENTIFIER;
-segment2: segment1 DOT segment1;
-segment: (segment1 | segment2);
-
 
 // B.F1 > Set1F <| T.A21;
 causal
@@ -91,6 +77,7 @@ causalExpression
  */
 expression
     : segment
+    | func
     | expression logicalBinaryOperator expression
     | LPARENTHESIS expression RPARENTHESIS
     ;
@@ -130,39 +117,12 @@ CAUSAL_FWD_AND_RESET_FWD: '>|>' | '|>>';
 CAUSAL_BWD_AND_RESET_BWD: '<<|' | '<|<';
 CAUSAL_BWD_AND_RESET_FWD: '|><';
 
-comment: BLOCK_COMMENT | LINE_COMMENT;
-BLOCK_COMMENT : '/*' (BLOCK_COMMENT|.)*? '*/' -> channel(HIDDEN) ;
-LINE_COMMENT  : '//' .*? ('\n'|EOF) -> channel(HIDDEN) ;
-
-
-// COMMENT
-//     : '/*' .*? '*/' -> skip
-// ;
-
-// LINE_COMMENT
-//     : '//' ~[\r\n]* -> skip
-// ;
 
 sys_: 'Sys';
 
-LBRACKET: '[';
-RBRACKET: ']';
-LBRACE: '{';
-RBRACE: '}';
-LPARENTHESIS: '(';
-RPARENTHESIS: ')';
-EQ: '=';
-SEIMCOLON: ';';
-DOT: '.';
-TILDE: '~';
-COMMA: ',';
-AND: '&';
-OR: '|';
-//NEWLINE: '\r'? '\n';
 
 accSRE: ('accSRE'|'accSR'|'accRE'|'accSE'|'accS'|'accR'|'accE');
 
-WS: [ \t\r\n]+ -> skip;
 
 // TOKEN
 //    : ('0' .. '9' | 'a' .. 'z' | 'A' .. 'Z' | '-' | ' ' | '/' | '_' | ':' | ',')+

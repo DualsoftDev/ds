@@ -83,7 +83,7 @@ repository:
   macros:
     patterns:
     - name: macro2.ds
-      begin: \[\s*(macro)\s*(=\s*([a-zA-Z_][a-zA-Z_0-9]*))?\s*\]\s*=\s*(\{)
+      begin: \[\s*(macro)\s*(=\s*([가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*))?\s*\]\s*=\s*(\{)
       beginCaptures:
         '1': {name: keyword.other.macro2.ds}      
         '3': {name: keyword.control.macro.var.ds}      
@@ -95,7 +95,7 @@ repository:
   callSegmentDefs:
     patterns:
     - name: call.segment.ds
-      begin: ([a-zA-Z_][a-zA-Z_0-9]*)\s*=\s*(\{)
+      begin: ([가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*)\s*=\s*(\{)
       beginCaptures:
         '1': {name: keyword.control.callSegment.ds}
       end: (\})
@@ -110,16 +110,20 @@ repository:
 
   causals:
     patterns:
+      - name: punctuation.comma.ds
+        match: ','
       - include: '#segment'
+      - name: invalid.illegal.expected-array-separator.json
+        match: '(<\|>)'   
       - name: keyword.other.causal.ds
-        match: '(<\|>)|(<\|)|(\|>)|<|>'
+        match: '(<\|\|>)|(<\|)|(\|>)|<|>' 
 
   segment:
     patterns:
     - name: 'variable.other.segment.withdot.ds'
-      match: '\b[a-zA-Z_][a-zA-Z_0-9]*\.[a-zA-Z_][a-zA-Z_0-9]*\b'
+      match: '\b[가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*\.[가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*\b'
     - name: 'variable.other.segment.ds'
-      match: '\b[a-zA-Z_][a-zA-Z_0-9]*\b'
+      match: '\b[가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*\b'
     - include: '#comments'
     - name: invalid.illegal.expected-array-separator.json
       match: '[^\s\{\};=<>\|&~\(\)]'

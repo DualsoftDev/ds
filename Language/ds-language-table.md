@@ -17,7 +17,7 @@
 |:---:|:----|:--:|:----|:---|:---|
 |SEQ6|Call | `~` |`C = {A ~ B}`<p> `C = {_ ~ B}` <p> empty key is `_` | Upper - Action C calls the action A to execute the DA셋(A ~ B), and indicates the state of action B<p>Lower - Action C just indicates the state of action B without executing<p>`C행위는 A를 실행시키며, B의 상태를 나타냄`<p>`C행위는 B의 상태만을 나타냄`| ![AAA](./png/Seq6.dio.png)|
 |SEQ7|And Call|`,`| `F = {A,B,C ~ D,E}`|Action F calls the action A, B and C to execute the DAG(A,B,C ~ D,E), and indicates the state of action D and E<p>`F행위는 A, B, C를 실행시키며, D, E의 상태를 나타냄`| ![AAA](./png/Seq7.dio.png)
-|SEQ8|Reset Call|`~ ~`| `H = {A,B,C ~ D,E ~ F,G}`|Action H calls the action A, B and C to execute the DAG(A,B,C ~ D,E), or calls the action F, G to reset the state of action D and E<p>And indicates the state of action D and E<p>`F행위는 진행을 위해 A, B, C를 실행시키거나 리셋을 위해 F, G를 실행시킬 수 있고, 이에 따라 변화되는 D, E의 상태를 나타낸다`| ![AAA](./png/Seq8.dio.png)|
+|SEQ8|Reset Call|`~ ~`| `H = {A,B,C ~ D,E ~ F,G}`|Action H calls the action A, B and C to execute the DAG(A,B,C ~ D,E), or calls the action F, G to reset the state of action D and E<p>And indicates the state of action D and E<p>`F행위는 진행을 위해 A, B, C를 실행시키거나 리셋을 위해 F, G를 실행시킬 수 있고, 이에 따라 변화되는 D, E의 상태를 나타냄`| ![AAA](./png/Seq8.dio.png)|
 
 </BR>
 
@@ -25,8 +25,8 @@
 
 |Id| Item | Unit | Example | Desc |   GUI | 
 |:---:|:----|:--:|:----|:---|:---|
-|SEQ9|system Parent | `[sys]=` |  [sys]D = { A > B <\| C } | system D processes that causality concurrently <p>` 시스템 D는 해당 인과를 동시적으로 처리`  | ![AAA](./png/Seq9.dio.png)|
-|SEQ10|Segement Parent| `=` |  D = { A > B <\| C } | Action D processes its causal relationship sequentially <p>` 행위 D는 해당 인과를 순차적으로 처리` | ![AAA](./png/Seq10.dio.png)|
+|SEQ9|system Parent | `[sys]=` |  [sys]D = { A > B <\| C } | System D parallelly processes the actions included in the causality DAG<p>`시스템 D는 인과 그래프(DAG)에 포함된 행위들을 '병렬'적으로 처리함`  | ![AAA](./png/Seq9.dio.png)|
+|SEQ10|Segement Parent| `=` |  D = { A > B <\| C } | Action D sequentially processes the actions included in the causality DAG<p>`행위 D는 인과 그래프(DAG)에 포함된 행위들을 '순차'적으로 처리함` | ![AAA](./png/Seq10.dio.png)|
 </BR>
 
 
@@ -34,8 +34,8 @@
 
 |Id| Item | Unit | Example | Desc |   GUI | 
 |:---:|:----|:--:|:----|:---|:---|
-|SEQ11| mutual interlock | <\|\|> |  A <\|\|> B <p>is equal to A <\| B ; A \|> B| Action A and Action B are mutually interlocked <p>` A 행위와 B 행위는 상호 인터락`  | ![AAA](./png/Seq11.dio.png)|
-|SEQ12| resetStart | \|>> |  A \|>> B <p>is equal to A > B ; A \|> B| Action B is caused by action A, B is initialized(reset) to action A <p>`B행위는 A행위으로 인해 수행 하며 B행위는 A행위으로 복귀` | ![AAA](./png/Seq12.dio.png)|
+|SEQ11| mutual interlock | <\|\|> |  A <\|\|> B <p>is equal to A <\| B ; A \|> B| Action A and Action B are linked in a mutually exclusive interlock<p>`A 행위와 B 행위는 상호 배타적인 인터락으로 연결되어 있음`  | ![AAA](./png/Seq11.dio.png)|
+|SEQ12| resetStart | \|>> |  A \|>> B <p>is equal to A > B ; A \|> B| Action B would be executed by the end of action A<p>And also B would be initialized(reset) by executing action A<p>`B행위는 A행위에 의해 실행되며, A행위의 실행중에 리셋됨` | ![AAA](./png/Seq12.dio.png)|
 
 </BR>
 
@@ -140,7 +140,7 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|FUN1|Abs | #abs  | #(65 == #abs (A))  | Calculate the absolute value of A. |![AAA](./png/Fun1.dio.png)|
+|FUN1|Abs | #abs  | #(65 == #abs (A))  | Calculate the absolute value of A. |![AAA](./png/FUN1.dio.png)|
 |FUN2|Sin| #sin|#(65 == #sin (A))| Calculate the Sin of A. ||
 |FUN3|Round | #round | #(65 == #round (A)) | Calculate the rounding of A.  || 
 

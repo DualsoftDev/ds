@@ -17,7 +17,7 @@
 |:---:|:----|:--:|:----|:---|:---|
 |SEQ6|Call | `~` |`C = {A ~ B}`<p> `C = {_ ~ B}` <p> empty key is `_` | Upper - Action C calls the action A to execute the DA셋(A ~ B), and indicates the state of action B<p>Lower - Action C just indicates the state of action B without executing<p>`C행위는 A를 실행시키며, B의 상태를 나타냄`<p>`C행위는 B의 상태만을 나타냄`| ![AAA](./png/Seq6.dio.png)|
 |SEQ7|And Call|`,`| `F = {A,B,C ~ D,E}`|Action F calls the action A, B and C to execute the DAG(A,B,C ~ D,E), and indicates the state of action D and E<p>`F행위는 A, B, C를 실행시키며, D, E의 상태를 나타냄`| ![AAA](./png/Seq7.dio.png)
-|SEQ8|Reset Call|`~ ~`| `H = {A,B,C ~ D,E ~ F,G}`|Action H calls the action A, B and C to execute the DAG(A,B,C ~ D,E), or calls the action F, G to reset the state of action D and E<p>And indicates the state of action D and E<p>`F행위는 A, B, C를 실행시키며, D, E의 상태를 나타내고, F, G를 실행시켜 D, E를 리셋함`| ![AAA](./png/Seq8.dio.png)|
+|SEQ8|Reset Call|`~ ~`| `H = {A,B,C ~ D,E ~ F,G}`|Action H calls the action A, B and C to execute the DAG(A,B,C ~ D,E), or calls the action F, G to reset the state of action D and E<p>And indicates the state of action D and E<p>`F행위는 진행을 위해 A, B, C를 실행시키거나 리셋을 위해 F, G를 실행시킬 수 있고, 이에 따라 변화되는 D, E의 상태를 나타낸다`| ![AAA](./png/Seq8.dio.png)|
 
 </BR>
 

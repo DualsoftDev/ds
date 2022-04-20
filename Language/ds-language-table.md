@@ -140,7 +140,7 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|FUN1|Abs | #abs  | #(65 == #abs (A))  | Calculate the absolute value of A. |![AAA](./png/fun1.dio.png)|
+|FUN1|Abs | #abs  | #(65 == #abs (A))  | Calculate the absolute value of A. |![AAA](./png/Fun1.dio.png)|
 |FUN2|Sin| #sin|#(65 == #sin (A))| Calculate the Sin of A. ||
 |FUN3|Round | #round | #(65 == #round (A)) | Calculate the rounding of A.  || 
 

@@ -5,7 +5,7 @@
 
 import * as path from 'path';
 import { workspace, ExtensionContext } from 'vscode';
-import {initializeWebview} from './dsWebView';
+import {initializeWebview} from './dsWebview';
 
 import {
 	LanguageClient,

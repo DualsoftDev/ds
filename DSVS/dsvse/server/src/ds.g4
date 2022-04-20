@@ -30,7 +30,7 @@ fragment VALID_ID_CHAR
 program: (system|comment)* EOF;
 
 
-system: sysHdr segment1_ '=' sysBlock;    // [Sys] Seg = {..}
+system: sysHdr segment1 '=' sysBlock;    // [Sys] Seg = {..}
 
 
 sysHdr: LBRACKET sys_ RBRACKET;  // [Sys]
@@ -38,10 +38,10 @@ sysBlock
     : simpleSysBlock        //#caseSimpleSysBlock
     | complexSysBlock       //#caseComplexSysBlock
     ;
-simpleSysBlock:  LBRACE segment1_ (';' segment1_)* RBRACE;
+simpleSysBlock:  LBRACE segment1 (';' segment1)* RBRACE;
 complexSysBlock: LBRACE (acc|macro|causal)* RBRACE;
 
-acc: LBRACKET accSRE RBRACKET EQ LBRACE segment1_ (SEIMCOLON segment1_)* RBRACE;    // [accSRE] = { A; B }
+acc: LBRACKET accSRE RBRACKET EQ LBRACE segment1 (SEIMCOLON segment1)* RBRACE;    // [accSRE] = { A; B }
 
 
 /*
@@ -54,36 +54,81 @@ macroHeader
     | namedMacroHeader
     ;
 simpleMacroHeader: 'macro';
-namedMacroHeader: 'macro' EQ segment1_;
+namedMacroHeader: 'macro' EQ segment1;
 
 // A23 = { M.U ~ S.S3U }
-call: segment1_ EQ LBRACE segment2s_ TILDE segment2s_ RBRACE;
+call: segment1 EQ LBRACE segments TILDE segments RBRACE;
 // M.U, M.D
-segment2s_: segment2_ (COMMA segment2_)*;
+segments: segment (COMMA segment)*;
+segment1: IDENTIFIER;
+segment2: segment1 DOT segment1;
+segment: (segment1 | segment2);
+
 
 // B.F1 > Set1F <| T.A21;
 causal
-    : expression causalOperator expression (causalOperator expression)* SEIMCOLON
-    // | expression causalOperator expression SEIMCOLON
+    : causalExpression causalOperator causalExpression SEIMCOLON
+    | causalExpression causalBwdOperator expression SEIMCOLON
+    | expression causalFwdOperator causalExpression SEIMCOLON
     ;
 //causal: expression causalOperator causal SEIMCOLON;
 
-causalOperator: '<' | '>' | '<|' | '|>' | '<|>';
 logicalBinaryOperator: '&' | '|';
-
-segment1_: WS* IDENTIFIER WS*;
-segment2_: segment1_ DOT segment1_;
-segmentAny_: (segment1_ | segment2_);
-
-
+ 
+/*
+ * Causal Expression
+    A, B |> C
+    (A & B) |> C
+ */
+causalExpression
+    : segments
+    | causalExpression  causalOperator      causalExpression
+    | expression        causalFwdOperator   causalExpression
+    | causalExpression  causalBwdOperator   expression
+    ;
 /*
  * Expression
  */
 expression
-    : segmentAny_
+    : segment
     | expression logicalBinaryOperator expression
     | LPARENTHESIS expression RPARENTHESIS
     ;
+
+
+causalOperator
+    : causalFwdOperator
+    | causalBwdOperator
+    | causalFBOperator
+    ;
+
+causalFwdOperator
+    : CAUSAL_FWD
+    | CAUSAL_RESET_FWD
+    | CAUSAL_FWD_AND_RESET_FWD  // '>|>' | '|>>';
+    ;
+causalBwdOperator
+    : CAUSAL_BWD
+    | CAUSAL_RESET_BWD
+    | CAUSAL_BWD_AND_RESET_BWD  // '<<|' | '<|<';
+    ;
+causalFBOperator
+    : CAUSAL_RESET_FB           // <||>
+    | CAUSAL_FWD_AND_RESET_BWD  // '><|';
+    | CAUSAL_BWD_AND_RESET_FWD  // '|><';
+    ;
+
+
+
+CAUSAL_FWD: '>';
+CAUSAL_BWD: '<';
+CAUSAL_RESET_FWD: '|>';
+CAUSAL_RESET_BWD: '<|';
+CAUSAL_RESET_FB: '<||>';
+CAUSAL_FWD_AND_RESET_BWD: '><|';
+CAUSAL_FWD_AND_RESET_FWD: '>|>' | '|>>';
+CAUSAL_BWD_AND_RESET_BWD: '<<|' | '<|<';
+CAUSAL_BWD_AND_RESET_FWD: '|><';
 
 comment: BLOCK_COMMENT | LINE_COMMENT;
 BLOCK_COMMENT : '/*' (BLOCK_COMMENT|.)*? '*/' -> channel(HIDDEN) ;

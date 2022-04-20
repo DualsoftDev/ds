@@ -1,3 +1,5 @@
+- [Load external js in external html file in Webview [vscode-extensions]](https://stackoverflow.com/questions/63140623/load-external-js-in-external-html-file-in-webview-vscode-extensions)
+
 - [vscode-webview-ui-toolkit/getting-started.md at main · microsoft/vscode-webview-ui-toolkit](https://github.com/microsoft/vscode-webview-ui-toolkit/blob/main/docs/getting-started.md)
 
 
@@ -24,3 +26,7 @@
 
 
 - ?? [Simplifying VS Code Webview Development with vscode-page](https://dev.to/foxgem/simplifying-vs-code-webview-development-with-vscode-page-13c3)
+
+
+## debugging webview
+- command palette : Open Webview Developer Tools

@@ -1,7 +1,7 @@
 {
-  "name": "dsvse",
-	"displayName": "DSVSE",
-	"description": "",
+  "name": "helloworldtypescript",
+	"displayName": "helloWorldTypeScript",
+	"description": "typescripted",
 	"version": "0.0.1",
 	"engines": {
 		"vscode": "^1.66.0"
@@ -10,35 +10,17 @@
 		"Other"
 	],
 	"activationEvents": [
-        "onCommand:dsvse.helloWorld"
+        "onCommand:helloworldtypescript.helloWorld"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "dsvse.helloWorld",
+				"command": "helloworldtypescript.helloWorld",
 				"title": "Hello World"
 			}
 		]
 	},
-	"_comment": "https://code.visualstudio.com/docs/languages/identifiers",
-	"languages": [{
-        "id": "ds",
-        "extensions": [ ".ds" ],
-        "aliases": [ "DS", "Ds", "ds" ]
-    }],	
-	"files.associations": {
-        "*.ds": "ds"
-    },	
-	"grammars": [{
-        "language": "ds",
-        "scopeName": "source.groovy",
-        "path": "./syntaxes/Groovy.tmLanguage.json"
-    }],
-    "snippets": [{
-        "language": "groovy",
-        "path": "./snippets/groovy.json"
-    }],	
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
 		"compile": "tsc -p ./",

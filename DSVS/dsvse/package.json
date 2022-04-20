@@ -30,13 +30,13 @@
 			"type": "object",
 			"title": "Example configuration",
 			"properties": {
-				"languageServerExample.maxNumberOfProblems": {
+				"dsLanguageServer.maxNumberOfProblems": {
 					"scope": "resource",
 					"type": "number",
 					"default": 100,
 					"description": "Controls the maximum number of problems produced by the server."
 				},
-				"languageServerExample.trace.server": {
+				"dsLanguageServer.trace.server": {
 					"scope": "window",
 					"type": "string",
 					"enum": [
@@ -59,23 +59,43 @@
 				"extensions": [
 					".ds"
 				],
-				"configuration": "./ds/language-configuration.json"
+				"configuration": "./ds.syntax/language-configuration.json"
 			}
 		],
 		"grammars": [
 			{
 				"language": "ds",
 				"scopeName": "source.ds",
-				"path": "./ds/syntaxes/ds.tmLanguage.json"
+				"path": "./ds.syntax/syntaxes/ds.tmLanguage.json"
 			}
 		],
 		"commands": [
 			{
 				"command": "ds.dsview",
 				"category": "DS",
-				"title": "DS view"
+				"title": "DS view",
+				"icon": {
+					"light": "./media/preview-right-light.svg",
+					"dark": "./media/preview-right-dark.svg"
+				}		  
 			}
-		]
+		],
+		"menus": {
+			"editor/context": [
+			  {
+				"command": "ds.dsview",
+				"when": "editorLangId == ds",
+				"group": "markdown-preview-enhanced"
+			  }
+			],
+			"editor/title": [
+			  {
+				"command": "ds.dsview",
+				"when": "editorLangId == ds",
+				"group": "navigation"
+			  }
+			]
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile && cd server && yarn antlr4ts -visitor -o src src/ds.g4",

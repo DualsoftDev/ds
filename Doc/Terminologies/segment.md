@@ -86,6 +86,9 @@
   - segment 내에 T type 변수 (.RESULT)를 가지는 segment
   - $f(x)$ 평가에 시간이 소요되는 경우, S,R,E 를 통해 인과 제어 가능  
 
-
+## SystemSegment
+- System 이 자동으로 만들어낸 Segemnt를 말함
+  - type1. 시스템 Root에 CallSeg가 있을경우 해당 Call을 해당 Call 전용 SystemSeg로 감싼다. 
+  - type2. 매크로 처리를 위한 더미 RealSeg를 말한다. 매크로에 따라 다름 참고 [4. Interface](/Language/ds-language-table.md)
 
 

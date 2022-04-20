@@ -1,0 +1,168 @@
+---
+# from INK
+
+name: ds
+scopeName: source.ds
+fileTypes: [ds, ds]
+foldingStartMarker: '\{\s*$'
+foldingStopMarker: '^\s*\}'
+
+# foldingStartMarker: '^\s*[{\[\`](?!.*[}\]\`],?\s*$)|[{\[\`]\s*$'
+# foldingStopMarker: '^\s*[}\]\`]'
+
+# 원본 참조
+# https://github.com/inkle/ink-tmlanguage/blob/master/grammars/Ink.YAML-tmLanguage
+
+variables:
+#   # # Identifier can't start with a number…
+#   indentifierBeginCharacter: '[a-zA-Z_\x{0100}-\x{017F}\x{0180}-\x{024F}\x{0600}-\x{06FF}\x{0530}-\x{058F}\x{0400}-\x{04FF}\x{0370}-\x{03FF}\x{0590}-\x{05FF}]'
+#   # Identifier characters can anything within these unicode blocks
+#   indentifierCharacter: '[a-zA-Z0-9_\x{0100}-\x{017F}\x{0180}-\x{024F}\x{0600}-\x{06FF}\x{0530}-\x{058F}\x{0400}-\x{04FF}\x{0370}-\x{03FF}\x{0590}-\x{05FF}]'
+
+#   anyNonIdentifierCharacter: '[^a-zA-Z_\x{0100}-\x{017F}\x{0180}-\x{024F}\x{0600}-\x{06FF}\x{0530}-\x{058F}\x{0400}-\x{04FF}\x{0370}-\x{03FF}\x{0590}-\x{05FF}]'
+#   validIdentifier: '{{indentifierCharacter}}*{{indentifierBeginCharacter}}{{indentifierCharacter}}*'
+
+#   standardFunctions: 'LIST_COUNT|LIST_MIN|LIST_MAX|LIST_ALL|LIST_INVERT|LIST_RANDOM|CHOICE_COUNT|TURNS_SINCE|LIST_RANGE|TURNS|POW|FLOOR|CEILING|INT|FLOAT'
+  whitespace: '[^\S\n\r]'
+  accSRE: 'accSRE|accSR|accRE|accSE|accS|accR|accE'
+
+#   segmentName: '[:alpha]([:alnum])*(.[:alnum]+){1}'
+
+patterns:
+- include: '#comments'
+- include: '#devices'
+- include: '#segments'
+- include: '#sample_keywords'
+- include: '#segment'
+- include: '#properties'
+- include: '#dquoted'
+
+repository:
+
+# ##############################################################################
+# Comments
+# ##############################################################################
+
+  comments: # Inline (//) and block (/* */) comments. Comments can happen anywhere.
+    patterns:
+    - name: comment.block.ds
+      begin: (/\*)
+      beginCaptures:
+        '1': { name: 'punctuation.definition.comment.ds' }
+      end: (\*/)
+      endCaptures:
+        '1': { name: 'punctuation.definition.comment.ds' }
+    - name: comment.line.ds
+      begin: (\/\/)
+      beginCaptures:
+        '1': { name: 'punctuation.definition.comment.ds' }
+      end: (?=$)
+
+  devices:
+    - name: device.definition.ds
+      begin: ((\[[^\]]*\])?\s*([a-zA-Z_][a-zA-Z_0-9]*)\s*=\s*\{([^\}]*\}))
+      end: (\})
+      # patterns:
+      #   - include: '#properties'
+      #   - name: punctuation.separator.define.ds
+      #   - match: '{{properties}}{{segment}}\s*={{segments}}\b'
+      #   - include: '#segments'
+
+
+
+#   todo:
+#     patterns: # # tag content • Cannot exist within a comment.
+#     - name: comment.line.ink entity.todo.ink
+#       begin: (?<=^|\-)(?:{{whitespace}})*(TODO)
+#       beginCaptures:
+#         '1': { name: 'constant.other entity.todo.begin.ink' }
+#       end: (?=$)
+#       patterns:
+#         - include: '#comment'
+
+
+  properties:
+    patterns:
+    - name: punctuation.definition.macro1111.ds
+      begin: (?:\[\s*)(macro)\s*=\s*([^\]]*)
+      beginCaptures:
+        '1': { name: keyword.control.macro2 }
+        '2': { name: keyword.control.macro3 }
+      end: (?:\])
+
+    - name: punctuation.definition.macro.ds
+      begin: (?:\[)
+      end: (?:\])
+      patterns:
+        - name: keyword.control.macro1.ds
+          match: '(Sys|accSRE|accSR|accRE|accSE|accS|accR|accE|macro)'
+        # - name: 'keyword.control.macro111.assignment.ds'
+        #   match: 'macro\s*={{segments}}'
+      # begin: (?:\[\s*(macro=))
+      # end: (?:\])
+
+    - name: keyword.control.macro2.ds
+      begin: (\[)
+      beginCaptures:
+        '1': { name: 'punctuation.definition.macro.start.ds' }
+      end: (\])
+      endCaptures:
+        '1': { name: 'punctuation.definition.macro.end.ds' } 
+      patterns:
+      - include: '#segment'
+
+
+  macro_assignment:
+    patterns:
+    - name: 'keyword.control.macro.assignment.ds'
+      match: '{{segments}\s*={{segments}}'
+
+  sample_keywords:
+    patterns:
+    - name: 'keyword.control.my.ds'
+      match: '\b(if|while|for|return)\b'
+
+  segment:
+    patterns:
+    - name: 'variable.other.segment.withdot.ds'
+      # match: '\b\w+(\.\w+)\b'
+      match: '\b[a-zA-Z_][a-zA-Z_0-9]*\.[a-zA-Z_][a-zA-Z_0-9]*\b'
+    - name: 'variable.other.segment.ds'
+      # match: '\b\w+\b'
+      # match: '{{segmentName}}'
+      # match: '([a-zA-Z_][:alnum:]*)|([a-zA-Z_][:alnum:]*\.[a-zA-Z_][:alnum:]*)'
+      match: '\b[a-zA-Z_][a-zA-Z_0-9]*\b'
+    - name: invalid.illegal.expected-array-separator.json
+      match: '[^\s\{\};=<>\|&~\(\)]'
+
+
+  segments:
+    - name: meta.structure.array.ds
+      begin: (\{)
+      beginCaptures:
+        '1': { name: 'punctuation.definition.macro.start.ds' }
+      end: (\})
+      endCaptures:
+        '1': { name: 'punctuation.definition.macro.end.ds' } 
+      patterns:
+      - name: punctuation.separator.array.ds
+        match: ";"
+      - name: invalid.illegal.expected-array-separator.json
+        match: '[^\s\]]'
+      - include: '#comments'
+      - include: '#segment'
+
+
+  dquoted:
+    patterns:
+    - name: 'string.quoted.double.untitled'
+      begin: (")
+      end: (")
+      patterns:
+      - name: 'constant.character.escape.untitled'
+        match: '\\.'
+
+
+
+
+...

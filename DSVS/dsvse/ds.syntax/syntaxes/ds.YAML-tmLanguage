@@ -1,0 +1,148 @@
+---
+
+name: ds
+comment: DS language syntax.  Do *NOT* modify auto-generated JSON file.
+scopeName: source.ds
+fileTypes: [ds]
+foldingStartMarker: '\{\s*$'
+foldingStopMarker: '^\s*\}'
+
+# foldingStartMarker: '^\s*[{\[\`](?!.*[}\]\`],?\s*$)|[{\[\`]\s*$'
+# foldingStopMarker: '^\s*[}\]\`]'
+
+# 원본 참조
+# https://github.com/inkle/ink-tmlanguage/blob/master/grammars/Ink.YAML-tmLanguage
+
+
+
+patterns:
+- include: '#comments'
+- include: '#systems'
+
+repository:
+  comments: # Inline (//) and block (/* */) comments. Comments can happen anywhere.
+    patterns:
+    - name: comment.block.ds
+      begin: (/\*)
+      beginCaptures:
+        '1': { name: 'punctuation.definition.comment.ds' }
+      end: (\*/)
+      endCaptures:
+        '1': { name: 'punctuation.definition.comment.ds' }
+    - name: comment.line.ds
+      begin: (\/\/)
+      beginCaptures:
+        '1': { name: 'punctuation.definition.comment.ds' }
+      end: (?=$)
+
+  systems:
+    patterns:
+      - comment: multi-line
+        name: system.multi.ds
+        begin: \[\s*(Sys)\s*\]\s*([a-zA-Z_][a-zA-Z_0-9]*)\s*=\s*(\{)(?=[^\}]*$)
+        beginCaptures:
+          '1': {name: keyword.other.ds}
+          '2': {name: keyword.control.ds}
+        end: (\})
+        endCaptures:
+          '1': {name: punctuation.brace.end.ds}
+        patterns:          
+        - include: '#comments'
+        - include: '#accessDefs'
+        - include: '#macros'
+        - include: '#causals'
+      - comment: single-line
+        name: system.single.ds
+        begin: \[\s*(Sys)\s*\]\s*([a-zA-Z_][a-zA-Z_0-9]*)\s*=\s*\{
+        beginCaptures:
+          '1': {name: keyword.other.ds}
+          '2': {name: keyword.control.ds}
+        end: \}
+        patterns:          
+        - name: punctuation.separator.array.ds
+          match: ";"
+        - include: '#segment'
+        - name: invalid.illegal.expected-array-separator.json
+          match: '[^\s\}]'
+
+  accessDefs:
+    patterns:
+    - name: access.ds
+      begin: \[\s*(accSRE|accSR|accRE|accSE|accS|accR|accE)\s*\]\s*=\s*(\{)
+      beginCaptures:
+        '1': {name: keyword.other.accessSRE.ds}      
+      end: (\})
+      patterns:
+        - name: punctuation.brace.separator.ds
+          match: ;
+        - include: '#segment'
+        - include: '#comments'
+    - include: '#comments'
+    - include: $self
+
+  macros:
+    patterns:
+    - name: macro2.ds
+      begin: \[\s*(macro)\s*(=\s*([a-zA-Z_][a-zA-Z_0-9]*))?\s*\]\s*=\s*(\{)
+      beginCaptures:
+        '1': {name: keyword.other.macro2.ds}      
+        '3': {name: keyword.control.macro.var.ds}      
+      end: (\})
+      patterns:
+        - include: '#callSegmentDefs'
+        - include: '#comments'
+
+  callSegmentDefs:
+    patterns:
+    - name: call.segment.ds
+      begin: ([a-zA-Z_][a-zA-Z_0-9]*)\s*=\s*(\{)
+      beginCaptures:
+        '1': {name: keyword.control.callSegment.ds}
+      end: (\})
+      patterns:
+        - name: punctuation.comma.ds
+          match: ','
+        - name: keyword.other.callSegment.ds
+          match: '~'
+        - include: '#segment'
+        - name: invalid.illegal.expected-array-separator.json
+          match: '[;<>\|]'
+
+  causals:
+    patterns:
+      - include: '#segment'
+      - name: keyword.other.causal.ds
+        match: '(<\|>)|(<\|)|(\|>)|<|>'
+
+  segment:
+    patterns:
+    - name: 'variable.other.segment.withdot.ds'
+      match: '\b[a-zA-Z_][a-zA-Z_0-9]*\.[a-zA-Z_][a-zA-Z_0-9]*\b'
+    - name: 'variable.other.segment.ds'
+      match: '\b[a-zA-Z_][a-zA-Z_0-9]*\b'
+    - include: '#comments'
+    - name: invalid.illegal.expected-array-separator.json
+      match: '[^\s\{\};=<>\|&~\(\)]'
+
+
+  segments:
+    - name: meta.structure.array.ds
+      begin: (\{)
+      beginCaptures:
+        '1': { name: 'punctuation.definition.macro.start.ds' }
+      end: (\})
+      endCaptures:
+        '1': { name: 'punctuation.definition.macro.end.ds' } 
+      patterns:
+      - name: punctuation.separator.array.ds
+        match: ";"
+      - name: invalid.illegal.expected-array-separator.json
+        match: '[^\s\]]'
+      - include: '#comments'
+      - include: '#segment'
+
+
+
+
+
+...

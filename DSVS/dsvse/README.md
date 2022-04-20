@@ -36,6 +36,11 @@ Update codes
 
 DS Preview added.
 
+### 1.0.4
+
+Update '<|>' syntax error.  
+Syntax support korean.
+
 -----------------------------------------------------------------------------------------------------------
 ## Following extension guidelines
 

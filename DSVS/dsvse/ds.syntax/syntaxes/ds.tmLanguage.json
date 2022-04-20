@@ -145,7 +145,7 @@
       "patterns": [
         {
           "name": "macro2.ds",
-          "begin": "\\[\\s*(macro)\\s*(=\\s*([a-zA-Z_][a-zA-Z_0-9]*))?\\s*\\]\\s*=\\s*(\\{)",
+          "begin": "\\[\\s*(macro)\\s*(=\\s*([가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*))?\\s*\\]\\s*=\\s*(\\{)",
           "beginCaptures": {
             "1": {
               "name": "keyword.other.macro2.ds"
@@ -170,7 +170,7 @@
       "patterns": [
         {
           "name": "call.segment.ds",
-          "begin": "([a-zA-Z_][a-zA-Z_0-9]*)\\s*=\\s*(\\{)",
+          "begin": "([가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*)\\s*=\\s*(\\{)",
           "beginCaptures": {
             "1": {
               "name": "keyword.control.callSegment.ds"
@@ -203,8 +203,12 @@
           "include": "#segment"
         },
         {
+          "name": "invalid.illegal.expected-array-separator.json",
+          "match": "(<\\|>)"
+        },
+        {
           "name": "keyword.other.causal.ds",
-          "match": "(<\\|>)|(<\\|)|(\\|>)|<|>"
+          "match": "(<\\|\\|>)|(<\\|)|(\\|>)|<|>"
         }
       ]
     },
@@ -212,11 +216,11 @@
       "patterns": [
         {
           "name": "variable.other.segment.withdot.ds",
-          "match": "\\b[a-zA-Z_][a-zA-Z_0-9]*\\.[a-zA-Z_][a-zA-Z_0-9]*\\b"
+          "match": "\\b[가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*\\.[가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*\\b"
         },
         {
           "name": "variable.other.segment.ds",
-          "match": "\\b[a-zA-Z_][a-zA-Z_0-9]*\\b"
+          "match": "\\b[가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*\\b"
         },
         {
           "include": "#comments"

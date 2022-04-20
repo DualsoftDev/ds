@@ -12,8 +12,8 @@
 
 ```
  [sys]door  = { Open <||> Close;
-               (Detect) > Open, @10sec  > Close;
-               @10 sec <| Close;
+               (Detect) > Open, @s (10)  > Close;
+               @s (10) <| Close;
 
       Open = { Out1 ~ In1, In2 }
       Close = { Out2 ~  }

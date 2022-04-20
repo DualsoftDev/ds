@@ -6,20 +6,20 @@
 
 | Num | Question :question:  | Answer     :exclamation: | Reference |
 |:--:| :-----: | ---- |  ---- | 
-|1.1 |A > B | After action A, action B <p>`A행위 후 B행위`|
-|1.2 |(A) > B | Action B if A value is true <p>`A 값이 true인 경우 B 행위`|
-|1.3 |@OnlyS(A, B) | Action B if A value is true, Reset B if A value is false  <p>`A 값이 true인 경우 B 행위실행, A 값이 false인 경우 B행위복귀`| IF6 -[4.3 Single  operation](../Language/ds-language-table.md/)|
-|1.4 |A \|> B | Reset B at the start of action A <p>`A행위 시작시에 B리셋`|
-|1.5 |(A) \|> B | Reset B if A value is true <p>`A 값이 true인 경우 B리셋`|
-|1.6 |@OnlyR(A, B) | Action B if A value is false, Reset B if A value is true  <p>`A 값이 false인 경우 B 행위실행, A 값이 true인 경우 B행위복귀`| IF8 - [4.3 Single  operation](../Language/ds-language-table.md/)|
+|1.1 |A > B | After action A, action B <p>`A행위 후 B행위`| -[1.1 Causal(원인결과 정의)](../Language/ds-language-table.md/) : SEQ1 | 
+|1.2 |(A) > B | Action B if A value is true <p>`A 값이 true인 경우 B 행위`|   -[2.1 Value operation (행위 값)](../Language/ds-language-table.md/) : OP1| 
+|1.3 |(A) > @pushs (B) | Action B Start if A value is true, <p> Action B Pause if A value is false <p>`A 값이 true인 경우 B 행위실행, A 값이 false인 경우 B행위멈춤`|  -[4.2  Sustain operation](../Language/ds-language-table.md/) : IF3|
+|1.4 |A \|> B | Reset B at the start of action A <p>`A행위 시작시에 B리셋`| -[1.1 Causal(원인결과 정의)](../Language/ds-language-table.md/) : SEQ2| 
+|1.5 |(A) \|> B | Reset B if A value is true <p>`A 값이 true인 경우 B리셋`|  -[2.1 Value operation (행위 값)](../Language/ds-language-table.md/) : OP1| 
+|1.6 |(A) \|> @pushr (B)|Action B Start if A value is true, <p> Action B Pause if A value is false <p>`A 값이 true인 경우 B 행위실행, A 값이 false인 경우 B행위멈춤`|  - [4.2  Sustain operation](../Language/ds-language-table.md/) : IF4|
 
 2. Call (행위 호출)
 
 | Num | Question :question:  | Answer     :exclamation: 
 |:--:| :-----: | ---- | 
 |2.1 |C = {A ~ B} | Execution of action C starts A and completes when B ends  <p>`행위 C 실행은 A를 시작시켜 B가 종료되면 수행완료`|
-|2.2 |C = {A, B ~ } | Execution of action C is completed when A and B are started  <p>`행위 C 실행은 A, B를 시작시키면 수행완료`|
-|2.3 |C = { ~ A, B} | Execution of action C is completed when A and B are finished<p>`행위 C 실행은 A, B가 종료되면 수행완료`|
+|2.2 |C = {A, B ~ _} | Execution of action C is completed when A and B are started  <p>`행위 C 실행은 A, B를 시작시키면 수행완료`|
+|2.3 |C = {_ ~ A, B} | Execution of action C is completed when A and B are finished<p>`행위 C 실행은 A, B가 종료되면 수행완료`|
 |2.4||
 3. Children  (행위 자식)
 

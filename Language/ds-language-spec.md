@@ -18,7 +18,7 @@
  - Text edit 처리 규칙 참고 [Antlr (`g4`) spec](/DSVS/dsvse/server/src/ds.g4)
 
  ```
-1. 모든 행위 이름 및 시스템 예약어 대소문자 구분  ex) test <> Test, [Sys] <> [SYS] 서로 다름
+1. 모든 이름 및 시스템 예약어 대소문자 구분        ex) test <> Test, [sys] <> [SYS] 서로 다름
 2. 띄어쓰기 대신 '_' 사용                         ex) 가공 작업 => 가공_작업
 3. 이름시작에 '_' 및 숫자 금지                    ex) _test (X), 1cycle (X)
 4. 라인 종료시에 ';' 작성                         ex) R1 =  {A > B};

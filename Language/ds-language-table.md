@@ -15,7 +15,7 @@
 
 |Id| Item | Unit | Example | Desc |   GUI | 
 |:---:|:----|:--:|:----|:---|:---|
-|SEQ6|Call | `~` |`C = {A ~ B}`<p> `C = {_ ~ B}` <p> empty key is `_` | Upper - Action C calls the action A to execute the DAG (A ~ B), and indicates the state of action B<p>Lower - Action C just indicates the state of action B without executing<p>`C행위는 A를 실행시키며, B의 상태를 나타냄`<p>`C행위는 B의 실행 없이 상태만을 나타냄`| ![AAA](./png/Seq6.dio.png)|
+|SEQ6|Call | `~` |`C = {A ~ B}`<p> `C = {_ ~ B}` <p> empty key is `_` | Upper - Action C calls the action A to execute the DAG (A ~ B), and indicates the state of action B<p>Lower - Action C just indicates the state of action B without executing<p>`C행위는 A를 실행시키며, B의 상태를 나타냄`<p>`C행위는 B의 상태만을 나타냄`| ![AAA](./png/Seq6.dio.png)|
 |SEQ7|And Call|`,`| `F = {A,B,C ~ D,E}`|Action F calls the action A, B and C to execute the DAG(A,B,C ~ D,E), and indicates the state of action D and E<p>`F행위는 A, B, C를 실행시키며, D, E의 상태를 나타냄`| ![AAA](./png/Seq7.dio.png)
 |SEQ8|Reset Call|`~ ~`| `H = {A,B,C ~ D,E ~ F,G}`|Action H calls the action A, B and C to execute, or calls the action F, G to reset the the DAG(A,B,C ~ D,E ~ F,G) and indicates the state of action D and E<p>`F행위는 A, B, C를 수행시킴으로 D, E의 종료상태를 관찰하며 F, G를 수행시켜 값을 리셋`| ![AAA](./png/Seq8.dio.png)|
 

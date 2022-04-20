@@ -59,7 +59,7 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|OP6|Equals|#( == )|#(B == 3) > A| Action A would be executed when the value of action B is equals to 3<p>`행위 A는 행위 B의 값이 3일 때 실행됨` |    ![AAA](./png/Op6.dio.png)|
+|OP6|Equals|#( == )|#(B == 3) > A| Action A is executed when the value of action B is equals to 3<p>`행위 A는 행위 B의 값이 3일 때 실행됨` |    ![AAA](./png/Op6.dio.png)|
 |OP7|Not equals |#( != )|#(B != 3) > A| Action A is executed when the value of action B is not equals to 3<p>`행위 A는 행위 B의 값이 3이 아닐 때 실행됨` |    ![AAA](./png/Op7.dio.png)|
 |OP8|Greater than |#( > )|#(B > 3) > A| Action A is executed when the value of action B is greater than 3<p>`행위 A는 행위 B의 값이 3보다 클 때 실행됨` |    ![AAA](./png/Op8.dio.png)|
 |OP9|Less than|#( < )|#(B < 3) > A| Action A is executed when the value of action B is less than 3<p>`행위 A는 행위 B의 값이 3보다 작을 때 실행됨` |    ![AAA](./png/Op9.dio.png)|

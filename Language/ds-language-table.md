@@ -15,9 +15,9 @@
 
 |Id| Item | Unit | Example | Desc |   GUI | 
 |:---:|:----|:--:|:----|:---|:---|
-|SEQ6|Call | `~` |`C = {A ~ B}`<p> `C = {_ ~ B}` <p> empty key is `_` | Action C indicates the end state of B by executing A<p>`C행위는 A를 수행시킴으로 B의 종료상태를 관찰`| ![AAA](./png/Seq6.dio.png)|
-|SEQ7|And Call|`,`| `F = {A,B,C ~ D,E}`|Action F indicates the end state of D, E by executing A, B, C<p>`F행위는 A, B, C를 수행시킴으로 D, E의 종료상태를 관찰`| ![AAA](./png/Seq7.dio.png)|
-|SEQ8|Reset Call|`~ ~`| `H = {A,B,C ~ D,E ~ F,G}`|Action H indicates the end state of D, E by executing A, B, C and by reset F, G, C<p>`F행위는 A, B, C를 수행시킴으로 D, E의 종료상태를 관찰하며 F, G를 수행시켜 값을 리셋`| ![AAA](./png/Seq8.dio.png)|
+|SEQ6|Call | `~` |`C = {A ~ B}`<p> `C = {_ ~ B}` <p> empty key is `_` | Upper - Action C calls the action A to execute the DAG (A ~ B), and indicates the state of action B<p>Lower - Action C just indicates the state of action B without executing<p>`C행위는 A를 실행시키며, B의 상태를 나타냄`<p>`C행위는 B의 실행 없이 상태만을 나타냄`| ![AAA](./png/Seq6.dio.png)|
+|SEQ7|And Call|`,`| `F = {A,B,C ~ D,E}`|Action F calls the action A, B and C to execute the DAG(A,B,C ~ D,E), and indicates the state of action D and E<p>`F행위는 A, B, C를 실행시키며, D, E의 상태를 나타냄`| ![AAA](./png/Seq7.dio.png)
+|SEQ8|Reset Call|`~ ~`| `H = {A,B,C ~ D,E ~ F,G}`|Action H calls the action A, B and C to execute, or calls the action F, G to reset the the DAG(A,B,C ~ D,E ~ F,G) and indicates the state of action D and E<p>`F행위는 A, B, C를 수행시킴으로 D, E의 종료상태를 관찰하며 F, G를 수행시켜 값을 리셋`| ![AAA](./png/Seq8.dio.png)|
 
 </BR>
 
@@ -49,7 +49,7 @@
 |:---:|:----|:-------:|:---:|:----|:---|
 |OP1|End  Value | ( ) | `(Seg), A > B`  | B be caused by action A when the Seg End Port (sensor) value is 'True'. <p>` 행위 B는 Seg의 End Port(sensor) 값이 'True' 일 경우에서 행위 A가 수헹되었을때 수행`    |![AAA](./png/Op1.dio.png)|
 |OP2|End Set Value | #set| `#set (Seg) > B` | B be caused by Seg End Port latch value(auto reset by #g(B)) <p>` 행위 B는 Seg의 End Port(sensor) 값이 'True' 면 값 유지(B행위 Going 시에 자동 값 리셋)`      |![AAA](./png/Op2.dio.png)|
-|OP3|End Latch Unlatch | #latch( , )| `#latch((SegA), #g (SegB)) > B` | B be caused by Seg End Port latch value(auto reset by #g(B)) <p>` 행위 B는 Seg의 End Port(sensor) 값이 'True' 면 값 유지(설정 값에 의한 리셋)`  |![AAA](./png/Op3.dio.png)|
+|OP3|End  Value | #latch( , )| `#latch((SegA), #g (SegB)) > B` | B be caused by Seg End Port latch value(auto reset by #g(B)) <p>` 행위 B는 Seg의 End Port(sensor) 값이 'True' 면 값 유지(설정 값에 의한 리셋)`  |![AAA](./png/Op3.dio.png)|
 |OP4|Going Status|#g |`#g(Seg) > B`| B be caused by Seg Going Value<p>` 행위 B는 Seg가 Going 경우 인해 수행`      |![AAA](./png/Op4.dio.png)|
 |OP5|Homing Status|#h |`#h(Seg) > B` | B be caused by Seg Homing Value <p>` 행위 B는 Seg가 Homing 경우 인해 수행`     |![AAA](./png/Op5.dio.png)|
 

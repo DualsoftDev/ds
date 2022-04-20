@@ -26,7 +26,7 @@
 |Id| Item | Unit | Example | Desc |   GUI | 
 |:---:|:----|:--:|:----|:---|:---|
 |SEQ9|system Parent | `[sys]=` |  [sys]D = { A > B <\| C } | System D parallelly processes the actions included in the causality DAG<p>`시스템 D는 인과 그래프(DAG)에 포함된 행위들을 '병렬'적으로 처리함`  | ![AAA](./png/Seq9.dio.png)|
-|SEQ10|Segement Parent| `=` |  D = { A > B <\| C } | Actions sequentially processes the actions included in the causality DAG<p>`행위 D는 인과 그래프(DAG)에 포함된 행위들을 '순차'적으로 처리gka` | ![AAA](./png/Seq10.dio.png)|
+|SEQ10|Segement Parent| `=` |  D = { A > B <\| C } | Actions sequentially processes the actions included in the causality DAG<p>`행위 D는 인과 그래프(DAG)에 포함된 행위들을 '순차'적으로 처리함` | ![AAA](./png/Seq10.dio.png)|
 </BR>
 
 

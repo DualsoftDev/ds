@@ -1,7 +1,7 @@
 
 [Sys]M = {U; D}  // Motor up / down
 [Sys]B = {F1; F2; F3; F4}    // Button.층 호출버튼
-[Sys]S = {S1D; S2D; S2U; S3D; S3U; S4U, xxx.a.b.c}    // Sensor Up, Down
+[Sys]S = {S1D; S2D; S2U; S3D; S3U; S4U, xxx.a.b.c}    // Sensor Up, Down    //의도적인 , 에러
 [Sys]My ={
     [accSRE] = {B; S}
     [accE] = {B; S}
@@ -13,32 +13,32 @@
      */
     [accS] = {a, B}    //의도적인 , 에러
     [macro=T] = {  //층간 이송 행위 Task
-        T12 = { M.U ~ S.S2U }
-        ll23 = { M.U ~ S.S3U }
-        T34 = { M.U ~ S.S4U }
-        T43 = { M.D ~ S.S3D }
-        T32 = { M.D ~ S.S2D ; A < B |> C}        //의도적인 에러 - ;, <, >, |
-        T21 = { M.D ~ S.S1D, S.S2U }    // comma test
+        T.F12 = { M.U ~ S.S2U }
+        T.F23 = { M.U ~ S.S3U }
+        T.F34 = { M.U ~ S.S4U }
+        T.F43 = { M.D ~ S.S3D }
+        T.F32 = { M.D ~ S.S2D ; A < B |> C}        //의도적인 에러 - ;, <, >, |
+        T.F21 = { M.D ~ S.S1D, S.S2U }    // comma test
     }
     // 호출 Set기억 
-    B.F1 > Set1F <| T.21;
-    B.F2 > Set2F <| T.32;
-           Set2F <| T.12;
-    B.F3 > Set3F <| T.23;
-           Set3F <| T.43;
-    B.F4 > Set4F <| T.34;  
+    B.F1 > Set1F <| T.21;    //의도적인 에러
+    B.F2 > Set2F <| T.F32;
+           Set2F <| T.F12;
+    B.F3 > Set3F <| T.F23;
+           Set3F <| T.F43;
+    B.F4 > Set4F <| T.F34;  
     
     // 층간 상하강 행위간 인터락
     
-    T.12 <|> T.21
-    T.34 |> T.23 <|> T.32 <| T.21
-    T.34 <|> T.43
+    T.F12 <||> T.F21
+    T.F34 |> T.F23 <||> T.F32 <| T.F21
+    T.F34 <||> T.F43
     
     //호출에 따른 층간 상하강 행위   
-    T.12 < (Set2F | Set3F | Set4F) & T.21
-    T.23 < (Set3F | Set4F) & (T.12 | T.32) 
-    T.34 <  Set4F & (T.43 | T.23)
-    T.43 < (Set1F | Set2F | Set3F) & T.34 
-    T.32 < (Set1F | Set2F) & (T.23 | T.43)
-    T.21 <  Set1F & (T.12 | T.32)
+    T.F12 < (Set2F | Set3F | Set4F) & T.F21
+    T.F23 < (Set3F | Set4F) & (T.F12 | T.F32) 
+    T.F34 <  Set4F & (T.F43 | T.F23)
+    T.F43 < (Set1F | Set2F | Set3F) & T.F34 
+    T.F32 < (Set1F | Set2F) & (T.F23 | T.F43)
+    T.F21 <  Set1F & (T.F12 | T.F32)
 }

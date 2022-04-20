@@ -60,12 +60,12 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|OP6|Equals|#( == )|#(B == 3) > A| A would be executed when B equals with 3 |    ![AAA](./png/Op6.dio.png)|
-|OP7|Not equals |#( != )|#(B != 3) > A| A would be executed when B unequals with 3 |    ![AAA](./png/Op7.dio.png)|
-|OP8|Greater than |#( > )|#(B > 3) > A| A would be executed when B is greater than 3 |    ![AAA](./png/Op8.dio.png)|
-|OP9|Less than|#( < )|#(B < 3) > A| A would be executed when B is less than 3 |    ![AAA](./png/Op9.dio.png)|
-|OP10|Greater Equals than |#( >= )|#(B >= 3) > A| A be caused by if B GE(greater than or equal ) 3.|    ![AAA](./png/Op10.dio.png)|
-|OP11|Less Equals than|#( <= )|#(B <= 3) > A| A be caused by if B LE(less than or equal ) 3. |    ![AAA](./png/Op11.dio.png)|
+|OP6|Equals|#( == )|#(B == 3) > A| Action A would be executed when B is equal to 3 |    ![AAA](./png/Op6.dio.png)|
+|OP7|Not equals |#( != )|#(B != 3) > A| Action A would be executed when B is not equal to 3 |    ![AAA](./png/Op7.dio.png)|
+|OP8|Greater than |#( > )|#(B > 3) > A| Action A would be executed when B is greater than 3 |    ![AAA](./png/Op8.dio.png)|
+|OP9|Less than|#( < )|#(B < 3) > A| Action A would be executed when B is less than 3 |    ![AAA](./png/Op9.dio.png)|
+|OP10|Greater Equals than |#( >= )|#(B >= 3) > A| Action A is executed when B is greater than or equal to 3|    ![AAA](./png/Op10.dio.png)|
+|OP11|Less Equals than|#( <= )|#(B <= 3) > A| Action A is executed when B is less than or equal to 3|    ![AAA](./png/Op11.dio.png)|
 
 </BR>
 

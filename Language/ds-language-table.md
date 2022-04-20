@@ -47,8 +47,9 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:-------:|:---:|:----|:---|
-|OP1|End  Value | ( ) | `(Seg), A > B`  | B be caused by action A when the Seg End Port (sensor) value is 'True'. <p>` 행위 B는 Seg의 End Port(sensor) 값이 'True' 일 경우에서 행위 A가 수헹되었을때 수행`    |![AAA](./png/Op1.dio.png)|
-|OP2|End Set Value | #set| `#set (Seg) > B` | B be caused by Seg End Port latch value(auto reset by #g(B)) <p>` 행위 B는 Seg의 End Port(sensor) 값이 'True' 면 값 유지(B행위 Going 시에 자동 값 리셋)`      |![AAA](./png/Op2.dio.png)|
+|OP1|End  Value | ( ) | `(Seg), A > B`  | Action B would be executed by causal action A and the value of action SEG(end port of segment) is 'True'<p>` 행위 B는 행위 A가 실행되고, 행위 SEG의 end port 값이 'True'일 때 수행`    |![AAA](./png/Op1.dio.png)|
+|OP2|End Set Value | #set| `#set (Seg) > B` | #set (SEG) is set to 'True' when the end port value of the action SEG becomes 'True', and is maintained regardless of the change in the action SEG thereafter<p>
+Action B is executed when the value of #set (SEG) is 'True', and resets the value of #set (SEG) during execution<p>` #set (SEG)는 행위 SEG의 end port 값이 'True'가 되면 'True'로 설정되며, 이후 행위 SEG의 변화와 무관하게 유지됨`<p>`행위 B는 #set (SEG)의 값이 'True'일 때 실행되며, 실행중에 #set (SEG)의 값을 리셋함`|![AAA](./png/Op2.dio.png)|
 |OP3|End  Value | #latch( , )| `#latch((SegA), #g (SegB)) > B` | B be caused by Seg End Port latch value(auto reset by #g(B)) <p>` 행위 B는 Seg의 End Port(sensor) 값이 'True' 면 값 유지(설정 값에 의한 리셋)`  |![AAA](./png/Op3.dio.png)|
 |OP4|Going Status|#g |`#g(Seg) > B`| B be caused by Seg Going Value<p>` 행위 B는 Seg가 Going 경우 인해 수행`      |![AAA](./png/Op4.dio.png)|
 |OP5|Homing Status|#h |`#h(Seg) > B` | B be caused by Seg Homing Value <p>` 행위 B는 Seg가 Homing 경우 인해 수행`     |![AAA](./png/Op5.dio.png)|

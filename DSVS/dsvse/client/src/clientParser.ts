@@ -8,15 +8,7 @@ import { assert } from 'console';
 import { link } from 'fs';
 import { dsLexer } from './server-bundle/dsLexer';
 import { dsParser, MacroContext, CausalContext, CausalExpressionContext, ExpressionContext, ProcContext, ProgramContext, SystemContext, ProcSleepMsContext } from './server-bundle/dsParser';
-// import { dsVisitor } from './dsVisitor';
-// import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
-//import { SimpleSysBlockContext, ComplexSysBlockContext } from './dsParser';
-// import {ANTLRErrorListener} from 'antlr4ts/ANTLRErrorListener';
-// import {RecognitionException, Recognizer} from 'antlr4ts';
-// import { Diagnostic, DiagnosticSeverity,} from 'vscode-languageserver/node';
-// import {
-// 	TextDocument, Position
-// } from 'vscode-languageserver-textdocument';
+
 
 /**
  * Parse Macro contexts
@@ -31,6 +23,10 @@ import { dsParser, MacroContext, CausalContext, CausalExpressionContext, Express
 	}
 }
 
+/**
+ * DS 문서로부터 parser 객체를 생성해서 반환
+ * @param text DS 문서
+ */
 function parserFromDocument(text:string) {
 	// Create the lexer and parser
 	const inputStream = new ANTLRInputStream(text);
@@ -39,12 +35,16 @@ function parserFromDocument(text:string) {
 	return new dsParser(tokenStream);
 }
 
-interface Link {
+/**
+ * Causal 관계를 표현하는 Link.  'A > B' 일 때, left = A, right = B, operator = '>'
+ */
+interface CausalLink {
 	l: string,
 	r: string,
 	op: string
 }
 
+/** 주어진 context 가 terminal ({ TerminalNode, ExpressionContext, ProcContext } 중 하나)인지 여부 */
 function isTerminalNode(ctx:ParseTree) {
 	if (ctx instanceof TerminalNode || ctx instanceof ExpressionContext || ctx instanceof ProcContext)
 		return true;
@@ -56,6 +56,10 @@ function isTerminalNode(ctx:ParseTree) {
 
 
 type Token = string;
+/**
+ * Expression 의 terminal 에 해당하는 부분의 token 을 반환
+ * @param exp (Causal)Expression or Proc(@)
+ */
 function getTerminalTokens(exp: ParseTree): Token[]
 {
 	assert(isTerminalNode(exp), 'Expected terminal node');
@@ -73,9 +77,11 @@ function getTerminalTokens(exp: ParseTree): Token[]
 	return getSegmentTokens(exp);
 }
 
+
+/** 주어진 expression 에서 segment 이름을 추출하여 배열로 반환 */
 function getSegmentTokens(exp: ParseTree)
 {
-	if (exp instanceof CausalExpressionContext && exp.segments() != null)
+	if (exp instanceof CausalExpressionContext && exp.segments())
 		return exp.segments()
 			.children
 			.filter(c => ! (c instanceof TerminalNode))
@@ -87,6 +93,13 @@ function getSegmentTokens(exp: ParseTree)
 }
 
 
+/**
+ * 주어진 expression 에서 operator 를 기준으로 왼쪽/오른쪽 방향으로 가장 깊은 terminal 의 tokens 문자 배열 검색해서 반환
+ * - operator 가 존재하지 않는 terminal 일 경우, termianl 자체를 반환
+ * @param exp 탐색 대상 expression
+ * @param leftmost 탐색 방향
+ * @returns 검색된 token 의 문자 배열
+ */
 function _getDeepTokens(exp: ParseTree, leftmost:boolean)
 {
 	if (exp instanceof CausalExpressionContext || exp instanceof CausalContext)
@@ -104,13 +117,31 @@ function _getDeepTokens(exp: ParseTree, leftmost:boolean)
 		return null;
 }
 
+/**
+ * 주어진 expression 에서 operator 를 기준으로 왼쪽으로 가장 깊은 terminal 의 tokens 문자 배열 검색해서 반환.
+ * - @see _getDeepTokens
+ */
 const getLeftmostTokens = (exp) => _getDeepTokens(exp, true);
-const getRightmostTokens = (exp) => _getDeepTokens(exp, false);
+/**
+ * 주어진 expression 에서 operator 를 기준으로 오른쪽으로 가장 깊은 terminal 의 tokens 문자 배열 검색해서 반환.
+ * - @see _getDeepTokens
+ */
+ const getRightmostTokens = (exp) => _getDeepTokens(exp, false);
 
-
-function parseExpressionContext(exp: ParseTree, links:Link[]) : Token[]
+/**
+ * causal expression 을 분석해서, CausalLink[] 를 반환
+ * @param exp : {Causal and/or Expression} Context
+ */
+function parseCausalExpressionContext(exp: ParseTree) : CausalLink[]
 {
-	function addLinks(ls:string[], op:string, rs:string[], links:Link[]) : void
+	const links:CausalLink[] = [];
+	parseCausalExpressionContext_(exp, links);
+	return links;
+}
+
+function parseCausalExpressionContext_(exp: ParseTree, links:CausalLink[]) : void
+{
+	function addLinks(ls:string[], op:string, rs:string[], links:CausalLink[]) : void
 	{
 		ls.forEach(l => {
 			rs.forEach(r => {
@@ -120,32 +151,29 @@ function parseExpressionContext(exp: ParseTree, links:Link[]) : Token[]
 	}
 
 
+	if (exp instanceof ExpressionContext)
+		return;
+
 	if (exp instanceof CausalExpressionContext || exp instanceof CausalContext)
 	{
 		const segments = getSegmentTokens(exp);
-		if (segments)
-			return segments;
-		else
+		if (! segments)
 		{
 			const [l, op_, r] = [exp.children[0], exp.children[1], exp.children[2]];
-			const x = isTerminalNode(l);
-			const y = isTerminalNode(r);
 			let lTokens:string[] = null;
 			let rTokens:string[] = null;
 
 			if (isTerminalNode(l))
 			{
-				/// 왼쪽 트리의 마지막 token 들
-				lTokens = getTerminalTokens(l);
-				parseExpressionContext(r, links);
+				lTokens = getTerminalTokens(l);	// 좌측이 terminal
+				parseCausalExpressionContext_(r, links);
 				rTokens = getLeftmostTokens(r);
 			}
 			else
 			{
-				/// 왼쪽 트리의 마지막 token 들
 				lTokens = getRightmostTokens(l);
-				parseExpressionContext(l, links);
-				rTokens = getTerminalTokens(r);
+				parseCausalExpressionContext_(l, links);
+				rTokens = getTerminalTokens(r);	// 우측이 terminal
 			}
 			const op = op_.text;
 			switch(op) {
@@ -177,29 +205,19 @@ function parseExpressionContext(exp: ParseTree, links:Link[]) : Token[]
 			}
 		}
 	}
-	else if (exp instanceof ExpressionContext)
-	{
-		return [exp.text];
-		// const lexp = exp as ExpressionContext;
-		// if (exp.segment() != null)
-		// 	return [exp.segment().text];
-
-		// return exp.seg
-
-	}
 	else
 		assert(false, "type match error");
 }
 
 
 /**
- * Parse DS model text
+ * Parse DS model text.  Causal 분석해서 Link 를 생성하는 generator
  * @param text DS model document obeying DS language rule.
+ * @see CausalLink
  */
 export function *parseDSDocument(text:string) {
 	console.log('In client parsing module.', text);
 	const parser = parserFromDocument(text);
-
 
 	// Parse the input, where `compilationUnit` is whatever entry point you defined
 	const tree = parser.program();
@@ -228,10 +246,7 @@ export function *parseDSDocument(text:string) {
 				}
 
 				console.log(`\tcausal: ${causal.text}`);
-				const links:Link[] = [];
-				parseExpressionContext(causal, links);
-				for(const l of links)
-					yield l;				
+				yield* parseCausalExpressionContext(causal);
 			}
 
 			console.log(`system: ${system.text}`);

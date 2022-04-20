@@ -3,5 +3,8 @@
     { "path": "DSVS/dsvse" },
     { "path": "Doc" },
     { "path": "." }
-  ]
+  ],
+  "settings": {
+    "liveServer.settings.multiRootWorkspaceName": "dsvse"
+  }
 }

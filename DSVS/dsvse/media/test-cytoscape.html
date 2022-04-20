@@ -23,22 +23,34 @@
         let cy = cytoscape({
             wheelSensitivity: 0.1,
             container: document.getElementById('cy'),
-            elements: [ { data: {id: 'A', label: 'A'}},{ data: {id: 'D', label: 'D'}},{ data: {id: 'B', label: 'B'}},{ data: {id: 'C', label: 'C'}},{ data: {
-                id: 'ADtrue',
-                source: 'A',
-                target: 'D',
-                'line-style': 'solid' }}
-            ,{ data: {
-                id: 'BDtrue',
-                source: 'B',
-                target: 'D',
-                'line-style': 'solid' }}
-            ,{ data: {
-                id: 'CDtrue',
-                source: 'C',
-                target: 'D',
-                'line-style': 'solid' }}
-             ],
+            elements: [
+              { data: {id: 'A', label: 'A'}}
+              ,{ data: {id: 'B', label: 'B'}}
+              ,{ data: {id: 'A&B', label: '', width: 10, height: 10}}
+              ,{ data: {id: 'D', label: 'D'}}
+              ,{ data: {id: 'C', label: 'C'}}
+              ,{ data: {
+                  id: 'ADtrue',
+                  source: 'A&B',
+                  target: 'D',
+                  'line-style': 'solid' }}
+              ,{ data: {
+                  id: 'BDtrue',
+                  source: 'B',
+                  target: 'A&B',
+                  'line-style': 'solid' }}
+              ,{ data: {
+                  id: 'A->A&B',
+                  source: 'A',
+                  target: 'A&B',
+                  'line-style': 'solid' }}
+
+              ,{ data: {
+                  id: 'CDtrue',
+                  source: 'C',
+                  target: 'D',
+                  'line-style': 'solid' }}
+              ],
             layout: {
                 name: 'cose',   //circle, cose, grid
             },
@@ -47,6 +59,8 @@
                     selector: 'node',
                     style: {
                         'shape': 'round-rectangle',
+                        'width': 'data(width)',
+                        'height': 'data(height)',
                         'color':"white",        // text color
                 
                         "border-width": 2,
@@ -60,8 +74,8 @@
                         // 'text-outline-color': 'orange'
                         'text-outline-width': 2,
                         'text-opacity': 0.5,
-                        'label': 'data(id)',
-                        'font-size' : '25px',
+                        'label': 'data(label)',
+                        //'font-size' : '25px',
                         'background-color': 'green'
                     }
                 },

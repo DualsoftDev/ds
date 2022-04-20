@@ -113,7 +113,7 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|OP25|On Delay(Start Edge Only) | @ms, @s| A > @500ms > B  | B be caused by A finish 500 msec delay    |![AAA](./png/Op25.dio.png)|
+|OP25|On Delay(Start Edge Only) | @ms, @s| A > @ms (500) > B  | B be caused by A finish 500 msec delay    |![AAA](./png/Op25.dio.png)|
 |OP26|Off Delay |None || Use On Delay    ||
 
 </BR>
@@ -152,17 +152,17 @@
 
 |Id| Item | Unit | Example| Desc | GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|IF1|Start Priority | #sf | A > #sf B <\|C  | The B start value overrides the B reset value. | ![AAA](./png/IF1.dio.png)|
-|IF2|Last Priority  |  #lf  | A > #lf B <\|C | During startup/reset, last occurrence takes precedence | ![AAA](./png/IF2.dio.png)|
+|IF1|Start Priority | @sf | A > @sf (B) <\|C  | The B start value overrides the B reset value. | ![AAA](./png/IF1.dio.png)|
+|IF2|Last Priority  |  @lf  | A > @lf (B) <\|C | During startup/reset, last occurrence takes precedence | ![AAA](./png/IF2.dio.png)|
 </BR>
 
 ### 4.2  Sustain operation
 
 |Id| Item | Unit | Example| Desc | GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|IF3|Start Sustain | #pushs  | A > #pushs B  | B start signal Sustain until B is Finish |  ![AAA](./png/IF3.dio.png)|
-|IF4|Reset Sustain | #pushr  | A > #pushr B  | B reset signal Sustain until B is Ready |  ![AAA](./png/IF4.dio.png)|
-|IF5|SR Sustain | #pushsr | A > #pushsr B  <\| C | B start signal Sustain until B is Finish and <p>  B reset signal Sustain until B is Ready  |  ![AAA](./png/IF5.dio.png)|
+|IF3|Start Sustain | @pushs ( ) | A > @pushs (B)  | B start signal Sustain until B is Finish |  ![AAA](./png/IF3.dio.png)|
+|IF4|Reset Sustain | @pushr ( ) | A > @pushr (B)  | B reset signal Sustain until B is Ready |  ![AAA](./png/IF4.dio.png)|
+|IF5|SR Sustain | @pushsr | A > @pushsr (B)  <\| C | B start signal Sustain until B is Finish and <p>  B reset signal Sustain until B is Ready  |  ![AAA](./png/IF5.dio.png)|
 
 </BR>
 
@@ -172,9 +172,9 @@
 
 |Id| Item | Unit | Example| Desc | GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|IF6|Start Single | #onlys  | A > #onlys B  | The B reset value is B start not |  ![AAA](./png/IF6.dio.png)|
-|IF7|Reset Single | #onlyr | A > #onlyr B  | The B start value is B reset not |  ![AAA](./png/IF7.dio.png)|
-|IF8|Self Reset | #selfr | A > #selfr B    | The B reset value is B end Value |  ![AAA](./png/IF8.dio.png)|
+|IF6|Start Single | @onlys  ( )| A > @onlys (B)  | The B reset value is B start not |  ![AAA](./png/IF6.dio.png)|
+|IF7|Reset Single | @onlyr ( )| A > @onlyr (B)  | The B start value is B reset not |  ![AAA](./png/IF7.dio.png)|
+|IF8|Self Reset | @selfr ( )| A > @selfr (B)    | The B reset value is B end Value |  ![AAA](./png/IF8.dio.png)|
 
 </BR>
 
@@ -185,8 +185,8 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|SYS1|Numeric |   | 3 + B > A  | A be caused by B add 56 ||
-|SYS2|String |' ' | ['C' = B] > A| A be caused by B Equal to 'A'||
+|SYS1|Numeric |   | #(C = 3) > A  | A be caused by B Equal to 3 ||
+|SYS2|String |' ' | #('C' = B) > A| A be caused by B Equal to 'C'||
 
 
 ### 5.2  system Bit

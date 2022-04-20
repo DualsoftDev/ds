@@ -103,7 +103,7 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|OP23|Copy | `=` | `@(C = B)`  | Copy B to C. |![AAA](./png/Op23.dio.png)|
+|OP23|Copy | `=` | `A > @(C = B)`  | Copy B to C is caused by action A|![AAA](./png/Op23.dio.png)|
 |OP24|Initialize|`=` |`#(A < 65) > @(A = 65)`| Initialize A. |![AAA](./png/Op24.dio.png)|
 
 </BR>
@@ -122,10 +122,10 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|OP27| Numeric  | #num ()   |` @(C = #num (B)) ` | C converts B to Numeric.  | |
-|OP28| String  |#str ()   | ` @(C = #str (B)) `  | C converts B to String.  |  |
-|OP29| BCD  | #bcd ()   |` @(C = #bcd (B)) `   | C converts B to BCD.  |
-|OP30| BIN  | #bin ()  |` @(C = #bin (B)) ` | C converts B to BIN.  |
+|OP27| Numeric  | #num ()   |` #(65 < #num (B)) ` | if converts B to Numeric,  GT(greater than) 65  |![AAA](./png/Op27.dio.png)|
+|OP28| String  |#str ()   | ` @(C = #str (B)) `  | C converts B to String.  | ![AAA](./png/Op28.dio.png)|
+|OP29| BCD  | #bcd ()   |` @(C = #bcd (B)) `   | C converts B to BCD.  |![AAA](./png/Op29.dio.png)|
+|OP30| BIN  | #bin ()  |` @(C = #bin (B)) ` | C converts B to BIN.  |![AAA](./png/Op30.dio.png)|
 
 </BR>
 
@@ -140,9 +140,10 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|FUN1|Abs | #abs  | #abs (A)  | Calculate the absolute value of A. |
-|FUN2|Sin| #sin|#sin (A)| Calculate the Sin of A. | 
-|FUN3|Round | #round | #round (A) | Calculate the rounding of A.  | 
+|FUN1|Abs | #abs  | #(65 == #abs (A))  | Calculate the absolute value of A. |![AAA](./png/FUN1.dio.png)|
+|FUN2|Sin| #sin|#(65 == #sin (A))| Calculate the Sin of A. ||
+|FUN3|Round | #round | #(65 == #round (A)) | Calculate the rounding of A.  || 
+
 
 
 
@@ -173,9 +174,9 @@
 |Id| Item | Unit | Example| Desc | GUI |
 |:---:|:----|:--:|:---:|:----|:---|
 |IF6|Start Single | @onlys  ( )| A > @onlys (B)  | The B reset value is B start not |  ![AAA](./png/IF6.dio.png)|
-|IF7|Reset Single | @onlyr ( )| A > @onlyr (B)  | The B start value is B reset not |  ![AAA](./png/IF7.dio.png)|
-|IF8|Self Reset | @selfr ( )| A > @selfr (B)    | The B reset value is B end Value |  ![AAA](./png/IF8.dio.png)|
-
+|IF7|Reset Single | @onlyr ( )| A \|> @onlyr (B)  | The B start value is B reset not |  ![AAA](./png/IF7.dio.png)|
+|IF8|Self Start | @selfs ( )| @selfs (B) > A   | The B start value is always on |  ![AAA](./png/IF8.dio.png)|
+|IF9|Self Reset | @selfr ( )| A > @selfr (B)    | The B reset value is B end Value |  ![AAA](./png/IF9.dio.png)|
 </BR>
 
 
@@ -185,20 +186,20 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|SYS1|Numeric |   | #(C = 3) > A  | A be caused by B Equal to 3 ||
-|SYS2|String |' ' | #('C' = B) > A| A be caused by B Equal to 'C'||
+|SYS1|Numeric |   | #(C == 3) > A  | A be caused by B Equal to 3 | ![AAA](./png/Sys1.dio.png)|
+|SYS2|String |' ' | #('C'== B) > A| A be caused by B Equal to 'C'| ![AAA](./png/Sys2.dio.png)|
 
 
 ### 5.2  system Bit
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|SYS3|Always On | _on | _on > A  | A be caused by Always On ||
-|SYS4|Always Off |_off | _off > A| A be caused by Always Off ||
-|SYS5|Running Flag |_run | _run > A| A be caused by system Run ||
-|SYS6|Stop Flag |_stop | _stop > A| A be caused by system Stop||
-|SYS7|Running Rising |_rr | _rr > A | A be caused by system Run Rising||
-|SYS8|Running Falling |_rf | _rf > A | A be caused by system Run Rising ||
+|SYS3|Always On | _on | _on > A  | A be caused by Always On | ![AAA](./png/Sys3.dio.png)|
+|SYS4|Always Off |_off | _off > A| A be caused by Always Off | ![AAA](./png/Sys4.dio.png)|
+|SYS5|Running Flag |_run | _run > A| A be caused by system Run | ![AAA](./png/Sys5.dio.png)|
+|SYS6|Stop Flag |_stop | _stop > A| A be caused by system Stop| ![AAA](./png/Sys6.dio.png)|
+|SYS7|Running Rising |_runr | _runr > A | A be caused by system Run Rising| ![AAA](./png/Sys7.dio.png)|
+|SYS8|Running Falling |_runf | _runf > A | A be caused by system Run Rising | ![AAA](./png/Sys8.dio.png)|
 
 
 
@@ -206,4 +207,4 @@
 
 |Id| Item | Unit | Example| Desc | GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|SYS9|Toggle #s | _t | _t50ms > A  | On/Off occurs at periodic intervals of 50msec. | |
+|SYS9|Toggle #s | _toggles () or _togglems() | _togglems (50) > A  | On/Off occurs at periodic intervals of 50msec. |  ![AAA](./png/Sys9.dio.png)|

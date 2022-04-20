@@ -21,7 +21,8 @@
         T.F21 = { M.D ~ S.S1D, S.S2U }    // comma test
     }
     // 호출 Set기억 
-    B.F1 > Set1F <| T.21;    //의도적인 에러
+    B.F1 > Set1F <| T.e21;    //의도적인 에러
+    A, B > C, D;             // comma test
     B.F2 > Set2F <| T.F32;
            Set2F <| T.F12;
     B.F3 > Set3F <| T.F23;
@@ -32,7 +33,7 @@
     
     // 층간 상하강 행위간 인터락
     
-    T.F12 <||> T.F21
+    T.F12 >|> T.F21
     T.F34 |> T.F23 <||> T.F32 <| T.F21
     T.F34 <||> T.F43
     리셋 <|> 에러테스트;    // 의도적인 <|> 에러

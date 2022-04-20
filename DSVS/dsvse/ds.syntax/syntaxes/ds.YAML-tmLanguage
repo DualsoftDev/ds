@@ -110,6 +110,8 @@ repository:
 
   causals:
     patterns:
+      - name: punctuation.comma.ds
+        match: ','
       - include: '#segment'
       - name: invalid.illegal.expected-array-separator.json
         match: '(<\|>)'   

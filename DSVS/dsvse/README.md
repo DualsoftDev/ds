@@ -41,6 +41,10 @@ DS Preview added.
 Update '<|>' syntax error.  
 Syntax support korean.
 
+### 1.0.5
+
+Fix comma in causals
+
 -----------------------------------------------------------------------------------------------------------
 ## Following extension guidelines
 

@@ -11,7 +11,7 @@ fragment VALID_ID_CHAR
    ;
 
 // M.U, M.D
-segments: segment (COMMA segment)*;
+segments: segment ( (COMMA|OR2) segment)*;
 segment1: IDENTIFIER;
 segment2: segment1 DOT segment1;
 segment: (segment1 | segment2);
@@ -34,6 +34,7 @@ TILDE: '~';
 COMMA: ',';
 AND: '&';
 OR: '|';
+OR2: '||';
 AT: '@';
 POUND: '#';
 //NEWLINE: '\r'? '\n';

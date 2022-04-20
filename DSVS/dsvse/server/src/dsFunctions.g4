@@ -18,7 +18,7 @@ funcNXOR: POUND 'nxor' LPARENTHESIS value COMMA value RPARENTHESIS;
 funcNAND: POUND 'nand' LPARENTHESIS value COMMA value RPARENTHESIS;
 funcNOR: POUND 'nor' LPARENTHESIS value COMMA value RPARENTHESIS;
 
-
+// #, 값, 네모
 func
     : funcSet
     | funcLatch
@@ -30,7 +30,7 @@ func
     | funcNOR
     ;
 
-
+// @, 세그먼트, 동그라미
 proc
     : procAssign
     | procSleepMs

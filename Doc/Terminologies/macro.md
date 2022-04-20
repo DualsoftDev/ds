@@ -14,7 +14,7 @@
 ## 매크로 용법
 
 ```ex
-[Sys]My = {
+[sys]My = {
     [accE] = {B; S}
     [accS] = {M}
     [macro] = {
@@ -36,7 +36,7 @@
 
 or 
 ```
-[Sys]My = {
+[sys]My = {
     [accE] = {B; S}
     [accS] = {M}
     [macro=K] = {             // 정의된 macro 명 K 가 system 내에서 중복되지 않아야 한다.

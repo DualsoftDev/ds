@@ -92,10 +92,10 @@ children 을 reset 안전인과 순서를 감안하여 reset 시켜나가는 과
 default reset 예시
 
 사용자 정의
-[Sys]sys1 = {seg1 > seg2 > seg3; seg3 |> seg1}
+[sys]sys1 = {seg1 > seg2 > seg3; seg3 |> seg1}
 
 사용자 정의 + 시스템 default reset 추가 해석
-[Sys]sys1 = {seg1 > seg2 > seg3; seg3 |> seg1; seg3 |> seg2}
+[sys]sys1 = {seg1 > seg2 > seg3; seg3 |> seg1; seg3 |> seg2}
 //seg1의 reset은 사용자에 의해 재정의 받으므로 default 생성 무시 
 
 

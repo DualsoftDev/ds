@@ -68,7 +68,7 @@
 
 - 구성 요소
   - DsSystem : Root Segment Edges
-    - indent 없이 [Sys]SystemName = {children segments edge List} (edge없을시 ';' 로 구분하여 행위만 나열)
+    - indent 없이 [sys]SystemName = {children segments edge List} (edge없을시 ';' 로 구분하여 행위만 나열)
       - brace '{}' 내부의 child 구분자는 `;` or line break
       - child segment 하부의 segment 는 위 목록에 기술하지 않음.  해당 child segment 정의에서 기술
     - indent 후 하부에 child segment 에 대한 세부 정의 및 속성 정의

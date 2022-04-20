@@ -144,8 +144,8 @@
 <tr>
 <td>Seq7</td>
 <td>Root</td>
-<td>[Sys]=</td>
-<td>[Sys]A = {S1}</td>
+<td>[sys]=</td>
+<td>[sys]A = {S1}</td>
 <td>processing S1</td>
 <td>
 
@@ -313,7 +313,7 @@
 <td>[macro]=</td>
 <td>(A = 65)</td>
 <td>Initialize A.</td>
-<td>[Sys]A = 65 //초기화</td>
+<td>[sys]A = 65 //초기화</td>
 <td>
 
 ```mermaid
@@ -345,7 +345,7 @@
 |Id| Item | Unit | Example| Desc | Extension | Extension GUI | 
 |:---:|:----|:--:|:---:|:----|:---|:---|
 |Op13| Numeric  | [macro]NUM  | (C <- (NUM B))  | C converts B to Numeric.  | B = 65 //초기화 |
-|Op14| String  | [macro]STR  | (C <- (STR B))  | C converts B to String.  | [Sys]C <- STR(B) //C에 'A' Setting |
+|Op14| String  | [macro]STR  | (C <- (STR B))  | C converts B to String.  | [sys]C <- STR(B) //C에 'A' Setting |
 |Op15| BCD  | [macro]BCD  | (C <- (BCD B))  | C converts B to BCD.  |
 |Op16| BIN  | [macro]BIN  | (C <- (BIN B))  | C converts B to BIN.  |
 

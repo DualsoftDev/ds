@@ -19,6 +19,6 @@
      */
 
      //action system 
-     [Sys]action  = {(Start) > DoAction <| (Reset)}
+     [sys]action  = {(Start) > DoAction <| (Reset)}
 ```
 

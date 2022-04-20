@@ -13,7 +13,7 @@
 
 
 ```
-     [Sys]trafficlight  = { RedLight <| (Button) > Walk <| Walk.End;
+     [sys]trafficlight  = { RedLight <| (Button) > Walk <| Walk.End;
                             RedLight < _RisingRun;
           Walk = { GreenLight > @30 sec > RedLight } 
      }

@@ -11,5 +11,5 @@
      
 
 ```
-     [Sys]coffee  = {(PutCup), (PushButton) > MakeCoffee <| (GetCoffee)}
+     [sys]coffee  = {(PutCup), (PushButton) > MakeCoffee <| (GetCoffee)}
 ```

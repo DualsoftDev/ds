@@ -31,7 +31,7 @@
 
 | Num | Question :question:  | Answer     :exclamation: 
 |:--:| :-----: | ---- | 
-|4.1 |[Sys]D = {A > B > C} | System D processes action B after action A and action C after action B.<p>`시스템 D는 A행위 후 B행위, B행위 후 C 행위를 각각 처리`|
+|4.1 |[sys]D = {A > B > C} | System D processes action B after action A and action C after action B.<p>`시스템 D는 A행위 후 B행위, B행위 후 C 행위를 각각 처리`|
 |4.2||
 
 5. System Macro

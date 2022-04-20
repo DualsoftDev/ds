@@ -59,12 +59,12 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|OP6|Equals|#( == )|#(B == 3) > A| Action A would be executed when the value of action B is equal to 3<p>`행위 A는 행위 B의 값이 3일 때 실행됨` |    ![AAA](./png/Op6.dio.png)|
-|OP7|Not equals |#( != )|#(B != 3) > A| Action A would be executed when the value of action B is not equal to 3<p>`행위 A는 행위 B의 값이 3이 아닐 때 실행됨` |    ![AAA](./png/Op7.dio.png)|
-|OP8|Greater than |#( > )|#(B > 3) > A| Action A would be executed when the value of action B is greater than 3<p>`행위 A는 행위 B의 값이 3보다 클 때 실행됨` |    ![AAA](./png/Op8.dio.png)|
-|OP9|Less than|#( < )|#(B < 3) > A| Action A would be executed when the value of action B is less than 3<p>`행위 A는 행위 B의 값이 3보다 작을 때 실행됨` |    ![AAA](./png/Op9.dio.png)|
-|OP10|Greater Equals than |#( >= )|#(B >= 3) > A| Action A is executed when the value of action B is greater than or equal to 3<p>`행위 A는 행위 B의 값이 3이상일 때 실행됨`|    ![AAA](./png/Op10.dio.png)|
-|OP11|Less Equals than|#( <= )|#(B <= 3) > A| Action A is executed when the value of action B is less than or equal to 3<p>`행위 A는 행위 B의 값이 3이하일 때 실행됨`|    ![AAA](./png/Op11.dio.png)|
+|OP6|Equals|#( == )|#(B == 3) > A| Action A would be executed when the value of action B is equals to 3<p>`행위 A는 행위 B의 값이 3일 때 실행됨` |    ![AAA](./png/Op6.dio.png)|
+|OP7|Not equals |#( != )|#(B != 3) > A| Action A is executed when the value of action B is not equals to 3<p>`행위 A는 행위 B의 값이 3이 아닐 때 실행됨` |    ![AAA](./png/Op7.dio.png)|
+|OP8|Greater than |#( > )|#(B > 3) > A| Action A is executed when the value of action B is greater than 3<p>`행위 A는 행위 B의 값이 3보다 클 때 실행됨` |    ![AAA](./png/Op8.dio.png)|
+|OP9|Less than|#( < )|#(B < 3) > A| Action A is executed when the value of action B is less than 3<p>`행위 A는 행위 B의 값이 3보다 작을 때 실행됨` |    ![AAA](./png/Op9.dio.png)|
+|OP10|Greater Equals than |#( >= )|#(B >= 3) > A| Action A is executed when the value of action B is greater than or equals to 3<p>`행위 A는 행위 B의 값이 3이상일 때 실행됨`|    ![AAA](./png/Op10.dio.png)|
+|OP11|Less Equals than|#( <= )|#(B <= 3) > A| Action A is executed when the value of action B is less than or equals to 3<p>`행위 A는 행위 B의 값이 3이하일 때 실행됨`|    ![AAA](./png/Op11.dio.png)|
 
 </BR>
 
@@ -73,10 +73,10 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|OP12|Addition | + | #(C != B + 3) | C != B plus 3. | ![AAA](./png/Op12.dio.png)|
-|OP13|Subtraction|- |#(C > B - 3)| C != B minus 3. |  ![AAA](./png/Op13.dio.png)|
-|OP14|Multiplication | * | @(C =  B * 3)  | B multiplied by 3 to assign to C| ![AAA](./png/Op14.dio.png)|
-|OP15|Division|/ | #(C ==  B / 3) | C == B divided by 3. | ![AAA](./png/Op15.dio.png)|
+|OP12|Addition | + | #(C != B + 3) | Action A is executed when 'C' is not equals to 'B plus 3' | ![AAA](./png/Op12.dio.png)|
+|OP13|Subtraction|- |#(C > B - 3)| Action A is executed when 'C' is not equals to 'B minus 3' |  ![AAA](./png/Op13.dio.png)|
+|OP14|Multiplication | * | @(C =  B * 3)  | Action A is executed by action C assigned 'B multiplied by 3' ![AAA](./png/Op14.dio.png)|
+|OP15|Division|/ | #(C ==  B / 3) | Action A is executed when the value of action C equals to 'B divided by 3' | ![AAA](./png/Op15.dio.png)|
 
 </BR>
 

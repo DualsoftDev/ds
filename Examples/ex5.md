@@ -11,11 +11,10 @@
     2. Close
 
 ```
- [sys]door  = { Open <||> Close;
-               (Detect) > Open, @s (10)  > Close;
-               @s (10) <| Close;
+ [sys]door  = {  Open <||> Close;
+               (Detect) > @sf (Open) > @s(10)  > Close;
 
       Open = { Out1 ~ In1, In2 }
-      Close = { Out2 ~  }
+      Close = { Out2 ~ _ }
   }
 ```

@@ -74,8 +74,8 @@
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
 |OP12|Addition | + | #(C != B + 3) | Action A is executed when 'C' is not equals to 'B plus 3' | ![AAA](./png/Op12.dio.png)|
-|OP13|Subtraction|- |#(C > B - 3)| Action A is executed when 'C' is not equals to 'B minus 3' |  ![AAA](./png/Op13.dio.png)|
-|OP14|Multiplication | * | @(C =  B * 3)  | Action A is executed by action C assigned 'B multiplied by 3' ![AAA](./png/Op14.dio.png)|
+|OP13|Subtraction|- |#(C > B - 3)| Action A is executed when 'C' is not equals to 'B minus 3' | ![AAA](./png/Op13.dio.png)|
+|OP14|Multiplication | * | @(C =  B * 3)  | Action A is executed by action C assigned 'B multiplied by 3' | ![AAA](./png/Op14.dio.png)|
 |OP15|Division|/ | #(C ==  B / 3) | Action A is executed when the value of action C equals to 'B divided by 3' | ![AAA](./png/Op15.dio.png)|
 
 </BR>

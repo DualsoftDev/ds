@@ -4,7 +4,7 @@
 |Id| Item | Unit |Example|   Desc |  GUI | 
 |:---:|:----|:--:|:---:|:----|:---|
 |SEQ1|Start Causal|`>`| `A > B > C` |Action B would be executed by causal action A, action C would be executed by causal action B  <p>`B행위는 A행위에 의해 실행되며, C행위는 B행위에 의해 실행됨`| ![AAA](./png/Seq1.dio.png)|
-|SEQ2|Reset Causal| \|> | A > B <\| C|Action B would be executed by causal action A, and the action B would be initialized(reset) by causal action C <p>`B행위는 A행위에 의해 실행되며, B행위는 C행위로 인해 복귀됨`| ![AAA](./png/Seq2.dio.png)|
+|SEQ2|Reset Causal| \|> | A > B <\| C|Action B would be executed by causal action A, and the action B would be initialized(reset) by causal action C <p>`B행위는 A행위에 의해 실행되며, B행위는 C행위로 인해 리셋됨`| ![AAA](./png/Seq2.dio.png)|
 |SEQ3|And Causal|`,`|`A,B,C > D,E` | Action D would be executed by united causal action A, B and C and also action E would be executed by same causal actions as D <p>`D, E행위는 A행위, B행위, C행위에 의해 실행됨`|  ![AAA](./png/Seq3.dio.png)|
 |SEQ4|Or Causal|\|\|| A, B \|\| C > D | Action D would be executed by causal action A and B<p> Or action D would be executed by causal action C <p>`D행위는 A행위, B행위에 의해 실행되거나, C 행위에 의해 실행됨`| ![AAA](./png/Seq4.dio.png)|
 |SEQ5|Causal Split|`;`| `A,B > D;C > D` | Action D would be executed by causal action A and B<p> Or action D would be executed by causal action C <p>`D행위는 A행위, B행위에 의해 실행되거나, C 행위에 의해 실행됨`| ![AAA](./png/Seq5.dio.png)|
@@ -15,9 +15,9 @@
 
 |Id| Item | Unit | Example | Desc |   GUI | 
 |:---:|:----|:--:|:----|:---|:---|
-|SEQ6|Call | `~` |`C = {A ~ B}`<p> `C = {_ ~ B}` <p> empty key is `_` | Upper - Action C calls the action A to execute the DAG (A ~ B), and indicates the state of action B<p>Lower - Action C just indicates the state of action B without executing<p>`C행위는 A를 실행시키며, B의 상태를 나타냄`<p>`C행위는 B의 상태만을 나타냄`| ![AAA](./png/Seq6.dio.png)|
+|SEQ6|Call | `~` |`C = {A ~ B}`<p> `C = {_ ~ B}` <p> empty key is `_` | Upper - Action C calls the action A to execute the DA셋(A ~ B), and indicates the state of action B<p>Lower - Action C just indicates the state of action B without executing<p>`C행위는 A를 실행시키며, B의 상태를 나타냄`<p>`C행위는 B의 상태만을 나타냄`| ![AAA](./png/Seq6.dio.png)|
 |SEQ7|And Call|`,`| `F = {A,B,C ~ D,E}`|Action F calls the action A, B and C to execute the DAG(A,B,C ~ D,E), and indicates the state of action D and E<p>`F행위는 A, B, C를 실행시키며, D, E의 상태를 나타냄`| ![AAA](./png/Seq7.dio.png)
-|SEQ8|Reset Call|`~ ~`| `H = {A,B,C ~ D,E ~ F,G}`|Action H calls the action A, B and C to execute, or calls the action F, G to reset the the DAG(A,B,C ~ D,E ~ F,G) and indicates the state of action D and E<p>`F행위는 A, B, C를 수행시킴으로 D, E의 종료상태를 관찰하며 F, G를 수행시켜 값을 리셋`| ![AAA](./png/Seq8.dio.png)|
+|SEQ8|Reset Call|`~ ~`| `H = {A,B,C ~ D,E ~ F,G}`|Action H calls the action A, B and C to execute the DAG(A,B,C ~ D,E), or calls the action F, G to reset the the state of action D and E<p>And indicates the state of action D and E<p>`F행위는 A, B, C를 실행시키며, D, E의 상태를 나타내고, F, G를 실행시켜 D, E를 리셋함`| ![AAA](./png/Seq8.dio.png)|
 
 </BR>
 

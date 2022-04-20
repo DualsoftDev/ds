@@ -49,7 +49,7 @@
 |:---:|:----|:-------:|:---:|:----|:---|
 |OP1|End  Value | ( ) | `(Seg), A > B`  | B be caused by action A when the Seg End Port (sensor) value is 'True'. <p>` 행위 B는 Seg의 End Port(sensor) 값이 'True' 일 경우에서 행위 A가 수헹되었을때 수행`    |![AAA](./png/Op1.dio.png)|
 |OP2|End Set Value | #set| `#set (Seg) > B` | B be caused by Seg End Port latch value(auto reset by #g(B)) <p>` 행위 B는 Seg의 End Port(sensor) 값이 'True' 면 값 유지(B행위 Going 시에 자동 값 리셋)`      |![AAA](./png/Op2.dio.png)|
-|OP3|End  Value | #latch( , )| `#latch(SegA, #g SegB) > B` | B be caused by Seg End Port latch value(auto reset by #g(B)) <p>` 행위 B는 Seg의 End Port(sensor) 값이 'True' 면 값 유지(설정 값에 의한 리셋)`  |![AAA](./png/Op3.dio.png)|
+|OP3|End  Value | #latch( , )| `#latch((SegA), #g (SegB)) > B` | B be caused by Seg End Port latch value(auto reset by #g(B)) <p>` 행위 B는 Seg의 End Port(sensor) 값이 'True' 면 값 유지(설정 값에 의한 리셋)`  |![AAA](./png/Op3.dio.png)|
 |OP4|Going Status|#g |`#g(Seg) > B`| B be caused by Seg Going Value<p>` 행위 B는 Seg가 Going 경우 인해 수행`      |![AAA](./png/Op4.dio.png)|
 |OP5|Homing Status|#h |`#h(Seg) > B` | B be caused by Seg Homing Value <p>` 행위 B는 Seg가 Homing 경우 인해 수행`     |![AAA](./png/Op5.dio.png)|
 
@@ -88,9 +88,9 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|OP16| And | & | (A&B) > C | C be caused by A end  & B end | ![AAA](./png/Op16.dio.png)|
-|OP17| Or | \| | (A\|B) > C | C be caused by A end or B end | ![AAA](./png/Op17.dio.png)|
-|OP18| Not | ! | (!A) > B | B be caused by not end A | ![AAA](./png/Op18.dio.png)|
+|OP16| And | & | #(A&B) > C | C be caused by A end  & B end | ![AAA](./png/Op16.dio.png)|
+|OP17| Or | \| | #(A\|B) > C | C be caused by A end or B end | ![AAA](./png/Op17.dio.png)|
+|OP18| Not | ! | #(!A) > B | B be caused by not end A | ![AAA](./png/Op18.dio.png)|
 |OP19| XOR | #xor( , ) | #xor(B, C) > A | A is exclusive or (B end, C end) |![AAA](./png/Op19.dio.png)|
 |OP20| NXOR | #nxor( , ) | #nxor(B, C) > A | A is NXOR (B end, C end) |![AAA](./png/Op20.dio.png)|
 |OP21| NAND | #nand( , ) | #nand(B, C) > A | A is NAND (B end, C end) |![AAA](./png/Op21.dio.png)|
@@ -104,7 +104,7 @@
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
 |OP23|Copy | `=` | `@(C = B)`  | Copy B to C. |![AAA](./png/Op23.dio.png)|
-|OP24|Initialize|`=` |`@(A = 65)`| Initialize A. |![AAA](./png/Op24.dio.png)|
+|OP24|Initialize|`=` |`#(A < 65) > @(A = 65)`| Initialize A. |![AAA](./png/Op24.dio.png)|
 
 </BR>
 

@@ -76,7 +76,7 @@
 |OP12|Addition | + | #(C != B + 3) | Action A is executed when 'C' is not equals to 'B plus 3'<p>`행위 A는 C가 B와 3을 더한 결과와 같을 때 실행됨` | ![AAA](./png/Op12.dio.png)|
 |OP13|Subtraction|- |#(C > B - 3)| Action A is executed when 'C' is not equals to 'B minus 3'<p>`행위 A는 C가 B와 3을 뺀 결과와 같을 때 실행됨` | ![AAA](./png/Op13.dio.png)|
 |OP14|Multiplication | * | @(C =  B * 3)  | Action A is executed by action C assigned 'B multiplied by 3'<p>`행위 A는 B와 3의 곱연산이 할당된 행위 C에 의해 실행됨` | ![AAA](./png/Op14.dio.png)|
-|OP15|Division|/ | #(C ==  B / 3) | Action A is executed when the value of action C equals to 'B divided by 3' | ![AAA](./png/Op15.dio.png)|
+|OP15|Division|/ | #(C ==  B / 3) | Action A is executed when the value of action C equals to 'B divided by 3'<p>`행위 A는 C가 B와 3을 나눈 결과와 같을 때 실행됨` | ![AAA](./png/Op15.dio.png)|
 
 </BR>
 

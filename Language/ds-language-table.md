@@ -120,7 +120,7 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|OP27| Numeric  | #num ()   |` #(65 < #num (B)) ` | Compare the numerically converted B is greater than 65  |![AAA](./png/Op27.dio.png)|
+|OP27| Numeric  | #num ()   |` #(65 < #num (B)) ` | Compares the numerically converted B is greater than 65  |![AAA](./png/Op27.dio.png)|
 |OP28| String  |#str ()   | ` @(C = #str (B)) `  | Convert B to string and put into the C.  | ![AAA](./png/Op28.dio.png)|
 |OP29| BCD  | #bcd ()   |` @(C = #bcd (B)) `   | Convert B to BCD and put into the C  |![AAA](./png/Op29.dio.png)|
 |OP30| BIN  | #bin ()  |` @(C = #bin (B)) ` | Convert B to BIN and put into the C  |![AAA](./png/Op30.dio.png)|
@@ -139,7 +139,7 @@
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
 |FUN1|Abs | #abs  | #(65 == #abs (A))  | Calculate the absolute value of A. |![AAA](./png/Fun1.dio.png)|
-|FUN2|Sin| #sin|#(65 == #sin (A))| Calculate the Sin of A. ||
+|FUN2|Sin| #sin|#(65 == #sin (A))| Calculate the SIN value of A. ||
 |FUN3|Round | #round | #(65 == #round (A)) | Calculate the rounding of A.  || 
 
 

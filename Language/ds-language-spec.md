@@ -1,5 +1,8 @@
 # DS text language spec
 
+DS 언어는 dualsoft® 이름으로 2019년에 상표등록(40-1609932)하여 
+스마트팩토리를 위한 자동화 설비 제어 프로그램의 개발 및 공장 운영을 위한 종합 솔루션입니다.
+
 
 ## 주요스펙 
 
@@ -8,7 +11,7 @@
 
 | Item | Unit |Example|   Desc | 
 |:---:|:----:|:--:|:---:|
-|최소단위 Segment(행위) 정의|call = { `~` } |A = {O1 ~ I1}| A 행위는 Q 를 시켜 I 를 관찰|
+|최소단위 Segment(행위) 정의|call = { `~` } |A = {Actuator.O1 ~ Sensor.I1}| A 행위는 Actuator.O1 를 시켜 Sensor.I1 를 관찰|
 |Segment(행위)레벨 인과 정의|real = { `>` } |R1 = {A > B}| R 행위는 A행위 수행후 B 행위를 수행|
 |System(시스템)레벨 인과 정의|[sys]name = { `>` } | S = {R1 > R2}| S 시스템은 R1행위 관찰 후 R2 시작명령|
  - 해석 규칙

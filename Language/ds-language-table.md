@@ -101,7 +101,7 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|OP23|Copy | `=` | `A > @(C = B)`  | Copy B into C would be executed after action A executed|![AAA](./png/Op23.dio.png)|
+|OP23|Copy | `=` | `A > @(C = B)`  | The action copying B into C would be executed after action A has finished|![AAA](./png/Op23.dio.png)|
 |OP24|Initialize|`=` |`#(A < 65) > @(A = 65)`| Initialization case of A |![AAA](./png/Op24.dio.png)|
 
 </BR>

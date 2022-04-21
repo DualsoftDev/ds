@@ -86,13 +86,13 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|OP16| And | & | #(A&B) > C | C be caused by A end  & B end | ![AAA](./png/Op16.dio.png)|
-|OP17| Or | \| | #(A\|B) > C | C be caused by A end or B end | ![AAA](./png/Op17.dio.png)|
-|OP18| Not | ! | #(!A) > B | B be caused by not end A | ![AAA](./png/Op18.dio.png)|
-|OP19| XOR | #xor( , ) | #xor(B, C) > A | A is exclusive or (B end, C end) |![AAA](./png/Op19.dio.png)|
-|OP20| NXOR | #nxor( , ) | #nxor(B, C) > A | A is NXOR (B end, C end) |![AAA](./png/Op20.dio.png)|
-|OP21| NAND | #nand( , ) | #nand(B, C) > A | A is NAND (B end, C end) |![AAA](./png/Op21.dio.png)|
-|OP22| NOR | #nor( , ) | #nor(B, C) > A | A is NOR (B end, C end) |![AAA](./png/Op22.dio.png)|
+|OP16| And | & | #(A&B) > C | C would be executed when the end of A and B are true | ![AAA](./png/Op16.dio.png)|
+|OP17| Or | \| | #(A\|B) > C | C would be executed when the end of A or B are true | ![AAA](./png/Op17.dio.png)|
+|OP18| Not | ! | #(!A) > B | C would be executed when the end of A is not true | ![AAA](./png/Op18.dio.png)|
+|OP19| XOR | #xor( , ) | #xor(B, C) > A | A would be executed when the XOR (end of B, end of C) is true |![AAA](./png/Op19.dio.png)|
+|OP20| NXOR | #nxor( , ) | #nxor(B, C) > A | A would be executed when the NXOR (end of B, end of C) is true |![AAA](./png/Op20.dio.png)|
+|OP21| NAND | #nand( , ) | #nand(B, C) > A | A would be executed when the NAND (end of B, end of C) is true |![AAA](./png/Op21.dio.png)|
+|OP22| NOR | #nor( , ) | #nor(B, C) > A | A would be executed when the NOR (end of B, end of C) is true |![AAA](./png/Op22.dio.png)|
 </BR>
 
 
@@ -101,8 +101,8 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|OP23|Copy | `=` | `A > @(C = B)`  | Copy B to C is caused by action A|![AAA](./png/Op23.dio.png)|
-|OP24|Initialize|`=` |`#(A < 65) > @(A = 65)`| Initialize A. |![AAA](./png/Op24.dio.png)|
+|OP23|Copy | `=` | `A > @(C = B)`  | The action copying B into C would be executed after action A has finished|![AAA](./png/Op23.dio.png)|
+|OP24|Initialize|`=` |`#(A < 65) > @(A = 65)`| Initialization case of A |![AAA](./png/Op24.dio.png)|
 
 </BR>
 
@@ -111,7 +111,7 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|OP25|On Delay(Start Edge Only) | @ms, @s| A > @ms (500) > B  | B be caused by A finish 500 msec delay    |![AAA](./png/Op25.dio.png)|
+|OP25|On Delay(Start Edge Only) | @ms, @s| A > @ms (500) > B  | B would be executed after 500 msec from the end of action A|![AAA](./png/Op25.dio.png)|
 |OP26|Off Delay |None || Use On Delay    ||
 
 </BR>
@@ -120,10 +120,10 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|OP27| Numeric  | #num ()   |` #(65 < #num (B)) ` | if converts B to Numeric,  GT(greater than) 65  |![AAA](./png/Op27.dio.png)|
-|OP28| String  |#str ()   | ` @(C = #str (B)) `  | C converts B to String.  | ![AAA](./png/Op28.dio.png)|
-|OP29| BCD  | #bcd ()   |` @(C = #bcd (B)) `   | C converts B to BCD.  |![AAA](./png/Op29.dio.png)|
-|OP30| BIN  | #bin ()  |` @(C = #bin (B)) ` | C converts B to BIN.  |![AAA](./png/Op30.dio.png)|
+|OP27| Numeric  | #num ()   |` #(65 < #num (B)) ` | Compares the numerically converted B is greater than 65  |![AAA](./png/Op27.dio.png)|
+|OP28| String  |#str ()   | ` @(C = #str (B)) `  | Convert B to string and put into the C.  | ![AAA](./png/Op28.dio.png)|
+|OP29| BCD  | #bcd ()   |` @(C = #bcd (B)) `   | Convert B to BCD and put into the C  |![AAA](./png/Op29.dio.png)|
+|OP30| BIN  | #bin ()  |` @(C = #bin (B)) ` | Convert B to BIN and put into the C  |![AAA](./png/Op30.dio.png)|
 
 </BR>
 
@@ -139,7 +139,7 @@
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
 |FUN1|Abs | #abs  | #(65 == #abs (A))  | Calculate the absolute value of A. |![AAA](./png/Fun1.dio.png)|
-|FUN2|Sin| #sin|#(65 == #sin (A))| Calculate the Sin of A. ||
+|FUN2|Sin| #sin|#(65 == #sin (A))| Calculate the SIN value of A. ||
 |FUN3|Round | #round | #(65 == #round (A)) | Calculate the rounding of A.  || 
 
 

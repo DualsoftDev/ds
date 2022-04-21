@@ -89,10 +89,10 @@
 |OP16| And | & | #(A&B) > C | C would be executed when the end of A and B are true | ![AAA](./png/Op16.dio.png)|
 |OP17| Or | \| | #(A\|B) > C | C would be executed when the end of A or B are true | ![AAA](./png/Op17.dio.png)|
 |OP18| Not | ! | #(!A) > B | C would be executed when the end of A is not true | ![AAA](./png/Op18.dio.png)|
-|OP19| XOR | #xor( , ) | #xor(B, C) > A | A would be executed when the exclusive or case (B end, C end) is true |![AAA](./png/Op19.dio.png)|
-|OP20| NXOR | #nxor( , ) | #nxor(B, C) > A | A would be executed when if NXOR (B end, C end) is true |![AAA](./png/Op20.dio.png)|
-|OP21| NAND | #nand( , ) | #nand(B, C) > A | A would be executed when if NAND (B end, C end) is true |![AAA](./png/Op21.dio.png)|
-|OP22| NOR | #nor( , ) | #nor(B, C) > A | A would be executed when if NOR (B end, C end) is true |![AAA](./png/Op22.dio.png)|
+|OP19| XOR | #xor( , ) | #xor(B, C) > A | A would be executed when the XOR (end of B, end of C) is true |![AAA](./png/Op19.dio.png)|
+|OP20| NXOR | #nxor( , ) | #nxor(B, C) > A | A would be executed when the NXOR (end of B, end of C) is true |![AAA](./png/Op20.dio.png)|
+|OP21| NAND | #nand( , ) | #nand(B, C) > A | A would be executed when the NAND (end of B, end of C) is true |![AAA](./png/Op21.dio.png)|
+|OP22| NOR | #nor( , ) | #nor(B, C) > A | A would be executed when the NOR (end of B, end of C) is true |![AAA](./png/Op22.dio.png)|
 </BR>
 
 

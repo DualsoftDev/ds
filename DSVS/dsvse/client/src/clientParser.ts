@@ -6,6 +6,7 @@ import { ANTLRInputStream, RecognitionException, Recognizer, CharStream, Parser,
 import { ParseTree, ParseTreeListener, TerminalNode, ErrorNode } from 'antlr4ts/tree';
 import { assert } from 'console';
 import { link } from 'fs';
+import { collectCNFs } from './parseCausal';
 import { dsLexer } from './server-bundle/dsLexer';
 import { dsParser, MacroContext, CausalContext, CausalExpressionContext, ExpressionContext, ProcContext, ProgramContext, SystemContext, ProcSleepMsContext } from './server-bundle/dsParser';
 
@@ -60,7 +61,7 @@ type Token = string;
  * Expression 의 terminal 에 해당하는 부분의 token 을 반환
  * @param exp (Causal)Expression or Proc(@)
  */
-function getTerminalTokens(exp: ParseTree): Token[]
+function getTerminalTokens(exp: ParseTree): TokenDNF
 {
 	assert(isTerminalNode(exp), 'Expected terminal node');
 	if (exp instanceof ExpressionContext)
@@ -77,9 +78,18 @@ function getTerminalTokens(exp: ParseTree): Token[]
 	return getSegmentTokens(exp);
 }
 
+/** (Disjunctive Normal Form) of tokens */
+type TokenDNF = (string | string[])[] | null;
 
-/** 주어진 expression 에서 segment 이름을 추출하여 배열로 반환 */
-function getSegmentTokens(exp: ParseTree)
+
+/**
+ * 주어진 expression 에서 segment 이름을 추출하여 배열로 반환
+ * @param exp 'A, B' or 'A, B || C'
+ * @returns TokenDNF type
+ * - 'A, B' -> [['A', 'B']]
+ * - 'A, B || C' -> [['A', 'B'], 'C']
+ */
+function getSegmentTokens(exp: ParseTree) : TokenDNF
 {
 	if (exp instanceof CausalExpressionContext && exp.segments())
 		return exp.segments()
@@ -100,7 +110,7 @@ function getSegmentTokens(exp: ParseTree)
  * @param leftmost 탐색 방향
  * @returns 검색된 token 의 문자 배열
  */
-function _getDeepTokens(exp: ParseTree, leftmost:boolean)
+function _getDeepTokens(exp: ParseTree, leftmost:boolean) : TokenDNF
 {
 	if (exp instanceof CausalExpressionContext || exp instanceof CausalContext)
 	{
@@ -141,11 +151,15 @@ function parseCausalExpressionContext(exp: ParseTree) : CausalLink[]
 
 function parseCausalExpressionContext_(exp: ParseTree, links:CausalLink[]) : void
 {
-	function addLinks(ls:string[], op:string, rs:string[], links:CausalLink[]) : void
+	// todo: fixme
+	function addLinks(ls:TokenDNF, op:string, rs:TokenDNF, links:CausalLink[]) : void
 	{
 		ls.forEach(l => {
 			rs.forEach(r => {
-				links.push({l, r, op});
+				if (typeof l == 'string' && typeof r == 'string' )
+					links.push({l, r, op});
+				else
+					assert(false, 'not yet, implented.');
 			});
 		});
 	}
@@ -160,20 +174,21 @@ function parseCausalExpressionContext_(exp: ParseTree, links:CausalLink[]) : voi
 		if (! segments)
 		{
 			const [l, op_, r] = [exp.children[0], exp.children[1], exp.children[2]];
-			let lTokens:string[] = null;
-			let rTokens:string[] = null;
+			let lCnfs:TokenDNF = null;
+			let rCnfs:TokenDNF = null;
 
+			const xx = collectCNFs(l);
 			if (isTerminalNode(l))
 			{
-				lTokens = getTerminalTokens(l);	// 좌측이 terminal
+				lCnfs = getTerminalTokens(l);	// 좌측이 terminal
 				parseCausalExpressionContext_(r, links);
-				rTokens = getLeftmostTokens(r);
+				rCnfs = getLeftmostTokens(r);
 			}
 			else
 			{
-				lTokens = getRightmostTokens(l);
+				lCnfs = getRightmostTokens(l);
 				parseCausalExpressionContext_(l, links);
-				rTokens = getTerminalTokens(r);	// 우측이 terminal
+				rCnfs = getTerminalTokens(r);	// 우측이 terminal
 			}
 			const op = op_.text;
 			switch(op) {
@@ -181,26 +196,26 @@ function parseCausalExpressionContext_(exp: ParseTree, links:CausalLink[]) : voi
 				case '<':
 				case '|>':
 				case '<|':
-					addLinks(lTokens, op, rTokens, links);
+					addLinks(lCnfs, op, rCnfs, links);
 					break;
 
 				case '>|>':
 				case '|>>':
-					addLinks(lTokens, '>', rTokens, links);
-					addLinks(lTokens, '|>', rTokens, links);
+					addLinks(lCnfs, '>', rCnfs, links);
+					addLinks(lCnfs, '|>', rCnfs, links);
 					break;
 
 
 				case '<|<':
 				case '<<|':
-					addLinks(lTokens, '<', rTokens, links);
-					addLinks(lTokens, '<|', rTokens, links);
+					addLinks(lCnfs, '<', rCnfs, links);
+					addLinks(lCnfs, '<|', rCnfs, links);
 					break;
 
 
 				case '<||>':
-					addLinks(lTokens, '|>', rTokens, links);
-					addLinks(lTokens, '<|', rTokens, links);
+					addLinks(lCnfs, '|>', rCnfs, links);
+					addLinks(lCnfs, '<|', rCnfs, links);
 					break;
 			}
 		}

@@ -4,7 +4,13 @@
     // Q |> R;
     // X <||> Y;
 
-    A, B  > D;
+    // X > Y;
+    // A, B > C || D;      // ERROR.  OR2 no outgoing
+    // A, B > C || D > E;      // OK.
+
+    A, B || C > D, E;
+    //A, B, C || D, E || F, G, H || I > J, K || L;
+    //A, B  > D;
 
     //(!A) > C;
     // (@xor(A, B) & D|E) > C;

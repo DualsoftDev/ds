@@ -111,7 +111,7 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|OP25|On Delay(Start Edge Only) | @ms, @s| A > @ms (500) > B  | B be caused by A finish 500 msec delay    |![AAA](./png/Op25.dio.png)|
+|OP25|On Delay(Start Edge Only) | @ms, @s| A > @ms (500) > B  | B would be executed after 500 msec from the end of action A|![AAA](./png/Op25.dio.png)|
 |OP26|Off Delay |None || Use On Delay    ||
 
 </BR>

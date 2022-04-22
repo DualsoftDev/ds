@@ -32,14 +32,19 @@ A, B, C || D, E || F, G, H || I			CausalExpressionContext
 
 import { ParseTree } from 'antlr4ts/tree';
 import { assert } from 'console';
-import { CausalContext, SegmentContext, SegmentsDNFContext, CausalExpressionContext, ExpressionContext, ProcContext, ProgramContext, SystemContext, ProcSleepMsContext, SegmentsCNFContext } from './server-bundle/dsParser';
+import { CausalContext, SegmentContext, SegmentsDNFContext, ExpressionContext, ProcContext, ProgramContext, SystemContext, ProcSleepMsContext, SegmentsCNFContext } from './server-bundle/dsParser';
 
-export function* enumerateChildren(from:ParseTree, includeMe=true) : Generator<ParseTree, void, undefined>
+export function* enumerateChildren(from:ParseTree, includeMe=true, predicate:(t:ParseTree) => boolean = null ) : Generator<ParseTree, void, undefined>
 {
-    if (includeMe)
+    const ok = (t:ParseTree) => {
+        if (predicate) return predicate(t);
+        return true;
+    };
+
+    if (includeMe && ok(from))
         yield from;
     for (let index = 0; index < from.childCount; index++)
-        yield* enumerateChildren(from.getChild(index), true);
+        yield* enumerateChildren(from.getChild(index), true, ok);
 }
 
 
@@ -57,7 +62,7 @@ export function findFirst(from:ParseTree, predicate: (exp:ParseTree) => boolean,
 export function collectCNFs(exp:ParseTree) : SegmentsCNFContext[]
 {
     assert(exp instanceof CausalContext
-        || exp instanceof CausalExpressionContext
+        // || exp instanceof CausalExpressionContext
         || exp instanceof SegmentContext
         || exp instanceof SegmentsDNFContext);
     return Array.from(helper(exp));

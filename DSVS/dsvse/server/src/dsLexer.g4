@@ -12,9 +12,10 @@ fragment VALID_ID_CHAR
 
 // M.U, M.D
 segments: segmentsDNF*;
-segment1: IDENTIFIER;
-segment2: segment1 DOT segment1;
-segment: (segment1 | segment2);
+// segment1: IDENTIFIER;
+// segment2: segment1 DOT segment1;
+// segment: (segment1 | segment2);
+segment: (IDENTIFIER | IDENTIFIER DOT IDENTIFIER);
 
 segmentsCNF: segment (COMMA segment)*;
 segmentsDNF: segmentsCNF (OR2 segmentsCNF)*;

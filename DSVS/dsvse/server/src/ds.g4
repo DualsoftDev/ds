@@ -22,7 +22,7 @@ import dsFunctions;
 program: (system|comment)* EOF;
 
 
-system: sysHdr segment1 '=' sysBlock;    // [sys] Seg = {..}
+system: sysHdr IDENTIFIER '=' sysBlock;    // [sys] Seg = {..}
 
 
 sysHdr: LBRACKET sys_ RBRACKET;  // [sys]
@@ -30,10 +30,10 @@ sysBlock
     : simpleSysBlock        //#caseSimpleSysBlock
     | complexSysBlock       //#caseComplexSysBlock
     ;
-simpleSysBlock:  LBRACE segment1 (';' segment1)* RBRACE;
+simpleSysBlock:  LBRACE IDENTIFIER (';' IDENTIFIER)* RBRACE;
 complexSysBlock: LBRACE (acc|macro|causal)* RBRACE;
 
-acc: LBRACKET accsre RBRACKET EQ LBRACE segment1 (SEIMCOLON segment1)* RBRACE;    // [accsre] = { A; B }
+acc: LBRACKET accsre RBRACKET EQ LBRACE IDENTIFIER (SEIMCOLON IDENTIFIER)* RBRACE;    // [accsre] = { A; B }
 
 
 /*
@@ -46,33 +46,40 @@ macroHeader
     | namedMacroHeader
     ;
 simpleMacroHeader: 'macro';
-namedMacroHeader: 'macro' EQ segment1;
+namedMacroHeader: 'macro' EQ IDENTIFIER;
 
 // A23 = { M.U ~ S.S3U }
-call: segment1 EQ LBRACE segments TILDE segments RBRACE;
+call: IDENTIFIER EQ LBRACE segments TILDE segments RBRACE;
 
 // B.F1 > Set1F <| T.A21;
 causal
-    : causalExpression causalOperator causalExpression SEIMCOLON
-    | causalExpression causalBwdOperator expression SEIMCOLON
-    | expression causalFwdOperator causalExpression SEIMCOLON
+    : causalPhrase+ SEIMCOLON
     ;
-//causal: expression causalOperator causal SEIMCOLON;
+causals: causal+;   // debugging purpose
 
+
+causalPhrase
+    : causalTokensDNF (causalOperator causalTokensDNF)*
+    ;
+
+causalToken
+    : segment       // 'A' or 'A.B'
+    | segmentValue  // '(A)' or '(A.B)'
+    | proc
+    | func
+    | expression
+    ;
+segmentValue: LPARENTHESIS segment RPARENTHESIS;
+
+causalTokensCNF
+    : causalToken (COMMA causalToken)*
+    ;
+causalTokensDNF
+    : causalTokensCNF (OR2 causalTokensCNF)*
+    ;
 logicalBinaryOperator: '&' | '|';
  
-/*
- * Causal Expression
-    A, B |> C
-    (A & B) |> C
- */
-causalExpression
-    : segments
-    | proc
-    | causalExpression  causalOperator      causalExpression
-    | expression        causalFwdOperator   causalExpression
-    | causalExpression  causalBwdOperator   expression
-    ;
+
 /*
  * Expression
  */
@@ -85,26 +92,38 @@ expression
 
 
 causalOperator
-    : causalFwdOperator
-    | causalBwdOperator
-    | causalFBOperator
-    ;
-
-causalFwdOperator
     : CAUSAL_FWD
     | CAUSAL_RESET_FWD
     | CAUSAL_FWD_AND_RESET_FWD  // '>|>' | '|>>';
-    ;
-causalBwdOperator
-    : CAUSAL_BWD
+    | CAUSAL_BWD
     | CAUSAL_RESET_BWD
     | CAUSAL_BWD_AND_RESET_BWD  // '<<|' | '<|<';
-    ;
-causalFBOperator
-    : CAUSAL_RESET_FB           // <||>
+    | CAUSAL_RESET_FB           // <||>
     | CAUSAL_FWD_AND_RESET_BWD  // '><|';
     | CAUSAL_BWD_AND_RESET_FWD  // '|><';
     ;
+
+// causalOperator
+//     : causalFwdOperator
+//     | causalBwdOperator
+//     | causalFBOperator
+//     ;
+
+// causalFwdOperator
+//     : CAUSAL_FWD
+//     | CAUSAL_RESET_FWD
+//     | CAUSAL_FWD_AND_RESET_FWD  // '>|>' | '|>>';
+//     ;
+// causalBwdOperator
+//     : CAUSAL_BWD
+//     | CAUSAL_RESET_BWD
+//     | CAUSAL_BWD_AND_RESET_BWD  // '<<|' | '<|<';
+//     ;
+// causalFBOperator
+//     : CAUSAL_RESET_FB           // <||>
+//     | CAUSAL_FWD_AND_RESET_BWD  // '><|';
+//     | CAUSAL_BWD_AND_RESET_FWD  // '|><';
+//     ;
 
 
 

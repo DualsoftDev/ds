@@ -8,7 +8,7 @@ import { assert } from 'console';
 import { link } from 'fs';
 import { collectCNFs } from './parseCausal';
 import { dsLexer } from './server-bundle/dsLexer';
-import { dsParser, MacroContext, CausalContext, CausalExpressionContext, ExpressionContext, ProcContext, ProgramContext, SystemContext, ProcSleepMsContext } from './server-bundle/dsParser';
+import { dsParser, MacroContext, CausalContext, ExpressionContext, ProcContext, ProgramContext, SystemContext, ProcSleepMsContext, } from './server-bundle/dsParser';
 
 
 /**
@@ -28,7 +28,7 @@ import { dsParser, MacroContext, CausalContext, CausalExpressionContext, Express
  * DS 문서로부터 parser 객체를 생성해서 반환
  * @param text DS 문서
  */
-function parserFromDocument(text:string) {
+export function parserFromDocument(text:string) {
 	// Create the lexer and parser
 	const inputStream = new ANTLRInputStream(text);
 	const lexer = new dsLexer(inputStream);
@@ -39,7 +39,7 @@ function parserFromDocument(text:string) {
 /**
  * Causal 관계를 표현하는 Link.  'A > B' 일 때, left = A, right = B, operator = '>'
  */
-interface CausalLink {
+export interface CausalLink {
 	l: string,
 	r: string,
 	op: string
@@ -56,87 +56,89 @@ function isTerminalNode(ctx:ParseTree) {
 }
 
 
-type Token = string;
-/**
- * Expression 의 terminal 에 해당하는 부분의 token 을 반환
- * @param exp (Causal)Expression or Proc(@)
- */
-function getTerminalTokens(exp: ParseTree): TokenDNF
-{
-	assert(isTerminalNode(exp), 'Expected terminal node');
-	if (exp instanceof ExpressionContext)
-	{
-		const lexp = exp as ExpressionContext;
-		return lexp.children
-			.filter(c => ! (c instanceof TerminalNode))
-			.map(c => c.text)
-			;
-	}
-	else if (exp instanceof CausalExpressionContext && exp.childCount == 1 && exp.children[0] instanceof ProcContext)
-		return getSegmentTokens(exp.children[0].children[0]);
+// type Token = string;
+// /**
+//  * Expression 의 terminal 에 해당하는 부분의 token 을 반환
+//  * @param exp (Causal)Expression or Proc(@)
+//  */
+// function getTerminalTokens(exp: ParseTree): TokenDNF
+// {
+// 	assert(isTerminalNode(exp), 'Expected terminal node');
+// 	if (exp instanceof ExpressionContext)
+// 	{
+// 		const lexp = exp as ExpressionContext;
+// 		return lexp.children
+// 			.filter(c => ! (c instanceof TerminalNode))
+// 			.map(c => c.text)
+// 			;
+// 	}
+// 	assert(false, 'fix me');
+// 	// else if (exp instanceof CausalExpressionContext && exp.childCount == 1 && exp.children[0] instanceof ProcContext)
+// 	// 	return getSegmentTokens(exp.children[0].children[0]);
 
-	return getSegmentTokens(exp);
-}
+// 	return getSegmentTokens(exp);
+// }
 
-/** (Disjunctive Normal Form) of tokens */
-type TokenDNF = (string | string[])[] | null;
-
-
-/**
- * 주어진 expression 에서 segment 이름을 추출하여 배열로 반환
- * @param exp 'A, B' or 'A, B || C'
- * @returns TokenDNF type
- * - 'A, B' -> [['A', 'B']]
- * - 'A, B || C' -> [['A', 'B'], 'C']
- */
-function getSegmentTokens(exp: ParseTree) : TokenDNF
-{
-	if (exp instanceof CausalExpressionContext && exp.segments())
-		return exp.segments()
-			.children
-			.filter(c => ! (c instanceof TerminalNode))
-			.map(c => c.text)
-			;
-	else if (exp instanceof ProcSleepMsContext)
-		return [exp.text];
-	return null;
-}
+// /** (Disjunctive Normal Form) of tokens */
+// type TokenDNF = (string | string[])[] | null;
 
 
-/**
- * 주어진 expression 에서 operator 를 기준으로 왼쪽/오른쪽 방향으로 가장 깊은 terminal 의 tokens 문자 배열 검색해서 반환
- * - operator 가 존재하지 않는 terminal 일 경우, termianl 자체를 반환
- * @param exp 탐색 대상 expression
- * @param leftmost 탐색 방향
- * @returns 검색된 token 의 문자 배열
- */
-function _getDeepTokens(exp: ParseTree, leftmost:boolean) : TokenDNF
-{
-	if (exp instanceof CausalExpressionContext || exp instanceof CausalContext)
-	{
-		const segments = getSegmentTokens(exp);
-		if (segments)
-			return segments;
+// /**
+//  * 주어진 expression 에서 segment 이름을 추출하여 배열로 반환
+//  * @param exp 'A, B' or 'A, B || C'
+//  * @returns TokenDNF type
+//  * - 'A, B' -> [['A', 'B']]
+//  * - 'A, B || C' -> [['A', 'B'], 'C']
+//  */
+// function getSegmentTokens(exp: ParseTree) : TokenDNF
+// {
+// 	assert(false, 'fix me 2');
+// 	// if (exp instanceof CausalTokenContext && exp.segments())
+// 	// 	return exp.segments()
+// 	// 		.children
+// 	// 		.filter(c => ! (c instanceof TerminalNode))
+// 	// 		.map(c => c.text)
+// 	// 		;
+// 	// else if (exp instanceof ProcSleepMsContext)
+// 	// 	return [exp.text];
+// 	return null;
+// }
+
+
+// /**
+//  * 주어진 expression 에서 operator 를 기준으로 왼쪽/오른쪽 방향으로 가장 깊은 terminal 의 tokens 문자 배열 검색해서 반환
+//  * - operator 가 존재하지 않는 terminal 일 경우, termianl 자체를 반환
+//  * @param exp 탐색 대상 expression
+//  * @param leftmost 탐색 방향
+//  * @returns 검색된 token 의 문자 배열
+//  */
+// function _getDeepTokens(exp: ParseTree, leftmost:boolean) : TokenDNF
+// {
+// 	if (exp instanceof CausalPhraseContext || exp instanceof CausalContext)
+// 	{
+// 		const segments = getSegmentTokens(exp);
+// 		if (segments)
+// 			return segments;
 	
-		const [l, op_, r] = [exp.children[0], exp.children[1], exp.children[2]];
-		return _getDeepTokens(leftmost ? l : r, leftmost);
-	}
-	else if (exp instanceof ExpressionContext)
-		return [exp.text];
-	else
-		return null;
-}
+// 		const [l, op_, r] = [exp.children[0], exp.children[1], exp.children[2]];
+// 		return _getDeepTokens(leftmost ? l : r, leftmost);
+// 	}
+// 	else if (exp instanceof ExpressionContext)
+// 		return [exp.text];
+// 	else
+// 		return null;
+// }
 
-/**
- * 주어진 expression 에서 operator 를 기준으로 왼쪽으로 가장 깊은 terminal 의 tokens 문자 배열 검색해서 반환.
- * - @see _getDeepTokens
- */
-const getLeftmostTokens = (exp) => _getDeepTokens(exp, true);
-/**
- * 주어진 expression 에서 operator 를 기준으로 오른쪽으로 가장 깊은 terminal 의 tokens 문자 배열 검색해서 반환.
- * - @see _getDeepTokens
- */
- const getRightmostTokens = (exp) => _getDeepTokens(exp, false);
+// /**
+//  * 주어진 expression 에서 operator 를 기준으로 왼쪽으로 가장 깊은 terminal 의 tokens 문자 배열 검색해서 반환.
+//  * - @see _getDeepTokens
+//  */
+// const getLeftmostTokens = (exp) => _getDeepTokens(exp, true);
+// /**
+//  * 주어진 expression 에서 operator 를 기준으로 오른쪽으로 가장 깊은 terminal 의 tokens 문자 배열 검색해서 반환.
+//  * - @see _getDeepTokens
+//  */
+//  const getRightmostTokens = (exp) => _getDeepTokens(exp, false);
 
 /**
  * causal expression 을 분석해서, CausalLink[] 를 반환
@@ -152,76 +154,76 @@ function parseCausalExpressionContext(exp: ParseTree) : CausalLink[]
 function parseCausalExpressionContext_(exp: ParseTree, links:CausalLink[]) : void
 {
 	// todo: fixme
-	function addLinks(ls:TokenDNF, op:string, rs:TokenDNF, links:CausalLink[]) : void
-	{
-		ls.forEach(l => {
-			rs.forEach(r => {
-				if (typeof l == 'string' && typeof r == 'string' )
-					links.push({l, r, op});
-				else
-					assert(false, 'not yet, implented.');
-			});
-		});
-	}
+	// function addLinks(ls:TokenDNF, op:string, rs:TokenDNF, links:CausalLink[]) : void
+	// {
+	// 	ls.forEach(l => {
+	// 		rs.forEach(r => {
+	// 			if (typeof l == 'string' && typeof r == 'string' )
+	// 				links.push({l, r, op});
+	// 			else
+	// 				assert(false, 'not yet, implented.');
+	// 		});
+	// 	});
+	// }
 
 
-	if (exp instanceof ExpressionContext)
-		return;
+	// if (exp instanceof ExpressionContext)
+	// 	return;
 
-	if (exp instanceof CausalExpressionContext || exp instanceof CausalContext)
-	{
-		const segments = getSegmentTokens(exp);
-		if (! segments)
-		{
-			const [l, op_, r] = [exp.children[0], exp.children[1], exp.children[2]];
-			let lCnfs:TokenDNF = null;
-			let rCnfs:TokenDNF = null;
+	// if (exp instanceof CausalPhraseContext || exp instanceof CausalContext)
+	// {
+	// 	const segments = getSegmentTokens(exp);
+	// 	if (! segments)
+	// 	{
+	// 		const [l, op_, r] = [exp.children[0], exp.children[1], exp.children[2]];
+	// 		let lCnfs:TokenDNF = null;
+	// 		let rCnfs:TokenDNF = null;
 
-			const xx = collectCNFs(l);
-			if (isTerminalNode(l))
-			{
-				lCnfs = getTerminalTokens(l);	// 좌측이 terminal
-				parseCausalExpressionContext_(r, links);
-				rCnfs = getLeftmostTokens(r);
-			}
-			else
-			{
-				lCnfs = getRightmostTokens(l);
-				parseCausalExpressionContext_(l, links);
-				rCnfs = getTerminalTokens(r);	// 우측이 terminal
-			}
-			const op = op_.text;
-			switch(op) {
-				case '>':
-				case '<':
-				case '|>':
-				case '<|':
-					addLinks(lCnfs, op, rCnfs, links);
-					break;
+	// 		const xx = collectCNFs(l);
+	// 		if (isTerminalNode(l))
+	// 		{
+	// 			lCnfs = getTerminalTokens(l);	// 좌측이 terminal
+	// 			parseCausalExpressionContext_(r, links);
+	// 			rCnfs = getLeftmostTokens(r);
+	// 		}
+	// 		else
+	// 		{
+	// 			lCnfs = getRightmostTokens(l);
+	// 			parseCausalExpressionContext_(l, links);
+	// 			rCnfs = getTerminalTokens(r);	// 우측이 terminal
+	// 		}
+	// 		const op = op_.text;
+	// 		switch(op) {
+	// 			case '>':
+	// 			case '<':
+	// 			case '|>':
+	// 			case '<|':
+	// 				addLinks(lCnfs, op, rCnfs, links);
+	// 				break;
 
-				case '>|>':
-				case '|>>':
-					addLinks(lCnfs, '>', rCnfs, links);
-					addLinks(lCnfs, '|>', rCnfs, links);
-					break;
-
-
-				case '<|<':
-				case '<<|':
-					addLinks(lCnfs, '<', rCnfs, links);
-					addLinks(lCnfs, '<|', rCnfs, links);
-					break;
+	// 			case '>|>':
+	// 			case '|>>':
+	// 				addLinks(lCnfs, '>', rCnfs, links);
+	// 				addLinks(lCnfs, '|>', rCnfs, links);
+	// 				break;
 
 
-				case '<||>':
-					addLinks(lCnfs, '|>', rCnfs, links);
-					addLinks(lCnfs, '<|', rCnfs, links);
-					break;
-			}
-		}
-	}
-	else
-		assert(false, "type match error");
+	// 			case '<|<':
+	// 			case '<<|':
+	// 				addLinks(lCnfs, '<', rCnfs, links);
+	// 				addLinks(lCnfs, '<|', rCnfs, links);
+	// 				break;
+
+
+	// 			case '<||>':
+	// 				addLinks(lCnfs, '|>', rCnfs, links);
+	// 				addLinks(lCnfs, '<|', rCnfs, links);
+	// 				break;
+	// 		}
+	// 	}
+	// }
+	// else
+	// 	assert(false, "type match error");
 }
 
 
@@ -260,7 +262,7 @@ export function *parseDSDocument(text:string) {
 					continue;
 				}
 
-				console.log(`\tcausal: ${causal.text}`);
+				console.log(`\tcausal: ${causal.toStringTree(parser)}`);
 				yield* parseCausalExpressionContext(causal);
 			}
 

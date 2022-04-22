@@ -1,11 +1,11 @@
-# DS text language table (# segment Macro)
+# DS text language table (@ segment Macro)
 
 ##  syntax :  @name ( , , ...)
 
 
 
 
-### 3. Priority operation
+### 1. Priority operation
 
 |Id| Item | Unit | Example| Desc | GUI |
 |:---:|:----|:--:|:---:|:----|:---|
@@ -13,7 +13,7 @@
 |IF2|Last Priority  |  @lf  | A > @lf (B) <\|C | Action B operates based on the last signal received among the start and reset signals | ![AAA](./png/IF2.dio.png)|
 </BR>
 
-### 4.  Push-button-like operation
+### 2. Push-button-like operation
 
 |Id| Item | Unit | Example| Desc | GUI |
 |:---:|:----|:--:|:---:|:----|:---|
@@ -25,7 +25,7 @@
 
 
 
-### 5. Single  operation
+### 3. Single  operation
 
 |Id| Item | Unit | Example| Desc | GUI |
 |:---:|:----|:--:|:---:|:----|:---|
@@ -36,7 +36,7 @@
 </BR>
 
 
-### 6. Data operation(데이터 처리)
+### 4. Data operation(데이터 처리)
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
@@ -46,7 +46,7 @@
 </BR>
 
 
-### 7. Time operation(시간연산)
+### 5. Time operation(시간연산)
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|

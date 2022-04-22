@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+  <script src="cytoscape-undo-redo.js"></script>
+  <title>Document</title>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      console.log('first');
+      let cy = cytoscape({
+        wheelSensitivity: 0.1,
+        container: document.getElementById('cy'),
+        elements: [
+          { data: { id: 'A', label: 'A' } }
+          , { data: { id: 'B', label: 'B' } }
+          , { data: { id: 'A&B', label: '', width: 10, height: 10 } }
+          , { data: { id: 'D', label: 'D' } }
+          , { data: { id: 'C', label: 'C' } }
+          , {
+            data: {
+              id: 'ADtrue',
+              source: 'A&B',
+              target: 'D',
+              'line-style': 'solid'
+            }
+          }
+          , {
+            data: {
+              id: 'BDtrue',
+              source: 'B',
+              target: 'A&B',
+              'line-style': 'solid'
+            }
+          }
+          , {
+            data: {
+              id: 'A->A&B',
+              source: 'A',
+              target: 'A&B',
+              'line-style': 'solid'
+            }
+          }
+
+          , {
+            data: {
+              id: 'CDtrue',
+              source: 'C',
+              target: 'D',
+              'line-style': 'solid'
+            }
+          }
+        ],
+        layout: {
+          name: 'cose',   //circle, cose, grid
+        },
+        style: [
+          {
+            selector: 'node',
+            style: {
+              'shape': 'round-rectangle',
+              // 'width': 'data(width)',
+              // 'height': 'data(height)',
+              'color': "white",        // text color
+
+              "border-width": 2,
+              "border-color": "white",
+              "border-style": "solid",   //"dotted",
+
+
+              // 'background-color': 'data(background_color)',
+              //'text-outline-color': 'data(background_color)',
+
+              // 'text-outline-color': 'orange'
+              'text-outline-width': 2,
+              'text-opacity': 0.5,
+              'label': 'data(label)',
+              //'font-size' : '25px',
+              'background-color': 'green'
+            }
+          },
+          {
+            selector: 'edge',
+            style: {
+              'curve-style': 'bezier',
+              'line-color': 'cyan',
+              'width': 3,
+              'target-arrow-shape': 'triangle',
+              // 'source-arrow-shape': 'circle',
+            }
+          }
+        ]
+      });
+      var ur = cy.undoRedo({
+        isDebug: true
+      });
+
+      cy.on("afterUndo", function (e, name) {
+        document.getElementById("undos").innerHTML += "<span style='color: darkred; font-weight: bold'>Undo: </span> " + name + "</br>";
+      });
+
+      cy.on("afterRedo", function (e, name) {
+        document.getElementById("undos").innerHTML += "<span style='color: darkblue; font-weight: bold'>Redo: </span>" + name + "</br>";
+      });
+
+      cy.on("afterDo", function (e, name) {
+        document.getElementById("undos").innerHTML += "<span style='color: darkmagenta; font-weight: bold'>Do: </span>" + name + "</br>";
+      });
+
+      ur.do("add", {
+        group: "nodes",
+        data: { weight: 75, name: "New Node" },
+        position: { x: 200, y: 200 },
+        style: {
+          "background-color": "darkred"
+        }
+      });
+      document.addEventListener("keydown", function (e) {
+        if (e.which === 46) {
+          var selecteds = cy.$(":selected");
+          if (selecteds.length > 0)
+            ur.do("remove", selecteds);
+        }
+        else if (e.ctrlKey && e.target.nodeName === 'BODY')
+          if (e.which === 90)
+            ur.undo();
+          else if (e.which === 89)
+            ur.redo();
+
+      });
+
+      document.getElementById('batchButton').addEventListener("click", function (e) {
+        actions = [];
+        actions.push({
+          name: "add",
+          param: {
+            group: "nodes",
+            data: { weight: 75, name: "Bob" },
+            position: { x: 200, y: 400 },
+            style: { "background-color": "darkgreen" }
+          }
+        });
+        actions.push({
+          name: "remove",
+          param: cy.$(":selected")
+        });
+        ur.do("batch", actions);
+      });
+
+      cy.edges()
+        .filter((e, i) => e.isEdge() && e.data('line-style') == 'dashed')
+        .style('line-style', 'dashed')
+        .update()
+        ;
+    });
+  </script>
+
+</head>
+<style>
+  #cy {
+    width: 100%;
+    height: 100%;
+    z-index: 999;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+  }
+</style>
+
+<body>
+  <p>
+    <b>DEL</b> to delete selected, <b>CTRL+Z</b> to undo, <b>CTRL+Y</b> to redo <br />
+    Test batch of actions: <input id="batchButton" type="button" value="Add 'Bob' and delete selected" />
+  </p>
+
+  <div id="cy"></div>
+  <div id="undoRedoList">
+    <span style="color: darkslateblue; font-weight: bold;">Log</span>
+    <div id="undos" style="padding-bottom: 20px;"></div>
+  </div>
+
+</body>
+
+</style>
+
+</html>

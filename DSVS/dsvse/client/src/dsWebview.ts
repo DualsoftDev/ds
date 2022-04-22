@@ -1,6 +1,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { parseDSDocument } from './clientParser';
+import { visitDSDocument } from './clientVisitor';
 import { getWebviewContentD3 } from './webview.d3';
 import { getWebviewContentCytoscape } from './webview.cytoscape';
 import { assert } from 'console';
@@ -8,6 +9,9 @@ import { assert } from 'console';
 let panel: vscode.WebviewPanel | null = null;
 export function initializeWebview(context: vscode.ExtensionContext) {
     console.log('=== initializing webview for ds.');
+
+    const text = vscode.window.activeTextEditor.document.getText();
+    visitDSDocument(text);
 
     context.subscriptions.push(
         vscode.workspace.onDidChangeTextDocument((event) => {
@@ -32,7 +36,7 @@ export function initializeWebview(context: vscode.ExtensionContext) {
 
         // {source: "Microsoft", target: "Amazon", type: "licensing"},
         const connections =
-            Array.from(parseDSDocument(text))
+            Array.from(visitDSDocument(text))
                 .flatMap(causal => {
                     const c = causal;
                     switch(causal.op)

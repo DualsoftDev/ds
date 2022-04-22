@@ -3,7 +3,14 @@
 
 ANTLR (ANother Tool for Language Recognition) 
 
-
+### grun
+- grun 설치: [antlr4/getting-started.md at master · antlr/antlr4](https://github.com/antlr/antlr4/blob/master/doc/getting-started.md)
+    - /usr/local/lib 에 복사해서 동일 환경으로 설정.
+- 운용
+    - *.ds 파일있는 위치에서
+    $ antlr4 ds.g4
+    $ javac *.java
+    $ echo "A || B, C > D, E || F;" | grun ds causal -gui
 
 [http://courses.missouristate.edu/anthonyclark/333/lectures/06-antlr-vscode.pdf](http://courses.missouristate.edu/anthonyclark/333/lectures/06-antlr-vscode.pdf)
 

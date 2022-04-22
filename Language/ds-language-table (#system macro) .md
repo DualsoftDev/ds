@@ -60,10 +60,10 @@
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|OP27| Numeric  | #num ()   |` #(65 < #num (B)) ` | Compares the numerically converted B is greater than 65  |![AAA](./png/Op27.dio.png)|
-|OP28| String  |#str ()   | ` @(C = #str (B)) `  | Assign the result of convert B to string into the action C  | ![AAA](./png/Op28.dio.png)|
-|OP29| BCD  | #bcd ()   |` @(C = #bcd (B)) `   | Assign the result of convert B to BCD into the action C  |![AAA](./png/Op29.dio.png)|
-|OP30| BIN  | #bin ()  |` @(C = #bin (B)) ` | Assign the result of convert B to BIN into the action C  |![AAA](./png/Op30.dio.png)|
+|OP23| Numeric  | #num ()   |` #(65 < #num (B)) ` | Compares the numerically converted B is greater than 65  |![AAA](./png/Op23.dio.png)|
+|OP24| String  |#str ()   | ` @(C = #str (B)) `  | Assign the result of convert B to string into the action C  | ![AAA](./png/Op24.dio.png)|
+|OP25| BCD  | #bcd ()   |` @(C = #bcd (B)) `   | Assign the result of convert B to BCD into the action C  |![AAA](./png/Op25.dio.png)|
+|OP26| BIN  | #bin ()  |` @(C = #bin (B)) ` | Assign the result of convert B to BIN into the action C  |![AAA](./png/Op26.dio.png)|
 
 </BR>
 

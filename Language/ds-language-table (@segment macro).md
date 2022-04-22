@@ -3,25 +3,6 @@
 ##  syntax :  @name ( , , ...)
 
 
-### 1. Data operation(데이터 처리)
-
-|Id| Item | Unit | Example| Desc |  GUI |
-|:---:|:----|:--:|:---:|:----|:---|
-|OP23|Copy | `=` | `A > @(C = B)`  | The action copying B into C would be executed after action A has finished|![AAA](./png/Op23.dio.png)|
-|OP24|Initialize|`=` |`#(A < 65) > @(A = 65)`| Initialization case of A |![AAA](./png/Op24.dio.png)|
-
-</BR>
-
-
-### 2. Time operation(시간연산)
-
-|Id| Item | Unit | Example| Desc |  GUI |
-|:---:|:----|:--:|:---:|:----|:---|
-|OP25|On Delay(Start Edge Only) | @ms, @s| A > @ms (500) > B  | B would be executed after 500 msec from the finish of action A|![AAA](./png/Op25.dio.png)|
-|OP26|Off Delay |None || Use On Delay    ||
-
-</BR>
-
 
 
 ### 3. Priority operation
@@ -54,3 +35,22 @@
 |IF9|Self Reset | @selfr ( )| A > @selfr (B)    | Action B would be reset itself after finish |  ![AAA](./png/IF9.dio.png)|
 </BR>
 
+
+### 6. Data operation(데이터 처리)
+
+|Id| Item | Unit | Example| Desc |  GUI |
+|:---:|:----|:--:|:---:|:----|:---|
+|IF10|Copy | `=` | `A > @(C = B)`  | The action copying B into C would be executed after action A has finished|![AAA](./png/IF10.dio.png)|
+|IF11|Initialize|`=` |`#(A < 65) > @(A = 65)`| Initialization case of A |![AAA](./png/IF10.dio.png)|
+
+</BR>
+
+
+### 7. Time operation(시간연산)
+
+|Id| Item | Unit | Example| Desc |  GUI |
+|:---:|:----|:--:|:---:|:----|:---|
+|IF12|On Delay(Start Edge Only) | @ms, @s| A > @ms (500) > B  | B would be executed after 500 msec from the finish of action A|![AAA](./png/IF12.dio.png)|
+|IF13|Off Delay |None || Use On Delay    ||
+
+</BR>

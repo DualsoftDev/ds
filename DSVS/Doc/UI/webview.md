@@ -1,5 +1,7 @@
 - [Load external js in external html file in Webview [vscode-extensions]](https://stackoverflow.com/questions/63140623/load-external-js-in-external-html-file-in-webview-vscode-extensions)
 
+- [What I've learned so far while bringing VS Code's Webviews to the web](https://blog.mattbierner.com/vscode-webview-web-learnings/)
+    - <webview> 태그
 
 ## extension <-> webview 통신
 #####  extension -> webview

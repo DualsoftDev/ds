@@ -28,8 +28,12 @@ export function initializeWebview(context: vscode.ExtensionContext) {
                 'dsview',
                 'DS view',
                 vscode.ViewColumn.Two,
-                { enableScripts: true,   //  because the document's frame is sandboxed and the 'allow-scripts' permission is not set
-                  //retainContextWhenHidden: true,
+                {
+                    enableScripts: true,   //  because the document's frame is sandboxed and the 'allow-scripts' permission is not set
+                    //retainContextWhenHidden: true,
+
+                    // Only allow the webview to access resources in our extension's media directory
+                    //localResourceRoots: [vscode.Uri.file(path.join(context.extensionPath, 'media'))]
                 }
             );
         }

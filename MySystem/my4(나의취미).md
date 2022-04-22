@@ -30,42 +30,26 @@
 
   }
 
-  
   [sys]뽑기  = {
 
-    #call (Xm, Xp);
-    #call (Ym, Yp);
-    #call (Zm, Zp);
-    #call (풀기, 잡기);
-    #call (버튼);
+    #import [X](../PathLib/interlock.ds);
+    #import [Y](../PathLib/interlock.ds);
+    #import [Z](../PathLib/interlock.ds);
+    #import [갈고리](../PathLib/interlock_returnTimmer.ds);
+    #import [잡기](../PathLib/button.ds);
 
-    풀기 <||> 잡기;
-    잡기버튼 > 인형뽑기처리 <| _runr;
-    인형뽑기처리 = {풀기, Zp > 잡기 > Zm > Xm, Ym, 풀기 > 잡기};
+    잡기.btn > 인형뽑기처리 <| _runr;
+    인형뽑기처리 = {갈고리.ret, Z.adv > 갈고리.adv > Z.ret;
+                   Z.ret > X.ret, Y.ret; };
 
   }
 ```
+../PathLib
 ```
-  //call macro from [sys]뽑기(수정 시 책임필요)
-  [sys]_뽑기_dev  = { 
-                Xm;Xp;
-                Ym;Yp;
-                Zm;Zp;
-                풀기;잡기;
-
-    Xm = {O.Xm ~ I.Xm};
-    Xp = {O.Xp ~ I.Xp};
-    
-    Ym = {O.Ym ~ I.Ym};
-    Yp = {O.Yp ~ I.Yp};
-    
-    Zm = {O.Zm ~ I.Zm};
-    Zp = {O.Zp ~ I.Zp};
-    
-    잡기 = {O.잡기 ~ @s (1)};
-    풀기 = {O.풀기 ~ I.풀기};
-
-    버튼 = {O.버튼 ~ _};
-  }
-  //call macro from [sys]뽑기
+  [sys]interlock  = { adv <||> ret };  //segment 해당 call 정의 없을시에 별도의 UI에서 interface 매핑 필요
+  [sys]interlock_returnTimmer  = 
+            { adv <||> ret;
+              ret = {_ ~ @s (1);
+            };
+  [sys]button  = {@selfr(btn)};
 ```

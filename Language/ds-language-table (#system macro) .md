@@ -75,12 +75,3 @@
 |FUN1|Abs | #abs  | #(65 == #abs (A))  | Calculate the absolute value of A. |![AAA](./png/Fun1.dio.png)|
 |FUN2|Sin| #sin|#(65 == #sin (A))| Calculate the SIN value of A. ||
 |FUN3|Round | #round | #(65 == #round (A)) | Calculate the rounding of A.  || 
-
-
-
-### 7.  Constain
-
-|Id| Item | Unit | Example| Desc |  GUI |
-|:---:|:----|:--:|:---:|:----|:---|
-|SYS1|Numeric |   | #(C == 3) > A  | Action A would be executed when C equals to number 3 | ![AAA](./png/Sys1.dio.png)|
-|SYS2|String |' ' | #('C'== B) > A| Action A would be executed when B equals to string C| ![AAA](./png/Sys2.dio.png)|

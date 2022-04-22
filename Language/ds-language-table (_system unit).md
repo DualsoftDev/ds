@@ -1,9 +1,16 @@
 # DS text language table (_system Unit)
 
-##  syntax :  _name 
+##  syntax :  _name / ' ' / Numeric
+
+### 1.  Constain
+
+|Id| Item | Unit | Example| Desc |  GUI |
+|:---:|:----|:--:|:---:|:----|:---|
+|SYS1|Numeric | 1,2,...  | #(C == 3) > A  | Action A would be executed when C equals to number 3 | ![AAA](./png/Sys1.dio.png)|
+|SYS2|String |' ' | #('C'== B) > A| Action A would be executed when B equals to string C| ![AAA](./png/Sys2.dio.png)|
 
 
-### 1.  system flag
+### 2.  system flag
 
 |Id| Item | Unit | Example| Desc |  GUI |
 |:---:|:----|:--:|:---:|:----|:---|
@@ -14,7 +21,7 @@
 |SYS7|Running Rising |_runr | _runr > A | A is executed by system bit '_runr'| ![AAA](./png/Sys7.dio.png)|
 |SYS8|Running Falling |_runf | _runf > A | A is executed by system bit '_runf' | ![AAA](./png/Sys8.dio.png)|
 
-### 2.  system timer
+### 3.  system timer
 
 |Id| Item | Unit | Example| Desc | GUI |
 |:---:|:----|:--:|:---:|:----|:---|

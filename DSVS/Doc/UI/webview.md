@@ -1,5 +1,46 @@
 - [Load external js in external html file in Webview [vscode-extensions]](https://stackoverflow.com/questions/63140623/load-external-js-in-external-html-file-in-webview-vscode-extensions)
 
+
+## extension <-> webview 통신
+#####  extension -> webview
+https://stackoverflow.com/questions/61800330/how-can-i-save-the-whole-body-of-webview-in-vscode
+```js
+function exportToSVG(type, name) {
+    // Saving the SVG is delegated to the extension to allow asking the user for a target file.
+    const svg = document.querySelectorAll('svg')[0];
+    const args = {
+        command: "saveSVG",
+        name: name,
+        type: type,
+        svg: svg.outerHTML
+    };
+
+    vscode.postMessage(args);
+}
+```
+##### webview -> extension
+- [Calling vscode Extension for data from webview](https://stackoverflow.com/questions/56830928/calling-vscode-extension-for-data-from-webview)
+```js
+(function() {
+            const vscode = acquireVsCodeApi();
+            const counter = document.getElementById('lines-of-code-counter');
+
+            let count = 0;
+            setInterval(() => {
+                counter.textContent = count++;
+
+                // Alert the extension when our cat introduces a bug
+                if (Math.random() < 0.001 * count) {
+                    vscode.postMessage({
+                        command: 'alert',
+                        text: '🐛  on line ' + count
+                    })
+                }
+            }, 100);
+        }())
+```
+
+## Resources
 - [vscode-webview-ui-toolkit/getting-started.md at main · microsoft/vscode-webview-ui-toolkit](https://github.com/microsoft/vscode-webview-ui-toolkit/blob/main/docs/getting-started.md)
 
 

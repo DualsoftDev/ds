@@ -3,22 +3,52 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
 
   <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
   <script src="cytoscape-undo-redo.js"></script>
   <title>Document</title>
 
+  <style>
+    body {
+      font-family: helvetica neue, helvetica, liberation sans, arial, sans-serif;
+      font-size: 14px;
+    }
+    #cy {
+      z-index: 999;
+      width: 85%;
+      height: 85%;
+      position: absolute;
+      float: left;
+      /* top: 0px;
+      left: 0px; */
+    }
+
+    /* #cy {
+            z-index: 999;
+            width: 85%;
+            height: 85%;
+            float: left;
+        } */
+
+
+    h1 {
+      opacity: 0.5;
+      font-size: 1em;
+      font-weight: bold;
+    }
+
+  </style>
+
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      console.log('first');
       let cy = cytoscape({
-        wheelSensitivity: 0.1,
         container: document.getElementById('cy'),
+        wheelSensitivity: 0.1,
         elements: [
           { data: { id: 'A', label: 'A' } }
           , { data: { id: 'B', label: 'B' } }
-          , { data: { id: 'A&B', label: '', width: 10, height: 10 } }
+          , { data: { id: 'A&B', label: '', /*width: 10, height: 10*/ } }
           , { data: { id: 'D', label: 'D' } }
           , { data: { id: 'C', label: 'C' } }
           , {
@@ -26,7 +56,7 @@
               id: 'ADtrue',
               source: 'A&B',
               target: 'D',
-              'line-style': 'solid'
+              'line-style': 'dashed'
             }
           }
           , {
@@ -80,6 +110,8 @@
               'text-opacity': 0.5,
               'label': 'data(label)',
               //'font-size' : '25px',
+
+              // todo : 한번 color 정하면, selection color 변경할 수 있는 방법을 찾아야 함.
               'background-color': 'green'
             }
           },
@@ -92,9 +124,19 @@
               'target-arrow-shape': 'triangle',
               // 'source-arrow-shape': 'circle',
             }
+          },
+          {
+            selector: ':selected',
+            style: {
+              "border-color": "red",
+              "border-width": 4,
+            }
           }
+
         ]
       });
+
+
       var ur = cy.undoRedo({
         isDebug: true
       });
@@ -113,8 +155,8 @@
 
       ur.do("add", {
         group: "nodes",
-        data: { weight: 75, name: "New Node" },
-        position: { x: 200, y: 200 },
+        data: { weight: 75, name: "New Node", id: "New Node", label:"New Node" },
+        position: { x: 50, y: 50 },
         style: {
           "background-color": "darkred"
         }
@@ -139,8 +181,8 @@
           name: "add",
           param: {
             group: "nodes",
-            data: { weight: 75, name: "Bob" },
-            position: { x: 200, y: 400 },
+            data: { weight: 75, name: "Bob", id: "Bob", label:"Bob" },
+            position: { x: 50, y: 50 },
             style: { "background-color": "darkgreen" }
           }
         });
@@ -154,28 +196,23 @@
       cy.edges()
         .filter((e, i) => e.isEdge() && e.data('line-style') == 'dashed')
         .style('line-style', 'dashed')
-        .update()
+        //.update()
         ;
     });
   </script>
-
 </head>
-<style>
-  #cy {
-    width: 100%;
-    height: 100%;
-    z-index: 999;
-    position: absolute;
-    top: 0px;
-    left: 0px;
-  }
-</style>
 
 <body>
-  <p>
+  <h1>cytoscape.js drawing/undo-redo demo</h1>
+
+  <div id="myDiv">
+    <input id="batchButton" type="button" value="Add 'Bob' and delete selected" />
+    <b>DEL</b> to delete selected, <b>CTRL+Z</b> to undo, <b>CTRL+Y</b> to redo <br />
+  </div>
+  <!-- <p>
     <b>DEL</b> to delete selected, <b>CTRL+Z</b> to undo, <b>CTRL+Y</b> to redo <br />
     Test batch of actions: <input id="batchButton" type="button" value="Add 'Bob' and delete selected" />
-  </p>
+  </p> -->
 
   <div id="cy"></div>
   <div id="undoRedoList">
@@ -184,7 +221,5 @@
   </div>
 
 </body>
-
-</style>
 
 </html>

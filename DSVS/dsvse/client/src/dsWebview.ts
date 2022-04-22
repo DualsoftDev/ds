@@ -28,7 +28,9 @@ export function initializeWebview(context: vscode.ExtensionContext) {
                 'dsview',
                 'DS view',
                 vscode.ViewColumn.Two,
-                { enableScripts: true }  //  because the document's frame is sandboxed and the 'allow-scripts' permission is not set
+                { enableScripts: true,   //  because the document's frame is sandboxed and the 'allow-scripts' permission is not set
+                  //retainContextWhenHidden: true,
+                }
             );
         }
 

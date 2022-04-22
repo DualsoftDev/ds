@@ -18,8 +18,10 @@
 </style>
 
 <body>
+    <button id="deleteButton" type="button" z_index="1000">Delete selected</button>
     <div id="cy"></div>
     <script>
+        console.log('first');
         let cy = cytoscape({
             wheelSensitivity: 0.1,
             container: document.getElementById('cy'),
@@ -59,8 +61,8 @@
                     selector: 'node',
                     style: {
                         'shape': 'round-rectangle',
-                        'width': 'data(width)',
-                        'height': 'data(height)',
+                        // 'width': 'data(width)',
+                        // 'height': 'data(height)',
                         'color':"white",        // text color
                 
                         "border-width": 2,
@@ -92,6 +94,34 @@
             ]
         });
 
+        // https://stackoverflow.com/questions/66074806/how-to-delete-the-parent-node-without-deleting-the-children-nodes
+        document
+            .getElementById("deleteButton")
+            .addEventListener("click", function() {
+                console.log('delete key pressed');
+                let selected = cy.nodes(':selected')[0];
+                selected.children().move({parent : (selected.parent().id() ? selected.parent().id() : null)});
+                selected.remove();
+            });
+        // document
+        //     .getElementById("deleteButton")
+        //     .onclick = function() {
+        //         console.log('delete key pressed');
+        //         let selected = cy.nodes(':selected')[0];
+        //         selected.children().move({parent : (selected.parent().id() ? selected.parent().id() : null)});
+        //         selected.remove();
+        //     };
+
+            
+        console.log('registering...', document.getElementById("deleteButton"));
+        cy.on('tap', 'node', function(evt){
+            var node = evt.target;
+            console.log( 'tapped ' + node.id() );
+        });
+        cy.on('keydown', function (e) {
+            console.log(e);
+        });
+
         cy.edges()
             .filter((e, i) => e.isEdge() && e.data('line-style') == 'dashed')
             .style('line-style', 'dashed')
@@ -99,4 +129,6 @@
             ;
     </script>
 </body>
+
+</style>
 </html>

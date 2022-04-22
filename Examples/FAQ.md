@@ -4,14 +4,14 @@
 
 1. Causal (인과 정의)
 
-| Num | Question :question:  | Answer     :exclamation: | Reference |
-|:--:| :-----: | ---- |  ---- | 
-|1.1 |A > B | After action A, action B <p>`A행위 후 B행위`| -[1.1 Causal](../Language/ds-language-table.md/) : SEQ1 | 
-|1.2 |(A) > B | Action B if A value is true <p>`A 값이 true인 경우 B 행위`|   -[2.1 Value operation](../Language/ds-language-table.md/) : OP1| 
-|1.3 |(A) > @pushs (B) | Action B Start if A value is true, <p> Action B Pause if A value is false <p>`A 값이 true인 경우 B 행위실행, A 값이 false인 경우 B행위멈춤`|  -[4.2  Sustain operation](../Language/ds-language-table.md/) : IF3|
-|1.4 |A \|> B | Reset B at the start of action A <p>`A행위 시작시에 B리셋`| -[1.1 Causal](../Language/ds-language-table.md/) : SEQ2| 
-|1.5 |(A) \|> B | Reset B if A value is true <p>`A 값이 true인 경우 B리셋`|  -[2.1 Value operation](../Language/ds-language-table.md/) : OP1| 
-|1.6 |(A) \|> @pushr (B)|Action B Start if A value is true, <p> Action B Pause if A value is false <p>`A 값이 true인 경우 B 행위실행, A 값이 false인 경우 B행위멈춤`|  - [4.2  Sustain operation](../Language/ds-language-table.md/) : IF4|
+| Num | Question :question:  | Answer     :exclamation: | Animation | Reference |
+|:--:| :-----: | ---- |  ---- | ---- | 
+|1.1 |A > B | After action A, action B <p>`A행위 후 B행위`|![](./img/1.1.gif)| -[1.1 Causal](../Language/ds-language-table.md/) : SEQ1 | 
+|1.2 |(A) > B | Action B if A value is true <p>`A 값이 true인 경우 B 행위`|![](./img/1.2.gif)|   -[2.1 Value operation](../Language/ds-language-table.md/) : OP1| 
+|1.3 |(A) > @pushs (B) | Action B Start if A value is true, <p> Action B Pause if A value is false <p>`A 값이 true인 경우 B 행위실행, A 값이 false인 경우 B행위멈춤`|![](./img/1.3.gif)|  -[4.2  Sustain operation](../Language/ds-language-table.md/) : IF3|
+|1.4 |A \|> B | Reset B at the start of action A <p>`A행위 시작시에 B리셋`|![](./img/1.4.gif)| -[1.1 Causal](../Language/ds-language-table.md/) : SEQ2| 
+|1.5 |(A) \|> B | Reset B if A value is true <p>`A 값이 true인 경우 B리셋`|![](./img/1.5.gif)|  -[2.1 Value operation](../Language/ds-language-table.md/) : OP1| 
+|1.6 |(A) \|> @pushr (B)|Action B Start if A value is true, <p> Action B Pause if A value is false <p>`A 값이 true인 경우 B 행위실행, A 값이 false인 경우 B행위멈춤`|![](./img/1.6.gif)|  - [4.2  Sustain operation](../Language/ds-language-table.md/) : IF4|
 
 2. Call (행위 호출)
 

@@ -1,9 +1,9 @@
-DSLexer.interp
-DSLexer.tokens
-DSLexer.ts
-ds.interp
-ds.tokens
+.antlr
+*.java
+*.class
+*.interp
+*.tokens
+dsLexer.ts
 dsListener.ts
 dsParser.ts
 dsVisitor.ts
-.antlr

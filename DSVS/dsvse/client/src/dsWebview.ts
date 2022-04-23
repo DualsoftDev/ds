@@ -7,11 +7,13 @@ import { getWebviewContentCytoscape } from './webview.cytoscape';
 import { assert } from 'console';
 
 let panel: vscode.WebviewPanel | null = null;
-export function initializeWebview(context: vscode.ExtensionContext) {
+let myTextEditor:vscode.TextEditor | null = null;
+export function initializeWebview(textEditor:vscode.TextEditor, context: vscode.ExtensionContext) {
     console.log('=== initializing webview for ds.');
+    myTextEditor = textEditor;
 
-    const text = vscode.window.activeTextEditor.document.getText();
-    visitDSDocument(text);
+    // const text = vscode.window.activeTextEditor.document.getText();
+    // visitDSDocument(text);
 
     context.subscriptions.push(
         vscode.workspace.onDidChangeTextDocument((event) => {
@@ -21,6 +23,7 @@ export function initializeWebview(context: vscode.ExtensionContext) {
     );
 
     function updateDSView() {
+        console.log('PATH=', context.extensionPath);
 
         if (panel == null) {
             // Create and show panel
@@ -33,12 +36,14 @@ export function initializeWebview(context: vscode.ExtensionContext) {
                     //retainContextWhenHidden: true,
 
                     // Only allow the webview to access resources in our extension's media directory
-                    //localResourceRoots: [vscode.Uri.file(path.join(context.extensionPath, 'media'))]
+                    localResourceRoots: [
+                        vscode.Uri.file(path.join(context.extensionPath, 'media')),
+                    ]
                 }
             );
         }
 
-        const text = vscode.window.activeTextEditor.document.getText();
+        const text = myTextEditor.document.getText();
 
         // {source: "Microsoft", target: "Amazon", type: "licensing"},
         const connections =
@@ -62,9 +67,11 @@ export function initializeWebview(context: vscode.ExtensionContext) {
             ;
         console.log('finished parseDSDocument on client side.' + connections);
 
+        console.log('webview=', panel.webview);
+
         // And set its HTML content
         // const html = getWebviewContentD3(connections);
-        const html = getWebviewContentCytoscape(connections);
+        const html = getWebviewContentCytoscape(context.extensionUri, panel.webview, connections);
         panel.webview.html = html;
 
     }
@@ -73,4 +80,3 @@ export function initializeWebview(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('ds.dsview', () => { updateDSView(); })
     );
 }
-

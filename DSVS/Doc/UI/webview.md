@@ -42,6 +42,22 @@ function exportToSVG(type, name) {
         }())
 ```
 
+
+##### webview html 에서 로컬 javascript 로딩
+- [webview-sample 참고](https://github.com/microsoft/vscode-extension-samples.git)
+    - https://github.com/microsoft/vscode-extension-samples/blob/main/webview-sample/src/extension.ts
+    - nonce, ...
+
+- [GitHub - SAP/vscode-webview-rpc-lib: Provides a conventient way to communicate between VSCode extension and his Webviews. Use RPC calls to invoke functions on the webview and receive callbacks.](https://github.com/SAP/vscode-webview-rpc-lib)
+```html
+<head>
+    <script>var exports = {};</script>
+    <script type="module" src="vscode-resource:/node_modules/@sap-devx/webview-rpc/out.browser/rpc-common.js"></script>
+    <script type="module" src="vscode-resource:/node_modules/@sap-devx/webview-rpc/out.browser/rpc-browser.js"></script>
+    <script type="module" src="vscode-resource:/out/media/main.js"></script>
+</head>
+```
+
 ## Resources
 - [vscode-webview-ui-toolkit/getting-started.md at main · microsoft/vscode-webview-ui-toolkit](https://github.com/microsoft/vscode-webview-ui-toolkit/blob/main/docs/getting-started.md)
 

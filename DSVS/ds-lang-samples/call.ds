@@ -4,12 +4,12 @@
     // Q |> R;
     // X <||> Y;
 
-    // X > Y;
+    X > Y;
     //A, B > C || D;      // ERROR.  OR2 no outgoing
     // A, B > C || D > E;      // OK.
 
     //A, B || C > D, E;
-    A, B, C || D, E || F, G, H || I > J, K || L > M, N;
+    //A, B, C || D, E || F, G, H || I > J, K || L > M, N;
     //A, B  > D;
 
     //(!A) > C;

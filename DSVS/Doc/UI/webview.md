@@ -42,6 +42,8 @@ function exportToSVG(type, name) {
         }())
 ```
 
+- [#DevHack: Open custom VSCode WebView panel and focus input](https://www.eliostruyf.com/devhack-open-custom-vscode-webview-panel-focus-input/)
+
 
 ##### webview html 에서 로컬 javascript 로딩
 - [webview-sample 참고](https://github.com/microsoft/vscode-extension-samples.git)

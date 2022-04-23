@@ -83,8 +83,7 @@ export function getWebviewContentCytoscape(extensionUri: vscode.Uri, webview:vsc
     
     <head>
       <meta charset="UTF-8">
-      <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} https: 'self' 'unsafe-inline'; img-src ${webview.cspSource} https:; script-src 'nonce-${nonce}';">
-      <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
+      <meta name="viewport" content="width=device-width">
       
       <script nonce="${nonce}" src="${scriptUris[0]}"></script>
       <script nonce="${nonce}" src="${scriptUris[1]}"></script>
@@ -94,14 +93,14 @@ export function getWebviewContentCytoscape(extensionUri: vscode.Uri, webview:vsc
       <style>
         body {
           font-family: helvetica neue, helvetica, liberation sans, arial, sans-serif;
-          font-size: 14px;
+          // font-size: 14px;
         }
         #cy {
-          z-index: 999;
+          // z-index: 999;
           width: 85%;
           height: 95%;
           position: absolute;
-          float: left;
+          //float: left;
           /* top: 0px;
           left: 0px; */
         }
@@ -127,16 +126,12 @@ export function getWebviewContentCytoscape(extensionUri: vscode.Uri, webview:vsc
     </head>
     
     <body>
-      <h1>cytoscape.js drawing/undo-redo demo</h1>
+      <h1>DS demo</h1>
     
       <div id="myDiv">
         <input id="batchButton" type="button" value="Add 'Bob' and delete selected" />
         <b>DEL</b> to delete selected, <b>CTRL+Z</b> to undo, <b>CTRL+Y</b> to redo <br />
       </div>
-      <!-- <p>
-        <b>DEL</b> to delete selected, <b>CTRL+Z</b> to undo, <b>CTRL+Y</b> to redo <br />
-        Test batch of actions: <input id="batchButton" type="button" value="Add 'Bob' and delete selected" />
-      </p> -->
     
       <div id="cy"></div>
       <div id="undoRedoList">
@@ -147,8 +142,6 @@ export function getWebviewContentCytoscape(extensionUri: vscode.Uri, webview:vsc
     </body>
     
     </html>`;
-
-
 }
 
 

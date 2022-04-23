@@ -12,6 +12,7 @@
 	],
 	"exclude": [
 		"node_modules",
+		"media",
 		".vscode-test"
 	],
 	"references": [

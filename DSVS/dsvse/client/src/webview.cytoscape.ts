@@ -34,7 +34,7 @@ export function getWebviewContentCytoscape(extensionUri: vscode.Uri, webview:vsc
 		// And the uri we use to load this script in the webview
     const scriptUris =
       Array.from(
-        [ 'cytoscape.min.js', 'cytoscape-undo-redo.js', 'empty.js']
+        [ 'cytoscape.min.js', 'cytoscape-undo-redo.js', 'cytoscape.ds.js']
           .map(f => vscode.Uri.joinPath(extensionUri, 'media', f))
           .map(f => webview.asWebviewUri(f)))
       ;
@@ -98,8 +98,8 @@ export function getWebviewContentCytoscape(extensionUri: vscode.Uri, webview:vsc
         }
         #cy {
           z-index: 999;
-          width: 65%;
-          height: 65%;
+          width: 85%;
+          height: 95%;
           position: absolute;
           float: left;
           /* top: 0px;
@@ -160,156 +160,4 @@ function getNonce() {
 	}
 	return text;
 }
-
-
-/*
-<--
-      <script>
-        document.addEventListener('DOMContentLoaded', function () {
-          let cy = cytoscape({
-            container: document.getElementById('cy'),
-            wheelSensitivity: 0.1,
-            elements: ${elements},
-            layout: {
-              name: 'cose',   //circle, cose, grid
-            },
-            style: [
-              {
-                selector: 'node',
-                style: {
-                  'shape': 'round-rectangle',
-                  // 'width': 'data(width)',
-                  // 'height': 'data(height)',
-                  'color': "white",        // text color
-    
-                  "border-width": 2,
-                  "border-color": "white",
-                  "border-style": "solid",   //"dotted",
-    
-    
-                  // 'background-color': 'data(background_color)',
-                  //'text-outline-color': 'data(background_color)',
-    
-                  // 'text-outline-color': 'orange'
-                  'text-outline-width': 2,
-                  'text-opacity': 0.5,
-                  'label': 'data(label)',
-                  //'font-size' : '25px',
-    
-                  // todo : 한번 color 정하면, selection color 변경할 수 있는 방법을 찾아야 함.
-                  'background-color': 'green'
-                }
-              },
-              {
-                selector: 'edge',
-                style: {
-                  'curve-style': 'bezier',
-                  'line-color': 'cyan',
-                  'width': 3,
-                  'target-arrow-shape': 'triangle',
-                  // 'source-arrow-shape': 'circle',
-                }
-              },
-              {
-                selector: ':selected',
-                style: {
-                  "border-color": "red",
-                  "border-width": 4,
-                }
-              }
-    
-            ]
-          });
-    
-    
-          var ur = cy.undoRedo({
-            isDebug: true
-          });
-    
-          cy.on("afterUndo", function (e, name) {
-            document.getElementById("undos").innerHTML += "<span style='color: darkred; font-weight: bold'>Undo: </span> " + name + "</br>";
-          });
-    
-          cy.on("afterRedo", function (e, name) {
-            document.getElementById("undos").innerHTML += "<span style='color: darkblue; font-weight: bold'>Redo: </span>" + name + "</br>";
-          });
-    
-          cy.on("afterDo", function (e, name) {
-            document.getElementById("undos").innerHTML += "<span style='color: darkmagenta; font-weight: bold'>Do: </span>" + name + "</br>";
-          });
-    
-          ur.do("add", {
-            group: "nodes",
-            data: { weight: 75, name: "New Node", id: "New Node", label:"New Node" },
-            position: { x: 50, y: 50 },
-            style: {
-              "background-color": "darkred"
-            }
-          });
-          document.addEventListener("keydown", function (e) {
-            if (e.which === 46) {
-              var selecteds = cy.$(":selected");
-              if (selecteds.length > 0)
-                ur.do("remove", selecteds);
-            }
-            else if (e.ctrlKey && e.target.nodeName === 'BODY')
-              if (e.which === 90)
-                ur.undo();
-              else if (e.which === 89)
-                ur.redo();
-    
-          });
-    
-          document.getElementById('batchButton').addEventListener("click", function (e) {
-            actions = [];
-            actions.push({
-              name: "add",
-              param: {
-                group: "nodes",
-                data: { weight: 75, name: "Bob", id: "Bob", label:"Bob" },
-                position: { x: 50, y: 50 },
-                style: { "background-color": "darkgreen" }
-              }
-            });
-            actions.push({
-              name: "remove",
-              param: cy.$(":selected")
-            });
-            ur.do("batch", actions);
-          });
-    
-          cy.edges()
-            .filter((e, i) => e.isEdge() && e.data('line-style') == 'dashed')
-            .style('line-style', 'dashed')
-            //.update()
-            ;
-        });
-      </script>
--->      
-*/
-
-function getSimpleHtml(webview, nonce, scriptUri)
-{
-  return `<!DOCTYPE html>
-  <html lang="en">
-  <head>
-      <meta charset="UTF-8">
-      <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; img-src ${webview.cspSource} https:; script-src 'nonce-${nonce}';">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Document</title>
-  </head>
-  <body>
-    <h1 id="lines-of-code-counter">0</h1>
-    <script nonce="${nonce}" src="${scriptUri}"></script>
-  </body>
-  </html>
-  `;
-}
-
-// function getCytoscapeHtml()
-// {
-// }
-
-
-
 

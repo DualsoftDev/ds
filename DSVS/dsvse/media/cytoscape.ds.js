@@ -1,10 +1,13 @@
 // This script will be run within the webview itself
 // It cannot access the main VS Code APIs directly.
 
-(function (args) {
+(function () {
+    // In your webview script
+    const vscode = acquireVsCodeApi();
+    console.log('vscode=', vscode);
+
     const strElements = document.title;
     const eles = JSON.parse(strElements);
-    console.log('argument elements string=', args);
     console.log('type of elements=', typeof eles, eles);
 
     document.addEventListener('DOMContentLoaded', function () {
@@ -95,10 +98,17 @@
           }
         });
         document.addEventListener("keydown", function (e) {
-          if (e.which === 46) {
+          if (e.which === 46) {   // DEL key
+            console.log('keydown event detected.', e.which);
             var selecteds = cy.$(":selected");
             if (selecteds.length > 0)
+            {
               ur.do("remove", selecteds);
+              vscode.postMessage({
+                type: "removed",
+                args: "Something",  //JSON.stringify(selecteds)
+              });
+            }
           }
           else if (e.ctrlKey && e.target.nodeName === 'BODY')
             if (e.which === 90)

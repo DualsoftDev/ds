@@ -8,18 +8,16 @@ import { assert } from 'console';
 
 let panel: vscode.WebviewPanel | null = null;
 let myTextEditor:vscode.TextEditor | null = null;
+
 export function initializeWebview(textEditor:vscode.TextEditor, context: vscode.ExtensionContext) {
     console.log('=== initializing webview for ds.');
     myTextEditor = textEditor;
-
-    // const text = vscode.window.activeTextEditor.document.getText();
-    // visitDSDocument(text);
 
     context.subscriptions.push(
         vscode.workspace.onDidChangeTextDocument((event) => {
             console.log('Modification detected.' + event);
             updateDSView();
-        }),
+    }),
     );
 
     function updateDSView() {
@@ -30,16 +28,32 @@ export function initializeWebview(textEditor:vscode.TextEditor, context: vscode.
             panel = vscode.window.createWebviewPanel(
                 'dsview',
                 'DS view',
-                vscode.ViewColumn.Two,
+                {
+                    viewColumn: vscode.ViewColumn.Two,
+                    preserveFocus: false,   // If preserveFocus is set, the new webview will not take focus.
+                },
                 {
                     enableScripts: true,   //  because the document's frame is sandboxed and the 'allow-scripts' permission is not set
-                    //retainContextWhenHidden: true,
+                    retainContextWhenHidden: true,
 
                     // Only allow the webview to access resources in our extension's media directory
                     localResourceRoots: [
                         vscode.Uri.file(path.join(context.extensionPath, 'media')),
                     ]
                 }
+            );
+
+            const doc = myTextEditor.document;
+            context.subscriptions.push(
+                // cytoscape.ds.js 에서 처리된 message 를 받음.
+                panel.webview.onDidReceiveMessage(msg => {
+                    console.log('Got message ', msg);
+                    const replaceContent = `${msg.type}: ${msg.args}\n`;
+                    vscode.window.showInformationMessage(replaceContent);
+                    // const lastLine = doc.lineAt(doc.lineCount - 1);
+                    // myTextEditor.edit((editBuilder) => {
+                    // editBuilder.replace(lastLine.range.end, replaceContent);
+                })
             );
         }
 

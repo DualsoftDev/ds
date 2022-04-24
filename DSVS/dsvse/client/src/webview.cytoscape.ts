@@ -1,3 +1,14 @@
+/*
+ * Issues
+  1. extension <--> webview 간 통신 (message passing)
+  1. webview 생성시의 security policy.
+    - local resource 및 script 를 막아 놓았으므로, 이를 풀고 수행하여야 한다.
+      - local script loading 을 허용하는 경우(nonce 사용), inline script 등은 사용할 수 없으므로 argument 를 pass 하여야 한다.
+      - 일반적으로 사용하는 script 호출의 argument 방식은 동작하지 않는다.  e.g http://....prog?arg=value
+        - HTML document 생성이전에 <header> 에서 script 를 loading 하므로, html 요소 중에 이용가능한 것은 HTML 의 title 밖에 없다.
+        - 인자를 title 에 encoding 해서 보낸다.
+ */
+
 import * as vscode from 'vscode';
 
 /**
@@ -30,6 +41,9 @@ export function getWebviewContentCytoscape(extensionUri: vscode.Uri, webview:vsc
             ;});
     }
 
+    /*
+     * HTML document 에서 loading 할 local script files.  .../media/*.js 위치에 있음.
+     */
 		// Local path to main script run in the webview
 		// And the uri we use to load this script in the webview
     const scriptUris =
@@ -88,6 +102,7 @@ export function getWebviewContentCytoscape(extensionUri: vscode.Uri, webview:vsc
       <script nonce="${nonce}" src="${scriptUris[0]}"></script>
       <script nonce="${nonce}" src="${scriptUris[1]}"></script>
       
+      <!-- DIRTY hack -->
       <title>${elements}</title>
 
       <style>
@@ -128,13 +143,13 @@ export function getWebviewContentCytoscape(extensionUri: vscode.Uri, webview:vsc
     <body>
       <h1>DS demo</h1>
     
-      <div id="myDiv">
+      <div id="myDiv" style="display:none">
         <input id="batchButton" type="button" value="Add 'Bob' and delete selected" />
         <b>DEL</b> to delete selected, <b>CTRL+Z</b> to undo, <b>CTRL+Y</b> to redo <br />
       </div>
     
       <div id="cy"></div>
-      <div id="undoRedoList">
+      <div id="undoRedoList"  style="display:none">
         <span style="color: darkslateblue; font-weight: bold;">Log</span>
         <div id="undos" style="padding-bottom: 20px;"></div>
       </div>

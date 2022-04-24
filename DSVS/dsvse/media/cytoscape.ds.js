@@ -1,7 +1,7 @@
 // This script will be run within the webview itself
 // It cannot access the main VS Code APIs directly.
 
-(function () {
+!(function () {
 	// In your webview script
 	const vscode = acquireVsCodeApi();
 	console.log("vscode=", vscode);
@@ -21,6 +21,8 @@
 			wheelSensitivity: 0.1,
 			layout: {
 				name: "cose", //circle, cose, grid
+				spacingFactor: 120,		// https://stackoverflow.com/questions/54015729/cytoscape-js-spacing-between-nodes
+				idealEdgeLength: 100,
 			},
 			elements: eles,
 			style: [
@@ -74,6 +76,8 @@
 			.filter((e, i) => e.isEdge() && e.data("line-style") == "dashed")
 			.style("line-style", "dashed");
 		//.update()
+
+		cy.style().run();
 
 		var ur = cy.undoRedo({
 			isDebug: true,
@@ -163,6 +167,8 @@
 				ur.do("batch", actions);
 			});
 	});
+
+	return true;
 })();
 
 // const vscode = acquireVsCodeApi();

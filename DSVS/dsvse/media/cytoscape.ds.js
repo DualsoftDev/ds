@@ -6,7 +6,10 @@
 	const vscode = acquireVsCodeApi();
 	console.log("vscode=", vscode);
 
+	console.log('say=', say);
+	console.log('Links by meta = ', document.querySelector('meta[name="links"]').content);
 	const strElements = document.title;
+	console.log('Links by title = ', document.title);
 	const eles = JSON.parse(strElements);
 	console.log("type of elements=", typeof eles, eles);
 
@@ -21,8 +24,8 @@
 			wheelSensitivity: 0.1,
 			layout: {
 				name: "cose", //circle, cose, grid
-				spacingFactor: 120,		// https://stackoverflow.com/questions/54015729/cytoscape-js-spacing-between-nodes
-				idealEdgeLength: 100,
+				// spacingFactor: 120,		// https://stackoverflow.com/questions/54015729/cytoscape-js-spacing-between-nodes
+				// idealEdgeLength: 100,
 			},
 			elements: eles,
 			style: [
@@ -77,7 +80,7 @@
 			.style("line-style", "dashed");
 		//.update()
 
-		cy.style().run();
+		//cy.layout().run();
 
 		var ur = cy.undoRedo({
 			isDebug: true,
@@ -88,6 +91,10 @@
 				"<span style='color: darkred; font-weight: bold'>Undo: </span> " +
 				name +
 				"</br>";
+			vscode.postMessage({
+				type: "undo",
+				args: name, //JSON.stringify(selecteds)
+			});				
 		});
 
 		cy.on("afterRedo", function (e, name) {
@@ -95,6 +102,10 @@
 				"<span style='color: darkblue; font-weight: bold'>Redo: </span>" +
 				name +
 				"</br>";
+			vscode.postMessage({
+				type: "redo",
+				args: name, //JSON.stringify(selecteds)
+			});				
 		});
 
 		cy.on("afterDo", function (e, name) {
@@ -114,8 +125,11 @@
 		});
 
 		cy.on("select", "node", function (e) {
-			console.log("node selected");
+			console.log("node selected:", e.target.id());
 		});
+		cy.bind('click', 'node', function(evt) {
+			console.log('node clicked:(by bind) ', evt.target.id());
+		  });
 
 		document.addEventListener("click", function (e) {
 			console.log("clicked");
@@ -134,11 +148,14 @@
 			if (e.which === 46) {
 				// DEL key
 				var selecteds = cy.$(":selected");
+				const delNodeName = selecteds[0]._private.data.name;
+				console.log('selected:', delNodeName);
+
 				if (selecteds.length > 0) {
 					ur.do("remove", selecteds);
 					vscode.postMessage({
 						type: "removed",
-						args: "Something", //JSON.stringify(selecteds)
+						args: delNodeName,	//e.target.nodeName, //JSON.stringify(selecteds)
 					});
 				}
 			} else if (e.ctrlKey && e.target.nodeName === "BODY")

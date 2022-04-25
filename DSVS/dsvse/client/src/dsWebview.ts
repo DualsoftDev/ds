@@ -1,5 +1,6 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
+import * as fs from "fs";
 import { parseDSDocument } from './clientParser';
 import { visitDSDocument } from './clientVisitor';
 import { getWebviewContentD3 } from './webview.d3';
@@ -87,6 +88,17 @@ export function initializeWebview(textEditor:vscode.TextEditor, context: vscode.
         // const html = getWebviewContentD3(connections);
         const html = getWebviewContentCytoscape(context.extensionUri, panel.webview, connections);
         panel.webview.html = html;
+
+        // write html string to file 'hello.html'
+        const test = context.asAbsolutePath(
+            path.join('media', 'test.html')
+        );    
+        fs.writeFileSync(test, html);
+
+        // // write html string to file abc.txt in the workspace root
+        //  vscode.workspace.openTextDocument({ content: html, language: 'html' })
+        //  .then(doc => {
+        //      vscode.window.showTextDocument(doc); });
 
     }
 

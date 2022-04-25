@@ -90,7 +90,7 @@ export function getWebviewContentCytoscape(extensionUri: vscode.Uri, webview:vsc
 
     const els = Array.from(generateElements());
     const elements = JSON.stringify(els);
-    console.log('TEXT=', els.join(','));
+    // console.log('TEXT=', els.map(e => JSON.stringify(e)).join('\n'));
 
     return `<!DOCTYPE html>
     <html lang="en">
@@ -98,9 +98,13 @@ export function getWebviewContentCytoscape(extensionUri: vscode.Uri, webview:vsc
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width">
+      <meta name="links" content=${elements}>
       
-      <script nonce="${nonce}" src="${scriptUris[0]}"></script>
-      <script nonce="${nonce}" src="${scriptUris[1]}"></script>
+      <script nonce="${getNonce()}" src="${scriptUris[0]}"></script>
+      <script nonce="${getNonce()}" src="${scriptUris[1]}"></script>
+      <script nonce="${getNonce()}">
+      let say = "hello";
+      </script>
       
       <!-- DIRTY hack -->
       <title>${elements}</title>
@@ -111,9 +115,9 @@ export function getWebviewContentCytoscape(extensionUri: vscode.Uri, webview:vsc
           // font-size: 14px;
         }
         #cy {
-          // z-index: 999;
-          width: 85%;
-          height: 95%;
+          z-index: 999;
+          width: 100%;
+          height: 100%;
           position: absolute;
           //float: left;
           /* top: 0px;
@@ -136,7 +140,7 @@ export function getWebviewContentCytoscape(extensionUri: vscode.Uri, webview:vsc
     
       </style>
 
-      <script nonce="${nonce}" src="${scriptUris[2]}"></script>
+      <script nonce="${getNonce()}" src="${scriptUris[2]}"></script>
       
     </head>
     

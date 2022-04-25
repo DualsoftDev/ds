@@ -31,7 +31,7 @@ sysBlock
     | complexSysBlock       //#caseComplexSysBlock
     ;
 simpleSysBlock:  LBRACE IDENTIFIER (';' IDENTIFIER)* RBRACE;
-complexSysBlock: LBRACE (acc|macro|causal)* RBRACE;
+complexSysBlock: LBRACE (acc|macro|causal|importStatement)* RBRACE;
 
 acc: LBRACKET accsre RBRACKET EQ LBRACE IDENTIFIER (SEIMCOLON IDENTIFIER)* RBRACE;    // [accsre] = { A; B }
 
@@ -55,8 +55,9 @@ call: IDENTIFIER EQ LBRACE segments TILDE segments RBRACE;
 causal
     : causalPhrase+ SEIMCOLON
     ;
-causals: causal+;   // debugging purpose
 
+causals: causal+;   // debugging purpose
+importStatements: importStatement+ ;   // debugging purpose
 
 causalPhrase
     : causalTokensDNF (causalOperator causalTokensDNF)*
@@ -77,6 +78,25 @@ causalTokensCNF
 causalTokensDNF
     : causalTokensCNF (OR2 causalTokensCNF)*
     ;
+
+
+importStatement
+    : '!#import' importPhrase 'from' quotedFilePath SEIMCOLON
+    ;
+importPhrase
+    : IDENTIFIER 'as' IDENTIFIER
+    | LBRACE IDENTIFIER 'as' IDENTIFIER
+        (COMMA IDENTIFIER 'as' IDENTIFIER)* (COMMA)?
+        RBRACE
+    ;
+quotedFilePath
+    : SQUOTE (~SQUOTE)* SQUOTE
+    | DQUOTE (~DQUOTE)* DQUOTE
+    ;
+
+
+
+
 logicalBinaryOperator: '&' | '|';
  
 

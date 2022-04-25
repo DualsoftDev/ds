@@ -4,6 +4,11 @@
     // Q |> R;
     // X <||> Y;
 
+    !#import {
+        이거 as A,
+        hello as B,
+    } from "./PathLib/template.dst";
+
     X > Y >Z;
     //A, B > C || D;      // ERROR.  OR2 no outgoing
     // A, B > C || D > E;      // OK.

@@ -17,6 +17,7 @@ g4:
 test:
 	@export CLASSPATH=".:/usr/local/lib/antlr-4.10.1-complete.jar:$$CLASSPATH"
 	@$(grun) ds causals < g4test/causals.txt
+	@$(grun) ds importStatements < g4test/imports.txt
 
 
 clean:

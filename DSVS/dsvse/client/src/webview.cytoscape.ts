@@ -102,9 +102,6 @@ export function getWebviewContentCytoscape(extensionUri: vscode.Uri, webview:vsc
       
       <script nonce="${getNonce()}" src="${scriptUris[0]}"></script>
       <script nonce="${getNonce()}" src="${scriptUris[1]}"></script>
-      <script nonce="${getNonce()}">
-      let say = "hello";
-      </script>
       
       <!-- DIRTY hack -->
       <title>${elements}</title>
@@ -157,6 +154,69 @@ export function getWebviewContentCytoscape(extensionUri: vscode.Uri, webview:vsc
         <span style="color: darkslateblue; font-weight: bold;">Log</span>
         <div id="undos" style="padding-bottom: 20px;"></div>
       </div>
+
+      <script nonce="${getNonce()}">
+
+
+
+        let cy = cytoscape({
+          container: document.getElementById("cy"),
+          wheelSensitivity: 0.1,
+          layout: {
+            name: "cose", //circle, cose, grid
+            // spacingFactor: 120,		// https://stackoverflow.com/questions/54015729/cytoscape-js-spacing-between-nodes
+            // idealEdgeLength: 100,
+          },
+          elements: ${elements},
+          style: [
+            {
+              selector: "node",
+              style: {
+                shape: "round-rectangle",
+                // 'width': 'data(width)',
+                // 'height': 'data(height)',
+                color: "white", // text color
+    
+                "border-width": 2,
+                "border-color": "white",
+                "border-style": "solid", //"dotted",
+    
+                // 'background-color': 'data(background_color)',
+                //'text-outline-color': 'data(background_color)',
+    
+                // 'text-outline-color': 'orange'
+    
+                // 'text-outline-width': 2,
+                "text-opacity": 0.5,
+                label: "data(label)",
+                //'font-size' : '25px',
+    
+                // todo : 한번 color 정하면, selection color 변경할 수 있는 방법을 찾아야 함.
+                "background-color": "green",
+              },
+            },
+            {
+              selector: "edge",
+              style: {
+                "curve-style": "bezier",
+                "line-color": "cyan",
+                // 'width': 3,
+                "target-arrow-shape": "triangle",
+                // 'source-arrow-shape': 'circle',
+              },
+            },
+            {
+              selector: ":selected",
+              style: {
+                "border-color": "red",
+                // "border-width": 4,
+              },
+            },
+          ],
+        });
+  
+
+      </script>
 
     </body>
     

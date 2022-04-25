@@ -2,6 +2,7 @@
 
   - 기본처리 : 모든 행위별 Start End Reset 정보가 없을경우 인터페이스 정의를 받는다.
   - 생성된 TAG_ID 에 매칭되는 인터페이스는 DS 외부에서 DS eventManager로 연동한다. (타 시스템별 3rd party api 개발별도)
+  - 생성된 TAG_ID 는 타입을 제공한다. (기본형 Bit, 확장형 word, string, real,...)
 ```
 [sys]my = { A >  B }; 
 ```

@@ -45,6 +45,9 @@ Syntax support korean.
 
 Fix comma in causals
 
+### 1.0.6
+
+Update ds.g4 & Fix bug
 -----------------------------------------------------------------------------------------------------------
 ## Following extension guidelines
 

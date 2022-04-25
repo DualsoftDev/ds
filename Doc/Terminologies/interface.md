@@ -14,9 +14,9 @@
 | B_ST |OUT3|PLC.M103|
 | B_RT |OUT4|PLC.M104|
 | B_ET |IN2|PLC.M105|
+
 </br></br>
 예시2
-
 ```
 [sys]my = { A >  @selfr (B) }; 
 ```

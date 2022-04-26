@@ -48,6 +48,10 @@ Fix comma in causals
 ### 1.0.6
 
 Update ds.g4 & Fix bug
+
+### 1.0.7
+
+Update parser, import, function
 -----------------------------------------------------------------------------------------------------------
 ## Following extension guidelines
 

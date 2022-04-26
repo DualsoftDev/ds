@@ -10,34 +10,49 @@
  */
 
 import * as vscode from 'vscode';
+import { CausalLink } from './clientParser';
 
 /**
  * Cytoscape 를 이용해서 webview contents 생성
  * @param connections 
  * @returns 
  */
-export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode.Uri, webview:vscode.Webview, connections: {source:string, target:string, solid:boolean}[]) {
-    console.log('hello');
+export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode.Uri, webview:vscode.Webview, systemNames:string[], connections: CausalLink[]) {
+    console.log('getWebviewContentCytoscape');
     /** Cytoscape 용 Elements 생성 */
     function *generateElements()
     {
+        yield*
+          systemNames
+          .map(sn => {
+            return {"data": { "id": sn, "label": sn, "background_color": "gray" }};
+          });
+
         const nodes =
             connections
-            .flatMap(c => [c.source, c.target])
+            .flatMap(c => [c.l, c.r])
             .filter((v, i, a) => a.indexOf(v) === i)  // filter unique : https://stackoverflow.com/questions/1960473/get-all-unique-values-in-a-javascript-array-remove-duplicates
             .map(n => {
-              return { "data": {"id": n, "label": n}};
+              let bg = 'green';
+              let parent = null;
+              switch(n.type)
+              {
+                case 'func': bg = 'blue'; break;
+                case 'system': bg = 'grey'; break;
+                case 'segment': parent = n.parentId; break;
+              }
+              return { "data": {"id": n.id, "label": n.label, "background_color" : bg, parent } };
             })
         ;
 
         yield* nodes;
 
         yield* connections.map(c => {
-            const dashStyle = c.solid ? 'solid' : 'dashed';
+            const dashStyle = c.op.includes('|') ? 'dashed' : 'solid';
             return { "data": {
-                "id": `${c.source}${c.target}${c.solid}`,
-                "source": c.source,
-                "target": c.target,
+                "id": `${c.l.id}${c.op}${c.r.id}`,
+                "source": c.l.id,
+                "target": c.r.id,
                 "line-style": dashStyle}}
             ;});
     }
@@ -103,20 +118,19 @@ export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode
       <script nonce="${getNonce()}" src="${scriptUris[0]}"></script>
       <script nonce="${getNonce()}" src="${scriptUris[1]}"></script>
       
-      <!-- DIRTY hack -->
       <title>${filePath}</title>
 
       <style>
         body {
           font-family: helvetica neue, helvetica, liberation sans, arial, sans-serif;
-          // font-size: 14px;
+          /* font-size: 14px; */
         }
         #cy {
           z-index: 999;
           width: 100%;
           height: 100%;
           position: absolute;
-          //float: left;
+          /* float: left; */
           /* top: 0px;
           left: 0px; */
         }
@@ -164,8 +178,10 @@ export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode
           wheelSensitivity: 0.1,
           layout: {
             name: "cose", //circle, cose, grid
-            // spacingFactor: 120,		// https://stackoverflow.com/questions/54015729/cytoscape-js-spacing-between-nodes
-            // idealEdgeLength: 100,
+            /*
+            spacingFactor: 120,		// https://stackoverflow.com/questions/54015729/cytoscape-js-spacing-between-nodes
+            idealEdgeLength: 100,
+            */
           },
           elements: ${elements},
           style: [
@@ -173,26 +189,31 @@ export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode
               selector: "node",
               style: {
                 shape: "round-rectangle",
-                // 'width': 'data(width)',
-                // 'height': 'data(height)',
-                color: "white", // text color
+                /*
+                'width': 'data(width)',
+                'height': 'data(height)',
+                */
+                color: "white", /* text color */
     
                 "border-width": 2,
                 "border-color": "white",
                 "border-style": "solid", //"dotted",
     
-                // 'background-color': 'data(background_color)',
-                //'text-outline-color': 'data(background_color)',
-    
-                // 'text-outline-color': 'orange'
-    
-                // 'text-outline-width': 2,
+                'background-color': 'data(background_color)',
+                /*
+                'text-outline-color': 'data(background_color)',    
+                'text-outline-width': 2,
+                'text-outline-color': 'orange'
+                */
+                
                 "text-opacity": 0.5,
                 label: "data(label)",
-                //'font-size' : '25px',
+                /* 'font-size' : '25px', */
     
+                /* 
                 // todo : 한번 color 정하면, selection color 변경할 수 있는 방법을 찾아야 함.
                 "background-color": "green",
+                */
               },
             },
             {
@@ -200,16 +221,16 @@ export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode
               style: {
                 "curve-style": "bezier",
                 "line-color": "cyan",
-                // 'width': 3,
+                /* 'width': 3, */
                 "target-arrow-shape": "triangle",
-                // 'source-arrow-shape': 'circle',
+                /* 'source-arrow-shape': 'circle', */
               },
             },
             {
               selector: ":selected",
               style: {
                 "border-color": "red",
-                // "border-width": 4,
+                /* "border-width": 4,*/
               },
             },
           ],

@@ -1,8 +1,8 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as fs from "fs";
-import { parseDSDocument } from './clientParser';
-import { visitDSDocument } from './clientVisitor';
+import { CausalLink, parseDSDocument, parserFromDocument } from './clientParser';
+import { enumerateSystemNames, visitLinks } from './clientVisitor';
 import { getWebviewContentD3 } from './webview.d3';
 import { getWebviewContentCytoscape } from './webview.cytoscape';
 import { assert } from 'console';
@@ -61,38 +61,42 @@ export function initializeWebview(textEditor:vscode.TextEditor, context: vscode.
         const text = myTextEditor.document.getText();
 
         // {source: "Microsoft", target: "Amazon", type: "licensing"},
-        const connections =
-            Array.from(visitDSDocument(text))
-                .flatMap(causal => {
-                    const c = causal;
-                    switch(causal.op)
-                    {
-                        case '>': return {source: c.l, target: c.r, solid: true};
-                        case '<': return {source: c.r, target: c.l, solid: true};
-                        case '|>': return {source: c.l, target: c.r, solid: false};
-                        case '<|': return {source: c.r, target: c.l, solid: false};
-                        default:
-                            assert(false, `invalid operator: ${causal.op}`);
-                            break;
-                    }
-                    const edge = causal.op == '>';
-                    return {source: causal.l, target: causal.r, solid: edge};
-                })
-                //.join(',')
+        const connections:CausalLink[] =
+            visitLinks(text)
+            .flatMap(causal => {
+                const c = causal;
+                const op = causal.op;
+                switch(causal.op)
+                {
+                    case '|>':
+                    case '>': return {l: c.l, r: c.r, op};
+
+                    case '<|':
+                    case '<': return {l: c.r, r: c.l, op};
+
+                    default:
+                        assert(false, `invalid operator: ${op}`);
+                        break;
+                }
+                return {l: causal.l, r: causal.r, op};
+            })
+            //.join(',')
             ;
+
+        const systemNames = enumerateSystemNames(text);
         console.log('finished parseDSDocument on client side.' + connections);
 
         console.log('webview=', panel.webview);
 
         // And set its HTML content
         // const html = getWebviewContentD3(connections);
-        const html = getWebviewContentCytoscape(myTextEditor.document.fileName, context.extensionUri, panel.webview, connections);
+        const html = getWebviewContentCytoscape(myTextEditor.document.fileName, context.extensionUri, panel.webview, systemNames, connections);
         panel.webview.html = html;
 
         // write html string to file 'hello.html'
         const test = context.asAbsolutePath(
             path.join('media', 'test.html')
-        );    
+        );
         fs.writeFileSync(test, html);
 
         // // write html string to file abc.txt in the workspace root

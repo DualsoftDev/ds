@@ -30,11 +30,45 @@ A, B, C || D, E || F, G, H || I			CausalExpressionContext
                 I   SegmentContext
 */
 
+import { ParserRuleContext } from 'antlr4ts';
 import { ParseTree } from 'antlr4ts/tree';
 import { assert } from 'console';
 import { CausalContext, SegmentContext, SegmentsDNFContext, ExpressionContext, ProcContext, ProgramContext, SystemContext, ProcSleepMsContext, SegmentsCNFContext } from './server-bundle/dsParser';
 
-export function* enumerateChildren(from:ParseTree, includeMe=true, predicate:(t:ParseTree) => boolean = null ) : Generator<ParseTree, void, undefined>
+// export function* enumerateChildren(from:ParseTree, includeMe=true, predicate:(t:ParseTree) => boolean = null ) : Generator<ParseTree, void, undefined>
+// {
+//     const ok = (t:ParseTree) => {
+//         if (predicate) return predicate(t);
+//         return true;
+//     };
+
+//     if (includeMe && !ok || ok(from))
+//         yield from;
+//     for (let index = 0; index < from.childCount; index++)
+//         yield* enumerateChildren(from.getChild(index), true, ok);
+// }
+
+export function enumerateChildren(from:ParseTree, includeMe=true, predicate:(t:ParseTree) => boolean = null ) : ParseTree[]
+{
+    const result:ParseTree[] = [];
+    enumerateChildrenHelper(result, from, includeMe, predicate);
+    return result;
+}
+
+function enumerateChildrenHelper(result:ParseTree[], from:ParseTree, includeMe, predicate:(t:ParseTree) => boolean)
+{
+    const ok = (t:ParseTree) => {
+        if (predicate) return predicate(t);
+        return true;
+    };
+
+    if (includeMe && !ok || ok(from))
+        result.push(from);
+    for (let index = 0; index < from.childCount; index++)
+        enumerateChildrenHelper(result, from.getChild(index), true, ok);
+}
+
+export function *enumerateParents(from:ParseTree, includeMe=true, predicate:(t:ParseTree) => boolean = null) : Generator<ParseTree, void, undefined>
 {
     const ok = (t:ParseTree) => {
         if (predicate) return predicate(t);
@@ -43,12 +77,11 @@ export function* enumerateChildren(from:ParseTree, includeMe=true, predicate:(t:
 
     if (includeMe && ok(from))
         yield from;
-    for (let index = 0; index < from.childCount; index++)
-        yield* enumerateChildren(from.getChild(index), true, ok);
+    yield* enumerateParents(from.parent, true, ok);
 }
 
 
-export function findFirst(from:ParseTree, predicate: (exp:ParseTree) => boolean, includeMe=true)
+export function findFirstChild(from:ParseTree, predicate: (exp:ParseTree) => boolean, includeMe=true)
 {
     for (const c of enumerateChildren(from, includeMe))
     {
@@ -58,6 +91,19 @@ export function findFirst(from:ParseTree, predicate: (exp:ParseTree) => boolean,
 
     return null;
 }
+
+export function findFirstAncestor(from:ParseTree, predicate: (exp:ParseTree) => boolean, includeMe=true)
+{
+    for (const c of enumerateParents(from, includeMe))
+    {
+        if (predicate(c))
+            return c;
+    }
+
+    return null;
+}
+
+
 
 export function collectCNFs(exp:ParseTree) : SegmentsCNFContext[]
 {
@@ -76,7 +122,7 @@ export function collectCNFs(exp:ParseTree) : SegmentsCNFContext[]
         }
         else
         {
-            const terminal = findFirst(exp, (e => e instanceof SegmentsDNFContext));
+            const terminal = findFirstChild(exp, (e => e instanceof SegmentsDNFContext));
             yield* Array.from(enumerateChildren(terminal))
                 .filter(c => c instanceof SegmentsCNFContext)
                 .map(c => c as SegmentsCNFContext)

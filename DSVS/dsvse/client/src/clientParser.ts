@@ -36,12 +36,21 @@ export function parserFromDocument(text:string) {
 	return new dsParser(tokenStream);
 }
 
+
+type NodeType = "system" | "proc" | "func" | "segment" | "expression";
+export interface Node {
+	id:string,
+	label:string,
+	parentId?:string,
+	type:NodeType,
+}
+
 /**
  * Causal 관계를 표현하는 Link.  'A > B' 일 때, left = A, right = B, operator = '>'
  */
 export interface CausalLink {
-	l: string,
-	r: string,
+	l: Node,
+	r: Node,
 	op: string
 }
 

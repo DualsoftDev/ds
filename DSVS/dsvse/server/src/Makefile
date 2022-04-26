@@ -16,8 +16,19 @@ g4:
 
 test:
 	@export CLASSPATH=".:/usr/local/lib/antlr-4.10.1-complete.jar:$$CLASSPATH"
-	@$(grun) ds causals < g4test/causals.txt
-	@$(grun) ds importStatements < g4test/imports.txt
+#	for f in g4test/*; do
+#		echo $$f
+#		$(grun) ds causals < g4test/causals.txt
+#	done
+
+	@echo causals
+	$(grun) ds causals < g4test/causals.txt
+	@echo imports
+	$(grun) ds importStatements < g4test/imports.txt
+	@echo problem
+	$(grun) ds program < g4test/problematic.txt
+	@echo expression
+	$(grun) ds expressions < g4test/expressions.txt
 
 
 clean:

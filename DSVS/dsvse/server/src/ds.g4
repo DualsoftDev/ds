@@ -31,9 +31,10 @@ sysBlock
     | complexSysBlock       //#caseComplexSysBlock
     ;
 simpleSysBlock:  LBRACE IDENTIFIER (';' IDENTIFIER)* RBRACE;
-complexSysBlock: LBRACE (acc|macro|causal|importStatement)* RBRACE;
+// complexSysBlock: LBRACE ((acc|macro)*|(causals|importStatements)) RBRACE;
+complexSysBlock: LBRACE (acc|macro|causal|importStatement)* (causalPhrase|importFinal)? RBRACE;
 
-acc: LBRACKET accsre RBRACKET EQ LBRACE IDENTIFIER (SEIMCOLON IDENTIFIER)* RBRACE;    // [accsre] = { A; B }
+acc: LBRACKET ACCESS_SRE RBRACKET EQ LBRACE IDENTIFIER (SEIMCOLON IDENTIFIER)* RBRACE;    // [accsre] = { A; B }
 
 
 /*
@@ -56,8 +57,14 @@ causal
     : causalPhrase+ SEIMCOLON
     ;
 
-causals: causal+;   // debugging purpose
-importStatements: importStatement+ ;   // debugging purpose
+
+// debugging purpose {
+causals: causalPhrase+ (SEIMCOLON causalPhrase)* (SEIMCOLON)?;
+importStatements: importStatement+ ;
+expressions: (expression SEIMCOLON)+ ;
+// } debugging purpose
+
+
 
 causalPhrase
     : causalTokensDNF (causalOperator causalTokensDNF)*
@@ -79,10 +86,10 @@ causalTokensDNF
     : causalTokensCNF (OR2 causalTokensCNF)*
     ;
 
-
-importStatement
-    : '!#import' importPhrase 'from' quotedFilePath SEIMCOLON
+importFinal
+    : '!#import' importPhrase 'from' quotedFilePath
     ;
+importStatement : importFinal SEIMCOLON;
 importPhrase
     : IDENTIFIER 'as' IDENTIFIER
     | LBRACE IDENTIFIER 'as' IDENTIFIER
@@ -90,25 +97,12 @@ importPhrase
         RBRACE
     ;
 quotedFilePath
-    : SQUOTE (~SQUOTE)* SQUOTE
-    | DQUOTE (~DQUOTE)* DQUOTE
+    : DQUOTE (~DQUOTE)* DQUOTE
+    // | SQUOTE (~SQUOTE)* SQUOTE
     ;
 
 
 
-
-logicalBinaryOperator: '&' | '|';
- 
-
-/*
- * Expression
- */
-expression
-    : segment
-    | func
-    | expression logicalBinaryOperator expression
-    | LPARENTHESIS expression RPARENTHESIS
-    ;
 
 
 causalOperator
@@ -147,8 +141,8 @@ causalOperator
 
 
 
-CAUSAL_FWD: '>';
-CAUSAL_BWD: '<';
+CAUSAL_FWD: GT; // '>'
+CAUSAL_BWD: LT; // '<'
 CAUSAL_RESET_FWD: '|>';
 CAUSAL_RESET_BWD: '<|';
 CAUSAL_RESET_FB: '<||>';
@@ -161,7 +155,7 @@ CAUSAL_BWD_AND_RESET_FWD: '|><';
 sys_: 'sys';
 
 
-accsre: ('accsre'|'accsr'|'accre'|'accse'|'accs'|'accr'|'acce');
+ACCESS_SRE: ('accsre'|'accsr'|'accre'|'accse'|'accs'|'accr'|'acce');
 
 
 // TOKEN

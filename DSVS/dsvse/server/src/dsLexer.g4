@@ -42,15 +42,32 @@ COMMA: ',';
 AND: '&';
 EXCLAMATION: '!';
 OR: '|';
-OR2: '||';
 AT: '@';
 POUND: '#';
 PLUS: '+';
 MINUS: '-';
-STAR: '*';
-SLASH: '/';
+MUL: STAR;
+DIV: SLASH;
+MOD: PERCENT;
+fragment STAR: '*';
+fragment SLASH: '/';
+fragment PERCENT: '%';
+
+fragment RANGLE: '>';
+fragment LANGLE: '<';
+GT: RANGLE;
+LT: LANGLE;
+GTE: '>=';
+LTE: '<=';
+
+OR2: '||';
+EQ2: '==';
+NEQ: '!=';
 //NEWLINE: '\r'? '\n';
 WS: [ \t\r\n]+ -> skip;
+
+NUMBER: [0-9]+(.[0-9]+)?;
+INTEGER: [1-9][0-9]*;
 
 // lexical rule for hangul characters
 HANGUL_CHAR: [\uAC00-\uD7A3]+;

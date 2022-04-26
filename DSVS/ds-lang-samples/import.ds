@@ -1,0 +1,26 @@
+[sys]My = {
+    P |> Q;
+    !#import {
+        이거 as A,
+        hello as B,
+    } from "./PathLib/template.dst";
+
+    !#import { interlock as A, } from "./PathLib/template.dst";
+
+    !#import { 저거 as 이거, } from "여기";
+
+    !#import {
+        interlock as A,
+        hello as B } from "./PathLib/template.dst";
+
+    !#import {
+        interlock as A,
+        hello as B,
+    } from "./PathLib/template.dst";
+
+    !#import interlock as A from "./PathLib/template.dst";
+
+
+
+
+}

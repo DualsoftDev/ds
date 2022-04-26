@@ -6,6 +6,26 @@ value
     : segment
     | func
     ;
+
+logicalBinaryOperator
+    : '*' | '/' | '%'   // MUL | DIV | MOD
+    | '+' | '-'         // PLUS | MINUS
+    | '&&'
+    | '||'       // AND | OR
+    | '==' | '!=' | '>=' | '<=' | '>' | '<' // DO *NOT* use like... EQ2 | NEQ | GTE | LTE | GT | LT
+    ;
+
+/*
+ * Expression
+ */
+expression
+    : func
+    | expression logicalBinaryOperator expression
+    | LPARENTHESIS expression RPARENTHESIS
+    | segment
+    | NUMBER
+    ;
+
 // unary function : #fun(args)
 funcSet: POUND 'set' LPARENTHESIS segment RPARENTHESIS;
 funcG: POUND 'g' LPARENTHESIS segment RPARENTHESIS;
@@ -17,6 +37,7 @@ funcXOR: POUND 'xor' LPARENTHESIS value COMMA value RPARENTHESIS;
 funcNXOR: POUND 'nxor' LPARENTHESIS value COMMA value RPARENTHESIS;
 funcNAND: POUND 'nand' LPARENTHESIS value COMMA value RPARENTHESIS;
 funcNOR: POUND 'nor' LPARENTHESIS value COMMA value RPARENTHESIS;
+funcExpression: POUND LPARENTHESIS expression RPARENTHESIS;
 
 // #, 값, 네모
 func
@@ -28,6 +49,7 @@ func
     | funcNXOR
     | funcNAND
     | funcNOR
+    | funcExpression
     ;
 
 // @, 세그먼트, 동그라미
@@ -43,4 +65,3 @@ procSleepS: AT S LPARENTHESIS (INTEGER|value) RPARENTHESIS;    // @s(2)
 
 MS: 'ms';
 S: 's';
-INTEGER: [1-9][0-9]*;

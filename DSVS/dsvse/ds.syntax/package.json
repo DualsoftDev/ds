@@ -1,10 +1,10 @@
 {
-    "name": "ds",
-    "displayName": "DS - Digital Twin Segment Language",
-    "description": "Syntaxes for DS language. DS mean Digital Twin Segment Language",
+    "name": "ds-web",
+    "displayName": "DS For Web - Digital Twin Segment Language for Web ",
+    "description": "Syntaxes for DS language Web version. DS mean Digital Twin Segment Language",
     "icon": "logo.png",
     "repository": { "type": "git", "url": "https://marketplace.visualstudio.com/items?itemName=dualsoft.ds" },
-    "version": "0.0.4",
+    "version": "0.0.1",
     "publisher": "dualsoft",
     "engines": {
         "vscode": "^1.66.0"

@@ -86,7 +86,7 @@ export function initializeWebview(textEditor:vscode.TextEditor, context: vscode.
 
         // And set its HTML content
         // const html = getWebviewContentD3(connections);
-        const html = getWebviewContentCytoscape(context.extensionUri, panel.webview, connections);
+        const html = getWebviewContentCytoscape(myTextEditor.document.fileName, context.extensionUri, panel.webview, connections);
         panel.webview.html = html;
 
         // write html string to file 'hello.html'

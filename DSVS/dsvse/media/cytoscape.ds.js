@@ -52,14 +52,17 @@
 				"</br>";
 		});
 
-		ur.do("add", {
-			group: "nodes",
-			data: { weight: 75, name: "New Node", id: "New Node", label: "New Node" },
-			position: { x: 50, y: 50 },
-			style: {
-				"background-color": "darkred",
-			},
-		});
+		/*
+		 * 임의 노드 추가
+		 */
+		// ur.do("add", {
+		// 	group: "nodes",
+		// 	data: { weight: 75, name: "New Node", id: "New Node", label: "New Node" },
+		// 	position: { x: 50, y: 50 },
+		// 	style: {
+		// 		"background-color": "darkred",
+		// 	},
+		// });
 
 		cy.on("select", "node", function (e) {
 			console.log("node selected:", e.target.id());

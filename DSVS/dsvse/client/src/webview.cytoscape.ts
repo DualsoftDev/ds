@@ -16,14 +16,15 @@ import * as vscode from 'vscode';
  * @param connections 
  * @returns 
  */
-export function getWebviewContentCytoscape(extensionUri: vscode.Uri, webview:vscode.Webview, connections: {source:string, target:string, solid:boolean}[]) {
+export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode.Uri, webview:vscode.Webview, connections: {source:string, target:string, solid:boolean}[]) {
     console.log('hello');
+    /** Cytoscape 용 Elements 생성 */
     function *generateElements()
     {
         const nodes =
             connections
             .flatMap(c => [c.source, c.target])
-            .filter((v, i, a) => a.indexOf(v) === i)
+            .filter((v, i, a) => a.indexOf(v) === i)  // filter unique : https://stackoverflow.com/questions/1960473/get-all-unique-values-in-a-javascript-array-remove-duplicates
             .map(n => {
               return { "data": {"id": n, "label": n}};
             })
@@ -98,13 +99,12 @@ export function getWebviewContentCytoscape(extensionUri: vscode.Uri, webview:vsc
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width">
-      <meta name="links" content=${elements}>
       
       <script nonce="${getNonce()}" src="${scriptUris[0]}"></script>
       <script nonce="${getNonce()}" src="${scriptUris[1]}"></script>
       
       <!-- DIRTY hack -->
-      <title>${elements}</title>
+      <title>${filePath}</title>
 
       <style>
         body {
@@ -142,7 +142,7 @@ export function getWebviewContentCytoscape(extensionUri: vscode.Uri, webview:vsc
     </head>
     
     <body>
-      <h1>DS demo</h1>
+      <h1>DS demo: ${filePath}</h1>
     
       <div id="myDiv" style="display:none">
         <input id="batchButton" type="button" value="Add 'Bob' and delete selected" />

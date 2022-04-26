@@ -1,4 +1,4 @@
-# DS - Digital Twin Segment language
+# DS - Digital Twin Segment language For Web
 
 
 ## Features

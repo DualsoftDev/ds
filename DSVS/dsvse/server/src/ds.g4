@@ -31,8 +31,9 @@ sysBlock
     | complexSysBlock       //#caseComplexSysBlock
     ;
 simpleSysBlock:  LBRACE IDENTIFIER (';' IDENTIFIER)* RBRACE;
-// complexSysBlock: LBRACE ((acc|macro)*|(causals|importStatements)) RBRACE;
-complexSysBlock: LBRACE (acc|macro|causal|importStatement)* (causalPhrase|importFinal)? RBRACE;
+complexSysBlock
+    : LBRACE (acc|macro|causal|importStatement|call (SEIMCOLON)?)* (causalPhrase|call)? RBRACE;
+//complexSysBlock: LBRACE (acc|macro|causal|importStatement)* (causalPhrase|importFinal)? RBRACE;
 
 acc: LBRACKET ACCESS_SRE RBRACKET EQ LBRACE IDENTIFIER (SEIMCOLON IDENTIFIER)* RBRACE;    // [accsre] = { A; B }
 
@@ -49,33 +50,34 @@ macroHeader
 simpleMacroHeader: 'macro';
 namedMacroHeader: 'macro' EQ IDENTIFIER;
 
-// A23 = { M.U ~ S.S3U }
-call: IDENTIFIER EQ LBRACE segments TILDE segments RBRACE;
+// A23 = { M.U ~ S.S3U ~ _ }
+call: IDENTIFIER EQ LBRACE segments TILDE segments (TILDE segments)? RBRACE;
 
 // B.F1 > Set1F <| T.A21;
 causal
-    : causalPhrase+ SEIMCOLON
+    : causalPhrase SEIMCOLON
     ;
 
 
 // debugging purpose {
-causals: causalPhrase+ (SEIMCOLON causalPhrase)* (SEIMCOLON)?;
+causals: causal* (causalPhrase)?;
 importStatements: importStatement+ ;
 expressions: (expression SEIMCOLON)+ ;
+calls: (call SEIMCOLON)+ ;
 // } debugging purpose
 
 
 
 causalPhrase
-    : causalTokensDNF (causalOperator causalTokensDNF)*
+    : causalTokensDNF (causalOperator causalTokensDNF)+
     ;
 
 causalToken
-    : segment       // 'A' or 'A.B'
-    | segmentValue  // '(A)' or '(A.B)'
-    | proc
+    : proc
     | func
+    | segmentValue  // '(A)' or '(A.B)'
     | expression
+    | segment       // 'A' or 'A.B'
     ;
 segmentValue: LPARENTHESIS segment RPARENTHESIS;
 
@@ -87,10 +89,10 @@ causalTokensDNF
     ;
 
 importFinal
-    : '!#import' importPhrase 'from' quotedFilePath
+    : '!#import' importAs 'from' quotedFilePath
     ;
 importStatement : importFinal SEIMCOLON;
-importPhrase
+importAs
     : IDENTIFIER 'as' IDENTIFIER
     | LBRACE IDENTIFIER 'as' IDENTIFIER
         (COMMA IDENTIFIER 'as' IDENTIFIER)* (COMMA)?
@@ -98,7 +100,7 @@ importPhrase
     ;
 quotedFilePath
     : DQUOTE (~DQUOTE)* DQUOTE
-    // | SQUOTE (~SQUOTE)* SQUOTE
+    | SQUOTE (~SQUOTE)* SQUOTE
     ;
 
 
@@ -106,15 +108,15 @@ quotedFilePath
 
 
 causalOperator
-    : CAUSAL_FWD
-    | CAUSAL_RESET_FWD
-    | CAUSAL_FWD_AND_RESET_FWD  // '>|>' | '|>>';
-    | CAUSAL_BWD
-    | CAUSAL_RESET_BWD
-    | CAUSAL_BWD_AND_RESET_BWD  // '<<|' | '<|<';
-    | CAUSAL_RESET_FB           // <||>
-    | CAUSAL_FWD_AND_RESET_BWD  // '><|';
-    | CAUSAL_BWD_AND_RESET_FWD  // '|><';
+    : '>'   // CAUSAL_FWD
+    | '|>'  // CAUSAL_RESET_FWD
+    | '>|>' | '|>>'     //CAUSAL_FWD_AND_RESET_FWD  // '>|>' | '|>>';
+    | '<'   // CAUSAL_BWD
+    | '<|'  // CAUSAL_RESET_BWD
+    | '<<|' | '<|<' // CAUSAL_BWD_AND_RESET_BWD
+    | '<||>'        // CAUSAL_RESET_FB         
+    | '><|'         // CAUSAL_FWD_AND_RESET_BWD
+    | '|><'         // CAUSAL_BWD_AND_RESET_FWD
     ;
 
 // causalOperator

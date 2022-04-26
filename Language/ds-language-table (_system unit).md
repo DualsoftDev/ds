@@ -25,6 +25,6 @@
 
 |Id| Item | Unit | Example| Desc | GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|SYS9|Toggle #s | _toggles () or _togglems() | _togglems (50) > A  | Every 50 msec, The value of '_toggles (50)' toggles true and false |  ![AAA](./png/Sys9.dio.png)|
-|SYS10|Current Time | _currt (t/d/dt) | #(_currt (t) > 23:12:22.124) > A | If the current time passes 23:12:22.124, action A |  ![AAA](./png/Sys10.dio.png)|
+|SYS9|Toggle #s | #_toggles () or #_togglems() | #_togglems (50) > A  | Every 50 msec, The value of '#_toggles (50)' toggles true and false |  ![AAA](./png/Sys9.dio.png)|
+|SYS10|Current Time | #_currt (t/d/dt) | (#_currt (t) > '23:12:22.124') > A | If the current time passes '23:12:22.124', action A |  ![AAA](./png/Sys10.dio.png)|
 

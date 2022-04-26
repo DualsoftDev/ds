@@ -1,8 +1,8 @@
+A > B;
+A, B > C;
+A, B ? C > D;
+A, B ? C, D > E;
+A.P, (B), #g(X), @ms(5000) ? C, D >|> E, F ? G < H, I ? J, K;
 #(C == 3) > A;
 #('C'== B) > A;
 _run > A;
-A > B;
-A, B > C;
-A, B || C > D;
-A, B || C, D > E;
-A.P, (B), #g(X), @ms(5000) || C, D >|> E, F || G < H, I || J, K;

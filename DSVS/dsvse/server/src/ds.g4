@@ -81,11 +81,11 @@ causalToken
     ;
 segmentValue: LPARENTHESIS segment RPARENTHESIS;
 
-causalTokensCNF
-    : causalToken (COMMA causalToken)*
-    ;
 causalTokensDNF
-    : causalTokensCNF (OR2 causalTokensCNF)*
+    : causalTokensCNF ('?' causalTokensCNF)*
+    ;
+causalTokensCNF
+    : causalToken (',' causalToken)*
     ;
 
 importFinal

@@ -16,16 +16,27 @@ logicalBinaryOperator
     ;
 
 /*
- * Expression
+ * Expression : https://docs.microsoft.com/en-us/cpp/c-language/precedence-and-order-of-evaluation?view=msvc-170
  */
 expression
     : func
-    | expression logicalBinaryOperator expression
+    | ('!' | '+' | '-' ) expression // unary opeartor
+    | expression ('*' | '/' | '%') expression
+    | expression ('+' | '-') expression
+    | expression ('>=' | '<=' | '>' | '<') expression
+    | expression ('==' | '!=') expression
+    | expression ('&&') expression
+    | expression ('||') expression
+
     | LPARENTHESIS expression RPARENTHESIS
     | segment
-    | NUMBER
+    | number
     ;
 
+number
+    : FLOAT
+    | INTEGER
+    ;
 // unary function : #fun(args)
 funcSet: POUND 'set' LPARENTHESIS segment RPARENTHESIS;
 funcG: POUND 'g' LPARENTHESIS segment RPARENTHESIS;
@@ -39,6 +50,16 @@ funcNAND: POUND 'nand' LPARENTHESIS value COMMA value RPARENTHESIS;
 funcNOR: POUND 'nor' LPARENTHESIS value COMMA value RPARENTHESIS;
 funcExpression: POUND LPARENTHESIS expression RPARENTHESIS;
 
+funcConvNum: POUND 'num' LPARENTHESIS value RPARENTHESIS;
+funcConvStr: POUND 'str' LPARENTHESIS value RPARENTHESIS;
+funcConvBCD: POUND 'bcd' LPARENTHESIS value RPARENTHESIS;
+funcConvBin: POUND 'bin' LPARENTHESIS value RPARENTHESIS;
+
+funcConvAbs: POUND 'abs' LPARENTHESIS value RPARENTHESIS;
+funcConvSin: POUND 'sin' LPARENTHESIS value RPARENTHESIS;
+funcConvCos: POUND 'cos' LPARENTHESIS value RPARENTHESIS;
+funcConvRound: POUND 'round' LPARENTHESIS value RPARENTHESIS;
+
 // #, 값, 네모
 func
     : funcSet
@@ -50,6 +71,17 @@ func
     | funcNAND
     | funcNOR
     | funcExpression
+
+    | funcConvNum
+    | funcConvStr
+    | funcConvBCD
+    | funcConvBin
+
+    | funcConvAbs
+    | funcConvSin
+    | funcConvCos
+    | funcConvRound
+
     ;
 
 // @, 세그먼트, 동그라미

@@ -66,8 +66,8 @@ NEQ: '!=';
 //NEWLINE: '\r'? '\n';
 WS: [ \t\r\n]+ -> skip;
 
-NUMBER: [0-9]+(.[0-9]+)?;
 INTEGER: [1-9][0-9]*;
+FLOAT: [1-9][0-9]*('.'[0-9]+)?;
 
 // lexical rule for hangul characters
 HANGUL_CHAR: [\uAC00-\uD7A3]+;

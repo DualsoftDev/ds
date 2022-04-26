@@ -5,7 +5,7 @@
 |SEQ1|Start Causal|`>`| `A > B > C` |Action B would be executed by causal action A, action C would be executed by causal action B  <p>`행위 B는 행위 A에 의해 실행되며, 행위 C는 행위 B에 의해 실행됨`| ![AAA](./png/Seq1.dio.png)|
 |SEQ2|Reset Causal| \|> | A > B <\| C|Action B would be executed by causal action A, and the action B would be initialized(reset) by causal action C <p>`행위 B는 행위 A에 의해 실행되며, 행위 C에 의해 리셋됨`| ![AAA](./png/Seq2.dio.png)|
 |SEQ3|And Causal|`,`|`A,B,C > D,E` | Action D would be executed by united causal action A, B and C and also action E would be executed by same causal actions as D <p>`행위 D, E는 행위 A, B, C에 의해 실행됨`|  ![AAA](./png/Seq3.dio.png)|
-|SEQ4|Or Causal|`\\`| A, B \ C > D | Action D would be executed by causal action A and B<p> Or action D would be executed by causal action C <p>`행위 D는 행위 A, B에 의해 실행되거나, 행위 C에 의해 실행됨`| ![AAA](./png/Seq4.dio.png)|
+|SEQ4|Or Causal|`\`| A, B \ C > D | Action D would be executed by causal action A and B<p> Or action D would be executed by causal action C <p>`행위 D는 행위 A, B에 의해 실행되거나, 행위 C에 의해 실행됨`| ![AAA](./png/Seq4.dio.png)|
 |SEQ5|Causal Split|`;`| `A,B > D;`<p>`C > D;` | Action D would be executed by causal action A and B<p> Or action D would be executed by causal action C <p>`행위 D는 행위 A, B에 의해 실행되거나, 행위 C에 의해 실행됨`| ![AAA](./png/Seq5.dio.png)|
 
 </BR>

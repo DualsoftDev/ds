@@ -57,12 +57,12 @@ export function enumerateChildren(from:ParseTree, includeMe=true, predicate:(t:P
 
 function enumerateChildrenHelper(result:ParseTree[], from:ParseTree, includeMe, predicate:(t:ParseTree) => boolean)
 {
-    const ok = (t:ParseTree) => {
+    function ok(t:ParseTree) {
         if (predicate) return predicate(t);
         return true;
-    };
+    }
 
-    if (includeMe && !ok || ok(from))
+    if (includeMe && ok(from))
         result.push(from);
     for (let index = 0; index < from.childCount; index++)
         enumerateChildrenHelper(result, from.getChild(index), true, ok);

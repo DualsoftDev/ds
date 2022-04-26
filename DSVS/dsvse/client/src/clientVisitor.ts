@@ -6,7 +6,7 @@
  */
 
 import { CausalLink, Node, parserFromDocument } from "./clientParser";
-import { CausalContext, CausalOperatorContext, CausalPhraseContext, CausalsContext, CausalTokensCNFContext, CausalTokensDNFContext, dsParser, MacroContext, ProgramContext, SystemContext } from './server-bundle/dsParser';
+import { CausalContext, CausalOperatorContext, CausalPhraseContext, CausalsContext, CausalTokenContext, CausalTokensCNFContext, CausalTokensDNFContext, dsParser, MacroContext, ProgramContext, SystemContext } from './server-bundle/dsParser';
 import { dsVisitor } from './server-bundle/dsVisitor';
 import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
 import { enumerateChildren, findFirstAncestor } from "./parseCausal";
@@ -24,10 +24,12 @@ class LinkWalker extends AbstractParseTreeVisitor<number> implements dsVisitor<n
 
 	protected addLinks(systemName:string, l:CausalTokensDNFContext, op:CausalOperatorContext, r:CausalTokensDNFContext)
 	{
-		const getTokens = (x:CausalTokensDNFContext) =>
-			Array.from(enumerateChildren(x, false, t => t instanceof CausalTokensCNFContext))
-			.flatMap(c => c.text)
-			;
+		function getTokens(x:CausalTokensDNFContext)
+		{
+			return enumerateChildren(x, false, t => t instanceof CausalTokenContext)
+				.flatMap(c => c.text)
+				;
+		}
 
 		function getNode(n:string) {
 			const node:Node = {id:n, label:n, type:"segment"};
@@ -57,9 +59,10 @@ class LinkWalker extends AbstractParseTreeVisitor<number> implements dsVisitor<n
 
 			
 
+		const [ls, rs] = [getTokens(l), getTokens(r)];
 
-		getTokens(l).forEach(ll => {
-			getTokens(r).forEach(rr => {
+		ls.forEach(ll => {
+			rs.forEach(rr => {
 				const [lll, ooo, rrr] = [getNode(l.text), op.text, getNode(r.text)];
 				this.links.push({l:lll, op:ooo, r:rrr});
 			});

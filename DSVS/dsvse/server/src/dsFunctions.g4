@@ -31,11 +31,16 @@ expression
     | LPARENTHESIS expression RPARENTHESIS
     | segment
     | number
+    | string
     ;
 
 number
     : FLOAT
     | INTEGER
+    ;
+string
+    : '"' (~'"')* '"'
+    | '\'' (~'\'')* '\''
     ;
 // unary function : #fun(args)
 funcSet: POUND 'set' LPARENTHESIS segment RPARENTHESIS;
@@ -60,6 +65,12 @@ funcConvSin: POUND 'sin' LPARENTHESIS value RPARENTHESIS;
 funcConvCos: POUND 'cos' LPARENTHESIS value RPARENTHESIS;
 funcConvRound: POUND 'round' LPARENTHESIS value RPARENTHESIS;
 
+funcSysToggleMs: POUND '_togglems' LPARENTHESIS INTEGER RPARENTHESIS;
+funcSysToggleS: POUND '_toggles' LPARENTHESIS INTEGER RPARENTHESIS;
+funcSysCurrentTime: POUND '_currt' LPARENTHESIS TIMESTRING RPARENTHESIS;
+
+TIMESTRING: '\'' [0-9.:]* '\'';
+
 // #, 값, 네모
 func
     : funcSet
@@ -81,7 +92,9 @@ func
     | funcConvSin
     | funcConvCos
     | funcConvRound
-
+    | funcSysToggleMs
+    | funcSysToggleS
+    | funcSysCurrentTime
     ;
 
 // @, 세그먼트, 동그라미
@@ -89,11 +102,30 @@ proc
     : procAssign
     | procSleepMs
     | procSleepS
+
+    | procStartFirst
+    | procLastFirst
+    | procPushStart
+    | procPushReset
+    | procPushStart
+
+    | procOnlyStart
+    | procOnlyReset
+    | procSelfStart
+    | procSelfReset
     ;
-procAssign: AT LPARENTHESIS segment EQ value RPARENTHESIS;    // @(C = #sin(#num(B)))
-procSleepMs: AT MS LPARENTHESIS (INTEGER|value) RPARENTHESIS;    // @ms(500)
-procSleepS: AT S LPARENTHESIS (INTEGER|value) RPARENTHESIS;    // @s(2)
 
+procAssign: AT LPARENTHESIS segment EQ expression RPARENTHESIS;    // @(C = #sin(#num(B)))
+procSleepMs: AT 'ms' LPARENTHESIS (INTEGER|value) RPARENTHESIS;    // @ms(500)
+procSleepS: AT 's' LPARENTHESIS (INTEGER|value) RPARENTHESIS;    // @s(2)
 
-MS: 'ms';
-S: 's';
+procStartFirst: AT 'sf' LPARENTHESIS segment RPARENTHESIS;    // @sf(A)
+procLastFirst: AT 'lf' LPARENTHESIS segment RPARENTHESIS;    // @lf(A)
+procPushStart: AT 'pushs' LPARENTHESIS segment RPARENTHESIS;    // @pushs(A)
+procPushReset: AT 'pushr' LPARENTHESIS segment RPARENTHESIS;    // @pushr(A)
+procPushStartReset: AT 'pushsr' LPARENTHESIS segment RPARENTHESIS;    // @pushr(A)
+
+procOnlyStart: AT 'onlys' LPARENTHESIS segment RPARENTHESIS;    // @onlys(A)
+procOnlyReset: AT 'onlyr' LPARENTHESIS segment RPARENTHESIS;    // @onlyr(A)
+procSelfStart: AT 'selfs' LPARENTHESIS segment RPARENTHESIS;    // @selfs(A)
+procSelfReset: AT 'selfr' LPARENTHESIS segment RPARENTHESIS;    // @selfr(A)

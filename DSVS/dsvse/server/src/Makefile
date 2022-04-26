@@ -26,9 +26,13 @@ test:
 	@echo imports
 	$(grun) ds importStatements < g4test/imports.txt
 	@echo problem
-	$(grun) ds program < g4test/problematic.txt
+	$(grun) ds program < g4test/problematic.ds
 	@echo expression
 	$(grun) ds expressions < g4test/expressions.txt
+	@echo proc
+	$(grun) ds program < g4test/proc.ds
+	@echo call
+	$(grun) ds calls < g4test/calls.txt
 
 
 clean:

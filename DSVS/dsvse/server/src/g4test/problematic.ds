@@ -6,7 +6,10 @@
     (Start) > DoAction <| (Reset);
     !#import { interlock as A, } from "./PathLib/template.dst";
     (Start) > DoAction <| (Reset);
-    !#import { 저거 as 이거, } from "여기"  // missing final semicolon(';')
+    !#import { 저거 as 이거, } from "여기";  // missing final semicolon(';')
+
+    #(C == 3) > A;
+    #('C'== B) > A;     // string value compare
 }
 
 

@@ -6,3 +6,6 @@ clean:
 
 pre:
 	vsce publish --pre-release
+
+publish:
+	vsce publish

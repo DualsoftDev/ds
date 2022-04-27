@@ -41,3 +41,11 @@
 
 ## Cloud
 
+
+
+## 참고 일정 : ikshin
+1. ds program loader(기본 parser - macro쪽 제외) ~ 20220429
+2. origin check ~ 20220506
+3. rest api server(cloud 연결 없이 pc들 끼리 통신) ~ 20220513
+4. 엘리베이터 키트 예제 simulation ~ 20220520
+5. 엘리베이터 키트 HW 컨트롤 ~ 20220527

@@ -118,6 +118,9 @@ export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode
       
       <script nonce="${getNonce()}" src="${scriptUris[0]}"></script>
       <script nonce="${getNonce()}" src="${scriptUris[1]}"></script>
+      <!-- Working!!
+      <script nonce="${getNonce()}" src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+      -->
       
       <title>${filePath}</title>
 
@@ -184,7 +187,10 @@ export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode
             idealEdgeLength: 100,
             */
             gravity: -100,
-            /* gravityCompound: -10, */
+            /*
+            gravityCompound: -10,
+            animate: false,
+            */
           },
           elements: ${elements},
           style: [

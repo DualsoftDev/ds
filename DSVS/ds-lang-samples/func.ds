@@ -1,6 +1,6 @@
 [sys]MyA = {
     // P > Q;
-    C, Z ? D > MyB.y > x;
+    C, Z ? D > MyB.y > x > Q > R > S;
 }
 [sys]MyB = {
     MyA.C > D > y > MyA.x;

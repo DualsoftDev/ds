@@ -22,21 +22,15 @@ import dsFunctions;
 program: (system|comment)* EOF;
 
 
-system: sysHdr IDENTIFIER '=' sysBlock;    // [sys] Seg = {..}
-
-
-sysHdr: LBRACKET sys_ RBRACKET;  // [sys]
+system: syskey IDENTIFIER '=' sysBlock;    // [sys] Seg = {..}
+syskey: '[sys]';
 sysBlock
-    : simpleSysBlock        //#caseSimpleSysBlock
-    | complexSysBlock       //#caseComplexSysBlock
+    : LBRACE (acc|macro|importStatement|listing|parenting|causal|call)* RBRACE
     ;
-simpleSysBlock:  LBRACE IDENTIFIER (';' IDENTIFIER)* RBRACE;
-complexSysBlock
-    : LBRACE (acc|macro|causal|importStatement|call (SEIMCOLON)?)* (causalPhrase|call)? RBRACE;
-//complexSysBlock: LBRACE (acc|macro|causal|importStatement)* (causalPhrase|importFinal)? RBRACE;
 
-acc: LBRACKET ACCESS_SRE RBRACKET EQ LBRACE IDENTIFIER (SEIMCOLON IDENTIFIER)* RBRACE;    // [accsre] = { A; B }
-
+acc: LBRACKET ACCESS_SRE RBRACKET EQ LBRACE IDENTIFIER (SEIMCOLON IDENTIFIER)* SEIMCOLON? RBRACE;    // [accsre] = { A; B }
+listing: IDENTIFIER SEIMCOLON;     // A;
+parenting: IDENTIFIER EQ LBRACE causal* RBRACE;
 
 /*
  * MACRO definitions

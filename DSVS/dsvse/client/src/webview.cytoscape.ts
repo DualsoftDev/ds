@@ -150,6 +150,10 @@ export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode
       <script nonce="${getNonce()}" src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
       <script nonce="${getNonce()}" src="https://ivis-at-bilkent.github.io/cytoscape.js-undo-redo/cytoscape-undo-redo.js"></script>
       -->
+
+      <script nonce="${getNonce()}" src="https://cdn.rawgit.com/cpettitt/dagre/v0.7.4/dist/dagre.min.js"></script>
+      <script nonce="${getNonce()}" src="https://cdn.rawgit.com/cytoscape/cytoscape.js-dagre/1.5.0/cytoscape-dagre.js"></script>
+  
       
       <title>${filePath}</title>
 
@@ -185,6 +189,7 @@ export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode
       </style>
 
       <script nonce="${getNonce()}" src="${scriptUris[2]}"></script>
+
       
     </head>
     
@@ -203,15 +208,12 @@ export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode
       </div>
 
       <script nonce="${getNonce()}">
-
-
-
         let cy = cytoscape({
           container: document.getElementById("cy"),
           wheelSensitivity: 0.1,
 
           layout: {
-            name: "cose", //circle, cose, grid
+            name: "dagre", //cose, grid, dagre, circle, random, arbor, cose-bilkent, cola, constraint
             /*
             spacingFactor: 120,		// https://stackoverflow.com/questions/54015729/cytoscape-js-spacing-between-nodes
             idealEdgeLength: 100,

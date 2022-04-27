@@ -5,12 +5,16 @@
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width">
       
-      <script nonce="J0bRJ1Ty91AMRphsl9kpbhZIYcOGPZeh" src="https://file%2B.vscode-resource.vscode-webview.net/f%3A/Git/ds-master/DSVS/dsvse/media/cytoscape.min.js"></script>
-      <script nonce="4SUL1m51UsJ4qq2ijnSHrjOrnhsWaOkk" src="https://file%2B.vscode-resource.vscode-webview.net/f%3A/Git/ds-master/DSVS/dsvse/media/cytoscape-undo-redo.js"></script>
+      <script nonce="jbSBSMG6vsEWZ8BEGA9E6LlkzjljT612" src="https://file%2B.vscode-resource.vscode-webview.net/f%3A/Git/ds-master/DSVS/dsvse/media/cytoscape.min.js"></script>
+      <script nonce="xKiNzieg1yNDx4kzWFHFLyIfponDqZxh" src="https://file%2B.vscode-resource.vscode-webview.net/f%3A/Git/ds-master/DSVS/dsvse/media/cytoscape-undo-redo.js"></script>
       <!-- Working!!
-      <script nonce="XugXxCeRFusqNP0o3LnRqG9tPrdUZpIE" src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
-      <script nonce="gEBXQi0iZZqUjDj1fwOzshI5DzTVoim0" src="https://ivis-at-bilkent.github.io/cytoscape.js-undo-redo/cytoscape-undo-redo.js"></script>
+      <script nonce="x8Ppto1bkJSbuL839oRD3b07oyLCUMNk" src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+      <script nonce="KwrLBasgbFivvUYrj3lO3jb9tCIWbPGX" src="https://ivis-at-bilkent.github.io/cytoscape.js-undo-redo/cytoscape-undo-redo.js"></script>
       -->
+
+      <script nonce="Cn5EKa4ena2syy7mZQqxqLE5tTkmgUbh" src="https://cdn.rawgit.com/cpettitt/dagre/v0.7.4/dist/dagre.min.js"></script>
+      <script nonce="HDtbm3roZofpLIALJEMAiKTYi57s1eqI" src="https://cdn.rawgit.com/cytoscape/cytoscape.js-dagre/1.5.0/cytoscape-dagre.js"></script>
+  
       
       <title>f:\Git\ds-master\DSVS\dsvse\server\src\g4test\call.ds</title>
 
@@ -45,8 +49,8 @@
     
       </style>
 
-      <script nonce="eF8grLuC8a5cg179GuU957AUzZIoAzxf" src="https://file%2B.vscode-resource.vscode-webview.net/f%3A/Git/ds-master/DSVS/dsvse/media/cytoscape.ds.js"></script>
-      <script nonce="N3WMhg3OP6EBd1QAsrBMpaCYeXh8bd52" src="https://file%2B.vscode-resource.vscode-webview.net/f%3A/Git/ds-master/DSVS/dsvse/media/cytoscape.layout.dagre.js"></script>
+      <script nonce="nvBLtC8Fz8bACYaaYBp6VXtvsCdw8tIL" src="https://file%2B.vscode-resource.vscode-webview.net/f%3A/Git/ds-master/DSVS/dsvse/media/cytoscape.ds.js"></script>
+
       
     </head>
     
@@ -64,16 +68,13 @@
         <div id="undos" style="padding-bottom: 20px;"></div>
       </div>
 
-      <script nonce="drJ3YEf92R0xwiqg7HBzW27snIaC0TwA">
-
-
-
+      <script nonce="SFAK6ZSeGsDDdl5H1b6NXoVVwYmYpaW6">
         let cy = cytoscape({
           container: document.getElementById("cy"),
           wheelSensitivity: 0.1,
 
           layout: {
-            name: "cose", //circle, cose, grid
+            name: "dagre", //cose, grid, dagre, circle, random, arbor, cose-bilkent, cola, constraint
             /*
             spacingFactor: 120,		// https://stackoverflow.com/questions/54015729/cytoscape-js-spacing-between-nodes
             idealEdgeLength: 100,
@@ -85,7 +86,7 @@
             animate: false,
             */
           },
-          elements: [{"data":{"id":"Your","label":"Your","background_color":"gray"}},{"data":{"id":"Your.CALL","label":"CALL\nA~B","background_color":"blue","parent":"Your"}},{"data":{"id":"Your.ME","label":"ME\nC~D","background_color":"blue","parent":"Your"}},{"data":{"id":"Your.E","label":"E","background_color":"green","parent":"Your"}},{"data":{"id":"Your.F","label":"F","background_color":"green","parent":"Your"}},{"data":{"id":"Your.CALL","label":"CALL","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.ME","label":"ME","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.E","label":"E","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.F","label":"F","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"#sin(50)","label":"#sin(50)","background_color":"springgreen","parent":null},"style":{"shape":"rectangle"},"classes":["func"]},{"data":{"id":"Your.B","label":"B","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"@lf(A)","label":"@lf(A)","background_color":"lightgreen","parent":null},"style":null,"classes":["proc"]},{"data":{"id":"Your.B","label":"B","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.CALL>Your.ME","source":"Your.CALL","target":"Your.ME","line-style":"solid"}},{"data":{"id":"Your.E>Your.F","source":"Your.E","target":"Your.F","line-style":"solid"}},{"data":{"id":"#sin(50)>Your.B","source":"#sin(50)","target":"Your.B","line-style":"solid"}},{"data":{"id":"@lf(A)>Your.B","source":"@lf(A)","target":"Your.B","line-style":"solid"}}],
+          elements: [{"data":{"id":"Your","label":"Your","background_color":"gray"}},{"data":{"id":"Your.CALL","label":"CALL\nA~B","background_color":"blue","parent":"Your"}},{"data":{"id":"Your.ME","label":"ME\nC~D","background_color":"blue","parent":"Your"}},{"data":{"id":"Your.E","label":"E","background_color":"green","parent":"Your"}},{"data":{"id":"Your.F","label":"F","background_color":"green","parent":"Your"}},{"data":{"id":"Your.CALL","label":"CALL","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.ME","label":"ME","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.E","label":"E","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.F","label":"F","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"#sin(50)","label":"#sin(50)","background_color":"springgreen","parent":null},"style":{"shape":"rectangle"},"classes":["func"]},{"data":{"id":"Your.B","label":"B","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"@lf(A)","label":"@lf(A)","background_color":"lightgreen","parent":null},"style":null,"classes":["proc"]},{"data":{"id":"Your.B","label":"B","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.A","label":"A","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"A,B,C","label":"A,B,C","background_color":"beige","parent":null},"style":null,"classes":["conjunction"]},{"data":{"id":"Your.B","label":"B","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.C","label":"C","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.D","label":"D","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"D,E","label":"D,E","background_color":"beige","parent":null},"style":null,"classes":["conjunction"]},{"data":{"id":"Your.E","label":"E","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.F","label":"F","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"F,G,H","label":"F,G,H","background_color":"beige","parent":null},"style":null,"classes":["conjunction"]},{"data":{"id":"Your.G","label":"G","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.H","label":"H","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.J","label":"J","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.K","label":"K","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.L","label":"L","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.I","label":"I","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.J","label":"J","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"J,K","label":"J,K","background_color":"beige","parent":null},"style":null,"classes":["conjunction"]},{"data":{"id":"Your.K","label":"K","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.M","label":"M","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.N","label":"N","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.L","label":"L","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.CALL>Your.ME","source":"Your.CALL","target":"Your.ME","line-style":"solid"}},{"data":{"id":"Your.E>Your.F","source":"Your.E","target":"Your.F","line-style":"solid"}},{"data":{"id":"#sin(50)>Your.B","source":"#sin(50)","target":"Your.B","line-style":"solid"}},{"data":{"id":"@lf(A)>Your.B","source":"@lf(A)","target":"Your.B","line-style":"solid"}},{"data":{"id":"Your.A>A,B,C","source":"Your.A","target":"A,B,C","line-style":"solid"}},{"data":{"id":"Your.B>A,B,C","source":"Your.B","target":"A,B,C","line-style":"solid"}},{"data":{"id":"Your.C>A,B,C","source":"Your.C","target":"A,B,C","line-style":"solid"}},{"data":{"id":"Your.D>D,E","source":"Your.D","target":"D,E","line-style":"solid"}},{"data":{"id":"Your.E>D,E","source":"Your.E","target":"D,E","line-style":"solid"}},{"data":{"id":"Your.F>F,G,H","source":"Your.F","target":"F,G,H","line-style":"solid"}},{"data":{"id":"Your.G>F,G,H","source":"Your.G","target":"F,G,H","line-style":"solid"}},{"data":{"id":"Your.H>F,G,H","source":"Your.H","target":"F,G,H","line-style":"solid"}},{"data":{"id":"A,B,C>Your.J","source":"A,B,C","target":"Your.J","line-style":"solid"}},{"data":{"id":"A,B,C>Your.K","source":"A,B,C","target":"Your.K","line-style":"solid"}},{"data":{"id":"A,B,C>Your.L","source":"A,B,C","target":"Your.L","line-style":"solid"}},{"data":{"id":"D,E>Your.J","source":"D,E","target":"Your.J","line-style":"solid"}},{"data":{"id":"D,E>Your.K","source":"D,E","target":"Your.K","line-style":"solid"}},{"data":{"id":"D,E>Your.L","source":"D,E","target":"Your.L","line-style":"solid"}},{"data":{"id":"F,G,H>Your.J","source":"F,G,H","target":"Your.J","line-style":"solid"}},{"data":{"id":"F,G,H>Your.K","source":"F,G,H","target":"Your.K","line-style":"solid"}},{"data":{"id":"F,G,H>Your.L","source":"F,G,H","target":"Your.L","line-style":"solid"}},{"data":{"id":"Your.I>Your.J","source":"Your.I","target":"Your.J","line-style":"solid"}},{"data":{"id":"Your.I>Your.K","source":"Your.I","target":"Your.K","line-style":"solid"}},{"data":{"id":"Your.I>Your.L","source":"Your.I","target":"Your.L","line-style":"solid"}},{"data":{"id":"Your.J>J,K","source":"Your.J","target":"J,K","line-style":"solid"}},{"data":{"id":"Your.K>J,K","source":"Your.K","target":"J,K","line-style":"solid"}},{"data":{"id":"J,K>Your.M","source":"J,K","target":"Your.M","line-style":"solid"}},{"data":{"id":"J,K>Your.N","source":"J,K","target":"Your.N","line-style":"solid"}},{"data":{"id":"Your.L>Your.M","source":"Your.L","target":"Your.M","line-style":"solid"}},{"data":{"id":"Your.L>Your.N","source":"Your.L","target":"Your.N","line-style":"solid"}}],
           style: [
             {
               selector: "node",
@@ -140,9 +141,10 @@
             },
           ],
 
-          /* initial viewport state: */
+          /* initial viewport state: Not working
           zoom: 0.8,
           pan: { x: 0, y: 0 },
+          */
 
         });
   

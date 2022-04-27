@@ -11,6 +11,7 @@
 
 import * as vscode from 'vscode';
 import { CausalLink } from './clientParser';
+import { SystemGraphInfo } from './clientVisitor';
 
 /**
  * Cytoscape 를 이용해서 webview contents 생성
@@ -18,9 +19,7 @@ import { CausalLink } from './clientParser';
  * @returns 
  */
 export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode.Uri,
-  webview:vscode.Webview,
-  systemInfos:{name:string, calls: {name:string, detail:string}[]}[],
-  connections: CausalLink[])
+    webview:vscode.Webview, systemInfos:SystemGraphInfo[], connections: CausalLink[])
 {
     const systemNames:string[] = systemInfos.map(si => si.name);
     
@@ -43,7 +42,17 @@ export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode
               const label = `${c.name}\n${c.detail}`;
               return {"data": { id, label, "background_color": "blue", parent: si.name} };
             }));
+
+        // listing node (unreferenced) 생성
+        yield*
+          systemInfos.flatMap(si =>
+            si.segmentListings.map(l => {
+              const id = `${si.name}.${l}`;
+              const label = l;
+              return {"data": { id, label, "background_color": "green", parent: si.name} };
+            }));
         
+        // connection (edge) 로부터 node 생성
         const nodes =
             connections
             .flatMap(c => [c.l, c.r])
@@ -51,14 +60,17 @@ export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode
             .map(n => {
               let bg = 'green';
               let parent = null;
+              let style = null;   // style override
+              const classes = [n.type];
               switch(n.type)
               {
-                case 'func': bg = 'blue'; break;
+                case 'func': bg = 'springgreen'; style = {"shape": "rectangle"}; break;
+                case 'proc': bg = 'lightgreen'; break;
                 case 'system': bg = 'grey'; break;
                 case 'segment': parent = n.parentId; break;
                 case 'conjunction': bg = 'beige'; break;
               }
-              return { "data": {"id": n.id, "label": n.label, "background_color" : bg, parent } };
+              return { "data": {"id": n.id, "label": n.label, "background_color" : bg, parent }, style, classes };
             })
         ;
 
@@ -197,11 +209,13 @@ export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode
         let cy = cytoscape({
           container: document.getElementById("cy"),
           wheelSensitivity: 0.1,
+
           layout: {
             name: "cose", //circle, cose, grid
             /*
             spacingFactor: 120,		// https://stackoverflow.com/questions/54015729/cytoscape-js-spacing-between-nodes
             idealEdgeLength: 100,
+            fit: false, // dangerous
             */
             gravity: -100,
             /*
@@ -262,6 +276,12 @@ export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode
               },
             },
           ],
+
+          /* initial viewport state: Not working
+          zoom: 0.8,
+          pan: { x: 0, y: 0 },
+          */
+
         });
   
 

@@ -7,7 +7,7 @@
 
 import { CausalLink, Node, parserFromDocument } from "./clientParser";
 import { CallContext, CallIdentifierContext, CallPhraseContext, CausalContext, CausalOperatorContext, CausalPhraseContext, CausalsContext, CausalTokenContext,
-		CausalTokensCNFContext, CausalTokensDNFContext, dsParser, FuncLatchContext, MacroContext,
+		CausalTokensCNFContext, CausalTokensDNFContext, dsParser, FuncLatchContext, ListingContext, MacroContext,
 		ProgramContext, SystemContext
 } from './server-bundle/dsParser';
 
@@ -165,8 +165,18 @@ function getParseRuleContext(text:string) {
 }
 
 
+/** A = { B ~ C ~ D } */
+interface CallDetail {
+	name:string,	// call name : A
+	detail:string,	// { B ~ C ~ D }
+}
+export interface SystemGraphInfo {
+	name:string,
+	calls: CallDetail[],
+	segmentListings: string[],		// node 정의만 되어 있고, 실체가 정의되지 않은 것.  [sys]A = {B; C; D} 에서 B; C; D 의 경우
+}
 
-export function enumerateSystemInfos(text:string) : {name:string, calls: {name:string, detail:string}[]}[]
+export function enumerateSystemInfos(text:string) : SystemGraphInfo[]
 {
 	const sysContexts =
 		getParseRuleContext(text)
@@ -175,10 +185,15 @@ export function enumerateSystemInfos(text:string) : {name:string, calls: {name:s
 
 	const systemNameAndCalls =
 		sysContexts
-		.map(p => {
-			const sys = p as SystemContext;
-			const name = sys.children[1].text;
-			const sysBlock = sys.children[3];
+		.map(sc => {
+			const sys = sc as SystemContext;	// syskey systemname = sysblock
+			const name = sys.children[1].text;	// systemName
+			const sysBlock = sys.children[3];	// sysblock
+			const segmentListings =
+				enumerateChildren(sysBlock, false, t => t instanceof ListingContext)
+				.map(l => (l as ListingContext).children[0].text)
+				;
+
 			const calls =
 				enumerateChildren(sysBlock, false, t => t instanceof CallContext)
 				.map(c => {
@@ -187,7 +202,7 @@ export function enumerateSystemInfos(text:string) : {name:string, calls: {name:s
 					const callDetail = call.children[3].text;
 					return {name:callName, detail:callDetail};
 				});
-			return {name, calls};
+			return {name, calls, segmentListings};
 		});
 
 	return systemNameAndCalls;	

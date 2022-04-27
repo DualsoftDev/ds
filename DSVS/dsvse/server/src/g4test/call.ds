@@ -4,4 +4,7 @@
     CALL > ME;
     E;
     F;
+    E > F;
+    #sin(50) > B;
+    @lf(A) > B;
 }

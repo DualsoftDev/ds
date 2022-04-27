@@ -2,11 +2,6 @@ grammar dsFunctions;
 
 import dsLexer;
 
-value
-    : segment
-    | func
-    ;
-
 logicalBinaryOperator
     : '*' | '/' | '%'   // MUL | DIV | MOD
     | '+' | '-'         // PLUS | MINUS
@@ -42,13 +37,24 @@ string
     : '"' (~'"')* '"'
     | '\'' (~'\'')* '\''
     ;
+
+segValue
+    : segment
+    | func
+    ;
+value
+    : segValue
+    | string
+    | number
+    ;
+
 // unary function : #fun(args)
 funcSet: POUND 'set' LPARENTHESIS segment RPARENTHESIS;
 funcG: POUND 'g' LPARENTHESIS segment RPARENTHESIS;
 funcH: POUND 'h' LPARENTHESIS segment RPARENTHESIS;
 
 // binary function : #fun(arg1, arg2)
-funcLatch: POUND 'latch' LPARENTHESIS value COMMA value RPARENTHESIS;
+funcLatch: POUND 'latch' LPARENTHESIS segValue COMMA segValue RPARENTHESIS;
 funcXOR: POUND 'xor' LPARENTHESIS value COMMA value RPARENTHESIS;
 funcNXOR: POUND 'nxor' LPARENTHESIS value COMMA value RPARENTHESIS;
 funcNAND: POUND 'nand' LPARENTHESIS value COMMA value RPARENTHESIS;

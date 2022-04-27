@@ -1,4 +1,5 @@
 [sys]My = {
+    #sin(50) > P;
     P |> Q;
     S > @onlys(S);
     S > @(S=123);

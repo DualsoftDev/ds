@@ -45,7 +45,9 @@ simpleMacroHeader: 'macro';
 namedMacroHeader: 'macro' EQ IDENTIFIER;
 
 // A23 = { M.U ~ S.S3U ~ _ }
-call: IDENTIFIER EQ LBRACE segments TILDE segments (TILDE segments)? RBRACE;
+call: callIdentifier EQ LBRACE callPhrase RBRACE;
+callIdentifier: IDENTIFIER;
+callPhrase: segments TILDE segments (TILDE segments)?;
 
 // B.F1 > Set1F <| T.A21;
 causal

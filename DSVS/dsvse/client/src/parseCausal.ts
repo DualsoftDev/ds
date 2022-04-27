@@ -35,19 +35,6 @@ import { ParseTree } from 'antlr4ts/tree';
 import { assert } from 'console';
 import { CausalContext, SegmentContext, SegmentsDNFContext, ExpressionContext, ProcContext, ProgramContext, SystemContext, ProcSleepMsContext, SegmentsCNFContext } from './server-bundle/dsParser';
 
-// export function* enumerateChildren(from:ParseTree, includeMe=true, predicate:(t:ParseTree) => boolean = null ) : Generator<ParseTree, void, undefined>
-// {
-//     const ok = (t:ParseTree) => {
-//         if (predicate) return predicate(t);
-//         return true;
-//     };
-
-//     if (includeMe && !ok || ok(from))
-//         yield from;
-//     for (let index = 0; index < from.childCount; index++)
-//         yield* enumerateChildren(from.getChild(index), true, ok);
-// }
-
 export function enumerateChildren(from:ParseTree, includeMe=true, predicate:(t:ParseTree) => boolean = null ) : ParseTree[]
 {
     const result:ParseTree[] = [];
@@ -104,30 +91,42 @@ export function findFirstAncestor(from:ParseTree, predicate: (exp:ParseTree) => 
 }
 
 
+// export function* enumerateChildren(from:ParseTree, includeMe=true, predicate:(t:ParseTree) => boolean = null ) : Generator<ParseTree, void, undefined>
+// {
+//     const ok = (t:ParseTree) => {
+//         if (predicate) return predicate(t);
+//         return true;
+//     };
 
-export function collectCNFs(exp:ParseTree) : SegmentsCNFContext[]
-{
-    assert(exp instanceof CausalContext
-        // || exp instanceof CausalExpressionContext
-        || exp instanceof SegmentContext
-        || exp instanceof SegmentsDNFContext);
-    return Array.from(helper(exp));
+//     if (includeMe && !ok || ok(from))
+//         yield from;
+//     for (let index = 0; index < from.childCount; index++)
+//         yield* enumerateChildren(from.getChild(index), true, ok);
+// }
 
-    function *helper(exp:ParseTree)
-    {
-        if (exp instanceof CausalContext)
-        {
-            yield* helper(exp.children[0]);
-            yield* helper(exp.children[2]);
-        }
-        else
-        {
-            const terminal = findFirstChild(exp, (e => e instanceof SegmentsDNFContext));
-            yield* Array.from(enumerateChildren(terminal))
-                .filter(c => c instanceof SegmentsCNFContext)
-                .map(c => c as SegmentsCNFContext)
-                ;    
-        }
-    }
-}
+// export function collectCNFs(exp:ParseTree) : SegmentsCNFContext[]
+// {
+//     assert(exp instanceof CausalContext
+//         // || exp instanceof CausalExpressionContext
+//         || exp instanceof SegmentContext
+//         || exp instanceof SegmentsDNFContext);
+//     return Array.from(helper(exp));
+
+//     function *helper(exp:ParseTree)
+//     {
+//         if (exp instanceof CausalContext)
+//         {
+//             yield* helper(exp.children[0]);
+//             yield* helper(exp.children[2]);
+//         }
+//         else
+//         {
+//             const terminal = findFirstChild(exp, (e => e instanceof SegmentsDNFContext));
+//             yield* Array.from(enumerateChildren(terminal))
+//                 .filter(c => c instanceof SegmentsCNFContext)
+//                 .map(c => c as SegmentsCNFContext)
+//                 ;    
+//         }
+//     }
+// }
 

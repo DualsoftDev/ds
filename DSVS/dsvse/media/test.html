@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+    <html lang="en">
+    
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width">
+      
+      <script nonce="t78a6VGGRsvwTNUSksg3Y2ra4Ig0NUlW" src="https://file%2B.vscode-resource.vscode-webview.net/f%3A/Git/ds-master/DSVS/dsvse/media/cytoscape.min.js"></script>
+      <script nonce="2YOBtMMQTZubwgMUqPUVdBqEdy4xwQoo" src="https://file%2B.vscode-resource.vscode-webview.net/f%3A/Git/ds-master/DSVS/dsvse/media/cytoscape-undo-redo.js"></script>
+      <!-- Working!!
+      <script nonce="vsz8u0Zj08kktIDkJpEjoDeOmo9jygEn" src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+      <script nonce="I2civN1q253vXB7vQD4Yk8Trx5nVBWhM" src="https://ivis-at-bilkent.github.io/cytoscape.js-undo-redo/cytoscape-undo-redo.js"></script>
+      -->
+      
+      <title>f:\Git\ds-master\DSVS\dsvse\server\src\g4test\call.ds</title>
+
+      <style>
+        body {
+          font-family: helvetica neue, helvetica, liberation sans, arial, sans-serif;
+          /* font-size: 14px; */
+        }
+        #cy {
+          z-index: 999;
+          width: 100%;
+          height: 100%;
+          position: absolute;
+          /* float: left; */
+          /* top: 0px;
+          left: 0px; */
+        }
+    
+        /* #cy {
+                z-index: 999;
+                width: 85%;
+                height: 85%;
+                float: left;
+            } */
+    
+    
+        h1 {
+          opacity: 0.5;
+          font-size: 1em;
+          font-weight: bold;
+        }
+    
+      </style>
+
+      <script nonce="6OWyxWogkK23YopDN3MOgsBnDJbXbfoS" src="https://file%2B.vscode-resource.vscode-webview.net/f%3A/Git/ds-master/DSVS/dsvse/media/cytoscape.ds.js"></script>
+      
+    </head>
+    
+    <body>
+      <h1>DS demo: f:\Git\ds-master\DSVS\dsvse\server\src\g4test\call.ds</h1>
+    
+      <div id="myDiv" style="display:none">
+        <input id="batchButton" type="button" value="Add 'Bob' and delete selected" />
+        <b>DEL</b> to delete selected, <b>CTRL+Z</b> to undo, <b>CTRL+Y</b> to redo <br />
+      </div>
+    
+      <div id="cy"></div>
+      <div id="undoRedoList"  style="display:none">
+        <span style="color: darkslateblue; font-weight: bold;">Log</span>
+        <div id="undos" style="padding-bottom: 20px;"></div>
+      </div>
+
+      <script nonce="i8JeLlNfe1BDg4IzsBIgM2TPz8az6Zpy">
+
+
+
+        let cy = cytoscape({
+          container: document.getElementById("cy"),
+          wheelSensitivity: 0.1,
+          layout: {
+            name: "cose", //circle, cose, grid
+            /*
+            spacingFactor: 120,		// https://stackoverflow.com/questions/54015729/cytoscape-js-spacing-between-nodes
+            idealEdgeLength: 100,
+            */
+            gravity: -100,
+            /*
+            gravityCompound: -10,
+            animate: false,
+            */
+          },
+          elements: [{"data":{"id":"Your","label":"Your","background_color":"gray"}},{"data":{"id":"Your.CALL","label":"CALL\nA~B","background_color":"blue","parent":"Your"}},{"data":{"id":"Your.ME","label":"ME\nC~D","background_color":"blue","parent":"Your"}},{"data":{"id":"Your.CALL","label":"CALL","background_color":"green","parent":"Your"}},{"data":{"id":"Your.ME","label":"ME","background_color":"green","parent":"Your"}},{"data":{"id":"Your.CALL>Your.ME","source":"Your.CALL","target":"Your.ME","line-style":"solid"}}],
+          style: [
+            {
+              selector: "node",
+              style: {
+                shape: "circle", //"round-rectangle",
+                /*
+                'width': 'data(width)',
+                'height': 'data(height)',
+                */
+                color: "white", /* text color */
+                "text-wrap": "wrap",  /* multiline text : use '
+' */
+    
+                "border-width": 2,
+                "border-color": "white",
+                "border-style": "solid", //"dotted",
+    
+                'background-color': 'data(background_color)',
+                /*
+                'text-outline-color': 'data(background_color)',    
+                'text-outline-width': 2,
+                'text-outline-color': 'orange'
+                */
+                
+                "text-opacity": 0.5,
+                label: "data(label)",
+                /* 'font-size' : '25px', */
+    
+                /* 
+                // todo : 한번 color 정하면, selection color 변경할 수 있는 방법을 찾아야 함.
+                "background-color": "green",
+                */
+              },
+            },
+            {
+              selector: "edge",
+              style: {
+                "curve-style": "bezier",
+                "line-color": "cyan",
+                /* 'width': 1, */
+                "target-arrow-shape": "triangle",
+                'target-arrow-color': 'orange',
+                /* 'source-arrow-shape': 'circle', */
+              },
+            },
+            {
+              selector: ":selected",
+              style: {
+                "border-color": "red",
+                /* "border-width": 4,*/
+              },
+            },
+          ],
+        });
+  
+
+      </script>
+
+    </body>
+    
+    </html>

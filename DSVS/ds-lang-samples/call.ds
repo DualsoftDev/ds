@@ -1,4 +1,5 @@
 [sys]My = {
+    CALL = {A ~ B}
     //A > B > C > D > E;
     // P |> Q;
     // Q |> R;
@@ -7,7 +8,7 @@
     //X > Y >Z;
     //A, B > C, D;
     //A, B > C ? D;      // ERROR.  OR2 no outgoing
-    A, B > C ? D ><| E, F;      // OK.
+    //A, B > C ? D ><| E, F;      // OK.
 
     //A, B ? C > D, E;
     //A, B, C ? D, E ? F, G, H ? I > J, K ? L > M, N;
@@ -27,4 +28,8 @@
 
 [sys]Your = {
     My.A > a > b > c |> My.B;
+}
+
+[sys]Your = {
+    CALL = {A ~ B}
 }

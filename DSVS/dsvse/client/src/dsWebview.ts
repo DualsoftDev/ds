@@ -2,7 +2,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import * as fs from "fs";
 import { CausalLink, parseDSDocument, parserFromDocument } from './clientParser';
-import { enumerateSystemNames, visitLinks } from './clientVisitor';
+import { enumerateSystemInfos, visitLinks } from './clientVisitor';
 import { getWebviewContentD3 } from './webview.d3';
 import { getWebviewContentCytoscape } from './webview.cytoscape';
 import { assert } from 'console';
@@ -126,14 +126,14 @@ export function initializeWebview(textEditor:vscode.TextEditor, context: vscode.
             //.join(',')
             ;
 
-        const systemNames = enumerateSystemNames(text);
+        const systemInfos = enumerateSystemInfos(text);
         console.log('finished parseDSDocument on client side.' + connections);
 
         console.log('webview=', panel.webview);
 
         // And set its HTML content
         // const html = getWebviewContentD3(connections);
-        const html = getWebviewContentCytoscape(key, context.extensionUri, panel.webview, systemNames, connections);
+        const html = getWebviewContentCytoscape(key, context.extensionUri, panel.webview, systemInfos, connections);
         panel.webview.html = html;
 
         // write html string to file 'hello.html'

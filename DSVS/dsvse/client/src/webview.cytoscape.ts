@@ -17,17 +17,33 @@ import { CausalLink } from './clientParser';
  * @param connections 
  * @returns 
  */
-export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode.Uri, webview:vscode.Webview, systemNames:string[], connections: CausalLink[]) {
+export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode.Uri,
+  webview:vscode.Webview,
+  systemInfos:{name:string, calls: {name:string, detail:string}[]}[],
+  connections: CausalLink[])
+{
+    const systemNames:string[] = systemInfos.map(si => si.name);
+    
     console.log('getWebviewContentCytoscape');
-    /** Cytoscape 용 Elements 생성 */
+    /** Cytoscape 용 Elements 생성 : Node or Edge 정보 반환 */
     function *generateElements()
     {
+        // system compound container box
         yield*
           systemNames
           .map(sn => {
             return {"data": { "id": sn, "label": sn, "background_color": "gray" }};
           });
 
+        // call segment node 생성
+        yield*
+          systemInfos.flatMap(si =>
+            si.calls.map(c => {
+              const id = `${si.name}.${c.name}`;
+              const label = `${c.name}\n${c.detail}`;
+              return {"data": { id, label, "background_color": "blue", parent: si.name} };
+            }));
+        
         const nodes =
             connections
             .flatMap(c => [c.l, c.r])
@@ -120,6 +136,7 @@ export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode
       <script nonce="${getNonce()}" src="${scriptUris[1]}"></script>
       <!-- Working!!
       <script nonce="${getNonce()}" src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+      <script nonce="${getNonce()}" src="https://ivis-at-bilkent.github.io/cytoscape.js-undo-redo/cytoscape-undo-redo.js"></script>
       -->
       
       <title>${filePath}</title>
@@ -197,12 +214,13 @@ export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode
             {
               selector: "node",
               style: {
-                shape: "round-rectangle",
+                shape: "circle", //"round-rectangle",
                 /*
                 'width': 'data(width)',
                 'height': 'data(height)',
                 */
                 color: "white", /* text color */
+                "text-wrap": "wrap",  /* multiline text : use '\n' */
     
                 "border-width": 2,
                 "border-color": "white",

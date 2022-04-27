@@ -63,8 +63,11 @@ class LinkWalker extends AbstractParseTreeVisitor<number> implements dsVisitor<n
 		}
 
 			
-		// e.g, l = 'C, Z ? D'
+		// e.g 'C, Z ? D > A, B'
+		// l = 'C, Z ? D'
+		// r = 'A, B'
 		// lss = [C, Z], [D]	// CNFs
+		// rss = [A, B]		// CNFs
 		const [lss, rss] = [getTokens(left), getTokens(right)];
 
 		const cnfLs:Node[] = [];
@@ -84,11 +87,12 @@ class LinkWalker extends AbstractParseTreeVisitor<number> implements dsVisitor<n
 				cnfLs.push(getNode(tokens[0].text));
 		}
 
+		console.log('.');
 		const cnfRs:Node[] =
-			rss
-			.flatMap(r => r)
-			.map(r => getNode(right.text))
-			;
+			rss.flatMap(rs =>
+				enumerateChildren(rs, false, t => t instanceof CausalTokenContext))
+				.map(r => getNode(r.text))
+				;
 
 		cnfLs.forEach(l => {
 			cnfRs.forEach(r => {
@@ -172,7 +176,7 @@ export function enumerateSystemNames(text:string)
 
 
 /** DS parser tree 에서 인과 link (e.g, A > B) 부분 추출을 위한 visitor */
-export function visitLinks(text:string)
+export function visitLinks(text:string): CausalLink[]
 {
 	//visitor.visit(parser.program());
 

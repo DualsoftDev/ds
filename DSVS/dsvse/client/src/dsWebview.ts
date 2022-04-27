@@ -90,24 +90,38 @@ export function initializeWebview(textEditor:vscode.TextEditor, context: vscode.
         const text = vscode.window.activeTextEditor.document.getText();
 
         // {source: "Microsoft", target: "Amazon", type: "licensing"},
+        const links = visitLinks(text);
         const connections:CausalLink[] =
-            visitLinks(text)
+            links
             .flatMap(causal => {
                 const c = causal;
                 const op = causal.op;
-                switch(causal.op)
+                switch(op)
                 {
                     case '|>':
-                    case '>': return {l: c.l, r: c.r, op};
+                    case '>': return [{l: c.l, r: c.r, op}];
 
                     case '<|':
-                    case '<': return {l: c.r, r: c.l, op};
+                    case '<': return [{l: c.r, r: c.l, op}];
+
+                    case '<||>':
+                    case '|><|':
+                        return [ {l: c.l, r: c.r, op:'|>'},
+                                 {l: c.r, r: c.l, op:'|>'}];
+
+                    case '><|':
+                        return [ {l: c.l, r: c.r, op:'>'},
+                                 {l: c.r, r: c.l, op:'|>'}];
+                    case '|><':
+                        return [ {l: c.l, r: c.r, op:'|>'},
+                                 {l: c.r, r: c.l, op:'>'}];
+
 
                     default:
                         assert(false, `invalid operator: ${op}`);
                         break;
                 }
-                return {l: causal.l, r: causal.r, op};
+                return [{l: causal.l, r: causal.r, op}];
             })
             //.join(',')
             ;

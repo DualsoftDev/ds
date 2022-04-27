@@ -3,4 +3,6 @@
 clean:
 	cd ..
 	make clean
-	
+
+pre:
+	vsce publish --pre-release

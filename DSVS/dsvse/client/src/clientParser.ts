@@ -37,7 +37,7 @@ export function parserFromDocument(text:string) {
 }
 
 
-type NodeType = "system" | "proc" | "func" | "segment" | "expression";
+type NodeType = "system" | "proc" | "func" | "segment" | "expression" | "conjunction";
 export interface Node {
 	id:string,
 	label:string,

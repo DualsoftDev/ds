@@ -12,7 +12,7 @@ logicalBinaryOperator
     | '+' | '-'         // PLUS | MINUS
     | '&&'
     | '||'       // AND | OR
-    | '==' | '!=' | '>=' | '<=' | '>' | '<' // DO *NOT* use like... EQ2 | NEQ | GTE | LTE | GT | LT
+    | '==' | '!=' | '>>=' | '<<=' | '>>' | '<<' // DO *NOT* use like... EQ2 | NEQ | GTE | LTE | GT | LT
     ;
 
 /*
@@ -23,7 +23,7 @@ expression
     | ('!' | '+' | '-' ) expression // unary opeartor
     | expression ('*' | '/' | '%') expression
     | expression ('+' | '-') expression
-    | expression ('>=' | '<=' | '>' | '<') expression
+    | expression ('>>=' | '<<=' | '>>' | '<<') expression
     | expression ('==' | '!=') expression
     | expression ('&&') expression
     | expression ('||') expression

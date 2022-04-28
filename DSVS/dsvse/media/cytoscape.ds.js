@@ -125,18 +125,30 @@
 	return true;
 })();
 
+/**
+ * 동적으로 cytoscape 의 layout 수행
+ * @param {*} name Layout 이름
+ */
 function layout(name) {
 	//import ext from 'cytoscape-cise';
 	//cytoscape.use( ext );
 	// cytoscape.use( require('cytoscape-cise') );
 
 	console.log('applying layout:', name);
+	// if (name === "cise") {
+    //     import ext as cise from 'cytoscape-cise';
+    //     cytoscape.use( cise );
+	// }
 	cy.layout({
 		name
 	}).run();
 }
 
-
+/**
+ * cytoscape 의 노드/엣지 추가
+ * @param elements - cytoscape 용 elements 집합 : object
+ * @returns 
+ */
 function fillCytoscape(elements) {
 	let cy = cytoscape({
 		container: document.getElementById("cy"),
@@ -221,6 +233,7 @@ function fillCytoscape(elements) {
 
 
 
+/* vscode 에서 dropdown 은 지원안되는 듯 함.. */
 function dropdown() {
 	document.getElementById("myDropdown").classList.toggle("show");
 

@@ -156,17 +156,19 @@ export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode
       <script nonce="${getNonce()}" src="${scriptCytoscapeMin}"></script>
       <script nonce="${getNonce()}" src="${scriptCytoscapeUndoRedo}"></script>
 
-      <!--
+
       <script nonce="${getNonce()}" src="${scriptCytoscapeLayoutCise}"></script>
+
+      <!--
+      <script nonce="${getNonce()}" type="module">
+        import ext as cise from 'cytoscape-cise';
+        cytoscape.use( cise );
+      </script>
       -->
 
       <!-- Working!!
       <script nonce="${getNonce()}" src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
       <script nonce="${getNonce()}" src="https://ivis-at-bilkent.github.io/cytoscape.js-undo-redo/cytoscape-undo-redo.js"></script>
-      <script nonce="${getNonce()}" type="module">
-        import ext as cise from 'cytoscape-cise';
-        cytoscape.use( cise );
-      </script>
       -->
 
       <script nonce="${getNonce()}" src="https://cdn.rawgit.com/cpettitt/dagre/v0.7.4/dist/dagre.min.js"></script>
@@ -210,11 +212,11 @@ export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode
         <button onclick="layout('concentric')" class="dropbtn">concentric</button>
         <button onclick="layout('random')" class="dropbtn">random</button>
         
-
-
+        
+        
         <!--
         <button onclick="dropdown()" class="dropbtn">dropdown</button>
-
+        
         <button onclick="layout('cise')" class="dropbtn">cise</button>    <<<<<<<<<< 그나마 괜찮은 듯..
         <button onclick="layout('klay')" class="dropbtn">klay</button>
         <button onclick="layout('elk')" class="dropbtn">elk</button>

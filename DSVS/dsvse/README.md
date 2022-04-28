@@ -52,6 +52,12 @@ Update ds.g4 & Fix bug
 ### 1.0.7
 
 Update parser, import, function
+
+### 1.0.11
+
+- System : boxed component view
+- Compound causal operator support: '>|>', '<|<', '>||<', '<||>', ..
+
 -----------------------------------------------------------------------------------------------------------
 ## Following extension guidelines
 

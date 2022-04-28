@@ -40,6 +40,7 @@ export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode
                 case 'func': bg = 'blue'; break;
                 case 'system': bg = 'grey'; break;
                 case 'segment': parent = n.parentId; break;
+                case 'conjunction': bg = 'beige'; break;
               }
               return { "data": {"id": n.id, "label": n.label, "background_color" : bg, parent } };
             })
@@ -53,8 +54,8 @@ export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode
                 "id": `${c.l.id}${c.op}${c.r.id}`,
                 "source": c.l.id,
                 "target": c.r.id,
-                "line-style": dashStyle}}
-            ;});
+                "line-style": dashStyle}};
+        });
     }
 
     /*
@@ -182,6 +183,8 @@ export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode
             spacingFactor: 120,		// https://stackoverflow.com/questions/54015729/cytoscape-js-spacing-between-nodes
             idealEdgeLength: 100,
             */
+            gravity: -100,
+            /* gravityCompound: -10, */
           },
           elements: ${elements},
           style: [
@@ -221,8 +224,9 @@ export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode
               style: {
                 "curve-style": "bezier",
                 "line-color": "cyan",
-                /* 'width': 3, */
+                /* 'width': 1, */
                 "target-arrow-shape": "triangle",
+                'target-arrow-color': 'orange',
                 /* 'source-arrow-shape': 'circle', */
               },
             },

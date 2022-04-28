@@ -2,10 +2,10 @@
 ### 1. Causal(원인결과 정의)
 |Id| Item | Unit |Example|   Desc |  GUI | 
 |:---:|:----|:--:|:---:|:----|:---|
-|SEQ1|Start Causal|`>`| `A > B > C` |Action B would be executed by causal action A, action C would be executed by causal action B  <p>`행위 B는 행위 A에 의해 실행되며, 행위 C는 행위 B에 의해 실행됨`| ![AAA](./png/Seq1.dio.png)|
-|SEQ2|Reset Causal| `\|>` | `A > B <\| C` |Action B would be executed by causal action A, and the action B would be initialized(reset) by causal action C <p>`행위 B는 행위 A에 의해 실행되며, 행위 C에 의해 리셋됨`| ![AAA](./png/Seq2.dio.png)|
-|SEQ3|And Causal|`,`|`A,B,C > D,E` | Action D would be executed by united causal action A, B and C and also action E would be executed by same causal actions as D <p>`행위 D, E는 행위 A, B, C에 의해 실행됨`|  ![AAA](./png/Seq3.dio.png)|
-|SEQ4|Or Causal|`?`| `A, B ? C > D` | Action D would be executed by causal action A and B<p> Or action D would be executed by causal action C <p>`행위 D는 행위 A, B에 의해 실행되거나, 행위 C에 의해 실행됨`| ![AAA](./png/Seq4.dio.png)|
+|SEQ1|Start Causal|`>`| `A > B > C;` |Action B would be executed by causal action A, action C would be executed by causal action B  <p>`행위 B는 행위 A에 의해 실행되며, 행위 C는 행위 B에 의해 실행됨`| ![AAA](./png/Seq1.dio.png)|
+|SEQ2|Reset Causal| `\|>` | `A > B <\| C;` |Action B would be executed by causal action A, and the action B would be initialized(reset) by causal action C <p>`행위 B는 행위 A에 의해 실행되며, 행위 C에 의해 리셋됨`| ![AAA](./png/Seq2.dio.png)|
+|SEQ3|And Causal|`,`|`A,B,C > D,E;` | Action D would be executed by united causal action A, B and C and also action E would be executed by same causal actions as D <p>`행위 D, E는 행위 A, B, C에 의해 실행됨`|  ![AAA](./png/Seq3.dio.png)|
+|SEQ4|Or Causal|`?`| `A, B ? C > D;` | Action D would be executed by causal action A and B<p> Or action D would be executed by causal action C <p>`행위 D는 행위 A, B에 의해 실행되거나, 행위 C에 의해 실행됨`| ![AAA](./png/Seq4.dio.png)|
 |SEQ5|Causal Split|`;`| `A,B > D;`<p>`C > D;` | Action D would be executed by causal action A and B<p> Or action D would be executed by causal action C <p>`행위 D는 행위 A, B에 의해 실행되거나, 행위 C에 의해 실행됨`| ![AAA](./png/Seq5.dio.png)|
 
 </BR>
@@ -24,8 +24,8 @@
 
 |Id| Item | Unit | Example | Desc |   GUI | 
 |:---:|:----|:--:|:----|:---|:---|
-|SEQ9|system Parent | `[sys]=` |  [sys]D = { A > B <\| C } | System D parallelly processes the actions included in the causality DAG<p>`시스템 D는 인과 그래프(DAG)에 포함된 행위들을 '병렬'적으로 처리함`  | ![AAA](./png/Seq9.dio.png)|
-|SEQ10|Segement Parent| `=` |  D = { A > B <\| C } | Action D sequentially processes the actions included in the causality DAG<p>`행위 D는 인과 그래프(DAG)에 포함된 행위들을 '순차'적으로 처리함` | ![AAA](./png/Seq10.dio.png)|
+|SEQ9|system Parent | `[sys]=` |  [sys]D = { A > B <\| C; } | System D parallelly processes the actions included in the causality DAG<p>`시스템 D는 인과 그래프(DAG)에 포함된 행위들을 '병렬'적으로 처리함`  | ![AAA](./png/Seq9.dio.png)|
+|SEQ10|Segement Parent| `=` |  D = { A > B <\| C; } | Action D sequentially processes the actions included in the causality DAG<p>`행위 D는 인과 그래프(DAG)에 포함된 행위들을 '순차'적으로 처리함` | ![AAA](./png/Seq10.dio.png)|
 </BR>
 
 
@@ -33,7 +33,7 @@
 
 |Id| Item | Unit | Example | Desc |   GUI | 
 |:---:|:----|:--:|:----|:---|:---|
-|SEQ11| mutual interlock | <\|\|> |  A <\|\|> B <p>is equal to A <\| B ; A \|> B| Action A and Action B are linked in a mutually exclusive interlock<p>`행위 A와 행위 B는 상호 배타적인 인터락으로 연결되어 있음`  | ![AAA](./png/Seq11.dio.png)|
-|SEQ12| resetStart | \|>> |  A \|>> B <p>is equal to A > B ; A \|> B| Action B would be executed by the end of causal action A<p>And also B would be initialized(reset) by executing causal action A<p>`행위 B는 행위A에 의해 실행되며, 행위 A의 실행중에 리셋됨` | ![AAA](./png/Seq12.dio.png)|
+|SEQ11| mutual interlock | <\|\|> |  A <\|\|> B; <p>is equal to A <\| B ; A \|> B| Action A and Action B are linked in a mutually exclusive interlock<p>`행위 A와 행위 B는 상호 배타적인 인터락으로 연결되어 있음`  | ![AAA](./png/Seq11.dio.png)|
+|SEQ12| resetStart | \|>> |  A \|>> B; <p>is equal to A > B ; A \|> B| Action B would be executed by the end of causal action A<p>And also B would be initialized(reset) by executing causal action A<p>`행위 B는 행위A에 의해 실행되며, 행위 A의 실행중에 리셋됨` | ![AAA](./png/Seq12.dio.png)|
 
 

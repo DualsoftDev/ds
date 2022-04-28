@@ -1,4 +1,13 @@
-[sys]action  = {(Start) > DoAction <| (Reset)}
+[sys]M = {U; D;}
+[sys]D = { A > B <| C; }
+[sys]tester = {A, B ? C > D; E > F <| H;}
+[sys]def = {A; B; A, B ? C > D; E > F <| H; C; D; }
+[sys]parenting = {
+    D = { A > B <| C; }
+}
+
+
+
 [sys]action  = {(Start) > DoAction <| (Reset);}
 
 

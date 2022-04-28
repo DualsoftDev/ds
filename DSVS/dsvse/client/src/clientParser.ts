@@ -37,7 +37,7 @@ export function parserFromDocument(text:string) {
 }
 
 
-type NodeType = "system" | "proc" | "func" | "segment" | "expression";
+type NodeType = "system" | "proc" | "func" | "segment" | "expression" | "conjunction";
 export interface Node {
 	id:string,
 	label:string,
@@ -249,34 +249,32 @@ export function *parseDSDocument(text:string) {
 	const tree = parser.program();
 	for (const system of tree.system()) {
 		const sysBlock = system.sysBlock();
-		const simple = sysBlock.simpleSysBlock();
-		const complex = sysBlock.complexSysBlock();
 
-		if (simple)
-			console.log(`system: ${system.text}`);
-		else if (complex)
+		if (! sysBlock)
 		{
-			console.log('========');
-			for (const acc of complex.acc())
-				console.log(`\tacc: ${acc.text}`);
+			console.error(`No system block: ${system.text}`);
+			return;
+		}
 
-			parseMacro(complex.macro());
-			for (const macro of complex.macro())
-				console.log(`\tmacro: ${macro.text}`);
-			for (const causal of complex.causal())
+
+		console.log('========');
+		for (const acc of sysBlock.acc())
+			console.log(`\tacc: ${acc.text}`);
+
+		parseMacro(sysBlock.macro());
+		for (const macro of sysBlock.macro())
+			console.log(`\tmacro: ${macro.text}`);
+		for (const causal of sysBlock.causal())
+		{
+			if (causal.exception != null)
 			{
-				if (causal.exception != null)
-				{
-					console.error(`Exception: ${causal.text} : ${causal.exception.toString()}`);
-					continue;
-				}
-
-				console.log(`\tcausal: ${causal.toStringTree(parser)}`);
-				yield* parseCausalExpressionContext(causal);
+				console.error(`Exception: ${causal.text} : ${causal.exception.toString()}`);
+				continue;
 			}
 
-			console.log(`system: ${system.text}`);
-		}			
+			console.log(`\tcausal: ${causal.toStringTree(parser)}`);
+			yield* parseCausalExpressionContext(causal);
+		}
 	}
 	// const visitor = new ProgramTreeWalker();
 	// const count = visitor.visit(tree);

@@ -1,8 +1,9 @@
-[sys]A = {
-    C > B.y > x;
+[sys]MyA = {
+    // P > Q;
+    C, Z ? D > MyB.y > x;
 }
-[sys]B = {
-    A.C > D > y > A.x;
+[sys]MyB = {
+    MyA.C > D > y > MyA.x;
 }
 
 

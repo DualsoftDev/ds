@@ -6,29 +6,34 @@
  */
 
 import { CausalLink, Node, parserFromDocument } from "./clientParser";
-import { CausalContext, CausalOperatorContext, CausalPhraseContext, CausalsContext, CausalTokenContext, CausalTokensCNFContext, CausalTokensDNFContext, dsParser, MacroContext, ProgramContext, SystemContext } from './server-bundle/dsParser';
+import { CausalContext, CausalOperatorContext, CausalPhraseContext, CausalsContext, CausalTokenContext,
+		CausalTokensCNFContext, CausalTokensDNFContext, dsParser, FuncLatchContext, MacroContext,
+		ProgramContext, SystemContext
+} from './server-bundle/dsParser';
+
 import { dsVisitor } from './server-bundle/dsVisitor';
 import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
 import { enumerateChildren, findFirstAncestor } from "./parseCausal";
 import { assert } from "console";
 import { ParserRuleContext } from "antlr4ts";
-import { notDeepStrictEqual } from "assert";
 import { dsListener } from "./server-bundle/dsListener";
-import { ParseTree } from "antlr4ts/tree";
 import { ParseTreeWalker } from 'antlr4ts/tree/ParseTreeWalker';
 
 
 // https://www.antlr.org/api/Java/org/antlr/v4/runtime/tree/AbstractParseTreeVisitor.html
 class LinkWalker extends AbstractParseTreeVisitor<number> implements dsVisitor<number> {
 	public links:CausalLink[] = [];
+	public nodes:Node[] = [];	// appended node.  '&' junction
 
-	protected addLinks(systemName:string, l:CausalTokensDNFContext, op:CausalOperatorContext, r:CausalTokensDNFContext)
+	protected addLinks(systemName:string, left:CausalTokensDNFContext, op:CausalOperatorContext, right:CausalTokensDNFContext)
 	{
-		function getTokens(x:CausalTokensDNFContext)
+		function getTokens(x:CausalTokensDNFContext) : CausalTokensCNFContext[]
 		{
-			return enumerateChildren(x, false, t => t instanceof CausalTokenContext)
-				.flatMap(c => c.text)
-				;
+			return enumerateChildren(x, true, t => t instanceof CausalTokensDNFContext)
+				.flatMap(t =>
+					enumerateChildren(x, false, t => t instanceof CausalTokensCNFContext)
+					.map(t => t as CausalTokensCNFContext)
+				);
 		}
 
 		function getNode(n:string) {
@@ -58,13 +63,40 @@ class LinkWalker extends AbstractParseTreeVisitor<number> implements dsVisitor<n
 		}
 
 			
+		// e.g 'C, Z ? D > A, B'
+		// l = 'C, Z ? D'
+		// r = 'A, B'
+		// lss = [C, Z], [D]	// CNFs
+		// rss = [A, B]		// CNFs
+		const [lss, rss] = [getTokens(left), getTokens(right)];
 
-		const [ls, rs] = [getTokens(l), getTokens(r)];
+		const cnfLs:Node[] = [];
+		for (const ls of lss) {		// ls = [C, Z]
+			const tokens = enumerateChildren(ls, false, t => t instanceof CausalTokenContext);
+			if (tokens.length > 1)
+			{
+				const id = ls.text;// ls.map(l => l.text).join(',');
+				const junction:Node = {id, label:id, type:"conjunction"};
+				this.nodes.push(junction);
+				tokens.forEach(l => {
+					this.links.push({l:getNode(l.text), op:op.text, r:junction});
+				});
+				cnfLs.push(junction);
+			}
+			else
+				cnfLs.push(getNode(tokens[0].text));
+		}
 
-		ls.forEach(ll => {
-			rs.forEach(rr => {
-				const [lll, ooo, rrr] = [getNode(l.text), op.text, getNode(r.text)];
-				this.links.push({l:lll, op:ooo, r:rrr});
+		console.log('.');
+		const cnfRs:Node[] =
+			rss.flatMap(rs =>
+				enumerateChildren(rs, false, t => t instanceof CausalTokenContext))
+				.map(r => getNode(r.text))
+				;
+
+		cnfLs.forEach(l => {
+			cnfRs.forEach(r => {
+				this.links.push({l, op:op.text, r});
 			});
 		});
 
@@ -144,7 +176,7 @@ export function enumerateSystemNames(text:string)
 
 
 /** DS parser tree 에서 인과 link (e.g, A > B) 부분 추출을 위한 visitor */
-export function visitLinks(text:string)
+export function visitLinks(text:string): CausalLink[]
 {
 	//visitor.visit(parser.program());
 

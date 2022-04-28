@@ -203,8 +203,12 @@
     "causals": {
       "patterns": [
         {
-          "name": "punctuation.comma.ds",
+          "name": "punctuation.andmark.ds",
           "match": ","
+        },
+        {
+          "name": "punctuation.ormark.ds",
+          "match": "\\?"
         },
         {
           "include": "#segment"

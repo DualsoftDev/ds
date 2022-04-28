@@ -81,6 +81,18 @@ repository:
     - include: '#comments'
     - include: $self
 
+  macros:
+    patterns:
+    - name: macro2.ds
+      begin: \[\s*(macro)\s*(=\s*([가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*))?\s*\]\s*=\s*(\{)
+      beginCaptures:
+        '1': {name: keyword.other.macro2.ds}      
+        '3': {name: keyword.control.macro.var.ds}      
+      end: (\})
+      patterns:
+        - include: '#callSegmentDefs'
+        - include: '#comments'
+
   callSegmentDefs:
     patterns:
     - name: call.segment.ds
@@ -99,13 +111,15 @@ repository:
 
   causals:
     patterns:
-      - name: punctuation.comma.ds
+      - name: punctuation.andmark.ds
         match: ','
+      - name: punctuation.ormark.ds
+        match: '\?'
       - include: '#segment'
       - name: invalid.illegal.expected-array-separator.json
         match: '(<\|>)'   
       - name: keyword.other.causal.ds
-        match: '(<\|\|>)|(<\|)|(\|>)|<|>' 
+        match: '(<\|\|>)|(<\|)|(\|>)|<|>'
 
   imports:
     patterns:
@@ -163,17 +177,7 @@ repository:
       - include: '#comments'
       - include: '#segment'
 
-  macros:
-    patterns:
-    - name: macro2.ds
-      begin: \[\s*(\#|\@)\s*(=\s*([가-힣a-zA-Z_0-9]*))?\s*\]\s*=\s*(\{)
-      beginCaptures:
-        '1': {name: keyword.other.macro2.ds}      
-        '3': {name: keyword.control.macro.var.ds}      
-      end: (\})
-      patterns:
-        - include: '#callSegmentDefs'
-        - include: '#comments'
+
 
 
 

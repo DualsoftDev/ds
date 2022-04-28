@@ -1,8 +1,8 @@
 
-[sys]M = {U; D}  // Motor up / down
-[sys]B = {F1; F2; F3; F4}    // Button.층 호출버튼
-[sys]S = {S1D; S2D; S2U; S3D; S3U; S4U, xxx.a.b.c}    // Sensor Up, Down    //의도적인 , 에러
-[sys]My ={
+[task]M = {U; D}  // Motor up / down
+[task]B = {F1; F2; F3; F4}    // Button.층 호출버튼
+[task]S = {S1D; S2D; S2U; S3D; S3U; S4U, xxx.a.b.c}    // Sensor Up, Down    //의도적인 , 에러
+[flow]My ={
     [accsre] = {B; S}
     [acce] = {B; S}
     [accs] = {M}
@@ -32,7 +32,7 @@
     
     T.F12 <||> T.F21
     T.F34 |> T.F23 <||> T.F32 <| T.F21
-    T.F34 <||> T.F43
+    T.F34 <||> T.F43 ? test , tset2;
     
     //호출에 따른 층간 상하강 행위   
     T.F12 < (Set2F | Set3F | Set4F) & T.F21

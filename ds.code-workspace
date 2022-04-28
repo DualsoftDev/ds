@@ -5,7 +5,7 @@
     { "path": "." }
   ],
   "settings": {
-    "liveServer.settings.multiRootWorkspaceName": "dsvse",
+    "liveServer.settings.multiRootWorkspaceName": "ds-master",
     "liveServer.settings.port": 5501
   }
 }

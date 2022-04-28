@@ -66,6 +66,8 @@ function exportToSVG(type, name) {
 - xxx [How to add a custom right-click menu to a webpage?](https://stackoverflow.com/questions/4909167/how-to-add-a-custom-right-click-menu-to-a-webpage)
 - QuickPick
     - [301 Moved Permanently](https://github.com/microsoft/vscode-extension-samples.git)
+- [Show HTML in window with OK button in VSCode extension](https://stackoverflow.com/questions/55239284/show-html-in-window-with-ok-button-in-vscode-extension)
+  - message passing 관련 참고 할 부분 있음.
 ## Resources
 - [vscode-webview-ui-toolkit/getting-started.md at main · microsoft/vscode-webview-ui-toolkit](https://github.com/microsoft/vscode-webview-ui-toolkit/blob/main/docs/getting-started.md)
 

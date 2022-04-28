@@ -4,71 +4,82 @@
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width">
+
+      <link href="https://file%2B.vscode-resource.vscode-webview.net/f%3A/Git/ds-master/DSVS/dsvse/media/ui.css" rel="stylesheet" />
+      <link href="https://file%2B.vscode-resource.vscode-webview.net/f%3A/Git/ds-master/DSVS/dsvse/media/cytoscape.css" rel="stylesheet" />
       
-      <script nonce="jbSBSMG6vsEWZ8BEGA9E6LlkzjljT612" src="https://file%2B.vscode-resource.vscode-webview.net/f%3A/Git/ds-master/DSVS/dsvse/media/cytoscape.min.js"></script>
-      <script nonce="xKiNzieg1yNDx4kzWFHFLyIfponDqZxh" src="https://file%2B.vscode-resource.vscode-webview.net/f%3A/Git/ds-master/DSVS/dsvse/media/cytoscape-undo-redo.js"></script>
+      <script nonce="ToJ8a5W0QYvDdBcuVE6lnu9D2UfsnLAF" src="https://file%2B.vscode-resource.vscode-webview.net/f%3A/Git/ds-master/DSVS/dsvse/media/cytoscape.min.js"></script>
+      <script nonce="XoSBd8zq4ZDjgjSY3sfCH8BFx3KbuLIJ" src="https://file%2B.vscode-resource.vscode-webview.net/f%3A/Git/ds-master/DSVS/dsvse/media/cytoscape-undo-redo.js"></script>
       <!-- Working!!
-      <script nonce="x8Ppto1bkJSbuL839oRD3b07oyLCUMNk" src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
-      <script nonce="KwrLBasgbFivvUYrj3lO3jb9tCIWbPGX" src="https://ivis-at-bilkent.github.io/cytoscape.js-undo-redo/cytoscape-undo-redo.js"></script>
+      <script nonce="nF8YCnxweYKuVgV19DSeUDcc3WGYSMfW" src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+      <script nonce="9ZAtBrV8eSZudPyLqDSeB10P3QCOF7b4" src="https://ivis-at-bilkent.github.io/cytoscape.js-undo-redo/cytoscape-undo-redo.js"></script>
       -->
 
-      <script nonce="Cn5EKa4ena2syy7mZQqxqLE5tTkmgUbh" src="https://cdn.rawgit.com/cpettitt/dagre/v0.7.4/dist/dagre.min.js"></script>
-      <script nonce="HDtbm3roZofpLIALJEMAiKTYi57s1eqI" src="https://cdn.rawgit.com/cytoscape/cytoscape.js-dagre/1.5.0/cytoscape-dagre.js"></script>
-  
+      <script nonce="oVufeXkaiIdpFZ9fPAdGrviLdN1tSq7w" src="https://cdn.rawgit.com/cpettitt/dagre/v0.7.4/dist/dagre.min.js"></script>
+      <script nonce="IFvFgIl6AfdT5SkVkdP98fQIoKonZSbb" src="https://cdn.rawgit.com/cytoscape/cytoscape.js-dagre/1.5.0/cytoscape-dagre.js"></script>
       
-      <title>f:\Git\ds-master\DSVS\dsvse\server\src\g4test\call.ds</title>
+      <title>f:\Git\ds-master\DSVS\ds-lang-samples\call.ds</title>
 
       <style>
         body {
           font-family: helvetica neue, helvetica, liberation sans, arial, sans-serif;
           /* font-size: 14px; */
-        }
-        #cy {
-          z-index: 999;
-          width: 100%;
-          height: 100%;
-          position: absolute;
-          /* float: left; */
-          /* top: 0px;
-          left: 0px; */
-        }
-    
-        /* #cy {
-                z-index: 999;
-                width: 85%;
-                height: 85%;
-                float: left;
-            } */
-    
-    
+        }    
         h1 {
           opacity: 0.5;
           font-size: 1em;
           font-weight: bold;
         }
-    
       </style>
 
-      <script nonce="nvBLtC8Fz8bACYaaYBp6VXtvsCdw8tIL" src="https://file%2B.vscode-resource.vscode-webview.net/f%3A/Git/ds-master/DSVS/dsvse/media/cytoscape.ds.js"></script>
+      <script nonce="C9Ur0Gr1GLKpNVYyDM6opVXYaHlY1nmF" src="https://file%2B.vscode-resource.vscode-webview.net/f%3A/Git/ds-master/DSVS/dsvse/media/cytoscape.ds.js"></script>
 
       
     </head>
     
     <body>
-      <h1>DS demo: f:\Git\ds-master\DSVS\dsvse\server\src\g4test\call.ds</h1>
+      <h1>DS demo: f:\Git\ds-master\DSVS\ds-lang-samples\call.ds</h1>
     
       <div id="myDiv" style="display:none">
         <input id="batchButton" type="button" value="Add 'Bob' and delete selected" />
         <b>DEL</b> to delete selected, <b>CTRL+Z</b> to undo, <b>CTRL+Y</b> to redo <br />
       </div>
     
+      <div class="dropdown">
+        <button onclick="layout('cose')" class="dropbtn">cose</button>
+        <button onclick="layout('breadthfirst')" class="dropbtn">breadthfirst</button>
+        <button onclick="layout('dagre')" class="dropbtn">dagre</button>
+        <button onclick="layout('circle')" class="dropbtn">circle</button>
+        <button onclick="layout('grid')" class="dropbtn">grid</button>
+        <button onclick="layout('concentric')" class="dropbtn">concentric</button>
+        <button onclick="layout('random')" class="dropbtn">random</button>
+
+
+
+        <!--
+        <button onclick="layout('klay')" class="dropbtn">klay</button>
+        <button onclick="layout('elk')" class="dropbtn">elk</button>
+        <button onclick="layout('cose-bilkent')" class="dropbtn">cose-bilkent</button>
+        <button onclick="layout('dagre-bilkent')" class="dropbtn">dagre-bilkent</button>
+        <button onclick="layout('cola')" class="dropbtn">cola</button>
+        -->
+
+        <div id="myDropdown" class="dropdown-content">
+          <a onclick="onHLink()">Link 1</a>
+          <a href="#">Link 2</a>
+          <a href="#">Link 3</a>
+        </div>
+      </div> 
+
       <div id="cy"></div>
       <div id="undoRedoList"  style="display:none">
         <span style="color: darkslateblue; font-weight: bold;">Log</span>
         <div id="undos" style="padding-bottom: 20px;"></div>
       </div>
 
-      <script nonce="SFAK6ZSeGsDDdl5H1b6NXoVVwYmYpaW6">
+
+
+      <script nonce="d6D6MhhqaMyioVdMeOFP2PLxbFEvjRyj">
         let cy = cytoscape({
           container: document.getElementById("cy"),
           wheelSensitivity: 0.1,
@@ -86,7 +97,7 @@
             animate: false,
             */
           },
-          elements: [{"data":{"id":"Your","label":"Your","background_color":"gray"}},{"data":{"id":"Your.CALL","label":"CALL\nA~B","background_color":"blue","parent":"Your"}},{"data":{"id":"Your.ME","label":"ME\nC~D","background_color":"blue","parent":"Your"}},{"data":{"id":"Your.E","label":"E","background_color":"green","parent":"Your"}},{"data":{"id":"Your.F","label":"F","background_color":"green","parent":"Your"}},{"data":{"id":"Your.CALL","label":"CALL","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.ME","label":"ME","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.E","label":"E","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.F","label":"F","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"#sin(50)","label":"#sin(50)","background_color":"springgreen","parent":null},"style":{"shape":"rectangle"},"classes":["func"]},{"data":{"id":"Your.B","label":"B","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"@lf(A)","label":"@lf(A)","background_color":"lightgreen","parent":null},"style":null,"classes":["proc"]},{"data":{"id":"Your.B","label":"B","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.A","label":"A","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"A,B,C","label":"A,B,C","background_color":"beige","parent":null},"style":null,"classes":["conjunction"]},{"data":{"id":"Your.B","label":"B","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.C","label":"C","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.D","label":"D","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"D,E","label":"D,E","background_color":"beige","parent":null},"style":null,"classes":["conjunction"]},{"data":{"id":"Your.E","label":"E","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.F","label":"F","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"F,G,H","label":"F,G,H","background_color":"beige","parent":null},"style":null,"classes":["conjunction"]},{"data":{"id":"Your.G","label":"G","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.H","label":"H","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.J","label":"J","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.K","label":"K","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.L","label":"L","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.I","label":"I","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.J","label":"J","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"J,K","label":"J,K","background_color":"beige","parent":null},"style":null,"classes":["conjunction"]},{"data":{"id":"Your.K","label":"K","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.M","label":"M","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.N","label":"N","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.L","label":"L","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.CALL>Your.ME","source":"Your.CALL","target":"Your.ME","line-style":"solid"}},{"data":{"id":"Your.E>Your.F","source":"Your.E","target":"Your.F","line-style":"solid"}},{"data":{"id":"#sin(50)>Your.B","source":"#sin(50)","target":"Your.B","line-style":"solid"}},{"data":{"id":"@lf(A)>Your.B","source":"@lf(A)","target":"Your.B","line-style":"solid"}},{"data":{"id":"Your.A>A,B,C","source":"Your.A","target":"A,B,C","line-style":"solid"}},{"data":{"id":"Your.B>A,B,C","source":"Your.B","target":"A,B,C","line-style":"solid"}},{"data":{"id":"Your.C>A,B,C","source":"Your.C","target":"A,B,C","line-style":"solid"}},{"data":{"id":"Your.D>D,E","source":"Your.D","target":"D,E","line-style":"solid"}},{"data":{"id":"Your.E>D,E","source":"Your.E","target":"D,E","line-style":"solid"}},{"data":{"id":"Your.F>F,G,H","source":"Your.F","target":"F,G,H","line-style":"solid"}},{"data":{"id":"Your.G>F,G,H","source":"Your.G","target":"F,G,H","line-style":"solid"}},{"data":{"id":"Your.H>F,G,H","source":"Your.H","target":"F,G,H","line-style":"solid"}},{"data":{"id":"A,B,C>Your.J","source":"A,B,C","target":"Your.J","line-style":"solid"}},{"data":{"id":"A,B,C>Your.K","source":"A,B,C","target":"Your.K","line-style":"solid"}},{"data":{"id":"A,B,C>Your.L","source":"A,B,C","target":"Your.L","line-style":"solid"}},{"data":{"id":"D,E>Your.J","source":"D,E","target":"Your.J","line-style":"solid"}},{"data":{"id":"D,E>Your.K","source":"D,E","target":"Your.K","line-style":"solid"}},{"data":{"id":"D,E>Your.L","source":"D,E","target":"Your.L","line-style":"solid"}},{"data":{"id":"F,G,H>Your.J","source":"F,G,H","target":"Your.J","line-style":"solid"}},{"data":{"id":"F,G,H>Your.K","source":"F,G,H","target":"Your.K","line-style":"solid"}},{"data":{"id":"F,G,H>Your.L","source":"F,G,H","target":"Your.L","line-style":"solid"}},{"data":{"id":"Your.I>Your.J","source":"Your.I","target":"Your.J","line-style":"solid"}},{"data":{"id":"Your.I>Your.K","source":"Your.I","target":"Your.K","line-style":"solid"}},{"data":{"id":"Your.I>Your.L","source":"Your.I","target":"Your.L","line-style":"solid"}},{"data":{"id":"Your.J>J,K","source":"Your.J","target":"J,K","line-style":"solid"}},{"data":{"id":"Your.K>J,K","source":"Your.K","target":"J,K","line-style":"solid"}},{"data":{"id":"J,K>Your.M","source":"J,K","target":"Your.M","line-style":"solid"}},{"data":{"id":"J,K>Your.N","source":"J,K","target":"Your.N","line-style":"solid"}},{"data":{"id":"Your.L>Your.M","source":"Your.L","target":"Your.M","line-style":"solid"}},{"data":{"id":"Your.L>Your.N","source":"Your.L","target":"Your.N","line-style":"solid"}}],
+          elements: [{"data":{"id":"My","label":"My","background_color":"gray"}},{"data":{"id":"Your","label":"Your","background_color":"gray"}},{"data":{"id":"Your","label":"Your","background_color":"gray"}},{"data":{"id":"My.CALL","label":"CALL\nA~B","background_color":"blue","parent":"My"}},{"data":{"id":"Your.CALL","label":"CALL\nA~B","background_color":"blue","parent":"Your"}},{"data":{"id":"My.A","label":"A","background_color":"green","parent":"My"},"style":null,"classes":["segment"]},{"data":{"id":"A,B,C","label":"A,B,C","background_color":"beige","parent":null},"style":null,"classes":["conjunction"]},{"data":{"id":"My.B","label":"B","background_color":"green","parent":"My"},"style":null,"classes":["segment"]},{"data":{"id":"My.C","label":"C","background_color":"green","parent":"My"},"style":null,"classes":["segment"]},{"data":{"id":"My.D","label":"D","background_color":"green","parent":"My"},"style":null,"classes":["segment"]},{"data":{"id":"D,E","label":"D,E","background_color":"beige","parent":null},"style":null,"classes":["conjunction"]},{"data":{"id":"My.E","label":"E","background_color":"green","parent":"My"},"style":null,"classes":["segment"]},{"data":{"id":"My.F","label":"F","background_color":"green","parent":"My"},"style":null,"classes":["segment"]},{"data":{"id":"F,G,H","label":"F,G,H","background_color":"beige","parent":null},"style":null,"classes":["conjunction"]},{"data":{"id":"My.G","label":"G","background_color":"green","parent":"My"},"style":null,"classes":["segment"]},{"data":{"id":"My.H","label":"H","background_color":"green","parent":"My"},"style":null,"classes":["segment"]},{"data":{"id":"My.J","label":"J","background_color":"green","parent":"My"},"style":null,"classes":["segment"]},{"data":{"id":"My.K","label":"K","background_color":"green","parent":"My"},"style":null,"classes":["segment"]},{"data":{"id":"My.L","label":"L","background_color":"green","parent":"My"},"style":null,"classes":["segment"]},{"data":{"id":"My.I","label":"I","background_color":"green","parent":"My"},"style":null,"classes":["segment"]},{"data":{"id":"My.J","label":"J","background_color":"green","parent":"My"},"style":null,"classes":["segment"]},{"data":{"id":"J,K","label":"J,K","background_color":"beige","parent":null},"style":null,"classes":["conjunction"]},{"data":{"id":"My.K","label":"K","background_color":"green","parent":"My"},"style":null,"classes":["segment"]},{"data":{"id":"My.M","label":"M","background_color":"green","parent":"My"},"style":null,"classes":["segment"]},{"data":{"id":"My.N","label":"N","background_color":"green","parent":"My"},"style":null,"classes":["segment"]},{"data":{"id":"My.L","label":"L","background_color":"green","parent":"My"},"style":null,"classes":["segment"]},{"data":{"id":"My.A","label":"A","background_color":"green","parent":"My"},"style":null,"classes":["segment"]},{"data":{"id":"Your.a","label":"a","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.a","label":"a","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.b","label":"b","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.b","label":"b","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.c","label":"c","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"Your.c","label":"c","background_color":"green","parent":"Your"},"style":null,"classes":["segment"]},{"data":{"id":"My.B","label":"B","background_color":"green","parent":"My"},"style":null,"classes":["segment"]},{"data":{"id":"My.A>A,B,C","source":"My.A","target":"A,B,C","line-style":"solid"}},{"data":{"id":"My.B>A,B,C","source":"My.B","target":"A,B,C","line-style":"solid"}},{"data":{"id":"My.C>A,B,C","source":"My.C","target":"A,B,C","line-style":"solid"}},{"data":{"id":"My.D>D,E","source":"My.D","target":"D,E","line-style":"solid"}},{"data":{"id":"My.E>D,E","source":"My.E","target":"D,E","line-style":"solid"}},{"data":{"id":"My.F>F,G,H","source":"My.F","target":"F,G,H","line-style":"solid"}},{"data":{"id":"My.G>F,G,H","source":"My.G","target":"F,G,H","line-style":"solid"}},{"data":{"id":"My.H>F,G,H","source":"My.H","target":"F,G,H","line-style":"solid"}},{"data":{"id":"A,B,C>My.J","source":"A,B,C","target":"My.J","line-style":"solid"}},{"data":{"id":"A,B,C>My.K","source":"A,B,C","target":"My.K","line-style":"solid"}},{"data":{"id":"A,B,C>My.L","source":"A,B,C","target":"My.L","line-style":"solid"}},{"data":{"id":"D,E>My.J","source":"D,E","target":"My.J","line-style":"solid"}},{"data":{"id":"D,E>My.K","source":"D,E","target":"My.K","line-style":"solid"}},{"data":{"id":"D,E>My.L","source":"D,E","target":"My.L","line-style":"solid"}},{"data":{"id":"F,G,H>My.J","source":"F,G,H","target":"My.J","line-style":"solid"}},{"data":{"id":"F,G,H>My.K","source":"F,G,H","target":"My.K","line-style":"solid"}},{"data":{"id":"F,G,H>My.L","source":"F,G,H","target":"My.L","line-style":"solid"}},{"data":{"id":"My.I>My.J","source":"My.I","target":"My.J","line-style":"solid"}},{"data":{"id":"My.I>My.K","source":"My.I","target":"My.K","line-style":"solid"}},{"data":{"id":"My.I>My.L","source":"My.I","target":"My.L","line-style":"solid"}},{"data":{"id":"My.J>J,K","source":"My.J","target":"J,K","line-style":"solid"}},{"data":{"id":"My.K>J,K","source":"My.K","target":"J,K","line-style":"solid"}},{"data":{"id":"J,K>My.M","source":"J,K","target":"My.M","line-style":"solid"}},{"data":{"id":"J,K>My.N","source":"J,K","target":"My.N","line-style":"solid"}},{"data":{"id":"My.L>My.M","source":"My.L","target":"My.M","line-style":"solid"}},{"data":{"id":"My.L>My.N","source":"My.L","target":"My.N","line-style":"solid"}},{"data":{"id":"My.A>Your.a","source":"My.A","target":"Your.a","line-style":"solid"}},{"data":{"id":"Your.a>Your.b","source":"Your.a","target":"Your.b","line-style":"solid"}},{"data":{"id":"Your.b>Your.c","source":"Your.b","target":"Your.c","line-style":"solid"}},{"data":{"id":"Your.c|>My.B","source":"Your.c","target":"My.B","line-style":"dashed"}}],
           style: [
             {
               selector: "node",

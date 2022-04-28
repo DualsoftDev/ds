@@ -128,6 +128,14 @@
 	return true;
 })();
 
+function layout(name) {
+	console.log(name);
+	cy.layout({
+	  name
+	}).run();
+}
+
+
 // const vscode = acquireVsCodeApi();
 
 // const oldState = /** @type {{ count: number} | undefined} */ (vscode.getState());

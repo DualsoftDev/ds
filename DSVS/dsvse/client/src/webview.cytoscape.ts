@@ -86,17 +86,22 @@ export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode
         });
     }
 
+    function toWebviewUri(fileName:string)
+    {
+      const path = vscode.Uri.joinPath(extensionUri, 'media', fileName);
+      return webview.asWebviewUri(path);
+    }
+
     /*
      * HTML document 에서 loading 할 local script files.  .../media/*.js 위치에 있음.
      */
 		// Local path to main script run in the webview
 		// And the uri we use to load this script in the webview
-    const scriptUris =
-      Array.from(
-        [ 'cytoscape.min.js', 'cytoscape-undo-redo.js', 'cytoscape.ds.js']
-          .map(f => vscode.Uri.joinPath(extensionUri, 'media', f))
-          .map(f => webview.asWebviewUri(f)))
-      ;
+    const scriptCytoscapeMin      = toWebviewUri('cytoscape.min.js');
+    const scriptCytoscapeUndoRedo = toWebviewUri('cytoscape-undo-redo.js');
+    const scriptCytoscapeDS       = toWebviewUri('cytoscape.ds.js');
+    const cssCytoscape            = toWebviewUri('cytoscape.css');
+    const cssUI                   = toWebviewUri('ui.css');
 
 		// Use a nonce to only allow specific scripts to be run
 		const nonce = getNonce();
@@ -143,9 +148,12 @@ export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width">
+
+      <link href="${cssUI}" rel="stylesheet" />
+      <link href="${cssCytoscape}" rel="stylesheet" />
       
-      <script nonce="${getNonce()}" src="${scriptUris[0]}"></script>
-      <script nonce="${getNonce()}" src="${scriptUris[1]}"></script>
+      <script nonce="${getNonce()}" src="${scriptCytoscapeMin}"></script>
+      <script nonce="${getNonce()}" src="${scriptCytoscapeUndoRedo}"></script>
       <!-- Working!!
       <script nonce="${getNonce()}" src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
       <script nonce="${getNonce()}" src="https://ivis-at-bilkent.github.io/cytoscape.js-undo-redo/cytoscape-undo-redo.js"></script>
@@ -153,7 +161,6 @@ export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode
 
       <script nonce="${getNonce()}" src="https://cdn.rawgit.com/cpettitt/dagre/v0.7.4/dist/dagre.min.js"></script>
       <script nonce="${getNonce()}" src="https://cdn.rawgit.com/cytoscape/cytoscape.js-dagre/1.5.0/cytoscape-dagre.js"></script>
-  
       
       <title>${filePath}</title>
 
@@ -161,34 +168,15 @@ export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode
         body {
           font-family: helvetica neue, helvetica, liberation sans, arial, sans-serif;
           /* font-size: 14px; */
-        }
-        #cy {
-          z-index: 999;
-          width: 100%;
-          height: 100%;
-          position: absolute;
-          /* float: left; */
-          /* top: 0px;
-          left: 0px; */
-        }
-    
-        /* #cy {
-                z-index: 999;
-                width: 85%;
-                height: 85%;
-                float: left;
-            } */
-    
-    
+        }    
         h1 {
           opacity: 0.5;
           font-size: 1em;
           font-weight: bold;
         }
-    
       </style>
 
-      <script nonce="${getNonce()}" src="${scriptUris[2]}"></script>
+      <script nonce="${getNonce()}" src="${scriptCytoscapeDS}"></script>
 
       
     </head>
@@ -201,11 +189,39 @@ export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode
         <b>DEL</b> to delete selected, <b>CTRL+Z</b> to undo, <b>CTRL+Y</b> to redo <br />
       </div>
     
+      <div class="dropdown">
+        <button onclick="layout('cose')" class="dropbtn">cose</button>
+        <button onclick="layout('breadthfirst')" class="dropbtn">breadthfirst</button>
+        <button onclick="layout('dagre')" class="dropbtn">dagre</button>
+        <button onclick="layout('circle')" class="dropbtn">circle</button>
+        <button onclick="layout('grid')" class="dropbtn">grid</button>
+        <button onclick="layout('concentric')" class="dropbtn">concentric</button>
+        <button onclick="layout('random')" class="dropbtn">random</button>
+
+
+
+        <!--
+        <button onclick="layout('klay')" class="dropbtn">klay</button>
+        <button onclick="layout('elk')" class="dropbtn">elk</button>
+        <button onclick="layout('cose-bilkent')" class="dropbtn">cose-bilkent</button>
+        <button onclick="layout('dagre-bilkent')" class="dropbtn">dagre-bilkent</button>
+        <button onclick="layout('cola')" class="dropbtn">cola</button>
+        -->
+
+        <div id="myDropdown" class="dropdown-content">
+          <a onclick="onHLink()">Link 1</a>
+          <a href="#">Link 2</a>
+          <a href="#">Link 3</a>
+        </div>
+      </div> 
+
       <div id="cy"></div>
       <div id="undoRedoList"  style="display:none">
         <span style="color: darkslateblue; font-weight: bold;">Log</span>
         <div id="undos" style="padding-bottom: 20px;"></div>
       </div>
+
+
 
       <script nonce="${getNonce()}">
         let cy = cytoscape({

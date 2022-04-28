@@ -17,3 +17,19 @@
     	'line-style': 'dashed',
 
 
+
+
+#### selection
+- class 이용 : [How to select nodes by class in cytoscape.js?](https://stackoverflow.com/questions/45572034/how-to-select-nodes-by-class-in-cytoscape-js)
+
+
+
+// 'a' 는 특정 classes 이름
+cy.$('.a').layout({name:'circle'}).run();
+cy.elements().not(cy.$('.a')).layout({name:'circle'}).run();
+cy.nodes(':parent');        // https://stackoverflow.com/questions/52200858/cytoscape-js-multiple-layouts-different-layout-within-compound-nodes
+cy.nodes().not(':parent').length;
+cy.elements().not(':parent').length;
+cy.nodes(':parent').layout({name:'circle'}).run();
+
+cy.elements('node[parent="C"],node[parent="B"]').layout({name:'circle'}).run();

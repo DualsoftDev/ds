@@ -100,6 +100,7 @@ export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode
     const scriptCytoscapeMin      = toWebviewUri('cytoscape.min.js');
     const scriptCytoscapeUndoRedo = toWebviewUri('cytoscape-undo-redo.js');
     const scriptCytoscapeDS       = toWebviewUri('cytoscape.ds.js');
+    const scriptCytoscapeLayoutCise = toWebviewUri('cytoscape-cise.js');
     const cssCytoscape            = toWebviewUri('cytoscape.css');
     const cssUI                   = toWebviewUri('ui.css');
 
@@ -154,14 +155,25 @@ export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode
       
       <script nonce="${getNonce()}" src="${scriptCytoscapeMin}"></script>
       <script nonce="${getNonce()}" src="${scriptCytoscapeUndoRedo}"></script>
+
+      <!--
+      <script nonce="${getNonce()}" src="${scriptCytoscapeLayoutCise}"></script>
+      -->
+
       <!-- Working!!
       <script nonce="${getNonce()}" src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
       <script nonce="${getNonce()}" src="https://ivis-at-bilkent.github.io/cytoscape.js-undo-redo/cytoscape-undo-redo.js"></script>
+      <script nonce="${getNonce()}" type="module">
+        import ext as cise from 'cytoscape-cise';
+        cytoscape.use( cise );
+      </script>
       -->
 
       <script nonce="${getNonce()}" src="https://cdn.rawgit.com/cpettitt/dagre/v0.7.4/dist/dagre.min.js"></script>
       <script nonce="${getNonce()}" src="https://cdn.rawgit.com/cytoscape/cytoscape.js-dagre/1.5.0/cytoscape-dagre.js"></script>
       
+
+
       <title>${filePath}</title>
 
       <style>
@@ -197,10 +209,13 @@ export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode
         <button onclick="layout('grid')" class="dropbtn">grid</button>
         <button onclick="layout('concentric')" class="dropbtn">concentric</button>
         <button onclick="layout('random')" class="dropbtn">random</button>
-
+        
 
 
         <!--
+        <button onclick="dropdown()" class="dropbtn">dropdown</button>
+
+        <button onclick="layout('cise')" class="dropbtn">cise</button>    <<<<<<<<<< 그나마 괜찮은 듯..
         <button onclick="layout('klay')" class="dropbtn">klay</button>
         <button onclick="layout('elk')" class="dropbtn">elk</button>
         <button onclick="layout('cose-bilkent')" class="dropbtn">cose-bilkent</button>
@@ -208,102 +223,22 @@ export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode
         <button onclick="layout('cola')" class="dropbtn">cola</button>
         -->
 
-        <div id="myDropdown" class="dropdown-content">
-          <a onclick="onHLink()">Link 1</a>
-          <a href="#">Link 2</a>
-          <a href="#">Link 3</a>
-        </div>
       </div> 
-
+      
       <div id="cy"></div>
+
+
       <div id="undoRedoList"  style="display:none">
         <span style="color: darkslateblue; font-weight: bold;">Log</span>
         <div id="undos" style="padding-bottom: 20px;"></div>
       </div>
 
 
-
       <script nonce="${getNonce()}">
-        let cy = cytoscape({
-          container: document.getElementById("cy"),
-          wheelSensitivity: 0.1,
-
-          layout: {
-            name: "dagre", //cose, grid, dagre, circle, random, arbor, cose-bilkent, cola, constraint
-            /*
-            spacingFactor: 120,		// https://stackoverflow.com/questions/54015729/cytoscape-js-spacing-between-nodes
-            idealEdgeLength: 100,
-            fit: false, // dangerous
-            */
-            gravity: -100,
-            /*
-            gravityCompound: -10,
-            animate: false,
-            */
-          },
-          elements: ${elements},
-          style: [
-            {
-              selector: "node",
-              style: {
-                shape: "circle", //"round-rectangle",
-                /*
-                'width': 'data(width)',
-                'height': 'data(height)',
-                */
-                color: "white", /* text color */
-                "text-wrap": "wrap",  /* multiline text : use '\n' */
-    
-                "border-width": 2,
-                "border-color": "white",
-                "border-style": "solid", //"dotted",
-    
-                'background-color': 'data(background_color)',
-                /*
-                'text-outline-color': 'data(background_color)',    
-                'text-outline-width': 2,
-                'text-outline-color': 'orange'
-                */
-                
-                "text-opacity": 0.5,
-                label: "data(label)",
-                /* 'font-size' : '25px', */
-    
-                /* 
-                // todo : 한번 color 정하면, selection color 변경할 수 있는 방법을 찾아야 함.
-                "background-color": "green",
-                */
-              },
-            },
-            {
-              selector: "edge",
-              style: {
-                "curve-style": "bezier",
-                "line-color": "cyan",
-                /* 'width': 1, */
-                "target-arrow-shape": "triangle",
-                'target-arrow-color': 'orange',
-                /* 'source-arrow-shape': 'circle', */
-              },
-            },
-            {
-              selector: ":selected",
-              style: {
-                "border-color": "red",
-                /* "border-width": 4,*/
-              },
-            },
-          ],
-
-          /* initial viewport state: Not working
-          zoom: 0.8,
-          pan: { x: 0, y: 0 },
-          */
-
-        });
-  
-
+        let cy = fillCytoscape(${elements});
       </script>
+
+
 
     </body>
     

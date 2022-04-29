@@ -6,14 +6,14 @@
  */
 
 import { CausalLink, Node, parserFromDocument } from "./clientParser";
-import { CausalContext, CausalOperatorContext, CausalPhraseContext, CausalsContext, CausalTokenContext,
-		CausalTokensCNFContext, CausalTokensDNFContext, dsParser, FuncLatchContext, MacroContext,
+import { CallContext, CallIdentifierContext, CallPhraseContext, CausalContext, CausalOperatorContext, CausalPhraseContext, CausalsContext, CausalTokenContext,
+		CausalTokensCNFContext, CausalTokensDNFContext, dsParser, FuncLatchContext, ListingContext, MacroContext,
 		ProgramContext, SystemContext
 } from './server-bundle/dsParser';
 
 import { dsVisitor } from './server-bundle/dsVisitor';
 import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
-import { enumerateChildren, findFirstAncestor } from "./parseCausal";
+import { enumerateChildren, findFirstAncestor, findFirstChild } from "./parseCausal";
 import { assert } from "console";
 import { ParserRuleContext } from "antlr4ts";
 import { dsListener } from "./server-bundle/dsListener";
@@ -165,13 +165,47 @@ function getParseRuleContext(text:string) {
 }
 
 
+/** A = { B ~ C ~ D } */
+interface CallDetail {
+	name:string,	// call name : A
+	detail:string,	// { B ~ C ~ D }
+}
+export interface SystemGraphInfo {
+	name:string,
+	calls: CallDetail[],
+	segmentListings: string[],		// node 정의만 되어 있고, 실체가 정의되지 않은 것.  [sys]A = {B; C; D} 에서 B; C; D 의 경우
+}
 
-export function enumerateSystemNames(text:string)
+export function enumerateSystemInfos(text:string) : SystemGraphInfo[]
 {
-	return getParseRuleContext(text)
+	const sysContexts =
+		getParseRuleContext(text)
 		.filter(p => p instanceof SystemContext)
-		.map(p => (p as SystemContext).children[1].text)
 		;
+
+	const systemNameAndCalls =
+		sysContexts
+		.map(sc => {
+			const sys = sc as SystemContext;	// syskey systemname = sysblock
+			const name = sys.children[1].text;	// systemName
+			const sysBlock = sys.children[3];	// sysblock
+			const segmentListings =
+				enumerateChildren(sysBlock, false, t => t instanceof ListingContext)
+				.map(l => (l as ListingContext).children[0].text)
+				;
+
+			const calls =
+				enumerateChildren(sysBlock, false, t => t instanceof CallContext)
+				.map(c => {
+					const call = c as CallContext;
+					const callName = call.children[0].text;
+					const callDetail = call.children[3].text;
+					return {name:callName, detail:callDetail};
+				});
+			return {name, calls, segmentListings};
+		});
+
+	return systemNameAndCalls;	
 }
 
 

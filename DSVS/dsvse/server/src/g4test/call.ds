@@ -1,0 +1,11 @@
+[sys]Your = {
+    CALL = {A ~ B}
+    ME = {C~D}
+    CALL > ME;
+    E;
+    F;
+    E > F;
+    #sin(50) > B;
+    @lf(A) > B;
+    A, B, C ? D, E ? F, G, H ? I > J, K ? L > M, N;
+}

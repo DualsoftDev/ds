@@ -45,7 +45,7 @@ function exportToSVG(type, name) {
 - [#DevHack: Open custom VSCode WebView panel and focus input](https://www.eliostruyf.com/devhack-open-custom-vscode-webview-panel-focus-input/)
 
 
-##### webview html 에서 로컬 javascript 로딩
+##### webview html 에서 로컬 javascript 로딩 ---> getNonce() 이용!!!
 - [webview-sample 참고](https://github.com/microsoft/vscode-extension-samples.git)
     - https://github.com/microsoft/vscode-extension-samples/blob/main/webview-sample/src/extension.ts
     - nonce, ...
@@ -60,6 +60,14 @@ function exportToSVG(type, name) {
 </head>
 ```
 
+
+##### Context menu
+- [Workaround to allow Popups in VSCode WebView Extension](https://stackoverflow.com/questions/56692461/workaround-to-allow-popups-in-vscode-webview-extension)
+- xxx [How to add a custom right-click menu to a webpage?](https://stackoverflow.com/questions/4909167/how-to-add-a-custom-right-click-menu-to-a-webpage)
+- QuickPick
+    - [301 Moved Permanently](https://github.com/microsoft/vscode-extension-samples.git)
+- [Show HTML in window with OK button in VSCode extension](https://stackoverflow.com/questions/55239284/show-html-in-window-with-ok-button-in-vscode-extension)
+  - message passing 관련 참고 할 부분 있음.
 ## Resources
 - [vscode-webview-ui-toolkit/getting-started.md at main · microsoft/vscode-webview-ui-toolkit](https://github.com/microsoft/vscode-webview-ui-toolkit/blob/main/docs/getting-started.md)
 

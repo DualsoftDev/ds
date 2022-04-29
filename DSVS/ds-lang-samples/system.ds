@@ -24,24 +24,24 @@
 
 
 //////// import from *.ds
-    [sys]MySystem = {
-        !#import {
-            task MyLibrary.A as A,
-            flow MyLibrary.A as X,
-        } from "template.ds"
+[sys]MySystem = {
+    !#import {
+        task MyLibrary.A as A,
+        flow MyLibrary.A as X,
+    } from "template.ds"
 
 
-    ---- template.ds
-    [sys]MyLibrary = {
-        [task]A = { A1; A2; A3; A4 };
-        [flow]A = {A.A1 > A.A2;
-                A. A3 <||> A.A4; };
-    }
-
-    ---- Result
-    [sys]MySystem = {
-
-        [task]A = { A1; A2; A3; A4 };
-        [flow]X = {A.A1 > A.A2;
+//---- template.ds
+[sys]MyLibrary = {
+    [task]A = { A1; A2; A3; A4 };
+    [flow]A = {A.A1 > A.A2;
             A. A3 <||> A.A4; };
+}
+
+//---- Result
+[sys]MySystem = {
+
+    [task]A = { A1; A2; A3; A4 };
+    [flow]X = {A.A1 > A.A2;
+        A. A3 <||> A.A4; };
 

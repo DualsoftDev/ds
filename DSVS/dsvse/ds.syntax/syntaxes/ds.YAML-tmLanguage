@@ -18,6 +18,8 @@ foldingStopMarker: '^\s*\}'
 patterns:
 - include: '#comments'
 - include: '#systems'
+- include: '#tasks'
+- include: '#flows'
 
 repository:
   comments: # Inline (//) and block (/* */) comments. Comments can happen anywhere.
@@ -55,6 +57,68 @@ repository:
       - comment: single-line
         name: system.single.ds
         begin: \[\s*(sys)\s*\]\s*([a-zA-Z_][a-zA-Z_0-9]*)\s*=\s*\{
+        beginCaptures:
+          '1': {name: keyword.other.ds}
+          '2': {name: keyword.control.ds}
+        end: \}
+        patterns:          
+        - name: punctuation.separator.array.ds
+          match: ";"
+        - include: '#segment'
+        - name: invalid.illegal.expected-array-separator.json
+          match: '[^\s\}]'
+
+  tasks:
+    patterns:
+      - comment: multi-line tasks
+        name: tasks.multi.ds
+        begin: \[\s*(task)\s*\]\s*([a-zA-Z_][a-zA-Z_0-9]*)\s*=\s*(\{)(?=[^\}]*$)
+        beginCaptures:
+          '1': {name: keyword.other.ds}
+          '2': {name: keyword.control.ds}
+        end: (\})
+        endCaptures:
+          '1': {name: punctuation.brace.end.ds}
+        patterns:          
+        - include: '#comments'
+        - include: '#accessDefs'
+        - include: '#macros'
+        #- include: '#causals'
+        - include: '#imports'
+      - comment: single-line tasks
+        name: tasks.single.ds
+        begin: \[\s*(task)\s*\]\s*([a-zA-Z_][a-zA-Z_0-9]*)\s*=\s*\{
+        beginCaptures:
+          '1': {name: keyword.other.ds}
+          '2': {name: keyword.control.ds}
+        end: \}
+        patterns:          
+        - name: punctuation.separator.array.ds
+          match: ";"
+        - include: '#segment'
+        - name: invalid.illegal.expected-array-separator.json
+          match: '[^\s\}]'
+
+  flows:
+    patterns:
+      - comment: multi-line flows
+        name: flows.multi.ds
+        begin: \[\s*(flow)\s*\]\s*([a-zA-Z_][a-zA-Z_0-9]*)\s*=\s*(\{)(?=[^\}]*$)
+        beginCaptures:
+          '1': {name: keyword.other.ds}
+          '2': {name: keyword.control.ds}
+        end: (\})
+        endCaptures:
+          '1': {name: punctuation.brace.end.ds}
+        patterns:          
+        - include: '#comments'
+        - include: '#accessDefs'
+        - include: '#macros'
+        - include: '#causals'
+        - include: '#imports'
+      - comment: single-line flows
+        name: flows.single.ds
+        begin: \[\s*(flow)\s*\]\s*([a-zA-Z_][a-zA-Z_0-9]*)\s*=\s*\{
         beginCaptures:
           '1': {name: keyword.other.ds}
           '2': {name: keyword.control.ds}
@@ -111,13 +175,15 @@ repository:
 
   causals:
     patterns:
-      - name: punctuation.comma.ds
+      - name: punctuation.andmark.ds
         match: ','
+      - name: punctuation.ormark.ds
+        match: '\?'
       - include: '#segment'
       - name: invalid.illegal.expected-array-separator.json
         match: '(<\|>)'   
       - name: keyword.other.causal.ds
-        match: '(<\|\|>)|(<\|)|(\|>)|<|>' 
+        match: '(<\|\|>)|(<\|)|(\|>)|<|>'
 
   imports:
     patterns:

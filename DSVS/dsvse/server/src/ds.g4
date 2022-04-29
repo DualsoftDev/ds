@@ -25,8 +25,18 @@ program: (system|comment)* EOF;
 system: syskey IDENTIFIER '=' sysBlock;    // [sys] Seg = {..}
 syskey: '[sys]';
 sysBlock
-    : LBRACE (acc|macro|importStatement|listing|parenting|causal|call)* RBRACE
+    : LBRACE (task|flow|importStatement|listing|parenting|causal|call|acc|macro)* RBRACE
     ;
+
+task
+    : taskKey IDENTIFIER '=' LBRACE (listing|call|parenting)* RBRACE
+    ;
+taskKey: '[task]';
+
+flow
+    : flowKey IDENTIFIER '=' LBRACE (causal)* RBRACE
+    ;
+flowKey: '[flow]';
 
 acc: LBRACKET ACCESS_SRE RBRACKET EQ LBRACE IDENTIFIER (SEIMCOLON IDENTIFIER)* SEIMCOLON? RBRACE;    // [accsre] = { A; B }
 listing: IDENTIFIER SEIMCOLON;     // A;

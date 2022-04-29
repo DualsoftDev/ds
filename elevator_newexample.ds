@@ -5,10 +5,10 @@
 
     [task]T = {  
             //층간 이송 행위 Task         call?
-            A12 = { M.U ~ S.S2U; }
-            A23 = { M.U ~ S.S3U; }
-            A32 = { M.D ~ S.S2D; }
-            A21 = { M.D ~ S.S1D; }
+            A12 = { M.U ~ S.S2U }
+            A23 = { M.U ~ S.S3U }
+            A32 = { M.D ~ S.S2D }
+            A21 = { M.D ~ S.S1D }
         }
 
     [flow]remember_call_set = {

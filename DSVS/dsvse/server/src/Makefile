@@ -33,6 +33,8 @@ test:
 	$(grun) ds program < g4test/proc.ds
 	@echo call
 	$(grun) ds calls < g4test/calls.txt
+	@echo elevator
+	$(grun) ds program < g4test/elevator_newexample.ds
 
 
 clean:

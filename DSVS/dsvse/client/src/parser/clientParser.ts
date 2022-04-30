@@ -9,19 +9,6 @@ import { dsParser, MacroContext, CausalContext, ExpressionContext, ProcContext, 
 
 
 /**
- * Parse Macro contexts
- * @param macros Macro contexts defined in a system context.
- */
- function parseMacro(macros:MacroContext[]): void {
-	for(const macro of macros) {
-		console.log(`\theader: ${macro.macroHeader().text}`);
-		for(const call of macro.call()) {
-			console.log(`\tcall: ${call.text}`);
-		}
-	}
-}
-
-/**
  * DS 문서로부터 parser 객체를 생성해서 반환
  * @param text DS 문서
  */
@@ -51,16 +38,29 @@ export interface CausalLink {
 	op: string
 }
 
-/** 주어진 context 가 terminal ({ TerminalNode, ExpressionContext, ProcContext } 중 하나)인지 여부 */
-function isTerminalNode(ctx:ParseTree) {
-	if (ctx instanceof TerminalNode || ctx instanceof ExpressionContext || ctx instanceof ProcContext)
-		return true;
-	if (ctx instanceof ParserRuleContext && ctx.childCount == 1)
-		return isTerminalNode(ctx.getChild(0));
+// /** 주어진 context 가 terminal ({ TerminalNode, ExpressionContext, ProcContext } 중 하나)인지 여부 */
+// function isTerminalNode(ctx:ParseTree) {
+// 	if (ctx instanceof TerminalNode || ctx instanceof ExpressionContext || ctx instanceof ProcContext)
+// 		return true;
+// 	if (ctx instanceof ParserRuleContext && ctx.childCount == 1)
+// 		return isTerminalNode(ctx.getChild(0));
 
-	return false;
-}
+// 	return false;
+// }
 
+
+// /**
+//  * Parse Macro contexts
+//  * @param macros Macro contexts defined in a system context.
+//  */
+//  function parseMacro(macros:MacroContext[]): void {
+// 	for(const macro of macros) {
+// 		console.log(`\theader: ${macro.macroHeader().text}`);
+// 		for(const call of macro.call()) {
+// 			console.log(`\tcall: ${call.text}`);
+// 		}
+// 	}
+// }
 
 // type Token = string;
 // /**
@@ -146,136 +146,136 @@ function isTerminalNode(ctx:ParseTree) {
 //  */
 //  const getRightmostTokens = (exp) => _getDeepTokens(exp, false);
 
-/**
- * causal expression 을 분석해서, CausalLink[] 를 반환
- * @param exp : {Causal and/or Expression} Context
- */
-function parseCausalExpressionContext(exp: ParseTree) : CausalLink[]
-{
-	const links:CausalLink[] = [];
-	parseCausalExpressionContext_(exp, links);
-	return links;
-}
+// /**
+//  * causal expression 을 분석해서, CausalLink[] 를 반환
+//  * @param exp : {Causal and/or Expression} Context
+//  */
+// function parseCausalExpressionContext(exp: ParseTree) : CausalLink[]
+// {
+// 	const links:CausalLink[] = [];
+// 	parseCausalExpressionContext_(exp, links);
+// 	return links;
+// }
 
-function parseCausalExpressionContext_(exp: ParseTree, links:CausalLink[]) : void
-{
-	// todo: fixme
-	// function addLinks(ls:TokenDNF, op:string, rs:TokenDNF, links:CausalLink[]) : void
-	// {
-	// 	ls.forEach(l => {
-	// 		rs.forEach(r => {
-	// 			if (typeof l == 'string' && typeof r == 'string' )
-	// 				links.push({l, r, op});
-	// 			else
-	// 				assert(false, 'not yet, implented.');
-	// 		});
-	// 	});
-	// }
-
-
-	// if (exp instanceof ExpressionContext)
-	// 	return;
-
-	// if (exp instanceof CausalPhraseContext || exp instanceof CausalContext)
-	// {
-	// 	const segments = getSegmentTokens(exp);
-	// 	if (! segments)
-	// 	{
-	// 		const [l, op_, r] = [exp.children[0], exp.children[1], exp.children[2]];
-	// 		let lCnfs:TokenDNF = null;
-	// 		let rCnfs:TokenDNF = null;
-
-	// 		const xx = collectCNFs(l);
-	// 		if (isTerminalNode(l))
-	// 		{
-	// 			lCnfs = getTerminalTokens(l);	// 좌측이 terminal
-	// 			parseCausalExpressionContext_(r, links);
-	// 			rCnfs = getLeftmostTokens(r);
-	// 		}
-	// 		else
-	// 		{
-	// 			lCnfs = getRightmostTokens(l);
-	// 			parseCausalExpressionContext_(l, links);
-	// 			rCnfs = getTerminalTokens(r);	// 우측이 terminal
-	// 		}
-	// 		const op = op_.text;
-	// 		switch(op) {
-	// 			case '>':
-	// 			case '<':
-	// 			case '|>':
-	// 			case '<|':
-	// 				addLinks(lCnfs, op, rCnfs, links);
-	// 				break;
-
-	// 			case '>|>':
-	// 			case '|>>':
-	// 				addLinks(lCnfs, '>', rCnfs, links);
-	// 				addLinks(lCnfs, '|>', rCnfs, links);
-	// 				break;
+// function parseCausalExpressionContext_(exp: ParseTree, links:CausalLink[]) : void
+// {
+// 	// todo: fixme
+// 	// function addLinks(ls:TokenDNF, op:string, rs:TokenDNF, links:CausalLink[]) : void
+// 	// {
+// 	// 	ls.forEach(l => {
+// 	// 		rs.forEach(r => {
+// 	// 			if (typeof l == 'string' && typeof r == 'string' )
+// 	// 				links.push({l, r, op});
+// 	// 			else
+// 	// 				assert(false, 'not yet, implented.');
+// 	// 		});
+// 	// 	});
+// 	// }
 
 
-	// 			case '<|<':
-	// 			case '<<|':
-	// 				addLinks(lCnfs, '<', rCnfs, links);
-	// 				addLinks(lCnfs, '<|', rCnfs, links);
-	// 				break;
+// 	// if (exp instanceof ExpressionContext)
+// 	// 	return;
+
+// 	// if (exp instanceof CausalPhraseContext || exp instanceof CausalContext)
+// 	// {
+// 	// 	const segments = getSegmentTokens(exp);
+// 	// 	if (! segments)
+// 	// 	{
+// 	// 		const [l, op_, r] = [exp.children[0], exp.children[1], exp.children[2]];
+// 	// 		let lCnfs:TokenDNF = null;
+// 	// 		let rCnfs:TokenDNF = null;
+
+// 	// 		const xx = collectCNFs(l);
+// 	// 		if (isTerminalNode(l))
+// 	// 		{
+// 	// 			lCnfs = getTerminalTokens(l);	// 좌측이 terminal
+// 	// 			parseCausalExpressionContext_(r, links);
+// 	// 			rCnfs = getLeftmostTokens(r);
+// 	// 		}
+// 	// 		else
+// 	// 		{
+// 	// 			lCnfs = getRightmostTokens(l);
+// 	// 			parseCausalExpressionContext_(l, links);
+// 	// 			rCnfs = getTerminalTokens(r);	// 우측이 terminal
+// 	// 		}
+// 	// 		const op = op_.text;
+// 	// 		switch(op) {
+// 	// 			case '>':
+// 	// 			case '<':
+// 	// 			case '|>':
+// 	// 			case '<|':
+// 	// 				addLinks(lCnfs, op, rCnfs, links);
+// 	// 				break;
+
+// 	// 			case '>|>':
+// 	// 			case '|>>':
+// 	// 				addLinks(lCnfs, '>', rCnfs, links);
+// 	// 				addLinks(lCnfs, '|>', rCnfs, links);
+// 	// 				break;
 
 
-	// 			case '<||>':
-	// 				addLinks(lCnfs, '|>', rCnfs, links);
-	// 				addLinks(lCnfs, '<|', rCnfs, links);
-	// 				break;
-	// 		}
-	// 	}
-	// }
-	// else
-	// 	assert(false, "type match error");
-}
+// 	// 			case '<|<':
+// 	// 			case '<<|':
+// 	// 				addLinks(lCnfs, '<', rCnfs, links);
+// 	// 				addLinks(lCnfs, '<|', rCnfs, links);
+// 	// 				break;
 
 
-/**
- * Parse DS model text.  Causal 분석해서 Link 를 생성하는 generator
- * @param text DS model document obeying DS language rule.
- * @see CausalLink
- */
-export function *parseDSDocument(text:string) {
-	console.log('In client parsing module.', text);
-	const parser = parserFromDocument(text);
-
-	// Parse the input, where `compilationUnit` is whatever entry point you defined
-	const tree = parser.program();
-	for (const system of tree.system()) {
-		const sysBlock = system.sysBlock();
-
-		if (! sysBlock)
-		{
-			console.error(`No system block: ${system.text}`);
-			return;
-		}
+// 	// 			case '<||>':
+// 	// 				addLinks(lCnfs, '|>', rCnfs, links);
+// 	// 				addLinks(lCnfs, '<|', rCnfs, links);
+// 	// 				break;
+// 	// 		}
+// 	// 	}
+// 	// }
+// 	// else
+// 	// 	assert(false, "type match error");
+// }
 
 
-		console.log('========');
-		for (const acc of sysBlock.acc())
-			console.log(`\tacc: ${acc.text}`);
+// /**
+//  * Parse DS model text.  Causal 분석해서 Link 를 생성하는 generator
+//  * @param text DS model document obeying DS language rule.
+//  * @see CausalLink
+//  */
+// export function *parseDSDocument(text:string) {
+// 	console.log('In client parsing module.', text);
+// 	const parser = parserFromDocument(text);
 
-		parseMacro(sysBlock.macro());
-		for (const macro of sysBlock.macro())
-			console.log(`\tmacro: ${macro.text}`);
-		for (const causal of sysBlock.causal())
-		{
-			if (causal.exception != null)
-			{
-				console.error(`Exception: ${causal.text} : ${causal.exception.toString()}`);
-				continue;
-			}
+// 	// Parse the input, where `compilationUnit` is whatever entry point you defined
+// 	const tree = parser.program();
+// 	for (const system of tree.system()) {
+// 		const sysBlock = system.sysBlock();
 
-			console.log(`\tcausal: ${causal.toStringTree(parser)}`);
-			yield* parseCausalExpressionContext(causal);
-		}
-	}
-	// const visitor = new ProgramTreeWalker();
-	// const count = visitor.visit(tree);
-	// console.log(`${count} systems: ${tree.system()..text}`);
-	// console.log(tree);
-}
+// 		if (! sysBlock)
+// 		{
+// 			console.error(`No system block: ${system.text}`);
+// 			return;
+// 		}
+
+
+// 		console.log('========');
+// 		for (const acc of sysBlock.acc())
+// 			console.log(`\tacc: ${acc.text}`);
+
+// 		parseMacro(sysBlock.macro());
+// 		for (const macro of sysBlock.macro())
+// 			console.log(`\tmacro: ${macro.text}`);
+// 		for (const causal of sysBlock.causal())
+// 		{
+// 			if (causal.exception != null)
+// 			{
+// 				console.error(`Exception: ${causal.text} : ${causal.exception.toString()}`);
+// 				continue;
+// 			}
+
+// 			console.log(`\tcausal: ${causal.toStringTree(parser)}`);
+// 			yield* parseCausalExpressionContext(causal);
+// 		}
+// 	}
+// 	// const visitor = new ProgramTreeWalker();
+// 	// const count = visitor.visit(tree);
+// 	// console.log(`${count} systems: ${tree.system()..text}`);
+// 	// console.log(tree);
+// }
 

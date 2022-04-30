@@ -1,9 +1,7 @@
 import { ParserRuleContext } from "antlr4ts";
-import { AbstractParseTreeVisitor, ParseTreeWalker } from "antlr4ts/tree";
-import { parserFromDocument } from "./clientParser";
+import { ParseTreeWalker } from "antlr4ts/tree";
 import { dsListener } from "../server-bundle/dsListener";
-import { CallContext, CausalPhraseContext, FlowContext, FlowKeyContext, ListingContext, ProgramContext, SystemContext, TaskContext } from "../server-bundle/dsParser";
-import { dsVisitor } from "../server-bundle/dsVisitor";
+import { CallContext, CausalPhraseContext, dsParser, FlowContext, FlowKeyContext, ListingContext, ProgramContext, SystemContext, TaskContext } from "../server-bundle/dsParser";
 
 interface NodeInfo {
 	id:string;			// system.task.segment
@@ -92,9 +90,9 @@ class GraphWalker implements dsListener
 // }
 
 
-export function visitGraph(text:string)
+export function visitGraph(parser:dsParser)
 {
-	const parser = parserFromDocument(text);
+    parser.reset();
 
 	const listener_ = new GraphWalker();
 	const listener:dsListener = listener_;

@@ -5,7 +5,7 @@
 	- 임시 방편으로 text 로부터 매번 parsing 해서 새로 visit 함.
  */
 
-import { CausalLink, Node, parserFromDocument } from "./clientParser";
+import { CausalLink, Node } from "./clientParser";
 import { CallContext, CallIdentifierContext, CallPhraseContext, CausalContext, CausalOperatorContext, CausalPhraseContext, CausalsContext, CausalTokenContext,
 		CausalTokensCNFContext, CausalTokensDNFContext, dsParser, FlowContext, FuncLatchContext, ListingContext, MacroContext,
 		ProgramContext, SystemContext, TaskContext
@@ -19,8 +19,7 @@ import { ParserRuleContext } from "antlr4ts";
 import { dsListener } from "../server-bundle/dsListener";
 import { ParseTreeWalker } from 'antlr4ts/tree/ParseTreeWalker';
 import { visitGraph } from "./cytoscapeVisitor";
-import { getAllParseTrees, visitEveryRule } from "./allVisitor";
-
+import { visitEveryRule } from "./allVisitor";
 
 // https://www.antlr.org/api/Java/org/antlr/v4/runtime/tree/AbstractParseTreeVisitor.html
 class LinkWalker extends AbstractParseTreeVisitor<number> implements dsVisitor<number> {
@@ -159,8 +158,8 @@ class ParseTreeListener implements dsListener
 	enterCausals(ctx: CausalsContext):void { this.Contexts.push(ctx); }
 }
 
-function getParseRuleContext(text:string) {
-	const parser = parserFromDocument(text);
+function getParseRuleContext(parser:dsParser) {
+	parser.reset();
 	const listener_ = new ParseTreeListener();
 	const listener:dsListener = listener_;
 	parser.removeParseListeners();
@@ -173,8 +172,8 @@ class ProgramListener implements dsListener
 	public ProgramContext:ProgramContext = null;
 	enterProgram(ctx: ProgramContext):void { this.ProgramContext = ctx; }
 }
-function getProgramContext(text:string) {
-	const parser = parserFromDocument(text);
+function getProgramContext(parser:dsParser) {
+	parser.reset();
 	const listener_ = new ProgramListener();
 	const listener:dsListener = listener_;
 	parser.removeParseListeners();
@@ -201,10 +200,10 @@ export interface TaskGraphInfo {
 }
 
 
-export function enumerateSystemInfos(text:string) : SystemGraphInfo[]
+export function enumerateSystemInfos(parser:dsParser) : SystemGraphInfo[]
 {
 	const sysContexts =
-		getParseRuleContext(text)
+		getParseRuleContext(parser)
 		.filter(p => p instanceof SystemContext)
 		;
 
@@ -238,19 +237,19 @@ export function enumerateSystemInfos(text:string) : SystemGraphInfo[]
 
 
 /** DS parser tree 에서 인과 link (e.g, A > B) 부분 추출을 위한 visitor */
-export function visitLinks(text:string): CausalLink[]
+export function visitLinks(parser:dsParser): CausalLink[]
 {
-	const xxxx = getAllParseTrees(text);
-	visitEveryRule(text);
+
+	visitEveryRule(parser);
 
 	console.log('visiting graph...');
 	//visitor.visit(parser.program());
-	const xxx = visitGraph(text);
+	const xxx = visitGraph(parser);
 	console.log('visited graph...');
 
     const visitor = new LinkWalker();
 	//enumerateChildren(parser.program())
-	getParseRuleContext(text)
+	getParseRuleContext(parser)
 		.filter(p => p instanceof CausalPhraseContext)
 		.forEach(c => visitor.visit(c))
 	;

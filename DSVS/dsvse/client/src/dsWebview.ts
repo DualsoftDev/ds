@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as fs from "fs";
-import { CausalLink, parseDSDocument, parserFromDocument } from './parser/clientParser';
+import { CausalLink, parserFromDocument } from './parser/clientParser';
 import { enumerateSystemInfos, SystemGraphInfo, visitLinks } from './parser/clientVisitor';
 import { getWebviewContentD3 } from './webview.d3';
 import { getWebviewContentCytoscape } from './webview.cytoscape';
@@ -88,9 +88,10 @@ export function initializeWebview(textEditor:vscode.TextEditor, context: vscode.
         console.log('PATH=', key);
 
         const text = vscode.window.activeTextEditor.document.getText();
+        const parser = parserFromDocument(text);
 
         // {source: "Microsoft", target: "Amazon", type: "licensing"},
-        const links = visitLinks(text);
+        const links = visitLinks(parser);
         const connections:CausalLink[] =
             links
             .flatMap(causal => {
@@ -126,8 +127,8 @@ export function initializeWebview(textEditor:vscode.TextEditor, context: vscode.
             //.join(',')
             ;
 
-        const systemInfos:SystemGraphInfo[] = enumerateSystemInfos(text);
-        console.log('finished parseDSDocument on client side.' + connections);
+        const systemInfos:SystemGraphInfo[] = enumerateSystemInfos(parser);
+        console.log('finished enumerateSystemInfos on client side.' + connections);
 
         console.log('webview=', panel.webview);
 

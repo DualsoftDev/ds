@@ -1,8 +1,8 @@
 import { ParserRuleContext, RuleContext } from "antlr4ts";
 import { AbstractParseTreeVisitor, ErrorNode, ParseTree, ParseTreeWalker, TerminalNode } from "antlr4ts/tree";
-import { parserFromDocument } from "./clientParser";
 import { dsListener } from "../server-bundle/dsListener";
 import { dsVisitor } from "../server-bundle/dsVisitor";
+import { dsParser } from "../server-bundle/dsParser";
 
 
 export interface ParserResult
@@ -27,10 +27,10 @@ class AllListener implements dsListener
 }
 
 
-export function getParseResult(text:string) : ParserResult
+export function getParseResult(parser:dsParser) : ParserResult
 {
+    parser.reset();
     const listener = new AllListener();
-    const parser = parserFromDocument(text);
     ParseTreeWalker.DEFAULT.walk(listener, parser.program());
     return listener.r;
 }
@@ -40,9 +40,9 @@ export function getParseResult(text:string) : ParserResult
  * @param text DS Document (Parser input)
  * @returns 
  */
-export function getAllParseTrees(text:string) : ParseTree[]
+export function getAllParseTrees(parser:dsParser) : ParseTree[]
 {
-    const r:ParserResult = getParseResult(text);
+    const r:ParserResult = getParseResult(parser);
     return [].concat.apply([], [r.rules, r.terminals, r.errors]);
 }
 
@@ -52,9 +52,9 @@ export function getAllParseTrees(text:string) : ParseTree[]
  * @param text DS Document (Parser input)
  * @returns 
  */
-export function getAllParseRules(text:string) : ParseTree[]
+export function getAllParseRules(parser:dsParser) : ParseTree[]
 {
-    const r:ParserResult = getParseResult(text);
+    const r:ParserResult = getParseResult(parser);
     return r.rules;
 }
 
@@ -81,9 +81,9 @@ class AllVisitor extends AbstractParseTreeVisitor<number> implements dsVisitor<n
 }
 
 
-export function visitEveryRule(text:string)
+export function visitEveryRule(parser:dsParser)
 {
-    const visitor = new AllVisitor();
-    const parser = parserFromDocument(text);
-    visitor.visit(parser.program());
+    // parser.reset();
+    // const visitor = new AllVisitor();
+    // visitor.visit(parser.program());
 }

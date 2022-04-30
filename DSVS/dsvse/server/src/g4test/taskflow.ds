@@ -4,10 +4,11 @@
         D;
         A12 = { M.U ~ S.S2U }
     }
+    [task]B = { X; Y; }
 
     [flow of B]remember_call_set = {
         // 호출 Set기억 
-        //#g(A), B.X1 > Set1F <| T.A21 ? T.X;
-        A, B ? C > D, E;
+        #g(A), M.U ><| Set1F <| T.A21 ? T.X;
+        //A, B ? C > D, E;
     }
 }

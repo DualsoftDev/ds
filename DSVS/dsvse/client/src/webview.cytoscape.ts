@@ -19,72 +19,72 @@ import { SystemGraphInfo } from './parser/clientVisitor';
  * @returns 
  */
 export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode.Uri,
-    webview:vscode.Webview, systemInfos:SystemGraphInfo[], connections: CausalLink[])
+    webview:vscode.Webview, elements:string)
 {
-    const systemNames:string[] = systemInfos.map(si => si.name);
+    // const systemNames:string[] = systemInfos.map(si => si.name);
     
-    console.log('getWebviewContentCytoscape');
-    /** Cytoscape 용 Elements 생성 : Node or Edge 정보 반환 */
-    function *generateElements()
-    {
-        // system compound container box
-        yield*
-          systemNames
-          .map(sn => {
-            return {"data": { "id": sn, "label": sn, "background_color": "gray" }};
-          });
+    // console.log('getWebviewContentCytoscape');
+    // /** Cytoscape 용 Elements 생성 : Node or Edge 정보 반환 */
+    // function *generateElements()
+    // {
+    //     // system compound container box
+    //     yield*
+    //       systemNames
+    //       .map(sn => {
+    //         return {"data": { "id": sn, "label": sn, "background_color": "gray" }};
+    //       });
 
-        // call segment node 생성
-        yield*
-          systemInfos.flatMap(si =>
-            si.calls.map(c => {
-              const id = `${si.name}.${c.name}`;
-              const label = `${c.name}\n${c.detail}`;
-              return {"data": { id, label, "background_color": "blue", parent: si.name} };
-            }));
+    //     // call segment node 생성
+    //     yield*
+    //       systemInfos.flatMap(si =>
+    //         si.calls.map(c => {
+    //           const id = `${si.name}.${c.name}`;
+    //           const label = `${c.name}\n${c.detail}`;
+    //           return {"data": { id, label, "background_color": "blue", parent: si.name} };
+    //         }));
 
-        // listing node (unreferenced) 생성
-        yield*
-          systemInfos.flatMap(si =>
-            si.segmentListings.map(l => {
-              const id = `${si.name}.${l}`;
-              const label = l;
-              return {"data": { id, label, "background_color": "green", parent: si.name} };
-            }));
+    //     // listing node (unreferenced) 생성
+    //     yield*
+    //       systemInfos.flatMap(si =>
+    //         si.segmentListings.map(l => {
+    //           const id = `${si.name}.${l}`;
+    //           const label = l;
+    //           return {"data": { id, label, "background_color": "green", parent: si.name} };
+    //         }));
         
-        // connection (edge) 로부터 node 생성
-        const nodes =
-            connections
-            .flatMap(c => [c.l, c.r])
-            .filter((v, i, a) => a.indexOf(v) === i)  // filter unique : https://stackoverflow.com/questions/1960473/get-all-unique-values-in-a-javascript-array-remove-duplicates
-            .map(n => {
-              let bg = 'green';
-              let parent = null;
-              let style = null;   // style override
-              const classes = [n.type];
-              switch(n.type)
-              {
-                case 'func': bg = 'springgreen'; style = {"shape": "rectangle"}; break;
-                case 'proc': bg = 'lightgreen'; break;
-                case 'system': bg = 'grey'; break;
-                case 'segment': parent = n.parentId; break;
-                case 'conjunction': bg = 'beige'; break;
-              }
-              return { "data": {"id": n.id, "label": n.label, "background_color" : bg, parent }, style, classes };
-            })
-        ;
+    //     // connection (edge) 로부터 node 생성
+    //     const nodes =
+    //         connections
+    //         .flatMap(c => [c.l, c.r])
+    //         .filter((v, i, a) => a.indexOf(v) === i)  // filter unique : https://stackoverflow.com/questions/1960473/get-all-unique-values-in-a-javascript-array-remove-duplicates
+    //         .map(n => {
+    //           let bg = 'green';
+    //           let parent = null;
+    //           let style = null;   // style override
+    //           const classes = [n.type];
+    //           switch(n.type)
+    //           {
+    //             case 'func': bg = 'springgreen'; style = {"shape": "rectangle"}; break;
+    //             case 'proc': bg = 'lightgreen'; break;
+    //             case 'system': bg = 'grey'; break;
+    //             case 'segment': parent = n.parentId; break;
+    //             case 'conjunction': bg = 'beige'; break;
+    //           }
+    //           return { "data": {"id": n.id, "label": n.label, "background_color" : bg, parent }, style, classes };
+    //         })
+    //     ;
 
-        yield* nodes;
+    //     yield* nodes;
 
-        yield* connections.map(c => {
-            const dashStyle = c.op.includes('|') ? 'dashed' : 'solid';
-            return { "data": {
-                "id": `${c.l.id}${c.op}${c.r.id}`,
-                "source": c.l.id,
-                "target": c.r.id,
-                "line-style": dashStyle}};
-        });
-    }
+    //     yield* connections.map(c => {
+    //         const dashStyle = c.op.includes('|') ? 'dashed' : 'solid';
+    //         return { "data": {
+    //             "id": `${c.l.id}${c.op}${c.r.id}`,
+    //             "source": c.l.id,
+    //             "target": c.r.id,
+    //             "line-style": dashStyle}};
+    //     });
+    // }
 
     function toWebviewUri(fileName:string)
     {
@@ -139,9 +139,9 @@ export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode
 
     */
 
-    const els = Array.from(generateElements());
-    const elements = JSON.stringify(els);
-    // console.log('TEXT=', els.map(e => JSON.stringify(e)).join('\n'));
+    // const els = Array.from(generateElements());
+    // const elements = JSON.stringify(els);
+    // // console.log('TEXT=', els.map(e => JSON.stringify(e)).join('\n'));
 
     return `<!DOCTYPE html>
     <html lang="en">

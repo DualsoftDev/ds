@@ -135,20 +135,22 @@ class ElementsListener implements dsListener
                     const dotCount = text.split('.').length - 1;
                     let id:string = text;
                     const taskId = `${this.systemName}.${this.flowOfName}`;
+                    let parentId = taskId;
                     switch(dotCount) {
                         case 0: id = `${taskId}.${text}`; break;
-                        case 1: id = `${this.systemName}.${text}`; break;
+                        case 1:
+                                id = `${this.systemName}.${text}`;
+                                parentId = `${this.systemName}.${text.split('.')[0]}`;
+                                break;
                     }
     
-                    const node:Node = { id, label:text, type: "segment" };
+                    const node:Node = { id, label:text, type: "segment", parentId:taskId };
                     cnfNodes.push(node);
                 }
-                cnfNodes.forEach(n => this.nodes.set(n.id, n));
-                console.log(t.text);
-                // if (! nodes.has()) {
-                //     const node = {"data": { id: t, label: t, "background_color": "gray" }};
-                //     this.nodes.set(t, node);
-                // }        
+                cnfNodes.forEach(n => {
+                    if (! this.nodes.has(n.id))
+                        this.nodes.set(n.id, n);
+                });
             });
             dnfNodes.push(cnfNodes);
         }
@@ -205,11 +207,13 @@ class ElementsListener implements dsListener
 
         const ls = this.addNodes(l);
         const rs = this.addNodes(r);
-        for (const n of this.nodes.keys())
-            console.log(n);
+        // for (const n of this.nodes.keys())
+        //     console.log(n);
 
         const lss = this.getCnfTokens(ls, true);
         const rss = this.getCnfTokens(rs, false);
+
+        console.log('.');
 
         for (const strL of lss) {
             for (const strR of rss) {
@@ -223,18 +227,18 @@ class ElementsListener implements dsListener
                     case '>': this.links.push({l, r, op}); break;
         
                     case '<|':
-                    case '<': this.links.push({r, l, op}); break;
+                    case '<': this.links.push({l:r, r:l, op}); break;
 
         
                     case '<||>':
                     case '|><|':
                         this.links.push({l, r, op:'|>'});
-                        this.links.push({r, l, op:'|>'});
+                        this.links.push({l:r, r:l, op:'|>'});
                         break;
         
                     case '><|':
                         this.links.push({l, r, op:'>'});
-                        this.links.push({r, l, op:'|>'});
+                        this.links.push({l:r, r:l, op:'|>'});
                         break;
 
                     case '|><':
@@ -255,7 +259,7 @@ class ElementsListener implements dsListener
 }
 
 
-export function getElements(parser:dsParser)
+export function getElements(parser:dsParser): string
 {
     const listener = new ElementsListener();
     ParseTreeWalker.DEFAULT.walk(listener, parser.program());
@@ -263,16 +267,27 @@ export function getElements(parser:dsParser)
     const nodes =
         Array.from(listener.nodes.values())
         .map(n => {
-            return {"data": { id: n.id, label: n.label, "background_color": "gray" }};
+            return {"data": { id: n.id, label: n.label, parent:n.parentId, "background_color": "gray" }};
         });
 
     // {"data":{"id":"MyElevatorSystem.B>A,B","source":"MyElevatorSystem.B","target":"A,B","line-style":"solid"}}
     const edges =
         listener.links.map(conn => {
-            const id = conn.l.id + conn.op + conn.r.id;
-            return {"data": {"id":id,"source":conn.l.id, "target":conn.r.id}};
+            const [l, op, r] = [conn.l, conn.op, conn.r];
+            const id = l.id + op + r.id;
+            const lineStyle = op.includes('|') ? 'dashed' : 'solid';
+            return {"data": {"id":id,"source":l.id, "target":r.id, "line-style":lineStyle}};
         });
 
-    const elements = JSON.stringify(nodes) + "," + JSON.stringify(edges);
-    console.log('a');
+    // const elements = JSON.stringify(nodes) + "," + JSON.stringify(edges);
+
+    console.log('nodes:');
+    nodes.forEach(n => console.log(JSON.stringify(n)));
+    console.log('edges:');
+    edges.forEach(e => console.log(JSON.stringify(e)));
+
+    const elements =
+        JSON.stringify([nodes, edges].flat());
+        
+    return elements;
 }

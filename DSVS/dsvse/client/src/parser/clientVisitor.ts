@@ -236,10 +236,6 @@ export function enumerateSystemInfos(parser:dsParser) : SystemGraphInfo[]
 /** DS parser tree 에서 인과 link (e.g, A > B) 부분 추출을 위한 visitor */
 export function visitLinks(parser:dsParser): CausalLink[]
 {
-	getElements(parser);
-	parser.reset();
-	
-	
 	console.log('visiting graph...');
     const visitor = new LinkWalker();
 	getAllParseRules(parser)

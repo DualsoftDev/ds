@@ -6,6 +6,7 @@ import { enumerateSystemInfos, SystemGraphInfo, visitLinks } from './parser/clie
 import { getWebviewContentD3 } from './webview.d3';
 import { getWebviewContentCytoscape } from './webview.cytoscape';
 import { assert } from 'console';
+import { getElements } from './parser/cytoscapeVisitor';
 
 // let myTextEditor:vscode.TextEditor | null = null;
 
@@ -90,53 +91,55 @@ export function initializeWebview(textEditor:vscode.TextEditor, context: vscode.
         const text = vscode.window.activeTextEditor.document.getText();
         const parser = parserFromDocument(text);
 
-        // {source: "Microsoft", target: "Amazon", type: "licensing"},
-        const links = visitLinks(parser);
-        const connections:CausalLink[] =
-            links
-            .flatMap(causal => {
-                const c = causal;
-                const op = causal.op;
-                switch(op)
-                {
-                    case '|>':
-                    case '>': return [{l: c.l, r: c.r, op}];
+        const elements = getElements(parser);
 
-                    case '<|':
-                    case '<': return [{l: c.r, r: c.l, op}];
+        // // {source: "Microsoft", target: "Amazon", type: "licensing"},
+        // const links = visitLinks(parser);
+        // const connections:CausalLink[] =
+        //     links
+        //     .flatMap(causal => {
+        //         const c = causal;
+        //         const op = causal.op;
+        //         switch(op)
+        //         {
+        //             case '|>':
+        //             case '>': return [{l: c.l, r: c.r, op}];
 
-                    case '<||>':
-                    case '|><|':
-                        return [ {l: c.l, r: c.r, op:'|>'},
-                                 {l: c.r, r: c.l, op:'|>'}];
+        //             case '<|':
+        //             case '<': return [{l: c.r, r: c.l, op}];
 
-                    case '><|':
-                        return [ {l: c.l, r: c.r, op:'>'},
-                                 {l: c.r, r: c.l, op:'|>'}];
-                    case '|><':
-                        return [ {l: c.l, r: c.r, op:'|>'},
-                                 {l: c.r, r: c.l, op:'>'}];
+        //             case '<||>':
+        //             case '|><|':
+        //                 return [ {l: c.l, r: c.r, op:'|>'},
+        //                          {l: c.r, r: c.l, op:'|>'}];
+
+        //             case '><|':
+        //                 return [ {l: c.l, r: c.r, op:'>'},
+        //                          {l: c.r, r: c.l, op:'|>'}];
+        //             case '|><':
+        //                 return [ {l: c.l, r: c.r, op:'|>'},
+        //                          {l: c.r, r: c.l, op:'>'}];
 
 
-                    default:
-                        assert(false, `invalid operator: ${op}`);
-                        break;
-                }
-                return [{l: causal.l, r: causal.r, op}];
-            })
-            //.join(',')
-            ;
+        //             default:
+        //                 assert(false, `invalid operator: ${op}`);
+        //                 break;
+        //         }
+        //         return [{l: causal.l, r: causal.r, op}];
+        //     })
+        //     //.join(',')
+        //     ;
 
-        parser.reset();
-        const systemInfos:SystemGraphInfo[] = enumerateSystemInfos(parser);
+        // parser.reset();
+        // const systemInfos:SystemGraphInfo[] = enumerateSystemInfos(parser);
         
-        console.log('finished enumerateSystemInfos on client side.' + connections);
+        // console.log('finished enumerateSystemInfos on client side.' + connections);
 
-        console.log('webview=', panel.webview);
+        // console.log('webview=', panel.webview);
 
         // And set its HTML content
         // const html = getWebviewContentD3(connections);
-        const html = getWebviewContentCytoscape(key, context.extensionUri, panel.webview, systemInfos, connections);
+        const html = getWebviewContentCytoscape(key, context.extensionUri, panel.webview, elements);
         panel.webview.html = html;
 
         // write html string to file 'hello.html'

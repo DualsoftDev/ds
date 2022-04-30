@@ -19,6 +19,7 @@ import { ParserRuleContext } from "antlr4ts";
 import { dsListener } from "../server-bundle/dsListener";
 import { ParseTreeWalker } from 'antlr4ts/tree/ParseTreeWalker';
 import { getAllParseRules } from "./allVisitor";
+import { getElements } from "./cytoscapeVisitor";
 
 // https://www.antlr.org/api/Java/org/antlr/v4/runtime/tree/AbstractParseTreeVisitor.html
 class LinkWalker extends AbstractParseTreeVisitor<number> implements dsVisitor<number> {
@@ -87,7 +88,6 @@ class LinkWalker extends AbstractParseTreeVisitor<number> implements dsVisitor<n
 				cnfLs.push(getNode(tokens[0].text));
 		}
 
-		console.log('.');
 		const cnfRs:Node[] =
 			rss.flatMap(rs =>
 				enumerateChildren(rs, false, t => t instanceof CausalTokenContext))
@@ -99,8 +99,6 @@ class LinkWalker extends AbstractParseTreeVisitor<number> implements dsVisitor<n
 				this.links.push({l, op:op.text, r});
 			});
 		});
-
-		console.log('good');
 	}
 
 	protected defaultResult(): number {
@@ -238,6 +236,10 @@ export function enumerateSystemInfos(parser:dsParser) : SystemGraphInfo[]
 /** DS parser tree 에서 인과 link (e.g, A > B) 부분 추출을 위한 visitor */
 export function visitLinks(parser:dsParser): CausalLink[]
 {
+	getElements(parser);
+	parser.reset();
+	
+	
 	console.log('visiting graph...');
     const visitor = new LinkWalker();
 	getAllParseRules(parser)

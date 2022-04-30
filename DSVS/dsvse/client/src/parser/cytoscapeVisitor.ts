@@ -1,107 +1,151 @@
-// import { ParserRuleContext } from "antlr4ts";
-// import { ParseTreeWalker } from "antlr4ts/tree";
-// import { dsListener } from "../server-bundle/dsListener";
-// import { CallContext, CausalPhraseContext, dsParser, FlowContext, ListingContext, ProgramContext, SystemContext, TaskContext } from "../server-bundle/dsParser";
+import { ParserRuleContext, RuleContext } from "antlr4ts";
+import { AbstractParseTreeVisitor, ErrorNode, ParseTree, ParseTreeWalker, TerminalNode } from "antlr4ts/tree";
+import { dsListener } from "../server-bundle/dsListener";
+import { dsVisitor } from "../server-bundle/dsVisitor";
+import { CallContext, CausalOperatorContext, CausalPhraseContext, CausalTokenContext, CausalTokensCNFContext, CausalTokensDNFContext, dsParser, FlowContext, ListingContext, SystemContext, TaskContext } from "../server-bundle/dsParser";
+import { assert } from "console";
+import { enumerateChildren } from "./clientParser";
 
 
-// const elementMap = new Map<string, string>();
-// interface NodeInfo {
-// 	id:string;			// system.task.segment
-// 	label:string;		// segment name
-// }
-// interface EdgeInfo {
-//     flowId:string;		// flow id
-//     source:NodeInfo;
-//     target:NodeInfo;
-//     operator:string;
-// }
+export interface ParserResult
+{
+    rules: ParserRuleContext[];
+    terminals: TerminalNode[];
+    errors: ErrorNode[];
+}
+
+/**
+ * Parse tree 전체 순회
+ */
+class ElementsListener implements dsListener
+{
+    /** causal operator 왼쪽 */
+    left:CausalTokensDNFContext;
+    op:CausalOperatorContext;
+
+    systemName:string;
+    taskName:string;
+    flowOfName:string;      // [flow of A] -> A
+
+    nodes:Map<string, any> = new Map();
 
 
-// class GraphWalker implements dsListener
-// {
-//     public elements: (NodeInfo|EdgeInfo)[] = [];
-//     _system:string = null;
-//     _task:string = null;
-//     _flowId:string = null;
-//     enterEveryRule(ctx: ParserRuleContext)
-//     {
-//         if (ctx instanceof TaskContext)
-//             console.log('every rule');
-//     }
-//     enterProgram(ctx: ProgramContext)
-//     {
-//         console.log('program');
-//     }
-// 	enterSystem(ctx: SystemContext):void {this._system = ctx.children[1].text;}
-// 	enterTask(ctx: TaskContext):void {this._task = ctx.children[1].text;}
-//     enterListing(ctx: ListingContext) {
-//         const name = ctx.children[0].text;
-//         const id = `${this._system}.${this._task}.${name}`;
-//         const label = name;
-//         this.elements.push({id, label});
-//     }
-//     enterCall(ctx: CallContext) {
-//         const name = ctx.children[0].text;
-//         const id = `${this._system}.${this._task}.${name}`;
-//         const callDetails = ctx.children[3].text;
-//         const label = `${name}\n${callDetails}`;
-//         this.elements.push({id, label});
-//     }
-//     enterFlow(ctx: FlowContext) {this._flowId = ctx.children[1].text;}
-//     visitCausalPhrase(ctx: CausalPhraseContext)
-//     {
-//         console.log('object');
-//     }
-// }
+    enterSystem(ctx: SystemContext) {this.systemName = ctx.id().text;}
+    exitSystem(ctx: SystemContext) {this.systemName = null;}
+    
+    enterTask(ctx: TaskContext) {
+        const name = ctx.id().text;
+        this.taskName = name;
+        const id = `${this.systemName}.${name}`;
+        const node = {"data": { id, label:name, "background_color": "gray", parent: this.systemName }};
+    }
+    exitTask(ctx: TaskContext) {this.taskName = null;}
+
+    enterListing(ctx: ListingContext) {
+        const name = ctx.id().text;
+        const id = `${this.systemName}.${this.taskName}.${name}`;
+        const node = {"data": { id, "label": name, "background_color": "gray", parent: this.taskName }};
+        this.nodes.set(id, node);
+    }
+
+    enterCall(ctx: CallContext) {
+        const name = ctx.id().text;
+        const label = `${name}\n${ctx.callPhrase().text}`;
+        const id = `${this.systemName}.${this.taskName}.${name}`;
+        const node = {"data": { id, label, "background_color": "gray", parent: this.taskName }};
+        this.nodes.set(id, node);
+    }
+
+    enterFlow(ctx: FlowContext) {
+        const flowOf = ctx.flowProp().id();        
+        this.flowOfName = flowOf ? flowOf.text : null;
+    }
+    exitFlow(ctx: FlowContext){this.flowOfName = null;}
+    
+
+    enterCausalPhrase(ctx: CausalPhraseContext) {
+        this.left = null;
+        this.op = null;
+    }
+    enterCausalTokensDNF(ctx: CausalTokensDNFContext) {
+        if (this.left) {
+            assert(this.op, 'operator expected');
+
+            // process operator
+            this.processCausal(this.left, this.op, ctx);
+        }
+
+        this.left = ctx;
+    }
+    enterCausalOperator(ctx: CausalOperatorContext) {this.op=ctx;}
 
 
-// class GraphWalker extends AbstractParseTreeVisitor<void> implements dsVisitor<void> {
-//     protected defaultResult(): void {
-//         throw new Error("Method not implemented.");
-//     }
-//     public elements: (NodeInfo|EdgeInfo)[] = [];
-
-//     _system:string = null;
-//     _task:string = null;
-//     _flowId:string = null;
-//     visitProgram(ctx: ProgramContext) {
-//         console.log('Program');
-//     }
-//     visitSystem(ctx: SystemContext) {this._system = ctx.children[1].text;}
-//     visitTask(ctx: TaskContext) {this._task = ctx.children[1].text;}
-//     visitListing(ctx: ListingContext) {
-//         const name = ctx.children[0].text;
-//         const id = `${this._system}.${this._task}.${name}`;
-//         const label = name;
-//         this.elements.push({id, label});
-//     }
-
-//     visitCall(ctx: CallContext) {
-//         const name = ctx.children[0].text;
-//         const id = `${this._system}.${this._task}.${name}`;
-//         const callDetails = ctx.children[3].text;
-//         const label = `${name}\n${callDetails}`;
-//         this.elements.push({id, label});
-//     }
-
-//     visitFlow(ctx: FlowContext) {this._flowId = ctx.children[1].text;}
-//     visitCausalPhrase(ctx: CausalPhraseContext)
-//     {
-//         console.log('object');
-//     }
-// }
+    // ParseTreeListener<> method
+    visitTerminal (node: TerminalNode)     { return; }
+    visitErrorNode(node: ErrorNode)        { return; }
+    enterEveryRule(ctx: ParserRuleContext) { return; }
+    exitEveryRule (ctx: ParserRuleContext) { return; }
 
 
-// export function visitGraph(parser:dsParser)
-// {
-//     parser.reset();
 
-// 	const listener_ = new GraphWalker();
-// 	const listener:dsListener = listener_;
-// 	parser.removeParseListeners();
-// 	ParseTreeWalker.DEFAULT.walk(listener, parser.program());
-//     const xxx = listener_.elements;
+    _nodesAlreadyAdded:CausalTokensDNFContext[] = [];
+    private addNodes(ctx:CausalTokensDNFContext) {
+        if (this._nodesAlreadyAdded.includes(ctx))
+            return;
+        this._nodesAlreadyAdded.push(ctx);
 
-// 	return listener_.elements;
+        const cnfs =
+            enumerateChildren(ctx, false, t => t instanceof CausalTokensCNFContext)
+            .map(t => t as CausalTokensCNFContext);
+        const tokens =
+            enumerateChildren(ctx, false, t => t instanceof CausalTokenContext)
+            .map(t => t as CausalTokenContext);
 
-// }
+        tokens.forEach(t => {
+            const text = t.text;
+            if (text.startsWith('#') || text.startsWith('@')) {
+                const node = {"data": { id:text, label:text, "background_color": "gray" }};
+                this.nodes.set(text, node);
+            }
+            else
+            {
+                // count number of '.' from text
+                const dotCount = text.split('.').length - 1;
+                let id:string = text;
+                const taskId = `${this.systemName}.${this.flowOfName}`;
+                switch(dotCount) {
+                    case 0: id = `${taskId}.${text}`; break;
+                    case 1: id = `${this.systemName}.${text}`; break;
+                }
+
+                const node = {"data": { id, label:text, "background_color": "gray", parent:taskId }};
+                this.nodes.set(id, node);
+            }
+            console.log(t.text);
+            // if (! nodes.has()) {
+            //     const node = {"data": { id: t, label: t, "background_color": "gray" }};
+            //     this.nodes.set(t, node);
+            // }
+        });
+    }
+
+    private processCausal(l:CausalTokensDNFContext, op:CausalOperatorContext, r:CausalTokensDNFContext) {        
+        console.log(`${l.text} ${op.text} ${r.text}`);
+        const nodes = this.nodes;
+
+        this.addNodes(l);
+        this.addNodes(r);
+
+        for (const n of this.nodes.keys())
+            console.log(n);
+        console.log('-----------------');
+    }
+}
+
+
+export function getElements(parser:dsParser)
+{
+    const listener = new ElementsListener();
+    ParseTreeWalker.DEFAULT.walk(listener, parser.program());
+    console.log('a');
+}

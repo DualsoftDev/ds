@@ -79,7 +79,7 @@ export function findFirstAncestor(from:ParseTree, predicate: (exp:ParseTree) => 
 
 
 
-type NodeType = "system" | "proc" | "func" | "segment" | "expression" | "conjunction";
+type NodeType = "system" | "task" | "call" | "proc" | "func" | "segment" | "expression" | "conjunction";
 export interface Node {
 	id:string,
 	label:string,

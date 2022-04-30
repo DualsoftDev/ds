@@ -5,6 +5,7 @@ import { dsVisitor } from "../server-bundle/dsVisitor";
 import { CallContext, CausalOperatorContext, CausalPhraseContext, CausalTokenContext, CausalTokensCNFContext, CausalTokensDNFContext, dsParser, FlowContext, ListingContext, SystemContext, TaskContext } from "../server-bundle/dsParser";
 import { assert } from "console";
 import { CausalLink, enumerateChildren, Node } from "./clientParser";
+import { DidSaveTextDocumentNotification } from "vscode-languageclient";
 
 
 export interface ParserResult
@@ -13,6 +14,17 @@ export interface ParserResult
     terminals: TerminalNode[];
     errors: ErrorNode[];
 }
+
+
+
+// type NodeType = "system" | "proc" | "func" | "segment" | "expression" | "conjunction";
+
+// export interface Node {
+// 	id:string,
+// 	label:string,
+// 	parentId?:string,
+// 	type:NodeType,
+// }
 
 type Nodes = (Node | Node[])[];
 
@@ -30,7 +42,7 @@ class ElementsListener implements dsListener
     taskName:string;
     flowOfName:string;      // [flow of A] -> A
 
-    nodes:Map<string, any> = new Map();
+    nodes:Map<string, Node> = new Map();
     links:CausalLink[] = [];
 
 
@@ -41,7 +53,7 @@ class ElementsListener implements dsListener
         const name = ctx.id().text;
         this.taskName = name;
         const id = `${this.systemName}.${name}`;
-        const node = {"data": { id, label:name, "background_color": "gray", parent: this.systemName }};
+        this.nodes.set(id, {id, label: name, parentId: this.systemName, type: "task"});
     }
     exitTask(ctx: TaskContext) {this.taskName = null;}
 
@@ -49,15 +61,16 @@ class ElementsListener implements dsListener
         const name = ctx.id().text;
         const id = `${this.systemName}.${this.taskName}.${name}`;
         const node = {"data": { id, "label": name, "background_color": "gray", parent: this.taskName }};
-        this.nodes.set(id, node);
+        const parentId = `${this.systemName}.${this.taskName}`;
+        this.nodes.set(id, {id, label: name, parentId, type: "segment"});
     }
 
     enterCall(ctx: CallContext) {
         const name = ctx.id().text;
         const label = `${name}\n${ctx.callPhrase().text}`;
-        const id = `${this.systemName}.${this.taskName}.${name}`;
-        const node = {"data": { id, label, "background_color": "gray", parent: this.taskName }};
-        this.nodes.set(id, node);
+        const parentId = `${this.systemName}.${this.taskName}`;
+        const id = `${parentId}.${name}`;
+        this.nodes.set(id, {id, label, parentId, type:"call"});
     }
 
     enterFlow(ctx: FlowContext) {
@@ -130,6 +143,7 @@ class ElementsListener implements dsListener
                     const node:Node = { id, label:text, type: "segment" };
                     cnfNodes.push(node);
                 }
+                cnfNodes.forEach(n => this.nodes.set(n.id, n));
                 console.log(t.text);
                 // if (! nodes.has()) {
                 //     const node = {"data": { id: t, label: t, "background_color": "gray" }};
@@ -141,15 +155,15 @@ class ElementsListener implements dsListener
 
 
         this._existings.set(ctx, dnfNodes);
-        // add added to this.nodes
-        for (const n of dnfNodes.flatMap(n => n)) {
-            let parentId = null;
-            if (n.type === "segment")
-                parentId = `${this.systemName}.${this.taskName}`;
 
-            const node = {"data": { id:n.id, "label": n.label, "background_color": "gray", parent: parentId }};
-            this.nodes.set(n.id, node);
-        }
+        // for (const n of dnfNodes.flatMap(n => n)) {
+        //     let parentId = null;
+        //     if (n.type === "segment")
+        //         parentId = `${this.systemName}.${this.taskName}`;
+
+        //     const node = {"data": { id:n.id, "label": n.label, "background_color": "gray", parent: parentId }};
+        //     this.nodes.set(n.id, node);
+        // }
         
         console.log('test me');
         return dnfNodes;
@@ -158,17 +172,27 @@ class ElementsListener implements dsListener
     private getCnfTokens(nodes:Nodes, append=false):string[] {
         const cnfTokens:string[] = [];
         for (const x of nodes) {
-            if (Array.isArray(x) && x.length > 1) {
+            const isArray = Array.isArray(x) && x.length > 1;
+
+            if (append && isArray) {
                 const id = x.map(n => n.id).join(',');
                 cnfTokens.push(id);
-                if (append)
-                {
-                    const data = {"data": { id, "label": "", "background_color": "gray" }};
-                    this.nodes.set(id, data);
+    
+                const conj:Node = {id, label: "", parentId: this.taskName, type: "conjunction"};
+                this.nodes.set(id, conj);
+
+                for(const src of x) {
+                    const s = this.nodes.get(src.id);
+                    this.links.push({l:s, r:conj, op:"-"});
                 }
+
+
             }
             else {
-                cnfTokens.push(x[0].id);
+                if (isArray)
+                    x.flatMap(n => n.id).forEach(id => cnfTokens.push(id));
+                else
+                    cnfTokens.push(x[0].id);
             }
         }
 
@@ -189,8 +213,9 @@ class ElementsListener implements dsListener
 
         for (const strL of lss) {
             for (const strR of rss) {
-                const l = this.nodes[strL];
-                const r = this.nodes[strR];
+                const l = this.nodes.get(strL);
+                const r = this.nodes.get(strR);
+                assert(l&&r, 'node not found');
                 const op = opr.text;
                 switch(op)
                 {
@@ -234,5 +259,20 @@ export function getElements(parser:dsParser)
 {
     const listener = new ElementsListener();
     ParseTreeWalker.DEFAULT.walk(listener, parser.program());
+
+    const nodes =
+        Array.from(listener.nodes.values())
+        .map(n => {
+            return {"data": { id: n.id, label: n.label, "background_color": "gray" }};
+        });
+
+    // {"data":{"id":"MyElevatorSystem.B>A,B","source":"MyElevatorSystem.B","target":"A,B","line-style":"solid"}}
+    const edges =
+        listener.links.map(conn => {
+            const id = conn.l.id + conn.op + conn.r.id;
+            return {"data": {"id":id,"source":conn.l.id, "target":conn.r.id}};
+        });
+
+    const elements = JSON.stringify(nodes) + "," + JSON.stringify(edges);
     console.log('a');
 }

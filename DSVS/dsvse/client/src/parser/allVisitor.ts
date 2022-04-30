@@ -1,7 +1,6 @@
-import { ParserRuleContext, RuleContext } from "antlr4ts";
-import { AbstractParseTreeVisitor, ErrorNode, ParseTree, ParseTreeWalker, TerminalNode } from "antlr4ts/tree";
+import { ParserRuleContext } from "antlr4ts";
+import { ErrorNode, ParseTree, ParseTreeWalker, TerminalNode } from "antlr4ts/tree";
 import { dsListener } from "../server-bundle/dsListener";
-import { dsVisitor } from "../server-bundle/dsVisitor";
 import { dsParser } from "../server-bundle/dsParser";
 
 
@@ -58,32 +57,3 @@ export function getAllParseRules(parser:dsParser) : ParseTree[]
     return r.rules;
 }
 
-
-
-
-
-
-
-// class AllVisitor extends AbstractParseTreeVisitor<number> implements dsVisitor<number> {
-//     protected defaultResult(): number {
-//         throw new Error("Method not implemented.");
-//     }
-
-//     visit(tree: ParseTree): number {
-//         console.log('visited ' + typeof tree);
-
-//         if (tree instanceof RuleContext)
-//             this.visitChildren(tree);
-//         return 0;
-//     }
-
-//     shouldVisitNextChild(node: RuleContext, currentResult: number) { return true;}
-// }
-
-
-// export function visitEveryRule(parser:dsParser)
-// {
-//     parser.reset();
-//     const visitor = new AllVisitor();
-//     visitor.visit(parser.program());
-// }

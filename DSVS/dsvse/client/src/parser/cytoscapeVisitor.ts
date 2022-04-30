@@ -1,11 +1,13 @@
-import { ParserRuleContext, RuleContext } from "antlr4ts";
-import { AbstractParseTreeVisitor, ErrorNode, ParseTree, ParseTreeWalker, TerminalNode } from "antlr4ts/tree";
+import { ParserRuleContext } from "antlr4ts";
+import { ErrorNode, ParseTreeWalker, TerminalNode } from "antlr4ts/tree";
 import { dsListener } from "../server-bundle/dsListener";
-import { dsVisitor } from "../server-bundle/dsVisitor";
-import { CallContext, CausalOperatorContext, CausalPhraseContext, CausalTokenContext, CausalTokensCNFContext, CausalTokensDNFContext, dsParser, FlowContext, ListingContext, SystemContext, TaskContext } from "../server-bundle/dsParser";
+import { CallContext, CausalOperatorContext, CausalPhraseContext, CausalTokenContext,
+         CausalTokensCNFContext, CausalTokensDNFContext, dsParser, FlowContext,
+         ListingContext, SystemContext, TaskContext
+        } from "../server-bundle/dsParser"
+        ;
 import { assert } from "console";
-import { CausalLink, enumerateChildren, Node } from "./clientParser";
-import { DidSaveTextDocumentNotification } from "vscode-languageclient";
+import { enumerateChildren } from "./clientParser";
 
 
 export interface ParserResult
@@ -17,14 +19,22 @@ export interface ParserResult
 
 
 
-// type NodeType = "system" | "proc" | "func" | "segment" | "expression" | "conjunction";
+type NodeType = "system" | "task" | "call" | "proc" | "func" | "segment" | "expression" | "conjunction";
+export interface Node {
+	id:string,
+	label:string,
+	parentId?:string,
+	type:NodeType,
+}
 
-// export interface Node {
-// 	id:string,
-// 	label:string,
-// 	parentId?:string,
-// 	type:NodeType,
-// }
+/**
+ * Causal 관계를 표현하는 Link.  'A > B' 일 때, left = A, right = B, operator = '>'
+ */
+export interface CausalLink {
+	l: Node,
+	r: Node,
+	op: string
+}
 
 type Nodes = (Node | Node[])[];
 

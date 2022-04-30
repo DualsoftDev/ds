@@ -1,11 +1,9 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as fs from "fs";
-import { CausalLink, parserFromDocument } from './parser/clientParser';
-import { enumerateSystemInfos, SystemGraphInfo, visitLinks } from './parser/clientVisitor';
+import { parserFromDocument } from './parser/clientParser';
 import { getWebviewContentD3 } from './webview.d3';
 import { getWebviewContentCytoscape } from './webview.cytoscape';
-import { assert } from 'console';
 import { getElements } from './parser/cytoscapeVisitor';
 
 // let myTextEditor:vscode.TextEditor | null = null;

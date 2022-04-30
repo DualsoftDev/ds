@@ -4,7 +4,7 @@ import { dsListener } from "../server-bundle/dsListener";
 import { dsVisitor } from "../server-bundle/dsVisitor";
 import { CallContext, CausalOperatorContext, CausalPhraseContext, CausalTokenContext, CausalTokensCNFContext, CausalTokensDNFContext, dsParser, FlowContext, ListingContext, SystemContext, TaskContext } from "../server-bundle/dsParser";
 import { assert } from "console";
-import { enumerateChildren } from "./clientParser";
+import { CausalLink, enumerateChildren, Node } from "./clientParser";
 
 
 export interface ParserResult
@@ -13,6 +13,9 @@ export interface ParserResult
     terminals: TerminalNode[];
     errors: ErrorNode[];
 }
+
+type Nodes = (Node | Node[])[];
+
 
 /**
  * Parse tree 전체 순회
@@ -28,6 +31,7 @@ class ElementsListener implements dsListener
     flowOfName:string;      // [flow of A] -> A
 
     nodes:Map<string, any> = new Map();
+    links:CausalLink[] = [];
 
 
     enterSystem(ctx: SystemContext) {this.systemName = ctx.id().text;}
@@ -87,57 +91,140 @@ class ElementsListener implements dsListener
     exitEveryRule (ctx: ParserRuleContext) { return; }
 
 
-
-    _nodesAlreadyAdded:CausalTokensDNFContext[] = [];
-    private addNodes(ctx:CausalTokensDNFContext) {
-        if (this._nodesAlreadyAdded.includes(ctx))
-            return;
-        this._nodesAlreadyAdded.push(ctx);
+    _existings:Map<CausalTokensDNFContext, Nodes> = new Map();
+    private addNodes(ctx:CausalTokensDNFContext) : Nodes {
+        if (this._existings.has(ctx))
+            return this._existings.get(ctx);
 
         const cnfs =
             enumerateChildren(ctx, false, t => t instanceof CausalTokensCNFContext)
-            .map(t => t as CausalTokensCNFContext);
-        const tokens =
-            enumerateChildren(ctx, false, t => t instanceof CausalTokenContext)
-            .map(t => t as CausalTokenContext);
+            .map(t => t as CausalTokensCNFContext)
+            ;
 
-        tokens.forEach(t => {
-            const text = t.text;
-            if (text.startsWith('#') || text.startsWith('@')) {
-                const node = {"data": { id:text, label:text, "background_color": "gray" }};
-                this.nodes.set(text, node);
-            }
-            else
-            {
-                // count number of '.' from text
-                const dotCount = text.split('.').length - 1;
-                let id:string = text;
-                const taskId = `${this.systemName}.${this.flowOfName}`;
-                switch(dotCount) {
-                    case 0: id = `${taskId}.${text}`; break;
-                    case 1: id = `${this.systemName}.${text}`; break;
+        const dnfNodes:Nodes = [];
+        for (const cnf of cnfs) {
+            const cnfNodes:Node[] = [];
+            enumerateChildren(cnf, false, t => t instanceof CausalTokenContext)
+            .map(t => t as CausalTokenContext)
+            .forEach(t => {
+                const text = t.text;
+                if (text.startsWith('#')) {
+                    const node:Node = { id:text, label:text, type: "func" };
+                    cnfNodes.push(node);
                 }
+                else if (text.startsWith('@')) {
+                    const node:Node = { id:text, label:text, type: "proc" };
+                    cnfNodes.push(node);
+                }
+                else
+                {
+                    // count number of '.' from text
+                    const dotCount = text.split('.').length - 1;
+                    let id:string = text;
+                    const taskId = `${this.systemName}.${this.flowOfName}`;
+                    switch(dotCount) {
+                        case 0: id = `${taskId}.${text}`; break;
+                        case 1: id = `${this.systemName}.${text}`; break;
+                    }
+    
+                    const node:Node = { id, label:text, type: "segment" };
+                    cnfNodes.push(node);
+                }
+                console.log(t.text);
+                // if (! nodes.has()) {
+                //     const node = {"data": { id: t, label: t, "background_color": "gray" }};
+                //     this.nodes.set(t, node);
+                // }        
+            });
+            dnfNodes.push(cnfNodes);
+        }
 
-                const node = {"data": { id, label:text, "background_color": "gray", parent:taskId }};
-                this.nodes.set(id, node);
-            }
-            console.log(t.text);
-            // if (! nodes.has()) {
-            //     const node = {"data": { id: t, label: t, "background_color": "gray" }};
-            //     this.nodes.set(t, node);
-            // }
-        });
+
+        this._existings.set(ctx, dnfNodes);
+        // add added to this.nodes
+        for (const n of dnfNodes.flatMap(n => n)) {
+            let parentId = null;
+            if (n.type === "segment")
+                parentId = `${this.systemName}.${this.taskName}`;
+
+            const node = {"data": { id:n.id, "label": n.label, "background_color": "gray", parent: parentId }};
+            this.nodes.set(n.id, node);
+        }
+        
+        console.log('test me');
+        return dnfNodes;
     }
 
-    private processCausal(l:CausalTokensDNFContext, op:CausalOperatorContext, r:CausalTokensDNFContext) {        
-        console.log(`${l.text} ${op.text} ${r.text}`);
+    private getCnfTokens(nodes:Nodes, append=false):string[] {
+        const cnfTokens:string[] = [];
+        for (const x of nodes) {
+            if (Array.isArray(x) && x.length > 1) {
+                const id = x.map(n => n.id).join(',');
+                cnfTokens.push(id);
+                if (append)
+                {
+                    const data = {"data": { id, "label": "", "background_color": "gray" }};
+                    this.nodes.set(id, data);
+                }
+            }
+            else {
+                cnfTokens.push(x[0].id);
+            }
+        }
+
+        return cnfTokens;
+    }
+
+    private processCausal(l:CausalTokensDNFContext, opr:CausalOperatorContext, r:CausalTokensDNFContext) {        
+        console.log(`${l.text} ${opr.text} ${r.text}`);
         const nodes = this.nodes;
 
-        this.addNodes(l);
-        this.addNodes(r);
-
+        const ls = this.addNodes(l);
+        const rs = this.addNodes(r);
         for (const n of this.nodes.keys())
             console.log(n);
+
+        const lss = this.getCnfTokens(ls, true);
+        const rss = this.getCnfTokens(rs, false);
+
+        for (const strL of lss) {
+            for (const strR of rss) {
+                const l = this.nodes[strL];
+                const r = this.nodes[strR];
+                const op = opr.text;
+                switch(op)
+                {
+                    case '|>':
+                    case '>': this.links.push({l, r, op}); break;
+        
+                    case '<|':
+                    case '<': this.links.push({r, l, op}); break;
+
+        
+                    case '<||>':
+                    case '|><|':
+                        this.links.push({l, r, op:'|>'});
+                        this.links.push({r, l, op:'|>'});
+                        break;
+        
+                    case '><|':
+                        this.links.push({l, r, op:'>'});
+                        this.links.push({r, l, op:'|>'});
+                        break;
+
+                    case '|><':
+                        this.links.push({l, r, op:'|>'});
+                        this.links.push({l:r, r: l, op:'>'});
+                        break;
+                
+                    default:
+                        assert(false, `invalid operator: ${op}`);
+                        break;
+                }
+        
+            }
+        }
+
         console.log('-----------------');
     }
 }

@@ -2,10 +2,10 @@
  * DS language parsing/traversing 을 위한 코드
  */
 
-import { ANTLRInputStream, RecognitionException, Recognizer, CharStream, Parser, ParserRuleContext, CommonTokenStream } from 'antlr4ts';
-import { ParseTree, ParseTreeListener, TerminalNode, ErrorNode } from 'antlr4ts/tree';
+import { ANTLRInputStream, CommonTokenStream } from 'antlr4ts';
+import { ParseTree } from 'antlr4ts/tree';
 import { dsLexer } from '../server-bundle/dsLexer';
-import { dsParser, MacroContext, CausalContext, ExpressionContext, ProcContext, ProgramContext, SystemContext, ProcSleepMsContext, } from '../server-bundle/dsParser';
+import { dsParser } from '../server-bundle/dsParser';
 
 
 /**
@@ -19,6 +19,64 @@ export function parserFromDocument(text:string) {
 	const tokenStream = new CommonTokenStream(lexer);
 	return new dsParser(tokenStream);
 }
+
+
+
+export function enumerateChildren(from:ParseTree, includeMe=true, predicate:(t:ParseTree) => boolean = null ) : ParseTree[]
+{
+    const result:ParseTree[] = [];
+    enumerateChildrenHelper(result, from, includeMe, predicate);
+    return result;
+}
+
+function enumerateChildrenHelper(result:ParseTree[], from:ParseTree, includeMe, predicate:(t:ParseTree) => boolean)
+{
+    function ok(t:ParseTree) {
+        if (predicate) return predicate(t);
+        return true;
+    }
+
+    if (includeMe && ok(from))
+        result.push(from);
+    for (let index = 0; index < from.childCount; index++)
+        enumerateChildrenHelper(result, from.getChild(index), true, ok);
+}
+
+export function *enumerateParents(from:ParseTree, includeMe=true, predicate:(t:ParseTree) => boolean = null) : Generator<ParseTree, void, undefined>
+{
+    const ok = (t:ParseTree) => {
+        if (predicate) return predicate(t);
+        return true;
+    };
+
+    if (includeMe && ok(from))
+        yield from;
+    yield* enumerateParents(from.parent, true, ok);
+}
+
+
+export function findFirstChild(from:ParseTree, predicate: (exp:ParseTree) => boolean, includeMe=true)
+{
+    for (const c of enumerateChildren(from, includeMe))
+    {
+        if (predicate(c))
+            return c;
+    }
+
+    return null;
+}
+
+export function findFirstAncestor(from:ParseTree, predicate: (exp:ParseTree) => boolean, includeMe=true)
+{
+    for (const c of enumerateParents(from, includeMe))
+    {
+        if (predicate(c))
+            return c;
+    }
+
+    return null;
+}
+
 
 
 type NodeType = "system" | "proc" | "func" | "segment" | "expression" | "conjunction";

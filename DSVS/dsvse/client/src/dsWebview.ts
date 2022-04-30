@@ -127,7 +127,9 @@ export function initializeWebview(textEditor:vscode.TextEditor, context: vscode.
             //.join(',')
             ;
 
+        parser.reset();
         const systemInfos:SystemGraphInfo[] = enumerateSystemInfos(parser);
+        
         console.log('finished enumerateSystemInfos on client side.' + connections);
 
         console.log('webview=', panel.webview);

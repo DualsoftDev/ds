@@ -6,20 +6,19 @@
  */
 
 import { CausalLink, Node } from "./clientParser";
-import { CallContext, CallIdentifierContext, CallPhraseContext, CausalContext, CausalOperatorContext, CausalPhraseContext, CausalsContext, CausalTokenContext,
-		CausalTokensCNFContext, CausalTokensDNFContext, dsParser, FlowContext, FuncLatchContext, ListingContext, MacroContext,
+import { CallContext, CausalContext, CausalOperatorContext, CausalPhraseContext, CausalsContext, CausalTokenContext,
+		CausalTokensCNFContext, CausalTokensDNFContext, dsParser, FlowContext, ListingContext, MacroContext,
 		ProgramContext, SystemContext, TaskContext
 } from '../server-bundle/dsParser';
 
 import { dsVisitor } from '../server-bundle/dsVisitor';
 import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
-import { enumerateChildren, findFirstAncestor, findFirstChild } from "./parseCausal";
+import { enumerateChildren, findFirstAncestor, } from "./clientParser";
 import { assert } from "console";
 import { ParserRuleContext } from "antlr4ts";
 import { dsListener } from "../server-bundle/dsListener";
 import { ParseTreeWalker } from 'antlr4ts/tree/ParseTreeWalker';
-import { visitGraph } from "./cytoscapeVisitor";
-import { visitEveryRule } from "./allVisitor";
+import { getAllParseRules } from "./allVisitor";
 
 // https://www.antlr.org/api/Java/org/antlr/v4/runtime/tree/AbstractParseTreeVisitor.html
 class LinkWalker extends AbstractParseTreeVisitor<number> implements dsVisitor<number> {
@@ -141,31 +140,31 @@ class LinkWalker extends AbstractParseTreeVisitor<number> implements dsVisitor<n
 }
 
 
-class ParseTreeListener implements dsListener
-{
-	public Contexts:ParserRuleContext[] = [];
+// class ParseTreeListener implements dsListener
+// {
+// 	public Contexts:ParserRuleContext[] = [];
 
-	enterProgram(ctx: ProgramContext):void { this.Contexts.push(ctx); }
-	enterSystem(ctx: SystemContext):void { this.Contexts.push(ctx); }
-	enterMacro(ctx: MacroContext):void { this.Contexts.push(ctx); }
-	enterTask(ctx: TaskContext):void { this.Contexts.push(ctx); }
-	enterFlow(ctx: FlowContext):void { this.Contexts.push(ctx); }
-	enterCausalTokensDNF(ctx: CausalTokensDNFContext):void { this.Contexts.push(ctx); }
-	enterCausalTokensCNF(ctx: CausalTokensCNFContext):void { this.Contexts.push(ctx); }
-	enterCausalPhrase(ctx: CausalPhraseContext):void { this.Contexts.push(ctx); }
-	enterCausalOperator(ctx: CausalOperatorContext):void { this.Contexts.push(ctx); }
-	enterCausal(ctx: CausalContext):void { this.Contexts.push(ctx); }
-	enterCausals(ctx: CausalsContext):void { this.Contexts.push(ctx); }
-}
+// 	enterProgram(ctx: ProgramContext):void { this.Contexts.push(ctx); }
+// 	enterSystem(ctx: SystemContext):void { this.Contexts.push(ctx); }
+// 	enterMacro(ctx: MacroContext):void { this.Contexts.push(ctx); }
+// 	enterTask(ctx: TaskContext):void { this.Contexts.push(ctx); }
+// 	enterFlow(ctx: FlowContext):void { this.Contexts.push(ctx); }
+// 	enterCausalTokensDNF(ctx: CausalTokensDNFContext):void { this.Contexts.push(ctx); }
+// 	enterCausalTokensCNF(ctx: CausalTokensCNFContext):void { this.Contexts.push(ctx); }
+// 	enterCausalPhrase(ctx: CausalPhraseContext):void { this.Contexts.push(ctx); }
+// 	enterCausalOperator(ctx: CausalOperatorContext):void { this.Contexts.push(ctx); }
+// 	enterCausal(ctx: CausalContext):void { this.Contexts.push(ctx); }
+// 	enterCausals(ctx: CausalsContext):void { this.Contexts.push(ctx); }
+// }
 
-function getParseRuleContext(parser:dsParser) {
-	parser.reset();
-	const listener_ = new ParseTreeListener();
-	const listener:dsListener = listener_;
-	parser.removeParseListeners();
-	ParseTreeWalker.DEFAULT.walk(listener, parser.program());
-	return listener_.Contexts;
-}
+// function getParseRuleContext(parser:dsParser) {
+// 	parser.reset();
+// 	const listener_ = new ParseTreeListener();
+// 	const listener:dsListener = listener_;
+// 	parser.removeParseListeners();
+// 	ParseTreeWalker.DEFAULT.walk(listener, parser.program());
+// 	return listener_.Contexts;
+// }
 
 class ProgramListener implements dsListener
 {
@@ -203,7 +202,7 @@ export interface TaskGraphInfo {
 export function enumerateSystemInfos(parser:dsParser) : SystemGraphInfo[]
 {
 	const sysContexts =
-		getParseRuleContext(parser)
+		getAllParseRules(parser)
 		.filter(p => p instanceof SystemContext)
 		;
 
@@ -239,17 +238,9 @@ export function enumerateSystemInfos(parser:dsParser) : SystemGraphInfo[]
 /** DS parser tree 에서 인과 link (e.g, A > B) 부분 추출을 위한 visitor */
 export function visitLinks(parser:dsParser): CausalLink[]
 {
-
-	visitEveryRule(parser);
-
 	console.log('visiting graph...');
-	//visitor.visit(parser.program());
-	const xxx = visitGraph(parser);
-	console.log('visited graph...');
-
     const visitor = new LinkWalker();
-	//enumerateChildren(parser.program())
-	getParseRuleContext(parser)
+	getAllParseRules(parser)
 		.filter(p => p instanceof CausalPhraseContext)
 		.forEach(c => visitor.visit(c))
 	;

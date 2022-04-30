@@ -22,25 +22,28 @@ import dsFunctions;
 program: (system|comment)* EOF;
 
 
-system: syskey IDENTIFIER '=' sysBlock;    // [sys] Seg = {..}
-syskey: '[sys]';
+system: sysProp id '=' sysBlock;    // [sys] Seg = {..}
+sysProp: '[' 'sys' ']';
 sysBlock
     : LBRACE (task|flow|importStatement|listing|parenting|causal|call|acc|macro)* RBRACE
     ;
 
 task
-    : taskKey IDENTIFIER '=' LBRACE (listing|call|parenting)* RBRACE
+    : taskProp id '=' LBRACE (listing|call|parenting)* RBRACE
     ;
-taskKey: '[task]';
+taskProp: '[' 'task' ']';
 
 flow
-    : flowKey IDENTIFIER '=' LBRACE (causal)* RBRACE
+    : flowProp id '=' LBRACE (causal)* RBRACE
     ;
-flowKey: '[flow]';
+flowProp
+    : '[' 'flow' ('of' id)? ']'
+    ;
+id: IDENTIFIER;
 
 acc: LBRACKET ACCESS_SRE RBRACKET EQ LBRACE IDENTIFIER (SEIMCOLON IDENTIFIER)* SEIMCOLON? RBRACE;    // [accsre] = { A; B }
-listing: IDENTIFIER SEIMCOLON;     // A;
-parenting: IDENTIFIER EQ LBRACE causal* RBRACE;
+listing: id SEIMCOLON;     // A;
+parenting: id EQ LBRACE causal* RBRACE;
 
 /*
  * MACRO definitions
@@ -55,8 +58,7 @@ simpleMacroHeader: 'macro';
 namedMacroHeader: 'macro' EQ IDENTIFIER;
 
 // A23 = { M.U ~ S.S3U ~ _ }
-call: callIdentifier EQ LBRACE callPhrase RBRACE;
-callIdentifier: IDENTIFIER;
+call: id EQ LBRACE callPhrase RBRACE;
 callPhrase: segments TILDE segments (TILDE segments)?;
 
 // B.F1 > Set1F <| T.A21;

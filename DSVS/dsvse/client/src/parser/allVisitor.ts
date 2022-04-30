@@ -20,16 +20,15 @@ class AllListener implements dsListener
     r:ParserResult = {rules:[], terminals:[], errors:[]};
 
     // ParseTreeListener<> method
-    visitTerminal (node: TerminalNode)     { this.r.terminals.push(node) ; console.log('Visiting Terminal: ', node.text);}
-    visitErrorNode(node: ErrorNode)        { this.r.errors.push(node)    ; console.log('Visiting ErrorNode: ', node.text);}
-    enterEveryRule(ctx: ParserRuleContext) { this.r.rules.push(ctx)      ; console.log('Entering Rule: ', ctx.text);}
-    exitEveryRule (ctx: ParserRuleContext) {                               console.log('Exiting Rule: ', ctx.text);}
+    visitTerminal (node: TerminalNode)     { this.r.terminals.push(node); }
+    visitErrorNode(node: ErrorNode)        { this.r.errors.push(node); }
+    enterEveryRule(ctx: ParserRuleContext) { this.r.rules.push(ctx); }
+    exitEveryRule (ctx: ParserRuleContext) { return; }
 }
 
 
 export function getParseResult(parser:dsParser) : ParserResult
 {
-    parser.reset();
     const listener = new AllListener();
     ParseTreeWalker.DEFAULT.walk(listener, parser.program());
     return listener.r;
@@ -55,6 +54,7 @@ export function getAllParseTrees(parser:dsParser) : ParseTree[]
 export function getAllParseRules(parser:dsParser) : ParseTree[]
 {
     const r:ParserResult = getParseResult(parser);
+    console.log(`Total ${r.rules.length} parser rules found.`);
     return r.rules;
 }
 
@@ -64,26 +64,26 @@ export function getAllParseRules(parser:dsParser) : ParseTree[]
 
 
 
-class AllVisitor extends AbstractParseTreeVisitor<number> implements dsVisitor<number> {
-    protected defaultResult(): number {
-        throw new Error("Method not implemented.");
-    }
+// class AllVisitor extends AbstractParseTreeVisitor<number> implements dsVisitor<number> {
+//     protected defaultResult(): number {
+//         throw new Error("Method not implemented.");
+//     }
 
-    visit(tree: ParseTree): number {
-        console.log('visited ' + typeof tree);
+//     visit(tree: ParseTree): number {
+//         console.log('visited ' + typeof tree);
 
-        if (tree instanceof RuleContext)
-            this.visitChildren(tree);
-        return 0;
-    }
+//         if (tree instanceof RuleContext)
+//             this.visitChildren(tree);
+//         return 0;
+//     }
 
-    shouldVisitNextChild(node: RuleContext, currentResult: number) { return true;}
-}
+//     shouldVisitNextChild(node: RuleContext, currentResult: number) { return true;}
+// }
 
 
-export function visitEveryRule(parser:dsParser)
-{
-    // parser.reset();
-    // const visitor = new AllVisitor();
-    // visitor.visit(parser.program());
-}
+// export function visitEveryRule(parser:dsParser)
+// {
+//     parser.reset();
+//     const visitor = new AllVisitor();
+//     visitor.visit(parser.program());
+// }

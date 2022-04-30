@@ -1,0 +1,12 @@
+[sys]MyElevatorSystem = {
+    [task]M = {
+        U;
+        D;
+        A12 = { M.U ~ S.S2U }
+    }
+
+    [flow]remember_call_set = {
+        // 호출 Set기억 
+        B.F1 > Set1F <| T.A21;
+    }
+}

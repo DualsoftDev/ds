@@ -7,8 +7,8 @@
 
 import { CausalLink, Node, parserFromDocument } from "./clientParser";
 import { CallContext, CallIdentifierContext, CallPhraseContext, CausalContext, CausalOperatorContext, CausalPhraseContext, CausalsContext, CausalTokenContext,
-		CausalTokensCNFContext, CausalTokensDNFContext, dsParser, FuncLatchContext, ListingContext, MacroContext,
-		ProgramContext, SystemContext
+		CausalTokensCNFContext, CausalTokensDNFContext, dsParser, FlowContext, FuncLatchContext, ListingContext, MacroContext,
+		ProgramContext, SystemContext, TaskContext
 } from './server-bundle/dsParser';
 
 import { dsVisitor } from './server-bundle/dsVisitor';
@@ -18,6 +18,8 @@ import { assert } from "console";
 import { ParserRuleContext } from "antlr4ts";
 import { dsListener } from "./server-bundle/dsListener";
 import { ParseTreeWalker } from 'antlr4ts/tree/ParseTreeWalker';
+import { visitGraph } from "./parser/cytoscapeVisitor";
+import { getAllParseTrees, visitEveryRule } from "./parser/allVisitor";
 
 
 // https://www.antlr.org/api/Java/org/antlr/v4/runtime/tree/AbstractParseTreeVisitor.html
@@ -147,6 +149,8 @@ class ParseTreeListener implements dsListener
 	enterProgram(ctx: ProgramContext):void { this.Contexts.push(ctx); }
 	enterSystem(ctx: SystemContext):void { this.Contexts.push(ctx); }
 	enterMacro(ctx: MacroContext):void { this.Contexts.push(ctx); }
+	enterTask(ctx: TaskContext):void { this.Contexts.push(ctx); }
+	enterFlow(ctx: FlowContext):void { this.Contexts.push(ctx); }
 	enterCausalTokensDNF(ctx: CausalTokensDNFContext):void { this.Contexts.push(ctx); }
 	enterCausalTokensCNF(ctx: CausalTokensCNFContext):void { this.Contexts.push(ctx); }
 	enterCausalPhrase(ctx: CausalPhraseContext):void { this.Contexts.push(ctx); }
@@ -164,6 +168,21 @@ function getParseRuleContext(text:string) {
 	return listener_.Contexts;
 }
 
+class ProgramListener implements dsListener
+{
+	public ProgramContext:ProgramContext = null;
+	enterProgram(ctx: ProgramContext):void { this.ProgramContext = ctx; }
+}
+function getProgramContext(text:string) {
+	const parser = parserFromDocument(text);
+	const listener_ = new ProgramListener();
+	const listener:dsListener = listener_;
+	parser.removeParseListeners();
+	ParseTreeWalker.DEFAULT.walk(listener, parser.program());
+	return listener_.ProgramContext;
+}
+
+
 
 /** A = { B ~ C ~ D } */
 interface CallDetail {
@@ -175,6 +194,12 @@ export interface SystemGraphInfo {
 	calls: CallDetail[],
 	segmentListings: string[],		// node 정의만 되어 있고, 실체가 정의되지 않은 것.  [sys]A = {B; C; D} 에서 B; C; D 의 경우
 }
+
+export interface TaskGraphInfo {
+	name:string,
+	segmentListings: string[],		// node 정의만 되어 있고, 실체가 정의되지 않은 것.  [sys]A = {B; C; D} 에서 B; C; D 의 경우
+}
+
 
 export function enumerateSystemInfos(text:string) : SystemGraphInfo[]
 {
@@ -209,10 +234,19 @@ export function enumerateSystemInfos(text:string) : SystemGraphInfo[]
 }
 
 
+
+
+
 /** DS parser tree 에서 인과 link (e.g, A > B) 부분 추출을 위한 visitor */
 export function visitLinks(text:string): CausalLink[]
 {
+	const xxxx = getAllParseTrees(text);
+	visitEveryRule(text);
+
+	console.log('visiting graph...');
 	//visitor.visit(parser.program());
+	const xxx = visitGraph(text);
+	console.log('visited graph...');
 
     const visitor = new LinkWalker();
 	//enumerateChildren(parser.program())

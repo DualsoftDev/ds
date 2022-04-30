@@ -1,6 +1,6 @@
 import { ParserRuleContext } from "antlr4ts";
 import { AbstractParseTreeVisitor, ParseTreeWalker } from "antlr4ts/tree";
-import { parserFromDocument } from "../clientParser";
+import { parserFromDocument } from "./clientParser";
 import { dsListener } from "../server-bundle/dsListener";
 import { CallContext, CausalPhraseContext, FlowContext, FlowKeyContext, ListingContext, ProgramContext, SystemContext, TaskContext } from "../server-bundle/dsParser";
 import { dsVisitor } from "../server-bundle/dsVisitor";

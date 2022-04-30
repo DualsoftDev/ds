@@ -4,8 +4,8 @@
 
 import { ANTLRInputStream, RecognitionException, Recognizer, CharStream, Parser, ParserRuleContext, CommonTokenStream } from 'antlr4ts';
 import { ParseTree, ParseTreeListener, TerminalNode, ErrorNode } from 'antlr4ts/tree';
-import { dsLexer } from './server-bundle/dsLexer';
-import { dsParser, MacroContext, CausalContext, ExpressionContext, ProcContext, ProgramContext, SystemContext, ProcSleepMsContext, } from './server-bundle/dsParser';
+import { dsLexer } from '../server-bundle/dsLexer';
+import { dsParser, MacroContext, CausalContext, ExpressionContext, ProcContext, ProgramContext, SystemContext, ProcSleepMsContext, } from '../server-bundle/dsParser';
 
 
 /**

@@ -10,8 +10,8 @@
  */
 
 import * as vscode from 'vscode';
-import { CausalLink } from './clientParser';
-import { SystemGraphInfo } from './clientVisitor';
+import { CausalLink } from './parser/clientParser';
+import { SystemGraphInfo } from './parser/clientVisitor';
 
 /**
  * Cytoscape 를 이용해서 webview contents 생성

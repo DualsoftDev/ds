@@ -1,6 +1,6 @@
 import { ParserRuleContext, RuleContext } from "antlr4ts";
 import { AbstractParseTreeVisitor, ErrorNode, ParseTree, ParseTreeWalker, TerminalNode } from "antlr4ts/tree";
-import { parserFromDocument } from "../clientParser";
+import { parserFromDocument } from "./clientParser";
 import { dsListener } from "../server-bundle/dsListener";
 import { dsVisitor } from "../server-bundle/dsVisitor";
 

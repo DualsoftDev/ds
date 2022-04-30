@@ -33,7 +33,7 @@ A, B, C || D, E || F, G, H || I			CausalExpressionContext
 import { ParserRuleContext } from 'antlr4ts';
 import { ParseTree } from 'antlr4ts/tree';
 import { assert } from 'console';
-import { CausalContext, SegmentContext, SegmentsDNFContext, ExpressionContext, ProcContext, ProgramContext, SystemContext, ProcSleepMsContext, SegmentsCNFContext } from './server-bundle/dsParser';
+import { CausalContext, SegmentContext, SegmentsDNFContext, ExpressionContext, ProcContext, ProgramContext, SystemContext, ProcSleepMsContext, SegmentsCNFContext } from '../server-bundle/dsParser';
 
 export function enumerateChildren(from:ParseTree, includeMe=true, predicate:(t:ParseTree) => boolean = null ) : ParseTree[]
 {

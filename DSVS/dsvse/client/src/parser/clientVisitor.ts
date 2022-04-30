@@ -9,17 +9,17 @@ import { CausalLink, Node, parserFromDocument } from "./clientParser";
 import { CallContext, CallIdentifierContext, CallPhraseContext, CausalContext, CausalOperatorContext, CausalPhraseContext, CausalsContext, CausalTokenContext,
 		CausalTokensCNFContext, CausalTokensDNFContext, dsParser, FlowContext, FuncLatchContext, ListingContext, MacroContext,
 		ProgramContext, SystemContext, TaskContext
-} from './server-bundle/dsParser';
+} from '../server-bundle/dsParser';
 
-import { dsVisitor } from './server-bundle/dsVisitor';
+import { dsVisitor } from '../server-bundle/dsVisitor';
 import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
 import { enumerateChildren, findFirstAncestor, findFirstChild } from "./parseCausal";
 import { assert } from "console";
 import { ParserRuleContext } from "antlr4ts";
-import { dsListener } from "./server-bundle/dsListener";
+import { dsListener } from "../server-bundle/dsListener";
 import { ParseTreeWalker } from 'antlr4ts/tree/ParseTreeWalker';
-import { visitGraph } from "./parser/cytoscapeVisitor";
-import { getAllParseTrees, visitEveryRule } from "./parser/allVisitor";
+import { visitGraph } from "./cytoscapeVisitor";
+import { getAllParseTrees, visitEveryRule } from "./allVisitor";
 
 
 // https://www.antlr.org/api/Java/org/antlr/v4/runtime/tree/AbstractParseTreeVisitor.html

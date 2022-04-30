@@ -1,8 +1,8 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as fs from "fs";
-import { CausalLink, parseDSDocument, parserFromDocument } from './clientParser';
-import { enumerateSystemInfos, SystemGraphInfo, visitLinks } from './clientVisitor';
+import { CausalLink, parseDSDocument, parserFromDocument } from './parser/clientParser';
+import { enumerateSystemInfos, SystemGraphInfo, visitLinks } from './parser/clientVisitor';
 import { getWebviewContentD3 } from './webview.d3';
 import { getWebviewContentCytoscape } from './webview.cytoscape';
 import { assert } from 'console';

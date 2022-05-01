@@ -201,7 +201,7 @@ export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode
         <b>DEL</b> to delete selected, <b>CTRL+Z</b> to undo, <b>CTRL+Y</b> to redo <br />
       </div>
     
-      <div class="dropdown">
+      <div id="layouts" class="dropdown">
         <button onclick="layout('cose')" class="dropbtn">cose</button>
         <button onclick="layout('breadthfirst')" class="dropbtn">breadthfirst</button>
         <button onclick="layout('dagre')" class="dropbtn">dagre</button>
@@ -209,6 +209,7 @@ export function getWebviewContentCytoscape(filePath:string, extensionUri: vscode
         <button onclick="layout('grid')" class="dropbtn">grid</button>
         <button onclick="layout('concentric')" class="dropbtn">concentric</button>
         <button onclick="layout('random')" class="dropbtn">random</button>
+        <button onclick="hide()" class="dropbtn">hide</button>
         
         
         

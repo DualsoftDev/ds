@@ -224,14 +224,7 @@ class ElementsListener implements dsListener
         return Array.from(split());
     }
 
-    private processCausal(l:CausalTokensDNFContext, opr:CausalOperatorContext, r:CausalTokensDNFContext) {
-        
-        const x0 = this.splitOperator('|>|>');
-        const x1 = this.splitOperator('>');
-        const x2 = this.splitOperator('<|<');
-        const x3 = this.splitOperator('|><');
-        const x4 = this.splitOperator('<<||>>');
-
+    private processCausal(l:CausalTokensDNFContext, opr:CausalOperatorContext, r:CausalTokensDNFContext) {        
         console.log(`${l.text} ${opr.text} ${r.text}`);
         const nodes = this.nodes;
 
@@ -240,47 +233,33 @@ class ElementsListener implements dsListener
         // for (const n of this.nodes.keys())
         //     console.log(n);
 
-        const lss = this.getCnfTokens(ls, true);
-        const rss = this.getCnfTokens(rs, false);
 
-        console.log('.');
+        const ops = this.splitOperator(opr.text);
 
-        for (const strL of lss) {
-            for (const strR of rss) {
-                const l = this.nodes.get(strL);
-                const r = this.nodes.get(strR);
-                assert(l&&r, 'node not found');
-                const op = opr.text;
-                switch(op)
-                {
-                    case '|>':
-                    case '>': this.links.push({l, r, op}); break;
-        
-                    case '<|':
-                    case '<': this.links.push({l:r, r:l, op}); break;
-
-        
-                    case '<||>':
-                    case '|><|':
-                        this.links.push({l, r, op:'|>'});
-                        this.links.push({l:r, r:l, op:'|>'});
-                        break;
-        
-                    case '><|':
-                        this.links.push({l, r, op:'>'});
-                        this.links.push({l:r, r:l, op:'|>'});
-                        break;
-
-                    case '|><':
-                        this.links.push({l, r, op:'|>'});
-                        this.links.push({l:r, r: l, op:'>'});
-                        break;
-                
-                    default:
-                        assert(false, `invalid operator: ${op}`);
-                        break;
+        for (const op of ops) {
+            const sinkToRight = op === '>' || op === '|>';
+            const lss = this.getCnfTokens(ls, sinkToRight);
+            const rss = this.getCnfTokens(rs, !sinkToRight);
+    
+            for (const strL of lss) {
+                for (const strR of rss) {
+                    const l = this.nodes.get(strL);
+                    const r = this.nodes.get(strR);
+                    assert(l&&r, 'node not found');
+                    switch(op)
+                    {
+                        case '|>':
+                        case '>': this.links.push({l, r, op}); break;
+            
+                        case '<|':
+                        case '<': this.links.push({l:r, r:l, op}); break;
+                        
+                        default:
+                            assert(false, `invalid operator: ${op}`);
+                            break;
+                    }
+            
                 }
-        
             }
         }
 
@@ -297,7 +276,23 @@ export function getElements(parser:dsParser): string
     const nodes =
         Array.from(listener.nodes.values())
         .map(n => {
-            return {"data": { id: n.id, label: n.label, parent:n.parentId, "background_color": "gray" }};
+
+            let bg = 'green';
+            let style = null;   // style override
+            const classes = [n.type];
+            switch(n.type)
+            {
+            case 'func': bg = 'springgreen'; style = {"shape": "rectangle"}; break;
+            case 'proc': bg = 'lightgreen'; break;
+            case 'task': bg = 'grey'; break;
+            case 'call': bg = 'purple'; break;
+            case 'system': bg = 'trnasparent'; break;
+            //case 'segment': break;
+            case 'conjunction':
+                bg = 'beige'; style = {"shape": "rectangle", "width": 3, "height" : 3}; break;
+            }
+
+            return {"data": { id: n.id, label: n.label, parent:n.parentId, "background_color": bg}, style, classes };
         });
 
     // {"data":{"id":"MyElevatorSystem.B>A,B","source":"MyElevatorSystem.B","target":"A,B","line-style":"solid"}}

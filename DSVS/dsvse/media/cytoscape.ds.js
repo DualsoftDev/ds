@@ -144,6 +144,11 @@ function layout(name) {
 	}).run();
 }
 
+function hide() {
+	// hide div element with whose class is 'dropdown'
+	document.getElementById("layouts").style.display = "none";
+}
+
 /**
  * cytoscape 의 노드/엣지 추가
  * @param elements - cytoscape 용 elements 집합 : object

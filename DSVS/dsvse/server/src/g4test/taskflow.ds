@@ -9,7 +9,7 @@
 
     [flow of B]remember_call_set = {
         // 호출 Set기억 
-        @puhsr(A), #g(A), M.U ><| Set1F <| T.A21 ? T.X;
+        @pushr(A), #g(A), M.U ><| Set1F <| T.A21 ? T.X;
         //A, B ? C > D, E;
     }
 }

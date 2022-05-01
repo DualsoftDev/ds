@@ -167,15 +167,6 @@ class ElementsListener implements dsListener
 
 
         this._existings.set(ctx, dnfNodes);
-
-        // for (const n of dnfNodes.flatMap(n => n)) {
-        //     let parentId = null;
-        //     if (n.type === "segment")
-        //         parentId = `${this.systemName}.${this.taskName}`;
-
-        //     const node = {"data": { id:n.id, "label": n.label, "background_color": "gray", parent: parentId }};
-        //     this.nodes.set(n.id, node);
-        // }
         
         console.log('test me');
         return dnfNodes;
@@ -197,8 +188,6 @@ class ElementsListener implements dsListener
                     const s = this.nodes.get(src.id);
                     this.links.push({l:s, r:conj, op:"-"});
                 }
-
-
             }
             else {
                 if (isArray)
@@ -211,7 +200,38 @@ class ElementsListener implements dsListener
         return cnfTokens;
     }
 
-    private processCausal(l:CausalTokensDNFContext, opr:CausalOperatorContext, r:CausalTokensDNFContext) {        
+    private splitOperator(operator:string): string[] {
+        let op = operator;
+        function *split() {
+            for (const o of ['|>', '<|']) {
+                if (op.includes(o))
+                {
+                    yield o;
+                    op = op.replace(o, '');
+                }
+            }
+            for (const o of ['>', '<']) {
+                if (op.includes(o))
+                {
+                    yield o;
+                    op = op.replace(o, '');
+                }
+            }
+            if (op.length > 0)
+                console.error("Error on causal operator:", operator);
+        }
+            
+        return Array.from(split());
+    }
+
+    private processCausal(l:CausalTokensDNFContext, opr:CausalOperatorContext, r:CausalTokensDNFContext) {
+        
+        const x0 = this.splitOperator('|>|>');
+        const x1 = this.splitOperator('>');
+        const x2 = this.splitOperator('<|<');
+        const x3 = this.splitOperator('|><');
+        const x4 = this.splitOperator('<<||>>');
+
         console.log(`${l.text} ${opr.text} ${r.text}`);
         const nodes = this.nodes;
 

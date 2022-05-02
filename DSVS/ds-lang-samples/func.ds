@@ -10,6 +10,22 @@
     }
 }
 
+[sys]_SYSTEMNAME = {
+    !#import {
+        _LIBTASKNAME as _X,
+        _LIBFLOWNAME as _X,
+    } from "./some/path/to/lib.ds";		
+
+    [task]_TASKNAME = {
+        _CALL = {_X ~ _X}
+        _PARENTING = {X.X > X.X;}
+    }
+    [flow of BASETASK]_FLOWNAME = {
+        X > X;
+    }
+}
+
+
 [sys]Your = {
     My.A > a > b > c |> My.B;
 }

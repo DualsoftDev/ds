@@ -58,6 +58,11 @@ Update parser, import, function
 - System : boxed component view
 - Compound causal operator support: '>|>', '<|<', '>||<', '<||>', ..
 
+### 1.0.14
+
+- task, flow 처리
+- graph layout option
+
 -----------------------------------------------------------------------------------------------------------
 ## Following extension guidelines
 

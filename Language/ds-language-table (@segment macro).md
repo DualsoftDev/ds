@@ -6,10 +6,12 @@
 
 
 ### 1. Priority operation
+- Start 와 Reset 신호가 동시에 ON 인 경우, 어떤 신호를 우선으로 해석할지의 여부 정의
 
 |Id| Item | Unit | Example| Desc | GUI |
 |:---:|:----|:--:|:---:|:----|:---|
-|IF1|Start Priority | @sf | A > @sf (B) <\|C;  | Start signal of B would be cutoff when action C is executing | ![AAA](./png/IF1.dio.png)|
+|IF0|Reset 우선(default) |  | A > B <\|C;  | A 와 C 가 동시에 ON 인 경우, reset 조건인 C 우선 | |
+|IF1|Start Priority | @sf | A > @sf (B) <\|C;  | Start 신호 우선 <br>~Start signal of B would be cutoff when action C is executing~ <br>Start wins on race condition | ![AAA](./png/IF1.dio.png)|
 |IF2|Last Priority  |  @lf  | A > @lf (B) <\|C; | Action B operates based on the last signal received among the start and reset signals | ![AAA](./png/IF2.dio.png)|
 </BR>
 

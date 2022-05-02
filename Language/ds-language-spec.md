@@ -13,7 +13,7 @@ DS 언어는 dualsoft® 이름으로 2019년에 상표등록(40-1609932)하여
 |:---:|:----:|:--:|:---:|
 |최소단위 Segment(행위) 정의|call = { `~` } |A = {Actuator.O1 ~ Sensor.I1}| A 행위는 Actuator.O1 를 시켜 Sensor.I1 를 관찰|
 |Segment(행위)레벨 인과 정의|real = { `>` } |R1 = {A > B}| R 행위는 A행위 수행후 B 행위를 수행|
-|System(시스템)레벨 인과 정의|[sys]name = { `>` } | S = {R1 > R2}| S 시스템은 R1행위 관찰 후 R2 시작명령|
+|System(시스템)레벨 인과 정의|[sys]name = { `>` } | [sys]S = {R1 > R2}| S 시스템은 R1행위 관찰 후 R2 시작명령|
  - 해석 규칙
    - Segment(행위)레벨 행위 절차  :  정의된 내부 각자행위들을 순차(Step)적으로 1회 수행함
    - System(시스템)레벨 행위 절차 :  정의된 내부 각자행위들을 조건(Condition)으로 수행함
@@ -40,14 +40,17 @@ DS 언어는 dualsoft® 이름으로 2019년에 상표등록(40-1609932)하여
 
 ```ex)
 
-[sys]S = {R1 > R2;
-   R1 =  {A > B};
-   R2 =  {C > D};
-          A = {O1 ~ I1};
-          B = {O2 ~ I2};
-          C = {O3 ~ I3};
-          D = {O4 ~ I4};
-      };
+[sys]S = {
+  [task]T = {
+    R1 =  {A > B};
+    R2 =  {C > D};
+    A = {O1 ~ I1};
+    B = {O2 ~ I2};
+    C = {O3 ~ I3};
+    D = {O4 ~ I4};
+  }
+  [flow of T]F = {R1 > R2;}
+};
     
 ```
 ![language-table](./png/spec.dio.png)
@@ -64,13 +67,13 @@ DS 언어는 dualsoft® 이름으로 2019년에 상표등록(40-1609932)하여
   - Ex) A |> B  의미 : A실행(Going)시 B Reset
   - Ex) A <||> B 의미 : A실행(Going)시 B Reset, B실행(Going)시 C Reset
 
- - Real Segment 정의 방법 : indent (\t) 이후 이름 = {edge1;edge2;...;edgeN;} 형식으로 정의
+ - Real Segment 정의 방법 : 이름 = {edge1;edge2;...;edgeN;} 형식으로 정의
 
     - Ex) RealSeg1 = {Seg1 > Seg2; Seg1 > Seg3; Seg1 <|> Seg2; }
     - Real Segment 는 CallSegment를 Child로 등록 가능하다. (CallSegement는 주로 라이브러리 형태로 미리제공예정)
     - 예약어 [arrH] 입력 받으시 Homing 인과로 추가해석 (Start Edge 만 가능)
 
- - Call Segment 정의 방법 : indent (\t) 이후 이름 = { System.SegA, System.SegB~System.SegC } 형식으로 정의
+ - Call Segment 정의 방법 : 이름 = { System.SegA, System.SegB~System.SegC } 형식으로 정의
 
     - Ex) CallSeg1 = {Sys.A,Sys.C ~ Sys.B}  (A,C 동시 실행후 B 완료관찰)
 </BR>

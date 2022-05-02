@@ -1,5 +1,5 @@
 import { ParserRuleContext } from "antlr4ts";
-import { ErrorNode, ParseTreeWalker, TerminalNode } from "antlr4ts/tree";
+import { ErrorNode, ParseTree, ParseTreeWalker, TerminalNode } from "antlr4ts/tree";
 import { dsListener } from "../server-bundle/dsListener";
 import { CallContext, CausalOperatorContext, CausalPhraseContext, CausalTokenContext,
          CausalTokensCNFContext, CausalTokensDNFContext, dsParser, FlowContext,
@@ -8,6 +8,7 @@ import { CallContext, CausalOperatorContext, CausalPhraseContext, CausalTokenCon
         ;
 import { assert } from "console";
 import { enumerateChildren } from "./clientParser";
+import { getAllParseRules } from "./allVisitor";
 
 
 export interface ParserResult
@@ -36,6 +37,10 @@ export interface CausalLink {
 	op: string
 }
 
+/**
+ * array of Node or Nodes
+ * DNF (e.g A, B ? C) -> [[A, B], C]
+ */
 type Nodes = (Node | Node[])[];
 
 
@@ -45,18 +50,33 @@ type Nodes = (Node | Node[])[];
 class ElementsListener implements dsListener
 {
     /** causal operator 왼쪽 */
-    left:CausalTokensDNFContext;
-    op:CausalOperatorContext;
+    private left:CausalTokensDNFContext;
+    private op:CausalOperatorContext;
 
-    systemName:string;
-    taskName:string;
-    flowOfName:string;      // [flow of A] -> A
+    private systemName:string;
+    private taskName:string;
+    private flowOfName:string;      // [flow of A] -> A
+    private allParserRules:ParseTree[];
+    private multipleSystems:boolean;
 
     nodes:Map<string, Node> = new Map();
     links:CausalLink[] = [];
 
+    constructor(parser:dsParser) {
+        this.allParserRules = getAllParseRules(parser);
+        parser.reset();
 
-    enterSystem(ctx: SystemContext) {this.systemName = ctx.id().text;}
+        this.multipleSystems = this.allParserRules.filter(t => t instanceof SystemContext).length > 1;
+    }
+
+
+    enterSystem(ctx: SystemContext) {
+        const n = ctx.id().text;
+        this.systemName = n;
+        if (this.multipleSystems) {
+            this.nodes.set(n, {id: n, label: n, type: "system"});
+        }
+    }
     exitSystem(ctx: SystemContext) {this.systemName = null;}
     
     enterTask(ctx: TaskContext) {
@@ -172,6 +192,12 @@ class ElementsListener implements dsListener
         return dnfNodes;
     }
 
+    /**
+     * 
+     * @param nodes : DNF nodes
+     * @param append true (==nodes 가 sink) 인 경우, conjuction 생성.  false: 개별 node 나열 생성
+     * @returns 
+     */
     private getCnfTokens(nodes:Nodes, append=false):string[] {
         const cnfTokens:string[] = [];
         for (const x of nodes) {
@@ -200,6 +226,11 @@ class ElementsListener implements dsListener
         return cnfTokens;
     }
 
+    /**
+     * 복합 Operator 를 분해해서 개별 operator array 로 반환
+     * @param operator 복합 operator.  e.g "<||>"
+     * @returns e.g [ "<|", "|>" ]
+     */
     private splitOperator(operator:string): string[] {
         let op = operator;
         function *split() {
@@ -224,6 +255,12 @@ class ElementsListener implements dsListener
         return Array.from(split());
     }
 
+    /**
+     * causal operator 를 처리해서 this.links 에 결과 누적
+     * @param l operator 왼쪽의 DNF
+     * @param opr (복합) operator
+     * @param r operator 우측의 DNF
+     */
     private processCausal(l:CausalTokensDNFContext, opr:CausalOperatorContext, r:CausalTokensDNFContext) {        
         console.log(`${l.text} ${opr.text} ${r.text}`);
         const nodes = this.nodes;
@@ -267,10 +304,14 @@ class ElementsListener implements dsListener
     }
 }
 
-
+/**
+ * 전체 모델을 분석하여 grpah 생성을 위한 node 및 edge 구조를 생성한다.
+ * @param parser model parser tree
+ * @returns Graph elements (string)
+ */
 export function getElements(parser:dsParser): string
 {
-    const listener = new ElementsListener();
+    const listener = new ElementsListener(parser);
     ParseTreeWalker.DEFAULT.walk(listener, parser.program());
 
     const nodes =
@@ -282,14 +323,14 @@ export function getElements(parser:dsParser): string
             const classes = [n.type];
             switch(n.type)
             {
-            case 'func': bg = 'springgreen'; style = {"shape": "rectangle"}; break;
-            case 'proc': bg = 'lightgreen'; break;
-            case 'task': bg = 'grey'; break;
-            case 'call': bg = 'purple'; break;
-            case 'system': bg = 'trnasparent'; break;
-            //case 'segment': break;
-            case 'conjunction':
-                bg = 'beige'; style = {"shape": "rectangle", "width": 3, "height" : 3}; break;
+                case 'func': bg = 'springgreen'; style = {"shape": "rectangle"}; break;
+                case 'system': bg = 'trnasparent'; style = {"shape": "rectangle"}; break;
+                case 'proc': bg = 'lightgreen'; break;
+                case 'task': bg = 'grey'; break;
+                case 'call': bg = 'purple'; break;
+                //case 'segment': break;
+                case 'conjunction':
+                    bg = 'beige'; style = {"shape": "rectangle", "width": 3, "height" : 3}; break;
             }
 
             return {"data": { id: n.id, label: n.label, parent:n.parentId, "background_color": bg}, style, classes };
@@ -304,7 +345,6 @@ export function getElements(parser:dsParser): string
             return {"data": {"id":id,"source":l.id, "target":r.id, "line-style":lineStyle}};
         });
 
-    // const elements = JSON.stringify(nodes) + "," + JSON.stringify(edges);
 
     console.log('nodes:');
     nodes.forEach(n => console.log(JSON.stringify(n)));

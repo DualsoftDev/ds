@@ -1,9 +1,13 @@
 [sys]MyA = {
-    // P > Q;
-    C, Z ? D > MyB.y > x > Q > R > S;
-}
-[sys]MyB = {
-    MyA.C > D > y > MyA.x;
+    [task]A = {C; Z; D; Q; R; S; x;}
+    [flow of A]A = {
+        // P > Q;
+        C, Z ? D > MyB.y > x > Q > R > S;
+    }
+    [task]B = {y;}
+    [flow]MyB = {
+        A.C > A.D > B.y > A.x;
+    }
 }
 
 

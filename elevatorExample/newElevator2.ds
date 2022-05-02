@@ -1,0 +1,43 @@
+[sys] elevator = {
+    [task] M = {U;D;}         //1모터 2방향 연결
+    [task] S = {S1D;S2U;S2D;S3D;} //각 센서 연결
+    [task] B = {F1;F2;F3;}    //각 층 정보 저장 및 활성화
+
+    [task] T = {
+        U12 = {M.U ~ S.S2U;}
+        U23 = {M.U ~ S.S3U;}
+        D32 = {M.D ~ S.S2D;}
+        D21 = {M.D ~ S.S1D;}
+    }
+
+    [flow] btn_reset = {
+        B.F1 <| (T.D21);
+
+        //B.F2 <| T.U12 ? T.D32;
+        B.F2 <| (T.U12);
+        B.F2 <| (T.D32);
+
+        B.F3 <| (T.U23);
+    }
+
+    [flow] inter_lock = {
+        T.U12 <||> T.D21 <| T.D32 <||> T.U23 <| T.U12;    //[task] S 에서 U12,U23,D32,D21을 자동으로 상호리셋을 지원해 주는가?
+    }
+
+    [flow] up_down = {
+        //별도의 층 메모리를 쓰지 않는 경우
+        T.U12 < B.F2 , T.D21;
+
+        //T.U23 < B.F3 , T.D32 ? B.F3 , T.U12;
+        T.U23 < B.F3 , T.D32;
+        T.U23 < B.F3 , T.U12;
+        
+        T.D32 < B.F2 , T.U23;
+
+        //T.U23 < B.F1 , T.D32 ? B.F1 , T.U12;
+        T.D21 < B.F1 , T.D32; 
+        T.D21 < B.F1 , T.U12;
+    }
+
+}
+

@@ -1,0 +1,34 @@
+[sys]robot_work_cell = {
+
+    [task] 감지 = {in; work; out;}
+    [task] r1 = {get;put;}
+    [task] r2 = {정렬;용접;}
+    [task] r3 = {도색;배출;}
+
+    
+    [flow] r1_work = {
+        r1.put > 감지.work;
+        r1.get |> 감지.in;
+        r1.get <||> r1.put;
+    } 
+
+    [flow] r2_work = {
+        r2.정렬 <||> r2.용접;
+    } 
+
+    [flow] r3_work = {
+      r3.도색 <||> r3.배출;
+    } 
+
+    [flow] 로딩 = {
+        감지.in > r1.get;
+        r1.get, (!감지.work) > r1.put;
+    }
+
+    [flow] 작업 = {
+        r2.정렬 > r3.도색, r2.용접;
+        r3.도색, r2.용접, (!감지.out) > r3.배출;
+    }
+
+
+}

@@ -1,0 +1,34 @@
+[sys]MyElevatorSystem = {
+    [task]M = {U; D;}  // Motor up / down        acce?
+    [task]B = {F1; F2; F3; }   // Button.층 호출버튼         accs?
+    [task]S = {S1D; S2D; S2U; S3D;}    // Sensor Up, Down              accs?
+
+    [task]T = {  
+            //층간 이송 행위 Task         call?
+            A12 = { M.U ~ S.S2U; }
+            A23 = { M.U ~ S.S3U; }
+            A32 = { M.D ~ S.S2D; }
+            A21 = { M.D ~ S.S1D; }
+        }
+
+    [flow]remember_call_set = {
+        // 호출 Set기억 
+        B.F1 > Set1F <| T.A21;
+        B.F2 > Set2F <| T.A32 ? T.A12;
+        B.F3 > Set3F <| T.A23;
+    }
+        
+    [flow]inter_lock = {
+        // 층간 상하강 행위간 인터락   
+        T.A12 <||> T.A21;
+        T.A23 <||> T.A32 <| T.A21;
+    }
+
+    [flow]up_down = {
+        //호출에 따른 층간 상하강 행위   
+        T.A12 < Set2F , T.A21 ? Set3F , T.A21;
+        T.A23 < Set3F , T.A12 ? Set3F , T.A32;
+        T.A32 < Set1F , T.A23 ? Set2F , T.A23;
+        T.A21 < Set1F , T.A12 ? Set1F , T.A32;
+    }
+}

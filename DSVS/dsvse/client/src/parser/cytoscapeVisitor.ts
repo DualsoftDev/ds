@@ -55,7 +55,8 @@ class ElementsListener implements dsListener
 
     private systemName:string;
     private taskName:string;
-    private flowOfName:string;      // [flow of A] -> A
+    private flowName:string;        // [flow of A]F={..} -> F
+    private flowOfName:string;      // [flow of A]F={..} -> A
     private allParserRules:ParseTree[];
     private multipleSystems:boolean;
 
@@ -104,10 +105,14 @@ class ElementsListener implements dsListener
     }
 
     enterFlow(ctx: FlowContext) {
-        const flowOf = ctx.flowProp().id();        
+        const flowOf = ctx.flowProp().id();
+        this.flowName = ctx.id().text;
         this.flowOfName = flowOf ? flowOf.text : null;
     }
-    exitFlow(ctx: FlowContext){this.flowOfName = null;}
+    exitFlow(ctx: FlowContext){
+        this.flowName = null;
+        this.flowOfName = null;
+    }
     
 
     enterCausalPhrase(ctx: CausalPhraseContext) {
@@ -185,10 +190,8 @@ class ElementsListener implements dsListener
             dnfNodes.push(cnfNodes);
         }
 
-
         this._existings.set(ctx, dnfNodes);
         
-        console.log('test me');
         return dnfNodes;
     }
 
@@ -324,7 +327,7 @@ export function getElements(parser:dsParser): string
             switch(n.type)
             {
                 case 'func': bg = 'springgreen'; style = {"shape": "rectangle"}; break;
-                case 'system': bg = 'trnasparent'; style = {"shape": "rectangle"}; break;
+                case 'system': bg = 'transparent'; style = {"shape": "rectangle"}; break;
                 case 'proc': bg = 'lightgreen'; break;
                 case 'task': bg = 'grey'; break;
                 case 'call': bg = 'purple'; break;

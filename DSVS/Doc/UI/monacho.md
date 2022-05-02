@@ -1,0 +1,1 @@
+[Custom languages, code completion and highlighting for the Monaco editor](https://blog.checklyhq.com/customizing-monaco/)

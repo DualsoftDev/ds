@@ -6,29 +6,31 @@
     [task] r3 = {도색;배출;}
 
     
-    [flow] r1_work = {
+    [flow] r1_interlock = {
         r1.put > 감지.work;
         r1.get |> 감지.in;
-        r1.get <||> r1.put;
+        r1.get <||> r1.put;   
     } 
 
-    [flow] r2_work = {
+    [flow] r2_interlock = {
         r2.정렬 <||> r2.용접;
     } 
 
-    [flow] r3_work = {
+    [flow] r3_interlock = {
       r3.도색 <||> r3.배출;
     } 
 
-    [flow] 로딩 = {
+    [flow] 로딩 = {  //task?
         감지.in > r1.get;
         r1.get, (!감지.work) > r1.put;
     }
 
-    [flow] 작업 = {
+    [flow] 작업 = {  //task?
         r2.정렬 > r3.도색, r2.용접;
         r3.도색, r2.용접, (!감지.out) > r3.배출;
     }
 
-
+    [flow] 전체작업 = {
+        로딩, 감지.work > 작업;
+    }
 }

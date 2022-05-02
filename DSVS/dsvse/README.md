@@ -63,6 +63,10 @@ Update parser, import, function
 - task, flow 처리
 - graph layout option
 
+
+### 1.0.15
+- Fix Support Korean
+
 -----------------------------------------------------------------------------------------------------------
 ## Following extension guidelines
 

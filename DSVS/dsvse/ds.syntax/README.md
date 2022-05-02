@@ -13,10 +13,7 @@
 # v 0.0.2 
 - Bug fix
 # v 0.0.3 
-- Callsegment delimiter(comma) bug fix
-
-# v 0.0.4
-- Callsegment ; fix
+- Fix Support Korean
 
 -----------------------------------------------------------------------------------------------------------
 

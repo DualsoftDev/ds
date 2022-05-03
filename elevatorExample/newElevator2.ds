@@ -1,13 +1,13 @@
 [sys] elevator = {
     [task] M = {U;D;}         //1모터 2방향 연결
-    [task] S = {S1D;S2U;S2D;S3D;} //각 센서 연결
+    [task] S = {S1D;S2U;S2D;} //각 센서 연결
     [task] B = {F1;F2;F3;}    //각 층 정보 저장 및 활성화
 
     [task] T = {
-        U12 = {M.U ~ S.S2U;}
-        U23 = {M.U ~ S.S3U;}
-        D32 = {M.D ~ S.S2D;}
-        D21 = {M.D ~ S.S1D;}
+        U12 = {M.U ~ S.S2U}
+        U23 = {M.U ~ S.S3U}
+        D32 = {M.D ~ S.S2D}
+        D21 = {M.D ~ S.S1D}
     }
 
     [flow] btn_reset = {
@@ -34,7 +34,7 @@
         
         T.D32 < B.F2 , T.U23;
 
-        T.U23 < B.F1 , T.D32 ? B.F1 , T.U12;
+        T.D21 < B.F1 , T.D32 ? B.F1 , T.U12;
         //T.D21 < B.F1 , T.D32; 
         //T.D21 < B.F1 , T.U12;
     }

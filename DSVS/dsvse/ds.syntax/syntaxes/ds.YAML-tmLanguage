@@ -54,6 +54,8 @@ repository:
         - include: '#macros'
         - include: '#causals'
         - include: '#imports'
+        - include: '#tasks'
+        - include: '#flows'                
       - comment: single-line
         name: system.single.ds
         begin: \[\s*(sys)\s*\]\s*([가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*)\s*=\s*\{
@@ -82,7 +84,8 @@ repository:
         patterns:          
         - include: '#comments'
         - include: '#accessDefs'
-        - include: '#macros'
+        - include: '#callSegmentDefs'
+        - include: '#macros'    
         #- include: '#causals'
         - include: '#imports'
       - comment: single-line tasks

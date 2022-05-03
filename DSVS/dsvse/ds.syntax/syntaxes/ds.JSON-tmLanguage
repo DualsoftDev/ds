@@ -86,6 +86,12 @@
             },
             {
               "include": "#imports"
+            },
+            {
+              "include": "#tasks"
+            },
+            {
+              "include": "#flows"
             }
           ]
         },
@@ -144,6 +150,9 @@
             },
             {
               "include": "#accessDefs"
+            },
+            {
+              "include": "#callSegmentDefs"
             },
             {
               "include": "#macros"

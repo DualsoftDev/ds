@@ -67,6 +67,8 @@ Update parser, import, function
 ### 1.0.15
 - Fix Support Korean
 
+### 1.0.16
+- Fix Server update
 -----------------------------------------------------------------------------------------------------------
 ## Following extension guidelines
 

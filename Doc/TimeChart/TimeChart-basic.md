@@ -45,7 +45,7 @@
 
 
 
-|||
+|확장|차트|
 |:----|:--:|
 |B의 value를 반대로 변화시킬 수도 있다.|<img src="IMG/ABTimeChart2.PNG" width="50%">|
 

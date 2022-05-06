@@ -1,5 +1,4 @@
 :smile: Welcome to the DS world  :smile:
-# Example 5 
 
 ## Elevator system :jeans:
 

@@ -34,4 +34,4 @@
 | Num | Question :question:  | Answer     :exclamation: 
 |:--:| :-----: | ---- | 
 |3.1 |[flow]F = { A > B > C } | flow F processes action B after action A and action C after action B.<p>`흐름 F는 A행위 후 B행위, B행위 후 C 행위를 각각 처리`|
-|3.2|[flow]F = { A > B > C</p>A = {A1 > A2 > A3}</p>B = {B1 > B2 > B3}</p>C = {C1 > C2 > C3} } | Action D executes actions A, B, and C once in sequence.<p>`행위 A는 행위 A1, A2, A3를 차례로 한 번 실행`|
+|3.2|[flow]F = { A > B > C;</p>A = {A1 > A2 > A3};</p>B = {B1 > B2 > B3};</p>C = {C1 > C2 > C3}; } | Action D executes actions A, B, and C once in sequence.<p>`행위 A는 행위 A1, A2, A3를 차례로 한 번 실행`|

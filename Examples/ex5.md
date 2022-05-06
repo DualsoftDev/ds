@@ -14,11 +14,17 @@
 
 
 ```
- [sys]door  = {  Open <||> Close;
-               (Detect) > @sf (Open) > @s(10)  > Close; 
-               //@sf is Start Priority 
 
-      Open = { Out1 ~ In1, In2 }
-      Close = { Out2 ~ _ }
+  [sys]door  = {
+          [task] t = { Detect;
+              Open = { Out1 ~ In1, In2 }
+              Close = { Out2 ~ _ }
+          }
+          [flow] f1 = {
+                #(Detect) > @sf (Open);
+                Open > @s(10)  > Close;
+          }
+          [flow] f2 = {  Open <||> Close }
   }
+ 
 ```

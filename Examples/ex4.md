@@ -13,8 +13,12 @@
 
 
 ```
-     [sys]trafficlight  = { RedLight <| (Button) > @selfr (Walk);
-                            RedLight < _RisingRun;
-          Walk = { GreenLight > @s(30) > RedLight };
+     [sys]trafficlight  = {
+          [task] t = { Button; }
+          [flow] f1 = {
+               _RisingRun > RedLight <| #(Button) > @selfr (Walk);
+               Walk < #(Button)
+               Walk = { GreenLight > @s(30) > RedLight };
+          }
      }
 ```

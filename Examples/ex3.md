@@ -10,10 +10,14 @@
     1. Open
     2. Close
 
-  ref to @sf (Start first)  [4.1 Priority operation](/Language/ds-language-table.md) 
-
 ```
- [sys]door  = { Open <||> Close;
-               (Detect) > @sf (Open) > @s(10)  > Close;
+
+  [sys]door  = {
+          [task] t = { Detect;  }
+          [flow] f1 = {
+                #(Detect) > @sf (Open);
+                Open > @s(10)  > Close;
+          }
+          [flow] f2 = {  Open <||> Close }
   }
 ```

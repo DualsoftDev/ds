@@ -54,7 +54,8 @@ connection.onInitialize((params: InitializeParams) => {
 			textDocumentSync: TextDocumentSyncKind.Incremental,
 			// Tell the client that this server supports code completion.
 			completionProvider: {
-				resolveProvider: true
+				resolveProvider: true,
+				//triggerCharacters: ['!', '#', '@'],		// https://github.com/microsoft/vscode-extension-samples/issues/161
 			}
 		}
 	};
@@ -210,19 +211,64 @@ connection.onDidChangeWatchedFiles(_change => {
 // This handler provides the initial list of the completion items.
 connection.onCompletion(
 	(_textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
+		const snipImport = 
+`!#import {
+	_LIBTASKNAME as _X,
+	_LIBFLOWNAME as _X,
+} from "./some/path/to/lib.ds";
+`;
+		const snipTask =
+`[task]_TASKNAME = {
+	_CALL = {_X ~ _X}
+	_PARENTING = {X.X > X.X;}
+}`;
+
+		const snipFlow =
+`[flow of _BASETASK]_FLOWNAME = {
+	X > X;
+}`;
+
 		// The pass parameter contains the position of the text document in
 		// which code complete got requested. For the example we ignore this
 		// info and always provide the same completion items.
 		return [
 			{
-				label: 'TypeScript',
+				label: 'import',
+				insertText:`${snipImport}`,
 				kind: CompletionItemKind.Text,
 				data: 1
 			},
 			{
-				label: 'JavaScript',
+				label: 'task',
+				insertText:`${snipTask}`,
 				kind: CompletionItemKind.Text,
 				data: 2
+			},
+			{
+				label: 'flow',
+				insertText:`${snipFlow}`,
+				kind: CompletionItemKind.Text,
+				data: 3
+			},
+			{
+				label:
+`[sys]_SYSTEMNAME = {
+	!#import {
+		_LIBTASKNAME as _X,
+		_LIBFLOWNAME as _X,
+	} from "./some/path/to/lib.ds";
+
+	[task]_TASKNAME = {
+		_CALL = {_X ~ _X}
+		_PARENTING = {X.X > X.X;}
+	}
+	
+	[flow of _BASETASK]_FLOWNAME = {
+		X > X;
+	}
+}`,
+				kind: CompletionItemKind.Text,
+				data: 4
 			}
 		];
 	}
@@ -233,11 +279,17 @@ connection.onCompletion(
 connection.onCompletionResolve(
 	(item: CompletionItem): CompletionItem => {
 		if (item.data === 1) {
-			item.detail = 'TypeScript details';
-			item.documentation = 'TypeScript documentation';
+			item.detail = '!#Import details';
+			item.documentation = 'Import documentation';
 		} else if (item.data === 2) {
-			item.detail = 'JavaScript details';
-			item.documentation = 'JavaScript documentation';
+			item.detail = 'Task details';
+			item.documentation = 'Task documentation';
+		} else if (item.data === 3) {
+			item.detail = 'Flow snippets';
+			item.documentation = 'Flow documentation';
+		} else if (item.data === 4) {
+			item.detail = 'System detail snippets';
+			item.documentation = 'System documentation';
 		}
 		return item;
 	}

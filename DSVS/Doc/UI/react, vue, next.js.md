@@ -1,0 +1,1 @@
+[Next JS 실습 강좌! React를 더욱 편리하게 SEO](https://www.youtube.com/watch?v=pdWQvfQBSGg)

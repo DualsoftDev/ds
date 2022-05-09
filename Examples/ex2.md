@@ -11,5 +11,11 @@
      
 
 ```
-     [sys]coffee  = {(PutCup), (PushButton) > MakeCoffee <| (GetCoffee)}
+     [sys]coffee  = {
+          [task] t = { PutCup; PushButton; GetCoffee; }
+          [flow] f = {
+                #(PutCup), #(PushButton) > MakeCoffee;
+                MakeCoffee <| #(GetCoffee);
+          }
+     }
 ```

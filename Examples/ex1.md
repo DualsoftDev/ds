@@ -19,6 +19,11 @@
      */
 
      //action system 
-     [sys]action  = {(Start) > DoAction <| (Reset)}
+     [sys]action  = {
+          [task] t = { start; reset; }
+          [flow] f = {
+               #(Start) > DoAction <| #(Reset);
+          }
+     }
 ```
 

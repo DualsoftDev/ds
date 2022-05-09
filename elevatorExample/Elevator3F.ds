@@ -15,7 +15,7 @@
     }
 
     [flow] inter_lock = {
-        T.U12 <||> T.D21 <| T.D32 <||> T.U23 <| T.U12;    //[task] S 에서 U12,U23,D32,D21을 자동으로 상호리셋을 지원해 주는가?
+        T.U12 <||> T.D21 <| T.D32 <||> T.U23 <| T.U12;
     }
 
     [flow] up_down = {

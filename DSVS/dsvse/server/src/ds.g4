@@ -29,12 +29,12 @@ sysBlock
     ;
 
 task
-    : taskProp id '=' LBRACE (listing|call|parenting)* RBRACE
+    : taskProp id '=' LBRACE (listing|call)* RBRACE
     ;
 taskProp: '[' 'task' ']';
 
 flow
-    : flowProp id '=' LBRACE (causal)* RBRACE
+    : flowProp id '=' LBRACE (causal|parenting|listing)* RBRACE
     ;
 flowProp
     : '[' 'flow' ('of' id)? ']'

@@ -6,10 +6,12 @@
     }
     [task]B = { X; Y;  }
     [task]T = { A21; X;  }
+    [flow] M = {U;D;}         //1모터 2방향 연결
 
     [flow of B]remember_call_set = {
         // 호출 Set기억 
         @pushr(A), #g(A), M.U ><| Set1F <| T.A21 ? T.X;
         //A, B ? C > D, E;
+        myFlow = {A > B > C;}
     }
 }

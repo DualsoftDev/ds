@@ -31,6 +31,8 @@ test:
 	$(grun) ds expressions < g4test/expressions.txt
 	@echo proc
 	$(grun) ds program < g4test/proc.ds
+	@echo taskFlow
+	$(grun) ds program < g4test/taskFlow.ds
 	@echo call
 	$(grun) ds calls < g4test/calls.txt
 	@echo elevator

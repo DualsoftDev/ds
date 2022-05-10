@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<!-- https://codepen.io/gmem/pen/qBOrKeB -->
+<html lang="en">
+<head>
+  <title>CircleCI Configuration Creator</title>
+	<link rel="stylesheet" type="text/css" href="https://tamats.com/projects/litegraph/css/litegraph.css">
+	<link rel="stylesheet" type="text/css" href="test.css">
+	<script type="text/javascript" src="https://unpkg.com/litegraph.js@0.7.5/build/litegraph.js"></script>
+</head>
+<body>
+<h1>CircleCI Configuration Creator</h1>
+<p>right click for context menu</p>
+  <div class="controls">
+<button onclick="graph.add(LiteGraph.createNode('circleci/workflow'));">Workflow</button>
+<button onclick="graph.add(LiteGraph.createNode('circleci/job'));">Job</button>
+<button onclick="graph.add(LiteGraph.createNode('circleci/executor'));">Executor</button>
+<button onclick="graph.add(LiteGraph.createNode('circleci/checkout'));">Checkout</button>
+<button onclick="graph.add(LiteGraph.createNode('circleci/run'));">Run</button>
+<button onclick="process()"">Generate</button>
+    
+  </div>
+<div class="app">
+<canvas id="mycanvas" height=500 width=1000></canvas>
+<pre><code id="config">{
+  version:2.1, 
+  workflows:{}, 
+  jobs:{}
+}</code></pre>
+  </div>
+
+  <script type="text/javascript" src="main.js"></script>
+
+</body>
+</html>

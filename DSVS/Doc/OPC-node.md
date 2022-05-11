@@ -1,5 +1,7 @@
 # OPC with node.js
 
+- [기능 비교 테이블](https://dl.gi.de/bitstream/handle/20.500.12116/34742/C4-8.pdf?sequence=1&isAllowed=y)
+
 ## node-opcua
 - [NodeOPCUA! the OPCUA sdk for node.js](https://node-opcua.github.io/)
 
@@ -16,4 +18,49 @@ node-red-contrib-opc-da is an OPC-DA compatible node for Node-RED that allow int
 
 
 - Youtube 동영상 [OPC UA Lesson 2 - Starting with OPC UA Server simulation and OPC UA Client](https://www.youtube.com/watch?v=yCd2j2WsgBM&t=628s)
+
+
+
+## python
+- [GitHub - FreeOpcUa/opcua-asyncio: OPC UA library for python &gt;= 3.7](https://github.com/FreeOpcUa/opcua-asyncio)
+    - [add / delete example](https://github.com/FreeOpcUa/opcua-asyncio/blob/master/examples/client_deleting.py)
+
+- [client 에서 추가 삭제](https://github.com/FreeOpcUa/python-opcua/issues/719)
+```
+i got it. If you want to change or create some objects you should connect to server via admin
+
+client = Client("opc.tcp://admin@localhost:4840/freeopcua/server/") #connect using a user
+```
+
+
+- KepServer 연동
+    $ python client_to_kepware.py
+    asyncua.ua.uaerrors._auto.BadSecurityChecksFailed: "An error occurred verifying security."(BadSecurityChecksFailed)
+
+    - Security None 추가
+
+
+    - Edit > Properties > Opc UA > client session
+        - allow anonymous login : YES 로 변경 하니 동작함..
+
+
+
+- [node-opcua 로 kepserver 연동시, certificate 없어 에러나는 경우](https://stackoverflow.com/questions/64440584/nodejs-how-to-generate-certificate-and-private-key-with-node-opcua-pki)
+cd ~/tmp/cert
+npm install rimraf
+npm install node-opcua-pki certificates
+npx node-opcua-pki certificates -o client_certificate.pem
+
+
+
+node-opcua.client --> KEPServer : OK!
+    // URL 주소: 뒷부분 path 를 없애 주어야 연결 됨.
+    const endpointUrl = "opc.tcp://127.0.0.1:49320";
+    const nodeId = "ns=2;s=Channel1.Device1.Tag1";
+
+python.client --> KEPServer : OK!
+    // URL 주소: 뒷부분 path 포함.
+    url = "opc.tcp://localhost:49320/OPCUA/SimulationServer/"
+
+
 

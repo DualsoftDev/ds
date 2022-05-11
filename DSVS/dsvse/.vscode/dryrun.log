@@ -1,0 +1,6 @@
+make.exe --dry-run --always-make --keep-going --print-directory
+make.exe: Entering directory `c:/ds/DSVS/dsvse'
+cd ..
+make clean
+make.exe: Leaving directory `c:/ds/DSVS/dsvse'
+ 

@@ -1,0 +1,321 @@
+make.exe all --print-data-base --no-builtin-variables --no-builtin-rules --question
+# GNU Make 3.81
+# Copyright (C) 2006  Free Software Foundation, Inc.
+# This is free software; see the source for copying conditions.
+# There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+
+# This program built for i386-pc-mingw32
+
+# ����ũ ����Ÿ���̽�, Wed May 11 15:53:50 2022
+�� ǥ��
+# ����
+
+# �ڵ�
+<D = $(patsubst %/,%,$(dir $<))
+# �ڵ�
+?F = $(notdir $?)
+# ȯ��
+ELECTRON_NO_ATTACH_CONSOLE = 1
+# ����ũ����
+MAKEFLAGS = Rrqp
+# ȯ��
+VSCODE_LOG_NATIVE = false
+# �ڵ�
+?D = $(patsubst %/,%,$(dir $?))
+# �ڵ�
+@D = $(patsubst %/,%,$(dir $@))
+# ȯ��
+HOMEDRIVE = C:
+# �ڵ�
+@F = $(notdir $@)
+# �ڵ�
+^D = $(patsubst %/,%,$(dir $^))
+# ����ũ����
+CURDIR := c:/ds/DSVS/dsvse
+# �⺻��
+SHELL := sh.exe
+# ȯ��
+WINDIR = C:\WINDOWS
+# ȯ��
+VSCODE_NLS_CONFIG = {"locale":"ko","availableLanguages":{"*":"ko"},"_languagePackId":"738ac08552cca045871a73764b8c446f.ko","_translationsConfigFile":"C:\\Users\\dskim\\AppData\\Roaming\\Code\\clp\\738ac08552cca045871a73764b8c446f.ko\\tcf.json","_cacheRoot":"C:\\Users\\dskim\\AppData\\Roaming\\Code\\clp\\738ac08552cca045871a73764b8c446f.ko","_resolvedLanguagePackCoreLocation":"C:\\Users\\dskim\\AppData\\Roaming\\Code\\clp\\738ac08552cca045871a73764b8c446f.ko\\da15b6fd3ef856477bf6f4fb29ba1b7af717770d","_corruptedFile":"C:\\Users\\dskim\\AppData\\Roaming\\Code\\clp\\738ac08552cca045871a73764b8c446f.ko\\corrupted.info","_languagePackSupport":true}
+# ȯ��
+ONEDRIVE = C:\Users\dskim\OneDrive
+# ȯ��
+PATHEXT = .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC;.PY;.PYW
+# ����ũ���� (from `makefile', line 1)
+MAKEFILE_LIST :=  makefile
+# ȯ��
+TMP = C:\Users\dskim\AppData\Local\Temp
+# ȯ��
+VSCODE_VERBOSE_LOGGING = true
+# ȯ��
+PROGRAMW6432 = C:\Program Files
+# ȯ��
+PROGRAMDATA = C:\ProgramData
+# ȯ��
+VSCODE_IPC_HOOK_EXTHOST = \\.\pipe\vscode-ipc-3d206115-f725-4cf5-b0e4-c361081060c6-sock
+# ȯ��
+VSCODE_CWD = C:\ds\DSVS\dsvse
+# ȯ��
+PATH = C:\Python310\Scripts\;C:\Python310\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\ProgramData\chocolatey\bin;C:\Program Files\Git\cmd;C:\Program Files (x86)\Yarn\bin\;C:\Program Files\nodejs\;C:\Program Files\Java\jdk1.8.0_211\bin;C:\Users\dskim\AppData\Local\Microsoft\WindowsApps;C:\Users\dskim\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\dskim\AppData\Local\GitHubDesktop\bin;C:\Users\dskim\AppData\Local\Yarn\bin;C:\Program Files (x86)\GnuWin32\bin;C:\Users\dskim\AppData\Roaming\npm
+# ȯ��
+COMMONPROGRAMW6432 = C:\Program Files\Common Files
+# ȯ��
+CHOCOLATEYLASTPATHUPDATE = 132960132716666428
+# ȯ��
+PROCESSOR_ARCHITECTURE = x86
+# ȯ��
+USERPROFILE = C:\Users\dskim
+# ȯ��
+CHOCOLATEYINSTALL = C:\ProgramData\chocolatey
+# ȯ��
+ALLUSERSPROFILE = C:\ProgramData
+# ȯ��
+VSCODE_LOG_STACK = false
+# ȯ��
+NUMBER_OF_PROCESSORS = 16
+# ȯ��
+ELECTRON_RUN_AS_NODE = 1
+# �⺻��
+.FEATURES := target-specific order-only second-expansion else-if archives
+# �ڵ�
+%F = $(notdir $%)
+# ȯ��
+CHROME_CRASHPAD_PIPE_NAME = \\.\pipe\crashpad_5880_VTYIMKVPSQKNFGGV
+# ȯ��
+VSCODE_PIPE_LOGGING = true
+# ȯ��
+COMPUTERNAME = DESKTOP-67CAFFA
+# ȯ��
+PROGRAMFILES = C:\Program Files (x86)
+# ȯ��
+DRIVERDATA = C:\Windows\System32\Drivers\DriverData
+# ȯ��
+ORIGINAL_XDG_CURRENT_DESKTOP = undefined
+# ȯ��
+USERNAME = dskim
+# ȯ��
+PUBLIC = C:\Users\Public
+# ȯ��
+VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
+# ȯ��
+VSCODE_CLI = 1
+# ȯ��
+VSCODE_CODE_CACHE_PATH = C:\Users\dskim\AppData\Roaming\Code\CachedData\da15b6fd3ef856477bf6f4fb29ba1b7af717770d
+# ȯ��
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
+# ȯ��
+COMMONPROGRAMFILES = C:\Program Files (x86)\Common Files
+# ȯ��
+LOGONSERVER = \\DESKTOP-67CAFFA
+# ȯ��
+VSCODE_HANDLES_UNCAUGHT_ERRORS = true
+# ȯ��
+USERDOMAIN = DESKTOP-67CAFFA
+# �⺻��
+MAKE = $(MAKE_COMMAND)
+# �⺻��
+MAKECMDGOALS := all
+# ȯ��
+JAVA_HOME = C:\Program Files\Java\jdk1.8.0_211
+# �⺻��
+MAKE_VERSION := 3.81
+# ����ũ����
+.DEFAULT_GOAL := clean
+# ȯ��
+CLASSPATH = .;
+# ȯ��
+PROGRAMFILES(X86) = C:\Program Files (x86)
+# �ڵ�
+%D = $(patsubst %/,%,$(dir $%))
+# ȯ��
+LOCALAPPDATA = C:\Users\dskim\AppData\Local
+# ȯ��
+PSMODULEPATH = C:\Program Files\WindowsPowerShell\Modules;C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules
+# �⺻��
+MAKE_COMMAND := make.exe
+# ȯ��
+PROCESSOR_ARCHITEW6432 = AMD64
+# �⺻��
+.VARIABLES := 
+# �ڵ�
+*F = $(notdir $*)
+# ȯ��
+PROCESSOR_IDENTIFIER = Intel64 Family 6 Model 165 Stepping 5, GenuineIntel
+# ȯ��
+OS = Windows_NT
+# ȯ��
+VSCODE_IPC_HOOK = \\.\pipe\679146e4feb75abeec38755d86712207-1.67.1-main-sock
+# ȯ��
+HOMEPATH = \Users\dskim
+# ȯ��
+COMMONPROGRAMFILES(X86) = C:\Program Files (x86)\Common Files
+# ȯ��
+PROMPT = $P$G
+# ȯ��
+MFLAGS = -Rrqp
+# �ڵ�
+*D = $(patsubst %/,%,$(dir $*))
+# ȯ��
+SYSTEMROOT = C:\WINDOWS
+# �ڵ�
++D = $(patsubst %/,%,$(dir $+))
+# �ڵ�
++F = $(notdir $+)
+# ȯ��
+APPDATA = C:\Users\dskim\AppData\Roaming
+# ȯ��
+TEMP = C:\Users\dskim\AppData\Local\Temp
+# ȯ��
+COMSPEC = C:\WINDOWS\system32\cmd.exe
+# �⺻��
+MAKEFILES := 
+# �ڵ�
+<F = $(notdir $<)
+# ȯ��
+LC_ALL = C
+# �ڵ�
+^F = $(notdir $^)
+# �⺻��
+SUFFIXES := 
+# ȯ��
+SYSTEMDRIVE = C:
+# ȯ��
+SESSIONNAME = Console
+# ȯ��
+PROCESSOR_REVISION = a505
+# ȯ��
+MAKELEVEL := 0
+# ȯ��
+LANG = C
+# ȯ��
+PROCESSOR_LEVEL = 6
+# ȯ��
+VSCODE_PID = 5880
+# ȯ��
+USERDOMAIN_ROAMINGPROFILE = DESKTOP-67CAFFA
+# variable set hash-table stats:
+# Load=92/1024=9%, Rehash=0, Collisions=9/112=8%
+
+# Pattern-specific Variable Values
+
+# ������ ���� ���� ������ �����ϴ�.
+
+# ���丮
+
+# C:\WINDOWS\System32\WindowsPowerShell\v1.0\ (Ű C:/WINDOWS/System32/WindowsPowerShell/v1.0/, ����ð� 1651195707): 31 ����, 0�� �Ұ���.
+# C:\WINDOWS\System32\Wbem (Ű C:/WINDOWS/System32/Wbem, ����ð� 1651195707): 171 ����, 0�� �Ұ���.
+# . (Ű c:/ds/DSVS/dsvse, ����ð� 1652251775): 35 ����, 0�� �Ұ���.
+# C:\Users\dskim\AppData\Local\GitHubDesktop\bin (Ű C:/Users/dskim/AppData/Local/GitHubDesktop/bin, ����ð� 1651133725): 4 ����, 0�� �Ұ���.
+# C:\Users\dskim\AppData\Local\Microsoft\WindowsApps (Ű C:/Users/dskim/AppData/Local/Microsoft/WindowsApps, ����ð� 1651622119): 15 ����, 0�� �Ұ���.
+# C:\ProgramData\chocolatey\bin (Ű C:/ProgramData/chocolatey/bin, ����ð� 1651134510): 11 ����, 0�� �Ұ���.
+# C:\Program Files\nodejs\ (Ű C:/Program Files/nodejs/, ����ð� 1651539506): 12 ����, 0�� �Ұ���.
+# C:\Python310\ (Ű C:/Python310/, ����ð� 1651134591): 18 ����, 0�� �Ұ���.
+# C:\Python310\Scripts\ (Ű C:/Python310/Scripts/, ����ð� 1651134591): 5 ����, 0�� �Ұ���.
+# C:\Users\dskim\AppData\Local\Yarn\bin (Ű C:/Users/dskim/AppData/Local/Yarn/bin, ����ð� 1651136085): 2 ����, 0�� �Ұ���.
+# C:\Users\dskim\AppData\Roaming\npm (Ű C:/Users/dskim/AppData/Roaming/npm, ����ð� 1651479977): 12 ����, 0�� �Ұ���.
+# C:\WINDOWS\System32\OpenSSH\: stat�� �� �� �������ϴ�.
+# C:\WINDOWS (Ű C:/WINDOWS, ����ð� 1651197167): 111 ����, 0�� �Ұ���.
+# C:\Program Files\Git\cmd (Ű C:/Program Files/Git/cmd, ����ð� 1651135218): 8 ����, 0�� �Ұ���.
+# C:\WINDOWS\system32 (Ű C:/WINDOWS/system32, ����ð� 1652140309): 2939 ����, 0�� �Ұ���.
+# C:\Program Files (x86)\Yarn\bin\ (Ű C:/Program Files (x86)/Yarn/bin/, ����ð� 1651135472): 7 ����, 0�� �Ұ���.
+# C:\Users\dskim\AppData\Local\Programs\Microsoft VS Code\bin (Ű C:/Users/dskim/AppData/Local/Programs/Microsoft VS Code/bin, ����ð� 1652235910): 4 ����, 0�� �Ұ���.
+# C:\Program Files\Java\jdk1.8.0_211\bin (Ű C:/Program Files/Java/jdk1.8.0_211/bin, ����ð� 1651539668): 56 ����, 0�� �Ұ���.
+# C:\Program Files (x86)\GnuWin32\bin (Ű C:/Program Files (x86)/GnuWin32/bin, ����ð� 1651193788): 5 ����, 0�� �Ұ���.
+
+# 3446 ����, 0�� impossibilities in 19 directories.
+
+# Implicit Rules
+
+# ������ ��Ģ ����.
+
+# ����
+
+pre:
+#  ������ ��Ģ Ž���� �Ϸ���� �ʾҽ��ϴ�.
+#  ���� �ð��� ���� �˻���� �ʾ���.
+#  ������ ���ŵ��� �ʾҽ��ϴ�.
+#  ������ ���ɾ� (`makefile'����, 12��° ��):
+	vsce publish --pre-release
+	
+
+# Ÿ���� �ƴ�:
+all:
+#  ������ Ÿ��.
+#  ������ ��Ģ Ž���� �Ϸ�Ǿ����ϴ�.
+#  ������ �������� �ʽ��ϴ�.
+#  ������ ���ŵ��� �ʾҽ��ϴ�.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+
+# Ÿ���� �ƴ�:
+.DEFAULT:
+#  ������ ��Ģ Ž���� �Ϸ���� �ʾҽ��ϴ�.
+#  ���� �ð��� ���� �˻���� �ʾ���.
+#  ������ ���ŵ��� �ʾҽ��ϴ�.
+
+.ONESHELL:
+#  ������ ��Ģ Ž���� �Ϸ���� �ʾҽ��ϴ�.
+#  ���� �ð��� ���� �˻���� �ʾ���.
+#  ������ ���ŵ��� �ʾҽ��ϴ�.
+
+# Ÿ���� �ƴ�:
+makefile:
+#  ������ ��Ģ Ž���� �Ϸ�Ǿ����ϴ�.
+#  ������ ���� 2022-04-29 11:17:35
+#  ������ ���ŵǾ����ϴ�.
+#  ���������� ���ŵ�.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+
+# Ÿ���� �ƴ�:
+.SUFFIXES:
+#  ������ ��Ģ Ž���� �Ϸ���� �ʾҽ��ϴ�.
+#  ���� �ð��� ���� �˻���� �ʾ���.
+#  ������ ���ŵ��� �ʾҽ��ϴ�.
+
+publish:
+#  ������ ��Ģ Ž���� �Ϸ���� �ʾҽ��ϴ�.
+#  ���� �ð��� ���� �˻���� �ʾ���.
+#  ������ ���ŵ��� �ʾҽ��ϴ�.
+#  ������ ���ɾ� (`makefile'����, 15��° ��):
+	vsce publish
+	
+
+g4:
+#  ������ ��Ģ Ž���� �Ϸ���� �ʾҽ��ϴ�.
+#  ���� �ð��� ���� �˻���� �ʾ���.
+#  ������ ���ŵ��� �ʾҽ��ϴ�.
+#  ������ ���ɾ� (`makefile'����, 8��° ��):
+	cd ..
+	make g4
+	
+
+clean:
+#  ������ ��Ģ Ž���� �Ϸ���� �ʾҽ��ϴ�.
+#  ���� �ð��� ���� �˻���� �ʾ���.
+#  ������ ���ŵ��� �ʾҽ��ϴ�.
+#  ������ ���ɾ� (`makefile'����, 4��° ��):
+	cd ..
+	make clean
+	
+
+# files hash-table stats:
+# Load=9/1024=1%, Rehash=0, Collisions=0/20=0%
+# VPATH Ž�� ���
+
+# `vpath' Ž�� ��ΰ� ����.
+
+# �Ϲ����� (`VPATH' ����) Ž�� ��ΰ� ����.
+
+# # of strings in strcache: 1
+# # of strcache buffers: 1
+# strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
+# strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
+
+# ����ũ ����Ÿ ���̽� ��ħ, Wed May 11 15:53:50 2022
+����
+ 
+make.exe: *** Ÿ�� `all'�� ���� ��Ģ�� ����.  ����.
+

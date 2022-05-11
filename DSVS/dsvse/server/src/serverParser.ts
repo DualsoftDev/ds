@@ -3,8 +3,8 @@
  */
 
 import { ANTLRInputStream, CharStream, CommonTokenStream } from 'antlr4ts';
-import { dsLexer } from './dsLexer';
-import { dsParser, MacroContext, ProgramContext, SystemContext } from './dsParser';
+import { dsLexer } from '@dualsoft/parser/dsLexer';
+import { dsParser, MacroContext, ProgramContext, SystemContext } from '@dualsoft/parser/dsParser';
 // import { dsVisitor } from './dsVisitor';
 // import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
 //import { SimpleSysBlockContext, ComplexSysBlockContext } from './dsParser';

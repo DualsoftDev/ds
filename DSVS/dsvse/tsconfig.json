@@ -14,9 +14,5 @@
 		"node_modules",
 		"media",
 		".vscode-test"
-	],
-	"references": [
-		{ "path": "./client" },
-		{ "path": "./server" }
 	]
 }

@@ -2,6 +2,11 @@
 # yarn lockfile v1
 
 
+"@dualsoft/parser@^0.0.2":
+  "integrity" "sha512-ydHgJYyLzIvHlCVM5Zv7ktLOayDejdk+WiufMGTOYQOvDC9tZM5xoeEoWqQkjkjE+MqXVB8aXatZaiE+HMib9g=="
+  "resolved" "https://registry.npmjs.org/@dualsoft/parser/-/parser-0.0.2.tgz"
+  "version" "0.0.2"
+
 "antlr4ts-cli@^0.5.0-alpha.4":
   "integrity" "sha512-lVPVBTA2CVHRYILSKilL6Jd4hAumhSZZWA7UbQNQrmaSSj7dPmmYaN4bOmZG79cOy0lS00i4LY68JZZjZMWVrw=="
   "resolved" "https://registry.npmjs.org/antlr4ts-cli/-/antlr4ts-cli-0.5.0-alpha.4.tgz"

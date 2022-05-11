@@ -4,8 +4,8 @@
 
 import { ANTLRInputStream, CommonTokenStream } from 'antlr4ts';
 import { ParseTree } from 'antlr4ts/tree';
-import { dsLexer } from '../server-bundle/dsLexer';
-import { dsParser } from '../server-bundle/dsParser';
+import { dsLexer } from './dsLexer';
+import { dsParser } from './dsParser';
 
 
 /**

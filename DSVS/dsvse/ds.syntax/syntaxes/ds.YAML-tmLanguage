@@ -148,17 +148,14 @@ repository:
     - include: '#comments'
     - include: $self
 
-  macros:
-    patterns:
-    - name: macro2.ds
-      begin: \[\s*(macro)\s*(=\s*([가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*))?\s*\]\s*=\s*(\{)
-      beginCaptures:
-        '1': {name: keyword.other.macro2.ds}      
-        '3': {name: keyword.control.macro.var.ds}      
-      end: (\})
-      patterns:
-        - include: '#callSegmentDefs'
-        - include: '#comments'
+#  macros:
+#    patterns:
+#    - name: macro2.ds
+#      begin: (\@|\#)\s*([가-힣a-zA-Z][가-힣a-zA-Z_0-9]*)*\s*\(\s*[가-힣a-zA-Z_0-9]*\s*\)
+#      patterns:
+#        - include: '#callSegmentDefs'
+#        - include: '#causals'
+#        - include: '#comments'
 
   callSegmentDefs:
     patterns:
@@ -216,6 +213,20 @@ repository:
         match: ','
       - include: '#segment'
       - include: '#comments'
+
+
+
+  macros:
+    patterns:
+    - name: macro.ds
+      #begin: \s*(!#|@)\s*([가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*) (\() ([가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*) (\))
+      #beginCaptures:
+      #  '1': {name: keyword.other.macro.ds}
+      #  '2': {name: variable.other}
+      #  '3': {name: keyword.other.macro.ds}
+      #  '4': {name: variable.other}
+      #  '5': {name: keyword.other.macro.ds}
+      #end: ';'
 
   segment:
     patterns:

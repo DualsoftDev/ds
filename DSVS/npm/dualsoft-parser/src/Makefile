@@ -4,6 +4,7 @@ antlr4=java -Xmx500M -cp /usr/local/lib/antlr-4.10.1-complete.jar org.antlr.v4.T
 grun=java -Xmx500M -cp /usr/local/lib/antlr-4.10.1-complete.jar:. org.antlr.v4.gui.TestRig
 
 grun:
+	@cd g4s
 	@java -version
 	@$(antlr4) ds.g4
 	@javac *.java
@@ -11,8 +12,8 @@ grun:
 
 g4:
 	@cd ..
-	@yarn antlr4ts -visitor -o src src/ds.g4
-	@cp src/ds*.ts ../client/src/server-bundle/
+	@yarn antlr4ts
+#	@cp src/ds*.ts ../client/src/server-bundle/
 
 test:
 	@export CLASSPATH=".:/usr/local/lib/antlr-4.10.1-complete.jar:$$CLASSPATH"
@@ -40,8 +41,9 @@ test:
 
 
 clean:
-	@rm -rf *.java *.class *.interp *.tokens
-	@rm -rf dsLexer.ts dsListener.ts dsParser.ts dsVisitor.ts
+	@rm -rf *.interp *.tokens dsLexer.ts dsListener.ts dsParser.ts dsVisitor.ts
+	@cd g4s
+	@rm -rf *.java *.class 
 
 
 all: g4 grun test

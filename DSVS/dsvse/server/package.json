@@ -15,8 +15,5 @@
 		"@dualsoft/parser": "^0.0.2",
 		"vscode-languageserver": "^7.0.0",
 		"vscode-languageserver-textdocument": "^1.0.4"
-	},
-	"scripts": {
-		"antlr4ts": "antlr4ts -visitor ./src/ds.g4"
 	}
 }

@@ -131,6 +131,9 @@ if __name__ == "__main__":
 
     impSeg1 = imparter()
     seg1.connect("me.S2", "me.S2", impSeg1)
+    seg1.origin_signals.append("me.call_it_S1.Tag")
+    seg1.origin_signals.append("me.call_it_S2.Tag")
+    seg1.start_points = [0, 1]
 
     child_relay0 = ds_signal_exchanger()
     impChildRelay0 = imparter()
@@ -141,6 +144,7 @@ if __name__ == "__main__":
     child_relay0.end_signals.append("me.call_it_S1.Tag")
     # child_relay0.clear_signals.append("me.call_it_S1.Tag")
     tag_call_it_S1.connect("me.call_it_S1.Tag", "me.S2.child0.Relay", impChildRelay0)
+    tag_call_it_S1.connect("me.call_it_S1.Tag", "me.S2", impSeg1)
     tag_call_it_S1.start_signals.append("me.S2.child0.Relay")
 
     seg1.end_signals.append("me.S2.child0.Relay")
@@ -156,6 +160,7 @@ if __name__ == "__main__":
     child_relay1.end_signals.append("me.call_it_S2.Tag")
     # child_relay1.clear_signals.append("me.call_it_S2.Tag")
     tag_call_it_S2.connect("me.call_it_S2.Tag", "me.S2.child1.Relay", impChildRelay1)
+    tag_call_it_S2.connect("me.call_it_S2.Tag", "me.S2", impSeg1)
     tag_call_it_S2.start_signals.append("me.S2.child1.Relay")
 
     seg1.end_signals.append("me.S2.child1.Relay")

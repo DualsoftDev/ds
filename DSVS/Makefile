@@ -37,10 +37,10 @@ g4:
 	cp ds.JSON-tmLanguage ds.tmLanguage.json
 	popd
 
-	cd dsvse/server
-	yarn antlr4ts -visitor -o src src/ds.g4
-	mkdir -p ../client/src/server-bundle/
-	cp src/ds*.ts ../client/src/server-bundle/
+#	cd dsvse/server
+#	yarn antlr4ts -visitor -o src src/ds.g4
+#	mkdir ../client/src/server-bundle/
+#	cp src/ds*.ts ../client/src/server-bundle/
 
 esbuild:
 	cd dsvse

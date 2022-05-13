@@ -135,3 +135,13 @@ def get_clear_signals(
     else:
         if obj_type == ds_object.Relay:
             return _object == signal_set()
+
+def get_origin_status(
+    _,
+    _my_type:ds_object, 
+    _target_name:str,
+    _object:signal_set):
+    obj_type = get_type(_target_name)
+    if _my_type == ds_object.Segment:
+        if obj_type == ds_object.Tag:
+            return _object.end

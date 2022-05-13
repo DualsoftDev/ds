@@ -13,6 +13,16 @@ clean:
 	rm -rf dsvse/client/out
 	rm -rf dsvse/server/out
 	
+all:
+	cd dsvse
+	npm install
+	make g4
+	cd server
+	tsc -b
+	cd ../client
+	tsc -b
+
+	
 choco:
 	choco install nodejs.install
 	choco install yarn
@@ -29,7 +39,7 @@ g4:
 
 	cd dsvse/server
 	yarn antlr4ts -visitor -o src src/ds.g4
-	mkdir ../client/src/server-bundle/
+	mkdir -p ../client/src/server-bundle/
 	cp src/ds*.ts ../client/src/server-bundle/
 
 esbuild:

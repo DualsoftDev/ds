@@ -29,6 +29,7 @@ g4:
 
 	cd dsvse/server
 	yarn antlr4ts -visitor -o src src/ds.g4
+	mkdir ../client/src/server-bundle/
 	cp src/ds*.ts ../client/src/server-bundle/
 
 esbuild:

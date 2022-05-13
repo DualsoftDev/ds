@@ -5,7 +5,7 @@
 	"license": "MIT",
 	"description": "Syntaxes for DS language. DS mean Digital Twin Segment Language",
 	"icon": "logo.png",
-	"version": "1.0.21",
+	"version": "1.0.23",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/Microsoft/vscode-extension-samples"
@@ -123,7 +123,7 @@
 		"antlr4ts": "^0.5.0-alpha.4",
 		"antlr4ts-cli": "^0.5.0-alpha.4",
 		"d3": "^7.4.4",
-		"yarn": "^1.22.18",		
+		"yarn": "^1.22.18",
 		"@types/glob": "^7.2.0",
 		"@types/mocha": "^9.1.0",
 		"@types/node": "^14.17.0",

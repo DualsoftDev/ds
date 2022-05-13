@@ -8,7 +8,7 @@
         "antlr4ts": "antlr4ts -visitor -o src ./src/g4s/ds.g4",
         "publish": "npm publish --access public",
         "unpublish": "npm unpublish @dualsoft/parser",
-        "clean": "rm -f allVisitor.js*  clientParser.js*  cytoscapeVisitor.js*  dsLexer.js*  dsListener.js*  dsParser.js*  dsVisitor.js* ds.interp ds.tokens src/ds.interp src/ds.tokens src/dsLexer.* src/dsListener.ts src/dsParser.ts* src/dsVisitor.ts*)"
+        "clean": "rm -f allVisitor.js*  clientParser.js*  cytoscapeVisitor.js*  dsLexer.js*  dsListener.js*  dsParser.js*  dsVisitor.js* ds.interp ds.tokens src/ds.interp src/ds.tokens src/dsLexer.* src/dsListener.ts src/dsParser.ts src/dsVisitor.ts)"
     },
     "author": "dualsoft",
     "license": "ISC",

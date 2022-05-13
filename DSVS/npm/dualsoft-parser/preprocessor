@@ -1,0 +1,23 @@
+#!/usr/bin/env node
+
+
+var antlr = require('antlr4ts')
+var ds = require('./export')
+var xxx = ds.findFirstAncestor;
+// grab provided args.
+const [,, ...args] = process.argv
+
+console.log(`Args=${args}`)
+
+const parser = parserFromDocument('hello')
+console.log(parser)
+
+
+
+function parserFromDocument(text) {
+	// Create the lexer and parser
+	const inputStream = new antlr.ANTLRInputStream(text);
+	const lexer = new ds.dsLexer(inputStream);
+	const tokenStream = new antlr.CommonTokenStream(lexer);
+	return new ds.dsParser(tokenStream);
+}

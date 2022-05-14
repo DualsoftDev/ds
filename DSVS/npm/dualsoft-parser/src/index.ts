@@ -14,3 +14,7 @@ export * from './dsParser';
 export * from './dsListener';
 export * from './clientParser';
 export * from './allVisitor';
+export * from './parserUtil';
+export * from './preprocessorImpl';
+
+

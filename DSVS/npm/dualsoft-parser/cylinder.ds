@@ -1,0 +1,10 @@
+[sys]Cylinder = {
+    [task]T = {
+        ADV = {QADV ~ IADV}
+        RET = {QRET ~ IRET}
+    }
+
+    [flow]F = {
+        T.ADV <||> T.RET;
+    }    
+}

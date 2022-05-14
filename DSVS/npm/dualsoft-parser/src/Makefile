@@ -22,6 +22,8 @@ test:
 #		$(grun) ds causals < g4test/causals.txt
 #	done
 
+	cd g4s
+
 	@echo causals
 	$(grun) ds causals < g4test/causals.txt
 	@echo imports

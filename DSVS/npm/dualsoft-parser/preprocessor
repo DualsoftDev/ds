@@ -12,8 +12,8 @@ process.stdin.on('data', data => {
 
 	console.log('TEXT=', text)
 
-	const parser = ds.parserFromDocument(text)
-	console.log(parser)	
+	const preprocessed = ds.preprocessDocument(text)
+	console.log(preprocessed)	
 })
 
 

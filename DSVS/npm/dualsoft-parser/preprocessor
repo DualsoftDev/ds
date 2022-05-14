@@ -1,5 +1,9 @@
 #!/usr/bin/env node
 
+/* USAGE:
+ $ cat system-with-cylinders.ds | ./preprocessor
+ */
+
 
 const antlr = require('antlr4ts')
 const ds = require('./index')
@@ -8,26 +12,17 @@ const process = require("process")
 let text = ''
 process.stdin.on('data', data => {
 	text = text + data.toString()
-    console.log('DATA=', data.toString())
+    // console.log('DATA=', data.toString())
 
-	console.log('TEXT=', text)
+	// console.log('TEXT=', text)
 
 	const preprocessed = ds.preprocessDocument(text)
+	console.log('------ preprocessed result: ------');
 	console.log(preprocessed)	
 })
 
 
 // grab provided args.
 const [,, ...args] = process.argv
+//console.log(`Args=${args}`)
 
-console.log(`Args=${args}`)
-
-
-
-// function parserFromDocument(text) {
-// 	// Create the lexer and parser
-// 	const inputStream = new antlr.ANTLRInputStream(text);
-// 	const lexer = new ds.dsLexer(inputStream);
-// 	const tokenStream = new antlr.CommonTokenStream(lexer);
-// 	return new ds.dsParser(tokenStream);
-// }

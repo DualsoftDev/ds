@@ -9,6 +9,7 @@ import {
 
 
 export function preprocessDocument(text:string) {
+    console.log(process.env.NODE_ENV);
     const imported = processImport(text);
     const macroExpanded = processMacro(imported);
     return macroExpanded;
@@ -37,6 +38,7 @@ function replaceSystemName(newSystemName:string, text:string, system:SystemConte
     const sysBlock = getOriginalText(text, system.sysBlock());
     return `// imported from ${id}
 [sys] ${newSystemName} = ${sysBlock}
+
 `;
 }
 
@@ -87,8 +89,9 @@ function processImport(text:string) : string
 
 //// test
 
-
-const text =`
+if (process.env.NODE_ENV === 'development')
+{
+    const text =`
 !#import { Cylinder as A, Cylinder as B } from "cylinder.ds";
 [sys]Cylinder = {
     [task]T = {
@@ -101,5 +104,6 @@ const text =`
     }    
 }`
 
-const x = preprocessDocument(text);
-console.log(x)
+    const x = preprocessDocument(text);
+    console.log(x)
+}

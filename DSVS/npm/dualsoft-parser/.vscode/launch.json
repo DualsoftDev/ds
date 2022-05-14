@@ -8,8 +8,12 @@
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
-            "program": "${workspaceFolder}/src/preprocessor.ts",
+            "program": "${workspaceFolder}/src/preprocessorImpl.ts",
             "preLaunchTask": "npm: debug",
-            "outFiles": ["${workspaceFolder}/**/*.js"]        }
+            "env": {
+                "NODE_ENV": "development"
+            },
+            "outFiles": ["${workspaceFolder}/**/*.js"]
+        }
     ]
 }

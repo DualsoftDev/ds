@@ -92,18 +92,28 @@ function processImport(text:string) : string
 if (process.env.NODE_ENV === 'development')
 {
     const text =`
-!#import { Cylinder as A, Cylinder as B } from "cylinder.ds";
-[sys]Cylinder = {
-    [task]T = {
-        ADV = {QADV ~ IADV}
-        RET = {QRET ~ IRET}
+!#import {
+    Cylinder as A,
+    Cylinder as B,
+    Cylinder as C,
+} from "cylinder.ds";
+    
+[sys] mySystem = {
+    [task] R = {
+      GRIP = {QGRIP ~ IGRIP}
+      RELEASE = {QRELEASE ~ IRELEASE}
+      WELD = {QWELD ~ _}
     }
-
-    [flow]F = {
-        T.ADV <||> T.RET;
-    }    
-}`
-
+    [flow] F = {
+        ADV = {A.ADV > B.ADV > C.ADV; }
+        RET = {C.RET > B.RET > A.RET; }
+        ADV <||> RET;
+        R.GRIP <||> R.RELEASE;
+        ADV > R.GRIP > @selfr(R.WELD) > R.RELEASE > RET;
+    }
+}
+`;
+      
     const x = preprocessDocument(text);
     console.log(x)
 }

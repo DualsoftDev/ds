@@ -1,14 +1,3 @@
-// import { dsLexer } from './dsLexer';
-// import { dsParser } from './dsParser';
-// import { dsListener } from './dsListener';
-// import {parserFromDocument} from './clientParser'
-
-// export { dsLexer };
-// export { dsParser };
-// export { dsListener };
-
-// export { parserFromDocument };
-
 export * from './dsLexer';
 export * from './dsParser';
 export * from './dsListener';
@@ -18,3 +7,8 @@ export * from './parserUtil';
 export * from './preprocessorImpl';
 
 
+// logger : https://github.com/log4js-node/log4js-node/issues/1009
+import {configure, getLogger} from 'log4js';
+export let logger = getLogger();
+logger.level = 'debug';
+logger.debug('logger initialized');

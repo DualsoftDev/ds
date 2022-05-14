@@ -1,15 +1,15 @@
 import { CommonToken, ParserRuleContext } from "antlr4ts";
 import * as fs from 'fs';
 import { ErrorNode, ParseTree, ParseTreeWalker, TerminalNode } from "antlr4ts/tree";
-import { dsParser, ProgramContext, SysBlockContext, SystemContext, ImportPhraseContext, ImportSystemNameContext, ImportAliasContext, IdContext } from './dsParser';
 import {
+    logger,
+    dsParser, ProgramContext, SysBlockContext, SystemContext, ImportPhraseContext, ImportSystemNameContext, ImportAliasContext, IdContext,
     enumerateChildren, ImportStatementContext, QuotedFilePathContext,
     parserFromDocument, getParseResult, findFirstChild, dsListener, getOriginalText
  } from './index';
 
 
 export function preprocessDocument(text:string) {
-    console.log(process.env.NODE_ENV);
     const imported = processImport(text);
     const macroExpanded = processMacro(imported);
     return macroExpanded;
@@ -66,7 +66,7 @@ function processImport(text:string) : string
                 const alias = findFirstChild(imp, t => t instanceof ImportAliasContext).text;       // A
                 const sys = sysDic[system];
                 result += replaceSystemName(alias, importText, sys);
-                console.log(system, alias);
+                logger?.debug(system, alias);
             }
         }
         else if (p instanceof SystemContext)
@@ -75,11 +75,11 @@ function processImport(text:string) : string
         }
         else if (p instanceof TerminalNode && p.symbol.type === dsParser.EOF)
         {
-            console.log('EOF=', p.text);
+            logger?.debug('EOF=', p.text);
         }
         else
         {
-            console.error('UNKNOWN=', p.text);
+            logger?.error('UNKNOWN=', p.text);
         }
     }
 

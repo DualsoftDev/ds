@@ -9,15 +9,18 @@ const antlr = require('antlr4ts')
 const ds = require('./index')
 const fs = require('fs');
 const process = require("process")
+
+ds.logger.level = 'info';
+
 let text = ''
 process.stdin.on('data', data => {
 	text = text + data.toString()
-    // console.log('DATA=', data.toString())
+    // ds.logger.debug('DATA=', data.toString())
 
-	// console.log('TEXT=', text)
+	// ds.logger.debug('TEXT=', text)
 
 	const preprocessed = ds.preprocessDocument(text)
-	console.log('------ preprocessed result: ------');
+	ds.logger.debug('------ preprocessed result: ------');
 	console.log(preprocessed)	
 })
 

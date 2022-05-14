@@ -17,6 +17,8 @@
         "@types/node": "^17.0.32",
         "antlr4ts": "^0.5.0-alpha.4",
         "antlr4ts-cli": "^0.5.0-alpha.4"
+    },
+    "dependencies": {
+        "log4js": "^6.4.6"
     }
 }
-

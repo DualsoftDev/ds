@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as fs from "fs";
-import { parserFromDocument } from '@dualsoft/parser/clientParser';
+import { parserFromDocument } from '@dualsoft/parser';
 import { getWebviewContentD3 } from './webview.d3';
 import { getWebviewContentCytoscape } from './webview.cytoscape';
 import { getElements } from '@dualsoft/parser/cytoscapeVisitor';

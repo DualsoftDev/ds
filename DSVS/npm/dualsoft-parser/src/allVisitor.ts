@@ -1,7 +1,7 @@
 import { ParserRuleContext } from "antlr4ts";
 import { ErrorNode, ParseTree, ParseTreeWalker, TerminalNode } from "antlr4ts/tree";
-import { dsListener } from "./dsListener";
-import { dsParser } from "././dsParser";
+import { dsListener, dsParser } from './index';
+
 
 
 export interface ParserResult

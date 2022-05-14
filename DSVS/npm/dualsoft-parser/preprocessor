@@ -1,23 +1,33 @@
 #!/usr/bin/env node
 
 
-var antlr = require('antlr4ts')
-var ds = require('./export')
-var xxx = ds.findFirstAncestor;
+const antlr = require('antlr4ts')
+const ds = require('./index')
+const fs = require('fs');
+const process = require("process")
+let text = ''
+process.stdin.on('data', data => {
+	text = text + data.toString()
+    console.log('DATA=', data.toString())
+
+	console.log('TEXT=', text)
+
+	const parser = ds.parserFromDocument(text)
+	console.log(parser)	
+})
+
+
 // grab provided args.
 const [,, ...args] = process.argv
 
 console.log(`Args=${args}`)
 
-const parser = parserFromDocument('hello')
-console.log(parser)
 
 
-
-function parserFromDocument(text) {
-	// Create the lexer and parser
-	const inputStream = new antlr.ANTLRInputStream(text);
-	const lexer = new ds.dsLexer(inputStream);
-	const tokenStream = new antlr.CommonTokenStream(lexer);
-	return new ds.dsParser(tokenStream);
-}
+// function parserFromDocument(text) {
+// 	// Create the lexer and parser
+// 	const inputStream = new antlr.ANTLRInputStream(text);
+// 	const lexer = new ds.dsLexer(inputStream);
+// 	const tokenStream = new antlr.CommonTokenStream(lexer);
+// 	return new ds.dsParser(tokenStream);
+// }

@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@dualsoft/parser@^0.0.2":
-  "integrity" "sha512-ydHgJYyLzIvHlCVM5Zv7ktLOayDejdk+WiufMGTOYQOvDC9tZM5xoeEoWqQkjkjE+MqXVB8aXatZaiE+HMib9g=="
-  "resolved" "https://registry.npmjs.org/@dualsoft/parser/-/parser-0.0.2.tgz"
-  "version" "0.0.2"
+"@dualsoft/parser@^1.0.0":
+  "integrity" "sha512-t/u9Maq/CdBaxAAxIln4+ZCmsWhhAvJ0mdEs4Atup8K1jfA/7BCc5pzixJrE095R1vA/xZ8wxzxrnLIdD4Vyng=="
+  "resolved" "https://registry.npmjs.org/@dualsoft/parser/-/parser-1.0.2.tgz"
+  "version" "1.0.2"
 
 "@eslint/eslintrc@^1.2.3":
   "integrity" "sha512-uGo44hIwoLGNyduRpjdEpovcbMdd+Nv7amtmJxnKmI8xj6yd5LncmSwDa5NgX/41lIFJtkjD6YdVfgEzPfJ5UA=="
@@ -238,6 +238,16 @@
   "version" "4.3.0"
   dependencies:
     "color-convert" "^2.0.1"
+
+"antlr4ts-cli@^0.5.0-alpha.4":
+  "integrity" "sha512-lVPVBTA2CVHRYILSKilL6Jd4hAumhSZZWA7UbQNQrmaSSj7dPmmYaN4bOmZG79cOy0lS00i4LY68JZZjZMWVrw=="
+  "resolved" "https://registry.npmjs.org/antlr4ts-cli/-/antlr4ts-cli-0.5.0-alpha.4.tgz"
+  "version" "0.5.0-alpha.4"
+
+"antlr4ts@^0.5.0-alpha.4":
+  "integrity" "sha512-WPQDt1B74OfPv/IMS2ekXAKkTZIHl88uMetg6q3OTqgFxZ/dxDXI0EWLyZid/1Pe6hTftyg5N7gel5wNAGxXyQ=="
+  "resolved" "https://registry.npmjs.org/antlr4ts/-/antlr4ts-0.5.0-alpha.4.tgz"
+  "version" "0.5.0-alpha.4"
 
 "anymatch@~3.1.2":
   "integrity" "sha512-P43ePfOAIupkguHUycrc4qJ9kz8ZiuOUijaETwX7THt0Y/GNK7v0aa8rY816xWjZ7rJdA5XdMcpVFTKMq+RvWg=="

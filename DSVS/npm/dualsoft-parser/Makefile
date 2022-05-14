@@ -1,7 +1,13 @@
 .ONESHELL: # Applies to every targets in the file!
 
 all:
-	npm run antlr4ts && tsc -b
+	npm run all
+#	npm run antlr4ts && tsc -b
+publish:
+	npm publish --access public
+
+unpublish:
+	npm unpublish @dualsoft/parser@1.0.0
 
 ant:
 	yarn antlr4ts

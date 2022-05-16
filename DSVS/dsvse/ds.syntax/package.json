@@ -7,7 +7,7 @@
         "type": "git",
         "url": "https://marketplace.visualstudio.com/items?itemName=dualsoft.ds"
     },
-    "version": "0.0.3",
+    "version": "0.0.4",
     "publisher": "dualsoft",
     "engines": {
         "vscode": "^1.66.0"

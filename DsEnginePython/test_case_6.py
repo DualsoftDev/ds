@@ -2,6 +2,7 @@ import os, time
 from ds_data_handler import signal_set, imparter
 from ds_data_handler import ds_signal_exchanger
 from ds_data_handler import thread_with_exception
+from ds_signal_handler import ds_causal
 
 if __name__ == "__main__":
     system_it = imparter()
@@ -159,12 +160,25 @@ if __name__ == "__main__":
     child_relay1.reset_signals.append("me.S2")
     child_relay1.end_signals.append("me.call_it_S2.Tag")
     # child_relay1.clear_signals.append("me.call_it_S2.Tag")
+    
+    child_relay1_h = ds_signal_exchanger()
+    impChildRelay1_h = imparter()
+    child_relay1_h.causal_type = ds_causal.H
+    child_relay1_h.connect("me.S2.child1_h.Relay", "me.S2", impSeg1)
+    child_relay1_h.connect("me.S2.child1_h.Relay", "me.S2.child1_h.Relay", impChildRelay1_h)
+    child_relay1_h.reset_signals.append("me.S2")
+    child_relay1_h.clear_signals.append("me.S2")
+    child_relay1_h.end_signals.append("me.call_it_S2.Tag")
+
     tag_call_it_S2.connect("me.call_it_S2.Tag", "me.S2.child1.Relay", impChildRelay1)
+    tag_call_it_S2.connect("me.call_it_S2.Tag", "me.S2.child1_h.Relay", impChildRelay1_h)
     tag_call_it_S2.connect("me.call_it_S2.Tag", "me.S2", impSeg1)
     tag_call_it_S2.start_signals.append("me.S2.child1.Relay")
+    tag_call_it_S2.start_signals.append("me.S2.child1_h.Relay")
 
     seg1.end_signals.append("me.S2.child1.Relay")
     seg1.clear_signals.append("me.S2.child1.Relay")
+    seg1.homing_signals.append("me.S2.child1_h.Relay")
 
 
     objs = [
@@ -174,7 +188,8 @@ if __name__ == "__main__":
         relay0, tag0, seg0,
         relay1, tag1, seg1,
         relay2, tag2, seg2,
-        child_relay0, child_relay1
+        child_relay0, child_relay1,
+        child_relay1_h
     ]
 
     thread = [

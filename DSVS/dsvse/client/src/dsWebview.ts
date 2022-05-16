@@ -1,10 +1,10 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as fs from "fs";
-import { parserFromDocument } from './parser/clientParser';
+import { parserFromDocument } from '@dualsoft/parser';
 import { getWebviewContentD3 } from './webview.d3';
 import { getWebviewContentCytoscape } from './webview.cytoscape';
-import { getElements } from './parser/cytoscapeVisitor';
+import { getElements } from '@dualsoft/parser/cytoscapeVisitor';
 
 // let myTextEditor:vscode.TextEditor | null = null;
 

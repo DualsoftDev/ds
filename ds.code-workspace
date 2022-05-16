@@ -2,6 +2,7 @@
   "folders": [
     { "path": "DSVS/dsvse" },
     { "path": "Doc" },
+    { "path": "DSVS/npm/dualsoft-parser" },
     { "path": "." }
   ],
   "settings": {

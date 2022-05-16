@@ -1,0 +1,18 @@
+!#import { Cylinder as A} from "F:\a.ds";
+!#import { Cylinder as A} from "F:\Git\ds-master\DSVS\ds-lang-samples\cylinder.ds";
+
+!#import {
+    interlock as A,
+    hello as B } from "./PathLib/template.dst";
+
+!#import {
+    interlock as A,
+    hello as B,
+} from "./PathLib/template.dst";
+
+!#import interlock as A from "./PathLib/template.dst";
+
+!#import { interlock as A, } from "./PathLib/template.dst";
+
+!#import { 저거 as 이거, } from "여기";
+

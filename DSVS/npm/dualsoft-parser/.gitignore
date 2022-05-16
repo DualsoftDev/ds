@@ -1,0 +1,8 @@
+node_modules
+.fake
+src/g4s/dsParser$*
+src/g4s/*.class
+src/g4s/*.java
+src/g4s/.antlr/*
+*.js
+*.js.map

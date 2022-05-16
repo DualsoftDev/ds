@@ -19,13 +19,13 @@ grammar ds;
 
 import dsFunctions;
 
-program: (system|comment)* EOF;
+program: (importStatement|system|comment)* EOF;
 
 
 system: sysProp id '=' sysBlock;    // [sys] Seg = {..}
 sysProp: '[' 'sys' ']';
 sysBlock
-    : LBRACE (task|flow|importStatement|listing|parenting|causal|call|acc|macro)* RBRACE
+    : LBRACE (task|flow|listing|parenting|causal|call|acc|macro)* RBRACE
     ;
 
 task
@@ -100,12 +100,19 @@ importFinal
     : '!#import' importAs 'from' quotedFilePath
     ;
 importStatement : importFinal SEIMCOLON;
+
 importAs
-    : IDENTIFIER 'as' IDENTIFIER
-    | LBRACE IDENTIFIER 'as' IDENTIFIER
-        (COMMA IDENTIFIER 'as' IDENTIFIER)* (COMMA)?
+    : importPhrase
+    | LBRACE importPhrase
+        (COMMA importPhrase)* (COMMA)?
         RBRACE
     ;
+
+importPhrase: importSystemName 'as' importAlias;
+importSystemName: IDENTIFIER;
+importAlias: IDENTIFIER;
+
+
 quotedFilePath
     : DQUOTE (~DQUOTE)* DQUOTE
     | SQUOTE (~SQUOTE)* SQUOTE

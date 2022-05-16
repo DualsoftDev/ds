@@ -1,10 +1,10 @@
 import { ParserRuleContext } from "antlr4ts";
 import { ErrorNode, ParseTree, ParseTreeWalker, TerminalNode } from "antlr4ts/tree";
-import { dsListener } from "../server-bundle/dsListener";
+import { dsListener } from "./dsListener";
 import { CallContext, CausalOperatorContext, CausalPhraseContext, CausalTokenContext,
          CausalTokensCNFContext, CausalTokensDNFContext, dsParser, FlowContext,
          ListingContext, SystemContext, TaskContext
-        } from "../server-bundle/dsParser"
+        } from "./dsParser"
         ;
 import { assert } from "console";
 import { enumerateChildren } from "./clientParser";

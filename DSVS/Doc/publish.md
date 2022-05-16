@@ -33,3 +33,8 @@ The Personal Access Token verification succeeded for the publisher 'dualsoft'.
 
     vsce publish  // 최신 버전 배포
 ```
+
+
+## 기타
+- vsix file 로부터 설치
+    - command pallete 에서 Install from VSIX 검색 > 클릭

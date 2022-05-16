@@ -1,0 +1,21 @@
+!#import {
+    Cylinder as A,
+    Cylinder as B,
+    Cylinder as C,
+} from "cylinder.ds";
+
+
+[sys] mySystem = {
+    [task] R = {
+      GRIP = {QGRIP ~ IGRIP}
+      RELEASE = {QRELEASE ~ IRELEASE}
+      WELD = {QWELD ~ _}
+    }
+    [flow] F = {
+        ADV = {A.ADV > B.ADV > C.ADV; }
+        RET = {C.RET > B.RET > A.RET; }
+        ADV <||> RET;
+        R.GRIP <||> R.RELEASE;
+        ADV > R.GRIP > @selfr(R.WELD) > R.RELEASE > RET;
+    }
+}

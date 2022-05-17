@@ -19,6 +19,9 @@
     },
     {
       "include": "#flows"
+    },
+    {
+      "include": "#macros"
     }
   ],
   "repository": {
@@ -156,6 +159,9 @@
             },
             {
               "include": "#macros"
+            },
+            {
+              "include": "#causals"
             },
             {
               "include": "#imports"
@@ -410,7 +416,36 @@
     "macros": {
       "patterns": [
         {
-          "name": "macro.ds"
+          "name": "access.ds",
+          "begin": "(#|@)\\s*([가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*)*\\s*(\\()",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.other.accessMacro.ds"
+            }
+          },
+          "end": "(\\))",
+          "patterns": [
+            {
+              "name": "punctuation.brace.separator.ds",
+              "match": ";"
+            },
+            {
+              "name": "variable.other.words.ds",
+              "match": "\\b[가-힣a-zA-Z_0-9]*\\b"
+            },
+            {
+              "include": "#segment"
+            },
+            {
+              "include": "#comments"
+            }
+          ]
+        },
+        {
+          "include": "#comments"
+        },
+        {
+          "include": "$self"
         }
       ]
     },
@@ -462,6 +497,9 @@
           },
           {
             "include": "#segment"
+          },
+          {
+            "include": "#macros"
           }
         ]
       }

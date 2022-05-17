@@ -2,9 +2,7 @@
  * DS language parsing/traversing 을 위한 코드
  */
 
-import { ANTLRInputStream, CharStream, CommonTokenStream } from 'antlr4ts';
-import { dsLexer } from './dsLexer';
-import { dsParser, MacroContext, ProgramContext, SystemContext } from './dsParser';
+import { dsParser, MacroContext, ProgramContext, SystemContext, parserFromDocument } from '@dualsoft/parser';
 // import { dsVisitor } from './dsVisitor';
 // import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
 //import { SimpleSysBlockContext, ComplexSysBlockContext } from './dsParser';
@@ -33,13 +31,6 @@ import {RecognitionException, Recognizer} from 'antlr4ts';
 	}
 }
 
-function parserFromDocument(text:string) {
-	// Create the lexer and parser
-	const inputStream = new ANTLRInputStream(text);
-	const lexer = new dsLexer(inputStream);
-	const tokenStream = new CommonTokenStream(lexer);
-	return new dsParser(tokenStream);
-}
 
 
 // // { https://segmentfault.com/a/1190000040176753/en

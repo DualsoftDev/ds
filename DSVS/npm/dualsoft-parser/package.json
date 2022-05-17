@@ -1,0 +1,24 @@
+{
+    "name": "@dualsoft/parser",
+    "version": "1.0.2",
+    "description": "language parser",
+    "main": "index.js",
+    "scripts": {
+        "all": "npm run antlr4ts && tsc -b",
+        "antlr4ts": "antlr4ts -visitor -o src ./src/g4s/ds.g4",
+        "publish": "npm publish --access public",
+        "unpublish": "npm unpublish @dualsoft/parser",
+        "clean": "rm -f allVisitor.js*  clientParser.js*  cytoscapeVisitor.js*  dsLexer.js*  dsListener.js*  dsParser.js*  dsVisitor.js* ds.interp ds.tokens src/ds.interp src/ds.tokens src/dsLexer.* src/dsListener.ts src/dsParser.ts src/dsVisitor.ts)",
+        "debug": "tsc --sourcemap"
+    },
+    "author": "dualsoft",
+    "license": "ISC",
+    "devDependencies": {
+        "@types/node": "^17.0.32",
+        "antlr4ts": "^0.5.0-alpha.4",
+        "antlr4ts-cli": "^0.5.0-alpha.4"
+    },
+    "dependencies": {
+        "log4js": "^6.4.6"
+    }
+}

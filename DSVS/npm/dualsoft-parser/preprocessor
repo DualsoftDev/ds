@@ -1,0 +1,31 @@
+#!/usr/bin/env node
+
+/* USAGE:
+ $ cat system-with-cylinders.ds | ./preprocessor
+ */
+
+
+const antlr = require('antlr4ts')
+const ds = require('./index')
+const fs = require('fs');
+const process = require("process")
+
+ds.logger.level = 'info';
+
+let text = ''
+process.stdin.on('data', data => {
+	text = text + data.toString()
+    // ds.logger.debug('DATA=', data.toString())
+
+	// ds.logger.debug('TEXT=', text)
+
+	const preprocessed = ds.preprocessDocument(text)
+	ds.logger.debug('------ preprocessed result: ------');
+	console.log(preprocessed)	
+})
+
+
+// grab provided args.
+const [,, ...args] = process.argv
+//console.log(`Args=${args}`)
+

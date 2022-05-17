@@ -10,9 +10,25 @@
 # 	cp -r dsvse $(DIR)/
 
 clean:
-	rm -rf dsvse/client/out
-	rm -rf dsvse/server/out
+	cd dsvse
+	make clean
 	
+all:
+	cd dsvse
+	make all
+
+tsc:
+	cd dsvse
+	make tsc
+
+g4:
+	cd dsvse
+	make g4
+	
+esbuild:
+	cd dsvse
+	make esbuild
+
 choco:
 	choco install nodejs.install
 	choco install yarn
@@ -22,15 +38,10 @@ choco:
 	npm install antlr4ts-cli
 
 
-g4:
-	pushd dsvse/ds.syntax/syntaxes
-	cp ds.JSON-tmLanguage ds.tmLanguage.json
-	popd
 
-	cd dsvse/server
-	yarn antlr4ts -visitor -o src src/ds.g4
-	cp src/ds*.ts ../client/src/server-bundle/
 
-esbuild:
-	cd dsvse
-	npm run esbuild
+#	cd dsvse/server
+#	yarn antlr4ts -visitor -o src src/ds.g4
+#	mkdir ../client/src/server-bundle/
+#	cp src/ds*.ts ../client/src/server-bundle/
+

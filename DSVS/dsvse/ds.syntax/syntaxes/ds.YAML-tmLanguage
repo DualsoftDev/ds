@@ -20,6 +20,7 @@ patterns:
 - include: '#systems'
 - include: '#tasks'
 - include: '#flows'
+- include: '#macros'
 
 repository:
   comments: # Inline (//) and block (/* */) comments. Comments can happen anywhere.
@@ -86,7 +87,7 @@ repository:
         - include: '#accessDefs'
         - include: '#callSegmentDefs'
         - include: '#macros'    
-        #- include: '#causals'
+        - include: '#causals'
         - include: '#imports'
       - comment: single-line tasks
         name: tasks.single.ds
@@ -215,18 +216,22 @@ repository:
       - include: '#comments'
 
 
-
   macros:
     patterns:
-    - name: macro.ds
-      #begin: \s*(!#|@)\s*([가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*) (\() ([가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*) (\))
-      #beginCaptures:
-      #  '1': {name: keyword.other.macro.ds}
-      #  '2': {name: variable.other}
-      #  '3': {name: keyword.other.macro.ds}
-      #  '4': {name: variable.other}
-      #  '5': {name: keyword.other.macro.ds}
-      #end: ';'
+    - name: access.ds
+      begin: (#|@)\s*([가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*)*\s*(\()
+      beginCaptures:
+        '1': {name: keyword.other.accessMacro.ds}      
+      end: (\))
+      patterns:
+        - name: punctuation.brace.separator.ds
+          match: ;
+        - name: 'variable.other.words.ds'
+          match: '\b[가-힣a-zA-Z_0-9]*\b'
+        - include: '#segment'
+        - include: '#comments'
+    - include: '#comments'
+    - include: $self
 
   segment:
     patterns:
@@ -254,6 +259,7 @@ repository:
         match: '[^\s\]]'
       - include: '#comments'
       - include: '#segment'
+      - include: '#macros'
 
 
 

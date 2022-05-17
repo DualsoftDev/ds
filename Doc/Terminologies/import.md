@@ -1,5 +1,113 @@
 # import
+
 - import keyword 구분: function 시작(`#`)과 구분: `!#import`
+- system 단위로만 import 지원
+
+
+## my system (importor)
+
+``` text
+!#import {
+  Cylinder as A,
+  Cylinder as B,
+  Cylinder as C,
+} from "cylinder.ds";
+
+[sys] mySystem = {
+    [task] R = {
+      GRIP = {QGRIP ~ IGRIP}
+      RELEASE = {QRELEASE ~ IRELEASE}
+      WELD = {QWELD ~ _}
+    }
+    [flow] F = {
+        ADV = {A.ADV > B.ADV > C.ADV; }
+        RET = {C.RET > B.RET > A.RET; }
+        ADV <||> RET;
+        R.GRIP <||> R.RELEASE;
+        ADV > R.GRIP > @selfr(R.WELD) > R.RELEASE > RET;
+    }
+}
+```
+
+## cylinder (exporter: cylinder.ds)
+
+``` text
+[sys]Cylinder = {
+    [task]T = {
+        ADV = {QADV ~ IADV}
+        RET = {QRET ~ IRET}
+    }
+
+    [flow]F = {
+        T.ADV <||> T.RET;
+    }    
+}
+```
+
+## generated my system
+
+``` text
+// imported from Cylinder
+[sys] A = {
+    [task]T = {
+        ADV = {QADV ~ IADV}
+        RET = {QRET ~ IRET}
+    }
+
+    [flow]F = {
+        T.ADV <||> T.RET;
+    }    
+}
+
+// imported from Cylinder
+[sys] B = {
+    [task]T = {
+        ADV = {QADV ~ IADV}
+        RET = {QRET ~ IRET}
+    }
+
+    [flow]F = {
+        T.ADV <||> T.RET;
+    }    
+}
+
+// imported from Cylinder
+[sys] C = {
+    [task]T = {
+        ADV = {QADV ~ IADV}
+        RET = {QRET ~ IRET}
+    }
+
+    [flow]F = {
+        T.ADV <||> T.RET;
+    }    
+}
+
+[sys] mySystem = {
+    [task] R = {
+      GRIP = {QGRIP ~ IGRIP}
+      RELEASE = {QRELEASE ~ IRELEASE}
+      WELD = {QWELD ~ _}
+    }
+    [flow] F = {
+        ADV = {A.ADV > B.ADV > C.ADV; }
+        RET = {C.RET > B.RET > A.RET; }
+        ADV <||> RET;
+        R.GRIP <||> R.RELEASE;
+        ADV > R.GRIP > @selfr(R.WELD) > R.RELEASE > RET;
+    }
+}
+```
+
+
+
+
+
+
+
+
+<!-- 
+
 - 파일 확장자 `.dst` 추가
 - 속성 keyword `syst` 추가
 ```
@@ -275,5 +383,5 @@ Call Dummy List
 ```
 
 
-
+ -->
 

@@ -1,7 +1,7 @@
 import { ParserRuleContext } from "antlr4ts";
 import { ErrorNode, ParseTree, ParseTreeWalker, TerminalNode } from "antlr4ts/tree";
-import { dsListener } from "../server-bundle/dsListener";
-import { dsParser } from "../server-bundle/dsParser";
+import { dsListener, dsParser } from './index';
+
 
 
 export interface ParserResult
@@ -56,4 +56,5 @@ export function getAllParseRules(parser:dsParser) : ParseTree[]
     console.log(`Total ${r.rules.length} parser rules found.`);
     return r.rules;
 }
+
 

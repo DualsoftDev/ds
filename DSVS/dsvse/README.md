@@ -73,6 +73,10 @@ Update parser, import, function
 
 ### 1.0.19
 - Update server for [sys]
+
+
+### 1.0.23
+- Fixed ds view bug and macros syntax
 -----------------------------------------------------------------------------------------------------------
 ## Following extension guidelines
 

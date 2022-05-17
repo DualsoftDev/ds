@@ -1,3 +1,4 @@
+from json import dumps
 import time
 import copy
 import ctypes 
@@ -12,6 +13,7 @@ from ds_signal_handler import get_start_signals, get_end_signals
 from ds_signal_handler import get_reset_signals, get_clear_signals
 from ds_signal_handler import get_origin_status, get_type
 from functools import reduce
+from ds_engine_producer import send_data
 
 class imparter(Observable):
     def notify_status(self, _id, _onoff_status:signal_status):
@@ -259,6 +261,14 @@ class ds_signal_exchanger(IObserver):
             f"{self.name}[{_id}] : "\
             f"{self.calc_now_status(self.signal_onoff)}"\
             f" - {datetime.fromtimestamp(t)}"
+        )
+        send_data(
+            {
+                "name" : f"{self.name}",
+                "signal" : dumps(self.signal_onoff.__dict__),
+                "status" : f"{self.calc_now_status(self.signal_onoff)}",
+                "time" : f"{datetime.fromtimestamp(t)}"
+            }
         )
         for parent in self.imparter:
             self.imparter[parent].notify_status(

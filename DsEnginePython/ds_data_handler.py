@@ -1,3 +1,4 @@
+from json import dumps
 import time
 import copy
 import ctypes 
@@ -6,12 +7,13 @@ from typing import List, Dict
 from datetime import datetime
 from observer_threading import IObserver
 from observer_threading import Observable
-from ds_signal_handler import ds_status, ds_object, ds_system_flag, get_origin_status
+from ds_signal_handler import ds_causal, ds_status, ds_object, ds_system_flag
 from ds_signal_handler import signal_status, signal_set
 from ds_signal_handler import get_start_signals, get_end_signals
 from ds_signal_handler import get_reset_signals, get_clear_signals
-from ds_signal_handler import get_type
+from ds_signal_handler import get_origin_status, get_type
 from functools import reduce
+from ds_engine_producer import send_data
 
 class imparter(Observable):
     def notify_status(self, _id, _onoff_status:signal_status):
@@ -27,9 +29,11 @@ class ds_signal_exchanger(IObserver):
         self.reset_signals:List[str] = []
         self.end_signals:List[str] = []
         self.clear_signals:List[str] = []
+        self.homing_signals:List[str] = []
         self.origin_signals:List[str] = []
         self.start_points:List[int] = []
         self.signal_onoff = signal_set()
+        self.causal_type = ds_causal.G
         self.status = ds_status.R
         self.event = threading.Event()
         self.thread_id = None
@@ -64,37 +68,55 @@ class ds_signal_exchanger(IObserver):
 
     def get_target_signals(self, _my_type, _target_signals, _signal_func):
         return [
-            _signal_func(self.name, _my_type, name, self.in_signals[name])
+            _signal_func((self.name, _my_type, name, self.in_signals[name]))
             for name in _target_signals
             if name in self.in_signals
         ]
 
     def origin_checker(self, _my_type):
-        origin = True
         if len(self.origin_signals) > 0:
-            # print(f"now status ---- {self.get_target_signals(_my_type, self.origin_signals, get_origin_status)}")
+            # print(
+            #   f"now status ---- "
+            #   f"{self.get_target_signals(_my_type, self.origin_signals, get_origin_status)}"
+            # )
             theta = reduce(
                 lambda num, bin: (num<<1) + int(bin), \
                 self.get_target_signals(_my_type, self.origin_signals, get_origin_status)
             )
             # print(f"{self.name} : ----------- theta : {theta}")
             if not theta in self.start_points:
-                origin = False
-        return origin
+                return False
+        return True
 
     def estimate(self):
         my_type = get_type(self.name)
         new_onoff_signal = copy.deepcopy(self.signal_onoff)
         if new_onoff_signal == signal_set(): # Ready
             try:
-                res = self.get_target_signals(my_type, self.start_signals, get_start_signals)
+                res = False
+                
+                if self.causal_type == ds_causal.G:
+                    res = self.get_target_signals(my_type, self.start_signals, get_start_signals)
+                else:
+                    res = self.get_target_signals(my_type, self.reset_signals, get_reset_signals)
+                    # print(self.name, "=================", res, self.reset_signals)
 
                 # RELAY : all
                 # TAG & PORT : any
                 start_checker = False
                 now_type = get_type(self.name)
                 if now_type == ds_object.Relay:
-                    start_checker = len(res) > 0 and all(res) and self.system_flags.always_on
+                    if self.causal_type == ds_causal.G:
+                        start_checker = len(res) > 0 and all(res) and self.system_flags.always_on
+                    else:
+                        finished = False
+                        tag_name = copy.deepcopy(self.name)
+                        tag_name = tag_name.replace("Relay", "Tag")
+                        if tag_name in self.in_signals and\
+                            self.in_signals[tag_name].finish == True:
+                            finished = True
+                        finish_checker = self.system_flags.always_on and finished
+
                 elif now_type == ds_object.Remote:
                     going_checker = False
                     tag_name = copy.deepcopy(self.name)
@@ -102,7 +124,6 @@ class ds_signal_exchanger(IObserver):
                     if tag_name in self.in_signals and\
                         self.in_signals[tag_name].start == True:
                         going_checker = True
-
                     start_checker = self.system_flags.always_on and going_checker
                 elif now_type == ds_object.Segment:
                     start_checker = \
@@ -111,11 +132,18 @@ class ds_signal_exchanger(IObserver):
                 else:
                     start_checker = len(res) > 0 and any(res) and self.system_flags.always_on
 
-                if start_checker == True:
-                    new_onoff_signal.start = True
+                if self.causal_type == ds_causal.G:
+                    if start_checker == True:
+                        new_onoff_signal.start = True
 
-                    # need condition of macro for push type
-                    self.truncate_signals(new_onoff_signal, self.start_signals)
+                        # need condition of macro for push type
+                        self.truncate_signals(new_onoff_signal, self.start_signals)
+                else:
+                    if finish_checker == True:
+                        new_onoff_signal.end = True
+                        new_onoff_signal.start = False
+                    elif len(res) > 0 and all(res) and self.system_flags.always_on:
+                        new_onoff_signal.start = True
             except Exception as ex:
                 # print(self.name, "has start error", ex)
                 pass
@@ -130,19 +158,24 @@ class ds_signal_exchanger(IObserver):
                 pass
         elif new_onoff_signal.reset == False and new_onoff_signal.end == True: # Finish
             try:
-                res = self.get_target_signals(my_type, self.reset_signals, get_reset_signals)
-                if len(res) > 0 and any(res) and self.system_flags.always_on:
-                    new_onoff_signal.reset = True
-                    new_onoff_signal.start = False
+                if self.causal_type == ds_causal.G:
+                    res = self.get_target_signals(my_type, self.reset_signals, get_reset_signals)
+                    if len(res) > 0 and any(res) and self.system_flags.always_on:
+                        new_onoff_signal.reset = True
+                        new_onoff_signal.start = False
 
-                # For force clear by a remote tag when my type is a tag
-                if my_type == ds_object.Tag:
+                    # For force clear by a remote tag when my type is a tag
+                    if my_type == ds_object.Tag:
+                        res = self.get_target_signals(my_type, self.clear_signals, get_clear_signals)
+                        if len(res) > 0 and all(res) and self.system_flags.always_on:
+                            new_onoff_signal = signal_set()
+
+                        # need condition of macro for push type
+                        # self.truncate_signals(new_onoff_signal, self.reset_signals)
+                else:
                     res = self.get_target_signals(my_type, self.clear_signals, get_clear_signals)
                     if len(res) > 0 and all(res) and self.system_flags.always_on:
                         new_onoff_signal = signal_set()
-
-                    # need condition of macro for push type
-                    # self.truncate_signals(new_onoff_signal, self.reset_signals)
             except Exception as ex:
                 # print(self.name, "has reset error", ex)
                 pass
@@ -151,7 +184,13 @@ class ds_signal_exchanger(IObserver):
                 res = self.get_target_signals(my_type, self.clear_signals, get_clear_signals)
                 if len(res) > 0 and all(res) and self.system_flags.always_on:
                     if my_type == ds_object.Segment:
-                        if self.origin_checker(my_type):    
+                        homing_res = True
+                        if len(self.homing_signals) > 0:
+                            homing_res = \
+                                self.get_target_signals(
+                                    my_type, self.homing_signals, get_end_signals
+                                )
+                        if self.origin_checker(my_type) and homing_res:
                             new_onoff_signal = signal_set()
                     else:
                         new_onoff_signal = signal_set()
@@ -222,6 +261,14 @@ class ds_signal_exchanger(IObserver):
             f"{self.name}[{_id}] : "\
             f"{self.calc_now_status(self.signal_onoff)}"\
             f" - {datetime.fromtimestamp(t)}"
+        )
+        send_data(
+            {
+                "name" : f"{self.name}",
+                "signal" : dumps(self.signal_onoff.__dict__),
+                "status" : f"{self.calc_now_status(self.signal_onoff)}",
+                "time" : f"{datetime.fromtimestamp(t)}"
+            }
         )
         for parent in self.imparter:
             self.imparter[parent].notify_status(

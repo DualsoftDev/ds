@@ -1,6 +1,10 @@
-
 from enum import Enum
 from dataclasses import dataclass
+
+# Causal type for relaying
+class ds_causal(Enum):
+    G = 0
+    H = 1
 
 # Status types of segment
 class ds_status(Enum):
@@ -51,11 +55,15 @@ def get_type(_name):
     else:
         return ds_object.Segment
 
-def get_start_signals(
-    _,
-    _my_type:ds_object, 
-    _target_name:str, 
-    _object:signal_set):
+# params[0] : my_name
+# params[1] : my_type
+# params[2] : target_name
+# params[3] : object
+# params[4] : causal_type
+def get_start_signals(params):
+    _, _my_type, _target_name,\
+    _object = params 
+
     obj_type = get_type(_target_name)
     if _my_type == ds_object.Relay:
         if obj_type == ds_object.Relay or \
@@ -72,11 +80,10 @@ def get_start_signals(
         if obj_type == ds_object.Tag:
             return _object.start
 
-def get_reset_signals(
-    _my_name:str,
-    _my_type:ds_object, 
-    _target_name:str, 
-    _object:signal_set):
+def get_reset_signals(params):
+    _my_name, _my_type, _target_name,\
+    _object = params 
+
     obj_type = get_type(_target_name)
     if _my_type == ds_object.Relay or \
         _my_type == ds_object.Remote:
@@ -98,11 +105,9 @@ def get_reset_signals(
         if obj_type == ds_object.Tag:
             return _object.reset
 
-def get_end_signals( 
-    _,
-    _my_type:ds_object, 
-    _target_name:str, 
-    _object:signal_set):
+def get_end_signals(params):
+    _, _my_type, _target_name, _object = params 
+
     obj_type = get_type(_target_name)
     if _my_type == ds_object.Relay or \
         _my_type == ds_object.Remote:
@@ -117,11 +122,9 @@ def get_end_signals(
         if obj_type == ds_object.Relay:
             return (not _object.reset) & _object.end
 
-def get_clear_signals(
-    _,
-    _my_type:ds_object, 
-    _target_name:str, 
-    _object:signal_set):
+def get_clear_signals(params):
+    _, _my_type, _target_name, _object = params 
+
     obj_type = get_type(_target_name)
     if _my_type == ds_object.Tag:
         if obj_type == ds_object.Segment:
@@ -132,15 +135,15 @@ def get_clear_signals(
         _my_type == ds_object.Remote:
         if obj_type == ds_object.Tag:
             return _object == signal_set()
+        elif obj_type == ds_object.Segment:
+            return _object == signal_set()
     else:
         if obj_type == ds_object.Relay:
             return _object == signal_set()
 
-def get_origin_status(
-    _,
-    _my_type:ds_object, 
-    _target_name:str,
-    _object:signal_set):
+def get_origin_status(params):
+    _, _my_type, _target_name, _object = params 
+
     obj_type = get_type(_target_name)
     if _my_type == ds_object.Segment:
         if obj_type == ds_object.Tag:

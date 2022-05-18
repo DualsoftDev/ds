@@ -1,53 +1,11 @@
 import os, time
-from ds_data_handler import signal_set, imparter
+from ds_data_handler import imparter
 from ds_data_handler import ds_signal_exchanger
 from ds_data_handler import thread_with_exception
-from ds_signal_handler import ds_causal
+from ds_signal_handler import ds_causal, signal_set
+from ds_engine_consumer import get_data
 
 if __name__ == "__main__":
-    system_it = imparter()
-
-    relay_it_S1 = ds_signal_exchanger()
-    imp_relay_it_S1 = imparter()
-    tag_it_S1 = ds_signal_exchanger()
-    imp_tag_it_S1 = imparter()
-    it_S1 = ds_signal_exchanger()
-    
-    relay_it_S1.connect("it.S1.Remote", "it", system_it)
-    relay_it_S1.connect("it.S1.Remote", "it.S1.Remote", imp_relay_it_S1)
-    relay_it_S1.end_signals.append("it.S1.Tag")
-    relay_it_S1.reset_signals.append("it.S2.Remote")
-    relay_it_S1.clear_signals.append("it.S1.Tag")
-    tag_it_S1.connect("it.S1.Tag", "it.S1.Remote", imp_relay_it_S1)
-    tag_it_S1.connect("it.S1.Tag", "it.S1.Tag", imp_tag_it_S1)
-    tag_it_S1.reset_signals.append("it.S1.Remote")
-    tag_it_S1.end_signals.append("it.S1")
-    tag_it_S1.clear_signals.append("it.S1")
-    it_S1.connect("it.S1", "it.S1.Tag", imp_tag_it_S1)
-    it_S1.start_signals.append("it.S1.Tag")
-    it_S1.reset_signals.append("it.S1.Tag")
-    
-    relay_it_S2 = ds_signal_exchanger()
-    imp_relay_it_S2 = imparter()
-    tag_it_S2 = ds_signal_exchanger()
-    imp_tag_it_S2 = imparter()
-    it_S2 = ds_signal_exchanger()
-    
-    relay_it_S2.connect("it.S2.Remote", "it", system_it)
-    relay_it_S2.connect("it.S2.Remote", "it.S2.Remote", imp_relay_it_S2)
-    relay_it_S2.end_signals.append("it.S2.Tag")
-    relay_it_S2.reset_signals.append("it.S1.Remote")
-    relay_it_S2.clear_signals.append("it.S2.Tag")
-    tag_it_S2.connect("it.S2.Tag", "it.S2.Remote", imp_relay_it_S2)
-    tag_it_S2.connect("it.S2.Tag", "it.S2.Tag", imp_tag_it_S2)
-    tag_it_S2.reset_signals.append("it.S2.Remote")
-    tag_it_S2.end_signals.append("it.S2")
-    tag_it_S2.clear_signals.append("it.S2")
-    it_S2.connect("it.S2", "it.S2.Tag", imp_tag_it_S2)
-    it_S2.start_signals.append("it.S2.Tag")
-    it_S2.reset_signals.append("it.S2.Tag")
-
-
     system_me = imparter()
 
     # call
@@ -55,16 +13,12 @@ if __name__ == "__main__":
     imp_tag_call_it_S1 = imparter()
     tag_call_it_S1.connect("me.call_it_S1.Tag", "me.call_it_S1.Tag", imp_tag_call_it_S1)
     tag_call_it_S1.end_signals.append("it.S1.Tag")
-    tag_it_S1.connect("it.S1.Tag", "me.call_it_S1.Tag", imp_tag_call_it_S1)
-    tag_it_S1.start_signals.append("me.call_it_S1.Tag")
     tag_call_it_S1.clear_signals.append("it.S1.Tag")
 
     tag_call_it_S2 = ds_signal_exchanger()
     imp_tag_call_it_S2 = imparter()
     tag_call_it_S2.connect("me.call_it_S2.Tag", "me.call_it_S2.Tag", imp_tag_call_it_S2)
     tag_call_it_S2.end_signals.append("it.S2.Tag")
-    tag_it_S2.connect("it.S2.Tag", "me.call_it_S2.Tag", imp_tag_call_it_S2)
-    tag_it_S2.start_signals.append("me.call_it_S2.Tag")
     tag_call_it_S2.clear_signals.append("it.S2.Tag")
 
     relay0 = ds_signal_exchanger()
@@ -178,14 +132,14 @@ if __name__ == "__main__":
     seg1.clear_signals.append("me.S2.child1.Relay")
     seg1.homing_signals.append("me.S2.child1_h.Relay")
 
-    exchanger_dict = {}
-    exchanger_dict["it.S1.Remote"] = relay_it_S1
-    exchanger_dict["it.S1.tag"] = tag_it_S1
-    exchanger_dict["it.S1"] = it_S1
-    exchanger_dict["it.S2.Remote"] = relay_it_S2
-    exchanger_dict["it.S2.tag"] = tag_it_S2
-    exchanger_dict["it.S2"] = it_S2
     
+    tag_it_S1 = ds_signal_exchanger()
+    tag_it_S1.connect("it.S1.Tag", "me.call_it_S1.Tag", imp_tag_call_it_S1)
+
+    tag_it_S2 = ds_signal_exchanger()
+    tag_it_S2.connect("it.S2.Tag", "me.call_it_S2.Tag", imp_tag_call_it_S2)
+
+    exchanger_dict = {}
     exchanger_dict["me.call_it_S1.Tag"] = tag_call_it_S1
     exchanger_dict["me.call_it_S2.Tag"] = tag_call_it_S2
 
@@ -202,6 +156,11 @@ if __name__ == "__main__":
     exchanger_dict["me.S2.child0.Relay"] = child_relay0
     exchanger_dict["me.S2.child1.Relay"] = child_relay1
     exchanger_dict["me.S2.child1_h.Relay"] = child_relay1_h
+    
+    exchanger_dict["it.S1.Tag"] = tag_it_S1
+    exchanger_dict["it.S2.Tag"] = tag_it_S2
+    
+    outer = ["it.S1.Tag", "it.S2.Tag"]
 
     thread = {
         obj[0] : thread_with_exception([obj[1]])
@@ -218,15 +177,8 @@ if __name__ == "__main__":
     time.sleep(3.0)
     print("initialize finished")
 
-    while True:
-        if thread["me.S1.tag"].client.signal_onoff == signal_set(False, False, False) and\
-            not thread["me.S2.Relay"].client.signal_onoff == signal_set(True, False, False):
-            # print("=====================================")
-            time.sleep(0.5)
-            thread["me.S1.tag"].client.signal_onoff = signal_set(True, False, False)
-            thread["me.S1.tag"].client.event.set()
+    thread["me.S1.tag"].client.signal_onoff = signal_set(True, False, False)
+    thread["me.S1.tag"].client.event.set()
+    get_data("segments",thread, outer)
 
-    # thread[9].client.signal_onoff = signal_set(True, False, False)
-    # thread[9].client.event.set()
-
-# test case-6
+# test case-6 part of segments

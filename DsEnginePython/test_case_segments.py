@@ -130,23 +130,25 @@ if __name__ == "__main__":
     child_relay1.end_signals["me.S2.child1.Relay"] = ds_status.G
     child_relay1.clear_signals["me.S2.child1.Relay"] = ds_status.H
     
-    # child_relay1_h = ds_signal_exchanger()
-    # impChildRelay1_h = imparter()
-    # child_relay1_h.causal_type = ds_causal.H
-    # child_relay1_h.connect("me.S2.child1_h.Relay", "me.S2", impSeg1)
-    # child_relay1_h.connect("me.S2.child1_h.Relay", "me.S2.child1_h.Relay", impChildRelay1_h)
-    # child_relay1_h.start_signals["me.S2"] = ds_status.H
-    # child_relay1_h.end_signals["it.S2.Tag"] = ds_status.F
-    # child_relay1_h.clear_signals.append("me.S2")
+    child_relay1_h = ds_signal_exchanger()
+    impChildRelay1_h = imparter()
+    child_relay1_h.connect("me.S2.child1_h.Relay", "me.S2", impSeg1)
+    child_relay1_h.connect("me.S2.child1_h.Relay", "me.S2.child1_h.Relay", impChildRelay1_h)
+    child_relay1_h.start_signals["me.S2"] = ds_status.H
+    child_relay1_h.end_signals["me.S2.child1_h.Relay"] = ds_status.G
+    child_relay1_h.end_signals["it.S2.Tag"] = ds_status.F
+    child_relay1_h.reset_signals["me.S2"] = ds_status.R
+    child_relay1_h.clear_signals["me.S2.child1_h.Relay"] = ds_status.H
     
-    # tag_call_it_S2.connect("start_it_S2.Tag", "me.S2.child1_h.Relay", impChildRelay1_h)
+    tag_call_it_S2.connect("start_it_S2.Tag", "me.S2.child1_h.Relay", impChildRelay1_h)
 
     tag_call_it_S2.connect("start_it_S2.Tag", "me.S2.child1.Relay", impChildRelay1)
     tag_call_it_S2.start_signals["me.S2.child1.Relay"] = ds_status.G
+    tag_call_it_S2.start_signals["me.S2.child1_h.Relay"] = ds_status.G
 
     seg1.end_signals["me.S2.child1.Relay"] = ds_status.F
     seg1.clear_signals["me.S2.child1.Relay"] = ds_status.R
-    # seg1.homing_signals.append("me.S2.child1_h.Relay")
+    seg1.homing_signals["me.S2.child1_h.Relay"] = ds_status.F
     
     tag_it_S1 = ds_signal_exchanger()
     tag_it_S1.connect("it.S1.Tag", "me.S2.child0.Relay", impChildRelay0)
@@ -155,6 +157,7 @@ if __name__ == "__main__":
 
     tag_it_S2 = ds_signal_exchanger()
     tag_it_S2.connect("it.S2.Tag", "me.S2.child1.Relay", impChildRelay1)
+    tag_it_S2.connect("it.S2.Tag", "me.S2.child1_h.Relay", impChildRelay1_h)
     tag_it_S2.connect("it.S2.Tag", "me.S2", impSeg1)
     child_relay1.end_signals["it.S2.Tag"] = ds_status.F
 
@@ -174,7 +177,7 @@ if __name__ == "__main__":
     
     exchanger_dict["me.S2.child0.Relay"] = child_relay0
     exchanger_dict["me.S2.child1.Relay"] = child_relay1
-    # exchanger_dict["me.S2.child1_h.Relay"] = child_relay1_h
+    exchanger_dict["me.S2.child1_h.Relay"] = child_relay1_h
     
     exchanger_dict["it.S1.Tag"] = tag_it_S1
     exchanger_dict["it.S2.Tag"] = tag_it_S2

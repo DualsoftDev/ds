@@ -1,0 +1,9 @@
+.\kafka_2.13-3.1.1\bin\windows로 이동
+새 cmd창(zookeeper 실행)
+zookeeper-server-start.bat ..\\..\\config\\zookeeper.properties
+
+새 cmd창(서버 실행)
+kafka-server-start.bat ..\\..\\config\\server.properties
+
+새 cmd창(서버 내용 중계)
+kafka-console-consumer.bat --bootstrap-server localhost:9092 --topic test

@@ -1,15 +1,14 @@
 from ds_data_handler import signal_set
-from ds_signal_handler import calc_now_status, ds_status
 from kafka import KafkaConsumer
 from json import loads
 
-# 'localhost:9092'
+# default address - 'localhost:9092'
 class consumer_set():
     def __init__(self, _target_server, _group_id):
         self.group_id = _group_id
         self.server =_target_server
         self.consumer = KafkaConsumer(
-            'test',
+            'ds_engine',
             bootstrap_servers = [self.server],
             auto_offset_reset = 'latest',
             enable_auto_commit = True,
@@ -30,13 +29,12 @@ class consumer_set():
             key = dic['name']
             signal = loads(dic['signal'])
             now_id = dic['group_id']
-            # print(f"{_name} --------- {dic['name']} : {signal['start']}, {signal['reset']}, {signal['end']}")
             if not now_id == self.group_id:
                 if key in _targets:
                     now_signal = signal_set(signal['start'], signal['reset'], signal['end'])
                     if not now_signal == _threads[key].client.signal_onoff:
                         _threads[key].client.signal_onoff = \
                             signal_set(signal['start'], signal['reset'], signal['end'])
+                        _threads[key].client.local_broadcast = True
                         _threads[key].client.event.set()
-                # print(f"{dic['name']} : {signal['start']}, {signal['reset']}, {signal['end']}")
         print('[end] get consumer list')

@@ -20,7 +20,8 @@ class Observable:
         with self.lock:
             self.observers.remove(observer)
 
-    def call_update(self, _observer:IObserver, _id, _onoff_status):
+    def call_update(self, _observer:IObserver, \
+        _id, _onoff_status):
         _observer.update(_id, _onoff_status)
 
     def notify(self, _id, _onoff_status):

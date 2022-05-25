@@ -3,11 +3,10 @@ from dataclasses import dataclass
 
 # Status types of segment
 class ds_status(Enum):
-    D = 0 # don't care
-    R = 1 # ready
-    G = 2 # going
-    F = 3 # finish
-    H = 4 # homing
+    R = 0 # ready
+    G = 1 # going
+    F = 2 # finish
+    H = 3 # homing
 
 # Object type
 class ds_object(Enum):
@@ -60,8 +59,8 @@ def get_type(_name):
     else:
         return ds_object.Segment
 
-# params[0] : object
-# params[1] : target_status
+# params[0] : object:signal_set
+# params[1] : target_status:ds_status
 def compare_signals(_params):
     object, target_signal = _params
     return calc_now_status(object) == target_signal

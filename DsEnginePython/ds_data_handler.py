@@ -24,6 +24,7 @@ class ds_signal_exchanger(IObserver):
     def __init__(self):
         self.system_flags:ds_system_flag = ds_system_flag
         self.name:str = None
+        self.updated_by:str = None
         self.imparter:Dict[str, imparter] = {}
         self.in_signals:Dict[str, signal_set] = {}
         self.start_signals:Dict[str, ds_status] = {}
@@ -34,12 +35,26 @@ class ds_signal_exchanger(IObserver):
         self.clear_signals:Dict[str, signal_set] = {}
         self.homing_signals:Dict[str, signal_set] = {}
         self.origin_signals:List[str] = []
+        self.white_list:List[str] = []
         self.start_points:List[int] = []
-        self.signal_onoff = signal_set()
-        self.status = ds_status.R
+        self.signal_onoff:signal_set = signal_set()
+        self.status:ds_status = ds_status.R
+        self.take_time:float = 0.0
+        self.consumer_group:int = -1
+        self.local_broadcast:bool = False
         self.event = threading.Event()
         self.thread_id = None
-        self.consumer_group = -1
+
+    def list_extractor(self, _target):
+        return [name for name in _target]
+
+    def setting_up(self):
+        self.white_list.extend(self.list_extractor(self.start_signals))
+        self.white_list.extend(self.list_extractor(self.end_signals))
+        self.white_list.extend(self.list_extractor(self.reset_signals))
+        self.white_list.extend(self.list_extractor(self.clear_signals))
+        self.white_list.extend(self.list_extractor(self.homing_signals))
+        self.white_list.extend(self.list_extractor(self.origin_signals))
 
     def truncate_signals(self, _new_signal:signal_set, _signals):
         for signal in _signals:
@@ -66,15 +81,10 @@ class ds_signal_exchanger(IObserver):
     def origin_checker(self):
         try:
             if len(self.origin_signals) > 0:
-                # print(
-                #     f"now status ---- "
-                #     f"{self.get_target_signals(self.origin_signals, get_origin_status)}"
-                # )
                 theta = reduce(
                     lambda num, bin: (num<<1) + int(bin), \
                     self.get_target_signals(self.origin_signals, get_origin_status)
                 )
-                # print(f"{self.name} : ----------- theta : {theta}")
                 if not theta in self.start_points:
                     return False
             return True
@@ -119,9 +129,7 @@ class ds_signal_exchanger(IObserver):
             if len(res) > 0 and self.system_flags.always_on and all(res):
                 _new_onoff_signal.end = True
                 _new_onoff_signal.start = False
-                # print(f"{self.name} -- going to finish : {res} in {self.in_signals}")
             
-            # print(self.thread_id, self.name, _new_onoff_signal)
             return _new_onoff_signal
         except Exception as ex:
             print(self.name, "has end error", ex)
@@ -138,7 +146,7 @@ class ds_signal_exchanger(IObserver):
                 _new_onoff_signal.start = False
 
                 # need condition of macro for push type
-                self.truncate_signals(_new_onoff_signal, self.reset_signals)
+                # self.truncate_signals(_new_onoff_signal, self.reset_signals)
 
             return _new_onoff_signal
         except Exception as ex:
@@ -183,10 +191,16 @@ class ds_signal_exchanger(IObserver):
             return self.check_homing_to_ready(my_type, new_onoff_signal)
 
     def update(self, _id, _onoff_status:signal_status):
+        if not _onoff_status.name in self.white_list:
+            return
+            
         self.in_signals[_onoff_status.name] = copy.deepcopy(_onoff_status.signal)
+        self.updated_by = _onoff_status.name
+
         estimated = self.estimate()
         if not self.signal_onoff == estimated:
             self.signal_onoff = copy.deepcopy(estimated)
+            time.sleep(self.take_time)
             self.event.set()
 
     def connect(self, _name:str, _parent:str, _imparter:imparter):
@@ -203,18 +217,19 @@ class ds_signal_exchanger(IObserver):
         print(
             f"{self.name}[{_id}] : "\
             f"{calc_now_status(self.signal_onoff)}"\
-            f" - {datetime.fromtimestamp(t)}"
+            f" - {datetime.fromtimestamp(t)}"\
+            f" / updated by {self.updated_by}"
         )
-        send_data(
-            {
-                "name" : f"{self.name}",
-                "signal" : dumps(self.signal_onoff.__dict__),
-                "status" : f"{calc_now_status(self.signal_onoff)}",
-                "time" : f"{datetime.fromtimestamp(t)}",
-                "group_id" : self.consumer_group
-            }
-        )
-        time.sleep(0.25)
+        if not self.local_broadcast == True:
+            send_data(
+                {
+                    "name" : f"{self.name}",
+                    "signal" : dumps(self.signal_onoff.__dict__),
+                    "status" : f"{calc_now_status(self.signal_onoff)}",
+                    "time" : f"{datetime.fromtimestamp(t)}",
+                    "group_id" : self.consumer_group
+                }
+            )
         for parent in self.imparter:
             self.imparter[parent].notify_status(
                 _id, 
@@ -224,7 +239,8 @@ class ds_signal_exchanger(IObserver):
                     t
                 )
             )
-            
+        self.local_broadcast = False
+                       
 class thread_with_exception(threading.Thread): 
     def __init__(self, _client:List[ds_signal_exchanger]): 
         threading.Thread.__init__(self)
@@ -234,11 +250,11 @@ class thread_with_exception(threading.Thread):
         # target function of the thread class 
         try: 
             while True: 
+                self.client.event.clear()
                 if self.client.thread_id == None:
                     self.client.thread_id = self.get_id()
-                self.client.event.wait()
-                self.client.event.clear()
                 self.client.change_event(self.client.thread_id)
+                self.client.event.wait()
         except Exception as ex:
             print(
                 "error message : ", self.client.name, \

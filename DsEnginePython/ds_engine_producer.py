@@ -9,5 +9,5 @@ producer = KafkaProducer(
 )
 
 def send_data(data):
-    producer.send('test', value = data)
+    producer.send('ds_engine', value = data)
     producer.flush()

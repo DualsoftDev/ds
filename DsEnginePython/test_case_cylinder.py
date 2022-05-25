@@ -94,6 +94,7 @@ if __name__ == "__main__":
     for th in thread.values():
         th.client.system_flags.always_on = True
         th.client.consumer_group = 1
+        th.client.setting_up()
         th.client.event.set()
     
     time.sleep(3.0)

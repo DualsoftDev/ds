@@ -1,0 +1,20 @@
+[sys] it = {
+    [task] T = { S1; S2; }
+    [flow] F = {
+        S1 <||> S2;
+    }
+}
+
+[sys] me = {
+    [task] TSK = { 
+        S0;
+        S1;
+        S2;
+        iS1 = {it.S1 ~ it.S1}
+        iS2 = {it.S2 ~ it.S2}
+    }
+    [flow] FLW = {
+        S0 > S1 > S2;
+        S1 = {iS1 > iS2;}
+    }
+}

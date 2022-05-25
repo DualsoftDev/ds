@@ -1,0 +1,5 @@
+새 cmd창
+
+antlr4env.bat 실행
+
+antlr4 -Dlanguage=Python3 ds.g4

@@ -8,7 +8,14 @@ Output = (ctypes.c_short*N)()
 Input = (ctypes.c_short*N)()
 
 ip = 12;       # for 192.168.0.12
-r1 = paix.nmc_OpenDevice(ip)
+
+nRet = paix.nmc_PingCheck(ip, 50)
+if nRet != 0:
+    print("nmc_PingCheck error")
+    exit()
+    
+
+r1 = paix.nmc_OpenDevice(ip);
 
 nRet = paix.nmc_GetDIOOutput(ip, Output)
 

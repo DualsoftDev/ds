@@ -34,6 +34,7 @@ class Node:
     parentId:str = None
 
     def __init__(self, id:str, label:str, parentId:str=None, type:NodeType=None):
+        assert id != None and id != "None" and ".None." not in id
         self.id = id
         self.label = label
         self.type = type
@@ -42,17 +43,10 @@ class Node:
 
 # Causal 관계를 표현하는 Link.  'A > B' 일 때, left = A, right = B, operator = '>'
 class CausalLink:
-    # l: Node = None
-    # r: Node = None
-    # op:str = None
-
     def __init__(self, l:Node=None, r:Node=None, operator:str=None):
         self.l:Node = l
         self.r:Node = r
         self.op:str = operator
-    # def get_l(self): return self.l
-    # def get_r(self): return self.r
-    # def get_op(self): return self.op
 
 #
 # array of Node or Nodes
@@ -65,8 +59,8 @@ class CausalLink:
 # Parse tree 전체 순회
 class ElementsListener(dsListener):
     def __init__(self, parser:dsParser):
-        self.allParserRules = getAllParseRules(parser);
-        parser.reset();
+        self.allParserRules = getAllParseRules(parser)
+        parser.reset()
 
         #self.multipleSystems = self.allParserRules.filter(t => t instanceof SystemContext).length > 1;
         self.multipleSystems:bool = any(t for t in self.allParserRules if isinstance(t, dsParser.SystemContext))
@@ -149,7 +143,7 @@ class ElementsListener(dsListener):
             assert self.op, 'operator expected'
 
             # process operator
-            self.processCausal(self.left, self.op, ctx);
+            self.processCausal(self.left, self.op, ctx)
 
         self.left = ctx
     
@@ -192,7 +186,9 @@ class ElementsListener(dsListener):
                     # count number of '.' from text
                     dotCount = len(text.split('.')) - 1
                     id:str = text
-                    taskId = f'{self.systemName}.{self.flowOfName}'
+                    taskId = self.systemName
+                    if self.flowOfName:
+                        taskId += f'.{self.flowOfName}'
                     parentId = taskId
                     if dotCount == 0:
                         id = f'{taskId}.{text}'
@@ -328,6 +324,8 @@ def getElements(parser:dsParser) -> str:
         elif t == NodeType.conjunction:
             bg = 'beige'; style = {"shape": "rectangle", "width": 3, "height" : 3}
 
+        assert ".None." not in n.id, f'{n.id}'
+
         return {
             "data": {
                 "id": n.id, "label": n.label, "parent":n.parentId, "background_color": bg
@@ -342,7 +340,7 @@ def getElements(parser:dsParser) -> str:
         [l, op, r] = [conn.l, conn.op, conn.r]
         id = l.id + op + r.id
         lineStyle = 'dashed' if '|' in op else 'solid'
-        return {"data": {"id":id,"source":l.id, "target":r.id, "line-style":lineStyle}};
+        return {"data": {"id":id,"source":l.id, "target":r.id, "line-style":lineStyle}}
 
     # {"data":{"id":"MyElevatorSystem.B>A,B","source":"MyElevatorSystem.B","target":"A,B","line-style":"solid"}}
     edges = map(linkMapper, listener.links)
@@ -355,7 +353,7 @@ def getElements(parser:dsParser) -> str:
     for e in edges:
         print(json.dumps(e))
 
-    elements = json.dumps([nodes, edges].flat());
+    elements = json.dumps([nodes, edges].flat())
         
     return elements
 

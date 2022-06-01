@@ -4,11 +4,11 @@ from json import loads
 
 # default address - 'localhost:9092'
 class consumer_set():
-    def __init__(self, _target_server, _group_id):
+    def __init__(self, _topic_name, _target_server, _group_id):
         self.group_id = _group_id
         self.server =_target_server
         self.consumer = KafkaConsumer(
-            'ds_engine',
+            _topic_name,
             bootstrap_servers = [self.server],
             auto_offset_reset = 'latest',
             enable_auto_commit = True,
@@ -22,8 +22,9 @@ class consumer_set():
     # "Key : {message.key}, "
     # "Offset : {message.offset}"
     # "Value : {message.value}"
-    def get_data(self, _name, _threads, _targets):
-        print('[start] get consumer list')
+    def get_data(self, _threads, _targets):
+        print(f"[start] get consumer list, group id : {self.group_id}")
+        print(_targets)
         for message in self.consumer:
             dic = message.value
             key = dic['name']
@@ -37,4 +38,4 @@ class consumer_set():
                             signal_set(signal['start'], signal['reset'], signal['end'])
                         _threads[key].client.local_broadcast = True
                         _threads[key].client.event.set()
-        print('[end] get consumer list')
+        print("[end] get consumer list")

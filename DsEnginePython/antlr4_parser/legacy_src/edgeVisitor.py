@@ -356,4 +356,3 @@ def getElements(parser:dsParser) -> str:
     elements = json.dumps([nodes, edges].flat())
         
     return elements
-

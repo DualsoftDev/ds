@@ -38,10 +38,11 @@ class ds_signal_exchanger(IObserver):
         self.white_list:List[str] = []
         self.start_points:List[int] = []
         self.signal_onoff:signal_set = signal_set()
-        self.status:ds_status = ds_status.R
-        self.take_time:float = 0.0
+        self.last_status:signal_set = signal_set()
+        self.take_time:float = 0.005
         self.consumer_group:int = -1
         self.local_broadcast:bool = False
+        self.pausable_type:bool = False
         self.event = threading.Event()
         self.thread_id = None
 
@@ -114,8 +115,11 @@ class ds_signal_exchanger(IObserver):
             if start_checker == True:
                 _new_onoff_signal.start = True
 
-                # need condition of macro for push type
-                self.truncate_signals(_new_onoff_signal, self.start_signals)
+                if self.pausable_type == False:
+                    self.truncate_signals(_new_onoff_signal, self.start_signals)
+            else:
+                if self.pausable_type == True:
+                    _new_onoff_signal.start = False
             
             return _new_onoff_signal
         except Exception as ex:
@@ -126,10 +130,14 @@ class ds_signal_exchanger(IObserver):
     def check_going_to_finish(self, _my_type:ds_object, _new_onoff_signal:signal_set):
         try:
             res = self.get_target_signals(self.end_signals, compare_signals)
+            
             if len(res) > 0 and self.system_flags.always_on and all(res):
                 _new_onoff_signal.end = True
                 _new_onoff_signal.start = False
             
+                if self.pausable_type == False:
+                    self.truncate_signals(_new_onoff_signal, self.end_signals)
+
             return _new_onoff_signal
         except Exception as ex:
             print(self.name, "has end error", ex)
@@ -145,8 +153,11 @@ class ds_signal_exchanger(IObserver):
                 _new_onoff_signal.reset = True
                 _new_onoff_signal.start = False
 
-                # need condition of macro for push type
-                # self.truncate_signals(_new_onoff_signal, self.reset_signals)
+                if self.pausable_type == False:
+                    self.truncate_signals(_new_onoff_signal, self.reset_signals)
+            else:
+                if self.pausable_type == True:
+                    _new_onoff_signal.reset = False
 
             return _new_onoff_signal
         except Exception as ex:
@@ -176,19 +187,50 @@ class ds_signal_exchanger(IObserver):
             print(traceback.format_exc())
             pass
 
+    def check_pause(self, _my_type:ds_object, 
+        _new_onoff_signal:signal_set, _check_function):
+        checker = _check_function(_my_type, _new_onoff_signal)
+        # print(f"{self.name} : {checker}, {self.signal_onoff}")
+        return checker != self.signal_onoff
+
     def estimate(self):
         my_type = get_type(self.name)
         new_onoff_signal = copy.deepcopy(self.signal_onoff)
+
         now_status = calc_now_status(new_onoff_signal)
 
         if now_status == ds_status.R:
             return self.check_ready_to_going(my_type, new_onoff_signal)
+
         elif now_status == ds_status.G:
+            if self.pausable_type == True and \
+                self.check_pause(my_type, new_onoff_signal, 
+                self.check_ready_to_going) == True:
+                new_onoff_signal.pause = True
+                return new_onoff_signal
+            else:
+                new_onoff_signal.pause = False
             return self.check_going_to_finish(my_type, new_onoff_signal)
+
         elif now_status == ds_status.F:
             return self.check_finish_to_homing(my_type, new_onoff_signal)
+
         elif now_status == ds_status.H:
+            if self.pausable_type == True and \
+                self.check_pause(my_type, new_onoff_signal, 
+                self.check_finish_to_homing) == True:
+                new_onoff_signal.pause = True
+                return new_onoff_signal
+            else:
+                new_onoff_signal.pause = False
             return self.check_homing_to_ready(my_type, new_onoff_signal)
+
+        elif now_status == ds_status.P:
+            new_onoff_signal.pause = False
+            if self.last_status.start == True:
+                return self.check_ready_to_going(my_type, new_onoff_signal)
+            elif self.last_status.reset == True:
+                return self.check_finish_to_homing(my_type, new_onoff_signal)
 
     def update(self, _id, _onoff_status:signal_status):
         if not _onoff_status.name in self.white_list:
@@ -200,6 +242,8 @@ class ds_signal_exchanger(IObserver):
         estimated = self.estimate()
         if not self.signal_onoff == estimated:
             self.signal_onoff = copy.deepcopy(estimated)
+            if not self.signal_onoff.pause == True:
+                self.last_status = self.signal_onoff
             time.sleep(self.take_time)
             self.event.set()
 
@@ -214,6 +258,8 @@ class ds_signal_exchanger(IObserver):
 
     def change_event(self, _id = ""):
         t = time.time()
+        # print(
+        #     f"{self.name} ------ {self.signal_onoff}, {self.last_status}")
         print(
             f"{self.name}[{_id}] : "\
             f"{calc_now_status(self.signal_onoff)}"\
@@ -240,7 +286,7 @@ class ds_signal_exchanger(IObserver):
                 )
             )
         self.local_broadcast = False
-                       
+
 class thread_with_exception(threading.Thread): 
     def __init__(self, _client:List[ds_signal_exchanger]): 
         threading.Thread.__init__(self)

@@ -7,6 +7,7 @@ class ds_status(Enum):
     G = 1 # going
     F = 2 # finish
     H = 3 # homing
+    P = 4 # pause
 
 # Object type
 class ds_object(Enum):
@@ -20,6 +21,7 @@ class signal_set:
     start:bool = False
     reset:bool = False
     end:bool = False
+    pause:bool = False
 
 # For input signal
 @dataclass
@@ -37,10 +39,11 @@ class ds_system_flag(Enum):
     run_rising:bool
     run_falling:bool
     system_stop:bool
+    emergency_stop:bool
 
 def calc_now_status(_signal:signal_set):
     now_status = ds_status.R
-    if _signal == signal_set(False, False, False):
+    if _signal == signal_set():
         now_status = ds_status.R
     elif _signal.start == True and _signal.end == False:
         now_status = ds_status.G
@@ -48,6 +51,8 @@ def calc_now_status(_signal:signal_set):
         now_status = ds_status.F
     elif _signal.reset == True:
         now_status = ds_status.H
+    elif _signal.pause == True:
+        now_status = ds_status.P
     return now_status
 
 def get_type(_name):

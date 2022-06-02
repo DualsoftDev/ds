@@ -60,16 +60,15 @@
         led_2_on <||> led_2_off;
         led_3_on <||> led_3_off;
 
-        #(btn.f1) > led_1_on < !#(dn1s);
+        #(btn.f1) && !#(snr.dn1s) > led_1_on;
         dn_to_1f = {
-            mt.dn > snd.p1 < snr.dn1s;
+            mt.dn, snr.dn1s > snd.p1;
             mt.dn <| snd.p1 |> snr.dn1s;
         }
-        !#g(up_to_2f) && !#g(up_to_3f) > dn_to_1f;
-        led_1_on > dn_to_1f > led_1_off;
+        led_1_on, !#g(up_to_2f) && !#g(up_to_3f) > dn_to_1f > dn_to_1f > led_1_off;
         dn_to_1f <| led_1_off;
         
-        #(btn.f2) > led_2_on < !#(dn2s) && !#(up2s);
+        #(btn.f2) && !#(snr.dn2s) && !#(snr.up2s) > led_2_on;
         dn_to_2f = {
             mt.dn > snd.p2 < snr.dn2s;
             mt.dn <| snd.p2 |> snr.dn2s;
@@ -78,19 +77,17 @@
             mt.up > snd.p2 < snr.up2s;
             mt.up <| snd.p2 |> snr.up2s;
         }
-        #(snr.dn3s) && !#g(up_to_2f) > dn_to_2f;
-        #(snr.dn1s) && !#g(dn_to_2f) > up_to_2f;
-        dn_to_2f < led_2_on > up_to_2f;
-        dn_to_2f || up_to_2f > led_2_off;
+        led_2_on, #(snr.dn3s) && !#g(up_to_2f) > dn_to_2f;
+        led_2_on, #(snr.dn1s) && !#g(dn_to_2f) > up_to_2f;
+        dn_to_2f > led_2_off < up_to_2f;
         dn_to_2f <| led_2_off |> up_to_2f;
 
-        #(btn.f3) > led_3_on < !#(up3s);
+        #(btn.f3) && !#(snr.up3s) > led_3_on;
         up_to_3f = {
             mt.up > snd.p3 < snr.up3s;
             mt.up <| snd.p3 |> snr.up3s;
         }
-        !#g(dn_to_1f) && !#g(dn_to_2f) > up_to_3f;
-        led_3_on > up_to_3f > led_3_off;
+        led_3_on, !#g(dn_to_1f) && !#g(dn_to_2f) > up_to_3f > up_to_3f > led_3_off;
         up_to_3f <| led_3_off;
     }
 }

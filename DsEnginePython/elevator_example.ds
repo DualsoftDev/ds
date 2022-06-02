@@ -81,7 +81,7 @@
         #(snr.dn3s) && !#g(up_to_2f) > dn_to_2f;
         #(snr.dn1s) && !#g(dn_to_2f) > up_to_2f;
         dn_to_2f < led_2_on > up_to_2f;
-        dn_to_2f > led_2_off < up_to_2f;
+        dn_to_2f || up_to_2f > led_2_off;
         dn_to_2f <| led_2_off |> up_to_2f;
 
         #(btn.f3) > led_3_on < !#(up3s);

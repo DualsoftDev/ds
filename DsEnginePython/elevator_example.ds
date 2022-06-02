@@ -1,0 +1,86 @@
+[sys] sensor = {
+    [flow] onoff = {
+        dn_1f;
+        dn_2f;
+        up_2f;
+        up_3f;
+    }
+}
+
+[sys] sound = {
+    [flow] play = {
+        play1;
+        play2;
+        play3;
+    }
+}
+
+[sys] motor = {
+    [flow] rotate = {
+        up;
+        dn;
+    }
+}
+
+[sys] ev_controls = {
+    [task] snr = {
+        dn1s = {_ ~ sensor.dn_1f}
+        dn2s = {_ ~ sensor.dn_2f}
+        up2s = {_ ~ sensor.up_2f}
+        up3s = {_ ~ sensor.up_3f}
+    }
+
+    [task] snd = {
+        p1 = {sound.play_1 ~ sound.play_1}
+        p2 = {sound.play_2 ~ sound.play_2}
+        p3 = {sound.play_3 ~ sound.play_3}
+    }
+
+    [task] mt = {
+        up = {motor.up ~ motor.up}
+        dn = {motor.dn ~ motor.dn}
+    }
+
+    [flow] Flow = {
+        Btn1;
+        Btn2;
+        Bnt3;
+
+        led_1_on <||> led_1_off;
+        led_2_on <||> led_2_off;
+        led_3_on <||> led_3_off;
+
+        #(Btn1) > led_1_on < !#(dn1s);
+        dn_to_1f = {
+            mt.dn > snd.p1 < snr.dn1s;
+            mt.dn <| snd.p1 |> snr.dn1s;
+        }
+        !#g(up_to_2f) && !#g(up_to_3f) > dn_to_1f;
+        led_1_on > dn_to_1f > led_1_off;
+        dn_to_1f <| led_1_off;
+        
+        #(Btn2) > led_2_on < !#(dn2s) && !#(up2s);
+        dn_to_2f = {
+            mt.dn > snd.p2 < snr.dn2s;
+            mt.dn <| snd.p2 |> snr.dn2s;
+        }
+        up_to_2f = {
+            mt.up > snd.p2 < snr.up2s;
+            mt.up <| snd.p2 |> snr.up2s;
+        }
+        #(snr.dn3s) && !#g(up_to_2f) > dn_to_2f;
+        #(snr.dn1s) && !#g(dn_to_2f) > up_to_2f;
+        dn_to_2f < led_2_on > up_to_2f;
+        dn_to_2f > led_2_off < up_to_2f;
+        dn_to_2f <| led_2_off |> up_to_2f;
+
+        #(Btn3) > led_3_on < !#(up3s);
+        up_to_3f = {
+            mt.up > snd.p3 < snr.up3s;
+            mt.up <| snd.p3 |> snr.up3s;
+        }
+        !#g(dn_to_1f) && !#g(dn_to_2f) > up_to_3f;
+        led_3_on > up_to_3f > led_3_off;
+        up_to_3f <| led_3_off;
+    }
+}

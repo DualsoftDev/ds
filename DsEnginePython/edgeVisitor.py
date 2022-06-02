@@ -117,6 +117,7 @@ class ElementsListener(dsListener):
                 "parent": self.taskName }}
 
         parentId = f'{self.systemName}.{self.taskName}'
+        print("????????", id)
         self.nodes[id] = Node(id, name, parentId, NodeType.segment)
     
 
@@ -289,28 +290,30 @@ class ElementsListener(dsListener):
     #private, nodes:Nodes
     def getCnfTokens(self, nodes, append=False) -> List[str]:
         cnfTokens:List[str] = []
+        print("???", nodes)
         for x in nodes:
-            isArray = isinstance(x, list) and len(x) > 1
+            isArray = type(x) == list and len(x) > 1
 
             if append and isArray:
-                id = map(lambda n: n.id, x).join(',')
+                id = map(lambda n: n.id, x)
+                id = ','.join(id)
                 cnfTokens.append(id)
-    
                 conj = Node(id, label=None, parentId=self.taskName, type=NodeType.conjunction)
-                self.nodes.set(id, conj)
+                self.nodes[id] = conj
 
                 for src in x:
-                    s = self.nodes.get(src.id)
-                    self.links.append(CausalLink(l=s, r=conj, op="-"))
+                    s = self.nodes[src.id]
+                    self.links.append(CausalLink(l=s, r=conj, operator="-"))
 
             else:
                 if (isArray):
                     #x.flatMap(n => n.id).forEach(id => cnfTokens.push(id))
-                    for id in flatMap(lambda n: n.id, x):
+                    for id in map(lambda n: n.id, x):
+                        print("====", id)
                         cnfTokens.append(id)
                 else:
                     cnfTokens.append(x[0].id)
-
+        
         return cnfTokens
 
     # 복합 Operator 를 분해해서 개별 operator array 로 반환
@@ -360,8 +363,10 @@ class ElementsListener(dsListener):
     
             for strL in lss:
                 for strR in rss:
-                    l = self.nodes.get(strL)
-                    r = self.nodes.get(strR)
+                    print(strL, strR)
+                    l = self.nodes[strL]
+                    r = self.nodes[strR]
+                    print(l, r)
                     assert l and r, 'node not found'
                     if op == '|>' or op == '>':
                         self.links.append(CausalLink(l, r, op))

@@ -74,7 +74,7 @@
             mt.dn <| snd.p2 |> snr.dn2s;
         }
         up_to_2f = {
-            mt.up > snd.p2 < snr.up2s;
+            mt.up, snr.up2s > snd.p2;
             mt.up <| snd.p2 |> snr.up2s;
         }
         led_2_on, #(snr.dn3s) && !#g(up_to_2f) > dn_to_2f;

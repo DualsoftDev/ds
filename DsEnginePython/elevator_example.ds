@@ -22,6 +22,14 @@
     }
 }
 
+[sys] button = {
+    [flow] push = {
+        btn1;
+        bnt2;
+        bnt3;
+    }
+}
+
 [sys] ev_controls = {
     [task] snr = {
         dn1s = {_ ~ sensor.dn_1f}
@@ -41,16 +49,18 @@
         dn = {motor.dn ~ motor.dn}
     }
 
-    [flow] Flow = {
-        Btn1;
-        Btn2;
-        Bnt3;
+    [task] btn = {
+        f1 = {_ ~ button.bnt1}
+        f2 = {_ ~ button.bnt2}
+        f3 = {_ ~ button.bnt3}
+    }
 
+    [flow] Flow = {
         led_1_on <||> led_1_off;
         led_2_on <||> led_2_off;
         led_3_on <||> led_3_off;
 
-        #(Btn1) > led_1_on < !#(dn1s);
+        #(btn.f1) > led_1_on < !#(dn1s);
         dn_to_1f = {
             mt.dn > snd.p1 < snr.dn1s;
             mt.dn <| snd.p1 |> snr.dn1s;
@@ -59,7 +69,7 @@
         led_1_on > dn_to_1f > led_1_off;
         dn_to_1f <| led_1_off;
         
-        #(Btn2) > led_2_on < !#(dn2s) && !#(up2s);
+        #(btn.f2) > led_2_on < !#(dn2s) && !#(up2s);
         dn_to_2f = {
             mt.dn > snd.p2 < snr.dn2s;
             mt.dn <| snd.p2 |> snr.dn2s;
@@ -74,7 +84,7 @@
         dn_to_2f > led_2_off < up_to_2f;
         dn_to_2f <| led_2_off |> up_to_2f;
 
-        #(Btn3) > led_3_on < !#(up3s);
+        #(btn.f3) > led_3_on < !#(up3s);
         up_to_3f = {
             mt.up > snd.p3 < snr.up3s;
             mt.up <| snd.p3 |> snr.up3s;

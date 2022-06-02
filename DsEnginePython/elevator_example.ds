@@ -9,9 +9,9 @@
 
 [sys] sound = {
     [flow] play = {
-        play1;
-        play2;
-        play3;
+        play_1;
+        play_2;
+        play_3;
     }
 }
 
@@ -24,9 +24,9 @@
 
 [sys] button = {
     [flow] push = {
-        btn1;
-        bnt2;
-        bnt3;
+        floor_1;
+        floor_2;
+        floor_3;
     }
 }
 
@@ -50,9 +50,9 @@
     }
 
     [task] btn = {
-        f1 = {_ ~ button.bnt1}
-        f2 = {_ ~ button.bnt2}
-        f3 = {_ ~ button.bnt3}
+        f1 = {_ ~ button.floor_1}
+        f2 = {_ ~ button.floor_2}
+        f3 = {_ ~ button.floor_3}
     }
 
     [flow] Flow = {

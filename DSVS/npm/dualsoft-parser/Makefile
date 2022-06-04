@@ -9,6 +9,10 @@ publish:
 unpublish:
 	npm unpublish @dualsoft/parser@1.0.0
 
+intall:
+	npm install
+
+# requires npm install
 ant:
 	yarn antlr4ts
 

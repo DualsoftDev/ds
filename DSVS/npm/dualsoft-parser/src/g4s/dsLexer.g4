@@ -12,10 +12,11 @@ fragment VALID_ID_CHAR
 
 // M.U, M.D
 segments: segmentsDNF*;
-// segment1: IDENTIFIER;
-// segment2: segment1 DOT segment1;
-// segment: (segment1 | segment2);
-segment: (IDENTIFIER | IDENTIFIER DOT IDENTIFIER);
+// - Segment 규격
+// - 0 DOT: TagName
+// - 1 DOT: TaskName.SegmentName  : mysystem 을 가정하고 있음.  필요한가?
+// - 2 DOT: System.TaskName.SegmentName
+segment: (IDENTIFIER | IDENTIFIER DOT IDENTIFIER | IDENTIFIER DOT IDENTIFIER DOT IDENTIFIER);
 
 segmentsCNF: segment (COMMA segment)*;
 segmentsDNF: segmentsCNF (OR2 segmentsCNF)*;

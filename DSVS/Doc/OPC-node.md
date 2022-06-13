@@ -46,11 +46,18 @@ client = Client("opc.tcp://admin@localhost:4840/freeopcua/server/") #connect usi
 
 
 - [node-opcua 로 kepserver 연동시, certificate 없어 에러나는 경우](https://stackoverflow.com/questions/64440584/nodejs-how-to-generate-certificate-and-private-key-with-node-opcua-pki)
+```
 cd ~/tmp/cert
 npm install rimraf
 npm install node-opcua-pki certificates
-npx node-opcua-pki certificates -o client_certificate.pem
+npx node-opcua-pki certificate -o client_certificate.pem
+```
 
+- [Kepserver: endpoint가 존재하지 않는다는 에러가 발생하는 경우 - opchub 문서 참조](http://opchub.com/download/KepserverEX_OPC_UA_Configuration.pdf)
+
+    - kepserver 트레이 아이콘 우클릭 후 OPC UA configuration 에서 opc.tcp://127.0.0.1:49320의 security 설정에 None 추가
+
+    - kepserver 트레이 아이콘 우클릭 후 Reinitialize 로 적용
 
 
 node-opcua.client --> KEPServer : OK!

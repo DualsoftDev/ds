@@ -32,10 +32,10 @@ class consumer_set():
             now_id = dic['group_id']
             if not now_id == self.group_id:
                 if key in _targets:
-                    now_signal = signal_set(signal['start'], signal['reset'], signal['end'])
+                    now_signal = signal_set(signal['start'], signal['reset'], signal['end'], signal['pause'])
                     if not now_signal == _threads[key].client.signal_onoff:
                         _threads[key].client.signal_onoff = \
-                            signal_set(signal['start'], signal['reset'], signal['end'])
+                            signal_set(signal['start'], signal['reset'], signal['end'], signal['pause'])
                         _threads[key].client.local_broadcast = True
                         _threads[key].client.event.set()
         print("[end] get consumer list")

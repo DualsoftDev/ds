@@ -15,6 +15,7 @@ from ds_signal_handler import get_origin_status, get_type
 from ds_signal_handler import calc_now_status
 from functools import reduce
 from ds_engine_producer import send_data
+from ds_expression_handler import token_type, parse_expr, calc_expr
 
 class imparter(Observable):
     def notify_status(self, _id, _onoff_status:signal_status):
@@ -28,9 +29,9 @@ class ds_signal_exchanger(IObserver):
         self.imparter:Dict[str, imparter] = {}
         self.in_signals:Dict[str, signal_set] = {}
         self.start_signals:Dict[str, ds_status] = {}
-        self.start_expression:str = None
+        self.start_expression:List[str] = []
         self.reset_signals:Dict[str, ds_status] = {}
-        self.reset_expression:str = None
+        self.reset_expression:List[str] = []
         self.end_signals:Dict[str, ds_status] = {}
         self.clear_signals:Dict[str, signal_set] = {}
         self.homing_signals:Dict[str, signal_set] = {}
@@ -45,6 +46,7 @@ class ds_signal_exchanger(IObserver):
         self.pausable_type:bool = False
         self.event = threading.Event()
         self.thread_id = None
+        self.initialize_process:bool = False
 
     def list_extractor(self, _target):
         return [name for name in _target]
@@ -56,6 +58,10 @@ class ds_signal_exchanger(IObserver):
         self.white_list.extend(self.list_extractor(self.clear_signals))
         self.white_list.extend(self.list_extractor(self.homing_signals))
         self.white_list.extend(self.list_extractor(self.origin_signals))
+
+    def target_signal_checker(self, 
+        _target_signal:signal_set, _target_status:ds_status):
+        return calc_now_status(_target_signal) == _target_status
 
     def truncate_signals(self, _new_signal:signal_set, _signals):
         for signal in _signals:
@@ -96,17 +102,25 @@ class ds_signal_exchanger(IObserver):
 
     def check_ready_to_going(self, _my_type:ds_object, _new_onoff_signal:signal_set):
         try:
-            res = False
             res = self.get_target_signals(self.start_signals, compare_signals)
+            if len(self.start_expression) > 0 and self.initialize_process == False:
+                exp_res = [
+                    calc_expr(
+                        parse_expr(exp, token_type.calculate_exp), 
+                        self.in_signals, 
+                        self.target_signal_checker
+                    )
+                    for exp in self.start_expression
+                ]
+                res.extend(exp_res)
 
             # RELAY : all
             # TAG & PORT : any
             start_checker = False
-            now_type = get_type(self.name)
             basic_condition = len(res) > 0 and self.system_flags.always_on
-            if now_type == ds_object.Relay:
+            if _my_type == ds_object.Relay:
                 start_checker = basic_condition and all(res)
-            elif now_type == ds_object.Tag:
+            elif _my_type == ds_object.Tag:
                 start_checker = basic_condition and any(res)
             else:
                 start_checker = \
@@ -147,6 +161,16 @@ class ds_signal_exchanger(IObserver):
     def check_finish_to_homing(self, _my_type:ds_object, _new_onoff_signal:signal_set):
         try:
             res = self.get_target_signals(self.reset_signals, compare_signals)
+            if len(self.reset_expression) > 0 and self.initialize_process == False:
+                exp_res = [
+                    calc_expr(
+                        parse_expr(exp, token_type.calculate_exp), 
+                        self.in_signals,
+                        self.target_signal_checker)
+                    for exp in self.reset_expression
+                ]
+                res.extend(exp_res)
+
             basic_condition = len(res) > 0 and self.system_flags.always_on
 
             if basic_condition and any(res):
@@ -180,10 +204,40 @@ class ds_signal_exchanger(IObserver):
             else:
                 if basic_condition and all(res):
                     _new_onoff_signal = signal_set()
-            
             return _new_onoff_signal
         except Exception as ex:
             print(self.name, "has clear error", ex)
+            print(traceback.format_exc())
+            pass
+
+    def check_forced_homing(self, _my_type:ds_object, _new_onoff_signal:signal_set):
+        try:
+            res = self.get_target_signals(self.reset_signals, compare_signals)
+            if len(self.reset_expression) > 0 and self.initialize_process == False:
+                exp_res = [
+                    calc_expr(
+                        parse_expr(exp, token_type.calculate_exp), 
+                        self.in_signals,
+                        self.target_signal_checker)
+                    for exp in self.reset_expression
+                ]
+                res.extend(exp_res)
+
+            basic_condition = len(res) > 0 and self.system_flags.always_on
+
+            if basic_condition and any(res):
+                _new_onoff_signal.reset = True
+                _new_onoff_signal.start = False
+
+                if self.pausable_type == False:
+                    self.truncate_signals(_new_onoff_signal, self.reset_signals)
+            else:
+                if self.pausable_type == True:
+                    _new_onoff_signal.reset = False
+
+            return _new_onoff_signal
+        except Exception as ex:
+            print(self.name, "has reset error", ex)
             print(traceback.format_exc())
             pass
 
@@ -198,6 +252,11 @@ class ds_signal_exchanger(IObserver):
         new_onoff_signal = copy.deepcopy(self.signal_onoff)
 
         now_status = calc_now_status(new_onoff_signal)
+
+        if my_type == ds_object.Relay and not now_status == ds_status.H:
+            is_homing = self.check_forced_homing(my_type, new_onoff_signal)
+            if calc_now_status(is_homing) == ds_status.H:
+                return is_homing
 
         if now_status == ds_status.R:
             return self.check_ready_to_going(my_type, new_onoff_signal)
@@ -238,8 +297,8 @@ class ds_signal_exchanger(IObserver):
             
         self.in_signals[_onoff_status.name] = copy.deepcopy(_onoff_status.signal)
         self.updated_by = _onoff_status.name
-
         estimated = self.estimate()
+
         if not self.signal_onoff == estimated:
             self.signal_onoff = copy.deepcopy(estimated)
             if not self.signal_onoff.pause == True:
@@ -258,8 +317,7 @@ class ds_signal_exchanger(IObserver):
 
     def change_event(self, _id = ""):
         t = time.time()
-        # print(
-        #     f"{self.name} ------ {self.signal_onoff}, {self.last_status}")
+        
         print(
             f"{self.name}[{_id}] : "\
             f"{calc_now_status(self.signal_onoff)}"\
@@ -273,7 +331,8 @@ class ds_signal_exchanger(IObserver):
                     "signal" : dumps(self.signal_onoff.__dict__),
                     "status" : f"{calc_now_status(self.signal_onoff)}",
                     "time" : f"{datetime.fromtimestamp(t)}",
-                    "group_id" : self.consumer_group
+                    "group_id" : self.consumer_group,
+                    "updated by" : self.updated_by
                 }
             )
         for parent in self.imparter:

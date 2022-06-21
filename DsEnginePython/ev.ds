@@ -1,0 +1,81 @@
+[sys] sensor = {
+    [flow] onoff = {
+        dn_1f;
+        dn_2f;
+        up_2f;
+        up_3f;
+    }
+}
+
+[sys] motor = {
+    [flow] rotate = {
+        up <||> dn;
+        up <||> off;
+        dn <||> off;
+    }
+}
+
+[sys] button = {
+    [flow] push = {
+        floor_1 <||> floor_2 <||> floor_3 <||> floor_1;
+    }
+}
+
+[sys] ev_controls = {
+    [task] snr = {
+        dn1s = {_ ~ sensor.onoff.dn_1f}
+        dn2s = {_ ~ sensor.onoff.dn_2f}
+        up2s = {_ ~ sensor.onoff.up_2f}
+        up3s = {_ ~ sensor.onoff.up_3f}
+    }
+
+    [task] mt = {
+        up = {motor.rotate.up ~ motor.rotate.up}
+        dn = {motor.rotate.dn ~ motor.rotate.dn}
+        ff = {motor.rotate.off ~ motor.rotate.off}
+    }
+
+    [flow] Flow = {
+        led_1_on <||> led_1_off;
+        led_2_on <||> led_2_off;
+        led_3_on <||> led_3_off;
+
+        #(button.push.floor_1 && !snr.dn1s) > led_1_on;
+        dn_to_1f = {
+            mt.dn;
+        }
+        led_1_on, !#g(up_to_2f) && !#g(dn_to_2f) && !#g(up_to_3f) > dn_to_1f > snr.dn1s;
+        led_1_off < snr.dn1s > mt.ff < dn_to_1f;
+        snr.dn2s <| dn_to_1f |> snr.up2s;
+        mt.ff <| dn_to_1f |> snr.up3s;
+        dn_to_1f <| led_1_off;
+        
+        #(button.push.floor_2 && !snr.dn2s && !snr.up2s) > led_2_on;
+        
+        dn_to_2f = {
+            mt.dn;
+        }
+        led_2_on, #(snr.up3s) && !#g(up_to_2f) && !#g(dn_to_1f) > dn_to_2f > snr.dn2s;
+        led_2_off < snr.dn2s > mt.ff < dn_to_2f;
+        mt.ff <| dn_to_2f |> snr.up3s;
+        dn_to_2f <| led_2_off;
+
+        up_to_2f = {
+            mt.up;
+        }
+        led_2_on, #(snr.dn1s) && !#g(dn_to_2f) && !#g(up_to_3f) > up_to_2f > snr.up2s;
+        led_2_off < snr.up2s > mt.ff <| up_to_2f;
+        mt.ff <| up_to_2f |> snr.dn1s;
+        up_to_2f <| led_2_off;
+
+        #(button.push.floor_3 && !snr.up3s) > led_3_on;
+        up_to_3f = {
+            mt.up;
+        }
+        led_3_on, !#g(dn_to_1f) && !#g(up_to_2f) && !#g(dn_to_2f) > up_to_3f > snr.up3s;
+        led_3_off < snr.up3s > mt.ff < up_to_3f;
+        snr.dn2s <| up_to_3f |> snr.up2s;
+        mt.ff <| up_to_3f |> snr.dn1s;
+        up_to_3f <| led_3_off;
+    }
+}

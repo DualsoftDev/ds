@@ -3,17 +3,18 @@ from dataclasses import dataclass
 
 # Status types of segment
 class ds_status(Enum):
-    R = 0 # ready
-    G = 1 # going
-    F = 2 # finish
-    H = 3 # homing
-    P = 4 # pause
+    R = 'R' # ready
+    G = 'G' # going
+    F = 'F' # finish
+    H = 'H' # homing
+    P = 'P' # pause
 
 # Object type
 class ds_object(Enum):
-    Relay = 0 # normal relay
-    Tag = 1 # tag of segment
-    Segment = 2 # port of segment
+    Relay = 'Relay' # normal relay
+    Tag = 'Tag' # tag of segment
+    Segment = 'Segment' # port of segment
+    Expression = 'Expression' # expression
 
 # Represent the signal status as a result of estimation
 @dataclass
@@ -40,6 +41,7 @@ class ds_system_flag(Enum):
     run_falling:bool
     system_stop:bool
     emergency_stop:bool
+    virtual_test:bool
 
 def calc_now_status(_signal:signal_set):
     now_status = ds_status.R

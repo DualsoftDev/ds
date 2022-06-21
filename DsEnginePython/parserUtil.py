@@ -48,6 +48,7 @@ def enumerateParents(_from:ParseTree, includeMe=True, predicate = None):
 
     if (includeMe and ok(_from)):
         yield _from
+
     yield from enumerateParents(_from.parent, True, ok)
 
 

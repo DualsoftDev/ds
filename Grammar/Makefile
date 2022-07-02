@@ -1,19 +1,16 @@
 .ONESHELL: # Applies to every targets in the file!
 
+
 antlr4=java -Xmx500M -cp /usr/local/lib/antlr-4.10.1-complete.jar org.antlr.v4.Tool
 grun=java -Xmx500M -cp /usr/local/lib/antlr-4.10.1-complete.jar:. org.antlr.v4.gui.TestRig
 
 grun:
-	@cd ../../../../Grammar/g4s
+	@cd g4s
 	@java -version
 	@$(antlr4) ds.g4
 	@javac *.java
 	@echo 'echo "A || B, #g(X), C > D, E || F;" | grun ds causals -gui'
 
-g4:
-	@cd ..
-	@yarn antlr4ts
-#	@cp src/ds*.ts ../client/src/server-bundle/
 
 test:
 	@export CLASSPATH=".:/usr/local/lib/antlr-4.10.1-complete.jar:$$CLASSPATH"
@@ -22,7 +19,7 @@ test:
 #		$(grun) ds causals < g4test/causals.txt
 #	done
 
-	cd ../../../../Grammar/g4s
+	cd g4s
 
 	@echo causals
 	$(grun) ds causals < g4test/causals.txt
@@ -41,11 +38,14 @@ test:
 	@echo elevator
 	$(grun) ds program < g4test/elevator_newexample.ds
 
+cs:
+	java -jar antlr-4.10.1-complete.jar -Dlanguage=CSharp -visitor -o CSharp/Generated g4s/ds.g4
 
 clean:
-	@rm -rf *.interp *.tokens dsLexer.ts dsListener.ts dsParser.ts dsVisitor.ts
-	@cd ../../../../Grammar/g4s
-	@rm -rf *.java *.class 
+	@rm -rf CSharp/Generated
+	cd g4s
+	@rm -rf *.interp *.tokens
+	rm -rf *.java *.class 
 
 
 all: g4 grun test

@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net47</TargetFramework>
+    <RootNamespace>FSharp.ProjectTemplate.Tests</RootNamespace>
+    <AssemblyName>FSharp.ProjectTemplate.Tests</AssemblyName>
+    <Name>FSharp.ProjectTemplate.Tests</Name>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Generators.fs" />
+    <Compile Include="Tests.fs" />
+    <Compile Include="RunTests.fs" />
+    <None Include="paket.references" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\FSharp.ProjectTemplate\FSharp.ProjectTemplate.fsproj"></ProjectReference>
+  </ItemGroup>
+  <Import Project="..\..\.paket\Paket.Restore.targets" />
+</Project>

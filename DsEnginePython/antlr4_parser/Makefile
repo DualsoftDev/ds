@@ -1,7 +1,7 @@
 .ONESHELL: # Applies to every targets in the file!
 
 ant:
-	java org.antlr.v4.Tool -Dlanguage=Python3 -visitor -o src ../../DSVS/npm/dualsoft-parser/src/g4s/ds.g4
+	java org.antlr.v4.Tool -Dlanguage=Python3 -visitor -o src ../../Grammar/g4s/ds.g4
 
 installPip:
 	pip install antlr4-python3-runtime

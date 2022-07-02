@@ -1,0 +1,333 @@
+﻿// from cytoscpaeVisitor.ts
+
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+using Antlr4.Runtime;
+using Antlr4.Runtime.Tree;
+
+using Nodes = System.Collections.Generic.List<System.Object>;
+
+namespace CsParser
+{
+    //enum NodeType = "system" | "task" | "call" | "proc" | "func" | "segment" | "expression" | "conjunction";
+    enum NodeType {
+        system,
+        task, call, proc, func, segment, expression, conjunction
+    };
+
+    class Node {
+        public string id;
+        public string label;
+        public string parentId;
+        public NodeType type;
+        public Node(string id, string label, string parentId, NodeType type)
+        {
+            this.id = id;
+            this.label = label;
+            this.parentId = parentId;
+            this.type = type;
+        }
+    }
+
+
+    /**
+     * Causal 관계를 표현하는 Link.  'A > B' 일 때, left = A, right = B, operator = '>'
+     */
+    class CausalLink
+    {
+        Node l;
+        Node r;
+        string op;
+        public CausalLink(Node l, Node r, string op)
+        {
+            this.l = l;
+            this.r = r;
+            this.op = op;
+        }
+    }
+
+
+    class ElementsListener : dsBaseListener
+    {
+        /** causal operator 왼쪽 */
+        private dsParser.CausalTokensDNFContext left;
+        private dsParser.CausalOperatorContext op;
+
+        private string systemName;
+        private string taskName;
+        private string flowName;        // [flow of A]F={..} -> F
+        private string flowOfName;      // [flow of A]F={..} -> A
+        private List<ParserRuleContext> allParserRules;
+        private bool multipleSystems;
+
+        Dictionary<string, Node> nodes = new Dictionary<string, Node>();
+        List<CausalLink> links = new List<CausalLink>();
+
+        public ElementsListener(dsParser parser)
+        {
+            this.allParserRules = DsParser.getAllParseRules(parser);
+            parser.Reset();
+
+            this.multipleSystems = this.allParserRules.Where(t => t is dsParser.SystemContext).Count() > 1;
+        }
+
+
+        override public void EnterSystem(dsParser.SystemContext ctx)
+        {
+            var n = ctx.id().GetText();
+            this.systemName = n;
+            if (this.multipleSystems)
+            {
+                this.nodes[n] = new Node(n, n, null, NodeType.system);
+            }
+        }
+        override public void ExitSystem(dsParser.SystemContext ctx) { this.systemName = null; }
+
+        override public void EnterTask(dsParser.TaskContext ctx)
+        {
+            var name = ctx.id().GetText();
+            this.taskName = name;
+            var id = $"{this.systemName}.{name}";
+            this.nodes[id] = new Node(id, name, this.systemName, NodeType.task);
+        }
+        override public void ExitTask(dsParser.TaskContext ctx) { this.taskName = null; }
+
+        override public void EnterListing(dsParser.ListingContext ctx)
+        {
+            var name = ctx.id().GetText();
+            var id = $"{this.systemName}.{this.taskName}.{name}";
+            //const node = { "data": { id, "label": name, "background_color": "gray", parent: this.taskName }        };
+            var parentId = $"{this.systemName}.{this.taskName}";
+            this.nodes[id] = new Node(id, label: name, parentId, NodeType.segment);
+        }
+
+        override public void EnterCall(dsParser.CallContext ctx) {
+            var name = ctx.id().GetText();
+            var label = $"{name}\n{ctx.callPhrase().GetText()}";
+            var parentId = $"{ this.systemName}.${ this.taskName}";
+            var id = $"{parentId}.{name}";
+            this.nodes[id] = new Node(id, label, parentId, NodeType.call);
+        }
+
+        override public void EnterFlow(dsParser.FlowContext ctx) {
+            var flowOf = ctx.flowProp().id();
+            this.flowName = ctx.id().GetText();
+            this.flowOfName = flowOf?.GetText();
+        }
+        override public void ExitFlow(dsParser.FlowContext ctx)
+        {
+            this.flowName = null;
+            this.flowOfName = null;
+        }
+
+
+        override public void EnterCausalPhrase(dsParser.CausalPhraseContext ctx) {
+            this.left = null;
+            this.op = null;
+        }
+        override public void EnterCausalTokensDNF(dsParser.CausalTokensDNFContext ctx) {
+            if (this.left != null)
+            {
+                Debug.Assert(this.op != null);  //, 'operator expected');
+
+                // process operator
+                this.processCausal(this.left, this.op, ctx);
+            }
+
+            this.left = ctx;
+        }
+        override public void EnterCausalOperator(dsParser.CausalOperatorContext ctx) { this.op = ctx; }
+
+
+        // ParseTreeListener<> method
+        override public void VisitTerminal(ITerminalNode node)     { return; }
+        override public void VisitErrorNode(IErrorNode node)        { return; }
+        override public void EnterEveryRule(ParserRuleContext ctx) { return; }
+        override public void ExitEveryRule(ParserRuleContext ctx) { return; }
+
+
+        private Dictionary<dsParser.CausalTokensDNFContext, Nodes> _existings = new Dictionary<dsParser.CausalTokensDNFContext, Nodes>();
+        private Nodes addNodes(dsParser.CausalTokensDNFContext ctx)
+        {
+            if (this._existings.ContainsKey(ctx))
+                return this._existings[ctx];
+
+            var cnfs =
+                DsParser.enumerateChildren(ctx, false, t => t is dsParser.CausalTokensCNFContext)
+                .Select(t => t as dsParser.CausalTokensCNFContext)
+                ;
+
+            Nodes dnfNodes = new Nodes();
+            foreach (var cnf in cnfs) {
+                List<Node> cnfNodes = new List<Node>();
+                var causalContexts =
+                    DsParser.enumerateChildren(cnf, false, t => t is dsParser.CausalTokenContext)
+                    .Select(t => t as dsParser.CausalTokenContext);
+                foreach (var t in causalContexts) {
+                    var text = t.GetText();
+                    if (text.StartsWith("#"))
+                    {
+                        var node = new Node(id: text, label: text, null, NodeType.func);
+                        cnfNodes.Add(node);
+                    }
+                    else if (text.StartsWith("@"))
+                    {
+                        var node = new Node(id: text, label: text, null, NodeType.proc);
+                        cnfNodes.Add(node);
+                    }
+                    else
+                    {
+                        // count number of '.' from text
+                        var dotCount = text.Split(new[] { '.' }).Length - 1;
+                        string id = text;
+                        var taskId = $"{this.systemName}.{this.flowOfName}";
+                        var parentId = taskId;
+                        switch (dotCount)
+                        {
+                            case 0: id = $"{ taskId}.{ text}";
+                                break;
+                            case 1:
+                                id = $"{this.systemName}.{ text}";
+                                parentId = $"{ this.systemName}.{text.Split(new[] { '.' })[0]}";
+                                break;
+                        }
+
+                        var node = new Node(id, label: text, parentId: taskId, NodeType.segment);
+                        cnfNodes.Add(node);
+                    }
+                    foreach(var n in cnfNodes) {
+                        if (!this.nodes.ContainsKey(n.id))
+                            this.nodes[n.id] = n;
+                    }
+                }
+                dnfNodes.Add(cnfNodes);
+            }
+
+            this._existings[ctx] = dnfNodes;
+
+            return dnfNodes;
+        }
+
+        /**
+            *
+            * @param nodes : DNF nodes
+            * @param append true (==nodes 가 sink) 인 경우, conjuction 생성.  false: 개별 node 나열 생성
+            * @returns
+            */
+        private List<string> getCnfTokens(Nodes nodes, bool append = false)
+        {
+            var cnfTokens = new List<string>();
+            foreach (var x in nodes) {
+                var array = x as List<Node>;
+                var isArray = array != null;    // x is IList<Node> && ((x as List<Node>).Count() > 1);
+
+                if (append && isArray)
+                {
+                    var id = string.Join(",", array.Select(n => n.id));
+                    cnfTokens.Add(id);
+
+                    var conj = new Node(id, label: "", parentId: this.taskName, NodeType.conjunction);
+                    this.nodes[id] = conj;
+
+                    foreach (var src in array) {
+                        var s = this.nodes[src.id];
+                        this.links.Add(new CausalLink(l: s, r: conj, op: "-"));
+                    }
+                }
+                else
+                {
+                    if (isArray)
+                        foreach(var id in array.Select(n => n.id))
+                            cnfTokens.Add(id);
+                    else
+                        cnfTokens.Add( (x as Node).id);
+                }
+            }
+
+            return cnfTokens;
+        }
+
+        /**
+            * 복합 Operator 를 분해해서 개별 operator array 로 반환
+            * @param operator 복합 operator.  e.g "<||>"
+            * @returns e.g [ "<|", "|>" ]
+            */
+        private List<string> splitOperator(string operator_)
+        {
+            var op = operator_;
+            IEnumerable<string> split()
+            {
+                foreach (var o in new[] { "|>", "<|" }) {
+                    if (op.Contains(o))
+                    {
+                        yield return o;
+                        op = op.Replace(o, "");
+                    }
+                }
+                foreach (var o in new[] { ">", "<" }) {
+                    if (op.Contains(o))
+                    {
+                        yield return o;
+                        op = op.Replace(o, "");
+                    }
+                }
+                if (op.Length > 0)
+                    Console.WriteLine($"Error on causal operator: {operator_}");
+            }
+
+            return split().ToList();
+        }
+
+        /**
+            * causal operator 를 처리해서 this.links 에 결과 누적
+            * @param l operator 왼쪽의 DNF
+            * @param opr (복합) operator
+            * @param r operator 우측의 DNF
+            */
+        private void processCausal(dsParser.CausalTokensDNFContext ll, dsParser.CausalOperatorContext opr, dsParser.CausalTokensDNFContext rr) {
+            //console.log(`${ l.text} ${ opr.text} ${ r.text}`);
+            var nodes = this.nodes;
+
+            var ls = this.addNodes(ll);
+            var rs = this.addNodes(rr);
+            // for (const n of this.nodes.keys())
+            //     console.log(n);
+
+
+            var ops = this.splitOperator(opr.GetText());
+            foreach(var op in ops) {
+                var sinkToRight = op == ">" || op == "|>";
+                var lss = this.getCnfTokens(ls, sinkToRight);
+                var rss = this.getCnfTokens(rs, !sinkToRight);
+
+                foreach (var strL in lss)
+                {
+                    foreach (var strR in rss)
+                    {
+                        var l = this.nodes[strL];
+                        var r = this.nodes[strR];
+                        Debug.Assert(l != null && r != null);   // 'node not found');
+                        switch (op)
+                        {
+                            case "|>":
+                            case ">": this.links.Add(new CausalLink(l, r, op)); break;
+
+                            case "<|":
+                            case "<": this.links.Add(new CausalLink(l: r, r: l, op)); break;
+
+                            default:
+                                Debug.Assert(false);    //, `invalid operator: ${ op}`);
+                                break;
+                        }
+
+                    }
+                }
+            }
+        }
+    }
+}

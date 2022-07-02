@@ -39,7 +39,7 @@ test:
 	$(grun) ds program < g4test/elevator_newexample.ds
 
 cs:
-	java -jar antlr-4.10.1-complete.jar -Dlanguage=CSharp -visitor -o CSharp/Generated g4s/ds.g4
+	java -jar antlr-4.10.1-complete.jar -package NameSpace -Dlanguage=CSharp -visitor -o CSharp/Generated g4s/ds.g4
 
 clean:
 	@rm -rf CSharp/Generated
@@ -49,3 +49,12 @@ clean:
 
 
 all: g4 grun test
+
+
+
+xxx:
+	dotnet new -i Antlr4BuildTasks.Templates
+	dotnet new antlr
+	dotnet build
+	dotnet run
+

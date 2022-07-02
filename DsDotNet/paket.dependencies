@@ -2,6 +2,8 @@ framework: auto-detect
 
 source https://nuget.org/api/v2
 
+nuget Antlr4
+nuget Antlr4.Runtime
 nuget FSharp.Core
 nuget Argu
 
@@ -44,7 +46,8 @@ nuget Fake.DotNet.Testing.Expecto
 nuget Fake.DotNet.FSFormatting
 nuget Fake.Api.GitHub
 
+neget System.Runtime.CompilerServices.Unsafe
+
 nuget System.Security.Permissions >= 4.5 framework: net30
 nuget System.Security.Permissions >= 4.7 framework: net48
 #nuget System.Security.Permissions >= 4.7
-

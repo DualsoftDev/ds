@@ -66,7 +66,7 @@ namespace CsParser
         private bool multipleSystems;
 
         Dictionary<string, Node> nodes = new Dictionary<string, Node>();
-        List<CausalLink> links = new List<CausalLink>();
+        public List<CausalLink> links = new List<CausalLink>();
 
         public ElementsListener(dsParser parser)
         {
@@ -85,6 +85,7 @@ namespace CsParser
             {
                 this.nodes[n] = new Node(n, n, null, NodeType.system);
             }
+            Trace.WriteLine($"System: {n}");
         }
         override public void ExitSystem(dsParser.SystemContext ctx) { this.systemName = null; }
 
@@ -94,6 +95,7 @@ namespace CsParser
             this.taskName = name;
             var id = $"{this.systemName}.{name}";
             this.nodes[id] = new Node(id, name, this.systemName, NodeType.task);
+            Trace.WriteLine($"Task: {name}");
         }
         override public void ExitTask(dsParser.TaskContext ctx) { this.taskName = null; }
 
@@ -109,15 +111,17 @@ namespace CsParser
         override public void EnterCall(dsParser.CallContext ctx) {
             var name = ctx.id().GetText();
             var label = $"{name}\n{ctx.callPhrase().GetText()}";
-            var parentId = $"{ this.systemName}.${ this.taskName}";
+            var parentId = $"{this.systemName}.{this.taskName}";
             var id = $"{parentId}.{name}";
             this.nodes[id] = new Node(id, label, parentId, NodeType.call);
+            Trace.WriteLine($"CALL: {id}");
         }
 
         override public void EnterFlow(dsParser.FlowContext ctx) {
             var flowOf = ctx.flowProp().id();
             this.flowName = ctx.id().GetText();
             this.flowOfName = flowOf?.GetText();
+            Trace.WriteLine($"Flow: {flowName}");
         }
         override public void ExitFlow(dsParser.FlowContext ctx)
         {
@@ -125,15 +129,38 @@ namespace CsParser
             this.flowOfName = null;
         }
 
+        override public void EnterCausals(dsParser.CausalsContext ctx)
+        {
+            Trace.WriteLine($"Causals: {ctx.GetText()}");
+        }
+        override public void ExitCausals(dsParser.CausalsContext ctx)
+        {
+        }
+
+        override public void EnterParenting(dsParser.ParentingContext ctx) {
+            Trace.WriteLine($"Parenting: {ctx.GetText()}");
+        }
+        override public void ExitParenting(dsParser.ParentingContext ctx) { }
+
+
 
         override public void EnterCausalPhrase(dsParser.CausalPhraseContext ctx) {
             this.left = null;
             this.op = null;
+
+            Trace.WriteLine($"CausalPhrase: {ctx.GetText()}");
+            var left = ctx.GetChild(0);
+            var op = ctx.GetChild(1);
+            var rights = ctx.GetChild(2);
+
+            Trace.WriteLine($"\tCausalPhrase all: {left.GetText()}, {op.GetText()}, {rights.GetText()}");
         }
         override public void EnterCausalTokensDNF(dsParser.CausalTokensDNFContext ctx) {
             if (this.left != null)
             {
                 Debug.Assert(this.op != null);  //, 'operator expected');
+
+                Trace.WriteLine($"CausalTokensDNF per operator: {left.GetText()} + {op.GetText()} + {ctx.GetText()}");
 
                 // process operator
                 this.processCausal(this.left, this.op, ctx);
@@ -285,9 +312,9 @@ namespace CsParser
 
         /**
             * causal operator 를 처리해서 this.links 에 결과 누적
-            * @param l operator 왼쪽의 DNF
+            * @param ll operator 왼쪽의 DNF
             * @param opr (복합) operator
-            * @param r operator 우측의 DNF
+            * @param rr operator 우측의 DNF
             */
         private void processCausal(dsParser.CausalTokensDNFContext ll, dsParser.CausalOperatorContext opr, dsParser.CausalTokensDNFContext rr) {
             //console.log(`${ l.text} ${ opr.text} ${ r.text}`);

@@ -8,7 +8,7 @@ using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
 
 using ParseTree = Antlr4.Runtime.RuleContext;
-namespace CsParser
+namespace DsParser
 {
     class ParserResult
     {

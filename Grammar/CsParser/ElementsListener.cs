@@ -12,7 +12,7 @@ using Antlr4.Runtime.Tree;
 
 using Nodes = System.Collections.Generic.List<System.Object>;
 
-namespace CsParser
+namespace DsParser
 {
     //enum NodeType = "system" | "task" | "call" | "proc" | "func" | "segment" | "expression" | "conjunction";
     enum NodeType {

@@ -12,9 +12,9 @@ namespace DsParser
         {
             var text = @"
 [sys] it = {
-    [task] T = { S1; S2; }
     [task] Task = { S1 = {TX ~ RX}; S2 = {TX ~ RX}; }
     [flow] F = {
+        parenting = {A > B > C; ; C |> B;}
         S1 <||> S2;
         A, B > C > D, E;
         T.S1 > T.S2;
@@ -35,13 +35,18 @@ namespace DsParser
 //        // 호출 Set기억
 //        @pushr(A), #g(A), M.U > Set1F <| T.A21 ? T.X;
 //        //A, B ? C > D, E;
-//        myFlow = {A > B > C;}
+//        myFlow = {A > B > C; C |> B; }
 //    }
 //}";
             var parser = DsParser.FromDocument(text);
-            var listener = new ElementsListener(parser);
+            var listener = new ModelListener(parser);
             ParseTreeWalker.Default.Walk(listener, parser.program());
-            var x = listener.links;
+            var model = listener.Model;
+
+            parser.Reset();
+            var elistener = new ElementsListener(parser, model);
+            ParseTreeWalker.Default.Walk(elistener, parser.program());
+            var x = elistener.links;
 
             Try("1 + 2 + 3");
             Try("1 2 + 3");

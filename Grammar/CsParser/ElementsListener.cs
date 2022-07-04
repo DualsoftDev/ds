@@ -54,22 +54,29 @@ namespace DsParser
 
     class ElementsListener : dsBaseListener
     {
+        Model _model;
+
         /** causal operator 왼쪽 */
         private dsParser.CausalTokensDNFContext left;
         private dsParser.CausalOperatorContext op;
 
-        private string systemName;
-        private string taskName;
-        private string flowName;        // [flow of A]F={..} -> F
+        DsSystem _system;
+        Task _task;
+        Flow _flow;
+
+        //private string flowName;        // [flow of A]F={..} -> F
         private string flowOfName;      // [flow of A]F={..} -> A
+        private string parentingName;
         private List<ParserRuleContext> allParserRules;
         private bool multipleSystems;
 
         Dictionary<string, Node> nodes = new Dictionary<string, Node>();
         public List<CausalLink> links = new List<CausalLink>();
 
-        public ElementsListener(dsParser parser)
+        public ElementsListener(dsParser parser, Model model)
         {
+            _model = model;
+
             this.allParserRules = DsParser.getAllParseRules(parser);
             parser.Reset();
 
@@ -79,54 +86,68 @@ namespace DsParser
 
         override public void EnterSystem(dsParser.SystemContext ctx)
         {
-            var n = ctx.id().GetText();
-            this.systemName = n;
-            if (this.multipleSystems)
-            {
-                this.nodes[n] = new Node(n, n, null, NodeType.system);
-            }
-            Trace.WriteLine($"System: {n}");
+            var name = ctx.id().GetText();
+            _system = _model.Systems.First(s => s.Name == name);
         }
-        override public void ExitSystem(dsParser.SystemContext ctx) { this.systemName = null; }
+        override public void ExitSystem(dsParser.SystemContext ctx) { this._system = null; }
 
         override public void EnterTask(dsParser.TaskContext ctx)
         {
             var name = ctx.id().GetText();
-            this.taskName = name;
-            var id = $"{this.systemName}.{name}";
-            this.nodes[id] = new Node(id, name, this.systemName, NodeType.task);
+            _task = _system.Tasks.First(t => t.Name == name);
             Trace.WriteLine($"Task: {name}");
         }
-        override public void ExitTask(dsParser.TaskContext ctx) { this.taskName = null; }
+        override public void ExitTask(dsParser.TaskContext ctx) { _task = null; }
 
         override public void EnterListing(dsParser.ListingContext ctx)
         {
-            var name = ctx.id().GetText();
-            var id = $"{this.systemName}.{this.taskName}.{name}";
-            //const node = { "data": { id, "label": name, "background_color": "gray", parent: this.taskName }        };
-            var parentId = $"{this.systemName}.{this.taskName}";
-            this.nodes[id] = new Node(id, label: name, parentId, NodeType.segment);
+            //var name = ctx.id().GetText();
+            //var id = $"{this.systemName}.{this.taskName}.{name}";
+            ////const node = { "data": { id, "label": name, "background_color": "gray", parent: this.taskName }        };
+            //var parentId = $"{this.systemName}.{this.taskName}";
+            //this.nodes[id] = new Node(id, label: name, parentId, NodeType.segment);
         }
 
         override public void EnterCall(dsParser.CallContext ctx) {
             var name = ctx.id().GetText();
             var label = $"{name}\n{ctx.callPhrase().GetText()}";
-            var parentId = $"{this.systemName}.{this.taskName}";
-            var id = $"{parentId}.{name}";
-            this.nodes[id] = new Node(id, label, parentId, NodeType.call);
-            Trace.WriteLine($"CALL: {id}");
+            var call = _task.Calls.First(c => c.Name == name);
+
+            var callph = ctx.callPhrase();
+            var tx = callph.segments(0);
+            var rx = callph.segments(1);
         }
 
-        override public void EnterFlow(dsParser.FlowContext ctx) {
+        override public void EnterFlow(dsParser.FlowContext ctx)
+        {
+            var flowName = ctx.id().GetText();
+            _flow = _system.Flows.First(f => f.Name == flowName);
+
             var flowOf = ctx.flowProp().id();
-            this.flowName = ctx.id().GetText();
-            this.flowOfName = flowOf?.GetText();
+            this.flowOfName = flowOf == null ? flowName : flowOf.GetText();
+
+            var causal =
+                DsParser.enumerateChildren(ctx, false, r => r is dsParser.CausalContext)
+                .Cast<dsParser.CausalContext>()
+                .ToArray()
+                ;
+            var parenting =
+                DsParser.enumerateChildren(ctx, false, r => r is dsParser.ParentingContext)
+                .Cast<dsParser.ParentingContext>()
+                .ToArray()
+                ;
+            var listing =
+                DsParser.enumerateChildren(ctx, false, r => r is dsParser.ListingContext)
+                .Cast<dsParser.ListingContext>()
+                .ToArray()
+                ;
+
             Trace.WriteLine($"Flow: {flowName}");
         }
         override public void ExitFlow(dsParser.FlowContext ctx)
         {
-            this.flowName = null;
-            this.flowOfName = null;
+            _flow = null;
+            flowOfName = null;
         }
 
         override public void EnterCausals(dsParser.CausalsContext ctx)
@@ -138,9 +159,22 @@ namespace DsParser
         }
 
         override public void EnterParenting(dsParser.ParentingContext ctx) {
+            var name = ctx.id().GetText();
+            parentingName = name;
+            var seg = _flow.Segments.First(s => s.Name == name) as RootSegment;
+
+            // A = {
+            //  B > C > D;
+            //  D |> C;
+            // }
+            var causalContexts =
+                DsParser.enumerateChildren(ctx, false, r => r is dsParser.CausalContext)
+                .Cast<dsParser.CausalContext>()
+                .ToArray()
+                ;
             Trace.WriteLine($"Parenting: {ctx.GetText()}");
         }
-        override public void ExitParenting(dsParser.ParentingContext ctx) { }
+        override public void ExitParenting(dsParser.ParentingContext ctx) { parentingName = null; }
 
 
 
@@ -190,12 +224,14 @@ namespace DsParser
                 ;
 
             Nodes dnfNodes = new Nodes();
-            foreach (var cnf in cnfs) {
+            foreach (var cnf in cnfs)
+            {
                 List<Node> cnfNodes = new List<Node>();
                 var causalContexts =
                     DsParser.enumerateChildren(cnf, false, t => t is dsParser.CausalTokenContext)
                     .Select(t => t as dsParser.CausalTokenContext);
-                foreach (var t in causalContexts) {
+                foreach (var t in causalContexts)
+                {
                     var text = t.GetText();
                     if (text.StartsWith("#"))
                     {
@@ -212,22 +248,27 @@ namespace DsParser
                         // count number of '.' from text
                         var dotCount = text.Split(new[] { '.' }).Length - 1;
                         string id = text;
-                        var taskId = $"{this.systemName}.{this.flowOfName}";
+                        var taskId = $"{_system.Name}.{this.flowOfName}";
+                        if (parentingName != null)
+                            taskId = $"{taskId}.{parentingName}";
+
                         var parentId = taskId;
                         switch (dotCount)
                         {
-                            case 0: id = $"{ taskId}.{ text}";
+                            case 0:
+                                id = $"{ taskId}.{ text}";
                                 break;
                             case 1:
-                                id = $"{this.systemName}.{ text}";
-                                parentId = $"{ this.systemName}.{text.Split(new[] { '.' })[0]}";
+                                id = $"{_system.Name}.{ text}";
+                                parentId = $"{ _system.Name}.{text.Split(new[] { '.' })[0]}";
                                 break;
                         }
 
                         var node = new Node(id, label: text, parentId: taskId, NodeType.segment);
                         cnfNodes.Add(node);
                     }
-                    foreach(var n in cnfNodes) {
+                    foreach (var n in cnfNodes)
+                    {
                         if (!this.nodes.ContainsKey(n.id))
                             this.nodes[n.id] = n;
                     }
@@ -249,19 +290,21 @@ namespace DsParser
         private List<string> getCnfTokens(Nodes nodes, bool append = false)
         {
             var cnfTokens = new List<string>();
-            foreach (var x in nodes) {
+            foreach (var x in nodes)
+            {
                 var array = x as List<Node>;
-                var isArray = array != null;    // x is IList<Node> && ((x as List<Node>).Count() > 1);
+                var isArray = array != null && array.Count() > 1;    // x is IList<Node> && ((x as List<Node>).Count() > 1);
 
                 if (append && isArray)
                 {
                     var id = string.Join(",", array.Select(n => n.id));
                     cnfTokens.Add(id);
 
-                    var conj = new Node(id, label: "", parentId: this.taskName, NodeType.conjunction);
+                    var conj = new Node(id, label: "", parentId: flowOfName, NodeType.conjunction);
                     this.nodes[id] = conj;
 
-                    foreach (var src in array) {
+                    foreach (var src in array)
+                    {
                         var s = this.nodes[src.id];
                         this.links.Add(new CausalLink(l: s, r: conj, op: "-"));
                     }
@@ -269,10 +312,13 @@ namespace DsParser
                 else
                 {
                     if (isArray)
-                        foreach(var id in array.Select(n => n.id))
+                        foreach (var id in array.Select(n => n.id))
                             cnfTokens.Add(id);
                     else
-                        cnfTokens.Add( (x as Node).id);
+                    {
+                        var token = array == null ? (x as Node) : array[0];
+                        cnfTokens.Add(token.id);
+                    }
                 }
             }
 
@@ -289,14 +335,16 @@ namespace DsParser
             var op = operator_;
             IEnumerable<string> split()
             {
-                foreach (var o in new[] { "|>", "<|" }) {
+                foreach (var o in new[] { "|>", "<|" })
+                {
                     if (op.Contains(o))
                     {
                         yield return o;
                         op = op.Replace(o, "");
                     }
                 }
-                foreach (var o in new[] { ">", "<" }) {
+                foreach (var o in new[] { ">", "<" })
+                {
                     if (op.Contains(o))
                     {
                         yield return o;
@@ -316,7 +364,8 @@ namespace DsParser
             * @param opr (복합) operator
             * @param rr operator 우측의 DNF
             */
-        private void processCausal(dsParser.CausalTokensDNFContext ll, dsParser.CausalOperatorContext opr, dsParser.CausalTokensDNFContext rr) {
+        private void processCausal(dsParser.CausalTokensDNFContext ll, dsParser.CausalOperatorContext opr, dsParser.CausalTokensDNFContext rr)
+        {
             //console.log(`${ l.text} ${ opr.text} ${ r.text}`);
             var nodes = this.nodes;
 
@@ -327,7 +376,8 @@ namespace DsParser
 
 
             var ops = this.splitOperator(opr.GetText());
-            foreach(var op in ops) {
+            foreach (var op in ops)
+            {
                 var sinkToRight = op == ">" || op == "|>";
                 var lss = this.getCnfTokens(ls, sinkToRight);
                 var rss = this.getCnfTokens(rs, !sinkToRight);

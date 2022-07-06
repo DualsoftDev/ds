@@ -7,7 +7,7 @@ namespace DsParser
     using System.Diagnostics;
     using System.Text;
 
-    public class Program
+    public class XProgram
     {
         static void Main(string[] args)
         {

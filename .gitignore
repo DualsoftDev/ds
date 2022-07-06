@@ -1,0 +1,6 @@
+**/__pycache__
+**/node_modules
+**/yarn-error.log
+**/.vscode
+**/.antlr
+DsEnginePython/antlr4_parser/src/

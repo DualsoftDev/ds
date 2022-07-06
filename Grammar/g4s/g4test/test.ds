@@ -1,0 +1,22 @@
+[sys] P = {
+    [flow] F = {
+        parenting = {A > B > C; C |> B; }
+        Vp ? X > Pp > Sp;
+        Vm > Pm > Sm;
+    }
+}
+
+/*
+[sys] it = {
+    [task] T = {
+    	C1 = {TX ~ RX ~ _}
+	    C2 = {TX ~ RX}
+    }
+    [flow] F = {
+        parenting = {A > B > C; C |> B; }
+        T.C1 <||> T.C2;
+        A, B > C > D, E;
+        T.C1 > T.C2;
+    }
+}
+*/

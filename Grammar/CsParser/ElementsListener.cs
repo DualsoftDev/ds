@@ -63,10 +63,10 @@ namespace DsParser
         DsSystem _system;
         Task _task;
         Flow _flow;
+        RootSegment _parenting;
 
         //private string flowName;        // [flow of A]F={..} -> F
         private string flowOfName;      // [flow of A]F={..} -> A
-        private string parentingName;
         private List<ParserRuleContext> allParserRules;
         private bool multipleSystems;
 
@@ -114,8 +114,11 @@ namespace DsParser
             var call = _task.Calls.First(c => c.Name == name);
 
             var callph = ctx.callPhrase();
-            var tx = callph.segments(0);
-            var rx = callph.segments(1);
+            var tx = _model.FindSegment(callph.segments(0).GetText());
+            var rx = _model.FindSegment(callph.segments(1).GetText());
+            call.TX = tx as RootSegment;
+            call.RX = rx as RootSegment;
+            Trace.WriteLine($"Call: {name} = {tx.Name} ~ {rx.Name}");
         }
 
         override public void EnterFlow(dsParser.FlowContext ctx)
@@ -154,20 +157,25 @@ namespace DsParser
 
         override public void EnterParenting(dsParser.ParentingContext ctx) {
             var name = ctx.id().GetText();
-            parentingName = name;
             var seg = _flow.Segments.First(s => s.Name == name) as RootSegment;
+
+            _parenting = new RootSegment(name, _flow);
 
             // A = {
             //  B > C > D;
             //  D |> C;
             // }
             var causalContexts =
-                DsParser.enumerateChildren<dsParser.CausalContext>(ctx, false, r => r is dsParser.CausalContext)
-                .ToArray()
+                DsParser.enumerateChildren<dsParser.CausalPhraseContext>(ctx, false, r => r is dsParser.CausalPhraseContext)
                 ;
+            foreach(var cauCtx in causalContexts)
+            {
+
+            }
+
             Trace.WriteLine($"Parenting: {ctx.GetText()}");
         }
-        override public void ExitParenting(dsParser.ParentingContext ctx) { parentingName = null; }
+        override public void ExitParenting(dsParser.ParentingContext ctx) { _parenting = null; }
 
 
 
@@ -180,6 +188,10 @@ namespace DsParser
             var op = ctx.GetChild(1);
             var rights = ctx.GetChild(2);
 
+            if (_parenting != null)
+            {
+                //_parenting.ChildFlow.Edges.Add(new Edge())
+            }
             Trace.WriteLine($"\tCausalPhrase all: {left.GetText()}, {op.GetText()}, {rights.GetText()}");
         }
         override public void EnterCausalTokensDNF(dsParser.CausalTokensDNFContext ctx) {
@@ -241,8 +253,8 @@ namespace DsParser
                         var dotCount = text.Split(new[] { '.' }).Length - 1;
                         string id = text;
                         var taskId = $"{_system.Name}.{this.flowOfName}";
-                        if (parentingName != null)
-                            taskId = $"{taskId}.{parentingName}";
+                        if (_parenting != null)
+                            taskId = $"{taskId}.{_parenting.Name}";
 
                         var parentId = taskId;
                         switch (dotCount)
@@ -380,14 +392,26 @@ namespace DsParser
                     {
                         var l = this.nodes[strL];
                         var r = this.nodes[strR];
+
+                        var flow = _flow;
+                        if (_parenting != null )
+                            flow = _parenting.ChildFlow;   // target flow
+
+                        var lv = _parenting == null ? (IVertex)_model.FindSegment(l.id) : _model.FindCall(l.id);
+                        var rv = _parenting == null ? (IVertex)_model.FindSegment(r.id) : _model.FindCall(r.id);
+
                         Debug.Assert(l != null && r != null);   // 'node not found');
                         switch (op)
                         {
                             case "|>":
-                            case ">": this.links.Add(new CausalLink(l, r, op)); break;
+                            case ">":
+                                flow.Edges.Add(new Edge(new[] { lv }, rv));
+                                this.links.Add(new CausalLink(l, r, op)); break;
 
                             case "<|":
-                            case "<": this.links.Add(new CausalLink(l: r, r: l, op)); break;
+                            case "<":
+                                flow.Edges.Add(new Edge(new[] { rv }, lv));
+                                this.links.Add(new CausalLink(l: r, r: l, op)); break;
 
                             default:
                                 Debug.Assert(false);    //, `invalid operator: ${ op}`);

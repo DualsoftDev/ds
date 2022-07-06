@@ -4,6 +4,7 @@ namespace DsParser
     using Antlr4.Runtime;
     using Antlr4.Runtime.Tree;
 
+    using System.Diagnostics;
     using System.Text;
 
     public class Program
@@ -12,14 +13,25 @@ namespace DsParser
         {
             var text = @"
 [sys] it = {
-    [task] Task = { S1 = {TX ~ RX}; S2 = {TX ~ RX}; }
-    [flow] F = {
-        parenting = {A > B > C; ; C |> B;}
-        S1 <||> S2;
-        A, B > C > D, E;
-        T.S1 > T.S2;
+    [task] T = {
+        Cp = {P.F.Vp ~ P.F.Sp}
+        Cm = {P.F.Vm ~ P.F.Sm}
     }
-}";
+    [flow] F = {
+        Main = { T.Cp > T.Cm > X.xx; }
+        //parenting = {A > B > C; C |> B; }
+        //T.C1 <||> T.C2;
+        //A, B > C > D, E;
+        //T.C1 > T.C2;
+    }
+}
+[sys] P = {
+    [flow] F = {
+        Vp > Pp > Sp;
+        Vm > Pm > Sm;
+    }
+}
+";
 //            text = @"
 //[sys]MyElevatorSystem = {
 //    [task]M = {
@@ -41,6 +53,7 @@ namespace DsParser
             var parser = DsParser.FromDocument(text);
             var listener = new ModelListener(parser);
             ParseTreeWalker.Default.Walk(listener, parser.program());
+            Trace.WriteLine("--- End of model listener");
             var model = listener.Model;
 
             parser.Reset();
@@ -48,9 +61,10 @@ namespace DsParser
             ParseTreeWalker.Default.Walk(elistener, parser.program());
             var x = elistener.links;
 
-            Try("1 + 2 + 3");
-            Try("1 2 + 3");
-            Try("1 + +");
+            //Try("1 + 2 + 3");
+            //Try("1 2 + 3");
+            //Try("1 + +");
+            System.Console.WriteLine("Done");
         }
 
         static void Try(string input)

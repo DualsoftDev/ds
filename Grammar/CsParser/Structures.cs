@@ -67,8 +67,11 @@ public class DsSystem : Named
         public List<Flow> Flows = new List<Flow>();
     }
 
-    public class Segment : Named
+    public interface IVertex {}
+
+    public class Segment : Named, IVertex
     {
+        /// container flow
         public Flow Flow;
         public Segment(string name, Flow flow)
             : base(name)
@@ -80,16 +83,20 @@ public class DsSystem : Named
 
     public class RootSegment: Segment
     {
+        public Flow ChildFlow;
         public List<Segment> Children = new List<Segment>();
         public RootSegment(string name, Flow flow)
             : base(name, flow)
         {
+            ChildFlow = new Flow($"_{name}", Flow.System);
         }
-    }
+}
 
-    public class Call : Named
+    public class Call : Named, IVertex
     {
         public Task Task;
+        public RootSegment TX;
+        public RootSegment RX;
 
         public Call(string name, Task task)
             : base(name)
@@ -101,5 +108,57 @@ public class DsSystem : Named
 
     public class Edge
     {
+        public IVertex[] Sources;
+        public IVertex Target;
+
+        public Edge(IVertex[] sources, IVertex target)
+        {
+            Sources = sources;
+            Target = target;
+        }
+    }
+
+    public static class ModelUtil
+    {
+        static IVertex FindSegmentOrCall(this Model model, string systemName, string flowOrTaskName, string segmentOrCallName, bool isSegment)
+        {
+            try
+            {
+                var system = model.Systems.First(s => s.Name == systemName);
+                if (isSegment)
+                    return system.Flows
+                        .First(f => f.Name == flowOrTaskName)
+                        .Segments.First(s => s.Name == segmentOrCallName)
+                        ;
+
+                return system.Tasks
+                    .First(t => t.Name == flowOrTaskName)
+                    .Calls.First(c => c.Name == segmentOrCallName)
+                    ;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+        public static Segment FindSegment(this Model model, string systemName, string flowName, string segmentName) =>
+            model.FindSegmentOrCall(systemName, flowName, segmentName, true) as Segment;
+
+        public static Call FindCall(this Model model, string systemName, string taskName, string callName) =>
+            model.FindSegmentOrCall(systemName, taskName, callName, false) as Call;
+
+        public static Segment FindSegment(this Model model, string fqSegmentName)
+        {
+            var names = fqSegmentName.Split(new[] { '.' });
+            (var sysName, var flowName, var segmentName) = (names[0], names[1], names[2]);
+            return model.FindSegment(sysName, flowName, segmentName);
+        }
+
+        public static Call FindCall(this Model model, string fqCallName)
+        {
+            var names = fqCallName.Split(new[] { '.' });
+            (var sysName, var taskName, var callName) = (names[0], names[1], names[2]);
+            return model.FindCall(sysName, taskName, callName);
+        }
     }
 }

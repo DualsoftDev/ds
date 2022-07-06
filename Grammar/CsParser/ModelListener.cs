@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Linq;
 
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
@@ -41,7 +42,24 @@ namespace DsParser
             _flow = new Flow(flowName, _system);
             Trace.WriteLine($"Flow: {flowName}");
         }
-        //override public void ExitFlow(dsParser.FlowContext ctx) { }
+        override public void ExitFlow(dsParser.FlowContext ctx) { _flow = null; }
+
+        override public void EnterCausalPhrase(dsParser.CausalPhraseContext ctx)
+        {
+            var dnfs =
+                DsParser.enumerateChildren<dsParser.CausalTokensDNFContext>(
+                    ctx, false, r => r is dsParser.CausalTokensDNFContext);
+
+            var segCtxs =
+                DsParser.enumerateChildren<dsParser.SegmentContext>(
+                    ctx, false, r => r is dsParser.SegmentContext);
+
+            var _segments =
+                segCtxs.Select(segCtx => new RootSegment(segCtx.GetText(), _flow))  // _flow 에 segment 로 등록됨
+                .ToArray()
+                ;
+        }
+
         override public void EnterCall(dsParser.CallContext ctx)
         {
             var name = ctx.id().GetText();
@@ -54,13 +72,14 @@ namespace DsParser
             //var parentId = $"{this.systemName}.{this.taskName}";
             //var id = $"{parentId}.{name}";
             //this.nodes[id] = new Node(id, label, parentId, NodeType.call);
-            //Trace.WriteLine($"CALL: {id}");
+            Trace.WriteLine($"CALL: {name}");
         }
+
 
         override public void EnterListing(dsParser.ListingContext ctx)
         {
             var name = ctx.id().GetText();
-            var seg = new Segment(name, _flow);
+            var seg = new RootSegment(name, _flow);
 
             //var id = $"{this.systemName}.{this.taskName}.{name}";
             ////const node = { "data": { id, "label": name, "background_color": "gray", parent: this.taskName }        };

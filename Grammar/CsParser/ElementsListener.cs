@@ -127,19 +127,13 @@ namespace DsParser
             this.flowOfName = flowOf == null ? flowName : flowOf.GetText();
 
             var causal =
-                DsParser.enumerateChildren(ctx, false, r => r is dsParser.CausalContext)
-                .Cast<dsParser.CausalContext>()
-                .ToArray()
+                DsParser.enumerateChildren<dsParser.CausalContext>(ctx, false, r => r is dsParser.CausalContext)
                 ;
             var parenting =
-                DsParser.enumerateChildren(ctx, false, r => r is dsParser.ParentingContext)
-                .Cast<dsParser.ParentingContext>()
-                .ToArray()
+                DsParser.enumerateChildren<dsParser.ParentingContext>(ctx, false, r => r is dsParser.ParentingContext)
                 ;
             var listing =
-                DsParser.enumerateChildren(ctx, false, r => r is dsParser.ListingContext)
-                .Cast<dsParser.ListingContext>()
-                .ToArray()
+                DsParser.enumerateChildren<dsParser.ListingContext>(ctx, false, r => r is dsParser.ListingContext)
                 ;
 
             Trace.WriteLine($"Flow: {flowName}");
@@ -168,8 +162,7 @@ namespace DsParser
             //  D |> C;
             // }
             var causalContexts =
-                DsParser.enumerateChildren(ctx, false, r => r is dsParser.CausalContext)
-                .Cast<dsParser.CausalContext>()
+                DsParser.enumerateChildren<dsParser.CausalContext>(ctx, false, r => r is dsParser.CausalContext)
                 .ToArray()
                 ;
             Trace.WriteLine($"Parenting: {ctx.GetText()}");
@@ -219,8 +212,7 @@ namespace DsParser
                 return this._existings[ctx];
 
             var cnfs =
-                DsParser.enumerateChildren(ctx, false, t => t is dsParser.CausalTokensCNFContext)
-                .Select(t => t as dsParser.CausalTokensCNFContext)
+                DsParser.enumerateChildren<dsParser.CausalTokensCNFContext>(ctx, false, t => t is dsParser.CausalTokensCNFContext)
                 ;
 
             Nodes dnfNodes = new Nodes();
@@ -228,8 +220,8 @@ namespace DsParser
             {
                 List<Node> cnfNodes = new List<Node>();
                 var causalContexts =
-                    DsParser.enumerateChildren(cnf, false, t => t is dsParser.CausalTokenContext)
-                    .Select(t => t as dsParser.CausalTokenContext);
+                    DsParser.enumerateChildren<dsParser.CausalTokenContext>(cnf, false, t => t is dsParser.CausalTokenContext);
+
                 foreach (var t in causalContexts)
                 {
                     var text = t.GetText();

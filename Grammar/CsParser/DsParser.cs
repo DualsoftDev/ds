@@ -25,14 +25,14 @@ namespace DsParser
             return parser;
         }
 
-        public static List<IParseTree> enumerateChildren(IParseTree from, bool includeMe=true, Func<IParseTree, bool> predicate = null )
+        public static List<T> enumerateChildren<T>(IParseTree from, bool includeMe=true, Func<IParseTree, bool> predicate = null ) where T : IParseTree
         {
-            var result = new List<IParseTree>();
+            var result = new List<T>();
             enumerateChildrenHelper(result, from, includeMe, predicate);
             return result;
 
 
-            void enumerateChildrenHelper(List<IParseTree> rslt, IParseTree frm, bool incMe, Func<IParseTree, bool> pred)
+            void enumerateChildrenHelper(List<T> rslt, IParseTree frm, bool incMe, Func<IParseTree, bool> pred)
             {
                 bool ok(IParseTree t)
                 {
@@ -42,7 +42,7 @@ namespace DsParser
                 }
 
                 if (incMe && ok(frm))
-                    rslt.Add(frm);
+                    rslt.Add((T)frm);
                 for (int index = 0; index < frm.ChildCount; index++)
                     enumerateChildrenHelper(rslt, frm.GetChild(index), true, ok);
             }
@@ -67,7 +67,7 @@ namespace DsParser
 
         public static IParseTree findFirstChild(IParseTree from, Func<IParseTree, bool> predicate, bool includeMe = true)
         {
-            foreach (var c in DsParser.enumerateChildren(from, includeMe))
+            foreach (var c in DsParser.enumerateChildren<IParseTree>(from, includeMe))
             {
                 if (predicate(c))
                     return c;

@@ -129,7 +129,7 @@ causalOperator
     | '<'   // CAUSAL_BWD
     | '<|'  // CAUSAL_RESET_BWD
     | '<<|' | '<|<' // CAUSAL_BWD_AND_RESET_BWD
-    | '<||>'        // CAUSAL_RESET_FB         
+    | '<||>'        // CAUSAL_RESET_FB
     | '><|'         // CAUSAL_FWD_AND_RESET_BWD
     | '|><'         // CAUSAL_BWD_AND_RESET_FWD
     ;

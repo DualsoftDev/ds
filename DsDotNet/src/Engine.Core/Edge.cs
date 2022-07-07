@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Linq;
 
-namespace Engine
+namespace Engine.Core
 {
     public interface IStrong { }
     public interface IReset { }

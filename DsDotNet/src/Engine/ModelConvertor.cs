@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
 using DsParser;
+using Engine.Core;
 
 namespace Engine
 {
@@ -83,17 +83,29 @@ namespace Engine
                     var flow = pick<Flow>(pFlow);
                     foreach (var pEdge in pFlow.Edges)
                     {
-                        var ss = pEdge.Sources.Select(pS => pick<ISegmentOrCall>(pS)).ToArray();
-                        var t = pick<ISegmentOrCall>(pEdge.Target);
+                        var ss = pEdge.Sources.Select(pS => pick<Core.ISegmentOrCall>(pS)).ToArray();
+                        var t = pick<Core.ISegmentOrCall>(pEdge.Target);
                         var op = pEdge.Operator;
-                        Edge edge = op switch
+
+                        //Edge edge = op switch
+                        //{
+                        //    ">" => new WeakSetEdge(ss, op, t),
+                        //    ">>" => new StrongSetEdge(ss, op, t),
+                        //    "|>" => new WeakResetEdge(ss, op, t),
+                        //    "|>>" => new StrongResetEdge(ss, op, t),
+                        //    _ => throw new Exception("ERROR"),
+                        //};
+                        Edge edge = null;
+                        switch(op)
                         {
-                            ">" => new WeakSetEdge(ss, op, t),
-                            ">>" => new StrongSetEdge(ss, op, t),
-                            "|>" => new WeakResetEdge(ss, op, t),
-                            "|>>" => new StrongResetEdge(ss, op, t),
-                            _ => throw new Exception("ERROR"),
+                            case ">":  edge = new WeakSetEdge(ss, op, t); break;
+                            case ">>": edge = new StrongSetEdge(ss, op, t); break;
+                            case "|>": edge = new WeakResetEdge(ss, op, t); break;
+                            case "|>>":edge = new StrongResetEdge(ss, op, t); break;
+                            default:
+                                throw new Exception("ERROR");
                         };
+
 
                         flow.Edges.Add(edge);
                     }

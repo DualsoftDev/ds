@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Engine
+namespace Engine.Core
 {
     public enum Status4
     {

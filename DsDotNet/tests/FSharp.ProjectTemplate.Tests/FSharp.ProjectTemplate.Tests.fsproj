@@ -15,8 +15,5 @@
     <Compile Include="RunTests.fs" />
     <None Include="paket.references" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\FSharp.ProjectTemplate\FSharp.ProjectTemplate.fsproj"></ProjectReference>
-  </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace Engine
+namespace Engine.Core
 {
     public class Segment : SegmentOrCallBase, IWithSREPorts
     {

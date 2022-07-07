@@ -25,7 +25,7 @@ namespace DsParser
     }
 
 
-public class PSystem : PNamed
+    public class PSystem : PNamed
     {
         public PModel Model;
         public List<PFlow> Flows = new List<PFlow>();

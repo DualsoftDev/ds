@@ -1,4 +1,4 @@
-﻿using DsParser;
+using DsParser;
 
 using System;
 

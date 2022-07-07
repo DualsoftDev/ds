@@ -63,7 +63,7 @@ namespace DsParser
         PSystem _system;
         PTask _task;
         PRootFlow _rootFlow;
-        PRootSegment _parenting;
+        PSegment _parenting;
 
         //private string flowName;        // [flow of A]F={..} -> F
         private string flowOfName;      // [flow of A]F={..} -> A
@@ -116,8 +116,8 @@ namespace DsParser
             var callph = ctx.callPhrase();
             var tx = _model.FindSegment(callph.segments(0).GetText());
             var rx = _model.FindSegment(callph.segments(1).GetText());
-            call.TX = tx as PRootSegment;
-            call.RX = rx as PRootSegment;
+            call.TX = tx;
+            call.RX = rx;
             Trace.WriteLine($"Call: {name} = {tx.Name} ~ {rx.Name}");
         }
 
@@ -157,9 +157,9 @@ namespace DsParser
 
         override public void EnterParenting(dsParser.ParentingContext ctx) {
             var name = ctx.id().GetText();
-            var seg = _rootFlow.Segments.First(s => s.Name == name) as PRootSegment;
+            var seg = _rootFlow.Segments.First(s => s.Name == name);
 
-            _parenting = seg ?? new PRootSegment(name, _rootFlow);
+            _parenting = seg ?? new PSegment(name, _rootFlow);
 
             // A = {
             //  B > C > D;

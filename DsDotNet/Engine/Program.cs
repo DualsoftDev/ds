@@ -18,7 +18,7 @@ namespace Engine
         Main = { T.Cp > T.Cm; }
         //parenting = {A > B > C; C |> B; }
         //T.C1 <||> T.C2;
-        A, B > C > D, E;
+        Main > A, B > C > D, E;
         T.Cm > T.Cp;
     }
 }

@@ -62,11 +62,11 @@ public class PSystem : PNamed
 
     public class PChildFlow : PFlow
     {
-        public PRootSegment Segment; // container
-        public PChildFlow(string name, PRootSegment segment)
-            : base(name, segment.Flow.System)
+        public PSegment ContainerSegment;
+        public PChildFlow(string name, PSegment segment)
+            : base(name, segment.ContainerFlow.System)
         {
-            Segment = segment;
+            ContainerSegment = segment;
         }
     }
 
@@ -91,18 +91,7 @@ public class PSystem : PNamed
 
     public class PSegment : PNamed, ISegmentOrCall
     {
-        /// container flow
-        public PRootFlow Flow;
-        public PSegment(string name, PRootFlow flow)
-            : base(name)
-        {
-            Flow = flow;
-            flow.Segments.Add(this);
-        }
-    }
-
-    public class PRootSegment: PSegment
-    {
+        public PRootFlow ContainerFlow;
         public PChildFlow ChildFlow;
         public IEnumerable<PCall> Children =>
             ChildFlow?.Edges
@@ -110,18 +99,22 @@ public class PSystem : PNamed
             .OfType<PCall>()
             .Distinct()
             ;
-        public PRootSegment(string name, PRootFlow flow)
-            : base(name, flow)
+
+        public PSegment(string name, PRootFlow containerFlow)
+            : base(name)
         {
+            ContainerFlow = containerFlow;
             ChildFlow = new PChildFlow($"_{name}", this);
+            containerFlow.Segments.Add(this);
         }
-}
+    }
+
 
     public class PCall : PNamed, ISegmentOrCall
     {
         public PTask Task;
-        public PRootSegment TX;
-        public PRootSegment RX;
+        public PSegment TX;
+        public PSegment RX;
 
         public PCall(string name, PTask task)
             : base(name)
@@ -149,7 +142,7 @@ public class PSystem : PNamed
         }
     }
 
-    public static class ModelUtil
+    public static class PModelUtil
     {
         static ISegmentOrCall FindSegmentOrCall(this PModel model, string systemName, string flowOrTaskName, string segmentOrCallName, bool isSegment)
         {

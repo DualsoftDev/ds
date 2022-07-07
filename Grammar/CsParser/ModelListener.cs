@@ -58,8 +58,9 @@ namespace DsParser
 
             var _segments =
                 names
-                .Where(n => ! n.Contains('.'))
-                .Select(n => new PRootSegment(n, _rootFlow))  // _flow 에 segment 로 등록됨
+                .Where(n => ! n.Contains('.'))  // '.' 이 포함되면 Call
+                .Where(n => !_rootFlow.Segments.Any(s => s.Name == n))
+                .Select(n => new PSegment(n, _rootFlow))  // _flow 에 segment 로 등록됨
                 .ToArray()
                 ;
         }
@@ -83,7 +84,7 @@ namespace DsParser
         override public void EnterListing(dsParser.ListingContext ctx)
         {
             var name = ctx.id().GetText();
-            var seg = new PRootSegment(name, _rootFlow);
+            var seg = new PSegment(name, _rootFlow);
 
             //var id = $"{this.systemName}.{this.taskName}.{name}";
             ////const node = { "data": { id, "label": name, "background_color": "gray", parent: this.taskName }        };
@@ -102,7 +103,7 @@ namespace DsParser
         override public void EnterParenting(dsParser.ParentingContext ctx) {
             Trace.WriteLine($"Parenting: {ctx.GetText()}");
             var name = ctx.id().GetText();
-            var seg = new PRootSegment(name, _rootFlow);
+            var seg = new PSegment(name, _rootFlow);
         }
         //override public void ExitParenting(dsParser.ParentingContext ctx) { }
 

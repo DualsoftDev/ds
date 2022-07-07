@@ -62,7 +62,7 @@ namespace DsParser
 
         DsSystem _system;
         Task _task;
-        Flow _flow;
+        RootFlow _rootFlow;
         RootSegment _parenting;
 
         //private string flowName;        // [flow of A]F={..} -> F
@@ -124,7 +124,7 @@ namespace DsParser
         override public void EnterFlow(dsParser.FlowContext ctx)
         {
             var flowName = ctx.id().GetText();
-            _flow = _system.Flows.First(f => f.Name == flowName);
+            _rootFlow = _system.Flows.OfType<RootFlow>().First(f => f.Name == flowName);
 
             var flowOf = ctx.flowProp().id();
             this.flowOfName = flowOf == null ? flowName : flowOf.GetText();
@@ -143,7 +143,7 @@ namespace DsParser
         }
         override public void ExitFlow(dsParser.FlowContext ctx)
         {
-            _flow = null;
+            _rootFlow = null;
             flowOfName = null;
         }
 
@@ -157,9 +157,9 @@ namespace DsParser
 
         override public void EnterParenting(dsParser.ParentingContext ctx) {
             var name = ctx.id().GetText();
-            var seg = _flow.Segments.First(s => s.Name == name) as RootSegment;
+            var seg = _rootFlow.Segments.First(s => s.Name == name) as RootSegment;
 
-            _parenting = new RootSegment(name, _flow);
+            _parenting = seg ?? new RootSegment(name, _rootFlow);
 
             // A = {
             //  B > C > D;
@@ -188,9 +188,16 @@ namespace DsParser
             var op = ctx.GetChild(1);
             var rights = ctx.GetChild(2);
 
-            if (_parenting != null)
+            if (_parenting == null)
             {
                 //_parenting.ChildFlow.Edges.Add(new Edge())
+            }
+            else
+            {
+                //var l = _model.FindCall($"{_system.Name}.{left.GetText()}");
+                //var r = _model.FindCall($"{_system.Name}.{rights.GetText()}");
+                //var edge = new Edge(new[] { l }, r);
+                //_parenting.ChildFlow.Edges.Add(edge);
             }
             Trace.WriteLine($"\tCausalPhrase all: {left.GetText()}, {op.GetText()}, {rights.GetText()}");
         }
@@ -362,6 +369,21 @@ namespace DsParser
             return split().ToList();
         }
 
+
+        ISegmentOrCall FindVertex(string v)
+        {
+            var seg = _model.FindSegment(v);
+            var call = _model.FindCall(v);
+
+            if (seg!=null && call!=null)
+                throw new Exception($"Parse error: {v} is ambiguous.  Both segment and call exists.");
+            if (seg == null && call == null)
+                throw new Exception($"Parse error: {v} not found.");
+
+            return (ISegmentOrCall)seg ?? call;
+        }
+        ISegmentOrCall[] FindSources(string specs) => specs.Split(new[] { ',' }).Select(FindVertex).ToArray();
+
         /**
             * causal operator 를 처리해서 this.links 에 결과 누적
             * @param ll operator 왼쪽의 DNF
@@ -393,24 +415,27 @@ namespace DsParser
                         var l = this.nodes[strL];
                         var r = this.nodes[strR];
 
-                        var flow = _flow;
+                        Flow flow = _rootFlow;
                         if (_parenting != null )
                             flow = _parenting.ChildFlow;   // target flow
 
-                        var lv = _parenting == null ? (IVertex)_model.FindSegment(l.id) : _model.FindCall(l.id);
-                        var rv = _parenting == null ? (IVertex)_model.FindSegment(r.id) : _model.FindCall(r.id);
+                        var lvs = FindSources(l.id);
+                        var rv = FindVertex(r.id);
 
                         Debug.Assert(l != null && r != null);   // 'node not found');
+                        if (lvs.Length == 0) throw new Exception($"Parse error: {l.id} not found");
+                        if (rv == null) throw new Exception($"Parse error: {r.id} not found");
+
                         switch (op)
                         {
                             case "|>":
                             case ">":
-                                flow.Edges.Add(new Edge(new[] { lv }, rv));
+                                flow.Edges.Add(new Edge(lvs, rv));
                                 this.links.Add(new CausalLink(l, r, op)); break;
 
                             case "<|":
                             case "<":
-                                flow.Edges.Add(new Edge(new[] { rv }, lv));
+                                flow.Edges.Add(new Edge(new[] { rv }, lvs[0]));
                                 this.links.Add(new CausalLink(l: r, r: l, op)); break;
 
                             default:

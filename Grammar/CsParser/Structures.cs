@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,6 +21,7 @@ namespace DsParser
         {
             Name = name;
         }
+        public override string ToString() => Name;
     }
 
 
@@ -36,17 +38,35 @@ public class DsSystem : Named
         }
     }
 
-    public class Flow : Named
+    public abstract class Flow : Named
     {
         public DsSystem System;
         public List<Segment> Segments = new List<Segment>();
         public List<Edge> Edges = new List<Edge>();
 
-        public Flow(string name, DsSystem system)
+        protected Flow(string name, DsSystem system)
             : base(name)
         {
             System = system;
             system.Flows.Add(this);
+        }
+    }
+
+    public class RootFlow : Flow
+    {
+        public RootFlow(string name, DsSystem system)
+            : base(name, system)
+        {
+        }
+    }
+
+    public class ChildFlow : Flow
+    {
+        public RootSegment Segment; // container
+        public ChildFlow(string name, RootSegment segment)
+            : base(name, segment.Flow.System)
+        {
+            Segment = segment;
         }
     }
 
@@ -67,13 +87,13 @@ public class DsSystem : Named
         public List<Flow> Flows = new List<Flow>();
     }
 
-    public interface IVertex {}
+    public interface ISegmentOrCall {}
 
-    public class Segment : Named, IVertex
+    public class Segment : Named, ISegmentOrCall
     {
         /// container flow
-        public Flow Flow;
-        public Segment(string name, Flow flow)
+        public RootFlow Flow;
+        public Segment(string name, RootFlow flow)
             : base(name)
         {
             Flow = flow;
@@ -83,16 +103,21 @@ public class DsSystem : Named
 
     public class RootSegment: Segment
     {
-        public Flow ChildFlow;
-        public List<Segment> Children = new List<Segment>();
-        public RootSegment(string name, Flow flow)
+        public ChildFlow ChildFlow;
+        public IEnumerable<Call> Children =>
+            ChildFlow?.Edges
+            .SelectMany(e => e.Sources.Concat(new[] { e.Target }))
+            .OfType<Call>()
+            .Distinct()
+            ;
+        public RootSegment(string name, RootFlow flow)
             : base(name, flow)
         {
-            ChildFlow = new Flow($"_{name}", Flow.System);
+            ChildFlow = new ChildFlow($"_{name}", this);
         }
 }
 
-    public class Call : Named, IVertex
+    public class Call : Named, ISegmentOrCall
     {
         public Task Task;
         public RootSegment TX;
@@ -106,40 +131,45 @@ public class DsSystem : Named
         }
     }
 
+    [DebuggerDisplay("{ToText()}")]
     public class Edge
     {
-        public IVertex[] Sources;
-        public IVertex Target;
+        public ISegmentOrCall[] Sources;
+        public ISegmentOrCall Target;
 
-        public Edge(IVertex[] sources, IVertex target)
+        public Edge(ISegmentOrCall[] sources, ISegmentOrCall target)
         {
             Sources = sources;
             Target = target;
+        }
+        public string ToText()
+        {
+            var ss = string.Join(", ", Sources.Select(s => s.ToString()));
+            return $"{ss} -> {Target}";
         }
     }
 
     public static class ModelUtil
     {
-        static IVertex FindSegmentOrCall(this Model model, string systemName, string flowOrTaskName, string segmentOrCallName, bool isSegment)
+        static ISegmentOrCall FindSegmentOrCall(this Model model, string systemName, string flowOrTaskName, string segmentOrCallName, bool isSegment)
         {
-            try
+            var system = model.Systems.First(s => s.Name == systemName);
+            if (isSegment)
             {
-                var system = model.Systems.First(s => s.Name == systemName);
-                if (isSegment)
-                    return system.Flows
-                        .First(f => f.Name == flowOrTaskName)
-                        .Segments.First(s => s.Name == segmentOrCallName)
-                        ;
+                var flow = system.Flows.FirstOrDefault(f => f.Name == flowOrTaskName);
+                if (flow == null)
+                    return null;
 
-                return system.Tasks
-                    .First(t => t.Name == flowOrTaskName)
-                    .Calls.First(c => c.Name == segmentOrCallName)
+                return flow
+                    .Segments.FirstOrDefault(s => s.Name == segmentOrCallName)
                     ;
             }
-            catch (Exception)
-            {
+
+            var task = system.Tasks.FirstOrDefault(t => t.Name == flowOrTaskName);
+            if (task == null)
                 return null;
-            }
+
+            return task.Calls.FirstOrDefault(c => c.Name == segmentOrCallName);
         }
         public static Segment FindSegment(this Model model, string systemName, string flowName, string segmentName) =>
             model.FindSegmentOrCall(systemName, flowName, segmentName, true) as Segment;

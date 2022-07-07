@@ -11,7 +11,7 @@ namespace DsParser
         public Model Model { get; }
         DsSystem _system;
         Task _task;
-        Flow _flow;
+        RootFlow _rootFlow;
 
         public ModelListener(dsParser parser)
         {
@@ -39,23 +39,27 @@ namespace DsParser
         {
             var flowName = ctx.id().GetText();
             var flowOf = ctx.flowProp().id();
-            _flow = new Flow(flowName, _system);
+            _rootFlow = new RootFlow(flowName, _system);
             Trace.WriteLine($"Flow: {flowName}");
         }
-        override public void ExitFlow(dsParser.FlowContext ctx) { _flow = null; }
+        override public void ExitFlow(dsParser.FlowContext ctx) { _rootFlow = null; }
 
         override public void EnterCausalPhrase(dsParser.CausalPhraseContext ctx)
         {
-            var dnfs =
-                DsParser.enumerateChildren<dsParser.CausalTokensDNFContext>(
-                    ctx, false, r => r is dsParser.CausalTokensDNFContext);
+            //var dnfs =
+            //    DsParser.enumerateChildren<dsParser.CausalTokensDNFContext>(
+            //        ctx, false, r => r is dsParser.CausalTokensDNFContext);
 
-            var segCtxs =
+            var names =
                 DsParser.enumerateChildren<dsParser.SegmentContext>(
-                    ctx, false, r => r is dsParser.SegmentContext);
+                    ctx, false, r => r is dsParser.SegmentContext)
+                .Select(segCtx => segCtx.GetText())
+                ;
 
             var _segments =
-                segCtxs.Select(segCtx => new RootSegment(segCtx.GetText(), _flow))  // _flow 에 segment 로 등록됨
+                names
+                .Where(n => ! n.Contains('.'))
+                .Select(n => new RootSegment(n, _rootFlow))  // _flow 에 segment 로 등록됨
                 .ToArray()
                 ;
         }
@@ -79,7 +83,7 @@ namespace DsParser
         override public void EnterListing(dsParser.ListingContext ctx)
         {
             var name = ctx.id().GetText();
-            var seg = new RootSegment(name, _flow);
+            var seg = new RootSegment(name, _rootFlow);
 
             //var id = $"{this.systemName}.{this.taskName}.{name}";
             ////const node = { "data": { id, "label": name, "background_color": "gray", parent: this.taskName }        };
@@ -98,7 +102,7 @@ namespace DsParser
         override public void EnterParenting(dsParser.ParentingContext ctx) {
             Trace.WriteLine($"Parenting: {ctx.GetText()}");
             var name = ctx.id().GetText();
-            var seg = new RootSegment(name, _flow);
+            var seg = new RootSegment(name, _rootFlow);
         }
         //override public void ExitParenting(dsParser.ParentingContext ctx) { }
 

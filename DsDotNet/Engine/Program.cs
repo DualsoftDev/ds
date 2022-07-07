@@ -15,11 +15,11 @@ namespace Engine
         Cm = {P.F.Vm ~ P.F.Sm}
     }
     [flow] F = {
-        Main = { T.Cp > T.Cm > X.xx; }
+        Main = { T.Cp > T.Cm; }
         //parenting = {A > B > C; C |> B; }
         //T.C1 <||> T.C2;
-        //A, B > C > D, E;
-        //T.C1 > T.C2;
+        A, B > C > D, E;
+        T.Cm > T.Cp;
     }
 }
 [sys] P = {

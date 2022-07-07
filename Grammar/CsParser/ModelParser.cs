@@ -23,6 +23,16 @@ namespace DsParser
             var elistener = new ElementsListener(parser, model);
             ParseTreeWalker.Default.Walk(elistener, parser.program());
 
+            // clean up
+            var segmentsWithEmptyFlow =
+                model.Systems
+                    .SelectMany(s => s.Flows).OfType<RootFlow>()
+                    .SelectMany(f => f.Segments).Cast<RootSegment>()
+                    .Where(s => s.ChildFlow.Edges.Count == 0)
+                    ;
+            foreach (var s in segmentsWithEmptyFlow)
+                s.ChildFlow = null;
+
             return model;
         }
     }

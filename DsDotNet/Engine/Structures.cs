@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace Engine
@@ -13,6 +12,22 @@ namespace Engine
         Homing
     }
 
+    public interface IWithRGFH
+    {
+        Status4 RGFH { get; set; }
+        bool ChangeR();
+        bool ChangeG();
+        bool ChangeF();
+        bool ChangeH();
+    }
+
+    public interface IWithSREPorts
+    {
+        PortS PortS { get; set; }
+        PortR PortR { get; set; }
+        PortE PortE { get; set; }
+    }
+
 
     public class Model
     {
@@ -20,9 +35,14 @@ namespace Engine
         public List<Cpu> Cpus = new List<Cpu>();
     }
 
-    public class Named
+    public interface INamed
     {
-        public string Name;
+        string Name { get; set; }
+    }
+
+    public class Named: INamed
+    {
+        public string Name { get; set; }
 
         public Named(string name)
         {
@@ -99,49 +119,70 @@ namespace Engine
 
     public interface ISegmentOrCall {}
 
-    public class Segment : Named, ISegmentOrCall
+    public abstract class SegmentOrCallBase : Named, IWithRGFH, ISegmentOrCall
     {
-        public RootFlow ContainerFlow;
-        public ChildFlow ChildFlow;
-
-        public Status4 Status { get; set; } = Status4.Homing;
-        public PortS PortS { get; set; }
-        public PortR PortR { get; set; }
-        public PortE PortE { get; set; }
-
-        public IEnumerable<Call> Children =>
-            ChildFlow?.Edges
-            .SelectMany(e => e.Sources.Concat(new[] { e.Target }))
-            .OfType<Call>()
-            .Distinct()
-            ;
-
-        public Segment(string name, RootFlow containerFlow)
-            : base(name)
+        public Status4 RGFH { get; set; } = Status4.Homing;
+        public SegmentOrCallBase(string name)
+            :base(name)
         {
-            ContainerFlow = containerFlow;
-            ChildFlow = new ChildFlow($"_{name}", this);
-            containerFlow.Segments.Add(this);
-
-            PortS = new PortS(this);
-            PortR = new PortR(this);
-            PortE = new PortE(this);
         }
-    }
 
 
-    public class Call : Named, ISegmentOrCall
-    {
-        public Task Task;
-        public Segment TX;
-        public Segment RX;
-        public Status4 Status { get; set; } = Status4.Homing;
+        bool IsChildrenStartPoint() => true;
 
-        public Call(string name, Task task)
-            : base(name)
+        public virtual bool ChangeR()
         {
-            Task = task;
-            task.Calls.Add(this);
+            if (RGFH == Status4.Ready)
+                return true;
+
+            if (RGFH == Status4.Homing)
+            {
+                if (IsChildrenStartPoint())
+                {
+                    RGFH = Status4.Ready;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public virtual bool ChangeG()
+        {
+            if (RGFH == Status4.Going)
+                return true;
+
+            if (RGFH == Status4.Ready)
+            {
+                RGFH = Status4.Going;
+                return true;
+            }
+            return false;
+        }
+
+        public virtual bool ChangeF()
+        {
+            if (RGFH == Status4.Finished)
+                return true;
+
+            if (RGFH == Status4.Going)
+            {
+                RGFH = Status4.Finished;
+                return true;
+            }
+            return false;
+        }
+
+        public virtual bool ChangeH()
+        {
+            if (RGFH == Status4.Homing)
+                return true;
+
+            if (RGFH == Status4.Finished)
+            {
+                RGFH = Status4.Homing;
+                return true;
+            }
+            return false;
         }
     }
 

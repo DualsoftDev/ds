@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Grammar\CsParser\DsParser.csproj" />
+    <ProjectReference Include="..\src\Dual.Common.Core\Dual.Common.Core.csproj" />
   </ItemGroup>
 
 </Project>

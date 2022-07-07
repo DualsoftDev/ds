@@ -29,8 +29,11 @@ namespace Engine
     }
 }
 ";
-            var model = ModelParser.ParseFromString(text);
+            var pModel = ModelParser.ParseFromString(text);
+
+            var model = ModelConvertor.Convert(pModel);
             Console.WriteLine("Hello World!");
+
         }
     }
 }

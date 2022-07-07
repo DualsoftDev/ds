@@ -1,0 +1,10 @@
+FSharp.Core
+Newtonsoft.Json
+log4net
+System.Management
+System.Data.DataSetExtensions
+Microsoft.CSharp
+System.IO.Compression
+System.Design
+DotNetZip
+System.Diagnostics.PerformanceCounter

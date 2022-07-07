@@ -57,6 +57,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DsParser", "..\Grammar\CsPa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Engine", "Engine\Engine.csproj", "{56B03815-608A-4EEA-98B2-5D3E1D26C6DF}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dual.Common.Core", "src\Dual.Common.Core\Dual.Common.Core.csproj", "{7539B456-88C3-47F8-98D1-50003A6DE25B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +85,10 @@ Global
 		{56B03815-608A-4EEA-98B2-5D3E1D26C6DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{56B03815-608A-4EEA-98B2-5D3E1D26C6DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{56B03815-608A-4EEA-98B2-5D3E1D26C6DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7539B456-88C3-47F8-98D1-50003A6DE25B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7539B456-88C3-47F8-98D1-50003A6DE25B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7539B456-88C3-47F8-98D1-50003A6DE25B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7539B456-88C3-47F8-98D1-50003A6DE25B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -93,6 +99,7 @@ Global
 		{E789C72A-5CFD-436B-8EF1-61AA2852A89F} = {ED8079DD-2B06-4030-9F0F-DC548F98E1C4}
 		{2D3C9B7C-9CCE-4B10-A0A3-7ED1CB7DF077} = {BF60BC93-E09B-4E5F-9D85-95A519479D54}
 		{56B03815-608A-4EEA-98B2-5D3E1D26C6DF} = {BF60BC93-E09B-4E5F-9D85-95A519479D54}
+		{7539B456-88C3-47F8-98D1-50003A6DE25B} = {BF60BC93-E09B-4E5F-9D85-95A519479D54}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8B36D7B1-CD69-44C5-8E57-DE46AC18C1F7}

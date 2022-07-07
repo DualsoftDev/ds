@@ -35,23 +35,6 @@ namespace DsParser
     }
 
 
-    /**
-     * Causal 관계를 표현하는 Link.  'A > B' 일 때, left = A, right = B, operator = '>'
-     */
-    class CausalLink
-    {
-        Node l;
-        Node r;
-        string op;
-        public CausalLink(Node l, Node r, string op)
-        {
-            this.l = l;
-            this.r = r;
-            this.op = op;
-        }
-    }
-
-
     class ElementsListener : dsBaseListener
     {
         PModel _model;
@@ -71,7 +54,6 @@ namespace DsParser
         private bool multipleSystems;
 
         Dictionary<string, Node> nodes = new Dictionary<string, Node>();
-        public List<CausalLink> links = new List<CausalLink>();
 
         public ElementsListener(dsParser parser, PModel model)
         {
@@ -313,12 +295,6 @@ namespace DsParser
 
                     var conj = new Node(id, label: "", parentId: flowOfName, NodeType.conjunction);
                     this.nodes[id] = conj;
-
-                    foreach (var src in array)
-                    {
-                        var s = this.nodes[src.id];
-                        this.links.Add(new CausalLink(l: s, r: conj, op: "-"));
-                    }
                 }
                 else
                 {
@@ -346,7 +322,7 @@ namespace DsParser
             var op = operator_;
             IEnumerable<string> split()
             {
-                foreach (var o in new[] { "|>", "<|" })
+                foreach (var o in new[] { "|>>", "<<|", ">>", "<<", })
                 {
                     if (op.Contains(o))
                     {
@@ -354,7 +330,16 @@ namespace DsParser
                         op = op.Replace(o, "");
                     }
                 }
-                foreach (var o in new[] { ">", "<" })
+
+                foreach (var o in new[] { "|>", "<|", })
+                {
+                    if (op.Contains(o))
+                    {
+                        yield return o;
+                        op = op.Replace(o, "");
+                    }
+                }
+                foreach (var o in new[] { ">", "<", })
                 {
                     if (op.Contains(o))
                     {
@@ -382,7 +367,7 @@ namespace DsParser
 
             return (ISegmentOrCall)seg ?? call;
         }
-        ISegmentOrCall[] FindSources(string specs) => specs.Split(new[] { ',' }).Select(FindVertex).ToArray();
+        ISegmentOrCall[] FindVertices(string specs) => specs.Split(new[] { ',' }).Select(FindVertex).ToArray();
 
         /**
             * causal operator 를 처리해서 this.links 에 결과 누적
@@ -419,24 +404,38 @@ namespace DsParser
                         if (_parenting != null )
                             flow = _parenting.ChildFlow;   // target flow
 
-                        var lvs = FindSources(l.id);
-                        var rv = FindVertex(r.id);
+                        var lvs = FindVertices(l.id);
+                        var rvs = FindVertices(r.id);
 
                         Debug.Assert(l != null && r != null);   // 'node not found');
                         if (lvs.Length == 0) throw new Exception($"Parse error: {l.id} not found");
-                        if (rv == null) throw new Exception($"Parse error: {r.id} not found");
+                        if (rvs.Length == 0) throw new Exception($"Parse error: {r.id} not found");
 
                         switch (op)
                         {
                             case "|>":
                             case ">":
-                                flow.Edges.Add(new PEdge(lvs, rv));
-                                this.links.Add(new CausalLink(l, r, op)); break;
+                            case "|>>":
+                            case ">>":
+                                flow.Edges.Add(new PEdge(lvs, op, rvs[0]));
+                                break;
 
                             case "<|":
+                                Debug.Assert(lvs.Length == 1);
+                                flow.Edges.Add(new PEdge(rvs, "|>", lvs[0]));
+                                break;
                             case "<":
-                                flow.Edges.Add(new PEdge(new[] { rv }, lvs[0]));
-                                this.links.Add(new CausalLink(l: r, r: l, op)); break;
+                                Debug.Assert(lvs.Length == 1);
+                                flow.Edges.Add(new PEdge(rvs, ">", lvs[0]));
+                                break;
+                            case "<<|":
+                                Debug.Assert(lvs.Length == 1);
+                                flow.Edges.Add(new PEdge(rvs, "|>>", lvs[0]));
+                                break;
+                            case "<<":
+                                Debug.Assert(lvs.Length == 1);
+                                flow.Edges.Add(new PEdge(rvs, ">>", lvs[0]));
+                                break;
 
                             default:
                                 Debug.Assert(false);    //, `invalid operator: ${ op}`);

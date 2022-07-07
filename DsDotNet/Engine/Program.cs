@@ -24,8 +24,8 @@ namespace Engine
 }
 [sys] P = {
     [flow] F = {
-        Vp > Pp > Sp;
-        Vm > Pm > Sm;
+        Vp >> Pp << Sp;
+        Vm >> Pm >> Sm;     // Vm, XX |>> Pm <<| Sm, YY;
     }
 }
 ";

@@ -129,16 +129,18 @@ namespace DsParser
     {
         public ISegmentOrCall[] Sources;
         public ISegmentOrCall Target;
+        public string Operator;
 
-        public PEdge(ISegmentOrCall[] sources, ISegmentOrCall target)
+        public PEdge(ISegmentOrCall[] sources, string operator_, ISegmentOrCall target)
         {
             Sources = sources;
             Target = target;
+            Operator = operator_;
         }
         public string ToText()
         {
             var ss = string.Join(", ", Sources.Select(s => s.ToString()));
-            return $"{ss} -> {Target}";
+            return $"{ss} {Operator} {Target}";
         }
     }
 

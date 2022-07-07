@@ -1,7 +1,7 @@
 [sys] P = {
     [flow] F = {
-        parenting = {A > B > C; C |> B; }
-        Vp ? X > Pp > Sp;
+        // parenting = {A > B > C; C |> B; }
+        Vp >> Pp > Sp;
         Vm > Pm > Sm;
     }
 }

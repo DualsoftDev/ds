@@ -59,7 +59,6 @@ namespace DsParser
             parser.Reset();
             var elistener = new ElementsListener(parser, model);
             ParseTreeWalker.Default.Walk(elistener, parser.program());
-            var x = elistener.links;
 
             //Try("1 + 2 + 3");
             //Try("1 2 + 3");

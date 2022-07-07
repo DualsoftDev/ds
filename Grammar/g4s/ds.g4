@@ -123,12 +123,17 @@ quotedFilePath
 
 
 causalOperator
-    : '>'   // CAUSAL_FWD
+    : '>>'
+    | '>'   // CAUSAL_FWD
+    | '|>>'  // CAUSAL_RESET_FWD_STRONG
     | '|>'  // CAUSAL_RESET_FWD
-    | '>|>' | '|>>'     //CAUSAL_FWD_AND_RESET_FWD  // '>|>' | '|>>';
+    | '>|>'  //CAUSAL_FWD_AND_RESET_FWD
+    | '<<'   // CAUSAL_BWD_STRONG
     | '<'   // CAUSAL_BWD
+    | '<<|'  // CAUSAL_RESET_BWD
     | '<|'  // CAUSAL_RESET_BWD
-    | '<<|' | '<|<' // CAUSAL_BWD_AND_RESET_BWD
+    | '<|<' // CAUSAL_BWD_AND_RESET_BWD
+    | '<<||>>'        // CAUSAL_RESET_FB_STRONG
     | '<||>'        // CAUSAL_RESET_FB
     | '><|'         // CAUSAL_FWD_AND_RESET_BWD
     | '|><'         // CAUSAL_BWD_AND_RESET_FWD

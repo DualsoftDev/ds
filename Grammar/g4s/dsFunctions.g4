@@ -18,7 +18,7 @@ expression
     | ('!' | '+' | '-' ) expression // unary opeartor
     | expression ('*' | '/' | '%') expression
     | expression ('+' | '-') expression
-    | expression ('>>=' | '<<=' | '>>' | '<<') expression
+    | expression (':>=' | ':<=' | ':>' | ':<') expression
     | expression ('==' | '!=') expression
     | expression ('&&') expression
     | expression ('||') expression

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -141,24 +140,6 @@ namespace Engine
         {
             Task = task;
             task.Calls.Add(this);
-        }
-    }
-
-    [DebuggerDisplay("{ToText()}")]
-    public class Edge
-    {
-        public ISegmentOrCall[] Sources;
-        public ISegmentOrCall Target;
-
-        public Edge(ISegmentOrCall[] sources, ISegmentOrCall target)
-        {
-            Sources = sources;
-            Target = target;
-        }
-        public string ToText()
-        {
-            var ss = string.Join(", ", Sources.Select(s => s.ToString()));
-            return $"{ss} -> {Target}";
         }
     }
 

@@ -80,7 +80,16 @@ namespace Engine
                     {
                         var ss = pEdge.Sources.Select(pS => pick<ISegmentOrCall>(pS)).ToArray();
                         var t = pick<ISegmentOrCall>(pEdge.Target);
-                        var edge = pick<Edge>(pEdge, () => new Edge(ss, t));
+                        var op = pEdge.Operator;
+                        Edge edge = op switch
+                        {
+                            ">" => new WeakSetEdge(ss, op, t),
+                            ">>" => new StrongSetEdge(ss, op, t),
+                            "|>" => new WeakResetEdge(ss, op, t),
+                            "|>>" => new StrongResetEdge(ss, op, t),
+                            _ => throw new Exception("ERROR"),
+                        };
+
                         flow.Edges.Add(edge);
                     }
                 }

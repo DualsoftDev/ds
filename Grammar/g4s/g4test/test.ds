@@ -6,6 +6,10 @@
     }
 }
 
+[cpu] Cpu = {
+    it.F;
+}
+
 /*
 [sys] it = {
     [task] T = {

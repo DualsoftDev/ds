@@ -89,9 +89,11 @@ namespace Engine
             system.Tasks.Add(this);
         }
     }
-    public class Cpu
+    public class Cpu : Named
     {
-        public List<Flow> Flows = new List<Flow>();
+        public Flow[] Flows;
+        public Cpu(string name, Flow[] flows) : base(name) { Flows = flows; }
+
     }
 
 

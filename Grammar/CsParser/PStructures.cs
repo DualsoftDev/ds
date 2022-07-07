@@ -82,9 +82,10 @@ namespace DsParser
             system.Tasks.Add(this);
         }
     }
-    public class PCpu
+    public class PCpu : PNamed
     {
-        public List<PFlow> Flows = new List<PFlow>();
+        public PFlow[] Flows;
+        public PCpu(string name, PFlow[] flows) : base(name) { Flows = flows; }
     }
 
     public interface ISegmentOrCall {}

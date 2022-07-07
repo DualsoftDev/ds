@@ -28,6 +28,9 @@ namespace Engine
         Vm >> Pm >> Sm;     // Vm, XX |>> Pm <<| Sm, YY;
     }
 }
+[cpu] Cpu = {
+    it.F;
+}
 ";
             var pModel = ModelParser.ParseFromString(text);
 

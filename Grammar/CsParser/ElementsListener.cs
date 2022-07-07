@@ -198,6 +198,29 @@ namespace DsParser
         }
         override public void EnterCausalOperator(dsParser.CausalOperatorContext ctx) { this.op = ctx; }
 
+        override public void EnterCpu(dsParser.CpuContext ctx) {
+            var name = ctx.id().GetText();
+            var flowPathContexts =
+                DsParser.enumerateChildren<dsParser.FlowPathContext>(ctx, false, r => r is dsParser.FlowPathContext)
+                ;
+
+            var flows =
+                flowPathContexts.Select(fpc =>
+                {
+                    var systemName = fpc.GetChild(0).GetText();
+                    var dot_ = fpc.GetChild(1).GetText();
+                    var flowName = fpc.GetChild(2).GetText();
+
+                    var system = _model.Systems.FirstOrDefault(sys => sys.Name == systemName);
+                    var flow = system.Flows.FirstOrDefault(f => f.Name == flowName);
+                    return flow;
+                })
+                .ToArray()
+                ;
+            var cpu = new PCpu(name, flows);
+            _model.Cpus.Add(cpu);
+        }
+
 
         // ParseTreeListener<> method
         override public void VisitTerminal(ITerminalNode node)     { return; }

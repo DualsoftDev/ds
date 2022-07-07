@@ -1,18 +1,23 @@
-using DsParser;
-
 using System;
 using System.Collections.Generic;
-using System.Text;
-using Dsu.Common.Utilities.ExtensionMethods;
 using System.Linq;
+
+using DsParser;
 
 namespace Engine
 {
+    /// <summary>
+    /// Parser 에서 만든 구조체를 Engine 용 구조체로 변환
+    /// Parser 에서는 parsing 에 충실, engine 에서는 engine 에 맞는 추가 작업 필요해서 이원화.
+    /// </summary>
     class ModelConvertor
     {
+        /// Parser 에서 만든 구조체를 Engine 용 구조체로 변환
         public static Model Convert(PModel pModel)
         {
+            // parser 구조체와 이에 대응하는 engine 구조체의 dictionary
             var dict = new Dictionary<object, object>();
+
             T pick<T>(object old, Func<T> creator=null) where T : class
             {
                 if (dict.ContainsKey(old))
@@ -52,10 +57,10 @@ namespace Engine
             }
             foreach (var pCpu in pModel.Cpus)
             {
-                var cpu_ = pick<Cpu>(pCpu, () => new Cpu());
+                var flows = pCpu.Flows.Select(pf => pick<Flow>(pf)).ToArray();
+                var cpu = pick<Cpu>(pCpu, () => new Cpu(pCpu.Name, flows));
+                model.Cpus.Add(cpu);
             }
-
-
 
 
             // second scan : fill edge, call tx, rx

@@ -18,6 +18,8 @@ segments: segmentsDNF*;
 // - 2 DOT: System.TaskName.SegmentName
 segment: (IDENTIFIER | IDENTIFIER DOT IDENTIFIER | IDENTIFIER DOT IDENTIFIER DOT IDENTIFIER);
 
+flowPath: IDENTIFIER DOT IDENTIFIER;
+
 segmentsCNF: segment (COMMA segment)*;
 segmentsDNF: segmentsCNF (OR2 segmentsCNF)*;
 

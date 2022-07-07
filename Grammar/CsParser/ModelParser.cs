@@ -11,7 +11,7 @@ namespace DsParser
 {
     public static class ModelParser
     {
-        public static Model ParseFromString(string text)
+        public static PModel ParseFromString(string text)
         {
             var parser = DsParser.FromDocument(text);
             var listener = new ModelListener(parser);
@@ -26,8 +26,8 @@ namespace DsParser
             // clean up
             var segmentsWithEmptyFlow =
                 model.Systems
-                    .SelectMany(s => s.Flows).OfType<RootFlow>()
-                    .SelectMany(f => f.Segments).Cast<RootSegment>()
+                    .SelectMany(s => s.Flows).OfType<PRootFlow>()
+                    .SelectMany(f => f.Segments).Cast<PRootSegment>()
                     .Where(s => s.ChildFlow.Edges.Count == 0)
                     ;
             foreach (var s in segmentsWithEmptyFlow)

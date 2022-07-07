@@ -8,14 +8,14 @@ namespace DsParser
 {
     class ModelListener : dsBaseListener
     {
-        public Model Model { get; }
-        DsSystem _system;
-        Task _task;
-        RootFlow _rootFlow;
+        public PModel Model { get; }
+        PSystem _system;
+        PTask _task;
+        PRootFlow _rootFlow;
 
         public ModelListener(dsParser parser)
         {
-            Model = new Model();
+            Model = new PModel();
             parser.Reset();
         }
 
@@ -23,7 +23,7 @@ namespace DsParser
         override public void EnterSystem(dsParser.SystemContext ctx)
         {
             var n = ctx.id().GetText();
-            _system = new DsSystem(n, Model);
+            _system = new PSystem(n, Model);
             Trace.WriteLine($"System: {n}");
         }
         //override public void ExitSystem(dsParser.SystemContext ctx) { this.systemName = null; }
@@ -31,7 +31,7 @@ namespace DsParser
         override public void EnterTask(dsParser.TaskContext ctx)
         {
             var name = ctx.id().GetText();
-            _task = new Task(name, _system);
+            _task = new PTask(name, _system);
         }
         //override public void ExitTask(dsParser.TaskContext ctx) { this.taskName = null; }
 
@@ -39,7 +39,7 @@ namespace DsParser
         {
             var flowName = ctx.id().GetText();
             var flowOf = ctx.flowProp().id();
-            _rootFlow = new RootFlow(flowName, _system);
+            _rootFlow = new PRootFlow(flowName, _system);
             Trace.WriteLine($"Flow: {flowName}");
         }
         override public void ExitFlow(dsParser.FlowContext ctx) { _rootFlow = null; }
@@ -59,7 +59,7 @@ namespace DsParser
             var _segments =
                 names
                 .Where(n => ! n.Contains('.'))
-                .Select(n => new RootSegment(n, _rootFlow))  // _flow 에 segment 로 등록됨
+                .Select(n => new PRootSegment(n, _rootFlow))  // _flow 에 segment 로 등록됨
                 .ToArray()
                 ;
         }
@@ -71,7 +71,7 @@ namespace DsParser
             var callph = ctx.callPhrase();
             //var tx = callph.segments(0);
             //var rx = callph.segments(1);
-            var call = new Call(name, _task);
+            var call = new PCall(name, _task);
 
             //var parentId = $"{this.systemName}.{this.taskName}";
             //var id = $"{parentId}.{name}";
@@ -83,7 +83,7 @@ namespace DsParser
         override public void EnterListing(dsParser.ListingContext ctx)
         {
             var name = ctx.id().GetText();
-            var seg = new RootSegment(name, _rootFlow);
+            var seg = new PRootSegment(name, _rootFlow);
 
             //var id = $"{this.systemName}.{this.taskName}.{name}";
             ////const node = { "data": { id, "label": name, "background_color": "gray", parent: this.taskName }        };
@@ -102,7 +102,7 @@ namespace DsParser
         override public void EnterParenting(dsParser.ParentingContext ctx) {
             Trace.WriteLine($"Parenting: {ctx.GetText()}");
             var name = ctx.id().GetText();
-            var seg = new RootSegment(name, _rootFlow);
+            var seg = new PRootSegment(name, _rootFlow);
         }
         //override public void ExitParenting(dsParser.ParentingContext ctx) { }
 

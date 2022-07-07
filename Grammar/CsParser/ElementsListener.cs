@@ -54,16 +54,16 @@ namespace DsParser
 
     class ElementsListener : dsBaseListener
     {
-        Model _model;
+        PModel _model;
 
         /** causal operator 왼쪽 */
         private dsParser.CausalTokensDNFContext left;
         private dsParser.CausalOperatorContext op;
 
-        DsSystem _system;
-        Task _task;
-        RootFlow _rootFlow;
-        RootSegment _parenting;
+        PSystem _system;
+        PTask _task;
+        PRootFlow _rootFlow;
+        PRootSegment _parenting;
 
         //private string flowName;        // [flow of A]F={..} -> F
         private string flowOfName;      // [flow of A]F={..} -> A
@@ -73,7 +73,7 @@ namespace DsParser
         Dictionary<string, Node> nodes = new Dictionary<string, Node>();
         public List<CausalLink> links = new List<CausalLink>();
 
-        public ElementsListener(dsParser parser, Model model)
+        public ElementsListener(dsParser parser, PModel model)
         {
             _model = model;
 
@@ -116,15 +116,15 @@ namespace DsParser
             var callph = ctx.callPhrase();
             var tx = _model.FindSegment(callph.segments(0).GetText());
             var rx = _model.FindSegment(callph.segments(1).GetText());
-            call.TX = tx as RootSegment;
-            call.RX = rx as RootSegment;
+            call.TX = tx as PRootSegment;
+            call.RX = rx as PRootSegment;
             Trace.WriteLine($"Call: {name} = {tx.Name} ~ {rx.Name}");
         }
 
         override public void EnterFlow(dsParser.FlowContext ctx)
         {
             var flowName = ctx.id().GetText();
-            _rootFlow = _system.Flows.OfType<RootFlow>().First(f => f.Name == flowName);
+            _rootFlow = _system.Flows.OfType<PRootFlow>().First(f => f.Name == flowName);
 
             var flowOf = ctx.flowProp().id();
             this.flowOfName = flowOf == null ? flowName : flowOf.GetText();
@@ -157,9 +157,9 @@ namespace DsParser
 
         override public void EnterParenting(dsParser.ParentingContext ctx) {
             var name = ctx.id().GetText();
-            var seg = _rootFlow.Segments.First(s => s.Name == name) as RootSegment;
+            var seg = _rootFlow.Segments.First(s => s.Name == name) as PRootSegment;
 
-            _parenting = seg ?? new RootSegment(name, _rootFlow);
+            _parenting = seg ?? new PRootSegment(name, _rootFlow);
 
             // A = {
             //  B > C > D;
@@ -415,7 +415,7 @@ namespace DsParser
                         var l = this.nodes[strL];
                         var r = this.nodes[strR];
 
-                        Flow flow = _rootFlow;
+                        PFlow flow = _rootFlow;
                         if (_parenting != null )
                             flow = _parenting.ChildFlow;   // target flow
 
@@ -430,12 +430,12 @@ namespace DsParser
                         {
                             case "|>":
                             case ">":
-                                flow.Edges.Add(new Edge(lvs, rv));
+                                flow.Edges.Add(new PEdge(lvs, rv));
                                 this.links.Add(new CausalLink(l, r, op)); break;
 
                             case "<|":
                             case "<":
-                                flow.Edges.Add(new Edge(new[] { rv }, lvs[0]));
+                                flow.Edges.Add(new PEdge(new[] { rv }, lvs[0]));
                                 this.links.Add(new CausalLink(l: r, r: l, op)); break;
 
                             default:

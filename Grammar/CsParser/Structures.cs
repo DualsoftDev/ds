@@ -7,17 +7,17 @@ using System.Threading.Tasks;
 
 namespace DsParser
 {
-    public class Model
+    public class PModel
     {
-        public List<DsSystem> Systems = new List<DsSystem>();
-        public List<Cpu> Cpus = new List<Cpu>();
+        public List<PSystem> Systems = new List<PSystem>();
+        public List<PCpu> Cpus = new List<PCpu>();
     }
 
-    public class Named
+    public class PNamed
     {
         public string Name;
 
-        public Named(string name)
+        public PNamed(string name)
         {
             Name = name;
         }
@@ -25,12 +25,12 @@ namespace DsParser
     }
 
 
-public class DsSystem : Named
+public class PSystem : PNamed
     {
-        public Model Model;
-        public List<Flow> Flows = new List<Flow>();
-        public List<Task> Tasks = new List<Task>();
-        public DsSystem(string name, Model model)
+        public PModel Model;
+        public List<PFlow> Flows = new List<PFlow>();
+        public List<PTask> Tasks = new List<PTask>();
+        public PSystem(string name, PModel model)
             : base(name)
         {
             Model = model;
@@ -38,13 +38,13 @@ public class DsSystem : Named
         }
     }
 
-    public abstract class Flow : Named
+    public abstract class PFlow : PNamed
     {
-        public DsSystem System;
-        public List<Segment> Segments = new List<Segment>();
-        public List<Edge> Edges = new List<Edge>();
+        public PSystem System;
+        public List<PSegment> Segments = new List<PSegment>();
+        public List<PEdge> Edges = new List<PEdge>();
 
-        protected Flow(string name, DsSystem system)
+        protected PFlow(string name, PSystem system)
             : base(name)
         {
             System = system;
@@ -52,48 +52,48 @@ public class DsSystem : Named
         }
     }
 
-    public class RootFlow : Flow
+    public class PRootFlow : PFlow
     {
-        public RootFlow(string name, DsSystem system)
+        public PRootFlow(string name, PSystem system)
             : base(name, system)
         {
         }
     }
 
-    public class ChildFlow : Flow
+    public class PChildFlow : PFlow
     {
-        public RootSegment Segment; // container
-        public ChildFlow(string name, RootSegment segment)
+        public PRootSegment Segment; // container
+        public PChildFlow(string name, PRootSegment segment)
             : base(name, segment.Flow.System)
         {
             Segment = segment;
         }
     }
 
-    public class Task : Named
+    public class PTask : PNamed
     {
-        public DsSystem System;
-        public List<Call> Calls = new List<Call>();
+        public PSystem System;
+        public List<PCall> Calls = new List<PCall>();
 
-        public Task(string name, DsSystem system)
+        public PTask(string name, PSystem system)
             : base(name)
         {
             System = system;
             system.Tasks.Add(this);
         }
     }
-    public class Cpu
+    public class PCpu
     {
-        public List<Flow> Flows = new List<Flow>();
+        public List<PFlow> Flows = new List<PFlow>();
     }
 
     public interface ISegmentOrCall {}
 
-    public class Segment : Named, ISegmentOrCall
+    public class PSegment : PNamed, ISegmentOrCall
     {
         /// container flow
-        public RootFlow Flow;
-        public Segment(string name, RootFlow flow)
+        public PRootFlow Flow;
+        public PSegment(string name, PRootFlow flow)
             : base(name)
         {
             Flow = flow;
@@ -101,29 +101,29 @@ public class DsSystem : Named
         }
     }
 
-    public class RootSegment: Segment
+    public class PRootSegment: PSegment
     {
-        public ChildFlow ChildFlow;
-        public IEnumerable<Call> Children =>
+        public PChildFlow ChildFlow;
+        public IEnumerable<PCall> Children =>
             ChildFlow?.Edges
             .SelectMany(e => e.Sources.Concat(new[] { e.Target }))
-            .OfType<Call>()
+            .OfType<PCall>()
             .Distinct()
             ;
-        public RootSegment(string name, RootFlow flow)
+        public PRootSegment(string name, PRootFlow flow)
             : base(name, flow)
         {
-            ChildFlow = new ChildFlow($"_{name}", this);
+            ChildFlow = new PChildFlow($"_{name}", this);
         }
 }
 
-    public class Call : Named, ISegmentOrCall
+    public class PCall : PNamed, ISegmentOrCall
     {
-        public Task Task;
-        public RootSegment TX;
-        public RootSegment RX;
+        public PTask Task;
+        public PRootSegment TX;
+        public PRootSegment RX;
 
-        public Call(string name, Task task)
+        public PCall(string name, PTask task)
             : base(name)
         {
             Task = task;
@@ -132,12 +132,12 @@ public class DsSystem : Named
     }
 
     [DebuggerDisplay("{ToText()}")]
-    public class Edge
+    public class PEdge
     {
         public ISegmentOrCall[] Sources;
         public ISegmentOrCall Target;
 
-        public Edge(ISegmentOrCall[] sources, ISegmentOrCall target)
+        public PEdge(ISegmentOrCall[] sources, ISegmentOrCall target)
         {
             Sources = sources;
             Target = target;
@@ -151,7 +151,7 @@ public class DsSystem : Named
 
     public static class ModelUtil
     {
-        static ISegmentOrCall FindSegmentOrCall(this Model model, string systemName, string flowOrTaskName, string segmentOrCallName, bool isSegment)
+        static ISegmentOrCall FindSegmentOrCall(this PModel model, string systemName, string flowOrTaskName, string segmentOrCallName, bool isSegment)
         {
             var system = model.Systems.First(s => s.Name == systemName);
             if (isSegment)
@@ -171,20 +171,20 @@ public class DsSystem : Named
 
             return task.Calls.FirstOrDefault(c => c.Name == segmentOrCallName);
         }
-        public static Segment FindSegment(this Model model, string systemName, string flowName, string segmentName) =>
-            model.FindSegmentOrCall(systemName, flowName, segmentName, true) as Segment;
+        public static PSegment FindSegment(this PModel model, string systemName, string flowName, string segmentName) =>
+            model.FindSegmentOrCall(systemName, flowName, segmentName, true) as PSegment;
 
-        public static Call FindCall(this Model model, string systemName, string taskName, string callName) =>
-            model.FindSegmentOrCall(systemName, taskName, callName, false) as Call;
+        public static PCall FindCall(this PModel model, string systemName, string taskName, string callName) =>
+            model.FindSegmentOrCall(systemName, taskName, callName, false) as PCall;
 
-        public static Segment FindSegment(this Model model, string fqSegmentName)
+        public static PSegment FindSegment(this PModel model, string fqSegmentName)
         {
             var names = fqSegmentName.Split(new[] { '.' });
             (var sysName, var flowName, var segmentName) = (names[0], names[1], names[2]);
             return model.FindSegment(sysName, flowName, segmentName);
         }
 
-        public static Call FindCall(this Model model, string fqCallName)
+        public static PCall FindCall(this PModel model, string fqCallName)
         {
             var names = fqCallName.Split(new[] { '.' });
             (var sysName, var taskName, var callName) = (names[0], names[1], names[2]);

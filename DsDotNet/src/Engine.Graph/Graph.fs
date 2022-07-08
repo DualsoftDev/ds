@@ -23,7 +23,7 @@ module GraphBase =
 [<AutoOpen>]
 module GraphUtil =
     /// g 상에서 source 에서 target 으로 가는 최단 경로 구함.  edge 의 array 반환
-    let computeDijkstra(g:IVertexAndEdgeListGraph<'v, 'e>, source:'v, target: 'v) =
+    let computeDijkstra (g:IVertexAndEdgeListGraph<'v, 'e>) (source:'v) (target: 'v) =
 
         // https://github.com/eosfor/Quickgraph.Wiki/blob/master/Shortest-Path.md
         let tryGetPaths =
@@ -35,19 +35,6 @@ module GraphUtil =
             path |> Array.ofSeq
         | _ ->
             Array.empty
-
-
-
-        //let dijkstra = DijkstraShortestPathAlgorithm<'v, 'e>(g, fun e -> 1.0)
-        //// creating the observer
-        //let vis = new VertexPredecessorRecorderObserver<'v, 'e>()
-        //// compute and record shortest paths
-        //use _ = ObserverScope.Create(dijkstra, vis)
-        //dijkstra.Compute(source)
-
-        //// vis can create all the shortest path in the graph
-        //vis.Path(target)
-        //|> Seq.iter(fun e -> Console.WriteLine(e))
 
     let getIncomingEdges (g:AdjacencyGraph<'V, 'E>) (target:'V) =
         g.Edges |> Seq.filter(fun e -> e.Target = target)
@@ -76,10 +63,10 @@ module GraphUtil =
         assert(cca.ComponentCount = ccs.Length)
         ccs
 
-    type GInfo(flows:Flow seq) =
+    type GraphInfo(flows:Flow seq) =
+        let edges = flows |> Seq.collect(fun f -> f.Edges) |> Array.ofSeq
         let qgEdges =
-            flows
-            |> Seq.collect(fun f -> f.Edges)
+            edges
             |> Seq.collect(fun ee ->
                 ee.Sources |> Seq.map(fun s -> QgEdge(s, ee.Target, ee)))
             |> Array.ofSeq
@@ -93,30 +80,45 @@ module GraphUtil =
             |> Seq.filter(fun e -> not ((e.OriginalEdge:>obj) :? IReset ))
             |> Array.ofSeq
 
+        let solidGraph = qgSolidEdges |> GraphExtensions.ToAdjacencyGraph
+        let inits = getInits(solidGraph)
+        let lasts = getLasts(solidGraph)
+
+        let undirectedGraph = qgEdges |> GraphExtensions.ToUndirectedGraph
+        let undirectedSolidGraph = qgSolidEdges |> GraphExtensions.ToUndirectedGraph
+
+        let connectedComponets = getConnectedComponents(undirectedGraph)
+        let solidConnectedComponets = getConnectedComponents(undirectedSolidGraph)
 
         member val Flows = flows |> Array.ofSeq
+        member val Edges = edges
         member val Vertices = vertices
         member val QgEdges = qgEdges with get
         member val Graph = qgEdges |> GraphExtensions.ToAdjacencyGraph
-        member val SolidGraph = qgSolidEdges |> GraphExtensions.ToAdjacencyGraph
-        member val UndirectedGraph = qgEdges |> GraphExtensions.ToUndirectedGraph
-        member val UndirectedSolidGraph = qgSolidEdges |> GraphExtensions.ToUndirectedGraph
+        member val SolidGraph = solidGraph
+        member val UndirectedGraph = undirectedGraph
+        member val UndirectedSolidGraph = undirectedSolidGraph
+        member val Inits = inits
+        member val Lasts = lasts
+
+        /// Reset edge 까지 고려하였을 때의 connected component
+        member val ConnectedComponets = connectedComponets
+
+        /// Reset edge 제외한 상태의 connected component
+        member val SolidConnectedComponets = solidConnectedComponets
+
+        member x.GetShortestPath(source, vertex) = computeDijkstra x.Graph source vertex
 
 
     let analyzeFlows(flows:Flow seq) =
-        let gri = GInfo(flows)
-        let connectedComponets = getConnectedComponents(gri.UndirectedGraph)
-        let solidConnectedComponets = getConnectedComponents(gri.UndirectedSolidGraph)
+        let gri = GraphInfo(flows)
         let graph = gri.Graph
 
         let path =
             let src = gri.Vertices |> Seq.find(fun v -> v.ToString() = "Vp")
             let tgt = gri.Vertices |> Seq.find(fun v -> v.ToString() = "Sm")
+            gri.GetShortestPath(src, tgt)
 
-            computeDijkstra(gri.Graph, src, tgt)
-
-        let inits = getInits(gri.SolidGraph)
-        let lasts = getLasts(gri.SolidGraph)
-        graph
+        gri
 
 

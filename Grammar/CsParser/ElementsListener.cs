@@ -217,8 +217,7 @@ namespace DsParser
                 })
                 .ToArray()
                 ;
-            var cpu = new PCpu(name, flows);
-            _model.Cpus.Add(cpu);
+            var cpu_ = new PCpu(name, flows, _model);
         }
 
 

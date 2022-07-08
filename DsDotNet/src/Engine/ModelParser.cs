@@ -64,8 +64,7 @@ namespace Engine
             foreach (var pCpu in pModel.Cpus)
             {
                 var flows = pCpu.Flows.Select(pf => pick<Flow>(pf)).ToArray();
-                var cpu = pick<Cpu>(pCpu, () => new Cpu(pCpu.Name, flows));
-                model.Cpus.Add(cpu);
+                var cpu = pick<Cpu>(pCpu, () => new Cpu(pCpu.Name, flows, model));
             }
 
 

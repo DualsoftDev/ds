@@ -111,8 +111,13 @@ namespace Engine.Core
     }
     public class Cpu : Named
     {
+        public Model Model;
         public Flow[] Flows;
-        public Cpu(string name, Flow[] flows) : base(name) { Flows = flows; }
+        public Cpu(string name, Flow[] flows, Model model) : base(name) {
+            Flows = flows;
+            Model = model;
+            model.Cpus.Add(this);
+        }
     }
 
 

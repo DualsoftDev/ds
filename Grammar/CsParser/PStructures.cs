@@ -84,8 +84,13 @@ namespace DsParser
     }
     public class PCpu : PNamed
     {
+        public PModel Model;
         public PFlow[] Flows;
-        public PCpu(string name, PFlow[] flows) : base(name) { Flows = flows; }
+        public PCpu(string name, PFlow[] flows, PModel model) : base(name) {
+            Flows = flows;
+            Model = model;
+            model.Cpus.Add(this);
+        }
     }
 
     public interface ISegmentOrCall {}

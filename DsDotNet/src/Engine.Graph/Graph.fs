@@ -131,10 +131,10 @@ module GraphUtil =
         let gri = GraphInfo(flows)
         let graph = gri.Graph
 
-        let path =
-            let src = gri.Vertices |> Seq.find(fun v -> v.ToString() = "Vp")
-            let tgt = gri.Vertices |> Seq.find(fun v -> v.ToString() = "Sm")
-            gri.GetShortestPath(src, tgt)
+        //let path =
+        //    let src = gri.Vertices |> Seq.find(fun v -> v.ToString() = "Vp")
+        //    let tgt = gri.Vertices |> Seq.find(fun v -> v.ToString() = "Sm")
+        //    gri.GetShortestPath(src, tgt)
 
         gri
 

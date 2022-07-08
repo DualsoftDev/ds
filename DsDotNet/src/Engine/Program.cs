@@ -44,7 +44,8 @@ namespace Engine
 
 
             var flows = model.Cpus.SelectMany(cpu => cpu.Flows);
-            var graph = GraphGenerator.generateGraph(flows);
+            var graph = GraphUtil.analyzeFlows(flows);
+
             Console.WriteLine("Hello World!");
         }
     }

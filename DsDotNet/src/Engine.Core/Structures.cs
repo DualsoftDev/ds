@@ -117,7 +117,10 @@ namespace Engine.Core
     }
 
 
-    public interface ISegmentOrCall {}
+    public interface IVertex {}
+    public interface IEdge { }
+
+    public interface ISegmentOrCall : IVertex {}
 
     public abstract class SegmentOrCallBase : Named, IWithRGFH, ISegmentOrCall
     {

@@ -7,7 +7,7 @@ namespace Engine.Core
     public interface IReset { }
 
     [DebuggerDisplay("{ToText()}")]
-    public abstract class Edge
+    public abstract class Edge : IEdge
     {
         public ISegmentOrCall[] Sources;
         public ISegmentOrCall Target;

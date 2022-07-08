@@ -5,6 +5,7 @@ open QuickGraph
 open QuickGraph.Algorithms
 open QuickGraph.Algorithms.ShortestPath
 open QuickGraph.Algorithms.Observers
+open Engine.Core
 
 
 [<AutoOpen>]
@@ -87,7 +88,10 @@ module GraphUtil =
             qgEdges |> Seq.collect(fun e -> [e.Source; e.Target]) |> Seq.distinct |> Array.ofSeq
 
         /// reset edge 제외한 start edge 만..
-        let qgSolidEdges = qgEdges |> Seq.filter(fun e -> not ((e.OriginalEdge:>obj) :? IReset ))
+        let qgSolidEdges =
+            qgEdges
+            |> Seq.filter(fun e -> not ((e.OriginalEdge:>obj) :? IReset ))
+            |> Array.ofSeq
 
 
         member val Flows = flows |> Array.ofSeq
@@ -110,6 +114,9 @@ module GraphUtil =
             let tgt = gri.Vertices |> Seq.find(fun v -> v.ToString() = "Sm")
 
             computeDijkstra(gri.Graph, src, tgt)
+
+        let inits = getInits(gri.SolidGraph)
+        let lasts = getLasts(gri.SolidGraph)
         graph
 
 

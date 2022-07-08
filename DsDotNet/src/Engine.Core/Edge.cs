@@ -34,7 +34,7 @@ namespace Engine.Core
             : base(sources, operator_, target)
         { }
     }
-    public abstract class ResetEdge : Edge
+    public abstract class ResetEdge : Edge, IReset
     {
         public ResetEdge(ISegmentOrCall[] sources, string operator_, ISegmentOrCall target)
             : base(sources, operator_, target)

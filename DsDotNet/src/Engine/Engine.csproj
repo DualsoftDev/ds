@@ -17,4 +17,6 @@
     <ProjectReference Include="..\Engine.Graph\Engine.Graph.fsproj" />
   </ItemGroup>
 
+	<Import Project="..\..\.paket\Paket.Restore.targets" />
+
 </Project>

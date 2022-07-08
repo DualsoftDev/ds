@@ -27,9 +27,26 @@ namespace Engine.Core
     public class Flag : Bit {
         public Flag(string name, bool bit = false) : base(name, bit) { }
     }
-    public class Tag : Bit {
+
+    public enum TagType { Unknown, Q, I, M, Special };
+    public class Tag : Bit, ITxRx
+    {
+        public Segment OwnerSegment { get; set; }
+        public TagType Type { get; set; }
+        /// <summary> 외부 접근 용 Tag 여부 </summary>
         public bool IsExternal { get; set; }
-        public Tag(string name, bool bit = false, bool isExternal = true) : base(name, bit) => IsExternal = isExternal;
+        public Tag(Segment ownerSegment, string name, bool bit = false, bool isExternal = false) : base(name, bit)
+        {
+            IsExternal = isExternal;
+            OwnerSegment = ownerSegment;
+        }
+    }
+
+    public interface IAutoTag {}
+    public class TagAutoStart : Tag, IAutoTag
+    {
+        public TagAutoStart(Segment ownerSegment, string name, bool bit = false, bool isExternal = true)
+            : base(ownerSegment, name, bit, isExternal) {}
     }
 
     public abstract class Port : Bit
@@ -37,25 +54,17 @@ namespace Engine.Core
         public Segment OwnerSegment { get; set; }
         public Port(Segment ownerSegment) => OwnerSegment = ownerSegment;
     }
-    public abstract class PortCommand : Port
+    public class PortS : Port
     {
-        /// Port S 나 R 을 시작시키는 명령.  OR'ing.  하나만 충족되면 S 나 R 을 시작
-        public List<IBit> Commands { get; set; } = new List<IBit>();
-        public PortCommand(Segment ownerSegment) : base(ownerSegment) {}
+        public PortS(Segment ownerSegment) : base(ownerSegment) { Name = "PortS"; }
     }
-    public class PortS : PortCommand
+    public class PortR : Port
     {
-        public PortS(Segment ownerSegment) : base(ownerSegment) {}
-    }
-    public class PortR : PortCommand
-    {
-        public PortR(Segment ownerSegment) : base(ownerSegment) {}
+        public PortR(Segment ownerSegment) : base(ownerSegment) { Name = "PortR"; }
     }
     public class PortE : Port
     {
-        /// End tag ON 시, turn on 시킬 Tag 목록
-        public List<Tag> EndTags { get; set; } = new List<Tag>();
-        public PortE(Segment ownerSegment) : base(ownerSegment) {}
+        public PortE(Segment ownerSegment) : base(ownerSegment) { Name = "PortE"; }
     }
 
 

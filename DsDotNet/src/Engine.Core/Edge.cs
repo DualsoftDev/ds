@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Engine.Core
@@ -11,6 +12,7 @@ namespace Engine.Core
     {
         public ISegmentOrCall[] Sources;
         public ISegmentOrCall Target;
+        public IEnumerable<ISegmentOrCall> Vertices => Sources.Concat(new[] { Target });
         public string Operator;
 
         public Edge(ISegmentOrCall[] sources, string operator_, ISegmentOrCall target)

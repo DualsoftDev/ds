@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Engine.Core
 {
-    public class Segment : SegmentOrCallBase, IWithSREPorts
+    public class Segment : SegmentOrCallBase, IWithSREPorts, ITxRx
     {
         public RootFlow ContainerFlow;
         public ChildFlow ChildFlow;
@@ -14,7 +14,7 @@ namespace Engine.Core
 
         public IEnumerable<Call> Children =>
             ChildFlow?.Edges
-            .SelectMany(e => e.Sources.Concat(new[] { e.Target }))
+            .SelectMany(e => e.Vertices)
             .OfType<Call>()
             .Distinct()
             ;

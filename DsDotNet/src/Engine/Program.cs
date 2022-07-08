@@ -33,12 +33,12 @@ namespace Engine
     }
 }
 [cpu] Cpu = {
-    it.F;
+    P.F;
 }
 ";
             var model = ModelParser.ParseFromString(text);
-            //foreach (var cpu in model.Cpus)
-            //    cpu.Run();
+            foreach (var cpu in model.Cpus)
+                cpu.Run();
 
             var flows = model.Cpus.SelectMany(cpu => cpu.Flows);
             var graphInfo = GraphUtil.analyzeFlows(flows);

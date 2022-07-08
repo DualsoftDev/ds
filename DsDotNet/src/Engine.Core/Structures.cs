@@ -67,7 +67,8 @@ namespace Engine.Core
 
     public abstract class Flow : Named
     {
-        public DsSystem System;
+        public DsSystem System { get; set; }
+        public Cpu Cpu { get; set; }
         public List<Segment> Segments = new List<Segment>();
         public List<Edge> Edges = new List<Edge>();
 
@@ -109,22 +110,14 @@ namespace Engine.Core
             system.Tasks.Add(this);
         }
     }
-    public class Cpu : Named
-    {
-        public Model Model;
-        public Flow[] Flows;
-        public Cpu(string name, Flow[] flows, Model model) : base(name) {
-            Flows = flows;
-            Model = model;
-            model.Cpus.Add(this);
-        }
-    }
-
 
     public interface IVertex {}
     public interface IEdge { }
 
     public interface ISegmentOrCall : IVertex {}
+
+    /// <summary> Call TX or RX </summary>
+    public interface ITxRx {}
 
     public abstract class SegmentOrCallBase : Named, IWithRGFH, ISegmentOrCall
     {

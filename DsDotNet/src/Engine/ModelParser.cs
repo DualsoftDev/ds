@@ -1,14 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using DsParser;
+
+using Dsu.Common.Utilities.ExtensionMethods;
+
 using Engine.Core;
 
 namespace Engine
 {
     /// <summary>
-    /// Parser ¿¡¼­ ¸¸µç ±¸Á¶Ã¼¸¦ Engine ¿ë ±¸Á¶Ã¼·Î º¯È¯
-    /// Parser ¿¡¼­´Â parsing ¿¡ Ãæ½Ç, engine ¿¡¼­´Â engine ¿¡ ¸Â´Â Ãß°¡ ÀÛ¾÷ ÇÊ¿äÇØ¼­ ÀÌ¿øÈ­.
+    /// Parser ì—ì„œ ë§Œë“  êµ¬ì¡°ì²´ë¥¼ Engine ìš© êµ¬ì¡°ì²´ë¡œ ë³€í™˜
+    /// Parser ì—ì„œëŠ” parsing ì— ì¶©ì‹¤, engine ì—ì„œëŠ” engine ì— ë§ëŠ” ì¶”ê°€ ì‘ì—… í•„ìš”í•´ì„œ ì´ì›í™”.
     /// </summary>
     class ModelParser
     {
@@ -18,13 +22,13 @@ namespace Engine
             return Convert(pModel);
         }
 
-        /// Parser ¿¡¼­ ¸¸µç ±¸Á¶Ã¼¸¦ Engine ¿ë ±¸Á¶Ã¼·Î º¯È¯
+        /// Parser ì—ì„œ ë§Œë“  êµ¬ì¡°ì²´ë¥¼ Engine ìš© êµ¬ì¡°ì²´ë¡œ ë³€í™˜
         static Model Convert(PModel pModel)
         {
-            // parser ±¸Á¶Ã¼¿Í ÀÌ¿¡ ´ëÀÀÇÏ´Â engine ±¸Á¶Ã¼ÀÇ dictionary
+            // parser êµ¬ì¡°ì²´ì™€ ì´ì— ëŒ€ì‘í•˜ëŠ” engine êµ¬ì¡°ì²´ì˜ dictionary
             var dict = new Dictionary<object, object>();
 
-            T pick<T>(object old, Func<T> creator=null) where T : class
+            T pick<T>(object old, Func<T> creator = null) where T : class
             {
                 if (dict.ContainsKey(old))
                     return (T)dict[old];
@@ -78,7 +82,7 @@ namespace Engine
                         var tx = pick<Segment>(pCall.TX);
                         var rx = pick<Segment>(pCall.RX);
                         var call = pick<Call>(pCall);
-                        call.TX = tx;
+                        call.TXs.Add(tx);
                         call.RX = rx;
                     }
                 }
@@ -101,18 +105,23 @@ namespace Engine
                         //    _ => throw new Exception("ERROR"),
                         //};
                         Edge edge = null;
-                        switch(op)
+                        switch (op)
                         {
-                            case ">":  edge = new WeakSetEdge(ss, op, t); break;
+                            case ">": edge = new WeakSetEdge(ss, op, t); break;
                             case ">>": edge = new StrongSetEdge(ss, op, t); break;
                             case "|>": edge = new WeakResetEdge(ss, op, t); break;
-                            case "|>>":edge = new StrongResetEdge(ss, op, t); break;
+                            case "|>>": edge = new StrongResetEdge(ss, op, t); break;
                             default:
                                 throw new Exception("ERROR");
                         };
 
 
                         flow.Edges.Add(edge);
+                    }
+
+                    foreach (var s in flow.Segments)
+                    {
+                        new Port[] { s.PortS, s.PortR, s.PortE }.Iter(p => p.OwnerCpu = flow.Cpu);
                     }
                 }
             }

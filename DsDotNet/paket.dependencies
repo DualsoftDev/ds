@@ -13,12 +13,24 @@ nuget log4net
 nuget nuget log4net
 nuget System.Configuration.ConfigurationManager
 nuget System.Reactive
+nuget System.Management
+nuget System.Data.DataSetExtensions
 
+nuget System.IO.Compression
+nuget System.Design
+nuget DotNetZip
+nuget System.Diagnostics.PerformanceCounter
 
-nuget Expecto
-nuget Expecto.BenchmarkDotNet
-nuget Expecto.FsCheck
-nuget Expecto.VisualStudio.TestAdapter version_in_path: true
+nuget QuickGraph.NETStandard
+nuget Akka
+nuget Akka.Remote
+
+nuget Microsoft.CSharp
+
+#nuget Expecto
+#nuget Expecto.BenchmarkDotNet
+#nuget Expecto.FsCheck
+#nuget Expecto.VisualStudio.TestAdapter version_in_path: true
 
 clitool dotnet-fake
 
@@ -47,6 +59,8 @@ nuget Fake.Api.GitHub
 
 #neget System.Runtime.CompilerServices.Unsafe
 
-nuget System.Security.Permissions >= 4.5 framework: net30
-nuget System.Security.Permissions >= 4.7 framework: net48
+#nuget System.Security.Permissions >= 4.5 framework: net30
+#nuget System.Security.Permissions >= 4.7 framework: net48
 #nuget System.Security.Permissions >= 4.7
+
+nuget System.Security.Permissions

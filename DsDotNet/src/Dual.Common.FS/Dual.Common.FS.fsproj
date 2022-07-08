@@ -140,5 +140,5 @@
     <PackageReference Include="YC.QuickGraph" Version="3.7.5-deta">
     </PackageReference>
   </ItemGroup>-->
-  <Import Project="$(SolutionDir)\.paket\Paket.Restore.targets" />
+  <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

@@ -113,7 +113,6 @@ namespace Engine.Core
     {
         public Flow[] Flows;
         public Cpu(string name, Flow[] flows) : base(name) { Flows = flows; }
-
     }
 
 

@@ -62,30 +62,47 @@ module GraphUtil =
             |> Array.ofSeq
         assert(cca.ComponentCount = ccs.Length)
         ccs
-
-    type GraphInfo(flows:Flow seq) =
-        let edges = flows |> Seq.collect(fun f -> f.Edges) |> Array.ofSeq
-        let qgEdges =
+    let edges2QgEdge (edges:Edge seq) =
             edges
             |> Seq.collect(fun ee ->
                 ee.Sources |> Seq.map(fun s -> QgEdge(s, ee.Target, ee)))
             |> Array.ofSeq
 
+    type GraphInfo(flows:Flow seq) =
+        let edges = flows |> Seq.collect(fun f -> f.Edges) |> Array.ofSeq
+        let resetEdges = edges |> Array.filter(fun e -> (e :> obj) :? IReset)
+        let solidEdges = edges |> Array.except(resetEdges)
+        let qgEdges = edges2QgEdge edges
+
+        /// edge 연결없이 고립된 segment
+        let isolatedSegments = flows |> Seq.collect(fun f -> f.Segments) |> Seq.cast<V>
+
         let vertices =
-            qgEdges |> Seq.collect(fun e -> [e.Source; e.Target]) |> Seq.distinct |> Array.ofSeq
+            qgEdges
+            |> Seq.collect(fun e -> [e.Source; e.Target])
+            |> Seq.append(isolatedSegments)
+            |> Seq.distinct |> Array.ofSeq
 
         /// reset edge 제외한 start edge 만..
-        let qgSolidEdges =
-            qgEdges
-            |> Seq.filter(fun e -> not ((e.OriginalEdge:>obj) :? IReset ))
-            |> Array.ofSeq
+        let qgSolidEdges = edges2QgEdge solidEdges
 
-        let solidGraph = qgSolidEdges |> GraphExtensions.ToAdjacencyGraph
+        let solidGraph =
+            let g = qgSolidEdges |> GraphExtensions.ToAdjacencyGraph
+            isolatedSegments |> Seq.iter(g.AddVertex >> ignore)
+            g
+
         let inits = getInits(solidGraph)
         let lasts = getLasts(solidGraph)
 
-        let undirectedGraph = qgEdges |> GraphExtensions.ToUndirectedGraph
-        let undirectedSolidGraph = qgSolidEdges |> GraphExtensions.ToUndirectedGraph
+        let undirectedGraph =
+            let g = qgEdges |> GraphExtensions.ToUndirectedGraph
+            isolatedSegments |> Seq.iter(g.AddVertex >> ignore)
+            g
+
+        let undirectedSolidGraph =
+            let g = qgSolidEdges |> GraphExtensions.ToUndirectedGraph
+            isolatedSegments |> Seq.iter(g.AddVertex >> ignore)
+            g
 
         let connectedComponets = getConnectedComponents(undirectedGraph)
         let solidConnectedComponets = getConnectedComponents(undirectedSolidGraph)

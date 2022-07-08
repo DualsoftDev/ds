@@ -1,0 +1,8 @@
+FSharp.Core
+FSharpPlus
+log4net
+Newtonsoft.Json
+QuickGraph.NETStandard
+Akka
+Akka.Remote
+

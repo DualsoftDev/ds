@@ -10,10 +10,16 @@ namespace Engine
     /// Parser 에서 만든 구조체를 Engine 용 구조체로 변환
     /// Parser 에서는 parsing 에 충실, engine 에서는 engine 에 맞는 추가 작업 필요해서 이원화.
     /// </summary>
-    class ModelConvertor
+    class ModelParser
     {
+        public static Model ParseFromString(string text)
+        {
+            var pModel = DsG4ModelParser.ParseFromString(text);
+            return Convert(pModel);
+        }
+
         /// Parser 에서 만든 구조체를 Engine 용 구조체로 변환
-        public static Model Convert(PModel pModel)
+        static Model Convert(PModel pModel)
         {
             // parser 구조체와 이에 대응하는 engine 구조체의 dictionary
             var dict = new Dictionary<object, object>();

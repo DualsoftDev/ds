@@ -10,7 +10,6 @@ nuget Argu
 nuget FSharpPlus
 nuget FSharp.Core
 nuget log4net
-nuget nuget log4net
 nuget System.Configuration.ConfigurationManager
 nuget System.Reactive
 nuget System.Management
@@ -21,7 +20,8 @@ nuget System.Design
 nuget DotNetZip
 nuget System.Diagnostics.PerformanceCounter
 
-nuget QuickGraph.NETStandard
+#nuget QuickGraph.NETStandard
+nuget YC.QuickGraph
 nuget Akka
 nuget Akka.Remote
 

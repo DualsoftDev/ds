@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="YC.QuickGraph" Version="3.7.4" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\..\Grammar\CsParser\DsParser.csproj" />
     <ProjectReference Include="..\Dual.Common.Core\Dual.Common.Core.csproj" />
     <ProjectReference Include="..\Engine.Core\Engine.Core.csproj" />

@@ -1,49 +1,39 @@
-using System;
-using System.Linq;
-using Engine.Graph;
+using System.IO;
+using System.Diagnostics;
+using System.Configuration;
+
+using log4net;
+using Dual.Common.Core;
 
 namespace Engine
 {
     class Program
     {
+        public static ILog Logger { get; private set; }
+
+        static void PrepareLog4Net()
+        {
+            // Configure log4net
+            var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            var configFile = new FileInfo(config.FilePath);
+
+            log4net.Config.XmlConfigurator.ConfigureAndWatch(configFile);
+            Logger = LogManager.GetLogger("EngineLogger");
+            Logger.Info($"Starting Engine.");
+            //Logger.Debug($"Configuration:\r\n{File.ReadAllText(config.FilePath)}");
+            //Logger.Debug("");
+
+            Log4NetHelper.Logger = Logger;
+
+            var repo = (log4net.Repository.Hierarchy.Hierarchy)log4net.LogManager.GetRepository();
+            var repoLogger = repo.GetLogger("EngineLogger", repo.LoggerFactory);
+            var traceAppender = new TraceLogAppender();
+            repoLogger.AddAppender(traceAppender);
+        }
         static void Main(string[] args)
         {
-            var text = @"
-[sys] it = {
-    [task] T = {
-        Cp = {P.F.Vp ~ P.F.Sp}
-        Cm = {P.F.Vm ~ P.F.Sm}
-    }
-    [flow] F = {
-        Main = { T.Cp > T.Cm; }
-        //parenting = {A > B > C; C |> B; }
-        //T.C1 <||> T.C2;
-        //A, B > C > D, E;
-        T.Cm > T.Cp;
-    }
-}
-[sys] P = {
-    [flow] F = {
-        Vp > Pp > Sp;
-        Vm > Pm > Sm;
-
-        Pp |> Sm;
-        Pm |> Sp;
-        Vp <||> Vm;
-    }
-}
-[cpu] Cpu = {
-    P.F;
-}
-";
-            var model = ModelParser.ParseFromString(text);
-            foreach (var cpu in model.Cpus)
-                cpu.Run();
-
-            var flows = model.Cpus.SelectMany(cpu => cpu.Flows);
-            var graphInfo = GraphUtil.analyzeFlows(flows);
-
-            Console.WriteLine("Hello World!");
+            PrepareLog4Net();
+            Tester.DoSampleTest();
         }
     }
 }

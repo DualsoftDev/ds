@@ -57,6 +57,8 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Engine.Graph", "src\Engine.
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Dual.Common.FS", "src\Dual.Common.FS\Dual.Common.FS.fsproj", "{2620BAD8-7696-4D1D-B2C6-EE4A093E9DFF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Engine.OPC", "src\Engine.OPC\Engine.OPC.csproj", "{D7BDA151-FBE4-46FF-8A97-CFDB99C8C843}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -87,6 +89,10 @@ Global
 		{2620BAD8-7696-4D1D-B2C6-EE4A093E9DFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2620BAD8-7696-4D1D-B2C6-EE4A093E9DFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2620BAD8-7696-4D1D-B2C6-EE4A093E9DFF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7BDA151-FBE4-46FF-8A97-CFDB99C8C843}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7BDA151-FBE4-46FF-8A97-CFDB99C8C843}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7BDA151-FBE4-46FF-8A97-CFDB99C8C843}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7BDA151-FBE4-46FF-8A97-CFDB99C8C843}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -100,6 +106,7 @@ Global
 		{EE1C858D-5749-4AC6-B00F-16B8A650E3CC} = {BF60BC93-E09B-4E5F-9D85-95A519479D54}
 		{42828943-9DAC-4F1E-9BBD-E14DCFFCA76A} = {BF60BC93-E09B-4E5F-9D85-95A519479D54}
 		{2620BAD8-7696-4D1D-B2C6-EE4A093E9DFF} = {BF60BC93-E09B-4E5F-9D85-95A519479D54}
+		{D7BDA151-FBE4-46FF-8A97-CFDB99C8C843} = {BF60BC93-E09B-4E5F-9D85-95A519479D54}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8B36D7B1-CD69-44C5-8E57-DE46AC18C1F7}

@@ -1,23 +1,17 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net48</TargetFramework>
+		<RootNamespace>Engine.Graph</RootNamespace>
+	</PropertyGroup>
+	<ItemGroup>
+		<None Include="paket.references" />
+		<Compile Include="Graph.fs" />
+	</ItemGroup>
 
-  <PropertyGroup>
-    <TargetFramework>net48</TargetFramework>
-	<RootNamespace>Engine.Graph</RootNamespace>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Include="Graph.fs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="YC.QuickGraph" Version="3.7.4" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Dual.Common.FS\Dual.Common.FS.fsproj" />
-    <ProjectReference Include="..\Engine.Core\Engine.Core.csproj" />
-  </ItemGroup>
-
+	<ItemGroup>
+		<ProjectReference Include="..\Dual.Common.FS\Dual.Common.FS.fsproj" />
+		<ProjectReference Include="..\Engine.Core\Engine.Core.csproj" />
+	</ItemGroup>
 	<Import Project="..\..\.paket\Paket.Restore.targets" />
-
 </Project>

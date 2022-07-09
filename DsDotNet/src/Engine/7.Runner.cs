@@ -14,7 +14,7 @@ namespace Engine
 
         public static void Initialize(this Cpu cpu)
         {
-            foreach (var flow in cpu.Flows)
+            foreach (var flow in cpu.Flows.OfType<RootFlow>())
                 flow.GenereateHmiTags();
 
             cpu.BuildBackwardDependency();
@@ -31,7 +31,7 @@ namespace Engine
                 otherFlows
                     .SelectMany(f => f.Edges)
                     .SelectMany(e => e.Vertices)
-                    .OfType<Call>()
+                    .OfType<CallPrototype>()
                     .Select(c => (c.TXs, c.RX))
                     ;
 

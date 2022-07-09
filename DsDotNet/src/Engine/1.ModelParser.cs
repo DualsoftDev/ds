@@ -60,7 +60,7 @@ namespace Engine
                     var task = pick<Task>(pTask, () => new Task(pTask.Name, sys));
                     foreach (var pCall in pTask.Calls)
                     {
-                        var call_ = pick<Call>(pCall, () => new Call(pCall.Name, task));
+                        var call_ = pick<CallPrototype>(pCall, () => new CallPrototype(pCall.Name, task));
                     }
                 }
 
@@ -81,7 +81,7 @@ namespace Engine
                     {
                         var tx = pick<Segment>(pCall.TX);
                         var rx = pick<Segment>(pCall.RX);
-                        var call = pick<Call>(pCall);
+                        var call = pick<CallPrototype>(pCall);
                         call.TXs.Add(tx);
                         call.RX = rx;
                     }
@@ -89,7 +89,7 @@ namespace Engine
 
                 foreach (var pFlow in pSys.Flows.OfType<PRootFlow>())
                 {
-                    var flow = pick<Flow>(pFlow);
+                    var flow = pick<RootFlow>(pFlow);
                     foreach (var pEdge in pFlow.Edges)
                     {
                         var ss = pEdge.Sources.Select(pS => pick<Core.ISegmentOrCall>(pS)).ToArray();
@@ -119,7 +119,7 @@ namespace Engine
                         flow.Edges.Add(edge);
                     }
 
-                    foreach (var s in flow.Segments)
+                    foreach (var s in flow.Children.OfType<Segment>())
                     {
                         new Port[] { s.PortS, s.PortR, s.PortE }.Iter(p => p.OwnerCpu = flow.Cpu);
                     }

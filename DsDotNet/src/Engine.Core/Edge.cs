@@ -4,9 +4,6 @@ using System.Linq;
 
 namespace Engine.Core
 {
-    public interface IStrong { }
-    public interface IReset { }
-
     [DebuggerDisplay("{ToText()}")]
     public abstract class Edge : IEdge
     {

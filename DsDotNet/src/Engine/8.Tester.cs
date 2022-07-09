@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Linq;
+
+using Engine.Core;
 using Engine.Graph;
 
 namespace Engine
@@ -44,7 +46,7 @@ namespace Engine
             //foreach (var cpu in model.Cpus)
             //    cpu.Run();
 
-            var flows = engine.Model.Cpus.SelectMany(cpu => cpu.Flows);
+            var flows = engine.Model.Cpus.SelectMany(cpu => cpu.Flows.OfType<RootFlow>());
             var graphInfo = GraphUtil.analyzeFlows(flows);
 
             Console.WriteLine("Hello World!");

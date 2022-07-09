@@ -4,12 +4,6 @@ using System.Linq;
 
 namespace Engine.Core
 {
-    public interface IBit
-    {
-        bool Value { get; }
-        void Set();
-        void Reset();
-    }
     public abstract class Bit : Named, IBit
     {
         bool _value;
@@ -42,7 +36,6 @@ namespace Engine.Core
         }
     }
 
-    public interface IAutoTag {}
     public class TagAutoStart : Tag, IAutoTag
     {
         public TagAutoStart(Segment ownerSegment, string name, bool bit = false, bool isExternal = true)

@@ -4,40 +4,10 @@ using System.Text;
 
 namespace Engine.Core
 {
-    public enum Status4
-    {
-        Ready = 0,
-        Going,
-        Finished,
-        Homing
-    }
-
-    public interface IWithRGFH
-    {
-        Status4 RGFH { get; set; }
-        bool ChangeR();
-        bool ChangeG();
-        bool ChangeF();
-        bool ChangeH();
-    }
-
-    public interface IWithSREPorts
-    {
-        PortS PortS { get; set; }
-        PortR PortR { get; set; }
-        PortE PortE { get; set; }
-    }
-
-
     public class Model
     {
         public List<DsSystem> Systems = new List<DsSystem>();
         public List<Cpu> Cpus = new List<Cpu>();
-    }
-
-    public interface INamed
-    {
-        string Name { get; set; }
     }
 
     public class Named: INamed
@@ -65,11 +35,10 @@ namespace Engine.Core
         }
     }
 
-    public abstract class Flow : Named
+    public abstract class Flow : Named, ISegmentOrFlow
     {
         public DsSystem System { get; set; }
         public Cpu Cpu { get; set; }
-        public List<Segment> Segments = new List<Segment>();
         public List<Edge> Edges = new List<Edge>();
 
         protected Flow(string name, DsSystem system)
@@ -82,6 +51,8 @@ namespace Engine.Core
 
     public class RootFlow : Flow
     {
+        /// <summary>Edge 를 통해 알 수 없는 isolated root segement 등을 포함 </summary>
+        public List<Segment> Children = new List<Segment>();
         public RootFlow(string name, DsSystem system)
             : base(name, system)
         {
@@ -101,7 +72,7 @@ namespace Engine.Core
     public class Task : Named
     {
         public DsSystem System;
-        public List<Call> Calls = new List<Call>();
+        public List<CallPrototype> CallPrototypes = new List<CallPrototype>();
 
         public Task(string name, DsSystem system)
             : base(name)
@@ -111,13 +82,6 @@ namespace Engine.Core
         }
     }
 
-    public interface IVertex {}
-    public interface IEdge { }
-
-    public interface ISegmentOrCall : IVertex {}
-
-    /// <summary> Call TX or RX </summary>
-    public interface ITxRx {}
 
     public abstract class SegmentOrCallBase : Named, IWithRGFH, ISegmentOrCall
     {

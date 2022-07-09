@@ -3,9 +3,6 @@
 open Engine.Core
 open QuickGraph
 open QuickGraph.Algorithms
-open QuickGraph.Algorithms.ShortestPath
-open QuickGraph.Algorithms.Observers
-open Engine.Core
 
 
 [<AutoOpen>]
@@ -68,14 +65,14 @@ module GraphUtil =
                 ee.Sources |> Seq.map(fun s -> QgEdge(s, ee.Target, ee)))
             |> Array.ofSeq
 
-    type GraphInfo(flows:Flow seq) =
+    type GraphInfo(flows:RootFlow seq) =
         let edges = flows |> Seq.collect(fun f -> f.Edges) |> Array.ofSeq
         let resetEdges = edges |> Array.filter(fun e -> (e :> obj) :? IReset)
         let solidEdges = edges |> Array.except(resetEdges)
         let qgEdges = edges2QgEdge edges
 
         /// edge 연결없이 고립된 segment
-        let isolatedSegments = flows |> Seq.collect(fun f -> f.Segments) |> Seq.cast<V>
+        let isolatedSegments = flows |> Seq.collect(fun f -> f.Children) |> Seq.cast<V>
 
         let vertices =
             qgEdges
@@ -127,7 +124,7 @@ module GraphUtil =
         member x.GetShortestPath(source, vertex) = computeDijkstra x.Graph source vertex
 
 
-    let analyzeFlows(flows:Flow seq) =
+    let analyzeFlows(flows:RootFlow seq) =
         let gri = GraphInfo(flows)
         let graph = gri.Graph
 

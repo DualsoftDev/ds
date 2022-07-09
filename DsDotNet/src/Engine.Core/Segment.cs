@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Engine.Core
 {
-    public class Segment : SegmentOrCallBase, IWithSREPorts, ITxRx
+    public class Segment : SegmentOrCallBase, ISegmentOrFlow, IWithSREPorts, ITxRx
     {
         public RootFlow ContainerFlow;
         public ChildFlow ChildFlow;
@@ -12,10 +12,10 @@ namespace Engine.Core
         public PortR PortR { get; set; }
         public PortE PortE { get; set; }
 
-        public IEnumerable<Call> Children =>
+        public IEnumerable<CallPrototype> Children =>
             ChildFlow?.Edges
             .SelectMany(e => e.Vertices)
-            .OfType<Call>()
+            .OfType<CallPrototype>()
             .Distinct()
             ;
 
@@ -25,7 +25,7 @@ namespace Engine.Core
         {
             ContainerFlow = containerFlow;
             ChildFlow = new ChildFlow($"_{name}", this);
-            containerFlow.Segments.Add(this);
+            containerFlow.Children.Add(this);
 
             PortS = new PortS(this);
             PortR = new PortR(this);

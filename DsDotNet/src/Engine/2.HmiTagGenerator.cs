@@ -34,7 +34,7 @@ namespace Engine
         }
 
         /// <summary> flow 의 init, last segment 에 대해서 auto start, auto reset tag 생성 </summary>
-        static void GenerateHmiAutoTag(Flow flow)
+        static void GenerateHmiAutoTagForRootSegment(RootFlow flow)
         {
             var cpu = flow.Cpu;
             var midName = $"{flow.System.Name}_{flow.Name}";
@@ -47,7 +47,7 @@ namespace Engine
                 var init = init_ as Segment;
                 if (init == null)
                 {
-                    Debug.Assert(init_ is Call);
+                    Debug.Assert(init_ is CallPrototype);
                     // do nothing for call
                 }
                 else
@@ -62,7 +62,7 @@ namespace Engine
                 var last = last_ as Segment;
                 if (last == null)
                 {
-                    Debug.Assert(last_ is Call);
+                    Debug.Assert(last_ is CallPrototype);
                     // do nothing for call
                 }
                 else
@@ -72,7 +72,14 @@ namespace Engine
                 }
             }
         }
+        static void GenerateHmiAutoTagForCalls(RootFlow flow)
+        {
 
+        }
+        static void GenerateHmiAutoTagForCalls(Segment segment)
+        {
+
+        }
         /// <summary>
         /// Flow 에 속한 root segment 에 대해서 S/R/E tag 생성
         /// - init 에 대해서 auto start,
@@ -80,13 +87,19 @@ namespace Engine
         /// todo: flow 에 속한 call 에 대한 HMI tag 생성
         /// <para> - 생성된 tag 는 CPU 에 저장된다.</para>
         /// </summary>
-        public static void GenereateHmiTags(this Flow flow)
+        public static void GenereateHmiTags(this RootFlow flow)
         {
             var cpu = flow.Cpu;
 
+            var segments = flow.Children.OfType<Segment>();
+
             // 모든 root segment 에 대해서 S/R/E tag 생성
-            flow.Segments.Iter(s => GenerateHmiTag(s));
-            GenerateHmiAutoTag(flow);
+            segments.Iter(s => GenerateHmiTag(s));
+            GenerateHmiAutoTagForRootSegment(flow);
+            GenerateHmiAutoTagForCalls(flow);
+
+            // root segment 에 포함된 call 에 대해 tag 생성
+            segments.Iter(s => GenerateHmiAutoTagForCalls(s));
         }
 
         public static IEnumerable<Tag> CollectTags(this Cpu cpu)

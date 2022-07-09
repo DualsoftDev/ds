@@ -38,11 +38,13 @@ namespace DsParser
         }
     }
 
-    public abstract class PFlow : PNamed
+    public abstract class PFlow : PNamed, IPSegmentOrFlow
     {
         public PSystem System;
         public List<PSegment> Segments = new List<PSegment>();
         public List<PEdge> Edges = new List<PEdge>();
+
+        internal Dictionary<PCallPrototype, PCall> CallInstanceMap = new Dictionary<PCallPrototype, PCall>();
 
         protected PFlow(string name, PSystem system)
             : base(name)
@@ -93,18 +95,28 @@ namespace DsParser
         }
     }
 
-    public interface ISegmentOrCall {}
+    public interface IPVertex { }
+    public interface IPSegmentOrFlow {}
+    public interface IPSegmentOrCall : IPVertex {}
 
-    public class PSegment : PNamed, ISegmentOrCall
+    public class PSegment : PNamed, IPSegmentOrCall, IPSegmentOrFlow
     {
         public PRootFlow ContainerFlow;
         public PChildFlow ChildFlow;
-        public IEnumerable<PCallPrototype> Children =>
-            ChildFlow?.Edges
-            .SelectMany(e => e.Sources.Concat(new[] { e.Target }))
-            .OfType<PCallPrototype>()
-            .Distinct()
-            ;
+        public IEnumerable<PCall> Children {
+            get
+            {
+                if (ChildFlow == null)
+                    return Enumerable.Empty<PCall>();
+
+                return
+                    ChildFlow.Edges
+                    .SelectMany(e => e.Sources.Concat(new[] { e.Target }))
+                    .OfType<PCall>()
+                    .Distinct()
+                    ;
+            }
+        }
 
         public PSegment(string name, PRootFlow containerFlow)
             : base(name)
@@ -116,7 +128,7 @@ namespace DsParser
     }
 
 
-    public class PCallBase : PNamed, ISegmentOrCall
+    public class PCallBase : PNamed, IPSegmentOrCall
     {
         public PSegment TX;
         public PSegment RX;
@@ -139,9 +151,12 @@ namespace DsParser
 
     public class PCall : PCallBase
     {
-        public Task Task;
-        public PCall(string name) : base(name)
+        public PCallPrototype Prototype;
+        public IPSegmentOrFlow Container;
+        public PCall(string name, IPSegmentOrFlow container, PCallPrototype prototype) : base(name)
         {
+            Prototype = prototype;
+            Container = container;
         }
     }
 
@@ -149,11 +164,13 @@ namespace DsParser
     public class PEdge
     {
         public PFlow ContainerFlow;
-        public ISegmentOrCall[] Sources;
-        public ISegmentOrCall Target;
+        public IPVertex[] Sources;
+        public IPVertex Target;
+        public IEnumerable<IPVertex> Vertices => Sources.Concat(new[] { Target });
+
         public string Operator;
 
-        public PEdge(PFlow containerFlow, ISegmentOrCall[] sources, string operator_, ISegmentOrCall target)
+        public PEdge(PFlow containerFlow, IPVertex[] sources, string operator_, IPVertex target)
         {
             ContainerFlow = containerFlow;
             Sources = sources;
@@ -169,7 +186,7 @@ namespace DsParser
 
     public static class PModelUtil
     {
-        static ISegmentOrCall FindSegmentOrCall(this PModel model, string systemName, string flowOrTaskName, string segmentOrCallName, bool isSegment)
+        static IPSegmentOrCall FindSegmentOrCall(this PModel model, string systemName, string flowOrTaskName, string segmentOrCallName, bool isSegment)
         {
             var system = model.Systems.First(s => s.Name == systemName);
             if (isSegment)

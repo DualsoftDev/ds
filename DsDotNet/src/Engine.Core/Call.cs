@@ -30,9 +30,17 @@ namespace Engine.Core
     {
         public CallPrototype Prototype;
         public ISegmentOrFlow Container;
-        public Call(string name, CallPrototype protoType) : base(name)
+        public Call(string name, ISegmentOrFlow container, CallPrototype protoType) : base(name)
         {
             Prototype = protoType;
+            Container = container;
+
+            Flow flow = container as Flow;
+            var containerSegment = container as Segment;
+            if (flow == null && containerSegment != null)
+                flow = containerSegment.ChildFlow;
+
+            flow.Children.Add(this);
         }
     }
 

@@ -42,25 +42,96 @@ namespace Engine
                 return t;
             }
 
+            void preparePick(IEnumerable<IPVertex> vertices)
+            {
+                foreach(var pV in vertices)
+                {
+                    var pSegment = pV as PSegment;
+                    if (pSegment != null && !dict.ContainsKey(pSegment))
+                        dict.Add(pSegment, new Segment(pSegment.Name, pick<RootFlow>(pSegment.ContainerFlow)));
+
+                    var pCall = pV as PCall;
+                    if (pCall != null && !dict.ContainsKey(pCall))
+                    {
+                        var container = pick<ISegmentOrFlow>(pCall.Container);
+                        dict.Add(pCall, new Call(pCall.Name, container, pick<CallPrototype>(pCall.Prototype)));
+                    }
+                }
+            }
+
+            void fillEdges(Flow flow, PFlow pFlow)
+            {
+                if (pFlow == null)
+                    return;
+
+                if (flow == null)
+                {
+                    var pChildFlow = pFlow as PChildFlow;
+                    if (pFlow is PRootFlow)
+                        flow = pick<RootFlow>(pFlow, () => new RootFlow(pFlow.Name, pick<DsSystem>(pFlow.System)));
+                    else if (pChildFlow != null)
+                        flow = pick<ChildFlow>(pChildFlow, () => new ChildFlow(pChildFlow.Name, pick<Segment>(pChildFlow.ContainerSegment)));
+                }
+
+
+                foreach (var pEdge in pFlow.Edges)
+                {
+                    preparePick(pEdge.Vertices);
+                    var ss = pEdge.Sources.Select(pS => dict[pS]).Cast<Core.IVertex>().ToArray();
+                    var t = dict[pEdge.Target] as Core.IVertex;
+                    var op = pEdge.Operator;
+
+                    Edge edge = null;
+                    switch (op)
+                    {
+                        case ">": edge = new WeakSetEdge(flow, ss, op, t); break;
+                        case ">>": edge = new StrongSetEdge(flow, ss, op, t); break;
+                        case "|>": edge = new WeakResetEdge(flow, ss, op, t); break;
+                        case "|>>": edge = new StrongResetEdge(flow, ss, op, t); break;
+                        default:
+                            throw new Exception("ERROR");
+                    };
+
+
+                    flow.AddEdge(edge);
+                }
+            }
+
             Model model = pick<Model>(pModel, () => new Model());
 
             foreach (var pSys in pModel.Systems)
             {
                 var sys = pick<DsSystem>(pSys, () => new DsSystem(pSys.Name, model));
-                foreach (var pFlow in pSys.Flows.OfType<PRootFlow>())
-                {
-                    var rootFlow = pick<RootFlow>(pFlow, () => new RootFlow(pFlow.Name, sys));
-                    foreach (var pSeg in pFlow.Segments)
-                    {
-                        var seg_ = pick<Segment>(pSeg, () => new Segment(pSeg.Name, rootFlow));
-                    }
-                }
                 foreach (var pTask in pSys.Tasks)
                 {
                     var task = pick<Task>(pTask, () => new Task(pTask.Name, sys));
                     foreach (var pCall in pTask.Calls)
                     {
                         var call_ = pick<CallPrototype>(pCall, () => new CallPrototype(pCall.Name, task));
+                    }
+                }
+
+                foreach (var pFlow in pSys.Flows.OfType<PRootFlow>())
+                {
+                    var rootFlow = pick<RootFlow>(pFlow, () => new RootFlow(pFlow.Name, sys));
+                    foreach (var pSeg in pFlow.Segments)
+                    {
+                        var seg = pick<Segment>(pSeg, () => new Segment(pSeg.Name, rootFlow));
+                        //foreach (var pEdge in pSeg.ChildFlow.Edges)
+                        //{
+                        //    var ss = pEdge.Sources.Select(pS => pick<IVertex>(pS)).ToArray();
+                        //    var t = pick<IVertex>(pEdge.Target);
+                        //    var edge = pick<Edge>(pEdge, () => new Edge(seg.ChildFlow, ss, pEdge.Operator, t));
+
+                        //}
+
+                        foreach (var pChCall in pSeg.Children?.OfType<PCall>())
+                        {
+                            var callProto = pick<CallPrototype>(pChCall.Prototype);
+                            var container = pick<ISegmentOrFlow>(pChCall.Container);
+                            var call = pick<Call>(pChCall, () => new Call(pChCall.Name, container, callProto));
+                        }
+                        Console.WriteLine();
                     }
                 }
 
@@ -90,49 +161,30 @@ namespace Engine
                 foreach (var pFlow in pSys.Flows.OfType<PRootFlow>())
                 {
                     var flow = pick<RootFlow>(pFlow);
-                    foreach (var pEdge in pFlow.Edges)
+
+                    preparePick(pFlow.Segments);
+
+                    foreach (var pSegment in pFlow.Segments)
                     {
-                        IVertex convertOnCall(IVertex v)
+                        var child = (SegmentOrCallBase)dict[pSegment];
+                        if (! flow.Children.Contains(child))
+                            flow.Children.Add(child);
+
+                        if (pSegment.ChildFlow != null)
                         {
-                            var callProto = v as CallPrototype;
-                            if (callProto == null)
-                                return v;
+                            var segment = child as Segment;
+                            fillEdges(segment.ChildFlow, pSegment.ChildFlow);
+                            segment.ChildFlow.Cpu = flow.Cpu;
 
-                            Call call = flow.Children.OfType<Call>().FirstOrDefault(c => c.Prototype == callProto);
-                            if (call == null)
-                            {
-                                call = new Call(callProto.Name, callProto);
-                                flow.Children.Add(call);
-                            }
-
-                            return call;
+                            foreach (var px in pSegment.Children)
+                                Console.WriteLine();
+                            foreach (var px in pSegment.ChildFlow.Edges)
+                                Console.WriteLine();
                         }
-                        var ss = pEdge.Sources.Select(pS => convertOnCall(pick<IVertex>(pS))).ToArray();
-                        var t = convertOnCall(pick<IVertex>(pEdge.Target));
-                        var op = pEdge.Operator;
-
-                        //Edge edge = op switch
-                        //{
-                        //    ">" => new WeakSetEdge(ss, op, t),
-                        //    ">>" => new StrongSetEdge(ss, op, t),
-                        //    "|>" => new WeakResetEdge(ss, op, t),
-                        //    "|>>" => new StrongResetEdge(ss, op, t),
-                        //    _ => throw new Exception("ERROR"),
-                        //};
-                        Edge edge = null;
-                        switch (op)
-                        {
-                            case ">": edge = new WeakSetEdge(flow, ss, op, t); break;
-                            case ">>": edge = new StrongSetEdge(flow, ss, op, t); break;
-                            case "|>": edge = new WeakResetEdge(flow, ss, op, t); break;
-                            case "|>>": edge = new StrongResetEdge(flow, ss, op, t); break;
-                            default:
-                                throw new Exception("ERROR");
-                        };
-
-
-                        flow.AddEdge(edge);
                     }
+
+                    fillEdges(flow, pFlow);
+
 
                     foreach (var s in flow.Children.OfType<Segment>())
                     {

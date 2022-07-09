@@ -377,19 +377,32 @@ namespace DsParser
         }
 
 
-        ISegmentOrCall FindVertex(string v)
+        IPSegmentOrCall FindVertex(string v, PFlow flow)
         {
             var seg = _model.FindSegment(v);
-            var call = _model.FindCall(v);
+            var callPrototype = _model.FindCall(v);
 
-            if (seg!=null && call!=null)
+            if (seg!=null && callPrototype!=null)
                 throw new Exception($"Parse error: {v} is ambiguous.  Both segment and call exists.");
-            if (seg == null && call == null)
+            if (seg == null && callPrototype == null)
                 throw new Exception($"Parse error: {v} not found.");
 
-            return (ISegmentOrCall)seg ?? call;
+            if (seg != null)
+                return seg;
+
+            var map = flow.CallInstanceMap;
+            if (! map.ContainsKey(callPrototype))
+            {
+                var childFlow = flow as PChildFlow;
+                var rootFlow = flow as PRootFlow;
+                var container = rootFlow != null ? (IPSegmentOrFlow)rootFlow: childFlow.ContainerSegment;
+                var call = new PCall(callPrototype.Name, container, callPrototype);
+                map.Add(callPrototype, call);
+            }
+
+            return map[callPrototype];
         }
-        ISegmentOrCall[] FindVertices(string specs) => specs.Split(new[] { ',' }).Select(FindVertex).ToArray();
+        IPSegmentOrCall[] FindVertices(string specs, PFlow flow) => specs.Split(new[] { ',' }).Select(spec => FindVertex(spec, flow)).ToArray();
 
         /**
             * causal operator 를 처리해서 this.links 에 결과 누적
@@ -426,8 +439,8 @@ namespace DsParser
                         if (_parenting != null )
                             flow = _parenting.ChildFlow;   // target flow
 
-                        var lvs = FindVertices(l.id);
-                        var rvs = FindVertices(r.id);
+                        var lvs = FindVertices(l.id, flow);
+                        var rvs = FindVertices(r.id, flow);
 
                         Debug.Assert(l != null && r != null);   // 'node not found');
                         if (lvs.Length == 0) throw new Exception($"Parse error: {l.id} not found");

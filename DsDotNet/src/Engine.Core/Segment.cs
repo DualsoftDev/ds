@@ -12,10 +12,10 @@ namespace Engine.Core
         public PortR PortR { get; set; }
         public PortE PortE { get; set; }
 
-        public IEnumerable<CallPrototype> Children =>
+        public IEnumerable<Call> Children =>
             ChildFlow?.Edges
             .SelectMany(e => e.Vertices)
-            .OfType<CallPrototype>()
+            .OfType<Call>()
             .Distinct()
             ;
 

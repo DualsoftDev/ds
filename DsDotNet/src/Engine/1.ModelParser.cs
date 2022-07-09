@@ -131,7 +131,7 @@ namespace Engine
                         };
 
 
-                        flow.Edges.Add(edge);
+                        flow.AddEdge(edge);
                     }
 
                     foreach (var s in flow.Children.OfType<Segment>())

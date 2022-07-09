@@ -34,13 +34,17 @@ namespace Engine
 }
 [cpu] Cpu = {
     P.F;
+    it.F;
 }
 ";
-            var model = ModelParser.ParseFromString(text);
-            foreach (var cpu in model.Cpus)
-                cpu.Run();
+            var engine = new Engine(text, "Cpu");
+            Program.Engine = engine;
+            engine.Run();
+            //var model = ModelParser.ParseFromString(text);
+            //foreach (var cpu in model.Cpus)
+            //    cpu.Run();
 
-            var flows = model.Cpus.SelectMany(cpu => cpu.Flows);
+            var flows = engine.Model.Cpus.SelectMany(cpu => cpu.Flows);
             var graphInfo = GraphUtil.analyzeFlows(flows);
 
             Console.WriteLine("Hello World!");

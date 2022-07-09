@@ -10,10 +10,9 @@ namespace Engine
     {
         public static void Run(this Cpu cpu)
         {
-            cpu.Initialize();
         }
 
-        static void Initialize(this Cpu cpu)
+        public static void Initialize(this Cpu cpu)
         {
             foreach (var flow in cpu.Flows)
                 flow.GenereateHmiTags();
@@ -49,14 +48,17 @@ namespace Engine
                 }
 
                 {
-                    var tag = rx as Tag;
-                    if (tag != null)
+                    var s = rx as Segment;
+                    var tags = s.ContainerFlow.Cpu.ForwardDependancyMap[s.PortE].OfType<Tag>();
+                    tags.Iter(tag =>
                     {
                         tag.Type = TagType.I;
                         tag.IsExternal = true;
-                    }
+                    });
                 }
             }
+
+            cpu.PrintTags();
         }
     }
 }

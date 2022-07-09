@@ -1,9 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>net48</TargetFrameworks>
+		<!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
+		<RootNamespace>Engine.Opc</RootNamespace>
+	</PropertyGroup>
 
-  <Import Project="..\..\.paket\Paket.Restore.targets" />
+	<Import Project="..\..\.paket\Paket.Restore.targets" />
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Engine.Core\Engine.Core.csproj" />
+	</ItemGroup>
 
 </Project>

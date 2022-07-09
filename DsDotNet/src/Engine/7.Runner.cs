@@ -14,7 +14,7 @@ namespace Engine
 
         public static void Initialize(this Cpu cpu)
         {
-            var rootFlows = cpu.Flows.OfType<RootFlow>();
+            var rootFlows = cpu.RootFlows.OfType<RootFlow>();
             foreach (var flow in rootFlows)
                 flow.GenereateHmiTags();
 
@@ -23,8 +23,8 @@ namespace Engine
             // cpu 기준으로 call 에 사용된 TX 및 RX 의 Tag 값 external 로 marking
             var otherFlows =
                 from system in cpu.Model.Systems
-                from flow in system.Flows
-                where !(cpu.Flows.Contains(flow))
+                from flow in system.RootFlows
+                where !(cpu.RootFlows.Contains(flow))
                 select flow
                 ;
 

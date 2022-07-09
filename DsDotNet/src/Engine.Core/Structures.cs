@@ -25,7 +25,7 @@ namespace Engine.Core
     public class DsSystem : Named
     {
         public Model Model;
-        public List<Flow> Flows = new List<Flow>();
+        public List<RootFlow> RootFlows = new List<RootFlow>();
         public List<Task> Tasks = new List<Task>();
         public DsSystem(string name, Model model)
             : base(name)

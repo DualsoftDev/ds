@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using DsParser;
-
 using Dsu.Common.Utilities.ExtensionMethods;
-
 using Engine.Core;
 
 namespace Engine
@@ -99,99 +97,108 @@ namespace Engine
 
             Model model = pick<Model>(pModel, () => new Model());
 
-            foreach (var pSys in pModel.Systems)
+            void firstScan()
             {
-                var sys = pick<DsSystem>(pSys, () => new DsSystem(pSys.Name, model));
-                foreach (var pTask in pSys.Tasks)
+                foreach (var pSys in pModel.Systems)
                 {
-                    var task = pick<Task>(pTask, () => new Task(pTask.Name, sys));
-                    foreach (var pCall in pTask.Calls)
+                    var sys = pick<DsSystem>(pSys, () => new DsSystem(pSys.Name, model));
+                    foreach (var pTask in pSys.Tasks)
                     {
-                        var call_ = pick<CallPrototype>(pCall, () => new CallPrototype(pCall.Name, task));
-                    }
-                }
-
-                foreach (var pFlow in pSys.Flows.OfType<PRootFlow>())
-                {
-                    var rootFlow = pick<RootFlow>(pFlow, () => new RootFlow(pFlow.Name, sys));
-                    foreach (var pSeg in pFlow.Segments)
-                    {
-                        var seg = pick<Segment>(pSeg, () => new Segment(pSeg.Name, rootFlow));
-                        //foreach (var pEdge in pSeg.ChildFlow.Edges)
-                        //{
-                        //    var ss = pEdge.Sources.Select(pS => pick<IVertex>(pS)).ToArray();
-                        //    var t = pick<IVertex>(pEdge.Target);
-                        //    var edge = pick<Edge>(pEdge, () => new Edge(seg.ChildFlow, ss, pEdge.Operator, t));
-
-                        //}
-
-                        foreach (var pChCall in pSeg.Children?.OfType<PCall>())
+                        var task = pick<Task>(pTask, () => new Task(pTask.Name, sys));
+                        foreach (var pCall in pTask.Calls)
                         {
-                            var callProto = pick<CallPrototype>(pChCall.Prototype);
-                            var container = pick<ISegmentOrFlow>(pChCall.Container);
-                            var call = pick<Call>(pChCall, () => new Call(pChCall.Name, container, callProto));
-                        }
-                        Console.WriteLine();
-                    }
-                }
-
-            }
-            foreach (var pCpu in pModel.Cpus)
-            {
-                var flows = pCpu.Flows.Select(pf => pick<Flow>(pf)).ToArray();
-                var cpu = pick<Cpu>(pCpu, () => new Cpu(pCpu.Name, flows, model));
-            }
-
-
-            // second scan : fill edge, call tx, rx
-            foreach (var pSys in pModel.Systems)
-            {
-                foreach (var pTask in pSys.Tasks)
-                {
-                    foreach (var pCall in pTask.Calls)
-                    {
-                        var tx = pick<Segment>(pCall.TX);
-                        var rx = pick<Segment>(pCall.RX);
-                        var call = pick<CallPrototype>(pCall);
-                        call.TXs.Add(tx);
-                        call.RX = rx;
-                    }
-                }
-
-                foreach (var pFlow in pSys.Flows.OfType<PRootFlow>())
-                {
-                    var flow = pick<RootFlow>(pFlow);
-
-                    preparePick(pFlow.Segments);
-
-                    foreach (var pSegment in pFlow.Segments)
-                    {
-                        var child = (SegmentOrCallBase)dict[pSegment];
-                        if (! flow.Children.Contains(child))
-                            flow.Children.Add(child);
-
-                        if (pSegment.ChildFlow != null)
-                        {
-                            var segment = child as Segment;
-                            fillEdges(segment.ChildFlow, pSegment.ChildFlow);
-                            segment.ChildFlow.Cpu = flow.Cpu;
-
-                            foreach (var px in pSegment.Children)
-                                Console.WriteLine();
-                            foreach (var px in pSegment.ChildFlow.Edges)
-                                Console.WriteLine();
+                            var call_ = pick<CallPrototype>(pCall, () => new CallPrototype(pCall.Name, task));
                         }
                     }
 
-                    fillEdges(flow, pFlow);
-
-
-                    foreach (var s in flow.Children.OfType<Segment>())
+                    foreach (var pFlow in pSys.RootFlows.OfType<PRootFlow>())
                     {
-                        new Port[] { s.PortS, s.PortR, s.PortE }.Iter(p => p.OwnerCpu = flow.Cpu);
+                        var rootFlow = pick<RootFlow>(pFlow, () => new RootFlow(pFlow.Name, sys));
+                        foreach (var pSeg in pFlow.Segments)
+                        {
+                            var seg = pick<Segment>(pSeg, () => new Segment(pSeg.Name, rootFlow));
+                            //foreach (var pEdge in pSeg.ChildFlow.Edges)
+                            //{
+                            //    var ss = pEdge.Sources.Select(pS => pick<IVertex>(pS)).ToArray();
+                            //    var t = pick<IVertex>(pEdge.Target);
+                            //    var edge = pick<Edge>(pEdge, () => new Edge(seg.ChildFlow, ss, pEdge.Operator, t));
+
+                            //}
+
+                            foreach (var pChCall in pSeg.Children?.OfType<PCall>())
+                            {
+                                var callProto = pick<CallPrototype>(pChCall.Prototype);
+                                var container = pick<ISegmentOrFlow>(pChCall.Container);
+                                var call = pick<Call>(pChCall, () => new Call(pChCall.Name, container, callProto));
+                            }
+                            Console.WriteLine();
+                        }
+                    }
+
+                }
+                foreach (var pCpu in pModel.Cpus)
+                {
+                    var flows = pCpu.RootFlows.Select(pf => pick<RootFlow>(pf)).ToArray();
+                    var cpu = pick<Cpu>(pCpu, () => new Cpu(pCpu.Name, flows, model));
+                }
+            }
+
+            void secondScan()
+            {
+                // second scan : fill edge, call tx, rx
+                foreach (var pSys in pModel.Systems)
+                {
+                    foreach (var pTask in pSys.Tasks)
+                    {
+                        foreach (var pCall in pTask.Calls)
+                        {
+                            var tx = pick<Segment>(pCall.TX);
+                            var rx = pick<Segment>(pCall.RX);
+                            var call = pick<CallPrototype>(pCall);
+                            call.TXs.Add(tx);
+                            call.RX = rx;
+                        }
+                    }
+
+                    foreach (var pFlow in pSys.RootFlows.OfType<PRootFlow>())
+                    {
+                        var flow = pick<RootFlow>(pFlow);
+
+                        preparePick(pFlow.Segments);
+
+                        foreach (var pSegment in pFlow.Segments)
+                        {
+                            var child = (SegmentOrCallBase)dict[pSegment];
+                            if (!flow.Children.Contains(child))
+                                flow.Children.Add(child);
+
+                            if (pSegment.ChildFlow != null)
+                            {
+                                var segment = child as Segment;
+                                fillEdges(segment.ChildFlow, pSegment.ChildFlow);
+                                segment.ChildFlow.Cpu = flow.Cpu;
+
+                                foreach (var px in pSegment.Children)
+                                    Console.WriteLine();
+                                foreach (var px in pSegment.ChildFlow.Edges)
+                                    Console.WriteLine();
+                            }
+                        }
+
+                        fillEdges(flow, pFlow);
+
+
+                        foreach (var s in flow.Children.OfType<Segment>())
+                        {
+                            new Port[] { s.PortS, s.PortR, s.PortE }.Iter(p => p.OwnerCpu = flow.Cpu);
+                        }
                     }
                 }
             }
+
+
+            firstScan();
+            secondScan();
 
             return model;
         }

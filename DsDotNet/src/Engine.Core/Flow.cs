@@ -26,7 +26,6 @@ namespace Engine.Core
             : base(name)
         {
             System = system;
-            system.Flows.Add(this);
         }
     }
 
@@ -34,9 +33,11 @@ namespace Engine.Core
 
     public class RootFlow : Flow
     {
+        public List<ChildFlow> SubFlows = new List<ChildFlow>();
         public RootFlow(string name, DsSystem system)
             : base(name, system)
         {
+            system.RootFlows.Add(this);
         }
     }
 
@@ -46,6 +47,7 @@ namespace Engine.Core
         public ChildFlow(string name, Segment segment)
             : base(name, segment.ContainerFlow.System)
         {
+            segment.ContainerFlow.SubFlows.Add(this);
             ContainerSegment = segment;
         }
     }

@@ -7,12 +7,12 @@ namespace Engine.Core
     public class Cpu : Named
     {
         public Model Model;
-        public Flow[] Flows;
-        public Cpu(string name, Flow[] flows, Model model) : base(name) {
-            Flows = flows;
+        public RootFlow[] RootFlows;
+        public Cpu(string name, RootFlow[] rootFlows, Model model) : base(name) {
+            RootFlows = rootFlows;
             Model = model;
             model.Cpus.Add(this);
-            flows.Iter(f => f.Cpu = this);
+            rootFlows.Iter(f => f.Cpu = this);
         }
 
 

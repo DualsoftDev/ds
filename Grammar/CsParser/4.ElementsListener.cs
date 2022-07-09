@@ -106,7 +106,7 @@ namespace DsParser
         override public void EnterFlow(dsParser.FlowContext ctx)
         {
             var flowName = ctx.id().GetText();
-            _rootFlow = _system.Flows.OfType<PRootFlow>().First(f => f.Name == flowName);
+            _rootFlow = _system.RootFlows.OfType<PRootFlow>().First(f => f.Name == flowName);
 
             var flowOf = ctx.flowProp().id();
             this.flowOfName = flowOf == null ? flowName : flowOf.GetText();
@@ -212,7 +212,7 @@ namespace DsParser
                     var flowName = fpc.GetChild(2).GetText();
 
                     var system = _model.Systems.FirstOrDefault(sys => sys.Name == systemName);
-                    var flow = system.Flows.FirstOrDefault(f => f.Name == flowName);
+                    var flow = system.RootFlows.FirstOrDefault(f => f.Name == flowName);
                     return flow;
                 })
                 .ToArray()

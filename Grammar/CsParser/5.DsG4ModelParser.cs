@@ -22,7 +22,7 @@ namespace DsParser
             // clean up
             var segmentsWithEmptyFlow =
                 model.Systems
-                    .SelectMany(s => s.Flows).OfType<PRootFlow>()
+                    .SelectMany(s => s.RootFlows).OfType<PRootFlow>()
                     .SelectMany(f => f.Segments)
                     .Where(s => s.ChildFlow.Edges.Count == 0)
                     ;

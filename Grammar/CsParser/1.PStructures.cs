@@ -28,7 +28,7 @@ namespace DsParser
     public class PSystem : PNamed
     {
         public PModel Model;
-        public List<PFlow> Flows = new List<PFlow>();
+        public List<PRootFlow> RootFlows = new List<PRootFlow>();
         public List<PTask> Tasks = new List<PTask>();
         public PSystem(string name, PModel model)
             : base(name)
@@ -50,7 +50,6 @@ namespace DsParser
             : base(name)
         {
             System = system;
-            system.Flows.Add(this);
         }
     }
 
@@ -59,6 +58,7 @@ namespace DsParser
         public PRootFlow(string name, PSystem system)
             : base(name, system)
         {
+            system.RootFlows.Add(this);
         }
     }
 
@@ -87,9 +87,9 @@ namespace DsParser
     public class PCpu : PNamed
     {
         public PModel Model;
-        public PFlow[] Flows;
-        public PCpu(string name, PFlow[] flows, PModel model) : base(name) {
-            Flows = flows;
+        public PRootFlow[] RootFlows;
+        public PCpu(string name, PRootFlow[] flows, PModel model) : base(name) {
+            RootFlows = flows;
             Model = model;
             model.Cpus.Add(this);
         }
@@ -191,7 +191,7 @@ namespace DsParser
             var system = model.Systems.First(s => s.Name == systemName);
             if (isSegment)
             {
-                var flow = system.Flows.FirstOrDefault(f => f.Name == flowOrTaskName);
+                var flow = system.RootFlows.FirstOrDefault(f => f.Name == flowOrTaskName);
                 if (flow == null)
                     return null;
 

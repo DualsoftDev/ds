@@ -73,7 +73,7 @@ namespace DsParser
     public class PTask : PNamed
     {
         public PSystem System;
-        public List<PCall> Calls = new List<PCall>();
+        public List<PCallPrototype> Calls = new List<PCallPrototype>();
 
         public PTask(string name, PSystem system)
             : base(name)
@@ -99,10 +99,10 @@ namespace DsParser
     {
         public PRootFlow ContainerFlow;
         public PChildFlow ChildFlow;
-        public IEnumerable<PCall> Children =>
+        public IEnumerable<PCallPrototype> Children =>
             ChildFlow?.Edges
             .SelectMany(e => e.Sources.Concat(new[] { e.Target }))
-            .OfType<PCall>()
+            .OfType<PCallPrototype>()
             .Distinct()
             ;
 
@@ -116,13 +116,20 @@ namespace DsParser
     }
 
 
-    public class PCall : PNamed, ISegmentOrCall
+    public class PCallBase : PNamed, ISegmentOrCall
     {
-        public PTask Task;
         public PSegment TX;
         public PSegment RX;
 
-        public PCall(string name, PTask task)
+        public PCallBase(string name) : base(name) {}
+    }
+
+
+    public class PCallPrototype : PCallBase
+    {
+        public PTask Task;
+
+        public PCallPrototype(string name, PTask task)
             : base(name)
         {
             Task = task;
@@ -130,15 +137,25 @@ namespace DsParser
         }
     }
 
+    public class PCall : PCallBase
+    {
+        public Task Task;
+        public PCall(string name) : base(name)
+        {
+        }
+    }
+
     [DebuggerDisplay("{ToText()}")]
     public class PEdge
     {
+        public PFlow ContainerFlow;
         public ISegmentOrCall[] Sources;
         public ISegmentOrCall Target;
         public string Operator;
 
-        public PEdge(ISegmentOrCall[] sources, string operator_, ISegmentOrCall target)
+        public PEdge(PFlow containerFlow, ISegmentOrCall[] sources, string operator_, ISegmentOrCall target)
         {
+            ContainerFlow = containerFlow;
             Sources = sources;
             Target = target;
             Operator = operator_;
@@ -175,8 +192,8 @@ namespace DsParser
         public static PSegment FindSegment(this PModel model, string systemName, string flowName, string segmentName) =>
             model.FindSegmentOrCall(systemName, flowName, segmentName, true) as PSegment;
 
-        public static PCall FindCall(this PModel model, string systemName, string taskName, string callName) =>
-            model.FindSegmentOrCall(systemName, taskName, callName, false) as PCall;
+        public static PCallPrototype FindCall(this PModel model, string systemName, string taskName, string callName) =>
+            model.FindSegmentOrCall(systemName, taskName, callName, false) as PCallPrototype;
 
         public static PSegment FindSegment(this PModel model, string fqSegmentName)
         {
@@ -185,7 +202,7 @@ namespace DsParser
             return model.FindSegment(sysName, flowName, segmentName);
         }
 
-        public static PCall FindCall(this PModel model, string fqCallName)
+        public static PCallPrototype FindCall(this PModel model, string fqCallName)
         {
             var names = fqCallName.Split(new[] { '.' });
             (var sysName, var taskName, var callName) = (names[0], names[1], names[2]);

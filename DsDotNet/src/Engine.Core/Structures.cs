@@ -35,39 +35,6 @@ namespace Engine.Core
         }
     }
 
-    public abstract class Flow : Named, ISegmentOrFlow
-    {
-        public DsSystem System { get; set; }
-        public Cpu Cpu { get; set; }
-        public List<Edge> Edges = new List<Edge>();
-
-        protected Flow(string name, DsSystem system)
-            : base(name)
-        {
-            System = system;
-            system.Flows.Add(this);
-        }
-    }
-
-    public class RootFlow : Flow
-    {
-        /// <summary>Edge 를 통해 알 수 없는 isolated root segement 등을 포함 </summary>
-        public List<Segment> Children = new List<Segment>();
-        public RootFlow(string name, DsSystem system)
-            : base(name, system)
-        {
-        }
-    }
-
-    public class ChildFlow : Flow
-    {
-        public Segment ContainerSegment;
-        public ChildFlow(string name, Segment segment)
-            : base(name, segment.ContainerFlow.System)
-        {
-            ContainerSegment = segment;
-        }
-    }
 
     public class Task : Named
     {

@@ -92,8 +92,23 @@ namespace Engine
                     var flow = pick<RootFlow>(pFlow);
                     foreach (var pEdge in pFlow.Edges)
                     {
-                        var ss = pEdge.Sources.Select(pS => pick<Core.ISegmentOrCall>(pS)).ToArray();
-                        var t = pick<Core.ISegmentOrCall>(pEdge.Target);
+                        IVertex convertOnCall(IVertex v)
+                        {
+                            var callProto = v as CallPrototype;
+                            if (callProto == null)
+                                return v;
+
+                            Call call = flow.Children.OfType<Call>().FirstOrDefault(c => c.Prototype == callProto);
+                            if (call == null)
+                            {
+                                call = new Call(callProto.Name, callProto);
+                                flow.Children.Add(call);
+                            }
+
+                            return call;
+                        }
+                        var ss = pEdge.Sources.Select(pS => convertOnCall(pick<IVertex>(pS))).ToArray();
+                        var t = convertOnCall(pick<IVertex>(pEdge.Target));
                         var op = pEdge.Operator;
 
                         //Edge edge = op switch
@@ -107,10 +122,10 @@ namespace Engine
                         Edge edge = null;
                         switch (op)
                         {
-                            case ">": edge = new WeakSetEdge(ss, op, t); break;
-                            case ">>": edge = new StrongSetEdge(ss, op, t); break;
-                            case "|>": edge = new WeakResetEdge(ss, op, t); break;
-                            case "|>>": edge = new StrongResetEdge(ss, op, t); break;
+                            case ">": edge = new WeakSetEdge(flow, ss, op, t); break;
+                            case ">>": edge = new StrongSetEdge(flow, ss, op, t); break;
+                            case "|>": edge = new WeakResetEdge(flow, ss, op, t); break;
+                            case "|>>": edge = new StrongResetEdge(flow, ss, op, t); break;
                             default:
                                 throw new Exception("ERROR");
                         };

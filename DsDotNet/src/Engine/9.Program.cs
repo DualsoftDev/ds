@@ -4,6 +4,7 @@ using System.Configuration;
 
 using log4net;
 using Dual.Common.Core;
+using Engine.Core;
 
 namespace Engine
 {
@@ -25,6 +26,7 @@ namespace Engine
             //Logger.Debug("");
 
             Log4NetHelper.Logger = Logger;
+            Global.Logger = Logger;
 
             var repo = (log4net.Repository.Hierarchy.Hierarchy)log4net.LogManager.GetRepository();
             var repoLogger = repo.GetLogger("EngineLogger", repo.LoggerFactory);

@@ -28,11 +28,11 @@ namespace Engine.Core
 
     public class Call : CallBase
     {
+        public CallPrototype Prototype;
         public ISegmentOrFlow Container;
-        public Task Task;
-        public Call(string name) : base(name)
+        public Call(string name, CallPrototype protoType) : base(name)
         {
-
+            Prototype = protoType;
         }
     }
 

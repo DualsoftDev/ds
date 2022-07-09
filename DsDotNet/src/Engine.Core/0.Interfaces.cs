@@ -1,4 +1,6 @@
-﻿using System;
+﻿using log4net;
+
+using System;
 
 namespace Engine.Core
 {
@@ -52,4 +54,9 @@ namespace Engine.Core
     public interface IStrong { }
     public interface IReset { }
 
+    public static class Global
+    {
+        public static ILog Logger { get; set; }
+
+    }
 }

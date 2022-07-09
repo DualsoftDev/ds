@@ -72,7 +72,7 @@ namespace DsParser
             var callph = ctx.callPhrase();
             //var tx = callph.segments(0);
             //var rx = callph.segments(1);
-            var call = new PCall(name, _task);
+            var call = new PCallPrototype(name, _task);
 
             //var parentId = $"{this.systemName}.{this.taskName}";
             //var id = $"{parentId}.{name}";

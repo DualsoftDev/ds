@@ -439,24 +439,24 @@ namespace DsParser
                             case ">":
                             case "|>>":
                             case ">>":
-                                flow.Edges.Add(new PEdge(lvs, op, rvs[0]));
+                                flow.Edges.Add(new PEdge(flow, lvs, op, rvs[0]));
                                 break;
 
                             case "<|":
                                 Debug.Assert(lvs.Length == 1);
-                                flow.Edges.Add(new PEdge(rvs, "|>", lvs[0]));
+                                flow.Edges.Add(new PEdge(flow, rvs, "|>", lvs[0]));
                                 break;
                             case "<":
                                 Debug.Assert(lvs.Length == 1);
-                                flow.Edges.Add(new PEdge(rvs, ">", lvs[0]));
+                                flow.Edges.Add(new PEdge(flow, rvs, ">", lvs[0]));
                                 break;
                             case "<<|":
                                 Debug.Assert(lvs.Length == 1);
-                                flow.Edges.Add(new PEdge(rvs, "|>>", lvs[0]));
+                                flow.Edges.Add(new PEdge(flow, rvs, "|>>", lvs[0]));
                                 break;
                             case "<<":
                                 Debug.Assert(lvs.Length == 1);
-                                flow.Edges.Add(new PEdge(rvs, ">>", lvs[0]));
+                                flow.Edges.Add(new PEdge(flow, rvs, ">>", lvs[0]));
                                 break;
 
                             default:

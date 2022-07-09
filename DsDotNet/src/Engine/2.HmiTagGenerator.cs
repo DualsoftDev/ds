@@ -47,7 +47,7 @@ namespace Engine
                 var init = init_ as Segment;
                 if (init == null)
                 {
-                    Debug.Assert(init_ is CallPrototype);
+                    Debug.Assert(init_ is Call);
                     // do nothing for call
                 }
                 else
@@ -62,7 +62,7 @@ namespace Engine
                 var last = last_ as Segment;
                 if (last == null)
                 {
-                    Debug.Assert(last_ is CallPrototype);
+                    Debug.Assert(last_ is Call);
                     // do nothing for call
                 }
                 else

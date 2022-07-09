@@ -7,13 +7,15 @@ namespace Engine.Core
     [DebuggerDisplay("{ToText()}")]
     public abstract class Edge : IEdge
     {
-        public ISegmentOrCall[] Sources;
-        public ISegmentOrCall Target;
-        public IEnumerable<ISegmentOrCall> Vertices => Sources.Concat(new[] { Target });
+        public Flow ContainerFlow;
+        public IVertex[] Sources;
+        public IVertex Target;
+        public IEnumerable<IVertex> Vertices => Sources.Concat(new[] { Target });
         public string Operator;
 
-        public Edge(ISegmentOrCall[] sources, string operator_, ISegmentOrCall target)
+        public Edge(Flow containerFlow, IVertex[] sources, string operator_, IVertex target)
         {
+            ContainerFlow = containerFlow;
             Sources = sources;
             Target = target;
             Operator = operator_;
@@ -29,38 +31,38 @@ namespace Engine.Core
     /// '>' or '>>'
     public abstract class SetEdge : Edge
     {
-        public SetEdge(ISegmentOrCall[] sources, string operator_, ISegmentOrCall target)
-            : base(sources, operator_, target)
+        public SetEdge(Flow containerFlow, IVertex[] sources, string operator_, IVertex target)
+            : base(containerFlow, sources, operator_, target)
         { }
     }
     public abstract class ResetEdge : Edge, IReset
     {
-        public ResetEdge(ISegmentOrCall[] sources, string operator_, ISegmentOrCall target)
-            : base(sources, operator_, target)
+        public ResetEdge(Flow containerFlow, IVertex[] sources, string operator_, IVertex target)
+            : base(containerFlow, sources, operator_, target)
         { }
     }
     public class WeakSetEdge : SetEdge
     {
-        public WeakSetEdge(ISegmentOrCall[] sources, string operator_, ISegmentOrCall target)
-            : base(sources, operator_, target)
+        public WeakSetEdge(Flow containerFlow, IVertex[] sources, string operator_, IVertex target)
+            : base(containerFlow, sources, operator_, target)
         { }
     }
     public class StrongSetEdge : SetEdge, IStrong
     {
-        public StrongSetEdge(ISegmentOrCall[] sources, string operator_, ISegmentOrCall target)
-            : base(sources, operator_, target)
+        public StrongSetEdge(Flow containerFlow, IVertex[] sources, string operator_, IVertex target)
+            : base(containerFlow, sources, operator_, target)
         { }
     }
     public class WeakResetEdge : ResetEdge
     {
-        public WeakResetEdge(ISegmentOrCall[] sources, string operator_, ISegmentOrCall target)
-            : base(sources, operator_, target)
+        public WeakResetEdge(Flow containerFlow, IVertex[] sources, string operator_, IVertex target)
+            : base(containerFlow, sources, operator_, target)
         { }
     }
     public class StrongResetEdge : ResetEdge, IStrong
     {
-        public StrongResetEdge(ISegmentOrCall[] sources, string operator_, ISegmentOrCall target)
-            : base(sources, operator_, target)
+        public StrongResetEdge(Flow containerFlow, IVertex[] sources, string operator_, IVertex target)
+            : base(containerFlow, sources, operator_, target)
         { }
     }
 

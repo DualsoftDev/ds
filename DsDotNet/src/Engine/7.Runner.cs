@@ -14,7 +14,8 @@ namespace Engine
 
         public static void Initialize(this Cpu cpu)
         {
-            foreach (var flow in cpu.Flows.OfType<RootFlow>())
+            var rootFlows = cpu.Flows.OfType<RootFlow>();
+            foreach (var flow in rootFlows)
                 flow.GenereateHmiTags();
 
             cpu.BuildBackwardDependency();
@@ -59,6 +60,8 @@ namespace Engine
             }
 
             cpu.PrintTags();
+            foreach (var flow in rootFlows)
+                flow.PrintFlow();
         }
     }
 }

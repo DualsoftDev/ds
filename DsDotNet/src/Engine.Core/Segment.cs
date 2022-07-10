@@ -11,6 +11,7 @@ namespace Engine.Core
         public PortS PortS { get; set; }
         public PortR PortR { get; set; }
         public PortE PortE { get; set; }
+        public Port[] AllPorts => new Port[] { PortS, PortR, PortE };
 
         public Tag TagS { get; set; }
         public Tag TagR { get; set; }

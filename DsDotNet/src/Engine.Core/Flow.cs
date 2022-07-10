@@ -11,7 +11,7 @@ namespace Engine.Core
     public abstract class Flow : Named, ISegmentOrFlow
     {
         public DsSystem System { get; set; }
-        public Cpu Cpu { get; set; }
+        public CpuBase Cpu { get; set; }
 
         /// <summary>Edge 를 통해 알 수 없는 isolated segement/call 등을 포함 </summary>
         public List<SegmentOrCallBase> Children { get; } = new List<SegmentOrCallBase>();
@@ -121,9 +121,10 @@ namespace Engine.Core
                 throw new Exception($"ERROR: duplicated causals: {duplicate[0]}");
         }
 
-        public static void PrintFlow(this Flow flow)
+        public static void PrintFlow(this Flow flow, bool isActive)
         {
-            Logger.Debug($"== Flow {flow.System.Name}::{flow.Name}");
+            var active = isActive ? "Active " : "";
+            Logger.Debug($"== {active}Flow {flow.System.Name}::{flow.Name}");
             foreach (var v in flow.CollectVertices())
                 Logger.Debug(v.ToString());
         }

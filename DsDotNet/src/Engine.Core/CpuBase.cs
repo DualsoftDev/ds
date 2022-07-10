@@ -4,16 +4,15 @@ using System.Collections.Generic;
 
 namespace Engine.Core
 {
-    public class Cpu : Named, ICpu
+    public abstract class CpuBase : Named, ICpu
     {
         public IEngine Engine { get; set; }
         public Model Model { get; }
         public RootFlow[] RootFlows { get; }
 
-        public Cpu(string name, RootFlow[] rootFlows, Model model) : base(name) {
+        protected CpuBase(string name, RootFlow[] rootFlows, Model model) : base(name) {
             RootFlows = rootFlows;
             Model = model;
-            model.Cpus.Add(this);
             rootFlows.Iter(f => f.Cpu = this);
         }
 
@@ -44,6 +43,23 @@ namespace Engine.Core
                     BackwardDependancyMap[t].Add(source);
                 }
             }
+        }
+    }
+
+    public class Cpu: CpuBase
+    {
+        public Cpu(string name, RootFlow[] rootFlows, Model model)
+            : base(name, rootFlows, model)
+        {
+            model.Cpus.Add(this);
+        }
+    }
+
+    public class FakeCpu : CpuBase
+    {
+        public FakeCpu(string name, RootFlow[] rootFlows, Model model)
+            : base(name, rootFlows, model)
+        {
         }
     }
 }

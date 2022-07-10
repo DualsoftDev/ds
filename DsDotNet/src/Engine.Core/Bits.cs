@@ -8,8 +8,8 @@ namespace Engine.Core
     {
         bool _value;
         public virtual bool Value => _value;
-        public Cpu OwnerCpu { get; set; }
-        public Bit(string name = "", bool bit = false, Cpu ownerCpu=null) : base(name) {
+        public CpuBase OwnerCpu { get; set; }
+        public Bit(string name = "", bool bit = false, CpuBase ownerCpu=null) : base(name) {
             _value = bit;
             OwnerCpu = ownerCpu;
         }

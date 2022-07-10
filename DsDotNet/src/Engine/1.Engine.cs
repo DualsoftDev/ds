@@ -1,6 +1,9 @@
-﻿using Engine.Core;
+﻿using Dsu.Common.Utilities.ExtensionMethods;
+
+using Engine.Core;
 using Engine.OPC;
 
+using System.Diagnostics;
 using System.Linq;
 
 namespace Engine
@@ -9,6 +12,7 @@ namespace Engine
     {
         public OpcBroker Opc { get; }
         public Cpu Cpu { get; }
+        public FakeCpu FakeCpu { get; set; }
         public Model Model { get; }
 
         public Engine(string modelText, string activeCpuName)
@@ -19,15 +23,9 @@ namespace Engine
             Cpu.Engine = this;
 
             this.InitializeFlows(Cpu, Opc);
-            //Cpu.InitializeOtherFlows(Opc);
-            //Cpu.InitializeMyFlows(Opc);
 
-            var externalTags =
-                Cpu.CollectTags()
-                    .OfType<Tag>()
-                    .Where(t => t.IsExternal)
-                    .ToArray();
-            Opc.AddTags(externalTags);
+            Debug.Assert(Opc.Tags.All(t => t.OriginalTag.IsExternal));
+            Opc.Print();
         }
 
         public void Run()

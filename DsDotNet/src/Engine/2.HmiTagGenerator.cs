@@ -104,7 +104,7 @@ namespace Engine
             return sre.Concat(autoSegTags).ToArray();
         }
 
-        public static IEnumerable<Tag> CollectTags(this Cpu cpu)
+        public static IEnumerable<Tag> CollectTags(this CpuBase cpu)
         {
             IEnumerable<IBit> Helper()
             {
@@ -123,7 +123,7 @@ namespace Engine
         }
 
 
-        public static void PrintTags(this Cpu cpu)
+        public static void PrintTags(this CpuBase cpu)
         {
             var tags = cpu.CollectTags().ToArray();
             var externalTagNames = string.Join("\r\n\t", tags.Where(t => t.IsExternal).Select(t => t.Name));

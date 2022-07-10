@@ -1,4 +1,6 @@
-﻿using log4net;
+﻿using Dsu.Common.Utilities.ExtensionMethods;
+
+using log4net;
 
 using System;
 using System.Collections.Generic;
@@ -15,6 +17,7 @@ namespace Engine.Core
         public List<SegmentOrCallBase> Children { get; } = new List<SegmentOrCallBase>();
         List<Edge> _edges = new List<Edge>();
 
+        public bool IsEmptyFlow => _edges.IsNullOrEmpty() && Children.IsNullOrEmpty();
         public IEnumerable<Edge> Edges => _edges;
         public void AddEdge(Edge edge)
         {

@@ -54,6 +54,9 @@ namespace Engine.Core
     public interface IStrong { }
     public interface IReset { }
 
+    public interface ICpu {}
+    public interface IEngine {}
+
     public static class Global
     {
         public static ILog Logger { get; set; }

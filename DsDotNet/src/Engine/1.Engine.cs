@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Engine
 {
-    class Engine
+    public class Engine : IEngine
     {
         public OpcBroker Opc { get; }
         public Cpu Cpu { get; }
@@ -14,11 +14,19 @@ namespace Engine
         public Engine(string modelText, string activeCpuName)
         {
             Model = ModelParser.ParseFromString(modelText);
-            Cpu = Model.Cpus.First(cpu => cpu.Name == activeCpuName);
-            Cpu.Initialize();
-
             Opc = new OpcBroker();
-            var externalTags = Cpu.CollectTags().OfType<Tag>().Where(t => t.IsExternal);
+            Cpu = Model.Cpus.First(cpu => cpu.Name == activeCpuName);
+            Cpu.Engine = this;
+
+            this.InitializeFlows(Cpu, Opc);
+            //Cpu.InitializeOtherFlows(Opc);
+            //Cpu.InitializeMyFlows(Opc);
+
+            var externalTags =
+                Cpu.CollectTags()
+                    .OfType<Tag>()
+                    .Where(t => t.IsExternal)
+                    .ToArray();
             Opc.AddTags(externalTags);
         }
 

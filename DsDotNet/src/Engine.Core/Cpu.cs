@@ -4,10 +4,12 @@ using System.Collections.Generic;
 
 namespace Engine.Core
 {
-    public class Cpu : Named
+    public class Cpu : Named, ICpu
     {
-        public Model Model;
-        public RootFlow[] RootFlows;
+        public IEngine Engine { get; set; }
+        public Model Model { get; }
+        public RootFlow[] RootFlows { get; }
+
         public Cpu(string name, RootFlow[] rootFlows, Model model) : base(name) {
             RootFlows = rootFlows;
             Model = model;

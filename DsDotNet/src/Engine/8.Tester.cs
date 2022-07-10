@@ -36,7 +36,6 @@ namespace Engine
     }
 }
 [cpu] Cpu = {
-    P.F;
     it.F;
 }
 ";

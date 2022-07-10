@@ -12,6 +12,10 @@ namespace Engine.Core
         public PortR PortR { get; set; }
         public PortE PortE { get; set; }
 
+        public Tag TagS { get; set; }
+        public Tag TagR { get; set; }
+        public Tag TagE { get; set; }
+
         public IEnumerable<Call> Children =>
             ChildFlow?.Edges
             .SelectMany(e => e.Vertices)
@@ -30,6 +34,13 @@ namespace Engine.Core
             PortS = new PortS(this);
             PortR = new PortR(this);
             PortE = new PortE(this);
+        }
+
+        public void SetSRETags(Tag s, Tag r, Tag e)
+        {
+            TagS = s;
+            TagR = r;
+            TagE = e;
         }
     }
 

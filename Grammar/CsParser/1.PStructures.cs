@@ -43,6 +43,7 @@ namespace DsParser
         public PSystem System;
         public List<PSegment> Segments = new List<PSegment>();
         public List<PEdge> Edges = new List<PEdge>();
+        public bool IsEmptyFlow => Segments.Count == 0 && Edges.Count == 0;
 
         internal Dictionary<PCallPrototype, PCall> CallInstanceMap = new Dictionary<PCallPrototype, PCall>();
 

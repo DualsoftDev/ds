@@ -196,9 +196,37 @@ namespace Engine
                 }
             }
 
+            void cleanUp()
+            {
+                var rootFlows = model.Systems.SelectMany(s => s.RootFlows);
+
+                var segmentsWithEmptyFlow =
+                    from rf in rootFlows
+                    from s in rf.Children.OfType<Segment>()
+                    where s.ChildFlow.IsEmptyFlow
+                    select s
+                    ;
+
+                foreach (var s in segmentsWithEmptyFlow)
+                    s.ChildFlow = null;
+
+
+                // root flow 의 sub flow 중 empty 인 것들 정리
+                var emptySubFlows =
+                    from s in model.Systems
+                    from rf in s.RootFlows
+                    from sf in rf.SubFlows
+                    where sf.IsEmptyFlow
+                    select (rf, sf)
+                    ;
+                foreach ((var rootFlow, var subFlow) in emptySubFlows.ToArray())
+                    rootFlow.SubFlows.Remove(subFlow);
+            }
+
 
             firstScan();
             secondScan();
+            cleanUp();
 
             return model;
         }

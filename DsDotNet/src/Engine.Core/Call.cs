@@ -5,18 +5,15 @@ namespace Engine.Core
 {
     public class CallBase : SegmentOrCallBase
     {
-        public List<ITxRx> TXs = new List<ITxRx>();
-        public ITxRx RX;
-
         public CallBase(string name) : base(name) {}
-
-        public IEnumerable<ITxRx> TxRxs => TXs.Concat(new[] { RX });
-
     }
 
     public class CallPrototype : CallBase
     {
         public Task Task;
+        public List<ITxRx> TXs = new List<ITxRx>();
+        public ITxRx RX;
+
         public CallPrototype(string name, Task task)
             : base(name)
         {
@@ -30,6 +27,11 @@ namespace Engine.Core
     {
         public CallPrototype Prototype;
         public ISegmentOrFlow Container;
+
+        public IEnumerable<ITxRx> TXs => Prototype.TXs;
+        public ITxRx RX => Prototype.RX;
+        public IEnumerable<ITxRx> TxRxs => TXs.Concat(new[] { RX });
+
         public Call(string name, ISegmentOrFlow container, CallPrototype protoType) : base(name)
         {
             Prototype = protoType;

@@ -29,10 +29,10 @@ namespace Engine.Core
     }
 
 
-    public interface IVertex { }
-    public interface IEdge { }
+    public interface IVertex : IBit { }
+    public interface IEdge : IBit { }
 
-    public interface ISegmentOrCall : IVertex, IBit { }
+    public interface ISegmentOrCall : IVertex { }
     public interface ISegmentOrFlow { }
 
     /// <summary> Call TX or RX </summary>

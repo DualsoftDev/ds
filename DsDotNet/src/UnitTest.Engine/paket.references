@@ -1,0 +1,5 @@
+﻿FSharpPlus
+FsUnit.xUnit
+Microsoft.NET.Test.Sdk
+xunit.runner.visualstudio
+log4net

@@ -9,9 +9,15 @@ namespace Engine.Core
     public abstract class Edge : IEdge
     {
         public Flow ContainerFlow;
+
+        /// <summary> Conjuction </summary>
         public IVertex[] Sources;
         public IVertex Target;
         public IEnumerable<IVertex> Vertices => Sources.Concat(new[] { Target });
+
+        public bool Value { get => Sources.All(v => v.Value); set => throw new NotImplementedException(); }
+        public CpuBase OwnerCpu { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
         public string Operator;
 
         public Edge(Flow containerFlow, IVertex[] sources, string operator_, IVertex target)

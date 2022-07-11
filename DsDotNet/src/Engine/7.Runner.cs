@@ -56,9 +56,9 @@ namespace Engine
         public static void InitializeFlows(this Engine engine, CpuBase cpu, OpcBroker opc)
         {
             var model = engine.Model;
+            var allRootFlows = model.Systems.SelectMany(s => s.RootFlows);
             var flowsGrps =
-                from system in model.Systems
-                from flow in system.RootFlows
+                from flow in allRootFlows
                 group flow by cpu.RootFlows.Contains(flow) into g
                 select new { Active = g.Key, Flows = g.ToList() };
                 ;

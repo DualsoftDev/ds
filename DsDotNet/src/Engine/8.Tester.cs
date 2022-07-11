@@ -18,7 +18,8 @@ namespace Engine
     }
     [flow] F = {
         Main = { T.Cp > T.Cm; }
-        Main > XXX;
+        Main > Weak;
+        Main >> Strong;
         Main |> XXX;
         //parenting = {A > B > C; C |> B; }
         //T.C1 <||> T.C2;
@@ -43,6 +44,14 @@ namespace Engine
 ";
             var engine = new Engine(text, "Cpu");
             Program.Engine = engine;
+            var opc = engine.Opc;
+            opc.Write("Reset_it_F_Main", true);
+            opc.Write("Reset_it_F_Main", false);
+            opc.Write("Reset_it_F_Main", true);
+
+
+            opc.Write("AutoStart_it_F_Main", true);
+
             engine.Run();
             //var model = ModelParser.ParseFromString(text);
             //foreach (var cpu in model.Cpus)

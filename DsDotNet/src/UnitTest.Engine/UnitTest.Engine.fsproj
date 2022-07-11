@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="OnlyOnce.fs" />
+    <Compile Include="Library.fs" />
+    <None Include="paket.references" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Engine.Core\Engine.Core.csproj" />
+    <ProjectReference Include="..\Engine.OPC\Engine.OPC.csproj" />
+    <ProjectReference Include="..\Engine\Engine.csproj" />
+  </ItemGroup>
+
+
+	<Import Project="..\..\.paket\Paket.Restore.targets" />
+
+</Project>

@@ -25,6 +25,12 @@ nuget YC.QuickGraph
 nuget Akka
 nuget Akka.Remote
 
+nuget xunit
+nuget xunit.runner.visualstudio
+nuget FsUnit.xUnit
+nuget Microsoft.NET.Test.Sdk
+
+
 nuget Microsoft.CSharp
 
 #nuget Expecto
@@ -56,6 +62,7 @@ nuget Fake.DotNet.Paket
 nuget Fake.DotNet.Testing.Expecto
 nuget Fake.DotNet.FSFormatting
 nuget Fake.Api.GitHub
+
 
 #neget System.Runtime.CompilerServices.Unsafe
 

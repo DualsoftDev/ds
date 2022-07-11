@@ -7,6 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="FsUnit.xUnit" Version="5.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.SDK" Version="17.2.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\..\Grammar\CsParser\DsParser.csproj" />
     <ProjectReference Include="..\Dual.Common.Core\Dual.Common.Core.csproj" />
     <ProjectReference Include="..\Engine.Core\Engine.Core.csproj" />

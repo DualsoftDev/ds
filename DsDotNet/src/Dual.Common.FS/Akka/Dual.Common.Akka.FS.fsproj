@@ -4,11 +4,7 @@
     <TargetFrameworks>netcoreapp3.1;netstandard2.0</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Common.fs" />
-    <Compile Include="Akka.fs" />
-    <Compile Include="SampleServer.fs" />
-    <Compile Include="Library.fs" />
-  </ItemGroup>
+    (<Compile Include="Common.fs" /><Compile Include="Akka.fs" /><Compile Include="SampleServer.fs" /><Compile Include="Library.fs" /></ItemGroup>
   <ItemGroup>
     <PackageReference Include="Akka" Version="1.4.16" />
     <PackageReference Include="Akka.Remote" Version="1.4.16" />
@@ -17,7 +13,8 @@
     <PackageReference Include="System.Reactive" Version="4.4.1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Dual.Common.FS\Dual.Common.FS.fsproj" />
+    <!-- <ProjectReference Include="..\Dual.Common.FS\Dual.Common.FS.fsproj" /> -->
   </ItemGroup>
+  <!-- <Import Project="..\..\..\.paket\Paket.Restore.targets" /> -->
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

@@ -45,12 +45,16 @@ namespace Engine
             var engine = new Engine(text, "Cpu");
             Program.Engine = engine;
             var opc = engine.Opc;
-            opc.Write("Reset_it_F_Main", true);
-            opc.Write("Reset_it_F_Main", false);
-            opc.Write("Reset_it_F_Main", true);
 
+            var startTag = "Reset_it_F_Main";
+            if (engine.Cpu.Tags.ContainsKey(startTag))
+            {
+                opc.Write(startTag, true);
+                opc.Write(startTag, false);
+                opc.Write(startTag, true);
 
-            opc.Write("AutoStart_it_F_Main", true);
+                opc.Write("AutoStart_it_F_Main", true);
+            }
 
             engine.Run();
             //var model = ModelParser.ParseFromString(text);

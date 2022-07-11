@@ -26,6 +26,7 @@ namespace Engine
                     .ToArray()
                     ;
 
+            var cpu = flow.Cpu;
             var calls = vertices.OfType<Call>().ToArray();
             var txs = calls.SelectMany(c => c.TXs).OfType<Segment>().Distinct().ToArray();
             var rxs = calls.Select(c => c.RX).OfType<Segment>().Distinct().ToArray();
@@ -35,29 +36,37 @@ namespace Engine
                 hmiTags.Iter(t => t.IsExternal = true);
                 opc.AddTags(hmiTags);
 
-                var startTags = txs.Select(s => s.TagS);
-                startTags.Iter(t => { t.Type = TagType.Q; t.IsExternal = true; });
+                var startTags = txs.Select(s => new Tag(s.TagS) { Type = TagType.Q, IsExternal = true, OwnerCpu = cpu});
                 opc.AddTags(startTags);
+                cpu.TxRxTags.AddRange(startTags);
 
-                var endTags = rxs.Select(s => s.TagE);
-                endTags.Iter(t => { t.Type = TagType.I; t.IsExternal = true; });
+                var endTags = rxs.Select(s => new Tag(s.TagE) { Type = TagType.I, IsExternal = true, OwnerCpu = cpu });
                 opc.AddTags(endTags);
+                cpu.TxRxTags.AddRange(endTags);
 
                 foreach (var call in calls)
                     call.OwnerCpu = flow.Cpu;
             }
 
 
-            var tags = isActiveCpu ? flow.Cpu.CollectTags().ToArray() : new Tag[] { };
+            var tags =
+                (isActiveCpu ? flow.Cpu.CollectTags().ToArray() : new Tag[] { })
+                .ToDictionary(t => t.Name, t => t);
             // Edge 를 Bit 로 보고
             // A -> B 연결을 A -> Edge -> B 연결 정보로 변환
             foreach(var e in flow.Edges)
             {
                 var deps = e.CollectForwardDependancy().ToArray();
-                foreach ((var src, var tgt) in deps)
+                foreach ((var src_, var tgt_) in deps)
                 {
-                    Debug.Assert(flow.Cpu == src.OwnerCpu);
-                    Debug.Assert(flow.Cpu == tgt.OwnerCpu);
+                    (var src, var tgt) = (src_, tgt_);
+                    if (cpu != src.OwnerCpu)
+                        src = tags[src.ToString()];
+                    if (cpu != tgt.OwnerCpu)
+                        tgt = tags[tgt.ToString()];
+
+                    Debug.Assert(cpu == src.OwnerCpu);
+                    Debug.Assert(cpu == tgt.OwnerCpu);
                     flow.Cpu.AddBitDependancy(src, tgt);
                 }
             }
@@ -80,32 +89,35 @@ namespace Engine
             var activeFlows = flowsGrps.Where(gr => gr.Active).SelectMany(gr => gr.Flows).ToArray();
             var otherFlows = flowsGrps.Where(gr => !gr.Active).SelectMany(gr => gr.Flows).ToArray();
 
-            // generate fake cpu's for other flows
-            var fakeCpu = new FakeCpu("FakeCpu", otherFlows, model) { Engine = engine };
-            engine.FakeCpu = fakeCpu;
-
-            foreach (var f in otherFlows)
+            FakeCpu fakeCpu = null;
+            if (otherFlows.Any())
             {
-                f.Cpu = fakeCpu;
-                f.Children.OfType<Segment>().SelectMany(s => s.AllPorts).Iter(p => p.OwnerCpu = fakeCpu);
-                InitializeFlow(f, false, opc);
+                // generate fake cpu's for other flows
+                fakeCpu = new FakeCpu("FakeCpu", otherFlows, model) { Engine = engine };
+                engine.FakeCpu = fakeCpu;
+
+                foreach (var f in otherFlows)
+                {
+                    f.Cpu = fakeCpu;
+                    f.Children.OfType<Segment>().SelectMany(s => s.AllPorts).Iter(p => p.OwnerCpu = fakeCpu);
+                    InitializeFlow(f, false, opc);
+                }
             }
+
 
             foreach (var f in activeFlows)
                 InitializeFlow(f, true, opc);
 
             cpu.BuildBackwardDependency();
-            fakeCpu.BuildBackwardDependency();
+            fakeCpu?.BuildBackwardDependency();
 
             opc._cpus.Add(cpu);
-            opc._cpus.Add(fakeCpu);
+            if (fakeCpu != null)
+                opc._cpus.Add(fakeCpu);
 
             // debugging
             Debug.Assert(cpu.CollectBits().All(b => b.OwnerCpu == cpu));
-            Debug.Assert(fakeCpu.CollectBits().All(b => b.OwnerCpu == fakeCpu));
-
-
-
+            Debug.Assert(fakeCpu == null || fakeCpu.CollectBits().All(b => b.OwnerCpu == fakeCpu));
         }
     }
 }

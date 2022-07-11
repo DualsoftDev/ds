@@ -28,6 +28,7 @@ namespace Engine.Core
     {
         public CallPrototype Prototype;
         public ISegmentOrFlow Container;
+        public bool Value => Prototype.Value;
 
         public IEnumerable<ITxRx> TXs => Prototype.TXs;
         public ITxRx RX => Prototype.RX;

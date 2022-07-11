@@ -6,17 +6,12 @@ namespace Engine.Core
 {
     public abstract class Bit : Named, IBit
     {
-        bool _value;
-        public virtual bool Value => _value;
+        public virtual bool Value { get; set; }
         public CpuBase OwnerCpu { get; set; }
         public Bit(string name = "", bool bit = false, CpuBase ownerCpu=null) : base(name) {
-            _value = bit;
+            Value = bit;
             OwnerCpu = ownerCpu;
         }
-
-        public virtual void Set() => _value = true;
-        public virtual void Reset() => _value = false;
-        public virtual void SetOrReset(bool value) => _value = value;
     }
 
     public class Flag : Bit {
@@ -90,13 +85,12 @@ namespace Engine.Core
 
     public class Expression : Bit
     {
-        public override void Set() => throw new Exception("Not allowed");
-        public override void Reset() => throw new Exception("Not allowed");
+        public override bool Value { get => base.Value; set => throw new Exception("ERROR"); }
     }
 
     public class And : Expression
     {
-        public override bool Value => Bits.All(b => b.Value);
+        public override bool Value { get { return Bits.All(b => b.Value); } set { throw new Exception("ERROR"); } }
         public List<IBit> Bits;
         public And(IBit[] bits)
         {

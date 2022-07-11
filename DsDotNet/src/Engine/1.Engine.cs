@@ -27,7 +27,12 @@ namespace Engine
             Debug.Assert(Opc._opcTags.All(t => t.OriginalTag.IsExternal));
             Opc.Print();
 
-            Opc.Write("Start_it_F_Main", true);
+            Opc.Write("Reset_it_F_Main", true);
+            Opc.Write("Reset_it_F_Main", false);
+            Opc.Write("Reset_it_F_Main", true);
+
+
+            Opc.Write("AutoStart_it_F_Main", true);
         }
 
         public void Run()

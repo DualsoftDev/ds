@@ -43,7 +43,7 @@ namespace Engine.OPC
             var bit = _tagDic[tagName];
             if (bit.Value != value)
             {
-                bit.SetOrReset(value);
+                bit.Value = value;
 
                 foreach (var cpu in _cpus)
                     cpu.OnOpcTagChanged(tagName, value);

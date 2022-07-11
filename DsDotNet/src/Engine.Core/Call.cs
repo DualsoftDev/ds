@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.Core
@@ -13,7 +14,18 @@ namespace Engine.Core
         public Task Task;
         public List<ITxRx> TXs = new List<ITxRx>();
         public ITxRx RX;
-        public bool Value => ((Tag)RX).Value;   // todo TAG 아닌 경우 처리 필요함.
+        public override bool Value
+        {
+            get {
+                switch(RX)
+                {
+                    case Segment seg: return seg.TagE.Value;
+                    case IBit bit: return bit.Value;   // todo TAG 아닌 경우 처리 필요함.
+                }
+                throw new Exception("Unknown type ERROR");
+            }
+            set => throw new Exception("XXXX ERROR");
+        }
 
         public CallPrototype(string name, Task task)
             : base(name)
@@ -28,7 +40,7 @@ namespace Engine.Core
     {
         public CallPrototype Prototype;
         public ISegmentOrFlow Container;
-        public bool Value => Prototype.Value;
+        public override bool Value => Prototype.Value;
 
         public IEnumerable<ITxRx> TXs => Prototype.TXs;
         public ITxRx RX => Prototype.RX;

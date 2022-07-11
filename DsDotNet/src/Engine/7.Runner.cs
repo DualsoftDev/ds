@@ -42,6 +42,9 @@ namespace Engine
                 var endTags = rxs.Select(s => s.TagE);
                 endTags.Iter(t => { t.Type = TagType.I; t.IsExternal = true; });
                 opc.AddTags(endTags);
+
+                foreach (var call in calls)
+                    call.OwnerCpu = flow.Cpu;
             }
 
 

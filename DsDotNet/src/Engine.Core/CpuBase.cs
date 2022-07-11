@@ -61,7 +61,7 @@ namespace Engine.Core
             if (Tags.ContainsKey(tagName))
             {
                 var tag = Tags[tagName];
-                tag.SetOrReset(value);
+                tag.Value = value;
                 OnBitChanged(new BitChange(tag, value, true));
             }
         }
@@ -83,7 +83,7 @@ namespace Engine.Core
                     if (bc.NewValue != bit.Value)
                     {
                         Debug.Assert(!bc.Applied);
-                        bit.SetOrReset(bc.NewValue);
+                        bit.Value = bc.NewValue;
                     }
 
                     foreach ( var forward in ForwardDependancyMap[bit])

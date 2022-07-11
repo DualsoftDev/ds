@@ -32,7 +32,7 @@ namespace Engine.Core
     public interface IVertex { }
     public interface IEdge { }
 
-    public interface ISegmentOrCall : IVertex { }
+    public interface ISegmentOrCall : IVertex, IBit { }
     public interface ISegmentOrFlow { }
 
     /// <summary> Call TX or RX </summary>
@@ -45,10 +45,7 @@ namespace Engine.Core
 
     public interface IBit
     {
-        bool Value { get; }
-        void Set();
-        void Reset();
-        void SetOrReset(bool value);
+        bool Value { get; set; }
         CpuBase OwnerCpu { get; set; }
     }
 

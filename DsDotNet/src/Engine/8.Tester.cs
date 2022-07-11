@@ -18,6 +18,8 @@ namespace Engine
     }
     [flow] F = {
         Main = { T.Cp > T.Cm; }
+        Main > XXX;
+        Main |> XXX;
         //parenting = {A > B > C; C |> B; }
         //T.C1 <||> T.C2;
         //A, B > C > D, E;

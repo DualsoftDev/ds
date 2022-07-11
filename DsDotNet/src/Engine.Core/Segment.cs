@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Engine.Core
@@ -7,6 +9,8 @@ namespace Engine.Core
     {
         public RootFlow ContainerFlow;
         public ChildFlow ChildFlow;
+        public override CpuBase OwnerCpu { get => ContainerFlow.Cpu; set => throw new NotImplementedException(); }
+
 
         public PortS PortS { get; set; }
         public PortR PortR { get; set; }
@@ -43,6 +47,60 @@ namespace Engine.Core
             TagS = s;
             TagR = r;
             TagE = e;
+        }
+
+        public bool TryChangePort(Port port, bool newValue)
+        {
+            bool tryChangePort()
+            {
+                Debug.Assert(port.Value != newValue);
+                port.Value = newValue;
+
+                switch (port)
+                {
+                    case PortS portS:
+                        if (newValue)
+                        {
+                            if ((RGFH == Status4.Ready || RGFH == Status4.Going) && (!IsResetFirst || !PortR.Value))
+                            {
+                                Paused = false;
+                                return ChangeG();
+                            }
+                        }
+                        else if (RGFH == Status4.Going)
+                            Paused = true;
+                        break;
+
+                    case PortR portR:
+                        if (newValue)
+                        {
+                            if ((RGFH == Status4.Finished || RGFH == Status4.Homing) && (IsResetFirst || !PortS.Value))
+                            {
+                                Paused = false;
+                                return ChangeH();
+                            }
+                        }
+                        else if (RGFH == Status4.Homing)
+                            Paused = true;
+                        break;
+                    case PortE portE when RGFH == Status4.Going && PortS.Value:
+                        return true;
+                }
+
+                if (IsResetFirst && PortR.Value && port == PortR)
+
+                if (newValue)
+                {
+                }
+
+                return false;
+            }
+
+            if (!tryChangePort())
+                return false;
+
+            port.Value = newValue;
+            return true;
         }
     }
 

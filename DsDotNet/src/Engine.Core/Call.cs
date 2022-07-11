@@ -13,6 +13,7 @@ namespace Engine.Core
         public Task Task;
         public List<ITxRx> TXs = new List<ITxRx>();
         public ITxRx RX;
+        public bool Value => ((Tag)RX).Value;   // todo TAG 아닌 경우 처리 필요함.
 
         public CallPrototype(string name, Task task)
             : base(name)

@@ -4,6 +4,7 @@ using Engine.Core;
 using Engine.OPC;
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Engine
@@ -80,6 +81,10 @@ namespace Engine
 
             opc._cpus.Add(cpu);
             opc._cpus.Add(fakeCpu);
+
+            // debugging
+            Debug.Assert(cpu.CollectBits().All(b => b.OwnerCpu == cpu));
+            Debug.Assert(fakeCpu.CollectBits().All(b => b.OwnerCpu == fakeCpu));
         }
     }
 }

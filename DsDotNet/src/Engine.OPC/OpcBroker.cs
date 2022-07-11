@@ -41,10 +41,13 @@ namespace Engine.OPC
         public void Write(string tagName, bool value)
         {
             var bit = _tagDic[tagName];
-            bit.SetOrReset(value);
+            if (bit.Value != value)
+            {
+                bit.SetOrReset(value);
 
-            foreach (var cpu in _cpus)
-                cpu.OnOpcTagChanged(tagName, value);
+                foreach (var cpu in _cpus)
+                    cpu.OnOpcTagChanged(tagName, value);
+            }
         }
     }
 

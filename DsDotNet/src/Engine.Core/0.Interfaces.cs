@@ -49,6 +49,7 @@ namespace Engine.Core
         void Set();
         void Reset();
         void SetOrReset(bool value);
+        CpuBase OwnerCpu { get; set; }
     }
 
     public interface IAutoTag { }

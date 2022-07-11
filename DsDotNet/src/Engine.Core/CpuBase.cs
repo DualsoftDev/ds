@@ -2,7 +2,9 @@
 
 using log4net;
 
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Engine.Core
@@ -12,6 +14,8 @@ namespace Engine.Core
         public IEngine Engine { get; set; }
         public Model Model { get; }
         public RootFlow[] RootFlows { get; }
+
+        public ConcurrentQueue<BitChange> Queue { get; } = new ConcurrentQueue<BitChange>();
 
         protected CpuBase(string name, RootFlow[] rootFlows, Model model) : base(name) {
             RootFlows = rootFlows;
@@ -51,15 +55,41 @@ namespace Engine.Core
             Tags = this.CollectTags().ToDictionary(t => t.Name, t => t);
         }
 
+        /// <summary> 외부에서 tag 가 변경된 경우 </summary>
         public void OnOpcTagChanged(string tagName, bool value)
         {
-            var tag = Tags[tagName];
-            OnBitChanged(tag, value);
+            if (Tags.ContainsKey(tagName))
+            {
+                var tag = Tags[tagName];
+                tag.SetOrReset(value);
+                OnBitChanged(new BitChange(tag, value, true));
+            }
         }
 
-        public void OnBitChanged(IBit bit, bool value)
+        public void OnBitChanged(BitChange bitChange)
         {
-            bit.SetOrReset(value);
+            Queue.Enqueue(bitChange);
+            ProcessQueue();
+        }
+
+        public void ProcessQueue()
+        {
+            while (Queue.Count > 0)
+            {
+                BitChange bc;
+                while(Queue.TryDequeue(out bc))
+                {
+                    var bit = bc.Bit;
+                    if (bc.NewValue != bit.Value)
+                    {
+                        Debug.Assert(!bc.Applied);
+                        bit.SetOrReset(bc.NewValue);
+                    }
+
+                    foreach ( var forward in ForwardDependancyMap[bit])
+                        forward.Evaluate();
+                }
+            }
         }
     }
 

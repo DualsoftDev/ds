@@ -30,18 +30,44 @@ namespace Engine.Core
         public TagType Type { get; set; }
         /// <summary> 외부 접근 용 Tag 여부 </summary>
         public bool IsExternal { get; set; }
-        public Tag(Segment ownerSegment, string name, bool bit = false, bool isExternal = false) : base(name, bit)
+        public Tag(Segment ownerSegment, string name, bool value = false, bool isExternal = false) : base(name, value)
         {
             IsExternal = isExternal;
             OwnerSegment = ownerSegment;
         }
     }
 
-    public class TagAutoStart : Tag, IAutoTag
+    public class TagS : Tag
     {
-        public TagAutoStart(Segment ownerSegment, string name, bool bit = false, bool isExternal = true)
-            : base(ownerSegment, name, bit, isExternal) {}
+        public TagS(Segment ownerSegment, string name) : base(ownerSegment, name) {}
     }
+    public class TagR : Tag
+    {
+        public TagR(Segment ownerSegment, string name) : base(ownerSegment, name) { }
+    }
+    public class TagE : Tag
+    {
+        public TagE(Segment ownerSegment, string name) : base(ownerSegment, name) { }
+    }
+
+    public class TagAutoStart : TagS, IAutoTag
+    {
+        public TagAutoStart(Segment ownerSegment, string name)
+            : base(ownerSegment, name)
+        {
+            IsExternal = true;
+        }
+    }
+
+    public class TagAutoReset : TagR, IAutoTag
+    {
+        public TagAutoReset(Segment ownerSegment, string name)
+            : base(ownerSegment, name)
+        {
+            IsExternal = true;
+        }
+    }
+
 
     public abstract class Port : Bit
     {
@@ -106,4 +132,21 @@ namespace Engine.Core
     public class Relay : Bit { }
     public class WeakRelay : Relay { }
     public class StrongRelay : Relay { }
+
+
+    public class BitChange
+    {
+        public IBit Bit { get; }
+        public bool NewValue { get;  }
+        public bool Applied { get; }
+        public DateTime Time { get; }
+        public BitChange(IBit bit, bool newValue, bool applied=false)
+        {
+            Bit = bit;
+            NewValue = newValue;
+            Applied = applied;
+            Time = DateTime.Now;
+        }
+
+    }
 }

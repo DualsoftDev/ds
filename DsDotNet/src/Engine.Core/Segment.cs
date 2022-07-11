@@ -17,6 +17,7 @@ namespace Engine.Core
         public Tag TagR { get; set; }
         public Tag TagE { get; set; }
 
+        public bool IsResetFirst { get; internal set; } = true;
         public IEnumerable<Call> Children =>
             ChildFlow?.Edges
             .SelectMany(e => e.Vertices)

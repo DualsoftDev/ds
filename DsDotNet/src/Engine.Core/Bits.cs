@@ -30,6 +30,10 @@ namespace Engine.Core
             IsExternal = isExternal;
             OwnerSegment = ownerSegment;
         }
+        public Tag(Tag tag)
+            : this(tag.OwnerSegment, tag.Name, tag.Value, tag.IsExternal)
+        {
+        }
     }
 
     public class TagS : Tag

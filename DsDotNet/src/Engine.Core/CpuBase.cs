@@ -27,6 +27,7 @@ namespace Engine.Core
         public Dictionary<IBit, HashSet<IBit>> ForwardDependancyMap { get; } = new Dictionary<IBit, HashSet<IBit>>();
         public Dictionary<IBit, HashSet<IBit>> BackwardDependancyMap { get; private set; }
         public Dictionary<string, Tag> Tags { get; private set; }
+        public List<Tag> TxRxTags { get; } = new List<Tag>();
         public void AddBitDependancy(IBit source, IBit target)
         {
             if (!ForwardDependancyMap.ContainsKey(source))
@@ -52,7 +53,7 @@ namespace Engine.Core
                 }
             }
 
-            Tags = this.CollectTags().ToDictionary(t => t.Name, t => t);
+            Tags = this.CollectTags().Distinct().ToDictionary(t => t.Name, t => t);
         }
 
         /// <summary> 외부에서 tag 가 변경된 경우 </summary>
@@ -133,7 +134,7 @@ namespace Engine.Core
 
             return helper().Distinct();
         }
-        public static IEnumerable<Tag> CollectTags(this CpuBase cpu) => cpu.CollectBits().OfType<Tag>();
+        public static IEnumerable<Tag> CollectTags(this CpuBase cpu) => cpu.TxRxTags.Concat(cpu.CollectBits()).OfType<Tag>();
 
 
         public static void PrintTags(this CpuBase cpu)

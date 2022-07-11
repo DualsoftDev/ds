@@ -48,6 +48,7 @@ namespace Engine.Core
         bool Value { get; }
         void Set();
         void Reset();
+        void SetOrReset(bool value);
     }
 
     public interface IAutoTag { }

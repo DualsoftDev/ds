@@ -21,9 +21,9 @@ namespace Engine
             var flow = segment.ContainerFlow;
             var cpu = flow.Cpu;
             var name = $"{flow.System.Name}_{flow.Name}_{segment.Name}";
-            var s = new Tag(segment, $"Start_{name}");
-            var r = new Tag(segment, $"Reset_{name}");
-            var e = new Tag(segment, $"End_{name}");
+            var s = new Tag(segment, $"Start_{name}") { Type = TagType.Q };
+            var r = new Tag(segment, $"Reset_{name}") { Type = TagType.Q };
+            var e = new Tag(segment, $"End_{name}") { Type = TagType.I };
             segment.SetSRETags(s, r, e);
 
             new[] { s, r, e }
@@ -102,35 +102,6 @@ namespace Engine
             var autoSegTags = GenerateHmiAutoTagForRootSegment(flow);
 
             return sre.Concat(autoSegTags).ToArray();
-        }
-
-        public static IEnumerable<Tag> CollectTags(this CpuBase cpu)
-        {
-            IEnumerable<IBit> Helper()
-            {
-                foreach (var map in new[] { cpu.ForwardDependancyMap, cpu.BackwardDependancyMap })
-                {
-                    foreach (var tpl in map)
-                    {
-                        yield return tpl.Key;
-                        foreach (var v in tpl.Value)
-                            yield return v;
-                    }
-                }
-            }
-
-            return Helper().OfType<Tag>().Distinct();
-        }
-
-
-        public static void PrintTags(this CpuBase cpu)
-        {
-            var tags = cpu.CollectTags().ToArray();
-            var externalTagNames = string.Join("\r\n\t", tags.Where(t => t.IsExternal).Select(t => t.Name));
-            var internalTagNames = string.Join("\r\n\t", tags.Where(t => ! t.IsExternal).Select(t => t.Name));
-            Logger.Debug($"-- Tags for {cpu.Name}");
-            Logger.Debug($"  External:\r\n\t{externalTagNames}");
-            Logger.Debug($"  Internal:\r\n\t{internalTagNames}");
         }
     }
 }

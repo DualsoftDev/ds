@@ -77,6 +77,9 @@ namespace Engine
 
             cpu.BuildBackwardDependency();
             fakeCpu.BuildBackwardDependency();
+
+            opc._cpus.Add(cpu);
+            opc._cpus.Add(fakeCpu);
         }
     }
 }

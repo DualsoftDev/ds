@@ -1,6 +1,9 @@
 ﻿using Dsu.Common.Utilities.ExtensionMethods;
 
+using log4net;
+
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.Core
 {
@@ -19,6 +22,7 @@ namespace Engine.Core
 
         public Dictionary<IBit, HashSet<IBit>> ForwardDependancyMap { get; } = new Dictionary<IBit, HashSet<IBit>>();
         public Dictionary<IBit, HashSet<IBit>> BackwardDependancyMap { get; private set; }
+        public Dictionary<string, Tag> Tags { get; private set; }
         public void AddBitDependancy(IBit source, IBit target)
         {
             if (!ForwardDependancyMap.ContainsKey(source))
@@ -43,6 +47,19 @@ namespace Engine.Core
                     BackwardDependancyMap[t].Add(source);
                 }
             }
+
+            Tags = this.CollectTags().ToDictionary(t => t.Name, t => t);
+        }
+
+        public void OnOpcTagChanged(string tagName, bool value)
+        {
+            var tag = Tags[tagName];
+            OnBitChanged(tag, value);
+        }
+
+        public void OnBitChanged(IBit bit, bool value)
+        {
+            bit.SetOrReset(value);
         }
     }
 
@@ -60,6 +77,40 @@ namespace Engine.Core
         public FakeCpu(string name, RootFlow[] rootFlows, Model model)
             : base(name, rootFlows, model)
         {
+        }
+    }
+
+    public static class CpuHelper
+    {
+        static ILog Logger => Global.Logger;
+        public static IEnumerable<IBit> CollectBits(this CpuBase cpu)
+        {
+            IEnumerable<IBit> Helper()
+            {
+                foreach (var map in new[] { cpu.ForwardDependancyMap, cpu.BackwardDependancyMap })
+                {
+                    foreach (var tpl in map)
+                    {
+                        yield return tpl.Key;
+                        foreach (var v in tpl.Value)
+                            yield return v;
+                    }
+                }
+            }
+
+            return Helper().Distinct();
+        }
+        public static IEnumerable<Tag> CollectTags(this CpuBase cpu) => cpu.CollectBits().OfType<Tag>();
+
+
+        public static void PrintTags(this CpuBase cpu)
+        {
+            var tags = cpu.CollectTags().ToArray();
+            var externalTagNames = string.Join("\r\n\t", tags.Where(t => t.IsExternal).Select(t => t.Name));
+            var internalTagNames = string.Join("\r\n\t", tags.Where(t => !t.IsExternal).Select(t => t.Name));
+            Logger.Debug($"-- Tags for {cpu.Name}");
+            Logger.Debug($"  External:\r\n\t{externalTagNames}");
+            Logger.Debug($"  Internal:\r\n\t{internalTagNames}");
         }
     }
 }

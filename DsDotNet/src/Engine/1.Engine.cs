@@ -24,16 +24,16 @@ namespace Engine
 
             this.InitializeFlows(Cpu, Opc);
 
-            Debug.Assert(Opc.Tags.All(t => t.OriginalTag.IsExternal));
+            Debug.Assert(Opc._opcTags.All(t => t.OriginalTag.IsExternal));
             Opc.Print();
+
+            Opc.Write("Start_it_F_Main", true);
         }
 
         public void Run()
         {
             Cpu.Run();
-            //foreach (var cpu in Model.Cpus)
-            //    cpu.Run();
+            FakeCpu.Run();
         }
-
     }
 }

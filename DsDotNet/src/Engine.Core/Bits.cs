@@ -16,6 +16,7 @@ namespace Engine.Core
 
         public virtual void Set() => _value = true;
         public virtual void Reset() => _value = false;
+        public virtual void SetOrReset(bool value) => _value = value;
     }
 
     public class Flag : Bit {

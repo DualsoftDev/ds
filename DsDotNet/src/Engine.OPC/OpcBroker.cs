@@ -51,7 +51,7 @@ namespace Engine.OPC
         }
     }
 
-    public static class OpcBrokerHelper
+    public static class OpcBrokerExtension
     {
         static ILog Logger => Global.Logger;
         public static void Print(this OpcBroker opc)

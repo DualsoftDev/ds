@@ -67,7 +67,7 @@ module GraphUtil =
 
     type GraphInfo(flows:RootFlow seq) =
         let edges = flows |> Seq.collect(fun f -> f.Edges) |> Array.ofSeq
-        let resetEdges = edges |> Array.filter(fun e -> (e :> obj) :? IReset)
+        let resetEdges = edges |> Array.filter(fun e -> (e :> obj) :? IResetEdge)
         let solidEdges = edges |> Array.except(resetEdges)
         let qgEdges = edges2QgEdge edges
 

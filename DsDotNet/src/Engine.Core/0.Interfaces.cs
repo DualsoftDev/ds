@@ -50,8 +50,10 @@ namespace Engine.Core
     }
 
     public interface IAutoTag { }
-    public interface IStrong { }
-    public interface IReset { }
+    public interface IStrongEdge : IEdge { }
+    public interface IWeakEdge : IEdge { }
+    public interface ISetEdge : IEdge { }
+    public interface IResetEdge : IEdge { }
 
     public interface ICpu {}
     public interface IEngine {}

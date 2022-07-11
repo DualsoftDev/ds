@@ -48,6 +48,21 @@ namespace Engine
             }
 
 
+            var tags = isActiveCpu ? flow.Cpu.CollectTags().ToArray() : new Tag[] { };
+            // Edge 를 Bit 로 보고
+            // A -> B 연결을 A -> Edge -> B 연결 정보로 변환
+            foreach(var e in flow.Edges)
+            {
+                var deps = e.CollectForwardDependancy().ToArray();
+                foreach ((var src, var tgt) in deps)
+                {
+                    Debug.Assert(flow.Cpu == src.OwnerCpu);
+                    Debug.Assert(flow.Cpu == tgt.OwnerCpu);
+                    flow.Cpu.AddBitDependancy(src, tgt);
+                }
+            }
+
+
             flow.PrintFlow(isActiveCpu);
             //cpu.PrintTags();
             //foreach (var flow in rootFlows)
@@ -88,6 +103,9 @@ namespace Engine
             // debugging
             Debug.Assert(cpu.CollectBits().All(b => b.OwnerCpu == cpu));
             Debug.Assert(fakeCpu.CollectBits().All(b => b.OwnerCpu == fakeCpu));
+
+
+
         }
     }
 }

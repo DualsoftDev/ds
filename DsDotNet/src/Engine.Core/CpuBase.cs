@@ -110,15 +110,18 @@ namespace Engine.Core
         }
     }
 
-    public static class CpuHelper
+    public static class CpuExtension
     {
         static ILog Logger => Global.Logger;
         public static IEnumerable<IBit> CollectBits(this CpuBase cpu)
         {
-            IEnumerable<IBit> Helper()
+            IEnumerable<IBit> helper()
             {
                 foreach (var map in new[] { cpu.ForwardDependancyMap, cpu.BackwardDependancyMap })
                 {
+                    if (map == null)
+                        continue;
+
                     foreach (var tpl in map)
                     {
                         yield return tpl.Key;
@@ -128,7 +131,7 @@ namespace Engine.Core
                 }
             }
 
-            return Helper().Distinct();
+            return helper().Distinct();
         }
         public static IEnumerable<Tag> CollectTags(this CpuBase cpu) => cpu.CollectBits().OfType<Tag>();
 

@@ -56,7 +56,7 @@ namespace Engine.Core
     }
 
 
-    public static class FlowHelper
+    public static class FlowExtension
     {
         static ILog Logger => Global.Logger;
         public static IEnumerable<IVertex> CollectVertices(this Flow flow) =>
@@ -114,6 +114,10 @@ namespace Engine.Core
                         ;
         }
 
+        /// <summary>
+        /// 중복 정의 check
+        /// e.g "A, B > C; A > C"
+        /// </summary>
         internal static void CheckAddable(this Flow flow, Edge edge)
         {
             var duplicate = flow.CollectArrow().Intersect(edge.CollectArrow()).ToArray();

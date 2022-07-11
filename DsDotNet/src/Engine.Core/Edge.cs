@@ -16,7 +16,7 @@ namespace Engine.Core
         public IEnumerable<IVertex> Vertices => Sources.Concat(new[] { Target });
 
         public bool Value { get => Sources.All(v => v.Value); set => throw new NotImplementedException(); }
-        public CpuBase OwnerCpu { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public CpuBase OwnerCpu { get => ContainerFlow.Cpu; set => throw new NotImplementedException(); }
 
         public string Operator;
 
@@ -36,40 +36,101 @@ namespace Engine.Core
 
 
     /// '>' or '>>'
-    public abstract class SetEdge : Edge
+    public abstract class SetEdge : Edge, ISetEdge
     {
         public SetEdge(Flow containerFlow, IVertex[] sources, string operator_, IVertex target)
             : base(containerFlow, sources, operator_, target)
         { }
     }
-    public abstract class ResetEdge : Edge, IReset
+    public abstract class ResetEdge : Edge, IResetEdge
     {
         public ResetEdge(Flow containerFlow, IVertex[] sources, string operator_, IVertex target)
             : base(containerFlow, sources, operator_, target)
         { }
     }
-    public class WeakSetEdge : SetEdge
+    public class WeakSetEdge : SetEdge, IWeakEdge
     {
         public WeakSetEdge(Flow containerFlow, IVertex[] sources, string operator_, IVertex target)
             : base(containerFlow, sources, operator_, target)
         { }
     }
-    public class StrongSetEdge : SetEdge, IStrong
+    public class StrongSetEdge : SetEdge, IStrongEdge
     {
         public StrongSetEdge(Flow containerFlow, IVertex[] sources, string operator_, IVertex target)
             : base(containerFlow, sources, operator_, target)
         { }
     }
-    public class WeakResetEdge : ResetEdge
+    public class WeakResetEdge : ResetEdge, IWeakEdge
     {
         public WeakResetEdge(Flow containerFlow, IVertex[] sources, string operator_, IVertex target)
             : base(containerFlow, sources, operator_, target)
         { }
     }
-    public class StrongResetEdge : ResetEdge, IStrong
+    public class StrongResetEdge : ResetEdge, IStrongEdge
     {
         public StrongResetEdge(Flow containerFlow, IVertex[] sources, string operator_, IVertex target)
             : base(containerFlow, sources, operator_, target)
         { }
+    }
+
+
+    public static class EdgeExtension
+    {
+        public static IEnumerable<(IBit, IBit)> CollectForwardDependancy(this Edge edge)
+        {
+            foreach(var s in edge.Sources)
+            {
+                switch(s)
+                {
+                    case Segment seg:
+                        yield return (seg.TagE, edge);
+                        break;
+
+                    case Call call:
+                        switch(call.RX)
+                        {
+                            case Segment seg:
+                                yield return (seg.TagE, edge);
+                                break;
+                            //case Tag tag:
+                            //    yield return (tag, edge);
+                            //    break;
+                            default:
+                                throw new Exception("ERROR");
+                        }
+                        break;
+                    default:
+                        throw new Exception("ERROR");
+                }
+            }
+
+            switch(edge.Target)
+            {
+                case Segment seg:
+                    yield return (edge, seg.TagS);
+                    break;
+
+                case Call call:
+                    foreach(var tx in call.TXs)
+                    {
+                        switch (tx)
+                        {
+                            case Segment seg:
+                                yield return (edge, seg.TagS);
+                                break;
+
+                            //case Tag tag:
+                            //    yield return (edge, tag);
+                            //    break;
+
+                            default:
+                                throw new Exception("ERROR");
+                        }
+                    }
+                    break;
+                default:
+                    throw new Exception("ERROR");
+            }
+        }
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Engine.Core
 {
-    public static class BitEvaluateHelper
+    public static class BitExtension
     {
         public static void Evaluate(this IBit bit)
         {

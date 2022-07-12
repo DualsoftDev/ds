@@ -49,6 +49,15 @@ namespace Engine.OPC
                     cpu.OnOpcTagChanged(tagName, value);
             }
         }
+
+        public IEnumerable<(string, bool)> ReadTags(IEnumerable<string> tags)
+        {
+            foreach(var tag in tags)
+            {
+                if (_tagDic.ContainsKey(tag))
+                    yield return (tag, _tagDic[tag].Value);
+            }
+        }
     }
 
     public static class OpcBrokerExtension

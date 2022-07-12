@@ -54,7 +54,7 @@ namespace Engine.Core
     {
         public Status4 RGFH { get; set; } = Status4.Homing;
         public virtual bool Value { get; set; }
-        public bool Paused { get; set; }
+        public bool Paused { get; set; } = true;
         public virtual CpuBase OwnerCpu { get; set; }
 
         public SegmentOrCallBase(string name)

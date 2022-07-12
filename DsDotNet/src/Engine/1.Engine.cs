@@ -26,6 +26,19 @@ namespace Engine
 
             Debug.Assert(Opc._opcTags.All(t => t.OriginalTag.IsExternal));
             Opc.Print();
+
+            Model.Cpus.Iter(cpu => readTagsFromOpc(cpu));
+
+            void readTagsFromOpc(Cpu cpu)
+            {
+                var tpls = Opc.ReadTags(cpu.Tags.Select(t => t.Key)).ToArray();
+                foreach ((var tName, var value) in tpls)
+                {
+                    var tag = cpu.Tags[tName];
+                    if (tag.Value != value)
+                        cpu.OnOpcTagChanged(tName, value);
+                }
+            }
         }
 
         public void Run()
@@ -33,5 +46,6 @@ namespace Engine
             Cpu.Run();
             FakeCpu.Run();
         }
+
     }
 }

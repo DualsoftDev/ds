@@ -1,6 +1,7 @@
 ﻿using log4net;
 
 using System;
+using System.Reactive.Subjects;
 
 namespace Engine.Core
 {
@@ -61,6 +62,6 @@ namespace Engine.Core
     public static class Global
     {
         public static ILog Logger { get; set; }
-
+        public static Subject<BitChange> BitChangedSubject { get; } = new Subject<BitChange>();
     }
 }

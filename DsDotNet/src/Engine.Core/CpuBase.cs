@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 
 namespace Engine.Core
 {
@@ -13,8 +14,10 @@ namespace Engine.Core
     {
         public IEngine Engine { get; set; }
         public Model Model { get; }
+        /// <summary> this Cpu 가 관장하는 root flows </summary>
         public RootFlow[] RootFlows { get; }
 
+        /// <summary> Bit change event queue </summary>
         public ConcurrentQueue<BitChange> Queue { get; } = new ConcurrentQueue<BitChange>();
 
         protected CpuBase(string name, RootFlow[] rootFlows, Model model) : base(name) {
@@ -24,9 +27,13 @@ namespace Engine.Core
         }
 
 
+        /// <summary> bit 간 순방향 의존성 map </summary>
         public Dictionary<IBit, HashSet<IBit>> ForwardDependancyMap { get; } = new Dictionary<IBit, HashSet<IBit>>();
+        /// <summary> bit 간 역방향 의존성 map </summary>
         public Dictionary<IBit, HashSet<IBit>> BackwardDependancyMap { get; private set; }
+        /// <summary> this Cpu 관련 tags.  Root segment 의 S/R/E 및 call 의 Tx, Rx </summary>
         public Dictionary<string, Tag> Tags { get; private set; }
+        /// <summary> Call 의 TX RX 에 사용된 tag 목록 </summary>
         public List<Tag> TxRxTags { get; } = new List<Tag>();
         public void AddBitDependancy(IBit source, IBit target)
         {
@@ -75,9 +82,9 @@ namespace Engine.Core
 
         public void ProcessQueue()
         {
+            BitChange bc;
             while (Queue.Count > 0)
             {
-                BitChange bc;
                 while(Queue.TryDequeue(out bc))
                 {
                     var bit = bc.Bit;
@@ -87,9 +94,14 @@ namespace Engine.Core
                         bit.Value = bc.NewValue;
                     }
 
+                    // 변경 이벤트 공지
+                    Global.BitChangedSubject.OnNext(bc);
+
                     foreach ( var forward in ForwardDependancyMap[bit])
                         forward.Evaluate();
                 }
+
+                Thread.Sleep(10);
             }
         }
     }

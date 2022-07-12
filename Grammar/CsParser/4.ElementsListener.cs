@@ -96,11 +96,11 @@ namespace DsParser
             var call = _task.Calls.First(c => c.Name == name);
 
             var callph = ctx.callPhrase();
-            var tx = _model.FindSegment(callph.segments(0).GetText());
+            var txs = _model.FindSegments(callph.segments(0).GetText());
             var rx = _model.FindSegment(callph.segments(1).GetText());
-            call.TX = tx;
+            call.TXs = txs;
             call.RX = rx;
-            Trace.WriteLine($"Call: {name} = {tx.Name} ~ {rx.Name}");
+            //Trace.WriteLine($"Call: {name} = {txs.Select(tx => tx.Name)} ~ {rx?.Name}");
         }
 
         override public void EnterFlow(dsParser.FlowContext ctx)

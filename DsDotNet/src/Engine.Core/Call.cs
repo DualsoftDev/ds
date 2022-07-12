@@ -12,8 +12,8 @@ namespace Engine.Core
     public class CallPrototype : CallBase
     {
         public Task Task;
-        public List<ITxRx> TXs = new List<ITxRx>();
-        public ITxRx RX;
+        public List<ITxRx> TXs = new List<ITxRx>(); // empty 이면 '_' 를 의미
+        public ITxRx RX;    // null 이면 '_' 를 의미
         public override bool Value
         {
             get {

@@ -152,10 +152,10 @@ namespace Engine
                     {
                         foreach (var pCall in pTask.Calls)
                         {
-                            var tx = pick<Segment>(pCall.TX);
-                            var rx = pick<Segment>(pCall.RX);
                             var call = pick<CallPrototype>(pCall);
-                            call.TXs.Add(tx);
+                            var txs = pCall.TXs.Select(pTx => pTx == null ? null : pick<Segment>(pTx)).OfNotNull();
+                            var rx = pCall.RX == null ? null : pick<Segment>(pCall.RX);
+                            call.TXs.AddRange(txs);
                             call.RX = rx;
                         }
                     }

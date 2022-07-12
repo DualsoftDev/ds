@@ -13,6 +13,8 @@ namespace Engine
             var text = @"
 [sys] it = {
     [task] T = {
+        CXXX = {P.F.Vp,P.F.Vm ~ P.F.Sp}
+        CXX = {_ ~ P.F.Sp}
         Cp = {P.F.Vp ~ P.F.Sp}
         Cm = {P.F.Vm ~ P.F.Sm}
     }

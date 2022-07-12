@@ -131,7 +131,7 @@ namespace DsParser
 
     public class PCallBase : PNamed, IPSegmentOrCall
     {
-        public PSegment TX;
+        public PSegment[] TXs;
         public PSegment RX;
 
         public PCallBase(string name) : base(name) {}
@@ -215,9 +215,22 @@ namespace DsParser
 
         public static PSegment FindSegment(this PModel model, string fqSegmentName)
         {
+            if (fqSegmentName == "_")
+                return null;
+
             var names = fqSegmentName.Split(new[] { '.' });
             (var sysName, var flowName, var segmentName) = (names[0], names[1], names[2]);
             return model.FindSegment(sysName, flowName, segmentName);
+        }
+
+        public static PSegment[] FindSegments(this PModel model, string fqSegmentNames)
+        {
+            return
+                fqSegmentNames
+                    .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(segName => FindSegment(model, segName))
+                    .ToArray()
+                    ;
         }
 
         public static PCallPrototype FindCall(this PModel model, string fqCallName)

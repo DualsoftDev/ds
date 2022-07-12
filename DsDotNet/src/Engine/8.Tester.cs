@@ -57,7 +57,7 @@ namespace Engine
 
                 opc.Write(resetTag, true);
                 opc.Write(resetTag, false);
-                opc.Write("Start_it_F_Main", true);
+                //opc.Write("Start_it_F_Main", true);
                 opc.Write(resetTag, true);
 
                 opc.Write("AutoStart_it_F_Main", true);

@@ -165,4 +165,14 @@ namespace Engine.Core
             Logger.Debug($"  Internal:\r\n\t{internalTagNames}");
         }
     }
+
+
+    public static class CpuExtensionBitChange
+    {
+        public static void OnTagChanged(this CpuBase cpu, Tag tag, bool value)
+        {
+
+        }
+
+    }
 }

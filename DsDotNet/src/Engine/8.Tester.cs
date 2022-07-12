@@ -15,9 +15,12 @@ namespace Engine
     [task] T = {
         Cp = {P.F.Vp ~ P.F.Sp}
         Cm = {P.F.Vm ~ P.F.Sm}
+        Cm1 = {P.F.Vm ~ P.F.Sm}
+        Cm2 = {P.F.Vm ~ P.F.Sm}
+        Cm3 = {P.F.Vm ~ P.F.Sm}
     }
     [flow] F = {
-        Main = { T.Cp > T.Cm; }
+        Main = { T.Cp > T.Cm, T.Cm1 > T.Cm2; T.Cm3 > T.Cm2; }
         Main > Weak;
         Main >> Strong;
         Main |> XXX;
@@ -46,15 +49,16 @@ namespace Engine
             Program.Engine = engine;
             var opc = engine.Opc;
 
-            var startTag = "Reset_it_F_Main";
-            if (engine.Cpu.Tags.ContainsKey(startTag))
+            var resetTag = "Reset_it_F_Main";
+            if (engine.Cpu.Tags.ContainsKey(resetTag))
             {
                 var main = engine.Cpu.RootFlows.SelectMany(f => f.Children).FirstOrDefault(c => c.Name == "Main") as Segment;
                 var edges = main.ChildFlow.Edges.ToArray();
 
-                opc.Write(startTag, true);
-                opc.Write(startTag, false);
-                opc.Write(startTag, true);
+                opc.Write(resetTag, true);
+                opc.Write(resetTag, false);
+                opc.Write("Start_it_F_Main", true);
+                opc.Write(resetTag, true);
 
                 opc.Write("AutoStart_it_F_Main", true);
             }

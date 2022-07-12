@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 
 namespace Engine.Core
@@ -9,6 +10,18 @@ namespace Engine.Core
     {
         public List<DsSystem> Systems = new List<DsSystem>();
         public List<Cpu> Cpus = new List<Cpu>();
+    }
+
+    public static class ModelExtension
+    {
+        public static void Epilogue(this Model model)
+        {
+            var rootFlows = model.Systems.SelectMany(sys => sys.RootFlows);
+            var subFlows = rootFlows.SelectMany(rf => rf.SubFlows);
+            var allFlows = rootFlows.Cast<Flow>().Concat(subFlows);
+            foreach (var flow in allFlows)
+                flow.BuildGraphInfo();
+        }
     }
 
     [DebuggerDisplay("{ToText()}")]
@@ -56,7 +69,7 @@ namespace Engine.Core
     public abstract class SegmentOrCallBase : Named, ISegmentOrCall
     {
         public virtual bool Value { get; set; }
-        public bool Paused { get; set; }
+        public virtual bool Paused { get; set; }
         public virtual CpuBase OwnerCpu { get; set; }
 
         public SegmentOrCallBase(string name)

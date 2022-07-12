@@ -10,6 +10,12 @@
     <ProjectReference Include="..\Dual.Common.Core\Dual.Common.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="Engine.Graph">
+      <HintPath>..\Engine.Graph\bin\Debug\net48\Engine.Graph.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 
 </Project>

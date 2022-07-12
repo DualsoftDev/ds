@@ -18,6 +18,8 @@ namespace Engine
         public Engine(string modelText, string activeCpuName)
         {
             Model = ModelParser.ParseFromString(modelText);
+            Model.Epilogue();
+
             Opc = new OpcBroker();
             Cpu = Model.Cpus.First(cpu => cpu.Name == activeCpuName);
             Cpu.Engine = this;

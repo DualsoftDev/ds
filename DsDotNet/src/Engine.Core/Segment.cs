@@ -181,7 +181,14 @@ namespace Engine.Core
 
             void going()
             {
-
+                var gi = segment.ChildFlow.GraphInfo;
+                var inits = gi.Inits;
+                var v_oes = gi.Traverse().ToArray();
+                foreach( (var v, var oes) in v_oes)
+                {
+                    Console.WriteLine();
+                }
+                Console.WriteLine();
             }
             void homing() { }
             void pause() { }

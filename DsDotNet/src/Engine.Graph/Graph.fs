@@ -3,6 +3,8 @@
 open Engine.Core
 open QuickGraph
 open QuickGraph.Algorithms
+open QuickGraph.Collections
+open System.Collections.Generic
 
 
 [<AutoOpen>]
@@ -65,7 +67,7 @@ module GraphUtil =
                 ee.Sources |> Seq.map(fun s -> QgEdge(s, ee.Target, ee)))
             |> Array.ofSeq
 
-    type GraphInfo(flows:RootFlow seq) =
+    type GraphInfo(flows:Flow seq) =
         let edges = flows |> Seq.collect(fun f -> f.Edges) |> Array.ofSeq
         let resetEdges = edges |> Array.filter(fun e -> (e :> obj) :? IResetEdge)
         let solidEdges = edges |> Array.except(resetEdges)
@@ -123,8 +125,21 @@ module GraphUtil =
 
         member x.GetShortestPath(source, vertex) = computeDijkstra x.Graph source vertex
 
+        /// Start causal 상에서 실행 순서에 맞게 graph 탐색해서 (V, OES)[] 를 반환.
+        member x.Traverse() =
+            let q = Queue<V>()
+            x.Inits |> List.iter q.Enqueue
+            seq {
+                while q.Count > 0 do
+                    let v = q.Dequeue()
+                    let oes = x.SolidGraph.OutEdges(v)
+                    let ooes = oes |> Seq.map(fun (e:QgEdge) -> e.OriginalEdge) |> Array.ofSeq
+                    yield v, ooes
+                    oes |> Seq.map (fun e -> e.Target) |> Seq.iter q.Enqueue
+            }
 
-    let analyzeFlows(flows:RootFlow seq) =
+
+    let analyzeFlows(flows:Flow seq) =
         let gri = GraphInfo(flows)
         let graph = gri.Graph
 

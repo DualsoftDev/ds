@@ -13,8 +13,6 @@ namespace Engine
             var text = @"
 [sys] it = {
     [task] T = {
-        CXXX = {P.F.Vp,P.F.Vm ~ P.F.Sp}
-        CXX = {_ ~ P.F.Sp}
         Cp = {P.F.Vp ~ P.F.Sp}
         Cm = {P.F.Vm ~ P.F.Sm}
     }
@@ -51,6 +49,9 @@ namespace Engine
             var startTag = "Reset_it_F_Main";
             if (engine.Cpu.Tags.ContainsKey(startTag))
             {
+                var main = engine.Cpu.RootFlows.SelectMany(f => f.Children).FirstOrDefault(c => c.Name == "Main") as Segment;
+                var edges = main.ChildFlow.Edges.ToArray();
+
                 opc.Write(startTag, true);
                 opc.Write(startTag, false);
                 opc.Write(startTag, true);

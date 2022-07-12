@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace Engine.Core
@@ -10,6 +11,7 @@ namespace Engine.Core
         public List<Cpu> Cpus = new List<Cpu>();
     }
 
+    [DebuggerDisplay("{ToText()}")]
     public class Named: INamed
     {
         public string Name { get; set; }
@@ -18,7 +20,8 @@ namespace Engine.Core
         {
             Name = name;
         }
-        public override string ToString() => Name;
+        public virtual string ToText() => Name;
+        //public override string ToString() => Name;
     }
 
 
@@ -63,6 +66,8 @@ namespace Engine.Core
 
 
         bool IsChildrenStartPoint() => true;
+        public override string ToString() => ToText();
+        public virtual string ToText() => $"{Name}: cpu={OwnerCpu?.Name}";
 
         //public virtual bool ChangeR()
         //{

@@ -5,6 +5,7 @@ using System.Linq;
 
 namespace Engine.Core
 {
+    [DebuggerDisplay("{ToText(),nq}")]
     public class Segment : SegmentOrCallBase, ISegmentOrFlow, IWithSREPorts, ITxRx
     {
         public RootFlow ContainerFlow;
@@ -49,6 +50,14 @@ namespace Engine.Core
             TagR = r;
             TagE = e;
         }
+
+        public override string ToString() => ToText();
+        public override string ToText()
+        {
+            return "Foo";
+            var c = Children == null ? 0 : Children.Count();
+            return $"{Name}: cpu={OwnerCpu?.Name}, #children={c}";
+        }
     }
 
 
@@ -91,6 +100,25 @@ namespace Engine.Core
             return Status4.Ready;
         }
 
+
+        //public static void ReEvaluateCommandPort(this Segment segment)
+        //{
+        //    var rf = segment.IsResetFirst;
+        //    var st = segment.GetStatus();
+        //    var paused = segment.Paused;
+        //    var s = segment.PortS.Value;
+        //    var r = segment.PortR.Value;
+        //    if (paused)
+        //    {
+        //        Debug.Assert(!(s && r));
+        //        if (s || r)
+        //            resume();
+        //    }
+        //    else
+        //    {
+
+        //    }
+        //}
         public static void EvaluatePort(this Segment segment, Port port, bool newValue)
         {
             if (port.Value == newValue)
@@ -134,6 +162,21 @@ namespace Engine.Core
 
                 case (PortE _, true,  Status4.Going)   : finish(); break;
                 case (PortE _, false, Status4.Homing)  : ready() ; break;
+
+
+                case (PortR _, true, Status4.Ready): break;
+                case (PortR _, false, Status4.Ready):
+                    if (segment.PortS.Value)
+                        going();
+                    break;
+                case (PortS _, true, Status4.Finished): break;
+                case (PortS _, false, Status4.Finished):
+                    if (segment.PortR.Value)
+                        homing();
+                    break;
+
+                default:
+                    throw new Exception("ERROR");
             }
 
             void going()

@@ -61,9 +61,9 @@ namespace Engine
                 {
                     (var src, var tgt) = (src_, tgt_);
                     if (cpu != src.OwnerCpu)
-                        src = tags[src.ToString()];
+                        src = tags[ ((Named)src).Name];
                     if (cpu != tgt.OwnerCpu)
-                        tgt = tags[tgt.ToString()];
+                        tgt = tags[((Named)tgt).Name];
 
                     Debug.Assert(cpu == src.OwnerCpu);
                     Debug.Assert(cpu == tgt.OwnerCpu);
@@ -77,8 +77,9 @@ namespace Engine
             //foreach (var flow in rootFlows)
         }
 
-        public static void InitializeFlows(this Engine engine, CpuBase cpu, OpcBroker opc)
+        public static void InitializeFlows(this Engine engine, CpuBase activeCpu, OpcBroker opc)
         {
+            var cpu = activeCpu;
             var model = engine.Model;
             var allRootFlows = model.Systems.SelectMany(s => s.RootFlows);
             var flowsGrps =

@@ -13,14 +13,14 @@ namespace Engine.Core
         Homing
     }
 
-    public interface IWithRGFH
-    {
-        Status4 RGFH { get; set; }
-        bool ChangeR();
-        bool ChangeG();
-        bool ChangeF();
-        bool ChangeH();
-    }
+    //public interface IWithRGFH
+    //{
+    //    Status4 RGFH { get; set; }
+    //    bool ChangeR();
+    //    bool ChangeG();
+    //    bool ChangeF();
+    //    bool ChangeH();
+    //}
 
     public interface IWithSREPorts
     {

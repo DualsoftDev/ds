@@ -50,11 +50,10 @@ namespace Engine.Core
     }
 
 
-    public abstract class SegmentOrCallBase : Named, IWithRGFH, ISegmentOrCall
+    public abstract class SegmentOrCallBase : Named, ISegmentOrCall
     {
-        public Status4 RGFH { get; set; } = Status4.Homing;
         public virtual bool Value { get; set; }
-        public bool Paused { get; set; } = true;
+        public bool Paused { get; set; }
         public virtual CpuBase OwnerCpu { get; set; }
 
         public SegmentOrCallBase(string name)
@@ -65,60 +64,60 @@ namespace Engine.Core
 
         bool IsChildrenStartPoint() => true;
 
-        public virtual bool ChangeR()
-        {
-            if (RGFH == Status4.Ready)
-                return true;
+        //public virtual bool ChangeR()
+        //{
+        //    if (RGFH == Status4.Ready)
+        //        return true;
 
-            if (RGFH == Status4.Homing)
-            {
-                if (IsChildrenStartPoint())
-                {
-                    RGFH = Status4.Ready;
-                    return true;
-                }
-            }
-            return false;
-        }
+        //    if (RGFH == Status4.Homing)
+        //    {
+        //        if (IsChildrenStartPoint())
+        //        {
+        //            RGFH = Status4.Ready;
+        //            return true;
+        //        }
+        //    }
+        //    return false;
+        //}
 
-        public virtual bool ChangeG()
-        {
-            if (RGFH == Status4.Going)
-                return true;
+        //public virtual bool ChangeG()
+        //{
+        //    if (RGFH == Status4.Going)
+        //        return true;
 
-            if (RGFH == Status4.Ready)
-            {
-                RGFH = Status4.Going;
-                return true;
-            }
-            return false;
-        }
+        //    if (RGFH == Status4.Ready)
+        //    {
+        //        RGFH = Status4.Going;
+        //        return true;
+        //    }
+        //    return false;
+        //}
 
-        public virtual bool ChangeF()
-        {
-            if (RGFH == Status4.Finished)
-                return true;
+        //public virtual bool ChangeF()
+        //{
+        //    if (RGFH == Status4.Finished)
+        //        return true;
 
-            if (RGFH == Status4.Going)
-            {
-                RGFH = Status4.Finished;
-                return true;
-            }
-            return false;
-        }
+        //    if (RGFH == Status4.Going)
+        //    {
+        //        RGFH = Status4.Finished;
+        //        return true;
+        //    }
+        //    return false;
+        //}
 
-        public virtual bool ChangeH()
-        {
-            if (RGFH == Status4.Homing)
-                return true;
+        //public virtual bool ChangeH()
+        //{
+        //    if (RGFH == Status4.Homing)
+        //        return true;
 
-            if (RGFH == Status4.Finished)
-            {
-                RGFH = Status4.Homing;
-                return true;
-            }
-            return false;
-        }
+        //    if (RGFH == Status4.Finished)
+        //    {
+        //        RGFH = Status4.Homing;
+        //        return true;
+        //    }
+        //    return false;
+        //}
     }
 
 }

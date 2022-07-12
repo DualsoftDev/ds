@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>net48</TargetFrameworks>
 	<RootNamespace>Engine.Core</RootNamespace>
+	<LangVersion>8.0</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

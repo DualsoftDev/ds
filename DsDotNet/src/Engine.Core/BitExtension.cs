@@ -23,7 +23,8 @@ namespace Engine.Core
                     break;
                 case Port port:
                     var seg = port.OwnerSegment;
-                    seg.TryChangePort(port, newValue);
+                    seg.EvaluatePort(port, newValue);
+                    //seg.TryChangePort(port, newValue);
                     break;
 
                 case Flag flag:

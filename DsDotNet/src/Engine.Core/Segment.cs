@@ -20,6 +20,7 @@ namespace Engine.Core
         public Tag TagS { get; set; }
         public Tag TagR { get; set; }
         public Tag TagE { get; set; }
+        public Status4 RGFH => this.GetStatus();
 
         public bool IsResetFirst { get; internal set; } = true;
         public IEnumerable<Call> Children =>
@@ -48,60 +49,102 @@ namespace Engine.Core
             TagR = r;
             TagE = e;
         }
-
-        public bool TryChangePort(Port port, bool newValue)
-        {
-            bool tryChangePort()
-            {
-                Debug.Assert(port.Value != newValue);
-                port.Value = newValue;
-
-                switch (port)
-                {
-                    case PortS portS:
-                        if (newValue)
-                        {
-                            if ((RGFH == Status4.Ready || RGFH == Status4.Going) && (!IsResetFirst || !PortR.Value))
-                            {
-                                Paused = false;
-                                return ChangeG();
-                            }
-                        }
-                        else if (RGFH == Status4.Going)
-                            Paused = true;
-                        break;
-
-                    case PortR portR:
-                        if (newValue)
-                        {
-                            if ((RGFH == Status4.Finished || RGFH == Status4.Homing) && (IsResetFirst || !PortS.Value))
-                            {
-                                Paused = false;
-                                return ChangeH();
-                            }
-                        }
-                        else if (RGFH == Status4.Homing)
-                            Paused = true;
-                        break;
-                    case PortE portE when RGFH == Status4.Going && PortS.Value:
-                        return true;
-                }
-
-                if (IsResetFirst && PortR.Value && port == PortR)
-
-                if (newValue)
-                {
-                }
-
-                return false;
-            }
-
-            if (!tryChangePort())
-                return false;
-
-            port.Value = newValue;
-            return true;
-        }
     }
 
+
+    public static class SegmentExtension
+    {
+        /*
+          ----------------------
+            Status   SP  RP  EP
+          ----------------------
+              R      x   -   x
+                     o   o   x
+              G      o   x   x
+              F      -   x   o
+              H      -   o   o
+          ----------------------
+          - 'o' : ON, 'x' : Off, '-' 는 don't care
+          - 내부에서 Reset First 로만 해석
+         */
+        public static Status4 GetStatus(this Segment segment)
+        {
+            var seg = segment;
+            var s = seg.PortS.Value;
+            var r = seg.PortR.Value;
+            var e = seg.PortE.Value;
+
+            if (seg.Paused)
+            {
+                Debug.Assert(!s && !r);
+                return e ? Status4.Homing : Status4.Going;
+            }
+
+            if (e)
+                return r ? Status4.Homing : Status4.Finished;
+
+            Debug.Assert(!e);
+            if (s)
+                return r ? Status4.Ready : Status4.Going;
+
+            Debug.Assert(!s && !e);
+            return Status4.Ready;
+        }
+
+        public static void EvaluatePort(this Segment segment, Port port, bool newValue)
+        {
+            if (port.Value == newValue)
+                return;
+
+            var sp = port as PortS;
+            var rp = port as PortR;
+            var ep = port as PortE;
+
+            var rf = segment.IsResetFirst;
+            var st = segment.GetStatus();
+            var paused = segment.Paused;
+
+            var duplicate =
+                newValue && ( (sp != null && segment.PortR.Value) || (rp != null && segment.PortS.Value));
+
+            Port effectivePort = port;
+            if (duplicate)
+                effectivePort = rf ? (Port)segment.PortR : segment.PortS;
+
+
+            effectivePort.Value = newValue;
+            if (paused)
+            {
+                switch (effectivePort, newValue, st)
+                {
+                    case (PortS _, true, Status4.Going): resume(); break;
+                    case (PortS _, false, Status4.Going): pause(); break;
+                    case (PortR _, true, Status4.Homing): resume(); break;
+                    case (PortR _, false, Status4.Homing): pause(); break;
+                }
+
+            }
+
+            switch (effectivePort, newValue, st)
+            {
+                case (PortS _, true,  Status4.Ready)   : going() ; break;
+                case (PortS _, false, Status4.Ready)   : pause() ; break;
+                case (PortR _, true,  Status4.Finished): homing(); break;
+                case (PortR _, false, Status4.Finished): pause() ; break;
+
+                case (PortE _, true,  Status4.Going)   : finish(); break;
+                case (PortE _, false, Status4.Homing)  : ready() ; break;
+            }
+
+            void going()
+            {
+
+            }
+            void homing() { }
+            void pause() { }
+            void resume() { }
+            void finish() { }
+            void ready() { }
+        }
+    }
 }

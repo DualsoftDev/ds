@@ -155,9 +155,10 @@ namespace Engine
                         {
                             var call = pick<CallPrototype>(pCall);
                             var txs = pCall.TXs.Select(pTx => pTx == null ? null : pick<Segment>(pTx)).OfNotNull();
-                            var rx = pCall.RX == null ? null : pick<Segment>(pCall.RX);
+                            //var rx = pCall.RXs == null ? null : pick<Segment>(pCall.RXs);
+                            var rxs = pCall.RXs.Select(pRx => pRx == null ? null : pick<Segment>(pRx)).OfNotNull();
                             call.TXs.AddRange(txs);
-                            call.RX = rx;
+                            call.RXs.AddRange(rxs);
                         }
                     }
 

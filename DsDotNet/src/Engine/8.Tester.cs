@@ -15,7 +15,7 @@ namespace Engine
     [task] T = {
         Cp = {P.F.Vp ~ P.F.Sp}
         Cm = {P.F.Vm ~ P.F.Sm}
-        Cm1 = {P.F.Vm ~ P.F.Sm}
+        Cm1 = {P.F.Vm ~ P.F.Sm, P.F.Sm}
         Cm2 = {P.F.Vm ~ P.F.Sm}
         Cm3 = {P.F.Vm ~ P.F.Sm}
     }

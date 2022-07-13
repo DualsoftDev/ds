@@ -28,7 +28,7 @@ namespace Engine
             var cpu = flow.Cpu;
             var calls = vertices.OfType<Call>().ToArray();
             var txs = calls.SelectMany(c => c.TXs).OfType<Segment>().Distinct().ToArray();
-            var rxs = calls.Select(c => c.RX).OfType<Segment>().Distinct().ToArray();
+            var rxs = calls.Select(c => c.RXs).OfType<Segment>().Distinct().ToArray();
 
             if (isActiveCpu)
             {

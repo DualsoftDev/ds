@@ -15,16 +15,20 @@ namespace Engine.Core
 
         /// <summary> 주로 target system 의 segment </summary>
         public List<ITxRx> TXs = new List<ITxRx>(); // empty 이면 '_' 를 의미
-        public ITxRx RX;    // null 이면 '_' 를 의미
+        public List<ITxRx> RXs = new List<ITxRx>(); // empty 이면 '_' 를 의미
         public override bool Value
         {
             get {
-                switch(RX)
+                bool getRxValue(ITxRx rx)
                 {
-                    case Segment seg: return seg.TagE.Value;
-                    case IBit bit: return bit.Value;   // todo TAG 아닌 경우 처리 필요함.
+                    switch (rx)
+                    {
+                        case Segment seg: return seg.TagE.Value;
+                        case IBit bit: return bit.Value;   // todo TAG 아닌 경우 처리 필요함.
+                    }
+                    throw new Exception("Unknown type ERROR");
                 }
-                throw new Exception("Unknown type ERROR");
+                return RXs.All(getRxValue);
             }
             set => throw new Exception("XXXX ERROR");
         }
@@ -71,8 +75,8 @@ namespace Engine.Core
 
 
         public IEnumerable<ITxRx> TXs => Prototype.TXs;
-        public ITxRx RX => Prototype.RX;
-        public IEnumerable<ITxRx> TxRxs => TXs.Concat(new[] { RX });
+        public IEnumerable<ITxRx> RXs => Prototype.RXs;
+        public IEnumerable<ITxRx> TxRxs => TXs.Concat(RXs);
 
         public Call(string name, ISegmentOrFlow container, CallPrototype protoType) : base(name)
         {
@@ -111,7 +115,7 @@ namespace Engine.Core
         public static Tag GetRxTag(this Call call)
         {
             var tags = call.OwnerCpu.Tags;
-            switch (call.RX)
+            switch (call.RXs)
             {
                 case Segment seg:
                     return tags[seg.TagE.Name];

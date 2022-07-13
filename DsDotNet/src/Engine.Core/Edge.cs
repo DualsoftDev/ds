@@ -87,7 +87,7 @@ namespace Engine.Core
                         break;
 
                     case Call call:
-                        switch(call.RX)
+                        switch(call.RXs)
                         {
                             case Segment seg:
                                 yield return (seg.TagE, edge);

@@ -97,9 +97,9 @@ namespace DsParser
 
             var callph = ctx.callPhrase();
             var txs = _model.FindSegments(callph.segments(0).GetText());
-            var rx = _model.FindSegment(callph.segments(1).GetText());
+            var rxs = _model.FindSegments(callph.segments(1).GetText());
             call.TXs = txs;
-            call.RX = rx;
+            call.RXs = rxs;
             //Trace.WriteLine($"Call: {name} = {txs.Select(tx => tx.Name)} ~ {rx?.Name}");
         }
 

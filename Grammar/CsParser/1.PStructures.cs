@@ -132,7 +132,7 @@ namespace DsParser
     public class PCallBase : PNamed, IPSegmentOrCall
     {
         public PSegment[] TXs;
-        public PSegment RX;
+        public PSegment[] RXs;
 
         public PCallBase(string name) : base(name) {}
     }

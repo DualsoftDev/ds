@@ -4,3 +4,8 @@
 **/.vscode
 **/.antlr
 DsEnginePython/antlr4_parser/src/
+DsDotNet/packages/
+DsDotNet/bin/
+DsDotNet/obj/
+Grammar/CsParser/obj/
+Grammar/CsParser/bin/

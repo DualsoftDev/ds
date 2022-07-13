@@ -87,17 +87,8 @@ namespace Engine.Core
                         break;
 
                     case Call call:
-                        switch(call.RXs)
-                        {
-                            case Segment seg:
-                                yield return (seg.TagE, edge);
-                                break;
-                            //case Tag tag:
-                            //    yield return (tag, edge);
-                            //    break;
-                            default:
-                                throw new Exception("ERROR");
-                        }
+                        foreach (var t in call.RxTags)
+                            yield return (t, edge);
                         break;
                     default:
                         throw new Exception("ERROR");
@@ -111,22 +102,9 @@ namespace Engine.Core
                     break;
 
                 case Call call:
-                    foreach(var tx in call.TXs)
-                    {
-                        switch (tx)
-                        {
-                            case Segment seg:
-                                yield return (edge, seg.TagS);
-                                break;
+                    foreach(var tx in call.TxTags)
+                        yield return (edge, tx);
 
-                            //case Tag tag:
-                            //    yield return (edge, tag);
-                            //    break;
-
-                            default:
-                                throw new Exception("ERROR");
-                        }
-                    }
                     break;
                 default:
                     throw new Exception("ERROR");

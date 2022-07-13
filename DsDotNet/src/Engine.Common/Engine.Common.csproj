@@ -3,6 +3,7 @@
 	<PropertyGroup>
 		<TargetFrameworks>net48</TargetFrameworks>
 		<!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
+		<RootNamespace>Engine.Common</RootNamespace>
 		<LangVersion>8.0</LangVersion>
 	</PropertyGroup>
 

@@ -26,25 +26,33 @@ namespace Engine
                     ;
 
             var cpu = flow.Cpu;
-            var calls = vertices.OfType<Call>().ToArray();
-            var txs = calls.SelectMany(c => c.TXs).OfType<Segment>().Distinct().ToArray();
-            var rxs = calls.SelectMany(c => c.RXs).OfType<Segment>().Distinct().ToArray();
 
             if (isActiveCpu)
             {
-                hmiTags.Iter(t => t.IsExternal = true);
+                hmiTags.Iter(t => t.Type = t.Type.Add(TagType.External));
                 opc.AddTags(hmiTags);
 
-                var startTags = txs.Select(s => new Tag(s.TagS) { Type = TagType.Q, IsExternal = true, OwnerCpu = cpu});
-                opc.AddTags(startTags);
-                cpu.TxRxTags.AddRange(startTags);
-
-                var endTags = rxs.Select(s => new Tag(s.TagE) { Type = TagType.I, IsExternal = true, OwnerCpu = cpu });
-                opc.AddTags(endTags);
-                cpu.TxRxTags.AddRange(endTags);
-
+                var calls = vertices.OfType<Call>().ToArray();
                 foreach (var call in calls)
+                {
+                    call.OwnerCpu = cpu;
+                    var txs = call.TXs.OfType<Segment>().Distinct().ToArray();
+                    var rxs = call.RXs.OfType<Segment>().Distinct().ToArray();
+
+
+                    var startTags = txs.Select(s => Tag.CreateCallTx(call, s.TagS)).ToArray();
+                    opc.AddTags(startTags);
+                    call.TxTags = startTags;
+                    cpu.TxRxTags.AddRange(startTags);
+
+                    var endTags = rxs.Select(s => Tag.CreateCallRx(call, s.TagE)).ToArray();
+                    opc.AddTags(endTags);
+                    call.RxTags = endTags;
+                    cpu.TxRxTags.AddRange(endTags);
+
                     call.OwnerCpu = flow.Cpu;
+                }
+
             }
 
 

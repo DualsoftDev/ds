@@ -22,6 +22,7 @@ namespace Engine.Core
         public Tag TagR { get; set; }
         public Tag TagE { get; set; }
         public Status4 RGFH => this.GetStatus();
+        public string QualifiedName => $"{ContainerFlow.QualifiedName}_{Name}";
 
         public bool IsResetFirst { get; internal set; } = true;
         public IEnumerable<Call> Children => ChildFlow?.Calls;
@@ -95,7 +96,6 @@ namespace Engine.Core
             return Status4.Ready;
         }
 
-
         //public static void ReEvaluateCommandPort(this Segment segment)
         //{
         //    var rf = segment.IsResetFirst;
@@ -154,6 +154,8 @@ namespace Engine.Core
                 case (PortS _, false, Status4.Ready)   : pause() ; break;
                 case (PortR _, true,  Status4.Finished): homing(); break;
                 case (PortR _, false, Status4.Finished): pause() ; break;
+                case (PortR _, true,  Status4.Going)   : homing(); break;
+                case (PortR _, false, Status4.Going)   : pause(); break;
 
                 case (PortE _, true,  Status4.Going)   : finish(); break;
                 case (PortE _, false, Status4.Homing)  : ready() ; break;

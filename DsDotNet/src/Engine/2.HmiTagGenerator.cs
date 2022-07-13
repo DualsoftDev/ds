@@ -57,7 +57,7 @@ namespace Engine
                 }
                 else
                 {
-                    var s = new TagAutoStart(init, $"AutoStart_{midName}_{init.Name}") { OwnerCpu = cpu, IsExternal = true };
+                    var s = Tag.CreateAutoStart(init, $"AutoStart_{midName}_{init.Name}", cpu);
                     cpu.AddBitDependancy(s, init.PortS);
                     tags.Add(s);
                 }
@@ -73,7 +73,7 @@ namespace Engine
                 }
                 else
                 {
-                    var r = new TagAutoReset(last, $"AutoReset_{midName}_{last.Name}") { OwnerCpu = cpu, IsExternal = true };
+                    var r = Tag.CreateAutoReset(last, $"AutoReset_{midName}_{last.Name}", cpu);
                     cpu.AddBitDependancy(r, last.PortR);
                     tags.Add(r);
                 }

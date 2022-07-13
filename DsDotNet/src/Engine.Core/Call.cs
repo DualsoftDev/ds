@@ -50,6 +50,9 @@ namespace Engine.Core
 
         // call 은 상태 저장.  segment 는 상태 동적 계산
         public Status4 RGFH { get; set; } = Status4.Homing;
+        public string QualifiedName => this.GetQualifiedName();
+        public Tag[] TxTags { get; set; }
+        public Tag[] RxTags { get; set; }
 
 
         /*
@@ -94,6 +97,18 @@ namespace Engine.Core
 
     public static class CallExtension
     {
+        public static string GetQualifiedName(this Call call)
+        {
+            switch(call.Container)
+            {
+                case Segment seg:
+                    return $"{seg.QualifiedName}_{call.Name}";
+                case RootFlow flow:
+                    return $"{flow.QualifiedName}_{call.Name}";
+                default:
+                    throw new Exception("ERROR");
+            }
+        }
         public static IEnumerable<Tag> GetTxTags(this Call call)
         {
             var tags = call.OwnerCpu.Tags;

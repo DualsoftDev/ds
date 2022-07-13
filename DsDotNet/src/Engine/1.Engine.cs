@@ -26,7 +26,7 @@ namespace Engine
 
             this.InitializeFlows(Cpu, Opc);
 
-            Debug.Assert(Opc._opcTags.All(t => t.OriginalTag.IsExternal));
+            Debug.Assert(Opc._opcTags.All(t => t.OriginalTag.IsExternal()));
             Opc.Print();
 
             Model.Cpus.Iter(cpu => readTagsFromOpc(cpu));

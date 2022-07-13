@@ -83,8 +83,8 @@ namespace Engine.Core
         public static void PrintTags(this CpuBase cpu)
         {
             var tags = cpu.CollectTags().ToArray();
-            var externalTagNames = string.Join("\r\n\t", tags.Where(t => t.IsExternal).Select(t => t.Name));
-            var internalTagNames = string.Join("\r\n\t", tags.Where(t => !t.IsExternal).Select(t => t.Name));
+            var externalTagNames = string.Join("\r\n\t", tags.Where(t => t.IsExternal()).Select(t => t.Name));
+            var internalTagNames = string.Join("\r\n\t", tags.Where(t => !t.IsExternal()).Select(t => t.Name));
             Logger.Debug($"-- Tags for {cpu.Name}");
             Logger.Debug($"  External:\r\n\t{externalTagNames}");
             Logger.Debug($"  Internal:\r\n\t{internalTagNames}");

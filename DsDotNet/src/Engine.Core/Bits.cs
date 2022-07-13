@@ -18,53 +18,61 @@ namespace Engine.Core
         public Flag(string name, bool bit = false) : base(name, bit) { }
     }
 
-    public enum TagType { Unknown, Q, I, M, Special };
+    [Flags]
+    public enum TagType {
+        None       = 0,
+        Q          = 1 << 0,
+        I          = 1 << 1,
+        M          = 1 << 2,
+        Special    = 1 << 3,
+
+        // segment tag
+        Start      = 1 << 4,
+        Reset      = 1 << 5,
+        End        = 1 << 6,
+        /// <summary> 공정(flow) auto start, auto reset </summary>
+        Auto       = 1 << 7,
+        /// <summary> 외부 접근 용 Tag 여부 </summary>
+        External   = 1 << 8,
+
+        // call tag
+        TX         = 1 << 9,
+        RX         = 1 << 10,
+    };
     public class Tag : Bit, ITxRx
     {
-        public Segment OwnerSegment { get; set; }
+        public ISegmentOrCall Owner { get; set; }
         public TagType Type { get; set; }
-        /// <summary> 외부 접근 용 Tag 여부 </summary>
-        public bool IsExternal { get; set; }
-        public Tag(Segment ownerSegment, string name, bool value = false, bool isExternal = false) : base(name, value)
+        public Tag(ISegmentOrCall owner, string name, TagType tagType=TagType.None, CpuBase ownerCpu = null, bool value = false)
+            : base(name, value, ownerCpu)
         {
-            IsExternal = isExternal;
-            OwnerSegment = ownerSegment;
+            Owner = owner;
+            Type = tagType;
         }
         public Tag(Tag tag)
-            : this(tag.OwnerSegment, tag.Name, tag.Value, tag.IsExternal)
+            : this(tag.Owner, tag.Name, tag.Type, tag.OwnerCpu, tag.Value)
         {
         }
+
+        public static Tag CreateAutoStart(Segment ownerSegment, string name, CpuBase ownerCpu) =>
+            new Tag(ownerSegment, name, TagType.Auto | TagType.Start | TagType.Q | TagType.External, ownerCpu)
+            ;
+        public static Tag CreateAutoReset(Segment ownerSegment, string name, CpuBase ownerCpu) =>
+            new Tag(ownerSegment, name, TagType.Auto | TagType.Reset | TagType.Q | TagType.External, ownerCpu)
+            ;
+
+        public static Tag CreateCallTx(Call ownerCall, Tag proto) =>
+            new Tag(ownerCall, $"{proto.Name}_{ownerCall.QualifiedName}_TX", TagType.TX | TagType.Q | TagType.External, ownerCall.OwnerCpu)
+            ;
+        public static Tag CreateCallRx(Call ownerCall, Tag proto) =>
+            new Tag(ownerCall, $"{proto.Name}_{ownerCall.QualifiedName}_RX", TagType.RX | TagType.I | TagType.External, ownerCall.OwnerCpu)
+            ;
+
     }
 
-    public class TagS : Tag
+    public static class TagExtension
     {
-        public TagS(Segment ownerSegment, string name) : base(ownerSegment, name) { }
-    }
-    public class TagR : Tag
-    {
-        public TagR(Segment ownerSegment, string name) : base(ownerSegment, name) { }
-    }
-    public class TagE : Tag
-    {
-        public TagE(Segment ownerSegment, string name) : base(ownerSegment, name) { }
-    }
-
-    public class TagAutoStart : TagS, IAutoTag
-    {
-        public TagAutoStart(Segment ownerSegment, string name)
-            : base(ownerSegment, name)
-        {
-            IsExternal = true;
-        }
-    }
-
-    public class TagAutoReset : TagR, IAutoTag
-    {
-        public TagAutoReset(Segment ownerSegment, string name)
-            : base(ownerSegment, name)
-        {
-            IsExternal = true;
-        }
+        public static bool IsExternal(this Tag tag) => tag.Type.HasFlag(TagType.External);
     }
 
 

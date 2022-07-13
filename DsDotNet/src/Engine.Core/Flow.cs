@@ -38,6 +38,7 @@ namespace Engine.Core
     public class RootFlow : Flow
     {
         public List<ChildFlow> SubFlows = new List<ChildFlow>();
+        public string QualifiedName => $"{System.Name}_{Name}";
         public RootFlow(string name, DsSystem system)
             : base(name, system)
         {

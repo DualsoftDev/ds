@@ -8,8 +8,8 @@ namespace Engine.Core
     [DebuggerDisplay("{ToText(),nq}")]
     public class Segment : SegmentOrCallBase, ISegmentOrFlow, IWithSREPorts, ITxRx
     {
-        public RootFlow ContainerFlow;
-        public ChildFlow ChildFlow;
+        public RootFlow ContainerFlow { get; }
+        public ChildFlow ChildFlow { get; set; }
         public override CpuBase OwnerCpu { get => ContainerFlow.Cpu; set => throw new NotImplementedException(); }
 
 
@@ -68,6 +68,8 @@ namespace Engine.Core
           ----------------------
           - 'o' : ON, 'x' : Off, '-' 는 don't care
           - 내부에서 Reset First 로만 해석
+
+          - 실행/Resume 은 Child call status 보고 G 이거나 R 인 것부터 수행
          */
         public static Status4 GetStatus(this Segment segment)
         {
@@ -76,11 +78,11 @@ namespace Engine.Core
             var r = seg.PortR.Value;
             var e = seg.PortE.Value;
 
-            if (seg.Paused)
-            {
-                Debug.Assert(!s && !r);
-                return e ? Status4.Homing : Status4.Going;
-            }
+            //if (seg.Paused)
+            //{
+            //    Debug.Assert(!s && !r);
+            //    return e ? Status4.Homing : Status4.Going;
+            //}
 
             if (e)
                 return r ? Status4.Homing : Status4.Finished;
@@ -123,7 +125,7 @@ namespace Engine.Core
 
             var rf = segment.IsResetFirst;
             var st = segment.GetStatus();
-            var paused = segment.Paused;
+            //var paused = segment.Paused;
 
             var duplicate =
                 newValue && ( (sp != null && segment.PortR.Value) || (rp != null && segment.PortS.Value));
@@ -134,17 +136,17 @@ namespace Engine.Core
 
 
             effectivePort.Value = newValue;
-            if (paused)
-            {
-                switch (effectivePort, newValue, st)
-                {
-                    case (PortS _, true, Status4.Going): resume(); break;
-                    case (PortS _, false, Status4.Going): pause(); break;
-                    case (PortR _, true, Status4.Homing): resume(); break;
-                    case (PortR _, false, Status4.Homing): pause(); break;
-                }
+            //if (paused)
+            //{
+            //    switch (effectivePort, newValue, st)
+            //    {
+            //        case (PortS _, true, Status4.Going): resume(); break;
+            //        case (PortS _, false, Status4.Going): pause(); break;
+            //        case (PortR _, true, Status4.Homing): resume(); break;
+            //        case (PortR _, false, Status4.Homing): pause(); break;
+            //    }
 
-            }
+            //}
 
             switch (effectivePort, newValue, st)
             {
@@ -174,6 +176,8 @@ namespace Engine.Core
 
             void going()
             {
+                // 1. Ready 상태에서의 clean start
+                // 2. Going pause (==> Ready 로 해석) 상태에서의 resume start
                 var gi = segment.ChildFlow.GraphInfo;
                 var inits = gi.Inits;
                 var v_oes = gi.TraverseOrders;

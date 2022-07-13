@@ -9,24 +9,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{63297B
 		paket.references = paket.references
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{A6A6AF7D-D6E3-442D-9B1E-58CC91879BE1}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "project", "project", "{BF60BC93-E09B-4E5F-9D85-95A519479D54}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
 		RELEASE_NOTES.md = RELEASE_NOTES.md
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{83F16175-43B1-4C90-A1EE-8E351C33435D}"
-	ProjectSection(SolutionItems) = preProject
-		docsrc\tools\generate.fsx = docsrc\tools\generate.fsx
-		docsrc\tools\templates\template.cshtml = docsrc\tools\templates\template.cshtml
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "content", "content", "{8E6D5255-776D-4B61-85F9-73C37AA1FB9A}"
-	ProjectSection(SolutionItems) = preProject
-		docsrc\content\index.fsx = docsrc\content\index.fsx
-		docsrc\content\tutorial.fsx = docsrc\content\tutorial.fsx
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "git", "git", "{078A9C52-DDC1-46F4-9235-9E6C89C87AFD}"
@@ -60,6 +46,11 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Engine.OPC", "src\Engine.OPC\Engine.OPC.csproj", "{D7BDA151-FBE4-46FF-8A97-CFDB99C8C843}"
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "UnitTest.Engine", "src\UnitTest.Engine\UnitTest.Engine.fsproj", "{15CC1B30-C380-43D3-AC41-22980FC48DA9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{3A857CD2-8DF3-4BF3-B7C8-1266B43BA603}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\ToDo.txt = Docs\ToDo.txt
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -104,8 +95,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{83F16175-43B1-4C90-A1EE-8E351C33435D} = {A6A6AF7D-D6E3-442D-9B1E-58CC91879BE1}
-		{8E6D5255-776D-4B61-85F9-73C37AA1FB9A} = {A6A6AF7D-D6E3-442D-9B1E-58CC91879BE1}
 		{2D3C9B7C-9CCE-4B10-A0A3-7ED1CB7DF077} = {BF60BC93-E09B-4E5F-9D85-95A519479D54}
 		{56B03815-608A-4EEA-98B2-5D3E1D26C6DF} = {BF60BC93-E09B-4E5F-9D85-95A519479D54}
 		{7539B456-88C3-47F8-98D1-50003A6DE25B} = {BF60BC93-E09B-4E5F-9D85-95A519479D54}

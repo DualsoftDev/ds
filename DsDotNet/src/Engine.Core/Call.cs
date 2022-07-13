@@ -46,23 +46,30 @@ namespace Engine.Core
         public ISegmentOrFlow Container;
         public override bool Value => Prototype.Value;
 
-        private bool _paused;
-        public override bool Paused {
-            get => _paused;
-            set {
-                if (value != _paused)
-                {
-                    _paused = value;
-                    // call pause 시에 TX 신호 끄기
-                    if (value)
-                        this.GetTxTags().Iter(txTag =>
-                        {
-                            txTag.Value = false;
-                            OwnerCpu.OnTagChanged(txTag, false);
-                        });
-                }
-            }
-        }
+        // call 은 상태 저장.  segment 는 상태 동적 계산
+        public Status4 RGFH { get; set; } = Status4.Homing;
+
+
+        /*
+         * Do not store Paused property
+         */
+        //private bool _paused;
+        //public override bool Paused {
+        //    get => _paused;
+        //    set {
+        //        if (value != _paused)
+        //        {
+        //            _paused = value;
+        //            // call pause 시에 TX 신호 끄기
+        //            if (value)
+        //                this.GetTxTags().Iter(txTag =>
+        //                {
+        //                    txTag.Value = false;
+        //                    OwnerCpu.OnTagChanged(txTag, false);
+        //                });
+        //        }
+        //    }
+        //}
 
 
         public IEnumerable<ITxRx> TXs => Prototype.TXs;

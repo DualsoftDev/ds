@@ -1,0 +1,21 @@
+- Call status
+
+	---------------------------------------------
+			TX					RX
+	---------------------------------------------
+		R	H					↑(Origin 부합)
+		G	↑(TX 잘)				x
+		F	G					↑(o)
+		H	↑(P.reset)			-
+	---------------------------------------------
+
+- Real segment 에서 Paused 상태 변수 제거.  실시간 계산
+  G or H 이면서 자식 중 Ready 와 Finish 섞여 있으면 Paused
+
+- Real 은 RGFH 상태 동적 계산
+- Call 은 RGFH 상태 저장
+
+- Call 별 TXs, RXs 모든 call 에 대해서 새로운 tag 생성
+  - e.g 동일 C1 call 을 여러 군데 사용하였을 경우, C1 의 TX 및 RX tag 는 매 call instance 마다 별도로 생성
+
+- Call 의 TXs 및 RXs 모두 복수개 지원

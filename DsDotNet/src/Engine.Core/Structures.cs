@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 
 namespace Engine.Core
 {
@@ -58,7 +56,11 @@ namespace Engine.Core
     public abstract class SegmentOrCallBase : Named, ISegmentOrCall
     {
         public virtual bool Value { get; set; }
-        public virtual bool Paused { get; set; }
+
+        /*
+         * Do not store Paused property
+         */
+        //public virtual bool Paused { get; set; }
         public virtual CpuBase OwnerCpu { get; set; }
 
         public SegmentOrCallBase(string name)

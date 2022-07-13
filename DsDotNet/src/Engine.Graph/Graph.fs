@@ -4,8 +4,9 @@ open Engine.Core
 open QuickGraph
 open QuickGraph.Algorithms
 open QuickGraph.Collections
-open System.Collections.Generic
 open System
+open System.Linq
+open System.Collections.Generic
 
 
 [<AutoOpen>]
@@ -136,18 +137,120 @@ module GraphUtil =
         override x.SolidConnectedComponets with get() = solidConnectedComponets
 
         member x.GetShortestPath(source, vertex) = computeDijkstra x.Graph source vertex
+    
 
+    let getAdjacencyGraphFromEdge(e:Edge seq) = 
+        (edges2QgEdge e) |> GraphExtensions.ToAdjacencyGraph
 
+    let checkSourceInGraph(sourceFlow:Flow) (src:IVertex) = 
+        GraphInfo(seq[sourceFlow]).SolidConnectedComponets
+        |> Seq.filter(fun gs -> gs |> Seq.contains(src))
+
+    let findGraphIncludeSource(rSrc:IVertex) =
+        match rSrc with
+        | :? Segment as s -> 
+            checkSourceInGraph s.ContainerFlow rSrc
+        | :? Call as c -> 
+            checkSourceInGraph (c.Container:?>Flow) rSrc
+        | _ -> 
+            failwith "[error] find source native graph"
+
+    let targetResetMarker(srcs:ITxRx seq) (tgts:ITxRx seq) =
+        let sourceSegs = srcs |> Seq.map(fun v -> v:?>IVertex)
+        let targetSegs = tgts |> Seq.map(fun v -> v:?>IVertex)
+        let targetIncommingResets = 
+            targetSegs
+            |> Seq.map(fun ts ->
+                getIncomingEdges (getAdjacencyGraphFromEdge (ts:?>Segment).ContainerFlow.Edges) ts
+            )
+
+        targetIncommingResets
+        |> Seq.map(fun es ->
+            es
+            |> Seq.filter(fun e ->
+                e.OriginalEdge.Operator = "|>" || e.OriginalEdge.Operator = "|>>"
+            )
+        )
+        |> Seq.map(fun es ->
+            es
+            |> Seq.map(fun e ->
+                findGraphIncludeSource e.Source
+            )
+        )
+        |> Seq.collect id
+        |> Seq.collect(fun rv ->
+            rv 
+            |> Seq.filter(fun r ->
+                Enumerable.SequenceEqual(Enumerable.Intersect(sourceSegs, r), sourceSegs)
+            )
+        )
+
+    let searchCallTargets(cpts:CallPrototype seq) (tgt:CallPrototype) = 
+        cpts
+        |> Seq.filter(fun src->
+            src <> tgt && src.TXs.Count <> 0 && tgt.RXs.Count <> 0
+        )
+        |> Seq.iter(fun src->
+            targetResetMarker src.TXs tgt.RXs
+            |> Seq.iter(fun v ->
+                printfn "'%A' strongly resets '%A' in progress of graph %A" src tgt v
+            )
+        )
+
+    let checkCallMutualReset(task:Task seq) =
+        task
+        |> Seq.iter(fun t ->
+            let cpts = t.CallPrototypes
+            cpts
+            |> Seq.iter(fun c -> 
+                searchCallTargets cpts c
+            )
+        )
 
     let analyzeFlows(flows:Flow seq) =
         let gri = GraphInfo(flows)
         let graph = gri.Graph
+        
+        //flows
+        //|> Seq.iter(fun f ->
+        //    f.SubFlows
+        //)
 
         //let path =
         //    let src = gri.Vertices |> Seq.find(fun v -> v.ToString() = "Vp")
         //    let tgt = gri.Vertices |> Seq.find(fun v -> v.ToString() = "Sm")
         //    gri.GetShortestPath(src, tgt)
+        //gri
+        //graph.Edges
+        //|> Seq.iter(fun e ->
+        //    printfn "%A" e.OriginalEdge
+        //    printfn "%A - %A" e.Source e.Target
+        //)
+        //graph.Vertices
+        //|> Seq.iter(fun v ->
+        //    match v with
+        //    | :? Named as n ->
+        //        printfn "%s" n.Name
+        //)
+        //gri.Inits
+        //|> Seq.iter(fun v ->
+        //    printfn "start - %A" v
+        //)
+        //gri.Lasts
+        //|> Seq.iter(fun v ->
+        //    printfn "finish - %A" v
+        //)
+        //gri.Vertices
+        //|> Seq.iter(fun v ->
+        //    match v with
+        //    //| :? Named as n ->
+        //    //    printfn "%s" n.Name
+        //    | :? Segment as s ->
+        //        printfn "segment %s" s.Name
+        //    | :? Call as c ->
+        //        printfn "call %A %s [%A]" c.TXs c.Name (c.RX :?> Segment).ContainerFlow.Children
+        //    | _ ->
+        //        failwith "error"
+        //)
 
         gri
-
-

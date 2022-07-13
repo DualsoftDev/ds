@@ -62,8 +62,8 @@ module GraphUtil =
                 ee.Sources |> Seq.map(fun s -> QgEdge(s, ee.Target, ee)))
             |> Array.ofSeq
 
-    type GraphInfo(flows:Flow seq) =
-        inherit CsGraphInfo(flows)
+    type FsGraphInfo(flows:Flow seq) =
+        inherit GraphInfo(flows)
         let edges = flows |> Seq.collect(fun f -> f.Edges) |> Array.ofSeq
         let resetEdges = edges |> Array.filter(fun e -> (e :> obj) :? IResetEdge)
         let solidEdges = edges |> Array.except(resetEdges)
@@ -108,27 +108,25 @@ module GraphUtil =
         let traverseOrders =
             let q = Queue<V>()
             inits |> Array.iter q.Enqueue
-            seq {
+            [|
                 while q.Count > 0 do
                     let v = q.Dequeue()
                     let oes = solidGraph.OutEdges(v)
                     let ooes = oes |> Seq.map(fun (e:QgEdge) -> e.OriginalEdge) |> Array.ofSeq
                     yield VertexAndOutgoingEdges(v, ooes)
                     oes |> Seq.map (fun e -> e.Target) |> Seq.iter q.Enqueue
-            }
-            |> Array.ofSeq
+            |]
 
-        override x.Edges with get() = edges
-        //member val Edges = edges
-        override x.Vertices with get() = vertices
-        override x.QgEdges with get() = qgEdges
-        override x.Graph with get() = graph
-        override x.SolidGraph with get() = solidGraph
-        override x.UndirectedGraph with get() = undirectedGraph
+        override x.Edges                with get() = edges
+        override x.Vertices             with get() = vertices
+        override x.QgEdges              with get() = qgEdges
+        override x.Graph                with get() = graph
+        override x.SolidGraph           with get() = solidGraph
+        override x.UndirectedGraph      with get() = undirectedGraph
         override x.UndirectedSolidGraph with get() = undirectedSolidGraph
-        override x.Inits with get() = inits
-        override x.Lasts with get() = lasts
-        override x.TraverseOrders with get() = traverseOrders
+        override x.Inits                with get() = inits
+        override x.Lasts                with get() = lasts
+        override x.TraverseOrders       with get() = traverseOrders
 
         /// Reset edge 까지 고려하였을 때의 connected component
         override x.ConnectedComponets with get() = connectedComponets
@@ -137,14 +135,22 @@ module GraphUtil =
         override x.SolidConnectedComponets with get() = solidConnectedComponets
 
         member x.GetShortestPath(source, vertex) = computeDijkstra x.Graph source vertex
-    
 
-    let getAdjacencyGraphFromEdge(e:Edge seq) = 
+
+    let analyzeFlows(flows:Flow seq) =
+        let gri = FsGraphInfo(flows)
+        let graph = gri.Graph
+        gri
+
+
+[<AutoOpen>]
+module GraphResetSearch =
+    let getAdjacencyGraphFromEdge(e:Edge seq) =
         (edges2QgEdge e) |> GraphExtensions.ToAdjacencyGraph
 
-    let checkSourceInGraph(sourceFlow:Flow) (src:IVertex) = 
-        let gri = GraphInfo(seq[sourceFlow])
-        let routes = 
+    let checkSourceInGraph(sourceFlow:Flow) (src:IVertex) =
+        let gri = FsGraphInfo(seq[sourceFlow])
+        let routes =
             getInits(gri.SolidGraph)
             |> Seq.map(fun s ->
                 (computeDijkstra gri.SolidGraph s src)
@@ -153,7 +159,7 @@ module GraphUtil =
             )
             |> Seq.filter(fun r -> (r |> Seq.length) <> 0)
             |> Seq.collect id
-        let graphs = 
+        let graphs =
             gri.SolidConnectedComponets
             |> Seq.filter(fun gs -> gs |> Seq.contains(src))
             |> Seq.collect id
@@ -162,11 +168,11 @@ module GraphUtil =
 
     let findGraphIncludeSource(rSrc:IVertex) =
         match rSrc with
-        | :? Segment as s -> 
+        | :? Segment as s ->
             checkSourceInGraph s.ContainerFlow rSrc
-        | :? Call as c -> 
+        | :? Call as c ->
             checkSourceInGraph (c.Container:?>Flow) rSrc
-        | _ -> 
+        | _ ->
             failwith "[error] find source native graph"
 
     let targetResetMarker(srcs:ITxRx seq) (tgts:ITxRx seq) =
@@ -191,7 +197,7 @@ module GraphUtil =
             Enumerable.SequenceEqual(Enumerable.Intersect(sourceSegs, fst(rv)), sourceSegs)
         )
 
-    let searchCallTargets(cpts:CallPrototype seq) (tgt:CallPrototype) = 
+    let searchCallTargets(cpts:CallPrototype seq) (tgt:CallPrototype) =
         cpts
         |> Seq.filter(fun src->
             src <> tgt && src.TXs.Count <> 0 && tgt.RXs.Count <> 0
@@ -203,20 +209,16 @@ module GraphUtil =
             )
         )
 
-    let checkCallResetSource(task:Task seq) =
+    let checkCallResetSource(task:DsTask seq) =
         task
         |> Seq.iter(fun t ->
             let cpts = t.CallPrototypes
             cpts
-            |> Seq.iter(fun c -> 
+            |> Seq.iter(fun c ->
                 searchCallTargets cpts c
             )
         )
 
-    let analyzeFlows(flows:Flow seq) =
-        let gri = GraphInfo(flows)
-        let graph = gri.Graph
-        
         //flows
         //|> Seq.iter(fun f ->
         //    f.SubFlows
@@ -259,4 +261,3 @@ module GraphUtil =
         //        failwith "error"
         //)
 
-        gri

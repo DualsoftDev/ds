@@ -30,7 +30,7 @@ namespace Engine.Core
         }
     }
 
-    public class CsGraphInfo
+    public class GraphInfo
     {
         public Flow[] Flows { get; }
         public virtual Edge[] Edges { get; }
@@ -51,7 +51,7 @@ namespace Engine.Core
 
         public virtual VertexAndOutgoingEdges[] TraverseOrders { get; protected set; }
 
-        public CsGraphInfo(IEnumerable<Flow> flows)
+        public GraphInfo(IEnumerable<Flow> flows)
         {
             Flows = flows.ToArray();
         }

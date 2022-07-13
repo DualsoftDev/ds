@@ -18,7 +18,7 @@ namespace Engine.Core
 
         /// <summary> Bit change event queue </summary>
         public ConcurrentQueue<BitChange> Queue { get; } = new ConcurrentQueue<BitChange>();
-        public CsGraphInfo GraphInfo { get; set; }
+        public GraphInfo GraphInfo { get; set; }
 
         /// <summary> bit 간 순방향 의존성 map </summary>
         public Dictionary<IBit, HashSet<IBit>> ForwardDependancyMap { get; } = new Dictionary<IBit, HashSet<IBit>>();

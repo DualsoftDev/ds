@@ -16,7 +16,7 @@ namespace Engine.Core
         /// <summary>Edge 를 통해 알 수 없는 isolated segement/call 등을 포함 </summary>
         public List<SegmentOrCallBase> Children { get; } = new List<SegmentOrCallBase>();
         List<Edge> _edges = new List<Edge>();
-        public CsGraphInfo GraphInfo { get; set; }
+        public GraphInfo GraphInfo { get; set; }
 
         public bool IsEmptyFlow => _edges.IsNullOrEmpty() && Children.IsNullOrEmpty();
         public IEnumerable<Edge> Edges => _edges;

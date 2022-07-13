@@ -25,6 +25,8 @@ module ModelTests =
 }
 """
 
+        let seqEq(a, b) = Enumerable.SequenceEqual(a, b) |> ShouldBeTrue
+
         interface IClassFixture<Fixtures.DemoFixture>
 
         [<Fact>]
@@ -45,7 +47,7 @@ module ModelTests =
             flow.Name === "F"
             let children = flow.Children |> Enumerable.OfType<Segment>
             let childrenNames = children |> Seq.map(fun (seg:Segment) -> seg.Name)
-            (childrenNames, ["Vp"; "Pp"; "Sp"; "Vm"; "Pm"; "Sm"]) |> Enumerable.SequenceEqual |> ShouldBeTrue
+            (childrenNames, ["Vp"; "Pp"; "Sp"; "Vm"; "Pm"; "Sm"]) |> seqEq
             children |> Seq.forall(fun seg -> isNull seg.ChildFlow) |> ShouldBeTrue
 
             flow.Cpu === cpu
@@ -82,7 +84,12 @@ module ModelTests =
             let task = system.Tasks |> Seq.exactlyOne
             let callProtos = task.CallPrototypes |> Seq.map(fun c -> c.Name, c) |> Tuple.toDictionary
             (callProtos.Keys, ["Cp"; "Cm"; "C00"; "C01"; "C02"; "C10"; "C20"; "C21"; "C22"; ])
-            |> Enumerable.SequenceEqual |> ShouldBeTrue
+            |> seqEq
+
+            let checkC22 =
+                let c22 = callProtos.["C22"]
+                let txs = c22.TXs.OfType<Segment>()
+                (txs |> Seq.map(fun tx -> tx.Name), ["Vp"; "Vm"]) |> seqEq
 
             cpu.Name === "Cpu"
             engine.FakeCpu |> ShouldBeNull

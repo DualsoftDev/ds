@@ -1,14 +1,10 @@
 ﻿using Dsu.Common.Utilities.ExtensionMethods;
 
-using Engine.Graph;
-
 using log4net;
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
-using static Engine.Graph.GraphUtil;
 
 namespace Engine.Core
 {
@@ -20,7 +16,7 @@ namespace Engine.Core
         /// <summary>Edge 를 통해 알 수 없는 isolated segement/call 등을 포함 </summary>
         public List<SegmentOrCallBase> Children { get; } = new List<SegmentOrCallBase>();
         List<Edge> _edges = new List<Edge>();
-        internal GraphInfo GraphInfo { get; set; }
+        public CsGraphInfo GraphInfo { get; set; }
 
         public bool IsEmptyFlow => _edges.IsNullOrEmpty() && Children.IsNullOrEmpty();
         public IEnumerable<Edge> Edges => _edges;
@@ -88,11 +84,6 @@ namespace Engine.Core
                 var op = IsReset ? "|>" : ">";
                 return $"{Source} {op} {Target}";
             }
-        }
-
-        public static void BuildGraphInfo(this Flow flow)
-        {
-            flow.GraphInfo = GraphUtil.analyzeFlows(new[] { flow });
         }
 
         static IEnumerable<Causal> CollectArrow(this Edge edge)

@@ -47,7 +47,7 @@ namespace Engine.Core
         public override bool Value => Prototype.Value;
 
         private bool _paused;
-        public virtual bool Paused {
+        public override bool Paused {
             get => _paused;
             set {
                 if (value != _paused)

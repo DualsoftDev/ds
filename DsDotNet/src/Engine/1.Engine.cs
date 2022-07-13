@@ -1,6 +1,7 @@
 ﻿using Dsu.Common.Utilities.ExtensionMethods;
 
 using Engine.Core;
+using Engine.Graph;
 using Engine.OPC;
 
 using System.Diagnostics;
@@ -50,4 +51,25 @@ namespace Engine
         }
 
     }
+
+    public static class EngineExtension
+    {
+
+    }
+
+    public static class ModelExtension
+    {
+        public static void Epilogue(this Model model)
+        {
+            var rootFlows = model.Systems.SelectMany(sys => sys.RootFlows);
+            var subFlows = rootFlows.SelectMany(rf => rf.SubFlows);
+            var allFlows = rootFlows.Cast<Flow>().Concat(subFlows);
+            foreach (var flow in allFlows)
+                flow.GraphInfo = GraphUtil.analyzeFlows(new[] { flow });
+
+            foreach(var cpu in model.Cpus)
+                cpu.GraphInfo = GraphUtil.analyzeFlows(cpu.RootFlows);
+        }
+    }
+
 }

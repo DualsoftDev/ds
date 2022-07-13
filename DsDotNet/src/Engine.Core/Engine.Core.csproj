@@ -11,9 +11,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="Engine.Graph">
+    <!--<Reference Include="Engine.Graph">
       <HintPath>..\Engine.Graph\bin\Debug\net48\Engine.Graph.dll</HintPath>
-    </Reference>
+    </Reference>-->
   </ItemGroup>
 
   <Import Project="..\..\.paket\Paket.Restore.targets" />

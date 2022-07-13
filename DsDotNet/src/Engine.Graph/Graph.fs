@@ -5,19 +5,13 @@ open QuickGraph
 open QuickGraph.Algorithms
 open QuickGraph.Collections
 open System.Collections.Generic
+open System
 
 
 [<AutoOpen>]
 module GraphBase =
     type V = Engine.Core.IVertex
     type E<'V> = QuickGraph.IEdge<'V>
-    type QgEdge(source:V, target:V, originalEdge:Edge) =
-        member val OriginalEdge = originalEdge with get
-        interface E<V> with
-            member x.Source = source
-            member x.Target = target
-        member x.Source = source
-        member x.Target = target
 
 [<AutoOpen>]
 module GraphUtil =
@@ -68,6 +62,7 @@ module GraphUtil =
             |> Array.ofSeq
 
     type GraphInfo(flows:Flow seq) =
+        inherit CsGraphInfo(flows)
         let edges = flows |> Seq.collect(fun f -> f.Edges) |> Array.ofSeq
         let resetEdges = edges |> Array.filter(fun e -> (e :> obj) :? IResetEdge)
         let solidEdges = edges |> Array.except(resetEdges)
@@ -85,13 +80,14 @@ module GraphUtil =
         /// reset edge 제외한 start edge 만..
         let qgSolidEdges = edges2QgEdge solidEdges
 
+        let graph = qgEdges |> GraphExtensions.ToAdjacencyGraph
         let solidGraph =
             let g = qgSolidEdges |> GraphExtensions.ToAdjacencyGraph
             isolatedSegments |> Seq.iter(g.AddVertex >> ignore)
             g
 
-        let inits = getInits(solidGraph)
-        let lasts = getLasts(solidGraph)
+        let inits = getInits(solidGraph) |> Array.ofSeq
+        let lasts = getLasts(solidGraph) |> Array.ofSeq
 
         let undirectedGraph =
             let g = qgEdges |> GraphExtensions.ToUndirectedGraph
@@ -106,37 +102,41 @@ module GraphUtil =
         let connectedComponets = getConnectedComponents(undirectedGraph)
         let solidConnectedComponets = getConnectedComponents(undirectedSolidGraph)
 
-        member val Flows = flows |> Array.ofSeq
-        member val Edges = edges
-        member val Vertices = vertices
-        member val QgEdges = qgEdges with get
-        member val Graph = qgEdges |> GraphExtensions.ToAdjacencyGraph
-        member val SolidGraph = solidGraph
-        member val UndirectedGraph = undirectedGraph
-        member val UndirectedSolidGraph = undirectedSolidGraph
-        member val Inits = inits
-        member val Lasts = lasts
-
-        /// Reset edge 까지 고려하였을 때의 connected component
-        member val ConnectedComponets = connectedComponets
-
-        /// Reset edge 제외한 상태의 connected component
-        member val SolidConnectedComponets = solidConnectedComponets
-
-        member x.GetShortestPath(source, vertex) = computeDijkstra x.Graph source vertex
 
         /// Start causal 상에서 실행 순서에 맞게 graph 탐색해서 (V, OES)[] 를 반환.
-        member x.Traverse() =
+        let traverseOrders =
             let q = Queue<V>()
-            x.Inits |> List.iter q.Enqueue
+            inits |> Array.iter q.Enqueue
             seq {
                 while q.Count > 0 do
                     let v = q.Dequeue()
-                    let oes = x.SolidGraph.OutEdges(v)
+                    let oes = solidGraph.OutEdges(v)
                     let ooes = oes |> Seq.map(fun (e:QgEdge) -> e.OriginalEdge) |> Array.ofSeq
-                    yield v, ooes
+                    yield VertexAndOutgoingEdges(v, ooes)
                     oes |> Seq.map (fun e -> e.Target) |> Seq.iter q.Enqueue
             }
+            |> Array.ofSeq
+
+        override x.Edges with get() = edges
+        //member val Edges = edges
+        override x.Vertices with get() = vertices
+        override x.QgEdges with get() = qgEdges
+        override x.Graph with get() = graph
+        override x.SolidGraph with get() = solidGraph
+        override x.UndirectedGraph with get() = undirectedGraph
+        override x.UndirectedSolidGraph with get() = undirectedSolidGraph
+        override x.Inits with get() = inits
+        override x.Lasts with get() = lasts
+        override x.TraverseOrders with get() = traverseOrders
+
+        /// Reset edge 까지 고려하였을 때의 connected component
+        override x.ConnectedComponets with get() = connectedComponets
+
+        /// Reset edge 제외한 상태의 connected component
+        override x.SolidConnectedComponets with get() = solidConnectedComponets
+
+        member x.GetShortestPath(source, vertex) = computeDijkstra x.Graph source vertex
+
 
 
     let analyzeFlows(flows:Flow seq) =

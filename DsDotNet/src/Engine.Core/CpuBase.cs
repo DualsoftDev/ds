@@ -1,7 +1,5 @@
 ﻿using Dsu.Common.Utilities.ExtensionMethods;
 
-using Engine.Graph;
-
 using log4net;
 
 using System.Collections.Concurrent;
@@ -9,8 +7,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
-
-using static Engine.Graph.GraphUtil;
 
 namespace Engine.Core
 {
@@ -23,7 +19,7 @@ namespace Engine.Core
 
         /// <summary> Bit change event queue </summary>
         public ConcurrentQueue<BitChange> Queue { get; } = new ConcurrentQueue<BitChange>();
-        internal GraphInfo GraphInfo { get; }
+        public CsGraphInfo GraphInfo { get; set; }
 
         /// <summary> bit 간 순방향 의존성 map </summary>
         public Dictionary<IBit, HashSet<IBit>> ForwardDependancyMap { get; } = new Dictionary<IBit, HashSet<IBit>>();
@@ -39,7 +35,6 @@ namespace Engine.Core
             RootFlows = rootFlows;
             Model = model;
             rootFlows.Iter(f => f.Cpu = this);
-            GraphInfo = GraphUtil.analyzeFlows(rootFlows);
         }
     }
 

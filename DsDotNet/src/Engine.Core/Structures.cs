@@ -12,17 +12,6 @@ namespace Engine.Core
         public List<Cpu> Cpus = new List<Cpu>();
     }
 
-    public static class ModelExtension
-    {
-        public static void Epilogue(this Model model)
-        {
-            var rootFlows = model.Systems.SelectMany(sys => sys.RootFlows);
-            var subFlows = rootFlows.SelectMany(rf => rf.SubFlows);
-            var allFlows = rootFlows.Cast<Flow>().Concat(subFlows);
-            foreach (var flow in allFlows)
-                flow.BuildGraphInfo();
-        }
-    }
 
     [DebuggerDisplay("{ToText()}")]
     public class Named: INamed
@@ -80,7 +69,7 @@ namespace Engine.Core
 
         bool IsChildrenStartPoint() => true;
         public override string ToString() => ToText();
-        public virtual string ToText() => $"{Name}: cpu={OwnerCpu?.Name}";
+        public override string ToText() => $"{Name}: cpu={OwnerCpu?.Name}";
 
         //public virtual bool ChangeR()
         //{

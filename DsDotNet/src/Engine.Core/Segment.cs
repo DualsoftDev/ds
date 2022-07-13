@@ -176,9 +176,11 @@ namespace Engine.Core
             {
                 var gi = segment.ChildFlow.GraphInfo;
                 var inits = gi.Inits;
-                var v_oes = gi.Traverse().ToArray();
-                foreach( (var v, var oes) in v_oes)
+                var v_oes = gi.TraverseOrders;
+                foreach (var ve in v_oes)
                 {
+                    var v = ve.Vertex;
+                    var es = ve.OutgoingEdges;
                     Console.WriteLine();
                 }
                 Console.WriteLine();

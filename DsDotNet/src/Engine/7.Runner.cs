@@ -21,6 +21,7 @@ namespace Engine
             var vertices =
                 flow.Edges
                     .SelectMany(e => e.Vertices)
+                    .Concat(flow.Children)
                     .Distinct()
                     .ToArray()
                     ;
@@ -32,7 +33,9 @@ namespace Engine
                 hmiTags.Iter(t => t.Type = t.Type.Add(TagType.External));
                 opc.AddTags(hmiTags);
 
-                var calls = vertices.OfType<Call>().ToArray();
+                var subCalls = vertices.OfType<Segment>().SelectMany(seg => seg.Children);
+                var rootCalls = vertices.OfType<Call>();
+                var calls = rootCalls.Concat(subCalls);
                 foreach (var call in calls)
                 {
                     call.OwnerCpu = cpu;

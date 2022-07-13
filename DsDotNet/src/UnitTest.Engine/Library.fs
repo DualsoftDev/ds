@@ -26,6 +26,8 @@ module ModelTests =
 """
 
         let seqEq(a, b) = Enumerable.SequenceEqual(a, b) |> ShouldBeTrue
+        let setEq(xs:'a seq, ys:'a seq) =
+            (xs.Count() = ys.Count() && xs |> Seq.forall(fun x -> ys.Contains(x)) ) |> ShouldBeTrue
 
         interface IClassFixture<Fixtures.DemoFixture>
 
@@ -71,7 +73,7 @@ module ModelTests =
         C22 = {P.F.Vp, P.F.Vm ~ P.F.Sp, P.F.Sm }
     }
     [flow] F = {
-        Main = { T.Cp > T.Cm; }
+        Main = { T.Cp > T.Cm > T.C22; }
     }
 }
 
@@ -79,6 +81,7 @@ module ModelTests =
     L.F;
 }"""
             let engine = new Engine(text, "Cpu")
+            ( engine.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
             let system = engine.Model.Systems |> Seq.find(fun s -> s.Name = "L")
             let cpu = engine.Cpu
             let task = system.Tasks |> Seq.exactlyOne
@@ -86,23 +89,32 @@ module ModelTests =
             (callProtos.Keys, ["Cp"; "Cm"; "C00"; "C01"; "C02"; "C10"; "C20"; "C21"; "C22"; ])
             |> seqEq
 
-            let checkC22 =
+            let checkC22Proto_ =
                 let c22 = callProtos.["C22"]
                 let txs = c22.TXs.OfType<Segment>()
-                (txs |> Seq.map(fun tx -> tx.Name), ["Vp"; "Vm"]) |> seqEq
+                (txs |> Seq.map(fun tx -> tx.Name), ["Vp"; "Vm"]) |> setEq
+
 
             cpu.Name === "Cpu"
-            engine.FakeCpu |> ShouldBeNull
-            system.Name === "P"
+            system.Name === "L"
             let flow = system.RootFlows |> Seq.exactlyOne
             flow.Name === "F"
-            let children = flow.Children |> Enumerable.OfType<Segment>
-            let childrenNames = children |> Seq.map(fun (seg:Segment) -> seg.Name)
-            (childrenNames, ["Vp"; "Pp"; "Sp"; "Vm"; "Pm"; "Sm"]) |> Enumerable.SequenceEqual |> ShouldBeTrue
-            children |> Seq.forall(fun seg -> isNull seg.ChildFlow) |> ShouldBeTrue
+            let main = flow.Children |> Enumerable.OfType<Segment> |> Seq.find(fun seg -> seg.Name = "Main")
+            main.Name === "Main"
+            let childrenNames = main.Children |> Seq.map(fun (call:Call) -> call.Name)
+            (childrenNames, ["Cp"; "Cm"; "C22"]) |> setEq
+
+            let checkC22Instance_ =
+                let c22 = main.Children |> Seq.find(fun call -> call.Name = "C22")
+                c22.QualifiedName === "L_F_Main_C22"
+                (c22.TxTags.Select(fun t -> t.Name), ["Start_P_F_Vp_L_F_Main_C22_TX"; "Start_P_F_Vm_L_F_Main_C22_TX"]) |> setEq
+                (c22.RxTags.Select(fun t -> t.Name), ["End_P_F_Sp_L_F_Main_C22_RX"; "End_P_F_Sp_L_F_Main_C22_RX"]) |> setEq
+
 
             flow.Cpu === cpu
             let rootFlow = cpu.RootFlows |> Seq.exactlyOne
             flow === rootFlow
 
+            let fakeCpu = engine.FakeCpu
+            fakeCpu |> ShouldNotBeNull
             ()

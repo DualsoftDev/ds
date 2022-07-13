@@ -52,32 +52,12 @@ namespace Engine.Core
 
         // call 은 상태 저장.  segment 는 상태 동적 계산
         public Status4 RGFH { get; set; } = Status4.Homing;
+        // Do not store Paused property
+        public override bool Paused => this.IsPaused();
+
         public string QualifiedName => this.GetQualifiedName();
         public Tag[] TxTags { get; set; }
         public Tag[] RxTags { get; set; }
-
-
-        /*
-         * Do not store Paused property
-         */
-        //private bool _paused;
-        //public override bool Paused {
-        //    get => _paused;
-        //    set {
-        //        if (value != _paused)
-        //        {
-        //            _paused = value;
-        //            // call pause 시에 TX 신호 끄기
-        //            if (value)
-        //                this.GetTxTags().Iter(txTag =>
-        //                {
-        //                    txTag.Value = false;
-        //                    OwnerCpu.OnTagChanged(txTag, false);
-        //                });
-        //        }
-        //    }
-        //}
-
 
         public IEnumerable<ITxRx> TXs => Prototype.TXs;
         public IEnumerable<ITxRx> RXs => Prototype.RXs;
@@ -111,6 +91,39 @@ namespace Engine.Core
                     throw new Exception("ERROR");
             }
         }
+
+        // 필요한가?
+        public static bool IsPaused(this Call call)
+        {
+            var rxs = call.RxTags;
+            var txs = call.TxTags;
+
+            var containerFlow = call.Container as RootFlow;
+            var txing = txs.All(t => t.Value);
+            var rxed = rxs.All(t => t.Value);
+
+            var going = call.RGFH == Status4.Going;
+            var homing = call.RGFH == Status4.Homing;
+            if (containerFlow != null)
+            {
+                // root 에 배치된 call
+                return going && !txing && !rxed;
+            }
+
+            var containerSeg = call.Container as Segment;
+            var parentPaused = containerSeg.Paused;
+            if (!parentPaused)
+                return false;
+
+            var parentGoing = containerSeg.RGFH == Status4.Going;
+            var parentHoming = containerSeg.RGFH == Status4.Homing;
+
+            return
+                   (parentGoing  && going  && !txing && !rxed  ) // going paused
+                || (parentHoming && homing ) // homing paused. todo : check ???
+                ;
+        }
+
         public static IEnumerable<Tag> GetTxTags(this Call call)
         {
             var tags = call.OwnerCpu.Tags;

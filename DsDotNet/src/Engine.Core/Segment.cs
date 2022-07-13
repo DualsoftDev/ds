@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Engine.Common;
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -22,6 +24,7 @@ namespace Engine.Core
         public Tag TagR { get; set; }
         public Tag TagE { get; set; }
         public Status4 RGFH => this.GetStatus();
+        public override bool Paused => this.IsPaused();
         public string QualifiedName => $"{ContainerFlow.QualifiedName}_{Name}";
 
         public bool IsResetFirst { get; internal set; } = true;
@@ -96,24 +99,23 @@ namespace Engine.Core
             return Status4.Ready;
         }
 
-        //public static void ReEvaluateCommandPort(this Segment segment)
-        //{
-        //    var rf = segment.IsResetFirst;
-        //    var st = segment.GetStatus();
-        //    var paused = segment.Paused;
-        //    var s = segment.PortS.Value;
-        //    var r = segment.PortR.Value;
-        //    if (paused)
-        //    {
-        //        Debug.Assert(!(s && r));
-        //        if (s || r)
-        //            resume();
-        //    }
-        //    else
-        //    {
+        public static bool IsPaused(this Segment segment)
+        {
+            var st = segment.GetStatus();
+            var childStarted = segment.Children.Any(c => c.RGFH.IsOneOf(Status4.Going, Status4.Finished));
+            return (st == Status4.Ready && childStarted);
+        }
 
-        //    }
-        //}
+        public static bool IsChildrenAllReady(this Segment segment) =>
+            segment.Children.All(call => call.RGFH == Status4.Ready)
+            ;
+        public static bool IsChildrenOrigin(this Segment segment)
+        {
+            return false;
+        }
+
+
+
         public static void EvaluatePort(this Segment segment, Port port, bool newValue)
         {
             if (port.Value == newValue)
@@ -193,7 +195,6 @@ namespace Engine.Core
             }
             void homing() { }
             void pause() { }
-            void resume() { }
             void finish() { }
             void ready() { }
         }

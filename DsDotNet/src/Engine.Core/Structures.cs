@@ -58,9 +58,9 @@ namespace Engine.Core
         public virtual bool Value { get; set; }
 
         /*
-         * Do not store Paused property
+         * Do not store Paused property (getter only, no setter)
          */
-        //public virtual bool Paused { get; set; }
+        public virtual bool Paused { get; }
         public virtual CpuBase OwnerCpu { get; set; }
 
         public SegmentOrCallBase(string name)

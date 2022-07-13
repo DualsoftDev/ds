@@ -24,13 +24,7 @@ namespace Engine.Core
         public Status4 RGFH => this.GetStatus();
 
         public bool IsResetFirst { get; internal set; } = true;
-        public IEnumerable<Call> Children =>
-            ChildFlow?.Edges
-            .SelectMany(e => e.Vertices)
-            .OfType<Call>()
-            .Distinct()
-            ;
-
+        public IEnumerable<Call> Children => ChildFlow?.Calls;
 
         public Segment(string name, RootFlow containerFlow)
             : base(name)
@@ -54,7 +48,6 @@ namespace Engine.Core
         public override string ToString() => ToText();
         public override string ToText()
         {
-            return "Foo";
             var c = Children == null ? 0 : Children.Count();
             return $"{Name}: cpu={OwnerCpu?.Name}, #children={c}";
         }

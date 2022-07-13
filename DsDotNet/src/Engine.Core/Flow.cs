@@ -52,6 +52,7 @@ namespace Engine.Core
     public class ChildFlow : Flow
     {
         public Segment ContainerSegment;
+        public IEnumerable<Call> Calls => Children.OfType<Call>();
         public ChildFlow(string name, Segment segment)
             : base(name, segment.ContainerFlow.System)
         {

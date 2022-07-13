@@ -29,7 +29,7 @@ namespace Engine.Core
     {
         public Model Model;
         public List<RootFlow> RootFlows = new List<RootFlow>();
-        public List<Task> Tasks = new List<Task>();
+        public List<DsTask> Tasks = new List<DsTask>();
         public DsSystem(string name, Model model)
             : base(name)
         {
@@ -39,12 +39,12 @@ namespace Engine.Core
     }
 
 
-    public class Task : Named
+    public class DsTask : Named
     {
         public DsSystem System;
         public List<CallPrototype> CallPrototypes = new List<CallPrototype>();
 
-        public Task(string name, DsSystem system)
+        public DsTask(string name, DsSystem system)
             : base(name)
         {
             System = system;

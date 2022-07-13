@@ -11,7 +11,7 @@ namespace Engine.Core
 
     public class CallPrototype : CallBase
     {
-        public Task Task;
+        public DsTask Task;
 
         /// <summary> 주로 target system 의 segment </summary>
         public List<ITxRx> TXs = new List<ITxRx>(); // empty 이면 '_' 를 의미
@@ -33,7 +33,7 @@ namespace Engine.Core
             set => throw new Exception("XXXX ERROR");
         }
 
-        public CallPrototype(string name, Task task)
+        public CallPrototype(string name, DsTask task)
             : base(name)
         {
             Task = task;

@@ -105,7 +105,7 @@ namespace Engine
                     var sys = pick<DsSystem>(pSys, () => new DsSystem(pSys.Name, model));
                     foreach (var pTask in pSys.Tasks)
                     {
-                        var task = pick<Task>(pTask, () => new Task(pTask.Name, sys));
+                        var task = pick<DsTask>(pTask, () => new DsTask(pTask.Name, sys));
                         foreach (var pCall in pTask.Calls)
                         {
                             var call_ = pick<CallPrototype>(pCall, () => new CallPrototype(pCall.Name, task));
@@ -155,8 +155,9 @@ namespace Engine
                         {
                             var call = pick<CallPrototype>(pCall);
                             var txs = pCall.TXs.Select(pTx => pTx == null ? null : pick<Segment>(pTx)).OfNotNull();
-                            //var rx = pCall.RXs == null ? null : pick<Segment>(pCall.RXs);
                             var rxs = pCall.RXs.Select(pRx => pRx == null ? null : pick<Segment>(pRx)).OfNotNull();
+
+
                             call.TXs.AddRange(txs);
                             call.RXs.AddRange(rxs);
                         }

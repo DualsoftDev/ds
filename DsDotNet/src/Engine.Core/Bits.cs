@@ -38,7 +38,7 @@ namespace Engine.Core
 
     public class TagS : Tag
     {
-        public TagS(Segment ownerSegment, string name) : base(ownerSegment, name) {}
+        public TagS(Segment ownerSegment, string name) : base(ownerSegment, name) { }
     }
     public class TagR : Tag
     {

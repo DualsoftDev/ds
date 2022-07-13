@@ -16,6 +16,8 @@ namespace Engine.Core
         /// <summary> 주로 target system 의 segment </summary>
         public List<ITxRx> TXs = new List<ITxRx>(); // empty 이면 '_' 를 의미
         public List<ITxRx> RXs = new List<ITxRx>(); // empty 이면 '_' 를 의미
+        public IVertex ResetSrouce;
+
         public override bool Value
         {
             get {
@@ -127,23 +129,28 @@ namespace Engine.Core
                 }
             }
         }
-        public static Tag GetRxTag(this Call call)
+
+        public static IEnumerable<Tag> GetRxTags(this Call call)
         {
             var tags = call.OwnerCpu.Tags;
-            switch (call.RXs)
+            foreach (var rx in call.RXs)
             {
-                case Segment seg:
-                    return tags[seg.TagE.Name];
-                case Tag tag:
-                    return tags[tag.Name];
-                default:
-                    throw new Exception("ERROR");
+                switch (rx)
+                {
+                    case Segment seg:
+                        yield return tags[seg.TagE.Name];
+                        break;
+                    case Tag tag:
+                        yield return tags[tag.Name];
+                        break;
+                    default:
+                        throw new Exception("ERROR");
+                }
             }
         }
 
         public static IEnumerable<Tag> GetTxRxTags(this Call call) =>
-            GetTxTags(call).Concat(new[] { GetRxTag(call) })
-            ;
+            GetTxTags(call).Concat(GetRxTags(call));
     }
 
 }

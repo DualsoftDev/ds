@@ -41,7 +41,7 @@ namespace Engine.Core
     };
     public class Tag : Bit, ITxRx
     {
-        public ISegmentOrCall Owner { get; set; }
+        public ICoin Owner { get; set; }
         public TagType Type { get; set; }
         bool _value;
         public override bool Value
@@ -56,7 +56,7 @@ namespace Engine.Core
             }
         }
 
-        public Tag(ISegmentOrCall owner, string name, TagType tagType=TagType.None, CpuBase ownerCpu = null, bool value = false)
+        public Tag(ICoin owner, string name, TagType tagType=TagType.None, CpuBase ownerCpu = null, bool value = false)
             : base(name, value, ownerCpu)
         {
             Owner = owner;

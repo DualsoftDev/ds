@@ -52,7 +52,7 @@ namespace Engine
                     var pCall = pV as PCall;
                     if (pCall != null && !dict.ContainsKey(pCall))
                     {
-                        var container = pick<ISegmentOrFlow>(pCall.Container);
+                        var container = pick<IWallet>(pCall.Container);
                         dict.Add(pCall, new Call(pCall.Name, container, pick<CallPrototype>(pCall.Prototype)));
                     }
                 }
@@ -137,7 +137,7 @@ namespace Engine
                             foreach (var pChCall in pSeg.Children?.OfType<PCall>())
                             {
                                 var callProto = pick<CallPrototype>(pChCall.Prototype);
-                                var container = pick<ISegmentOrFlow>(pChCall.Container);
+                                var container = pick<IWallet>(pChCall.Container);
                                 var call = pick<Call>(pChCall, () => new Call(pChCall.Name, container, callProto));
                             }
                         }
@@ -178,7 +178,7 @@ namespace Engine
 
                         foreach (var pSegment in pFlow.Segments)
                         {
-                            var child = (SegmentOrCallBase)dict[pSegment];
+                            var child = (Coin)dict[pSegment];
                             if (!flow.Children.Contains(child))
                                 flow.Children.Add(child);
 

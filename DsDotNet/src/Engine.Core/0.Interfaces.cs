@@ -33,8 +33,10 @@ namespace Engine.Core
     public interface IVertex : IBit { }
     public interface IEdge : IBit { }
 
-    public interface ISegmentOrCall : IVertex { }
-    public interface ISegmentOrFlow { }
+    /// <summary> Segment or Call Base </summary>
+    public interface ICoin : IVertex { }
+    /// <summary> Coin container.  Segment or Flow base interface </summary>
+    public interface IWallet { }
 
     /// <summary> Call TX or RX </summary>
     public interface ITxRx { }

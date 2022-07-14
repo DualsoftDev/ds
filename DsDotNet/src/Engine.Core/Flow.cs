@@ -9,13 +9,13 @@ using System.Linq;
 
 namespace Engine.Core
 {
-    public abstract class Flow : Named, ISegmentOrFlow
+    public abstract class Flow : Named, IWallet
     {
         public DsSystem System { get; set; }
         public CpuBase Cpu { get; set; }
 
         /// <summary>Edge 를 통해 알 수 없는 isolated segement/call 등을 포함 </summary>
-        //public List<SegmentOrCallBase> Children { get; } = new List<SegmentOrCallBase>();
+        //public List<Coin> Children { get; } = new List<Coin>();
         public List<IVertex> Children { get; } = new List<IVertex>();
 
         List<Edge> _edges = new List<Edge>();

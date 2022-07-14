@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Engine.Core
 {
-    public class CallBase : SegmentOrCallBase
+    public class CallBase : Coin
     {
         public CallBase(string name) : base(name) {}
     }
@@ -50,7 +50,7 @@ namespace Engine.Core
     public class Call : CallBase
     {
         public CallPrototype Prototype;
-        public ISegmentOrFlow Container;
+        public IWallet Container;
         public override bool Value => Prototype.Value;
 
         // call 은 상태 저장.  segment 는 상태 동적 계산
@@ -66,7 +66,7 @@ namespace Engine.Core
         public IEnumerable<ITxRx> RXs => Prototype.RXs;
         public IEnumerable<ITxRx> TxRxs => TXs.Concat(RXs);
 
-        public Call(string name, ISegmentOrFlow container, CallPrototype protoType) : base(name)
+        public Call(string name, IWallet container, CallPrototype protoType) : base(name)
         {
             Prototype = protoType;
             Container = container;

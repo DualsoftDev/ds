@@ -9,7 +9,7 @@ using System.Reactive.Linq;
 namespace Engine.Core
 {
     [DebuggerDisplay("{ToText(),nq}")]
-    public class Segment : SegmentOrCallBase, ISegmentOrFlow, IWithSREPorts, ITxRx
+    public class Segment : Coin, IWallet, IWithSREPorts, ITxRx
     {
         public RootFlow ContainerFlow { get; }
         public ChildFlow ChildFlow { get; set; }
@@ -29,8 +29,8 @@ namespace Engine.Core
         public string QualifiedName => $"{ContainerFlow.QualifiedName}_{Name}";
 
         public bool IsResetFirst { get; internal set; } = true;
-        public IEnumerable<IVertex> Children => ChildFlow == null ? Enumerable.Empty<IVertex>() : ChildFlow.Children;   // SegmentOrCallBase
-        public IEnumerable<SegmentOrCallBase> SegmentOrCallBaseChildren => Children.OfType<SegmentOrCallBase>();
+        public IEnumerable<IVertex> Children => ChildFlow == null ? Enumerable.Empty<IVertex>() : ChildFlow.Children;   // Coin
+        public IEnumerable<Coin> CoinChildren => Children.OfType<Coin>();
         public IEnumerable<Call> CallChildren => Children.OfType<Call>();
 
         public Segment(string name, RootFlow containerFlow)

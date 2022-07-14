@@ -377,7 +377,7 @@ namespace DsParser
         }
 
 
-        IPSegmentOrCall FindVertex(string v, PFlow flow)
+        IPCoin FindVertex(string v, PFlow flow)
         {
             var seg = _model.FindSegment(v);
             var callPrototype = _model.FindCall(v);
@@ -395,14 +395,14 @@ namespace DsParser
             {
                 var childFlow = flow as PChildFlow;
                 var rootFlow = flow as PRootFlow;
-                var container = rootFlow != null ? (IPSegmentOrFlow)rootFlow: childFlow.ContainerSegment;
+                var container = rootFlow != null ? (IPWallet)rootFlow: childFlow.ContainerSegment;
                 var call = new PCall(callPrototype.Name, container, callPrototype);
                 map.Add(callPrototype, call);
             }
 
             return map[callPrototype];
         }
-        IPSegmentOrCall[] FindVertices(string specs, PFlow flow) => specs.Split(new[] { ',' }).Select(spec => FindVertex(spec, flow)).ToArray();
+        IPCoin[] FindVertices(string specs, PFlow flow) => specs.Split(new[] { ',' }).Select(spec => FindVertex(spec, flow)).ToArray();
 
         /**
             * causal operator 를 처리해서 this.links 에 결과 누적

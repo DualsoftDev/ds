@@ -53,7 +53,8 @@ namespace Engine.Core
     }
 
 
-    public abstract class SegmentOrCallBase : Named, ISegmentOrCall
+    /// <summary> Segment Or Call base </summary>
+    public abstract class Coin : Named, ICoin
     {
         public virtual bool Value { get; set; }
 
@@ -63,7 +64,7 @@ namespace Engine.Core
         public virtual bool Paused { get; }
         public virtual CpuBase OwnerCpu { get; set; }
 
-        public SegmentOrCallBase(string name)
+        public Coin(string name)
             :base(name)
         {
         }

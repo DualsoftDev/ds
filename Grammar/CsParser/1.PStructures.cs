@@ -38,7 +38,7 @@ namespace DsParser
         }
     }
 
-    public abstract class PFlow : PNamed, IPSegmentOrFlow
+    public abstract class PFlow : PNamed, IPWallet
     {
         public PSystem System;
         public List<PSegment> Segments = new List<PSegment>();
@@ -98,10 +98,10 @@ namespace DsParser
     }
 
     public interface IPVertex { }
-    public interface IPSegmentOrFlow {}
-    public interface IPSegmentOrCall : IPVertex {}
+    public interface IPWallet {}
+    public interface IPCoin : IPVertex {}
 
-    public class PSegment : PNamed, IPSegmentOrCall, IPSegmentOrFlow
+    public class PSegment : PNamed, IPCoin, IPWallet
     {
         public PRootFlow ContainerFlow;
         public PChildFlow ChildFlow;
@@ -130,7 +130,7 @@ namespace DsParser
     }
 
 
-    public class PCallBase : PNamed, IPSegmentOrCall
+    public class PCallBase : PNamed, IPCoin
     {
         public PSegment[] TXs;
         public PSegment[] RXs;
@@ -154,8 +154,8 @@ namespace DsParser
     public class PCall : PCallBase
     {
         public PCallPrototype Prototype;
-        public IPSegmentOrFlow Container;
-        public PCall(string name, IPSegmentOrFlow container, PCallPrototype prototype) : base(name)
+        public IPWallet Container;
+        public PCall(string name, IPWallet container, PCallPrototype prototype) : base(name)
         {
             Prototype = prototype;
             Container = container;
@@ -188,7 +188,7 @@ namespace DsParser
 
     public static class PModelUtil
     {
-        static IPSegmentOrCall FindSegmentOrCall(this PModel model, string systemName, string flowOrTaskName, string segmentOrCallName, bool isSegment)
+        static IPCoin FindCoin(this PModel model, string systemName, string flowOrTaskName, string segmentOrCallName, bool isSegment)
         {
             var system = model.Systems.First(s => s.Name == systemName);
             if (isSegment)
@@ -209,10 +209,10 @@ namespace DsParser
             return task.Calls.FirstOrDefault(c => c.Name == segmentOrCallName);
         }
         public static PSegment FindSegment(this PModel model, string systemName, string flowName, string segmentName) =>
-            model.FindSegmentOrCall(systemName, flowName, segmentName, true) as PSegment;
+            model.FindCoin(systemName, flowName, segmentName, true) as PSegment;
 
         public static PCallPrototype FindCall(this PModel model, string systemName, string taskName, string callName) =>
-            model.FindSegmentOrCall(systemName, taskName, callName, false) as PCallPrototype;
+            model.FindCoin(systemName, taskName, callName, false) as PCallPrototype;
 
         public static PSegment FindSegment(this PModel model, string fqSegmentName)
         {

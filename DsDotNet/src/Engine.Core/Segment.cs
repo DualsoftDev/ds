@@ -127,7 +127,6 @@ namespace Engine.Core
         {
             var tag = bc.Bit as Tag;
             var calls = segment.CallChildren.Where(c => c.RxTags.Any(t => t.Name == tag.Name));
-            Console.WriteLine();
         }
 
 
@@ -220,7 +219,6 @@ namespace Engine.Core
                     Debug.Assert(segment.IsChildrenStatusAllWith(Status4.Homing));      // 하나라도 homing 이면, 모두 homing
                     if (segment.IsChildrenOrigin())
                     {
-                        Console.WriteLine();
                         segment.CallChildren.Iter(c => c.RGFH = Status4.Ready);
                     }
                 }
@@ -251,7 +249,6 @@ namespace Engine.Core
                             default:
                                 throw new Exception("ERROR");
                         }
-                        Console.WriteLine();
                     }
                 }
 
@@ -260,7 +257,6 @@ namespace Engine.Core
                 {
 
                 }
-                Console.WriteLine();
             }
             void homing() { }
             void pause() { }

@@ -99,9 +99,6 @@ namespace Engine
                         var v = pick<IVertex>(pV);
                         if (!flow.Children.Contains(v))
                             flow.Children.Add(v);
-                        Console.WriteLine();
-
-
                     }
 
                 }
@@ -142,13 +139,11 @@ namespace Engine
                                 var callProto = pick<CallPrototype>(pChCall.Prototype);
                                 var container = pick<ISegmentOrFlow>(pChCall.Container);
                                 var call = pick<Call>(pChCall, () => new Call(pChCall.Name, container, callProto));
-                                Console.WriteLine();
                             }
-                            Console.WriteLine();
                         }
                     }
-
                 }
+
                 foreach (var pCpu in pModel.Cpus)
                 {
                     var flows = pCpu.RootFlows.Select(pf => pick<RootFlow>(pf)).ToArray();
@@ -192,11 +187,6 @@ namespace Engine
                                 var segment = child as Segment;
                                 fillEdges(segment.ChildFlow, pSegment.ChildFlow);
                                 segment.ChildFlow.Cpu = flow.Cpu;
-
-                                foreach (var px in pSegment.Children)
-                                    Console.WriteLine();
-                                foreach (var px in pSegment.ChildFlow.Edges)
-                                    Console.WriteLine();
                             }
                         }
 

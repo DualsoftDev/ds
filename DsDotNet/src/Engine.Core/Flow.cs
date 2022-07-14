@@ -4,6 +4,7 @@ using log4net;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Engine.Core
@@ -69,6 +70,13 @@ namespace Engine.Core
             .Concat(flow.Children)
             .Distinct()
             ;
+
+        public static IEnumerable<Segment> CollectExternalRealSegment(this ChildFlow childFlow)
+        {
+            var exSegments = childFlow.Children.OfType<Segment>();
+            Debug.Assert(exSegments.All(s => s.ContainerFlow.System != childFlow.System));
+            return exSegments;
+        }
 
         struct Causal
         {

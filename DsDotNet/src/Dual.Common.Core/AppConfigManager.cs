@@ -53,7 +53,6 @@ namespace Dual.Common.Core
                 Console.WriteLine($"{sectionGroup.Name}");
                 foreach (var kv in GetAllNamedSections(sectionGroup.Sections))
                     yield return ($"{key}/{kv.Key}", kv.Value);
-                Console.WriteLine();
             }
         }
         static IEnumerable<(string, ConfigurationSection)> getAllNamedSections(ConfigurationSectionCollection sections)

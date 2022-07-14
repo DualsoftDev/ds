@@ -150,5 +150,6 @@ module ModelTests =
             main.Name === "Main"
             let childrenNames = main.SegmentOrCallBaseChildren |> Seq.map(fun soc -> soc.Name)
             (childrenNames, ["Vp"; "Vm";]) |> setEq
+            (main.ChildFlow.CollectExternalRealSegment() |> Seq.map(fun seg -> seg.Name), ["Vp"; "Vm";]) |> setEq
 
             ()

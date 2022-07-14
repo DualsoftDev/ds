@@ -101,11 +101,11 @@ module ModelTests =
             flow.Name === "F"
             let main = flow.Children |> Enumerable.OfType<Segment> |> Seq.find(fun seg -> seg.Name = "Main")
             main.Name === "Main"
-            let childrenNames = main.Children |> Seq.map(fun (call:Call) -> call.Name)
+            let childrenNames = main.SegmentOrCallBaseChildren |> Seq.map(fun soc -> soc.Name)
             (childrenNames, ["Cp"; "Cm"; "C22"]) |> setEq
 
             let checkC22Instance_ =
-                let c22 = main.Children |> Seq.find(fun call -> call.Name = "C22")
+                let c22 = main.CallChildren |> Seq.find(fun call -> call.Name = "C22")
                 c22.QualifiedName === "L_F_Main_C22"
                 (c22.TxTags.Select(fun t -> t.Name), ["Start_P_F_Vp_L_F_Main_C22_TX"; "Start_P_F_Vm_L_F_Main_C22_TX"]) |> setEq
                 (c22.RxTags.Select(fun t -> t.Name), [  "End_P_F_Sp_L_F_Main_C22_RX";   "End_P_F_Sm_L_F_Main_C22_RX"]) |> setEq
@@ -117,4 +117,38 @@ module ModelTests =
 
             let fakeCpu = engine.FakeCpu
             fakeCpu |> ShouldNotBeNull
+            ()
+
+
+
+        [<Fact>]
+        member __.``Parse Real Child`` () =
+            let text = """
+[sys] L = {
+    [flow] F = {
+        Main = { P.F.Vp > P.F.Vm; }
+    }
+}
+[sys] P = {
+    [flow] F = {
+        Vp > Vm;
+    }
+}
+[cpu] Cpu = {
+    L.F;
+}"""
+            let engine = new Engine(text, "Cpu")
+            ( engine.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
+            let system = engine.Model.Systems |> Seq.find(fun s -> s.Name = "L")
+            let cpu = engine.Cpu
+
+            cpu.Name === "Cpu"
+            system.Name === "L"
+            let flow = system.RootFlows |> Seq.exactlyOne
+            flow.Name === "F"
+            let main = flow.Children |> Enumerable.OfType<Segment> |> Seq.find(fun seg -> seg.Name = "Main")
+            main.Name === "Main"
+            let childrenNames = main.SegmentOrCallBaseChildren |> Seq.map(fun soc -> soc.Name)
+            (childrenNames, ["Vp"; "Vm";]) |> setEq
+
             ()

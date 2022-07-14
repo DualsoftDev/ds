@@ -93,6 +93,17 @@ namespace Engine
 
 
                     flow.AddEdge(edge);
+
+                    foreach ( var pV in pEdge.Vertices)
+                    {
+                        var v = pick<IVertex>(pV);
+                        if (!flow.Children.Contains(v))
+                            flow.Children.Add(v);
+                        Console.WriteLine();
+
+
+                    }
+
                 }
             }
 
@@ -164,7 +175,7 @@ namespace Engine
                         }
                     }
 
-                    foreach (var pFlow in pSys.RootFlows.OfType<PRootFlow>())
+                    foreach (var pFlow in pSys.RootFlows)
                     {
                         var flow = pick<RootFlow>(pFlow);
 

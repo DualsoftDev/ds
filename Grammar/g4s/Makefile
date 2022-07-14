@@ -5,7 +5,6 @@ antlr4=java -Xmx500M -cp /usr/local/lib/antlr-4.10.1-complete.jar org.antlr.v4.T
 grun=java -Xmx500M -cp /usr/local/lib/antlr-4.10.1-complete.jar:. org.antlr.v4.gui.TestRig
 
 grun:
-	@cd g4s
 	@java -version
 	@$(antlr4) ds.g4
 	@javac *.java
@@ -18,8 +17,6 @@ test:
 #		echo $$f
 #		$(grun) ds causals < g4test/causals.txt
 #	done
-
-	cd g4s
 
 	@echo causals
 	$(grun) ds causals < g4test/causals.txt
@@ -43,7 +40,6 @@ cs:
 
 clean:
 	@rm -rf CSharp/Generated
-	cd g4s
 	@rm -rf *.interp *.tokens
 	rm -rf *.java *.class 
 

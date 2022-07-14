@@ -33,7 +33,7 @@ namespace Engine
                 hmiTags.Iter(t => t.Type = t.Type.Add(TagType.External));
                 opc.AddTags(hmiTags);
 
-                var subCalls = vertices.OfType<Segment>().SelectMany(seg => seg.Children);
+                var subCalls = vertices.OfType<Segment>().SelectMany(seg => seg.CallChildren);
                 var rootCalls = vertices.OfType<Call>();
                 var calls = rootCalls.Concat(subCalls);
                 foreach (var call in calls)

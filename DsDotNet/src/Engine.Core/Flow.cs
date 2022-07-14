@@ -14,7 +14,9 @@ namespace Engine.Core
         public CpuBase Cpu { get; set; }
 
         /// <summary>Edge 를 통해 알 수 없는 isolated segement/call 등을 포함 </summary>
-        public List<SegmentOrCallBase> Children { get; } = new List<SegmentOrCallBase>();
+        //public List<SegmentOrCallBase> Children { get; } = new List<SegmentOrCallBase>();
+        public List<IVertex> Children { get; } = new List<IVertex>();
+
         List<Edge> _edges = new List<Edge>();
         public GraphInfo GraphInfo { get; set; }
 
@@ -49,7 +51,7 @@ namespace Engine.Core
     public class ChildFlow : Flow
     {
         public Segment ContainerSegment;
-        public IEnumerable<Call> Calls => Children.OfType<Call>();
+        //public IEnumerable<Call> Calls => Children.OfType<Call>();
         public ChildFlow(string name, Segment segment)
             : base(name, segment.ContainerFlow.System)
         {

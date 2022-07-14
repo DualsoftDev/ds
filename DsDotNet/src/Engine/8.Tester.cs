@@ -52,7 +52,8 @@ namespace Engine
             var resetTag = "Reset_it_F_Main";
             if (engine.Cpu.Tags.ContainsKey(resetTag))
             {
-                var main = engine.Cpu.RootFlows.SelectMany(f => f.Children).FirstOrDefault(c => c.Name == "Main") as Segment;
+                var children = engine.Cpu.RootFlows.SelectMany(f => f.Children);
+                var main = children.OfType<Segment>().FirstOrDefault(c => c.Name == "Main");
                 var edges = main.ChildFlow.Edges.ToArray();
 
                 opc.Write(resetTag, true);

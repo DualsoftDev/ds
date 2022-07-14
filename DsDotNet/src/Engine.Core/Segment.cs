@@ -29,7 +29,9 @@ namespace Engine.Core
         public string QualifiedName => $"{ContainerFlow.QualifiedName}_{Name}";
 
         public bool IsResetFirst { get; internal set; } = true;
-        public IEnumerable<Call> Children => ChildFlow == null ? Enumerable.Empty<Call>() : ChildFlow.Calls;
+        public IEnumerable<IVertex> Children => ChildFlow == null ? Enumerable.Empty<IVertex>() : ChildFlow.Children;   // SegmentOrCallBase
+        public IEnumerable<SegmentOrCallBase> SegmentOrCallBaseChildren => Children.OfType<SegmentOrCallBase>();
+        public IEnumerable<Call> CallChildren => Children.OfType<Call>();
 
         public Segment(string name, RootFlow containerFlow)
             : base(name)
@@ -103,11 +105,15 @@ namespace Engine.Core
         public static bool IsPaused(this Segment segment)
         {
             var st = segment.GetStatus();
-            var childStarted = segment.Children.Any(c => c.RGFH.IsOneOf(Status4.Going, Status4.Finished));
+            var childStarted =
+                segment.Children
+                    .OfType<Call>() // todo : check external Segment case.
+                    .Any(c => c.RGFH.IsOneOf(Status4.Going, Status4.Finished))
+                    ;
             return (st == Status4.Ready && childStarted);
         }
 
-        public static IEnumerable<Status4> CollectChildrenStatus(this Segment segment) => segment.Children.Select(call => call.RGFH);
+        public static IEnumerable<Status4> CollectChildrenStatus(this Segment segment) => segment.CallChildren.Select(call => call.RGFH);
 
         public static bool IsChildrenStatusAllWith(this Segment segment, Status4 status) => segment.CollectChildrenStatus().All(st => st == status);
         public static bool IsChildrenStatusAnyWith(this Segment segment, Status4 status) => segment.CollectChildrenStatus().Any(st => st == status);
@@ -120,7 +126,7 @@ namespace Engine.Core
         public static void OnChildRxTagChanged(this Segment segment, BitChange bc)
         {
             var tag = bc.Bit as Tag;
-            var calls = segment.Children.Where(c => c.RxTags.Any(t => t.Name == tag.Name));
+            var calls = segment.CallChildren.Where(c => c.RxTags.Any(t => t.Name == tag.Name));
             Console.WriteLine();
         }
 
@@ -128,7 +134,7 @@ namespace Engine.Core
         public static void Epilogue(this Segment segment)
         {
             // segment 내의 child call 에 대한 RX tag 변경 시, child origin 검사 및 child 의 status 변경 저장하도록 event handler 등록
-            var rxs = segment.Children.SelectMany(c => c.RxTags).ToArray();
+            var rxs = segment.CallChildren.SelectMany(c => c.RxTags).ToArray();
             var rxNames = rxs.Select(t => t.Name).ToHashSet();
 
             var subs =
@@ -215,7 +221,7 @@ namespace Engine.Core
                     if (segment.IsChildrenOrigin())
                     {
                         Console.WriteLine();
-                        segment.Children.Iter(c => c.RGFH = Status4.Ready);
+                        segment.CallChildren.Iter(c => c.RGFH = Status4.Ready);
                     }
                 }
 

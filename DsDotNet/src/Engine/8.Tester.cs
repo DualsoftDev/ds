@@ -52,7 +52,7 @@ namespace Engine
             var resetTag = "Reset_it_F_Main";
             if (engine.Cpu.Tags.ContainsKey(resetTag))
             {
-                var children = engine.Cpu.RootFlows.SelectMany(f => f.Children);
+                var children = engine.Cpu.RootFlows.SelectMany(f => f.ChildVertices);
                 var main = children.OfType<Segment>().FirstOrDefault(c => c.Name == "Main");
                 var edges = main.ChildFlow.Edges.ToArray();
 

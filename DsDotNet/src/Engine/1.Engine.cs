@@ -85,7 +85,7 @@ namespace Engine
             return allFlows;
         }
         public static IEnumerable<Segment> CollectSegments(this Model model) =>
-            model.CollectRootFlows().Select(rf => rf.Children).OfType<Segment>()
+            model.CollectRootFlows().Select(rf => rf.ChildVertices).OfType<Segment>()
             ;
 
     }

@@ -76,7 +76,7 @@ namespace Engine.Core
             if (flow == null && containerSegment != null)
                 flow = containerSegment.ChildFlow;
 
-            flow.Children.Add(this);
+            flow.ChildVertices.Add(this);
         }
     }
 

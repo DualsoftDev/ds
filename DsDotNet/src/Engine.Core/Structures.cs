@@ -64,6 +64,8 @@ namespace Engine.Core
         public virtual bool Paused { get; }
         public virtual CpuBase OwnerCpu { get; set; }
 
+        public virtual IWallet Wallet => throw new NotImplementedException();
+
         public Coin(string name)
             :base(name)
         {

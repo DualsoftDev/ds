@@ -15,14 +15,17 @@ namespace Engine.Core
         public CpuBase Cpu { get; set; }
 
         /// <summary>Edge 를 통해 알 수 없는 isolated segement/call 등을 포함 </summary>
-        //public List<Coin> Children { get; } = new List<Coin>();
-        public List<IVertex> Children { get; } = new List<IVertex>();
+        internal List<IVertex> ChildVertices { get; } = new List<IVertex>();
 
         List<Edge> _edges = new List<Edge>();
         public GraphInfo GraphInfo { get; set; }
 
-        public bool IsEmptyFlow => _edges.IsNullOrEmpty() && Children.IsNullOrEmpty();
+        public bool IsEmptyFlow => _edges.IsNullOrEmpty() && ChildVertices.IsNullOrEmpty();
         public IEnumerable<Edge> Edges => _edges;
+
+        public IEnumerable<ICoin> Coins => ChildVertices.OfType<ICoin>();
+        public IEnumerable<ICoin> IsolatedCoins => this.CollectIsolatedCoins();
+
         public void AddEdge(Edge edge)
         {
             this.CheckAddable(edge);
@@ -65,15 +68,38 @@ namespace Engine.Core
     public static class FlowExtension
     {
         static ILog Logger => Global.Logger;
+
+        public static void Epilogue(this Flow flow)
+        {
+            var allVertices =
+                flow.Edges
+                    .SelectMany(e => e.Vertices)
+                    .Concat(flow.ChildVertices)
+                    .Distinct()
+                    ;
+
+            flow.ChildVertices.Clear();
+            flow.ChildVertices.AddRange(allVertices);
+        }
+
+        public static IEnumerable<ICoin> CollectIsolatedCoins(this Flow flow)
+        {
+            var verticesFromEdge = flow.Edges.SelectMany(e => e.Vertices);
+            return flow.ChildVertices
+                .Except(verticesFromEdge)
+                .OfType<ICoin>()
+                ;
+        }
+
         public static IEnumerable<IVertex> CollectVertices(this Flow flow) =>
             flow.Edges.SelectMany(e => e.Vertices)
-            .Concat(flow.Children)
+            .Concat(flow.ChildVertices)
             .Distinct()
             ;
 
         public static IEnumerable<Segment> CollectExternalRealSegment(this ChildFlow childFlow)
         {
-            var exSegments = childFlow.Children.OfType<Segment>();
+            var exSegments = childFlow.ChildVertices.OfType<Segment>();
             Debug.Assert(exSegments.All(s => s.ContainerFlow.System != childFlow.System));
             return exSegments;
         }

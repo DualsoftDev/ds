@@ -97,8 +97,8 @@ namespace Engine
                     foreach ( var pV in pEdge.Vertices)
                     {
                         var v = pick<IVertex>(pV);
-                        if (!flow.Children.Contains(v))
-                            flow.Children.Add(v);
+                        if (!flow.ChildVertices.Contains(v))
+                            flow.ChildVertices.Add(v);
                     }
 
                 }
@@ -179,8 +179,8 @@ namespace Engine
                         foreach (var pSegment in pFlow.Segments)
                         {
                             var child = (Coin)dict[pSegment];
-                            if (!flow.Children.Contains(child))
-                                flow.Children.Add(child);
+                            if (!flow.ChildVertices.Contains(child))
+                                flow.ChildVertices.Add(child);
 
                             if (pSegment.ChildFlow != null)
                             {
@@ -193,7 +193,7 @@ namespace Engine
                         fillEdges(flow, pFlow);
 
 
-                        foreach (var s in flow.Children.OfType<Segment>())
+                        foreach (var s in flow.ChildVertices.OfType<Segment>())
                         {
                             new Port[] { s.PortS, s.PortR, s.PortE }.Iter(p => p.OwnerCpu = flow.Cpu);
                         }
@@ -203,29 +203,29 @@ namespace Engine
 
             void cleanUp()
             {
-                var rootFlows = model.Systems.SelectMany(s => s.RootFlows);
+                //var rootFlows = model.Systems.SelectMany(s => s.RootFlows);
 
-                var segmentsWithEmptyFlow =
-                    from rf in rootFlows
-                    from s in rf.Children.OfType<Segment>()
-                    where s.ChildFlow.IsEmptyFlow
-                    select s
-                    ;
+                //var segmentsWithEmptyFlow =
+                //    from rf in rootFlows
+                //    from s in rf.Children.OfType<Segment>()
+                //    where s.ChildFlow.IsEmptyFlow
+                //    select s
+                //    ;
 
-                foreach (var s in segmentsWithEmptyFlow)
-                    s.ChildFlow = null;
+                //foreach (var s in segmentsWithEmptyFlow)
+                //    s.ChildFlow = null;
 
 
-                // root flow 의 sub flow 중 empty 인 것들 정리
-                var emptySubFlows =
-                    from s in model.Systems
-                    from rf in s.RootFlows
-                    from sf in rf.SubFlows
-                    where sf.IsEmptyFlow
-                    select (rf, sf)
-                    ;
-                foreach ((var rootFlow, var subFlow) in emptySubFlows.ToArray())
-                    rootFlow.SubFlows.Remove(subFlow);
+                //// root flow 의 sub flow 중 empty 인 것들 정리
+                //var emptySubFlows =
+                //    from s in model.Systems
+                //    from rf in s.RootFlows
+                //    from sf in rf.SubFlows
+                //    where sf.IsEmptyFlow
+                //    select (rf, sf)
+                //    ;
+                //foreach ((var rootFlow, var subFlow) in emptySubFlows.ToArray())
+                //    rootFlow.SubFlows.Remove(subFlow);
             }
 
 

@@ -21,7 +21,7 @@ namespace Engine
             var vertices =
                 flow.Edges
                     .SelectMany(e => e.Vertices)
-                    .Concat(flow.Children)
+                    .Concat(flow.ChildVertices)
                     .Distinct()
                     .ToArray()
                     ;
@@ -111,7 +111,7 @@ namespace Engine
                 foreach (var f in otherFlows)
                 {
                     f.Cpu = fakeCpu;
-                    f.Children.OfType<Segment>().SelectMany(s => s.AllPorts).Iter(p => p.OwnerCpu = fakeCpu);
+                    f.ChildVertices.OfType<Segment>().SelectMany(s => s.AllPorts).Iter(p => p.OwnerCpu = fakeCpu);
                     InitializeFlow(f, false, opc);
                 }
             }

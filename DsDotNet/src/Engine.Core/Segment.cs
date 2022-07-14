@@ -29,16 +29,18 @@ namespace Engine.Core
         public string QualifiedName => $"{ContainerFlow.QualifiedName}_{Name}";
 
         public bool IsResetFirst { get; internal set; } = true;
-        public IEnumerable<IVertex> Children => ChildFlow == null ? Enumerable.Empty<IVertex>() : ChildFlow.Children;   // Coin
+        public IEnumerable<IVertex> Children => ChildFlow.ChildVertices;   // Coin
         public IEnumerable<Coin> CoinChildren => Children.OfType<Coin>();
         public IEnumerable<Call> CallChildren => Children.OfType<Call>();
+        public IEnumerable<ICoin> Coins => Children.OfType<ICoin>();
+        public override IWallet Wallet => ContainerFlow;
 
         public Segment(string name, RootFlow containerFlow)
             : base(name)
         {
             ContainerFlow = containerFlow;
             ChildFlow = new ChildFlow($"_{name}", this);
-            containerFlow.Children.Add(this);
+            containerFlow.ChildVertices.Add(this);
 
             PortS = new PortS(this);
             PortR = new PortR(this);

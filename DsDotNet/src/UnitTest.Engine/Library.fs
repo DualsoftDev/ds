@@ -47,7 +47,7 @@ module ModelTests =
             system.Name === "P"
             let flow = system.RootFlows |> Seq.exactlyOne
             flow.Name === "F"
-            let children = flow.Children |> Enumerable.OfType<Segment>
+            let children = flow.Coins |> Enumerable.OfType<Segment>
             let childrenNames = children |> Seq.map(fun (seg:Segment) -> seg.Name)
             (childrenNames, ["Vp"; "Pp"; "Sp"; "Vm"; "Pm"; "Sm"]) |> seqEq
             children |> Seq.forall(fun seg -> isNull seg.ChildFlow) |> ShouldBeTrue
@@ -99,7 +99,7 @@ module ModelTests =
             system.Name === "L"
             let flow = system.RootFlows |> Seq.exactlyOne
             flow.Name === "F"
-            let main = flow.Children |> Enumerable.OfType<Segment> |> Seq.find(fun seg -> seg.Name = "Main")
+            let main = flow.Coins |> Enumerable.OfType<Segment> |> Seq.find(fun seg -> seg.Name = "Main")
             main.Name === "Main"
             let childrenNames = main.CoinChildren |> Seq.map(fun soc -> soc.Name)
             (childrenNames, ["Cp"; "Cm"; "C22"]) |> setEq
@@ -146,7 +146,7 @@ module ModelTests =
             system.Name === "L"
             let flow = system.RootFlows |> Seq.exactlyOne
             flow.Name === "F"
-            let main = flow.Children |> Enumerable.OfType<Segment> |> Seq.find(fun seg -> seg.Name = "Main")
+            let main = flow.Coins |> Enumerable.OfType<Segment> |> Seq.find(fun seg -> seg.Name = "Main")
             main.Name === "Main"
             let childrenNames = main.CoinChildren |> Seq.map(fun soc -> soc.Name)
             (childrenNames, ["Vp"; "Vm";]) |> setEq

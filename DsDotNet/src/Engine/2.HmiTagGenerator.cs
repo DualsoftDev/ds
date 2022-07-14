@@ -94,7 +94,7 @@ namespace Engine
         {
             var cpu = flow.Cpu;
 
-            var segments = flow.Children.OfType<Segment>();
+            var segments = flow.ChildVertices.OfType<Segment>();
 
             // 모든 root segment 에 대해서 S/R/E tag 생성
             var sre = segments.SelectMany(s => GenerateHmiTag(s)).ToArray();

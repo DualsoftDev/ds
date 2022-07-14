@@ -70,7 +70,7 @@ module GraphUtil =
         let qgEdges = edges2QgEdge edges
 
         /// edge 연결없이 고립된 segment
-        let isolatedSegments = flows |> Seq.collect(fun f -> f.Children) |> Seq.cast<V>
+        let isolatedSegments = flows |> Seq.collect(fun f -> f.IsolatedCoins) |> Seq.cast<V>
 
         let vertices =
             qgEdges

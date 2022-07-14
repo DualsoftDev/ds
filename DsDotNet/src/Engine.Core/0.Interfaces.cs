@@ -1,6 +1,7 @@
 ﻿using log4net;
 
 using System;
+using System.Collections.Generic;
 using System.Reactive.Subjects;
 
 namespace Engine.Core
@@ -34,9 +35,13 @@ namespace Engine.Core
     public interface IEdge : IBit { }
 
     /// <summary> Segment or Call Base </summary>
-    public interface ICoin : IVertex { }
+    public interface ICoin : IVertex {
+        IWallet Wallet { get; }
+    }
     /// <summary> Coin container.  Segment or Flow base interface </summary>
-    public interface IWallet { }
+    public interface IWallet {
+        IEnumerable<ICoin> Coins { get; }
+    }
 
     /// <summary> Call TX or RX </summary>
     public interface ITxRx { }

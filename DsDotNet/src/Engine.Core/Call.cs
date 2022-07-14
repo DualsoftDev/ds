@@ -1,5 +1,8 @@
-﻿using System;
+﻿using Engine.Common;
+
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Engine.Core
@@ -122,6 +125,15 @@ namespace Engine.Core
                    (parentGoing  && going  && !txing && !rxed  ) // going paused
                 || (parentHoming && homing ) // homing paused. todo : check ???
                 ;
+        }
+
+        public static void Going(this Call call)
+        {
+            if (call.RGFH == Status4.Ready)
+                call.RGFH = Status4.Going;
+
+            Debug.Assert(call.RGFH == Status4.Going);
+            call.TxTags.Iter(t => t.Value = true);
         }
 
         public static IEnumerable<Tag> GetTxTags(this Call call)

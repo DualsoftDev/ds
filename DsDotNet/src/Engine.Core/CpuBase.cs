@@ -1,9 +1,11 @@
 ﻿using log4net;
 
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading;
 using Engine.Common;
 
@@ -79,6 +81,14 @@ namespace Engine.Core
         }
         public static IEnumerable<Tag> CollectTags(this CpuBase cpu) => cpu.TxRxTags.Concat(cpu.CollectBits()).OfType<Tag>();
 
+        public static void Epilogue(this CpuBase cpu)
+        {
+            var subs =
+            Global.BitChangedSubject.Subscribe( bc =>
+            {
+                cpu.OnBitChanged(bc);
+            });
+        }
 
         public static void PrintTags(this CpuBase cpu)
         {
@@ -124,10 +134,6 @@ namespace Engine.Core
             cpu.Tags = cpu.CollectTags().Distinct().ToDictionary(t => t.Name, t => t);
         }
 
-        public static void OnTagChanged(this CpuBase cpu, Tag tag, bool value)
-        {
-
-        }
         /// <summary> 외부에서 tag 가 변경된 경우 </summary>
         public static void OnOpcTagChanged(this CpuBase cpu, string tagName, bool value)
         {
@@ -135,7 +141,6 @@ namespace Engine.Core
             {
                 var tag = cpu.Tags[tagName];
                 tag.Value = value;
-                cpu.OnBitChanged(new BitChange(tag, value, true));
             }
         }
 
@@ -159,11 +164,11 @@ namespace Engine.Core
                         bit.Value = bc.NewValue;
                     }
 
-                    // 변경 이벤트 공지
-                    Global.BitChangedSubject.OnNext(bc);
-
-                    foreach (var forward in cpu.ForwardDependancyMap[bit])
-                        forward.Evaluate();
+                    if (cpu.ForwardDependancyMap.ContainsKey(bit))
+                    {
+                        foreach (var forward in cpu.ForwardDependancyMap[bit])
+                            forward.Evaluate();
+                    }
                 }
 
                 Thread.Sleep(10);

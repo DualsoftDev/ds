@@ -4,10 +4,11 @@
 			TX					RX
 	---------------------------------------------
 		R	H					↑(Origin 부합)
-		G	↑(TX 잘)				x
+		G	↑(TX) (잘)			x
 		F	G					↑(o)
 		H	↑(P.reset)			-
 	---------------------------------------------
+	(잘) : parent segment 가 child call 에 대해서 적절한 시점에 TX 를 ON 시켰다는 것을 가정
 
 - Real segment 에서 Paused 상태 변수 제거.  실시간 계산
   G or H 이면서 자식 중 Ready 와 Finish 섞여 있으면 Paused

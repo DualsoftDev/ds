@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reactive.Linq;
 
 namespace Engine.Core
 {
@@ -28,7 +29,7 @@ namespace Engine.Core
         public string QualifiedName => $"{ContainerFlow.QualifiedName}_{Name}";
 
         public bool IsResetFirst { get; internal set; } = true;
-        public IEnumerable<Call> Children => ChildFlow?.Calls;
+        public IEnumerable<Call> Children => ChildFlow == null ? Enumerable.Empty<Call>() : ChildFlow.Calls;
 
         public Segment(string name, RootFlow containerFlow)
             : base(name)
@@ -106,12 +107,36 @@ namespace Engine.Core
             return (st == Status4.Ready && childStarted);
         }
 
-        public static bool IsChildrenAllReady(this Segment segment) =>
-            segment.Children.All(call => call.RGFH == Status4.Ready)
-            ;
+        public static IEnumerable<Status4> CollectChildrenStatus(this Segment segment) => segment.Children.Select(call => call.RGFH);
+
+        public static bool IsChildrenStatusAllWith(this Segment segment, Status4 status) => segment.CollectChildrenStatus().All(st => st == status);
+        public static bool IsChildrenStatusAnyWith(this Segment segment, Status4 status) => segment.CollectChildrenStatus().Any(st => st == status);
+
         public static bool IsChildrenOrigin(this Segment segment)
         {
-            return false;
+            return true;
+        }
+
+        public static void OnChildRxTagChanged(this Segment segment, BitChange bc)
+        {
+            var tag = bc.Bit as Tag;
+            var calls = segment.Children.Where(c => c.RxTags.Any(t => t.Name == tag.Name));
+            Console.WriteLine();
+        }
+
+
+        public static void Epilogue(this Segment segment)
+        {
+            // segment 내의 child call 에 대한 RX tag 변경 시, child origin 검사 및 child 의 status 변경 저장하도록 event handler 등록
+            var rxs = segment.Children.SelectMany(c => c.RxTags).ToArray();
+            var rxNames = rxs.Select(t => t.Name).ToHashSet();
+
+            var subs =
+            Global.BitChangedSubject
+                .Where( bc => bc.Bit is Tag && rxNames.Contains(((Tag)bc.Bit).Name ) )
+                .Subscribe(bc => {
+                    segment.OnChildRxTagChanged(bc);
+                });
         }
 
 
@@ -138,18 +163,6 @@ namespace Engine.Core
 
 
             effectivePort.Value = newValue;
-            //if (paused)
-            //{
-            //    switch (effectivePort, newValue, st)
-            //    {
-            //        case (PortS _, true, Status4.Going): resume(); break;
-            //        case (PortS _, false, Status4.Going): pause(); break;
-            //        case (PortR _, true, Status4.Homing): resume(); break;
-            //        case (PortR _, false, Status4.Homing): pause(); break;
-            //    }
-
-            //}
-
             switch (effectivePort, newValue, st)
             {
                 case (PortS _, true,  Status4.Ready)   : going() ; break;
@@ -180,16 +193,66 @@ namespace Engine.Core
 
             void going()
             {
+                Debug.Assert(segment.PortS.Value);
+
                 // 1. Ready 상태에서의 clean start
                 // 2. Going pause (==> Ready 로 해석) 상태에서의 resume start
                 var gi = segment.ChildFlow.GraphInfo;
                 var inits = gi.Inits;
-                var v_oes = gi.TraverseOrders;
-                foreach (var ve in v_oes)
+
+                var allFinished = segment.IsChildrenStatusAllWith(Status4.Finished);
+                if (allFinished)
                 {
-                    var v = ve.Vertex;
-                    var es = ve.OutgoingEdges;
-                    Console.WriteLine();
+                    segment.PortE.Value = true;
+                    Debug.Assert(segment.RGFH == Status4.Finished);
+                    return;
+                }
+
+                var anyHoming = segment.IsChildrenStatusAnyWith(Status4.Homing);
+                if (anyHoming)
+                {
+                    Debug.Assert(segment.IsChildrenStatusAllWith(Status4.Homing));      // 하나라도 homing 이면, 모두 homing
+                    if (segment.IsChildrenOrigin())
+                    {
+                        Console.WriteLine();
+                        segment.Children.Iter(c => c.RGFH = Status4.Ready);
+                    }
+                }
+
+                var allReady = segment.IsChildrenStatusAllWith(Status4.Ready);
+                var anyGoing = segment.IsChildrenStatusAnyWith(Status4.Going);
+                if (allReady || anyGoing)
+                {
+                    if (allReady)
+                    {
+                        // do origin check
+                    }
+
+                    var v_oes = gi.TraverseOrders;
+                    foreach (var ve in v_oes)
+                    {
+                        var call = ve.Vertex as Call;
+                        var es = ve.OutgoingEdges;
+                        switch(call.RGFH)
+                        {
+                            // child call 을 "잘" 시켜야 한다.
+                            case Status4.Ready:
+                                call.Going();
+                                break;
+                            case Status4.Going:
+                            case Status4.Finished:
+                                break;
+                            default:
+                                throw new Exception("ERROR");
+                        }
+                        Console.WriteLine();
+                    }
+                }
+
+
+                if (segment.IsChildrenStatusAnyWith(Status4.Homing))
+                {
+
                 }
                 Console.WriteLine();
             }

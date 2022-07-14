@@ -42,6 +42,7 @@ namespace Engine
                     var txs = call.TXs.OfType<Segment>().Distinct().ToArray();
                     var rxs = call.RXs.OfType<Segment>().Distinct().ToArray();
 
+                    // Call prototype 의 tag 로부터 Call instance 에 사용할 tag 생성
 
                     var startTags = txs.Select(s => Tag.CreateCallTx(call, s.TagS)).ToArray();
                     opc.AddTags(startTags);

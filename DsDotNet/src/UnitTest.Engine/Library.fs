@@ -108,7 +108,7 @@ module ModelTests =
                 let c22 = main.Children |> Seq.find(fun call -> call.Name = "C22")
                 c22.QualifiedName === "L_F_Main_C22"
                 (c22.TxTags.Select(fun t -> t.Name), ["Start_P_F_Vp_L_F_Main_C22_TX"; "Start_P_F_Vm_L_F_Main_C22_TX"]) |> setEq
-                (c22.RxTags.Select(fun t -> t.Name), ["End_P_F_Sp_L_F_Main_C22_RX"; "End_P_F_Sp_L_F_Main_C22_RX"]) |> setEq
+                (c22.RxTags.Select(fun t -> t.Name), [  "End_P_F_Sp_L_F_Main_C22_RX";   "End_P_F_Sm_L_F_Main_C22_RX"]) |> setEq
 
 
             flow.Cpu === cpu

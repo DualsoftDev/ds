@@ -3,6 +3,7 @@ using Engine.Core;
 using Engine.Graph;
 using Engine.OPC;
 
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
@@ -18,13 +19,13 @@ namespace Engine
         public Engine(string modelText, string activeCpuName)
         {
             Model = ModelParser.ParseFromString(modelText);
-            Model.Epilogue();
 
             Opc = new OpcBroker();
             Cpu = Model.Cpus.First(cpu => cpu.Name == activeCpuName);
             Cpu.Engine = this;
 
             this.InitializeFlows(Cpu, Opc);
+            Model.Epilogue();
 
             Debug.Assert(Opc._opcTags.All(t => t.OriginalTag.IsExternal()));
             Opc.Print();
@@ -60,15 +61,33 @@ namespace Engine
     {
         public static void Epilogue(this Model model)
         {
-            var rootFlows = model.Systems.SelectMany(sys => sys.RootFlows);
-            var subFlows = rootFlows.SelectMany(rf => rf.SubFlows);
-            var allFlows = rootFlows.Cast<Flow>().Concat(subFlows);
+            var allFlows = model.CollectFlows();
             foreach (var flow in allFlows)
                 flow.GraphInfo = GraphUtil.analyzeFlows(new[] { flow });
 
             foreach(var cpu in model.Cpus)
                 cpu.GraphInfo = GraphUtil.analyzeFlows(cpu.RootFlows);
+
+            foreach (var segment in model.CollectSegments())
+                segment.Epilogue();
+
+            foreach (var cpu in model.Cpus)
+                cpu.Epilogue();
         }
+
+        public static IEnumerable<RootFlow> CollectRootFlows(this Model model) => model.Systems.SelectMany(sys => sys.RootFlows);
+
+        public static IEnumerable<Flow> CollectFlows(this Model model)
+        {
+            var rootFlows = model.CollectRootFlows().ToArray();
+            var subFlows = rootFlows.SelectMany(rf => rf.SubFlows);
+            var allFlows = rootFlows.Cast<Flow>().Concat(subFlows);
+            return allFlows;
+        }
+        public static IEnumerable<Segment> CollectSegments(this Model model) =>
+            model.CollectRootFlows().Select(rf => rf.Children).OfType<Segment>()
+            ;
+
     }
 
 }

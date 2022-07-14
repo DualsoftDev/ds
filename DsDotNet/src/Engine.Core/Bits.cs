@@ -43,6 +43,19 @@ namespace Engine.Core
     {
         public ISegmentOrCall Owner { get; set; }
         public TagType Type { get; set; }
+        bool _value;
+        public override bool Value
+        {
+            get => _value;
+            set {
+                if (_value != value)
+                {
+                    _value = value;
+                    Global.BitChangedSubject.OnNext(new BitChange(this, value, true));
+                }
+            }
+        }
+
         public Tag(ISegmentOrCall owner, string name, TagType tagType=TagType.None, CpuBase ownerCpu = null, bool value = false)
             : base(name, value, ownerCpu)
         {
@@ -61,9 +74,11 @@ namespace Engine.Core
             new Tag(ownerSegment, name, TagType.Auto | TagType.Reset | TagType.Q | TagType.External, ownerCpu)
             ;
 
+        /// <summary> Call 에서 사용한 TX 에 대한 tag 생성 </summary>
         public static Tag CreateCallTx(Call ownerCall, Tag proto) =>
             new Tag(ownerCall, $"{proto.Name}_{ownerCall.QualifiedName}_TX", TagType.TX | TagType.Q | TagType.External, ownerCall.OwnerCpu)
             ;
+        /// <summary> Call 에서 사용한 RX 에 대한 tag 생성 </summary>
         public static Tag CreateCallRx(Call ownerCall, Tag proto) =>
             new Tag(ownerCall, $"{proto.Name}_{ownerCall.QualifiedName}_RX", TagType.RX | TagType.I | TagType.External, ownerCall.OwnerCpu)
             ;

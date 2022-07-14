@@ -58,7 +58,7 @@ namespace Engine.Core
         // Do not store Paused property
         public override bool Paused => this.IsPaused();
 
-        public string QualifiedName => this.GetQualifiedName();
+        public override string QualifiedName => this.GetQualifiedName();
         public Tag[] TxTags { get; set; }
         public Tag[] RxTags { get; set; }
 

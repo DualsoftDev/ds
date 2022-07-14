@@ -36,11 +36,11 @@ namespace Engine.Core
 
     /// <summary> Segment or Call Base </summary>
     public interface ICoin : IVertex {
-        IWallet Wallet { get; }
+        //IWallet Wallet { get; }
     }
     /// <summary> Coin container.  Segment or Flow base interface </summary>
     public interface IWallet {
-        IEnumerable<ICoin> Coins { get; }
+        //IEnumerable<ICoin> Coins { get; }
     }
 
     /// <summary> Call TX or RX </summary>

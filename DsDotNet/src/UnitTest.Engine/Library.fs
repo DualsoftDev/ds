@@ -101,7 +101,7 @@ module ModelTests =
             flow.Name === "F"
             let main = flow.Coins |> Enumerable.OfType<Segment> |> Seq.find(fun seg -> seg.Name = "Main")
             main.Name === "Main"
-            let childrenNames = main.CoinChildren |> Seq.map(fun soc -> soc.Name)
+            let childrenNames = main.Vertices |> Enumerable.OfType<Coin> |> Seq.map(fun soc -> soc.Name)
             (childrenNames, ["Cp"; "Cm"; "C22"]) |> setEq
 
             let checkC22Instance_ =
@@ -148,7 +148,7 @@ module ModelTests =
             flow.Name === "F"
             let main = flow.Coins |> Enumerable.OfType<Segment> |> Seq.find(fun seg -> seg.Name = "Main")
             main.Name === "Main"
-            let childrenNames = main.CoinChildren |> Seq.map(fun soc -> soc.Name)
+            let childrenNames = main.Vertices |> Enumerable.OfType<Coin> |> Seq.map(fun soc -> soc.Name)
             (childrenNames, ["Vp"; "Vm";]) |> setEq
             (main.ChildFlow.CollectExternalRealSegment() |> Seq.map(fun seg -> seg.Name), ["Vp"; "Vm";]) |> setEq
 

@@ -73,8 +73,9 @@ namespace Engine.Core
 
 
         bool IsChildrenStartPoint() => true;
+        public virtual string QualifiedName { get; }
         public override string ToString() => ToText();
-        public override string ToText() => $"{Name}: cpu={OwnerCpu?.Name}";
+        public override string ToText() => $"{QualifiedName}: cpu={OwnerCpu?.Name}";
 
         //public virtual bool ChangeR()
         //{

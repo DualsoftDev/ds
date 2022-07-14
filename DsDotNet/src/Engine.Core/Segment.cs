@@ -26,14 +26,14 @@ namespace Engine.Core
         public Tag TagE { get; set; }
         public Status4 RGFH => this.GetStatus();
         public override bool Paused => this.IsPaused();
-        public string QualifiedName => $"{ContainerFlow.QualifiedName}_{Name}";
 
         public bool IsResetFirst { get; internal set; } = true;
-        public IEnumerable<IVertex> Children => ChildFlow.ChildVertices;   // Coin
-        public IEnumerable<Coin> CoinChildren => Children.OfType<Coin>();
-        public IEnumerable<Call> CallChildren => Children.OfType<Call>();
-        public IEnumerable<ICoin> Coins => Children.OfType<ICoin>();
-        public override IWallet Wallet => ContainerFlow;
+        public IEnumerable<IVertex> Vertices => ChildFlow.ChildVertices;   // Coin
+        public IEnumerable<Call> CallChildren => Vertices.OfType<Call>();
+
+        public override string QualifiedName => $"{ContainerFlow.QualifiedName}_{Name}";
+
+        public Child[] Children { get; internal set; }
 
         public Segment(string name, RootFlow containerFlow)
             : base(name)
@@ -57,7 +57,7 @@ namespace Engine.Core
         public override string ToString() => ToText();
         public override string ToText()
         {
-            var c = Children == null ? 0 : Children.Count();
+            var c = Vertices == null ? 0 : Vertices.Count();
             return $"{Name}: cpu={OwnerCpu?.Name}, #children={c}";
         }
     }
@@ -108,7 +108,7 @@ namespace Engine.Core
         {
             var st = segment.GetStatus();
             var childStarted =
-                segment.Children
+                segment.Vertices
                     .OfType<Call>() // todo : check external Segment case.
                     .Any(c => c.RGFH.IsOneOf(Status4.Going, Status4.Finished))
                     ;
@@ -134,6 +134,12 @@ namespace Engine.Core
 
         public static void Epilogue(this Segment segment)
         {
+            segment.Children =
+                segment.Vertices.OfType<Coin>()
+                    .Select(coin => new Child(coin))
+                    .ToArray()
+                    ;
+
             // segment 내의 child call 에 대한 RX tag 변경 시, child origin 검사 및 child 의 status 변경 저장하도록 event handler 등록
             var rxs = segment.CallChildren.SelectMany(c => c.RxTags).ToArray();
             var rxNames = rxs.Select(t => t.Name).ToHashSet();

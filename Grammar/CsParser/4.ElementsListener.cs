@@ -435,12 +435,12 @@ namespace DsParser
                         var l = this.nodes[strL];
                         var r = this.nodes[strR];
 
-                        PFlow flow = _rootFlow;
+                        PFlow pFlow = _rootFlow;
                         if (_parenting != null )
-                            flow = _parenting.ChildFlow;   // target flow
+                            pFlow = _parenting.ChildFlow;   // target flow
 
-                        var lvs = FindVertices(l.id, flow);
-                        var rvs = FindVertices(r.id, flow);
+                        var lvs = FindVertices(l.id, pFlow);
+                        var rvs = FindVertices(r.id, pFlow);
 
                         Debug.Assert(l != null && r != null);   // 'node not found');
                         if (lvs.Length == 0) throw new Exception($"Parse error: {l.id} not found");
@@ -452,24 +452,24 @@ namespace DsParser
                             case ">":
                             case "|>>":
                             case ">>":
-                                flow.Edges.Add(new PEdge(flow, lvs, op, rvs[0]));
+                                pFlow.Edges.Add(new PEdge(pFlow, lvs, op, rvs[0]));
                                 break;
 
                             case "<|":
                                 Debug.Assert(lvs.Length == 1);
-                                flow.Edges.Add(new PEdge(flow, rvs, "|>", lvs[0]));
+                                pFlow.Edges.Add(new PEdge(pFlow, rvs, "|>", lvs[0]));
                                 break;
                             case "<":
                                 Debug.Assert(lvs.Length == 1);
-                                flow.Edges.Add(new PEdge(flow, rvs, ">", lvs[0]));
+                                pFlow.Edges.Add(new PEdge(pFlow, rvs, ">", lvs[0]));
                                 break;
                             case "<<|":
                                 Debug.Assert(lvs.Length == 1);
-                                flow.Edges.Add(new PEdge(flow, rvs, "|>>", lvs[0]));
+                                pFlow.Edges.Add(new PEdge(pFlow, rvs, "|>>", lvs[0]));
                                 break;
                             case "<<":
                                 Debug.Assert(lvs.Length == 1);
-                                flow.Edges.Add(new PEdge(flow, rvs, ">>", lvs[0]));
+                                pFlow.Edges.Add(new PEdge(pFlow, rvs, ">>", lvs[0]));
                                 break;
 
                             default:

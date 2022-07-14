@@ -1,0 +1,13 @@
+[sys] it = {
+    [flow] F = {
+        Main = { P.F.Vp > P.F.Vm; }
+    }
+}
+[sys] P = {
+    [flow] F = {
+        Vp > Vm;
+    }
+}
+[cpu] Cpu = {
+    it.F;
+}

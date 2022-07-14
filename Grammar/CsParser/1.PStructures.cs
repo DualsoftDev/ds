@@ -42,6 +42,7 @@ namespace DsParser
     {
         public PSystem System;
         public List<PSegment> Segments = new List<PSegment>();
+        public IEnumerable<IPVertex> Children => Segments.Concat(Edges.SelectMany(e => e.Sources.Concat(new[] { e.Target }))).ToArray();
         public List<PEdge> Edges = new List<PEdge>();
         public bool IsEmptyFlow => Segments.Count == 0 && Edges.Count == 0;
 
@@ -104,16 +105,16 @@ namespace DsParser
     {
         public PRootFlow ContainerFlow;
         public PChildFlow ChildFlow;
-        public IEnumerable<PCall> Children {
+        public IEnumerable<IPVertex> Children {
             get
             {
                 if (ChildFlow == null)
-                    return Enumerable.Empty<PCall>();
+                    return Enumerable.Empty<IPVertex>();
 
                 return
                     ChildFlow.Edges
                     .SelectMany(e => e.Sources.Concat(new[] { e.Target }))
-                    .OfType<PCall>()
+                    //.OfType<PCall>()
                     .Distinct()
                     ;
             }

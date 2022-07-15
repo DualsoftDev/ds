@@ -1,0 +1,10 @@
+[sys] P = {
+    [flow] F = {
+        Vp > Pp > Sp;
+        Vm > Pm > Sm;
+
+        Pp |> Sm;
+        Pm |> Sp;
+        Vp <||> Vm;
+    }
+}

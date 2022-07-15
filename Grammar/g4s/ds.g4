@@ -25,7 +25,7 @@ program: (importStatement|system|cpu|comment)* EOF;
 system: sysProp id '=' sysBlock;    // [sys] Seg = {..}
 sysProp: '[' 'sys' ']';
 sysBlock
-    : LBRACE (task|flow|listing|parenting|causal|call|acc|macro)* RBRACE
+    : LBRACE (task|flow|listing|alias|parenting|causal|call|acc|macro)* RBRACE
     ;
 
 cpu: cpuProp id '=' cpuBlock;    // [cpu] Cpu = {..}
@@ -42,9 +42,16 @@ taskProp: '[' 'task' ']';
 flow
     : flowProp id '=' LBRACE (causal|parenting|listing)* RBRACE
     ;
-flowProp
-    : '[' 'flow' ('of' id)? ']'
+flowProp : '[' 'flow' ('of' id)? ']';
+
+alias
+    : aliasProp (id)? '=' LBRACE (aliasListing)* RBRACE
     ;
+aliasProp: '[' 'alias' ']';
+aliasListing:
+    segments '=' LBRACE (IDENTIFIER)? ( ';' IDENTIFIER)* (';')+ RBRACE
+    ;
+
 id: IDENTIFIER;
 
 acc: LBRACKET ACCESS_SRE RBRACKET EQ LBRACE IDENTIFIER (SEIMCOLON IDENTIFIER)* SEIMCOLON? RBRACE;    // [accsre] = { A; B }

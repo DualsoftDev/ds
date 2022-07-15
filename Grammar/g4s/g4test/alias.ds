@@ -2,10 +2,17 @@
     [alias] = {
         P.F.Vp = { Vp1; Vp2; Vp3; }
         P.F.Vm = { Vm1; Vm2; Vm3; }
-
+        T.A = {A1; A2; A3;}
+        T.B = {B1; B2;}
+    }
+    [task] T = {
+    	A = {TX ~ RX ~ _}
+	    B = {TX ~ RX}
     }
     [flow] F = {
-        Main = { P.F.Vp > P.F.Vm; }
+        Main = { Vp1 |> Vm1; Vp2 |> Vm2; }
+        A1 > B1;
+        A2 |> B2;
     }
 }
 [sys] P = {

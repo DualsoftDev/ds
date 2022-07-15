@@ -21,18 +21,13 @@ namespace Engine.Core
     }
     public class VertexAndOutgoingEdges
     {
-        public IVertex Vertex { get; }
+        public IVertex Vertex { get; internal set; }
         public Edge[] OutgoingEdges { get; }
         public VertexAndOutgoingEdges(IVertex vertex, Edge[] outgoingEdges)
         {
             Vertex = vertex;
             OutgoingEdges = outgoingEdges;
         }
-    }
-
-    internal class ChildAndOutgoingEdges
-    {
-        public Child Child { get; }
     }
 
     public class GraphInfo

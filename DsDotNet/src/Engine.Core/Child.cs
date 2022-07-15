@@ -3,8 +3,8 @@ using System.Diagnostics;
 
 namespace Engine.Core
 {
-    [DebuggerDisplay("{ToText()}")]
-    public class Child //: IVertex
+    [DebuggerDisplay("{ToString()}")]
+    public class Child : IVertex
     {
         public Coin Coin { get; }
         public bool IsCall => Coin is Call;
@@ -27,6 +27,9 @@ namespace Engine.Core
         }
 
         public virtual string QualifiedName { get; }
-        public string ToText() => (IsCall ? "" : "==") + Coin.ToText();
+        public bool Value { get => Coin.Value; set => Coin.Value = value; }
+        public CpuBase OwnerCpu { get => Coin.OwnerCpu; set => throw new NotImplementedException(); }
+
+        public override string ToString() => (IsCall ? "" : "==") + Coin.ToText();
     }
 }

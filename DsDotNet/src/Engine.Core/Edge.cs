@@ -11,8 +11,8 @@ namespace Engine.Core
         public Flow ContainerFlow;
 
         /// <summary> Conjuction </summary>
-        public IVertex[] Sources;
-        public IVertex Target;
+        public IVertex[] Sources { get; internal set; }
+        public IVertex Target { get; internal set; }
         public IEnumerable<IVertex> Vertices => Sources.Concat(new[] { Target });
 
         public bool Value { get => Sources.All(v => v.Value); set => throw new NotImplementedException(); }

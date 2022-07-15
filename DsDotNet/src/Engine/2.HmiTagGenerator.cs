@@ -23,7 +23,10 @@ namespace Engine
             var s = new Tag(segment, $"Start_{name}") { Type = TagType.Q };
             var r = new Tag(segment, $"Reset_{name}") { Type = TagType.Q };
             var e = new Tag(segment, $"End_{name}") { Type = TagType.I };
-            segment.SetSRETags(s, r, e);
+            segment.TagS = s;
+            segment.TagR = r;
+            segment.TagE = e;
+
 
             new[] { s, r, e }
                 .Iter(t => {

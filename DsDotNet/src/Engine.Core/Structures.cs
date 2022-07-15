@@ -77,6 +77,8 @@ namespace Engine.Core
         public override string ToString() => ToText();
         public override string ToText() => QualifiedName;       // }: cpu={OwnerCpu?.Name}";
 
+        public virtual void Going() => throw new Exception("ERROR");
+
         //public virtual bool ChangeR()
         //{
         //    if (RGFH == Status4.Ready)

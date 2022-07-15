@@ -50,7 +50,12 @@ module ModelTests =
             let children = flow.Coins |> Enumerable.OfType<Segment>
             let childrenNames = children |> Seq.map(fun (seg:Segment) -> seg.Name)
             (childrenNames, ["Vp"; "Pp"; "Sp"; "Vm"; "Pm"; "Sm"]) |> seqEq
-            children |> Seq.forall(fun seg -> isNull seg.ChildFlow) |> ShouldBeTrue
+
+            children
+            |> Seq.map(fun c -> c.ChildFlow)
+            |> Seq.forall(fun f ->
+                f.Edges.Count() = 0 && f.ChildVertices.Count = 0)
+            |> ShouldBeTrue
 
             flow.Cpu === cpu
             let rootFlow = cpu.RootFlows |> Seq.exactlyOne

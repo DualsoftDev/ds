@@ -124,17 +124,13 @@ namespace Engine.Core
         {
             var st = segment.GetStatus();
             var childStarted =
-                segment.Vertices
-                    .OfType<Call>() // todo : check external Segment case.
-                    .Any(c => c.RGFH.IsOneOf(Status4.Going, Status4.Finished))
-                    ;
+                segment.ChildStatusMap.Values.Any(s => s.IsOneOf(Status4.Going, Status4.Finished))
+                ;
             return (st == Status4.Ready && childStarted);
         }
 
-        public static IEnumerable<Status4> CollectChildrenStatus(this Segment segment) => segment.CallChildren.Select(call => call.RGFH);
-
-        public static bool IsChildrenStatusAllWith(this Segment segment, Status4 status) => segment.CollectChildrenStatus().All(st => st == status);
-        public static bool IsChildrenStatusAnyWith(this Segment segment, Status4 status) => segment.CollectChildrenStatus().Any(st => st == status);
+        public static bool IsChildrenStatusAllWith(this Segment segment, Status4 status) => segment.ChildStatusMap.Values.All(st => st == status);
+        public static bool IsChildrenStatusAnyWith(this Segment segment, Status4 status) => segment.ChildStatusMap.Values.Any(st => st == status);
 
         public static bool IsChildrenOrigin(this Segment segment)
         {
@@ -153,7 +149,7 @@ namespace Engine.Core
             // coin -> child map
             var ccMap =
                 segment.Vertices.OfType<Coin>()
-                    .ToDictionary(coin => coin, coin => new Child(coin))
+                    .ToDictionary(coin => coin, coin => new Child(coin, segment))
                     ;
             segment.CoinChildMap = ccMap;
             segment.Children = ccMap.Values.ToArray();
@@ -259,8 +255,6 @@ namespace Engine.Core
 
                 // 1. Ready 상태에서의 clean start
                 // 2. Going pause (==> Ready 로 해석) 상태에서의 resume start
-                var gi = segment.ChildFlow.GraphInfo;
-                var inits = gi.Inits;
 
                 var allFinished = segment.IsChildrenStatusAllWith(Status4.Finished);
                 if (allFinished)
@@ -276,7 +270,10 @@ namespace Engine.Core
                     Debug.Assert(segment.IsChildrenStatusAllWith(Status4.Homing));      // 하나라도 homing 이면, 모두 homing
                     if (segment.IsChildrenOrigin())
                     {
-                        segment.CallChildren.Iter(c => c.RGFH = Status4.Ready);
+                        var map = segment.ChildStatusMap;
+                        var keys = map.Keys.ToArray();
+                        foreach (var key in keys)
+                            map[key] = Status4.Ready;
                     }
                 }
 
@@ -289,16 +286,16 @@ namespace Engine.Core
                         // do origin check
                     }
 
-                    var v_oes = gi.TraverseOrders;
+                    var v_oes = segment.TraverseOrder;
                     foreach (var ve in v_oes)
                     {
-                        var call = ve.Vertex as Call;
+                        var child = ve.Vertex as Child;
                         var es = ve.OutgoingEdges;
-                        switch(call.RGFH)
+                        switch(child.Status)
                         {
                             // child call 을 "잘" 시켜야 한다.
                             case Status4.Ready:
-                                call.Going();
+                                child.Going();
                                 break;
                             case Status4.Going:
                             case Status4.Finished:

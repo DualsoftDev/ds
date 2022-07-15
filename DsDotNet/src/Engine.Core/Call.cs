@@ -52,12 +52,6 @@ namespace Engine.Core
         public CallPrototype Prototype;
         public IWallet Container;
         public override bool Value => Prototype.Value;
-
-        // call 은 상태 저장.  segment 는 상태 동적 계산
-        public Status4 RGFH { get; set; } = Status4.Homing;
-        // Do not store Paused property
-        public override bool Paused => this.IsPaused();
-
         public override string QualifiedName => this.GetQualifiedName();
         public Tag[] TxTags { get; set; }
         public Tag[] RxTags { get; set; }
@@ -78,6 +72,8 @@ namespace Engine.Core
 
             flow.ChildVertices.Add(this);
         }
+
+        public override void Going() => TxTags.Iter(t => t.Value = true);
     }
 
     public static class CallExtension
@@ -95,46 +91,38 @@ namespace Engine.Core
             }
         }
 
-        // 필요한가?
-        public static bool IsPaused(this Call call)
-        {
-            var rxs = call.RxTags;
-            var txs = call.TxTags;
+        //// 필요한가?
+        //public static bool IsPaused(this Call call)
+        //{
+        //    var rxs = call.RxTags;
+        //    var txs = call.TxTags;
 
-            var containerFlow = call.Container as RootFlow;
-            var txing = txs.All(t => t.Value);
-            var rxed = rxs.All(t => t.Value);
+        //    var containerFlow = call.Container as RootFlow;
+        //    var txing = txs.All(t => t.Value);
+        //    var rxed = rxs.All(t => t.Value);
 
-            var going = call.RGFH == Status4.Going;
-            var homing = call.RGFH == Status4.Homing;
-            if (containerFlow != null)
-            {
-                // root 에 배치된 call
-                return going && !txing && !rxed;
-            }
+        //    var going = call.RGFH == Status4.Going;
+        //    var homing = call.RGFH == Status4.Homing;
+        //    if (containerFlow != null)
+        //    {
+        //        // root 에 배치된 call
+        //        return going && !txing && !rxed;
+        //    }
 
-            var containerSeg = call.Container as Segment;
-            var parentPaused = containerSeg.Paused;
-            if (!parentPaused)
-                return false;
+        //    var containerSeg = call.Container as Segment;
+        //    var parentPaused = containerSeg.Paused;
+        //    if (!parentPaused)
+        //        return false;
 
-            var parentGoing = containerSeg.RGFH == Status4.Going;
-            var parentHoming = containerSeg.RGFH == Status4.Homing;
+        //    var parentGoing = containerSeg.RGFH == Status4.Going;
+        //    var parentHoming = containerSeg.RGFH == Status4.Homing;
 
-            return
-                   (parentGoing  && going  && !txing && !rxed  ) // going paused
-                || (parentHoming && homing ) // homing paused. todo : check ???
-                ;
-        }
+        //    return
+        //           (parentGoing  && going  && !txing && !rxed  ) // going paused
+        //        || (parentHoming && homing ) // homing paused. todo : check ???
+        //        ;
+        //}
 
-        public static void Going(this Call call)
-        {
-            if (call.RGFH == Status4.Ready)
-                call.RGFH = Status4.Going;
-
-            Debug.Assert(call.RGFH == Status4.Going);
-            call.TxTags.Iter(t => t.Value = true);
-        }
 
         public static IEnumerable<Tag> GetTxTags(this Call call)
         {

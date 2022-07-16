@@ -24,6 +24,12 @@ module ModelTests =
     }
 }
 """
+        let cpuL = """
+[cpu] Cpu = {
+    L.F;
+}
+"""
+
 
         let seqEq(a, b) = Enumerable.SequenceEqual(a, b) |> ShouldBeTrue
         let setEq(xs:'a seq, ys:'a seq) =
@@ -64,7 +70,7 @@ module ModelTests =
 
         [<Fact>]
         member __.``Parse Task`` () =
-            let text = sysP + """
+            let text = sysP + cpuL + """
 [sys] L = {
     [task] T = {
         Cp = {P.F.Vp ~ P.F.Sp}
@@ -81,10 +87,7 @@ module ModelTests =
         Main = { T.Cp > T.Cm > T.C22; }
     }
 }
-
-[cpu] Cpu = {
-    L.F;
-}"""
+"""
             let engine = new Engine(text, "Cpu")
             ( engine.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
             let system = engine.Model.Systems |> Seq.find(fun s -> s.Name = "L")
@@ -128,7 +131,7 @@ module ModelTests =
 
         [<Fact>]
         member __.``Parse Real Child`` () =
-            let text = """
+            let text = cpuL + """
 [sys] L = {
     [flow] F = {
         Main = { P.F.Vp > P.F.Vm; }
@@ -139,9 +142,7 @@ module ModelTests =
         Vp > Vm;
     }
 }
-[cpu] Cpu = {
-    L.F;
-}"""
+"""
             let engine = new Engine(text, "Cpu")
             ( engine.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
             let system = engine.Model.Systems |> Seq.find(fun s -> s.Name = "L")
@@ -157,4 +158,38 @@ module ModelTests =
             (childrenNames, ["Vp"; "Vm";]) |> setEq
             (main.ChildFlow.CollectExternalRealSegment() |> Seq.map(fun seg -> seg.Name), ["Vp"; "Vm";]) |> setEq
 
+            ()
+        [<Fact>]
+        member __.``Parse Alias`` () =
+            let mutable text = cpuL + """
+[sys] L = {
+    [alias] = {
+        P.F.Vp = { Vp1; Vp2; Vp3; }
+        P.F.Vm = { Vm1; Vm2; Vm3; }
+        T.A = {A1; A2; A3;}
+    }
+    [task] T = {
+        A = {P.F.Vp ~ P.F.Sp}
+    }
+
+    [flow] F = {
+        Main = { Vp1 > Vp2 > A1; }
+    }
+"""
+            text <- text + sysP
+
+            let engine = new Engine(text, "Cpu")
+            ( engine.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
+            let system = engine.Model.Systems |> Seq.find(fun s -> s.Name = "L")
+            let cpu = engine.Cpu
+
+            cpu.Name === "Cpu"
+            system.Name === "L"
+            let flow = system.RootFlows |> Seq.exactlyOne
+            flow.Name === "F"
+            let main = flow.Coins |> Enumerable.OfType<Segment> |> Seq.find(fun seg -> seg.Name = "Main")
+            main.Name === "Main"
+            let childrenNames = main.Vertices |> Enumerable.OfType<Coin> |> Seq.map(fun soc -> soc.Name)
+            (childrenNames, ["Main"; "Vp1"; "Vp2"; "A1"]) |> setEq
+            (main.ChildFlow.CollectExternalRealSegment() |> Seq.map(fun seg -> seg.Name), ["Vp"; "Vm";]) |> setEq
             ()

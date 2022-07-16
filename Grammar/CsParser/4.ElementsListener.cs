@@ -17,7 +17,9 @@ namespace DsParser
     //enum NodeType = "system" | "task" | "call" | "proc" | "func" | "segment" | "expression" | "conjunction";
     enum NodeType {
         system,
-        task, call, proc, func, segment, expression, conjunction
+        task, call, proc, func, segment, expression, conjunction,
+        segmentAlias,
+        callAlias,
     };
 
     class Node {
@@ -221,6 +223,44 @@ namespace DsParser
         }
 
 
+        //override public void ExitProgram(dsParser.ProgramContext ctx)
+        //{
+        //    //var tpls = _model.Systems.SelectMany(s => s.AliasNameMap).Select(tpl => (tpl.Key, tpl.Value));
+        //    //foreach ( (var alias, var target) in tpls )
+        //    //{
+        //    //    var xxx2 = _model.FindSegment(target);
+        //    //    var xxx = _model.FindSegment(alias);
+        //    //    //FindVertex(target);
+        //    //    Console.WriteLine();
+        //    //}
+
+        //    var tpls =
+        //        from sys in _model.Systems
+        //        from tpl in sys.AliasNameMap
+        //        where sys.Aliases.ContainsKey(tpl.Key)
+        //        let alias = sys.Aliases[tpl.Key]
+        //        let target = _model.FindSegment(tpl.Value)
+        //        select (alias, target)
+        //        ;
+        //    foreach ((var alias, var target) in tpls)
+        //    {
+        //        switch(alias)
+        //        {
+        //            case PSegmentAlias seg:
+        //                seg.AliasTarget = target;
+        //                break;
+        //            default:
+        //                throw new Exception("ERROR");
+        //        }
+        //        Console.WriteLine();
+
+        //    }
+
+        //        Console.WriteLine();
+        //    //_model.Systems.
+        //}
+
+
         // ParseTreeListener<> method
         override public void VisitTerminal(ITerminalNode node)     { return; }
         override public void VisitErrorNode(IErrorNode node)        { return; }
@@ -279,7 +319,11 @@ namespace DsParser
                                 break;
                         }
 
-                        var node = new Node(id, label: text, parentId: taskId, NodeType.segment);
+                        var nodeType = NodeType.segment;
+                        if (dotCount == 0 && _system.AliasNameMap.ContainsKey(text))
+                            nodeType = NodeType.segmentAlias;
+
+                        var node = new Node(id, label: text, parentId: taskId, nodeType);
                         cnfNodes.Add(node);
                     }
                     foreach (var n in cnfNodes)
@@ -403,6 +447,15 @@ namespace DsParser
             return map[callPrototype];
         }
         IPCoin[] FindVertices(string specs, PFlow flow) => specs.Split(new[] { ',' }).Select(spec => FindVertex(spec, flow)).ToArray();
+        IPCoin[] FindVertices(Node node, PFlow flow)
+        {
+            if (node.type == NodeType.segmentAlias)
+            {
+                var aliasTarget = flow.System.Aliases[node.label];
+                return new IPCoin[] { aliasTarget };
+            }
+            return FindVertices(node.id, flow);
+        }
 
         /**
             * causal operator 를 처리해서 this.links 에 결과 누적
@@ -412,7 +465,7 @@ namespace DsParser
             */
         private void processCausal(dsParser.CausalTokensDNFContext ll, dsParser.CausalOperatorContext opr, dsParser.CausalTokensDNFContext rr)
         {
-            //console.log(`${ l.text} ${ opr.text} ${ r.text}`);
+            Trace.WriteLine($"{ ll.GetText()} { opr.GetText()} { rr.GetText()}");
             var nodes = this.nodes;
 
             var ls = this.addNodes(ll);
@@ -439,8 +492,8 @@ namespace DsParser
                         if (_parenting != null )
                             pFlow = _parenting.ChildFlow;   // target flow
 
-                        var lvs = FindVertices(l.id, pFlow);
-                        var rvs = FindVertices(r.id, pFlow);
+                        var lvs = FindVertices(l, pFlow);
+                        var rvs = FindVertices(r, pFlow);
 
                         Debug.Assert(l != null && r != null);   // 'node not found');
                         if (lvs.Length == 0) throw new Exception($"Parse error: {l.id} not found");

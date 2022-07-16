@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Linq;
 
 using Antlr4.Runtime;
@@ -60,9 +61,17 @@ namespace DsParser
                 names
                 .Where(n => ! n.Contains('.'))  // '.' 이 포함되면 Call
                 .Where(n => !_rootFlow.Segments.Any(s => s.Name == n))
-                .Select(n => new PSegment(n, _rootFlow))  // _flow 에 segment 로 등록됨
+                .Select(n =>
+                {
+                    if (_system.AliasNameMap.ContainsKey(n))
+                        return new PSegmentAlias(n, _rootFlow, _system.AliasNameMap[n]);
+                    else
+                        return new PSegment(n, _rootFlow);
+                })  // _flow 에 segment 로 등록됨
                 .ToArray()
                 ;
+
+            System.Console.WriteLine();
         }
 
         override public void EnterCall(dsParser.CallContext ctx)
@@ -106,6 +115,71 @@ namespace DsParser
             var seg = new PSegment(name, _rootFlow);
         }
         //override public void ExitParenting(dsParser.ParentingContext ctx) { }
+
+        override public void EnterAliasListing(dsParser.AliasListingContext ctx)
+        {
+            var def = ctx.aliasDef().GetText();
+            var aliasMnemonics =
+                DsParser.enumerateChildren<dsParser.AliasMnemonicContext>(ctx, false, r => r is dsParser.AliasMnemonicContext)
+                .Select(mne => mne.GetText())
+                .ToArray()
+                ;
+            Debug.Assert(aliasMnemonics.Length == aliasMnemonics.Distinct().Count());
+
+            _system._strBackwardAliasMap.Add(def, aliasMnemonics);
+        }
+        override public void ExitAlias(dsParser.AliasContext ctx)
+        {
+            var bwd = _system._strBackwardAliasMap;
+            Debug.Assert(_system.AliasNameMap.Count() == 0);
+            Debug.Assert(bwd.Values.Count() == bwd.Values.Distinct().Count());
+            var reversed =
+                from tpl in bwd
+                let k = tpl.Key
+                from v in tpl.Value
+                select (v, k)
+                ;
+
+            foreach ((var mnemonic, var target) in reversed)
+                _system.AliasNameMap.Add(mnemonic, target);
+        }
+
+        override public void ExitProgram(dsParser.ProgramContext ctx)
+        {
+            //var tpls = _model.Systems.SelectMany(s => s.AliasNameMap).Select(tpl => (tpl.Key, tpl.Value));
+            //foreach ( (var alias, var target) in tpls )
+            //{
+            //    var xxx2 = _model.FindSegment(target);
+            //    var xxx = _model.FindSegment(alias);
+            //    //FindVertex(target);
+            //    Console.WriteLine();
+            //}
+
+            var tpls =
+                from sys in Model.Systems
+                from tpl in sys.AliasNameMap
+                where sys.Aliases.ContainsKey(tpl.Key)
+                let alias = sys.Aliases[tpl.Key]
+                let target = Model.FindSegment(tpl.Value)
+                select (alias, target)
+                ;
+            foreach ((var alias, var target) in tpls)
+            {
+                switch (alias)
+                {
+                    case PSegmentAlias seg:
+                        seg.AliasTarget = target;
+                        break;
+                    default:
+                        throw new Exception("ERROR");
+                }
+                Console.WriteLine();
+
+            }
+
+            Console.WriteLine();
+            //_model.Systems.
+        }
 
 
         // ParseTreeListener<> method

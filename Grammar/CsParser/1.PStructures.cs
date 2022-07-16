@@ -30,6 +30,13 @@ namespace DsParser
         public PModel Model;
         public List<PRootFlow> RootFlows = new List<PRootFlow>();
         public List<PTask> Tasks = new List<PTask>();
+
+        /// <summary> (Alias Target) => {Alias1, Alias2, .. } map </summary>
+        internal Dictionary<string, string[]> _strBackwardAliasMap = new Dictionary<string, string[]>();
+        /// <summary> Alias1 => (Alias Target), Alias2 => (Alias Target) </summary>
+        public Dictionary<string, string> AliasNameMap = new Dictionary<string, string>();
+        public Dictionary<string, IPAlias> Aliases = new Dictionary<string, IPAlias>();
+
         public PSystem(string name, PModel model)
             : base(name)
         {
@@ -100,6 +107,8 @@ namespace DsParser
     public interface IPVertex { }
     public interface IPWallet {}
     public interface IPCoin : IPVertex {}
+    public interface IPAlias : IPCoin { }
+
 
     public class PSegment : PNamed, IPCoin, IPWallet
     {
@@ -129,6 +138,17 @@ namespace DsParser
         }
     }
 
+    public class PSegmentAlias: PSegment, IPAlias
+    {
+        public PSegment AliasTarget { get; set; }
+        public string AliasTargetName;
+        public PSegmentAlias(string name, PRootFlow containerFlow, string aliasTarget)
+            : base(name, containerFlow)
+        {
+            AliasTargetName = aliasTarget;
+            containerFlow.System.Aliases.Add(name, this);
+        }
+    }
 
     public class PCallBase : PNamed, IPCoin
     {

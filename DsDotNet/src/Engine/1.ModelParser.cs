@@ -43,17 +43,23 @@ namespace Engine
 
             void preparePick(IEnumerable<IPVertex> vertices)
             {
-                foreach(var pV in vertices)
+                foreach(var pV in vertices.Where(v => ! dict.ContainsKey(v)))
                 {
-                    var pSegment = pV as PSegment;
-                    if (pSegment != null && !dict.ContainsKey(pSegment))
-                        dict.Add(pSegment, new Segment(pSegment.Name, pick<RootFlow>(pSegment.ContainerFlow)));
-
-                    var pCall = pV as PCall;
-                    if (pCall != null && !dict.ContainsKey(pCall))
+                    switch(pV)
                     {
-                        var container = pick<IWallet>(pCall.Container);
-                        dict.Add(pCall, new Call(pCall.Name, container, pick<CallPrototype>(pCall.Prototype)));
+                        case PSegmentAlias a:
+                            //var aliasTarget = pick<Segment>(a.AliasTarget);
+                            //dict.Add(a, new SegmentAlias(a.Name, pick<RootFlow>(a.ContainerFlow)));
+                            break;
+                        case PSegment s:
+                            dict.Add(s, new Segment(s.Name, pick<RootFlow>(s.ContainerFlow)));
+                            break;
+                        case PCall pCall:
+                            var container = pick<IWallet>(pCall.Container);
+                            dict.Add(pCall, new Call(pCall.Name, container, pick<CallPrototype>(pCall.Prototype)));
+                            break;
+                        default:
+                            throw new Exception("ERROR");
                     }
                 }
             }

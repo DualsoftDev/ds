@@ -439,7 +439,7 @@ namespace DsParser
             {
                 var childFlow = flow as PChildFlow;
                 var rootFlow = flow as PRootFlow;
-                var container = rootFlow != null ? (IPWallet)rootFlow: childFlow.ContainerSegment;
+                var container = (IPWallet)rootFlow ?? childFlow;
                 var call = new PCall(callPrototype.Name, container, callPrototype);
                 map.Add(callPrototype, call);
             }

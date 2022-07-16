@@ -63,10 +63,10 @@ namespace Engine
         {
             var allFlows = model.CollectFlows();
             foreach (var flow in allFlows)
-                flow.GraphInfo = GraphUtil.analyzeFlows(new[] { flow });
+                flow.GraphInfo = GraphUtil.analyzeFlows(new[] { flow }, flow is RootFlow);
 
             foreach(var cpu in model.Cpus)
-                cpu.GraphInfo = GraphUtil.analyzeFlows(cpu.RootFlows);
+                cpu.GraphInfo = GraphUtil.analyzeFlows(cpu.RootFlows, true);
 
             foreach (var segment in model.CollectSegments())
                 segment.Epilogue();

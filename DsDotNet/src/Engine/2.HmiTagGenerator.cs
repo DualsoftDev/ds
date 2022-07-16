@@ -47,7 +47,7 @@ namespace Engine
             var midName = $"{flow.System.Name}_{flow.Name}";
 
             // graph 분석
-            var graphInfo = GraphUtil.analyzeFlows(new[] { flow });
+            var graphInfo = GraphUtil.analyzeFlows(new[] { flow }, true);
             List<Tag> tags = new List<Tag>();
 
             foreach (var init_ in graphInfo.Inits)

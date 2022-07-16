@@ -93,6 +93,8 @@ namespace Engine.Core
                     return $"{seg.QualifiedName}_{call.Name}";
                 case RootFlow flow:
                     return $"{flow.QualifiedName}_{call.Name}";
+                case ChildFlow flow:
+                    return $"{flow.ContainerSegment.QualifiedName}_{call.Name}";
                 default:
                     throw new Exception("ERROR");
             }

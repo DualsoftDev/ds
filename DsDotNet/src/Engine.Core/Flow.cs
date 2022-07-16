@@ -59,6 +59,7 @@ namespace Engine.Core
         public ChildFlow(string name, Segment segment)
             : base(name, segment.ContainerFlow.System)
         {
+            Debug.Assert(segment.ContainerFlow.SubFlows.All(sf => sf.Name != name));
             segment.ContainerFlow.SubFlows.Add(this);
             ContainerSegment = segment;
         }

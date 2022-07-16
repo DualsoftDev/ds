@@ -135,13 +135,79 @@ namespace Engine
                             var call_ = pick<CallPrototype>(pCall, () => new CallPrototype(pCall.Name, task));
                         }
                     }
+                }
+
+
+                foreach (var pSys in pModel.Systems)
+                {
+                    var sys = pick<DsSystem>(pSys);
 
                     foreach (var pFlow in pSys.RootFlows.OfType<PRootFlow>())
                     {
                         var rootFlow = pick<RootFlow>(pFlow, () => new RootFlow(pFlow.Name, sys));
+                    }
+                }
+
+                foreach (var pSys in pModel.Systems)
+                {
+                    var sys = pick<DsSystem>(pSys);
+
+                    foreach (var pFlow in pSys.RootFlows.OfType<PRootFlow>())
+                    {
+                        var rootFlow = pick<RootFlow>(pFlow);
                         foreach (var pSeg in pFlow.Segments)
                         {
                             var seg = pick<Segment>(pSeg, () => new Segment(pSeg.Name, rootFlow));
+                        }
+                    }
+                }
+
+                var pRootFlows = pModel.Systems.SelectMany(psys => psys.RootFlows);
+                var pChildFlows =
+                    pRootFlows
+                        .SelectMany(prf => prf.Children.OfType<PSegment>())
+                        .Select(pseg => pseg.ChildFlow)
+                        .Where(cf => cf != null)
+                        .Distinct()
+                        .ToArray()
+                        ;
+                foreach (var pcf in pChildFlows)
+                {
+                    var cf = pick<Segment>(pcf.ContainerSegment).ChildFlow;
+                    Debug.Assert(cf != null);
+                    dict.Add(pcf, cf);
+                    //var childFlow_ = pick<ChildFlow>(pcf, () => new ChildFlow(pcf.Name, seg));
+                }
+
+                //var pRootSegements = pRootFlows.SelectMany(rf => rf.Children.OfType<PSegment>()).Distinct().ToArray();
+                foreach (var pSys in pModel.Systems)
+                {
+                    var sys = pick<DsSystem>(pSys);
+
+                    foreach (var pFlow in pSys.RootFlows.OfType<PRootFlow>())
+                    {
+                        var rootFlow = pick<RootFlow>(pFlow);
+                        foreach (var pSeg in pFlow.Segments)
+                        {
+                            var seg = pick<Segment>(pSeg, () => new Segment(pSeg.Name, rootFlow));
+                        }
+                    }
+                }
+
+
+
+
+
+                foreach (var pSys in pModel.Systems)
+                {
+                    var sys = pick<DsSystem>(pSys);
+
+                    foreach (var pFlow in pSys.RootFlows.OfType<PRootFlow>())
+                    {
+                        var rootFlow = pick<RootFlow>(pFlow);
+                        foreach (var pSeg in pFlow.Segments)
+                        {
+                            var seg = pick<Segment>(pSeg);
                             foreach (var pCh in pSeg.Children)
                             {
                                 switch(pCh)

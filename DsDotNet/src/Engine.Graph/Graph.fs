@@ -7,6 +7,7 @@ open QuickGraph.Collections
 open System
 open System.Linq
 open System.Collections.Generic
+open System.Net.Security
 
 
 [<AutoOpen>]
@@ -62,11 +63,49 @@ module GraphUtil =
                 ee.Sources |> Seq.map(fun s -> QgEdge(s, ee.Target, ee)))
             |> Array.ofSeq
 
-    type FsGraphInfo(flows:Flow seq) =
+    let isResetEdge(edge:Edge) = (edge :> obj) :? IResetEdge
+
+    type FsGraphInfo(flows:Flow seq, isRootFlow:bool) =
         inherit GraphInfo(flows)
         let edges = flows |> Seq.collect(fun f -> f.Edges) |> Array.ofSeq
-        let resetEdges = edges |> Array.filter(fun e -> (e :> obj) :? IResetEdge)
+        let resetEdges = edges |> Array.filter(isResetEdge)
         let solidEdges = edges |> Array.except(resetEdges)
+
+        let validateChildren() =
+            for f in flows do
+                if f :? ChildFlow then
+                    let gr = f.Edges |> edges2QgEdge |> GraphExtensions.ToAdjacencyGraph
+                    for v in gr.Vertices do
+                        let n = getIncomingEdges gr v |> Seq.length
+                        if n > 1 then
+                            failwithf "%A has multiple(%d) incoming edges" v n
+
+
+
+        // reset edge 이면서 target 이 call 인 edge
+        let voidEdges =
+            edges
+            |> Seq.filter(isResetEdge)
+            |> Seq.filter(fun e ->
+                match e.Target with
+                | :? Child as child ->
+                    match child.Coin with
+                    | :? Call
+                    | :? CallAlias ->
+                        true
+                    | _ ->
+                        false
+                | :? Segment ->
+                    false
+                | :? Call ->
+                    true
+                | _ ->
+                    failwith "ERROR")
+            |> Array.ofSeq
+
+
+
+
         let qgEdges = edges2QgEdge edges
 
         /// edge 연결없이 고립된 segment
@@ -87,8 +126,8 @@ module GraphUtil =
             isolatedSegments |> Seq.iter(g.AddVertex >> ignore)
             g
 
-        let inits = getInits(solidGraph) |> Array.ofSeq
-        let lasts = getLasts(solidGraph) |> Array.ofSeq
+        let inits = getInits(if isRootFlow then solidGraph else graph) |> Array.ofSeq
+        let lasts = getLasts(if isRootFlow then solidGraph else graph) |> Array.ofSeq
 
         let undirectedGraph =
             let g = qgEdges |> GraphExtensions.ToUndirectedGraph
@@ -109,9 +148,9 @@ module GraphUtil =
             let q = Queue<V>()
             inits |> Array.iter q.Enqueue
             [|
-                while q.Count > 0 do
+                while not isRootFlow && q.Count > 0 do
                     let v = q.Dequeue()
-                    let oes = solidGraph.OutEdges(v)
+                    let oes = graph.OutEdges(v)
                     let ooes = oes |> Seq.map(fun (e:QgEdge) -> e.OriginalEdge) |> Array.ofSeq
                     yield VertexAndOutgoingEdges(v, ooes)
                     oes |> Seq.map (fun e -> e.Target) |> Seq.iter q.Enqueue
@@ -137,8 +176,8 @@ module GraphUtil =
         member x.GetShortestPath(source, vertex) = computeDijkstra x.Graph source vertex
 
 
-    let analyzeFlows(flows:Flow seq) =
-        let gri = FsGraphInfo(flows)
+    let analyzeFlows(flows:Flow seq, isRootFlow:bool) =
+        let gri = FsGraphInfo(flows, isRootFlow)
         let graph = gri.Graph
         gri
 
@@ -149,7 +188,9 @@ module GraphResetSearch =
         (edges2QgEdge e) |> GraphExtensions.ToAdjacencyGraph
 
     let checkSourceInGraph(sourceFlow:Flow) (src:IVertex) =
-        let gri = FsGraphInfo(seq[sourceFlow])
+        let gri =
+            let isRootFlow = false
+            FsGraphInfo(seq[sourceFlow], isRootFlow)
         let routes =
             getInits(gri.SolidGraph)
             |> Seq.map(fun s ->

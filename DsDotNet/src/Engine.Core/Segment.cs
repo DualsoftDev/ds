@@ -10,7 +10,7 @@ using System.Reactive.Linq;
 namespace Engine.Core
 {
     [DebuggerDisplay("{ToText(),nq}")]
-    public class Segment : Coin, IWallet, IWithSREPorts, ITxRx
+    public partial class Segment : Coin, IWallet, IWithSREPorts, ITxRx
     {
         public RootFlow ContainerFlow { get; }
         public ChildFlow ChildFlow { get; set; }
@@ -25,8 +25,6 @@ namespace Engine.Core
         public Tag TagS { get; set; }
         public Tag TagR { get; set; }
         public Tag TagE { get; set; }
-        public Status4 RGFH => this.GetStatus();
-        public override bool Paused => this.IsPaused();
 
         public bool IsResetFirst { get; internal set; } = true;
         public IEnumerable<IVertex> Vertices => ChildFlow.ChildVertices;   // Coin
@@ -38,9 +36,7 @@ namespace Engine.Core
         public Child[] Inits { get; internal set; }
         public Child[] Lasts { get; internal set; }
         public VertexAndOutgoingEdges[] TraverseOrder { get; internal set; }
-        public Dictionary<Child, Status4> ChildStatusMap { get; internal set; }
         internal Dictionary<Coin, Child> CoinChildMap { get; set; }
-        internal Status4 GetChildStatus(IVertex child) => SegmentExtension.GetChildStatus(this, child);
 
         internal CompositeDisposable Disposables = new CompositeDisposable();
 
@@ -67,75 +63,9 @@ namespace Engine.Core
 
     public static class SegmentExtension
     {
-        /*
-          ----------------------
-            Status   SP  RP  EP
-          ----------------------
-              R      x   -   x
-                     o   o   x
-              G      o   x   x
-              F      -   x   o
-              H      -   o   o
-          ----------------------
-          - 'o' : ON, 'x' : Off, '-' 는 don't care
-          - 내부에서 Reset First 로만 해석
-
-          - 실행/Resume 은 Child call status 보고 G 이거나 R 인 것부터 수행
-         */
-        public static Status4 GetStatus(this Segment segment)
-        {
-            var seg = segment;
-            var s = seg.PortS.Value;
-            var r = seg.PortR.Value;
-            var e = seg.PortE.Value;
-
-            //if (seg.Paused)
-            //{
-            //    Debug.Assert(!s && !r);
-            //    return e ? Status4.Homing : Status4.Going;
-            //}
-
-            if (e)
-                return r ? Status4.Homing : Status4.Finished;
-
-            Debug.Assert(!e);
-            if (s)
-                return r ? Status4.Ready : Status4.Going;
-
-            Debug.Assert(!s && !e);
-            return Status4.Ready;
-        }
-
-        public static Status4 GetChildStatus(this Segment segment, IVertex vertex)
-        {
-            Child child = null;
-            switch(vertex)
-            {
-                case Child ch: child = ch; break;
-                case Coin coin: child = segment.CoinChildMap[coin]; break;
-                default:
-                    throw new Exception("ERROR");
-            }
-            return segment.ChildStatusMap[child];
-        }
-
-
-        public static bool IsPaused(this Segment segment)
-        {
-            var st = segment.GetStatus();
-            var childStarted =
-                segment.ChildStatusMap.Values.Any(s => s.IsOneOf(Status4.Going, Status4.Finished))
-                ;
-            return (st == Status4.Ready && childStarted);
-        }
 
         public static bool IsChildrenStatusAllWith(this Segment segment, Status4 status) => segment.ChildStatusMap.Values.All(st => st == status);
         public static bool IsChildrenStatusAnyWith(this Segment segment, Status4 status) => segment.ChildStatusMap.Values.Any(st => st == status);
-
-        public static bool IsChildrenOrigin(this Segment segment)
-        {
-            return true;
-        }
 
         public static void OnChildRxTagChanged(this Segment segment, BitChange bc)
         {
@@ -195,127 +125,6 @@ namespace Engine.Core
                         segment.OnChildRxTagChanged(bc);
                     });
             segment.Disposables.Add(subs);
-        }
-
-
-
-        public static void EvaluatePort(this Segment segment, Port port, bool newValue)
-        {
-            if (port.Value == newValue)
-                return;
-
-            var sp = port as PortS;
-            var rp = port as PortR;
-            var ep = port as PortE;
-
-            var rf = segment.IsResetFirst;
-            var st = segment.GetStatus();
-            //var paused = segment.Paused;
-
-            var duplicate =
-                newValue && ( (sp != null && segment.PortR.Value) || (rp != null && segment.PortS.Value));
-
-            Port effectivePort = port;
-            if (duplicate)
-                effectivePort = rf ? (Port)segment.PortR : segment.PortS;
-
-
-            effectivePort.Value = newValue;
-            switch (effectivePort, newValue, st)
-            {
-                case (PortS _, true,  Status4.Ready)   : going() ; break;
-                case (PortS _, false, Status4.Ready)   : pause() ; break;
-                case (PortR _, true,  Status4.Finished): homing(); break;
-                case (PortR _, false, Status4.Finished): pause() ; break;
-                case (PortR _, true,  Status4.Going)   : homing(); break;
-                case (PortR _, false, Status4.Going)   : pause(); break;
-
-                case (PortE _, true,  Status4.Going)   : finish(); break;
-                case (PortE _, false, Status4.Homing)  : ready() ; break;
-
-
-                case (PortR _, true, Status4.Ready): break;
-                case (PortR _, false, Status4.Ready):
-                    if (segment.PortS.Value)
-                        going();
-                    break;
-                case (PortS _, true, Status4.Finished): break;
-                case (PortS _, false, Status4.Finished):
-                    if (segment.PortR.Value)
-                        homing();
-                    break;
-
-                default:
-                    throw new Exception("ERROR");
-            }
-
-            void going()
-            {
-                Debug.Assert(segment.PortS.Value);
-
-                // 1. Ready 상태에서의 clean start
-                // 2. Going pause (==> Ready 로 해석) 상태에서의 resume start
-
-                var allFinished = segment.IsChildrenStatusAllWith(Status4.Finished);
-                if (allFinished)
-                {
-                    segment.PortE.Value = true;
-                    Debug.Assert(segment.RGFH == Status4.Finished);
-                    return;
-                }
-
-                var anyHoming = segment.IsChildrenStatusAnyWith(Status4.Homing);
-                if (anyHoming)
-                {
-                    Debug.Assert(segment.IsChildrenStatusAllWith(Status4.Homing));      // 하나라도 homing 이면, 모두 homing
-                    if (segment.IsChildrenOrigin())
-                    {
-                        var map = segment.ChildStatusMap;
-                        var keys = map.Keys.ToArray();
-                        foreach (var key in keys)
-                            map[key] = Status4.Ready;
-                    }
-                }
-
-                var allReady = segment.IsChildrenStatusAllWith(Status4.Ready);
-                var anyGoing = segment.IsChildrenStatusAnyWith(Status4.Going);
-                if (allReady || anyGoing)
-                {
-                    if (allReady)
-                    {
-                        // do origin check
-                    }
-
-                    var v_oes = segment.TraverseOrder;
-                    foreach (var ve in v_oes)
-                    {
-                        var child = ve.Vertex as Child;
-                        var es = ve.OutgoingEdges;
-                        switch(child.Status)
-                        {
-                            // child call 을 "잘" 시켜야 한다.
-                            case Status4.Ready:
-                                child.Going();
-                                break;
-                            case Status4.Going:
-                            case Status4.Finished:
-                                break;
-                            default:
-                                throw new Exception("ERROR");
-                        }
-                    }
-                }
-
-
-                if (segment.IsChildrenStatusAnyWith(Status4.Homing))
-                {
-
-                }
-            }
-            void homing() { }
-            void pause() { }
-            void finish() { }
-            void ready() { }
         }
     }
 }

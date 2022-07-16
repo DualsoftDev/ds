@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 using DsParser;
@@ -47,9 +48,18 @@ namespace Engine
                 {
                     switch(pV)
                     {
-                        case PSegmentAlias a:
-                            //var aliasTarget = pick<Segment>(a.AliasTarget);
-                            //dict.Add(a, new SegmentAlias(a.Name, pick<RootFlow>(a.ContainerFlow)));
+                        case PAlias a:
+                            switch(a.AliasTarget)
+                            {
+                                case PSegment pSeg:
+                                    var aliasTarget = pick<Segment>(pSeg);
+                                    dict.Add(a, new SegmentAlias(a.Name, pick<RootFlow>(a.ContainerFlow), aliasTarget));
+                                    break;
+                                case PCall call:
+                                    break;
+                                default:
+                                    throw new Exception("ERROR");
+                            }
                             break;
                         case PSegment s:
                             dict.Add(s, new Segment(s.Name, pick<RootFlow>(s.ContainerFlow)));
@@ -132,19 +142,28 @@ namespace Engine
                         foreach (var pSeg in pFlow.Segments)
                         {
                             var seg = pick<Segment>(pSeg, () => new Segment(pSeg.Name, rootFlow));
-                            //foreach (var pEdge in pSeg.ChildFlow.Edges)
-                            //{
-                            //    var ss = pEdge.Sources.Select(pS => pick<IVertex>(pS)).ToArray();
-                            //    var t = pick<IVertex>(pEdge.Target);
-                            //    var edge = pick<Edge>(pEdge, () => new Edge(seg.ChildFlow, ss, pEdge.Operator, t));
-
-                            //}
-
-                            foreach (var pChCall in pSeg.Children?.OfType<PCall>())
+                            foreach (var pCh in pSeg.Children)
                             {
-                                var callProto = pick<CallPrototype>(pChCall.Prototype);
-                                var container = pick<IWallet>(pChCall.Container);
-                                var call = pick<Call>(pChCall, () => new Call(pChCall.Name, container, callProto));
+                                switch(pCh)
+                                {
+                                    case PCall pChCall:
+                                        var callProto = pick<CallPrototype>(pChCall.Prototype);
+                                        var container = pick<IWallet>(pChCall.Container);
+                                        var call = pick<Call>(pChCall, () => new Call(pChCall.Name, container, callProto));
+                                        break;
+                                    case PAlias pAlias:
+                                        break;
+
+                                    case PSegment pChSeg:
+                                        //var chSeg = pick<Segment>(pChSeg);
+                                        //Debug.Assert(chSeg != null);
+                                        //Debug.Assert(chSeg.ContainerFlow.System != seg.ContainerFlow.System);
+                                        break;
+
+                                    default:
+                                        throw new Exception("ERROR");
+                                }
+
                             }
                         }
                     }
@@ -158,6 +177,52 @@ namespace Engine
             }
 
             void secondScan()
+            {
+                foreach (var pSys in pModel.Systems)
+                {
+                    foreach (var pFlow in pSys.RootFlows.OfType<PRootFlow>())
+                    {
+                        foreach (var pSeg in pFlow.Segments)
+                        {
+                            foreach (var pCh in pSeg.Children)
+                            {
+                                switch (pCh)
+                                {
+                                    case PAlias pAlias:
+                                        {
+                                            var pa = pAlias;
+                                            var container = pick<Flow>(pAlias.ContainerFlow);
+                                            var pTarget = pAlias.AliasTarget;
+                                            switch (pTarget)
+                                            {
+                                                case PCallPrototype pCp:
+                                                    var cp = pick<CallPrototype>(pCp);
+                                                    var call = pick<Call>(pAlias, () => new CallAlias(pAlias.Name, container, cp));
+                                                    break;
+                                                case PSegment seg:
+                                                    var target = pick<Segment>(pTarget);
+                                                    var _ = new SegmentAlias(pAlias.Name, container, target);
+                                                    break;
+                                                default:
+                                                    throw new Exception("ERROR");
+                                            }
+                                        }
+                                        break;
+                                    case PCall _:
+                                    case PSegment _:
+                                        break;
+                                    default:
+                                        throw new Exception("ERROR");
+                                }
+
+                            }
+                        }
+                    }
+                }
+            }
+
+
+            void thirdScan()
             {
                 // second scan : fill edge, call tx, rx
                 foreach (var pSys in pModel.Systems)
@@ -237,6 +302,7 @@ namespace Engine
 
             firstScan();
             secondScan();
+            thirdScan();
             cleanUp();
 
             return model;

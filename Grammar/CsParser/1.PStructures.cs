@@ -35,7 +35,7 @@ namespace DsParser
         internal Dictionary<string, string[]> _strBackwardAliasMap = new Dictionary<string, string[]>();
         /// <summary> Alias1 => (Alias Target), Alias2 => (Alias Target) </summary>
         public Dictionary<string, string> AliasNameMap = new Dictionary<string, string>();
-        public Dictionary<string, IPAlias> Aliases = new Dictionary<string, IPAlias>();
+        public Dictionary<string, PAlias> Aliases = new Dictionary<string, PAlias>();
 
         public PSystem(string name, PModel model)
             : base(name)
@@ -107,7 +107,6 @@ namespace DsParser
     public interface IPVertex { }
     public interface IPWallet {}
     public interface IPCoin : IPVertex {}
-    public interface IPAlias : IPCoin { }
 
 
     public class PSegment : PNamed, IPCoin, IPWallet
@@ -138,14 +137,16 @@ namespace DsParser
         }
     }
 
-    public class PSegmentAlias: PSegment, IPAlias
+    public class PAlias: PNamed, IPCoin
     {
-        public PSegment AliasTarget { get; set; }
+        public IPCoin AliasTarget { get; set; }
         public string AliasTargetName;
-        public PSegmentAlias(string name, PRootFlow containerFlow, string aliasTarget)
-            : base(name, containerFlow)
+        public PFlow ContainerFlow;
+        public PAlias(string name, PFlow containerFlow, string aliasTarget)
+            : base(name)
         {
             AliasTargetName = aliasTarget;
+            ContainerFlow = containerFlow;
             containerFlow.System.Aliases.Add(name, this);
         }
     }
@@ -240,8 +241,18 @@ namespace DsParser
                 return null;
 
             var names = fqSegmentName.Split(new[] { '.' });
+            Debug.Assert(names.Length == 3);
             (var sysName, var flowName, var segmentName) = (names[0], names[1], names[2]);
             return model.FindSegment(sysName, flowName, segmentName);
+        }
+
+        public static IPCoin FindCoin(this PModel model, string fqSegmentName)
+        {
+            var seg = model.FindSegment(fqSegmentName);
+            if (seg != null)
+                return seg;
+
+            return model.FindCall(fqSegmentName);
         }
 
         public static PSegment[] FindSegments(this PModel model, string fqSegmentNames)

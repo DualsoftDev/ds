@@ -76,6 +76,13 @@ namespace Engine.Core
         public override void Going() => TxTags.Iter(t => t.Value = true);
     }
 
+    public class CallAlias : Call, IAlias
+    {
+        public CallAlias(string name, IWallet container, CallPrototype protoType)
+            : base(name, container, protoType)
+        {}
+    }
+
     public static class CallExtension
     {
         public static string GetQualifiedName(this Call call)

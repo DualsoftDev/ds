@@ -42,6 +42,7 @@ namespace Engine.Core
     public interface IWallet {
         //IEnumerable<ICoin> Coins { get; }
     }
+    public interface IAlias : INamed { }
 
     /// <summary> Call TX or RX </summary>
     public interface ITxRx { }

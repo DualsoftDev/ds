@@ -35,7 +35,7 @@ namespace Engine
 
                 var subCalls = vertices.OfType<Segment>().SelectMany(seg => seg.CallChildren);
                 var rootCalls = vertices.OfType<Call>();
-                var calls = rootCalls.Concat(subCalls);
+                var calls = rootCalls.Concat(subCalls).Distinct();
                 foreach (var call in calls)
                 {
                     call.OwnerCpu = cpu;
@@ -59,9 +59,8 @@ namespace Engine
 
             }
 
-
             var tags =
-                (isActiveCpu ? flow.Cpu.CollectTags().ToArray() : new Tag[] { })
+                (isActiveCpu ? flow.Cpu.CollectTags().Distinct().ToArray() : new Tag[] { })
                 .ToDictionary(t => t.Name, t => t);
             // Edge 를 Bit 로 보고
             // A -> B 연결을 A -> Edge -> B 연결 정보로 변환

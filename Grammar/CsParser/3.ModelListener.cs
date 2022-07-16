@@ -64,7 +64,7 @@ namespace DsParser
                 .Select(n =>
                 {
                     if (_system.AliasNameMap.ContainsKey(n))
-                        return new PSegmentAlias(n, _rootFlow, _system.AliasNameMap[n]);
+                        return new PAlias(n, _rootFlow, _system.AliasNameMap[n]) as IPCoin;
                     else
                         return new PSegment(n, _rootFlow);
                 })  // _flow 에 segment 로 등록됨
@@ -160,14 +160,15 @@ namespace DsParser
                 from tpl in sys.AliasNameMap
                 where sys.Aliases.ContainsKey(tpl.Key)
                 let alias = sys.Aliases[tpl.Key]
-                let target = Model.FindSegment(tpl.Value)
+                let target = Model.FindCoin(tpl.Value)
                 select (alias, target)
                 ;
             foreach ((var alias, var target) in tpls)
             {
+                Debug.Assert(target != null);
                 switch (alias)
                 {
-                    case PSegmentAlias seg:
+                    case PAlias seg:
                         seg.AliasTarget = target;
                         break;
                     default:

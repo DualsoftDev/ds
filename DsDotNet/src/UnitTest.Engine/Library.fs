@@ -156,9 +156,9 @@ module ModelTests =
             main.Name === "Main"
             let childrenNames = main.Vertices |> Enumerable.OfType<Coin> |> Seq.map(fun soc -> soc.Name)
             (childrenNames, ["Vp"; "Vm";]) |> setEq
-            (main.ChildFlow.CollectExternalRealSegment() |> Seq.map(fun seg -> seg.Name), ["Vp"; "Vm";]) |> setEq
-
             ()
+
+
         [<Fact>]
         member __.``Parse Alias`` () =
             let mutable text = cpuL + """
@@ -166,7 +166,7 @@ module ModelTests =
     [alias] = {
         P.F.Vp = { Vp1; Vp2; Vp3; }
         P.F.Vm = { Vm1; Vm2; Vm3; }
-        T.A = {A1; A2; A3;}
+        L.T.A = {A1; A2; A3;}
     }
     [task] T = {
         A = {P.F.Vp ~ P.F.Sp}
@@ -190,6 +190,9 @@ module ModelTests =
             let main = flow.Coins |> Enumerable.OfType<Segment> |> Seq.find(fun seg -> seg.Name = "Main")
             main.Name === "Main"
             let childrenNames = main.Vertices |> Enumerable.OfType<Coin> |> Seq.map(fun soc -> soc.Name)
-            (childrenNames, ["Main"; "Vp1"; "Vp2"; "A1"]) |> setEq
-            (main.ChildFlow.CollectExternalRealSegment() |> Seq.map(fun seg -> seg.Name), ["Vp"; "Vm";]) |> setEq
+            (childrenNames, ["Vp1"; "Vp2"; "A1"]) |> setEq
+
+            let externalReals = main.ChildFlow.CollectExternalRealSegment()
+            ( externalReals |> Seq.map(fun seg -> seg.Name), ["Vp1"; "Vp2";]) |> setEq
+            (main.ChildFlow.CollectAlises() |> Seq.map(fun seg -> seg.Name), ["Vp1"; "Vp2"; "A1"]) |> setEq
             ()

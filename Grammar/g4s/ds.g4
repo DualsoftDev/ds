@@ -51,7 +51,7 @@ aliasProp: '[' 'alias' ']';
 aliasListing:
     aliasDef '=' LBRACE (aliasMnemonic)? ( ';' aliasMnemonic)* (';')+ RBRACE
     ;
-aliasDef: (IDENTIFIER | IDENTIFIER DOT IDENTIFIER | IDENTIFIER DOT IDENTIFIER DOT IDENTIFIER);
+aliasDef: (IDENTIFIER DOT IDENTIFIER DOT IDENTIFIER);
 aliasMnemonic: IDENTIFIER;
 
 

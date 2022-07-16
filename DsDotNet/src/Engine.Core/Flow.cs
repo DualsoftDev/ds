@@ -97,12 +97,17 @@ namespace Engine.Core
             .Distinct()
             ;
 
-        public static IEnumerable<Segment> CollectExternalRealSegment(this ChildFlow childFlow)
+        public static IEnumerable<SegmentAlias> CollectExternalRealSegment(this ChildFlow childFlow)
         {
-            var exSegments = childFlow.ChildVertices.OfType<Segment>();
-            Debug.Assert(exSegments.All(s => s.ContainerFlow.System != childFlow.System));
+            var exSegments = childFlow.ChildVertices.OfType<SegmentAlias>();
+            Debug.Assert(exSegments.All(s => s.AliasTarget.ContainerFlow.System != childFlow.System));
             return exSegments;
         }
+        public static IEnumerable<CallAlias> CollectCallAlises(this ChildFlow childFlow) => childFlow.ChildVertices.OfType<CallAlias>();
+        public static IEnumerable<IAlias> CollectAlises(this ChildFlow childFlow) =>
+            childFlow.CollectExternalRealSegment().Cast<IAlias>()
+            .Concat(childFlow.CollectCallAlises())
+            ;
 
         struct Causal
         {

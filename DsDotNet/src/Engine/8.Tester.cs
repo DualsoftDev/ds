@@ -11,12 +11,12 @@ namespace Engine
         public static void DoSampleTest()
         {
             var text = @"
-[sys] it = {
+[sys] L = {
     [alias] = {
         P.F.Vp = { Vp1; Vp2; Vp3; }
         P.F.Vm = { Vm1; Vm2; Vm3; }
-        T.A = {A1; A2; A3;}
-        T.B = {B1; B2;}
+        L.T.A = {A1; A2; A3;}
+        L.T.B = {B1; B2;}
     }
     [task] T = {
         Cp = {P.F.Vp ~ P.F.Sp}
@@ -48,7 +48,7 @@ namespace Engine
     }
 }
 [cpu] Cpu = {
-    it.F;
+    L.F;
 }
 ";
             var engine = new Engine(text, "Cpu");

@@ -15,8 +15,8 @@ namespace Engine
     [alias] = {
         P.F.Vp = { Vp1; Vp2; Vp3; }
         P.F.Vm = { Vm1; Vm2; Vm3; }
-        L.T.A = {A1; A2; A3;}
-        L.T.B = {B1; B2;}
+        L.T.Cp = {Cp1; Cp2; Cp3;}
+        L.T.Cm = {Cm1; Cm2; Cm3;}
     }
     [task] T = {
         Cp = {P.F.Vp ~ P.F.Sp}
@@ -26,7 +26,7 @@ namespace Engine
         Cm3 = {P.F.Vm ~ P.F.Sm}
     }
     [flow] F = {
-        Main = { T.Cp > T.Cm, T.Cm1 > T.Cm2; T.Cm3 > T.Cm2; }
+        Main = { Cp1 > T.Cp > T.Cm, T.Cm1 > T.Cm2; T.Cm3 > T.Cm2; }
         Main > Weak;
         Main >> Strong;
         Main |> XXX;
@@ -55,7 +55,7 @@ namespace Engine
             Program.Engine = engine;
             var opc = engine.Opc;
 
-            var resetTag = "Reset_it_F_Main";
+            var resetTag = "Reset_L_F_Main";
             if (engine.Cpu.Tags.ContainsKey(resetTag))
             {
                 var children = engine.Cpu.RootFlows.SelectMany(f => f.ChildVertices);
@@ -64,10 +64,10 @@ namespace Engine
 
                 opc.Write(resetTag, true);
                 opc.Write(resetTag, false);
-                opc.Write("Start_it_F_Main", true);
+                opc.Write("Start_L_F_Main", true);
                 opc.Write(resetTag, true);
 
-                opc.Write("AutoStart_it_F_Main", true);
+                opc.Write("AutoStart_L_F_Main", true);
             }
 
             engine.Run();

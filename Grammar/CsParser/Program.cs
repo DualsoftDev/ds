@@ -12,7 +12,7 @@ namespace DsParser
         static void Main(string[] args)
         {
             var text = @"
-[sys] it = {
+[sys] L = {
     [task] T = {
         Cp = {P.F.Vp ~ P.F.Sp}
         Cm = {P.F.Vm ~ P.F.Sm}

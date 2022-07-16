@@ -4,7 +4,7 @@ using System.Diagnostics;
 namespace Engine.Core
 {
     [DebuggerDisplay("{ToString()}")]
-    public class Child : IVertex
+    public class Child : Named, IVertex
     {
         public Segment Parent { get; }
         public Coin Coin { get; }
@@ -12,12 +12,14 @@ namespace Engine.Core
         // 부모가 바라본 child 상태
         public Status4 Status => Parent.ChildStatusMap[this];
         public Child(Coin coin, Segment parent)
+            :base(coin.Name)
         {
             Parent = parent;
             Coin = coin;
+            QualifiedName = $"{parent.QualifiedName}_{coin.Name}";
         }
 
-        public virtual string QualifiedName { get; }
+        public string QualifiedName { get; }
         public bool Value { get => Coin.Value; set => Coin.Value = value; }
         public CpuBase OwnerCpu { get => Coin.OwnerCpu; set => throw new NotImplementedException(); }
 

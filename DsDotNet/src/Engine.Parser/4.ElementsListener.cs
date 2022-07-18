@@ -13,8 +13,6 @@ using Antlr4.Runtime.Tree;
 using Engine.Common;
 using Engine.Core;
 
-using Nodes = System.Collections.Generic.List<System.Object>;
-
 namespace DsParser
 {
     //enum NodeType = "system" | "task" | "call" | "proc" | "func" | "segment" | "expression" | "conjunction";
@@ -40,53 +38,35 @@ namespace DsParser
     }
 
 
-    class ElementsListener : dsBaseListener
+    partial class ElementsListener : dsBaseListener
     {
         public ParserHelper ParserHelper;
-        Model _model;
+        Model    _model => ParserHelper.Model;
+        DsSystem _system { get => ParserHelper._system; set => ParserHelper._system = value; }
+        DsTask   _task { get => ParserHelper._task; set => ParserHelper._task = value; }
+        RootFlow _rootFlow { get => ParserHelper._rootFlow; set => ParserHelper._rootFlow = value; }
+        Segment  _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
+
+        string CurrentPath => ParserHelper.CurrentPath;
+        Dictionary<string, object> QpMap => ParserHelper.QualifiedPathMap;
 
         /** causal operator 왼쪽 */
         private dsParser.CausalTokensDNFContext left;
         private dsParser.CausalOperatorContext op;
 
-        DsSystem _system;
-        DsTask _task;
-        RootFlow _rootFlow;
-        Segment _parenting;
 
-        //private string flowName;        // [flow of A]F={..} -> F
         private string flowOfName;      // [flow of A]F={..} -> A
         private List<ParserRuleContext> allParserRules;
-        private bool multipleSystems;
 
         Dictionary<string, Node> nodes = new Dictionary<string, Node>();
 
-        string CurrentPath
-        {
-            get
-            {
-                if (_task != null)
-                    return $"{_system.Name}.{_task.Name}";
-                if (_parenting != null)
-                    return $"{_system.Name}.{_rootFlow.Name}.{_parenting.Name}";
-                if (_rootFlow != null)
-                    return $"{_system.Name}.{_rootFlow.Name}";
-                if (_system != null)
-                    return _system.Name;
 
-                throw new Exception("ERROR");
-            }
-        }
-
-        public ElementsListener(dsParser parser, Model model, ParserHelper helper)
+        public ElementsListener(dsParser parser, ParserHelper helper)
         {
             ParserHelper = helper;
-            _model = model;
 
             this.allParserRules = DsParser.getAllParseRules(parser);
             parser.Reset();
-
-            this.multipleSystems = this.allParserRules.Where(t => t is dsParser.SystemContext).Count() > 1;
         }
 
 
@@ -105,14 +85,7 @@ namespace DsParser
         }
         override public void ExitTask(dsParser.TaskContext ctx) { _task = null; }
 
-        override public void EnterListing(dsParser.ListingContext ctx)
-        {
-            //var name = ctx.id().GetText();
-            //var id = $"{this.systemName}.{this.taskName}.{name}";
-            ////const node = { "data": { id, "label": name, "background_color": "gray", parent: this.taskName }        };
-            //var parentId = $"{this.systemName}.{this.taskName}";
-            //this.nodes[id] = new Node(id, label: name, parentId, NodeType.segment);
-        }
+        override public void EnterListing(dsParser.ListingContext ctx) {}
 
         override public void EnterCall(dsParser.CallContext ctx) {
             var name = ctx.id().GetText();
@@ -163,7 +136,7 @@ namespace DsParser
 
         override public void EnterParenting(dsParser.ParentingContext ctx) {
             var name = ctx.id().GetText();
-            var seg = (Segment)ParserHelper.QualifiedPathMap[$"{CurrentPath}.{name}"];
+            var seg = (Segment)QpMap[$"{CurrentPath}.{name}"];
             //var seg = _rootFlow.Segments.First(s => s.Name == name);
             //_parenting = seg ?? new Segment(name, _rootFlow);
             _parenting = seg;
@@ -195,23 +168,7 @@ namespace DsParser
             var op = ctx.GetChild(1);
             var rights = ctx.GetChild(2);
 
-            if (_parenting == null)
-            {
-                //_parenting.ChildFlow.Edges.Add(new Edge())
-            }
-            else
-            {
-                //var l = _model.FindCall($"{_system.Name}.{left.GetText()}");
-                //var r = _model.FindCall($"{_system.Name}.{rights.GetText()}");
-                //var edge = new Edge(new[] { l }, r);
-                //_parenting.ChildFlow.Edges.Add(edge);
-            }
             Trace.WriteLine($"\tCausalPhrase all: {left.GetText()}, {op.GetText()}, {rights.GetText()}");
-
-
-
-
-
 
 
             var names =
@@ -228,10 +185,10 @@ namespace DsParser
                 //{
                 //    Debug.Assert(!_system.AliasNameMap.ContainsKey(n));
                 //    var fqdn = $"{CurrentPath}.{n}";
-                //    if (!ParserHelper.QualifiedPathMap.ContainsKey(fqdn))
+                //    if (!QpMap.ContainsKey(fqdn))
                 //    {
                 //        var seg = new Segment(n, _rootFlow);
-                //        ParserHelper.QualifiedPathMap.Add(fqdn, seg);
+                //        QpMap.Add(fqdn, seg);
                 //    }
                 //}
             }
@@ -242,7 +199,7 @@ namespace DsParser
                     Child child = null;
                     bool isAlias = false;
                     var fqdn = $"{CurrentPath}.{n}";
-                    if (ParserHelper.QualifiedPathMap.ContainsKey(fqdn))
+                    if (QpMap.ContainsKey(fqdn))
                         continue;
 
                     var nameComponents = n.Split(new[] { '.' }).ToArray();
@@ -263,48 +220,21 @@ namespace DsParser
                             throw new Exception("ERROR");
                     }
 
-
-                    //if (ParserHelper.QualifiedPathMap.ContainsKey(targetName))
-                    //    continue;
-
-                    var target = ParserHelper.QualifiedPathMap[targetName];
+                    var target = QpMap[targetName];
 
                     switch (target)
                     {
                         case CallPrototype cp:
                             child = new Child(new Call(n, _parenting, cp), _parenting) { IsAlias = isAlias };
-                            ParserHelper.QualifiedPathMap.Add(fqdn, child);
+                            QpMap.Add(fqdn, child);
                             break;
                         case Segment exSeg:
                             child = new Child(new ExSegmentCall(n, exSeg), _parenting) { IsAlias = isAlias };
-                            ParserHelper.QualifiedPathMap.Add(fqdn, child);
+                            QpMap.Add(fqdn, child);
                             break;
                         default:
                             throw new Exception("ERRROR");
                     }
-
-                    //if (isAlias)
-                    //{
-                    //}
-                    //else
-                    //{
-                    //    switch (target)
-                    //    {
-                    //        case CallPrototype cp:
-                    //            child = new Child(new Call(n, _parenting, cp), _parenting) { IsAlias = isAlias };
-                    //            ParserHelper.QualifiedPathMap.Add(n, child);
-                    //            break;
-                    //        case Segment exSeg:
-                    //            child = new Child(new ExSegmentCall(n, exSeg), _parenting) { IsAlias = isAlias };
-                    //            ParserHelper.QualifiedPathMap.Add(n, child);
-                    //            break;
-                    //        default:
-                    //            throw new Exception("ERRROR");
-                    //    }
-
-                    //}
-
-                    Console.WriteLine();
                 }
             }
 
@@ -351,287 +281,5 @@ namespace DsParser
         override public void VisitErrorNode(IErrorNode node)        { return; }
         override public void EnterEveryRule(ParserRuleContext ctx) { return; }
         override public void ExitEveryRule(ParserRuleContext ctx) { return; }
-
-
-        private Dictionary<dsParser.CausalTokensDNFContext, Nodes> _existings = new Dictionary<dsParser.CausalTokensDNFContext, Nodes>();
-        private Nodes addNodes(dsParser.CausalTokensDNFContext ctx)
-        {
-            if (this._existings.ContainsKey(ctx))
-                return this._existings[ctx];
-
-            var cnfs =
-                DsParser.enumerateChildren<dsParser.CausalTokensCNFContext>(ctx, false, t => t is dsParser.CausalTokensCNFContext)
-                ;
-
-            Nodes dnfNodes = new Nodes();
-            foreach (var cnf in cnfs)
-            {
-                List<Node> cnfNodes = new List<Node>();
-                var causalContexts =
-                    DsParser.enumerateChildren<dsParser.CausalTokenContext>(cnf, false, t => t is dsParser.CausalTokenContext);
-
-                foreach (var t in causalContexts)
-                {
-                    var text = t.GetText();
-                    if (text.StartsWith("#"))
-                    {
-                        var node = new Node(id: text, label: text, null, NodeType.func);
-                        cnfNodes.Add(node);
-                    }
-                    else if (text.StartsWith("@"))
-                    {
-                        var node = new Node(id: text, label: text, null, NodeType.proc);
-                        cnfNodes.Add(node);
-                    }
-                    else
-                    {
-                        // count number of '.' from text
-                        var dotCount = text.Split(new[] { '.' }).Length - 1;
-                        string id = text;
-                        var taskId = $"{_system.Name}.{this.flowOfName}";
-                        if (_parenting != null)
-                            taskId = $"{taskId}.{_parenting.Name}";
-
-                        var parentId = taskId;
-                        switch (dotCount)
-                        {
-                            case 0:
-                                id = $"{ taskId}.{ text}";
-                                break;
-                            case 1:
-                                id = $"{_system.Name}.{ text}";
-                                parentId = $"{ _system.Name}.{text.Split(new[] { '.' })[0]}";
-                                break;
-                        }
-
-                        var nodeType = NodeType.segment;
-                        if (dotCount == 0 && _system.AliasNameMap.ContainsKey(text))
-                            nodeType = NodeType.segmentAlias;
-
-                        var node = new Node(id, label: text, parentId: taskId, nodeType);
-                        cnfNodes.Add(node);
-                    }
-                    foreach (var n in cnfNodes)
-                    {
-                        if (!this.nodes.ContainsKey(n.id))
-                            this.nodes[n.id] = n;
-                    }
-                }
-                dnfNodes.Add(cnfNodes);
-            }
-
-            this._existings[ctx] = dnfNodes;
-
-            return dnfNodes;
-        }
-
-        /**
-            *
-            * @param nodes : DNF nodes
-            * @param append true (==nodes 가 sink) 인 경우, conjuction 생성.  false: 개별 node 나열 생성
-            * @returns
-            */
-        private List<string> getCnfTokens(Nodes nodes, bool append = false)
-        {
-            var cnfTokens = new List<string>();
-            foreach (var x in nodes)
-            {
-                var array = x as List<Node>;
-                var isArray = array != null && array.Count() > 1;    // x is IList<Node> && ((x as List<Node>).Count() > 1);
-
-                if (append && isArray)
-                {
-                    var id = string.Join(",", array.Select(n => n.id));
-                    cnfTokens.Add(id);
-
-                    var conj = new Node(id, label: "", parentId: flowOfName, NodeType.conjunction);
-                    this.nodes[id] = conj;
-                }
-                else
-                {
-                    if (isArray)
-                        foreach (var id in array.Select(n => n.id))
-                            cnfTokens.Add(id);
-                    else
-                    {
-                        var token = array == null ? (x as Node) : array[0];
-                        cnfTokens.Add(token.id);
-                    }
-                }
-            }
-
-            return cnfTokens;
-        }
-
-        /**
-            * 복합 Operator 를 분해해서 개별 operator array 로 반환
-            * @param operator 복합 operator.  e.g "<||>"
-            * @returns e.g [ "<|", "|>" ]
-            */
-        private List<string> splitOperator(string operator_)
-        {
-            var op = operator_;
-            IEnumerable<string> split()
-            {
-                foreach (var o in new[] { "|>>", "<<|", ">>", "<<", })
-                {
-                    if (op.Contains(o))
-                    {
-                        yield return o;
-                        op = op.Replace(o, "");
-                    }
-                }
-
-                foreach (var o in new[] { "|>", "<|", })
-                {
-                    if (op.Contains(o))
-                    {
-                        yield return o;
-                        op = op.Replace(o, "");
-                    }
-                }
-                foreach (var o in new[] { ">", "<", })
-                {
-                    if (op.Contains(o))
-                    {
-                        yield return o;
-                        op = op.Replace(o, "");
-                    }
-                }
-                if (op.Length > 0)
-                    Console.WriteLine($"Error on causal operator: {operator_}");
-            }
-
-            return split().ToList();
-        }
-
-
-        //ICoin FindVertex(string v, Flow flow)
-        //{
-        //    var seg = _model.FindSegment(v);
-        //    var callPrototype = _model.FindCall(v);
-
-        //    if (seg!=null && callPrototype!=null)
-        //        throw new Exception($"Parse error: {v} is ambiguous.  Both segment and call exists.");
-        //    if (seg == null && callPrototype == null)
-        //        throw new Exception($"Parse error: {v} not found.");
-
-        //    if (seg != null)
-        //        return seg;
-
-        //    var map = flow.CallInstanceMap;
-        //    if (! map.ContainsKey(callPrototype))
-        //    {
-        //        var call = new PCall(callPrototype.Name, flow, callPrototype);
-        //        map.Add(callPrototype, call);
-        //    }
-
-        //    return map[callPrototype];
-        //}
-        //ICoin[] FindVertices(string specs, Flow flow) => specs.Split(new[] { ',' }).Select(spec => FindVertex(spec, flow)).ToArray();
-        //ICoin[] FindVertices(Node node, Flow flow)
-        //{
-        //    if (node.type == NodeType.segmentAlias)
-        //    {
-        //        var aliasTarget = flow.GetSystem().Aliases[node.label];
-        //        return new ICoin[] { aliasTarget };
-        //    }
-        //    return FindVertices(node.id, flow);
-        //}
-
-        IVertex[] FindVertices(string context, string specs)
-        {
-            return specs.Split(new[] { ',' }).Select(sp => {
-                //var spec = sp;
-                //if (context.IsNullOrEmpty() && !sp.StartsWith(context))
-                //    spec = $"{context}.{sp}";
-                var spec = ParserHelper.QualifiedPathMap.ContainsKey($"{context}.{sp}") ? $"{context}.{sp}" : sp;
-                var vertex = ParserHelper.QualifiedPathMap[spec] as IVertex;
-                if (vertex is CallPrototype)
-                {
-
-                    Console.WriteLine();
-                }
-                return vertex;
-            }).ToArray();
-        }
-
-
-        /**
-            * causal operator 를 처리해서 this.links 에 결과 누적
-            * @param ll operator 왼쪽의 DNF
-            * @param opr (복합) operator
-            * @param rr operator 우측의 DNF
-            */
-        private void processCausal(dsParser.CausalTokensDNFContext ll, dsParser.CausalOperatorContext opr, dsParser.CausalTokensDNFContext rr)
-        {
-            Trace.WriteLine($"{ ll.GetText()} { opr.GetText()} { rr.GetText()}");
-            var nodes = this.nodes;
-
-            var ls = this.addNodes(ll);
-            var rs = this.addNodes(rr);
-            // for (const n of this.nodes.keys())
-            //     console.log(n);
-
-
-            var ops = this.splitOperator(opr.GetText());
-            foreach (var op in ops)
-            {
-                var sinkToRight = op == ">" || op == "|>";
-                var lss = this.getCnfTokens(ls, sinkToRight);
-                var rss = this.getCnfTokens(rs, !sinkToRight);
-
-                foreach (var strL in lss)
-                {
-                    foreach (var strR in rss)
-                    {
-                        var l = this.nodes[strL];
-                        var r = this.nodes[strR];
-
-                        Flow flow = (Flow)_parenting ?? _rootFlow;   // target flow
-                        var context = _parenting == null ? "" : CurrentPath;
-
-                        var lvs = FindVertices(context, l.id);
-                        var rvs = FindVertices(context, r.id);
-
-                        Debug.Assert(l != null && r != null);   // 'node not found');
-                        if (lvs.Length == 0) throw new Exception($"Parse error: {l.id} not found");
-                        if (rvs.Length == 0) throw new Exception($"Parse error: {r.id} not found");
-
-                        Edge e = null;
-                        switch (op)
-                        {
-                            case "|>":  e = new WeakResetEdge(flow, lvs, op, rvs[0]); break;
-                            case ">":   e = new WeakSetEdge(flow, lvs, op, rvs[0]); break;
-                            case "|>>": e = new StrongResetEdge(flow, lvs, op, rvs[0]); break;
-                            case ">>":  e = new StrongSetEdge(flow, lvs, op, rvs[0]); break;
-
-                            case "<|":
-                                Debug.Assert(lvs.Length == 1);
-                                e = new WeakResetEdge(flow, rvs, "|>", lvs[0]);
-                                break;
-                            case "<":
-                                Debug.Assert(lvs.Length == 1);
-                                e = new WeakSetEdge(flow, rvs, ">", lvs[0]);
-                                break;
-                            case "<<|":
-                                Debug.Assert(lvs.Length == 1);
-                                e = new StrongResetEdge(flow, rvs, "|>>", lvs[0]);
-                                break;
-                            case "<<":
-                                Debug.Assert(lvs.Length == 1);
-                                e = new StrongSetEdge(flow, rvs, ">>", lvs[0]);
-                                break;
-
-                            default:
-                                Debug.Assert(false);    //, `invalid operator: ${ op}`);
-                                break;
-                        }
-                        flow.AddEdge(e);
-
-                    }
-                }
-            }
-        }
     }
 }

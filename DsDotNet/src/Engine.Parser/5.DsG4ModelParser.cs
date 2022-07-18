@@ -17,13 +17,12 @@ namespace DsParser
             var listener = new ModelListener(parser, helper);
             ParseTreeWalker.Default.Walk(listener, parser.program());
             Trace.WriteLine("--- End of model listener");
-            var model = listener.Model;
 
             parser.Reset();
-            var elistener = new ElementsListener(parser, model, helper);
+            var elistener = new ElementsListener(parser, helper);
             ParseTreeWalker.Default.Walk(elistener, parser.program());
 
-            return model;
+            return helper.Model;
         }
     }
 }

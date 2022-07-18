@@ -12,6 +12,33 @@ namespace DsParser
         public Dictionary<string, object> QualifiedPathMap = new Dictionary<string, object>();
         //public Dictionary<ParserRuleContext, object> ContextMap = new Dictionary<ParserRuleContext, object>();
 
+
+
+        public Model Model { get; } = new Model();
+        internal DsSystem _system;
+        internal DsTask _task;
+        internal RootFlow _rootFlow;
+        internal Segment _parenting;
+
+        internal string CurrentPath
+        {
+            get
+            {
+                if (_task != null)
+                    return $"{_system.Name}.{_task.Name}";
+                if (_parenting != null)
+                    return $"{_system.Name}.{_rootFlow.Name}.{_parenting.Name}";
+                if (_rootFlow != null)
+                    return $"{_system.Name}.{_rootFlow.Name}";
+                if (_system != null)
+                    return _system.Name;
+
+                throw new Exception("ERROR");
+            }
+        }
+
+
+
         T PickQualifiedPathObject<T>(string qualifiedName, Func<T> creator = null) where T : class
         {
             var dict = QualifiedPathMap;

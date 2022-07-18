@@ -78,16 +78,8 @@ namespace Engine.Core
         public override void Going() => TxTags.Iter(t => t.Value = true);
     }
 
-    //public class CallAlias : Call, IAlias
-    //{
-    //    public string AliasTargetName;
-    //    public CallAlias(string name, string aliasTargetName, Flow container, CallPrototype protoType)
-    //        : base(name, container, protoType)
-    //    {
-    //        AliasTargetName = aliasTargetName;
-    //    }
-    //}
 
+    [DebuggerDisplay("[{ToText()}]")]
     public class ExSegmentCall: Coin
     {
         public Segment ExternalSegment;
@@ -97,6 +89,8 @@ namespace Engine.Core
         {
             ExternalSegment = externalSegment;
         }
+        public override string ToText() => $"{Name}={ExternalSegment.QualifiedName}";
+
     }
 
     public static class CallExtension

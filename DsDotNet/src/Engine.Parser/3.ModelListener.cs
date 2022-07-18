@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
@@ -11,32 +12,19 @@ namespace DsParser
 {
     class ModelListener : dsBaseListener
     {
-        public Model Model { get; }
         public ParserHelper ParserHelper;
-        DsSystem _system;
-        DsTask _task;
-        RootFlow _rootFlow;
-        Segment _parenting;
+        Model _model => ParserHelper.Model;
+        DsSystem _system { get => ParserHelper._system; set => ParserHelper._system = value; }
+        DsTask _task { get => ParserHelper._task; set => ParserHelper._task = value; }
+        RootFlow _rootFlow { get => ParserHelper._rootFlow; set => ParserHelper._rootFlow = value; }
+        Segment _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
+        /// <summary> Qualified Path Map </summary>
+        Dictionary<string, object> QpMap => ParserHelper.QualifiedPathMap;
 
-        string CurrentPath
-        {
-            get
-            {
-                if (_task != null)
-                    return $"{_system.Name}.{_task.Name}";
-                if (_parenting != null)
-                    return $"{_system.Name}.{_rootFlow.Name}.{_parenting.Name}";
-                if (_rootFlow != null)
-                    return $"{_system.Name}.{_rootFlow.Name}";
-                if (_system != null)
-                    return _system.Name;
+        string CurrentPath => ParserHelper.CurrentPath;
 
-                throw new Exception("ERROR");
-            }
-        }
         public ModelListener(dsParser parser, ParserHelper helper)
         {
-            Model = new Model();
             ParserHelper = helper;
             parser.Reset();
         }
@@ -45,16 +33,16 @@ namespace DsParser
         override public void EnterSystem(dsParser.SystemContext ctx)
         {
             var n = ctx.id().GetText();
-            _system = new DsSystem(n, Model);
+            _system = new DsSystem(n, _model);
             Trace.WriteLine($"System: {n}");
         }
-        //override public void ExitSystem(dsParser.SystemContext ctx) { this.systemName = null; }
+        override public void ExitSystem(dsParser.SystemContext ctx) { _system = null; }
 
         override public void EnterTask(dsParser.TaskContext ctx)
         {
             var name = ctx.id().GetText();
             _task = new DsTask(name, _system);
-            ParserHelper.QualifiedPathMap.Add(CurrentPath, _task);
+            QpMap.Add(CurrentPath, _task);
         }
         override public void ExitTask(dsParser.TaskContext ctx) { _task = null; }
 
@@ -63,7 +51,7 @@ namespace DsParser
             var flowName = ctx.id().GetText();
             var flowOf = ctx.flowProp().id();
             _rootFlow = new RootFlow(flowName, _system);
-            ParserHelper.QualifiedPathMap.Add(CurrentPath, _rootFlow);
+            QpMap.Add(CurrentPath, _rootFlow);
             Trace.WriteLine($"Flow: {flowName}");
         }
         override public void ExitFlow(dsParser.FlowContext ctx) { _rootFlow = null; }
@@ -72,7 +60,7 @@ namespace DsParser
             Trace.WriteLine($"Parenting: {ctx.GetText()}");
             var name = ctx.id().GetText();
             _parenting = new Segment(name, _rootFlow);
-            ParserHelper.QualifiedPathMap.Add(CurrentPath, _parenting);
+            QpMap.Add(CurrentPath, _parenting);
         }
         override public void ExitParenting(dsParser.ParentingContext ctx) { _parenting = null; }
 
@@ -91,10 +79,10 @@ namespace DsParser
                 {
                     Debug.Assert(!_system.AliasNameMap.ContainsKey(n));
                     var fqdn = $"{CurrentPath}.{n}";
-                    if (!ParserHelper.QualifiedPathMap.ContainsKey(fqdn))
+                    if (!QpMap.ContainsKey(fqdn))
                     {
                         var seg = new Segment(n, _rootFlow);
-                        ParserHelper.QualifiedPathMap.Add(fqdn, seg);
+                        QpMap.Add(fqdn, seg);
                     }
                 }
             }
@@ -125,7 +113,7 @@ namespace DsParser
             //var tx = callph.segments(0);
             //var rx = callph.segments(1);
             var call = new CallPrototype(name, _task);
-            ParserHelper.QualifiedPathMap.Add($"{CurrentPath}.{name}", call);
+            QpMap.Add($"{CurrentPath}.{name}", call);
             //var parentId = $"{this.systemName}.{this.taskName}";
             //var id = $"{parentId}.{name}";
             //this.nodes[id] = new Node(id, label, parentId, NodeType.call);
@@ -137,7 +125,7 @@ namespace DsParser
         {
             var name = ctx.id().GetText();
             var seg = new Segment(name, _rootFlow);
-            ParserHelper.QualifiedPathMap.Add($"{CurrentPath}.{name}", seg);
+            QpMap.Add($"{CurrentPath}.{name}", seg);
 
             //var id = $"{this.systemName}.{this.taskName}.{name}";
             ////const node = { "data": { id, "label": name, "background_color": "gray", parent: this.taskName }        };
@@ -197,13 +185,13 @@ namespace DsParser
                     var dot_ = fpc.GetChild(1).GetText();
                     var flowName = fpc.GetChild(2).GetText();
 
-                    var system = Model.Systems.FirstOrDefault(sys => sys.Name == systemName);
+                    var system = _model.Systems.FirstOrDefault(sys => sys.Name == systemName);
                     var flow = system.RootFlows.FirstOrDefault(f => f.Name == flowName);
                     return flow;
                 })
                 .ToArray()
                 ;
-            var cpu_ = new Cpu(name, flows, Model);
+            var cpu_ = new Cpu(name, flows, _model);
         }
 
 

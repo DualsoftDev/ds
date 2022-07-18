@@ -11,7 +11,8 @@ namespace Engine.Core
     }
 
 
-    [DebuggerDisplay("{ToText()}")]
+    //[DebuggerDisplay("{ToText()}")]
+    [DebuggerDisplay("{Name}")]
     public class Named: INamed
     {
         public string Name { get; set; }

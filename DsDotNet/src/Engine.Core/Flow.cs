@@ -16,11 +16,10 @@ namespace Engine.Core
         /// <summary>Edge 를 통해 알 수 없는 isolated segement/call 등을 포함 </summary>
         internal List<IVertex> ChildVertices { get; } = new List<IVertex>();
 
-        List<Edge> _edges = new List<Edge>();
         public GraphInfo GraphInfo { get; set; }
 
-        public bool IsEmptyFlow => _edges.IsNullOrEmpty() && ChildVertices.IsNullOrEmpty();
-        public IEnumerable<Edge> Edges => _edges;
+        public bool IsEmptyFlow => Edges.IsNullOrEmpty() && ChildVertices.IsNullOrEmpty();
+        public List<Edge> Edges { get; } = new List<Edge>();
 
         public IEnumerable<ICoin> Coins => ChildVertices.OfType<ICoin>();
         public IEnumerable<ICoin> IsolatedCoins => this.CollectIsolatedCoins();
@@ -28,7 +27,7 @@ namespace Engine.Core
         public void AddEdge(Edge edge)
         {
             this.CheckAddable(edge);
-            _edges.Add(edge);
+            Edges.Add(edge);
         }
 
         protected Flow(string name)

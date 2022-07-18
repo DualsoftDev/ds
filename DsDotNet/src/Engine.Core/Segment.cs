@@ -28,10 +28,10 @@ namespace Engine.Core
         public Tag TagE { get; set; }
 
         public bool IsResetFirst { get; internal set; } = true;
-        public IEnumerable<Call> CallChildren => ChildVertices.OfType<Call>();
+        public IEnumerable<Call> CallChildren => ChildVertices.OfType<Child>().Select(c => c.Coin).OfType<Call>();
 
 
-        public Child[] Children { get; internal set; }
+        //public List<Child> Children { get; } = new List<Child>();
         public Child[] Inits { get; internal set; }
         public Child[] Lasts { get; internal set; }
         public VertexAndOutgoingEdges[] TraverseOrder { get; internal set; }
@@ -75,40 +75,44 @@ namespace Engine.Core
 
         public static void Epilogue(this Segment segment)
         {
-            // coin -> child map
-            var ccMap =
-                segment.ChildVertices.OfType<Coin>()
-                    .ToDictionary(coin => coin, coin => new Child(coin, segment))
-                    ;
-            segment.CoinChildMap = ccMap;
-            segment.Children = ccMap.Values.ToArray();
+            //// coin -> child map
+            //var ccMap =
+            //    segment.ChildVertices.OfType<Child>()
+            //        .ToDictionary(coin => coin, coin => new Child(coin, segment))
+            //        ;
+            //segment.CoinChildMap = ccMap;
+            ////segment.Children = ccMap.Values.ToArray();
             segment.ChildStatusMap =
-                segment.Children
+                segment.ChildVertices.OfType<Child>()
                 .ToDictionary(child => child, _ => Status4.Homing)
                 ;
 
-            // call or segment 를 'Child' class 로 wrapping
-            IVertex convert(IVertex old)
-            {
-                var coin = old as Coin;
-                if (coin != null && ccMap.ContainsKey(coin))
-                    return ccMap[coin];
-                return old;
-            }
+            //// call or segment 를 'Child' class 로 wrapping
+            //IVertex convert(IVertex old)
+            //{
+            //    var coin = old as Coin;
+            //    if (coin != null && ccMap.ContainsKey(coin))
+            //        return ccMap[coin];
+            //    return old;
+            //}
 
             // { Graph 정보 추출 & 저장
             var gi = segment.GraphInfo;
-            foreach (var ves in gi.TraverseOrders)
-            {
-                ves.Vertex = convert(ves.Vertex);
-                foreach (var oe in ves.OutgoingEdges)
-                {
-                    oe.Sources = oe.Sources.Select(s => convert(s)).ToArray();
-                    oe.Target = convert(oe.Target);
-                }
-            }
-            segment.Inits = gi.Inits.OfType<Coin>().Select(convert).Cast<Child>().ToArray();
-            segment.Lasts = gi.Lasts.Select(convert).Cast<Child>().ToArray();
+            //foreach (var ves in gi.TraverseOrders)
+            //{
+            //    ves.Vertex = convert(ves.Vertex);
+            //    foreach (var oe in ves.OutgoingEdges)
+            //    {
+            //        oe.Sources = oe.Sources.Select(s => convert(s)).ToArray();
+            //        oe.Target = convert(oe.Target);
+            //    }
+            //}
+            //segment.Inits = gi.Inits.OfType<Coin>().Select(convert).Cast<Child>().ToArray();
+            //segment.Lasts = gi.Lasts.Select(convert).Cast<Child>().ToArray();
+
+
+            segment.Inits = gi.Inits.OfType<Child>().ToArray();
+            segment.Lasts = gi.Lasts.OfType<Child>().ToArray();
             segment.TraverseOrder = gi.TraverseOrders;
             // }
 

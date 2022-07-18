@@ -25,6 +25,7 @@ namespace Engine.Core
             Parent = parent;
             Coin = coin;
             QualifiedName = $"{parent.QualifiedName}_{coin.Name}";
+            Parent.ChildVertices.Add(this);
             //switch(coin)
             //{
             //    case Call call when call.RxTags.Any():

@@ -59,7 +59,7 @@ module ModelTests =
 
             children
             |> Seq.forall(fun f ->
-                f.Edges.Count() = 0 && f.ChildVertices.Count = 0)
+                f.Edges.length() = 0 && f.ChildVertices.Count = 0)
             |> ShouldBeTrue
 
             flow.Cpu === cpu

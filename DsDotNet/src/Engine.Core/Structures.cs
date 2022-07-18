@@ -36,6 +36,15 @@ namespace Engine.Core
             Model = model;
             model.Systems.Add(this);
         }
+
+        // { temporary
+        /// <summary> (Alias Target) => {Alias1, Alias2, .. } map </summary>
+        public Dictionary<string, string[]> _strBackwardAliasMap = new Dictionary<string, string[]>();
+        /// <summary> Alias1 => (Alias Target), Alias2 => (Alias Target) </summary>
+        public Dictionary<string, string> AliasNameMap = new Dictionary<string, string>();
+        //public Dictionary<string, PAlias> Aliases = new Dictionary<string, PAlias>();
+        // }
+
     }
 
 

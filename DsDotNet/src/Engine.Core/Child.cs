@@ -11,6 +11,7 @@ namespace Engine.Core
         public Segment Parent { get; }
         public Coin Coin { get; }
         public bool IsCall => Coin is Call;
+        public bool IsAlias { get; set; }
         // 부모가 바라본 child 상태
         public Status4 Status
         {
@@ -44,11 +45,8 @@ namespace Engine.Core
 
             switch(Coin)
             {
-                case SegmentAlias extSeg:
+                case ExSegmentCall extSeg:
                     extSeg.Going();
-                    break;
-                case CallAlias call:
-                    call.Going();
                     break;
                 case Call call:
                     call.Going();

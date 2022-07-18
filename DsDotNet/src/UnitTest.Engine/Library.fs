@@ -69,7 +69,7 @@ module ModelTests =
 
         [<Fact>]
         member __.``Parse Task`` () =
-            let text = sysP + cpuL + """
+            let mutable text = """
 [sys] L = {
     [task] T = {
         Cp = {P.F.Vp ~ P.F.Sp}
@@ -87,6 +87,7 @@ module ModelTests =
     }
 }
 """
+            text <- text + sysP + cpuL
             let engine = new Engine(text, "Cpu")
             ( engine.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
             let system = engine.Model.Systems |> Seq.find(fun s -> s.Name = "L")
@@ -108,14 +109,14 @@ module ModelTests =
             flow.Name === "F"
             let main = flow.Coins |> Enumerable.OfType<Segment> |> Seq.find(fun seg -> seg.Name = "Main")
             main.Name === "Main"
-            let childrenNames = main.ChildVertices |> Enumerable.OfType<Coin> |> Seq.map(fun soc -> soc.Name)
-            (childrenNames, ["Cp"; "Cm"; "C22"]) |> setEq
+            let childrenNames = main.ChildVertices |> Enumerable.OfType<Child> |> Seq.map(fun soc -> soc.Name)
+            (childrenNames, ["L.T.Cp"; "L.T.Cm"; "L.T.C22"]) |> setEq
 
             let checkC22Instance_ =
-                let c22 = main.CallChildren |> Seq.find(fun call -> call.Name = "C22")
-                c22.QualifiedName === "L_F_Main_C22"
-                (c22.TxTags.Select(fun t -> t.Name), ["Start_P_F_Vp_L_F_Main_C22_TX"; "Start_P_F_Vm_L_F_Main_C22_TX"]) |> setEq
-                (c22.RxTags.Select(fun t -> t.Name), [  "End_P_F_Sp_L_F_Main_C22_RX";   "End_P_F_Sm_L_F_Main_C22_RX"]) |> setEq
+                let c22 = main.CallChildren |> Seq.find(fun call -> call.Name = "L.T.C22")
+                c22.QualifiedName === "L_F_Main_L.T.C22"
+                (c22.TxTags.Select(fun t -> t.Name), ["Start_P_F_Vp_L_F_Main_L.T.C22_TX"; "Start_P_F_Vm_L_F_Main_L.T.C22_TX"]) |> setEq
+                (c22.RxTags.Select(fun t -> t.Name), [  "End_P_F_Sp_L_F_Main_L.T.C22_RX";   "End_P_F_Sm_L_F_Main_L.T.C22_RX"]) |> setEq
 
 
             flow.Cpu === cpu
@@ -130,7 +131,7 @@ module ModelTests =
 
         [<Fact>]
         member __.``Parse Real Child`` () =
-            let text = cpuL + """
+            let mutable text = """
 [sys] L = {
     [flow] F = {
         Main = { P.F.Vp > P.F.Vm; }
@@ -142,6 +143,7 @@ module ModelTests =
     }
 }
 """
+            text <- text + cpuL;
             let engine = new Engine(text, "Cpu")
             ( engine.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
             let system = engine.Model.Systems |> Seq.find(fun s -> s.Name = "L")
@@ -153,14 +155,14 @@ module ModelTests =
             flow.Name === "F"
             let main = flow.Coins |> Enumerable.OfType<Segment> |> Seq.find(fun seg -> seg.Name = "Main")
             main.Name === "Main"
-            let childrenNames = main.ChildVertices |> Enumerable.OfType<Coin> |> Seq.map(fun soc -> soc.Name)
-            (childrenNames, ["Vp"; "Vm";]) |> setEq
+            let childrenNames = main.ChildVertices |> Enumerable.OfType<Child> |> Seq.map(fun soc -> soc.Name)
+            (childrenNames, ["P.F.Vp"; "P.F.Vm";]) |> setEq
             ()
 
 
         [<Fact>]
         member __.``Parse Alias`` () =
-            let mutable text = cpuL + """
+            let mutable text = """
 [sys] L = {
     [alias] = {
         P.F.Vp = { Vp1; Vp2; Vp3; }
@@ -175,7 +177,7 @@ module ModelTests =
         Main = { Vp1 > Vp2 > A1; }
     }
 """
-            text <- text + sysP
+            text <- text + sysP + cpuL
 
             let engine = new Engine(text, "Cpu")
             ( engine.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
@@ -188,7 +190,7 @@ module ModelTests =
             flow.Name === "F"
             let main = flow.Coins |> Enumerable.OfType<Segment> |> Seq.find(fun seg -> seg.Name = "Main")
             main.Name === "Main"
-            let childrenNames = main.ChildVertices |> Enumerable.OfType<Coin> |> Seq.map(fun soc -> soc.Name)
+            let childrenNames = main.ChildVertices |> Enumerable.OfType<Child> |> Seq.map(fun soc -> soc.Name)
             (childrenNames, ["Vp1"; "Vp2"; "A1"]) |> setEq
 
             let externalReals = main.CollectExternalRealSegment()

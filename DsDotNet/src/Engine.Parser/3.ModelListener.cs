@@ -78,6 +78,7 @@ namespace DsParser
 
         override public void EnterCausalPhrase(dsParser.CausalPhraseContext ctx)
         {
+            var xx = ctx.GetText();
             var names =
                 DsParser.enumerateChildren<dsParser.SegmentContext>(
                     ctx, false, r => r is dsParser.SegmentContext)
@@ -90,34 +91,13 @@ namespace DsParser
                 {
                     Debug.Assert(!_system.AliasNameMap.ContainsKey(n));
                     var fqdn = $"{CurrentPath}.{n}";
-                    if (! ParserHelper.QualifiedPathMap.ContainsKey(fqdn))
+                    if (!ParserHelper.QualifiedPathMap.ContainsKey(fqdn))
                     {
                         var seg = new Segment(n, _rootFlow);
                         ParserHelper.QualifiedPathMap.Add(fqdn, seg);
                     }
                 }
             }
-            else
-            {
-                foreach (var n in names)
-                {
-                    if (_system.AliasNameMap.ContainsKey(n))
-                    {
-                        var target = ParserHelper.QualifiedPathMap[_system.AliasNameMap[n]];
-                        switch (target)
-                        {
-                            case CallPrototype cp:
-                                var child = new Child(new Call(n, _parenting, cp), _parenting);
-                                ParserHelper.QualifiedPathMap.Add($"{CurrentPath}.{n}", child);
-                                break;
-                            default:
-                                throw new Exception("ERRROR");
-                        }
-                        Console.WriteLine();
-                    }
-                }
-            }
-
 
             //var _segments =
             //    names
@@ -201,6 +181,32 @@ namespace DsParser
             foreach ((var mnemonic, var target) in reversed)
                 _system.AliasNameMap.Add(mnemonic, target);
         }
+
+
+        override public void EnterCpu(dsParser.CpuContext ctx)
+        {
+            var name = ctx.id().GetText();
+            var flowPathContexts =
+                DsParser.enumerateChildren<dsParser.FlowPathContext>(ctx, false, r => r is dsParser.FlowPathContext)
+                ;
+
+            var flows =
+                flowPathContexts.Select(fpc =>
+                {
+                    var systemName = fpc.GetChild(0).GetText();
+                    var dot_ = fpc.GetChild(1).GetText();
+                    var flowName = fpc.GetChild(2).GetText();
+
+                    var system = Model.Systems.FirstOrDefault(sys => sys.Name == systemName);
+                    var flow = system.RootFlows.FirstOrDefault(f => f.Name == flowName);
+                    return flow;
+                })
+                .ToArray()
+                ;
+            var cpu_ = new Cpu(name, flows, Model);
+        }
+
+
 
         override public void ExitProgram(dsParser.ProgramContext ctx)
         {

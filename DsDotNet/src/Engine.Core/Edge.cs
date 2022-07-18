@@ -22,6 +22,9 @@ namespace Engine.Core
 
         public Edge(Flow containerFlow, IVertex[] sources, string operator_, IVertex target)
         {
+            Debug.Assert(sources.All(s => s != null));
+            Debug.Assert(target != null);
+
             ContainerFlow = containerFlow;
             Sources = sources;
             Target = target;

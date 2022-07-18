@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
 
+using Engine.Common;
 using Engine.Core;
 
 using Nodes = System.Collections.Generic.List<System.Object>;
@@ -206,6 +207,109 @@ namespace DsParser
                 //_parenting.ChildFlow.Edges.Add(edge);
             }
             Trace.WriteLine($"\tCausalPhrase all: {left.GetText()}, {op.GetText()}, {rights.GetText()}");
+
+
+
+
+
+
+
+            var names =
+                DsParser.enumerateChildren<dsParser.SegmentContext>(
+                    ctx, false, r => r is dsParser.SegmentContext)
+                .Select(segCtx => segCtx.GetText())
+                .Select(n => ParserHelper.ToFQDN(n, _system, _rootFlow.Name, _parenting?.Name))
+                .ToArray()
+                ;
+
+            if (_parenting == null)
+            {
+                //foreach (var n in names)
+                //{
+                //    Debug.Assert(!_system.AliasNameMap.ContainsKey(n));
+                //    var fqdn = $"{CurrentPath}.{n}";
+                //    if (!ParserHelper.QualifiedPathMap.ContainsKey(fqdn))
+                //    {
+                //        var seg = new Segment(n, _rootFlow);
+                //        ParserHelper.QualifiedPathMap.Add(fqdn, seg);
+                //    }
+                //}
+            }
+            else
+            {
+                foreach (var n in names)
+                {
+                    Child child = null;
+                    bool isAlias = false;
+                    var fqdn = $"{CurrentPath}.{n}";
+                    if (ParserHelper.QualifiedPathMap.ContainsKey(fqdn))
+                        continue;
+
+                    var nameComponents = n.Split(new[] { '.' }).ToArray();
+                    string targetName = n;
+                    switch(nameComponents.Length)
+                    {
+                        case 1:
+                            isAlias = _system.AliasNameMap.ContainsKey(n);
+                            targetName = isAlias ? _system.AliasNameMap[n] : n;
+                            break;
+                        case 2:
+                            targetName = $"{_system.Name}.{n}";
+                            break;
+                        case 3:
+                            targetName = n;
+                            break;
+                        default:
+                            throw new Exception("ERROR");
+                    }
+
+
+                    //if (ParserHelper.QualifiedPathMap.ContainsKey(targetName))
+                    //    continue;
+
+                    var target = ParserHelper.QualifiedPathMap[targetName];
+
+                    switch (target)
+                    {
+                        case CallPrototype cp:
+                            child = new Child(new Call(n, _parenting, cp), _parenting) { IsAlias = isAlias };
+                            ParserHelper.QualifiedPathMap.Add(fqdn, child);
+                            break;
+                        case Segment exSeg:
+                            child = new Child(new ExSegmentCall(n, exSeg), _parenting) { IsAlias = isAlias };
+                            ParserHelper.QualifiedPathMap.Add(fqdn, child);
+                            break;
+                        default:
+                            throw new Exception("ERRROR");
+                    }
+
+                    //if (isAlias)
+                    //{
+                    //}
+                    //else
+                    //{
+                    //    switch (target)
+                    //    {
+                    //        case CallPrototype cp:
+                    //            child = new Child(new Call(n, _parenting, cp), _parenting) { IsAlias = isAlias };
+                    //            ParserHelper.QualifiedPathMap.Add(n, child);
+                    //            break;
+                    //        case Segment exSeg:
+                    //            child = new Child(new ExSegmentCall(n, exSeg), _parenting) { IsAlias = isAlias };
+                    //            ParserHelper.QualifiedPathMap.Add(n, child);
+                    //            break;
+                    //        default:
+                    //            throw new Exception("ERRROR");
+                    //    }
+
+                    //}
+
+                    Console.WriteLine();
+                }
+            }
+
+
+
         }
         override public void EnterCausalTokensDNF(dsParser.CausalTokensDNFContext ctx) {
             if (this.left != null)
@@ -222,27 +326,22 @@ namespace DsParser
         }
         override public void EnterCausalOperator(dsParser.CausalOperatorContext ctx) { this.op = ctx; }
 
-        override public void EnterCpu(dsParser.CpuContext ctx) {
-            var name = ctx.id().GetText();
-            var flowPathContexts =
-                DsParser.enumerateChildren<dsParser.FlowPathContext>(ctx, false, r => r is dsParser.FlowPathContext)
-                ;
-
-            var flows =
-                flowPathContexts.Select(fpc =>
+        override public void ExitProgram(dsParser.ProgramContext ctx)
+        {
+            foreach(var cpu in _model.Cpus)
+            {
+                foreach(var seg in cpu.RootFlows.SelectMany(rf => rf.ChildVertices).OfType<Segment>())
                 {
-                    var systemName = fpc.GetChild(0).GetText();
-                    var dot_ = fpc.GetChild(1).GetText();
-                    var flowName = fpc.GetChild(2).GetText();
-
-                    var system = _model.Systems.FirstOrDefault(sys => sys.Name == systemName);
-                    var flow = system.RootFlows.FirstOrDefault(f => f.Name == flowName);
-                    return flow;
-                })
-                .ToArray()
-                ;
-            var cpu_ = new Cpu(name, flows, _model);
+                    var ports = new Port[] { seg.PortS, seg.PortR, seg.PortE, };
+                    ports.Iter(p => p.OwnerCpu = cpu);
+                }
+            }
         }
+
+
+
+
+
 
 
 
@@ -440,7 +539,22 @@ namespace DsParser
         //    return FindVertices(node.id, flow);
         //}
 
-        ICoin[] FindVertices(string specs) => specs.Split(new[] { ',' }).Select(spec => ParserHelper.QualifiedPathMap[spec] as ICoin).ToArray();
+        IVertex[] FindVertices(string context, string specs)
+        {
+            return specs.Split(new[] { ',' }).Select(sp => {
+                //var spec = sp;
+                //if (context.IsNullOrEmpty() && !sp.StartsWith(context))
+                //    spec = $"{context}.{sp}";
+                var spec = ParserHelper.QualifiedPathMap.ContainsKey($"{context}.{sp}") ? $"{context}.{sp}" : sp;
+                var vertex = ParserHelper.QualifiedPathMap[spec] as IVertex;
+                if (vertex is CallPrototype)
+                {
+
+                    Console.WriteLine();
+                }
+                return vertex;
+            }).ToArray();
+        }
 
 
         /**
@@ -475,9 +589,10 @@ namespace DsParser
                         var r = this.nodes[strR];
 
                         Flow flow = (Flow)_parenting ?? _rootFlow;   // target flow
+                        var context = _parenting == null ? "" : CurrentPath;
 
-                        var lvs = FindVertices(l.id);
-                        var rvs = FindVertices(r.id);
+                        var lvs = FindVertices(context, l.id);
+                        var rvs = FindVertices(context, r.id);
 
                         Debug.Assert(l != null && r != null);   // 'node not found');
                         if (lvs.Length == 0) throw new Exception($"Parse error: {l.id} not found");
@@ -512,7 +627,7 @@ namespace DsParser
                                 Debug.Assert(false);    //, `invalid operator: ${ op}`);
                                 break;
                         }
-                        flow.Edges.Add(e);
+                        flow.AddEdge(e);
 
                     }
                 }

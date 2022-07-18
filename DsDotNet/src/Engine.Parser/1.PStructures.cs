@@ -227,7 +227,7 @@ namespace DsParser
                 if (flow == null)
                     return null;
 
-                return flow.CollectVertices().OfType<Segment>()
+                return flow.ChildVertices.OfType<Segment>()
                     .FirstOrDefault(s => s.Name == segmentOrCallName)
                     ;
             }

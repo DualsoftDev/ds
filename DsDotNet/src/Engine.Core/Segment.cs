@@ -44,7 +44,8 @@ namespace Engine.Core
             : base(name)
         {
             ContainerFlow = containerFlow;
-            containerFlow.ChildVertices.Add(this);
+            //containerFlow.ChildVertices.Add(this);
+            containerFlow.AddChildVertex(this);
 
             PortS = new PortS(this);
             PortR = new PortR(this);

@@ -7,16 +7,16 @@ using System.Threading.Tasks;
 
 namespace Engine.Core
 {
-    [DebuggerDisplay("{ToText()}")]
-    public class SegmentAlias : Coin, IAlias
-    {
-        public SegmentAlias(string name, IWallet container, Segment aliasTarget)
-            : base(name)
-        {
-            AliasTarget = aliasTarget;
-        }
+    //[DebuggerDisplay("{ToText()}")]
+    //public class SegmentAlias : Coin, IAlias
+    //{
+    //    public SegmentAlias(string name, IWallet container, Segment aliasTarget)
+    //        : base(name)
+    //    {
+    //        AliasTarget = aliasTarget;
+    //    }
 
-        public Segment AliasTarget { get; }
-        public override string ToText() => $"{Name} => {AliasTarget.Name}";
-    }
+    //    public Segment AliasTarget { get; }
+    //    public override string ToText() => $"{Name} => {AliasTarget.Name}";
+    //}
 }

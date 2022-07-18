@@ -64,19 +64,38 @@ namespace Engine.Core
         {
             Prototype = protoType;
             Container = flow;
-            flow.ChildVertices.Add(this);
+
+
+
+            //flow.ChildVertices.Add(this);
+            //flow.AddChildVertex(this);
+
+            // child flow 에서는 Child 로 wrapping 해서 추가됨.
+            if (flow is RootFlow)
+                flow.ChildVertices.Add(this);
         }
 
         public override void Going() => TxTags.Iter(t => t.Value = true);
     }
 
-    public class CallAlias : Call, IAlias
+    //public class CallAlias : Call, IAlias
+    //{
+    //    public string AliasTargetName;
+    //    public CallAlias(string name, string aliasTargetName, Flow container, CallPrototype protoType)
+    //        : base(name, container, protoType)
+    //    {
+    //        AliasTargetName = aliasTargetName;
+    //    }
+    //}
+
+    public class ExSegmentCall: Coin
     {
-        public string AliasTargetName;
-        public CallAlias(string name, string aliasTargetName, Flow container, CallPrototype protoType)
-            : base(name, container, protoType)
+        public Segment ExternalSegment;
+
+        public ExSegmentCall(string aliasName, Segment externalSegment)
+            : base(aliasName)
         {
-            AliasTargetName = aliasTargetName;
+            ExternalSegment = externalSegment;
         }
     }
 

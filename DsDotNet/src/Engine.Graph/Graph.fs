@@ -90,8 +90,7 @@ module GraphUtil =
                 match e.Target with
                 | :? Child as child ->
                     match child.Coin with
-                    | :? Call
-                    | :? CallAlias ->
+                    | :? Call ->
                         true
                     | _ ->
                         false

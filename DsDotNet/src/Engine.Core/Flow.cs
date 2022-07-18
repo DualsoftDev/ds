@@ -14,7 +14,17 @@ namespace Engine.Core
         public CpuBase Cpu { get; set; }
 
         /// <summary>Edge 를 통해 알 수 없는 isolated segement/call 등을 포함 </summary>
-        internal List<IVertex> ChildVertices { get; } = new List<IVertex>();
+        public HashSet<IVertex> ChildVertices { get; } = new HashSet<IVertex>();
+        public void AddChildVertices(IEnumerable<IVertex> children)// 임시
+        {
+            foreach (var child in children)
+                AddChildVertex(child);
+        }
+        public void AddChildVertex(IVertex child)// 임시
+        {
+            Debug.Assert(this is RootFlow || child is Child);
+            ChildVertices.Add(child);
+        }
 
         public GraphInfo GraphInfo { get; set; }
 
@@ -28,6 +38,11 @@ namespace Engine.Core
         {
             this.CheckAddable(edge);
             Edges.Add(edge);
+
+            //edge.Sources.Iter(s => ChildVertices.Add(s));
+            edge.Sources.Iter(s => AddChildVertex(s));
+            //ChildVertices.Add(edge.Target);
+            AddChildVertex(edge.Target);
         }
 
         protected Flow(string name)
@@ -84,7 +99,8 @@ namespace Engine.Core
                     ;
 
             flow.ChildVertices.Clear();
-            flow.ChildVertices.AddRange(allVertices);
+            //allVertices.Iter(v => flow.ChildVertices.Add(v));
+            allVertices.Iter(v => flow.AddChildVertex(v));
         }
 
         public static IEnumerable<ICoin> CollectIsolatedCoins(this Flow flow)
@@ -96,22 +112,19 @@ namespace Engine.Core
                 ;
         }
 
-        public static IEnumerable<IVertex> CollectVertices(this Flow flow) =>
-            flow.Edges.SelectMany(e => e.Vertices)
-            .Concat(flow.ChildVertices)
-            .Distinct()
-            ;
+        //public static IEnumerable<IVertex> CollectVertices(this Flow flow) =>
+        //    flow.Edges.SelectMany(e => e.Vertices)
+        //    .Concat(flow.ChildVertices)
+        //    .Distinct()
+        //    ;
 
-        public static IEnumerable<SegmentAlias> CollectExternalRealSegment(this ChildFlow childFlow)
+        public static IEnumerable<ExSegmentCall> CollectExternalRealSegment(this ChildFlow childFlow)
         {
-            var exSegments = childFlow.ChildVertices.OfType<SegmentAlias>();
-            Debug.Assert(exSegments.All(s => s.AliasTarget.ContainerFlow.System != ((Segment)childFlow).ContainerFlow.System));
+            var exSegments = childFlow.ChildVertices.OfType<Child>().Select(c => c.Coin).OfType<ExSegmentCall>();
             return exSegments;
         }
-        public static IEnumerable<CallAlias> CollectCallAlises(this ChildFlow childFlow) => childFlow.ChildVertices.OfType<CallAlias>();
-        public static IEnumerable<IAlias> CollectAlises(this ChildFlow childFlow) =>
-            childFlow.CollectExternalRealSegment().Cast<IAlias>()
-            .Concat(childFlow.CollectCallAlises())
+        public static IEnumerable<Child> CollectAlises(this ChildFlow childFlow) =>
+            childFlow.ChildVertices.OfType<Child>().Where(c => c.IsAlias)
             ;
 
         struct Causal
@@ -178,7 +191,7 @@ namespace Engine.Core
         {
             var active = isActive ? "Active " : "";
             Logger.Debug($"== {active}Flow {flow.GetSystem().Name}::{flow.Name}");
-            foreach (var v in flow.CollectVertices())
+            foreach (var v in flow.ChildVertices)
                 Logger.Debug(v.ToString());
         }
     }

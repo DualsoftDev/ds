@@ -78,9 +78,12 @@ namespace Engine.Core
 
     public class CallAlias : Call, IAlias
     {
-        public CallAlias(string name, IWallet container, CallPrototype protoType)
+        public string AliasTargetName;
+        public CallAlias(string name, string aliasTargetName, IWallet container, CallPrototype protoType)
             : base(name, container, protoType)
-        {}
+        {
+            AliasTargetName = aliasTargetName;
+        }
     }
 
     public static class CallExtension

@@ -13,6 +13,7 @@ namespace DsParser
         PSystem _system;
         PTask _task;
         PRootFlow _rootFlow;
+        PSegment _parenting;
 
         public ModelListener(dsParser parser)
         {
@@ -44,6 +45,15 @@ namespace DsParser
             Trace.WriteLine($"Flow: {flowName}");
         }
         override public void ExitFlow(dsParser.FlowContext ctx) { _rootFlow = null; }
+        override public void EnterParenting(dsParser.ParentingContext ctx)
+        {
+            Trace.WriteLine($"Parenting: {ctx.GetText()}");
+            var name = ctx.id().GetText();
+            var seg = _rootFlow.Segments.FirstOrDefault(s => s.Name == name);
+            _parenting = seg ?? new PSegment(name, _rootFlow);
+
+        }
+        override public void ExitParenting(dsParser.ParentingContext ctx) { _parenting = null; }
 
         override public void EnterCausalPhrase(dsParser.CausalPhraseContext ctx)
         {
@@ -63,8 +73,9 @@ namespace DsParser
                 .Where(n => !_rootFlow.Segments.Any(s => s.Name == n))
                 .Select(n =>
                 {
+                    var flow = (PFlow)_parenting?.ChildFlow ?? _rootFlow;
                     if (_system.AliasNameMap.ContainsKey(n))
-                        return new PAlias(n, _rootFlow, _system.AliasNameMap[n]) as IPCoin;
+                        return new PAlias(n, flow, _system.AliasNameMap[n]) as IPCoin;
                     else
                         return new PSegment(n, _rootFlow);
                 })  // _flow 에 segment 로 등록됨
@@ -109,12 +120,6 @@ namespace DsParser
         }
         //override public void ExitCausals(dsParser.CausalsContext ctx) {}
 
-        override public void EnterParenting(dsParser.ParentingContext ctx) {
-            Trace.WriteLine($"Parenting: {ctx.GetText()}");
-            var name = ctx.id().GetText();
-            var seg = new PSegment(name, _rootFlow);
-        }
-        //override public void ExitParenting(dsParser.ParentingContext ctx) { }
 
         override public void EnterAliasListing(dsParser.AliasListingContext ctx)
         {

@@ -27,6 +27,8 @@ namespace Engine
             this.InitializeFlows(Cpu, Opc);
             Model.Epilogue();
 
+            var f = Model.Systems.FirstOrDefault(s => s.Name == "L")?.RootFlows[0];
+
             Debug.Assert(Opc._opcTags.All(t => t.OriginalTag.IsExternal()));
             Opc.Print();
 

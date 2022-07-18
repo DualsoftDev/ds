@@ -24,7 +24,6 @@ namespace Engine.Core
                 case Port port:
                     var seg = port.OwnerSegment;
                     seg.EvaluatePort(port, newValue);
-                    //seg.TryChangePort(port, newValue);
                     break;
 
                 case Flag flag:

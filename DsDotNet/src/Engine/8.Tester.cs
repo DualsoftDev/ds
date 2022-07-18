@@ -35,8 +35,8 @@ namespace Engine
         //parenting = {A > B > C; C |> B; }
         //T.C1 <||> T.C2;
         //A, B > C > D, E;
-        T.Cm > T.Cp;
-        T.Cm |> T.Cp;
+        //T.Cm > T.Cp;
+        //T.Cm |> T.Cp;
     }
 }
 [sys] P = {

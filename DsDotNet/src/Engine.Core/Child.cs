@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
+using System.Reactive.Disposables;
 
 namespace Engine.Core
 {
@@ -10,13 +12,24 @@ namespace Engine.Core
         public Coin Coin { get; }
         public bool IsCall => Coin is Call;
         // 부모가 바라본 child 상태
-        public Status4 Status => Parent.ChildStatusMap[this];
+        public Status4 Status
+        {
+            get => Parent.ChildStatusMap[this];
+            set => Parent.ChildStatusMap[this] = value;
+        }
+
+        CompositeDisposable _disposables = new CompositeDisposable();
         public Child(Coin coin, Segment parent)
             :base(coin.Name)
         {
             Parent = parent;
             Coin = coin;
             QualifiedName = $"{parent.QualifiedName}_{coin.Name}";
+            //switch(coin)
+            //{
+            //    case Call call when call.RxTags.Any():
+
+            //}
         }
 
         public string QualifiedName { get; }
@@ -24,10 +37,28 @@ namespace Engine.Core
         public CpuBase OwnerCpu { get => Coin.OwnerCpu; set => throw new NotImplementedException(); }
 
         public override string ToString() => (IsCall ? "" : "==") + Coin.ToText();
+        public void Going()
+        {
+            //Coin.Going();
+
+            switch(Coin)
+            {
+                case SegmentAlias extSeg:
+                    extSeg.Going();
+                    break;
+                case CallAlias call:
+                    call.Going();
+                    break;
+                case Call call:
+                    call.Going();
+                    break;
+                default:
+                    throw new Exception("ERROR");
+            }
+        }
     }
 
     public static class ChildExtension
     {
-        public static void Going(this Child child) => child.Coin.Going();
     }
 }

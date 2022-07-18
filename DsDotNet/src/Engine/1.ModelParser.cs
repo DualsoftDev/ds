@@ -53,7 +53,7 @@ namespace Engine
                             {
                                 case PSegment pSeg:
                                     var aliasTarget = pick<Segment>(pSeg);
-                                    dict.Add(a, new SegmentAlias(a.Name, pick<RootFlow>(a.ContainerFlow), aliasTarget));
+                                    dict.Add(a, new SegmentAlias(a.Name, pick<Flow>(a.ContainerFlow), aliasTarget));
                                     break;
                                 case PCall call:
                                     break;
@@ -263,7 +263,7 @@ namespace Engine
                                             {
                                                 case PCallPrototype pCp:
                                                     var cp = pick<CallPrototype>(pCp);
-                                                    var call = pick<Call>(pAlias, () => new CallAlias(pAlias.Name, container, cp));
+                                                    var call = pick<Call>(pAlias, () => new CallAlias(pAlias.Name, pAlias.AliasTargetName, container, cp));
                                                     break;
                                                 case PSegment seg:
                                                     var target = pick<Segment>(pTarget);

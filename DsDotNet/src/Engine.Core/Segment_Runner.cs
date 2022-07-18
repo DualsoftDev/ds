@@ -22,6 +22,7 @@ namespace Engine.Core
             var st = Status;
             //var paused = Paused;
 
+            // start port 와 reset port 동시 눌림
             var duplicate =
                 newValue && ((sp != null && PortR.Value) || (rp != null && PortS.Value));
 

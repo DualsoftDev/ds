@@ -65,7 +65,7 @@ namespace Engine
                             dict.Add(s, new Segment(s.Name, pick<RootFlow>(s.ContainerFlow)));
                             break;
                         case PCall pCall:
-                            var container = pick<IWallet>(pCall.Container);
+                            var container = pick<Flow>(pCall.Container);
                             dict.Add(pCall, new Call(pCall.Name, container, pick<CallPrototype>(pCall.Prototype)));
                             break;
                         default:
@@ -81,11 +81,17 @@ namespace Engine
 
                 if (flow == null)
                 {
-                    var pChildFlow = pFlow as PChildFlow;
-                    if (pFlow is PRootFlow)
-                        flow = pick<RootFlow>(pFlow, () => new RootFlow(pFlow.Name, pick<DsSystem>(pFlow.System)));
-                    else if (pChildFlow != null)
-                        flow = pick<ChildFlow>(pChildFlow, () => new ChildFlow(pChildFlow.Name, pick<Segment>(pChildFlow.ContainerSegment)));
+                    switch(pFlow)
+                    {
+                        case PRootFlow pRootFlow:
+                            flow = pick<RootFlow>(pRootFlow, () => new RootFlow(pRootFlow.Name, pick<DsSystem>(pRootFlow.System)));
+                            break;
+                        case PSegment pSeg:
+                            flow = pick<Segment>(pSeg, () => new Segment(pSeg.Name, pick<RootFlow>(pSeg.ContainerFlow)));
+                            break;
+                        default:
+                            throw new Exception("ERROR");
+                    }
                 }
 
 
@@ -166,17 +172,17 @@ namespace Engine
                 var pChildFlows =
                     pRootFlows
                         .SelectMany(prf => prf.Children.OfType<PSegment>())
-                        .Select(pseg => pseg.ChildFlow)
                         .Where(cf => cf != null)
                         .Distinct()
                         .ToArray()
                         ;
                 foreach (var pcf in pChildFlows)
                 {
-                    var cf = pick<Segment>(pcf.ContainerSegment).ChildFlow;
-                    Debug.Assert(cf != null);
-                    dict.Add(pcf, cf);
-                    //var childFlow_ = pick<ChildFlow>(pcf, () => new ChildFlow(pcf.Name, seg));
+                    Debug.Assert(dict.ContainsKey(pcf));
+                    //var cf = pick<Segment>(pcf);
+                    //Debug.Assert(cf != null);
+                    //dict.Add(pcf, cf);
+                    ////var childFlow_ = pick<ChildFlow>(pcf, () => new ChildFlow(pcf.Name, seg));
                 }
 
                 //var pRootSegements = pRootFlows.SelectMany(rf => rf.Children.OfType<PSegment>()).Distinct().ToArray();
@@ -214,7 +220,7 @@ namespace Engine
                                 {
                                     case PCall pChCall:
                                         var callProto = pick<CallPrototype>(pChCall.Prototype);
-                                        var container = pick<IWallet>(pChCall.Container);
+                                        var container = pick<Flow>(pChCall.Container);
                                         var call = pick<Call>(pChCall, () => new Call(pChCall.Name, container, callProto));
                                         break;
                                     case PAlias pAlias:
@@ -315,16 +321,13 @@ namespace Engine
 
                         foreach (var pSegment in pFlow.Segments)
                         {
-                            var child = (Coin)dict[pSegment];
+                            var child = (ICoin)dict[pSegment];
                             if (!flow.ChildVertices.Contains(child))
                                 flow.ChildVertices.Add(child);
 
-                            if (pSegment.ChildFlow != null)
-                            {
-                                var segment = child as Segment;
-                                fillEdges(segment.ChildFlow, pSegment.ChildFlow);
-                                segment.ChildFlow.Cpu = flow.Cpu;
-                            }
+                            var segment = child as Segment;
+                            fillEdges(segment, pSegment);
+                            segment.Cpu = flow.Cpu;
                         }
 
                         fillEdges(flow, pFlow);

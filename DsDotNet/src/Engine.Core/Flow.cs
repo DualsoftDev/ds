@@ -11,7 +11,6 @@ namespace Engine.Core
 {
     public abstract class Flow : Named, IWallet
     {
-        public DsSystem System { get; set; }
         public CpuBase Cpu { get; set; }
 
         /// <summary>Edge 를 통해 알 수 없는 isolated segement/call 등을 포함 </summary>
@@ -32,10 +31,9 @@ namespace Engine.Core
             _edges.Add(edge);
         }
 
-        protected Flow(string name, DsSystem system)
+        protected Flow(string name)
             : base(name)
         {
-            System = system;
         }
     }
 
@@ -43,25 +41,21 @@ namespace Engine.Core
 
     public class RootFlow : Flow
     {
-        public List<ChildFlow> SubFlows = new List<ChildFlow>();
+        public DsSystem System { get; set; }
         public string QualifiedName => $"{System.Name}_{Name}";
         public RootFlow(string name, DsSystem system)
-            : base(name, system)
+            : base(name)
         {
+            System = system;
             system.RootFlows.Add(this);
         }
     }
 
     public class ChildFlow : Flow
     {
-        public Segment ContainerSegment;
-        //public IEnumerable<Call> Calls => Children.OfType<Call>();
-        public ChildFlow(string name, Segment segment)
-            : base(name, segment.ContainerFlow.System)
+        public ChildFlow(string name)
+            : base(name)
         {
-            Debug.Assert(segment.ContainerFlow.SubFlows.All(sf => sf.Name != name));
-            segment.ContainerFlow.SubFlows.Add(this);
-            ContainerSegment = segment;
         }
     }
 
@@ -69,6 +63,17 @@ namespace Engine.Core
     public static class FlowExtension
     {
         static ILog Logger => Global.Logger;
+
+        public static DsSystem GetSystem(this Flow flow)
+        {
+            switch(flow)
+            {
+                case RootFlow rf: return rf.System;
+                case Segment seg: return seg.ContainerFlow.System;
+                default:
+                    throw new Exception("ERROR");
+            }
+        }
 
         public static void Epilogue(this Flow flow)
         {
@@ -101,7 +106,7 @@ namespace Engine.Core
         public static IEnumerable<SegmentAlias> CollectExternalRealSegment(this ChildFlow childFlow)
         {
             var exSegments = childFlow.ChildVertices.OfType<SegmentAlias>();
-            Debug.Assert(exSegments.All(s => s.AliasTarget.ContainerFlow.System != childFlow.System));
+            Debug.Assert(exSegments.All(s => s.AliasTarget.ContainerFlow.System != ((Segment)childFlow).ContainerFlow.System));
             return exSegments;
         }
         public static IEnumerable<CallAlias> CollectCallAlises(this ChildFlow childFlow) => childFlow.ChildVertices.OfType<CallAlias>();
@@ -173,7 +178,7 @@ namespace Engine.Core
         public static void PrintFlow(this Flow flow, bool isActive)
         {
             var active = isActive ? "Active " : "";
-            Logger.Debug($"== {active}Flow {flow.System.Name}::{flow.Name}");
+            Logger.Debug($"== {active}Flow {flow.GetSystem().Name}::{flow.Name}");
             foreach (var v in flow.CollectVertices())
                 Logger.Debug(v.ToString());
         }

@@ -62,7 +62,7 @@ namespace Engine
             {
                 var children = engine.Cpu.RootFlows.SelectMany(f => f.ChildVertices);
                 var main = children.OfType<Segment>().FirstOrDefault(c => c.Name == "Main");
-                var edges = main.ChildFlow.Edges.ToArray();
+                var edges = main.Edges.ToArray();
 
                 opc.Write(resetTag, true);
                 opc.Write(resetTag, false);

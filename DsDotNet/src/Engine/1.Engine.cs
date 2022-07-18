@@ -24,10 +24,13 @@ namespace Engine
             Cpu = Model.Cpus.First(cpu => cpu.Name == activeCpuName);
             Cpu.Engine = this;
 
+            var xxL = Model.Systems.FirstOrDefault(s => s.Name == "L")?.RootFlows[0];
+            var xxP = Model.Systems.FirstOrDefault(s => s.Name == "P")?.RootFlows[0];
+            var xxRfs = Model.CollectRootFlows().ToArray();
+
             this.InitializeFlows(Cpu, Opc);
             Model.Epilogue();
 
-            var f = Model.Systems.FirstOrDefault(s => s.Name == "L")?.RootFlows[0];
 
             Debug.Assert(Opc._opcTags.All(t => t.OriginalTag.IsExternal()));
             Opc.Print();
@@ -63,15 +66,18 @@ namespace Engine
     {
         public static void Epilogue(this Model model)
         {
-            var allFlows = model.CollectFlows();
-            foreach (var flow in allFlows)
-                flow.GraphInfo = GraphUtil.analyzeFlows(new[] { flow }, flow is RootFlow);
+            var rootFlows = model.CollectRootFlows();
+            foreach (var flow in rootFlows)
+                flow.GraphInfo = GraphUtil.analyzeFlows(new[] { flow }, true);
 
             foreach(var cpu in model.Cpus)
                 cpu.GraphInfo = GraphUtil.analyzeFlows(cpu.RootFlows, true);
 
             foreach (var segment in model.CollectSegments())
+            {
+                segment.GraphInfo = GraphUtil.analyzeFlows(new[] { segment }, false);
                 segment.Epilogue();
+            }
 
             foreach (var cpu in model.Cpus)
                 cpu.Epilogue();
@@ -82,7 +88,7 @@ namespace Engine
         public static IEnumerable<Flow> CollectFlows(this Model model)
         {
             var rootFlows = model.CollectRootFlows().ToArray();
-            var subFlows = rootFlows.SelectMany(rf => rf.SubFlows);
+            var subFlows = rootFlows.SelectMany(rf => rf.ChildVertices.OfType<Segment>());
             var allFlows = rootFlows.Cast<Flow>().Concat(subFlows);
             return allFlows;
         }

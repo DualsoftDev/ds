@@ -52,7 +52,7 @@ namespace Engine.Core
             }
         }
 
-        public override bool Paused
+        public bool Paused
         {
             get {
                 var childStarted =

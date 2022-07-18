@@ -437,10 +437,7 @@ namespace DsParser
             var map = flow.CallInstanceMap;
             if (! map.ContainsKey(callPrototype))
             {
-                var childFlow = flow as PChildFlow;
-                var rootFlow = flow as PRootFlow;
-                var container = (IPWallet)rootFlow ?? childFlow;
-                var call = new PCall(callPrototype.Name, container, callPrototype);
+                var call = new PCall(callPrototype.Name, flow, callPrototype);
                 map.Add(callPrototype, call);
             }
 
@@ -451,7 +448,7 @@ namespace DsParser
         {
             if (node.type == NodeType.segmentAlias)
             {
-                var aliasTarget = flow.System.Aliases[node.label];
+                var aliasTarget = flow.GetSystem().Aliases[node.label];
                 return new IPCoin[] { aliasTarget };
             }
             return FindVertices(node.id, flow);
@@ -488,9 +485,7 @@ namespace DsParser
                         var l = this.nodes[strL];
                         var r = this.nodes[strR];
 
-                        PFlow pFlow = _rootFlow;
-                        if (_parenting != null )
-                            pFlow = _parenting.ChildFlow;   // target flow
+                        PFlow pFlow = (PFlow)_parenting ?? _rootFlow;   // target flow
 
                         var lvs = FindVertices(l, pFlow);
                         var rvs = FindVertices(r, pFlow);

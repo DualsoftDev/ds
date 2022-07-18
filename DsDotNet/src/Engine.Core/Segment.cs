@@ -9,12 +9,13 @@ using System.Reactive.Linq;
 
 namespace Engine.Core
 {
-    [DebuggerDisplay("{ToText(),nq}")]
-    public partial class Segment : Coin, IWallet, IWithSREPorts, ITxRx
+    //[DebuggerDisplay("{ToText(),nq}")]
+    [DebuggerDisplay("XXX")]
+    public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, IWithSREPorts, ITxRx// Coin
     {
         public RootFlow ContainerFlow { get; }
-        public ChildFlow ChildFlow { get; set; }
-        public override CpuBase OwnerCpu { get => ContainerFlow.Cpu; set => throw new NotImplementedException(); }
+        public CpuBase OwnerCpu { get => ContainerFlow.Cpu; set => throw new NotImplementedException(); }
+        public string QualifiedName => $"{ContainerFlow.QualifiedName}_{Name}";
 
 
         public PortS PortS { get; set; }
@@ -27,16 +28,15 @@ namespace Engine.Core
         public Tag TagE { get; set; }
 
         public bool IsResetFirst { get; internal set; } = true;
-        public IEnumerable<IVertex> Vertices => ChildFlow.ChildVertices;   // Coin
-        public IEnumerable<Call> CallChildren => Vertices.OfType<Call>();
+        public IEnumerable<Call> CallChildren => ChildVertices.OfType<Call>();
 
-        public override string QualifiedName => $"{ContainerFlow.QualifiedName}_{Name}";
 
         public Child[] Children { get; internal set; }
         public Child[] Inits { get; internal set; }
         public Child[] Lasts { get; internal set; }
         public VertexAndOutgoingEdges[] TraverseOrder { get; internal set; }
         internal Dictionary<Coin, Child> CoinChildMap { get; set; }
+        public bool Value { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         internal CompositeDisposable Disposables = new CompositeDisposable();
 
@@ -44,7 +44,6 @@ namespace Engine.Core
             : base(name)
         {
             ContainerFlow = containerFlow;
-            ChildFlow = new ChildFlow($"_{name}", this);
             containerFlow.ChildVertices.Add(this);
 
             PortS = new PortS(this);
@@ -55,7 +54,7 @@ namespace Engine.Core
         public override string ToString() => ToText();
         public override string ToText()
         {
-            var c = Vertices == null ? 0 : Vertices.Count();
+            var c = ChildVertices == null ? 0 : ChildVertices.Count();
             return $"{Name}: cpu={OwnerCpu?.Name}, #children={c}";
         }
     }
@@ -78,7 +77,7 @@ namespace Engine.Core
         {
             // coin -> child map
             var ccMap =
-                segment.Vertices.OfType<Coin>()
+                segment.ChildVertices.OfType<Coin>()
                     .ToDictionary(coin => coin, coin => new Child(coin, segment))
                     ;
             segment.CoinChildMap = ccMap;
@@ -98,9 +97,7 @@ namespace Engine.Core
             }
 
             // { Graph 정보 추출 & 저장
-            var gi = segment.ChildFlow.GraphInfo;
-            segment.Inits = gi.Inits.OfType<Coin>().Select(convert).Cast<Child>().ToArray();
-            segment.Lasts = gi.Lasts.Select(convert).Cast<Child>().ToArray();
+            var gi = segment.GraphInfo;
             foreach (var ves in gi.TraverseOrders)
             {
                 ves.Vertex = convert(ves.Vertex);
@@ -110,6 +107,8 @@ namespace Engine.Core
                     oe.Target = convert(oe.Target);
                 }
             }
+            segment.Inits = gi.Inits.OfType<Coin>().Select(convert).Cast<Child>().ToArray();
+            segment.Lasts = gi.Lasts.Select(convert).Cast<Child>().ToArray();
             segment.TraverseOrder = gi.TraverseOrders;
             // }
 

@@ -50,7 +50,7 @@ namespace Engine.Core
     public class Call : CallBase
     {
         public CallPrototype Prototype;
-        public IWallet Container;
+        public Flow Container;
         public override bool Value => Prototype.Value;
         public override string QualifiedName => this.GetQualifiedName();
         public Tag[] TxTags { get; set; }
@@ -60,16 +60,10 @@ namespace Engine.Core
         public IEnumerable<ITxRx> RXs => Prototype.RXs;
         public IEnumerable<ITxRx> TxRxs => TXs.Concat(RXs);
 
-        public Call(string name, IWallet container, CallPrototype protoType) : base(name)
+        public Call(string name, Flow flow, CallPrototype protoType) : base(name)
         {
             Prototype = protoType;
-            Container = container;
-
-            Flow flow = container as Flow;
-            var containerSegment = container as Segment;
-            if (flow == null && containerSegment != null)
-                flow = containerSegment.ChildFlow;
-
+            Container = flow;
             flow.ChildVertices.Add(this);
         }
 
@@ -79,7 +73,7 @@ namespace Engine.Core
     public class CallAlias : Call, IAlias
     {
         public string AliasTargetName;
-        public CallAlias(string name, string aliasTargetName, IWallet container, CallPrototype protoType)
+        public CallAlias(string name, string aliasTargetName, Flow container, CallPrototype protoType)
             : base(name, container, protoType)
         {
             AliasTargetName = aliasTargetName;
@@ -96,8 +90,6 @@ namespace Engine.Core
                     return $"{seg.QualifiedName}_{call.Name}";
                 case RootFlow flow:
                     return $"{flow.QualifiedName}_{call.Name}";
-                case ChildFlow flow:
-                    return $"{flow.ContainerSegment.QualifiedName}_{call.Name}";
                 default:
                     throw new Exception("ERROR");
             }

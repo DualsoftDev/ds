@@ -47,7 +47,6 @@ namespace DsParser
 
     public abstract class PFlow : PNamed, IPWallet
     {
-        public PSystem System;
         public List<PSegment> Segments = new List<PSegment>();
         public IEnumerable<IPVertex> Children => Segments.Concat(Edges.SelectMany(e => e.Sources.Concat(new[] { e.Target }))).ToArray();
         public List<PEdge> Edges = new List<PEdge>();
@@ -55,29 +54,42 @@ namespace DsParser
 
         internal Dictionary<PCallPrototype, PCall> CallInstanceMap = new Dictionary<PCallPrototype, PCall>();
 
-        protected PFlow(string name, PSystem system)
+        protected PFlow(string name)
             : base(name)
         {
-            System = system;
         }
     }
 
     public class PRootFlow : PFlow
     {
+        public PSystem System;
         public PRootFlow(string name, PSystem system)
-            : base(name, system)
+            : base(name)
         {
+            System = system;
             system.RootFlows.Add(this);
         }
     }
 
     public class PChildFlow : PFlow
     {
-        public PSegment ContainerSegment;
-        public PChildFlow(string name, PSegment segment)
-            : base(name, segment.ContainerFlow.System)
+        public PChildFlow(string name)
+            : base(name)
         {
-            ContainerSegment = segment;
+        }
+    }
+
+    public static class PFlowExtension
+    {
+        public static PSystem GetSystem(this PFlow flow)
+        {
+            switch (flow)
+            {
+                case PRootFlow rf: return rf.System;
+                case PSegment seg: return seg.ContainerFlow.System;
+                default:
+                    throw new Exception("ERROR");
+            }
         }
     }
 
@@ -109,18 +121,14 @@ namespace DsParser
     public interface IPCoin : IPVertex {}
 
 
-    public class PSegment : PNamed, IPCoin, IPWallet
+    public class PSegment : PChildFlow, IPCoin, IPWallet
     {
         public PRootFlow ContainerFlow;
-        public PChildFlow ChildFlow;
         public IEnumerable<IPVertex> Children {
             get
             {
-                if (ChildFlow == null)
-                    return Enumerable.Empty<IPVertex>();
-
                 return
-                    ChildFlow.Edges
+                    Edges
                     .SelectMany(e => e.Sources.Concat(new[] { e.Target }))
                     //.OfType<PCall>()
                     .Distinct()
@@ -132,7 +140,6 @@ namespace DsParser
             : base(name)
         {
             ContainerFlow = containerFlow;
-            ChildFlow = new PChildFlow($"_{name}", this);
             containerFlow.Segments.Add(this);
         }
     }
@@ -147,7 +154,7 @@ namespace DsParser
         {
             AliasTargetName = aliasTarget;
             ContainerFlow = containerFlow;
-            containerFlow.System.Aliases.Add(name, this);
+            containerFlow.GetSystem().Aliases.Add(name, this);
         }
     }
 
@@ -175,8 +182,8 @@ namespace DsParser
     public class PCall : PCallBase
     {
         public PCallPrototype Prototype;
-        public IPWallet Container;
-        public PCall(string name, IPWallet container, PCallPrototype prototype) : base(name)
+        public PFlow Container;
+        public PCall(string name, PFlow container, PCallPrototype prototype) : base(name)
         {
             Prototype = prototype;
             Container = container;

@@ -58,7 +58,6 @@ module ModelTests =
             (childrenNames, ["Vp"; "Pp"; "Sp"; "Vm"; "Pm"; "Sm"]) |> seqEq
 
             children
-            |> Seq.map(fun c -> c.ChildFlow)
             |> Seq.forall(fun f ->
                 f.Edges.Count() = 0 && f.ChildVertices.Count = 0)
             |> ShouldBeTrue
@@ -109,7 +108,7 @@ module ModelTests =
             flow.Name === "F"
             let main = flow.Coins |> Enumerable.OfType<Segment> |> Seq.find(fun seg -> seg.Name = "Main")
             main.Name === "Main"
-            let childrenNames = main.Vertices |> Enumerable.OfType<Coin> |> Seq.map(fun soc -> soc.Name)
+            let childrenNames = main.ChildVertices |> Enumerable.OfType<Coin> |> Seq.map(fun soc -> soc.Name)
             (childrenNames, ["Cp"; "Cm"; "C22"]) |> setEq
 
             let checkC22Instance_ =
@@ -154,7 +153,7 @@ module ModelTests =
             flow.Name === "F"
             let main = flow.Coins |> Enumerable.OfType<Segment> |> Seq.find(fun seg -> seg.Name = "Main")
             main.Name === "Main"
-            let childrenNames = main.Vertices |> Enumerable.OfType<Coin> |> Seq.map(fun soc -> soc.Name)
+            let childrenNames = main.ChildVertices |> Enumerable.OfType<Coin> |> Seq.map(fun soc -> soc.Name)
             (childrenNames, ["Vp"; "Vm";]) |> setEq
             ()
 
@@ -189,10 +188,10 @@ module ModelTests =
             flow.Name === "F"
             let main = flow.Coins |> Enumerable.OfType<Segment> |> Seq.find(fun seg -> seg.Name = "Main")
             main.Name === "Main"
-            let childrenNames = main.Vertices |> Enumerable.OfType<Coin> |> Seq.map(fun soc -> soc.Name)
+            let childrenNames = main.ChildVertices |> Enumerable.OfType<Coin> |> Seq.map(fun soc -> soc.Name)
             (childrenNames, ["Vp1"; "Vp2"; "A1"]) |> setEq
 
-            let externalReals = main.ChildFlow.CollectExternalRealSegment()
+            let externalReals = main.CollectExternalRealSegment()
             ( externalReals |> Seq.map(fun seg -> seg.Name), ["Vp1"; "Vp2";]) |> setEq
-            (main.ChildFlow.CollectAlises() |> Seq.map(fun seg -> seg.Name), ["Vp1"; "Vp2"; "A1"]) |> setEq
+            (main.CollectAlises() |> Seq.map(fun seg -> seg.Name), ["Vp1"; "Vp2"; "A1"]) |> setEq
             ()

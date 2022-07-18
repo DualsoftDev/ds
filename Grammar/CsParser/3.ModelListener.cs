@@ -73,7 +73,7 @@ namespace DsParser
                 .Where(n => !_rootFlow.Segments.Any(s => s.Name == n))
                 .Select(n =>
                 {
-                    var flow = (PFlow)_parenting?.ChildFlow ?? _rootFlow;
+                    var flow = (PFlow)_parenting ?? _rootFlow;
                     if (_system.AliasNameMap.ContainsKey(n))
                         return new PAlias(n, flow, _system.AliasNameMap[n]) as IPCoin;
                     else

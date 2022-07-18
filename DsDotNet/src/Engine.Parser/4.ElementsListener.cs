@@ -42,9 +42,9 @@ namespace DsParser
     {
         public ParserHelper ParserHelper;
         Model    _model => ParserHelper.Model;
-        DsSystem _system { get => ParserHelper._system; set => ParserHelper._system = value; }
-        DsTask   _task { get => ParserHelper._task; set => ParserHelper._task = value; }
-        RootFlow _rootFlow { get => ParserHelper._rootFlow; set => ParserHelper._rootFlow = value; }
+        DsSystem _system    { get => ParserHelper._system;    set => ParserHelper._system = value; }
+        DsTask   _task      { get => ParserHelper._task;      set => ParserHelper._task = value; }
+        RootFlow _rootFlow  { get => ParserHelper._rootFlow;  set => ParserHelper._rootFlow = value; }
         Segment  _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
 
         string CurrentPath => ParserHelper.CurrentPath;
@@ -93,8 +93,8 @@ namespace DsParser
             var call = _task.CallPrototypes.First(c => c.Name == name);
 
             var callph = ctx.callPhrase();
-            var txs = _model.FindSegments(callph.segments(0).GetText());
-            var rxs = _model.FindSegments(callph.segments(1).GetText());
+            var txs = ParserHelper.FindObjects<Segment>(callph.segments(0).GetText());
+            var rxs = ParserHelper.FindObjects<Segment>(callph.segments(1).GetText());
             call.TXs.AddRange(txs);
             call.RXs.AddRange(rxs);
             //Trace.WriteLine($"Call: {name} = {txs.Select(tx => tx.Name)} ~ {rx?.Name}");
@@ -175,7 +175,6 @@ namespace DsParser
                 DsParser.enumerateChildren<dsParser.SegmentContext>(
                     ctx, false, r => r is dsParser.SegmentContext)
                 .Select(segCtx => segCtx.GetText())
-                .Select(n => ParserHelper.ToFQDN(n, _system, _rootFlow.Name, _parenting?.Name))
                 .ToArray()
                 ;
 
@@ -194,8 +193,9 @@ namespace DsParser
             }
             else
             {
-                foreach (var n in names)
+                foreach (var name in names)
                 {
+                    var n = ParserHelper.ToFQDN(name, _system, _rootFlow.Name, _parenting?.Name);
                     Child child = null;
                     bool isAlias = false;
                     var fqdn = $"{CurrentPath}.{n}";
@@ -225,11 +225,11 @@ namespace DsParser
                     switch (target)
                     {
                         case CallPrototype cp:
-                            child = new Child(new Call(n, _parenting, cp), _parenting) { IsAlias = isAlias };
+                            child = new Child(new Call(name, _parenting, cp), _parenting) { IsAlias = isAlias };
                             QpMap.Add(fqdn, child);
                             break;
                         case Segment exSeg:
-                            child = new Child(new ExSegmentCall(n, exSeg), _parenting) { IsAlias = isAlias };
+                            child = new Child(new ExSegmentCall(name, exSeg), _parenting) { IsAlias = isAlias };
                             QpMap.Add(fqdn, child);
                             break;
                         default:

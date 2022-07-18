@@ -170,11 +170,6 @@ namespace DsParser
             return specs.Split(new[] { ',' }).Select(sp => {
                 var spec = QpMap.ContainsKey($"{context}.{sp}") ? $"{context}.{sp}" : sp;
                 var vertex = QpMap[spec] as IVertex;
-                if (vertex is CallPrototype)
-                {
-
-                    Console.WriteLine();
-                }
                 return vertex;
             }).ToArray();
         }

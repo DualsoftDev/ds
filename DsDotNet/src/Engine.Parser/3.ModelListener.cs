@@ -13,11 +13,11 @@ namespace DsParser
     class ModelListener : dsBaseListener
     {
         public ParserHelper ParserHelper;
-        Model _model => ParserHelper.Model;
-        DsSystem _system { get => ParserHelper._system; set => ParserHelper._system = value; }
-        DsTask _task { get => ParserHelper._task; set => ParserHelper._task = value; }
-        RootFlow _rootFlow { get => ParserHelper._rootFlow; set => ParserHelper._rootFlow = value; }
-        Segment _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
+        Model    _model => ParserHelper.Model;
+        DsSystem _system    { get => ParserHelper._system;    set => ParserHelper._system = value; }
+        DsTask   _task      { get => ParserHelper._task;      set => ParserHelper._task = value; }
+        RootFlow _rootFlow  { get => ParserHelper._rootFlow;  set => ParserHelper._rootFlow = value; }
+        Segment  _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
         /// <summary> Qualified Path Map </summary>
         Dictionary<string, object> QpMap => ParserHelper.QualifiedPathMap;
 

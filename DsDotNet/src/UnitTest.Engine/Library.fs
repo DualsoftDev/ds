@@ -110,13 +110,13 @@ module ModelTests =
             let main = flow.Coins |> Enumerable.OfType<Segment> |> Seq.find(fun seg -> seg.Name = "Main")
             main.Name === "Main"
             let childrenNames = main.ChildVertices |> Enumerable.OfType<Child> |> Seq.map(fun soc -> soc.Name)
-            (childrenNames, ["L.T.Cp"; "L.T.Cm"; "L.T.C22"]) |> setEq
+            (childrenNames, ["T.Cp"; "T.Cm"; "T.C22"]) |> setEq
 
             let checkC22Instance_ =
-                let c22 = main.CallChildren |> Seq.find(fun call -> call.Name = "L.T.C22")
-                c22.QualifiedName === "L_F_Main_L.T.C22"
-                (c22.TxTags.Select(fun t -> t.Name), ["Start_P_F_Vp_L_F_Main_L.T.C22_TX"; "Start_P_F_Vm_L_F_Main_L.T.C22_TX"]) |> setEq
-                (c22.RxTags.Select(fun t -> t.Name), [  "End_P_F_Sp_L_F_Main_L.T.C22_RX";   "End_P_F_Sm_L_F_Main_L.T.C22_RX"]) |> setEq
+                let c22 = main.CallChildren |> Seq.find(fun call -> call.Name = "T.C22")
+                c22.QualifiedName === "L_F_Main_T.C22"
+                (c22.TxTags.Select(fun t -> t.Name), ["Start_P_F_Vp_L_F_Main_T.C22_TX"; "Start_P_F_Vm_L_F_Main_T.C22_TX"]) |> setEq
+                (c22.RxTags.Select(fun t -> t.Name), [  "End_P_F_Sp_L_F_Main_T.C22_RX";   "End_P_F_Sm_L_F_Main_T.C22_RX"]) |> setEq
 
 
             flow.Cpu === cpu

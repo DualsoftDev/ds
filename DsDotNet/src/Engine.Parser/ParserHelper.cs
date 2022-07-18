@@ -37,6 +37,20 @@ namespace DsParser
             }
         }
 
+        public T FindObject<T>(string qualifiedName) where T : class => PickQualifiedPathObject<T>(qualifiedName);
+
+        public T[] FindObjects<T>(string qualifiedNames) where T : class
+        {
+            if (qualifiedNames == "_")
+                return Array.Empty<T>();
+
+            return
+                qualifiedNames
+                    .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(name => FindObject<T>(name))
+                    .ToArray()
+                    ;
+        }
 
 
         T PickQualifiedPathObject<T>(string qualifiedName, Func<T> creator = null) where T : class

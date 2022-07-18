@@ -5,9 +5,9 @@ using Engine.Core;
 using System.Diagnostics;
 using System.Linq;
 
-namespace DsParser
+namespace Engine.Parser
 {
-    public static class DsG4ModelParser
+    public static class ModelParser
     {
         public static Model ParseFromString(string text)
         {

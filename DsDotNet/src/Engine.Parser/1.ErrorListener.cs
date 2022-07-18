@@ -1,5 +1,5 @@
 ﻿// Template generated code from Antlr4BuildTasks.Template v 8.17
-namespace DsParser
+namespace Engine.Parser
 {
     using Antlr4.Runtime;
     using Antlr4.Runtime.Misc;

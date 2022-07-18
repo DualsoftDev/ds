@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿using System.Collections.Generic;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
 
-using ParseTree = Antlr4.Runtime.RuleContext;
-namespace DsParser
+namespace Engine.Parser
 {
     class ParserResult
     {

@@ -7,7 +7,7 @@ using Antlr4.Runtime.Tree;
 
 //using ParseTree = Antlr4.Runtime.RuleContext;
 
-namespace DsParser
+namespace Engine.Parser
 {
 
     class DsParser

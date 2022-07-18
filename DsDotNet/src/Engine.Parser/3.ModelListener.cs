@@ -8,7 +8,7 @@ using Antlr4.Runtime.Tree;
 
 using Engine.Core;
 
-namespace DsParser
+namespace Engine.Parser
 {
     class ModelListener : dsBaseListener
     {
@@ -34,6 +34,8 @@ namespace DsParser
         {
             var n = ctx.id().GetText();
             _system = new DsSystem(n, _model);
+            ParserHelper.AliasNameMaps.Add(_system, new Dictionary<string, string>());
+            ParserHelper.BackwardAliasMaps.Add(_system, new Dictionary<string, string[]>());
             Trace.WriteLine($"System: {n}");
         }
         override public void ExitSystem(dsParser.SystemContext ctx) { _system = null; }
@@ -77,7 +79,7 @@ namespace DsParser
             {
                 foreach (var n in names)
                 {
-                    Debug.Assert(!_system.AliasNameMap.ContainsKey(n));
+                    Debug.Assert(!ParserHelper.AliasNameMaps[_system].ContainsKey(n));
                     var fqdn = $"{CurrentPath}.{n}";
                     if (!QpMap.ContainsKey(fqdn))
                     {
@@ -94,8 +96,8 @@ namespace DsParser
             //    .Select(n =>
             //    {
             //        var flow = (PFlow)_parenting ?? _rootFlow;
-            //        if (_system.AliasNameMap.ContainsKey(n))
-            //            return new PAlias(n, flow, _system.AliasNameMap[n]) as IPCoin;
+            //        if (ParserHelper.AliasNameMaps[_system].ContainsKey(n))
+            //            return new PAlias(n, flow, ParserHelper.AliasNameMaps[_system][n]) as IPCoin;
             //        else
             //            return new PSegment(n, _rootFlow);
             //    })  // _flow 에 segment 로 등록됨
@@ -152,12 +154,12 @@ namespace DsParser
                 ;
             Debug.Assert(aliasMnemonics.Length == aliasMnemonics.Distinct().Count());
 
-            _system._strBackwardAliasMap.Add(def, aliasMnemonics);
+            ParserHelper.BackwardAliasMaps[_system].Add(def, aliasMnemonics);
         }
         override public void ExitAlias(dsParser.AliasContext ctx)
         {
-            var bwd = _system._strBackwardAliasMap;
-            Debug.Assert(_system.AliasNameMap.Count() == 0);
+            var bwd = ParserHelper.BackwardAliasMaps[_system];
+            Debug.Assert(ParserHelper.AliasNameMaps[_system].Count() == 0);
             Debug.Assert(bwd.Values.Count() == bwd.Values.Distinct().Count());
             var reversed =
                 from tpl in bwd
@@ -167,7 +169,7 @@ namespace DsParser
                 ;
 
             foreach ((var mnemonic, var target) in reversed)
-                _system.AliasNameMap.Add(mnemonic, target);
+                ParserHelper.AliasNameMaps[_system].Add(mnemonic, target);
         }
 
 
@@ -196,43 +198,7 @@ namespace DsParser
 
 
 
-        override public void ExitProgram(dsParser.ProgramContext ctx)
-        {
-            ////var tpls = _model.Systems.SelectMany(s => s.AliasNameMap).Select(tpl => (tpl.Key, tpl.Value));
-            ////foreach ( (var alias, var target) in tpls )
-            ////{
-            ////    var xxx2 = _model.FindSegment(target);
-            ////    var xxx = _model.FindSegment(alias);
-            ////    //FindVertex(target);
-            ////    Console.WriteLine();
-            ////}
-
-            //var tpls =
-            //    from sys in Model.Systems
-            //    from tpl in sys.AliasNameMap
-            //    where sys.Aliases.ContainsKey(tpl.Key)
-            //    let alias = sys.Aliases[tpl.Key]
-            //    let target = Model.FindCoin(tpl.Value)
-            //    select (alias, target)
-            //    ;
-            //foreach ((var alias, var target) in tpls)
-            //{
-            //    Debug.Assert(target != null);
-            //    switch (alias)
-            //    {
-            //        case PAlias seg:
-            //            seg.AliasTarget = target;
-            //            break;
-            //        default:
-            //            throw new Exception("ERROR");
-            //    }
-            //    Console.WriteLine();
-
-            //}
-
-            //Console.WriteLine();
-            ////_model.Systems.
-        }
+        override public void ExitProgram(dsParser.ProgramContext ctx) {}
 
 
         // ParseTreeListener<> method

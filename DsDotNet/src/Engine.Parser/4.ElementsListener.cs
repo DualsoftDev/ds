@@ -13,7 +13,7 @@ using Antlr4.Runtime.Tree;
 using Engine.Common;
 using Engine.Core;
 
-namespace DsParser
+namespace Engine.Parser
 {
     //enum NodeType = "system" | "task" | "call" | "proc" | "func" | "segment" | "expression" | "conjunction";
     enum NodeType {
@@ -182,7 +182,7 @@ namespace DsParser
             {
                 //foreach (var n in names)
                 //{
-                //    Debug.Assert(!_system.AliasNameMap.ContainsKey(n));
+                //    Debug.Assert(!ParserHelper.AliasNameMaps[_system].ContainsKey(n));
                 //    var fqdn = $"{CurrentPath}.{n}";
                 //    if (!QpMap.ContainsKey(fqdn))
                 //    {
@@ -195,7 +195,7 @@ namespace DsParser
             {
                 foreach (var name in names)
                 {
-                    var n = ParserHelper.ToFQDN(name, _system, _rootFlow.Name, _parenting?.Name);
+                    var n = ParserHelper.ToFQDN(name);
                     Child child = null;
                     bool isAlias = false;
                     var fqdn = $"{CurrentPath}.{n}";
@@ -207,8 +207,8 @@ namespace DsParser
                     switch(nameComponents.Length)
                     {
                         case 1:
-                            isAlias = _system.AliasNameMap.ContainsKey(n);
-                            targetName = isAlias ? _system.AliasNameMap[n] : n;
+                            isAlias = ParserHelper.AliasNameMaps[_system].ContainsKey(n);
+                            targetName = isAlias ? ParserHelper.AliasNameMaps[_system][n] : n;
                             break;
                         case 2:
                             targetName = $"{_system.Name}.{n}";

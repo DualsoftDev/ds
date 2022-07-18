@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace DsParser
+namespace Engine.Parser
 {
     public class ParserHelper
     {
@@ -13,6 +13,8 @@ namespace DsParser
         //public Dictionary<ParserRuleContext, object> ContextMap = new Dictionary<ParserRuleContext, object>();
 
 
+        public Dictionary<DsSystem, Dictionary<string, string>> AliasNameMaps = new Dictionary<DsSystem, Dictionary<string, string>>();
+        public Dictionary<DsSystem, Dictionary<string, string[]>> BackwardAliasMaps = new Dictionary<DsSystem, Dictionary<string, string[]>>();
 
         public Model Model { get; } = new Model();
         internal DsSystem _system;
@@ -69,24 +71,25 @@ namespace DsParser
         }
 
 
-        public static string ToFQDN(string name, DsSystem system, string middleName, string parentingName)
+        public string ToFQDN(string name)
         {
             string concat(params string[] names) =>
                 String.Join(".", names.Where(n => n != null))
                 ;
-            var sysName = system.Name;
-            var tasks = system.Tasks.Select(t => t.Name);
+            var sysName = _system.Name;
+            var tasks = _system.Tasks.Select(t => t.Name);
             if (tasks.Any(t => name.StartsWith($"{t}.")))
                 return concat(sysName, name);
 
             var nameComponents = name.Split(new[] { '.' }).ToArray();
+            var middleName = _rootFlow.Name;
             var mid = name.StartsWith($"{middleName}.") ? null : middleName;
+            var parentingName = _parenting?.Name;
             var par = name.StartsWith($"{parentingName}.") ? null : parentingName;
             switch (nameComponents.Length)
             {
                 case 1:
-                    if (system.AliasNameMap.ContainsKey(name))
-                        //return system.AliasNameMap[name];
+                    if (AliasNameMaps[_system].ContainsKey(name))
                         return name;
                     return concat(sysName, middleName, parentingName, name);
                 case 2:

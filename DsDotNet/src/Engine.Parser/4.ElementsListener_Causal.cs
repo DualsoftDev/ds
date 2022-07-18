@@ -7,7 +7,7 @@ using Engine.Common;
 using Engine.Core;
 using Nodes = System.Collections.Generic.List<System.Object>;
 
-namespace DsParser
+namespace Engine.Parser
 {
     partial class ElementsListener
     {
@@ -63,7 +63,7 @@ namespace DsParser
                         }
 
                         var nodeType = NodeType.segment;
-                        if (dotCount == 0 && _system.AliasNameMap.ContainsKey(text))
+                        if (dotCount == 0 && ParserHelper.AliasNameMaps[_system].ContainsKey(text))
                             nodeType = NodeType.segmentAlias;
 
                         var node = new Node(id, label: text, parentId: taskId, nodeType);

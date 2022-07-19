@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Engine.Common;
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -12,7 +14,7 @@ namespace Engine.Core
         public Segment Parent { get; }
         /// <summary>Call or ExSegmentCall</summary>
         public Coin Coin { get; }
-        public bool IsCall => Coin is Call;
+        public bool IsCall => Coin is SubCall;
         public bool IsAlias { get; set; }
         // 부모가 바라본 child 상태
         public Status4 Status
@@ -52,14 +54,15 @@ namespace Engine.Core
             switch(Coin)
             {
                 case ExSegmentCall extSeg:
-                    extSeg.Going();
+                    //extSeg.Going();
                     break;
-                case Call call:
-                    call.Going();
+                case SubCall call:
+                    //call.Going();
                     break;
                 default:
                     throw new Exception("ERROR");
             }
+            TagsStart.Iter(t => t.Value = true);
         }
     }
 

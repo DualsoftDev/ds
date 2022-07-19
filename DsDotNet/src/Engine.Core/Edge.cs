@@ -89,7 +89,7 @@ namespace Engine.Core
                         yield return (seg.TagE, rootEdge);
                         break;
 
-                    case Call call:
+                    case RootCall call:
                         foreach (var t in call.RxTags)
                             yield return (t, rootEdge);
                         break;
@@ -104,7 +104,7 @@ namespace Engine.Core
                     yield return (rootEdge, seg.TagS);
                     break;
 
-                case Call call:
+                case RootCall call:
                     foreach(var tx in call.TxTags)
                         yield return (rootEdge, tx);
 

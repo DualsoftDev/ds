@@ -165,10 +165,19 @@ namespace Engine.Parser
 
 
 
-        IVertex[] FindVertices(string context, string specs)
+        IVertex[] FindVertices(string context, Node node)
         {
+            string specs = node.id;
             return specs.Split(new[] { ',' }).Select(sp => {
-                var spec = QpMap.ContainsKey($"{context}.{sp}") ? $"{context}.{sp}" : sp;
+                var spec = sp;
+                if (QpMap.ContainsKey($"{context}.{sp}"))
+                    spec = $"{context}.{sp}";
+                if (! QpMap.ContainsKey(spec))
+                {
+                    if (ParserHelper.AliasNameMaps[_system].ContainsKey(node.label))
+                        spec = ParserHelper.AliasNameMaps[_system][node.label];
+                }
+
                 var vertex = QpMap[spec] as IVertex;
                 return vertex;
             }).ToArray();
@@ -205,8 +214,8 @@ namespace Engine.Parser
                         Flow flow = (Flow)_parenting ?? _rootFlow;   // target flow
                         var context = _parenting == null ? "" : CurrentPath;
 
-                        var lvs = FindVertices(context, l.id);
-                        var rvs = FindVertices(context, r.id);
+                        var lvs = FindVertices(context, l);
+                        var rvs = FindVertices(context, r);
 
                         Debug.Assert(l != null && r != null);   // 'node not found');
                         if (lvs.Length == 0) throw new Exception($"Parse error: {l.id} not found");

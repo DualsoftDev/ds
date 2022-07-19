@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
+[assembly: DebuggerDisplay("[{Key}={Value}]", Target = typeof(KeyValuePair<,>))]
+
 namespace Engine
 {
     public partial class Engine : IEngine
@@ -112,19 +114,24 @@ namespace Engine
         {
             public TagType Type;
             public Segment Segment;
-            public Child Child;
-            public string Context;
-            public string TagName => $"{Child.QualifiedName}_{Segment.QualifiedName}_{Type}";
 
-            public TagGenInfo(TagType type, Segment segment, Child child, string context)
+            //public Child Child;
+            //public RootCall RootCall;
+            public ICoin Child;     // Child or RootCall
+
+            public string Context;
+            public string TagName => $"{Child.GetQualifiedName()}_{Segment.QualifiedName}_{Type}";
+            public TagGenInfo(TagType type, Segment segment, ICoin child, string context)
             {
+                Debug.Assert(child is Child || child is RootCall);
                 Type = type;
                 Segment = segment;
-                Child = child;
                 Context = context;
+                Child = child;
             }
         }
 
+        /// <summary> Root flow 에서 타 시스템을 호출하기 위한 interface tag 를 생성한다. </summary>
         void CreateTags4Child(CpuBase cpu, RootFlow[] activeFlows)
         {
             var tagGenInfos =
@@ -135,21 +142,36 @@ namespace Engine
             var tgiGroups = tagGenInfos.GroupByToDictionary(tgi => (tgi.Child, tgi.Type));
             foreach ( var kv in tgiGroups)
             {
-                (var child, var type) = kv.Key;
+                (var location, var type) = kv.Key;
                 var tgis = kv.Value;
-                var tags = tgis.Select(tgi => new Tag(child, tgi.TagName, type, cpu)).ToArray();
-                var storage = type switch
+                var tags = tgis.Select(tgi => new Tag(location, tgi.TagName, type, cpu)).ToArray();
+
+                List<Tag> storage = null;
+                switch(location)
                 {
-                    TagType.Start => child.TagsStart,
-                    TagType.Reset => child.TagsReset,
-                    TagType.End => child.TagsEnd,
-                    _ => throw new Exception("ERROR")
-                };
+                    case Child child:
+                        storage = type switch
+                        {
+                            TagType.Start => child.TagsStart,
+                            TagType.Reset => child.TagsReset,
+                            TagType.End => child.TagsEnd,
+                            _ => throw new Exception("ERROR")
+                        };
+                        break;
+                    case RootCall rootCall:
+                        storage = type switch
+                        {
+                            TagType.Start => rootCall.TxTags,
+                            TagType.End => rootCall.RxTags,
+                            _ => throw new Exception("ERROR")
+                        };
+                        break;
+                }
 
                 Debug.Assert(storage.IsNullOrEmpty());
                 storage.AddRange(tags);
                 var tagNames = String.Join(", ", tgis.Select(tgi => tgi.TagName));
-                Global.Logger.Debug($"Adding Child Tags {tagNames} to child [{child.QualifiedName}]");
+                Global.Logger.Debug($"Adding Child Tags {tagNames} to child [{location.GetQualifiedName()}]");
 
                 // apply to segment
                 foreach (var tgi in tgis)
@@ -170,7 +192,10 @@ namespace Engine
                 Console.WriteLine();
             }
 
-
+            /// Root flow 에 존재하는 
+            /// - root call 
+            /// - root segment 의 하부 call 및 external segment call 
+            /// 의 호출을 위한 start/reset/end tag 를 생성하기 위한 정보를 생성
             IEnumerable<TagGenInfo> collectTagGenInfo()
             {
                 var roots = activeFlows.SelectMany(f => f.ChildVertices).Distinct();
@@ -178,7 +203,11 @@ namespace Engine
                 {
                     switch (root)
                     {
-                        case Call rootCall:
+                        case RootCall rootCall:
+                            foreach (var txSeg in rootCall.Prototype.TXs.OfType<Segment>())
+                                yield return new TagGenInfo(TagType.Start, txSeg, rootCall, rootCall.QualifiedName);
+                            foreach (var rxSeg in rootCall.Prototype.RXs.OfType<Segment>())
+                                yield return new TagGenInfo(TagType.End, rxSeg, rootCall, rootCall.QualifiedName);
                             break;
 
                         case Segment rootSeg:
@@ -198,7 +227,7 @@ namespace Engine
 
                                 switch (child.Coin)
                                 {
-                                    case Call call:
+                                    case SubCall call:
                                         if (iesSet.Length > 0)
                                         {
                                             var segStart = call.Prototype.TXs.OfType<Segment>();

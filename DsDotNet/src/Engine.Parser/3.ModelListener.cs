@@ -79,12 +79,30 @@ namespace Engine.Parser
             {
                 foreach (var n in names)
                 {
-                    Debug.Assert(!ParserHelper.AliasNameMaps[_system].ContainsKey(n));
                     var fqdn = $"{CurrentPath}.{n}";
-                    if (!QpMap.ContainsKey(fqdn))
+                    if (ParserHelper.AliasNameMaps[_system].ContainsKey(n))
                     {
-                        var seg = new Segment(n, _rootFlow);
-                        QpMap.Add(fqdn, seg);
+                        var targetName = ParserHelper.AliasNameMaps[_system][n];
+                        var target = QpMap[targetName];
+                        switch(target)
+                        {
+                            case CallPrototype cp:
+                                var call = new RootCall(n, _rootFlow, cp);
+                                QpMap.Add(fqdn, call);
+                                break;
+                            default:
+                                throw new Exception("ERROR");
+                        }
+                        Console.WriteLine();
+
+                    }
+                    else
+                    {
+                        if (!QpMap.ContainsKey(fqdn))
+                        {
+                            var seg = new Segment(n, _rootFlow);
+                            QpMap.Add(fqdn, seg);
+                        }
                     }
                 }
             }

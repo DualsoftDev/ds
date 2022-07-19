@@ -9,8 +9,7 @@ using System.Reactive.Linq;
 
 namespace Engine.Core
 {
-    //[DebuggerDisplay("{ToText(),nq}")]
-    [DebuggerDisplay("XXX")]
+    [DebuggerDisplay("{ToText(),nq}")]
     public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, IWithSREPorts, ITxRx// Coin
     {
         public RootFlow ContainerFlow { get; }

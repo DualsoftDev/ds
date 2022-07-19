@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Engine.Core
 {
-    public class CallBase : Coin
+    public abstract class CallBase : Coin
     {
         public CallBase(string name) : base(name) {}
     }
@@ -47,38 +47,49 @@ namespace Engine.Core
 
     }
 
-    public class Call : CallBase
+    public abstract class Call : CallBase
     {
         public CallPrototype Prototype;
         public Flow Container;
         public override bool Value => Prototype.Value;
         public override string QualifiedName => this.GetQualifiedName();
-        public Tag[] TxTags { get; set; }
-        public Tag[] RxTags { get; set; }
 
         public Call(string name, Flow flow, CallPrototype protoType) : base(name)
         {
             Prototype = protoType;
             Container = flow;
-
-
-
-            //flow.ChildVertices.Add(this);
-            //flow.AddChildVertex(this);
-
-            // child flow 에서는 Child 로 wrapping 해서 추가됨.
-            if (flow is RootFlow)
-                flow.ChildVertices.Add(this);
         }
 
-        public override void Going() => TxTags.Iter(t => t.Value = true);
+        //public override void Going() => TxTags.Iter(t => t.Value = true);
     }
+    public class SubCall : Call
+    {
+        public Child ContainerChild { get; set; }
+        public SubCall(string name, ChildFlow flow, CallPrototype protoType)
+            : base(name, flow, protoType)
+        {}
+    }
+
+    public class RootCall : Call
+    {
+        public List<Tag> TxTags { get; } = new List<Tag>();
+        public List<Tag> RxTags { get; } = new List<Tag>();
+        public RootCall(string name, RootFlow flow, CallPrototype protoType)
+            : base(name, flow, protoType)
+        {
+            // root flow 에서만 child vertices 에 추가.   (child flow 에서는 Child 로 wrapping 해서 추가됨.)
+            flow.ChildVertices.Add(this);
+        }
+    }
+
+
 
 
     [DebuggerDisplay("[{ToText()}]")]
     public class ExSegmentCall: Coin
     {
         public Segment ExternalSegment;
+        public Child ContainerChild { get; set; }
 
         public ExSegmentCall(string aliasName, Segment externalSegment)
             : base(aliasName)
@@ -91,14 +102,30 @@ namespace Engine.Core
 
     public static class CallExtension
     {
-        public static string GetQualifiedName(this Call call)
+        public static string GetQualifiedName(this ICoin coin)
         {
-            switch(call.Container)
+            switch(coin)
             {
-                case Segment seg:
-                    return $"{seg.QualifiedName}_{call.Name}";
-                case RootFlow flow:
-                    return $"{flow.QualifiedName}_{call.Name}";
+                case RootCall rootCall:
+                    var rootFlow = rootCall.Container;
+                    var system = rootFlow.GetSystem();
+                    return $"{system.Name}.{rootFlow.Name}.{rootCall.Name}";
+
+                case Child child:
+                    return child.QualifiedName;
+
+                case Call call:
+                    switch (call.Container)
+                    {
+                        case Segment seg:
+                            return $"{seg.QualifiedName}_{call.Name}";
+                        case RootFlow flow:
+                            return $"{flow.QualifiedName}_{call.Name}";
+                        default:
+                            throw new Exception("ERROR");
+                    }
+                    break;
+
                 default:
                     throw new Exception("ERROR");
             }

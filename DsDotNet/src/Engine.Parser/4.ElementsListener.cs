@@ -180,16 +180,9 @@ namespace Engine.Parser
 
             if (_parenting == null)
             {
-                //foreach (var n in names)
-                //{
-                //    Debug.Assert(!ParserHelper.AliasNameMaps[_system].ContainsKey(n));
-                //    var fqdn = $"{CurrentPath}.{n}";
-                //    if (!QpMap.ContainsKey(fqdn))
-                //    {
-                //        var seg = new Segment(n, _rootFlow);
-                //        QpMap.Add(fqdn, seg);
-                //    }
-                //}
+                /*
+                 * See ModelListener.EnterCausalPhrase()
+                 */
             }
             else
             {
@@ -225,11 +218,15 @@ namespace Engine.Parser
                     switch (target)
                     {
                         case CallPrototype cp:
-                            child = new Child(new Call(name, _parenting, cp), _parenting) { IsAlias = isAlias };
+                            var subCall = new SubCall(name, _parenting, cp);
+                            child = new Child(subCall, _parenting) { IsAlias = isAlias };
+                            subCall.ContainerChild = child;
                             QpMap.Add(fqdn, child);
                             break;
                         case Segment exSeg:
-                            child = new Child(new ExSegmentCall(name, exSeg), _parenting) { IsAlias = isAlias };
+                            var exCall = new ExSegmentCall(name, exSeg);
+                            child = new Child(exCall, _parenting) { IsAlias = isAlias };
+                            exCall.ContainerChild = child;
                             QpMap.Add(fqdn, child);
                             break;
                         default:

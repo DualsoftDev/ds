@@ -24,13 +24,15 @@ namespace Engine
         Cm1 = {P.F.Vm ~ P.F.Sm, P.F.Sm}
         Cm2 = {P.F.Vm ~ P.F.Sm}
         Cm3 = {P.F.Vm ~ P.F.Sm}
+        Cp2 = {P.F.Vp ~ P.F.Sp}
     }
     [flow] F = {
-        Main = { T.Cp |> T.Cm, T.Cm1 > T.Cm2; T.Cm3 > T.Cm2; Cp1 |> Cm1; }
-        //Main = { T.Cp |> T.Cm; }
+        //Main = { T.Cp |> T.Cm, T.Cm1 > T.Cm2; T.Cm3 > T.Cm2; Cp2 > Cm2}
+        Main = { T.Cp2 |> Cp2; }
         //Main = { Cp1 |> Cm1; }
         //Main > Weak;
-        Weak >> Strong;
+        Cp1 > Cm1;
+        //Weak >> Strong;
         //Main |> XXX;
         //parenting = {A > B > C; C |> B; }
         //T.C1 <||> T.C2;

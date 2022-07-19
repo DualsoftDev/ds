@@ -32,10 +32,7 @@ namespace Engine.Core
         public List<Tag> TagsEnd { get; } = new List<Tag>();
 
         public bool IsResetFirst { get; internal set; } = true;
-        public IEnumerable<Call> CallChildren => Children.Select(c => c.Coin).OfType<Call>();
 
-
-        //public List<Child> Children { get; } = new List<Child>();
         public Child[] Inits { get; internal set; }
         public Child[] Lasts { get; internal set; }
         public VertexAndOutgoingEdges[] TraverseOrder { get; internal set; }

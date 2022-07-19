@@ -30,7 +30,7 @@ namespace Engine
         //Main = { T.Cp |> T.Cm; }
         //Main = { Cp1 |> Cm1; }
         //Main > Weak;
-        //Main >> Strong;
+        Weak >> Strong;
         //Main |> XXX;
         //parenting = {A > B > C; C |> B; }
         //T.C1 <||> T.C2;

@@ -56,10 +56,6 @@ namespace Engine.Core
         public Tag[] TxTags { get; set; }
         public Tag[] RxTags { get; set; }
 
-        public IEnumerable<ITxRx> TXs => Prototype.TXs;
-        public IEnumerable<ITxRx> RXs => Prototype.RXs;
-        public IEnumerable<ITxRx> TxRxs => TXs.Concat(RXs);
-
         public Call(string name, Flow flow, CallPrototype protoType) : base(name)
         {
             Prototype = protoType;
@@ -107,80 +103,6 @@ namespace Engine.Core
                     throw new Exception("ERROR");
             }
         }
-
-        //// 필요한가?
-        //public static bool IsPaused(this Call call)
-        //{
-        //    var rxs = call.RxTags;
-        //    var txs = call.TxTags;
-
-        //    var containerFlow = call.Container as RootFlow;
-        //    var txing = txs.All(t => t.Value);
-        //    var rxed = rxs.All(t => t.Value);
-
-        //    var going = call.RGFH == Status4.Going;
-        //    var homing = call.RGFH == Status4.Homing;
-        //    if (containerFlow != null)
-        //    {
-        //        // root 에 배치된 call
-        //        return going && !txing && !rxed;
-        //    }
-
-        //    var containerSeg = call.Container as Segment;
-        //    var parentPaused = containerSeg.Paused;
-        //    if (!parentPaused)
-        //        return false;
-
-        //    var parentGoing = containerSeg.RGFH == Status4.Going;
-        //    var parentHoming = containerSeg.RGFH == Status4.Homing;
-
-        //    return
-        //           (parentGoing  && going  && !txing && !rxed  ) // going paused
-        //        || (parentHoming && homing ) // homing paused. todo : check ???
-        //        ;
-        //}
-
-
-        public static IEnumerable<Tag> GetTxTags(this Call call)
-        {
-            var tags = call.OwnerCpu.Tags;
-            foreach (var tx in call.TXs)
-            {
-                switch(tx)
-                {
-                    case Segment seg:
-                        yield return tags[seg.TagS.Name];
-                        break;
-                    case Tag tag:
-                        yield return tags[tag.Name];
-                        break;
-                    default:
-                        throw new Exception("ERROR");
-                }
-            }
-        }
-
-        //public static IEnumerable<Tag> GetRxTags(this Call call)
-        //{
-        //    var tags = call.OwnerCpu.Tags;
-        //    foreach (var rx in call.RXs)
-        //    {
-        //        switch (rx)
-        //        {
-        //            case Segment seg:
-        //                yield return tags[seg.TagE.Name];
-        //                break;
-        //            case Tag tag:
-        //                yield return tags[tag.Name];
-        //                break;
-        //            default:
-        //                throw new Exception("ERROR");
-        //        }
-        //    }
-        //}
-
-        //public static IEnumerable<Tag> GetTxRxTags(this Call call) =>
-        //    GetTxTags(call).Concat(GetRxTags(call));
     }
 
 }

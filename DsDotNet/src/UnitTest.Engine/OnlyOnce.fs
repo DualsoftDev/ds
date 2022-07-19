@@ -32,7 +32,7 @@ module Fixtures =
             let logger = configureLog4Net "EngineLogger" configFile
 
             // 로깅 결과 파일 : UnitTest.Engine/bin/logEngine*.txt
-            logger.Info "Hello, Log4net!!!"
+            logInfo "Hello, Log4net!!!"
 
             if not (File.Exists configFile) then
                 failwith "config 파일 위치를 강제로 수정해 주세요."

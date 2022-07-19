@@ -87,7 +87,7 @@ namespace Engine
             foreach (var f in otherFlows)
             {
                 f.Cpu = FakeCpu;
-                f.ChildVertices.OfType<Segment>().SelectMany(s => s.AllPorts).Iter(p => p.OwnerCpu = FakeCpu);
+                f.RootSegments.SelectMany(s => s.AllPorts).Iter(p => p.OwnerCpu = FakeCpu);
                 InitializeFlow(f, false, opc);
             }
 
@@ -201,8 +201,8 @@ namespace Engine
                                     case Call call:
                                         if (iesSet.Length > 0)
                                         {
-                                            var segStart = call.TXs.OfType<Segment>();
-                                            var segEnd = call.RXs.OfType<Segment>();
+                                            var segStart = call.Prototype.TXs.OfType<Segment>();
+                                            var segEnd = call.Prototype.RXs.OfType<Segment>();
                                             foreach (var s in segStart)
                                                 yield return new TagGenInfo(TagType.Start, s, child, fqdn);
                                             foreach (var e in segEnd)
@@ -236,24 +236,17 @@ namespace Engine
             }
         }
 
-        void InitializeFlow(RootFlow flow, bool isActiveCpu, OpcBroker opc)
+        void InitializeFlow(RootFlow rootFlow, bool isActiveCpu, OpcBroker opc)
         {
             // my flow 상의 root segment 들에 대한 HMI s/r/e tags
-            var hmiTags = flow.GenereateHmiTags4Segments().ToArray();
-            //var vertices =
-            //    flow.Edges
-            //        .SelectMany(e => e.Vertices)
-            //        .Concat(flow.ChildVertices)
-            //        .Distinct()
-            //        .ToArray()
-            //        ;
+            var hmiTags = rootFlow.GenereateHmiTags4Segments().ToArray();
+            var cpu = rootFlow.Cpu;
 
-            var cpu = flow.Cpu;
+            hmiTags.Iter(t => t.Type = t.Type.Add(TagType.External));
+            opc.AddTags(hmiTags);
 
             if (isActiveCpu)
             {
-                hmiTags.Iter(t => t.Type = t.Type.Add(TagType.External));
-                opc.AddTags(hmiTags);
 
                 //var subCalls = vertices.OfType<Segment>().SelectMany(seg => seg.CallChildren);
                 //var rootCalls = vertices.OfType<Call>();
@@ -282,11 +275,11 @@ namespace Engine
             }
 
             var tags =
-                (isActiveCpu ? flow.Cpu.CollectTags().Distinct().ToArray() : new Tag[] { })
+                (isActiveCpu ? rootFlow.Cpu.CollectTags().Distinct().ToArray() : new Tag[] { })
                 .ToDictionary(t => t.Name, t => t);
             // Edge 를 Bit 로 보고
             // A -> B 연결을 A -> Edge -> B 연결 정보로 변환
-            foreach (var e in flow.Edges)
+            foreach (var e in rootFlow.Edges)
             {
                 var deps = e.CollectForwardDependancy().ToArray();
                 foreach ((var src_, var tgt_) in deps)
@@ -299,12 +292,12 @@ namespace Engine
 
                     Debug.Assert(cpu == src.OwnerCpu);
                     Debug.Assert(cpu == tgt.OwnerCpu);
-                    flow.Cpu.AddBitDependancy(src, tgt);
+                    rootFlow.Cpu.AddBitDependancy(src, tgt);
                 }
             }
 
 
-            flow.PrintFlow(isActiveCpu);
+            rootFlow.PrintFlow(isActiveCpu);
 
             //cpu.PrintTags();
         }

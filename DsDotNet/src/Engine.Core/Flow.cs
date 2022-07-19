@@ -63,6 +63,8 @@ namespace Engine.Core
             System = system;
             system.RootFlows.Add(this);
         }
+
+        public IEnumerable<Segment> RootSegments => ChildVertices.OfType<Segment>();
     }
 
     public class ChildFlow : Flow

@@ -79,34 +79,34 @@ namespace Engine.Core
 
     public static class EdgeExtension
     {
-        public static IEnumerable<(IBit, IBit)> CollectForwardDependancy(this Edge edge)
+        public static IEnumerable<(IBit, IBit)> CollectForwardDependancy(this Edge rootEdge)
         {
-            foreach(var s in edge.Sources)
+            foreach(var s in rootEdge.Sources)
             {
                 switch(s)
                 {
                     case Segment seg:
-                        yield return (seg.TagE, edge);
+                        yield return (seg.TagE, rootEdge);
                         break;
 
                     case Call call:
                         foreach (var t in call.RxTags)
-                            yield return (t, edge);
+                            yield return (t, rootEdge);
                         break;
                     default:
                         throw new Exception("ERROR");
                 }
             }
 
-            switch(edge.Target)
+            switch(rootEdge.Target)
             {
                 case Segment seg:
-                    yield return (edge, seg.TagS);
+                    yield return (rootEdge, seg.TagS);
                     break;
 
                 case Call call:
                     foreach(var tx in call.TxTags)
-                        yield return (edge, tx);
+                        yield return (rootEdge, tx);
 
                     break;
                 default:

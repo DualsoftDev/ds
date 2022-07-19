@@ -8,6 +8,9 @@ using System.Reactive.Disposables;
 
 namespace Engine.Core
 {
+    /// <summary> Segment 내에 배치된 `Child`.  SubCall 또는 ExSegmentCall 를 Coin 으로 갖는 wrapper</summary>
+    /// 
+    /// 
     [DebuggerDisplay("{ToString()}")]
     public class Child : Named, IVertex, ICoin
     {

@@ -28,6 +28,8 @@ namespace Engine.Core
 
                 case Flag flag:
                     break;
+                default:
+                    throw new Exception("ERROR");
 
             }
         }

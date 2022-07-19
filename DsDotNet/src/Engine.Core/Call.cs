@@ -47,6 +47,8 @@ namespace Engine.Core
 
     }
 
+
+    /// <summary> Call.  Derived = {SubCall, RootCall.} </summary>
     public abstract class Call : CallBase
     {
         public CallPrototype Prototype;
@@ -62,6 +64,8 @@ namespace Engine.Core
 
         //public override void Going() => TxTags.Iter(t => t.Value = true);
     }
+
+    /// <summary> Segment 내에 배치된 call </summary>
     public class SubCall : Call
     {
         public Child ContainerChild { get; set; }
@@ -70,6 +74,7 @@ namespace Engine.Core
         {}
     }
 
+    /// <summary> Root 에 배치된 Call </summary>
     public class RootCall : Call
     {
         public List<Tag> TxTags { get; } = new List<Tag>();
@@ -85,6 +90,7 @@ namespace Engine.Core
 
 
 
+    /// <summary> 외부 segment 에 대한 호출 </summary>
     [DebuggerDisplay("[{ToText()}]")]
     public class ExSegmentCall: Coin
     {
@@ -115,17 +121,12 @@ namespace Engine.Core
                     return child.QualifiedName;
 
                 case Call call:
-                    switch (call.Container)
+                    return call.Container switch
                     {
-                        case Segment seg:
-                            return $"{seg.QualifiedName}_{call.Name}";
-                        case RootFlow flow:
-                            return $"{flow.QualifiedName}_{call.Name}";
-                        default:
-                            throw new Exception("ERROR");
-                    }
-                    break;
-
+                        Segment seg   => $"{seg.QualifiedName}_{call.Name}",
+                        RootFlow flow => $"{flow.QualifiedName}_{call.Name}",
+                        _             => throw new Exception("ERROR"),
+                    };
                 default:
                     throw new Exception("ERROR");
             }

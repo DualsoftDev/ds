@@ -198,6 +198,47 @@ namespace Engine
             /// 의 호출을 위한 start/reset/end tag 를 생성하기 위한 정보를 생성
             IEnumerable<TagGenInfo> collectTagGenInfo()
             {
+                /// 하나의 [external segment call 을 위한 Child] 에 대해서 Set 및 Reset 명령이 동시에 들어올 수 없음을 check
+                void verifyExternalSegmentCallChild_SingleCommandType(Child child)
+                {
+                    if (child.IsCall)
+                        return;
+
+                    var ies =
+                        GraphUtil.getIncomingEdges(child.Parent.GraphInfo.Graph, child)
+                            .Select(qge => qge.OriginalEdge)
+                            .Distinct()
+                            ;
+                    if (ies.Any())
+                    {
+                        // incoming edge 를 reset edge 여부로 grouping 한 것.
+                        var iesGroups = ies.GroupByToDictionary(e => e is IResetEdge);
+                        if (iesGroups.Count() > 1)
+                            throw new Exception("ERROR: Both reset and start edges exists for external segment child call.");
+                    }
+                }
+
+                /// Child 에 대한 End tag 생성 정보를 반환
+                IEnumerable<TagGenInfo> createEndTagGenInfos(Child child, string context)
+                {
+                    switch (child.Coin)
+                    {
+                        case SubCall call:
+                            var segEnd = call.Prototype.RXs.OfType<Segment>();
+                            foreach (var e in segEnd)
+                                yield return new TagGenInfo(TagType.End, e, child, context);
+                            break;
+
+                        case ExSegmentCall exSeg:
+                            var seg = exSeg.ExternalSegment;
+                            yield return new TagGenInfo(TagType.End, seg, child, context);
+                            break;
+                        default:
+                            throw new Exception("ERROR");
+                    }
+
+                }
+
                 var roots = activeFlows.SelectMany(f => f.ChildVertices).Distinct();
                 foreach (var root in roots)
                 {
@@ -215,43 +256,40 @@ namespace Engine
                             var children = rootSeg.ChildVertices.OfType<Child>();
                             foreach (var child in children)
                             {
-                                var ies =
+                                verifyExternalSegmentCallChild_SingleCommandType(child);
+
+                                // - 모든 경우(SubCall or ExSegmentCall )에 End Tag 는 무조건 생성
+                                // - SubCall 인 경우, reset edge 무시
+                                // - incoming edge 가 reset 인 경우 : Reset Tag 생성
+                                // - incoming edge 가 reset 이 아닌 경우 (없는 경우 포함) : Start Tag 생성
+
+                                foreach (var tgi in createEndTagGenInfos(child, fqdn))
+                                    yield return tgi;
+
+                                var hasReset =
                                     GraphUtil.getIncomingEdges(rootSeg.GraphInfo.Graph, child)
                                     .Select(qge => qge.OriginalEdge)
-                                    .Distinct()
+                                    .Any(e => e is IResetEdge)
                                     ;
-                                // incoming edge 를 reset edge 여부로 grouping 한 것.
-                                var iesGroups = ies.GroupByToDictionary(e => e is IResetEdge);
-                                var iesResets = iesGroups.ContainsKey(true) ? iesGroups[true] : Array.Empty<Edge>();
-                                var iesSet = iesGroups.ContainsKey(false) ? iesGroups[false] : Array.Empty<Edge>();
+
 
                                 switch (child.Coin)
                                 {
                                     case SubCall call:
-                                        if (iesSet.Length > 0)
+                                        if (! hasReset) // reset 이 없으면...  (set edge 가 있거나, 없거나..)
                                         {
                                             var segStart = call.Prototype.TXs.OfType<Segment>();
-                                            var segEnd = call.Prototype.RXs.OfType<Segment>();
                                             foreach (var s in segStart)
                                                 yield return new TagGenInfo(TagType.Start, s, child, fqdn);
-                                            foreach (var e in segEnd)
-                                                yield return new TagGenInfo(TagType.End, e, child, fqdn);
                                         }
                                         break;
 
                                     case ExSegmentCall exSeg:
                                         var seg = exSeg.ExternalSegment;
-                                        if (iesGroups.Count() > 1)
-                                            throw new Exception("ERROR: Both reset and start edges exists for external segment child call.");
-                                        if (iesResets.Any())
-                                            yield return new TagGenInfo(TagType.Reset, seg, child, fqdn);
-                                        else if (iesSet.Any())
-                                            yield return new TagGenInfo(TagType.Start, seg, child, fqdn);
-
-                                        yield return new TagGenInfo(TagType.End, seg, child, fqdn);
-
-
+                                        var type = hasReset ? TagType.Reset : TagType.Start;
+                                        yield return new TagGenInfo(type, seg, child, fqdn);
                                         break;
+
                                     default:
                                         throw new Exception("ERROR");
                                 }

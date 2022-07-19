@@ -74,14 +74,14 @@ namespace Engine.Core
             new Tag(ownerSegment, name, TagType.Auto | TagType.Reset | TagType.Q | TagType.External, ownerCpu)
             ;
 
-        /// <summary> Call 에서 사용한 TX 에 대한 tag 생성 </summary>
-        public static Tag CreateCallTx(Call ownerCall, Tag proto) =>
-            new Tag(ownerCall, $"{proto.Name}_{ownerCall.QualifiedName}_TX", TagType.TX | TagType.Q | TagType.External, ownerCall.OwnerCpu)
-            ;
-        /// <summary> Call 에서 사용한 RX 에 대한 tag 생성 </summary>
-        public static Tag CreateCallRx(Call ownerCall, Tag proto) =>
-            new Tag(ownerCall, $"{proto.Name}_{ownerCall.QualifiedName}_RX", TagType.RX | TagType.I | TagType.External, ownerCall.OwnerCpu)
-            ;
+        ///// <summary> Call 에서 사용한 TX 에 대한 tag 생성 </summary>
+        //public static Tag CreateCallTx(Call ownerCall, Tag proto) =>
+        //    new Tag(ownerCall, $"{proto.Name}_{ownerCall.QualifiedName}_TX", TagType.TX | TagType.Q | TagType.External, ownerCall.OwnerCpu)
+        //    ;
+        ///// <summary> Call 에서 사용한 RX 에 대한 tag 생성 </summary>
+        //public static Tag CreateCallRx(Call ownerCall, Tag proto) =>
+        //    new Tag(ownerCall, $"{proto.Name}_{ownerCall.QualifiedName}_RX", TagType.RX | TagType.I | TagType.External, ownerCall.OwnerCpu)
+        //    ;
 
     }
 

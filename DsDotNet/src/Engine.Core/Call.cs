@@ -160,27 +160,27 @@ namespace Engine.Core
             }
         }
 
-        public static IEnumerable<Tag> GetRxTags(this Call call)
-        {
-            var tags = call.OwnerCpu.Tags;
-            foreach (var rx in call.RXs)
-            {
-                switch (rx)
-                {
-                    case Segment seg:
-                        yield return tags[seg.TagE.Name];
-                        break;
-                    case Tag tag:
-                        yield return tags[tag.Name];
-                        break;
-                    default:
-                        throw new Exception("ERROR");
-                }
-            }
-        }
+        //public static IEnumerable<Tag> GetRxTags(this Call call)
+        //{
+        //    var tags = call.OwnerCpu.Tags;
+        //    foreach (var rx in call.RXs)
+        //    {
+        //        switch (rx)
+        //        {
+        //            case Segment seg:
+        //                yield return tags[seg.TagE.Name];
+        //                break;
+        //            case Tag tag:
+        //                yield return tags[tag.Name];
+        //                break;
+        //            default:
+        //                throw new Exception("ERROR");
+        //        }
+        //    }
+        //}
 
-        public static IEnumerable<Tag> GetTxRxTags(this Call call) =>
-            GetTxTags(call).Concat(GetRxTags(call));
+        //public static IEnumerable<Tag> GetTxRxTags(this Call call) =>
+        //    GetTxTags(call).Concat(GetRxTags(call));
     }
 
 }

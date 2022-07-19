@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="App.config" />
     <Compile Include="OnlyOnce.fs" />
     <Compile Include="Library.fs" />
     <None Include="paket.references" />

@@ -8,10 +8,11 @@ open Engine
 open Engine.Core
 open System.Linq
 open Dual.Common
+open Xunit.Abstractions
 
 [<AutoOpen>]
 module ModelTests =
-    type DemoTests() =
+    type DemoTests(output1:ITestOutputHelper) =
         let sysP = """
 [sys] P = {
     [flow] F = {
@@ -39,6 +40,7 @@ module ModelTests =
 
         [<Fact>]
         member __.``Parse Cylinder`` () =
+            logInfo "============== Parse Cylinder"
             let text = sysP + """
 [cpu] Cpu = {
     P.F;
@@ -69,6 +71,7 @@ module ModelTests =
 
         [<Fact>]
         member __.``Parse Task`` () =
+            logInfo "============== Parse Task"
             let mutable text = """
 [sys] L = {
     [task] T = {
@@ -113,10 +116,10 @@ module ModelTests =
             (childrenNames, ["T.Cp"; "T.Cm"; "T.C22"]) |> setEq
 
             let checkC22Instance_ =
-                let c22 = main.CallChildren |> Seq.find(fun call -> call.Name = "T.C22")
+                let c22 = main.Children |> Seq.find(fun child -> child.Name = "T.C22")
                 c22.QualifiedName === "L_F_Main_T.C22"
-                (c22.TxTags.Select(fun t -> t.Name), ["Start_P_F_Vp_L_F_Main_T.C22_TX"; "Start_P_F_Vm_L_F_Main_T.C22_TX"]) |> setEq
-                (c22.RxTags.Select(fun t -> t.Name), [  "End_P_F_Sp_L_F_Main_T.C22_RX";   "End_P_F_Sm_L_F_Main_T.C22_RX"]) |> setEq
+                (c22.TagsStart.Select(fun t -> t.Name), ["L_F_Main_T.C22_P_F_Vp_Start"; "L_F_Main_T.C22_P_F_Vm_Start"]) |> setEq
+                (c22.TagsEnd.  Select(fun t -> t.Name), ["L_F_Main_T.C22_P_F_Sp_End";   "L_F_Main_T.C22_P_F_Sm_End"]) |> setEq
 
 
             flow.Cpu === cpu
@@ -131,6 +134,7 @@ module ModelTests =
 
         [<Fact>]
         member __.``Parse Real Child`` () =
+            logInfo "============== Parse Real Child"
             let mutable text = """
 [sys] L = {
     [flow] F = {

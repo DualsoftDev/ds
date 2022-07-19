@@ -74,22 +74,21 @@ namespace Engine
             var otherFlows = flowsGrps.Where(gr => !gr.Active).SelectMany(gr => gr.Flows).ToArray();
             Debug.Assert(activeFlows.All(f => f.Cpu == activeCpu));
 
-            CreateTags4Child(activeCpu, activeFlows);
-            //InitializeOtherFlows(otherFlows);
-
-            FakeCpu fakeCpu = null;
             if (otherFlows.Any())
             {
                 // generate fake cpu's for other flows
-                fakeCpu = new FakeCpu("FakeCpu", otherFlows, Model) { Engine = this };
-                FakeCpu = fakeCpu;
+                FakeCpu = new FakeCpu("FakeCpu", otherFlows, Model) { Engine = this };
+            }
 
-                foreach (var f in otherFlows)
-                {
-                    f.Cpu = fakeCpu;
-                    f.ChildVertices.OfType<Segment>().SelectMany(s => s.AllPorts).Iter(p => p.OwnerCpu = fakeCpu);
-                    InitializeFlow(f, false, opc);
-                }
+
+            CreateTags4Child(activeCpu, activeFlows);
+            CreateTags4Child(FakeCpu, otherFlows);
+
+            foreach (var f in otherFlows)
+            {
+                f.Cpu = FakeCpu;
+                f.ChildVertices.OfType<Segment>().SelectMany(s => s.AllPorts).Iter(p => p.OwnerCpu = FakeCpu);
+                InitializeFlow(f, false, opc);
             }
 
 
@@ -97,15 +96,15 @@ namespace Engine
                 InitializeFlow(f, true, opc);
 
             cpu.BuildBackwardDependency();
-            fakeCpu?.BuildBackwardDependency();
+            FakeCpu?.BuildBackwardDependency();
 
             opc._cpus.Add(cpu);
-            if (fakeCpu != null)
-                opc._cpus.Add(fakeCpu);
+            if (FakeCpu != null)
+                opc._cpus.Add(FakeCpu);
 
             // debugging
             Debug.Assert(cpu.CollectBits().All(b => b.OwnerCpu == cpu));
-            Debug.Assert(fakeCpu == null || fakeCpu.CollectBits().All(b => b.OwnerCpu == fakeCpu));
+            Debug.Assert(FakeCpu == null || FakeCpu.CollectBits().All(b => b.OwnerCpu == FakeCpu));
         }
 
 
@@ -195,7 +194,7 @@ namespace Engine
                                 // incoming edge 를 reset edge 여부로 grouping 한 것.
                                 var iesGroups = ies.GroupByToDictionary(e => e is IResetEdge);
                                 var iesResets = iesGroups.ContainsKey(true) ? iesGroups[true] : Array.Empty<Edge>();
-                                var iesSet = iesGroups.ContainsKey(true) ? iesGroups[true] : Array.Empty<Edge>();
+                                var iesSet = iesGroups.ContainsKey(false) ? iesGroups[false] : Array.Empty<Edge>();
 
                                 switch (child.Coin)
                                 {
@@ -241,13 +240,13 @@ namespace Engine
         {
             // my flow 상의 root segment 들에 대한 HMI s/r/e tags
             var hmiTags = flow.GenereateHmiTags4Segments().ToArray();
-            var vertices =
-                flow.Edges
-                    .SelectMany(e => e.Vertices)
-                    .Concat(flow.ChildVertices)
-                    .Distinct()
-                    .ToArray()
-                    ;
+            //var vertices =
+            //    flow.Edges
+            //        .SelectMany(e => e.Vertices)
+            //        .Concat(flow.ChildVertices)
+            //        .Distinct()
+            //        .ToArray()
+            //        ;
 
             var cpu = flow.Cpu;
 
@@ -256,29 +255,29 @@ namespace Engine
                 hmiTags.Iter(t => t.Type = t.Type.Add(TagType.External));
                 opc.AddTags(hmiTags);
 
-                var subCalls = vertices.OfType<Segment>().SelectMany(seg => seg.CallChildren);
-                var rootCalls = vertices.OfType<Call>();
-                var calls = rootCalls.Concat(subCalls).Distinct();
-                foreach (var call in calls)
-                {
-                    call.OwnerCpu = cpu;
-                    var txs = call.TXs.OfType<Segment>().Distinct().ToArray();
-                    var rxs = call.RXs.OfType<Segment>().Distinct().ToArray();
+                //var subCalls = vertices.OfType<Segment>().SelectMany(seg => seg.CallChildren);
+                //var rootCalls = vertices.OfType<Call>();
+                //var calls = rootCalls.Concat(subCalls).Distinct();
+                //foreach (var call in calls)
+                //{
+                //    call.OwnerCpu = cpu;
+                //    var txs = call.TXs.OfType<Segment>().Distinct().ToArray();
+                //    var rxs = call.RXs.OfType<Segment>().Distinct().ToArray();
 
-                    // Call prototype 의 tag 로부터 Call instance 에 사용할 tag 생성
+                //    // Call prototype 의 tag 로부터 Call instance 에 사용할 tag 생성
 
-                    var startTags = txs.Select(s => Tag.CreateCallTx(call, s.TagS)).ToArray();
-                    opc.AddTags(startTags);
-                    call.TxTags = startTags;
-                    cpu.TxRxTags.AddRange(startTags);
+                //    var startTags = txs.Select(s => Tag.CreateCallTx(call, s.TagS)).ToArray();
+                //    opc.AddTags(startTags);
+                //    call.TxTags = startTags;
+                //    cpu.TxRxTags.AddRange(startTags);
 
-                    var endTags = rxs.Select(s => Tag.CreateCallRx(call, s.TagE)).ToArray();
-                    opc.AddTags(endTags);
-                    call.RxTags = endTags;
-                    cpu.TxRxTags.AddRange(endTags);
+                //    var endTags = rxs.Select(s => Tag.CreateCallRx(call, s.TagE)).ToArray();
+                //    opc.AddTags(endTags);
+                //    call.RxTags = endTags;
+                //    cpu.TxRxTags.AddRange(endTags);
 
-                    call.OwnerCpu = flow.Cpu;
-                }
+                //    call.OwnerCpu = flow.Cpu;
+                //}
 
             }
 
@@ -306,8 +305,8 @@ namespace Engine
 
 
             flow.PrintFlow(isActiveCpu);
+
             //cpu.PrintTags();
-            //foreach (var flow in rootFlows)
         }
     }
 

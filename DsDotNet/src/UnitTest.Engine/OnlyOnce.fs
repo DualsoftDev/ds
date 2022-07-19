@@ -8,6 +8,7 @@ open Engine.Core
 open FsUnit
 open Xunit
 open System.IO
+open Dual.Common
 
 // FsUnit/XUnit 사용법:
 // https://github.com/fsprojects/FsUnit/tree/master/tests/FsUnit.Xunit.Test
@@ -18,6 +19,7 @@ module Fixtures =
         XmlConfigurator.Configure(new FileInfo(log4netConfigFile)) |> ignore
         let logger = LogManager.GetLogger(loggerName)
         Global.Logger <- logger
+        gLogger <- logger
         Global.Logger
 
     type DemoFixture() =
@@ -26,8 +28,10 @@ module Fixtures =
         do
             let cwd = Directory.GetCurrentDirectory()
             sprintf "테스트 초기화 수행" |> ignore
-            let configFile = @"..\..\..\..\Engine\App.config"
+            let configFile = @"F:\Git\ds\DsDotNet\src\UnitTest.Engine\App.config"
             let logger = configureLog4Net "EngineLogger" configFile
+
+            // 로깅 결과 파일 : UnitTest.Engine/bin/logEngine*.txt
             logger.Info "Hello, Log4net!!!"
 
             if not (File.Exists configFile) then

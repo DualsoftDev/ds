@@ -21,14 +21,14 @@ namespace Engine
     [task] T = {
         Cp = {P.F.Vp ~ P.F.Sp}
         Cm = {P.F.Vm ~ P.F.Sm}
-        //Cm1 = {P.F.Vm ~ P.F.Sm, P.F.Sm}
-        //Cm2 = {P.F.Vm ~ P.F.Sm}
-        //Cm3 = {P.F.Vm ~ P.F.Sm}
+        Cm1 = {P.F.Vm ~ P.F.Sm, P.F.Sm}
+        Cm2 = {P.F.Vm ~ P.F.Sm}
+        Cm3 = {P.F.Vm ~ P.F.Sm}
     }
     [flow] F = {
-        //Main = { T.Cp |> T.Cm, T.Cm1 > T.Cm2; T.Cm3 > T.Cm2; }
+        Main = { T.Cp |> T.Cm, T.Cm1 > T.Cm2; T.Cm3 > T.Cm2; Cp1 |> Cm1; }
         //Main = { T.Cp |> T.Cm; }
-        Main = { Cp1 |> Cm1; }
+        //Main = { Cp1 |> Cm1; }
         //Main > Weak;
         //Main >> Strong;
         //Main |> XXX;

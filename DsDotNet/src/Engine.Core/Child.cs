@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Disposables;
@@ -6,9 +7,10 @@ using System.Reactive.Disposables;
 namespace Engine.Core
 {
     [DebuggerDisplay("{ToString()}")]
-    public class Child : Named, IVertex
+    public class Child : Named, IVertex, ICoin
     {
         public Segment Parent { get; }
+        /// <summary>Call or ExSegmentCall</summary>
         public Coin Coin { get; }
         public bool IsCall => Coin is Call;
         public bool IsAlias { get; set; }
@@ -18,6 +20,10 @@ namespace Engine.Core
             get => Parent.ChildStatusMap[this];
             set => Parent.ChildStatusMap[this] = value;
         }
+
+        public List<Tag> TagsStart { get; } = new List<Tag>();
+        public List<Tag> TagsReset { get; } = new List<Tag>();
+        public List<Tag> TagsEnd { get; } = new List<Tag>();
 
         CompositeDisposable _disposables = new CompositeDisposable();
         public Child(Coin coin, Segment parent)

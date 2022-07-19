@@ -27,8 +27,12 @@ namespace Engine.Core
         public Tag TagR { get; set; }
         public Tag TagE { get; set; }
 
+        public List<Tag> TagsStart { get; } = new List<Tag>();
+        public List<Tag> TagsReset { get; } = new List<Tag>();
+        public List<Tag> TagsEnd { get; } = new List<Tag>();
+
         public bool IsResetFirst { get; internal set; } = true;
-        public IEnumerable<Call> CallChildren => ChildVertices.OfType<Child>().Select(c => c.Coin).OfType<Call>();
+        public IEnumerable<Call> CallChildren => Children.Select(c => c.Coin).OfType<Call>();
 
 
         //public List<Child> Children { get; } = new List<Child>();
@@ -67,66 +71,38 @@ namespace Engine.Core
         public static bool IsChildrenStatusAllWith(this Segment segment, Status4 status) => segment.ChildStatusMap.Values.All(st => st == status);
         public static bool IsChildrenStatusAnyWith(this Segment segment, Status4 status) => segment.ChildStatusMap.Values.Any(st => st == status);
 
-        public static void OnChildRxTagChanged(this Segment segment, BitChange bc)
+        public static void OnChildEndTagChanged(this Segment segment, BitChange bc)
         {
             var tag = bc.Bit as Tag;
-            var calls = segment.CallChildren.Where(c => c.RxTags.Any(t => t.Name == tag.Name));
+            var child = segment.Children.Where(c => c.TagsEnd.Any(t => t.Name == tag.Name));
         }
 
 
         public static void Epilogue(this Segment segment)
         {
-            //// coin -> child map
-            //var ccMap =
-            //    segment.ChildVertices.OfType<Child>()
-            //        .ToDictionary(coin => coin, coin => new Child(coin, segment))
-            //        ;
-            //segment.CoinChildMap = ccMap;
-            ////segment.Children = ccMap.Values.ToArray();
             segment.ChildStatusMap =
-                segment.ChildVertices.OfType<Child>()
+                segment.Children
                 .ToDictionary(child => child, _ => Status4.Homing)
                 ;
 
-            //// call or segment 를 'Child' class 로 wrapping
-            //IVertex convert(IVertex old)
-            //{
-            //    var coin = old as Coin;
-            //    if (coin != null && ccMap.ContainsKey(coin))
-            //        return ccMap[coin];
-            //    return old;
-            //}
-
-            // { Graph 정보 추출 & 저장
+            // Graph 정보 추출 & 저장
             var gi = segment.GraphInfo;
-            //foreach (var ves in gi.TraverseOrders)
-            //{
-            //    ves.Vertex = convert(ves.Vertex);
-            //    foreach (var oe in ves.OutgoingEdges)
-            //    {
-            //        oe.Sources = oe.Sources.Select(s => convert(s)).ToArray();
-            //        oe.Target = convert(oe.Target);
-            //    }
-            //}
-            //segment.Inits = gi.Inits.OfType<Coin>().Select(convert).Cast<Child>().ToArray();
-            //segment.Lasts = gi.Lasts.Select(convert).Cast<Child>().ToArray();
-
-
             segment.Inits = gi.Inits.OfType<Child>().ToArray();
             segment.Lasts = gi.Lasts.OfType<Child>().ToArray();
             segment.TraverseOrder = gi.TraverseOrders;
-            // }
+
 
 
             // segment 내의 child call 에 대한 RX tag 변경 시, child origin 검사 및 child 의 status 변경 저장하도록 event handler 등록
-            var rxs = segment.CallChildren.SelectMany(c => c.RxTags).ToArray();
-            var rxNames = rxs.Select(t => t.Name).ToHashSet();
+            var endTags = segment.Children.SelectMany(c => c.TagsEnd).ToArray();
+            var endTagNames = endTags.Select(t => t.Name).ToHashSet();
 
             var subs =
                 Global.BitChangedSubject
-                    .Where( bc => bc.Bit is Tag && rxNames.Contains(((Tag)bc.Bit).Name ) )
-                    .Subscribe(bc => {
-                        segment.OnChildRxTagChanged(bc);
+                    .Where(bc => bc.Bit is Tag && endTagNames.Contains(((Tag)bc.Bit).Name))
+                    .Subscribe(bc =>
+                    {
+                        segment.OnChildEndTagChanged(bc);
                     });
             segment.Disposables.Add(subs);
         }

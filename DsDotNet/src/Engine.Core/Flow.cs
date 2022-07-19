@@ -71,6 +71,8 @@ namespace Engine.Core
             : base(name)
         {
         }
+
+        public IEnumerable<Child> Children => ChildVertices.OfType<Child>();
     }
 
 
@@ -120,11 +122,11 @@ namespace Engine.Core
 
         public static IEnumerable<ExSegmentCall> CollectExternalRealSegment(this ChildFlow childFlow)
         {
-            var exSegments = childFlow.ChildVertices.OfType<Child>().Select(c => c.Coin).OfType<ExSegmentCall>();
+            var exSegments = childFlow.Children.Select(c => c.Coin).OfType<ExSegmentCall>();
             return exSegments;
         }
         public static IEnumerable<Child> CollectAlises(this ChildFlow childFlow) =>
-            childFlow.ChildVertices.OfType<Child>().Where(c => c.IsAlias)
+            childFlow.Children.Where(c => c.IsAlias)
             ;
 
         struct Causal

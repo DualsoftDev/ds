@@ -1,4 +1,4 @@
-﻿using Engine.Common;
+using Engine.Common;
 using Engine.Core;
 using Engine.Graph;
 

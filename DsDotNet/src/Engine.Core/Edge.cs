@@ -32,8 +32,8 @@ namespace Engine.Core
         }
         public string ToText()
         {
-            var ss = string.Join(", ", Sources.Select(s => s.ToString()));
-            return $"{ss} {Operator} {Target}";
+            var ss = string.Join(", ", Sources.Select(s => s.GetQualifiedName()));
+            return $"{ss} {Operator} {Target.GetQualifiedName()}";
         }
     }
 

@@ -12,6 +12,7 @@ namespace Engine
 {
     partial class Engine
     {
+        [DebuggerDisplay("[{TagName}]")]
         class TagGenInfo
         {
             public TagType Type;
@@ -217,7 +218,10 @@ namespace Engine
                             var fqdn = rootSeg.QualifiedName;
                             if (edge != null)
                             {
-                                var type = isSource ? TagType.End : TagType.Start;
+                                var type = isSource ? TagType.End : (edge is IResetEdge ? TagType.Reset : TagType.Start);
+                                if (!isSource)
+                                    if (edge is IResetEdge)
+                                        Console.WriteLine();
                                 yield return new TagGenInfo(type, rootSeg, rootSeg, fqdn, edge, isSource);
 
                             }

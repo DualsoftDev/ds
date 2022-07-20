@@ -108,6 +108,14 @@ namespace Engine.Core
 
     public static class CallExtension
     {
+        public static string GetQualifiedName(this IVertex vertex)
+        {
+            return vertex switch
+            {
+                ICoin coin => coin.GetQualifiedName(),
+                _ => vertex.ToString(),
+            };
+        }
         public static string GetQualifiedName(this ICoin coin)
         {
             switch(coin)

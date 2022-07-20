@@ -135,38 +135,10 @@ namespace Engine
             var cpu = rootFlow.Cpu;
 
             hmiTags.Iter(t => t.Type = t.Type.Add(TagType.External));
+            hmiTags.Iter(cpu.AddTag);
             Opc.AddTags(hmiTags);
 
-            if (isActiveCpu)
-            {
-
-                //var subCalls = vertices.OfType<Segment>().SelectMany(seg => seg.CallChildren);
-                //var rootCalls = vertices.OfType<Call>();
-                //var calls = rootCalls.Concat(subCalls).Distinct();
-                //foreach (var call in calls)
-                //{
-                //    call.OwnerCpu = cpu;
-                //    var txs = call.TXs.OfType<Segment>().Distinct().ToArray();
-                //    var rxs = call.RXs.OfType<Segment>().Distinct().ToArray();
-
-                //    // Call prototype 의 tag 로부터 Call instance 에 사용할 tag 생성
-
-                //    var startTags = txs.Select(s => Tag.CreateCallTx(call, s.TagS)).ToArray();
-                //    opc.AddTags(startTags);
-                //    call.TxTags = startTags;
-                //    cpu.TxRxTags.AddRange(startTags);
-
-                //    var endTags = rxs.Select(s => Tag.CreateCallRx(call, s.TagE)).ToArray();
-                //    opc.AddTags(endTags);
-                //    call.RxTags = endTags;
-                //    cpu.TxRxTags.AddRange(endTags);
-
-                //    call.OwnerCpu = flow.Cpu;
-                //}
-
-            }
-
-            var tags = rootFlow.Cpu.TagsMap;
+            var tags = cpu.TagsMap;
             // Edge 를 Bit 로 보고
             // A -> B 연결을 A -> Edge -> B 연결 정보로 변환
             foreach (var e in rootFlow.Edges)

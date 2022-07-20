@@ -11,30 +11,8 @@ open Dual.Common
 open Xunit.Abstractions
 
 [<AutoOpen>]
-module ModelTests =
-    type DemoTests(output1:ITestOutputHelper) =
-        let sysP = """
-[sys] P = {
-    [flow] F = {
-        Vp > Pp > Sp;
-        Vm > Pm > Sm;
-
-        Pp |> Sm;
-        Pm |> Sp;
-        Vp <||> Vm;
-    }
-}
-"""
-        let cpuL = """
-[cpu] Cpu = {
-    L.F;
-}
-"""
-
-
-        let seqEq(a, b) = Enumerable.SequenceEqual(a, b) |> ShouldBeTrue
-        let setEq(xs:'a seq, ys:'a seq) =
-            (xs.Count() = ys.Count() && xs |> Seq.forall(fun x -> ys.Contains(x)) ) |> ShouldBeTrue
+module ModelTests1 =
+    type DemoTests1(output1:ITestOutputHelper) =
 
         interface IClassFixture<Fixtures.DemoFixture>
 

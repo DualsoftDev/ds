@@ -7,7 +7,9 @@
   <ItemGroup>
     <None Include="App.config" />
     <Compile Include="OnlyOnce.fs" />
-    <Compile Include="Library.fs" />
+    <Compile Include="ModelTest_Common.fs" />
+    <Compile Include="ModelTest1.fs" />
+    <Compile Include="ModelTest2.fs" />
     <None Include="paket.references" />
   </ItemGroup>
 

@@ -23,6 +23,9 @@ namespace Engine
             //public RootCall RootCall;
             public ICoin Child;     // Child or RootCall
 
+            public Edge Edge;       // 사용된 edge
+            public bool IsSource;   // edge 의 source 쪽인지 여부
+
             public string Context;
             // Tag 가 null 인 상태에서도 tag name 을 가져 올 수 있어야 함.  Tag 가 non null 이면 Tag.Name 과 동일
             public string TagName
@@ -44,13 +47,15 @@ namespace Engine
             /// <param name="segment">tag 가 직접 제어할 segment</param>
             /// <param name="child">segment 를 포함하는 Child.  (Child or RootCall) </param>
             /// <param name="context">생성할 tag 가 사용되는 context</param>
-            public TagGenInfo(TagType type, Segment segment, ICoin child, string context)
+            public TagGenInfo(TagType type, Segment segment, ICoin child, string context, Edge edge, bool isSource)
             {
                 Debug.Assert(child is Segment || child is Child || child is RootCall);
                 Type = type;
                 Segment = segment;
                 Context = context;
                 Child = child;
+                Edge = edge;
+                IsSource = isSource;
                 GeneratedTag = null;
             }
         }
@@ -65,8 +70,9 @@ namespace Engine
             }
 
             var tagGenInfos =
-                collectTagGenInfo().GroupBy(tgi => tgi.TagName).Select(g => g.First())      // DistinctBy : https://stackoverflow.com/questions/2537823/distinct-by-property-of-class-with-linq
-                                                                                            //.Select(gi => gi.TagName)
+                collectTagGenInfo()
+                .GroupBy(tgi => tgi.TagName).Select(g => g.First())      // DistinctBy : https://stackoverflow.com/questions/2537823/distinct-by-property-of-class-with-linq
+                //.Select(gi => gi.TagName)
                 .ToArray();
 
             // tag 가 사용된 위치(child) 및 tag type 으로 grouping
@@ -163,19 +169,19 @@ namespace Engine
                 }
 
                 /// Child 에 대한 End tag 생성 정보를 반환
-                IEnumerable<TagGenInfo> createEndTagGenInfos(Child child, string context)
+                IEnumerable<TagGenInfo> createEndTagGenInfos(Child child, string context, Edge edge, bool isSource)
                 {
                     switch (child.Coin)
                     {
                         case SubCall call:
                             var segEnd = call.Prototype.RXs.OfType<Segment>();
                             foreach (var e in segEnd)
-                                yield return new TagGenInfo(TagType.End, e, child, context);
+                                yield return new TagGenInfo(TagType.End, e, child, context, edge, isSource);
                             break;
 
                         case ExSegmentCall exSeg:
                             var seg = exSeg.ExternalSegment;
-                            yield return new TagGenInfo(TagType.End, seg, child, context);
+                            yield return new TagGenInfo(TagType.End, seg, child, context, edge, isSource);
                             break;
                         default:
                             throw new Exception("ERROR");
@@ -183,21 +189,35 @@ namespace Engine
 
                 }
 
-                var roots = activeFlows.SelectMany(f => f.ChildVertices).Distinct();
-                foreach (var root in roots)
+
+                IEnumerable<TagGenInfo> createTagGenInfos4Edge(Edge edge)
+                {
+                    var sourceTgis = edge.Sources.SelectMany(s => createTagGenInfos4RootVertex(s, edge, true));
+                    foreach (var tgi in sourceTgis)
+                        yield return tgi;
+
+                    var tagetTgis = createTagGenInfos4RootVertex(edge.Target, edge, false);
+                    foreach (var tgi in tagetTgis)
+                        yield return tgi;
+
+                }
+
+
+
+                IEnumerable<TagGenInfo> createTagGenInfos4RootVertex(IVertex root, Edge edge, bool isSource)
                 {
                     switch (root)
                     {
                         case RootCall rootCall:
                             foreach (var txSeg in rootCall.Prototype.TXs.OfType<Segment>())
-                                yield return new TagGenInfo(TagType.Start, txSeg, rootCall, rootCall.QualifiedName);
+                                yield return new TagGenInfo(TagType.Start, txSeg, rootCall, rootCall.QualifiedName, edge, isSource);
                             foreach (var rxSeg in rootCall.Prototype.RXs.OfType<Segment>())
-                                yield return new TagGenInfo(TagType.End, rxSeg, rootCall, rootCall.QualifiedName);
+                                yield return new TagGenInfo(TagType.End, rxSeg, rootCall, rootCall.QualifiedName, edge, isSource);
                             break;
 
                         case Segment rootSeg:
                             var fqdn = rootSeg.QualifiedName;
-                            yield return new TagGenInfo(TagType.Start, rootSeg, rootSeg, fqdn);
+                            yield return new TagGenInfo(TagType.Start, rootSeg, rootSeg, fqdn, edge, isSource);
 
                             var children = rootSeg.ChildVertices.OfType<Child>();
                             foreach (var child in children)
@@ -209,7 +229,7 @@ namespace Engine
                                 // - incoming edge 가 reset 인 경우 : Reset Tag 생성
                                 // - incoming edge 가 reset 이 아닌 경우 (없는 경우 포함) : Start Tag 생성
 
-                                foreach (var tgi in createEndTagGenInfos(child, fqdn))
+                                foreach (var tgi in createEndTagGenInfos(child, fqdn, edge, isSource))
                                     yield return tgi;
 
                                 var hasReset =
@@ -226,14 +246,14 @@ namespace Engine
                                         {
                                             var segStart = call.Prototype.TXs.OfType<Segment>();
                                             foreach (var s in segStart)
-                                                yield return new TagGenInfo(TagType.Start, s, child, fqdn);
+                                                yield return new TagGenInfo(TagType.Start, s, child, fqdn, edge, isSource);
                                         }
                                         break;
 
                                     case ExSegmentCall exSeg:
                                         var seg = exSeg.ExternalSegment;
                                         var type = hasReset ? TagType.Reset : TagType.Start;
-                                        yield return new TagGenInfo(type, seg, child, fqdn);
+                                        yield return new TagGenInfo(type, seg, child, fqdn, edge, isSource);
                                         break;
 
                                     default:
@@ -246,6 +266,20 @@ namespace Engine
                             throw new Exception("ERROR");
                     }
                 }
+
+
+
+                var edges = activeFlows.SelectMany(f => f.Edges);
+                foreach ( var tgi in edges.SelectMany(createTagGenInfos4Edge))
+                    yield return tgi;
+
+
+                // edge 연결 없이 root 상에 존재하는 vertices 에 대한 tag 생성
+                var roots = activeFlows.SelectMany(f => f.ChildVertices).Distinct();
+                var vertices = edges.SelectMany(e => e.Vertices);
+                var isolatedVertices = roots.Except(vertices);
+                foreach (var tgi in isolatedVertices.SelectMany(v => createTagGenInfos4RootVertex(v, null, false)))
+                    yield return tgi;
             }
         }
     }

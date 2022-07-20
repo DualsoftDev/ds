@@ -428,7 +428,7 @@ namespace Engine.Common
                 result =
                     from accseq in result
                     from item in sequence
-                    select accseq.Concat(new[] { item });
+                    select accseq.Append(item);
             }
             return result;
         }

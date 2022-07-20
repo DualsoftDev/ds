@@ -13,7 +13,7 @@ namespace Engine.Core
         /// <summary> Conjuction </summary>
         public IVertex[] Sources { get; internal set; }
         public IVertex Target { get; internal set; }
-        public IEnumerable<IVertex> Vertices => Sources.Concat(new[] { Target });
+        public IEnumerable<IVertex> Vertices => Sources.Append(Target);
 
         public bool Value { get => Sources.All(v => v.Value); set => throw new NotImplementedException(); }
         public CpuBase OwnerCpu { get => ContainerFlow.Cpu; set => throw new NotImplementedException(); }

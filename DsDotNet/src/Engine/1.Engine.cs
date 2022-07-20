@@ -1,6 +1,5 @@
 ﻿using Engine.Common;
 using Engine.Core;
-using Engine.Graph;
 using Engine.OPC;
 using Engine.Parser;
 
@@ -29,7 +28,7 @@ namespace Engine
             Cpu.Engine = this;
 
             Model.BuidGraphInfo();
-            this.InitializeFlows(Cpu, Opc);
+            this.InitializeAllFlows(Opc);
 
 
             Model.Epilogue();
@@ -42,10 +41,10 @@ namespace Engine
 
             void readTagsFromOpc(Cpu cpu)
             {
-                var tpls = Opc.ReadTags(cpu.Tags.Select(t => t.Key)).ToArray();
+                var tpls = Opc.ReadTags(cpu.TagsMap.Select(t => t.Key)).ToArray();
                 foreach ((var tName, var value) in tpls)
                 {
-                    var tag = cpu.Tags[tName];
+                    var tag = cpu.TagsMap[tName];
                     if (tag.Value != value)
                         cpu.OnOpcTagChanged(tName, value);
                 }
@@ -63,18 +62,17 @@ namespace Engine
     // Engine Initializer
     partial class Engine
     {
-        public void InitializeFlows(CpuBase activeCpu, OpcBroker opc)
+        public void InitializeAllFlows(OpcBroker opc)
         {
-            var cpu = activeCpu;
             var allRootFlows = Model.Systems.SelectMany(s => s.RootFlows);
             var flowsGrps =
                 from flow in allRootFlows
-                group flow by cpu.RootFlows.Contains(flow) into g
+                group flow by Cpu.RootFlows.Contains(flow) into g
                 select new { Active = g.Key, Flows = g.ToList() };
             ;
             var activeFlows = flowsGrps.Where(gr => gr.Active).SelectMany(gr => gr.Flows).ToArray();
             var otherFlows = flowsGrps.Where(gr => !gr.Active).SelectMany(gr => gr.Flows).ToArray();
-            Debug.Assert(activeFlows.All(f => f.Cpu == activeCpu));
+            Debug.Assert(activeFlows.All(f => f.Cpu == Cpu));
 
             if (otherFlows.Any())
             {
@@ -83,227 +81,37 @@ namespace Engine
             }
 
 
-            CreateTags4Child(activeCpu, activeFlows);
-            CreateTags4Child(FakeCpu, otherFlows);
+            TagGenInfo[] tgisActive = CreateTags4Child(Cpu, activeFlows);
+            TagGenInfo[] tgisFake   = CreateTags4Child(FakeCpu, otherFlows);
+            tgisActive.Select(tgi => tgi.GeneratedTag).Iter(Cpu.AddTag);
+            tgisFake.Select(  tgi => tgi.GeneratedTag).Iter(FakeCpu.AddTag);
 
             foreach (var f in otherFlows)
             {
                 f.Cpu = FakeCpu;
                 f.RootSegments.SelectMany(s => s.AllPorts).Iter(p => p.OwnerCpu = FakeCpu);
-                InitializeFlow(f, false, opc);
+                InitializeRootFlow(f, false, opc);
             }
 
 
             foreach (var f in activeFlows)
-                InitializeFlow(f, true, opc);
+                InitializeRootFlow(f, true, opc);
 
-            cpu.BuildBackwardDependency();
+            Cpu.BuildBackwardDependency();
             FakeCpu?.BuildBackwardDependency();
 
-            opc._cpus.Add(cpu);
+            opc._cpus.Add(Cpu);
             if (FakeCpu != null)
                 opc._cpus.Add(FakeCpu);
 
             // debugging
-            Debug.Assert(cpu.CollectBits().All(b => b.OwnerCpu == cpu));
+            Debug.Assert(Cpu.CollectBits().All(b => b.OwnerCpu == Cpu));
             Debug.Assert(FakeCpu == null || FakeCpu.CollectBits().All(b => b.OwnerCpu == FakeCpu));
         }
 
-
-        struct TagGenInfo
-        {
-            public TagType Type;
-            public Segment Segment;
-
-            //public Child Child;
-            //public RootCall RootCall;
-            public ICoin Child;     // Child or RootCall
-
-            public string Context;
-            public string TagName => $"{Child.GetQualifiedName()}_{Segment.QualifiedName}_{Type}";
-            public TagGenInfo(TagType type, Segment segment, ICoin child, string context)
-            {
-                Debug.Assert(child is Child || child is RootCall);
-                Type = type;
-                Segment = segment;
-                Context = context;
-                Child = child;
-            }
-        }
-
         /// <summary> Root flow 에서 타 시스템을 호출하기 위한 interface tag 를 생성한다. </summary>
-        void CreateTags4Child(CpuBase cpu, RootFlow[] activeFlows)
-        {
-            var tagGenInfos =
-                collectTagGenInfo().Distinct()
-                //.Select(gi => gi.TagName)
-                .ToArray();
 
-            var tgiGroups = tagGenInfos.GroupByToDictionary(tgi => (tgi.Child, tgi.Type));
-            foreach ( var kv in tgiGroups)
-            {
-                (var location, var type) = kv.Key;
-                var tgis = kv.Value;
-                var tags = tgis.Select(tgi => new Tag(location, tgi.TagName, type, cpu)).ToArray();
-
-                List<Tag> storage = null;
-                switch(location)
-                {
-                    case Child child:
-                        storage = type switch
-                        {
-                            TagType.Start => child.TagsStart,
-                            TagType.Reset => child.TagsReset,
-                            TagType.End => child.TagsEnd,
-                            _ => throw new Exception("ERROR")
-                        };
-                        break;
-                    case RootCall rootCall:
-                        storage = type switch
-                        {
-                            TagType.Start => rootCall.TxTags,
-                            TagType.End => rootCall.RxTags,
-                            _ => throw new Exception("ERROR")
-                        };
-                        break;
-                }
-
-                Debug.Assert(storage.IsNullOrEmpty());
-                storage.AddRange(tags);
-                var tagNames = String.Join(", ", tgis.Select(tgi => tgi.TagName));
-                Global.Logger.Debug($"Adding Child Tags {tagNames} to child [{location.GetQualifiedName()}]");
-
-                // apply to segment
-                foreach (var tgi in tgis)
-                {
-                    var seg = tgi.Segment;
-                    var segStorage = tgi.Type switch
-                    {
-                        TagType.Start => seg.TagsStart,
-                        TagType.Reset => seg.TagsReset,
-                        TagType.End => seg.TagsEnd,
-                        _ => throw new Exception("ERROR")
-                    };
-
-                    Global.Logger.Debug($"Adding Export {tgi.Type} Tag [{tgi.TagName}] to segment [{seg.QualifiedName}]");
-                    segStorage.Add(new Tag(seg, tgi.TagName, type, seg.OwnerCpu));
-                }
-
-                Console.WriteLine();
-            }
-
-            /// Root flow 에 존재하는 
-            /// - root call 
-            /// - root segment 의 하부 call 및 external segment call 
-            /// 의 호출을 위한 start/reset/end tag 를 생성하기 위한 정보를 생성
-            IEnumerable<TagGenInfo> collectTagGenInfo()
-            {
-                /// 하나의 [external segment call 을 위한 Child] 에 대해서 Set 및 Reset 명령이 동시에 들어올 수 없음을 check
-                void verifyExternalSegmentCallChild_SingleCommandType(Child child)
-                {
-                    if (child.IsCall)
-                        return;
-
-                    var ies =
-                        GraphUtil.getIncomingEdges(child.Parent.GraphInfo.Graph, child)
-                            .Select(qge => qge.OriginalEdge)
-                            .Distinct()
-                            ;
-                    if (ies.Any())
-                    {
-                        // incoming edge 를 reset edge 여부로 grouping 한 것.
-                        var iesGroups = ies.GroupByToDictionary(e => e is IResetEdge);
-                        if (iesGroups.Count() > 1)
-                            throw new Exception("ERROR: Both reset and start edges exists for external segment child call.");
-                    }
-                }
-
-                /// Child 에 대한 End tag 생성 정보를 반환
-                IEnumerable<TagGenInfo> createEndTagGenInfos(Child child, string context)
-                {
-                    switch (child.Coin)
-                    {
-                        case SubCall call:
-                            var segEnd = call.Prototype.RXs.OfType<Segment>();
-                            foreach (var e in segEnd)
-                                yield return new TagGenInfo(TagType.End, e, child, context);
-                            break;
-
-                        case ExSegmentCall exSeg:
-                            var seg = exSeg.ExternalSegment;
-                            yield return new TagGenInfo(TagType.End, seg, child, context);
-                            break;
-                        default:
-                            throw new Exception("ERROR");
-                    }
-
-                }
-
-                var roots = activeFlows.SelectMany(f => f.ChildVertices).Distinct();
-                foreach (var root in roots)
-                {
-                    switch (root)
-                    {
-                        case RootCall rootCall:
-                            foreach (var txSeg in rootCall.Prototype.TXs.OfType<Segment>())
-                                yield return new TagGenInfo(TagType.Start, txSeg, rootCall, rootCall.QualifiedName);
-                            foreach (var rxSeg in rootCall.Prototype.RXs.OfType<Segment>())
-                                yield return new TagGenInfo(TagType.End, rxSeg, rootCall, rootCall.QualifiedName);
-                            break;
-
-                        case Segment rootSeg:
-                            var fqdn = rootSeg.QualifiedName;
-                            var children = rootSeg.ChildVertices.OfType<Child>();
-                            foreach (var child in children)
-                            {
-                                verifyExternalSegmentCallChild_SingleCommandType(child);
-
-                                // - 모든 경우(SubCall or ExSegmentCall )에 End Tag 는 무조건 생성
-                                // - SubCall 인 경우, reset edge 무시
-                                // - incoming edge 가 reset 인 경우 : Reset Tag 생성
-                                // - incoming edge 가 reset 이 아닌 경우 (없는 경우 포함) : Start Tag 생성
-
-                                foreach (var tgi in createEndTagGenInfos(child, fqdn))
-                                    yield return tgi;
-
-                                var hasReset =
-                                    GraphUtil.getIncomingEdges(rootSeg.GraphInfo.Graph, child)
-                                    .Select(qge => qge.OriginalEdge)
-                                    .Any(e => e is IResetEdge)
-                                    ;
-
-
-                                switch (child.Coin)
-                                {
-                                    case SubCall call:
-                                        if (! hasReset) // reset 이 없으면...  (set edge 가 있거나, 없거나..)
-                                        {
-                                            var segStart = call.Prototype.TXs.OfType<Segment>();
-                                            foreach (var s in segStart)
-                                                yield return new TagGenInfo(TagType.Start, s, child, fqdn);
-                                        }
-                                        break;
-
-                                    case ExSegmentCall exSeg:
-                                        var seg = exSeg.ExternalSegment;
-                                        var type = hasReset ? TagType.Reset : TagType.Start;
-                                        yield return new TagGenInfo(type, seg, child, fqdn);
-                                        break;
-
-                                    default:
-                                        throw new Exception("ERROR");
-                                }
-                            }
-                            break;
-
-                        default:
-                            throw new Exception("ERROR");
-                    }
-                }
-            }
-        }
-
-        void InitializeFlow(RootFlow rootFlow, bool isActiveCpu, OpcBroker opc)
+        void InitializeRootFlow(RootFlow rootFlow, bool isActiveCpu, OpcBroker opc)
         {
             // my flow 상의 root segment 들에 대한 HMI s/r/e tags
             var hmiTags = rootFlow.GenereateHmiTags4Segments().ToArray();
@@ -341,9 +149,7 @@ namespace Engine
 
             }
 
-            var tags =
-                (isActiveCpu ? rootFlow.Cpu.CollectTags().Distinct().ToArray() : new Tag[] { })
-                .ToDictionary(t => t.Name, t => t);
+            var tags = rootFlow.Cpu.TagsMap;
             // Edge 를 Bit 로 보고
             // A -> B 연결을 A -> Edge -> B 연결 정보로 변환
             foreach (var e in rootFlow.Edges)
@@ -373,42 +179,5 @@ namespace Engine
     public static class EngineExtension
     {
 
-    }
-
-    public static class ModelExtension
-    {
-        public static void BuidGraphInfo(this Model model)
-        {
-            var rootFlows = model.CollectRootFlows();
-            foreach (var flow in rootFlows)
-                flow.GraphInfo = GraphUtil.analyzeFlows(new[] { flow }, true);
-
-            foreach (var cpu in model.Cpus)
-                cpu.GraphInfo = GraphUtil.analyzeFlows(cpu.RootFlows, true);
-
-            foreach (var segment in model.CollectSegments())
-                segment.GraphInfo = GraphUtil.analyzeFlows(new[] { segment }, false);
-        }
-        public static void Epilogue(this Model model)
-        {
-            foreach (var segment in model.CollectSegments())
-                segment.Epilogue();
-
-            foreach (var cpu in model.Cpus)
-                cpu.Epilogue();
-        }
-
-        public static IEnumerable<RootFlow> CollectRootFlows(this Model model) => model.Systems.SelectMany(sys => sys.RootFlows);
-
-        public static IEnumerable<Flow> CollectFlows(this Model model)
-        {
-            var rootFlows = model.CollectRootFlows().ToArray();
-            var subFlows = rootFlows.SelectMany(rf => rf.ChildVertices.OfType<Segment>());
-            var allFlows = rootFlows.Cast<Flow>().Concat(subFlows);
-            return allFlows;
-        }
-        public static IEnumerable<Segment> CollectSegments(this Model model) =>
-            model.CollectRootFlows().SelectMany(rf => rf.ChildVertices).OfType<Segment>()
-            ;
     }
 }

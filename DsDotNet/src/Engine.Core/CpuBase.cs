@@ -27,7 +27,7 @@ namespace Engine.Core
         /// <summary> bit 간 역방향 의존성 map </summary>
         public Dictionary<IBit, HashSet<IBit>> BackwardDependancyMap { get; internal set; }
         /// <summary> this Cpu 관련 tags.  Root segment 의 S/R/E 및 call 의 Tx, Rx </summary>
-        public Dictionary<string, Tag> Tags { get; internal set; }
+        public Dictionary<string, Tag> TagsMap { get; } = new Dictionary<string, Tag>();
         /// <summary> Call 의 TX RX 에 사용된 tag 목록 </summary>
         public List<Tag> TxRxTags { get; } = new List<Tag>();
 
@@ -59,6 +59,7 @@ namespace Engine.Core
     public static class CpuExtension
     {
         static ILog Logger => Global.Logger;
+        public static void AddTag(this CpuBase cpu, Tag tag) => cpu.TagsMap.Add(tag.Name, tag);
         public static IEnumerable<IBit> CollectBits(this CpuBase cpu)
         {
             IEnumerable<IBit> helper()
@@ -79,7 +80,6 @@ namespace Engine.Core
 
             return helper().Distinct();
         }
-        public static IEnumerable<Tag> CollectTags(this CpuBase cpu) => cpu.TxRxTags.Concat(cpu.CollectBits()).OfType<Tag>();
 
         public static void Epilogue(this CpuBase cpu)
         {
@@ -92,7 +92,7 @@ namespace Engine.Core
 
         //public static void PrintTags(this CpuBase cpu)
         //{
-        //    var tags = cpu.CollectTags().ToArray();
+        //    var tags = cpu.Tags.ToArray();
         //    var externalTagNames = string.Join("\r\n\t", tags.Where(t => t.IsExternal()).Select(t => t.Name));
         //    var internalTagNames = string.Join("\r\n\t", tags.Where(t => !t.IsExternal()).Select(t => t.Name));
         //    Logger.Debug($"-- Tags for {cpu.Name}");
@@ -130,16 +130,14 @@ namespace Engine.Core
                     bwdMap[t].Add(source);
                 }
             }
-
-            cpu.Tags = cpu.CollectTags().Distinct().ToDictionary(t => t.Name, t => t);
         }
 
         /// <summary> 외부에서 tag 가 변경된 경우 </summary>
         public static void OnOpcTagChanged(this CpuBase cpu, string tagName, bool value)
         {
-            if (cpu.Tags.ContainsKey(tagName))
+            if (cpu.TagsMap.ContainsKey(tagName))
             {
-                var tag = cpu.Tags[tagName];
+                var tag = cpu.TagsMap[tagName];
                 tag.Value = value;
             }
         }

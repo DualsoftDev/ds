@@ -28,10 +28,10 @@ namespace Engine
     }
     [flow] F = {
         //Main = { T.Cp |> T.Cm, T.Cm1 > T.Cm2; T.Cm3 > T.Cm2; Cp2 > Cm2}
-        Main = { T.Cp2 |> Cp2; }
-        //Main = { Cp1 |> Cm1; }
+        //Main = { T.Cp2 |> Cp2; }
+        Main = { Cp2 |> Cm2; }
         //Main > Weak;
-        Cp1 > Cm1;
+        //Cp1 > Cm1;
         //Weak >> Strong;
         //Main |> XXX;
         //parenting = {A > B > C; C |> B; }
@@ -60,7 +60,7 @@ namespace Engine
             var opc = engine.Opc;
 
             var resetTag = "Reset_L_F_Main";
-            if (engine.Cpu.Tags.ContainsKey(resetTag))
+            if (engine.Cpu.TagsMap.ContainsKey(resetTag))
             {
                 var children = engine.Cpu.RootFlows.SelectMany(f => f.ChildVertices);
                 var main = children.OfType<Segment>().FirstOrDefault(c => c.Name == "Main");

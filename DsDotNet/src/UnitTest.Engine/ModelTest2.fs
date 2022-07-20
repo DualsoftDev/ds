@@ -49,7 +49,7 @@ module ModelTest2 =
             let flow = system.RootFlows |> Seq.exactlyOne
             flow.Name === "F"
 
-            flow.ChildVertices.Count === 3
+            flow.ChildVertices.Count() === 3
             flow.Coins.Count() === 3
             let flowCallChildrenNames = flow.ChildVertices |> Enumerable.OfType<RootCall> |> Seq.map(fun c -> c.Name)
             (flowCallChildrenNames, ["T.Cm"; "T.Cp"]) |> setEq

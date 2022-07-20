@@ -83,7 +83,7 @@ namespace Engine.Core
             : base(name, flow, protoType)
         {
             // root flow 에서만 child vertices 에 추가.   (child flow 에서는 Child 로 wrapping 해서 추가됨.)
-            flow.ChildVertices.Add(this);
+            flow.AddChildVertex(this);
         }
     }
 

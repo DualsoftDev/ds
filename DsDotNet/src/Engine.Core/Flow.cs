@@ -14,23 +14,26 @@ namespace Engine.Core
         public CpuBase Cpu { get; set; }
 
         /// <summary>Edge 를 통해 알 수 없는 isolated segement/call 등을 포함 </summary>
-        public HashSet<IVertex> ChildVertices { get; } = new HashSet<IVertex>();
+        HashSet<IVertex> _childVertices = new HashSet<IVertex>();
+        public IEnumerable<IVertex> ChildVertices => _childVertices;
         public void AddChildVertices(IEnumerable<IVertex> children)// 임시
         {
             foreach (var child in children)
                 AddChildVertex(child);
         }
-        public void AddChildVertex(IVertex child)// 임시
+        public void AddChildVertex(IVertex child)
         {
             Debug.Assert(this is RootFlow || child is Child);
             Debug.Assert(!(child is CallPrototype));
-            ChildVertices.Add(child);
+            _childVertices.Add(child);
         }
 
         public GraphInfo GraphInfo { get; set; }
 
         public bool IsEmptyFlow => Edges.IsNullOrEmpty() && ChildVertices.IsNullOrEmpty();
-        public List<Edge> Edges { get; } = new List<Edge>();
+        
+        List<Edge> _edges = new List<Edge>();
+        public IEnumerable<Edge> Edges => _edges;
 
         public IEnumerable<ICoin> Coins => ChildVertices.OfType<ICoin>();
         public IEnumerable<ICoin> IsolatedCoins => this.CollectIsolatedCoins();
@@ -38,7 +41,7 @@ namespace Engine.Core
         public void AddEdge(Edge edge)
         {
             this.CheckAddable(edge);
-            Edges.Add(edge);
+            _edges.Add(edge);
 
             //edge.Sources.Iter(s => ChildVertices.Add(s));
             edge.Sources.Iter(s => AddChildVertex(s));
@@ -94,19 +97,19 @@ namespace Engine.Core
             }
         }
 
-        public static void Epilogue(this Flow flow)
-        {
-            var allVertices =
-                flow.Edges
-                    .SelectMany(e => e.Vertices)
-                    .Concat(flow.ChildVertices)
-                    .Distinct()
-                    ;
+        //public static void Epilogue(this Flow flow)
+        //{
+        //    var allVertices =
+        //        flow.Edges
+        //            .SelectMany(e => e.Vertices)
+        //            .Concat(flow.ChildVertices)
+        //            .Distinct()
+        //            ;
 
-            flow.ChildVertices.Clear();
-            //allVertices.Iter(v => flow.ChildVertices.Add(v));
-            allVertices.Iter(v => flow.AddChildVertex(v));
-        }
+        //    flow.ChildVertices.Clear();
+        //    //allVertices.Iter(v => flow.ChildVertices.Add(v));
+        //    allVertices.Iter(v => flow.AddChildVertex(v));
+        //}
 
         public static IEnumerable<ICoin> CollectIsolatedCoins(this Flow flow)
         {

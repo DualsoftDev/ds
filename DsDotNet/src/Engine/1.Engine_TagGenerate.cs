@@ -136,8 +136,6 @@ namespace Engine
                     Global.Logger.Debug($"Adding Export {tgi.Type} Tag [{tgi.TagName}] to segment [{seg.QualifiedName}]");
                     segStorage.Add(createTag(tgi, seg, type, seg.OwnerCpu));
                 }
-
-                Console.WriteLine();
             }
 
             return tagGenInfos.ToArray();
@@ -217,7 +215,12 @@ namespace Engine
 
                         case Segment rootSeg:
                             var fqdn = rootSeg.QualifiedName;
-                            yield return new TagGenInfo(TagType.Start, rootSeg, rootSeg, fqdn, edge, isSource);
+                            if (edge != null)
+                            {
+                                var type = isSource ? TagType.End : TagType.Start;
+                                yield return new TagGenInfo(type, rootSeg, rootSeg, fqdn, edge, isSource);
+
+                            }
 
                             var children = rootSeg.ChildVertices.OfType<Child>();
                             foreach (var child in children)

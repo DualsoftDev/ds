@@ -24,7 +24,7 @@ namespace Engine
             Model = ModelParser.ParseFromString(modelText);
 
             Opc = new OpcBroker();
-            Cpu = Model.Cpus.First(cpu => cpu.Name == activeCpuName);
+            Cpu = Model.Cpus.OfType<Cpu>().First(cpu => cpu.Name == activeCpuName);
             Cpu.Engine = this;
 
             Model.BuidGraphInfo();
@@ -37,8 +37,9 @@ namespace Engine
             Opc.Print();
 
             Model.Cpus.Iter(cpu => readTagsFromOpc(cpu));
+            Model.Cpus.Iter(cpu => cpu.PrintTags());
 
-            void readTagsFromOpc(Cpu cpu)
+            void readTagsFromOpc(CpuBase cpu)
             {
                 var tpls = Opc.ReadTags(cpu.TagsMap.Select(t => t.Key)).ToArray();
                 foreach ((var tName, var value) in tpls)
@@ -78,6 +79,7 @@ namespace Engine
             {
                 // generate fake cpu's for other flows
                 FakeCpu = new FakeCpu("FakeCpu", otherFlows, Model) { Engine = this };
+                Model.Cpus.Add(FakeCpu);
             }
 
 

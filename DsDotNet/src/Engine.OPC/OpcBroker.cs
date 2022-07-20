@@ -63,9 +63,8 @@ namespace Engine.OPC
         static ILog Logger => Global.Logger;
         public static void Print(this OpcBroker opc)
         {
-            Logger.Debug("== OPC");
             var tags = String.Join("\r\n\t", opc.Tags);
-            Logger.Debug("\r\n\t" + tags);
+            Logger.Debug($"== OPC Tags:\r\n\t{tags}");
         }
     }
 }

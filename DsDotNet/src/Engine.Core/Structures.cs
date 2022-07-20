@@ -7,7 +7,7 @@ namespace Engine.Core
     public class Model
     {
         public List<DsSystem> Systems = new List<DsSystem>();
-        public List<Cpu> Cpus = new List<Cpu>();
+        public List<CpuBase> Cpus { get; } = new List<CpuBase>();
     }
 
 

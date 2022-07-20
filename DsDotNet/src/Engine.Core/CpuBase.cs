@@ -80,6 +80,12 @@ namespace Engine.Core
 
             return helper().Distinct();
         }
+        
+        public static void PrintTags(this CpuBase cpu)
+        {
+            var tagNames = String.Join("\r\n\t", cpu.TagsMap.Values.Select(t => t.Name));
+            Logger.Debug($"{cpu.Name} tags:\r\n\t{tagNames}");
+        }
 
         public static void Epilogue(this CpuBase cpu)
         {

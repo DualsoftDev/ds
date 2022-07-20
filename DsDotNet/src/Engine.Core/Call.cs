@@ -116,6 +116,8 @@ namespace Engine.Core
                     var rootFlow = rootCall.Container;
                     var system = rootFlow.GetSystem();
                     return $"{system.Name}.{rootFlow.Name}.{rootCall.Name}";
+                case Segment rootSegment:
+                    return rootSegment.QualifiedName;
 
                 case Child child:
                     return child.QualifiedName;

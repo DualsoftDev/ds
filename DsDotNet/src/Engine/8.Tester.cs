@@ -37,7 +37,7 @@ namespace Engine
         //parenting = {A > B > C; C |> B; }
         //T.C1 <||> T.C2;
         //A, B > C > D, E;
-        //T.Cm > T.Cp;
+        T.Cm > T.Cp;
         //T.Cm |> T.Cp;
     }
 }
@@ -75,14 +75,6 @@ namespace Engine
             }
 
             engine.Run();
-            //var model = ModelParser.ParseFromString(text);
-            //foreach (var cpu in model.Cpus)
-            //    cpu.Run();
-
-            var flows = engine.Model.Cpus.SelectMany(cpu => cpu.RootFlows.OfType<RootFlow>());
-            var graphInfo = GraphUtil.analyzeFlows(flows, true);
-
-            Console.WriteLine("Hello World!");
         }
     }
 }

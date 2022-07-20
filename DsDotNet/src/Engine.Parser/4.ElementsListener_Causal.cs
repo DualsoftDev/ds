@@ -57,8 +57,8 @@ namespace Engine.Parser
                                 id = $"{ taskId}.{ text}";
                                 break;
                             case 1:
-                                id = $"{_system.Name}.{ text}";
-                                parentId = $"{ _system.Name}.{text.Split(new[] { '.' })[0]}";
+                                id = $"{taskId}.{ text}";
+                                //parentId = $"{taskId}.{text.Split(new[] { '.' })[0]}";
                                 break;
                         }
 
@@ -170,15 +170,15 @@ namespace Engine.Parser
             string specs = node.id;
             return specs.Split(new[] { ',' }).Select(sp => {
                 var spec = sp;
-                if (QpMap.ContainsKey($"{context}.{sp}"))
+                if (QpInstanceMap.ContainsKey($"{context}.{sp}"))
                     spec = $"{context}.{sp}";
-                if (! QpMap.ContainsKey(spec))
+                if (! QpInstanceMap.ContainsKey(spec))
                 {
                     if (ParserHelper.AliasNameMaps[_system].ContainsKey(node.label))
                         spec = ParserHelper.AliasNameMaps[_system][node.label];
                 }
 
-                var vertex = QpMap[spec] as IVertex;
+                var vertex = QpInstanceMap[spec] as IVertex;
                 return vertex;
             }).ToArray();
         }

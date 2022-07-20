@@ -28,13 +28,12 @@ namespace Engine
             Cpu.Engine = this;
 
             Model.BuidGraphInfo();
-            this.InitializeAllFlows(Opc);
+            InitializeAllFlows();
 
 
             Model.Epilogue();
 
 
-            Debug.Assert(Opc._opcTags.All(t => t.OriginalTag.IsExternal()));
             Opc.Print();
 
             Model.Cpus.Iter(cpu => readTagsFromOpc(cpu));
@@ -55,6 +54,7 @@ namespace Engine
         {
             //Cpu.Run();
             //FakeCpu.Run();
+            Global.Logger.Info("Engine started!");
         }
     }
 
@@ -62,7 +62,7 @@ namespace Engine
     // Engine Initializer
     partial class Engine
     {
-        public void InitializeAllFlows(OpcBroker opc)
+        public void InitializeAllFlows()
         {
             var allRootFlows = Model.Systems.SelectMany(s => s.RootFlows);
             var flowsGrps =
@@ -83,42 +83,59 @@ namespace Engine
 
             TagGenInfo[] tgisActive = CreateTags4Child(Cpu, activeFlows);
             TagGenInfo[] tgisFake   = CreateTags4Child(FakeCpu, otherFlows);
-            tgisActive.Select(tgi => tgi.GeneratedTag).Iter(Cpu.AddTag);
-            tgisFake.Select(  tgi => tgi.GeneratedTag).Iter(FakeCpu.AddTag);
+            var tagsActive = tgisActive.Select(tgi => tgi.GeneratedTag).ToArray();
+            var tagsFake = tgisFake.Select(tgi => tgi.GeneratedTag).ToArray();
+            tagsActive.Iter(Cpu.AddTag);
+            tagsFake.Iter(FakeCpu.AddTag);
+
+            var allTgis = tgisActive.Concat(tgisFake).ToArray();
+            allTgis.Iter(tgi => copyChildSRETagsToSegment(tgi));
+
+            Opc.AddTags(tagsActive);
+            Opc.AddTags(tagsFake);
+
 
             foreach (var f in otherFlows)
             {
                 f.Cpu = FakeCpu;
                 f.RootSegments.SelectMany(s => s.AllPorts).Iter(p => p.OwnerCpu = FakeCpu);
-                InitializeRootFlow(f, false, opc);
+                InitializeRootFlow(f, false);
             }
 
 
             foreach (var f in activeFlows)
-                InitializeRootFlow(f, true, opc);
+                InitializeRootFlow(f, true);
 
             Cpu.BuildBackwardDependency();
             FakeCpu?.BuildBackwardDependency();
 
-            opc._cpus.Add(Cpu);
+            Opc._cpus.Add(Cpu);
             if (FakeCpu != null)
-                opc._cpus.Add(FakeCpu);
+                Opc._cpus.Add(FakeCpu);
 
             // debugging
             Debug.Assert(Cpu.CollectBits().All(b => b.OwnerCpu == Cpu));
             Debug.Assert(FakeCpu == null || FakeCpu.CollectBits().All(b => b.OwnerCpu == FakeCpu));
+
+
+
+            /// 'Child' 의 Tags{Start,Reset,End} tag 들을 Child 가 실제 가리키는 segment 의 S/R/E Tags 에도 반영한다. 
+            void copyChildSRETagsToSegment(TagGenInfo tgi)
+            {
+                //tgi.Child.
+            }
         }
 
-        /// <summary> Root flow 에서 타 시스템을 호출하기 위한 interface tag 를 생성한다. </summary>
+        /// <summary> Root flow 의 root segment 를 타 시스템에서 호출하기 위한 interface tag 를 생성한다. </summary>
 
-        void InitializeRootFlow(RootFlow rootFlow, bool isActiveCpu, OpcBroker opc)
+        void InitializeRootFlow(RootFlow rootFlow, bool isActiveCpu)
         {
             // my flow 상의 root segment 들에 대한 HMI s/r/e tags
             var hmiTags = rootFlow.GenereateHmiTags4Segments().ToArray();
             var cpu = rootFlow.Cpu;
 
             hmiTags.Iter(t => t.Type = t.Type.Add(TagType.External));
-            opc.AddTags(hmiTags);
+            Opc.AddTags(hmiTags);
 
             if (isActiveCpu)
             {

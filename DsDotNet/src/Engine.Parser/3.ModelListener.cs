@@ -19,7 +19,8 @@ namespace Engine.Parser
         RootFlow _rootFlow  { get => ParserHelper._rootFlow;  set => ParserHelper._rootFlow = value; }
         Segment  _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
         /// <summary> Qualified Path Map </summary>
-        Dictionary<string, object> QpMap => ParserHelper.QualifiedPathMap;
+        Dictionary<string, object> QpInstanceMap => ParserHelper.QualifiedInstancePathMap;
+        Dictionary<string, object> QpDefinitionMap => ParserHelper.QualifiedDefinitionPathMap;
 
         string CurrentPath => ParserHelper.CurrentPath;
 
@@ -44,7 +45,7 @@ namespace Engine.Parser
         {
             var name = ctx.id().GetText();
             _task = new DsTask(name, _system);
-            QpMap.Add(CurrentPath, _task);
+            QpInstanceMap.Add(CurrentPath, _task);
         }
         override public void ExitTask(dsParser.TaskContext ctx) { _task = null; }
 
@@ -53,7 +54,7 @@ namespace Engine.Parser
             var flowName = ctx.id().GetText();
             var flowOf = ctx.flowProp().id();
             _rootFlow = new RootFlow(flowName, _system);
-            QpMap.Add(CurrentPath, _rootFlow);
+            QpInstanceMap.Add(CurrentPath, _rootFlow);
             Trace.WriteLine($"Flow: {flowName}");
         }
         override public void ExitFlow(dsParser.FlowContext ctx) { _rootFlow = null; }
@@ -62,18 +63,30 @@ namespace Engine.Parser
             Trace.WriteLine($"Parenting: {ctx.GetText()}");
             var name = ctx.id().GetText();
             _parenting = new Segment(name, _rootFlow);
-            QpMap.Add(CurrentPath, _parenting);
+            QpInstanceMap.Add(CurrentPath, _parenting);
         }
         override public void ExitParenting(dsParser.ParentingContext ctx) { _parenting = null; }
 
         override public void EnterCausalPhrase(dsParser.CausalPhraseContext ctx)
         {
-            var xx = ctx.GetText();
             var names =
                 DsParser.enumerateChildren<dsParser.SegmentContext>(
                     ctx, false, r => r is dsParser.SegmentContext)
                 .Select(segCtx => segCtx.GetText())
                 ;
+
+            void createFromDefinition(object target, string n, string fqdn)
+            {
+                switch (target)
+                {
+                    case CallPrototype cp:
+                        var call = new RootCall(n, _rootFlow, cp);
+                        QpInstanceMap.Add(fqdn, call);
+                        break;
+                    default:
+                        throw new Exception("ERROR");
+                }
+            }
 
             if (_parenting == null)
             {
@@ -83,25 +96,25 @@ namespace Engine.Parser
                     if (ParserHelper.AliasNameMaps[_system].ContainsKey(n))
                     {
                         var targetName = ParserHelper.AliasNameMaps[_system][n];
-                        var target = QpMap[targetName];
-                        switch(target)
-                        {
-                            case CallPrototype cp:
-                                var call = new RootCall(n, _rootFlow, cp);
-                                QpMap.Add(fqdn, call);
-                                break;
-                            default:
-                                throw new Exception("ERROR");
-                        }
-                        Console.WriteLine();
-
+                        var target = QpDefinitionMap[targetName];
+                        createFromDefinition(target, n, fqdn);
                     }
                     else
                     {
-                        if (!QpMap.ContainsKey(fqdn))
+                        if (!QpInstanceMap.ContainsKey(fqdn))
                         {
+                            if (n.Contains("."))
+                            {
+                                var fullPrototypeName = ParserHelper.ToFQDN(n);
+                                if (QpDefinitionMap.ContainsKey(fullPrototypeName))
+                                {
+                                    var def = QpDefinitionMap[fullPrototypeName];
+                                    createFromDefinition(def, n, fqdn);
+                                    continue;
+                                }
+                            }
                             var seg = new Segment(n, _rootFlow);
-                            QpMap.Add(fqdn, seg);
+                            QpInstanceMap.Add(fqdn, seg);
                         }
                     }
                 }
@@ -125,6 +138,7 @@ namespace Engine.Parser
             System.Console.WriteLine();
         }
 
+        /// <summary>CallPrototype </summary>
         override public void EnterCall(dsParser.CallContext ctx)
         {
             var name = ctx.id().GetText();
@@ -133,7 +147,7 @@ namespace Engine.Parser
             //var tx = callph.segments(0);
             //var rx = callph.segments(1);
             var call = new CallPrototype(name, _task);
-            QpMap.Add($"{CurrentPath}.{name}", call);
+            QpDefinitionMap.Add($"{CurrentPath}.{name}", call);
             //var parentId = $"{this.systemName}.{this.taskName}";
             //var id = $"{parentId}.{name}";
             //this.nodes[id] = new Node(id, label, parentId, NodeType.call);
@@ -145,7 +159,8 @@ namespace Engine.Parser
         {
             var name = ctx.id().GetText();
             var seg = new Segment(name, _rootFlow);
-            QpMap.Add($"{CurrentPath}.{name}", seg);
+            QpDefinitionMap.Add($"{CurrentPath}.{name}", seg);
+            QpInstanceMap.Add($"{CurrentPath}.{name}", seg);
 
             //var id = $"{this.systemName}.{this.taskName}.{name}";
             ////const node = { "data": { id, "label": name, "background_color": "gray", parent: this.taskName }        };

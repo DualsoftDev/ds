@@ -25,10 +25,28 @@ namespace Engine
 
             public string Context;
             // Tag 가 null 인 상태에서도 tag name 을 가져 올 수 있어야 함.  Tag 가 non null 이면 Tag.Name 과 동일
-            public string TagName => $"{Child.GetQualifiedName()}_{Segment.QualifiedName}_{Type}";
+            public string TagName
+            {
+                get
+                {
+                    if (Child == Segment)
+                        return Segment.QualifiedName;
+
+                    return $"{Child.GetQualifiedName()}_{Segment.QualifiedName}_{Type}";
+                }
+            }
+
+
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="type">생성할 tag type</param>
+            /// <param name="segment">tag 가 직접 제어할 segment</param>
+            /// <param name="child">segment 를 포함하는 Child.  (Child or RootCall) </param>
+            /// <param name="context">생성할 tag 가 사용되는 context</param>
             public TagGenInfo(TagType type, Segment segment, ICoin child, string context)
             {
-                Debug.Assert(child is Child || child is RootCall);
+                Debug.Assert(child is Segment || child is Child || child is RootCall);
                 Type = type;
                 Segment = segment;
                 Context = context;
@@ -79,9 +97,20 @@ namespace Engine
                             _ => throw new Exception("ERROR")
                         };
                         break;
+                    case Segment child:
+                        storage = type switch
+                        {
+                            TagType.Start => child.TagsStart,
+                            TagType.Reset => child.TagsReset,
+                            TagType.End => child.TagsEnd,
+                            _ => throw new Exception("ERROR")
+                        };
+                        break;
+                    default:
+                        throw new Exception("ERROR");
                 }
 
-                Debug.Assert(storage.IsNullOrEmpty());
+                //Debug.Assert(storage.IsNullOrEmpty());
                 storage.AddRange(tags);
                 var tagNames = String.Join(", ", tgis.Select(tgi => tgi.TagName));
                 Global.Logger.Debug($"Adding Child Tags {tagNames} to child [{location.GetQualifiedName()}]");
@@ -168,6 +197,8 @@ namespace Engine
 
                         case Segment rootSeg:
                             var fqdn = rootSeg.QualifiedName;
+                            yield return new TagGenInfo(TagType.Start, rootSeg, rootSeg, fqdn);
+
                             var children = rootSeg.ChildVertices.OfType<Child>();
                             foreach (var child in children)
                             {

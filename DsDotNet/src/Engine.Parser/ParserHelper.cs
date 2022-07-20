@@ -9,7 +9,10 @@ namespace Engine.Parser
 {
     public class ParserHelper
     {
-        public Dictionary<string, object> QualifiedPathMap = new Dictionary<string, object>();
+        public Dictionary<string, object> QualifiedInstancePathMap = new Dictionary<string, object>();
+
+        /// <summary> Alias, CallPrototype 에 대한 path </summary>
+        public Dictionary<string, object> QualifiedDefinitionPathMap = new Dictionary<string, object>();
         //public Dictionary<ParserRuleContext, object> ContextMap = new Dictionary<ParserRuleContext, object>();
 
 
@@ -57,7 +60,7 @@ namespace Engine.Parser
 
         T PickQualifiedPathObject<T>(string qualifiedName, Func<T> creator = null) where T : class
         {
-            var dict = QualifiedPathMap;
+            var dict = QualifiedInstancePathMap;
             if (dict.ContainsKey(qualifiedName))
                 return (T)dict[qualifiedName];
 

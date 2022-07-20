@@ -48,7 +48,8 @@ namespace Engine.Parser
         Segment  _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
 
         string CurrentPath => ParserHelper.CurrentPath;
-        Dictionary<string, object> QpMap => ParserHelper.QualifiedPathMap;
+        Dictionary<string, object> QpInstanceMap => ParserHelper.QualifiedInstancePathMap;
+        Dictionary<string, object> QpDefinitionMap => ParserHelper.QualifiedDefinitionPathMap;
 
         /** causal operator 왼쪽 */
         private dsParser.CausalTokensDNFContext left;
@@ -136,7 +137,7 @@ namespace Engine.Parser
 
         override public void EnterParenting(dsParser.ParentingContext ctx) {
             var name = ctx.id().GetText();
-            var seg = (Segment)QpMap[$"{CurrentPath}.{name}"];
+            var seg = (Segment)QpInstanceMap[$"{CurrentPath}.{name}"];
             //var seg = _rootFlow.Segments.First(s => s.Name == name);
             //_parenting = seg ?? new Segment(name, _rootFlow);
             _parenting = seg;
@@ -188,11 +189,12 @@ namespace Engine.Parser
             {
                 foreach (var name in names)
                 {
-                    var n = ParserHelper.ToFQDN(name);
+                    //var n = ParserHelper.ToFQDN(name);
+                    var n = name;
                     Child child = null;
                     bool isAlias = false;
                     var fqdn = $"{CurrentPath}.{n}";
-                    if (QpMap.ContainsKey(fqdn))
+                    if (QpInstanceMap.ContainsKey(fqdn))
                         continue;
 
                     var nameComponents = n.Split(new[] { '.' }).ToArray();
@@ -213,7 +215,11 @@ namespace Engine.Parser
                             throw new Exception("ERROR");
                     }
 
-                    var target = QpMap[targetName];
+                    object target = null;
+                    if (QpDefinitionMap.ContainsKey(targetName))
+                        target = QpDefinitionMap[targetName];   // definition 우선시
+                    else if (QpInstanceMap.ContainsKey(targetName))
+                        target = QpInstanceMap[targetName];
 
                     switch (target)
                     {
@@ -221,13 +227,13 @@ namespace Engine.Parser
                             var subCall = new SubCall(name, _parenting, cp);
                             child = new Child(subCall, _parenting) { IsAlias = isAlias };
                             subCall.ContainerChild = child;
-                            QpMap.Add(fqdn, child);
+                            QpInstanceMap.Add(fqdn, child);
                             break;
                         case Segment exSeg:
                             var exCall = new ExSegmentCall(name, exSeg);
                             child = new Child(exCall, _parenting) { IsAlias = isAlias };
                             exCall.ContainerChild = child;
-                            QpMap.Add(fqdn, child);
+                            QpInstanceMap.Add(fqdn, child);
                             break;
                         default:
                             throw new Exception("ERRROR");

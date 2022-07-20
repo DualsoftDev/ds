@@ -85,11 +85,6 @@ namespace Engine.Core
 
     }
 
-    public static class TagExtension
-    {
-        public static bool IsExternal(this Tag tag) => tag.Type.HasFlag(TagType.External);
-    }
-
 
     public abstract class Port : Bit
     {

@@ -23,6 +23,7 @@ namespace Engine.Core
         public void AddChildVertex(IVertex child)// 임시
         {
             Debug.Assert(this is RootFlow || child is Child);
+            Debug.Assert(!(child is CallPrototype));
             ChildVertices.Add(child);
         }
 

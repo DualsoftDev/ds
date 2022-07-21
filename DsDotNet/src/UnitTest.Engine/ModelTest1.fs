@@ -73,6 +73,14 @@ module ModelTests1 =
             ( engine.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
             let system = engine.Model.Systems |> Seq.find(fun s -> s.Name = "L")
             let cpu = engine.Cpu
+            cpu.ForwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) cpu) |> ShouldBeTrue
+            cpu.BackwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) cpu) |> ShouldBeTrue
+
+            let fakeCpu = engine.FakeCpu
+            fakeCpu.ForwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) fakeCpu) |> ShouldBeTrue
+            fakeCpu.BackwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) fakeCpu) |> ShouldBeTrue
+            
+
             let task = system.Tasks |> Seq.exactlyOne
             let callProtos = task.CallPrototypes |> Seq.map(fun c -> c.Name, c) |> Tuple.toDictionary
             (callProtos.Keys, ["Cp"; "Cm"; "C00"; "C01"; "C02"; "C10"; "C20"; "C21"; "C22"; ])

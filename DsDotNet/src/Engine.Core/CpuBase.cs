@@ -113,8 +113,16 @@ namespace Engine.Core
         public static void AddBitDependancy(this CpuBase cpu, IBit source, IBit target)
         {
             var fwdMap = cpu.ForwardDependancyMap;
+            
             if (!fwdMap.ContainsKey(source))
+            {
+                var srcTag = source as Tag;
+                if (srcTag != null)
+                    Debug.Assert(!fwdMap.Keys.OfType<Tag>().Any(k => k.Name == srcTag.Name));
+
+
                 fwdMap[source] = new HashSet<IBit>();
+            }
 
             fwdMap[source].Add(target);
         }

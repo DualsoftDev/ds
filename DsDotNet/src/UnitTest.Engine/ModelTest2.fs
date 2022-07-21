@@ -43,8 +43,16 @@ module ModelTest2 =
             ( engine.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
             let system = engine.Model.Systems |> Seq.find(fun s -> s.Name = "L")
             let cpu = engine.Cpu
-
             cpu.Name === "Cpu"
+            
+            cpu.ForwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) cpu) |> ShouldBeTrue
+            cpu.BackwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) cpu) |> ShouldBeTrue
+
+            let fakeCpu = engine.FakeCpu
+            fakeCpu.ForwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) fakeCpu) |> ShouldBeTrue
+            fakeCpu.BackwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) fakeCpu) |> ShouldBeTrue
+
+            
             system.Name === "L"
             let flow = system.RootFlows |> Seq.exactlyOne
             flow.Name === "F"
@@ -84,9 +92,21 @@ module ModelTest2 =
             let engine = new Engine(text, "Cpu")
             ( engine.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
             let system = engine.Model.Systems |> Seq.find(fun s -> s.Name = "L")
-            let cpu = engine.Cpu
 
+
+            let cpu = engine.Cpu
             cpu.Name === "Cpu"
+
+
+            cpu.ForwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) cpu) |> ShouldBeTrue
+            cpu.BackwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) cpu) |> ShouldBeTrue
+
+            let fakeCpu = engine.FakeCpu
+            fakeCpu.ForwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) fakeCpu) |> ShouldBeTrue
+            fakeCpu.BackwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) fakeCpu) |> ShouldBeTrue
+
+
+
             system.Name === "L"
             let flow = system.RootFlows |> Seq.exactlyOne
             flow.Name === "F"
@@ -153,7 +173,7 @@ module ModelTest2 =
                 cpStart.Name === "L_F_Main1_T.Cp_P_F_Vp_Start"
                 let vpStart = vp.TagsStart |> Seq.find(fun t -> t.Name = cpStart.Name)
                 cpStart.Name === vpStart.Name
-                cpStart =!= vpStart                
+                //cpStart =!= vpStart
 
 (*
 [sys] L = {
@@ -175,7 +195,7 @@ module ModelTest2 =
 
                 let spEnd = sp.TagsEnd |> Seq.find(fun t -> t.Name = cpEnd.Name)
                 cpEnd.Name === spEnd.Name
-                cpEnd =!= spEnd
+                //cpEnd =!= spEnd
 
                 ()
             

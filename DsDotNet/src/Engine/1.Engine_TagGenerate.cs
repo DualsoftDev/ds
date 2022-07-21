@@ -71,7 +71,6 @@ namespace Engine
             var tagGenInfos =
                 collectTagGenInfo()
                 .GroupBy(tgi => tgi.TagName).Select(g => g.First())      // DistinctBy : https://stackoverflow.com/questions/2537823/distinct-by-property-of-class-with-linq
-                //.Select(gi => gi.TagName)
                 .ToArray();
 
             // tag 가 사용된 위치(child) 및 tag type 으로 grouping
@@ -95,43 +94,6 @@ namespace Engine
                 };
 
                 addTagsFunc(tags);
-
-                //List<Tag> storage = null;
-                //switch (location)
-                //{
-                //    case Child child:
-                //        storage = type switch
-                //        {
-                //            TagType.Start => child.TagsStart,
-                //            TagType.Reset => child.TagsReset,
-                //            TagType.End => child.TagsEnd,
-                //            _ => throw new Exception("ERROR")
-                //        };
-                //        break;
-                //    case RootCall rootCall:
-                //        storage = type switch
-                //        {
-                //            TagType.Start => rootCall.TxTags,
-                //            TagType.End => rootCall.RxTags,
-                //            _ => throw new Exception("ERROR")
-                //        };
-                //        break;
-                //    case Segment child:
-                //        storage = type switch
-                //        {
-                //            TagType.Start => child.TagsStart,
-                //            TagType.Reset => child.TagsReset,
-                //            TagType.End => child.TagsEnd,
-                //            _ => throw new Exception("ERROR")
-                //        };
-                //        break;
-                //    default:
-                //        throw new Exception("ERROR");
-                //}
-
-                ////Debug.Assert(storage.IsNullOrEmpty());
-                //storage.AddRange(tags);
-
 
                 
                 var tagNames = String.Join(", ", tgis.Select(tgi => tgi.TagName));

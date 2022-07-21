@@ -1,11 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using TagDic = System.Collections.Generic.Dictionary<string, Engine.Core.Tag>;
-
 namespace Engine.Core;
 
 public interface ITagSREContainer {
@@ -13,9 +5,9 @@ public interface ITagSREContainer {
 }
 internal class TagSREContainer : ITagSREContainer
 {
-    TagDic _starts = new TagDic();
-    TagDic _resets = new TagDic();
-    TagDic _ends   = new TagDic();
+    TagDic _starts = new();
+    TagDic _resets = new();
+    TagDic _ends   = new();
     Action<IEnumerable<Tag>> _addTagsFunc;
 
     public IEnumerable<Tag> TagsStart => _starts.Values;

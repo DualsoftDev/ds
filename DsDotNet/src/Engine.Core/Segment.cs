@@ -1,9 +1,3 @@
-using Engine.Common;
-
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 
@@ -22,7 +16,7 @@ public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, IWithSREPorts
     public PortE PortE { get; set; }
     public Port[] AllPorts => new Port[] { PortS, PortR, PortE };
 
-    TagSREContainer _tagSREContainer = new TagSREContainer();
+    TagSREContainer _tagSREContainer = new();
     public IEnumerable<Tag> TagsStart => _tagSREContainer.TagsStart;
     public IEnumerable<Tag> TagsReset => _tagSREContainer.TagsReset;
     public IEnumerable<Tag> TagsEnd => _tagSREContainer.TagsEnd;
@@ -46,7 +40,7 @@ public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, IWithSREPorts
     public bool Value { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
 
-    internal CompositeDisposable Disposables = new CompositeDisposable();
+    internal CompositeDisposable Disposables = new();
 
     public Segment(string name, RootFlow containerFlow)
         : base(name)

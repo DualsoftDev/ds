@@ -1,9 +1,3 @@
-using System;
-using System.Linq;
-
-using Engine.Core;
-using Engine.Graph;
-
 namespace Engine;
 
 class Tester

@@ -1,9 +1,3 @@
-using Engine.Common;
-
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Reactive.Disposables;
 
 namespace Engine.Core;
@@ -26,7 +20,7 @@ public class Child : Named, IVertex, ICoin, ITagSREContainer
         set => Parent.ChildStatusMap[this] = value;
     }
 
-    TagSREContainer _tagSREContainer = new TagSREContainer();
+    TagSREContainer _tagSREContainer = new();
     public IEnumerable<Tag> TagsStart => _tagSREContainer.TagsStart;
     public IEnumerable<Tag> TagsReset => _tagSREContainer.TagsReset;
     public IEnumerable<Tag> TagsEnd => _tagSREContainer.TagsEnd;
@@ -36,7 +30,7 @@ public class Child : Named, IVertex, ICoin, ITagSREContainer
     public Action<IEnumerable<Tag>> AddTagsFunc => _tagSREContainer.AddTagsFunc;
 
 
-    CompositeDisposable _disposables = new CompositeDisposable();
+    CompositeDisposable _disposables = new();
     public Child(Coin coin, Segment parent)
         :base(coin.Name)
     {

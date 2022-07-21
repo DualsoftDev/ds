@@ -1,12 +1,3 @@
-using Engine.Common;
-
-using log4net;
-
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-
 namespace Engine.Core;
 
 public abstract class Flow : Named, IWallet
@@ -14,7 +5,7 @@ public abstract class Flow : Named, IWallet
     public CpuBase Cpu { get; set; }
 
     /// <summary>Edge 를 통해 알 수 없는 isolated segement/call 등을 포함 </summary>
-    HashSet<IVertex> _childVertices = new HashSet<IVertex>();
+    HashSet<IVertex> _childVertices = new();
     public IEnumerable<IVertex> ChildVertices => _childVertices;
     public void AddChildVertices(IEnumerable<IVertex> children)// 임시
     {
@@ -32,7 +23,7 @@ public abstract class Flow : Named, IWallet
 
     public bool IsEmptyFlow => Edges.IsNullOrEmpty() && ChildVertices.IsNullOrEmpty();
 
-    List<Edge> _edges = new List<Edge>();
+    List<Edge> _edges = new();
     public IEnumerable<Edge> Edges => _edges;
 
     public IEnumerable<ICoin> Coins => ChildVertices.OfType<ICoin>();

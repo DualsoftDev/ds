@@ -1,13 +1,7 @@
-using log4net;
-
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Reactive.Linq;
 using System.Threading;
-using Engine.Common;
+using System.Reactive.Disposables;
 
 namespace Engine.Core;
 
@@ -19,17 +13,18 @@ public abstract class CpuBase : Named, ICpu
     public RootFlow[] RootFlows { get; }
 
     /// <summary> Bit change event queue </summary>
-    public ConcurrentQueue<BitChange> Queue { get; } = new ConcurrentQueue<BitChange>();
+    public ConcurrentQueue<BitChange> Queue { get; } = new();
     public GraphInfo GraphInfo { get; set; }
 
     /// <summary> bit 간 순방향 의존성 map </summary>
-    public Dictionary<IBit, HashSet<IBit>> ForwardDependancyMap { get; } = new Dictionary<IBit, HashSet<IBit>>();
+    public Dictionary<IBit, HashSet<IBit>> ForwardDependancyMap { get; } = new();
     /// <summary> bit 간 역방향 의존성 map </summary>
     public Dictionary<IBit, HashSet<IBit>> BackwardDependancyMap { get; internal set; }
     /// <summary> this Cpu 관련 tags.  Root segment 의 S/R/E 및 call 의 Tx, Rx </summary>
-    public Dictionary<string, Tag> TagsMap { get; } = new Dictionary<string, Tag>();
+    public TagDic TagsMap { get; } = new();
     /// <summary> Call 의 TX RX 에 사용된 tag 목록 </summary>
     public List<Tag> TxRxTags { get; } = new List<Tag>();
+    protected CompositeDisposable _disposables = new();
 
     protected CpuBase(string name, RootFlow[] rootFlows, Model model) : base(name)
     {
@@ -37,6 +32,17 @@ public abstract class CpuBase : Named, ICpu
         Model = model;
         rootFlows.Iter(f => f.Cpu = this);
     }
+
+    public void Epilogue()
+    {
+        var subs =
+            Global.BitChangedSubject.Subscribe(bc =>
+            {
+                this.OnBitChanged(bc);
+            });
+        _disposables.Add(subs);
+    }
+
 }
 
 public class Cpu: CpuBase
@@ -80,21 +86,13 @@ public static class CpuExtension
 
         return helper().Distinct();
     }
-    
+
     public static void PrintTags(this CpuBase cpu)
     {
         var tagNames = String.Join("\r\n\t", cpu.TagsMap.Values.Select(t => t.Name));
         Logger.Debug($"{cpu.Name} tags:\r\n\t{tagNames}");
     }
 
-    public static void Epilogue(this CpuBase cpu)
-    {
-        var subs =
-        Global.BitChangedSubject.Subscribe( bc =>
-        {
-            cpu.OnBitChanged(bc);
-        });
-    }
 
     //public static void PrintTags(this CpuBase cpu)
     //{
@@ -113,7 +111,7 @@ public static class CpuExtensionBitChange
     public static void AddBitDependancy(this CpuBase cpu, IBit source, IBit target)
     {
         var fwdMap = cpu.ForwardDependancyMap;
-        
+
         if (!fwdMap.ContainsKey(source))
         {
             var srcTag = source as Tag;

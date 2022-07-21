@@ -1,12 +1,3 @@
-using Engine.Common;
-
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-
-using TagDic = System.Collections.Generic.Dictionary<string, Engine.Core.Tag>;
-
 namespace Engine.Core;
 
 public abstract class CallBase : Coin
@@ -20,8 +11,8 @@ public class CallPrototype : CallBase
     public DsTask Task;
 
     /// <summary> 주로 target system 의 segment </summary>
-    public List<ITxRx> TXs = new List<ITxRx>(); // empty 이면 '_' 를 의미
-    public List<ITxRx> RXs = new List<ITxRx>(); // empty 이면 '_' 를 의미
+    public List<ITxRx> TXs = new(); // empty 이면 '_' 를 의미
+    public List<ITxRx> RXs = new(); // empty 이면 '_' 를 의미
     public IVertex ResetSrouce;
 
     public override bool Value
@@ -85,8 +76,8 @@ public class SubCall : Call
 /// <summary> Root 에 배치된 Call </summary>
 public class RootCall : Call
 {
-    TagDic _txTags = new TagDic();
-    TagDic _rxTags = new TagDic();
+    TagDic _txTags = new();
+    TagDic _rxTags = new();
 
     public IEnumerable<Tag> TxTags => _txTags.Values;
     public IEnumerable<Tag> RxTags => _rxTags.Values;

@@ -1,8 +1,14 @@
-using log4net;
+global using System;
+global using System.Collections.Generic;
+global using System.Reactive.Subjects;
+global using System.Diagnostics;
+global using System.Linq;
 
-using System;
-using System.Collections.Generic;
-using System.Reactive.Subjects;
+global using log4net;
+global using TagDic = System.Collections.Generic.Dictionary<string, Engine.Core.Tag>;
+global using Engine.Common;
+
+
 
 namespace Engine.Core;
 

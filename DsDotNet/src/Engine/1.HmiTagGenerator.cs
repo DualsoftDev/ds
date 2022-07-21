@@ -1,12 +1,4 @@
-using Engine.Common;
-using Engine.Core;
 using Engine.Graph;
-
-using log4net;
-
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 
 namespace Engine;
 
@@ -52,7 +44,7 @@ public static class HmiTagGenerator
 
         // graph 분석
         var graphInfo = GraphUtil.analyzeFlows(new[] { flow }, true);
-        List<Tag> tags = new List<Tag>();
+        List<Tag> tags = new();
 
         foreach (var init_ in graphInfo.Inits)
         {

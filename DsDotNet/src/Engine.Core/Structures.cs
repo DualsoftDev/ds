@@ -1,13 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-
 namespace Engine.Core;
 
 public class Model
 {
-    public List<DsSystem> Systems = new List<DsSystem>();
-    public List<CpuBase> Cpus { get; } = new List<CpuBase>();
+    public List<DsSystem> Systems = new();
+    public List<CpuBase> Cpus { get; } = new();
 }
 
 
@@ -28,8 +24,8 @@ public class Named: INamed
 public class DsSystem : Named
 {
     public Model Model;
-    public List<RootFlow> RootFlows = new List<RootFlow>();
-    public List<DsTask> Tasks = new List<DsTask>();
+    public List<RootFlow> RootFlows = new();
+    public List<DsTask> Tasks = new();
     public DsSystem(string name, Model model)
         : base(name)
     {
@@ -43,7 +39,7 @@ public class DsSystem : Named
 public class DsTask : Named
 {
     public DsSystem System;
-    public List<CallPrototype> CallPrototypes = new List<CallPrototype>();
+    public List<CallPrototype> CallPrototypes = new();
 
     public DsTask(string name, DsSystem system)
         : base(name)

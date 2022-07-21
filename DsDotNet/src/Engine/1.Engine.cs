@@ -1,12 +1,15 @@
-using Engine.Common;
-using Engine.Core;
-using Engine.OPC;
+global using System;
+global using System.Collections.Generic;
+global using System.Diagnostics;
+global using System.Linq;
+global using log4net;
+
+global using Engine.Common;
+global using Engine.Core;
+global using Engine.OPC;
+
 using Engine.Parser;
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 
 [assembly: DebuggerDisplay("[{Key}={Value}]", Target = typeof(KeyValuePair<,>))]
 

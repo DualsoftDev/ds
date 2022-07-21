@@ -6,6 +6,7 @@ public abstract class Flow : Named, IWallet
 
     /// <summary>Edge 를 통해 알 수 없는 isolated segement/call 등을 포함 </summary>
     HashSet<IVertex> _childVertices = new();
+    /// <summary> {RootCall, Segment, Child} instances </summary>
     public IEnumerable<IVertex> ChildVertices => _childVertices;
     public void AddChildVertices(IEnumerable<IVertex> children)// 임시
     {
@@ -100,16 +101,6 @@ public static class FlowExtension
             .OfType<ICoin>()
             ;
     }
-
-
-    public static IEnumerable<ExSegmentCall> CollectExternalRealSegment(this ChildFlow childFlow)
-    {
-        var exSegments = childFlow.Children.Select(c => c.Coin).OfType<ExSegmentCall>();
-        return exSegments;
-    }
-    public static IEnumerable<Child> CollectAlises(this ChildFlow childFlow) =>
-        childFlow.Children.Where(c => c.IsAlias)
-        ;
 
     struct Causal
     {

@@ -79,7 +79,7 @@ module ModelTests1 =
             let fakeCpu = engine.FakeCpu
             fakeCpu.ForwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) fakeCpu) |> ShouldBeTrue
             fakeCpu.BackwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) fakeCpu) |> ShouldBeTrue
-            
+
 
             let task = system.Tasks |> Seq.exactlyOne
             let callProtos = task.CallPrototypes |> Seq.map(fun c -> c.Name, c) |> Tuple.toDictionary
@@ -183,7 +183,7 @@ module ModelTests1 =
             let childrenNames = main.ChildVertices |> Enumerable.OfType<Child> |> Seq.map(fun soc -> soc.Name)
             (childrenNames, ["Vp1"; "Vp2"; "A1"]) |> setEq
 
-            let externalReals = main.CollectExternalRealSegment()
+            let externalReals = collectExternalRealSegment main
             ( externalReals |> Seq.map(fun seg -> seg.Name), ["Vp1"; "Vp2";]) |> setEq
-            (main.CollectAlises() |> Seq.map(fun seg -> seg.Name), ["Vp1"; "Vp2"; "A1"]) |> setEq
+            (collectAlises main |> Seq.map(fun seg -> seg.Name), ["Vp1"; "Vp2"; "A1"]) |> setEq
             ()

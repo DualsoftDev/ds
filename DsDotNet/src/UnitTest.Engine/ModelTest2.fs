@@ -65,7 +65,7 @@ module ModelTest2 =
             let mainChildrenNames = main.ChildVertices |> Enumerable.OfType<Child> |> Seq.map(fun soc -> soc.Name)
             (mainChildrenNames, ["Cp2"; "Cm2"]) |> setEq
 
-            (main.CollectAlises() |> Seq.map(fun seg -> seg.Name), ["Cp2"; "Cm2"]) |> setEq
+            (collectAlises main |> Seq.map(fun seg -> seg.Name), ["Cp2"; "Cm2"]) |> setEq
             ()
 
 
@@ -274,3 +274,71 @@ module ModelTest2 =
             ()
 
 
+
+
+
+        [<Fact>]
+        member __.``Find object from model`` () =
+            logInfo "============== Find object from model"
+            let mutable text = """
+[sys] L = {
+    [task] T = {
+        Cp = {P.F.Vp ~ P.F.Sp}
+        Cm = {P.F.Vm ~ P.F.Sm}
+    }
+    [flow] F = {
+        Main1 = { T.Cp > T.Cm; }
+        Main2 = { T.Cm |> T.Cp; }
+        Main1 > Main2;
+    }
+}
+"""
+            text <- text + sysP + cpuL
+
+            let engine = new Engine(text, "Cpu")
+            let model = engine.Model
+            let sysL = model.FindObject<DsSystem>("L");
+            let sysP = model.FindObject<DsSystem>("P");
+            sysL.Name === "L"
+            sysP.Name === "P"
+
+            let t = model.FindObject<DsTask>("L.T");
+            t.Name === "T"
+            let cp = model.FindObject<CallPrototype>("L.T.Cp");
+            cp.Name === "Cp"
+            let cm = model.FindObject<CallPrototype>("L.T.Cm");
+            cm.Name === "Cm"
+
+            let f = model.FindObject<RootFlow>("L.F");
+            f.Name === "F"
+            let main1 = model.FindObject<Segment>("L.F.Main1");
+            main1.Name === "Main1"
+            let main2 = model.FindObject<Segment>("L.F.Main2");
+            main2.Name === "Main2"
+
+            let main1CallInstanceCp = model.FindObject<Child>("L.F.Main1.T.Cp");
+            main1CallInstanceCp.Name === "T.Cp"
+            main1CallInstanceCp.QualifiedName === "L_F_Main1_T.Cp"
+
+
+            let vp = model.FindObject<Segment>("P.F.Vp");
+            vp.Name === "Vp"
+
+            let vpTagsStart = vp.TagsStart |> Array.ofSeq
+            let cpStart = main1CallInstanceCp.TagsStart |> Seq.exactlyOne
+            let vpStart = vpTagsStart |> Seq.filter(fun t -> t.Name = cpStart.Name) |> Seq.exactlyOne
+            cpStart.Name === vpStart.Name
+            cpStart =!= vpStart
+            cpStart.OwnerCpu =!= vpStart.Owner
+
+
+            let sp = model.FindObject<Segment>("P.F.Sp");
+            sp.Name === "Sp"
+            let spTagsEnd = sp.TagsEnd |> Array.ofSeq
+            let cpEnd = main1CallInstanceCp.TagsEnd |> Seq.exactlyOne
+            let spEnd = spTagsEnd|> Seq.filter(fun t -> t.Name = cpEnd.Name) |> Seq.exactlyOne
+            cpEnd.Name === spEnd.Name
+            cpEnd =!= spEnd
+            cpEnd.OwnerCpu =!= spEnd.Owner
+
+            ()

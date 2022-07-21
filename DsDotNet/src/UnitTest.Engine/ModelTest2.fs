@@ -1,4 +1,4 @@
-﻿namespace UnitTest.Engine
+namespace UnitTest.Engine
 
 
 open Xunit
@@ -142,8 +142,7 @@ module ModelTest2 =
                 edge1 :? WeakSetEdge |> ShouldBeTrue
                 edge2 :? WeakResetEdge |> ShouldBeTrue
 
-                let s1 = edge1.Sources|> Seq.exactlyOne
-                
+                let s1 = edge1.Sources|> Seq.exactlyOne                
                 ()
 
             let ``check call tag with real segment`` =
@@ -154,7 +153,7 @@ module ModelTest2 =
                 cpStart.Name === "L_F_Main1_T.Cp_P_F_Vp_Start"
                 let vpStart = vp.TagsStart |> Seq.find(fun t -> t.Name = cpStart.Name)
                 cpStart.Name === vpStart.Name
-                cpStart =!= vpStart
+                cpStart =!= vpStart                
 
 (*
 [sys] L = {

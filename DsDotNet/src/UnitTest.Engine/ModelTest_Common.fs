@@ -1,13 +1,7 @@
-﻿namespace UnitTest.Engine
+namespace UnitTest.Engine
 
-open Xunit
-open System
-open FsUnit.Xunit
-open Engine
-open Engine.Core
 open System.Linq
 open Dual.Common
-open Xunit.Abstractions
 
 
 [<AutoOpen>]
@@ -15,14 +9,14 @@ module ModelTest_Common =
 
     let sysP = """
 [sys] P = {
-[flow] F = {
-    Vp > Pp > Sp;
-    Vm > Pm > Sm;
+    [flow] F = {
+        Vp > Pp > Sp;
+        Vm > Pm > Sm;
 
-    Pp |> Sm;
-    Pm |> Sp;
-    Vp <||> Vm;
-}
+        Pp |> Sm;
+        Pm |> Sp;
+        Vp <||> Vm;
+    }
 }
 """
     let cpuL = """

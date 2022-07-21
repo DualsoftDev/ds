@@ -80,6 +80,11 @@ namespace Engine
                 // generate fake cpu's for other flows
                 FakeCpu = new FakeCpu("FakeCpu", otherFlows, Model) { Engine = this };
                 Model.Cpus.Add(FakeCpu);
+                foreach (var f in otherFlows)
+                {
+                    f.Cpu = FakeCpu;
+                    f.RootSegments.SelectMany(s => s.AllPorts).Iter(p => p.OwnerCpu = FakeCpu);
+                }
             }
 
 
@@ -96,13 +101,19 @@ namespace Engine
             Opc.AddTags(tagsActive);
             Opc.AddTags(tagsFake);
 
+            // other flow 상의 root segment 들에 대한 HMI s/r/e tags
+            var otherFlowsHmiTags = otherFlows.SelectMany(f => f.GenereateHmiTags4Segments()).ToArray();
+            otherFlowsHmiTags.Iter(FakeCpu.AddTag);
+            Opc.AddTags(otherFlowsHmiTags);
+
+            // active flow 상의 root segment 들에 대한 HMI s/r/e tags
+            var activeFlowsHmiTags = activeFlows.SelectMany(f => f.GenereateHmiTags4Segments()).ToArray();
+            activeFlowsHmiTags.Iter(Cpu.AddTag);
+            Opc.AddTags(activeFlowsHmiTags);
+
 
             foreach (var f in otherFlows)
-            {
-                f.Cpu = FakeCpu;
-                f.RootSegments.SelectMany(s => s.AllPorts).Iter(p => p.OwnerCpu = FakeCpu);
                 InitializeRootFlow(f, false);
-            }
 
 
             foreach (var f in activeFlows)
@@ -142,14 +153,7 @@ namespace Engine
 
         void InitializeRootFlow(RootFlow rootFlow, bool isActiveCpu)
         {
-            // my flow 상의 root segment 들에 대한 HMI s/r/e tags
-            var hmiTags = rootFlow.GenereateHmiTags4Segments().ToArray();
             var cpu = rootFlow.Cpu;
-
-            hmiTags.Iter(t => t.Type = t.Type.Add(TagType.External));
-            hmiTags.Iter(cpu.AddTag);
-            Opc.AddTags(hmiTags);
-
             var tags = cpu.TagsMap;
             // Edge 를 Bit 로 보고
             // A -> B 연결을 A -> Edge -> B 연결 정보로 변환

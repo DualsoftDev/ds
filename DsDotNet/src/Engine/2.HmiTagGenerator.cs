@@ -109,7 +109,10 @@ namespace Engine
             var sre = segments.SelectMany(s => GenerateHmiTag(s)).ToArray();
             var autoSegTags = GenerateHmiAutoTagForRootSegment(flow);
 
-            return sre.Concat(autoSegTags).ToArray();
+            var hmiTags = sre.Concat(autoSegTags).ToArray();
+            hmiTags.Iter(t => t.Type = t.Type.Add(TagType.External));
+
+            return hmiTags;
         }
     }
 }

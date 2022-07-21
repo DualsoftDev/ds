@@ -1,4 +1,4 @@
-﻿namespace UnitTest.Engine
+namespace UnitTest.Engine
 
 open System
 open System.IO

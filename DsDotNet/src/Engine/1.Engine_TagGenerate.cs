@@ -16,13 +16,11 @@ namespace Engine
         class TagGenInfo
         {
             public TagType Type;
-            public Segment Segment;
+            public Segment TagContainerSegment;
             // Generated tag using this. Will be filled in later.   추후, edge 의 dependency 판정 등에 사용 됨.
             public Tag GeneratedTag { get; set; }
 
-            //public Child Child;
-            //public RootCall RootCall;
-            public ICoin Child;     // Child or RootCall
+            public ICoin Child;     // Child or RootCall or Segment
 
             public Edge Edge;       // 사용된 edge
             public bool IsSource;   // edge 의 source 쪽인지 여부
@@ -33,10 +31,10 @@ namespace Engine
             {
                 get
                 {
-                    if (Child == Segment)
-                        return Segment.QualifiedName;
+                    if (Child == TagContainerSegment)
+                        return $"{TagContainerSegment.QualifiedName}_{Type}";
 
-                    return $"{Child.GetQualifiedName()}_{Segment.QualifiedName}_{Type}";
+                    return $"{Child.GetQualifiedName()}_{TagContainerSegment.QualifiedName}_{Type}";
                 }
             }
 
@@ -45,14 +43,14 @@ namespace Engine
             /// 
             /// </summary>
             /// <param name="type">생성할 tag type</param>
-            /// <param name="segment">tag 가 직접 제어할 segment</param>
+            /// <param name="tagContainerSegment">tag 가 직접 제어할 segment</param>
             /// <param name="child">segment 를 포함하는 Child.  (Child or RootCall) </param>
             /// <param name="context">생성할 tag 가 사용되는 context</param>
-            public TagGenInfo(TagType type, Segment segment, ICoin child, string context, Edge edge, bool isSource)
+            public TagGenInfo(TagType type, Segment tagContainerSegment, ICoin child, string context, Edge edge, bool isSource)
             {
                 Debug.Assert(child is Segment || child is Child || child is RootCall);
                 Type = type;
-                Segment = segment;
+                TagContainerSegment = tagContainerSegment;
                 Context = context;
                 Child = child;
                 Edge = edge;
@@ -125,7 +123,7 @@ namespace Engine
                 // apply to segment
                 foreach (var tgi in tgis)
                 {
-                    var seg = tgi.Segment;
+                    var seg = tgi.TagContainerSegment;
                     var segStorage = tgi.Type switch
                     {
                         TagType.Start => seg.TagsStart,
@@ -189,18 +187,70 @@ namespace Engine
                 }
 
 
-                IEnumerable<TagGenInfo> createTagGenInfos4Edge(Edge edge)
+                IEnumerable<TagGenInfo> createTagGenInfos4Edge(Edge edge, string fqdn)
                 {
-                    var sourceTgis = edge.Sources.SelectMany(s => createTagGenInfos4RootVertex(s, edge, true));
+                    var sourceTgis =
+                        edge.Sources
+                        .SelectMany(s => s switch {
+                            Child child => createTagGenInfos4Child(child, edge, true, fqdn),
+                            Segment segment => createTagGenInfos4RootVertex(s, edge, true),
+                            RootCall rootCall => createTagGenInfos4RootVertex(s, edge, true),
+                            _ => throw new Exception("ERROR"),
+                        })
+                        .ToArray()
+                        ;
+                            
                     foreach (var tgi in sourceTgis)
                         yield return tgi;
 
-                    var tagetTgis = createTagGenInfos4RootVertex(edge.Target, edge, false);
+                    var tagetTgis = createTagGenInfos4RootVertex(edge.Target, edge, false).ToArray();
                     foreach (var tgi in tagetTgis)
                         yield return tgi;
 
                 }
 
+
+                IEnumerable<TagGenInfo> createTagGenInfos4Child(Child child, Edge edge, bool isSource, string fqdn)
+                {
+                    verifyExternalSegmentCallChild_SingleCommandType(child);
+                    var rootSeg = child.Parent;
+
+                    // - 모든 경우(SubCall or ExSegmentCall )에 End Tag 는 무조건 생성
+                    // - SubCall 인 경우, reset edge 무시
+                    // - incoming edge 가 reset 인 경우 : Reset Tag 생성
+                    // - incoming edge 가 reset 이 아닌 경우 (없는 경우 포함) : Start Tag 생성
+
+                    foreach (var tgi in createEndTagGenInfos(child, fqdn, edge, isSource))
+                        yield return tgi;
+
+                    var hasReset =
+                        GraphUtil.getIncomingEdges(rootSeg.GraphInfo.Graph, child)
+                        .Select(qge => qge.OriginalEdge)
+                        .Any(e => e is IResetEdge)
+                        ;
+
+
+                    switch (child.Coin)
+                    {
+                        case SubCall call:
+                            if (!hasReset) // reset 이 없으면...  (set edge 가 있거나, 없거나..)
+                            {
+                                var segStart = call.Prototype.TXs.OfType<Segment>();
+                                foreach (var s in segStart)
+                                    yield return new TagGenInfo(TagType.Start, s, child, fqdn, edge, isSource);
+                            }
+                            break;
+
+                        case ExSegmentCall exSeg:
+                            var seg = exSeg.ExternalSegment;
+                            var type = hasReset ? TagType.Reset : TagType.Start;
+                            yield return new TagGenInfo(type, seg, child, fqdn, edge, isSource);
+                            break;
+
+                        default:
+                            throw new Exception("ERROR");
+                    }
+                }
 
 
                 IEnumerable<TagGenInfo> createTagGenInfos4RootVertex(IVertex root, Edge edge, bool isSource)
@@ -219,54 +269,32 @@ namespace Engine
                             if (edge != null)
                             {
                                 var type = isSource ? TagType.End : (edge is IResetEdge ? TagType.Reset : TagType.Start);
-                                if (!isSource)
-                                    if (edge is IResetEdge)
-                                        Console.WriteLine();
                                 yield return new TagGenInfo(type, rootSeg, rootSeg, fqdn, edge, isSource);
-
                             }
 
-                            var children = rootSeg.ChildVertices.OfType<Child>();
-                            foreach (var child in children)
-                            {
-                                verifyExternalSegmentCallChild_SingleCommandType(child);
-
-                                // - 모든 경우(SubCall or ExSegmentCall )에 End Tag 는 무조건 생성
-                                // - SubCall 인 경우, reset edge 무시
-                                // - incoming edge 가 reset 인 경우 : Reset Tag 생성
-                                // - incoming edge 가 reset 이 아닌 경우 (없는 경우 포함) : Start Tag 생성
-
-                                foreach (var tgi in createEndTagGenInfos(child, fqdn, edge, isSource))
-                                    yield return tgi;
-
-                                var hasReset =
-                                    GraphUtil.getIncomingEdges(rootSeg.GraphInfo.Graph, child)
-                                    .Select(qge => qge.OriginalEdge)
-                                    .Any(e => e is IResetEdge)
+                            var subEdges = rootSeg.Edges.ToArray();
+                            var tgisSource =
+                                subEdges
+                                    .SelectMany(edge => edge.Sources)
+                                    .OfType<Child>()
+                                    .SelectMany(ch => createTagGenInfos4Child(ch, edge, true, fqdn))
+                                    .ToArray()
                                     ;
+                            foreach (var tgi in tgisSource)
+                                yield return tgi;
 
+                            var tgisTarget =
+                                subEdges
+                                    .Select(edge => edge.Target)
+                                    .OfType<Child>()
+                                    .SelectMany(ch => createTagGenInfos4Child(ch, edge, false, fqdn))
+                                    .ToArray()
+                                    ;
+                            foreach (var tgi in tgisTarget)
+                                yield return tgi;
 
-                                switch (child.Coin)
-                                {
-                                    case SubCall call:
-                                        if (!hasReset) // reset 이 없으면...  (set edge 가 있거나, 없거나..)
-                                        {
-                                            var segStart = call.Prototype.TXs.OfType<Segment>();
-                                            foreach (var s in segStart)
-                                                yield return new TagGenInfo(TagType.Start, s, child, fqdn, edge, isSource);
-                                        }
-                                        break;
+                            // Todo : isolated vertex 처리
 
-                                    case ExSegmentCall exSeg:
-                                        var seg = exSeg.ExternalSegment;
-                                        var type = hasReset ? TagType.Reset : TagType.Start;
-                                        yield return new TagGenInfo(type, seg, child, fqdn, edge, isSource);
-                                        break;
-
-                                    default:
-                                        throw new Exception("ERROR");
-                                }
-                            }
                             break;
 
                         default:
@@ -277,7 +305,7 @@ namespace Engine
 
 
                 var edges = activeFlows.SelectMany(f => f.Edges);
-                foreach ( var tgi in edges.SelectMany(createTagGenInfos4Edge))
+                foreach ( var tgi in edges.SelectMany(edge => createTagGenInfos4Edge(edge, null)) )
                     yield return tgi;
 
 

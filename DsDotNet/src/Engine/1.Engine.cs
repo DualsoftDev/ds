@@ -124,7 +124,17 @@ namespace Engine
             /// 'Child' 의 Tags{Start,Reset,End} tag 들을 Child 가 실제 가리키는 segment 의 S/R/E Tags 에도 반영한다. 
             void copyChildSRETagsToSegment(TagGenInfo tgi)
             {
-                //tgi.Child.
+                var segment = tgi.TagContainerSegment;
+                var tag = tgi.GeneratedTag;
+                var tt = tag.Type;
+                if (tt.HasFlag(TagType.Start))
+                    segment.TagsStart.Add(tag);
+                else if (tt.HasFlag(TagType.Reset))
+                    segment.TagsReset.Add(tag);
+                else if (tt.HasFlag(TagType.End))
+                    segment.TagsEnd.Add(tag);
+                else
+                    throw new Exception("ERROR");
             }
         }
 

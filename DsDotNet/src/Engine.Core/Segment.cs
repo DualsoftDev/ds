@@ -56,7 +56,7 @@ namespace Engine.Core
         public override string ToText()
         {
             var c = ChildVertices == null ? 0 : ChildVertices.Count();
-            return $"{Name}: cpu={OwnerCpu?.Name}, #children={c}";
+            return $"{QualifiedName}: cpu={OwnerCpu?.Name}, #children={c}";
         }
     }
 

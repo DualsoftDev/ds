@@ -156,12 +156,27 @@ module ModelTest2 =
                 cpStart.Name === vpStart.Name
                 cpStart =!= vpStart
 
+(*
+[sys] L = {
+    [task] T = {
+        Cp = {P.F.Vp ~ P.F.Sp}
+        Cm = {P.F.Vm ~ P.F.Sm}
+    }
+    [flow] F = {
+        Main1 = { T.Cp > T.Cm; }
+        Main2 = { T.Cm |> T.Cp; }
+        Main1 > Main2;
+    }
+}
+*)
 
                 let cpEnd = main1Cp.TagsEnd |> Seq.exactlyOne
                 cpEnd.Name === "L_F_Main1_T.Cp_P_F_Sp_End"
-                let vpEnd = vp.TagsEnd |> Seq.find(fun t -> t.Name = cpEnd.Name)
-                cpEnd.Name === vpEnd.Name
-                cpEnd =!= vpEnd
+                let sp = flowP.ChildVertices |> Seq.ofType<Segment> |> Seq.find(fun s -> s.Name = "Sp")
+
+                let spEnd = sp.TagsEnd |> Seq.find(fun t -> t.Name = cpEnd.Name)
+                cpEnd.Name === spEnd.Name
+                cpEnd =!= spEnd
 
                 ()
             

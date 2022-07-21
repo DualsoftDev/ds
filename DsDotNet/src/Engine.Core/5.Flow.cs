@@ -91,19 +91,6 @@ public static class FlowExtension
         }
     }
 
-    //public static void Epilogue(this Flow flow)
-    //{
-    //    var allVertices =
-    //        flow.Edges
-    //            .SelectMany(e => e.Vertices)
-    //            .Concat(flow.ChildVertices)
-    //            .Distinct()
-    //            ;
-
-    //    flow.ChildVertices.Clear();
-    //    //allVertices.Iter(v => flow.ChildVertices.Add(v));
-    //    allVertices.Iter(v => flow.AddChildVertex(v));
-    //}
 
     public static IEnumerable<ICoin> CollectIsolatedCoins(this Flow flow)
     {
@@ -114,11 +101,6 @@ public static class FlowExtension
             ;
     }
 
-    //public static IEnumerable<IVertex> CollectVertices(this Flow flow) =>
-    //    flow.Edges.SelectMany(e => e.Vertices)
-    //    .Concat(flow.ChildVertices)
-    //    .Distinct()
-    //    ;
 
     public static IEnumerable<ExSegmentCall> CollectExternalRealSegment(this ChildFlow childFlow)
     {

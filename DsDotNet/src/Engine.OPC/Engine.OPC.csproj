@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>net48</TargetFrameworks>
     <!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
-	  <LangVersion>8.0</LangVersion>
+	  <LangVersion>10.0</LangVersion>
 	  <RootNamespace>Engine.Opc</RootNamespace>
   </PropertyGroup>
   <ItemGroup>

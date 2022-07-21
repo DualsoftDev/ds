@@ -40,7 +40,7 @@ namespace Engine
 
 
             /// <summary>
-            /// 
+            ///
             /// </summary>
             /// <param name="type">생성할 tag type</param>
             /// <param name="tagContainerSegment">tag 가 직접 제어할 segment</param>
@@ -95,7 +95,7 @@ namespace Engine
 
                 addTagsFunc(tags);
 
-                
+
                 var tagNames = String.Join(", ", tgis.Select(tgi => tgi.TagName));
                 Global.Logger.Debug($"Adding Child Tags {tagNames} to child [{location.GetQualifiedName()}]");
 
@@ -111,9 +111,9 @@ namespace Engine
 
             return tagGenInfos.ToArray();
 
-            /// Root flow 에 존재하는 
-            /// - root call 
-            /// - root segment 의 하부 call 및 external segment call 
+            /// Root flow 에 존재하는
+            /// - root call
+            /// - root segment 의 하부 call 및 external segment call
             /// 의 호출을 위한 start/reset/end tag 를 생성하기 위한 정보를 생성
             IEnumerable<TagGenInfo> collectTagGenInfo()
             {
@@ -171,7 +171,7 @@ namespace Engine
                         })
                         .ToArray()
                         ;
-                            
+
                     foreach (var tgi in sourceTgis)
                         yield return tgi;
 

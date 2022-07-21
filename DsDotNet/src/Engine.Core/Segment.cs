@@ -109,6 +109,28 @@ namespace Engine.Core
                         segment.OnChildEndTagChanged(bc);
                     });
             segment.Disposables.Add(subs);
+
+            segment.PrintPortTags();
         }
+
+        public static void PrintPortTags(this Segment seg)
+        {
+            IEnumerable<string> spit()
+            {
+                var tagNamesS = String.Join("\r\n\t\t", seg.TagsStart.Select(t => t.Name));
+                var tagNamesR = String.Join("\r\n\t\t", seg.TagsReset.Select(t => t.Name));
+                var tagNamesE = String.Join("\r\n\t\t", seg.TagsEnd.Select(t => t.Name));
+                if (tagNamesS.NonNullAny())
+                    yield return $"j\r\n\tStart Tags:\r\n\t\t{tagNamesS}";
+                if (tagNamesR.NonNullAny())
+                    yield return $"j\r\n\tReset Tags:\r\n\t\t{tagNamesR}";
+                if (tagNamesE.NonNullAny())
+                    yield return $"j\r\n\tEnd Tags:\r\n\t\t{tagNamesE}";
+            }
+            var str = String.Concat(spit());
+            Global.Logger.Debug($"Tags for segment [{seg.QualifiedName}]:{str}");
+
+        }
+
     }
 }

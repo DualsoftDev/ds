@@ -1,10 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net48;</TargetFrameworks>
 	  <!--<TargetFrameworks>net48;netcoreapp3.1</TargetFrameworks>-->
-	<LangVersion>8.0</LangVersion>
+	<LangVersion>10.0</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

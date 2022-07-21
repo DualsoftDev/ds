@@ -1,4 +1,4 @@
-﻿namespace Engine.Graph
+namespace Engine.Graph
 
 open Engine.Core
 open QuickGraph
@@ -211,7 +211,7 @@ module GraphResetSearch =
         | :? Segment as s ->
             checkSourceInGraph s.ContainerFlow rSrc
         | :? Call as c ->
-            checkSourceInGraph (c.Container:?>Flow) rSrc
+            checkSourceInGraph c.Container rSrc
         | _ ->
             failwith "[error] find source native graph"
 

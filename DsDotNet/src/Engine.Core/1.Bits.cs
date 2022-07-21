@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Engine.Core
 {
+    [DebuggerDisplay("{ToText()}")]
     public abstract class Bit : Named, IBit
     {
         public virtual bool Value { get; set; }
@@ -12,6 +14,8 @@ namespace Engine.Core
             Value = bit;
             OwnerCpu = ownerCpu;
         }
+
+        public override string ToText() => $"{base.ToText()}@{OwnerCpu.Name}";
     }
 
     public class Flag : Bit {

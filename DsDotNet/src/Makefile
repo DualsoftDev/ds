@@ -3,6 +3,13 @@
 doxy:
 	doxygen
 
+classes:
+	$(eval cwd=$(shell pwd))
+# 	echo CWD is $(cwd)
+	$(eval dos=$(shell cygpath -d $(cwd)))
+#	echo DOS path = $(dos)
+	"C:\Program Files\Mozilla Firefox\firefox.exe" "file:$(dos)\html\index.html"
+
 install-paket-tool:
 	dotnet tool install -g Paket
 

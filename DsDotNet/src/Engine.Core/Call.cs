@@ -14,6 +14,7 @@ namespace Engine.Core
         public CallBase(string name) : base(name) {}
     }
 
+
     public class CallPrototype : CallBase
     {
         public DsTask Task;
@@ -47,10 +48,13 @@ namespace Engine.Core
             task.CallPrototypes.Add(this);
         }
 
+        public override string QualifiedName => $"{Task.QualifiedName}_{Name}";
+
     }
 
 
     /// <summary> Call.  Derived = {SubCall, RootCall.} </summary>
+    [DebuggerDisplay("{ToText()}")]
     public abstract class Call : CallBase
     {
         public CallPrototype Prototype;
@@ -66,6 +70,7 @@ namespace Engine.Core
         }
 
         //public override void Going() => TxTags.Iter(t => t.Value = true);
+        public override string ToText() => $"{QualifiedName}[{this.GetType().Name}]";
     }
 
     /// <summary> Segment 내에 배치된 call </summary>
@@ -97,7 +102,7 @@ namespace Engine.Core
         }
         public void AddRxTags(IEnumerable<Tag> tags) => AddTags(_rxTags, tags);
         public void AddTxTags(IEnumerable<Tag> tags) => AddTags(_txTags, tags);
-        
+
         public RootCall(string name, RootFlow flow, CallPrototype protoType)
             : base(name, flow, protoType)
         {

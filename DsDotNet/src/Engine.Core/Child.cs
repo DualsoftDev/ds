@@ -9,9 +9,9 @@ using System.Reactive.Disposables;
 namespace Engine.Core
 {
     /// <summary> Segment 내에 배치된 `Child`.  SubCall 또는 ExSegmentCall 를 Coin 으로 갖는 wrapper</summary>
-    /// 
-    /// 
-    [DebuggerDisplay("{ToString()}")]
+    ///
+    ///
+    [DebuggerDisplay("{ToText()}")]
     public class Child : Named, IVertex, ICoin, ITagSREContainer
     {
         public Segment Parent { get; }
@@ -53,9 +53,10 @@ namespace Engine.Core
 
         public string QualifiedName { get; }
         public bool Value { get => Coin.Value; set => Coin.Value = value; }
-        public CpuBase OwnerCpu { get => Coin.OwnerCpu; set => throw new NotImplementedException(); }
+        public CpuBase OwnerCpu { get => Parent.OwnerCpu; set => throw new NotImplementedException(); }
 
-        public override string ToString() => (IsCall ? "" : "==") + Coin.ToText();
+        public override string ToString() => ToText();
+        public override string ToText() => $"{QualifiedName}[{this.GetType().Name}] : " + (IsCall ? "CALL" : "ExSegmentCall");
         public void Going()
         {
             //Coin.Going();

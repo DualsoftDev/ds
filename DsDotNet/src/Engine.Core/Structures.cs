@@ -11,8 +11,7 @@ namespace Engine.Core
     }
 
 
-    //[DebuggerDisplay("{ToText()}")]
-    [DebuggerDisplay("{Name}")]
+    [DebuggerDisplay("{ToText()}")]
     public class Named: INamed
     {
         public string Name { get; set; }
@@ -21,7 +20,7 @@ namespace Engine.Core
         {
             Name = name;
         }
-        public virtual string ToText() => Name;
+        public virtual string ToText() => $"{Name}[{this.GetType().Name}]";
         //public override string ToString() => Name;
     }
 
@@ -40,6 +39,7 @@ namespace Engine.Core
     }
 
 
+    [DebuggerDisplay("{ToText()}")]
     public class DsTask : Named
     {
         public DsSystem System;
@@ -51,10 +51,14 @@ namespace Engine.Core
             System = system;
             system.Tasks.Add(this);
         }
+
+        public string QualifiedName => $"{System.Name}_{Name}";
+        public override string ToText() => $"{QualifiedName}[{this.GetType().Name}], #call proto={CallPrototypes.Count}";
     }
 
 
     /// <summary> Segment Or Call base </summary>
+    [DebuggerDisplay("{ToText()}")]
     public abstract class Coin : Named, ICoin
     {
         public virtual bool Value { get; set; }
@@ -65,8 +69,6 @@ namespace Engine.Core
         public virtual bool Paused { get; }
         public virtual CpuBase OwnerCpu { get; set; }
 
-        public virtual IWallet Wallet => throw new NotImplementedException();
-
         public Coin(string name)
             :base(name)
         {
@@ -76,8 +78,7 @@ namespace Engine.Core
         bool IsChildrenStartPoint() => true;
         public virtual string QualifiedName { get; }
         public override string ToString() => ToText();
-        public override string ToText() => QualifiedName;       // }: cpu={OwnerCpu?.Name}";
-
+        public override string ToText() => $"{QualifiedName}[{this.GetType().Name}]";
         public virtual void Going() => throw new Exception("ERROR");
 
         //public virtual bool ChangeR()

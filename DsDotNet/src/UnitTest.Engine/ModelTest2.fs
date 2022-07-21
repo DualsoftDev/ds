@@ -2,8 +2,6 @@ namespace UnitTest.Engine
 
 
 open Xunit
-open System
-open FsUnit.Xunit
 open Engine
 open Engine.Core
 open System.Linq
@@ -44,7 +42,7 @@ module ModelTest2 =
             let system = engine.Model.Systems |> Seq.find(fun s -> s.Name = "L")
             let cpu = engine.Cpu
             cpu.Name === "Cpu"
-            
+
             cpu.ForwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) cpu) |> ShouldBeTrue
             cpu.BackwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) cpu) |> ShouldBeTrue
 
@@ -52,7 +50,7 @@ module ModelTest2 =
             fakeCpu.ForwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) fakeCpu) |> ShouldBeTrue
             fakeCpu.BackwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) fakeCpu) |> ShouldBeTrue
 
-            
+
             system.Name === "L"
             let flow = system.RootFlows |> Seq.exactlyOne
             flow.Name === "F"
@@ -123,9 +121,13 @@ module ModelTest2 =
 
             let mutable main1Cp:Child = null
             let mutable main2Cp:Child = null
+            let mutable main1Cm:Child = null
+            let mutable main2Cm:Child = null
             let mutable main1CpProto:CallPrototype = null
             let mutable main2CpProto:CallPrototype = null
-            
+            let mutable main1CmProto:CallPrototype = null
+            let mutable main2CmProto:CallPrototype = null
+
             let ``check children`` =
                 let main1Children = main1.ChildVertices |> Enumerable.OfType<Child> |> Array.ofSeq
                 (main1Children |> Seq.map(fun ch -> ch.Name), ["T.Cp"; "T.Cm"]) |> setEq
@@ -147,13 +149,26 @@ module ModelTest2 =
 
                 // main1/T.Cp 와 main2/T.Cp 는 동일한 Call prototype 이어야 한다.
                 main1CpProto === main2CpProto
-                
+
+
+                main1CmProto <-
+                    main1Cm <- main1Children |> Seq.find(fun ch -> ch.Name = "T.Cm")
+                    (main1Cm.Coin :?> SubCall).Prototype
+
+                main2CmProto <-
+                    main2Cm <- main1Children |> Seq.find(fun ch -> ch.Name = "T.Cm")
+                    (main2Cm.Coin :?> SubCall).Prototype
+
+                // main1/T.Cm 와 main2/T.Cm 는 동일한 Call prototype 이어야 한다.
+                main1CmProto === main2CmProto
+
+
             let ``check main edges`` =
                 let edge = flow.Edges |> Seq.exactlyOne
                 edge.ToText() === "L_F_Main1 > L_F_Main2"
                 edge.Sources |> Seq.exactlyOne === main1
                 edge.Target === main2
-                
+
             let ``check sub edges`` =
                 let edge1 = main1.Edges |> Seq.exactlyOne
                 let edge2 = main2.Edges |> Seq.exactlyOne
@@ -162,7 +177,7 @@ module ModelTest2 =
                 edge1 :? WeakSetEdge |> ShouldBeTrue
                 edge2 :? WeakResetEdge |> ShouldBeTrue
 
-                let s1 = edge1.Sources|> Seq.exactlyOne                
+                let s1 = edge1.Sources|> Seq.exactlyOne
                 ()
 
             let ``check call tag with real segment`` =
@@ -197,8 +212,65 @@ module ModelTest2 =
                 cpEnd.Name === spEnd.Name
                 //cpEnd =!= spEnd
 
+
+                let ``check main1`` =
+                    // Call 이 실제 사용하는 외부 시스템의 real segment 를 찾아서, 해당 segment 의 tag 가 존재하는 지 검사.
+                    let segMain1CpTx = (main1Cp.Coin :?> SubCall).Prototype.TXs |> Enumerable.OfType<Segment> |> Seq.exactlyOne
+                    let segMain1CpRx = (main1Cp.Coin :?> SubCall).Prototype.RXs |> Enumerable.OfType<Segment> |> Seq.exactlyOne
+
+                    segMain1CpTx.QualifiedName === "P_F_Vp"
+                    segMain1CpRx.QualifiedName === "P_F_Sp"
+
+                    let cpStart_ = segMain1CpTx.TagsStart |> Seq.filter(fun t -> t.Name = cpStart.Name) |> Seq.exactlyOne
+                    let cpEnd_   = segMain1CpRx.TagsEnd   |> Seq.filter(fun t -> t.Name = cpEnd.Name)   |> Seq.exactlyOne
+
+                    cpStart.OwnerCpu =!= cpStart_.OwnerCpu
+                    cpEnd.OwnerCpu =!= cpEnd_.OwnerCpu
+
+
+                    let segMain1CmTx = (main1Cm.Coin :?> SubCall).Prototype.TXs |> Enumerable.OfType<Segment> |> Seq.exactlyOne
+                    let segMain1CmRx = (main1Cm.Coin :?> SubCall).Prototype.RXs |> Enumerable.OfType<Segment> |> Seq.exactlyOne
+
+                    segMain1CmTx.QualifiedName === "P_F_Vm"
+                    segMain1CmRx.QualifiedName === "P_F_Sm"
+
+                    let cpStart_ = segMain1CpTx.TagsStart |> Seq.filter(fun t -> t.Name = cpStart.Name) |> Seq.exactlyOne
+                    let cpEnd_   = segMain1CpRx.TagsEnd   |> Seq.filter(fun t -> t.Name = cpEnd.Name)   |> Seq.exactlyOne
+
+                    cpStart.OwnerCpu =!= cpStart_.OwnerCpu
+                    cpEnd.OwnerCpu =!= cpEnd_.OwnerCpu
+
+
+                let ``check main2`` =
+                    // Call 이 실제 사용하는 외부 시스템의 real segment 를 찾아서, 해당 segment 의 tag 가 존재하는 지 검사.
+                    let segMain2CpTx = (main2Cp.Coin :?> SubCall).Prototype.TXs |> Enumerable.OfType<Segment> |> Seq.exactlyOne
+                    let segMain2CpRx = (main2Cp.Coin :?> SubCall).Prototype.RXs |> Enumerable.OfType<Segment> |> Seq.exactlyOne
+
+                    segMain2CpTx.QualifiedName === "P_F_Vp"
+                    segMain2CpRx.QualifiedName === "P_F_Sp"
+
+                    let cpStart_ = segMain2CpTx.TagsStart |> Seq.filter(fun t -> t.Name = cpStart.Name) |> Seq.exactlyOne
+                    let cpEnd_   = segMain2CpRx.TagsEnd   |> Seq.filter(fun t -> t.Name = cpEnd.Name)   |> Seq.exactlyOne
+
+                    cpStart.OwnerCpu =!= cpStart_.OwnerCpu
+                    cpEnd.OwnerCpu =!= cpEnd_.OwnerCpu
+
+
+                    let segMain2CmTx = (main2Cm.Coin :?> SubCall).Prototype.TXs |> Enumerable.OfType<Segment> |> Seq.exactlyOne
+                    let segMain2CmRx = (main2Cm.Coin :?> SubCall).Prototype.RXs |> Enumerable.OfType<Segment> |> Seq.exactlyOne
+
+                    segMain2CmTx.QualifiedName === "P_F_Vm"
+                    segMain2CmRx.QualifiedName === "P_F_Sm"
+
+                    let cpStart_ = segMain2CpTx.TagsStart |> Seq.filter(fun t -> t.Name = cpStart.Name) |> Seq.exactlyOne
+                    let cpEnd_   = segMain2CpRx.TagsEnd   |> Seq.filter(fun t -> t.Name = cpEnd.Name)   |> Seq.exactlyOne
+
+                    cpStart.OwnerCpu =!= cpStart_.OwnerCpu
+                    cpEnd.OwnerCpu =!= cpEnd_.OwnerCpu
+
+
                 ()
-            
+
             ()
 
 

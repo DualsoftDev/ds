@@ -57,6 +57,7 @@ namespace Engine.Core
 
 
 
+    [DebuggerDisplay("[{ToText()}]")]
     public class RootFlow : Flow
     {
         public DsSystem System { get; set; }
@@ -69,6 +70,8 @@ namespace Engine.Core
         }
 
         public IEnumerable<Segment> RootSegments => ChildVertices.OfType<Segment>();
+
+        public override string ToText() => $"{System.Name}.{Name}";
     }
 
     public class ChildFlow : Flow

@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
+using TagDic = System.Collections.Generic.Dictionary<string, Engine.Core.Tag>;
+
 namespace Engine.Core
 {
     public abstract class CallBase : Coin
@@ -55,6 +57,7 @@ namespace Engine.Core
         public Flow Container;
         public override bool Value => Prototype.Value;
         public override string QualifiedName => this.GetQualifiedName();
+        public override CpuBase OwnerCpu { get => Container.Cpu; set => throw new Exception("ERROR"); }
 
         public Call(string name, Flow flow, CallPrototype protoType) : base(name)
         {
@@ -77,8 +80,24 @@ namespace Engine.Core
     /// <summary> Root 에 배치된 Call </summary>
     public class RootCall : Call
     {
-        public List<Tag> TxTags { get; } = new List<Tag>();
-        public List<Tag> RxTags { get; } = new List<Tag>();
+        TagDic _txTags = new TagDic();
+        TagDic _rxTags = new TagDic();
+
+        public IEnumerable<Tag> TxTags => _txTags.Values;
+        public IEnumerable<Tag> RxTags => _rxTags.Values;
+
+        void AddTags(TagDic dic, IEnumerable<Tag> tags)
+        {
+            foreach (var tag in tags)
+            {
+                Debug.Assert(tag.OwnerCpu == OwnerCpu);     // ! call 이므로 다른 system 호출용 tag 여야 함
+                dic.Add(tag.Name, tag);
+            }
+
+        }
+        public void AddRxTags(IEnumerable<Tag> tags) => AddTags(_rxTags, tags);
+        public void AddTxTags(IEnumerable<Tag> tags) => AddTags(_txTags, tags);
+        
         public RootCall(string name, RootFlow flow, CallPrototype protoType)
             : base(name, flow, protoType)
         {

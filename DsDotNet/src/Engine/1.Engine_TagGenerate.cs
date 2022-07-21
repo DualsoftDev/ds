@@ -86,9 +86,9 @@ namespace Engine
                     ITagSREContainer sreContainer => sreContainer.AddTagsFunc,  // sreContainer = {Child or Segment}
                     RootCall rootCall => type switch
                     {
-                        TagType.Start => new Action<IEnumerable<Tag>>(tags => rootCall.TxTags.AddRange(tags)),
-                        TagType.End => new Action<IEnumerable<Tag>>(tags => rootCall.RxTags.AddRange(tags)),
-                        _ => throw new Exception("ERROR")
+                        TagType.Start => new Action<IEnumerable<Tag>>(tags => rootCall.AddTxTags(tags)),
+                        TagType.End   => new Action<IEnumerable<Tag>>(tags => rootCall.AddRxTags(tags)),
+                        _             => throw new Exception("ERROR")
                     },
                     _ => throw new Exception("ERROR"),
                 };
@@ -103,16 +103,9 @@ namespace Engine
                 foreach (var tgi in tgis)
                 {
                     var seg = tgi.TagContainerSegment;
-                    var segStorage = tgi.Type switch
-                    {
-                        TagType.Start => seg.TagsStart,
-                        TagType.Reset => seg.TagsReset,
-                        TagType.End => seg.TagsEnd,
-                        _ => throw new Exception("ERROR")
-                    };
-
                     Global.Logger.Debug($"Adding Export {tgi.Type} Tag [{tgi.TagName}] to segment [{seg.QualifiedName}]");
-                    addTagsFunc(new[] { createTag(tgi, seg, type, seg.OwnerCpu) });
+                    var tag = createTag(tgi, seg, type, seg.OwnerCpu);
+                    seg.AddTagsFunc(new[] { tag });
                 }
             }
 

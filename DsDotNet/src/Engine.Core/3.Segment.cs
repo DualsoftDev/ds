@@ -27,9 +27,9 @@ public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, IWithSREPorts
     public Action<IEnumerable<Tag>> AddTagsFunc => _tagSREContainer.AddTagsFunc;
 
 
-    public Tag TagS { get; set; }
-    public Tag TagR { get; set; }
-    public Tag TagE { get; set; }
+    public Tag TagS { get; set; }       // todo : remove me
+    public Tag TagR { get; set; }       // todo : remove me
+    public Tag TagE { get; set; }       // todo : remove me
 
     public bool IsResetFirst { get; internal set; } = true;
 

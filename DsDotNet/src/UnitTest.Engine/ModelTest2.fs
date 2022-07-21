@@ -297,48 +297,54 @@ module ModelTest2 =
 
             let engine = new Engine(text, "Cpu")
             let model = engine.Model
-            let sysL = model.FindObject<DsSystem>("L");
-            let sysP = model.FindObject<DsSystem>("P");
-            sysL.Name === "L"
-            sysP.Name === "P"
 
-            let t = model.FindObject<DsTask>("L.T");
-            t.Name === "T"
-            let cp = model.FindObject<CallPrototype>("L.T.Cp");
-            cp.Name === "Cp"
-            let cm = model.FindObject<CallPrototype>("L.T.Cm");
-            cm.Name === "Cm"
+            let ``model object inspection`` =
+                let sysL = model.FindObject<DsSystem>("L");
+                let sysP = model.FindObject<DsSystem>("P");
+                sysL.Name === "L"
+                sysP.Name === "P"
 
-            let f = model.FindObject<RootFlow>("L.F");
-            f.Name === "F"
-            let main1 = model.FindObject<Segment>("L.F.Main1");
-            main1.Name === "Main1"
-            let main2 = model.FindObject<Segment>("L.F.Main2");
-            main2.Name === "Main2"
+                let t = model.FindObject<DsTask>("L.T");
+                t.Name === "T"
+                let cp = model.FindObject<CallPrototype>("L.T.Cp");
+                cp.Name === "Cp"
+                let cm = model.FindObject<CallPrototype>("L.T.Cm");
+                cm.Name === "Cm"
 
-            let main1CallInstanceCp = model.FindObject<Child>("L.F.Main1.T.Cp");
-            main1CallInstanceCp.Name === "T.Cp"
-            main1CallInstanceCp.QualifiedName === "L_F_Main1_T.Cp"
+                let f = model.FindObject<RootFlow>("L.F");
+                f.Name === "F"
+                let main1 = model.FindObject<Segment>("L.F.Main1");
+                main1.Name === "Main1"
+                let main2 = model.FindObject<Segment>("L.F.Main2");
+                main2.Name === "Main2"
+
+                let main1CallInstanceCp = model.FindObject<Child>("L.F.Main1.T.Cp");
+                main1CallInstanceCp.Name === "T.Cp"
+                main1CallInstanceCp.QualifiedName === "L_F_Main1_T.Cp"
+
+            let ``call site tag <--> real segment tag`` =
+                let vp = model.FindObject<Segment>("P.F.Vp");
+                vp.Name === "Vp"
+
+                let vpTagsStart = vp.TagsStart |> Array.ofSeq
+                let cp = model.FindObject<Child>("L.F.Main1.T.Cp");
+                let cpStart = cp.TagsStart |> Seq.exactlyOne
+                let vpStart = vpTagsStart |> Seq.filter(fun t -> t.Name = cpStart.Name) |> Seq.exactlyOne
+                cpStart.Name === vpStart.Name
+                cpStart =!= vpStart
+                cpStart.OwnerCpu =!= vpStart.Owner
+
+                let pp = model.FindObject<Segment>("P.F.Pp");
+                pp.Name === "Pp"
 
 
-            let vp = model.FindObject<Segment>("P.F.Vp");
-            vp.Name === "Vp"
-
-            let vpTagsStart = vp.TagsStart |> Array.ofSeq
-            let cpStart = main1CallInstanceCp.TagsStart |> Seq.exactlyOne
-            let vpStart = vpTagsStart |> Seq.filter(fun t -> t.Name = cpStart.Name) |> Seq.exactlyOne
-            cpStart.Name === vpStart.Name
-            cpStart =!= vpStart
-            cpStart.OwnerCpu =!= vpStart.Owner
-
-
-            let sp = model.FindObject<Segment>("P.F.Sp");
-            sp.Name === "Sp"
-            let spTagsEnd = sp.TagsEnd |> Array.ofSeq
-            let cpEnd = main1CallInstanceCp.TagsEnd |> Seq.exactlyOne
-            let spEnd = spTagsEnd|> Seq.filter(fun t -> t.Name = cpEnd.Name) |> Seq.exactlyOne
-            cpEnd.Name === spEnd.Name
-            cpEnd =!= spEnd
-            cpEnd.OwnerCpu =!= spEnd.Owner
+                let sp = model.FindObject<Segment>("P.F.Sp");
+                sp.Name === "Sp"
+                let spTagsEnd = sp.TagsEnd |> Array.ofSeq
+                let cpEnd = cp.TagsEnd |> Seq.exactlyOne
+                let spEnd = spTagsEnd|> Seq.filter(fun t -> t.Name = cpEnd.Name) |> Seq.exactlyOne
+                cpEnd.Name === spEnd.Name
+                cpEnd =!= spEnd
+                cpEnd.OwnerCpu =!= spEnd.Owner
 
             ()

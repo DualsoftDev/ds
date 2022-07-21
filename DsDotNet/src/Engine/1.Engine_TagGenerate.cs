@@ -63,7 +63,7 @@ partial class Engine
 
         var tagGenInfos =
             collectTagGenInfo()
-            .GroupBy(tgi => tgi.TagName).Select(g => g.First())      // DistinctBy : https://stackoverflow.com/questions/2537823/distinct-by-property-of-class-with-linq
+            .DistinctBy(tgi => tgi.TagName)
             .ToArray();
 
         // tag 가 사용된 위치(child) 및 tag type 으로 grouping

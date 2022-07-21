@@ -82,41 +82,58 @@ namespace Engine
                 var tgis = kv.Value;
                 var tags = tgis.Select(tgi => createTag(tgi, location, type, cpu)).ToArray();
 
-                List<Tag> storage = null;
-                switch (location)
+                var addTagsFunc = location switch
                 {
-                    case Child child:
-                        storage = type switch
-                        {
-                            TagType.Start => child.TagsStart,
-                            TagType.Reset => child.TagsReset,
-                            TagType.End => child.TagsEnd,
-                            _ => throw new Exception("ERROR")
-                        };
-                        break;
-                    case RootCall rootCall:
-                        storage = type switch
-                        {
-                            TagType.Start => rootCall.TxTags,
-                            TagType.End => rootCall.RxTags,
-                            _ => throw new Exception("ERROR")
-                        };
-                        break;
-                    case Segment child:
-                        storage = type switch
-                        {
-                            TagType.Start => child.TagsStart,
-                            TagType.Reset => child.TagsReset,
-                            TagType.End => child.TagsEnd,
-                            _ => throw new Exception("ERROR")
-                        };
-                        break;
-                    default:
-                        throw new Exception("ERROR");
-                }
+                    ITagSREContainer sreContainer => sreContainer.AddTagsFunc,  // sreContainer = {Child or Segment}
+                    RootCall rootCall => type switch
+                    {
+                        TagType.Start => new Action<IEnumerable<Tag>>(tags => rootCall.TxTags.AddRange(tags)),
+                        TagType.End => new Action<IEnumerable<Tag>>(tags => rootCall.RxTags.AddRange(tags)),
+                        _ => throw new Exception("ERROR")
+                    },
+                    _ => throw new Exception("ERROR"),
+                };
 
-                //Debug.Assert(storage.IsNullOrEmpty());
-                storage.AddRange(tags);
+                addTagsFunc(tags);
+
+                //List<Tag> storage = null;
+                //switch (location)
+                //{
+                //    case Child child:
+                //        storage = type switch
+                //        {
+                //            TagType.Start => child.TagsStart,
+                //            TagType.Reset => child.TagsReset,
+                //            TagType.End => child.TagsEnd,
+                //            _ => throw new Exception("ERROR")
+                //        };
+                //        break;
+                //    case RootCall rootCall:
+                //        storage = type switch
+                //        {
+                //            TagType.Start => rootCall.TxTags,
+                //            TagType.End => rootCall.RxTags,
+                //            _ => throw new Exception("ERROR")
+                //        };
+                //        break;
+                //    case Segment child:
+                //        storage = type switch
+                //        {
+                //            TagType.Start => child.TagsStart,
+                //            TagType.Reset => child.TagsReset,
+                //            TagType.End => child.TagsEnd,
+                //            _ => throw new Exception("ERROR")
+                //        };
+                //        break;
+                //    default:
+                //        throw new Exception("ERROR");
+                //}
+
+                ////Debug.Assert(storage.IsNullOrEmpty());
+                //storage.AddRange(tags);
+
+
+                
                 var tagNames = String.Join(", ", tgis.Select(tgi => tgi.TagName));
                 Global.Logger.Debug($"Adding Child Tags {tagNames} to child [{location.GetQualifiedName()}]");
 
@@ -133,7 +150,7 @@ namespace Engine
                     };
 
                     Global.Logger.Debug($"Adding Export {tgi.Type} Tag [{tgi.TagName}] to segment [{seg.QualifiedName}]");
-                    segStorage.Add(createTag(tgi, seg, type, seg.OwnerCpu));
+                    addTagsFunc(new[] { createTag(tgi, seg, type, seg.OwnerCpu) });
                 }
             }
 

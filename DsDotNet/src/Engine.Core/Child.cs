@@ -12,7 +12,7 @@ namespace Engine.Core
     /// 
     /// 
     [DebuggerDisplay("{ToString()}")]
-    public class Child : Named, IVertex, ICoin
+    public class Child : Named, IVertex, ICoin, ITagSREContainer
     {
         public Segment Parent { get; }
         /// <summary>Call or ExSegmentCall</summary>
@@ -26,9 +26,15 @@ namespace Engine.Core
             set => Parent.ChildStatusMap[this] = value;
         }
 
-        public List<Tag> TagsStart { get; } = new List<Tag>();
-        public List<Tag> TagsReset { get; } = new List<Tag>();
-        public List<Tag> TagsEnd { get; } = new List<Tag>();
+        TagSREContainer _tagSREContainer = new TagSREContainer();
+        public IEnumerable<Tag> TagsStart => _tagSREContainer.TagsStart;
+        public IEnumerable<Tag> TagsReset => _tagSREContainer.TagsReset;
+        public IEnumerable<Tag> TagsEnd => _tagSREContainer.TagsEnd;
+        public void AddStartTags(params Tag[] tags) => _tagSREContainer.AddStartTags(tags);
+        public void AddResetTags(params Tag[] tags) => _tagSREContainer.AddResetTags(tags);
+        public void AddEndTags(params Tag[] tags) => _tagSREContainer.AddEndTags(tags);
+        public Action<IEnumerable<Tag>> AddTagsFunc => _tagSREContainer.AddTagsFunc;
+
 
         CompositeDisposable _disposables = new CompositeDisposable();
         public Child(Coin coin, Segment parent)

@@ -10,7 +10,7 @@ using System.Reactive.Linq;
 namespace Engine.Core
 {
     [DebuggerDisplay("{ToText(),nq}")]
-    public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, IWithSREPorts, ITxRx// Coin
+    public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, IWithSREPorts, ITxRx, ITagSREContainer// Coin
     {
         public RootFlow ContainerFlow { get; }
         public CpuBase OwnerCpu { get => ContainerFlow.Cpu; set => throw new NotImplementedException(); }
@@ -22,13 +22,20 @@ namespace Engine.Core
         public PortE PortE { get; set; }
         public Port[] AllPorts => new Port[] { PortS, PortR, PortE };
 
+        TagSREContainer _tagSREContainer = new TagSREContainer();
+        public IEnumerable<Tag> TagsStart => _tagSREContainer.TagsStart;
+        public IEnumerable<Tag> TagsReset => _tagSREContainer.TagsReset;
+        public IEnumerable<Tag> TagsEnd => _tagSREContainer.TagsEnd;
+
+        public void AddStartTags(params Tag[] tags) => _tagSREContainer.AddStartTags(tags);
+        public void AddResetTags(params Tag[] tags) => _tagSREContainer.AddResetTags(tags);
+        public void AddEndTags(params Tag[] tags) => _tagSREContainer.AddEndTags(tags);
+        public Action<IEnumerable<Tag>> AddTagsFunc => _tagSREContainer.AddTagsFunc;
+
+
         public Tag TagS { get; set; }
         public Tag TagR { get; set; }
         public Tag TagE { get; set; }
-
-        public List<Tag> TagsStart { get; } = new List<Tag>();
-        public List<Tag> TagsReset { get; } = new List<Tag>();
-        public List<Tag> TagsEnd { get; } = new List<Tag>();
 
         public bool IsResetFirst { get; internal set; } = true;
 
@@ -37,6 +44,7 @@ namespace Engine.Core
         public VertexAndOutgoingEdges[] TraverseOrder { get; internal set; }
         internal Dictionary<Coin, Child> CoinChildMap { get; set; }
         public bool Value { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
 
         internal CompositeDisposable Disposables = new CompositeDisposable();
 

@@ -27,9 +27,9 @@ namespace Engine
             segment.TagR = r;
             segment.TagE = e;
 
-            segment.TagsStart.Add(s);
-            segment.TagsReset.Add(r);
-            segment.TagsEnd.Add(e);
+            segment.AddStartTags(s);
+            segment.AddResetTags(r);
+            segment.AddEndTags(e);
 
 
             new[] { s, r, e }
@@ -65,7 +65,7 @@ namespace Engine
                 else
                 {
                     var s = Tag.CreateAutoStart(init, $"AutoStart_{midName}_{init.Name}", cpu);
-                    init.TagsStart.Add(s);
+                    init.AddStartTags(s);
                     cpu.AddBitDependancy(s, init.PortS);
                     tags.Add(s);
                 }
@@ -82,7 +82,7 @@ namespace Engine
                 else
                 {
                     var r = Tag.CreateAutoReset(last, $"AutoReset_{midName}_{last.Name}", cpu);
-                    last.TagsReset.Add(r);
+                    last.AddResetTags(r);
                     cpu.AddBitDependancy(r, last.PortR);
                     tags.Add(r);
                 }

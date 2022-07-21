@@ -115,9 +115,9 @@ namespace Engine
             if (FakeCpu != null)
                 Opc._cpus.Add(FakeCpu);
 
-            // debugging
-            Debug.Assert(Cpu.CollectBits().All(b => b.OwnerCpu == Cpu));
-            Debug.Assert(FakeCpu == null || FakeCpu.CollectBits().All(b => b.OwnerCpu == FakeCpu));
+            // todo: debugging
+            //Debug.Assert(Cpu.CollectBits().All(b => b.OwnerCpu == Cpu));
+            //Debug.Assert(FakeCpu == null || FakeCpu.CollectBits().All(b => b.OwnerCpu == FakeCpu));
 
 
 
@@ -128,11 +128,11 @@ namespace Engine
                 var tag = tgi.GeneratedTag;
                 var tt = tag.Type;
                 if (tt.HasFlag(TagType.Start))
-                    segment.TagsStart.Add(tag);
+                    segment.AddStartTags(tag);
                 else if (tt.HasFlag(TagType.Reset))
-                    segment.TagsReset.Add(tag);
+                    segment.AddResetTags(tag);
                 else if (tt.HasFlag(TagType.End))
-                    segment.TagsEnd.Add(tag);
+                    segment.AddEndTags(tag);
                 else
                     throw new Exception("ERROR");
             }
@@ -164,8 +164,10 @@ namespace Engine
                     if (cpu != tgt.OwnerCpu)
                         tgt = tags[((Named)tgt).Name];
 
-                    Debug.Assert(cpu == src.OwnerCpu);
-                    Debug.Assert(cpu == tgt.OwnerCpu);
+                    // todo:
+                    //Debug.Assert(cpu == src.OwnerCpu);
+                    //Debug.Assert(cpu == tgt.OwnerCpu);
+
                     rootFlow.Cpu.AddBitDependancy(src, tgt);
                 }
             }

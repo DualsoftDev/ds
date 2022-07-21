@@ -1,70 +1,68 @@
-﻿using Engine.Core;
+using Engine.Core;
 
 using log4net;
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
-namespace Engine.OPC
+namespace Engine.OPC;
+
+public class OpcTag : Bit
 {
-    public class OpcTag : Bit
+    internal Tag OriginalTag;
+    public OpcTag(Tag tag)
+        : base(tag.Name, tag.Value)
     {
-        internal Tag OriginalTag;
-        public OpcTag(Tag tag)
-            : base(tag.Name, tag.Value)
-        {
-            OriginalTag = tag;
-        }
+        OriginalTag = tag;
     }
-    public class OpcBroker
+}
+public class OpcBroker
+{
+    Dictionary<string, OpcTag> _tagDic = new Dictionary<string, OpcTag>();
+    public IEnumerable<string> Tags => _tagDic.Values.Select(ot => ot.Name);
+
+    // { Debug only, or temporary implementations
+    internal IEnumerable<OpcTag> _opcTags => _tagDic.Values;
+    internal List<CpuBase> _cpus = new List<CpuBase>();
+    // }
+
+    public void AddTags(IEnumerable<Tag> tags)
     {
-        Dictionary<string, OpcTag> _tagDic = new Dictionary<string, OpcTag>();
-        public IEnumerable<string> Tags => _tagDic.Values.Select(ot => ot.Name);
+        foreach(var opcTag in tags.Select(t => new OpcTag(t)))
+            if (! _tagDic.ContainsKey(opcTag.Name))
+                _tagDic.Add(opcTag.Name, opcTag);
+    }
 
-        // { Debug only, or temporary implementations
-        internal IEnumerable<OpcTag> _opcTags => _tagDic.Values;
-        internal List<CpuBase> _cpus = new List<CpuBase>();
-        // }
 
-        public void AddTags(IEnumerable<Tag> tags)
+    public void Write(string tagName, bool value)
+    {
+        var bit = _tagDic[tagName];
+        if (bit.Value != value)
         {
-            foreach(var opcTag in tags.Select(t => new OpcTag(t)))
-                if (! _tagDic.ContainsKey(opcTag.Name))
-                    _tagDic.Add(opcTag.Name, opcTag);
-        }
+            bit.Value = value;
 
-
-        public void Write(string tagName, bool value)
-        {
-            var bit = _tagDic[tagName];
-            if (bit.Value != value)
-            {
-                bit.Value = value;
-
-                foreach (var cpu in _cpus)
-                    cpu.OnOpcTagChanged(tagName, value);
-            }
-        }
-
-        public IEnumerable<(string, bool)> ReadTags(IEnumerable<string> tags)
-        {
-            foreach(var tag in tags)
-            {
-                if (_tagDic.ContainsKey(tag))
-                    yield return (tag, _tagDic[tag].Value);
-            }
+            foreach (var cpu in _cpus)
+                cpu.OnOpcTagChanged(tagName, value);
         }
     }
 
-    public static class OpcBrokerExtension
+    public IEnumerable<(string, bool)> ReadTags(IEnumerable<string> tags)
     {
-        static ILog Logger => Global.Logger;
-        public static void Print(this OpcBroker opc)
+        foreach(var tag in tags)
         {
-            var tags = String.Join("\r\n\t", opc.Tags);
-            Logger.Debug($"== OPC Tags:\r\n\t{tags}");
+            if (_tagDic.ContainsKey(tag))
+                yield return (tag, _tagDic[tag].Value);
         }
+    }
+}
+
+public static class OpcBrokerExtension
+{
+    static ILog Logger => Global.Logger;
+    public static void Print(this OpcBroker opc)
+    {
+        var tags = String.Join("\r\n\t", opc.Tags);
+        Logger.Debug($"== OPC Tags:\r\n\t{tags}");
     }
 }

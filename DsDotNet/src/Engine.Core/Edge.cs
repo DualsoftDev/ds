@@ -3,115 +3,114 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace Engine.Core
+namespace Engine.Core;
+
+[DebuggerDisplay("{ToText()}")]
+public abstract class Edge : IEdge
 {
-    [DebuggerDisplay("{ToText()}")]
-    public abstract class Edge : IEdge
+    public Flow ContainerFlow;
+
+    /// <summary> Conjuction </summary>
+    public IVertex[] Sources { get; internal set; }
+    public IVertex Target { get; internal set; }
+    public IEnumerable<IVertex> Vertices => Sources.Append(Target);
+
+    public bool Value { get => Sources.All(v => v.Value); set => throw new NotImplementedException(); }
+    public CpuBase OwnerCpu { get => ContainerFlow.Cpu; set => throw new NotImplementedException(); }
+
+    public string Operator;
+
+    public Edge(Flow containerFlow, IVertex[] sources, string operator_, IVertex target)
     {
-        public Flow ContainerFlow;
+        Debug.Assert(sources.All(s => s != null));
+        Debug.Assert(target != null);
 
-        /// <summary> Conjuction </summary>
-        public IVertex[] Sources { get; internal set; }
-        public IVertex Target { get; internal set; }
-        public IEnumerable<IVertex> Vertices => Sources.Append(Target);
+        ContainerFlow = containerFlow;
+        Sources = sources;
+        Target = target;
+        Operator = operator_;
+    }
+    public string ToText()
+    {
+        var ss = string.Join(", ", Sources.Select(s => s.GetQualifiedName()));
+        return $"{ss} {Operator} {Target.GetQualifiedName()}[{this.GetType().Name}]";
+    }
+}
 
-        public bool Value { get => Sources.All(v => v.Value); set => throw new NotImplementedException(); }
-        public CpuBase OwnerCpu { get => ContainerFlow.Cpu; set => throw new NotImplementedException(); }
 
-        public string Operator;
+/// '>' or '>>'
+public abstract class SetEdge : Edge, ISetEdge
+{
+    public SetEdge(Flow containerFlow, IVertex[] sources, string operator_, IVertex target)
+        : base(containerFlow, sources, operator_, target)
+    { }
+}
+public abstract class ResetEdge : Edge, IResetEdge
+{
+    public ResetEdge(Flow containerFlow, IVertex[] sources, string operator_, IVertex target)
+        : base(containerFlow, sources, operator_, target)
+    { }
+}
+public class WeakSetEdge : SetEdge, IWeakEdge
+{
+    public WeakSetEdge(Flow containerFlow, IVertex[] sources, string operator_, IVertex target)
+        : base(containerFlow, sources, operator_, target)
+    { }
+}
+public class StrongSetEdge : SetEdge, IStrongEdge
+{
+    public StrongSetEdge(Flow containerFlow, IVertex[] sources, string operator_, IVertex target)
+        : base(containerFlow, sources, operator_, target)
+    { }
+}
+public class WeakResetEdge : ResetEdge, IWeakEdge
+{
+    public WeakResetEdge(Flow containerFlow, IVertex[] sources, string operator_, IVertex target)
+        : base(containerFlow, sources, operator_, target)
+    { }
+}
+public class StrongResetEdge : ResetEdge, IStrongEdge
+{
+    public StrongResetEdge(Flow containerFlow, IVertex[] sources, string operator_, IVertex target)
+        : base(containerFlow, sources, operator_, target)
+    { }
+}
 
-        public Edge(Flow containerFlow, IVertex[] sources, string operator_, IVertex target)
+
+public static class EdgeExtension
+{
+    public static IEnumerable<(IBit, IBit)> CollectForwardDependancy(this Edge rootEdge)
+    {
+        foreach(var s in rootEdge.Sources)
         {
-            Debug.Assert(sources.All(s => s != null));
-            Debug.Assert(target != null);
-
-            ContainerFlow = containerFlow;
-            Sources = sources;
-            Target = target;
-            Operator = operator_;
-        }
-        public string ToText()
-        {
-            var ss = string.Join(", ", Sources.Select(s => s.GetQualifiedName()));
-            return $"{ss} {Operator} {Target.GetQualifiedName()}[{this.GetType().Name}]";
-        }
-    }
-
-
-    /// '>' or '>>'
-    public abstract class SetEdge : Edge, ISetEdge
-    {
-        public SetEdge(Flow containerFlow, IVertex[] sources, string operator_, IVertex target)
-            : base(containerFlow, sources, operator_, target)
-        { }
-    }
-    public abstract class ResetEdge : Edge, IResetEdge
-    {
-        public ResetEdge(Flow containerFlow, IVertex[] sources, string operator_, IVertex target)
-            : base(containerFlow, sources, operator_, target)
-        { }
-    }
-    public class WeakSetEdge : SetEdge, IWeakEdge
-    {
-        public WeakSetEdge(Flow containerFlow, IVertex[] sources, string operator_, IVertex target)
-            : base(containerFlow, sources, operator_, target)
-        { }
-    }
-    public class StrongSetEdge : SetEdge, IStrongEdge
-    {
-        public StrongSetEdge(Flow containerFlow, IVertex[] sources, string operator_, IVertex target)
-            : base(containerFlow, sources, operator_, target)
-        { }
-    }
-    public class WeakResetEdge : ResetEdge, IWeakEdge
-    {
-        public WeakResetEdge(Flow containerFlow, IVertex[] sources, string operator_, IVertex target)
-            : base(containerFlow, sources, operator_, target)
-        { }
-    }
-    public class StrongResetEdge : ResetEdge, IStrongEdge
-    {
-        public StrongResetEdge(Flow containerFlow, IVertex[] sources, string operator_, IVertex target)
-            : base(containerFlow, sources, operator_, target)
-        { }
-    }
-
-
-    public static class EdgeExtension
-    {
-        public static IEnumerable<(IBit, IBit)> CollectForwardDependancy(this Edge rootEdge)
-        {
-            foreach(var s in rootEdge.Sources)
-            {
-                switch(s)
-                {
-                    case Segment seg:
-                        yield return (seg.TagE, rootEdge);
-                        break;
-
-                    case RootCall call:
-                        foreach (var t in call.RxTags)
-                            yield return (t, rootEdge);
-                        break;
-                    default:
-                        throw new Exception("ERROR");
-                }
-            }
-
-            switch(rootEdge.Target)
+            switch(s)
             {
                 case Segment seg:
-                    yield return (rootEdge, seg.TagS);
+                    yield return (seg.TagE, rootEdge);
                     break;
 
                 case RootCall call:
-                    foreach(var tx in call.TxTags)
-                        yield return (rootEdge, tx);
-
+                    foreach (var t in call.RxTags)
+                        yield return (t, rootEdge);
                     break;
                 default:
                     throw new Exception("ERROR");
             }
+        }
+
+        switch(rootEdge.Target)
+        {
+            case Segment seg:
+                yield return (rootEdge, seg.TagS);
+                break;
+
+            case RootCall call:
+                foreach(var tx in call.TxTags)
+                    yield return (rootEdge, tx);
+
+                break;
+            default:
+                throw new Exception("ERROR");
         }
     }
 }

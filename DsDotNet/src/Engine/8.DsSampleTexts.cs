@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Engine
+namespace Engine;
+
+class DsSampleTexts
 {
-    class DsSampleTexts
-    {
-        public static string DoubleActCylinder = @"
+    public static string DoubleActCylinder = @"
 [sys] P = {
     [flow] F = {
         Vp > Pp > Sp;
@@ -24,7 +24,7 @@ namespace Engine
 }
 ";
 
-        public static string CylinderCell = @"
+    public static string CylinderCell = @"
 [sys] L = {
     [task] T = {
         Cp = {P.F.Vp ~ P.F.Sp}
@@ -48,5 +48,4 @@ namespace Engine
     it.F;
 }
 ";
-    }
 }

@@ -1,28 +1,27 @@
-﻿using Antlr4.Runtime.Tree;
+using Antlr4.Runtime.Tree;
 
 using Engine.Core;
 
 using System.Diagnostics;
 using System.Linq;
 
-namespace Engine.Parser
+namespace Engine.Parser;
+
+public static class ModelParser
 {
-    public static class ModelParser
+    public static Model ParseFromString(string text)
     {
-        public static Model ParseFromString(string text)
-        {
-            var parser = DsParser.FromDocument(text);
-            var helper = new ParserHelper();
+        var parser = DsParser.FromDocument(text);
+        var helper = new ParserHelper();
 
-            var listener = new ModelListener(parser, helper);
-            ParseTreeWalker.Default.Walk(listener, parser.program());
-            Trace.WriteLine("--- End of model listener");
+        var listener = new ModelListener(parser, helper);
+        ParseTreeWalker.Default.Walk(listener, parser.program());
+        Trace.WriteLine("--- End of model listener");
 
-            parser.Reset();
-            var elistener = new ElementsListener(parser, helper);
-            ParseTreeWalker.Default.Walk(elistener, parser.program());
+        parser.Reset();
+        var elistener = new ElementsListener(parser, helper);
+        ParseTreeWalker.Default.Walk(elistener, parser.program());
 
-            return helper.Model;
-        }
+        return helper.Model;
     }
 }

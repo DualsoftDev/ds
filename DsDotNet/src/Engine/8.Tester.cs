@@ -4,13 +4,13 @@ using System.Linq;
 using Engine.Core;
 using Engine.Graph;
 
-namespace Engine
+namespace Engine;
+
+class Tester
 {
-    class Tester
+    public static void DoSampleTest()
     {
-        public static void DoSampleTest()
-        {
-            var text = @"
+        var text = @"
 [sys] L = {
     [alias] = {
         P.F.Vp = { Vp1; Vp2; Vp3; }
@@ -55,26 +55,25 @@ namespace Engine
     L.F;
 }
 ";
-            var engine = new Engine(text, "Cpu");
-            Program.Engine = engine;
-            var opc = engine.Opc;
+        var engine = new Engine(text, "Cpu");
+        Program.Engine = engine;
+        var opc = engine.Opc;
 
-            var resetTag = "Reset_L_F_Main";
-            if (engine.Cpu.TagsMap.ContainsKey(resetTag))
-            {
-                var children = engine.Cpu.RootFlows.SelectMany(f => f.ChildVertices);
-                var main = children.OfType<Segment>().FirstOrDefault(c => c.Name == "Main");
-                var edges = main.Edges.ToArray();
+        var resetTag = "Reset_L_F_Main";
+        if (engine.Cpu.TagsMap.ContainsKey(resetTag))
+        {
+            var children = engine.Cpu.RootFlows.SelectMany(f => f.ChildVertices);
+            var main = children.OfType<Segment>().FirstOrDefault(c => c.Name == "Main");
+            var edges = main.Edges.ToArray();
 
-                opc.Write(resetTag, true);
-                opc.Write(resetTag, false);
-                opc.Write("Start_L_F_Main", true);
-                opc.Write(resetTag, true);
+            opc.Write(resetTag, true);
+            opc.Write(resetTag, false);
+            opc.Write("Start_L_F_Main", true);
+            opc.Write(resetTag, true);
 
-                opc.Write("AutoStart_L_F_Main", true);
-            }
-
-            engine.Run();
+            opc.Write("AutoStart_L_F_Main", true);
         }
+
+        engine.Run();
     }
 }

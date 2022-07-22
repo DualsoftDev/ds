@@ -20,8 +20,10 @@ module ModelTests1 =
         member __.``Parse Cylinder`` () =
             logInfo "============== Parse Cylinder"
             let text = sysP + """
-[cpu] Cpu = {
-    P.F;
+[cpus] AllCpus = {
+    [cpu] Cpu = {
+        P.F;
+    }
 }
 """
 

@@ -29,6 +29,7 @@ public partial class Engine : IEngine
         Opc = new OpcBroker();
         Cpu = Model.Cpus.OfType<Cpu>().First(cpu => cpu.Name == activeCpuName);
         Cpu.Engine = this;
+        Cpu.IsActive = true;
 
         Model.BuidGraphInfo();
         InitializeAllFlows();

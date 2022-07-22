@@ -20,8 +20,10 @@ module ModelTest_Common =
 }
 """
     let cpuL = """
-[cpu] Cpu = {
-    L.F;
+[cpus] AllCpus = {
+    [cpu] Cpu = {
+        L.F;
+    }
 }
 """
 

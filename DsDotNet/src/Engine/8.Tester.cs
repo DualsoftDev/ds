@@ -45,9 +45,15 @@ class Tester
         Vp <||> Vm;
     }
 }
-[cpu] Cpu = {
-    L.F;
+[cpus] AllCpus = {
+    [cpu] Cpu = {
+        L.F;
+    }
+    [cpu] OtherCpu = {
+        P.F;
+    }
 }
+
 ";
         var engine = new Engine(text, "Cpu");
         Program.Engine = engine;

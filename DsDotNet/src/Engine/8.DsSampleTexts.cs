@@ -13,8 +13,10 @@ class DsSampleTexts
         Vp <||> Vm;
     }
 }
-[cpu] Cpu = {
-    P.F;
+[cpus] AllCpus = {
+    [cpu] Cpu = {
+        P.F;
+    }
 }
 ";
 
@@ -38,8 +40,10 @@ class DsSampleTexts
         Vp <||> Vm;
     }
 }
-[cpu] Cpu = {
-    it.F;
+[cpus] AllCpus = {
+    [cpu] Cpu = {
+        it.F;
+    }
 }
 ";
 }

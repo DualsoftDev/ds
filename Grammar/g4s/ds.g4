@@ -19,7 +19,7 @@ grammar ds;
 
 import dsFunctions;
 
-program: (importStatement|system|cpu|comment)* EOF;
+program: (importStatement|system|cpus|comment)* EOF;
 
 
 system: sysProp id '=' sysBlock;    // [sys] Seg = {..}
@@ -28,10 +28,16 @@ sysBlock
     : LBRACE (task|flow|listing|alias|parenting|causal|call|acc|macro)* RBRACE
     ;
 
+cpus: cpusProp (id)? '=' cpusBlock;
+cpusProp: '[' 'cpus' ']';
+cpusBlock
+    : LBRACE (cpu)* RBRACE
+    ;
+
 cpu: cpuProp id '=' cpuBlock;    // [cpu] Cpu = {..}
 cpuProp: '[' 'cpu' ']';
 cpuBlock
-    : LBRACE flowPath* (SEIMCOLON flowPath)* SEIMCOLON? RBRACE
+    : LBRACE flowPath (SEIMCOLON flowPath)* SEIMCOLON? RBRACE
     ;
 
 task

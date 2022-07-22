@@ -54,3 +54,7 @@ xxx:
 	dotnet build
 	dotnet run
 
+java-install:
+	choco install javaruntime 8.0.231
+	choco install jdk8 8.0.211
+	choco install jre8 8.0.321

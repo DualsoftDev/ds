@@ -20,6 +20,8 @@
         Vp > Vm;
     }
 }
-[cpu] Cpu = {
-    it.F;
+[cpus] AllCpus = {
+    [cpu] Cpu = {
+        it.F;
+    }
 }

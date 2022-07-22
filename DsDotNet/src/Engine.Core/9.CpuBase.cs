@@ -47,6 +47,7 @@ public abstract class CpuBase : Named, ICpu
 
 public class Cpu: CpuBase
 {
+    public bool IsActive { get; set; }
     public Cpu(string name, RootFlow[] rootFlows, Model model)
         : base(name, rootFlows, model)
     {

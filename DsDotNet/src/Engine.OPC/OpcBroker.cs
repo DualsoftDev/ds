@@ -29,8 +29,10 @@ public class OpcBroker
 
     public void AddTags(IEnumerable<Tag> tags)
     {
-        foreach(var opcTag in tags.Select(t => new OpcTag(t)))
-            if (! _tagDic.ContainsKey(opcTag.Name))
+        foreach (var opcTag in tags.Select(t => new OpcTag(t)))
+            if (_tagDic.ContainsKey(opcTag.Name))
+                Global.Logger.Debug($"OPC: tag[{opcTag.Name}] duplicated.");
+            else
                 _tagDic.Add(opcTag.Name, opcTag);
     }
 

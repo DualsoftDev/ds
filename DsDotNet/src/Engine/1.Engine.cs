@@ -68,14 +68,14 @@ partial class Engine
 {
     public void InitializeAllFlows()
     {
+        // active cpu 의 flow 와 나머지 flow 로 grouping
         var allRootFlows = Model.Systems.SelectMany(s => s.RootFlows);
-        var flowsGrps =
-            from flow in allRootFlows
-            group flow by Cpu.RootFlows.Contains(flow) into g
-            select new { Active = g.Key, Flows = g.ToList() };
-        ;
-        var activeFlows = flowsGrps.Where(gr => gr.Active).SelectMany(gr => gr.Flows).ToArray();
-        var otherFlows = flowsGrps.Where(gr => !gr.Active).SelectMany(gr => gr.Flows).ToArray();
+        var empty = Array.Empty<RootFlow>();
+        var flowsGrps = allRootFlows.GroupByToDictionary(Cpu.RootFlows.Contains);
+        var activeFlows = flowsGrps.ContainsKey(true) ? flowsGrps[true] : empty;
+        var otherFlows = flowsGrps.ContainsKey(false) ? flowsGrps[false]: empty;
+
+
         Debug.Assert(activeFlows.All(f => f.Cpu == Cpu));
 
         if (otherFlows.Any())

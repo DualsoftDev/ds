@@ -5,7 +5,7 @@ namespace Engine;
 
 partial class Engine
 {
-    [DebuggerDisplay("[{TagName}]")]
+    [DebuggerDisplay("{ToText()}")]
     class TagGenInfo
     {
         public TagType Type;
@@ -50,8 +50,18 @@ partial class Engine
             IsSource = isSource;
             GeneratedTag = null;
         }
+
+        public string ToText() => $"{TagName} : Child={Child.ToString()}";
+
     }
 
+
+    /// <summary>
+    /// Root flow 에 존재하는
+    /// <para/> - root call 및
+    /// <para/> - root segment 의 하부 call 및 external segment call 의
+    /// <para/>   호출을 위한 start/reset/end tag 를 생성하기 위한 정보를 생성
+    /// </summary>
     TagGenInfo[] CreateTags4Child(CpuBase cpu, RootFlow[] activeFlows)
     {
         Tag createTag(TagGenInfo tgi, ICoin owner, TagType tagType, CpuBase ownerCpu)
@@ -238,25 +248,22 @@ partial class Engine
                         }
 
                         var subEdges = rootSeg.Edges.ToArray();
-                        var tgisSource =
-                            subEdges
-                                .SelectMany(edge => edge.Sources)
-                                .OfType<Child>()
-                                .SelectMany(ch => createTagGenInfos4Child(ch, edge, true, fqdn))
-                                .ToArray()
-                                ;
-                        foreach (var tgi in tgisSource)
-                            yield return tgi;
+                        foreach (var subEdge in subEdges)
+                        {
+                            var tgisSource =
+                                subEdge.Sources
+                                    .OfType<Child>()
+                                    .SelectMany(ch => createTagGenInfos4Child(ch, subEdge, true, fqdn))
+                                    .ToArray()
+                                    ;
+                            foreach (var tgi in tgisSource)
+                                yield return tgi;
 
-                        var tgisTarget =
-                            subEdges
-                                .Select(edge => edge.Target)
-                                .OfType<Child>()
-                                .SelectMany(ch => createTagGenInfos4Child(ch, edge, false, fqdn))
-                                .ToArray()
-                                ;
-                        foreach (var tgi in tgisTarget)
-                            yield return tgi;
+                            var target = subEdge.Target as Child;
+                            if (target != null)
+                                foreach (var tgi in createTagGenInfos4Child(target, subEdge, false, fqdn))
+                                    yield return tgi;
+                        }
 
                         // Todo : isolated vertex 처리
 

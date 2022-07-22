@@ -21,7 +21,7 @@ module ModelTest_Common =
 """
     let cpuL = """
 [cpu] Cpu = {
-L.F;
+    L.F;
 }
 """
 

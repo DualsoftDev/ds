@@ -40,6 +40,7 @@ class Node {
 
 partial class ElementsListener : dsBaseListener
 {
+    #region Boiler-plates
     public ParserHelper ParserHelper;
     Model    _model => ParserHelper.Model;
     DsSystem _system    { get => ParserHelper._system;    set => ParserHelper._system = value; }
@@ -50,17 +51,6 @@ partial class ElementsListener : dsBaseListener
     string CurrentPath => ParserHelper.CurrentPath;
     Dictionary<string, object> QpInstanceMap => ParserHelper.QualifiedInstancePathMap;
     Dictionary<string, object> QpDefinitionMap => ParserHelper.QualifiedDefinitionPathMap;
-
-    /** causal operator 왼쪽 */
-    private dsParser.CausalTokensDNFContext left;
-    private dsParser.CausalOperatorContext op;
-
-
-    private string flowOfName;      // [flow of A]F={..} -> A
-    private List<ParserRuleContext> allParserRules;
-
-    Dictionary<string, Node> nodes = new Dictionary<string, Node>();
-
 
     public ElementsListener(dsParser parser, ParserHelper helper)
     {
@@ -101,6 +91,26 @@ partial class ElementsListener : dsBaseListener
     }
 
     override public void EnterListing(dsParser.ListingContext ctx) { }
+
+    #endregion Boiler-plates
+
+
+
+
+
+    /** causal operator 왼쪽 */
+    private dsParser.CausalTokensDNFContext left;
+    private dsParser.CausalOperatorContext op;
+
+
+    private string flowOfName;      // [flow of A]F={..} -> A
+    private List<ParserRuleContext> allParserRules;
+
+    Dictionary<string, Node> nodes = new Dictionary<string, Node>();
+
+
+
+
 
     override public void EnterCall(dsParser.CallContext ctx)
     {

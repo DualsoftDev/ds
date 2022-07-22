@@ -18,6 +18,10 @@ public static class ModelParser
         ParseTreeWalker.Default.Walk(sListener, parser.program());
         Trace.WriteLine("--- End of skeleton listener");
 
+        var aListener = new AliasListener(parser, helper);
+        ParseTreeWalker.Default.Walk(aListener, parser.program());
+        Trace.WriteLine("--- End of alias listener");
+
 
         var mListener = new ModelListener(parser, helper);
         ParseTreeWalker.Default.Walk(mListener, parser.program());

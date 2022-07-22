@@ -25,6 +25,7 @@ public static class ModelExtension
             cpu.Epilogue();
     }
 
+
     public static IEnumerable<RootFlow> CollectRootFlows(this Model model) => model.Systems.SelectMany(sys => sys.RootFlows);
 
     public static IEnumerable<Flow> CollectFlows(this Model model)

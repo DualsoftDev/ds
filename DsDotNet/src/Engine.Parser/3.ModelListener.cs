@@ -12,6 +12,7 @@ namespace Engine.Parser;
 
 class ModelListener : dsBaseListener
 {
+    #region Boiler-plates
     public ParserHelper ParserHelper;
     Model    _model => ParserHelper.Model;
     DsSystem _system    { get => ParserHelper._system;    set => ParserHelper._system = value; }
@@ -60,6 +61,7 @@ class ModelListener : dsBaseListener
         _parenting = (Segment)QpInstanceMap[$"{CurrentPath}.{name}"];
     }
     override public void ExitParenting(dsParser.ParentingContext ctx) { _parenting = null; }
+    #endregion Boiler-plates
 
 
 
@@ -150,38 +152,6 @@ class ModelListener : dsBaseListener
 
 
 
-    /*
-        [alias] = {
-            P.F.Vp = { Vp1; Vp2; Vp3; }
-        }
-     */
-    override public void EnterAliasListing(dsParser.AliasListingContext ctx)
-    {
-        var def = ctx.aliasDef().GetText(); // e.g "P.F.Vp"
-        var aliasMnemonics =    // e.g { Vp1; Vp2; Vp3; }
-            DsParser.enumerateChildren<dsParser.AliasMnemonicContext>(ctx, false, r => r is dsParser.AliasMnemonicContext)
-            .Select(mne => mne.GetText())
-            .ToArray()
-            ;
-        Debug.Assert(aliasMnemonics.Length == aliasMnemonics.Distinct().Count());
-
-        ParserHelper.BackwardAliasMaps[_system].Add(def, aliasMnemonics);
-    }
-    override public void ExitAlias(dsParser.AliasContext ctx)
-    {
-        var bwd = ParserHelper.BackwardAliasMaps[_system];
-        Debug.Assert(ParserHelper.AliasNameMaps[_system].Count() == 0);
-        Debug.Assert(bwd.Values.Count() == bwd.Values.Distinct().Count());
-        var reversed =
-            from tpl in bwd
-            let k = tpl.Key
-            from v in tpl.Value
-            select (v, k)
-            ;
-
-        foreach ((var mnemonic, var target) in reversed)
-            ParserHelper.AliasNameMaps[_system].Add(mnemonic, target);
-    }
 
 
 

@@ -62,17 +62,13 @@ partial class Engine
     /// <para/> - root segment 의 하부 call 및 external segment call 의
     /// <para/>   호출을 위한 start/reset/end tag 를 생성하기 위한 정보를 생성
     /// </summary>
-    TagGenInfo[] CreateTags4Child(CpuBase cpu, RootFlow[] activeFlows)
+    TagGenInfo[] CreateTags4Child(RootFlow[] rootFlows)
     {
-        Tag createTag(TagGenInfo tgi, ICoin owner, TagType tagType, CpuBase ownerCpu)
-        {
-            var tag = new Tag(owner, tgi.TagName, tagType, ownerCpu);
-            tgi.GeneratedTag = tag;
-            return tag;
-        }
+        Debug.Assert(rootFlows.Select(f => f.Cpu).Distinct().Count() == 1);
+        Cpu cpu = rootFlows[0].Cpu;
 
         var tagGenInfos =
-            collectTagGenInfo()
+            collectTagGenInfo(rootFlows)
             .DistinctBy(tgi => tgi.TagName)
             .ToArray();
 
@@ -114,12 +110,35 @@ partial class Engine
 
         return tagGenInfos.ToArray();
 
+
+        Tag createTag(TagGenInfo tgi, ICoin owner, TagType tagType, Cpu ownerCpu)
+        {
+            var tag = new Tag(owner, tgi.TagName, tagType, ownerCpu);
+            tgi.GeneratedTag = tag;
+            return tag;
+        }
+
+
+
         /// Root flow 에 존재하는
         /// - root call
         /// - root segment 의 하부 call 및 external segment call
         /// 의 호출을 위한 start/reset/end tag 를 생성하기 위한 정보를 생성
-        IEnumerable<TagGenInfo> collectTagGenInfo()
+        IEnumerable<TagGenInfo> collectTagGenInfo(RootFlow[] rootFlows)
         {
+            var edges = rootFlows.SelectMany(f => f.Edges);
+            foreach (var tgi in edges.SelectMany(edge => createTagGenInfos4Edge(edge, null)))
+                yield return tgi;
+
+
+            // edge 연결 없이 root 상에 존재하는 vertices 에 대한 tag 생성
+            var roots = rootFlows.SelectMany(f => f.ChildVertices).Distinct();
+            var vertices = edges.SelectMany(e => e.Vertices);
+            var isolatedVertices = roots.Except(vertices);
+            foreach (var tgi in isolatedVertices.SelectMany(v => createTagGenInfos4RootVertex(v, null, false)))
+                yield return tgi;
+
+
             /// 하나의 [external segment call 을 위한 Child] 에 대해서 Set 및 Reset 명령이 동시에 들어올 수 없음을 check
             void verifyExternalSegmentCallChild_SingleCommandType(Child child)
             {
@@ -274,19 +293,6 @@ partial class Engine
                 }
             }
 
-
-
-            var edges = activeFlows.SelectMany(f => f.Edges);
-            foreach ( var tgi in edges.SelectMany(edge => createTagGenInfos4Edge(edge, null)) )
-                yield return tgi;
-
-
-            // edge 연결 없이 root 상에 존재하는 vertices 에 대한 tag 생성
-            var roots = activeFlows.SelectMany(f => f.ChildVertices).Distinct();
-            var vertices = edges.SelectMany(e => e.Vertices);
-            var isolatedVertices = roots.Except(vertices);
-            foreach (var tgi in isolatedVertices.SelectMany(v => createTagGenInfos4RootVertex(v, null, false)))
-                yield return tgi;
         }
     }
 }

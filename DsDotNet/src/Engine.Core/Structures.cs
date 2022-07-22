@@ -3,7 +3,7 @@ namespace Engine.Core;
 public class Model
 {
     public List<DsSystem> Systems = new();
-    public List<CpuBase> Cpus { get; } = new();
+    public List<Cpu> Cpus { get; } = new();
 }
 
 public static class ModelExtension
@@ -112,7 +112,7 @@ public abstract class Coin : Named, ICoin
      * Do not store Paused property (getter only, no setter)
      */
     public virtual bool Paused { get; }
-    public virtual CpuBase OwnerCpu { get; set; }
+    public virtual Cpu OwnerCpu { get; set; }
 
     public Coin(string name)
         :base(name)

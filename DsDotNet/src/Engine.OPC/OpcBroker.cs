@@ -24,7 +24,7 @@ public class OpcBroker
 
     // { Debug only, or temporary implementations
     internal IEnumerable<OpcTag> _opcTags => _tagDic.Values;
-    internal List<CpuBase> _cpus = new List<CpuBase>();
+    internal List<Cpu> _cpus = new List<Cpu>();
     // }
 
     public void AddTags(IEnumerable<Tag> tags)

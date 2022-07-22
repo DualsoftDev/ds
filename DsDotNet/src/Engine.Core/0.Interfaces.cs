@@ -61,7 +61,7 @@ public interface INamed
 public interface IBit
 {
     bool Value { get; set; }
-    CpuBase OwnerCpu { get; set; }
+    Cpu OwnerCpu { get; set; }
 }
 
 public interface IAutoTag { }

@@ -4,8 +4,8 @@ namespace Engine.Core;
 public abstract class Bit : Named, IBit
 {
     public virtual bool Value { get; set; }
-    public CpuBase OwnerCpu { get; set; }
-    public Bit(string name = "", bool bit = false, CpuBase ownerCpu=null) : base(name) {
+    public Cpu OwnerCpu { get; set; }
+    public Bit(string name = "", bool bit = false, Cpu ownerCpu=null) : base(name) {
         Value = bit;
         OwnerCpu = ownerCpu;
     }

@@ -42,7 +42,7 @@ public class Tag : Bit, ITxRx
         }
     }
 
-    public Tag(ICoin owner, string name, TagType tagType=TagType.None, CpuBase ownerCpu = null, bool value = false)
+    public Tag(ICoin owner, string name, TagType tagType=TagType.None, Cpu ownerCpu = null, bool value = false)
         : base(name, value, ownerCpu)
     {
         Owner = owner;
@@ -53,10 +53,10 @@ public class Tag : Bit, ITxRx
     {
     }
 
-    public static Tag CreateAutoStart(Segment ownerSegment, string name, CpuBase ownerCpu) =>
+    public static Tag CreateAutoStart(Segment ownerSegment, string name, Cpu ownerCpu) =>
         new Tag(ownerSegment, name, TagType.Auto | TagType.Start | TagType.Q | TagType.External, ownerCpu)
         ;
-    public static Tag CreateAutoReset(Segment ownerSegment, string name, CpuBase ownerCpu) =>
+    public static Tag CreateAutoReset(Segment ownerSegment, string name, Cpu ownerCpu) =>
         new Tag(ownerSegment, name, TagType.Auto | TagType.Reset | TagType.Q | TagType.External, ownerCpu)
         ;
 

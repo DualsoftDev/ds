@@ -1,13 +1,3 @@
-global using System;
-global using System.Collections.Generic;
-global using System.Diagnostics;
-global using System.Linq;
-global using log4net;
-
-global using Engine.Common;
-global using Engine.Core;
-global using Engine.OPC;
-
 using Engine.Parser;
 
 
@@ -19,7 +9,6 @@ public partial class Engine : IEngine
 {
     public OpcBroker Opc { get; }
     public Cpu Cpu { get; }
-    public FakeCpu FakeCpu { get; set; }
     public Model Model { get; }
 
     public Engine(string modelText, string activeCpuName)
@@ -43,7 +32,7 @@ public partial class Engine : IEngine
         Model.Cpus.Iter(cpu => readTagsFromOpc(cpu));
         Model.Cpus.Iter(cpu => cpu.PrintTags());
 
-        void readTagsFromOpc(CpuBase cpu)
+        void readTagsFromOpc(Cpu cpu)
         {
             var tpls = Opc.ReadTags(cpu.TagsMap.Select(t => t.Key)).ToArray();
             foreach ((var tName, var value) in tpls)
@@ -69,70 +58,31 @@ partial class Engine
 {
     public void InitializeAllFlows()
     {
-        // active cpu 의 flow 와 나머지 flow 로 grouping
+        // root flow 를 cpu 별로 grouping
         var allRootFlows = Model.Systems.SelectMany(s => s.RootFlows);
         var empty = Array.Empty<RootFlow>();
-        var flowsGrps = allRootFlows.GroupByToDictionary(Cpu.RootFlows.Contains);
-        var activeFlows = flowsGrps.ContainsKey(true) ? flowsGrps[true] : empty;
-        var otherFlows = flowsGrps.ContainsKey(false) ? flowsGrps[false]: empty;
-
-
-        Debug.Assert(activeFlows.All(f => f.Cpu == Cpu));
-
-        if (otherFlows.Any())
+        var flowsGrps = allRootFlows.GroupByToDictionary(flow => flow.Cpu);
+        foreach (var (cpu, flows) in flowsGrps.Select(kv => kv.ToTuple()))
         {
-            // generate fake cpu's for other flows
-            FakeCpu = new FakeCpu("FakeCpu", otherFlows, Model) { Engine = this };
-            Model.Cpus.Add(FakeCpu);
-            foreach (var f in otherFlows)
-            {
-                f.Cpu = FakeCpu;
-                f.RootSegments.SelectMany(s => s.AllPorts).Iter(p => p.OwnerCpu = FakeCpu);
-            }
+            TagGenInfo[] tgis = CreateTags4Child(flows);
+            var tags = tgis.Select(tgi => tgi.GeneratedTag).ToArray();
+            tgis.Iter(tgi => copyChildSRETagsToSegment(tgi));
+            tags.Iter(cpu.AddTag);
+            Opc.AddTags(tags);
+
+            // flow 상의 root segment 들에 대한 HMI s/r/e tags
+            var hmiTags = flows.SelectMany(f => f.GenereateHmiTags4Segments()).ToArray();
+            hmiTags.Iter(cpu.AddTag);
+            Opc.AddTags(hmiTags);
+
+            foreach (var f in flows)
+                InitializeRootFlow(f);
+
+
+            cpu.BuildBackwardDependency();
+            Opc._cpus.Add(cpu);
         }
 
-
-        TagGenInfo[] tgisActive = CreateTags4Child(Cpu, activeFlows);
-        TagGenInfo[] tgisFake   = CreateTags4Child(FakeCpu, otherFlows);
-        var tagsActive = tgisActive.Select(tgi => tgi.GeneratedTag).ToArray();
-        var tagsFake = tgisFake.Select(tgi => tgi.GeneratedTag).ToArray();
-        tagsActive.Iter(Cpu.AddTag);
-        tagsFake.Iter(FakeCpu.AddTag);
-
-        var allTgis = tgisActive.Concat(tgisFake).ToArray();
-        allTgis.Iter(tgi => copyChildSRETagsToSegment(tgi));
-
-        Opc.AddTags(tagsActive);
-        Opc.AddTags(tagsFake);
-
-        // other flow 상의 root segment 들에 대한 HMI s/r/e tags
-        var otherFlowsHmiTags = otherFlows.SelectMany(f => f.GenereateHmiTags4Segments()).ToArray();
-        otherFlowsHmiTags.Iter(FakeCpu.AddTag);
-        Opc.AddTags(otherFlowsHmiTags);
-
-        // active flow 상의 root segment 들에 대한 HMI s/r/e tags
-        var activeFlowsHmiTags = activeFlows.SelectMany(f => f.GenereateHmiTags4Segments()).ToArray();
-        activeFlowsHmiTags.Iter(Cpu.AddTag);
-        Opc.AddTags(activeFlowsHmiTags);
-
-
-        foreach (var f in otherFlows)
-            InitializeRootFlow(f, false);
-
-
-        foreach (var f in activeFlows)
-            InitializeRootFlow(f, true);
-
-        Cpu.BuildBackwardDependency();
-        FakeCpu?.BuildBackwardDependency();
-
-        Opc._cpus.Add(Cpu);
-        if (FakeCpu != null)
-            Opc._cpus.Add(FakeCpu);
-
-        // todo: debugging
-        //Debug.Assert(Cpu.CollectBits().All(b => b.OwnerCpu == Cpu));
-        //Debug.Assert(FakeCpu == null || FakeCpu.CollectBits().All(b => b.OwnerCpu == FakeCpu));
 
 
 
@@ -155,7 +105,7 @@ partial class Engine
 
     /// <summary> Root flow 의 root segment 를 타 시스템에서 호출하기 위한 interface tag 를 생성한다. </summary>
 
-    void InitializeRootFlow(RootFlow rootFlow, bool isActiveCpu)
+    void InitializeRootFlow(RootFlow rootFlow)
     {
         var cpu = rootFlow.Cpu;
         var tags = cpu.TagsMap;
@@ -181,7 +131,7 @@ partial class Engine
         }
 
 
-        rootFlow.PrintFlow(isActiveCpu);
+        rootFlow.PrintFlow();
 
         //cpu.PrintTags();
     }

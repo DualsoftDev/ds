@@ -2,7 +2,7 @@ namespace Engine.Core;
 
 public abstract class Flow : Named, IWallet
 {
-    public CpuBase Cpu { get; set; }
+    public Cpu Cpu { get; set; }
 
     /// <summary>Edge 를 통해 알 수 없는 isolated segement/call 등을 포함 </summary>
     HashSet<IVertex> _childVertices = new();
@@ -162,9 +162,9 @@ public static class FlowExtension
             throw new Exception($"ERROR: duplicated causals: {duplicate[0]}");
     }
 
-    public static void PrintFlow(this Flow flow, bool isActive)
+    public static void PrintFlow(this Flow flow)
     {
-        var active = isActive ? "Active " : "";
+        var active = flow.Cpu.IsActive ? "Active " : "";
         Logger.Debug($"== {active}Flow {flow.GetSystem().Name}::{flow.Name}");
         foreach (var v in flow.ChildVertices)
             Logger.Debug(v.ToString());

@@ -19,4 +19,6 @@ public static partial class EmLinq
         xs.GroupBy(keySelector).Select(g => g.First())
         ;
 
+    public static (K, V) ToTuple<K, V>(this KeyValuePair<K, V> pr) => (pr.Key, pr.Value);
+
 }

@@ -31,7 +31,6 @@ module ModelTests1 =
             let system = engine.Model.Systems |> Seq.exactlyOne
             let cpu = engine.Cpu
             cpu.Name === "Cpu"
-            engine.FakeCpu |> ShouldBeNull
             system.Name === "P"
             let flow = system.RootFlows |> Seq.exactlyOne
             flow.Name === "F"
@@ -70,7 +69,7 @@ module ModelTests1 =
     }
 }
 """
-            text <- text + sysP + cpuL
+            text <- text + sysP + cpus
             let engine = new Engine(text, "Cpu")
             ( engine.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
             let system = engine.Model.Systems |> Seq.find(fun s -> s.Name = "L")
@@ -78,7 +77,7 @@ module ModelTests1 =
             cpu.ForwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) cpu) |> ShouldBeTrue
             cpu.BackwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) cpu) |> ShouldBeTrue
 
-            let fakeCpu = engine.FakeCpu
+            let fakeCpu = engine.Model.Cpus |> Seq.find(fun c -> not c.IsActive)
             fakeCpu.ForwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) fakeCpu) |> ShouldBeTrue
             fakeCpu.BackwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) fakeCpu) |> ShouldBeTrue
 
@@ -114,9 +113,6 @@ module ModelTests1 =
             let rootFlow = cpu.RootFlows |> Seq.exactlyOne
             flow === rootFlow
 
-            let fakeCpu = engine.FakeCpu
-            fakeCpu |> ShouldNotBeNull
-            ()
 
 
 
@@ -135,7 +131,7 @@ module ModelTests1 =
     }
 }
 """
-            text <- text + cpuL;
+            text <- text + cpus;
             let engine = new Engine(text, "Cpu")
             ( engine.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
             let system = engine.Model.Systems |> Seq.find(fun s -> s.Name = "L")
@@ -169,7 +165,7 @@ module ModelTests1 =
         Main = { Vp1 > Vp2 > A1; }
     }
 """
-            text <- text + sysP + cpuL
+            text <- text + sysP + cpus
 
             let engine = new Engine(text, "Cpu")
             ( engine.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq

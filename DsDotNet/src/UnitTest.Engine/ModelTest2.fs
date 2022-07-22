@@ -35,7 +35,7 @@ module ModelTest2 =
     }
 }
 """
-            text <- text + sysP + cpuL
+            text <- text + sysP + cpus
 
             let engine = new Engine(text, "Cpu")
             ( engine.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
@@ -46,7 +46,7 @@ module ModelTest2 =
             cpu.ForwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) cpu) |> ShouldBeTrue
             cpu.BackwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) cpu) |> ShouldBeTrue
 
-            let fakeCpu = engine.FakeCpu
+            let fakeCpu = engine.Model.Cpus |> Seq.find(fun c -> not c.IsActive)
             fakeCpu.ForwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) fakeCpu) |> ShouldBeTrue
             fakeCpu.BackwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) fakeCpu) |> ShouldBeTrue
 
@@ -85,7 +85,7 @@ module ModelTest2 =
     }
 }
 """
-            text <- text + sysP + cpuL
+            text <- text + sysP + cpus
 
             let engine = new Engine(text, "Cpu")
             ( engine.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
@@ -99,7 +99,7 @@ module ModelTest2 =
             cpu.ForwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) cpu) |> ShouldBeTrue
             cpu.BackwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) cpu) |> ShouldBeTrue
 
-            let fakeCpu = engine.FakeCpu
+            let fakeCpu = engine.Model.Cpus |> Seq.find(fun c -> not c.IsActive)
             fakeCpu.ForwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) fakeCpu) |> ShouldBeTrue
             fakeCpu.BackwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) fakeCpu) |> ShouldBeTrue
 
@@ -293,7 +293,7 @@ module ModelTest2 =
     }
 }
 """
-            text <- text + sysP + cpuL
+            text <- text + sysP + cpus
 
             let engine = new Engine(text, "Cpu")
             let model = engine.Model

@@ -11,7 +11,7 @@ public abstract class Edge : IEdge
     public IEnumerable<IVertex> Vertices => Sources.Append(Target);
 
     public bool Value { get => Sources.All(v => v.Value); set => throw new NotImplementedException(); }
-    public CpuBase OwnerCpu { get => ContainerFlow.Cpu; set => throw new NotImplementedException(); }
+    public Cpu OwnerCpu { get => ContainerFlow.Cpu; set => throw new NotImplementedException(); }
 
     public string Operator;
 

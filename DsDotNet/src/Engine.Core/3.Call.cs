@@ -52,7 +52,7 @@ public abstract class Call : CallBase
     public Flow Container;
     public override bool Value => Prototype.Value;
     public override string QualifiedName => this.GetQualifiedName();
-    public override CpuBase OwnerCpu { get => Container.Cpu; set => throw new Exception("ERROR"); }
+    public override Cpu OwnerCpu { get => Container.Cpu; set => throw new Exception("ERROR"); }
 
     public Call(string name, Flow flow, CallPrototype protoType) : base(name)
     {

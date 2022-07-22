@@ -7,7 +7,7 @@ namespace Engine.Core;
 public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, IWithSREPorts, ITxRx, ITagSREContainer// Coin
 {
     public RootFlow ContainerFlow { get; }
-    public CpuBase OwnerCpu { get => ContainerFlow.Cpu; set => throw new NotImplementedException(); }
+    public Cpu OwnerCpu { get => ContainerFlow.Cpu; set => throw new NotImplementedException(); }
     public string QualifiedName => $"{ContainerFlow.QualifiedName}_{Name}";
 
 

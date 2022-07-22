@@ -5,10 +5,11 @@ using System.Reactive.Disposables;
 
 namespace Engine.Core;
 
-public abstract class CpuBase : Named, ICpu
+public class Cpu : Named, ICpu
 {
     public IEngine Engine { get; set; }
     public Model Model { get; }
+    public bool IsActive { get; set; }
     /// <summary> this Cpu 가 관장하는 root flows </summary>
     public RootFlow[] RootFlows { get; }
 
@@ -26,10 +27,11 @@ public abstract class CpuBase : Named, ICpu
     public List<Tag> TxRxTags { get; } = new List<Tag>();
     protected CompositeDisposable _disposables = new();
 
-    protected CpuBase(string name, RootFlow[] rootFlows, Model model) : base(name)
+    public Cpu(string name, RootFlow[] rootFlows, Model model) : base(name)
     {
         RootFlows = rootFlows;
         Model = model;
+        model.Cpus.Add(this);
         rootFlows.Iter(f => f.Cpu = this);
     }
 
@@ -45,29 +47,12 @@ public abstract class CpuBase : Named, ICpu
 
 }
 
-public class Cpu: CpuBase
-{
-    public bool IsActive { get; set; }
-    public Cpu(string name, RootFlow[] rootFlows, Model model)
-        : base(name, rootFlows, model)
-    {
-        model.Cpus.Add(this);
-    }
-}
-
-public class FakeCpu : CpuBase
-{
-    public FakeCpu(string name, RootFlow[] rootFlows, Model model)
-        : base(name, rootFlows, model)
-    {
-    }
-}
 
 public static class CpuExtension
 {
     static ILog Logger => Global.Logger;
-    public static void AddTag(this CpuBase cpu, Tag tag) => cpu.TagsMap.Add(tag.Name, tag);
-    public static IEnumerable<IBit> CollectBits(this CpuBase cpu)
+    public static void AddTag(this Cpu cpu, Tag tag) => cpu.TagsMap.Add(tag.Name, tag);
+    public static IEnumerable<IBit> CollectBits(this Cpu cpu)
     {
         IEnumerable<IBit> helper()
         {
@@ -88,7 +73,7 @@ public static class CpuExtension
         return helper().Distinct();
     }
 
-    public static void PrintTags(this CpuBase cpu)
+    public static void PrintTags(this Cpu cpu)
     {
         var tagNames = String.Join("\r\n\t", cpu.TagsMap.Values.Select(t => t.Name));
         Logger.Debug($"{cpu.Name} tags:\r\n\t{tagNames}");
@@ -109,7 +94,7 @@ public static class CpuExtension
 
 public static class CpuExtensionBitChange
 {
-    public static void AddBitDependancy(this CpuBase cpu, IBit source, IBit target)
+    public static void AddBitDependancy(this Cpu cpu, IBit source, IBit target)
     {
         var fwdMap = cpu.ForwardDependancyMap;
 
@@ -126,7 +111,7 @@ public static class CpuExtensionBitChange
         fwdMap[source].Add(target);
     }
 
-    public static void BuildBackwardDependency(this CpuBase cpu)
+    public static void BuildBackwardDependency(this Cpu cpu)
     {
         cpu.BackwardDependancyMap = new Dictionary<IBit, HashSet<IBit>>();
         var bwdMap = cpu.BackwardDependancyMap;
@@ -146,7 +131,7 @@ public static class CpuExtensionBitChange
     }
 
     /// <summary> 외부에서 tag 가 변경된 경우 </summary>
-    public static void OnOpcTagChanged(this CpuBase cpu, string tagName, bool value)
+    public static void OnOpcTagChanged(this Cpu cpu, string tagName, bool value)
     {
         if (cpu.TagsMap.ContainsKey(tagName))
         {
@@ -155,13 +140,13 @@ public static class CpuExtensionBitChange
         }
     }
 
-    public static void OnBitChanged(this CpuBase cpu, BitChange bitChange)
+    public static void OnBitChanged(this Cpu cpu, BitChange bitChange)
     {
         cpu.Queue.Enqueue(bitChange);
         cpu.ProcessQueue();
     }
 
-    public static void ProcessQueue(this CpuBase cpu)
+    public static void ProcessQueue(this Cpu cpu)
     {
         BitChange bc;
         while (cpu.Queue.Count > 0)

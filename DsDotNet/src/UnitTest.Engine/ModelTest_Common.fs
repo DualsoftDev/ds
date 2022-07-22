@@ -19,10 +19,13 @@ module ModelTest_Common =
     }
 }
 """
-    let cpuL = """
+    let cpus = """
 [cpus] AllCpus = {
     [cpu] Cpu = {
         L.F;
+    }
+    [cpu] FakeCpu = {
+        P.F;
     }
 }
 """

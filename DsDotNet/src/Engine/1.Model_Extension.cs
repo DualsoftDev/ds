@@ -20,9 +20,6 @@ public static class ModelExtension
     {
         foreach (var segment in model.CollectSegments())
             segment.Epilogue();
-
-        foreach (var cpu in model.Cpus)
-            cpu.Epilogue();
     }
 
 

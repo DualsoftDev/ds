@@ -5,6 +5,7 @@ using log4net;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Subjects;
 
 namespace Engine.OPC;
 
@@ -24,7 +25,7 @@ public class OpcBroker
 
     // { Debug only, or temporary implementations
     internal IEnumerable<OpcTag> _opcTags => _tagDic.Values;
-    internal List<Cpu> _cpus = new List<Cpu>();
+    internal Subject<OpcTagChange> OpcTagChangedSubject => Global.OpcTagChangedSubject;
     // }
 
     public void AddTags(IEnumerable<Tag> tags)
@@ -44,8 +45,7 @@ public class OpcBroker
         {
             bit.Value = value;
 
-            foreach (var cpu in _cpus)
-                cpu.OnOpcTagChanged(tagName, value);
+            OpcTagChangedSubject.OnNext(new OpcTagChange(tagName, value));
         }
     }
 

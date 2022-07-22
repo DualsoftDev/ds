@@ -57,6 +57,8 @@ class Tester
 ";
         var engine = new Engine(text, "Cpu");
         Program.Engine = engine;
+        engine.Run();
+
         var opc = engine.Opc;
 
         var resetTag = "Reset_L_F_Main";
@@ -74,6 +76,5 @@ class Tester
             opc.Write("AutoStart_L_F_Main", true);
         }
 
-        engine.Run();
     }
 }

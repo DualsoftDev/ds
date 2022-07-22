@@ -25,7 +25,6 @@ public class Cpu : Named, ICpu
     public TagDic TagsMap { get; } = new();
     /// <summary> Call 의 TX RX 에 사용된 tag 목록 </summary>
     public List<Tag> TxRxTags { get; } = new List<Tag>();
-    protected CompositeDisposable _disposables = new();
 
     public Cpu(string name, RootFlow[] rootFlows, Model model) : base(name)
     {
@@ -33,16 +32,6 @@ public class Cpu : Named, ICpu
         Model = model;
         model.Cpus.Add(this);
         rootFlows.Iter(f => f.Cpu = this);
-    }
-
-    public void Epilogue()
-    {
-        var subs =
-            Global.BitChangedSubject.Subscribe(bc =>
-            {
-                this.OnBitChanged(bc);
-            });
-        _disposables.Add(subs);
     }
 
 }
@@ -72,6 +61,8 @@ public static class CpuExtension
 
         return helper().Distinct();
     }
+
+
 
     public static void PrintTags(this Cpu cpu)
     {
@@ -131,8 +122,9 @@ public static class CpuExtensionBitChange
     }
 
     /// <summary> 외부에서 tag 가 변경된 경우 </summary>
-    public static void OnOpcTagChanged(this Cpu cpu, string tagName, bool value)
+    public static void OnOpcTagChanged(this Cpu cpu, OpcTagChange tc)
     {
+        var (tagName, value) = (tc.TagName, tc.Value);
         if (cpu.TagsMap.ContainsKey(tagName))
         {
             var tag = cpu.TagsMap[tagName];

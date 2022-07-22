@@ -1,5 +1,5 @@
 using Engine.Parser;
-
+using Engine.Runner;
 
 [assembly: DebuggerDisplay("[{Key}={Value}]", Target = typeof(KeyValuePair<,>))]
 
@@ -39,15 +39,14 @@ public partial class Engine : IEngine
             {
                 var tag = cpu.TagsMap[tName];
                 if (tag.Value != value)
-                    cpu.OnOpcTagChanged(tName, value);
+                    cpu.OnOpcTagChanged(new OpcTagChange(tName, value));
             }
         }
     }
 
     public void Run()
     {
-        //Cpu.Run();
-        //FakeCpu.Run();
+        Model.Run();
         Global.Logger.Info("Engine started!");
     }
 }
@@ -80,7 +79,6 @@ partial class Engine
 
 
             cpu.BuildBackwardDependency();
-            Opc._cpus.Add(cpu);
         }
 
 

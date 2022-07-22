@@ -22,6 +22,7 @@
     <ProjectReference Include="..\Engine.Graph\Engine.Graph.fsproj" />
     <ProjectReference Include="..\Engine.OPC\Engine.OPC.csproj" />
     <ProjectReference Include="..\Engine.Parser\Engine.Parser.csproj" />
+    <ProjectReference Include="..\Engine.Runner\Engine.Runner.fsproj" />
   </ItemGroup>
 
 	<Import Project="..\..\.paket\Paket.Restore.targets" />

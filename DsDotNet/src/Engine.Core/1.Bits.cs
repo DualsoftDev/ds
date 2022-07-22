@@ -81,7 +81,7 @@ public class WeakRelay : Relay { }
 public class StrongRelay : Relay { }
 
 
-public class BitChange
+public record BitChange
 {
     public IBit Bit { get; }
     public bool NewValue { get;  }
@@ -95,4 +95,15 @@ public class BitChange
         Time = DateTime.Now;
     }
 
+}
+
+public record OpcTagChange
+{
+    public string TagName { get; }
+    public bool Value { get; }
+    public OpcTagChange(string tagName, bool value)
+    {
+        TagName = tagName;
+        Value = value;
+    }
 }

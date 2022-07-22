@@ -14,13 +14,18 @@ public static class ModelParser
         var parser = DsParser.FromDocument(text);
         var helper = new ParserHelper();
 
-        var listener = new ModelListener(parser, helper);
-        ParseTreeWalker.Default.Walk(listener, parser.program());
+        var sListener = new SkeletonListener(parser, helper);
+        ParseTreeWalker.Default.Walk(sListener, parser.program());
+        Trace.WriteLine("--- End of skeleton listener");
+
+
+        var mListener = new ModelListener(parser, helper);
+        ParseTreeWalker.Default.Walk(mListener, parser.program());
         Trace.WriteLine("--- End of model listener");
 
         parser.Reset();
-        var elistener = new ElementsListener(parser, helper);
-        ParseTreeWalker.Default.Walk(elistener, parser.program());
+        var eListener = new ElementsListener(parser, helper);
+        ParseTreeWalker.Default.Walk(eListener, parser.program());
 
         return helper.Model;
     }

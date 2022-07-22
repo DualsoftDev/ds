@@ -30,42 +30,44 @@ class ModelListener : dsBaseListener
         parser.Reset();
     }
 
-
     override public void EnterSystem(dsParser.SystemContext ctx)
     {
-        var n = ctx.id().GetText();
-        _system = new DsSystem(n, _model);
-        ParserHelper.AliasNameMaps.Add(_system, new Dictionary<string, string>());
-        ParserHelper.BackwardAliasMaps.Add(_system, new Dictionary<string, string[]>());
-        Trace.WriteLine($"System: {n}");
+        var name = ctx.id().GetText();
+        _system = _model.Systems.First(s => s.Name == name);
     }
-    override public void ExitSystem(dsParser.SystemContext ctx) { _system = null; }
+    override public void ExitSystem(dsParser.SystemContext ctx) { this._system = null; }
 
     override public void EnterTask(dsParser.TaskContext ctx)
     {
         var name = ctx.id().GetText();
-        _task = new DsTask(name, _system);
-        QpInstanceMap.Add(CurrentPath, _task);
+        _task = _system.Tasks.First(t => t.Name == name);
+        Trace.WriteLine($"Task: {name}");
     }
     override public void ExitTask(dsParser.TaskContext ctx) { _task = null; }
 
     override public void EnterFlow(dsParser.FlowContext ctx)
     {
         var flowName = ctx.id().GetText();
-        var flowOf = ctx.flowProp().id();
-        _rootFlow = new RootFlow(flowName, _system);
-        QpInstanceMap.Add(CurrentPath, _rootFlow);
-        Trace.WriteLine($"Flow: {flowName}");
+        _rootFlow = _system.RootFlows.First(f => f.Name == flowName);
     }
     override public void ExitFlow(dsParser.FlowContext ctx) { _rootFlow = null; }
+
+
+
     override public void EnterParenting(dsParser.ParentingContext ctx)
     {
-        Trace.WriteLine($"Parenting: {ctx.GetText()}");
         var name = ctx.id().GetText();
-        _parenting = new Segment(name, _rootFlow);
-        QpInstanceMap.Add(CurrentPath, _parenting);
+        _parenting = (Segment)QpInstanceMap[$"{CurrentPath}.{name}"];
     }
     override public void ExitParenting(dsParser.ParentingContext ctx) { _parenting = null; }
+
+
+
+
+
+
+
+
 
     override public void EnterCausalPhrase(dsParser.CausalPhraseContext ctx)
     {
@@ -138,36 +140,6 @@ class ModelListener : dsBaseListener
         System.Console.WriteLine();
     }
 
-    /// <summary>CallPrototype </summary>
-    override public void EnterCall(dsParser.CallContext ctx)
-    {
-        var name = ctx.id().GetText();
-        var label = $"{name}\n{ctx.callPhrase().GetText()}";
-        var callph = ctx.callPhrase();
-        //var tx = callph.segments(0);
-        //var rx = callph.segments(1);
-        var call = new CallPrototype(name, _task);
-        QpDefinitionMap.Add($"{CurrentPath}.{name}", call);
-        //var parentId = $"{this.systemName}.{this.taskName}";
-        //var id = $"{parentId}.{name}";
-        //this.nodes[id] = new Node(id, label, parentId, NodeType.call);
-        Trace.WriteLine($"CALL: {name}");
-    }
-
-
-    override public void EnterListing(dsParser.ListingContext ctx)
-    {
-        var name = ctx.id().GetText();
-        var seg = new Segment(name, _rootFlow);
-        QpDefinitionMap.Add($"{CurrentPath}.{name}", seg);
-        QpInstanceMap.Add($"{CurrentPath}.{name}", seg);
-
-        //var id = $"{this.systemName}.{this.taskName}.{name}";
-        ////const node = { "data": { id, "label": name, "background_color": "gray", parent: this.taskName }        };
-        //var parentId = $"{this.systemName}.{this.taskName}";
-        //this.nodes[id] = new Node(id, label: name, parentId, NodeType.segment);
-    }
-
 
 
     override public void EnterCausals(dsParser.CausalsContext ctx)
@@ -177,10 +149,16 @@ class ModelListener : dsBaseListener
     //override public void ExitCausals(dsParser.CausalsContext ctx) {}
 
 
+
+    /*
+        [alias] = {
+            P.F.Vp = { Vp1; Vp2; Vp3; }
+        }
+     */
     override public void EnterAliasListing(dsParser.AliasListingContext ctx)
     {
-        var def = ctx.aliasDef().GetText();
-        var aliasMnemonics =
+        var def = ctx.aliasDef().GetText(); // e.g "P.F.Vp"
+        var aliasMnemonics =    // e.g { Vp1; Vp2; Vp3; }
             DsParser.enumerateChildren<dsParser.AliasMnemonicContext>(ctx, false, r => r is dsParser.AliasMnemonicContext)
             .Select(mne => mne.GetText())
             .ToArray()
@@ -203,30 +181,6 @@ class ModelListener : dsBaseListener
 
         foreach ((var mnemonic, var target) in reversed)
             ParserHelper.AliasNameMaps[_system].Add(mnemonic, target);
-    }
-
-
-    override public void EnterCpu(dsParser.CpuContext ctx)
-    {
-        var name = ctx.id().GetText();
-        var flowPathContexts =
-            DsParser.enumerateChildren<dsParser.FlowPathContext>(ctx, false, r => r is dsParser.FlowPathContext)
-            ;
-
-        var flows =
-            flowPathContexts.Select(fpc =>
-            {
-                var systemName = fpc.GetChild(0).GetText();
-                var dot_ = fpc.GetChild(1).GetText();
-                var flowName = fpc.GetChild(2).GetText();
-
-                var system = _model.Systems.FirstOrDefault(sys => sys.Name == systemName);
-                var flow = system.RootFlows.FirstOrDefault(f => f.Name == flowName);
-                return flow;
-            })
-            .ToArray()
-            ;
-        var cpu_ = new Cpu(name, flows, _model);
     }
 
 

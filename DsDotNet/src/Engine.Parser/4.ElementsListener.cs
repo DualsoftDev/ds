@@ -86,9 +86,24 @@ partial class ElementsListener : dsBaseListener
     }
     override public void ExitTask(dsParser.TaskContext ctx) { _task = null; }
 
-    override public void EnterListing(dsParser.ListingContext ctx) {}
+    override public void EnterFlow(dsParser.FlowContext ctx)
+    {
+        var flowName = ctx.id().GetText();
+        _rootFlow = _system.RootFlows.First(f => f.Name == flowName);
 
-    override public void EnterCall(dsParser.CallContext ctx) {
+        var flowOf = ctx.flowProp().id();
+        this.flowOfName = flowOf == null ? flowName : flowOf.GetText();
+    }
+    override public void ExitFlow(dsParser.FlowContext ctx)
+    {
+        _rootFlow = null;
+        flowOfName = null;
+    }
+
+    override public void EnterListing(dsParser.ListingContext ctx) { }
+
+    override public void EnterCall(dsParser.CallContext ctx)
+    {
         var name = ctx.id().GetText();
         var label = $"{name}\n{ctx.callPhrase().GetText()}";
         var call = _task.CallPrototypes.First(c => c.Name == name);
@@ -101,60 +116,10 @@ partial class ElementsListener : dsBaseListener
         //Trace.WriteLine($"Call: {name} = {txs.Select(tx => tx.Name)} ~ {rx?.Name}");
     }
 
-    override public void EnterFlow(dsParser.FlowContext ctx)
-    {
-        var flowName = ctx.id().GetText();
-        _rootFlow = _system.RootFlows.First(f => f.Name == flowName);
-
-        var flowOf = ctx.flowProp().id();
-        this.flowOfName = flowOf == null ? flowName : flowOf.GetText();
-
-        var causal =
-            DsParser.enumerateChildren<dsParser.CausalContext>(ctx, false, r => r is dsParser.CausalContext)
-            ;
-        var parenting =
-            DsParser.enumerateChildren<dsParser.ParentingContext>(ctx, false, r => r is dsParser.ParentingContext)
-            ;
-        var listing =
-            DsParser.enumerateChildren<dsParser.ListingContext>(ctx, false, r => r is dsParser.ListingContext)
-            ;
-
-        Trace.WriteLine($"Flow: {flowName}");
-    }
-    override public void ExitFlow(dsParser.FlowContext ctx)
-    {
-        _rootFlow = null;
-        flowOfName = null;
-    }
-
-    override public void EnterCausals(dsParser.CausalsContext ctx)
-    {
-        Trace.WriteLine($"Causals: {ctx.GetText()}");
-    }
-    override public void ExitCausals(dsParser.CausalsContext ctx)
-    {
-    }
 
     override public void EnterParenting(dsParser.ParentingContext ctx) {
         var name = ctx.id().GetText();
-        var seg = (Segment)QpInstanceMap[$"{CurrentPath}.{name}"];
-        //var seg = _rootFlow.Segments.First(s => s.Name == name);
-        //_parenting = seg ?? new Segment(name, _rootFlow);
-        _parenting = seg;
-
-        // A = {
-        //  B > C > D;
-        //  D |> C;
-        // }
-        var causalContexts =
-            DsParser.enumerateChildren<dsParser.CausalPhraseContext>(ctx, false, r => r is dsParser.CausalPhraseContext)
-            ;
-        foreach(var cauCtx in causalContexts)
-        {
-
-        }
-
-        Trace.WriteLine($"Parenting: {ctx.GetText()}");
+        _parenting = (Segment)QpInstanceMap[$"{CurrentPath}.{name}"];
     }
     override public void ExitParenting(dsParser.ParentingContext ctx) { _parenting = null; }
 

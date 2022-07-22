@@ -51,23 +51,23 @@ public class Child : Named, IVertex, ICoin, ITagSREContainer
 
     public override string ToString() => ToText();
     public override string ToText() => $"{QualifiedName}[{this.GetType().Name}] : " + (IsCall ? "CALL" : "ExSegmentCall");
-    public void Going()
-    {
-        //Coin.Going();
+    //public void Going()
+    //{
+    //    //Coin.Going();
 
-        switch(Coin)
-        {
-            case ExSegmentCall extSeg:
-                //extSeg.Going();
-                break;
-            case SubCall call:
-                //call.Going();
-                break;
-            default:
-                throw new Exception("ERROR");
-        }
-        TagsStart.Iter(t => t.Value = true);
-    }
+    //    switch(Coin)
+    //    {
+    //        case ExSegmentCall extSeg:
+    //            //extSeg.Going();
+    //            break;
+    //        case SubCall call:
+    //            //call.Going();
+    //            break;
+    //        default:
+    //            throw new Exception("ERROR");
+    //    }
+    //    TagsStart.Iter(t => t.Value = true);
+    //}
 }
 
 public static class ChildExtension

@@ -37,7 +37,7 @@ module ModelTest2 =
 """
             text <- text + sysP + cpus
 
-            let engine = new Engine(text, "Cpu")
+            let engine = new EngineBuilder(text, "Cpu")
             ( engine.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
             let system = engine.Model.Systems |> Seq.find(fun s -> s.Name = "L")
             let cpu = engine.Cpu
@@ -87,7 +87,7 @@ module ModelTest2 =
 """
             text <- text + sysP + cpus
 
-            let engine = new Engine(text, "Cpu")
+            let engine = new EngineBuilder(text, "Cpu")
             ( engine.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
             let system = engine.Model.Systems |> Seq.find(fun s -> s.Name = "L")
 
@@ -295,7 +295,7 @@ module ModelTest2 =
 """
             text <- text + sysP + cpus
 
-            let engine = new Engine(text, "Cpu")
+            let engine = new EngineBuilder(text, "Cpu")
             let model = engine.Model
 
             let ``model object inspection`` =

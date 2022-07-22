@@ -27,7 +27,7 @@ module ModelTests1 =
 }
 """
 
-            let engine = new Engine(text, "Cpu")
+            let engine = new EngineBuilder(text, "Cpu")
             let system = engine.Model.Systems |> Seq.exactlyOne
             let cpu = engine.Cpu
             cpu.Name === "Cpu"
@@ -70,7 +70,7 @@ module ModelTests1 =
 }
 """
             text <- text + sysP + cpus
-            let engine = new Engine(text, "Cpu")
+            let engine = new EngineBuilder(text, "Cpu")
             ( engine.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
             let system = engine.Model.Systems |> Seq.find(fun s -> s.Name = "L")
             let cpu = engine.Cpu
@@ -132,7 +132,7 @@ module ModelTests1 =
 }
 """
             text <- text + cpus;
-            let engine = new Engine(text, "Cpu")
+            let engine = new EngineBuilder(text, "Cpu")
             ( engine.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
             let system = engine.Model.Systems |> Seq.find(fun s -> s.Name = "L")
             let cpu = engine.Cpu
@@ -167,7 +167,7 @@ module ModelTests1 =
 """
             text <- text + sysP + cpus
 
-            let engine = new Engine(text, "Cpu")
+            let engine = new EngineBuilder(text, "Cpu")
             ( engine.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
             let system = engine.Model.Systems |> Seq.find(fun s -> s.Name = "L")
             let cpu = engine.Cpu

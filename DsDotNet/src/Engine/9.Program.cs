@@ -6,7 +6,7 @@ namespace Engine;
 class Program
 {
     public static ILog Logger { get; private set; }
-    public static Engine Engine { get; set; }
+    public static ENGINE Engine { get; set; }
 
     static void PrepareLog4Net()
     {

@@ -5,13 +5,14 @@ using Engine.Runner;
 
 namespace Engine;
 
-public partial class Engine : IEngine
+public partial class EngineBuilder : IEngine
 {
     public OpcBroker Opc { get; }
     public Cpu Cpu { get; }
     public Model Model { get; }
+    public ENGINE Engine { get; }
 
-    public Engine(string modelText, string activeCpuName)
+    public EngineBuilder(string modelText, string activeCpuName)
     {
         Model = ModelParser.ParseFromString(modelText);
 
@@ -29,31 +30,15 @@ public partial class Engine : IEngine
 
         Opc.Print();
 
-        Model.Cpus.Iter(cpu => readTagsFromOpc(cpu));
         Model.Cpus.Iter(cpu => cpu.PrintTags());
 
-        void readTagsFromOpc(Cpu cpu)
-        {
-            var tpls = Opc.ReadTags(cpu.TagsMap.Select(t => t.Key)).ToArray();
-            foreach ((var tName, var value) in tpls)
-            {
-                var tag = cpu.TagsMap[tName];
-                if (tag.Value != value)
-                    cpu.OnOpcTagChanged(new OpcTagChange(tName, value));
-            }
-        }
-    }
-
-    public void Run()
-    {
-        Model.Run();
-        Global.Logger.Info("Engine started!");
+        Engine = new ENGINE(Model, Opc, Cpu);
     }
 }
 
 
 // Engine Initializer
-partial class Engine
+partial class EngineBuilder
 {
     public void InitializeAllFlows()
     {
@@ -135,7 +120,3 @@ partial class Engine
     }
 }
 
-public static class EngineExtension
-{
-
-}

@@ -8,6 +8,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<Compile Include="Engine.fs" />
 		<Compile Include="Runner.fs" />
 	</ItemGroup>
 
@@ -15,6 +16,7 @@
 	  <ProjectReference Include="..\Dual.Common.FS\Dual.Common.FS.fsproj" />
 	  <ProjectReference Include="..\Engine.Common\Engine.Common.csproj" />
 	  <ProjectReference Include="..\Engine.Core\Engine.Core.csproj" />
+	  <ProjectReference Include="..\Engine.OPC\Engine.OPC.csproj" />
 	</ItemGroup>
 
 </Project>

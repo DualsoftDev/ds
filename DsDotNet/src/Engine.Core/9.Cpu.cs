@@ -120,46 +120,4 @@ public static class CpuExtensionBitChange
             }
         }
     }
-
-    /// <summary> 외부에서 tag 가 변경된 경우 </summary>
-    public static void OnOpcTagChanged(this Cpu cpu, OpcTagChange tc)
-    {
-        var (tagName, value) = (tc.TagName, tc.Value);
-        if (cpu.TagsMap.ContainsKey(tagName))
-        {
-            var tag = cpu.TagsMap[tagName];
-            tag.Value = value;
-        }
-    }
-
-    public static void OnBitChanged(this Cpu cpu, BitChange bitChange)
-    {
-        cpu.Queue.Enqueue(bitChange);
-        cpu.ProcessQueue();
-    }
-
-    public static void ProcessQueue(this Cpu cpu)
-    {
-        BitChange bc;
-        while (cpu.Queue.Count > 0)
-        {
-            while (cpu.Queue.TryDequeue(out bc))
-            {
-                var bit = bc.Bit;
-                if (bc.NewValue != bit.Value)
-                {
-                    Debug.Assert(!bc.Applied);
-                    bit.Value = bc.NewValue;
-                }
-
-                if (cpu.ForwardDependancyMap.ContainsKey(bit))
-                {
-                    foreach (var forward in cpu.ForwardDependancyMap[bit])
-                        forward.Evaluate();
-                }
-            }
-
-            Thread.Sleep(10);
-        }
-    }
 }

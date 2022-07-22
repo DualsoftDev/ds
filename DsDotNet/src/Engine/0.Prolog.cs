@@ -7,5 +7,6 @@ global using log4net;
 global using Engine.Common;
 global using Engine.Core;
 global using Engine.OPC;
+global using ENGINE = Engine.Runner.EngineModule.Engine;
 
 namespace Engine;

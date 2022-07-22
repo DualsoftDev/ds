@@ -1,5 +1,6 @@
 namespace Engine;
 
+using Engine.Runner;
 class Tester
 {
     public static void DoSampleTest()
@@ -55,7 +56,7 @@ class Tester
 }
 
 ";
-        var engine = new Engine(text, "Cpu");
+        var engine = new EngineBuilder(text, "Cpu").Engine;
         Program.Engine = engine;
         engine.Run();
 

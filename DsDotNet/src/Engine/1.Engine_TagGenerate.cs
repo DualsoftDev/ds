@@ -3,7 +3,7 @@ using Engine.Graph;
 
 namespace Engine;
 
-partial class Engine
+partial class EngineBuilder
 {
     [DebuggerDisplay("{ToText()}")]
     class TagGenInfo

@@ -12,6 +12,7 @@
 		<Compile Include="Bit, Cpu.fs" />
 		<Compile Include="Engine.fs" />
 		<Compile Include="Runner.fs" />
+		<None Include="paket.references" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -20,5 +21,7 @@
 	  <ProjectReference Include="..\Engine.Core\Engine.Core.csproj" />
 	  <ProjectReference Include="..\Engine.OPC\Engine.OPC.csproj" />
 	</ItemGroup>
+
+	<Import Project="..\..\.paket\Paket.Restore.targets" />
 
 </Project>

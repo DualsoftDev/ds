@@ -86,7 +86,6 @@ partial class EngineBuilder
         }
     }
 
-    /// <summary> Root flow 의 root segment 를 타 시스템에서 호출하기 위한 interface tag 를 생성한다. </summary>
 
     void InitializeRootFlow(RootFlow rootFlow)
     {

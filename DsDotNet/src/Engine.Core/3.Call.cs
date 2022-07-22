@@ -22,14 +22,14 @@ public class CallPrototype : CallBase
             {
                 switch (rx)
                 {
-                    case Segment seg: return seg.TagE.Value;
+                    case Segment seg: return seg.TagsEnd.Any(t => t.Value);
                     case IBit bit: return bit.Value;   // todo TAG 아닌 경우 처리 필요함.
                 }
                 throw new Exception("Unknown type ERROR");
             }
             return RXs.All(getRxValue);
         }
-        set => throw new Exception("XXXX ERROR");
+        set => throw new Exception("ERROR");
     }
 
     public CallPrototype(string name, DsTask task)

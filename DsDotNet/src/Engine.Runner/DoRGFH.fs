@@ -71,9 +71,10 @@ module DoRGFH =
     let private finish() = ()
     let private ready() = ()
 
-    let evaluatePort (seg:Segment) (port:Port) (newValue:bool) =
+    /// Port 값 변경에 따른 작업 수행
+    let evaluatePort (port:Port) (newValue:bool) =
         if port.Value <> newValue then
-
+            let seg = port.OwnerSegment
             let rf = seg.IsResetFirst
             let st = seg.Status
 
@@ -85,7 +86,7 @@ module DoRGFH =
                     | :? PortR when seg.PortS.Value -> true
                     | _ -> false
 
-
+            // 동시 눌림을 고려한, 실제 동작해야 할 port
             let mutable effectivePort = port
             if duplicate then
                 effectivePort <- if rf then seg.PortR :> Port else seg.PortS
@@ -95,20 +96,21 @@ module DoRGFH =
             match effectivePort, newValue, st with
             | :? PortS, true , Status4.Ready -> goingSegment seg
             | :? PortS, false, Status4.Ready -> pause()
-            | :? PortR, true , Status4.Finished -> homing()
-            | :? PortR, false, Status4.Finished -> pause()
-            | :? PortR, true , Status4.Going -> homing()
-            | :? PortR, false, Status4.Going -> pause()
-            | :? PortE, true , Status4.Going -> finish()
-            | :? PortE, false, Status4.Homing -> ready()
-            | :? PortR, true , Status4.Ready -> ()
-            | :? PortR, false, Status4.Ready ->
-                    if seg.PortS.Value then
-                        goingSegment seg
             | :? PortS, true,  Status4.Finished -> ()
             | :? PortS, false, Status4.Finished ->
                     if seg.PortR.Value then
                         homing()
+            | :? PortR, true , Status4.Finished -> homing()
+            | :? PortR, false, Status4.Finished -> pause()
+            | :? PortR, true , Status4.Going -> homing()
+            | :? PortR, false, Status4.Going -> pause()
+            | :? PortR, true , Status4.Ready -> ()
+            | :? PortR, false, Status4.Ready ->
+                    if seg.PortS.Value then
+                        goingSegment seg
+
+            | :? PortE, true , Status4.Going -> finish()
+            | :? PortE, false, Status4.Homing -> ready()
 
             | _ ->
                 failwith "ERROR"

@@ -1,15 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-
-	<PropertyGroup>
-		<TargetFrameworks>net48</TargetFrameworks>
-		<RootNamespace>Engine.Core</RootNamespace>
-		<LangVersion>10.0</LangVersion>
-	</PropertyGroup>
-
-	<Import Project="..\..\.paket\Paket.Restore.targets" />
-
-	<ItemGroup>
-		<ProjectReference Include="..\Engine.Common\Engine.Common.csproj" />
-	</ItemGroup>
-
+  <PropertyGroup>
+    <TargetFrameworks>net48</TargetFrameworks>
+    <RootNamespace>Engine.Core</RootNamespace>
+    <LangVersion>10.0</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Engine.Common\Engine.Common.csproj" />
+  </ItemGroup>
+  <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

@@ -3,7 +3,9 @@ framework: auto-detect
 source https://nuget.org/api/v2
 
 nuget Antlr4
+nuget Antlr4.Runtime.Standard 4.9.3
 nuget Antlr4.Runtime
+nuget Antlr4BuildTasks 8.17.0
 nuget Argu
 
 

@@ -1,9 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-
 	<PropertyGroup>
 		<TargetFramework>netcoreapp3.1</TargetFramework>
+		<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
 	</PropertyGroup>
-
 	<ItemGroup>
 		<None Include="App.config" />
 		<Compile Include="0.OnlyOnce.fs" />
@@ -13,15 +13,11 @@
 		<Compile Include="ModelTest2.fs" />
 		<None Include="paket.references" />
 	</ItemGroup>
-
 	<ItemGroup>
 		<ProjectReference Include="..\Dual.Common.FS\Dual.Common.FS.fsproj" />
 		<ProjectReference Include="..\Engine.Core\Engine.Core.csproj" />
 		<ProjectReference Include="..\Engine.OPC\Engine.OPC.csproj" />
 		<ProjectReference Include="..\Engine\Engine.csproj" />
 	</ItemGroup>
-
-
 	<Import Project="..\..\.paket\Paket.Restore.targets" />
-
 </Project>

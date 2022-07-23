@@ -2,6 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFramework>netcoreapp3.1</TargetFramework>
+		<!--<TargetFramework>net48</TargetFramework>-->
 		<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
 	</PropertyGroup>
 	<ItemGroup>
@@ -11,6 +12,7 @@
 		<Compile Include="1.ModelExtension.fs" />
 		<Compile Include="ModelTest1.fs" />
 		<Compile Include="ModelTest2.fs" />
+		<Compile Include="EdgeTest.fs" />
 		<None Include="paket.references" />
 	</ItemGroup>
 	<ItemGroup>

@@ -16,7 +16,7 @@ module ModelTest2 =
 
         [<Fact>]
         member __.``Parse Alias & Task`` () =
-            logInfo "============== Parse Cylinder"
+            logInfo "============== Parse Alias & Task"
             let mutable text = """
 [sys] L = {
     [alias] = {
@@ -37,16 +37,16 @@ module ModelTest2 =
 """
             text <- text + sysP + cpus
 
-            let engine = new EngineBuilder(text, "Cpu")
-            ( engine.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
-            let system = engine.Model.Systems |> Seq.find(fun s -> s.Name = "L")
-            let cpu = engine.Cpu
+            let builder = new EngineBuilder(text, "Cpu")
+            ( builder.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
+            let system = builder.Model.Systems |> Seq.find(fun s -> s.Name = "L")
+            let cpu = builder.Cpu
             cpu.Name === "Cpu"
 
             cpu.ForwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) cpu) |> ShouldBeTrue
             cpu.BackwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) cpu) |> ShouldBeTrue
 
-            let fakeCpu = engine.Model.Cpus |> Seq.find(fun c -> not c.IsActive)
+            let fakeCpu = builder.Model.Cpus |> Seq.find(fun c -> not c.IsActive)
             fakeCpu.ForwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) fakeCpu) |> ShouldBeTrue
             fakeCpu.BackwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) fakeCpu) |> ShouldBeTrue
 
@@ -71,7 +71,7 @@ module ModelTest2 =
 
         [<Fact>]
         member __.``Tag/Edge with two main`` () =
-            logInfo "============== Parse Cylinder"
+            logInfo "============== Tag/Edge with two main"
             let mutable text = """
 [sys] L = {
     [task] T = {
@@ -87,19 +87,19 @@ module ModelTest2 =
 """
             text <- text + sysP + cpus
 
-            let engine = new EngineBuilder(text, "Cpu")
-            ( engine.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
-            let system = engine.Model.Systems |> Seq.find(fun s -> s.Name = "L")
+            let builder = new EngineBuilder(text, "Cpu")
+            ( builder.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
+            let system = builder.Model.Systems |> Seq.find(fun s -> s.Name = "L")
 
 
-            let cpu = engine.Cpu
+            let cpu = builder.Cpu
             cpu.Name === "Cpu"
 
 
             cpu.ForwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) cpu) |> ShouldBeTrue
             cpu.BackwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) cpu) |> ShouldBeTrue
 
-            let fakeCpu = engine.Model.Cpus |> Seq.find(fun c -> not c.IsActive)
+            let fakeCpu = builder.Model.Cpus |> Seq.find(fun c -> not c.IsActive)
             fakeCpu.ForwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) fakeCpu) |> ShouldBeTrue
             fakeCpu.BackwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) fakeCpu) |> ShouldBeTrue
 
@@ -181,7 +181,7 @@ module ModelTest2 =
                 ()
 
             let ``check call tag with real segment`` =
-                let systemP = engine.Model.Systems |> Seq.find(fun s -> s.Name = "P")
+                let systemP = builder.Model.Systems |> Seq.find(fun s -> s.Name = "P")
                 let flowP = systemP.RootFlows |> Seq.exactlyOne
                 let vp = flowP.ChildVertices |> Seq.ofType<Segment> |> Seq.find(fun s -> s.Name = "Vp")
                 let cpStart = main1Cp.TagsStart |> Seq.exactlyOne
@@ -295,8 +295,8 @@ module ModelTest2 =
 """
             text <- text + sysP + cpus
 
-            let engine = new EngineBuilder(text, "Cpu")
-            let model = engine.Model
+            let builder = new EngineBuilder(text, "Cpu")
+            let model = builder.Model
 
             let ``model object inspection`` =
                 let sysL = model.FindObject<DsSystem>("L");

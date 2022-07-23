@@ -27,9 +27,9 @@ module ModelTests1 =
 }
 """
 
-            let engine = new EngineBuilder(text, "Cpu")
-            let system = engine.Model.Systems |> Seq.exactlyOne
-            let cpu = engine.Cpu
+            let builder = new EngineBuilder(text, "Cpu")
+            let system = builder.Model.Systems |> Seq.exactlyOne
+            let cpu = builder.Cpu
             cpu.Name === "Cpu"
             system.Name === "P"
             let flow = system.RootFlows |> Seq.exactlyOne
@@ -70,14 +70,14 @@ module ModelTests1 =
 }
 """
             text <- text + sysP + cpus
-            let engine = new EngineBuilder(text, "Cpu")
-            ( engine.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
-            let system = engine.Model.Systems |> Seq.find(fun s -> s.Name = "L")
-            let cpu = engine.Cpu
+            let builder = new EngineBuilder(text, "Cpu")
+            ( builder.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
+            let system = builder.Model.Systems |> Seq.find(fun s -> s.Name = "L")
+            let cpu = builder.Cpu
             cpu.ForwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) cpu) |> ShouldBeTrue
             cpu.BackwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) cpu) |> ShouldBeTrue
 
-            let fakeCpu = engine.Model.Cpus |> Seq.find(fun c -> not c.IsActive)
+            let fakeCpu = builder.Model.Cpus |> Seq.find(fun c -> not c.IsActive)
             fakeCpu.ForwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) fakeCpu) |> ShouldBeTrue
             fakeCpu.BackwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) fakeCpu) |> ShouldBeTrue
 
@@ -132,10 +132,10 @@ module ModelTests1 =
 }
 """
             text <- text + cpus;
-            let engine = new EngineBuilder(text, "Cpu")
-            ( engine.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
-            let system = engine.Model.Systems |> Seq.find(fun s -> s.Name = "L")
-            let cpu = engine.Cpu
+            let builder = new EngineBuilder(text, "Cpu")
+            ( builder.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
+            let system = builder.Model.Systems |> Seq.find(fun s -> s.Name = "L")
+            let cpu = builder.Cpu
 
             cpu.Name === "Cpu"
             system.Name === "L"
@@ -167,10 +167,10 @@ module ModelTests1 =
 """
             text <- text + sysP + cpus
 
-            let engine = new EngineBuilder(text, "Cpu")
-            ( engine.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
-            let system = engine.Model.Systems |> Seq.find(fun s -> s.Name = "L")
-            let cpu = engine.Cpu
+            let builder = new EngineBuilder(text, "Cpu")
+            ( builder.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
+            let system = builder.Model.Systems |> Seq.find(fun s -> s.Name = "L")
+            let cpu = builder.Cpu
 
             cpu.Name === "Cpu"
             system.Name === "L"

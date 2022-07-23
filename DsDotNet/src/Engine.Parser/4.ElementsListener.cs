@@ -211,13 +211,10 @@ partial class ElementsListener : dsBaseListener
                         QpInstanceMap.Add(fqdn, child);
                         break;
                     default:
-                        throw new Exception("ERRROR");
+                        throw new Exception($"ERRROR: Unknown target for {targetName}");
                 }
             }
         }
-
-
-
     }
     override public void EnterCausalTokensDNF(dsParser.CausalTokensDNFContext ctx) {
         if (this.left != null)

@@ -17,7 +17,7 @@ public partial class EngineBuilder : IEngine
         Model = ModelParser.ParseFromString(modelText);
 
         Opc = new OpcBroker();
-        Cpu = Model.Cpus.OfType<Cpu>().First(cpu => cpu.Name == activeCpuName);
+        Cpu = Model.Cpus.First(cpu => cpu.Name == activeCpuName);
         Cpu.Engine = this;
         Cpu.IsActive = true;
 
@@ -34,8 +34,14 @@ public partial class EngineBuilder : IEngine
 
         Engine = new ENGINE(Model, Opc, Cpu);
     }
-}
 
+    /// <summary> Used for Unit test only.</summary>
+    internal EngineBuilder(string modelText)
+    {
+        Opc = new OpcBroker();
+        Model = ModelParser.ParseFromString(modelText);
+    }
+}
 
 // Engine Initializer
 partial class EngineBuilder

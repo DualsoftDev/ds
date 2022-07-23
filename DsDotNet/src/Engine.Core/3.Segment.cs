@@ -7,6 +7,7 @@ namespace Engine.Core;
 public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, IWithSREPorts, ITxRx, ITagSREContainer// Coin
 {
     public RootFlow ContainerFlow { get; }
+    public override Cpu Cpu { get => ContainerFlow.Cpu; set => throw new NotImplementedException(); }
     public Cpu OwnerCpu { get => ContainerFlow.Cpu; set => throw new NotImplementedException(); }
     public string QualifiedName => $"{ContainerFlow.QualifiedName}_{Name}";
 
@@ -26,10 +27,6 @@ public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, IWithSREPorts
     public void AddEndTags(params Tag[] tags) => _tagSREContainer.AddEndTags(tags);
     public Action<IEnumerable<Tag>> AddTagsFunc => _tagSREContainer.AddTagsFunc;
 
-
-    public Tag TagS { get; set; }       // todo : remove me
-    public Tag TagR { get; set; }       // todo : remove me
-    public Tag TagE { get; set; }       // todo : remove me
 
     public bool IsResetFirst { get; internal set; } = true;
 

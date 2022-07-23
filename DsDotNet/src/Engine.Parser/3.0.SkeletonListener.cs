@@ -130,5 +130,16 @@ class SkeletonListener : dsBaseListener
     }
 
 
-
+    override public void ExitProgram(dsParser.ProgramContext ctx)
+    {
+        foreach(var sys in _model.Systems)
+        {
+            foreach (var flow in sys.RootFlows)
+            {
+                foreach (var seg in flow.RootSegments)
+                    Debug.Assert(seg.OwnerCpu != null && seg.OwnerCpu == flow.Cpu);
+                Console.WriteLine();
+            }
+        }
+    }
 }

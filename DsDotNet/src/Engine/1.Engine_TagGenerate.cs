@@ -19,6 +19,8 @@ partial class EngineBuilder
         public bool IsSource;   // edge 의 source 쪽인지 여부
 
         public string Context;
+
+        public Cpu OwnerCpu;    // 생성된 tag 의 소유주 CPU
         // Tag 가 null 인 상태에서도 tag name 을 가져 올 수 있어야 함.  Tag 가 non null 이면 Tag.Name 과 동일
         public string TagName
         {
@@ -38,8 +40,11 @@ partial class EngineBuilder
         /// <param name="type">생성할 tag type</param>
         /// <param name="tagContainerSegment">tag 가 직접 제어할 segment</param>
         /// <param name="child">segment 를 포함하는 Child.  (Child or RootCall) </param>
-        /// <param name="context">생성할 tag 가 사용되는 context</param>
-        public TagGenInfo(TagType type, Segment tagContainerSegment, ICoin child, string context, Edge edge, bool isSource)
+        /// <param name="context">child 가 사용된 context</param>
+        /// <param name="edge">생성 정보 기준 edge</param>
+        /// <param name="isSource">child 가 edge 의 source 쪽인지의 여부.  false 이면 target 쪽</param>
+        /// <param name="ownerCpu">생성된 Tag 가 속할 CPU</param>
+        public TagGenInfo(TagType type, Segment tagContainerSegment, ICoin child, string context, Edge edge, bool isSource, Cpu ownerCpu)
         {
             Debug.Assert(child is Segment || child is Child || child is RootCall);
             Type = type;
@@ -48,6 +53,7 @@ partial class EngineBuilder
             Child = child;
             Edge = edge;
             IsSource = isSource;
+            OwnerCpu = ownerCpu;
             GeneratedTag = null;
         }
 
@@ -61,16 +67,14 @@ partial class EngineBuilder
     /// <para/> - root call 및
     /// <para/> - root segment 의 하부 call 및 external segment call 의
     /// <para/>   호출을 위한 start/reset/end tag 를 생성하기 위한 정보를 생성
+    /// <para/> *** 호출 site 와 피호출 site 모두 동일 이름의 tag 를 생성할 수 있도록 CPU 별 pair 로 중복 정보를 생성한다.
     /// </summary>
     TagGenInfo[] CreateTags4Child(RootFlow[] rootFlows)
     {
         Debug.Assert(rootFlows.Select(f => f.Cpu).Distinct().Count() == 1);
         Cpu cpu = rootFlows[0].Cpu;
 
-        var tagGenInfos =
-            collectTagGenInfo(rootFlows)
-            .DistinctBy(tgi => tgi.TagName)
-            .ToArray();
+        var tagGenInfos = collectTagGenInfo(rootFlows).ToArray();
 
         // tag 가 사용된 위치(child) 및 tag type 으로 grouping
         var tgiGroups = tagGenInfos.GroupByToDictionary(tgi => (tgi.Child, tgi.Type));
@@ -78,7 +82,11 @@ partial class EngineBuilder
         {
             (var location, var type) = kv.Key;
             var tgis = kv.Value;
-            var tags = tgis.Select(tgi => createTag(tgi, location, type, cpu)).ToArray();
+            var tags =
+                tgis
+                .Select(tgi => createTag(tgi, location, type))
+                .Where(tgi => tgi.OwnerCpu == cpu)
+                .ToArray();
 
             var addTagsFunc = location switch
             {
@@ -99,11 +107,13 @@ partial class EngineBuilder
             Global.Logger.Debug($"Adding Child Tags {tagNames} to child [{location.GetQualifiedName()}]");
 
             // apply to segment
-            foreach (var tgi in tgis)
+            // 생성 정보 중에 적용할 segment 의 CPU 에 해당하는 것들에 대해서만...
+            foreach (var tgi in tgis.Where(tgi => tgi.OwnerCpu == tgi.TagContainerSegment.OwnerCpu))
             {
                 var seg = tgi.TagContainerSegment;
                 Global.Logger.Debug($"Adding Export {tgi.Type} Tag [{tgi.TagName}] to segment [{seg.QualifiedName}]");
-                var tag = createTag(tgi, seg, type, seg.OwnerCpu);
+                Debug.Assert(seg.OwnerCpu == tgi.OwnerCpu);
+                var tag = createTag(tgi, seg, type);
                 seg.AddTagsFunc(new[] { tag });
             }
         }
@@ -111,9 +121,10 @@ partial class EngineBuilder
         return tagGenInfos.ToArray();
 
 
-        Tag createTag(TagGenInfo tgi, ICoin owner, TagType tagType, Cpu ownerCpu)
+        Tag createTag(TagGenInfo tgi, ICoin owner, TagType tagType)
         {
-            var tag = new Tag(owner, tgi.TagName, tagType, ownerCpu);
+            var tag = new Tag(owner, tgi.TagName, tagType, tgi.OwnerCpu);
+            Debug.Assert(tag.OwnerCpu == tgi.OwnerCpu);
             tgi.GeneratedTag = tag;
             return tag;
         }
@@ -134,8 +145,13 @@ partial class EngineBuilder
             // edge 연결 없이 root 상에 존재하는 vertices 에 대한 tag 생성
             var roots = rootFlows.SelectMany(f => f.ChildVertices).Distinct();
             var vertices = edges.SelectMany(e => e.Vertices);
-            var isolatedVertices = roots.Except(vertices);
-            foreach (var tgi in isolatedVertices.SelectMany(v => createTagGenInfos4RootVertex(v, null, false)))
+            var isolatedVertices = roots.Except(vertices).ToArray();
+            var isolatedVertiecsTags =
+                isolatedVertices
+                .SelectMany(v => createTagGenInfos4RootVertex(v, null, false))
+                .ToArray()
+                ;
+            foreach (var tgi in isolatedVertiecsTags)
                 yield return tgi;
 
 
@@ -165,14 +181,20 @@ partial class EngineBuilder
                 switch (child.Coin)
                 {
                     case SubCall call:
-                        var segEnd = call.Prototype.RXs.OfType<Segment>();
-                        foreach (var e in segEnd)
-                            yield return new TagGenInfo(TagType.End, e, child, context, edge, isSource);
+                        var segsEnd = call.Prototype.RXs.OfType<Segment>();
+                        foreach (var segE in segsEnd)
+                        {
+                            // 호출측 CPU: edge.OwnerCpu
+                            // 피호출측 CPU: segE.OwnerCpu
+                            yield return new TagGenInfo(TagType.End, segE, child, context, edge, isSource, segE.OwnerCpu);
+                            yield return new TagGenInfo(TagType.End, segE, child, context, edge, isSource, edge.OwnerCpu);
+                        }
                         break;
 
                     case ExSegmentCall exSeg:
                         var seg = exSeg.ExternalSegment;
-                        yield return new TagGenInfo(TagType.End, seg, child, context, edge, isSource);
+                        yield return new TagGenInfo(TagType.End, seg, child, context, edge, isSource, seg.OwnerCpu);
+                        yield return new TagGenInfo(TagType.End, seg, child, context, edge, isSource, edge.OwnerCpu);
                         break;
                     default:
                         throw new Exception("ERROR");
@@ -230,15 +252,19 @@ partial class EngineBuilder
                         if (!hasReset) // reset 이 없으면...  (set edge 가 있거나, 없거나..)
                         {
                             var segStart = call.Prototype.TXs.OfType<Segment>();
-                            foreach (var s in segStart)
-                                yield return new TagGenInfo(TagType.Start, s, child, fqdn, edge, isSource);
+                            foreach (var segS in segStart)
+                            {
+                                yield return new TagGenInfo(TagType.Start, segS, child, fqdn, edge, isSource, segS.OwnerCpu);
+                                yield return new TagGenInfo(TagType.Start, segS, child, fqdn, edge, isSource, edge.OwnerCpu);
+                            }
                         }
                         break;
 
                     case ExSegmentCall exSeg:
                         var seg = exSeg.ExternalSegment;
                         var type = hasReset ? TagType.Reset : TagType.Start;
-                        yield return new TagGenInfo(type, seg, child, fqdn, edge, isSource);
+                        yield return new TagGenInfo(type, seg, child, fqdn, edge, isSource, seg.OwnerCpu);
+                        yield return new TagGenInfo(type, seg, child, fqdn, edge, isSource, edge.OwnerCpu);
                         break;
 
                     default:
@@ -253,9 +279,15 @@ partial class EngineBuilder
                 {
                     case RootCall rootCall:
                         foreach (var txSeg in rootCall.Prototype.TXs.OfType<Segment>())
-                            yield return new TagGenInfo(TagType.Start, txSeg, rootCall, rootCall.QualifiedName, edge, isSource);
+                        {
+                            yield return new TagGenInfo(TagType.Start, txSeg, rootCall, rootCall.QualifiedName, edge, isSource, txSeg.OwnerCpu);
+                            yield return new TagGenInfo(TagType.Start, txSeg, rootCall, rootCall.QualifiedName, edge, isSource, edge.OwnerCpu);
+                        }
                         foreach (var rxSeg in rootCall.Prototype.RXs.OfType<Segment>())
-                            yield return new TagGenInfo(TagType.End, rxSeg, rootCall, rootCall.QualifiedName, edge, isSource);
+                        {
+                            yield return new TagGenInfo(TagType.End, rxSeg, rootCall, rootCall.QualifiedName, edge, isSource, rxSeg.OwnerCpu);
+                            yield return new TagGenInfo(TagType.End, rxSeg, rootCall, rootCall.QualifiedName, edge, isSource, edge.OwnerCpu);
+                        }
                         break;
 
                     case Segment rootSeg:
@@ -263,7 +295,7 @@ partial class EngineBuilder
                         if (edge != null)
                         {
                             var type = isSource ? TagType.End : (edge is IResetEdge ? TagType.Reset : TagType.Start);
-                            yield return new TagGenInfo(type, rootSeg, rootSeg, fqdn, edge, isSource);
+                            yield return new TagGenInfo(type, rootSeg, rootSeg, fqdn, edge, isSource, root.OwnerCpu);
                         }
 
                         var subEdges = rootSeg.Edges.ToArray();
@@ -280,8 +312,11 @@ partial class EngineBuilder
 
                             var target = subEdge.Target as Child;
                             if (target != null)
-                                foreach (var tgi in createTagGenInfos4Child(target, subEdge, false, fqdn))
+                            {
+                                var targetTags = createTagGenInfos4Child(target, subEdge, false, fqdn).ToArray();
+                                foreach (var tgi in targetTags)
                                     yield return tgi;
+                            }
                         }
 
                         // Todo : isolated vertex 처리

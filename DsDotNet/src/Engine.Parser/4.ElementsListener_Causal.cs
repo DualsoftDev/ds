@@ -212,6 +212,8 @@ partial class ElementsListener
                     var r = this.nodes[strR];
 
                     Flow flow = (Flow)_parenting ?? _rootFlow;   // target flow
+                    Debug.Assert(flow.Cpu != null);
+
                     var context = _parenting == null ? "" : CurrentPath;
 
                     var lvs = FindVertices(context, l);

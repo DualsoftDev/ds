@@ -28,11 +28,11 @@ public static class ModelExtension
     public static IEnumerable<Flow> CollectFlows(this Model model)
     {
         var rootFlows = model.CollectRootFlows().ToArray();
-        var subFlows = rootFlows.SelectMany(rf => rf.ChildVertices.OfType<Segment>());
+        var subFlows = rootFlows.SelectMany(rf => rf.RootSegments);
         var allFlows = rootFlows.Cast<Flow>().Concat(subFlows);
         return allFlows;
     }
     public static IEnumerable<Segment> CollectSegments(this Model model) =>
-        model.CollectRootFlows().SelectMany(rf => rf.ChildVertices).OfType<Segment>()
+        model.CollectRootFlows().SelectMany(rf => rf.RootSegments)
         ;
 }

@@ -42,11 +42,19 @@ public class Tag : Bit, ITxRx
         }
     }
 
-    public Tag(ICoin owner, string name, TagType tagType=TagType.None, Cpu ownerCpu = null, bool value = false)
+    public Tag(ICoin owner, string name, TagType tagType = TagType.None, Cpu ownerCpu = null, bool value = false)
         : base(name, value, ownerCpu)
     {
         Owner = owner;
         Type = tagType;
+
+        if (ownerCpu != null)
+        {
+            if (ownerCpu.TagsMap.ContainsKey(name))
+                Global.Logger.Warn($"Cpu [{ownerCpu.Name} already contains tag with name [{name}])");
+            else
+                ownerCpu.TagsMap.Add(name, this);
+        }
     }
     public Tag(Tag tag)
         : this(tag.Owner, tag.Name, tag.Type, tag.OwnerCpu, tag.Value)

@@ -24,7 +24,7 @@ module EdgeTest =
         Cm = {P.F.Vm ~ P.F.Sm}
     }
     [flow] F = {
-        Main = { T.Cp |> T.Cm; }
+        Main = { T.Cp > T.Cm; }
     }
 }
 """

@@ -40,7 +40,16 @@ public class Cpu : Named, ICpu
 public static class CpuExtension
 {
     static ILog Logger => Global.Logger;
-    public static void AddTag(this Cpu cpu, Tag tag) => cpu.TagsMap.Add(tag.Name, tag);
+    public static void AddTag(this Cpu cpu, Tag tag)
+    {
+        Debug.Assert(tag.OwnerCpu == cpu);
+        if (cpu.TagsMap.ContainsKey(tag.Name))
+        {
+            Debug.Assert(cpu.TagsMap[tag.Name] == tag);
+            return;
+        }
+        cpu.TagsMap.Add(tag.Name, tag);
+    }
     public static IEnumerable<IBit> CollectBits(this Cpu cpu)
     {
         IEnumerable<IBit> helper()

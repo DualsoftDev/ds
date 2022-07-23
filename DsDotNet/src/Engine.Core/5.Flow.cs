@@ -2,7 +2,7 @@ namespace Engine.Core;
 
 public abstract class Flow : Named, IWallet
 {
-    public Cpu Cpu { get; set; }
+    public virtual Cpu Cpu { get; set; }
 
     /// <summary>Edge 를 통해 알 수 없는 isolated segement/call 등을 포함 </summary>
     HashSet<IVertex> _childVertices = new();

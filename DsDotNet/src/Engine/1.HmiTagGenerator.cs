@@ -15,9 +15,6 @@ public static class HmiTagGenerator
         var s = new Tag(segment, $"Start_{name}") { Type = TagType.Q };
         var r = new Tag(segment, $"Reset_{name}") { Type = TagType.Q };
         var e = new Tag(segment, $"End_{name}") { Type = TagType.I };
-        segment.TagS = s;
-        segment.TagR = r;
-        segment.TagE = e;
 
         segment.AddStartTags(s);
         segment.AddResetTags(r);
@@ -95,7 +92,7 @@ public static class HmiTagGenerator
     {
         var cpu = flow.Cpu;
 
-        var segments = flow.ChildVertices.OfType<Segment>();
+        var segments = flow.RootSegments;
 
         // 모든 root segment 에 대해서 S/R/E tag 생성
         var sre = segments.SelectMany(s => GenerateHmiTag(s)).ToArray();

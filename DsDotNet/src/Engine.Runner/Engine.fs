@@ -13,6 +13,8 @@ module EngineModule =
 
     type Engine(model:Model, opc:OpcBroker, activeCpu:Cpu) =
         let cpus = model.Cpus
+
+        interface IEngine
         member x.Model = model
         member x.Opc = opc
         member x.Cpu = activeCpu

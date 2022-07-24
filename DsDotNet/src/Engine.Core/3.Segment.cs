@@ -63,8 +63,10 @@ public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, IWithSREPorts
 public static class SegmentExtension
 {
 
-    public static bool IsChildrenStatusAllWith(this Segment segment, Status4 status) => segment.ChildStatusMap.Values.All(st => st == status);
-    public static bool IsChildrenStatusAnyWith(this Segment segment, Status4 status) => segment.ChildStatusMap.Values.Any(st => st == status);
+    public static bool IsChildrenStatusAllWith(this Segment segment, Status4 status) =>
+        segment.ChildStatusMap.Values.All(st => st == status);
+    public static bool IsChildrenStatusAnyWith(this Segment segment, Status4 status) =>
+        segment.ChildStatusMap.Values.Any(st => st == status);
 
     public static void OnChildEndTagChanged(this Segment segment, BitChange bc)
     {
@@ -108,9 +110,9 @@ public static class SegmentExtension
     {
         IEnumerable<string> spit()
         {
-            var tagNamesS = String.Join("\r\n\t\t", seg.TagsStart.Select(t => t.Name));
-            var tagNamesR = String.Join("\r\n\t\t", seg.TagsReset.Select(t => t.Name));
-            var tagNamesE = String.Join("\r\n\t\t", seg.TagsEnd.Select(t => t.Name));
+            var tagNamesS = string.Join("\r\n\t\t", seg.TagsStart.Select(t => t.Name));
+            var tagNamesR = string.Join("\r\n\t\t", seg.TagsReset.Select(t => t.Name));
+            var tagNamesE = string.Join("\r\n\t\t", seg.TagsEnd.Select(t => t.Name));
             if (tagNamesS.NonNullAny())
                 yield return $"j\r\n\tStart Tags:\r\n\t\t{tagNamesS}";
             if (tagNamesR.NonNullAny())
@@ -118,7 +120,7 @@ public static class SegmentExtension
             if (tagNamesE.NonNullAny())
                 yield return $"j\r\n\tEnd Tags:\r\n\t\t{tagNamesE}";
         }
-        var str = String.Concat(spit());
+        var str = string.Concat(spit());
         Global.Logger.Debug($"Tags for segment [{seg.QualifiedName}]:{str}");
 
     }

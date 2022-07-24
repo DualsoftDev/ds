@@ -75,7 +75,7 @@ public static class CpuExtension
 
     public static void PrintTags(this Cpu cpu)
     {
-        var tagNames = String.Join("\r\n\t", cpu.TagsMap.Values.Select(t => t.Name));
+        var tagNames = string.Join("\r\n\t", cpu.TagsMap.Values.Select(t => t.Name));
         Logger.Debug($"{cpu.Name} tags:\r\n\t{tagNames}");
     }
 

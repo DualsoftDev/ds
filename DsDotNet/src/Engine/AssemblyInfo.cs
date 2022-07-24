@@ -21,7 +21,7 @@ using System.Runtime.CompilerServices;
 
 
 
-[assembly: DebuggerDisplay("[{Key}={Value}]", Target = typeof(KeyValuePair<,>))]
+//[assembly: DebuggerDisplay("[{Key}={Value}]", Target = typeof(KeyValuePair<,>))]
 
 
 [assembly: InternalsVisibleTo("UnitTest.Engine")]

@@ -59,5 +59,20 @@ module EdgeTest =
             (fwd[main.PortE] |> Enumerable.OfType<Tag>, main.TagsEnd)   |> seqEq
 
 
-            // todo : subflow check
+            // subflow check
+            let edge = main.Edges |> Seq.exactlyOne
+
+            let vpStart = cpu.TagsMap["L_F_Main_T.Cp_P_F_Vp_Start"]
+            let spEnd = cpu.TagsMap["L_F_Main_T.Cp_P_F_Sp_End"]
+            cpu.TagsMap.ContainsKey(vpStart.Name) |> ShouldBeTrue
+            cpu.TagsMap.ContainsKey(spEnd.Name) |> ShouldBeTrue
+            cpu.ForwardDependancyMap[spEnd].Contains(edge) |> ShouldBeTrue
+
+
+
+            let vmStart = cpu.TagsMap["L_F_Main_T.Cm_P_F_Vm_Start"]
+            let smEnd = cpu.TagsMap["L_F_Main_T.Cm_P_F_Sm_End"]
+            cpu.TagsMap.ContainsKey(vmStart.Name) |> ShouldBeTrue
+            cpu.TagsMap.ContainsKey(smEnd.Name) |> ShouldBeTrue
+            cpu.ForwardDependancyMap[edge].Contains(vmStart) |> ShouldBeTrue
             ()

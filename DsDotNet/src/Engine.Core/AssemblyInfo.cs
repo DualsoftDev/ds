@@ -17,5 +17,6 @@ using System.Runtime.InteropServices;
 
 [assembly: Guid("7f99d393-df88-4137-8501-1d1d1cd74d25")]
 [assembly: InternalsVisibleTo("Engine")]
+[assembly: InternalsVisibleTo("Engine.Runner")]
 //[assembly: InternalsVisibleTo("Engine.Graph")]
 [assembly: InternalsVisibleTo("UnitTest.Engine")]

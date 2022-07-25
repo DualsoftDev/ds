@@ -1,5 +1,6 @@
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Threading;
 
 namespace Engine.Core;
 
@@ -35,6 +36,7 @@ public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, IWithSREPorts
     public VertexAndOutgoingEdges[] TraverseOrder { get; internal set; }
     internal Dictionary<Coin, Child> CoinChildMap { get; set; }
     public bool Value { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    internal CancellationTokenSource MovingCancellationTokenSource { get; set; }
 
 
     internal CompositeDisposable Disposables = new();
@@ -62,6 +64,16 @@ public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, IWithSREPorts
 
 public static class SegmentExtension
 {
+    public static void CancelGoing(this Segment segment)
+    {
+        segment.MovingCancellationTokenSource.Cancel();
+        segment.MovingCancellationTokenSource = null;
+    }
+    public static void CancelHoming(this Segment segment)
+    {
+        segment.MovingCancellationTokenSource.Cancel();
+        segment.MovingCancellationTokenSource = null;
+    }
 
     public static bool IsChildrenStatusAllWith(this Segment segment, Status4 status) =>
         segment.ChildStatusMap.Values.All(st => st == status);

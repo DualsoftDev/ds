@@ -5,6 +5,7 @@ using log4net;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Reactive.Subjects;
 
 namespace Engine.OPC;
@@ -25,8 +26,24 @@ public class OpcBroker
 
     // { Debug only, or temporary implementations
     internal IEnumerable<OpcTag> _opcTags => _tagDic.Values;
-    internal Subject<OpcTagChange> OpcTagChangedSubject => Global.OpcTagChangedSubject;
+    internal Subject<OpcTagChange> OpcTagChangedSubject => Global.TagChangeFromOpcServerSubject;
     // }
+
+    CompositeDisposable _disposables = new();
+
+    public OpcBroker()
+    {
+        var subs = Global.TagChangeToOpcServerSubject.Subscribe(otc =>
+        {
+            Global.Logger.Debug($"Publishing tag[{otc.TagName}] change = {otc.Value}");
+            Write(otc.TagName, otc.Value);
+            //if (_tagDic.ContainsKey(otc.TagName))
+            //{
+            //    Global.TagChangeFromOpcServerSubject.OnNext(otc);
+            //}
+        });
+        _disposables.Add(subs);
+    }
 
     public void AddTags(IEnumerable<Tag> tags)
     {

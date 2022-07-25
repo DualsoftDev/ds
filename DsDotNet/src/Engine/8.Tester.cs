@@ -24,7 +24,8 @@ class Tester
     [flow] F = {
         //Main = { T.Cp |> T.Cm, T.Cm1 > T.Cm2; T.Cm3 > T.Cm2; Cp2 > Cm2}
         //Main = { T.Cp2 |> Cp2; }
-        Main = { Cp2 |> Cm2; }
+        //Main = { Cp2 |> Cm2; }
+        Main = { T.Cp |> T.Cm; }
         //Main > Weak;
         //Cp1 > Cm1;
         //Weak >> Strong;

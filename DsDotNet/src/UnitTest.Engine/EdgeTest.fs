@@ -75,4 +75,33 @@ module EdgeTest =
             cpu.TagsMap.ContainsKey(vmStart.Name) |> ShouldBeTrue
             cpu.TagsMap.ContainsKey(smEnd.Name) |> ShouldBeTrue
             cpu.ForwardDependancyMap[edge].Contains(vmStart) |> ShouldBeTrue
+
+
+            let otherCpu = model.Cpus.First(fun cpu -> not cpu.IsActive);
+            [vpStart; spEnd; vmStart; smEnd]
+            |> List.map (fun t -> t.Name)
+            |> List.forall(otherCpu.TagsMap.ContainsKey)
+            |> ShouldBeTrue
+
+            let otherRootFlow = otherCpu.RootFlows |> Seq.exactlyOne
+            let vp = otherRootFlow.Coins |> Enumerable.OfType<Segment> |> Seq.find(fun seg -> seg.Name = "Vp")
+            let sp = otherRootFlow.Coins |> Enumerable.OfType<Segment> |> Seq.find(fun seg -> seg.Name = "Sp")
+            let vpStart2 = otherCpu.TagsMap["L_F_Main_T.Cp_P_F_Vp_Start"]
+            let spEnd2 = otherCpu.TagsMap["L_F_Main_T.Cp_P_F_Sp_End"]
+            vp.TagsStart.Contains(vpStart2) |> ShouldBeTrue
+            sp.TagsEnd.Contains(spEnd2) |> ShouldBeTrue
+            vpStart =!= vpStart2
+            spEnd =!= spEnd2
+
+
+
+            model.Epilogue()
+
+
+            let xxx = otherCpu.ForwardDependancyMap.Keys.OfType<Tag>().Select(fun k -> k.Name).ToArray()
+
+            otherCpu.ForwardDependancyMap[vpStart2].Contains(vp.PortS) |> ShouldBeTrue
+            otherCpu.ForwardDependancyMap[vp.PortE].Contains(spEnd2) |> ShouldBeTrue
+
+
             ()

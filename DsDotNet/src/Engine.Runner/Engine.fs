@@ -39,7 +39,7 @@ module EngineModule =
 
 
                     // OPC server 쪽에서 tag 값 변경시, 해당 tag 를 가지고 있는 모든 CPU 에 event 를 전달한다.
-                    Global.OpcTagChangedSubject
+                    Global.TagChangeFromOpcServerSubject
                         .Subscribe(fun tc ->
                             cpus
                             |> Seq.filter(fun cpu -> cpu.TagsMap.ContainsKey(tc.TagName))

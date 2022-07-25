@@ -15,6 +15,7 @@ public static class Global
     public static ILog Logger { get; set; }
     public static Subject<BitChange> BitChangedSubject { get; } = new();
 
-    public static Subject<OpcTagChange> OpcTagChangedSubject { get; } = new();
+    public static Subject<OpcTagChange> TagChangeToOpcServerSubject { get; } = new();
+    public static Subject<OpcTagChange> TagChangeFromOpcServerSubject { get; } = new();
 }
 

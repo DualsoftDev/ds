@@ -37,6 +37,7 @@ public class Tag : Bit, ITxRx
             if (_value != value)
             {
                 _value = value;
+                Global.TagChangeToOpcServerSubject.OnNext(new OpcTagChange(Name, value));
                 Global.BitChangedSubject.OnNext(new BitChange(this, value, true));
             }
         }

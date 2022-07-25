@@ -54,21 +54,5 @@ partial class Segment
     }
 
     public Dictionary<Child, Status4> ChildStatusMap { get; internal set; }
-    internal Status4 GetChildStatus(IVertex child)
-    {
-        Child child_ = null;
-        switch (child)
-        {
-            case Child ch: child_ = ch; break;
-            case Coin coin: child_ = CoinChildMap[coin]; break;
-            default:
-                throw new Exception("ERROR");
-        }
-        return ChildStatusMap[child_];
-    }
 
-    public bool IsChildrenOrigin()
-    {
-        return true;
-    }
 }

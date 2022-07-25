@@ -15,12 +15,23 @@ module EngineModule =
         let cpus = model.Cpus
 
         interface IEngine
-        member x.Model = model
-        member x.Opc = opc
-        member x.Cpu = activeCpu
+        member _.Model = model
+        member _.Opc = opc
+        member _.Cpu = activeCpu
 
 
-        member x.Run() =
+        member _.Run() =
+            logInfo "Start F# Engine running..."
+            /// OPC Server 에서 Cpu 가 가지고 있는 tag 값들을 읽어 들임
+            /// Engine 최초 구동 시, 수행됨.
+            let readTagsFromOpc (cpu:Cpu) (opc:OpcBroker) =
+                let tpls = opc.ReadTags(cpu.TagsMap.map(fun t -> t.Key))
+                for tName, value in tpls do
+                    let tag = cpu.TagsMap[tName]
+                    if tag.Value <> value then
+                        onOpcTagChanged cpu (new OpcTagChange(tName, value))
+
+
             let subscriptions =
                 [
                     for cpu in cpus do

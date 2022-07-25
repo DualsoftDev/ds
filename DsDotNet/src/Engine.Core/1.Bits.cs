@@ -17,10 +17,14 @@ public class Flag : Bit {
     public Flag(string name, bool bit = false) : base(name, bit) { }
 }
 
+
+
+[DebuggerDisplay("{QualifiedName}")]
 public abstract class Port : Bit
 {
     public Segment OwnerSegment { get; set; }
     public Port(Segment ownerSegment) => OwnerSegment = ownerSegment;
+    public string QualifiedName => $"{OwnerSegment.QualifiedName}.{GetType().Name}";
 }
 public class PortS : Port
 {

@@ -1,5 +1,6 @@
 using System.IO;
 using System.Configuration;
+using Dual.Common;
 
 namespace Engine;
 
@@ -21,6 +22,7 @@ class Program
         //Logger.Debug("");
 
         Log4NetHelper.Logger = Logger;
+        Log4NetWrapper.SetLogger(Logger);
         Global.Logger = Logger;
 
         var repo = (log4net.Repository.Hierarchy.Hierarchy)log4net.LogManager.GetRepository();

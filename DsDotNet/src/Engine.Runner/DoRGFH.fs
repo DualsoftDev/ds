@@ -3,11 +3,26 @@ namespace Engine.Runner
 
 open Dual.Common
 open Engine.Core
-
+open System.Reactive.Linq
 
 [<AutoOpen>]
 module DoRGFH =
+    let noop() = ()
+
+    ///<summary> 모든 Children 을 origin 상태로 이동</summary>
+    let moveChildrenToOrigin (seg:Segment) (funCheckGoingPaused: unit -> bool) =
+        // todo: children 이 origin 상태에 있는지 검사!!!
+        logDebug $"Moving segment[{seg.QualifiedName}] children to origin."
+        while not <| funCheckGoingPaused() do
+            ()
+        true
+
+
     let rec goingChild (child:Child) =
+        let parent = child.Parent
+        assert (parent.Status = Status4.Going)
+        child.Status <- Status4.Going
+
         match child.Coin with
         | :? ExSegmentCall as extSeg ->
             //goingSegment extSeg
@@ -22,6 +37,20 @@ module DoRGFH =
 
     and private goingSegment (seg:Segment) =
         assert seg.PortS.Value
+        assert (seg.Status = Status4.Ready)
+
+        logDebug $"Segment Going: {seg.QualifiedName}"
+
+        //let mutable paused = false
+        //use _pauseSubscription =
+        //    Global.BitChangedSubject
+        //        .Where(fun bc ->
+        //            (bc.Bit = seg.PortS && bc.NewValue = false)
+        //            || (bc.Bit = seg.PortR && bc.NewValue = true))
+        //        .Subscribe(fun _ -> paused <- true)
+        //        ;
+        //let isGoingPaused() = paused
+        let isGoingPaused() = seg.Paused
 
         // 1. Ready 상태에서의 clean start
         // 2. Going pause (==> Ready 로 해석) 상태에서의 resume start
@@ -34,11 +63,13 @@ module DoRGFH =
             let anyHoming = seg.IsChildrenStatusAnyWith(Status4.Homing)
             if anyHoming then
                 assert(seg.IsChildrenStatusAllWith(Status4.Homing))      // 하나라도 homing 이면, 모두 homing
-                if seg.IsChildrenOrigin() then
+                if moveChildrenToOrigin seg isGoingPaused then
                     let map = seg.ChildStatusMap
                     let keys = map.Keys |> Array.ofSeq
                     for key in keys do
                         map[key] <- Status4.Ready
+                else
+                    noop()
 
             let allReady = seg.IsChildrenStatusAllWith(Status4.Ready)
             let anyGoing = seg.IsChildrenStatusAnyWith(Status4.Going)
@@ -49,17 +80,20 @@ module DoRGFH =
 
                 let v_oes = seg.TraverseOrder
                 for ve in v_oes do
-                    let child = ve.Vertex :?> Child
-                    let es = ve.OutgoingEdges
-                    match child.Status with
-                    // child call 을 "잘" 시켜야 한다.
-                    | Status4.Ready ->
-                        goingChild child
-                    | Status4.Going
-                    | Status4.Finished ->
-                        ()
-                    | _ ->
-                        failwith "ERROR"
+                    if isGoingPaused() then
+                        logWarn "Going paused.."
+                    else
+                        let child = ve.Vertex :?> Child
+                        let es = ve.OutgoingEdges
+                        match child.Status with
+                        //! child call 을 "잘" 시켜야 한다.
+                        | Status4.Ready ->
+                            goingChild child
+                        | Status4.Going
+                        | Status4.Finished ->
+                            ()
+                        | _ ->
+                            failwith "ERROR"
 
 
             if (seg.IsChildrenStatusAnyWith(Status4.Homing)) then
@@ -67,7 +101,7 @@ module DoRGFH =
 
 
     let private homing() = ()
-    let private pause() = ()
+    let private pauseSegment (seg:Segment) = ()
     let private finish() = ()
     let private ready() = ()
 
@@ -77,6 +111,8 @@ module DoRGFH =
             let seg = port.OwnerSegment
             let rf = seg.IsResetFirst
             let st = seg.Status
+
+            logDebug $"Evaluating port [{port.QualifiedName}]={newValue} with {st}"
 
             // start port 와 reset port 동시 눌림
             let duplicate =
@@ -91,20 +127,19 @@ module DoRGFH =
             if duplicate then
                 effectivePort <- if rf then seg.PortR :> Port else seg.PortS
 
-
             effectivePort.Value <- newValue
             match effectivePort, newValue, st with
             | :? PortS, true , Status4.Ready -> goingSegment seg
-            | :? PortS, false, Status4.Ready -> pause()
-            | :? PortS, true,  Status4.Finished -> ()
+            | :? PortS, false, Status4.Ready -> pauseSegment seg
+            | :? PortS, true,  Status4.Finished -> noop()
             | :? PortS, false, Status4.Finished ->
                     if seg.PortR.Value then
                         homing()
             | :? PortR, true , Status4.Finished -> homing()
-            | :? PortR, false, Status4.Finished -> pause()
+            | :? PortR, false, Status4.Finished -> pauseSegment seg
             | :? PortR, true , Status4.Going -> homing()
-            | :? PortR, false, Status4.Going -> pause()
-            | :? PortR, true , Status4.Ready -> ()
+            | :? PortR, false, Status4.Going -> pauseSegment seg
+            | :? PortR, true , Status4.Ready -> noop()
             | :? PortR, false, Status4.Ready ->
                     if seg.PortS.Value then
                         goingSegment seg

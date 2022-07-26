@@ -1,3 +1,5 @@
+using System.Linq;
+
 namespace Engine.Core;
 
 [Flags]
@@ -43,9 +45,16 @@ public class Tag : Bit, ITxRx
         }
     }
 
+
+    static Dictionary<string, Tag> _generatedTagsMap = new();
     public Tag(ICoin owner, string name, TagType tagType = TagType.None, Cpu ownerCpu = null, bool value = false)
         : base(name, value, ownerCpu)
     {
+        var key = $"{ownerCpu?.Name}.{name}";
+        Debug.Assert(!_generatedTagsMap.ContainsKey(key));
+        _generatedTagsMap.Add(key, this);
+
+
         Owner = owner;
         Type = tagType;
 

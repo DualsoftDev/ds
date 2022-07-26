@@ -102,7 +102,10 @@ public static class CpuExtensionBitChange
         {
             var srcTag = source as Tag;
             if (srcTag != null)
+            {
+                var xxx = fwdMap.Keys.OfType<Tag>().FirstOrDefault(k => k.Name == srcTag.Name);
                 Debug.Assert(!fwdMap.Keys.OfType<Tag>().Any(k => k.Name == srcTag.Name));
+            }
 
 
             fwdMap[source] = new HashSet<IBit>();

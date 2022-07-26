@@ -96,6 +96,18 @@ partial class EngineBuilder
                         cpu.AddBitDependancy(seg.PortE, et);
             }
 
+            foreach (var e in flows.SelectMany(f => f.Edges))
+            {
+                foreach(var s in e.SourceTags)
+                {
+                    if (!fwd.ContainsKey(s) || !fwd[s].Contains(e))
+                        cpu.AddBitDependancy(s, e);
+                }
+
+                if (!fwd.ContainsKey(e) || !fwd[e].Contains(e.TargetTag))
+                    cpu.AddBitDependancy(e, e.TargetTag);
+            }
+
         }
 
 
@@ -107,13 +119,33 @@ partial class EngineBuilder
             var segment = tgi.TagContainerSegment;
             var tag = segment.OwnerCpu.TagsMap[tgi.GeneratedTag.Name];
             var tt = tag.Type;
+            var edge = tgi.Edge;
+            Debug.Assert(segment.OwnerCpu == tag.OwnerCpu);
+            var edgeTag =
+                edge.OwnerCpu == tag.OwnerCpu
+                ? tag
+                : edge.OwnerCpu.TagsMap[tag.Name]
+                ;
+            Debug.Assert(edge.OwnerCpu == edgeTag.OwnerCpu);
 
             if (tt.HasFlag(TagType.Start))
+            {
                 segment.AddStartTags(tag);
+                if (tgi.IsTarget)
+                    edge.TargetTag = edgeTag;
+            }
             else if (tt.HasFlag(TagType.Reset))
+            {
                 segment.AddResetTags(tag);
+                if (tgi.IsTarget)
+                    edge.TargetTag = edgeTag;
+            }
             else if (tt.HasFlag(TagType.End))
+            {
                 segment.AddEndTags(tag);
+                if (tgi.IsSource)
+                    edge.SourceTags.Add(edgeTag);
+            }
             else
                 throw new Exception("ERROR");
         }

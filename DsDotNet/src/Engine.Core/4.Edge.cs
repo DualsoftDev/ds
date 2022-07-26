@@ -5,12 +5,23 @@ public abstract class Edge : IEdge
 {
     public Flow ContainerFlow;
 
-    /// <summary> Conjuction </summary>
+    /// <summary> Conjuction : 사용자가 모델링한 source vertices</summary>
     public IVertex[] Sources { get; internal set; }
+
+    /// <summary>사용자가 모델링한 target vertex</summary>
     public IVertex Target { get; internal set; }
+
+
+    public List<Tag> SourceTags { get; } = new();
+    public Tag TargetTag { get; internal set; }
+
+
     public IEnumerable<IVertex> Vertices => Sources.Append(Target);
 
-    public bool Value { get => Sources.All(v => v.Value); set => throw new NotImplementedException(); }
+    public bool Value {
+        get => Sources.All(v => v.Value);
+        set => throw new NotImplementedException();
+    }
     public Cpu OwnerCpu { get => ContainerFlow.Cpu; set => throw new NotImplementedException(); }
 
     public string Operator;

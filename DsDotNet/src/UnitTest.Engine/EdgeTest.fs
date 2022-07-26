@@ -105,4 +105,15 @@ module EdgeTest =
             let eVp2Pp = otherRootFlow.Edges |> Seq.find(fun e -> e.Sources.Contains(vp) && e.Target = pp)
             let ePp2Sp = otherRootFlow.Edges |> Seq.find(fun e -> e.Sources.Contains(pp) && e.Target = sp)
 
+            let vpEnd2 = otherCpu.TagsMap["P_F_Vp_End"]
+            let ppStart2 = otherCpu.TagsMap["P_F_Pp_Start"]
+            let ppEndt2 = otherCpu.TagsMap["P_F_Pp_End"]
+            let spStart2 = otherCpu.TagsMap["P_F_Sp_Start"]
+            let spEnd2 = otherCpu.TagsMap["L_F_Main_T.Cp_P_F_Sp_End"]
+
+            otherCpu.ForwardDependancyMap[vpEnd2].Contains(eVp2Pp) |> ShouldBeTrue
+            otherCpu.ForwardDependancyMap[eVp2Pp].Contains(ppStart2) |> ShouldBeTrue
+
+
+
             ()

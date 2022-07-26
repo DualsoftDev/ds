@@ -17,6 +17,7 @@ partial class EngineBuilder
 
         public Edge Edge;       // 사용된 edge
         public bool IsSource;   // edge 의 source 쪽인지 여부
+        public bool IsTarget => !IsSource;   // edge 의 target 쪽인지 여부
 
         public string Context;
 
@@ -123,8 +124,21 @@ partial class EngineBuilder
 
         Tag createTag(TagGenInfo tgi, ICoin owner, TagType tagType)
         {
+            if (tgi.GeneratedTag != null)
+            {
+                Debug.Assert(tgi.GeneratedTag.OwnerCpu == owner.OwnerCpu);
+                Debug.Assert(tgi.GeneratedTag.Type == tagType);
+                return tgi.GeneratedTag;
+            }
+            if (tgi.OwnerCpu == owner.OwnerCpu && tgi.OwnerCpu.TagsMap.ContainsKey(tgi.TagName))
+            {
+                Global.Logger.Warn($"Tag [{tgi.TagName} already created.  using it instead creating new one.");
+                var existing = tgi.OwnerCpu.TagsMap[tgi.TagName];
+                tgi.GeneratedTag = existing;
+                return existing;
+            }
+
             var tag = new Tag(owner, tgi.TagName, tagType, tgi.OwnerCpu);
-            Debug.Assert(tag.OwnerCpu == tgi.OwnerCpu);
             tgi.GeneratedTag = tag;
             return tag;
         }

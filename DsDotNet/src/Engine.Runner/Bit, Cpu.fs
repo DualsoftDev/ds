@@ -59,7 +59,11 @@ module internal CpuModule =
 
 
     let onBitChanged (cpu:Cpu) (bitChange:BitChange) =
-        cpu.Queue.Enqueue(bitChange)
-        processQueue cpu
+        if bitChange.Bit.OwnerCpu = cpu then
+            cpu.Queue.Enqueue(bitChange)
+            processQueue cpu
+        else
+            // skipping other cpu's bit change
+            ()
 
 

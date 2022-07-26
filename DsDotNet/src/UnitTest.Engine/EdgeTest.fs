@@ -45,6 +45,9 @@ module EdgeTest =
             model.BuidGraphInfo();
             builder.InitializeAllFlows()
 
+            model.Epilogue()
+
+
             let fwd = cpu.ForwardDependancyMap
             let bwd = cpu.BackwardDependancyMap
 
@@ -85,6 +88,7 @@ module EdgeTest =
 
             let otherRootFlow = otherCpu.RootFlows |> Seq.exactlyOne
             let vp = otherRootFlow.Coins |> Enumerable.OfType<Segment> |> Seq.find(fun seg -> seg.Name = "Vp")
+            let pp = otherRootFlow.Coins |> Enumerable.OfType<Segment> |> Seq.find(fun seg -> seg.Name = "Pp")
             let sp = otherRootFlow.Coins |> Enumerable.OfType<Segment> |> Seq.find(fun seg -> seg.Name = "Sp")
             let vpStart2 = otherCpu.TagsMap["L_F_Main_T.Cp_P_F_Vp_Start"]
             let spEnd2 = otherCpu.TagsMap["L_F_Main_T.Cp_P_F_Sp_End"]
@@ -94,14 +98,11 @@ module EdgeTest =
             spEnd =!= spEnd2
 
 
-
-            model.Epilogue()
-
-
-            let xxx = otherCpu.ForwardDependancyMap.Keys.OfType<Tag>().Select(fun k -> k.Name).ToArray()
-
             otherCpu.ForwardDependancyMap[vpStart2].Contains(vp.PortS) |> ShouldBeTrue
-            otherCpu.ForwardDependancyMap[vp.PortE].Contains(spEnd2) |> ShouldBeTrue
+            otherCpu.ForwardDependancyMap[sp.PortE].Contains(spEnd2) |> ShouldBeTrue
 
+
+            let eVp2Pp = otherRootFlow.Edges |> Seq.find(fun e -> e.Sources.Contains(vp) && e.Target = pp)
+            let ePp2Sp = otherRootFlow.Edges |> Seq.find(fun e -> e.Sources.Contains(pp) && e.Target = sp)
 
             ()

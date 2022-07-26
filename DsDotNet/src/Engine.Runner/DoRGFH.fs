@@ -84,6 +84,7 @@ module DoRGFH =
 
         let allFinished = seg.IsChildrenStatusAllWith(Status4.Finished)
         if allFinished then
+            logDebug $"Finishing segment [{seg.QualifiedName}]."
             seg.PortE.Value <- true
             assert(seg.Status = Status4.Finished)
         else

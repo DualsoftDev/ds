@@ -74,7 +74,28 @@ partial class EngineBuilder
             hmiTags.Iter(cpu.AddTag);
             Opc.AddTags(hmiTags);
 
+            addMissingForwardDependencies(cpu, flows);
             cpu.BuildBackwardDependency();
+        }
+
+        void addMissingForwardDependencies(Cpu cpu, RootFlow[] flows)
+        {
+            var fwd = cpu.ForwardDependancyMap;
+            foreach (var seg in flows.SelectMany(f => f.RootSegments))
+            {
+                foreach (var st in seg.TagsStart)
+                    if (!fwd.ContainsKey(st) || !fwd[st].Contains(seg.PortS))
+                        cpu.AddBitDependancy(st, seg.PortS);
+
+                foreach (var rt in seg.TagsReset)
+                    if (!fwd.ContainsKey(rt) || !fwd[rt].Contains(seg.PortR))
+                        cpu.AddBitDependancy(rt, seg.PortR);
+
+                foreach (var et in seg.TagsEnd)
+                    if (!fwd.ContainsKey(seg.PortE) || !fwd[seg.PortE].Contains(et))
+                        cpu.AddBitDependancy(seg.PortE, et);
+            }
+
         }
 
 

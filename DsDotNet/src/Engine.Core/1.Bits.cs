@@ -10,6 +10,7 @@ public abstract class Bit : Named, IBit
         OwnerCpu = ownerCpu;
     }
 
+    public override string ToString() => ToText();
     public override string ToText() => $"{base.ToText()}@{OwnerCpu.Name}";
 }
 
@@ -26,6 +27,7 @@ public abstract class Port : Bit
     public Segment OwnerSegment { get; set; }
     public Port(Segment ownerSegment) => OwnerSegment = ownerSegment;
     public string QualifiedName => $"{OwnerSegment.QualifiedName}.{GetType().Name}";
+    public override string ToString() => $"{QualifiedName}[{this.GetType().Name}]@{OwnerCpu.Name}";
 }
 public class PortS : Port
 {

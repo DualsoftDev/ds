@@ -66,7 +66,7 @@ public class Named: INamed
         Name = name;
     }
     public virtual string ToText() => $"{Name}[{this.GetType().Name}]";
-    //public override string ToString() => Name;
+    public override string ToString() => ToText();
 }
 
 

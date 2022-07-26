@@ -35,7 +35,7 @@ public class OpcBroker
     {
         var subs = Global.TagChangeToOpcServerSubject.Subscribe(otc =>
         {
-            Global.Logger.Debug($"Publishing tag[{otc.TagName}] change = {otc.Value}");
+            Global.Logger.Debug($"\tPublishing tag[{otc.TagName}] change = {otc.Value}");
             Write(otc.TagName, otc.Value);
             //if (_tagDic.ContainsKey(otc.TagName))
             //{

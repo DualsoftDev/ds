@@ -1,7 +1,7 @@
 namespace Engine.Core;
 
 [DebuggerDisplay("{ToText()}")]
-public abstract class Edge : IEdge
+public abstract partial class Edge : IEdge
 {
     public Flow ContainerFlow;
 
@@ -10,19 +10,6 @@ public abstract class Edge : IEdge
 
     /// <summary>사용자가 모델링한 target vertex</summary>
     public IVertex Target { get; internal set; }
-
-
-    public List<Tag> SourceTags { get; } = new();
-    public Tag TargetTag { get; internal set; }
-
-
-    public IEnumerable<IVertex> Vertices => Sources.Append(Target);
-
-    public bool Value {
-        get => Sources.All(v => v.Value);
-        set => throw new NotImplementedException();
-    }
-    public Cpu OwnerCpu { get => ContainerFlow.Cpu; set => throw new NotImplementedException(); }
 
     public string Operator;
 
@@ -36,6 +23,24 @@ public abstract class Edge : IEdge
         Target = target;
         Operator = operator_;
     }
+}
+
+
+public partial class Edge
+{
+    public List<Tag> SourceTags { get; } = new();
+    public Tag TargetTag { get; internal set; }
+
+
+    public IEnumerable<IVertex> Vertices => Sources.Append(Target);
+
+    public bool IsSourcesTrue => Sources.All(v => v.Value);
+    public virtual bool Value { get; set; }
+
+    public Cpu OwnerCpu { get => ContainerFlow.Cpu; set => throw new NotImplementedException(); }
+
+    public bool IsRootEdge => ContainerFlow is RootFlow;
+    public override string ToString() => ToText();
     public string ToText()
     {
         var ss = string.Join(", ", Sources.Select(s => s.GetQualifiedName()));

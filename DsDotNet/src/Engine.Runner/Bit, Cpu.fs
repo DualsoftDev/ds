@@ -19,25 +19,46 @@ module internal CpuModule =
         let tagName, value = tagChange.TagName, tagChange.Value
         if (cpu.TagsMap.ContainsKey(tagName)) then
             let tag = cpu.TagsMap[tagName]
-            tag.Value <- value;      //! setter 에서 BitChangedSubject.OnNext --> onBitChanged 가 호출된다.
+            if tag.Value <> value then
+                tag.Value <- value;      //! setter 에서 BitChangedSubject.OnNext --> onBitChanged 가 호출된다.
 
     /// CPU 별 bit change event queue 에 들어 있는 event 를 처리 : evaluateBit 호출
     let private processQueue(cpu:Cpu) =
         /// bit 변경에 따라 다음 수행해야 할 작업을 찾아서 수행
         let evaluateBit (bit:IBit) =
-            let cpu = bit.OwnerCpu
-            let prevs = cpu.BackwardDependancyMap[bit]
-            let newValue = prevs |> Seq.exists(fun b -> b.Value)
-            let current = bit.Value
-            if current <> newValue then
-                match bit with
-                | :? Flag
-                | :? Tag ->
-                    logWarn "Processing bit [%A] skipped." bit
-                | :? Port as port ->
-                    evaluatePort port newValue
-                | _ ->
-                    failwith "ERROR"
+            let evaluateEdge(edge:Edge) =
+                if edge.Value <> edge.IsSourcesTrue then
+                    logDebug $"\tEvaluating Edge {edge}"
+                    edge.Value <- edge.IsSourcesTrue
+                    edge.TargetTag.Value <- edge.Value
+                else
+                    logDebug "\t\tSkip evaluating edge %A" edge
+                ()
+
+            match bit with
+            | :? Edge as e when e.IsRootEdge ->
+                evaluateEdge(e)
+            | :? Edge as e ->
+                logWarn $"Need keep going for internal edge: {e}"
+            | _ ->
+                let cpu = bit.OwnerCpu
+                let prevs = cpu.BackwardDependancyMap[bit]
+                let newValue = prevs |> Seq.exists(fun b -> b.Value)
+                let current = bit.Value
+                if current <> newValue then
+                    logDebug "\tEvaluating bit %A" bit
+                    match bit with
+                    | :? Port as port ->
+                        evaluatePort port newValue
+                    | :? Flag
+                    | :? Tag ->
+                        failwith "ERROR"
+
+                    | _ ->
+                        failwith "ERROR"
+                else
+                    logDebug "\t\tSkip evaluating bit %A" bit
+
 
         while (cpu.Queue.Count > 0) do
             let mutable goOn = true
@@ -48,6 +69,9 @@ module internal CpuModule =
                     if (bc.NewValue <> bit.Value) then
                         assert not bc.Applied
                         bit.Value <- bc.NewValue
+
+
+                    logDebug "\tProcessing Queue : bit change %A" bc
 
                     if cpu.ForwardDependancyMap.ContainsKey(bit) then
                         cpu.ForwardDependancyMap[bit] |> Seq.iter evaluateBit

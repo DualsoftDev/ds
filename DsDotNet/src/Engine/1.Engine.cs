@@ -1,8 +1,6 @@
 using Engine.Parser;
 using Engine.Runner;
 
-[assembly: DebuggerDisplay("[{Key}={Value}]", Target = typeof(KeyValuePair<,>))]
-
 namespace Engine;
 
 public partial class EngineBuilder

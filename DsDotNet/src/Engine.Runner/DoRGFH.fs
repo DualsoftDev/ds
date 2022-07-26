@@ -79,15 +79,18 @@ module DoRGFH =
                     seg.CancelGoing())
                 ;
 
+        let checkAllChildrenFinished() =
+            let allFinished = seg.IsChildrenStatusAllWith(Status4.Finished)
+            if allFinished then
+                logDebug $"Finishing segment [{seg.QualifiedName}]."
+                seg.PortE.Value <- true
+                assert(seg.Status = Status4.Finished)
+            allFinished
+
         // 1. Ready 상태에서의 clean start
         // 2. Going pause (==> Ready 로 해석) 상태에서의 resume start
 
-        let allFinished = seg.IsChildrenStatusAllWith(Status4.Finished)
-        if allFinished then
-            logDebug $"Finishing segment [{seg.QualifiedName}]."
-            seg.PortE.Value <- true
-            assert(seg.Status = Status4.Finished)
-        else
+        if not <| checkAllChildrenFinished() then
             let anyHoming = seg.IsChildrenStatusAnyWith(Status4.Homing)
             if anyHoming then
                 assert(seg.IsChildrenStatusAllWith(Status4.Homing))      // 하나라도 homing 이면, 모두 homing
@@ -113,7 +116,7 @@ module DoRGFH =
 
                 let keepGoingFrom (child:Child) =
                     let goingChild (child:Child) =
-                        logDebug $"Child [{child.QualifiedName}] going.."
+                        logDebug $"Child Going: [{child.QualifiedName}]"
                         //! child call 을 "잘" 시켜야 한다.
                         let parent = child.Parent
                         assert (parent.Status = Status4.Going)
@@ -131,27 +134,27 @@ module DoRGFH =
                     for next in getNextChildren child do
                         goingChild next
 
+                    checkAllChildrenFinished()
+
 
                 use _childFinishedSubscription =
                     // child 들의 end tag 들 중에 하나라도 ON 으로 변경되면...
-                    let xx =
-                        Global.BitChangedSubject
-                            .Where(fun bc ->
-                                match bc.Bit with
-                                | :? Tag as tag ->
-                                    endTag2ChildMap.ContainsKey(tag)
-                                | _ -> false )
-                            .Subscribe(fun bc ->
-                                let child = endTag2ChildMap[bc.Bit :?> Tag]
+                    Global.BitChangedSubject
+                        .Where(fun bc ->
+                            match bc.Bit with
+                            | :? Tag as tag ->
+                                endTag2ChildMap.ContainsKey(tag)
+                            | _ -> false )
+                        .Subscribe(fun bc ->
+                            let child = endTag2ChildMap[bc.Bit :?> Tag]
 
-                                assert (child.Status = Status4.Going)
-                                if child.Status = Status4.Going then
-                                    logDebug $"Detected child [{child.QualifiedName}] finished"
-                                    child.Status <- Status4.Finished
-                                    keepGoingFrom child )
-                    Disposable.Empty
+                            assert (child.Status = Status4.Going)
+                            if child.Status = Status4.Going then
+                                logDebug $"Finising child [{child.QualifiedName}] detected"
+                                child.Status <- Status4.Finished
+                                keepGoingFrom child |> ignore )
 
-                keepGoingFrom null
+                keepGoingFrom null |> ignore
 
 
                 //let pickVictims (seed:Child) =

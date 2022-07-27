@@ -37,10 +37,6 @@ public class OpcBroker
         {
             Global.Logger.Debug($"\tPublishing tag[{otc.TagName}] change = {otc.Value}");
             Write(otc.TagName, otc.Value);
-            //if (_tagDic.ContainsKey(otc.TagName))
-            //{
-            //    Global.TagChangeFromOpcServerSubject.OnNext(otc);
-            //}
         });
         _disposables.Add(subs);
     }

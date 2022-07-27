@@ -3,24 +3,25 @@ namespace Engine.Core;
 [Flags]
 public enum TagType
 {
-    None = 0,
-    Q = 1 << 0,
-    I = 1 << 1,
-    M = 1 << 2,
-    Special = 1 << 3,
+    None     = 0,
+    Q        = 1 << 0,
+    I        = 1 << 1,
+    M        = 1 << 2,
+    Special  = 1 << 3,
 
     // segment tag
-    Start = 1 << 4,
-    Reset = 1 << 5,
-    End = 1 << 6,
+    Start    = 1 << 4,
+    Reset    = 1 << 5,
+    End      = 1 << 6,
+    Going    = 1 << 7,
     /// <summary> 공정(flow) auto start, auto reset </summary>
-    Auto = 1 << 7,
+    Auto     = 1 << 10,
     /// <summary> 외부 접근 용 Tag 여부 </summary>
-    External = 1 << 8,
+    External = 1 << 11,
 
     // call tag
-    TX = 1 << 9,
-    RX = 1 << 10,
+    TX       = 1 << 12,
+    RX       = 1 << 13,
 };
 
 

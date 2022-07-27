@@ -22,6 +22,7 @@ public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, IWithSREPorts
     public IEnumerable<Tag> TagsStart => _tagSREContainer.TagsStart;
     public IEnumerable<Tag> TagsReset => _tagSREContainer.TagsReset;
     public IEnumerable<Tag> TagsEnd => _tagSREContainer.TagsEnd;
+    public Tag TagGoing { get; internal set; }
 
     public void AddStartTags(params Tag[] tags) => _tagSREContainer.AddStartTags(tags);
     public void AddResetTags(params Tag[] tags) => _tagSREContainer.AddResetTags(tags);

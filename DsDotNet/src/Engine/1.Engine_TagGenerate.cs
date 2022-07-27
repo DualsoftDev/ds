@@ -192,9 +192,14 @@ partial class EngineBuilder
             /// Child 에 대한 End tag 생성 정보를 반환
             IEnumerable<TagGenInfo> createEndTagGenInfos(Child child, string context, Edge edge, bool isSource)
             {
+                var isResetEdge = edge is IResetEdge;
+
                 switch (child.Coin)
                 {
                     case SubCall call:
+                        if (isResetEdge)
+                            yield break;
+
                         var segsEnd = call.Prototype.RXs.OfType<Segment>();
                         foreach (var segE in segsEnd)
                         {
@@ -219,6 +224,10 @@ partial class EngineBuilder
 
             IEnumerable<TagGenInfo> createTagGenInfos4Edge(Edge edge, string fqdn)
             {
+                var isResetEdge = edge is IResetEdge;
+                if (isResetEdge)
+                    Console.WriteLine();
+
                 var sourceTgis =
                     edge.Sources
                     .SelectMany(s => s switch {
@@ -242,6 +251,10 @@ partial class EngineBuilder
 
             IEnumerable<TagGenInfo> createTagGenInfos4Child(Child child, Edge edge, bool isSource, string fqdn)
             {
+                //Debug.Assert(!(edge is IResetEdge));
+                var isResetEdge = edge is IResetEdge;
+                if (isResetEdge)
+                    Console.WriteLine();
                 verifyExternalSegmentCallChild_SingleCommandType(child);
                 var rootSeg = child.Parent;
 
@@ -262,6 +275,9 @@ partial class EngineBuilder
 
                 switch (child.Coin)
                 {
+                    case SubCall call when isResetEdge:
+                        Global.Logger.Debug($"Skipping generating tags for reset edge on Calls");
+                        break;
                     case SubCall call:
                         if (!hasReset) // reset 이 없으면...  (set edge 가 있거나, 없거나..)
                         {
@@ -289,8 +305,12 @@ partial class EngineBuilder
 
             IEnumerable<TagGenInfo> createTagGenInfos4RootVertex(IVertex root, Edge edge, bool isSource)
             {
+                var isResetEdge = edge is IResetEdge;
                 switch (root)
                 {
+                    case RootCall rootCall when isResetEdge:
+                        Global.Logger.Debug($"Skipping generating tags for reset edge on Calls");
+                        break;
                     case RootCall rootCall:
                         foreach (var txSeg in rootCall.Prototype.TXs.OfType<Segment>())
                         {
@@ -308,7 +328,13 @@ partial class EngineBuilder
                         var fqdn = rootSeg.QualifiedName;
                         if (edge != null)
                         {
-                            var type = isSource ? TagType.End : (edge is IResetEdge ? TagType.Reset : TagType.Start);
+                            var type = (isResetEdge, isSource) switch
+                            {
+                                (true, true) => TagType.Going,
+                                (true, false) => TagType.Reset,
+                                (false, true) => TagType.End,
+                                (false, false) => TagType.Start,
+                            };
                             yield return new TagGenInfo(type, rootSeg, rootSeg, fqdn, edge, isSource, root.OwnerCpu);
                         }
 

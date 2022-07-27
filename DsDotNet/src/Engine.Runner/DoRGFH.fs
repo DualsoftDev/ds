@@ -154,6 +154,7 @@ module DoRGFH =
                                 child.Status <- Status4.Finished
                                 keepGoingFrom child |> ignore )
 
+                seg.TagGoing.Value <- true;
                 keepGoingFrom null |> ignore
 
 

@@ -25,10 +25,10 @@ module internal CpuModule =
     /// CPU 별 bit change event queue 에 들어 있는 event 를 처리 : evaluateBit 호출
     let private processQueue(cpu:Cpu) =
         /// bit 변경에 따라 다음 수행해야 할 작업을 찾아서 수행
-        let evaluateBit (bit:IBit) =
+        let evaluateBit (causalBit:IBit) (bit:IBit) =
             let evaluateEdge(edge:Edge) =
                 if edge.Value <> edge.IsSourcesTrue then
-                    logDebug $"\tEvaluating Edge {edge}"
+                    logDebug $"\tEvaluating Edge {edge} due to {causalBit}"
                     edge.Value <- edge.IsSourcesTrue
                     edge.TargetTag.Value <- edge.Value
                 else
@@ -46,7 +46,7 @@ module internal CpuModule =
                 let newValue = prevs |> Seq.exists(fun b -> b.Value)
                 let current = bit.Value
                 if current <> newValue then
-                    logDebug "\tEvaluating bit %A" bit
+                    logDebug $"\tEvaluating bit {bit} due to {causalBit}"
                     match bit with
                     | :? Port as port ->
                         evaluatePort port newValue
@@ -74,7 +74,7 @@ module internal CpuModule =
                     logDebug "\tProcessing Queue: %A" bc
 
                     if cpu.ForwardDependancyMap.ContainsKey(bit) then
-                        cpu.ForwardDependancyMap[bit] |> Seq.iter evaluateBit
+                        cpu.ForwardDependancyMap[bit] |> Seq.iter (evaluateBit bit)
                 | false, _ ->
                     goOn <- false
 

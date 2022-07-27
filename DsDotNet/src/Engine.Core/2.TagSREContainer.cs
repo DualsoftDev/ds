@@ -8,6 +8,7 @@ internal class TagSREContainer : ITagSREContainer
     TagDic _starts = new();
     TagDic _resets = new();
     TagDic _ends   = new();
+    TagDic _goings = new();
     Action<IEnumerable<Tag>> _addTagsFunc;
 
     public IEnumerable<Tag> TagsStart => _starts.Values;
@@ -50,6 +51,8 @@ internal class TagSREContainer : ITagSREContainer
                 dic = _resets;
             else if (tag.Type.HasFlag(TagType.End))
                 dic = _ends;
+            else if (tag.Type.HasFlag(TagType.Going))
+                dic = _goings;
             else
                 throw new Exception("Tag type is not supported.");
 

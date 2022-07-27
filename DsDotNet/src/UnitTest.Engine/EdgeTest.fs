@@ -26,9 +26,20 @@ module EdgeTest =
     [flow] F = {
         Main = { T.Cp > T.Cm; }
     }
+
+[sys] P = {
+    [flow] F = {
+        Vp > Pp > Sp;
+        Vm > Pm > Sm;
+
+        Pp |> Sm;
+        Pm |> Sp;
+        Vp <||> Vm;
+    }
+}
 }
 """
-            text <- text + sysP + cpus
+            text <- text + (*sysP +*) cpus
 
             let builder = new EngineBuilder(text)
             let model = builder.Model
@@ -114,6 +125,17 @@ module EdgeTest =
 
                 otherCpu.ForwardDependancyMap[vpEnd2].Contains(eVp2Pp) |> ShouldBeTrue
                 otherCpu.ForwardDependancyMap[eVp2Pp].Contains(ppStart2) |> ShouldBeTrue
+
+
+                let ``check reset edge source & targets`` =
+                    // Pp |> Sm;
+                    let sm = otherRootFlow.Coins |> Enumerable.OfType<Segment> |> Seq.find(fun seg -> seg.Name = "Sm")
+                    let eResetPp2Sm = otherRootFlow.Edges |> Seq.find(fun e -> e.Sources.Contains(pp) && e.Target = sm)
+                    box eResetPp2Sm :? IResetEdge |> ShouldBeTrue
+                    eResetPp2Sm.SourceTags.Contains(pp.TagGoing) |> ShouldBeTrue
+                    sm.TagsReset.Contains(eResetPp2Sm.TargetTag)
+                ()
+
 
             let ``children start/end tags check`` =
                 main.Children |> Seq.forall(fun c -> c.TagsStart.Count() = 1 && c.TagsEnd.Count() = 1) |> ShouldBeTrue

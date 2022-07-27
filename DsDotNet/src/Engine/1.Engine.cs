@@ -66,6 +66,9 @@ partial class EngineBuilder
 
             Opc.AddTags(tags);
 
+            var goingTags = flows.SelectMany(f => f.RootSegments).Select(seg => seg.TagGoing);
+            Opc.AddTags(goingTags);
+
 
             // flow 상의 root segment 들에 대한 HMI s/r/e tags
             var hmiTags = flows.SelectMany(f => f.GenereateHmiTags4Segments()).ToArray();
@@ -144,6 +147,13 @@ partial class EngineBuilder
                 if (tgi.IsSource)
                     edge.SourceTags.Add(edgeTag);
             }
+            else if (tt.HasFlag(TagType.Going))
+            {
+                Debug.Assert(segment.TagGoing.Name == tag.Name);
+                Debug.Assert(segment.TagGoing == edgeTag);
+                if (tgi.IsSource)
+                    edge.SourceTags.Add(segment.TagGoing);
+            }
             else
                 throw new Exception("ERROR");
         }
@@ -177,26 +187,26 @@ partial class EngineBuilder
             switch (tgi.Child)
             {
                 case Segment:
-                    switch (tgi.IsSource, tgi.Type)
+                    switch (isReset, tgi.IsSource, tgi.Type)
                     {
-                        case (true, TagType.End) when isReset:
-                            // todo : Going tag??
-                            Global.Logger.Warn("Need going tag???");
-                            //cpu.AddBitDependancy(some-going-tag, edge);
+                        // { reset edge case
+                        case (true, true, TagType.Going):
+                            cpu.AddBitDependancy(tgi.GeneratedTag, edge);
                             break;
-                        case (true, TagType.End):
-                            cpu.AddBitDependancy(tag, edge);
-                            break;
-                        case (false, TagType.Reset):        // <--- added for segment
-                        case (false, TagType.Start):
+                        case (true, false, TagType.Reset):
                             cpu.AddBitDependancy(edge, tag);
                             break;
+                        // }
 
-                        case (true, TagType.Start):
-                        case (false, TagType.End):
+                        // { start edge case
+                        case (false, true, TagType.End):
+                            cpu.AddBitDependancy(tag, edge);
                             break;
+                        case (false, false, TagType.Start):
+                            cpu.AddBitDependancy(edge, tag);
+                            break;
+                        // }
 
-                        case (true, TagType.Reset):
                         default:
                             throw new Exception("ERROR");
                     }
@@ -227,8 +237,6 @@ partial class EngineBuilder
                     //throw new Exception("ERROR");
                     break;
             }
-
-            Console.WriteLine();
         }
     }
 }

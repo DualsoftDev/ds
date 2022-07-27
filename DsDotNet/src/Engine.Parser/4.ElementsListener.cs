@@ -237,6 +237,7 @@ partial class ElementsListener : dsBaseListener
         {
             foreach(var seg in cpu.RootFlows.SelectMany(rf => rf.ChildVertices).OfType<Segment>())
             {
+                seg.TagGoing = new Tag(cpu, seg, $"{seg.QualifiedName}_Going") { Type = TagType.Going };
                 var ports = new Port[] { seg.PortS, seg.PortR, seg.PortE, };
                 ports.Iter(p => p.OwnerCpu = cpu);
             }

@@ -65,7 +65,7 @@ module DoRGFH =
         assert (seg.Status = Status4.Going) // PortS ON 시, 이미 Going 상태
         assert isNull seg.MovingCancellationTokenSource
 
-        logDebug $"Segment Going: {seg.QualifiedName}"
+        logDebug $"GOING segment: {seg.QualifiedName}"
 
         let goingCancel = new CancellationTokenSource()
         seg.MovingCancellationTokenSource <- goingCancel
@@ -82,7 +82,7 @@ module DoRGFH =
         let checkAllChildrenFinished() =
             let allFinished = seg.IsChildrenStatusAllWith(Status4.Finished)
             if allFinished then
-                logDebug $"Finishing segment [{seg.QualifiedName}]."
+                logDebug $"FINISHING segment [{seg.QualifiedName}]."
                 seg.PortE.Value <- true
                 assert(seg.Status = Status4.Finished)
             allFinished
@@ -150,7 +150,7 @@ module DoRGFH =
 
                             assert (child.Status = Status4.Going)
                             if child.Status = Status4.Going then
-                                logDebug $"Finising child [{child.QualifiedName}] detected"
+                                logDebug $"FINISHING child [{child.QualifiedName}] detected"
                                 child.Status <- Status4.Finished
                                 keepGoingFrom child |> ignore )
 
@@ -243,7 +243,7 @@ module DoRGFH =
             let rf = seg.IsResetFirst
             let st = seg.Status
 
-            logDebug $"Evaluating port [{port.QualifiedName}]={newValue} with {st}"
+            logDebug $"\tEvaluating port [{port.QualifiedName}]={newValue} with {st}"
 
             // start port 와 reset port 동시 눌림
             let duplicate =

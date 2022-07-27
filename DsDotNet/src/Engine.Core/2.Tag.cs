@@ -1,5 +1,3 @@
-using System.Linq;
-
 namespace Engine.Core;
 
 [Flags]
@@ -49,8 +47,7 @@ public class Tag : Bit, ITxRx
     public Tag(Cpu ownerCpu, ICoin owner, string name, TagType tagType = TagType.None, bool value = false)
         : base(name, value, ownerCpu)
     {
-        ownerCpu.VerifyFirstCreateTag(name, this);
-
+        Debug.Assert(! ownerCpu.TagsMap.ContainsKey(name));
 
         Owner = owner;
         Type = tagType;

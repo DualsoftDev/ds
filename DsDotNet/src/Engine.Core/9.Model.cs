@@ -8,21 +8,9 @@ public class Model
 {
     public List<DsSystem> Systems = new();
     public List<Cpu> Cpus { get; } = new();
-
-    internal Dictionary<string, Tag> _generatedTagsMap = new();
 }
 public static class ModelExtension
 {
-    public static void VerifyFirstCreateTag(this Cpu cpu, string tagName, Tag tag)
-    {
-        var map = cpu.Model._generatedTagsMap;
-        var key = $"{cpu.Name}.{tagName}";
-
-        Debug.Assert(!map.ContainsKey(key));
-        map.Add(key, tag);
-    }
-
-
     public static T FindObject<T>(this Model model, string qualifiedName) where T : class
     {
         var tokens = qualifiedName.Split(new[] { '.' });

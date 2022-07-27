@@ -71,7 +71,7 @@ module internal CpuModule =
                         bit.Value <- bc.NewValue
 
 
-                    logDebug "\tProcessing Queue : bit change %A" bc
+                    logDebug "\tProcessing Queue: %A" bc
 
                     if cpu.ForwardDependancyMap.ContainsKey(bit) then
                         cpu.ForwardDependancyMap[bit] |> Seq.iter evaluateBit

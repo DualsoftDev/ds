@@ -1,18 +1,77 @@
+#nowarn "760"   // warning FS0760: IDisposable 인터페이스를 지원하는 개체는 생성 값이 리소스를 소유할 수도 있다는 것을 표시하기 위해 생성자를 나타내는 함수 값으로 'Type(args)' 또는 'Type'이 아니라 'new Type(args)' 구문을 사용하여 만드는 것이 좋습니다.
+
 namespace Engine.Runner
 
 open System
 open System.Reactive.Disposables
+open System.Reactive.Linq
+open System.Threading
+open System.Collections.Generic
+open System.Runtime.CompilerServices
 
 open Dual.Common
 open Engine.Core
-open Engine.OPC
-open System.Threading
+open System.Collections.Concurrent
 
-
+[<Extension>] // type Segment =
+type EngineExt =
+    [<Extension>]
+    static member OnSomethingWithSegment(segment:Segment, status:Status4) =
+        noop()
 
 [<AutoOpen>]
 module internal CpuModule =
-    let runCpu (cpu:Cpu) = Disposable.Empty
+    let runCpu (cpu:Cpu) =
+        let cancels = ConcurrentDictionary<Segment, CancellationTokenSource>()
+        let onSegmentStatusChanged (seg:Segment) (status:Status4) =
+            let doReady (seg:Segment) _cts =
+                ()
+            let doGoing (seg:Segment) (cts:CancellationTokenSource) =
+                ()
+            let doFinish (seg:Segment) _cts =
+                // just confirm finish
+                noop()
+            let doHoming (seg:Segment) (cts:CancellationTokenSource) =
+                ()
+
+            match cancels.TryGetValue(seg) with
+            | true, cts -> cts.Cancel()
+            | _ -> ()
+
+            (seg, new CancellationTokenSource())
+            ||> match status with
+                | Status4.Ready    -> doReady
+                | Status4.Going    -> doGoing
+                | Status4.Finished -> doFinish
+                | Status4.Homing   -> doHoming
+                | _  -> failwith "ERROR"
+
+        let listenPortChanges (segment:Segment) =
+            let xxx = Array.Empty<IBit>()    // segment.allPortBits
+            let bits = xxx |> HashSet
+            let subs =
+                Global.BitChangedSubject
+                    .Where(fun bc -> bits.Contains(bc.Bit))
+                    .Subscribe (fun bc ->
+                        //! todo
+                        (*
+                            let portS = segment.PortStartBits |> Seq.exists(fun b -> b.Value)
+                            let portR = segment.PortResetBits |> Seq.exists(fun b -> b.Value)
+                            let portE = segment.PortEndBits   |> Seq.exists(fun b -> b.Value)
+                            let segStatus = getSegmentStatus portS portR portE
+                            assert (segStatus <> previousSegmentStatus)
+                            //Global.SegmentStatusChangedSubject.OnNext(SegmentStatusChange(segment, segStatus))
+                            onSegmentStatusChanged segment segStatus
+                            *)
+                        ())
+            segment.Disposables.Add(subs)
+            subs
+
+        [
+            for f in cpu.RootFlows do
+            for s in f.RootSegments do
+                listenPortChanges s
+        ] |> CompositeDisposable
 
     /// 외부에서 tag 가 변경된 경우 수행할 작업 지정
     let onOpcTagChanged (cpu:Cpu) (tagChange:OpcTagChange) =

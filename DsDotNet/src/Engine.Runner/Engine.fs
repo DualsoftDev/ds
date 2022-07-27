@@ -47,7 +47,7 @@ module EngineModule =
 
                     for cpu in cpus do
                         readTagsFromOpc cpu opc
-                        runCpu cpu
+                        runCpu cpu  // ! 실제 수행!!
                 ]
 
             new CompositeDisposable(subscriptions)

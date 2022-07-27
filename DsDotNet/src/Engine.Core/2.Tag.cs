@@ -54,14 +54,7 @@ public class Tag : Bit, ITxRx
 
         Owner = owner;
         Type = tagType;
-
-        if (ownerCpu != null)
-        {
-            if (ownerCpu.TagsMap.ContainsKey(name))
-                Global.Logger.Warn($"Cpu [{ownerCpu.Name} already contains tag with name [{name}]");
-            else
-                ownerCpu.TagsMap.Add(name, this);
-        }
+        ownerCpu.TagsMap.Add(name, this);
     }
     public Tag(Tag tag)
         : this(tag.OwnerCpu, tag.Owner, tag.Name, tag.Type, tag.Value)

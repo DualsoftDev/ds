@@ -138,7 +138,7 @@ partial class EngineBuilder
                 return existing;
             }
 
-            var tag = new Tag(owner, tgi.TagName, tagType, tgi.OwnerCpu);
+            var tag = new Tag(tgi.OwnerCpu, owner, tgi.TagName, tagType);
             tgi.GeneratedTag = tag;
             return tag;
         }

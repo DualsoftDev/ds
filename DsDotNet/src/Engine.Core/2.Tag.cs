@@ -46,13 +46,10 @@ public class Tag : Bit, ITxRx
     }
 
 
-    static Dictionary<string, Tag> _generatedTagsMap = new();
-    public Tag(ICoin owner, string name, TagType tagType = TagType.None, Cpu ownerCpu = null, bool value = false)
+    public Tag(Cpu ownerCpu, ICoin owner, string name, TagType tagType = TagType.None, bool value = false)
         : base(name, value, ownerCpu)
     {
-        var key = $"{ownerCpu?.Name}.{name}";
-        Debug.Assert(!_generatedTagsMap.ContainsKey(key));
-        _generatedTagsMap.Add(key, this);
+        ownerCpu.VerifyFirstCreateTag(name, this);
 
 
         Owner = owner;
@@ -67,15 +64,15 @@ public class Tag : Bit, ITxRx
         }
     }
     public Tag(Tag tag)
-        : this(tag.Owner, tag.Name, tag.Type, tag.OwnerCpu, tag.Value)
+        : this(tag.OwnerCpu, tag.Owner, tag.Name, tag.Type, tag.Value)
     {
     }
 
     public static Tag CreateAutoStart(Segment ownerSegment, string name, Cpu ownerCpu) =>
-        new Tag(ownerSegment, name, TagType.Auto | TagType.Start | TagType.Q | TagType.External, ownerCpu)
+        new Tag(ownerCpu, ownerSegment, name, TagType.Auto | TagType.Start | TagType.Q | TagType.External)
         ;
     public static Tag CreateAutoReset(Segment ownerSegment, string name, Cpu ownerCpu) =>
-        new Tag(ownerSegment, name, TagType.Auto | TagType.Reset | TagType.Q | TagType.External, ownerCpu)
+        new Tag(ownerCpu, ownerSegment, name, TagType.Auto | TagType.Reset | TagType.Q | TagType.External)
         ;
 
 }

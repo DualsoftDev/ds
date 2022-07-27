@@ -12,9 +12,9 @@ public static class HmiTagGenerator
         var flow = segment.ContainerFlow;
         var cpu = flow.Cpu;
         var name = $"{flow.System.Name}_{flow.Name}_{segment.Name}";
-        var s = new Tag(segment, $"Start_{name}") { Type = TagType.Q };
-        var r = new Tag(segment, $"Reset_{name}") { Type = TagType.Q };
-        var e = new Tag(segment, $"End_{name}") { Type = TagType.I };
+        var s = new Tag(cpu, segment, $"Start_{name}") { Type = TagType.Q };
+        var r = new Tag(cpu, segment, $"Reset_{name}") { Type = TagType.Q };
+        var e = new Tag(cpu, segment, $"End_{name}") { Type = TagType.I };
 
         segment.AddStartTags(s);
         segment.AddResetTags(r);

@@ -34,7 +34,7 @@ public partial class Edge
 
     public IEnumerable<IVertex> Vertices => Sources.Append(Target);
 
-    public bool IsSourcesTrue => Sources.All(v => v.Value);
+    public bool IsSourcesTrue => SourceTags.All(t => t.Value);
     public virtual bool Value { get; set; }
 
     public Cpu OwnerCpu { get => ContainerFlow.Cpu; set => throw new NotImplementedException(); }

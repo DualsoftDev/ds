@@ -5,10 +5,8 @@ open Dual.Common
 open Engine.Core
 open System.Reactive.Linq
 open System.Linq
-open System.Threading.Tasks
 open System
 open System.Threading
-open System.Reactive.Disposables
 
 [<AutoOpen>]
 module DoRGFH =
@@ -90,7 +88,13 @@ module DoRGFH =
         // 1. Ready 상태에서의 clean start
         // 2. Going pause (==> Ready 로 해석) 상태에서의 resume start
 
-        if not <| checkAllChildrenFinished() then
+        if seg.Children.IsEmpty() then
+            seg.TagGoing.Value <- true
+            assert(seg.Status = Status4.Going)
+            seg.PortE.Value <- true
+            //assert(seg.Status = Status4.Finished) || Status4.Ready???
+            ()
+        elif not <| checkAllChildrenFinished() then
             let anyHoming = seg.IsChildrenStatusAnyWith(Status4.Homing)
             if anyHoming then
                 assert(seg.IsChildrenStatusAllWith(Status4.Homing))      // 하나라도 homing 이면, 모두 homing
@@ -119,9 +123,14 @@ module DoRGFH =
                         logDebug $"Child Going: [{child.QualifiedName}]"
                         //! child call 을 "잘" 시켜야 한다.
                         let parent = child.Parent
-                        assert (parent.Status = Status4.Going)
-                        child.Status <- Status4.Going
-                        child.TagsStart |> Seq.iter(fun t -> t.Value <- true)
+                        match parent.Status with
+                        | Status4.Going ->
+                            child.Status <- Status4.Going
+                            child.TagsStart |> Seq.iter(fun t -> t.Value <- true)
+                        | Status4.Finished ->
+                            assert (child.Status = Status4.Finished)
+                        | _ ->
+                            failwith "Unexpected"
 
                     let getNextChildren (seed:Child) =
                         if isNull seed then
@@ -147,12 +156,14 @@ module DoRGFH =
                             | _ -> false )
                         .Subscribe(fun bc ->
                             let child = endTag2ChildMap[bc.Bit :?> Tag]
-
-                            assert (child.Status = Status4.Going)
-                            if child.Status = Status4.Going then
+                            assert (child.Status = Status4.Going || child.Status = Status4.Finished)
+                            if child.Status = Status4.Finished
+                                || (child.Status = Status4.Going && child.TagsEnd.All(fun t -> t.Value))
+                            then
                                 logDebug $"FINISHING child [{child.QualifiedName}] detected"
                                 child.Status <- Status4.Finished
-                                keepGoingFrom child |> ignore )
+                                keepGoingFrom child |> ignore)
+
 
                 seg.TagGoing.Value <- true;
                 keepGoingFrom null |> ignore
@@ -231,11 +242,18 @@ module DoRGFH =
 
 
     let private homing (seg:Segment) =
-        seg.PortR.Value <- false
-    let private pauseSegment (seg:Segment) = ()
+        logDebug $"HOMING segment [{seg.QualifiedName}]."
+        seg.PortE.Value <- false
+
+    let private pauseSegment (seg:Segment) =
+        logDebug $"Pausing segment [{seg.QualifiedName}]."
+        ()
     let private finish (seg:Segment) =
+        logDebug $"FINISHING segment [{seg.QualifiedName}]."
         seg.PortS.Value <- false
-    let private ready() = ()
+    let private ready (seg:Segment) =
+        logDebug $"READY segment [{seg.QualifiedName}]."
+        ()
 
     /// Port 값 변경에 따른 작업 수행
     let evaluatePort (port:Port) (newValue:bool) =
@@ -243,6 +261,9 @@ module DoRGFH =
             let seg = port.OwnerSegment
             let rf = seg.IsResetFirst
             let st = seg.Status
+
+            if port :? PortR then
+                noop()
 
             logDebug $"\tEvaluating port [{port.QualifiedName}]={newValue} with {st}"
 
@@ -275,13 +296,14 @@ module DoRGFH =
             | :? PortR, false, Status4.Going -> pauseSegment seg
             | :? PortR, true , Status4.Ready ->
                 // if seg is in origin state, then, turn off reset port
+                logDebug $"\tSkip homing due to segment [{seg.QualifiedName}] already ready state."
                 seg.PortR.Value <- false
             | :? PortR, false, Status4.Ready ->
                     if seg.PortS.Value then
                         goingSegment seg
 
             | :? PortE, true , Status4.Going -> finish seg
-            | :? PortE, false, Status4.Homing -> ready()
+            | :? PortE, false, Status4.Homing -> ready seg
 
             | _ ->
                 failwith "ERROR"

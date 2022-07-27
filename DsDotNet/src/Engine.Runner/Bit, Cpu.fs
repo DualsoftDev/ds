@@ -73,6 +73,9 @@ module internal CpuModule =
 
                     logDebug "\tProcessing Queue: %A" bc
 
+                    if bit :? IResetEdge then
+                        ()
+
                     if cpu.ForwardDependancyMap.ContainsKey(bit) then
                         cpu.ForwardDependancyMap[bit] |> Seq.iter (evaluateBit bit)
                 | false, _ ->

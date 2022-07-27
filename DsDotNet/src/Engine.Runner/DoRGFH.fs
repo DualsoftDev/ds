@@ -229,9 +229,11 @@ module DoRGFH =
                 ()
 
 
-    let private homing() = ()
+    let private homing (seg:Segment) =
+        seg.PortR.Value <- false
     let private pauseSegment (seg:Segment) = ()
-    let private finish() = ()
+    let private finish (seg:Segment) =
+        seg.PortS.Value <- false
     let private ready() = ()
 
     /// Port 값 변경에 따른 작업 수행
@@ -261,20 +263,23 @@ module DoRGFH =
             | :? PortS, true , Status4.Ready ->
                 goingSegment seg
             | :? PortS, false, Status4.Ready -> pauseSegment seg
-            | :? PortS, true,  Status4.Finished -> noop()
+            | :? PortS, true,  Status4.Finished ->
+                seg.PortS.Value <- false
             | :? PortS, false, Status4.Finished ->
                     if seg.PortR.Value then
-                        homing()
-            | :? PortR, true , Status4.Finished -> homing()
+                        homing seg
+            | :? PortR, true , Status4.Finished -> homing seg
             | :? PortR, false, Status4.Finished -> pauseSegment seg
-            | :? PortR, true , Status4.Going -> homing()
+            | :? PortR, true , Status4.Going -> homing seg
             | :? PortR, false, Status4.Going -> pauseSegment seg
-            | :? PortR, true , Status4.Ready -> noop()
+            | :? PortR, true , Status4.Ready ->
+                // if seg is in origin state, then, turn off reset port
+                seg.PortR.Value <- false
             | :? PortR, false, Status4.Ready ->
                     if seg.PortS.Value then
                         goingSegment seg
 
-            | :? PortE, true , Status4.Going -> finish()
+            | :? PortE, true , Status4.Going -> finish seg
             | :? PortE, false, Status4.Homing -> ready()
 
             | _ ->

@@ -23,11 +23,10 @@ public class Flag : Bit {
 [DebuggerDisplay("{QualifiedName}")]
 public abstract class Port : Bit
 {
-    protected bool _value;
     public Segment OwnerSegment { get; set; }
     public Port(Segment ownerSegment) => OwnerSegment = ownerSegment;
     public string QualifiedName => $"{OwnerSegment.QualifiedName}.{GetType().Name}";
-    public override string ToString() => $"{QualifiedName}[{this.GetType().Name}]@{OwnerCpu.Name}";
+    public override string ToString() => $"{QualifiedName}[{this.GetType().Name}]@{OwnerCpu.Name}={Value}";
 }
 public class PortS : Port
 {
@@ -40,6 +39,7 @@ public class PortR : Port
 public class PortE : Port
 {
     public PortE(Segment ownerSegment) : base(ownerSegment) { Name = "PortE"; }
+    bool _value;
     public override bool Value
     {
         get => _value;

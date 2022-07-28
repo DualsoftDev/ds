@@ -9,7 +9,7 @@ public class Latch : BitReEvaluatable
     IBit _resetCondition { get; }
 
     public Latch(Cpu cpu, string name, IBit setCondition, IBit resetCondition)
-        : base(name, cpu, new[] {setCondition, resetCondition})
+        : base(cpu, name, new[] {setCondition, resetCondition})
     {
         _setCondition = setCondition;
         _resetCondition = resetCondition;

@@ -19,7 +19,7 @@ public abstract class RisingFallingBase : BitReEvaluatable
     }
 
     protected RisingFallingBase(Cpu cpu, string name, IBit target)
-        : base(name, cpu, target)
+        : base(cpu, name, target)
     {
         _target = target;
     }

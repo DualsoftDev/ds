@@ -53,7 +53,7 @@ public static class HmiTagGenerator
             }
             else
             {
-                var s = Tag.CreateAutoStart(init, $"AutoStart_{midName}_{init.Name}", cpu);
+                var s = Tag.CreateAutoStart(cpu, init, $"AutoStart_{midName}_{init.Name}");
                 init.AddStartTags(s);
                 cpu.AddBitDependancy(s, init.PortS);
                 tags.Add(s);
@@ -70,7 +70,7 @@ public static class HmiTagGenerator
             }
             else
             {
-                var r = Tag.CreateAutoReset(last, $"AutoReset_{midName}_{last.Name}", cpu);
+                var r = Tag.CreateAutoReset(cpu, last, $"AutoReset_{midName}_{last.Name}");
                 last.AddResetTags(r);
                 cpu.AddBitDependancy(r, last.PortR);
                 tags.Add(r);

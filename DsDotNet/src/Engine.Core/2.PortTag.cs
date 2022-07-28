@@ -5,7 +5,7 @@ namespace Engine.Core;
 public abstract class PortTag : BitReEvaluatable
 {
     protected PortTag(Cpu cpu, string name, IBit plan, Tag actual)
-        : base(name, cpu, plan, actual)
+        : base(cpu, name, plan, actual)
     {
         Plan = plan;
         Actual = actual;

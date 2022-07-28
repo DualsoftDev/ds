@@ -47,7 +47,7 @@ public class Tag : Bit, ITxRx
 
 
     public Tag(Cpu ownerCpu, ICoin owner, string name, TagType tagType = TagType.None, bool value = false)
-        : base(name, value, ownerCpu)
+        : base(ownerCpu, name, value)
     {
         Debug.Assert(! ownerCpu.TagsMap.ContainsKey(name));
 
@@ -60,10 +60,10 @@ public class Tag : Bit, ITxRx
     {
     }
 
-    public static Tag CreateAutoStart(Segment ownerSegment, string name, Cpu ownerCpu) =>
+    public static Tag CreateAutoStart(Cpu ownerCpu, Segment ownerSegment, string name) =>
         new Tag(ownerCpu, ownerSegment, name, TagType.Auto | TagType.Start | TagType.Q | TagType.External)
         ;
-    public static Tag CreateAutoReset(Segment ownerSegment, string name, Cpu ownerCpu) =>
+    public static Tag CreateAutoReset(Cpu ownerCpu, Segment ownerSegment, string name) =>
         new Tag(ownerCpu, ownerSegment, name, TagType.Auto | TagType.Reset | TagType.Q | TagType.External)
         ;
 

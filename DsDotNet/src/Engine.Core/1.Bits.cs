@@ -5,11 +5,11 @@ public abstract class Bit : Named, IBit
 {
     public virtual bool Value { get; set; }
     public Cpu OwnerCpu { get; set; }
-    public Bit(string name = "", bool bit = false, Cpu ownerCpu=null) : base(name) {
+    public Bit(Cpu ownerCpu = null, string name = "", bool bit = false) : base(name) {
         Value = bit;
         OwnerCpu = ownerCpu;
     }
-    protected Bit(string name, Cpu ownerCpu) : base(name)
+    protected Bit(Cpu ownerCpu, string name) : base(name)
     {
         OwnerCpu = ownerCpu;
     }
@@ -24,8 +24,8 @@ public abstract class Bit : Named, IBit
 public abstract class BitReEvaluatable : Bit
 {
     protected abstract void ReEvaulate(BitChange bitChange);
-    protected BitReEvaluatable(string name, Cpu cpu, params IBit[] monitoringBits)
-        : base(name, cpu)
+    protected BitReEvaluatable(Cpu cpu, string name, params IBit[] monitoringBits)
+        : base(cpu, name)
     {
         Global.BitChangedSubject
             .Where(bc => monitoringBits.Contains(bc.Bit))
@@ -37,7 +37,7 @@ public abstract class BitReEvaluatable : Bit
 
 
 public class Flag : Bit {
-    public Flag(string name, bool bit = false) : base(name, bit) { }
+    public Flag(Cpu cpu, string name, bool bit = false) : base(cpu, name, bit) { }
 }
 
 

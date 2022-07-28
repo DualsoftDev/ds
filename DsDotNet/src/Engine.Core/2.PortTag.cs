@@ -34,6 +34,7 @@ public abstract class PortExpressionCommand : PortExpression
             var val = bitChange.Bit.Value;
             if (Actual != null)
                 Actual.Value = val;
+            Global.BitChangedSubject.OnNext(new BitChange(this, val, true));
         }
     }
 }
@@ -57,7 +58,7 @@ public class PortExpressionReset : PortExpressionCommand
 /// <summary> 관찰용 정보(Plan) + 물리(Actual) </summary>
 public class PortExpressionEnd : PortExpression
 {
-    public PortExpressionEnd(Cpu cpu, string name, IBit plan, Tag actual)
+    private PortExpressionEnd(Cpu cpu, string name, IBit plan, Tag actual)
         : base(cpu, name, plan, actual)
     {
         if (Actual == null || (!Plan.Value && !Actual.Value))
@@ -66,7 +67,31 @@ public class PortExpressionEnd : PortExpression
             CheckMatch(Plan.Value);
     }
 
-    public override bool Value => Plan.Value && (Actual == null || Actual.Value);
+
+    // End port expression 은 plan 으로 외부에서 따로 지정할 수 없고,
+    // 내부에서 해당 값을 설정할 수 있어야 하므로 (Segment Finish 나 Homing 완료시 ON/OFF 시켜야 함)
+    // 외부에서 받지 않고, 내부에서 생성해서 관리한다.
+    public static PortExpressionEnd Create(Cpu cpu, string name, Tag actual)
+    {
+        var plan = new Flag(cpu, $"{name}_Plan");
+        return new PortExpressionEnd(cpu, name, plan, actual);
+    }
+
+
+    public override bool Value
+    {
+        get => Plan.Value && (Actual == null || Actual.Value);
+        // PortExpressionEnd 에 한해, setter 를 허용한다.
+        set
+        {
+            if (Plan.Value != value)
+            {
+                CheckMatch(value);
+                Plan.Value = value;
+                Global.BitChangedSubject.OnNext(new BitChange(this, value, true));
+            }
+        }
+    }
 
     void CheckMatch(bool newPlanValue)
     {

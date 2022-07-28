@@ -7,7 +7,8 @@ open Engine.Core
 open System.Linq
 open Dual.Common
 open Xunit.Abstractions
-
+open System.Reactive.Linq
+open Akka.Actor
 
 [<AutoOpen>]
 module MockUp =
@@ -19,6 +20,37 @@ module MockUp =
         member val PortR:PortExpressionReset = rp with get, set
         member val PortE:PortExpressionEnd = ep with get, set
         member val Going = new Tag(cpu, null, $"{n}_Going")
+        member x.GetSegmentStatus() =
+            match x.PortS.Value, x.PortR.Value, x.PortE.Value with
+            | false, false, false -> Status4.Ready  //??
+            | true, false, false  -> Status4.Going
+            | _, false, true      -> Status4.Finished
+            | _, true, _          -> Status4.Homing
+            | _ -> failwith "Unexpected"
+
+        member x.WireEvent() =
+            Global.BitChangedSubject
+                //.Select(fun bc -> bc.Bit)
+                .Where(fun bc -> [x.PortS :> IBit; x.PortR; x.PortE] |> Seq.contains(bc.Bit))
+                .Subscribe(fun bc ->
+                    let newSegmentState = x.GetSegmentStatus()
+                    logDebug $"Segment [{x.Name}] status : {newSegmentState}"
+                    x.Going.Value <- (newSegmentState = Status4.Going)
+                    match newSegmentState with
+                    | Status4.Ready -> ()
+                    | Status4.Going ->
+                        x.PortE.Value <- true
+                    | Status4.Finished ->
+                        x.PortS.Plan.Value <- false
+                    | Status4.Homing ->
+                        let xs = x.PortS.Value
+                        let xr = x.PortR.Value
+                        let xe = x.PortE.Value
+                        x.PortE.Value <- false
+                        let xx = x.GetSegmentStatus()
+                        ()
+                        //x.PortR.Plan.Value <- false
+                )
 
     let buildBackToBack() =
         let cpu = new Cpu("dummy", [||], new Model())
@@ -34,9 +66,9 @@ module MockUp =
         let gvrt = new Flag(cpu, "VResetG")
         let bvrt = new Flag(cpu, "VResetB")
 
-        let rvet = new Flag(cpu, "VEndR")
-        let gvet = new Flag(cpu, "VEndG")
-        let bvet = new Flag(cpu, "VEndB")
+        r.PortE <- PortExpressionEnd.Create(cpu, "RVEP", null)
+        g.PortE <- PortExpressionEnd.Create(cpu, "GVEP", null)
+        b.PortE <- PortExpressionEnd.Create(cpu, "BVEP", null)
 
 
         let bvspe =      // bvspe: B 노드의 Virtual Start Port Expression
@@ -89,16 +121,12 @@ module MockUp =
         g.PortR <- new PortExpressionReset(cpu, "GVRP", gvrpe, null)
         b.PortR <- new PortExpressionReset(cpu, "BVRP", bvrpe, null)
 
-        r.PortE <- new PortExpressionEnd(cpu, "RVEP", rvet, null)
-        g.PortE <- new PortExpressionEnd(cpu, "GVEP", gvet, null)
-        b.PortE <- new PortExpressionEnd(cpu, "BVEP", bvet, null)
-
 
         {|  Segments=[b; g; r;]
             Cpu=cpu
             VStarts=[bvst; gvst; rvst;]
             VResets=[bvrt; gvrt; rvrt;]
-            VEnds=[bvet; gvet; rvet;]
+            VEnds=[b.PortE.Plan; g.PortE.Plan; r.PortE.Plan;]
             |}
 
 [<AutoOpen>]
@@ -119,9 +147,13 @@ module ToyMockupTest =
             init()
             let toySystem = buildBackToBack()
             let [b; g; r;] = toySystem.Segments
+            [b; g; r;] |> Seq.iter(fun seg -> seg.WireEvent() |> ignore)
             let [bvst; gvst; rvst;] = toySystem.VStarts
             let [bvrt; gvrt; rvrt;] = toySystem.VResets
             let [bvet; gvet; rvet;] = toySystem.VEnds
 
             bvst.Value <- true
+
+            b.PortE.Value === true
+            r.PortS.Plan.Value === true
             ()

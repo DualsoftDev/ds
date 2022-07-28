@@ -22,6 +22,7 @@ public abstract class RisingFallingBase : BitReEvaluatable
     protected RisingFallingBase(Cpu cpu, string name, IBit target)
         : base(cpu, name, target)
     {
+        Debug.Assert(target != null);
     }
 
 }

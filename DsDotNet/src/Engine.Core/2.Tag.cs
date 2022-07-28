@@ -7,7 +7,6 @@ public enum TagType
     Q        = 1 << 0,
     I        = 1 << 1,
     M        = 1 << 2,
-    Subordinate  = 1 << 4,
     Special  = 1 << 5,
 
     // segment tag

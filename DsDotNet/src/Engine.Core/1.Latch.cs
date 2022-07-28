@@ -2,7 +2,7 @@ namespace Engine.Core;
 
 public class Latch : BitReEvaluatable
 {
-    protected Tag subordinateTag;
+    protected Flag subordinateTag;
 
     public override bool Value { get => subordinateTag.Value; set => throw new DsException("Not Supported."); }
     IBit _setCondition { get; }
@@ -11,9 +11,10 @@ public class Latch : BitReEvaluatable
     public Latch(Cpu cpu, string name, IBit setCondition, IBit resetCondition)
         : base(cpu, name, new[] {setCondition, resetCondition})
     {
+        Debug.Assert(setCondition != null && resetCondition != null);
         _setCondition = setCondition;
         _resetCondition = resetCondition;
-        subordinateTag = new Tag(cpu, null, $"{name}_internal", TagType.Subordinate);
+        subordinateTag = new Flag(cpu, $"{name}_LatchInternal");
         ReEvaulate(null);
     }
 

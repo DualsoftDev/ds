@@ -61,10 +61,10 @@ module PortExpressionTest =
                 pts.Actual.Value === true
 
             let ``_PortExpressionEnd Normal 테스트`` =
-                let plan = new Tag(cpu, null, "T1_test2")
                 let actual = new Tag(cpu, null, "T2_test2")
 
-                let pte = new PortExpressionEnd(cpu, "_PortExpressionEnd", plan, actual)
+                let pte = PortExpressionEnd.Create(cpu, "_PortExpressionEnd", actual)
+                let plan = pte.Plan
                 pte.Value === false
                 pte.Plan.Value === false
                 pte.Actual.Value === false
@@ -88,19 +88,20 @@ module PortExpressionTest =
 
 
             let ``_PortExpressionEnd 특이 case 테스트`` =
-                let plan = new Tag(cpu, null, "T1_test3")
                 let actual = new Tag(cpu, null, "T2_test3")
                 actual.Value <- true
 
                 // Actual 이 ON 인 상태에서의 creation
-                let pte = new PortExpressionEnd(cpu, "_PortExpressionEnd", plan, actual)
+                let pte = PortExpressionEnd.Create(cpu, "_PortExpressionEnd", actual)
+                let plan = pte.Plan
                 pte.Value === false
                 pte.Plan.Value === false
                 pte.Actual.Value === true
 
-                // actual tag 만 ON 상태에서 plan 만 ON 시킬 수 없다.
+                // actual tag ON 상태에서 plan 만 ON 시킬 수 없다.
                 (fun () -> pte.Value <- true)
-                |> ShouldFailWithSubstringT<DsException> "Not Supported."
+                |> ShouldFailWithSubstringT<DsException> "Spatial Error:"
+
                 pte.Value === false
                 plan.Value === false
 

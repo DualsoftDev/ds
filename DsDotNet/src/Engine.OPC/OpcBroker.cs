@@ -53,13 +53,20 @@ public class OpcBroker
 
     public void Write(string tagName, bool value)
     {
-        var bit = _tagDic[tagName];
-        if (bit.Value != value)
+        // unit test 가 아니라면 무조건 실행되어야 할 부분.  unit test 에서만 생략 가능
+        void doWrite()
         {
-            bit.Value = value;
+            var bit = _tagDic[tagName];
+            if (bit.Value != value)
+            {
+                bit.Value = value;
 
-            OpcTagChangedSubject.OnNext(new OpcTagChange(tagName, value));
+                OpcTagChangedSubject.OnNext(new OpcTagChange(tagName, value));
+            }
         }
+
+        if (! Global.IsInUnitTest || _tagDic.ContainsKey(tagName))
+            doWrite();
     }
 
     public IEnumerable<(string, bool)> ReadTags(IEnumerable<string> tags)

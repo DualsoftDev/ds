@@ -67,6 +67,8 @@ class Tester
 }
 
 ";
+
+        Debug.Assert(!Global.IsInUnitTest);
         var engine = new EngineBuilder(text, "Cpu").Engine;
         Program.Engine = engine;
         engine.Run();

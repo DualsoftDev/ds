@@ -13,6 +13,7 @@
 		<Compile Include="ModelTest1.fs" />
 		<Compile Include="ModelTest2.fs" />
 		<Compile Include="EdgeTest.fs" />
+		<Compile Include="Tag,Expression,Latch,Bits\LatchTest.fs" />
 		<None Include="paket.references" />
 	</ItemGroup>
 	<ItemGroup>

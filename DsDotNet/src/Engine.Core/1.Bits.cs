@@ -9,10 +9,30 @@ public abstract class Bit : Named, IBit
         Value = bit;
         OwnerCpu = ownerCpu;
     }
+    protected Bit(string name, Cpu ownerCpu) : base(name)
+    {
+        OwnerCpu = ownerCpu;
+    }
+
 
     public override string ToString() => ToText();
     public override string ToText() => $"{base.ToText()}@{OwnerCpu.Name}";
 }
+
+public abstract class BitReEvaluatable : Bit
+{
+    protected abstract void ReEvaulate();
+    protected BitReEvaluatable(string name, Cpu cpu, params IBit[] monitoringBits)
+        : base(name, cpu)
+    {
+        Global.BitChangedSubject
+            .Where(bc => monitoringBits.Contains(bc.Bit))
+            .Subscribe(_ => ReEvaulate())
+            ;
+    }
+}
+
+
 
 public class Flag : Bit {
     public Flag(string name, bool bit = false) : base(name, bit) { }
@@ -85,14 +105,6 @@ public class Not : Expression
     public override bool Value => !Bit.Value;
     public IBit Bit;
     public Not(IBit bit) => Bit = bit;
-}
-
-
-public class Rising : Bit { }
-public class Falling : Bit { }
-public class Latch : Bit {
-    public IBit SetCondition { get; set; }
-    public IBit ResetCondition { get; set; }
 }
 
 

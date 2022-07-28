@@ -13,11 +13,11 @@ open Dual.Common
 open Engine.Core
 open System.Collections.Concurrent
 
-[<Extension>] // type Segment =
-type EngineExt =
-    [<Extension>]
-    static member OnSomethingWithSegment(segment:Segment, status:Status4) =
-        noop()
+//[<Extension>] // type Segment =
+//type EngineExt =
+//    [<Extension>]
+//    static member OnSomethingWithSegment(segment:Segment, status:Status4) =
+//        noop()
 
 [<AutoOpen>]
 module internal CpuModule =
@@ -47,6 +47,14 @@ module internal CpuModule =
                 | _  -> failwith "ERROR"
 
         let listenPortChanges (segment:Segment) =
+            let getSegmentStatus portS portR portE =
+                match portS, portR, portE with
+                | false, false, false -> Status4.Ready  //??
+                | true, false, false -> Status4.Going
+                | _, false, true -> Status4.Finished
+                | _, true, true -> Status4.Homing
+                | _ -> failwith "Unexpected"
+
             let xxx = Array.Empty<IBit>()    // segment.allPortBits
             let bits = xxx |> HashSet
             let subs =

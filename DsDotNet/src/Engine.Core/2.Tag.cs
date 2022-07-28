@@ -7,21 +7,22 @@ public enum TagType
     Q        = 1 << 0,
     I        = 1 << 1,
     M        = 1 << 2,
-    Special  = 1 << 3,
+    Subordinate  = 1 << 4,
+    Special  = 1 << 5,
 
     // segment tag
-    Start    = 1 << 4,
-    Reset    = 1 << 5,
-    End      = 1 << 6,
-    Going    = 1 << 7,
+    Start    = 1 << 11,
+    Reset    = 1 << 12,
+    End      = 1 << 13,
+    Going    = 1 << 14,
     /// <summary> 공정(flow) auto start, auto reset </summary>
-    Auto     = 1 << 10,
+    Auto     = 1 << 15,
     /// <summary> 외부 접근 용 Tag 여부 </summary>
-    External = 1 << 11,
+    External = 1 << 16,
 
     // call tag
-    TX       = 1 << 12,
-    RX       = 1 << 13,
+    TX       = 1 << 21,
+    RX       = 1 << 22,
 };
 
 

@@ -23,10 +23,12 @@ public abstract class Bit : Named, IBit
 /// <summary> 다른 bit 요소(monitoringBits)에 의해서 값이 변경될 수 있는 bit 에 대한 추상 class </summary>
 public abstract class BitReEvaluatable : Bit
 {
+    protected IBit[] _monitoringBits;
     protected abstract void ReEvaulate(BitChange bitChange);
     protected BitReEvaluatable(Cpu cpu, string name, params IBit[] monitoringBits)
         : base(cpu, name)
     {
+        _monitoringBits = monitoringBits;
         Global.BitChangedSubject
             .Where(bc => monitoringBits.Contains(bc.Bit))
             .Subscribe(ReEvaulate)

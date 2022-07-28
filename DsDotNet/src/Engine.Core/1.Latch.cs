@@ -4,7 +4,7 @@ public class Latch : BitReEvaluatable
 {
     protected Tag subordinateTag;
 
-    public override bool Value { get => subordinateTag.Value; set => subordinateTag.Value = value; }
+    public override bool Value { get => subordinateTag.Value; set => throw new DsException("Not Supported."); }
     IBit _setCondition { get; }
     IBit _resetCondition { get; }
 

@@ -1,32 +1,74 @@
 namespace Engine.Core;
 
-//public abstract class ExpressionBase : BitReEvaluatable
-//{
-//    public override bool Value { get => base.Value; set => throw new Exception("ERROR"); }
-//}
-//public class And : ExpressionBase
-//{
-//    public override bool Value { get { return Bits.All(b => b.Value); } set { throw new Exception("ERROR"); } }
-//    public List<IBit> Bits;
-//    public And(IBit[] bits)
-//    {
-//        Bits = bits.ToList();
-//    }
-//}
-//public class Or : ExpressionBase
-//{
-//    public override bool Value => Bits.Any(b => b.Value);
-//    public List<IBit> Bits;
-//    public Or(IBit[] bits)
-//    {
-//        Bits = bits.ToList();
-//    }
-//}
+public abstract class Expression : BitReEvaluatable
+{
+    protected bool _oldValue;
+    public override bool Value
+    {
+        get => throw new Exception("Should be redefined");
+        set => throw new Exception("ERROR");
+    }
 
-//public class Not : ExpressionBase
-//{
-//    public override bool Value => !Bit.Value;
-//    public IBit Bit;
-//    public Not(IBit bit) => Bit = bit;
-//}
+    protected Expression(Cpu cpu, string name, params IBit[] monitoringBits)
+        : base(cpu, name, monitoringBits)
+    {
+    }
+}
+public class And : Expression
+{
+    public override bool Value => _monitoringBits.All(b => b.Value);
+    public And(Cpu cpu, string name, params IBit[] bits)
+        : base(cpu, name, bits)
+    {
+        _oldValue = this.Value;
+    }
+
+    protected override void ReEvaulate(BitChange bitChange)
+    {
+        var newValue = Value;
+        if (_oldValue != newValue )
+        {
+            _oldValue = newValue;
+            Global.BitChangedSubject.OnNext(new BitChange(this, newValue, true));
+        }
+    }
+}
+public class Or : Expression
+{
+    public override bool Value => _monitoringBits.Any(b => b.Value);
+    public Or(Cpu cpu, string name, params IBit[] bits)
+        : base(cpu, name, bits)
+    {
+        _oldValue = this.Value;
+    }
+    protected override void ReEvaulate(BitChange bitChange)
+    {
+        var newValue = Value;
+        if (_oldValue != newValue)
+        {
+            _oldValue = newValue;
+            Global.BitChangedSubject.OnNext(new BitChange(this, newValue, true));
+        }
+    }
+}
+
+public class Not : Expression
+{
+    public override bool Value => !_monitoringBits[0].Value;
+    public IBit Bit;
+    public Not(Cpu cpu, string name, IBit bit)
+        : base(cpu, name, bit)
+    {
+        _oldValue = this.Value;
+    }
+    protected override void ReEvaulate(BitChange bitChange)
+    {
+        var newValue = Value;
+        if (_oldValue != newValue)
+        {
+            _oldValue = newValue;
+            Global.BitChangedSubject.OnNext(new BitChange(this, newValue, true));
+        }
+    }
+}
 

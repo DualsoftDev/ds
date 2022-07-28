@@ -79,6 +79,12 @@ module LatchTest =
             t1Falling.Value === false
             t2Falling.Value === false
 
+
+            (fun () -> t1Rising.Value <- false) |> ShouldFail
+            t1Rising.Value === false
+            (fun () -> t1Falling.Value <- false) |> ShouldFail
+            t1Falling.Value === false
+
             let risings = [t1Rising :> IBit; t2Rising; t1Falling; t2Falling]
             let risingCounter =
                 risings |> Seq.map (fun r -> (r, 0))
@@ -104,6 +110,9 @@ module LatchTest =
             latch.Value === true
             t1Rising.Value === false
             risingCounter[t1Rising] === 1
+
+            (fun () -> latch.Value <- false) |> ShouldFail
+            latch.Value === true
 
             t1.Value <- false
             fallingCounter[t1Falling] === 1

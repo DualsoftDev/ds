@@ -3,25 +3,25 @@ namespace Engine.Core;
 
 public abstract class RisingFallingBase : BitReEvaluatable
 {
-    protected IBit _target { get; }
     bool _value;
     public override bool Value
     {
         get => _value;
-        set
+        set => throw new DsException("Not Supported.");
+    }
+
+    protected void SetValue(bool value)
+    {
+        if (_value != value)
         {
-            if (_value != value)
-            {
-                _value = value;
-                Global.BitChangedSubject.OnNext(new BitChange(this, value, true));
-            }
+            _value = value;
+            Global.BitChangedSubject.OnNext(new BitChange(this, value, true));
         }
     }
 
     protected RisingFallingBase(Cpu cpu, string name, IBit target)
         : base(cpu, name, target)
     {
-        _target = target;
     }
 
 }
@@ -35,10 +35,10 @@ public class Rising : RisingFallingBase
 
     protected override void ReEvaulate(BitChange bitChange)
     {
-        Value = _target.Value;
+        SetValue(_monitoringBits[0].Value);
 
         // end of rising
-        Value = false;
+        SetValue(false);
 
     }
 }
@@ -51,10 +51,10 @@ public class Falling : RisingFallingBase
 
     protected override void ReEvaulate(BitChange bitChange)
     {
-        Value = ! _target.Value;
+        SetValue(!_monitoringBits[0].Value);
 
         // end of falling
-        Value = false;
+        SetValue(false);
     }
 }
 

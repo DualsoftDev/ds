@@ -3,7 +3,20 @@ namespace Engine.Core;
 [DebuggerDisplay("{ToText()}")]
 public abstract class Bit : Named, IBit
 {
-    public virtual bool Value { get; set; }
+    bool _value;
+    public virtual bool Value
+    {
+        get => _value;
+        set
+        {
+            if (_value != value)
+            {
+                _value = value;
+                Global.BitChangedSubject.OnNext(new BitChange(this, value, true));
+            }
+        }
+    }
+
     public Cpu OwnerCpu { get; set; }
     public Bit(Cpu ownerCpu = null, string name = "", bool bit = false) : base(name) {
         Value = bit;
@@ -25,6 +38,7 @@ public abstract class BitReEvaluatable : Bit
 {
     protected IBit[] _monitoringBits;
     protected abstract void ReEvaulate(BitChange bitChange);
+    public override bool Value { set => throw new DsException("Not Supported."); }
     protected BitReEvaluatable(Cpu cpu, string name, params IBit[] monitoringBits)
         : base(cpu, name)
     {

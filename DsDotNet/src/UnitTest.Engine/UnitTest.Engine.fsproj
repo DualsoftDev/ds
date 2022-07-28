@@ -16,6 +16,7 @@
 		<Compile Include="Tag,Expression,Latch,Bits\Latch, Rising Test.fs" />
 		<Compile Include="Tag,Expression,Latch,Bits\PortTag Test.fs" />
 		<Compile Include="Tag,Expression,Latch,Bits\Expression Test.fs" />
+		<Compile Include="ToyMockupTest.fs" />
 		<None Include="paket.references" />
 	</ItemGroup>
 	<ItemGroup>

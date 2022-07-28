@@ -69,53 +69,53 @@ module LatchTest =
 
             let t1 = new Tag(cpu, null, "T1")
             let t2 = new Tag(cpu, null, "T2")
-            let t1Rising = new Rising(cpu, "Rising", t1)
-            let t2Rising = new Rising(cpu, "Rising", t2)
-            let t1Falling = new Rising(cpu, "FallingT1", t1)
-            let t2Falling = new Rising(cpu, "FallingT2", t2)
+            let ``t1↑`` = new Rising(cpu, "Rising", t1)
+            let ``t2↑`` = new Rising(cpu, "Rising", t2)
+            let ``t1↓`` = new Rising(cpu, "FallingT1", t1)
+            let ``t2↓`` = new Rising(cpu, "FallingT2", t2)
 
-            t1Rising.Value === false
-            t2Rising.Value === false
-            t1Falling.Value === false
-            t2Falling.Value === false
+            ``t1↑``.Value === false
+            ``t2↑``.Value === false
+            ``t1↓``.Value === false
+            ``t2↓``.Value === false
 
 
-            (fun () -> t1Rising.Value <- false) |> ShouldFail
-            t1Rising.Value === false
-            (fun () -> t1Falling.Value <- false) |> ShouldFail
-            t1Falling.Value === false
+            (fun () -> ``t1↑``.Value <- false) |> ShouldFail
+            ``t1↑``.Value === false
+            (fun () -> ``t1↓``.Value <- false) |> ShouldFail
+            ``t1↓``.Value === false
 
-            let risings = [t1Rising :> IBit; t2Rising; t1Falling; t2Falling]
-            let risingCounter =
-                risings |> Seq.map (fun r -> (r, 0))
+            let ``↑&↓s`` = [``t1↑`` :> IBit; ``t2↑``; ``t1↓``; ``t2↓``]
+            let ```↑counter`` =
+                ``↑&↓s`` |> Seq.map (fun r -> (r, 0))
                 |> Tuple.toDictionary
-            let fallingCounter =
-                risings |> Seq.map (fun r -> (r, 0))
+            let ``↓counter`` =
+                ``↑&↓s`` |> Seq.map (fun r -> (r, 0))
                 |> Tuple.toDictionary
             use _subs =
                 Global.BitChangedSubject
-                    .Where(fun bc -> risings |> Seq.contains(bc.Bit))
+                    .Where(fun bc -> ``↑&↓s`` |> Seq.contains(bc.Bit))
                     .Subscribe(fun bc ->
                         let bit = bc.Bit
                         logDebug $"RisingBit changed: [{bit}] = {bc.NewValue}"
-                        let map = if bc.NewValue then risingCounter else fallingCounter
+                        let map = if bc.NewValue then ```↑counter`` else ``↓counter``
                         map[bit] <- map[bit] + 1
                     )
             let reset = new Tag(cpu, null, "Reset")
-            let latch = new Latch(cpu, "Latch1", t1Rising, reset)
+            let latch = new Latch(cpu, "Latch1", ``t1↑``, reset)
 
-            risingCounter[t1Rising] === 0
+            ```↑counter``[``t1↑``] === 0
             t1.Value <- true
             // --> t1.Value Rising 되는 순간에 t1Rising.Value 가 ON 되었다가 바로 OFF 된다.
             latch.Value === true
-            t1Rising.Value === false
-            risingCounter[t1Rising] === 1
+            ``t1↑``.Value === false
+            ```↑counter``[``t1↑``] === 1
 
             (fun () -> latch.Value <- false) |> ShouldFail
             latch.Value === true
 
             t1.Value <- false
-            fallingCounter[t1Falling] === 1
+            ``↓counter``[``t1↓``] === 1
 
             ()
 

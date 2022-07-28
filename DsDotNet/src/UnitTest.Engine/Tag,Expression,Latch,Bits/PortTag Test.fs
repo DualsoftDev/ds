@@ -38,14 +38,17 @@ module PortTagTest =
                 pts.Plan.Value === false
                 pts.Actual.Value === false
 
-                // pts 전체 ON 시, actual tag 도 ON 되어야 한다.
-                pts.Value <- true
+                // Expression 으로, 값을 설정할 수 없어야 한다.
+                (fun () -> pts.Value <- true)
+                |> ShouldFail
+
+                plan.Value <- true
                 pts.Plan.Value === true
                 pts.Value === true
                 pts.Actual.Value === true
 
-                // pts 전체 OFF 시, actual tag 도 OFF 되어야 한다.
-                pts.Value <- false
+                // plan OFF 시, actual tag 도 OFF 되어야 한다.
+                plan.Value <- false
                 pts.Plan.Value === false
                 pts.Value === false
                 pts.Actual.Value === false
@@ -67,7 +70,7 @@ module PortTagTest =
                 pte.Actual.Value === false
 
                 // pte 전체 ON 하더라도, actual tag 는 ON 되지 않는다.
-                pte.Value <- true
+                plan.Value <- true
                 pte.Plan.Value === true
                 pte.Value === false
                 pte.Actual.Value === false
@@ -97,14 +100,14 @@ module PortTagTest =
 
                 // actual tag 만 ON 상태에서 plan 만 ON 시킬 수 없다.
                 (fun () -> pte.Value <- true)
-                |> ShouldFailWithSubstringT<DsException> "Spatial Error:"
+                |> ShouldFailWithSubstringT<DsException> "Not Supported."
                 pte.Value === false
                 plan.Value === false
 
 
                 // actual tag OFF 상태에서는 plan OFF 가능
                 actual.Value <- false
-                pte.Value <- true
+                plan.Value <- true
                 pte.Plan.Value === true
                 pte.Actual.Value === false
                 pte.Value === false

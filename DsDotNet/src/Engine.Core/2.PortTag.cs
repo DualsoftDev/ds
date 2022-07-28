@@ -11,7 +11,9 @@ public abstract class PortTag : BitReEvaluatable
         Actual = actual;
     }
 
+
     public IBit Plan { get; }
+    /// <summary> Allow null </summary>
     public Tag Actual { get; }
 }
 
@@ -23,18 +25,15 @@ public abstract class PortTagCommand : PortTag
         : base(cpu, name, plan, actual)
     {
     }
-    public override bool Value {
-        get => Plan.Value;
-        set => Plan.Value = value;
-    }
+    public override bool Value => Plan.Value;
 
     protected override void ReEvaulate(BitChange bitChange)
     {
         if (bitChange.Bit == Plan)
         {
             var val = bitChange.Bit.Value;
-            Actual.Value = val;
-            this.Value = val;
+            if (Actual != null)
+                Actual.Value = val;
         }
     }
 }
@@ -61,27 +60,18 @@ public class PortTagEnd : PortTag
     public PortTagEnd(Cpu cpu, string name, IBit plan, Tag actual)
         : base(cpu, name, plan, actual)
     {
-        if (!Plan.Value && !Actual.Value)
+        if (Actual == null || (!Plan.Value && !Actual.Value))
             ;
         else
             CheckMatch(Plan.Value);
     }
 
-    public override bool Value
-    {
-        get => Plan.Value && Actual.Value;
-        //set => Plan.Value = value;
-        set
-        {
-            CheckMatch(value);
-            Plan.Value = value;
-        }
-    }
+    public override bool Value => Plan.Value && (Actual == null || Actual.Value);
 
     void CheckMatch(bool newPlanValue)
     {
         // Plan 설정 이후에, Actual 센서가 이미 Plan 설정하려는 값과 동일한 상태로 먼저 바뀌어 있는 상태
-        if (newPlanValue == Actual.Value)
+        if (Actual != null && newPlanValue == Actual.Value)
             throw new DsException($"Spatial Error: Plan[{Plan}={newPlanValue}] <> Actual[{Actual.Value}]");
 
     }
@@ -92,7 +82,7 @@ public class PortTagEnd : PortTag
         var val = bitChange.Bit.Value;
         if (bitChange.Bit == Actual)
         {
-            if (Plan.Value != val)
+            if (Actual != null && Plan.Value != val)
                 throw new DsException($"Spatial Error: Plan[{bitChange.Bit}={val}] <> Actual[{Actual.Value}]");
             Debug.Assert(this.Value == val);
         }

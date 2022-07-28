@@ -115,10 +115,10 @@ public static class SegmentExtension
                 });
         segment.Disposables.Add(subs);
 
-        segment.PrintPortTags();
+        segment.PrintPortExpressions();
     }
 
-    public static void PrintPortTags(this Segment seg)
+    public static void PrintPortExpressions(this Segment seg)
     {
         IEnumerable<string> spit()
         {

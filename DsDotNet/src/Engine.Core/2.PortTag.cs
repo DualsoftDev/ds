@@ -2,9 +2,9 @@ namespace Engine.Core;
 
 
 /// <summary> 정보(Plan) + 물리(Actual) </summary>
-public abstract class PortTag : BitReEvaluatable
+public abstract class PortExpression : BitReEvaluatable
 {
-    protected PortTag(Cpu cpu, string name, IBit plan, Tag actual)
+    protected PortExpression(Cpu cpu, string name, IBit plan, Tag actual)
         : base(cpu, name, plan, actual)
     {
         Plan = plan;
@@ -19,9 +19,9 @@ public abstract class PortTag : BitReEvaluatable
 
 
 /// <summary> 지시(Start or Reset) 용 정보(Plan) + 물리(Actual) </summary>
-public abstract class PortTagCommand : PortTag
+public abstract class PortExpressionCommand : PortExpression
 {
-    protected PortTagCommand(Cpu cpu, string name, IBit plan, Tag actual)
+    protected PortExpressionCommand(Cpu cpu, string name, IBit plan, Tag actual)
         : base(cpu, name, plan, actual)
     {
     }
@@ -38,30 +38,30 @@ public abstract class PortTagCommand : PortTag
     }
 }
 /// <summary> Start 명령용 정보(Plan) + 물리(Actual) </summary>
-public class PortTagStart : PortTagCommand
+public class PortExpressionStart : PortExpressionCommand
 {
-    public PortTagStart(Cpu cpu, string name, IBit plan, Tag actual)
+    public PortExpressionStart(Cpu cpu, string name, IBit plan, Tag actual)
         : base(cpu, name, plan, actual)
     {
     }
 }
 /// <summary> Reset 명령용 정보(Plan) + 물리(Actual) </summary>
-public class PortTagReset : PortTagCommand
+public class PortExpressionReset : PortExpressionCommand
 {
-    public PortTagReset(Cpu cpu, string name, IBit plan, Tag actual)
+    public PortExpressionReset(Cpu cpu, string name, IBit plan, Tag actual)
         : base(cpu, name, plan, actual)
     {
     }
 }
 
 /// <summary> 관찰용 정보(Plan) + 물리(Actual) </summary>
-public class PortTagEnd : PortTag
+public class PortExpressionEnd : PortExpression
 {
-    public PortTagEnd(Cpu cpu, string name, IBit plan, Tag actual)
+    public PortExpressionEnd(Cpu cpu, string name, IBit plan, Tag actual)
         : base(cpu, name, plan, actual)
     {
         if (Actual == null || (!Plan.Value && !Actual.Value))
-            ;
+            Global.NoOp();
         else
             CheckMatch(Plan.Value);
     }

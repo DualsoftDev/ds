@@ -15,9 +15,9 @@ module MockUp =
         new(cpu, n) = Segment(cpu, n, null, null, null)
         member x.Cpu:Cpu = cpu
         member x.Name:string = n
-        member val PortS:PortTagStart = sp with get, set
-        member val PortR:PortTagReset = rp with get, set
-        member val PortE:PortTagEnd = ep with get, set
+        member val PortS:PortExpressionStart = sp with get, set
+        member val PortR:PortExpressionReset = rp with get, set
+        member val PortE:PortExpressionEnd = ep with get, set
         member val Going = new Tag(cpu, null, $"{n}_Going")
 
     let buildBackToBack() =
@@ -81,17 +81,17 @@ module MockUp =
             Or(cpu, "RVRP", latch, rvrt)
 
 
-        r.PortS <- new PortTagStart(cpu, "RVSP", rvspe, null)
-        g.PortS <- new PortTagStart(cpu, "GVSP", gvspe, null)
-        b.PortS <- new PortTagStart(cpu, "BVSP", bvspe, null)
+        r.PortS <- new PortExpressionStart(cpu, "RVSP", rvspe, null)
+        g.PortS <- new PortExpressionStart(cpu, "GVSP", gvspe, null)
+        b.PortS <- new PortExpressionStart(cpu, "BVSP", bvspe, null)
 
-        r.PortR <- new PortTagReset(cpu, "RVRP", rvrpe, null)
-        g.PortR <- new PortTagReset(cpu, "GVRP", gvrpe, null)
-        b.PortR <- new PortTagReset(cpu, "BVRP", bvrpe, null)
+        r.PortR <- new PortExpressionReset(cpu, "RVRP", rvrpe, null)
+        g.PortR <- new PortExpressionReset(cpu, "GVRP", gvrpe, null)
+        b.PortR <- new PortExpressionReset(cpu, "BVRP", bvrpe, null)
 
-        r.PortE <- new PortTagEnd(cpu, "RVEP", rvet, null)
-        g.PortE <- new PortTagEnd(cpu, "GVEP", gvet, null)
-        b.PortE <- new PortTagEnd(cpu, "BVEP", bvet, null)
+        r.PortE <- new PortExpressionEnd(cpu, "RVEP", rvet, null)
+        g.PortE <- new PortExpressionEnd(cpu, "GVEP", gvet, null)
+        b.PortE <- new PortExpressionEnd(cpu, "BVEP", bvet, null)
 
 
         {|  Segments=[b; g; r;]

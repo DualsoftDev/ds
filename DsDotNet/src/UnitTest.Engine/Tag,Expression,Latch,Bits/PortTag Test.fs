@@ -8,8 +8,8 @@ open Xunit.Abstractions
 open System
 
 [<AutoOpen>]
-module PortTagTest =
-    type PortTagTests1(output1:ITestOutputHelper) =
+module PortExpressionTest =
+    type PortExpressionTests1(output1:ITestOutputHelper) =
 
         let init() =
             Global.BitChangedSubject
@@ -22,18 +22,18 @@ module PortTagTest =
         interface IClassFixture<Fixtures.DemoFixture>
 
         [<Fact>]
-        member __.``PortTag test`` () =
-            logInfo "============== PortTag test"
+        member __.``PortExpression test`` () =
+            logInfo "============== PortExpression test"
             init()
 
 
             let cpu = new Cpu("dummy", [||], new Model())
 
 
-            let ``_PortTagStart 테스트`` =
+            let ``_PortExpressionStart 테스트`` =
                 let plan = new Tag(cpu, null, "T1_test1")
                 let actual = new Tag(cpu, null, "T2_test1")
-                let pts = new PortTagStart(cpu, "PortTagStart", plan, actual)
+                let pts = new PortExpressionStart(cpu, "PortExpressionStart", plan, actual)
                 pts.Value === false
                 pts.Plan.Value === false
                 pts.Actual.Value === false
@@ -60,11 +60,11 @@ module PortTagTest =
                 pts.Value === true
                 pts.Actual.Value === true
 
-            let ``_PortTagEnd Normal 테스트`` =
+            let ``_PortExpressionEnd Normal 테스트`` =
                 let plan = new Tag(cpu, null, "T1_test2")
                 let actual = new Tag(cpu, null, "T2_test2")
 
-                let pte = new PortTagEnd(cpu, "_PortTagEnd", plan, actual)
+                let pte = new PortExpressionEnd(cpu, "_PortExpressionEnd", plan, actual)
                 pte.Value === false
                 pte.Plan.Value === false
                 pte.Actual.Value === false
@@ -87,13 +87,13 @@ module PortTagTest =
                 pte.Value === false
 
 
-            let ``_PortTagEnd 특이 case 테스트`` =
+            let ``_PortExpressionEnd 특이 case 테스트`` =
                 let plan = new Tag(cpu, null, "T1_test3")
                 let actual = new Tag(cpu, null, "T2_test3")
                 actual.Value <- true
 
                 // Actual 이 ON 인 상태에서의 creation
-                let pte = new PortTagEnd(cpu, "_PortTagEnd", plan, actual)
+                let pte = new PortExpressionEnd(cpu, "_PortExpressionEnd", plan, actual)
                 pte.Value === false
                 pte.Plan.Value === false
                 pte.Actual.Value === true

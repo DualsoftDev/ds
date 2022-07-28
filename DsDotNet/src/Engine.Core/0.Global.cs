@@ -28,5 +28,8 @@ public static class Global
             .Any(n => n.StartsWith("Microsoft.VisualStudio.TestPlatform."))
             ;
     }
+
+    /// <summary> Do nothing </summary>
+    public static void NoOp() {}
 }
 

@@ -19,15 +19,17 @@ public abstract class Bit : Named, IBit
     public override string ToText() => $"{base.ToText()}@{OwnerCpu.Name}";
 }
 
+
+/// <summary> 다른 bit 요소(monitoringBits)에 의해서 값이 변경될 수 있는 bit 에 대한 추상 class </summary>
 public abstract class BitReEvaluatable : Bit
 {
-    protected abstract void ReEvaulate();
+    protected abstract void ReEvaulate(BitChange bitChange);
     protected BitReEvaluatable(string name, Cpu cpu, params IBit[] monitoringBits)
         : base(name, cpu)
     {
         Global.BitChangedSubject
             .Where(bc => monitoringBits.Contains(bc.Bit))
-            .Subscribe(_ => ReEvaulate())
+            .Subscribe(ReEvaulate)
             ;
     }
 }

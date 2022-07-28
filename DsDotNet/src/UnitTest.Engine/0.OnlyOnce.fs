@@ -89,3 +89,13 @@ module Base =
     let ShouldFail func                    = func |> shouldFail
     let ShouldFailWith msg func            = func |> should (throwWithMessage msg) typeof<System.Exception>
     let ShouldFailWithT<'ex> msg func      = func |> should (throwWithMessage msg) typeof<'ex>
+    let ShouldFailWithSubstringT<'ex when 'ex :> Exception> (substring:string) (func:unit->unit) =
+        try
+            func()
+            failwith "No exception matched!"
+        with
+        | :? 'ex as excpt when excpt.ToString().Contains substring ->
+            tracefn $"Got expected exception:\r\n{excpt}"
+            ()  // OK
+        | _ as err ->
+            failwith $"Exception messsage match failed on {err}.  expected = {substring}"

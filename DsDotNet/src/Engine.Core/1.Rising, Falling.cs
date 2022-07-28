@@ -33,7 +33,7 @@ public class Rising : RisingFallingBase
     {
     }
 
-    protected override void ReEvaulate()
+    protected override void ReEvaulate(BitChange bitChange)
     {
         Value = _target.Value;
 
@@ -49,7 +49,7 @@ public class Falling : RisingFallingBase
     {
     }
 
-    protected override void ReEvaulate()
+    protected override void ReEvaulate(BitChange bitChange)
     {
         Value = ! _target.Value;
 

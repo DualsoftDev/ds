@@ -14,10 +14,10 @@ public class Latch : BitReEvaluatable
         _setCondition = setCondition;
         _resetCondition = resetCondition;
         subordinateTag = new Tag(cpu, null, $"{name}_internal", TagType.Subordinate);
-        ReEvaulate();
+        ReEvaulate(null);
     }
 
-    protected override void ReEvaulate()
+    protected override void ReEvaulate(BitChange _bitChange)
     {
         var value = (_setCondition.Value, _resetCondition.Value) switch
         {

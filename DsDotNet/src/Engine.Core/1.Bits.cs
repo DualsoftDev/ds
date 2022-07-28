@@ -18,12 +18,16 @@ public abstract class Bit : Named, IBit
     }
 
     public Cpu OwnerCpu { get; set; }
-    public Bit(Cpu ownerCpu = null, string name = "", bool bit = false) : base(name) {
+    public Bit(Cpu ownerCpu = null, string name = "", bool bit = false) : base(name)
+    {
+        Debug.Assert(ownerCpu != null);
+
         Value = bit;
         OwnerCpu = ownerCpu;
     }
     protected Bit(Cpu ownerCpu, string name) : base(name)
     {
+        Debug.Assert(ownerCpu != null);
         OwnerCpu = ownerCpu;
     }
 

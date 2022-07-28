@@ -133,7 +133,7 @@ module ExpressionTest =
 
 
         [<Fact>]
-        member __.``복합(+Latch) expression test`` () =
+        member __.``(+Latch)복합 expression test`` () =
             logInfo "============== 복합(+Latch) expression test"
             init()
 
@@ -144,9 +144,9 @@ module ExpressionTest =
             //      Set = s↑
             //      Reset = r↑
 
-            let a = new Tag(cpu, null, "a_test5")
-            let s = new Tag(cpu, null, "s1_test5")
-            let r = new Tag(cpu, null, "r1_test5")
+            let a = new Flag(cpu, "a_test5")
+            let s = new Flag(cpu, "s1_test5")
+            let r = new Flag(cpu, "r1_test5")
             let ``s↑`` = new Rising(cpu, "s↑", s)
             let ``r↑`` = new Rising(cpu, "r↑", r)
             let latch = new Latch(cpu, "latch1_test5", ``s↑``, ``r↑``)
@@ -160,8 +160,12 @@ module ExpressionTest =
             x.Value === true
 
             s.Value <- false
+            latch.Value === true
             x.Value === true
+
+            // latch reset ON -> latch reset 및 Or expression OFF 확인
             r.Value <- true
+            latch.Value === false
             x.Value === false
 
             ()

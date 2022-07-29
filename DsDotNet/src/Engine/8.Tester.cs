@@ -7,7 +7,7 @@ class Tester
 {
     public static void DoSampleTest()
     {
-        /*
+
         var text = @"
 //[sys] L = {
 //    [task] T = {
@@ -70,8 +70,8 @@ class Tester
 }
 
 ";
-        */
-        var text = @"
+
+        /*var text = @"
 [sys] L = {
     [alias] = {
         P.F.Vp1 = {Vp11; Vp12;}
@@ -127,11 +127,11 @@ class Tester
         //    T.Cp2 <||> T.Cm2;
         //}
 
-        //TC3.1
-        tester = {
-            T.Cp1 > T.Cp2 > T.Cm2 > T.Cm1;
-            T.Cp1 |> T.Cm2 |> T.Cp2 |> T.Cm1;
-        }
+        ////TC3.1
+        //tester = {
+        //    T.Cp1 > T.Cp2 > T.Cm2 > T.Cm1;
+        //    T.Cp1 |> T.Cm2 |> T.Cp2 |> T.Cm1;
+        //}
 
         ////TC4
         //tester = {
@@ -172,13 +172,13 @@ class Tester
         //    CP14 <| CM14;
         //}
 
-        ////TC6
-        //tester = {
-        //    T.Cp1 > T.Cm1 > T.Cm2 > W1;
-        //    T.Cp1 > T.Cp2 > W1;
-        //    T.Cp1 <||> T.Cm1;
-        //    T.Cp2 <||> T.Cm2;
-        //}
+        //TC6
+        tester = {
+            T.Cp1 > T.Cm1 > T.Cm2 > W1;
+            T.Cp1 > T.Cp2 > W1;
+            T.Cp1 <||> T.Cm1;
+            T.Cp2 <||> T.Cm2;
+        }
 
         ////TC7
         //tester = {
@@ -225,7 +225,7 @@ class Tester
         W.F;
     }
 }
-";
+";*/
 
         Debug.Assert(!Global.IsInUnitTest);
         var engine = new EngineBuilder(text, "Cpu").Engine;

@@ -34,7 +34,7 @@ public abstract class PortExpressionCommand : PortExpression
             var val = bitChange.Bit.Value;
             if (Actual != null)
                 Actual.Value = val;
-            Global.BitChangedSubject.OnNext(new BitChange(this, val, true));
+            Global.RawBitChangedSubject.OnNext(new BitChange(this, val, true));
         }
     }
 }
@@ -88,7 +88,7 @@ public class PortExpressionEnd : PortExpression
             {
                 CheckMatch(value);
                 Plan.Value = value;
-                Global.BitChangedSubject.OnNext(new BitChange(this, value, true));
+                Global.RawBitChangedSubject.OnNext(new BitChange(this, value, true));
             }
         }
     }

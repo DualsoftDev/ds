@@ -145,44 +145,44 @@ module ToyMockupTest =
         [<Fact>]
         member __.``ToyMockup with 1 segment test`` () =
             init()
-            let cpu = new Cpu("dummy", new Model())
-            let b = Segment(cpu, "B")
-            let bvst = new Flag(cpu, "VStartB")
-            let bvrt = new Flag(cpu, "VResetB")
-            b.PortE <- PortExpressionEnd.Create(cpu, "BVEP", null)
+            //let cpu = new Cpu("dummy", new Model())
+            //let b = Segment(cpu, "B")
+            //let bvst = new Flag(cpu, "VStartB")
+            //let bvrt = new Flag(cpu, "VResetB")
+            //b.PortE <- PortExpressionEnd.Create(cpu, "BVEP", null)
 
 
-            let ``bvst↑`` = Rising(cpu, "시작버튼 눌림감지↑", bvst)
-            let ``finish↑`` = Rising(cpu, "종료 감지↑", b.PortE)
-            let startLatch = Latch(cpu, "시작 래치", ``bvst↑``, ``finish↑``)
-            // bvspe: B 노드의 Virtual Start Port Expression
-            let bvspe = Or(cpu, "OR(BVSPE)", startLatch, bvst)
+            //let ``bvst↑`` = Rising(cpu, "시작버튼 눌림감지↑", bvst)
+            //let ``finish↑`` = Rising(cpu, "종료 감지↑", b.PortE)
+            //let startLatch = Latch(cpu, "시작 래치", ``bvst↑``, ``finish↑``)
+            //// bvspe: B 노드의 Virtual Start Port Expression
+            //let bvspe = Or(cpu, "OR(BVSPE)", startLatch, bvst)
 
-            let ``bvrt↑`` = Rising(cpu, "bvrt↑", bvrt)
-            let ``resetFinished↓`` = Falling(cpu, "B↓", b.PortE)
-            let resetLatch = Latch(cpu, "BVSP_Latch", ``bvrt↑``, ``resetFinished↓``)
+            //let ``bvrt↑`` = Rising(cpu, "bvrt↑", bvrt)
+            //let ``resetFinished↓`` = Falling(cpu, "B↓", b.PortE)
+            //let resetLatch = Latch(cpu, "BVSP_Latch", ``bvrt↑``, ``resetFinished↓``)
 
-            // bvrpe: B 노드의 Virtual Reset Port Expression
-            let bvrpe = Or(cpu, "OR(BVRPE)", resetLatch, bvrt)
+            //// bvrpe: B 노드의 Virtual Reset Port Expression
+            //let bvrpe = Or(cpu, "OR(BVRPE)", resetLatch, bvrt)
 
 
-            b.PortS <- new PortExpressionStart(cpu, "BVSP", bvspe, null)
-            b.PortR <- new PortExpressionReset(cpu, "BVRP", bvrpe, null)
+            //b.PortS <- new PortExpressionStart(cpu, "BVSP", bvspe, null)
+            //b.PortR <- new PortExpressionReset(cpu, "BVRP", bvrpe, null)
 
-            Global.BitChangedSubject
-                .Where(fun bc -> bc.Bit = b.PortE && bc.Bit.Value)
-                .Subscribe(fun bc ->
-                    logDebug $"Endport 감지로 인한 start button 끄기"
-                    bvst.Value <- false // 종료 감지시 -> Start button 끄기
-                )
-            |> ignore
+            //Global.BitChangedSubject
+            //    .Where(fun bc -> bc.Bit = b.PortE && bc.Bit.Value)
+            //    .Subscribe(fun bc ->
+            //        logDebug $"Endport 감지로 인한 start button 끄기"
+            //        bvst.Value <- false // 종료 감지시 -> Start button 끄기
+            //    )
+            //|> ignore
 
-            b.WireEvent()
+            //b.WireEvent()
 
-            bvst.Value <- true
-            b.PortS.Value === true
-            b.PortE.Value === true
-            b.PortR.Value === false
+            //bvst.Value <- true
+            //b.PortS.Value === true
+            //b.PortE.Value === true
+            //b.PortR.Value === false
 
             ()
 

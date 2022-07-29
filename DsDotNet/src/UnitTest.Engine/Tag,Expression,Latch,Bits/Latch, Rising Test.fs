@@ -11,8 +11,8 @@ open FSharpPlus
 
 [<AutoOpen>]
 module LatchTest =
+    [<Collection("Sequential")>]
     type LatchTests1(output1:ITestOutputHelper) =
-
         let init() =
             Global.BitChangedSubject
                 .Subscribe(fun bc ->
@@ -59,7 +59,6 @@ module LatchTest =
             latch.Value === false
 
             ()
-
 
         [<Fact>]
         member __.``Rising test`` () =

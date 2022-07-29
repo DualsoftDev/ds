@@ -15,7 +15,7 @@ public abstract class RisingFallingBase : BitReEvaluatable
         if (_value != value)
         {
             _value = value;
-            Global.BitChangedSubject.OnNext(new BitChange(this, value, true));
+            Global.RawBitChangedSubject.OnNext(new BitChange(this, value, true));
         }
     }
 

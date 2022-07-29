@@ -52,6 +52,14 @@ public interface IBit
     Cpu OwnerCpu { get; set; }
 }
 
+public interface IBitReadable : IBit {}
+public interface IBitWritable : IBit {
+    Action SetValueNowAngGetLaterNotifyAction(bool newValue, bool notifyChange);
+}
+public interface IBitReadWritable : IBitReadable, IBitWritable { }
+
+
+
 public interface IAutoTag { }
 public interface IStrongEdge : IEdge { }
 public interface IWeakEdge : IEdge { }

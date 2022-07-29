@@ -2,8 +2,6 @@ namespace Engine.Core;
 
 public class Latch : BitReEvaluatable
 {
-    protected bool _value;
-
     public override bool Value { get => _value; set => throw new DsException("Not Supported."); }
     IBit _setCondition { get; }
     IBit _resetCondition { get; }

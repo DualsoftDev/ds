@@ -61,7 +61,7 @@ public class PortExpressionReset : PortExpressionCommand
 /// <summary> 관찰용 정보(Plan) + 물리(Actual) </summary>
 public class PortExpressionEnd : PortExpression
 {
-    private PortExpressionEnd(Cpu cpu, Segment segment, string name, IBit plan, Tag actual)
+    private PortExpressionEnd(Cpu cpu, Segment segment, string name, IBitWritable plan, Tag actual)
         : base(cpu, segment, name, plan, actual)
     {
         if (Actual == null || (!Plan.Value && !Actual.Value))
@@ -98,8 +98,10 @@ public class PortExpressionEnd : PortExpression
                 //};
                 //Task.WhenAll(tasks).Wait();
 
-                Plan.Value = value;
+                var notifyAction = ((IBitWritable)Plan).SetValueNowAngGetLaterNotifyAction(value, false);
+                //Plan.Value = value;
                 Global.RawBitChangedSubject.OnNext(new BitChange(this, value, true));
+                notifyAction.Invoke();
             }
         }
     }

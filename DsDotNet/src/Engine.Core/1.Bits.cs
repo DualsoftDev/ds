@@ -3,18 +3,26 @@ namespace Engine.Core;
 [DebuggerDisplay("{ToText()}")]
 public abstract class Bit : Named, IBit
 {
-    bool _value;
+    protected bool _value;
     public virtual bool Value
     {
         get => _value;
         set
         {
-            if (_value != value)
-            {
-                _value = value;
-                Global.RawBitChangedSubject.OnNext(new BitChange(this, value, true));
-            }
+            Debug.Assert(this is IBitWritable);
+            InternalSetValueNowAngGetLaterNotifyAction(value, true).Invoke();
         }
+    }
+    protected Action InternalSetValueNowAngGetLaterNotifyAction(bool newValue, bool notifyChange)
+    {
+        if (_value != newValue)
+        {
+            _value = newValue;
+            if (notifyChange)
+                return new Action(() => Global.RawBitChangedSubject.OnNext(new BitChange(this, newValue, true)));
+        }
+
+        return new Action(() => { });
     }
 
     public Cpu OwnerCpu { get; set; }
@@ -48,7 +56,7 @@ public abstract class Bit : Named, IBit
 
 
 /// <summary> 다른 bit 요소(monitoringBits)에 의해서 값이 변경될 수 있는 bit 에 대한 추상 class </summary>
-public abstract class BitReEvaluatable : Bit
+public abstract class BitReEvaluatable : Bit, IBitReadable
 {
     protected IBit[] _monitoringBits;
     protected abstract void ReEvaulate(BitChange bitChange);
@@ -70,14 +78,18 @@ public abstract class BitReEvaluatable : Bit
 
 
 
-public class Flag : Bit {
+public class Flag : Bit, IBitReadWritable
+{
     public Flag(Cpu cpu, string name, bool bit = false) : base(cpu, name, bit) { }
+
+    public Action SetValueNowAngGetLaterNotifyAction(bool newValue, bool notifyChange) => InternalSetValueNowAngGetLaterNotifyAction(newValue, notifyChange);
 }
 
 
 
 [DebuggerDisplay("{QualifiedName}")]
-public abstract class Port : Bit
+[Obsolete("PortExpression 으로 대체 예정")]
+public abstract class Port : Bit, IBitReadWritable
 {
     public Segment OwnerSegment { get; set; }
     public Port(Segment ownerSegment, string name)
@@ -87,6 +99,7 @@ public abstract class Port : Bit
     }
     public string QualifiedName => $"{OwnerSegment.QualifiedName}.{GetType().Name}";
     public override string ToString() => $"{QualifiedName}[{this.GetType().Name}]@{OwnerCpu.Name}={Value}";
+    public virtual Action SetValueNowAngGetLaterNotifyAction(bool newValue, bool notifyChange) => InternalSetValueNowAngGetLaterNotifyAction(newValue, notifyChange);
 }
 public class PortS : Port
 {
@@ -99,7 +112,6 @@ public class PortR : Port
 public class PortE : Port
 {
     public PortE(Segment ownerSegment) : base(ownerSegment, "PortE") {}
-    bool _value;
     public override bool Value
     {
         get => _value;
@@ -112,6 +124,25 @@ public class PortE : Port
             }
         }
     }
+
+    public override Action SetValueNowAngGetLaterNotifyAction(bool newValue, bool notifyChange)
+    {
+        if (_value != newValue)
+        {
+            var act = InternalSetValueNowAngGetLaterNotifyAction(newValue, notifyChange);
+            if (notifyChange)
+            {
+                return new Action(() =>
+                {
+                    act.Invoke();
+                    Global.TagChangeToOpcServerSubject.OnNext(new OpcTagChange(Name, newValue));
+                });
+            }
+            return act;
+        }
+        return new Action(() => {});
+    }
+
 
 }
 

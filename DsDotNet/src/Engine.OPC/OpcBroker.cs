@@ -10,7 +10,7 @@ using System.Reactive.Subjects;
 
 namespace Engine.OPC;
 
-public class OpcTag : Bit
+public class OpcTag : Bit, IBitReadWritable
 {
     internal Tag OriginalTag;
     public OpcTag(Tag tag)
@@ -18,6 +18,7 @@ public class OpcTag : Bit
     {
         OriginalTag = tag;
     }
+    public Action SetValueNowAngGetLaterNotifyAction(bool newValue, bool notifyChange) => InternalSetValueNowAngGetLaterNotifyAction(newValue, notifyChange);
 }
 public class OpcBroker
 {

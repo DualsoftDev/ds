@@ -15,8 +15,6 @@ module MockUp =
     type Segment(cpu, n, sp, rp, ep) =
         inherit Engine.Core.Segment(n)
         new(cpu, n) = Segment(cpu, n, null, null, null)
-        member x.Cpu:Cpu = cpu
-        member x.Name:string = n
         member val PortS:PortExpressionStart = sp with get, set
         member val PortR:PortExpressionReset = rp with get, set
         member val PortE:PortExpressionEnd = ep with get, set
@@ -31,10 +29,12 @@ module MockUp =
         member x.WireEvent() =
             Global.BitChangedSubject
                 //.Select(fun bc -> bc.Bit)
-                .Where(fun bc -> [x.PortS :> IBit; x.PortR; x.PortE] |> Seq.contains(bc.Bit))
+                .Where(fun bc ->
+                    [x.PortS :> IBit; x.PortR; x.PortE] |> Seq.contains(bc.Bit)
+                )
                 .Subscribe(fun bc ->
                     let newSegmentState = x.GetSegmentStatus()
-                    logDebug $"Segment [{x.Name}] status : {newSegmentState}"
+                    logDebug $"[{x.Name}] Segment status : {newSegmentState}"
 
                     x.Going.Value <- (newSegmentState = Status4.Going)
 
@@ -48,7 +48,7 @@ module MockUp =
                     | Status4.Homing   -> x.PortE.Value <- false
                     | _ -> failwith "Unexpected"
                     //    ) |> ignore
-                    logDebug $"New Segment [{x.Name}] status : {x.GetSegmentStatus()}"
+                    logDebug $"[{x.Name}] New Segment status : {x.GetSegmentStatus()}"
                 )
 
 [<AutoOpen>]
@@ -168,8 +168,6 @@ module ToyMockupTest =
                 let fallingG = Falling(cpu, "↓G", g.PortE)
                 let rlG = Latch(cpu, "rlG", b.Going, fallingG)
                 Or(cpu, "rpeG(OR)", rlG, rtG)
-
-
 
 
             let spexR =

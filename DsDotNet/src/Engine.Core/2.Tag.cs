@@ -26,22 +26,14 @@ public enum TagType
 
 
 
-public class Tag : Bit, ITxRx
+public class Tag : Bit, IBitReadWritable, ITxRx
 {
     public ICoin Owner { get; set; }
     public TagType Type { get; set; }
-    bool _value;
     public override bool Value
     {
         get => _value;
-        set {
-            if (_value != value)
-            {
-                _value = value;
-                Global.TagChangeToOpcServerSubject.OnNext(new OpcTagChange(Name, value));
-                Global.RawBitChangedSubject.OnNext(new BitChange(this, value, true));
-            }
-        }
+        set => SetValueNowAngGetLaterNotifyAction(value, true);
     }
 
 
@@ -66,4 +58,22 @@ public class Tag : Bit, ITxRx
         new Tag(ownerCpu, ownerSegment, name, TagType.Auto | TagType.Reset | TagType.Q | TagType.External)
         ;
 
+    public Action SetValueNowAngGetLaterNotifyAction(bool newValue, bool notifyChange)
+    {
+        if (_value != newValue)
+        {
+            var act = InternalSetValueNowAngGetLaterNotifyAction(newValue, notifyChange);
+            if (notifyChange)
+            {
+                return new Action(() =>
+                {
+                    act.Invoke();
+                    Global.TagChangeToOpcServerSubject.OnNext(new OpcTagChange(Name, newValue));
+                });
+
+            }
+            return act;
+        }
+        return new Action(() => { });
+    }
 }

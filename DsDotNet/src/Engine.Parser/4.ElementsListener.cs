@@ -237,7 +237,16 @@ partial class ElementsListener : dsBaseListener
         {
             foreach(var seg in cpu.RootFlows.SelectMany(rf => rf.ChildVertices).OfType<Segment>())
             {
-                seg.TagGoing = new Tag(cpu, seg, $"{seg.QualifiedName}_Going") { Type = TagType.Going };
+                var name = $"{seg.QualifiedName}_Going";
+                if (cpu.TagsMap.ContainsKey(name))
+                {
+                    Global.Logger.Warn($"Going tag [{name}] already created!.  Check it.");
+                    seg.TagGoing = cpu.TagsMap[name];
+                }
+                else
+                    seg.TagGoing = new Tag(cpu, seg, name) { Type = TagType.Going };
+
+
                 var ports = new Port[] { seg.PortS, seg.PortR, seg.PortE, };
                 ports.Iter(p => p.OwnerCpu = cpu);
             }

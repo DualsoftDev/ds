@@ -63,7 +63,7 @@ module PortExpressionTest =
             let ``_PortExpressionEnd Normal 테스트`` =
                 let actual = new Tag(cpu, null, "T2_test2")
 
-                let pte = PortExpressionEnd.Create(cpu, "_PortExpressionEnd", actual)
+                let pte = PortExpressionEnd.Create(cpu, "_PortExpressionEnd_test2", actual)
                 let plan = pte.Plan
                 pte.Value === false
                 pte.Plan.Value === false
@@ -92,7 +92,7 @@ module PortExpressionTest =
                 actual.Value <- true
 
                 // Actual 이 ON 인 상태에서의 creation
-                let pte = PortExpressionEnd.Create(cpu, "_PortExpressionEnd", actual)
+                let pte = PortExpressionEnd.Create(cpu, "_PortExpressionEnd_test3", actual)
                 let plan = pte.Plan
                 pte.Value === false
                 pte.Plan.Value === false

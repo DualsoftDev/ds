@@ -62,7 +62,7 @@ partial class EngineBuilder
             }
 
             var tags = tgis.Select(tgi => tgi.GeneratedTag).ToArray();
-            Debug.Assert(tags.All(tag => tag.OwnerCpu.TagsMap.ContainsKey(tag.Name)));
+            Debug.Assert(tags.All(tag => tag.OwnerCpu.BitsMap.ContainsKey(tag.Name)));
 
             Opc.AddTags(tags);
 
@@ -76,6 +76,7 @@ partial class EngineBuilder
             Opc.AddTags(hmiTags);
 
             addMissingForwardDependencies(cpu, flows);
+            cpu.BuildTagsMap();
             cpu.BuildBackwardDependency();
         }
 
@@ -171,7 +172,7 @@ partial class EngineBuilder
 
             var tName = tag.Name;
             Debug.Assert(edge.OwnerCpu == cpu);
-            Debug.Assert(tag.OwnerCpu.TagsMap.ContainsKey(tName));
+            Debug.Assert(tag.OwnerCpu.BitsMap.ContainsKey(tName));
             // todo : Debug.Assert(tag.OwnerCpu == cpu);
             if (tag.OwnerCpu != cpu)
             {

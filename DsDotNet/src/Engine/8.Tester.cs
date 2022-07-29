@@ -76,7 +76,7 @@ class Tester
         var opc = engine.Opc;
 
         var resetTag = "Reset_L_F_Main";
-        if (engine.Cpu.TagsMap.ContainsKey(resetTag))
+        if (engine.Cpu.BitsMap.ContainsKey(resetTag))
         {
             var children = engine.Cpu.RootFlows.SelectMany(f => f.ChildVertices);
             var main = children.OfType<Segment>().FirstOrDefault(c => c.Name == "Main");

@@ -69,8 +69,8 @@ module LatchTest =
 
             let t1 = new Tag(cpu, null, "T1")
             let t2 = new Tag(cpu, null, "T2")
-            let ``t1↑`` = new Rising(cpu, "Rising", t1)
-            let ``t2↑`` = new Rising(cpu, "Rising", t2)
+            let ``t1↑`` = new Rising(cpu, "RisingT1", t1)
+            let ``t2↑`` = new Rising(cpu, "RisingT2", t2)
             let ``t1↓`` = new Rising(cpu, "FallingT1", t1)
             let ``t2↓`` = new Rising(cpu, "FallingT2", t2)
 

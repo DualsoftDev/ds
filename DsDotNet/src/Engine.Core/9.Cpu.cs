@@ -21,6 +21,7 @@ public class Cpu : Named, ICpu
     /// <summary> bit 간 역방향 의존성 map </summary>
     public Dictionary<IBit, HashSet<IBit>> BackwardDependancyMap { get; internal set; }
     /// <summary> this Cpu 관련 tags.  Root segment 의 S/R/E 및 call 의 Tx, Rx </summary>
+    public BitDic BitsMap { get; } = new();
     public TagDic TagsMap { get; } = new();
     /// <summary> Call 의 TX RX 에 사용된 tag 목록 </summary>
     public List<Tag> TxRxTags { get; } = new List<Tag>();
@@ -40,12 +41,12 @@ public static class CpuExtension
     public static void AddTag(this Cpu cpu, Tag tag)
     {
         Debug.Assert(tag.OwnerCpu == cpu);
-        if (cpu.TagsMap.ContainsKey(tag.Name))
+        if (cpu.BitsMap.ContainsKey(tag.Name))
         {
-            Debug.Assert(cpu.TagsMap[tag.Name] == tag);
+            Debug.Assert(cpu.BitsMap[tag.Name] == tag);
             return;
         }
-        cpu.TagsMap.Add(tag.Name, tag);
+        cpu.BitsMap.Add(tag.Name, tag);
     }
     public static IEnumerable<IBit> CollectBits(this Cpu cpu)
     {
@@ -72,7 +73,7 @@ public static class CpuExtension
 
     public static void PrintTags(this Cpu cpu)
     {
-        var tagNames = string.Join("\r\n\t", cpu.TagsMap.Values.Select(t => t.Name));
+        var tagNames = string.Join("\r\n\t", cpu.BitsMap.Values.OfType<Tag>().Select(t => t.Name));
         Logger.Debug($"{cpu.Name} tags:\r\n\t{tagNames}");
     }
 
@@ -109,6 +110,14 @@ public static class CpuExtensionBitChange
         }
 
         fwdMap[source].Add(target);
+    }
+
+    public static void BuildTagsMap(this Cpu cpu)
+    {
+        cpu.BitsMap
+            .Where(kv => kv.Value is Tag && !cpu.TagsMap.ContainsKey(kv.Key))
+            .Iter(kv => cpu.TagsMap.Add(kv.Key, kv.Value as Tag))
+            ;
     }
 
     public static void BuildBackwardDependency(this Cpu cpu)

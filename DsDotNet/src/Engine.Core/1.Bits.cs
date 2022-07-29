@@ -24,6 +24,7 @@ public abstract class Bit : Named, IBit
 
         Value = bit;
         OwnerCpu = ownerCpu;
+        ownerCpu.BitsMap.Add(name, this);
     }
 
     // Value setter 를 수행하지 않기 위한 생성자
@@ -31,6 +32,7 @@ public abstract class Bit : Named, IBit
     {
         Debug.Assert(ownerCpu != null);
         OwnerCpu = ownerCpu;
+        ownerCpu.BitsMap.Add(name, this);
     }
     // null cpu 를 허용하기 위한 생성자.  OpcTag 만 cpu null 허용
     internal Bit(string name, bool bit = false) : base(name)
@@ -74,8 +76,8 @@ public class Flag : Bit {
 public abstract class Port : Bit
 {
     public Segment OwnerSegment { get; set; }
-    public Port(Segment ownerSegment)
-        : base(ownerSegment.Cpu, "")
+    public Port(Segment ownerSegment, string name)
+        : base(ownerSegment.Cpu, $"{ownerSegment.QualifiedName}_{name}")
     {
         OwnerSegment = ownerSegment;
     }
@@ -84,15 +86,15 @@ public abstract class Port : Bit
 }
 public class PortS : Port
 {
-    public PortS(Segment ownerSegment) : base(ownerSegment) { Name = "PortS"; }
+    public PortS(Segment ownerSegment) : base(ownerSegment, "PortS") {}
 }
 public class PortR : Port
 {
-    public PortR(Segment ownerSegment) : base(ownerSegment) { Name = "PortR"; }
+    public PortR(Segment ownerSegment) : base(ownerSegment, "PortR") {}
 }
 public class PortE : Port
 {
-    public PortE(Segment ownerSegment) : base(ownerSegment) { Name = "PortE"; }
+    public PortE(Segment ownerSegment) : base(ownerSegment, "PortE") {}
     bool _value;
     public override bool Value
     {

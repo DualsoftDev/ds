@@ -130,7 +130,7 @@ partial class EngineBuilder
                 Debug.Assert(tgi.GeneratedTag.Type == tagType);
                 return tgi.GeneratedTag;
             }
-            if (tgi.OwnerCpu.TagsMap.ContainsKey(tgi.TagName))
+            if (tgi.OwnerCpu.BitsMap.ContainsKey(tgi.TagName))
             {
                 Global.Logger.Warn($"Tag [{tgi.TagName} already created.  using it instead creating new one.");
                 var existing = tgi.OwnerCpu.TagsMap[tgi.TagName];

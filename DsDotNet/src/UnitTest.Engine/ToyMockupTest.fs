@@ -156,14 +156,14 @@ module ToyMockupTest =
             let ``finish↑`` = Rising(cpu, "종료 감지↑", b.PortE)
             let startLatch = Latch(cpu, "시작 래치", ``bvst↑``, ``finish↑``)
             // bvspe: B 노드의 Virtual Start Port Expression
-            let bvspe = Or(cpu, "BVSP", startLatch, bvst)
+            let bvspe = Or(cpu, "OR(BVSPE)", startLatch, bvst)
 
             let ``bvrt↑`` = Rising(cpu, "bvrt↑", bvrt)
             let ``resetFinished↓`` = Falling(cpu, "B↓", b.PortE)
-            let resetLatch = Latch(cpu, "BVSP", ``bvrt↑``, ``resetFinished↓``)
+            let resetLatch = Latch(cpu, "BVSP_Latch", ``bvrt↑``, ``resetFinished↓``)
 
             // bvrpe: B 노드의 Virtual Reset Port Expression
-            let bvrpe = Or(cpu, "BVRP", resetLatch, bvrt)
+            let bvrpe = Or(cpu, "OR(BVRPE)", resetLatch, bvrt)
 
 
             b.PortS <- new PortExpressionStart(cpu, "BVSP", bvspe, null)

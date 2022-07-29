@@ -2,17 +2,16 @@ namespace UnitTest.Engine
 
 
 open Xunit
-open Engine
 open Engine.Core
-open System.Linq
 open Dual.Common
 open Xunit.Abstractions
 open System.Reactive.Linq
-open Akka.Actor
+open System.Threading
 
 [<AutoOpen>]
 module MockUp =
     type Segment(cpu, n, sp, rp, ep) =
+        inherit Engine.Core.Segment(n)
         new(cpu, n) = Segment(cpu, n, null, null, null)
         member x.Cpu:Cpu = cpu
         member x.Name:string = n
@@ -32,102 +31,18 @@ module MockUp =
                 //.Select(fun bc -> bc.Bit)
                 .Where(fun bc -> [x.PortS :> IBit; x.PortR; x.PortE] |> Seq.contains(bc.Bit))
                 .Subscribe(fun bc ->
+                    Thread.Sleep(10);
                     let newSegmentState = x.GetSegmentStatus()
                     logDebug $"Segment [{x.Name}] status : {newSegmentState}"
                     x.Going.Value <- (newSegmentState = Status4.Going)
                     match newSegmentState with
-                    | Status4.Ready -> ()
-                    | Status4.Going ->
-                        x.PortE.Value <- true
-                    | Status4.Finished ->
-                        ()//x.PortS.Plan.Value <- false
-                    | Status4.Homing ->
-                        let xs = x.PortS.Value
-                        let xr = x.PortR.Value
-                        let xe = x.PortE.Value
-                        x.PortE.Value <- false
-                        let xx = x.GetSegmentStatus()
-                        ()
-                        //x.PortR.Plan.Value <- false
+                    | Status4.Ready    -> ()
+                    | Status4.Going    -> x.PortE.Value <- true
+                    | Status4.Finished -> ()
+                    | Status4.Homing   -> x.PortE.Value <- false
                     | _ -> failwith "Unexpected"
+                    logDebug $"New Segment [{x.Name}] status : {x.GetSegmentStatus()}"
                 )
-
-    let buildBackToBack() =
-        let cpu = new Cpu("dummy", new Model())
-        let b = Segment(cpu, "B")
-        let g = Segment(cpu, "G")
-        let r = Segment(cpu, "R")
-
-        let rvst = new Flag(cpu, "VStartR")     // rvst: R 노드의 Virtual Start Tag
-        let gvst = new Flag(cpu, "VStartG")
-        let bvst = new Flag(cpu, "VStartB")
-
-        let rvrt = new Flag(cpu, "VResetR")
-        let gvrt = new Flag(cpu, "VResetG")
-        let bvrt = new Flag(cpu, "VResetB")
-
-        r.PortE <- PortExpressionEnd.Create(cpu, "RVEP", null)
-        g.PortE <- PortExpressionEnd.Create(cpu, "GVEP", null)
-        b.PortE <- PortExpressionEnd.Create(cpu, "BVEP", null)
-
-
-        let bvspe =      // bvspe: B 노드의 Virtual Start Port Expression
-            let ``g↑`` = Rising(cpu, "G↑", g.PortE)
-            let ``b↑`` = Rising(cpu, "B↑", b.PortE)
-            let latch = Latch(cpu, "BVSP_latch", ``g↑``, ``b↑``)
-            Or(cpu, "BVSP", latch, bvst)
-
-        let bvrpe =     // bvrpe: B 노드의 Virtual Reset Port Expression
-            let ``rG↑`` = Rising(cpu, "↑g(R)", r.Going)
-            let ``b↓`` = Falling(cpu, "B↓", b.PortE)
-            let latch = Latch(cpu, "BVSP", ``rG↑``, ``b↓``)
-            Or(cpu, "BVRP", latch, bvrt)
-
-
-
-        let gvspe =
-            let ``r↑`` = Rising(cpu, "R↑", r.PortE)
-            let ``g↑`` = Rising(cpu, "G↑", g.PortE)
-            let latch = Latch(cpu, "GVSP_latch", ``r↑``, ``g↑``)
-            Or(cpu, "GVSP", latch, gvst)
-
-        let gvrpe =
-            let ``bG↑`` = Rising(cpu, "↑g(B)", b.Going)
-            let ``g↓`` = Falling(cpu, "G↓", g.PortE)
-            let latch = Latch(cpu, "GVSP", ``bG↑``, ``g↓``)
-            Or(cpu, "GVRP", latch, gvrt)
-
-
-
-
-        let rvspe =
-            let ``b↑`` = Rising(cpu, "B↑", b.PortE)
-            let ``r↑`` = Rising(cpu, "R↑", r.PortE)
-            let latch = Latch(cpu, "RVSP_latch", ``b↑``, ``r↑``)
-            Or(cpu, "RVSP", latch, rvst)
-
-        let rvrpe =
-            let ``gG↑`` = Rising(cpu, "↑g(G)", g.Going)
-            let ``r↓`` = Falling(cpu, "R↓", r.PortE)
-            let latch = Latch(cpu, "RVSP", ``gG↑``, ``r↓``)
-            Or(cpu, "RVRP", latch, rvrt)
-
-
-        r.PortS <- new PortExpressionStart(cpu, "RVSP", rvspe, null)
-        g.PortS <- new PortExpressionStart(cpu, "GVSP", gvspe, null)
-        b.PortS <- new PortExpressionStart(cpu, "BVSP", bvspe, null)
-
-        r.PortR <- new PortExpressionReset(cpu, "RVRP", rvrpe, null)
-        g.PortR <- new PortExpressionReset(cpu, "GVRP", gvrpe, null)
-        b.PortR <- new PortExpressionReset(cpu, "BVRP", bvrpe, null)
-
-
-        {|  Segments=[b; g; r;]
-            Cpu=cpu
-            VStarts=[bvst; gvst; rvst;]
-            VResets=[bvrt; gvrt; rvrt;]
-            VEnds=[b.PortE.Plan; g.PortE.Plan; r.PortE.Plan;]
-            |}
 
 [<AutoOpen>]
 module ToyMockupTest =
@@ -136,7 +51,7 @@ module ToyMockupTest =
             Global.BitChangedSubject
                 .Subscribe(fun bc ->
                     let bit = bc.Bit
-                    logDebug $"Bit changed: [{bit}] = {bc.NewValue}"
+                    logDebug $"\tBit changed: [{bit}] = {bc.NewValue}"
                 )
             |> ignore
 
@@ -145,61 +60,147 @@ module ToyMockupTest =
         [<Fact>]
         member __.``ToyMockup with 1 segment test`` () =
             init()
-            //let cpu = new Cpu("dummy", new Model())
-            //let b = Segment(cpu, "B")
-            //let bvst = new Flag(cpu, "VStartB")
-            //let bvrt = new Flag(cpu, "VResetB")
-            //b.PortE <- PortExpressionEnd.Create(cpu, "BVEP", null)
+            let cpu = new Cpu("dummy", new Model())
+            let b = Segment(cpu, "B")
+            let st = new Flag(cpu, "VStartB")
+            let rt = new Flag(cpu, "VResetB")
+            b.PortE <- PortExpressionEnd.Create(cpu, b, "BVEP", null)
 
 
-            //let ``bvst↑`` = Rising(cpu, "시작버튼 눌림감지↑", bvst)
-            //let ``finish↑`` = Rising(cpu, "종료 감지↑", b.PortE)
-            //let startLatch = Latch(cpu, "시작 래치", ``bvst↑``, ``finish↑``)
-            //// bvspe: B 노드의 Virtual Start Port Expression
-            //let bvspe = Or(cpu, "OR(BVSPE)", startLatch, bvst)
+            let startLatch = Latch(cpu, "시작 래치", st, b.PortE)
+            // bvspe: B 노드의 Virtual Start Port Expression
+            let bvspe = Or(cpu, "OR(BVSPE)", startLatch, st)
 
-            //let ``bvrt↑`` = Rising(cpu, "bvrt↑", bvrt)
-            //let ``resetFinished↓`` = Falling(cpu, "B↓", b.PortE)
-            //let resetLatch = Latch(cpu, "BVSP_Latch", ``bvrt↑``, ``resetFinished↓``)
+            let notPortE = Not(cpu, "^B", b.PortE)
+            let resetLatch = Latch(cpu, "BVSP_Latch", rt, notPortE)
 
-            //// bvrpe: B 노드의 Virtual Reset Port Expression
-            //let bvrpe = Or(cpu, "OR(BVRPE)", resetLatch, bvrt)
+            // bvrpe: B 노드의 Virtual Reset Port Expression
+            let bvrpe = Or(cpu, "OR(BVRPE)", resetLatch, rt)
 
 
-            //b.PortS <- new PortExpressionStart(cpu, "BVSP", bvspe, null)
-            //b.PortR <- new PortExpressionReset(cpu, "BVRP", bvrpe, null)
+            b.PortS <- new PortExpressionStart(cpu, b, "BVSP", bvspe, null)
+            b.PortR <- new PortExpressionReset(cpu, b, "BVRP", bvrpe, null)
 
-            //Global.BitChangedSubject
-            //    .Where(fun bc -> bc.Bit = b.PortE && bc.Bit.Value)
-            //    .Subscribe(fun bc ->
-            //        logDebug $"Endport 감지로 인한 start button 끄기"
-            //        bvst.Value <- false // 종료 감지시 -> Start button 끄기
-            //    )
-            //|> ignore
+            Global.BitChangedSubject
+                .Subscribe(fun bc ->
+                    let bit = bc.Bit
+                    if bit = b.PortE then
+                        if bit.Value then
+                            logDebug $"Endport ON 감지로 인한 start button 끄기"
+                            st.Value <- false // 종료 감지시 -> Start button 끄기
+                        else
+                            logDebug $"Endport OFF 감지로 인한 reset button 끄기"
+                            rt.Value <- false
+                )
+            |> ignore
 
-            //b.WireEvent()
+            b.WireEvent() |> ignore
 
-            //bvst.Value <- true
-            //b.PortS.Value === true
-            //b.PortE.Value === true
-            //b.PortR.Value === false
+            st.Value <- true
+            // ... going 진행 후, end port 까지 ON
+            st.Value === false
+            b.GetSegmentStatus() === Status4.Finished
 
+            b.PortS.Value === false
+            b.PortE.Value === true
+            b.PortR.Value === false
+
+            notPortE.Value === false
+            startLatch.Value === false
+            resetLatch.Value === false
+
+            // reset 시작
+            rt.Value <- true
+            b.PortE.Value === false
+            notPortE.Value === true
+            b.GetSegmentStatus() === Status4.Ready
             ()
 
         [<Fact>]
         member __.``ToyMockup test`` () =
             // todo : 현재 무한 루프
 
-            //init()
-            //let toySystem = buildBackToBack()
-            //let [b; g; r;] = toySystem.Segments
-            //[b; g; r;] |> Seq.iter(fun seg -> seg.WireEvent() |> ignore)
-            //let [bvst; gvst; rvst;] = toySystem.VStarts
-            //let [bvrt; gvrt; rvrt;] = toySystem.VResets
-            //let [bvet; gvet; rvet;] = toySystem.VEnds
+            let cpu = new Cpu("dummy", new Model())
+            let b = Segment(cpu, "B")
+            let g = Segment(cpu, "G")
+            let r = Segment(cpu, "R")
 
-            //bvst.Value <- true
+            let stR = new Flag(cpu, "stR")     // rvst: R 노드의 Virtual Start Tag
+            let stG = new Flag(cpu, "stG")
+            let stB = new Flag(cpu, "stB")
 
-            //b.PortE.Value === true
-            //r.PortS.Plan.Value === true
+            let rtR = new Flag(cpu, "rtR")
+            let rtG = new Flag(cpu, "rtG")
+            let rtB = new Flag(cpu, "rtB")
+
+            r.PortE <- PortExpressionEnd.Create(cpu, r, "epeR", null)
+            g.PortE <- PortExpressionEnd.Create(cpu, g, "epeG", null)
+            b.PortE <- PortExpressionEnd.Create(cpu, b, "epeB", null)
+
+
+            let speB =      // bvspe: B 노드의 Virtual Start Port Expression
+                let slB = Latch(cpu, "slB", g.PortE, b.PortE)
+                Or(cpu, "speB(OR)", slB, stB)
+
+            let rpeB =     // bvrpe: B 노드의 Virtual Reset Port Expression
+                let notB = Not(cpu, "^B", b.PortE)
+                let rlB = Latch(cpu, "rlB", r.Going, notB)
+                Or(cpu, "rpeB(OR)", rlB, rtB)
+
+
+
+            let speG =
+                let slG = Latch(cpu, "slG", r.PortE, g.PortE)
+                Or(cpu, "speG(OR)", slG, stG)
+
+            let rpeG =
+                let notG = Not(cpu, "^G", g.PortE)
+                let rlG = Latch(cpu, "rlG", b.Going, notG)
+                Or(cpu, "rpeG(OR)", rlG, rtG)
+
+
+
+
+            let speR =
+                let slR = Latch(cpu, "slR", b.PortE, r.PortE)
+                Or(cpu, "speR(OR)", slR, stR)
+
+            let rpeR =
+                let notR = Not(cpu, "^R", r.PortE)
+                let rlR = Latch(cpu, "rlR", g.Going, notR)
+                Or(cpu, "rpeR(OR)", rlR, rtR)
+
+
+            r.PortS <- new PortExpressionStart(cpu, r, "speR", speR, null)
+            g.PortS <- new PortExpressionStart(cpu, g, "speG", speG, null)
+            b.PortS <- new PortExpressionStart(cpu, b, "speB", speB, null)
+
+            r.PortR <- new PortExpressionReset(cpu, r, "rpeR", rpeR, null)
+            g.PortR <- new PortExpressionReset(cpu, g, "rpeG", rpeG, null)
+            b.PortR <- new PortExpressionReset(cpu, b, "rpeB", rpeB, null)
+
+
+
+            Global.BitChangedSubject
+                .Subscribe(fun bc ->
+                    let bit = bc.Bit
+                    logDebug $"\tBit changed: [{bit}] = {bc.NewValue}"
+                    match bit with
+                    | :? PortExpressionEnd as portE ->
+                        let seg = portE.Segment :?> Segment
+                        let status = seg.GetSegmentStatus()
+                        logDebug $"Segment [{seg.Name}] Status : {status} inferred by port [{bit}]={bit.Value} change"
+                        ()
+                    | _ ->
+                        ()
+                )
+            |> ignore
+
+            [b; g; r;] |> Seq.iter(fun seg -> seg.WireEvent() |> ignore)
+
+
+            stB.Value <- true
+
+            b.PortE.Value === true
+            r.PortS.Plan.Value === true
             ()

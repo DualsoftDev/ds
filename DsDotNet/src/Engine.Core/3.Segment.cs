@@ -53,6 +53,10 @@ public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, IWithSREPorts
         PortE = new PortE(this);
     }
 
+    internal Segment(string name)
+        : base(null, name)
+    {}
+
     public override string ToString() => ToText();
     public override string ToText()
     {

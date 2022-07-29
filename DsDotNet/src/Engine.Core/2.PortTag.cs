@@ -4,14 +4,15 @@ namespace Engine.Core;
 /// <summary> 정보(Plan) + 물리(Actual) </summary>
 public abstract class PortExpression : BitReEvaluatable
 {
-    protected PortExpression(Cpu cpu, string name, IBit plan, Tag actual)
+    protected PortExpression(Cpu cpu, Segment segment, string name, IBit plan, Tag actual)
         : base(cpu, name, plan, actual)
     {
         Plan = plan;
         Actual = actual;
+        Segment = segment;
     }
 
-
+    public Segment Segment { get; set; }
     public IBit Plan { get; }
     /// <summary> Allow null </summary>
     public Tag Actual { get; }
@@ -21,8 +22,8 @@ public abstract class PortExpression : BitReEvaluatable
 /// <summary> 지시(Start or Reset) 용 정보(Plan) + 물리(Actual) </summary>
 public abstract class PortExpressionCommand : PortExpression
 {
-    protected PortExpressionCommand(Cpu cpu, string name, IBit plan, Tag actual)
-        : base(cpu, name, plan, actual)
+    protected PortExpressionCommand(Cpu cpu, Segment segment, string name, IBit plan, Tag actual)
+        : base(cpu, segment, name, plan, actual)
     {
     }
     public override bool Value => Plan.Value;
@@ -41,16 +42,16 @@ public abstract class PortExpressionCommand : PortExpression
 /// <summary> Start 명령용 정보(Plan) + 물리(Actual) </summary>
 public class PortExpressionStart : PortExpressionCommand
 {
-    public PortExpressionStart(Cpu cpu, string name, IBit plan, Tag actual)
-        : base(cpu, name, plan, actual)
+    public PortExpressionStart(Cpu cpu, Segment segment, string name, IBit plan, Tag actual)
+        : base(cpu, segment, name, plan, actual)
     {
     }
 }
 /// <summary> Reset 명령용 정보(Plan) + 물리(Actual) </summary>
 public class PortExpressionReset : PortExpressionCommand
 {
-    public PortExpressionReset(Cpu cpu, string name, IBit plan, Tag actual)
-        : base(cpu, name, plan, actual)
+    public PortExpressionReset(Cpu cpu, Segment segment, string name, IBit plan, Tag actual)
+        : base(cpu, segment, name, plan, actual)
     {
     }
 }
@@ -58,8 +59,8 @@ public class PortExpressionReset : PortExpressionCommand
 /// <summary> 관찰용 정보(Plan) + 물리(Actual) </summary>
 public class PortExpressionEnd : PortExpression
 {
-    private PortExpressionEnd(Cpu cpu, string name, IBit plan, Tag actual)
-        : base(cpu, name, plan, actual)
+    private PortExpressionEnd(Cpu cpu, Segment segment, string name, IBit plan, Tag actual)
+        : base(cpu, segment, name, plan, actual)
     {
         if (Actual == null || (!Plan.Value && !Actual.Value))
             Global.NoOp();
@@ -71,10 +72,10 @@ public class PortExpressionEnd : PortExpression
     // End port expression 은 plan 으로 외부에서 따로 지정할 수 없고,
     // 내부에서 해당 값을 설정할 수 있어야 하므로 (Segment Finish 나 Homing 완료시 ON/OFF 시켜야 함)
     // 외부에서 받지 않고, 내부에서 생성해서 관리한다.
-    public static PortExpressionEnd Create(Cpu cpu, string name, Tag actual)
+    public static PortExpressionEnd Create(Cpu cpu, Segment segment, string name, Tag actual)
     {
         var plan = new Flag(cpu, $"{name}_Plan");
-        return new PortExpressionEnd(cpu, name, plan, actual);
+        return new PortExpressionEnd(cpu, segment, name, plan, actual);
     }
 
 

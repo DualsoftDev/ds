@@ -117,7 +117,8 @@ public class PortE : Port
 //public class StrongRelay : Relay { }
 
 
-public record BitChange
+// class or record?
+public class BitChange
 {
     public IBit Bit { get; }
     public bool NewValue { get;  }

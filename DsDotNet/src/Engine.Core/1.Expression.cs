@@ -12,35 +12,10 @@ public abstract class Expression : BitReEvaluatable
     protected Expression(Cpu cpu, string name, params IBit[] monitoringBits)
         : base(cpu, name, monitoringBits)
     {
-    }
-}
-public class And : Expression
-{
-    public override bool Value => _monitoringBits.All(b => b.Value);
-    public And(Cpu cpu, string name, params IBit[] bits)
-        : base(cpu, name, bits)
-    {
+        // override 된 Value 를 생성자에서 호출 가능함.
         _oldValue = this.Value;
     }
 
-    protected override void ReEvaulate(BitChange bitChange)
-    {
-        var newValue = Value;
-        if (_oldValue != newValue )
-        {
-            _oldValue = newValue;
-            Global.BitChangedSubject.OnNext(new BitChange(this, newValue, true));
-        }
-    }
-}
-public class Or : Expression
-{
-    public override bool Value => _monitoringBits.Any(b => b.Value);
-    public Or(Cpu cpu, string name, params IBit[] bits)
-        : base(cpu, name, bits)
-    {
-        _oldValue = this.Value;
-    }
     protected override void ReEvaulate(BitChange bitChange)
     {
         var newValue = Value;
@@ -49,6 +24,22 @@ public class Or : Expression
             _oldValue = newValue;
             Global.BitChangedSubject.OnNext(new BitChange(this, newValue, true));
         }
+    }
+}
+public class And : Expression
+{
+    public override bool Value => _monitoringBits.All(b => b.Value);
+    public And(Cpu cpu, string name, params IBit[] bits)
+        : base(cpu, name, bits)
+    {
+    }
+}
+public class Or : Expression
+{
+    public override bool Value => _monitoringBits.Any(b => b.Value);
+    public Or(Cpu cpu, string name, params IBit[] bits)
+        : base(cpu, name, bits)
+    {
     }
 }
 
@@ -59,16 +50,6 @@ public class Not : Expression
     public Not(Cpu cpu, string name, IBit bit)
         : base(cpu, name, bit)
     {
-        _oldValue = this.Value;
-    }
-    protected override void ReEvaulate(BitChange bitChange)
-    {
-        var newValue = Value;
-        if (_oldValue != newValue)
-        {
-            _oldValue = newValue;
-            Global.BitChangedSubject.OnNext(new BitChange(this, newValue, true));
-        }
     }
 }
 

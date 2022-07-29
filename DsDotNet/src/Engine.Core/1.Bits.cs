@@ -25,11 +25,14 @@ public abstract class Bit : Named, IBit
         Value = bit;
         OwnerCpu = ownerCpu;
     }
-    protected Bit(Cpu ownerCpu, string name) : base(name)
+
+    // Value setter 를 수행하지 않기 위한 생성자
+    protected Bit(string name, Cpu ownerCpu) : base(name)
     {
         Debug.Assert(ownerCpu != null);
         OwnerCpu = ownerCpu;
     }
+    // null cpu 를 허용하기 위한 생성자.  OpcTag 만 cpu null 허용
     internal Bit(string name, bool bit = false) : base(name)
     {
         Value = bit;
@@ -49,7 +52,7 @@ public abstract class BitReEvaluatable : Bit
     protected abstract void ReEvaulate(BitChange bitChange);
     public override bool Value { set => throw new DsException("Not Supported."); }
     protected BitReEvaluatable(Cpu cpu, string name, params IBit[] monitoringBits)
-        : base(cpu, name)
+        : base(name, cpu)
     {
         _monitoringBits = monitoringBits;
         Global.BitChangedSubject

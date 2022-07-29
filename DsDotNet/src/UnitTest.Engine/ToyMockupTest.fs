@@ -7,6 +7,8 @@ open Dual.Common
 open Xunit.Abstractions
 open System.Reactive.Linq
 open System.Threading
+open System.Threading.Tasks
+open Engine.Core
 
 [<AutoOpen>]
 module MockUp =
@@ -31,16 +33,21 @@ module MockUp =
                 //.Select(fun bc -> bc.Bit)
                 .Where(fun bc -> [x.PortS :> IBit; x.PortR; x.PortE] |> Seq.contains(bc.Bit))
                 .Subscribe(fun bc ->
-                    Thread.Sleep(10);
                     let newSegmentState = x.GetSegmentStatus()
                     logDebug $"Segment [{x.Name}] status : {newSegmentState}"
+
                     x.Going.Value <- (newSegmentState = Status4.Going)
+
+                    assert(x.GetSegmentStatus() = newSegmentState)
+
+                    //Task.Run(fun () ->
                     match newSegmentState with
                     | Status4.Ready    -> ()
                     | Status4.Going    -> x.PortE.Value <- true
                     | Status4.Finished -> ()
                     | Status4.Homing   -> x.PortE.Value <- false
                     | _ -> failwith "Unexpected"
+                    //    ) |> ignore
                     logDebug $"New Segment [{x.Name}] status : {x.GetSegmentStatus()}"
                 )
 
@@ -125,6 +132,10 @@ module ToyMockupTest =
             let g = Segment(cpu, "G")
             let r = Segment(cpu, "R")
 
+            (*
+                {s, r, e}{t, l, pex}: {Start, Reset, End} {Tag, Latch, Port Expression}
+            *)
+
             let stR = new Flag(cpu, "stR")     // rvst: R 노드의 Virtual Start Tag
             let stG = new Flag(cpu, "stG")
             let stB = new Flag(cpu, "stB")
@@ -133,51 +144,51 @@ module ToyMockupTest =
             let rtG = new Flag(cpu, "rtG")
             let rtB = new Flag(cpu, "rtB")
 
-            r.PortE <- PortExpressionEnd.Create(cpu, r, "epeR", null)
-            g.PortE <- PortExpressionEnd.Create(cpu, g, "epeG", null)
-            b.PortE <- PortExpressionEnd.Create(cpu, b, "epeB", null)
+            r.PortE <- PortExpressionEnd.Create(cpu, r, "epexR", null)
+            g.PortE <- PortExpressionEnd.Create(cpu, g, "epexG", null)
+            b.PortE <- PortExpressionEnd.Create(cpu, b, "epexB", null)
 
 
-            let speB =      // bvspe: B 노드의 Virtual Start Port Expression
-                let slB = Latch(cpu, "slB", g.PortE, b.PortE)
-                Or(cpu, "speB(OR)", slB, stB)
+            let slB = Latch(cpu, "slB", g.PortE, b.PortE)
+            // bvspe: B 노드의 Virtual Start Port Expression
+            let spexB = Or(cpu, "speB(OR)", slB, stB)
 
-            let rpeB =     // bvrpe: B 노드의 Virtual Reset Port Expression
-                let notB = Not(cpu, "^B", b.PortE)
-                let rlB = Latch(cpu, "rlB", r.Going, notB)
+            let rpexB =     // bvrpe: B 노드의 Virtual Reset Port Expression
+                let fallingB = Falling(cpu, "↓B", b.PortE)
+                let rlB = Latch(cpu, "rlB", r.Going, fallingB)
                 Or(cpu, "rpeB(OR)", rlB, rtB)
 
 
 
-            let speG =
+            let spexG =
                 let slG = Latch(cpu, "slG", r.PortE, g.PortE)
                 Or(cpu, "speG(OR)", slG, stG)
 
-            let rpeG =
-                let notG = Not(cpu, "^G", g.PortE)
-                let rlG = Latch(cpu, "rlG", b.Going, notG)
+            let rpexG =
+                let fallingG = Falling(cpu, "↓G", g.PortE)
+                let rlG = Latch(cpu, "rlG", b.Going, fallingG)
                 Or(cpu, "rpeG(OR)", rlG, rtG)
 
 
 
 
-            let speR =
+            let spexR =
                 let slR = Latch(cpu, "slR", b.PortE, r.PortE)
                 Or(cpu, "speR(OR)", slR, stR)
 
-            let rpeR =
-                let notR = Not(cpu, "^R", r.PortE)
-                let rlR = Latch(cpu, "rlR", g.Going, notR)
+            let rpexR =
+                let fallingR = Falling(cpu, "↓R", r.PortE)
+                let rlR = Latch(cpu, "rlR", g.Going, fallingR)
                 Or(cpu, "rpeR(OR)", rlR, rtR)
 
 
-            r.PortS <- new PortExpressionStart(cpu, r, "speR", speR, null)
-            g.PortS <- new PortExpressionStart(cpu, g, "speG", speG, null)
-            b.PortS <- new PortExpressionStart(cpu, b, "speB", speB, null)
+            r.PortS <- new PortExpressionStart(cpu, r, "spexR", spexR, null)
+            g.PortS <- new PortExpressionStart(cpu, g, "spexG", spexG, null)
+            b.PortS <- new PortExpressionStart(cpu, b, "spexB", spexB, null)
 
-            r.PortR <- new PortExpressionReset(cpu, r, "rpeR", rpeR, null)
-            g.PortR <- new PortExpressionReset(cpu, g, "rpeG", rpeG, null)
-            b.PortR <- new PortExpressionReset(cpu, b, "rpeB", rpeB, null)
+            r.PortR <- new PortExpressionReset(cpu, r, "rpexR", rpexR, null)
+            g.PortR <- new PortExpressionReset(cpu, g, "rpexG", rpexG, null)
+            b.PortR <- new PortExpressionReset(cpu, b, "rpexB", rpexB, null)
 
 
 
@@ -200,6 +211,9 @@ module ToyMockupTest =
 
 
             stB.Value <- true
+
+            // give enough time to wait...
+            Thread.Sleep(1000)
 
             b.PortE.Value === true
             r.PortS.Plan.Value === true

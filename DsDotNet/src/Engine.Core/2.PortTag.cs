@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+
 namespace Engine.Core;
 
 
@@ -88,6 +90,14 @@ public class PortExpressionEnd : PortExpression
             if (Plan.Value != value)
             {
                 CheckMatch(value);
+                //! 호출 순서 매우 민감.
+                //var tasks = new[]
+                //{
+                //    Task.Run(() => Plan.Value = value),
+                //    Task.Run(() => Global.RawBitChangedSubject.OnNext(new BitChange(this, value, true))),
+                //};
+                //Task.WhenAll(tasks).Wait();
+
                 Plan.Value = value;
                 Global.RawBitChangedSubject.OnNext(new BitChange(this, value, true));
             }

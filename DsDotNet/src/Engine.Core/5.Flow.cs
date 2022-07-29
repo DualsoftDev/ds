@@ -2,7 +2,7 @@ namespace Engine.Core;
 
 public abstract class Flow : Named, IWallet
 {
-    public virtual Cpu Cpu { get; set; }
+    public virtual Cpu Cpu { get; }
 
     /// <summary>Edge 를 통해 알 수 없는 isolated segement/call 등을 포함 </summary>
     HashSet<IVertex> _childVertices = new();
@@ -41,9 +41,10 @@ public abstract class Flow : Named, IWallet
         AddChildVertex(edge.Target);
     }
 
-    protected Flow(string name)
+    protected Flow(Cpu cpu, string name)
         : base(name)
     {
+        Cpu = cpu;
     }
 }
 
@@ -54,8 +55,8 @@ public class RootFlow : Flow
 {
     public DsSystem System { get; set; }
     public string QualifiedName => $"{System.Name}_{Name}";
-    public RootFlow(string name, DsSystem system)
-        : base(name)
+    public RootFlow(Cpu cpu, string name, DsSystem system)
+        : base(cpu, name)
     {
         System = system;
         system.RootFlows.Add(this);
@@ -68,8 +69,8 @@ public class RootFlow : Flow
 
 public class ChildFlow : Flow
 {
-    public ChildFlow(string name)
-        : base(name)
+    public ChildFlow(Cpu cpu, string name)
+        : base(cpu, name)
     {
     }
 

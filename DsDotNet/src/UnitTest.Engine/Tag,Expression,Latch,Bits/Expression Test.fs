@@ -25,7 +25,7 @@ module ExpressionTest =
             logInfo "============== And test"
             init()
 
-            let cpu = new Cpu("dummy", [||], new Model())
+            let cpu = new Cpu("dummy", new Model())
 
             let a1 = new Tag(cpu, null, "a1_test1")
             let a2 = new Tag(cpu, null, "a2_test1")
@@ -52,7 +52,7 @@ module ExpressionTest =
             logInfo "============== Or test"
             init()
 
-            let cpu = new Cpu("dummy", [||], new Model())
+            let cpu = new Cpu("dummy", new Model())
 
             let a1 = new Tag(cpu, null, "a1_test2")
             let a2 = new Tag(cpu, null, "a2_test2")
@@ -83,7 +83,7 @@ module ExpressionTest =
             logInfo "============== Not test"
             init()
 
-            let cpu = new Cpu("dummy", [||], new Model())
+            let cpu = new Cpu("dummy", new Model())
 
             let a1 = new Tag(cpu, null, "a1_test3")
             let xNot = new Not(cpu, "Not1_test2", a1)
@@ -105,7 +105,7 @@ module ExpressionTest =
             logInfo "============== 복합 expression test"
             init()
 
-            let cpu = new Cpu("dummy", [||], new Model())
+            let cpu = new Cpu("dummy", new Model())
 
             // x = a && (b || ( c && !d))
 
@@ -137,7 +137,7 @@ module ExpressionTest =
             logInfo "============== 복합(+Latch) expression test"
             init()
 
-            let cpu = new Cpu("dummy", [||], new Model())
+            let cpu = new Cpu("dummy", new Model())
 
             // x = a || latch
             // latch :

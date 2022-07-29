@@ -30,7 +30,7 @@ module LatchTest =
             init()
 
 
-            let cpu = new Cpu("dummy", [||], new Model())
+            let cpu = new Cpu("dummy", new Model())
 
             let tSet = new Tag(cpu, null, "T1")
             let tReset = new Tag(cpu, null, "T2")
@@ -65,7 +65,7 @@ module LatchTest =
         member __.``Rising test`` () =
             logInfo "============== Rising test"
             init()
-            let cpu = new Cpu("dummy", [||], new Model())
+            let cpu = new Cpu("dummy", new Model())
 
             let t1 = new Tag(cpu, null, "T1")
             let t2 = new Tag(cpu, null, "T2")

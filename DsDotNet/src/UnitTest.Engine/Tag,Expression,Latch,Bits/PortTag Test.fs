@@ -27,7 +27,7 @@ module PortExpressionTest =
             init()
 
 
-            let cpu = new Cpu("dummy", [||], new Model())
+            let cpu = new Cpu("dummy", new Model())
 
 
             let ``_PortExpressionStart 테스트`` =

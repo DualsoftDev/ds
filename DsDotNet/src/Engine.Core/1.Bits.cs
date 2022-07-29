@@ -18,7 +18,7 @@ public abstract class Bit : Named, IBit
     }
 
     public Cpu OwnerCpu { get; set; }
-    public Bit(Cpu ownerCpu = null, string name = "", bool bit = false) : base(name)
+    public Bit(Cpu ownerCpu, string name, bool bit = false) : base(name)
     {
         Debug.Assert(ownerCpu != null);
 
@@ -29,6 +29,11 @@ public abstract class Bit : Named, IBit
     {
         Debug.Assert(ownerCpu != null);
         OwnerCpu = ownerCpu;
+    }
+    internal Bit(string name, bool bit = false) : base(name)
+    {
+        Value = bit;
+        Debug.Assert(GetType().Name.Contains("OpcTag"));
     }
 
 
@@ -66,7 +71,11 @@ public class Flag : Bit {
 public abstract class Port : Bit
 {
     public Segment OwnerSegment { get; set; }
-    public Port(Segment ownerSegment) => OwnerSegment = ownerSegment;
+    public Port(Segment ownerSegment)
+        : base(ownerSegment.Cpu, "")
+    {
+        OwnerSegment = ownerSegment;
+    }
     public string QualifiedName => $"{OwnerSegment.QualifiedName}.{GetType().Name}";
     public override string ToString() => $"{QualifiedName}[{this.GetType().Name}]@{OwnerCpu.Name}={Value}";
 }
@@ -98,9 +107,9 @@ public class PortE : Port
 }
 
 
-public class Relay : Bit { }
-public class WeakRelay : Relay { }
-public class StrongRelay : Relay { }
+//public class Relay : Bit { }
+//public class WeakRelay : Relay { }
+//public class StrongRelay : Relay { }
 
 
 public record BitChange

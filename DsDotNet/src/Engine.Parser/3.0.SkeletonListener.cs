@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Antlr4.Runtime.Misc;
+
 using Engine.Core;
 
 namespace Engine.Parser;
@@ -35,6 +37,40 @@ class SkeletonListener : dsBaseListener
     }
 
 
+    override public void EnterProgram(dsParser.ProgramContext ctx)
+    {
+        var cpuContexts =
+            DsParser.enumerateChildren<dsParser.CpuContext>(ctx, false, r => r is dsParser.CpuContext)
+            ;
+
+        Dictionary<string, Cpu> dict = new();
+
+        Cpu createCpu(string cpuName)
+        {
+            if (dict.ContainsKey(cpuName))
+                return dict[cpuName];
+            var cpu = new Cpu(cpuName, ParserHelper.Model);
+            dict[cpuName] = cpu;
+            return cpu;
+        }
+        var flowName2CpuNames =
+            from cpuctx in cpuContexts
+            let cpuName = cpuctx.id().GetText()
+            from flowCtx in DsParser.enumerateChildren<dsParser.FlowPathContext>(cpuctx, false, r => r is dsParser.FlowPathContext)
+            let flowName = flowCtx.GetText()
+            select (flowName, createCpu(cpuName))
+            ;
+
+        var flowName2CpuNameMap =
+            flowName2CpuNames.ToDictionary(tpl => tpl.Item1, tpl=>tpl.Item2)
+            ;
+
+        ParserHelper.FlowName2CpuMap = flowName2CpuNameMap;
+
+        Console.WriteLine();
+
+    }
+
     override public void EnterSystem(dsParser.SystemContext ctx)
     {
         var n = ctx.id().GetText();
@@ -57,7 +93,9 @@ class SkeletonListener : dsBaseListener
     {
         var flowName = ctx.id().GetText();
         var flowOf = ctx.flowProp().id();
-        _rootFlow = new RootFlow(flowName, _system);
+        var cpu = ParserHelper.FlowName2CpuMap[$"{CurrentPath}.{flowName}"];
+        _rootFlow = new RootFlow(cpu, flowName, _system);
+        cpu.RootFlows.Add(_rootFlow);
         QpInstanceMap.Add(CurrentPath, _rootFlow);
         Trace.WriteLine($"Flow: {flowName}");
     }
@@ -108,25 +146,25 @@ class SkeletonListener : dsBaseListener
 
     override public void EnterCpu(dsParser.CpuContext ctx)
     {
-        var name = ctx.id().GetText();
-        var flowPathContexts =
-            DsParser.enumerateChildren<dsParser.FlowPathContext>(ctx, false, r => r is dsParser.FlowPathContext)
-            ;
+        //var name = ctx.id().GetText();
+        //var flowPathContexts =
+        //    DsParser.enumerateChildren<dsParser.FlowPathContext>(ctx, false, r => r is dsParser.FlowPathContext)
+        //    ;
 
-        var flows =
-            flowPathContexts.Select(fpc =>
-            {
-                var systemName = fpc.GetChild(0).GetText();
-                var dot_ = fpc.GetChild(1).GetText();
-                var flowName = fpc.GetChild(2).GetText();
+        //var flows =
+        //    flowPathContexts.Select(fpc =>
+        //    {
+        //        var systemName = fpc.GetChild(0).GetText();
+        //        var dot_ = fpc.GetChild(1).GetText();
+        //        var flowName = fpc.GetChild(2).GetText();
 
-                var system = _model.Systems.FirstOrDefault(sys => sys.Name == systemName);
-                var flow = system.RootFlows.FirstOrDefault(f => f.Name == flowName);
-                return flow;
-            })
-            .ToArray()
-            ;
-        var cpu_ = new Cpu(name, flows, _model);
+        //        var system = _model.Systems.FirstOrDefault(sys => sys.Name == systemName);
+        //        var flow = system.RootFlows.FirstOrDefault(f => f.Name == flowName);
+        //        return flow;
+        //    })
+        //    .ToArray()
+        //    ;
+        //var cpu_ = new Cpu(name, _model) { RootFlows = flows };
     }
 
 

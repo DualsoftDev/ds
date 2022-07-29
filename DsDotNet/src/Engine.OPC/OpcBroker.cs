@@ -14,7 +14,7 @@ public class OpcTag : Bit
 {
     internal Tag OriginalTag;
     public OpcTag(Tag tag)
-        : base(null, tag.Name, tag.Value)
+        : base(tag.Name, tag.Value)
     {
         OriginalTag = tag;
     }

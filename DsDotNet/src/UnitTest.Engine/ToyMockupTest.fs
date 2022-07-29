@@ -53,7 +53,7 @@ module MockUp =
                 )
 
     let buildBackToBack() =
-        let cpu = new Cpu("dummy", [||], new Model())
+        let cpu = new Cpu("dummy", new Model())
         let b = Segment(cpu, "B")
         let g = Segment(cpu, "G")
         let r = Segment(cpu, "R")
@@ -145,7 +145,7 @@ module ToyMockupTest =
         [<Fact>]
         member __.``ToyMockup with 1 segment test`` () =
             init()
-            let cpu = new Cpu("dummy", [||], new Model())
+            let cpu = new Cpu("dummy", new Model())
             let b = Segment(cpu, "B")
             let bvst = new Flag(cpu, "VStartB")
             let bvrt = new Flag(cpu, "VResetB")

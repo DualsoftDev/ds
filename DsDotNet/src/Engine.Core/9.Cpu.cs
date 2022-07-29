@@ -7,8 +7,10 @@ public class Cpu : Named, ICpu
     public IEngine Engine { get; set; }
     public Model Model { get; }
     public bool IsActive { get; set; }
+
+
     /// <summary> this Cpu 가 관장하는 root flows </summary>
-    public RootFlow[] RootFlows { get; }
+    public List<RootFlow> RootFlows { get; } = new();
 
     /// <summary> Bit change event queue </summary>
     public ConcurrentQueue<BitChange> Queue { get; } = new();
@@ -23,12 +25,10 @@ public class Cpu : Named, ICpu
     /// <summary> Call 의 TX RX 에 사용된 tag 목록 </summary>
     public List<Tag> TxRxTags { get; } = new List<Tag>();
 
-    public Cpu(string name, RootFlow[] rootFlows, Model model) : base(name)
+    public Cpu(string name, Model model) : base(name)
     {
-        RootFlows = rootFlows;
         Model = model;
         model.Cpus.Add(this);
-        rootFlows.Iter(f => f.Cpu = this);
     }
 
 }

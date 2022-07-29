@@ -28,6 +28,15 @@ sysBlock
     : LBRACE (task|flow|listing|alias|parenting|causal|call|acc|macro)* RBRACE
     ;
 
+
+/*
+[cpus] AllCpus = {
+    [cpu] Cpu = {
+        L.F;
+    }
+}
+ */
+
 cpus: cpusProp (id)? '=' cpusBlock;
 cpusProp: '[' 'cpus' ']';
 cpusBlock

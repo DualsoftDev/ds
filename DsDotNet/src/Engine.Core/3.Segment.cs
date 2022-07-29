@@ -7,7 +7,7 @@ namespace Engine.Core;
 public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, IWithSREPorts, ITxRx, ITagSREContainer// Coin
 {
     public RootFlow ContainerFlow { get; }
-    public override Cpu Cpu { get => ContainerFlow.Cpu; set => throw new NotImplementedException(); }
+    public override Cpu Cpu { get => ContainerFlow.Cpu; }
     public Cpu OwnerCpu { get => ContainerFlow.Cpu; set => throw new NotImplementedException(); }
     public string QualifiedName => $"{ContainerFlow.QualifiedName}_{Name}";
 
@@ -42,7 +42,7 @@ public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, IWithSREPorts
     internal CompositeDisposable Disposables = new();
 
     public Segment(string name, RootFlow containerFlow)
-        : base(name)
+        : base(containerFlow.Cpu, name)
     {
         ContainerFlow = containerFlow;
         //containerFlow.ChildVertices.Add(this);

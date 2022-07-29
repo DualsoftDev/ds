@@ -25,6 +25,8 @@ public class ParserHelper
     internal RootFlow _rootFlow;
     internal Segment _parenting;
 
+    internal Dictionary<string, Cpu> FlowName2CpuMap;
+
     internal string CurrentPath
     {
         get

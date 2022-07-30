@@ -10,20 +10,26 @@ public abstract class Bit : Named, IBit
         set
         {
             Debug.Assert(this is IBitWritable);
-            InternalSetValueNowAngGetLaterNotifyAction(value, true).Invoke();
-        }
-    }
-    protected Action InternalSetValueNowAngGetLaterNotifyAction(bool newValue, bool notifyChange)
-    {
-        if (_value != newValue)
-        {
-            _value = newValue;
-            if (notifyChange)
-                return new Action(() => Global.RawBitChangedSubject.OnNext(new BitChange(this, newValue, true)));
-        }
+            /*NOTIFYACTION*/ //InternalSetValueNowAngGetLaterNotifyAction(value, true).Invoke();
+            if (_value != value)
+            {
+                _value = value;
+                Global.RawBitChangedSubject.OnNext(new BitChange(this, value, true));
+            }
 
-        return new Action(() => { });
+        }
     }
+    /*NOTIFYACTION*/ //protected Action InternalSetValueNowAngGetLaterNotifyAction(bool newValue, bool notifyChange)
+    /*NOTIFYACTION*/ //{
+    /*NOTIFYACTION*/ //    if (_value != newValue)
+    /*NOTIFYACTION*/ //    {
+    /*NOTIFYACTION*/ //        _value = newValue;
+    /*NOTIFYACTION*/ //        if (notifyChange)
+    /*NOTIFYACTION*/ //            return new Action(() => Global.RawBitChangedSubject.OnNext(new BitChange(this, newValue, true)));
+    /*NOTIFYACTION*/ //    }
+    /*NOTIFYACTION*/
+    /*NOTIFYACTION*/ //    return new Action(() => { });
+    /*NOTIFYACTION*/ //}
 
     public Cpu OwnerCpu { get; set; }
     public Bit(Cpu ownerCpu, string name, bool bit = false) : base(name)
@@ -82,7 +88,7 @@ public class Flag : Bit, IBitReadWritable
 {
     public Flag(Cpu cpu, string name, bool bit = false) : base(cpu, name, bit) { }
 
-    public Action SetValueNowAngGetLaterNotifyAction(bool newValue, bool notifyChange) => InternalSetValueNowAngGetLaterNotifyAction(newValue, notifyChange);
+    /*NOTIFYACTION*/ //public Action SetValueNowAngGetLaterNotifyAction(bool newValue, bool notifyChange) => InternalSetValueNowAngGetLaterNotifyAction(newValue, notifyChange);
 }
 
 
@@ -99,7 +105,7 @@ public abstract class Port : Bit, IBitReadWritable
     }
     public string QualifiedName => $"{OwnerSegment.QualifiedName}.{GetType().Name}";
     public override string ToString() => $"{QualifiedName}[{this.GetType().Name}]@{OwnerCpu.Name}={Value}";
-    public virtual Action SetValueNowAngGetLaterNotifyAction(bool newValue, bool notifyChange) => InternalSetValueNowAngGetLaterNotifyAction(newValue, notifyChange);
+    /*NOTIFYACTION*/ //public virtual Action SetValueNowAngGetLaterNotifyAction(bool newValue, bool notifyChange) => InternalSetValueNowAngGetLaterNotifyAction(newValue, notifyChange);
 }
 public class PortS : Port
 {
@@ -125,23 +131,23 @@ public class PortE : Port
         }
     }
 
-    public override Action SetValueNowAngGetLaterNotifyAction(bool newValue, bool notifyChange)
-    {
-        if (_value != newValue)
-        {
-            var act = InternalSetValueNowAngGetLaterNotifyAction(newValue, notifyChange);
-            if (notifyChange)
-            {
-                return new Action(() =>
-                {
-                    act.Invoke();
-                    Global.TagChangeToOpcServerSubject.OnNext(new OpcTagChange(Name, newValue));
-                });
-            }
-            return act;
-        }
-        return new Action(() => {});
-    }
+    /*NOTIFYACTION*/ //public override Action SetValueNowAngGetLaterNotifyAction(bool newValue, bool notifyChange)
+    /*NOTIFYACTION*/ //{
+    /*NOTIFYACTION*/ //    if (_value != newValue)
+    /*NOTIFYACTION*/ //    {
+    /*NOTIFYACTION*/ //        var act = InternalSetValueNowAngGetLaterNotifyAction(newValue, notifyChange);
+    /*NOTIFYACTION*/ //        if (notifyChange)
+    /*NOTIFYACTION*/ //        {
+    /*NOTIFYACTION*/ //            return new Action(() =>
+    /*NOTIFYACTION*/ //            {
+    /*NOTIFYACTION*/ //                act.Invoke();
+    /*NOTIFYACTION*/ //                Global.TagChangeToOpcServerSubject.OnNext(new OpcTagChange(Name, newValue));
+    /*NOTIFYACTION*/ //            });
+    /*NOTIFYACTION*/ //        }
+    /*NOTIFYACTION*/ //        return act;
+    /*NOTIFYACTION*/ //    }
+    /*NOTIFYACTION*/ //    return new Action(() => {});
+    /*NOTIFYACTION*/ //}
 
 
 }

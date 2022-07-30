@@ -1,4 +1,4 @@
-namespace UnitTest.Engine
+namespace UnitTest.Mockup.Engine
 
 
 open Xunit
@@ -9,6 +9,7 @@ open System.Reactive.Linq
 open System.Threading
 open System.Threading.Tasks
 open Engine.Core
+open UnitTest.Engine
 
 [<AutoOpen>]
 module MockUp =
@@ -43,7 +44,11 @@ module MockUp =
                     //Task.Run(fun () ->
                     match newSegmentState with
                     | Status4.Ready    -> ()
-                    | Status4.Going    -> x.PortE.Value <- true
+                    | Status4.Going    ->
+                        x.Going.Value <- false
+                        assert(x.GetSegmentStatus() = Status4.Going)
+                        x.PortE.Value <- true
+                        assert(x.GetSegmentStatus() = Status4.Finished)
                     | Status4.Finished -> ()
                     | Status4.Homing   -> x.PortE.Value <- false
                     | _ -> failwith "Unexpected"

@@ -54,7 +54,7 @@ public interface IBit
 
 public interface IBitReadable : IBit {}
 public interface IBitWritable : IBit {
-    Action SetValueNowAngGetLaterNotifyAction(bool newValue, bool notifyChange);
+    //Action SetValueNowAngGetLaterNotifyAction(bool newValue, bool notifyChange);
 }
 public interface IBitReadWritable : IBitReadable, IBitWritable { }
 

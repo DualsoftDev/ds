@@ -98,10 +98,11 @@ public class PortExpressionEnd : PortExpression
                 //};
                 //Task.WhenAll(tasks).Wait();
 
-                var notifyAction = ((IBitWritable)Plan).SetValueNowAngGetLaterNotifyAction(value, false);
-                //Plan.Value = value;
+
+                /*NOTIFYACTION*/ //var notifyAction = ((IBitWritable)Plan).SetValueNowAngGetLaterNotifyAction(value, false);
+                Plan.Value = value;
                 Global.RawBitChangedSubject.OnNext(new BitChange(this, value, true));
-                notifyAction.Invoke();
+                /*NOTIFYACTION*/ //notifyAction.Invoke();
             }
         }
     }

@@ -33,7 +33,16 @@ public class Tag : Bit, IBitReadWritable, ITxRx
     public override bool Value
     {
         get => _value;
-        set => SetValueNowAngGetLaterNotifyAction(value, true);
+        set
+        {
+            if (_value != value)
+            {
+                _value = value;
+                Global.TagChangeToOpcServerSubject.OnNext(new OpcTagChange(Name, value));
+                Global.RawBitChangedSubject.OnNext(new BitChange(this, value, true));
+            }
+        }
+        /*NOTIFYACTION*/ //set => SetValueNowAngGetLaterNotifyAction(value, true).Invoke();
     }
 
 
@@ -58,22 +67,23 @@ public class Tag : Bit, IBitReadWritable, ITxRx
         new Tag(ownerCpu, ownerSegment, name, TagType.Auto | TagType.Reset | TagType.Q | TagType.External)
         ;
 
-    public Action SetValueNowAngGetLaterNotifyAction(bool newValue, bool notifyChange)
-    {
-        if (_value != newValue)
-        {
-            var act = InternalSetValueNowAngGetLaterNotifyAction(newValue, notifyChange);
-            if (notifyChange)
-            {
-                return new Action(() =>
-                {
-                    act.Invoke();
-                    Global.TagChangeToOpcServerSubject.OnNext(new OpcTagChange(Name, newValue));
-                });
-
-            }
-            return act;
-        }
-        return new Action(() => { });
-    }
+    /*NOTIFYACTION*/ //public Action SetValueNowAngGetLaterNotifyAction(bool newValue, bool notifyChange)
+    /*NOTIFYACTION*/ //{
+    /*NOTIFYACTION*/ //    if (_value != newValue)
+    /*NOTIFYACTION*/ //    {
+    /*NOTIFYACTION*/ //        var act = InternalSetValueNowAngGetLaterNotifyAction(newValue, notifyChange);
+    /*NOTIFYACTION*/ //        if (notifyChange)
+    /*NOTIFYACTION*/ //        {
+    /*NOTIFYACTION*/ //            return new Action(() =>
+    /*NOTIFYACTION*/ //            {
+    /*NOTIFYACTION*/ //                act.Invoke();
+    /*NOTIFYACTION*/ //                Global.TagChangeToOpcServerSubject.OnNext(new OpcTagChange(Name, newValue));
+    /*NOTIFYACTION*/ //            });
+    /*NOTIFYACTION*/ //
+    /*NOTIFYACTION*/ //        }
+    /*NOTIFYACTION*/ //        return act;
+    /*NOTIFYACTION*/ //    }
+    /*NOTIFYACTION*/ //    return new Action(() => { });
+    /*NOTIFYACTION*/ //
+    /*NOTIFYACTION*/ //}
 }

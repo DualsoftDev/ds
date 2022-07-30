@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+
 namespace Engine.Core;
 
 [DebuggerDisplay("{ToText()}")]
@@ -14,7 +16,7 @@ public abstract class Bit : Named, IBit
             if (_value != value)
             {
                 _value = value;
-                Global.RawBitChangedSubject.OnNext(new BitChange(this, value, true));
+                BitChange.Publish(this, value, true);
             }
 
         }
@@ -173,6 +175,16 @@ public class BitChange
         NewValue = newValue;
         Applied = applied;
         Time = DateTime.Now;
+    }
+
+    public static ConcurrentHashSet<Task> PendingTasks = new();
+    public static void Publish(IBit bit, bool newValue, bool applied)
+    {
+        //! 현재값 publish 를 threading 으로 처리...
+        var task = new Task(() => Global.RawBitChangedSubject.OnNext(new BitChange(bit, newValue, applied)));
+        PendingTasks.Add(task);
+        task.ContinueWith(t => PendingTasks.TryRemove(t, out Task _task));
+        task.Start();
     }
 
 }

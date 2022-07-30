@@ -39,7 +39,7 @@ public class Tag : Bit, IBitReadWritable, ITxRx
             {
                 _value = value;
                 Global.TagChangeToOpcServerSubject.OnNext(new OpcTagChange(Name, value));
-                Global.RawBitChangedSubject.OnNext(new BitChange(this, value, true));
+                BitChange.Publish(this, value, true);
             }
         }
         /*NOTIFYACTION*/ //set => SetValueNowAngGetLaterNotifyAction(value, true).Invoke();

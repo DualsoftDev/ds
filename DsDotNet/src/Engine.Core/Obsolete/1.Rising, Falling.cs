@@ -15,7 +15,7 @@
 /**/            if (_value != value)
 /**/            {
 /**/                _value = value;
-/**/                Global.RawBitChangedSubject.OnNext(new BitChange(this, value, true));
+/**/                BitChange.Publish(this, value, true);
 /**/            }
 /**/        }
 /**/

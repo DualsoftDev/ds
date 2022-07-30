@@ -24,7 +24,6 @@ public static class Global
     public static Subject<OpcTagChange> TagChangeToOpcServerSubject { get; } = new();
     public static Subject<OpcTagChange> TagChangeFromOpcServerSubject { get; } = new();
 
-    public static ConcurrentHashSet<Task> PendingTasks = new();
 
     public static bool IsInUnitTest { get; }
     static Global()

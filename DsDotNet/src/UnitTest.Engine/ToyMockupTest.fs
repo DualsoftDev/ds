@@ -58,7 +58,8 @@ module MockUp =
                     | _ ->
                         failwith "Unexpected"
                     //    ) |> ignore
-                    logDebug $"[{x.Name}] New Segment status : {x.GetSegmentStatus()}"
+
+                    //logDebug $"[{x.Name}] New Segment status : {x.GetSegmentStatus()}"
                 )
 
     type MuCpu(n) =
@@ -176,13 +177,13 @@ module ToyMockupTest =
 
 
 
-            let spexG =
-                let slG = Latch(cpu, "slG", r.PortE, g.PortE)
-                Or(cpu, "speG(OR)", slG, stG)
+            let slG = Latch(cpu, "slG", r.PortE, g.PortE)
+            let spexG = Or(cpu, "speG(OR)", slG, stG)
 
+            let fallingG = Falling(cpu, "↓G", g.PortE)
+            let notG = Falling(cpu, "^G", g.PortE)
+            let rlG = Latch(cpu, "rlG", b.Going, fallingG)
             let rpexG =
-                let fallingG = Falling(cpu, "↓G", g.PortE)
-                let rlG = Latch(cpu, "rlG", b.Going, fallingG)
                 Or(cpu, "rpeG(OR)", rlG, rtG)
 
 
@@ -215,6 +216,8 @@ module ToyMockupTest =
                         let seg = portE.Segment :?> Segment
                         let status = seg.GetSegmentStatus()
                         logDebug $"Segment [{seg.Name}] Status : {status} inferred by port [{bit}]={bit.Value} change"
+                        if bit = b.PortE then
+                            stB.Value <- false
                         ()
                     | _ ->
                         ()
@@ -227,9 +230,12 @@ module ToyMockupTest =
             stB.Value <- true
 
             // give enough time to wait...
-            while Global.PendingTasks.Count > 0 do
+            while BitChange.PendingTasks.Count > 0 do
                 Thread.Sleep(500)
 
             b.PortE.Value === true
+            let gStatus = g.GetSegmentStatus()
+            let gPortS = g.PortS.Value
+
             r.PortS.Plan.Value === true
             ()

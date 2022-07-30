@@ -37,7 +37,8 @@ public abstract class PortExpressionCommand : PortExpression
             var val = bitChange.Bit.Value;
             if (Actual != null)
                 Actual.Value = val;
-            BitChange.Publish(this, val, true);
+            Debug.Assert(Plan.Value == val);
+            BitChange.Publish(this, val, true, bitChange);
         }
     }
 }
@@ -126,7 +127,7 @@ public class PortExpressionEnd : PortExpression
             if (Actual != null && Plan.Value != val)
                 throw new DsException($"Spatial Error: Plan[{bitChange.Bit}={val}] <> Actual[{Actual.Value}]");
             Debug.Assert(this.Value == val);
-            BitChange.Publish(this, val, true);
+            BitChange.Publish(this, val, true, bitChange);
         }
     }
 }

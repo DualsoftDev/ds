@@ -26,7 +26,7 @@ public class Latch : BitReEvaluatable
         if (_value != value)
         {
             _value = value;
-            BitChange.Publish(this, value, true);
+            BitChange.Publish(this, value, true, _bitChange);
         }
     }
 

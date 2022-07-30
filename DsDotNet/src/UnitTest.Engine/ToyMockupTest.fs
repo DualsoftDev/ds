@@ -210,7 +210,8 @@ module ToyMockupTest =
             Global.BitChangedSubject
                 .Subscribe(fun bc ->
                     let bit = bc.Bit
-                    logDebug $"\tBit changed: [{bit}] = {bc.NewValue}"
+                    let cause = if isNull bc.Cause then "" else $" caused by [{bc.Cause.Bit}={bc.Cause.NewValue}]"
+                    logDebug $"\tBit changed: [{bit}] = {bc.NewValue}{cause}"
                     match bit with
                     | :? PortExpressionEnd as portE ->
                         let seg = portE.Segment :?> Segment

@@ -169,19 +169,21 @@ public class BitChange
     public bool NewValue { get;  }
     public bool Applied { get; }
     public DateTime Time { get; }
-    public BitChange(IBit bit, bool newValue, bool applied=false)
+    public BitChange Cause { get; }
+    public BitChange(IBit bit, bool newValue, bool applied= false, BitChange cause = null)
     {
         Bit = bit;
         NewValue = newValue;
         Applied = applied;
         Time = DateTime.Now;
+        Cause = cause;
     }
 
     public static ConcurrentHashSet<Task> PendingTasks = new();
-    public static void Publish(IBit bit, bool newValue, bool applied)
+    public static void Publish(IBit bit, bool newValue, bool applied, BitChange cause = null)
     {
         //! 현재값 publish 를 threading 으로 처리...
-        var task = new Task(() => Global.RawBitChangedSubject.OnNext(new BitChange(bit, newValue, applied)));
+        var task = new Task(() => Global.RawBitChangedSubject.OnNext(new BitChange(bit, newValue, applied, cause)));
         PendingTasks.Add(task);
         task.ContinueWith(t => PendingTasks.TryRemove(t, out Task _task));
         task.Start();

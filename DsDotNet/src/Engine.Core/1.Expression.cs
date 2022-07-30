@@ -22,7 +22,7 @@ public abstract class Expression : BitReEvaluatable
         if (_oldValue != newValue)
         {
             _oldValue = newValue;
-            BitChange.Publish(this, newValue, true);
+            BitChange.Publish(this, newValue, true, bitChange);
         }
     }
 }

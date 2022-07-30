@@ -10,12 +10,12 @@
 /**/            set => throw new DsException("Not Supported.");
 /**/        }
 /**/
-/**/        protected void SetValue(bool value)
+/**/        protected void SetValue(bool value, BitChange cause=null)
 /**/        {
 /**/            if (_value != value)
 /**/            {
 /**/                _value = value;
-/**/                BitChange.Publish(this, value, true);
+/**/                BitChange.Publish(this, value, true, cause);
 /**/            }
 /**/        }
 /**/
@@ -37,7 +37,7 @@
 /**/
 /**/        protected override void ReEvaulate(BitChange bitChange)
 /**/        {
-/**/            SetValue(_monitoringBits[0].Value);
+/**/            SetValue(_monitoringBits[0].Value, bitChange);
 /**/
 /**/            // end of rising
 /**/            SetValue(false);
@@ -54,7 +54,7 @@
 /**/
 /**/        protected override void ReEvaulate(BitChange bitChange)
 /**/        {
-/**/            SetValue(!_monitoringBits[0].Value);
+/**/            SetValue(!_monitoringBits[0].Value, bitChange);
 /**/
 /**/            // end of falling
 /**/            SetValue(false);

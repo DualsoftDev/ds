@@ -101,8 +101,15 @@ public class PortExpressionEnd : PortExpression
 
                 /*NOTIFYACTION*/ //var notifyAction = ((IBitWritable)Plan).SetValueNowAngGetLaterNotifyAction(value, false);
                 Plan.Value = value;
-                Global.RawBitChangedSubject.OnNext(new BitChange(this, value, true));
-                /*NOTIFYACTION*/ //notifyAction.Invoke();
+                if (Actual == null)
+                {
+                    //! 현재값 publish 를 threading 으로 처리...
+                    var task = new Task(() => Global.RawBitChangedSubject.OnNext(new BitChange(this, value, true)));
+                    Global.PendingTasks.Add(task);
+                    task.ContinueWith(t => Global.PendingTasks.TryRemove(t, out Task _task));
+                    task.Start();
+                }
+                /*NOTIFYACTION*/ //notifyActidon.Invoke();
             }
         }
     }
@@ -118,12 +125,13 @@ public class PortExpressionEnd : PortExpression
 
     protected override void ReEvaulate(BitChange bitChange)
     {
-        var val = bitChange.Bit.Value;
         if (bitChange.Bit == Actual)
         {
+            var val = Actual.Value;
             if (Actual != null && Plan.Value != val)
                 throw new DsException($"Spatial Error: Plan[{bitChange.Bit}={val}] <> Actual[{Actual.Value}]");
             Debug.Assert(this.Value == val);
+            Global.RawBitChangedSubject.OnNext(new BitChange(this, val, true));
         }
     }
 }

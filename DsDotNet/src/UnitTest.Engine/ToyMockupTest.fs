@@ -44,15 +44,19 @@ module MockUp =
 
                     //Task.Run(fun () ->
                     match newSegmentState with
-                    | Status4.Ready    -> ()
+                    | Status4.Ready    ->
+                        ()
                     | Status4.Going    ->
                         x.Going.Value <- false
                         assert(x.GetSegmentStatus() = Status4.Going)
                         x.PortE.Value <- true
                         assert(x.GetSegmentStatus() = Status4.Finished)
-                    | Status4.Finished -> ()
-                    | Status4.Homing   -> x.PortE.Value <- false
-                    | _ -> failwith "Unexpected"
+                    | Status4.Finished ->
+                        ()
+                    | Status4.Homing   ->
+                        x.PortE.Value <- false
+                    | _ ->
+                        failwith "Unexpected"
                     //    ) |> ignore
                     logDebug $"[{x.Name}] New Segment status : {x.GetSegmentStatus()}"
                 )
@@ -223,7 +227,8 @@ module ToyMockupTest =
             stB.Value <- true
 
             // give enough time to wait...
-            Thread.Sleep(1000)
+            while Global.PendingTasks.Count > 0 do
+                Thread.Sleep(500)
 
             b.PortE.Value === true
             r.PortS.Plan.Value === true

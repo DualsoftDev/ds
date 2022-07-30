@@ -18,6 +18,7 @@ isntall-package:
 
 clean:
 	rm -rf latex html
+	rm -rf */bin */obj
 
 cloc:
 	cloc Engine*

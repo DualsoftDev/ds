@@ -10,6 +10,8 @@ global using log4net;
 global using BitDic = System.Collections.Generic.Dictionary<string, Engine.Core.IBit>;
 global using TagDic = System.Collections.Generic.Dictionary<string, Engine.Core.Tag>;
 global using Engine.Common;
+using System.Collections.Concurrent;
+using System.Threading.Tasks;
 
 namespace Engine.Core;
 
@@ -21,6 +23,8 @@ public static class Global
 
     public static Subject<OpcTagChange> TagChangeToOpcServerSubject { get; } = new();
     public static Subject<OpcTagChange> TagChangeFromOpcServerSubject { get; } = new();
+
+    public static ConcurrentHashSet<Task> PendingTasks = new();
 
     public static bool IsInUnitTest { get; }
     static Global()

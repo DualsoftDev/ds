@@ -19,6 +19,8 @@ public abstract class Bit : Named, IBit
 
         }
     }
+    public virtual void SetValueSilently(bool newValue) => _value = newValue;
+
     /*NOTIFYACTION*/ //protected Action InternalSetValueNowAngGetLaterNotifyAction(bool newValue, bool notifyChange)
     /*NOTIFYACTION*/ //{
     /*NOTIFYACTION*/ //    if (_value != newValue)
@@ -72,7 +74,7 @@ public abstract class BitReEvaluatable : Bit, IBitReadable
     {
         // PortExpression 의 경우, plan 대비 actual 에 null 을 허용
         _monitoringBits = monitoringBits.Where(b => b is not null).ToArray();
-        Global.BitChangedSubject
+        Global.RawBitChangedSubject
             .Where(bc => monitoringBits.Contains(bc.Bit))
             .Subscribe(bc =>
             {

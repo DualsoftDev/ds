@@ -19,6 +19,7 @@
 		<Compile Include="ToyMockupTest.fs" />
 		<Compile Include="Common test\QueueTest.fs" />
 		<None Include="paket.references" />
+		<None Include="test.ipynb" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Dual.Common.FS\Dual.Common.FS.fsproj" />

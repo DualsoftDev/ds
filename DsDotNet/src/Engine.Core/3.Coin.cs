@@ -1,10 +1,11 @@
-﻿namespace Engine.Core;
+namespace Engine.Core;
 
 /// <summary> Segment Or Call base </summary>
 [DebuggerDisplay("{ToText()}")]
 public abstract class Coin : Named, ICoin
 {
     public virtual bool Value { get; set; }
+    public virtual void SetValueSilently(bool newValue) => Value = newValue;
 
     /*
      * Do not store Paused property (getter only, no setter)

@@ -50,6 +50,7 @@ public interface IBit
 {
     bool Value { get; set; }
     Cpu Cpu { get; set; }
+    void SetValueSilently(bool newValue);
 }
 
 public interface IBitReadable : IBit {}

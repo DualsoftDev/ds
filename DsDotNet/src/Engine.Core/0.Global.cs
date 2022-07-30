@@ -17,7 +17,7 @@ public static class Global
 {
     public static ILog Logger { get; set; }
     public static Subject<BitChange> RawBitChangedSubject { get; } = new();
-    public static IObservable<BitChange> BitChangedSubject { get; } = RawBitChangedSubject.Select(x => x);
+    public static IObservable<BitChange> BitChangedSubject { get; set; } = RawBitChangedSubject.Select(x => x);
 
     public static Subject<OpcTagChange> TagChangeToOpcServerSubject { get; } = new();
     public static Subject<OpcTagChange> TagChangeFromOpcServerSubject { get; } = new();

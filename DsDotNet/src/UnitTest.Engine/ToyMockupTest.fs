@@ -10,6 +10,7 @@ open System.Threading
 open System.Threading.Tasks
 open Engine.Core
 open UnitTest.Engine
+open System.Collections.Concurrent
 
 [<AutoOpen>]
 module MockUp =
@@ -56,12 +57,18 @@ module MockUp =
                     logDebug $"[{x.Name}] New Segment status : {x.GetSegmentStatus()}"
                 )
 
+    type MuCpu(n) =
+        inherit Cpu(n, new Model())
+        member val MuQueue = new ConcurrentQueue<BitChange>()
+
+
 [<AutoOpen>]
 module ToyMockupTest =
     type ToyMockupTests1(output1:ITestOutputHelper) =
-        let init() =
+        let init (cpu:MuCpu) =
             Global.BitChangedSubject
                 .Subscribe(fun bc ->
+                    //cpu.MuQueue.Enqueue(bc)
                     let bit = bc.Bit
                     logDebug $"\tBit changed: [{bit}] = {bc.NewValue}"
                 )
@@ -71,8 +78,8 @@ module ToyMockupTest =
 
         [<Fact>]
         member __.``ToyMockup with 1 segment test`` () =
-            init()
-            let cpu = new Cpu("dummy", new Model())
+            let cpu = new MuCpu("dummy")
+            init cpu
             let b = Segment(cpu, "B")
             let st = new Flag(cpu, "VStartB")
             let rt = new Flag(cpu, "VResetB")
@@ -132,7 +139,7 @@ module ToyMockupTest =
         member __.``ToyMockup test`` () =
             // todo : 현재 무한 루프
 
-            let cpu = new Cpu("dummy", new Model())
+            let cpu = new MuCpu("dummy")
             let b = Segment(cpu, "B")
             let g = Segment(cpu, "G")
             let r = Segment(cpu, "R")

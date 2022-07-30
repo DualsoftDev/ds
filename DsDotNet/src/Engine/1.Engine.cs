@@ -62,7 +62,7 @@ partial class EngineBuilder
             }
 
             var tags = tgis.Select(tgi => tgi.GeneratedTag).ToArray();
-            Debug.Assert(tags.All(tag => tag.OwnerCpu.BitsMap.ContainsKey(tag.Name)));
+            Debug.Assert(tags.All(tag => tag.Cpu.BitsMap.ContainsKey(tag.Name)));
 
             Opc.AddTags(tags);
 
@@ -119,16 +119,16 @@ partial class EngineBuilder
         void copyChildSRETagsToSegment(TagGenInfo tgi)
         {
             var segment = tgi.TagContainerSegment;
-            var tag = segment.OwnerCpu.TagsMap[tgi.GeneratedTag.Name];
+            var tag = segment.Cpu.TagsMap[tgi.GeneratedTag.Name];
             var tt = tag.Type;
             var edge = tgi.Edge;
-            Debug.Assert(segment.OwnerCpu == tag.OwnerCpu);
+            Debug.Assert(segment.Cpu == tag.Cpu);
             var edgeTag =
-                edge.OwnerCpu == tag.OwnerCpu
+                edge.Cpu == tag.Cpu
                 ? tag
-                : edge.OwnerCpu.TagsMap[tag.Name]
+                : edge.Cpu.TagsMap[tag.Name]
                 ;
-            Debug.Assert(edge.OwnerCpu == edgeTag.OwnerCpu);
+            Debug.Assert(edge.Cpu == edgeTag.Cpu);
 
             if (tt.HasFlag(TagType.Start))
             {
@@ -171,16 +171,16 @@ partial class EngineBuilder
 
 
             var tName = tag.Name;
-            Debug.Assert(edge.OwnerCpu == cpu);
-            Debug.Assert(tag.OwnerCpu.BitsMap.ContainsKey(tName));
+            Debug.Assert(edge.Cpu == cpu);
+            Debug.Assert(tag.Cpu.BitsMap.ContainsKey(tName));
             // todo : Debug.Assert(tag.OwnerCpu == cpu);
-            if (tag.OwnerCpu != cpu)
+            if (tag.Cpu != cpu)
             {
                 if (cpu.TagsMap.ContainsKey(tName))
                     tag = cpu.TagsMap[tName];
                 else
                     Debug.Assert(false);
-                Debug.Assert(tag.OwnerCpu.TagsMap.ContainsKey(tag.Name));
+                Debug.Assert(tag.Cpu.TagsMap.ContainsKey(tag.Name));
             }
 
 

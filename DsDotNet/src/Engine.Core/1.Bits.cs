@@ -31,22 +31,22 @@ public abstract class Bit : Named, IBit
     /*NOTIFYACTION*/ //    return new Action(() => { });
     /*NOTIFYACTION*/ //}
 
-    public Cpu OwnerCpu { get; set; }
-    public Bit(Cpu ownerCpu, string name, bool bit = false) : base(name)
+    public Cpu Cpu { get; set; }
+    public Bit(Cpu cpu, string name, bool bit = false) : base(name)
     {
-        Debug.Assert(ownerCpu != null);
+        Debug.Assert(cpu != null);
 
         Value = bit;
-        OwnerCpu = ownerCpu;
-        ownerCpu.BitsMap.Add(name, this);
+        Cpu = cpu;
+        cpu.BitsMap.Add(name, this);
     }
 
     // Value setter 를 수행하지 않기 위한 생성자
-    protected Bit(string name, Cpu ownerCpu) : base(name)
+    protected Bit(string name, Cpu cpu) : base(name)
     {
-        Debug.Assert(ownerCpu != null);
-        OwnerCpu = ownerCpu;
-        ownerCpu.BitsMap.Add(name, this);
+        Debug.Assert(cpu != null);
+        Cpu = cpu;
+        cpu.BitsMap.Add(name, this);
     }
     // null cpu 를 허용하기 위한 생성자.  OpcTag 만 cpu null 허용
     internal Bit(string name, bool bit = false) : base(name)
@@ -57,7 +57,7 @@ public abstract class Bit : Named, IBit
 
 
     public override string ToString() => ToText();
-    public override string ToText() => $"{base.ToText()}@{OwnerCpu.Name}";
+    public override string ToText() => $"{base.ToText()}@{Cpu.Name}";
 }
 
 
@@ -104,7 +104,7 @@ public abstract class Port : Bit, IBitReadWritable
         OwnerSegment = ownerSegment;
     }
     public string QualifiedName => $"{OwnerSegment.QualifiedName}.{GetType().Name}";
-    public override string ToString() => $"{QualifiedName}[{this.GetType().Name}]@{OwnerCpu.Name}={Value}";
+    public override string ToString() => $"{QualifiedName}[{this.GetType().Name}]@{Cpu.Name}={Value}";
     /*NOTIFYACTION*/ //public virtual Action SetValueNowAngGetLaterNotifyAction(bool newValue, bool notifyChange) => InternalSetValueNowAngGetLaterNotifyAction(newValue, notifyChange);
 }
 public class PortS : Port

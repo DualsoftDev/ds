@@ -45,7 +45,7 @@ public class Child : Named, IVertex, ICoin, ITagSREContainer
 
     public string QualifiedName { get; }
     public bool Value { get => Coin.Value; set => Coin.Value = value; }
-    public Cpu OwnerCpu { get => Parent.OwnerCpu; set => throw new NotImplementedException(); }
+    public Cpu Cpu { get => Parent.Cpu; set => throw new NotImplementedException(); }
 
     public override string ToString() => ToText();
     public override string ToText() => $"{QualifiedName}[{this.GetType().Name}] : " + (IsCall ? "CALL" : "ExSegmentCall");

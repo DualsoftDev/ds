@@ -10,7 +10,7 @@ public abstract class Coin : Named, ICoin
      * Do not store Paused property (getter only, no setter)
      */
     public virtual bool Paused { get; }
-    public virtual Cpu OwnerCpu { get; set; }
+    public virtual Cpu Cpu { get; set; }
 
     public Coin(string name)
         :base(name)

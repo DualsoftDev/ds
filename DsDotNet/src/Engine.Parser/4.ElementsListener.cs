@@ -248,7 +248,7 @@ partial class ElementsListener : dsBaseListener
 
 
                 var ports = new Port[] { seg.PortS, seg.PortR, seg.PortE, };
-                ports.Iter(p => p.OwnerCpu = cpu);
+                ports.Iter(p => p.Cpu = cpu);
             }
         }
     }

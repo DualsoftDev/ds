@@ -52,7 +52,7 @@ public abstract class Call : CallBase
     public Flow Container;
     public override bool Value => Prototype.Value;
     public override string QualifiedName => this.GetQualifiedName();
-    public override Cpu OwnerCpu { get => Container.Cpu; set => throw new Exception("ERROR"); }
+    public override Cpu Cpu { get => Container.Cpu; set => throw new Exception("ERROR"); }
 
     public Call(string name, Flow flow, CallPrototype protoType) : base(name)
     {
@@ -86,7 +86,7 @@ public class RootCall : Call
     {
         foreach (var tag in tags)
         {
-            Debug.Assert(tag.OwnerCpu == OwnerCpu);     // ! call 이므로 다른 system 호출용 tag 여야 함
+            Debug.Assert(tag.Cpu == Cpu);     // ! call 이므로 다른 system 호출용 tag 여야 함
             dic.Add(tag.Name, tag);
         }
 

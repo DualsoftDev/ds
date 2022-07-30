@@ -7,8 +7,7 @@ namespace Engine.Core;
 public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, IWithSREPorts, ITxRx, ITagSREContainer// Coin
 {
     public RootFlow ContainerFlow { get; }
-    public override Cpu Cpu { get => ContainerFlow.Cpu; }
-    public Cpu OwnerCpu { get => ContainerFlow.Cpu; set => throw new NotImplementedException(); }
+    public Cpu Cpu { get => ContainerFlow.Cpu; set => throw new NotImplementedException(); }
     public string QualifiedName => $"{ContainerFlow.QualifiedName}_{Name}";
 
 
@@ -61,7 +60,7 @@ public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, IWithSREPorts
     public override string ToText()
     {
         var c = ChildVertices == null ? 0 : ChildVertices.Count();
-        return $"{QualifiedName}[{this.GetType().Name}] ={OwnerCpu?.Name}, #children={c}";
+        return $"{QualifiedName}[{this.GetType().Name}] ={Cpu?.Name}, #children={c}";
     }
 }
 

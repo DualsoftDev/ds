@@ -23,7 +23,7 @@ public static class HmiTagGenerator
 
         new[] { s, r, e }
             .Iter(t => {
-                t.OwnerCpu = cpu;
+                t.Cpu = cpu;
                 //t.IsExternal = true;
             });
 

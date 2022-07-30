@@ -43,12 +43,12 @@ module ModelTest2 =
             let cpu = builder.Cpu
             cpu.Name === "Cpu"
 
-            cpu.ForwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) cpu) |> ShouldBeTrue
-            cpu.BackwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) cpu) |> ShouldBeTrue
+            cpu.ForwardDependancyMap.Keys |> Seq.map(fun k -> k.Cpu) |> Seq.forall( (=) cpu) |> ShouldBeTrue
+            cpu.BackwardDependancyMap.Keys |> Seq.map(fun k -> k.Cpu) |> Seq.forall( (=) cpu) |> ShouldBeTrue
 
             let fakeCpu = builder.Model.Cpus |> Seq.find(fun c -> not c.IsActive)
-            fakeCpu.ForwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) fakeCpu) |> ShouldBeTrue
-            fakeCpu.BackwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) fakeCpu) |> ShouldBeTrue
+            fakeCpu.ForwardDependancyMap.Keys |> Seq.map(fun k -> k.Cpu) |> Seq.forall( (=) fakeCpu) |> ShouldBeTrue
+            fakeCpu.BackwardDependancyMap.Keys |> Seq.map(fun k -> k.Cpu) |> Seq.forall( (=) fakeCpu) |> ShouldBeTrue
 
 
             system.Name === "L"
@@ -96,12 +96,12 @@ module ModelTest2 =
             cpu.Name === "Cpu"
 
 
-            cpu.ForwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) cpu) |> ShouldBeTrue
-            cpu.BackwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) cpu) |> ShouldBeTrue
+            cpu.ForwardDependancyMap.Keys |> Seq.map(fun k -> k.Cpu) |> Seq.forall( (=) cpu) |> ShouldBeTrue
+            cpu.BackwardDependancyMap.Keys |> Seq.map(fun k -> k.Cpu) |> Seq.forall( (=) cpu) |> ShouldBeTrue
 
             let fakeCpu = builder.Model.Cpus |> Seq.find(fun c -> not c.IsActive)
-            fakeCpu.ForwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) fakeCpu) |> ShouldBeTrue
-            fakeCpu.BackwardDependancyMap.Keys |> Seq.map(fun k -> k.OwnerCpu) |> Seq.forall( (=) fakeCpu) |> ShouldBeTrue
+            fakeCpu.ForwardDependancyMap.Keys |> Seq.map(fun k -> k.Cpu) |> Seq.forall( (=) fakeCpu) |> ShouldBeTrue
+            fakeCpu.BackwardDependancyMap.Keys |> Seq.map(fun k -> k.Cpu) |> Seq.forall( (=) fakeCpu) |> ShouldBeTrue
 
 
 
@@ -224,8 +224,8 @@ module ModelTest2 =
                     let cpStart_ = segMain1CpTx.TagsStart |> Seq.filter(fun t -> t.Name = cpStart.Name) |> Seq.exactlyOne
                     let cpEnd_   = segMain1CpRx.TagsEnd   |> Seq.filter(fun t -> t.Name = cpEnd.Name)   |> Seq.exactlyOne
 
-                    cpStart.OwnerCpu =!= cpStart_.OwnerCpu
-                    cpEnd.OwnerCpu =!= cpEnd_.OwnerCpu
+                    cpStart.Cpu =!= cpStart_.Cpu
+                    cpEnd.Cpu =!= cpEnd_.Cpu
 
 
                     let segMain1CmTx = (main1Cm.Coin :?> SubCall).Prototype.TXs |> Enumerable.OfType<Segment> |> Seq.exactlyOne
@@ -237,8 +237,8 @@ module ModelTest2 =
                     let cpStart_ = segMain1CpTx.TagsStart |> Seq.filter(fun t -> t.Name = cpStart.Name) |> Seq.exactlyOne
                     let cpEnd_   = segMain1CpRx.TagsEnd   |> Seq.filter(fun t -> t.Name = cpEnd.Name)   |> Seq.exactlyOne
 
-                    cpStart.OwnerCpu =!= cpStart_.OwnerCpu
-                    cpEnd.OwnerCpu =!= cpEnd_.OwnerCpu
+                    cpStart.Cpu =!= cpStart_.Cpu
+                    cpEnd.Cpu =!= cpEnd_.Cpu
 
 
                 let ``check main2`` =
@@ -252,8 +252,8 @@ module ModelTest2 =
                     let cpStart_ = segMain2CpTx.TagsStart |> Seq.filter(fun t -> t.Name = cpStart.Name) |> Seq.exactlyOne
                     let cpEnd_   = segMain2CpRx.TagsEnd   |> Seq.filter(fun t -> t.Name = cpEnd.Name)   |> Seq.exactlyOne
 
-                    cpStart.OwnerCpu =!= cpStart_.OwnerCpu
-                    cpEnd.OwnerCpu =!= cpEnd_.OwnerCpu
+                    cpStart.Cpu =!= cpStart_.Cpu
+                    cpEnd.Cpu =!= cpEnd_.Cpu
 
 
                     let segMain2CmTx = (main2Cm.Coin :?> SubCall).Prototype.TXs |> Enumerable.OfType<Segment> |> Seq.exactlyOne
@@ -265,8 +265,8 @@ module ModelTest2 =
                     let cpStart_ = segMain2CpTx.TagsStart |> Seq.filter(fun t -> t.Name = cpStart.Name) |> Seq.exactlyOne
                     let cpEnd_   = segMain2CpRx.TagsEnd   |> Seq.filter(fun t -> t.Name = cpEnd.Name)   |> Seq.exactlyOne
 
-                    cpStart.OwnerCpu =!= cpStart_.OwnerCpu
-                    cpEnd.OwnerCpu =!= cpEnd_.OwnerCpu
+                    cpStart.Cpu =!= cpStart_.Cpu
+                    cpEnd.Cpu =!= cpEnd_.Cpu
 
 
                 ()
@@ -332,7 +332,7 @@ module ModelTest2 =
                 let vpStart = vpTagsStart |> Seq.filter(fun t -> t.Name = cpStart.Name) |> Seq.exactlyOne
                 cpStart.Name === vpStart.Name
                 cpStart =!= vpStart
-                cpStart.OwnerCpu =!= vpStart.Owner
+                cpStart.Cpu =!= vpStart.Owner
 
                 let pp = model.FindObject<Segment>("P.F.Pp");
                 pp.Name === "Pp"
@@ -345,6 +345,6 @@ module ModelTest2 =
                 let spEnd = spTagsEnd|> Seq.filter(fun t -> t.Name = cpEnd.Name) |> Seq.exactlyOne
                 cpEnd.Name === spEnd.Name
                 cpEnd =!= spEnd
-                cpEnd.OwnerCpu =!= spEnd.Owner
+                cpEnd.Cpu =!= spEnd.Owner
 
             ()

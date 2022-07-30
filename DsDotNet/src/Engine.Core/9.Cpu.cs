@@ -40,7 +40,7 @@ public static class CpuExtension
     static ILog Logger => Global.Logger;
     public static void AddTag(this Cpu cpu, Tag tag)
     {
-        Debug.Assert(tag.OwnerCpu == cpu);
+        Debug.Assert(tag.Cpu == cpu);
         if (cpu.BitsMap.ContainsKey(tag.Name))
         {
             Debug.Assert(cpu.BitsMap[tag.Name] == tag);

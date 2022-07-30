@@ -49,7 +49,7 @@ public interface INamed
 public interface IBit
 {
     bool Value { get; set; }
-    Cpu OwnerCpu { get; set; }
+    Cpu Cpu { get; set; }
 }
 
 public interface IBitReadable : IBit {}

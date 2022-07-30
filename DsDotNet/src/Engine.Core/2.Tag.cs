@@ -56,7 +56,7 @@ public class Tag : Bit, IBitReadWritable, ITxRx
         ownerCpu.TagsMap.Add(name, this);
     }
     public Tag(Tag tag)
-        : this(tag.OwnerCpu, tag.Owner, tag.Name, tag.Type, tag.Value)
+        : this(tag.Cpu, tag.Owner, tag.Name, tag.Type, tag.Value)
     {
     }
 

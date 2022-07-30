@@ -108,7 +108,7 @@ module internal CpuModule =
             | :? Edge as e ->
                 logWarn $"Need keep going for internal edge: {e}"
             | _ ->
-                let cpu = bit.OwnerCpu
+                let cpu = bit.Cpu
                 let prevs = cpu.BackwardDependancyMap[bit]
                 let newValue = prevs |> Seq.exists(fun b -> b.Value)
                 let current = bit.Value
@@ -153,7 +153,7 @@ module internal CpuModule =
 
 
     let onBitChanged (cpu:Cpu) (bitChange:BitChange) =
-        if bitChange.Bit.OwnerCpu = cpu then
+        if bitChange.Bit.Cpu = cpu then
             cpu.Queue.Enqueue(bitChange)
             processQueue cpu
         else

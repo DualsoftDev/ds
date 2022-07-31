@@ -30,15 +30,16 @@ public abstract class PortExpressionCommand : PortExpression
     }
     public override bool Value => Plan.Value;
 
-    protected override void ReEvaulate(BitChange bitChange)
+    protected override bool NeedChange(IBit causeBit) => causeBit == Plan;
+    protected override void ReEvaulate(IBit causeBit)
     {
-        if (bitChange.Bit == Plan)
+        if (causeBit == Plan)
         {
-            var val = bitChange.Bit.Value;
+            var val = causeBit.Value;
             if (Actual != null)
                 Actual.Value = val;
             Debug.Assert(Plan.Value == val);
-            BitChange.Publish(this, val, true, bitChange);
+            BitChange.Publish(this, val, true, causeBit);
         }
     }
 }
@@ -119,15 +120,16 @@ public class PortExpressionEnd : PortExpression
     }
 
 
-    protected override void ReEvaulate(BitChange bitChange)
+    protected override bool NeedChange(IBit causeBit) => causeBit == Actual;
+    protected override void ReEvaulate(IBit causeBit)
     {
-        if (bitChange.Bit == Actual)
+        if (causeBit == Actual)
         {
             var val = Actual.Value;
             if (Actual != null && Plan.Value != val)
-                throw new DsException($"Spatial Error: Plan[{bitChange.Bit}={val}] <> Actual[{Actual.Value}]");
+                throw new DsException($"Spatial Error: Plan[{causeBit}={val}] <> Actual[{Actual.Value}]");
             Debug.Assert(this.Value == val);
-            BitChange.Publish(this, val, true, bitChange);
+            BitChange.Publish(this, val, true, causeBit);
         }
     }
 }

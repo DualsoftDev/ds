@@ -150,6 +150,7 @@ module ExpressionTest =
             let ``s↑`` = new Rising(cpu, "s↑", s)
             let ``r↑`` = new Rising(cpu, "r↑", r)
             let latch = new Latch(cpu, "latch1_test5", ``s↑``, ``r↑``)
+            let latch2 = new Latch(cpu, "latch2_test5", ``s↑``, ``r↑``)
 
             let x = new Or(cpu, "a||latch", a, latch)
 

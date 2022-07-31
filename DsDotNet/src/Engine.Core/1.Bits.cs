@@ -69,18 +69,28 @@ public abstract class Bit : Named, IBit
 public abstract class BitReEvaluatable : Bit, IBitReadable
 {
     protected IBit[] _monitoringBits;
-    protected abstract void ReEvaulate(BitChange bitChange);
+    protected abstract void ReEvaulate(IBit causeBit);
+    protected abstract bool NeedChange(IBit causeBit);
     public override bool Value { set => throw new DsException("Not Supported."); }
     protected BitReEvaluatable(Cpu cpu, string name, params IBit[] monitoringBits)
         : base(name, cpu)
     {
         // PortExpression 의 경우, plan 대비 actual 에 null 을 허용
         _monitoringBits = monitoringBits.Where(b => b is not null).ToArray();
-        Global.RawBitChangedSubject
-            .Where(bc => monitoringBits.Contains(bc.Bit))
-            .Subscribe(bc =>
+        RisingFalling.RisingFallingSourceSubject
+            .Where(bit => monitoringBits.Contains(bit))
+            .Subscribe(bit =>
             {
-                ReEvaulate(bc);
+                if (NeedChange(bit))
+                    RisingFalling.RisingFallingChangedSubject.OnNext(this);
+            });
+
+        Global.RawBitChangedSubject
+            .Select(bc => bc.Bit)
+            .Where(bit => monitoringBits.Contains(bit))
+            .Subscribe(bit =>
+            {
+                ReEvaulate(bit);
             })
             ;
     }
@@ -169,8 +179,8 @@ public class BitChange
     public bool NewValue { get;  }
     public bool Applied { get; }
     public DateTime Time { get; }
-    public BitChange Cause { get; }
-    public BitChange(IBit bit, bool newValue, bool applied= false, BitChange cause = null)
+    public IBit Cause { get; }
+    public BitChange(IBit bit, bool newValue, bool applied= false, IBit cause = null)
     {
         Bit = bit;
         NewValue = newValue;
@@ -180,13 +190,15 @@ public class BitChange
     }
 
     public static ConcurrentHashSet<Task> PendingTasks = new();
-    public static void Publish(IBit bit, bool newValue, bool applied, BitChange cause = null)
+    public static void Publish(IBit bit, bool newValue, bool applied, IBit cause = null)
     {
-        //! 현재값 publish 를 threading 으로 처리...
-        var task = new Task(() => Global.RawBitChangedSubject.OnNext(new BitChange(bit, newValue, applied, cause)));
-        PendingTasks.Add(task);
-        task.ContinueWith(t => PendingTasks.TryRemove(t, out Task _task));
-        task.Start();
+        ////! 현재값 publish 를 threading 으로 처리...
+        //var task = new Task(() => Global.RawBitChangedSubject.OnNext(new BitChange(bit, newValue, applied, cause)));
+        //PendingTasks.Add(task);
+        //task.ContinueWith(t => PendingTasks.TryRemove(t, out Task _task));
+        //task.Start();
+
+        Global.RawBitChangedSubject.OnNext(new BitChange(bit, newValue, applied, cause));
     }
 
 }

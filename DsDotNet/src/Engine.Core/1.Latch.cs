@@ -15,18 +15,24 @@ public class Latch : BitReEvaluatable
         ReEvaulate(null);
     }
 
-    protected override void ReEvaulate(BitChange _bitChange)
+
+    bool EvaluateGetValue()
     {
-        var value = (_setCondition.Value, _resetCondition.Value) switch
+        return (_setCondition.Value, _resetCondition.Value) switch
         {
             (true, false) => true,
             (false, false) => _value,
             (_, true) => false,
         };
+    }
+    protected override bool NeedChange(IBit _causeBit) => _value != EvaluateGetValue();
+    protected override void ReEvaulate(IBit _cause)
+    {
+        var value = EvaluateGetValue();
         if (_value != value)
         {
             _value = value;
-            BitChange.Publish(this, value, true, _bitChange);
+            BitChange.Publish(this, value, true, null);
         }
     }
 

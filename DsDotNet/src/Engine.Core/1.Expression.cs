@@ -16,15 +16,18 @@ public abstract class Expression : BitReEvaluatable
         _oldValue = this.Value;
     }
 
-    protected override void ReEvaulate(BitChange bitChange)
+
+    protected override bool NeedChange(IBit causeBit) => _oldValue != Value;
+    protected override void ReEvaulate(IBit causeBit)
     {
         var newValue = Value;
         if (_oldValue != newValue)
         {
             _oldValue = newValue;
-            BitChange.Publish(this, newValue, true, bitChange);
+            BitChange.Publish(this, newValue, true, causeBit);
         }
     }
+
 }
 public class And : Expression
 {

@@ -86,11 +86,13 @@ public abstract class BitReEvaluatable : Bit, IBitReadable
                     RisingFalling.ChangedSubject.OnNext(bitChange);
             });
 
+        var capturedThis = this;
         Global.RawBitChangedSubject
             .Select(bc => bc.Bit)
             .Where(bit => monitoringBits.Contains(bit))
             .Subscribe(bit =>
             {
+                var xxThis = capturedThis;
                 ReEvaulate(bit);
             })
             ;
@@ -191,17 +193,26 @@ public class BitChange
     }
 
     public static ConcurrentHashSet<Task> PendingTasks = new();
+
     public static void Publish(IBit bit, bool newValue, bool applied, IBit cause = null)
     {
+        (new BitChange(bit, newValue, applied, cause)).Publish();
+    }
+    public void Publish()
+    {
         ////! 현재값 publish 를 threading 으로 처리...
-        //var task = new Task(() => Global.RawBitChangedSubject.OnNext(new BitChange(bit, newValue, applied, cause)));
+        //var capturedThis = this;
+        //var task = new Task(() =>
+        //{
+        //    Global.RawBitChangedSubject.OnNext(capturedThis);
+        //});
         //PendingTasks.Add(task);
         //task.ContinueWith(t => PendingTasks.TryRemove(t, out Task _task));
         //task.Start();
 
-        (new BitChange(bit, newValue, applied, cause)).Publish();
+        Global.RawBitChangedSubject.OnNext(this);
     }
-    public void Publish() => Global.RawBitChangedSubject.OnNext(this);
+
     public void Apply()
     {
         Debug.Assert(!Applied);
@@ -209,6 +220,8 @@ public class BitChange
         Applied = true;
         Publish();
     }
+
+    public override string ToString() => $"{Bit}={NewValue}";
 }
 
 public record OpcTagChange

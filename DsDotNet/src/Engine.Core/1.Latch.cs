@@ -33,13 +33,13 @@ public class Latch : BitReEvaluatable
 
         return new BitChange(this, newValue, false, causeBit);
     }
-    protected override void ReEvaulate(IBit _cause)
+    protected override void ReEvaulate(IBit causeBit)
     {
         var value = EvaluateGetValue();
         if (_value != value)
         {
             _value = value;
-            BitChange.Publish(this, value, true, null);
+            BitChange.Publish(this, value, true, causeBit);
         }
     }
 

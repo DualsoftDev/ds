@@ -56,5 +56,9 @@ public class Not : Expression
         : base(cpu, name, bit)
     {
     }
+    public Not(Bit bit)
+        : base(bit.Cpu, $"Not_{bit.Name}", bit)
+    {
+    }
 }
 

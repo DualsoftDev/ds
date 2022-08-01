@@ -107,12 +107,21 @@ public class PortExpressionEnd : PortExpression
                 //Task.WhenAll(tasks).Wait();
 
 
-                /*NOTIFYACTION*/ //var notifyAction = ((IBitWritable)Plan).SetValueNowAngGetLaterNotifyAction(value, false);
+                ///*NOTIFYACTION*/ //var notifyAction = ((IBitWritable)Plan).SetValueNowAngGetLaterNotifyAction(value, false);
+                //Plan.Value = value;
+                //Debug.Assert(this.Value == value);
+                //if (Actual == null)
+                //    BitChange.Publish(this, value, true);
+
+                ///*NOTIFYACTION*/ //notifyActidon.Invoke();
+
+
                 Plan.Value = value;
+                //Plan.SetValueSilently(value);
+                Debug.Assert(Plan.Value == value);
                 if (Actual == null)
                     BitChange.Publish(this, value, true);
 
-                /*NOTIFYACTION*/ //notifyActidon.Invoke();
             }
         }
     }

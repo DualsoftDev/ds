@@ -38,23 +38,43 @@ module MockUp =
                     let newSegmentState = x.GetSegmentStatus()
                     logDebug $"[{x.Name}] Segment status : {newSegmentState}"
 
-                    x.Going.Value <- (newSegmentState = Status4.Going)
-
-                    assert(x.GetSegmentStatus() = newSegmentState)
+                    //x.Going.Value <- (newSegmentState = Status4.Going)
+                    //assert(x.GetSegmentStatus() = newSegmentState)
 
                     //Task.Run(fun () ->
                     match newSegmentState with
                     | Status4.Ready    ->
                         ()
                     | Status4.Going    ->
-                        x.Going.Value <- false
-                        assert(x.GetSegmentStatus() = Status4.Going)
-                        x.PortE.Value <- true
-                        assert(x.GetSegmentStatus() = Status4.Finished)
+                        //Task.Run(fun () ->
+                            x.Going.Value <- true
+                            Thread.Sleep(100)
+                            assert(x.GetSegmentStatus() = Status4.Going)
+                            x.Going.Value <- false
+                            x.PortE.Value <- true
+                            if not x.PortE.Value then
+                                ()
+                            //assert(x.PortE.Value)
+                            //assert(x.GetSegmentStatus() = Status4.Finished)
+                        //) |> ignore
                     | Status4.Finished ->
+                        assert(x.PortE.Value)
                         ()
                     | Status4.Homing   ->
-                        x.PortE.Value <- false
+                        //assert(not x.PortS.Value)
+
+                        if x.PortE.Value then
+                            if (x.Name = "B") then
+                                ()
+                            x.PortE.Value <- false
+                            assert(not x.PortE.Value)
+                            //assert(x.GetSegmentStatus() = Status4.Ready);
+                        else
+                            logDebug $"\tSkipping [{x.Name}] Segment status : {newSegmentState} : already homing by bit change {bc.Bit}={bc.NewValue}"
+                            ()
+
+                        assert(not x.PortE.Value)
+
                     | _ ->
                         failwith "Unexpected"
                     //    ) |> ignore
@@ -148,65 +168,10 @@ module ToyMockupTest =
             let b = Segment(cpu, "B")
             let g = Segment(cpu, "G")
             let r = Segment(cpu, "R")
-
-            (*
-                {s, r, e}{t, l, pex}: {Start, Reset, End} {Tag, Latch, Port Expression}
-            *)
-
-            let stR = new Flag(cpu, "stR")     // rvst: R 노드의 Virtual Start Tag
-            let stG = new Flag(cpu, "stG")
             let stB = new Flag(cpu, "stB")
 
-            let rtR = new Flag(cpu, "rtR")
-            let rtG = new Flag(cpu, "rtG")
-            let rtB = new Flag(cpu, "rtB")
 
-            r.PortE <- PortExpressionEnd.Create(cpu, r, "epexR", null)
-            g.PortE <- PortExpressionEnd.Create(cpu, g, "epexG", null)
-            b.PortE <- PortExpressionEnd.Create(cpu, b, "epexB", null)
-
-
-            let slB = Latch(cpu, "slB", g.PortE, b.PortE)
-            // bvspe: B 노드의 Virtual Start Port Expression
-            let spexB = Or(cpu, "speB(OR)", slB, stB)
-
-            let rpexB =     // bvrpe: B 노드의 Virtual Reset Port Expression
-                let fallingB = Falling(cpu, "↓B", b.PortE)
-                let rlB = Latch(cpu, "rlB", r.Going, fallingB)
-                Or(cpu, "rpeB(OR)", rlB, rtB)
-
-
-
-            let slG = Latch(cpu, "slG", r.PortE, g.PortE)
-            let spexG = Or(cpu, "speG(OR)", slG, stG)
-
-            let fallingG = Falling(cpu, "↓G", g.PortE)
-            let notG = Falling(cpu, "^G", g.PortE)
-            let rlG = Latch(cpu, "rlG", b.Going, fallingG)
-            let rpexG =
-                Or(cpu, "rpeG(OR)", rlG, rtG)
-
-
-            let spexR =
-                let slR = Latch(cpu, "slR", b.PortE, r.PortE)
-                Or(cpu, "speR(OR)", slR, stR)
-
-            let rpexR =
-                let fallingR = Falling(cpu, "↓R", r.PortE)
-                let rlR = Latch(cpu, "rlR", g.Going, fallingR)
-                Or(cpu, "rpeR(OR)", rlR, rtR)
-
-
-            r.PortS <- new PortExpressionStart(cpu, r, "spexR", spexR, null)
-            g.PortS <- new PortExpressionStart(cpu, g, "spexG", spexG, null)
-            b.PortS <- new PortExpressionStart(cpu, b, "spexB", spexB, null)
-
-            r.PortR <- new PortExpressionReset(cpu, r, "rpexR", rpexR, null)
-            g.PortR <- new PortExpressionReset(cpu, g, "rpexG", rpexG, null)
-            b.PortR <- new PortExpressionReset(cpu, b, "rpexB", rpexB, null)
-
-
-
+            [b; g; r;] |> Seq.iter(fun seg -> seg.WireEvent() |> ignore)
             Global.BitChangedSubject
                 .Subscribe(fun bc ->
                     let bit = bc.Bit
@@ -217,7 +182,8 @@ module ToyMockupTest =
                         let seg = portE.Segment :?> Segment
                         let status = seg.GetSegmentStatus()
                         logDebug $"Segment [{seg.Name}] Status : {status} inferred by port [{bit}]={bit.Value} change"
-                        if bit = b.PortE then
+                        if bit = b.PortE && b.PortE.Value && stB.Value then
+                            logDebug "초기 시작 button OFF"
                             stB.Value <- false
                         ()
                     | _ ->
@@ -225,7 +191,63 @@ module ToyMockupTest =
                 )
             |> ignore
 
-            [b; g; r;] |> Seq.iter(fun seg -> seg.WireEvent() |> ignore)
+
+            (*
+                {s, r, e}{t, l, pex}: {Start, Reset, End} {Tag, Latch, Port Expression}
+            *)
+
+            let stR = new Flag(cpu, "stR")     // rvst: R 노드의 Virtual Start Tag
+            let stG = new Flag(cpu, "stG")
+
+            let rtR = new Flag(cpu, "rtR")
+            let rtG = new Flag(cpu, "rtG")
+            let rtB = new Flag(cpu, "rtB")
+
+            r.PortE <- PortExpressionEnd.Create(cpu, r, "epexR", null)
+            g.PortE <- PortExpressionEnd.Create(cpu, g, "epexG", null)
+            b.PortE <- PortExpressionEnd.Create(cpu, b, "epexB", null)
+
+            let RisingB = Rising(b.PortE)
+            let RisingR = Rising(r.PortE)
+            let RisingG = Rising(g.PortE)
+
+
+            let slB = Latch(cpu, "slB", RisingG, RisingB)
+            let slG = Latch(cpu, "slG", RisingR, RisingG)
+            let slR = Latch(cpu, "slR", RisingB, RisingR)
+
+
+            //let rlB = Latch(cpu, "rlB", Rising(r.Going), Falling(b.PortE))
+            //let rlG = Latch(cpu, "rlG", Rising(b.Going), Falling(g.PortE))
+            //let rlR = Latch(cpu, "rlR", Rising(g.Going), Falling(r.PortE))
+
+
+            let rlBSet = And(cpu, "And_rlBSet", Rising(r.Going), Not(b.PortE))
+            let rlB = Latch(cpu, "rlB", rlBSet, Falling(b.PortE))
+            let rlGSet = And(cpu, "And_rlGSet", Rising(b.Going), Not(g.PortE))
+            let rlG = Latch(cpu, "rlG", rlGSet, Falling(g.PortE))
+            let rlRSet = And(cpu, "And_rlRSet", Rising(g.Going), Not(r.PortE))
+            let rlR = Latch(cpu, "rlR", rlRSet, Falling(r.PortE))
+
+
+            // bvspe: B 노드의 Virtual Start Port Expression
+            let spexB = Or(cpu, "speB(OR)", slB, stB)
+            let spexG = Or(cpu, "speG(OR)", slG, stG)
+            let spexR = Or(cpu, "speR(OR)", slR, stR)
+
+            let rpexB = Or(cpu, "rpeB(OR)", rlB, rtB)
+            let rpexG = Or(cpu, "rpeG(OR)", rlG, rtG)
+            let rpexR = Or(cpu, "rpeR(OR)", rlR, rtR)
+
+            r.PortS <- new PortExpressionStart(cpu, r, "spexR", spexR, null)
+            g.PortS <- new PortExpressionStart(cpu, g, "spexG", spexG, null)
+            b.PortS <- new PortExpressionStart(cpu, b, "spexB", spexB, null)
+
+            r.PortR <- new PortExpressionReset(cpu, r, "rpexR", rpexR, null)
+            g.PortR <- new PortExpressionReset(cpu, g, "rpexG", rpexG, null)
+            b.PortR <- new PortExpressionReset(cpu, b, "rpexB", rpexB, null)
+
+
 
 
             stB.Value <- true
@@ -239,4 +261,16 @@ module ToyMockupTest =
             let gPortS = g.PortS.Value
 
             r.PortS.Plan.Value === true
+            ()
+
+        [<Fact>]
+        member __.``ResetLatch test`` () =
+            let cpu = new MuCpu("dummy")
+            let going = Flag(cpu, "Going");
+            let goingUp = Rising(going)
+            let finish = Flag(cpu, "Finish")
+            let notFinish = Not(finish)
+            let rlBSet = And(cpu, "And_rlBSet", goingUp, notFinish)
+            let latch = Latch(cpu, "rlB", rlBSet, Falling(finish))
+            going.Value <- true
             ()

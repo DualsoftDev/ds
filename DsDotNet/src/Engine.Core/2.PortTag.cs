@@ -30,7 +30,13 @@ public abstract class PortExpressionCommand : PortExpression
     }
     public override bool Value => Plan.Value;
 
-    protected override bool NeedChange(IBit causeBit) => causeBit == Plan;
+    protected override BitChange NeedChange(IBit causeBit)
+    {
+        Debug.Assert(causeBit == Plan);
+        if (causeBit == Plan)
+            return new BitChange(this, causeBit.Value, false, causeBit);
+        return null;
+    }
     protected override void ReEvaulate(IBit causeBit)
     {
         if (causeBit == Plan)
@@ -120,7 +126,12 @@ public class PortExpressionEnd : PortExpression
     }
 
 
-    protected override bool NeedChange(IBit causeBit) => causeBit == Actual;
+    protected override BitChange NeedChange(IBit causeBit)
+    {
+        Debug.Assert(false);
+        Debug.Assert(causeBit == Actual);
+        return new BitChange(this, causeBit == Actual, false, causeBit);
+    }
     protected override void ReEvaulate(IBit causeBit)
     {
         if (causeBit == Actual)

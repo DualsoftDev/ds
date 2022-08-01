@@ -70,19 +70,20 @@ public abstract class BitReEvaluatable : Bit, IBitReadable
 {
     protected IBit[] _monitoringBits;
     protected abstract void ReEvaulate(IBit causeBit);
-    protected abstract bool NeedChange(IBit causeBit);
+    protected abstract BitChange NeedChange(IBit causeBit);
     public override bool Value { set => throw new DsException("Not Supported."); }
     protected BitReEvaluatable(Cpu cpu, string name, params IBit[] monitoringBits)
         : base(name, cpu)
     {
         // PortExpression 의 경우, plan 대비 actual 에 null 을 허용
         _monitoringBits = monitoringBits.Where(b => b is not null).ToArray();
-        RisingFalling.RisingFallingSourceSubject
+        RisingFalling.SourceSubject
             .Where(bit => monitoringBits.Contains(bit))
             .Subscribe(bit =>
             {
-                if (NeedChange(bit))
-                    RisingFalling.RisingFallingChangedSubject.OnNext(this);
+                var bitChange = NeedChange(bit);
+                if (bitChange != null)
+                    RisingFalling.ChangedSubject.OnNext(bitChange);
             });
 
         Global.RawBitChangedSubject
@@ -176,10 +177,10 @@ public class PortE : Port
 public class BitChange
 {
     public IBit Bit { get; }
-    public bool NewValue { get;  }
-    public bool Applied { get; }
-    public DateTime Time { get; }
+    public bool NewValue { get; }
     public IBit Cause { get; }
+    public bool Applied { get; internal set; }
+    public DateTime Time { get; }
     public BitChange(IBit bit, bool newValue, bool applied= false, IBit cause = null)
     {
         Bit = bit;
@@ -198,9 +199,16 @@ public class BitChange
         //task.ContinueWith(t => PendingTasks.TryRemove(t, out Task _task));
         //task.Start();
 
-        Global.RawBitChangedSubject.OnNext(new BitChange(bit, newValue, applied, cause));
+        (new BitChange(bit, newValue, applied, cause)).Publish();
     }
-
+    public void Publish() => Global.RawBitChangedSubject.OnNext(this);
+    public void Apply()
+    {
+        Debug.Assert(!Applied);
+        Bit.SetValueSilently(NewValue);
+        Applied = true;
+        Publish();
+    }
 }
 
 public record OpcTagChange

@@ -25,7 +25,14 @@ public class Latch : BitReEvaluatable
             (_, true) => false,
         };
     }
-    protected override bool NeedChange(IBit _causeBit) => _value != EvaluateGetValue();
+    protected override BitChange NeedChange(IBit causeBit)
+    {
+        var newValue = EvaluateGetValue();
+        if (_value == newValue)
+            return null;
+
+        return new BitChange(this, newValue, false, causeBit);
+    }
     protected override void ReEvaulate(IBit _cause)
     {
         var value = EvaluateGetValue();

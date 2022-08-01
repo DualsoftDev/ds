@@ -787,7 +787,7 @@ module GraphProgressSupportUtil =
 
         let printPreCaculatedTheta() =
             printfn "\nCheck segemtns to be 'ON' in progress(Theta)"
-            thetaInProgress
+            normalizedPreCalculatedTheta
             |> Seq.iter(fun m -> 
                 printf "%A : " m.Key
                 printfn "[%A]" m.Value

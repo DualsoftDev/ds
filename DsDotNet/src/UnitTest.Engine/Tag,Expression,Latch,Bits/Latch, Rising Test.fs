@@ -59,69 +59,69 @@ module LatchTest =
 
             ()
 
-        [<Fact>]
-        member __.``Obsolete Rising test`` () =
-            logInfo "============== Rising test"
-            init()
-            let cpu = new Cpu("dummy", new Model())
+        //[<Fact>]
+        //member __.``Obsolete Rising test`` () =
+        //    logInfo "============== Rising test"
+        //    init()
+        //    let cpu = new Cpu("dummy", new Model())
 
-            let t1 = new Tag(cpu, null, "T1")
-            let t2 = new Tag(cpu, null, "T2")
-            let ``t1↑`` = new Rising(cpu, "RisingT1", t1)
-            let ``t2↑`` = new Rising(cpu, "RisingT2", t2)
-            let ``t1↓`` = new Falling(cpu, "FallingT1", t1)
-            let ``t2↓`` = new Falling(cpu, "FallingT2", t2)
+        //    let t1 = new Tag(cpu, null, "T1")
+        //    let t2 = new Tag(cpu, null, "T2")
+        //    let ``t1↑`` = new Rising(cpu, "RisingT1", t1)
+        //    let ``t2↑`` = new Rising(cpu, "RisingT2", t2)
+        //    let ``t1↓`` = new Falling(cpu, "FallingT1", t1)
+        //    let ``t2↓`` = new Falling(cpu, "FallingT2", t2)
 
-            ``t1↑``.Value === false
-            ``t2↑``.Value === false
-            ``t1↓``.Value === false
-            ``t2↓``.Value === false
-
-
-            (fun () -> ``t1↑``.Value <- false) |> ShouldFail
-            ``t1↑``.Value === false
-            (fun () -> ``t1↓``.Value <- false) |> ShouldFail
-            ``t1↓``.Value === false
-
-            t1.Value <- true
-            ``t1↑``.Value === true
-            t1.Value <- false
-            ``t1↓``.Value === false
+        //    ``t1↑``.Value === false
+        //    ``t2↑``.Value === false
+        //    ``t1↓``.Value === false
+        //    ``t2↓``.Value === false
 
 
+        //    (fun () -> ``t1↑``.Value <- false) |> ShouldFail
+        //    ``t1↑``.Value === false
+        //    (fun () -> ``t1↓``.Value <- false) |> ShouldFail
+        //    ``t1↓``.Value === false
 
-            let ``↑&↓s`` = [``t1↑`` :> IBit; ``t2↑``; ``t1↓``; ``t2↓``]
-            let ``↑counter`` =
-                ``↑&↓s`` |> Seq.map (fun r -> (r, 0))
-                |> Tuple.toDictionary
-            let ``↓counter`` =
-                ``↑&↓s`` |> Seq.map (fun r -> (r, 0))
-                |> Tuple.toDictionary
-            use _subs =
-                Global.BitChangedSubject
-                    .Where(fun bc -> ``↑&↓s`` |> Seq.contains(bc.Bit))
-                    .Subscribe(fun bc ->
-                        let bit = bc.Bit
-                        logDebug $"RisingBit changed: [{bit}] = {bc.NewValue}"
-                        let map = if bc.NewValue then ``↑counter`` else ``↓counter``
-                        map[bit] <- map[bit] + 1
-                    )
-            let reset = new Tag(cpu, null, "Reset")
-            let latch = new Latch(cpu, "Latch1", ``t1↑``, reset)
+        //    t1.Value <- true
+        //    ``t1↑``.Value === true
+        //    t1.Value <- false
+        //    ``t1↓``.Value === false
 
-            //``↑counter``[``t1↑``] === 0
-            t1.Value <- true
-            // --> t1.Value Rising 되는 순간에 t1Rising.Value 가 ON 되었다가 바로 OFF 된다.
-            latch.Value === true
-            ``t1↑``.Value === false
-            //``↑counter``[``t1↑``] === 1
 
-            (fun () -> latch.Value <- false) |> ShouldFail
-            latch.Value === true
 
-            t1.Value <- false
-            //``↓counter``[``t1↓``] === 1
+        //    let ``↑&↓s`` = [``t1↑`` :> IBit; ``t2↑``; ``t1↓``; ``t2↓``]
+        //    let ``↑counter`` =
+        //        ``↑&↓s`` |> Seq.map (fun r -> (r, 0))
+        //        |> Tuple.toDictionary
+        //    let ``↓counter`` =
+        //        ``↑&↓s`` |> Seq.map (fun r -> (r, 0))
+        //        |> Tuple.toDictionary
+        //    use _subs =
+        //        Global.BitChangedSubject
+        //            .Where(fun bc -> ``↑&↓s`` |> Seq.contains(bc.Bit))
+        //            .Subscribe(fun bc ->
+        //                let bit = bc.Bit
+        //                logDebug $"RisingBit changed: [{bit}] = {bc.NewValue}"
+        //                let map = if bc.NewValue then ``↑counter`` else ``↓counter``
+        //                map[bit] <- map[bit] + 1
+        //            )
+        //    let reset = new Tag(cpu, null, "Reset")
+        //    let latch = new Latch(cpu, "Latch1", ``t1↑``, reset)
 
-            ()
+        //    //``↑counter``[``t1↑``] === 0
+        //    t1.Value <- true
+        //    // --> t1.Value Rising 되는 순간에 t1Rising.Value 가 ON 되었다가 바로 OFF 된다.
+        //    latch.Value === true
+        //    ``t1↑``.Value === false
+        //    //``↑counter``[``t1↑``] === 1
+
+        //    (fun () -> latch.Value <- false) |> ShouldFail
+        //    latch.Value === true
+
+        //    t1.Value <- false
+        //    //``↓counter``[``t1↓``] === 1
+
+        //    ()
 
 

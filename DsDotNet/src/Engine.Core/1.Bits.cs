@@ -21,7 +21,6 @@ public abstract class Bit : Named, IBit
 
         }
     }
-    public virtual void SetValueSilently(bool newValue) => _value = newValue;
 
     /*NOTIFYACTION*/ //protected Action InternalSetValueNowAngGetLaterNotifyAction(bool newValue, bool notifyChange)
     /*NOTIFYACTION*/ //{
@@ -70,21 +69,12 @@ public abstract class BitReEvaluatable : Bit, IBitReadable
 {
     protected IBit[] _monitoringBits;
     protected abstract void ReEvaulate(IBit causeBit);
-    protected abstract BitChange NeedChange(IBit causeBit);
     public override bool Value { set => throw new DsException("Not Supported."); }
     protected BitReEvaluatable(Cpu cpu, string name, params IBit[] monitoringBits)
         : base(name, cpu)
     {
         // PortExpression 의 경우, plan 대비 actual 에 null 을 허용
         _monitoringBits = monitoringBits.Where(b => b is not null).ToArray();
-        RisingFalling.SourceSubject
-            .Where(bit => monitoringBits.Contains(bit))
-            .Subscribe(bit =>
-            {
-                var bitChange = NeedChange(bit);
-                if (bitChange != null)
-                    RisingFalling.ChangedSubject.OnNext(bitChange);
-            });
 
         var capturedThis = this;
         Global.RawBitChangedSubject
@@ -211,14 +201,6 @@ public class BitChange
         //task.Start();
 
         Global.RawBitChangedSubject.OnNext(this);
-    }
-
-    public void Apply()
-    {
-        Debug.Assert(!Applied);
-        Bit.SetValueSilently(NewValue);
-        Applied = true;
-        Publish();
     }
 
     public override string ToString() => $"{Bit}={NewValue}";

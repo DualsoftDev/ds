@@ -263,10 +263,17 @@ module ToyMockupTest =
         member __.``ResetLatch test`` () =
             let cpu = new MuCpu("dummy")
             let going = Flag(cpu, "Going");
-            let goingUp = Rising(going)
             let finish = Flag(cpu, "Finish")
             let notFinish = Not(finish)
-            let rlBSet = And(cpu, "And_rlBSet", goingUp, notFinish)
-            let latch = Latch(cpu, "rlB", rlBSet, Falling(finish))
+            let rlBSet = And(cpu, "And_rlBSet", going, notFinish)
+            let rlBReset = Flag(cpu, "Reset");
+            let latch = Latch(cpu, "rlB", rlBSet, rlBReset)
             going.Value <- true
+            rlBSet.Value === true
+            latch.Value === true
+
+            rlBReset.Value <- true
+            latch.Value === false
+            rlBSet.Value === true
+
             ()

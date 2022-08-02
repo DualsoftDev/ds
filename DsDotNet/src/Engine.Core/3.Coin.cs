@@ -5,7 +5,6 @@ namespace Engine.Core;
 public abstract class Coin : Named, ICoin
 {
     public virtual bool Value { get; set; }
-    public virtual void SetValueSilently(bool newValue) => Value = newValue;
 
     /*
      * Do not store Paused property (getter only, no setter)

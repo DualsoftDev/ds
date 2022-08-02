@@ -1,5 +1,6 @@
 namespace Engine.Core;
 
+#if false
 
 internal static class RisingFalling
 {
@@ -97,3 +98,67 @@ internal class Falling : RisingFallingBase
 
 
 
+
+
+public abstract class BitReEvaluatable : Bit, IBitReadable
+{
+    protected abstract BitChange NeedChange(IBit causeBit);
+    // 생성자
+    protected BitReEvaluatable(Cpu cpu, string name, params IBit[] monitoringBits)
+    {
+        // PortExpression 의 경우, plan 대비 actual 에 null 을 허용
+        _monitoringBits = monitoringBits.Where(b => b is not null).ToArray();
+
+        //! 여기
+        RisingFalling.SourceSubject
+            .Where(bit => monitoringBits.Contains(bit))
+            .Subscribe(bit =>
+            {
+                var bitChange = NeedChange(bit);
+                if (bitChange != null)
+                    RisingFalling.ChangedSubject.OnNext(bitChange);
+            });
+
+        // 나머지...
+            ;
+    }
+}
+
+public class Latch : BitReEvaluatable
+{
+    protected override BitChange NeedChange(IBit causeBit)
+    {
+        var newValue = EvaluateGetValue();
+        if (_value == newValue)
+            return null;
+
+        return new BitChange(this, newValue, false, causeBit);
+    }
+
+}
+
+
+public class PortExpressionEnd : PortExpression
+{
+    protected override BitChange NeedChange(IBit causeBit)
+    {
+        Debug.Assert(false);
+        Debug.Assert(causeBit == Actual);
+        return new BitChange(this, causeBit == Actual, false, causeBit);
+    }
+}
+
+
+public abstract class PortExpressionCommand : PortExpression
+{
+    protected override BitChange NeedChange(IBit causeBit)
+    {
+        Debug.Assert(causeBit == Plan);
+        if (causeBit == Plan)
+            return new BitChange(this, causeBit.Value, false, causeBit);
+        return null;
+    }
+}
+
+
+#endif

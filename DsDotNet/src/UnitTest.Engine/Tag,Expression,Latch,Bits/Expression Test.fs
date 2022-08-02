@@ -147,10 +147,8 @@ module ExpressionTest =
             let a = new Flag(cpu, "a_test5")
             let s = new Flag(cpu, "s1_test5")
             let r = new Flag(cpu, "r1_test5")
-            let ``s↑`` = new Rising(cpu, "s↑", s)
-            let ``r↑`` = new Rising(cpu, "r↑", r)
-            let latch = new Latch(cpu, "latch1_test5", ``s↑``, ``r↑``)
-            let latch2 = new Latch(cpu, "latch2_test5", ``s↑``, ``r↑``)
+            let latch = new Latch(cpu, "latch1_test5", s, r)
+            let latch2 = new Latch(cpu, "latch2_test5", s, r)
 
             let x = new Or(cpu, "a||latch", a, latch)
 

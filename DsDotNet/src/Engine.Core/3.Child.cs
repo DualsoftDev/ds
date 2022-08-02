@@ -45,7 +45,6 @@ public class Child : Named, IVertex, ICoin, ITagSREContainer
 
     public string QualifiedName { get; }
     public bool Value { get => Coin.Value; set => Coin.Value = value; }
-    public virtual void SetValueSilently(bool newValue) => Value = newValue;
 
     public Cpu Cpu { get => Parent.Cpu; set => throw new NotImplementedException(); }
 

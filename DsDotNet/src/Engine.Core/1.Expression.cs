@@ -16,10 +16,6 @@ public abstract class Expression : BitReEvaluatable
         _oldValue = this.Value;
     }
 
-
-    protected override BitChange NeedChange(IBit causeBit) =>
-        _oldValue == Value ? null : new BitChange(this, _oldValue != Value, false, causeBit)
-        ;
     protected override void ReEvaulate(IBit causeBit)
     {
         var newValue = Value;

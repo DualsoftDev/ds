@@ -92,28 +92,23 @@ public class PortExpressionEnd : PortExpression
             {
                 CheckMatch(value);
                 //! 호출 순서 매우 민감.
-                //var tasks = new[]
-                //{
-                //    Task.Run(() => Plan.Value = value),
-                //    Task.Run(() => Global.RawBitChangedSubject.OnNext(new BitChange(this, value, true))),
-                //};
-                //Task.WhenAll(tasks).Wait();
+                if (Global.IsSupportParallel)
+                {
+                    var tasks = new[]
+                    {
+                        Task.Run(() => Plan.Value = value),
+                        Task.Run(() => Global.RawBitChangedSubject.OnNext(new BitChange(this, value, true))),
+                    };
+                    Task.WhenAll(tasks).Wait();
 
-
-                ///*NOTIFYACTION*/ //var notifyAction = ((IBitWritable)Plan).SetValueNowAngGetLaterNotifyAction(value, false);
-                //Plan.Value = value;
-                //Debug.Assert(this.Value == value);
-                //if (Actual == null)
-                //    BitChange.Publish(this, value, true);
-
-                ///*NOTIFYACTION*/ //notifyActidon.Invoke();
-
-
-                Plan.Value = value;
-                Debug.Assert(Plan.Value == value);
-                if (Actual == null)
-                    BitChange.Publish(this, value, true);
-
+                }
+                else
+                {
+                    Plan.Value = value;
+                    Debug.Assert(Plan.Value == value);
+                    if (Actual == null)
+                        BitChange.Publish(this, value, true);
+                }
             }
         }
     }

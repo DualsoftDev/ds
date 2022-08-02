@@ -12,7 +12,6 @@ public abstract class Bit : Named, IBit
         set
         {
             Debug.Assert(this is IBitWritable);
-            /*NOTIFYACTION*/ //InternalSetValueNowAngGetLaterNotifyAction(value, true).Invoke();
             if (_value != value)
             {
                 _value = value;
@@ -21,18 +20,6 @@ public abstract class Bit : Named, IBit
 
         }
     }
-
-    /*NOTIFYACTION*/ //protected Action InternalSetValueNowAngGetLaterNotifyAction(bool newValue, bool notifyChange)
-    /*NOTIFYACTION*/ //{
-    /*NOTIFYACTION*/ //    if (_value != newValue)
-    /*NOTIFYACTION*/ //    {
-    /*NOTIFYACTION*/ //        _value = newValue;
-    /*NOTIFYACTION*/ //        if (notifyChange)
-    /*NOTIFYACTION*/ //            return new Action(() => Global.RawBitChangedSubject.OnNext(new BitChange(this, newValue, true)));
-    /*NOTIFYACTION*/ //    }
-    /*NOTIFYACTION*/
-    /*NOTIFYACTION*/ //    return new Action(() => { });
-    /*NOTIFYACTION*/ //}
 
     public Cpu Cpu { get; set; }
     public Bit(Cpu cpu, string name, bool bit = false) : base(name)
@@ -94,8 +81,6 @@ public abstract class BitReEvaluatable : Bit, IBitReadable
 public class Flag : Bit, IBitReadWritable
 {
     public Flag(Cpu cpu, string name, bool bit = false) : base(cpu, name, bit) { }
-
-    /*NOTIFYACTION*/ //public Action SetValueNowAngGetLaterNotifyAction(bool newValue, bool notifyChange) => InternalSetValueNowAngGetLaterNotifyAction(newValue, notifyChange);
 }
 
 
@@ -112,7 +97,6 @@ public abstract class Port : Bit, IBitReadWritable
     }
     public string QualifiedName => $"{OwnerSegment.QualifiedName}.{GetType().Name}";
     public override string ToString() => $"{QualifiedName}[{this.GetType().Name}]@{Cpu.Name}={Value}";
-    /*NOTIFYACTION*/ //public virtual Action SetValueNowAngGetLaterNotifyAction(bool newValue, bool notifyChange) => InternalSetValueNowAngGetLaterNotifyAction(newValue, notifyChange);
 }
 public class PortS : Port
 {
@@ -137,26 +121,6 @@ public class PortE : Port
             }
         }
     }
-
-    /*NOTIFYACTION*/ //public override Action SetValueNowAngGetLaterNotifyAction(bool newValue, bool notifyChange)
-    /*NOTIFYACTION*/ //{
-    /*NOTIFYACTION*/ //    if (_value != newValue)
-    /*NOTIFYACTION*/ //    {
-    /*NOTIFYACTION*/ //        var act = InternalSetValueNowAngGetLaterNotifyAction(newValue, notifyChange);
-    /*NOTIFYACTION*/ //        if (notifyChange)
-    /*NOTIFYACTION*/ //        {
-    /*NOTIFYACTION*/ //            return new Action(() =>
-    /*NOTIFYACTION*/ //            {
-    /*NOTIFYACTION*/ //                act.Invoke();
-    /*NOTIFYACTION*/ //                Global.TagChangeToOpcServerSubject.OnNext(new OpcTagChange(Name, newValue));
-    /*NOTIFYACTION*/ //            });
-    /*NOTIFYACTION*/ //        }
-    /*NOTIFYACTION*/ //        return act;
-    /*NOTIFYACTION*/ //    }
-    /*NOTIFYACTION*/ //    return new Action(() => {});
-    /*NOTIFYACTION*/ //}
-
-
 }
 
 
@@ -190,17 +154,20 @@ public class BitChange
     }
     public void Publish()
     {
-        ////! 현재값 publish 를 threading 으로 처리...
-        //var capturedThis = this;
-        //var task = new Task(() =>
-        //{
-        //    Global.RawBitChangedSubject.OnNext(capturedThis);
-        //});
-        //PendingTasks.Add(task);
-        //task.ContinueWith(t => PendingTasks.TryRemove(t, out Task _task));
-        //task.Start();
-
-        Global.RawBitChangedSubject.OnNext(this);
+        if (Global.IsSupportParallel)
+        {
+            //! 현재값 publish 를 threading 으로 처리...
+            var capturedThis = this;
+            var task = new Task(() =>
+            {
+                Global.RawBitChangedSubject.OnNext(capturedThis);
+            });
+            PendingTasks.Add(task);
+            task.ContinueWith(t => PendingTasks.TryRemove(t, out Task _task));
+            task.Start();
+        }
+        else
+            Global.RawBitChangedSubject.OnNext(this);
     }
 
     public override string ToString() => $"{Bit}={NewValue}";

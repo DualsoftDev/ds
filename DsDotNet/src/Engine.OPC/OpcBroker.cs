@@ -18,7 +18,6 @@ public class OpcTag : Bit, IBitReadWritable
     {
         OriginalTag = tag;
     }
-    /*NOTIFYACTION*/ //public Action SetValueNowAngGetLaterNotifyAction(bool newValue, bool notifyChange) => InternalSetValueNowAngGetLaterNotifyAction(newValue, notifyChange);
 }
 public class OpcBroker
 {

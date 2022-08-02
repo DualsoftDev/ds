@@ -12,21 +12,26 @@ open System.Collections.Concurrent
 
 [<AutoOpen>]
 module MockUpClasses =
-    type MuSegment(cpu, n, sp, rp, ep) =
-        inherit Engine.Core.Segment(n)
-        let mutable oldStatus = Status4.Homing
-        new(cpu, n) = MuSegment(cpu, n, null, null, null)
-        member val FinishCount = 0 with get, set
+    type MuSegmentBase(cpu, n, sp, rp, ep) =
+        inherit Segment(n)
+        member val Cpu:Cpu = cpu
         member val PortS:PortExpressionStart = sp with get, set
         member val PortR:PortExpressionReset = rp with get, set
         member val PortE:PortExpressionEnd = ep with get, set
         member val Going = new Tag(cpu, null, $"{n}_Going")
+        member val Ready = new Tag(cpu, null, $"{n}_Ready")
         member x.GetSegmentStatus() =
             match x.PortS.Value, x.PortR.Value, x.PortE.Value with
             | false, false, false -> Status4.Ready  //??
             | true, false, false  -> Status4.Going
             | _, false, true      -> Status4.Finished
             | _, true, _          -> Status4.Homing
+
+    type MuSegment(cpu, n, sp, rp, ep) =
+        inherit MuSegmentBase(cpu, n, sp, rp, ep)
+        let mutable oldStatus = Status4.Homing
+        new(cpu, n) = MuSegment(cpu, n, null, null, null)
+        member val FinishCount = 0 with get, set
 
         member x.WireEvent() =
             Global.BitChangedSubject
@@ -71,4 +76,39 @@ module MockUpClasses =
         inherit Cpu(n, new Model())
         member val MuQueue = new ConcurrentQueue<BitChange>()
 
+    /// Virtual Parent Segment
+    /// endport 는 target child 의 endport 공유
+    /// startPort 는 공정 auto
+    /// resetPort = { auto &&
+    ///     #latch( (Self
+    ///                 && #latch(#g(Previous), #r(Self)  <--- reset 조건 1
+    ///                 && #latch(#g(Next), #r(Self)),    <--- reset 조건 2 ...
+    ///             #r(Self))
+    type Vps(target:MuSegment, startPort, resetPort) =
+        inherit MuSegmentBase(target.Cpu, $"VPS({target.Name})", startPort, resetPort, target.PortE)
+        private new(target) = Vps(target, null, null)
+        member val Target = target;
+
+        static member Create(target:MuSegment, startCondition:IBit, resetSourceSegments:MuSegment seq) =
+            let cpu = target.Cpu
+            let vps = Vps(target)
+            let n = vps.Name
+            let resets = [
+                for r in resetSourceSegments do
+                    yield Latch(cpu, $"ResetInnerLatch({r.Name})", r.Going, vps.Ready)
+            ]
+            vps.PortR <-
+                let plan =
+                    let bits = [|
+                        yield startCondition;
+                        yield! resets |> Array.cast<IBit> |]
+                    And(cpu, $"InnerResetAnd_{n}", bits)
+                PortExpressionReset(cpu, vps, $"Reset_{n}", plan, null)
+
+            vps.PortS <-
+                match startCondition with
+                | :? PortExpressionStart as sp -> sp
+                | _ -> PortExpressionStart(cpu, vps, $"Start_{n}", startCondition, null)
+
+            vps
 

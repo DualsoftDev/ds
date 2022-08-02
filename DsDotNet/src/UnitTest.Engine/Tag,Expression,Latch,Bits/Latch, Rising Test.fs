@@ -59,6 +59,26 @@ module LatchTest =
 
             ()
 
+        [<Fact>]
+        member __.``ResetLatch test`` () =
+            let cpu = new Cpu("dummy", new Model())
+            let going = Flag(cpu, "Going");
+            let finish = Flag(cpu, "Finish")
+            let notFinish = Not(finish)
+            let rlBSet = And(cpu, "And_rlBSet", going, notFinish)
+            let rlBReset = Flag(cpu, "Reset");
+            let latch = Latch(cpu, "rlB", rlBSet, rlBReset)
+            going.Value <- true
+            rlBSet.Value === true
+            latch.Value === true
+
+            rlBReset.Value <- true
+            latch.Value === false
+            rlBSet.Value === true
+
+            ()
+
+
         //[<Fact>]
         //member __.``Obsolete Rising test`` () =
         //    logInfo "============== Rising test"

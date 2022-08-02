@@ -18,6 +18,7 @@ module MockUp =
         inherit Engine.Core.Segment(n)
         let mutable oldStatus = Status4.Homing
         new(cpu, n) = Segment(cpu, n, null, null, null)
+        member val FinishCount = 0 with get, set
         member val PortS:PortExpressionStart = sp with get, set
         member val PortR:PortExpressionReset = rp with get, set
         member val PortE:PortExpressionEnd = ep with get, set
@@ -37,7 +38,9 @@ module MockUp =
                 )
                 .Subscribe(fun bc ->
                     let newSegmentState = x.GetSegmentStatus()
-                    if newSegmentState <> oldStatus then
+                    if newSegmentState = oldStatus then
+                        logDebug $"\t\tSkipping duplicate status: [{x.Name}] status : {newSegmentState}"
+                    else
                         oldStatus <- newSegmentState
                         logDebug $"[{x.Name}] Segment status : {newSegmentState}"
 
@@ -61,17 +64,15 @@ module MockUp =
                                 //assert(x.GetSegmentStatus() = Status4.Finished)
                             //) |> ignore
                         | Status4.Finished ->
+                            x.FinishCount <- x.FinishCount + 1
                             assert(x.PortE.Value)
                             ()
                         | Status4.Homing   ->
                             //assert(not x.PortS.Value)
 
                             if x.PortE.Value then
-                                if (x.Name = "B") then
-                                    ()
                                 x.PortE.Value <- false
                                 assert(not x.PortE.Value)
-                                //assert(x.GetSegmentStatus() = Status4.Ready);
                             else
                                 logDebug $"\tSkipping [{x.Name}] Segment status : {newSegmentState} : already homing by bit change {bc.Bit}={bc.NewValue}"
                                 ()
@@ -93,75 +94,7 @@ module MockUp =
 [<AutoOpen>]
 module ToyMockupTest =
     type ToyMockupTests1(output1:ITestOutputHelper) =
-        let init (cpu:MuCpu) =
-            Global.BitChangedSubject
-                .Subscribe(fun bc ->
-                    //cpu.MuQueue.Enqueue(bc)
-                    let bit = bc.Bit
-                    logDebug $"\tBit changed: [{bit}] = {bc.NewValue}"
-                )
-            |> ignore
-
         interface IClassFixture<Fixtures.DemoFixture>
-
-        [<Fact>]
-        member __.``ToyMockup with 1 segment test`` () =
-            let cpu = new MuCpu("dummy")
-            init cpu
-            let b = Segment(cpu, "B")
-            let st = new Flag(cpu, "VStartB")
-            let rt = new Flag(cpu, "VResetB")
-            b.PortE <- PortExpressionEnd.Create(cpu, b, "BVEP", null)
-
-
-            let startLatch = Latch(cpu, "시작 래치", st, b.PortE)
-            // bvspe: B 노드의 Virtual Start Port Expression
-            let bvspe = Or(cpu, "OR(BVSPE)", startLatch, st)
-
-            let notPortE = Not(cpu, "^B", b.PortE)
-            let resetLatch = Latch(cpu, "BVSP_Latch", rt, notPortE)
-
-            // bvrpe: B 노드의 Virtual Reset Port Expression
-            let bvrpe = Or(cpu, "OR(BVRPE)", resetLatch, rt)
-
-
-            b.PortS <- new PortExpressionStart(cpu, b, "BVSP", bvspe, null)
-            b.PortR <- new PortExpressionReset(cpu, b, "BVRP", bvrpe, null)
-
-            Global.BitChangedSubject
-                .Subscribe(fun bc ->
-                    let bit = bc.Bit
-                    if bit = b.PortE then
-                        if bit.Value then
-                            logDebug $"Endport ON 감지로 인한 start button 끄기"
-                            st.Value <- false // 종료 감지시 -> Start button 끄기
-                        else
-                            logDebug $"Endport OFF 감지로 인한 reset button 끄기"
-                            rt.Value <- false
-                )
-            |> ignore
-
-            b.WireEvent() |> ignore
-
-            st.Value <- true
-            // ... going 진행 후, end port 까지 ON
-            st.Value === false
-            b.GetSegmentStatus() === Status4.Finished
-
-            b.PortS.Value === false
-            b.PortE.Value === true
-            b.PortR.Value === false
-
-            notPortE.Value === false
-            startLatch.Value === false
-            resetLatch.Value === false
-
-            // reset 시작
-            rt.Value <- true
-            b.PortE.Value === false
-            notPortE.Value === true
-            b.GetSegmentStatus() === Status4.Ready
-            ()
 
         [<Fact>]
         member __.``ToyMockup repeating triangle test`` () =
@@ -185,10 +118,15 @@ module ToyMockupTest =
                     | :? PortExpressionEnd as portE ->
                         let seg = portE.Segment :?> Segment
                         let status = seg.GetSegmentStatus()
-                        logDebug $"Segment [{seg.Name}] Status : {status} inferred by port [{bit}]={bit.Value} change"
-                        if bit = b.PortE && b.PortE.Value && stB.Value then
-                            logDebug "초기 시작 button OFF"
-                            stB.Value <- false
+                        //logDebug $"Segment [{seg.Name}] Status : {status} inferred by port [{bit}]={bit.Value} change"
+                        if bit = b.PortE && b.PortE.Value then
+                            if stB.Value then
+                                logDebug "초기 시작 button OFF"
+                                stB.Value <- false
+
+                            if seg.FinishCount % 10 = 0 then
+                                logDebug $"COUNTER: B={b.FinishCount}, G={g.FinishCount}, R={r.FinishCount}"
+
                         ()
                     | _ ->
                         ()
@@ -260,20 +198,70 @@ module ToyMockupTest =
             ()
 
         [<Fact>]
-        member __.``ResetLatch test`` () =
+        member __.``ToyMockup with 1 segment test`` () =
+            let init (cpu:MuCpu) =
+                Global.BitChangedSubject
+                    .Subscribe(fun bc ->
+                        //cpu.MuQueue.Enqueue(bc)
+                        let bit = bc.Bit
+                        logDebug $"\tBit changed: [{bit}] = {bc.NewValue}"
+                    )
+                |> ignore
+
             let cpu = new MuCpu("dummy")
-            let going = Flag(cpu, "Going");
-            let finish = Flag(cpu, "Finish")
-            let notFinish = Not(finish)
-            let rlBSet = And(cpu, "And_rlBSet", going, notFinish)
-            let rlBReset = Flag(cpu, "Reset");
-            let latch = Latch(cpu, "rlB", rlBSet, rlBReset)
-            going.Value <- true
-            rlBSet.Value === true
-            latch.Value === true
+            init cpu
+            let b = Segment(cpu, "B")
+            let st = new Flag(cpu, "VStartB")
+            let rt = new Flag(cpu, "VResetB")
+            b.PortE <- PortExpressionEnd.Create(cpu, b, "BVEP", null)
 
-            rlBReset.Value <- true
-            latch.Value === false
-            rlBSet.Value === true
 
+            let startLatch = Latch(cpu, "시작 래치", st, b.PortE)
+            // bvspe: B 노드의 Virtual Start Port Expression
+            let bvspe = Or(cpu, "OR(BVSPE)", startLatch, st)
+
+            let notPortE = Not(cpu, "^B", b.PortE)
+            let resetLatch = Latch(cpu, "BVSP_Latch", rt, notPortE)
+
+            // bvrpe: B 노드의 Virtual Reset Port Expression
+            let bvrpe = Or(cpu, "OR(BVRPE)", resetLatch, rt)
+
+
+            b.PortS <- new PortExpressionStart(cpu, b, "BVSP", bvspe, null)
+            b.PortR <- new PortExpressionReset(cpu, b, "BVRP", bvrpe, null)
+
+            Global.BitChangedSubject
+                .Subscribe(fun bc ->
+                    let bit = bc.Bit
+                    if bit = b.PortE then
+                        if bit.Value then
+                            logDebug $"Endport ON 감지로 인한 start button 끄기"
+                            st.Value <- false // 종료 감지시 -> Start button 끄기
+                        else
+                            logDebug $"Endport OFF 감지로 인한 reset button 끄기"
+                            rt.Value <- false
+                )
+            |> ignore
+
+            b.WireEvent() |> ignore
+
+            st.Value <- true
+            // ... going 진행 후, end port 까지 ON
+            st.Value === false
+            b.GetSegmentStatus() === Status4.Finished
+
+            b.PortS.Value === false
+            b.PortE.Value === true
+            b.PortR.Value === false
+
+            notPortE.Value === false
+            startLatch.Value === false
+            resetLatch.Value === false
+
+            // reset 시작
+            rt.Value <- true
+            b.PortE.Value === false
+            notPortE.Value === true
+            b.GetSegmentStatus() === Status4.Ready
             ()
+

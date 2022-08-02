@@ -702,84 +702,6 @@ module GraphProgressSupportUtil =
         )
         |> Map.ofSeq
 
-    let calculateThetaInProgress(gri:GraphInfo) = // for test
-        let resetEdges = getResetEdges gri.Edges
-        let mutualResets = getMutualDummyResets resetEdges
-        let aliasResets = getAliasResets resetEdges
-        let dummyResets = resetEdges |> Seq.except(aliasResets)
-        let orderEdges =
-            gri.SolidGraph.Edges
-            |> Seq.append(aliasResets)
-            |> GraphExtensions.ToAdjacencyGraph
-
-        let solidEdges = 
-            gri.SolidGraph.Edges
-            |> GraphExtensions.ToAdjacencyGraph
-            
-        let inits = getInits orderEdges
-        let lasts = getLasts orderEdges
-        let solidLasts = getLasts solidEdges
-        let traverse = getTraverseOder inits orderEdges
-        let indexed = getIndexedMap traverse
-        
-        printfn "\nindexes"
-        indexed
-        |> Seq.iter(fun i ->
-            printfn "%A" i
-        )
-            
-        let allRoutes = getAllRoutes inits lasts orderEdges
-        let solidRoutes = getAllRoutes inits solidLasts solidEdges
-        
-        let toProcess = 
-            getProgressMap 
-                traverse allRoutes solidRoutes dummyResets 
-                mutualResets gri.Graph.Edges
-                
-        printfn "\nCheck segemtns to be 'ON' in progress(Theta)"
-        toProcess
-        |> Seq.iter(fun m -> 
-            printf "%A : [" m.Key 
-            m.Value
-            |> Seq.iter(fun v -> printf "%A;" (v.GetQualifiedName()))
-            printfn "]"
-        )
-
-        toProcess
-
-    let calculateOriginState(gri:GraphInfo) = // for test
-        let resetEdges = getResetEdges gri.Edges
-        let mutualResets = getMutualDummyResets resetEdges
-        let aliasResets = getAliasResets resetEdges
-        let dummyResets = resetEdges |> Seq.except(aliasResets)
-        let orderEdges =
-            gri.SolidGraph.Edges
-            |> Seq.append(aliasResets)
-            |> GraphExtensions.ToAdjacencyGraph
-
-        let solidEdges = 
-            gri.SolidGraph.Edges
-            |> GraphExtensions.ToAdjacencyGraph
-            
-        let inits = getInits orderEdges
-        let solidLasts = getLasts solidEdges
-            
-        let solidRoutes = 
-            getAllRoutes inits solidLasts solidEdges
-
-        let origin = 
-            getOrigins 
-                solidRoutes dummyResets 
-                mutualResets gri.Graph.Edges
-                
-        printfn "\nCheck segemtns to be 'ON' in origin state"
-        origin
-        |> Seq.iter(fun v ->
-            printfn " - %A" v
-        )
-
-        origin
-
     type ProgressInfo (gri:GraphInfo) =
         // child flow included whole reset edges
         let resetEdges = getResetEdges gri.Edges
@@ -819,26 +741,60 @@ module GraphProgressSupportUtil =
         let solidRoutes = getAllRoutes inits solidLasts solidEdges
         
         // making {node:estimate target list} map to predict progress theta
-        let thetaInProgress = 
+        let calculationTargetsInProgress = 
             getProgressMap 
                 traverse allRoutes solidRoutes dummyResets 
                 mutualResets gri.Graph.Edges
 
+        let thetaInProgress =
+            calculationTargetsInProgress
+            |> Seq.map(fun m ->
+                (
+                    m.Key,
+                    m.Value
+                    |> Seq.map(fun v ->
+                        Math.Exp(
+                            indexedChildren.Item(v.GetQualifiedName())
+                        )
+                    )
+                    |> Seq.sum
+                )
+            )
+            |> Map.ofSeq
+
+        let normalizedPreCalculatedTheta = 
+            calculationTargetsInProgress
+            |> Seq.map(fun m ->
+                (
+                    m.Key,
+                    Math.Log(
+                        m.Value
+                        |> Seq.map(fun v ->
+                            Math.Exp(
+                                indexedChildren.Item(v.GetQualifiedName())
+                            )
+                        )
+                        |> Seq.sum
+                    ) / float(indexedChildren.Count + 1)
+                )
+            )
+            |> Map.ofSeq
+
         let childOrigin = 
             getOrigins 
-                solidRoutes dummyResets 
+                solidRoutes dummyResets
                 mutualResets gri.Graph.Edges
 
-        let PrintThetaInProgress() =
-            thetaInProgress
+        let printPreCaculatedTheta() =
+            printfn "\nCheck segemtns to be 'ON' in progress(Theta)"
+            normalizedPreCalculatedTheta
             |> Seq.iter(fun m -> 
-                printf "%A : [" m.Key 
-                m.Value
-                |> Seq.iter(fun v -> printf "%A;" (v.GetQualifiedName()))
-                printfn "]"
+                printf "%A : " m.Key
+                printfn "[%A]" m.Value
             )
 
-        let PrintOrigin() =
+        let printOrigin() =
+            printfn "\nCheck segemtns to be 'ON' in origin state"
             childOrigin
             |> Seq.iter(fun v ->
                 printfn " - %A" v
@@ -846,7 +802,11 @@ module GraphProgressSupportUtil =
                         
         member x.IndexedChildren with get() = indexedChildren
         member x.ChildOrigin with get() = childOrigin
+        member x.CalculationTargetsInProgress with get() = calculationTargetsInProgress
         member x.ThetaInProgress with get() = thetaInProgress
+        member x.NormalizedPreCalculatedTheta with get() = normalizedPreCalculatedTheta
+        member x.PrintOrigin() = printOrigin()
+        member x.PrintPreCaculatedTheta() = printPreCaculatedTheta()
 
 [<AutoOpen>]
 module GraphResetSearch =

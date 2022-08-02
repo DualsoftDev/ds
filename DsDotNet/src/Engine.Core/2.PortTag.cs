@@ -92,17 +92,17 @@ public class PortExpressionEnd : PortExpression
             {
                 CheckMatch(value);
                 //! 호출 순서 매우 민감.
-                if (Global.IsSupportParallel)
-                {
-                    var tasks = new[]
-                    {
-                        Task.Run(() => Plan.Value = value),
-                        Task.Run(() => Global.RawBitChangedSubject.OnNext(new BitChange(this, value, true))),
-                    };
-                    Task.WhenAll(tasks).Wait();
+                //if (Global.IsSupportParallel)
+                //{
+                //    var tasks = new[]
+                //    {
+                //        Task.Run(() => Plan.Value = value),
+                //        Task.Run(() => Global.RawBitChangedSubject.OnNext(new BitChange(this, value, true))),
+                //    };
+                //    Task.WhenAll(tasks).Wait();
 
-                }
-                else
+                //}
+                //else
                 {
                     Plan.Value = value;
                     Debug.Assert(Plan.Value == value);

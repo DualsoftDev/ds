@@ -25,7 +25,7 @@ public static class Global
     public static Subject<OpcTagChange> TagChangeFromOpcServerSubject { get; } = new();
 
 
-    public static bool IsSupportParallel { get; set; }
+    public static bool IsSupportParallel { get; set; } = true;
     public static bool IsInUnitTest { get; }
     static Global()
     {

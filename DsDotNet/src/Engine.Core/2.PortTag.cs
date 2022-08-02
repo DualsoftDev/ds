@@ -91,24 +91,12 @@ public class PortExpressionEnd : PortExpression
             if (Plan.Value != value)
             {
                 CheckMatch(value);
-                //! 호출 순서 매우 민감.
-                //if (Global.IsSupportParallel)
-                //{
-                //    var tasks = new[]
-                //    {
-                //        Task.Run(() => Plan.Value = value),
-                //        Task.Run(() => Global.RawBitChangedSubject.OnNext(new BitChange(this, value, true))),
-                //    };
-                //    Task.WhenAll(tasks).Wait();
 
-                //}
-                //else
-                {
-                    Plan.Value = value;
-                    Debug.Assert(Plan.Value == value);
-                    if (Actual == null)
-                        BitChange.Publish(this, value, true);
-                }
+                //! 호출 순서 매우 민감 + 병렬화 불가 영역
+                Plan.Value = value;
+                Debug.Assert(Plan.Value == value);
+                if (Actual == null)
+                    BitChange.Publish(this, value, true);
             }
         }
     }

@@ -7,8 +7,6 @@ open Dual.Common
 open Xunit.Abstractions
 open System.Reactive.Linq
 open System.Threading
-open System.Threading.Tasks
-open Engine.Core
 open UnitTest.Engine
 open System.Collections.Concurrent
 
@@ -32,7 +30,6 @@ module MockUp =
 
         member x.WireEvent() =
             Global.BitChangedSubject
-                //.Select(fun bc -> bc.Bit)
                 .Where(fun bc ->
                     [x.PortS :> IBit; x.PortR; x.PortE] |> Seq.contains(bc.Bit)
                 )
@@ -44,32 +41,19 @@ module MockUp =
                         oldStatus <- newSegmentState
                         logDebug $"[{x.Name}] Segment status : {newSegmentState}"
 
-                        //x.Going.Value <- (newSegmentState = Status4.Going)
-                        //assert(x.GetSegmentStatus() = newSegmentState)
-
-                        //Task.Run(fun () ->
                         match newSegmentState with
                         | Status4.Ready    ->
                             ()
                         | Status4.Going    ->
-                            //Task.Run(fun () ->
-                                x.Going.Value <- true
-                                Thread.Sleep(100)
-                                assert(x.GetSegmentStatus() = Status4.Going)
-                                x.Going.Value <- false
-                                x.PortE.Value <- true
-                                if not x.PortE.Value then
-                                    ()
-                                //assert(x.PortE.Value)
-                                //assert(x.GetSegmentStatus() = Status4.Finished)
-                            //) |> ignore
+                            x.Going.Value <- true
+                            Thread.Sleep(100)
+                            assert(x.GetSegmentStatus() = Status4.Going)
+                            x.Going.Value <- false
+                            x.PortE.Value <- true
                         | Status4.Finished ->
                             x.FinishCount <- x.FinishCount + 1
                             assert(x.PortE.Value)
-                            ()
                         | Status4.Homing   ->
-                            //assert(not x.PortS.Value)
-
                             if x.PortE.Value then
                                 x.PortE.Value <- false
                                 assert(not x.PortE.Value)
@@ -81,9 +65,6 @@ module MockUp =
 
                         | _ ->
                             failwith "Unexpected"
-                        //    ) |> ignore
-
-                        //logDebug $"[{x.Name}] New Segment status : {x.GetSegmentStatus()}"
                 )
 
     type MuCpu(n) =
@@ -98,8 +79,6 @@ module ToyMockupTest =
 
         [<Fact>]
         member __.``ToyMockup repeating triangle test`` () =
-            // todo : check execution order/counting
-
             let cpu = new MuCpu("dummy")
             let b = Segment(cpu, "B")
             let g = Segment(cpu, "G")
@@ -124,14 +103,13 @@ module ToyMockupTest =
                                 logDebug "초기 시작 button OFF"
                                 stB.Value <- false
 
+                        if bit = g.PortE && g.PortE.Value then
                             if seg.FinishCount % 10 = 0 then
                                 logDebug $"COUNTER: B={b.FinishCount}, G={g.FinishCount}, R={r.FinishCount}"
-
                         ()
                     | _ ->
                         ()
-                )
-            |> ignore
+                ) |> ignore
 
 
             (*
@@ -187,7 +165,7 @@ module ToyMockupTest =
             stB.Value <- true
 
             // give enough time to wait...
-            while BitChange.PendingTasks.Count > 0 do
+            while Global.IsSupportParallel && BitChange.PendingTasks.Count > 0 do
                 Thread.Sleep(500)
 
             b.PortE.Value === true

@@ -16,6 +16,7 @@ open System.Collections.Concurrent
 module MockUp =
     type Segment(cpu, n, sp, rp, ep) =
         inherit Engine.Core.Segment(n)
+        let mutable oldStatus = Status4.Homing
         new(cpu, n) = Segment(cpu, n, null, null, null)
         member val PortS:PortExpressionStart = sp with get, set
         member val PortR:PortExpressionReset = rp with get, set
@@ -36,50 +37,52 @@ module MockUp =
                 )
                 .Subscribe(fun bc ->
                     let newSegmentState = x.GetSegmentStatus()
-                    logDebug $"[{x.Name}] Segment status : {newSegmentState}"
+                    if newSegmentState <> oldStatus then
+                        oldStatus <- newSegmentState
+                        logDebug $"[{x.Name}] Segment status : {newSegmentState}"
 
-                    //x.Going.Value <- (newSegmentState = Status4.Going)
-                    //assert(x.GetSegmentStatus() = newSegmentState)
+                        //x.Going.Value <- (newSegmentState = Status4.Going)
+                        //assert(x.GetSegmentStatus() = newSegmentState)
 
-                    //Task.Run(fun () ->
-                    match newSegmentState with
-                    | Status4.Ready    ->
-                        ()
-                    | Status4.Going    ->
                         //Task.Run(fun () ->
-                            x.Going.Value <- true
-                            Thread.Sleep(100)
-                            assert(x.GetSegmentStatus() = Status4.Going)
-                            x.Going.Value <- false
-                            x.PortE.Value <- true
-                            if not x.PortE.Value then
-                                ()
-                            //assert(x.PortE.Value)
-                            //assert(x.GetSegmentStatus() = Status4.Finished)
-                        //) |> ignore
-                    | Status4.Finished ->
-                        assert(x.PortE.Value)
-                        ()
-                    | Status4.Homing   ->
-                        //assert(not x.PortS.Value)
-
-                        if x.PortE.Value then
-                            if (x.Name = "B") then
-                                ()
-                            x.PortE.Value <- false
-                            assert(not x.PortE.Value)
-                            //assert(x.GetSegmentStatus() = Status4.Ready);
-                        else
-                            logDebug $"\tSkipping [{x.Name}] Segment status : {newSegmentState} : already homing by bit change {bc.Bit}={bc.NewValue}"
+                        match newSegmentState with
+                        | Status4.Ready    ->
                             ()
+                        | Status4.Going    ->
+                            //Task.Run(fun () ->
+                                x.Going.Value <- true
+                                Thread.Sleep(100)
+                                assert(x.GetSegmentStatus() = Status4.Going)
+                                x.Going.Value <- false
+                                x.PortE.Value <- true
+                                if not x.PortE.Value then
+                                    ()
+                                //assert(x.PortE.Value)
+                                //assert(x.GetSegmentStatus() = Status4.Finished)
+                            //) |> ignore
+                        | Status4.Finished ->
+                            assert(x.PortE.Value)
+                            ()
+                        | Status4.Homing   ->
+                            //assert(not x.PortS.Value)
 
-                        assert(not x.PortE.Value)
+                            if x.PortE.Value then
+                                if (x.Name = "B") then
+                                    ()
+                                x.PortE.Value <- false
+                                assert(not x.PortE.Value)
+                                //assert(x.GetSegmentStatus() = Status4.Ready);
+                            else
+                                logDebug $"\tSkipping [{x.Name}] Segment status : {newSegmentState} : already homing by bit change {bc.Bit}={bc.NewValue}"
+                                ()
 
-                    | _ ->
-                        failwith "Unexpected"
-                    //    ) |> ignore
+                            assert(not x.PortE.Value)
 
-                    //logDebug $"[{x.Name}] New Segment status : {x.GetSegmentStatus()}"
+                        | _ ->
+                            failwith "Unexpected"
+                        //    ) |> ignore
+
+                        //logDebug $"[{x.Name}] New Segment status : {x.GetSegmentStatus()}"
                 )
 
     type MuCpu(n) =
@@ -161,8 +164,8 @@ module ToyMockupTest =
             ()
 
         [<Fact>]
-        member __.``ToyMockup test`` () =
-            // todo : 현재 무한 루프
+        member __.``ToyMockup repeating triangle test`` () =
+            // todo : check execution order/counting
 
             let cpu = new MuCpu("dummy")
             let b = Segment(cpu, "B")
@@ -172,6 +175,7 @@ module ToyMockupTest =
 
 
             [b; g; r;] |> Seq.iter(fun seg -> seg.WireEvent() |> ignore)
+
             Global.BitChangedSubject
                 .Subscribe(fun bc ->
                     let bit = bc.Bit
@@ -193,7 +197,7 @@ module ToyMockupTest =
 
 
             (*
-                {s, r, e}{t, l, pex}: {Start, Reset, End} {Tag, Latch, Port Expression}
+                {s, r, e}{t, l, pex}{R, G, B}: {Start, Reset, End} {Tag, Latch, Port Expression} for seg {R, G, B}
             *)
 
             let stR = new Flag(cpu, "stR")     // rvst: R 노드의 Virtual Start Tag
@@ -207,27 +211,19 @@ module ToyMockupTest =
             g.PortE <- PortExpressionEnd.Create(cpu, g, "epexG", null)
             b.PortE <- PortExpressionEnd.Create(cpu, b, "epexB", null)
 
-            let RisingB = Rising(b.PortE)
-            let RisingR = Rising(r.PortE)
-            let RisingG = Rising(g.PortE)
+
+            let B = b.PortE
+            let R = r.PortE
+            let G = g.PortE
 
 
-            let slB = Latch(cpu, "slB", RisingG, RisingB)
-            let slG = Latch(cpu, "slG", RisingR, RisingG)
-            let slR = Latch(cpu, "slR", RisingB, RisingR)
+            let slB = Latch(cpu, "slB", G, B)
+            let slG = Latch(cpu, "slG", R, G)
+            let slR = Latch(cpu, "slR", B, R)
 
-
-            //let rlB = Latch(cpu, "rlB", Rising(r.Going), Falling(b.PortE))
-            //let rlG = Latch(cpu, "rlG", Rising(b.Going), Falling(g.PortE))
-            //let rlR = Latch(cpu, "rlR", Rising(g.Going), Falling(r.PortE))
-
-
-            let rlBSet = And(cpu, "And_rlBSet", Rising(r.Going), Not(b.PortE))
-            let rlB = Latch(cpu, "rlB", rlBSet, Falling(b.PortE))
-            let rlGSet = And(cpu, "And_rlGSet", Rising(b.Going), Not(g.PortE))
-            let rlG = Latch(cpu, "rlG", rlGSet, Falling(g.PortE))
-            let rlRSet = And(cpu, "And_rlRSet", Rising(g.Going), Not(r.PortE))
-            let rlR = Latch(cpu, "rlR", rlRSet, Falling(r.PortE))
+            let rlB = Latch(cpu, "rlB", r.Going, Not(B))
+            let rlG = Latch(cpu, "rlG", b.Going, Not(G))
+            let rlR = Latch(cpu, "rlR", g.Going, Not(R))
 
 
             // bvspe: B 노드의 Virtual Start Port Expression

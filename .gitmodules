@@ -1,0 +1,3 @@
+[submodule "dual.common"]
+	path = dual.common
+	url = git@dualsoft.co.kr:/git/dual.common.git

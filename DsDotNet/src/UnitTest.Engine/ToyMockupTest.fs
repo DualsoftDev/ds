@@ -5,72 +5,8 @@ open Xunit
 open Engine.Core
 open Dual.Common
 open Xunit.Abstractions
-open System.Reactive.Linq
 open System.Threading
 open UnitTest.Engine
-open System.Collections.Concurrent
-
-[<AutoOpen>]
-module MockUp =
-    type Segment(cpu, n, sp, rp, ep) =
-        inherit Engine.Core.Segment(n)
-        let mutable oldStatus = Status4.Homing
-        new(cpu, n) = Segment(cpu, n, null, null, null)
-        member val FinishCount = 0 with get, set
-        member val PortS:PortExpressionStart = sp with get, set
-        member val PortR:PortExpressionReset = rp with get, set
-        member val PortE:PortExpressionEnd = ep with get, set
-        member val Going = new Tag(cpu, null, $"{n}_Going")
-        member x.GetSegmentStatus() =
-            match x.PortS.Value, x.PortR.Value, x.PortE.Value with
-            | false, false, false -> Status4.Ready  //??
-            | true, false, false  -> Status4.Going
-            | _, false, true      -> Status4.Finished
-            | _, true, _          -> Status4.Homing
-
-        member x.WireEvent() =
-            Global.BitChangedSubject
-                .Where(fun bc ->
-                    [x.PortS :> IBit; x.PortR; x.PortE] |> Seq.contains(bc.Bit)
-                )
-                .Subscribe(fun bc ->
-                    let newSegmentState = x.GetSegmentStatus()
-                    if newSegmentState = oldStatus then
-                        logDebug $"\t\tSkipping duplicate status: [{x.Name}] status : {newSegmentState}"
-                    else
-                        oldStatus <- newSegmentState
-                        logDebug $"[{x.Name}] Segment status : {newSegmentState}"
-
-                        match newSegmentState with
-                        | Status4.Ready    ->
-                            ()
-                        | Status4.Going    ->
-                            x.Going.Value <- true
-                            Thread.Sleep(100)
-                            assert(x.GetSegmentStatus() = Status4.Going)
-                            x.Going.Value <- false
-                            x.PortE.Value <- true
-                        | Status4.Finished ->
-                            x.FinishCount <- x.FinishCount + 1
-                            assert(x.PortE.Value)
-                        | Status4.Homing   ->
-                            if x.PortE.Value then
-                                x.PortE.Value <- false
-                                assert(not x.PortE.Value)
-                            else
-                                logDebug $"\tSkipping [{x.Name}] Segment status : {newSegmentState} : already homing by bit change {bc.Bit}={bc.NewValue}"
-                                ()
-
-                            assert(not x.PortE.Value)
-
-                        | _ ->
-                            failwith "Unexpected"
-                )
-
-    type MuCpu(n) =
-        inherit Cpu(n, new Model())
-        member val MuQueue = new ConcurrentQueue<BitChange>()
-
 
 [<AutoOpen>]
 module ToyMockupTest =
@@ -80,9 +16,9 @@ module ToyMockupTest =
         [<Fact>]
         member __.``ToyMockup repeating triangle test`` () =
             let cpu = new MuCpu("dummy")
-            let b = Segment(cpu, "B")
-            let g = Segment(cpu, "G")
-            let r = Segment(cpu, "R")
+            let b = MuSegment(cpu, "B")
+            let g = MuSegment(cpu, "G")
+            let r = MuSegment(cpu, "R")
             let stB = new Flag(cpu, "stB")
 
 
@@ -95,7 +31,7 @@ module ToyMockupTest =
                     logDebug $"\tBit changed: [{bit}] = {bc.NewValue}{cause}"
                     match bit with
                     | :? PortExpressionEnd as portE ->
-                        let seg = portE.Segment :?> Segment
+                        let seg = portE.Segment :?> MuSegment
                         let status = seg.GetSegmentStatus()
                         //logDebug $"Segment [{seg.Name}] Status : {status} inferred by port [{bit}]={bit.Value} change"
                         if bit = b.PortE && b.PortE.Value then
@@ -177,18 +113,16 @@ module ToyMockupTest =
 
         [<Fact>]
         member __.``ToyMockup with 1 segment test`` () =
-            let init (cpu:MuCpu) =
-                Global.BitChangedSubject
-                    .Subscribe(fun bc ->
-                        //cpu.MuQueue.Enqueue(bc)
-                        let bit = bc.Bit
-                        logDebug $"\tBit changed: [{bit}] = {bc.NewValue}"
-                    )
-                |> ignore
-
             let cpu = new MuCpu("dummy")
-            init cpu
-            let b = Segment(cpu, "B")
+            Global.BitChangedSubject
+                .Subscribe(fun bc ->
+                    //cpu.MuQueue.Enqueue(bc)
+                    let bit = bc.Bit
+                    logDebug $"\tBit changed: [{bit}] = {bc.NewValue}"
+                )
+            |> ignore
+
+            let b = MuSegment(cpu, "B")
             let st = new Flag(cpu, "VStartB")
             let rt = new Flag(cpu, "VResetB")
             b.PortE <- PortExpressionEnd.Create(cpu, b, "BVEP", null)

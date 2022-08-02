@@ -2,7 +2,6 @@ namespace Engine.Core;
 
 public abstract class Expression : BitReEvaluatable
 {
-    protected bool _oldValue;
     public override bool Value
     {
         get => throw new Exception("Should be redefined");
@@ -13,15 +12,15 @@ public abstract class Expression : BitReEvaluatable
         : base(cpu, name, monitoringBits)
     {
         // override 된 Value 를 생성자에서 호출 가능함.
-        _oldValue = this.Value;
+        _value = this.Value;
     }
 
     protected override void ReEvaulate(IBit causeBit)
     {
         var newValue = Value;
-        if (_oldValue != newValue)
+        if (_value != newValue)
         {
-            _oldValue = newValue;
+            _value = newValue;
             BitChange.Publish(this, newValue, true, causeBit);
         }
     }

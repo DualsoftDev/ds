@@ -2,6 +2,8 @@ namespace UnitTest.Engine
 
 open System.Linq
 open Dual.Common
+open Engine.Core
+open System.Threading
 
 
 [<AutoOpen>]
@@ -34,3 +36,7 @@ module ModelTest_Common =
     let seqEq(a, b) = Enumerable.SequenceEqual(a, b) |> ShouldBeTrue
     let setEq(xs:'a seq, ys:'a seq) =
         (xs.Count() = ys.Count() && xs |> Seq.forall(fun x -> ys.Contains(x)) ) |> ShouldBeTrue
+
+    let wait() =
+        while Global.IsSupportParallel && BitChange.PendingTasks.Count > 0 do
+            Thread.Sleep(50)

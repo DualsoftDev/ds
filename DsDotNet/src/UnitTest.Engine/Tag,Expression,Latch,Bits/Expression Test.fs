@@ -6,6 +6,7 @@ open Engine.Core
 open Dual.Common
 open Xunit.Abstractions
 open System
+open System.Threading
 
 [<AutoOpen>]
 module ExpressionTest =
@@ -17,6 +18,7 @@ module ExpressionTest =
                     logDebug $"Bit changed: [{bit}] = {bc.NewValue}"
                 )
             |> ignore
+
 
         interface IClassFixture<Fixtures.DemoFixture>
 
@@ -155,15 +157,19 @@ module ExpressionTest =
             x.Value === false
 
             s.Value <- true
+
+            wait()
             latch.Value === true
             x.Value === true
 
             s.Value <- false
+            wait()
             latch.Value === true
             x.Value === true
 
             // latch reset ON -> latch reset 및 Or expression OFF 확인
             r.Value <- true
+            wait()
             latch.Value === false
             x.Value === false
 

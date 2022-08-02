@@ -43,12 +43,14 @@ module PortExpressionTest =
                 |> ShouldFail
 
                 plan.Value <- true
+                wait()
                 pts.Plan.Value === true
                 pts.Value === true
                 pts.Actual.Value === true
 
                 // plan OFF 시, actual tag 도 OFF 되어야 한다.
                 plan.Value <- false
+                wait()
                 pts.Plan.Value === false
                 pts.Value === false
                 pts.Actual.Value === false
@@ -56,6 +58,7 @@ module PortExpressionTest =
 
                 // pts plan tag ON 시, pts 도 ON 되어야 한다.
                 plan.Value <- true
+                wait()
                 pts.Plan.Value === true
                 pts.Value === true
                 pts.Actual.Value === true
@@ -71,20 +74,23 @@ module PortExpressionTest =
 
                 // pte 전체 ON 하더라도, actual tag 는 ON 되지 않는다.
                 plan.Value <- true
+                wait()
                 pte.Plan.Value === true
                 pte.Value === false
                 pte.Actual.Value === false
 
                 // actual tag ON 시, pte 전체 ON
                 actual.Value <- true
+                wait()
                 pte.Value === true
 
-                // actual tag 흔들림시, pte 전체도 연동
-                (fun () -> actual.Value <- false)
-                |> ShouldFailWithSubstringT<DsException> "Spatial Error:"
+                // actual tag 흔들림시, pte 전체도 연동 (병렬 수행시, exception catch 불가)
+                if not Global.IsSupportParallel then
+                    (fun () -> actual.Value <- false)
+                    |> ShouldFailWithSubstringT<DsException> "Spatial Error:"
 
-                actual.Value === false
-                pte.Value === false
+                    actual.Value === false
+                    pte.Value === false
 
 
             let ``_PortExpressionEnd 특이 case 테스트`` =
@@ -94,26 +100,32 @@ module PortExpressionTest =
                 // Actual 이 ON 인 상태에서의 creation
                 let pte = PortExpressionEnd.Create(cpu, null, "_PortExpressionEnd_test3", actual)
                 let plan = pte.Plan
+                wait()
                 pte.Value === false
                 pte.Plan.Value === false
                 pte.Actual.Value === true
 
                 // actual tag ON 상태에서 plan 만 ON 시킬 수 없다.
-                (fun () -> pte.Value <- true)
-                |> ShouldFailWithSubstringT<DsException> "Spatial Error:"
+                if not Global.IsSupportParallel then //(병렬 수행시, exception catch 불가)
+                    (fun () ->
+                        pte.Value <- true
+                        wait())
+                    |> ShouldFailWithSubstringT<DsException> "Spatial Error:"
 
-                pte.Value === false
-                plan.Value === false
+                    pte.Value === false
+                    plan.Value === false
 
 
                 // actual tag OFF 상태에서는 plan OFF 가능
                 actual.Value <- false
                 plan.Value <- true
+                wait()
                 pte.Plan.Value === true
                 pte.Actual.Value === false
                 pte.Value === false
 
                 pte.Actual.Value <- true
+                wait()
                 pte.Value === true
 
                 ()

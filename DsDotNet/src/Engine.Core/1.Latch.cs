@@ -3,8 +3,8 @@ namespace Engine.Core;
 public class Latch : BitReEvaluatable
 {
     public override bool Value { get => _value; set => throw new DsException("Not Supported."); }
-    IBit _setCondition { get; }
-    IBit _resetCondition { get; }
+    internal IBit _setCondition { get; }
+    internal IBit _resetCondition { get; }
 
     public Latch(Cpu cpu, string name, IBit setCondition, IBit resetCondition)
         : base(cpu, name, new[] {setCondition, resetCondition})

@@ -46,15 +46,14 @@ public abstract class Bit : Named, IBit
     }
 
 
-    public override string ToString() => ToText();
-    public override string ToText() => $"{base.ToText()}@{Cpu.Name}";
+    public override string ToText() => ExpressionExtension.ToText(this);
 }
 
 
 /// <summary> 다른 bit 요소(monitoringBits)에 의해서 값이 변경될 수 있는 bit 에 대한 추상 class </summary>
 public abstract class BitReEvaluatable : Bit, IBitReadable
 {
-    protected IBit[] _monitoringBits;
+    internal IBit[] _monitoringBits;
     protected abstract void ReEvaulate(IBit causeBit);
     public override bool Value { set => throw new DsException("Not Supported."); }
     protected BitReEvaluatable(Cpu cpu, string name, params IBit[] monitoringBits)

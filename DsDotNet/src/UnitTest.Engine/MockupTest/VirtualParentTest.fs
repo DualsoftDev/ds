@@ -22,6 +22,7 @@ module VirtualParentTestTest =
             let auto = new Tag(cpu, null, "auto")
 
             let vpB = Vps.Create(b, auto, [g; r])
+            let xxx = vpB.PortR.ToText();
             let vpG = Vps.Create(g, auto, [b])
             let vpR = Vps.Create(r, auto, [g])
             ()

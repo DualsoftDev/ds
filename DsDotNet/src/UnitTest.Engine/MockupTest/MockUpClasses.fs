@@ -30,7 +30,14 @@ module MockUpClasses =
     type MuSegment(cpu, n, sp, rp, ep) =
         inherit MuSegmentBase(cpu, n, sp, rp, ep)
         let mutable oldStatus = Status4.Homing
-        new(cpu, n) = MuSegment(cpu, n, null, null, null)
+
+        static member Create(cpu, n) =
+            let sp = null//new PortExpressionStart(cpu, null, $"spex{n}_default", null)
+            let rp = null//new PortExpressionReset(cpu, null, $"spex{n}_default", null)
+            let ep = PortExpressionEnd.Create(cpu, null, $"epex{n}", null)
+            let seg = MuSegment(cpu, n, sp, rp, ep)
+            ep.Segment <- seg
+            seg
         member val FinishCount = 0 with get, set
 
         member x.WireEvent() =
@@ -84,14 +91,15 @@ module MockUpClasses =
     ///                 && #latch(#g(Previous), #r(Self)  <--- reset 조건 1
     ///                 && #latch(#g(Next), #r(Self)),    <--- reset 조건 2 ...
     ///             #r(Self))
-    type Vps(target:MuSegment, startPort, resetPort) =
+    type Vps(target:MuSegment, causalSourceSegments:MuSegment seq, startPort, resetPort) =
         inherit MuSegmentBase(target.Cpu, $"VPS({target.Name})", startPort, resetPort, target.PortE)
-        private new(target) = Vps(target, null, null)
+        private new(target, causalSourceSegments) = Vps(target, causalSourceSegments, null, null)
         member val Target = target;
+        member val PreChildren = causalSourceSegments |> Array.ofSeq
 
-        static member Create(target:MuSegment, auto:IBit, resetSourceSegments:MuSegment seq) =
+        static member Create(target:MuSegment, auto:IBit, causalSourceSegments:MuSegment seq, resetSourceSegments:MuSegment seq) =
             let cpu = target.Cpu
-            let vps = Vps(target)
+            let vps = Vps(target, causalSourceSegments)
             let n = vps.Name
             if isNull target.PortE then
                 target.PortE <- PortExpressionEnd.Create(cpu, target, $"epex({n})", null)
@@ -104,10 +112,10 @@ module MockUpClasses =
                                 [|
                                     yield target.PortE :> IBit
                                     for rsseg in resetSourceSegments do
-                                        yield Latch(cpu, $"InnerResetSourceLatch({rsseg.Name})", rsseg.Going, vps.Ready)
+                                        yield Latch.Create(cpu, $"InnerResetSourceLatch({rsseg.Name})", rsseg.Going, vps.Ready)
                                 |]
                             And(cpu, $"InnerResetSourceAnd_{n}", andItems)
-                        yield Latch(cpu, $"ResetLatch({n})", set, vps.Ready)
+                        yield Latch.Create(cpu, $"ResetLatch({n})", set, vps.Ready)
                     |]
                 And(cpu, $"ResetPortExpression({n})", vrp)
 

@@ -16,13 +16,15 @@ module VirtualParentTestTest =
         [<Fact>]
         member __.``Vps 생성 test`` () =
             let cpu = new MuCpu("dummy")
-            let b = MuSegment(cpu, "B")
-            let g = MuSegment(cpu, "G")
-            let r = MuSegment(cpu, "R")
+            let b = MuSegment.Create(cpu, "B")
+            let g = MuSegment.Create(cpu, "G")
+            let r = MuSegment.Create(cpu, "R")
             let auto = new Tag(cpu, null, "auto")
 
-            let vpB = Vps.Create(b, auto, [g; r])
-            let xxx = vpB.PortR.ToText();
-            let vpG = Vps.Create(g, auto, [b])
-            let vpR = Vps.Create(r, auto, [g])
+            let vpB = Vps.Create(b, auto, [g], [g; r])
+            Global.Logger.Debug($"B Start:{vpB.PortS.ToText()}");
+            Global.Logger.Debug($"B Reset:{vpB.PortR.ToText()}");
+            Global.Logger.Debug($"B End:{vpB.PortE.ToText()}");
+            let vpG = Vps.Create(g, auto, [r], [b])
+            let vpR = Vps.Create(r, auto, [b], [g])
             ()

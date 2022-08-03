@@ -16,9 +16,9 @@ module ToyMockupTest =
         [<Fact>]
         member __.``ToyMockup repeating triangle test`` () =
             let cpu = new MuCpu("dummy")
-            let b = MuSegment(cpu, "B")
-            let g = MuSegment(cpu, "G")
-            let r = MuSegment(cpu, "R")
+            let b = MuSegment.Create(cpu, "B")
+            let g = MuSegment.Create(cpu, "G")
+            let r = MuSegment.Create(cpu, "R")
             let stB = new Flag(cpu, "stB")
 
 
@@ -58,10 +58,6 @@ module ToyMockupTest =
             let rtR = new Flag(cpu, "rtR")
             let rtG = new Flag(cpu, "rtG")
             let rtB = new Flag(cpu, "rtB")
-
-            r.PortE <- PortExpressionEnd.Create(cpu, r, "epexR", null)
-            g.PortE <- PortExpressionEnd.Create(cpu, g, "epexG", null)
-            b.PortE <- PortExpressionEnd.Create(cpu, b, "epexB", null)
 
 
             let B = b.PortE
@@ -122,10 +118,9 @@ module ToyMockupTest =
                 )
             |> ignore
 
-            let b = MuSegment(cpu, "B")
+            let b = MuSegment.Create(cpu, "B")
             let st = new Flag(cpu, "VStartB")
             let rt = new Flag(cpu, "VResetB")
-            b.PortE <- PortExpressionEnd.Create(cpu, b, "BVEP", null)
 
 
             let startLatch = Latch(cpu, "시작 래치", st, b.PortE)

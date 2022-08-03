@@ -15,6 +15,17 @@ public class Latch : BitReEvaluatable
         ReEvaulate(null);
     }
 
+    public static Latch Create(Cpu cpu, string name, IBit setCondition, IBit resetCondition)
+    {
+        var existing = GetExistingBit<Latch>(cpu, name);
+        if (existing != null)
+        {
+            Global.Logger.Warn($"Bit {name} already exists.  Using it instead creating new one.");
+            return existing;
+        }
+
+        return new Latch(cpu, name, setCondition, resetCondition);
+    }
 
     bool EvaluateGetValue()
     {

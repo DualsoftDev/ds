@@ -31,6 +31,20 @@ public abstract class Bit : Named, IBit
         cpu.BitsMap.Add(name, this);
     }
 
+    /// <summary>  Bit 생성 이전에 동일 이름이 존재하는지 check 하기 위한 용도. </summary>
+    public static T GetExistingBit<T>(Cpu cpu, string name) where T: Bit
+    {
+        if (cpu.BitsMap.ContainsKey(name))
+        {
+            var existing = cpu.BitsMap[name];
+            if (existing is T)
+                return existing as T;
+            else
+                throw new Exception($"ERROR: duplicate name {name} exists with other type {existing.GetType().Name}");
+        }
+        return null;
+    }
+
     // Value setter 를 수행하지 않기 위한 생성자
     protected Bit(string name, Cpu cpu) : base(name)
     {
@@ -46,7 +60,7 @@ public abstract class Bit : Named, IBit
     }
 
 
-    public override string ToText() => ExpressionExtension.ToText(this);
+    public override string ToText() => BitExtension.ToText(this);
 }
 
 

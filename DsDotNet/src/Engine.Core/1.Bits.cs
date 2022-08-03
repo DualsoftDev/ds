@@ -70,22 +70,25 @@ public abstract class BitReEvaluatable : Bit, IBitReadable
     internal IBit[] _monitoringBits;
     protected abstract void ReEvaulate(IBit causeBit);
     public override bool Value { set => throw new DsException("Not Supported."); }
+    IDisposable _subscription;
     protected BitReEvaluatable(Cpu cpu, string name, params IBit[] monitoringBits)
         : base(name, cpu)
     {
         // PortExpression 의 경우, plan 대비 actual 에 null 을 허용
         _monitoringBits = monitoringBits.Where(b => b is not null).ToArray();
 
-        var capturedThis = this;
-        Global.RawBitChangedSubject
-            .Select(bc => bc.Bit)
-            .Where(bit => monitoringBits.Contains(bit))
-            .Subscribe(bit =>
-            {
-                var xxThis = capturedThis;
-                ReEvaulate(bit);
-            })
-            ;
+        ReSubscribe();
+    }
+
+    protected void ReSubscribe()
+    {
+        _subscription?.Dispose();
+        _subscription =
+            Global.RawBitChangedSubject
+                .Select(bc => bc.Bit)
+                .Where(bit => _monitoringBits.Contains(bit))
+                .Subscribe(ReEvaulate)
+                ;
     }
 }
 

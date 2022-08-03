@@ -15,9 +15,27 @@ public abstract class PortExpression : BitReEvaluatable
     }
 
     public Segment Segment { get; set; }
-    public IBit Plan { get; }
+
+    IBit _plan;
+    Tag _actual;
+    public IBit Plan {
+        get => _plan;
+        set {
+            _plan = value;
+            _monitoringBits = new[] { _plan, _actual };
+            ReSubscribe();
+        }
+    }
     /// <summary> Allow null </summary>
-    public Tag Actual { get; }
+    public Tag Actual {
+        get => _actual;
+        set
+        {
+            _actual = value;
+            _monitoringBits = new[] { _plan, _actual };
+            ReSubscribe();
+        }
+    }
 }
 
 

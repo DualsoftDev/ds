@@ -27,4 +27,9 @@ module VirtualParentTestTest =
             Global.Logger.Debug($"B End:{vpB.PortE.ToText()}");
             let vpG = Vps.Create(g, auto, [r], [b])
             let vpR = Vps.Create(r, auto, [b], [g])
+
+            let stB = Tag(cpu, b, "StartB")
+            b.PortS.Plan <- stB
+            let xx1 = b.PortS.ToString()
+            let xx2 = b.PortS.ToText()
             ()

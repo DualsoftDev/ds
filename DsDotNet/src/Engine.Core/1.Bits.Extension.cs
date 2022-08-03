@@ -24,6 +24,8 @@ public static class BitExtension
                         PortExpression pe =>
                             new Func<string>(() =>
                             {
+                                if (pe.Plan == null)
+                                    throw new Exception($"Port [{pe.Name}] Plan is null");
                                 var plan = pe.Plan.ToText();
                                 var actual = "";
                                 if (pe.Actual != null)

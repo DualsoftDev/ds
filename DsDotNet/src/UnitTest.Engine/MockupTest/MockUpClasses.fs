@@ -32,12 +32,16 @@ module MockUpClasses =
         let mutable oldStatus = Status4.Homing
 
         static member Create(cpu, n) =
-            let sp = null//new PortExpressionStart(cpu, null, $"spex{n}_default", null)
-            let rp = null//new PortExpressionReset(cpu, null, $"spex{n}_default", null)
+            let sp = PortExpressionStart(cpu, null, $"spex{n}_default", null, null)
+            let rp = PortExpressionReset(cpu, null, $"rpex{n}_default", null, null)
             let ep = PortExpressionEnd.Create(cpu, null, $"epex{n}", null)
             let seg = MuSegment(cpu, n, sp, rp, ep)
+            sp.Segment <- seg
+            rp.Segment <- seg
             ep.Segment <- seg
             seg
+
+
         member val FinishCount = 0 with get, set
 
         member x.WireEvent() =

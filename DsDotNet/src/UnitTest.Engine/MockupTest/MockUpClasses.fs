@@ -89,26 +89,34 @@ module MockUpClasses =
         private new(target) = Vps(target, null, null)
         member val Target = target;
 
-        static member Create(target:MuSegment, startCondition:IBit, resetSourceSegments:MuSegment seq) =
+        static member Create(target:MuSegment, auto:IBit, resetSourceSegments:MuSegment seq) =
             let cpu = target.Cpu
             let vps = Vps(target)
             let n = vps.Name
-            let resets = [
-                for r in resetSourceSegments do
-                    yield Latch(cpu, $"ResetInnerLatch({r.Name})", r.Going, vps.Ready)
-            ]
-            vps.PortR <-
-                let plan =
-                    let bits = [|
-                        yield startCondition;
-                        yield! resets |> Array.cast<IBit> |]
-                    And(cpu, $"InnerResetAnd_{n}", bits)
-                PortExpressionReset(cpu, vps, $"Reset_{n}", plan, null)
+            if isNull target.PortE then
+                target.PortE <- PortExpressionEnd.Create(cpu, target, $"epex({n})", null)
+            let resetPortExpressionPlan =
+                let vrp =
+                    [|
+                        yield auto
+                        let set =
+                            let andItems =
+                                [|
+                                    yield target.PortE :> IBit
+                                    for rsseg in resetSourceSegments do
+                                        yield Latch(cpu, $"InnerResetSourceLatch({rsseg.Name})", rsseg.Going, vps.Ready)
+                                |]
+                            And(cpu, $"InnerResetSourceAnd_{n}", andItems)
+                        yield Latch(cpu, $"ResetLatch({n})", set, vps.Ready)
+                    |]
+                And(cpu, $"ResetPortExpression({n})", vrp)
+
+            vps.PortR <- PortExpressionReset(cpu, vps, $"Reset_{n}", resetPortExpressionPlan, null)
 
             vps.PortS <-
-                match startCondition with
+                match auto with
                 | :? PortExpressionStart as sp -> sp
-                | _ -> PortExpressionStart(cpu, vps, $"Start_{n}", startCondition, null)
+                | _ -> PortExpressionStart(cpu, vps, $"Start_{n}", auto, null)
 
             vps
 

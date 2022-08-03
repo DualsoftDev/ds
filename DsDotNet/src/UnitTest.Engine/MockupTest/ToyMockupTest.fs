@@ -16,9 +16,9 @@ module ToyMockupTest =
         [<Fact>]
         member __.``ToyMockup repeating triangle test`` () =
             let cpu = new MuCpu("dummy")
-            let b = MuSegment(cpu, "B")
-            let g = MuSegment(cpu, "G")
-            let r = MuSegment(cpu, "R")
+            let b, (stB, rtB) = MuSegment.CreateWithDefaultTags(cpu, "B")
+            let g, (stG, rtG) = MuSegment.CreateWithDefaultTags(cpu, "G")
+            let r, (stR, rtR) = MuSegment.CreateWithDefaultTags(cpu, "R")
             let stB = new Flag(cpu, "stB")
 
 
@@ -110,7 +110,7 @@ module ToyMockupTest =
                 )
             |> ignore
 
-            let b = MuSegment(cpu, "B")
+            let b, (stB, rtB) = MuSegment.CreateWithDefaultTags(cpu, "B")
             let st = new Flag(cpu, "VStartB")
             let rt = new Flag(cpu, "VResetB")
 

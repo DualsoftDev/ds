@@ -9,22 +9,20 @@ open System.Reactive.Linq
 open System.Threading
 open UnitTest.Engine
 open System.Collections.Concurrent
+open System
+open System.Reactive.Disposables
 
 [<AutoOpen>]
 module MockUpClasses =
-    type MuSegmentBase(cpu, n, sp, rp, ep) as this =
+    type MuSegmentBase(cpu, n, sp, rp, ep, goingTag, readyTag) =
         inherit Segment(n)
-
-        let sp = if isNull sp then PortExpressionStart(cpu, this, $"spex{n}_default", null, null) else sp
-        let rp = if isNull rp then PortExpressionReset(cpu, this, $"rpex{n}_default", null, null) else rp
-        let ep = if isNull ep then PortExpressionEnd.Create(cpu, this, $"epex{n}_default", null) else ep
 
         member val Cpu:Cpu = cpu
         member val PortS:PortExpressionStart = sp with get, set
         member val PortR:PortExpressionReset = rp with get, set
         member val PortE:PortExpressionEnd = ep with get, set
-        member val Going = new Tag(cpu, null, $"{n}_Going")
-        member val Ready = new Tag(cpu, null, $"{n}_Ready")
+        member val Going = if isNull goingTag then new Tag(cpu, null, $"{n}_Going") else goingTag
+        member val Ready = if isNull readyTag then new Tag(cpu, null, $"{n}_Ready") else readyTag
         member val FinishCount = 0 with get, set
         member x.GetSegmentStatus() =
             match x.PortS.Value, x.PortR.Value, x.PortE.Value with
@@ -32,14 +30,27 @@ module MockUpClasses =
             | true, false, false  -> Status4.Going
             | _, false, true      -> Status4.Finished
             | _, true, _          -> Status4.Homing
+        abstract member WireEvent:unit->IDisposable
+        default x.WireEvent() = Disposable.Empty
 
-    type MuSegment(cpu, n, sp, rp, ep) =
-        inherit MuSegmentBase(cpu, n, sp, rp, ep)
+    type MuSegment(cpu, n, sp, rp, ep, goingTag, readyTag) =
+        inherit MuSegmentBase(cpu, n, sp, rp, ep, goingTag, readyTag)
         let mutable oldStatus = Status4.Homing
 
-        new (cpu, n) = MuSegment(cpu, n, null, null, null)
+        //static member Create(cpu, n) = MuSegment(cpu, n, null, null, null)
 
-        member x.WireEvent() =
+        static member CreateWithDefaultTags(cpu, n) =
+            let seg = MuSegment(cpu, n, null, null, null, null, null)
+            let st = Tag(cpu, seg, $"st_default_{n}", TagType.Start)
+            let rt = Tag(cpu, seg, $"rt_default_{n}", TagType.Reset)
+            seg.PortS <- PortExpressionStart(cpu, seg, $"spex{n}_default", st, null)
+            seg.PortR <- PortExpressionReset(cpu, seg, $"rpex{n}_default", rt, null)
+            seg.PortE <- PortExpressionEnd.Create(cpu, seg, $"epex{n}_default", null)
+
+            seg, (st, rt)
+
+
+        override x.WireEvent() =
             Global.BitChangedSubject
                 .Where(fun bc ->
                     [x.PortS :> IBit; x.PortR; x.PortE] |> Seq.contains(bc.Bit)

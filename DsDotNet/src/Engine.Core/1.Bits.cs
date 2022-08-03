@@ -172,7 +172,7 @@ public class BitChange
     }
     public void Publish()
     {
-        if (Global.IsSupportParallel)
+        if (Global.IsSupportParallel && Bit is PortExpressionEnd)
         {
             //! 현재값 publish 를 threading 으로 처리...
             var capturedThis = this;

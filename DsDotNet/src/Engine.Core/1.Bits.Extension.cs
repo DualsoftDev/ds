@@ -30,7 +30,7 @@ public static class BitExtension
                                 var actual = "";
                                 if (pe.Actual != null)
                                     actual = $", Actual={ToText(pe.Actual)}";
-                                return $"{pe.Segment.Name}.[{pe.GetType().Name}]=[Plan={plan}]{actual}";
+                                return $"{pe.Segment?.Name}.[{pe.GetType().Name}]=[Plan={plan}]{actual}";
                             }).Invoke(),
                         _ => throw new Exception("ERROR")
                     };

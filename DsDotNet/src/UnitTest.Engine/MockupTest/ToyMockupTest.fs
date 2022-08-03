@@ -16,9 +16,9 @@ module ToyMockupTest =
         [<Fact>]
         member __.``ToyMockup repeating triangle test`` () =
             let cpu = new MuCpu("dummy")
-            let b = MuSegment.Create(cpu, "B")
-            let g = MuSegment.Create(cpu, "G")
-            let r = MuSegment.Create(cpu, "R")
+            let b = MuSegment(cpu, "B")
+            let g = MuSegment(cpu, "G")
+            let r = MuSegment(cpu, "R")
             let stB = new Flag(cpu, "stB")
 
 
@@ -74,22 +74,14 @@ module ToyMockupTest =
             let rlR = Latch(cpu, "rlR", g.Going, Not(R))
 
 
-            // bvspe: B 노드의 Virtual Start Port Expression
-            let spexB = Or(cpu, "speB(OR)", slB, stB)
-            let spexG = Or(cpu, "speG(OR)", slG, stG)
-            let spexR = Or(cpu, "speR(OR)", slR, stR)
 
-            let rpexB = Or(cpu, "rpeB(OR)", rlB, rtB)
-            let rpexG = Or(cpu, "rpeG(OR)", rlG, rtG)
-            let rpexR = Or(cpu, "rpeR(OR)", rlR, rtR)
+            r.PortS.Plan <- Or(cpu, "speR(OR)", slR, stR)
+            g.PortS.Plan <- Or(cpu, "speG(OR)", slG, stG)
+            b.PortS.Plan <- Or(cpu, "speB(OR)", slB, stB)
 
-            r.PortS <- new PortExpressionStart(cpu, r, "spexR", spexR, null)
-            g.PortS <- new PortExpressionStart(cpu, g, "spexG", spexG, null)
-            b.PortS <- new PortExpressionStart(cpu, b, "spexB", spexB, null)
-
-            r.PortR <- new PortExpressionReset(cpu, r, "rpexR", rpexR, null)
-            g.PortR <- new PortExpressionReset(cpu, g, "rpexG", rpexG, null)
-            b.PortR <- new PortExpressionReset(cpu, b, "rpexB", rpexB, null)
+            r.PortR.Plan <- Or(cpu, "rpeR(OR)", rlR, rtR)
+            g.PortR.Plan <- Or(cpu, "rpeG(OR)", rlG, rtG)
+            b.PortR.Plan <- Or(cpu, "rpeB(OR)", rlB, rtB)
 
 
 
@@ -118,7 +110,7 @@ module ToyMockupTest =
                 )
             |> ignore
 
-            let b = MuSegment.Create(cpu, "B")
+            let b = MuSegment(cpu, "B")
             let st = new Flag(cpu, "VStartB")
             let rt = new Flag(cpu, "VResetB")
 

@@ -12,14 +12,20 @@ open System.Collections.Concurrent
 
 [<AutoOpen>]
 module MockUpClasses =
-    type MuSegmentBase(cpu, n, sp, rp, ep) =
+    type MuSegmentBase(cpu, n, sp, rp, ep) as this =
         inherit Segment(n)
+
+        let sp = if isNull sp then PortExpressionStart(cpu, this, $"spex{n}_default", null, null) else sp
+        let rp = if isNull rp then PortExpressionReset(cpu, this, $"rpex{n}_default", null, null) else rp
+        let ep = if isNull ep then PortExpressionEnd.Create(cpu, this, $"epex{n}_default", null) else ep
+
         member val Cpu:Cpu = cpu
         member val PortS:PortExpressionStart = sp with get, set
         member val PortR:PortExpressionReset = rp with get, set
         member val PortE:PortExpressionEnd = ep with get, set
         member val Going = new Tag(cpu, null, $"{n}_Going")
         member val Ready = new Tag(cpu, null, $"{n}_Ready")
+        member val FinishCount = 0 with get, set
         member x.GetSegmentStatus() =
             match x.PortS.Value, x.PortR.Value, x.PortE.Value with
             | false, false, false -> Status4.Ready  //??
@@ -31,18 +37,7 @@ module MockUpClasses =
         inherit MuSegmentBase(cpu, n, sp, rp, ep)
         let mutable oldStatus = Status4.Homing
 
-        static member Create(cpu, n) =
-            let sp = PortExpressionStart(cpu, null, $"spex{n}_default", null, null)
-            let rp = PortExpressionReset(cpu, null, $"rpex{n}_default", null, null)
-            let ep = PortExpressionEnd.Create(cpu, null, $"epex{n}", null)
-            let seg = MuSegment(cpu, n, sp, rp, ep)
-            sp.Segment <- seg
-            rp.Segment <- seg
-            ep.Segment <- seg
-            seg
-
-
-        member val FinishCount = 0 with get, set
+        new (cpu, n) = MuSegment(cpu, n, null, null, null)
 
         member x.WireEvent() =
             Global.BitChangedSubject
@@ -86,49 +81,4 @@ module MockUpClasses =
     type MuCpu(n) =
         inherit Cpu(n, new Model())
         member val MuQueue = new ConcurrentQueue<BitChange>()
-
-    /// Virtual Parent Segment
-    /// endport 는 target child 의 endport 공유
-    /// startPort 는 공정 auto
-    /// resetPort = { auto &&
-    ///     #latch( (Self
-    ///                 && #latch(#g(Previous), #r(Self)  <--- reset 조건 1
-    ///                 && #latch(#g(Next), #r(Self)),    <--- reset 조건 2 ...
-    ///             #r(Self))
-    type Vps(target:MuSegment, causalSourceSegments:MuSegment seq, startPort, resetPort) =
-        inherit MuSegmentBase(target.Cpu, $"VPS({target.Name})", startPort, resetPort, target.PortE)
-        private new(target, causalSourceSegments) = Vps(target, causalSourceSegments, null, null)
-        member val Target = target;
-        member val PreChildren = causalSourceSegments |> Array.ofSeq
-
-        static member Create(target:MuSegment, auto:IBit, causalSourceSegments:MuSegment seq, resetSourceSegments:MuSegment seq) =
-            let cpu = target.Cpu
-            let vps = Vps(target, causalSourceSegments)
-            let n = vps.Name
-            if isNull target.PortE then
-                target.PortE <- PortExpressionEnd.Create(cpu, target, $"epex({n})", null)
-            let resetPortExpressionPlan =
-                let vrp =
-                    [|
-                        yield auto
-                        let set =
-                            let andItems =
-                                [|
-                                    yield target.PortE :> IBit
-                                    for rsseg in resetSourceSegments do
-                                        yield Latch.Create(cpu, $"InnerResetSourceLatch({rsseg.Name})", rsseg.Going, vps.Ready)
-                                |]
-                            And(cpu, $"InnerResetSourceAnd_{n}", andItems)
-                        yield Latch.Create(cpu, $"ResetLatch({n})", set, vps.Ready)
-                    |]
-                And(cpu, $"ResetPortExpression({n})", vrp)
-
-            vps.PortR <- PortExpressionReset(cpu, vps, $"Reset_{n}", resetPortExpressionPlan, null)
-
-            vps.PortS <-
-                match auto with
-                | :? PortExpressionStart as sp -> sp
-                | _ -> PortExpressionStart(cpu, vps, $"Start_{n}", auto, null)
-
-            vps
 

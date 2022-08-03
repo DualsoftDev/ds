@@ -45,6 +45,7 @@ public abstract class PortExpressionCommand : PortExpression
     protected PortExpressionCommand(Cpu cpu, Segment segment, string name, IBit plan, Tag actual)
         : base(cpu, segment, name, plan, actual)
     {
+        Debug.Assert(plan is Or || plan is Tag);
     }
     public override bool Value => Plan.Value;
 

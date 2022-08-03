@@ -16,9 +16,9 @@ module VirtualParentTestTest =
         [<Fact>]
         member __.``Vps 생성 test`` () =
             let cpu = new MuCpu("dummy")
-            let b = MuSegment.Create(cpu, "B")
-            let g = MuSegment.Create(cpu, "G")
-            let r = MuSegment.Create(cpu, "R")
+            let b = MuSegment(cpu, "B")
+            let g = MuSegment(cpu, "G")
+            let r = MuSegment(cpu, "R")
             let auto = new Tag(cpu, null, "auto")
 
             let vpB = Vps.Create(b, auto, [g], [g; r])
@@ -32,4 +32,17 @@ module VirtualParentTestTest =
             b.PortS.Plan <- stB
             let xx1 = b.PortS.ToString()
             let xx2 = b.PortS.ToText()
+
+            b.PortS.Value === false
+            stB.Value <- true
+            wait()
+            b.PortS.Value === true
+
+            vpB.WireEvent() |> ignore
+
+
+            vpB.PortS.Value === false
+            auto.Value <- true
+            wait()
+            vpB.PortS.Value === true
             ()

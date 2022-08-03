@@ -80,15 +80,17 @@ public abstract class BitReEvaluatable : Bit, IBitReadable
         ReSubscribe();
     }
 
-    protected void ReSubscribe()
+    internal void ReSubscribe()
     {
         _subscription?.Dispose();
         _subscription =
             Global.RawBitChangedSubject
                 .Select(bc => bc.Bit)
                 .Where(bit => _monitoringBits.Contains(bit))
-                .Subscribe(ReEvaulate)
-                ;
+                .Subscribe(bit =>
+                {
+                    ReEvaulate(bit);
+                });
     }
 }
 

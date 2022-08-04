@@ -62,15 +62,19 @@ module MockUpClasses =
                     else
                         oldStatus <- newSegmentState
                         logDebug $"[{x.Name}] Segment status : {newSegmentState}"
+                        if newSegmentState <> Status4.Going then
+                            x.Going.Value <- false
+                        if newSegmentState <> Status4.Ready then
+                            x.Ready.Value <- false
 
                         match newSegmentState with
                         | Status4.Ready    ->
+                            x.Ready.Value <- true
                             ()
                         | Status4.Going    ->
                             x.Going.Value <- true
                             Thread.Sleep(100)
                             assert(x.GetSegmentStatus() = Status4.Going)
-                            x.Going.Value <- false
                             x.PortE.Value <- true
                         | Status4.Finished ->
                             x.FinishCount <- x.FinishCount + 1

@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Xml.Linq;
 
 namespace Engine.Core;
 
@@ -76,6 +77,24 @@ public static class CpuExtension
         var tagNames = string.Join("\r\n\t", cpu.BitsMap.Values.OfType<Tag>().Select(t => t.Name));
         Logger.Debug($"{cpu.Name} tags:\r\n\t{tagNames}");
     }
+
+    public static void PrintAllTags(this Cpu cpu)
+    {
+        IEnumerable<string> helper()
+        {
+            foreach (var bit in cpu.BitsMap.Values)
+            {
+                var type = bit.GetType().Name;
+                var name = bit is Named ? $" {((Named)bit).Name}" : "";
+                yield return $"[{type}]{name} = {bit}";
+            }
+        }
+        helper()
+            .OrderBy(x => x)
+            .Iter(Logger.Debug)
+            ;
+    }
+
 
 
     //public static void PrintTags(this CpuBase cpu)

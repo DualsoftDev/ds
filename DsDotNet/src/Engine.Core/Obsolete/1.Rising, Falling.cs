@@ -161,4 +161,27 @@ public abstract class PortExpressionCommand : PortExpression
 }
 
 
+public interface IBit
+{
+    void SetValueSilently(bool newValue);
+}
+
+public abstract class Bit : Named, IBit
+{
+    public virtual void SetValueSilently(bool newValue) => _value = newValue;
+    public void Apply()
+    {
+        Debug.Assert(!Applied);
+        Bit.SetValueSilently(NewValue);
+        Applied = true;
+        Publish();
+    }
+}
+public class Child, Coin, Segment, Edge
+{
+    public virtual void SetValueSilently(bool newValue) => Value = newValue;
+    public virtual void SetValueSilently(bool newValue) => Value = newValue;
+}
+
+
 #endif

@@ -2,6 +2,14 @@ namespace Engine.Core;
 
 public static class BitExtension
 {
+    public static string GetName(this IBit bit)
+    {
+        return bit switch
+        {
+            Named n => n.Name,
+            _ => bit.ToText(),
+        };
+    }
     public static string ToText(this IBit bit)
     {
         return bit switch

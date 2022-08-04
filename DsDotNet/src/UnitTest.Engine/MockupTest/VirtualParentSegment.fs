@@ -36,7 +36,7 @@ module VirtualParentSegment =
 
         static member Create(target:MuSegment, auto:IBit, (targetStartTag:IBit, targetResetTag:IBit), causalSourceSegments:MuSegment seq, resetSourceSegments:MuSegment seq) =
             let cpu = target.Cpu
-            let n = $"VPS({target.Name})"
+            let n = $"VPS_{target.Name}"
 
             let readyTag = new Tag(cpu, null, $"{n}_Ready")
 
@@ -49,12 +49,12 @@ module VirtualParentSegment =
                                 [|
                                     yield target.PortE :> IBit
                                     for rsseg in resetSourceSegments do
-                                        yield Latch.Create(cpu, $"InnerResetSourceLatch_{rsseg.Name}_{n})", rsseg.Going, readyTag)
+                                        yield Latch.Create(cpu, $"InnerResetSourceLatch_{n}_{rsseg.Name}", rsseg.Going, readyTag)
                                 |]
                             And(cpu, $"InnerResetSourceAnd_{n}", andItems)
-                        yield Latch.Create(cpu, $"ResetLatch({n})", set, readyTag)
+                        yield Latch.Create(cpu, $"ResetLatch_{n}", set, readyTag)
                     |]
-                And(cpu, $"ResetPortExpression({n})", vrp)
+                And(cpu, $"ResetPortExpression_{n}", vrp)
 
             let rp = PortExpressionReset(cpu, null, $"Reset_{n}", resetPortExpressionPlan, null)
             let sp =
@@ -109,7 +109,6 @@ module VirtualParentSegment =
                             | Status4.Going    ->
                                 let targetChildStatus = x.Target.GetSegmentStatus()
                                 x.Going.Value <- true
-                                Thread.Sleep(100)
                                 assert(x.GetSegmentStatus() = Status4.Going)
                                 //x.Going.Value <- false
                                 //x.PortE.Value <- true
@@ -118,6 +117,8 @@ module VirtualParentSegment =
                                 x.FinishCount <- x.FinishCount + 1
                                 assert(x.PortE.Value)
                             | Status4.Homing   ->
+                                assert(x.Target.GetSegmentStatus() = Status4.Finished)
+                                assert(x.Target.PortE.Value)
                                 targetResetTag.Value <- true
                                 if x.PortE.Value then
                                     x.PortE.Value <- false

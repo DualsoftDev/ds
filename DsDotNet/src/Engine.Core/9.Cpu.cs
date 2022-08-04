@@ -78,7 +78,7 @@ public static class CpuExtension
         Logger.Debug($"{cpu.Name} tags:\r\n\t{tagNames}");
     }
 
-    public static void PrintAllTags(this Cpu cpu)
+    public static void PrintAllTags(this Cpu cpu, bool expand)
     {
         IEnumerable<string> helper()
         {
@@ -86,7 +86,7 @@ public static class CpuExtension
             {
                 var type = bit.GetType().Name;
                 var name = bit is Named ? $" {((Named)bit).Name}" : "";
-                yield return $"[{type}]{name} = {bit}";
+                yield return $"[{type}]{name} = {bit.ToText(expand)}";
             }
         }
         helper()

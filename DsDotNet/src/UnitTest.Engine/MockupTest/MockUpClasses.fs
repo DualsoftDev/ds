@@ -72,10 +72,12 @@ module MockUpClasses =
                             x.Ready.Value <- true
                             ()
                         | Status4.Going    ->
+                            if (x.Name = "G") then
+                                ()
                             x.Going.Value <- true
-                            Thread.Sleep(100)
                             assert(x.GetSegmentStatus() = Status4.Going)
                             x.PortE.Value <- true
+                            assert(x.PortE.Plan.Value = true)
                         | Status4.Finished ->
                             x.FinishCount <- x.FinishCount + 1
                             assert(x.PortE.Value)

@@ -80,9 +80,11 @@ module VirtualParentTestTest =
             let vpR = Vps.Create(r, auto, (stR, rtR), [b], [g])
 
 
+            logDebug "====================="
+            cpu.PrintAllTags(false);
             logDebug "---------------------"
-            cpu.PrintAllTags();
-            logDebug "---------------------"
+            cpu.PrintAllTags(true);
+            logDebug "====================="
 
 
 

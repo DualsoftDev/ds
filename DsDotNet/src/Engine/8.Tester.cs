@@ -2,6 +2,7 @@ namespace Engine;
 
 using Engine.Runner;
 using Engine.Graph;
+using System.Diagnostics;
 
 class Tester
 {
@@ -71,7 +72,32 @@ class Tester
 
 ";
 
-        /*var text = @"
+        Debug.Assert(!Global.IsInUnitTest);
+        var engine = new EngineBuilder(text, "Cpu").Engine;
+        Program.Engine = engine;
+        engine.Run();
+
+        var opc = engine.Opc;
+
+        var resetTag = "Reset_L_F_Main";
+        if (engine.Cpu.BitsMap.ContainsKey(resetTag))
+        {
+            var children = engine.Cpu.RootFlows.SelectMany(f => f.ChildVertices);
+            var main = children.OfType<Segment>().FirstOrDefault(c => c.Name == "Main");
+            var edges = main.Edges.ToArray();
+
+            opc.Write(resetTag, true);
+            opc.Write(resetTag, false);
+            opc.Write("Start_L_F_Main", true);
+            //opc.Write(resetTag, true);
+
+            opc.Write("AutoStart_L_F_Main", true);
+        }
+    }
+
+    public static void DoSampleTest2()
+    {
+        var text = @"
 [sys] L = {
     [alias] = {
         P.F.Vp1 = {Vp11; Vp12;}
@@ -98,6 +124,9 @@ class Tester
         DD = {W.F.dd ~ W.F.dd}
         EE = {W.F.ee ~ W.F.ee}
         FF = {W.F.ff ~ W.F.ff}
+        GG = {W.F.gg ~ W.F.gg}
+        HH = {W.F.hh ~ W.F.hh}
+        II = {W.F.ii ~ W.F.ii}
     }
     [flow] F = {
         ////TC1
@@ -172,13 +201,13 @@ class Tester
         //    CP14 <| CM14;
         //}
 
-        //TC6
-        tester = {
-            T.Cp1 > T.Cm1 > T.Cm2 > W1;
-            T.Cp1 > T.Cp2 > W1;
-            T.Cp1 <||> T.Cm1;
-            T.Cp2 <||> T.Cm2;
-        }
+        ////TC6
+        //tester = {
+        //    T.Cp1 > T.Cm1 > T.Cm2 > W1;
+        //    T.Cp1 > T.Cp2 > W1;
+        //    T.Cp1 <||> T.Cm1;
+        //    T.Cp2 <||> T.Cm2;
+        //}
 
         ////TC7
         //tester = {
@@ -187,6 +216,13 @@ class Tester
         //    CP16 <| CP15 > CP17;
         //    CP18 <| CP15;
         //}
+
+        //TC8
+        tester = {
+            T.FF > T.HH;
+            T.GG, T.HH > T.II <||> T.CC;
+            T.CC > T.DD > T.EE > T.FF, T.GG;
+        }
 
         tester |> tester;
     }
@@ -213,7 +249,8 @@ class Tester
     [flow] F = {
         work |> work;
         aa; bb;
-        cc |> ee |> ff |> dd;
+        //cc |> ee |> ff |> dd;
+        cc; dd; ee; ff; gg; hh; ii;
     }
 }
 [cpus] AllCpus = {
@@ -225,34 +262,23 @@ class Tester
         W.F;
     }
 }
-";*/
+";
 
         Debug.Assert(!Global.IsInUnitTest);
         var engine = new EngineBuilder(text, "Cpu").Engine;
         Program.Engine = engine;
         engine.Run();
 
-        var opc = engine.Opc;
-
-        var resetTag = "Reset_L_F_Main";
-        if (engine.Cpu.BitsMap.ContainsKey(resetTag))
-        {
-            var children = engine.Cpu.RootFlows.SelectMany(f => f.ChildVertices);
-            var main = children.OfType<Segment>().FirstOrDefault(c => c.Name == "Main");
-            var edges = main.Edges.ToArray();
-
-            opc.Write(resetTag, true);
-            opc.Write(resetTag, false);
-            opc.Write("Start_L_F_Main", true);
-            //opc.Write(resetTag, true);
-
-            opc.Write("AutoStart_L_F_Main", true);
-        }
-
-        //var cds = engine.Cpu.RootFlows.SelectMany(f => f.ChildVertices);
-        //var m = cds.OfType<Segment>().FirstOrDefault(c => c.Name == "tester");
-        //Console.WriteLine(m.Name);
-        //GraphProgressSupportUtil.calculateThetaInProgress(m.GraphInfo);
-        //GraphProgressSupportUtil.calculateOriginState(m.GraphInfo);
+        var cds = engine.Cpu.RootFlows.SelectMany(f => f.ChildVertices);
+        var m = cds.OfType<Segment>().FirstOrDefault(c => c.Name == "tester");
+        Console.WriteLine(m.Name);
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
+        var t = new GraphProgressSupportUtil.ProgressInfo(m.GraphInfo);
+        stopwatch.Stop();
+        Console.WriteLine("time : " + stopwatch.ElapsedMilliseconds + "ms");
+        t.PrintIndexedChildren();
+        t.PrintPreCaculatedTargets();
+        t.PrintOrigin();
     }
 }

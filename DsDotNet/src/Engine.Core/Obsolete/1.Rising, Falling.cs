@@ -40,7 +40,7 @@ internal abstract class RisingFallingBase : BitReEvaluatable
 
     protected override BitChange NeedChange(IBit causeBit) => throw new Exception("ERROR");
 
-    protected override void ReEvaulate(IBit causeBit)
+    protected override void ReEvaluate(IBit causeBit)
     {
         var value = _monitoringBits[0].Value;
         if (value != _previousValue)

@@ -8,6 +8,7 @@ open Xunit.Abstractions
 open System.Threading
 open UnitTest.Engine
 open System.Reactive.Disposables
+open System
 
 [<AutoOpen>]
 module VirtualParentTestTest =
@@ -48,12 +49,29 @@ module VirtualParentTestTest =
 
             [b :> MuSegmentBase; g; r; vpB;] |> Seq.iter(fun seg -> seg.WireEvent() |> ignore)
 
+            logDebug "====================="
+            cpu.PrintAllTags(false);
+            logDebug "---------------------"
+            cpu.PrintAllTags(true);
+            logDebug "====================="
 
+            cpu.BuildBitDependencies()
+            let runSubscription = cpu.Run()
 
+            let x = cpu.ForwardDependancyMap[stB]
+            let xs = cpu.CollectForwardDependantBits(stB)|> Array.ofSeq
+            let gg = cpu.ForwardDependancyMap[g.Going]
+            let ggs = cpu.CollectForwardDependantBits(g.Going) |> Array.ofSeq
             vpB.PortS.Value === false
-            auto.Value <- true
-            stB.Value <- true
+
+            cpu.Enqueue(new BitChange(auto, true))
+            cpu.Enqueue(new BitChange(stB, true))
+            //auto.Value <- true
+            //stB.Value <- true
             wait()
+            Console.ReadLine()
+            while true do
+                Thread.Sleep(1000)
             vpB.PortS.Value === true
             ()
 
@@ -81,11 +99,11 @@ module VirtualParentTestTest =
             let vpR = Vps.Create(r, auto, (stR, rtR), [b], [g])
 
 
-            //logDebug "====================="
-            //cpu.PrintAllTags(false);
-            //logDebug "---------------------"
-            //cpu.PrintAllTags(true);
-            //logDebug "====================="
+            logDebug "====================="
+            cpu.PrintAllTags(false);
+            logDebug "---------------------"
+            cpu.PrintAllTags(true);
+            logDebug "====================="
 
 
 
@@ -107,9 +125,17 @@ module VirtualParentTestTest =
             [b :> MuSegmentBase; g; r; vpB; vpG; vpR] |> Seq.iter(fun seg -> seg.WireEvent() |> ignore)
 
 
+            cpu.BuildBitDependencies()
+            let runSubscription = cpu.Run()
+
+            cpu.Enqueue(new BitChange(auto, true))
+            cpu.Enqueue(new BitChange(stB, true))
+
             vpB.PortS.Value === false
-            auto.Value <- true
-            stB.Value <- true
+            //auto.Value <- true
+            //stB.Value <- true
+
+            Console.ReadLine()
             wait()
             vpB.PortS.Value === true
 

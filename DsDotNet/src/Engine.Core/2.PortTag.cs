@@ -46,9 +46,9 @@ public abstract class PortExpressionCommand : PortExpression
         : base(cpu, segment, name, plan, actual)
     {
     }
-    public override bool Value => Plan.Value;
+    public override bool Evaluate() => Plan.Value;
 
-    protected override void ReEvaulate(IBit causeBit)
+    protected override void ReEvaluate(IBit causeBit)
     {
         if (causeBit == Plan)
         {
@@ -100,9 +100,11 @@ public class PortExpressionEnd : PortExpression
     }
 
 
+    public override bool Evaluate() => Plan.Value && (Actual == null || Actual.Value);
+
     public override bool Value
     {
-        get => Plan.Value && (Actual == null || Actual.Value);
+        get => Evaluate();
         // PortExpressionEnd 에 한해, setter 를 허용한다.
         set
         {
@@ -128,7 +130,7 @@ public class PortExpressionEnd : PortExpression
     }
 
 
-    protected override void ReEvaulate(IBit causeBit)
+    protected override void ReEvaluate(IBit causeBit)
     {
         if (causeBit == Actual)
         {

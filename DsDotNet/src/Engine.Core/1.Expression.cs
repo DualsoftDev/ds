@@ -4,9 +4,10 @@ public abstract class Expression : BitReEvaluatable
 {
     public override bool Value
     {
-        get => throw new Exception("Should be redefined");
+        get => Evaluate();
         set => throw new Exception("ERROR");
     }
+    public override bool Evaluate() => throw new Exception("Should be redefined");
 
     protected Expression(Cpu cpu, string name, params IBit[] monitoringBits)
         : base(cpu, name, monitoringBits)
@@ -15,7 +16,8 @@ public abstract class Expression : BitReEvaluatable
         _value = this.Value;
     }
 
-    protected override void ReEvaulate(IBit causeBit)
+
+    protected override void ReEvaluate(IBit causeBit)
     {
         var newValue = Value;
         if (_value != newValue)
@@ -29,7 +31,7 @@ public abstract class Expression : BitReEvaluatable
 }
 public class And : Expression
 {
-    public override bool Value => _monitoringBits.All(b => b.Value);
+    public override bool Evaluate() => _monitoringBits.All(b => b.Value);
     public And(Cpu cpu, string name, params IBit[] bits)
         : base(cpu, name, bits)
     {
@@ -37,7 +39,7 @@ public class And : Expression
 }
 public class Or : Expression
 {
-    public override bool Value => _monitoringBits.Any(b => b.Value);
+    public override bool Evaluate() => _monitoringBits.Any(b => b.Value);
     public Or(Cpu cpu, string name, params IBit[] bits)
         : base(cpu, name, bits)
     {
@@ -46,7 +48,8 @@ public class Or : Expression
 
 public class Not : Expression
 {
-    public override bool Value => !_monitoringBits[0].Value;
+    public override bool Evaluate() => !_monitoringBits[0].Value;
+
     public IBit Bit;
     public Not(Cpu cpu, string name, IBit bit)
         : base(cpu, name, bit)

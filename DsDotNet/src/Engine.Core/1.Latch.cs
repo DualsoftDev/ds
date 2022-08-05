@@ -12,7 +12,7 @@ public class Latch : BitReEvaluatable
         Debug.Assert(setCondition != null && resetCondition != null);
         _setCondition = setCondition;
         _resetCondition = resetCondition;
-        ReEvaulate(null);
+        ReEvaluate(null);
     }
 
     public static Latch Create(Cpu cpu, string name, IBit setCondition, IBit resetCondition)
@@ -27,7 +27,7 @@ public class Latch : BitReEvaluatable
         return new Latch(cpu, name, setCondition, resetCondition);
     }
 
-    bool EvaluateGetValue()
+    public override bool Evaluate()
     {
         return (_setCondition.Value, _resetCondition.Value) switch
         {
@@ -36,9 +36,9 @@ public class Latch : BitReEvaluatable
             (_, true) => false,
         };
     }
-    protected override void ReEvaulate(IBit causeBit)
+    protected override void ReEvaluate(IBit causeBit)
     {
-        var value = EvaluateGetValue();
+        var value = Evaluate();
         if (_value != value)
         {
             _value = value;

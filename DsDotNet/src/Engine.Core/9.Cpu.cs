@@ -1,4 +1,6 @@
 using System.Collections.Concurrent;
+using System.Drawing;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 
 namespace Engine.Core;
@@ -157,4 +159,101 @@ public static class CpuExtensionBitChange
             }
         }
     }
+
+
+    public static void BuildBitDependencies(this Cpu cpu)
+    {
+        Debug.Assert(cpu.ForwardDependancyMap.IsNullOrEmpty());
+        Debug.Assert(cpu.BackwardDependancyMap is null);
+
+        cpu.BackwardDependancyMap = new();
+        var grp = cpu.BitsMap.Values.GroupByToDictionary(b => b is BitReEvaluatable);
+        var stems = grp[true].Cast<BitReEvaluatable>();
+        var terminals = grp[false];
+
+        var bwd = cpu.BackwardDependancyMap;
+        var fwd = cpu.ForwardDependancyMap;
+
+        foreach (var stem in stems)
+        {
+            if (stem is PortExpressionStart)
+                Console.WriteLine();
+            foreach (var b in stem._monitoringBits.Where(b => b!=null))
+            {
+                if (!fwd.ContainsKey(b))
+                    fwd[b] = new HashSet<IBit>();
+
+                fwd[b].Add(stem);
+
+                if (!bwd.ContainsKey(stem))
+                    bwd[stem] = new HashSet<IBit>();
+
+                bwd[stem].Add(b);
+            }
+        }
+    }
+
+    public static IEnumerable<IBit> CollectForwardDependantBits(this Cpu cpu, IBit source)
+    {
+        var fwd = cpu.ForwardDependancyMap;
+        if (!fwd.ContainsKey(source))
+            yield break;
+
+        foreach (var dep in cpu.ForwardDependancyMap[source])
+        {
+            yield return dep;
+            foreach (var v in cpu.CollectForwardDependantBits(dep))
+                yield return v;
+        }
+    }
+
+    public static IDisposable Run(this Cpu cpu)
+    {
+        var disposable = new CancellationDisposable();
+        Task.Run(async () =>
+        {
+            while (!disposable.IsDisposed)
+            {
+                var q = cpu.Queue;
+                var fwd = cpu.ForwardDependancyMap;
+                while (q.Count > 0)
+                {
+                    if (q.TryDequeue(out BitChange bitChange))
+                    {
+                        Debug.Assert(!bitChange.Applied);
+                        var bit = (Bit)bitChange.Bit;
+                        if (fwd.ContainsKey(bit))
+                        {
+                            var dependents = fwd[bit].Cast<BitReEvaluatable>();
+                            var prevValues = dependents.ToDictionary(dep => dep, dep => dep.Value);
+
+                            // 실제 변경 적용
+                            Global.Logger.Debug($"Processing bitChnage {bitChange}");
+                            bit.SetValueOnly(bitChange.NewValue);
+
+                            // 변경으로 인한 파생 변경 enqueue
+                            var changes =
+                                from dep in dependents
+                                let newValue = dep.Evaluate()
+                                where newValue != prevValues[dep]
+                                select (new BitChange(dep, newValue, false))
+                                ;
+
+                            changes.Iter(bc => q.Enqueue(bc));
+                        }
+                        else
+                        {
+                            Global.Logger.Warn($"Failed to find dependency for {bit.GetName()}");
+                            Global.RawBitChangedSubject.OnNext(bitChange);
+                        }
+                    }
+                }
+                await Task.Delay(50);
+            }
+        });
+        return disposable;
+    }
+
+    public static void Enqueue(this Cpu cpu, BitChange bc) => cpu.Queue.Enqueue(bc);
+
 }

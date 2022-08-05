@@ -17,9 +17,10 @@ public abstract class Bit : Named, IBit
                 _value = value;
                 BitChange.Publish(this, value, true);
             }
-
         }
     }
+
+    internal void SetValueOnly(bool newValue) => _value = newValue;
 
     public Cpu Cpu { get; set; }
     public Bit(Cpu cpu, string name, bool bit = false) : base(name)
@@ -68,7 +69,8 @@ public abstract class Bit : Named, IBit
 public abstract class BitReEvaluatable : Bit, IBitReadable
 {
     internal IBit[] _monitoringBits;
-    protected abstract void ReEvaulate(IBit causeBit);
+    protected abstract void ReEvaluate(IBit causeBit);
+    public abstract bool Evaluate();
     public override bool Value { set => throw new DsException("Not Supported."); }
     IDisposable _subscription;
     protected BitReEvaluatable(Cpu cpu, string name, params IBit[] monitoringBits)
@@ -89,7 +91,7 @@ public abstract class BitReEvaluatable : Bit, IBitReadable
                 .Where(bit => _monitoringBits.Contains(bit))
                 .Subscribe(bit =>
                 {
-                    ReEvaulate(bit);
+                    ReEvaluate(bit);
                 });
     }
 }

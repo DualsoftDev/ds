@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Drawing;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
@@ -210,7 +211,7 @@ public static class CpuExtensionBitChange
     public static IDisposable Run(this Cpu cpu)
     {
         var disposable = new CancellationDisposable();
-        Task.Run(async () =>
+        new Thread(async () =>
         {
             while (!disposable.IsDisposed)
             {
@@ -224,12 +225,13 @@ public static class CpuExtensionBitChange
                         var bit = (Bit)bitChange.Bit;
                         if (fwd.ContainsKey(bit))
                         {
-                            var dependents = fwd[bit].Cast<BitReEvaluatable>();
+                            //var dependents = fwd[bit].Cast<BitReEvaluatable>();
+                            var dependents = cpu.CollectForwardDependantBits(bit).Cast<BitReEvaluatable>();
                             var prevValues = dependents.ToDictionary(dep => dep, dep => dep.Value);
 
                             // 실제 변경 적용
-                            Global.Logger.Debug($"Processing bitChnage {bitChange}");
-                            bit.SetValueOnly(bitChange.NewValue);
+                            Global.Logger.Debug($"= Processing bitChnage {bitChange}");
+                            Apply(bitChange);
 
                             // 변경으로 인한 파생 변경 enqueue
                             var changes =
@@ -238,22 +240,50 @@ public static class CpuExtensionBitChange
                                 where newValue != prevValues[dep]
                                 select (new BitChange(dep, newValue, false))
                                 ;
+                            var chgrp = changes.GroupByToDictionary(ch => ch.Bit is PortExpression);
+                            if (chgrp.ContainsKey(false))
+                            {
+                                var nonPorts = chgrp[false];
+                                foreach(var bc in nonPorts)
+                                    Apply(bc);
+                            }
+                            if (chgrp.ContainsKey(true))
+                            {
+                                var ports = chgrp[true];
+                                foreach (var bc in ports)
+                                    q.Enqueue(bc);
+                            }
 
-                            changes.Iter(bc => q.Enqueue(bc));
                         }
                         else
                         {
-                            Global.Logger.Warn($"Failed to find dependency for {bit.GetName()}");
-                            Global.RawBitChangedSubject.OnNext(bitChange);
+                            //Global.Logger.Warn($"Failed to find dependency for {bit.GetName()}");
+                            Apply(bitChange);
                         }
                     }
+                    else
+                    {
+                        Global.Logger.Warn($"Failed to deque.");
+                    }
                 }
-                await Task.Delay(50);
+                await Task.Delay(100);
             }
-        });
+        }).Start()
+        ;
         return disposable;
+
+
+        void Apply(BitChange bitChange)
+        {
+            Debug.Assert(!bitChange.Applied);
+            Global.Logger.Debug($"\t= Applying bitchange {bitChange}");
+            ((Bit)bitChange.Bit).SetValueOnly(bitChange.NewValue);
+            bitChange.Applied = true;
+            Global.RawBitChangedSubject.OnNext(bitChange);
+        }
     }
 
     public static void Enqueue(this Cpu cpu, BitChange bc) => cpu.Queue.Enqueue(bc);
+    public static void Enqueue(this Cpu cpu, IBit bit, bool newValue) => Enqueue(cpu, new BitChange(bit, newValue, false));
 
 }

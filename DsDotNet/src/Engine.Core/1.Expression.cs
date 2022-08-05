@@ -17,15 +17,15 @@ public abstract class Expression : BitReEvaluatable
     }
 
 
-    protected override void ReEvaluate(IBit causeBit)
-    {
-        var newValue = Value;
-        if (_value != newValue)
-        {
-            _value = newValue;
-            BitChange.Publish(this, newValue, true, causeBit);
-        }
-    }
+    //protected override void ReEvaluate(IBit causeBit)
+    //{
+    //    var newValue = Value;
+    //    if (_value != newValue)
+    //    {
+    //        _value = newValue;
+    //        BitChange.Publish(this, newValue, true, causeBit);
+    //    }
+    //}
 
     public override string ToString() => BitExtension.ToText(this);
 }

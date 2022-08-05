@@ -35,6 +35,7 @@ public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, IWithSREPorts
     public VertexAndOutgoingEdges[] TraverseOrder { get; internal set; }
     internal Dictionary<Coin, Child> CoinChildMap { get; set; }
     public bool Value { get => PortE.Value; set => throw new NotImplementedException(); }
+    public virtual bool Evaluate() => Value;
 
     internal CancellationTokenSource MovingCancellationTokenSource { get; set; }
 

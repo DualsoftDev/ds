@@ -82,9 +82,9 @@ module VirtualParentSegment =
 
                     if notiTargetFinish then
                         logDebug $"VPS[{x.Name}] - Turning off child reset port{x.Target.Name}.."
-                        targetResetTag.Value <- false
-                        x.PortE.Value <- true
-                        x.Going.Value <- false
+                        cpu.Enqueue(targetResetTag, false)
+                        cpu.Enqueue(x.PortE, true)
+                        cpu.Enqueue(x.Going, false)
 
                     elif notiPrevChildFinish then
                         let allPrevChildrenFinished = prevChildrenEndPorts.All(fun ep -> ep.Value)
@@ -95,7 +95,7 @@ module VirtualParentSegment =
                         match allPrevChildrenFinished, vpsStatus, targetChildStatus with
                         | true, Status4.Going, Status4.Ready -> // 사전 조건 완료, target child 수행
                             logDebug $"VPS[{x.Name}] - Executing child.."
-                            targetStartTag.Value <- true
+                            cpu.Enqueue(targetStartTag, true)
                         | _ ->
                             ()
 
@@ -112,21 +112,21 @@ module VirtualParentSegment =
                                 ()
                             | Status4.Going    ->
                                 let targetChildStatus = x.Target.GetSegmentStatus()
-                                //x.Going.Value <- true
+                                cpu.Enqueue(x.Going, true)
                                 //assert(x.GetSegmentStatus() = Status4.Going)
-                                ////x.PortE.Value <- true
-                                ////x.Going.Value <- false
+                                //cpu.Enqueue(x.PortE, true)
+                                //cpu.Enqueue(x.Going, false)
                                 ()
                             | Status4.Finished ->
-                                targetStartTag.Value <- false
+                                cpu.Enqueue(targetStartTag, false)
                                 x.FinishCount <- x.FinishCount + 1
                                 assert(x.PortE.Value)
                             | Status4.Homing   ->
                                 assert(x.Target.GetSegmentStatus() = Status4.Finished)
                                 assert(x.Target.PortE.Value)
-                                targetResetTag.Value <- true
+                                cpu.Enqueue(targetResetTag, true)
                                 if x.PortE.Value then
-                                    x.PortE.Value <- false
+                                    cpu.Enqueue(x.PortE, false)
                                     assert(not x.PortE.Value)
                                 else
                                     logDebug $"\tSkipping [{x.Name}] Segment status : {newSegmentState} : already homing by bit change {bc.Bit.GetName()}={bc.NewValue}"

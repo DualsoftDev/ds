@@ -38,7 +38,7 @@ module VirtualParentTestTest =
                     .Subscribe(fun bc ->
                         if bc.Bit = b.PortE (*&& b.PortE.Value *)then
                             logDebug "Turning off 최초 시작 trigger"
-                            stB.Value <- false
+                            cpu.Enqueue(stB, false)
                             subscription.Dispose())
 
             Global.BitChangedSubject
@@ -56,6 +56,12 @@ module VirtualParentTestTest =
             logDebug "====================="
 
             cpu.BuildBitDependencies()
+
+            let rpexB = vpB.PortR
+            let rpexBAnd = rpexB.Plan :?> And       // auto & Latch
+            let rpexBAndLatch = rpexBAnd._monitoringBits[1]
+            cpu.CollectForwardDependantBits(vpB.PortE).Contains(rpexBAndLatch) === true
+
             let runSubscription = cpu.Run()
 
             let x = cpu.ForwardDependancyMap[stB]
@@ -113,7 +119,7 @@ module VirtualParentTestTest =
                     .Subscribe(fun bc ->
                         if bc.Bit = b.PortE (*&& b.PortE.Value *)then
                             logDebug "Turning off 최초 시작 trigger"
-                            stB.Value <- false
+                            cpu.Enqueue(stB, false)
                             subscription.Dispose())
 
             Global.BitChangedSubject

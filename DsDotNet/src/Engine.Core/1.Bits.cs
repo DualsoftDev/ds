@@ -19,8 +19,13 @@ public abstract class Bit : Named, IBit
             }
         }
     }
+    public virtual bool Evaluate() => Value;
 
-    internal void SetValueOnly(bool newValue) => _value = newValue;
+    internal virtual void SetValueOnly(bool newValue)
+    {
+        Debug.Assert(_value != newValue);
+        _value = newValue;
+    }
 
     public Cpu Cpu { get; set; }
     public Bit(Cpu cpu, string name, bool bit = false) : base(name)
@@ -69,7 +74,7 @@ public abstract class Bit : Named, IBit
 public abstract class BitReEvaluatable : Bit, IBitReadable
 {
     internal IBit[] _monitoringBits;
-    protected abstract void ReEvaluate(IBit causeBit);
+    //protected abstract void ReEvaluate(IBit causeBit);
     public abstract bool Evaluate();
     public override bool Value { set => throw new DsException("Not Supported."); }
     IDisposable _subscription;
@@ -79,21 +84,21 @@ public abstract class BitReEvaluatable : Bit, IBitReadable
         // PortExpression 의 경우, plan 대비 actual 에 null 을 허용
         _monitoringBits = monitoringBits.Where(b => b is not null).ToArray();
 
-        ReSubscribe();
+        //ReSubscribe();
     }
 
-    internal void ReSubscribe()
-    {
-        _subscription?.Dispose();
-        _subscription =
-            Global.RawBitChangedSubject
-                .Select(bc => bc.Bit)
-                .Where(bit => _monitoringBits.Contains(bit))
-                .Subscribe(bit =>
-                {
-                    ReEvaluate(bit);
-                });
-    }
+    //internal void ReSubscribe()
+    //{
+    //    _subscription?.Dispose();
+    //    _subscription =
+    //        Global.RawBitChangedSubject
+    //            .Select(bc => bc.Bit)
+    //            .Where(bit => _monitoringBits.Contains(bit))
+    //            .Subscribe(bit =>
+    //            {
+    //                ReEvaluate(bit);
+    //            });
+    //}
 }
 
 
@@ -174,6 +179,8 @@ public class BitChange
     }
     public void Publish()
     {
+        Debug.Assert(false);
+
         if (Global.IsSupportParallel && Bit is PortExpressionEnd)
         {
             //! 현재값 publish 를 threading 으로 처리...

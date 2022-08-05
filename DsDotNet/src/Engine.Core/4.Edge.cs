@@ -37,6 +37,7 @@ public partial class Edge
 
     public bool IsSourcesTrue => SourceTags.All(t => t.Value);
     public virtual bool Value { get; set; }
+    public virtual bool Evaluate() => Value;
 
     public Cpu Cpu { get => ContainerFlow.Cpu; set => throw new NotImplementedException(); }
 

@@ -5,6 +5,7 @@ namespace Engine.Core;
 public abstract class Coin : Named, ICoin
 {
     public virtual bool Value { get; set; }
+    public virtual bool Evaluate() => Value;
 
     /*
      * Do not store Paused property (getter only, no setter)

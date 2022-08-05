@@ -62,26 +62,26 @@ module MockUpClasses =
                     else
                         oldStatus <- newSegmentState
                         logDebug $"[{x.Name}] Segment status : {newSegmentState}"
-                        if newSegmentState <> Status4.Going then
-                            x.Going.Value <- false
-                        if newSegmentState <> Status4.Ready then
-                            x.Ready.Value <- false
+                        if x.Going.Value && newSegmentState <> Status4.Going then
+                            cpu.Enqueue(x.Going, false)
+                        if x.Ready.Value && newSegmentState <> Status4.Ready then
+                            cpu.Enqueue(x.Ready, false)
 
                         match newSegmentState with
                         | Status4.Ready    ->
-                            x.Ready.Value <- true
+                            cpu.Enqueue(x.Ready, true)
                             ()
                         | Status4.Going    ->
-                            if (x.Name = "G") then
+                            if (x.Name = "B") then
                                 ()
-                            x.Going.Value <- true
-                            x.PortE.Value <- true
-                            x.Going.Value <- false  //! 순서 민감
+                            cpu.Enqueue(x.Going, true)
+                            cpu.Enqueue(x.PortE, true)
+                            cpu.Enqueue(x.Going, false)   //! 순서 민감
                         | Status4.Finished ->
                             x.FinishCount <- x.FinishCount + 1
                         | Status4.Homing   ->
                             if x.PortE.Value then
-                                x.PortE.Value <- false
+                                cpu.Enqueue(x.PortE, false)
                             else
                                 logDebug $"\tSkipping [{x.Name}] Segment status : {newSegmentState} : already homing by bit change {bc.Bit.GetName()}={bc.NewValue}"
                                 ()

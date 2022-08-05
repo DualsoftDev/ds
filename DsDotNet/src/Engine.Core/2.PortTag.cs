@@ -23,7 +23,7 @@ public abstract class PortExpression : BitReEvaluatable
         set {
             _plan = value;
             _monitoringBits = new[] { _plan, _actual };
-            ReSubscribe();
+            //ReSubscribe();
         }
     }
     /// <summary> Allow null </summary>
@@ -33,7 +33,7 @@ public abstract class PortExpression : BitReEvaluatable
         {
             _actual = value;
             _monitoringBits = new[] { _plan, _actual };
-            ReSubscribe();
+            //ReSubscribe();
         }
     }
 }
@@ -48,17 +48,17 @@ public abstract class PortExpressionCommand : PortExpression
     }
     public override bool Evaluate() => Plan.Value;
 
-    protected override void ReEvaluate(IBit causeBit)
-    {
-        if (causeBit == Plan)
-        {
-            var val = causeBit.Value;
-            if (Actual != null)
-                Actual.Value = val;
-            Debug.Assert(Plan.Value == val);
-            BitChange.Publish(this, val, true, causeBit);
-        }
-    }
+    //protected override void ReEvaluate(IBit causeBit)
+    //{
+    //    if (causeBit == Plan)
+    //    {
+    //        var val = causeBit.Value;
+    //        if (Actual != null)
+    //            Actual.Value = val;
+    //        Debug.Assert(Plan.Value == val);
+    //        BitChange.Publish(this, val, true, causeBit);
+    //    }
+    //}
 }
 /// <summary> Start 명령용 정보(Plan) + 물리(Actual) </summary>
 public class PortExpressionStart : PortExpressionCommand
@@ -130,15 +130,15 @@ public class PortExpressionEnd : PortExpression
     }
 
 
-    protected override void ReEvaluate(IBit causeBit)
-    {
-        if (causeBit == Actual)
-        {
-            var val = Actual.Value;
-            if (Actual != null && Plan.Value != val)
-                throw new DsException($"Spatial Error: Plan[{causeBit}={val}] <> Actual[{Actual.Value}]");
-            Debug.Assert(this.Value == val);
-            BitChange.Publish(this, val, true, causeBit);
-        }
-    }
+    //protected override void ReEvaluate(IBit causeBit)
+    //{
+    //    if (causeBit == Actual)
+    //    {
+    //        var val = Actual.Value;
+    //        if (Actual != null && Plan.Value != val)
+    //            throw new DsException($"Spatial Error: Plan[{causeBit}={val}] <> Actual[{Actual.Value}]");
+    //        Debug.Assert(this.Value == val);
+    //        BitChange.Publish(this, val, true, causeBit);
+    //    }
+    //}
 }

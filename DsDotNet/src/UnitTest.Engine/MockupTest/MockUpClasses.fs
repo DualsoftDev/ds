@@ -75,21 +75,22 @@ module MockUpClasses =
                             if (x.Name = "G") then
                                 ()
                             x.Going.Value <- true
-                            assert(x.GetSegmentStatus() = Status4.Going)
+                            assert(x.GetSegmentStatus() = Status4.Going || Global.IsSupportParallel)
                             x.PortE.Value <- true
-                            assert(x.PortE.Plan.Value = true)
+                            x.Going.Value <- false  //! ¼ø¼­ ¹Î°¨
+                            assert(x.PortE.Plan.Value = true || Global.IsSupportParallel)
                         | Status4.Finished ->
                             x.FinishCount <- x.FinishCount + 1
-                            assert(x.PortE.Value)
+                            assert(x.PortE.Value || Global.IsSupportParallel)
                         | Status4.Homing   ->
                             if x.PortE.Value then
                                 x.PortE.Value <- false
-                                assert(not x.PortE.Value)
+                                assert(not x.PortE.Value || Global.IsSupportParallel)
                             else
                                 logDebug $"\tSkipping [{x.Name}] Segment status : {newSegmentState} : already homing by bit change {bc.Bit}={bc.NewValue}"
                                 ()
 
-                            assert(not x.PortE.Value)
+                            assert(not x.PortE.Value || Global.IsSupportParallel)
 
                         | _ ->
                             failwith "Unexpected"

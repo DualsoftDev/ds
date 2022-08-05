@@ -72,15 +72,19 @@ module VirtualParentSegment =
             Global.BitChangedSubject
                 .Subscribe(fun bc ->
                     let bit = bc.Bit :?> Bit
+                    let on = bc.Bit.Value
                     let notiPrevChildFinish =
-                        bc.Bit :? PortExpressionEnd
+                        on
+                            && bc.Bit :? PortExpressionEnd
                             && prevChildrenEndPorts |> Seq.contains(bc.Bit :?> PortExpressionEnd)
                     let notiVpsPortChange = [x.PortS :> IBit; x.PortR; x.PortE] |> Seq.contains(bc.Bit)
-                    let notiTargetFinish = bc.Bit = x.Target.PortE
+                    let notiTargetFinish = on && bc.Bit = x.Target.PortE
 
                     if notiTargetFinish then
                         logDebug $"VPS[{x.Name}] - Turning off child reset port{x.Target.Name}.."
                         targetResetTag.Value <- false
+                        x.PortE.Value <- true
+                        x.Going.Value <- false
 
                     elif notiPrevChildFinish then
                         let allPrevChildrenFinished = prevChildrenEndPorts.All(fun ep -> ep.Value)
@@ -108,10 +112,11 @@ module VirtualParentSegment =
                                 ()
                             | Status4.Going    ->
                                 let targetChildStatus = x.Target.GetSegmentStatus()
-                                x.Going.Value <- true
-                                assert(x.GetSegmentStatus() = Status4.Going)
-                                //x.Going.Value <- false
-                                //x.PortE.Value <- true
+                                //x.Going.Value <- true
+                                //assert(x.GetSegmentStatus() = Status4.Going)
+                                ////x.PortE.Value <- true
+                                ////x.Going.Value <- false
+                                ()
                             | Status4.Finished ->
                                 targetStartTag.Value <- false
                                 x.FinishCount <- x.FinishCount + 1
@@ -124,7 +129,7 @@ module VirtualParentSegment =
                                     x.PortE.Value <- false
                                     assert(not x.PortE.Value)
                                 else
-                                    logDebug $"\tSkipping [{x.Name}] Segment status : {newSegmentState} : already homing by bit change {bc.Bit}={bc.NewValue}"
+                                    logDebug $"\tSkipping [{x.Name}] Segment status : {newSegmentState} : already homing by bit change {bc.Bit.GetName()}={bc.NewValue}"
                                     ()
 
                                 assert(not x.PortE.Value)

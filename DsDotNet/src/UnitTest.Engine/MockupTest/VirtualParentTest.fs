@@ -72,7 +72,8 @@ module VirtualParentTestTest =
 
             let auto = new Tag(cpu, null, "auto")
 
-            let vpB = Vps.Create(b, auto, (stB, rtB), [g], [g; r])
+            //let vpB = Vps.Create(b, auto, (stB, rtB), [g], [g; r])
+            let vpB = Vps.Create(b, auto, (stB, rtB), [g], [r])
             logDebug $"B Start:{vpB.PortS.ToText()}";
             logDebug $"B Reset:{vpB.PortR.ToText()}";
             logDebug $"B End:{vpB.PortE.ToText()}";
@@ -80,11 +81,11 @@ module VirtualParentTestTest =
             let vpR = Vps.Create(r, auto, (stR, rtR), [b], [g])
 
 
-            logDebug "====================="
-            cpu.PrintAllTags(false);
-            logDebug "---------------------"
-            cpu.PrintAllTags(true);
-            logDebug "====================="
+            //logDebug "====================="
+            //cpu.PrintAllTags(false);
+            //logDebug "---------------------"
+            //cpu.PrintAllTags(true);
+            //logDebug "====================="
 
 
 
@@ -93,6 +94,7 @@ module VirtualParentTestTest =
                 Global.BitChangedSubject
                     .Subscribe(fun bc ->
                         if bc.Bit = b.PortE (*&& b.PortE.Value *)then
+                            logDebug "Turning off 최초 시작 trigger"
                             stB.Value <- false
                             subscription.Dispose())
 
@@ -103,7 +105,6 @@ module VirtualParentTestTest =
                     logDebug $"\tBit changed: [{bit.GetName()}] = {bc.NewValue}{cause}") |> ignore
 
             [b :> MuSegmentBase; g; r; vpB; vpG; vpR] |> Seq.iter(fun seg -> seg.WireEvent() |> ignore)
-
 
 
             vpB.PortS.Value === false

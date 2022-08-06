@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
@@ -211,55 +212,20 @@ public static class CpuExtensionBitChange
     public static IDisposable Run(this Cpu cpu)
     {
         var disposable = new CancellationDisposable();
+        var q = cpu.Queue;
+        var fwd = cpu.ForwardDependancyMap;
+        var indent = 0;
         new Thread(async () =>
         {
             while (!disposable.IsDisposed)
             {
-                var q = cpu.Queue;
-                var fwd = cpu.ForwardDependancyMap;
                 while (q.Count > 0)
                 {
                     if (q.TryDequeue(out BitChange bitChange))
                     {
                         Debug.Assert(!bitChange.Applied);
-                        var bit = (Bit)bitChange.Bit;
-                        if (fwd.ContainsKey(bit))
-                        {
-                            //var dependents = fwd[bit].Cast<BitReEvaluatable>();
-                            var dependents = cpu.CollectForwardDependantBits(bit).Cast<BitReEvaluatable>();
-                            var prevValues = dependents.ToDictionary(dep => dep, dep => dep.Value);
-
-                            // 실제 변경 적용
-                            Global.Logger.Debug($"= Processing bitChnage {bitChange}");
-                            Apply(bitChange);
-
-                            // 변경으로 인한 파생 변경 enqueue
-                            var changes =
-                                from dep in dependents
-                                let newValue = dep.Evaluate()
-                                where newValue != prevValues[dep]
-                                select (new BitChange(dep, newValue, false))
-                                ;
-                            var chgrp = changes.GroupByToDictionary(ch => ch.Bit is PortExpression);
-                            if (chgrp.ContainsKey(false))
-                            {
-                                var nonPorts = chgrp[false];
-                                foreach(var bc in nonPorts)
-                                    Apply(bc);
-                            }
-                            if (chgrp.ContainsKey(true))
-                            {
-                                var ports = chgrp[true];
-                                foreach (var bc in ports)
-                                    q.Enqueue(bc);
-                            }
-
-                        }
-                        else
-                        {
-                            //Global.Logger.Warn($"Failed to find dependency for {bit.GetName()}");
-                            Apply(bitChange);
-                        }
+                        Global.Logger.Debug($"= Processing bitChnage {bitChange}");
+                        Apply(bitChange);
                     }
                     else
                     {
@@ -273,17 +239,78 @@ public static class CpuExtensionBitChange
         return disposable;
 
 
-        void Apply(BitChange bitChange)
+        bool DoApply(BitChange bitChange)
         {
             Debug.Assert(!bitChange.Applied);
-            Global.Logger.Debug($"\t= Applying bitchange {bitChange}");
-            ((Bit)bitChange.Bit).SetValueOnly(bitChange.NewValue);
-            bitChange.Applied = true;
-            Global.RawBitChangedSubject.OnNext(bitChange);
+            var bit = (Bit)bitChange.Bit;
+            if (bit is PortExpressionReset)
+                Console.WriteLine();
+
+            //if (bit.Value == bitChange.NewValue)
+            //{
+            //    Global.Logger.Debug($"\t=({indent}) Skipping already same bitchange {bitChange}");
+            //    return bit is BitReEvaluatable;
+            //}
+            //else
+            {
+                Global.Logger.Debug($"\t=({indent}) Applying bitchange {bitChange}");
+                bit.SetValueOnly(bitChange.NewValue);
+                bitChange.Applied = true;
+                Global.RawBitChangedSubject.OnNext(bitChange);
+                return true;
+            }
         }
+
+        void Apply(BitChange bitChange)
+        {
+            indent++;
+            var bit = (Bit)bitChange.Bit;
+            if (fwd.ContainsKey(bit))
+            {
+                //var dependents = fwd[bit].Cast<BitReEvaluatable>();
+                var dependents = cpu.ForwardDependancyMap[bit].Cast<BitReEvaluatable>();
+                var prevValues = dependents.ToDictionary(dep => dep, dep => dep.Value);
+
+                // 실제 변경 적용
+                if (DoApply(bitChange))
+                {
+                    // 변경으로 인한 파생 변경 enqueue
+                    var changes =
+                        from dep in dependents
+                        let newValue = dep.Evaluate()
+                        where newValue != prevValues[dep]
+                        select (new BitChange(dep, newValue, false))
+                        ;
+                    var chgrp = changes.GroupByToDictionary(ch => ch.Bit is PortExpression);
+                    if (chgrp.ContainsKey(false))
+                    {
+                        var nonPorts = chgrp[false];
+                        foreach (var bc in nonPorts)
+                            Apply(bc);
+                    }
+                    if (chgrp.ContainsKey(true))
+                    {
+                        var ports = chgrp[true];
+                        foreach (var bc in ports)
+                            q.Enqueue(bc);
+                    }
+                }
+            }
+            else
+            {
+                //Global.Logger.Warn($"Failed to find dependency for {bit.GetName()}");
+                DoApply(bitChange);
+            }
+            indent--;
+        }
+
     }
 
-    public static void Enqueue(this Cpu cpu, BitChange bc) => cpu.Queue.Enqueue(bc);
+    public static void Enqueue(this Cpu cpu, BitChange bc)
+    {
+        //Debug.Assert(bc.Bit.Value != bc.NewValue);
+        cpu.Queue.Enqueue(bc);
+    }
     public static void Enqueue(this Cpu cpu, IBit bit, bool newValue) => Enqueue(cpu, new BitChange(bit, newValue, false));
 
 }

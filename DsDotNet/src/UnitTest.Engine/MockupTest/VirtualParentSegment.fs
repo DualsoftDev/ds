@@ -127,12 +127,12 @@ module VirtualParentSegment =
                                 cpu.Enqueue(targetResetTag, true)
                                 if x.PortE.Value then
                                     cpu.Enqueue(x.PortE, false)
-                                    assert(not x.PortE.Value)
+                                    //assert(not x.PortE.Value)
                                 else
                                     logDebug $"\tSkipping [{x.Name}] Segment status : {newSegmentState} : already homing by bit change {bc.Bit.GetName()}={bc.NewValue}"
                                     ()
 
-                                assert(not x.PortE.Value)
+                                //assert(not x.PortE.Value)
 
                             | _ ->
                                 failwith "Unexpected"

@@ -62,6 +62,11 @@ module VirtualParentTestTest =
             let rpexBAndLatch = rpexBAnd._monitoringBits[1]
             cpu.CollectForwardDependantBits(vpB.PortE).Contains(rpexBAndLatch) === true
 
+            let xxx = cpu.BitsMap["epexB_default"]
+            cpu.BitsMap["rt_default_B"] === rtB
+            let rpB = b.PortR
+            cpu.CollectForwardDependantBits(rtB).Contains(rpB) === true
+
             let runSubscription = cpu.Run()
 
             let x = cpu.ForwardDependancyMap[stB]

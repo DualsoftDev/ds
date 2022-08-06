@@ -4,7 +4,11 @@ public abstract class Expression : BitReEvaluatable
 {
     public override bool Value
     {
-        get => Evaluate();
+        get
+        {
+            _value = Evaluate();
+            return _value;
+        }
         set => throw new Exception("ERROR");
     }
     public override bool Evaluate() => throw new Exception("Should be redefined");
@@ -13,7 +17,7 @@ public abstract class Expression : BitReEvaluatable
         : base(cpu, name, monitoringBits)
     {
         // override 된 Value 를 생성자에서 호출 가능함.
-        _value = this.Value;
+        _value = Evaluate();
     }
 
 

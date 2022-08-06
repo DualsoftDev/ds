@@ -23,7 +23,7 @@ public abstract class Bit : Named, IBit
 
     internal virtual void SetValueOnly(bool newValue)
     {
-        Debug.Assert(_value != newValue);
+        //Debug.Assert(_value != newValue);
         _value = newValue;
     }
 
@@ -197,7 +197,7 @@ public class BitChange
             Global.RawBitChangedSubject.OnNext(this);
     }
 
-    public override string ToString() => $"{Bit}={NewValue}";
+    public override string ToString() => $"{Bit.GetName()}={Bit}={NewValue}";
 }
 
 public record OpcTagChange

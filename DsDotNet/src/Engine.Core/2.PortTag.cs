@@ -128,6 +128,12 @@ public class PortExpressionEnd : PortExpression
             throw new DsException($"Spatial Error: Plan[{Plan}={newPlanValue}] <> Actual[{Actual.Value}]");
 
     }
+    internal override void SetValueOnly(bool newValue)
+    {
+        //Debug.Assert(_value != newValue);
+        ((Bit)Plan).SetValueOnly(newValue);
+        _value = newValue;
+    }
 
 
     //protected override void ReEvaluate(IBit causeBit)

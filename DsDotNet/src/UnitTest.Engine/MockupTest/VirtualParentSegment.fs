@@ -6,6 +6,7 @@ open Dual.Common
 open System.Linq
 open System.Reactive.Linq
 open System.Threading
+open Engine.Runner
 
 
 [<AutoOpen>]
@@ -80,26 +81,29 @@ module VirtualParentSegment =
                     let notiVpsPortChange = [x.PortS :> IBit; x.PortR; x.PortE] |> Seq.contains(bc.Bit)
                     let notiTargetFinish = on && bc.Bit = x.Target.PortE
 
-                    if notiTargetFinish then
-                        logDebug $"VPS[{x.Name}] - Turning off child reset port{x.Target.Name}.."
-                        cpu.Enqueue(targetResetTag, false)
-                        cpu.Enqueue(x.PortE, true)
-                        cpu.Enqueue(x.Going, false)
+                    if notiPrevChildFinish || notiVpsPortChange || notiTargetFinish then
+                        noop()
 
-                    elif notiPrevChildFinish then
+                    if notiPrevChildFinish then
                         let allPrevChildrenFinished = prevChildrenEndPorts.All(fun ep -> ep.Value)
                         let vpsStatus = x.GetSegmentStatus()
                         let targetChildStatus = x.Target.GetSegmentStatus()
                         if allPrevChildrenFinished then
-                            logDebug $"VPS[{x.Name}] - All prev child [{x.PreChildren[0].Name}] finish detected"
+                            logDebug $"{x.Name}] - All prev child [{x.PreChildren[0].Name}] finish detected"
                         match allPrevChildrenFinished, vpsStatus, targetChildStatus with
                         | true, Status4.Going, Status4.Ready -> // 사전 조건 완료, target child 수행
-                            logDebug $"VPS[{x.Name}] - Executing child.."
+                            logDebug $"{x.Name}] - Executing child.."
                             cpu.Enqueue(targetStartTag, true)
                         | _ ->
                             ()
 
-                    elif notiVpsPortChange then
+                    if notiTargetFinish then
+                        logDebug $"{x.Name}] - Turning off child reset port{x.Target.Name}.."
+                        cpu.Enqueue(targetResetTag, false)
+                        //cpu.Enqueue(x.PortE, true)
+                        //cpu.Enqueue(x.Going, false)
+
+                    if notiVpsPortChange then
                         let newSegmentState = x.GetSegmentStatus()
                         if newSegmentState = oldStatus then
                             logDebug $"\t\tVPS Skipping duplicate status: [{x.Name}] status : {newSegmentState}"
@@ -119,6 +123,8 @@ module VirtualParentSegment =
                                 ()
                             | Status4.Finished ->
                                 cpu.Enqueue(targetStartTag, false)
+                                //cpu.Enqueue(x.PortE, true)
+                                cpu.Enqueue(x.Going, false)
                                 x.FinishCount <- x.FinishCount + 1
                                 assert(x.PortE.Value)
                             | Status4.Homing   ->

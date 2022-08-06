@@ -224,7 +224,7 @@ public static class CpuExtensionBitChange
                     if (q.TryDequeue(out BitChange bitChange))
                     {
                         Debug.Assert(!bitChange.Applied);
-                        Global.Logger.Debug($"= Processing bitChnage {bitChange}");
+                        //Global.Logger.Debug($"= Processing bitChnage {bitChange}");
                         Apply(bitChange);
                     }
                     else
@@ -253,7 +253,7 @@ public static class CpuExtensionBitChange
             //}
             //else
             {
-                Global.Logger.Debug($"\t=({indent}) Applying bitchange {bitChange}");
+                //Global.Logger.Debug($"\t=({indent}) Applying bitchange {bitChange}");
                 bit.SetValueOnly(bitChange.NewValue);
                 bitChange.Applied = true;
                 Global.RawBitChangedSubject.OnNext(bitChange);
@@ -265,6 +265,11 @@ public static class CpuExtensionBitChange
         {
             indent++;
             var bit = (Bit)bitChange.Bit;
+            if (bit.Name.Contains("epexB_default"))
+                Console.WriteLine();
+            if (bit is PortExpressionEnd)
+                Console.WriteLine();
+
             if (fwd.ContainsKey(bit))
             {
                 //var dependents = fwd[bit].Cast<BitReEvaluatable>();

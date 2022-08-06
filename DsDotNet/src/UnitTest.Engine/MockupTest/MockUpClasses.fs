@@ -76,15 +76,12 @@ module MockUpClasses =
                                 ()
                             cpu.Enqueue(x.Going, true)
                             cpu.Enqueue(x.PortE, true)
-                            cpu.Enqueue(x.Going, false)   //! 순서 민감
                         | Status4.Finished ->
+                            cpu.Enqueue(x.Going, false)   //! 순서 민감
                             x.FinishCount <- x.FinishCount + 1
+                            logDebug $"[{x.Name}] Segment FinishCounter = {x.FinishCount}"
                         | Status4.Homing   ->
-                            if x.PortE.Value then
-                                cpu.Enqueue(x.PortE, false)
-                            else
-                                logDebug $"\tSkipping [{x.Name}] Segment status : {newSegmentState} : already homing by bit change {bc.Bit.GetName()}={bc.NewValue}"
-                                ()
+                            cpu.Enqueue(x.PortE, false)
 
                         | _ ->
                             failwith "Unexpected"

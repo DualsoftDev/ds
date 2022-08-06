@@ -135,7 +135,7 @@ module VirtualParentTestTest =
 
                     match bit with
                     | :? PortExpressionEnd as portE ->
-                        let seg = portE.Segment :?> MuSegment
+                        let seg = portE.Segment :?> MuSegmentBase
                         if bit = g.PortE && g.PortE.Value then
                             if seg.FinishCount % 10 = 0 then
                                 logDebug $"COUNTER: B={b.FinishCount}, G={g.FinishCount}, R={r.FinishCount}"

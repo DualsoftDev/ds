@@ -7,6 +7,7 @@ open System.Linq
 open System.Reactive.Linq
 open System.Threading
 open Engine.Runner
+open Dsu.Common.Utilities.FS.ComputationExpression
 
 
 [<AutoOpen>]
@@ -24,10 +25,15 @@ module VirtualParentSegment =
         startPort, resetPort,
         goingTag, readyTag,
         targetStartTag, targetResetTag               // target child 의 start port 에 가상 부모가 시작시킬 수 있는 start tag 추가 (targetStartTag)
-    ) =
-        inherit MuSegmentBase(target.Cpu, name, startPort, resetPort, target.PortE, goingTag, readyTag)
+    ) as this =
+        inherit MuSegmentBase(target.Cpu, name, startPort, resetPort,
+            null, //target.PortE
+            goingTag, readyTag)
         let cpu = target.Cpu
         let mutable oldStatus = Status4.Homing
+
+        do
+            this.PortE <- PortExpressionEnd.Create(cpu, this, $"End_VPS_{target.Name}", null)
 
         //private new(target, causalSourceSegments) = Vps(target, causalSourceSegments, null, null)
         member val Target = target;
@@ -46,12 +52,12 @@ module VirtualParentSegment =
                     [|
                         yield auto
                         let set =
-                            let andItems =
-                                [|
-                                    yield target.PortE :> IBit
-                                    for rsseg in resetSourceSegments do
-                                        yield Latch.Create(cpu, $"InnerResetSourceLatch_{n}_{rsseg.Name}", rsseg.Going, readyTag)
-                                |]
+                            let andItems = [|
+                                yield target.PortE :> IBit
+                                for rsseg in resetSourceSegments do
+                                    let going = And(cpu, $"InnerResetSourceLatchAnd_{n}", target.PortE, rsseg.Going)
+                                    yield Latch.Create(cpu, $"InnerResetSourceLatch_{n}_{rsseg.Name}", going, readyTag)
+                            |]
                             And(cpu, $"InnerResetSourceAnd_{n}", andItems)
                         yield Latch.Create(cpu, $"ResetLatch_{n}", set, readyTag)
                     |]
@@ -79,9 +85,10 @@ module VirtualParentSegment =
                             && bc.Bit :? PortExpressionEnd
                             && prevChildrenEndPorts |> Seq.contains(bc.Bit :?> PortExpressionEnd)
                     let notiVpsPortChange = [x.PortS :> IBit; x.PortR; x.PortE] |> Seq.contains(bc.Bit)
-                    let notiTargetFinish = on && bc.Bit = x.Target.PortE
+                    let notiTargetEndPortChange = bc.Bit = x.Target.PortE
+                    let newSegmentState = x.GetSegmentStatus()
 
-                    if notiPrevChildFinish || notiVpsPortChange || notiTargetFinish then
+                    if notiPrevChildFinish || notiVpsPortChange || notiTargetEndPortChange then
                         noop()
 
                     if notiPrevChildFinish then
@@ -89,22 +96,32 @@ module VirtualParentSegment =
                         let vpsStatus = x.GetSegmentStatus()
                         let targetChildStatus = x.Target.GetSegmentStatus()
                         if allPrevChildrenFinished then
-                            logDebug $"{x.Name}] - All prev child [{x.PreChildren[0].Name}] finish detected"
+                            logDebug $"[{x.Name}]{newSegmentState} - All prev child [{x.PreChildren[0].Name}] finish detected"
                         match allPrevChildrenFinished, vpsStatus, targetChildStatus with
                         | true, Status4.Going, Status4.Ready -> // 사전 조건 완료, target child 수행
-                            logDebug $"{x.Name}] - Executing child.."
+                            logDebug $"[{x.Name}] - Executing child.."
                             cpu.Enqueue(targetStartTag, true)
                         | _ ->
                             ()
 
-                    if notiTargetFinish then
-                        logDebug $"{x.Name}] - Turning off child reset port{x.Target.Name}.."
-                        cpu.Enqueue(targetResetTag, false)
-                        //cpu.Enqueue(x.PortE, true)
-                        //cpu.Enqueue(x.Going, false)
+                    if notiTargetEndPortChange then
+                        match newSegmentState, on with
+                        | Status4.Finished, true
+                        | Status4.Going, true ->
+                            cpu.Enqueue(targetStartTag, false)
+                            cpu.Enqueue(x.Going, false)
+                            cpu.Enqueue(x.PortE, true)
+
+                        | Status4.Ready, false
+                        | Status4.Homing, false ->
+                            cpu.Enqueue(targetResetTag, false)
+                            cpu.Enqueue(x.Ready, true)
+                            cpu.Enqueue(x.PortE, false)
+                        | _ ->
+                            failwithlog $"Unknown: [{x.Name}]{newSegmentState}: Target endport => {x.Target.Name}={on}"
+
 
                     if notiVpsPortChange then
-                        let newSegmentState = x.GetSegmentStatus()
                         if newSegmentState = oldStatus then
                             logDebug $"\t\tVPS Skipping duplicate status: [{x.Name}] status : {newSegmentState}"
                         else
@@ -115,8 +132,12 @@ module VirtualParentSegment =
                             | Status4.Ready    ->
                                 ()
                             | Status4.Going    ->
+                                if x.Name = "VPS_B" then
+                                    noop()
                                 let targetChildStatus = x.Target.GetSegmentStatus()
                                 cpu.Enqueue(x.Going, true)
+
+                                cpu.Enqueue(targetStartTag, true)
                                 //assert(x.GetSegmentStatus() = Status4.Going)
                                 //cpu.Enqueue(x.PortE, true)
                                 //cpu.Enqueue(x.Going, false)
@@ -131,12 +152,7 @@ module VirtualParentSegment =
                                 assert(x.Target.GetSegmentStatus() = Status4.Finished)
                                 assert(x.Target.PortE.Value)
                                 cpu.Enqueue(targetResetTag, true)
-                                if x.PortE.Value then
-                                    cpu.Enqueue(x.PortE, false)
-                                    //assert(not x.PortE.Value)
-                                else
-                                    logDebug $"\tSkipping [{x.Name}] Segment status : {newSegmentState} : already homing by bit change {bc.Bit.GetName()}={bc.NewValue}"
-                                    ()
+                                //cpu.Enqueue(x.PortE, false)
 
                                 //assert(not x.PortE.Value)
 

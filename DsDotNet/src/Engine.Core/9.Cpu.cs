@@ -1,9 +1,6 @@
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace Engine.Core;
 
@@ -178,8 +175,6 @@ public static class CpuExtensionBitChange
 
         foreach (var stem in stems)
         {
-            if (stem is PortExpressionStart)
-                Console.WriteLine();
             foreach (var b in stem._monitoringBits.Where(b => b!=null))
             {
                 if (!fwd.ContainsKey(b))
@@ -228,11 +223,9 @@ public static class CpuExtensionBitChange
                         Apply(bitChange);
                     }
                     else
-                    {
                         Global.Logger.Warn($"Failed to deque.");
-                    }
                 }
-                await Task.Delay(100);
+                await Task.Delay(20);
             }
         }).Start()
         ;
@@ -243,8 +236,6 @@ public static class CpuExtensionBitChange
         {
             Debug.Assert(!bitChange.Applied);
             var bit = (Bit)bitChange.Bit;
-            if (bit is PortExpressionReset)
-                Console.WriteLine();
 
             //if (bit.Value == bitChange.NewValue)
             //{
@@ -265,19 +256,9 @@ public static class CpuExtensionBitChange
         {
             indent++;
             var bit = (Bit)bitChange.Bit;
-            if (bit.Name.Contains("st_default_G"))
-                Console.WriteLine();
-            if (bit.Name.Contains("End_VPS_B")) // epexB_default
-                Console.WriteLine();
-            if (bit.Name.Contains("VPS_B_Ready")) // epexB_default
-                Console.WriteLine();
-            if (bit is PortExpressionEnd)
-                Console.WriteLine();
-
             if (fwd.ContainsKey(bit))
             {
-                //var dependents = fwd[bit].Cast<BitReEvaluatable>();
-                var dependents = cpu.ForwardDependancyMap[bit].Cast<BitReEvaluatable>();
+                var dependents = fwd[bit].Cast<BitReEvaluatable>();
                 var prevValues = dependents.ToDictionary(dep => dep, dep => dep.Value);
 
                 // 실제 변경 적용

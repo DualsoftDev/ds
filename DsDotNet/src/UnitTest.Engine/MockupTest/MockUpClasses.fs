@@ -1,13 +1,9 @@
 namespace UnitTest.Mockup.Engine
 
 
-open Xunit
 open Engine.Core
 open Dual.Common
-open Xunit.Abstractions
 open System.Reactive.Linq
-open System.Threading
-open UnitTest.Engine
 open System.Collections.Concurrent
 open System
 open System.Reactive.Disposables
@@ -36,8 +32,6 @@ module MockUpClasses =
     type MuSegment(cpu, n, sp, rp, ep, goingTag, readyTag) =
         inherit MuSegmentBase(cpu, n, sp, rp, ep, goingTag, readyTag)
         let mutable oldStatus = Status4.Homing
-
-        //static member Create(cpu, n) = MuSegment(cpu, n, null, null, null)
 
         static member CreateWithDefaultTags(cpu, n) =
             let seg = MuSegment(cpu, n, null, null, null, null, null)
@@ -72,8 +66,6 @@ module MockUpClasses =
                             cpu.Enqueue(x.Ready, true)
                             ()
                         | Status4.Going    ->
-                            if (x.Name = "B") then
-                                ()
                             cpu.Enqueue(x.Going, true)
                             cpu.Enqueue(x.PortE, true)
                         | Status4.Finished ->

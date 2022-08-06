@@ -29,7 +29,6 @@ module VirtualParentSegment =
         let mutable oldStatus = Status4.Homing
         let mutable prevChildrenChecked:bool option = None
 
-        //private new(target, causalSourceSegments) = Vps(target, causalSourceSegments, null, null)
         member val Target = target;
         member val PreChildren = causalSourceSegments |> Array.ofSeq
         member val TargetStartTag = targetStartTag with get
@@ -50,8 +49,7 @@ module VirtualParentSegment =
                             let andItems = [|
                                 yield target.PortE :> IBit
                                 for rsseg in resetSourceSegments do
-                                    let going = rsseg.Going//And(cpu, $"InnerResetSourceLatchAnd_{n}", ep, rsseg.Going)
-                                    yield Latch.Create(cpu, $"InnerResetSourceLatch_{n}_{rsseg.Name}", going, readyTag)
+                                    yield Latch.Create(cpu, $"InnerResetSourceLatch_{n}_{rsseg.Name}", rsseg.Going, readyTag)
                             |]
                             And(cpu, $"InnerResetSourceAnd_{n}", andItems)
                         yield Latch.Create(cpu, $"ResetLatch_{n}", set, readyTag)
@@ -95,8 +93,6 @@ module VirtualParentSegment =
                             logDebug $"[{x.Name}]{newSegmentState} - All prev child [{x.PreChildren[0].Name}] finish detected"
                             assert (prevChildrenChecked <> Some true)
                             prevChildrenChecked <- Some true
-                            if x.Name = "VPS_B" then
-                                noop()
                         match prevChildrenChecked, vpsStatus, targetChildStatus with
                         | None, Status4.Going, Status4.Ready
                         | Some true, Status4.Going, Status4.Ready -> // 사전 조건 완료, target child 수행
@@ -115,8 +111,6 @@ module VirtualParentSegment =
                         | Status4.Finished, true ->
                             assert(false)
                         | Status4.Going, true ->
-                            if x.Name = "VPS_B" then
-                                noop()
                             cpu.Enqueue(targetStartTag, false)
                             cpu.Enqueue(x.Going, false)
                             cpu.Enqueue(x.PortE, true)
@@ -143,8 +137,6 @@ module VirtualParentSegment =
                             | Status4.Ready    ->
                                 ()
                             | Status4.Going    ->
-                                if x.Name = "VPS_B" then
-                                    noop()
                                 let targetChildStatus = x.Target.GetSegmentStatus()
                                 cpu.Enqueue(x.Going, true)
 
@@ -153,16 +145,9 @@ module VirtualParentSegment =
                                     assert(prevChildrenChecked <> Some false)
                                     prevChildrenChecked <- Some false
                                     cpu.Enqueue(targetStartTag, true)
-
-                                //assert(x.GetSegmentStatus() = Status4.Going)
-                                //cpu.Enqueue(x.PortE, true)
-                                //cpu.Enqueue(x.Going, false)
                                 ()
                             | Status4.Finished ->
-                                if x.Name = "VPS_B" then
-                                    noop()
                                 cpu.Enqueue(targetStartTag, false)
-                                //cpu.Enqueue(x.PortE, true)
                                 cpu.Enqueue(x.Going, false)
                                 x.FinishCount <- x.FinishCount + 1
                                 assert(x.PortE.Value)
@@ -170,6 +155,7 @@ module VirtualParentSegment =
 
                                 // self reset
                                 cpu.Enqueue(x.PortR, true)
+
                             | Status4.Homing   ->
                                 //assert(prevChildrenChecked <> Some false)
                                 if prevChildrenChecked = Some false then
@@ -178,14 +164,7 @@ module VirtualParentSegment =
                                 assert(x.Target.GetSegmentStatus() = Status4.Finished)
                                 assert(x.Target.PortE.Value)
                                 cpu.Enqueue(targetResetTag, true)
-                                //cpu.Enqueue(x.PortE, false)
-
-                                //assert(not x.PortE.Value)
-
                             | _ ->
                                 failwith "Unexpected"
-
-
-
                         ()
                 )

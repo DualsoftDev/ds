@@ -23,10 +23,6 @@ module VirtualParentTestTest =
             let g, (stG, rtG) = MuSegment.CreateWithDefaultTags(cpu, "G")
             let r, (stR, rtR) = MuSegment.CreateWithDefaultTags(cpu, "R")
 
-            //b.PortR.Plan <- Latch(cpu, "rlB", rtB, Not(b.PortE))
-            //g.PortR.Plan <- Latch(cpu, "rlG", rtG, Not(g.PortE))
-            //r.PortR.Plan <- Latch(cpu, "rlR", rtR, Not(r.PortE))
-
             let auto = new Tag(cpu, null, "auto")
 
             let vpB = Vps.Create(b, auto, (stB, rtB), [g], [g; r])
@@ -94,10 +90,6 @@ module VirtualParentTestTest =
             let b, (stB, rtB) = MuSegment.CreateWithDefaultTags(cpu, "B")
             let g, (stG, rtG) = MuSegment.CreateWithDefaultTags(cpu, "G")
             let r, (stR, rtR) = MuSegment.CreateWithDefaultTags(cpu, "R")
-
-            //b.PortR.Plan <- Latch(cpu, "rlB", rtB, Not(b.PortE))
-            //g.PortR.Plan <- Latch(cpu, "rlG", rtG, Not(g.PortE))
-            //r.PortR.Plan <- Latch(cpu, "rlR", rtR, Not(r.PortE))
 
             let auto = new Tag(cpu, null, "auto")
 

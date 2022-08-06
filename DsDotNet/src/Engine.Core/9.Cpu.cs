@@ -265,7 +265,11 @@ public static class CpuExtensionBitChange
         {
             indent++;
             var bit = (Bit)bitChange.Bit;
-            if (bit.Name.Contains("epexB_default"))
+            if (bit.Name.Contains("st_default_G"))
+                Console.WriteLine();
+            if (bit.Name.Contains("End_VPS_B")) // epexB_default
+                Console.WriteLine();
+            if (bit.Name.Contains("VPS_B_Ready")) // epexB_default
                 Console.WriteLine();
             if (bit is PortExpressionEnd)
                 Console.WriteLine();
@@ -284,7 +288,7 @@ public static class CpuExtensionBitChange
                         from dep in dependents
                         let newValue = dep.Evaluate()
                         where newValue != prevValues[dep]
-                        select (new BitChange(dep, newValue, false))
+                        select (new BitChange(dep, newValue, false, bit))
                         ;
                     var chgrp = changes.GroupByToDictionary(ch => ch.Bit is PortExpression);
                     if (chgrp.ContainsKey(false))

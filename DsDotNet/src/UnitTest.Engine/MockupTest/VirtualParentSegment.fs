@@ -19,22 +19,25 @@ module VirtualParentSegment =
     ///                 && #latch(#g(Previous), #r(Self)  <--- reset 조건 1
     ///                 && #latch(#g(Next), #r(Self)),    <--- reset 조건 2 ...
     ///             #r(Self))
-    type Vps(name, target:MuSegment, causalSourceSegments:MuSegment seq,
-        startPort, resetPort, endPort,
-        goingTag, readyTag,
-        targetStartTag, targetResetTag               // target child 의 start port 에 가상 부모가 시작시킬 수 있는 start tag 추가 (targetStartTag)
+    type Vps(name, target:MuSegment, causalSourceSegments:MuSegment seq
+        , startPort, resetPort, endPort
+        , goingTag, readyTag
+        , targetStartTag, targetResetTag               // target child 의 start port 에 가상 부모가 시작시킬 수 있는 start tag 추가 (targetStartTag)
     ) =
         inherit MuSegmentBase(target.Cpu, name, startPort, resetPort, endPort, goingTag, readyTag)
         let cpu = target.Cpu
         let mutable oldStatus = Status4.Homing
-        let mutable prevChildrenChecked:bool option = None
 
         member val Target = target;
         member val PreChildren = causalSourceSegments |> Array.ofSeq
         member val TargetStartTag = targetStartTag with get
         member val TargetResetTag = targetResetTag with get
 
-        static member Create(target:MuSegment, auto:IBit, (targetStartTag:IBit, targetResetTag:IBit), causalSourceSegments:MuSegment seq, resetSourceSegments:MuSegment seq) =
+        static member Create(target:MuSegment, auto:IBit
+            , (targetStartTag:IBit, targetResetTag:IBit)
+            , causalSourceSegments:MuSegment seq
+            , resetSourceSegments:MuSegment seq
+        ) =
             let cpu = target.Cpu
             let n = $"VPS_{target.Name}"
 
@@ -47,8 +50,11 @@ module VirtualParentSegment =
                         yield auto
                         let set =
                             let andItems = [|
-                                yield target.PortE :> IBit
+                                //yield target.PortE :> IBit
+                                yield ep :> IBit
                                 for rsseg in resetSourceSegments do
+                                    //let going = And(cpu, $"InnerResetSourceLatchAnd_{n}_{rsseg.Name}", ep, rsseg.Going)
+                                    //yield Latch.Create(cpu, $"InnerResetSourceLatch_{n}_{rsseg.Name}", going, readyTag)
                                     yield Latch.Create(cpu, $"InnerResetSourceLatch_{n}_{rsseg.Name}", rsseg.Going, readyTag)
                             |]
                             And(cpu, $"InnerResetSourceAnd_{n}", andItems)
@@ -91,11 +97,8 @@ module VirtualParentSegment =
                         let targetChildStatus = x.Target.GetSegmentStatus()
                         if allPrevChildrenFinished then
                             logDebug $"[{x.Name}]{newSegmentState} - All prev child [{x.PreChildren[0].Name}] finish detected"
-                            assert (prevChildrenChecked <> Some true)
-                            prevChildrenChecked <- Some true
-                        match prevChildrenChecked, vpsStatus, targetChildStatus with
-                        | None, Status4.Going, Status4.Ready
-                        | Some true, Status4.Going, Status4.Ready -> // 사전 조건 완료, target child 수행
+                        match allPrevChildrenFinished, vpsStatus, targetChildStatus with
+                        | true, Status4.Going, Status4.Ready -> // 사전 조건 완료, target child 수행
                             logDebug $"[{x.Name}] - Executing child.."
                             cpu.Enqueue(targetStartTag, true)
                         | _ ->
@@ -142,8 +145,6 @@ module VirtualParentSegment =
 
                                 assert(targetChildStatus = Status4.Ready)
                                 if allPrevChildrenFinished then
-                                    assert(prevChildrenChecked <> Some false)
-                                    prevChildrenChecked <- Some false
                                     cpu.Enqueue(targetStartTag, true)
                                 ()
                             | Status4.Finished ->
@@ -157,10 +158,6 @@ module VirtualParentSegment =
                                 cpu.Enqueue(x.PortR, true)
 
                             | Status4.Homing   ->
-                                //assert(prevChildrenChecked <> Some false)
-                                if prevChildrenChecked = Some false then
-                                    logWarn $"Need previous children finish check on {x.Name}?"
-                                prevChildrenChecked <- None
                                 assert(x.Target.GetSegmentStatus() = Status4.Finished)
                                 assert(x.Target.PortE.Value)
                                 cpu.Enqueue(targetResetTag, true)

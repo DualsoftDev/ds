@@ -43,10 +43,10 @@ module VirtualParentSegment =
 
             let readyTag = new Tag(cpu, null, $"{n}_Ready")
 
-            let ep = PortExpressionEnd.Create(cpu, null, $"End_{n}", null)
+            let ep = PortInfoEnd.Create(cpu, null, $"End_{n}", null)
 
             (*
-                And(            // $"ResetPortExpression_{X}"
+                And(            // $"ResetPortInfo_{X}"
                     _auto
                     ,Latch(     // $"ResetLatch_{X}"
                         And(    // $"InnerResetSourceAnd_{X}"
@@ -55,7 +55,7 @@ module VirtualParentSegment =
                             , latch(#g(ResetSource2), #r(__X)) )        // $"InnerResetSourceLatch_{X}_{rsseg.Name}"
                         ,#r(__X)))
             *)
-            let resetPortExpressionPlan =
+            let resetPortInfoPlan =
                 let vrp =
                     [|
                         yield auto
@@ -68,13 +68,13 @@ module VirtualParentSegment =
                             And(cpu, $"InnerResetSourceAnd_{n}", andItems)
                         yield Latch.Create(cpu, $"ResetLatch_{n}", set, readyTag)
                     |]
-                And(cpu, $"ResetPortExpression_{n}", vrp)
+                And(cpu, $"ResetPortInfo_{n}", vrp)
 
             let sp =
                 match auto with
-                | :? PortExpressionStart as sp -> sp
-                | _ -> PortExpressionStart(cpu, null, $"Start_{n}", auto, null)
-            let rp = PortExpressionReset(cpu, null, $"Reset_{n}", resetPortExpressionPlan, null)
+                | :? PortInfoStart as sp -> sp
+                | _ -> PortInfoStart(cpu, null, $"Start_{n}", auto, null)
+            let rp = PortInfoReset(cpu, null, $"Reset_{n}", resetPortInfoPlan, null)
             let vps = Vps(n, target, causalSourceSegments, sp, rp, ep, null, readyTag, targetStartTag, targetResetTag)
             sp.Segment <- vps
             rp.Segment <- vps
@@ -88,7 +88,7 @@ module VirtualParentSegment =
             Global.BitChangedSubject
                 .Subscribe(fun bc ->
                     let bit = bc.Bit :?> Bit
-                    let ep = if bc.Bit :? PortExpressionEnd then bc.Bit :?> PortExpressionEnd else null
+                    let ep = if bc.Bit :? PortInfoEnd then bc.Bit :?> PortInfoEnd else null
                     let on = bc.Bit.Value
                     let allPrevChildrenFinished = prevChildrenEndPorts.All(fun ep -> ep.Value)
                     if on && ep <> null && prevChildrenEndMonitored.ContainsKey(ep) then

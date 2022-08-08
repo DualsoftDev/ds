@@ -31,7 +31,7 @@ public static class BitExtension
                                 var reset = getText(latch._resetCondition, expand);
                                 return $"Latch[Set={set}, Reset={reset}]";
                             }).Invoke(),
-                        PortExpression pe =>
+                        PortInfo pe =>
                             new Func<string>(() =>
                             {
                                 if (pe.Plan == null)

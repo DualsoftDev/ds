@@ -274,7 +274,7 @@ public static class CpuExtensionBitChange
                         where newValue != prevValues[dep]
                         select (new BitChange(dep, newValue, false, bit))
                         ;
-                    var chgrp = changes.GroupByToDictionary(ch => ch.Bit is PortExpression);
+                    var chgrp = changes.GroupByToDictionary(ch => ch.Bit is PortInfo);
                     if (chgrp.ContainsKey(false))
                     {
                         var nonPorts = chgrp[false];
@@ -304,7 +304,7 @@ public static class CpuExtensionBitChange
         switch(bit)
         {
             case Expression _:
-            case BitReEvaluatable re when re is not PortExpression:
+            case BitReEvaluatable re when re is not PortInfo:
                 throw new Exception("ERROR: Expression can't be set!");
             default:
                 cpu.Queue.Enqueue(new BitChange(bit, newValue, false, cause));

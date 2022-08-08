@@ -9,8 +9,8 @@ open System
 open System.Threading
 
 [<AutoOpen>]
-module PortExpressionTest =
-    type PortExpressionTests1(output1:ITestOutputHelper) =
+module PortInfoTest =
+    type PortInfoTests1(output1:ITestOutputHelper) =
 
         let init() =
             Global.BitChangedSubject
@@ -23,16 +23,16 @@ module PortExpressionTest =
         interface IClassFixture<Fixtures.DemoFixture>
 
         [<Fact>]
-        member __.``PortExpression test`` () =
-            logInfo "============== PortExpression test"
+        member __.``PortInfo test`` () =
+            logInfo "============== PortInfo test"
             init()
 
 
-            let ``_PortExpressionStart 테스트`` =
+            let ``_PortInfoStart 테스트`` =
                 let cpu = new Cpu("dummy", new Model())
                 let plan = new Tag(cpu, null, "T1_test1")
                 let actual = new Tag(cpu, null, "T2_test1")
-                let pts = new PortExpressionStart(cpu, null, "PortExpressionStart", plan, actual)
+                let pts = new PortInfoStart(cpu, null, "PortInfoStart", plan, actual)
 
 
                 let wait() = wait(cpu)
@@ -70,11 +70,11 @@ module PortExpressionTest =
                 pts.Value === true
                 pts.Actual.Value === true
 
-            let ``_PortExpressionEnd Normal 테스트`` =
+            let ``_PortInfoEnd Normal 테스트`` =
                 let cpu = new Cpu("dummy", new Model())
                 let actual = new Tag(cpu, null, "T2_test2")
 
-                let pte = PortExpressionEnd.Create(cpu, null, "_PortExpressionEnd_test2", actual)
+                let pte = PortInfoEnd.Create(cpu, null, "_PortInfoEnd_test2", actual)
 
                 let wait() = wait(cpu)
                 let enqueue(bit, value) =
@@ -107,12 +107,12 @@ module PortExpressionTest =
                 pte.Value === false
 
 
-            let ``_PortExpressionEnd 특이 case 테스트`` =
+            let ``_PortInfoEnd 특이 case 테스트`` =
                 let cpu = new Cpu("dummy", new Model())
                 let actual = new Tag(cpu, null, "T2_test3", TagType.None, true)
 
                 // Actual 이 ON 인 상태에서의 creation
-                let pte = PortExpressionEnd.Create(cpu, null, "_PortExpressionEnd_test3", actual)
+                let pte = PortInfoEnd.Create(cpu, null, "_PortInfoEnd_test3", actual)
 
                 let wait() = wait(cpu)
                 let enqueue(bit, value) =

@@ -81,7 +81,7 @@ public abstract class BitReEvaluatable : Bit, IBitReadable
     protected BitReEvaluatable(Cpu cpu, string name, params IBit[] monitoringBits)
         : base(name, cpu)
     {
-        // PortExpression 의 경우, plan 대비 actual 에 null 을 허용
+        // PortInfo 의 경우, plan 대비 actual 에 null 을 허용
         _monitoringBits = monitoringBits.Where(b => b is not null).ToArray();
 
         //ReSubscribe();
@@ -111,7 +111,7 @@ public class Flag : Bit, IBitReadWritable
 
 
 [DebuggerDisplay("{QualifiedName}")]
-[Obsolete("PortExpression 으로 대체 예정")]
+[Obsolete("PortInfo 으로 대체 예정")]
 public abstract class Port : Bit, IBitReadWritable
 {
     public Segment OwnerSegment { get; set; }
@@ -192,7 +192,7 @@ public class BitChange
     {
         Debug.Assert(false);
 
-        //if (Global.IsSupportParallel && Bit is PortExpressionEnd)
+        //if (Global.IsSupportParallel && Bit is PortInfoEnd)
         //{
         //    //! 현재값 publish 를 threading 으로 처리...
         //    var capturedThis = this;

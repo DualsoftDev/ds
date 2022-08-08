@@ -124,7 +124,7 @@ module VirtualParentTestTest =
                     logDebug $"\tBit changed: [{bit.GetName()}] = {bc.NewValue}{cause}"
 
                     match bit with
-                    | :? PortExpressionEnd as portE ->
+                    | :? PortInfoEnd as portE ->
                         let seg = portE.Segment :?> MuSegmentBase
                         if bit = g.PortE && g.PortE.Value then
                             if seg.FinishCount % 10 = 0 then

@@ -10,8 +10,6 @@ global using log4net;
 global using BitDic = System.Collections.Generic.Dictionary<string, Engine.Core.IBit>;
 global using TagDic = System.Collections.Generic.Dictionary<string, Engine.Core.Tag>;
 global using Engine.Common;
-using System.Collections.Concurrent;
-using System.Threading.Tasks;
 
 namespace Engine.Core;
 

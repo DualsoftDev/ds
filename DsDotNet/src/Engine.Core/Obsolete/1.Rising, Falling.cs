@@ -106,7 +106,7 @@ public abstract class BitReEvaluatable : Bit, IBitReadable
     // 생성자
     protected BitReEvaluatable(Cpu cpu, string name, params IBit[] monitoringBits)
     {
-        // PortExpression 의 경우, plan 대비 actual 에 null 을 허용
+        // PortInfo 의 경우, plan 대비 actual 에 null 을 허용
         _monitoringBits = monitoringBits.Where(b => b is not null).ToArray();
 
         //! 여기
@@ -138,7 +138,7 @@ public class Latch : BitReEvaluatable
 }
 
 
-public class PortExpressionEnd : PortExpression
+public class PortInfoEnd : PortInfo
 {
     protected override BitChange NeedChange(IBit causeBit)
     {
@@ -149,7 +149,7 @@ public class PortExpressionEnd : PortExpression
 }
 
 
-public abstract class PortExpressionCommand : PortExpression
+public abstract class PortInfoCommand : PortInfo
 {
     protected override BitChange NeedChange(IBit causeBit)
     {

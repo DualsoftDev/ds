@@ -30,7 +30,7 @@ module ToyMockupTest =
                     let cause = if isNull bc.CauseRepr then "" else $" caused by [{bc.CauseRepr}]"
                     logDebug $"\tBit changed: [{bit}] = {bc.NewValue}{cause}"
                     match bit with
-                    | :? PortExpressionEnd as portE ->
+                    | :? PortInfoEnd as portE ->
                         let seg = portE.Segment :?> MuSegment
                         let status = seg.GetSegmentStatus()
                         //logDebug $"Segment [{seg.Name}] Status : {status} inferred by port [{bit}]={bit.Value} change"
@@ -125,8 +125,8 @@ module ToyMockupTest =
             let bvrpe = Or(cpu, "OR(BVRPE)", resetLatch, rt)
 
 
-            b.PortS <- new PortExpressionStart(cpu, b, "BVSP", bvspe, null)
-            b.PortR <- new PortExpressionReset(cpu, b, "BVRP", bvrpe, null)
+            b.PortS <- new PortInfoStart(cpu, b, "BVSP", bvspe, null)
+            b.PortR <- new PortInfoReset(cpu, b, "BVRP", bvrpe, null)
 
             Global.BitChangedSubject
                 .Subscribe(fun bc ->

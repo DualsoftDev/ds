@@ -14,9 +14,9 @@ module MockUpClasses =
         inherit Segment(n)
 
         member val Cpu:Cpu = cpu
-        member val PortS:PortExpressionStart = sp with get, set
-        member val PortR:PortExpressionReset = rp with get, set
-        member val PortE:PortExpressionEnd = ep with get, set
+        member val PortS:PortInfoStart = sp with get, set
+        member val PortR:PortInfoReset = rp with get, set
+        member val PortE:PortInfoEnd = ep with get, set
         member val Going = if isNull goingTag then new Tag(cpu, null, $"{n}_Going") else goingTag
         member val Ready = if isNull readyTag then new Tag(cpu, null, $"{n}_Ready") else readyTag
         member val FinishCount = 0 with get, set
@@ -37,9 +37,9 @@ module MockUpClasses =
             let seg = MuSegment(cpu, n, null, null, null, null, null)
             let st = Tag(cpu, seg, $"st_default_{n}", TagType.Start)
             let rt = Tag(cpu, seg, $"rt_default_{n}", TagType.Reset)
-            seg.PortS <- PortExpressionStart(cpu, seg, $"spex{n}_default", st, null)
-            seg.PortR <- PortExpressionReset(cpu, seg, $"rpex{n}_default", rt, null)
-            seg.PortE <- PortExpressionEnd.Create(cpu, seg, $"epex{n}_default", null)
+            seg.PortS <- PortInfoStart(cpu, seg, $"spex{n}_default", st, null)
+            seg.PortR <- PortInfoReset(cpu, seg, $"rpex{n}_default", rt, null)
+            seg.PortE <- PortInfoEnd.Create(cpu, seg, $"epex{n}_default", null)
 
             seg, (st, rt)
 

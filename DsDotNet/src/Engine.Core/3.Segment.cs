@@ -120,10 +120,10 @@ public static class SegmentExtension
                 });
         segment.Disposables.Add(subs);
 
-        segment.PrintPortExpressions();
+        segment.PrintPortInfos();
     }
 
-    public static void PrintPortExpressions(this Segment seg)
+    public static void PrintPortInfos(this Segment seg)
     {
         IEnumerable<string> spit()
         {

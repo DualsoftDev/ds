@@ -87,15 +87,20 @@ module VirtualParentSegment =
 
         override x.WireEvent() =
             let prevChildrenEndPorts = x.PreChildren |> Array.map(fun seg -> seg.PortE)
+            let prevChildrenEndMonitored = prevChildrenEndPorts |> Seq.map(fun p -> p, p.Value) |> Tuple.toDictionary
             Global.BitChangedSubject
                 .Subscribe(fun bc ->
                     let bit = bc.Bit :?> Bit
+                    let ep = if bc.Bit :? PortExpressionEnd then bc.Bit :?> PortExpressionEnd else null
                     let on = bc.Bit.Value
                     let allPrevChildrenFinished = prevChildrenEndPorts.All(fun ep -> ep.Value)
+                    if on && ep <> null && prevChildrenEndMonitored.ContainsKey(ep) then
+                        prevChildrenEndMonitored[ep] <- on
+
                     let notiPrevChildFinish =
                         on
-                            && bc.Bit :? PortExpressionEnd
-                            && prevChildrenEndPorts |> Seq.contains(bc.Bit :?> PortExpressionEnd)
+                            && not (isNull ep)
+                            && prevChildrenEndPorts |> Seq.contains(ep)
                     let notiVpsPortChange = [x.PortS :> IBit; x.PortR; x.PortE] |> Seq.contains(bc.Bit)
                     let notiTargetEndPortChange = bc.Bit = x.Target.PortE
                     let newVpsState = x.GetSegmentStatus()
@@ -161,7 +166,8 @@ module VirtualParentSegment =
                                 cpu.Enqueue(x.Going, true, $"{name} GOING 시작")
 
                                 assert(targetChildStatus = Status4.Ready)
-                                if allPrevChildrenFinished then
+                                if prevChildrenEndMonitored.Values.All(id) then
+                                    prevChildrenEndMonitored.Keys |> Array.ofSeq |> Seq.iter(fun k -> prevChildrenEndMonitored[k] <- false )
                                     cpu.Enqueue(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
                                 ()
                             | Status4.Finished ->

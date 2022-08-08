@@ -28,24 +28,33 @@ module ExpressionTest =
             init()
 
             let cpu = new Cpu("dummy", new Model())
+            let wait() = wait(cpu)
+            let enqueue(bit, value) =
+                cpu.Enqueue(bit, value)
+                wait()
+
 
             let a1 = new Tag(cpu, null, "a1_test1")
             let a2 = new Tag(cpu, null, "a2_test1")
             let a3 = new Tag(cpu, null, "a3_test1")
             let xAnd = new And(cpu, "And1_test1", a1, a2, a3)
 
+            cpu.BuildBitDependencies()
+            let runSubscription = cpu.Run()
+
+
             xAnd.Value === false
-            [a1; a2; a3] |> Seq.iter (fun x -> x.Value <- true)
+            [a1; a2; a3] |> Seq.iter (fun x -> enqueue(x, true))
             xAnd.Value === true
 
-            a2.Value <- false
+            enqueue(a2, false)
             xAnd.Value === false
 
-            a2.Value <- true
+            enqueue(a2, true)
             xAnd.Value === true
 
             // And 의 값을 설정할 수 없어야 한다.
-            (fun () -> xAnd.Value <- false) |> ShouldFail
+            (fun () -> enqueue(xAnd, false)) |> ShouldFail
             xAnd.Value === true
 
 
@@ -61,21 +70,28 @@ module ExpressionTest =
             let a3 = new Tag(cpu, null, "a3_test2")
             let xOr = new Or(cpu, "Or1_test2", a1, a2, a3)
 
+            let wait() = wait(cpu)
+            let enqueue(bit, value) =
+                cpu.Enqueue(bit, value)
+                wait()
+            cpu.BuildBitDependencies()
+            let runSubscription = cpu.Run()
+
             xOr.Value === false
-            a2.Value <- true
+            enqueue(a2, true)
             xOr.Value === true
 
-            a3.Value <- true
+            enqueue(a3, true)
             xOr.Value === true
 
-            [a1; a2; a3] |> Seq.iter (fun x -> x.Value <- false)
+            [a1; a2; a3] |> Seq.iter (fun x -> enqueue(x, false))
             xOr.Value === false
 
-            a1.Value <- true
+            enqueue(a1, true)
             xOr.Value === true
 
             // Or 의 값을 설정할 수 없어야 한다.
-            (fun () -> xOr.Value <- false) |> ShouldFail
+            (fun () -> enqueue(xOr, false)) |> ShouldFail
             xOr.Value === true
 
 
@@ -87,18 +103,26 @@ module ExpressionTest =
 
             let cpu = new Cpu("dummy", new Model())
 
+
             let a1 = new Tag(cpu, null, "a1_test3")
             let xNot = new Not(cpu, "Not1_test2", a1)
+
+            let wait() = wait(cpu)
+            let enqueue(bit, value) =
+                cpu.Enqueue(bit, value)
+                wait()
+            cpu.BuildBitDependencies()
+            let runSubscription = cpu.Run()
 
             a1.Value === false
             xNot.Value === true
 
-            a1.Value <- true
+            enqueue(a1, true)
             xNot.Value === false
 
 
             // Not 의 값을 설정할 수 없어야 한다.
-            (fun () -> xNot.Value <- true) |> ShouldFail
+            (fun () -> enqueue(xNot, true)) |> ShouldFail
             xNot.Value === false
 
 
@@ -120,18 +144,28 @@ module ExpressionTest =
             let ``b || ( c && !d)`` = new Or(cpu, "b || ( c && !d1", b, ``c&&!d``)
             let x = new And(cpu, "a && (b || ( c && !d))", a, ``b || ( c && !d)``)
 
+
+            let wait() = wait(cpu)
+            let enqueue(bit, value) =
+                cpu.Enqueue(bit, value)
+                wait()
+            cpu.BuildBitDependencies()
+            let runSubscription = cpu.Run()
+
+
+
             x.Value === false
-            a.Value <- true
-            b.Value <- true
+            enqueue(a, true)
+            enqueue(b, true)
             x.Value === true
-            b.Value <- false
+            enqueue(b, false)
             x.Value === false
 
-            c.Value <- true
+            enqueue(c, true)
             x.Value === true
 
             // And 의 값을 설정할 수 없어야 한다.
-            (fun () -> x.Value <- true) |> ShouldFail
+            (fun () -> enqueue(x, true)) |> ShouldFail
 
 
         [<Fact>]
@@ -154,22 +188,26 @@ module ExpressionTest =
 
             let x = new Or(cpu, "a||latch", a, latch)
 
+            let wait() = wait(cpu)
+            let enqueue(bit, value) =
+                cpu.Enqueue(bit, value)
+                wait()
+            cpu.BuildBitDependencies()
+            let runSubscription = cpu.Run()
+
             x.Value === false
 
-            s.Value <- true
+            enqueue(s, true)
 
-            wait()
             latch.Value === true
             x.Value === true
 
-            s.Value <- false
-            wait()
+            enqueue(s, false)
             latch.Value === true
             x.Value === true
 
             // latch reset ON -> latch reset 및 Or expression OFF 확인
-            r.Value <- true
-            wait()
+            enqueue(r, true)
             latch.Value === false
             x.Value === false
 

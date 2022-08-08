@@ -16,6 +16,7 @@ public class Cpu : Named, ICpu
 
     /// <summary> Bit change event queue </summary>
     public ConcurrentQueue<BitChange> Queue { get; } = new();
+    public bool ProcessingQueue { get; internal set; }
     public GraphInfo GraphInfo { get; set; }
 
     /// <summary> bit 간 순방향 의존성 map </summary>
@@ -216,6 +217,7 @@ public static class CpuExtensionBitChange
             {
                 while (q.Count > 0)
                 {
+                    cpu.ProcessingQueue = true;
                     if (q.TryDequeue(out BitChange bitChange))
                     {
                         Debug.Assert(!bitChange.Applied);
@@ -225,6 +227,7 @@ public static class CpuExtensionBitChange
                     else
                         Global.Logger.Warn($"Failed to deque.");
                 }
+                cpu.ProcessingQueue = false;
                 await Task.Delay(20);
             }
         }).Start()
@@ -296,6 +299,17 @@ public static class CpuExtensionBitChange
 
     }
 
-    public static void Enqueue(this Cpu cpu, IBit bit, bool newValue, object cause=null) => cpu.Queue.Enqueue(new BitChange(bit, newValue, false, cause));
+    public static void Enqueue(this Cpu cpu, IBit bit, bool newValue, object cause = null)
+    {
+        switch(bit)
+        {
+            case Expression _:
+            case BitReEvaluatable re when re is not PortExpression:
+                throw new Exception("ERROR: Expression can't be set!");
+            default:
+                cpu.Queue.Enqueue(new BitChange(bit, newValue, false, cause));
+                break;
+        };
+    }
 
 }

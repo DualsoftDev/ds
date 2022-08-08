@@ -34,33 +34,36 @@ module LatchTest =
             let tSet = new Tag(cpu, null, "T1")
             let tReset = new Tag(cpu, null, "T2")
             let latch = new Latch(cpu, "Latch1", tSet, tReset)
+
+            let wait() = wait(cpu)
+            let enqueue(bit, value) =
+                cpu.Enqueue(bit, value)
+                wait()
+            cpu.BuildBitDependencies()
+            let runSubscription = cpu.Run()
+
+
             latch.Value === false
-            tSet.Value <- true
-            wait()
+            enqueue(tSet, true)
             latch.Value === true
 
-            tReset.Value <- true
-            wait()
+            enqueue(tReset, true)
             latch.Value === false
 
             // tSet 조건은 여전히 true 이므로, reset 만 clear 해도 latch ON 상태로 다시 변경된다.
-            tReset.Value <- false
-            wait()
+            enqueue(tReset, false)
             latch.Value === true
 
             // set 조건만 false
-            tSet.Value <- false
-            wait()
+            enqueue(tSet, false)
             latch.Value === true
 
             // reset 조건만 true
-            tReset.Value <- true
-            wait()
+            enqueue(tReset, true)
             latch.Value === false
 
             // reset 이 살아 있으므로, set 시켜도 latch 안됨
-            tSet.Value <- true
-            wait()
+            enqueue(tSet, true)
             latch.Value === false
 
             ()
@@ -74,13 +77,19 @@ module LatchTest =
             let rlBSet = And(cpu, "And_rlBSet", going, notFinish)
             let rlBReset = Flag(cpu, "Reset");
             let latch = Latch(cpu, "rlB", rlBSet, rlBReset)
-            going.Value <- true
-            wait()
+
+            let wait() = wait(cpu)
+            let enqueue(bit, value) =
+                cpu.Enqueue(bit, value)
+                wait()
+            cpu.BuildBitDependencies()
+            let runSubscription = cpu.Run()
+
+            enqueue(going, true)
             rlBSet.Value === true
             latch.Value === true
 
-            rlBReset.Value <- true
-            wait()
+            enqueue(rlBReset, true)
             latch.Value === false
             rlBSet.Value === true
 

@@ -89,8 +89,7 @@ module ToyMockupTest =
             stB.Value <- true
 
             // give enough time to wait...
-            while Global.IsSupportParallel && BitChange.PendingTasks.Count > 0 do
-                Thread.Sleep(500)
+            wait(cpu)
 
             b.PortE.Value === true
             let gStatus = g.GetSegmentStatus()

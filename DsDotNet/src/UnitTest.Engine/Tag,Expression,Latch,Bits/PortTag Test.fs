@@ -6,6 +6,7 @@ open Engine.Core
 open Dual.Common
 open Xunit.Abstractions
 open System
+open System.Threading
 
 [<AutoOpen>]
 module PortExpressionTest =
@@ -27,105 +28,121 @@ module PortExpressionTest =
             init()
 
 
-            let cpu = new Cpu("dummy", new Model())
-
-
             let ``_PortExpressionStart 테스트`` =
+                let cpu = new Cpu("dummy", new Model())
                 let plan = new Tag(cpu, null, "T1_test1")
                 let actual = new Tag(cpu, null, "T2_test1")
                 let pts = new PortExpressionStart(cpu, null, "PortExpressionStart", plan, actual)
+
+
+                let wait() = wait(cpu)
+                let enqueue(bit, value) =
+                    cpu.Enqueue(bit, value)
+                    wait()
+
+                cpu.BuildBitDependencies()
+                let runSubscription = cpu.Run()
+
                 pts.Value === false
                 pts.Plan.Value === false
                 pts.Actual.Value === false
 
                 // Expression 으로, 값을 설정할 수 없어야 한다.
-                (fun () -> pts.Value <- true)
+                (fun () -> enqueue(pts, true))
                 |> ShouldFail
 
-                plan.Value <- true
-                wait()
+                enqueue(plan, true)
+                Thread.Sleep(100)
                 pts.Plan.Value === true
                 pts.Value === true
                 pts.Actual.Value === true
 
                 // plan OFF 시, actual tag 도 OFF 되어야 한다.
-                plan.Value <- false
-                wait()
+                enqueue(plan, false)
                 pts.Plan.Value === false
                 pts.Value === false
                 pts.Actual.Value === false
 
 
                 // pts plan tag ON 시, pts 도 ON 되어야 한다.
-                plan.Value <- true
-                wait()
+                enqueue(plan, true)
                 pts.Plan.Value === true
                 pts.Value === true
                 pts.Actual.Value === true
 
             let ``_PortExpressionEnd Normal 테스트`` =
+                let cpu = new Cpu("dummy", new Model())
                 let actual = new Tag(cpu, null, "T2_test2")
 
                 let pte = PortExpressionEnd.Create(cpu, null, "_PortExpressionEnd_test2", actual)
+
+                let wait() = wait(cpu)
+                let enqueue(bit, value) =
+                    cpu.Enqueue(bit, value)
+                    wait()
+
+                cpu.BuildBitDependencies()
+                let runSubscription = cpu.Run()
+
                 let plan = pte.Plan
                 pte.Value === false
                 pte.Plan.Value === false
                 pte.Actual.Value === false
 
                 // pte 전체 ON 하더라도, actual tag 는 ON 되지 않는다.
-                plan.Value <- true
-                wait()
+                enqueue(plan, true)
                 pte.Plan.Value === true
                 pte.Value === false
                 pte.Actual.Value === false
 
                 // actual tag ON 시, pte 전체 ON
-                actual.Value <- true
-                wait()
+                enqueue(actual, true)
                 pte.Value === true
 
-                // actual tag 흔들림시, pte 전체도 연동 (병렬 수행시, exception catch 불가)
-                if not Global.IsSupportParallel then
-                    (fun () -> actual.Value <- false)
-                    |> ShouldFailWithSubstringT<DsException> "Spatial Error:"
+                // actual tag 흔들림시, pte 전체도 연동
+                (fun () -> enqueue(actual, false))
+                |> ShouldFailWithSubstringT<DsException> "Spatial Error:"
 
-                    actual.Value === false
-                    pte.Value === false
+                actual.Value === false
+                pte.Value === false
 
 
             let ``_PortExpressionEnd 특이 case 테스트`` =
-                let actual = new Tag(cpu, null, "T2_test3")
-                actual.Value <- true
+                let cpu = new Cpu("dummy", new Model())
+                let actual = new Tag(cpu, null, "T2_test3", TagType.None, true)
 
                 // Actual 이 ON 인 상태에서의 creation
                 let pte = PortExpressionEnd.Create(cpu, null, "_PortExpressionEnd_test3", actual)
+
+                let wait() = wait(cpu)
+                let enqueue(bit, value) =
+                    cpu.Enqueue(bit, value)
+                    wait()
+
+                cpu.BuildBitDependencies()
+                let runSubscription = cpu.Run()
+
                 let plan = pte.Plan
-                wait()
                 pte.Value === false
                 pte.Plan.Value === false
                 pte.Actual.Value === true
 
                 // actual tag ON 상태에서 plan 만 ON 시킬 수 없다.
-                if not Global.IsSupportParallel then //(병렬 수행시, exception catch 불가)
-                    (fun () ->
-                        pte.Value <- true
-                        wait())
-                    |> ShouldFailWithSubstringT<DsException> "Spatial Error:"
+                (fun () -> enqueue(pte, true))
+                |> ShouldFailWithSubstringT<DsException> "Spatial Error:"
 
-                    pte.Value === false
-                    plan.Value === false
+                pte.Value === false
+                plan.Value === false
 
 
                 // actual tag OFF 상태에서는 plan OFF 가능
-                actual.Value <- false
-                plan.Value <- true
-                wait()
+                enqueue(actual, false)
+                enqueue(plan, true)
                 pte.Plan.Value === true
                 pte.Actual.Value === false
                 pte.Value === false
 
-                pte.Actual.Value <- true
-                wait()
+                enqueue(pte.Actual, true)
                 pte.Value === true
 
                 ()

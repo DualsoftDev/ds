@@ -183,7 +183,6 @@ public class BitChange
         _ => throw new Exception("ERROR"),
     };
 
-    public static ConcurrentHashSet<Task> PendingTasks = new();
 
     public static void Publish(IBit bit, bool newValue, bool applied, object cause = null)
     {
@@ -193,20 +192,20 @@ public class BitChange
     {
         Debug.Assert(false);
 
-        if (Global.IsSupportParallel && Bit is PortExpressionEnd)
-        {
-            //! 현재값 publish 를 threading 으로 처리...
-            var capturedThis = this;
-            var task = new Task(() =>
-            {
-                Global.RawBitChangedSubject.OnNext(capturedThis);
-            });
-            PendingTasks.Add(task);
-            task.ContinueWith(t => PendingTasks.TryRemove(t, out Task _task));
-            task.Start();
-        }
-        else
-            Global.RawBitChangedSubject.OnNext(this);
+        //if (Global.IsSupportParallel && Bit is PortExpressionEnd)
+        //{
+        //    //! 현재값 publish 를 threading 으로 처리...
+        //    var capturedThis = this;
+        //    var task = new Task(() =>
+        //    {
+        //        Global.RawBitChangedSubject.OnNext(capturedThis);
+        //    });
+        //    PendingTasks.Add(task);
+        //    task.ContinueWith(t => PendingTasks.TryRemove(t, out Task _task));
+        //    task.Start();
+        //}
+        //else
+        //    Global.RawBitChangedSubject.OnNext(this);
     }
 
     public override string ToString() => $"{Bit.GetName()}={Bit}={NewValue}";

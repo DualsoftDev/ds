@@ -18,6 +18,7 @@ module VirtualParentTestTest =
         [<Fact>]
         member __.``Vps 생성 test`` () =
             let cpu = new MuCpu("dummy")
+            let wait() = wait(cpu)
 
             let b, (stB, rtB) = MuSegment.CreateWithDefaultTags(cpu, "B")
             let g, (stG, rtG) = MuSegment.CreateWithDefaultTags(cpu, "G")
@@ -76,9 +77,6 @@ module VirtualParentTestTest =
             //auto.Value <- true
             //stB.Value <- true
             wait()
-            Console.ReadLine()
-            while true do
-                Thread.Sleep(1000)
             vpB.PortS.Value === true
             ()
 
@@ -86,6 +84,7 @@ module VirtualParentTestTest =
         [<Fact>]
         member __.``Vps 실행 test`` () =
             let cpu = new MuCpu("dummy")
+            let wait() = wait(cpu)
 
             let b, (stB, rtB) = MuSegment.CreateWithDefaultTags(cpu, "B")
             let g, (stG, rtG) = MuSegment.CreateWithDefaultTags(cpu, "G")

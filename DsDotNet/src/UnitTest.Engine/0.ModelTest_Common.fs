@@ -37,6 +37,6 @@ module ModelTest_Common =
     let setEq(xs:'a seq, ys:'a seq) =
         (xs.Count() = ys.Count() && xs |> Seq.forall(fun x -> ys.Contains(x)) ) |> ShouldBeTrue
 
-    let wait() =
-        while Global.IsSupportParallel && BitChange.PendingTasks.Count > 0 do
+    let wait(cpu:Cpu) =
+        while cpu.ProcessingQueue || cpu.Queue.Count > 0 do
             Thread.Sleep(50)

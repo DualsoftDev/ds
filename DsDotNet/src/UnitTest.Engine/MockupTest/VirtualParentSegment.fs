@@ -98,33 +98,33 @@ module VirtualParentSegment =
                             && prevChildrenEndPorts |> Seq.contains(bc.Bit :?> PortExpressionEnd)
                     let notiVpsPortChange = [x.PortS :> IBit; x.PortR; x.PortE] |> Seq.contains(bc.Bit)
                     let notiTargetEndPortChange = bc.Bit = x.Target.PortE
-                    let newSegmentState = x.GetSegmentStatus()
+                    let newVpsState = x.GetSegmentStatus()
 
                     if notiPrevChildFinish || notiVpsPortChange || notiTargetEndPortChange then
                         noop()
 
                     if notiPrevChildFinish then
-                        let vpsStatus = x.GetSegmentStatus()
                         let targetChildStatus = x.Target.GetSegmentStatus()
                         if allPrevChildrenFinished then
-                            logDebug $"[{x.Name}]{newSegmentState} - All prev child [{x.PreChildren[0].Name}] finish detected"
-                        match allPrevChildrenFinished, vpsStatus, targetChildStatus with
+                            logDebug $"[{x.Name}]{newVpsState} - Prev child [{x.PreChildren[0].Name}] finish detected"
+                        match allPrevChildrenFinished, newVpsState, targetChildStatus with
                         | true, Status4.Going, Status4.Ready -> // 사전 조건 완료, target child 수행
                             logDebug $"[{x.Name}] - Executing child.."
                             cpu.Enqueue(targetStartTag, true)
                         | _ ->
+                            logWarn $"[{x.Name}]{newVpsState} - Need Executing child.."
                             ()
 
                     if notiTargetEndPortChange then
-                        if x.Going.Value && newSegmentState <> Status4.Going then
-                            cpu.Enqueue(x.Going, false, $"{x.Name} going off by status {newSegmentState}")
-                        if x.Ready.Value && newSegmentState <> Status4.Ready then
-                            cpu.Enqueue(x.Ready, false, $"{x.Name} ready off by status {newSegmentState}")
+                        if x.Going.Value && newVpsState <> Status4.Going then
+                            cpu.Enqueue(x.Going, false, $"{x.Name} going off by status {newVpsState}")
+                        if x.Ready.Value && newVpsState <> Status4.Ready then
+                            cpu.Enqueue(x.Ready, false, $"{x.Name} ready off by status {newVpsState}")
 
                         let cause = $"${x.Target.Name} End Port={x.Target.PortE.Value}"
 
 
-                        match newSegmentState, on with
+                        match newVpsState, on with
                         | Status4.Finished, true ->
                             assert(false)
                         | Status4.Going, true ->
@@ -140,23 +140,23 @@ module VirtualParentSegment =
                             cpu.Enqueue(x.Ready, true)
                             cpu.Enqueue(x.PortE, false)
                         | _ ->
-                            failwithlog $"Unknown: [{x.Name}]{newSegmentState}: Target endport => {x.Target.Name}={on}"
+                            failwithlog $"Unknown: [{x.Name}]{newVpsState}: Target endport => {x.Target.Name}={on}"
 
 
                     if notiVpsPortChange then
-                        if newSegmentState = oldStatus then
-                            logDebug $"\t\tVPS Skipping duplicate status: [{x.Name}] status : {newSegmentState}"
+                        if newVpsState = oldStatus then
+                            logDebug $"\t\tVPS Skipping duplicate status: [{x.Name}] status : {newVpsState}"
                         else
-                            oldStatus <- newSegmentState
-                            logDebug $"[{x.Name}] Segment status : {newSegmentState} by {bit.Name}={bit.Value}"
+                            oldStatus <- newVpsState
+                            logDebug $"[{x.Name}] Segment status : {newVpsState} by {bit.Name}={bit.Value}"
 
-                            match newSegmentState with
+                            match newVpsState with
                             | Status4.Ready    ->
                                 ()
                             | Status4.Going    ->
                                 if x.Name = "VPS_B" then
                                     noop()
-                                    
+
                                 let targetChildStatus = x.Target.GetSegmentStatus()
                                 cpu.Enqueue(x.Going, true, $"{name} GOING 시작")
 

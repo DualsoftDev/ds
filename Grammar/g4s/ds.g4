@@ -19,7 +19,7 @@ grammar ds;
 
 import dsFunctions;
 
-program: (importStatement|system|cpus|comment)* EOF;
+program: (importStatement|system|cpus|layouts|comment)* EOF;
 
 
 system: sysProp id '=' sysBlock;    // [sys] Seg = {..}
@@ -49,6 +49,19 @@ cpuBlock
     : LBRACE flowPath (SEIMCOLON flowPath)* SEIMCOLON? RBRACE
     ;
 
+layouts: layoutProp (id)? '=' layoutsBlock;
+layoutProp: '[' 'layouts' ']';
+layoutsBlock
+    : LBRACE (positionDef)* RBRACE
+    ;
+positionDef: callPath '=' xywh;
+    callPath: IDENTIFIER DOT IDENTIFIER DOT IDENTIFIER;
+    xywh: LPARENTHESIS x COMMA y (COMMA w COMMA h)? RPARENTHESIS (SEIMCOLON)?;
+    x: INTEGER;
+    y: INTEGER;
+    w: INTEGER;
+    h: INTEGER;
+
 task
     : taskProp id '=' LBRACE (listing|call)* RBRACE
     ;
@@ -66,7 +79,7 @@ aliasProp: '[' 'alias' ']';
 aliasListing:
     aliasDef '=' LBRACE (aliasMnemonic)? ( ';' aliasMnemonic)* (';')+ RBRACE
     ;
-aliasDef: (IDENTIFIER DOT IDENTIFIER DOT IDENTIFIER);
+aliasDef: identifier3;
 aliasMnemonic: IDENTIFIER;
 
 

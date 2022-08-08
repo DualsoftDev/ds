@@ -6,6 +6,24 @@ public abstract class CallBase : Coin
 }
 
 
+
+public class Xywh
+{
+    public Xywh(int x, int y, int? w, int? h)
+    {
+        X = x;
+        Y = y;
+        W = w;
+        H = h;
+    }
+
+    public int X { get; }
+    public int Y { get; }
+    public int? W { get; }
+    public int? H { get; }
+
+
+}
 public class CallPrototype : CallBase
 {
     public DsTask Task;
@@ -40,6 +58,8 @@ public class CallPrototype : CallBase
     }
 
     public override string QualifiedName => $"{Task.QualifiedName}_{Name}";
+
+    public Xywh Xywh { get; set; }
 
 }
 

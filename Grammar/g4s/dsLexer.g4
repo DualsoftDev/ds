@@ -10,15 +10,19 @@ fragment VALID_ID_CHAR
    : VALID_ID_START | ('0' .. '9') | HANGUL_CHAR
    ;
 
+identifier2: IDENTIFIER DOT IDENTIFIER;
+identifier3: IDENTIFIER DOT IDENTIFIER DOT IDENTIFIER;
+
+
 // M.U, M.D
 segments: segmentsDNF*;
 // - Segment 규격
 // - 0 DOT: TagName
 // - 1 DOT: TaskName.SegmentName  : mysystem 을 가정하고 있음.  필요한가?
 // - 2 DOT: System.TaskName.SegmentName
-segment: (IDENTIFIER | IDENTIFIER DOT IDENTIFIER | IDENTIFIER DOT IDENTIFIER DOT IDENTIFIER);
+segment: (IDENTIFIER | identifier2 | identifier3);
 
-flowPath: IDENTIFIER DOT IDENTIFIER;
+flowPath: identifier2;
 
 segmentsCNF: segment (COMMA segment)*;
 segmentsDNF: segmentsCNF (OR2 segmentsCNF)*;

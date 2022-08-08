@@ -251,6 +251,28 @@ partial class ElementsListener : dsBaseListener
                 ports.Iter(p => p.Cpu = cpu);
             }
         }
+
+        var layouts =
+            DsParser.enumerateChildren<dsParser.LayoutsContext>(
+                ctx, false, r => r is dsParser.LayoutsContext)
+            .ToArray()
+            ;
+        if (layouts.Length > 1)
+            throw new Exception("Layouts block should exist only once");
+
+        var positionDefs =
+            DsParser.enumerateChildren<dsParser.PositionDefContext>(
+                ctx, false, r => r is dsParser.PositionDefContext)
+            .ToArray()
+            ;
+        foreach(var posiDef in positionDefs)
+        {
+            var callPath = posiDef.callPath().GetText();
+            var cp = (CallPrototype)QpDefinitionMap[callPath];
+            var xywh = posiDef.xywh();
+            var (x, y, w, h) = (xywh.x().GetText(), xywh.y().GetText(), xywh.w()?.GetText(), xywh.h()?.GetText());
+            cp.Xywh = new Xywh(int.Parse(x), int.Parse(y), w == null ? null : int.Parse(w), h == null ? null : int.Parse(h));
+        }
     }
 
 

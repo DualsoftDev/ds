@@ -296,11 +296,6 @@ public static class CpuExtensionBitChange
 
     }
 
-    public static void Enqueue(this Cpu cpu, BitChange bc)
-    {
-        //Debug.Assert(bc.Bit.Value != bc.NewValue);
-        cpu.Queue.Enqueue(bc);
-    }
-    public static void Enqueue(this Cpu cpu, IBit bit, bool newValue) => Enqueue(cpu, new BitChange(bit, newValue, false));
+    public static void Enqueue(this Cpu cpu, IBit bit, bool newValue, object cause=null) => cpu.Queue.Enqueue(new BitChange(bit, newValue, false, cause));
 
 }

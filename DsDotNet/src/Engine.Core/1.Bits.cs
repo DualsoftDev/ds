@@ -159,21 +159,33 @@ public class BitChange
 {
     public IBit Bit { get; }
     public bool NewValue { get; }
-    public IBit Cause { get; }
+    /// <summary>IBit or string description</summary>
+    public object Cause { get; }
     public bool Applied { get; internal set; }
     public DateTime Time { get; }
-    public BitChange(IBit bit, bool newValue, bool applied= false, IBit cause = null)
+    public BitChange(IBit bit, bool newValue, bool applied= false, object cause = null)
     {
+        Debug.Assert(cause is null || cause is IBit || cause is string);
         Bit = bit;
         NewValue = newValue;
         Applied = applied;
         Time = DateTime.Now;
         Cause = cause;
+        if (cause == null)
+            Console.WriteLine();
     }
+
+    public string CauseRepr => Cause switch
+    {
+        IBit b => $"{b.GetName()}={b.Value}",
+        string s => s,
+        null => null,
+        _ => throw new Exception("ERROR"),
+    };
 
     public static ConcurrentHashSet<Task> PendingTasks = new();
 
-    public static void Publish(IBit bit, bool newValue, bool applied, IBit cause = null)
+    public static void Publish(IBit bit, bool newValue, bool applied, object cause = null)
     {
         (new BitChange(bit, newValue, applied, cause)).Publish();
     }

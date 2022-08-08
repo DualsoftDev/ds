@@ -44,6 +44,17 @@ module VirtualParentSegment =
             let readyTag = new Tag(cpu, null, $"{n}_Ready")
 
             let ep = PortExpressionEnd.Create(cpu, null, $"End_{n}", null)
+
+            (*
+                And(            // $"ResetPortExpression_{X}"
+                    _auto
+                    ,Latch(     // $"ResetLatch_{X}"
+                        And(    // $"InnerResetSourceAnd_{X}"
+                            #(__X)
+                            //, Latch(#g(ResetSource1), #r(__X))
+                            , latch(#g(ResetSource2), #r(__X)) )        // $"InnerResetSourceLatch_{X}_{rsseg.Name}"
+                        ,#r(__X)))
+            *)
             let resetPortExpressionPlan =
                 let vrp =
                     [|
@@ -106,17 +117,20 @@ module VirtualParentSegment =
 
                     if notiTargetEndPortChange then
                         if x.Going.Value && newSegmentState <> Status4.Going then
-                            cpu.Enqueue(x.Going, false)
+                            cpu.Enqueue(x.Going, false, $"{x.Name} going off by status {newSegmentState}")
                         if x.Ready.Value && newSegmentState <> Status4.Ready then
-                            cpu.Enqueue(x.Ready, false)
+                            cpu.Enqueue(x.Ready, false, $"{x.Name} ready off by status {newSegmentState}")
+
+                        let cause = $"${x.Target.Name} End Port={x.Target.PortE.Value}"
+
 
                         match newSegmentState, on with
                         | Status4.Finished, true ->
                             assert(false)
                         | Status4.Going, true ->
-                            cpu.Enqueue(targetStartTag, false)
-                            cpu.Enqueue(x.Going, false)
-                            cpu.Enqueue(x.PortE, true)
+                            cpu.Enqueue(targetStartTag, false, $"{x.Name} going 끝내기 by{cause}")
+                            cpu.Enqueue(x.Going, false, $"{x.Name} going 끝내기 by{cause}")
+                            cpu.Enqueue(x.PortE, true, $"{x.Name} FINISH 끝내기 by{cause}")
 
                         | Status4.Ready, false ->
                             assert(false)
@@ -140,12 +154,15 @@ module VirtualParentSegment =
                             | Status4.Ready    ->
                                 ()
                             | Status4.Going    ->
+                                if x.Name = "VPS_B" then
+                                    noop()
+                                    
                                 let targetChildStatus = x.Target.GetSegmentStatus()
-                                cpu.Enqueue(x.Going, true)
+                                cpu.Enqueue(x.Going, true, $"{name} GOING 시작")
 
                                 assert(targetChildStatus = Status4.Ready)
                                 if allPrevChildrenFinished then
-                                    cpu.Enqueue(targetStartTag, true)
+                                    cpu.Enqueue(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
                                 ()
                             | Status4.Finished ->
                                 cpu.Enqueue(targetStartTag, false)
@@ -154,8 +171,8 @@ module VirtualParentSegment =
                                 assert(x.PortE.Value)
                                 assert(x.PortR.Value = false)
 
-                                // self reset
-                                cpu.Enqueue(x.PortR, true)
+                                //// self reset
+                                //cpu.Enqueue(x.PortR, true, $"{x.Name} SELF RESETTING")
 
                             | Status4.Homing   ->
                                 assert(x.Target.GetSegmentStatus() = Status4.Finished)

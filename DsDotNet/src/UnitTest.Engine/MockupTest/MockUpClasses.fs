@@ -52,28 +52,28 @@ module MockUpClasses =
                 .Subscribe(fun bc ->
                     let newSegmentState = x.GetSegmentStatus()
                     if newSegmentState = oldStatus then
-                        logDebug $"\t\tSkipping duplicate status: [{x.Name}] status : {newSegmentState} by bit change {bc.Bit.GetName()}={bc.NewValue}"
+                        logDebug $"\t\tSkipping duplicate status: [{n}] status : {newSegmentState} by bit change {bc.Bit.GetName()}={bc.NewValue}"
                     else
                         oldStatus <- newSegmentState
-                        logDebug $"[{x.Name}] Segment status : {newSegmentState}"
+                        logDebug $"[{n}] Segment status : {newSegmentState}"
                         if x.Going.Value && newSegmentState <> Status4.Going then
-                            cpu.Enqueue(x.Going, false)
+                            cpu.Enqueue(x.Going, false, $"{n} going off by status {newSegmentState}")
                         if x.Ready.Value && newSegmentState <> Status4.Ready then
-                            cpu.Enqueue(x.Ready, false)
+                            cpu.Enqueue(x.Ready, false, $"{n} ready off by status {newSegmentState}")
 
                         match newSegmentState with
                         | Status4.Ready    ->
                             cpu.Enqueue(x.Ready, true)
                             ()
                         | Status4.Going    ->
-                            cpu.Enqueue(x.Going, true)
-                            cpu.Enqueue(x.PortE, true)
+                            cpu.Enqueue(x.Going, true, $"{n} GOING 시작")
+                            cpu.Enqueue(x.PortE, true, $"{n} GOING 끝")
                         | Status4.Finished ->
-                            cpu.Enqueue(x.Going, false)   //! 순서 민감
+                            cpu.Enqueue(x.Going, false, $"{n} FINISH")   //! 순서 민감
                             x.FinishCount <- x.FinishCount + 1
                             logDebug $"[{x.Name}] Segment FinishCounter = {x.FinishCount}"
                         | Status4.Homing   ->
-                            cpu.Enqueue(x.PortE, false)
+                            cpu.Enqueue(x.PortE, false, $"{n} HOMING")
 
                         | _ ->
                             failwith "Unexpected"

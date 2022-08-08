@@ -40,7 +40,7 @@ module VirtualParentTestTest =
             Global.BitChangedSubject
                 .Subscribe(fun bc ->
                     let bit = bc.Bit
-                    let cause = if isNull bc.Cause then "" else $" caused by [{bc.Cause.GetName()}={bc.Cause.Value}]"
+                    let cause = if isNull bc.CauseRepr then "" else $" caused by [{bc.CauseRepr}]"
                     logDebug $"\tBit changed: [{bit.GetName()}] = {bc.NewValue}{cause}") |> ignore
 
             [b :> MuSegmentBase; g; r; vpB;] |> Seq.iter(fun seg -> seg.WireEvent() |> ignore)
@@ -71,8 +71,8 @@ module VirtualParentTestTest =
             let ggs = cpu.CollectForwardDependantBits(g.Going) |> Array.ofSeq
             vpB.PortS.Value === false
 
-            cpu.Enqueue(new BitChange(auto, true))
-            cpu.Enqueue(new BitChange(stB, true))
+            cpu.Enqueue(auto, true, "최초 auto 시작")
+            cpu.Enqueue(stB, true)
             //auto.Value <- true
             //stB.Value <- true
             wait()
@@ -93,8 +93,8 @@ module VirtualParentTestTest =
 
             let auto = new Tag(cpu, null, "auto")
 
-            //let vpB = Vps.Create(b, auto, (stB, rtB), [g], [g; r])
-            let vpB = Vps.Create(b, auto, (stB, rtB), [g], [r])
+            let vpB = Vps.Create(b, auto, (stB, rtB), [g], [g; r])
+            //let vpB = Vps.Create(b, auto, (stB, rtB), [g], [r])
             logDebug $"B Start:{vpB.PortS.ToText()}";
             logDebug $"B Reset:{vpB.PortR.ToText()}";
             logDebug $"B End:{vpB.PortE.ToText()}";
@@ -115,14 +115,13 @@ module VirtualParentTestTest =
                 Global.BitChangedSubject
                     .Subscribe(fun bc ->
                         if bc.Bit = b.PortE (*&& b.PortE.Value *)then
-                            logDebug "Turning off 최초 시작 trigger"
-                            cpu.Enqueue(stB, false)
+                            cpu.Enqueue(stB, false, "Turning off 최초 시작 trigger")
                             subscription.Dispose())
 
             Global.BitChangedSubject
                 .Subscribe(fun bc ->
                     let bit = bc.Bit
-                    let cause = if isNull bc.Cause then "" else $" caused by [{bc.Cause.GetName()}={bc.Cause.Value}]"
+                    let cause = if isNull bc.CauseRepr then "" else $" caused by [{bc.CauseRepr}]"
                     logDebug $"\tBit changed: [{bit.GetName()}] = {bc.NewValue}{cause}"
 
                     match bit with
@@ -141,8 +140,8 @@ module VirtualParentTestTest =
             cpu.BuildBitDependencies()
             let runSubscription = cpu.Run()
 
-            cpu.Enqueue(new BitChange(auto, true))
-            cpu.Enqueue(new BitChange(stB, true))
+            cpu.Enqueue(auto, true, "최초 auto 시작")
+            cpu.Enqueue(stB, true, "최초 B 시작")
 
             vpB.PortS.Value === false
             //auto.Value <- true

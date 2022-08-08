@@ -61,11 +61,8 @@ module VirtualParentSegment =
                         yield auto
                         let set =
                             let andItems = [|
-                                //yield target.PortE :> IBit
                                 yield ep :> IBit
                                 for rsseg in resetSourceSegments do
-                                    //let going = And(cpu, $"InnerResetSourceLatchAnd_{n}_{rsseg.Name}", ep, rsseg.Going)
-                                    //yield Latch.Create(cpu, $"InnerResetSourceLatch_{n}_{rsseg.Name}", going, readyTag)
                                     yield Latch.Create(cpu, $"InnerResetSourceLatch_{n}_{rsseg.Name}", rsseg.Going, readyTag)
                             |]
                             And(cpu, $"InnerResetSourceAnd_{n}", andItems)
@@ -167,6 +164,7 @@ module VirtualParentSegment =
 
                                 assert(targetChildStatus = Status4.Ready)
                                 if prevChildrenEndMonitored.Values.All(id) then
+                                    //assert(allPrevChildrenFinished) // ! check!!!!!!!!!!!
                                     prevChildrenEndMonitored.Keys |> Array.ofSeq |> Seq.iter(fun k -> prevChildrenEndMonitored[k] <- false )
                                     cpu.Enqueue(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
                                 ()

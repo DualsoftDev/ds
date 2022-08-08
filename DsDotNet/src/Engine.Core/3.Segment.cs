@@ -4,17 +4,16 @@ using System.Threading;
 namespace Engine.Core;
 
 [DebuggerDisplay("{ToText(),nq}")]
-public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, IWithSREPorts, ITxRx, ITagSREContainer// Coin
+public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, ITxRx, ITagSREContainer// Coin
 {
     public RootFlow ContainerFlow { get; }
     public Cpu Cpu { get => ContainerFlow.Cpu; set => throw new NotImplementedException(); }
     public string QualifiedName => $"{ContainerFlow.QualifiedName}_{Name}";
 
 
-    public PortS PortS { get; set; }
-    public PortR PortR { get; set; }
-    public PortE PortE { get; set; }
-    public Port[] AllPorts => new Port[] { PortS, PortR, PortE };
+    public PortInfoStart PortS { get; set; }
+    public PortInfoReset PortR { get; set; }
+    public PortInfoEnd PortE { get; set; }
 
     TagSREContainer _tagSREContainer = new();
     public IEnumerable<Tag> TagsStart => _tagSREContainer.TagsStart;
@@ -34,7 +33,8 @@ public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, IWithSREPorts
     public Child[] Lasts { get; internal set; }
     public VertexAndOutgoingEdges[] TraverseOrder { get; internal set; }
     internal Dictionary<Coin, Child> CoinChildMap { get; set; }
-    public bool Value { get => PortE.Value; set => throw new NotImplementedException(); }
+    public bool Value { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    //public bool Value { get => PortE.Value; set => throw new NotImplementedException(); }
     public virtual bool Evaluate() => Value;
 
     internal CancellationTokenSource MovingCancellationTokenSource { get; set; }
@@ -49,9 +49,9 @@ public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, IWithSREPorts
         //containerFlow.ChildVertices.Add(this);
         containerFlow.AddChildVertex(this);
 
-        PortS = new PortS(this);
-        PortR = new PortR(this);
-        PortE = new PortE(this);
+        //PortS = new PortS(this);
+        //PortR = new PortR(this);
+        //PortE = new PortE(this);
     }
 
     internal Segment(string name)

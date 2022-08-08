@@ -17,12 +17,12 @@ public enum Status4
 //    bool ChangeH();
 //}
 
-public interface IWithSREPorts
-{
-    PortS PortS { get; set; }
-    PortR PortR { get; set; }
-    PortE PortE { get; set; }
-}
+//public interface IWithSREPorts
+//{
+//    PortS PortS { get; set; }
+//    PortR PortR { get; set; }
+//    PortE PortE { get; set; }
+//}
 
 
 public interface IVertex : IBit { }

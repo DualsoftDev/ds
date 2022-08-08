@@ -15,6 +15,7 @@ public abstract class PortInfo : BitReEvaluatable
     }
 
     public Segment Segment { get; set; }
+    public string QualifiedName => $"{Segment.QualifiedName}.{GetType().Name}";
 
     IBit _plan;
     Tag _actual;

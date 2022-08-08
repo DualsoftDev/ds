@@ -1,4 +1,5 @@
-namespace Engine.Core;
+namespace Engine.Core.Obsolete;
+
 
 #if false
 

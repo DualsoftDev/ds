@@ -245,10 +245,6 @@ partial class ElementsListener : dsBaseListener
                 }
                 else
                     seg.TagGoing = new Tag(cpu, seg, name) { Type = TagType.Going };
-
-
-                var ports = new Port[] { seg.PortS, seg.PortR, seg.PortE, };
-                ports.Iter(p => p.Cpu = cpu);
             }
         }
 

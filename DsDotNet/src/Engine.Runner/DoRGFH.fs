@@ -256,13 +256,13 @@ module DoRGFH =
         ()
 
     /// Port 값 변경에 따른 작업 수행
-    let evaluatePort (port:Port) (newValue:bool) =
+    let evaluatePort (port:PortInfo) (newValue:bool) =
         if port.Value <> newValue then
-            let seg = port.OwnerSegment
+            let seg = port.Segment
             let rf = seg.IsResetFirst
             let st = seg.Status
 
-            if port :? PortR then
+            if port :? PortInfoReset then
                 noop()
 
             logDebug $"\tEvaluating port [{port.QualifiedName}]={newValue} with {st}"
@@ -271,39 +271,39 @@ module DoRGFH =
             let duplicate =
                 newValue &&
                     match port with
-                    | :? PortS when seg.PortR.Value -> true
-                    | :? PortR when seg.PortS.Value -> true
+                    | :? PortInfoStart when seg.PortR.Value -> true
+                    | :? PortInfoReset when seg.PortS.Value -> true
                     | _ -> false
 
             // 동시 눌림을 고려한, 실제 동작해야 할 port
             let mutable effectivePort = port
             if duplicate then
-                effectivePort <- if rf then seg.PortR :> Port else seg.PortS
+                effectivePort <- if rf then seg.PortR :> PortInfo else seg.PortS
 
             effectivePort.Value <- newValue
             match effectivePort, newValue, st with
-            | :? PortS, true , Status4.Ready ->
+            | :? PortInfoStart, true , Status4.Ready ->
                 goingSegment seg
-            | :? PortS, false, Status4.Ready -> pauseSegment seg
-            | :? PortS, true,  Status4.Finished ->
+            | :? PortInfoStart, false, Status4.Ready -> pauseSegment seg
+            | :? PortInfoStart, true,  Status4.Finished ->
                 seg.PortS.Value <- false
-            | :? PortS, false, Status4.Finished ->
+            | :? PortInfoStart, false, Status4.Finished ->
                     if seg.PortR.Value then
                         homing seg
-            | :? PortR, true , Status4.Finished -> homing seg
-            | :? PortR, false, Status4.Finished -> pauseSegment seg
-            | :? PortR, true , Status4.Going -> homing seg
-            | :? PortR, false, Status4.Going -> pauseSegment seg
-            | :? PortR, true , Status4.Ready ->
+            | :? PortInfoReset, true , Status4.Finished -> homing seg
+            | :? PortInfoReset, false, Status4.Finished -> pauseSegment seg
+            | :? PortInfoReset, true , Status4.Going -> homing seg
+            | :? PortInfoReset, false, Status4.Going -> pauseSegment seg
+            | :? PortInfoReset, true , Status4.Ready ->
                 // if seg is in origin state, then, turn off reset port
                 logDebug $"\tSkip homing due to segment [{seg.QualifiedName}] already ready state."
                 seg.PortR.Value <- false
-            | :? PortR, false, Status4.Ready ->
+            | :? PortInfoReset, false, Status4.Ready ->
                     if seg.PortS.Value then
                         goingSegment seg
 
-            | :? PortE, true , Status4.Going -> finish seg
-            | :? PortE, false, Status4.Homing -> ready seg
+            | :? PortInfoEnd, true , Status4.Going -> finish seg
+            | :? PortInfoEnd, false, Status4.Homing -> ready seg
 
             | _ ->
                 failwith "ERROR"

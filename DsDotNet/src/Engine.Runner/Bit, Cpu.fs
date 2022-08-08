@@ -115,7 +115,7 @@ module internal CpuModule =
                 if current <> newValue then
                     logDebug $"\tEvaluating bit {bit} due to {causalBit}"
                     match bit with
-                    | :? Port as port ->
+                    | :? PortInfo as port ->
                         evaluatePort port newValue
                     | :? Flag
                     | :? Tag ->

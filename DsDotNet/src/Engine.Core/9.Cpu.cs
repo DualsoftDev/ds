@@ -202,10 +202,10 @@ public static class CpuExtensionBitChange
                     }
                     break;
                 case FlipFlop ff:
-                    addRelationship(ff._setCondition, ff);
-                    addSubRelationship(ff._setCondition);
-                    addRelationship(ff._resetCondition, ff);
-                    addSubRelationship(ff._resetCondition);
+                    addRelationship(ff.S, ff);
+                    addSubRelationship(ff.S);
+                    addRelationship(ff.R, ff);
+                    addSubRelationship(ff.R);
                     break;
                 default:
                     throw new Exception("ERROR");
@@ -243,8 +243,8 @@ public static class CpuExtensionBitChange
         var flipFlops = cpu.BitsMap.Values.OfType<FlipFlop>().ToArray();
 
 
-        var ffSetterMap = flipFlops.GroupByToDictionary(ff => ff._setCondition);
-        var ffResetterMap = flipFlops.GroupByToDictionary(ff => ff._resetCondition);
+        var ffSetterMap = flipFlops.GroupByToDictionary(ff => ff.S);
+        var ffResetterMap = flipFlops.GroupByToDictionary(ff => ff.R);
 
         new Thread(async () =>
         {

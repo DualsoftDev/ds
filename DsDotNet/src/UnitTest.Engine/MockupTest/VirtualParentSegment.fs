@@ -3,9 +3,7 @@ namespace UnitTest.Mockup.Engine
 
 open Engine.Core
 open Dual.Common
-open System.Linq
 open Engine.Runner
-open System.Net
 
 
 [<AutoOpen>]
@@ -26,7 +24,7 @@ module VirtualParentSegment =
     ) =
         inherit MuSegmentBase(target.Cpu, name, startPort, resetPort, endPort, goingTag, readyTag)
         let cpu = target.Cpu
-        let mutable oldStatus = Status4.Homing
+        let mutable oldStatus:Status4 option = None
 
         member val Target = target;
         member val PreChildren = causalSourceSegments |> Array.ofSeq
@@ -60,14 +58,14 @@ module VirtualParentSegment =
                     let vrp =
                         [|
                             yield auto
-                            yield ep
+                            yield target.PortE  //ep
                             let set =
                                 let andItems = [|
                                     for rsseg in resetSourceSegments do
-                                        yield Latch.Create(cpu, $"InnerResetSourceLatch_{n}_{rsseg.Name}", rsseg.Going, readyTag)  :> IBit
+                                        yield FlipFlop(cpu, $"InnerResetSourceLatch_{n}_{rsseg.Name}", rsseg.Going, readyTag)  :> IBit
                                 |]
                                 And(cpu, $"InnerResetSourceAnd_{n}", andItems)
-                            yield Latch.Create(cpu, $"ResetLatch_{n}", set, readyTag)
+                            yield FlipFlop(cpu, $"ResetLatch_{n}", set, readyTag)
                         |]
                     And(cpu, $"ResetPortInfo_{n}", vrp)
                 PortInfoReset(cpu, null, $"Reset_{n}", resetPortInfoPlan, null)
@@ -86,12 +84,7 @@ module VirtualParentSegment =
                             yield auto
                             yield readyTag :> IBit
                             for csseg in causalSourceSegments do
-                                yield Latch.Create(cpu, $"InnerStartSourceLatch_{n}_{csseg.Name}", csseg.PortE, ep)// :> IBit
-                            //let set =
-                            //    let andItems = [|
-                            //    |]
-                            //    And(cpu, $"InnerStartSourceAnd_{n}", andItems)
-                            //yield Latch.Create(cpu, $"StartLatch_{n}", set, readyTag)
+                                yield FlipFlop(cpu, $"InnerStartSourceLatch_{n}_{csseg.Name}", csseg.PortE, ep)// :> IBit
                         |]
                     And(cpu, $"StartPortInfo_{n}", vsp)
 
@@ -106,39 +99,18 @@ module VirtualParentSegment =
             vps
 
         override x.WireEvent() =
-            //let prevChildrenEndPorts = x.PreChildren |> Array.map(fun seg -> seg.PortE)
-            //let prevChildrenEndMonitored = prevChildrenEndPorts |> Seq.map(fun p -> p, p.Value) |> Tuple.toDictionary
             Global.BitChangedSubject
                 .Subscribe(fun bc ->
                     let bit = bc.Bit :?> Bit
                     let ep = if bc.Bit :? PortInfoEnd then bc.Bit :?> PortInfoEnd else null
                     let on = bc.Bit.Value
-                    //let allPrevChildrenFinished = prevChildrenEndPorts.All(fun ep -> ep.Value)
-                    //if on && ep <> null && prevChildrenEndMonitored.ContainsKey(ep) then
-                    //    prevChildrenEndMonitored[ep] <- on
 
-                    //let notiPrevChildFinish =
-                    //    on
-                    //        && not (isNull ep)
-                    //        && prevChildrenEndPorts |> Seq.contains(ep)
                     let notiVpsPortChange = [x.PortS :> IBit; x.PortR; x.PortE] |> Seq.contains(bc.Bit)
                     let notiTargetEndPortChange = bc.Bit = x.Target.PortE
                     let newVpsState = x.GetSegmentStatus()
 
-                    //if notiPrevChildFinish || notiVpsPortChange || notiTargetEndPortChange then
+                    //if notiVpsPortChange || notiTargetEndPortChange then
                     //    noop()
-
-                    //if notiPrevChildFinish then
-                    //    let targetChildStatus = x.Target.GetSegmentStatus()
-                    //    if allPrevChildrenFinished then
-                    //        logDebug $"[{x.Name}]{newVpsState} - Prev child [{x.PreChildren[0].Name}] finish detected"
-                    //    match allPrevChildrenFinished, newVpsState, targetChildStatus with
-                    //    | true, Status4.Going, Status4.Ready -> // 사전 조건 완료, target child 수행
-                    //        logDebug $"[{x.Name}] - Executing child.."
-                    //        cpu.Enqueue(targetStartTag, true)
-                    //    | _ ->
-                    //        logWarn $"[{x.Name}]{newVpsState} - Need Executing child.."
-                    //        ()
 
                     if notiTargetEndPortChange then
                         if x.Going.Value && newVpsState <> Status4.Going then
@@ -163,7 +135,7 @@ module VirtualParentSegment =
                             ()
                         | Status4.Homing, false ->
                             assert(x.Going.Value = false)
-                            cpu.Enqueue(targetResetTag, false)
+                            cpu.Enqueue(targetResetTag, false, $"{x.Target.Name} homing 완료로 reset 끄기")
                             cpu.Enqueue(x.Ready, true)
                             cpu.Enqueue(x.PortE, false)
                         | _ ->
@@ -171,43 +143,48 @@ module VirtualParentSegment =
 
 
                     if notiVpsPortChange then
-                        if newVpsState = oldStatus then
+                        if x.Name = "VPS_B" then
+                            noop()
+                        if oldStatus = Some newVpsState then
                             logDebug $"\t\tVPS Skipping duplicate status: [{x.Name}] status : {newVpsState}"
                         else
-                            oldStatus <- newVpsState
+                            oldStatus <- Some newVpsState
                             logDebug $"[{x.Name}] Segment status : {newVpsState} by {bit.Name}={bit.Value}"
 
                             match newVpsState with
                             | Status4.Ready    ->
                                 ()
                             | Status4.Going    ->
-                                if x.Name = "VPS_B" then
-                                    noop()
-
                                 let targetChildStatus = x.Target.GetSegmentStatus()
                                 cpu.Enqueue(x.Going, true, $"{name} GOING 시작")
 
-                                assert(targetChildStatus = Status4.Ready)
-                                cpu.Enqueue(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
-                                //if prevChildrenEndMonitored.Values.All(id) then
-                                //    //assert(allPrevChildrenFinished) // ! check!!!!!!!!!!!
-                                //    prevChildrenEndMonitored.Keys |> Array.ofSeq |> Seq.iter(fun k -> prevChildrenEndMonitored[k] <- false )
-                                //    cpu.Enqueue(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
+                                assert(targetChildStatus = Status4.Ready || cpu.ProcessingQueue);
+                                if targetChildStatus = Status4.Ready then
+                                    cpu.Enqueue(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
+                                else
+                                    async {
+                                        // wait while target child available
+                                        let mutable targetChildStatus:Status4 option = None
+                                        while targetChildStatus <> Some Status4.Ready do
+                                            targetChildStatus <- Some <| x.Target.GetSegmentStatus()
+                                            logWarn $"Waiting target child [{x.Target.Name}] ready..from {targetChildStatus.Value}"
+                                            do! Async.Sleep(10);
+
+                                        cpu.Enqueue(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
+                                    } |> Async.StartAsTask |> ignore
+
                                 ()
                             | Status4.Finished ->
-                                cpu.Enqueue(targetStartTag, false)
+                                cpu.Enqueue(targetStartTag, false, $"{x.Name} FINISH 로 인한 {x.Target.Name} start 끄기")
                                 cpu.Enqueue(x.Going, false)
                                 x.FinishCount <- x.FinishCount + 1
                                 assert(x.PortE.Value)
                                 assert(x.PortR.Value = false)
 
-                                //// self reset
-                                //cpu.Enqueue(x.PortR, true, $"{x.Name} SELF RESETTING")
-
                             | Status4.Homing   ->
                                 assert(x.Target.GetSegmentStatus() = Status4.Finished)
                                 assert(x.Target.PortE.Value)
-                                cpu.Enqueue(targetResetTag, true)
+                                cpu.Enqueue(targetResetTag, true, $"{x.Name} HOMING 으로 인한 {x.Target.Name} reset 켜기")
                             | _ ->
                                 failwith "Unexpected"
                         ()

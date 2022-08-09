@@ -1,3 +1,5 @@
+using Engine.Common;
+
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
@@ -174,21 +176,48 @@ public static class CpuExtensionBitChange
         var bwd = cpu.BackwardDependancyMap;
         var fwd = cpu.ForwardDependancyMap;
 
-        foreach (var stem in stems)
+        void addRelationship(IBit slave, IBit master)
         {
-            foreach (var b in stem._monitoringBits.Where(b => b!=null))
+            if (!fwd.ContainsKey(slave))
+                fwd[slave] = new HashSet<IBit>();
+            fwd[slave].Add(master);
+
+            if (!bwd.ContainsKey(master))
+                bwd[master] = new HashSet<IBit>();
+            bwd[master].Add(slave);
+        }
+
+        void addSubRelationship(IBit bit)
+        {
+            switch(bit)
             {
-                if (!fwd.ContainsKey(b))
-                    fwd[b] = new HashSet<IBit>();
-
-                fwd[b].Add(stem);
-
-                if (!bwd.ContainsKey(stem))
-                    bwd[stem] = new HashSet<IBit>();
-
-                bwd[stem].Add(b);
+                case Flag:
+                case Tag:
+                    break;
+                case BitReEvaluatable bre:
+                    foreach (var mb in bre._monitoringBits.Where(b => b != null))
+                    {
+                        addRelationship(mb, bre);
+                        addSubRelationship(mb);
+                    }
+                    break;
+                case FlipFlop ff:
+                    addRelationship(ff._setCondition, ff);
+                    addSubRelationship(ff._setCondition);
+                    addRelationship(ff._resetCondition, ff);
+                    addSubRelationship(ff._resetCondition);
+                    break;
+                default:
+                    throw new Exception("ERROR");
             }
         }
+
+        foreach (var stem in stems)
+            addSubRelationship(stem);
+
+        var ffs = cpu.BitsMap.Values.OfType<FlipFlop>();
+        foreach (var ff in ffs)
+            addSubRelationship(ff);
     }
 
     public static IEnumerable<IBit> CollectForwardDependantBits(this Cpu cpu, IBit source)
@@ -211,6 +240,12 @@ public static class CpuExtensionBitChange
         var q = cpu.Queue;
         var fwd = cpu.ForwardDependancyMap;
         var indent = 0;
+        var flipFlops = cpu.BitsMap.Values.OfType<FlipFlop>().ToArray();
+
+
+        var ffSetterMap = flipFlops.GroupByToDictionary(ff => ff._setCondition);
+        var ffResetterMap = flipFlops.GroupByToDictionary(ff => ff._resetCondition);
+
         new Thread(async () =>
         {
             while (!disposable.IsDisposed)
@@ -257,26 +292,35 @@ public static class CpuExtensionBitChange
 
         void Apply(BitChange bitChange)
         {
-            if (bitChange.Bit.GetName() == "InnerStartSourceLatch_VPS_R_B")
+            if (bitChange.Bit.GetName() == "ResetLatch_VPS_B")
                 Console.WriteLine();
 
             indent++;
             var bit = (Bit)bitChange.Bit;
             if (fwd.ContainsKey(bit))
             {
-                var dependents = fwd[bit].Cast<BitReEvaluatable>();
+                var dependents = fwd[bit].OfType<BitReEvaluatable>();
                 var prevValues = dependents.ToDictionary(dep => dep, dep => dep.Value);
 
                 // 실제 변경 적용
                 if (DoApply(bitChange))
                 {
                     // 변경으로 인한 파생 변경 enqueue
-                    var changes =
-                        from dep in dependents
-                        let newValue = dep.Evaluate()
-                        where newValue != prevValues[dep]
-                        select (new BitChange(dep, newValue, false, bit))
-                        ;
+                    var changes = (
+                            from dep in dependents
+                            let newValue = dep.Evaluate()
+                            where newValue != prevValues[dep]
+                            select (new BitChange(dep, newValue, false, bit))
+                        ).ToList();
+
+                    if (ffSetterMap.ContainsKey(bit) && bitChange.NewValue)
+                        foreach(var ff in ffSetterMap[bit].Where(ff => ! ff.Value))
+                            changes.Add(new BitChange(ff, true, false, bit));
+
+                    if (ffResetterMap.ContainsKey(bit) && bitChange.NewValue)
+                        foreach (var ff in ffResetterMap[bit].Where(ff => ff.Value))
+                            changes.Add(new BitChange(ff, false, false, bit));
+
                     var chgrp = changes.GroupByToDictionary(ch => ch.Bit is PortInfo);
                     if (chgrp.ContainsKey(false))
                     {

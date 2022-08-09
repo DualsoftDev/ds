@@ -139,6 +139,7 @@ module VirtualParentTestTest =
             cpu.BuildBitDependencies()
             let runSubscription = cpu.Run()
 
+            assert([vpB; vpG; vpR] |> Seq.forall(fun vp -> vp.GetSegmentStatus() = Status4.Ready));
             [vpB; vpG; vpR] |> Seq.iter(fun vp -> cpu.Enqueue(vp.Ready, true));
 
             cpu.Enqueue(auto, true, "최초 auto 시작")

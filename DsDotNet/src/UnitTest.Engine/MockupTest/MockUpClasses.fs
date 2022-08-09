@@ -31,7 +31,7 @@ module MockUpClasses =
 
     type MuSegment(cpu, n, sp, rp, ep, goingTag, readyTag) =
         inherit MuSegmentBase(cpu, n, sp, rp, ep, goingTag, readyTag)
-        let mutable oldStatus = Status4.Homing
+        let mutable oldStatus:Status4 option = None
 
         static member CreateWithDefaultTags(cpu, n) =
             let seg = MuSegment(cpu, n, null, null, null, null, null)
@@ -51,10 +51,10 @@ module MockUpClasses =
                 )
                 .Subscribe(fun bc ->
                     let newSegmentState = x.GetSegmentStatus()
-                    if newSegmentState = oldStatus then
+                    if oldStatus = Some newSegmentState then
                         logDebug $"\t\tSkipping duplicate status: [{n}] status : {newSegmentState} by bit change {bc.Bit.GetName()}={bc.NewValue}"
                     else
-                        oldStatus <- newSegmentState
+                        oldStatus <- Some newSegmentState
                         logDebug $"[{n}] Segment status : {newSegmentState}"
                         if x.Going.Value && newSegmentState <> Status4.Going then
                             cpu.Enqueue(x.Going, false, $"{n} going off by status {newSegmentState}")

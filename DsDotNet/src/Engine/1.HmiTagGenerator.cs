@@ -9,6 +9,7 @@ public static class HmiTagGenerator
     /// <summary> flow 의 모든 root segment 에 대해서 S/R/E tag 생성 </summary>
     static Tag[] GenerateHmiTag(Segment segment)
     {
+        //Debug.Assert(segment.GetSRETags().IsNullOrEmpty());
         var flow = segment.ContainerFlow;
         var cpu = flow.Cpu;
         var name = $"{flow.System.Name}_{flow.Name}_{segment.Name}";

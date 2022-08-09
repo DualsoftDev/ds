@@ -36,14 +36,14 @@ class Tester
         //Cp2 = {P.F.Vp ~ P.F.Sp}
     }
     [flow] F = {
+        //Main = { T.Cp > T.Cm; }
         //Main = { T.Cp |> T.Cm, T.Cm1 > T.Cm2; T.Cm3 > T.Cm2; Cp2 > Cm2}
         //Main = { T.Cp2 |> Cp2; }
         //Main = { Cp2 |> Cm2; }
-        Main = { T.Cp > T.Cm; }
         //Main > Weak;
         //Cp1 > Cm1;
         //Weak >> Strong;
-        //Main |> XXX;
+        Main |> XXX;
         //parenting = {A > B > C; C |> B; }
         //T.C1 <||> T.C2;
         //A, B > C > D, E;

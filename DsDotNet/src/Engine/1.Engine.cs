@@ -66,7 +66,7 @@ partial class EngineBuilder
 
             Opc.AddTags(tags);
 
-            var goingTags = flows.SelectMany(f => f.RootSegments).Select(seg => seg.TagGoing);
+            var goingTags = flows.SelectMany(f => f.RootSegments).Select(seg => seg.TagGoing).Where(t => t is not null);
             Opc.AddTags(goingTags);
 
 
@@ -77,40 +77,9 @@ partial class EngineBuilder
 
             // todo: dependency 생성
             Console.WriteLine();
-            //addMissingForwardDependencies(cpu, flows);
             //cpu.BuildTagsMap();
             //cpu.BuildBackwardDependency();
         }
-
-        void addMissingForwardDependencies(Cpu cpu, RootFlow[] flows)
-        {
-            var fwd = cpu.ForwardDependancyMap;
-            foreach (var seg in flows.SelectMany(f => f.RootSegments))
-            {
-                foreach (var st in seg.TagsStart)
-                    Debug.Assert(seg.TagsStart.Contains(st));
-
-                foreach (var rt in seg.TagsReset)
-                    Debug.Assert(seg.TagsReset.Contains(rt));
-
-                foreach (var et in seg.TagsEnd)
-                    Debug.Assert(seg.TagsEnd.Contains(et));
-            }
-
-            //foreach (var e in flows.SelectMany(f => f.Edges))
-            //{
-            //    foreach(var s in e.SourceTags)
-            //    {
-            //        if (!fwd.ContainsKey(s) || !fwd[s].Contains(e))
-            //            cpu.AddBitDependancy(s, e);
-            //    }
-
-            //    if (!fwd.ContainsKey(e) || !fwd[e].Contains(e.TargetTag))
-            //        cpu.AddBitDependancy(e, e.TargetTag);
-            //}
-
-        }
-
 
 
 
@@ -149,7 +118,8 @@ partial class EngineBuilder
             }
             else if (tt.HasFlag(TagType.Going))
             {
-                Debug.Assert(segment.TagGoing.Name == tag.Name);
+                Debug.Assert(segment.TagGoing == null);
+                segment.TagGoing = tag;
                 Debug.Assert(segment.TagGoing == edgeTag);
                 if (tgi.IsSource)
                     edge.SourceTags.Add(segment.TagGoing);

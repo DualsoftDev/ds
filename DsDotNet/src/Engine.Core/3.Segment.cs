@@ -20,6 +20,7 @@ public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, ITxRx, ITagSR
     public IEnumerable<Tag> TagsReset => _tagSREContainer.TagsReset;
     public IEnumerable<Tag> TagsEnd => _tagSREContainer.TagsEnd;
     public Tag TagGoing { get; internal set; }
+    public Tag TagReady { get; internal set; }
 
     public void AddStartTags(params Tag[] tags) => _tagSREContainer.AddStartTags(tags);
     public void AddResetTags(params Tag[] tags) => _tagSREContainer.AddResetTags(tags);
@@ -140,7 +141,29 @@ public static class SegmentExtension
         }
         var str = string.Concat(spit());
         Global.Logger.Debug($"Tags for segment [{seg.QualifiedName}]:{str}");
+    }
 
+    public static IEnumerable<Tag> GetSRETags(this Segment segment)
+    {
+        var s = segment;
+        foreach (var t in s.TagsStart)
+            yield return t;
+        foreach (var t in s.TagsReset)
+            yield return t;
+        foreach (var t in s.TagsEnd)
+            yield return t;
+    }
+
+    public static IEnumerable<Tag> GetSREGRTags(this Segment segment)
+    {
+        var s = segment;
+        foreach (var t in s.GetSRETags())
+            yield return t;
+
+        if (s.TagGoing is not null)
+            yield return s.TagGoing;
+        if (s.TagReady is not null)
+            yield return s.TagReady;
     }
 
 }

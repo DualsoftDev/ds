@@ -59,7 +59,7 @@ module DoRGFH =
     //    tcs.Task
 
     let private goingSegment (seg:Segment) =
-        assert seg.PortS.Value
+        assert seg.PortInfoS.Value
         assert (seg.Status = Status4.Going) // PortS ON 시, 이미 Going 상태
         assert isNull seg.MovingCancellationTokenSource
 
@@ -71,8 +71,8 @@ module DoRGFH =
             // going 중에 start port 꺼지거나, reset port 켜질 때에는 going 중단.
             Global.BitChangedSubject
                 .Where(fun bc ->
-                    (bc.Bit = seg.PortS && bc.NewValue = false)
-                    || (bc.Bit = seg.PortR && bc.NewValue = true))
+                    (bc.Bit = seg.PortInfoS && bc.NewValue = false)
+                    || (bc.Bit = seg.PortInfoR && bc.NewValue = true))
                 .Subscribe(fun _ ->
                     seg.CancelGoing())
                 ;
@@ -81,7 +81,7 @@ module DoRGFH =
             let allFinished = seg.IsChildrenStatusAllWith(Status4.Finished)
             if allFinished then
                 logDebug $"FINISHING segment [{seg.QualifiedName}]."
-                seg.PortE.Value <- true
+                seg.PortInfoE.Value <- true
                 assert(seg.Status = Status4.Finished)
             allFinished
 
@@ -91,7 +91,7 @@ module DoRGFH =
         if seg.Children.IsEmpty() then
             seg.TagGoing.Value <- true
             assert(seg.Status = Status4.Going)
-            seg.PortE.Value <- true
+            seg.PortInfoE.Value <- true
             //assert(seg.Status = Status4.Finished) || Status4.Ready???
             ()
         elif not <| checkAllChildrenFinished() then
@@ -243,14 +243,14 @@ module DoRGFH =
 
     let private homing (seg:Segment) =
         logDebug $"HOMING segment [{seg.QualifiedName}]."
-        seg.PortE.Value <- false
+        seg.PortInfoE.Value <- false
 
     let private pauseSegment (seg:Segment) =
         logDebug $"Pausing segment [{seg.QualifiedName}]."
         ()
     let private finish (seg:Segment) =
         logDebug $"FINISHING segment [{seg.QualifiedName}]."
-        seg.PortS.Value <- false
+        seg.PortInfoS.Value <- false
     let private ready (seg:Segment) =
         logDebug $"READY segment [{seg.QualifiedName}]."
         ()
@@ -271,14 +271,14 @@ module DoRGFH =
             let duplicate =
                 newValue &&
                     match port with
-                    | :? PortInfoStart when seg.PortR.Value -> true
-                    | :? PortInfoReset when seg.PortS.Value -> true
+                    | :? PortInfoStart when seg.PortInfoR.Value -> true
+                    | :? PortInfoReset when seg.PortInfoS.Value -> true
                     | _ -> false
 
             // 동시 눌림을 고려한, 실제 동작해야 할 port
             let mutable effectivePort = port
             if duplicate then
-                effectivePort <- if rf then seg.PortR :> PortInfo else seg.PortS
+                effectivePort <- if rf then seg.PortInfoR :> PortInfo else seg.PortInfoS
 
             effectivePort.Value <- newValue
             match effectivePort, newValue, st with
@@ -286,9 +286,9 @@ module DoRGFH =
                 goingSegment seg
             | :? PortInfoStart, false, Status4.Ready -> pauseSegment seg
             | :? PortInfoStart, true,  Status4.Finished ->
-                seg.PortS.Value <- false
+                seg.PortInfoS.Value <- false
             | :? PortInfoStart, false, Status4.Finished ->
-                    if seg.PortR.Value then
+                    if seg.PortInfoR.Value then
                         homing seg
             | :? PortInfoReset, true , Status4.Finished -> homing seg
             | :? PortInfoReset, false, Status4.Finished -> pauseSegment seg
@@ -297,9 +297,9 @@ module DoRGFH =
             | :? PortInfoReset, true , Status4.Ready ->
                 // if seg is in origin state, then, turn off reset port
                 logDebug $"\tSkip homing due to segment [{seg.QualifiedName}] already ready state."
-                seg.PortR.Value <- false
+                seg.PortInfoR.Value <- false
             | :? PortInfoReset, false, Status4.Ready ->
-                    if seg.PortS.Value then
+                    if seg.PortInfoS.Value then
                         goingSegment seg
 
             | :? PortInfoEnd, true , Status4.Going -> finish seg

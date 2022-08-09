@@ -21,7 +21,6 @@ module EngineModule =
 
 
         member _.Run() =
-            logInfo "Start F# Engine running..."
             /// OPC Server 에서 Cpu 가 가지고 있는 tag 값들을 읽어 들임
             /// Engine 최초 구동 시, 수행됨.
             let readTagsFromOpc (cpu:Cpu) (opc:OpcBroker) =
@@ -31,6 +30,11 @@ module EngineModule =
                     if tag.Value <> value then
                         onOpcTagChanged cpu (new OpcTagChange(tName, value))
 
+
+
+            logInfo "Start F# Engine running..."
+            activeCpu.BuildBitDependencies()
+            activeCpu.Run()
 
             let subscriptions =
                 [

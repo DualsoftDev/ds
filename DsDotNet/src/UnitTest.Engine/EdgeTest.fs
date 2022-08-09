@@ -63,14 +63,14 @@ module EdgeTest =
             let bwd = cpu.BackwardDependancyMap
 
             // tag 기준으로 해당 port 와 연결되어 있는지 check
-            main.TagsStart |> Seq.forall(fun s -> fwd[s].Contains(main.PortS)) |> ShouldBeTrue
-            main.TagsReset |> Seq.forall(fun r -> fwd[r].Contains(main.PortR)) |> ShouldBeTrue
-            main.TagsEnd   |> Seq.forall(fun e -> bwd[e].Contains(main.PortE)) |> ShouldBeTrue
+            main.TagsStart |> Seq.forall(fun s -> fwd[s].Contains(main.PortInfoS)) |> ShouldBeTrue
+            main.TagsReset |> Seq.forall(fun r -> fwd[r].Contains(main.PortInfoR)) |> ShouldBeTrue
+            main.TagsEnd   |> Seq.forall(fun e -> bwd[e].Contains(main.PortInfoE)) |> ShouldBeTrue
 
             // port 기준으로 해당 tag 와 연결되어 있는지 check
-            (bwd[main.PortS] |> Enumerable.OfType<Tag>, main.TagsStart) |> seqEq
-            (bwd[main.PortR] |> Enumerable.OfType<Tag>, main.TagsReset) |> seqEq
-            (fwd[main.PortE] |> Enumerable.OfType<Tag>, main.TagsEnd)   |> seqEq
+            (bwd[main.PortInfoS] |> Enumerable.OfType<Tag>, main.TagsStart) |> seqEq
+            (bwd[main.PortInfoR] |> Enumerable.OfType<Tag>, main.TagsReset) |> seqEq
+            (fwd[main.PortInfoE] |> Enumerable.OfType<Tag>, main.TagsEnd)   |> seqEq
 
 
             let otherCpu = model.Cpus.First(fun cpu -> not cpu.IsActive);
@@ -110,8 +110,8 @@ module EdgeTest =
                 spEnd =!= spEnd2
 
 
-                otherCpu.ForwardDependancyMap[vpStart2].Contains(vp.PortS) |> ShouldBeTrue
-                otherCpu.ForwardDependancyMap[sp.PortE].Contains(spEnd2) |> ShouldBeTrue
+                otherCpu.ForwardDependancyMap[vpStart2].Contains(vp.PortInfoS) |> ShouldBeTrue
+                otherCpu.ForwardDependancyMap[sp.PortInfoE].Contains(spEnd2) |> ShouldBeTrue
 
 
                 let eVp2Pp = otherRootFlow.Edges |> Seq.find(fun e -> e.Sources.Contains(vp) && e.Target = pp)

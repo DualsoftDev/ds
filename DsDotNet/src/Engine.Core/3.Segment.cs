@@ -11,9 +11,9 @@ public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, ITxRx, ITagSR
     public string QualifiedName => $"{ContainerFlow.QualifiedName}_{Name}";
 
 
-    public PortInfoStart PortS { get; set; }
-    public PortInfoReset PortR { get; set; }
-    public PortInfoEnd PortE { get; set; }
+    public PortInfoStart PortInfoS { get; set; }
+    public PortInfoReset PortInfoR { get; set; }
+    public PortInfoEnd PortInfoE { get; set; }
 
     TagSREContainer _tagSREContainer = new();
     public IEnumerable<Tag> TagsStart => _tagSREContainer.TagsStart;
@@ -49,9 +49,10 @@ public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, ITxRx, ITagSR
         //containerFlow.ChildVertices.Add(this);
         containerFlow.AddChildVertex(this);
 
-        //PortS = new PortS(this);
-        //PortR = new PortR(this);
-        //PortE = new PortE(this);
+        // todo : Segment Port 생성
+        //PortInfoS = new PortInfoStart(this);
+        //PortInfoR = new PortInfoReset(this);
+        //PortInfoE = new PortInfoEnd(this);
     }
 
     internal Segment(string name)

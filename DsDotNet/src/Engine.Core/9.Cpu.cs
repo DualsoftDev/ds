@@ -113,8 +113,11 @@ public static class CpuExtension
 
 public static class CpuExtensionBitChange
 {
+    [Obsolete("Old version")]
     public static void AddBitDependancy(this Cpu cpu, IBit source, IBit target)
     {
+        Debug.Assert(source is not null && target is not null);
+
         var fwdMap = cpu.ForwardDependancyMap;
 
         if (!fwdMap.ContainsKey(source))
@@ -141,6 +144,7 @@ public static class CpuExtensionBitChange
             ;
     }
 
+    [Obsolete("Old version")]
     public static void BuildBackwardDependency(this Cpu cpu)
     {
         cpu.BackwardDependancyMap = new Dictionary<IBit, HashSet<IBit>>();

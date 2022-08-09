@@ -17,12 +17,12 @@ module VirtualParentSegment =
     ///                 && #latch(#g(Previous), #r(Self)  <--- reset 조건 1
     ///                 && #latch(#g(Next), #r(Self)),    <--- reset 조건 2 ...
     ///             #r(Self))
-    type Vps(name, target:MuSegment, causalSourceSegments:MuSegment seq
+    type Vps(name, target:MockupSegment, causalSourceSegments:MockupSegment seq
         , startPort, resetPort, endPort
         , goingTag, readyTag
         , targetStartTag, targetResetTag               // target child 의 start port 에 가상 부모가 시작시킬 수 있는 start tag 추가 (targetStartTag)
     ) =
-        inherit MuSegmentBase(target.Cpu, name, startPort, resetPort, endPort, goingTag, readyTag)
+        inherit MockupSegmentBase(target.Cpu, name, startPort, resetPort, endPort, goingTag, readyTag)
         let cpu = target.Cpu
         let mutable oldStatus:Status4 option = None
 
@@ -31,10 +31,10 @@ module VirtualParentSegment =
         member val TargetStartTag = targetStartTag with get
         member val TargetResetTag = targetResetTag with get
 
-        static member Create(target:MuSegment, auto:IBit
+        static member Create(target:MockupSegment, auto:IBit
             , (targetStartTag:IBit, targetResetTag:IBit)
-            , causalSourceSegments:MuSegment seq
-            , resetSourceSegments:MuSegment seq
+            , causalSourceSegments:MockupSegment seq
+            , resetSourceSegments:MockupSegment seq
         ) =
             let cpu = target.Cpu
             let n = $"VPS_{target.Name}"
@@ -108,21 +108,21 @@ module VirtualParentSegment =
 
                     let notiVpsPortChange = [x.PortS :> IBit; x.PortR; x.PortE] |> Seq.contains(bc.Bit)
                     let notiTargetEndPortChange = bc.Bit = x.Target.PortE
-                    let newVpsState = x.GetSegmentStatus()
+                    let state = x.GetSegmentStatus()
 
                     //if notiVpsPortChange || notiTargetEndPortChange then
                     //    noop()
 
                     if notiTargetEndPortChange then
-                        if x.Going.Value && newVpsState <> Status4.Going then
-                            cpu.Enqueue(x.Going, false, $"{x.Name} going off by status {newVpsState}")
-                        if x.Ready.Value && newVpsState <> Status4.Ready then
-                            cpu.Enqueue(x.Ready, false, $"{x.Name} ready off by status {newVpsState}")
+                        if x.Going.Value && state <> Status4.Going then
+                            cpu.Enqueue(x.Going, false, $"{x.Name} going off by status {state}")
+                        if x.Ready.Value && state <> Status4.Ready then
+                            cpu.Enqueue(x.Ready, false, $"{x.Name} ready off by status {state}")
 
                         let cause = $"${x.Target.Name} End Port={x.Target.PortE.Value}"
 
 
-                        match newVpsState, on with
+                        match state, on with
                         | Status4.Going, true ->
                             cpu.Enqueue(targetStartTag, false, $"{x.Name} going 끝내기 by{cause}")
                             cpu.Enqueue(x.Going, false, $"{x.Name} going 끝내기 by{cause}")
@@ -139,34 +139,34 @@ module VirtualParentSegment =
                             logInfo $"외부에서 내부 target {x.Target.Name} 실행 감지"
 
                         | _ ->
-                            failwithlog $"Unknown: [{x.Name}]{newVpsState}: Target endport => {x.Target.Name}={on}"
+                            failwithlog $"Unknown: [{x.Name}]{state}: Target endport => {x.Target.Name}={on}"
 
 
                     if notiVpsPortChange then
-                        if oldStatus = Some newVpsState then
-                            logDebug $"\t\tVPS Skipping duplicate status: [{x.Name}] status : {newVpsState}"
+                        if oldStatus = Some state then
+                            logDebug $"\t\tVPS Skipping duplicate status: [{x.Name}] status : {state}"
                         else
-                            oldStatus <- Some newVpsState
-                            logDebug $"[{x.Name}] Segment status : {newVpsState} by {bit.Name}={bit.Value}"
+                            oldStatus <- Some state
+                            logDebug $"[{x.Name}] Segment status : {state} by {bit.Name}={bit.Value}"
 
-                            match newVpsState with
+                            match state with
                             | Status4.Ready    ->
                                 ()
                             | Status4.Going    ->
-                                let targetChildStatus = x.Target.GetSegmentStatus()
+                                let childStatus = x.Target.GetSegmentStatus()
                                 cpu.Enqueue(x.Going, true, $"{name} GOING 시작")
 
-                                assert(targetChildStatus = Status4.Ready || cpu.ProcessingQueue);
-                                if targetChildStatus = Status4.Ready then
+                                assert(childStatus = Status4.Ready || cpu.ProcessingQueue);
+                                if childStatus = Status4.Ready then
                                     cpu.Enqueue(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
                                 else
                                     async {
                                         // wait while target child available
-                                        let mutable targetChildStatus:Status4 option = None
-                                        while targetChildStatus <> Some Status4.Ready do
+                                        let mutable childStatus:Status4 option = None
+                                        while childStatus <> Some Status4.Ready do
                                             // re-evaluate child status
-                                            targetChildStatus <- Some <| x.Target.GetSegmentStatus()
-                                            logWarn $"Waiting target child [{x.Target.Name}] ready..from {targetChildStatus.Value}"
+                                            childStatus <- Some <| x.Target.GetSegmentStatus()
+                                            logWarn $"Waiting target child [{x.Target.Name}] ready..from {childStatus.Value}"
                                             do! Async.Sleep(10);
 
                                         cpu.Enqueue(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")

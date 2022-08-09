@@ -20,9 +20,9 @@ module VirtualParentTestTest =
             let cpu = new MuCpu("dummy")
             let wait() = wait(cpu)
 
-            let b, (stB, rtB) = MuSegment.CreateWithDefaultTags(cpu, "B")
-            let g, (stG, rtG) = MuSegment.CreateWithDefaultTags(cpu, "G")
-            let r, (stR, rtR) = MuSegment.CreateWithDefaultTags(cpu, "R")
+            let b, (stB, rtB) = MockupSegment.CreateWithDefaultTags(cpu, "B")
+            let g, (stG, rtG) = MockupSegment.CreateWithDefaultTags(cpu, "G")
+            let r, (stR, rtR) = MockupSegment.CreateWithDefaultTags(cpu, "R")
 
             let auto = new Tag(cpu, null, "auto")
 
@@ -44,7 +44,7 @@ module VirtualParentTestTest =
                     let cause = if isNull bc.CauseRepr then "" else $" caused by [{bc.CauseRepr}]"
                     logDebug $"\tBit changed: [{bit.GetName()}] = {bc.NewValue}{cause}") |> ignore
 
-            [b :> MuSegmentBase; g; r; vpB;] |> Seq.iter(fun seg -> seg.WireEvent() |> ignore)
+            [b :> MockupSegmentBase; g; r; vpB;] |> Seq.iter(fun seg -> seg.WireEvent() |> ignore)
 
             logDebug "====================="
             cpu.PrintAllTags(false);
@@ -86,9 +86,9 @@ module VirtualParentTestTest =
             let cpu = new MuCpu("dummy")
             let wait() = wait(cpu)
 
-            let b, (stB, rtB) = MuSegment.CreateWithDefaultTags(cpu, "B")
-            let g, (stG, rtG) = MuSegment.CreateWithDefaultTags(cpu, "G")
-            let r, (stR, rtR) = MuSegment.CreateWithDefaultTags(cpu, "R")
+            let b, (stB, rtB) = MockupSegment.CreateWithDefaultTags(cpu, "B")
+            let g, (stG, rtG) = MockupSegment.CreateWithDefaultTags(cpu, "G")
+            let r, (stR, rtR) = MockupSegment.CreateWithDefaultTags(cpu, "R")
 
             let auto = new Tag(cpu, null, "auto")
 
@@ -125,7 +125,7 @@ module VirtualParentTestTest =
 
                     match bit with
                     | :? PortInfoEnd as portE ->
-                        let seg = portE.Segment :?> MuSegmentBase
+                        let seg = portE.Segment :?> MockupSegmentBase
                         if bit = g.PortE && g.PortE.Value then
                             if seg.FinishCount % 10 = 0 then
                                 logDebug $"COUNTER: B={b.FinishCount}, G={g.FinishCount}, R={r.FinishCount}"
@@ -133,7 +133,7 @@ module VirtualParentTestTest =
                         ()
                 ) |> ignore
 
-            [b :> MuSegmentBase; g; r; vpB; vpG; vpR] |> Seq.iter(fun seg -> seg.WireEvent() |> ignore)
+            [b :> MockupSegmentBase; g; r; vpB; vpG; vpR] |> Seq.iter(fun seg -> seg.WireEvent() |> ignore)
 
 
             cpu.BuildBitDependencies()

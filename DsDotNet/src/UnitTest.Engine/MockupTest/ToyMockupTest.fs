@@ -16,9 +16,9 @@ module ToyMockupTest =
         [<Fact>]
         member __.``ToyMockup repeating triangle test`` () =
             let cpu = new MuCpu("dummy")
-            let b, (stB, rtB) = MuSegment.CreateWithDefaultTags(cpu, "B")
-            let g, (stG, rtG) = MuSegment.CreateWithDefaultTags(cpu, "G")
-            let r, (stR, rtR) = MuSegment.CreateWithDefaultTags(cpu, "R")
+            let b, (stB, rtB) = MockupSegment.CreateWithDefaultTags(cpu, "B")
+            let g, (stG, rtG) = MockupSegment.CreateWithDefaultTags(cpu, "G")
+            let r, (stR, rtR) = MockupSegment.CreateWithDefaultTags(cpu, "R")
             let stB = new Flag(cpu, "stB")
 
 
@@ -31,7 +31,7 @@ module ToyMockupTest =
                     logDebug $"\tBit changed: [{bit}] = {bc.NewValue}{cause}"
                     match bit with
                     | :? PortInfoEnd as portE ->
-                        let seg = portE.Segment :?> MuSegment
+                        let seg = portE.Segment :?> MockupSegment
                         let status = seg.GetSegmentStatus()
                         //logDebug $"Segment [{seg.Name}] Status : {status} inferred by port [{bit}]={bit.Value} change"
                         if bit = b.PortE && b.PortE.Value then
@@ -103,13 +103,12 @@ module ToyMockupTest =
             let cpu = new MuCpu("dummy")
             Global.BitChangedSubject
                 .Subscribe(fun bc ->
-                    //cpu.MuQueue.Enqueue(bc)
                     let bit = bc.Bit
                     logDebug $"\tBit changed: [{bit}] = {bc.NewValue}"
                 )
             |> ignore
 
-            let b, (stB, rtB) = MuSegment.CreateWithDefaultTags(cpu, "B")
+            let b, (stB, rtB) = MockupSegment.CreateWithDefaultTags(cpu, "B")
             let st = new Flag(cpu, "VStartB")
             let rt = new Flag(cpu, "VResetB")
 

@@ -10,7 +10,7 @@ open System.Reactive.Disposables
 
 [<AutoOpen>]
 module MockUpClasses =
-    type MuSegmentBase(cpu, n, sp, rp, ep, goingTag, readyTag) =
+    type MockupSegmentBase(cpu, n, sp, rp, ep, goingTag, readyTag) =
         inherit Segment(n)
 
         member val Cpu:Cpu = cpu
@@ -29,12 +29,12 @@ module MockUpClasses =
         abstract member WireEvent:unit->IDisposable
         default x.WireEvent() = Disposable.Empty
 
-    type MuSegment(cpu, n, sp, rp, ep, goingTag, readyTag) =
-        inherit MuSegmentBase(cpu, n, sp, rp, ep, goingTag, readyTag)
+    type MockupSegment(cpu, n, sp, rp, ep, goingTag, readyTag) =
+        inherit MockupSegmentBase(cpu, n, sp, rp, ep, goingTag, readyTag)
         let mutable oldStatus:Status4 option = None
 
         static member CreateWithDefaultTags(cpu, n) =
-            let seg = MuSegment(cpu, n, null, null, null, null, null)
+            let seg = MockupSegment(cpu, n, null, null, null, null, null)
             let st = Tag(cpu, seg, $"st_default_{n}", TagType.Start)
             let rt = Tag(cpu, seg, $"rt_default_{n}", TagType.Reset)
             seg.PortS <- PortInfoStart(cpu, seg, $"spex{n}_default", st, null)
@@ -50,18 +50,18 @@ module MockUpClasses =
                     [x.PortS :> IBit; x.PortR; x.PortE] |> Seq.contains(bc.Bit)
                 )
                 .Subscribe(fun bc ->
-                    let newSegmentState = x.GetSegmentStatus()
-                    if oldStatus = Some newSegmentState then
-                        logDebug $"\t\tSkipping duplicate status: [{n}] status : {newSegmentState} by bit change {bc.Bit.GetName()}={bc.NewValue}"
+                    let state = x.GetSegmentStatus()
+                    if oldStatus = Some state then
+                        logDebug $"\t\tSkipping duplicate status: [{n}] status : {state} by bit change {bc.Bit.GetName()}={bc.NewValue}"
                     else
-                        oldStatus <- Some newSegmentState
-                        logDebug $"[{n}] Segment status : {newSegmentState}"
-                        if x.Going.Value && newSegmentState <> Status4.Going then
-                            cpu.Enqueue(x.Going, false, $"{n} going off by status {newSegmentState}")
-                        if x.Ready.Value && newSegmentState <> Status4.Ready then
-                            cpu.Enqueue(x.Ready, false, $"{n} ready off by status {newSegmentState}")
+                        oldStatus <- Some state
+                        logDebug $"[{n}] Segment status : {state}"
+                        if x.Going.Value && state <> Status4.Going then
+                            cpu.Enqueue(x.Going, false, $"{n} going off by status {state}")
+                        if x.Ready.Value && state <> Status4.Ready then
+                            cpu.Enqueue(x.Ready, false, $"{n} ready off by status {state}")
 
-                        match newSegmentState with
+                        match state with
                         | Status4.Ready    ->
                             cpu.Enqueue(x.Ready, true)
                             ()

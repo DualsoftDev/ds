@@ -45,36 +45,59 @@ module VirtualParentSegment =
 
             let ep = PortInfoEnd.Create(cpu, null, $"End_{n}", null)
 
-            (*
-                And(            // $"ResetPortInfo_{X}"
-                    _auto
-                    ,Latch(     // $"ResetLatch_{X}"
-                        And(    // $"InnerResetSourceAnd_{X}"
-                            #(__X)
-                            //, Latch(#g(ResetSource1), #r(__X))
-                            , latch(#g(ResetSource2), #r(__X)) )        // $"InnerResetSourceLatch_{X}_{rsseg.Name}"
-                        ,#r(__X)))
-            *)
-            let resetPortInfoPlan =
-                let vrp =
-                    [|
-                        yield auto
-                        let set =
-                            let andItems = [|
-                                yield ep :> IBit
-                                for rsseg in resetSourceSegments do
-                                    yield Latch.Create(cpu, $"InnerResetSourceLatch_{n}_{rsseg.Name}", rsseg.Going, readyTag)
-                            |]
-                            And(cpu, $"InnerResetSourceAnd_{n}", andItems)
-                        yield Latch.Create(cpu, $"ResetLatch_{n}", set, readyTag)
-                    |]
-                And(cpu, $"ResetPortInfo_{n}", vrp)
+            let rp =
+                (*
+                    And(            // $"ResetPortInfo_{X}"
+                        _auto
+                        ,Latch(     // $"ResetLatch_{X}"
+                            And(    // $"InnerResetSourceAnd_{X}"
+                                #(__X)
+                                //, Latch(#g(ResetSource1), #r(__X))
+                                , latch(#g(ResetSource2), #r(__X)) )        // $"InnerResetSourceLatch_{X}_{rsseg.Name}"
+                            ,#r(__X)))
+                *)
+                let resetPortInfoPlan =
+                    let vrp =
+                        [|
+                            yield auto
+                            yield ep
+                            let set =
+                                let andItems = [|
+                                    for rsseg in resetSourceSegments do
+                                        yield Latch.Create(cpu, $"InnerResetSourceLatch_{n}_{rsseg.Name}", rsseg.Going, readyTag)  :> IBit
+                                |]
+                                And(cpu, $"InnerResetSourceAnd_{n}", andItems)
+                            yield Latch.Create(cpu, $"ResetLatch_{n}", set, readyTag)
+                        |]
+                    And(cpu, $"ResetPortInfo_{n}", vrp)
+                PortInfoReset(cpu, null, $"Reset_{n}", resetPortInfoPlan, null)
 
             let sp =
-                match auto with
-                | :? PortInfoStart as sp -> sp
-                | _ -> PortInfoStart(cpu, null, $"Start_{n}", auto, null)
-            let rp = PortInfoReset(cpu, null, $"Reset_{n}", resetPortInfoPlan, null)
+                (*
+                    And(            // $"StartPortInfo_{X}"
+                        _auto
+                        ,Latch(     // $"StartLatch_{X}"
+                                #(__Prev)
+                                ,#(__X.RsetPort)))
+                *)
+                let startPortInfoPlan =
+                    let vsp =
+                        [|
+                            yield auto
+                            yield readyTag :> IBit
+                            for csseg in causalSourceSegments do
+                                yield Latch.Create(cpu, $"InnerStartSourceLatch_{n}_{csseg.Name}", csseg.PortE, ep)// :> IBit
+                            //let set =
+                            //    let andItems = [|
+                            //    |]
+                            //    And(cpu, $"InnerStartSourceAnd_{n}", andItems)
+                            //yield Latch.Create(cpu, $"StartLatch_{n}", set, readyTag)
+                        |]
+                    And(cpu, $"StartPortInfo_{n}", vsp)
+
+                PortInfoStart(cpu, null, $"Start_{n}", startPortInfoPlan, null)
+
+
             let vps = Vps(n, target, causalSourceSegments, sp, rp, ep, null, readyTag, targetStartTag, targetResetTag)
             sp.Segment <- vps
             rp.Segment <- vps
@@ -83,39 +106,39 @@ module VirtualParentSegment =
             vps
 
         override x.WireEvent() =
-            let prevChildrenEndPorts = x.PreChildren |> Array.map(fun seg -> seg.PortE)
-            let prevChildrenEndMonitored = prevChildrenEndPorts |> Seq.map(fun p -> p, p.Value) |> Tuple.toDictionary
+            //let prevChildrenEndPorts = x.PreChildren |> Array.map(fun seg -> seg.PortE)
+            //let prevChildrenEndMonitored = prevChildrenEndPorts |> Seq.map(fun p -> p, p.Value) |> Tuple.toDictionary
             Global.BitChangedSubject
                 .Subscribe(fun bc ->
                     let bit = bc.Bit :?> Bit
                     let ep = if bc.Bit :? PortInfoEnd then bc.Bit :?> PortInfoEnd else null
                     let on = bc.Bit.Value
-                    let allPrevChildrenFinished = prevChildrenEndPorts.All(fun ep -> ep.Value)
-                    if on && ep <> null && prevChildrenEndMonitored.ContainsKey(ep) then
-                        prevChildrenEndMonitored[ep] <- on
+                    //let allPrevChildrenFinished = prevChildrenEndPorts.All(fun ep -> ep.Value)
+                    //if on && ep <> null && prevChildrenEndMonitored.ContainsKey(ep) then
+                    //    prevChildrenEndMonitored[ep] <- on
 
-                    let notiPrevChildFinish =
-                        on
-                            && not (isNull ep)
-                            && prevChildrenEndPorts |> Seq.contains(ep)
+                    //let notiPrevChildFinish =
+                    //    on
+                    //        && not (isNull ep)
+                    //        && prevChildrenEndPorts |> Seq.contains(ep)
                     let notiVpsPortChange = [x.PortS :> IBit; x.PortR; x.PortE] |> Seq.contains(bc.Bit)
                     let notiTargetEndPortChange = bc.Bit = x.Target.PortE
                     let newVpsState = x.GetSegmentStatus()
 
-                    if notiPrevChildFinish || notiVpsPortChange || notiTargetEndPortChange then
-                        noop()
+                    //if notiPrevChildFinish || notiVpsPortChange || notiTargetEndPortChange then
+                    //    noop()
 
-                    if notiPrevChildFinish then
-                        let targetChildStatus = x.Target.GetSegmentStatus()
-                        if allPrevChildrenFinished then
-                            logDebug $"[{x.Name}]{newVpsState} - Prev child [{x.PreChildren[0].Name}] finish detected"
-                        match allPrevChildrenFinished, newVpsState, targetChildStatus with
-                        | true, Status4.Going, Status4.Ready -> // 사전 조건 완료, target child 수행
-                            logDebug $"[{x.Name}] - Executing child.."
-                            cpu.Enqueue(targetStartTag, true)
-                        | _ ->
-                            logWarn $"[{x.Name}]{newVpsState} - Need Executing child.."
-                            ()
+                    //if notiPrevChildFinish then
+                    //    let targetChildStatus = x.Target.GetSegmentStatus()
+                    //    if allPrevChildrenFinished then
+                    //        logDebug $"[{x.Name}]{newVpsState} - Prev child [{x.PreChildren[0].Name}] finish detected"
+                    //    match allPrevChildrenFinished, newVpsState, targetChildStatus with
+                    //    | true, Status4.Going, Status4.Ready -> // 사전 조건 완료, target child 수행
+                    //        logDebug $"[{x.Name}] - Executing child.."
+                    //        cpu.Enqueue(targetStartTag, true)
+                    //    | _ ->
+                    //        logWarn $"[{x.Name}]{newVpsState} - Need Executing child.."
+                    //        ()
 
                     if notiTargetEndPortChange then
                         if x.Going.Value && newVpsState <> Status4.Going then
@@ -136,6 +159,8 @@ module VirtualParentSegment =
 
                         | Status4.Ready, false ->
                             assert(false)
+                        | Status4.Ready, true ->    // 외부에서 내부 target 을 실행한 경우
+                            ()
                         | Status4.Homing, false ->
                             assert(x.Going.Value = false)
                             cpu.Enqueue(targetResetTag, false)
@@ -163,10 +188,11 @@ module VirtualParentSegment =
                                 cpu.Enqueue(x.Going, true, $"{name} GOING 시작")
 
                                 assert(targetChildStatus = Status4.Ready)
-                                if prevChildrenEndMonitored.Values.All(id) then
-                                    //assert(allPrevChildrenFinished) // ! check!!!!!!!!!!!
-                                    prevChildrenEndMonitored.Keys |> Array.ofSeq |> Seq.iter(fun k -> prevChildrenEndMonitored[k] <- false )
-                                    cpu.Enqueue(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
+                                cpu.Enqueue(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
+                                //if prevChildrenEndMonitored.Values.All(id) then
+                                //    //assert(allPrevChildrenFinished) // ! check!!!!!!!!!!!
+                                //    prevChildrenEndMonitored.Keys |> Array.ofSeq |> Seq.iter(fun k -> prevChildrenEndMonitored[k] <- false )
+                                //    cpu.Enqueue(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
                                 ()
                             | Status4.Finished ->
                                 cpu.Enqueue(targetStartTag, false)

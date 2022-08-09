@@ -257,6 +257,9 @@ public static class CpuExtensionBitChange
 
         void Apply(BitChange bitChange)
         {
+            if (bitChange.Bit.GetName() == "InnerStartSourceLatch_VPS_R_B")
+                Console.WriteLine();
+
             indent++;
             var bit = (Bit)bitChange.Bit;
             if (fwd.ContainsKey(bit))

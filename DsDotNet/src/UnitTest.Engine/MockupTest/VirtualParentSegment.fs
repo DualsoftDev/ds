@@ -55,7 +55,7 @@ type VirtualParentSegment(name, target:MockupSegment, causalSourceSegments:Mocku
                 let vrp =
                     [|
                         yield auto
-                        yield target.PortE  //ep
+                        //yield target.PortE  //ep
                         let set =
                             let andItems = [|
                                 for rsseg in resetSourceSegments do
@@ -80,7 +80,7 @@ type VirtualParentSegment(name, target:MockupSegment, causalSourceSegments:Mocku
                 let vsp =
                     [|
                         yield auto
-                        yield readyTag
+                        //yield readyTag
                         for csseg in causalSourceSegments do
                             yield FlipFlop(cpu, $"InnerStartSourceFF_{n}_{csseg.Name}", csseg.PortE, ep)// :> IBit
                     |]
@@ -144,12 +144,12 @@ type VirtualParentSegment(name, target:MockupSegment, causalSourceSegments:Mocku
                     else
                         oldStatus <- Some state
                         logDebug $"[{x.Name}] Segment status : {state} by {bit.Name}={bit.Value}"
+                        let childStatus = x.Target.GetSegmentStatus()
 
                         match state with
                         | Status4.Ready    ->
                             ()
                         | Status4.Going    ->
-                            let childStatus = x.Target.GetSegmentStatus()
                             cpu.Enqueue(x.Going, true, $"{name} GOING 시작")
 
                             assert(childStatus = Status4.Ready || cpu.ProcessingQueue);
@@ -175,10 +175,13 @@ type VirtualParentSegment(name, target:MockupSegment, causalSourceSegments:Mocku
                             assert(x.PortE.Value)
                             assert(x.PortR.Value = false)
 
-                        | Status4.Homing   ->
-                            assert(x.Target.GetSegmentStatus() = Status4.Finished)
-                            assert(x.Target.PortE.Value)
+                        | Status4.Homing ->
+                            if childStatus = Status4.Going then
+                                failwith $"Something bad happend?  trying to reset child while {x.Target.Name}={childStatus}"
+
                             cpu.Enqueue(targetResetTag, true, $"{x.Name} HOMING 으로 인한 {x.Target.Name} reset 켜기")
+
+
                         | _ ->
                             failwith "Unexpected"
                     ()

@@ -44,14 +44,4 @@ public class Latch : BitReEvaluatable
         _value = newValue;
     }
 
-    //protected override void ReEvaluate(IBit causeBit)
-    //{
-    //    var value = Evaluate();
-    //    if (_value != value)
-    //    {
-    //        _value = value;
-    //        BitChange.Publish(this, value, true, causeBit);
-    //    }
-    //}
-
 }

@@ -117,7 +117,7 @@ class ModelListener : dsBaseListener
                                 continue;
                             }
                         }
-                        var seg = new Segment(n, _rootFlow);
+                        var seg = Segment.Create(n, _rootFlow);
                         QpInstanceMap.Add(fqdn, seg);
                     }
                 }

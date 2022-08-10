@@ -1,5 +1,6 @@
 using System.Reactive.Disposables;
 using System.Threading;
+using System.Xml.Linq;
 
 namespace Engine.Core;
 
@@ -51,7 +52,10 @@ public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, ITxRx, ITagSR
 
     internal CompositeDisposable Disposables = new();
 
-    public Segment(string name, RootFlow containerFlow)
+
+    /// <summary>Segment 생성 함수.  Segment 에서 상속받은 class 객체를 생성하기 위함. (e.g Engine.Runner.FsSegment)</summary>
+    public static Func<string, RootFlow, Segment> Create { get; set; } = (string name, RootFlow containerFlow) => new Segment(name, containerFlow);
+    private Segment(string name, RootFlow containerFlow)
         : base(containerFlow.Cpu, name)
     {
         ContainerFlow = containerFlow;

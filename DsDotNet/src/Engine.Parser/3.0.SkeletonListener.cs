@@ -124,7 +124,7 @@ class SkeletonListener : dsBaseListener
     override public void EnterListing(dsParser.ListingContext ctx)
     {
         var name = ctx.id().GetText();
-        var seg = new Segment(name, _rootFlow);
+        var seg = Segment.Create(name, _rootFlow);
         QpDefinitionMap.Add($"{CurrentPath}.{name}", seg);
         QpInstanceMap.Add($"{CurrentPath}.{name}", seg);
     }
@@ -134,7 +134,7 @@ class SkeletonListener : dsBaseListener
     {
         Trace.WriteLine($"Parenting: {ctx.GetText()}");
         var name = ctx.id().GetText();
-        _parenting = new Segment(name, _rootFlow);
+        _parenting = Segment.Create(name, _rootFlow);
         QpInstanceMap.Add(CurrentPath, _parenting);
     }
     override public void ExitParenting(dsParser.ParentingContext ctx) { _parenting = null; }

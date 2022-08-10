@@ -8,13 +8,13 @@ public static class ModelExtension
     {
         var rootFlows = model.CollectRootFlows();
         foreach (var flow in rootFlows)
-            flow.GraphInfo = GraphUtil.analyzeFlows(new[] { flow }, true);
+            flow.GraphInfo = FsGraphInfo.AnalyzeFlows(new[] { flow }, true);
 
         foreach (var cpu in model.Cpus)
-            cpu.GraphInfo = GraphUtil.analyzeFlows(cpu.RootFlows, true);
+            cpu.GraphInfo = FsGraphInfo.AnalyzeFlows(cpu.RootFlows, true);
 
         foreach (var segment in model.CollectSegments())
-            segment.GraphInfo = GraphUtil.analyzeFlows(new[] { segment }, false);
+            segment.GraphInfo = FsGraphInfo.AnalyzeFlows(new[] { segment }, false);
     }
     public static void Epilogue(this Model model)
     {

@@ -34,7 +34,7 @@ public static class HmiTagGenerator
         var midName = $"{flow.System.Name}_{flow.Name}";
 
         // graph 분석
-        var graphInfo = GraphUtil.analyzeFlows(new[] { flow }, true);
+        var graphInfo = FsGraphInfo.AnalyzeFlows(new[] { flow }, true);
         List<Tag> tags = new();
 
         foreach (var init_ in graphInfo.Inits)

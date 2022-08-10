@@ -7,6 +7,9 @@
 	<ItemGroup>
 		<None Include="paket.references" />
 		<Compile Include="Graph.fs" />
+		<Compile Include="FsGraphInfo.fs" />
+		<Compile Include="GraphProgressSupportUtil.fs" />
+		<Compile Include="GraphResetSearch.fs" />
 	</ItemGroup>
 
 	<ItemGroup>

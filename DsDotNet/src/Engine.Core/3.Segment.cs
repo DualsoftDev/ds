@@ -7,7 +7,16 @@ namespace Engine.Core;
 public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, ITxRx, ITagSREContainer// Coin
 {
     public RootFlow ContainerFlow { get; }
-    public Cpu Cpu { get => ContainerFlow.Cpu; set => throw new NotImplementedException(); }
+    Cpu _cpu;
+    public Cpu Cpu {
+        get => _cpu;
+        set
+        {
+            if (ContainerFlow != null)
+                Debug.Assert(value == ContainerFlow.Cpu);
+            _cpu = value;
+        }
+    }
     public string QualifiedName => $"{ContainerFlow.QualifiedName}_{Name}";
 
 
@@ -46,6 +55,7 @@ public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, ITxRx, ITagSR
         : base(containerFlow.Cpu, name)
     {
         ContainerFlow = containerFlow;
+        _cpu = containerFlow.Cpu;
         //containerFlow.ChildVertices.Add(this);
         containerFlow.AddChildVertex(this);
 

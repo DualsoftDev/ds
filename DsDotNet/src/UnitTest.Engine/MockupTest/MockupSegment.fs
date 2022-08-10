@@ -7,13 +7,15 @@ open System.Reactive.Disposables
 open Dual.Common
 open Engine.Core
 
-type MockupSegmentBase(cpu, n, sp, rp, ep, goingTag, readyTag) =
+type MockupSegmentBase(cpu, n, sp, rp, ep, goingTag, readyTag) as this =
     inherit Segment(n)
 
-    member val Cpu:Cpu = cpu
-    member val PortS:PortInfoStart = sp with get, set
-    member val PortR:PortInfoReset = rp with get, set
-    member val PortE:PortInfoEnd = ep with get, set
+    do
+        this.PortS <- sp
+        this.PortR <- rp
+        this.PortE <- ep
+        this.Cpu <- cpu
+
     member val Going = if isNull goingTag then new Tag(cpu, null, $"{n}_Going") else goingTag
     member val Ready = if isNull readyTag then new Tag(cpu, null, $"{n}_Ready") else readyTag
     member val FinishCount = 0 with get, set

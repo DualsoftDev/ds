@@ -35,6 +35,7 @@ public class Tag : Bit, IBitReadWritable, ITxRx
         get => _value;
         set
         {
+            throw new Exception("TESTING");
             if (_value != value)
             {
                 _value = value;

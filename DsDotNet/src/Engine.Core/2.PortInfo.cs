@@ -4,7 +4,7 @@ namespace Engine.Core;
 
 
 /// <summary> 정보(Plan) + 물리(Actual) </summary>
-public abstract class PortInfo : BitReEvaluatable
+public abstract class PortInfo : BitReEvaluatable, IBitWritable
 {
     protected PortInfo(Cpu cpu, Segment segment, string name, IBit plan, Tag actual)
         : base(cpu, name, plan, actual)
@@ -95,6 +95,7 @@ public class PortInfoEnd : PortInfo
         // PortInfoEnd 에 한해, setter 를 허용한다.
         set
         {
+            throw new Exception("TESTING");
             if (Plan.Value != value)
             {
                 CheckMatch(value);

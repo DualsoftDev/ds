@@ -8,7 +8,7 @@ classes:
 # 	echo CWD is $(cwd)
 	$(eval dos=$(shell cygpath -d $(cwd)))
 #	echo DOS path = $(dos)
-	"C:\Program Files\Mozilla Firefox\firefox.exe" "file:$(dos)\html\index.html"
+	"C:\Program Files\Mozilla Firefox\firefox.exe" "file:$(dos)\html\inherits.html"
 
 install-paket-tool:
 	dotnet tool install -g Paket

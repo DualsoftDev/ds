@@ -12,6 +12,7 @@ public abstract class Bit : Named, IBit
         set
         {
             Debug.Assert(this is IBitWritable);
+            throw new Exception("TESTING");
             if (_value != value)
             {
                 _value = value;
@@ -21,7 +22,7 @@ public abstract class Bit : Named, IBit
     }
     internal virtual void SetValueOnly(bool newValue)
     {
-        //Debug.Assert(_value != newValue);
+        Debug.Assert(this is IBitWritable);
         _value = newValue;
     }
 
@@ -30,7 +31,7 @@ public abstract class Bit : Named, IBit
     {
         Debug.Assert(cpu != null);
 
-        Value = bit;
+        _value = bit;
         Cpu = cpu;
         cpu.BitsMap.Add(name, this);
     }

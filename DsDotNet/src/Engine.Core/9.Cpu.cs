@@ -296,7 +296,11 @@ public static class CpuExtensionBitChange
             //else
             {
                 //Global.Logger.Debug($"\t=({indent}) Applying bitchange {bitChange}");
-                bit.SetValueOnly(bitChange.NewValue);
+                if (bit is IBitWritable || (bit is BitReEvaluatable && bit is not Expression))
+                    bit.SetValueOnly(bitChange.NewValue);
+                else
+                    Debug.Assert(bit.Value == bitChange.NewValue);
+
                 bitChange.Applied = true;
                 Global.RawBitChangedSubject.OnNext(bitChange);
                 return true;

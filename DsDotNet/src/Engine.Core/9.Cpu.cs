@@ -225,19 +225,19 @@ public static class CpuExtensionBitChange
             addSubRelationship(ff);
     }
 
-    public static IEnumerable<IBit> CollectForwardDependantBits(this Cpu cpu, IBit source)
-    {
-        var fwd = cpu.ForwardDependancyMap;
-        if (!fwd.ContainsKey(source))
-            yield break;
+    //public static IEnumerable<IBit> CollectForwardDependantBits(this Cpu cpu, IBit source)
+    //{
+    //    var fwd = cpu.ForwardDependancyMap;
+    //    if (!fwd.ContainsKey(source))
+    //        yield break;
 
-        foreach (var dep in cpu.ForwardDependancyMap[source])
-        {
-            yield return dep;
-            foreach (var v in cpu.CollectForwardDependantBits(dep))
-                yield return v;
-        }
-    }
+    //    foreach (var dep in cpu.ForwardDependancyMap[source])
+    //    {
+    //        yield return dep;
+    //        foreach (var v in cpu.CollectForwardDependantBits(dep))
+    //            yield return v;
+    //    }
+    //}
 
     public static IDisposable Run(this Cpu cpu)
     {

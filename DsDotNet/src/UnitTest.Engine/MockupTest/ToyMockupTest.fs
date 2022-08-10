@@ -5,7 +5,6 @@ open Xunit
 open Engine.Core
 open Dual.Common
 open Xunit.Abstractions
-open System.Threading
 open UnitTest.Engine
 
 [<AutoOpen>]
@@ -15,7 +14,7 @@ module ToyMockupTest =
 
         [<Fact>]
         member __.``ToyMockup repeating triangle test`` () =
-            let cpu = new MuCpu("dummy")
+            let cpu = MockUpCpu.create("dummy")
             let b, (stB, rtB) = MockupSegment.CreateWithDefaultTags(cpu, "B")
             let g, (stG, rtG) = MockupSegment.CreateWithDefaultTags(cpu, "G")
             let r, (stR, rtR) = MockupSegment.CreateWithDefaultTags(cpu, "R")
@@ -100,7 +99,7 @@ module ToyMockupTest =
 
         [<Fact>]
         member __.``ToyMockup with 1 segment test`` () =
-            let cpu = new MuCpu("dummy")
+            let cpu = MockUpCpu.create("dummy")
             Global.BitChangedSubject
                 .Subscribe(fun bc ->
                     let bit = bc.Bit

@@ -8,7 +8,10 @@ public class Cpu : Named, ICpu
 {
     public IEngine Engine { get; set; }
     public Model Model { get; }
+
+    /// <summary> My System 의 Cpu 인지 여부</summary>
     public bool IsActive { get; set; }
+
 
 
     /// <summary> this Cpu 가 관장하는 root flows </summary>
@@ -16,7 +19,11 @@ public class Cpu : Named, ICpu
 
     /// <summary> Bit change event queue </summary>
     public ConcurrentQueue<BitChange> Queue { get; } = new();
+
+    /// <summary>CPU queue 에 더 처리할 내용이 있음을 외부에 알리기 위한 flag</summary>
     public bool ProcessingQueue { get; internal set; }
+    /// <summary>외부에서 CPU 를 멈추거나 가동하기 위한 flag</summary>
+    public bool Running { get; set; } = true;
     public GraphInfo GraphInfo { get; set; }
 
     /// <summary> bit 간 순방향 의존성 map </summary>
@@ -246,7 +253,7 @@ public static class CpuExtensionBitChange
 
         new Thread(async () =>
         {
-            while (!disposable.IsDisposed)
+            while (!disposable.IsDisposed && cpu.Running)
             {
                 while (q.Count > 0)
                 {

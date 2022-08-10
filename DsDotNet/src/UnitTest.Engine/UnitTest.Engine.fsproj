@@ -16,11 +16,11 @@
 		<Compile Include="Tag,Expression,Latch,Bits\Latch, Rising Test.fs" />
 		<Compile Include="Tag,Expression,Latch,Bits\PortTag Test.fs" />
 		<Compile Include="Tag,Expression,Latch,Bits\Expression Test.fs" />
-		<Compile Include="MockupTest/MockUpClasses.fs" />
-		<Compile Include="MockupTest\VirtualParentSegment.fs" />
+		<Compile Include="MockupTest/MockupSegment.fs" />
+		<Compile Include="MockupTest/VirtualParentSegment.fs" />
 		<Compile Include="MockupTest/ToyMockupTest.fs" />
-		<Compile Include="MockupTest\VirtualParentTest.fs" />
-		<Compile Include="Common test\QueueTest.fs" />
+		<Compile Include="MockupTest/VirtualParentTest.fs" />
+		<Compile Include="Common test/QueueTest.fs" />
 		<None Include="paket.references" />
 		<None Include="test.ipynb" />
 	</ItemGroup>

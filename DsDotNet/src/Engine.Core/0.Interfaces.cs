@@ -49,7 +49,6 @@ public interface INamed
 public interface IBit
 {
     bool Value { get; set; }
-    bool Evaluate();
     Cpu Cpu { get; set; }
 }
 

@@ -19,8 +19,6 @@ public abstract class Bit : Named, IBit
             }
         }
     }
-    public virtual bool Evaluate() => Value;
-
     internal virtual void SetValueOnly(bool newValue)
     {
         //Debug.Assert(_value != newValue);

@@ -29,7 +29,7 @@ public class Latch : BitReEvaluatable
 
     public override bool Evaluate()
     {
-        return (_setCondition.Evaluate(), _resetCondition.Evaluate()) switch
+        return (_setCondition.Value, _resetCondition.Value) switch
         {
             (true, false) => true,
             (false, false) => _value,

@@ -178,9 +178,6 @@ public static class CpuExtensionBitChange
         Debug.Assert(cpu.BackwardDependancyMap is null);
 
         cpu.BackwardDependancyMap = new();
-        var grp = cpu.BitsMap.Values.GroupByToDictionary(b => b is BitReEvaluatable);
-        var stems = grp[true].Cast<BitReEvaluatable>();
-        var terminals = grp[false];
 
         var bwd = cpu.BackwardDependancyMap;
         var fwd = cpu.ForwardDependancyMap;
@@ -221,8 +218,15 @@ public static class CpuExtensionBitChange
             }
         }
 
-        foreach (var stem in stems)
-            addSubRelationship(stem);
+        var grp = cpu.BitsMap.Values.GroupByToDictionary(b => b is BitReEvaluatable);
+        if (grp.ContainsKey(true))
+        {
+            var stems = grp[true].Cast<BitReEvaluatable>();
+            foreach (var stem in stems)
+                addSubRelationship(stem);
+        }
+        //var terminals = grp[false];
+
 
         var ffs = cpu.BitsMap.Values.OfType<FlipFlop>();
         foreach (var ff in ffs)

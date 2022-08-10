@@ -17,6 +17,9 @@ public abstract class PortInfo : BitReEvaluatable, IBitWritable
     public Segment Segment { get; set; }
     public string QualifiedName => $"{Segment.QualifiedName}.{GetType().Name}";
     public abstract void SetValue(bool newValue);
+    public abstract bool PlanValueChanged(bool newValue);
+    public abstract bool ActualValueChanged(bool newValue);
+
     IBit _plan;
     Tag _actual;
     public IBit Plan {
@@ -61,6 +64,15 @@ public abstract class PortInfoCommand : PortInfo
         _value = newValue;
         Actual.SetValue(newValue);
     }
+
+    public override bool PlanValueChanged(bool newValue)
+    {
+        Debug.Assert(Plan.Value == newValue);
+        Actual?.SetValue(newValue);
+        SetValue(newValue);
+        return true;
+    }
+    public override bool ActualValueChanged(bool newValue) => false;
 
 }
 /// <summary> Start 명령용 정보(Plan) + 물리(Actual) </summary>
@@ -131,4 +143,21 @@ public class PortInfoEnd : PortInfo
             _value = newValue;
         }
     }
+
+    public override bool PlanValueChanged(bool newValue)
+    {
+        Debug.Assert(Plan.Value == newValue);
+        CheckMatch(newValue);
+        return false;
+    }
+    public override bool ActualValueChanged(bool newValue)
+    {
+        Debug.Assert(Actual.Value == newValue);
+        if (Plan.Value != newValue)
+            throw new DsException($"Spatial Error: Plan[{Plan}={Plan.Value}] <> Actual[{Actual.Value}]");
+
+        _value = newValue;
+        return true;
+    }
+
 }

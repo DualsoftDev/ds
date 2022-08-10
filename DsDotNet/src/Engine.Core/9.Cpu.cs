@@ -171,8 +171,20 @@ public static class CpuExtensionBitChange
             }
         }
     }
+}
 
 
+
+
+
+
+
+
+/// <summary>
+/// Queue 이용한 구현
+/// </summary>
+public static class CpuExtensionQueueing
+{
     public static void BuildBitDependencies(this Cpu cpu)
     {
         Debug.Assert(cpu.ForwardDependancyMap.IsNullOrEmpty());
@@ -248,6 +260,25 @@ public static class CpuExtensionBitChange
     //    }
     //}
 
+
+    abstract class PortInfoChange : BitChange
+    {
+        public PortInfo PortInfo { get; }
+        public PortInfoChange(BitChange bc)
+            : base(bc.Bit, bc.NewValue, bc.Applied, bc.Cause)
+        {
+            PortInfo = (PortInfo)bc.Bit;
+        }
+    }
+    class PortInfoPlanChange : PortInfoChange
+    {
+        public PortInfoPlanChange(BitChange bc) : base(bc) {}
+    }
+    class PortInfoActualChange : PortInfoChange
+    {
+        public PortInfoActualChange(BitChange bc) : base(bc) { }
+    }
+
     public static IDisposable Run(this Cpu cpu)
     {
         var disposable = new CancellationDisposable();
@@ -284,29 +315,36 @@ public static class CpuExtensionBitChange
         return disposable;
 
 
-        bool DoApply(BitChange bitChange)
+        void DoApply(BitChange bitChange)
         {
             Debug.Assert(!bitChange.Applied);
             var bit = (Bit)bitChange.Bit;
+            //Global.Logger.Debug($"\t=({indent}) Applying bitchange {bitChange}");
 
-            //if (bit.Value == bitChange.NewValue)
-            //{
-            //    Global.Logger.Debug($"\t=({indent}) Skipping already same bitchange {bitChange}");
-            //    return bit is BitReEvaluatable;
-            //}
-            //else
+            var bitChanged = bitChange switch
             {
-                //Global.Logger.Debug($"\t=({indent}) Applying bitchange {bitChange}");
-                var writable = bit as IBitWritable;
-                if (writable == null)
-                    Debug.Assert(bit.Value == bitChange.NewValue);
-                else
-                    writable.SetValue(bitChange.NewValue);
+                PortInfoPlanChange pc => pc.PortInfo.PlanValueChanged(pc.NewValue),
+                PortInfoActualChange ac => ac.PortInfo.ActualValueChanged(ac.NewValue),
+                _ => new Func<bool>(() =>
+                {
+                    var writable = bit as IBitWritable;
+                    if (writable == null)
+                    {
+                        Debug.Assert(bit.Value == bitChange.NewValue);
+                        return false;
+                    }
+                    else
+                    {
+                        writable.SetValue(bitChange.NewValue);
+                        return true;
+                    }
+                })(),
+            };
 
-                bitChange.Applied = true;
+            bitChange.Applied = true;
+
+            if (bitChanged)
                 Global.RawBitChangedSubject.OnNext(bitChange);
-                return true;
-            }
         }
 
         void Apply(BitChange bitChange)
@@ -322,9 +360,10 @@ public static class CpuExtensionBitChange
                 var prevValues = dependents.ToDictionary(dep => dep, dep => dep.Value);
 
                 // 실제 변경 적용
-                if (DoApply(bitChange))
+                DoApply(bitChange);
+
+                // 변경으로 인한 파생 변경 enqueue
                 {
-                    // 변경으로 인한 파생 변경 enqueue
                     var changes = (
                             from dep in dependents
                             let newValue = dep.Evaluate()
@@ -354,12 +393,11 @@ public static class CpuExtensionBitChange
                         {
                             var port = (PortInfo)bc.Bit;
                             if (bit == port.Plan)
-                                Console.WriteLine();
+                                q.Enqueue(new PortInfoPlanChange(bc));
                             else if (bit == port.Actual)
-                                Console.WriteLine();
+                                q.Enqueue(new PortInfoActualChange(bc));
                             else
-                                Debug.Assert(false);
-                            q.Enqueue(bc);
+                                throw new Exception("ERROR");
                         }
                     }
                 }

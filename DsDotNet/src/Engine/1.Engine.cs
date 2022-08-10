@@ -66,7 +66,7 @@ partial class EngineBuilder
 
             Opc.AddTags(tags);
 
-            var goingTags = flows.SelectMany(f => f.RootSegments).Select(seg => seg.TagGoing);
+            var goingTags = flows.SelectMany(f => f.RootSegments).Select(seg => seg.TagGoing).Where(t => t is not null);
             Opc.AddTags(goingTags);
 
 
@@ -75,43 +75,11 @@ partial class EngineBuilder
             hmiTags.Iter(cpu.AddTag);
             Opc.AddTags(hmiTags);
 
-            addMissingForwardDependencies(cpu, flows);
-            cpu.BuildTagsMap();
-            cpu.BuildBackwardDependency();
+            // todo: dependency 생성
+            Console.WriteLine();
+            //cpu.BuildTagsMap();
+            //cpu.BuildBackwardDependency();
         }
-
-        void addMissingForwardDependencies(Cpu cpu, RootFlow[] flows)
-        {
-            var fwd = cpu.ForwardDependancyMap;
-            foreach (var seg in flows.SelectMany(f => f.RootSegments))
-            {
-                foreach (var st in seg.TagsStart)
-                    if (!fwd.ContainsKey(st) || !fwd[st].Contains(seg.PortS))
-                        cpu.AddBitDependancy(st, seg.PortS);
-
-                foreach (var rt in seg.TagsReset)
-                    if (!fwd.ContainsKey(rt) || !fwd[rt].Contains(seg.PortR))
-                        cpu.AddBitDependancy(rt, seg.PortR);
-
-                foreach (var et in seg.TagsEnd)
-                    if (!fwd.ContainsKey(seg.PortE) || !fwd[seg.PortE].Contains(et))
-                        cpu.AddBitDependancy(seg.PortE, et);
-            }
-
-            foreach (var e in flows.SelectMany(f => f.Edges))
-            {
-                foreach(var s in e.SourceTags)
-                {
-                    if (!fwd.ContainsKey(s) || !fwd[s].Contains(e))
-                        cpu.AddBitDependancy(s, e);
-                }
-
-                if (!fwd.ContainsKey(e) || !fwd[e].Contains(e.TargetTag))
-                    cpu.AddBitDependancy(e, e.TargetTag);
-            }
-
-        }
-
 
 
 
@@ -150,7 +118,8 @@ partial class EngineBuilder
             }
             else if (tt.HasFlag(TagType.Going))
             {
-                Debug.Assert(segment.TagGoing.Name == tag.Name);
+                Debug.Assert(segment.TagGoing == null);
+                segment.TagGoing = tag;
                 Debug.Assert(segment.TagGoing == edgeTag);
                 if (tgi.IsSource)
                     edge.SourceTags.Add(segment.TagGoing);
@@ -163,10 +132,11 @@ partial class EngineBuilder
         void buildBitDependencies(TagGenInfo tgi, Cpu cpu)
         {
             var (tag, edge) = (tgi.GeneratedTag, tgi.Edge);
+            var isReset = edge is IResetEdge;
 
             // call 에 대한 reset edge 는 실효성이 없으므로 무시.  (정보로만 사용)
             var child = tgi.Child as Child;
-            if (child != null && child.Coin is Call && edge is IResetEdge)
+            if (child != null && child.Coin is Call && isReset)
                 return;
 
 
@@ -184,7 +154,6 @@ partial class EngineBuilder
             }
 
 
-            var isReset = tgi.Edge is IResetEdge;
             switch (tgi.Child)
             {
                 case Segment:
@@ -192,19 +161,23 @@ partial class EngineBuilder
                     {
                         // { reset edge case
                         case (true, true, TagType.Going):
-                            cpu.AddBitDependancy(tgi.GeneratedTag, edge);
+                            Debug.Assert(edge.SourceTags.Contains(tag));
+                            //cpu.AddBitDependancy(tag, edge);
                             break;
                         case (true, false, TagType.Reset):
-                            cpu.AddBitDependancy(edge, tag);
+                            Debug.Assert(edge.TargetTag == tag);
+                            //cpu.AddBitDependancy(edge, tag);
                             break;
                         // }
 
                         // { start edge case
                         case (false, true, TagType.End):
-                            cpu.AddBitDependancy(tag, edge);
+                            Debug.Assert(edge.SourceTags.Contains(tag));
+                            //cpu.AddBitDependancy(tag, edge);
                             break;
                         case (false, false, TagType.Start):
-                            cpu.AddBitDependancy(edge, tag);
+                            Debug.Assert(edge.TargetTag == tag);
+                            //cpu.AddBitDependancy(edge, tag);
                             break;
                         // }
 
@@ -217,10 +190,12 @@ partial class EngineBuilder
                     switch (tgi.IsSource, tgi.Type)
                     {
                         case (true, TagType.End):
-                            cpu.AddBitDependancy(tag, edge);
+                            Debug.Assert(edge.SourceTags.Contains(tag));
+                            //cpu.AddBitDependancy(tag, edge);
                             break;
                         case (false, TagType.Start):
-                            cpu.AddBitDependancy(edge, tag);
+                            Debug.Assert(edge.TargetTag == tag);
+                            //cpu.AddBitDependancy(edge, tag);
                             break;
 
                         case (true, TagType.Start):

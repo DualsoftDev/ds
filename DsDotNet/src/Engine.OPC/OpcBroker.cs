@@ -4,6 +4,7 @@ using log4net;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Subjects;
@@ -18,6 +19,8 @@ public class OpcTag : Bit, IBitReadWritable
     {
         OriginalTag = tag;
     }
+
+    public override bool Value { set => _value = value; }
 }
 public class OpcBroker
 {
@@ -26,7 +29,6 @@ public class OpcBroker
 
     // { Debug only, or temporary implementations
     internal IEnumerable<OpcTag> _opcTags => _tagDic.Values;
-    internal Subject<OpcTagChange> OpcTagChangedSubject => Global.TagChangeFromOpcServerSubject;
     // }
 
     CompositeDisposable _disposables = new();
@@ -61,7 +63,7 @@ public class OpcBroker
             {
                 bit.Value = value;
 
-                OpcTagChangedSubject.OnNext(new OpcTagChange(tagName, value));
+                Global.TagChangeFromOpcServerSubject.OnNext(new OpcTagChange(tagName, value));
             }
         }
 

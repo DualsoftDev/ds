@@ -9,6 +9,7 @@ public static class HmiTagGenerator
     /// <summary> flow 의 모든 root segment 에 대해서 S/R/E tag 생성 </summary>
     static Tag[] GenerateHmiTag(Segment segment)
     {
+        //Debug.Assert(segment.GetSRETags().IsNullOrEmpty());
         var flow = segment.ContainerFlow;
         var cpu = flow.Cpu;
         var name = $"{flow.System.Name}_{flow.Name}_{segment.Name}";
@@ -20,16 +21,9 @@ public static class HmiTagGenerator
         segment.AddResetTags(r);
         segment.AddEndTags(e);
 
-
-        new[] { s, r, e }
-            .Iter(t => {
-                t.Cpu = cpu;
-                //t.IsExternal = true;
-            });
-
-        cpu.AddBitDependancy(s, segment.PortS);
-        cpu.AddBitDependancy(r, segment.PortR);
-        cpu.AddBitDependancy(segment.PortE, e);
+        //cpu.AddBitDependancy(s, segment.PortInfoS);
+        //cpu.AddBitDependancy(r, segment.PortInfoR);
+        //cpu.AddBitDependancy(segment.PortInfoE, e);
         return new[] { s, r, e };
     }
 
@@ -55,7 +49,6 @@ public static class HmiTagGenerator
             {
                 var s = Tag.CreateAutoStart(cpu, init, $"AutoStart_{midName}_{init.Name}");
                 init.AddStartTags(s);
-                cpu.AddBitDependancy(s, init.PortS);
                 tags.Add(s);
             }
         }
@@ -72,7 +65,6 @@ public static class HmiTagGenerator
             {
                 var r = Tag.CreateAutoReset(cpu, last, $"AutoReset_{midName}_{last.Name}");
                 last.AddResetTags(r);
-                cpu.AddBitDependancy(r, last.PortR);
                 tags.Add(r);
             }
         }

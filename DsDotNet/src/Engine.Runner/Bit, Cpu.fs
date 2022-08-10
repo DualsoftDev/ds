@@ -87,7 +87,7 @@ module internal CpuModule =
         if (cpu.TagsMap.ContainsKey(tagName)) then
             let tag = cpu.TagsMap[tagName]
             if tag.Value <> value then
-                tag.Value <- value;      //! setter 에서 BitChangedSubject.OnNext --> onBitChanged 가 호출된다.
+                cpu.Enqueue(tag, value, $"OPC Tag 변경");      //! setter 에서 BitChangedSubject.OnNext --> onBitChanged 가 호출된다.
 
     /// CPU 별 bit change event queue 에 들어 있는 event 를 처리 : evaluateBit 호출
     let private processQueue(cpu:Cpu) =

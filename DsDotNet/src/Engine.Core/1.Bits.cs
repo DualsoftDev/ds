@@ -51,7 +51,7 @@ public abstract class Bit : Named, IBit
         return null;
     }
 
-    // Value setter 를 수행하지 않기 위한 생성자
+    // Value setter 를 수행하지 않기 위한 생성자.  BitReEvaluatable 의 base 생성자로 사용됨
     protected Bit(string name, Cpu cpu) : base(name)
     {
         Debug.Assert(cpu != null);

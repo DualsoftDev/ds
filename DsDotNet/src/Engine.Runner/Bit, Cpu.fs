@@ -97,7 +97,7 @@ module internal CpuModule =
                 if edge.Value <> edge.IsSourcesTrue then
                     logDebug $"\tEvaluating Edge {edge} due to {causalBit}"
                     edge.Value <- edge.IsSourcesTrue
-                    edge.TargetTag.Value <- edge.Value
+                    edge.TargetTag.SetValue(edge.Value)
                 else
                     logDebug "\t\tSkip evaluating edge %A" edge
                 ()
@@ -135,7 +135,9 @@ module internal CpuModule =
                     let bit = bc.Bit
                     if (bc.NewValue <> bit.Value) then
                         assert not bc.Applied
-                        bit.Value <- bc.NewValue
+                        match bit with
+                        | :? IBitWritable as wb -> wb.SetValue(bc.NewValue)
+                        | _ -> assert (bit.Value = bc.NewValue)
 
 
                     logDebug "\tProcessing Queue: %A" bc

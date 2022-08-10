@@ -48,12 +48,14 @@ public interface INamed
 
 public interface IBit
 {
-    bool Value { get; set; }
+    bool Value { get; }
     Cpu Cpu { get; set; }
 }
 
 public interface IBitReadable : IBit {}
-public interface IBitWritable : IBit {}
+public interface IBitWritable : IBit {
+    void SetValue(bool newValue);
+}
 public interface IBitReadWritable : IBitReadable, IBitWritable { }
 
 

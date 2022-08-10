@@ -18,7 +18,7 @@ public class OpcTag : Bit, IBitReadWritable
         OriginalTag = tag;
     }
 
-    public override bool Value { set => _value = value; }
+    public void SetValue(bool newValue) => _value = newValue;
 }
 public class OpcBroker
 {
@@ -59,7 +59,7 @@ public class OpcBroker
             var bit = _tagDic[tagName];
             if (bit.Value != value)
             {
-                bit.Value = value;
+                bit.SetValue(value);
 
                 Global.TagChangeFromOpcServerSubject.OnNext(new OpcTagChange(tagName, value));
             }

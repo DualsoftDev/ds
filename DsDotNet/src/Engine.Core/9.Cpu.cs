@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Reactive.Joins;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -296,10 +297,11 @@ public static class CpuExtensionBitChange
             //else
             {
                 //Global.Logger.Debug($"\t=({indent}) Applying bitchange {bitChange}");
-                if (bit is IBitWritable || (bit is BitReEvaluatable && bit is not Expression))
-                    bit.SetValueOnly(bitChange.NewValue);
-                else
+                var writable = bit as IBitWritable;
+                if (writable == null)
                     Debug.Assert(bit.Value == bitChange.NewValue);
+                else
+                    writable.SetValue(bitChange.NewValue);
 
                 bitChange.Applied = true;
                 Global.RawBitChangedSubject.OnNext(bitChange);
@@ -349,7 +351,16 @@ public static class CpuExtensionBitChange
                     {
                         var ports = chgrp[true];
                         foreach (var bc in ports)
+                        {
+                            var port = (PortInfo)bc.Bit;
+                            if (bit == port.Plan)
+                                Console.WriteLine();
+                            else if (bit == port.Actual)
+                                Console.WriteLine();
+                            else
+                                Debug.Assert(false);
                             q.Enqueue(bc);
+                        }
                     }
                 }
             }

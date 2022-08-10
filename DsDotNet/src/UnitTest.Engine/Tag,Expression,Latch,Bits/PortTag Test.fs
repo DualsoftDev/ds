@@ -47,12 +47,11 @@ module PortInfoTest =
                 pts.Plan.Value === false
                 pts.Actual.Value === false
 
-                // Expression 으로, 값을 설정할 수 없어야 한다.
-                (fun () -> enqueue(pts, true))
-                |> ShouldFail
+                //// Expression 으로, 값을 설정할 수 없어야 한다.
+                //(fun () -> enqueue(pts, true))
+                //|> ShouldFail
 
-                enqueue(plan, true)
-                Thread.Sleep(100)
+                enqueue(pts, true)
                 pts.Plan.Value === true
                 pts.Value === true
                 pts.Actual.Value === true

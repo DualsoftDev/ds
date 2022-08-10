@@ -1,8 +1,7 @@
 namespace Engine.Core;
 
-public class Latch : BitReEvaluatable
+public class Latch : BitReEvaluatable, IBitWritable
 {
-    public override bool Value { get => _value; set => throw new DsException("Not Supported."); }
     internal IBit _setCondition { get; }
     internal IBit _resetCondition { get; }
 
@@ -37,7 +36,7 @@ public class Latch : BitReEvaluatable
         };
     }
 
-    internal override void SetValueOnly(bool newValue)
+    public void SetValue(bool newValue)
     {
         var realValue = Evaluate();
         Debug.Assert(realValue == newValue);

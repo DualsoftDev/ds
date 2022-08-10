@@ -10,6 +10,8 @@ internal class FlipFlop : Bit, IBitWritable
 {
     public IBit S { get; }
     public IBit R { get; }
+    public void SetValue(bool newValue) => _value = newValue;
+
 
     public FlipFlop(Cpu cpu, string name, IBit set, IBit reset, bool value=false)
         : base(cpu, name, value)

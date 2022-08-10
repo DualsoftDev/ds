@@ -6,25 +6,7 @@ namespace Engine.Core;
 public abstract class Bit : Named, IBit
 {
     protected bool _value;
-    public virtual bool Value
-    {
-        get => _value;
-        set
-        {
-            Debug.Assert(this is IBitWritable);
-            throw new Exception("TESTING");
-            if (_value != value)
-            {
-                _value = value;
-                BitChange.Publish(this, value, true);
-            }
-        }
-    }
-    internal virtual void SetValueOnly(bool newValue)
-    {
-        Debug.Assert(this is IBitWritable);
-        _value = newValue;
-    }
+    public virtual bool Value => _value;    //{ get => _value; set => _value = value; }
 
     public Cpu Cpu { get; set; }
     public Bit(Cpu cpu, string name, bool bit = false) : base(name)
@@ -60,7 +42,7 @@ public abstract class Bit : Named, IBit
     // null cpu 를 허용하기 위한 생성자.  OpcTag 만 cpu null 허용
     internal Bit(string name, bool bit = false) : base(name)
     {
-        Value = bit;
+        _value = bit;
         Debug.Assert(GetType().Name.Contains("OpcTag"));
     }
 

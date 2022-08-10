@@ -36,7 +36,7 @@ module ToyMockupTest =
                         if bit = b.PortE && b.PortE.Value then
                             if stB.Value then
                                 logDebug "초기 시작 button OFF"
-                                stB.Value <- false
+                                cpu.Enqueue(stB, false)
 
                         if bit = g.PortE && g.PortE.Value then
                             if seg.FinishCount % 10 = 0 then
@@ -83,9 +83,11 @@ module ToyMockupTest =
             b.PortR.Plan <- Or(cpu, "rpeB(OR)", rlB, rtB)
 
 
+            cpu.BuildBitDependencies()
+            let runSubscription = cpu.Run()
 
 
-            stB.Value <- true
+            cpu.Enqueue(stB, true)
 
             // give enough time to wait...
             wait(cpu)
@@ -132,16 +134,16 @@ module ToyMockupTest =
                     if bit = b.PortE then
                         if bit.Value then
                             logDebug $"Endport ON 감지로 인한 start button 끄기"
-                            st.Value <- false // 종료 감지시 -> Start button 끄기
+                            cpu.Enqueue(st, false) // 종료 감지시 -> Start button 끄기
                         else
                             logDebug $"Endport OFF 감지로 인한 reset button 끄기"
-                            rt.Value <- false
+                            cpu.Enqueue(rt, false)
                 )
             |> ignore
 
             b.WireEvent() |> ignore
 
-            st.Value <- true
+            cpu.Enqueue(st, true)
             // ... going 진행 후, end port 까지 ON
             st.Value === false
             b.GetSegmentStatus() === Status4.Finished
@@ -155,7 +157,7 @@ module ToyMockupTest =
             resetLatch.Value === false
 
             // reset 시작
-            rt.Value <- true
+            cpu.Enqueue(rt, true)
             b.PortE.Value === false
             notPortE.Value === true
             b.GetSegmentStatus() === Status4.Ready

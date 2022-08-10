@@ -9,7 +9,6 @@ public abstract class Expression : BitReEvaluatable
             _value = Evaluate();
             return _value;
         }
-        set => throw new Exception("ERROR");
     }
     public override bool Evaluate() => throw new Exception("Should be redefined");
 

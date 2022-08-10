@@ -5,7 +5,6 @@ public abstract class BitReEvaluatable : Bit, IBitReadable
 {
     internal IBit[] _monitoringBits;
     public abstract bool Evaluate();
-    public override bool Value { set => throw new DsException("Not Supported."); }
     IDisposable _subscription;
     protected BitReEvaluatable(Cpu cpu, string name, params IBit[] monitoringBits)
         : base(name, cpu)

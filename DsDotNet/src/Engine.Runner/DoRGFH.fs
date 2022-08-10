@@ -81,7 +81,7 @@ module DoRGFH =
             let allFinished = seg.IsChildrenStatusAllWith(Status4.Finished)
             if allFinished then
                 logDebug $"FINISHING segment [{seg.QualifiedName}]."
-                seg.PortE.Value <- true
+                seg.PortE.SetValue(true)
                 assert(seg.Status = Status4.Finished)
             allFinished
 
@@ -89,9 +89,9 @@ module DoRGFH =
         // 2. Going pause (==> Ready 로 해석) 상태에서의 resume start
 
         if seg.Children.IsEmpty() then
-            seg.TagGoing.Value <- true
+            seg.TagGoing.SetValue(true)
             assert(seg.Status = Status4.Going)
-            seg.PortE.Value <- true
+            seg.PortE.SetValue(true)
             //assert(seg.Status = Status4.Finished) || Status4.Ready???
             ()
         elif not <| checkAllChildrenFinished() then
@@ -126,7 +126,7 @@ module DoRGFH =
                         match parent.Status with
                         | Status4.Going ->
                             child.Status <- Status4.Going
-                            child.TagsStart |> Seq.iter(fun t -> t.Value <- true)
+                            child.TagsStart |> Seq.iter(fun t -> t.SetValue(true))
                         | Status4.Finished ->
                             assert (child.Status = Status4.Finished)
                         | _ ->
@@ -165,7 +165,7 @@ module DoRGFH =
                                 keepGoingFrom child |> ignore)
 
 
-                seg.TagGoing.Value <- true;
+                seg.TagGoing.SetValue(true)
                 keepGoingFrom null |> ignore
 
 
@@ -243,14 +243,14 @@ module DoRGFH =
 
     let private homing (seg:Segment) =
         logDebug $"HOMING segment [{seg.QualifiedName}]."
-        seg.PortE.Value <- false
+        seg.PortE.SetValue(false)
 
     let private pauseSegment (seg:Segment) =
         logDebug $"Pausing segment [{seg.QualifiedName}]."
         ()
     let private finish (seg:Segment) =
         logDebug $"FINISHING segment [{seg.QualifiedName}]."
-        seg.PortS.Value <- false
+        seg.PortS.SetValue(false)
     let private ready (seg:Segment) =
         logDebug $"READY segment [{seg.QualifiedName}]."
         ()
@@ -280,13 +280,13 @@ module DoRGFH =
             if duplicate then
                 effectivePort <- if rf then seg.PortR :> PortInfo else seg.PortS
 
-            effectivePort.Value <- newValue
+            effectivePort.SetValue(newValue)
             match effectivePort, newValue, st with
             | :? PortInfoStart, true , Status4.Ready ->
                 goingSegment seg
             | :? PortInfoStart, false, Status4.Ready -> pauseSegment seg
             | :? PortInfoStart, true,  Status4.Finished ->
-                seg.PortS.Value <- false
+                seg.PortS.SetValue(false)
             | :? PortInfoStart, false, Status4.Finished ->
                     if seg.PortR.Value then
                         homing seg
@@ -297,7 +297,7 @@ module DoRGFH =
             | :? PortInfoReset, true , Status4.Ready ->
                 // if seg is in origin state, then, turn off reset port
                 logDebug $"\tSkip homing due to segment [{seg.QualifiedName}] already ready state."
-                seg.PortR.Value <- false
+                seg.PortR.SetValue(false)
             | :? PortInfoReset, false, Status4.Ready ->
                     if seg.PortS.Value then
                         goingSegment seg

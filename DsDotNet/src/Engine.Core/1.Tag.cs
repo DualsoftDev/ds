@@ -30,20 +30,9 @@ public class Tag : Bit, IBitReadWritable, ITxRx
 {
     public ICoin Owner { get; set; }
     public TagType Type { get; set; }
-    public override bool Value
-    {
-        get => _value;
-        set
-        {
-            throw new Exception("TESTING");
-            if (_value != value)
-            {
-                _value = value;
-                Global.TagChangeToOpcServerSubject.OnNext(new OpcTagChange(Name, value));
-                BitChange.Publish(this, value, true);
-            }
-        }
-    }
+
+    // todo: Global.TagChangeToOpcServerSubject.OnNext(new OpcTagChange(Name, value));
+    public void SetValue(bool newValue) => _value = newValue;
 
 
     public Tag(Cpu ownerCpu, ICoin owner, string name, TagType tagType = TagType.None, bool value = false)

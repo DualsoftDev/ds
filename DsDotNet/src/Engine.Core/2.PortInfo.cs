@@ -16,7 +16,7 @@ public abstract class PortInfo : BitReEvaluatable, IBitWritable
 
     public Segment Segment { get; set; }
     public string QualifiedName => $"{Segment.QualifiedName}.{GetType().Name}";
-
+    public abstract void SetValue(bool newValue);
     IBit _plan;
     Tag _actual;
     public IBit Plan {
@@ -46,6 +46,22 @@ public abstract class PortInfoCommand : PortInfo
     {
     }
     public override bool Evaluate() => Plan.Value;
+    public override void SetValue(bool newValue)
+    {
+        switch(Plan)
+        {
+            case IBitWritable w:
+                w.SetValue(newValue);
+                break;
+            default:
+                var eval = Evaluate();
+                Debug.Assert(eval == newValue);
+                break;
+        }
+        _value = newValue;
+        Actual.SetValue(newValue);
+    }
+
 }
 /// <summary> Start 명령용 정보(Plan) + 물리(Actual) </summary>
 public class PortInfoStart : PortInfoCommand
@@ -89,25 +105,7 @@ public class PortInfoEnd : PortInfo
 
     public override bool Evaluate() => Plan.Value && (Actual == null || Actual.Value);
 
-    public override bool Value
-    {
-        get => Evaluate();
-        // PortInfoEnd 에 한해, setter 를 허용한다.
-        set
-        {
-            throw new Exception("TESTING");
-            if (Plan.Value != value)
-            {
-                CheckMatch(value);
-
-                //! 호출 순서 매우 민감 + 병렬화 불가 영역
-                Plan.Value = value;
-                Debug.Assert(Plan.Value == value);
-                if (Actual == null)
-                    BitChange.Publish(this, value, true);
-            }
-        }
-    }
+    public override bool Value => Evaluate();
 
     void CheckMatch(bool newPlanValue)
     {
@@ -116,10 +114,21 @@ public class PortInfoEnd : PortInfo
             throw new DsException($"Spatial Error: Plan[{Plan}={newPlanValue}] <> Actual[{Actual.Value}]");
 
     }
-    internal override void SetValueOnly(bool newValue)
+    public override void SetValue(bool newValue)
     {
-        //Debug.Assert(_value != newValue);
-        ((Bit)Plan).SetValueOnly(newValue);
-        _value = newValue;
+        Debug.Assert(Plan.Value == _value);
+
+        if (Plan.Value != newValue)
+        {
+            CheckMatch(newValue);
+
+            var wPlan = Plan as IBitWritable;
+            if (wPlan == null)
+                Debug.Assert(Plan.Value == newValue);
+            else
+                wPlan.SetValue(newValue);
+
+            _value = newValue;
+        }
     }
 }

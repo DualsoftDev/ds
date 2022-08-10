@@ -48,8 +48,6 @@ public class Tag : Bit, IBitReadWritable, ITxRx
     public Tag(Cpu ownerCpu, ICoin owner, string name, TagType tagType = TagType.None, bool value = false)
         : base(ownerCpu, name, value)
     {
-        if (name == "AutoStart_L_F_Main")
-            Console.WriteLine();
         Debug.Assert(! ownerCpu.TagsMap.ContainsKey(name));
 
         Owner = owner;

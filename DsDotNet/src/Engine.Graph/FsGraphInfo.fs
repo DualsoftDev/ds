@@ -2,6 +2,7 @@ namespace Engine.Graph
 
 open System
 open System.Collections.Generic
+open Dual.Common
 open QuickGraph
 open QuickGraph.Algorithms
 open Engine.Core
@@ -67,8 +68,8 @@ type FsGraphInfo(flows:Flow seq, isRootFlow:bool) =
         isolatedSegments |> Seq.iter(g.AddVertex >> ignore)
         g
 
-    let inits = getInits(if isRootFlow then solidGraph else graph) |> Array.ofSeq
-    let lasts = getLasts(if isRootFlow then solidGraph else graph) |> Array.ofSeq
+    let inits = isolatedSegments @@ getInits(if isRootFlow then solidGraph else graph) |> Seq.distinct |> Array.ofSeq
+    let lasts = isolatedSegments @@ getLasts(if isRootFlow then solidGraph else graph) |> Seq.distinct |> Array.ofSeq
 
     let undirectedGraph =
         let g = qgEdges |> GraphExtensions.ToUndirectedGraph

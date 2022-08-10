@@ -4,10 +4,8 @@ using log4net;
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Disposables;
-using System.Reactive.Subjects;
 
 namespace Engine.OPC;
 

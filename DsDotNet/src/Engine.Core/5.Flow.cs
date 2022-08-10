@@ -96,7 +96,7 @@ public static class FlowExtension
 
     public static IEnumerable<ICoin> CollectIsolatedCoins(this Flow flow)
     {
-        var verticesFromEdge = flow.Edges.SelectMany(e => e.Vertices);
+        var verticesFromEdge = flow.Edges.Where(e => e is not IResetEdge).SelectMany(e => e.Vertices);
         return flow.ChildVertices
             .Except(verticesFromEdge)
             .OfType<ICoin>()

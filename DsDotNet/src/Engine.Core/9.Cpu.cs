@@ -315,38 +315,6 @@ public static class CpuExtensionQueueing
         return disposable;
 
 
-        void DoApply(BitChange bitChange)
-        {
-            Debug.Assert(!bitChange.Applied);
-            var bit = (Bit)bitChange.Bit;
-            //Global.Logger.Debug($"\t=({indent}) Applying bitchange {bitChange}");
-
-            var bitChanged = bitChange switch
-            {
-                PortInfoPlanChange pc => pc.PortInfo.PlanValueChanged(pc.NewValue),
-                PortInfoActualChange ac => ac.PortInfo.ActualValueChanged(ac.NewValue),
-                _ => new Func<bool>(() =>
-                {
-                    var writable = bit as IBitWritable;
-                    if (writable == null)
-                    {
-                        Debug.Assert(bit.Value == bitChange.NewValue);
-                        return false;
-                    }
-                    else
-                    {
-                        writable.SetValue(bitChange.NewValue);
-                        return true;
-                    }
-                })(),
-            };
-
-            bitChange.Applied = true;
-
-            if (bitChanged)
-                Global.RawBitChangedSubject.OnNext(bitChange);
-        }
-
         void Apply(BitChange bitChange)
         {
             if (bitChange.Bit.GetName() == "ResetLatch_VPS_B")
@@ -408,6 +376,39 @@ public static class CpuExtensionQueueing
                 DoApply(bitChange);
             }
             indent--;
+
+
+            void DoApply(BitChange bitChange)
+            {
+                Debug.Assert(!bitChange.Applied);
+                var bit = (Bit)bitChange.Bit;
+                //Global.Logger.Debug($"\t=({indent}) Applying bitchange {bitChange}");
+
+                var bitChanged = bitChange switch
+                {
+                    PortInfoPlanChange pc => pc.PortInfo.PlanValueChanged(pc.NewValue),
+                    PortInfoActualChange ac => ac.PortInfo.ActualValueChanged(ac.NewValue),
+                    _ => new Func<bool>(() =>
+                    {
+                        if (bit is IBitWritable writable)
+                        {
+                            writable.SetValue(bitChange.NewValue);
+                            return true;
+                        }
+                        else
+                        {
+                            Debug.Assert(bit.Value == bitChange.NewValue);
+                            return false;
+                        }
+                    })(),
+                };
+
+                bitChange.Applied = true;
+
+                if (bitChanged)
+                    Global.RawBitChangedSubject.OnNext(bitChange);
+            }
+
         }
 
     }

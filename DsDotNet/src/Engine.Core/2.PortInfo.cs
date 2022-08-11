@@ -134,11 +134,10 @@ public class PortInfoEnd : PortInfo
         {
             CheckMatch(newValue);
 
-            var wPlan = Plan as IBitWritable;
-            if (wPlan == null)
-                Debug.Assert(Plan.Value == newValue);
-            else
+            if (Plan is IBitWritable wPlan)
                 wPlan.SetValue(newValue);
+            else
+                Debug.Assert(Plan.Value == newValue);
 
             _value = newValue;
         }

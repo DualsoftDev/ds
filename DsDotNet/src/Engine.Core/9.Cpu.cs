@@ -302,7 +302,7 @@ public static class CpuExtensionQueueing
                     {
                         Debug.Assert(!bitChange.Applied);
                         //Global.Logger.Debug($"= Processing bitChnage {bitChange}");
-                        Apply(bitChange);
+                        Apply(cpu, bitChange, true);
                     }
                     else
                         Global.Logger.Warn($"Failed to deque.");
@@ -314,8 +314,10 @@ public static class CpuExtensionQueueing
         ;
         return disposable;
 
+        _applyDirectly = new Action<Cpu, BitChange>( (cpu, bitChange) => Apply(cpu, bitChange, false));
 
-        void Apply(BitChange bitChange)
+
+        void Apply(Cpu cpu, BitChange bitChange, bool withQueue)
         {
             if (bitChange.Bit.GetName() == "ResetLatch_VPS_B")
                 Console.WriteLine();
@@ -352,7 +354,7 @@ public static class CpuExtensionQueueing
                     {
                         var nonPorts = chgrp[false];
                         foreach (var bc in nonPorts)
-                            Apply(bc);
+                            Apply(cpu, bc, withQueue);
                     }
                     if (chgrp.ContainsKey(true))
                     {
@@ -361,9 +363,22 @@ public static class CpuExtensionQueueing
                         {
                             var port = (PortInfo)bc.Bit;
                             if (bit == port.Plan)
-                                q.Enqueue(new PortInfoPlanChange(bc));
+                            {
+                                var newBc = new PortInfoPlanChange(bc);
+                                if (withQueue)
+                                    q.Enqueue(newBc);
+                                else
+                                    Apply(cpu, newBc, withQueue);
+                            }
                             else if (bit == port.Actual)
-                                q.Enqueue(new PortInfoActualChange(bc));
+                            {
+                                var newBc = new PortInfoActualChange(bc);
+                                if (withQueue)
+                                    q.Enqueue(newBc);
+                                else
+                                    Apply(cpu, newBc, withQueue);
+
+                            }
                             else
                                 throw new Exception("ERROR");
                         }
@@ -410,8 +425,8 @@ public static class CpuExtensionQueueing
             }
 
         }
-
     }
+
 
     /// <summary> Bit 의 값 변경 처리를 CPU 에 위임.  즉시 수행되지 않고, CPU 의 Queue 에 추가 된 후, CPU thread 에서 수행된다.  </summary>
     public static void Enqueue(this Cpu cpu, IBit bit, bool newValue, object cause = null)
@@ -427,4 +442,8 @@ public static class CpuExtensionQueueing
         };
     }
 
+
+    static Action<Cpu, BitChange> _applyDirectly = null;
+    public static void SendChange(this Cpu cpu, IBit bit, bool newValue, object cause = null) => _applyDirectly(cpu, new BitChange(bit, newValue, false, cause));
+    public static void PostChange(this Cpu cpu, IBit bit, bool newValue, object cause = null) => Enqueue(cpu, bit, newValue, cause);
 }

@@ -51,18 +51,13 @@ public abstract class PortInfoCommand : PortInfo
     public override bool Evaluate() => Plan.Value;
     public override void SetValue(bool newValue)
     {
-        switch(Plan)
-        {
-            case IBitWritable w:
-                w.SetValue(newValue);
-                break;
-            default:
-                var eval = Evaluate();
-                Debug.Assert(eval == newValue);
-                break;
-        }
+        if (Plan is IBitWritable w)
+            w.SetValue(newValue);
+        else
+            Debug.Assert(Evaluate() == newValue);
+
         _value = newValue;
-        Actual.SetValue(newValue);
+        Actual?.SetValue(newValue);
     }
 
     public override bool PlanValueChanged(bool newValue)

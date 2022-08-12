@@ -1,0 +1,6 @@
+Segment 의 s/r/e tag
+	- HMI 수동조작
+		S: <QualifiedName>:ManualStart
+		R: <QualifiedName>:ManualReset
+	- default end tag
+		E: <QualifiedName>:DefaultEnd

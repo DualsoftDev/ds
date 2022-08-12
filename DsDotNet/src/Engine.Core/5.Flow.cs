@@ -97,14 +97,19 @@ public static class FlowExtension
     }
 
 
-    public static IEnumerable<ICoin> CollectIsolatedCoins(this Flow flow)
+    public static IEnumerable<IVertex> CollectIsolatedVertex(this Flow flow, bool bySetEdge, bool byResetEdge)
     {
-        var verticesFromEdge = flow.Edges.Where(e => e is not IResetEdge).SelectMany(e => e.Vertices);
+        var verticesFromEdge =
+            flow.Edges
+            .Where(e => bySetEdge == e is ISetEdge || byResetEdge == e is IResetEdge)
+            .SelectMany(e => e.Vertices)
+            ;
         return flow.ChildVertices
             .Except(verticesFromEdge)
-            .OfType<ICoin>()
             ;
     }
+    public static IEnumerable<ICoin> CollectIsolatedCoins(this Flow flow, bool bySetEdge=true, bool byResetEdge=false) =>
+        flow.CollectIsolatedVertex(bySetEdge, byResetEdge).OfType<ICoin>();
 
     struct Causal
     {

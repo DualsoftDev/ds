@@ -92,7 +92,7 @@ class Tester
 
             opc.Write(resetTag, true);
             opc.Write(resetTag, false);
-            opc.Write("Start_L_F_Main", true);
+            opc.Write("ManualStart_L_F_Main", true);
             //opc.Write(resetTag, true);
 
             opc.Write("AutoStart_L_F_Main", true);

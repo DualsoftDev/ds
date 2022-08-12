@@ -15,9 +15,10 @@ public static class HmiTagGenerator
         var flow = segment.ContainerFlow;
         var cpu = flow.Cpu;
         var name = $"{flow.System.Name}_{flow.Name}_{segment.Name}";
-        var s = new Tag(cpu, segment, $"Start_{name}") { Type = TagType.Q };
-        var r = new Tag(cpu, segment, $"Reset_{name}") { Type = TagType.Q };
-        var e = new Tag(cpu, segment, $"End_{name}") { Type = TagType.I };
+        var qName = $"{flow.System.Name}.{flow.Name}.{segment.Name}";
+        var s = new Tag(cpu, segment, $"ManualStart_{name}") { Type = TagType.Q|TagType.Manual, InternalName = $"{qName}:ManualStart" };
+        var r = new Tag(cpu, segment, $"ManualReset_{name}") { Type = TagType.Q|TagType.Manual, InternalName = $"{qName}:ManualReset" };
+        var e = new Tag(cpu, segment, $"End_{name}") { Type = TagType.I, InternalName = $"{qName}:DefaultEnd" };
 
         segment.AddStartTags(s);
         segment.AddResetTags(r);
@@ -35,10 +36,10 @@ public static class HmiTagGenerator
         var cpu = flow.Cpu;
         var midName = $"{flow.System.Name}_{flow.Name}";
 
-        var autoStart = Tag.CreateAutoStart(cpu, null, $"AutoStart_{midName}");
+        var autoStart = Tag.CreateAutoStart(cpu, null, $"AutoStart_{midName}", $"{midName}.AutoStart");
         flow.AutoStart = autoStart;
 
-        var autoReset = Tag.CreateAutoReset(cpu, null, $"AutoReset_{midName}");
+        var autoReset = Tag.CreateAutoReset(cpu, null, $"AutoReset_{midName}", $"{midName}.AutoReset");
         flow.AutoReset = autoReset;
 
         foreach(var rs in flow.RootSegments)

@@ -22,7 +22,7 @@ partial class EngineBuilder
         public string Context;
 
         public Cpu OwnerCpu;    // 생성된 tag 의 소유주 CPU
-        // Tag 가 null 인 상태에서도 tag name 을 가져 올 수 있어야 함.  Tag 가 non null 이면 Tag.Name 과 동일
+        // GeneratedTag 가 null 인 상태에서도 tag name 을 가져 올 수 있어야 함.  GeneratedTag 가 non null 이면 Tag.Name 과 동일해야 함
         public string TagName
         {
             get
@@ -75,6 +75,7 @@ partial class EngineBuilder
         Debug.Assert(rootFlows.Select(f => f.Cpu).Distinct().Count() == 1);
         Cpu cpu = rootFlows[0].Cpu;
 
+        var tagTypeEndRx = TagType.End | TagType.RX;
         var tagGenInfos = collectTagGenInfo(rootFlows).ToArray();
 
         // tag 가 사용된 위치(child) 및 tag type 으로 grouping
@@ -143,8 +144,6 @@ partial class EngineBuilder
             return tag;
         }
 
-
-
         /// Root flow 에 존재하는
         /// - root call
         /// - root segment 의 하부 call 및 external segment call
@@ -159,7 +158,8 @@ partial class EngineBuilder
             // edge 연결 없이 root 상에 존재하는 vertices 에 대한 tag 생성
             var roots = rootFlows.SelectMany(f => f.ChildVertices).Distinct();
             var vertices = edges.SelectMany(e => e.Vertices);
-            var isolatedVertices = roots.Except(vertices).ToArray();
+            //var isolatedVertices = roots.Except(vertices).ToArray();
+            var isolatedVertices = rootFlows.SelectMany(f => f.CollectIsolatedVertex(true, false)).ToArray();
             var isolatedVertiecsTags =
                 isolatedVertices
                 .SelectMany(v => createTagGenInfos4RootVertex(v, null, false))
@@ -205,15 +205,15 @@ partial class EngineBuilder
                         {
                             // 호출측 CPU: edge.OwnerCpu
                             // 피호출측 CPU: segE.OwnerCpu
-                            yield return new TagGenInfo(TagType.End, segE, child, context, edge, isSource, segE.Cpu);
-                            yield return new TagGenInfo(TagType.End, segE, child, context, edge, isSource, edge.Cpu);
+                            yield return new TagGenInfo(tagTypeEndRx, segE, child, context, edge, isSource, segE.Cpu);
+                            yield return new TagGenInfo(tagTypeEndRx, segE, child, context, edge, isSource, edge.Cpu);
                         }
                         break;
 
                     case ExSegmentCall exSeg:
                         var seg = exSeg.ExternalSegment;
-                        yield return new TagGenInfo(TagType.End, seg, child, context, edge, isSource, seg.Cpu);
-                        yield return new TagGenInfo(TagType.End, seg, child, context, edge, isSource, edge.Cpu);
+                        yield return new TagGenInfo(tagTypeEndRx, seg, child, context, edge, isSource, seg.Cpu);
+                        yield return new TagGenInfo(tagTypeEndRx, seg, child, context, edge, isSource, edge.Cpu);
                         break;
                     default:
                         throw new Exception("ERROR");
@@ -284,15 +284,15 @@ partial class EngineBuilder
                             var segStart = call.Prototype.TXs.OfType<Segment>();
                             foreach (var segS in segStart)
                             {
-                                yield return new TagGenInfo(TagType.Start, segS, child, fqdn, edge, isSource, segS.Cpu);
-                                yield return new TagGenInfo(TagType.Start, segS, child, fqdn, edge, isSource, edge.Cpu);
+                                yield return new TagGenInfo(TagType.Start | TagType.TX, segS, child, fqdn, edge, isSource, segS.Cpu);
+                                yield return new TagGenInfo(TagType.Start | TagType.TX, segS, child, fqdn, edge, isSource, edge.Cpu);
                             }
                         }
                         break;
 
                     case ExSegmentCall exSeg:
                         var seg = exSeg.ExternalSegment;
-                        var type = hasReset ? TagType.Reset : TagType.Start;
+                        var type = (hasReset ? TagType.Reset : TagType.Start) | TagType.TX;
                         yield return new TagGenInfo(type, seg, child, fqdn, edge, isSource, seg.Cpu);
                         yield return new TagGenInfo(type, seg, child, fqdn, edge, isSource, edge.Cpu);
                         break;
@@ -314,19 +314,24 @@ partial class EngineBuilder
                     case RootCall rootCall:
                         foreach (var txSeg in rootCall.Prototype.TXs.OfType<Segment>())
                         {
-                            yield return new TagGenInfo(TagType.Start, txSeg, rootCall, rootCall.QualifiedName, edge, isSource, txSeg.Cpu);
-                            yield return new TagGenInfo(TagType.Start, txSeg, rootCall, rootCall.QualifiedName, edge, isSource, edge.Cpu);
+                            yield return new TagGenInfo(TagType.Start|TagType.TX, txSeg, rootCall, rootCall.QualifiedName, edge, isSource, txSeg.Cpu);
+                            yield return new TagGenInfo(TagType.Start|TagType.TX, txSeg, rootCall, rootCall.QualifiedName, edge, isSource, edge.Cpu);
                         }
                         foreach (var rxSeg in rootCall.Prototype.RXs.OfType<Segment>())
                         {
-                            yield return new TagGenInfo(TagType.End, rxSeg, rootCall, rootCall.QualifiedName, edge, isSource, rxSeg.Cpu);
-                            yield return new TagGenInfo(TagType.End, rxSeg, rootCall, rootCall.QualifiedName, edge, isSource, edge.Cpu);
+                            yield return new TagGenInfo(TagType.End|TagType.RX, rxSeg, rootCall, rootCall.QualifiedName, edge, isSource, rxSeg.Cpu);
+                            yield return new TagGenInfo(TagType.End|TagType.RX, rxSeg, rootCall, rootCall.QualifiedName, edge, isSource, edge.Cpu);
                         }
                         break;
 
                     case Segment rootSeg:
                         var fqdn = rootSeg.QualifiedName;
-                        if (edge != null)
+                        if (edge == null)
+                        {
+                            yield return new TagGenInfo(TagType.Start|TagType.Flow, rootSeg, rootSeg, fqdn, null, true, root.Cpu);
+                            yield return new TagGenInfo(TagType.Reset|TagType.Flow, rootSeg, rootSeg, fqdn, null, false, root.Cpu);
+                        }
+                        else
                         {
                             var type = (isResetEdge, isSource) switch
                             {
@@ -335,7 +340,7 @@ partial class EngineBuilder
                                 (false, true) => TagType.End,
                                 (false, false) => TagType.Start,
                             };
-                            yield return new TagGenInfo(type, rootSeg, rootSeg, fqdn, edge, isSource, root.Cpu);
+                            yield return new TagGenInfo(type|TagType.Flow, rootSeg, rootSeg, fqdn, edge, isSource, root.Cpu);
                         }
 
                         var subEdges = rootSeg.Edges.ToArray();

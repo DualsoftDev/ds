@@ -1,6 +1,7 @@
 namespace Engine.Runner
 
 open System
+open System.Linq
 open System.Reactive.Disposables
 
 open Dual.Common
@@ -30,13 +31,32 @@ module EngineModule =
                     if tag.Value <> value then
                         onOpcTagChanged cpu (new OpcTagChange(tName, value))
 
+
+            let roots = activeCpu.RootFlows.selectMany(fun rf -> rf.RootSegments).Cast<FsSegment>()
+
+            let _makeUpSegmentBits =
+                for root in roots do
+                    let cpu = root.ContainerFlow.Cpu
+                    let n = root.QualifiedName
+                    if isNull root.Going then
+                        root.Going <- Tag(cpu, root, $"Going_TEMP_{n}", TagType.Going)
+                    if not <| root.TagsStart.Any(fun t -> t.Type.HasFlag(TagType.Flow)) then
+                        root.AddStartTags([|Tag(cpu, root, $"FlowStart_{n}", TagType.Start|||TagType.Flow)|])
+                    if not <| root.TagsReset.Any(fun t -> t.Type.HasFlag(TagType.Flow)) then
+                        root.AddResetTags([|Tag(cpu, root, $"FlowReset_{n}", TagType.Reset|||TagType.Flow)|])
+                
             // todo : 가상 부모 생성
             let virtualParentSegments =
                 [
-                    for cpu in cpus do
-                    for rf in cpu.RootFlows do
+                    for rf in activeCpu.RootFlows do
                         yield! VirtualParentSegmentModule.CreateVirtualParentSegmentsFromRootFlow(rf)
                 ]
+
+
+
+            let unparentedRoots =
+                let parentedRoots = virtualParentSegments.Select(fun vps -> vps.Target)
+                roots.Except(parentedRoots) 
 
 
 

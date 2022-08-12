@@ -13,10 +13,14 @@ module VirtualParentSegmentModule =
         , startPort, resetPort, endPort
         , goingTag, readyTag
         , targetStartTag, targetResetTag               // target child 의 start port 에 가상 부모가 시작시킬 수 있는 start tag 추가 (targetStartTag)
-    ) =
+    ) as this =
         inherit FsSegment(target.Cpu, name) //, startPort, resetPort, endPort, goingTag, readyTag)
+
         let cpu = target.Cpu
         let mutable oldStatus:Status4 option = None
+
+        do
+            this.CreateSREGR(cpu, startPort, resetPort, endPort, goingTag, readyTag)
 
         member val Target = target;
         member val PreChildren = causalSourceSegments |> Array.ofSeq
@@ -183,39 +187,22 @@ module VirtualParentSegmentModule =
                         ()
                 )
 
-    //let CreateVirtualParentSegment(segment: FsSegment) =
-    //    let flow = segment.ContainerFlow
-    //    let es = flow.Edges.Where(fun e -> e.Target = segment)
-    //    if es.IsEmpty() then
-    //        None
-    //    else
-    //        let setEdge = es.Where(fun e -> box e :? ISetEdge).ToArray()
-    //        let resetEdge = es.Where(fun e -> box e :? IResetEdge).ToArray()
-    //        assert(setEdge.Length = 0 || setEdge.Length = 1)
-    //        assert(resetEdge.Length = 0 || resetEdge.Length = 1)
-    //        let target = es.Select(fun e -> e.Target).Distinct().Cast<FsSegment>() |> Seq.exactlyOne
-
-    //        let st, rt = target.TagsStart |> Seq.exactlyOne, target.TagsReset |> Seq.exactlyOne
-    //        let causalSources = setEdge.Select(fun e -> e.Sources).Cast<FsSegment>()
-    //        let resetSources = resetEdge.Select(fun e -> e.Sources).Cast<FsSegment>()
-    //        let vps = VirtualParentSegment.Create(target, flow.AutoStart, (st, rt), causalSources, resetSources)
-    //        Some vps
-
     let CreateVirtualParentSegmentsFromRootFlow(rootFlow: RootFlow) =
         let autoStart = rootFlow.AutoStart
         let allEdges = rootFlow.Edges.ToArray()
         let segments = rootFlow.RootSegments.Cast<FsSegment>()
-        [
+        [|
             for target in segments do
                 let es = allEdges.Where(fun e -> e.Target = target).ToArray()
-                let setEdge = es.Where(fun e -> box e :? ISetEdge).ToArray()
-                let resetEdge = es.Where(fun e -> box e :? IResetEdge).ToArray()
-                assert(setEdge.Length = 0 || setEdge.Length = 1)
-                assert(resetEdge.Length = 0 || resetEdge.Length = 1)
-                let st = target.TagsStart.Where(fun t -> not <| t.Type.HasFlag(TagType.Auto)) |> Seq.exactlyOne
-                let rt = target.TagsReset.Where(fun t -> not <| t.Type.HasFlag(TagType.Auto)) |> Seq.exactlyOne
-                let causalSources = setEdge.Select(fun e -> e.Sources).Cast<FsSegment>()
-                let resetSources = resetEdge.Select(fun e -> e.Sources).Cast<FsSegment>()
+                let setEdges = es.Where(fun e -> box e :? ISetEdge).ToArray()
+                let resetEdges = es.Where(fun e -> box e :? IResetEdge).ToArray()
+                assert(setEdges.Length = 0 || setEdges.Length = 1)
+                assert(resetEdges.Length = 0 || resetEdges.Length = 1)
+                let st = target.TagsStart.Where(fun t -> t.Type.HasFlag(TagType.Flow)) |> Seq.exactlyOne
+                let rt = target.TagsReset.Where(fun t -> t.Type.HasFlag(TagType.Flow)) |> Seq.exactlyOne
+
+                let causalSources = setEdges.selectMany(fun e -> e.Sources).Cast<FsSegment>().ToArray()
+                let resetSources = resetEdges.selectMany(fun e -> e.Sources).Cast<FsSegment>().ToArray()
                 let vps = VirtualParentSegment.Create(target, autoStart, (st, rt), causalSources, resetSources)
                 yield vps
-        ]
+        |]

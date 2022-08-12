@@ -233,21 +233,6 @@ partial class ElementsListener : dsBaseListener
 
     override public void ExitProgram(dsParser.ProgramContext ctx)
     {
-        //foreach(var cpu in _model.Cpus)
-        //{
-        //    foreach(var seg in cpu.RootFlows.SelectMany(rf => rf.ChildVertices).OfType<Segment>())
-        //    {
-        //        var name = $"{seg.QualifiedName}_Going";
-        //        if (cpu.TagsMap.ContainsKey(name))
-        //        {
-        //            Global.Logger.Warn($"Going tag [{name}] already created!.  Check it.");
-        //            seg.TagGoing = cpu.TagsMap[name];
-        //        }
-        //        else
-        //            seg.TagGoing = new Tag(cpu, seg, name) { Type = TagType.Going };
-        //    }
-        //}
-
         var layouts =
             DsParser.enumerateChildren<dsParser.LayoutsContext>(
                 ctx, false, r => r is dsParser.LayoutsContext)

@@ -18,7 +18,7 @@ public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, ITxRx, ITagSR
             _cpu = value;
         }
     }
-    public string QualifiedName => $"{ContainerFlow.QualifiedName}_{Name}";
+    public string QualifiedName => $"{ContainerFlow?.QualifiedName}_{Name}";
 
 
     public PortInfoStart PortS { get; set; }
@@ -29,8 +29,8 @@ public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, ITxRx, ITagSR
     public IEnumerable<Tag> TagsStart => _tagSREContainer.TagsStart;
     public IEnumerable<Tag> TagsReset => _tagSREContainer.TagsReset;
     public IEnumerable<Tag> TagsEnd => _tagSREContainer.TagsEnd;
-    public Tag TagGoing { get; internal set; }
-    public Tag TagReady { get; internal set; }
+    public Tag Going { get; internal set; } // Flag or Tag
+    public Tag Ready { get; internal set; } // Flag or Tag
 
     public void AddStartTags(params Tag[] tags) => _tagSREContainer.AddStartTags(tags);
     public void AddResetTags(params Tag[] tags) => _tagSREContainer.AddResetTags(tags);
@@ -57,22 +57,25 @@ public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, ITxRx, ITagSR
     /// <summary>Segment 생성 함수.  Segment 에서 상속받은 class 객체를 생성하기 위함. (e.g Engine.Runner.FsSegment)</summary>
     public static Func<string, RootFlow, Segment> Create { get; set; } = (string name, RootFlow containerFlow) => new Segment(name, containerFlow);
     private Segment(string name, RootFlow containerFlow)
-        : base(containerFlow.Cpu, name)
+        : this(containerFlow.Cpu, name)
     {
         ContainerFlow = containerFlow;
-        _cpu = containerFlow.Cpu;
         //containerFlow.ChildVertices.Add(this);
         containerFlow.AddChildVertex(this);
-
-        // todo : Segment Port 생성
-        //PortInfoS = new PortInfoStart(this);
-        //PortInfoR = new PortInfoReset(this);
-        //PortInfoE = new PortInfoEnd(this);
     }
 
-    internal Segment(string name)
-        : base(null, name)
-    {}
+    internal Segment(Cpu cpu, string name, PortInfoStart sp=null, PortInfoReset rp=null, PortInfoEnd ep=null, Tag going=null, Tag ready=null)
+        : base(cpu, name)
+    {
+        _cpu = cpu;
+        // todo : Segment Port 생성
+        var n = QualifiedName;
+        PortS = sp ?? new PortInfoStart(_cpu, this, $"PortInfoS_{n}", new Flag(_cpu, $"PortSDefaultPlan_{n}"), null);
+        PortR = rp ?? new PortInfoReset(_cpu, this, $"PortInfoR_{n}", new Flag(_cpu, $"PortRDefaultPlan_{n}"), null);
+        PortE = ep ?? PortInfoEnd.Create(_cpu, this, $"PortInfoE_{n}", null);
+        Going = going ?? new Tag(_cpu, this, $"Going_{n}", TagType.Going);
+        Ready = ready ?? new Tag(_cpu, this, $"Ready_{n}", TagType.Ready);
+    }
 
     public override string ToString() => ToText();
     public override string ToText()
@@ -168,16 +171,25 @@ public static class SegmentExtension
             yield return t;
     }
 
-    public static IEnumerable<Tag> GetSREGRTags(this Segment segment)
+    public static IEnumerable<PortInfo> GetAllPorts(this Segment segment)
     {
         var s = segment;
-        foreach (var t in s.GetSRETags())
-            yield return t;
-
-        if (s.TagGoing is not null)
-            yield return s.TagGoing;
-        if (s.TagReady is not null)
-            yield return s.TagReady;
+        yield return s.PortS;
+        yield return s.PortR;
+        yield return s.PortE;
     }
+
+
+    //public static IEnumerable<Tag> GetSREGRTags(this Segment segment)
+    //{
+    //    var s = segment;
+    //    foreach (var t in s.GetSRETags())
+    //        yield return t;
+
+    //    if (s.Going is not null)
+    //        yield return s.Going;
+    //    if (s.Ready is not null)
+    //        yield return s.Ready;
+    //}
 
 }

@@ -66,7 +66,7 @@ partial class EngineBuilder
 
             Opc.AddTags(tags);
 
-            var goingTags = flows.SelectMany(f => f.RootSegments).Select(seg => seg.TagGoing).Where(t => t is not null);
+            var goingTags = flows.SelectMany(f => f.RootSegments).Select(seg => seg.Going).Where(t => t is not null);
             Opc.AddTags(goingTags);
 
 
@@ -118,11 +118,11 @@ partial class EngineBuilder
             }
             else if (tt.HasFlag(TagType.Going))
             {
-                Debug.Assert(segment.TagGoing == null);
-                segment.TagGoing = tag;
-                Debug.Assert(segment.TagGoing == edgeTag);
+                Debug.Assert(segment.Going == null);
+                segment.Going = tag;
+                Debug.Assert(segment.Going == edgeTag);
                 if (tgi.IsSource)
-                    edge.SourceTags.Add(segment.TagGoing);
+                    edge.SourceTags.Add(segment.Going);
             }
             else
                 throw new Exception("ERROR");

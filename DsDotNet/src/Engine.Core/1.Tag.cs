@@ -14,10 +14,11 @@ public enum TagType
     Reset    = 1 << 12,
     End      = 1 << 13,
     Going    = 1 << 14,
+    Ready    = 1 << 15,
     /// <summary> 공정(flow) auto start, auto reset </summary>
-    Auto     = 1 << 15,
+    Auto = 1 << 18,
     /// <summary> 외부 접근 용 Tag 여부 </summary>
-    External = 1 << 16,
+    External = 1 << 19,
 
     // call tag
     TX       = 1 << 21,

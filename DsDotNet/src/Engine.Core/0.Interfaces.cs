@@ -8,23 +8,6 @@ public enum Status4
     Homing
 }
 
-//public interface IWithRGFH
-//{
-//    Status4 RGFH { get; set; }
-//    bool ChangeR();
-//    bool ChangeG();
-//    bool ChangeF();
-//    bool ChangeH();
-//}
-
-//public interface IWithSREPorts
-//{
-//    PortS PortS { get; set; }
-//    PortR PortR { get; set; }
-//    PortE PortE { get; set; }
-//}
-
-
 public interface IVertex : IBit { }
 public interface IEdge : IBit { }
 

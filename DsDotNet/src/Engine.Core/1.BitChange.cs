@@ -29,31 +29,6 @@ public class BitChange
         _ => throw new Exception("ERROR"),
     };
 
-
-    public static void Publish(IBit bit, bool newValue, bool applied, object cause = null)
-    {
-        (new BitChange(bit, newValue, applied, cause)).Publish();
-    }
-    public void Publish()
-    {
-        Debug.Assert(false);
-
-        //if (Global.IsSupportParallel && Bit is PortInfoEnd)
-        //{
-        //    //! 현재값 publish 를 threading 으로 처리...
-        //    var capturedThis = this;
-        //    var task = new Task(() =>
-        //    {
-        //        Global.RawBitChangedSubject.OnNext(capturedThis);
-        //    });
-        //    PendingTasks.Add(task);
-        //    task.ContinueWith(t => PendingTasks.TryRemove(t, out Task _task));
-        //    task.Start();
-        //}
-        //else
-        //    Global.RawBitChangedSubject.OnNext(this);
-    }
-
     public override string ToString() => $"{Bit.GetName()}={Bit}={NewValue}";
 }
 

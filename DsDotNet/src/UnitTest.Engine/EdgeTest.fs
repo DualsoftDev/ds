@@ -132,7 +132,7 @@ module EdgeTest =
                     let sm = otherRootFlow.Coins |> Enumerable.OfType<Segment> |> Seq.find(fun seg -> seg.Name = "Sm")
                     let eResetPp2Sm = otherRootFlow.Edges |> Seq.find(fun e -> e.Sources.Contains(pp) && e.Target = sm)
                     box eResetPp2Sm :? IResetEdge |> ShouldBeTrue
-                    eResetPp2Sm.SourceTags.Contains(pp.TagGoing) |> ShouldBeTrue
+                    eResetPp2Sm.SourceTags.Contains(pp.Going) |> ShouldBeTrue
                     sm.TagsReset.Contains(eResetPp2Sm.TargetTag)
                 ()
 

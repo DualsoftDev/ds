@@ -30,6 +30,8 @@ module EngineModule =
                     if tag.Value <> value then
                         onOpcTagChanged cpu (new OpcTagChange(tName, value))
 
+            let createVps() =
+                ()
 
 
             logInfo "Start F# Engine running..."

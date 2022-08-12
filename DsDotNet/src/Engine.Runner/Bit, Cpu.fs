@@ -12,6 +12,7 @@ open System.Runtime.CompilerServices
 open Dual.Common
 open Engine.Core
 open System.Collections.Concurrent
+open System.Linq
 
 //[<Extension>] // type Segment =
 //type EngineExt =
@@ -55,12 +56,12 @@ module internal CpuModule =
                 | _, true, true -> Status4.Homing
                 | _ -> failwith "Unexpected"
 
-            let xxx = Array.Empty<IBit>()    // segment.allPortBits
-            let bits = xxx |> HashSet
+            let bits = segment.GetAllPorts() |> Enumerable.Cast<IBit> |> HashSet
             let subs =
                 Global.BitChangedSubject
                     .Where(fun bc -> bits.Contains(bc.Bit))
                     .Subscribe (fun bc ->
+                        noop()
                         //! todo
                         (*
                             let portS = segment.PortStartBits |> Seq.exists(fun b -> b.Value)
@@ -75,7 +76,13 @@ module internal CpuModule =
             segment.Disposables.Add(subs)
             subs
 
+        cpu.ForwardDependancyMap.Clear();
+        cpu.BackwardDependancyMap.Clear();
+
+        cpu.BuildBitDependencies()
+
         [
+            cpu.Run()
             for f in cpu.RootFlows do
             for s in f.RootSegments do
                 listenPortChanges s

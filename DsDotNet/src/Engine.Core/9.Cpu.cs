@@ -188,7 +188,7 @@ public static class CpuExtensionQueueing
     public static void BuildBitDependencies(this Cpu cpu)
     {
         Debug.Assert(cpu.ForwardDependancyMap.IsNullOrEmpty());
-        Debug.Assert(cpu.BackwardDependancyMap is null);
+        Debug.Assert(cpu.BackwardDependancyMap.IsNullOrEmpty());
 
         cpu.BackwardDependancyMap = new();
 

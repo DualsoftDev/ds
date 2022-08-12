@@ -9,16 +9,8 @@ open Engine.Core
 
 type ChangeWriter = IBit*bool*obj -> unit
 type MockupSegmentBase(cpu, n, sp, rp, ep, goingTag, readyTag) as this =
-    inherit Segment(n)
+    inherit Segment(cpu, n, sp, rp, ep, goingTag, readyTag)
 
-    do
-        this.PortS <- sp
-        this.PortR <- rp
-        this.PortE <- ep
-        this.Cpu <- cpu
-
-    member val Going = if isNull goingTag then new Tag(cpu, null, $"{n}_Going") else goingTag
-    member val Ready = if isNull readyTag then new Tag(cpu, null, $"{n}_Ready") else readyTag
     member val FinishCount = 0 with get, set
     member x.GetSegmentStatus() =
         match x.PortS.Value, x.PortR.Value, x.PortE.Value with
@@ -32,12 +24,12 @@ type MockupSegmentBase(cpu, n, sp, rp, ep, goingTag, readyTag) as this =
     static member val WithThreadOnPortEnd = false with get, set
     static member val WithThreadOnPortReset = false with get, set
 
-type MockupSegment(cpu, n, sp, rp, ep, goingTag, readyTag) =
-    inherit MockupSegmentBase(cpu, n, sp, rp, ep, goingTag, readyTag)
+type MockupSegment(cpu, n) =
+    inherit MockupSegmentBase(cpu, n, null, null, null, null, null)
     let mutable oldStatus:Status4 option = None
 
     static member CreateWithDefaultTags(cpu, n) =
-        let seg = MockupSegment(cpu, n, null, null, null, null, null)
+        let seg = MockupSegment(cpu, n)
         let st = Tag(cpu, seg, $"st_default_{n}", TagType.Start)
         let rt = Tag(cpu, seg, $"rt_default_{n}", TagType.Reset)
         seg.PortS <- PortInfoStart(cpu, seg, $"spex{n}_default", st, null)

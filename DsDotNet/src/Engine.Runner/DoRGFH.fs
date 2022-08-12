@@ -89,7 +89,7 @@ module DoRGFH =
         // 2. Going pause (==> Ready 로 해석) 상태에서의 resume start
 
         if seg.Children.IsEmpty() then
-            seg.TagGoing.SetValue(true)
+            seg.Going.SetValue(true)
             assert(seg.Status = Status4.Going)
             seg.PortE.SetValue(true)
             //assert(seg.Status = Status4.Finished) || Status4.Ready???
@@ -165,7 +165,7 @@ module DoRGFH =
                                 keepGoingFrom child |> ignore)
 
 
-                seg.TagGoing.SetValue(true)
+                seg.Going.SetValue(true)
                 keepGoingFrom null |> ignore
 
 

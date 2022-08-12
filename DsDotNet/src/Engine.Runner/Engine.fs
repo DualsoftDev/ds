@@ -7,6 +7,7 @@ open System.Reactive.Disposables
 open Dual.Common
 open Engine.Core
 open Engine.OPC
+open System.Threading
 
 
 [<AutoOpen>]
@@ -44,6 +45,23 @@ module EngineModule =
                         root.AddStartTags([|Tag(cpu, root, $"FlowStart_{n}", TagType.Start|||TagType.Flow)|])
                     if not <| root.TagsReset.Any(fun t -> t.Type.HasFlag(TagType.Flow)) then
                         root.AddResetTags([|Tag(cpu, root, $"FlowReset_{n}", TagType.Reset|||TagType.Flow)|])
+
+                    //if not <| root.TagsEnd.Any(fun t -> t.Type.HasFlag(TagType.Flow)) then
+                    //    root.AddEndTags([|Tag(cpu, root, $"FlowEnd_{n}", TagType.End|||TagType.Flow)|])
+                    if isNull root.PortE then
+                        root.PortE <- PortInfoEnd.Create(cpu, root, $"epex{n}_default", null)
+
+                    if isNull root.PortS then
+                        root.PortS <-
+                            let ss = root.TagsStart.Cast<IBit>().ToArray()
+                            let sor = Or(cpu, $"start_OR_trigers_{n}", ss)
+                            PortInfoStart(cpu, root, $"spex{n}_default", sor, null)
+                    if isNull root.PortR then
+                        root.PortR <-
+                            let rs = root.TagsStart.Cast<IBit>().ToArray()
+                            let ror = Or(cpu, $"reset_OR_trigers_{n}", rs)
+                            PortInfoReset(cpu, root, $"rpex{n}_default", ror, null)
+
                 
             // todo : 가상 부모 생성
             let virtualParentSegments =
@@ -61,17 +79,17 @@ module EngineModule =
 
 
             logInfo "Start F# Engine running..."
-            activeCpu.BuildBitDependencies()
-            activeCpu.Run()
+            for cpu in cpus do
+                cpu.BuildBitDependencies()
 
             let subscriptions =
                 [
                     for cpu in cpus do
-                        Global.BitChangedSubject.Subscribe(onBitChanged cpu)
+                        yield Global.BitChangedSubject.Subscribe(onBitChanged cpu)
 
 
                     // OPC server 쪽에서 tag 값 변경시, 해당 tag 를 가지고 있는 모든 CPU 에 event 를 전달한다.
-                    Global.TagChangeFromOpcServerSubject
+                    yield Global.TagChangeFromOpcServerSubject
                         .Subscribe(fun tc ->
                             cpus
                             |> Seq.filter(fun cpu -> cpu.TagsMap.ContainsKey(tc.TagName))
@@ -79,8 +97,10 @@ module EngineModule =
 
                     for cpu in cpus do
                         readTagsFromOpc cpu opc
-                        runCpu cpu  // ! 실제 수행!!
+                        yield runCpu cpu  // ! 실제 수행!!
                 ]
 
             new CompositeDisposable(subscriptions)
-
+        member _.Wait() =
+            while cpus.Any(fun cpu -> cpu.Running) do
+                Thread.Sleep(50)

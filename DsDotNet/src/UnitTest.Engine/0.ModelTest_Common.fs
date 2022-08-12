@@ -38,5 +38,5 @@ module ModelTest_Common =
         (xs.Count() = ys.Count() && xs |> Seq.forall(fun x -> ys.Contains(x)) ) |> ShouldBeTrue
 
     let wait(cpu:Cpu) =
-        while cpu.Running && (cpu.ProcessingQueue || cpu.Queue.Count > 0) do
+        while cpu.NeedWait do
             Thread.Sleep(50)

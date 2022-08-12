@@ -76,11 +76,11 @@ module internal CpuModule =
             segment.Disposables.Add(subs)
             subs
 
-        cpu.ForwardDependancyMap.Clear();
-        if cpu.BackwardDependancyMap <> null then
-            cpu.BackwardDependancyMap.Clear();
+        //cpu.ForwardDependancyMap.Clear();
+        //if cpu.BackwardDependancyMap <> null then
+        //    cpu.BackwardDependancyMap.Clear();
 
-        cpu.BuildBitDependencies()
+        //cpu.BuildBitDependencies()
 
         [
             cpu.Run()

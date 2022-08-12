@@ -4,12 +4,66 @@ using Engine.Runner;
 using Engine.Graph;
 using System.Diagnostics;
 
+
+[Flags]
+public enum EnumTest
+{
+    None = 0,
+    A,
+    B,
+    C,
+};
 class Tester
 {
     public static void DoSampleTest()
     {
 
         var text = @"
+[sys] L = {
+    [task] T = {
+        Ap = {A.F.Vp ~ A.F.Sp}
+        Am = {A.F.Vm ~ A.F.Sm}
+        Bp = {B.F.Vp ~ B.F.Sp}
+        Bm = {B.F.Vm ~ B.F.Sm}
+    }
+    [flow] F = {
+        Main = { T.Ap > T.Am, T.Bp > T.Bm; }
+    }
+}
+[sys] A = {
+    [flow] F = {
+        Vp > Pp > Sp;
+        Vm > Pm > Sm;
+
+        Sp |> Pp |> Sm;
+        Sm |> Pm |> Sp;
+        Vp <||> Vm;
+    }
+}
+[sys] B = {
+    [flow] F = {
+        Vp > Pp > Sp;
+        Vm > Pm > Sm;
+
+        Sp |> Pp |> Sm;
+        Sm |> Pm |> Sp;
+        Vp <||> Vm;
+    }
+}
+[cpus] AllCpus = {
+    [cpu] Cpu = {
+        L.F;
+    }
+    [cpu] ACpu = {
+        A.F;
+    }
+    [cpu] BCpu = {
+        B.F;
+    }
+}
+";
+
+        var text2 = @"
 //[sys] L = {
 //    [task] T = {
 //        Cp = {P.F.Vp ~ P.F.Sp}
@@ -43,7 +97,7 @@ class Tester
         //Main > Weak;
         //Cp1 > Cm1;
         //Weak >> Strong;
-        Main |> XXX;
+        //Main |> XXX;
         //parenting = {A > B > C; C |> B; }
         //T.C1 <||> T.C2;
         //A, B > C > D, E;
@@ -77,7 +131,7 @@ class Tester
 ";
 
         Debug.Assert(!Global.IsInUnitTest);
-        var engine = new EngineBuilder(text, "Cpu").Engine;
+        var engine = new EngineBuilder(text, "ACpu").Engine;
         Program.Engine = engine;
         engine.Run();
 
@@ -97,6 +151,8 @@ class Tester
 
             opc.Write("AutoStart_L_F_Main", true);
         }
+
+        engine.Wait();
     }
 
     public static void DoSampleTest2()

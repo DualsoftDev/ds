@@ -25,6 +25,7 @@ public class Cpu : Named, ICpu
     public bool ProcessingQueue { get; internal set; }
     /// <summary>외부에서 CPU 를 멈추거나 가동하기 위한 flag</summary>
     public bool Running { get; set; } = true;
+    public bool NeedWait => Running && (ProcessingQueue || Queue.Count > 0);
     public GraphInfo GraphInfo { get; set; }
 
     /// <summary> bit 간 순방향 의존성 map </summary>

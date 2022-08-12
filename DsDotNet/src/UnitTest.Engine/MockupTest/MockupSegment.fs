@@ -12,12 +12,6 @@ type MockupSegmentBase(cpu, n, sp, rp, ep, goingTag, readyTag) as this =
     inherit Segment(cpu, n, sp, rp, ep, goingTag, readyTag)
 
     member val FinishCount = 0 with get, set
-    member x.GetSegmentStatus() =
-        match x.PortS.Value, x.PortR.Value, x.PortE.Value with
-        | false, false, false -> Status4.Ready  //??
-        | true, false, false  -> Status4.Going
-        | _, false, true      -> Status4.Finished
-        | _, true, _          -> Status4.Homing
     abstract member WireEvent:ChangeWriter->IDisposable
     default x.WireEvent(writer:ChangeWriter) = Disposable.Empty
 
@@ -45,7 +39,7 @@ type MockupSegment(cpu, n) =
                 [x.PortS :> IBit; x.PortR; x.PortE] |> Seq.contains(bc.Bit)
             )
             .Subscribe(fun bc ->
-                let state = x.GetSegmentStatus()
+                let state = x.Status
                 if oldStatus = Some state then
                     logDebug $"\t\tSkipping duplicate status: [{n}] status : {state} by bit change {bc.Bit.GetName()}={bc.NewValue}"
                 else

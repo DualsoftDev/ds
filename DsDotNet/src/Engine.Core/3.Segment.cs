@@ -1,4 +1,5 @@
 using System.Reactive.Disposables;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml.Linq;
 
@@ -76,6 +77,42 @@ public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, ITxRx, ITagSR
         Going = going ?? new Tag(_cpu, this, $"Going_{n}", TagType.Going);
         Ready = ready ?? new Tag(_cpu, this, $"Ready_{n}", TagType.Ready);
     }
+
+    public Status4 Status =>
+        (PortS.Value, PortR.Value, PortE.Value) switch
+        {
+            (false, false, false) => Status4.Ready,  //??
+            (true, false, false) => Status4.Going,
+            (_, false, true) => Status4.Finished,
+            (_, true, _) => Status4.Homing,
+        };
+
+    //public Status4 Status
+    //{
+    //    get
+    //    {
+    //        var s = PortS.Value;
+    //        var r = PortR.Value;
+    //        var e = PortE.Value;
+
+    //        //if (seg.Paused)
+    //        //{
+    //        //    Debug.Assert(!s && !r);
+    //        //    return e ? Status4.Homing : Status4.Going;
+    //        //}
+
+    //        if (e)
+    //            return r ? Status4.Homing : Status4.Finished;
+
+    //        Debug.Assert(!e);
+    //        if (s)
+    //            return r ? Status4.Ready : Status4.Going;
+
+    //        Debug.Assert(!s && !e);
+    //        return Status4.Ready;
+    //    }
+    //}
+
 
     public override string ToString() => ToText();
     public override string ToText()

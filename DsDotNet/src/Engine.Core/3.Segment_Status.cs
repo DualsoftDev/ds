@@ -17,31 +17,6 @@ partial class Segment
 
       - 실행/Resume 은 Child call status 보고 G 이거나 R 인 것부터 수행
      */
-    public Status4 Status
-    {
-        get
-        {
-            var s = PortS.Value;
-            var r = PortR.Value;
-            var e = PortE.Value;
-
-            //if (seg.Paused)
-            //{
-            //    Debug.Assert(!s && !r);
-            //    return e ? Status4.Homing : Status4.Going;
-            //}
-
-            if (e)
-                return r ? Status4.Homing : Status4.Finished;
-
-            Debug.Assert(!e);
-            if (s)
-                return r ? Status4.Ready : Status4.Going;
-
-            Debug.Assert(!s && !e);
-            return Status4.Ready;
-        }
-    }
 
     public bool Paused
     {

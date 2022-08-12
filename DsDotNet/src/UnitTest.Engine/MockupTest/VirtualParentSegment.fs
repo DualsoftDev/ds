@@ -104,7 +104,7 @@ type VirtualParentSegment(name, target:MockupSegment, causalSourceSegments:Mocku
 
                 let notiVpsPortChange = [x.PortS :> IBit; x.PortR; x.PortE] |> Seq.contains(bc.Bit)
                 let notiTargetEndPortChange = bc.Bit = x.Target.PortE
-                let state = x.GetSegmentStatus()
+                let state = x.Status
 
                 //if notiVpsPortChange || notiTargetEndPortChange then
                 //    noop()
@@ -153,7 +153,7 @@ type VirtualParentSegment(name, target:MockupSegment, causalSourceSegments:Mocku
                     else
                         oldStatus <- Some state
                         logDebug $"[{x.Name}] Segment status : {state} by {bit.Name}={bit.Value}"
-                        let childStatus = x.Target.GetSegmentStatus()
+                        let childStatus = x.Target.Status
 
                         match state with
                         | Status4.Ready    ->
@@ -170,7 +170,7 @@ type VirtualParentSegment(name, target:MockupSegment, causalSourceSegments:Mocku
                                     let mutable childStatus:Status4 option = None
                                     while childStatus <> Some Status4.Ready do
                                         // re-evaluate child status
-                                        childStatus <- Some <| x.Target.GetSegmentStatus()
+                                        childStatus <- Some <| x.Target.Status
                                         logWarn $"Waiting target child [{x.Target.Name}] ready..from {childStatus.Value}"
                                         do! Async.Sleep(10);
 

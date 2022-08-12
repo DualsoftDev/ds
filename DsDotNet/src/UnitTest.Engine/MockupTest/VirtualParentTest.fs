@@ -90,7 +90,7 @@ module VirtualParentTestTest =
             // 각 segment 별 event handling 등록
             [b :> MockupSegmentBase; g; r; vpB; vpG; vpR] |> Seq.iter(fun seg -> seg.WireEvent(writer) |> ignore)
 
-            assert([vpB; vpG; vpR] |> Seq.forall(fun vp -> vp.GetSegmentStatus() = Status4.Ready));
+            assert([vpB; vpG; vpR] |> Seq.forall(fun vp -> vp.Status = Status4.Ready));
 
             cpu.BuildBitDependencies()
             let runSubscription = cpu.Run()

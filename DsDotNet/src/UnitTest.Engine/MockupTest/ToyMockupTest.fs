@@ -31,7 +31,7 @@ module ToyMockupTest =
                     match bit with
                     | :? PortInfoEnd as portE ->
                         let seg = portE.Segment :?> MockupSegment
-                        let status = seg.GetSegmentStatus()
+                        let status = seg.Status
                         //logDebug $"Segment [{seg.Name}] Status : {status} inferred by port [{bit}]={bit.Value} change"
                         if bit = b.PortE && b.PortE.Value then
                             if stB.Value then
@@ -93,7 +93,7 @@ module ToyMockupTest =
             wait(cpu)
 
             b.PortE.Value === true
-            let gStatus = g.GetSegmentStatus()
+            let gStatus = g.Status
             let gPortS = g.PortS.Value
 
             r.PortS.Plan.Value === true
@@ -146,7 +146,7 @@ module ToyMockupTest =
             cpu.Enqueue(st, true)
             // ... going 진행 후, end port 까지 ON
             st.Value === false
-            b.GetSegmentStatus() === Status4.Finished
+            b.Status === Status4.Finished
 
             b.PortS.Value === false
             b.PortE.Value === true
@@ -160,6 +160,6 @@ module ToyMockupTest =
             cpu.Enqueue(rt, true)
             b.PortE.Value === false
             notPortE.Value === true
-            b.GetSegmentStatus() === Status4.Ready
+            b.Status === Status4.Ready
             ()
 

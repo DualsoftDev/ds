@@ -27,10 +27,11 @@ partial class EngineBuilder
         {
             get
             {
+                var type = Type.ToString().Replace(", ", "_");
                 if (Child == TagContainerSegment)
-                    return $"{TagContainerSegment.QualifiedName}_{Type}";
+                    return $"{TagContainerSegment.QualifiedName}_{type}";
 
-                return $"{Child.GetQualifiedName()}_{TagContainerSegment.QualifiedName}_{Type}";
+                return $"{Child.GetQualifiedName()}_{TagContainerSegment.QualifiedName}_{type}";
             }
         }
 

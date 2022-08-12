@@ -301,6 +301,8 @@ public static class CpuExtensionQueueing
                     cpu.ProcessingQueue = true;
                     if (q.TryDequeue(out BitChange bitChange))
                     {
+                        if (bitChange.Bit.GetName() == "ManualStart_A_F_Pp")
+                            Console.WriteLine();
                         Debug.Assert(!bitChange.Applied);
                         //Global.Logger.Debug($"= Processing bitChnage {bitChange}");
                         Apply(cpu, bitChange, true);

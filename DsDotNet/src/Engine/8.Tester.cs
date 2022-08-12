@@ -131,25 +131,37 @@ class Tester
 ";
 
         Debug.Assert(!Global.IsInUnitTest);
-        var engine = new EngineBuilder(text, "ACpu").Engine;
+        var engine = new EngineBuilder(text, "Cpu").Engine;
         Program.Engine = engine;
         engine.Run();
 
         var opc = engine.Opc;
 
-        var resetTag = "Reset_L_F_Main";
-        if (engine.Cpu.BitsMap.ContainsKey(resetTag))
-        {
-            var children = engine.Cpu.RootFlows.SelectMany(f => f.ChildVertices);
-            var main = children.OfType<Segment>().FirstOrDefault(c => c.Name == "Main");
-            var edges = main.Edges.ToArray();
+        //var resetTag = "Reset_L_F_Main";
+        //if (engine.Cpu.BitsMap.ContainsKey(resetTag))
+        //{
+        //    var children = engine.Cpu.RootFlows.SelectMany(f => f.ChildVertices);
+        //    var main = children.OfType<Segment>().FirstOrDefault(c => c.Name == "Main");
+        //    var edges = main.Edges.ToArray();
 
+        //    opc.Write(resetTag, true);
+        //    opc.Write(resetTag, false);
+        //    opc.Write("ManualStart_L_F_Main", true);
+        //    //opc.Write(resetTag, true);
+
+        //    opc.Write("AutoStart_L_F_Main", true);
+        //}
+
+        var resetTag = "ManualReset_L_F_Main";
+        if (engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(resetTag))
+        {
             opc.Write(resetTag, true);
             opc.Write(resetTag, false);
             opc.Write("ManualStart_L_F_Main", true);
             //opc.Write(resetTag, true);
 
-            opc.Write("AutoStart_L_F_Main", true);
+            //opc.Write("AutoStart_L_F_Main", true);
+            opc.Write("ManualStart_A_F_Pp", true);
         }
 
         engine.Wait();

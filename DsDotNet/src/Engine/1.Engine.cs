@@ -23,13 +23,9 @@ public partial class EngineBuilder
         Model.BuidGraphInfo();
         InitializeAllFlows();
 
-
         Model.Epilogue();
 
-
         Opc.Print();
-
-        Model.Cpus.Iter(cpu => cpu.PrintTags());
 
         Engine = new ENGINE(Model, Opc, Cpu);
         Cpu.Engine = Engine;

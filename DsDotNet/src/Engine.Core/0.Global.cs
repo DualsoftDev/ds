@@ -23,6 +23,7 @@ public static class Global
     public static Subject<OpcTagChange> TagChangeToOpcServerSubject { get; } = new();
     public static Subject<OpcTagChange> TagChangeFromOpcServerSubject { get; } = new();
 
+    public static IObservable<long> TickSeconds { get; set; } = Observable.Interval(TimeSpan.FromSeconds(1));
 
     public static bool IsInUnitTest { get; }
     static Global()

@@ -8,6 +8,7 @@ open Dual.Common
 open Engine.Core
 open Engine.OPC
 open System.Threading
+open System.Reactive.Linq
 
 
 [<AutoOpen>]
@@ -33,7 +34,8 @@ module EngineModule =
                         onOpcTagChanged cpu (new OpcTagChange(tName, value))
 
 
-            let roots = activeCpu.RootFlows.selectMany(fun rf -> rf.RootSegments).Cast<FsSegment>()
+            //let roots = activeCpu.RootFlows.selectMany(fun rf -> rf.RootSegments).Cast<FsSegment>()
+            let roots = cpus.selectMany(fun cpu -> cpu.RootFlows).selectMany(fun rf -> rf.RootSegments).Cast<FsSegment>()
 
             let _makeUpSegmentBits =
                 for root in roots do
@@ -81,6 +83,9 @@ module EngineModule =
             logInfo "Start F# Engine running..."
             for cpu in cpus do
                 cpu.BuildBitDependencies()
+                cpu.PrintTags()
+
+
 
             let subscriptions =
                 [
@@ -101,6 +106,12 @@ module EngineModule =
                 ]
 
             new CompositeDisposable(subscriptions)
+
         member _.Wait() =
+            use _subs =
+                Observable.Interval(TimeSpan.FromSeconds(5))
+                    .Subscribe(fun t ->
+                        let runningCpus = String.Join(", ", cpus.Where(fun cpu -> cpu.Running))
+                        logDebug $"Running cpus: {runningCpus}")
             while cpus.Any(fun cpu -> cpu.Running) do
                 Thread.Sleep(50)

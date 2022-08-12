@@ -12,6 +12,8 @@ public partial class EngineBuilder
 
     public EngineBuilder(string modelText, string activeCpuName)
     {
+        FsSegmentModule.Initialize();
+
         Model = ModelParser.ParseFromString(modelText);
 
         Opc = new OpcBroker();
@@ -54,13 +56,6 @@ partial class EngineBuilder
         {
             TagGenInfo[] tgis = CreateTags4Child(flows);
 
-            var myTgis = tgis.Where(tgi => tgi.OwnerCpu == cpu).ToArray();
-            foreach (var tgi in myTgis)
-            {
-                copyChildSRETagsToSegment(tgi);
-                buildBitDependencies(tgi, cpu);
-            }
-
             var tags = tgis.Select(tgi => tgi.GeneratedTag).ToArray();
             Debug.Assert(tags.All(tag => tag.Cpu.BitsMap.ContainsKey(tag.Name)));
 
@@ -75,145 +70,142 @@ partial class EngineBuilder
             hmiTags.Iter(cpu.AddTag);
             Opc.AddTags(hmiTags);
 
-            // todo: dependency 생성
             Console.WriteLine();
-            //cpu.BuildTagsMap();
-            //cpu.BuildBackwardDependency();
         }
 
 
 
-        /// 'Child' 의 Tags{Start,Reset,End} tag 들을 Child 가 실제 가리키는 segment 의 S/R/E Tags 에도 반영한다.
-        void copyChildSRETagsToSegment(TagGenInfo tgi)
-        {
-            var segment = tgi.TagContainerSegment;
-            var tag = segment.Cpu.TagsMap[tgi.GeneratedTag.Name];
-            var tt = tag.Type;
-            var edge = tgi.Edge;
-            Debug.Assert(segment.Cpu == tag.Cpu);
-            var edgeTag =
-                edge.Cpu == tag.Cpu
-                ? tag
-                : edge.Cpu.TagsMap[tag.Name]
-                ;
-            Debug.Assert(edge.Cpu == edgeTag.Cpu);
+        ///// 'Child' 의 Tags{Start,Reset,End} tag 들을 Child 가 실제 가리키는 segment 의 S/R/E Tags 에도 반영한다.
+        //void copyChildSRETagsToSegment(TagGenInfo tgi)
+        //{
+        //    var segment = tgi.TagContainerSegment;
+        //    var tag = segment.Cpu.TagsMap[tgi.GeneratedTag.Name];
+        //    var tt = tag.Type;
+        //    var edge = tgi.Edge;
+        //    Debug.Assert(segment.Cpu == tag.Cpu);
+        //    var edgeTag =
+        //        edge.Cpu == tag.Cpu
+        //        ? tag
+        //        : edge.Cpu.TagsMap[tag.Name]
+        //        ;
+        //    Debug.Assert(edge.Cpu == edgeTag.Cpu);
 
-            if (tt.HasFlag(TagType.Start))
-            {
-                segment.AddStartTags(tag);
-                if (tgi.IsTarget)
-                    edge.TargetTag = edgeTag;
-            }
-            else if (tt.HasFlag(TagType.Reset))
-            {
-                segment.AddResetTags(tag);
-                if (tgi.IsTarget)
-                    edge.TargetTag = edgeTag;
-            }
-            else if (tt.HasFlag(TagType.End))
-            {
-                segment.AddEndTags(tag);
-                if (tgi.IsSource)
-                    edge.SourceTags.Add(edgeTag);
-            }
-            else if (tt.HasFlag(TagType.Going))
-            {
-                Debug.Assert(segment.Going == null);
-                segment.Going = tag;
-                Debug.Assert(segment.Going == edgeTag);
-                if (tgi.IsSource)
-                    edge.SourceTags.Add(segment.Going);
-            }
-            else
-                throw new Exception("ERROR");
-        }
-
-
-        void buildBitDependencies(TagGenInfo tgi, Cpu cpu)
-        {
-            var (tag, edge) = (tgi.GeneratedTag, tgi.Edge);
-            var isReset = edge is IResetEdge;
-
-            // call 에 대한 reset edge 는 실효성이 없으므로 무시.  (정보로만 사용)
-            var child = tgi.Child as Child;
-            if (child != null && child.Coin is Call && isReset)
-                return;
+        //    if (tt.HasFlag(TagType.Start))
+        //    {
+        //        segment.AddStartTags(tag);
+        //        if (tgi.IsTarget)
+        //            edge.TargetTag = edgeTag;
+        //    }
+        //    else if (tt.HasFlag(TagType.Reset))
+        //    {
+        //        segment.AddResetTags(tag);
+        //        if (tgi.IsTarget)
+        //            edge.TargetTag = edgeTag;
+        //    }
+        //    else if (tt.HasFlag(TagType.End))
+        //    {
+        //        segment.AddEndTags(tag);
+        //        if (tgi.IsSource)
+        //            edge.SourceTags.Add(edgeTag);
+        //    }
+        //    else if (tt.HasFlag(TagType.Going))
+        //    {
+        //        Debug.Assert(segment.Going == null);
+        //        segment.Going = tag;
+        //        Debug.Assert(segment.Going == edgeTag);
+        //        if (tgi.IsSource)
+        //            edge.SourceTags.Add(segment.Going);
+        //    }
+        //    else
+        //        throw new Exception("ERROR");
+        //}
 
 
-            var tName = tag.Name;
-            Debug.Assert(edge.Cpu == cpu);
-            Debug.Assert(tag.Cpu.BitsMap.ContainsKey(tName));
-            // todo : Debug.Assert(tag.OwnerCpu == cpu);
-            if (tag.Cpu != cpu)
-            {
-                if (cpu.TagsMap.ContainsKey(tName))
-                    tag = cpu.TagsMap[tName];
-                else
-                    Debug.Assert(false);
-                Debug.Assert(tag.Cpu.TagsMap.ContainsKey(tag.Name));
-            }
+        //void buildBitDependencies(TagGenInfo tgi, Cpu cpu)
+        //{
+        //    var (tag, edge) = (tgi.GeneratedTag, tgi.Edge);
+        //    var isReset = edge is IResetEdge;
+
+        //    // call 에 대한 reset edge 는 실효성이 없으므로 무시.  (정보로만 사용)
+        //    var child = tgi.Child as Child;
+        //    if (child != null && child.Coin is Call && isReset)
+        //        return;
 
 
-            switch (tgi.Child)
-            {
-                case Segment:
-                    switch (isReset, tgi.IsSource, tgi.Type)
-                    {
-                        // { reset edge case
-                        case (true, true, TagType.Going):
-                            Debug.Assert(edge.SourceTags.Contains(tag));
-                            //cpu.AddBitDependancy(tag, edge);
-                            break;
-                        case (true, false, TagType.Reset):
-                            Debug.Assert(edge.TargetTag == tag);
-                            //cpu.AddBitDependancy(edge, tag);
-                            break;
-                        // }
-
-                        // { start edge case
-                        case (false, true, TagType.End):
-                            Debug.Assert(edge.SourceTags.Contains(tag));
-                            //cpu.AddBitDependancy(tag, edge);
-                            break;
-                        case (false, false, TagType.Start):
-                            Debug.Assert(edge.TargetTag == tag);
-                            //cpu.AddBitDependancy(edge, tag);
-                            break;
-                        // }
-
-                        default:
-                            throw new Exception("ERROR");
-                    }
-                    break;
-
-                case Child:
-                    switch (tgi.IsSource, tgi.Type)
-                    {
-                        case (true, TagType.End):
-                            Debug.Assert(edge.SourceTags.Contains(tag));
-                            //cpu.AddBitDependancy(tag, edge);
-                            break;
-                        case (false, TagType.Start):
-                            Debug.Assert(edge.TargetTag == tag);
-                            //cpu.AddBitDependancy(edge, tag);
-                            break;
-
-                        case (true, TagType.Start):
-                        case (false, TagType.End):
-                            break;
-
-                        default:
-                            throw new Exception("ERROR");
-                    }
+        //    var tName = tag.Name;
+        //    Debug.Assert(edge.Cpu == cpu);
+        //    Debug.Assert(tag.Cpu.BitsMap.ContainsKey(tName));
+        //    // todo : Debug.Assert(tag.OwnerCpu == cpu);
+        //    if (tag.Cpu != cpu)
+        //    {
+        //        if (cpu.TagsMap.ContainsKey(tName))
+        //            tag = cpu.TagsMap[tName];
+        //        else
+        //            Debug.Assert(false);
+        //        Debug.Assert(tag.Cpu.TagsMap.ContainsKey(tag.Name));
+        //    }
 
 
-                    break;
-                case RootCall call:
-                    // todo:
-                    //throw new Exception("ERROR");
-                    break;
-            }
-        }
+        //    switch (tgi.Child)
+        //    {
+        //        case Segment:
+        //            switch (isReset, tgi.IsSource, tgi.Type)
+        //            {
+        //                // { reset edge case
+        //                case (true, true, TagType.Going):
+        //                    Debug.Assert(edge.SourceTags.Contains(tag));
+        //                    //cpu.AddBitDependancy(tag, edge);
+        //                    break;
+        //                case (true, false, TagType.Reset):
+        //                    Debug.Assert(edge.TargetTag == tag);
+        //                    //cpu.AddBitDependancy(edge, tag);
+        //                    break;
+        //                // }
+
+        //                // { start edge case
+        //                case (false, true, TagType.End):
+        //                    Debug.Assert(edge.SourceTags.Contains(tag));
+        //                    //cpu.AddBitDependancy(tag, edge);
+        //                    break;
+        //                case (false, false, TagType.Start):
+        //                    Debug.Assert(edge.TargetTag == tag);
+        //                    //cpu.AddBitDependancy(edge, tag);
+        //                    break;
+        //                // }
+
+        //                default:
+        //                    throw new Exception("ERROR");
+        //            }
+        //            break;
+
+        //        case Child:
+        //            switch (tgi.IsSource, tgi.Type)
+        //            {
+        //                case (true, TagType.End):
+        //                    Debug.Assert(edge.SourceTags.Contains(tag));
+        //                    //cpu.AddBitDependancy(tag, edge);
+        //                    break;
+        //                case (false, TagType.Start):
+        //                    Debug.Assert(edge.TargetTag == tag);
+        //                    //cpu.AddBitDependancy(edge, tag);
+        //                    break;
+
+        //                case (true, TagType.Start):
+        //                case (false, TagType.End):
+        //                    break;
+
+        //                default:
+        //                    throw new Exception("ERROR");
+        //            }
+
+
+        //            break;
+        //        case RootCall call:
+        //            // todo:
+        //            //throw new Exception("ERROR");
+        //            break;
+        //    }
+        //}
     }
 }
 

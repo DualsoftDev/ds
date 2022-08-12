@@ -18,15 +18,15 @@ partial class Segment
       - 실행/Resume 은 Child call status 보고 G 이거나 R 인 것부터 수행
      */
 
-    public bool Paused
-    {
-        get {
-            var childStarted =
-                ChildStatusMap.Values.Any(s => s.IsOneOf(Status4.Going, Status4.Finished))
-                ;
-            return (Status == Status4.Ready && childStarted);
-        }
-    }
+    //public bool Paused
+    //{
+    //    get {
+    //        var childStarted =
+    //            ChildStatusMap.Values.Any(s => s.IsOneOf(Status4.Going, Status4.Finished))
+    //            ;
+    //        return (Status == Status4.Ready && childStarted);
+    //    }
+    //}
 
     public Dictionary<Child, Status4> ChildStatusMap { get; internal set; }
 

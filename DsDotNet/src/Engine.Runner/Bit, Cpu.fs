@@ -77,7 +77,8 @@ module internal CpuModule =
             subs
 
         cpu.ForwardDependancyMap.Clear();
-        cpu.BackwardDependancyMap.Clear();
+        if cpu.BackwardDependancyMap <> null then
+            cpu.BackwardDependancyMap.Clear();
 
         cpu.BuildBitDependencies()
 

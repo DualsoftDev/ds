@@ -1,5 +1,7 @@
 using Engine.Graph;
 
+using FSharpPlus.Data;
+
 namespace Engine;
 
 public static class HmiTagGenerator
@@ -33,43 +35,19 @@ public static class HmiTagGenerator
         var cpu = flow.Cpu;
         var midName = $"{flow.System.Name}_{flow.Name}";
 
-        // graph 분석
-        var graphInfo = FsGraphInfo.AnalyzeFlows(new[] { flow }, true);
-        List<Tag> tags = new();
+        var autoStart = Tag.CreateAutoStart(cpu, null, $"AutoStart_{midName}");
+        flow.AutoStart = autoStart;
 
-        foreach (var init_ in graphInfo.Inits)
+        var autoReset = Tag.CreateAutoReset(cpu, null, $"AutoReset_{midName}");
+        flow.AutoReset = autoReset;
+
+        foreach(var rs in flow.RootSegments)
         {
-            var init = init_ as Segment;
-            if (init == null)
-            {
-                Debug.Assert(init_ is Call);
-                // do nothing for call
-            }
-            else
-            {
-                var s = Tag.CreateAutoStart(cpu, init, $"AutoStart_{midName}_{init.Name}");
-                init.AddStartTags(s);
-                tags.Add(s);
-            }
+            rs.AddStartTags(autoStart);
+            rs.AddResetTags(autoReset);
         }
 
-        foreach (var last_ in graphInfo.Lasts)
-        {
-            var last = last_ as Segment;
-            if (last == null)
-            {
-                Debug.Assert(last_ is Call);
-                // do nothing for call
-            }
-            else
-            {
-                var r = Tag.CreateAutoReset(cpu, last, $"AutoReset_{midName}_{last.Name}");
-                last.AddResetTags(r);
-                tags.Add(r);
-            }
-        }
-
-        return tags.ToArray();
+        return new[] {autoStart, autoReset} ;
     }
 
     /// <summary>

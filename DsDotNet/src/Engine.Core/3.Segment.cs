@@ -8,7 +8,7 @@ namespace Engine.Core;
 [DebuggerDisplay("{ToText(),nq}")]
 public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, ITxRx, ITagSREContainer// Coin
 {
-    public RootFlow ContainerFlow { get; }
+    public RootFlow ContainerFlow { get; internal set; }
     Cpu _cpu;
     public Cpu Cpu {
         get => _cpu;
@@ -56,36 +56,38 @@ public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, ITxRx, ITagSR
 
 
     /// <summary>Segment 생성 함수.  Segment 에서 상속받은 class 객체를 생성하기 위함. (e.g Engine.Runner.FsSegment)</summary>
-    public static Func<string, RootFlow, Segment> Create { get; set; } = (string name, RootFlow containerFlow) => new Segment(name, containerFlow);
-    private Segment(string name, RootFlow containerFlow)
-        : this(containerFlow.Cpu, name)
-    {
-        ContainerFlow = containerFlow;
-        //containerFlow.ChildVertices.Add(this);
-        containerFlow.AddChildVertex(this);
-    }
+    public static Func<string, RootFlow, Segment> Create { get; set; } =
+        (string name, RootFlow containerFlow) =>
+        {
+            Debug.Assert(false);        // should be overriden
+            var seg = new Segment(containerFlow.Cpu, name) { ContainerFlow = containerFlow };
+            containerFlow.AddChildVertex(seg);
+            return seg;
+        };
+    //private Segment(string name, RootFlow containerFlow)
+    //    : this(containerFlow.Cpu, name)
+    //{
+    //    ContainerFlow = containerFlow;
+    //    _cpu = ContainerFlow.Cpu;
+    //    //containerFlow.ChildVertices.Add(this);
+    //    containerFlow.AddChildVertex(this);
+    //}
 
-    internal Segment(Cpu cpu, string name, PortInfoStart sp=null, PortInfoReset rp=null, PortInfoEnd ep=null, Tag going=null, Tag ready=null)
+    internal Segment(Cpu cpu, string name)
         : base(cpu, name)
     {
         _cpu = cpu;
-        // todo : Segment Port 생성
-        var n = QualifiedName;
-        PortS = sp ?? new PortInfoStart(_cpu, this, $"PortInfoS_{n}", new Flag(_cpu, $"PortSDefaultPlan_{n}"), null);
-        PortR = rp ?? new PortInfoReset(_cpu, this, $"PortInfoR_{n}", new Flag(_cpu, $"PortRDefaultPlan_{n}"), null);
-        PortE = ep ?? PortInfoEnd.Create(_cpu, this, $"PortInfoE_{n}", null);
-        Going = going ?? new Tag(_cpu, this, $"Going_{n}", TagType.Going);
-        Ready = ready ?? new Tag(_cpu, this, $"Ready_{n}", TagType.Ready);
     }
 
-    public Status4 Status =>
-        (PortS.Value, PortR.Value, PortE.Value) switch
-        {
-            (false, false, false) => Status4.Ready,  //??
-            (true, false, false) => Status4.Going,
-            (_, false, true) => Status4.Finished,
-            (_, true, _) => Status4.Homing,
-        };
+
+    //public Status4 Status =>
+    //    (PortS.Value, PortR.Value, PortE.Value) switch
+    //    {
+    //        (false, false, false) => Status4.Ready,  //??
+    //        (true, false, false) => Status4.Going,
+    //        (_, false, true) => Status4.Finished,
+    //        (_, true, _) => Status4.Homing,
+    //    };
 
     //public Status4 Status
     //{
@@ -229,4 +231,14 @@ public static class SegmentExtension
     //        yield return s.Ready;
     //}
 
+    public static void CreateSREGR(this Segment segment, Cpu cpu, PortInfoStart sp, PortInfoReset rp, PortInfoEnd ep, Tag going, Tag ready)
+    {
+        var s = segment;
+        var n = s.QualifiedName;
+        s.PortS = sp ?? new PortInfoStart(cpu, s, $"PortInfoS_{n}", new Flag(cpu, $"PortSDefaultPlan_{n}"), null);
+        s.PortR = rp ?? new PortInfoReset(cpu, s, $"PortInfoR_{n}", new Flag(cpu, $"PortRDefaultPlan_{n}"), null);
+        s.PortE = ep ?? PortInfoEnd.Create(cpu, s, $"PortInfoE_{n}", null);
+        s.Going = going ?? new Tag(cpu, s, $"Going_{n}", TagType.Going);
+        s.Ready = ready ?? new Tag(cpu, s, $"Ready_{n}", TagType.Ready);
+    }
 }

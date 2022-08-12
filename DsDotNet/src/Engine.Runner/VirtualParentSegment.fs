@@ -1,0 +1,221 @@
+namespace Engine.Runner
+
+
+open Dual.Common
+open Engine.Core
+open System
+open System.Linq
+open Engine.Core
+
+[<AutoOpen>]
+module VirtualParentSegmentModule =
+    type VirtualParentSegment(name, target:FsSegment, causalSourceSegments:FsSegment seq
+        , startPort, resetPort, endPort
+        , goingTag, readyTag
+        , targetStartTag, targetResetTag               // target child 의 start port 에 가상 부모가 시작시킬 수 있는 start tag 추가 (targetStartTag)
+    ) =
+        inherit FsSegment(target.Cpu, name) //, startPort, resetPort, endPort, goingTag, readyTag)
+        let cpu = target.Cpu
+        let mutable oldStatus:Status4 option = None
+
+        member val Target = target;
+        member val PreChildren = causalSourceSegments |> Array.ofSeq
+        member val TargetStartTag = targetStartTag with get
+        member val TargetResetTag = targetResetTag with get
+
+        static member Create(target:FsSegment, auto:IBit
+            , (targetStartTag:IBit, targetResetTag:IBit)
+            , causalSourceSegments:FsSegment seq
+            , resetSourceSegments:FsSegment seq
+        ) =
+            let cpu = target.Cpu
+            let n = $"VPS_{target.Name}"
+
+            let readyTag = new Tag(cpu, null, $"{n}_Ready")
+
+            let ep = PortInfoEnd.Create(cpu, null, $"End_{n}", null)
+
+            let rp =
+                (*
+                    And(            // $"ResetAnd_{X}"
+                        _auto
+                        , targetEnd
+                        ,FlipFlop(     // $"ResetFF_{X}"
+                            And(    // $"InnerResetSourceAnd_{X}"
+                                #(__X)
+                                //, FlipFlop(#g(ResetSource1), #r(__X))
+                                , FlipFlop(#g(ResetSource2), #r(__X)) )        // $"InnerResetSourceFF_{X}_{rsseg.Name}"
+                            ,#r(__X)))
+                *)
+                let resetPortInfoPlan =
+                    let vrp =
+                        [|
+                            yield auto
+                            //yield target.PortE  //ep
+                            let set =
+                                let andItems = [|
+                                    for rsseg in resetSourceSegments do
+                                        yield FlipFlop(cpu, $"InnerResetSourceFF_{n}_{rsseg.Name}", rsseg.Going, readyTag)  :> IBit
+                                |]
+                                And(cpu, $"InnerResetSourceAnd_{n}", andItems)
+                            yield FlipFlop(cpu, $"ResetFF_{n}", set, readyTag)
+                        |]
+                    And(cpu, $"ResetAnd_{n}", vrp)
+                PortInfoReset(cpu, null, $"Reset_{n}", resetPortInfoPlan, null)
+
+            let sp =
+                (*
+                    And(            // $"StartAnd_{X}"
+                        _auto
+                        ,ready
+                        ,FlipFlop(     // $"StartFF_{X}"
+                                #(__Prev)
+                                ,#(__X.RsetPort)))
+                *)
+                let startPortInfoPlan =
+                    let vsp =
+                        [|
+                            yield auto
+                            //yield readyTag
+                            for csseg in causalSourceSegments do
+                                yield FlipFlop(cpu, $"InnerStartSourceFF_{n}_{csseg.Name}", csseg.PortE, ep)// :> IBit
+                        |]
+                    And(cpu, $"StartAnd_{n}", vsp)
+
+                PortInfoStart(cpu, null, $"Start_{n}", startPortInfoPlan, null)
+
+
+            let vps = VirtualParentSegment(n, target, causalSourceSegments, sp, rp, ep, null, readyTag, targetStartTag, targetResetTag)
+            sp.Segment <- vps
+            rp.Segment <- vps
+            ep.Segment <- vps
+
+            vps
+
+        override x.WireEvent(writer) =
+            Global.BitChangedSubject
+                .Subscribe(fun bc ->
+                    let bit = bc.Bit :?> Bit
+                    let on = bc.Bit.Value
+
+                    let notiVpsPortChange = [x.PortS :> IBit; x.PortR; x.PortE] |> Seq.contains(bc.Bit)
+                    let notiTargetEndPortChange = bc.Bit = x.Target.PortE
+                    let state = x.Status
+
+                    //if notiVpsPortChange || notiTargetEndPortChange then
+                    //    noop()
+
+                    if notiTargetEndPortChange then
+                        if x.Going.Value && state <> Status4.Going then
+                            writer(x.Going, false, $"{x.Name} going off by status {state}")
+                        if x.Ready.Value && state <> Status4.Ready then
+                            writer(x.Ready, false, $"{x.Name} ready off by status {state}")
+
+                        let cause = $"${x.Target.Name} End Port={x.Target.PortE.Value}"
+
+
+                        match state, on with
+                        | Status4.Going, true ->
+                            writer(targetStartTag, false, $"{x.Name} going 끝내기 by{cause}")
+                            writer(x.Going, false, $"{x.Name} going 끝내기 by{cause}")
+                            writer(x.PortE, true, $"{x.Name} FINISH 끝내기 by{cause}")
+                            
+
+
+                        | Status4.Homing, false ->
+                            assert(x.Going.Value = false)
+                            writer(targetResetTag, false, $"{x.Target.Name} homing 완료로 reset 끄기")
+                            writer(x.Ready, true, $"{x.Target.Name} homing 완료")
+                            writer(x.PortE, false, null)
+
+                        | Status4.Ready, true ->
+                            logInfo $"외부에서 내부 target {x.Target.Name} 실행 감지"
+
+                        | _ ->
+                            failwithlog $"Unknown: [{x.Name}]{state}: Target endport => {x.Target.Name}={on}"
+
+
+                    if notiVpsPortChange then
+                        if oldStatus = Some state then
+                            logDebug $"\t\tVPS Skipping duplicate status: [{x.Name}] status : {state}"
+                        else
+                            oldStatus <- Some state
+                            logDebug $"[{x.Name}] Segment status : {state} by {bit.Name}={bit.Value}"
+                            let childStatus = x.Target.Status
+
+                            match state with
+                            | Status4.Ready    ->
+                                ()
+                            | Status4.Going    ->
+                                writer(x.Going, true, $"{name} GOING 시작")
+
+                                assert(childStatus = Status4.Ready || cpu.ProcessingQueue);
+                                if childStatus = Status4.Ready then
+                                    writer(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
+                                else
+                                    async {
+                                        // wait while target child available
+                                        let mutable childStatus:Status4 option = None
+                                        while childStatus <> Some Status4.Ready do
+                                            // re-evaluate child status
+                                            childStatus <- Some <| x.Target.Status
+                                            logWarn $"Waiting target child [{x.Target.Name}] ready..from {childStatus.Value}"
+                                            do! Async.Sleep(10);
+
+                                        writer(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
+                                    } |> Async.Start
+
+                            | Status4.Finished ->
+                                writer(targetStartTag, false, $"{x.Name} FINISH 로 인한 {x.Target.Name} start 끄기")
+                                writer(x.Going, false, "${x.Name} FINISH")
+                                assert(x.PortE.Value)
+                                assert(x.PortR.Value = false)
+
+                            | Status4.Homing ->
+                                if childStatus = Status4.Going then
+                                    failwith $"Something bad happend?  trying to reset child while {x.Target.Name}={childStatus}"
+
+                                writer(targetResetTag, true, $"{x.Name} HOMING 으로 인한 {x.Target.Name} reset 켜기")
+
+
+                            | _ ->
+                                failwith "Unexpected"
+                        ()
+                )
+
+    //let CreateVirtualParentSegment(segment: FsSegment) =
+    //    let flow = segment.ContainerFlow
+    //    let es = flow.Edges.Where(fun e -> e.Target = segment)
+    //    if es.IsEmpty() then
+    //        None
+    //    else
+    //        let setEdge = es.Where(fun e -> box e :? ISetEdge).ToArray()
+    //        let resetEdge = es.Where(fun e -> box e :? IResetEdge).ToArray()
+    //        assert(setEdge.Length = 0 || setEdge.Length = 1)
+    //        assert(resetEdge.Length = 0 || resetEdge.Length = 1)
+    //        let target = es.Select(fun e -> e.Target).Distinct().Cast<FsSegment>() |> Seq.exactlyOne
+
+    //        let st, rt = target.TagsStart |> Seq.exactlyOne, target.TagsReset |> Seq.exactlyOne
+    //        let causalSources = setEdge.Select(fun e -> e.Sources).Cast<FsSegment>()
+    //        let resetSources = resetEdge.Select(fun e -> e.Sources).Cast<FsSegment>()
+    //        let vps = VirtualParentSegment.Create(target, flow.AutoStart, (st, rt), causalSources, resetSources)
+    //        Some vps
+
+    let CreateVirtualParentSegmentsFromRootFlow(rootFlow: RootFlow) =
+        let autoStart = rootFlow.AutoStart
+        let allEdges = rootFlow.Edges.ToArray()
+        let segments = rootFlow.RootSegments.Cast<FsSegment>()
+        [
+            for target in segments do
+                let es = allEdges.Where(fun e -> e.Target = target).ToArray()
+                let setEdge = es.Where(fun e -> box e :? ISetEdge).ToArray()
+                let resetEdge = es.Where(fun e -> box e :? IResetEdge).ToArray()
+                assert(setEdge.Length = 0 || setEdge.Length = 1)
+                assert(resetEdge.Length = 0 || resetEdge.Length = 1)
+                let st = target.TagsStart.Where(fun t -> not <| t.Type.HasFlag(TagType.Auto)) |> Seq.exactlyOne
+                let rt = target.TagsReset.Where(fun t -> not <| t.Type.HasFlag(TagType.Auto)) |> Seq.exactlyOne
+                let causalSources = setEdge.Select(fun e -> e.Sources).Cast<FsSegment>()
+                let resetSources = resetEdge.Select(fun e -> e.Sources).Cast<FsSegment>()
+                let vps = VirtualParentSegment.Create(target, autoStart, (st, rt), causalSources, resetSources)
+                yield vps
+        ]

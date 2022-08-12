@@ -30,8 +30,14 @@ module EngineModule =
                     if tag.Value <> value then
                         onOpcTagChanged cpu (new OpcTagChange(tName, value))
 
-            let createVps() =
-                ()
+            // todo : 가상 부모 생성
+            let virtualParentSegments =
+                [
+                    for cpu in cpus do
+                    for rf in cpu.RootFlows do
+                        yield! VirtualParentSegmentModule.CreateVirtualParentSegmentsFromRootFlow(rf)
+                ]
+
 
 
             logInfo "Start F# Engine running..."

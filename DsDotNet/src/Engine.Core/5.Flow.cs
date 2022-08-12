@@ -62,6 +62,9 @@ public class RootFlow : Flow
         system.RootFlows.Add(this);
     }
 
+    public Tag AutoStart { get; set; }
+    public Tag AutoReset { get; set; }
+
     public IEnumerable<Segment> RootSegments => ChildVertices.OfType<Segment>();
 
     public override string ToText() => $"{QualifiedName}, #seg={RootSegments.Count()}, #chilren={ChildVertices.Count()}, #edges={Edges.Count()}";

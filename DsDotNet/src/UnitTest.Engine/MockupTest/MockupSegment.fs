@@ -6,14 +6,14 @@ open System
 open System.Reactive.Disposables
 open Dual.Common
 open Engine.Core
+open Engine.Runner
 
-type ChangeWriter = IBit*bool*obj -> unit
 type MockupSegmentBase(cpu, n, sp, rp, ep, goingTag, readyTag) as this =
-    inherit Segment(cpu, n, sp, rp, ep, goingTag, readyTag)
+    inherit FsSegment(cpu, n)
+    do
+        this.CreateSREGR(cpu, sp, rp, ep, goingTag, readyTag)
 
     member val FinishCount = 0 with get, set
-    abstract member WireEvent:ChangeWriter->IDisposable
-    default x.WireEvent(writer:ChangeWriter) = Disposable.Empty
 
     static member val WithThreadOnPortEnd = false with get, set
     static member val WithThreadOnPortReset = false with get, set

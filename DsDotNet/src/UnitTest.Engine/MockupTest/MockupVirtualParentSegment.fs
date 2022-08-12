@@ -13,7 +13,7 @@ open Dual.Common
 ///                 && #latch(#g(Previous), #r(Self)  <--- reset 조건 1
 ///                 && #latch(#g(Next), #r(Self)),    <--- reset 조건 2 ...
 ///             #r(Self))
-type VirtualParentSegment(name, target:MockupSegment, causalSourceSegments:MockupSegment seq
+type MockupVirtualParentSegment(name, target:MockupSegment, causalSourceSegments:MockupSegment seq
     , startPort, resetPort, endPort
     , goingTag, readyTag
     , targetStartTag, targetResetTag               // target child 의 start port 에 가상 부모가 시작시킬 수 있는 start tag 추가 (targetStartTag)
@@ -89,7 +89,7 @@ type VirtualParentSegment(name, target:MockupSegment, causalSourceSegments:Mocku
             PortInfoStart(cpu, null, $"Start_{n}", startPortInfoPlan, null)
 
 
-        let vps = VirtualParentSegment(n, target, causalSourceSegments, sp, rp, ep, null, readyTag, targetStartTag, targetResetTag)
+        let vps = MockupVirtualParentSegment(n, target, causalSourceSegments, sp, rp, ep, null, readyTag, targetStartTag, targetResetTag)
         sp.Segment <- vps
         rp.Segment <- vps
         ep.Segment <- vps
@@ -197,5 +197,5 @@ type VirtualParentSegment(name, target:MockupSegment, causalSourceSegments:Mocku
                     ()
             )
 
-type Vps = VirtualParentSegment
+type Vps = MockupVirtualParentSegment
 

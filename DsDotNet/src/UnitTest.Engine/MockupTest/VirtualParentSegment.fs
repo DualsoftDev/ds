@@ -130,10 +130,15 @@ type VirtualParentSegment(name, target:MockupSegment, causalSourceSegments:Mocku
 
 
                     | Status4.Homing, false ->
-                        assert(x.Going.Value = false)
-                        writer(targetResetTag, false, $"{x.Target.Name} homing 완료로 reset 끄기")
-                        writer(x.Ready, true, $"{x.Target.Name} homing 완료")
-                        writer(x.PortE, false, null)
+                        let homing() =
+                            assert(x.Going.Value = false)
+                            writer(targetResetTag, false, $"{x.Target.Name} homing 완료로 reset 끄기")
+                            writer(x.Ready, true, $"{x.Target.Name} homing 완료")
+                            writer(x.PortE, false, null)
+                        if MockupSegmentBase.WithThreadOnPortReset then
+                            async { homing() } |> Async.Start
+                        else
+                            homing()
 
                     | Status4.Ready, true ->
                         logInfo $"외부에서 내부 target {x.Target.Name} 실행 감지"
@@ -176,8 +181,9 @@ type VirtualParentSegment(name, target:MockupSegment, causalSourceSegments:Mocku
                             writer(targetStartTag, false, $"{x.Name} FINISH 로 인한 {x.Target.Name} start 끄기")
                             writer(x.Going, false, "${x.Name} FINISH")
                             x.FinishCount <- x.FinishCount + 1
-                            assert(x.PortE.Value)
-                            assert(x.PortR.Value = false)
+                            if not MockupSegmentBase.WithThreadOnPortReset then
+                                assert(x.PortE.Value)
+                                assert(x.PortR.Value = false)
 
                         | Status4.Homing ->
                             if childStatus = Status4.Going then

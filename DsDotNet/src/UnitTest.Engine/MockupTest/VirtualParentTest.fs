@@ -15,9 +15,7 @@ module VirtualParentTestTest =
     type Tests1(output1:ITestOutputHelper) =
 
         let mutable testFinished = false
-        let prepare(cpu:Cpu, writer:ChangeWriter) =
-            /// 목적 수행 횟수
-            let numCycles = 1000
+        let prepare(cpu:Cpu, writer:ChangeWriter, numCycles) =
 
             let b, (stB, rtB) = MockupSegment.CreateWithDefaultTags(cpu, "B")
             let g, (stG, rtG) = MockupSegment.CreateWithDefaultTags(cpu, "G")
@@ -172,12 +170,12 @@ module VirtualParentTestTest =
         [<Fact>]
         member __.``Single thread w/ Queueing : OK`` () =
             let cpu = MockUpCpu.create("dummy")
-            let vpB, vpG, vpR, auto, stB = prepare(cpu, cpu.Enqueue)
+            let vpB, vpG, vpR, auto, stB = prepare(cpu, cpu.Enqueue, 100)
 
-            [vpB; vpG; vpR] |> Seq.iter(fun vp -> cpu.Enqueue(vp.Ready, true));
+            [vpB; vpG; vpR] |> Seq.iter(fun vp -> cpu.PostChange(vp.Ready, true, null));
 
-            cpu.Enqueue(auto, true, "최초 auto 시작")
-            cpu.Enqueue(stB, true, "최초 B 시작")
+            cpu.PostChange(auto, true, "최초 auto 시작")
+            cpu.PostChange(stB, true, "최초 B 시작")
 
             wait(cpu)
             while not testFinished do
@@ -188,14 +186,17 @@ module VirtualParentTestTest =
 
 
         [<Fact>]
-        member __.``Single thread w/o Queue => Stack overflow`` () =
+        member __.``FAIL: Single thread w/o Queue => Stack overflow`` () =
             let cpu = MockUpCpu.create("dummy")
-            let vpB, vpG, vpR, auto, stB = prepare(cpu, cpu.SendChange)
+            let vpB, vpG, vpR, auto, stB = prepare(cpu, cpu.SendChange, 100)
 
             [vpB; vpG; vpR] |> Seq.iter(fun vp -> cpu.SendChange(vp.Ready, true, null));
 
-            cpu.SendChange(auto, true, "최초 auto 시작")
-            cpu.SendChange(stB, true, "최초 B 시작")
+            try
+                cpu.SendChange(auto, true, "최초 auto 시작")
+                cpu.SendChange(stB, true, "최초 B 시작")
+            with exn ->
+                logError $"Exception: {exn}"
 
             wait(cpu)
             while not testFinished do
@@ -210,7 +211,7 @@ module VirtualParentTestTest =
             MockupSegmentBase.WithThreadOnPortEnd <- true
 
             let cpu = MockUpCpu.create("dummy")
-            let vpB, vpG, vpR, auto, stB = prepare(cpu, cpu.SendChange)
+            let vpB, vpG, vpR, auto, stB = prepare(cpu, cpu.SendChange, 1000)
 
             [vpB; vpG; vpR] |> Seq.iter(fun vp -> cpu.SendChange(vp.Ready, true, null));
 
@@ -224,11 +225,51 @@ module VirtualParentTestTest =
             logInfo "Test 종료"
 
         [<Fact>]
+        member __.``FAIL: Multithread on PortReset w/o Queue => Stack overflow`` () =
+            MockupSegmentBase.WithThreadOnPortReset <- true
+
+            let cpu = MockUpCpu.create("dummy")
+            let vpB, vpG, vpR, auto, stB = prepare(cpu, cpu.SendChange, 1000)
+
+            [vpB; vpG; vpR] |> Seq.iter(fun vp -> cpu.SendChange(vp.Ready, true, null));
+
+            cpu.SendChange(auto, true, "최초 auto 시작")
+            cpu.SendChange(stB, true, "최초 B 시작")
+
+            wait(cpu)
+            while not testFinished do
+                Thread.Sleep(100)
+
+            logInfo "Test 종료"
+
+
+        /// target child Going 중에 parent reset 받음.
+        [<Fact>]
+        member __.``FAIL: Multithread on Port{End, Reset} w/o Queue`` () =
+            MockupSegmentBase.WithThreadOnPortEnd <- true
+            MockupSegmentBase.WithThreadOnPortReset <- true
+
+            let cpu = MockUpCpu.create("dummy")
+            let vpB, vpG, vpR, auto, stB = prepare(cpu, cpu.SendChange, 1000)
+
+            [vpB; vpG; vpR] |> Seq.iter(fun vp -> cpu.SendChange(vp.Ready, true, null));
+
+            cpu.SendChange(auto, true, "최초 auto 시작")
+            cpu.SendChange(stB, true, "최초 B 시작")
+
+            wait(cpu)
+            while not testFinished do
+                Thread.Sleep(100)
+
+            logInfo "Test 종료"
+
+
+        [<Fact>]
         member __.``Multithread on PortEnd with Queue : OK`` () =
             MockupSegmentBase.WithThreadOnPortEnd <- true
 
             let cpu = MockUpCpu.create("dummy")
-            let vpB, vpG, vpR, auto, stB = prepare(cpu, cpu.Enqueue)
+            let vpB, vpG, vpR, auto, stB = prepare(cpu, cpu.Enqueue, 1000)
 
             [vpB; vpG; vpR] |> Seq.iter(fun vp -> cpu.Enqueue(vp.Ready, true, null));
 

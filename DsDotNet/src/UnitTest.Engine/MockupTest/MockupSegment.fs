@@ -30,6 +30,7 @@ type MockupSegmentBase(cpu, n, sp, rp, ep, goingTag, readyTag) as this =
     default x.WireEvent(writer:ChangeWriter) = Disposable.Empty
 
     static member val WithThreadOnPortEnd = false with get, set
+    static member val WithThreadOnPortReset = false with get, set
 
 type MockupSegment(cpu, n, sp, rp, ep, goingTag, readyTag) =
     inherit MockupSegmentBase(cpu, n, sp, rp, ep, goingTag, readyTag)
@@ -78,7 +79,10 @@ type MockupSegment(cpu, n, sp, rp, ep, goingTag, readyTag) =
                         x.FinishCount <- x.FinishCount + 1
                         logDebug $"[{x.Name}] Segment FinishCounter = {x.FinishCount}"
                     | Status4.Homing   ->
-                        writer(x.PortE, false, $"{n} HOMING")
+                        if MockupSegmentBase.WithThreadOnPortReset then
+                            async { writer(x.PortE, false, $"{n} HOMING") } |> Async.Start
+                        else
+                            writer(x.PortE, false, $"{n} HOMING")
 
                     | _ ->
                         failwith "Unexpected"

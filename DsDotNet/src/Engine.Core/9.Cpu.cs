@@ -312,9 +312,11 @@ public static class CpuExtensionQueueing
             }
         }).Start()
         ;
+
+        _applyDirectly = new Action<Cpu, BitChange>((cpu, bitChange) => Apply(cpu, bitChange, false));
+
         return disposable;
 
-        _applyDirectly = new Action<Cpu, BitChange>( (cpu, bitChange) => Apply(cpu, bitChange, false));
 
 
         void Apply(Cpu cpu, BitChange bitChange, bool withQueue)
@@ -429,7 +431,7 @@ public static class CpuExtensionQueueing
 
 
     /// <summary> Bit 의 값 변경 처리를 CPU 에 위임.  즉시 수행되지 않고, CPU 의 Queue 에 추가 된 후, CPU thread 에서 수행된다.  </summary>
-    public static void Enqueue(this Cpu cpu, IBit bit, bool newValue, object cause = null)
+    public static void Enqueue(this Cpu cpu, IBit bit, bool newValue, object cause)
     {
         switch(bit)
         {
@@ -441,9 +443,10 @@ public static class CpuExtensionQueueing
                 break;
         };
     }
+    public static void Enqueue(this Cpu cpu, IBit bit, bool newValue) => Enqueue(cpu, bit, newValue, null);
 
 
     static Action<Cpu, BitChange> _applyDirectly = null;
-    public static void SendChange(this Cpu cpu, IBit bit, bool newValue, object cause = null) => _applyDirectly(cpu, new BitChange(bit, newValue, false, cause));
-    public static void PostChange(this Cpu cpu, IBit bit, bool newValue, object cause = null) => Enqueue(cpu, bit, newValue, cause);
+    public static void SendChange(this Cpu cpu, IBit bit, bool newValue, object cause) => _applyDirectly(cpu, new BitChange(bit, newValue, false, cause));
+    public static void PostChange(this Cpu cpu, IBit bit, bool newValue, object cause) => Enqueue(cpu, bit, newValue, cause);
 }

@@ -7,6 +7,7 @@ open System.Reactive.Disposables
 open Dual.Common
 open Engine.Core
 
+type ChangeWriter = IBit*bool*obj -> unit
 type MockupSegmentBase(cpu, n, sp, rp, ep, goingTag, readyTag) as this =
     inherit Segment(n)
 
@@ -25,8 +26,10 @@ type MockupSegmentBase(cpu, n, sp, rp, ep, goingTag, readyTag) as this =
         | true, false, false  -> Status4.Going
         | _, false, true      -> Status4.Finished
         | _, true, _          -> Status4.Homing
-    abstract member WireEvent:unit->IDisposable
-    default x.WireEvent() = Disposable.Empty
+    abstract member WireEvent:ChangeWriter->IDisposable
+    default x.WireEvent(writer:ChangeWriter) = Disposable.Empty
+
+    static member val WithThreadOnPortEnd = false with get, set
 
 type MockupSegment(cpu, n, sp, rp, ep, goingTag, readyTag) =
     inherit MockupSegmentBase(cpu, n, sp, rp, ep, goingTag, readyTag)
@@ -43,7 +46,7 @@ type MockupSegment(cpu, n, sp, rp, ep, goingTag, readyTag) =
         seg, (st, rt)
 
 
-    override x.WireEvent() =
+    override x.WireEvent(writer) =
         Global.BitChangedSubject
             .Where(fun bc ->
                 [x.PortS :> IBit; x.PortR; x.PortE] |> Seq.contains(bc.Bit)
@@ -56,23 +59,26 @@ type MockupSegment(cpu, n, sp, rp, ep, goingTag, readyTag) =
                     oldStatus <- Some state
                     logDebug $"[{n}] Segment status : {state}"
                     if x.Going.Value && state <> Status4.Going then
-                        cpu.Enqueue(x.Going, false, $"{n} going off by status {state}")
+                        writer(x.Going, false, $"{n} going off by status {state}")
                     if x.Ready.Value && state <> Status4.Ready then
                         cpu.Enqueue(x.Ready, false, $"{n} ready off by status {state}")
 
                     match state with
                     | Status4.Ready    ->
-                        cpu.Enqueue(x.Ready, true)
+                        writer(x.Ready, true, null)
                         ()
                     | Status4.Going    ->
-                        cpu.Enqueue(x.Going, true, $"{n} GOING 시작")
-                        cpu.Enqueue(x.PortE, true, $"{n} GOING 끝")
+                        writer(x.Going, true, $"{n} GOING 시작")
+                        if MockupSegmentBase.WithThreadOnPortEnd then
+                            async { writer(x.PortE, true, $"{n} GOING 끝") } |> Async.Start
+                        else
+                            writer(x.PortE, true, $"{n} GOING 끝")
                     | Status4.Finished ->
-                        cpu.Enqueue(x.Going, false, $"{n} FINISH")   //! 순서 민감
+                        writer(x.Going, false, $"{n} FINISH")   //! 순서 민감
                         x.FinishCount <- x.FinishCount + 1
                         logDebug $"[{x.Name}] Segment FinishCounter = {x.FinishCount}"
                     | Status4.Homing   ->
-                        cpu.Enqueue(x.PortE, false, $"{n} HOMING")
+                        writer(x.PortE, false, $"{n} HOMING")
 
                     | _ ->
                         failwith "Unexpected"

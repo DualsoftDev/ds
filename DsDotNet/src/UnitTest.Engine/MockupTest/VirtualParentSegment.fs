@@ -96,7 +96,7 @@ type VirtualParentSegment(name, target:MockupSegment, causalSourceSegments:Mocku
 
         vps
 
-    override x.WireEvent() =
+    override x.WireEvent(writer) =
         Global.BitChangedSubject
             .Subscribe(fun bc ->
                 let bit = bc.Bit :?> Bit
@@ -111,25 +111,29 @@ type VirtualParentSegment(name, target:MockupSegment, causalSourceSegments:Mocku
 
                 if notiTargetEndPortChange then
                     if x.Going.Value && state <> Status4.Going then
-                        cpu.Enqueue(x.Going, false, $"{x.Name} going off by status {state}")
+                        writer(x.Going, false, $"{x.Name} going off by status {state}")
                     if x.Ready.Value && state <> Status4.Ready then
-                        cpu.Enqueue(x.Ready, false, $"{x.Name} ready off by status {state}")
+                        writer(x.Ready, false, $"{x.Name} ready off by status {state}")
 
                     let cause = $"${x.Target.Name} End Port={x.Target.PortE.Value}"
 
 
                     match state, on with
                     | Status4.Going, true ->
-                        cpu.Enqueue(targetStartTag, false, $"{x.Name} going 끝내기 by{cause}")
-                        cpu.Enqueue(x.Going, false, $"{x.Name} going 끝내기 by{cause}")
-                        cpu.Enqueue(x.PortE, true, $"{x.Name} FINISH 끝내기 by{cause}")
+                        writer(targetStartTag, false, $"{x.Name} going 끝내기 by{cause}")
+                        writer(x.Going, false, $"{x.Name} going 끝내기 by{cause}")
+                        if MockupSegmentBase.WithThreadOnPortEnd then
+                            async { writer(x.PortE, true, $"{x.Name} FINISH 끝내기 by{cause}") } |> Async.Start
+                        else
+                            writer(x.PortE, true, $"{x.Name} FINISH 끝내기 by{cause}")
+                            
 
 
                     | Status4.Homing, false ->
                         assert(x.Going.Value = false)
-                        cpu.Enqueue(targetResetTag, false, $"{x.Target.Name} homing 완료로 reset 끄기")
-                        cpu.Enqueue(x.Ready, true)
-                        cpu.Enqueue(x.PortE, false)
+                        writer(targetResetTag, false, $"{x.Target.Name} homing 완료로 reset 끄기")
+                        writer(x.Ready, true, $"{x.Target.Name} homing 완료")
+                        writer(x.PortE, false, null)
 
                     | Status4.Ready, true ->
                         logInfo $"외부에서 내부 target {x.Target.Name} 실행 감지"
@@ -150,11 +154,11 @@ type VirtualParentSegment(name, target:MockupSegment, causalSourceSegments:Mocku
                         | Status4.Ready    ->
                             ()
                         | Status4.Going    ->
-                            cpu.Enqueue(x.Going, true, $"{name} GOING 시작")
+                            writer(x.Going, true, $"{name} GOING 시작")
 
                             assert(childStatus = Status4.Ready || cpu.ProcessingQueue);
                             if childStatus = Status4.Ready then
-                                cpu.Enqueue(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
+                                writer(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
                             else
                                 async {
                                     // wait while target child available
@@ -165,12 +169,12 @@ type VirtualParentSegment(name, target:MockupSegment, causalSourceSegments:Mocku
                                         logWarn $"Waiting target child [{x.Target.Name}] ready..from {childStatus.Value}"
                                         do! Async.Sleep(10);
 
-                                    cpu.Enqueue(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
+                                    writer(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
                                 } |> Async.Start
 
                         | Status4.Finished ->
-                            cpu.Enqueue(targetStartTag, false, $"{x.Name} FINISH 로 인한 {x.Target.Name} start 끄기")
-                            cpu.Enqueue(x.Going, false)
+                            writer(targetStartTag, false, $"{x.Name} FINISH 로 인한 {x.Target.Name} start 끄기")
+                            writer(x.Going, false, "${x.Name} FINISH")
                             x.FinishCount <- x.FinishCount + 1
                             assert(x.PortE.Value)
                             assert(x.PortR.Value = false)
@@ -179,7 +183,7 @@ type VirtualParentSegment(name, target:MockupSegment, causalSourceSegments:Mocku
                             if childStatus = Status4.Going then
                                 failwith $"Something bad happend?  trying to reset child while {x.Target.Name}={childStatus}"
 
-                            cpu.Enqueue(targetResetTag, true, $"{x.Name} HOMING 으로 인한 {x.Target.Name} reset 켜기")
+                            writer(targetResetTag, true, $"{x.Name} HOMING 으로 인한 {x.Target.Name} reset 켜기")
 
 
                         | _ ->

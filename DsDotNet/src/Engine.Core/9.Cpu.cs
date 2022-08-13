@@ -446,10 +446,13 @@ public static class CpuExtensionQueueing
                 break;
         };
     }
-    public static void Enqueue(this Cpu cpu, IBit bit, bool newValue) => Enqueue(cpu, bit, newValue, null);
+    public static void Enqueue(this Cpu cpu, IBit bit, bool newValue) =>
+        Enqueue(cpu, bit, newValue, null);
 
 
     static Action<Cpu, BitChange> _applyDirectly = null;
-    public static void SendChange(this Cpu cpu, IBit bit, bool newValue, object cause) => _applyDirectly(cpu, new BitChange(bit, newValue, false, cause));
-    public static void PostChange(this Cpu cpu, IBit bit, bool newValue, object cause) => Enqueue(cpu, bit, newValue, cause);
+    public static void SendChange(this Cpu cpu, IBit bit, bool newValue, object cause) =>
+        _applyDirectly(cpu, new BitChange(bit, newValue, false, cause));
+    public static void PostChange(this Cpu cpu, IBit bit, bool newValue, object cause) =>
+        Enqueue(cpu, bit, newValue, cause);
 }

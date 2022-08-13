@@ -8,6 +8,7 @@ open Dual.Common
 
 [<AutoOpen>]
 module FsSegmentModule =
+    /// Bit * New Value * Change reason
     type ChangeWriter = IBit*bool*obj -> unit
 
     type FsSegment(cpu, n) =

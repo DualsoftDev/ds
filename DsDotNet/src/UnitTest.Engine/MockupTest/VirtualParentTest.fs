@@ -56,7 +56,7 @@ module VirtualParentTestTest =
             subscriptionAutoOff <-
                 Global.BitChangedSubject
                     .Subscribe(fun bc ->
-                        if bc.Bit = b.PortE && b.FinishCount = numCycles then
+                        if bc.Bit = g.PortE && g.FinishCount = numCycles then
                             logInfo $"자동 운전 종료"
                             writer(auto, false, "Auto off")
                             cpu.Running <- false
@@ -258,6 +258,11 @@ module VirtualParentTestTest =
             cpu.SendChange(auto, true, "최초 auto 시작")
             cpu.SendChange(stB, true, "최초 B 시작")
 
+            (* 실패 원인:
+                - dead lock (block)
+                - Something bad happend?  trying to reset child while R=Going
+            *)
+            
             wait(cpu)
             while not testFinished do
                 Thread.Sleep(100)

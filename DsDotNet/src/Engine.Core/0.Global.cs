@@ -13,6 +13,9 @@ global using Engine.Common;
 
 namespace Engine.Core;
 
+
+public delegate void ExceptionHandler(Exception ex);
+
 public static class Global
 {
     public static ILog Logger { get; set; }

@@ -9,7 +9,8 @@ public class BitChange
     public object Cause { get; }
     public bool Applied { get; internal set; }
     public DateTime Time { get; }
-    public BitChange(IBit bit, bool newValue, bool applied= false, object cause = null)
+    public ExceptionHandler OnError { get; set; }
+    public BitChange(IBit bit, bool newValue, object cause = null, ExceptionHandler onError =null, bool applied = false)
     {
         Debug.Assert(cause is null || cause is IBit || cause is string);
         Bit = bit;
@@ -17,6 +18,7 @@ public class BitChange
         Applied = applied;
         Time = DateTime.Now;
         Cause = cause;
+        OnError = onError;
         if (cause == null)
             Console.WriteLine();
     }

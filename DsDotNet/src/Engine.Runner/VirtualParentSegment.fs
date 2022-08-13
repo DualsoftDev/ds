@@ -5,7 +5,6 @@ open Dual.Common
 open Engine.Core
 open System
 open System.Linq
-open Engine.Core
 
 [<AutoOpen>]
 module VirtualParentSegmentModule =
@@ -96,7 +95,9 @@ module VirtualParentSegmentModule =
 
             vps
 
-        override x.WireEvent(writer) =
+        override x.WireEvent(writer, onError) =
+            let write(bit, value, cause) =
+                writer(BitChange(bit, value, cause, onError))
             Global.BitChangedSubject
                 .Subscribe(fun bc ->
                     let bit = bc.Bit :?> Bit
@@ -111,26 +112,26 @@ module VirtualParentSegmentModule =
 
                     if notiTargetEndPortChange then
                         if x.Going.Value && state <> Status4.Going then
-                            writer(x.Going, false, $"{x.Name} going off by status {state}")
+                            write(x.Going, false, $"{x.Name} going off by status {state}")
                         if x.Ready.Value && state <> Status4.Ready then
-                            writer(x.Ready, false, $"{x.Name} ready off by status {state}")
+                            write(x.Ready, false, $"{x.Name} ready off by status {state}")
 
                         let cause = $"${x.Target.Name} End Port={x.Target.PortE.Value}"
 
 
                         match state, on with
                         | Status4.Going, true ->
-                            writer(targetStartTag, false, $"{x.Name} going 끝내기 by{cause}")
-                            writer(x.Going, false, $"{x.Name} going 끝내기 by{cause}")
-                            writer(x.PortE, true, $"{x.Name} FINISH 끝내기 by{cause}")
+                            write(targetStartTag, false, $"{x.Name} going 끝내기 by{cause}")
+                            write(x.Going, false, $"{x.Name} going 끝내기 by{cause}")
+                            write(x.PortE, true, $"{x.Name} FINISH 끝내기 by{cause}")
                             
 
 
                         | Status4.Homing, false ->
                             assert(x.Going.Value = false)
-                            writer(targetResetTag, false, $"{x.Target.Name} homing 완료로 reset 끄기")
-                            writer(x.Ready, true, $"{x.Target.Name} homing 완료")
-                            writer(x.PortE, false, null)
+                            write(targetResetTag, false, $"{x.Target.Name} homing 완료로 reset 끄기")
+                            write(x.Ready, true, $"{x.Target.Name} homing 완료")
+                            write(x.PortE, false, null)
 
                         | Status4.Ready, true ->
                             logInfo $"외부에서 내부 target {x.Target.Name} 실행 감지"
@@ -151,11 +152,11 @@ module VirtualParentSegmentModule =
                             | Status4.Ready    ->
                                 ()
                             | Status4.Going    ->
-                                writer(x.Going, true, $"{name} GOING 시작")
+                                write(x.Going, true, $"{name} GOING 시작")
 
                                 assert(childStatus = Status4.Ready || cpu.ProcessingQueue);
                                 if childStatus = Status4.Ready then
-                                    writer(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
+                                    write(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
                                 else
                                     async {
                                         // wait while target child available
@@ -166,12 +167,12 @@ module VirtualParentSegmentModule =
                                             logWarn $"Waiting target child [{x.Target.Name}] ready..from {childStatus.Value}"
                                             do! Async.Sleep(10);
 
-                                        writer(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
+                                        write(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
                                     } |> Async.Start
 
                             | Status4.Finished ->
-                                writer(targetStartTag, false, $"{x.Name} FINISH 로 인한 {x.Target.Name} start 끄기")
-                                writer(x.Going, false, "${x.Name} FINISH")
+                                write(targetStartTag, false, $"{x.Name} FINISH 로 인한 {x.Target.Name} start 끄기")
+                                write(x.Going, false, "${x.Name} FINISH")
                                 assert(x.PortE.Value)
                                 assert(x.PortR.Value = false)
 
@@ -179,7 +180,7 @@ module VirtualParentSegmentModule =
                                 if childStatus = Status4.Going then
                                     failwith $"Something bad happend?  trying to reset child while {x.Target.Name}={childStatus}"
 
-                                writer(targetResetTag, true, $"{x.Name} HOMING 으로 인한 {x.Target.Name} reset 켜기")
+                                write(targetResetTag, true, $"{x.Name} HOMING 으로 인한 {x.Target.Name} reset 켜기")
 
 
                             | _ ->

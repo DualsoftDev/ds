@@ -33,7 +33,9 @@ type MockupSegment(cpu, n) =
         seg, (st, rt)
 
 
-    override x.WireEvent(writer) =
+    override x.WireEvent(writer, onError) =
+        let write(bit, value, cause) =
+            writer(BitChange(bit, value, cause, onError))
         Global.BitChangedSubject
             .Where(fun bc ->
                 [x.PortS :> IBit; x.PortR; x.PortE] |> Seq.contains(bc.Bit)
@@ -46,29 +48,29 @@ type MockupSegment(cpu, n) =
                     oldStatus <- Some state
                     logDebug $"[{n}] Segment status : {state}"
                     if x.Going.Value && state <> Status4.Going then
-                        writer(x.Going, false, $"{n} going off by status {state}")
+                        write(x.Going, false, $"{n} going off by status {state}")
                     if x.Ready.Value && state <> Status4.Ready then
                         cpu.Enqueue(x.Ready, false, $"{n} ready off by status {state}")
 
                     match state with
                     | Status4.Ready    ->
-                        writer(x.Ready, true, null)
+                        write(x.Ready, true, null)
                         ()
                     | Status4.Going    ->
-                        writer(x.Going, true, $"{n} GOING 시작")
+                        write(x.Going, true, $"{n} GOING 시작")
                         if MockupSegmentBase.WithThreadOnPortEnd then
-                            async { writer(x.PortE, true, $"{n} GOING 끝") } |> Async.Start
+                            async { write(x.PortE, true, $"{n} GOING 끝") } |> Async.Start
                         else
-                            writer(x.PortE, true, $"{n} GOING 끝")
+                            write(x.PortE, true, $"{n} GOING 끝")
                     | Status4.Finished ->
-                        writer(x.Going, false, $"{n} FINISH")   //! 순서 민감
+                        write(x.Going, false, $"{n} FINISH")   //! 순서 민감
                         x.FinishCount <- x.FinishCount + 1
                         logDebug $"[{x.Name}] Segment FinishCounter = {x.FinishCount}"
                     | Status4.Homing   ->
                         if MockupSegmentBase.WithThreadOnPortReset then
-                            async { writer(x.PortE, false, $"{n} HOMING") } |> Async.Start
+                            async { write(x.PortE, false, $"{n} HOMING") } |> Async.Start
                         else
-                            writer(x.PortE, false, $"{n} HOMING")
+                            write(x.PortE, false, $"{n} HOMING")
 
                     | _ ->
                         failwith "Unexpected"

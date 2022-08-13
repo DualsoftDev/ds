@@ -10,13 +10,18 @@ open UnitTest.Engine
 open System.Reactive.Disposables
 open System
 open System.Threading
+open System.Reactive.Linq
 
 [<AutoOpen>]
 module VirtualParentTestTest =
     type Tests1(output1:ITestOutputHelper) =
 
         let mutable testFinished = false
-        let prepare(cpu:Cpu, writer:ChangeWriter, numCycles) =
+        let onError =
+            fun (ex:Exception) ->
+                testFinished <- true
+
+        let prepare(cpu:Cpu, writer:ChangeWriter, numCycles, onError) =
 
             let b, (stB, rtB) = MockupSegment.CreateWithDefaultTags(cpu, "B")
             let g, (stG, rtG) = MockupSegment.CreateWithDefaultTags(cpu, "G")
@@ -39,6 +44,8 @@ module VirtualParentTestTest =
             cpu.PrintAllTags(true);
             logDebug "====================="
 
+            let write(bit, value, cause) =
+                writer(BitChange(bit, value, cause, onError))
 
 
             // 외부 시작 (start B) off
@@ -48,7 +55,7 @@ module VirtualParentTestTest =
                     .Subscribe(fun bc ->
                         if bc.Bit = b.PortE then
                             assert b.PortE.Value
-                            writer(stB, false, "Turning off 최초 시작 trigger")
+                            write(stB, false, "Turning off 최초 시작 trigger")
                             subscriptionExternalStartOff.Dispose())
 
             // 목적 cycle 수행 후, auto off 및 시험 종료
@@ -58,13 +65,15 @@ module VirtualParentTestTest =
                     .Subscribe(fun bc ->
                         if bc.Bit = g.PortE && g.FinishCount = numCycles then
                             logInfo $"자동 운전 종료"
-                            writer(auto, false, "Auto off")
+                            write(auto, false, "Auto off")
                             cpu.Running <- false
                             // 수행 횟수 확인
                             async {
                                 while cpu.ProcessingQueue do
                                     do! Async.Sleep(10)
-                                [b.FinishCount; g.FinishCount; r.FinishCount] |> List.forall((=) numCycles) |> ShouldBeTrue
+                                [b.FinishCount; g.FinishCount; r.FinishCount]
+                                |> List.forall(fun n -> abs(n - numCycles) <= 1)                                |> ShouldBeTrue
+
                                 logInfo $"최종 결과 확인 완료!"
                                 testFinished <- true
                             } |> Async.Start
@@ -89,7 +98,7 @@ module VirtualParentTestTest =
                 ) |> ignore
 
             // 각 segment 별 event handling 등록
-            [b :> MockupSegmentBase; g; r; vpB; vpG; vpR] |> Seq.iter(fun seg -> seg.WireEvent(writer) |> ignore)
+            [b :> MockupSegmentBase; g; r; vpB; vpG; vpR] |> Seq.iter(fun seg -> seg.WireEvent(writer, onError) |> ignore)
 
             assert([vpB; vpG; vpR] |> Seq.forall(fun vp -> vp.Status = Status4.Ready));
 
@@ -130,7 +139,7 @@ module VirtualParentTestTest =
                     let cause = if isNull bc.CauseRepr then "" else $" caused by [{bc.CauseRepr}]"
                     logDebug $"\tBit changed: [{bit.GetName()}] = {bc.NewValue}{cause}") |> ignore
 
-            [b :> MockupSegmentBase; g; r; vpB;] |> Seq.iter(fun seg -> seg.WireEvent(cpu.Enqueue) |> ignore)
+            [b :> MockupSegmentBase; g; r; vpB;] |> Seq.iter(fun seg -> seg.WireEvent(cpu.Enqueue, raise) |> ignore)
 
             logDebug "====================="
             cpu.PrintAllTags(false);
@@ -171,7 +180,7 @@ module VirtualParentTestTest =
         [<Fact>]
         member __.``Single thread w/ Queueing : OK`` () =
             let cpu = MockUpCpu.create("dummy")
-            let vpB, vpG, vpR, auto, stB = prepare(cpu, cpu.Enqueue, 100)
+            let vpB, vpG, vpR, auto, stB = prepare(cpu, cpu.Enqueue, 100, raise)
 
             [vpB; vpG; vpR] |> Seq.iter(fun vp -> cpu.PostChange(vp.Ready, true, null));
 
@@ -189,7 +198,7 @@ module VirtualParentTestTest =
         [<Fact>]
         member __.``FAIL: Single thread w/o Queue => Stack overflow`` () =
             let cpu = MockUpCpu.create("dummy")
-            let vpB, vpG, vpR, auto, stB = prepare(cpu, cpu.SendChange, 100)
+            let vpB, vpG, vpR, auto, stB = prepare(cpu, cpu.SendChange, 100, raise)
 
             [vpB; vpG; vpR] |> Seq.iter(fun vp -> cpu.SendChange(vp.Ready, true, null));
 
@@ -212,7 +221,7 @@ module VirtualParentTestTest =
             MockupSegmentBase.WithThreadOnPortEnd <- true
 
             let cpu = MockUpCpu.create("dummy")
-            let vpB, vpG, vpR, auto, stB = prepare(cpu, cpu.SendChange, 1000)
+            let vpB, vpG, vpR, auto, stB = prepare(cpu, cpu.SendChange, 1000, onError)
 
             [vpB; vpG; vpR] |> Seq.iter(fun vp -> cpu.SendChange(vp.Ready, true, null));
 
@@ -230,7 +239,7 @@ module VirtualParentTestTest =
             MockupSegmentBase.WithThreadOnPortReset <- true
 
             let cpu = MockUpCpu.create("dummy")
-            let vpB, vpG, vpR, auto, stB = prepare(cpu, cpu.SendChange, 1000)
+            let vpB, vpG, vpR, auto, stB = prepare(cpu, cpu.SendChange, 1000, onError)
 
             [vpB; vpG; vpR] |> Seq.iter(fun vp -> cpu.SendChange(vp.Ready, true, null));
 
@@ -247,11 +256,17 @@ module VirtualParentTestTest =
         /// target child Going 중에 parent reset 받음.
         [<Fact>]
         member __.``FAIL: Multithread on Port{End, Reset} w/o Queue`` () =
+            let mutable error:Exception = null
+            let onError =
+                fun (ex:Exception) ->
+                    testFinished <- true
+                    error <- ex
+
             MockupSegmentBase.WithThreadOnPortEnd <- true
             MockupSegmentBase.WithThreadOnPortReset <- true
 
             let cpu = MockUpCpu.create("dummy")
-            let vpB, vpG, vpR, auto, stB = prepare(cpu, cpu.SendChange, 1000)
+            let vpB, vpG, vpR, auto, stB = prepare(cpu, cpu.SendChange, 1000, onError)
 
             [vpB; vpG; vpR] |> Seq.iter(fun vp -> cpu.SendChange(vp.Ready, true, null));
 
@@ -262,12 +277,29 @@ module VirtualParentTestTest =
                 - dead lock (block)
                 - Something bad happend?  trying to reset child while R=Going
             *)
+
+            let mutable timeOut = false
+            let mutable lastFinishCount = 0
+            let _subs =
+                Observable.Interval(TimeSpan.FromSeconds(5))
+                    .Subscribe(fun t ->
+                        if lastFinishCount = vpB.FinishCount then
+                            testFinished <- true
+                            timeOut <- true)
+
             
             wait(cpu)
-            while not testFinished do
+            while not testFinished && not timeOut do
                 Thread.Sleep(100)
 
             logInfo "Test 종료"
+            error |> ShouldNotBeNull
+            logError $"{error}"
+            
+            (timeOut
+                || error.Message.Contains("Something bad happend?")
+                || error.Message.Contains("Unexpected VPS & child status")) === true
+
 
 
         [<Fact>]
@@ -275,7 +307,7 @@ module VirtualParentTestTest =
             MockupSegmentBase.WithThreadOnPortEnd <- true
 
             let cpu = MockUpCpu.create("dummy")
-            let vpB, vpG, vpR, auto, stB = prepare(cpu, cpu.Enqueue, 1000)
+            let vpB, vpG, vpR, auto, stB = prepare(cpu, cpu.Enqueue, 1000, onError)
 
             [vpB; vpG; vpR] |> Seq.iter(fun vp -> cpu.Enqueue(vp.Ready, true, null));
 

@@ -21,7 +21,7 @@ module ToyMockupTest =
             let stB = new Flag(cpu, "stB")
 
 
-            [b; g; r;] |> Seq.iter(fun seg -> seg.WireEvent(cpu.Enqueue) |> ignore)
+            [b; g; r;] |> Seq.iter(fun seg -> seg.WireEvent(cpu.Enqueue, raise) |> ignore)
 
             Global.BitChangedSubject
                 .Subscribe(fun bc ->
@@ -141,7 +141,7 @@ module ToyMockupTest =
                 )
             |> ignore
 
-            b.WireEvent(cpu.Enqueue) |> ignore
+            b.WireEvent(cpu.Enqueue, raise) |> ignore
 
             cpu.Enqueue(st, true)
             // ... going 진행 후, end port 까지 ON

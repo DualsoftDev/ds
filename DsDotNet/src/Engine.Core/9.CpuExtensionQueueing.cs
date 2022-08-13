@@ -8,100 +8,6 @@ namespace Engine.Core;
 /// </summary>
 public static class CpuExtensionQueueing
 {
-    public static void BuildBitDependencies(this Cpu cpu)
-    {
-        Debug.Assert(cpu.ForwardDependancyMap.IsNullOrEmpty());
-        Debug.Assert(cpu.BackwardDependancyMap.IsNullOrEmpty());
-
-        cpu.BackwardDependancyMap = new();
-
-        var bwd = cpu.BackwardDependancyMap;
-        var fwd = cpu.ForwardDependancyMap;
-
-        void addRelationship(IBit slave, IBit master)
-        {
-            if (!fwd.ContainsKey(slave))
-                fwd[slave] = new HashSet<IBit>();
-            fwd[slave].Add(master);
-
-            if (!bwd.ContainsKey(master))
-                bwd[master] = new HashSet<IBit>();
-            bwd[master].Add(slave);
-        }
-
-        void addSubRelationship(IBit bit)
-        {
-            switch(bit)
-            {
-                case Flag:
-                case Tag:
-                    break;
-                case BitReEvaluatable bre:
-                    foreach (var mb in bre._monitoringBits.Where(b => b != null))
-                    {
-                        addRelationship(mb, bre);
-                        addSubRelationship(mb);
-                    }
-                    break;
-                case FlipFlop ff:
-                    addRelationship(ff.S, ff);
-                    addSubRelationship(ff.S);
-                    addRelationship(ff.R, ff);
-                    addSubRelationship(ff.R);
-                    break;
-                default:
-                    throw new Exception("ERROR");
-            }
-        }
-
-        var grp = cpu.BitsMap.Values.GroupByToDictionary(b => b is BitReEvaluatable);
-        if (grp.ContainsKey(true))
-        {
-            var stems = grp[true].Cast<BitReEvaluatable>();
-            foreach (var stem in stems)
-                addSubRelationship(stem);
-        }
-        //var terminals = grp[false];
-
-
-        var ffs = cpu.BitsMap.Values.OfType<FlipFlop>();
-        foreach (var ff in ffs)
-            addSubRelationship(ff);
-    }
-
-    //public static IEnumerable<IBit> CollectForwardDependantBits(this Cpu cpu, IBit source)
-    //{
-    //    var fwd = cpu.ForwardDependancyMap;
-    //    if (!fwd.ContainsKey(source))
-    //        yield break;
-
-    //    foreach (var dep in cpu.ForwardDependancyMap[source])
-    //    {
-    //        yield return dep;
-    //        foreach (var v in cpu.CollectForwardDependantBits(dep))
-    //            yield return v;
-    //    }
-    //}
-
-
-    abstract class PortInfoChange : BitChange
-    {
-        public PortInfo PortInfo { get; }
-        public PortInfoChange(BitChange bc)
-            : base(bc.Bit, bc.NewValue, bc.Applied, bc.Cause)
-        {
-            PortInfo = (PortInfo)bc.Bit;
-        }
-    }
-    class PortInfoPlanChange : PortInfoChange
-    {
-        public PortInfoPlanChange(BitChange bc) : base(bc) {}
-    }
-    class PortInfoActualChange : PortInfoChange
-    {
-        public PortInfoActualChange(BitChange bc) : base(bc) { }
-    }
-
     public static IDisposable Run(this Cpu cpu)
     {
         var disposable = new CancellationDisposable();
@@ -113,7 +19,7 @@ public static class CpuExtensionQueueing
         {
             while (!disposable.IsDisposed && cpu.Running)
             {
-                while (q.Count > 0)
+                while (q.Count > 0 && cpu.Running)
                 {
                     cpu.ProcessingQueue = true;
                     if (q.TryDequeue(out BitChange bitChange))
@@ -162,16 +68,16 @@ public static class CpuExtensionQueueing
                         from dep in dependents
                         let newValue = dep.Evaluate()
                         where newValue != prevValues[dep]
-                        select (new BitChange(dep, newValue, false, bit))
+                        select (new BitChange(dep, newValue, bit, bitChange.OnError))
                     ).ToList();
 
                 if (cpu.FFSetterMap.ContainsKey(bit) && bitChange.NewValue)
                     foreach (var ff in cpu.FFSetterMap[bit].Where(ff => !ff.Value))
-                        changes.Add(new BitChange(ff, true, false, bit));
+                        changes.Add(new BitChange(ff, true, bit, bitChange.OnError));
 
                 if (cpu.FFResetterMap.ContainsKey(bit) && bitChange.NewValue)
                     foreach (var ff in cpu.FFResetterMap[bit].Where(ff => ff.Value))
-                        changes.Add(new BitChange(ff, false, false, bit));
+                        changes.Add(new BitChange(ff, false, bit, bitChange.OnError));
 
                 var chgrp = changes.GroupByToDictionary(ch => ch.Bit is PortInfo);
                 if (chgrp.ContainsKey(false))
@@ -253,7 +159,11 @@ public static class CpuExtensionQueueing
                 catch (Exception ex)
                 {
                     Global.Logger.Error(ex);
-                    throw;
+                    if (bitChange.OnError == null)
+                        throw;
+                    else
+                        bitChange.OnError(ex);
+
                 }
             }
         }
@@ -262,24 +172,122 @@ public static class CpuExtensionQueueing
 
 
     /// <summary> Bit 의 값 변경 처리를 CPU 에 위임.  즉시 수행되지 않고, CPU 의 Queue 에 추가 된 후, CPU thread 에서 수행된다.  </summary>
-    public static void Enqueue(this Cpu cpu, IBit bit, bool newValue, object cause)
+    public static void Enqueue(this Cpu cpu, BitChange bitChange)
     {
-        switch(bit)
+        switch (bitChange.Bit)
         {
             case Expression _:
             case BitReEvaluatable re when re is not PortInfo:
                 throw new Exception("ERROR: Expression can't be set!");
             default:
-                cpu.Queue.Enqueue(new BitChange(bit, newValue, false, cause));
+                cpu.Queue.Enqueue(bitChange);
                 break;
         };
     }
+    public static void Enqueue(this Cpu cpu, IBit bit, bool newValue, object cause) =>
+        Enqueue(cpu, new BitChange(bit, newValue, cause));
     public static void Enqueue(this Cpu cpu, IBit bit, bool newValue) =>
-        Enqueue(cpu, bit, newValue, null);
+        Enqueue(cpu, new BitChange(bit, newValue, null));
 
 
     public static void SendChange(this Cpu cpu, IBit bit, bool newValue, object cause) =>
-        cpu.Apply(new BitChange(bit, newValue, false, cause), false);
+        SendChange(cpu, new BitChange(bit, newValue, cause));
+    public static void SendChange(this Cpu cpu, BitChange bitChange) =>
+        cpu.Apply(bitChange, false);
     public static void PostChange(this Cpu cpu, IBit bit, bool newValue, object cause) =>
-        Enqueue(cpu, bit, newValue, cause);
+        Enqueue(cpu, new BitChange(bit, newValue, cause));
+
+    public static void BuildBitDependencies(this Cpu cpu)
+    {
+        Debug.Assert(cpu.ForwardDependancyMap.IsNullOrEmpty());
+        Debug.Assert(cpu.BackwardDependancyMap.IsNullOrEmpty());
+
+        cpu.BackwardDependancyMap = new();
+
+        var bwd = cpu.BackwardDependancyMap;
+        var fwd = cpu.ForwardDependancyMap;
+
+        void addRelationship(IBit slave, IBit master)
+        {
+            if (!fwd.ContainsKey(slave))
+                fwd[slave] = new HashSet<IBit>();
+            fwd[slave].Add(master);
+
+            if (!bwd.ContainsKey(master))
+                bwd[master] = new HashSet<IBit>();
+            bwd[master].Add(slave);
+        }
+
+        void addSubRelationship(IBit bit)
+        {
+            switch(bit)
+            {
+                case Flag:
+                case Tag:
+                    break;
+                case BitReEvaluatable bre:
+                    foreach (var mb in bre._monitoringBits.Where(b => b != null))
+                    {
+                        addRelationship(mb, bre);
+                        addSubRelationship(mb);
+                    }
+                    break;
+                case FlipFlop ff:
+                    addRelationship(ff.S, ff);
+                    addSubRelationship(ff.S);
+                    addRelationship(ff.R, ff);
+                    addSubRelationship(ff.R);
+                    break;
+                default:
+                    throw new Exception("ERROR");
+            }
+        }
+
+        var grp = cpu.BitsMap.Values.GroupByToDictionary(b => b is BitReEvaluatable);
+        if (grp.ContainsKey(true))
+        {
+            var stems = grp[true].Cast<BitReEvaluatable>();
+            foreach (var stem in stems)
+                addSubRelationship(stem);
+        }
+        //var terminals = grp[false];
+
+
+        var ffs = cpu.BitsMap.Values.OfType<FlipFlop>();
+        foreach (var ff in ffs)
+            addSubRelationship(ff);
+    }
+
+    //public static IEnumerable<IBit> CollectForwardDependantBits(this Cpu cpu, IBit source)
+    //{
+    //    var fwd = cpu.ForwardDependancyMap;
+    //    if (!fwd.ContainsKey(source))
+    //        yield break;
+
+    //    foreach (var dep in cpu.ForwardDependancyMap[source])
+    //    {
+    //        yield return dep;
+    //        foreach (var v in cpu.CollectForwardDependantBits(dep))
+    //            yield return v;
+    //    }
+    //}
+
+
+    abstract class PortInfoChange : BitChange
+    {
+        public PortInfo PortInfo { get; }
+        public PortInfoChange(BitChange bc)
+            : base(bc.Bit, bc.NewValue, bc.Cause, bc.OnError, bc.Applied)
+        {
+            PortInfo = (PortInfo)bc.Bit;
+        }
+    }
+    class PortInfoPlanChange : PortInfoChange
+    {
+        public PortInfoPlanChange(BitChange bc) : base(bc) {}
+    }
+    class PortInfoActualChange : PortInfoChange
+    {
+        public PortInfoActualChange(BitChange bc) : base(bc) { }
+    }
 }

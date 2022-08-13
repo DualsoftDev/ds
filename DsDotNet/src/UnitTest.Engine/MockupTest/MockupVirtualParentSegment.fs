@@ -3,6 +3,7 @@ namespace UnitTest.Mockup.Engine
 
 open Engine.Core
 open Dual.Common
+open System
 
 
 /// Virtual Parent Segment
@@ -96,7 +97,14 @@ type MockupVirtualParentSegment(name, target:MockupSegment, causalSourceSegments
 
         vps
 
-    override x.WireEvent(writer) =
+    override x.WireEvent(writer, onError) =
+        let write(bit, value, cause) =
+            writer(BitChange(bit, value, cause, onError))
+
+        let onError =
+            fun (ex:Exception) ->
+                cpu.Running <- false
+
         Global.BitChangedSubject
             .Subscribe(fun bc ->
                 let bit = bc.Bit :?> Bit
@@ -111,30 +119,31 @@ type MockupVirtualParentSegment(name, target:MockupSegment, causalSourceSegments
 
                 if notiTargetEndPortChange then
                     if x.Going.Value && state <> Status4.Going then
-                        writer(x.Going, false, $"{x.Name} going off by status {state}")
+                        write(x.Going, false, $"{x.Name} going off by status {state}")
                     if x.Ready.Value && state <> Status4.Ready then
-                        writer(x.Ready, false, $"{x.Name} ready off by status {state}")
+                        write(x.Ready, false, $"{x.Name} ready off by status {state}")
 
                     let cause = $"${x.Target.Name} End Port={x.Target.PortE.Value}"
 
 
                     match state, on with
                     | Status4.Going, true ->
-                        writer(targetStartTag, false, $"{x.Name} going 끝내기 by{cause}")
-                        writer(x.Going, false, $"{x.Name} going 끝내기 by{cause}")
+                        write(targetStartTag, false, $"{x.Name} going 끝내기 by{cause}")
+                        write(x.Going, false, $"{x.Name} going 끝내기 by{cause}")
                         if MockupSegmentBase.WithThreadOnPortEnd then
-                            async { writer(x.PortE, true, $"{x.Name} FINISH 끝내기 by{cause}") } |> Async.Start
+                            async { write(x.PortE, true, $"{x.Name} FINISH 끝내기 by{cause}") } |> Async.Start
                         else
-                            writer(x.PortE, true, $"{x.Name} FINISH 끝내기 by{cause}")
+                            write(x.PortE, true, $"{x.Name} FINISH 끝내기 by{cause}")
                             
 
 
                     | Status4.Homing, false ->
+                        assert(x.Going.Value = false)
                         let homing() =
-                            assert(x.Going.Value = false)
-                            writer(targetResetTag, false, $"{x.Target.Name} homing 완료로 reset 끄기")
-                            writer(x.Ready, true, $"{x.Target.Name} homing 완료")
-                            writer(x.PortE, false, null)
+                            write(targetResetTag, false, $"{x.Target.Name} homing 완료로 reset 끄기")
+                            write(x.Ready, true, $"{x.Target.Name} homing 완료")
+                            write(x.PortE, false, null)
+
                         if MockupSegmentBase.WithThreadOnPortReset then
                             async { homing() } |> Async.Start
                         else
@@ -144,7 +153,7 @@ type MockupVirtualParentSegment(name, target:MockupSegment, causalSourceSegments
                         logInfo $"외부에서 내부 target {x.Target.Name} 실행 감지"
 
                     | _ ->
-                        failwithlog $"Unknown: [{x.Name}]{state}: Target endport => {x.Target.Name}={on}"
+                        failwithlog $"Unexpected VPS & child status : [{x.Name}]{state}: Target endport => {x.Target.Name}={on}"
 
 
                 if notiVpsPortChange then
@@ -159,11 +168,11 @@ type MockupVirtualParentSegment(name, target:MockupSegment, causalSourceSegments
                         | Status4.Ready    ->
                             ()
                         | Status4.Going    ->
-                            writer(x.Going, true, $"{name} GOING 시작")
+                            write(x.Going, true, $"{name} GOING 시작")
 
                             assert(childStatus = Status4.Ready || cpu.ProcessingQueue);
                             if childStatus = Status4.Ready then
-                                writer(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
+                                write(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
                             else
                                 async {
                                     // wait while target child available
@@ -174,12 +183,12 @@ type MockupVirtualParentSegment(name, target:MockupSegment, causalSourceSegments
                                         logWarn $"Waiting target child [{x.Target.Name}] ready..from {childStatus.Value}"
                                         do! Async.Sleep(10);
 
-                                    writer(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
+                                    write(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
                                 } |> Async.Start
 
                         | Status4.Finished ->
-                            writer(targetStartTag, false, $"{x.Name} FINISH 로 인한 {x.Target.Name} start 끄기")
-                            writer(x.Going, false, "${x.Name} FINISH")
+                            write(targetStartTag, false, $"{x.Name} FINISH 로 인한 {x.Target.Name} start 끄기")
+                            write(x.Going, false, "${x.Name} FINISH")
                             x.FinishCount <- x.FinishCount + 1
                             if not MockupSegmentBase.WithThreadOnPortReset then
                                 assert(x.PortE.Value)
@@ -187,9 +196,14 @@ type MockupVirtualParentSegment(name, target:MockupSegment, causalSourceSegments
 
                         | Status4.Homing ->
                             if childStatus = Status4.Going then
-                                failwith $"Something bad happend?  trying to reset child while {x.Target.Name}={childStatus}"
+                                let msg = $"Something bad happend?  trying to reset child while {x.Target.Name}={childStatus}"
+                                logError "%s" msg
+                                if isNull bc.OnError then
+                                    failwith msg
+                                else
+                                    bc.OnError.Invoke(new DsException(msg))
 
-                            writer(targetResetTag, true, $"{x.Name} HOMING 으로 인한 {x.Target.Name} reset 켜기")
+                            write(targetResetTag, true, $"{x.Name} HOMING 으로 인한 {x.Target.Name} reset 켜기")
 
 
                         | _ ->

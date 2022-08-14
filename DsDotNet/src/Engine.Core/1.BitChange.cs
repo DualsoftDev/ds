@@ -10,8 +10,12 @@ public class BitChange
     public bool Applied { get; internal set; }
     public DateTime Time { get; }
     public ExceptionHandler OnError { get; set; }
+    public string Guid { get; set; }
     public BitChange(IBit bit, bool newValue, object cause = null, ExceptionHandler onError =null, bool applied = false)
     {
+        Debug.Assert(!applied); // todo : temp, remove me
+        Guid = System.Guid.NewGuid().ToString().Substring(0, 8);
+
         Debug.Assert(cause is null || cause is IBit || cause is string);
         Bit = bit;
         NewValue = newValue;

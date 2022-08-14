@@ -35,7 +35,8 @@ module EngineModule =
 
 
             //let roots = activeCpu.RootFlows.selectMany(fun rf -> rf.RootSegments).Cast<FsSegment>()
-            let roots = cpus.selectMany(fun cpu -> cpu.RootFlows).selectMany(fun rf -> rf.RootSegments).Cast<FsSegment>()
+            let rootFlows = cpus.selectMany(fun cpu -> cpu.RootFlows)
+            let roots = rootFlows.selectMany(fun rf -> rf.RootSegments).Cast<FsSegment>()
 
             let _makeUpSegmentBits =
                 for root in roots do
@@ -68,7 +69,7 @@ module EngineModule =
             // todo : 가상 부모 생성
             let virtualParentSegments =
                 [
-                    for rf in activeCpu.RootFlows do
+                    for rf in rootFlows do
                         yield! VirtualParentSegmentModule.CreateVirtualParentSegmentsFromRootFlow(rf)
                 ]
 
@@ -78,13 +79,19 @@ module EngineModule =
                 let parentedRoots = virtualParentSegments.Select(fun vps -> vps.Target)
                 roots.Except(parentedRoots) 
 
+            virtualParentSegments |> Seq.iter(fun seg -> seg.WireEvent(seg.Cpu.Enqueue, raise) |> ignore)
 
 
             logInfo "Start F# Engine running..."
             for cpu in cpus do
                 cpu.BuildBitDependencies()
-                cpu.PrintTags()
+                //cpu.PrintTags()
 
+                logDebug "====================="
+                cpu.PrintAllTags(false);
+                logDebug "---------------------"
+                cpu.PrintAllTags(true);
+                logDebug "====================="
 
 
             let subscriptions =
@@ -102,14 +109,17 @@ module EngineModule =
 
                     for cpu in cpus do
                         readTagsFromOpc cpu opc
-                        yield runCpu cpu  // ! 실제 수행!!
+
+                        // todo : 코멘트 처리 해제?
+                        //yield runCpu cpu  // ! 실제 수행!!
+                        yield cpu.Run()
                 ]
 
             new CompositeDisposable(subscriptions)
 
         member _.Wait() =
             use _subs =
-                Observable.Interval(TimeSpan.FromSeconds(5))
+                Observable.Interval(TimeSpan.FromSeconds(10))
                     .Subscribe(fun t ->
                         let runningCpus = String.Join(", ", cpus.Where(fun cpu -> cpu.Running))
                         logDebug $"Running cpus: {runningCpus}")

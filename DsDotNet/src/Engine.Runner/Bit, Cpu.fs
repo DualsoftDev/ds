@@ -99,6 +99,7 @@ module internal CpuModule =
 
     /// CPU 별 bit change event queue 에 들어 있는 event 를 처리 : evaluateBit 호출
     let private processQueue(cpu:Cpu) =
+        assert(false)
         /// bit 변경에 따라 다음 수행해야 할 작업을 찾아서 수행
         let evaluateBit (causalBit:IBit) (bit:IBit) =
             let evaluateEdge(edge:Edge) =
@@ -164,8 +165,9 @@ module internal CpuModule =
 
     let onBitChanged (cpu:Cpu) (bitChange:BitChange) =
         if bitChange.Bit.Cpu = cpu then
-            cpu.Queue.Enqueue(bitChange)
-            processQueue cpu
+            //cpu.Queue.Enqueue(bitChange)
+            //processQueue cpu
+            noop()
         else
             // skipping other cpu's bit change
             ()

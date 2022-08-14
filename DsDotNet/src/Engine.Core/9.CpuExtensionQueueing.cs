@@ -17,6 +17,7 @@ public static class CpuExtensionQueueing
 
         new Thread(async () =>
         {
+            var tid = Thread.CurrentThread.ManagedThreadId;
             while (!disposable.IsDisposed && cpu.Running)
             {
                 while (q.Count > 0 && cpu.Running)
@@ -27,7 +28,6 @@ public static class CpuExtensionQueueing
                         if (bitChange.Bit.GetName() == "ManualStart_A_F_Pp")
                             Console.WriteLine();
                         Debug.Assert(!bitChange.Applied);
-                        //Global.Logger.Debug($"= Processing bitChnage {bitChange}");
                         cpu.Apply(bitChange, true);
                     }
                     else
@@ -46,6 +46,8 @@ public static class CpuExtensionQueueing
     {
         if (bitChange.Bit.GetName() == "ResetLatch_VPS_B")
             Console.WriteLine();
+
+        Global.Logger.Debug($"=[{cpu.NestingLevel}] Applying bitChange [{bitChange.Guid}]{bitChange}");
 
         var fwd = cpu.ForwardDependancyMap;
         var q = cpu.Queue;
@@ -149,6 +151,7 @@ public static class CpuExtensionQueueing
             };
 
             bitChange.Applied = true;
+            Global.Logger.Debug($"{bitChange.Guid} marked applied");
 
             if (bitChanged)
             {
@@ -174,6 +177,7 @@ public static class CpuExtensionQueueing
     /// <summary> Bit 의 값 변경 처리를 CPU 에 위임.  즉시 수행되지 않고, CPU 의 Queue 에 추가 된 후, CPU thread 에서 수행된다.  </summary>
     public static void Enqueue(this Cpu cpu, BitChange bitChange)
     {
+        Debug.Assert(!bitChange.Applied);
         switch (bitChange.Bit)
         {
             case Expression _:

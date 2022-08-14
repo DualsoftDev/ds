@@ -3,7 +3,7 @@ namespace Engine;
 using Engine.Runner;
 using Engine.Graph;
 using System.Diagnostics;
-
+using System.Runtime.InteropServices;
 
 [Flags]
 public enum EnumTest
@@ -155,9 +155,10 @@ class Tester
         var resetTag = "ManualReset_L_F_Main";
         if (engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(resetTag))
         {
-            opc.Write(resetTag, true);
-            opc.Write(resetTag, false);
+            //opc.Write(resetTag, true);
+            //opc.Write(resetTag, false);
             opc.Write("ManualStart_L_F_Main", true);
+            opc.Write("AutoStart_L_F", true);
             //opc.Write(resetTag, true);
 
             //opc.Write("AutoStart_L_F_Main", true);

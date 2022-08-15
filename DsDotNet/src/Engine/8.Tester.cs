@@ -168,6 +168,53 @@ class Tester
         engine.Wait();
     }
 
+    public static void DoSampleTestVps()
+    {
+
+        var text = @"
+[sys] L = {
+    [task] T = {
+        Ap = {A.F.Vp ~ A.F.Sp}
+        Am = {A.F.Vm ~ A.F.Sm}
+    }
+    [flow] F = {
+        Main = { T.Ap > T.Am; }
+    }
+}
+[sys] A = {
+    [flow] F = {
+        Vp > Pp > Sp;
+        Vm > Pm > Sm;
+
+        Sp |> Pp |> Sm;
+        Sm |> Pm |> Sp;
+        Vp <||> Vm;
+    }f
+}
+[cpus] AllCpus = {
+    [cpu] Cpu = {
+        L.F;
+    }
+    [cpu] ACpu = {
+        A.F;
+    }
+}
+";
+
+        Debug.Assert(!Global.IsInUnitTest);
+        var engine = new EngineBuilder(text, "Cpu").Engine;
+        Program.Engine = engine;
+        engine.Run();
+
+        var opc = engine.Opc;
+
+        opc.Write("AutoStart_L_F", true);
+        opc.Write("ManualStart_L_F_Main", true);
+        //opc.Write("ManualStart_A_F_Pp", true);
+
+        engine.Wait();
+    }
+
     public static void DoSampleTest2()
     {
         var text = @"

@@ -22,17 +22,18 @@ module FsSegmentModule =
         default x.WireEvent(writer, onError) =
             let write(bit, value, cause) =
                 writer(BitChange(bit, value, cause, onError))
-            Global.BitChangedSubject
+            Global.PortChangedSubject
                 .Where(fun bc ->
                     [x.PortS :> IBit; x.PortR; x.PortE] |> Seq.contains(bc.Bit)
                 )
                 .Subscribe(fun bc ->
                     let state = x.Status
+                    let cause = $"by bit change {bc.Bit.GetName()}={bc.NewValue}"
                     if oldStatus = Some state then
-                        logDebug $"\t\tSkipping duplicate status: [{n}] status : {state} by bit change {bc.Bit.GetName()}={bc.NewValue}"
+                        logDebug $"\t\tSkipping duplicate status: [{n}] status : {state} {cause}"
                     else
                         oldStatus <- Some state
-                        logDebug $"[{n}] Segment status : {state}"
+                        logDebug $"[{n}] Segment status : {state} {cause}"
                         if x.Going.Value && state <> Status4.Going then
                             write(x.Going, false, $"{n} going off by status {state}")
                         if x.Ready.Value && state <> Status4.Ready then
@@ -50,7 +51,8 @@ module FsSegmentModule =
                             write(x.PortE, true, $"{n} GOING 끝")
 
                         | Status4.Finished ->
-                            write(x.Going, false, $"{n} FINISH")   //! 순서 민감
+                            assert (not x.Going.Value || x.Cpu.Queue |> Seq.exists(fun (bc:BitChange) -> bc.Bit = x.Going && not bc.NewValue))
+                            //write(x.Going, false, $"{n} FINISH")
 
                         | Status4.Homing   ->
                             //if MockupSegmentBase.WithThreadOnPortReset then

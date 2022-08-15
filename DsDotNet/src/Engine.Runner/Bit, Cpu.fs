@@ -143,7 +143,6 @@ module internal CpuModule =
                 | true, bc ->
                     let bit = bc.Bit
                     if (bc.NewValue <> bit.Value) then
-                        assert not bc.Applied
                         match bit with
                         | :? IBitWritable as wb -> wb.SetValue(bc.NewValue)
                         | _ -> assert (bit.Value = bc.NewValue)

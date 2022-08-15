@@ -5,7 +5,6 @@ public abstract class BitReEvaluatable : Bit, IBitReadable
 {
     internal IBit[] _monitoringBits;
     public abstract bool Evaluate();
-    IDisposable _subscription;
     protected BitReEvaluatable(Cpu cpu, string name, params IBit[] monitoringBits)
         : base(name, cpu)
     {

@@ -27,7 +27,6 @@ public static class CpuExtensionQueueing
                     {
                         if (bitChange.Bit.GetName() == "ManualStart_A_F_Pp")
                             Console.WriteLine();
-                        Debug.Assert(!bitChange.Applied);
                         cpu.Apply(bitChange, true);
                     }
                     else
@@ -44,10 +43,10 @@ public static class CpuExtensionQueueing
     }
     public static void Apply(this Cpu cpu, BitChange bitChange, bool withQueue)
     {
-        if (bitChange.Bit.GetName() == "ResetLatch_VPS_B")
+        if (bitChange.Bit.GetName() == "Going_TEMP_L_F_Main")
             Console.WriteLine();
 
-        Global.Logger.Debug($"=[{cpu.NestingLevel}] Applying bitChange [{bitChange.Guid}]{bitChange}");
+        Global.Logger.Debug($"=[{cpu.NestingLevel}] Applying bitChange {bitChange}");   // {bitChange.Guid}
 
         var fwd = cpu.ForwardDependancyMap;
         var q = cpu.Queue;
@@ -127,7 +126,6 @@ public static class CpuExtensionQueueing
 
         void DoApply(BitChange bitChange)
         {
-            Debug.Assert(!bitChange.Applied);
             var bit = (Bit)bitChange.Bit;
             //Global.Logger.Debug($"\t=({indent}) Applying bitchange {bitChange}");
 
@@ -149,9 +147,6 @@ public static class CpuExtensionQueueing
                     }
                 })(),
             };
-
-            bitChange.Applied = true;
-            Global.Logger.Debug($"{bitChange.Guid} marked applied");
 
             if (bitChanged)
             {
@@ -177,7 +172,6 @@ public static class CpuExtensionQueueing
     /// <summary> Bit 의 값 변경 처리를 CPU 에 위임.  즉시 수행되지 않고, CPU 의 Queue 에 추가 된 후, CPU thread 에서 수행된다.  </summary>
     public static void Enqueue(this Cpu cpu, BitChange bitChange)
     {
-        Debug.Assert(!bitChange.Applied);
         switch (bitChange.Bit)
         {
             case Expression _:
@@ -281,7 +275,7 @@ public static class CpuExtensionQueueing
     {
         public PortInfo PortInfo { get; }
         public PortInfoChange(BitChange bc)
-            : base(bc.Bit, bc.NewValue, bc.Cause, bc.OnError, bc.Applied)
+            : base(bc.Bit, bc.NewValue, bc.Cause, bc.OnError)
         {
             PortInfo = (PortInfo)bc.Bit;
         }

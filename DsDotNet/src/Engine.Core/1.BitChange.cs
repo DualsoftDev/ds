@@ -7,19 +7,16 @@ public class BitChange
     public bool NewValue { get; }
     /// <summary>IBit or string description</summary>
     public object Cause { get; }
-    public bool Applied { get; internal set; }
     public DateTime Time { get; }
     public ExceptionHandler OnError { get; set; }
     public string Guid { get; set; }
-    public BitChange(IBit bit, bool newValue, object cause = null, ExceptionHandler onError =null, bool applied = false)
+    public BitChange(IBit bit, bool newValue, object cause = null, ExceptionHandler onError =null)
     {
-        Debug.Assert(!applied); // todo : temp, remove me
-        Guid = System.Guid.NewGuid().ToString().Substring(0, 8);
+        Guid = System.Guid.NewGuid().ToString().Substring(0, 4);
 
         Debug.Assert(cause is null || cause is IBit || cause is string);
         Bit = bit;
         NewValue = newValue;
-        Applied = applied;
         Time = DateTime.Now;
         Cause = cause;
         OnError = onError;
@@ -35,7 +32,7 @@ public class BitChange
         _ => throw new Exception("ERROR"),
     };
 
-    public override string ToString() => $"{Bit.GetName()}={Bit}={NewValue}";
+    public override string ToString() => $"{Bit.GetName()}={Bit}={NewValue} by {CauseRepr}";
 }
 
 

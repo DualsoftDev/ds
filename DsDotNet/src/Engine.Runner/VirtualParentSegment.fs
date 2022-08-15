@@ -51,17 +51,13 @@ module VirtualParentSegmentModule =
                             ,#r(__X)))
                 *)
                 let resetPortInfoPlan =
+                    assert resetSourceSegments.Any()
                     let vrp =
                         [|
                             yield auto
                             //yield target.PortE  //ep
-                            let set =
-                                let andItems = [|
-                                    for rsseg in resetSourceSegments do
-                                        yield FlipFlop(cpu, $"InnerResetSourceFF_{n}_{rsseg.Name}", rsseg.Going, readyTag)  :> IBit
-                                |]
-                                And(cpu, $"InnerResetSourceAnd_{n}", andItems)
-                            yield FlipFlop(cpu, $"ResetFF_{n}", set, readyTag)
+                            for rsseg in resetSourceSegments do
+                                yield FlipFlop(cpu, $"InnerResetSourceFF_{n}_{rsseg.Name}", rsseg.Going, readyTag)  :> IBit
                         |]
                     And(cpu, $"ResetAnd_{n}", vrp)
                 PortInfoReset(cpu, null, $"Reset_{n}", resetPortInfoPlan, null)
@@ -76,6 +72,7 @@ module VirtualParentSegmentModule =
                                 ,#(__X.RsetPort)))
                 *)
                 let startPortInfoPlan =
+                    assert causalSourceSegments.Any()
                     let vsp =
                         [|
                             yield auto
@@ -204,6 +201,9 @@ module VirtualParentSegmentModule =
 
                 let causalSources = setEdges.selectMany(fun e -> e.Sources).Cast<FsSegment>().ToArray()
                 let resetSources = resetEdges.selectMany(fun e -> e.Sources).Cast<FsSegment>().ToArray()
-                let vps = VirtualParentSegment.Create(target, autoStart, (st, rt), causalSources, resetSources)
-                yield vps
+                if causalSources.Any() && resetSources.Any() then
+                    let vps = VirtualParentSegment.Create(target, autoStart, (st, rt), causalSources, resetSources)
+                    yield vps
+                else
+                    logWarn $"Do not create VPS for {target.QualifiedName}"
         |]

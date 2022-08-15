@@ -44,6 +44,9 @@ module EngineModule =
                     let n = root.QualifiedName
                     if isNull root.Going then
                         root.Going <- Tag(cpu, root, $"Going_TEMP_{n}", TagType.Going)
+                    if isNull root.Ready then
+                        root.Ready <- Tag(cpu, root, $"Ready_TEMP_{n}", TagType.Ready)
+
                     if not <| root.TagsStart.Any(fun t -> t.Type.HasFlag(TagType.Flow)) then
                         root.AddStartTags([|Tag(cpu, root, $"FlowStart_{n}", TagType.Start|||TagType.Flow)|])
                     if not <| root.TagsReset.Any(fun t -> t.Type.HasFlag(TagType.Flow)) then
@@ -61,7 +64,7 @@ module EngineModule =
                             PortInfoStart(cpu, root, $"spex{n}_default", sor, null)
                     if isNull root.PortR then
                         root.PortR <-
-                            let rs = root.TagsStart.Cast<IBit>().ToArray()
+                            let rs = root.TagsReset.Cast<IBit>().ToArray()
                             let ror = Or(cpu, $"reset_OR_trigers_{n}", rs)
                             PortInfoReset(cpu, root, $"rpex{n}_default", ror, null)
 
@@ -79,7 +82,18 @@ module EngineModule =
                 let parentedRoots = virtualParentSegments.Select(fun vps -> vps.Target)
                 roots.Except(parentedRoots) 
 
-            virtualParentSegments |> Seq.iter(fun seg -> seg.WireEvent(seg.Cpu.Enqueue, raise) |> ignore)
+            virtualParentSegments
+            |> Seq.iter(fun vps ->
+                vps.Target.WireEvent(vps.Cpu.Enqueue, raise) |> ignore
+                vps.WireEvent(vps.Cpu.Enqueue, raise) |> ignore
+                )
+            unparentedRoots
+            |> Seq.iter(fun seg ->
+                seg.WireEvent(seg.Cpu.Enqueue, raise) |> ignore
+                )
+
+            assert( virtualParentSegments |> Seq.forall(fun vp -> vp.Status = Status4.Ready));
+            assert( unparentedRoots       |> Seq.forall(fun vp -> vp.Status = Status4.Ready));
 
 
             logInfo "Start F# Engine running..."

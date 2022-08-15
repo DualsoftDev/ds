@@ -33,6 +33,6 @@ class Program
     static void Main(string[] args)
     {
         PrepareLog4Net();
-        Tester.DoSampleTest();
+        Tester.DoSampleTestVps();   // DoSampleTest
     }
 }

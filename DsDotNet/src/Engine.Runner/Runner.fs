@@ -10,7 +10,18 @@ open Dual.Common
 
 [<AutoOpen>]
 module ModelRunnerModule =
+    let Initialize() =
+        Segment.Create <-
+            new Func<string, RootFlow, Segment>(
+                fun name (rootFlow:RootFlow) ->
+                    let seg = FsSegment(rootFlow.Cpu, name)
+                    seg.ContainerFlow <- rootFlow
+                    rootFlow.AddChildVertex(seg)
+                    seg)
     ()
+
+
+
     //let runCpu (cpu:Cpu) = ()
 
     //type EngineRunner(engine:Engine) as this =

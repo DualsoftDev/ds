@@ -4,13 +4,12 @@ open Engine.Core
 open System
 open System.Reactive.Linq
 open Dual.Common
-open log4net.Core
 
 
 [<AutoOpen>]
 module FsSegmentModule =
     /// Bit * New Value * Change reason
-    //type ChangeWriter = IBit*bool*obj -> unit
+    //type Writer = IBit*bool*obj -> unit
     type ChangeWriter = BitChange -> unit
     
     type FsSegment(cpu, n) =
@@ -45,9 +44,6 @@ module FsSegmentModule =
                             ()
                         | Status4.Going    ->
                             write(x.Going, true, $"{n} GOING 시작")
-                            //if MockupSegmentBase.WithThreadOnPortEnd then
-                            //    async { writer(x.PortE, true, $"{n} GOING 끝") } |> Async.Start
-                            //else
                             write(x.PortE, true, $"{n} GOING 끝")
 
                         | Status4.Finished ->
@@ -55,9 +51,6 @@ module FsSegmentModule =
                             //write(x.Going, false, $"{n} FINISH")
 
                         | Status4.Homing   ->
-                            //if MockupSegmentBase.WithThreadOnPortReset then
-                            //    async { writer(x.PortE, false, $"{n} HOMING") } |> Async.Start
-                            //else
                             write(x.PortE, false, $"{n} HOMING")
 
                         | _ ->
@@ -73,12 +66,3 @@ module FsSegmentModule =
             | _, true, _          -> Status4.Homing
 
 
-    let Initialize() =
-        Segment.Create <-
-            new Func<string, RootFlow, Segment>(
-                fun name (rootFlow:RootFlow) ->
-                    let seg = FsSegment(rootFlow.Cpu, name)
-                    seg.ContainerFlow <- rootFlow
-                    rootFlow.AddChildVertex(seg)
-                    seg)
-    ()

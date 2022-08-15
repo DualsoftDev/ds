@@ -57,11 +57,13 @@ type MockupSegment(cpu, n) =
                         write(x.Ready, true, null)
                         ()
                     | Status4.Going    ->
-                        write(x.Going, true, $"{n} GOING 시작")
-                        if MockupSegmentBase.WithThreadOnPortEnd then
-                            async { write(x.PortE, true, $"{n} GOING 끝") } |> Async.Start
-                        else
+                        let go() =
+                            write(x.Going, true, $"{n} GOING 시작")
                             write(x.PortE, true, $"{n} GOING 끝")
+                        if MockupSegmentBase.WithThreadOnPortEnd then
+                            async { go() } |> Async.Start
+                        else
+                            go()
                     | Status4.Finished ->
                         write(x.Going, false, $"{n} FINISH")   //! 순서 민감
                         x.FinishCount <- x.FinishCount + 1

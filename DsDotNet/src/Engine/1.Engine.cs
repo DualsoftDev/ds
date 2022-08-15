@@ -12,7 +12,7 @@ public partial class EngineBuilder
 
     public EngineBuilder(string modelText, string activeCpuName)
     {
-        FsSegmentModule.Initialize();
+        ModelRunnerModule.Initialize();
 
         Model = ModelParser.ParseFromString(modelText);
 

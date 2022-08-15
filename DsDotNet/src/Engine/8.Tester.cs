@@ -4,6 +4,7 @@ using Engine.Runner;
 using Engine.Graph;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Reactive.Linq;
 
 [Flags]
 public enum EnumTest
@@ -208,8 +209,16 @@ class Tester
 
         var opc = engine.Opc;
 
+        Global.BitChangedSubject
+            .Where(bc => bc.Bit.GetName() == "epexL_F_Main_default" && bc.Bit.Value)
+            .Subscribe(bc =>
+            {
+                //opc.Write("AutoStart_L_F", false);
+                opc.Write("AutoReset_L_F", true);
+            });
+
         opc.Write("AutoStart_L_F", true);
-        opc.Write("ManualStart_L_F_Main", true);
+        //opc.Write("ManualStart_L_F_Main", true);
         //opc.Write("ManualStart_A_F_Pp", true);
 
         engine.Wait();

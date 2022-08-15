@@ -13,7 +13,7 @@ module DoRGFH =
     let noop() = ()
 
     ///<summary> 모든 Children 을 origin 상태로 이동</summary>
-    let moveChildrenToOrigin (seg:FsSegment) =
+    let moveChildrenToOrigin (seg:Segment) =
         // todo: children 이 origin 상태에 있는지 검사!!!
         logDebug $"Moving segment[{seg.QualifiedName}] children to origin."
         //while not <| seg.MovingCancellationTokenSource.IsCancellationRequested do
@@ -58,7 +58,7 @@ module DoRGFH =
     //    child.TagsStart |> Seq.iter(fun t -> t.Value <- true)
     //    tcs.Task
 
-    let private goingSegment (seg:FsSegment) =
+    let private goingSegment (seg:Segment) =
         assert seg.PortS.Value
         assert (seg.Status = Status4.Going) // PortS ON 시, 이미 Going 상태
         assert isNull seg.MovingCancellationTokenSource
@@ -122,7 +122,7 @@ module DoRGFH =
                     let goingChild (child:Child) =
                         logDebug $"Child Going: [{child.QualifiedName}]"
                         //! child call 을 "잘" 시켜야 한다.
-                        let parent = child.Parent :?> FsSegment
+                        let parent = child.Parent
                         match parent.Status with
                         | Status4.Going ->
                             child.Status <- Status4.Going
@@ -258,7 +258,7 @@ module DoRGFH =
     /// Port 값 변경에 따른 작업 수행
     let evaluatePort (port:PortInfo) (newValue:bool) =
         if port.Value <> newValue then
-            let seg = port.Segment :?> FsSegment
+            let seg = port.Segment
             let rf = seg.IsResetFirst
             let st = seg.Status
 

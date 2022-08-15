@@ -80,14 +80,14 @@ public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, ITxRx, ITagSR
     }
 
 
-    //public Status4 Status =>
-    //    (PortS.Value, PortR.Value, PortE.Value) switch
-    //    {
-    //        (false, false, false) => Status4.Ready,  //??
-    //        (true, false, false) => Status4.Going,
-    //        (_, false, true) => Status4.Finished,
-    //        (_, true, _) => Status4.Homing,
-    //    };
+    public Status4 Status =>
+        (PortS.Value, PortR.Value, PortE.Value) switch
+        {
+            (false, false, false) => Status4.Ready,  //??
+            (true, false, false) => Status4.Going,
+            (_, false, true) => Status4.Finished,
+            (_, true, _) => Status4.Homing,
+        };
 
     //public Status4 Status
     //{

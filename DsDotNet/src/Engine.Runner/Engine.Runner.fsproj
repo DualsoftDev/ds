@@ -8,9 +8,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<Compile Include="DoRGFH.fs" />
 		<Compile Include="FsSegment.fs" />
 		<Compile Include="VirtualParentSegment.fs" />
-		<Compile Include="DoRGFH.fs" />
 		<Compile Include="Bit, Cpu.fs" />
 		<Compile Include="Engine.fs" />
 		<Compile Include="Runner.fs" />

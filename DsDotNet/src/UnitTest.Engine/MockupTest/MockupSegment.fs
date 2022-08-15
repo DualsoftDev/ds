@@ -55,7 +55,6 @@ type MockupSegment(cpu, n) =
                     match state with
                     | Status4.Ready    ->
                         write(x.Ready, true, null)
-                        ()
                     | Status4.Going    ->
                         let go() =
                             write(x.Going, true, $"{n} GOING 시작")

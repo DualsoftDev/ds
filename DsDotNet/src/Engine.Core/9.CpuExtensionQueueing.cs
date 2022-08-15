@@ -25,7 +25,7 @@ public static class CpuExtensionQueueing
                     cpu.ProcessingQueue = true;
                     if (q.TryDequeue(out BitChange bitChange))
                     {
-                        if (bitChange.Bit.GetName() == "ManualStart_A_F_Pp")
+                        if (bitChange.Bit.GetName() == "AutoStart_L_F")
                             Console.WriteLine();
                         cpu.Apply(bitChange, true);
                     }

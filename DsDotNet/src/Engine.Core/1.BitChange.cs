@@ -12,9 +12,10 @@ public class BitChange
     public string Guid { get; set; }
     public BitChange(IBit bit, bool newValue, object cause = null, ExceptionHandler onError =null)
     {
-        Guid = System.Guid.NewGuid().ToString().Substring(0, 4);
-
         Debug.Assert(cause is null || cause is IBit || cause is string);
+        //Debug.Assert(bit.Value != newValue);
+
+        Guid = System.Guid.NewGuid().ToString().Substring(0, 4);
         Bit = bit;
         NewValue = newValue;
         Time = DateTime.Now;

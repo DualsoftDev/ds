@@ -14,7 +14,11 @@ public static class ModelExtension
             cpu.GraphInfo = FsGraphInfo.AnalyzeFlows(cpu.RootFlows, true);
 
         foreach (var segment in model.CollectSegments())
+        {
             segment.GraphInfo = FsGraphInfo.AnalyzeFlows(new[] { segment }, false);
+            var pi = new GraphProgressSupportUtil.ProgressInfo(segment.GraphInfo);
+            segment.ChildrenOrigin = pi.ChildOrigin.ToArray();
+        }
     }
     public static void Epilogue(this Model model)
     {

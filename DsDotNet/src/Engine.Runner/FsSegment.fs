@@ -71,7 +71,7 @@ module FsSegmentModule =
 
 
                         | Status4.Ready -> doReady(write, x)
-                        | Status4.Going -> doGoing(write, x)
+                        | Status4.Going -> doGoing(write, x, tagMyFlowReset)
                         | Status4.Finished -> doFinish(write, x)
                         | Status4.Homing -> doHoming(write, x)
 

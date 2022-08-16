@@ -43,6 +43,7 @@ public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, ITxRx, ITagSR
 
     public Child[] Inits { get; internal set; }
     public Child[] Lasts { get; internal set; }
+    public IVertex[] ChildrenOrigin { get; internal set; }
     public VertexAndOutgoingEdges[] TraverseOrder { get; internal set; }
     internal Dictionary<Coin, Child> CoinChildMap { get; set; }
     public bool Value { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
@@ -139,9 +140,9 @@ public static class SegmentExtension
     }
 
     public static bool IsChildrenStatusAllWith(this Segment segment, Status4 status) =>
-        segment.ChildStatusMap.Values.All(st => st == status);
+        segment.ChildStatusMap.Values.Select(tpl => tpl.Item2).All(st => st == status);
     public static bool IsChildrenStatusAnyWith(this Segment segment, Status4 status) =>
-        segment.ChildStatusMap.Values.Any(st => st == status);
+        segment.ChildStatusMap.Values.Select(tpl => tpl.Item2).Any(st => st == status);
 
     public static void OnChildEndTagChanged(this Segment segment, BitChange bc)
     {
@@ -152,9 +153,10 @@ public static class SegmentExtension
 
     public static void Epilogue(this Segment segment)
     {
+        // child 의 최초 상태 등록 : null (vs Homing?)
         segment.ChildStatusMap =
             segment.Children
-            .ToDictionary(child => child, _ => Status4.Homing)
+            .ToDictionary(child => child, _ => (false, (Status4?)null))// Status4.Homing)
             ;
 
         // Graph 정보 추출 & 저장

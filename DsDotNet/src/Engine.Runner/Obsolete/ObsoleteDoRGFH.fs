@@ -103,7 +103,7 @@ module DoRGFH =
                     let map = seg.ChildStatusMap
                     let keys = map.Keys |> Array.ofSeq
                     for key in keys do
-                        map[key] <- Status4.Ready
+                        map[key] <- (false, Status4.Ready)
                 else
                     noop()
 

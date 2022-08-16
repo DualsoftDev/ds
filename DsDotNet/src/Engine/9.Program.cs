@@ -34,5 +34,6 @@ class Program
     {
         PrepareLog4Net();
         Tester.DoSampleTestVps();   // DoSampleTest
+        //Tester.DoSampleTest2();
     }
 }

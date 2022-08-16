@@ -14,12 +14,15 @@ module RGFHModule =
     let doReady(write:Writer, seg:Segment) =
         write(seg.Ready, true, null)
 
-    let doGoing(write:Writer, seg:Segment) =
+    let doGoing(write:Writer, seg:Segment, tagFlowReset:Tag) =
         write(seg.Going, true, $"{seg.QualifiedName} GOING 시작")
 
     let doFinish(write:Writer, seg:Segment) =
         write(seg.Going, false, $"{seg.QualifiedName} FINISH")
 
     let doHoming(write:Writer, seg:Segment) =
+        //for child in seg.Children do
+        //for orig in seg.ChildrenOrigin do
+        //    seg.ChildStatusMap[orig]
         write(seg.PortE, false, $"{seg.QualifiedName} HOMING")
 

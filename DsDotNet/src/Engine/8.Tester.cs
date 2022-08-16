@@ -30,6 +30,7 @@ class Tester
     [flow] F = {
         Main = { T.Ap > T.Am, T.Bp > T.Bm; }
     }
+    //[address]...
 }
 [sys] A = {
     [flow] F = {
@@ -40,6 +41,10 @@ class Tester
         Sm |> Pm |> Sp;
         Vp <||> Vm;
     }
+    //[address] = {
+    //    Vp = (Q100, , );
+    //    Sp = (, , I100);
+    //}
 }
 [sys] B = {
     [flow] F = {

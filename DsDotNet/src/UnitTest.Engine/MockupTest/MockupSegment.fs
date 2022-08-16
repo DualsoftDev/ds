@@ -58,6 +58,8 @@ type MockupSegment(cpu, n) =
                     | Status4.Going    ->
                         let go() =
                             write(x.Going, true, $"{n} GOING 시작")
+
+
                             write(x.PortE, true, $"{n} GOING 끝")
                         if MockupSegmentBase.WithThreadOnPortEnd then
                             async { go() } |> Async.Start

@@ -28,6 +28,7 @@ partial class Segment
     //    }
     //}
 
-    public Dictionary<Child, Status4> ChildStatusMap { get; internal set; }
+    /// <summary> Flip 여부 * Status </summary>
+    public Dictionary<Child, (bool, Status4?)> ChildStatusMap { get; internal set; }
 
 }

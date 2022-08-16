@@ -12,10 +12,10 @@ public class Child : Named, IVertex, ICoin, ITagSREContainer
     public bool IsCall => Coin is SubCall;
     public bool IsAlias { get; set; }
     // 부모가 바라본 child 상태
-    public Status4 Status
+    public Status4? Status
     {
-        get => Parent.ChildStatusMap[this];
-        set => Parent.ChildStatusMap[this] = value;
+        get => Parent.ChildStatusMap[this].Item2;
+        set => Parent.ChildStatusMap[this] = (Parent.ChildStatusMap[this].Item1, value);
     }
 
     TagSREContainer _tagSREContainer = new();

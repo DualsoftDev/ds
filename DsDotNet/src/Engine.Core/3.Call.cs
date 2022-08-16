@@ -21,9 +21,8 @@ public class Xywh
     public int Y { get; }
     public int? W { get; }
     public int? H { get; }
-
-
 }
+
 public class CallPrototype : CallBase
 {
     public DsTask Task;

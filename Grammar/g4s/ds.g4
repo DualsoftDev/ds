@@ -19,7 +19,7 @@ grammar ds;
 
 import dsFunctions;
 
-program: (importStatement|system|cpus|layouts|comment)* EOF;
+program: (importStatement|system|cpus|layouts|addresses|comment)* EOF;        // 
 
 
 system: sysProp id '=' sysBlock;    // [sys] Seg = {..}
@@ -61,6 +61,18 @@ positionDef: callPath '=' xywh;
     y: INTEGER;
     w: INTEGER;
     h: INTEGER;
+
+addresses: addressesProp (id)? '=' addressesBlock;
+addressesProp: '[' 'addresses' ']';
+addressesBlock
+    : LBRACE (addressDef)* RBRACE
+    ;
+addressDef: addressCallPath '=' address;
+    addressCallPath: IDENTIFIER DOT IDENTIFIER DOT IDENTIFIER;
+    address: LPARENTHESIS (startTag)? COMMA (resetTag)? COMMA (endTag)? RPARENTHESIS (SEIMCOLON)?;
+    startTag: TAG_ADDRESS;
+    resetTag: TAG_ADDRESS;
+    endTag: TAG_ADDRESS;
 
 task
     : taskProp id '=' LBRACE (listing|call)* RBRACE
@@ -180,6 +192,7 @@ causalOperator
     | '<<||>>'        // CAUSAL_RESET_FB_STRONG
     | '<||>'        // CAUSAL_RESET_FB
     | '><|'         // CAUSAL_FWD_AND_RESET_BWD
+    | '=>'          // CAUSAL_FWD_AND_RESET_BWD
     | '|><'         // CAUSAL_BWD_AND_RESET_FWD
     ;
 
@@ -212,7 +225,7 @@ CAUSAL_BWD: LT; // '<'
 CAUSAL_RESET_FWD: '|>';
 CAUSAL_RESET_BWD: '<|';
 CAUSAL_RESET_FB: '<||>';
-CAUSAL_FWD_AND_RESET_BWD: '><|';
+CAUSAL_FWD_AND_RESET_BWD: '><|' | '=>';
 CAUSAL_FWD_AND_RESET_FWD: '>|>' | '|>>';
 CAUSAL_BWD_AND_RESET_BWD: '<<|' | '<|<';
 CAUSAL_BWD_AND_RESET_FWD: '|><';

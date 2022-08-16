@@ -129,6 +129,9 @@ partial class ElementsListener
     private List<string> splitOperator(string operator_)
     {
         var op = operator_;
+        if (op == "=>")
+            op = "><|";     // replace shortcut(=>) to original 
+
         IEnumerable<string> split()
         {
             foreach (var o in new[] { "|>>", "<<|", ">>", "<<", })

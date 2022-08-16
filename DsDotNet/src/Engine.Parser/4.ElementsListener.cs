@@ -233,6 +233,11 @@ partial class ElementsListener : dsBaseListener
 
     override public void ExitProgram(dsParser.ProgramContext ctx)
     {
+        //[layouts] = {
+        //       L.T.Cp = (30, 50)            // xy
+        //       L.T.Cm = (60, 50, 20, 20)    // xywh
+        //}
+
         var layouts =
             DsParser.enumerateChildren<dsParser.LayoutsContext>(
                 ctx, false, r => r is dsParser.LayoutsContext)
@@ -254,6 +259,14 @@ partial class ElementsListener : dsBaseListener
             var (x, y, w, h) = (xywh.x().GetText(), xywh.y().GetText(), xywh.w()?.GetText(), xywh.h()?.GetText());
             cp.Xywh = new Xywh(int.Parse(x), int.Parse(y), w == null ? null : int.Parse(w), h == null ? null : int.Parse(h));
         }
+
+        //[addresses] = {
+        //    A.F.Am = (%Q123.23, , %I12.1);        // FQSegmentName = (Start, Reset, End) Tag address
+        //    A.F.Ap = (%Q123.24, , %I12.2);
+        //    B.F.Bm = (%Q123.25, , %I12.3);
+        //    B.F.Bp = (%Q123.26, , %I12.4);
+        //}
+
     }
 
 

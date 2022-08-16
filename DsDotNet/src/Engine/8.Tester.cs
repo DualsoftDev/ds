@@ -18,8 +18,78 @@ class Tester
 {
     public static void DoSampleTest()
     {
-
         var text = @"
+[sys] LS_Demo = {
+	[flow] page01 = { 	//Ex1_Diamond
+		Work1 = {
+			IO.Am <||> IO.Ap;
+			IO.Am, IO.Bp > IO.Bm;
+			IO.Ap > IO.Am;
+			IO.Ap > IO.Bp;
+			IO.Bm <||> IO.Bp;
+		}
+	}
+	[flow] page02 = { 	//Ex2_RGB
+		B ><| R;           // 인과 + 후행 reset   B ><| R, R |> B
+		G => B;
+		R => G;
+	}
+
+	[flow] page03 = { 	//Ex1_Diamond
+		Am;
+		Ap;
+		Bm;
+		Bp;
+	}
+
+	[task] IO = {
+		Am = {EX_Am_Ap.F.Am ~ EX_Am_Ap.F.Am}
+		Ap = {EX_Am_Ap.F.Ap ~ EX_Am_Ap.F.Ap}
+		Bm = {EX_Bm_Bp.F.Bm ~ EX_Bm_Bp.F.Bm}
+		Bp = {EX_Bm_Bp.F.Bp ~ EX_Bm_Bp.F.Bp}
+	}
+} //C:\Users\kwak\Downloads\LS_Demo.pptx
+
+//LS_Demo ExRealSegments system auto generation
+//LS_Demo CallSegments system auto generation
+[sys] EX_Am_Ap = {
+	[flow] F = { Am  <||>  Ap; }
+}
+
+[sys] EX_Bm_Bp = {
+	[flow] F = { Bm  <||>  Bp; }
+}
+[layouts] = {
+	LS_Demo.IO.Ap = (1237,437,144,144)
+	LS_Demo.IO.Bp = (1244,653,144,144)
+	LS_Demo.IO.Am = (1381,299,144,144)
+	LS_Demo.IO.Bm = (1474,758,144,144)
+}
+[addresses] = {
+	EX_Am_Ap.F.Am = (%Q123.23, , %I12.1);
+	EX_Am_Ap.F.Ap = (%Q123.24, , %I12.2);
+	EX_Bm_Bp.F.Bm = (%Q123.25, , %I12.3);
+	EX_Bm_Bp.F.Bp = (%Q123.26, , %I12.4);
+}
+
+[cpus] AllCpus = {
+	[cpu] Cpu = {
+		LS_Demo.page01;
+		LS_Demo.page02;
+		LS_Demo.page03;
+	}
+	[cpu] ACpu = {
+		EX_Am_Ap.F;
+	}
+	[cpu] BCpu = {
+		EX_Bm_Bp.F;
+	}
+}
+
+";
+
+
+        var text3 = @"
 [sys] L = {
     [task] T = {
         Ap = {A.F.Vp ~ A.F.Sp}

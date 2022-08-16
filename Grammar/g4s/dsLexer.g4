@@ -13,6 +13,18 @@ fragment VALID_ID_CHAR
 identifier2: IDENTIFIER DOT IDENTIFIER;
 identifier3: IDENTIFIER DOT IDENTIFIER DOT IDENTIFIER;
 
+TAG_ADDRESS: VALID_TAG_START VALID_TAG_CHAR*;
+fragment VALID_TAG_START
+   : PERCENT   // | ('a' .. 'z') | ('A' .. 'Z') | '_' | HANGUL_CHAR
+   ;
+
+fragment VALID_TAG_CHAR
+   : DOT | VALID_ID_CHAR | ('0' .. '9') | HANGUL_CHAR
+   ;
+// TAG_ADDRESS: TAG_CHAR+;
+// fragment TAG_CHAR
+//    : '%' | VALID_ID_CHAR;   //|DOT)*;
+
 
 // M.U, M.D
 segments: segmentsDNF*;

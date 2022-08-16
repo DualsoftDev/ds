@@ -25,6 +25,10 @@ public abstract class Coin : Named, ICoin
     public override string ToText() => $"{QualifiedName}[{this.GetType().Name}]";
     public virtual void Going() => throw new Exception("ERROR");
 
+    //public abstract IEnumerable<Tag> GetStartTags();
+    //public abstract IEnumerable<Tag> GetResetTags();
+    //public abstract IEnumerable<Tag> GetEndTags();
+
     //public virtual bool ChangeR()
     //{
     //    if (RGFH == Status4.Ready)

@@ -18,7 +18,7 @@ class Tester
 {
     public static void DoSampleTest()
     {
-        var text = @"
+        var textLsDemo = @"
 [sys] LS_Demo = {
 	[flow] page01 = { 	//Ex1_Diamond
 		Work1 = {
@@ -89,7 +89,7 @@ class Tester
 ";
 
 
-        var text3 = @"
+        var text = @"
 [sys] L = {
     [task] T = {
         Ap = {A.F.Vp ~ A.F.Sp}

@@ -2,8 +2,10 @@ namespace Engine.Runner
 
 open Engine.Core
 open System
+open System.Linq
 open System.Reactive.Linq
 open Dual.Common
+open System.Collections.Generic
 
 
 [<AutoOpen>]
@@ -11,11 +13,23 @@ module RGFHModule =
 
     type Writer = IBit*bool*obj -> unit
 
+    let goingSubscriptions = Dictionary<Segment, IDisposable>()
+
     let doReady(write:Writer, seg:Segment) =
         write(seg.Ready, true, null)
 
     let doGoing(write:Writer, seg:Segment, tagFlowReset:Tag) =
         write(seg.Going, true, $"{seg.QualifiedName} GOING 시작")
+        if seg.Children.Any() then
+            assert(not <| goingSubscriptions.ContainsKey(seg))
+            let xx = seg.Inits
+            let childRxTags = seg.Children.Select(fun ch -> ch.Coin)
+            let subs =
+                Global.RawBitChangedSubject.Subscribe(fun bc -> noop())
+            goingSubscriptions.Add(seg, subs)
+        else
+            write(seg.PortE, true, $"{seg.QualifiedName} GOING 끝")
+
 
     let doFinish(write:Writer, seg:Segment) =
         write(seg.Going, false, $"{seg.QualifiedName} FINISH")

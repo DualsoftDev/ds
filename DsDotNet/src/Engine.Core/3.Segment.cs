@@ -47,7 +47,6 @@ public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, ITxRx, ITagSR
     public Child[] Lasts { get; internal set; }
     public IVertex[] ChildrenOrigin { get; internal set; }
     public VertexAndOutgoingEdges[] TraverseOrder { get; internal set; }
-    internal Dictionary<Coin, Child> CoinChildMap { get; set; }
     public bool Value { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
     //public bool Value { get => PortE.Value; set => throw new NotImplementedException(); }
     public virtual bool Evaluate() => Value;

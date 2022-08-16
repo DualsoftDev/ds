@@ -266,7 +266,30 @@ partial class ElementsListener : dsBaseListener
         //    B.F.Bm = (%Q123.25, , %I12.3);
         //    B.F.Bp = (%Q123.26, , %I12.4);
         //}
+        var addresses =
+            DsParser.enumerateChildren<dsParser.AddressesContext>(
+                ctx, false, r => r is dsParser.AddressesContext)
+            .ToArray()
+            ;
+        if (addresses.Length > 1)
+            throw new Exception("Layouts block should exist only once");
 
+        var addressDefs =
+            DsParser.enumerateChildren<dsParser.AddressDefContext>(
+                ctx, false, r => r is dsParser.AddressDefContext)
+            .ToArray()
+            ;
+        foreach (var addrDef in addressDefs)
+        {
+            var segPath = addrDef.segmentPath().GetText();            
+            var seg = (Segment)QpInstanceMap[segPath];
+            var sre = addrDef.address();
+            var (s, r, e) = (sre.startTag()?.GetText(), sre.resetTag()?.GetText(), sre.endTag()?.GetText());
+
+            seg.DefaultStartTagAddress = s;
+            seg.DefaultResetTagAddress = r;
+            seg.DefaultEndTagAddress = e;
+        }
     }
 
 

@@ -140,7 +140,18 @@ partial class EngineBuilder
                 return existing;
             }
 
-            var tag = new Tag(tgi.OwnerCpu, owner, tgi.TagName, tagType);
+            var tagAddress = "";
+            if (owner is Segment seg && tagType.HasFlag(TagType.Flow))
+            {
+                if (seg.DefaultStartTagAddress != null && tagType.HasFlag(TagType.Start))
+                    tagAddress = seg.DefaultStartTagAddress;
+                else if (seg.DefaultResetTagAddress != null && tagType.HasFlag(TagType.Reset))
+                    tagAddress = seg.DefaultResetTagAddress;
+                else if (seg.DefaultEndTagAddress != null && tagType.HasFlag(TagType.End))
+                    tagAddress = seg.DefaultEndTagAddress;
+            }
+
+            var tag = new Tag(tgi.OwnerCpu, owner, tgi.TagName, tagType) { Address = tagAddress };
             tgi.GeneratedTag = tag;
             return tag;
         }

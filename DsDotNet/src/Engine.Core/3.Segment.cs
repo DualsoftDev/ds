@@ -37,7 +37,9 @@ public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, ITxRx, ITagSR
     public void AddResetTags(params Tag[] tags) => _tagSREContainer.AddResetTags(tags);
     public void AddEndTags(params Tag[] tags) => _tagSREContainer.AddEndTags(tags);
     public Action<IEnumerable<Tag>> AddTagsFunc => _tagSREContainer.AddTagsFunc;
-
+    internal string DefaultStartTagAddress { get; set; }
+    internal string DefaultResetTagAddress { get; set; }
+    internal string DefaultEndTagAddress { get; set; }
 
     public bool IsResetFirst { get; internal set; } = true;
 

@@ -37,6 +37,7 @@ public class Tag : Bit, IBitReadWritable, ITxRx
 
     // todo: Global.TagChangeToOpcServerSubject.OnNext(new OpcTagChange(Name, value));
     public void SetValue(bool newValue) => _value = newValue;
+    public string Address { get; set; }
 
     /// <summary> 내부 추적용 Tag 이름 : QualifiedName + 기능명.  e.g "L.F.Main.AutoStart.  사용자가 지정하는 이름과는 별개 </summary>
     public string InternalName { get; set; }

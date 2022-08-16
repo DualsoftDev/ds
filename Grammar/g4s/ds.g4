@@ -67,8 +67,8 @@ addressesProp: '[' 'addresses' ']';
 addressesBlock
     : LBRACE (addressDef)* RBRACE
     ;
-addressDef: addressCallPath '=' address;
-    addressCallPath: IDENTIFIER DOT IDENTIFIER DOT IDENTIFIER;
+addressDef: segmentPath '=' address;
+    segmentPath: IDENTIFIER DOT IDENTIFIER DOT IDENTIFIER;
     address: LPARENTHESIS (startTag)? COMMA (resetTag)? COMMA (endTag)? RPARENTHESIS (SEIMCOLON)?;
     startTag: TAG_ADDRESS;
     resetTag: TAG_ADDRESS;

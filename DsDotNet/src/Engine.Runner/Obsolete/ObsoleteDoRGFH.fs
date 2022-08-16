@@ -59,6 +59,7 @@ module DoRGFH =
     //    tcs.Task
 
     let private goingSegment (seg:Segment) =
+        assert false
         assert seg.PortS.Value
         assert (seg.Status = Status4.Going) // PortS ON 시, 이미 Going 상태
         assert isNull seg.MovingCancellationTokenSource
@@ -257,6 +258,7 @@ module DoRGFH =
 
     /// Port 값 변경에 따른 작업 수행
     let evaluatePort (port:PortInfo) (newValue:bool) =
+        assert false
         if port.Value <> newValue then
             let seg = port.Segment
             let rf = seg.IsResetFirst

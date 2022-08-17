@@ -22,6 +22,7 @@ public static class Global
     public static Subject<BitChange> RawBitChangedSubject { get; } = new();
     public static IObservable<BitChange> BitChangedSubject { get; set; } = RawBitChangedSubject.Select(x => x);
     public static IObservable<BitChange> PortChangedSubject { get; set; } = RawBitChangedSubject.Where(bc => bc.Bit is PortInfo);
+    public static IObservable<Tag> TagChangedSubject { get; set; } = RawBitChangedSubject.Where(bc => bc.Bit is Tag).Select(bc => bc.Bit as Tag);
 
     public static Subject<OpcTagChange> TagChangeToOpcServerSubject { get; } = new();
     public static Subject<OpcTagChange> TagChangeFromOpcServerSubject { get; } = new();

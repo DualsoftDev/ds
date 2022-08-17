@@ -2,6 +2,7 @@
 
 namespace Engine.Runner
 
+
 open System
 open System.Reactive.Disposables
 open System.Reactive.Linq
@@ -22,6 +23,15 @@ open System.Linq
 
 [<AutoOpen>]
 module internal CpuModule =
+    /// 외부에서 tag 가 변경된 경우 수행할 작업 지정
+    let onOpcTagChanged (cpu:Cpu) (tagChange:OpcTagChange) =
+        let tagName, value = tagChange.TagName, tagChange.Value
+        if (cpu.TagsMap.ContainsKey(tagName)) then
+            let tag = cpu.TagsMap[tagName]
+            if tag.Value <> value then
+                cpu.Enqueue(tag, value, $"OPC Tag [{tagName}] 변경");      //! setter 에서 BitChangedSubject.OnNext --> onBitChanged 가 호출된다.
+
+#if false
     let runCpu (cpu:Cpu) =
         let cancels = ConcurrentDictionary<Segment, CancellationTokenSource>()
         let onSegmentStatusChanged (seg:Segment) (status:Status4) =
@@ -89,13 +99,6 @@ module internal CpuModule =
                 listenPortChanges s
         ] |> CompositeDisposable
 
-    /// 외부에서 tag 가 변경된 경우 수행할 작업 지정
-    let onOpcTagChanged (cpu:Cpu) (tagChange:OpcTagChange) =
-        let tagName, value = tagChange.TagName, tagChange.Value
-        if (cpu.TagsMap.ContainsKey(tagName)) then
-            let tag = cpu.TagsMap[tagName]
-            if tag.Value <> value then
-                cpu.Enqueue(tag, value, $"OPC Tag 변경");      //! setter 에서 BitChangedSubject.OnNext --> onBitChanged 가 호출된다.
 
     /// CPU 별 bit change event queue 에 들어 있는 event 를 처리 : evaluateBit 호출
     let private processQueue(cpu:Cpu) =
@@ -172,3 +175,4 @@ module internal CpuModule =
             ()
 
 
+#endif

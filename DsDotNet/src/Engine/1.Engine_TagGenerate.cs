@@ -89,6 +89,7 @@ partial class EngineBuilder
                 tgis
                 .Select(tgi => createTag(tgi, location, type))
                 .Where(tgi => tgi.Cpu == cpu)
+                .Distinct()
                 .ToArray();
 
             var addTagsFunc = location switch
@@ -106,7 +107,7 @@ partial class EngineBuilder
             addTagsFunc(tags);
 
 
-            var tagNames = String.Join(", ", tgis.Select(tgi => tgi.TagName));
+            var tagNames = String.Join(", ", tgis.Select(tgi => tgi.TagName).Distinct());
             Global.Logger.Debug($"Adding Child Tags {tagNames} to child [{location.GetQualifiedName()}]");
 
             // apply to segment

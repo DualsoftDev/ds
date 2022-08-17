@@ -58,6 +58,7 @@ module DoRGFH =
     //    child.TagsStart |> Seq.iter(fun t -> t.Value <- true)
     //    tcs.Task
 
+#if false
     let private goingSegment (seg:Segment) =
         assert false
         assert seg.PortS.Value
@@ -310,3 +311,4 @@ module DoRGFH =
             | _ ->
                 failwith "ERROR"
 
+#endif

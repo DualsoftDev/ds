@@ -17,6 +17,11 @@ public class Child : Named, IVertex, ICoin, ITagSREContainer
         get => Parent.ChildStatusMap[this].Item2;
         set => Parent.ChildStatusMap[this] = (Parent.ChildStatusMap[this].Item1, value);
     }
+    public bool IsFlipped
+    {
+        get => Parent.ChildStatusMap[this].Item1;
+        set => Parent.ChildStatusMap[this] = (value, Parent.ChildStatusMap[this].Item2);
+    }
 
     TagSREContainer _tagSREContainer = new();
     public IEnumerable<Tag> TagsStart => _tagSREContainer.TagsStart;
@@ -72,4 +77,36 @@ public class Child : Named, IVertex, ICoin, ITagSREContainer
 
 public static class ChildExtension
 {
+    //static IEnumerable<Tag> getStartTags(this Coin coin) =>
+    //    coin switch
+    //    {
+    //        ExSegmentCall extSeg => extSeg.ExternalSegment.TagsStart,
+    //        SubCall call => call.Prototype.TXs.OfType<Segment>().SelectMany(seg => seg.TagsStart),
+    //        _ => throw new Exception("ERROR"),
+    //    };
+    //static IEnumerable<Tag> getResetTags(this Coin coin) =>
+    //    coin switch
+    //    {
+    //        ExSegmentCall extSeg => extSeg.ExternalSegment.TagsReset,
+    //        //SubCall call => Enumerable.Empty<Tag>(),
+    //        _ => throw new Exception("ERROR"),
+    //    };
+    //static IEnumerable<Tag> getEndTags(this Coin coin) =>
+    //    coin switch
+    //    {
+    //        ExSegmentCall extSeg => extSeg.ExternalSegment.TagsEnd,
+    //        SubCall call => call.Prototype.RXs.OfType<Segment>().SelectMany(seg => seg.TagsEnd),
+    //        _ => throw new Exception("ERROR"),
+    //    };
+
+    //public static IEnumerable<Tag> GetStartTags(this Coin coin) => getStartTags(coin).Where(t => t.Type.HasFlag(TagType.Flow));
+    //public static IEnumerable<Tag> GetResetTags(this Coin coin) => getResetTags(coin).Where(t => t.Type.HasFlag(TagType.Flow));
+    //public static IEnumerable<Tag> GetEndTags(this Coin coin) => getEndTags(coin).Where(t => t.Type.HasFlag(TagType.Flow));
+
+    //public static IEnumerable<Tag> GetStartTags(this Child child) => child.Coin.GetStartTags();
+    //public static IEnumerable<Tag> GetResetTags(this Child child) => child.Coin.GetResetTags();
+    //public static IEnumerable<Tag> GetEndTags(this Child child) => child.Coin.GetEndTags();
+    public static IEnumerable<Tag> GetStartTags(this Child child) => child.TagsStart;
+    public static IEnumerable<Tag> GetResetTags(this Child child) => child.TagsReset;
+    public static IEnumerable<Tag> GetEndTags(this Child child) => child.TagsEnd;
 }

@@ -110,10 +110,6 @@ module EngineModule =
 
             let subscriptions =
                 [
-                    for cpu in cpus do
-                        yield Global.BitChangedSubject.Subscribe(onBitChanged cpu)
-
-
                     // OPC server 쪽에서 tag 값 변경시, 해당 tag 를 가지고 있는 모든 CPU 에 event 를 전달한다.
                     yield Global.TagChangeFromOpcServerSubject
                         .Subscribe(fun tc ->
@@ -128,6 +124,11 @@ module EngineModule =
                         //yield runCpu cpu  // ! 실제 수행!!
                         yield cpu.Run()
                 ]
+
+            let _autoStart =
+                for cpu in cpus do
+                for rf in cpu.RootFlows do
+                    cpu.Enqueue(rf.Auto, true, "Auto Flow start")
 
             new CompositeDisposable(subscriptions)
 

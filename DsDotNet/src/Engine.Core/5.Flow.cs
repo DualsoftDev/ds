@@ -62,6 +62,7 @@ public class RootFlow : Flow
         system.RootFlows.Add(this);
     }
 
+    public Tag Auto { get; set; }
     public Tag AutoStart { get; set; }
     public Tag AutoReset { get; set; }
 

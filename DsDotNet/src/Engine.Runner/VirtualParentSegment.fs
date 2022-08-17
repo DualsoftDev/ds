@@ -186,7 +186,7 @@ module VirtualParentSegmentModule =
                 )
 
     let CreateVirtualParentSegmentsFromRootFlow(rootFlow: RootFlow) =
-        let autoStart = rootFlow.AutoStart
+        let autoStart = rootFlow.Auto
         let allEdges = rootFlow.Edges.ToArray()
         let segments = rootFlow.RootSegments.Cast<FsSegment>()
         [|

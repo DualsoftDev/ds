@@ -145,11 +145,11 @@ public static class SegmentExtension
     public static bool IsChildrenStatusAnyWith(this Segment segment, Status4 status) =>
         segment.ChildStatusMap.Values.Select(tpl => tpl.Item2).Any(st => st == status);
 
-    public static void OnChildEndTagChanged(this Segment segment, BitChange bc)
-    {
-        var tag = bc.Bit as Tag;
-        var child = segment.Children.Where(c => c.TagsEnd.Any(t => t.Name == tag.Name));
-    }
+    //public static void OnChildEndTagChanged(this Segment segment, BitChange bc)
+    //{
+    //    var tag = bc.Bit as Tag;
+    //    var child = segment.Children.Where(c => c.TagsEnd.Any(t => t.Name == tag.Name));
+    //}
 
 
     public static void Epilogue(this Segment segment)
@@ -168,18 +168,18 @@ public static class SegmentExtension
 
 
 
-        // segment 내의 child call 에 대한 RX tag 변경 시, child origin 검사 및 child 의 status 변경 저장하도록 event handler 등록
-        var endTags = segment.Children.SelectMany(c => c.TagsEnd).ToArray();
-        var endTagNames = endTags.Select(t => t.Name).ToHashSet();
+        //// segment 내의 child call 에 대한 RX tag 변경 시, child origin 검사 및 child 의 status 변경 저장하도록 event handler 등록
+        //var endTags = segment.Children.SelectMany(c => c.TagsEnd).ToArray();
+        //var endTagNames = endTags.Select(t => t.Name).ToHashSet();
 
-        var subs =
-            Global.BitChangedSubject
-                .Where(bc => bc.Bit is Tag && endTagNames.Contains(((Tag)bc.Bit).Name))
-                .Subscribe(bc =>
-                {
-                    segment.OnChildEndTagChanged(bc);
-                });
-        segment.Disposables.Add(subs);
+        //var subs =
+        //    Global.BitChangedSubject
+        //        .Where(bc => bc.Bit is Tag && endTagNames.Contains(((Tag)bc.Bit).Name))
+        //        .Subscribe(bc =>
+        //        {
+        //            segment.OnChildEndTagChanged(bc);
+        //        });
+        //segment.Disposables.Add(subs);
 
         segment.PrintPortInfos();
     }

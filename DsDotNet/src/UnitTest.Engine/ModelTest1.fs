@@ -105,8 +105,8 @@ module ModelTests1 =
             let checkC22Instance_ =
                 let c22 = main.Children |> Seq.find(fun child -> child.Name = "T.C22")
                 c22.QualifiedName === "L_F_Main_T.C22"
-                (c22.TagsStart.Select(fun t -> t.Name), ["L_F_Main_T.C22_P_F_Vp_Start"; "L_F_Main_T.C22_P_F_Vm_Start"]) |> setEq
-                (c22.TagsEnd.  Select(fun t -> t.Name), ["L_F_Main_T.C22_P_F_Sp_End";   "L_F_Main_T.C22_P_F_Sm_End"]) |> setEq
+                (c22.GetStartTags().Select(fun t -> t.Name), ["L_F_Main_T.C22_P_F_Vp_Start"; "L_F_Main_T.C22_P_F_Vm_Start"]) |> setEq
+                (c22.GetEndTags().  Select(fun t -> t.Name), ["L_F_Main_T.C22_P_F_Sp_End";   "L_F_Main_T.C22_P_F_Sm_End"]) |> setEq
 
 
             flow.Cpu === cpu

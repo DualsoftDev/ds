@@ -43,10 +43,10 @@ public static class CpuExtensionQueueing
     }
     public static void Apply(this Cpu cpu, BitChange bitChange, bool withQueue)
     {
-        if (bitChange.Bit.GetName() == "Going_TEMP_L_F_Main")
+        if (bitChange.Bit.GetName() == "L_F_Main_T.Ap_A_F_Vp_Start_TX")
             Console.WriteLine();
 
-        Global.Logger.Debug($"=[{cpu.NestingLevel}] Applying bitChange {bitChange}");   // {bitChange.Guid}
+        Global.Logger.Debug($"\t\t=[{cpu.NestingLevel}] Applying bitChange {bitChange}");   // {bitChange.Guid}
 
         var fwd = cpu.ForwardDependancyMap;
         var q = cpu.Queue;
@@ -153,6 +153,8 @@ public static class CpuExtensionQueueing
                 try
                 {
                     Global.RawBitChangedSubject.OnNext(bitChange);
+                    if (bit is Tag tag)
+                        Global.TagChangeToOpcServerSubject.OnNext(new OpcTagChange(bit.Name, bitChange.NewValue));
                 }
                 catch (Exception ex)
                 {

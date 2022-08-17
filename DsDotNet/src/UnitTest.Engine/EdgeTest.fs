@@ -138,6 +138,6 @@ module EdgeTest =
 
 
             let ``children start/end tags check`` =
-                main.Children |> Seq.forall(fun c -> c.TagsStart.Count() = 1 && c.TagsEnd.Count() = 1) |> ShouldBeTrue
+                main.Children |> Seq.forall(fun c -> c.GetStartTags().Count() = 1 && c.GetEndTags().Count() = 1) |> ShouldBeTrue
 
             ()

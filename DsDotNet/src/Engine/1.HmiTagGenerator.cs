@@ -36,6 +36,8 @@ public static class HmiTagGenerator
         var cpu = flow.Cpu;
         var midName = $"{flow.System.Name}_{flow.Name}";
 
+        flow.Auto = new Tag(cpu, null, $"Auto_{midName}", TagType.Auto | TagType.Flow);
+
         var autoStart = Tag.CreateAutoStart(cpu, null, $"AutoStart_{midName}", $"{midName}.AutoStart");
         flow.AutoStart = autoStart;
 

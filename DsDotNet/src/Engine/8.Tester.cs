@@ -107,9 +107,14 @@ class Tester
         Vp > Pp > Sp;
         Vm > Pm > Sm;
 
-        Sp |> Pp |> Sm;
-        Sm |> Pm |> Sp;
+        //Sp |> Pp |> Sm;
+        //Sm |> Pm |> Sp;
+        //Vp <||> Vm;
+        Pp |> Sm;
+        Pm |> Sp;
         Vp <||> Vm;
+        Vp |> Pm;
+        Vm |> Pp;
     }
     //[address] = {
     //    Vp = (Q100, , );
@@ -121,9 +126,14 @@ class Tester
         Vp > Pp > Sp;
         Vm > Pm > Sm;
 
-        Sp |> Pp |> Sm;
-        Sm |> Pm |> Sp;
+        //Sp |> Pp |> Sm;
+        //Sm |> Pm |> Sp;
+        //Vp <||> Vm;
+        Pp |> Sm;
+        Pm |> Sp;
         Vp <||> Vm;
+        Vp |> Pm;
+        Vm |> Pp;
     }
 }
 [cpus] AllCpus = {
@@ -238,7 +248,7 @@ class Tester
             //opc.Write(resetTag, true);
 
             //opc.Write("AutoStart_L_F_Main", true);
-            opc.Write("ManualStart_A_F_Pp", true);
+            //opc.Write("ManualStart_A_F_Pp", true);
         }
 
         engine.Wait();

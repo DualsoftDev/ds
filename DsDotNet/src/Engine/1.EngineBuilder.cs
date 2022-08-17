@@ -34,6 +34,7 @@ public partial class EngineBuilder
     /// <summary> Used for Unit test only.</summary>
     internal EngineBuilder(string modelText)
     {
+        ModelRunnerModule.Initialize();
         Opc = new OpcBroker();
         Model = ModelParser.ParseFromString(modelText);
     }

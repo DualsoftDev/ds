@@ -6,6 +6,7 @@ open System.Linq
 open System.Reactive.Linq
 open Dual.Common
 open System.Collections.Generic
+open QuickGraph.Algorithms.Search
 
 
 [<AutoOpen>]
@@ -22,7 +23,11 @@ module RGFHModule =
         write(seg.Going, true, $"{seg.QualifiedName} GOING 시작")
         if seg.Children.Any() then
             assert(not <| goingSubscriptions.ContainsKey(seg))
-            let xx = seg.Inits
+            for init in seg.Inits do
+                let st = init.TagsStart.First(fun t -> t.Type.HasFlag(TagType.Flow) || t.Type.HasFlag(TagType.TX))
+                write(st, true, "Starting child")
+            //let unflipped = seg.TraverseOrder |
+            let startTasg = seg.Inits.SelectMany(fun ch -> ch.TagsStart)
             let childRxTags = seg.Children.Select(fun ch -> ch.Coin)
             let subs =
                 Global.RawBitChangedSubject.Subscribe(fun bc -> noop())

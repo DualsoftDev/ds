@@ -184,7 +184,7 @@ module ModelTest2 =
                 let systemP = builder.Model.Systems |> Seq.find(fun s -> s.Name = "P")
                 let flowP = systemP.RootFlows |> Seq.exactlyOne
                 let vp = flowP.ChildVertices |> Seq.ofType<Segment> |> Seq.find(fun s -> s.Name = "Vp")
-                let cpStart = main1Cp.TagsStart |> Seq.exactlyOne
+                let cpStart = main1Cp.GetStartTags() |> Seq.exactlyOne
                 cpStart.Name === "L_F_Main1_T.Cp_P_F_Vp_Start"
                 let vpStart = vp.TagsStart |> Seq.find(fun t -> t.Name = cpStart.Name)
                 cpStart.Name === vpStart.Name
@@ -204,7 +204,7 @@ module ModelTest2 =
 }
 *)
 
-                let cpEnd = main1Cp.TagsEnd |> Seq.exactlyOne
+                let cpEnd = main1Cp.GetEndTags() |> Seq.exactlyOne
                 cpEnd.Name === "L_F_Main1_T.Cp_P_F_Sp_End"
                 let sp = flowP.ChildVertices |> Seq.ofType<Segment> |> Seq.find(fun s -> s.Name = "Sp")
 
@@ -328,7 +328,7 @@ module ModelTest2 =
 
                 let vpTagsStart = vp.TagsStart |> Array.ofSeq
                 let cp = model.FindObject<Child>("L.F.Main1.T.Cp");
-                let cpStart = cp.TagsStart |> Seq.exactlyOne
+                let cpStart = cp.GetStartTags() |> Seq.exactlyOne
                 let vpStart = vpTagsStart |> Seq.filter(fun t -> t.Name = cpStart.Name) |> Seq.exactlyOne
                 cpStart.Name === vpStart.Name
                 cpStart =!= vpStart
@@ -341,7 +341,7 @@ module ModelTest2 =
                 let sp = model.FindObject<Segment>("P.F.Sp");
                 sp.Name === "Sp"
                 let spTagsEnd = sp.TagsEnd |> Array.ofSeq
-                let cpEnd = cp.TagsEnd |> Seq.exactlyOne
+                let cpEnd = cp.GetEndTags() |> Seq.exactlyOne
                 let spEnd = spTagsEnd|> Seq.filter(fun t -> t.Name = cpEnd.Name) |> Seq.exactlyOne
                 cpEnd.Name === spEnd.Name
                 cpEnd =!= spEnd

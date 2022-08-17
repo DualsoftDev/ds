@@ -18,7 +18,6 @@ module FsSegmentModule =
     
         abstract member WireEvent:ChangeWriter*ExceptionHandler->IDisposable
         default x.WireEvent(writer, onError) =
-            let tagMyFlowReset = x.TagsReset |> Seq.find(fun t -> t.Type.HasFlag(TagType.Flow))
             let write(bit, value, cause) =
                 writer(BitChange(bit, value, cause, onError))
 
@@ -34,22 +33,6 @@ module FsSegmentModule =
                     let bit = bc.Bit
                     let value = bc.NewValue
                     let cause = $"by bit change {bit.GetName()}={value}"
-                    //if bit = x.Going then
-                    //    if value then   // going 시작
-                    //        write(x.PortE, true, $"{n} GOING 끝")
-                    //    ()
-                    //elif bit = x.Ready then
-                    //    ()
-                    //elif bit = tagMyFlowReset then
-                    //    if value then
-                    //        ()
-                    //    else if state = Status4.Homing then
-                    //        if x.PortE.Value then
-                    //            write(x.PortE, false, $"{n} HOMING")
-                    //        else
-                    //            write(x.Ready, true, $"{n} Ready")
-                    //    ()
-                    //else
                     if oldStatus = Some state then
                         logDebug $"\t\tSkipping duplicate status: [{n}] status : {state} {cause}"
                     else
@@ -60,22 +43,10 @@ module FsSegmentModule =
                             write(x.Ready, false, $"{n} ready off by status {state}")
 
                         match state with
-                        //| None, Status4.Going ->
-                        //    // 준비가 되지 않아 reset 먼저 수행
-                        //    write(tagMyFlowReset, true, $"{n} GOING 시작을 위한 reset")
-                        //| Some Status4.Going, Status4.Homing ->
-                        //    if tagMyFlowReset.Value then
-                        //        write(tagMyFlowReset, false, $"{n} GOING 시작을 위한 reset 완료")
-                        //    else
-                        //        ()
-
-
                         | Status4.Ready -> doReady(write, x)
-                        | Status4.Going -> doGoing(write, x, tagMyFlowReset)
+                        | Status4.Going -> doGoing(write, x)
                         | Status4.Finished -> doFinish(write, x)
                         | Status4.Homing -> doHoming(write, x)
-
-
                         | _ ->
                             failwith "Unexpected"
                         oldStatus <- Some state

@@ -4,7 +4,7 @@ namespace Engine.Core;
 ///
 ///
 [DebuggerDisplay("{ToText()}")]
-public class Child : Named, IVertex, ICoin, ITagSREContainer
+public class Child : Named, IVertex, ICoin
 {
     public Segment Parent { get; }
     /// <summary>Call or ExSegmentCall</summary>
@@ -23,14 +23,13 @@ public class Child : Named, IVertex, ICoin, ITagSREContainer
         set => Parent.ChildStatusMap[this] = (value, Parent.ChildStatusMap[this].Item2);
     }
 
-    TagSREContainer _tagSREContainer = new();
-    public IEnumerable<Tag> TagsStart => _tagSREContainer.TagsStart;
-    public IEnumerable<Tag> TagsReset => _tagSREContainer.TagsReset;
-    public IEnumerable<Tag> TagsEnd => _tagSREContainer.TagsEnd;
-    public void AddStartTags(params Tag[] tags) => _tagSREContainer.AddStartTags(tags);
-    public void AddResetTags(params Tag[] tags) => _tagSREContainer.AddResetTags(tags);
-    public void AddEndTags(params Tag[] tags) => _tagSREContainer.AddEndTags(tags);
-    public Action<IEnumerable<Tag>> AddTagsFunc => _tagSREContainer.AddTagsFunc;
+    /// <summary> Start tag 는 Call 인 경우, 복수의 TX 를 허용해야 한다. </summary>
+    public List<Tag> TagsStart { get; set; }
+    /// <summary> Reset 은 ExSegment call 을 위한 것으로, reset tag 는 하나만 존재할 수 있다.</summary>
+    public Tag TagReset { get; set; }
+    /// <summary> End tag 는 Call 인 경우, 복수의 RX 를 허용해야 한다. </summary>
+    public List<Tag> TagsEnd { get; set; }
+
 
 
     CompositeDisposable _disposables = new();
@@ -106,7 +105,4 @@ public static class ChildExtension
     //public static IEnumerable<Tag> GetStartTags(this Child child) => child.Coin.GetStartTags();
     //public static IEnumerable<Tag> GetResetTags(this Child child) => child.Coin.GetResetTags();
     //public static IEnumerable<Tag> GetEndTags(this Child child) => child.Coin.GetEndTags();
-    public static IEnumerable<Tag> GetStartTags(this Child child) => child.TagsStart;
-    public static IEnumerable<Tag> GetResetTags(this Child child) => child.TagsReset;
-    public static IEnumerable<Tag> GetEndTags(this Child child) => child.TagsEnd;
 }

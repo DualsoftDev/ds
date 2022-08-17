@@ -6,7 +6,7 @@ using System.Xml.Linq;
 namespace Engine.Core;
 
 [DebuggerDisplay("{ToText(),nq}")]
-public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, ITxRx, ITagSREContainer// Coin
+public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, ITxRx
 {
     public RootFlow ContainerFlow { get; internal set; }
     Cpu _cpu;
@@ -26,20 +26,11 @@ public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, ITxRx, ITagSR
     public PortInfoReset PortR { get; set; }
     public PortInfoEnd PortE { get; set; }
 
-    TagSREContainer _tagSREContainer = new();
-    public IEnumerable<Tag> TagsStart => _tagSREContainer.TagsStart;
-    public IEnumerable<Tag> TagsReset => _tagSREContainer.TagsReset;
-    public IEnumerable<Tag> TagsEnd => _tagSREContainer.TagsEnd;
+    public Tag TagStart { get; }
+    public Tag TagReset { get; }
+    public Tag TagEnd { get; }
     public Tag Going { get; internal set; } // Flag or Tag
     public Tag Ready { get; internal set; } // Flag or Tag
-
-    public void AddStartTags(params Tag[] tags) => _tagSREContainer.AddStartTags(tags);
-    public void AddResetTags(params Tag[] tags) => _tagSREContainer.AddResetTags(tags);
-    public void AddEndTags(params Tag[] tags) => _tagSREContainer.AddEndTags(tags);
-    public Action<IEnumerable<Tag>> AddTagsFunc => _tagSREContainer.AddTagsFunc;
-    internal string DefaultStartTagAddress { get; set; }
-    internal string DefaultResetTagAddress { get; set; }
-    internal string DefaultEndTagAddress { get; set; }
 
     public bool IsResetFirst { get; internal set; } = true;
 
@@ -79,6 +70,10 @@ public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, ITxRx, ITagSR
         : base(cpu, name)
     {
         _cpu = cpu;
+        var uid = EmLinq.UniqueId;
+        TagStart = new Tag(cpu, this, $"Start_{name}_{uid()}", TagType.Q | TagType.Start);
+        TagReset = new Tag(cpu, this, $"Reset_{name}_{uid()}", TagType.Q | TagType.Reset);
+        TagEnd   = new Tag(cpu, this, $"End_{name}_{uid()}",   TagType.I | TagType.End);
     }
 
 
@@ -90,33 +85,6 @@ public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, ITxRx, ITagSR
             (_, false, true) => Status4.Finished,
             (_, true, _) => Status4.Homing,
         };
-
-    //public Status4 Status
-    //{
-    //    get
-    //    {
-    //        var s = PortS.Value;
-    //        var r = PortR.Value;
-    //        var e = PortE.Value;
-
-    //        //if (seg.Paused)
-    //        //{
-    //        //    Debug.Assert(!s && !r);
-    //        //    return e ? Status4.Homing : Status4.Going;
-    //        //}
-
-    //        if (e)
-    //            return r ? Status4.Homing : Status4.Finished;
-
-    //        Debug.Assert(!e);
-    //        if (s)
-    //            return r ? Status4.Ready : Status4.Going;
-
-    //        Debug.Assert(!s && !e);
-    //        return Status4.Ready;
-    //    }
-    //}
-
 
     public override string ToString() => ToText();
     public override string ToText()
@@ -186,32 +154,22 @@ public static class SegmentExtension
 
     public static void PrintPortInfos(this Segment seg)
     {
-        IEnumerable<string> spit()
-        {
-            var tagNamesS = string.Join("\r\n\t\t", seg.TagsStart.Select(t => t.Name));
-            var tagNamesR = string.Join("\r\n\t\t", seg.TagsReset.Select(t => t.Name));
-            var tagNamesE = string.Join("\r\n\t\t", seg.TagsEnd.Select(t => t.Name));
-            if (tagNamesS.NonNullAny())
-                yield return $"j\r\n\tStart Tags:\r\n\t\t{tagNamesS}";
-            if (tagNamesR.NonNullAny())
-                yield return $"j\r\n\tReset Tags:\r\n\t\t{tagNamesR}";
-            if (tagNamesE.NonNullAny())
-                yield return $"j\r\n\tEnd Tags:\r\n\t\t{tagNamesE}";
-        }
-        var str = string.Concat(spit());
-        Global.Logger.Debug($"Tags for segment [{seg.QualifiedName}]:{str}");
+        var s = seg.TagStart?.Name;
+        var r = seg.TagReset?.Name;
+        var e = seg.TagEnd?.Name;
+        Global.Logger.Debug($"Tags for segment [{seg.QualifiedName}]:({s}, {r}, {e})");
     }
 
-    public static IEnumerable<Tag> GetSRETags(this Segment segment)
-    {
-        var s = segment;
-        foreach (var t in s.TagsStart)
-            yield return t;
-        foreach (var t in s.TagsReset)
-            yield return t;
-        foreach (var t in s.TagsEnd)
-            yield return t;
-    }
+    //public static IEnumerable<Tag> GetSRETags(this Segment segment)
+    //{
+    //    var s = segment;
+    //    foreach (var t in s.TagsStart)
+    //        yield return t;
+    //    foreach (var t in s.TagsReset)
+    //        yield return t;
+    //    foreach (var t in s.TagsEnd)
+    //        yield return t;
+    //}
 
     public static IEnumerable<PortInfo> GetAllPorts(this Segment segment)
     {

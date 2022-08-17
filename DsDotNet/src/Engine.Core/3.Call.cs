@@ -39,7 +39,7 @@ public class CallPrototype : CallBase
             {
                 switch (rx)
                 {
-                    case Segment seg: return seg.TagsEnd.Any(t => t.Value);
+                    case Segment seg: return seg.TagEnd.Value;
                     case IBit bit: return bit.Value;   // todo TAG 아닌 경우 처리 필요함.
                 }
                 throw new Exception("Unknown type ERROR");

@@ -51,23 +51,21 @@ partial class EngineBuilder
         var flowsGrps = allRootFlows.GroupByToDictionary(flow => flow.Cpu);
         foreach (var (cpu, flows) in flowsGrps.Select(kv => kv.ToTuple()))
         {
-            TagGenInfo[] tgis = CreateTags4Child(flows);
+            //TagGenInfo[] tgis = CreateTags4Child(flows);
 
-            var tags = tgis.Select(tgi => tgi.GeneratedTag).ToArray();
-            Debug.Assert(tags.All(tag => tag.Cpu.BitsMap.ContainsKey(tag.Name)));
+            //var tags = tgis.Select(tgi => tgi.GeneratedTag).ToArray();
+            //Debug.Assert(tags.All(tag => tag.Cpu.BitsMap.ContainsKey(tag.Name)));
 
-            Opc.AddTags(tags);
+            //Opc.AddTags(tags);
 
-            var goingTags = flows.SelectMany(f => f.RootSegments).Select(seg => seg.Going).Where(t => t is not null);
-            Opc.AddTags(goingTags);
+            //var goingTags = flows.SelectMany(f => f.RootSegments).Select(seg => seg.Going).Where(t => t is not null);
+            //Opc.AddTags(goingTags);
 
 
-            // flow 상의 root segment 들에 대한 HMI s/r/e tags
-            var hmiTags = flows.SelectMany(f => f.GenereateHmiTags4Segments()).ToArray();
-            hmiTags.Iter(cpu.AddTag);
-            Opc.AddTags(hmiTags);
+            //// todo: flow 상의 root segment 들에 대한 s/r/e tags
+            ////Opc.AddTags(hmiTags);
 
-            Console.WriteLine();
+            //Console.WriteLine();
         }
 
 

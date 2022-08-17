@@ -12,6 +12,7 @@ public class BitChange
     public string Guid { get; set; }
     public BitChange(IBit bit, bool newValue, object cause = null, ExceptionHandler onError =null)
     {
+        Debug.Assert(bit != null);
         Debug.Assert(cause is null || cause is IBit || cause is string);
         //Debug.Assert(bit.Value != newValue);
 

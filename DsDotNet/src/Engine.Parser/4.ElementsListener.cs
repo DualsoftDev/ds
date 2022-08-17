@@ -286,9 +286,9 @@ partial class ElementsListener : dsBaseListener
             var sre = addrDef.address();
             var (s, r, e) = (sre.startTag()?.GetText(), sre.resetTag()?.GetText(), sre.endTag()?.GetText());
 
-            seg.DefaultStartTagAddress = s;
-            seg.DefaultResetTagAddress = r;
-            seg.DefaultEndTagAddress = e;
+            seg.TagStart.Address = s;
+            seg.TagReset.Address = r;
+            seg.TagEnd.Address = e;
         }
     }
 

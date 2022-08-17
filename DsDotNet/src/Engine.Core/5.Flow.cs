@@ -60,9 +60,10 @@ public class RootFlow : Flow
     {
         System = system;
         system.RootFlows.Add(this);
+        Auto = new Tag(cpu, null, $"Auto_{name}_{EmLinq.UniqueId()}", TagType.Auto);
     }
 
-    public Tag Auto { get; set; }
+    public Tag Auto { get; }
     public Tag AutoStart { get; set; }
     public Tag AutoReset { get; set; }
 

@@ -8,72 +8,50 @@ public static class HmiTagGenerator
 {
     static ILog Logger => Program.Logger;
 
-    /// <summary> flow 의 모든 root segment 에 대해서 S/R/E tag 생성 </summary>
-    static Tag[] GenerateHmiTag(Segment segment)
-    {
-        //Debug.Assert(segment.GetSRETags().IsNullOrEmpty());
-        var flow = segment.ContainerFlow;
-        var cpu = flow.Cpu;
-        var name = $"{flow.System.Name}_{flow.Name}_{segment.Name}";
-        var qName = $"{flow.System.Name}.{flow.Name}.{segment.Name}";
-        var s = new Tag(cpu, segment, $"ManualStart_{name}") { Type = TagType.Q|TagType.Manual, InternalName = $"{qName}:ManualStart" };
-        var r = new Tag(cpu, segment, $"ManualReset_{name}") { Type = TagType.Q|TagType.Manual, InternalName = $"{qName}:ManualReset" };
-        var e = new Tag(cpu, segment, $"End_{name}") { Type = TagType.I, InternalName = $"{qName}:DefaultEnd" };
+    ///// <summary> flow 의 init, last segment 에 대해서 auto start, auto reset tag 생성 </summary>
+    //static Tag[] GenerateHmiAutoTagForRootSegment(RootFlow flow)
+    //{
+    //    var cpu = flow.Cpu;
+    //    var midName = $"{flow.System.Name}_{flow.Name}";
 
-        segment.AddStartTags(s);
-        segment.AddResetTags(r);
-        segment.AddEndTags(e);
+    //    flow.Auto = new Tag(cpu, null, $"Auto_{midName}", TagType.Auto | TagType.Flow);
 
-        //cpu.AddBitDependancy(s, segment.PortInfoS);
-        //cpu.AddBitDependancy(r, segment.PortInfoR);
-        //cpu.AddBitDependancy(segment.PortInfoE, e);
-        return new[] { s, r, e };
-    }
+    //    var autoStart = Tag.CreateAutoStart(cpu, null, $"AutoStart_{midName}", $"{midName}.AutoStart");
+    //    flow.AutoStart = autoStart;
 
-    /// <summary> flow 의 init, last segment 에 대해서 auto start, auto reset tag 생성 </summary>
-    static Tag[] GenerateHmiAutoTagForRootSegment(RootFlow flow)
-    {
-        var cpu = flow.Cpu;
-        var midName = $"{flow.System.Name}_{flow.Name}";
+    //    var autoReset = Tag.CreateAutoReset(cpu, null, $"AutoReset_{midName}", $"{midName}.AutoReset");
+    //    flow.AutoReset = autoReset;
 
-        flow.Auto = new Tag(cpu, null, $"Auto_{midName}", TagType.Auto | TagType.Flow);
+    //    foreach(var rs in flow.RootSegments)
+    //    {
+    //        rs.AddStartTags(autoStart);
+    //        rs.AddResetTags(autoReset);
+    //    }
 
-        var autoStart = Tag.CreateAutoStart(cpu, null, $"AutoStart_{midName}", $"{midName}.AutoStart");
-        flow.AutoStart = autoStart;
+    //    return new[] {autoStart, autoReset} ;
+    //}
 
-        var autoReset = Tag.CreateAutoReset(cpu, null, $"AutoReset_{midName}", $"{midName}.AutoReset");
-        flow.AutoReset = autoReset;
+    ///// <summary>
+    ///// Flow 에 속한 root segment 에 대해서 S/R/E tag 생성
+    ///// - init 에 대해서 auto start,
+    ///// - last segment에 대해서 auto reset tag 생성
+    ///// <para>Side effect : 해당 cpu 에 dependancy 설정됨. </para>
+    ///// todo: flow 에 속한 call 에 대한 HMI tag 생성
+    ///// <para> - 생성된 tag 는 CPU 에 저장된다.</para>
+    ///// </summary>
+    //public static Tag[] GenereateHmiTags4Segments(this RootFlow flow)
+    //{
+    //    var cpu = flow.Cpu;
 
-        foreach(var rs in flow.RootSegments)
-        {
-            rs.AddStartTags(autoStart);
-            rs.AddResetTags(autoReset);
-        }
+    //    var segments = flow.RootSegments;
 
-        return new[] {autoStart, autoReset} ;
-    }
+    //    // 모든 root segment 에 대해서 S/R/E tag 생성
+    //    var sre = segments.SelectMany(s => GenerateHmiTag(s)).ToArray();
+    //    var autoSegTags = GenerateHmiAutoTagForRootSegment(flow);
 
-    /// <summary>
-    /// Flow 에 속한 root segment 에 대해서 S/R/E tag 생성
-    /// - init 에 대해서 auto start,
-    /// - last segment에 대해서 auto reset tag 생성
-    /// <para>Side effect : 해당 cpu 에 dependancy 설정됨. </para>
-    /// todo: flow 에 속한 call 에 대한 HMI tag 생성
-    /// <para> - 생성된 tag 는 CPU 에 저장된다.</para>
-    /// </summary>
-    public static Tag[] GenereateHmiTags4Segments(this RootFlow flow)
-    {
-        var cpu = flow.Cpu;
+    //    var hmiTags = sre.Concat(autoSegTags).ToArray();
+    //    hmiTags.Iter(t => t.Type = t.Type.Add(TagType.External));
 
-        var segments = flow.RootSegments;
-
-        // 모든 root segment 에 대해서 S/R/E tag 생성
-        var sre = segments.SelectMany(s => GenerateHmiTag(s)).ToArray();
-        var autoSegTags = GenerateHmiAutoTagForRootSegment(flow);
-
-        var hmiTags = sre.Concat(autoSegTags).ToArray();
-        hmiTags.Iter(t => t.Type = t.Type.Add(TagType.External));
-
-        return hmiTags;
-    }
+    //    return hmiTags;
+    //}
 }

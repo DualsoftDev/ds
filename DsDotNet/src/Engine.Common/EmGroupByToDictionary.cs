@@ -21,4 +21,5 @@ public static partial class EmLinq
 
     public static (K, V) ToTuple<K, V>(this KeyValuePair<K, V> pr) => (pr.Key, pr.Value);
 
+    public static string UniqueId() => Guid.NewGuid().ToString().Substring(0, 8);
 }

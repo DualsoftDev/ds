@@ -184,10 +184,9 @@ module ModelTest2 =
                 let systemP = builder.Model.Systems |> Seq.find(fun s -> s.Name = "P")
                 let flowP = systemP.RootFlows |> Seq.exactlyOne
                 let vp = flowP.ChildVertices |> Seq.ofType<Segment> |> Seq.find(fun s -> s.Name = "Vp")
-                let cpStart = main1Cp.GetStartTags() |> Seq.exactlyOne
+                let cpStart = main1Cp.TagsStart |> Seq.exactlyOne
                 cpStart.Name === "L_F_Main1_T.Cp_P_F_Vp_Start"
-                let vpStart = vp.TagsStart |> Seq.find(fun t -> t.Name = cpStart.Name)
-                cpStart.Name === vpStart.Name
+                cpStart.Name === vp.TagStart.Name
                 //cpStart =!= vpStart
 
 (*
@@ -204,12 +203,10 @@ module ModelTest2 =
 }
 *)
 
-                let cpEnd = main1Cp.GetEndTags() |> Seq.exactlyOne
+                let cpEnd = main1Cp.TagsEnd |> Seq.exactlyOne
                 cpEnd.Name === "L_F_Main1_T.Cp_P_F_Sp_End"
                 let sp = flowP.ChildVertices |> Seq.ofType<Segment> |> Seq.find(fun s -> s.Name = "Sp")
-
-                let spEnd = sp.TagsEnd |> Seq.find(fun t -> t.Name = cpEnd.Name)
-                cpEnd.Name === spEnd.Name
+                cpEnd.Name === sp.TagEnd.Name
                 //cpEnd =!= spEnd
 
 
@@ -221,8 +218,8 @@ module ModelTest2 =
                     segMain1CpTx.QualifiedName === "P_F_Vp"
                     segMain1CpRx.QualifiedName === "P_F_Sp"
 
-                    let cpStart_ = segMain1CpTx.TagsStart |> Seq.filter(fun t -> t.Name = cpStart.Name) |> Seq.exactlyOne
-                    let cpEnd_   = segMain1CpRx.TagsEnd   |> Seq.filter(fun t -> t.Name = cpEnd.Name)   |> Seq.exactlyOne
+                    let cpStart_ = segMain1CpTx.TagStart
+                    let cpEnd_   = segMain1CpRx.TagEnd
 
                     cpStart.Cpu =!= cpStart_.Cpu
                     cpEnd.Cpu =!= cpEnd_.Cpu
@@ -234,8 +231,8 @@ module ModelTest2 =
                     segMain1CmTx.QualifiedName === "P_F_Vm"
                     segMain1CmRx.QualifiedName === "P_F_Sm"
 
-                    let cpStart_ = segMain1CpTx.TagsStart |> Seq.filter(fun t -> t.Name = cpStart.Name) |> Seq.exactlyOne
-                    let cpEnd_   = segMain1CpRx.TagsEnd   |> Seq.filter(fun t -> t.Name = cpEnd.Name)   |> Seq.exactlyOne
+                    let cpStart_ = segMain1CpTx.TagStart
+                    let cpEnd_   = segMain1CpRx.TagEnd
 
                     cpStart.Cpu =!= cpStart_.Cpu
                     cpEnd.Cpu =!= cpEnd_.Cpu
@@ -249,8 +246,8 @@ module ModelTest2 =
                     segMain2CpTx.QualifiedName === "P_F_Vp"
                     segMain2CpRx.QualifiedName === "P_F_Sp"
 
-                    let cpStart_ = segMain2CpTx.TagsStart |> Seq.filter(fun t -> t.Name = cpStart.Name) |> Seq.exactlyOne
-                    let cpEnd_   = segMain2CpRx.TagsEnd   |> Seq.filter(fun t -> t.Name = cpEnd.Name)   |> Seq.exactlyOne
+                    let cpStart_ = segMain2CpTx.TagStart
+                    let cpEnd_   = segMain2CpRx.TagEnd
 
                     cpStart.Cpu =!= cpStart_.Cpu
                     cpEnd.Cpu =!= cpEnd_.Cpu
@@ -262,8 +259,8 @@ module ModelTest2 =
                     segMain2CmTx.QualifiedName === "P_F_Vm"
                     segMain2CmRx.QualifiedName === "P_F_Sm"
 
-                    let cpStart_ = segMain2CpTx.TagsStart |> Seq.filter(fun t -> t.Name = cpStart.Name) |> Seq.exactlyOne
-                    let cpEnd_   = segMain2CpRx.TagsEnd   |> Seq.filter(fun t -> t.Name = cpEnd.Name)   |> Seq.exactlyOne
+                    let cpStart_ = segMain2CpTx.TagStart
+                    let cpEnd_   = segMain2CpRx.TagEnd
 
                     cpStart.Cpu =!= cpStart_.Cpu
                     cpEnd.Cpu =!= cpEnd_.Cpu
@@ -326,10 +323,9 @@ module ModelTest2 =
                 let vp = model.FindObject<Segment>("P.F.Vp");
                 vp.Name === "Vp"
 
-                let vpTagsStart = vp.TagsStart |> Array.ofSeq
                 let cp = model.FindObject<Child>("L.F.Main1.T.Cp");
-                let cpStart = cp.GetStartTags() |> Seq.exactlyOne
-                let vpStart = vpTagsStart |> Seq.filter(fun t -> t.Name = cpStart.Name) |> Seq.exactlyOne
+                let cpStart = cp.TagsStart |> Seq.exactlyOne
+                let vpStart = vp.TagStart
                 cpStart.Name === vpStart.Name
                 cpStart =!= vpStart
                 cpStart.Cpu =!= vpStart.Owner
@@ -340,11 +336,9 @@ module ModelTest2 =
 
                 let sp = model.FindObject<Segment>("P.F.Sp");
                 sp.Name === "Sp"
-                let spTagsEnd = sp.TagsEnd |> Array.ofSeq
-                let cpEnd = cp.GetEndTags() |> Seq.exactlyOne
-                let spEnd = spTagsEnd|> Seq.filter(fun t -> t.Name = cpEnd.Name) |> Seq.exactlyOne
-                cpEnd.Name === spEnd.Name
-                cpEnd =!= spEnd
-                cpEnd.Cpu =!= spEnd.Owner
+                let cpEnd = cp.TagsEnd |> Seq.exactlyOne
+                cpEnd.Name === sp.TagEnd.Name
+                cpEnd =!= sp.TagEnd
+                cpEnd.Cpu =!= sp.TagEnd.Owner
 
             ()

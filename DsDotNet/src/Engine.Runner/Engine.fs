@@ -47,10 +47,6 @@ module EngineModule =
                     if isNull root.Ready then
                         root.Ready <- Tag(cpu, root, $"Ready_TEMP_{n}", TagType.Ready)
 
-                    if not <| root.TagsStart.Any(fun t -> t.Type.HasFlag(TagType.Flow)) then
-                        root.AddStartTags([|Tag(cpu, root, $"FlowStart_{n}", TagType.Start|||TagType.Flow)|])
-                    if not <| root.TagsReset.Any(fun t -> t.Type.HasFlag(TagType.Flow)) then
-                        root.AddResetTags([|Tag(cpu, root, $"FlowReset_{n}", TagType.Reset|||TagType.Flow)|])
 
                     //if not <| root.TagsEnd.Any(fun t -> t.Type.HasFlag(TagType.Flow)) then
                     //    root.AddEndTags([|Tag(cpu, root, $"FlowEnd_{n}", TagType.End|||TagType.Flow)|])
@@ -58,15 +54,9 @@ module EngineModule =
                         root.PortE <- PortInfoEnd.Create(cpu, root, $"epex{n}_default", null)
 
                     if isNull root.PortS then
-                        root.PortS <-
-                            let ss = root.TagsStart.Cast<IBit>().ToArray()
-                            let sor = Or(cpu, $"start_OR_trigers_{n}", ss)
-                            PortInfoStart(cpu, root, $"spex{n}_default", sor, null)
+                        root.PortS <- PortInfoStart(cpu, root, $"spex{n}_default", root.TagStart, null)
                     if isNull root.PortR then
-                        root.PortR <-
-                            let rs = root.TagsReset.Cast<IBit>().ToArray()
-                            let ror = Or(cpu, $"reset_OR_trigers_{n}", rs)
-                            PortInfoReset(cpu, root, $"rpex{n}_default", ror, null)
+                        root.PortR <- PortInfoReset(cpu, root, $"rpex{n}_default", root.TagReset, null)
 
                 
             // todo : 가상 부모 생성

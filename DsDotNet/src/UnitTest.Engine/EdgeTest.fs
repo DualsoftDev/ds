@@ -63,14 +63,14 @@ module EdgeTest =
             let bwd = cpu.BackwardDependancyMap
 
             // tag 기준으로 해당 port 와 연결되어 있는지 check
-            main.TagsStart |> Seq.forall(fun s -> fwd[s].Contains(main.PortS)) |> ShouldBeTrue
-            main.TagsReset |> Seq.forall(fun r -> fwd[r].Contains(main.PortR)) |> ShouldBeTrue
-            main.TagsEnd   |> Seq.forall(fun e -> bwd[e].Contains(main.PortE)) |> ShouldBeTrue
+            fwd[main.TagStart].Contains(main.PortS) |> ShouldBeTrue
+            fwd[main.TagReset].Contains(main.PortR) |> ShouldBeTrue
+            bwd[main.TagEnd  ].Contains(main.PortE) |> ShouldBeTrue
 
             // port 기준으로 해당 tag 와 연결되어 있는지 check
-            (bwd[main.PortS] |> Enumerable.OfType<Tag>, main.TagsStart) |> seqEq
-            (bwd[main.PortR] |> Enumerable.OfType<Tag>, main.TagsReset) |> seqEq
-            (fwd[main.PortE] |> Enumerable.OfType<Tag>, main.TagsEnd)   |> seqEq
+            bwd[main.PortS].OfType<Tag>().Contains(main.TagStart) |> ShouldBeTrue
+            bwd[main.PortR].OfType<Tag>().Contains(main.TagReset) |> ShouldBeTrue
+            fwd[main.PortE].OfType<Tag>().Contains(main.TagEnd)   |> ShouldBeTrue
 
 
             let otherCpu = model.Cpus.First(fun cpu -> not cpu.IsActive);
@@ -104,8 +104,8 @@ module EdgeTest =
                 let sp = otherRootFlow.Coins |> Enumerable.OfType<Segment> |> Seq.find(fun seg -> seg.Name = "Sp")
                 let vpStart2 = otherCpu.TagsMap["L_F_Main_T.Cp_P_F_Vp_Start"]
                 let spEnd2 = otherCpu.TagsMap["L_F_Main_T.Cp_P_F_Sp_End"]
-                vp.TagsStart.Contains(vpStart2) |> ShouldBeTrue
-                sp.TagsEnd.Contains(spEnd2) |> ShouldBeTrue
+                vp.TagStart === vpStart2
+                sp.TagEnd === spEnd2
                 vpStart =!= vpStart2
                 spEnd =!= spEnd2
 
@@ -133,11 +133,11 @@ module EdgeTest =
                     let eResetPp2Sm = otherRootFlow.Edges |> Seq.find(fun e -> e.Sources.Contains(pp) && e.Target = sm)
                     box eResetPp2Sm :? IResetEdge |> ShouldBeTrue
                     eResetPp2Sm.SourceTags.Contains(pp.Going) |> ShouldBeTrue
-                    sm.TagsReset.Contains(eResetPp2Sm.TargetTag)
+                    sm.TagReset === eResetPp2Sm.TargetTag
                 ()
 
 
             let ``children start/end tags check`` =
-                main.Children |> Seq.forall(fun c -> c.GetStartTags().Count() = 1 && c.GetEndTags().Count() = 1) |> ShouldBeTrue
+                main.Children |> Seq.forall(fun c -> c.TagsStart.Count = 1 && c.TagsEnd.Count = 1) |> ShouldBeTrue
 
             ()

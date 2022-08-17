@@ -196,13 +196,11 @@ module VirtualParentSegmentModule =
                 let resetEdges = es.Where(fun e -> box e :? IResetEdge).ToArray()
                 assert(setEdges.Length = 0 || setEdges.Length = 1)
                 assert(resetEdges.Length = 0 || resetEdges.Length = 1)
-                let st = target.TagsStart.Where(fun t -> t.Type.HasFlag(TagType.Flow)) |> Seq.exactlyOne
-                let rt = target.TagsReset.Where(fun t -> t.Type.HasFlag(TagType.Flow)) |> Seq.exactlyOne
 
                 let causalSources = setEdges.selectMany(fun e -> e.Sources).Cast<FsSegment>().ToArray()
                 let resetSources = resetEdges.selectMany(fun e -> e.Sources).Cast<FsSegment>().ToArray()
                 if causalSources.Any() && resetSources.Any() then
-                    let vps = VirtualParentSegment.Create(target, autoStart, (st, rt), causalSources, resetSources)
+                    let vps = VirtualParentSegment.Create(target, autoStart, (target.TagStart, target.TagReset), causalSources, resetSources)
                     yield vps
                 else
                     logWarn $"Do not create VPS for {target.QualifiedName}"

@@ -1,16 +1,10 @@
 namespace Engine.Runner
 
 open Engine.Core
-open Engine.Common
-open System
-open System.Linq
-open System.Reactive.Linq
-open Dual.Common
-open System.Collections.Generic
 
 
 [<AutoOpen>]
-module RGFHModule =
+module PrologueModule =
 
     type Writer = IBit*bool*obj -> unit
 

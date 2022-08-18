@@ -81,7 +81,9 @@ module FsSegmentModule =
                     if oldStatus = Some state then
                         logDebug $"\t\tSkipping duplicate status: [{n}] status : {state} {cause}"
                     else
-                        logDebug $"[{n}] Segment status : {state} {cause}"
+                        logInfo $"[{n}] Segment status : {state} {cause}"
+                        Global.SegmentStatusChangedSubject.OnNext(SegmentStatusChange(x, state))
+
                         if x.Going.Value && state <> Status4.Going then
                             write(x.Going, false, $"{n} going off by status {state}")
                         if x.Ready.Value && state <> Status4.Ready then

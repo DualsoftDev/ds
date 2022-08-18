@@ -9,7 +9,7 @@ open Engine.Core
 open Engine.Runner
 
 [<AbstractClass>]
-type MockupSegmentBase(cpu, n, startTagName, resetTagName, endTagName) as this =
+type MockupSegmentBase(cpu, n, startTagName, resetTagName, endTagName) =
     inherit FsSegmentBase(cpu, n
         , if isNull startTagName then $"Start_{n}" else startTagName
         , if isNull resetTagName then $"Reset_{n}" else resetTagName

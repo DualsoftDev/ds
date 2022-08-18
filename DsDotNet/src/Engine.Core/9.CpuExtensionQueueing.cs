@@ -126,6 +126,13 @@ public static class CpuExtensionQueueing
 
         void DoApply(BitChange bitChange)
         {
+            bitChange.BeforeAction?.Invoke();
+            DoApplyBitChange(bitChange);
+            bitChange.AfterAction?.Invoke();
+        }
+
+        void DoApplyBitChange(BitChange bitChange)
+        {
             var bit = (Bit)bitChange.Bit;
             //Global.Logger.Debug($"\t=({indent}) Applying bitchange {bitChange}");
 

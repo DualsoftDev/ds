@@ -146,7 +146,7 @@ module VirtualParentSegmentModule =
                             logDebug $"\t\tVPS Skipping duplicate status: [{n}] status : {state}"
                         else
                             oldStatus <- Some state
-                            logDebug $"[{n}] Segment status : {state} by {bit.Name}={bit.Value}"
+                            logInfo $"[{n}] Segment status : {state} by {bit.Name}={bit.Value}"
                             let childStatus = x.Target.Status
 
                             match state with

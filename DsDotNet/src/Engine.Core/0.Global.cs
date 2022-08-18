@@ -27,6 +27,9 @@ public static class Global
     public static Subject<OpcTagChange> TagChangeToOpcServerSubject { get; } = new();
     public static Subject<OpcTagChange> TagChangeFromOpcServerSubject { get; } = new();
 
+    /// <summary> Segment 상태 변경 공지.  가상부모 segment 는 제외 </summary>
+    public static Subject<SegmentStatusChange> SegmentStatusChangedSubject { get; } = new();
+    public static Subject<ChildStatusChange> ChildStatusChangedSubject { get; } = new();
     public static IObservable<long> TickSeconds => Observable.Interval(TimeSpan.FromSeconds(1));
 
     public static bool IsInUnitTest { get; }

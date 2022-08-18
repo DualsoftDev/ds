@@ -9,6 +9,8 @@ public class BitChange
     public object Cause { get; }
     public DateTime Time { get; }
     public ExceptionHandler OnError { get; set; }
+    public Action BeforeAction { get; set; }
+    public Action AfterAction { get; set; }
     public string Guid { get; set; }
     public BitChange(IBit bit, bool newValue, object cause = null, ExceptionHandler onError =null)
     {
@@ -48,4 +50,31 @@ public record OpcTagChange
         TagName = tagName;
         Value = value;
     }
+}
+
+public record SegmentStatusChange
+{
+    public SegmentStatusChange(SegmentBase segment, Status4 status)
+    {
+        Segment = segment;
+        Status = status;
+    }
+
+    public SegmentBase Segment { get; }
+    public Status4 Status { get; set; }
+}
+
+
+public record ChildStatusChange
+{
+    public ChildStatusChange(Child child, Status4 status, bool isFlipped)
+    {
+        Child = child;
+        Status = status;
+        IsFlipped = isFlipped;
+    }
+
+    public Child Child { get; }
+    public Status4 Status { get; }
+    public bool IsFlipped { get; }
 }

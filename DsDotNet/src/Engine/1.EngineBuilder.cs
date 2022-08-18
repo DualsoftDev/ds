@@ -12,7 +12,7 @@ public partial class EngineBuilder
 
     public EngineBuilder(string modelText, string activeCpuName)
     {
-        ModelRunnerModule.Initialize();
+        EngineModule.Initialize();
 
         Model = ModelParser.ParseFromString(modelText);
 
@@ -34,7 +34,7 @@ public partial class EngineBuilder
     /// <summary> Used for Unit test only.</summary>
     internal EngineBuilder(string modelText)
     {
-        ModelRunnerModule.Initialize();
+        EngineModule.Initialize();
         Opc = new OpcBroker();
         Model = ModelParser.ParseFromString(modelText);
     }

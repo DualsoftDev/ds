@@ -12,6 +12,7 @@ module FsSegmentModule =
     /// Bit * New Value * Change reason
     type ChangeWriter = BitChange -> unit
     
+    /// Common base class for *Real* root segment and Virtual Parent Segment
     [<AbstractClass>]
     type FsSegmentBase(cpu, segmentName, startTagName, resetTagName, endTagName) =
         inherit SegmentBase(cpu, segmentName, startTagName, resetTagName, endTagName)
@@ -27,7 +28,8 @@ module FsSegmentModule =
         //    | _, false, true      -> Status4.Finished
         //    | _, true, _          -> Status4.Homing
 
-    type FsSegment(cpu, segmentName) as this =
+    /// Real Root Segment
+    type Segment(cpu, segmentName) as this =
         inherit FsSegmentBase(cpu, segmentName, null, null, null)
         do
             let uid = EmLinq.UniqueId;

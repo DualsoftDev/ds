@@ -5,14 +5,6 @@ open Engine.Core
 
 [<AutoOpen>]
 module ModelRunnerModule =
-    let Initialize() =
-        SegmentBase.Create <-
-            new Func<string, RootFlow, SegmentBase>(
-                fun name (rootFlow:RootFlow) ->
-                    let seg = FsSegment(rootFlow.Cpu, name)
-                    seg.ContainerFlow <- rootFlow
-                    rootFlow.AddChildVertex(seg)
-                    seg)
     ()
 
 

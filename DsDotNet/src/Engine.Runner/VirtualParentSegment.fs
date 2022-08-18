@@ -8,7 +8,7 @@ open System.Linq
 
 [<AutoOpen>]
 module VirtualParentSegmentModule =
-    type VirtualParentSegment(target:FsSegment, causalSourceSegments:FsSegment seq
+    type VirtualParentSegment(target:Segment, causalSourceSegments:Segment seq
         , startPort, resetPort, endPort
         , goingTag, readyTag
         , targetStartTag, targetResetTag               // target child 의 start port 에 가상 부모가 시작시킬 수 있는 start tag 추가 (targetStartTag)
@@ -30,10 +30,10 @@ module VirtualParentSegmentModule =
         member val TargetStartTag = targetStartTag with get
         member val TargetResetTag = targetResetTag with get
 
-        static member Create(target:FsSegment, auto:IBit
+        static member Create(target:Segment, auto:IBit
             , (targetStartTag:IBit, targetResetTag:IBit)
-            , causalSourceSegments:FsSegment seq
-            , resetSourceSegments:FsSegment seq
+            , causalSourceSegments:Segment seq
+            , resetSourceSegments:Segment seq
         ) =
             let cpu = target.Cpu
             let n = $"VPS_{target.QualifiedName}"
@@ -192,7 +192,7 @@ module VirtualParentSegmentModule =
     let CreateVirtualParentSegmentsFromRootFlow(rootFlow: RootFlow) =
         let autoStart = rootFlow.Auto
         let allEdges = rootFlow.Edges.ToArray()
-        let segments = rootFlow.RootSegments.Cast<FsSegment>()
+        let segments = rootFlow.RootSegments.Cast<Segment>()
         [|
             for target in segments do
                 let es = allEdges.Where(fun e -> e.Target = target).ToArray()
@@ -201,8 +201,8 @@ module VirtualParentSegmentModule =
                 assert(setEdges.Length = 0 || setEdges.Length = 1)
                 assert(resetEdges.Length = 0 || resetEdges.Length = 1)
 
-                let causalSources = setEdges.selectMany(fun e -> e.Sources).Cast<FsSegment>().ToArray()
-                let resetSources = resetEdges.selectMany(fun e -> e.Sources).Cast<FsSegment>().ToArray()
+                let causalSources = setEdges.selectMany(fun e -> e.Sources).Cast<Segment>().ToArray()
+                let resetSources = resetEdges.selectMany(fun e -> e.Sources).Cast<Segment>().ToArray()
                 if causalSources.Any() && resetSources.Any() then
                     let vps = VirtualParentSegment.Create(target, autoStart, (target.TagStart, target.TagReset), causalSources, resetSources)
                     yield vps

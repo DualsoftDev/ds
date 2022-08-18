@@ -14,7 +14,6 @@
 		<Compile Include="Segment.fs" />
 		<Compile Include="VirtualParentSegment.fs" />
 		<Compile Include="Engine.fs" />
-		<Compile Include="Runner.fs" />
 		<None Include="paket.references" />
 	</ItemGroup>
 

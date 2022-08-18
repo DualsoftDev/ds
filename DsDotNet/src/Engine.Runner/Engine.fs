@@ -13,8 +13,17 @@ open System.Reactive.Linq
 
 [<AutoOpen>]
 module EngineModule =
+    let Initialize() =
+        SegmentBase.Create <-
+            new Func<string, RootFlow, SegmentBase>(
+                fun name (rootFlow:RootFlow) ->
+                    let seg = Segment(rootFlow.Cpu, name)
+                    seg.ContainerFlow <- rootFlow
+                    rootFlow.AddChildVertex(seg)
+                    seg)
+
     /// 외부에서 tag 가 변경된 경우 수행할 작업 지정
-    let onOpcTagChanged (cpu:Cpu) (tagChange:OpcTagChange) =
+    let private onOpcTagChanged (cpu:Cpu) (tagChange:OpcTagChange) =
         let tagName, value = tagChange.TagName, tagChange.Value
         if (cpu.TagsMap.ContainsKey(tagName)) then
             let tag = cpu.TagsMap[tagName]
@@ -42,7 +51,7 @@ module EngineModule =
 
 
             let rootFlows = cpus.selectMany(fun cpu -> cpu.RootFlows)
-            let roots = rootFlows.selectMany(fun rf -> rf.RootSegments).Cast<FsSegment>()
+            let roots = rootFlows.selectMany(fun rf -> rf.RootSegments).Cast<Segment>()
                 
             // 가상 부모 생성
             let virtualParentSegments =

@@ -43,10 +43,13 @@ module ModelTest2 =
             let cpu = builder.Cpu
             cpu.Name === "Cpu"
 
+            cpu.BuildBitDependencies()
+
             cpu.ForwardDependancyMap.Keys |> Seq.map(fun k -> k.Cpu) |> Seq.forall( (=) cpu) |> ShouldBeTrue
             cpu.BackwardDependancyMap.Keys |> Seq.map(fun k -> k.Cpu) |> Seq.forall( (=) cpu) |> ShouldBeTrue
 
             let fakeCpu = builder.Model.Cpus |> Seq.find(fun c -> not c.IsActive)
+            fakeCpu.BuildBitDependencies()
             fakeCpu.ForwardDependancyMap.Keys |> Seq.map(fun k -> k.Cpu) |> Seq.forall( (=) fakeCpu) |> ShouldBeTrue
             fakeCpu.BackwardDependancyMap.Keys |> Seq.map(fun k -> k.Cpu) |> Seq.forall( (=) fakeCpu) |> ShouldBeTrue
 
@@ -95,11 +98,13 @@ module ModelTest2 =
             let cpu = builder.Cpu
             cpu.Name === "Cpu"
 
+            cpu.BuildBitDependencies()
 
             cpu.ForwardDependancyMap.Keys |> Seq.map(fun k -> k.Cpu) |> Seq.forall( (=) cpu) |> ShouldBeTrue
             cpu.BackwardDependancyMap.Keys |> Seq.map(fun k -> k.Cpu) |> Seq.forall( (=) cpu) |> ShouldBeTrue
 
             let fakeCpu = builder.Model.Cpus |> Seq.find(fun c -> not c.IsActive)
+            fakeCpu.BuildBitDependencies()
             fakeCpu.ForwardDependancyMap.Keys |> Seq.map(fun k -> k.Cpu) |> Seq.forall( (=) fakeCpu) |> ShouldBeTrue
             fakeCpu.BackwardDependancyMap.Keys |> Seq.map(fun k -> k.Cpu) |> Seq.forall( (=) fakeCpu) |> ShouldBeTrue
 
@@ -185,7 +190,7 @@ module ModelTest2 =
                 let flowP = systemP.RootFlows |> Seq.exactlyOne
                 let vp = flowP.ChildVertices |> Seq.ofType<Segment> |> Seq.find(fun s -> s.Name = "Vp")
                 let cpStart = main1Cp.TagsStart |> Seq.exactlyOne
-                cpStart.Name === "L_F_Main1_T.Cp_P_F_Vp_Start"
+                cpStart.Name === "Start_P_F_Vp"
                 cpStart.Name === vp.TagStart.Name
                 //cpStart =!= vpStart
 
@@ -204,7 +209,7 @@ module ModelTest2 =
 *)
 
                 let cpEnd = main1Cp.TagsEnd |> Seq.exactlyOne
-                cpEnd.Name === "L_F_Main1_T.Cp_P_F_Sp_End"
+                cpEnd.Name === "End_P_F_Sp"
                 let sp = flowP.ChildVertices |> Seq.ofType<Segment> |> Seq.find(fun s -> s.Name = "Sp")
                 cpEnd.Name === sp.TagEnd.Name
                 //cpEnd =!= spEnd
@@ -221,8 +226,8 @@ module ModelTest2 =
                     let cpStart_ = segMain1CpTx.TagStart
                     let cpEnd_   = segMain1CpRx.TagEnd
 
-                    cpStart.Cpu =!= cpStart_.Cpu
-                    cpEnd.Cpu =!= cpEnd_.Cpu
+                    cpStart === cpStart_
+                    cpEnd === cpEnd_
 
 
                     let segMain1CmTx = (main1Cm.Coin :?> SubCall).Prototype.TXs |> Enumerable.OfType<Segment> |> Seq.exactlyOne
@@ -234,8 +239,8 @@ module ModelTest2 =
                     let cpStart_ = segMain1CpTx.TagStart
                     let cpEnd_   = segMain1CpRx.TagEnd
 
-                    cpStart.Cpu =!= cpStart_.Cpu
-                    cpEnd.Cpu =!= cpEnd_.Cpu
+                    cpStart === cpStart_
+                    cpEnd === cpEnd_
 
 
                 let ``check main2`` =
@@ -249,8 +254,8 @@ module ModelTest2 =
                     let cpStart_ = segMain2CpTx.TagStart
                     let cpEnd_   = segMain2CpRx.TagEnd
 
-                    cpStart.Cpu =!= cpStart_.Cpu
-                    cpEnd.Cpu =!= cpEnd_.Cpu
+                    cpStart === cpStart_
+                    cpEnd === cpEnd_
 
 
                     let segMain2CmTx = (main2Cm.Coin :?> SubCall).Prototype.TXs |> Enumerable.OfType<Segment> |> Seq.exactlyOne
@@ -262,8 +267,8 @@ module ModelTest2 =
                     let cpStart_ = segMain2CpTx.TagStart
                     let cpEnd_   = segMain2CpRx.TagEnd
 
-                    cpStart.Cpu =!= cpStart_.Cpu
-                    cpEnd.Cpu =!= cpEnd_.Cpu
+                    cpStart === cpStart_
+                    cpEnd === cpEnd_
 
 
                 ()
@@ -327,8 +332,8 @@ module ModelTest2 =
                 let cpStart = cp.TagsStart |> Seq.exactlyOne
                 let vpStart = vp.TagStart
                 cpStart.Name === vpStart.Name
-                cpStart =!= vpStart
-                cpStart.Cpu =!= vpStart.Owner
+                cpStart === vpStart
+                cpStart.Cpu === vpStart.Owner.Cpu
 
                 let pp = model.FindObject<Segment>("P.F.Pp");
                 pp.Name === "Pp"
@@ -338,7 +343,7 @@ module ModelTest2 =
                 sp.Name === "Sp"
                 let cpEnd = cp.TagsEnd |> Seq.exactlyOne
                 cpEnd.Name === sp.TagEnd.Name
-                cpEnd =!= sp.TagEnd
-                cpEnd.Cpu =!= sp.TagEnd.Owner
+                cpEnd === sp.TagEnd
+                cpEnd.Cpu === sp.TagEnd.Owner.Cpu
 
             ()

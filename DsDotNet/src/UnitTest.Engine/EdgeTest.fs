@@ -58,7 +58,7 @@ module EdgeTest =
 
             model.Epilogue()
 
-
+            cpu.BuildBitDependencies()
             let fwd = cpu.ForwardDependancyMap
             let bwd = cpu.BackwardDependancyMap
 

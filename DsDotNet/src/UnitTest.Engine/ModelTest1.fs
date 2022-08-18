@@ -74,10 +74,12 @@ module ModelTests1 =
             ( builder.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
             let system = builder.Model.Systems |> Seq.find(fun s -> s.Name = "L")
             let cpu = builder.Cpu
+            cpu.BuildBitDependencies()
             cpu.ForwardDependancyMap.Keys |> Seq.map(fun k -> k.Cpu) |> Seq.forall( (=) cpu) |> ShouldBeTrue
             cpu.BackwardDependancyMap.Keys |> Seq.map(fun k -> k.Cpu) |> Seq.forall( (=) cpu) |> ShouldBeTrue
 
             let fakeCpu = builder.Model.Cpus |> Seq.find(fun c -> not c.IsActive)
+            fakeCpu.BuildBitDependencies()
             fakeCpu.ForwardDependancyMap.Keys |> Seq.map(fun k -> k.Cpu) |> Seq.forall( (=) fakeCpu) |> ShouldBeTrue
             fakeCpu.BackwardDependancyMap.Keys |> Seq.map(fun k -> k.Cpu) |> Seq.forall( (=) fakeCpu) |> ShouldBeTrue
 
@@ -105,8 +107,8 @@ module ModelTests1 =
             let checkC22Instance_ =
                 let c22 = main.Children |> Seq.find(fun child -> child.Name = "T.C22")
                 c22.QualifiedName === "L_F_Main_T.C22"
-                (c22.TagsStart.Select(fun t -> t.Name), ["L_F_Main_T.C22_P_F_Vp_Start"; "L_F_Main_T.C22_P_F_Vm_Start"]) |> setEq
-                (c22.TagsEnd.Select(fun t -> t.Name), ["L_F_Main_T.C22_P_F_Sp_End";   "L_F_Main_T.C22_P_F_Sm_End"]) |> setEq
+                (c22.TagsStart.Select(fun t -> t.Name), ["Start_P_F_Vp"; "Start_P_F_Vm"]) |> setEq
+                (c22.TagsEnd.Select(fun t -> t.Name), ["End_P_F_Sp"; "End_P_F_Sm"]) |> setEq
 
 
             flow.Cpu === cpu

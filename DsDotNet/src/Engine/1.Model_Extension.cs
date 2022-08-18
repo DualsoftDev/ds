@@ -16,8 +16,8 @@ public static class ModelExtension
         foreach (var segment in model.CollectSegments())
         {
             segment.GraphInfo = FsGraphInfo.AnalyzeFlows(new[] { segment }, false);
-            var pi = new GraphProgressSupportUtil.ProgressInfo(segment.GraphInfo);
-            segment.ChildrenOrigin = pi.ChildOrigin.ToArray();
+            //var pi = new GraphProgressSupportUtil.ProgressInfo(segment.GraphInfo);
+            //segment.ChildrenOrigin = pi.ChildOrigin.ToArray();
         }
     }
     public static void Epilogue(this Model model)

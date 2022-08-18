@@ -2,9 +2,11 @@ namespace Engine.Runner
 
 open Engine.Core
 open System
+open System.Linq
 open System.Reactive.Linq
 open Dual.Common
 open Engine.Common
+open System.Collections.Generic
 
 
 [<AutoOpen>]
@@ -40,6 +42,23 @@ module FsSegmentModule =
             this.PortE.InternalName <- "EndPort"
             this.PortS <- new PortInfoStart(cpu, this, $"StartPort_{segmentName}_{uid()}", this.TagStart, null, InternalName = "StartPort")
             this.PortR <- new PortInfoReset(cpu, this, $"ResetPort_{segmentName}_{uid()}", this.TagReset, null, InternalName = "ResetPort")
+
+        member val Inits:Child array = null with get, set
+        member val Lasts:Child array = null with get, set
+        member val ChildrenOrigin:IVertex array = null with get, set
+        member val TraverseOrder:VertexAndOutgoingEdges array = null with get, set
+
+        override x.Epilogue() =
+            base.Epilogue()
+
+            // Graph 정보 추출 & 저장
+            let gi = x.GraphInfo;
+            x.Inits <- gi.Inits.OfType<Child>().ToArray();
+            x.Lasts <- gi.Lasts.OfType<Child>().ToArray();
+            x.TraverseOrder <- gi.TraverseOrders;
+
+            x.PrintPortInfos();
+
 
         default x.WireEvent(writer, onError) =
             let mutable oldStatus:Status4 option = None

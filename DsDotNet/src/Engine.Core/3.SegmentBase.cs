@@ -34,10 +34,17 @@ public abstract partial class SegmentBase : ChildFlow, IVertex, ICoin, IWallet, 
 
     public bool IsResetFirst { get; internal set; } = true;
 
-    public Child[] Inits { get; internal set; }
-    public Child[] Lasts { get; internal set; }
-    public IVertex[] ChildrenOrigin { get; internal set; }
-    public VertexAndOutgoingEdges[] TraverseOrder { get; internal set; }
+    public virtual void Epilogue()
+    {
+        // child 의 최초 상태 등록 : null (vs Homing?)
+        ChildStatusMap =
+            Children
+            .ToDictionary(child => child, _ => (false, (Status4?)null))// Status4.Homing)
+            ;
+    }
+
+
+
     public bool Value { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
     //public bool Value { get => PortE.Value; set => throw new NotImplementedException(); }
     public virtual bool Evaluate() => Value;
@@ -116,24 +123,6 @@ public static class SegmentExtension
         segment.ChildStatusMap.Values.Select(tpl => tpl.Item2).All(st => st == status);
     public static bool IsChildrenStatusAnyWith(this SegmentBase segment, Status4 status) =>
         segment.ChildStatusMap.Values.Select(tpl => tpl.Item2).Any(st => st == status);
-
-
-    public static void Epilogue(this SegmentBase segment)
-    {
-        // child 의 최초 상태 등록 : null (vs Homing?)
-        segment.ChildStatusMap =
-            segment.Children
-            .ToDictionary(child => child, _ => (false, (Status4?)null))// Status4.Homing)
-            ;
-
-        // Graph 정보 추출 & 저장
-        var gi = segment.GraphInfo;
-        segment.Inits = gi.Inits.OfType<Child>().ToArray();
-        segment.Lasts = gi.Lasts.OfType<Child>().ToArray();
-        segment.TraverseOrder = gi.TraverseOrders;
-
-        segment.PrintPortInfos();
-    }
 
     public static void PrintPortInfos(this SegmentBase seg)
     {

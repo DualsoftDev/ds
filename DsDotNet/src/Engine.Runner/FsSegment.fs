@@ -4,6 +4,7 @@ open Engine.Core
 open System
 open System.Reactive.Linq
 open Dual.Common
+open Engine.Common
 
 
 [<AutoOpen>]
@@ -11,12 +12,34 @@ module FsSegmentModule =
     /// Bit * New Value * Change reason
     type ChangeWriter = BitChange -> unit
     
-    type FsSegment(cpu, segmentName, createPortsGoingReady, startTagName, resetTagName, endTagName) =
-        inherit Segment(cpu, segmentName, createPortsGoingReady, startTagName, resetTagName, endTagName)
-        let mutable oldStatus:Status4 option = None
+    [<AbstractClass>]
+    type FsSegmentBase(cpu, segmentName, startTagName, resetTagName, endTagName) =
+        inherit Segment(cpu, segmentName, startTagName, resetTagName, endTagName)
     
-        new(cpu, segmentName) = FsSegment(cpu, segmentName, true, null, null, null)
+        //new(cpu, segmentName) = FsSegment(cpu, segmentName, true, null, null, null)
         abstract member WireEvent:ChangeWriter*ExceptionHandler->IDisposable
+
+
+        //member x.Status = //with get() =
+        //    match x.PortS.Value, x.PortR.Value, x.PortE.Value with
+        //    | false, false, false -> Status4.Ready  //??
+        //    | true, false, false  -> Status4.Going
+        //    | _, false, true      -> Status4.Finished
+        //    | _, true, _          -> Status4.Homing
+
+    type FsSegment(cpu, segmentName) as this =
+        inherit FsSegmentBase(cpu, segmentName, null, null, null)
+        do
+            let uid = EmLinq.UniqueId;
+            this.Going <- Tag(cpu, this, $"Going_{segmentName}_{uid()}", TagType.Going, InternalName = "Going")
+            this.Ready <- Tag(cpu, this, $"Ready_{segmentName}_{uid()}", TagType.Ready, InternalName = "Ready")
+
+            this.PortE <- PortInfoEnd.Create(cpu, this, $"EndPort_{segmentName}_{uid()}", null)
+            this.PortE.InternalName <- "EndPort"
+            this.PortS <- new PortInfoStart(cpu, this, $"StartPort_{segmentName}_{uid()}", this.TagStart, null, InternalName = "StartPort")
+            this.PortR <- new PortInfoReset(cpu, this, $"ResetPort_{segmentName}_{uid()}", this.TagReset, null, InternalName = "ResetPort")
+
+        let mutable oldStatus:Status4 option = None
         default x.WireEvent(writer, onError) =
             let n = x.QualifiedName
             let write(bit, value, cause) =
@@ -52,13 +75,5 @@ module FsSegmentModule =
                             failwith "Unexpected"
                         oldStatus <- Some state
                 )
-
-
-        //member x.Status = //with get() =
-        //    match x.PortS.Value, x.PortR.Value, x.PortE.Value with
-        //    | false, false, false -> Status4.Ready  //??
-        //    | true, false, false  -> Status4.Going
-        //    | _, false, true      -> Status4.Finished
-        //    | _, true, _          -> Status4.Homing
 
 

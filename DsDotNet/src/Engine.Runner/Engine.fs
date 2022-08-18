@@ -36,35 +36,13 @@ module EngineModule =
 
             let rootFlows = cpus.selectMany(fun cpu -> cpu.RootFlows)
             let roots = rootFlows.selectMany(fun rf -> rf.RootSegments).Cast<FsSegment>()
-
-            //let _makeUpSegmentBits =
-            //    for root in roots do
-            //        let cpu = root.ContainerFlow.Cpu
-            //        let n = root.QualifiedName
-            //        if isNull root.Going then
-            //            root.Going <- Tag(cpu, root, $"Going_TEMP_{n}", TagType.Going)
-            //        if isNull root.Ready then
-            //            root.Ready <- Tag(cpu, root, $"Ready_TEMP_{n}", TagType.Ready)
-
-
-            //        //if not <| root.TagsEnd.Any(fun t -> t.Type.HasFlag(TagType.Flow)) then
-            //        //    root.AddEndTags([|Tag(cpu, root, $"FlowEnd_{n}", TagType.End|||TagType.Flow)|])
-            //        if isNull root.PortE then
-            //            root.PortE <- PortInfoEnd.Create(cpu, root, $"epex{n}_default", null)
-
-            //        if isNull root.PortS then
-            //            root.PortS <- PortInfoStart(cpu, root, $"spex{n}_default", root.TagStart, null)
-            //        if isNull root.PortR then
-            //            root.PortR <- PortInfoReset(cpu, root, $"rpex{n}_default", root.TagReset, null)
-
                 
-            // todo : 가상 부모 생성
+            // 가상 부모 생성
             let virtualParentSegments =
                 [
                     for rf in rootFlows do
                         yield! VirtualParentSegmentModule.CreateVirtualParentSegmentsFromRootFlow(rf)
                 ]
-
 
 
             let unparentedRoots =

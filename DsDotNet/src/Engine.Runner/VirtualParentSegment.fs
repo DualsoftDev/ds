@@ -13,7 +13,7 @@ module VirtualParentSegmentModule =
         , goingTag, readyTag
         , targetStartTag, targetResetTag               // target child 의 start port 에 가상 부모가 시작시킬 수 있는 start tag 추가 (targetStartTag)
     ) as this =
-        inherit FsSegment(target.Cpu, $"VPS_{target.QualifiedName}", false
+        inherit FsSegmentBase(target.Cpu, $"VPS_{target.QualifiedName}"
             , $"VPS_{target.TagStart.Name}"
             , $"VPS_{target.TagReset.Name}"
             , $"VPS_{target.TagEnd.Name}"

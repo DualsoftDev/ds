@@ -1,10 +1,9 @@
 namespace Engine.Graph
 
-open System
+open System.Linq
 open System.Collections.Generic
 open Dual.Common
 open QuickGraph
-open QuickGraph.Algorithms
 open Engine.Core
 
 
@@ -68,8 +67,10 @@ type FsGraphInfo(flows:Flow seq, isRootFlow:bool) =
         isolatedSegments |> Seq.iter(g.AddVertex >> ignore)
         g
 
-    let inits = isolatedSegments @@ getInits(if isRootFlow then solidGraph else graph) |> Seq.distinct |> Array.ofSeq
-    let lasts = isolatedSegments @@ getLasts(if isRootFlow then solidGraph else graph) |> Seq.distinct |> Array.ofSeq
+    let inits = isolatedSegments @@ getInits solidGraph |> Seq.distinct |> Array.ofSeq
+    let lasts = isolatedSegments @@ getLasts solidGraph |> Seq.distinct |> Array.ofSeq
+    //let inits = isolatedSegments @@ getInits(if isRootFlow then solidGraph else graph) |> Seq.distinct |> Array.ofSeq
+    //let lasts = isolatedSegments @@ getLasts(if isRootFlow then solidGraph else graph) |> Seq.distinct |> Array.ofSeq
 
     let undirectedGraph =
         let g = qgEdges |> GraphExtensions.ToUndirectedGraph
@@ -92,7 +93,7 @@ type FsGraphInfo(flows:Flow seq, isRootFlow:bool) =
         [|
             while not isRootFlow && q.Count > 0 do
                 let v = q.Dequeue()
-                let oes = graph.OutEdges(v)
+                let oes = graph.OutEdges(v).Where(fun e -> box e :? ISetEdge)
                 let ooes = oes |> Seq.map(fun (e:QgEdge) -> e.OriginalEdge) |> Array.ofSeq
                 yield VertexAndOutgoingEdges(v, ooes)
                 oes |> Seq.map (fun e -> e.Target) |> Seq.iter q.Enqueue

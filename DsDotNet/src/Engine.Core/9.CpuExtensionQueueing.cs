@@ -269,21 +269,6 @@ public static class CpuExtensionQueueing
             addSubRelationship(ff);
     }
 
-    //public static IEnumerable<IBit> CollectForwardDependantBits(this Cpu cpu, IBit source)
-    //{
-    //    var fwd = cpu.ForwardDependancyMap;
-    //    if (!fwd.ContainsKey(source))
-    //        yield break;
-
-    //    foreach (var dep in cpu.ForwardDependancyMap[source])
-    //    {
-    //        yield return dep;
-    //        foreach (var v in cpu.CollectForwardDependantBits(dep))
-    //            yield return v;
-    //    }
-    //}
-
-
     abstract class PortInfoChange : BitChange
     {
         public PortInfo PortInfo { get; }

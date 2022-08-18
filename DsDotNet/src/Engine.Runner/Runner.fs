@@ -1,12 +1,7 @@
 namespace Engine.Runner
 
 open System
-open System.Reactive.Linq
-open System.Runtime.CompilerServices
-open System.Reactive.Disposables
-
 open Engine.Core
-open Dual.Common
 
 [<AutoOpen>]
 module ModelRunnerModule =

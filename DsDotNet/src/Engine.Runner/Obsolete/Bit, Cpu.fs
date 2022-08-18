@@ -1,6 +1,8 @@
+namespace Engine.Runner
+
+#if false
 #nowarn "760"   // warning FS0760: IDisposable 인터페이스를 지원하는 개체는 생성 값이 리소스를 소유할 수도 있다는 것을 표시하기 위해 생성자를 나타내는 함수 값으로 'Type(args)' 또는 'Type'이 아니라 'new Type(args)' 구문을 사용하여 만드는 것이 좋습니다.
 
-namespace Engine.Runner
 
 open Engine.Core
 
@@ -12,15 +14,6 @@ open Engine.Core
 
 [<AutoOpen>]
 module internal CpuModule =
-    /// 외부에서 tag 가 변경된 경우 수행할 작업 지정
-    let onOpcTagChanged (cpu:Cpu) (tagChange:OpcTagChange) =
-        let tagName, value = tagChange.TagName, tagChange.Value
-        if (cpu.TagsMap.ContainsKey(tagName)) then
-            let tag = cpu.TagsMap[tagName]
-            if tag.Value <> value then
-                cpu.Enqueue(tag, value, $"OPC Tag [{tagName}] 변경");      //! setter 에서 BitChangedSubject.OnNext --> onBitChanged 가 호출된다.
-
-#if false
     let runCpu (cpu:Cpu) =
         let cancels = ConcurrentDictionary<Segment, CancellationTokenSource>()
         let onSegmentStatusChanged (seg:Segment) (status:Status4) =

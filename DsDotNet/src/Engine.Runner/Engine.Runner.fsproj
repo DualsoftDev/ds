@@ -9,10 +9,10 @@
 
 	<ItemGroup>
 		<Compile Include="Obsolete/ObsoleteDoRGFH.fs" />
+		<Compile Include="Obsolete/Bit, Cpu.fs" />
 		<Compile Include="RGFH.fs" />
 		<Compile Include="FsSegment.fs" />
 		<Compile Include="VirtualParentSegment.fs" />
-		<Compile Include="Bit, Cpu.fs" />
 		<Compile Include="Engine.fs" />
 		<Compile Include="Runner.fs" />
 		<None Include="paket.references" />

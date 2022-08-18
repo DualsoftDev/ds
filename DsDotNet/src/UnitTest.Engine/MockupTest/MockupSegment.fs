@@ -8,8 +8,15 @@ open Dual.Common
 open Engine.Core
 open Engine.Runner
 
+[<AbstractClass>]
 type MockupSegmentBase(cpu, n, sp, rp, ep, goingTag, readyTag) as this =
-    inherit FsSegment(cpu, n)
+    //inherit FsSegment(cpu, n)
+    inherit FsSegmentBase(cpu, n
+        , $"Start_{n}"
+        , $"Reset_{n}"
+        , $"End_{n}"
+        ) //, startPort, resetPort, endPort, goingTag, readyTag)
+
     do
         if sp <> null then
             this.CreateSREGR(cpu, sp, rp, ep, goingTag, readyTag)

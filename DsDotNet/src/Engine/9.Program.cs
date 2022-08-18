@@ -35,7 +35,7 @@ class Program
         PrepareLog4Net();
         //Tester.DoSampleTestVps();
         //Tester.DoSampleTest();
-        //Tester.DoSampleTestDiamond();
-        Tester.DoSampleTestAddressesAndLayouts();
+        Tester.DoSampleTestDiamond();
+        //Tester.DoSampleTestAddressesAndLayouts();
     }
 }

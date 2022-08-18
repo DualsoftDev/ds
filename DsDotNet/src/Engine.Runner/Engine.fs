@@ -13,6 +13,13 @@ open System.Reactive.Linq
 
 [<AutoOpen>]
 module EngineModule =
+    /// 외부에서 tag 가 변경된 경우 수행할 작업 지정
+    let onOpcTagChanged (cpu:Cpu) (tagChange:OpcTagChange) =
+        let tagName, value = tagChange.TagName, tagChange.Value
+        if (cpu.TagsMap.ContainsKey(tagName)) then
+            let tag = cpu.TagsMap[tagName]
+            if tag.Value <> value then
+                cpu.Enqueue(tag, value, $"OPC Tag [{tagName}] 변경");      //! setter 에서 BitChangedSubject.OnNext --> onBitChanged 가 호출된다.
 
     type Engine(model:Model, opc:OpcBroker, activeCpu:Cpu) =
         let cpus = model.Cpus

@@ -98,7 +98,7 @@ module VirtualParentTestTest =
                 ) |> ignore
 
             // 각 segment 별 event handling 등록
-            let vpsAndTargets = [b :> FsSegment; g; r; vpB; vpG; vpR]
+            let vpsAndTargets = [b :> FsSegmentBase; g; r; vpB; vpG; vpR]
             vpsAndTargets |> Seq.iter(fun seg -> seg.WireEvent(writer, onError) |> ignore)
 
             assert(vpsAndTargets |> Seq.forall(fun vp -> vp.Status = Status4.Ready));

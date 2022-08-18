@@ -39,8 +39,8 @@ module FsSegmentModule =
             this.PortS <- new PortInfoStart(cpu, this, $"StartPort_{segmentName}_{uid()}", this.TagStart, null, InternalName = "StartPort")
             this.PortR <- new PortInfoReset(cpu, this, $"ResetPort_{segmentName}_{uid()}", this.TagReset, null, InternalName = "ResetPort")
 
-        let mutable oldStatus:Status4 option = None
         default x.WireEvent(writer, onError) =
+            let mutable oldStatus:Status4 option = None
             let n = x.QualifiedName
             let write(bit, value, cause) =
                 writer(BitChange(bit, value, cause, onError))
@@ -76,4 +76,4 @@ module FsSegmentModule =
                         oldStatus <- Some state
                 )
 
-
+        //member val ProgressInfo:GraphProgressSupportUtil.ProgressInfo = null with get, set

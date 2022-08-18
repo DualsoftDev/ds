@@ -20,14 +20,14 @@ public static class Global
 {
     public static ILog Logger { get; set; }
     public static Subject<BitChange> RawBitChangedSubject { get; } = new();
-    public static IObservable<BitChange> BitChangedSubject { get; set; } = RawBitChangedSubject.Select(x => x);
-    public static IObservable<BitChange> PortChangedSubject { get; set; } = RawBitChangedSubject.Where(bc => bc.Bit is PortInfo);
-    public static IObservable<Tag> TagChangedSubject { get; set; } = RawBitChangedSubject.Where(bc => bc.Bit is Tag).Select(bc => bc.Bit as Tag);
+    public static IObservable<BitChange> BitChangedSubject => RawBitChangedSubject.Select(x => x);
+    public static IObservable<BitChange> PortChangedSubject => RawBitChangedSubject.Where(bc => bc.Bit is PortInfo);
+    public static IObservable<Tag> TagChangedSubject => RawBitChangedSubject.Where(bc => bc.Bit is Tag).Select(bc => bc.Bit as Tag);
 
     public static Subject<OpcTagChange> TagChangeToOpcServerSubject { get; } = new();
     public static Subject<OpcTagChange> TagChangeFromOpcServerSubject { get; } = new();
 
-    public static IObservable<long> TickSeconds { get; set; } = Observable.Interval(TimeSpan.FromSeconds(1));
+    public static IObservable<long> TickSeconds => Observable.Interval(TimeSpan.FromSeconds(1));
 
     public static bool IsInUnitTest { get; }
     static Global()

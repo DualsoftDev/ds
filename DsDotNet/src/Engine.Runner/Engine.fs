@@ -6,11 +6,13 @@ open System.Reactive.Disposables
 open System.Threading
 open System.Reactive.Linq
 open System.Collections.Generic
+open System.Runtime.CompilerServices
 
 open Dual.Common
 open Engine.Core
 open Engine.OPC
 open Engine.Common
+open Engine.Graph
 
 
 [<AutoOpen>]
@@ -36,7 +38,7 @@ module EngineModule =
     let private stopMonitorGoing seg = stopMonitor goingSubscriptions seg
     let private stopMonitorHoming seg = stopMonitor homingSubscriptions seg
 
-    let procReady(write:Writer, seg:SegmentBase) =
+    let private procReady(write:Writer, seg:SegmentBase) =
         stopMonitorHoming seg
         write(seg.Ready, true, null)
 
@@ -44,7 +46,7 @@ module EngineModule =
     ///     - child 가 하나라도 있으면, child 의 종료를 모니터링하기 위한 subscription 후, 최초 child group(init) 만 수행
     ///         * 이후, child 종료를 감지하면, 다음 실행할 child 계속 실행하고, 없으면 해당 segment 종료
     ///     - 없으면 바로 종료
-    let procGoing(write:Writer, seg:SegmentBase) =
+    let private procGoing(write:Writer, seg:SegmentBase) =
         assert( not <| homingSubscriptions.ContainsKey(seg))
         write(seg.Going, true, $"{seg.QualifiedName} GOING 시작")
         if seg.Children.Any() then
@@ -92,12 +94,12 @@ module EngineModule =
             write(seg.PortE, true, $"{seg.QualifiedName} GOING 끝")
 
 
-    let procFinish(write:Writer, seg:SegmentBase) =
+    let private procFinish(write:Writer, seg:SegmentBase) =
         stopMonitorGoing seg
         write(seg.Going, false, $"{seg.QualifiedName} FINISH")
         write(seg.TagEnd, true, $"Finishing {seg.QualifiedName}")
 
-    let procHoming(write:Writer, seg:SegmentBase) =
+    let private procHoming(write:Writer, seg:SegmentBase) =
         stopMonitorGoing seg
         // 자식 원위치 맞추기
         let childRxTags = seg.Children.selectMany(fun ch -> ch.TagsEnd).ToArray()
@@ -185,7 +187,6 @@ module EngineModule =
             logInfo "Start F# Engine running..."
             for cpu in cpus do
                 cpu.BuildBitDependencies()
-                //cpu.PrintTags()
 
                 logDebug "====================="
                 cpu.PrintAllTags(false);
@@ -226,3 +227,23 @@ module EngineModule =
                         logDebug $"Running cpus: {runningCpus}")
             while cpus.Any(fun cpu -> cpu.Running) do
                 Thread.Sleep(50)
+
+
+
+[<Extension>] // type Model =
+type EngineExt =
+    [<Extension>]
+    static member BuildGraphInfo(model:Model) =
+        
+        let rootFlows = model.Systems.selectMany(fun sys -> sys.RootFlows)
+        for flow in rootFlows do
+            flow.GraphInfo <- FsGraphInfo.AnalyzeFlows([flow], true);
+
+        for cpu in model.Cpus do
+            cpu.GraphInfo <- FsGraphInfo.AnalyzeFlows(cpu.RootFlows.Cast<Flow>(), true)
+
+        let segments = rootFlows.SelectMany(fun rf -> rf.RootSegments).Cast<Segment>()
+        for seg in segments do
+            seg.GraphInfo <- FsGraphInfo.AnalyzeFlows([seg], false)
+            let pi = new GraphProgressSupportUtil.ProgressInfo(seg.GraphInfo)
+            seg.ChildrenOrigin <- pi.ChildOrigin.ToArray();

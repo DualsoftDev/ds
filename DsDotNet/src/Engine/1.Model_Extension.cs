@@ -4,22 +4,22 @@ namespace Engine;
 
 public static class ModelExtension
 {
-    public static void BuidGraphInfo(this Model model)
-    {
-        var rootFlows = model.CollectRootFlows();
-        foreach (var flow in rootFlows)
-            flow.GraphInfo = FsGraphInfo.AnalyzeFlows(new[] { flow }, true);
+    //public static void BuidGraphInfo(this Model model)
+    //{
+    //    var rootFlows = model.CollectRootFlows();
+    //    foreach (var flow in rootFlows)
+    //        flow.GraphInfo = FsGraphInfo.AnalyzeFlows(new[] { flow }, true);
 
-        foreach (var cpu in model.Cpus)
-            cpu.GraphInfo = FsGraphInfo.AnalyzeFlows(cpu.RootFlows, true);
+    //    foreach (var cpu in model.Cpus)
+    //        cpu.GraphInfo = FsGraphInfo.AnalyzeFlows(cpu.RootFlows, true);
 
-        foreach (var segment in model.CollectSegments())
-        {
-            segment.GraphInfo = FsGraphInfo.AnalyzeFlows(new[] { segment }, false);
-            //var pi = new GraphProgressSupportUtil.ProgressInfo(segment.GraphInfo);
-            //segment.ChildrenOrigin = pi.ChildOrigin.ToArray();
-        }
-    }
+    //    foreach (var segment in model.CollectSegments())
+    //    {
+    //        segment.GraphInfo = FsGraphInfo.AnalyzeFlows(new[] { segment }, false);
+    //        //var pi = new GraphProgressSupportUtil.ProgressInfo(segment.GraphInfo);
+    //        //segment.ChildrenOrigin = pi.ChildOrigin.ToArray();
+    //    }
+    //}
     public static void Epilogue(this Model model)
     {
         foreach (var segment in model.CollectSegments())

@@ -261,8 +261,6 @@ public static class CpuExtensionQueueing
             foreach (var stem in stems)
                 addSubRelationship(stem);
         }
-        //var terminals = grp[false];
-
 
         var ffs = cpu.BitsMap.Values.OfType<FlipFlop>();
         foreach (var ff in ffs)

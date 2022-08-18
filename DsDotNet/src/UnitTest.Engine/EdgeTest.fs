@@ -4,6 +4,7 @@ namespace UnitTest.Engine
 open Xunit
 open Engine
 open Engine.Core
+open Engine.Runner
 open System.Linq
 open Dual.Common
 open Xunit.Abstractions
@@ -53,7 +54,7 @@ module EdgeTest =
             let main = rootFlow.Coins |> Enumerable.OfType<SegmentBase> |> Seq.find(fun seg -> seg.Name = "Main")
 
 
-            model.BuidGraphInfo();
+            model.BuildGraphInfo();
             builder.InitializeAllFlows()
 
             model.Epilogue()

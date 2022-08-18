@@ -20,7 +20,7 @@ public partial class EngineBuilder
         Cpu = Model.Cpus.First(cpu => cpu.Name == activeCpuName);
         Cpu.IsActive = true;
 
-        Model.BuidGraphInfo();
+        Model.BuildGraphInfo();
         InitializeAllFlows();
 
         Model.Epilogue();

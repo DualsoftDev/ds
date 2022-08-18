@@ -238,13 +238,13 @@ class Tester
         //    opc.Write("AutoStart_L_F_Main", true);
         //}
 
-        var resetTag = "ManualReset_L_F_Main";
+        var resetTag = "Reset_L_F_Main";
         if (engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(resetTag))
         {
             //opc.Write(resetTag, true);
             //opc.Write(resetTag, false);
-            opc.Write("ManualStart_L_F_Main", true);
-            opc.Write("AutoStart_L_F", true);
+            opc.Write("Start_L_F_Main", true);
+            opc.Write("Auto_L_F", true);
             //opc.Write(resetTag, true);
 
             //opc.Write("AutoStart_L_F_Main", true);

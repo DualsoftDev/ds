@@ -51,6 +51,47 @@ partial class EngineBuilder
         var flowsGrps = allRootFlows.GroupByToDictionary(flow => flow.Cpu);
         foreach (var (cpu, flows) in flowsGrps.Select(kv => kv.ToTuple()))
         {
+            var cpuTags = new HashSet<Tag>();
+            // rename flow/segment tags
+            foreach (var f in flows)
+            {
+                foreach(var seg in f.RootSegments)
+                {
+                    var q = seg.QualifiedName;
+                    foreach(var t in new[] { seg.TagStart, seg.TagReset, seg.TagEnd, })
+                    {
+                        cpuTags.Add(t);
+                        t.Name = $"{t.InternalName}_{q}";
+                    }
+                }
+                cpuTags.Add(f.Auto);
+                f.Auto.Name = $"Auto_{f.QualifiedName}";
+            }
+
+            Debug.Assert(cpuTags.ForAll(cpu.BitsMap.Values.Contains));
+            Debug.Assert(cpuTags.ForAll(cpu.TagsMap.Values.Contains));
+
+            var oldKeys = cpu.BitsMap.Where(kv => cpuTags.Contains(kv.Value)).Select(kv => kv.Key).ToArray();
+            foreach(var ok in oldKeys)
+            {
+                cpu.BitsMap.Remove(ok);
+                cpu.TagsMap.Remove(ok);
+            }
+
+            foreach(var t in cpuTags)
+            {
+                cpu.BitsMap.Add(t.Name, t);
+                cpu.TagsMap.Add(t.Name, t);
+            }
+
+            Opc.AddTags(cpuTags);
+
+            // rename CPU bits map
+
+
+
+
+
             //TagGenInfo[] tgis = CreateTags4Child(flows);
 
             //var tags = tgis.Select(tgi => tgi.GeneratedTag).ToArray();

@@ -43,7 +43,7 @@ public static class CpuExtensionQueueing
     }
     public static void Apply(this Cpu cpu, BitChange bitChange, bool withQueue)
     {
-        if (bitChange.Bit.GetName() == "L_F_Main_T.Ap_A_F_Vp_Start_TX")
+        if (bitChange.Bit.GetName() == "Start_A_F_Vp")
             Console.WriteLine();
 
         Global.Logger.Debug($"\t\t=[{cpu.NestingLevel}] Applying bitChange {bitChange}");   // {bitChange.Guid}
@@ -128,6 +128,17 @@ public static class CpuExtensionQueueing
         {
             var bit = (Bit)bitChange.Bit;
             //Global.Logger.Debug($"\t=({indent}) Applying bitchange {bitChange}");
+
+            // bit 가 나의 cpu 의 bit 가 아닌 경우, 타 cpu 에서 수행할 수 있도록 tag 변경을 공지.
+            // e.g.  Call 의 TX 에 해당하는 bit 변경은 Call 이 정의된 system 의 cpu 에서 처리한다.
+            if (! cpu.BitsMap.ContainsKey(bit.Name))
+            {
+                if (bit is Tag)
+                    Global.TagChangeToOpcServerSubject.OnNext(new OpcTagChange(bit.Name, bitChange.NewValue));
+                else
+                    throw new Exception("ERROR");
+            }
+
 
             var bitChanged = bitChange switch
             {

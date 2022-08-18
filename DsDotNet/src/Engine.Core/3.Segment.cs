@@ -19,8 +19,11 @@ public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, ITxRx
             _cpu = value;
         }
     }
-    public string QualifiedName => $"{ContainerFlow?.QualifiedName}_{Name}";
-
+    public string QualifiedName =>
+        (ContainerFlow == null)
+        ? Name
+        : $"{ContainerFlow.QualifiedName}_{Name}"
+        ;
 
     public PortInfoStart PortS { get; set; }
     public PortInfoReset PortR { get; set; }
@@ -57,23 +60,19 @@ public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, ITxRx
             containerFlow.AddChildVertex(seg);
             return seg;
         };
-    //private Segment(string name, RootFlow containerFlow)
-    //    : this(containerFlow.Cpu, name)
-    //{
-    //    ContainerFlow = containerFlow;
-    //    _cpu = ContainerFlow.Cpu;
-    //    //containerFlow.ChildVertices.Add(this);
-    //    containerFlow.AddChildVertex(this);
-    //}
 
-    internal Segment(Cpu cpu, string name)
+
+    internal Segment(Cpu cpu, string name, string startTagName=null, string resetTagName=null, string endTagName=null)
         : base(cpu, name)
     {
         _cpu = cpu;
         var uid = EmLinq.UniqueId;
-        TagStart = new Tag(cpu, this, $"Start_{name}_{uid()}", TagType.Q | TagType.Start);
-        TagReset = new Tag(cpu, this, $"Reset_{name}_{uid()}", TagType.Q | TagType.Reset);
-        TagEnd   = new Tag(cpu, this, $"End_{name}_{uid()}",   TagType.I | TagType.End);
+        var ns = startTagName ?? $"Start_{name}_{uid()}";
+        var nr = resetTagName ?? $"Reset_{name}_{uid()}";
+        var ne = endTagName   ?? $"End_{name}_{uid()}";
+        TagStart = new Tag(cpu, this, ns, TagType.Q | TagType.Start) { InternalName = "Start"};
+        TagReset = new Tag(cpu, this, nr, TagType.Q | TagType.Reset) { InternalName = "Reset" };
+        TagEnd   = new Tag(cpu, this, ne, TagType.I | TagType.End)   { InternalName = "End" };
     }
 
 
@@ -134,21 +133,6 @@ public static class SegmentExtension
         segment.Lasts = gi.Lasts.OfType<Child>().ToArray();
         segment.TraverseOrder = gi.TraverseOrders;
 
-
-
-        //// segment 내의 child call 에 대한 RX tag 변경 시, child origin 검사 및 child 의 status 변경 저장하도록 event handler 등록
-        //var endTags = segment.Children.SelectMany(c => c.TagsEnd).ToArray();
-        //var endTagNames = endTags.Select(t => t.Name).ToHashSet();
-
-        //var subs =
-        //    Global.BitChangedSubject
-        //        .Where(bc => bc.Bit is Tag && endTagNames.Contains(((Tag)bc.Bit).Name))
-        //        .Subscribe(bc =>
-        //        {
-        //            segment.OnChildEndTagChanged(bc);
-        //        });
-        //segment.Disposables.Add(subs);
-
         segment.PrintPortInfos();
     }
 
@@ -160,17 +144,6 @@ public static class SegmentExtension
         Global.Logger.Debug($"Tags for segment [{seg.QualifiedName}]:({s}, {r}, {e})");
     }
 
-    //public static IEnumerable<Tag> GetSRETags(this Segment segment)
-    //{
-    //    var s = segment;
-    //    foreach (var t in s.TagsStart)
-    //        yield return t;
-    //    foreach (var t in s.TagsReset)
-    //        yield return t;
-    //    foreach (var t in s.TagsEnd)
-    //        yield return t;
-    //}
-
     public static IEnumerable<PortInfo> GetAllPorts(this Segment segment)
     {
         var s = segment;
@@ -180,26 +153,16 @@ public static class SegmentExtension
     }
 
 
-    //public static IEnumerable<Tag> GetSREGRTags(this Segment segment)
-    //{
-    //    var s = segment;
-    //    foreach (var t in s.GetSRETags())
-    //        yield return t;
-
-    //    if (s.Going is not null)
-    //        yield return s.Going;
-    //    if (s.Ready is not null)
-    //        yield return s.Ready;
-    //}
-
     public static void CreateSREGR(this Segment segment, Cpu cpu, PortInfoStart sp, PortInfoReset rp, PortInfoEnd ep, Tag going, Tag ready)
     {
         var s = segment;
         var n = s.QualifiedName;
+        Debug.Assert((new object[] { s.PortS, s.PortR, s.PortE, s.Going, s.Ready, }).ForAll(b => b is null));
         s.PortS = sp ?? new PortInfoStart(cpu, s, $"PortInfoS_{n}", new Flag(cpu, $"PortSDefaultPlan_{n}"), null);
         s.PortR = rp ?? new PortInfoReset(cpu, s, $"PortInfoR_{n}", new Flag(cpu, $"PortRDefaultPlan_{n}"), null);
         s.PortE = ep ?? PortInfoEnd.Create(cpu, s, $"PortInfoE_{n}", null);
         s.Going = going ?? new Tag(cpu, s, $"Going_{n}", TagType.Going);
         s.Ready = ready ?? new Tag(cpu, s, $"Ready_{n}", TagType.Ready);
+
     }
 }

@@ -64,8 +64,6 @@ public class RootFlow : Flow
     }
 
     public Tag Auto { get; }
-    public Tag AutoStart { get; set; }
-    public Tag AutoReset { get; set; }
 
     public IEnumerable<Segment> RootSegments => ChildVertices.OfType<Segment>();
 

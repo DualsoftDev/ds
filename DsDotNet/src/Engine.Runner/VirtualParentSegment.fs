@@ -8,12 +8,16 @@ open System.Linq
 
 [<AutoOpen>]
 module VirtualParentSegmentModule =
-    type VirtualParentSegment(name, target:FsSegment, causalSourceSegments:FsSegment seq
+    type VirtualParentSegment(target:FsSegment, causalSourceSegments:FsSegment seq
         , startPort, resetPort, endPort
         , goingTag, readyTag
         , targetStartTag, targetResetTag               // target child 의 start port 에 가상 부모가 시작시킬 수 있는 start tag 추가 (targetStartTag)
     ) as this =
-        inherit FsSegment(target.Cpu, name) //, startPort, resetPort, endPort, goingTag, readyTag)
+        inherit FsSegment(target.Cpu, $"VPS_{target.QualifiedName}"
+            , $"VPS_{target.TagStart.Name}"
+            , $"VPS_{target.TagReset.Name}"
+            , $"VPS_{target.TagEnd.Name}"
+            ) //, startPort, resetPort, endPort, goingTag, readyTag)
 
         let cpu = target.Cpu
         let mutable oldStatus:Status4 option = None
@@ -32,8 +36,7 @@ module VirtualParentSegmentModule =
             , resetSourceSegments:FsSegment seq
         ) =
             let cpu = target.Cpu
-            let n = $"VPS_{target.Name}"
-
+            let n = $"VPS_{target.QualifiedName}"
             let readyTag = new Tag(cpu, null, $"{n}_Ready")
 
             let ep = PortInfoEnd.Create(cpu, null, $"End_{n}", null)
@@ -85,7 +88,7 @@ module VirtualParentSegmentModule =
                 PortInfoStart(cpu, null, $"Start_{n}", startPortInfoPlan, null)
 
 
-            let vps = VirtualParentSegment(n, target, causalSourceSegments, sp, rp, ep, null, readyTag, targetStartTag, targetResetTag)
+            let vps = VirtualParentSegment(target, causalSourceSegments, sp, rp, ep, null, readyTag, targetStartTag, targetResetTag)
             sp.Segment <- vps
             rp.Segment <- vps
             ep.Segment <- vps
@@ -103,24 +106,25 @@ module VirtualParentSegmentModule =
                     let notiVpsPortChange = [x.PortS :> IBit; x.PortR; x.PortE] |> Seq.contains(bc.Bit)
                     let notiTargetEndPortChange = bc.Bit = x.Target.PortE
                     let state = x.Status
+                    let n = x.QualifiedName
 
                     //if notiVpsPortChange || notiTargetEndPortChange then
                     //    noop()
 
                     if notiTargetEndPortChange then
                         if x.Going.Value && state <> Status4.Going then
-                            write(x.Going, false, $"{x.Name} going off by status {state}")
+                            write(x.Going, false, $"{n} going off by status {state}")
                         if x.Ready.Value && state <> Status4.Ready then
-                            write(x.Ready, false, $"{x.Name} ready off by status {state}")
+                            write(x.Ready, false, $"{n} ready off by status {state}")
 
                         let cause = $"${x.Target.Name} End Port={x.Target.PortE.Value}"
 
 
                         match state, on with
                         | Status4.Going, true ->
-                            write(targetStartTag, false, $"{x.Name} going 끝내기 by{cause}")
-                            write(x.Going, false, $"{x.Name} going 끝내기 by{cause}")
-                            write(x.PortE, true, $"{x.Name} FINISH 끝내기 by{cause}")
+                            write(targetStartTag, false, $"{n} going 끝내기 by{cause}")
+                            write(x.Going, false, $"{n} going 끝내기 by{cause}")
+                            write(x.PortE, true, $"{n} FINISH 끝내기 by{cause}")
                             
 
 
@@ -134,22 +138,22 @@ module VirtualParentSegmentModule =
                             logInfo $"외부에서 내부 target {x.Target.Name} 실행 감지"
 
                         | _ ->
-                            failwithlog $"Unknown: [{x.Name}]{state}: Target endport => {x.Target.Name}={on}"
+                            failwithlog $"Unknown: [{n}]{state}: Target endport => {x.Target.Name}={on}"
 
 
                     if notiVpsPortChange then
                         if oldStatus = Some state then
-                            logDebug $"\t\tVPS Skipping duplicate status: [{x.Name}] status : {state}"
+                            logDebug $"\t\tVPS Skipping duplicate status: [{n}] status : {state}"
                         else
                             oldStatus <- Some state
-                            logDebug $"[{x.Name}] Segment status : {state} by {bit.Name}={bit.Value}"
+                            logDebug $"[{n}] Segment status : {state} by {bit.Name}={bit.Value}"
                             let childStatus = x.Target.Status
 
                             match state with
                             | Status4.Ready    ->
                                 ()
                             | Status4.Going    ->
-                                write(x.Going, true, $"{name} GOING 시작")
+                                write(x.Going, true, $"{n} GOING 시작")
 
                                 assert(childStatus = Status4.Ready || cpu.ProcessingQueue);
                                 if childStatus = Status4.Ready then
@@ -168,8 +172,8 @@ module VirtualParentSegmentModule =
                                     } |> Async.Start
 
                             | Status4.Finished ->
-                                write(targetStartTag, false, $"{x.Name} FINISH 로 인한 {x.Target.Name} start 끄기")
-                                write(x.Going, false, "${x.Name} FINISH")
+                                write(targetStartTag, false, $"{n} FINISH 로 인한 {x.Target.Name} start 끄기")
+                                write(x.Going, false, "${n} FINISH")
                                 assert(x.PortE.Value)
                                 assert(x.PortR.Value = false)
 
@@ -177,7 +181,7 @@ module VirtualParentSegmentModule =
                                 if childStatus = Status4.Going then
                                     failwith $"Something bad happend?  trying to reset child while {x.Target.Name}={childStatus}"
 
-                                write(targetResetTag, true, $"{x.Name} HOMING 으로 인한 {x.Target.Name} reset 켜기")
+                                write(targetResetTag, true, $"{n} HOMING 으로 인한 {x.Target.Name} reset 켜기")
 
 
                             | _ ->

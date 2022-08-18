@@ -35,7 +35,7 @@ public static class ModelExtension
                 flow.ChildVertices.FirstOrDefault(v => v switch
                 {
                     RootCall call => call.Name == tokens[2],
-                    Segment seg => seg.Name == tokens[2],
+                    SegmentBase seg => seg.Name == tokens[2],
                     Child child => child.Name == tokens[2],
                     _ => throw new Exception("ERROR"),
                 });
@@ -46,7 +46,7 @@ public static class ModelExtension
             var grandsonName = String.Join(".", tokens.Skip(3));
             return unit switch
             {
-                Segment seg => seg.Children.FirstOrDefault(grandson => grandson.Name == grandsonName) as T,
+                SegmentBase seg => seg.Children.FirstOrDefault(grandson => grandson.Name == grandsonName) as T,
                 _ => throw new Exception("ERROR"),
             };
         }

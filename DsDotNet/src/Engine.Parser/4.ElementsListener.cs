@@ -46,7 +46,7 @@ partial class ElementsListener : dsBaseListener
     DsSystem _system    { get => ParserHelper._system;    set => ParserHelper._system = value; }
     DsTask   _task      { get => ParserHelper._task;      set => ParserHelper._task = value; }
     RootFlow _rootFlow  { get => ParserHelper._rootFlow;  set => ParserHelper._rootFlow = value; }
-    Segment  _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
+    SegmentBase  _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
 
     string CurrentPath => ParserHelper.CurrentPath;
     Dictionary<string, object> QpInstanceMap => ParserHelper.QualifiedInstancePathMap;
@@ -119,8 +119,8 @@ partial class ElementsListener : dsBaseListener
         var call = _task.CallPrototypes.First(c => c.Name == name);
 
         var callph = ctx.callPhrase();
-        var txs = ParserHelper.FindObjects<Segment>(callph.segments(0).GetText());
-        var rxs = ParserHelper.FindObjects<Segment>(callph.segments(1).GetText());
+        var txs = ParserHelper.FindObjects<SegmentBase>(callph.segments(0).GetText());
+        var rxs = ParserHelper.FindObjects<SegmentBase>(callph.segments(1).GetText());
         call.TXs.AddRange(txs);
         call.RXs.AddRange(rxs);
         //Trace.WriteLine($"Call: {name} = {txs.Select(tx => tx.Name)} ~ {rx?.Name}");
@@ -129,7 +129,7 @@ partial class ElementsListener : dsBaseListener
 
     override public void EnterParenting(dsParser.ParentingContext ctx) {
         var name = ctx.id().GetText();
-        _parenting = (Segment)QpInstanceMap[$"{CurrentPath}.{name}"];
+        _parenting = (SegmentBase)QpInstanceMap[$"{CurrentPath}.{name}"];
     }
     override public void ExitParenting(dsParser.ParentingContext ctx) { _parenting = null; }
 
@@ -204,7 +204,7 @@ partial class ElementsListener : dsBaseListener
                         subCall.ContainerChild = child;
                         QpInstanceMap.Add(fqdn, child);
                         break;
-                    case Segment exSeg:
+                    case SegmentBase exSeg:
                         var exCall = new ExSegmentCall(name, exSeg);
                         child = new Child(exCall, _parenting) { IsAlias = isAlias };
                         exCall.ContainerChild = child;
@@ -282,7 +282,7 @@ partial class ElementsListener : dsBaseListener
         foreach (var addrDef in addressDefs)
         {
             var segPath = addrDef.segmentPath().GetText();            
-            var seg = (Segment)QpInstanceMap[segPath];
+            var seg = (SegmentBase)QpInstanceMap[segPath];
             var sre = addrDef.address();
             var (s, r, e) = (sre.startTag()?.GetText(), sre.resetTag()?.GetText(), sre.endTag()?.GetText());
 

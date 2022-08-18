@@ -14,7 +14,7 @@ module FsSegmentModule =
     
     [<AbstractClass>]
     type FsSegmentBase(cpu, segmentName, startTagName, resetTagName, endTagName) =
-        inherit Segment(cpu, segmentName, startTagName, resetTagName, endTagName)
+        inherit SegmentBase(cpu, segmentName, startTagName, resetTagName, endTagName)
     
         //new(cpu, segmentName) = FsSegment(cpu, segmentName, true, null, null, null)
         abstract member WireEvent:ChangeWriter*ExceptionHandler->IDisposable

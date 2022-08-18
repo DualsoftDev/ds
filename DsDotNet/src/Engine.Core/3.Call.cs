@@ -39,7 +39,7 @@ public class CallPrototype : CallBase
             {
                 switch (rx)
                 {
-                    case Segment seg: return seg.TagEnd.Value;
+                    case SegmentBase seg: return seg.TagEnd.Value;
                     case IBit bit: return bit.Value;   // todo TAG 아닌 경우 처리 필요함.
                 }
                 throw new Exception("Unknown type ERROR");
@@ -128,10 +128,10 @@ public class RootCall : Call
 [DebuggerDisplay("[{ToText()}]")]
 public class ExSegmentCall: Coin
 {
-    public Segment ExternalSegment;
+    public SegmentBase ExternalSegment;
     public Child ContainerChild { get; set; }
 
-    public ExSegmentCall(string aliasName, Segment externalSegment)
+    public ExSegmentCall(string aliasName, SegmentBase externalSegment)
         : base(aliasName)
     {
         ExternalSegment = externalSegment;
@@ -158,7 +158,7 @@ public static class CallExtension
                 var rootFlow = rootCall.Container;
                 var system = rootFlow.GetSystem();
                 return $"{system.Name}.{rootFlow.Name}.{rootCall.Name}";
-            case Segment rootSegment:
+            case SegmentBase rootSegment:
                 return rootSegment.QualifiedName;
 
             case Child child:
@@ -167,7 +167,7 @@ public static class CallExtension
             case Call call:
                 return call.Container switch
                 {
-                    Segment seg   => $"{seg.QualifiedName}_{call.Name}",
+                    SegmentBase seg   => $"{seg.QualifiedName}_{call.Name}",
                     RootFlow flow => $"{flow.QualifiedName}_{call.Name}",
                     _             => throw new Exception("ERROR"),
                 };

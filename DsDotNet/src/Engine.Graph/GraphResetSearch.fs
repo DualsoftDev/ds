@@ -33,7 +33,7 @@ module GraphResetSearch =
 
     let findGraphIncludeSource(rSrc:IVertex) =
         match rSrc with
-        | :? Segment as s ->
+        | :? SegmentBase as s ->
             checkSourceInGraph s.ContainerFlow rSrc
         | :? Call as c ->
             checkSourceInGraph c.Container rSrc
@@ -46,7 +46,7 @@ module GraphResetSearch =
 
         targetSegs
         |> Seq.map(fun ts ->
-            getIncomingEdges (getAdjacencyGraphFromEdge (ts:?>Segment).ContainerFlow.Edges) ts
+            getIncomingEdges (getAdjacencyGraphFromEdge (ts:?>SegmentBase).ContainerFlow.Edges) ts
         )
         |> Seq.map(fun es ->
             es

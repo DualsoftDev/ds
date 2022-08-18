@@ -3,7 +3,7 @@ namespace Engine.Core;
 using System.Threading;
 
 [DebuggerDisplay("{ToText(),nq}")]
-public abstract partial class Segment : ChildFlow, IVertex, ICoin, IWallet, ITxRx
+public abstract partial class SegmentBase : ChildFlow, IVertex, ICoin, IWallet, ITxRx
 {
     public RootFlow ContainerFlow { get; internal set; }
     Cpu _cpu;
@@ -49,7 +49,7 @@ public abstract partial class Segment : ChildFlow, IVertex, ICoin, IWallet, ITxR
 
 
     /// <summary>Segment 생성 함수.  Segment 에서 상속받은 class 객체를 생성하기 위함. (e.g Engine.Runner.FsSegment)</summary>
-    public static Func<string, RootFlow, Segment> Create { get; set; } =
+    public static Func<string, RootFlow, SegmentBase> Create { get; set; } =
         (string name, RootFlow containerFlow) =>
         {
             Debug.Assert(false);        // should be overriden
@@ -59,7 +59,7 @@ public abstract partial class Segment : ChildFlow, IVertex, ICoin, IWallet, ITxR
         };
 
 
-    internal Segment(Cpu cpu, string name, string startTagName=null, string resetTagName=null, string endTagName=null)
+    internal SegmentBase(Cpu cpu, string name, string startTagName=null, string resetTagName=null, string endTagName=null)
         : base(cpu, name)
     {
         _cpu = cpu;
@@ -90,7 +90,7 @@ public abstract partial class Segment : ChildFlow, IVertex, ICoin, IWallet, ITxR
     }
 }
 
-class DummySegment: Segment
+class DummySegment: SegmentBase
 {
     public DummySegment(Cpu cpu, string name, string startTagName=null, string resetTagName=null, string endTagName=null)
         : base(cpu, name, startTagName, resetTagName, endTagName)
@@ -101,24 +101,24 @@ class DummySegment: Segment
 
 public static class SegmentExtension
 {
-    public static void CancelGoing(this Segment segment)
+    public static void CancelGoing(this SegmentBase segment)
     {
         segment.MovingCancellationTokenSource.Cancel();
         segment.MovingCancellationTokenSource = null;
     }
-    public static void CancelHoming(this Segment segment)
+    public static void CancelHoming(this SegmentBase segment)
     {
         segment.MovingCancellationTokenSource.Cancel();
         segment.MovingCancellationTokenSource = null;
     }
 
-    public static bool IsChildrenStatusAllWith(this Segment segment, Status4 status) =>
+    public static bool IsChildrenStatusAllWith(this SegmentBase segment, Status4 status) =>
         segment.ChildStatusMap.Values.Select(tpl => tpl.Item2).All(st => st == status);
-    public static bool IsChildrenStatusAnyWith(this Segment segment, Status4 status) =>
+    public static bool IsChildrenStatusAnyWith(this SegmentBase segment, Status4 status) =>
         segment.ChildStatusMap.Values.Select(tpl => tpl.Item2).Any(st => st == status);
 
 
-    public static void Epilogue(this Segment segment)
+    public static void Epilogue(this SegmentBase segment)
     {
         // child 의 최초 상태 등록 : null (vs Homing?)
         segment.ChildStatusMap =
@@ -135,7 +135,7 @@ public static class SegmentExtension
         segment.PrintPortInfos();
     }
 
-    public static void PrintPortInfos(this Segment seg)
+    public static void PrintPortInfos(this SegmentBase seg)
     {
         var s = seg.TagStart?.Name;
         var r = seg.TagReset?.Name;
@@ -143,7 +143,7 @@ public static class SegmentExtension
         Global.Logger.Debug($"Tags for segment [{seg.QualifiedName}]:({s}, {r}, {e})");
     }
 
-    public static IEnumerable<PortInfo> GetAllPorts(this Segment segment)
+    public static IEnumerable<PortInfo> GetAllPorts(this SegmentBase segment)
     {
         var s = segment;
         yield return s.PortS;
@@ -152,7 +152,7 @@ public static class SegmentExtension
     }
 
 
-    public static void CreateSREGR(this Segment segment, Cpu cpu, PortInfoStart sp, PortInfoReset rp, PortInfoEnd ep, Tag going, Tag ready)
+    public static void CreateSREGR(this SegmentBase segment, Cpu cpu, PortInfoStart sp, PortInfoReset rp, PortInfoEnd ep, Tag going, Tag ready)
     {
         var s = segment;
         var n = s.QualifiedName;

@@ -23,7 +23,7 @@ public class ParserHelper
     internal DsSystem _system;
     internal DsTask _task;
     internal RootFlow _rootFlow;
-    internal Segment _parenting;
+    internal SegmentBase _parenting;
 
     internal Dictionary<string, Cpu> FlowName2CpuMap;
 

@@ -15,9 +15,9 @@ module RGFHModule =
     type Writer = IBit*bool*obj -> unit
 
     /// Segment 별로 Going 중에 child 의 종료 모니터링.  segment 가 Going 이 아니게 되면, dispose
-    let private goingSubscriptions = Dictionary<Segment, IDisposable>()
-    let private homingSubscriptions = Dictionary<Segment, IDisposable>()
-    let private stopMonitor (subscriptions:Dictionary<Segment, IDisposable>) (seg:Segment) =
+    let private goingSubscriptions = Dictionary<SegmentBase, IDisposable>()
+    let private homingSubscriptions = Dictionary<SegmentBase, IDisposable>()
+    let private stopMonitor (subscriptions:Dictionary<SegmentBase, IDisposable>) (seg:SegmentBase) =
         if subscriptions.ContainsKey(seg) then
             let subs = subscriptions[seg]
             subscriptions.Remove(seg) |> ignore
@@ -26,7 +26,7 @@ module RGFHModule =
     let private stopMonitorHoming seg = stopMonitor homingSubscriptions seg
 
 
-    let doReady(write:Writer, seg:Segment) =
+    let doReady(write:Writer, seg:SegmentBase) =
         stopMonitorHoming seg
         write(seg.Ready, true, null)
 
@@ -34,7 +34,7 @@ module RGFHModule =
     ///     - child 가 하나라도 있으면, child 의 종료를 모니터링하기 위한 subscription 후, 최초 child group(init) 만 수행
     ///         * 이후, child 종료를 감지하면, 다음 실행할 child 계속 실행하고, 없으면 해당 segment 종료
     ///     - 없으면 바로 종료
-    let doGoing(write:Writer, seg:Segment) =
+    let doGoing(write:Writer, seg:SegmentBase) =
         assert( not <| homingSubscriptions.ContainsKey(seg))
         write(seg.Going, true, $"{seg.QualifiedName} GOING 시작")
         if seg.Children.Any() then
@@ -81,12 +81,12 @@ module RGFHModule =
             write(seg.PortE, true, $"{seg.QualifiedName} GOING 끝")
 
 
-    let doFinish(write:Writer, seg:Segment) =
+    let doFinish(write:Writer, seg:SegmentBase) =
         stopMonitorGoing seg
         write(seg.Going, false, $"{seg.QualifiedName} FINISH")
         write(seg.TagEnd, true, $"Finishing {seg.QualifiedName}")
 
-    let doHoming(write:Writer, seg:Segment) =
+    let doHoming(write:Writer, seg:SegmentBase) =
         stopMonitorGoing seg
         // 자식 원위치 맞추기
         let childRxTags = seg.Children.selectMany(fun ch -> ch.TagsEnd).ToArray()

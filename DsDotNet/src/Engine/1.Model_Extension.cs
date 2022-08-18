@@ -36,7 +36,7 @@ public static class ModelExtension
         var allFlows = rootFlows.Cast<Flow>().Concat(subFlows);
         return allFlows;
     }
-    public static IEnumerable<Segment> CollectSegments(this Model model) =>
+    public static IEnumerable<SegmentBase> CollectSegments(this Model model) =>
         model.CollectRootFlows().SelectMany(rf => rf.RootSegments)
         ;
 }

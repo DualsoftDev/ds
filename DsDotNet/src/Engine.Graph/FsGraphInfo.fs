@@ -36,7 +36,7 @@ type FsGraphInfo(flows:Flow seq, isRootFlow:bool) =
                     true
                 | _ ->
                     false
-            | :? Segment ->
+            | :? SegmentBase ->
                 false
             | :? Call ->
                 true

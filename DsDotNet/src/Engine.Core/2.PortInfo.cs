@@ -4,7 +4,7 @@ namespace Engine.Core;
 /// <summary> 정보(Plan) + 물리(Actual) </summary>
 public abstract class PortInfo : BitReEvaluatable, IBitWritable
 {
-    protected PortInfo(Cpu cpu, Segment segment, string name, IBit plan, Tag actual)
+    protected PortInfo(Cpu cpu, SegmentBase segment, string name, IBit plan, Tag actual)
         : base(cpu, name, plan, actual)
     {
         Plan = plan;
@@ -12,7 +12,7 @@ public abstract class PortInfo : BitReEvaluatable, IBitWritable
         Segment = segment;
     }
 
-    public Segment Segment { get; set; }
+    public SegmentBase Segment { get; set; }
     public string QualifiedName => $"{Segment.QualifiedName}_{GetType().Name}";
     /// <summary> 내부 추적용 Tag 이름 : QualifiedName + 기능명.  e.g "L.F.Main.AutoStart.  사용자가 지정하는 이름과는 별개 </summary>
     public string InternalName { get; set; }
@@ -44,7 +44,7 @@ public abstract class PortInfo : BitReEvaluatable, IBitWritable
 /// <summary> 지시(Start or Reset) 용 정보(Plan) + 물리(Actual) </summary>
 public abstract class PortInfoCommand : PortInfo
 {
-    protected PortInfoCommand(Cpu cpu, Segment segment, string name, IBit plan, Tag actual)
+    protected PortInfoCommand(Cpu cpu, SegmentBase segment, string name, IBit plan, Tag actual)
         : base(cpu, segment, name, plan, actual)
     {
     }
@@ -73,7 +73,7 @@ public abstract class PortInfoCommand : PortInfo
 /// <summary> Start 명령용 정보(Plan) + 물리(Actual) </summary>
 public class PortInfoStart : PortInfoCommand
 {
-    public PortInfoStart(Cpu cpu, Segment segment, string name, IBit plan, Tag actual)
+    public PortInfoStart(Cpu cpu, SegmentBase segment, string name, IBit plan, Tag actual)
         : base(cpu, segment, name, plan, actual)
     {
     }
@@ -81,7 +81,7 @@ public class PortInfoStart : PortInfoCommand
 /// <summary> Reset 명령용 정보(Plan) + 물리(Actual) </summary>
 public class PortInfoReset : PortInfoCommand
 {
-    public PortInfoReset(Cpu cpu, Segment segment, string name, IBit plan, Tag actual)
+    public PortInfoReset(Cpu cpu, SegmentBase segment, string name, IBit plan, Tag actual)
         : base(cpu, segment, name, plan, actual)
     {
     }
@@ -90,7 +90,7 @@ public class PortInfoReset : PortInfoCommand
 /// <summary> 관찰용 정보(Plan) + 물리(Actual) </summary>
 public class PortInfoEnd : PortInfo
 {
-    private PortInfoEnd(Cpu cpu, Segment segment, string name, IBitWritable plan, Tag actual)
+    private PortInfoEnd(Cpu cpu, SegmentBase segment, string name, IBitWritable plan, Tag actual)
         : base(cpu, segment, name, plan, actual)
     {
         if (Actual == null || (!Plan.Value && !Actual.Value))
@@ -103,7 +103,7 @@ public class PortInfoEnd : PortInfo
     // End port expression 은 plan 으로 외부에서 따로 지정할 수 없고,
     // 내부에서 해당 값을 설정할 수 있어야 하므로 (Segment Finish 나 Homing 완료시 ON/OFF 시켜야 함)
     // 외부에서 받지 않고, 내부에서 생성해서 관리한다.
-    public static PortInfoEnd Create(Cpu cpu, Segment segment, string name, Tag actual)
+    public static PortInfoEnd Create(Cpu cpu, SegmentBase segment, string name, Tag actual)
     {
         var plan = new Flag(cpu, $"{name}_Plan");
         return new PortInfoEnd(cpu, segment, name, plan, actual);

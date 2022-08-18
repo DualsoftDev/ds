@@ -1,6 +1,6 @@
 namespace Engine.Core;
 
-partial class Segment
+partial class SegmentBase
 {
     /*
       ----------------------

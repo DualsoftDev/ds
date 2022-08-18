@@ -271,7 +271,7 @@ class Tester
 
         {
             var cds = engine.Cpu.RootFlows.SelectMany(f => f.ChildVertices);
-            var m = cds.OfType<Segment>().FirstOrDefault(c => c.Name == "Main");
+            var m = cds.OfType<SegmentBase>().FirstOrDefault(c => c.Name == "Main");
 
             // test origin
             Stopwatch stopwatch = new Stopwatch();
@@ -528,7 +528,7 @@ class Tester
         engine.Run();
 
         var cds = engine.Cpu.RootFlows.SelectMany(f => f.ChildVertices);
-        var m = cds.OfType<Segment>().FirstOrDefault(c => c.Name == "tester");
+        var m = cds.OfType<SegmentBase>().FirstOrDefault(c => c.Name == "tester");
         Console.WriteLine(m.Name);
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();

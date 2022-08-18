@@ -63,7 +63,7 @@ module ModelTest2 =
             let flowCallChildrenNames = flow.ChildVertices |> Enumerable.OfType<RootCall> |> Seq.map(fun c -> c.Name)
             (flowCallChildrenNames, ["T.Cm"; "T.Cp"]) |> setEq
 
-            let main = flow.Coins |> Enumerable.OfType<Segment> |> Seq.find(fun seg -> seg.Name = "Main")
+            let main = flow.Coins |> Enumerable.OfType<SegmentBase> |> Seq.find(fun seg -> seg.Name = "Main")
             main.Name === "Main"
             let mainChildrenNames = main.ChildVertices |> Enumerable.OfType<Child> |> Seq.map(fun soc -> soc.Name)
             (mainChildrenNames, ["Cp2"; "Cm2"]) |> setEq
@@ -116,7 +116,7 @@ module ModelTest2 =
 
             flow.ChildVertices.Count() === 2
             flow.Coins.Count() === 2
-            let mains = flow.ChildVertices |> Enumerable.OfType<Segment> |> Array.ofSeq
+            let mains = flow.ChildVertices |> Enumerable.OfType<SegmentBase> |> Array.ofSeq
             let mainNames = mains |> Seq.map(fun c -> c.Name)
             (mainNames, ["Main1"; "Main2"]) |> setEq
 
@@ -188,7 +188,7 @@ module ModelTest2 =
             let ``check call tag with real segment`` =
                 let systemP = builder.Model.Systems |> Seq.find(fun s -> s.Name = "P")
                 let flowP = systemP.RootFlows |> Seq.exactlyOne
-                let vp = flowP.ChildVertices |> Seq.ofType<Segment> |> Seq.find(fun s -> s.Name = "Vp")
+                let vp = flowP.ChildVertices |> Seq.ofType<SegmentBase> |> Seq.find(fun s -> s.Name = "Vp")
                 let cpStart = main1Cp.TagsStart |> Seq.exactlyOne
                 cpStart.Name === "Start_P_F_Vp"
                 cpStart.Name === vp.TagStart.Name
@@ -210,15 +210,15 @@ module ModelTest2 =
 
                 let cpEnd = main1Cp.TagsEnd |> Seq.exactlyOne
                 cpEnd.Name === "End_P_F_Sp"
-                let sp = flowP.ChildVertices |> Seq.ofType<Segment> |> Seq.find(fun s -> s.Name = "Sp")
+                let sp = flowP.ChildVertices |> Seq.ofType<SegmentBase> |> Seq.find(fun s -> s.Name = "Sp")
                 cpEnd.Name === sp.TagEnd.Name
                 //cpEnd =!= spEnd
 
 
                 let ``check main1`` =
                     // Call 이 실제 사용하는 외부 시스템의 real segment 를 찾아서, 해당 segment 의 tag 가 존재하는 지 검사.
-                    let segMain1CpTx = (main1Cp.Coin :?> SubCall).Prototype.TXs |> Enumerable.OfType<Segment> |> Seq.exactlyOne
-                    let segMain1CpRx = (main1Cp.Coin :?> SubCall).Prototype.RXs |> Enumerable.OfType<Segment> |> Seq.exactlyOne
+                    let segMain1CpTx = (main1Cp.Coin :?> SubCall).Prototype.TXs |> Enumerable.OfType<SegmentBase> |> Seq.exactlyOne
+                    let segMain1CpRx = (main1Cp.Coin :?> SubCall).Prototype.RXs |> Enumerable.OfType<SegmentBase> |> Seq.exactlyOne
 
                     segMain1CpTx.QualifiedName === "P_F_Vp"
                     segMain1CpRx.QualifiedName === "P_F_Sp"
@@ -230,8 +230,8 @@ module ModelTest2 =
                     cpEnd === cpEnd_
 
 
-                    let segMain1CmTx = (main1Cm.Coin :?> SubCall).Prototype.TXs |> Enumerable.OfType<Segment> |> Seq.exactlyOne
-                    let segMain1CmRx = (main1Cm.Coin :?> SubCall).Prototype.RXs |> Enumerable.OfType<Segment> |> Seq.exactlyOne
+                    let segMain1CmTx = (main1Cm.Coin :?> SubCall).Prototype.TXs |> Enumerable.OfType<SegmentBase> |> Seq.exactlyOne
+                    let segMain1CmRx = (main1Cm.Coin :?> SubCall).Prototype.RXs |> Enumerable.OfType<SegmentBase> |> Seq.exactlyOne
 
                     segMain1CmTx.QualifiedName === "P_F_Vm"
                     segMain1CmRx.QualifiedName === "P_F_Sm"
@@ -245,8 +245,8 @@ module ModelTest2 =
 
                 let ``check main2`` =
                     // Call 이 실제 사용하는 외부 시스템의 real segment 를 찾아서, 해당 segment 의 tag 가 존재하는 지 검사.
-                    let segMain2CpTx = (main2Cp.Coin :?> SubCall).Prototype.TXs |> Enumerable.OfType<Segment> |> Seq.exactlyOne
-                    let segMain2CpRx = (main2Cp.Coin :?> SubCall).Prototype.RXs |> Enumerable.OfType<Segment> |> Seq.exactlyOne
+                    let segMain2CpTx = (main2Cp.Coin :?> SubCall).Prototype.TXs |> Enumerable.OfType<SegmentBase> |> Seq.exactlyOne
+                    let segMain2CpRx = (main2Cp.Coin :?> SubCall).Prototype.RXs |> Enumerable.OfType<SegmentBase> |> Seq.exactlyOne
 
                     segMain2CpTx.QualifiedName === "P_F_Vp"
                     segMain2CpRx.QualifiedName === "P_F_Sp"
@@ -258,8 +258,8 @@ module ModelTest2 =
                     cpEnd === cpEnd_
 
 
-                    let segMain2CmTx = (main2Cm.Coin :?> SubCall).Prototype.TXs |> Enumerable.OfType<Segment> |> Seq.exactlyOne
-                    let segMain2CmRx = (main2Cm.Coin :?> SubCall).Prototype.RXs |> Enumerable.OfType<Segment> |> Seq.exactlyOne
+                    let segMain2CmTx = (main2Cm.Coin :?> SubCall).Prototype.TXs |> Enumerable.OfType<SegmentBase> |> Seq.exactlyOne
+                    let segMain2CmRx = (main2Cm.Coin :?> SubCall).Prototype.RXs |> Enumerable.OfType<SegmentBase> |> Seq.exactlyOne
 
                     segMain2CmTx.QualifiedName === "P_F_Vm"
                     segMain2CmRx.QualifiedName === "P_F_Sm"
@@ -315,9 +315,9 @@ module ModelTest2 =
 
                 let f = model.FindObject<RootFlow>("L.F");
                 f.Name === "F"
-                let main1 = model.FindObject<Segment>("L.F.Main1");
+                let main1 = model.FindObject<SegmentBase>("L.F.Main1");
                 main1.Name === "Main1"
-                let main2 = model.FindObject<Segment>("L.F.Main2");
+                let main2 = model.FindObject<SegmentBase>("L.F.Main2");
                 main2.Name === "Main2"
 
                 let main1CallInstanceCp = model.FindObject<Child>("L.F.Main1.T.Cp");
@@ -325,7 +325,7 @@ module ModelTest2 =
                 main1CallInstanceCp.QualifiedName === "L_F_Main1_T.Cp"
 
             let ``call site tag <--> real segment tag`` =
-                let vp = model.FindObject<Segment>("P.F.Vp");
+                let vp = model.FindObject<SegmentBase>("P.F.Vp");
                 vp.Name === "Vp"
 
                 let cp = model.FindObject<Child>("L.F.Main1.T.Cp");
@@ -335,11 +335,11 @@ module ModelTest2 =
                 cpStart === vpStart
                 cpStart.Cpu === vpStart.Owner.Cpu
 
-                let pp = model.FindObject<Segment>("P.F.Pp");
+                let pp = model.FindObject<SegmentBase>("P.F.Pp");
                 pp.Name === "Pp"
 
 
-                let sp = model.FindObject<Segment>("P.F.Sp");
+                let sp = model.FindObject<SegmentBase>("P.F.Sp");
                 sp.Name === "Sp"
                 let cpEnd = cp.TagsEnd |> Seq.exactlyOne
                 cpEnd.Name === sp.TagEnd.Name

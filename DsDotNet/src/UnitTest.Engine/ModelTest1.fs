@@ -34,8 +34,8 @@ module ModelTests1 =
             system.Name === "P"
             let flow = system.RootFlows |> Seq.exactlyOne
             flow.Name === "F"
-            let children = flow.Coins |> Enumerable.OfType<Segment>
-            let childrenNames = children |> Seq.map(fun (seg:Segment) -> seg.Name)
+            let children = flow.Coins |> Enumerable.OfType<SegmentBase>
+            let childrenNames = children |> Seq.map(fun (seg:SegmentBase) -> seg.Name)
             (childrenNames, ["Vp"; "Pp"; "Sp"; "Vm"; "Pm"; "Sm"]) |> seqEq
 
             children
@@ -91,7 +91,7 @@ module ModelTests1 =
 
             let checkC22Proto_ =
                 let c22 = callProtos.["C22"]
-                let txs = c22.TXs.OfType<Segment>()
+                let txs = c22.TXs.OfType<SegmentBase>()
                 (txs |> Seq.map(fun tx -> tx.Name), ["Vp"; "Vm"]) |> setEq
 
 
@@ -99,7 +99,7 @@ module ModelTests1 =
             system.Name === "L"
             let flow = system.RootFlows |> Seq.exactlyOne
             flow.Name === "F"
-            let main = flow.Coins |> Enumerable.OfType<Segment> |> Seq.find(fun seg -> seg.Name = "Main")
+            let main = flow.Coins |> Enumerable.OfType<SegmentBase> |> Seq.find(fun seg -> seg.Name = "Main")
             main.Name === "Main"
             let childrenNames = main.ChildVertices |> Enumerable.OfType<Child> |> Seq.map(fun soc -> soc.Name)
             (childrenNames, ["T.Cp"; "T.Cm"; "T.C22"]) |> setEq
@@ -143,7 +143,7 @@ module ModelTests1 =
             system.Name === "L"
             let flow = system.RootFlows |> Seq.exactlyOne
             flow.Name === "F"
-            let main = flow.Coins |> Enumerable.OfType<Segment> |> Seq.find(fun seg -> seg.Name = "Main")
+            let main = flow.Coins |> Enumerable.OfType<SegmentBase> |> Seq.find(fun seg -> seg.Name = "Main")
             main.Name === "Main"
             let childrenNames = main.ChildVertices |> Enumerable.OfType<Child> |> Seq.map(fun soc -> soc.Name)
             (childrenNames, ["P.F.Vp"; "P.F.Vm";]) |> setEq
@@ -178,7 +178,7 @@ module ModelTests1 =
             system.Name === "L"
             let flow = system.RootFlows |> Seq.exactlyOne
             flow.Name === "F"
-            let main = flow.Coins |> Enumerable.OfType<Segment> |> Seq.find(fun seg -> seg.Name = "Main")
+            let main = flow.Coins |> Enumerable.OfType<SegmentBase> |> Seq.find(fun seg -> seg.Name = "Main")
             main.Name === "Main"
             let childrenNames = main.ChildVertices |> Enumerable.OfType<Child> |> Seq.map(fun soc -> soc.Name)
             (childrenNames, ["Vp1"; "Vp2"; "A1"]) |> setEq

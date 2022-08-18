@@ -6,7 +6,7 @@ namespace Engine.Core;
 [DebuggerDisplay("{ToText()}")]
 public class Child : Named, IVertex, ICoin
 {
-    public Segment Parent { get; }
+    public SegmentBase Parent { get; }
     /// <summary>Call or ExSegmentCall</summary>
     public Coin Coin { get; }
     public bool IsCall => Coin is SubCall;
@@ -33,7 +33,7 @@ public class Child : Named, IVertex, ICoin
 
 
     CompositeDisposable _disposables = new();
-    public Child(Coin coin, Segment parent)
+    public Child(Coin coin, SegmentBase parent)
         :base(coin.Name)
     {
         Parent = parent;
@@ -44,7 +44,7 @@ public class Child : Named, IVertex, ICoin
         Tag getTags(ITxRx x, bool tx) =>
             x switch
             {
-                Segment seg => tx ? seg.TagStart : seg.TagEnd,
+                SegmentBase seg => tx ? seg.TagStart : seg.TagEnd,
                 Tag tag => tag,
                 _ => throw new Exception("ERROR")
             };

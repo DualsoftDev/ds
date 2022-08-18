@@ -23,7 +23,7 @@ class SkeletonListener : dsBaseListener
     DsSystem _system { get => ParserHelper._system; set => ParserHelper._system = value; }
     DsTask _task { get => ParserHelper._task; set => ParserHelper._task = value; }
     RootFlow _rootFlow { get => ParserHelper._rootFlow; set => ParserHelper._rootFlow = value; }
-    Segment _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
+    SegmentBase _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
     /// <summary> Qualified Path Map </summary>
     Dictionary<string, object> QpInstanceMap => ParserHelper.QualifiedInstancePathMap;
     Dictionary<string, object> QpDefinitionMap => ParserHelper.QualifiedDefinitionPathMap;
@@ -124,7 +124,7 @@ class SkeletonListener : dsBaseListener
     override public void EnterListing(dsParser.ListingContext ctx)
     {
         var name = ctx.id().GetText();
-        var seg = Segment.Create(name, _rootFlow);
+        var seg = SegmentBase.Create(name, _rootFlow);
         QpDefinitionMap.Add($"{CurrentPath}.{name}", seg);
         QpInstanceMap.Add($"{CurrentPath}.{name}", seg);
     }
@@ -134,7 +134,7 @@ class SkeletonListener : dsBaseListener
     {
         Trace.WriteLine($"Parenting: {ctx.GetText()}");
         var name = ctx.id().GetText();
-        _parenting = Segment.Create(name, _rootFlow);
+        _parenting = SegmentBase.Create(name, _rootFlow);
         QpInstanceMap.Add(CurrentPath, _parenting);
     }
     override public void ExitParenting(dsParser.ParentingContext ctx) { _parenting = null; }

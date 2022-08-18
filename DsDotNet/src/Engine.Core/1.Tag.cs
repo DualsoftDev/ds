@@ -57,10 +57,10 @@ public class Tag : Bit, IBitReadWritable, ITxRx
     {
     }
 
-    public static Tag CreateAutoStart(Cpu ownerCpu, Segment ownerSegment, string name, string internalName) =>
+    public static Tag CreateAutoStart(Cpu ownerCpu, SegmentBase ownerSegment, string name, string internalName) =>
         new Tag(ownerCpu, ownerSegment, name, TagType.Auto | TagType.Start | TagType.Q | TagType.External) { InternalName = internalName }
         ;
-    public static Tag CreateAutoReset(Cpu ownerCpu, Segment ownerSegment, string name, string internalName) =>
+    public static Tag CreateAutoReset(Cpu ownerCpu, SegmentBase ownerSegment, string name, string internalName) =>
         new Tag(ownerCpu, ownerSegment, name, TagType.Auto | TagType.Reset | TagType.Q | TagType.External) { InternalName = internalName }
         ;
 }

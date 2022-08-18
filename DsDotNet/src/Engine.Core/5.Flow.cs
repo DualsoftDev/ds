@@ -65,7 +65,7 @@ public class RootFlow : Flow
 
     public Tag Auto { get; }
 
-    public IEnumerable<Segment> RootSegments => ChildVertices.OfType<Segment>();
+    public IEnumerable<SegmentBase> RootSegments => ChildVertices.OfType<SegmentBase>();
 
     public override string ToText() => $"{QualifiedName}, #seg={RootSegments.Count()}, #chilren={ChildVertices.Count()}, #edges={Edges.Count()}";
 }
@@ -90,7 +90,7 @@ public static class FlowExtension
         switch(flow)
         {
             case RootFlow rf: return rf.System;
-            case Segment seg: return seg.ContainerFlow.System;
+            case SegmentBase seg: return seg.ContainerFlow.System;
             default:
                 throw new Exception("ERROR");
         }

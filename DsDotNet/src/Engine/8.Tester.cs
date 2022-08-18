@@ -98,7 +98,12 @@ class Tester
         Bm = {B.F.Vm ~ B.F.Sm}
     }
     [flow] F = {
-        Main = { T.Ap > T.Am, T.Bp > T.Bm; }
+        Main = {
+            // 정보로서의 Call 상호 리셋
+            T.Ap <||> T.Am;
+            T.Bp <||> T.Bm;
+            T.Ap > T.Am, T.Bp > T.Bm;
+        }
     }
     //[address]...
 }
@@ -262,7 +267,12 @@ class Tester
         Bm = {B.F.Vm ~ B.F.Sm}
     }
     [flow] F = {
-        Main = { T.Ap > T.Am, T.Bp > T.Bm; }
+        Main = {
+            // 정보로서의 Call 상호 리셋
+            T.Ap <||> T.Am;
+            T.Bp <||> T.Bm;
+            T.Ap > T.Am, T.Bp > T.Bm;
+        }
     }
     //[address]...
 }
@@ -353,7 +363,11 @@ class Tester
         Am = {A.F.Vm ~ A.F.Sm}
     }
     [flow] F = {
-        Main = { T.Ap > T.Am; }
+        Main = {
+            // 정보로서의 Call 상호 리셋
+            T.Ap <||> T.Am;
+            T.Ap > T.Am;
+        }
     }
 }
 [sys] A = {

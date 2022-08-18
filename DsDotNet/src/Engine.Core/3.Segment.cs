@@ -1,3 +1,4 @@
+using System;
 using System.Reactive.Disposables;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -56,13 +57,13 @@ public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, ITxRx
         (string name, RootFlow containerFlow) =>
         {
             Debug.Assert(false);        // should be overriden
-            var seg = new Segment(containerFlow.Cpu, name) { ContainerFlow = containerFlow };
+            var seg = new Segment(containerFlow.Cpu, name, true) { ContainerFlow = containerFlow };
             containerFlow.AddChildVertex(seg);
             return seg;
         };
 
 
-    internal Segment(Cpu cpu, string name, string startTagName=null, string resetTagName=null, string endTagName=null)
+    internal Segment(Cpu cpu, string name, bool createPortsGoingReady, string startTagName=null, string resetTagName=null, string endTagName=null)
         : base(cpu, name)
     {
         _cpu = cpu;
@@ -73,6 +74,18 @@ public partial class Segment : ChildFlow, IVertex, ICoin, IWallet, ITxRx
         TagStart = new Tag(cpu, this, ns, TagType.Q | TagType.Start) { InternalName = "Start"};
         TagReset = new Tag(cpu, this, nr, TagType.Q | TagType.Reset) { InternalName = "Reset" };
         TagEnd   = new Tag(cpu, this, ne, TagType.I | TagType.End)   { InternalName = "End" };
+        if (createPortsGoingReady)
+        {
+            Going = new Tag(cpu, this, $"Going_{name}_{uid()}", TagType.Going) { InternalName = "Going" };
+            Ready = new Tag(cpu, this, $"Ready_{name}_{uid()}", TagType.Ready) { InternalName = "Ready" };
+
+            PortE = PortInfoEnd.Create(cpu, this, $"EndPort_{name}_{uid()}", null);
+            PortE.InternalName = "EndPort";
+            PortS = new PortInfoStart(cpu, this, $"StartPort_{name}_{uid()}", TagStart, null) { InternalName = "StartPort" };
+            PortR = new PortInfoReset(cpu, this, $"ResetPort_{name}_{uid()}", TagReset, null) { InternalName = "ResetPort" };
+
+            Console.WriteLine();
+        }
     }
 
 

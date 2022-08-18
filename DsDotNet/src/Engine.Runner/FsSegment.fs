@@ -11,11 +11,11 @@ module FsSegmentModule =
     /// Bit * New Value * Change reason
     type ChangeWriter = BitChange -> unit
     
-    type FsSegment(cpu, segmentName, startTagName, resetTagName, endTagName) =
-        inherit Segment(cpu, segmentName, startTagName, resetTagName, endTagName)
+    type FsSegment(cpu, segmentName, createPortsGoingReady, startTagName, resetTagName, endTagName) =
+        inherit Segment(cpu, segmentName, createPortsGoingReady, startTagName, resetTagName, endTagName)
         let mutable oldStatus:Status4 option = None
     
-        new(cpu, segmentName) = FsSegment(cpu, segmentName, null, null, null)
+        new(cpu, segmentName) = FsSegment(cpu, segmentName, true, null, null, null)
         abstract member WireEvent:ChangeWriter*ExceptionHandler->IDisposable
         default x.WireEvent(writer, onError) =
             let n = x.QualifiedName

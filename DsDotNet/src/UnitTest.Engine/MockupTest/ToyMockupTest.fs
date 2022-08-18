@@ -15,9 +15,9 @@ module ToyMockupTest =
         [<Fact>]
         member __.``ToyMockup repeating triangle test`` () =
             let cpu = MockUpCpu.create("dummy")
-            let b, (stB, rtB) = MockupSegment.CreateWithDefaultTags(cpu, "B")
-            let g, (stG, rtG) = MockupSegment.CreateWithDefaultTags(cpu, "G")
-            let r, (stR, rtR) = MockupSegment.CreateWithDefaultTags(cpu, "R")
+            let b = MockupSegment.CreateWithDefaultTags(cpu, "B")
+            let g = MockupSegment.CreateWithDefaultTags(cpu, "G")
+            let r = MockupSegment.CreateWithDefaultTags(cpu, "R")
             let stB = new Flag(cpu, "stB")
 
 
@@ -109,7 +109,7 @@ module ToyMockupTest =
                 )
             |> ignore
 
-            let b, (stB, rtB) = MockupSegment.CreateWithDefaultTags(cpu, "B")
+            let b = MockupSegment.CreateWithDefaultTags(cpu, "B")
             let st = new Flag(cpu, "VStartB")
             let rt = new Flag(cpu, "VResetB")
 

@@ -238,18 +238,107 @@ class Tester
         //    opc.Write("AutoStart_L_F_Main", true);
         //}
 
-        var resetTag = "Reset_L_F_Main";
-        if (engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(resetTag))
+        var startTag = "Start_L_F_Main";
+        if (engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(startTag))
         {
-            //opc.Write(resetTag, true);
-            //opc.Write(resetTag, false);
-            opc.Write("Start_L_F_Main", true);
+            opc.Write(startTag, true);
             opc.Write("Auto_L_F", true);
             //opc.Write(resetTag, true);
 
             //opc.Write("AutoStart_L_F_Main", true);
             //opc.Write("ManualStart_A_F_Pp", true);
         }
+
+        engine.Wait();
+    }
+    public static void DoSampleTestDiamond()
+    {
+        var text = @"
+[sys] L = {
+    [task] T = {
+        Ap = {A.F.Vp ~ A.F.Sp}
+        Am = {A.F.Vm ~ A.F.Sm}
+        Bp = {B.F.Vp ~ B.F.Sp}
+        Bm = {B.F.Vm ~ B.F.Sm}
+    }
+    [flow] F = {
+        Main = { T.Ap > T.Am, T.Bp > T.Bm; }
+    }
+    //[address]...
+}
+[sys] A = {
+    [flow] F = {
+        Vp > Pp > Sp;
+        Vm > Pm > Sm;
+
+        //Sp |> Pp |> Sm;
+        //Sm |> Pm |> Sp;
+        //Vp <||> Vm;
+        Pp |> Sm;
+        Pm |> Sp;
+        Vp <||> Vm;
+        Vp |> Pm;
+        Vm |> Pp;
+    }
+    //[address] = {
+    //    Vp = (Q100, , );
+    //    Sp = (, , I100);
+    //}
+}
+[sys] B = {
+    [flow] F = {
+        Vp > Pp > Sp;
+        Vm > Pm > Sm;
+
+        //Sp |> Pp |> Sm;
+        //Sm |> Pm |> Sp;
+        //Vp <||> Vm;
+        Pp |> Sm;
+        Pm |> Sp;
+        Vp <||> Vm;
+        Vp |> Pm;
+        Vm |> Pp;
+    }
+}
+[cpus] AllCpus = {
+    [cpu] Cpu = {
+        L.F;
+    }
+    [cpu] ACpu = {
+        A.F;
+    }
+    [cpu] BCpu = {
+        B.F;
+    }
+}
+";
+
+        Debug.Assert(!Global.IsInUnitTest);
+        var engine = new EngineBuilder(text, "Cpu").Engine;
+        Program.Engine = engine;
+        engine.Run();
+
+        {
+            var cds = engine.Cpu.RootFlows.SelectMany(f => f.ChildVertices);
+            var m = cds.OfType<Segment>().FirstOrDefault(c => c.Name == "Main");
+
+            // test origin
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            var t = new GraphProgressSupportUtil.ProgressInfo(m.GraphInfo);
+            stopwatch.Stop();
+            Console.WriteLine("time : " + stopwatch.ElapsedMilliseconds + "ms");
+            t.PrintIndexedChildren();
+            t.PrintPreCaculatedTargets();
+            t.PrintOrigin();
+        }
+
+        var opc = engine.Opc;
+
+        var startTag = "Start_L_F_Main";
+        Debug.Assert(engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(startTag));
+        opc.Write(startTag, true);
+        opc.Write("Auto_L_F", true);
 
         engine.Wait();
     }

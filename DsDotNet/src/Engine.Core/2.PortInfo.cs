@@ -1,5 +1,3 @@
-using System.Threading.Tasks;
-
 namespace Engine.Core;
 
 
@@ -15,7 +13,9 @@ public abstract class PortInfo : BitReEvaluatable, IBitWritable
     }
 
     public Segment Segment { get; set; }
-    public string QualifiedName => $"{Segment.QualifiedName}.{GetType().Name}";
+    public string QualifiedName => $"{Segment.QualifiedName}_{GetType().Name}";
+    /// <summary> 내부 추적용 Tag 이름 : QualifiedName + 기능명.  e.g "L.F.Main.AutoStart.  사용자가 지정하는 이름과는 별개 </summary>
+    public string InternalName { get; set; }
     public abstract void SetValue(bool newValue);
     public abstract bool PlanValueChanged(bool newValue);
     public abstract bool ActualValueChanged(bool newValue);

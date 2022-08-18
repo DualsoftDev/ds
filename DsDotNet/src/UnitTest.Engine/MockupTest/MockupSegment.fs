@@ -11,7 +11,8 @@ open Engine.Runner
 type MockupSegmentBase(cpu, n, sp, rp, ep, goingTag, readyTag) as this =
     inherit FsSegment(cpu, n)
     do
-        this.CreateSREGR(cpu, sp, rp, ep, goingTag, readyTag)
+        if sp <> null then
+            this.CreateSREGR(cpu, sp, rp, ep, goingTag, readyTag)
 
     member val FinishCount = 0 with get, set
 
@@ -24,13 +25,11 @@ type MockupSegment(cpu, n) =
 
     static member CreateWithDefaultTags(cpu, n) =
         let seg = MockupSegment(cpu, n)
-        let st = Tag(cpu, seg, $"st_default_{n}", TagType.Start)
-        let rt = Tag(cpu, seg, $"rt_default_{n}", TagType.Reset)
-        seg.PortS <- PortInfoStart(cpu, seg, $"spex{n}_default", st, null)
-        seg.PortR <- PortInfoReset(cpu, seg, $"rpex{n}_default", rt, null)
+        seg.PortS <- PortInfoStart(cpu, seg, $"spex{n}_default", seg.TagStart, null)
+        seg.PortR <- PortInfoReset(cpu, seg, $"rpex{n}_default", seg.TagReset, null)
         seg.PortE <- PortInfoEnd.Create(cpu, seg, $"epex{n}_default", null)
 
-        seg, (st, rt)
+        seg
 
 
     override x.WireEvent(writer, onError) =

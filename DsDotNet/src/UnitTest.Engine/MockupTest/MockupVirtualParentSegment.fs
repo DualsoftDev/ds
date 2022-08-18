@@ -18,8 +18,15 @@ type MockupVirtualParentSegment(name, target:MockupSegment, causalSourceSegments
     , startPort, resetPort, endPort
     , goingTag, readyTag
     , targetStartTag, targetResetTag               // target child 의 start port 에 가상 부모가 시작시킬 수 있는 start tag 추가 (targetStartTag)
-) =
-    inherit MockupSegmentBase(target.Cpu, name, startPort, resetPort, endPort, goingTag, readyTag)
+) as this =
+    inherit MockupSegmentBase(target.Cpu, name
+        , $"VPS_Start_{name}"
+        , $"VPS_Reset_{name}"
+        , $"VPS_End_{name}"
+        )
+    do
+        this.CreateSREGR(target.Cpu, startPort, resetPort, endPort, goingTag, readyTag)
+
     let cpu = target.Cpu
     let mutable oldStatus:Status4 option = None
 

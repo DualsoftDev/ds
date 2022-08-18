@@ -9,29 +9,27 @@ open Engine.Core
 open Engine.Runner
 
 [<AbstractClass>]
-type MockupSegmentBase(cpu, n, sp, rp, ep, goingTag, readyTag) as this =
-    //inherit FsSegment(cpu, n)
+type MockupSegmentBase(cpu, n, startTagName, resetTagName, endTagName) as this =
     inherit FsSegmentBase(cpu, n
-        , $"Start_{n}"
-        , $"Reset_{n}"
-        , $"End_{n}"
-        ) //, startPort, resetPort, endPort, goingTag, readyTag)
+        , if isNull startTagName then $"Start_{n}" else startTagName
+        , if isNull resetTagName then $"Reset_{n}" else resetTagName
+        , if isNull endTagName then $"End_{n}" else endTagName
+    )
 
-    do
-        if sp <> null then
-            this.CreateSREGR(cpu, sp, rp, ep, goingTag, readyTag)
-
+    new(cpu, n) = MockupSegmentBase(cpu, n, null, null, null)
     member val FinishCount = 0 with get, set
 
     static member val WithThreadOnPortEnd = false with get, set
     static member val WithThreadOnPortReset = false with get, set
 
 type MockupSegment(cpu, n) =
-    inherit MockupSegmentBase(cpu, n, null, null, null, null, null)
+    inherit MockupSegmentBase(cpu, n)
     let mutable oldStatus:Status4 option = None
 
     static member CreateWithDefaultTags(cpu, n) =
         let seg = MockupSegment(cpu, n)
+        seg.Going <- Tag(cpu, seg, $"Going_{n}", TagType.Going)
+        seg.Ready <- Tag(cpu, seg, $"Ready_{n}", TagType.Ready)
         seg.PortS <- PortInfoStart(cpu, seg, $"spex{n}_default", seg.TagStart, null)
         seg.PortR <- PortInfoReset(cpu, seg, $"rpex{n}_default", seg.TagReset, null)
         seg.PortE <- PortInfoEnd.Create(cpu, seg, $"epex{n}_default", null)

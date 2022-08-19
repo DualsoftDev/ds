@@ -5,7 +5,7 @@ open Engine.Core
 
 [<AutoOpen>]
 module PrologueModule =
-
+    let noop() = ()
     type Writer = IBit*bool*obj -> unit
 
 

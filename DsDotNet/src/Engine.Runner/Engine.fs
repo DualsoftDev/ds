@@ -165,12 +165,11 @@ module EngineModule =
 
     let Initialize() =
         SegmentBase.Create <-
-            new Func<string, RootFlow, SegmentBase>(
-                fun name (rootFlow:RootFlow) ->
-                    let seg = Segment(rootFlow.Cpu, name)
-                    seg.ContainerFlow <- rootFlow
-                    rootFlow.AddChildVertex(seg)
-                    seg)
+            fun name (rootFlow:RootFlow) ->
+                let seg = Segment(rootFlow.Cpu, name)
+                seg.ContainerFlow <- rootFlow
+                rootFlow.AddChildVertex(seg)
+                seg
 
         doReady  <- procReady 
         doGoing  <- procGoing 
@@ -204,28 +203,16 @@ module EngineModule =
                 
             // 가상 부모 생성
             let virtualParentSegments =
-                [
-                    for rf in rootFlows do
-                        yield! CreateVirtualParentSegmentsFromRootFlow(rf)
-                ]
+                rootFlows.selectMany(CreateVirtualParentSegmentsFromRootFlow).ToArray()
 
-
-            let unparentedRoots =
-                let parentedRoots = virtualParentSegments.Select(fun vps -> vps.Target)
-                roots.Except(parentedRoots) 
 
             virtualParentSegments
             |> Seq.iter(fun vps ->
                 vps.Target.WireEvent(vps.Cpu.Enqueue, raise) |> ignore
                 vps.WireEvent(vps.Cpu.Enqueue, raise) |> ignore
                 )
-            unparentedRoots
-            |> Seq.iter(fun seg ->
-                seg.WireEvent(seg.Cpu.Enqueue, raise) |> ignore
-                )
 
             assert( virtualParentSegments |> Seq.forall(fun vp -> vp.Status = Status4.Ready));
-            assert( unparentedRoots       |> Seq.forall(fun vp -> vp.Status = Status4.Ready));
 
 
             logInfo "Start F# Engine running..."

@@ -2,6 +2,9 @@ namespace Engine.Core;
 
 using System.Threading;
 
+/// <summary>Segment 생성 함수.  Segment 에서 상속받은 class 객체를 생성하기 위함. (e.g Engine.Runner.FsSegment)</summary>
+public delegate SegmentBase SegmentCreator(string segmentName, RootFlow rootFlow);
+
 [DebuggerDisplay("{ToText(),nq}")]
 public abstract partial class SegmentBase : ChildFlow, IVertex, ICoin, IWallet, ITxRx
 {
@@ -56,10 +59,10 @@ public abstract partial class SegmentBase : ChildFlow, IVertex, ICoin, IWallet, 
 
 
     /// <summary>Segment 생성 함수.  Segment 에서 상속받은 class 객체를 생성하기 위함. (e.g Engine.Runner.FsSegment)</summary>
-    public static Func<string, RootFlow, SegmentBase> Create { get; set; } =
+    public static SegmentCreator Create { get; set; } =
         (string name, RootFlow containerFlow) =>
         {
-            Debug.Assert(false);        // should be overriden
+            Debug.Assert(Global.IsInUnitTest);        // should be overriden if not unit test
             var seg = new DummySegment(containerFlow.Cpu, name) { ContainerFlow = containerFlow };
             containerFlow.AddChildVertex(seg);
             return seg;

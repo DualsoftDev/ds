@@ -81,10 +81,11 @@ type ModelExt =
                     rx.Type <- rx.Type ||| TagType.RX ||| TagType.External
 
                 for ch in rs.Children do
-                    assert(ch.Coin :? ExSegmentCall)
                     let reset = ch.TagReset
-                    assert(reset.Type.HasFlag(TagType.Reset))
-                    reset.Type <- reset.Type ||| TagType.External
+                    if reset <> null then
+                        assert(ch.Coin :? ExSegmentCall)
+                        assert(reset.Type.HasFlag(TagType.Reset))
+                        reset.Type <- reset.Type ||| TagType.External
 
         renameBits()
         rebuildMap()

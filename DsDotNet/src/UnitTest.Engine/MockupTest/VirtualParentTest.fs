@@ -4,7 +4,7 @@ namespace UnitTest.Mockup.Engine
 open Xunit
 open Engine.Core
 open Engine.Runner
-open Dual.Common
+open Engine.Common.FS
 open Xunit.Abstractions
 open UnitTest.Engine
 open System.Reactive.Disposables

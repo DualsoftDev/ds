@@ -2,7 +2,7 @@ namespace Engine.Graph
 
 open System.Linq
 open System.Collections.Generic
-open Dual.Common
+open Engine.Common.FS
 open QuickGraph
 open Engine.Core
 

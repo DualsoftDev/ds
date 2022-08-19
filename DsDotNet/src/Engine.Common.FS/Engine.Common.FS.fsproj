@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
+		<TargetFramework>net48</TargetFramework>
+		<RootNamespace>Engine.Common.FS</RootNamespace>
+		<LangVersion>6.0</LangVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="paket.references" />
+		<Compile Include="Prelude.fs" />
+		<Compile Include="Module\Log4NetWrapper.fs" />
+		<Compile Include="Module\Functions.fs" />
+		<Compile Include="Module\QualifiedAccess\Seq.fs" />
+		<Compile Include="Module\QualifiedAccess\Tuple.fs" />
+		<Compile Include="Module\QualifiedAccess\Array.fs" />
+		<Compile Include="Module\Print.fs" />
+		<Compile Include="TypeExtensions\Em.Collection.fs" />
+		<Compile Include="Graph\QuickGraph.fs" />
+		<Compile Include="Library.fs" />
+	</ItemGroup>
+
+	<ItemGroup />
+	<Import Project="..\..\.paket\Paket.Restore.targets" />
+
+</Project>

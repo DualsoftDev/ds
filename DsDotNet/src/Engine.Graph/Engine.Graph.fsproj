@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFramework>net48</TargetFramework>
@@ -13,7 +13,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Dual.Common.FS\Dual.Common.FS.fsproj" />
+		<ProjectReference Include="..\Engine.Common.FS\Engine.Common.FS.fsproj" />
 		<ProjectReference Include="..\Engine.Core\Engine.Core.csproj" />
 	</ItemGroup>
 	<Import Project="..\..\.paket\Paket.Restore.targets" />

@@ -3,7 +3,7 @@ namespace Engine.Graph
 open System.Linq
 open System.Collections.Generic
 open QuickGraph
-open Dual.Common.Graph.QuickGraph.GraphAlgorithm
+open Engine.Common.FS.Graph.QuickGraph.GraphAlgorithm
 open Engine.Core
 
 

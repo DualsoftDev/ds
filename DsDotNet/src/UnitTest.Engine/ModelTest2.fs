@@ -5,7 +5,7 @@ open Xunit
 open Engine
 open Engine.Core
 open System.Linq
-open Dual.Common
+open Engine.Common.FS
 open Xunit.Abstractions
 
 [<AutoOpen>]

@@ -25,7 +25,6 @@
 		<None Include="test.ipynb" />
 	</ItemGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\Dual.Common.FS\Dual.Common.FS.fsproj" />
 		<ProjectReference Include="..\Engine.Core\Engine.Core.csproj" />
 		<ProjectReference Include="..\Engine.OPC\Engine.OPC.csproj" />
 		<ProjectReference Include="..\Engine\Engine.csproj" />

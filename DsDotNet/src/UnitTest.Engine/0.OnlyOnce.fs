@@ -8,7 +8,7 @@ open Engine.Core
 open FsUnit
 open Xunit
 open System.IO
-open Dual.Common
+open Engine.Common.FS
 
 // FsUnit/XUnit 사용법:
 // https://github.com/fsprojects/FsUnit/tree/master/tests/FsUnit.Xunit.Test

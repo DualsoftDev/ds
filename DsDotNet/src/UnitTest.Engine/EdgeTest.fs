@@ -54,8 +54,8 @@ module EdgeTest =
             let main = rootFlow.Coins |> Enumerable.OfType<SegmentBase> |> Seq.find(fun seg -> seg.Name = "Main")
 
 
-            model.BuildGraphInfo();
-            builder.RetouchTags()
+            model.BuildGraphInfo()
+            model.RetouchTags(builder.Opc)
 
             model.Epilogue()
 

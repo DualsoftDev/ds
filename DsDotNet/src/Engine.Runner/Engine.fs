@@ -270,22 +270,3 @@ module EngineModule =
             while cpus.Any(fun cpu -> cpu.Running) do
                 Thread.Sleep(50)
 
-
-
-[<Extension>] // type Model =
-type EngineExt =
-    [<Extension>]
-    static member BuildGraphInfo(model:Model) =
-        
-        let rootFlows = model.Systems.selectMany(fun sys -> sys.RootFlows)
-        for flow in rootFlows do
-            flow.GraphInfo <- FsGraphInfo.AnalyzeFlows([flow], true);
-
-        for cpu in model.Cpus do
-            cpu.GraphInfo <- FsGraphInfo.AnalyzeFlows(cpu.RootFlows.Cast<Flow>(), true)
-
-        let segments = rootFlows.SelectMany(fun rf -> rf.RootSegments).Cast<Segment>()
-        for seg in segments do
-            seg.GraphInfo <- FsGraphInfo.AnalyzeFlows([seg], false)
-            let pi = new GraphProgressSupportUtil.ProgressInfo(seg.GraphInfo)
-            seg.ChildrenOrigin <- pi.ChildOrigin.ToArray();

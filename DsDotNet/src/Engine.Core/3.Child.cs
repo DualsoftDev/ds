@@ -15,7 +15,15 @@ public class Child : Named, IVertex, ICoin
     public Status4? Status
     {
         get => Parent.ChildStatusMap[this].Item2;
-        set => Parent.ChildStatusMap[this] = (Parent.ChildStatusMap[this].Item1, value);
+        set
+        {
+            var (flipped, oldState) = Parent.ChildStatusMap[this];
+            if (oldState != value)
+            {
+                Global.ChildStatusChangedSubject.OnNext(new ChildStatusChange(this, value.Value, flipped));
+                Parent.ChildStatusMap[this] = (Parent.ChildStatusMap[this].Item1, value);
+            }
+        }
     }
     public bool IsFlipped
     {

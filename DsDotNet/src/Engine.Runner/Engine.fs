@@ -37,17 +37,28 @@ module EngineModule =
             subs.Dispose()
     let private stopMonitorGoing (seg:SegmentBase) =
         // stop running children
-        assert(false)   // todo : fill me!!
-        let runningChildren = seg.Children.Where(fun ch -> ch.Status = Status4.Going)
-        for child in seg.Children do
+        let runningChildren = seg.Children.Where(fun ch -> ch.Status = Nullable Status4.Going)
+        if seg.Children.Any() then
+            noop()
+        for child in runningChildren do
             ()
 
         stopMonitor goingSubscriptions seg
-    let private stopMonitorHoming seg = stopMonitor homingSubscriptions seg
+
+    let private stopMonitorHoming (seg:SegmentBase) =
+        // stop homing children
+        let homingChildren = seg.Children.Where(fun ch -> ch.Status = Nullable Status4.Homing)
+        if seg.Children.Any() then
+            noop()
+        for child in homingChildren do
+            ()
+        stopMonitor homingSubscriptions seg
 
     let private procReady(seg:SegmentBase, writer:ChangeWriter, onError:ExceptionHandler) =
         let write(bit, value, cause) =
             writer(BitChange(bit, value, cause, onError))
+        assert( [seg.TagStart; seg.TagReset; seg.TagEnd].ForAll(fun t -> not t.Value ))     // A_F_Pp.TagEnd 가 true 되는 상태???
+        assert( [seg.PortS :> PortInfo; seg.PortR; seg.PortE].ForAll(fun t -> not t.Value ))
         stopMonitorHoming seg
         write(seg.Ready, true, null)
 
@@ -85,6 +96,9 @@ module EngineModule =
                             logDebug $"Child {finishedChild.QualifiedName} finish detected."
                             finishedChild.Status <- Status4.Finished
                             finishedChild.IsFlipped <- true
+                            for st in finishedChild.TagsStart do
+                                write(st, false, $"Child {finishedChild.QualifiedName} finished")
+                            
                             if (seg.Children.ForAll(fun ch -> ch.IsFlipped)) then
                                 write(seg.PortE, true, $"{seg.QualifiedName} GOING 끝 (모든 child end)")
                             else
@@ -117,14 +131,15 @@ module EngineModule =
         write(seg.Going, false, $"{seg.QualifiedName} FINISH")
         write(seg.TagEnd, true, $"Finishing {seg.QualifiedName}")
 
-    let private procHoming(seg:SegmentBase, writer:ChangeWriter, onError:ExceptionHandler) =
+    let private procHoming(segment:SegmentBase, writer:ChangeWriter, onError:ExceptionHandler) =
+        let seg = segment :?> Segment
         let write(bit, value, cause) =
             writer(BitChange(bit, value, cause, onError))
 
         stopMonitorGoing seg
         // 자식 원위치 맞추기
         let childRxTags = seg.Children.selectMany(fun ch -> ch.TagsEnd).ToArray()
-        let originTargets = Seq.empty  // todo: 원위치 맞출 children
+        let originTargets = seg.ChildrenOrigin  // todo: 원위치 맞출 children
 
         if originTargets.Any() then                    
             let subs =
@@ -132,6 +147,9 @@ module EngineModule =
                     .Where(fun t -> not t.Value)    // OFF child
                     .Where(childRxTags.Contains)
                     .Subscribe(fun tag ->
+                        let readyChild = seg.Children.FirstOrDefault(fun ch -> ch.TagsEnd.Contains(tag) && ch.TagsEnd.ForAll(fun t -> not t.Value))
+                        if readyChild <> null then
+                            ()
                         // originTargets 모두 원위치인지 확인
                         write(seg.PortE, false, $"{seg.QualifiedName} HOMING finished")
                         ()

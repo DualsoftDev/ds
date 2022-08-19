@@ -129,6 +129,7 @@ module VirtualParentSegmentModule =
 
 
                         | Status4.Homing, false ->
+                            assert(not targetStartTag.Value)
                             assert(x.Going.Value = false)
                             write(targetResetTag, false, $"{x.Target.Name} homing 완료로 reset 끄기")
                             write(x.Ready, true, $"{x.Target.Name} homing 완료")
@@ -143,6 +144,7 @@ module VirtualParentSegmentModule =
 
                     if notiVpsPortChange then
                         if oldStatus = Some state then
+                            assert(not bit.Value)
                             logDebug $"\t\tVPS Skipping duplicate status: [{n}] status : {state}"
                         else
                             oldStatus <- Some state
@@ -172,12 +174,13 @@ module VirtualParentSegmentModule =
                                     } |> Async.Start
 
                             | Status4.Finished ->
-                                write(targetStartTag, false, $"{n} FINISH 로 인한 {x.Target.Name} start 끄기")
+                                write(targetStartTag, false, $"{n} FINISH 로 인한 {x.Target.Name} start {targetStartTag.GetName()} 끄기")
                                 write(x.Going, false, "${n} FINISH")
                                 assert(x.PortE.Value)
                                 assert(x.PortR.Value = false)
 
                             | Status4.Homing ->
+                                assert(not targetStartTag.Value)        // 일반적으로... 
                                 if childStatus = Status4.Going then
                                     failwith $"Something bad happend?  trying to reset child while {x.Target.Name}={childStatus}"
 
@@ -203,7 +206,9 @@ module VirtualParentSegmentModule =
 
                 let causalSources = setEdges.selectMany(fun e -> e.Sources).Cast<Segment>().ToArray()
                 let resetSources = resetEdges.selectMany(fun e -> e.Sources).Cast<Segment>().ToArray()
-                if causalSources.Any() && resetSources.Any() then
+
+                // todo: 알맹이의 reset 이 없는 경우, 가상부모는 self reset 이면서, reset 수행 중에 알맹이 reset 은 수행하지 않음
+                if causalSources.Any() (*&& resetSources.Any()*) then
                     let vps = VirtualParentSegment.Create(target, autoStart, (target.TagStart, target.TagReset), causalSources, resetSources)
                     yield vps
                 else

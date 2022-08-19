@@ -1,3 +1,4 @@
+
 namespace Engine.Runner
 
 open Engine.Core
@@ -76,7 +77,20 @@ module FsSegmentModule =
                     let value = bc.NewValue
                     let cause = $"by bit change {bit.GetName()}={value}"
                     if oldStatus = Some state then
-                        logDebug $"\t\tSkipping duplicate status: [{n}] status : {state} {cause}"
+                        assert(not bit.Value)
+                        let msg = $"{n} status {state} duplicated on port {bit.GetName()} OFF by {cause}"
+                        // case1 : Reset port 켜지는 시점
+                        // case2 : EndPort 꺼지는 시점에 : Reset port 는 아직 살아 있으므로 homing 
+                        if bit = x.PortS then   // finish 도중에 start port 꺼져서 finish 완료되려는 시점
+                            logDebug $"\t\tFinished homing: {msg}"
+                        elif bit = x.PortR then
+                            ()
+                        elif bit = x.PortE then // reset 중에 end port 꺼져서 reset 완료 되려는 시점.  상태는 아직 homing 중
+                            logDebug $"\t\tAbout to finished homing: [{n}] status : {state} {cause}"
+                            assert(not x.TagStart.Value)
+                            //write(x.TagStart, false, $"{n} homing completed")
+                        else
+                            failwith "ERROR"
                     else
                         logInfo $"[{n}] Segment status : {state} {cause}"
                         Global.SegmentStatusChangedSubject.OnNext(SegmentStatusChange(x, state))
@@ -85,6 +99,18 @@ module FsSegmentModule =
                             write(x.Going, false, $"{n} going off by status {state}")
                         if x.Ready.Value && state <> Status4.Ready then
                             write(x.Ready, false, $"{n} ready off by status {state}")
+
+                        // { debug
+                        if n = "A_F_Pp" && state = Status4.Homing then
+                            noop()
+                        match state with
+                        | Status4.Ready ->  assert( [x.TagStart; x.TagEnd].ForAll(fun t -> not t.Value))
+                        | Status4.Going -> ()
+                        | Status4.Finished -> ()
+                        | Status4.Homing -> ()
+                        | _ -> ()
+                        // } debug
+
 
                         match state with
                         | Status4.Ready -> doReady(x, writer, onError)

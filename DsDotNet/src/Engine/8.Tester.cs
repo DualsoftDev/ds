@@ -225,11 +225,9 @@ class Tester
         //Sp |> Pp |> Sm;
         //Sm |> Pm |> Sp;
         //Vp <||> Vm;
-        Pp |> Sm;
-        Pm |> Sp;
+        Vp |> Pm |> Sp;
+        Vm |> Pp |> Sm;
         Vp <||> Vm;
-        Vp |> Pm;
-        Vm |> Pp;
     }
     //[address] = {
     //    Vp = (Q100, , );
@@ -244,11 +242,10 @@ class Tester
         //Sp |> Pp |> Sm;
         //Sm |> Pm |> Sp;
         //Vp <||> Vm;
-        Pp |> Sm;
-        Pm |> Sp;
+
+        Vp |> Pm |> Sp;
+        Vm |> Pp |> Sm;
         Vp <||> Vm;
-        Vp |> Pm;
-        Vm |> Pp;
     }
 }
 [cpus] AllCpus = {
@@ -268,6 +265,12 @@ class Tester
         var engine = new EngineBuilder(text, "Cpu").Engine;
         Program.Engine = engine;
         engine.Run();
+
+        Global.SegmentStatusChangedSubject.Subscribe(ssc =>
+        {
+            if (ssc.Segment.Name == "Main" && ssc.Status == Status4.Finished)
+                Console.WriteLine();
+        });
 
         {
             var cds = engine.Cpu.RootFlows.SelectMany(f => f.ChildVertices);

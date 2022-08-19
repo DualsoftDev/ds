@@ -249,8 +249,6 @@ module EngineModule =
                     for cpu in cpus do
                         readTagsFromOpc cpu opc
 
-                        // todo : 코멘트 처리 해제?
-                        //yield runCpu cpu  // ! 실제 수행!!
                         yield cpu.Run()
                 ]
 

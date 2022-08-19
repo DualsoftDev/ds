@@ -35,7 +35,6 @@ public class Tag : Bit, IBitReadWritable, ITxRx
     public ICoin Owner { get; set; }
     public TagType Type { get; set; }
 
-    // todo: Global.TagChangeToOpcServerSubject.OnNext(new OpcTagChange(Name, value));
     public void SetValue(bool newValue) => _value = newValue;
     public string Address { get; set; }
 

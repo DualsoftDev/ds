@@ -391,7 +391,7 @@ namespace Engine;
 //                            }
 //                        }
 
-//                        // Todo : isolated vertex 처리
+//                        // to do : isolated vertex 처리
 
 //                        break;
 

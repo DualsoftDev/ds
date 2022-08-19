@@ -14,7 +14,7 @@ module DoRGFH =
 
     ///<summary> 모든 Children 을 origin 상태로 이동</summary>
     let moveChildrenToOrigin (seg:SegmentBase) =
-        // todo: children 이 origin 상태에 있는지 검사!!!
+        // to do: children 이 origin 상태에 있는지 검사!!!
         logDebug $"Moving segment[{seg.QualifiedName}] children to origin."
         //while not <| seg.MovingCancellationTokenSource.IsCancellationRequested do
         //    ()

@@ -34,7 +34,7 @@ public static class HmiTagGenerator
     ///// - init 에 대해서 auto start,
     ///// - last segment에 대해서 auto reset tag 생성
     ///// <para>Side effect : 해당 cpu 에 dependancy 설정됨. </para>
-    ///// todo: flow 에 속한 call 에 대한 HMI tag 생성
+    ///// to do: flow 에 속한 call 에 대한 HMI tag 생성
     ///// <para> - 생성된 tag 는 CPU 에 저장된다.</para>
     ///// </summary>
     //public static Tag[] GenereateHmiTags4Segments(this RootFlow flow)

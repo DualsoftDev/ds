@@ -54,7 +54,7 @@ module internal CpuModule =
                     .Where(fun bc -> bits.Contains(bc.Bit))
                     .Subscribe (fun bc ->
                         noop()
-                        //! todo
+                        //! to do
                         (*
                             let portS = segment.PortStartBits |> Seq.exists(fun b -> b.Value)
                             let portR = segment.PortResetBits |> Seq.exists(fun b -> b.Value)

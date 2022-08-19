@@ -208,14 +208,5 @@ module VirtualParentSegmentModule =
                 let causalSources = setEdges.selectMany(fun e -> e.Sources).Cast<Segment>().ToArray()
                 let resetSources = resetEdges.selectMany(fun e -> e.Sources).Cast<Segment>().ToArray()
 
-
-
                 yield VirtualParentSegment.Create(target, autoStart, (target.TagStart, target.TagReset), causalSources, resetSources)
-
-                //// todo: 알맹이의 reset 이 없는 경우, 가상부모는 self reset 이면서, reset 수행 중에 알맹이 reset 은 수행하지 않음
-                //if causalSources.Any() (*&& resetSources.Any()*) then
-                //    let vps = VirtualParentSegment.Create(target, autoStart, (target.TagStart, target.TagReset), causalSources, resetSources)
-                //    yield vps
-                //else
-                //    logWarn $"Do not create VPS for {target.QualifiedName}"
         |]

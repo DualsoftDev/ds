@@ -10,10 +10,7 @@ open System.Collections.Generic
 
 
 [<AutoOpen>]
-module FsSegmentModule =
-    /// Bit * New Value * Change reason
-    type ChangeWriter = BitChange -> unit
-    
+module FsSegmentModule =    
     /// Common base class for *Real* root segment and Virtual Parent Segment
     [<AbstractClass>]
     type FsSegmentBase(cpu, segmentName, startTagName, resetTagName, endTagName) =
@@ -90,10 +87,10 @@ module FsSegmentModule =
                             write(x.Ready, false, $"{n} ready off by status {state}")
 
                         match state with
-                        | Status4.Ready -> doReady(write, x)
-                        | Status4.Going -> doGoing(write, x)
-                        | Status4.Finished -> doFinish(write, x)
-                        | Status4.Homing -> doHoming(write, x)
+                        | Status4.Ready -> doReady(x, writer, onError)
+                        | Status4.Going -> doGoing(x, writer, onError)
+                        | Status4.Finished -> doFinish(x, writer, onError)
+                        | Status4.Homing -> doHoming(x, writer, onError)
                         | _ ->
                             failwith "Unexpected"
                         oldStatus <- Some state

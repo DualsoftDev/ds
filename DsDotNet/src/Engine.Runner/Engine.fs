@@ -35,10 +35,19 @@ module EngineModule =
             let subs = subscriptions[seg]
             subscriptions.Remove(seg) |> ignore
             subs.Dispose()
-    let private stopMonitorGoing seg = stopMonitor goingSubscriptions seg
+    let private stopMonitorGoing (seg:SegmentBase) =
+        // stop running children
+        assert(false)   // todo : fill me!!
+        let runningChildren = seg.Children.Where(fun ch -> ch.Status = Status4.Going)
+        for child in seg.Children do
+            ()
+
+        stopMonitor goingSubscriptions seg
     let private stopMonitorHoming seg = stopMonitor homingSubscriptions seg
 
-    let private procReady(write:Writer, seg:SegmentBase) =
+    let private procReady(seg:SegmentBase, writer:ChangeWriter, onError:ExceptionHandler) =
+        let write(bit, value, cause) =
+            writer(BitChange(bit, value, cause, onError))
         stopMonitorHoming seg
         write(seg.Ready, true, null)
 
@@ -46,16 +55,22 @@ module EngineModule =
     ///     - child 가 하나라도 있으면, child 의 종료를 모니터링하기 위한 subscription 후, 최초 child group(init) 만 수행
     ///         * 이후, child 종료를 감지하면, 다음 실행할 child 계속 실행하고, 없으면 해당 segment 종료
     ///     - 없으면 바로 종료
-    let private procGoing(write:Writer, seg:SegmentBase) =
+    let private procGoing(seg:SegmentBase, writer:ChangeWriter, onError:ExceptionHandler) =
         assert( not <| homingSubscriptions.ContainsKey(seg))
+        let write(bit, value, cause) =
+            writer(BitChange(bit, value, cause, onError))
+
         write(seg.Going, true, $"{seg.QualifiedName} GOING 시작")
         if seg.Children.Any() then
             let runChildren(children:Child seq) =
                 for child in children do
                     assert(not child.IsFlipped && (not child.Status.HasValue || child.Status.Value = Status4.Going))
-                    child.Status <- Status4.Going
                     for st in child.TagsStart do
-                        write(st, true, "Starting child")
+                        let before = fun () ->
+                            child.Status <- Status4.Going
+                            Global.ChildStatusChangedSubject.OnNext(ChildStatusChange(child, Status4.Going))
+                            
+                        writer(BitChange(st, true, "Starting child", onError, BeforeAction = before))
 
             assert(not <| goingSubscriptions.ContainsKey(seg))
             let childRxTags = seg.Children.selectMany(fun ch -> ch.TagsEnd).ToArray()
@@ -94,12 +109,18 @@ module EngineModule =
             write(seg.PortE, true, $"{seg.QualifiedName} GOING 끝")
 
 
-    let private procFinish(write:Writer, seg:SegmentBase) =
+    let private procFinish(seg:SegmentBase, writer:ChangeWriter, onError:ExceptionHandler) =
+        let write(bit, value, cause) =
+            writer(BitChange(bit, value, cause, onError))
+
         stopMonitorGoing seg
         write(seg.Going, false, $"{seg.QualifiedName} FINISH")
         write(seg.TagEnd, true, $"Finishing {seg.QualifiedName}")
 
-    let private procHoming(write:Writer, seg:SegmentBase) =
+    let private procHoming(seg:SegmentBase, writer:ChangeWriter, onError:ExceptionHandler) =
+        let write(bit, value, cause) =
+            writer(BitChange(bit, value, cause, onError))
+
         stopMonitorGoing seg
         // 자식 원위치 맞추기
         let childRxTags = seg.Children.selectMany(fun ch -> ch.TagsEnd).ToArray()

@@ -67,7 +67,7 @@ public record SegmentStatusChange
 
 public record ChildStatusChange
 {
-    public ChildStatusChange(Child child, Status4 status, bool isFlipped)
+    public ChildStatusChange(Child child, Status4 status, bool isFlipped=false)
     {
         Child = child;
         Status = status;

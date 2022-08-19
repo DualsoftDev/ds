@@ -1,6 +1,7 @@
 using System.IO;
 using System.Configuration;
 using Dual.Common;
+using System.Threading;
 
 namespace Engine;
 
@@ -30,8 +31,15 @@ class Program
         var traceAppender = new TraceLogAppender();
         repoLogger.AddAppender(traceAppender);
     }
+
+    static void PrepareThreadPool()
+    {
+        //ThreadPool.GetMinThreads(out int minWorker, out int minIOC);
+        ThreadPool.SetMinThreads(60, 60);
+    }
     static void Main(string[] args)
     {
+        PrepareThreadPool();
         PrepareLog4Net();
         //Tester.DoSampleTestVps();
         //Tester.DoSampleTest();

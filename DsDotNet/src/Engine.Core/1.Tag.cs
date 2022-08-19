@@ -46,7 +46,7 @@ public class Tag : Bit, IBitReadWritable, ITxRx
         : base(ownerCpu, name, value)
     {
         Debug.Assert(! ownerCpu.TagsMap.ContainsKey(name));
-        Global.Logger.Debug($"Creating tag {name}");
+        //Global.Logger.Debug($"Creating tag {name}");
 
         Owner = owner;
         Type = tagType;

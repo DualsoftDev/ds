@@ -197,6 +197,64 @@ class Tester
 
         engine.Wait();
     }
+    public static void DoSampleTestAdvanceReturn()
+    {
+        var text = @"
+[sys] L = {
+    [task] T = {
+        Ap = {A.F.Vp ~ A.F.Sp}
+        Am = {A.F.Vm ~ A.F.Sm}
+    }
+    [flow] F = {
+        Main = {
+            // 정보로서의 Call 상호 리셋
+            T.Ap <||> T.Am;
+            T.Ap > T.Am;
+        }
+    }
+    //[address]...
+}
+[sys] A = {
+    [flow] F = {
+        Vp > Pp > Sp;
+        Vm > Pm > Sm;
+
+        Vp |> Pm |> Sp;
+        Vm |> Pp |> Sm;
+        Vp <||> Vm;
+    }
+}
+[cpus] AllCpus = {
+    [cpu] Cpu = {
+        L.F;
+    }
+    [cpu] ACpu = {
+        A.F;
+    }
+}
+";
+
+        Debug.Assert(!Global.IsInUnitTest);
+        var engine = new EngineBuilder(text, "Cpu").Engine;
+        Program.Engine = engine;
+        engine.Run();
+
+        Global.SegmentStatusChangedSubject.Subscribe(ssc =>
+        {
+            if (ssc.Segment.Name == "Main" && ssc.Status == Status4.Finished)
+                Console.WriteLine();
+        });
+
+        var opc = engine.Opc;
+
+        var startTag = "Start_L_F_Main";
+        Debug.Assert(engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(startTag));
+        opc.Write(startTag, true);
+        opc.Write("Auto_L_F", true);
+
+        engine.Wait();
+    }
+
     public static void DoSampleTestDiamond()
     {
         var text = @"

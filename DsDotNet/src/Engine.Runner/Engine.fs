@@ -158,6 +158,9 @@ module EngineModule =
         else
             write(seg.PortE, false, $"{seg.QualifiedName} HOMING finished")
 
+            // todo: fix me
+            write(seg.TagEnd, false, $"임시: end off --------- 제거해야 함")
+
     let Initialize() =
         SegmentBase.Create <-
             new Func<string, RootFlow, SegmentBase>(
@@ -201,7 +204,7 @@ module EngineModule =
             let virtualParentSegments =
                 [
                     for rf in rootFlows do
-                        yield! VirtualParentSegmentModule.CreateVirtualParentSegmentsFromRootFlow(rf)
+                        yield! CreateVirtualParentSegmentsFromRootFlow(rf)
                 ]
 
 
@@ -227,11 +230,11 @@ module EngineModule =
             for cpu in cpus do
                 cpu.BuildBitDependencies()
 
-                logDebug "====================="
-                cpu.PrintAllTags(false);
-                logDebug "---------------------"
-                cpu.PrintAllTags(true);
-                logDebug "====================="
+                //logDebug "====================="
+                //cpu.PrintAllTags(false);
+                //logDebug "---------------------"
+                //cpu.PrintAllTags(true);
+                //logDebug "====================="
 
 
             let subscriptions =

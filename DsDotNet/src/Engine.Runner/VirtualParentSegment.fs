@@ -8,7 +8,9 @@ open System.Linq
 
 [<AutoOpen>]
 module VirtualParentSegmentModule =
-    type VirtualParentSegment(target:Segment, causalSourceSegments:Segment seq
+    type VirtualParentSegment(target:Segment
+        , causalSourceSegments:Segment seq
+        , resetSourceSegments:Segment seq
         , startPort, resetPort, endPort
         , goingTag, readyTag
         , targetStartTag, targetResetTag               // target child 의 start port 에 가상 부모가 시작시킬 수 있는 start tag 추가 (targetStartTag)
@@ -21,14 +23,13 @@ module VirtualParentSegmentModule =
 
         let cpu = target.Cpu
         let mutable oldStatus:Status4 option = None
+        let triggerTargetStart = causalSourceSegments.Any()
+        let triggerTargetReset = resetSourceSegments.Any()
 
         do
             this.CreateSREGR(cpu, startPort, resetPort, endPort, goingTag, readyTag)
 
         member val Target = target;
-        member val PreChildren = causalSourceSegments |> Array.ofSeq
-        member val TargetStartTag = targetStartTag with get
-        member val TargetResetTag = targetResetTag with get
 
         static member Create(target:Segment, auto:IBit
             , (targetStartTag:IBit, targetResetTag:IBit)
@@ -45,7 +46,6 @@ module VirtualParentSegmentModule =
                 (*
                     And(            // $"ResetAnd_{X}"
                         _auto
-                        , targetEnd
                         ,FlipFlop(     // $"ResetFF_{X}"
                             And(    // $"InnerResetSourceAnd_{X}"
                                 #(__X)
@@ -54,13 +54,15 @@ module VirtualParentSegmentModule =
                             ,#r(__X)))
                 *)
                 let resetPortInfoPlan =
-                    assert resetSourceSegments.Any()
                     let vrp =
                         [|
                             yield auto
-                            //yield target.PortE  //ep
-                            for rsseg in resetSourceSegments do
-                                yield FlipFlop(cpu, $"InnerResetSourceFF_{n}_{rsseg.Name}", rsseg.Going, readyTag)  :> IBit
+                            if resetSourceSegments.Any() then
+                                for rsseg in resetSourceSegments do
+                                    yield FlipFlop(cpu, $"InnerResetSourceFF_{n}_{rsseg.Name}", rsseg.Going, readyTag)  :> IBit
+                            else
+                                // self reset.  실제 reset 시 알맹이의 reset 은 수행하지 말아야 한다.
+                                yield ep
                         |]
                     And(cpu, $"ResetAnd_{n}", vrp)
                 PortInfoReset(cpu, null, $"Reset_{n}", resetPortInfoPlan, null)
@@ -69,17 +71,15 @@ module VirtualParentSegmentModule =
                 (*
                     And(            // $"StartAnd_{X}"
                         _auto
-                        ,ready
                         ,FlipFlop(     // $"StartFF_{X}"
                                 #(__Prev)
                                 ,#(__X.RsetPort)))
                 *)
                 let startPortInfoPlan =
-                    assert causalSourceSegments.Any()
+                    //assert causalSourceSegments.Any()
                     let vsp =
                         [|
                             yield auto
-                            //yield readyTag
                             for csseg in causalSourceSegments do
                                 yield FlipFlop(cpu, $"InnerStartSourceFF_{n}_{csseg.Name}", csseg.PortE, ep)// :> IBit
                         |]
@@ -88,7 +88,7 @@ module VirtualParentSegmentModule =
                 PortInfoStart(cpu, null, $"Start_{n}", startPortInfoPlan, null)
 
 
-            let vps = VirtualParentSegment(target, causalSourceSegments, sp, rp, ep, null, readyTag, targetStartTag, targetResetTag)
+            let vps = VirtualParentSegment(target, causalSourceSegments, resetSourceSegments, sp, rp, ep, null, readyTag, targetStartTag, targetResetTag)
             sp.Segment <- vps
             rp.Segment <- vps
             ep.Segment <- vps
@@ -130,7 +130,7 @@ module VirtualParentSegmentModule =
 
                         | Status4.Homing, false ->
                             assert(not targetStartTag.Value)
-                            assert(x.Going.Value = false)
+                            //assert(x.Going.Value = false) // 아직 write 안되었을 수도 있음
                             write(targetResetTag, false, $"{x.Target.Name} homing 완료로 reset 끄기")
                             write(x.Ready, true, $"{x.Target.Name} homing 완료")
                             write(x.PortE, false, null)
@@ -156,22 +156,22 @@ module VirtualParentSegmentModule =
                                 ()
                             | Status4.Going    ->
                                 write(x.Going, true, $"{n} GOING 시작")
-
-                                assert(childStatus = Status4.Ready || cpu.ProcessingQueue);
-                                if childStatus = Status4.Ready then
-                                    write(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
-                                else
-                                    async {
-                                        // wait while target child available
-                                        let mutable childStatus:Status4 option = None
-                                        while childStatus <> Some Status4.Ready do
-                                            // re-evaluate child status
-                                            childStatus <- Some <| x.Target.Status
-                                            logWarn $"Waiting target child [{x.Target.Name}] ready..from {childStatus.Value}"
-                                            do! Async.Sleep(10);
-
+                                if triggerTargetStart then
+                                    assert(childStatus = Status4.Ready || cpu.ProcessingQueue);
+                                    if childStatus = Status4.Ready then
                                         write(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
-                                    } |> Async.Start
+                                    else
+                                        async {
+                                            // wait while target child available
+                                            let mutable childStatus:Status4 option = None
+                                            while childStatus <> Some Status4.Ready do
+                                                // re-evaluate child status
+                                                childStatus <- Some <| x.Target.Status
+                                                logWarn $"Waiting target child [{x.Target.Name}] ready..from {childStatus.Value}"
+                                                do! Async.Sleep(10);
+
+                                            write(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
+                                        } |> Async.Start
 
                             | Status4.Finished ->
                                 write(targetStartTag, false, $"{n} FINISH 로 인한 {x.Target.Name} start {targetStartTag.GetName()} 끄기")
@@ -180,11 +180,12 @@ module VirtualParentSegmentModule =
                                 assert(x.PortR.Value = false)
 
                             | Status4.Homing ->
-                                assert(not targetStartTag.Value)        // 일반적으로... 
-                                if childStatus = Status4.Going then
-                                    failwith $"Something bad happend?  trying to reset child while {x.Target.Name}={childStatus}"
+                                if triggerTargetReset then
+                                    assert(not targetStartTag.Value)        // 일반적으로... 
+                                    if childStatus = Status4.Going then
+                                        failwith $"Something bad happend?  trying to reset child while {x.Target.Name}={childStatus}"
 
-                                write(targetResetTag, true, $"{n} HOMING 으로 인한 {x.Target.Name} reset 켜기")
+                                    write(targetResetTag, true, $"{n} HOMING 으로 인한 {x.Target.Name} reset 켜기")
 
 
                             | _ ->
@@ -207,10 +208,14 @@ module VirtualParentSegmentModule =
                 let causalSources = setEdges.selectMany(fun e -> e.Sources).Cast<Segment>().ToArray()
                 let resetSources = resetEdges.selectMany(fun e -> e.Sources).Cast<Segment>().ToArray()
 
-                // todo: 알맹이의 reset 이 없는 경우, 가상부모는 self reset 이면서, reset 수행 중에 알맹이 reset 은 수행하지 않음
-                if causalSources.Any() (*&& resetSources.Any()*) then
-                    let vps = VirtualParentSegment.Create(target, autoStart, (target.TagStart, target.TagReset), causalSources, resetSources)
-                    yield vps
-                else
-                    logWarn $"Do not create VPS for {target.QualifiedName}"
+
+
+                yield VirtualParentSegment.Create(target, autoStart, (target.TagStart, target.TagReset), causalSources, resetSources)
+
+                //// todo: 알맹이의 reset 이 없는 경우, 가상부모는 self reset 이면서, reset 수행 중에 알맹이 reset 은 수행하지 않음
+                //if causalSources.Any() (*&& resetSources.Any()*) then
+                //    let vps = VirtualParentSegment.Create(target, autoStart, (target.TagStart, target.TagReset), causalSources, resetSources)
+                //    yield vps
+                //else
+                //    logWarn $"Do not create VPS for {target.QualifiedName}"
         |]

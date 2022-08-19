@@ -55,7 +55,7 @@ module EdgeTest =
 
 
             model.BuildGraphInfo();
-            builder.InitializeAllFlows()
+            builder.RetouchTags()
 
             model.Epilogue()
 

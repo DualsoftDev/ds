@@ -51,15 +51,4 @@ public class Tag : Bit, IBitReadWritable, ITxRx
         Type = tagType;
         ownerCpu.TagsMap.Add(name, this);
     }
-    public Tag(Tag tag)
-        : this(tag.Cpu, tag.Owner, tag.Name, tag.Type, tag.Value)
-    {
-    }
-
-    public static Tag CreateAutoStart(Cpu ownerCpu, SegmentBase ownerSegment, string name, string internalName) =>
-        new Tag(ownerCpu, ownerSegment, name, TagType.Auto | TagType.Start | TagType.Q | TagType.External) { InternalName = internalName }
-        ;
-    public static Tag CreateAutoReset(Cpu ownerCpu, SegmentBase ownerSegment, string name, string internalName) =>
-        new Tag(ownerCpu, ownerSegment, name, TagType.Auto | TagType.Reset | TagType.Q | TagType.External) { InternalName = internalName }
-        ;
 }

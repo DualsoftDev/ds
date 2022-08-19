@@ -21,7 +21,7 @@ public partial class EngineBuilder
         Cpu.IsActive = true;
 
         Model.BuildGraphInfo();
-        InitializeAllFlows();
+        RetouchTags();
 
         Model.Epilogue();
 
@@ -43,76 +43,111 @@ public partial class EngineBuilder
 // Engine Initializer
 partial class EngineBuilder
 {
-    public void InitializeAllFlows()
+    public void RetouchTags()
     {
-        // root flow 를 cpu 별로 grouping
-        var allRootFlows = Model.Systems.SelectMany(s => s.RootFlows);
-        var empty = Array.Empty<RootFlow>();
-        var flowsGrps = allRootFlows.GroupByToDictionary(flow => flow.Cpu);
-        foreach (var (cpu, flows) in flowsGrps.Select(kv => kv.ToTuple()))
+        RenameBits();
+        RebuildMap();
+        MarkTxRxTags();
+        return;
+
+        void RenameBits()
         {
-            var cpuBits = new HashSet<IBit>();
-            // rename flow/segment tags
-            foreach (var f in flows)
+            // root flow 를 cpu 별로 grouping
+            var allRootFlows = Model.Systems.SelectMany(s => s.RootFlows);
+            var flowsGrps = allRootFlows.GroupByToDictionary(flow => flow.Cpu);
+            foreach (var (cpu, flows) in flowsGrps.Select(kv => kv.ToTuple()))
             {
-                foreach(var seg in f.RootSegments)
+                var cpuBits = new HashSet<IBit>();
+                // rename flow/segment tags, add flow auto bit
+                foreach (var f in flows)
                 {
-                    var q = seg.QualifiedName;
-                    foreach(var t in new[] { seg.TagStart, seg.TagReset, seg.TagEnd, seg.Going, seg.Ready})
+                    foreach (var seg in f.RootSegments)
                     {
-                        cpuBits.Add(t);
-                        t.Name = $"{t.InternalName}_{q}";
+                        var q = seg.QualifiedName;
+                        foreach (var t in new[] { seg.TagStart, seg.TagReset, seg.TagEnd, seg.Going, seg.Ready })
+                        {
+                            cpuBits.Add(t);
+                            t.Name = $"{t.InternalName}_{q}";
+                        }
+                        foreach (var p in new PortInfo[] { seg.PortS, seg.PortR, seg.PortE, })
+                        {
+                            cpuBits.Add(p);
+                            p.Name = $"{p.InternalName}_{q}";
+                            if (p.Actual != null)
+                            {
+                                cpuBits.Add(p.Actual);
+                                //if (p.Actual is Named named)
+                                //    named.Name = $"{p.InternalName}_Actual_{q}";
+                                //else
+                                //    throw new Exception("ERROR");
+                            }
+                            if (p.Plan != null)
+                            {
+                                cpuBits.Add(p.Plan);
+                                if (p == seg.PortE && p.Plan is Named named)
+                                    named.Name = $"{p.InternalName}_Plan_{q}";
+                            }
+                        }
                     }
-                    foreach (var p in new PortInfo[] { seg.PortS, seg.PortR, seg.PortE, })
+                    cpuBits.Add(f.Auto);
+                    f.Auto.Name = $"Auto_{f.QualifiedName}";
+                }
+
+                Debug.Assert(cpuBits.ForAll(cpu.BitsMap.Values.Contains));
+                Debug.Assert(cpuBits.OfType<Tag>().ForAll(cpu.TagsMap.Values.Contains));
+            }
+        }
+
+        void RebuildMap()
+        {
+            foreach (var cpu in Model.Cpus)
+            {
+                var cpuBits = cpu.BitsMap.Values.ToHashSet();
+                var oldKeys = cpu.BitsMap.Where(kv => cpuBits.Contains(kv.Value)).Select(kv => kv.Key).ToArray();
+                foreach (var ok in oldKeys)
+                {
+                    cpu.BitsMap.Remove(ok);
+                    cpu.TagsMap.Remove(ok);
+                }
+
+                foreach (var b in cpuBits)
+                {
+                    var n = b.GetName();
+                    cpu.BitsMap.Add(n, b);
+                    if (b is Tag t)
+                        cpu.TagsMap.Add(n, t);
+                }
+
+                Opc.AddTags(cpuBits.OfType<Tag>());
+            }
+        }
+
+        void MarkTxRxTags()
+        {
+            var allRootSegments =
+                Model.Systems.SelectMany(s => s.RootFlows)
+                .SelectMany(f => f.RootSegments)
+                ;
+
+            foreach(var rs in allRootSegments)
+            {
+                foreach (var tx in rs.Children.SelectMany(ch => ch.TagsStart).OfType<Tag>())
+                    tx.Type = tx.Type | TagType.TX | TagType.External;
+
+                foreach (var rx in rs.Children.SelectMany(ch => ch.TagsEnd).OfType<Tag>())
+                    rx.Type = rx.Type | TagType.RX | TagType.External;
+
+                foreach (var ch in rs.Children)
+                {
+                    if (ch.TagReset is Tag reset)
                     {
-                        cpuBits.Add(p);
-                        p.Name = $"{p.InternalName}_{q}";
-                        if (p.Actual != null)
-                        {
-                            cpuBits.Add(p.Actual);
-                            //if (p.Actual is Named named)
-                            //    named.Name = $"{p.InternalName}_Actual_{q}";
-                            //else
-                            //    throw new Exception("ERROR");
-                        }
-                        if (p.Plan != null)
-                        {
-                            cpuBits.Add(p.Plan);
-                            if (p == seg.PortE && p.Plan is Named named)
-                                named.Name = $"{p.InternalName}_Plan_{q}";
-                        }
+                        Debug.Assert(ch.Coin is ExSegmentCall);
+                        Debug.Assert(reset.Type.HasFlag(TagType.Reset));
+                        reset.Type = reset.Type | TagType.External;
                     }
                 }
-                cpuBits.Add(f.Auto);
-                f.Auto.Name = $"Auto_{f.QualifiedName}";
             }
-
-            Debug.Assert(cpuBits.ForAll(cpu.BitsMap.Values.Contains));
-            Debug.Assert(cpuBits.OfType<Tag>().ForAll(cpu.TagsMap.Values.Contains));
         }
-
-        foreach (var cpu in Model.Cpus)
-        {
-            var cpuBits = cpu.BitsMap.Values.ToHashSet();
-            var oldKeys = cpu.BitsMap.Where(kv => cpuBits.Contains(kv.Value)).Select(kv => kv.Key).ToArray();
-            foreach (var ok in oldKeys)
-            {
-                cpu.BitsMap.Remove(ok);
-                cpu.TagsMap.Remove(ok);
-            }
-
-            foreach (var b in cpuBits)
-            {
-                var n = b.GetName();
-                cpu.BitsMap.Add(n, b);
-                if (b is Tag t)
-                    cpu.TagsMap.Add(n, t);
-            }
-
-            Opc.AddTags(cpuBits.OfType<Tag>());
-        }
-
-
     }
 }
 

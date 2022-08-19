@@ -159,7 +159,9 @@ module EngineModule =
             write(seg.PortE, false, $"{seg.QualifiedName} HOMING finished")
 
             // todo: fix me
-            write(seg.TagEnd, false, $"임시: end off --------- 제거해야 함")
+            let et = seg.TagEnd
+            if not <| et.Type.HasFlag(TagType.External) then
+                write(et, false, $"내부 end tag {et.Name} 강제 off by {segment.QualifiedName} homing")
 
     let Initialize() =
         SegmentBase.Create <-

@@ -15,13 +15,13 @@ type ModelExt =
     [<Extension>]
     static member RetouchTags(model:Model, opc:OpcBroker) =
 
+        /// rename flow/segment tags, add flow auto bit
         let renameBits() =
             // root flow 를 cpu 별로 grouping
             let allRootFlows = model.Systems.selectMany(fun s -> s.RootFlows)
             let flowsGrps = allRootFlows.GroupByToDictionary(fun flow -> flow.Cpu)
             for (cpu, flows) in flowsGrps.Select(fun kv -> kv.ToTuple()) do
                 let cpuBits = new HashSet<IBit>()
-                // rename flow/segment tags, add flow auto bit
                 for f in flows do
                     for seg in f.RootSegments do
                         let q = seg.QualifiedName
@@ -34,20 +34,20 @@ type ModelExt =
                             p.Name <- $"{p.InternalName}_{q}"
                             if p.Actual <> null then
                                 cpuBits.Add(p.Actual) |> ignore
-                                //if (p.Actual is Named named)
-                                //    named.Name = $"{p.InternalName}_Actual_{q}"
-                                //else
-                                //    throw new Exception("ERROR")
+                                p.Actual.SetName $"{p.InternalName}_Actual_{q}"
+
                             if p.Plan <> null then
                                 cpuBits.Add(p.Plan) |> ignore
-                                if p = seg.PortE && p.Plan :? Named then
-                                    (p.Plan :?> Named).Name <- $"{p.InternalName}_Plan_{q}"
-                    cpuBits.Add(f.Auto) |> ignore
+                                if p = seg.PortE then
+                                    p.Plan.SetName $"{p.InternalName}_Plan_{q}"
+
+                    cpuBits.Add f.Auto |> ignore
                     f.Auto.Name <- $"Auto_{f.QualifiedName}"
 
                 assert(cpuBits.ForAll(cpu.BitsMap.Values.Contains))
                 assert(cpuBits.OfType<Tag>().ForAll(cpu.TagsMap.Values.Contains))
 
+        /// Tag 이름 변경으로 인한, cpu 의 BitMap/TagsMap 갱신 및 OPC tag 갱신
         let rebuildMap() =
             for cpu in model.Cpus do
                 let cpuBits = cpu.BitsMap.Values.ToHashSet()

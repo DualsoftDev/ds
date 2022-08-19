@@ -61,6 +61,15 @@ public static class BitExtension
             _ => bit.ToText(),
         };
     }
+
+    public static void SetName(this IBit bit, string name)
+    {
+        if (bit is Named named)
+            named.Name = name;
+        else
+            throw new Exception("ERROR");
+    }
+
     public static string ToText(this IBit bit, bool expand = false)
     {
         string getText(IBit bit, bool expand) => expand ? bit.ToText(true) : bit.GetName();

@@ -96,8 +96,9 @@ module VirtualParentSegmentModule =
             vps
 
         override x.WireEvent(writer, onError) =
-            let write(bit, value, cause) =
-                writer(BitChange(bit, value, cause, onError))
+            let write:BitWriter = getBitWriter writer onError
+            let writeEndPort = getEndPortPlanWriter writer onError
+
             Global.BitChangedSubject
                 .Subscribe(fun bc ->
                     let bit = bc.Bit :?> Bit
@@ -124,7 +125,7 @@ module VirtualParentSegmentModule =
                         | Status4.Going, true ->
                             write(targetStartTag, false, $"{n} going 끝내기 by{cause}")
                             write(x.Going, false, $"{n} going 끝내기 by{cause}")
-                            write(x.PortE, true, $"{n} FINISH 끝내기 by{cause}")
+                            writeEndPort(x.PortE, true, $"{n} FINISH 끝내기 by{cause}")
                             
 
 
@@ -133,7 +134,7 @@ module VirtualParentSegmentModule =
                             //assert(x.Going.Value = false) // 아직 write 안되었을 수도 있음
                             write(targetResetTag, false, $"{x.Target.Name} homing 완료로 reset 끄기")
                             write(x.Ready, true, $"{x.Target.Name} homing 완료")
-                            write(x.PortE, false, null)
+                            writeEndPort(x.PortE, false, null)
 
                         | Status4.Ready, true ->
                             logInfo $"외부에서 내부 target {x.Target.Name} 실행 감지"

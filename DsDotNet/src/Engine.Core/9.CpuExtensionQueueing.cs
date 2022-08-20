@@ -98,7 +98,7 @@ public static class CpuExtensionQueueing
                         var port = (PortInfo)bc.Bit;
                         if (bit == port.Plan)
                         {
-                            var newBc = new PortInfoPlanChange(bc);
+                            var newBc = new PortInfoPlanChange(bc) { Applied = true };
                             if (withQueue)
                                 q.Enqueue(newBc);
                             else
@@ -152,8 +152,18 @@ public static class CpuExtensionQueueing
 
             var bitChanged = bitChange switch
             {
-                PortInfoPlanChange pc => pc.PortInfo.PlanValueChanged(pc.NewValue),
+                PortInfoPlanChange pc => new Func<bool>(() =>
+                {
+                    if (!pc.Applied)
+                        if (pc.PortInfo.Plan is IBitWritable writable)
+                            writable.SetValue(pc.NewValue);
+                        else
+                            throw new Exception("ERROR");
+                    return pc.PortInfo.PlanValueChanged(pc.NewValue);
+                })(),
+
                 PortInfoActualChange ac => ac.PortInfo.ActualValueChanged(ac.NewValue),
+
                 _ => new Func<bool>(() =>
                 {
                     Debug.Assert(bit is not PortInfo);

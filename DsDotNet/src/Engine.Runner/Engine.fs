@@ -53,8 +53,7 @@ module EngineModule =
         stopMonitor homingSubscriptions seg
 
     let private procReady(seg:SegmentBase, writer:ChangeWriter, onError:ExceptionHandler) =
-        let write(bit, value, cause) =
-            writer(BitChange(bit, value, cause, onError))
+        let write:BitWriter = getBitWriter writer onError
         assert( [seg.TagStart; seg.TagReset; seg.TagEnd].ForAll(fun t -> not t.Value ))     // A_F_Pp.TagEnd 가 true 되는 상태???
         assert( [seg.PortS :> PortInfo; seg.PortR; seg.PortE].ForAll(fun t -> not t.Value ))
         stopMonitorHoming seg
@@ -66,8 +65,8 @@ module EngineModule =
     ///     - 없으면 바로 종료
     let private procGoing(seg:SegmentBase, writer:ChangeWriter, onError:ExceptionHandler) =
         assert( not <| homingSubscriptions.ContainsKey(seg))
-        let write(bit, value, cause) =
-            writer(BitChange(bit, value, cause, onError))
+        let write:BitWriter = getBitWriter writer onError
+        let writeEndPort = getEndPortPlanWriter writer onError
 
         write(seg.Going, true, $"{seg.QualifiedName} GOING 시작")
         if seg.Children.Any() then
@@ -98,7 +97,7 @@ module EngineModule =
                                 write(st, false, $"Child {finishedChild.QualifiedName} finished")
                             
                             if (seg.Children.ForAll(fun ch -> ch.IsFlipped)) then
-                                write(seg.PortE, true, $"{seg.QualifiedName} GOING 끝 (모든 child end)")
+                                writeEndPort(seg.PortE, true, $"{seg.QualifiedName} GOING 끝 (모든 child end)")
                             else
                                 // 남은 children 중에서 다음 뒤집을 target 선정후 뒤집기
                                 let targets =
@@ -118,12 +117,11 @@ module EngineModule =
             runChildren seg.Inits
 
         else
-            write(seg.PortE, true, $"{seg.QualifiedName} GOING 끝")
+            writeEndPort(seg.PortE, true, $"{seg.QualifiedName} GOING 끝")
 
 
     let private procFinish(seg:SegmentBase, writer:ChangeWriter, onError:ExceptionHandler) =
-        let write(bit, value, cause) =
-            writer(BitChange(bit, value, cause, onError))
+        let write = getBitWriter writer onError
 
         stopMonitorGoing seg
         write(seg.Going, false, $"{seg.QualifiedName} FINISH")
@@ -131,8 +129,8 @@ module EngineModule =
 
     let private procHoming(segment:SegmentBase, writer:ChangeWriter, onError:ExceptionHandler) =
         let seg = segment :?> Segment
-        let write(bit, value, cause) =
-            writer(BitChange(bit, value, cause, onError))
+        let write:BitWriter = getBitWriter writer onError
+        let writeEndPort = getEndPortPlanWriter writer onError
 
         stopMonitorGoing seg
         // 자식 원위치 맞추기
@@ -149,17 +147,19 @@ module EngineModule =
                         if readyChild <> null then
                             ()
                         // originTargets 모두 원위치인지 확인
-                        write(seg.PortE, false, $"{seg.QualifiedName} HOMING finished")
+                        writeEndPort(seg.PortE, false, $"{seg.QualifiedName} HOMING finished")
                         ()
                     )
             homingSubscriptions.Add(seg, subs)
         else
-            write(seg.PortE, false, $"{seg.QualifiedName} HOMING finished")
+            writeEndPort(seg.PortE, false, $"{seg.QualifiedName} HOMING finished")
 
             // todo: fix me
             let et = seg.TagEnd
-            if not <| et.Type.HasFlag(TagType.External) then
-                write(et, false, $"내부 end tag {et.Name} 강제 off by {segment.QualifiedName} homing")
+            //if et.Type.HasFlag(TagType.External) then
+            //    ()
+            //else
+            write(et, false, $"내부 end tag {et.Name} 강제 off by {segment.QualifiedName} homing")
 
     let Initialize() =
         SegmentBase.Create <-

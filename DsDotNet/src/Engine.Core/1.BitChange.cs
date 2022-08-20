@@ -55,6 +55,7 @@ public abstract class PortInfoChange : BitChange
 }
 public class PortInfoPlanChange : PortInfoChange
 {
+    public bool Applied { get; set; }
     public PortInfoPlanChange(BitChange bc) : base(bc) { }
     //public PortInfoPlanChange(PortInfo bit, bool newValue, object cause = null, ExceptionHandler onError = null)
     //    : base(bit, newValue, cause, onError)

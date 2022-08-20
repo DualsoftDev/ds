@@ -142,7 +142,7 @@ public class PortInfoEnd : PortInfo
     {
         Debug.Assert(Plan.Value == newValue);
         CheckMatch(newValue);
-        return false;
+        return Actual == null;
     }
     public override bool ActualValueChanged(bool newValue)
     {

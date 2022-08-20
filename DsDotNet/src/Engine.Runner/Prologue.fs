@@ -21,3 +21,16 @@ module PrologueModule =
     let mutable doFinish:DoStatus = defaultDoStatus
     let mutable doHoming:DoStatus = defaultDoStatus
 
+[<AutoOpen>]
+module internal BitWriterModule =
+    type BitWriter = IBit * bool * obj -> unit
+
+    let getBitWriter (writer:ChangeWriter) onError =
+        fun (bit, value, cause) ->
+            assert(not <| box bit :? PortInfo)
+            writer(BitChange(bit, value, cause, onError))
+
+    let getEndPortPlanWriter (writer:ChangeWriter) onError =
+        fun (endPort:PortInfoEnd, value, cause) ->
+            //assert(box endPort:? PortInfo)
+            writer(PortInfoPlanChange(BitChange(endPort, value, cause, onError)))

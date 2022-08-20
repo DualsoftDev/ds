@@ -97,6 +97,8 @@ public static class CpuExtension
             foreach (var bit in cpu.BitsMap.Values)
             {
                 var type = bit.GetType().Name;
+                if (type == "FlipFlop")
+                    Console.WriteLine();
                 var name = bit is Named ? $" {((Named)bit).Name}" : "";
                 yield return $"[{type}]{name} = {bit.ToText(expand)}";
             }

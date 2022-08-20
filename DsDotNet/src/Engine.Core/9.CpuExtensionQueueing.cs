@@ -43,6 +43,9 @@ public static class CpuExtensionQueueing
     }
     public static void Apply(this Cpu cpu, BitChange bitChange, bool withQueue)
     {
+        //if (bitChange.Bit.Value == bitChange.NewValue)
+        //    return;
+
         if (bitChange.Bit.GetName() == "Start_A_F_Vp")
             Console.WriteLine();
 
@@ -153,6 +156,8 @@ public static class CpuExtensionQueueing
                 PortInfoActualChange ac => ac.PortInfo.ActualValueChanged(ac.NewValue),
                 _ => new Func<bool>(() =>
                 {
+                    Debug.Assert(bit is not PortInfo);
+
                     if (bit is IBitWritable writable)
                     {
                         writable.SetValue(bitChange.NewValue);
@@ -187,6 +192,7 @@ public static class CpuExtensionQueueing
         }
 
     }
+
 
 
     /// <summary> Bit 의 값 변경 처리를 CPU 에 위임.  즉시 수행되지 않고, CPU 의 Queue 에 추가 된 후, CPU thread 에서 수행된다.  </summary>
@@ -272,23 +278,5 @@ public static class CpuExtensionQueueing
         var ffs = cpu.BitsMap.Values.OfType<FlipFlop>();
         foreach (var ff in ffs)
             addSubRelationship(ff);
-    }
-
-    abstract class PortInfoChange : BitChange
-    {
-        public PortInfo PortInfo { get; }
-        public PortInfoChange(BitChange bc)
-            : base(bc.Bit, bc.NewValue, bc.Cause, bc.OnError)
-        {
-            PortInfo = (PortInfo)bc.Bit;
-        }
-    }
-    class PortInfoPlanChange : PortInfoChange
-    {
-        public PortInfoPlanChange(BitChange bc) : base(bc) {}
-    }
-    class PortInfoActualChange : PortInfoChange
-    {
-        public PortInfoActualChange(BitChange bc) : base(bc) { }
     }
 }

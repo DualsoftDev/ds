@@ -49,7 +49,7 @@ public abstract class PortInfoCommand : PortInfo
     {
     }
     public override bool Evaluate() => Plan.Value;
-    public override void SetValue(bool newValue)
+    public override void SetValue(bool newValue)    // PortInfoCommand
     {
         if (Plan is IBitWritable w)
             w.SetValue(newValue);
@@ -60,7 +60,7 @@ public abstract class PortInfoCommand : PortInfo
         Actual?.SetValue(newValue);
     }
 
-    public override bool PlanValueChanged(bool newValue)
+    public override bool PlanValueChanged(bool newValue)    // PortInfoCommand
     {
         Debug.Assert(Plan.Value == newValue);
         Actual?.SetValue(newValue);
@@ -121,7 +121,7 @@ public class PortInfoEnd : PortInfo
             throw new DsException($"Spatial Error: Plan[{Plan}={newPlanValue}] <> Actual[{Actual.Value}]");
 
     }
-    public override void SetValue(bool newValue)
+    public override void SetValue(bool newValue)    // PortInfoEnd
     {
         Debug.Assert(Plan.Value == _value);
 
@@ -138,7 +138,7 @@ public class PortInfoEnd : PortInfo
         }
     }
 
-    public override bool PlanValueChanged(bool newValue)
+    public override bool PlanValueChanged(bool newValue)    // PortInfoEnd
     {
         Debug.Assert(Plan.Value == newValue);
         CheckMatch(newValue);

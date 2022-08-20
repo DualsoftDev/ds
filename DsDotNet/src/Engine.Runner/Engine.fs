@@ -6,13 +6,11 @@ open System.Reactive.Disposables
 open System.Threading
 open System.Reactive.Linq
 open System.Collections.Generic
-open System.Runtime.CompilerServices
 
 open Engine.Common.FS
 open Engine.Core
 open Engine.OPC
 open Engine.Common
-open Engine.Graph
 
 
 [<AutoOpen>]
@@ -221,9 +219,9 @@ module EngineModule =
 
                 //logDebug "====================="
                 //cpu.PrintAllTags(false);
-                //logDebug "---------------------"
-                //cpu.PrintAllTags(true);
-                //logDebug "====================="
+                logDebug "---------------------"
+                cpu.PrintAllTags(true);
+                logDebug "====================="
 
 
             let subscriptions =

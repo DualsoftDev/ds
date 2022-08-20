@@ -105,6 +105,8 @@ public static class BitExtension
                         _ => throw new Exception("ERROR")
                     };
                 }).Invoke(),
+
+            FlipFlop ff => $"[Set={ff.S.ToText()}, Reset={ff.R.ToText()}]",
             Bit b => b.Name,
             _ => throw new Exception("ERROR")   //$"ToStringText=>{bit.Cpu.Name}[{bit.GetType().Name}]",
         };

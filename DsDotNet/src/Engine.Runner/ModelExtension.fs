@@ -36,10 +36,9 @@ type ModelExt =
                                 cpuBits.Add(p.Actual) |> ignore
                                 p.Actual.SetName $"{p.InternalName}_Actual_{q}"
 
-                            if p.Plan <> null then
-                                cpuBits.Add(p.Plan) |> ignore
-                                if p = seg.PortE then
-                                    p.Plan.SetName $"{p.InternalName}_Plan_{q}"
+                            cpuBits.Add(p.Plan) |> ignore
+                            if p = seg.PortE then
+                                p.Plan.SetName $"{p.InternalName}_Plan_{q}"
 
                     cpuBits.Add f.Auto |> ignore
                     f.Auto.Name <- $"Auto_{f.QualifiedName}"

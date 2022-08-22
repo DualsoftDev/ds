@@ -146,6 +146,7 @@ public static class SegmentExtension
 
     public static void CreateSREGR(this SegmentBase segment, Cpu cpu, PortInfoStart sp, PortInfoReset rp, PortInfoEnd ep, Tag going, Tag ready)
     {
+        Debug.Assert(segment.GetType().Name == "VirtualParentSegment" || Global.IsInUnitTest);
         var s = segment;
         var n = s.QualifiedName;
         Debug.Assert((new object[] { s.PortS, s.PortR, s.PortE, s.Going, s.Ready, }).ForAll(b => b is null));
@@ -154,6 +155,5 @@ public static class SegmentExtension
         s.PortE = ep ?? PortInfoEnd.Create(cpu, s, $"PortInfoE_{n}", null);
         s.Going = going ?? new Tag(cpu, s, $"Going_{n}", TagType.Going);
         s.Ready = ready ?? new Tag(cpu, s, $"Ready_{n}", TagType.Ready);
-
     }
 }

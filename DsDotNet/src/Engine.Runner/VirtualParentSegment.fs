@@ -5,6 +5,7 @@ open Engine.Common.FS
 open Engine.Core
 open System
 open System.Linq
+open System.Web.Configuration
 
 [<AutoOpen>]
 module VirtualParentSegmentModule =
@@ -13,26 +14,34 @@ module VirtualParentSegmentModule =
         , resetSourceSegments:Segment seq
         , startPort, resetPort, endPort
         , goingTag, readyTag
-        , targetStartTag, targetResetTag               // target child 의 start port 에 가상 부모가 시작시킬 수 있는 start tag 추가 (targetStartTag)
     ) as this =
         inherit FsSegmentBase(target.Cpu, $"VPS_{target.QualifiedName}"
             , $"VPS_{target.TagStart.Name}"
             , $"VPS_{target.TagReset.Name}"
             , $"VPS_{target.TagEnd.Name}"
-            ) //, startPort, resetPort, endPort, goingTag, readyTag)
+            )
 
         let cpu = target.Cpu
         let mutable oldStatus:Status4 option = None
         let triggerTargetStart = causalSourceSegments.Any()
         let triggerTargetReset = resetSourceSegments.Any()
+        let targetStartTag = target.TagStart
+        let targetResetTag = target.TagReset
 
         do
             this.CreateSREGR(cpu, startPort, resetPort, endPort, goingTag, readyTag)
 
         member val Target = target;
 
+        /// target 에 대한 가상 부모 생성
+        /// 가상부모 StartPort:
+        ///     ON: target 으로 들어오는 모든 set incoming 에 대해서 finish rising 이 되었을 때
+        ///     OFF: 가상부모가 finish 되었을 때
+        /// 가상부모 ResetPort:
+        ///     ON: 가상 부모가 ready 상태에서 target 으로 들어오는 모든 reset incoming 에 대해서,  going rising 되었을 때
+        ///     OFF: 가상부모가 ready 되었을 때
+        /// - 가상 부모는 plan 만 존재하고, actual 이 없음
         static member Create(target:Segment, auto:IBit
-            , (targetStartTag:IBit, targetResetTag:IBit)
             , causalSourceSegments:Segment seq
             , resetSourceSegments:Segment seq
         ) =
@@ -88,7 +97,7 @@ module VirtualParentSegmentModule =
                 PortInfoStart(cpu, null, $"Start_{n}", startPortInfoPlan, null)
 
 
-            let vps = VirtualParentSegment(target, causalSourceSegments, resetSourceSegments, sp, rp, ep, null, readyTag, targetStartTag, targetResetTag)
+            let vps = VirtualParentSegment(target, causalSourceSegments, resetSourceSegments, sp, rp, ep, null, readyTag)
             sp.Segment <- vps
             rp.Segment <- vps
             ep.Segment <- vps
@@ -195,7 +204,7 @@ module VirtualParentSegmentModule =
                 )
 
     let CreateVirtualParentSegmentsFromRootFlow(rootFlow: RootFlow) =
-        let autoStart = rootFlow.Auto
+        let auto = rootFlow.Auto
         let allEdges = rootFlow.Edges.ToArray()
         let segments = rootFlow.RootSegments.Cast<Segment>()
         [|
@@ -209,5 +218,5 @@ module VirtualParentSegmentModule =
                 let causalSources = setEdges.selectMany(fun e -> e.Sources).Cast<Segment>().ToArray()
                 let resetSources = resetEdges.selectMany(fun e -> e.Sources).Cast<Segment>().ToArray()
 
-                yield VirtualParentSegment.Create(target, autoStart, (target.TagStart, target.TagReset), causalSources, resetSources)
+                yield VirtualParentSegment.Create(target, auto, causalSources, resetSources)
         |]

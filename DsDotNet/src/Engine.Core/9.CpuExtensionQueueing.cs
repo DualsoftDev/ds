@@ -166,7 +166,7 @@ public static class CpuExtensionQueueing
 
                 _ => new Func<bool>(() =>
                 {
-                    Debug.Assert(bit is not PortInfo);
+                    Debug.Assert(bit is not PortInfo || Global.IsInUnitTest);
 
                     if (bit is IBitWritable writable)
                     {

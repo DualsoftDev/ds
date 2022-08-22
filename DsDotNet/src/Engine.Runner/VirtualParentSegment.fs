@@ -6,6 +6,7 @@ open Engine.Core
 open System
 open System.Linq
 open System.Web.Configuration
+open Engine.Common
 
 [<AutoOpen>]
 module VirtualParentSegmentModule =
@@ -15,13 +16,18 @@ module VirtualParentSegmentModule =
         , startPort, resetPort, endPort
         , goingTag, readyTag
     ) as this =
-        inherit FsSegmentBase(target.Cpu, $"VPS_{target.QualifiedName}"
-            , $"VPS_{target.TagStart.Name}"
-            , $"VPS_{target.TagReset.Name}"
-            , $"VPS_{target.TagEnd.Name}"
-            )
+        inherit FsSegmentBase(target.Cpu, $"VPS_{target.QualifiedName}")
 
         let cpu = target.Cpu
+        do
+            let ns = $"VPS_{target.TagStart.Name}"
+            let nr = $"VPS_{target.TagReset.Name}"
+            let ne = $"VPS_{target.TagEnd.Name}"
+            this.TagStart <- Tag(cpu, this, ns, TagType.Q ||| TagType.Start)
+            this.TagReset <- Tag(cpu, this, nr, TagType.Q ||| TagType.Reset)
+            this.TagEnd   <- Tag(cpu, this, ne, TagType.I ||| TagType.End  )
+
+
         let mutable oldStatus:Status4 option = None
         let triggerTargetStart = causalSourceSegments.Any()
         let triggerTargetReset = resetSourceSegments.Any()

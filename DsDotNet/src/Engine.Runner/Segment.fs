@@ -14,10 +14,9 @@ open System.Collections.Generic
 module FsSegmentModule =    
     /// Common base class for *Real* root segment and Virtual Parent Segment
     [<AbstractClass>]
-    type FsSegmentBase(cpu, segmentName, startTagName, resetTagName, endTagName) =
-        inherit SegmentBase(cpu, segmentName, startTagName, resetTagName, endTagName)
-    
-        //new(cpu, segmentName) = FsSegment(cpu, segmentName, true, null, null, null)
+    type FsSegmentBase(cpu, segmentName) =
+        inherit SegmentBase(cpu, segmentName)
+
         abstract member WireEvent:ChangeWriter*ExceptionHandler->IDisposable
 
 
@@ -30,16 +29,24 @@ module FsSegmentModule =
 
     /// Real Root Segment
     type Segment(cpu, segmentName) as this =
-        inherit FsSegmentBase(cpu, segmentName, null, null, null)
+        inherit FsSegmentBase(cpu, segmentName)
         do
+            let name = segmentName
             let uid = EmLinq.UniqueId;
-            this.Going <- Tag(cpu, this, $"Going_{segmentName}_{uid()}", TagType.Going, InternalName = "Going")
-            this.Ready <- Tag(cpu, this, $"Ready_{segmentName}_{uid()}", TagType.Ready, InternalName = "Ready")
+            this.Going <- Tag(cpu, this, $"Going_{name}_{uid()}", TagType.Going, InternalName = "Going")
+            this.Ready <- Tag(cpu, this, $"Ready_{name}_{uid()}", TagType.Ready, InternalName = "Ready")
 
-            this.PortE <- PortInfoEnd.Create(cpu, this, $"EndPort_{segmentName}_{uid()}", null)
+            let ns = $"Start_{name}_{uid()}"
+            let nr = $"Reset_{name}_{uid()}"
+            let ne = $"End_{name}_{uid()}"
+            this.TagStart <- Tag(cpu, this, ns, TagType.Q ||| TagType.Start, InternalName = "Start")
+            this.TagReset <- Tag(cpu, this, nr, TagType.Q ||| TagType.Reset, InternalName = "Reset")
+            this.TagEnd   <- Tag(cpu, this, ne, TagType.I ||| TagType.End  , InternalName = "End")
+
+            this.PortE <- PortInfoEnd.Create(cpu, this, $"EndPort_{name}_{uid()}", null)
             this.PortE.InternalName <- "EndPort"
-            this.PortS <- new PortInfoStart(cpu, this, $"StartPort_{segmentName}_{uid()}", this.TagStart, null, InternalName = "StartPort")
-            this.PortR <- new PortInfoReset(cpu, this, $"ResetPort_{segmentName}_{uid()}", this.TagReset, null, InternalName = "ResetPort")
+            this.PortS <- new PortInfoStart(cpu, this, $"StartPort_{name}_{uid()}", this.TagStart, null, InternalName = "StartPort")
+            this.PortR <- new PortInfoReset(cpu, this, $"ResetPort_{name}_{uid()}", this.TagReset, null, InternalName = "ResetPort")
 
         member val Inits:Child array = null with get, set
         member val Lasts:Child array = null with get, set

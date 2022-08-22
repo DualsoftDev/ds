@@ -29,9 +29,9 @@ public abstract partial class SegmentBase : ChildFlow, IVertex, ICoin, IWallet, 
     public PortInfoReset PortR { get; set; }
     public PortInfoEnd PortE { get; set; }
 
-    public Tag TagStart { get; }
-    public Tag TagReset { get; }
-    public Tag TagEnd { get; }
+    public Tag TagStart { get; internal set; }
+    public Tag TagReset { get; internal set; }
+    public Tag TagEnd { get; internal set; }
     public Tag Going { get; internal set; } // Flag or Tag
     public Tag Ready { get; internal set; } // Flag or Tag
 
@@ -73,13 +73,6 @@ public abstract partial class SegmentBase : ChildFlow, IVertex, ICoin, IWallet, 
         : base(cpu, name)
     {
         _cpu = cpu;
-        var uid = EmLinq.UniqueId;
-        var ns = startTagName ?? $"Start_{name}_{uid()}";
-        var nr = resetTagName ?? $"Reset_{name}_{uid()}";
-        var ne = endTagName   ?? $"End_{name}_{uid()}";
-        TagStart = new Tag(cpu, this, ns, TagType.Q | TagType.Start) { InternalName = "Start"};
-        TagReset = new Tag(cpu, this, nr, TagType.Q | TagType.Reset) { InternalName = "Reset" };
-        TagEnd   = new Tag(cpu, this, ne, TagType.I | TagType.End)   { InternalName = "End" };
     }
 
 

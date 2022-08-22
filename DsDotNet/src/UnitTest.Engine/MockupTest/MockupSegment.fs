@@ -9,14 +9,10 @@ open Engine.Core
 open Engine.Runner
 
 [<AbstractClass>]
-type MockupSegmentBase(cpu, n, startTagName, resetTagName, endTagName) =
-    inherit FsSegmentBase(cpu, n
-        , if isNull startTagName then $"Start_{n}" else startTagName
-        , if isNull resetTagName then $"Reset_{n}" else resetTagName
-        , if isNull endTagName then $"End_{n}" else endTagName
-    )
+type MockupSegmentBase(cpu, n) as this =
+    inherit FsSegmentBase(cpu, n)
 
-    new(cpu, n) = MockupSegmentBase(cpu, n, null, null, null)
+
     member val FinishCount = 0 with get, set
 
     static member val WithThreadOnPortEnd = false with get, set
@@ -28,6 +24,12 @@ type MockupSegment(cpu, n) =
 
     static member CreateWithDefaultTags(cpu, n) =
         let seg = MockupSegment(cpu, n)
+        let ns = $"Start_{n}"
+        let nr = $"Reset_{n}"
+        let ne = $"End_{n}"
+        seg.TagStart <- Tag(cpu, seg, ns, TagType.Q ||| TagType.Start)
+        seg.TagReset <- Tag(cpu, seg, nr, TagType.Q ||| TagType.Reset)
+        seg.TagEnd   <- Tag(cpu, seg, ne, TagType.I ||| TagType.End  )
         seg.Going <- Tag(cpu, seg, $"Going_{n}", TagType.Going)
         seg.Ready <- Tag(cpu, seg, $"Ready_{n}", TagType.Ready)
         seg.PortS <- PortInfoStart(cpu, seg, $"spex{n}_default", seg.TagStart, null)

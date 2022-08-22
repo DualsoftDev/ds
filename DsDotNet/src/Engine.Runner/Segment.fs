@@ -51,6 +51,7 @@ module FsSegmentModule =
         override x.Epilogue() =
             base.Epilogue()
             let uid = EmLinq.UniqueId;
+            //x.PortE <- PortInfoEnd(cpu, x, $"EndPort_{name}_{uid()}", x.TagEnd, null, InternalName = "EndPort")
             x.PortE <- PortInfoEnd.Create(cpu, x, $"EndPort_{name}_{uid()}", null)
             x.PortE.InternalName <- "EndPort"
             x.PortS <- PortInfoStart(cpu, x, $"StartPort_{name}_{uid()}", x.TagStart, null, InternalName = "StartPort")

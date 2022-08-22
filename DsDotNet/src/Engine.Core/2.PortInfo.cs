@@ -90,7 +90,7 @@ public class PortInfoReset : PortInfoCommand
 /// <summary> 관찰용 정보(Plan) + 물리(Actual) </summary>
 public class PortInfoEnd : PortInfo
 {
-    private PortInfoEnd(Cpu cpu, SegmentBase segment, string name, IBitWritable plan, Tag actual)
+    public PortInfoEnd(Cpu cpu, SegmentBase segment, string name, IBitWritable plan, Tag actual)
         : base(cpu, segment, name, plan, actual)
     {
         if (Actual == null || (!Plan.Value && !Actual.Value))

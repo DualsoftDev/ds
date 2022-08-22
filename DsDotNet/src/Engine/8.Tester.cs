@@ -273,7 +273,6 @@ class Tester
             T.Ap > T.Am, T.Bp > T.Bm;
         }
     }
-    //[address]...
 }
 [sys] A = {
     [flow] F = {
@@ -287,10 +286,6 @@ class Tester
         Vm |> Pp |> Sm;
         Vp <||> Vm;
     }
-    //[address] = {
-    //    Vp = (Q100, , );
-    //    Sp = (, , I100);
-    //}
 }
 [sys] B = {
     [flow] F = {
@@ -305,6 +300,13 @@ class Tester
         Vm |> Pp |> Sm;
         Vp <||> Vm;
     }
+}
+[addresses] = {
+	L.F.Main = (%0, %0,);
+	A.F.Vp = (%Q123.23, ,);
+	A.F.Sp = (, , %I12.2);
+	B.F.Vp = (%Q123.24, ,);
+	B.F.Sp = (, , %I12.3);
 }
 [cpus] AllCpus = {
     [cpu] Cpu = {

@@ -63,31 +63,54 @@ module internal ModelModule =
 
             opc.AddTags(cpuBits.OfType<Tag>())
 
-    let markTxRxTags(model:Model) =
+    let markChildren(model:Model) =
         let allRootSegments =
             model.Systems.selectMany(fun s -> s.RootFlows)
                 .SelectMany(fun f -> f.RootSegments)
+        let children =
+                allRootSegments
+                    .SelectMany(fun rs -> rs.Children)
+                    .Distinct()
+        for ch in children do
+            let getTags(x:ITxRx, tx:bool) =
+                match x with
+                    | :? SegmentBase as seg -> if tx then seg.TagStart else seg.TagEnd
+                    | :? Tag as tag -> tag
+                    | _ -> failwith "ERROR"
+            match ch.Coin with
+                | :? Call as call->
+                    ch.TagsStart <- call.Prototype.TXs.Select(fun tx -> getTags(tx, true)) |> ResizeArray
+                    ch.TagsEnd   <- call.Prototype.RXs.Select(fun rx -> getTags(rx, false)) |> ResizeArray
+                    for ts in ch.TagsStart do
+                        ts.Type <- ts.Type ||| TagType.TX ||| TagType.External
+                    for te in ch.TagsEnd do
+                        te.Type <- te.Type ||| TagType.RX ||| TagType.External
+                | :? ExSegmentCall as exSegCall->
+                    let ex = exSegCall.ExternalSegment
+                    ch.TagsStart <- [ex.TagStart] |> ResizeArray
+                    ch.TagReset <- ex.TagReset
+                    ch.TagsEnd <- [ex.TagEnd] |> ResizeArray
+
+                    for t in ch.TagsStart @@ ch.TagsEnd do
+                        t.Type <- t.Type ||| TagType.External
+                    ch.TagReset.Type <- ch.TagReset.Type ||| TagType.External
+                | _ ->
+                    failwith "ERROR"
+
+        let activeFlowRoots =
+            model.Cpus.First(fun cpu -> cpu.IsActive)
+                .RootFlows.SelectMany(fun f -> f.RootSegments)
+        for seg in activeFlowRoots do
+            for t in [seg.TagStart; seg.TagReset; seg.TagEnd] do
+                t.Type <- t.Type ||| TagType.External
                 
-
-        for rs in allRootSegments do
-            for tx in rs.Children.selectMany(fun ch -> ch.TagsStart).OfType<Tag>() do
-                tx.Type <- tx.Type ||| TagType.TX ||| TagType.External
-
-            for rx in rs.Children.selectMany(fun ch -> ch.TagsEnd).OfType<Tag>() do
-                rx.Type <- rx.Type ||| TagType.RX ||| TagType.External
-
-            for ch in rs.Children do
-                let reset = ch.TagReset
-                if reset <> null then
-                    assert(ch.Coin :? ExSegmentCall)
-                    assert(reset.Type.HasFlag(TagType.Reset))
-                    reset.Type <- reset.Type ||| TagType.External
 
 [<Extension>] // type Segment =
 type ModelExt =
     [<Extension>]
     static member Epilogue(model:Model, opc:OpcBroker) =
-        markTxRxTags(model)
+        markChildren(model)
+        //markTxRxTags(model)
         let segments =
             model.Systems.selectMany(fun sys -> sys.RootFlows)
                 .selectMany(fun rf -> rf.RootSegments)

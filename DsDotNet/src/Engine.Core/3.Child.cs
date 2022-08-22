@@ -48,29 +48,6 @@ public class Child : Named, IVertex, ICoin
         Coin = coin;
         QualifiedName = $"{parent.QualifiedName}_{coin.Name}";
         Parent.AddChildVertex(this);
-
-        Tag getTags(ITxRx x, bool tx) =>
-            x switch
-            {
-                SegmentBase seg => tx ? seg.TagStart : seg.TagEnd,
-                Tag tag => tag,
-                _ => throw new Exception("ERROR")
-            };
-        switch (coin)
-        {
-            case Call call:
-                TagsStart = call.Prototype.TXs.Select(tx => getTags(tx, true)).ToList();
-                TagsEnd   = call.Prototype.RXs.Select(rx => getTags(rx, false)).ToList();
-                break;
-            case ExSegmentCall exSegCall:
-                var ex = exSegCall.ExternalSegment;
-                TagsStart = new[] { ex.TagStart }.ToList();
-                TagReset = ex.TagReset;
-                TagsEnd = new[] { ex.TagEnd }.ToList();
-                break;
-            default:
-                throw new Exception("ERROR");
-        }
     }
 
     public string QualifiedName { get; }

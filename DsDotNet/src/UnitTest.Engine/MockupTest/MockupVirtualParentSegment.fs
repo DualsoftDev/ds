@@ -29,7 +29,13 @@ type MockupVirtualParentSegment(name, target:MockupSegment, causalSourceSegments
         this.TagStart <- Tag(cpu, this, ns, TagType.Q ||| TagType.Start)
         this.TagReset <- Tag(cpu, this, nr, TagType.Q ||| TagType.Reset)
         this.TagEnd   <- Tag(cpu, this, ne, TagType.I ||| TagType.End  )
-        this.CreateSREGR(target.Cpu, startPort, resetPort, endPort, goingTag, readyTag)
+
+        this.PortS <- startPort
+        this.PortR <- resetPort
+        this.PortE <- endPort
+
+        this.Going <- if isNull goingTag then Tag(cpu, this, $"Going_{name}", TagType.Going) else goingTag
+        this.Ready <- if isNull readyTag then Tag(cpu, this, $"Ready_{name}", TagType.Ready) else readyTag
 
     let mutable oldStatus:Status4 option = None
 

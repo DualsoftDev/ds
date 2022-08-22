@@ -9,7 +9,7 @@ open Engine.Core
 open Engine.Runner
 
 [<AbstractClass>]
-type MockupSegmentBase(cpu, n) as this =
+type MockupSegmentBase(cpu, n) =
     inherit FsSegmentBase(cpu, n)
 
 

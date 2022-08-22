@@ -13,7 +13,9 @@ module VirtualParentSegmentModule =
     type VirtualParentSegment(target:Segment
         , causalSourceSegments:Segment seq
         , resetSourceSegments:Segment seq
-        , startPort, resetPort, endPort
+        , startPort:PortInfoStart
+        , resetPort:PortInfoReset
+        , endPort:PortInfoEnd
         , goingTag, readyTag
     ) as this =
         inherit FsSegmentBase(target.Cpu, $"VPS_{target.QualifiedName}")
@@ -27,15 +29,20 @@ module VirtualParentSegmentModule =
             this.TagReset <- Tag(cpu, this, nr, TagType.Q ||| TagType.Reset)
             this.TagEnd   <- Tag(cpu, this, ne, TagType.I ||| TagType.End  )
 
+            assert([startPort:>PortInfo; resetPort; endPort].ForAll(fun p -> p <> null))
+            let n = $"VPS_{target.QualifiedName}"
+            this.PortS <- startPort
+            this.PortR <- resetPort
+            this.PortE <- endPort
+            this.Going <- if isNull goingTag then Tag(cpu, this, $"Going_{n}", TagType.Going) else goingTag
+            this.Ready <- if isNull readyTag then Tag(cpu, this, $"Ready_{n}", TagType.Ready) else readyTag
+
 
         let mutable oldStatus:Status4 option = None
         let triggerTargetStart = causalSourceSegments.Any()
         let triggerTargetReset = resetSourceSegments.Any()
         let targetStartTag = target.TagStart
         let targetResetTag = target.TagReset
-
-        do
-            this.CreateSREGR(cpu, startPort, resetPort, endPort, goingTag, readyTag)
 
         member val Target = target;
 

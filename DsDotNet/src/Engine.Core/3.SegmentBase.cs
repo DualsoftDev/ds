@@ -135,18 +135,4 @@ public static class SegmentExtension
         yield return s.PortR;
         yield return s.PortE;
     }
-
-
-    public static void CreateSREGR(this SegmentBase segment, Cpu cpu, PortInfoStart sp, PortInfoReset rp, PortInfoEnd ep, Tag going, Tag ready)
-    {
-        Debug.Assert(segment.GetType().Name == "VirtualParentSegment" || Global.IsInUnitTest);
-        var s = segment;
-        var n = s.QualifiedName;
-        Debug.Assert((new object[] { s.PortS, s.PortR, s.PortE, s.Going, s.Ready, }).ForAll(b => b is null));
-        s.PortS = sp ?? new PortInfoStart(cpu, s, $"PortInfoS_{n}", new Flag(cpu, $"PortSDefaultPlan_{n}"), null);
-        s.PortR = rp ?? new PortInfoReset(cpu, s, $"PortInfoR_{n}", new Flag(cpu, $"PortRDefaultPlan_{n}"), null);
-        s.PortE = ep ?? PortInfoEnd.Create(cpu, s, $"PortInfoE_{n}", null);
-        s.Going = going ?? new Tag(cpu, s, $"Going_{n}", TagType.Going);
-        s.Ready = ready ?? new Tag(cpu, s, $"Ready_{n}", TagType.Ready);
-    }
 }

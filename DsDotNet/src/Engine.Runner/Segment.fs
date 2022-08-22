@@ -30,8 +30,8 @@ module FsSegmentModule =
     /// Real Root Segment
     type Segment(cpu, segmentName) as this =
         inherit FsSegmentBase(cpu, segmentName)
+        let name = segmentName
         do
-            let name = segmentName
             let uid = EmLinq.UniqueId;
             this.Going <- Tag(cpu, this, $"Going_{name}_{uid()}", TagType.Going, InternalName = "Going")
             this.Ready <- Tag(cpu, this, $"Ready_{name}_{uid()}", TagType.Ready, InternalName = "Ready")
@@ -43,11 +43,6 @@ module FsSegmentModule =
             this.TagReset <- Tag(cpu, this, nr, TagType.Q ||| TagType.Reset, InternalName = "Reset")
             this.TagEnd   <- Tag(cpu, this, ne, TagType.I ||| TagType.End  , InternalName = "End")
 
-            this.PortE <- PortInfoEnd.Create(cpu, this, $"EndPort_{name}_{uid()}", null)
-            this.PortE.InternalName <- "EndPort"
-            this.PortS <- new PortInfoStart(cpu, this, $"StartPort_{name}_{uid()}", this.TagStart, null, InternalName = "StartPort")
-            this.PortR <- new PortInfoReset(cpu, this, $"ResetPort_{name}_{uid()}", this.TagReset, null, InternalName = "ResetPort")
-
         member val Inits:Child array = null with get, set
         member val Lasts:Child array = null with get, set
         member val ChildrenOrigin:IVertex array = null with get, set
@@ -55,6 +50,11 @@ module FsSegmentModule =
 
         override x.Epilogue() =
             base.Epilogue()
+            let uid = EmLinq.UniqueId;
+            x.PortE <- PortInfoEnd.Create(cpu, x, $"EndPort_{name}_{uid()}", null)
+            x.PortE.InternalName <- "EndPort"
+            x.PortS <- PortInfoStart(cpu, x, $"StartPort_{name}_{uid()}", x.TagStart, null, InternalName = "StartPort")
+            x.PortR <- PortInfoReset(cpu, x, $"ResetPort_{name}_{uid()}", x.TagReset, null, InternalName = "ResetPort")
 
             // Graph 정보 추출 & 저장
             let gi = x.GraphInfo;

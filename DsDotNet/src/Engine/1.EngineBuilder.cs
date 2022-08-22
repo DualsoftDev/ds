@@ -21,9 +21,8 @@ public class EngineBuilder
         Cpu.IsActive = true;
 
         Model.BuildGraphInfo();
-        Model.RetouchTags(Opc);
 
-        Model.Epilogue();
+        Model.Epilogue(Opc);
 
         Opc.Print();
 

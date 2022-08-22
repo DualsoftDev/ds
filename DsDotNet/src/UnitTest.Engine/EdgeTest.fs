@@ -63,14 +63,14 @@ module EdgeTest =
             let bwd = cpu.BackwardDependancyMap
 
             // tag 기준으로 해당 port 와 연결되어 있는지 check
-            fwd[main.TagStart].Contains(main.PortS) |> ShouldBeTrue
-            fwd[main.TagReset].Contains(main.PortR) |> ShouldBeTrue
-            bwd[main.TagEnd  ].Contains(main.PortE) |> ShouldBeTrue
+            fwd[main.TagPStart].Contains(main.PortS) |> ShouldBeTrue
+            fwd[main.TagPReset].Contains(main.PortR) |> ShouldBeTrue
+            bwd[main.TagPEnd  ].Contains(main.PortE) |> ShouldBeTrue
 
             // port 기준으로 해당 tag 와 연결되어 있는지 check
-            bwd[main.PortS].OfType<Tag>().Contains(main.TagStart) |> ShouldBeTrue
-            bwd[main.PortR].OfType<Tag>().Contains(main.TagReset) |> ShouldBeTrue
-            fwd[main.PortE].OfType<Tag>().Contains(main.TagEnd)   |> ShouldBeTrue
+            bwd[main.PortS].OfType<Tag>().Contains(main.TagPStart) |> ShouldBeTrue
+            bwd[main.PortR].OfType<Tag>().Contains(main.TagPReset) |> ShouldBeTrue
+            fwd[main.PortE].OfType<Tag>().Contains(main.TagPEnd)   |> ShouldBeTrue
 
 
             let otherCpu = model.Cpus.First(fun cpu -> not cpu.IsActive);
@@ -104,8 +104,8 @@ module EdgeTest =
                 let sp = otherRootFlow.Coins |> Enumerable.OfType<SegmentBase> |> Seq.find(fun seg -> seg.Name = "Sp")
                 let vpStart2 = otherCpu.TagsMap["L_F_Main_T.Cp_P_F_Vp_Start"]
                 let spEnd2 = otherCpu.TagsMap["L_F_Main_T.Cp_P_F_Sp_End"]
-                vp.TagStart === vpStart2
-                sp.TagEnd === spEnd2
+                vp.TagPStart === vpStart2
+                sp.TagPEnd === spEnd2
                 vpStart =!= vpStart2
                 spEnd =!= spEnd2
 
@@ -133,7 +133,7 @@ module EdgeTest =
                     let eResetPp2Sm = otherRootFlow.Edges |> Seq.find(fun e -> e.Sources.Contains(pp) && e.Target = sm)
                     box eResetPp2Sm :? IResetEdge |> ShouldBeTrue
                     eResetPp2Sm.SourceTags.Contains(pp.Going) |> ShouldBeTrue
-                    sm.TagReset === eResetPp2Sm.TargetTag
+                    sm.TagPReset === eResetPp2Sm.TargetTag
                 ()
 
 

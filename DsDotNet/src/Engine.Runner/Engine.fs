@@ -54,7 +54,7 @@ module EngineModule =
 
     let private procReady(seg:SegmentBase, writer:ChangeWriter, onError:ExceptionHandler) =
         let write:BitWriter = getBitWriter writer onError
-        assert( [seg.TagStart; seg.TagReset; seg.TagEnd].ForAll(fun t -> not t.Value ))     // A_F_Pp.TagEnd 가 true 되는 상태???
+        assert( [seg.TagPStart; seg.TagPReset; seg.TagPEnd].ForAll(fun t -> not t.Value ))     // A_F_Pp.TagEnd 가 true 되는 상태???
         assert( [seg.PortS :> PortInfo; seg.PortR; seg.PortE].ForAll(fun t -> not t.Value ))
         stopMonitorHoming seg
         write(seg.Ready, true, null)
@@ -125,7 +125,7 @@ module EngineModule =
 
         stopMonitorGoing seg
         write(seg.Going, false, $"{seg.QualifiedName} FINISH")
-        write(seg.TagEnd, true, $"Finishing {seg.QualifiedName}")
+        write(seg.TagPEnd, true, $"Finishing {seg.QualifiedName}")
 
     let private procHoming(segment:SegmentBase, writer:ChangeWriter, onError:ExceptionHandler) =
         let seg = segment :?> Segment
@@ -155,7 +155,7 @@ module EngineModule =
             writeEndPort(seg.PortE, false, $"{seg.QualifiedName} HOMING finished")
 
             // todo: fix me
-            let et = seg.TagEnd
+            let et = seg.TagPEnd
             //if et.Type.HasFlag(TagType.External) then
             //    ()
             //else

@@ -26,16 +26,16 @@ type MockupVirtualParentSegment(name, target:MockupSegment, causalSourceSegments
         let ns = $"VPS_Start_{name}"
         let nr = $"VPS_Reset_{name}"
         let ne = $"VPS_End_{name}"
-        this.TagStart <- Tag(cpu, this, ns, TagType.Q ||| TagType.Start)
-        this.TagReset <- Tag(cpu, this, nr, TagType.Q ||| TagType.Reset)
-        this.TagEnd   <- Tag(cpu, this, ne, TagType.I ||| TagType.End  )
+        this.TagPStart <- TagP(cpu, this, ns, TagType.Q ||| TagType.Start)
+        this.TagPReset <- TagP(cpu, this, nr, TagType.Q ||| TagType.Reset)
+        this.TagPEnd   <- TagP(cpu, this, ne, TagType.I ||| TagType.End  )
 
         this.PortS <- startPort
         this.PortR <- resetPort
         this.PortE <- endPort
 
-        this.Going <- if isNull goingTag then Tag(cpu, this, $"Going_{name}", TagType.Going) else goingTag
-        this.Ready <- if isNull readyTag then Tag(cpu, this, $"Ready_{name}", TagType.Ready) else readyTag
+        this.Going <- if isNull goingTag then TagE(cpu, this, $"Going_{name}", TagType.Going) else goingTag
+        this.Ready <- if isNull readyTag then TagE(cpu, this, $"Ready_{name}", TagType.Ready) else readyTag
 
     let mutable oldStatus:Status4 option = None
 
@@ -52,7 +52,7 @@ type MockupVirtualParentSegment(name, target:MockupSegment, causalSourceSegments
         let cpu = target.Cpu
         let n = $"VPS_{target.Name}"
 
-        let readyTag = new Tag(cpu, null, $"{n}_Ready")
+        let readyTag = new TagE(cpu, null, $"{n}_Ready")
 
         let ep = PortInfoEnd.Create(cpu, null, $"End_{n}", null)
 

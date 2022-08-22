@@ -27,12 +27,12 @@ module VirtualParentTestTest =
             let g = MockupSegment.CreateWithDefaultTags(cpu, "G")
             let r = MockupSegment.CreateWithDefaultTags(cpu, "R")
 
-            let auto = new Tag(cpu, null, "auto")
+            let auto = new TagE(cpu, null, "auto")
 
             //let vpB = Vps.Create(b, auto, (stB, rtB), [g], [r])
-            let vpB = Vps.Create(b, auto, (b.TagStart, b.TagReset), [g], [g; r])
-            let vpG = Vps.Create(g, auto, (g.TagStart, g.TagReset), [r], [b])
-            let vpR = Vps.Create(r, auto, (r.TagStart, r.TagReset), [b], [g])
+            let vpB = Vps.Create(b, auto, (b.TagPStart, b.TagPReset), [g], [g; r])
+            let vpG = Vps.Create(g, auto, (g.TagPStart, g.TagPReset), [r], [b])
+            let vpR = Vps.Create(r, auto, (r.TagPStart, r.TagPReset), [b], [g])
             logDebug $"B Start:{vpB.PortS.ToText()}";
             logDebug $"B Reset:{vpB.PortR.ToText()}";
             logDebug $"B End:{vpB.PortE.ToText()}";
@@ -55,7 +55,7 @@ module VirtualParentTestTest =
                     .Subscribe(fun bc ->
                         if bc.Bit = b.PortE then
                             assert b.PortE.Value
-                            write(b.TagStart, false, "Turning off 최초 시작 trigger")
+                            write(b.TagPStart, false, "Turning off 최초 시작 trigger")
                             subscriptionExternalStartOff.Dispose())
 
             // 목적 cycle 수행 후, auto off 및 시험 종료
@@ -106,7 +106,7 @@ module VirtualParentTestTest =
             cpu.BuildBitDependencies()
             let runSubscription = cpu.Run()
 
-            vpB, vpG, vpR, auto, b.TagStart
+            vpB, vpG, vpR, auto, b.TagPStart
 
 
         interface IClassFixture<Fixtures.DemoFixture>
@@ -120,9 +120,9 @@ module VirtualParentTestTest =
             let g = MockupSegment.CreateWithDefaultTags(cpu, "G")
             let r = MockupSegment.CreateWithDefaultTags(cpu, "R")
 
-            let auto = new Tag(cpu, null, "auto")
+            let auto = new TagE(cpu, null, "auto")
 
-            let vpB = Vps.Create(b, auto, (b.TagStart, b.TagReset), [g], [g; r])
+            let vpB = Vps.Create(b, auto, (b.TagPStart, b.TagPReset), [g], [g; r])
 
 
             let mutable subscription = Disposable.Empty
@@ -131,7 +131,7 @@ module VirtualParentTestTest =
                     .Subscribe(fun bc ->
                         if bc.Bit = b.PortE (*&& b.PortE.Value *)then
                             logDebug "Turning off 최초 시작 trigger"
-                            cpu.Enqueue(b.TagStart, false)
+                            cpu.Enqueue(b.TagPStart, false)
                             subscription.Dispose())
 
             Global.BitChangedSubject

@@ -34,9 +34,9 @@ module ExpressionTest =
                 wait()
 
 
-            let a1 = new Tag(cpu, null, "a1_test1")
-            let a2 = new Tag(cpu, null, "a2_test1")
-            let a3 = new Tag(cpu, null, "a3_test1")
+            let a1 = new TagE(cpu, null, "a1_test1")
+            let a2 = new TagE(cpu, null, "a2_test1")
+            let a3 = new TagE(cpu, null, "a3_test1")
             let xAnd = new And(cpu, "And1_test1", a1, a2, a3)
 
             cpu.BuildBitDependencies()
@@ -65,9 +65,9 @@ module ExpressionTest =
 
             let cpu = new Cpu("dummy", new Model())
 
-            let a1 = new Tag(cpu, null, "a1_test2")
-            let a2 = new Tag(cpu, null, "a2_test2")
-            let a3 = new Tag(cpu, null, "a3_test2")
+            let a1 = new TagE(cpu, null, "a1_test2")
+            let a2 = new TagE(cpu, null, "a2_test2")
+            let a3 = new TagE(cpu, null, "a3_test2")
             let xOr = new Or(cpu, "Or1_test2", a1, a2, a3)
 
             let wait() = wait(cpu)
@@ -104,7 +104,7 @@ module ExpressionTest =
             let cpu = new Cpu("dummy", new Model())
 
 
-            let a1 = new Tag(cpu, null, "a1_test3")
+            let a1 = new TagE(cpu, null, "a1_test3")
             let xNot = new Not(cpu, "Not1_test2", a1)
 
             let wait() = wait(cpu)
@@ -135,10 +135,10 @@ module ExpressionTest =
 
             // x = a && (b || ( c && !d))
 
-            let a = new Tag(cpu, null, "a1_test4")
-            let b = new Tag(cpu, null, "b1_test4")
-            let c = new Tag(cpu, null, "c1_test4")
-            let d = new Tag(cpu, null, "d1_test4")
+            let a = new TagE(cpu, null, "a1_test4")
+            let b = new TagE(cpu, null, "b1_test4")
+            let c = new TagE(cpu, null, "c1_test4")
+            let d = new TagE(cpu, null, "d1_test4")
             let ``!d`` = new Not(cpu, "!d1", d)
             let ``c&&!d`` = new And(cpu, "c&&!d1", c, ``!d``)
             let ``b || ( c && !d)`` = new Or(cpu, "b || ( c && !d1", b, ``c&&!d``)

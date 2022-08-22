@@ -30,8 +30,8 @@ module PortInfoTest =
 
             let ``_PortInfoStart 테스트`` =
                 let cpu = new Cpu("dummy", new Model())
-                let plan = new Tag(cpu, null, "T1_test1")
-                let actual = new Tag(cpu, null, "T2_test1")
+                let plan = new TagE(cpu, null, "T1_test1")
+                let actual = new TagE(cpu, null, "T2_test1")
                 let pts = new PortInfoStart(cpu, null, "PortInfoStart", plan, actual)
 
 
@@ -71,7 +71,7 @@ module PortInfoTest =
 
             let ``_PortInfoEnd Normal 테스트`` =
                 let cpu = new Cpu("dummy", new Model())
-                let actual = new Tag(cpu, null, "T2_test2")
+                let actual = new TagE(cpu, null, "T2_test2")
 
                 let pte = PortInfoEnd.Create(cpu, null, "_PortInfoEnd_test2", actual)
 
@@ -108,7 +108,7 @@ module PortInfoTest =
 
             let ``_PortInfoEnd 특이 case 테스트`` =
                 let cpu = new Cpu("dummy", new Model())
-                let actual = new Tag(cpu, null, "T2_test3", TagType.None, true)
+                let actual = new TagE(cpu, null, "T2_test3", TagType.None, true)
 
                 // Actual 이 ON 인 상태에서의 creation
                 let pte = PortInfoEnd.Create(cpu, null, "_PortInfoEnd_test3", actual)

@@ -285,10 +285,7 @@ partial class ElementsListener : dsBaseListener
             var seg = (SegmentBase)QpInstanceMap[segPath];
             var sre = addrDef.address();
             var (s, r, e) = (sre.startTag()?.GetText(), sre.resetTag()?.GetText(), sre.endTag()?.GetText());
-
-            seg.TagStart.Address = s;
-            seg.TagReset.Address = r;
-            seg.TagEnd.Address = e;
+            seg.Addresses = Tuple.Create(s, r, e);
         }
     }
 

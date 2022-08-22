@@ -29,11 +29,24 @@ public abstract partial class SegmentBase : ChildFlow, IVertex, ICoin, IWallet, 
     public PortInfoReset PortR { get; set; }
     public PortInfoEnd PortE { get; set; }
 
-    public Tag TagStart { get; internal set; }
-    public Tag TagReset { get; internal set; }
-    public Tag TagEnd { get; internal set; }
+    /// <summary>Plan tag for start</summary>
+    public TagP TagPStart { get; internal set; }
+    /// <summary>Plan tag for reset</summary>
+    public TagP TagPReset { get; internal set; }
+    /// <summary>Plan tag for end</summary>
+    public TagP TagPEnd { get; internal set; }
+    /// <summary>Actual tag for start</summary>
+    public TagA TagAStart { get; internal set; }
+    /// <summary>Actual tag for reset</summary>
+    public TagA TagAReset { get; internal set; }
+    /// <summary>Actual tag for end</summary>
+    public TagA TagAEnd { get; internal set; }
+
+
     public Tag Going { get; internal set; } // Flag or Tag
     public Tag Ready { get; internal set; } // Flag or Tag
+
+    internal Tuple<string, string, string> Addresses { get; set; } = new Tuple<string, string, string>(null, null, null);
 
     public bool IsResetFirst { get; internal set; } = true;
 
@@ -122,9 +135,9 @@ public static class SegmentExtension
 
     public static void PrintPortInfos(this SegmentBase seg)
     {
-        var s = seg.TagStart?.Name;
-        var r = seg.TagReset?.Name;
-        var e = seg.TagEnd?.Name;
+        var s = seg.TagPStart?.Name;
+        var r = seg.TagPReset?.Name;
+        var e = seg.TagPEnd?.Name;
         Global.Logger.Debug($"Tags for segment [{seg.QualifiedName}]:({s}, {r}, {e})");
     }
 

@@ -22,26 +22,27 @@ public enum TagType
     Flow = 1 << 20,
     /// <summary> 외부 접근 용 Tag 여부 </summary>
     External = 1 << 21,
+    Plan = 1 << 22,
+    Etc = 1 << 23,
 
     // call tag
-    TX       = 1 << 25,
+    TX = 1 << 25,
     RX       = 1 << 26,
 };
 
 
 
-public class Tag : Bit, IBitReadWritable, ITxRx
+public abstract class Tag : Bit, IBitReadWritable, ITxRx
 {
     public ICoin Owner { get; set; }
     public TagType Type { get; set; }
 
     public void SetValue(bool newValue) => _value = newValue;
-    public string Address { get; set; }
 
     /// <summary> 내부 추적용 Tag 이름 : QualifiedName + 기능명.  e.g "L.F.Main.AutoStart.  사용자가 지정하는 이름과는 별개 </summary>
     public string InternalName { get; set; }
 
-    public Tag(Cpu ownerCpu, ICoin owner, string name, TagType tagType = TagType.None, bool value = false)
+    protected Tag(Cpu ownerCpu, ICoin owner, string name, TagType tagType = TagType.None, bool value = false)
         : base(ownerCpu, name, value)
     {
         Debug.Assert(! ownerCpu.TagsMap.ContainsKey(name));
@@ -52,3 +53,34 @@ public class Tag : Bit, IBitReadWritable, ITxRx
         ownerCpu.TagsMap.Add(name, this);
     }
 }
+
+/// <summary> Tag Actual (w/ address) </summary>
+public class TagA : Tag
+{
+    public string Address { get; set; }
+
+    public TagA(Cpu ownerCpu, ICoin owner, string name, string address, TagType tagType, bool value = false)
+        : base(ownerCpu, owner, name, tagType, value)
+    {
+        Address = address;
+    }
+}
+
+/// <summary> Tag Plan </summary>
+public class TagP : Tag
+{
+    public TagP(Cpu ownerCpu, ICoin owner, string name, TagType tagType, bool value = false)
+        : base(ownerCpu, owner, name, tagType, value)
+    {}
+}
+
+
+/// <summary> Tag Etc : flow auto, going/ready tag,</summary>
+public class TagE : Tag
+{
+    public TagE(Cpu ownerCpu, ICoin owner, string name, TagType tagType=TagType.Etc, bool value = false)
+        : base(ownerCpu, owner, name, tagType, value)
+    { }
+}
+
+

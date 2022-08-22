@@ -27,13 +27,13 @@ type MockupSegment(cpu, n) =
         let ns = $"Start_{n}"
         let nr = $"Reset_{n}"
         let ne = $"End_{n}"
-        seg.TagStart <- Tag(cpu, seg, ns, TagType.Q ||| TagType.Start)
-        seg.TagReset <- Tag(cpu, seg, nr, TagType.Q ||| TagType.Reset)
-        seg.TagEnd   <- Tag(cpu, seg, ne, TagType.I ||| TagType.End  )
-        seg.Going <- Tag(cpu, seg, $"Going_{n}", TagType.Going)
-        seg.Ready <- Tag(cpu, seg, $"Ready_{n}", TagType.Ready)
-        seg.PortS <- PortInfoStart(cpu, seg, $"spex{n}_default", seg.TagStart, null)
-        seg.PortR <- PortInfoReset(cpu, seg, $"rpex{n}_default", seg.TagReset, null)
+        seg.TagPStart <- TagP(cpu, seg, ns, TagType.Q ||| TagType.Start)
+        seg.TagPReset <- TagP(cpu, seg, nr, TagType.Q ||| TagType.Reset)
+        seg.TagPEnd   <- TagP(cpu, seg, ne, TagType.I ||| TagType.End  )
+        seg.Going <- TagE(cpu, seg, $"Going_{n}", TagType.Going)
+        seg.Ready <- TagE(cpu, seg, $"Ready_{n}", TagType.Ready)
+        seg.PortS <- PortInfoStart(cpu, seg, $"spex{n}_default", seg.TagPStart, null)
+        seg.PortR <- PortInfoReset(cpu, seg, $"rpex{n}_default", seg.TagPReset, null)
         seg.PortE <- PortInfoEnd.Create(cpu, seg, $"epex{n}_default", null)
 
         seg

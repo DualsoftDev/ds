@@ -60,10 +60,10 @@ public class RootFlow : Flow
     {
         System = system;
         system.RootFlows.Add(this);
-        Auto = new Tag(cpu, null, $"Auto_{name}_{EmLinq.UniqueId()}", TagType.Auto);
+        Auto = new TagE(cpu, null, $"Auto_{name}_{EmLinq.UniqueId()}", TagType.Auto);
     }
 
-    public Tag Auto { get; }
+    public TagE Auto { get; }
 
     public IEnumerable<SegmentBase> RootSegments => ChildVertices.OfType<SegmentBase>();
 

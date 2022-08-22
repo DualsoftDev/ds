@@ -31,8 +31,8 @@ module LatchTest =
 
             let cpu = new Cpu("dummy", new Model())
 
-            let tSet = new Tag(cpu, null, "T1")
-            let tReset = new Tag(cpu, null, "T2")
+            let tSet = new TagE(cpu, null, "T1")
+            let tReset = new TagE(cpu, null, "T2")
             let latch = new Latch(cpu, "Latch1", tSet, tReset)
 
             let wait() = wait(cpu)

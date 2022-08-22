@@ -191,7 +191,7 @@ module ModelTest2 =
                 let vp = flowP.ChildVertices |> Seq.ofType<SegmentBase> |> Seq.find(fun s -> s.Name = "Vp")
                 let cpStart = main1Cp.TagsStart |> Seq.exactlyOne
                 cpStart.Name === "Start_P_F_Vp"
-                cpStart.Name === vp.TagStart.Name
+                cpStart.Name === vp.TagPStart.Name
                 //cpStart =!= vpStart
 
 (*
@@ -211,7 +211,7 @@ module ModelTest2 =
                 let cpEnd = main1Cp.TagsEnd |> Seq.exactlyOne
                 cpEnd.Name === "End_P_F_Sp"
                 let sp = flowP.ChildVertices |> Seq.ofType<SegmentBase> |> Seq.find(fun s -> s.Name = "Sp")
-                cpEnd.Name === sp.TagEnd.Name
+                cpEnd.Name === sp.TagPEnd.Name
                 //cpEnd =!= spEnd
 
 
@@ -223,8 +223,8 @@ module ModelTest2 =
                     segMain1CpTx.QualifiedName === "P_F_Vp"
                     segMain1CpRx.QualifiedName === "P_F_Sp"
 
-                    let cpStart_ = segMain1CpTx.TagStart
-                    let cpEnd_   = segMain1CpRx.TagEnd
+                    let cpStart_ = segMain1CpTx.TagPStart
+                    let cpEnd_   = segMain1CpRx.TagPEnd
 
                     cpStart === cpStart_
                     cpEnd === cpEnd_
@@ -236,8 +236,8 @@ module ModelTest2 =
                     segMain1CmTx.QualifiedName === "P_F_Vm"
                     segMain1CmRx.QualifiedName === "P_F_Sm"
 
-                    let cpStart_ = segMain1CpTx.TagStart
-                    let cpEnd_   = segMain1CpRx.TagEnd
+                    let cpStart_ = segMain1CpTx.TagPStart
+                    let cpEnd_   = segMain1CpRx.TagPEnd
 
                     cpStart === cpStart_
                     cpEnd === cpEnd_
@@ -251,8 +251,8 @@ module ModelTest2 =
                     segMain2CpTx.QualifiedName === "P_F_Vp"
                     segMain2CpRx.QualifiedName === "P_F_Sp"
 
-                    let cpStart_ = segMain2CpTx.TagStart
-                    let cpEnd_   = segMain2CpRx.TagEnd
+                    let cpStart_ = segMain2CpTx.TagPStart
+                    let cpEnd_   = segMain2CpRx.TagPEnd
 
                     cpStart === cpStart_
                     cpEnd === cpEnd_
@@ -264,8 +264,8 @@ module ModelTest2 =
                     segMain2CmTx.QualifiedName === "P_F_Vm"
                     segMain2CmRx.QualifiedName === "P_F_Sm"
 
-                    let cpStart_ = segMain2CpTx.TagStart
-                    let cpEnd_   = segMain2CpRx.TagEnd
+                    let cpStart_ = segMain2CpTx.TagPStart
+                    let cpEnd_   = segMain2CpRx.TagPEnd
 
                     cpStart === cpStart_
                     cpEnd === cpEnd_
@@ -330,7 +330,7 @@ module ModelTest2 =
 
                 let cp = model.FindObject<Child>("L.F.Main1.T.Cp");
                 let cpStart = cp.TagsStart |> Seq.exactlyOne
-                let vpStart = vp.TagStart
+                let vpStart = vp.TagPStart
                 cpStart.Name === vpStart.Name
                 cpStart === vpStart
                 cpStart.Cpu === vpStart.Owner.Cpu
@@ -342,8 +342,8 @@ module ModelTest2 =
                 let sp = model.FindObject<SegmentBase>("P.F.Sp");
                 sp.Name === "Sp"
                 let cpEnd = cp.TagsEnd |> Seq.exactlyOne
-                cpEnd.Name === sp.TagEnd.Name
-                cpEnd === sp.TagEnd
-                cpEnd.Cpu === sp.TagEnd.Owner.Cpu
+                cpEnd.Name === sp.TagPEnd.Name
+                cpEnd === sp.TagPEnd
+                cpEnd.Cpu === sp.TagPEnd.Owner.Cpu
 
             ()

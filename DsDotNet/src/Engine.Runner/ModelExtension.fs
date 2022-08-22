@@ -22,7 +22,7 @@ module internal ModelModule =
             for f in flows do
                 for seg in f.RootSegments do
                     let q = seg.QualifiedName
-                    for t in [seg.TagStart; seg.TagReset; seg.TagEnd; seg.Going; seg.Ready] do
+                    for t in [seg.TagPStart :> Tag; seg.TagPReset; seg.TagPEnd; seg.Going; seg.Ready] do
                         cpuBits.Add(t) |> ignore
                         t.Name <- $"{t.InternalName}_{q}"
 
@@ -74,7 +74,7 @@ module internal ModelModule =
         for ch in children do
             let getTags(x:ITxRx, tx:bool) =
                 match x with
-                    | :? SegmentBase as seg -> if tx then seg.TagStart else seg.TagEnd
+                    | :? SegmentBase as seg -> if tx then seg.TagPStart :> Tag else seg.TagPEnd
                     | :? Tag as tag -> tag
                     | _ -> failwith "ERROR"
             match ch.Coin with
@@ -87,9 +87,9 @@ module internal ModelModule =
                         te.Type <- te.Type ||| TagType.RX ||| TagType.External
                 | :? ExSegmentCall as exSegCall->
                     let ex = exSegCall.ExternalSegment
-                    ch.TagsStart <- [ex.TagStart] |> ResizeArray
-                    ch.TagReset <- ex.TagReset
-                    ch.TagsEnd <- [ex.TagEnd] |> ResizeArray
+                    ch.TagsStart <- [ex.TagPStart :> Tag] |> ResizeArray
+                    ch.TagReset <- ex.TagPReset
+                    ch.TagsEnd <- [ex.TagPEnd :> Tag] |> ResizeArray
 
                     for t in ch.TagsStart @@ ch.TagsEnd do
                         t.Type <- t.Type ||| TagType.External
@@ -101,8 +101,8 @@ module internal ModelModule =
             model.Cpus.First(fun cpu -> cpu.IsActive)
                 .RootFlows.SelectMany(fun f -> f.RootSegments)
         for seg in activeFlowRoots do
-            for t in [seg.TagStart; seg.TagReset; seg.TagEnd] do
-                t.Type <- t.Type ||| TagType.External
+            for t in [seg.TagPStart; seg.TagPReset; seg.TagPEnd] do
+                t.Type <- t.Type ||| TagType.Plan ||| TagType.External
                 
 
 [<Extension>] // type Segment =

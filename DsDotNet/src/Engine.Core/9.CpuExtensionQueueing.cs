@@ -208,6 +208,7 @@ public static class CpuExtensionQueueing
     /// <summary> Bit 의 값 변경 처리를 CPU 에 위임.  즉시 수행되지 않고, CPU 의 Queue 에 추가 된 후, CPU thread 에서 수행된다.  </summary>
     public static void Enqueue(this Cpu cpu, BitChange bitChange)
     {
+        Debug.Assert(bitChange.Bit.Cpu == cpu);
         switch (bitChange.Bit)
         {
             case Expression _:

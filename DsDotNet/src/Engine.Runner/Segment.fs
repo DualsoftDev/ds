@@ -31,17 +31,17 @@ module FsSegmentModule =
     type Segment(cpu, segmentName) as this =
         inherit FsSegmentBase(cpu, segmentName)
         let name = segmentName
-        let getName() = $"{name}_{EmLinq.UniqueId()}"
         do
+            let getName() = $"{name}_{EmLinq.UniqueId()}"
             this.Going <- TagE(cpu, this, $"Going_{getName()}", TagType.Going, InternalName = "Going")
             this.Ready <- TagE(cpu, this, $"Ready_{getName()}", TagType.Ready, InternalName = "Ready")
 
             let ns = $"StartPlan_{getName()}"
             let nr = $"ResetPlan_{getName()}"
             let ne = $"EndPlan_{getName()}"
-            this.TagPStart <- TagP(cpu, this, ns, TagType.Plan ||| TagType.Q ||| TagType.Start, InternalName = "Start")
-            this.TagPReset <- TagP(cpu, this, nr, TagType.Plan ||| TagType.Q ||| TagType.Reset, InternalName = "Reset")
-            this.TagPEnd   <- TagP(cpu, this, ne, TagType.Plan ||| TagType.I ||| TagType.End  , InternalName = "End")
+            this.TagPStart <- TagP(cpu, this, ns, TagType.Plan ||| TagType.Q ||| TagType.Start, InternalName = "StartPlan")
+            this.TagPReset <- TagP(cpu, this, nr, TagType.Plan ||| TagType.Q ||| TagType.Reset, InternalName = "ResetPlan")
+            this.TagPEnd   <- TagP(cpu, this, ne, TagType.Plan ||| TagType.I ||| TagType.End  , InternalName = "EndPlan")
 
         member val Inits:Child array = null with get, set
         member val Lasts:Child array = null with get, set
@@ -51,19 +51,19 @@ module FsSegmentModule =
         override x.Epilogue() =
             base.Epilogue()
             
-            let uid = EmLinq.UniqueId;
+            let n = $"{name}_{x.QualifiedName}"
             let (s, r, e) = x.Addresses
             if s <> null then
-                this.TagAStart <- TagA(cpu, this, $"StartActual_{getName()}", s, TagType.External ||| TagType.Q ||| TagType.Start, InternalName = "Start")
+                this.TagAStart <- TagA(cpu, this, $"StartActual_{n}", s, TagType.External ||| TagType.Q ||| TagType.Start, InternalName = "Start")
             if r <> null then
-                this.TagAReset <- TagA(cpu, this, $"ResetActual_{getName()}", r, TagType.External ||| TagType.Q ||| TagType.Reset, InternalName = "Reset")
+                this.TagAReset <- TagA(cpu, this, $"ResetActual_{n}", r, TagType.External ||| TagType.Q ||| TagType.Reset, InternalName = "Reset")
             if e <> null then
-                this.TagAEnd   <- TagA(cpu, this, $"EndActual_{getName()}",   e, TagType.External ||| TagType.I ||| TagType.End  , InternalName = "End")
+                this.TagAEnd   <- TagA(cpu, this, $"EndActual_{n}",   e, TagType.External ||| TagType.I ||| TagType.End  , InternalName = "End")
 
 
-            x.PortS <- PortInfoStart(cpu, x, $"StartPort_{getName()}", x.TagPStart, x.TagAStart, InternalName = "StartPort")
-            x.PortR <- PortInfoReset(cpu, x, $"ResetPort_{getName()}", x.TagPReset, x.TagAReset, InternalName = "ResetPort")
-            x.PortE <- PortInfoEnd  (cpu, x, $"EndPort_{getName()}",   x.TagPEnd,   x.TagAEnd,   InternalName = "EndPort")
+            x.PortS <- PortInfoStart(cpu, x, $"StartPort_{n}", x.TagPStart, x.TagAStart, InternalName = "StartPort")
+            x.PortR <- PortInfoReset(cpu, x, $"ResetPort_{n}", x.TagPReset, x.TagAReset, InternalName = "ResetPort")
+            x.PortE <- PortInfoEnd  (cpu, x, $"EndPort_{n}",   x.TagPEnd,   x.TagAEnd,   InternalName = "EndPort")
 
             // Graph 정보 추출 & 저장
             let gi = x.GraphInfo;

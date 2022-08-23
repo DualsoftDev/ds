@@ -25,6 +25,8 @@ public class EngineBuilder
         Model.Epilogue(Opc);
 
         Opc.Print();
+        foreach(var cpu in Model.Cpus)
+            cpu.PrintTags();
 
         Engine = new ENGINE(Model, Opc, Cpu);
         Cpu.Engine = Engine;

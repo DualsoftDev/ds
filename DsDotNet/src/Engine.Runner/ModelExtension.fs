@@ -22,9 +22,15 @@ module internal ModelModule =
             for f in flows do
                 for seg in f.RootSegments do
                     let q = seg.QualifiedName
-                    for t in [seg.TagPStart :> Tag; seg.TagPReset; seg.TagPEnd; seg.Going; seg.Ready] do
-                        cpuBits.Add(t) |> ignore
+                    let tags =
+                        [
+                            seg.TagPStart :> Tag; seg.TagPReset; seg.TagPEnd;
+                            seg.TagAStart :> Tag; seg.TagAReset; seg.TagAEnd;
+                            seg.Going; seg.Ready
+                        ].Where(isNull >> not)
+                    for t in tags do
                         t.Name <- $"{t.InternalName}_{q}"
+                        cpuBits.Add(t) |> ignore
 
                     for p in [seg.PortS :> PortInfo; seg.PortR; seg.PortE;] do
                         cpuBits.Add(p) |> ignore
@@ -71,11 +77,14 @@ module internal ModelModule =
                 allRootSegments
                     .SelectMany(fun rs -> rs.Children)
                     .Distinct()
+
+        let txrxMap = Dictionary<Tag, TagE>()
         for ch in children do
             let getTags(x:ITxRx, tx:bool) =
-                match x with
-                    | :? SegmentBase as seg -> if tx then seg.TagPStart :> Tag else seg.TagPEnd
-                    | :? Tag as tag -> tag
+                match x, tx with
+                    | :? SegmentBase as seg, true -> seg.TagPStart :> Tag
+                    | :? SegmentBase as seg, false -> if seg.TagAEnd = null then seg.TagPEnd else seg.TagAEnd
+                    | :? Tag as tag, _ -> tag
                     | _ -> failwith "ERROR"
             match ch.Coin with
                 | :? Call as call->
@@ -97,6 +106,18 @@ module internal ModelModule =
                 | _ ->
                     failwith "ERROR"
 
+            // call 의 원래 cpu에 정의된 tag 를 현재의 cpu 에 동일하게 생성
+            let allTags = ch.TagsStart @@ ch.TagsEnd @@ [ch.TagReset]
+            let notYets = allTags.Where(isNull >> not).Where(fun t -> not <| txrxMap.ContainsKey(t)).ToArray()
+            for t in notYets do
+                txrxMap.Add(t, TagE(ch.Cpu, ch, t.Name, t.Type))
+            ch.TagsStart <- ch.TagsStart.Select(fun t -> txrxMap[t]).Cast<Tag>().ToList()
+            ch.TagsEnd   <- ch.TagsEnd  .Select(fun t -> txrxMap[t]).Cast<Tag>().ToList()
+            if ch.TagReset <> null then
+                ch.TagReset <- txrxMap[ch.TagReset]
+
+
+
         let activeFlowRoots =
             model.Cpus.First(fun cpu -> cpu.IsActive)
                 .RootFlows.SelectMany(fun f -> f.RootSegments)
@@ -109,7 +130,6 @@ module internal ModelModule =
 type ModelExt =
     [<Extension>]
     static member Epilogue(model:Model, opc:OpcBroker) =
-        markChildren(model)
         //markTxRxTags(model)
         let segments =
             model.Systems.selectMany(fun sys -> sys.RootFlows)
@@ -118,6 +138,7 @@ type ModelExt =
             segment.Epilogue()
 
         renameBits(model)
+        markChildren(model)
         rebuildMap(model, opc)
 
 

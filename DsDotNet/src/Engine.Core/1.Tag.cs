@@ -39,9 +39,6 @@ public abstract class Tag : Bit, IBitReadWritable, ITxRx
 
     public void SetValue(bool newValue) => _value = newValue;
 
-    /// <summary> 내부 추적용 Tag 이름 : QualifiedName + 기능명.  e.g "L.F.Main.AutoStart.  사용자가 지정하는 이름과는 별개 </summary>
-    public string InternalName { get; set; }
-
     protected Tag(Cpu ownerCpu, ICoin owner, string name, TagType tagType = TagType.None, bool value = false)
         : base(ownerCpu, name, value)
     {

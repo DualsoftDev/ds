@@ -358,7 +358,7 @@ class Tester
 
         var opc = engine.Opc;
 
-        var startTag = "Start_L_F_Main";
+        var startTag = "StartPlan_L_F_Main";
         Debug.Assert(engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(startTag));
         opc.Write(startTag, true);
         opc.Write("Auto_L_F", true);

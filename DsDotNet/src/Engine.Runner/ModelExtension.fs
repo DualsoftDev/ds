@@ -4,7 +4,6 @@ open System.Linq
 open System.Collections.Generic
 open System.Runtime.CompilerServices
 
-open Engine.Common
 open Engine.Common.FS
 open Engine.Core
 open Engine.OPC
@@ -14,40 +13,8 @@ open Engine.Graph
 module internal ModelModule =
         /// rename flow/segment tags, add flow auto bit
     let renameBits(model:Model) =
-        // root flow 를 cpu 별로 grouping
-        let allRootFlows = model.Systems.selectMany(fun s -> s.RootFlows)
-        let flowsGrps = allRootFlows.GroupByToDictionary(fun flow -> flow.Cpu)
-        for (cpu, flows) in flowsGrps.Select(fun kv -> kv.ToTuple()) do
-            let cpuBits = new HashSet<IBit>()
-            for f in flows do
-                for seg in f.RootSegments do
-                    let q = seg.QualifiedName
-                    let tags =
-                        [
-                            seg.TagPStart :> Tag; seg.TagPReset; seg.TagPEnd;
-                            seg.TagAStart :> Tag; seg.TagAReset; seg.TagAEnd;
-                            seg.Going; seg.Ready
-                        ].Where(isNull >> not)
-                    for t in tags do
-                        t.Name <- $"{t.InternalName}_{q}"
-                        cpuBits.Add(t) |> ignore
-
-                    for p in [seg.PortS :> PortInfo; seg.PortR; seg.PortE;] do
-                        cpuBits.Add(p) |> ignore
-                        p.Name <- $"{p.InternalName}_{q}"
-                        if p.Actual <> null then
-                            cpuBits.Add(p.Actual) |> ignore
-                            p.Actual.SetName $"{p.InternalName}_Actual_{q}"
-
-                        cpuBits.Add(p.Plan) |> ignore
-                        if p = seg.PortE then
-                            p.Plan.SetName $"{p.InternalName}_Plan_{q}"
-
-                cpuBits.Add f.Auto |> ignore
-                f.Auto.Name <- $"Auto_{f.QualifiedName}"
-
-            assert(cpuBits.ForAll(cpu.BitsMap.Values.Contains))
-            assert(cpuBits.OfType<Tag>().ForAll(cpu.TagsMap.Values.Contains))
+        for f in model.Cpus.selectMany(fun f -> f.RootFlows) do
+            f.Auto.Name <- $"Auto_{f.QualifiedName}"
 
     /// Tag 이름 변경으로 인한, cpu 의 BitMap/TagsMap 갱신 및 OPC tag 갱신
     let rebuildMap(model:Model, opc:OpcBroker) =
@@ -130,7 +97,6 @@ module internal ModelModule =
 type ModelExt =
     [<Extension>]
     static member Epilogue(model:Model, opc:OpcBroker) =
-        //markTxRxTags(model)
         let segments =
             model.Systems.selectMany(fun sys -> sys.RootFlows)
                 .selectMany(fun rf -> rf.RootSegments)

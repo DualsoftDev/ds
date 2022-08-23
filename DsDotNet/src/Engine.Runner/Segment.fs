@@ -99,9 +99,13 @@ module FsSegmentModule =
                         elif bit = x.PortR then
                             ()
                         elif bit = x.PortE then // reset 중에 end port 꺼져서 reset 완료 되려는 시점.  상태는 아직 homing 중
-                            logDebug $"\t\tAbout to finished homing: [{n}] status : {state} {cause}"
-                            assert(not x.TagPStart.Value)
-                            //write(x.TagStart, false, $"{n} homing completed")
+                            if state = Status4.Homing then
+                                logDebug $"\t\tAbout to finished homing: [{n}] status : {state} {cause}"
+                                assert(not x.TagPStart.Value)
+                            elif state = Status4.Going then
+                                logDebug $"\t\tAbout to finished going: [{n}] status : {state} {cause}"
+                                assert(value)
+                                //write(x.TagPStart, false, $"{n} going completed")
                         else
                             failwith "ERROR"
                     else

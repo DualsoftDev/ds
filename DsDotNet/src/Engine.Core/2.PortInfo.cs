@@ -141,7 +141,7 @@ public class PortInfoEnd : PortInfo
     {
         Debug.Assert(Plan.Value == newValue);
         CheckMatch(newValue);
-        return Actual == null;
+        return Actual == null || Actual.Value == newValue;
     }
     public override bool ActualValueChanged(bool newValue)
     {

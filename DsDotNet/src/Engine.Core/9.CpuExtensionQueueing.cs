@@ -46,7 +46,7 @@ public static class CpuExtensionQueueing
         //if (bitChange.Bit.Value == bitChange.NewValue)
         //    return;
 
-        if (bitChange.Bit.GetName() == "Start_A_F_Vp")
+        if (bitChange.Bit.GetName() == "EndPort_A_F_Sp")
             Console.WriteLine();
 
         Global.Logger.Debug($"\t\t=[{cpu.NestingLevel}] Applying bitChange {bitChange}");   // {bitChange.Guid}
@@ -156,7 +156,11 @@ public static class CpuExtensionQueueing
                 {
                     if (!pc.Applied)
                         if (pc.PortInfo.Plan is IBitWritable writable)
+                        {
                             writable.SetValue(pc.NewValue);
+                            Global.RawBitChangedSubject.OnNext(new BitChange(writable, pc.NewValue));
+                        }
+
                         else
                             throw new Exception("ERROR");
                     return pc.PortInfo.PlanValueChanged(pc.NewValue);

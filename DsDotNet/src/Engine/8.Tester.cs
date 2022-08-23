@@ -251,6 +251,7 @@ class Tester
         });
 
         var opc = engine.Opc;
+        opc.Write("EndActual_A_F_Sm", true);
 
         var startTag = "StartPlan_L_F_Main";
         Debug.Assert(engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(startTag));
@@ -357,6 +358,27 @@ class Tester
         }
 
         var opc = engine.Opc;
+
+        // initial condition
+        opc.Write("EndActual_A_F_Sm", true);
+        opc.Write("EndActual_B_F_Sm", true);
+
+        // simulating physics
+        Global.BitChangedSubject
+            .Subscribe(bc =>
+            {
+                var n = bc.Bit.GetName();
+                var val = bc.Bit.Value;
+                if (n == "EndPlan_A_F_Sp")
+                    opc.Write("EndActual_A_F_Sp", val);
+                else if (n == "EndPlan_A_F_Sm")
+                    opc.Write("EndActual_A_F_Sm", val);
+                else if (n == "EndPlan_B_F_Sp")
+                    opc.Write("EndActual_B_F_Sp", val);
+                else if (n == "EndPlan_B_F_Sm")
+                    opc.Write("EndActual_B_F_Sm", val);
+            });
+
 
         var startTag = "StartPlan_L_F_Main";
         Debug.Assert(engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(startTag));

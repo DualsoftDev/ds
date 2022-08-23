@@ -26,14 +26,14 @@ public static class CpuExtensionQueueing
                     if (q.TryDequeue(out BitChange bitChange))
                     {
                         if (bitChange.Bit.GetName() == "AutoStart_L_F")
-                            Console.WriteLine();
+                            Global.NoOp();
                         cpu.Apply(bitChange, true);
                     }
                     else
                         Global.Logger.Warn($"Failed to deque.");
                 }
                 cpu.ProcessingQueue = false;
-                await Task.Delay(20);
+                await Task.Delay(5);
             }
         }).Start()
         ;
@@ -47,7 +47,7 @@ public static class CpuExtensionQueueing
         //    return;
 
         if (bitChange.Bit.GetName() == "EndPort_A_F_Sp")
-            Console.WriteLine();
+            Global.NoOp();
 
         Global.Logger.Debug($"\t\t=[{cpu.NestingLevel}] Applying bitChange {bitChange}");   // {bitChange.Guid}
 
@@ -158,7 +158,7 @@ public static class CpuExtensionQueueing
                         if (pc.PortInfo.Plan is IBitWritable writable)
                         {
                             writable.SetValue(pc.NewValue);
-                            Global.RawBitChangedSubject.OnNext(new BitChange(writable, pc.NewValue));
+                            Global.RawBitChangedSubject.OnNext(new BitChange(writable, pc.NewValue, $"Plan 변경: [{pc.PortInfo.Plan}]={pc.NewValue}"));
                         }
 
                         else

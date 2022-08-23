@@ -33,6 +33,7 @@ public static class Global
     public static IObservable<long> TickSeconds => Observable.Interval(TimeSpan.FromSeconds(1));
 
     public static bool IsInUnitTest { get; }
+    public static bool IsSimulationMode { get; internal set; } = true;
     static Global()
     {
         IsInUnitTest = AppDomain.CurrentDomain.GetAssemblies()

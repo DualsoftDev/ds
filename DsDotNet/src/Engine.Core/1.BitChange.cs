@@ -24,8 +24,6 @@ public class BitChange
         Time = DateTime.Now;
         Cause = cause;
         OnError = onError;
-        if (cause == null)
-            Console.WriteLine();
     }
 
     public string CauseRepr => Cause switch

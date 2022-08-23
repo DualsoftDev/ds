@@ -247,7 +247,7 @@ class Tester
         Global.SegmentStatusChangedSubject.Subscribe(ssc =>
         {
             if (ssc.Segment.Name == "Main" && ssc.Status == Status4.Finished)
-                Console.WriteLine();
+                Global.NoOp();
         });
 
         var opc = engine.Opc;
@@ -339,7 +339,7 @@ class Tester
         Global.SegmentStatusChangedSubject.Subscribe(ssc =>
         {
             if (ssc.Segment.Name == "Main" && ssc.Status == Status4.Finished)
-                Console.WriteLine();
+                Global.NoOp();
         });
 
         {
@@ -369,14 +369,19 @@ class Tester
             {
                 var n = bc.Bit.GetName();
                 var val = bc.Bit.Value;
-                if (n == "EndPlan_A_F_Sp")
-                    opc.Write("EndActual_A_F_Sp", val);
-                else if (n == "EndPlan_A_F_Sm")
-                    opc.Write("EndActual_A_F_Sm", val);
-                else if (n == "EndPlan_B_F_Sp")
-                    opc.Write("EndActual_B_F_Sp", val);
-                else if (n == "EndPlan_B_F_Sm")
-                    opc.Write("EndActual_B_F_Sm", val);
+                var monitors = new[] { "EndPlan_A_F_Sp", "EndPlan_A_F_Sm", "EndPlan_B_F_Sp", "EndPlan_B_F_Sm" };
+                if (monitors.Contains(n))
+                {
+                    Global.Logger.Debug($"Plan for Sensor {n} value={val}");
+                    if (n == "EndPlan_A_F_Sp")
+                        opc.Write("EndActual_A_F_Sp", val);
+                    else if (n == "EndPlan_A_F_Sm")
+                        opc.Write("EndActual_A_F_Sm", val);
+                    else if (n == "EndPlan_B_F_Sp")
+                        opc.Write("EndActual_B_F_Sp", val);
+                    else if (n == "EndPlan_B_F_Sm")
+                        opc.Write("EndActual_B_F_Sm", val);
+                }
             });
 
 

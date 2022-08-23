@@ -123,23 +123,6 @@ class ModelListener : dsBaseListener
                 }
             }
         }
-
-        //var _segments =
-        //    names
-        //    .Where(n => !n.Contains('.'))  // '.' 이 포함되면 Call
-        //    .Where(n => !_rootFlow.Segments.Any(s => s.Name == n))
-        //    .Select(n =>
-        //    {
-        //        var flow = (PFlow)_parenting ?? _rootFlow;
-        //        if (ParserHelper.AliasNameMaps[_system].ContainsKey(n))
-        //            return new PAlias(n, flow, ParserHelper.AliasNameMaps[_system][n]) as IPCoin;
-        //        else
-        //            return new PSegment(n, _rootFlow);
-        //    })  // _flow 에 segment 로 등록됨
-        //    .ToArray()
-        //    ;
-
-        System.Console.WriteLine();
     }
 
 

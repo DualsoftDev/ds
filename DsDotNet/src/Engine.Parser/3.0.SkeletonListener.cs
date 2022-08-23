@@ -66,9 +66,6 @@ class SkeletonListener : dsBaseListener
             ;
 
         ParserHelper.FlowName2CpuMap = flowName2CpuNameMap;
-
-        Console.WriteLine();
-
     }
 
     override public void EnterSystem(dsParser.SystemContext ctx)
@@ -176,7 +173,6 @@ class SkeletonListener : dsBaseListener
             {
                 foreach (var seg in flow.RootSegments)
                     Debug.Assert(seg.Cpu != null && seg.Cpu == flow.Cpu);
-                Console.WriteLine();
             }
         }
     }

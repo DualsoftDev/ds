@@ -71,8 +71,13 @@ public static class CpuExtensionQueueing
         var bit = (Bit)bitChange.Bit;
         if (fwd.ContainsKey(bit))
         {
-            var dependents = fwd[bit].OfType<BitReEvaluatable>();
+            var dependents = fwd[bit].OfType<BitReEvaluatable>().ToArray();
             var prevValues = dependents.ToDictionary(dep => dep, dep => dep.Value);
+
+            //// { debug
+            //foreach (var d in dependents)
+            //    Debug.Assert(d.Value == d.Evaluate());
+            //// } debug
 
             // 실제 변경 적용
             DoApply(bitChange);

@@ -26,10 +26,10 @@ class Program
         Log4NetWrapper.SetLogger(Logger);
         Global.Logger = Logger;
 
-        var repo = (log4net.Repository.Hierarchy.Hierarchy)log4net.LogManager.GetRepository();
-        var repoLogger = repo.GetLogger("EngineLogger", repo.LoggerFactory);
-        var traceAppender = new TraceLogAppender();
-        repoLogger.AddAppender(traceAppender);
+        //var repo = (log4net.Repository.Hierarchy.Hierarchy)log4net.LogManager.GetRepository();
+        //var repoLogger = repo.GetLogger("EngineLogger", repo.LoggerFactory);
+        //var traceAppender = new TraceLogAppender();
+        //repoLogger.AddAppender(traceAppender);
     }
 
     static void PrepareThreadPool()

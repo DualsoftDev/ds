@@ -14,6 +14,8 @@ public class BitChange
     public string Guid { get; set; }
     public BitChange(IBit bit, bool newValue, object cause = null, ExceptionHandler onError =null)
     {
+        //Debug.Assert(bit.Value != newValue);
+
         if (newValue && bit.GetName().IsOneOf("StartPlan_A_F_Vm", "StartPlan_B_F_Vp"))
             Console.WriteLine();
         //if (newValue && bit.GetName().IsOneOf("StartPort_A_F_Vm", "StartPort_B_F_Vp"))

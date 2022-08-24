@@ -73,12 +73,15 @@ module EngineModule =
             let runChildren(children:Child seq) =
                 assert(children.Distinct().Count() = children.Count())
                 for child in children do
+                    child.Status <- Status4.Going
+
+                for child in children do
                     assert(not child.IsFlipped && (not child.Status.HasValue || child.Status.Value = Status4.Going))
-                    logDebug $"Child {child.QualifiedName} starting.."
+                    logInfo $"Child {child.QualifiedName} starting.."
                     assert(child.TagsStart.Count <= 1)  // 일단... 체크용..
                     for st in child.TagsStart do
                         let before = fun () ->
-                            child.Status <- Status4.Going
+                            //child.Status <- Status4.Going
                             Global.ChildStatusChangedSubject.OnNext(ChildStatusChange(child, Status4.Going))
 
                         writer(BitChange(st, true, "Starting child", onError, BeforeAction = before))
@@ -95,11 +98,12 @@ module EngineModule =
                         assert(finishedChildren.Length = 0 || finishedChildren.Length = 1 )
                         let finishedChild = finishedChildren.FirstOrDefault()
                         if finishedChild <> null then
-                            logDebug $"Child {finishedChild.QualifiedName} finish detected."
+                            logInfo $"Child {finishedChild.QualifiedName} finish detected."
                             finishedChild.Status <- Status4.Finished
                             finishedChild.IsFlipped <- true
                             for st in finishedChild.TagsStart do
-                                write(st, false, $"Child {finishedChild.QualifiedName} finished")
+                                assert(not st.Value)
+                                //write(st, false, $"Child {finishedChild.QualifiedName} finished")
                             
                             if (seg.Children.ForAll(fun ch -> ch.IsFlipped)) then
                                 writeEndPort(seg.PortE, true, $"{seg.QualifiedName} GOING 끝 (모든 child end)")
@@ -114,8 +118,9 @@ module EngineModule =
                                                     .ForAll(finishedChildren.Contains))
                                     edges.Select(fun e -> e.Target)
                                         .OfType<Child>()
-                                        .Where(fun e -> not e.IsFlipped)
+                                        .Where(fun ch -> ch.Status <> Nullable Status4.Going && not ch.IsFlipped)
                                         .Distinct()
+                                        .ToArray()
 
                                 runChildren targets
                     )
@@ -133,7 +138,8 @@ module EngineModule =
 
         stopMonitorGoing seg
         write(seg.Going, false, $"{seg.QualifiedName} FINISH")
-        write(seg.TagPEnd, true, $"Finishing {seg.QualifiedName}")
+        if not seg.TagPEnd.Value then
+            write(seg.TagPEnd, true, $"Finishing {seg.QualifiedName}")
 
     let private procHoming(segment:SegmentBase, writer:ChangeWriter, onError:ExceptionHandler) =
         let seg = segment :?> Segment
@@ -167,7 +173,9 @@ module EngineModule =
             //if et.Type.HasFlag(TagType.External) then
             //    ()
             //else
-            write(et, false, $"내부 end tag {et.Name} 강제 off by {segment.QualifiedName} homing")
+            if et.Value then
+                //assert(false)
+                write(et, false, $"내부 end tag {et.Name} 강제 off by {segment.QualifiedName} homing")
 
     let Initialize() =
         SegmentBase.Create <-

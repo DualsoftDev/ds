@@ -247,16 +247,44 @@ class Tester
         Global.SegmentStatusChangedSubject.Subscribe(ssc =>
         {
             if (ssc.Segment.Name == "Main" && ssc.Status == Status4.Finished)
-                Global.NoOp();
+                Global.Logger.Info("-------------------------- End of Main segment");
         });
 
         var opc = engine.Opc;
-        opc.Write("EndActual_A_F_Sm", true);
 
         var startTag = "StartPlan_L_F_Main";
         Debug.Assert(engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(startTag));
-        opc.Write(startTag, true);
         opc.Write("Auto_L_F", true);
+        opc.Write(startTag, true);
+
+        var hasAddress =
+            engine.Model.Cpus
+                .SelectMany(cpu => cpu.TagsMap.Values)
+                .OfType<TagA>()
+                .Any(t => !t.Address.IsNullOrEmpty())
+                ;
+        if (hasAddress)
+        {
+            // initial condition
+            opc.Write("EndActual_A_F_Sm", true);
+
+            // simulating physics
+            Global.BitChangedSubject
+                .Subscribe(bc =>
+                {
+                    var n = bc.Bit.GetName();
+                    var val = bc.Bit.Value;
+                    var monitors = new[] { "EndPlan_A_F_Sp", "EndPlan_A_F_Sm" };
+                    if (monitors.Contains(n))
+                    {
+                        Global.Logger.Debug($"Plan for Sensor {n} value={val}");
+                        if (n == "EndPlan_A_F_Sp")
+                            opc.Write("EndActual_A_F_Sp", val);
+                        else if (n == "EndPlan_A_F_Sm")
+                            opc.Write("EndActual_A_F_Sm", val);
+                    }
+                });
+        }
 
         engine.Wait();
     }
@@ -310,12 +338,12 @@ class Tester
 //[addresses] = {
 //	//L.F.Main = (%0, %0,);
 //	A.F.Vp = (%Q123.23, ,);
-//	A.F.Sp = (, , %I12.2);
 //	A.F.Vm = (%Q123.24, ,);
-//	A.F.Sm = (, , %I12.3);
 //	B.F.Vp = (%Q123.25, ,);
-//	B.F.Sp = (, , %I12.3);
 //	B.F.Vm = (%Q123.24, ,);
+//	A.F.Sp = (, , %I12.2);
+//	A.F.Sm = (, , %I12.3);
+//	B.F.Sp = (, , %I12.3);
 //	B.F.Sm = (, , %I12.3);
 //}
 [cpus] AllCpus = {
@@ -339,7 +367,7 @@ class Tester
         Global.SegmentStatusChangedSubject.Subscribe(ssc =>
         {
             if (ssc.Segment.Name == "Main" && ssc.Status == Status4.Finished)
-                Global.NoOp();
+                Global.Logger.Info("-------------------------- End of Main segment");
         });
 
         {

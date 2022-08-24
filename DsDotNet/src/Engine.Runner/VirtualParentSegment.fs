@@ -86,7 +86,7 @@ module VirtualParentSegmentModule =
                                 // self reset.  실제 reset 시 알맹이의 reset 은 수행하지 말아야 한다.
                                 yield ep
                         |]
-                    And(cpu, $"ResetAnd_{n}", vrp)
+                    And(cpu, $"ResetPlanAnd_{n}", vrp)
                 PortInfoReset(cpu, null, $"Reset_{n}", resetPortInfoPlan, null)
 
             let sp =
@@ -105,7 +105,7 @@ module VirtualParentSegmentModule =
                             for csseg in causalSourceSegments do
                                 yield FlipFlop(cpu, $"InnerStartSourceFF_{n}_{csseg.Name}", csseg.PortE, ep)// :> IBit
                         |]
-                    And(cpu, $"StartAnd_{n}", vsp)
+                    And(cpu, $"StartPlanAnd_{n}", vsp)
 
                 PortInfoStart(cpu, null, $"Start_{n}", startPortInfoPlan, null)
 
@@ -166,11 +166,11 @@ module VirtualParentSegmentModule =
 
                     if notiVpsPortChange then
                         if oldStatus = Some state then
-                            assert(not bit.Value)
-                            logDebug $"\t\tVPS Skipping duplicate status: [{n}] status : {state}"
+                            logDebug $"\t\tVPS Skipping duplicate status: [{n}] status : {state} by {bit.Name}={on}"
+                            assert(not on)
                         else
                             oldStatus <- Some state
-                            logInfo $"[{n}] Segment status : {state} by {bit.Name}={bit.Value}"
+                            logInfo $"[{n}] Segment status : {state} by {bit.Name}={on}"
                             let childStatus = x.Target.Status
 
                             match state with

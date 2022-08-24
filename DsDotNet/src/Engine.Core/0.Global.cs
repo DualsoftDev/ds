@@ -34,6 +34,9 @@ public static class Global
 
     public static bool IsInUnitTest { get; }
     public static bool IsSimulationMode { get; internal set; } = true;
+
+    public static Model Model { get; set; }
+
     static Global()
     {
         IsInUnitTest = AppDomain.CurrentDomain.GetAssemblies()

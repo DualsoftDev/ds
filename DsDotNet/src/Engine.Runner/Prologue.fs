@@ -34,5 +34,6 @@ module internal BitWriterModule =
         fun (endPort:PortInfoEnd, value, cause) ->
             //assert(box endPort:? PortInfo)
             writer(PortInfoPlanChange(BitChange(endPort, value, cause, onError)))
-            if endPort.Cpu.IsActive && endPort.Actual <> null then
-                writer(BitChange(endPort.Actual, value, $"Active CPU endport: writing actual {endPort}={value}"))
+            if endPort.Cpu.IsActive then
+                if endPort.Actual <> null then
+                    writer(BitChange(endPort.Actual, value, $"Active CPU endport: writing actual {endPort}={value}"))

@@ -14,6 +14,11 @@ public class BitChange
     public string Guid { get; set; }
     public BitChange(IBit bit, bool newValue, object cause = null, ExceptionHandler onError =null)
     {
+        if (newValue && bit.GetName().IsOneOf("StartPlan_A_F_Vm", "StartPlan_B_F_Vp"))
+            Console.WriteLine();
+        //if (newValue && bit.GetName().IsOneOf("StartPort_A_F_Vm", "StartPort_B_F_Vp"))
+        //    Console.WriteLine();
+
         Debug.Assert(bit != null);
         Debug.Assert(cause is null || cause is IBit || cause is string);
         //Debug.Assert(bit.Value != newValue);
@@ -46,7 +51,7 @@ public abstract class PortInfoChange : BitChange
     //    PortInfo = bit;
     //}
     public PortInfoChange(BitChange bc)
-        : base(bc.Bit, bc.NewValue, bc.Cause, bc.OnError)
+        : base(bc.Bit, bc.NewValue, $"PortInfo change by {bc.Cause}", bc.OnError)
     {
         PortInfo = (PortInfo)bc.Bit;
     }

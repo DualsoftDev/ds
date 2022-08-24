@@ -164,7 +164,6 @@ module VirtualParentSegmentModule =
                         | _ ->
                             failwithlog $"Unknown: [{n}]{state}: Target endport => {x.Target.Name}={on}"
 
-
                     if notiVpsPortChange then
                         if oldStatus = Some state then
                             assert(not bit.Value)

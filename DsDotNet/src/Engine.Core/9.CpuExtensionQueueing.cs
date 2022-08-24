@@ -15,9 +15,15 @@ public static class CpuExtensionQueueing
 
         cpu.BuildFlipFlopMapOnDemand();
 
+#if DEBUG
+        new Thread(() =>
+#else
         new Thread(async () =>
+#endif
         {
-            var tid = Thread.CurrentThread.ManagedThreadId;
+            cpu.ThreadId = Thread.CurrentThread.ManagedThreadId;
+            Global.Logger.Debug($"\tRunning {cpu.ToText()}");
+
             while (!disposable.IsDisposed && cpu.Running)
             {
                 while (q.Count > 0 && cpu.Running)
@@ -33,7 +39,12 @@ public static class CpuExtensionQueueing
                         Global.Logger.Warn($"Failed to deque.");
                 }
                 cpu.ProcessingQueue = false;
+
+#if DEBUG
+                Thread.Sleep(5);
+#else
                 await Task.Delay(5);
+#endif
             }
         }).Start()
         ;
@@ -149,11 +160,15 @@ public static class CpuExtensionQueueing
                     throw new Exception("ERROR");
             }
 
+            if (bitChange.NewValue && (bit.Name == "StartPort_A_F_Vm" || bit.Name == "StartPort_B_F_Vp"))
+                Console.WriteLine();
+
 
             var bitChanged = bitChange switch
             {
-                PortInfoPlanChange pc => new Func<bool>(() =>
+                PortInfoPlanChange pic => new Func<bool>(() =>
                 {
+                    var pc = pic;
                     if (!pc.Applied)
                         if (pc.PortInfo.Plan is IBitWritable writable)
                         {

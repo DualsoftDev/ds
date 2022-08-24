@@ -4,6 +4,8 @@ public class Model
 {
     public List<DsSystem> Systems = new();
     public List<Cpu> Cpus { get; } = new();
+    /// <summary> 가상 부모 목록.  debugging 용 </summary>
+    public List<SegmentBase> VPSs { get; } = new();
 }
 public static class ModelExtension
 {

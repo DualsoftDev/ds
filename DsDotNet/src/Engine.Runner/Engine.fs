@@ -71,13 +71,16 @@ module EngineModule =
         write(seg.Going, true, $"{seg.QualifiedName} GOING 시작")
         if seg.Children.Any() then
             let runChildren(children:Child seq) =
+                assert(children.Distinct().Count() = children.Count())
                 for child in children do
                     assert(not child.IsFlipped && (not child.Status.HasValue || child.Status.Value = Status4.Going))
+                    logDebug $"Child {child.QualifiedName} starting.."
+                    assert(child.TagsStart.Count <= 1)  // 일단... 체크용..
                     for st in child.TagsStart do
                         let before = fun () ->
                             child.Status <- Status4.Going
                             Global.ChildStatusChangedSubject.OnNext(ChildStatusChange(child, Status4.Going))
-                            
+
                         writer(BitChange(st, true, "Starting child", onError, BeforeAction = before))
 
             assert(not <| goingSubscriptions.ContainsKey(seg))
@@ -88,7 +91,9 @@ module EngineModule =
                     .Where(fun t -> t.Value)
                     .Where(childRxTags.Contains)
                     .Subscribe(fun tag ->
-                        let finishedChild = seg.Children.FirstOrDefault(fun ch -> ch.TagsEnd.Contains(tag) && ch.TagsEnd.ForAll(fun t -> t.Value))
+                        let finishedChildren = seg.Children.Where(fun ch -> ch.TagsEnd.Contains(tag) && ch.TagsEnd.ForAll(fun t -> t.Value)).ToArray()
+                        assert(finishedChildren.Length = 0 || finishedChildren.Length = 1 )
+                        let finishedChild = finishedChildren.FirstOrDefault()
                         if finishedChild <> null then
                             logDebug $"Child {finishedChild.QualifiedName} finish detected."
                             finishedChild.Status <- Status4.Finished
@@ -107,7 +112,10 @@ module EngineModule =
                                             .Where(fun e ->
                                                 e.Sources.OfType<Child>()
                                                     .ForAll(finishedChildren.Contains))
-                                    edges.Select(fun e -> e.Target).OfType<Child>().Where(fun e -> not e.IsFlipped)
+                                    edges.Select(fun e -> e.Target)
+                                        .OfType<Child>()
+                                        .Where(fun e -> not e.IsFlipped)
+                                        .Distinct()
 
                                 runChildren targets
                     )
@@ -202,6 +210,8 @@ module EngineModule =
             // 가상 부모 생성
             let virtualParentSegments =
                 rootFlows.selectMany(CreateVirtualParentSegmentsFromRootFlow).ToArray()
+
+            Global.Model.VPSs.AddRange(virtualParentSegments.Cast<SegmentBase>())
 
 
             virtualParentSegments

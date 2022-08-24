@@ -15,6 +15,7 @@ public class EngineBuilder
         EngineModule.Initialize();
 
         Model = ModelParser.ParseFromString(modelText);
+        Global.Model = Model;
 
         Opc = new OpcBroker();
         Cpu = Model.Cpus.First(cpu => cpu.Name == activeCpuName);

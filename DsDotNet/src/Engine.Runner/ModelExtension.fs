@@ -16,26 +16,6 @@ module internal ModelModule =
         for f in model.Cpus.selectMany(fun f -> f.RootFlows) do
             f.Auto.Name <- $"Auto_{f.QualifiedName}"
 
-    /// Tag 이름 변경으로 인한, cpu 의 BitMap/TagsMap 갱신 및 OPC tag 갱신
-    let rebuildMap(model:Model, opc:OpcBroker) =
-        for cpu in model.Cpus do
-            let cpuBits = cpu.BitsMap.Values.ToHashSet()
-            let oldKeys = cpu.BitsMap.Where(fun kv -> cpuBits.Contains(kv.Value)).Select(fun kv -> kv.Key).ToArray()
-            for ok in oldKeys do
-                cpu.BitsMap.Remove(ok) |> ignore
-                cpu.TagsMap.Remove(ok) |> ignore
-
-            for b in cpuBits do
-                let n = b.GetName()
-                cpu.BitsMap.Add(n, b)
-                match b with
-                | :? Tag as t ->
-                    cpu.TagsMap.Add(n, t)
-                | _ ->
-                    ()
-
-            opc.AddTags(cpuBits.OfType<Tag>())
-
     let markChildren(model:Model) =
         let allRootSegments =
             model.Systems.selectMany(fun s -> s.RootFlows)
@@ -92,6 +72,35 @@ module internal ModelModule =
             for t in [seg.TagPStart; seg.TagPReset; seg.TagPEnd] do
                 t.Type <- t.Type ||| TagType.Plan ||| TagType.External
                 
+    /// Tag 이름 변경으로 인한, cpu 의 BitMap/TagsMap 갱신 및 OPC tag 갱신
+    let rebuildMap(model:Model, opc:OpcBroker) =
+        for cpu in model.Cpus do
+            let cpuBits = cpu.BitsMap.Values.ToHashSet()
+            let oldKeys = cpu.BitsMap.Where(fun kv -> cpuBits.Contains(kv.Value)).Select(fun kv -> kv.Key).ToArray()
+            for ok in oldKeys do
+                cpu.BitsMap.Remove(ok) |> ignore
+                cpu.TagsMap.Remove(ok) |> ignore
+
+            for b in cpuBits do
+                let n = b.GetName()
+                cpu.BitsMap.Add(n, b)
+                match b with
+                | :? Tag as t ->
+                    cpu.TagsMap.Add(n, t)
+                | _ ->
+                    ()
+
+            opc.AddTags(cpuBits.OfType<Tag>())
+
+    let checkCpu(model:Model) =
+        let check(cpu:Cpu) =
+            let exprs = cpu.BitsMap.Values.OfType<BitReEvaluatable>().ToArray()
+            for ex in exprs do
+                assert(ex.Evaluate() = ex.Value)
+        for cpu in model.Cpus do
+            check cpu
+
+
 
 [<Extension>] // type Segment =
 type ModelExt =
@@ -106,6 +115,7 @@ type ModelExt =
         renameBits(model)
         markChildren(model)
         rebuildMap(model, opc)
+        checkCpu(model)
 
 
     [<Extension>]

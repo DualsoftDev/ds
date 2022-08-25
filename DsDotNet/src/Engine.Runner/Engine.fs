@@ -138,8 +138,9 @@ module EngineModule =
 
         stopMonitorGoing seg
         write(seg.Going, false, $"{seg.QualifiedName} FINISH")
-        if not seg.TagPEnd.Value then
-            write(seg.TagPEnd, true, $"Finishing {seg.QualifiedName}")
+        if seg.TagPEnd.Value then
+            noop()
+        write(seg.TagPEnd, true, $"Finishing {seg.QualifiedName}")
 
     let private procHoming(segment:SegmentBase, writer:ChangeWriter, onError:ExceptionHandler) =
         let seg = segment :?> Segment

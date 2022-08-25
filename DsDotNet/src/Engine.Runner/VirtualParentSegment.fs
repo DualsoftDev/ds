@@ -167,7 +167,7 @@ module VirtualParentSegmentModule =
                     if notiVpsPortChange then
                         if oldStatus = Some state then
                             logDebug $"\t\tVPS Skipping duplicate status: [{n}] status : {state} by {bit.Name}={on}"
-                            assert(not on)
+                            //assert(not on)    // todo
                         else
                             oldStatus <- Some state
                             logInfo $"[{n}] Segment status : {state} by {bit.Name}={on}"
@@ -197,7 +197,7 @@ module VirtualParentSegmentModule =
 
                             | Status4.Finished ->
                                 write(targetStartTag, false, $"{n} FINISH 로 인한 {x.Target.Name} start {targetStartTag.GetName()} 끄기")
-                                write(x.Going, false, "${n} FINISH")
+                                write(x.Going, false, $"{n} FINISH")
                                 assert(x.PortE.Value)
                                 assert(x.PortR.Value = false)
 

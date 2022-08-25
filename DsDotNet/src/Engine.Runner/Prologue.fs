@@ -32,8 +32,11 @@ module internal BitWriterModule =
 
     let getEndPortPlanWriter (writer:ChangeWriter) onError =
         fun (endPort:PortInfoEnd, value, cause) ->
-            //assert(box endPort:? PortInfo)
-            writer(PortInfoPlanChange(BitChange(endPort, value, cause, onError)))
+            //writer(PortInfoPlanChange(BitChange(endPort, value, cause, onError)))
+            //if endPort.Cpu.IsActive then
+            //    if endPort.Actual <> null then
+            //        writer(BitChange(endPort.Actual, value, $"Active CPU endport: writing actual {endPort}={value}"))
+            writer(BitChange(endPort.Plan, value, cause, onError))
             if endPort.Cpu.IsActive then
                 if endPort.Actual <> null then
                     writer(BitChange(endPort.Actual, value, $"Active CPU endport: writing actual {endPort}={value}"))

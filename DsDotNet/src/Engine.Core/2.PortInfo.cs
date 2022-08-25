@@ -2,7 +2,7 @@ namespace Engine.Core;
 
 
 /// <summary> 정보(Plan) + 물리(Actual) </summary>
-public abstract class PortInfo : BitReEvaluatable, IBitWritable
+public abstract class PortInfo : BitReEvaluatable//, IBitWritable
 {
     protected PortInfo(Cpu cpu, SegmentBase segment, string name, IBit plan, Tag actual)
         : base(cpu, name, plan, actual)
@@ -16,7 +16,7 @@ public abstract class PortInfo : BitReEvaluatable, IBitWritable
     public string QualifiedName => $"{Segment.QualifiedName}_{GetType().Name}";
     /// <summary> 내부 추적용 Tag 이름 : QualifiedName + 기능명.  e.g "L.F.Main.AutoStart.  사용자가 지정하는 이름과는 별개 </summary>
     public string InternalName { get; set; }
-    public abstract void SetValue(bool newValue);
+    //public abstract void SetValue(bool newValue);
     public abstract bool PlanValueChanged(bool newValue);
     public abstract bool ActualValueChanged(bool newValue);
 
@@ -49,28 +49,36 @@ public abstract class PortInfoCommand : PortInfo
     {
     }
     public override bool Evaluate() => Plan.Value;
-    public override void SetValue(bool newValue)    // PortInfoCommand
-    {
-        if (Plan is IBitWritable w)
-            w.SetValue(newValue);
-        else
-            Debug.Assert(Evaluate() == newValue);
+    //public override void SetValue(bool newValue)    // PortInfoCommand
+    //{
+    //    if (Plan is IBitWritable w)
+    //        w.SetValue(newValue);
+    //    else
+    //        Debug.Assert(Evaluate() == newValue);
 
-        _value = newValue;
-        Actual?.SetValue(newValue);
-    }
+    //    _value = newValue;
+    //    Actual?.SetValue(newValue);
+    //}
 
     public override bool PlanValueChanged(bool newValue)    // PortInfoCommand
     {
         Debug.Assert(Plan.Value == newValue);
         Actual?.SetValue(newValue);
-        SetValue(newValue);
+        //SetValue(newValue);
         return true;
     }
     public override bool ActualValueChanged(bool newValue) => false;
+    public override bool Value
+    {
+        get
+        {
+            _value = Evaluate();
+            return _value;
+        }
+    }
 
 }
-/// <summary> Start 명령용 정보(Plan) + 물리(Actual) </summary>
+    /// <summary> Start 명령용 정보(Plan) + 물리(Actual) </summary>
 public class PortInfoStart : PortInfoCommand
 {
     public PortInfoStart(Cpu cpu, SegmentBase segment, string name, IBit plan, Tag actual)
@@ -120,22 +128,22 @@ public class PortInfoEnd : PortInfo
         if (Actual != null && newPlanValue == Actual.Value)
             throw new DsException($"Spatial Error: Plan[{Plan}={newPlanValue}] <> Actual[{Actual.Value}]");
     }
-    public override void SetValue(bool newValue)    // PortInfoEnd
-    {
-        Debug.Assert(Plan.Value == _value);
+    //public override void SetValue(bool newValue)    // PortInfoEnd
+    //{
+    //    Debug.Assert(Plan.Value == _value);
 
-        if (Plan.Value != newValue)
-        {
-            CheckMatch(newValue);
+    //    if (Plan.Value != newValue)
+    //    {
+    //        CheckMatch(newValue);
 
-            if (Plan is IBitWritable wPlan)
-                wPlan.SetValue(newValue);
-            else
-                Debug.Assert(Plan.Value == newValue);
+    //        if (Plan is IBitWritable wPlan)
+    //            wPlan.SetValue(newValue);
+    //        else
+    //            Debug.Assert(Plan.Value == newValue);
 
-            _value = newValue;
-        }
-    }
+    //        _value = newValue;
+    //    }
+    //}
 
     public override bool PlanValueChanged(bool newValue)    // PortInfoEnd
     {

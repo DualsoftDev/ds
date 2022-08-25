@@ -134,56 +134,56 @@ public static class CpuExtension
 }
 
 
-public static class CpuExtensionBitChange
-{
-    [Obsolete("Old version")]
-    public static void AddBitDependancy(this Cpu cpu, IBit source, IBit target)
-    {
-        Debug.Assert(source is not null && target is not null);
+//public static class CpuExtensionBitChange
+//{
+//    [Obsolete("Old version")]
+//    public static void AddBitDependancy(this Cpu cpu, IBit source, IBit target)
+//    {
+//        Debug.Assert(source is not null && target is not null);
 
-        var fwdMap = cpu.ForwardDependancyMap;
+//        var fwdMap = cpu.ForwardDependancyMap;
 
-        if (!fwdMap.ContainsKey(source))
-        {
-            var srcTag = source as Tag;
-            if (srcTag != null)
-            {
-                var xxx = fwdMap.Keys.OfType<Tag>().FirstOrDefault(k => k.Name == srcTag.Name);
-                Debug.Assert(!fwdMap.Keys.OfType<Tag>().Any(k => k.Name == srcTag.Name));
-            }
+//        if (!fwdMap.ContainsKey(source))
+//        {
+//            var srcTag = source as Tag;
+//            if (srcTag != null)
+//            {
+//                var xxx = fwdMap.Keys.OfType<Tag>().FirstOrDefault(k => k.Name == srcTag.Name);
+//                Debug.Assert(!fwdMap.Keys.OfType<Tag>().Any(k => k.Name == srcTag.Name));
+//            }
 
 
-            fwdMap[source] = new HashSet<IBit>();
-        }
+//            fwdMap[source] = new HashSet<IBit>();
+//        }
 
-        fwdMap[source].Add(target);
-    }
+//        fwdMap[source].Add(target);
+//    }
 
-    public static void BuildTagsMap(this Cpu cpu)
-    {
-        cpu.BitsMap
-            .Where(kv => kv.Value is Tag && !cpu.TagsMap.ContainsKey(kv.Key))
-            .Iter(kv => cpu.TagsMap.Add(kv.Key, kv.Value as Tag))
-            ;
-    }
+//    public static void BuildTagsMap(this Cpu cpu)
+//    {
+//        cpu.BitsMap
+//            .Where(kv => kv.Value is Tag && !cpu.TagsMap.ContainsKey(kv.Key))
+//            .Iter(kv => cpu.TagsMap.Add(kv.Key, kv.Value as Tag))
+//            ;
+//    }
 
-    [Obsolete("Old version")]
-    public static void BuildBackwardDependency(this Cpu cpu)
-    {
-        cpu.BackwardDependancyMap = new Dictionary<IBit, HashSet<IBit>>();
-        var bwdMap = cpu.BackwardDependancyMap;
+//    [Obsolete("Old version")]
+//    public static void BuildBackwardDependency(this Cpu cpu)
+//    {
+//        cpu.BackwardDependancyMap = new Dictionary<IBit, HashSet<IBit>>();
+//        var bwdMap = cpu.BackwardDependancyMap;
 
-        foreach (var tpl in cpu.ForwardDependancyMap)
-        {
-            (var source, var targets) = (tpl.Key, tpl.Value);
+//        foreach (var tpl in cpu.ForwardDependancyMap)
+//        {
+//            (var source, var targets) = (tpl.Key, tpl.Value);
 
-            foreach (var t in targets)
-            {
-                if (!bwdMap.ContainsKey(t))
-                    bwdMap[t] = new HashSet<IBit>();
+//            foreach (var t in targets)
+//            {
+//                if (!bwdMap.ContainsKey(t))
+//                    bwdMap[t] = new HashSet<IBit>();
 
-                bwdMap[t].Add(source);
-            }
-        }
-    }
-}
+//                bwdMap[t].Add(source);
+//            }
+//        }
+//    }
+//}

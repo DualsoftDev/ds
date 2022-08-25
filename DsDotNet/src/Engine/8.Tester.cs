@@ -277,7 +277,7 @@ class Tester
                     var monitors = new[] { "EndPlan_A_F_Sp", "EndPlan_A_F_Sm" };
                     if (monitors.Contains(n))
                     {
-                        Global.Logger.Debug($"Plan for Sensor {n} value={val}");
+                        Global.Logger.Info($"Simualting Plan for Sensor {n} value={val}");
                         if (n == "EndPlan_A_F_Sp")
                             opc.Write("EndActual_A_F_Sp", val);
                         else if (n == "EndPlan_A_F_Sm")
@@ -335,17 +335,17 @@ class Tester
         Vp <||> Vm;
     }
 }
-//[addresses] = {
-//	//L.F.Main = (%0, %0,);
-//	A.F.Vp = (%Q123.23, ,);
-//	A.F.Vm = (%Q123.24, ,);
-//	B.F.Vp = (%Q123.25, ,);
-//	B.F.Vm = (%Q123.24, ,);
-//	A.F.Sp = (, , %I12.2);
-//	A.F.Sm = (, , %I12.3);
-//	B.F.Sp = (, , %I12.3);
-//	B.F.Sm = (, , %I12.3);
-//}
+[addresses] = {
+	//L.F.Main = (%0, %0,);
+	A.F.Vp = (%Q123.23, ,);
+	A.F.Vm = (%Q123.24, ,);
+	B.F.Vp = (%Q123.25, ,);
+	B.F.Vm = (%Q123.24, ,);
+	A.F.Sp = (, , %I12.2);
+	A.F.Sm = (, , %I12.3);
+	B.F.Sp = (, , %I12.3);
+	B.F.Sm = (, , %I12.3);
+}
 [cpus] AllCpus = {
     [cpu] Cpu = {
         L.F;

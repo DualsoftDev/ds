@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -57,39 +58,117 @@ public static class CpuExtensionQueueing
         //if (bitChange.Bit.Value == bitChange.NewValue)
         //    return;
 
-        if (bitChange.Bit.GetName() == "EndPort_A_F_Sp")
-            Global.NoOp();
-
         Global.Logger.Debug($"\t\t=[{cpu.NestingLevel}] Applying bitChange {bitChange}");   // {bitChange.Guid}
 
         var fwd = cpu.ForwardDependancyMap;
         var q = cpu.Queue;
 
+        Debug.Assert(cpu.FFSetterMap != null);
         cpu.BuildFlipFlopMapOnDemand();
 
         cpu.NestingLevel++;
         var bit = (Bit)bitChange.Bit;
+
+        // { debug
+        if (bitChange is PortInfoPlanChange pipc)
+        {
+            var contain = fwd.ContainsKey(bit);
+            Global.NoOp();
+        }
+        if (bitChange.Bit.GetName() == "EndActual_A_F_Sm")  //"ResetPlan_A_F_Sm")  //"StartPlan_A_F_Vm") //"InnerStartSourceFF_VPS_A_F_Pp_Vp")   // "StartPlanAnd_VPS_A_F_Pp")
+            Global.NoOp();
+
+        IEnumerable<IBit> collectForwards(IBit bit)
+        {
+            if (fwd.ContainsKey(bit))
+            {
+                var dependents = fwd[bit];
+                foreach (var d in dependents)
+                {
+                    yield return d;
+                    if (d is not IBitWritable)
+                        foreach (var dd in collectForwards(d))
+                            yield return dd;
+                }
+            }
+        }
+
+        //IBit[] allDependents = new IBit[] {} ;
+        //Dictionary<IBit, bool> allPrevValues = new();
+        //if (fwd.ContainsKey(bit))
+        //{
+        //    allDependents = collectForwards(bit).ToArray();
+        //    allPrevValues = allDependents.ToDictionary(dep => dep, dep => dep.Value);
+        //    Console.WriteLine();
+        //}
+        // } debug
+
+
+
+
         if (fwd.ContainsKey(bit))
         {
-            var dependents = fwd[bit].OfType<BitReEvaluatable>().ToArray();
+            //var dependents = fwd[bit]
+            //    //.OfType<BitReEvaluatable>().ToArray()
+            //    ;
+            //var prevValues = dependents.ToDictionary(dep => dep, dep => dep.Value);
+            var dependents = collectForwards(bit).ToArray();
             var prevValues = dependents.ToDictionary(dep => dep, dep => dep.Value);
 
-            //// { debug
-            //foreach (var d in dependents)
-            //    Debug.Assert(d.Value == d.Evaluate());
-            //// } debug
 
             // 실제 변경 적용
             DoApply(bitChange);
 
+            //// { debug
+            //var changedxxx =
+            //    (from kv in allPrevValues
+            //     let b = kv.Key
+            //     let val = kv.Value
+            //     where val != b.Value
+            //     select b
+            //     ).ToArray();
+
+            //var changedPortxx =
+            //    changedxxx.OfType<PortInfo>().ToArray();
+            //if (changedPortxx.Any())
+            //    Console.WriteLine();
+            //// } debug
+
+
             // 변경으로 인한 파생 변경 enqueue
             {
-                var changes = (
-                        from dep in dependents
-                        let newValue = dep.Evaluate()
-                        where newValue != prevValues[dep]
-                        select (new BitChange(dep, newValue, bit, bitChange.OnError))
-                    ).ToList();
+                bool getValue(IBit dep) => (dep is BitReEvaluatable re) ? re.Evaluate() : dep.Value;
+                List<BitChange> changes = new();
+                foreach(var dep in dependents)
+                {
+                    BitChange bc = null;
+                    if (dep is PortInfo pi)
+                    {
+                        if (pi.Plan == bit)
+                        {
+                            if (pi.Actual == null || pi.Actual.Value == pi.Plan.Value)
+                                bc = new BitChange(dep, bitChange.NewValue, bit, bitChange.OnError);
+                            else
+                                Console.WriteLine();
+                        }
+                        else if (pi.Actual == bit)
+                        {
+                            if (pi.Actual.Value == pi.Plan.Value)
+                                bc = new BitChange(dep, bitChange.NewValue, bit, bitChange.OnError);
+                            else
+                                Console.WriteLine();
+                        }
+                    }
+
+                    if (bc == null)
+                    {
+                        var newValue = getValue(dep);
+                        if (newValue != prevValues[dep])
+                            bc = new BitChange(dep, newValue, bit, bitChange.OnError);
+                    }
+                    if (bc != null)
+                        changes.Add(bc);
+                }
 
                 if (cpu.FFSetterMap.ContainsKey(bit) && bitChange.NewValue)
                     foreach (var ff in cpu.FFSetterMap[bit].Where(ff => !ff.Value))
@@ -99,40 +178,70 @@ public static class CpuExtensionQueueing
                     foreach (var ff in cpu.FFResetterMap[bit].Where(ff => ff.Value))
                         changes.Add(new BitChange(ff, false, bit, bitChange.OnError));
 
-                var chgrp = changes.GroupByToDictionary(ch => ch.Bit is PortInfo);
-                if (chgrp.ContainsKey(false))
-                {
-                    var nonPorts = chgrp[false];
-                    foreach (var bc in nonPorts)
-                        cpu.Apply(bc, withQueue);
-                }
-                if (chgrp.ContainsKey(true))
-                {
-                    var ports = chgrp[true];
-                    foreach (var bc in ports)
-                    {
-                        var port = (PortInfo)bc.Bit;
-                        if (bit == port.Plan)
-                        {
-                            var newBc = new PortInfoPlanChange(bc) { Applied = true };
-                            if (withQueue)
-                                q.Enqueue(newBc);
-                            else
-                                cpu.Apply(newBc, withQueue);
-                        }
-                        else if (bit == port.Actual)
-                        {
-                            var newBc = new PortInfoActualChange(bc);
-                            if (withQueue)
-                                q.Enqueue(newBc);
-                            else
-                                cpu.Apply(newBc, withQueue);
+                //var portChanges =
+                //    dependents
+                //        .OfType<PortInfo>()
+                //        .Where(pi =>
+                //        {
+                //            if (pi.Plan == bit && pi.Actual == null)
+                //            {
+                //                var writablePlan = pi.Plan is IBitWritable;
+                //                Debug.Assert(dependents.Contains(pi));
+                //                var valueChanged = prevValues[pi] != pi.Value;
 
-                        }
-                        else
-                            throw new Exception("ERROR");
-                    }
-                }
+                //                var bcChanged = bit.Value != bitChange.NewValue;
+                //                var changeContains = changes.Any(bc => bc.Bit == pi);
+                //                var changesLength = changes.Count;
+                //                Console.WriteLine();
+
+                //                if (!writablePlan)
+                //                    Console.WriteLine();
+                //            }
+                //            return true;
+                //        })
+                //        .ToArray()
+                //        ;
+                //if (portChanges.Any())
+                //    Console.WriteLine();
+
+
+                foreach (var bc in changes)
+                    cpu.Apply(bc, withQueue);
+
+                //var chgrp = changes.GroupByToDictionary(ch => ch.Bit is PortInfo);
+                //if (chgrp.ContainsKey(false))
+                //{
+                //    var nonPorts = chgrp[false];
+                //    foreach (var bc in nonPorts)
+                //        cpu.Apply(bc, withQueue);
+                //}
+                //if (chgrp.ContainsKey(true))
+                //{
+                //    var ports = chgrp[true];
+                //    foreach (var bc in ports)
+                //    {
+                //        var port = (PortInfo)bc.Bit;
+                //        if (bit == port.Plan)
+                //        {
+                //            var newBc = new PortInfoPlanChange(bc) { Applied = true };
+                //            if (withQueue)
+                //                q.Enqueue(newBc);
+                //            else
+                //                cpu.Apply(newBc, withQueue);
+                //        }
+                //        else if (bit == port.Actual)
+                //        {
+                //            var newBc = new PortInfoActualChange(bc);
+                //            if (withQueue)
+                //                q.Enqueue(newBc);
+                //            else
+                //                cpu.Apply(newBc, withQueue);
+
+                //        }
+                //        else
+                //            throw new Exception("ERROR");
+                //    }
+                //}
             }
         }
         else
@@ -190,7 +299,7 @@ public static class CpuExtensionQueueing
 
                 _ => new Func<bool>(() =>
                 {
-                    Debug.Assert(bit is not PortInfo || Global.IsInUnitTest);
+                    //Debug.Assert(bit is not PortInfo || Global.IsInUnitTest);
 
                     if (bit is IBitWritable writable)
                     {
@@ -200,7 +309,7 @@ public static class CpuExtensionQueueing
                     else
                     {
                         Debug.Assert(bit.Value == bitChange.NewValue);
-                        return false;
+                        return bit is PortInfo;
                     }
                 })(),
             };
@@ -284,18 +393,25 @@ public static class CpuExtensionQueueing
                 case Flag:
                 case Tag:
                     break;
+                case FlipFlop ff:
+                    addRelationship(ff.S, ff);
+                    addSubRelationship(ff.S);
+                    addRelationship(ff.R, ff);
+                    addSubRelationship(ff.R);
+                    break;
+                case PortInfo pi:
+                    foreach (var mb in pi._monitoringBits.Where(b => b != null))
+                    {
+                        addRelationship(mb, pi);
+                        addSubRelationship(mb);
+                    }
+                    break;
                 case BitReEvaluatable bre:
                     foreach (var mb in bre._monitoringBits.Where(b => b != null))
                     {
                         addRelationship(mb, bre);
                         addSubRelationship(mb);
                     }
-                    break;
-                case FlipFlop ff:
-                    addRelationship(ff.S, ff);
-                    addSubRelationship(ff.S);
-                    addRelationship(ff.R, ff);
-                    addSubRelationship(ff.R);
                     break;
                 default:
                     throw new Exception("ERROR");

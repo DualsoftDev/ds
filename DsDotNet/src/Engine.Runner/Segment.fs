@@ -91,7 +91,7 @@ module FsSegmentModule =
                     let cause = $"by bit change {bit.GetName()}={value}"
                     if oldStatus = Some state then
                         let msg = $"{n} status {state} duplicated on port {bit.GetName()}={value} by {cause}"
-                        assert(not bit.Value)
+                        //assert(not bit.Value) // todo
                         // case1 : Reset port 켜지는 시점
                         // case2 : EndPort 꺼지는 시점에 : Reset port 는 아직 살아 있으므로 homing 
                         if bit = x.PortS then   // finish 도중에 start port 꺼져서 finish 완료되려는 시점

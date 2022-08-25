@@ -94,7 +94,13 @@ module EngineModule =
                     .Where(fun t -> t.Value)
                     .Where(childRxTags.Contains)
                     .Subscribe(fun tag ->
-                        let finishedChildren = seg.Children.Where(fun ch -> ch.TagsEnd.Contains(tag) && ch.TagsEnd.ForAll(fun t -> t.Value)).ToArray()
+                        let finishedChildren =
+                            seg.Children
+                                .Where(fun ch ->
+                                    ch.Status = Nullable Status4.Going
+                                    && ch.TagsEnd.Contains(tag)
+                                    && ch.TagsEnd.ForAll(fun t -> t.Value))
+                                    .ToArray()
                         assert(finishedChildren.Length = 0 || finishedChildren.Length = 1 )
                         let finishedChild = finishedChildren.FirstOrDefault()
                         if finishedChild <> null then
@@ -113,6 +119,7 @@ module EngineModule =
                                     let edges =
                                         let finishedChildren = seg.Children.Where(fun ch -> ch.IsFlipped).ToArray()
                                         seg.Edges
+                                            .Where(fun e -> box e :? ISetEdge)
                                             .Where(fun e ->
                                                 e.Sources.OfType<Child>()
                                                     .ForAll(finishedChildren.Contains))

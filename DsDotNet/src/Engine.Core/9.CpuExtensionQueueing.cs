@@ -1,4 +1,3 @@
-using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -69,23 +68,9 @@ public static class CpuExtensionQueueing
         cpu.NestingLevel++;
         var bit = (Bit)bitChange.Bit;
 
-        // { debug
-        if (bitChange is PortInfoPlanChange pipc)
-        {
-            var contain = fwd.ContainsKey(bit);
-            Global.NoOp();
-        }
         if (bitChange.Bit.GetName() == "EndActual_A_F_Sm")  //"ResetPlan_A_F_Sm")  //"StartPlan_A_F_Vm") //"InnerStartSourceFF_VPS_A_F_Pp_Vp")   // "StartPlanAnd_VPS_A_F_Pp")
             Global.NoOp();
 
-
-        BitChange createBitChagne(IBit bit, bool newValue, object cause = null, ExceptionHandler onError = null) =>
-            bit switch
-            {
-                IBitWritable wr when wr.Value == newValue => null,
-                //PortInfo pi when pi.Value == newValue => null,
-                _ => new BitChange(bit, newValue, cause, onError),
-            };
 
         if (fwd.ContainsKey(bit))
         {
@@ -107,17 +92,18 @@ public static class CpuExtensionQueueing
                     {
                         if (pi.Plan == bit)
                         {
+                            //Debug.Assert(pi.Plan.Value != pi.Actual?.Value);
                             if (pi.Actual == null || pi.Plan.Value == pi.Actual.Value)
-                                bc = createBitChagne(dep, bitChange.NewValue, bit, bitChange.OnError);
+                                bc = new BitChange(dep, bitChange.NewValue, bit, bitChange.OnError);
                             else
-                                Console.WriteLine();
+                                Global.NoOp();
                         }
                         else if (pi.Actual == bit)
                         {
                             if (pi.Plan.Value == pi.Actual.Value)
-                                bc = createBitChagne(dep, bitChange.NewValue, bit, bitChange.OnError);
+                                bc = new BitChange(dep, bitChange.NewValue, bit, bitChange.OnError);
                             else
-                                Console.WriteLine();
+                                Global.NoOp();
                         }
                     }
 
@@ -125,7 +111,7 @@ public static class CpuExtensionQueueing
                     {
                         var newValue = getValue(dep);
                         if (newValue != prevValues[dep])
-                            bc = createBitChagne(dep, newValue, bit, bitChange.OnError);
+                            bc = new BitChange(dep, newValue, bit, bitChange.OnError);
                     }
                     if (bc != null)
                         changes.Add(bc);
@@ -164,55 +150,17 @@ public static class CpuExtensionQueueing
             var bit = (Bit)bitChange.Bit;
             //Global.Logger.Debug($"\t=({indent}) Applying bitchange {bitChange}");
 
-            // bit 가 나의 cpu 의 bit 가 아닌 경우, 타 cpu 에서 수행할 수 있도록 tag 변경을 공지.
-            // e.g.  Call 의 TX 에 해당하는 bit 변경은 Call 이 정의된 system 의 cpu 에서 처리한다.
-            if (! cpu.BitsMap.ContainsKey(bit.Name))
+            var bitChanged = false;
+            if (bit is IBitWritable writable)
             {
-                if (bit is Tag)
-                    Global.TagChangeToOpcServerSubject.OnNext(new OpcTagChange(bit.Name, bitChange.NewValue));
-                else
-                    throw new Exception("ERROR");
+                writable.SetValue(bitChange.NewValue);
+                bitChanged = true;
             }
-
-            if (bitChange.NewValue && (bit.Name == "StartPort_A_F_Vm" || bit.Name == "StartPort_B_F_Vp"))
-                Console.WriteLine();
-
-
-            var bitChanged = bitChange switch
+            else
             {
-                //PortInfoPlanChange pic => new Func<bool>(() =>
-                //{
-                //    var pc = pic;
-                //    if (!pc.Applied)
-                //        if (pc.PortInfo.Plan is IBitWritable writable)
-                //        {
-                //            writable.SetValue(pc.NewValue);
-                //            Global.RawBitChangedSubject.OnNext(new BitChange(writable, pc.NewValue, $"Plan 변경: [{pc.PortInfo.Plan}]={pc.NewValue}"));
-                //        }
-
-                //        else
-                //            throw new Exception("ERROR");
-                //    return pc.PortInfo.PlanValueChanged(pc.NewValue);
-                //})(),
-
-                //PortInfoActualChange ac => ac.PortInfo.ActualValueChanged(ac.NewValue),
-
-                _ => new Func<bool>(() =>
-                {
-                    //Debug.Assert(bit is not PortInfo || Global.IsInUnitTest);
-
-                    if (bit is IBitWritable writable)
-                    {
-                        writable.SetValue(bitChange.NewValue);
-                        return true;
-                    }
-                    else
-                    {
-                        Debug.Assert(bit.Value == bitChange.NewValue);
-                        return bit is PortInfo;
-                    }
-                })(),
-            };
+                Debug.Assert(bit.Value == bitChange.NewValue);
+                bitChanged = bit is PortInfo;
+            }
 
             if (bitChanged)
             {
@@ -229,7 +177,6 @@ public static class CpuExtensionQueueing
                         throw;
                     else
                         bitChange.OnError(ex);
-
                 }
             }
         }

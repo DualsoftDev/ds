@@ -140,14 +140,14 @@ module VirtualParentSegmentModule =
                         if x.Ready.Value && state <> Status4.Ready then
                             write(x.Ready, false, $"{n} ready off by status {state}")
 
-                        let cause = $"${x.Target.Name} End Port={x.Target.PortE.Value}"
+                        let cause = $"{x.Target.Name} End Port={x.Target.PortE.Value}"
 
 
                         match state, on with
                         | Status4.Going, true ->
-                            write(targetStartTag, false, $"{n} going 끝내기 by{cause}")
-                            write(x.Going, false, $"{n} going 끝내기 by{cause}")
-                            writeEndPort(x.PortE, true, $"{n} FINISH 끝내기 by{cause}")
+                            //write(targetStartTag, false, $"{n} going 끝내기 by {cause}")
+                            //write(x.Going, false, $"{n} going 끝내기 by {cause}")
+                            writeEndPort(x.PortE, true, $"{n} FINISH 끝내기 by {cause}")
                             
 
 
@@ -167,6 +167,7 @@ module VirtualParentSegmentModule =
                     if notiVpsPortChange then
                         if oldStatus = Some state then
                             logDebug $"\t\tVPS Skipping duplicate status: [{n}] status : {state} by {bit.Name}={on}"
+                            noop()
                             //assert(not on)    // todo
                         else
                             oldStatus <- Some state

@@ -1,56 +1,55 @@
 namespace Engine.Runner
 
-open System
-open Engine.Core
+//open System
+//open Engine.Core
 
-[<AutoOpen>]
-module ModelRunnerModule =
-    ()
-
+//[<AutoOpen>]
+//module ModelRunnerModule =
 
 
-    //let runCpu (cpu:Cpu) = ()
 
-    //type EngineRunner(engine:Engine) as this =
-    //    let mutable _disposabls = new CompositeDisposable()
-    //    let model = engine.Model
-    //    let cpus = model.Cpus
-    //    let activeCpu = cpus |> Seq.filter(fun cpu -> cpu.IsActive) |> Seq.exactlyOne
-    //    let otherCpus = cpus |> Seq.except([activeCpu])
+//    let runCpu (cpu:Cpu) = ()
 
-    //    interface IDisposable with
-    //        member x.Dispose() = x.Dispose()
+//    type EngineRunner(engine:Engine) as this =
+//        let mutable _disposabls = new CompositeDisposable()
+//        let model = engine.Model
+//        let cpus = model.Cpus
+//        let activeCpu = cpus |> Seq.filter(fun cpu -> cpu.IsActive) |> Seq.exactlyOne
+//        let otherCpus = cpus |> Seq.except([activeCpu])
 
-    //    member private x.Dispose() =
-    //        _disposabls.Dispose()
-    //        _disposabls <- new CompositeDisposable()
-    //    member val Model = model
+//        interface IDisposable with
+//            member x.Dispose() = x.Dispose()
 
-    //    member x.Run() =
-    //        x.Dispose()
+//        member private x.Dispose() =
+//            _disposabls.Dispose()
+//            _disposabls <- new CompositeDisposable()
+//        member val Model = model
 
-    //        [
-    //            for cpu in model.Cpus do
-    //                Global.BitChangedSubject.Subscribe(fun bc -> cpu.OnBitChanged(bc))
+//        member x.Run() =
+//            x.Dispose()
 
-
-    //            // OPC server 쪽에서 tag 값 변경시, 해당 tag 를 가지고 있는 모든 CPU 에 event 를 전달한다.
-    //            Global.OpcTagChangedSubject
-    //                .Subscribe(fun tc ->
-    //                    cpus
-    //                    |> Seq.filter(fun cpu -> cpu.TagsMap.ContainsKey(tc.TagName))
-    //                    |> Seq.iter(fun cpu -> cpu.OnOpcTagChanged(tc)))
-
-    //        ]|> List.iter _disposabls.Add
-
-    //        cpus |> Seq.iter runCpu
-    //        this
+//            [
+//                for cpu in model.Cpus do
+//                    Global.BitChangedSubject.Subscribe(fun bc -> cpu.OnBitChanged(bc))
 
 
-    //let run (engine:Engine) =
-    //    logInfo "Start running model.."
-    //    let runner = new EngineRunner(engine)
-    //    runner.Run()
+//                // OPC server 쪽에서 tag 값 변경시, 해당 tag 를 가지고 있는 모든 CPU 에 event 를 전달한다.
+//                Global.OpcTagChangedSubject
+//                    .Subscribe(fun tc ->
+//                        cpus
+//                        |> Seq.filter(fun cpu -> cpu.TagsMap.ContainsKey(tc.TagName))
+//                        |> Seq.iter(fun cpu -> cpu.OnOpcTagChanged(tc)))
+
+//            ]|> List.iter _disposabls.Add
+
+//            cpus |> Seq.iter runCpu
+//            this
+
+
+//    let run (engine:Engine) =
+//        logInfo "Start running model.."
+//        let runner = new EngineRunner(engine)
+//        runner.Run()
 
 
 //[<Extension>]

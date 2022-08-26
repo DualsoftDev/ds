@@ -100,16 +100,45 @@ module internal ModelModule =
         for cpu in model.Cpus do
             check cpu
 
+[<AutoOpen>]
+module internal ModelPrintModule =
+    let bitToString(bit:IBit) =
+        if isNull bit then
+            "-"
+        else if bit.Value then "1"
+        else "0"
+    let portInfoToString (pi:PortInfo) =
+        $"{bitToString pi.Plan}:{bitToString pi.Actual}"
+        
+        
+    let printSegment(seg:SegmentBase) =
+        let p = bitToString
+        let pp = portInfoToString
 
+        logDebug $"{seg.QualifiedName} {seg.Status}"
+        logDebug $"\tTagPlan(S/R/E)  =({p seg.TagPStart}/{p seg.TagPReset}/{p seg.TagPEnd})"
+        logDebug $"\tTagActual(S/R/E)=({p seg.TagAStart}/{p seg.TagAReset}/{p seg.TagAEnd})"
+        logDebug $"\tPortInfo(Plan:Actual) =({pp seg.PortS}/{pp seg.PortR}/{pp seg.PortE})"
+
+    let getRootSegments (model:Model) =
+        model.Systems.selectMany(fun sys -> sys.RootFlows)
+            .selectMany(fun rf -> rf.RootSegments)
+
+    let printModel (model:Model) =
+        logDebug ":::::::: Root Segments"
+        for segment in getRootSegments model do
+            printSegment segment
+
+        if Global.Model.VPSs <> null then
+            logDebug ":::::::: Virtual Parent Segments"
+            for vps in Global.Model.VPSs do
+                printSegment vps
 
 [<Extension>] // type Segment =
 type ModelExt =
     [<Extension>]
     static member Epilogue(model:Model, opc:OpcBroker) =
-        let segments =
-            model.Systems.selectMany(fun sys -> sys.RootFlows)
-                .selectMany(fun rf -> rf.RootSegments)
-        for segment in segments do
+        for segment in getRootSegments model do
             segment.Epilogue()
 
         renameBits(model)
@@ -117,6 +146,8 @@ type ModelExt =
         rebuildMap(model, opc)
         checkCpu(model)
 
+    [<Extension>]
+    static member Print(model:Model) = printModel model
 
     [<Extension>]
     static member BuildGraphInfo(model:Model) =

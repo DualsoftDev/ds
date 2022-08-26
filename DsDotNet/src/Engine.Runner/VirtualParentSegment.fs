@@ -175,8 +175,12 @@ module VirtualParentSegmentModule =
                             //assert(not on)    // todo
                         else
                             oldStatus <- Some state
-                            logInfo $"[{n}] Segment status : {state} by {bit.Name}={on}"
+                            logInfo $"[{n}] VPS Segment status : {state} by {bit.Name}={on}"
                             let childStatus = x.Target.Status
+
+                            if n = "L_F_Main" then
+                                noop()
+
 
                             match state with
                             | Status4.Ready    ->

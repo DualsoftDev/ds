@@ -109,7 +109,6 @@ module FsSegmentModule =
                     else
                         logInfo $"[{n}] Segment status : {state} {cause}"
                         Global.SegmentStatusChangedSubject.OnNext(SegmentStatusChange(x, state))
-
                         if x.Going.Value && state <> Status4.Going then
                             write(x.Going, false, $"{n} going off by status {state}")
                         if x.Ready.Value && state <> Status4.Ready then
@@ -124,6 +123,9 @@ module FsSegmentModule =
                         | Status4.Finished -> ()
                         | Status4.Homing -> ()
                         | _ -> ()
+
+                        if n = "L_F_Main" then
+                            noop()
                         // } debug
 
 
@@ -134,6 +136,7 @@ module FsSegmentModule =
                         | Status4.Homing -> doHoming(x, writer, onError)
                         | _ ->
                             failwith "Unexpected"
+
                         oldStatus <- Some state
                 )
 

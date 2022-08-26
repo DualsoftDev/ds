@@ -77,6 +77,7 @@ module internal SegmentRGFHModule =
         assert( [seg.PortS :> PortInfo; seg.PortR; seg.PortE].ForAll(fun t -> not t.Value ))
         stopMonitorHoming seg
         write(seg.Ready, true, null)
+        write(seg.TagPReset, false, null)
 
     /// Going tag ON 발송 후,
     ///     - child 가 하나라도 있으면, child 의 종료를 모니터링하기 위한 subscription 후, 최초 child group(init) 만 수행
@@ -116,7 +117,7 @@ module internal SegmentRGFHModule =
                                     //write(st, false, $"Child {finishedChild.QualifiedName} finished")
                             
                                 if (seg.Children.ForAll(fun ch -> ch.IsFlipped)) then
-                                    writeEndPort(seg.PortE, true, $"{seg.QualifiedName} GOING 끝 (모든 child end)")
+                                    writeEndPort(seg.PortE, true, $"{seg.QualifiedName} GOING 끝 (모든 child end)")                                    
                                 else
                                     // 남은 children 중에서 다음 뒤집을 target 선정후 뒤집기
                                     let targets =
@@ -161,11 +162,15 @@ module internal SegmentRGFHModule =
     let procFinish(seg:SegmentBase, writer:ChangeWriter, onError:ExceptionHandler) =
         let write = getBitWriter writer onError
 
+        if seg.QualifiedName = "L_F_Main" then
+            noop()
+
         stopMonitorGoing seg
         write(seg.Going, false, $"{seg.QualifiedName} FINISH")
         if seg.TagPEnd.Value then
             noop()
         write(seg.TagPEnd, true, $"Finishing {seg.QualifiedName}")
+        write(seg.TagPStart, false, $"Finishing {seg.QualifiedName}")
 
     let procHoming(segment:SegmentBase, writer:ChangeWriter, onError:ExceptionHandler) =
         let seg = segment :?> Segment
@@ -173,6 +178,10 @@ module internal SegmentRGFHModule =
         let writeEndPort = getEndPortPlanWriter writer onError
 
         stopMonitorGoing seg
+
+        for ch in segment.Children do
+            ch.IsFlipped <- false
+
         // 자식 원위치 맞추기
         let originTargets = getChildrenOrigin seg  // todo: 원위치 맞출 children
         let childRxTags = originTargets.selectMany(fun ch -> ch.TagsEnd).ToArray()
@@ -196,11 +205,11 @@ module internal SegmentRGFHModule =
         else
             writeEndPort(seg.PortE, false, $"{seg.QualifiedName} HOMING finished")
 
-            // todo: fix me
-            let et = seg.TagPEnd
-            //if et.Type.HasFlag(TagType.External) then
-            //    ()
-            //else
-            if et.Value then
-                //assert(false)
-                write(et, false, $"내부 end tag {et.Name} 강제 off by {segment.QualifiedName} homing")
+            //// todo: fix me
+            //let et = seg.TagPEnd
+            ////if et.Type.HasFlag(TagType.External) then
+            ////    ()
+            ////else
+            //if et.Value then
+            //    //assert(false)
+            //    write(et, false, $"내부 end tag {et.Name} 강제 off by {segment.QualifiedName} homing")

@@ -62,7 +62,7 @@ module EngineModule =
             let virtualParentSegments =
                 rootFlows.selectMany(CreateVirtualParentSegmentsFromRootFlow).ToArray()
 
-            Global.Model.VPSs.AddRange(virtualParentSegments.Cast<SegmentBase>())
+            Global.Model.VPSs <- virtualParentSegments.Cast<SegmentBase>().ToArray()
 
 
             virtualParentSegments

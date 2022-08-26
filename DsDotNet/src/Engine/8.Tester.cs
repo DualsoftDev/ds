@@ -1,6 +1,7 @@
-using Engine.Graph;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using Engine.Graph;
+using Engine.Runner;
 
 namespace Engine;
 
@@ -384,10 +385,11 @@ class Tester
         var opc = engine.Opc;
 
         var startTag = "StartPlan_L_F_Main";
+        var resetTag = "ResetPlan_L_F_Main";
         var counter = 0;
         Global.SegmentStatusChangedSubject.Subscribe(ssc =>
         {
-            if (ssc.Segment.Name == "Main" && ssc.Status == Status4.Finished)
+            if (ssc.Segment.QualifiedName == "L_F_Main" && ssc.Status == Status4.Finished)
             {
                 Global.Logger.Info("-------------------------- End of Main segment");
                 if (counter++ < 3)
@@ -395,9 +397,13 @@ class Tester
                     Task.Run(async () =>
                     {
                         await Task.Delay(300);
+                        engine.Model.Print();
+
                         Global.Logger.Info("-------------------------- Restarting Main segment");
+                        opc.Write(resetTag, true);
+                        await Task.Delay(300);
                         opc.Write(startTag, true);
-                        opc.Write("Auto_L_F", true);
+                        //opc.Write("Auto_L_F", true);
                     });
                 }
             }

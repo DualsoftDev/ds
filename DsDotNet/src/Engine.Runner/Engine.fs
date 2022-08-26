@@ -75,6 +75,9 @@ module EngineModule =
 
 
             logInfo "Start F# Engine running..."
+
+            // printModel model
+
             for cpu in cpus do
                 cpu.BuildBitDependencies()
 

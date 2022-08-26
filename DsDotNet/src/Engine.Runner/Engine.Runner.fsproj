@@ -12,8 +12,8 @@
 		<Compile Include="Segment.fs" />
 		<Compile Include="VirtualParentSegment.fs" />
 		<Compile Include="SegmentRGFH.fs" />
-		<Compile Include="Engine.fs" />
 		<Compile Include="ModelExtension.fs" />
+		<Compile Include="Engine.fs" />
 		<None Include="Obsolete\Runner.fsx" />
 		<None Include="Obsolete/ObsoleteDoRGFH.fsx" />
 		<None Include="Obsolete/Bit, Cpu.fsx" />

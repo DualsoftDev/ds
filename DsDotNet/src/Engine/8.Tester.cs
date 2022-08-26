@@ -397,11 +397,17 @@ class Tester
                     Task.Run(async () =>
                     {
                         await Task.Delay(300);
+                        Global.Logger.Info("-------------------------- After finishing Main segment");
                         engine.Model.Print();
 
-                        Global.Logger.Info("-------------------------- Restarting Main segment");
+                        Global.Logger.Info("--- Resetting Main segment");
                         opc.Write(resetTag, true);
                         await Task.Delay(300);
+
+                        Global.Logger.Info("-------------------------- After resetting Main segment");
+                        engine.Model.Print();
+
+                        Global.Logger.Info("--- Starting Main segment");
                         opc.Write(startTag, true);
                         //opc.Write("Auto_L_F", true);
                     });

@@ -1,5 +1,6 @@
 using Engine.Graph;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 
 namespace Engine;
 
@@ -364,11 +365,6 @@ class Tester
         Program.Engine = engine;
         engine.Run();
 
-        Global.SegmentStatusChangedSubject.Subscribe(ssc =>
-        {
-            if (ssc.Segment.Name == "Main" && ssc.Status == Status4.Finished)
-                Global.Logger.Info("-------------------------- End of Main segment");
-        });
 
         {
             var cds = engine.Cpu.RootFlows.SelectMany(f => f.ChildVertices);
@@ -386,6 +382,26 @@ class Tester
         }
 
         var opc = engine.Opc;
+
+        var startTag = "StartPlan_L_F_Main";
+        var counter = 0;
+        Global.SegmentStatusChangedSubject.Subscribe(ssc =>
+        {
+            if (ssc.Segment.Name == "Main" && ssc.Status == Status4.Finished)
+            {
+                Global.Logger.Info("-------------------------- End of Main segment");
+                if (counter++ < 3)
+                {
+                    Task.Run(async () =>
+                    {
+                        await Task.Delay(300);
+                        Global.Logger.Info("-------------------------- Restarting Main segment");
+                        opc.Write(startTag, true);
+                        opc.Write("Auto_L_F", true);
+                    });
+                }
+            }
+        });
 
         var hasAddress =
             engine.Model.Cpus
@@ -433,7 +449,6 @@ class Tester
         }
 
 
-        var startTag = "StartPlan_L_F_Main";
         Debug.Assert(engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(startTag));
         opc.Write(startTag, true);
         opc.Write("Auto_L_F", true);

@@ -95,6 +95,7 @@ public abstract partial class SegmentBase : ChildFlow, IVertex, ICoin, IWallet, 
             (_, true, _) => Status4.Homing,
         };
 
+    public bool IsOriginating { get; set; }
     public override string ToString() => ToText();
     public override string ToText()
     {

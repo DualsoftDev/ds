@@ -140,9 +140,9 @@ module internal SegmentRGFHModule =
                 let seg = seg :?> Segment
                 runChildren (seg.Inits, writer, onError)
 
-            else
+            else // no children
                 writeEndPort(seg.PortE, true, $"{seg.QualifiedName} GOING 끝")
-        else    // children not at origin
+        else // children not at origin
             let outofOriginChildren = getOutofOriginChildren seg
             let subs = 
                 Global.PortChangedSubject
@@ -153,6 +153,8 @@ module internal SegmentRGFHModule =
                             ch.Status <- Status4.Ready
                         doGoing(seg, writer, onError)
                         )
+
+            seg.IsOriginating <- true
             doHoming(seg, writer, onError)
             originatingSubscriptions.Add(seg, subs)
 

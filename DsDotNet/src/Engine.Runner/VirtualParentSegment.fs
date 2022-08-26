@@ -163,7 +163,7 @@ module VirtualParentSegmentModule =
 
 
                         | Status4.Going, false ->
-                            logInfo $"Child originated bit {bit} before going {x.Target.Name}"
+                            logInfo $"Children originated before going {x.Target.Name}"
 
                         | _ ->
                             failwithlog $"Unknown: [{n}]{state}: Target endport => {x.Target.Name}={on}"

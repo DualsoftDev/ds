@@ -5,6 +5,7 @@ namespace Engine.Core;
 
 /// <summary>
 /// Queue 이용한 구현
+/// todo: ObservableConcurrentQueue 이용해서 spinning thread 없이 구현 (https://www.nuget.org/packages/ObservableConcurrentQueue/)
 /// </summary>
 public static class CpuExtensionQueueing
 {

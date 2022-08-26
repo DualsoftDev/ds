@@ -99,8 +99,11 @@ module FsSegmentModule =
                                 assert(not x.TagPStart.Value)
                             elif state = Status4.Going then
                                 logDebug $"\t\tAbout to finished going: [{n}] status : {state} {cause}"
+                                assert(value || x.IsOriginating)
+                                if x.IsOriginating then
+                                    x.IsOriginating <- false
+                            else
                                 assert(value)
-                                //write(x.TagPStart, false, $"{n} going completed")
                         else
                             failwith "ERROR"
                     else

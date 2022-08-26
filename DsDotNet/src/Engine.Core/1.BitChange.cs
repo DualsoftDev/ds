@@ -11,21 +11,17 @@ public class BitChange
     public ExceptionHandler OnError { get; set; }
     public Action BeforeAction { get; set; }
     public Action AfterAction { get; set; }
-    public string Guid { get; set; }
     public BitChange(IBit bit, bool newValue, object cause = null, ExceptionHandler onError =null)
     {
         //Debug.Assert(bit.Value != newValue);
 
-        if (newValue && bit.GetName().IsOneOf("StartPlan_A_F_Vm", "StartPlan_B_F_Vp"))
-            Console.WriteLine();
-        //if (newValue && bit.GetName().IsOneOf("StartPort_A_F_Vm", "StartPort_B_F_Vp"))
-        //    Console.WriteLine();
+        //if (newValue && bit.GetName().IsOneOf("StartPlan_A_F_Vm", "StartPlan_B_F_Vp"))
+        //    Global.NoOp();
 
         Debug.Assert(bit != null);
         Debug.Assert(cause is null || cause is IBit || cause is string);
         //Debug.Assert(bit.Value != newValue);
 
-        Guid = System.Guid.NewGuid().ToString().Substring(0, 4);
         Bit = bit;
         NewValue = newValue;
         Time = DateTime.Now;

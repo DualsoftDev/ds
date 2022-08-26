@@ -68,7 +68,7 @@ module FsSegmentModule =
             x.Lasts <- gi.Lasts.OfType<Child>().ToArray();
             x.TraverseOrder <- gi.TraverseOrders;
 
-            x.PrintPortInfos();
+            x.PrintPortPlanTags();
 
 
         default x.WireEvent(writer, onError) =

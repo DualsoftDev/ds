@@ -65,9 +65,6 @@ public abstract partial class SegmentBase : ChildFlow, IVertex, ICoin, IWallet, 
     //public bool Value { get => PortE.Value; set => throw new NotImplementedException(); }
     public virtual bool Evaluate() => Value;
 
-    internal CancellationTokenSource MovingCancellationTokenSource { get; set; }
-
-
     internal CompositeDisposable Disposables = new();
 
 
@@ -117,35 +114,11 @@ class DummySegment: SegmentBase
 
 public static class SegmentExtension
 {
-    public static void CancelGoing(this SegmentBase segment)
-    {
-        segment.MovingCancellationTokenSource.Cancel();
-        segment.MovingCancellationTokenSource = null;
-    }
-    public static void CancelHoming(this SegmentBase segment)
-    {
-        segment.MovingCancellationTokenSource.Cancel();
-        segment.MovingCancellationTokenSource = null;
-    }
-
-    public static bool IsChildrenStatusAllWith(this SegmentBase segment, Status4 status) =>
-        segment.ChildStatusMap.Values.Select(tpl => tpl.Item2).All(st => st == status);
-    public static bool IsChildrenStatusAnyWith(this SegmentBase segment, Status4 status) =>
-        segment.ChildStatusMap.Values.Select(tpl => tpl.Item2).Any(st => st == status);
-
-    public static void PrintPortInfos(this SegmentBase seg)
+    public static void PrintPortPlanTags(this SegmentBase seg)
     {
         var s = seg.TagPStart?.Name;
         var r = seg.TagPReset?.Name;
         var e = seg.TagPEnd?.Name;
         Global.Logger.Debug($"Tags for segment [{seg.QualifiedName}]:({s}, {r}, {e})");
-    }
-
-    public static IEnumerable<PortInfo> GetAllPorts(this SegmentBase segment)
-    {
-        var s = segment;
-        yield return s.PortS;
-        yield return s.PortR;
-        yield return s.PortE;
     }
 }

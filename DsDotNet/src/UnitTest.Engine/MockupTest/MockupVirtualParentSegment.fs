@@ -2,6 +2,7 @@ namespace UnitTest.Mockup.Engine
 
 
 open Engine.Core
+open Engine.Common
 open Engine.Common.FS
 open System
 
@@ -126,7 +127,7 @@ type MockupVirtualParentSegment(name, target:MockupSegment, causalSourceSegments
                 let bit = bc.Bit :?> Bit
                 let on = bc.Bit.Value
 
-                let notiVpsPortChange = [x.PortS :> IBit; x.PortR; x.PortE] |> Seq.contains(bc.Bit)
+                let notiVpsPortChange = bc.Bit.IsOneOf(x.PortS, x.PortR, x.PortE)
                 let notiTargetEndPortChange = bc.Bit = x.Target.PortE
                 let state = x.Status
 

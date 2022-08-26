@@ -395,9 +395,9 @@ class Tester
                 ;
         if (hasAddress)
         {
-            // initial condition
-            opc.Write("EndActual_A_F_Sm", true);
-            opc.Write("EndActual_B_F_Sm", true);
+            //// initial condition
+            //opc.Write("EndActual_A_F_Sm", true);
+            //opc.Write("EndActual_B_F_Sm", true);
 
             // simulating physics
             Global.BitChangedSubject

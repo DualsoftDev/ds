@@ -126,7 +126,7 @@ module VirtualParentSegmentModule =
                     let bit = bc.Bit :?> Bit
                     let on = bc.Bit.Value
 
-                    let notiVpsPortChange = [x.PortS :> IBit; x.PortR; x.PortE] |> Seq.contains(bc.Bit)
+                    let notiVpsPortChange = bc.Bit.IsOneOf(x.PortS, x.PortR, x.PortE)
                     let notiTargetEndPortChange = bc.Bit = x.Target.PortE
                     let state = x.Status
                     let n = x.QualifiedName

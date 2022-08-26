@@ -3,7 +3,7 @@ namespace UnitTest.Mockup.Engine
 
 open System.Reactive.Linq
 open System
-open System.Reactive.Disposables
+open Engine.Common
 open Engine.Common.FS
 open Engine.Core
 open Engine.Runner
@@ -43,9 +43,7 @@ type MockupSegment(cpu, n) =
         let write(bit, value, cause) =
             writer(BitChange(bit, value, cause, onError))
         Global.BitChangedSubject
-            .Where(fun bc ->
-                [x.PortS :> IBit; x.PortR; x.PortE] |> Seq.contains(bc.Bit)
-            )
+            .Where(fun bc -> bc.Bit.IsOneOf(x.PortS, x.PortR, x.PortE))
             .Subscribe(fun bc ->
                 let state = x.Status
                 if oldStatus = Some state then

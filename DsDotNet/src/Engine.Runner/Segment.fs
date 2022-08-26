@@ -78,12 +78,7 @@ module FsSegmentModule =
                 writer(BitChange(bit, value, cause, onError))
 
             Global.RawBitChangedSubject
-                .Where(fun bc ->
-                    [
-                        //tagMyFlowReset :> IBit; x.Going; x.Ready;
-                        x.PortS :> IBit; x.PortR; x.PortE
-                    ] |> Seq.contains(bc.Bit)
-                )
+                .Where(fun bc -> bc.Bit.IsOneOf(x.PortS, x.PortR, x.PortE))
                 .Subscribe(fun bc ->
                     let state = x.Status
                     let bit = bc.Bit

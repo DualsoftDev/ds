@@ -106,7 +106,7 @@ module FsSegmentModule =
                             ()
                         | 'e', Status4.Homing, false ->
                             logDebug $"\t\tAbout to finished homing: [{n}] status : {state} {cause}"
-                            assert(not x.TagPStart.Value)
+                            //assert(not x.TagPStart.Value) // homing 중에 end port 가 꺼졌다고, 반드시 start tag 가 꺼져 있어야 한다고 볼 수는 없다.  start tag ON 이면 바로 재시작
                         | 'e', Status4.Going, false ->
                             logDebug $"\t\tAbout to finished originating: [{n}] status : {state} {cause}"
                             assert(x.DbgIsOriginating)
@@ -119,8 +119,7 @@ module FsSegmentModule =
 
 
                         | 's', Status4.Homing, true ->      // homing 중에 start port 가 켜진 상태
-                            logWarn $"UNKNOWN: {n} status {state} duplicated on port {bit.GetName()}={value} by {cause}"
-                            assert(false)
+                            ()
                         | _ ->
                             logWarn $"UNKNOWN: {n} status {state} duplicated on port {bit.GetName()}={value} by {cause}"
                             assert(false)

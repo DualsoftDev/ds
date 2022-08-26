@@ -143,17 +143,14 @@ module VirtualParentSegmentModule =
 
                         let cause = $"{x.Target.Name} End Port={x.Target.PortE.Value}"
 
-
                         match state, on with
                         | Status4.Going, true ->
                             //write(targetStartTag, false, $"{n} going 끝내기 by {cause}")
                             //write(x.Going, false, $"{n} going 끝내기 by {cause}")
                             writeEndPort(x.PortE, true, $"{n} FINISH 끝내기 by {cause}")
-                            
-
 
                         | Status4.Homing, false ->
-                            assert(not targetStartTag.Value)
+                            //assert(not targetStartTag.Value)    // homing 중에 end port 가 꺼졌다고, 반드시 start tag 가 꺼져 있어야 한다고 볼 수는 없다.  start tag ON 이면 바로 재시작
                             //assert(x.Going.Value = false) // 아직 write 안되었을 수도 있음
                             write(targetResetTag, false, $"{x.Target.Name} homing 완료로 reset 끄기")
                             write(x.Ready, true, $"{x.Target.Name} homing 완료")
@@ -180,12 +177,16 @@ module VirtualParentSegmentModule =
                             match bitMatch, state, on with
                             //| 's', Status4.Finished, false -> // finish 도중에 start port 꺼져서 finish 완료되려는 시점
                             //    ()
+                            | 'e', Status4.Ready, false ->
+                                ()
                             | 'e', Status4.Finished, _ ->
                                 assert(on)
                                 noop()
                             | 'e', Status4.Going, false ->  // going 중에 endport 가 꺼진다???
                                 //assert(false)
                                 noop()
+                            | 's', Status4.Finished, false ->
+                                ()
                             | _ ->
                                 logWarn $"UNKNOWN: {n} status {state} duplicated on port {bit.GetName()}={on} by {cause}"
                                 //assert(not on)    // todo

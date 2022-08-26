@@ -417,26 +417,33 @@ class Tester
             if (ssc.Segment.QualifiedName == "L_F_Main" && ssc.Status == Status4.Finished)
             {
                 Global.Logger.Info("-------------------------- End of Main segment");
-                if (counter++ < 3)
+
+                Task.Run(async () =>
                 {
-                    Task.Run(async () =>
-                    {
-                        //await Task.Delay(300);
-                        Global.Logger.Info($"-------------------------- [{counter}] After finishing Main segment");
-                        engine.Model.Print();
+                    await Task.Delay(300);
+                    engine.Model.Print();
+                });
 
-                        Global.Logger.Info($"--- [{counter}] Resetting Main segment");
-                        opc.Write(resetTag, true);
-                        //await Task.Delay(1300);
+                //if (counter++ < 3)
+                //{
+                //    Task.Run(async () =>
+                //    {
+                //        //await Task.Delay(300);
+                //        Global.Logger.Info($"-------------------------- [{counter}] After finishing Main segment");
+                //        engine.Model.Print();
 
-                        Global.Logger.Info($"-------------------------- [{counter}] After resetting Main segment");
-                        engine.Model.Print();
+                //        Global.Logger.Info($"--- [{counter}] Resetting Main segment");
+                //        opc.Write(resetTag, true);
+                //        //await Task.Delay(1300);
 
-                        Global.Logger.Info($"--- [{counter}] Starting Main segment");
-                        opc.Write(startTag, true);
-                        //opc.Write("Auto_L_F", true);
-                    });
-                }
+                //        Global.Logger.Info($"-------------------------- [{counter}] After resetting Main segment");
+                //        engine.Model.Print();
+
+                //        Global.Logger.Info($"--- [{counter}] Starting Main segment");
+                //        opc.Write(startTag, true);
+                //        //opc.Write("Auto_L_F", true);
+                //    });
+                //}
             }
         });
 

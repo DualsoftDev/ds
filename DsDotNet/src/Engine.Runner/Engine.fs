@@ -64,11 +64,12 @@ module EngineModule =
 
             Global.Model.VPSs <- virtualParentSegments.Cast<SegmentBase>().ToArray()
 
-
             virtualParentSegments
             |> Seq.iter(fun vps ->
-                vps.Target.WireEvent(vps.Cpu.Enqueue, raise) |> ignore
-                vps.WireEvent(vps.Cpu.Enqueue, raise) |> ignore
+                let writer = vps.Cpu.Enqueue
+                //let writer = vps.Cpu.SendChange
+                vps.Target.WireEvent(writer, raise) |> ignore
+                vps.WireEvent(writer, raise) |> ignore
                 )
 
             assert( virtualParentSegments |> Seq.forall(fun vp -> vp.Status = Status4.Ready));

@@ -22,7 +22,7 @@ public static class CpuExtensionQueueing
         new Thread(async () =>
 #endif
         {
-            cpu.ThreadId = Thread.CurrentThread.ManagedThreadId;
+            cpu.DbgThreadId = Thread.CurrentThread.ManagedThreadId;
             Global.Logger.Debug($"\tRunning {cpu.ToText()}");
 
             while (!disposable.IsDisposed && cpu.Running)
@@ -58,7 +58,7 @@ public static class CpuExtensionQueueing
         //if (bitChange.Bit.Value == bitChange.NewValue)
         //    return;
 
-        Global.Logger.Debug($"\t\t=[{cpu.NestingLevel}] Applying bitChange {bitChange}");   // {bitChange.Guid}
+        Global.Logger.Debug($"\t\t=[{cpu.DbgNestingLevel}] Applying bitChange {bitChange}");   // {bitChange.Guid}
 
         var fwd = cpu.ForwardDependancyMap;
         var q = cpu.Queue;
@@ -66,7 +66,7 @@ public static class CpuExtensionQueueing
         Debug.Assert(cpu.FFSetterMap != null);
         cpu.BuildFlipFlopMapOnDemand();
 
-        cpu.NestingLevel++;
+        cpu.DbgNestingLevel++;
         var bit = (Bit)bitChange.Bit;
 
         if (bitChange.Bit.GetName() == "EndActual_A_F_Sm")  //"ResetPlan_A_F_Sm")  //"StartPlan_A_F_Vm") //"InnerStartSourceFF_VPS_A_F_Pp_Vp")   // "StartPlanAnd_VPS_A_F_Pp")
@@ -136,7 +136,7 @@ public static class CpuExtensionQueueing
             //Global.Logger.Warn($"Failed to find dependency for {bit.GetName()}");
             DoApply(bitChange);
         }
-        cpu.NestingLevel--;
+        cpu.DbgNestingLevel--;
 
 
         void DoApply(BitChange bitChange)

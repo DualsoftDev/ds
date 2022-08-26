@@ -26,8 +26,8 @@ public class Cpu : Named, ICpu
 
     internal Dictionary<IBit, FlipFlop[]> FFSetterMap;
     internal Dictionary<IBit, FlipFlop[]> FFResetterMap;
-    internal int NestingLevel { get; set; }
-    public int ThreadId { get; internal set; }
+    internal int DbgNestingLevel { get; set; }
+    public int DbgThreadId { get; internal set; }
 
     public GraphInfo GraphInfo { get; set; }
 
@@ -45,7 +45,7 @@ public class Cpu : Named, ICpu
         model.Cpus.Add(this);
     }
 
-    public override string ToText() => $"Cpu [{Name}={ThreadId}]";
+    public override string ToText() => $"Cpu [{Name}={DbgThreadId}]";
 }
 
 

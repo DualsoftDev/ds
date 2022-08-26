@@ -30,6 +30,9 @@ public class Child : Named, IVertex, ICoin
         get => Parent.ChildStatusMap[this].Item1;
         set => Parent.ChildStatusMap[this] = (value, Parent.ChildStatusMap[this].Item2);
     }
+    /// <summary>Debugging purpose</summary>
+    public bool IsOriginating { get; set; }
+
 
     /// <summary> Start tag 는 Call 인 경우, 복수의 TX 를 허용해야 한다. </summary>
     public List<Tag> TagsStart { get; set; }

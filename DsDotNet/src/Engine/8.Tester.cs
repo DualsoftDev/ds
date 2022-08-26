@@ -246,15 +246,40 @@ class Tester
         Program.Engine = engine;
         engine.Run();
 
-        Global.SegmentStatusChangedSubject.Subscribe(ssc =>
-        {
-            if (ssc.Segment.Name == "Main" && ssc.Status == Status4.Finished)
-                Global.Logger.Info("-------------------------- End of Main segment");
-        });
 
         var opc = engine.Opc;
 
         var startTag = "StartPlan_L_F_Main";
+        var resetTag = "ResetPlan_L_F_Main";
+        var counter = 0;
+        Global.SegmentStatusChangedSubject.Subscribe(ssc =>
+        {
+            if (ssc.Segment.QualifiedName == "L_F_Main" && ssc.Status == Status4.Finished)
+            {
+                Global.Logger.Info("-------------------------- End of Main segment");
+                if (counter++ < 3)
+                {
+                    Task.Run(async () =>
+                    {
+                        await Task.Delay(300);
+                        Global.Logger.Info("-------------------------- After finishing Main segment");
+                        engine.Model.Print();
+
+                        Global.Logger.Info("--- Resetting Main segment");
+                        opc.Write(resetTag, true);
+                        await Task.Delay(1300);
+
+                        Global.Logger.Info("-------------------------- After resetting Main segment");
+                        engine.Model.Print();
+
+                        //Global.Logger.Info("--- Starting Main segment");
+                        //opc.Write(startTag, true);
+                        ////opc.Write("Auto_L_F", true);
+                    });
+                }
+            }
+        });
+
         Debug.Assert(engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(startTag));
         opc.Write("Auto_L_F", true);
         opc.Write(startTag, true);
@@ -267,8 +292,8 @@ class Tester
                 ;
         if (hasAddress)
         {
-            // initial condition
-            opc.Write("EndActual_A_F_Sm", true);
+            //// initial condition
+            //opc.Write("EndActual_A_F_Sm", true);
 
             // simulating physics
             Global.BitChangedSubject
@@ -402,14 +427,14 @@ class Tester
 
                         Global.Logger.Info("--- Resetting Main segment");
                         opc.Write(resetTag, true);
-                        await Task.Delay(300);
+                        await Task.Delay(1300);
 
                         Global.Logger.Info("-------------------------- After resetting Main segment");
                         engine.Model.Print();
 
-                        Global.Logger.Info("--- Starting Main segment");
-                        opc.Write(startTag, true);
-                        //opc.Write("Auto_L_F", true);
+                        //Global.Logger.Info("--- Starting Main segment");
+                        //opc.Write(startTag, true);
+                        ////opc.Write("Auto_L_F", true);
                     });
                 }
             }

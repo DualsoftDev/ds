@@ -152,10 +152,13 @@ module internal SegmentRGFHModule =
                         stopMonitorOriginating seg
                         for ch in outofOriginChildren do
                             ch.Status <- Status4.Ready
+                            ch.IsOriginating <- false
                         doGoing(seg, writer, onError)
                         )
 
             seg.IsOriginating <- true
+            for ch in outofOriginChildren do
+                ch.IsOriginating <- true
             doHoming(seg, writer, onError)
             originatingSubscriptions.Add(seg, subs)
 
@@ -182,11 +185,13 @@ module internal SegmentRGFHModule =
         for ch in segment.Children do
             ch.IsFlipped <- false
 
-        // 자식 원위치 맞추기
-        let originTargets = getChildrenOrigin seg  // todo: 원위치 맞출 children
-        let childRxTags = originTargets.selectMany(fun ch -> ch.TagsEnd).ToArray()
-
-        if originTargets.Any() then                    
+        if isChildrenOrigin segment then
+            writeEndPort(seg.PortE, false, $"{seg.QualifiedName} HOMING finished")
+        else
+            // 자식 원위치 맞추기
+            let originTargets = getChildrenOrigin seg  // todo: 원위치 맞출 children
+            let childRxTags = originTargets.selectMany(fun ch -> ch.TagsEnd).ToArray()
+            assert(originTargets.Any())
             let subs =
                 Global.TagChangedSubject
                     .Where(fun t -> t.Value)    // ON child
@@ -201,9 +206,6 @@ module internal SegmentRGFHModule =
             homingSubscriptions.Add(seg, subs)
 
             runChildren(originTargets, writer, onError)
-
-        else
-            writeEndPort(seg.PortE, false, $"{seg.QualifiedName} HOMING finished")
 
             //// todo: fix me
             //let et = seg.TagPEnd

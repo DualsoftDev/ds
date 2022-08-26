@@ -130,6 +130,7 @@ module VirtualParentSegmentModule =
                     let notiTargetEndPortChange = bc.Bit = x.Target.PortE
                     let state = x.Status
                     let n = x.QualifiedName
+                    let cause = $"by bit change {bit.GetName()}={on}"
 
                     //if notiVpsPortChange || notiTargetEndPortChange then
                     //    noop()
@@ -171,8 +172,28 @@ module VirtualParentSegmentModule =
                     if notiVpsPortChange then
                         if oldStatus = Some state then
                             logDebug $"\t\tVPS Skipping duplicate status: [{n}] status : {state} by {bit.Name}={on}"
+                            let bitMatch =
+                                if bit = x.PortS then 's'
+                                else if bit = x.PortR then 'r'
+                                else if bit = x.PortE then 'e'
+                                else failwith "ERROR"
+                            match bitMatch, state, on with
+                            //| 's', Status4.Finished, false -> // finish 도중에 start port 꺼져서 finish 완료되려는 시점
+                            //    ()
+                            | 'e', Status4.Finished, _ ->
+                                assert(on)
+                                noop()
+                            | 'e', Status4.Going, false ->  // going 중에 endport 가 꺼진다???
+                                //assert(false)
+                                noop()
+                            | _ ->
+                                logWarn $"UNKNOWN: {n} status {state} duplicated on port {bit.GetName()}={on} by {cause}"
+                                //assert(not on)    // todo
+                                //assert(false)
+                                noop()
+
+
                             noop()
-                            //assert(not on)    // todo
                         else
                             oldStatus <- Some state
                             logInfo $"[{n}] VPS Segment status : {state} by {bit.Name}={on}"

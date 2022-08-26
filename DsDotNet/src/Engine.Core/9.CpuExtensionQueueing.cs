@@ -206,13 +206,20 @@ public static class CpuExtensionQueueing
     public static void Enqueue(this Cpu cpu, BitChange bitChange)
     {
         Debug.Assert(bitChange.Bit.Cpu == cpu);
+
+        //Debug.Assert(bitChange.Bit.Value != bitChange.NewValue);
+
         switch (bitChange.Bit)
         {
             case Expression _:
             case BitReEvaluatable re when re is not PortInfo:
                 throw new Exception("ERROR: Expression can't be set!");
             default:
-                cpu.Queue.Enqueue(bitChange);
+                //var last = cpu.Queue.LastOrDefault();
+                //if (last != null && last.Bit == bitChange.Bit && last.NewValue == bitChange.NewValue)
+                //    Global.Logger.Warn($"Skipping enque'ing duplicate change {bitChange}");
+                //else
+                    cpu.Queue.Enqueue(bitChange);
                 break;
         };
     }

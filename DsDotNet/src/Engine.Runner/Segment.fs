@@ -7,6 +7,7 @@ open System.Reactive.Linq
 open Engine.Core
 open Engine.Common.FS
 open Engine.Common
+open Engine.Core
 
 
 [<AutoOpen>]
@@ -85,27 +86,45 @@ module FsSegmentModule =
                     let value = bc.NewValue
                     let cause = $"by bit change {bit.GetName()}={value}"
                     if oldStatus = Some state then
-                        let msg = $"{n} status {state} duplicated on port {bit.GetName()}={value} by {cause}"
+                        logDebug $"{n} status {state} duplicated on port {bit.GetName()}={value} by {cause}"
                         //assert(not bit.Value) // todo
-                        // case1 : Reset port 켜지는 시점
-                        // case2 : EndPort 꺼지는 시점에 : Reset port 는 아직 살아 있으므로 homing 
-                        if bit = x.PortS then   // finish 도중에 start port 꺼져서 finish 완료되려는 시점
-                            logDebug $"\t\tFinished homing: {msg}"
-                        elif bit = x.PortR then
+
+                        let bitMatch =
+                            if bit = x.PortS then 's'
+                            else if bit = x.PortR then 'r'
+                            else if bit = x.PortE then 'e'
+                            else failwith "ERROR"
+
+                        match bitMatch, state, value with
+                        | 's', Status4.Finished, false -> // finish 도중에 start port 꺼져서 finish 완료되려는 시점
+                            // case1 : Reset port 켜지는 시점
+                            // case2 : EndPort 꺼지는 시점에 : Reset port 는 아직 살아 있으므로 homing 
                             ()
-                        elif bit = x.PortE then // reset 중에 end port 꺼져서 reset 완료 되려는 시점.  상태는 아직 homing 중
-                            if state = Status4.Homing then
-                                logDebug $"\t\tAbout to finished homing: [{n}] status : {state} {cause}"
-                                assert(not x.TagPStart.Value)
-                            elif state = Status4.Going then
-                                logDebug $"\t\tAbout to finished going: [{n}] status : {state} {cause}"
-                                assert(value || x.IsOriginating)
-                                if x.IsOriginating then
-                                    x.IsOriginating <- false
-                            else
-                                assert(value)
-                        else
-                            failwith "ERROR"
+
+                        | 's', Status4.Ready, false
+                        | 'r', Status4.Ready, false ->
+                            ()
+                        | 'e', Status4.Homing, false ->
+                            logDebug $"\t\tAbout to finished homing: [{n}] status : {state} {cause}"
+                            assert(not x.TagPStart.Value)
+                        | 'e', Status4.Going, false ->
+                            logDebug $"\t\tAbout to finished originating: [{n}] status : {state} {cause}"
+                            assert(x.IsOriginating)
+                            x.IsOriginating <- false
+                        | 'e', Status4.Going, true ->
+                            logDebug $"\t\tAbout to finished going: [{n}] status : {state} {cause}"
+                        | 'e', Status4.Finished, _ ->
+                            assert(value)
+
+
+
+                        | 's', Status4.Homing, true ->      // homing 중에 start port 가 켜진 상태
+                            logWarn $"UNKNOWN: {n} status {state} duplicated on port {bit.GetName()}={value} by {cause}"
+                            assert(false)
+                        | _ ->
+                            logWarn $"UNKNOWN: {n} status {state} duplicated on port {bit.GetName()}={value} by {cause}"
+                            assert(false)
+                            ()
                     else
                         logInfo $"[{n}] Segment status : {state} {cause}"
                         Global.SegmentStatusChangedSubject.OnNext(SegmentStatusChange(x, state))
@@ -115,7 +134,7 @@ module FsSegmentModule =
                             write(x.Ready, false, $"{n} ready off by status {state}")
 
                         // { debug
-                        if n = "A_F_Pp" && state = Status4.Homing then
+                        if n = "A_F_Vp" && state = Status4.Homing then
                             noop()
                         match state with
                         | Status4.Ready ->  assert( [x.TagPStart; x.TagPEnd].ForAll(fun t -> not t.Value))
@@ -124,7 +143,7 @@ module FsSegmentModule =
                         | Status4.Homing -> ()
                         | _ -> ()
 
-                        if n = "L_F_Main" then
+                        if n = "L_F_Main" && state = Status4.Going then
                             noop()
                         // } debug
 

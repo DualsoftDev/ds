@@ -262,19 +262,19 @@ class Tester
                     Task.Run(async () =>
                     {
                         await Task.Delay(300);
-                        Global.Logger.Info("-------------------------- After finishing Main segment");
+                        Global.Logger.Info($"-------------------------- [{counter}] After finishing Main segment");
                         engine.Model.Print();
 
-                        Global.Logger.Info("--- Resetting Main segment");
+                        Global.Logger.Info($"--- [{counter}] Resetting Main segment");
                         opc.Write(resetTag, true);
                         await Task.Delay(1300);
 
-                        Global.Logger.Info("-------------------------- After resetting Main segment");
+                        Global.Logger.Info($"-------------------------- [{counter}] After resetting Main segment");
                         engine.Model.Print();
 
-                        //Global.Logger.Info("--- Starting Main segment");
-                        //opc.Write(startTag, true);
-                        ////opc.Write("Auto_L_F", true);
+                        Global.Logger.Info($"--- [{counter}] Starting Main segment");
+                        opc.Write(startTag, true);
+                        //opc.Write("Auto_L_F", true);
                     });
                 }
             }
@@ -421,20 +421,20 @@ class Tester
                 {
                     Task.Run(async () =>
                     {
-                        await Task.Delay(300);
-                        Global.Logger.Info("-------------------------- After finishing Main segment");
+                        //await Task.Delay(300);
+                        Global.Logger.Info($"-------------------------- [{counter}] After finishing Main segment");
                         engine.Model.Print();
 
-                        Global.Logger.Info("--- Resetting Main segment");
+                        Global.Logger.Info($"--- [{counter}] Resetting Main segment");
                         opc.Write(resetTag, true);
-                        await Task.Delay(1300);
+                        //await Task.Delay(1300);
 
-                        Global.Logger.Info("-------------------------- After resetting Main segment");
+                        Global.Logger.Info($"-------------------------- [{counter}] After resetting Main segment");
                         engine.Model.Print();
 
-                        //Global.Logger.Info("--- Starting Main segment");
-                        //opc.Write(startTag, true);
-                        ////opc.Write("Auto_L_F", true);
+                        Global.Logger.Info($"--- [{counter}] Starting Main segment");
+                        opc.Write(startTag, true);
+                        //opc.Write("Auto_L_F", true);
                     });
                 }
             }
@@ -448,9 +448,9 @@ class Tester
                 ;
         if (hasAddress)
         {
-            //// initial condition
-            //opc.Write("EndActual_A_F_Sm", true);
-            //opc.Write("EndActual_B_F_Sm", true);
+            // initial condition
+            opc.Write("EndActual_A_F_Sm", true);
+            opc.Write("EndActual_B_F_Sm", true);
 
             // simulating physics
             Global.BitChangedSubject

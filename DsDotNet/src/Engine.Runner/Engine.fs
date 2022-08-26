@@ -60,7 +60,7 @@ module EngineModule =
                 
             // 가상 부모 생성
             let virtualParentSegments =
-                rootFlows.selectMany(CreateVirtualParentSegmentsFromRootFlow).ToArray()
+                rootFlows.selectMany(createVPSsFromRootFlow).ToArray()
 
             Global.Model.VPSs <- virtualParentSegments.Cast<SegmentBase>().ToArray()
 

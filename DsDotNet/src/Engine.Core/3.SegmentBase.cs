@@ -95,8 +95,8 @@ public abstract partial class SegmentBase : ChildFlow, IVertex, ICoin, IWallet, 
             (_, true, _) => Status4.Homing,
         };
 
-    /// <summary>Debugging purpose</summary>
-    public bool IsOriginating { get; set; }
+    /// <summary>Going 시 원위치 맞추기 작업 중 flag.  Debugging purpose</summary>
+    public bool DbgIsOriginating { get; set; }
     public override string ToString() => ToText();
     public override string ToText()
     {

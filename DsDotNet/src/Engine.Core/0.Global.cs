@@ -32,8 +32,10 @@ public static class Global
     public static Subject<ChildStatusChange> ChildStatusChangedSubject { get; } = new();
     public static IObservable<long> TickSeconds => Observable.Interval(TimeSpan.FromSeconds(1));
 
-    public static bool IsInUnitTest { get; }
-    public static bool IsSimulationMode { get; internal set; } = true;
+    /// <summary>Engine running mode: if false, just simulation mode</summary>
+    public static bool IsControlMode { get; internal set; }
+    internal static bool IsInUnitTest { get; }
+    internal static bool IsSingleThreadMode { get; set; }
 
     public static Model Model { get; set; }
 
@@ -43,6 +45,10 @@ public static class Global
             .Select(a => a.FullName)
             .Any(n => n.StartsWith("Microsoft.VisualStudio.TestPlatform."))
             ;
+#if !DEBUG
+        if (IsSingleThreadMode)
+            throw new Exception("Running in single thread mode not allowed in production mode.");
+#endif
     }
 
     /// <summary> Do nothing </summary>

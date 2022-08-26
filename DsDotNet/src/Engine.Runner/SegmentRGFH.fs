@@ -152,13 +152,13 @@ module internal SegmentRGFHModule =
                         stopMonitorOriginating seg
                         for ch in outofOriginChildren do
                             ch.Status <- Status4.Ready
-                            ch.IsOriginating <- false
+                            ch.DbgIsOriginating <- false
                         doGoing(seg, writer, onError)
                         )
 
-            seg.IsOriginating <- true
+            seg.DbgIsOriginating <- true
             for ch in outofOriginChildren do
-                ch.IsOriginating <- true
+                ch.DbgIsOriginating <- true
             doHoming(seg, writer, onError)
             originatingSubscriptions.Add(seg, subs)
 

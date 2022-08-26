@@ -245,7 +245,7 @@ module VirtualParentSegmentModule =
                         ()
                 )
 
-    let CreateVirtualParentSegmentsFromRootFlow(rootFlow: RootFlow) =
+    let internal createVPSsFromRootFlow (rootFlow: RootFlow) =
         let auto = rootFlow.Auto
         let allEdges = rootFlow.Edges.ToArray()
         let segments = rootFlow.RootSegments.Cast<Segment>()

@@ -109,8 +109,8 @@ module FsSegmentModule =
                             assert(not x.TagPStart.Value)
                         | 'e', Status4.Going, false ->
                             logDebug $"\t\tAbout to finished originating: [{n}] status : {state} {cause}"
-                            assert(x.IsOriginating)
-                            x.IsOriginating <- false
+                            assert(x.DbgIsOriginating)
+                            x.DbgIsOriginating <- false
                         | 'e', Status4.Going, true ->
                             logDebug $"\t\tAbout to finished going: [{n}] status : {state} {cause}"
                         | 'e', Status4.Finished, _ ->
@@ -150,7 +150,11 @@ module FsSegmentModule =
 
                         match state with
                         | Status4.Ready -> doReady(x, writer, onError)
-                        | Status4.Going -> doGoing(x, writer, onError)
+                        | Status4.Going ->
+                            if Global.IsSingleThreadMode then
+                                doGoing(x, writer, onError)
+                            else
+                                async { doGoing(x, writer, onError) } |> Async.Start
                         | Status4.Finished -> doFinish(x, writer, onError)
                         | Status4.Homing -> doHoming(x, writer, onError)
                         | _ ->

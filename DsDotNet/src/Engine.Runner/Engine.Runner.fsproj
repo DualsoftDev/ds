@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
@@ -8,15 +8,15 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Compile Include="Obsolete\Runner.fs" />
-		<Compile Include="Obsolete/ObsoleteDoRGFH.fs" />
-		<Compile Include="Obsolete/Bit, Cpu.fs" />
 		<Compile Include="Prologue.fs" />
 		<Compile Include="Segment.fs" />
 		<Compile Include="VirtualParentSegment.fs" />
 		<Compile Include="SegmentRGFH.fs" />
 		<Compile Include="Engine.fs" />
 		<Compile Include="ModelExtension.fs" />
+		<None Include="Obsolete\Runner.fsx" />
+		<None Include="Obsolete/ObsoleteDoRGFH.fsx" />
+		<None Include="Obsolete/Bit, Cpu.fsx" />
 		<None Include="paket.references" />
 	</ItemGroup>
 

@@ -161,6 +161,10 @@ module VirtualParentSegmentModule =
                         | Status4.Ready, true ->
                             logInfo $"외부에서 내부 target {x.Target.Name} 실행 감지"
 
+
+                        | Status4.Going, false ->
+                            logInfo $"Child originated bit {bit} before going {x.Target.Name}"
+
                         | _ ->
                             failwithlog $"Unknown: [{n}]{state}: Target endport => {x.Target.Name}={on}"
 

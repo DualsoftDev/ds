@@ -22,8 +22,6 @@ public abstract class Flow : Named, IWallet
 
     public GraphInfo GraphInfo { get; set; }
 
-    public bool IsEmptyFlow => Edges.IsNullOrEmpty() && ChildVertices.IsNullOrEmpty();
-
     List<Edge> _edges = new();
     public IEnumerable<Edge> Edges => _edges;
 

@@ -33,3 +33,25 @@ module QueueTestModule =
                 n.number <- n.number * 10
             for n in q do
                 logDebug $"{n.number}"
+
+        [<Fact>]
+        member __.``MailboxProcessorTest`` () =
+            logInfo "============== MailboxProcessorTest"
+
+            let mutable agent:MailboxProcessor<string> option = None
+            agent <-
+                MailboxProcessor<string>.Start(fun inbox ->
+                    let rec loop() =
+                        async {
+                            let! msg = inbox.Receive()
+                            logDebug $"{msg}"
+                            if msg.ToUpper() = msg then
+                                agent.Value.Post (msg.ToLower())
+
+                            return! loop()
+                        } 
+                    loop()
+                ) |> Some
+
+            [| "hello"; "KWAK!"; "nice"; "TO"; "meet"; "you" |]
+            |> Array.iter agent.Value.Post

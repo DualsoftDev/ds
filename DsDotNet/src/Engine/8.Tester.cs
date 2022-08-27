@@ -15,6 +15,17 @@ public enum EnumTest
 };
 class Tester
 {
+    static string CreateCylinder(string name) => $"[sys] {name} =\r\n" + @"{
+    [flow] F = {
+        Vp > Pp > Sp;
+        Vm > Pm > Sm;
+
+        Vp |> Pm |> Sp;
+        Vm |> Pp |> Sm;
+        Vp <||> Vm;
+    }
+}";
+
     public static void DoSampleTest()
     {
         var text = @"
@@ -81,7 +92,6 @@ class Tester
        L.T.Cp = (30, 50)            // xy
        L.T.Cm = (60, 50, 20, 20)    // xywh
 }
-
 ";
 
         Debug.Assert(!Global.IsInUnitTest);
@@ -199,6 +209,7 @@ class Tester
 
         engine.Wait();
     }
+
     public static void DoSampleTestAdvanceReturn()
     {
         var text = @"
@@ -215,16 +226,6 @@ class Tester
         }
     }
 }
-[sys] A = {
-    [flow] F = {
-        Vp > Pp > Sp;
-        Vm > Pm > Sm;
-
-        Vp |> Pm |> Sp;
-        Vm |> Pp |> Sm;
-        Vp <||> Vm;
-    }
-}
 [addresses] = {
 	A.F.Vp = (%Q123.23, ,);
 	A.F.Sp = (, , %I12.2);
@@ -239,7 +240,8 @@ class Tester
         A.F;
     }
 }
-";
+" + CreateCylinder("A")
+;
 
         Debug.Assert(!Global.IsInUnitTest);
         var engine = new EngineBuilder(text, "Cpu").Engine;
@@ -335,33 +337,6 @@ class Tester
         }
     }
 }
-[sys] A = {
-    [flow] F = {
-        Vp > Pp > Sp;
-        Vm > Pm > Sm;
-
-        //Sp |> Pp |> Sm;
-        //Sm |> Pm |> Sp;
-        //Vp <||> Vm;
-        Vp |> Pm |> Sp;
-        Vm |> Pp |> Sm;
-        Vp <||> Vm;
-    }
-}
-[sys] B = {
-    [flow] F = {
-        Vp > Pp > Sp;
-        Vm > Pm > Sm;
-
-        //Sp |> Pp |> Sm;
-        //Sm |> Pm |> Sp;
-        //Vp <||> Vm;
-
-        Vp |> Pm |> Sp;
-        Vm |> Pp |> Sm;
-        Vp <||> Vm;
-    }
-}
 [addresses] = {
 	//L.F.Main = (%0, %0,);
 	A.F.Vp = (%Q123.23, ,);
@@ -384,7 +359,7 @@ class Tester
         B.F;
     }
 }
-";
+" + CreateCylinder("A") + "\r\n" + CreateCylinder("B");
 
         Debug.Assert(!Global.IsInUnitTest);
         var engine = new EngineBuilder(text, "Cpu").Engine;
@@ -418,32 +393,32 @@ class Tester
             {
                 Global.Logger.Info("-------------------------- End of Main segment");
 
-                Task.Run(async () =>
-                {
-                    await Task.Delay(300);
-                    engine.Model.Print();
-                });
-
-                //if (counter++ < 3)
+                //Task.Run(async () =>
                 //{
-                //    Task.Run(async () =>
-                //    {
-                //        //await Task.Delay(300);
-                //        Global.Logger.Info($"-------------------------- [{counter}] After finishing Main segment");
-                //        engine.Model.Print();
+                //    await Task.Delay(300);
+                //    engine.Model.Print();
+                //});
 
-                //        Global.Logger.Info($"--- [{counter}] Resetting Main segment");
-                //        opc.Write(resetTag, true);
-                //        //await Task.Delay(1300);
+                if (counter++ < 3)
+                {
+                    Task.Run(async () =>
+                    {
+                        //await Task.Delay(300);
+                        Global.Logger.Info($"-------------------------- [{counter}] After finishing Main segment");
+                        engine.Model.Print();
 
-                //        Global.Logger.Info($"-------------------------- [{counter}] After resetting Main segment");
-                //        engine.Model.Print();
+                        Global.Logger.Info($"--- [{counter}] Resetting Main segment");
+                        opc.Write(resetTag, true);
+                        //await Task.Delay(1300);
 
-                //        Global.Logger.Info($"--- [{counter}] Starting Main segment");
-                //        opc.Write(startTag, true);
-                //        //opc.Write("Auto_L_F", true);
-                //    });
-                //}
+                        Global.Logger.Info($"-------------------------- [{counter}] After resetting Main segment");
+                        engine.Model.Print();
+
+                        Global.Logger.Info($"--- [{counter}] Starting Main segment");
+                        opc.Write(startTag, true);
+                        //opc.Write("Auto_L_F", true);
+                    });
+                }
             }
         });
 
@@ -500,6 +475,77 @@ class Tester
         engine.Wait();
     }
 
+
+    public static void DoSampleTestTriangle()
+    {
+        var text = @"
+[sys] L = {
+    [flow] F = {
+        R > G > B > R;
+        R, G |> B |> G |> R        
+    }
+}
+
+[cpus] AllCpus = {
+    [cpu] Cpu = {
+        L.F;
+    }
+}
+";
+
+        Debug.Assert(!Global.IsInUnitTest);
+        var engine = new EngineBuilder(text, "Cpu").Engine;
+        Program.Engine = engine;
+        engine.Run();
+
+        var opc = engine.Opc;
+
+        var startTag = "StartPlan_L_F_B";
+
+        var rootSegments =
+            engine.Model.Systems
+            .SelectMany(s => s.RootFlows)
+            .SelectMany(f => f.RootSegments)
+            .Distinct()
+            ;
+        var coutner = rootSegments.ToDictionary(s => s, _ => 0);
+        bool first = true;
+        var finished =
+            Global.SegmentStatusChangedSubject
+            .Where(ssc => ssc.Status == Status4.Finished && ssc.Segment.GetType().Name == "Segment")
+            ;
+        var _counterSubscription = finished.Subscribe(ssc =>
+            {
+                coutner[ssc.Segment] = coutner[ssc.Segment] + 1;
+
+                var avg = (int)coutner.Values.Average(s => s);
+                Debug.Assert(coutner.Values.ForAll(v => Math.Abs(avg - v) <= 1));
+
+                if (ssc.Segment.QualifiedName == "L_F_B")
+                {
+                    Global.Logger.Info("-------------------------- End of Main segment");
+                    if (first)
+                    {
+                        opc.Write(startTag, false);
+                        first = false;
+                    }
+                }
+            });
+
+        var _checkOrderSubscription = finished.Buffer(3).Subscribe(sscs =>
+        {
+            var order = sscs.Select(ssc => ssc.Segment.Name).ToArray();
+            Debug.Assert(order.SequenceEqual(new[] { "B", "R", "G", }));
+        });
+
+        Debug.Assert(engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(startTag));
+        opc.Write(startTag, true);
+        opc.Write("Auto_L_F", true);
+
+        engine.Wait();
+    }
+
+
     public static void DoSampleTestVps()
     {
 
@@ -525,7 +571,7 @@ class Tester
         Sp |> Pp |> Sm;
         Sm |> Pm |> Sp;
         Vp <||> Vm;
-    }f
+    }
 }
 [cpus] AllCpus = {
     [cpu] Cpu = {

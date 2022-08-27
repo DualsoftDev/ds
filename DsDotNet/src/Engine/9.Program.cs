@@ -45,6 +45,7 @@ class Program
         //Tester.DoSampleTest();
         //Tester.DoSampleTestAdvanceReturn();
         Tester.DoSampleTestDiamond();
+        //Tester.DoSampleTestTriangle();
         //Tester.DoSampleTestAddressesAndLayouts();
     }
 }

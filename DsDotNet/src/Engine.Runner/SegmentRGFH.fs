@@ -32,12 +32,14 @@ module internal SegmentRGFHModule =
             assert(not child.IsFlipped && (not child.Status.HasValue || child.Status.Value = Status4.Going))
             logInfo $"Child {child.QualifiedName} starting.."
             assert(child.TagsStart.Count <= 1)  // 일단... 체크용..
-            for st in child.TagsStart do
-                let before = fun () ->
-                    //child.Status <- Status4.Going
-                    Global.ChildStatusChangedSubject.OnNext(ChildStatusChange(child, Status4.Going))
+            [|
+                for st in child.TagsStart do
+                    let before = fun () ->
+                        //child.Status <- Status4.Going
+                        Global.ChildStatusChangedSubject.OnNext(ChildStatusChange(child, Status4.Going))
 
-                writer(BitChange(st, true, "Starting child", onError, BeforeAction = before))
+                    BitChange(st, true, "Starting child", onError, BeforeAction = before)
+            |] |> writer
 
     /// Segment 별로 Going 중에 child 의 종료 모니터링.  segment 가 Going 이 아니게 되면, dispose
     let goingSubscriptions = Dictionary<SegmentBase, IDisposable>()
@@ -72,12 +74,13 @@ module internal SegmentRGFHModule =
         stopMonitor originatingSubscriptions seg
 
     let procReady(seg:SegmentBase, writer:ChangeWriter, onError:ExceptionHandler) =
-        let write:BitWriter = getBitWriter writer onError
         assert( [seg.TagPStart; seg.TagPReset; seg.TagPEnd].ForAll(fun t -> not t.Value ))     // A_F_Pp.TagEnd 가 true 되는 상태???
         assert( [seg.PortS :> PortInfo; seg.PortR; seg.PortE].ForAll(fun t -> not t.Value ))
         stopMonitorHoming seg
-        write(seg.Ready, true, null)
-        write(seg.TagPReset, false, null)
+        [|
+            BitChange(seg.Ready, true, null)
+            BitChange(seg.TagPReset, false, null)
+        |] |> writer
 
     /// Going tag ON 발송 후,
     ///     - child 가 하나라도 있으면, child 의 종료를 모니터링하기 위한 subscription 후, 최초 child group(init) 만 수행
@@ -86,7 +89,6 @@ module internal SegmentRGFHModule =
     let procGoing(seg:SegmentBase, writer:ChangeWriter, onError:ExceptionHandler) =
         assert( not <| homingSubscriptions.ContainsKey(seg))
         let write:BitWriter = getBitWriter writer onError
-        let writeEndPort = getEndPortPlanWriter writer onError
 
         if isChildrenOrigin(seg) then
             write(seg.Going, true, $"{seg.QualifiedName} GOING 시작")
@@ -117,7 +119,7 @@ module internal SegmentRGFHModule =
                                     //write(st, false, $"Child {finishedChild.QualifiedName} finished")
                             
                                 if (seg.Children.ForAll(fun ch -> ch.IsFlipped)) then
-                                    writeEndPort(seg.PortE, true, $"{seg.QualifiedName} GOING 끝 (모든 child end)")                                    
+                                    write(seg.PortE, true, $"{seg.QualifiedName} GOING 끝 (모든 child end)")                                    
                                 else
                                     // 남은 children 중에서 다음 뒤집을 target 선정후 뒤집기
                                     let targets =
@@ -142,7 +144,7 @@ module internal SegmentRGFHModule =
                 runChildren (seg.Inits, writer, onError)
 
             else // no children
-                writeEndPort(seg.PortE, true, $"{seg.QualifiedName} GOING 끝")
+                write(seg.PortE, true, $"{seg.QualifiedName} GOING 끝")
         else // children not at origin
             let outofOriginChildren = getOutofOriginChildren seg
             let subs = 
@@ -169,16 +171,16 @@ module internal SegmentRGFHModule =
             noop()
 
         stopMonitorGoing seg
-        write(seg.Going, false, $"{seg.QualifiedName} FINISH")
-        if seg.TagPEnd.Value then
-            noop()
-        write(seg.TagPEnd, true, $"Finishing {seg.QualifiedName}")
-        write(seg.TagPStart, false, $"Finishing {seg.QualifiedName}")
+
+        [|
+            BitChange(seg.Going, false, $"{seg.QualifiedName} FINISH")
+            BitChange(seg.TagPEnd, true, $"Finishing {seg.QualifiedName}")
+            BitChange(seg.TagPStart, false, $"Finishing {seg.QualifiedName}")
+        |] |> writer
 
     let procHoming(segment:SegmentBase, writer:ChangeWriter, onError:ExceptionHandler) =
         let seg = segment :?> Segment
         let write:BitWriter = getBitWriter writer onError
-        let writeEndPort = getEndPortPlanWriter writer onError
 
         stopMonitorGoing seg
 
@@ -186,7 +188,7 @@ module internal SegmentRGFHModule =
             ch.IsFlipped <- false
 
         if isChildrenOrigin segment then
-            writeEndPort(seg.PortE, false, $"{seg.QualifiedName} HOMING finished")
+            write(seg.PortE, false, $"{seg.QualifiedName} HOMING finished")
         else
             // 자식 원위치 맞추기
             let originTargets = getChildrenOrigin seg  // todo: 원위치 맞출 children
@@ -201,7 +203,7 @@ module internal SegmentRGFHModule =
                         let isOrigin = originTargets.ForAll(fun ch -> ch.TagsEnd.ForAll(fun t -> t.Value))
                         if isOrigin then
                             stopMonitorHoming seg
-                            writeEndPort(seg.PortE, false, $"{seg.QualifiedName} HOMING finished")
+                            write(seg.PortE, false, $"{seg.QualifiedName} HOMING finished")
                     )
             homingSubscriptions.Add(seg, subs)
 

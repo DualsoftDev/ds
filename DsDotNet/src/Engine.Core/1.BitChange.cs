@@ -40,6 +40,14 @@ public class BitChange
     public override string ToString() => $"{Bit.GetName()}={Bit}={NewValue} by {CauseRepr}";
 }
 
+public class EndPortChange : BitChange
+{
+    public EndPortChange(IBit bit, bool newValue, object cause = null, ExceptionHandler onError = null)
+        : base(bit, newValue, cause, onError)
+    {
+    }
+}
+
 public record OpcTagChange
 {
     public string TagName { get; }

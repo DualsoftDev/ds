@@ -45,7 +45,7 @@ module VirtualParentTestTest =
             logDebug "====================="
 
             let write(bit, value, cause) =
-                writer(BitChange(bit, value, cause, onError))
+                writer([| BitChange(bit, value, cause, onError) |])
 
 
             // 외부 시작 (start B) off
@@ -140,7 +140,7 @@ module VirtualParentTestTest =
                     let cause = if isNull bc.CauseRepr then "" else $" caused by [{bc.CauseRepr}]"
                     logDebug $"\tBit changed: [{bit.GetName()}] = {bc.NewValue}{cause}") |> ignore
 
-            [b :> MockupSegmentBase; g; r; vpB;] |> Seq.iter(fun seg -> seg.WireEvent(cpu.Enqueue, raise) |> ignore)
+            [b :> MockupSegmentBase; g; r; vpB;] |> Seq.iter(fun seg -> seg.WireEvent(cpu.Enqueues, raise) |> ignore)
 
             logDebug "====================="
             cpu.PrintAllTags(false);
@@ -181,7 +181,7 @@ module VirtualParentTestTest =
         [<Fact>]
         member __.``Single thread w/ Queueing : OK`` () =
             let cpu = MockUpCpu.create("dummy")
-            let vpB, vpG, vpR, auto, stB = prepare(cpu, cpu.Enqueue, 100, raise)
+            let vpB, vpG, vpR, auto, stB = prepare(cpu, cpu.Enqueues, 100, raise)
 
             [vpB; vpG; vpR] |> Seq.iter(fun vp -> cpu.PostChange(vp.Ready, true, null));
 
@@ -199,7 +199,7 @@ module VirtualParentTestTest =
         [<Fact>]
         member __.``FAIL: Single thread w/o Queue => Stack overflow`` () =
             let cpu = MockUpCpu.create("dummy")
-            let vpB, vpG, vpR, auto, stB = prepare(cpu, cpu.SendChange, 100, raise)
+            let vpB, vpG, vpR, auto, stB = prepare(cpu, cpu.SendChanges, 100, raise)
 
             [vpB; vpG; vpR] |> Seq.iter(fun vp -> cpu.SendChange(vp.Ready, true, null));
 
@@ -222,7 +222,7 @@ module VirtualParentTestTest =
             MockupSegmentBase.WithThreadOnPortEnd <- true
 
             let cpu = MockUpCpu.create("dummy")
-            let vpB, vpG, vpR, auto, stB = prepare(cpu, cpu.SendChange, 1000, onError)
+            let vpB, vpG, vpR, auto, stB = prepare(cpu, cpu.SendChanges, 1000, onError)
 
             [vpB; vpG; vpR] |> Seq.iter(fun vp -> cpu.SendChange(vp.Ready, true, null));
 
@@ -240,7 +240,7 @@ module VirtualParentTestTest =
             MockupSegmentBase.WithThreadOnPortReset <- true
 
             let cpu = MockUpCpu.create("dummy")
-            let vpB, vpG, vpR, auto, stB = prepare(cpu, cpu.SendChange, 1000, onError)
+            let vpB, vpG, vpR, auto, stB = prepare(cpu, cpu.SendChanges, 1000, onError)
 
             [vpB; vpG; vpR] |> Seq.iter(fun vp -> cpu.SendChange(vp.Ready, true, null));
 
@@ -267,7 +267,7 @@ module VirtualParentTestTest =
             MockupSegmentBase.WithThreadOnPortReset <- true
 
             let cpu = MockUpCpu.create("dummy")
-            let vpB, vpG, vpR, auto, stB = prepare(cpu, cpu.SendChange, 1000, onError)
+            let vpB, vpG, vpR, auto, stB = prepare(cpu, cpu.SendChanges, 1000, onError)
 
             [vpB; vpG; vpR] |> Seq.iter(fun vp -> cpu.SendChange(vp.Ready, true, null));
 
@@ -308,7 +308,7 @@ module VirtualParentTestTest =
             MockupSegmentBase.WithThreadOnPortEnd <- true
 
             let cpu = MockUpCpu.create("dummy")
-            let vpB, vpG, vpR, auto, stB = prepare(cpu, cpu.Enqueue, 1000, onError)
+            let vpB, vpG, vpR, auto, stB = prepare(cpu, cpu.Enqueues, 1000, onError)
 
             [vpB; vpG; vpR] |> Seq.iter(fun vp -> cpu.Enqueue(vp.Ready, true, null));
 

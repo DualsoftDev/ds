@@ -41,7 +41,7 @@ type MockupSegment(cpu, n) =
 
     override x.WireEvent(writer, onError) =
         let write(bit, value, cause) =
-            writer(BitChange(bit, value, cause, onError))
+            writer([| BitChange(bit, value, cause, onError) |])
         Global.BitChangedSubject
             .Where(fun bc -> bc.Bit.IsOneOf(x.PortS, x.PortR, x.PortE))
             .Subscribe(fun bc ->

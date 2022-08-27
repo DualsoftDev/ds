@@ -30,11 +30,11 @@ public static class CpuExtensionQueueing
                 while (q.Count > 0 && cpu.Running)
                 {
                     cpu.ProcessingQueue = true;
-                    if (q.TryDequeue(out BitChange bitChange))
+                    if (q.TryDequeue(out BitChange[] bitChanges))
                     {
-                        if (bitChange.Bit.GetName() == "AutoStart_L_F")
+                        if (bitChanges[0].Bit.GetName() == "AutoStart_L_F")
                             Global.NoOp();
-                        cpu.Apply(bitChange, true);
+                        cpu.Applies(bitChanges, true);
                     }
                     else
                         Global.Logger.Warn($"Failed to deque.");
@@ -53,6 +53,93 @@ public static class CpuExtensionQueueing
 
         return disposable;
     }
+
+    public static void Applies(this Cpu cpu, BitChange[] bitChanges, bool withQueue)
+    {
+        //if (bitChange.Bit.Value == bitChange.NewValue)
+        //    return;
+
+        //Global.Logger.Debug($"\t\t=[{cpu.DbgNestingLevel}] Applying bitChange {bitChange}");   // {bitChange.Guid}
+
+        var fwd = cpu.ForwardDependancyMap;
+        var q = cpu.Queue;
+
+        Debug.Assert(cpu.FFSetterMap != null);
+        cpu.BuildFlipFlopMapOnDemand();
+
+        cpu.DbgNestingLevel++;
+        var bits = bitChanges.ToDictionary(bc => bc.Bit, bc => bc);
+
+        if (bits.Keys.Any(b => fwd.ContainsKey(b)))
+        {
+            var dependents = bits.Keys.SelectMany(b => collectForwards(cpu, b)).Distinct().ToArray();
+            var prevValues = dependents.ToDictionary(dep => dep, dep => dep.Value);
+
+
+            // 실제 변경 적용
+            bitChanges.Iter(DoApply);
+
+            // 변경으로 인한 파생 변경 enqueue
+            {
+                bool getValue(IBit dep) => (dep is BitReEvaluatable re) ? re.Evaluate() : dep.Value;
+                List<BitChange> changes = new();
+                foreach (var dep in dependents)
+                {
+                    BitChange bc = null;
+                    if (dep is PortInfo pi)
+                    {
+                        if (bits.ContainsKey(pi.Plan))
+                        {
+                            //Debug.Assert(pi.Plan.Value != pi.Actual?.Value);
+                            if (pi.Actual == null || pi.Plan.Value == pi.Actual.Value)
+                                bc = new BitChange(dep, bits[pi.Plan].NewValue, pi.Plan, bits[pi.Plan].OnError);
+                            else
+                                Global.NoOp();
+                        }
+                        else if (pi.Actual != null && bits.ContainsKey(pi.Actual))
+                        {
+                            if (pi.Plan.Value == pi.Actual.Value)
+                                bc = new BitChange(dep, bits[pi.Actual].NewValue, pi.Actual, bits[pi.Actual].OnError);
+                            else
+                                Global.NoOp();
+                        }
+                    }
+
+                    if (bc == null)
+                    {
+                        var newValue = getValue(dep);
+                        if (newValue != prevValues[dep])
+                            bc = new BitChange(dep, newValue, null, null);
+                    }
+                    if (bc != null)
+                        changes.Add(bc);
+                }
+
+                foreach (var kv in bits)
+                {
+                    var (b, bc) = (kv.Key, kv.Value);
+                    if (cpu.FFSetterMap.ContainsKey(b) && bc.NewValue)
+                        foreach (var ff in cpu.FFSetterMap[b].Where(ff => !ff.Value))
+                            changes.Add(new BitChange(ff, true, b, bc.OnError));
+
+                    if (cpu.FFResetterMap.ContainsKey(b) && bc.NewValue)
+                        foreach (var ff in cpu.FFResetterMap[b].Where(ff => ff.Value))
+                            changes.Add(new BitChange(ff, false, b, bc.OnError));
+                }
+
+
+                foreach (var bc in changes)
+                    cpu.Apply(bc, withQueue);
+            }
+        }
+        else
+        {
+            //Global.Logger.Warn($"Failed to find dependency for {bit.GetName()}");
+            bitChanges.Iter(DoApply);
+        }
+        cpu.DbgNestingLevel--;
+    }
+
     public static void Apply(this Cpu cpu, BitChange bitChange, bool withQueue)
     {
         //if (bitChange.Bit.Value == bitChange.NewValue)
@@ -75,7 +162,7 @@ public static class CpuExtensionQueueing
 
         if (fwd.ContainsKey(bit))
         {
-            var dependents = collectForwards(bit).ToArray();
+            var dependents = collectForwards(cpu, bit).ToArray();
             var prevValues = dependents.ToDictionary(dep => dep, dep => dep.Value);
 
 
@@ -137,69 +224,68 @@ public static class CpuExtensionQueueing
             DoApply(bitChange);
         }
         cpu.DbgNestingLevel--;
+    }
 
+    static void DoApply(BitChange bitChange)
+    {
+        bitChange.BeforeAction?.Invoke();
+        DoApplyBitChange(bitChange);
+        bitChange.AfterAction?.Invoke();
+    }
 
-        void DoApply(BitChange bitChange)
+    static void DoApplyBitChange(BitChange bitChange)
+    {
+        var bit = (Bit)bitChange.Bit;
+        //Global.Logger.Debug($"\t=({indent}) Applying bitchange {bitChange}");
+
+        var bitChanged = false;
+        if (bit is IBitWritable writable)
         {
-            bitChange.BeforeAction?.Invoke();
-            DoApplyBitChange(bitChange);
-            bitChange.AfterAction?.Invoke();
+            writable.SetValue(bitChange.NewValue);
+            bitChanged = true;
+        }
+        else
+        {
+            Debug.Assert(bit.Value == bitChange.NewValue);
+            bitChanged = bit is PortInfo;
         }
 
-        void DoApplyBitChange(BitChange bitChange)
+        if (bitChanged)
         {
-            var bit = (Bit)bitChange.Bit;
-            //Global.Logger.Debug($"\t=({indent}) Applying bitchange {bitChange}");
-
-            var bitChanged = false;
-            if (bit is IBitWritable writable)
+            try
             {
-                writable.SetValue(bitChange.NewValue);
-                bitChanged = true;
+                Global.RawBitChangedSubject.OnNext(bitChange);
+                if (bit is Tag tag)
+                    Global.TagChangeToOpcServerSubject.OnNext(new OpcTagChange(bit.Name, bitChange.NewValue));
             }
-            else
+            catch (Exception ex)
             {
-                Debug.Assert(bit.Value == bitChange.NewValue);
-                bitChanged = bit is PortInfo;
-            }
-
-            if (bitChanged)
-            {
-                try
-                {
-                    Global.RawBitChangedSubject.OnNext(bitChange);
-                    if (bit is Tag tag)
-                        Global.TagChangeToOpcServerSubject.OnNext(new OpcTagChange(bit.Name, bitChange.NewValue));
-                }
-                catch (Exception ex)
-                {
-                    Global.Logger.Error(ex);
-                    if (bitChange.OnError == null)
-                        throw;
-                    else
-                        bitChange.OnError(ex);
-                }
-            }
-        }
-
-        IEnumerable<IBit> collectForwards(IBit bit)
-        {
-            if (fwd.ContainsKey(bit))
-            {
-                var dependents = fwd[bit];
-                foreach (var d in dependents)
-                {
-                    if (d is not Expression)
-                        yield return d;
-
-                    if (d is not IBitWritable)
-                        foreach (var dd in collectForwards(d))
-                            yield return dd;
-                }
+                Global.Logger.Error(ex);
+                if (bitChange.OnError == null)
+                    throw;
+                else
+                    bitChange.OnError(ex);
             }
         }
     }
 
+    static IEnumerable<IBit> collectForwards(Cpu cpu, IBit bit)
+    {
+        var fwd = cpu.ForwardDependancyMap;
+        if (fwd.ContainsKey(bit))
+        {
+            var dependents = fwd[bit];
+            foreach (var d in dependents)
+            {
+                if (d is not Expression)
+                    yield return d;
+
+                if (d is not IBitWritable)
+                    foreach (var dd in collectForwards(cpu, d))
+                        yield return dd;
+            }
+        }
+    }
 
 
     /// <summary> Bit 의 값 변경 처리를 CPU 에 위임.  즉시 수행되지 않고, CPU 의 Queue 에 추가 된 후, CPU thread 에서 수행된다.  </summary>
@@ -219,9 +305,14 @@ public static class CpuExtensionQueueing
                 //if (last != null && last.Bit == bitChange.Bit && last.NewValue == bitChange.NewValue)
                 //    Global.Logger.Warn($"Skipping enque'ing duplicate change {bitChange}");
                 //else
-                    cpu.Queue.Enqueue(bitChange);
+                cpu.Queue.Enqueue(new[] { bitChange });
                 break;
         };
+    }
+
+    public static void Enqueues(this Cpu cpu, BitChange[] bitChanges)
+    {
+        cpu.Queue.Enqueue(bitChanges);
     }
     public static void Enqueue(this Cpu cpu, IBit bit, bool newValue, object cause) =>
         Enqueue(cpu, new BitChange(bit, newValue, cause));
@@ -233,6 +324,8 @@ public static class CpuExtensionQueueing
         SendChange(cpu, new BitChange(bit, newValue, cause));
     public static void SendChange(this Cpu cpu, BitChange bitChange) =>
         cpu.Apply(bitChange, false);
+    public static void SendChanges(this Cpu cpu, BitChange[] bitChanges) =>
+        bitChanges.Iter(bitChange => cpu.Apply(bitChange, false));
     public static void PostChange(this Cpu cpu, IBit bit, bool newValue, object cause) =>
         Enqueue(cpu, new BitChange(bit, newValue, cause));
 

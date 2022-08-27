@@ -16,7 +16,7 @@ public class Cpu : Named, ICpu
     public List<RootFlow> RootFlows { get; } = new();
 
     /// <summary> Bit change event queue </summary>
-    public ConcurrentQueue<BitChange> Queue { get; } = new();
+    public ConcurrentQueue<BitChange[]> Queue { get; } = new();
 
     /// <summary>CPU queue 에 더 처리할 내용이 있음을 외부에 알리기 위한 flag</summary>
     public bool ProcessingQueue { get; internal set; }

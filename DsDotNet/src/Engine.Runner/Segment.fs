@@ -76,7 +76,7 @@ module FsSegmentModule =
             let mutable oldStatus:Status4 option = None
             let n = x.QualifiedName
             let write(bit, value, cause) =
-                writer(BitChange(bit, value, cause, onError))
+                writer([| BitChange(bit, value, cause, onError) |])
 
             Global.RawBitChangedSubject
                 .Where(fun bc -> bc.Bit.IsOneOf(x.PortS, x.PortR, x.PortE))

@@ -10,7 +10,7 @@ module PrologueModule =
 
 
     /// Bit * New Value * Change reason
-    type ChangeWriter = BitChange -> unit
+    type ChangeWriter = BitChange array -> unit
 
     type DoStatus = SegmentBase*ChangeWriter*ExceptionHandler -> unit
     let private defaultDoStatus(seg:SegmentBase, writer:ChangeWriter, exceptionHandler:ExceptionHandler) =
@@ -27,16 +27,11 @@ module internal BitWriterModule =
 
     let getBitWriter (writer:ChangeWriter) onError =
         fun (bit, value, cause) ->
-            assert(not <| box bit :? PortInfo)
-            writer(BitChange(bit, value, cause, onError))
-
-    let getEndPortPlanWriter (writer:ChangeWriter) onError =
-        fun (endPort:PortInfoEnd, value, cause) ->
-            //writer(PortInfoPlanChange(BitChange(endPort, value, cause, onError)))
-            //if endPort.Cpu.IsActive then
-            //    if endPort.Actual <> null then
-            //        writer(BitChange(endPort.Actual, value, $"Active CPU endport: writing actual {endPort}={value}"))
-            writer(BitChange(endPort.Plan, value, cause, onError))
-            if endPort.Cpu.IsActive then
-                if endPort.Actual <> null then
-                    writer(BitChange(endPort.Actual, value, $"Active CPU endport: writing actual {endPort}={value}"))
+            match box bit with
+            | :? PortInfoEnd as ep ->
+                [|  EndPortChange(ep.Plan, value, cause, onError) :> BitChange
+                    if ep.Cpu.IsActive && ep.Actual <> null then
+                        BitChange(ep.Actual, value, $"Active CPU endport: writing actual {ep}={value}") |]
+            | :? PortInfo -> failwith "Unexpected"
+            | _ -> [| BitChange(bit, value, cause, onError) |]
+            |> writer

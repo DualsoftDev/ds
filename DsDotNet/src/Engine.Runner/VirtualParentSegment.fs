@@ -119,7 +119,6 @@ module VirtualParentSegmentModule =
 
         override x.WireEvent(writer, onError) =
             let write:BitWriter = getBitWriter writer onError
-            let writeEndPort = getEndPortPlanWriter writer onError
 
             Global.BitChangedSubject
                 .Subscribe(fun bc ->
@@ -147,14 +146,20 @@ module VirtualParentSegmentModule =
                         | Status4.Going, true ->
                             //write(targetStartTag, false, $"{n} going 끝내기 by {cause}")
                             //write(x.Going, false, $"{n} going 끝내기 by {cause}")
-                            writeEndPort(x.PortE, true, $"{n} FINISH 끝내기 by {cause}")
+                            write(x.PortE, true, $"{n} FINISH 끝내기 by {cause}")
 
                         | Status4.Homing, false ->
                             //assert(not targetStartTag.Value)    // homing 중에 end port 가 꺼졌다고, 반드시 start tag 가 꺼져 있어야 한다고 볼 수는 없다.  start tag ON 이면 바로 재시작
                             //assert(x.Going.Value = false) // 아직 write 안되었을 수도 있음
+                            //[|
+                            //    BitChange(targetResetTag, false, $"{x.Target.Name} homing 완료로 reset 끄기")
+                            //    BitChange(x.Ready, true, $"{x.Target.Name} homing 완료")
+                            //    BitChange(x.PortE, false, null)
+                            //|] |> writer
                             write(targetResetTag, false, $"{x.Target.Name} homing 완료로 reset 끄기")
                             write(x.Ready, true, $"{x.Target.Name} homing 완료")
-                            writeEndPort(x.PortE, false, null)
+                            write(x.PortE, false, null)
+
 
                         | Status4.Ready, true ->
                             logInfo $"외부에서 내부 target {x.Target.Name} 실행 감지"
@@ -227,8 +232,13 @@ module VirtualParentSegmentModule =
                                         } |> Async.Start
 
                             | Status4.Finished ->
-                                write(targetStartTag, false, $"{n} FINISH 로 인한 {x.Target.Name} start {targetStartTag.GetName()} 끄기")
-                                write(x.Going, false, $"{n} FINISH")
+                                [|
+                                    BitChange(targetStartTag, false, $"{n} FINISH 로 인한 {x.Target.Name} start {targetStartTag.GetName()} 끄기")
+                                    BitChange(x.Going, false, $"{n} FINISH")
+                                |] |> writer
+                                //write(targetStartTag, false, $"{n} FINISH 로 인한 {x.Target.Name} start {targetStartTag.GetName()} 끄기")
+                                //write(x.Going, false, $"{n} FINISH")
+
                                 assert(x.PortE.Value)
                                 assert(x.PortR.Value = false)
 

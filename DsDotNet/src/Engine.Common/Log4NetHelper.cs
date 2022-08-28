@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 
 using log4net;
 using log4net.Appender;
+using log4net.Core;
 
 namespace Engine.Common;
 
@@ -43,7 +44,13 @@ public class Log4NetHelper
         return Directory.GetFiles(path)
             .Where(p => Path.GetFileName(p).StartsWith(stem))
             ;
+    }
 
+    // https://stackoverflow.com/questions/715941/change-log4net-logging-level-programmatically
+    public static void ChangeLogLevel(Level level)
+    {
+        var repo = ((log4net.Repository.Hierarchy.Hierarchy)LogManager.GetRepository());
+        repo.Threshold = level;
     }
 
     ///// <summary>

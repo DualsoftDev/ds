@@ -361,6 +361,8 @@ class Tester
 }
 " + CreateCylinder("A") + "\r\n" + CreateCylinder("B");
 
+        Log4NetHelper.ChangeLogLevel(log4net.Core.Level.Warn);
+
         Debug.Assert(!Global.IsInUnitTest);
         var engine = new EngineBuilder(text, "Cpu").Engine;
         Program.Engine = engine;
@@ -399,11 +401,11 @@ class Tester
                 //    engine.Model.Print();
                 //});
 
-                if (counter++ < 3000)
+                if (counter++ < 1000000)
                 {
-                    Task.Run(async () =>
+                    Task.Run(() =>
                     {
-                        Global.Logger.Info($"-------------------------- [{counter}] After finishing Main segment");
+                        Global.Logger.Warn($"-------------------------- [{counter}] After finishing Main segment");
                         //engine.Model.Print();
 
                         Global.Logger.Info($"--- [{counter}] Resetting Main segment");

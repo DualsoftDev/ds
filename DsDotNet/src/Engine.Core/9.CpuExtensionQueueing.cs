@@ -30,7 +30,7 @@ public static class CpuExtensionQueueing
 
             while (!disposable.IsDisposed && cpu.Running)
             {
-                waitHandle.WaitOne();
+                waitHandle.WaitOne(TimeSpan.FromMilliseconds(100));
                 while (q.Count > 0 && cpu.Running)
                 {
                     cpu.ProcessingQueue = true;
@@ -41,9 +41,13 @@ public static class CpuExtensionQueueing
                         cpu.Applies(bitChanges, true);
                     }
                     else
+                    {
                         Global.Logger.Warn($"Failed to deque.");
+                        throw new Exception("ERROR");
+                    }
                 }
                 cpu.ProcessingQueue = false;
+                //Thread.Sleep(1);
             }
         }).Start()
         ;

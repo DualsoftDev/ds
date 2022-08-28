@@ -8,6 +8,7 @@ open System.Collections.Generic
 open Engine.Common.FS
 open Engine.Core
 open Engine.Common
+open System.Collections.Concurrent
 
 
 [<AutoOpen>]
@@ -42,16 +43,19 @@ module internal SegmentRGFHModule =
             |] |> writer
 
     /// Segment 별로 Going 중에 child 의 종료 모니터링.  segment 가 Going 이 아니게 되면, dispose
-    let goingSubscriptions = Dictionary<SegmentBase, IDisposable>()
-    let homingSubscriptions = Dictionary<SegmentBase, IDisposable>()
+    let goingSubscriptions = ConcurrentDictionary<SegmentBase, IDisposable>()
+    let homingSubscriptions = ConcurrentDictionary<SegmentBase, IDisposable>()
     /// 원위치가 맞지 않은 상태에서 Going 시, 원위치부터 맞추기 위한 작업
-    let originatingSubscriptions = Dictionary<SegmentBase, IDisposable>()
+    let originatingSubscriptions = ConcurrentDictionary<SegmentBase, IDisposable>()
 
-    let stopMonitor (subscriptions:Dictionary<SegmentBase, IDisposable>) (seg:SegmentBase) =
+    let stopMonitor (subscriptions:ConcurrentDictionary<SegmentBase, IDisposable>) (seg:SegmentBase) =
         if subscriptions.ContainsKey(seg) then
-            let subs = subscriptions[seg]
-            subscriptions.Remove(seg) |> ignore
-            subs.Dispose()
+            match subscriptions.TryRemove(seg) with
+            | true, subs ->
+                subs.Dispose()
+            | _ ->
+                failwith $"Failed to remove subscription."
+
     let stopMonitorGoing (seg:SegmentBase) =
         // stop running children
         let runningChildren = seg.Children.Where(fun ch -> ch.Status = Nullable Status4.Going)
@@ -138,7 +142,7 @@ module internal SegmentRGFHModule =
 
                                     runChildren (targets, writer, onError)
                         )
-                goingSubscriptions.Add(seg, subs)
+                goingSubscriptions.TryAdd(seg, subs) |> verify
 
                 let seg = seg :?> Segment
                 runChildren (seg.Inits, writer, onError)
@@ -162,7 +166,7 @@ module internal SegmentRGFHModule =
             for ch in outofOriginChildren do
                 ch.DbgIsOriginating <- true
             doHoming(seg, writer, onError)
-            originatingSubscriptions.Add(seg, subs)
+            originatingSubscriptions.TryAdd(seg, subs) |> verify
 
     let procFinish(seg:SegmentBase, writer:ChangeWriter, onError:ExceptionHandler) =
         let write = getBitWriter writer onError
@@ -205,7 +209,7 @@ module internal SegmentRGFHModule =
                             stopMonitorHoming seg
                             write(seg.PortE, false, $"{seg.QualifiedName} HOMING finished")
                     )
-            homingSubscriptions.Add(seg, subs)
+            homingSubscriptions.TryAdd(seg, subs) |> verify
 
             runChildren(originTargets, writer, onError)
 

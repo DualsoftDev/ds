@@ -16,17 +16,21 @@ public static class CpuExtensionQueueing
 
         cpu.BuildFlipFlopMapOnDemand();
 
-#if DEBUG
+        AutoResetEvent waitHandle = new AutoResetEvent(false);
+
         new Thread(() =>
-#else
-        new Thread(async () =>
-#endif
         {
             cpu.DbgThreadId = Thread.CurrentThread.ManagedThreadId;
             Global.Logger.Debug($"\tRunning {cpu.ToText()}");
 
+            cpu.Queue.CollectionChanged += (s, e) =>
+            {
+                waitHandle.Set();
+            };
+
             while (!disposable.IsDisposed && cpu.Running)
             {
+                waitHandle.WaitOne();
                 while (q.Count > 0 && cpu.Running)
                 {
                     cpu.ProcessingQueue = true;
@@ -40,12 +44,6 @@ public static class CpuExtensionQueueing
                         Global.Logger.Warn($"Failed to deque.");
                 }
                 cpu.ProcessingQueue = false;
-
-#if DEBUG
-                Thread.Sleep(5);
-#else
-                await Task.Delay(5);
-#endif
             }
         }).Start()
         ;

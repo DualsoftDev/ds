@@ -15,6 +15,8 @@ public class Cpu : Named, ICpu
     /// <summary> this Cpu 가 관장하는 root flows </summary>
     public List<RootFlow> RootFlows { get; } = new();
 
+
+
     /// <summary> Bit change event queue </summary>
     public ObservableConcurrentQueue<BitChange[]> Queue { get; } = new();
 

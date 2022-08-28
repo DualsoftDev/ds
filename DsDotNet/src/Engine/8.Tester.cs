@@ -399,20 +399,18 @@ class Tester
                 //    engine.Model.Print();
                 //});
 
-                if (counter++ < 3)
+                if (counter++ < 3000)
                 {
                     Task.Run(async () =>
                     {
-                        //await Task.Delay(300);
                         Global.Logger.Info($"-------------------------- [{counter}] After finishing Main segment");
-                        engine.Model.Print();
+                        //engine.Model.Print();
 
                         Global.Logger.Info($"--- [{counter}] Resetting Main segment");
                         opc.Write(resetTag, true);
-                        //await Task.Delay(1300);
 
                         Global.Logger.Info($"-------------------------- [{counter}] After resetting Main segment");
-                        engine.Model.Print();
+                        //engine.Model.Print();
 
                         Global.Logger.Info($"--- [{counter}] Starting Main segment");
                         opc.Write(startTag, true);

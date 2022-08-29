@@ -13,9 +13,9 @@ public enum EnumTest
     B,
     C,
 };
-class Tester
+public class Tester
 {
-    static string CreateCylinder(string name) => $"[sys] {name} =\r\n" + @"{
+    public static string CreateCylinder(string name) => $"[sys] {name} =\r\n" + @"{
     [flow] F = {
         Vp > Pp > Sp;
         Vm > Pm > Sm;
@@ -361,7 +361,7 @@ class Tester
 }
 " + CreateCylinder("A") + "\r\n" + CreateCylinder("B");
 
-        Log4NetHelper.ChangeLogLevel(log4net.Core.Level.Error);
+        //Log4NetHelper.ChangeLogLevel(log4net.Core.Level.Error);
 
         Debug.Assert(!Global.IsInUnitTest);
         var engine = new EngineBuilder(text, "Cpu").Engine;
@@ -391,6 +391,10 @@ class Tester
         var counter = 0;
         Global.SegmentStatusChangedSubject.Subscribe(ssc =>
         {
+            if (ssc.Segment.QualifiedName == "VPS_L_F_Main")
+                Global.NoOp();
+
+
             if (ssc.Segment.QualifiedName == "L_F_Main")
             {
                 if (ssc.Status == Status4.Finished)
@@ -398,7 +402,7 @@ class Tester
                     if (counter++ % 100 == 0)
                     {
                         Console.WriteLine($"[{counter}] After finishing Main segment");
-                        //Global.Logger.Info($"-------------------------- [{counter}] After finishing Main segment");
+                        Global.Logger.Info($"-------------------------- [{counter}] After finishing Main segment");
                         //engine.Model.Print();
                     }
                     opc.Write(resetTag, true);

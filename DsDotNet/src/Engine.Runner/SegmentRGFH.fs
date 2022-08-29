@@ -78,7 +78,8 @@ module internal SegmentRGFHModule =
     let stopMonitorOriginating (seg:SegmentBase) =
         stopMonitor originatingSubscriptions seg
 
-    let procReady(seg:SegmentBase, writer:ChangeWriter, onError:ExceptionHandler) =
+    let procReady(segment:SegmentBase, writer:ChangeWriter, onError:ExceptionHandler) =
+        let seg = segment :?> Segment
         assert( [seg.TagPStart; seg.TagPReset; seg.TagPEnd].ForAll(fun t -> not t.Value ))     // A_F_Pp.TagEnd 가 true 되는 상태???
         assert( [seg.PortS :> PortInfo; seg.PortR; seg.PortE].ForAll(fun t -> not t.Value ))
         stopMonitorHoming seg
@@ -169,7 +170,8 @@ module internal SegmentRGFHModule =
             doHoming(seg, writer, onError)
             originatingSubscriptions.TryAdd(seg, subs) |> verify
 
-    let procFinish(seg:SegmentBase, writer:ChangeWriter, onError:ExceptionHandler) =
+    let procFinish(segment:SegmentBase, writer:ChangeWriter, onError:ExceptionHandler) =
+        let seg = segment :?> Segment
         let write = getBitWriter writer onError
 
         if seg.QualifiedName = "L_F_Main" then

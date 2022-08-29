@@ -14,29 +14,17 @@ module VirtualParentSegmentModule =
     type VirtualParentSegment(target:Segment
         , causalSourceSegments:Segment seq
         , resetSourceSegments:Segment seq
-        , startPort:PortInfoStart
-        , resetPort:PortInfoReset
-        , endPort:PortInfoEnd
-        , goingTag, readyTag
     ) as this =
         inherit FsSegmentBase(target.Cpu, $"VPS_{target.QualifiedName}")
 
         let cpu = target.Cpu
         do
-            let ns = $"VPS_{target.TagPStart.Name}"
-            let nr = $"VPS_{target.TagPReset.Name}"
             let ne = $"VPS_{target.TagPEnd.Name}"
-            this.TagPStart <- TagP(cpu, this, ns, TagType.Q ||| TagType.Start)
-            this.TagPReset <- TagP(cpu, this, nr, TagType.Q ||| TagType.Reset)
             this.TagPEnd   <- TagP(cpu, this, ne, TagType.I ||| TagType.End  )
 
-            assert([startPort:>PortInfo; resetPort; endPort].ForAll(fun p -> p <> null))
             let n = $"VPS_{target.QualifiedName}"
-            this.PortS <- startPort
-            this.PortR <- resetPort
-            this.PortE <- endPort
-            this.Going <- if isNull goingTag then TagE(cpu, this, $"Going_{n}", TagType.Going) else goingTag
-            this.Ready <- if isNull readyTag then TagE(cpu, this, $"Ready_{n}", TagType.Ready) else readyTag
+            this.Going <- TagE(cpu, this, $"Going_{n}", TagType.Going)
+            this.Ready <- TagE(cpu, this, $"Ready_{n}", TagType.Ready)
 
 
         let mutable oldStatus:Status4 option = None
@@ -46,6 +34,11 @@ module VirtualParentSegmentModule =
         let targetResetTag = target.TagPReset
 
         member val Target = target;
+
+        member x.SetPorts(s, r, e) =
+            x.PortS <- s
+            x.PortR <- r
+            x.PortE <- e
 
         /// target 에 대한 가상 부모 생성
         /// 가상부모 StartPort:
@@ -61,9 +54,9 @@ module VirtualParentSegmentModule =
         ) =
             let cpu = target.Cpu
             let n = $"VPS_{target.QualifiedName}"
-            let readyTag = new TagE(cpu, null, $"{n}_Ready")
+            let vps = VirtualParentSegment(target, causalSourceSegments, resetSourceSegments)
 
-            let ep = PortInfoEnd.Create(cpu, null, $"End_{n}", null)
+            let ep = PortInfoEnd(cpu, vps, $"End_{n}", vps.TagPEnd, null)
 
             let rp =
                 (*
@@ -82,13 +75,14 @@ module VirtualParentSegmentModule =
                             yield auto
                             if resetSourceSegments.Any() then
                                 for rsseg in resetSourceSegments do
-                                    yield FlipFlop(cpu, $"InnerResetSourceFF_{n}_{rsseg.Name}", rsseg.Going, readyTag)  :> IBit
+                                    yield FlipFlop(cpu, $"InnerResetSourceFF_{n}_{rsseg.Name}", rsseg.Going, vps.Ready)  :> IBit
                             else
                                 // self reset.  실제 reset 시 알맹이의 reset 은 수행하지 말아야 한다.
                                 yield ep
                         |]
                     And(cpu, $"ResetPlanAnd_{n}", vrp)
-                PortInfoReset(cpu, null, $"Reset_{n}", resetPortInfoPlan, null)
+                vps.BitPReset <- resetPortInfoPlan
+                PortInfoReset(cpu, vps, $"Reset_{n}", resetPortInfoPlan, null)
 
             let sp =
                 (*
@@ -108,13 +102,11 @@ module VirtualParentSegmentModule =
                         |]
                     And(cpu, $"StartPlanAnd_{n}", vsp)
 
-                PortInfoStart(cpu, null, $"Start_{n}", startPortInfoPlan, null)
+                vps.BitPStart <- startPortInfoPlan
+                PortInfoStart(cpu, vps, $"Start_{n}", startPortInfoPlan, null)
 
 
-            let vps = VirtualParentSegment(target, causalSourceSegments, resetSourceSegments, sp, rp, ep, null, readyTag)
-            sp.Segment <- vps
-            rp.Segment <- vps
-            ep.Segment <- vps
+            vps.SetPorts(sp, rp, ep)
 
             vps
 
@@ -130,24 +122,31 @@ module VirtualParentSegmentModule =
                     let notiTargetEndPortChange = bc.Bit = x.Target.PortE
                     let state = x.Status
                     let n = x.QualifiedName
-                    let cause = $"by bit change {bit.GetName()}={on}"
+                    let cause = $"bit change {bit.GetName()}={on}"
 
-                    //if notiVpsPortChange || notiTargetEndPortChange then
-                    //    noop()
+                    if notiVpsPortChange || notiTargetEndPortChange then
+                        noop()
+                        if x.Name = "VPS_L_F_Main" then
+                            noop()
+
+
 
                     if notiTargetEndPortChange then
-                        if x.Going.Value && state <> Status4.Going then
-                            write(x.Going, false, $"{n} going off by status {state}")
-                        if x.Ready.Value && state <> Status4.Ready then
-                            write(x.Ready, false, $"{n} ready off by status {state}")
-
                         let cause = $"{x.Target.Name} End Port={x.Target.PortE.Value}"
 
                         match state, on with
                         | Status4.Going, true ->
+                            //[|
+                            //    BitChange(targetStartTag, false, $"{n} going 끝내기 by {cause}")
+                            //    BitChange(x.Going, false, $"{n} going 끝내기 by {cause}")
+                            //|] |> writer
+                            //write(x.PortE, true, $"{n} FINISH 끝내기 by {cause}")
+
+
                             //write(targetStartTag, false, $"{n} going 끝내기 by {cause}")
                             //write(x.Going, false, $"{n} going 끝내기 by {cause}")
                             write(x.PortE, true, $"{n} FINISH 끝내기 by {cause}")
+
 
                         | Status4.Homing, false ->
                             //assert(not targetStartTag.Value)    // homing 중에 end port 가 꺼졌다고, 반드시 start tag 가 꺼져 있어야 한다고 볼 수는 없다.  start tag ON 이면 바로 재시작
@@ -156,7 +155,7 @@ module VirtualParentSegmentModule =
                             //    BitChange(targetResetTag, false, $"{x.Target.Name} homing 완료로 reset 끄기")
                             //    BitChange(x.Ready, true, $"{x.Target.Name} homing 완료")
                             //    BitChange(x.PortE, false, null)
-                            //|] |> writer
+                            //|] |> writer  // <-- fail
                             write(targetResetTag, false, $"{x.Target.Name} homing 완료로 reset 끄기")
                             write(x.Ready, true, $"{x.Target.Name} homing 완료")
                             write(x.PortE, false, null)
@@ -204,16 +203,23 @@ module VirtualParentSegmentModule =
                         else
                             oldStatus <- Some state
                             logInfo $"[{n}] VPS Segment status : {state} by {bit.Name}={on}"
+
+                            if x.Going.Value && state <> Status4.Going then
+                                write(x.Going, false, $"{n} going off by status {state}")
+                            if x.Ready.Value && state <> Status4.Ready then
+                                write(x.Ready, false, $"{n} ready off by status {state}")
+
+                            Global.SegmentStatusChangedSubject.OnNext(SegmentStatusChange(x, state))
+
+
                             let childStatus = x.Target.Status
-
-                            if n = "L_F_Main" then
-                                noop()
-
 
                             match state with
                             | Status4.Ready    ->
                                 ()
                             | Status4.Going    ->
+
+                                    
                                 write(x.Going, true, $"{n} GOING 시작")
                                 if triggerTargetStart then
                                     assert(childStatus = Status4.Ready || cpu.ProcessingQueue);

@@ -25,10 +25,6 @@ public class OpcBroker
     Dictionary<string, OpcTag> _tagDic = new Dictionary<string, OpcTag>();
     public IEnumerable<string> Tags => _tagDic.Values.Select(ot => ot.Name);
 
-    // { Debug only, or temporary implementations
-    internal IEnumerable<OpcTag> _opcTags => _tagDic.Values;
-    // }
-
     CompositeDisposable _disposables = new();
 
     public OpcBroker()
@@ -56,6 +52,9 @@ public class OpcBroker
 
     public void Write(string tagName, bool value)
     {
+        if (tagName == "ResetPlan_L_F_Main")
+            Global.NoOp();
+
         // unit test 가 아니라면 무조건 실행되어야 할 부분.  unit test 에서만 생략 가능
         void doWrite()
         {

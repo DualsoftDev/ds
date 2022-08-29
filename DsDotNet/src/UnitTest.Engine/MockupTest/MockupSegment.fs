@@ -21,14 +21,16 @@ type MockupSegmentBase(cpu, n) =
 type MockupSegment(cpu, n) =
     inherit MockupSegmentBase(cpu, n)
     let mutable oldStatus:Status4 option = None
+    member x.TagPStart = x.BitPStart :?> TagP
+    member x.TagPReset = x.BitPReset :?> TagP
 
     static member CreateWithDefaultTags(cpu, n) =
         let seg = MockupSegment(cpu, n)
         let ns = $"Start_{n}"
         let nr = $"Reset_{n}"
         let ne = $"End_{n}"
-        seg.TagPStart <- TagP(cpu, seg, ns, TagType.Q ||| TagType.Start)
-        seg.TagPReset <- TagP(cpu, seg, nr, TagType.Q ||| TagType.Reset)
+        seg.BitPStart <- TagP(cpu, seg, ns, TagType.Q ||| TagType.Start)
+        seg.BitPReset <- TagP(cpu, seg, nr, TagType.Q ||| TagType.Reset)
         seg.TagPEnd   <- TagP(cpu, seg, ne, TagType.I ||| TagType.End  )
         seg.Going <- TagE(cpu, seg, $"Going_{n}", TagType.Going)
         seg.Ready <- TagE(cpu, seg, $"Ready_{n}", TagType.Ready)

@@ -35,7 +35,8 @@ module FsSegmentModule =
         member val Lasts:Child array = null with get, set
         member val ChildrenOrigin:IVertex array = null with get, set
         member val TraverseOrder:VertexAndOutgoingEdges array = null with get, set
-
+        member x.TagPStart = x.BitPStart :?> TagP
+        member x.TagPReset = x.BitPReset :?> TagP
         override x.Epilogue() =
             base.Epilogue()
             
@@ -46,8 +47,8 @@ module FsSegmentModule =
             let ns = $"StartPlan_{n}"
             let nr = $"ResetPlan_{n}"
             let ne = $"EndPlan_{n}"
-            this.TagPStart <- TagP(cpu, this, ns, TagType.Plan ||| TagType.Q ||| TagType.Start)
-            this.TagPReset <- TagP(cpu, this, nr, TagType.Plan ||| TagType.Q ||| TagType.Reset)
+            this.BitPStart <- TagP(cpu, this, ns, TagType.Plan ||| TagType.Q ||| TagType.Start)
+            this.BitPReset <- TagP(cpu, this, nr, TagType.Plan ||| TagType.Q ||| TagType.Reset)
             this.TagPEnd   <- TagP(cpu, this, ne, TagType.Plan ||| TagType.I ||| TagType.End)
 
             let (s, r, e) = x.Addresses
@@ -59,8 +60,8 @@ module FsSegmentModule =
                 this.TagAEnd   <- TagA(cpu, this, $"EndActual_{n}",   e, TagType.External ||| TagType.I ||| TagType.End)
 
 
-            x.PortS <- PortInfoStart(cpu, x, $"StartPort_{n}", x.TagPStart, x.TagAStart)
-            x.PortR <- PortInfoReset(cpu, x, $"ResetPort_{n}", x.TagPReset, x.TagAReset)
+            x.PortS <- PortInfoStart(cpu, x, $"StartPort_{n}", x.BitPStart, x.TagAStart)
+            x.PortR <- PortInfoReset(cpu, x, $"ResetPort_{n}", x.BitPReset, x.TagAReset)
             x.PortE <- PortInfoEnd  (cpu, x, $"EndPort_{n}",   x.TagPEnd,   x.TagAEnd)
 
             // Graph 정보 추출 & 저장
@@ -84,7 +85,7 @@ module FsSegmentModule =
                     let state = x.Status
                     let bit = bc.Bit
                     let value = bc.NewValue
-                    let cause = $"by bit change {bit.GetName()}={value}"
+                    let cause = $"bit change {bit.GetName()}={value}"
 
                     if x.QualifiedName = "L_F_Main" then
                         noop()

@@ -240,6 +240,9 @@ public static class CpuExtensionQueueing
         var bit = (Bit)bitChange.Bit;
         //Global.Logger.Debug($"\t=({indent}) Applying bitchange {bitChange}");
 
+        if (bit.Name == "ResetPlan_L_F_Main")
+            Global.NoOp();
+
         var bitChanged = false;
         if (bit is IBitWritable writable)
         {

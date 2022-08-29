@@ -27,8 +27,8 @@ type MockupVirtualParentSegment(name, target:MockupSegment, causalSourceSegments
         let ns = $"VPS_Start_{name}"
         let nr = $"VPS_Reset_{name}"
         let ne = $"VPS_End_{name}"
-        this.TagPStart <- TagP(cpu, this, ns, TagType.Q ||| TagType.Start)
-        this.TagPReset <- TagP(cpu, this, nr, TagType.Q ||| TagType.Reset)
+        this.BitPStart <- TagP(cpu, this, ns, TagType.Q ||| TagType.Start)
+        this.BitPReset <- TagP(cpu, this, nr, TagType.Q ||| TagType.Reset)
         this.TagPEnd   <- TagP(cpu, this, ne, TagType.I ||| TagType.End  )
 
         this.PortS <- startPort

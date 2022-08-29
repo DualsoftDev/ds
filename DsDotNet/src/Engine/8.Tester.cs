@@ -391,13 +391,18 @@ public class Tester
         var counter = 0;
         Global.SegmentStatusChangedSubject.Subscribe(ssc =>
         {
-            if (ssc.Segment.QualifiedName == "VPS_L_F_Main")
-                Global.NoOp();
-
-
-            if (ssc.Segment.QualifiedName == "L_F_Main")
+            var qName = ssc.Segment.QualifiedName;
+            var state = ssc.Status;
+            if (qName == "VPS_L_F_Main")
             {
-                if (ssc.Status == Status4.Finished)
+                if (state == Status4.Finished)
+                    opc.Write(resetTag, true);
+            }
+
+
+            if (qName == "L_F_Main")
+            {
+                if (state == Status4.Finished)
                 {
                     if (counter++ % 100 == 0)
                     {
@@ -405,7 +410,7 @@ public class Tester
                         Global.Logger.Info($"-------------------------- [{counter}] After finishing Main segment");
                         //engine.Model.Print();
                     }
-                    opc.Write(resetTag, true);
+                    //opc.Write(resetTag, true);
                 }
                 else if (ssc.Status == Status4.Ready)
                 {

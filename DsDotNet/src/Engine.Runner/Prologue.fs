@@ -26,7 +26,10 @@ module internal BitWriterModule =
     type BitWriter = IBit * bool * obj -> unit
 
     let getBitWriter (writer:ChangeWriter) onError =
-        fun (bit, value, cause) ->
+        fun (bit:IBit, value, cause) ->
+            if value && bit.GetName() = "End_VPS_L_F_Main" then
+                noop()
+
             match box bit with
             | :? PortInfoEnd as ep ->
                 [|  EndPortChange(ep.Plan, value, cause, onError) :> BitChange

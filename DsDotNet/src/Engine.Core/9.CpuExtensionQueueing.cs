@@ -131,7 +131,7 @@ public static class CpuExtensionQueueing
 
 
                 foreach (var bc in changes)
-                    cpu.Apply(bc, withQueue);
+                    cpu.Applies(new[] { bc }, withQueue);
             }
         }
         else
@@ -142,91 +142,91 @@ public static class CpuExtensionQueueing
         cpu.DbgNestingLevel--;
     }
 
-    public static void Apply(this Cpu cpu, BitChange bitChange, bool withQueue)
-    {
-        //if (bitChange.Bit.Value == bitChange.NewValue)
-        //    return;
+    //public static void Apply(this Cpu cpu, BitChange bitChange, bool withQueue)
+    //{
+    //    //if (bitChange.Bit.Value == bitChange.NewValue)
+    //    //    return;
 
-        Global.Logger.Debug($"\t\t=[{cpu.DbgNestingLevel}] Applying bitChange {bitChange}");   // {bitChange.Guid}
+    //    Global.Logger.Debug($"\t\t=[{cpu.DbgNestingLevel}] Applying bitChange {bitChange}");   // {bitChange.Guid}
 
-        var fwd = cpu.ForwardDependancyMap;
-        var q = cpu.Queue;
+    //    var fwd = cpu.ForwardDependancyMap;
+    //    var q = cpu.Queue;
 
-        Debug.Assert(cpu.FFSetterMap != null);
-        cpu.BuildFlipFlopMapOnDemand();
+    //    Debug.Assert(cpu.FFSetterMap != null);
+    //    cpu.BuildFlipFlopMapOnDemand();
 
-        cpu.DbgNestingLevel++;
-        var bit = (Bit)bitChange.Bit;
+    //    cpu.DbgNestingLevel++;
+    //    var bit = (Bit)bitChange.Bit;
 
-        if (bitChange.Bit.GetName() == "EndActual_A_F_Sm")  //"ResetPlan_A_F_Sm")  //"StartPlan_A_F_Vm") //"InnerStartSourceFF_VPS_A_F_Pp_Vp")   // "StartPlanAnd_VPS_A_F_Pp")
-            Global.NoOp();
-
-
-        if (fwd.ContainsKey(bit))
-        {
-            var dependents = collectForwards(cpu, bit).ToArray();
-            var prevValues = dependents.ToDictionary(dep => dep, dep => dep.Value);
+    //    if (bitChange.Bit.GetName() == "EndActual_A_F_Sm")  //"ResetPlan_A_F_Sm")  //"StartPlan_A_F_Vm") //"InnerStartSourceFF_VPS_A_F_Pp_Vp")   // "StartPlanAnd_VPS_A_F_Pp")
+    //        Global.NoOp();
 
 
-            // 실제 변경 적용
-            DoApply(bitChange);
-
-            // 변경으로 인한 파생 변경 enqueue
-            {
-                bool getValue(IBit dep) => (dep is BitReEvaluatable re) ? re.Evaluate() : dep.Value;
-                List<BitChange> changes = new();
-                foreach(var dep in dependents)
-                {
-                    BitChange bc = null;
-                    if (dep is PortInfo pi)
-                    {
-                        if (pi.Plan == bit)
-                        {
-                            //Debug.Assert(pi.Plan.Value != pi.Actual?.Value);
-                            if (pi.Actual == null || pi.Plan.Value == pi.Actual.Value)
-                                bc = new BitChange(dep, bitChange.NewValue, bit, bitChange.OnError);
-                            else
-                                Global.NoOp();
-                        }
-                        else if (pi.Actual == bit)
-                        {
-                            if (pi.Plan.Value == pi.Actual.Value)
-                                bc = new BitChange(dep, bitChange.NewValue, bit, bitChange.OnError);
-                            else
-                                Global.NoOp();
-                        }
-                    }
-
-                    if (bc == null)
-                    {
-                        var newValue = getValue(dep);
-                        if (newValue != prevValues[dep])
-                            bc = new BitChange(dep, newValue, bit, bitChange.OnError);
-                    }
-                    if (bc != null)
-                        changes.Add(bc);
-                }
-
-                if (cpu.FFSetterMap.ContainsKey(bit) && bitChange.NewValue)
-                    foreach (var ff in cpu.FFSetterMap[bit].Where(ff => !ff.Value))
-                        changes.Add(new BitChange(ff, true, bit, bitChange.OnError));
-
-                if (cpu.FFResetterMap.ContainsKey(bit) && bitChange.NewValue)
-                    foreach (var ff in cpu.FFResetterMap[bit].Where(ff => ff.Value))
-                        changes.Add(new BitChange(ff, false, bit, bitChange.OnError));
+    //    if (fwd.ContainsKey(bit))
+    //    {
+    //        var dependents = collectForwards(cpu, bit).ToArray();
+    //        var prevValues = dependents.ToDictionary(dep => dep, dep => dep.Value);
 
 
-                foreach (var bc in changes)
-                    cpu.Apply(bc, withQueue);
-            }
-        }
-        else
-        {
-            //Global.Logger.Warn($"Failed to find dependency for {bit.GetName()}");
-            DoApply(bitChange);
-        }
-        cpu.DbgNestingLevel--;
-    }
+    //        // 실제 변경 적용
+    //        DoApply(bitChange);
+
+    //        // 변경으로 인한 파생 변경 enqueue
+    //        {
+    //            bool getValue(IBit dep) => (dep is BitReEvaluatable re) ? re.Evaluate() : dep.Value;
+    //            List<BitChange> changes = new();
+    //            foreach(var dep in dependents)
+    //            {
+    //                BitChange bc = null;
+    //                if (dep is PortInfo pi)
+    //                {
+    //                    if (pi.Plan == bit)
+    //                    {
+    //                        //Debug.Assert(pi.Plan.Value != pi.Actual?.Value);
+    //                        if (pi.Actual == null || pi.Plan.Value == pi.Actual.Value)
+    //                            bc = new BitChange(dep, bitChange.NewValue, bit, bitChange.OnError);
+    //                        else
+    //                            Global.NoOp();
+    //                    }
+    //                    else if (pi.Actual == bit)
+    //                    {
+    //                        if (pi.Plan.Value == pi.Actual.Value)
+    //                            bc = new BitChange(dep, bitChange.NewValue, bit, bitChange.OnError);
+    //                        else
+    //                            Global.NoOp();
+    //                    }
+    //                }
+
+    //                if (bc == null)
+    //                {
+    //                    var newValue = getValue(dep);
+    //                    if (newValue != prevValues[dep])
+    //                        bc = new BitChange(dep, newValue, bit, bitChange.OnError);
+    //                }
+    //                if (bc != null)
+    //                    changes.Add(bc);
+    //            }
+
+    //            if (cpu.FFSetterMap.ContainsKey(bit) && bitChange.NewValue)
+    //                foreach (var ff in cpu.FFSetterMap[bit].Where(ff => !ff.Value))
+    //                    changes.Add(new BitChange(ff, true, bit, bitChange.OnError));
+
+    //            if (cpu.FFResetterMap.ContainsKey(bit) && bitChange.NewValue)
+    //                foreach (var ff in cpu.FFResetterMap[bit].Where(ff => ff.Value))
+    //                    changes.Add(new BitChange(ff, false, bit, bitChange.OnError));
+
+
+    //            foreach (var bc in changes)
+    //                cpu.Apply(bc, withQueue);
+    //        }
+    //    }
+    //    else
+    //    {
+    //        //Global.Logger.Warn($"Failed to find dependency for {bit.GetName()}");
+    //        DoApply(bitChange);
+    //    }
+    //    cpu.DbgNestingLevel--;
+    //}
 
     static void DoApply(BitChange bitChange)
     {
@@ -328,9 +328,9 @@ public static class CpuExtensionQueueing
     public static void SendChange(this Cpu cpu, IBit bit, bool newValue, object cause) =>
         SendChange(cpu, new BitChange(bit, newValue, cause));
     public static void SendChange(this Cpu cpu, BitChange bitChange) =>
-        cpu.Apply(bitChange, false);
+        cpu.Applies(new[] { bitChange }, false);
     public static void SendChanges(this Cpu cpu, BitChange[] bitChanges) =>
-        bitChanges.Iter(bitChange => cpu.Apply(bitChange, false));
+        bitChanges.Iter(bitChange => cpu.Applies(new[] { bitChange }, false));
     public static void PostChange(this Cpu cpu, IBit bit, bool newValue, object cause) =>
         Enqueue(cpu, new BitChange(bit, newValue, cause));
 

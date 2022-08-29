@@ -127,7 +127,8 @@ module VirtualParentSegmentModule =
                     if notiVpsPortChange || notiTargetEndPortChange then
                         noop()
                         if x.Name = "VPS_L_F_Main" then
-                            noop()
+                            if notiVpsPortChange && bit = x.PortE then
+                                noop()
 
 
 
@@ -136,16 +137,12 @@ module VirtualParentSegmentModule =
 
                         match state, on with
                         | Status4.Going, true ->
-                            //[|
-                            //    BitChange(targetStartTag, false, $"{n} going 끝내기 by {cause}")
-                            //    BitChange(x.Going, false, $"{n} going 끝내기 by {cause}")
-                            //|] |> writer
-                            //write(x.PortE, true, $"{n} FINISH 끝내기 by {cause}")
-
-
                             //write(targetStartTag, false, $"{n} going 끝내기 by {cause}")
                             //write(x.Going, false, $"{n} going 끝내기 by {cause}")
                             write(x.PortE, true, $"{n} FINISH 끝내기 by {cause}")
+
+                            // 가상부모 end 공지.  인위적...
+                            Global.SegmentStatusChangedSubject.OnNext(SegmentStatusChange(x, Status4.Finished))
 
 
                         | Status4.Homing, false ->
@@ -237,6 +234,9 @@ module VirtualParentSegmentModule =
                                                 )
 
                             | Status4.Finished ->
+                                if x.Name = "VPS_L_F_Main" then
+                                    noop()
+
                                 [|
                                     BitChange(targetStartTag, false, $"{n} FINISH 로 인한 {x.Target.Name} start {targetStartTag.GetName()} 끄기")
                                     BitChange(x.Going, false, $"{n} FINISH")

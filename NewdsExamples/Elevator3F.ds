@@ -1,12 +1,16 @@
 [sys] elevator = {
     [flow] M = {U;D;}         //1모터 2방향 연결
     [flow] S = {S2U;S3U;S2D;S1D;}  // 센서 연결
-    [task] B = {F1;F2;F3;}    //각 층 정보 저장 및 활성화
+    [flow] B = {F1;F2;F3;}    //각 층 정보 저장 및 활성화
     [task] T = {  //모터, 센서정보 할당 필요
         U12 = {M.U ~ S.S2U}
         U23 = {M.U ~ S.S3U}
         D32 = {M.D ~ S.S2D}
         D21 = {M.D ~ S.S1D}
+    }
+
+    [task] btn = {
+        
     }
 
     [flow] btn_reset = {

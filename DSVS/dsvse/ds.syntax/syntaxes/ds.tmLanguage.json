@@ -257,6 +257,152 @@
               "include": "#segment"
             },
             {
+              "include": "#causals"
+            },
+            {
+              "name": "invalid.illegal.expected-array-separator.json",
+              "match": "[^\\s\\}]"
+            }
+          ]
+        }
+      ]
+    },
+    "address": {
+      "patterns": [
+        {
+          "comment": "multi-line address",
+          "name": "address.multi.ds",
+          "begin": "\\[\\s*(address)\\s*\\]\\s*([가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*)\\s*=\\s*(\\{)(?=[^\\}]*$)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.other.ds"
+            },
+            "2": {
+              "name": "keyword.control.ds"
+            }
+          },
+          "end": "(\\})",
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.brace.end.ds"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#comments"
+            },
+            {
+              "include": "#accessDefs"
+            },
+            {
+              "include": "#callSegmentDefs"
+            },
+            {
+              "include": "#macros"
+            },
+            {
+              "include": "#causals"
+            },
+            {
+              "include": "#imports"
+            }
+          ]
+        },
+        {
+          "comment": "single-line address",
+          "name": "address.single.ds",
+          "begin": "\\[\\s*(address)\\s*\\]\\s*([가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*)\\s*=\\s*\\{",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.other.ds"
+            },
+            "2": {
+              "name": "keyword.control.ds"
+            }
+          },
+          "end": "\\}",
+          "patterns": [
+            {
+              "name": "punctuation.separator.array.ds",
+              "match": ";"
+            },
+            {
+              "include": "#segment"
+            },
+            {
+              "include": "#causals"
+            },
+            {
+              "name": "invalid.illegal.expected-array-separator.json",
+              "match": "[^\\s\\}]"
+            }
+          ]
+        }
+      ]
+    },
+    "layouts": {
+      "patterns": [
+        {
+          "comment": "multi-line layouts",
+          "name": "layouts.multi.ds",
+          "begin": "\\[\\s*(layouts)\\s*\\]\\s*([가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*)\\s*=\\s*(\\{)(?=[^\\}]*$)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.other.ds"
+            },
+            "2": {
+              "name": "keyword.control.ds"
+            }
+          },
+          "end": "(\\})",
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.brace.end.ds"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#comments"
+            },
+            {
+              "include": "#accessDefs"
+            },
+            {
+              "include": "#callSegmentDefs"
+            },
+            {
+              "include": "#macros"
+            },
+            {
+              "include": "#causals"
+            },
+            {
+              "include": "#imports"
+            }
+          ]
+        },
+        {
+          "comment": "single-line layouts",
+          "name": "layouts.single.ds",
+          "begin": "\\[\\s*(layouts)\\s*\\]\\s*([가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*)\\s*=\\s*\\{",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.other.ds"
+            },
+            "2": {
+              "name": "keyword.control.ds"
+            }
+          },
+          "end": "\\}",
+          "patterns": [
+            {
+              "name": "punctuation.separator.array.ds",
+              "match": ";"
+            },
+            {
+              "include": "#segment"
+            },
+            {
               "name": "invalid.illegal.expected-array-separator.json",
               "match": "[^\\s\\}]"
             }
@@ -301,6 +447,16 @@
         {
           "name": "call.segment.ds",
           "begin": "([가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*)\\s*=\\s*(\\{)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.control.callSegment.ds"
+            }
+          },
+          "end": "(\\})"
+        },
+        {
+          "name": "call.segment.with.dot.ds",
+          "begin": "(.[가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*)\\s*=\\s*(\\{)",
           "beginCaptures": {
             "1": {
               "name": "keyword.control.callSegment.ds"

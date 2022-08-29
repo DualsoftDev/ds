@@ -4,6 +4,7 @@ namespace Engine.Runner
 open Engine.Common.FS
 open Engine.Core
 open System
+open System.Reactive.Linq
 open System.Linq
 open System.Web.Configuration
 open Engine.Common
@@ -219,17 +220,15 @@ module VirtualParentSegmentModule =
                                     if childStatus = Status4.Ready then
                                         write(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
                                     else
-                                        async {
-                                            // wait while target child available
-                                            let mutable childStatus:Status4 option = None
-                                            while childStatus <> Some Status4.Ready do
-                                                // re-evaluate child status
-                                                childStatus <- Some <| x.Target.Status
-                                                logWarn $"Waiting target child [{x.Target.Name}] ready..from {childStatus.Value}"
-                                                do! Async.Sleep(10);
-
-                                            write(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
-                                        } |> Async.Start
+                                        logDebug $"Waiting target child [{x.Target.Name}] ready..from {x.Target.Status}"
+                                        // wait while target child available
+                                        let mutable subs:IDisposable = null
+                                        subs <-
+                                            Global.SegmentStatusChangedSubject.Where(fun ssc -> ssc.Segment = x.Target && ssc.Segment.Status = Status4.Ready)
+                                                .Subscribe(fun ssc ->
+                                                    write(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
+                                                    subs.Dispose()
+                                                )
 
                             | Status4.Finished ->
                                 [|

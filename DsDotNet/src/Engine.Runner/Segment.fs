@@ -126,11 +126,12 @@ module FsSegmentModule =
                             ()
                     else
                         logInfo $"[{n}] Segment status : {state} {cause}"
-                        Global.SegmentStatusChangedSubject.OnNext(SegmentStatusChange(x, state))
                         if x.Going.Value && state <> Status4.Going then
                             write(x.Going, false, $"{n} going off by status {state}")
                         if x.Ready.Value && state <> Status4.Ready then
                             write(x.Ready, false, $"{n} ready off by status {state}")
+
+                        Global.SegmentStatusChangedSubject.OnNext(SegmentStatusChange(x, state))
 
                         // { debug
                         if n = "A_F_Vp" && state = Status4.Homing then

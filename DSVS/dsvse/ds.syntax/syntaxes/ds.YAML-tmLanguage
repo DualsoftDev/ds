@@ -89,6 +89,7 @@ repository:
         - include: '#macros'    
         - include: '#causals'
         - include: '#imports'
+        - include: '#segment'
       - comment: single-line tasks
         name: tasks.single.ds
         begin: \[\s*(task)\s*\]\s*([가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*)\s*=\s*\{
@@ -142,7 +143,7 @@ repository:
     patterns:
       - comment: multi-line address
         name: address.multi.ds
-        begin: \[\s*(address)\s*\]\s*([가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*)\s*=\s*(\{)(?=[^\}]*$)
+        begin: \[\s*(address)\s*\]\s*=\s*(\{)(?=[^\}]*$)
         beginCaptures:
           '1': {name: keyword.other.ds}
           '2': {name: keyword.control.ds}
@@ -158,7 +159,7 @@ repository:
         - include: '#imports'
       - comment: single-line address
         name: address.single.ds
-        begin: \[\s*(address)\s*\]\s*([가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*)\s*=\s*\{
+        begin: \[\s*(address)\s*\]\s*=\s*\{
         beginCaptures:
           '1': {name: keyword.other.ds}
           '2': {name: keyword.control.ds}
@@ -177,7 +178,7 @@ repository:
     patterns:
       - comment: multi-line layouts
         name: layouts.multi.ds
-        begin: \[\s*(layouts)\s*\]\s*([가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*)\s*=\s*(\{)(?=[^\}]*$)
+        begin: \[\s*(layouts)\s*\]\s*=\s*(\{)(?=[^\}]*$)
         beginCaptures:
           '1': {name: keyword.other.ds}
           '2': {name: keyword.control.ds}
@@ -193,7 +194,7 @@ repository:
         - include: '#imports'
       - comment: single-line layouts
         name: layouts.single.ds
-        begin: \[\s*(layouts)\s*\]\s*([가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*)\s*=\s*\{
+        begin: \[\s*(layouts)\s*\]\s*=\s*\{
         beginCaptures:
           '1': {name: keyword.other.ds}
           '2': {name: keyword.control.ds}

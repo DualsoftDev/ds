@@ -7,6 +7,14 @@
 	  <RootNamespace>Engine.Opc</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Confluent.Kafka" Version="1.9.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Dsu.PLC.Common\Dsu.PLC.Common.csproj" />
+    <ProjectReference Include="..\Dsu.PLC.LS.FS\Dsu.PLC.LS.FS.fsproj" />
+    <ProjectReference Include="..\Dual.Common.FS\Dual.Common.FS.fsproj" />
+    <ProjectReference Include="..\Dual.Core.FS\Dual.Core.FS.fsproj" />
+    <ProjectReference Include="..\Dual.CovertPLC.FS\Dual.ConvertPLC.FS.fsproj" />
     <ProjectReference Include="..\Engine.Common\Engine.Common.csproj" />
     <ProjectReference Include="..\Engine.Core\Engine.Core.csproj" />
   </ItemGroup>

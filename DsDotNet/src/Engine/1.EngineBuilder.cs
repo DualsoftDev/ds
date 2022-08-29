@@ -1,5 +1,6 @@
 using Engine.Parser;
 using Engine.Runner;
+using System.Threading.Tasks;
 
 namespace Engine;
 
@@ -26,7 +27,8 @@ public class EngineBuilder
         Model.Epilogue(Opc);
 
         Opc.Print();
-        foreach(var cpu in Model.Cpus)
+        _ = Task.Run(async () => { await Opc.CommunicationPLC(); });
+        foreach (var cpu in Model.Cpus)
             cpu.PrintTags();
 
         Engine = new ENGINE(Model, Opc, Cpu);

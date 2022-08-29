@@ -339,14 +339,14 @@ class Tester
 }
 [addresses] = {
 	//L.F.Main = (%0, %0,);
-	A.F.Vp = (%Q123.23, ,);
-	A.F.Vm = (%Q123.24, ,);
-	B.F.Vp = (%Q123.25, ,);
-	B.F.Vm = (%Q123.24, ,);
-	A.F.Sp = (, , %I12.2);
-	A.F.Sm = (, , %I12.3);
-	B.F.Sp = (, , %I12.3);
-	B.F.Sm = (, , %I12.3);
+	A.F.Vp = (%MX901, ,);
+	A.F.Vm = (%MX902, ,);
+	B.F.Vp = (%MX903, ,);
+	B.F.Vm = (%MX904, ,);
+	A.F.Sp = (, , %MX905);
+	A.F.Sm = (, , %MX906);
+	B.F.Sp = (, , %MX907);
+	B.F.Sm = (, , %MX908);
 }
 [cpus] AllCpus = {
     [cpu] Cpu = {
@@ -419,8 +419,8 @@ class Tester
         if (hasAddress)
         {
             // initial condition
-            opc.Write("EndActual_A_F_Sm", true);
-            opc.Write("EndActual_B_F_Sm", true);
+            //opc.Write("EndActual_A_F_Sm", true);
+            //opc.Write("EndActual_B_F_Sm", true);
 
             // simulating physics
             Global.BitChangedSubject
@@ -457,8 +457,8 @@ class Tester
 
 
         Debug.Assert(engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(startTag));
-        opc.Write(startTag, true);
-        opc.Write("Auto_L_F", true);
+        //opc.Write(startTag, true);
+        //opc.Write("Auto_L_F", true);
 
         engine.Wait();
     }

@@ -27,6 +27,7 @@ module internal SegmentRGFHModule =
     let runChildren (children:Child seq, writer:ChangeWriter, onError:ExceptionHandler) =
         assert(children.Distinct().Count() = children.Count())
         for child in children do
+            assert(not child.Status.HasValue || child.Status = Nullable Status4.Ready)
             child.Status <- Status4.Going
 
         for child in children do
@@ -184,18 +185,22 @@ module internal SegmentRGFHModule =
 
     let procHoming(segment:SegmentBase, writer:ChangeWriter, onError:ExceptionHandler) =
         let seg = segment :?> Segment
+
+        if seg.QualifiedName = "L_F_Main" then
+            noop()
+
         let write:BitWriter = getBitWriter writer onError
 
         stopMonitorGoing seg
 
-        for ch in segment.Children do
+        let originTargets = getChildrenOrigin seg  // todo: 원위치 맞출 children
+        for ch in seg.Children do
             ch.IsFlipped <- false
 
-        if isChildrenOrigin segment then
+        if isChildrenOrigin seg then
             write(seg.PortE, false, $"{seg.QualifiedName} HOMING finished")
         else
             // 자식 원위치 맞추기
-            let originTargets = getChildrenOrigin seg  // todo: 원위치 맞출 children
             let childRxTags = originTargets.selectMany(fun ch -> ch.TagsEnd).ToArray()
             assert(originTargets.Any())
             let subs =

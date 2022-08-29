@@ -85,6 +85,10 @@ module FsSegmentModule =
                     let bit = bc.Bit
                     let value = bc.NewValue
                     let cause = $"by bit change {bit.GetName()}={value}"
+
+                    if x.QualifiedName = "L_F_Main" then
+                        noop()
+
                     if oldStatus = Some state then
                         logDebug $"{n} status {state} duplicated on port {bit.GetName()}={value} by {cause}"
                         //assert(not bit.Value) // todo

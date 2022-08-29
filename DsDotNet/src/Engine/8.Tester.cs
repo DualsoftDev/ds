@@ -361,7 +361,7 @@ class Tester
 }
 " + CreateCylinder("A") + "\r\n" + CreateCylinder("B");
 
-        Log4NetHelper.ChangeLogLevel(log4net.Core.Level.Warn);
+        Log4NetHelper.ChangeLogLevel(log4net.Core.Level.Error);
 
         Debug.Assert(!Global.IsInUnitTest);
         var engine = new EngineBuilder(text, "Cpu").Engine;
@@ -391,34 +391,52 @@ class Tester
         var counter = 0;
         Global.SegmentStatusChangedSubject.Subscribe(ssc =>
         {
-            if (ssc.Segment.QualifiedName == "L_F_Main" && ssc.Status == Status4.Finished)
+            if (ssc.Segment.QualifiedName == "L_F_Main")
             {
-                Global.Logger.Info("-------------------------- End of Main segment");
-
-                //Task.Run(async () =>
-                //{
-                //    await Task.Delay(300);
-                //    engine.Model.Print();
-                //});
-
-                if (counter++ < 1000000)
+                if (ssc.Status == Status4.Finished)
                 {
-                    Task.Run(() =>
-                    {
-                        Global.Logger.Warn($"-------------------------- [{counter}] After finishing Main segment");
-                        //engine.Model.Print();
-
-                        Global.Logger.Info($"--- [{counter}] Resetting Main segment");
-                        opc.Write(resetTag, true);
-
-                        Global.Logger.Info($"-------------------------- [{counter}] After resetting Main segment");
-                        //engine.Model.Print();
-
-                        Global.Logger.Info($"--- [{counter}] Starting Main segment");
-                        opc.Write(startTag, true);
-                        //opc.Write("Auto_L_F", true);
-                    });
+                    if (counter++ % 100 == 0)
+                        Console.WriteLine($"-------------------------- [{counter}] After finishing Main segment");
+                    opc.Write(resetTag, true);
                 }
+                else if (ssc.Status == Status4.Ready)
+                {
+                    opc.Write(startTag, true);
+                }
+                //Global.Logger.Info("-------------------------- End of Main segment");
+
+                ////Task.Run(async () =>
+                ////{
+                ////    await Task.Delay(300);
+                ////    engine.Model.Print();
+                ////});
+
+                //if (counter++ < 1000000)
+                //{
+                //    Task.Run(async () =>
+                //    {
+                //        await Task.Delay(2);
+                //        Console.WriteLine($"-------------------------- [{counter}] After finishing Main segment");
+                //        opc.Write(resetTag, true);
+                //        opc.Write(startTag, true);
+                //    });
+
+                //    //Task.Run(() =>
+                //    //{
+                //    //    Global.Logger.Error($"-------------------------- [{counter}] After finishing Main segment");
+                //    //    //engine.Model.Print();
+
+                //    //    Global.Logger.Info($"--- [{counter}] Resetting Main segment");
+                //    //    opc.Write(resetTag, true);
+
+                //    //    Global.Logger.Info($"-------------------------- [{counter}] After resetting Main segment");
+                //    //    //engine.Model.Print();
+
+                //    //    Global.Logger.Info($"--- [{counter}] Starting Main segment");
+                //    //    opc.Write(startTag, true);
+                //    //    //opc.Write("Auto_L_F", true);
+                //    //});
+                //}
             }
         });
 

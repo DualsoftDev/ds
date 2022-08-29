@@ -23,14 +23,14 @@ public static class CpuExtensionQueueing
             cpu.DbgThreadId = Thread.CurrentThread.ManagedThreadId;
             Global.Logger.Debug($"\tRunning {cpu.ToText()}");
 
-            cpu.Queue.CollectionChanged += (s, e) =>
+            cpu.Queue.Added += () =>
             {
                 waitHandle.Set();
             };
 
             while (!disposable.IsDisposed && cpu.Running)
             {
-                waitHandle.WaitOne(TimeSpan.FromMilliseconds(100));
+                waitHandle.WaitOne(TimeSpan.FromMilliseconds(50));
                 while (q.Count > 0 && cpu.Running)
                 {
                     cpu.ProcessingQueue = true;

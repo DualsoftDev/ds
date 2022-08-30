@@ -169,6 +169,7 @@ public class OpcBroker
             Write("StartActual_B_F_Vp", false);
             Write("StartActual_A_F_Vm", false);
             Write("StartActual_B_F_Vm", false);
+            Conn.WriteRandomTags(LsBits.ToArray());
             Conn.Subject
                 .OfType<TagValueChangedEvent>()
                 .Subscribe(evt =>

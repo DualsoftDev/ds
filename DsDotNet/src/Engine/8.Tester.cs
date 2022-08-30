@@ -18,12 +18,16 @@ class Tester
 {
     static string CreateCylinder(string name) => $"[sys] {name} =\r\n" + @"{
     [flow] F = {
-        Vp > Pp > Sp;
-        Vm > Pm > Sm;
+        Plus <||> Minus;
+        
+        //Vp > Pp > Sp;
+        //Vm > Pm > Sm;
 
-        Vp |> Pm |> Sp;
-        Vm |> Pp |> Sm;
-        Vp <||> Vm;
+        ////Vp |> Pm |> Sp;
+        ////Vm |> Pp |> Sm;
+        //Pp <| Pm |> Sp;
+        //Pm <| Pp |> Sm;
+        //Vp <||> Vm;
     }
 }";
 
@@ -324,31 +328,42 @@ class Tester
         var text = @"
 [sys] L = {
     [task] T = {
-        Ap = {A.F.Vp ~ A.F.Sp}
-        Am = {A.F.Vm ~ A.F.Sm}
-        Bp = {B.F.Vp ~ B.F.Sp}
-        Bm = {B.F.Vm ~ B.F.Sm}
+        Ap = {A.F.Plus ~ A.F.Plus}
+        Am = {A.F.Minus ~ A.F.Minus}
+        Bp = {B.F.Plus ~ B.F.Plus}
+        Bm = {B.F.Minus ~ B.F.Minus}
+        Cp = {C.F.Plus ~ C.F.Plus}
+        Cm = {C.F.Minus ~ C.F.Minus}
+        Dp = {D.F.Plus ~ D.F.Plus}
+        Dm = {D.F.Minus ~ D.F.Minus}
     }
     [flow] F = {
+        Main > Main2;
+        Main <||> Main2;
         Main = {
             // 정보로서의 Call 상호 리셋
             T.Ap <||> T.Am;
             T.Bp <||> T.Bm;
-            T.Ap > T.Am, T.Bp > T.Bm;
+            T.Ap > T.Bp > T.Bm > T.Am;
+        }
+        Main2 = {
+            // 정보로서의 Call 상호 리셋
+            T.Cp <||> T.Cm;
+            T.Dp <||> T.Dm;
+            T.Cp > T.Cm, T.Dp > T.Dm;
         }
     }
 }
 
 [addresses] = {
-	//L.F.Main = (%0, %0,);
-	A.F.Vp = (%QX0.1.3, ,);
-	A.F.Vm = (%QX0.1.2, ,);
-	B.F.Vp = (%QX0.1.5, ,);
-	B.F.Vm = (%QX0.1.4, ,);
-	A.F.Sp = (, , %IX0.0.5);
-	A.F.Sm = (, , %IX0.0.4);
-	B.F.Sp = (, , %IX0.0.7);
-	B.F.Sm = (, , %IX0.0.6);
+	A.F.Plus = (%QX0.1.3, , %IX0.0.5);
+	A.F.Minus = (%QX0.1.2, , %IX0.0.4);
+	B.F.Plus = (%QX0.1.5, , %IX0.0.7);
+	B.F.Minus = (%QX0.1.4, , %IX0.0.6);
+	C.F.Plus = (%QX0.1.7, , %IX0.0.9);
+	C.F.Minus = (%QX0.1.6, , %IX0.0.8);
+	D.F.Plus = (%QX0.1.9, , %IX0.0.11);
+	D.F.Minus = (%QX0.1.8, , %IX0.0.10);
 }
 [cpus] AllCpus = {
     [cpu] Cpu = {
@@ -360,8 +375,14 @@ class Tester
     [cpu] BCpu = {
         B.F;
     }
+    [cpu] CCpu = {
+        C.F;
+    }
+    [cpu] DCpu = {
+        D.F;
+    }
 }
-" + CreateCylinder("A") + "\r\n" + CreateCylinder("B");
+" + CreateCylinder("A") + "\r\n" + CreateCylinder("B") + CreateCylinder("C") + "\r\n" + CreateCylinder("D");
 
         //Log4NetHelper.ChangeLogLevel(log4net.Core.Level.Error);
 
@@ -374,16 +395,22 @@ class Tester
         {
             var cds = engine.Cpu.RootFlows.SelectMany(f => f.ChildVertices);
             var m = cds.OfType<SegmentBase>().FirstOrDefault(c => c.Name == "Main");
+            var m2 = cds.OfType<SegmentBase>().FirstOrDefault(c => c.Name == "Main2");
 
             // test origin
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
             var t = new GraphProgressSupportUtil.ProgressInfo(m.GraphInfo);
+            var t2 = new GraphProgressSupportUtil.ProgressInfo(m2.GraphInfo);
             stopwatch.Stop();
             Console.WriteLine("time : " + stopwatch.ElapsedMilliseconds + "ms");
             t.PrintIndexedChildren();
             t.PrintPreCaculatedTargets();
             t.PrintOrigin();
+
+            t2.PrintIndexedChildren();
+            t2.PrintPreCaculatedTargets();
+            t2.PrintOrigin();
         }
 
         var opc = engine.Opc;
@@ -395,17 +422,18 @@ class Tester
         {
             if (ssc.Segment.QualifiedName == "L_F_Main")
             {
-                if (ssc.Status == Status4.Finished)
-                {
-                    if (counter++ % 100 == 0)
-                    {
-                        Console.WriteLine($"[{counter}] After finishing Main segment");
-                        //Global.Logger.Info($"-------------------------- [{counter}] After finishing Main segment");
-                        //engine.Model.Print();
-                    }
-                    opc.Write(resetTag, true);
-                }
-                else if (ssc.Status == Status4.Ready)
+                //if (ssc.Status == Status4.Finished)
+                //{
+                //    if (counter++ % 100 == 0)
+                //    {
+                //        Console.WriteLine($"[{counter}] After finishing Main segment");
+                //        //Global.Logger.Info($"-------------------------- [{counter}] After finishing Main segment");
+                //        //engine.Model.Print();
+                //    }
+                //    opc.Write(resetTag, true);
+                //}
+                //else 
+                if (ssc.Status == Status4.Ready)
                 {
                     //Thread.Sleep(500);
                     opc.Write(startTag, true);
@@ -432,19 +460,29 @@ class Tester
                     var n = bc.Bit.GetName();
                     var val = bc.Bit.Value;
                     var monitors = new[] {
-                        "StartPlan_A_F_Vp", "StartPlan_B_F_Vp", "StartPlan_A_F_Vm", "StartPlan_B_F_Vm",
-                        "EndPlan_A_F_Sp", "EndPlan_A_F_Sm", "EndPlan_B_F_Sp", "EndPlan_B_F_Sm" };
+                        "StartPlan_A_F_Plus", "StartPlan_B_F_Plus", "StartPlan_A_F_Minus", "StartPlan_B_F_Minus",
+                        "EndPlan_A_F_Plus", "EndPlan_A_F_Minus", "EndPlan_B_F_Plus", "EndPlan_B_F_Minus",
+                        "StartPlan_C_F_Plus", "StartPlan_D_F_Plus", "StartPlan_C_F_Minus", "StartPlan_D_F_Minus",
+                        "EndPlan_C_F_Plus", "EndPlan_D_F_Minus", "EndPlan_C_F_Plus", "EndPlan_D_F_Minus"};
                     if (monitors.Contains(n))
                     {
                         Global.Logger.Debug($"Plan for TAG {n} value={val}");
-                        if (n == "StartPlan_A_F_Vp")
-                            opc.Write("StartActual_A_F_Vp", val);
-                        else if (n == "StartPlan_B_F_Vp")
-                            opc.Write("StartActual_B_F_Vp", val);
-                        else if (n == "StartPlan_A_F_Vm")
-                            opc.Write("StartActual_A_F_Vm", val);
-                        else if (n == "StartPlan_B_F_Vm")
-                            opc.Write("StartActual_B_F_Vm", val);
+                        if (n == "StartPlan_A_F_Plus")
+                            opc.Write("StartActual_A_F_Plus", val);
+                        else if (n == "StartPlan_B_F_Plus")
+                            opc.Write("StartActual_B_F_Plus", val);
+                        else if (n == "StartPlan_A_F_Minus")
+                            opc.Write("StartActual_A_F_Minus", val);
+                        else if (n == "StartPlan_B_F_Minus")
+                            opc.Write("StartActual_B_F_Minus", val);
+                        else if (n == "StartPlan_C_F_Plus")
+                            opc.Write("StartActual_C_F_Plus", val);
+                        else if (n == "StartPlan_D_F_Plus")
+                            opc.Write("StartActual_D_F_Plus", val);
+                        else if (n == "StartPlan_C_F_Minus")
+                            opc.Write("StartActual_C_F_Minus", val);
+                        else if (n == "StartPlan_D_F_Minus")
+                            opc.Write("StartActual_D_F_Minus", val);
 
                         //else if (n == "EndPlan_A_F_Sp")
                         //    opc.Write("EndActual_A_F_Sp", val);
@@ -457,7 +495,6 @@ class Tester
                     }
                 });
         }
-
 
         Debug.Assert(engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(startTag));
         opc.Write(startTag, true);

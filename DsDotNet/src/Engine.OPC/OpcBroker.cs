@@ -109,7 +109,6 @@ public class OpcBroker
 
     public void Write(string tagName, bool value)
     {
-
         // unit test 가 아니라면 무조건 실행되어야 할 부분.  unit test 에서만 생략 가능
         void doWrite()
         {
@@ -159,16 +158,28 @@ public class OpcBroker
         }
     }
 
+    public void StreamData()
+    {   
+        Core.Global.BitChangedSubject
+            .Subscribe(bc =>
+            {
+                var n = bc.Bit.GetName();
+                var val = bc.Bit.Value;
+                Console.WriteLine($"name : {n}, value : {val}");
+            }
+        );
+    }
+
     public async Task CommunicationPLC()
     {
         Conn.PerRequestDelay = 1;
         if (Conn.Connect())
         {
             Conn.AddMonitoringTags(LsBits);
-            Write("StartActual_A_F_Vp", false);
-            Write("StartActual_B_F_Vp", false);
-            Write("StartActual_A_F_Vm", false);
-            Write("StartActual_B_F_Vm", false);
+            Write("StartActual_A_F_Plus", false);
+            Write("StartActual_B_F_Plus", false);
+            Write("StartActual_A_F_Minus", false);
+            Write("StartActual_B_F_Minus", false);
             Conn.WriteRandomTags(LsBits.ToArray());
             Conn.Subject
                 .OfType<TagValueChangedEvent>()

@@ -33,6 +33,7 @@ public class EngineBuilder
 
         Engine = new ENGINE(Model, Opc, Cpu);
         Cpu.Engine = Engine;
+        _ = Task.Run(() => { Opc.StreamData(); });
     }
 
     /// <summary> Used for Unit test only.</summary>

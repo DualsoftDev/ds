@@ -161,10 +161,14 @@ public class OpcBroker
 
     public async Task CommunicationPLC()
     {
-        Conn.PerRequestDelay = 20;
+        Conn.PerRequestDelay = 1;
         if (Conn.Connect())
         {
             Conn.AddMonitoringTags(LsBits);
+            //Write("EndActual_A_F_Vp", false);
+            //Write("EndActual_B_F_Vp", false);
+            //Write("EndActual_A_F_Vm", true);
+            //Write("EndActual_B_F_Vm", true);
             Conn.Subject
                 .OfType<TagValueChangedEvent>()
                 .Subscribe(evt =>
@@ -173,6 +177,7 @@ public class OpcBroker
                         Read(addrToTag[tag.Name], (bool)tag.Value);
                     }
                 );
+            Console.WriteLine("Ready!");
             await Conn.StartDataExchangeLoopAsync();
         }
     }

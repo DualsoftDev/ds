@@ -337,16 +337,17 @@ class Tester
         }
     }
 }
+
 [addresses] = {
 	//L.F.Main = (%0, %0,);
-	A.F.Vp = (%MX901, ,);
-	A.F.Vm = (%MX902, ,);
-	B.F.Vp = (%MX903, ,);
-	B.F.Vm = (%MX904, ,);
-	A.F.Sp = (, , %MX905);
-	A.F.Sm = (, , %MX906);
-	B.F.Sp = (, , %MX907);
-	B.F.Sm = (, , %MX908);
+	A.F.Vp = (%QX0.1.3, ,);
+	A.F.Vm = (%QX0.1.2, ,);
+	B.F.Vp = (%QX0.1.5, ,);
+	B.F.Vm = (%QX0.1.4, ,);
+	A.F.Sp = (, , %IX0.0.5);
+	A.F.Sm = (, , %IX0.0.4);
+	B.F.Sp = (, , %IX0.0.7);
+	B.F.Sm = (, , %IX0.0.6);
 }
 [cpus] AllCpus = {
     [cpu] Cpu = {
@@ -361,7 +362,7 @@ class Tester
 }
 " + CreateCylinder("A") + "\r\n" + CreateCylinder("B");
 
-        Log4NetHelper.ChangeLogLevel(log4net.Core.Level.Error);
+        //Log4NetHelper.ChangeLogLevel(log4net.Core.Level.Error);
 
         Debug.Assert(!Global.IsInUnitTest);
         var engine = new EngineBuilder(text, "Cpu").Engine;
@@ -389,26 +390,26 @@ class Tester
         var startTag = "StartPlan_L_F_Main";
         var resetTag = "ResetPlan_L_F_Main";
         var counter = 0;
-        Global.SegmentStatusChangedSubject.Subscribe(ssc =>
-        {
-            if (ssc.Segment.QualifiedName == "L_F_Main")
-            {
-                if (ssc.Status == Status4.Finished)
-                {
-                    if (counter++ % 100 == 0)
-                    {
-                        Console.WriteLine($"[{counter}] After finishing Main segment");
-                        //Global.Logger.Info($"-------------------------- [{counter}] After finishing Main segment");
-                        //engine.Model.Print();
-                    }
-                    opc.Write(resetTag, true);
-                }
-                else if (ssc.Status == Status4.Ready)
-                {
-                    opc.Write(startTag, true);
-                }
-            }
-        });
+        //Global.SegmentStatusChangedSubject.Subscribe(ssc =>
+        //{
+        //    if (ssc.Segment.QualifiedName == "L_F_Main")
+        //    {
+        //        if (ssc.Status == Status4.Finished)
+        //        {
+        //            if (counter++ % 100 == 0)
+        //            {
+        //                Console.WriteLine($"[{counter}] After finishing Main segment");
+        //                //Global.Logger.Info($"-------------------------- [{counter}] After finishing Main segment");
+        //                //engine.Model.Print();
+        //            }
+        //            opc.Write(resetTag, true);
+        //        }
+        //        else if (ssc.Status == Status4.Ready)
+        //        {
+        //            opc.Write(startTag, true);
+        //        }
+        //    }
+        //});
 
         var hasAddress =
             engine.Model.Cpus
@@ -443,22 +444,22 @@ class Tester
                         else if (n == "StartPlan_B_F_Vm")
                             opc.Write("StartActual_B_F_Vm", val);
 
-                        else if (n == "EndPlan_A_F_Sp")
-                            opc.Write("EndActual_A_F_Sp", val);
-                        else if (n == "EndPlan_A_F_Sm")
-                            opc.Write("EndActual_A_F_Sm", val);
-                        else if (n == "EndPlan_B_F_Sp")
-                            opc.Write("EndActual_B_F_Sp", val);
-                        else if (n == "EndPlan_B_F_Sm")
-                            opc.Write("EndActual_B_F_Sm", val);
+                        //else if (n == "EndPlan_A_F_Sp")
+                        //    opc.Write("EndActual_A_F_Sp", val);
+                        //else if (n == "EndPlan_A_F_Sm")
+                        //    opc.Write("EndActual_A_F_Sm", val);
+                        //else if (n == "EndPlan_B_F_Sp")
+                        //    opc.Write("EndActual_B_F_Sp", val);
+                        //else if (n == "EndPlan_B_F_Sm")
+                        //    opc.Write("EndActual_B_F_Sm", val);
                     }
                 });
         }
 
 
         Debug.Assert(engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(startTag));
-        //opc.Write(startTag, true);
-        //opc.Write("Auto_L_F", true);
+        opc.Write(startTag, true);
+        opc.Write("Auto_L_F", true);
 
         engine.Wait();
     }

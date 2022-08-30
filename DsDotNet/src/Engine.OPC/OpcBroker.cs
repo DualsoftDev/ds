@@ -165,10 +165,10 @@ public class OpcBroker
         if (Conn.Connect())
         {
             Conn.AddMonitoringTags(LsBits);
-            //Write("EndActual_A_F_Vp", false);
-            //Write("EndActual_B_F_Vp", false);
-            //Write("EndActual_A_F_Vm", true);
-            //Write("EndActual_B_F_Vm", true);
+            Write("StartActual_A_F_Vp", false);
+            Write("StartActual_B_F_Vp", false);
+            Write("StartActual_A_F_Vm", false);
+            Write("StartActual_B_F_Vm", false);
             Conn.Subject
                 .OfType<TagValueChangedEvent>()
                 .Subscribe(evt =>

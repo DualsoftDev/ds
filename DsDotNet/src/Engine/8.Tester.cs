@@ -390,26 +390,26 @@ class Tester
         var startTag = "StartPlan_L_F_Main";
         var resetTag = "ResetPlan_L_F_Main";
         var counter = 0;
-        //Global.SegmentStatusChangedSubject.Subscribe(ssc =>
-        //{
-        //    if (ssc.Segment.QualifiedName == "L_F_Main")
-        //    {
-        //        if (ssc.Status == Status4.Finished)
-        //        {
-        //            if (counter++ % 100 == 0)
-        //            {
-        //                Console.WriteLine($"[{counter}] After finishing Main segment");
-        //                //Global.Logger.Info($"-------------------------- [{counter}] After finishing Main segment");
-        //                //engine.Model.Print();
-        //            }
-        //            opc.Write(resetTag, true);
-        //        }
-        //        else if (ssc.Status == Status4.Ready)
-        //        {
-        //            opc.Write(startTag, true);
-        //        }
-        //    }
-        //});
+        Global.SegmentStatusChangedSubject.Subscribe(ssc =>
+        {
+            if (ssc.Segment.QualifiedName == "L_F_Main")
+            {
+                if (ssc.Status == Status4.Finished)
+                {
+                    if (counter++ % 100 == 0)
+                    {
+                        Console.WriteLine($"[{counter}] After finishing Main segment");
+                        //Global.Logger.Info($"-------------------------- [{counter}] After finishing Main segment");
+                        //engine.Model.Print();
+                    }
+                    opc.Write(resetTag, true);
+                }
+                else if (ssc.Status == Status4.Ready)
+                {
+                    opc.Write(startTag, true);
+                }
+            }
+        });
 
         var hasAddress =
             engine.Model.Cpus

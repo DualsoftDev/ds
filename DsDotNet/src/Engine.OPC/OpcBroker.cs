@@ -175,7 +175,8 @@ public class OpcBroker
                 .Subscribe(evt =>
                     {
                         var tag = (LsTag)evt.Tag;
-                        Read(addrToTag[tag.Name], (bool)tag.Value);
+                        if (tag.Name[1] != 'Q')
+                            Read(addrToTag[tag.Name], (bool)tag.Value);
                     }
                 );
             Console.WriteLine("Ready!");

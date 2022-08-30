@@ -1,4 +1,5 @@
 using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Engine.Graph;
 using Engine.Runner;
@@ -406,6 +407,7 @@ class Tester
                 }
                 else if (ssc.Status == Status4.Ready)
                 {
+                    //Thread.Sleep(500);
                     opc.Write(startTag, true);
                 }
             }

@@ -125,8 +125,8 @@ module FsSegmentModule =
                         | 's', Status4.Homing, true ->      // homing 중에 start port 가 켜진 상태
                             ()
                         | _ ->
-                            logWarn $"UNKNOWN: {n} status {state} duplicated on port {bit.GetName()}={value} by {cause}"
-                            assert(false)
+                            //logWarn $"UNKNOWN: {n} status {state} duplicated on port {bit.GetName()}={value} by {cause}"
+                            //assert(false)
                             ()
                     else
                         logInfo $"[{n}] Segment status : {state} {cause}"

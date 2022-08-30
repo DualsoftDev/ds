@@ -172,14 +172,18 @@ public class OpcBroker
 
     public async Task CommunicationPLC()
     {
-        Conn.PerRequestDelay = 1;
+        Conn.PerRequestDelay = 20;
         if (Conn.Connect())
         {
             Conn.AddMonitoringTags(LsBits);
             Write("StartActual_A_F_Plus", false);
             Write("StartActual_B_F_Plus", false);
+            Write("StartActual_C_F_Plus", false);
+            Write("StartActual_D_F_Plus", false);
             Write("StartActual_A_F_Minus", false);
             Write("StartActual_B_F_Minus", false);
+            Write("StartActual_C_F_Minus", false);
+            Write("StartActual_D_F_Minus", false);
             Conn.WriteRandomTags(LsBits.ToArray());
             Conn.Subject
                 .OfType<TagValueChangedEvent>()
@@ -187,7 +191,9 @@ public class OpcBroker
                     {
                         var tag = (LsTag)evt.Tag;
                         if (tag.Name[1] != 'Q')
+                        {
                             Read(addrToTag[tag.Name], (bool)tag.Value);
+                        }
                     }
                 );
             Console.WriteLine("Ready!");

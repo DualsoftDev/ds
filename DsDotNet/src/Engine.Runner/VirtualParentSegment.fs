@@ -165,9 +165,6 @@ module VirtualParentSegmentModule =
                         | Status4.Ready, true ->
                             logInfo $"외부에서 내부 target {x.Target.Name} 실행 감지"
 
-                        | Status4.Ready, false ->
-                            ()
-
                         | Status4.Going, false ->
                             logInfo $"Children originated before going {x.Target.Name}"
 

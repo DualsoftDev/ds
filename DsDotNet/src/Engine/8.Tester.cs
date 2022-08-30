@@ -328,18 +328,18 @@ class Tester
         var text = @"
 [sys] L = {
     [task] T = {
-        Ap = {A.F.Plus ~ A.F.Plus}
+        Ap = {A.F.Plus  ~ A.F.Plus }
         Am = {A.F.Minus ~ A.F.Minus}
-        Bp = {B.F.Plus ~ B.F.Plus}
+        Bp = {B.F.Plus  ~ B.F.Plus }
         Bm = {B.F.Minus ~ B.F.Minus}
-        Cp = {C.F.Plus ~ C.F.Plus}
+        Cp = {C.F.Plus  ~ C.F.Plus }
         Cm = {C.F.Minus ~ C.F.Minus}
-        Dp = {D.F.Plus ~ D.F.Plus}
+        Dp = {D.F.Plus  ~ D.F.Plus }
         Dm = {D.F.Minus ~ D.F.Minus}
     }
     [flow] F = {
         Main > Main2;
-        Main <||> Main2;
+        //Main <| Main2;
         Main = {
             // 정보로서의 Call 상호 리셋
             T.Ap <||> T.Am;
@@ -356,13 +356,13 @@ class Tester
 }
 
 [addresses] = {
-	A.F.Plus = (%QX0.1.3, , %IX0.0.5);
+	A.F.Plus  = (%QX0.1.3, , %IX0.0.5);
 	A.F.Minus = (%QX0.1.2, , %IX0.0.4);
-	B.F.Plus = (%QX0.1.5, , %IX0.0.7);
+	B.F.Plus  = (%QX0.1.5, , %IX0.0.7);
 	B.F.Minus = (%QX0.1.4, , %IX0.0.6);
-	C.F.Plus = (%QX0.1.7, , %IX0.0.9);
+	C.F.Plus  = (%QX0.1.7, , %IX0.0.9);
 	C.F.Minus = (%QX0.1.6, , %IX0.0.8);
-	D.F.Plus = (%QX0.1.9, , %IX0.0.11);
+	D.F.Plus  = (%QX0.1.9, , %IX0.0.11);
 	D.F.Minus = (%QX0.1.8, , %IX0.0.10);
 }
 [cpus] AllCpus = {
@@ -416,30 +416,42 @@ class Tester
         var opc = engine.Opc;
 
         var startTag = "StartPlan_L_F_Main";
-        var resetTag = "ResetPlan_L_F_Main";
+        var resetTag = "ResetPlan_L_F_Main2";
         var counter = 0;
-        Global.SegmentStatusChangedSubject.Subscribe(ssc =>
-        {
-            if (ssc.Segment.QualifiedName == "L_F_Main")
-            {
-                //if (ssc.Status == Status4.Finished)
-                //{
-                //    if (counter++ % 100 == 0)
-                //    {
-                //        Console.WriteLine($"[{counter}] After finishing Main segment");
-                //        //Global.Logger.Info($"-------------------------- [{counter}] After finishing Main segment");
-                //        //engine.Model.Print();
-                //    }
-                //    opc.Write(resetTag, true);
-                //}
-                //else 
-                if (ssc.Status == Status4.Ready)
-                {
-                    //Thread.Sleep(500);
-                    opc.Write(startTag, true);
-                }
-            }
-        });
+        //Global.SegmentStatusChangedSubject.Subscribe(ssc =>
+        //{
+        //    if (ssc.Segment.QualifiedName == "L_F_Main2")
+        //    {
+        //        if (ssc.Status == Status4.Finished)
+        //        {
+        //            if (counter++ % 100 == 0)
+        //            {
+        //                Console.WriteLine($"[{counter}] After finishing Main segment");
+        //                //Global.Logger.Info($"-------------------------- [{counter}] After finishing Main segment");
+        //                //engine.Model.Print();
+        //            }
+        //            opc.Write(resetTag, true);
+        //        }
+        //    }
+        //    if (ssc.Segment.QualifiedName == "L_F_Main2")
+        //    {
+        //        if (ssc.Status == Status4.Finished)
+        //        {
+        //            if (counter++ % 100 == 0)
+        //            {
+        //                Console.WriteLine($"[{counter}] After finishing Main segment");
+        //                //Global.Logger.Info($"-------------------------- [{counter}] After finishing Main segment");
+        //                //engine.Model.Print();
+        //            }
+        //            opc.Write(resetTag, true);
+        //        }
+        //        else if (ssc.Status == Status4.Ready)
+        //        {
+        //            //Thread.Sleep(500);
+        //            opc.Write(startTag, true);
+        //        }
+        //    }
+        //});
 
         var hasAddress =
             engine.Model.Cpus
@@ -460,10 +472,10 @@ class Tester
                     var n = bc.Bit.GetName();
                     var val = bc.Bit.Value;
                     var monitors = new[] {
-                        "StartPlan_A_F_Plus", "StartPlan_B_F_Plus", "StartPlan_A_F_Minus", "StartPlan_B_F_Minus",
+                        "StartPlan_A_F_Plus", "StartPlan_A_F_Minus", "StartPlan_B_F_Plus", "StartPlan_B_F_Minus",
                         "EndPlan_A_F_Plus", "EndPlan_A_F_Minus", "EndPlan_B_F_Plus", "EndPlan_B_F_Minus",
-                        "StartPlan_C_F_Plus", "StartPlan_D_F_Plus", "StartPlan_C_F_Minus", "StartPlan_D_F_Minus",
-                        "EndPlan_C_F_Plus", "EndPlan_D_F_Minus", "EndPlan_C_F_Plus", "EndPlan_D_F_Minus"};
+                        "StartPlan_C_F_Plus", "StartPlan_C_F_Minus", "StartPlan_D_F_Plus", "StartPlan_D_F_Minus",
+                        "EndPlan_C_F_Plus", "EndPlan_C_F_Minus", "EndPlan_D_F_Plus", "EndPlan_D_F_Minus" };
                     if (monitors.Contains(n))
                     {
                         Global.Logger.Debug($"Plan for TAG {n} value={val}");
@@ -483,6 +495,8 @@ class Tester
                             opc.Write("StartActual_C_F_Minus", val);
                         else if (n == "StartPlan_D_F_Minus")
                             opc.Write("StartActual_D_F_Minus", val);
+                    
+                        Thread.Sleep(500);
 
                         //else if (n == "EndPlan_A_F_Sp")
                         //    opc.Write("EndActual_A_F_Sp", val);

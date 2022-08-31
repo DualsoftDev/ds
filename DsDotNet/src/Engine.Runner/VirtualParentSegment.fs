@@ -217,7 +217,7 @@ module VirtualParentSegmentModule =
                             | Status4.Going    ->
 
                                     
-                                write(x.Going, true, $"{n} GOING 시작")
+                                write(x.Going, true, $"{n} VPS GOING 시작")
                                 if triggerTargetStart then
                                     assert(childStatus = Status4.Ready || cpu.ProcessingQueue);
                                     if childStatus = Status4.Ready then

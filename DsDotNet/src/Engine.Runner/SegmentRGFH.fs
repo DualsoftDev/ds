@@ -98,7 +98,7 @@ module internal SegmentRGFHModule =
         let write:BitWriter = getBitWriter writer onError
 
         if isChildrenOrigin(seg) then
-            write(seg.Going, true, $"{seg.QualifiedName} GOING 시작")
+            write(seg.Going, true, $"{seg.QualifiedName} Segment GOING 시작")
             if seg.Children.Any() then
                 assert(not <| goingSubscriptions.ContainsKey(seg))
                 let childRxTags = seg.Children.selectMany(fun ch -> ch.TagsEnd).ToArray()
@@ -183,7 +183,7 @@ module internal SegmentRGFHModule =
         [|
             BitChange(seg.Going, false, $"{seg.QualifiedName} FINISH")
             BitChange(seg.TagPEnd, true, $"Finishing {seg.QualifiedName}")
-            BitChange(seg.TagPStart, false, $"Finishing {seg.QualifiedName}")
+            //BitChange(seg.TagPStart, false, $"Finishing {seg.QualifiedName}")
         |] |> writer
 
     let procHoming(segment:SegmentBase, writer:ChangeWriter, onError:ExceptionHandler) =

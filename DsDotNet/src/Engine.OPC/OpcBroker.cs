@@ -23,6 +23,7 @@ public class OpcTag : Bit, IBitReadWritable
 public class OpcBroker
 {
     Dictionary<string, OpcTag> _tagDic = new Dictionary<string, OpcTag>();
+    public OpcTag GetTag(string name) => _tagDic.ContainsKey(name) ? _tagDic[name] : null;
     public IEnumerable<string> Tags => _tagDic.Values.Select(ot => ot.Name);
 
     CompositeDisposable _disposables = new();

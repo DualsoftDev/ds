@@ -53,5 +53,13 @@ public static class Global
 
     /// <summary> Do nothing </summary>
     public static void NoOp() {}
+    public static void Verify(string message, bool condition)
+    {
+        if (!condition)
+        {
+            Global.Logger.Error(message);
+            throw new Exception(message);
+        }
+    }
 }
 

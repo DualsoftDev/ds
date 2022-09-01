@@ -177,7 +177,7 @@ module VirtualParentSegmentModule =
                                 if bit = x.PortS then 's'
                                 else if bit = x.PortR then 'r'
                                 else if bit = x.PortE then 'e'
-                                else failwith "ERROR"
+                                else failwithlog "ERROR"
                             match bitMatch, state, on with
                             //| 's', Status4.Finished, false -> // finish 도중에 start port 꺼져서 finish 완료되려는 시점
                             //    ()
@@ -200,7 +200,6 @@ module VirtualParentSegmentModule =
 
                             noop()
                         else
-                            oldStatus <- Some state
                             logInfo $"[{n}] VPS Segment status : {state} by {bit.Name}={on}"
 
                             if x.Going.Value && state <> Status4.Going then
@@ -212,6 +211,12 @@ module VirtualParentSegmentModule =
 
 
                             let childStatus = x.Target.Status
+
+                            match state with
+                            | Status4.Going
+                            | Status4.Homing -> oldStatus <- Some state
+                            | _ -> ()
+
 
                             match state with
                             | Status4.Ready    ->
@@ -253,13 +258,18 @@ module VirtualParentSegmentModule =
                                 if triggerTargetReset then
                                     assert(not targetStartTag.Value)        // 일반적으로... 
                                     if childStatus = Status4.Going then
-                                        failwith $"Something bad happend?  trying to reset child while {x.Target.Name}={childStatus}"
+                                        failwithlog $"Something bad happend?  trying to reset child while {x.Target.Name}={childStatus}"
 
                                     write(targetResetTag, true, $"{n} HOMING 으로 인한 {x.Target.Name} reset 켜기")
 
 
                             | _ ->
-                                failwith "Unexpected"
+                                failwithlog "Unexpected"
+
+                            match state with
+                            | Status4.Ready
+                            | Status4.Finished -> oldStatus <- Some state
+                            | _ -> ()
                         ()
                 )
 

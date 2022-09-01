@@ -98,7 +98,7 @@ module FsSegmentModule =
                             if bit = x.PortS then 's'
                             else if bit = x.PortR then 'r'
                             else if bit = x.PortE then 'e'
-                            else failwith "ERROR"
+                            else failwithlog "ERROR"
 
                         match bitMatch, state, value with
                         | 's', Status4.Finished, false -> // finish 도중에 start port 꺼져서 finish 완료되려는 시점
@@ -155,14 +155,23 @@ module FsSegmentModule =
 
                         async {
                             match state with
+                            | Status4.Going
+                            | Status4.Homing -> oldStatus <- Some state
+                            | _ -> ()
+
+                            match state with
                             | Status4.Ready -> doReady(x, writer, onError)
                             | Status4.Going -> doGoing(x, writer, onError)
                             | Status4.Finished -> doFinish(x, writer, onError)
                             | Status4.Homing -> doHoming(x, writer, onError)
                             | _ ->
-                                failwith "Unexpected"
+                                failwithlog "Unexpected"
 
-                            oldStatus <- Some state
+                            match state with
+                            | Status4.Ready
+                            | Status4.Finished -> oldStatus <- Some state
+                            | _ -> ()
+
                         } |> Async.Start
                 )
 

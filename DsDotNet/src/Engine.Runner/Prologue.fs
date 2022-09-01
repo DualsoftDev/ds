@@ -1,6 +1,7 @@
 namespace Engine.Runner
 
 open Engine.Core
+open Engine.Common.FS
 
 
 [<AutoOpen>]
@@ -35,6 +36,6 @@ module internal BitWriterModule =
                 [|  EndPortChange(ep.Plan, value, cause, onError) :> BitChange
                     if ep.Cpu.IsActive && ep.Actual <> null then
                         BitChange(ep.Actual, value, $"Active CPU endport: writing actual {ep}={value}") |]
-            | :? PortInfo -> failwith "Unexpected"
+            | :? PortInfo -> failwithlog "Unexpected"
             | _ -> [| BitChange(bit, value, cause, onError) |]
             |> writer

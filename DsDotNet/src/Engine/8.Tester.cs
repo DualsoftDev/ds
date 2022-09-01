@@ -269,13 +269,16 @@ public class Tester
             {
                 if (state == Status4.Finished)
                 {
-                    if (counter++ % 100 == 0)
-                    {
-                        Console.WriteLine($"[{counter}] After finishing Main segment");
-                        Global.Logger.Info($"-------------------------- [{counter}] After finishing Main segment");
-                        //engine.Model.Print();
-                    }
-                    //opc.Write(resetTag, true);
+                    counter++;
+                    Console.WriteLine($"[{counter}] After finishing Main segment");
+                    Global.Logger.Info($"-------------------------- [{counter}] After finishing Main segment");
+                    //if (counter++ % 10 == 0)
+                    //{
+                    //    Console.WriteLine($"[{counter}] After finishing Main segment");
+                    //    Global.Logger.Info($"-------------------------- [{counter}] After finishing Main segment");
+                    //    //engine.Model.Print();
+                    //}
+                    ////opc.Write(resetTag, true);
                 }
                 else if (ssc.Status == Status4.Ready)
                 {

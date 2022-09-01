@@ -3,6 +3,7 @@ using Engine.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,62 +14,61 @@ namespace Engine
     internal class Simulator
     {
         // e.g cmd2sensors = {("StartActual_A_F_Vp", "EndActual_A_F_Sm"), }
-        public Simulator(OpcBroker opc, IEnumerable<(string, string)> cmd2sensors, IEnumerable<(string, string)> mutualExclusives)
+        public Simulator(OpcBroker opc, IEnumerable<(string, Action<Bit, bool>)> actions)
         {
-            var random = new Random();
-            var c2sDic = new Dictionary<string, string>();
-            var mutexDic = new Dictionary<string, string>();
+            var c2sDic = new Dictionary<string, Action<Bit, bool>>();
 
-            foreach (var (command, sensor) in cmd2sensors)
-                c2sDic.Add(command, sensor);
-            foreach (var (plus, minus) in mutualExclusives)
-            {
-                mutexDic.Add(plus, minus);
-                mutexDic.Add(minus, plus);
-            }
+            foreach (var (bit, action) in actions)
+                c2sDic.Add(bit, action);
 
             Global.BitChangedSubject
+                .Where(bc => bc.Bit is Bit)
                 .Subscribe(async bc =>
                 {
-                    var n = bc.Bit.GetName();
-                    var val = bc.Bit.Value;
-
-                    if (val && mutexDic.ContainsKey(n))
-                    {
-                        var opcTag = opc.GetTag(mutexDic[n]);
-                        Debug.Assert(!opcTag.Value);
-                    }
-
+                    var bit = bc.Bit as Bit;
+                    var n = bit.GetName();
                     if (c2sDic.ContainsKey(n))
-                    {
-                        await Task.Delay(random.Next(10, 500));
-                        opc.Write(c2sDic[n], val);
-                    }
+                        c2sDic[n].Invoke(bit, bc.NewValue);
                 });
         }
 
         public static Simulator CreateFromCylinder(OpcBroker opc, IEnumerable<string> cylinderFlowNames)   // e.g {"A_F", "B_F"}
         {
-            IEnumerable<(string, string)> generateMap()
+            var random = new Random();
+            IEnumerable<(string, Action<Bit, bool>)> generateMap()
             {
                 foreach (var f in cylinderFlowNames)
                 {
-                    yield return ($"StartActual_{f}_Vp", $"EndActual_{f}_Sp");
-                    yield return ($"StartActual_{f}_Vm", $"EndActual_{f}_Sm");
+                    yield return ($"StartActual_{f}_Vp",
+                        new Action<Bit, bool>(async (bit, val) =>
+                        {
+                            var opcOpposite = opc.GetTag($"StartActual_{f}_Vm");
+                            if (val)
+                            {
+                                Debug.Assert(opcOpposite.Value == false);
+                                await Task.Delay(random.Next(5, 50));
+                                opc.Write($"EndActual_{f}_Sm", !val);
+                                await Task.Delay(random.Next(10, 500));
+                                opc.Write($"EndActual_{f}_Sp", val);
+                            }
+                        }));
+                    yield return ($"StartActual_{f}_Vm",
+                        new Action<Bit, bool>(async (bit, val) =>
+                        {
+                            var opcOpposite = opc.GetTag($"StartActual_{f}_Vp");
+                            if (val)
+                            {
+                                Debug.Assert(opcOpposite.Value == false);
+                                await Task.Delay(random.Next(5, 50));
+                                opc.Write($"EndActual_{f}_Sp", !val);
+                                await Task.Delay(random.Next(10, 500));
+                                opc.Write($"EndActual_{f}_Sm", val);
+                            }
+                        }));
                 }
             }
-            IEnumerable<(string, string)> generateExclusivesMap()
-            {
-                foreach (var f in cylinderFlowNames)
-                {
-                    yield return ($"StartActual_{f}_Vp", $"StartActual_{f}_Vm");
-                    yield return ($"EndActual_{f}_Sp", $"EndActual_{f}_Sm");
-                }
-            }
-
             var cmd2sensors = generateMap().ToArray();
-            var exclusives = generateExclusivesMap().ToArray();
-            return new Simulator(opc, cmd2sensors, exclusives);
+            return new Simulator(opc, cmd2sensors);
         }
     }
 }

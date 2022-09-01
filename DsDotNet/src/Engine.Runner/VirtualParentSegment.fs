@@ -166,7 +166,9 @@ module VirtualParentSegmentModule =
                             logInfo $"Children originated before going {x.Target.Name}"
 
                         | _ ->
-                            failwithlog $"Unknown: [{n}]{state}: Target endport => {x.Target.Name}={on}"
+                            //failwithlog $"Unknown: [{n}]{state}: Target endport => {x.Target.Name}={on}"
+                            logWarn $"Unknown: [{n}]{state}: Target endport => {x.Target.Name}={on}"
+                            ()
 
                     if notiVpsPortChange then
                         if oldStatus = Some state then

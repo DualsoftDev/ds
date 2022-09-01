@@ -153,19 +153,17 @@ module FsSegmentModule =
                         // } debug
 
 
-                        match state with
-                        | Status4.Ready -> doReady(x, writer, onError)
-                        | Status4.Going ->
-                            if Global.IsSingleThreadMode then
-                                doGoing(x, writer, onError)
-                            else
-                                async { doGoing(x, writer, onError) } |> Async.Start
-                        | Status4.Finished -> doFinish(x, writer, onError)
-                        | Status4.Homing -> doHoming(x, writer, onError)
-                        | _ ->
-                            failwith "Unexpected"
+                        async {
+                            match state with
+                            | Status4.Ready -> doReady(x, writer, onError)
+                            | Status4.Going -> doGoing(x, writer, onError)
+                            | Status4.Finished -> doFinish(x, writer, onError)
+                            | Status4.Homing -> doHoming(x, writer, onError)
+                            | _ ->
+                                failwith "Unexpected"
 
-                        oldStatus <- Some state
+                            oldStatus <- Some state
+                        } |> Async.Start
                 )
 
         //member val ProgressInfo:GraphProgressSupportUtil.ProgressInfo = null with get, set

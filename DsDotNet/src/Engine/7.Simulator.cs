@@ -37,6 +37,9 @@ namespace Engine
 
         public static Simulator CreateFromCylinder(OpcBroker opc, IEnumerable<string> cylinderFlowNames)   // e.g {"A_F", "B_F"}
         {
+            if (Global.IsControlMode)
+                throw new Exception("Simulation not supported in real control mode.");
+
             var random = new Random();
             IEnumerable<(string, Func<Bit, bool, Task>)> generateMap()
             {

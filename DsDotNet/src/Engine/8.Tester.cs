@@ -332,6 +332,205 @@ public class Tester
         engine.Wait();
     }
 
+    public static void DoSampleTestHatOnHat()
+    {
+        var text = @"
+[sys] L = {
+    [task] T = {
+        Ap = {A.F.Vp ~ A.F.Sp}
+        Am = {A.F.Vm ~ A.F.Sm}
+        Bp = {B.F.Vp ~ B.F.Sp}
+        Bm = {B.F.Vm ~ B.F.Sm}
+    }
+    [flow] F = {
+        Main = {
+            // 정보로서의 Call 상호 리셋
+            T.Ap <||> T.Am;
+            T.Bp <||> T.Bm;
+            T.Ap > T.Bp > T.Bm > T.Am;
+        }
+    }
+}
+[addresses] = {
+	L.F.Main = (%0, %1,);
+	A.F.Vp = (%Q123.23, ,);
+	A.F.Vm = (%Q123.24, ,);
+	B.F.Vp = (%Q123.25, ,);
+	B.F.Vm = (%Q123.24, ,);
+	A.F.Sp = (, , %I12.2);
+	A.F.Sm = (, , %I12.3);
+	B.F.Sp = (, , %I12.3);
+	B.F.Sm = (, , %I12.3);
+}
+[cpus] AllCpus = {
+    [cpu] Cpu = {
+        L.F;
+    }
+    [cpu] ACpu = {
+        A.F;
+    }
+    [cpu] BCpu = {
+        B.F;
+    }
+}
+" + CreateCylinder("A") + "\r\n" + CreateCylinder("B");
+
+        //Log4NetHelper.ChangeLogLevel(log4net.Core.Level.Error);
+
+        Debug.Assert(!Global.IsInUnitTest);
+        var engine = new EngineBuilder(text, "Cpu").Engine;
+        Program.Engine = engine;
+        engine.Run();
+
+        var opc = engine.Opc;
+
+        var startTag = "StartPlan_L_F_Main";
+        var resetTag = "ResetPlan_L_F_Main";
+        var counter = 0;
+        Global.SegmentStatusChangedSubject.Subscribe(ssc =>
+        {
+            var qName = ssc.Segment.QualifiedName;
+            var state = ssc.Status;
+            if (qName == "VPS_L_F_Main")
+            {
+                if (state == Status4.Finished)
+                {
+                    Global.Logger.Debug($"Resetting externally {resetTag}");
+                    opc.Write(resetTag, true);
+                }
+            }
+
+
+            if (qName == "L_F_Main")
+            {
+                if (state == Status4.Finished)
+                {
+                    counter++;
+                    //if (counter++ % 100 == 0)
+                    {
+                        Console.WriteLine($"[{counter}] After finishing Main segment");
+                        Global.Logger.Info($"-------------------------- [Progress: {counter}] After finishing Main segment");
+                        //engine.Model.Print();
+                    }
+                    //opc.Write(resetTag, true);
+                }
+                else if (ssc.Status == Status4.Ready)
+                {
+                    Console.Beep(10000, 200);
+                    Thread.Sleep(1000);
+                    opc.Write(startTag, true);
+                }
+            }
+        });
+
+        var actuals =
+            Global.TagChangeFromOpcServerSubject
+                .Where(otc => otc.TagName.Contains("Actual"))
+                ;
+
+        // https://stackoverflow.com/questions/8837665/how-to-split-an-observable-stream-in-chunks-dependent-on-second-stream
+        var oneCycleHistory =
+            actuals.Publish(otcs =>
+                otcs.Where(otc => otc.TagName == "StartActual_A_F_Vp" && otc.Value)       // a+ 출력 켜진 후부터
+                    .Select(obs =>
+                        otcs.TakeUntil(otc => otc.TagName == "StartActual_A_F_Vm" && !otc.Value) // a- 출력 꺼질때까지
+                        .StartWith(obs)
+                        .ToArray()))
+                .Merge()
+                ;
+        oneCycleHistory.Subscribe(o =>
+        {
+            Debug.Assert(o[ 0].TagName == "StartActual_A_F_Vp"   && o[ 0].Value == true);   // a+
+            Debug.Assert(o[ 1].TagName == "EndActual_A_F_Sm"     && o[ 1].Value == false);  // !A-
+            Debug.Assert(o[ 2].TagName == "EndActual_A_F_Sp"     && o[ 2].Value == true);   // A+
+            Debug.Assert(o[ 3].TagName == "StartActual_A_F_Vp"   && o[ 3].Value == false);  // !a+
+
+
+            Debug.Assert(o[ 4].TagName == "StartActual_B_F_Vp"   && o[ 4].Value == true);   // b+
+            Debug.Assert(o[ 5].TagName == "EndActual_B_F_Sm"     && o[ 5].Value == false);  // !B-
+            Debug.Assert(o[ 6].TagName == "EndActual_B_F_Sp"     && o[ 6].Value == true);   // B+
+            Debug.Assert(o[ 7].TagName == "StartActual_B_F_Vp"   && o[ 7].Value == false);  // !b+
+
+
+            Debug.Assert(o[ 8].TagName == "StartActual_B_F_Vm"   && o[ 8].Value == true);   // b-
+            Debug.Assert(o[ 9].TagName == "EndActual_B_F_Sp"     && o[ 9].Value == false);  // !B+
+            Debug.Assert(o[10].TagName == "EndActual_B_F_Sm"     && o[10].Value == true);   // B-
+            Debug.Assert(o[11].TagName == "StartActual_B_F_Vm"   && o[11].Value == false);  // !b-
+
+            Debug.Assert(o[12].TagName == "StartActual_A_F_Vm"   && o[12].Value == true);   // a-
+            Debug.Assert(o[13].TagName == "EndActual_A_F_Sp"     && o[13].Value == false);  // !A+
+            Debug.Assert(o[14].TagName == "EndActual_A_F_Sm"     && o[14].Value == true);   // A-
+            Debug.Assert(o[15].TagName == "StartActual_A_F_Vm"   && o[15].Value == false);  // !a-
+        });
+
+        //actuals
+        //    .Subscribe(otc =>
+        //    {
+        //        Trace.WriteLine($"{otc.TagName}={otc.Value}");
+        //    });
+
+        var hasAddress =
+            engine.Model.Cpus
+                .SelectMany(cpu => cpu.TagsMap.Values)
+                .OfType<TagA>()
+                .Any(t => !t.Address.IsNullOrEmpty())
+                ;
+        if (hasAddress)
+        {
+            // initial condition
+            opc.Write("EndActual_A_F_Sm", true);
+            opc.Write("EndActual_B_F_Sm", true);
+
+            // simulating physics
+            if (Global.IsControlMode)
+            { }   // todo : 실물 연결
+            else
+                Simulator.CreateFromCylinder(opc, new[] { "A_F", "B_F" });
+
+            Global.BitChangedSubject
+                .Subscribe(bc =>
+                {
+                    var n = bc.Bit.GetName();
+                    var val = bc.Bit.Value;
+                    var monitors = new[] {
+                        "StartPlan_A_F_Vp", "StartPlan_B_F_Vp", "StartPlan_A_F_Vm", "StartPlan_B_F_Vm",
+                        "EndPlan_A_F_Sp", "EndPlan_A_F_Sm", "EndPlan_B_F_Sp", "EndPlan_B_F_Sm" };
+                    if (monitors.Contains(n))
+                    {
+                        Global.Logger.Debug($"Plan for TAG {n} value={val}");
+
+                        if (val)
+                        {
+                            if (n == "StartPlan_A_F_Vp")
+                                opc.Write("StartActual_A_F_Vp", val);
+                            else if (n == "StartPlan_B_F_Vp")
+                                opc.Write("StartActual_B_F_Vp", val);
+                            else if (n == "StartPlan_A_F_Vm")
+                                opc.Write("StartActual_A_F_Vm", val);
+                            else if (n == "StartPlan_B_F_Vm")
+                                opc.Write("StartActual_B_F_Vm", val);
+                        }
+
+                        //else if (n == "EndPlan_A_F_Sp")
+                        //    opc.Write("EndActual_A_F_Sp", val);
+                        //else if (n == "EndPlan_A_F_Sm")
+                        //    opc.Write("EndActual_A_F_Sm", val);
+                        //else if (n == "EndPlan_B_F_Sp")
+                        //    opc.Write("EndActual_B_F_Sp", val);
+                        //else if (n == "EndPlan_B_F_Sm")
+                        //    opc.Write("EndActual_B_F_Sm", val);
+                    }
+                });
+        }
+
+
+        Debug.Assert(engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(startTag));
+        opc.Write(startTag, true);
+        opc.Write("Auto_L_F", true);
+
+        engine.Wait();
+    }
+
     public static void DoSampleTestDiamond()
     {
         var text = @"
@@ -439,6 +638,61 @@ public class Tester
             }
         });
 
+        var actuals =
+            Global.TagChangeFromOpcServerSubject
+                .Where(otc => otc.TagName.Contains("Actual"))
+                ;
+
+        // https://stackoverflow.com/questions/8837665/how-to-split-an-observable-stream-in-chunks-dependent-on-second-stream
+        var oneCycleHistory =
+            actuals.Publish(otcs =>
+                otcs.Where(otc => otc.TagName == "StartActual_A_F_Vp" && otc.Value)       // a+ 출력 켜진 후부터
+                    .Select(obs =>
+                        otcs.TakeUntil(otc => otc.TagName == "StartActual_B_F_Vm" && !otc.Value) // b- 출력 꺼질때까지
+                        .StartWith(obs)
+                        .ToArray()))
+                .Merge()
+                ;
+        oneCycleHistory.Subscribe(o =>
+        {
+            Debug.Assert(o[ 0].TagName == "StartActual_A_F_Vp"   && o[ 0].Value == true);   // a+
+            Debug.Assert(o[ 1].TagName == "EndActual_A_F_Sm"     && o[ 1].Value == false);  // !A-
+            Debug.Assert(o[ 2].TagName == "EndActual_A_F_Sp"     && o[ 2].Value == true);   // A+
+            Debug.Assert(o[ 3].TagName == "StartActual_A_F_Vp"   && o[ 3].Value == false);  // !a+
+
+            Debug.Assert(o[ 4].TagName == "StartActual_A_F_Vm"   && o[ 4].Value == true);   // a-
+            Debug.Assert(o[ 5].TagName == "StartActual_B_F_Vp"   && o[ 5].Value == true);   // b+
+
+            var notAp = o.FindIndex(otc => otc.TagName == "EndActual_A_F_Sp" && otc.Value == false);  // !A+
+            var notBm = o.FindIndex(otc => otc.TagName == "EndActual_B_F_Sm" && otc.Value == false);  // !B-
+
+            Debug.Assert(notAp.IsOneOf(6, 7) && notBm.IsOneOf(6, 7));
+            //Debug.Assert(o[ 6].TagName == "EndActual_A_F_Sp"     && o[ 6].Value == false);  // !A+
+            //Debug.Assert(o[ 7].TagName == "EndActual_B_F_Sm"     && o[ 7].Value == false);  // !B-
+
+            var Bp      = o.FindIndex(otc => otc.TagName == "EndActual_B_F_Sp"     && otc.Value == true);   // B+
+            var notbp   = o.FindIndex(otc => otc.TagName == "StartActual_B_F_Vp"   && otc.Value == false);  // !b+
+            var Am      = o.FindIndex(otc => otc.TagName == "EndActual_A_F_Sm"     && otc.Value == true);   // A-
+            var notam   = o.FindIndex(otc => otc.TagName == "StartActual_A_F_Vm"   && otc.Value == false);  // !a-
+            Debug.Assert(new[] { Bp, notbp, Am, notam }.ForAll(n => n.IsOneOf(8, 9, 10, 11)));
+            Debug.Assert(Bp < notbp && Am < notam);
+            //Debug.Assert(o[ 8].TagName == "EndActual_B_F_Sp"     && o[ 8].Value == true);   // B+
+            //Debug.Assert(o[ 9].TagName == "StartActual_B_F_Vp"   && o[ 9].Value == false);  // !b+
+            //Debug.Assert(o[10].TagName == "EndActual_A_F_Sm"     && o[10].Value == true);   // A-
+            //Debug.Assert(o[11].TagName == "StartActual_A_F_Vm"   && o[11].Value == false);  // !a-
+            
+            Debug.Assert(o[12].TagName == "StartActual_B_F_Vm"   && o[12].Value == true);   // b-
+            Debug.Assert(o[13].TagName == "EndActual_B_F_Sp"     && o[13].Value == false);  // !B+
+            Debug.Assert(o[14].TagName == "EndActual_B_F_Sm"     && o[14].Value == true);   // B-
+            Debug.Assert(o[15].TagName == "StartActual_B_F_Vm"   && o[15].Value == false);   // !b-
+        });
+
+        //actuals
+        //    .Subscribe(otc =>
+        //    {
+        //        Trace.WriteLine($"{otc.TagName}={otc.Value}");
+        //    });
+
         var hasAddress =
             engine.Model.Cpus
                 .SelectMany(cpu => cpu.TagsMap.Values)
@@ -450,8 +704,13 @@ public class Tester
             // initial condition
             opc.Write("EndActual_A_F_Sm", true);
             opc.Write("EndActual_B_F_Sm", true);
-            Simulator.CreateFromCylinder(opc, new[] { "A_F", "B_F" });
+
             // simulating physics
+            if (Global.IsControlMode)
+                {}   // todo : 실물 연결
+            else
+                Simulator.CreateFromCylinder(opc, new[] { "A_F", "B_F" });
+
             Global.BitChangedSubject
                 .Subscribe(bc =>
                 {

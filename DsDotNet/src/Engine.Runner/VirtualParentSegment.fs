@@ -244,12 +244,8 @@ module VirtualParentSegmentModule =
                                 if x.Name = "VPS_L_F_Main" then
                                     noop()
 
-                                [|
-                                    BitChange(targetStartTag, false, $"{n} FINISH 로 인한 {x.Target.Name} start {targetStartTag.GetName()} 끄기")
-                                    BitChange(x.Going, false, $"{n} FINISH")
-                                |] |> writer
-                                //write(targetStartTag, false, $"{n} FINISH 로 인한 {x.Target.Name} start {targetStartTag.GetName()} 끄기")
-                                //write(x.Going, false, $"{n} FINISH")
+                                write(targetStartTag, false, $"{n} FINISH 로 인한 {x.Target.Name} start {targetStartTag.GetName()} 끄기")
+                                write(x.Going, false, $"{n} FINISH")
 
                                 assert(x.PortE.Value)
                                 assert(x.PortR.Value = false)

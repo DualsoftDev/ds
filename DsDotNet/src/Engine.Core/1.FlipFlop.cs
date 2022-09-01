@@ -19,5 +19,9 @@ internal class FlipFlop : Bit, IBitWritable
         Debug.Assert(set != null && reset != null);
         S = set;
         R = reset;
+        if (S is Bit s)
+            s.Containers.Add(this);
+        if (R is Bit r)
+            r.Containers.Add(this);
     }
 }

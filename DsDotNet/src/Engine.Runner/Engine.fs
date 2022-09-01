@@ -43,8 +43,8 @@ module EngineModule =
                 if (cpu.TagsMap.ContainsKey(tagName)) then
                     let tag = cpu.TagsMap[tagName]
                     if tag.Value <> value then
-                        logDebug $"OPC Tag [{tagName}] 변경"
-                        cpu.Enqueue(tag, value, $"OPC Tag [{tagName}] 변경");      //! setter 에서 BitChangedSubject.OnNext --> onBitChanged 가 호출된다.
+                        logDebug $"OPC Tag 변경 [{tagName}={value}] : cpu={cpu}"
+                        cpu.Enqueue(tag, value, $"OPC Tag 변경 [{tagName}={value}]");      //! setter 에서 BitChangedSubject.OnNext --> onBitChanged 가 호출된다.
 
             /// OPC Server 에서 Cpu 가 가지고 있는 tag 값들을 읽어 들임
             /// Engine 최초 구동 시, 수행됨.
@@ -67,7 +67,7 @@ module EngineModule =
 
             virtualParentSegments
             |> Seq.iter(fun vps ->
-                let writer = vps.Cpu.Enqueues
+                let writer = vps.Cpu.Enqueue
                 //let writer = vps.Cpu.SendChange
                 vps.Target.WireEvent(writer, raise) |> ignore
                 vps.WireEvent(writer, raise) |> ignore

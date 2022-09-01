@@ -34,16 +34,15 @@ module internal SegmentRGFHModule =
 
         for child in children do
             assert(not child.IsFlipped && (not child.Status.HasValue || child.Status.Value = Status4.Going))
-            logInfo $"Child {child.QualifiedName} starting.."
+            logInfo $"Progress: Child {child.QualifiedName} starting.."
             assert(child.TagsStart.Count <= 1)  // 일단... 체크용..
-            [|
-                for st in child.TagsStart do
-                    let before = fun () ->
-                        //child.Status <- Status4.Going
-                        Global.ChildStatusChangedSubject.OnNext(ChildStatusChange(child, Status4.Going))
 
-                    BitChange(st, true, "Starting child", onError, BeforeAction = before)
-            |] |> writer
+            for st in child.TagsStart do
+                let before = fun () ->
+                    //child.Status <- Status4.Going
+                    Global.ChildStatusChangedSubject.OnNext(ChildStatusChange(child, Status4.Going))
+
+                writer(BitChange(st, true, "Starting child", onError, BeforeAction = before))
 
     /// Segment 별로 Going 중에 child 의 종료 모니터링.  segment 가 Going 이 아니게 되면, dispose
     let goingSubscriptions = ConcurrentDictionary<SegmentBase, IDisposable>()
@@ -85,10 +84,8 @@ module internal SegmentRGFHModule =
         assert( [seg.TagPStart; seg.TagPReset; seg.TagPEnd].ForAll(fun t -> not t.Value ))     // A_F_Pp.TagEnd 가 true 되는 상태???
         assert( [seg.PortS :> PortInfo; seg.PortR; seg.PortE].ForAll(fun t -> not t.Value ))
         stopMonitorHoming seg
-        [|
-            BitChange(seg.Ready, true, null)
-            BitChange(seg.TagPReset, false, null)
-        |] |> writer
+        writer(BitChange(seg.Ready, true, null))
+        writer(BitChange(seg.TagPReset, false, null))
 
     /// Going tag ON 발송 후,
     ///     - child 가 하나라도 있으면, child 의 종료를 모니터링하기 위한 subscription 후, 최초 child group(init) 만 수행
@@ -120,11 +117,10 @@ module internal SegmentRGFHModule =
                                 assert(finishedChildren.Length = 0 || finishedChildren.Length = 1 )
                                 let finishedChild = finishedChildren.FirstOrDefault()
                                 if finishedChild <> null then
-                                    logInfo $"Child {finishedChild.QualifiedName} finish detected."
+                                    logInfo $"Progress: Child {finishedChild.QualifiedName} finish detected."
                                     finishedChild.Status <- Status4.Finished
                                     finishedChild.IsFlipped <- true
                                     for st in finishedChild.TagsStart do
-                                        assert(not st.Value)
                                         write(st, false, $"Child {finishedChild.QualifiedName} finished")
                             
                                     if (seg.Children.ForAll(fun ch -> ch.IsFlipped)) then
@@ -184,11 +180,9 @@ module internal SegmentRGFHModule =
 
         stopMonitorGoing seg
 
-        [|
-            BitChange(seg.Going, false, $"{seg.QualifiedName} FINISH")
-            BitChange(seg.TagPEnd, true, $"Finishing {seg.QualifiedName}")
-            BitChange(seg.TagPStart, false, $"Finishing {seg.QualifiedName}")
-        |] |> writer
+        write(seg.Going, false, $"{seg.QualifiedName} FINISH")
+        write(seg.TagPEnd, true, $"Finishing {seg.QualifiedName}")
+        write(seg.TagPStart, false, $"Finishing {seg.QualifiedName}")
 
     let procHoming(segment:SegmentBase, writer:ChangeWriter, onError:ExceptionHandler) =
         let seg = segment :?> Segment

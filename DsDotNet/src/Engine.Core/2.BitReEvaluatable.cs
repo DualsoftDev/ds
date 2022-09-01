@@ -10,6 +10,7 @@ public abstract class BitReEvaluatable : Bit, IBitReadable
     {
         // PortInfo 의 경우, plan 대비 actual 에 null 을 허용
         _monitoringBits = monitoringBits.Where(b => b is not null).ToArray();
+        _monitoringBits.OfType<Bit>().Iter(b => b.Containers.Add(this));
     }
 }
 

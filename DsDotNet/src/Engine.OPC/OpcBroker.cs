@@ -62,6 +62,11 @@ public class OpcBroker
             var bit = _tagDic[tagName];
             if (bit.Value != value)
             {
+                var actu = _tagDic["StartActual_A_F_Vp"];
+                var plan = _tagDic["StartPlan_A_F_Vp"];
+                if (bit.Name == "StartPlan_A_F_Vp" || bit.Name == "StartActual_A_F_Vp")
+                    Global.NoOp();
+
                 bit.SetValue(value);
 
                 Global.TagChangeFromOpcServerSubject.OnNext(new OpcTagChange(tagName, value));

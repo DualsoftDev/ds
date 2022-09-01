@@ -11,7 +11,7 @@ module PrologueModule =
 
 
     /// Bit * New Value * Change reason
-    type ChangeWriter = BitChange array -> unit
+    type ChangeWriter = BitChange -> unit
 
     type DoStatus = SegmentBase*ChangeWriter*ExceptionHandler -> unit
     let private defaultDoStatus(seg:SegmentBase, writer:ChangeWriter, exceptionHandler:ExceptionHandler) =
@@ -33,9 +33,8 @@ module internal BitWriterModule =
 
             match box bit with
             | :? PortInfoEnd as ep ->
-                [|  EndPortChange(ep.Plan, value, cause, onError) :> BitChange
-                    if ep.Cpu.IsActive && ep.Actual <> null then
-                        BitChange(ep.Actual, value, $"Active CPU endport: writing actual {ep}={value}") |]
+                writer(EndPortChange(ep.Plan, value, cause, onError))
+                if ep.Cpu.IsActive && ep.Actual <> null then
+                    writer(BitChange(ep.Actual, value, $"Active CPU endport: writing actual {ep}={value}"))
             | :? PortInfo -> failwithlog "Unexpected"
-            | _ -> [| BitChange(bit, value, cause, onError) |]
-            |> writer
+            | _ -> writer(BitChange(bit, value, cause, onError))

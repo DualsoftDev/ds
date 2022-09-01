@@ -7,6 +7,7 @@ public abstract class Bit : Named, IBit
 {
     protected bool _value;
     public virtual bool Value => _value;    //{ get => _value; set => _value = value; }
+    public List<IBit> Containers { get; } = new ();
 
     public Cpu Cpu { get; set; }
     public Bit(Cpu cpu, string name, bool bit = false) : base(name)

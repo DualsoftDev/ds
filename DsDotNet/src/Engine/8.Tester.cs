@@ -1,4 +1,5 @@
 using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Engine.Graph;
 using Engine.Runner;
@@ -417,16 +418,19 @@ public class Tester
             {
                 if (state == Status4.Finished)
                 {
-                    if (counter++ % 100 == 0)
+                    counter++;
+                    //if (counter++ % 100 == 0)
                     {
                         Console.WriteLine($"[{counter}] After finishing Main segment");
-                        Global.Logger.Info($"-------------------------- [{counter}] After finishing Main segment");
+                        Global.Logger.Info($"-------------------------- [Progress: {counter}] After finishing Main segment");
                         //engine.Model.Print();
                     }
                     //opc.Write(resetTag, true);
                 }
                 else if (ssc.Status == Status4.Ready)
                 {
+                    Console.Beep(10000, 200);
+                    Thread.Sleep(1000);
                     opc.Write(startTag, true);
                 }
             }
@@ -457,7 +461,7 @@ public class Tester
                     {
                         Global.Logger.Debug($"Plan for TAG {n} value={val}");
 
-                        //if (val)
+                        if (val)
                         {
                             if (n == "StartPlan_A_F_Vp")
                                 opc.Write("StartActual_A_F_Vp", val);

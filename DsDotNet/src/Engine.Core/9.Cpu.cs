@@ -18,7 +18,7 @@ public class Cpu : Named, ICpu
 
 
     /// <summary> Bit change event queue </summary>
-    public ObservableConcurrentQueue<BitChange[]> Queue { get; } = new();
+    public ObservableConcurrentQueue<BitChange> Queue { get; } = new();
     //public ConcurrentQueue<BitChange[]> Queue { get; } = new();
 
     /// <summary>CPU queue 에 더 처리할 내용이 있음을 외부에 알리기 위한 flag</summary>

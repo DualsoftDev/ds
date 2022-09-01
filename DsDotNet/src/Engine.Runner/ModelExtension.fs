@@ -29,7 +29,7 @@ module internal ModelModule =
         for ch in children do
             let getTags(x:ITxRx, tx:bool) =
                 match x, tx with
-                    | :? Segment as seg, true -> seg.TagPStart :> Tag
+                    | :? Segment as seg, true -> if seg.TagAStart = null then seg.TagPStart:> Tag else seg.TagAStart
                     | :? Segment as seg, false -> if seg.TagAEnd = null then seg.TagPEnd else seg.TagAEnd
                     | :? Tag as tag, _ -> tag
                     | _ -> failwith "ERROR"

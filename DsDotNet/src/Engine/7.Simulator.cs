@@ -14,9 +14,9 @@ namespace Engine
     internal class Simulator
     {
         // e.g cmd2sensors = {("StartActual_A_F_Vp", "EndActual_A_F_Sm"), }
-        public Simulator(OpcBroker opc, IEnumerable<(string, Action<Bit, bool>)> actions)
+        public Simulator(OpcBroker opc, IEnumerable<(string, Func<Bit, bool, Task>)> actions)
         {
-            var c2sDic = new Dictionary<string, Action<Bit, bool>>();
+            var c2sDic = new Dictionary<string, Func<Bit, bool, Task>>();
 
             foreach (var (bit, action) in actions)
                 c2sDic.Add(bit, action);
@@ -27,63 +27,65 @@ namespace Engine
                 {
                     var bit = bc.Bit as Bit;
                     var n = bit.GetName();
-                    if (c2sDic.ContainsKey(n))
-                        c2sDic[n].Invoke(bit, bc.NewValue);
+                    if (c2sDic.ContainsKey(n) && bit is TagA)
+                        Task.Run(async () =>
+                        {
+                            await c2sDic[n].Invoke(bit, bc.NewValue);
+                        });
                 });
         }
 
         public static Simulator CreateFromCylinder(OpcBroker opc, IEnumerable<string> cylinderFlowNames)   // e.g {"A_F", "B_F"}
         {
             var random = new Random();
-            IEnumerable<(string, Action<Bit, bool>)> generateMap()
+            IEnumerable<(string, Func<Bit, bool, Task>)> generateMap()
             {
                 foreach (var f in cylinderFlowNames)
                 {
                     yield return ($"StartActual_{f}_Vp",
-                        new Action<Bit, bool>(async (bit, val) =>
-                        {
+                        (bit, val) => Task.Run(async () => {
                             var opcOpposite = opc.GetTag($"StartActual_{f}_Vm");
                             Global.Logger.Debug($"Tag/Actuator {bit.Name} = {val}");
                             if (val)
                             {
-                                Console.Beep();
-                                Global.Verify("Exclusive error", opcOpposite.Value == false);
+                                Console.Beep(800, 200);
+                                Global.Verify($"Exclusive error: {bit.Name}", opcOpposite.Value == false);
                                 await Task.Delay(random.Next(5, 50));
                                 opc.Write($"EndActual_{f}_Sm", !val);
-                                await Task.Delay(random.Next(10, 500));
+                                await Task.Delay(random.Next(5, 1000));
+                                Global.Verify($"유지:{bit.Name}", bit.Value);
                                 opc.Write($"EndActual_{f}_Sp", val);
                             }
                         }));
+                            
                     yield return ($"StartActual_{f}_Vm",
-                        new Action<Bit, bool>(async (bit, val) =>
-                        {
+                        (bit, val) => Task.Run(async () => {
                             var opcOpposite = opc.GetTag($"StartActual_{f}_Vp");
                             Global.Logger.Debug($"Tag/Actuator {bit.Name} = {val}");
                             if (val)
                             {
-                                Console.Beep();
-                                Global.Verify("Exclusive error", opcOpposite.Value == false);
+                                Console.Beep(1600, 200);
+                                Global.Verify($"Exclusive error: {bit.Name}", opcOpposite.Value == false);
                                 await Task.Delay(random.Next(5, 50));
                                 opc.Write($"EndActual_{f}_Sp", !val);
-                                await Task.Delay(random.Next(10, 500));
+                                await Task.Delay(random.Next(5, 1000));
+                                Global.Verify($"유지:{bit.Name}", bit.Value);
                                 opc.Write($"EndActual_{f}_Sm", val);
                             }
                         }));
 
                     yield return ($"EndActual_{f}_Sp",
-                        new Action<Bit, bool>(async (bit, val) =>
-                        {
+                        (bit, val) => Task.Run(async () => {
                             Global.Logger.Debug($"Tag/Sensor {bit.Name} = {val}");
                             var opcOpposite = opc.GetTag($"EndActual_{f}_Sm");
-                            Global.Verify("Exclusive error", !val || opcOpposite.Value == false);
+                            Global.Verify($"Exclusive error: {bit.Name}", !val || opcOpposite.Value == false);
                         }));
 
                     yield return ($"EndActual_{f}_Sm",
-                        new Action<Bit, bool>(async (bit, val) =>
-                        {
+                        (bit, val) => Task.Run(async () => {
                             Global.Logger.Debug($"Tag/Sensor {bit.Name} = {val}");
                             var opcOpposite = opc.GetTag($"EndActual_{f}_Sp");
-                            Global.Verify("Exclusive error", !val || opcOpposite.Value == false);
+                            Global.Verify($"Exclusive error: {bit.Name}", !val || opcOpposite.Value == false);
                         }));
                 }
             }

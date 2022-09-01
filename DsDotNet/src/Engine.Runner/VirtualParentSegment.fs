@@ -8,6 +8,7 @@ open System.Reactive.Linq
 open System.Linq
 open System.Web.Configuration
 open Engine.Common
+open System.Collections.Generic
 
 [<AutoOpen>]
 module VirtualParentSegmentModule =
@@ -112,7 +113,7 @@ module VirtualParentSegmentModule =
 
         override x.WireEvent(writer, onError) =
             let write:BitWriter = getBitWriter writer onError
-
+            let mutable isInitialReady = true
             Global.BitChangedSubject
                 .Subscribe(fun bc ->
                     let bit = bc.Bit :?> Bit
@@ -161,6 +162,10 @@ module VirtualParentSegmentModule =
                         | Status4.Ready, true ->
                             logInfo $"외부에서 내부 target {x.Target.Name} 실행 감지"
 
+                        | Status4.Ready, false ->
+                            if not isInitialReady then
+                                assert(false)
+                                failwithlog $"최초 초기값이 아닌 ready 상태의 가상부모에서 target endport 꺼짐"
 
                         | Status4.Going, false ->
                             logInfo $"Children originated before going {x.Target.Name}"
@@ -173,6 +178,7 @@ module VirtualParentSegmentModule =
                     if notiVpsPortChange then
                         if oldStatus = Some state then
                             logDebug $"\t\tVPS Skipping duplicate status: [{n}] status : {state} by {bit.Name}={on}"
+
                             let bitMatch =
                                 if bit = x.PortS then 's'
                                 else if bit = x.PortR then 'r'
@@ -191,6 +197,10 @@ module VirtualParentSegmentModule =
                                 noop()
                             | 's', Status4.Finished, false ->
                                 ()
+                            | 'r', Status4.Homing, true ->
+                                assert not triggerTargetReset   // self reset 인 경우만 허용
+                            | 'r', Status4.Going, false ->
+                                assert not triggerTargetStart   // self start 인 경우만 허용
                             | _ ->
                                 logWarn $"UNKNOWN: {n} status {state} duplicated on port {bit.GetName()}={on} by {cause}"
                                 //assert(not on)    // todo
@@ -206,6 +216,9 @@ module VirtualParentSegmentModule =
                                 write(x.Going, false, $"{n} going off by status {state}")
                             if x.Ready.Value && state <> Status4.Ready then
                                 write(x.Ready, false, $"{n} ready off by status {state}")
+
+                            if state <> Status4.Ready then
+                                isInitialReady <- false
 
                             Global.SegmentStatusChangedSubject.OnNext(SegmentStatusChange(x, state))
 
@@ -266,6 +279,7 @@ module VirtualParentSegmentModule =
                             | Status4.Ready
                             | Status4.Finished -> oldStatus <- Some state
                             | _ -> ()
+
                         ()
                 )
 

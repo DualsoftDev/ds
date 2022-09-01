@@ -79,6 +79,8 @@ module FsSegmentModule =
             let write(bit, value, cause) =
                 writer(BitChange(bit, value, cause, onError))
 
+            let mutable isInitialReady = true
+
             Global.RawBitChangedSubject
                 .Where(fun bc -> bc.Bit.IsOneOf(x.PortS, x.PortR, x.PortE))
                 .Subscribe(fun bc ->
@@ -105,9 +107,13 @@ module FsSegmentModule =
                             // case1 : Reset port 켜지는 시점
                             // case2 : EndPort 꺼지는 시점에 : Reset port 는 아직 살아 있으므로 homing 
                             ()
+                        | 's', Status4.Homing, false ->
+                            logWarn $"Homing 중에 startport 꺼짐: {x.QualifiedName}"
 
-                        | 's', Status4.Ready, false
-                        | 'r', Status4.Ready, false ->
+                        | _, Status4.Ready, false ->
+                            if not isInitialReady then
+                                assert(false)
+                                failwithlog $"최초 초기값이 아닌 ready 상태의 가상부모에서 target endport 꺼짐"
                             ()
                         | 'e', Status4.Homing, false ->
                             logDebug $"\t\tAbout to finished homing: [{n}] status : {state} {cause}"
@@ -135,6 +141,8 @@ module FsSegmentModule =
                             write(x.Going, false, $"{n} going off by status {state}")
                         if x.Ready.Value && state <> Status4.Ready then
                             write(x.Ready, false, $"{n} ready off by status {state}")
+                        if state <> Status4.Ready then
+                            isInitialReady <- false
 
                         Global.SegmentStatusChangedSubject.OnNext(SegmentStatusChange(x, state))
 

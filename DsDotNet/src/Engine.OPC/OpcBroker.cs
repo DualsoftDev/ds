@@ -4,6 +4,7 @@ using log4net;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Disposables;
 
@@ -34,8 +35,14 @@ public class OpcBroker
         {
             if (_tagDic.ContainsKey(otc.TagName))
             {
-                Global.Logger.Debug($"\t\tPublishing tag[{otc.TagName}] change = {otc.Value}");
-                Write(otc.TagName, otc.Value);
+                var otag = _tagDic[otc.TagName];
+                if (otag.Value == otc.Value)
+                    Global.Logger.Debug($"\t\tSkipping duplicated Publishing tag[{otc.TagName}] change = {otc.Value}");
+                else
+                {
+                    Global.Logger.Debug($"\t\tPublishing tag[{otc.TagName}] change = {otc.Value}");
+                    Write(otc.TagName, otc.Value);
+                }
             }
         });
         _disposables.Add(subs);
@@ -62,11 +69,6 @@ public class OpcBroker
             var bit = _tagDic[tagName];
             if (bit.Value != value)
             {
-                var actu = _tagDic["StartActual_A_F_Vp"];
-                var plan = _tagDic["StartPlan_A_F_Vp"];
-                if (bit.Name == "StartPlan_A_F_Vp" || bit.Name == "StartActual_A_F_Vp")
-                    Global.NoOp();
-
                 bit.SetValue(value);
 
                 Global.TagChangeFromOpcServerSubject.OnNext(new OpcTagChange(tagName, value));

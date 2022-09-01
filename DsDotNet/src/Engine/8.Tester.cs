@@ -410,7 +410,10 @@ public class Tester
             if (qName == "VPS_L_F_Main")
             {
                 if (state == Status4.Finished)
+                {
+                    Global.Logger.Debug($"Resetting externally {resetTag}");
                     opc.Write(resetTag, true);
+                }
             }
 
 

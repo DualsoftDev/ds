@@ -49,7 +49,7 @@ namespace Engine;
 //        /// <param name="ownerCpu">생성된 Tag 가 속할 CPU</param>
 //        public TagGenInfo(TagType type, Segment tagContainerSegment, ICoin child, string context, Edge edge, bool isSource, Cpu ownerCpu)
 //        {
-//            Debug.Assert(child is Segment || child is Child || child is RootCall);
+//            DAssert(child is Segment || child is Child || child is RootCall);
 //            Type = type;
 //            TagContainerSegment = tagContainerSegment;
 //            Context = context;
@@ -74,7 +74,7 @@ namespace Engine;
 //    /// </summary>
 //    TagGenInfo[] CreateTags4Child(RootFlow[] rootFlows)
 //    {
-//        Debug.Assert(rootFlows.Select(f => f.Cpu).Distinct().Count() == 1);
+//        DAssert(rootFlows.Select(f => f.Cpu).Distinct().Count() == 1);
 //        Cpu cpu = rootFlows[0].Cpu;
 
 //        var tagTypeEndRx = TagType.End | TagType.RX;
@@ -129,7 +129,7 @@ namespace Engine;
 //            {
 //                var seg = tgi.TagContainerSegment;
 //                Global.Logger.Debug($"Adding Export {tgi.Type} Tag [{tgi.TagName}] to segment [{seg.QualifiedName}]");
-//                Debug.Assert(seg.Cpu == tgi.OwnerCpu);
+//                DAssert(seg.Cpu == tgi.OwnerCpu);
 //                var tag = createTag(tgi, seg, type);
 //                seg.AddTagsFunc(new[] { tag });
 //            }
@@ -142,8 +142,8 @@ namespace Engine;
 //        {
 //            if (tgi.GeneratedTag != null)
 //            {
-//                Debug.Assert(tgi.GeneratedTag.Cpu == owner.Cpu);
-//                Debug.Assert(tgi.GeneratedTag.Type == tagType);
+//                DAssert(tgi.GeneratedTag.Cpu == owner.Cpu);
+//                DAssert(tgi.GeneratedTag.Type == tagType);
 //                return tgi.GeneratedTag;
 //            }
 //            if (tgi.OwnerCpu.BitsMap.ContainsKey(tgi.TagName))
@@ -278,7 +278,7 @@ namespace Engine;
 
 //            IEnumerable<TagGenInfo> createTagGenInfos4Child(Child child, Edge edge, bool isSource, string fqdn)
 //            {
-//                //Debug.Assert(!(edge is IResetEdge));
+//                //DAssert(!(edge is IResetEdge));
 //                var isResetEdge = edge is IResetEdge;
 //                if (isResetEdge)
 //                    Console.WriteLine();

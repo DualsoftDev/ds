@@ -15,8 +15,8 @@ public abstract partial class Edge : IEdge
 
     public Edge(Flow containerFlow, IVertex[] sources, string operator_, IVertex target)
     {
-        Debug.Assert(sources.All(s => s != null));
-        Debug.Assert(target != null);
+        DAssert(sources.All(s => s != null));
+        DAssert(target != null);
 
         ContainerFlow = containerFlow;
         Sources = sources;

@@ -16,10 +16,10 @@ module CpuModule =
 
     let doApplyBitChange(bitChange:BitChange) =
         let bit = bitChange.Bit :?> Bit
-        //Global.Logger.Debug($"\t=({indent}) Applying bitchange {bitChange}")
+        //LogDebug($"\t=({indent}) Applying bitchange {bitChange}")
 
         if bit.Name = "ResetPlan_L_F_Main" then
-            Global.NoOp()
+            noop()
 
         let mutable bitChanged = false
         match box bit with
@@ -40,7 +40,7 @@ module CpuModule =
                     Global.TagChangeToOpcServerSubject.OnNext(new OpcTagChange(bit.Name, bitChange.NewValue))
                 Global.RawBitChangedSubject.OnNext(bitChange)
             with ex ->
-                Global.Logger.Error(ex)
+                logError $"{ex}"
                 if isNull bitChange.OnError then
                     reraise()
                 else
@@ -71,7 +71,7 @@ module CpuModule =
         //if (bitChange.Bit.Value == bitChange.NewValue)
         //    return
 
-        //Global.Logger.Debug($"\t\t=[{cpu.DbgNestingLevel}] Applying bitChange {bitChange}")   // {bitChange.Guid}
+        //LogDebug($"\t\t=[{cpu.DbgNestingLevel}] Applying bitChange {bitChange}")   // {bitChange.Guid}
 
         let fwd = cpu.ForwardDependancyMap
         let q = cpu.Queue
@@ -105,12 +105,12 @@ module CpuModule =
                         if (isNull pi.Actual || pi.Plan.Value = pi.Actual.Value) then
                             bc <- BitChange(dep, bitChange.NewValue, pi.Plan, bitChange.OnError)
                         else
-                            Global.NoOp()
+                            noop()
                     elif (bit = pi.Actual) then
                         if pi.Plan.Value = pi.Actual.Value then
                             bc <- new BitChange(dep, bitChange.NewValue, pi.Actual, bitChange.OnError)
                         else
-                            Global.NoOp()
+                            noop()
                 | _ ->
                     ()
 
@@ -130,7 +130,7 @@ module CpuModule =
                 for ff in cpu.FFResetterMap[bit].Where(fun ff -> ff.Value) do
                     BitChange(ff, false, bit, bitChange.OnError) |> doApply 
         else
-            //Global.Logger.Warn($"Failed to find dependency for {bit.GetName()}")
+            //LogWarn($"Failed to find dependency for {bit.GetName()}")
             doApply bitChange
 
         cpu.DbgNestingLevel <- cpu.DbgNestingLevel - 1
@@ -164,12 +164,12 @@ module CpuModule =
                         | true, bitChange ->
                             let bit = bitChange.Bit
                             if (bit.GetName() = "AutoStart_L_F") then
-                                Global.NoOp()
+                                noop()
 
                             if lasts.ContainsKey(bit) then
                                 if lasts[bit] = bitChange.NewValue then
-                                    Global.Logger.Warn($"Skipping duplicated bit change {bit}.");
-                                    Global.NoOp();
+                                    logWarn $"Skipping duplicated bit change {bit}.";
+                                    noop();
                                 else
                                     lasts[bit] <- bitChange.NewValue;
                                     apply cpu bitChange true

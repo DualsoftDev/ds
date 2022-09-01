@@ -11,8 +11,18 @@ global using BitDic = System.Collections.Generic.Dictionary<string, Engine.Core.
 global using TagDic = System.Collections.Generic.Dictionary<string, Engine.Core.Tag>;
 global using Engine.Common;
 
+global using static Engine.Core.GlobalShortCuts;
+
 namespace Engine.Core;
 
+public static class GlobalShortCuts
+{
+    public static void LogDebug(object message) => Global.Logger.Debug(message);
+    public static void LogInfo (object message) => Global.Logger.Info(message);
+    public static void LogWarn (object message) => Global.Logger.Warn(message);
+    public static void LogError(object message) => Global.Logger.Error(message);
+    public static void DAssert(bool condition) => System.Diagnostics.Debug.Assert(condition);
+}
 
 public delegate void ExceptionHandler(Exception ex);
 
@@ -57,7 +67,7 @@ public static class Global
     {
         if (!condition)
         {
-            Global.Logger.Error(message);
+            LogError(message);
             throw new Exception(message);
         }
     }

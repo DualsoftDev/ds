@@ -1,23 +1,13 @@
-using Engine.Core;
-
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-
 namespace Engine.Parser;
 
 public class ParserHelper
 {
-    public Dictionary<string, object> QualifiedInstancePathMap = new Dictionary<string, object>();
+    public Dictionary<string, object> QualifiedInstancePathMap = new();
 
     /// <summary> Alias, CallPrototype 에 대한 path </summary>
-    public Dictionary<string, object> QualifiedDefinitionPathMap = new Dictionary<string, object>();
-    //public Dictionary<ParserRuleContext, object> ContextMap = new Dictionary<ParserRuleContext, object>();
-
-
-    public Dictionary<DsSystem, Dictionary<string, string>> AliasNameMaps = new Dictionary<DsSystem, Dictionary<string, string>>();
-    public Dictionary<DsSystem, Dictionary<string, string[]>> BackwardAliasMaps = new Dictionary<DsSystem, Dictionary<string, string[]>>();
+    public Dictionary<string, object> QualifiedDefinitionPathMap = new();
+    public Dictionary<DsSystem, Dictionary<string, string>> AliasNameMaps = new();
+    public Dictionary<DsSystem, Dictionary<string, string[]>> BackwardAliasMaps = new();
 
     public Model Model { get; } = new Model();
     internal DsSystem _system;
@@ -98,7 +88,7 @@ public class ParserHelper
                     return name;
                 return concat(sysName, middleName, parentingName, name);
             case 2:
-                Debug.Assert(!name.StartsWith(sysName));
+                DAssert(!name.StartsWith(sysName));
                 return concat(sysName, mid, par, name);
             case 3:
                 return name;

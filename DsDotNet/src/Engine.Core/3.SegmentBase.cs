@@ -15,7 +15,7 @@ public abstract partial class SegmentBase : ChildFlow, IVertex, ICoin, IWallet, 
         set
         {
             if (ContainerFlow != null)
-                Debug.Assert(value == ContainerFlow.Cpu);
+                DAssert(value == ContainerFlow.Cpu);
             _cpu = value;
         }
     }
@@ -72,7 +72,7 @@ public abstract partial class SegmentBase : ChildFlow, IVertex, ICoin, IWallet, 
     public static SegmentCreator Create { get; set; } =
         (string name, RootFlow containerFlow) =>
         {
-            Debug.Assert(Global.IsInUnitTest);        // should be overriden if not unit test
+            DAssert(Global.IsInUnitTest);        // should be overriden if not unit test
             var seg = new DummySegment(containerFlow.Cpu, name) { ContainerFlow = containerFlow };
             containerFlow.AddChildVertex(seg);
             return seg;
@@ -121,6 +121,6 @@ public static class SegmentExtension
         var s = seg.BitPStart?.Name;
         var r = seg.BitPReset?.Name;
         var e = seg.TagPEnd?.Name;
-        Global.Logger.Debug($"Tags for segment [{seg.QualifiedName}]:({s}, {r}, {e})");
+        LogDebug($"Tags for segment [{seg.QualifiedName}]:({s}, {r}, {e})");
     }
 }

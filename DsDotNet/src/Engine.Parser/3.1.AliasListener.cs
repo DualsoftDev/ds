@@ -1,12 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Engine.Core;
-
 namespace Engine.Parser
 {
     class AliasListener : dsBaseListener
@@ -78,7 +69,7 @@ namespace Engine.Parser
                 .Select(mne => mne.GetText())
                 .ToArray()
                 ;
-            Debug.Assert(aliasMnemonics.Length == aliasMnemonics.Distinct().Count());
+            DAssert(aliasMnemonics.Length == aliasMnemonics.Distinct().Count());
 
             //var defInstance = _model.FindObject<object>(def);
 
@@ -87,8 +78,8 @@ namespace Engine.Parser
         override public void ExitAlias(dsParser.AliasContext ctx)
         {
             var bwd = ParserHelper.BackwardAliasMaps[_system];
-            Debug.Assert(ParserHelper.AliasNameMaps[_system].Count() == 0);
-            Debug.Assert(bwd.Values.Count() == bwd.Values.Distinct().Count());
+            DAssert(ParserHelper.AliasNameMaps[_system].Count() == 0);
+            DAssert(bwd.Values.Count() == bwd.Values.Distinct().Count());
             var reversed =
                 from tpl in bwd
                 let k = tpl.Key

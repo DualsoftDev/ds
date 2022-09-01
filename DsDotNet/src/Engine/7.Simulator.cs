@@ -1,13 +1,8 @@
-using Engine.Common;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reactive.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
-using static Microsoft.FSharp.Core.ByRefKinds;
+using static Engine.Core.GlobalShortCuts;
+
 
 namespace Engine
 {
@@ -48,7 +43,7 @@ namespace Engine
                     yield return ($"StartActual_{f}_Vp",
                         (bit, val) => Task.Run(async () => {
                             var opcOpposite = opc.GetTag($"StartActual_{f}_Vm");
-                            Global.Logger.Debug($"Tag/Actuator {bit.Name} = {val}");
+                            LogDebug($"Tag/Actuator {bit.Name} = {val}");
                             if (val)
                             {
                                 Console.Beep(800, 200);
@@ -64,7 +59,7 @@ namespace Engine
                     yield return ($"StartActual_{f}_Vm",
                         (bit, val) => Task.Run(async () => {
                             var opcOpposite = opc.GetTag($"StartActual_{f}_Vp");
-                            Global.Logger.Debug($"Tag/Actuator {bit.Name} = {val}");
+                            LogDebug($"Tag/Actuator {bit.Name} = {val}");
                             if (val)
                             {
                                 Console.Beep(1600, 200);
@@ -79,14 +74,14 @@ namespace Engine
 
                     yield return ($"EndActual_{f}_Sp",
                         (bit, val) => Task.Run(async () => {
-                            Global.Logger.Debug($"Tag/Sensor {bit.Name} = {val}");
+                            LogDebug($"Tag/Sensor {bit.Name} = {val}");
                             var opcOpposite = opc.GetTag($"EndActual_{f}_Sm");
                             Global.Verify($"Exclusive error: {bit.Name}", !val || opcOpposite.Value == false);
                         }));
 
                     yield return ($"EndActual_{f}_Sm",
                         (bit, val) => Task.Run(async () => {
-                            Global.Logger.Debug($"Tag/Sensor {bit.Name} = {val}");
+                            LogDebug($"Tag/Sensor {bit.Name} = {val}");
                             var opcOpposite = opc.GetTag($"EndActual_{f}_Sp");
                             Global.Verify($"Exclusive error: {bit.Name}", !val || opcOpposite.Value == false);
                         }));

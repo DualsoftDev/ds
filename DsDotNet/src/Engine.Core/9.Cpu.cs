@@ -56,13 +56,10 @@ public class Cpu : Named, ICpu
 
 public static class CpuExtension
 {
-    static ILog Logger => Global.Logger;
-
-
     public static void PrintTags(this Cpu cpu)
     {
         var tagNames = string.Join("\r\n\t", cpu.BitsMap.Values.OfType<Tag>().Select(t => t.Name));
-        Logger.Debug($"{cpu.Name} tags:\r\n\t{tagNames}");
+        LogDebug($"{cpu.Name} tags:\r\n\t{tagNames}");
     }
 
     public static void PrintAllTags(this Cpu cpu, bool expand)
@@ -78,7 +75,7 @@ public static class CpuExtension
         }
         helper()
             .OrderBy(x => x)
-            .Iter(Logger.Debug)
+            .Iter(LogDebug)
             ;
     }
 

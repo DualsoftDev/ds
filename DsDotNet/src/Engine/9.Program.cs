@@ -39,7 +39,7 @@ class Program
     }
     static void Main(string[] args)
     {
-        PrepareThreadPool();
+        //PrepareThreadPool();
         PrepareLog4Net();
         //Tester.DoSampleTestVps();
         //Tester.DoSampleTest();

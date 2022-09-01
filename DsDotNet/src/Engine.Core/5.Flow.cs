@@ -15,8 +15,8 @@ public abstract class Flow : Named, IWallet
     }
     public void AddChildVertex(IVertex child)
     {
-        Debug.Assert(this is RootFlow || child is Child);
-        Debug.Assert(!(child is CallPrototype));
+        DAssert(this is RootFlow || child is Child);
+        DAssert(!(child is CallPrototype));
         _childVertices.Add(child);
     }
 
@@ -81,8 +81,6 @@ public class ChildFlow : Flow
 
 public static class FlowExtension
 {
-    static ILog Logger => Global.Logger;
-
     public static DsSystem GetSystem(this Flow flow)
     {
         switch(flow)
@@ -172,8 +170,8 @@ public static class FlowExtension
     public static void PrintFlow(this Flow flow)
     {
         var active = flow.Cpu.IsActive ? "Active " : "";
-        Logger.Debug($"== {active}Flow {flow.GetSystem().Name}::{flow.Name}");
+        LogDebug($"== {active}Flow {flow.GetSystem().Name}::{flow.Name}");
         foreach (var v in flow.ChildVertices)
-            Logger.Debug(v.ToString());
+            LogDebug(v.ToString());
     }
 }

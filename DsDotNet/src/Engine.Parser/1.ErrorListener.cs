@@ -1,12 +1,7 @@
 // Template generated code from Antlr4BuildTasks.Template v 8.17
 namespace Engine.Parser;
 
-using Antlr4.Runtime;
-using Antlr4.Runtime.Misc;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 public class ErrorListener<S> : ConsoleErrorListener<S>
 {

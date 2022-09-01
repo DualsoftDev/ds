@@ -23,7 +23,7 @@ public static class ModelExtension
             if (n == 2)
                 return task as T;
             var callProto = task.CallPrototypes.FirstOrDefault(c => c.Name == tokens[2]);
-            Debug.Assert(n == 3);
+            DAssert(n == 3);
             return callProto as T;
         }
 

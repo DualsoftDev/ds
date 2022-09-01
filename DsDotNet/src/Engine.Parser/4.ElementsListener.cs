@@ -1,18 +1,5 @@
 // from cytoscpaeVisitor.ts
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Antlr4.Runtime;
-using Antlr4.Runtime.Tree;
-
-using Engine.Common;
-using Engine.Core;
-
 namespace Engine.Parser;
 
 //enum NodeType = "system" | "task" | "call" | "proc" | "func" | "segment" | "expression" | "conjunction";
@@ -219,7 +206,7 @@ partial class ElementsListener : dsBaseListener
     override public void EnterCausalTokensDNF(dsParser.CausalTokensDNFContext ctx) {
         if (this.left != null)
         {
-            Debug.Assert(this.op != null);  //, 'operator expected');
+            DAssert(this.op != null);  //, 'operator expected');
 
             Trace.WriteLine($"CausalTokensDNF per operator: {left.GetText()} + {op.GetText()} + {ctx.GetText()}");
 

@@ -16,7 +16,7 @@ internal class FlipFlop : Bit, IBitWritable
     public FlipFlop(Cpu cpu, string name, IBit set, IBit reset, bool value=false)
         : base(cpu, name, value)
     {
-        Debug.Assert(set != null && reset != null);
+        DAssert(set != null && reset != null);
         S = set;
         R = reset;
         if (S is Bit s)

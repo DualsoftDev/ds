@@ -3,11 +3,10 @@ namespace UnitTest.Engine
 
 open Xunit
 open Engine.Core
-open System.Reactive.Linq
+open Engine.Runner
 open Engine.Common.FS
 open Xunit.Abstractions
 open System
-open FSharpPlus
 
 [<AutoOpen>]
 module LatchTest =

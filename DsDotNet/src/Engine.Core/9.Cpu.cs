@@ -24,6 +24,8 @@ public class Cpu : Named, ICpu
     /// <summary>CPU queue 에 더 처리할 내용이 있음을 외부에 알리기 위한 flag</summary>
     public bool ProcessingQueue { get; internal set; }
     /// <summary>외부에서 CPU 를 멈추거나 가동하기 위한 flag</summary>
+    public Action<BitChange, bool> Apply { get; internal set; }
+
     public bool Running { get; set; } = true;
     public bool NeedWait => Running && (ProcessingQueue || Queue.Count > 0);
 

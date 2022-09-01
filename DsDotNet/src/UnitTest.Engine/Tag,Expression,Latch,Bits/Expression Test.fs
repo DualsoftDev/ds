@@ -4,9 +4,9 @@ namespace UnitTest.Engine
 open Xunit
 open Engine.Core
 open Engine.Common.FS
+open Engine.Runner
 open Xunit.Abstractions
 open System
-open System.Threading
 
 [<AutoOpen>]
 module ExpressionTest =

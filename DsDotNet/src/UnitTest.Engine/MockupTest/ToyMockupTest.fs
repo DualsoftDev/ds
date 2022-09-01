@@ -4,6 +4,7 @@ namespace UnitTest.Mockup.Engine
 open Xunit
 open Engine.Core
 open Engine.Common.FS
+open Engine.Runner
 open Xunit.Abstractions
 open UnitTest.Engine
 

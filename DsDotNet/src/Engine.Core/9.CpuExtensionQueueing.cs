@@ -67,7 +67,6 @@ public static class CpuExtensionQueueing
         var q = cpu.Queue;
 
         Debug.Assert(cpu.FFSetterMap != null);
-        cpu.BuildFlipFlopMapOnDemand();
 
         cpu.DbgNestingLevel++;
         var bits = bitChanges.ToDictionary(bc => bc.Bit, bc => bc);
@@ -240,20 +239,22 @@ public static class CpuExtensionQueueing
         var bit = (Bit)bitChange.Bit;
         //Global.Logger.Debug($"\t=({indent}) Applying bitchange {bitChange}");
 
-        if (bit.Name == "ResetPlan_L_F_Main")
-            Global.NoOp();
-
         var bitChanged = false;
         if (bit is IBitWritable writable)
         {
-            writable.SetValue(bitChange.NewValue);
+            if (bit.Value != bitChange.NewValue)
+            {
+                writable.SetValue(bitChange.NewValue);
+                bitChanged = true;
+            }
+        }
+        else if (bit is PortInfo)
+        {
+            Debug.Assert(bit.Value == bitChange.NewValue);
             bitChanged = true;
         }
         else
-        {
-            Debug.Assert(bit.Value == bitChange.NewValue);
-            bitChanged = bit is PortInfo;
-        }
+            Debug.Assert(false);
 
         if (bitChanged)
         {

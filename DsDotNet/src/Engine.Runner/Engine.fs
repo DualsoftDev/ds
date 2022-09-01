@@ -43,6 +43,7 @@ module EngineModule =
                 if (cpu.TagsMap.ContainsKey(tagName)) then
                     let tag = cpu.TagsMap[tagName]
                     if tag.Value <> value then
+                        logDebug $"OPC Tag [{tagName}] 변경"
                         cpu.Enqueue(tag, value, $"OPC Tag [{tagName}] 변경");      //! setter 에서 BitChangedSubject.OnNext --> onBitChanged 가 호출된다.
 
             /// OPC Server 에서 Cpu 가 가지고 있는 tag 값들을 읽어 들임
@@ -94,9 +95,8 @@ module EngineModule =
                     // OPC server 쪽에서 tag 값 변경시, 해당 tag 를 가지고 있는 모든 CPU 에 event 를 전달한다.
                     yield Global.TagChangeFromOpcServerSubject
                         .Subscribe(fun tc ->
-                            cpus
-                            |> Seq.filter(fun cpu -> cpu.TagsMap.ContainsKey(tc.TagName))
-                            |> Seq.iter(fun cpu -> onOpcTagChanged cpu tc))
+                            let cpusA = cpus |> Seq.filter(fun cpu -> cpu.TagsMap.ContainsKey(tc.TagName)) |> Array.ofSeq
+                            cpusA |> Seq.iter(fun cpu -> onOpcTagChanged cpu tc))
 
                     for cpu in cpus do
                         readTagsFromOpc cpu opc

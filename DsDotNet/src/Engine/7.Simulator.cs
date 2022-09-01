@@ -23,7 +23,7 @@ namespace Engine
 
             Global.BitChangedSubject
                 .Where(bc => bc.Bit is Bit)
-                .Subscribe(async bc =>
+                .Subscribe(bc =>
                 {
                     var bit = bc.Bit as Bit;
                     var n = bit.GetName();

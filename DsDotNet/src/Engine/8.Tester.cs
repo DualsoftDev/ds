@@ -351,7 +351,7 @@ public class Tester
     }
 }
 [addresses] = {
-	//L.F.Main = (%0, %0,);
+	L.F.Main = (%0, %1,);
 	A.F.Vp = (%Q123.23, ,);
 	A.F.Vm = (%Q123.24, ,);
 	B.F.Vp = (%Q123.25, ,);
@@ -456,14 +456,18 @@ public class Tester
                     if (monitors.Contains(n))
                     {
                         Global.Logger.Debug($"Plan for TAG {n} value={val}");
-                        if (n == "StartPlan_A_F_Vp")
-                            opc.Write("StartActual_A_F_Vp", val);
-                        else if (n == "StartPlan_B_F_Vp")
-                            opc.Write("StartActual_B_F_Vp", val);
-                        else if (n == "StartPlan_A_F_Vm")
-                            opc.Write("StartActual_A_F_Vm", val);
-                        else if (n == "StartPlan_B_F_Vm")
-                            opc.Write("StartActual_B_F_Vm", val);
+
+                        //if (val)
+                        {
+                            if (n == "StartPlan_A_F_Vp")
+                                opc.Write("StartActual_A_F_Vp", val);
+                            else if (n == "StartPlan_B_F_Vp")
+                                opc.Write("StartActual_B_F_Vp", val);
+                            else if (n == "StartPlan_A_F_Vm")
+                                opc.Write("StartActual_A_F_Vm", val);
+                            else if (n == "StartPlan_B_F_Vm")
+                                opc.Write("StartActual_B_F_Vm", val);
+                        }
 
                         //else if (n == "EndPlan_A_F_Sp")
                         //    opc.Write("EndActual_A_F_Sp", val);

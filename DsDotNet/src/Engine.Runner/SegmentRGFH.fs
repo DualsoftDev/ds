@@ -125,7 +125,7 @@ module internal SegmentRGFHModule =
                                     finishedChild.IsFlipped <- true
                                     for st in finishedChild.TagsStart do
                                         assert(not st.Value)
-                                        //write(st, false, $"Child {finishedChild.QualifiedName} finished")
+                                        write(st, false, $"Child {finishedChild.QualifiedName} finished")
                             
                                     if (seg.Children.ForAll(fun ch -> ch.IsFlipped)) then
                                         write(seg.PortE, true, $"{seg.QualifiedName} GOING 끝 (모든 child end)")                                    
@@ -187,7 +187,7 @@ module internal SegmentRGFHModule =
         [|
             BitChange(seg.Going, false, $"{seg.QualifiedName} FINISH")
             BitChange(seg.TagPEnd, true, $"Finishing {seg.QualifiedName}")
-            //BitChange(seg.TagPStart, false, $"Finishing {seg.QualifiedName}")
+            BitChange(seg.TagPStart, false, $"Finishing {seg.QualifiedName}")
         |] |> writer
 
     let procHoming(segment:SegmentBase, writer:ChangeWriter, onError:ExceptionHandler) =

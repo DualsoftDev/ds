@@ -52,7 +52,22 @@ public class OpcBroker
     {
         foreach (var opcTag in tags.Select(t => new OpcTag(t)))
             if (_tagDic.ContainsKey(opcTag.Name))
+            {
+                var existing = _tagDic[opcTag.Name];
+                Debug.Assert(existing.Name == opcTag.Name);
+                switch (existing.OriginalTag, opcTag.OriginalTag)
+                {
+                    case (TagA exs, TagA neo):
+                        Debug.Assert(exs.Address == neo.Address);
+                        break;
+                    case (TagA tagA, Tag neo): break;
+                    case (Tag exs, TagA neo):
+                        _tagDic[opcTag.Name] = opcTag;
+                        break;
+                }
+
                 Global.Logger.Debug($"OPC: tag[{opcTag.Name}] duplicated.");
+            }
             else
                 _tagDic.Add(opcTag.Name, opcTag);
     }

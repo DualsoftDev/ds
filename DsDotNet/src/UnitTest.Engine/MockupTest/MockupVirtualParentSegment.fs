@@ -116,7 +116,7 @@ type MockupVirtualParentSegment(name, target:MockupSegment, causalSourceSegments
 
     override x.WireEvent(writer, onError) =
         let write(bit, value, cause) =
-            writer([| BitChange(bit, value, cause, onError) |])
+            writer(BitChange(bit, value, cause, onError))
 
         let onError =
             fun (ex:Exception) ->

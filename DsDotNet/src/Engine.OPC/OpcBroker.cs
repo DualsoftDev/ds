@@ -14,7 +14,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Reactive.Disposables;
 using static Engine.Core.GlobalShortCuts;
@@ -35,7 +34,7 @@ public class OpcTag : Bit, IBitReadWritable
 
 public class OpcBroker
 {
-    Dictionary<string, OpcTag> _tagDic = new Dictionary<string, OpcTag>();
+    Dictionary<string, OpcTag> _tagDic = new();
     public OpcTag GetTag(string name) => _tagDic.ContainsKey(name) ? _tagDic[name] : null;
     public IEnumerable<string> Tags => _tagDic.Values.Select(ot => ot.Name);
 
@@ -54,13 +53,13 @@ public class OpcBroker
     internal List<LsTag> LsBits = new();
     internal Dictionary<string, int> IdxLsBits = new();
 
-    internal LsConnection Conn =
+    internal LsConnection Conn = Core.Global.IsControlMode ?
         new LsConnection(
             new LsConnectionParameters(
                 "192.168.0.100", new FSharpOption<ushort>(2004),
                 TransportProtocol.Tcp, 3000.0
             )
-        );
+        ) : null;
 
     public OpcBroker()
     {
@@ -117,13 +116,14 @@ public class OpcBroker
 
     public void AddLsBits(string tagName, string memAddr)
     {
+        if (Conn == null) return;
         Console.WriteLine(tagName  + " : " + memAddr);
         LsBits.Add((LsTag)Conn.CreateTag(memAddr));
         IdxLsBits[tagName] = IdxLsBits.Count;
         LsBits.Last().Value = false;
     }
 
-    public void UpdateListBits(string tagName, bool value)
+    public void UpdateLsBits(string tagName, bool value)
     {
         var idx = IdxLsBits[tagName];
         LsBits[idx].Value = value;
@@ -142,10 +142,10 @@ public class OpcBroker
             if (bit.Value != value)
             {
                 bit.SetValue(value);
-                if (tagToAddr.ContainsKey(tagName))
+                if (tagToAddr.ContainsKey(tagName) && Conn != null)
                 {
                     Console.WriteLine("Write - " + tagName + " : " + value);
-                    UpdateListBits(tagName, value);
+                    UpdateLsBits(tagName, value);
                 }
                 Core.Global.TagChangeFromOpcServerSubject.OnNext(new OpcTagChange(tagName, value));
             }
@@ -163,7 +163,6 @@ public class OpcBroker
             var bit = _tagDic[tagName];
             if (bit.Value != value)
             {
-                Conn.WriteRandomTags(LsBits.ToArray());
                 Console.WriteLine("Read - " + tagName + " : " + value);
                 bit.SetValue(value);
                 Core.Global.TagChangeFromOpcServerSubject.OnNext(new OpcTagChange(tagName, value));
@@ -201,15 +200,6 @@ public class OpcBroker
         if (Conn.Connect())
         {
             Conn.AddMonitoringTags(LsBits);
-            //LsBits[IdxLsBits["StartActual_A_F_Plus"]].Value = false;
-            //LsBits[IdxLsBits["StartActual_B_F_Plus"]].Value = false;
-            //LsBits[IdxLsBits["StartActual_C_F_Plus"]].Value = false;
-            //LsBits[IdxLsBits["StartActual_D_F_Plus"]].Value = false;
-            //LsBits[IdxLsBits["StartActual_A_F_Minus"]].Value = false;
-            //LsBits[IdxLsBits["StartActual_B_F_Minus"]].Value = false;
-            //LsBits[IdxLsBits["StartActual_C_F_Minus"]].Value = false;
-            //LsBits[IdxLsBits["StartActual_D_F_Minus"]].Value = false;
-            Conn.WriteRandomTags(LsBits.ToArray());
             Conn.Subject
                 .OfType<TagValueChangedEvent>()
                 .Subscribe(evt =>

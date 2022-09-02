@@ -89,7 +89,7 @@ module EngineModule =
                 cpu.PrintAllTags(true);
                 logDebug "====================="
 
-            Thread.Sleep(5000)
+            Thread.Sleep(1000)
 
             let subscriptions =
                 [

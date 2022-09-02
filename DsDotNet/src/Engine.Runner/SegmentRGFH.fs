@@ -79,6 +79,25 @@ module internal SegmentRGFHModule =
     let stopMonitorOriginating (seg:SegmentBase) =
         stopMonitor originatingSubscriptions seg
 
+
+    /// tag 값의 변경으로 인해, going 중 finish 상태가 되는 child 가 존재하면 그것의 start 출력을 끊는다.
+    let turnOffStartForFinishedChildren(write:BitWriter, tag:Tag, monitoringChildren:Child seq) =
+        let finishedChildren =
+            monitoringChildren
+                .Where(fun ch ->
+                    ch.Status = Nullable Status4.Going
+                    && ch.TagsEnd.Contains(tag)
+                    && ch.TagsEnd.ForAll(fun t -> t.Value))
+                    .ToArray()
+        assert(finishedChildren.Length = 0 || finishedChildren.Length = 1 )
+        let finishedChild = finishedChildren.FirstOrDefault()
+        if finishedChild <> null then
+            logInfo $"Progress: Child {finishedChild.QualifiedName} originated."
+            for st in finishedChild.TagsStart do
+                write(st, false, $"Child {finishedChild.QualifiedName} originated")
+        finishedChild
+
+
     let procReady(segment:SegmentBase, writer:ChangeWriter) =
         let seg = segment :?> Segment
         assert( [seg.TagPStart; seg.TagPReset; seg.TagPEnd].ForAll(fun t -> not t.Value ))     // A_F_Pp.TagEnd 가 true 되는 상태???
@@ -107,21 +126,11 @@ module internal SegmentRGFHModule =
                         .Where(childRxTags.Contains)
                         .Subscribe(fun tag ->
                             try
-                                let finishedChildren =
-                                    seg.Children
-                                        .Where(fun ch ->
-                                            ch.Status = Nullable Status4.Going
-                                            && ch.TagsEnd.Contains(tag)
-                                            && ch.TagsEnd.ForAll(fun t -> t.Value))
-                                            .ToArray()
-                                assert(finishedChildren.Length = 0 || finishedChildren.Length = 1 )
-                                let finishedChild = finishedChildren.FirstOrDefault()
+                                let finishedChild = turnOffStartForFinishedChildren(write, tag, seg.Children)
                                 if finishedChild <> null then
                                     logInfo $"Progress: Child {finishedChild.QualifiedName} finish detected."
                                     finishedChild.Status <- Status4.Finished
                                     finishedChild.IsFlipped <- true
-                                    for st in finishedChild.TagsStart do
-                                        write(st, false, $"Child {finishedChild.QualifiedName} finished")
                             
                                     if (seg.Children.ForAll(fun ch -> ch.IsFlipped)) then
                                         write(seg.PortE, true, $"{seg.QualifiedName} GOING 끝 (모든 child end)")                                    
@@ -209,6 +218,7 @@ module internal SegmentRGFHModule =
                     .Where(fun t -> t.Value)    // ON child
                     .Where(childRxTags.Contains)
                     .Subscribe(fun tag ->
+                        turnOffStartForFinishedChildren(write, tag, originTargets) |> ignore
                         // originTargets 모두 원위치인지 확인
                         let isOrigin = originTargets.ForAll(fun ch -> ch.TagsEnd.ForAll(fun t -> t.Value))
                         if isOrigin then

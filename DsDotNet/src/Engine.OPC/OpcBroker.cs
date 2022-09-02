@@ -15,6 +15,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Reactive.Disposables;
 using static Engine.Core.GlobalShortCuts;
 
@@ -132,7 +133,7 @@ public class OpcBroker
     public void Write(string tagName, bool value)
     {
         if (tagName == "ResetPlan_L_F_Main")
-            Global.NoOp();
+            Core.Global.NoOp();
 
         // unit test 가 아니라면 무조건 실행되어야 할 부분.  unit test 에서만 생략 가능
         void doWrite()

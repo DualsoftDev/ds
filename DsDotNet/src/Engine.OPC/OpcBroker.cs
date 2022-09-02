@@ -163,7 +163,6 @@ public class OpcBroker
             var bit = _tagDic[tagName];
             if (bit.Value != value)
             {
-                LsBits[IdxLsBits[tagName] - 1].Value = false;
                 Conn.WriteRandomTags(LsBits.ToArray());
                 Console.WriteLine("Read - " + tagName + " : " + value);
                 bit.SetValue(value);
@@ -202,14 +201,14 @@ public class OpcBroker
         if (Conn.Connect())
         {
             Conn.AddMonitoringTags(LsBits);
-            LsBits[IdxLsBits["StartActual_A_F_Plus"]].Value = false;
-            LsBits[IdxLsBits["StartActual_B_F_Plus"]].Value = false;
-            LsBits[IdxLsBits["StartActual_C_F_Plus"]].Value = false;
-            LsBits[IdxLsBits["StartActual_D_F_Plus"]].Value = false;
-            LsBits[IdxLsBits["StartActual_A_F_Minus"]].Value = false;
-            LsBits[IdxLsBits["StartActual_B_F_Minus"]].Value = false;
-            LsBits[IdxLsBits["StartActual_C_F_Minus"]].Value = false;
-            LsBits[IdxLsBits["StartActual_D_F_Minus"]].Value = false;
+            //LsBits[IdxLsBits["StartActual_A_F_Plus"]].Value = false;
+            //LsBits[IdxLsBits["StartActual_B_F_Plus"]].Value = false;
+            //LsBits[IdxLsBits["StartActual_C_F_Plus"]].Value = false;
+            //LsBits[IdxLsBits["StartActual_D_F_Plus"]].Value = false;
+            //LsBits[IdxLsBits["StartActual_A_F_Minus"]].Value = false;
+            //LsBits[IdxLsBits["StartActual_B_F_Minus"]].Value = false;
+            //LsBits[IdxLsBits["StartActual_C_F_Minus"]].Value = false;
+            //LsBits[IdxLsBits["StartActual_D_F_Minus"]].Value = false;
             Conn.WriteRandomTags(LsBits.ToArray());
             Conn.Subject
                 .OfType<TagValueChangedEvent>()

@@ -19,7 +19,7 @@ namespace Engine.Core.Obsolete
     {
         public override void SetValue(bool newValue)    // PortInfoEnd
         {
-            DAssert(Plan.Value == _value);
+            Assert(Plan.Value == _value);
 
             if (Plan.Value != newValue)
             {
@@ -28,7 +28,7 @@ namespace Engine.Core.Obsolete
                 if (Plan is IBitWritable wPlan)
                     wPlan.SetValue(newValue);
                 else
-                    DAssert(Plan.Value == newValue);
+                    Assert(Plan.Value == newValue);
 
                 _value = newValue;
             }
@@ -36,13 +36,13 @@ namespace Engine.Core.Obsolete
 
         public override bool PlanValueChanged(bool newValue)    // PortInfoEnd
         {
-            DAssert(Plan.Value == newValue);
+            Assert(Plan.Value == newValue);
             CheckMatch(newValue);
             return Actual == null || Actual.Value == newValue;
         }
         public override bool ActualValueChanged(bool newValue)
         {
-            DAssert(Actual.Value == newValue);
+            Assert(Actual.Value == newValue);
             if (Plan.Value != newValue)
                 throw new DsException($"Spatial Error: Plan[{Plan}={Plan.Value}] <> Actual[{Actual.Value}]");
 
@@ -59,7 +59,7 @@ namespace Engine.Core.Obsolete
         //    if (Plan is IBitWritable w)
         //        w.SetValue(newValue);
         //    else
-        //        DAssert(Evaluate() == newValue);
+        //        Assert(Evaluate() == newValue);
 
         //    _value = newValue;
         //    Actual?.SetValue(newValue);
@@ -67,7 +67,7 @@ namespace Engine.Core.Obsolete
 
         public override bool PlanValueChanged(bool newValue)    // PortInfoCommand
         {
-            DAssert(Plan.Value == newValue);
+            Assert(Plan.Value == newValue);
             Actual?.SetValue(newValue);
             //SetValue(newValue);
             return true;

@@ -85,7 +85,7 @@ public static class CpuExtensionQueueing
     //    var fwd = cpu.ForwardDependancyMap;
     //    var q = cpu.Queue;
 
-    //    DAssert(cpu.FFSetterMap != null);
+    //    Assert(cpu.FFSetterMap != null);
 
     //    cpu.DbgNestingLevel++;
     //    var bits = bitChanges.ToDictionary(bc => bc.Bit, bc => bc);
@@ -110,7 +110,7 @@ public static class CpuExtensionQueueing
     //                {
     //                    if (bits.ContainsKey(pi.Plan))
     //                    {
-    //                        //DAssert(pi.Plan.Value != pi.Actual?.Value);
+    //                        //Assert(pi.Plan.Value != pi.Actual?.Value);
     //                        if (pi.Actual == null || pi.Plan.Value == pi.Actual.Value)
     //                            bc = new BitChange(dep, bits[pi.Plan].NewValue, pi.Plan, bits[pi.Plan].OnError);
     //                        else
@@ -170,7 +170,7 @@ public static class CpuExtensionQueueing
         var fwd = cpu.ForwardDependancyMap;
         var q = cpu.Queue;
 
-        DAssert(cpu.FFSetterMap != null);
+        Assert(cpu.FFSetterMap != null);
 
         cpu.DbgNestingLevel++;
         var bit = (Bit)bitChange.Bit;
@@ -200,7 +200,7 @@ public static class CpuExtensionQueueing
                     {
                         if (pi.Plan == bit)
                         {
-                            //DAssert(pi.Plan.Value != pi.Actual?.Value);
+                            //Assert(pi.Plan.Value != pi.Actual?.Value);
                             if (pi.Actual == null || pi.Plan.Value == pi.Actual.Value)
                                 bc = new BitChange(dep, bitChange.NewValue, bit, bitChange.OnError);
                             else
@@ -265,11 +265,11 @@ public static class CpuExtensionQueueing
         }
         else if (bit is PortInfo)
         {
-            DAssert(bit.Value == bitChange.NewValue);
+            Assert(bit.Value == bitChange.NewValue);
             bitChanged = true;
         }
         else
-            DAssert(false);
+            Assert(false);
 
         if (bitChanged)
         {
@@ -315,9 +315,9 @@ public static class CpuExtensionQueueing
     /// <summary> Bit 의 값 변경 처리를 CPU 에 위임.  즉시 수행되지 않고, CPU 의 Queue 에 추가 된 후, CPU thread 에서 수행된다.  </summary>
     public static void Enqueue(this Cpu cpu, BitChange bitChange)
     {
-        DAssert(bitChange.Bit.Cpu == cpu);
+        Assert(bitChange.Bit.Cpu == cpu);
 
-        //DAssert(bitChange.Bit.Value != bitChange.NewValue);
+        //Assert(bitChange.Bit.Value != bitChange.NewValue);
 
         switch (bitChange.Bit)
         {
@@ -351,8 +351,8 @@ public static class CpuExtensionQueueing
 
     public static void BuildBitDependencies(this Cpu cpu)
     {
-        DAssert(cpu.ForwardDependancyMap.IsNullOrEmpty());
-        DAssert(cpu.BackwardDependancyMap.IsNullOrEmpty());
+        Assert(cpu.ForwardDependancyMap.IsNullOrEmpty());
+        Assert(cpu.BackwardDependancyMap.IsNullOrEmpty());
 
         cpu.BackwardDependancyMap = new();
 

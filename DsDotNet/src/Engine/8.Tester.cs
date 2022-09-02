@@ -1,7 +1,6 @@
 using System.Reactive.Linq;
 using System.Threading;
 using Engine.Graph;
-using static Engine.Core.GlobalShortCuts;
 
 namespace Engine;
 
@@ -94,7 +93,7 @@ public class Tester
 }
 ";
 
-        DAssert(!Global.IsInUnitTest);
+        Assert(!Global.IsInUnitTest);
         var engine = new EngineBuilder(text, "Cpu").Engine;
         Program.Engine = engine;
         engine.Run();
@@ -200,7 +199,7 @@ public class Tester
 }
 
 ";
-        DAssert(!Global.IsInUnitTest);
+        Assert(!Global.IsInUnitTest);
         var engine = new EngineBuilder(text, "Cpu").Engine;
         Program.Engine = engine;
         engine.Run();
@@ -243,7 +242,7 @@ public class Tester
 " + CreateCylinder("A")
 ;
 
-        DAssert(!Global.IsInUnitTest);
+        Assert(!Global.IsInUnitTest);
         var engine = new EngineBuilder(text, "Cpu").Engine;
         Program.Engine = engine;
         engine.Run();
@@ -324,7 +323,7 @@ public class Tester
                 });
         }
 
-        DAssert(engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(startTag));
+        Assert(engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(startTag));
         opc.Write("Auto_L_F", true);
         opc.Write(startTag, true);
 
@@ -376,7 +375,7 @@ public class Tester
 
         //Log4NetHelper.ChangeLogLevel(log4net.Core.Level.Error);
 
-        DAssert(!Global.IsInUnitTest);
+        Assert(!Global.IsInUnitTest);
         var engine = new EngineBuilder(text, "Cpu").Engine;
         Program.Engine = engine;
         engine.Run();
@@ -439,27 +438,27 @@ public class Tester
                 ;
         oneCycleHistory.Subscribe(o =>
         {
-            DAssert(o[ 0].TagName == "StartActual_A_F_Vp"   && o[ 0].Value == true);   // a+
-            DAssert(o[ 1].TagName == "EndActual_A_F_Sm"     && o[ 1].Value == false);  // !A-
-            DAssert(o[ 2].TagName == "EndActual_A_F_Sp"     && o[ 2].Value == true);   // A+
-            DAssert(o[ 3].TagName == "StartActual_A_F_Vp"   && o[ 3].Value == false);  // !a+
+            Assert(o[ 0].TagName == "StartActual_A_F_Vp"   && o[ 0].Value == true);   // a+
+            Assert(o[ 1].TagName == "EndActual_A_F_Sm"     && o[ 1].Value == false);  // !A-
+            Assert(o[ 2].TagName == "EndActual_A_F_Sp"     && o[ 2].Value == true);   // A+
+            Assert(o[ 3].TagName == "StartActual_A_F_Vp"   && o[ 3].Value == false);  // !a+
 
 
-            DAssert(o[ 4].TagName == "StartActual_B_F_Vp"   && o[ 4].Value == true);   // b+
-            DAssert(o[ 5].TagName == "EndActual_B_F_Sm"     && o[ 5].Value == false);  // !B-
-            DAssert(o[ 6].TagName == "EndActual_B_F_Sp"     && o[ 6].Value == true);   // B+
-            DAssert(o[ 7].TagName == "StartActual_B_F_Vp"   && o[ 7].Value == false);  // !b+
+            Assert(o[ 4].TagName == "StartActual_B_F_Vp"   && o[ 4].Value == true);   // b+
+            Assert(o[ 5].TagName == "EndActual_B_F_Sm"     && o[ 5].Value == false);  // !B-
+            Assert(o[ 6].TagName == "EndActual_B_F_Sp"     && o[ 6].Value == true);   // B+
+            Assert(o[ 7].TagName == "StartActual_B_F_Vp"   && o[ 7].Value == false);  // !b+
 
 
-            DAssert(o[ 8].TagName == "StartActual_B_F_Vm"   && o[ 8].Value == true);   // b-
-            DAssert(o[ 9].TagName == "EndActual_B_F_Sp"     && o[ 9].Value == false);  // !B+
-            DAssert(o[10].TagName == "EndActual_B_F_Sm"     && o[10].Value == true);   // B-
-            DAssert(o[11].TagName == "StartActual_B_F_Vm"   && o[11].Value == false);  // !b-
+            Assert(o[ 8].TagName == "StartActual_B_F_Vm"   && o[ 8].Value == true);   // b-
+            Assert(o[ 9].TagName == "EndActual_B_F_Sp"     && o[ 9].Value == false);  // !B+
+            Assert(o[10].TagName == "EndActual_B_F_Sm"     && o[10].Value == true);   // B-
+            Assert(o[11].TagName == "StartActual_B_F_Vm"   && o[11].Value == false);  // !b-
 
-            DAssert(o[12].TagName == "StartActual_A_F_Vm"   && o[12].Value == true);   // a-
-            DAssert(o[13].TagName == "EndActual_A_F_Sp"     && o[13].Value == false);  // !A+
-            DAssert(o[14].TagName == "EndActual_A_F_Sm"     && o[14].Value == true);   // A-
-            DAssert(o[15].TagName == "StartActual_A_F_Vm"   && o[15].Value == false);  // !a-
+            Assert(o[12].TagName == "StartActual_A_F_Vm"   && o[12].Value == true);   // a-
+            Assert(o[13].TagName == "EndActual_A_F_Sp"     && o[13].Value == false);  // !A+
+            Assert(o[14].TagName == "EndActual_A_F_Sm"     && o[14].Value == true);   // A-
+            Assert(o[15].TagName == "StartActual_A_F_Vm"   && o[15].Value == false);  // !a-
         });
 
         //actuals
@@ -523,7 +522,7 @@ public class Tester
         }
 
 
-        DAssert(engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(startTag));
+        Assert(engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(startTag));
         opc.Write(startTag, true);
         opc.Write("Auto_L_F", true);
 
@@ -575,7 +574,7 @@ public class Tester
 
         //Log4NetHelper.ChangeLogLevel(log4net.Core.Level.Error);
 
-        DAssert(!Global.IsInUnitTest);
+        Assert(!Global.IsInUnitTest);
         var engine = new EngineBuilder(text, "Cpu").Engine;
         Program.Engine = engine;
         engine.Run();
@@ -654,36 +653,36 @@ public class Tester
                 ;
         oneCycleHistory.Subscribe(o =>
         {
-            DAssert(o[ 0].TagName == "StartActual_A_F_Vp"   && o[ 0].Value == true);   // a+
-            DAssert(o[ 1].TagName == "EndActual_A_F_Sm"     && o[ 1].Value == false);  // !A-
-            DAssert(o[ 2].TagName == "EndActual_A_F_Sp"     && o[ 2].Value == true);   // A+
-            DAssert(o[ 3].TagName == "StartActual_A_F_Vp"   && o[ 3].Value == false);  // !a+
+            Assert(o[ 0].TagName == "StartActual_A_F_Vp"   && o[ 0].Value == true);   // a+
+            Assert(o[ 1].TagName == "EndActual_A_F_Sm"     && o[ 1].Value == false);  // !A-
+            Assert(o[ 2].TagName == "EndActual_A_F_Sp"     && o[ 2].Value == true);   // A+
+            Assert(o[ 3].TagName == "StartActual_A_F_Vp"   && o[ 3].Value == false);  // !a+
 
-            DAssert(o[ 4].TagName == "StartActual_A_F_Vm"   && o[ 4].Value == true);   // a-
-            DAssert(o[ 5].TagName == "StartActual_B_F_Vp"   && o[ 5].Value == true);   // b+
+            Assert(o[ 4].TagName == "StartActual_A_F_Vm"   && o[ 4].Value == true);   // a-
+            Assert(o[ 5].TagName == "StartActual_B_F_Vp"   && o[ 5].Value == true);   // b+
 
             var notAp = o.FindIndex(otc => otc.TagName == "EndActual_A_F_Sp" && otc.Value == false);  // !A+
             var notBm = o.FindIndex(otc => otc.TagName == "EndActual_B_F_Sm" && otc.Value == false);  // !B-
 
-            DAssert(notAp.IsOneOf(6, 7) && notBm.IsOneOf(6, 7));
-            //DAssert(o[ 6].TagName == "EndActual_A_F_Sp"     && o[ 6].Value == false);  // !A+
-            //DAssert(o[ 7].TagName == "EndActual_B_F_Sm"     && o[ 7].Value == false);  // !B-
+            Assert(notAp.IsOneOf(6, 7) && notBm.IsOneOf(6, 7));
+            //Assert(o[ 6].TagName == "EndActual_A_F_Sp"     && o[ 6].Value == false);  // !A+
+            //Assert(o[ 7].TagName == "EndActual_B_F_Sm"     && o[ 7].Value == false);  // !B-
 
             var Bp      = o.FindIndex(otc => otc.TagName == "EndActual_B_F_Sp"     && otc.Value == true);   // B+
             var notbp   = o.FindIndex(otc => otc.TagName == "StartActual_B_F_Vp"   && otc.Value == false);  // !b+
             var Am      = o.FindIndex(otc => otc.TagName == "EndActual_A_F_Sm"     && otc.Value == true);   // A-
             var notam   = o.FindIndex(otc => otc.TagName == "StartActual_A_F_Vm"   && otc.Value == false);  // !a-
-            DAssert(new[] { Bp, notbp, Am, notam }.ForAll(n => n.IsOneOf(8, 9, 10, 11)));
-            DAssert(Bp < notbp && Am < notam);
-            //DAssert(o[ 8].TagName == "EndActual_B_F_Sp"     && o[ 8].Value == true);   // B+
-            //DAssert(o[ 9].TagName == "StartActual_B_F_Vp"   && o[ 9].Value == false);  // !b+
-            //DAssert(o[10].TagName == "EndActual_A_F_Sm"     && o[10].Value == true);   // A-
-            //DAssert(o[11].TagName == "StartActual_A_F_Vm"   && o[11].Value == false);  // !a-
+            Assert(new[] { Bp, notbp, Am, notam }.ForAll(n => n.IsOneOf(8, 9, 10, 11)));
+            Assert(Bp < notbp && Am < notam);
+            //Assert(o[ 8].TagName == "EndActual_B_F_Sp"     && o[ 8].Value == true);   // B+
+            //Assert(o[ 9].TagName == "StartActual_B_F_Vp"   && o[ 9].Value == false);  // !b+
+            //Assert(o[10].TagName == "EndActual_A_F_Sm"     && o[10].Value == true);   // A-
+            //Assert(o[11].TagName == "StartActual_A_F_Vm"   && o[11].Value == false);  // !a-
             
-            DAssert(o[12].TagName == "StartActual_B_F_Vm"   && o[12].Value == true);   // b-
-            DAssert(o[13].TagName == "EndActual_B_F_Sp"     && o[13].Value == false);  // !B+
-            DAssert(o[14].TagName == "EndActual_B_F_Sm"     && o[14].Value == true);   // B-
-            DAssert(o[15].TagName == "StartActual_B_F_Vm"   && o[15].Value == false);   // !b-
+            Assert(o[12].TagName == "StartActual_B_F_Vm"   && o[12].Value == true);   // b-
+            Assert(o[13].TagName == "EndActual_B_F_Sp"     && o[13].Value == false);  // !B+
+            Assert(o[14].TagName == "EndActual_B_F_Sm"     && o[14].Value == true);   // B-
+            Assert(o[15].TagName == "StartActual_B_F_Vm"   && o[15].Value == false);   // !b-
         });
 
         //actuals
@@ -747,7 +746,7 @@ public class Tester
         }
 
 
-        DAssert(engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(startTag));
+        Assert(engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(startTag));
         opc.Write(startTag, true);
         opc.Write("Auto_L_F", true);
 
@@ -772,7 +771,7 @@ public class Tester
 }
 ";
 
-        DAssert(!Global.IsInUnitTest);
+        Assert(!Global.IsInUnitTest);
         var engine = new EngineBuilder(text, "Cpu").Engine;
         Program.Engine = engine;
         engine.Run();
@@ -798,7 +797,7 @@ public class Tester
                 coutner[ssc.Segment] = coutner[ssc.Segment] + 1;
 
                 var avg = (int)coutner.Values.Average(s => s);
-                DAssert(coutner.Values.ForAll(v => Math.Abs(avg - v) <= 1));
+                Assert(coutner.Values.ForAll(v => Math.Abs(avg - v) <= 1));
 
                 if (ssc.Segment.QualifiedName == "L_F_B")
                 {
@@ -814,10 +813,10 @@ public class Tester
         var _checkOrderSubscription = finished.Buffer(3).Subscribe(sscs =>
         {
             var order = sscs.Select(ssc => ssc.Segment.Name).ToArray();
-            DAssert(order.SequenceEqual(new[] { "B", "R", "G", }));
+            Assert(order.SequenceEqual(new[] { "B", "R", "G", }));
         });
 
-        DAssert(engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(startTag));
+        Assert(engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(startTag));
         opc.Write(startTag, true);
         opc.Write("Auto_L_F", true);
 
@@ -862,7 +861,7 @@ public class Tester
 }
 ";
 
-        DAssert(!Global.IsInUnitTest);
+        Assert(!Global.IsInUnitTest);
         var engine = new EngineBuilder(text, "Cpu").Engine;
         Program.Engine = engine;
         engine.Run();
@@ -1053,7 +1052,7 @@ public class Tester
 }
 ";
 
-        DAssert(!Global.IsInUnitTest);
+        Assert(!Global.IsInUnitTest);
         var engine = new EngineBuilder(text, "Cpu").Engine;
         Program.Engine = engine;
         engine.Run();

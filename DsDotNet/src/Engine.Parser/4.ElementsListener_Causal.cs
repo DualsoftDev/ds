@@ -208,14 +208,14 @@ partial class ElementsListener
                     var r = this.nodes[strR];
 
                     Flow flow = (Flow)_parenting ?? _rootFlow;   // target flow
-                    DAssert(flow.Cpu != null);
+                    Assert(flow.Cpu != null);
 
                     var context = _parenting == null ? "" : CurrentPath;
 
                     var lvs = FindVertices(context, l);
                     var rvs = FindVertices(context, r);
 
-                    DAssert(l != null && r != null);   // 'node not found');
+                    Assert(l != null && r != null);   // 'node not found');
                     if (lvs.Length == 0) throw new Exception($"Parse error: {l.id} not found");
                     if (rvs.Length == 0) throw new Exception($"Parse error: {r.id} not found");
 
@@ -228,24 +228,24 @@ partial class ElementsListener
                         case ">>" : e = new StrongSetEdge  (flow, lvs, op, rvs[0]); break;
 
                         case "<|":
-                            DAssert(lvs.Length == 1);
+                            Assert(lvs.Length == 1);
                             e = new WeakResetEdge(flow, rvs, "|>", lvs[0]);
                             break;
                         case "<":
-                            DAssert(lvs.Length == 1);
+                            Assert(lvs.Length == 1);
                             e = new WeakSetEdge(flow, rvs, ">", lvs[0]);
                             break;
                         case "<<|":
-                            DAssert(lvs.Length == 1);
+                            Assert(lvs.Length == 1);
                             e = new StrongResetEdge(flow, rvs, "|>>", lvs[0]);
                             break;
                         case "<<":
-                            DAssert(lvs.Length == 1);
+                            Assert(lvs.Length == 1);
                             e = new StrongSetEdge(flow, rvs, ">>", lvs[0]);
                             break;
 
                         default:
-                            DAssert(false);    //, `invalid operator: ${ op}`);
+                            Assert(false);    //, `invalid operator: ${ op}`);
                             break;
                     }
                     flow.AddEdge(e);

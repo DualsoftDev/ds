@@ -15,8 +15,8 @@ public abstract class Flow : Named, IWallet
     }
     public void AddChildVertex(IVertex child)
     {
-        DAssert(this is RootFlow || child is Child);
-        DAssert(!(child is CallPrototype));
+        Assert(this is RootFlow || child is Child);
+        Assert(!(child is CallPrototype));
         _childVertices.Add(child);
     }
 

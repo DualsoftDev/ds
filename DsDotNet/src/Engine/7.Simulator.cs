@@ -18,12 +18,12 @@ namespace Engine
 
             Global.BitChangedSubject
                 .Where(bc => bc.Bit is Bit)
-                .Subscribe(bc =>
+                .Subscribe(async bc =>
                 {
                     var bit = bc.Bit as Bit;
                     var n = bit.GetName();
                     if (c2sDic.ContainsKey(n) && bit is TagA)
-                        Task.Run(async () =>
+                        await Task.Run(async () =>
                         {
                             await c2sDic[n].Invoke(bit, bc.NewValue);
                         });

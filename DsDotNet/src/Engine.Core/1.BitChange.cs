@@ -12,14 +12,14 @@ public class BitChange
     public Action AfterAction { get; set; }
     public BitChange(IBit bit, bool newValue, object cause = null)
     {
-        //DAssert(bit.Value != newValue);
+        //Assert(bit.Value != newValue);
 
         //if (newValue && bit.GetName().IsOneOf("StartPlan_A_F_Vm", "StartPlan_B_F_Vp"))
         //    Global.NoOp();
 
-        DAssert(bit != null);
-        DAssert(cause is null || cause is IBit || cause is string);
-        //DAssert(bit.Value != newValue);
+        Assert(bit != null);
+        Assert(cause is null || cause is IBit || cause is string);
+        //Assert(bit.Value != newValue);
 
         Bit = bit;
         NewValue = newValue;

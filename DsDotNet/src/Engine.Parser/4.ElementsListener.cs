@@ -206,7 +206,7 @@ partial class ElementsListener : dsBaseListener
     override public void EnterCausalTokensDNF(dsParser.CausalTokensDNFContext ctx) {
         if (this.left != null)
         {
-            DAssert(this.op != null);  //, 'operator expected');
+            Assert(this.op != null);  //, 'operator expected');
 
             Trace.WriteLine($"CausalTokensDNF per operator: {left.GetText()} + {op.GetText()} + {ctx.GetText()}");
 

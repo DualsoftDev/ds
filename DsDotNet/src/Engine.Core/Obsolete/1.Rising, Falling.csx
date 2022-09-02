@@ -36,7 +36,7 @@
 //    protected RisingFallingBase(Cpu cpu, string name, IBit target)
 //        : base(cpu, name, target)
 //    {
-//        DAssert(target != null);
+//        Assert(target != null);
 //    }
 
 //    protected override BitChange NeedChange(IBit causeBit) => throw new Exception("ERROR");
@@ -65,7 +65,7 @@
 //                foreach (var bc in bitChanges)
 //                {
 //                    var bit = bc.Bit as BitReEvaluatable;
-//                    DAssert(bit is not null);
+//                    Assert(bit is not null);
 //                    bc.Apply();
 //                }
 //            }
@@ -143,8 +143,8 @@
 //{
 //    protected override BitChange NeedChange(IBit causeBit)
 //    {
-//        DAssert(false);
-//        DAssert(causeBit == Actual);
+//        Assert(false);
+//        Assert(causeBit == Actual);
 //        return new BitChange(this, causeBit == Actual, false, causeBit);
 //    }
 //}
@@ -154,7 +154,7 @@
 //{
 //    protected override BitChange NeedChange(IBit causeBit)
 //    {
-//        DAssert(causeBit == Plan);
+//        Assert(causeBit == Plan);
 //        if (causeBit == Plan)
 //            return new BitChange(this, causeBit.Value, false, causeBit);
 //        return null;
@@ -172,7 +172,7 @@
 //    public virtual void SetValueSilently(bool newValue) => _value = newValue;
 //    public void Apply()
 //    {
-//        DAssert(!Applied);
+//        Assert(!Applied);
 //        Bit.SetValueSilently(NewValue);
 //        Applied = true;
 //        Publish();

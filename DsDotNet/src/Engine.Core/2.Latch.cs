@@ -8,7 +8,7 @@ public class Latch : BitReEvaluatable, IBitWritable
     public Latch(Cpu cpu, string name, IBit setCondition, IBit resetCondition)
         : base(cpu, name, new[] {setCondition, resetCondition})
     {
-        DAssert(setCondition != null && resetCondition != null);
+        Assert(setCondition != null && resetCondition != null);
         _setCondition = setCondition;
         _resetCondition = resetCondition;
         _value = Evaluate();
@@ -39,7 +39,7 @@ public class Latch : BitReEvaluatable, IBitWritable
     public void SetValue(bool newValue)
     {
         var realValue = Evaluate();
-        DAssert(realValue == newValue);
+        Assert(realValue == newValue);
         _value = newValue;
     }
 

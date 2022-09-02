@@ -88,7 +88,7 @@ public class ParserHelper
                     return name;
                 return concat(sysName, middleName, parentingName, name);
             case 2:
-                DAssert(!name.StartsWith(sysName));
+                Assert(!name.StartsWith(sysName));
                 return concat(sysName, mid, par, name);
             case 3:
                 return name;

@@ -161,7 +161,7 @@ class SkeletonListener : dsBaseListener
             foreach (var flow in sys.RootFlows)
             {
                 foreach (var seg in flow.RootSegments)
-                    DAssert(seg.Cpu != null && seg.Cpu == flow.Cpu);
+                    Assert(seg.Cpu != null && seg.Cpu == flow.Cpu);
             }
         }
     }

@@ -10,10 +10,10 @@
 //{
 //    public static void AddTag(this Cpu cpu, Tag tag)
 //    {
-//        DAssert(tag.Cpu == cpu);
+//        Assert(tag.Cpu == cpu);
 //        if (cpu.BitsMap.ContainsKey(tag.Name))
 //        {
-//            DAssert(cpu.BitsMap[tag.Name] == tag);
+//            Assert(cpu.BitsMap[tag.Name] == tag);
 //            return;
 //        }
 //        cpu.BitsMap.Add(tag.Name, tag);
@@ -57,7 +57,7 @@
 //    [Obsolete("Old version")]
 //    public static void AddBitDependancy(this Cpu cpu, IBit source, IBit target)
 //    {
-//        DAssert(source is not null && target is not null);
+//        Assert(source is not null && target is not null);
 
 //        var fwdMap = cpu.ForwardDependancyMap;
 
@@ -67,7 +67,7 @@
 //            if (srcTag != null)
 //            {
 //                var xxx = fwdMap.Keys.OfType<Tag>().FirstOrDefault(k => k.Name == srcTag.Name);
-//                DAssert(!fwdMap.Keys.OfType<Tag>().Any(k => k.Name == srcTag.Name));
+//                Assert(!fwdMap.Keys.OfType<Tag>().Any(k => k.Name == srcTag.Name));
 //            }
 
 

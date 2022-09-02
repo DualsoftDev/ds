@@ -4,9 +4,9 @@ global using System.Linq;
 global using System.Reactive.Linq;
 global using System.Diagnostics;
 global using Engine.Core;
-global using static Engine.Core.GlobalShortCuts;
 global using Antlr4.Runtime;
 global using Antlr4.Runtime.Tree;
+global using static System.Diagnostics.Debug;
 
 global using log4net;
 

@@ -15,7 +15,7 @@ public abstract partial class SegmentBase : ChildFlow, IVertex, ICoin, IWallet, 
         set
         {
             if (ContainerFlow != null)
-                DAssert(value == ContainerFlow.Cpu);
+                Assert(value == ContainerFlow.Cpu);
             _cpu = value;
         }
     }
@@ -72,7 +72,7 @@ public abstract partial class SegmentBase : ChildFlow, IVertex, ICoin, IWallet, 
     public static SegmentCreator Create { get; set; } =
         (string name, RootFlow containerFlow) =>
         {
-            DAssert(Global.IsInUnitTest);        // should be overriden if not unit test
+            Assert(Global.IsInUnitTest);        // should be overriden if not unit test
             var seg = new DummySegment(containerFlow.Cpu, name) { ContainerFlow = containerFlow };
             containerFlow.AddChildVertex(seg);
             return seg;

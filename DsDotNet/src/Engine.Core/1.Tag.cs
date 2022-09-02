@@ -42,8 +42,8 @@ public abstract class Tag : Bit, IBitReadWritable, ITxRx
     protected Tag(Cpu ownerCpu, ICoin owner, string name, TagType tagType = TagType.None, bool value = false)
         : base(ownerCpu, name, value)
     {
-        Debug.Assert(! ownerCpu.TagsMap.ContainsKey(name));
-        //Global.Logger.Debug($"Creating tag {name}");
+        Assert(! ownerCpu.TagsMap.ContainsKey(name));
+        //LogDebug($"Creating tag {name}");
 
         Owner = owner;
         Type = tagType;

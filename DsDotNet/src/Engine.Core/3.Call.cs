@@ -105,7 +105,7 @@ public class RootCall : Call
     {
         foreach (var tag in tags)
         {
-            Debug.Assert(tag.Cpu == Cpu);     // ! call 이므로 다른 system 호출용 tag 여야 함
+            Assert(tag.Cpu == Cpu);     // ! call 이므로 다른 system 호출용 tag 여야 함
             dic.Add(tag.Name, tag);
         }
 

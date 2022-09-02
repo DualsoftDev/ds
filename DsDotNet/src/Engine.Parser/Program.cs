@@ -1,12 +1,6 @@
 // Template generated code from Antlr4BuildTasks.Template v 8.17
 namespace Engine.Parser;
 
-using Antlr4.Runtime;
-using Antlr4.Runtime.Tree;
-
-using System.Diagnostics;
-using System.Text;
-
 public class XProgram
 {
     static void Main(string[] args)

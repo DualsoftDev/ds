@@ -1,6 +1,7 @@
 namespace Engine.Runner
 
 open Engine.Core
+open Engine.Common.FS
 
 
 [<AutoOpen>]
@@ -10,10 +11,10 @@ module PrologueModule =
 
 
     /// Bit * New Value * Change reason
-    type ChangeWriter = BitChange array -> unit
+    type ChangeWriter = BitChange -> unit
 
-    type DoStatus = SegmentBase*ChangeWriter*ExceptionHandler -> unit
-    let private defaultDoStatus(seg:SegmentBase, writer:ChangeWriter, exceptionHandler:ExceptionHandler) =
+    type DoStatus = SegmentBase*ChangeWriter -> unit
+    let private defaultDoStatus(seg:SegmentBase, writer:ChangeWriter) =
         failwith "Should be overriden"
 
     let mutable doReady:DoStatus = defaultDoStatus
@@ -25,13 +26,15 @@ module PrologueModule =
 module internal BitWriterModule =
     type BitWriter = IBit * bool * obj -> unit
 
-    let getBitWriter (writer:ChangeWriter) onError =
-        fun (bit, value, cause) ->
+    let getBitWriter (writer:ChangeWriter) =
+        fun (bit:IBit, value, cause) ->
+            if value && bit.GetName() = "End_VPS_L_F_Main" then
+                noop()
+
             match box bit with
             | :? PortInfoEnd as ep ->
-                [|  EndPortChange(ep.Plan, value, cause, onError) :> BitChange
-                    if ep.Cpu.IsActive && ep.Actual <> null then
-                        BitChange(ep.Actual, value, $"Active CPU endport: writing actual {ep}={value}") |]
-            | :? PortInfo -> failwith "Unexpected"
-            | _ -> [| BitChange(bit, value, cause, onError) |]
-            |> writer
+                writer(EndPortChange(ep.Plan, value, cause))
+                if ep.Cpu.IsActive && ep.Actual <> null then
+                    writer(BitChange(ep.Actual, value, $"Active CPU endport: writing actual {ep}={value}"))
+            | :? PortInfo -> failwithlog "Unexpected"
+            | _ -> writer(BitChange(bit, value, cause))

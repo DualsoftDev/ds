@@ -8,5 +8,7 @@ global using Engine.Common;
 global using Engine.Core;
 global using Engine.OPC;
 global using ENGINE = Engine.Runner.EngineModule.Engine;
+global using static Engine.Core.GlobalShortCuts;
+global using static System.Diagnostics.Debug;
 
 namespace Engine;

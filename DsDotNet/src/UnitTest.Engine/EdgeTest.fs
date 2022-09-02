@@ -51,7 +51,7 @@ module EdgeTest =
             cpu.IsActive <- true
 
             let rootFlow = cpu.RootFlows |> Seq.exactlyOne
-            let main = rootFlow.Coins |> Enumerable.OfType<SegmentBase> |> Seq.find(fun seg -> seg.Name = "Main")
+            let main = rootFlow.Coins |> Enumerable.OfType<Segment> |> Seq.find(fun seg -> seg.Name = "Main")
 
 
             model.BuildGraphInfo()
@@ -99,9 +99,9 @@ module EdgeTest =
                 |> List.forall(otherCpu.TagsMap.ContainsKey)
                 |> ShouldBeTrue
 
-                let vp = otherRootFlow.Coins |> Enumerable.OfType<SegmentBase> |> Seq.find(fun seg -> seg.Name = "Vp")
-                let pp = otherRootFlow.Coins |> Enumerable.OfType<SegmentBase> |> Seq.find(fun seg -> seg.Name = "Pp")
-                let sp = otherRootFlow.Coins |> Enumerable.OfType<SegmentBase> |> Seq.find(fun seg -> seg.Name = "Sp")
+                let vp = otherRootFlow.Coins.OfType<Segment>() |> Seq.find(fun seg -> seg.Name = "Vp")
+                let pp = otherRootFlow.Coins.OfType<Segment>() |> Seq.find(fun seg -> seg.Name = "Pp")
+                let sp = otherRootFlow.Coins.OfType<Segment>() |> Seq.find(fun seg -> seg.Name = "Sp")
                 let vpStart2 = otherCpu.TagsMap["L_F_Main_T.Cp_P_F_Vp_Start"]
                 let spEnd2 = otherCpu.TagsMap["L_F_Main_T.Cp_P_F_Sp_End"]
                 vp.TagPStart === vpStart2
@@ -129,7 +129,7 @@ module EdgeTest =
 
                 let ``check reset edge source & targets`` =
                     // Pp |> Sm;
-                    let sm = otherRootFlow.Coins |> Enumerable.OfType<SegmentBase> |> Seq.find(fun seg -> seg.Name = "Sm")
+                    let sm = otherRootFlow.Coins |> Enumerable.OfType<Segment> |> Seq.find(fun seg -> seg.Name = "Sm")
                     let eResetPp2Sm = otherRootFlow.Edges |> Seq.find(fun e -> e.Sources.Contains(pp) && e.Target = sm)
                     box eResetPp2Sm :? IResetEdge |> ShouldBeTrue
                     eResetPp2Sm.SourceTags.Contains(pp.Going) |> ShouldBeTrue

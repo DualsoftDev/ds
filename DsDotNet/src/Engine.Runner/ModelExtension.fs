@@ -29,8 +29,8 @@ module internal ModelModule =
         for ch in children do
             let getTags(x:ITxRx, tx:bool) =
                 match x, tx with
-                    | :? SegmentBase as seg, true -> seg.TagPStart :> Tag
-                    | :? SegmentBase as seg, false -> if seg.TagAEnd = null then seg.TagPEnd else seg.TagAEnd
+                    | :? Segment as seg, true -> if seg.TagAStart = null then seg.TagPStart:> Tag else seg.TagAStart
+                    | :? Segment as seg, false -> if seg.TagAEnd = null then seg.TagPEnd else seg.TagAEnd
                     | :? Tag as tag, _ -> tag
                     | _ -> failwith "ERROR"
             match ch.Coin with
@@ -42,7 +42,7 @@ module internal ModelModule =
                     for te in ch.TagsEnd do
                         te.Type <- te.Type ||| TagType.RX ||| TagType.External
                 | :? ExSegmentCall as exSegCall->
-                    let ex = exSegCall.ExternalSegment
+                    let ex = exSegCall.ExternalSegment :?> Segment
                     ch.TagsStart <- [ex.TagPStart :> Tag] |> ResizeArray
                     ch.TagReset <- ex.TagPReset
                     ch.TagsEnd <- [ex.TagPEnd :> Tag] |> ResizeArray
@@ -67,7 +67,7 @@ module internal ModelModule =
 
         let activeFlowRoots =
             model.Cpus.First(fun cpu -> cpu.IsActive)
-                .RootFlows.SelectMany(fun f -> f.RootSegments)
+                .RootFlows.SelectMany(fun f -> f.RootSegments).Cast<Segment>()
         for seg in activeFlowRoots do
             for t in [seg.TagPStart; seg.TagPReset; seg.TagPEnd] do
                 t.Type <- t.Type ||| TagType.Plan ||| TagType.External
@@ -111,7 +111,8 @@ module internal ModelPrintModule =
         $"{bitToString pi.Plan}:{bitToString pi.Actual}"
         
         
-    let printSegment(seg:SegmentBase) =
+    let printSegment(segment:SegmentBase) =
+        let seg = segment :?> Segment
         let p = bitToString
         let pp = portInfoToString
 

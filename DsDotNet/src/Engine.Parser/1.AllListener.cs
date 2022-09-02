@@ -1,14 +1,10 @@
-using System.Collections.Generic;
-using Antlr4.Runtime;
-using Antlr4.Runtime.Tree;
-
 namespace Engine.Parser;
 
 class ParserResult
 {
-    public List<ParserRuleContext> rules = new List<ParserRuleContext>();
-    public List<ITerminalNode> terminals = new List<ITerminalNode>();
-    public List<IErrorNode> errors = new List<IErrorNode>();
+    public List<ParserRuleContext> rules = new();
+    public List<ITerminalNode> terminals = new();
+    public List<IErrorNode> errors = new();
 }
 class AllListener : dsBaseListener
 {

@@ -27,8 +27,8 @@ type MockupVirtualParentSegment(name, target:MockupSegment, causalSourceSegments
         let ns = $"VPS_Start_{name}"
         let nr = $"VPS_Reset_{name}"
         let ne = $"VPS_End_{name}"
-        this.TagPStart <- TagP(cpu, this, ns, TagType.Q ||| TagType.Start)
-        this.TagPReset <- TagP(cpu, this, nr, TagType.Q ||| TagType.Reset)
+        this.BitPStart <- TagP(cpu, this, ns, TagType.Q ||| TagType.Start)
+        this.BitPReset <- TagP(cpu, this, nr, TagType.Q ||| TagType.Reset)
         this.TagPEnd   <- TagP(cpu, this, ne, TagType.I ||| TagType.End  )
 
         this.PortS <- startPort
@@ -114,9 +114,9 @@ type MockupVirtualParentSegment(name, target:MockupSegment, causalSourceSegments
 
         vps
 
-    override x.WireEvent(writer, onError) =
+    override x.WireEvent(writer) =
         let write(bit, value, cause) =
-            writer([| BitChange(bit, value, cause, onError) |])
+            writer(BitChange(bit, value, cause))
 
         let onError =
             fun (ex:Exception) ->
@@ -213,12 +213,7 @@ type MockupVirtualParentSegment(name, target:MockupSegment, causalSourceSegments
 
                         | Status4.Homing ->
                             if childStatus = Status4.Going then
-                                let msg = $"Something bad happend?  trying to reset child while {x.Target.Name}={childStatus}"
-                                logError "%s" msg
-                                if isNull bc.OnError then
-                                    failwith msg
-                                else
-                                    bc.OnError.Invoke(new DsException(msg))
+                                failwithlog $"Something bad happend?  trying to reset child while {x.Target.Name}={childStatus}"
 
                             write(targetResetTag, true, $"{x.Name} HOMING 으로 인한 {x.Target.Name} reset 켜기")
 

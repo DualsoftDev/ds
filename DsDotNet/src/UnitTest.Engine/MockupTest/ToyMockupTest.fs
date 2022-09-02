@@ -4,6 +4,7 @@ namespace UnitTest.Mockup.Engine
 open Xunit
 open Engine.Core
 open Engine.Common.FS
+open Engine.Runner
 open Xunit.Abstractions
 open UnitTest.Engine
 
@@ -21,7 +22,7 @@ module ToyMockupTest =
             let stB = new Flag(cpu, "stB")
 
 
-            [b; g; r;] |> Seq.iter(fun seg -> seg.WireEvent(cpu.Enqueues, raise) |> ignore)
+            [b; g; r;] |> Seq.iter(fun seg -> seg.WireEvent(cpu.Enqueue) |> ignore)
 
             Global.BitChangedSubject
                 .Subscribe(fun bc ->
@@ -141,7 +142,7 @@ module ToyMockupTest =
                 )
             |> ignore
 
-            b.WireEvent(cpu.Enqueues, raise) |> ignore
+            b.WireEvent(cpu.Enqueue) |> ignore
 
             cpu.Enqueue(st, true)
             // ... going 진행 후, end port 까지 ON

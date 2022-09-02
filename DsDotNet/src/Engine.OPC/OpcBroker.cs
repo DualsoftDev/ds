@@ -10,13 +10,13 @@ using Microsoft.FSharp.Core;
 using log4net;
 
 using System;
-using System.Net;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Collections.Generic;
 using System.Reactive.Disposables;
-using System.Threading;
-using System.Threading.Tasks;
+using static Engine.Core.GlobalShortCuts;
 
 namespace Engine.OPC;
 
@@ -34,7 +34,8 @@ public class OpcTag : Bit, IBitReadWritable
 
 public class OpcBroker
 {
-    Dictionary<string, OpcTag> _tagDic = new();
+    Dictionary<string, OpcTag> _tagDic = new Dictionary<string, OpcTag>();
+    public OpcTag GetTag(string name) => _tagDic.ContainsKey(name) ? _tagDic[name] : null;
     public IEnumerable<string> Tags => _tagDic.Values.Select(ot => ot.Name);
 
     // { Debug only, or temporary implementations
@@ -66,8 +67,14 @@ public class OpcBroker
         {
             if (_tagDic.ContainsKey(otc.TagName))
             {
-                Core.Global.Logger.Debug($"\t\tPublishing tag[{otc.TagName}] change = {otc.Value}");
-                Write(otc.TagName, otc.Value);
+                var otag = _tagDic[otc.TagName];
+                if (otag.Value == otc.Value)
+                    LogDebug($"\t\tSkipping duplicated Publishing tag[{otc.TagName}] change = {otc.Value}");
+                else
+                {
+                    LogDebug($"\t\tPublishing tag[{otc.TagName}] change = {otc.Value}");
+                    Write(otc.TagName, otc.Value);
+                }
             }
         });
         _disposables.Add(subs);
@@ -87,7 +94,22 @@ public class OpcBroker
 
         foreach (var opcTag in tags.Select(t => new OpcTag(t)))
             if (_tagDic.ContainsKey(opcTag.Name))
-                Core.Global.Logger.Debug($"OPC: tag[{opcTag.Name}] duplicated.");
+            {
+                var existing = _tagDic[opcTag.Name];
+                Debug.Assert(existing.Name == opcTag.Name);
+                switch (existing.OriginalTag, opcTag.OriginalTag)
+                {
+                    case (TagA exs, TagA neo):
+                        Debug.Assert(exs.Address == neo.Address);
+                        break;
+                    case (TagA tagA, Tag neo): break;
+                    case (Tag exs, TagA neo):
+                        _tagDic[opcTag.Name] = opcTag;
+                        break;
+                }
+
+                LogDebug($"OPC: tag[{opcTag.Name}] duplicated.");
+            }
             else
                 _tagDic.Add(opcTag.Name, opcTag);
     }
@@ -109,6 +131,9 @@ public class OpcBroker
 
     public void Write(string tagName, bool value)
     {
+        if (tagName == "ResetPlan_L_F_Main")
+            Global.NoOp();
+
         // unit test 가 아니라면 무조건 실행되어야 할 부분.  unit test 에서만 생략 가능
         void doWrite()
         {
@@ -202,10 +227,9 @@ public class OpcBroker
 
 public static class OpcBrokerExtension
 {
-    static ILog Logger => Core.Global.Logger;
     public static void Print(this OpcBroker opc)
     {
         var tags = String.Join("\r\n\t", opc.Tags);
-        Logger.Debug($"== OPC Tags:\r\n\t{tags}");
+        LogDebug($"== OPC Tags:\r\n\t{tags}");
     }
 }

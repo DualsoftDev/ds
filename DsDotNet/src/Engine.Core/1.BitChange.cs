@@ -8,25 +8,23 @@ public class BitChange
     /// <summary>IBit or string description</summary>
     public object Cause { get; }
     public DateTime Time { get; }
-    public ExceptionHandler OnError { get; set; }
     public Action BeforeAction { get; set; }
     public Action AfterAction { get; set; }
-    public BitChange(IBit bit, bool newValue, object cause = null, ExceptionHandler onError =null)
+    public BitChange(IBit bit, bool newValue, object cause = null)
     {
-        //Debug.Assert(bit.Value != newValue);
+        //Assert(bit.Value != newValue);
 
         //if (newValue && bit.GetName().IsOneOf("StartPlan_A_F_Vm", "StartPlan_B_F_Vp"))
         //    Global.NoOp();
 
-        Debug.Assert(bit != null);
-        Debug.Assert(cause is null || cause is IBit || cause is string);
-        //Debug.Assert(bit.Value != newValue);
+        Assert(bit != null);
+        Assert(cause is null || cause is IBit || cause is string);
+        //Assert(bit.Value != newValue);
 
         Bit = bit;
         NewValue = newValue;
         Time = DateTime.Now;
         Cause = cause;
-        OnError = onError;
     }
 
     public string CauseRepr => Cause switch
@@ -42,8 +40,8 @@ public class BitChange
 
 public class EndPortChange : BitChange
 {
-    public EndPortChange(IBit bit, bool newValue, object cause = null, ExceptionHandler onError = null)
-        : base(bit, newValue, cause, onError)
+    public EndPortChange(IBit bit, bool newValue, object cause = null)
+        : base(bit, newValue, cause)
     {
     }
 }

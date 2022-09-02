@@ -18,12 +18,14 @@ public class Cpu : Named, ICpu
 
 
     /// <summary> Bit change event queue </summary>
-    public ObservableConcurrentQueue<BitChange[]> Queue { get; } = new();
+    public ObservableConcurrentQueue<BitChange> Queue { get; } = new();
     //public ConcurrentQueue<BitChange[]> Queue { get; } = new();
 
     /// <summary>CPU queue 에 더 처리할 내용이 있음을 외부에 알리기 위한 flag</summary>
     public bool ProcessingQueue { get; internal set; }
     /// <summary>외부에서 CPU 를 멈추거나 가동하기 위한 flag</summary>
+    public Action<BitChange, bool> Apply { get; internal set; }
+
     public bool Running { get; set; } = true;
     public bool NeedWait => Running && (ProcessingQueue || Queue.Count > 0);
 
@@ -54,13 +56,10 @@ public class Cpu : Named, ICpu
 
 public static class CpuExtension
 {
-    static ILog Logger => Global.Logger;
-
-
     public static void PrintTags(this Cpu cpu)
     {
         var tagNames = string.Join("\r\n\t", cpu.BitsMap.Values.OfType<Tag>().Select(t => t.Name));
-        Logger.Debug($"{cpu.Name} tags:\r\n\t{tagNames}");
+        LogDebug($"{cpu.Name} tags:\r\n\t{tagNames}");
     }
 
     public static void PrintAllTags(this Cpu cpu, bool expand)
@@ -76,7 +75,7 @@ public static class CpuExtension
         }
         helper()
             .OrderBy(x => x)
-            .Iter(Logger.Debug)
+            .Iter(LogDebug)
             ;
     }
 

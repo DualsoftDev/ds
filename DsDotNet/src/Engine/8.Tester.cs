@@ -1,8 +1,6 @@
 using System.Reactive.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using Engine.Graph;
-using Engine.Runner;
 
 namespace Engine;
 
@@ -14,20 +12,16 @@ public enum EnumTest
     B,
     C,
 };
-class Tester
+public class Tester
 {
-    static string CreateCylinder(string name) => $"[sys] {name} =\r\n" + @"{
+    public static string CreateCylinder(string name) => $"[sys] {name} =\r\n" + @"{
     [flow] F = {
-        Plus <||> Minus;
-        
-        //Vp > Pp > Sp;
-        //Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vm > Pm > Sm;
 
-        ////Vp |> Pm |> Sp;
-        ////Vm |> Pp |> Sm;
-        //Pp <| Pm |> Sp;
-        //Pm <| Pp |> Sm;
-        //Vp <||> Vm;
+        Vp |> Pm |> Sp;
+        Vm |> Pp |> Sm;
+        Vp <||> Vm;
     }
 }";
 
@@ -99,7 +93,7 @@ class Tester
 }
 ";
 
-        Debug.Assert(!Global.IsInUnitTest);
+        Assert(!Global.IsInUnitTest);
         var engine = new EngineBuilder(text, "Cpu").Engine;
         Program.Engine = engine;
         engine.Run();
@@ -205,7 +199,7 @@ class Tester
 }
 
 ";
-        Debug.Assert(!Global.IsInUnitTest);
+        Assert(!Global.IsInUnitTest);
         var engine = new EngineBuilder(text, "Cpu").Engine;
         Program.Engine = engine;
         engine.Run();
@@ -248,7 +242,7 @@ class Tester
 " + CreateCylinder("A")
 ;
 
-        Debug.Assert(!Global.IsInUnitTest);
+        Assert(!Global.IsInUnitTest);
         var engine = new EngineBuilder(text, "Cpu").Engine;
         Program.Engine = engine;
         engine.Run();
@@ -261,35 +255,36 @@ class Tester
         var counter = 0;
         Global.SegmentStatusChangedSubject.Subscribe(ssc =>
         {
-            if (ssc.Segment.QualifiedName == "L_F_Main" && ssc.Status == Status4.Finished)
+            var qName = ssc.Segment.QualifiedName;
+            var state = ssc.Status;
+            if (qName == "VPS_L_F_Main")
             {
-                Global.Logger.Info("-------------------------- End of Main segment");
-                if (counter++ < 3)
+                if (state == Status4.Finished)
+                    opc.Write(resetTag, true);
+            }
+
+
+            if (qName == "L_F_Main")
+            {
+                if (state == Status4.Finished)
                 {
-                    Task.Run(async () =>
-                    {
-                        await Task.Delay(300);
-                        Global.Logger.Info($"-------------------------- [{counter}] After finishing Main segment");
-                        engine.Model.Print();
-
-                        Global.Logger.Info($"--- [{counter}] Resetting Main segment");
-                        opc.Write(resetTag, true);
-                        await Task.Delay(1300);
-
-                        Global.Logger.Info($"-------------------------- [{counter}] After resetting Main segment");
-                        engine.Model.Print();
-
-                        Global.Logger.Info($"--- [{counter}] Starting Main segment");
-                        opc.Write(startTag, true);
-                        //opc.Write("Auto_L_F", true);
-                    });
+                    counter++;
+                    Console.WriteLine($"[{counter}] After finishing Main segment");
+                    LogInfo($"-------------------------- [{counter}] After finishing Main segment");
+                    //if (counter++ % 10 == 0)
+                    //{
+                    //    Console.WriteLine($"[{counter}] After finishing Main segment");
+                    //    LogInfo($"-------------------------- [{counter}] After finishing Main segment");
+                    //    //engine.Model.Print();
+                    //}
+                    ////opc.Write(resetTag, true);
+                }
+                else if (ssc.Status == Status4.Ready)
+                {
+                    opc.Write(startTag, true);
                 }
             }
         });
-
-        Debug.Assert(engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(startTag));
-        opc.Write("Auto_L_F", true);
-        opc.Write(startTag, true);
 
         var hasAddress =
             engine.Model.Cpus
@@ -299,8 +294,9 @@ class Tester
                 ;
         if (hasAddress)
         {
-            //// initial condition
-            //opc.Write("EndActual_A_F_Sm", true);
+            // initial condition
+            opc.Write("EndActual_A_F_Sm", true);
+            Simulator.CreateFromCylinder(opc, new[] { "A_F" });
 
             // simulating physics
             Global.BitChangedSubject
@@ -308,62 +304,61 @@ class Tester
                 {
                     var n = bc.Bit.GetName();
                     var val = bc.Bit.Value;
-                    var monitors = new[] { "EndPlan_A_F_Sp", "EndPlan_A_F_Sm" };
+                    var monitors = new[] {
+                        "StartPlan_A_F_Vp", "StartPlan_A_F_Vm",
+                        "EndPlan_A_F_Sp", "EndPlan_A_F_Sm" };
                     if (monitors.Contains(n))
                     {
-                        Global.Logger.Info($"Simualting Plan for Sensor {n} value={val}");
-                        if (n == "EndPlan_A_F_Sp")
-                            opc.Write("EndActual_A_F_Sp", val);
-                        else if (n == "EndPlan_A_F_Sm")
-                            opc.Write("EndActual_A_F_Sm", val);
+                        LogInfo($"Simualting Plan for Sensor {n} value={val}");
+                        if (n == "StartPlan_A_F_Vp")
+                            opc.Write("StartActual_A_F_Vp", val);
+                        else if (n == "StartPlan_A_F_Vm")
+                            opc.Write("StartActual_A_F_Vm", val);
+
+                        //if (n == "EndPlan_A_F_Sp")
+                        //    opc.Write("EndActual_A_F_Sp", val);
+                        //else if (n == "EndPlan_A_F_Sm")
+                        //    opc.Write("EndActual_A_F_Sm", val);
                     }
                 });
         }
 
+        Assert(engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(startTag));
+        opc.Write("Auto_L_F", true);
+        opc.Write(startTag, true);
+
         engine.Wait();
     }
 
-    public static void DoSampleTestDiamond()
+    public static void DoSampleTestHatOnHat()
     {
         var text = @"
 [sys] L = {
     [task] T = {
-        Ap = {A.F.Plus  ~ A.F.Plus }
-        Am = {A.F.Minus ~ A.F.Minus}
-        Bp = {B.F.Plus  ~ B.F.Plus }
-        Bm = {B.F.Minus ~ B.F.Minus}
-        Cp = {C.F.Plus  ~ C.F.Plus }
-        Cm = {C.F.Minus ~ C.F.Minus}
-        Dp = {D.F.Plus  ~ D.F.Plus }
-        Dm = {D.F.Minus ~ D.F.Minus}
+        Ap = {A.F.Vp ~ A.F.Sp}
+        Am = {A.F.Vm ~ A.F.Sm}
+        Bp = {B.F.Vp ~ B.F.Sp}
+        Bm = {B.F.Vm ~ B.F.Sm}
     }
     [flow] F = {
-        Main > Main2;
-        Main <||> Main2;
         Main = {
             // 정보로서의 Call 상호 리셋
             T.Ap <||> T.Am;
             T.Bp <||> T.Bm;
             T.Ap > T.Bp > T.Bm > T.Am;
         }
-        Main2 = {
-            // 정보로서의 Call 상호 리셋
-            T.Cp <||> T.Cm;
-            T.Dp <||> T.Dm;
-            T.Cp > T.Cm, T.Dp > T.Dm;
-        }
     }
 }
-
 [addresses] = {
-	A.F.Plus  = (%QX0.1.3, , %IX0.0.5);
-	A.F.Minus = (%QX0.1.2, , %IX0.0.4);
-	B.F.Plus  = (%QX0.1.5, , %IX0.0.7);
-	B.F.Minus = (%QX0.1.4, , %IX0.0.6);
-	C.F.Plus  = (%QX0.1.7, , %IX0.0.9);
-	C.F.Minus = (%QX0.1.6, , %IX0.0.8);
-	D.F.Plus  = (%QX0.1.9, , %IX0.0.11);
-	D.F.Minus = (%QX0.1.8, , %IX0.0.10);
+	L.F.Main = (%0, %1,);
+	A.F.Vp = (%Q123.23, ,);
+	A.F.Vm = (%Q123.24, ,);
+	B.F.Vp = (%Q123.25, ,);
+	B.F.Vm = (%Q123.24, ,);
+	A.F.Sp = (, , %I12.2);
+	A.F.Sm = (, , %I12.3);
+	B.F.Sp = (, , %I12.3);
+	B.F.Sm = (, , %I12.3);
 }
 [cpus] AllCpus = {
     [cpu] Cpu = {
@@ -375,18 +370,211 @@ class Tester
     [cpu] BCpu = {
         B.F;
     }
-    [cpu] CCpu = {
-        C.F;
-    }
-    [cpu] DCpu = {
-        D.F;
-    }
 }
-" + CreateCylinder("A") + "\r\n" + CreateCylinder("B") + CreateCylinder("C") + "\r\n" + CreateCylinder("D");
+" + CreateCylinder("A") + "\r\n" + CreateCylinder("B");
 
         //Log4NetHelper.ChangeLogLevel(log4net.Core.Level.Error);
 
-        Debug.Assert(!Global.IsInUnitTest);
+        Assert(!Global.IsInUnitTest);
+        var engine = new EngineBuilder(text, "Cpu").Engine;
+        Program.Engine = engine;
+        engine.Run();
+
+        var opc = engine.Opc;
+
+        var startTag = "StartPlan_L_F_Main";
+        var resetTag = "ResetPlan_L_F_Main";
+        var counter = 0;
+        Global.SegmentStatusChangedSubject.Subscribe(ssc =>
+        {
+            var qName = ssc.Segment.QualifiedName;
+            var state = ssc.Status;
+            if (qName == "VPS_L_F_Main")
+            {
+                if (state == Status4.Finished)
+                {
+                    LogDebug($"Resetting externally {resetTag}");
+                    opc.Write(resetTag, true);
+                }
+            }
+
+
+            if (qName == "L_F_Main")
+            {
+                if (state == Status4.Finished)
+                {
+                    counter++;
+                    //if (counter++ % 100 == 0)
+                    {
+                        Console.WriteLine($"[{counter}] After finishing Main segment");
+                        LogInfo($"-------------------------- [Progress: {counter}] After finishing Main segment");
+                        //engine.Model.Print();
+                    }
+                    //opc.Write(resetTag, true);
+                }
+                else if (ssc.Status == Status4.Ready)
+                {
+                    Console.Beep(10000, 200);
+                    Thread.Sleep(1000);
+                    opc.Write(startTag, true);
+                }
+            }
+        });
+
+        var actuals =
+            Global.TagChangeFromOpcServerSubject
+                .Where(otc => otc.TagName.Contains("Actual"))
+                ;
+
+        // https://stackoverflow.com/questions/8837665/how-to-split-an-observable-stream-in-chunks-dependent-on-second-stream
+        var oneCycleHistory =
+            actuals.Publish(otcs =>
+                otcs.Where(otc => otc.TagName == "StartActual_A_F_Vp" && otc.Value)       // a+ 출력 켜진 후부터
+                    .Select(obs =>
+                        otcs.TakeUntil(otc => otc.TagName == "StartActual_A_F_Vm" && !otc.Value) // a- 출력 꺼질때까지
+                        .StartWith(obs)
+                        .ToArray()))
+                .Merge()
+                ;
+        oneCycleHistory.Subscribe(o =>
+        {
+            Assert(o[ 0].TagName == "StartActual_A_F_Vp"   && o[ 0].Value == true);   // a+
+            Assert(o[ 1].TagName == "EndActual_A_F_Sm"     && o[ 1].Value == false);  // !A-
+            Assert(o[ 2].TagName == "EndActual_A_F_Sp"     && o[ 2].Value == true);   // A+
+            Assert(o[ 3].TagName == "StartActual_A_F_Vp"   && o[ 3].Value == false);  // !a+
+
+
+            Assert(o[ 4].TagName == "StartActual_B_F_Vp"   && o[ 4].Value == true);   // b+
+            Assert(o[ 5].TagName == "EndActual_B_F_Sm"     && o[ 5].Value == false);  // !B-
+            Assert(o[ 6].TagName == "EndActual_B_F_Sp"     && o[ 6].Value == true);   // B+
+            Assert(o[ 7].TagName == "StartActual_B_F_Vp"   && o[ 7].Value == false);  // !b+
+
+
+            Assert(o[ 8].TagName == "StartActual_B_F_Vm"   && o[ 8].Value == true);   // b-
+            Assert(o[ 9].TagName == "EndActual_B_F_Sp"     && o[ 9].Value == false);  // !B+
+            Assert(o[10].TagName == "EndActual_B_F_Sm"     && o[10].Value == true);   // B-
+            Assert(o[11].TagName == "StartActual_B_F_Vm"   && o[11].Value == false);  // !b-
+
+            Assert(o[12].TagName == "StartActual_A_F_Vm"   && o[12].Value == true);   // a-
+            Assert(o[13].TagName == "EndActual_A_F_Sp"     && o[13].Value == false);  // !A+
+            Assert(o[14].TagName == "EndActual_A_F_Sm"     && o[14].Value == true);   // A-
+            Assert(o[15].TagName == "StartActual_A_F_Vm"   && o[15].Value == false);  // !a-
+        });
+
+        //actuals
+        //    .Subscribe(otc =>
+        //    {
+        //        Trace.WriteLine($"{otc.TagName}={otc.Value}");
+        //    });
+
+        var hasAddress =
+            engine.Model.Cpus
+                .SelectMany(cpu => cpu.TagsMap.Values)
+                .OfType<TagA>()
+                .Any(t => !t.Address.IsNullOrEmpty())
+                ;
+        if (hasAddress)
+        {
+            // initial condition
+            opc.Write("EndActual_A_F_Sm", true);
+            opc.Write("EndActual_B_F_Sm", true);
+
+            // simulating physics
+            if (Global.IsControlMode)
+            { }   // todo : 실물 연결
+            else
+                Simulator.CreateFromCylinder(opc, new[] { "A_F", "B_F" });
+
+            Global.BitChangedSubject
+                .Subscribe(bc =>
+                {
+                    var n = bc.Bit.GetName();
+                    var val = bc.Bit.Value;
+                    var monitors = new[] {
+                        "StartPlan_A_F_Vp", "StartPlan_B_F_Vp", "StartPlan_A_F_Vm", "StartPlan_B_F_Vm",
+                        "EndPlan_A_F_Sp", "EndPlan_A_F_Sm", "EndPlan_B_F_Sp", "EndPlan_B_F_Sm" };
+                    if (monitors.Contains(n))
+                    {
+                        LogDebug($"Plan for TAG {n} value={val}");
+
+                        if (val)
+                        {
+                            if (n == "StartPlan_A_F_Vp")
+                                opc.Write("StartActual_A_F_Vp", val);
+                            else if (n == "StartPlan_B_F_Vp")
+                                opc.Write("StartActual_B_F_Vp", val);
+                            else if (n == "StartPlan_A_F_Vm")
+                                opc.Write("StartActual_A_F_Vm", val);
+                            else if (n == "StartPlan_B_F_Vm")
+                                opc.Write("StartActual_B_F_Vm", val);
+                        }
+
+                        //else if (n == "EndPlan_A_F_Sp")
+                        //    opc.Write("EndActual_A_F_Sp", val);
+                        //else if (n == "EndPlan_A_F_Sm")
+                        //    opc.Write("EndActual_A_F_Sm", val);
+                        //else if (n == "EndPlan_B_F_Sp")
+                        //    opc.Write("EndActual_B_F_Sp", val);
+                        //else if (n == "EndPlan_B_F_Sm")
+                        //    opc.Write("EndActual_B_F_Sm", val);
+                    }
+                });
+        }
+
+
+        Assert(engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(startTag));
+        opc.Write(startTag, true);
+        opc.Write("Auto_L_F", true);
+
+        engine.Wait();
+    }
+
+    public static void DoSampleTestDiamond()
+    {
+        var text = @"
+[sys] L = {
+    [task] T = {
+        Ap = {A.F.Vp ~ A.F.Sp}
+        Am = {A.F.Vm ~ A.F.Sm}
+        Bp = {B.F.Vp ~ B.F.Sp}
+        Bm = {B.F.Vm ~ B.F.Sm}
+    }
+    [flow] F = {
+        Main = {
+            // 정보로서의 Call 상호 리셋
+            T.Ap <||> T.Am;
+            T.Bp <||> T.Bm;
+            T.Ap > T.Am, T.Bp > T.Bm;
+        }
+    }
+}
+[addresses] = {
+	//L.F.Main = (%0, %0,);
+	A.F.Vp = (%Q123.23, ,);
+	A.F.Vm = (%Q123.24, ,);
+	B.F.Vp = (%Q123.25, ,);
+	B.F.Vm = (%Q123.24, ,);
+	A.F.Sp = (, , %I12.2);
+	A.F.Sm = (, , %I12.3);
+	B.F.Sp = (, , %I12.3);
+	B.F.Sm = (, , %I12.3);
+}
+[cpus] AllCpus = {
+    [cpu] Cpu = {
+        L.F;
+    }
+    [cpu] ACpu = {
+        A.F;
+    }
+    [cpu] BCpu = {
+        B.F;
+    }
+}
+" + CreateCylinder("A") + "\r\n" + CreateCylinder("B");
+
+        //Log4NetHelper.ChangeLogLevel(log4net.Core.Level.Error);
+
+        Assert(!Global.IsInUnitTest);
         var engine = new EngineBuilder(text, "Cpu").Engine;
         Program.Engine = engine;
         engine.Run();
@@ -407,28 +595,103 @@ class Tester
             t.PrintIndexedChildren();
             t.PrintPreCaculatedTargets();
             t.PrintOrigin();
-
-            t2.PrintIndexedChildren();
-            t2.PrintPreCaculatedTargets();
-            t2.PrintOrigin();
         }
 
         var opc = engine.Opc;
 
         var startTag = "StartPlan_L_F_Main";
-        var resetTag = "ResetPlan_L_F_Main2";
+        var resetTag = "ResetPlan_L_F_Main";
+        var counter = 0;
+        Global.SegmentStatusChangedSubject.Subscribe(ssc =>
+        {
+            var qName = ssc.Segment.QualifiedName;
+            var state = ssc.Status;
+            if (qName == "VPS_L_F_Main")
+            {
+                if (state == Status4.Finished)
+                {
+                    LogDebug($"Resetting externally {resetTag}");
+                    opc.Write(resetTag, true);
+                }
+            }
 
-        //Global.SegmentStatusChangedSubject.Subscribe(ssc =>
-        //{
-        //    if (ssc.Segment.QualifiedName == "L_F_Main")
+
+            if (qName == "L_F_Main")
+            {
+                if (state == Status4.Finished)
+                {
+                    counter++;
+                    //if (counter++ % 100 == 0)
+                    {
+                        Console.WriteLine($"[{counter}] After finishing Main segment");
+                        LogInfo($"-------------------------- [Progress: {counter}] After finishing Main segment");
+                        //engine.Model.Print();
+                    }
+                    //opc.Write(resetTag, true);
+                }
+                else if (ssc.Status == Status4.Ready)
+                {
+                    Console.Beep(10000, 200);
+                    Thread.Sleep(1000);
+                    opc.Write(startTag, true);
+                }
+            }
+        });
+
+        var actuals =
+            Global.TagChangeFromOpcServerSubject
+                .Where(otc => otc.TagName.Contains("Actual"))
+                ;
+
+        // https://stackoverflow.com/questions/8837665/how-to-split-an-observable-stream-in-chunks-dependent-on-second-stream
+        var oneCycleHistory =
+            actuals.Publish(otcs =>
+                otcs.Where(otc => otc.TagName == "StartActual_A_F_Vp" && otc.Value)       // a+ 출력 켜진 후부터
+                    .Select(obs =>
+                        otcs.TakeUntil(otc => otc.TagName == "StartActual_B_F_Vm" && !otc.Value) // b- 출력 꺼질때까지
+                        .StartWith(obs)
+                        .ToArray()))
+                .Merge()
+                ;
+        oneCycleHistory.Subscribe(o =>
+        {
+            Assert(o[ 0].TagName == "StartActual_A_F_Vp"   && o[ 0].Value == true);   // a+
+            Assert(o[ 1].TagName == "EndActual_A_F_Sm"     && o[ 1].Value == false);  // !A-
+            Assert(o[ 2].TagName == "EndActual_A_F_Sp"     && o[ 2].Value == true);   // A+
+            Assert(o[ 3].TagName == "StartActual_A_F_Vp"   && o[ 3].Value == false);  // !a+
+
+            Assert(o[ 4].TagName == "StartActual_A_F_Vm"   && o[ 4].Value == true);   // a-
+            Assert(o[ 5].TagName == "StartActual_B_F_Vp"   && o[ 5].Value == true);   // b+
+
+            var notAp = o.FindIndex(otc => otc.TagName == "EndActual_A_F_Sp" && otc.Value == false);  // !A+
+            var notBm = o.FindIndex(otc => otc.TagName == "EndActual_B_F_Sm" && otc.Value == false);  // !B-
+
+            Assert(notAp.IsOneOf(6, 7) && notBm.IsOneOf(6, 7));
+            //Assert(o[ 6].TagName == "EndActual_A_F_Sp"     && o[ 6].Value == false);  // !A+
+            //Assert(o[ 7].TagName == "EndActual_B_F_Sm"     && o[ 7].Value == false);  // !B-
+
+            var Bp      = o.FindIndex(otc => otc.TagName == "EndActual_B_F_Sp"     && otc.Value == true);   // B+
+            var notbp   = o.FindIndex(otc => otc.TagName == "StartActual_B_F_Vp"   && otc.Value == false);  // !b+
+            var Am      = o.FindIndex(otc => otc.TagName == "EndActual_A_F_Sm"     && otc.Value == true);   // A-
+            var notam   = o.FindIndex(otc => otc.TagName == "StartActual_A_F_Vm"   && otc.Value == false);  // !a-
+            Assert(new[] { Bp, notbp, Am, notam }.ForAll(n => n.IsOneOf(8, 9, 10, 11)));
+            Assert(Bp < notbp && Am < notam);
+            //Assert(o[ 8].TagName == "EndActual_B_F_Sp"     && o[ 8].Value == true);   // B+
+            //Assert(o[ 9].TagName == "StartActual_B_F_Vp"   && o[ 9].Value == false);  // !b+
+            //Assert(o[10].TagName == "EndActual_A_F_Sm"     && o[10].Value == true);   // A-
+            //Assert(o[11].TagName == "StartActual_A_F_Vm"   && o[11].Value == false);  // !a-
+            
+            Assert(o[12].TagName == "StartActual_B_F_Vm"   && o[12].Value == true);   // b-
+            Assert(o[13].TagName == "EndActual_B_F_Sp"     && o[13].Value == false);  // !B+
+            Assert(o[14].TagName == "EndActual_B_F_Sm"     && o[14].Value == true);   // B-
+            Assert(o[15].TagName == "StartActual_B_F_Vm"   && o[15].Value == false);   // !b-
+        });
+
+        //actuals
+        //    .Subscribe(otc =>
         //    {
-        //        if (ssc.Status == Status4.Ready)
-        //        {
-        //            Thread.Sleep(5000);
-        //            opc.Write(startTag, true);
-        //        }
-        //    }
-        //});
+        //        Trace.WriteLine($"{otc.TagName}={otc.Value}");
+        //    });
 
         var hasAddress =
             engine.Model.Cpus
@@ -443,47 +706,49 @@ class Tester
             //opc.Write("EndActual_B_F_Sm", true);
 
             // simulating physics
-            _ = Task.Run(() =>
-            {
-                Global.BitChangedSubject
-                    .Subscribe(bc =>
-                    {
-                        var n = bc.Bit.GetName();
-                        var val = bc.Bit.Value;
-                        var monitors = new[] {
-                        "StartPlan_A_F_Plus", "StartPlan_A_F_Minus", "StartPlan_B_F_Plus", "StartPlan_B_F_Minus",
-                        //"EndPlan_A_F_Plus", "EndPlan_A_F_Minus", "EndPlan_B_F_Plus", "EndPlan_B_F_Minus",
-                        "StartPlan_C_F_Plus", "StartPlan_C_F_Minus", "StartPlan_D_F_Plus", "StartPlan_D_F_Minus",
-                        //"EndPlan_C_F_Plus", "EndPlan_C_F_Minus", "EndPlan_D_F_Plus", "EndPlan_D_F_Minus" 
-                        };
-                        if (monitors.Contains(n))
-                        {
-                            Global.Logger.Debug($"Plan for TAG {n} value={val}");
-                            //opc.Write(n, val);
-                            if (n == "StartPlan_A_F_Plus")
-                                opc.Write("StartActual_A_F_Plus", val);
-                            else if (n == "StartPlan_B_F_Plus")
-                                opc.Write("StartActual_B_F_Plus", val);
-                            else if (n == "StartPlan_A_F_Minus")
-                                opc.Write("StartActual_A_F_Minus", val);
-                            else if (n == "StartPlan_B_F_Minus")
-                                opc.Write("StartActual_B_F_Minus", val);
-                            else if (n == "StartPlan_C_F_Plus")
-                                opc.Write("StartActual_C_F_Plus", val);
-                            else if (n == "StartPlan_D_F_Plus")
-                                opc.Write("StartActual_D_F_Plus", val);
-                            else if (n == "StartPlan_C_F_Minus")
-                                opc.Write("StartActual_C_F_Minus", val);
-                            else if (n == "StartPlan_D_F_Minus")
-                                opc.Write("StartActual_D_F_Minus", val);
+            if (Global.IsControlMode)
+                {}   // todo : 실물 연결
+            else
+                Simulator.CreateFromCylinder(opc, new[] { "A_F", "B_F" });
 
-                            Thread.Sleep(500);
+            Global.BitChangedSubject
+                .Subscribe(bc =>
+                {
+                    var n = bc.Bit.GetName();
+                    var val = bc.Bit.Value;
+                    var monitors = new[] {
+                        "StartPlan_A_F_Vp", "StartPlan_B_F_Vp", "StartPlan_A_F_Vm", "StartPlan_B_F_Vm",
+                        "EndPlan_A_F_Sp", "EndPlan_A_F_Sm", "EndPlan_B_F_Sp", "EndPlan_B_F_Sm" };
+                    if (monitors.Contains(n))
+                    {
+                        LogDebug($"Plan for TAG {n} value={val}");
+
+                        if (val)
+                        {
+                            if (n == "StartPlan_A_F_Vp")
+                                opc.Write("StartActual_A_F_Vp", val);
+                            else if (n == "StartPlan_B_F_Vp")
+                                opc.Write("StartActual_B_F_Vp", val);
+                            else if (n == "StartPlan_A_F_Vm")
+                                opc.Write("StartActual_A_F_Vm", val);
+                            else if (n == "StartPlan_B_F_Vm")
+                                opc.Write("StartActual_B_F_Vm", val);
                         }
-                    });
-            });
+
+                        //else if (n == "EndPlan_A_F_Sp")
+                        //    opc.Write("EndActual_A_F_Sp", val);
+                        //else if (n == "EndPlan_A_F_Sm")
+                        //    opc.Write("EndActual_A_F_Sm", val);
+                        //else if (n == "EndPlan_B_F_Sp")
+                        //    opc.Write("EndActual_B_F_Sp", val);
+                        //else if (n == "EndPlan_B_F_Sm")
+                        //    opc.Write("EndActual_B_F_Sm", val);
+                    }
+                });
         }
 
-        Debug.Assert(engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(startTag));
+
+        Assert(engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(startTag));
         opc.Write(startTag, true);
         opc.Write("Auto_L_F", true);
 
@@ -508,7 +773,7 @@ class Tester
 }
 ";
 
-        Debug.Assert(!Global.IsInUnitTest);
+        Assert(!Global.IsInUnitTest);
         var engine = new EngineBuilder(text, "Cpu").Engine;
         Program.Engine = engine;
         engine.Run();
@@ -534,11 +799,11 @@ class Tester
                 coutner[ssc.Segment] = coutner[ssc.Segment] + 1;
 
                 var avg = (int)coutner.Values.Average(s => s);
-                Debug.Assert(coutner.Values.ForAll(v => Math.Abs(avg - v) <= 1));
+                Assert(coutner.Values.ForAll(v => Math.Abs(avg - v) <= 1));
 
                 if (ssc.Segment.QualifiedName == "L_F_B")
                 {
-                    Global.Logger.Info("-------------------------- End of Main segment");
+                    LogInfo("-------------------------- End of Main segment");
                     if (first)
                     {
                         opc.Write(startTag, false);
@@ -550,10 +815,10 @@ class Tester
         var _checkOrderSubscription = finished.Buffer(3).Subscribe(sscs =>
         {
             var order = sscs.Select(ssc => ssc.Segment.Name).ToArray();
-            Debug.Assert(order.SequenceEqual(new[] { "B", "R", "G", }));
+            Assert(order.SequenceEqual(new[] { "B", "R", "G", }));
         });
 
-        Debug.Assert(engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(startTag));
+        Assert(engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(startTag));
         opc.Write(startTag, true);
         opc.Write("Auto_L_F", true);
 
@@ -598,7 +863,7 @@ class Tester
 }
 ";
 
-        Debug.Assert(!Global.IsInUnitTest);
+        Assert(!Global.IsInUnitTest);
         var engine = new EngineBuilder(text, "Cpu").Engine;
         Program.Engine = engine;
         engine.Run();
@@ -789,7 +1054,7 @@ class Tester
 }
 ";
 
-        Debug.Assert(!Global.IsInUnitTest);
+        Assert(!Global.IsInUnitTest);
         var engine = new EngineBuilder(text, "Cpu").Engine;
         Program.Engine = engine;
         engine.Run();

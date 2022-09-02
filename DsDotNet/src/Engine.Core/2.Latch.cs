@@ -8,7 +8,7 @@ public class Latch : BitReEvaluatable, IBitWritable
     public Latch(Cpu cpu, string name, IBit setCondition, IBit resetCondition)
         : base(cpu, name, new[] {setCondition, resetCondition})
     {
-        Debug.Assert(setCondition != null && resetCondition != null);
+        Assert(setCondition != null && resetCondition != null);
         _setCondition = setCondition;
         _resetCondition = resetCondition;
         _value = Evaluate();
@@ -19,7 +19,7 @@ public class Latch : BitReEvaluatable, IBitWritable
         var existing = GetExistingBit<Latch>(cpu, name);
         if (existing != null)
         {
-            Global.Logger.Warn($"Bit {name} already exists.  Using it instead creating new one.");
+            LogWarn($"Bit {name} already exists.  Using it instead creating new one.");
             return existing;
         }
 
@@ -39,7 +39,7 @@ public class Latch : BitReEvaluatable, IBitWritable
     public void SetValue(bool newValue)
     {
         var realValue = Evaluate();
-        Debug.Assert(realValue == newValue);
+        Assert(realValue == newValue);
         _value = newValue;
     }
 

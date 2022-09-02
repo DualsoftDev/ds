@@ -15,7 +15,7 @@ public abstract partial class SegmentBase : ChildFlow, IVertex, ICoin, IWallet, 
         set
         {
             if (ContainerFlow != null)
-                Debug.Assert(value == ContainerFlow.Cpu);
+                Assert(value == ContainerFlow.Cpu);
             _cpu = value;
         }
     }
@@ -30,9 +30,9 @@ public abstract partial class SegmentBase : ChildFlow, IVertex, ICoin, IWallet, 
     public PortInfoEnd PortE { get; set; }
 
     /// <summary>Plan tag for start</summary>
-    public TagP TagPStart { get; internal set; }
+    public Bit BitPStart { get; internal set; }
     /// <summary>Plan tag for reset</summary>
-    public TagP TagPReset { get; internal set; }
+    public Bit BitPReset { get; internal set; }
     /// <summary>Plan tag for end</summary>
     public TagP TagPEnd { get; internal set; }
     /// <summary>Actual tag for start</summary>
@@ -72,7 +72,7 @@ public abstract partial class SegmentBase : ChildFlow, IVertex, ICoin, IWallet, 
     public static SegmentCreator Create { get; set; } =
         (string name, RootFlow containerFlow) =>
         {
-            Debug.Assert(Global.IsInUnitTest);        // should be overriden if not unit test
+            Assert(Global.IsInUnitTest);        // should be overriden if not unit test
             var seg = new DummySegment(containerFlow.Cpu, name) { ContainerFlow = containerFlow };
             containerFlow.AddChildVertex(seg);
             return seg;
@@ -118,9 +118,9 @@ public static class SegmentExtension
 {
     public static void PrintPortPlanTags(this SegmentBase seg)
     {
-        var s = seg.TagPStart?.Name;
-        var r = seg.TagPReset?.Name;
+        var s = seg.BitPStart?.Name;
+        var r = seg.BitPReset?.Name;
         var e = seg.TagPEnd?.Name;
-        Global.Logger.Debug($"Tags for segment [{seg.QualifiedName}]:({s}, {r}, {e})");
+        LogDebug($"Tags for segment [{seg.QualifiedName}]:({s}, {r}, {e})");
     }
 }

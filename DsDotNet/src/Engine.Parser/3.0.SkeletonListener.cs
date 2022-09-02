@@ -1,14 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Antlr4.Runtime.Misc;
-
-using Engine.Core;
-
 namespace Engine.Parser;
 
 
@@ -172,7 +161,7 @@ class SkeletonListener : dsBaseListener
             foreach (var flow in sys.RootFlows)
             {
                 foreach (var seg in flow.RootSegments)
-                    Debug.Assert(seg.Cpu != null && seg.Cpu == flow.Cpu);
+                    Assert(seg.Cpu != null && seg.Cpu == flow.Cpu);
             }
         }
     }

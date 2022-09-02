@@ -17,7 +17,7 @@ module FsSegmentModule =
     type FsSegmentBase(cpu, segmentName) =
         inherit SegmentBase(cpu, segmentName)
 
-        abstract member WireEvent:ChangeWriter*ExceptionHandler->IDisposable
+        abstract member WireEvent:ChangeWriter->IDisposable
 
 
         //member x.Status = //with get() =
@@ -35,7 +35,8 @@ module FsSegmentModule =
         member val Lasts:Child array = null with get, set
         member val ChildrenOrigin:IVertex array = null with get, set
         member val TraverseOrder:VertexAndOutgoingEdges array = null with get, set
-
+        member x.TagPStart = x.BitPStart :?> TagP
+        member x.TagPReset = x.BitPReset :?> TagP
         override x.Epilogue() =
             base.Epilogue()
             
@@ -46,8 +47,8 @@ module FsSegmentModule =
             let ns = $"StartPlan_{n}"
             let nr = $"ResetPlan_{n}"
             let ne = $"EndPlan_{n}"
-            this.TagPStart <- TagP(cpu, this, ns, TagType.Plan ||| TagType.Q ||| TagType.Start)
-            this.TagPReset <- TagP(cpu, this, nr, TagType.Plan ||| TagType.Q ||| TagType.Reset)
+            this.BitPStart <- TagP(cpu, this, ns, TagType.Plan ||| TagType.Q ||| TagType.Start)
+            this.BitPReset <- TagP(cpu, this, nr, TagType.Plan ||| TagType.Q ||| TagType.Reset)
             this.TagPEnd   <- TagP(cpu, this, ne, TagType.Plan ||| TagType.I ||| TagType.End)
 
             let (s, r, e) = x.Addresses
@@ -59,8 +60,8 @@ module FsSegmentModule =
                 this.TagAEnd   <- TagA(cpu, this, $"EndActual_{n}",   e, TagType.External ||| TagType.I ||| TagType.End)
 
 
-            x.PortS <- PortInfoStart(cpu, x, $"StartPort_{n}", x.TagPStart, x.TagAStart)
-            x.PortR <- PortInfoReset(cpu, x, $"ResetPort_{n}", x.TagPReset, x.TagAReset)
+            x.PortS <- PortInfoStart(cpu, x, $"StartPort_{n}", x.BitPStart, x.TagAStart)
+            x.PortR <- PortInfoReset(cpu, x, $"ResetPort_{n}", x.BitPReset, x.TagAReset)
             x.PortE <- PortInfoEnd  (cpu, x, $"EndPort_{n}",   x.TagPEnd,   x.TagAEnd)
 
             // Graph 정보 추출 & 저장
@@ -72,11 +73,13 @@ module FsSegmentModule =
             x.PrintPortPlanTags();
 
 
-        default x.WireEvent(writer, onError) =
+        default x.WireEvent(writer) =
             let mutable oldStatus:Status4 option = None
             let n = x.QualifiedName
             let write(bit, value, cause) =
-                writer([| BitChange(bit, value, cause, onError) |])
+                writer(BitChange(bit, value, cause))
+
+            let mutable isInitialReady = true
 
             Global.RawBitChangedSubject
                 .Where(fun bc -> bc.Bit.IsOneOf(x.PortS, x.PortR, x.PortE))
@@ -84,7 +87,7 @@ module FsSegmentModule =
                     let state = x.Status
                     let bit = bc.Bit
                     let value = bc.NewValue
-                    let cause = $"by bit change {bit.GetName()}={value}"
+                    let cause = $"bit change {bit.GetName()}={value}"
 
                     if x.QualifiedName = "L_F_Main" then
                         noop()
@@ -97,16 +100,20 @@ module FsSegmentModule =
                             if bit = x.PortS then 's'
                             else if bit = x.PortR then 'r'
                             else if bit = x.PortE then 'e'
-                            else failwith "ERROR"
+                            else failwithlog "ERROR"
 
                         match bitMatch, state, value with
                         | 's', Status4.Finished, false -> // finish 도중에 start port 꺼져서 finish 완료되려는 시점
                             // case1 : Reset port 켜지는 시점
                             // case2 : EndPort 꺼지는 시점에 : Reset port 는 아직 살아 있으므로 homing 
                             ()
+                        | 's', Status4.Homing, false ->
+                            logWarn $"Homing 중에 startport 꺼짐: {x.QualifiedName}"
 
-                        | 's', Status4.Ready, false
-                        | 'r', Status4.Ready, false ->
+                        | _, Status4.Ready, false ->
+                            if not isInitialReady then
+                                assert(false)
+                                failwithlog $"최초 초기값이 아닌 ready 상태의 가상부모에서 target endport 꺼짐"
                             ()
                         | 'e', Status4.Homing, false ->
                             logDebug $"\t\tAbout to finished homing: [{n}] status : {state} {cause}"
@@ -134,6 +141,8 @@ module FsSegmentModule =
                             write(x.Going, false, $"{n} going off by status {state}")
                         if x.Ready.Value && state <> Status4.Ready then
                             write(x.Ready, false, $"{n} ready off by status {state}")
+                        if state <> Status4.Ready then
+                            isInitialReady <- false
 
                         Global.SegmentStatusChangedSubject.OnNext(SegmentStatusChange(x, state))
 
@@ -152,19 +161,26 @@ module FsSegmentModule =
                         // } debug
 
 
-                        match state with
-                        | Status4.Ready -> doReady(x, writer, onError)
-                        | Status4.Going ->
-                            if Global.IsSingleThreadMode then
-                                doGoing(x, writer, onError)
-                            else
-                                async { doGoing(x, writer, onError) } |> Async.Start
-                        | Status4.Finished -> doFinish(x, writer, onError)
-                        | Status4.Homing -> doHoming(x, writer, onError)
-                        | _ ->
-                            failwith "Unexpected"
+                        async {
+                            match state with
+                            | Status4.Going
+                            | Status4.Homing -> oldStatus <- Some state
+                            | _ -> ()
 
-                        oldStatus <- Some state
+                            match state with
+                            | Status4.Ready -> doReady(x, writer)
+                            | Status4.Going -> doGoing(x, writer)
+                            | Status4.Finished -> doFinish(x, writer)
+                            | Status4.Homing -> doHoming(x, writer)
+                            | _ ->
+                                failwithlog "Unexpected"
+
+                            match state with
+                            | Status4.Ready
+                            | Status4.Finished -> oldStatus <- Some state
+                            | _ -> ()
+
+                        } |> Async.Start
                 )
 
         //member val ProgressInfo:GraphProgressSupportUtil.ProgressInfo = null with get, set

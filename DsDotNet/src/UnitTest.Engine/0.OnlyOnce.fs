@@ -20,7 +20,7 @@ module Fixtures =
         let logger = LogManager.GetLogger(loggerName)
         Global.Logger <- logger
         gLogger <- logger
-        Global.Logger
+        logger
 
     type DemoFixture() =
         //DO THE TEST SETUP HERE

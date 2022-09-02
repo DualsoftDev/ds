@@ -7,11 +7,12 @@ public abstract class Bit : Named, IBit
 {
     protected bool _value;
     public virtual bool Value => _value;    //{ get => _value; set => _value = value; }
+    public List<IBit> Containers { get; } = new ();
 
     public Cpu Cpu { get; set; }
     public Bit(Cpu cpu, string name, bool bit = false) : base(name)
     {
-        Debug.Assert(cpu != null);
+        Assert(cpu != null);
 
         _value = bit;
         Cpu = cpu;
@@ -35,7 +36,7 @@ public abstract class Bit : Named, IBit
     // Value setter 를 수행하지 않기 위한 생성자.  BitReEvaluatable 의 base 생성자로 사용됨
     protected Bit(string name, Cpu cpu) : base(name)
     {
-        Debug.Assert(cpu != null);
+        Assert(cpu != null);
         Cpu = cpu;
         cpu.BitsMap.Add(name, this);
     }
@@ -43,7 +44,7 @@ public abstract class Bit : Named, IBit
     internal Bit(string name, bool bit = false) : base(name)
     {
         _value = bit;
-        Debug.Assert(GetType().Name.Contains("OpcTag"));
+        Assert(GetType().Name.Contains("OpcTag"));
     }
 
 

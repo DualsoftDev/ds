@@ -1,14 +1,10 @@
-﻿module Cluster
+module Cluster
 
 open System
-open System.Collections
 open System.Collections.Generic
-open Dual.Common
-open Dsu.PLC
-open Dsu.PLC.Common
+open Engine.Common.FS
 open FSharpPlus
 open AddressConvert
-open Dual.Common
 
 //
 // 다수의 tags 를 최소한(or sub optimal)의 횟수로 PLC 에서 읽어 오기 위한 전략 수립

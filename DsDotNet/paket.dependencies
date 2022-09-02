@@ -73,3 +73,5 @@ nuget Fake.Api.GitHub
 #nuget System.Security.Permissions >= 4.7
 
 nuget System.Security.Permissions
+
+nuget FParsec

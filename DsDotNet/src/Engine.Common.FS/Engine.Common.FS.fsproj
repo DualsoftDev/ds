@@ -10,19 +10,50 @@
 	<ItemGroup>
 		<None Include="paket.references" />
 		<Compile Include="Prelude.fs" />
+		<None Include="FSharpFSIs\Microsoft.FSharp.Collections\ArrayModule.fsi" />
+		<None Include="FSharpFSIs\Microsoft.FSharp.Collections\ListModule.fsi" />
+		<None Include="FSharpFSIs\Microsoft.FSharp.Collections\MapModule.fsi" />
+		<None Include="FSharpFSIs\Microsoft.FSharp.Collections\SeqModule.fsi" />
+		<None Include="FSharpFSIs\Microsoft.FSharp.Collections\SetModule.fsi" />
+		<None Include="FSharpFSIs\Microsoft.FSharp.Control\EventModule.fsi" />
+		<None Include="FSharpFSIs\Microsoft.FSharp.Control\FSharpAsync.fsi" />
+		<None Include="FSharpFSIs\Microsoft.FSharp.Control\MailboxProcessor.fsi" />
+		<None Include="FSharpFSIs\Microsoft.FSharp.Control\ObservableModule.fsi" />
+		<None Include="FSharpFSIs\Microsoft.FSharp.Core\ExtraTopLevelOperators.fsi" />
+		<None Include="FSharpFSIs\Microsoft.FSharp.Core\Operators.fsi" />
+		<None Include="FSharpFSIs\Microsoft.FSharp.Core\OptionModule.fsi" />
+		<None Include="FSharpFSIs\Option.fsi" />
+		<Compile Include="Prelude.AdhocPolymorphism.fs" />
+		<Compile Include="ForwardDecl.fs" />
+		<Compile Include="Module\App.Config.fs" />
 		<Compile Include="Module\Log4NetWrapper.fs" />
 		<Compile Include="Module\Functions.fs" />
+		<Compile Include="Module\Collection.Algo.fs" />
+		<Compile Include="Module\ActivePattern.fs" />
 		<Compile Include="Module\QualifiedAccess\Seq.fs" />
 		<Compile Include="Module\QualifiedAccess\Tuple.fs" />
 		<!--<Compile Include="Module\QualifiedAccess\Option.fs" />-->
 		<Compile Include="Module\QualifiedAccess\Array.fs" />
+		<Compile Include="Module\QualifiedAccess\Bytes.fs" />
+		<Compile Include="Module\QualifiedAccess\List.fs" />
+		<Compile Include="Module\QualifiedAccess\DiscriminatedUnions.fs" />
+		<Compile Include="Module\QualifiedAccess\ResizeArray.fs" />
+		<Compile Include="Module\QualifiedAccess\Map.fs" />
 		<Compile Include="Module\Print.fs" />
+		<Compile Include="Module\TcpIp.fs" />
+		<Compile Include="TypeExtensions\Xml.fs" />
 		<Compile Include="TypeExtensions\Em.Collection.fs" />
 		<Compile Include="Graph\QuickGraph.fs" />
 		<Compile Include="Library.fs" />
 	</ItemGroup>
 
-	<ItemGroup />
+	<ItemGroup>
+	  <Folder Include="FSharpFSIs\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="FParsec" Version="1.1.1" />
+	</ItemGroup>
 	<Import Project="..\..\.paket\Paket.Restore.targets" />
 
 </Project>

@@ -1,3 +1,5 @@
 log4net
 YC.QuickGraph
-
+FSharpPlus
+Newtonsoft.Json
+FParsec

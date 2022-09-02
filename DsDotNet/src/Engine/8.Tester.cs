@@ -339,7 +339,7 @@ class Tester
     }
     [flow] F = {
         Main > Main2;
-        //Main <| Main2;
+        Main <||> Main2;
         Main = {
             // 정보로서의 Call 상호 리셋
             T.Ap <||> T.Am;
@@ -417,37 +417,14 @@ class Tester
 
         var startTag = "StartPlan_L_F_Main";
         var resetTag = "ResetPlan_L_F_Main2";
-        var counter = 0;
+
         //Global.SegmentStatusChangedSubject.Subscribe(ssc =>
         //{
-        //    if (ssc.Segment.QualifiedName == "L_F_Main2")
+        //    if (ssc.Segment.QualifiedName == "L_F_Main")
         //    {
-        //        if (ssc.Status == Status4.Finished)
+        //        if (ssc.Status == Status4.Ready)
         //        {
-        //            if (counter++ % 100 == 0)
-        //            {
-        //                Console.WriteLine($"[{counter}] After finishing Main segment");
-        //                //Global.Logger.Info($"-------------------------- [{counter}] After finishing Main segment");
-        //                //engine.Model.Print();
-        //            }
-        //            opc.Write(resetTag, true);
-        //        }
-        //    }
-        //    if (ssc.Segment.QualifiedName == "L_F_Main2")
-        //    {
-        //        if (ssc.Status == Status4.Finished)
-        //        {
-        //            if (counter++ % 100 == 0)
-        //            {
-        //                Console.WriteLine($"[{counter}] After finishing Main segment");
-        //                //Global.Logger.Info($"-------------------------- [{counter}] After finishing Main segment");
-        //                //engine.Model.Print();
-        //            }
-        //            opc.Write(resetTag, true);
-        //        }
-        //        else if (ssc.Status == Status4.Ready)
-        //        {
-        //            //Thread.Sleep(500);
+        //            Thread.Sleep(5000);
         //            opc.Write(startTag, true);
         //        }
         //    }
@@ -466,48 +443,44 @@ class Tester
             //opc.Write("EndActual_B_F_Sm", true);
 
             // simulating physics
-            Global.BitChangedSubject
-                .Subscribe(bc =>
-                {
-                    var n = bc.Bit.GetName();
-                    var val = bc.Bit.Value;
-                    var monitors = new[] {
-                        "StartPlan_A_F_Plus", "StartPlan_A_F_Minus", "StartPlan_B_F_Plus", "StartPlan_B_F_Minus",
-                        "EndPlan_A_F_Plus", "EndPlan_A_F_Minus", "EndPlan_B_F_Plus", "EndPlan_B_F_Minus",
-                        "StartPlan_C_F_Plus", "StartPlan_C_F_Minus", "StartPlan_D_F_Plus", "StartPlan_D_F_Minus",
-                        "EndPlan_C_F_Plus", "EndPlan_C_F_Minus", "EndPlan_D_F_Plus", "EndPlan_D_F_Minus" };
-                    if (monitors.Contains(n))
+            _ = Task.Run(() =>
+            {
+                Global.BitChangedSubject
+                    .Subscribe(bc =>
                     {
-                        Global.Logger.Debug($"Plan for TAG {n} value={val}");
-                        if (n == "StartPlan_A_F_Plus")
-                            opc.Write("StartActual_A_F_Plus", val);
-                        else if (n == "StartPlan_B_F_Plus")
-                            opc.Write("StartActual_B_F_Plus", val);
-                        else if (n == "StartPlan_A_F_Minus")
-                            opc.Write("StartActual_A_F_Minus", val);
-                        else if (n == "StartPlan_B_F_Minus")
-                            opc.Write("StartActual_B_F_Minus", val);
-                        else if (n == "StartPlan_C_F_Plus")
-                            opc.Write("StartActual_C_F_Plus", val);
-                        else if (n == "StartPlan_D_F_Plus")
-                            opc.Write("StartActual_D_F_Plus", val);
-                        else if (n == "StartPlan_C_F_Minus")
-                            opc.Write("StartActual_C_F_Minus", val);
-                        else if (n == "StartPlan_D_F_Minus")
-                            opc.Write("StartActual_D_F_Minus", val);
-                    
-                        Thread.Sleep(500);
+                        var n = bc.Bit.GetName();
+                        var val = bc.Bit.Value;
+                        var monitors = new[] {
+                        "StartPlan_A_F_Plus", "StartPlan_A_F_Minus", "StartPlan_B_F_Plus", "StartPlan_B_F_Minus",
+                        //"EndPlan_A_F_Plus", "EndPlan_A_F_Minus", "EndPlan_B_F_Plus", "EndPlan_B_F_Minus",
+                        "StartPlan_C_F_Plus", "StartPlan_C_F_Minus", "StartPlan_D_F_Plus", "StartPlan_D_F_Minus",
+                        //"EndPlan_C_F_Plus", "EndPlan_C_F_Minus", "EndPlan_D_F_Plus", "EndPlan_D_F_Minus" 
+                        };
+                        if (monitors.Contains(n))
+                        {
+                            Global.Logger.Debug($"Plan for TAG {n} value={val}");
+                            //opc.Write(n, val);
+                            if (n == "StartPlan_A_F_Plus")
+                                opc.Write("StartActual_A_F_Plus", val);
+                            else if (n == "StartPlan_B_F_Plus")
+                                opc.Write("StartActual_B_F_Plus", val);
+                            else if (n == "StartPlan_A_F_Minus")
+                                opc.Write("StartActual_A_F_Minus", val);
+                            else if (n == "StartPlan_B_F_Minus")
+                                opc.Write("StartActual_B_F_Minus", val);
+                            else if (n == "StartPlan_C_F_Plus")
+                                opc.Write("StartActual_C_F_Plus", val);
+                            else if (n == "StartPlan_D_F_Plus")
+                                opc.Write("StartActual_D_F_Plus", val);
+                            else if (n == "StartPlan_C_F_Minus")
+                                opc.Write("StartActual_C_F_Minus", val);
+                            else if (n == "StartPlan_D_F_Minus")
+                                opc.Write("StartActual_D_F_Minus", val);
 
-                        //else if (n == "EndPlan_A_F_Sp")
-                        //    opc.Write("EndActual_A_F_Sp", val);
-                        //else if (n == "EndPlan_A_F_Sm")
-                        //    opc.Write("EndActual_A_F_Sm", val);
-                        //else if (n == "EndPlan_B_F_Sp")
-                        //    opc.Write("EndActual_B_F_Sp", val);
-                        //else if (n == "EndPlan_B_F_Sm")
-                        //    opc.Write("EndActual_B_F_Sm", val);
-                    }
-                });
+                            Thread.Sleep(500);
+                        }
+                    });
+            });
         }
 
         Debug.Assert(engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(startTag));

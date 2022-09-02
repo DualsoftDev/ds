@@ -4,8 +4,8 @@ using Dsu.PLC.LS;
 using Dsu.PLC.Common;
 using Confluent.Kafka;
 using Confluent.Kafka.Admin;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+//using Newtonsoft.Json;
+//using Newtonsoft.Json.Linq;
 using Microsoft.FSharp.Core;
 using log4net;
 
@@ -116,13 +116,11 @@ public class OpcBroker
             if (bit.Value != value)
             {
                 bit.SetValue(value);
-
                 if (tagToAddr.ContainsKey(tagName))
                 {
                     Console.WriteLine("Write - " + tagName + " : " + value);
                     UpdateListBits(tagName, value);
                 }
-
                 Core.Global.TagChangeFromOpcServerSubject.OnNext(new OpcTagChange(tagName, value));
             }
         }
@@ -139,6 +137,8 @@ public class OpcBroker
             var bit = _tagDic[tagName];
             if (bit.Value != value)
             {
+                LsBits[IdxLsBits[tagName] - 1].Value = false;
+                Conn.WriteRandomTags(LsBits.ToArray());
                 Console.WriteLine("Read - " + tagName + " : " + value);
                 bit.SetValue(value);
                 Core.Global.TagChangeFromOpcServerSubject.OnNext(new OpcTagChange(tagName, value));
@@ -165,7 +165,7 @@ public class OpcBroker
             {
                 var n = bc.Bit.GetName();
                 var val = bc.Bit.Value;
-                Console.WriteLine($"name : {n}, value : {val}");
+                //Console.WriteLine($"name : {n}, value : {val}");
             }
         );
     }
@@ -176,24 +176,22 @@ public class OpcBroker
         if (Conn.Connect())
         {
             Conn.AddMonitoringTags(LsBits);
-            Write("StartActual_A_F_Plus", false);
-            Write("StartActual_B_F_Plus", false);
-            Write("StartActual_C_F_Plus", false);
-            Write("StartActual_D_F_Plus", false);
-            Write("StartActual_A_F_Minus", false);
-            Write("StartActual_B_F_Minus", false);
-            Write("StartActual_C_F_Minus", false);
-            Write("StartActual_D_F_Minus", false);
+            LsBits[IdxLsBits["StartActual_A_F_Plus"]].Value = false;
+            LsBits[IdxLsBits["StartActual_B_F_Plus"]].Value = false;
+            LsBits[IdxLsBits["StartActual_C_F_Plus"]].Value = false;
+            LsBits[IdxLsBits["StartActual_D_F_Plus"]].Value = false;
+            LsBits[IdxLsBits["StartActual_A_F_Minus"]].Value = false;
+            LsBits[IdxLsBits["StartActual_B_F_Minus"]].Value = false;
+            LsBits[IdxLsBits["StartActual_C_F_Minus"]].Value = false;
+            LsBits[IdxLsBits["StartActual_D_F_Minus"]].Value = false;
             Conn.WriteRandomTags(LsBits.ToArray());
             Conn.Subject
                 .OfType<TagValueChangedEvent>()
                 .Subscribe(evt =>
                     {
                         var tag = (LsTag)evt.Tag;
-                        if (tag.Name[1] != 'Q')
-                        {
+                        if (tag.Name[1] == 'I')
                             Read(addrToTag[tag.Name], (bool)tag.Value);
-                        }
                     }
                 );
             Console.WriteLine("Ready!");

@@ -1,9 +1,0 @@
-﻿
-* 마지막 relay 설정
-  - (자신을 제외한 모든 relay 가 off) & (모든 device 의 원위치 상태) --- 맞지 않음.
-  - diamond-with-single-actuation.project 예제
-    . A+; {A-; B+}; B-; C+
-    . DAG 의 terminal 에서 역방향 탐색하면서 가장 먼저 만나는 vertex 가 해당 device 의 최종 상태
-    . A-, B-, C+
-  - (자신을 제외한 모든 relay 가 off) & (모든 device 의 최종 위치 상태) --- 이렇게 해야 할 듯.
-  

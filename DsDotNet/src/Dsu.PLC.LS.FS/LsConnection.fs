@@ -1,8 +1,9 @@
-﻿namespace Dsu.PLC.LS
+namespace Dsu.PLC.LS
 
 open System.Net.Sockets
 open FSharpPlus
-open Dual.Common
+open Engine.Common.FS
+open Engine.Common.FS.Prelude
 open Dsu.PLC.Common
 open Dsu.PLC
 open PacketImpl

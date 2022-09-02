@@ -1,12 +1,10 @@
-﻿module PacketImpl
+module PacketImpl
 
 open System
 open System.Net.Sockets
 open System.Text
-open Dual.Common
+open Engine.Common.FS
 open AddressConvert
-open Cluster
-
 
 /// Source of Frame : * 클라이언트(HMI) -> 서버(PLC): 0x33, * 서버(PLC) -> 클라이언트(HMI): 0x11
 module FrameType =

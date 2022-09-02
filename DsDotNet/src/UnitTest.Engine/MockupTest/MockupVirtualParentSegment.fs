@@ -114,9 +114,9 @@ type MockupVirtualParentSegment(name, target:MockupSegment, causalSourceSegments
 
         vps
 
-    override x.WireEvent(writer, onError) =
+    override x.WireEvent(writer) =
         let write(bit, value, cause) =
-            writer(BitChange(bit, value, cause, onError))
+            writer(BitChange(bit, value, cause))
 
         let onError =
             fun (ex:Exception) ->
@@ -213,12 +213,7 @@ type MockupVirtualParentSegment(name, target:MockupSegment, causalSourceSegments
 
                         | Status4.Homing ->
                             if childStatus = Status4.Going then
-                                let msg = $"Something bad happend?  trying to reset child while {x.Target.Name}={childStatus}"
-                                logError "%s" msg
-                                if isNull bc.OnError then
-                                    failwith msg
-                                else
-                                    bc.OnError.Invoke(new DsException(msg))
+                                failwithlog $"Something bad happend?  trying to reset child while {x.Target.Name}={childStatus}"
 
                             write(targetResetTag, true, $"{x.Name} HOMING 으로 인한 {x.Target.Name} reset 켜기")
 

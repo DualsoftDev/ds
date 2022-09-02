@@ -25,7 +25,7 @@ module internal SegmentRGFHModule =
         let isChildrenOrigin = getOutofOriginChildren >> Seq.isEmpty
 
     let verifyM msg x = if not x then failwithlog $"{msg}"
-    let runChildren (children:Child seq, writer:ChangeWriter, onError:ExceptionHandler) =
+    let runChildren (children:Child seq, writer:ChangeWriter) =
         assert(children.Distinct().Count() = children.Count())
         for child in children do
             // todo
@@ -42,7 +42,7 @@ module internal SegmentRGFHModule =
                     //child.Status <- Status4.Going
                     Global.ChildStatusChangedSubject.OnNext(ChildStatusChange(child, Status4.Going))
 
-                writer(BitChange(st, true, "Starting child", onError, BeforeAction = before))
+                writer(BitChange(st, true, "Starting child", BeforeAction = before))
 
     /// Segment 별로 Going 중에 child 의 종료 모니터링.  segment 가 Going 이 아니게 되면, dispose
     let goingSubscriptions = ConcurrentDictionary<SegmentBase, IDisposable>()
@@ -79,7 +79,7 @@ module internal SegmentRGFHModule =
     let stopMonitorOriginating (seg:SegmentBase) =
         stopMonitor originatingSubscriptions seg
 
-    let procReady(segment:SegmentBase, writer:ChangeWriter, onError:ExceptionHandler) =
+    let procReady(segment:SegmentBase, writer:ChangeWriter) =
         let seg = segment :?> Segment
         assert( [seg.TagPStart; seg.TagPReset; seg.TagPEnd].ForAll(fun t -> not t.Value ))     // A_F_Pp.TagEnd 가 true 되는 상태???
         assert( [seg.PortS :> PortInfo; seg.PortR; seg.PortE].ForAll(fun t -> not t.Value ))
@@ -91,9 +91,9 @@ module internal SegmentRGFHModule =
     ///     - child 가 하나라도 있으면, child 의 종료를 모니터링하기 위한 subscription 후, 최초 child group(init) 만 수행
     ///         * 이후, child 종료를 감지하면, 다음 실행할 child 계속 실행하고, 없으면 해당 segment 종료
     ///     - 없으면 바로 종료
-    let procGoing(seg:SegmentBase, writer:ChangeWriter, onError:ExceptionHandler) =
+    let procGoing(seg:SegmentBase, writer:ChangeWriter) =
         assert( not <| homingSubscriptions.ContainsKey(seg))
-        let write:BitWriter = getBitWriter writer onError
+        let write:BitWriter = getBitWriter writer
 
         if isChildrenOrigin(seg) then
             write(seg.Going, true, $"{seg.QualifiedName} Segment GOING 시작")
@@ -141,14 +141,14 @@ module internal SegmentRGFHModule =
                                                 .Distinct()
                                                 .ToArray()
 
-                                        runChildren (targets, writer, onError)
+                                        runChildren (targets, writer)
                             with exn ->
                                 failwithlog $"{exn}"
                         )
                 goingSubscriptions.TryAdd(seg, subs) |> verifyM "Failed to add Going subscription"
 
                 let seg = seg :?> Segment
-                runChildren (seg.Inits, writer, onError)
+                runChildren (seg.Inits, writer)
 
             else // no children
                 write(seg.PortE, true, $"{seg.QualifiedName} GOING 끝")
@@ -162,18 +162,18 @@ module internal SegmentRGFHModule =
                         for ch in outofOriginChildren do
                             ch.Status <- Status4.Ready
                             ch.DbgIsOriginating <- false
-                        doGoing(seg, writer, onError)
+                        doGoing(seg, writer)
                         )
 
             seg.DbgIsOriginating <- true
             for ch in outofOriginChildren do
                 ch.DbgIsOriginating <- true
-            doHoming(seg, writer, onError)
+            doHoming(seg, writer)
             originatingSubscriptions.TryAdd(seg, subs) |> verifyM "Failed to add Originating subscription"
 
-    let procFinish(segment:SegmentBase, writer:ChangeWriter, onError:ExceptionHandler) =
+    let procFinish(segment:SegmentBase, writer:ChangeWriter) =
         let seg = segment :?> Segment
-        let write = getBitWriter writer onError
+        let write = getBitWriter writer
 
         if seg.QualifiedName = "L_F_Main" then
             noop()
@@ -184,13 +184,13 @@ module internal SegmentRGFHModule =
         write(seg.TagPEnd, true, $"Finishing {seg.QualifiedName}")
         write(seg.TagPStart, false, $"Finishing {seg.QualifiedName}")
 
-    let procHoming(segment:SegmentBase, writer:ChangeWriter, onError:ExceptionHandler) =
+    let procHoming(segment:SegmentBase, writer:ChangeWriter) =
         let seg = segment :?> Segment
 
         if seg.QualifiedName = "L_F_Main" then
             noop()
 
-        let write:BitWriter = getBitWriter writer onError
+        let write:BitWriter = getBitWriter writer
 
         stopMonitorGoing seg
 
@@ -217,7 +217,7 @@ module internal SegmentRGFHModule =
                     )
             homingSubscriptions.TryAdd(seg, subs) |> verifyM "Failed to add Homing subscription"
 
-            runChildren(originTargets, writer, onError)
+            runChildren(originTargets, writer)
 
             //// todo: fix me
             //let et = seg.TagPEnd

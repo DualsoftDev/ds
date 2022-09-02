@@ -34,17 +34,10 @@ module CpuModule =
             assert false
 
         if bitChanged then
-            try
-                if (bit :? Tag) then
-                    logDebug($"Publishing tag from CPU: {bit.Name}={bitChange.NewValue}");
-                    Global.TagChangeToOpcServerSubject.OnNext(new OpcTagChange(bit.Name, bitChange.NewValue))
-                Global.RawBitChangedSubject.OnNext(bitChange)
-            with ex ->
-                logError $"{ex}"
-                if isNull bitChange.OnError then
-                    reraise()
-                else
-                    bitChange.OnError.Invoke(ex)
+            if (bit :? Tag) then
+                logDebug($"Publishing tag from CPU: {bit.Name}={bitChange.NewValue}");
+                Global.TagChangeToOpcServerSubject.OnNext(new OpcTagChange(bit.Name, bitChange.NewValue))
+            Global.RawBitChangedSubject.OnNext(bitChange)
 
     let doApply(bitChange:BitChange) =
         if bitChange.BeforeAction <> null then
@@ -103,12 +96,12 @@ module CpuModule =
                     if bit:>IBit = pi.Plan then
                         //Debug.Assert(pi.Plan.Value != pi.Actual?.Value)
                         if (isNull pi.Actual || pi.Plan.Value = pi.Actual.Value) then
-                            bc <- BitChange(dep, bitChange.NewValue, pi.Plan, bitChange.OnError)
+                            bc <- BitChange(dep, bitChange.NewValue, pi.Plan)
                         else
                             noop()
                     elif (bit = pi.Actual) then
                         if pi.Plan.Value = pi.Actual.Value then
-                            bc <- new BitChange(dep, bitChange.NewValue, pi.Actual, bitChange.OnError)
+                            bc <- new BitChange(dep, bitChange.NewValue, pi.Actual)
                         else
                             noop()
                 | _ ->
@@ -118,17 +111,17 @@ module CpuModule =
                 if isNull bc then
                     let newValue = getValue(dep)
                     if newValue <> prevValues[dep] then
-                        BitChange(dep, newValue, null, null) |> doApply 
+                        BitChange(dep, newValue, null) |> doApply 
                 else
                     bc |> doApply 
+            if bitChange.NewValue then
+                if cpu.FFSetterMap.ContainsKey(bit) then
+                    for ff in cpu.FFSetterMap[bit].Where(fun ff -> not ff.Value) do
+                        BitChange(ff, true, bit) |> doApply 
 
-            if (cpu.FFSetterMap.ContainsKey(bit) && bitChange.NewValue) then
-                for ff in cpu.FFSetterMap[bit].Where(fun ff -> not ff.Value) do
-                    BitChange(ff, true, bit, bitChange.OnError) |> doApply 
-
-            if cpu.FFResetterMap.ContainsKey(bit) && bitChange.NewValue then
-                for ff in cpu.FFResetterMap[bit].Where(fun ff -> ff.Value) do
-                    BitChange(ff, false, bit, bitChange.OnError) |> doApply 
+                if cpu.FFResetterMap.ContainsKey(bit) then
+                    for ff in cpu.FFResetterMap[bit].Where(fun ff -> ff.Value) do
+                        BitChange(ff, false, bit) |> doApply 
         else
             //LogWarn($"Failed to find dependency for {bit.GetName()}")
             doApply bitChange
@@ -163,18 +156,19 @@ module CpuModule =
                         match q.TryDequeue() with
                         | true, bitChange ->
                             let bit = bitChange.Bit
+                            let value = bitChange.NewValue
                             if (bit.GetName() = "AutoStart_L_F") then
                                 noop()
 
                             if lasts.ContainsKey(bit) then
-                                if lasts[bit] = bitChange.NewValue then
+                                if lasts[bit] = value then
                                     logWarn $"Skipping duplicated bit change {bit}.";
                                     noop();
                                 else
-                                    lasts[bit] <- bitChange.NewValue;
+                                    lasts[bit] <- value;
                                     apply cpu bitChange true
                             else
-                                lasts.Add(bit, bitChange.NewValue);
+                                lasts.Add(bit, value);
                                 apply cpu bitChange true
 
                         | false, _ ->

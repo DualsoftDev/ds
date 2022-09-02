@@ -105,7 +105,7 @@ type Diamond(output1:ITestOutputHelper) =
 
         let engine = EngineBuilder(text, "Cpu").Engine
         Program.Engine <- engine
-        engine.Run()
+        engine.Run() |> ignore
 
         let opc = engine.Opc
 

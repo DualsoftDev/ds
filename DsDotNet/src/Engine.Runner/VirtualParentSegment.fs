@@ -111,8 +111,8 @@ module VirtualParentSegmentModule =
 
             vps
 
-        override x.WireEvent(writer, onError) =
-            let write:BitWriter = getBitWriter writer onError
+        override x.WireEvent(writer) =
+            let write:BitWriter = getBitWriter writer
             let mutable isInitialReady = true
             Global.BitChangedSubject
                 .Subscribe(fun bc ->

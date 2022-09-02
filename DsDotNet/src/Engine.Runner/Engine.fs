@@ -69,8 +69,8 @@ module EngineModule =
             |> Seq.iter(fun vps ->
                 let writer = vps.Cpu.Enqueue
                 //let writer = vps.Cpu.SendChange
-                vps.Target.WireEvent(writer, raise) |> ignore
-                vps.WireEvent(writer, raise) |> ignore
+                vps.Target.WireEvent(writer) |> ignore
+                vps.WireEvent(writer) |> ignore
                 )
 
             assert( virtualParentSegments |> Seq.forall(fun vp -> vp.Status = Status4.Ready));

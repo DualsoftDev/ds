@@ -8,10 +8,9 @@ public class BitChange
     /// <summary>IBit or string description</summary>
     public object Cause { get; }
     public DateTime Time { get; }
-    public ExceptionHandler OnError { get; set; }
     public Action BeforeAction { get; set; }
     public Action AfterAction { get; set; }
-    public BitChange(IBit bit, bool newValue, object cause = null, ExceptionHandler onError =null)
+    public BitChange(IBit bit, bool newValue, object cause = null)
     {
         //DAssert(bit.Value != newValue);
 
@@ -26,7 +25,6 @@ public class BitChange
         NewValue = newValue;
         Time = DateTime.Now;
         Cause = cause;
-        OnError = onError;
     }
 
     public string CauseRepr => Cause switch
@@ -42,8 +40,8 @@ public class BitChange
 
 public class EndPortChange : BitChange
 {
-    public EndPortChange(IBit bit, bool newValue, object cause = null, ExceptionHandler onError = null)
-        : base(bit, newValue, cause, onError)
+    public EndPortChange(IBit bit, bool newValue, object cause = null)
+        : base(bit, newValue, cause)
     {
     }
 }

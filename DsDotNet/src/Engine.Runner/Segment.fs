@@ -17,7 +17,7 @@ module FsSegmentModule =
     type FsSegmentBase(cpu, segmentName) =
         inherit SegmentBase(cpu, segmentName)
 
-        abstract member WireEvent:ChangeWriter*ExceptionHandler->IDisposable
+        abstract member WireEvent:ChangeWriter->IDisposable
 
 
         //member x.Status = //with get() =
@@ -73,11 +73,11 @@ module FsSegmentModule =
             x.PrintPortPlanTags();
 
 
-        default x.WireEvent(writer, onError) =
+        default x.WireEvent(writer) =
             let mutable oldStatus:Status4 option = None
             let n = x.QualifiedName
             let write(bit, value, cause) =
-                writer(BitChange(bit, value, cause, onError))
+                writer(BitChange(bit, value, cause))
 
             let mutable isInitialReady = true
 
@@ -168,10 +168,10 @@ module FsSegmentModule =
                             | _ -> ()
 
                             match state with
-                            | Status4.Ready -> doReady(x, writer, onError)
-                            | Status4.Going -> doGoing(x, writer, onError)
-                            | Status4.Finished -> doFinish(x, writer, onError)
-                            | Status4.Homing -> doHoming(x, writer, onError)
+                            | Status4.Ready -> doReady(x, writer)
+                            | Status4.Going -> doGoing(x, writer)
+                            | Status4.Finished -> doFinish(x, writer)
+                            | Status4.Homing -> doHoming(x, writer)
                             | _ ->
                                 failwithlog "Unexpected"
 

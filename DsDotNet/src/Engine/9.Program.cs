@@ -2,6 +2,8 @@ using System.IO;
 using System.Configuration;
 using Engine.Common.FS;
 using System.Threading;
+using System.Windows.Forms;
+using System.Threading.Tasks;
 
 namespace Engine;
 
@@ -37,10 +39,16 @@ class Program
         //ThreadPool.GetMinThreads(out int minWorker, out int minIOC);
         ThreadPool.SetMinThreads(60, 60);
     }
+
     static void Main(string[] args)
     {
+
         //PrepareThreadPool();
         PrepareLog4Net();
+        SimpleExceptionHandler.InstallExceptionHandler();
+
+        //throw new Exception("Main exception");
+
         //Tester.DoSampleTestVps();
         //Tester.DoSampleTest();
         //Tester.DoSampleTestAdvanceReturn();

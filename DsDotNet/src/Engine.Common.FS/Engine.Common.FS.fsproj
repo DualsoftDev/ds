@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
@@ -30,6 +30,7 @@
 		<Compile Include="Module\Functions.fs" />
 		<Compile Include="Module\Collection.Algo.fs" />
 		<Compile Include="Module\ActivePattern.fs" />
+		<Compile Include="Module\QualifiedAccess\Async.fs" />
 		<Compile Include="Module\QualifiedAccess\Seq.fs" />
 		<Compile Include="Module\QualifiedAccess\Tuple.fs" />
 		<!--<Compile Include="Module\QualifiedAccess\Option.fs" />-->

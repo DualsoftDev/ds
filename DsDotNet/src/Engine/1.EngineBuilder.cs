@@ -27,7 +27,8 @@ public class EngineBuilder
         Model.Epilogue(Opc);
 
         Opc.Print();
-        //_ = Task.Run(async () => { await Opc.CommunicationPLC(); });
+        if (Global.IsControlMode)
+            _ = Task.Run(async () => { await Opc.CommunicationPLC(); });
         foreach (var cpu in Model.Cpus)
             cpu.PrintTags();
 

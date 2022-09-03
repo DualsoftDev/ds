@@ -9,6 +9,7 @@ open System.Linq
 open System.Web.Configuration
 open Engine.Common
 open System.Collections.Generic
+open System.Threading.Tasks
 
 [<AutoOpen>]
 module VirtualParentSegmentModule =
@@ -111,7 +112,7 @@ module VirtualParentSegmentModule =
 
             vps
 
-        override x.WireEvent(writer) =
+        override x.WireEvent(writer:ChangeWriter) =
             let write:BitWriter = getBitWriter writer
             let mutable isInitialReady = true
             Global.BitChangedSubject
@@ -136,44 +137,46 @@ module VirtualParentSegmentModule =
                     if notiTargetEndPortChange then
                         let cause = $"{x.Target.Name} End Port={x.Target.PortE.Value}"
 
-                        match state, on with
-                        | Status4.Going, true ->
-                            //write(targetStartTag, false, $"{n} going 끝내기 by {cause}")
-                            //write(x.Going, false, $"{n} going 끝내기 by {cause}")
-                            write(x.PortE, true, $"{n} FINISH 끝내기 by {cause}")
+                        task {
+                            match state, on with
+                            | Status4.Going, true ->
+                                //write(targetStartTag, false, $"{n} going 끝내기 by {cause}")
+                                //write(x.Going, false, $"{n} going 끝내기 by {cause}")
+                                do! write(x.PortE, true, $"{n} FINISH 끝내기 by {cause}")
 
-                            // 가상부모 end 공지.  인위적...
-                            Global.SegmentStatusChangedSubject.OnNext(SegmentStatusChange(x, Status4.Finished))
-
-
-                        | Status4.Homing, false ->
-                            //assert(not targetStartTag.Value)    // homing 중에 end port 가 꺼졌다고, 반드시 start tag 가 꺼져 있어야 한다고 볼 수는 없다.  start tag ON 이면 바로 재시작
-                            //assert(x.Going.Value = false) // 아직 write 안되었을 수도 있음
-                            //[|
-                            //    BitChange(targetResetTag, false, $"{x.Target.Name} homing 완료로 reset 끄기")
-                            //    BitChange(x.Ready, true, $"{x.Target.Name} homing 완료")
-                            //    BitChange(x.PortE, false, null)
-                            //|] |> writer  // <-- fail
-                            write(targetResetTag, false, $"{x.Target.Name} homing 완료로 reset 끄기")
-                            write(x.Ready, true, $"{x.Target.Name} homing 완료")
-                            write(x.PortE, false, null)
+                                // 가상부모 end 공지.  인위적...
+                                Global.SegmentStatusChangingSubject.OnNext(SegmentStatusChange(x, Status4.Finished))
 
 
-                        | Status4.Ready, true ->
-                            logInfo $"외부에서 내부 target {x.Target.Name} 실행 감지"
+                            | Status4.Homing, false ->
+                                //assert(not targetStartTag.Value)    // homing 중에 end port 가 꺼졌다고, 반드시 start tag 가 꺼져 있어야 한다고 볼 수는 없다.  start tag ON 이면 바로 재시작
+                                //assert(x.Going.Value = false) // 아직 write 안되었을 수도 있음
+                                //[|
+                                //    BitChange(targetResetTag, false, $"{x.Target.Name} homing 완료로 reset 끄기")
+                                //    BitChange(x.Ready, true, $"{x.Target.Name} homing 완료")
+                                //    BitChange(x.PortE, false, null)
+                                //|] |> writer  // <-- fail
+                                do! write(targetResetTag, false, $"{x.Target.Name} homing 완료로 reset 끄기")
+                                do! write(x.Ready, true, $"{x.Target.Name} homing 완료")
+                                do! write(x.PortE, false, null)
 
-                        | Status4.Ready, false ->
-                            if not isInitialReady then
-                                assert(false)
-                                failwithlog $"최초 초기값이 아닌 ready 상태의 가상부모에서 target endport 꺼짐"
 
-                        | Status4.Going, false ->
-                            logInfo $"Children originated before going {x.Target.Name}"
+                            | Status4.Ready, true ->
+                                logInfo $"외부에서 내부 target {x.Target.Name} 실행 감지"
 
-                        | _ ->
-                            //failwithlog $"Unknown: [{n}]{state}: Target endport => {x.Target.Name}={on}"
-                            logWarn $"Unknown: [{n}]{state}: Target endport => {x.Target.Name}={on}"
-                            ()
+                            | Status4.Ready, false ->
+                                if not isInitialReady then
+                                    assert(false)
+                                    failwithlog $"최초 초기값이 아닌 ready 상태의 가상부모에서 target endport 꺼짐"
+
+                            | Status4.Going, false ->
+                                logInfo $"Children originated before going {x.Target.Name}"
+
+                            | _ ->
+                                //failwithlog $"Unknown: [{n}]{state}: Target endport => {x.Target.Name}={on}"
+                                logWarn $"Unknown: [{n}]{state}: Target endport => {x.Target.Name}={on}"
+                                ()
+                        } |> Async.AwaitTask |> Async.Start
 
                     if notiVpsPortChange then
                         if oldStatus = Some state then
@@ -210,75 +213,81 @@ module VirtualParentSegmentModule =
 
                             noop()
                         else
-                            logInfo $"[{n}] VPS Segment status : {state} by {bit.Name}={on}"
+                            task {
+                                logInfo $"[{n}] VPS Segment status : {state} by {bit.Name}={on}"
 
-                            if x.Going.Value && state <> Status4.Going then
-                                write(x.Going, false, $"{n} going off by status {state}")
-                            if x.Ready.Value && state <> Status4.Ready then
-                                write(x.Ready, false, $"{n} ready off by status {state}")
+                                if x.Going.Value && state <> Status4.Going then
+                                    do! write(x.Going, false, $"{n} going off by status {state}")
+                                if x.Ready.Value && state <> Status4.Ready then
+                                    do! write(x.Ready, false, $"{n} ready off by status {state}")
 
-                            if state <> Status4.Ready then
-                                isInitialReady <- false
+                                if state <> Status4.Ready then
+                                    isInitialReady <- false
 
-                            Global.SegmentStatusChangedSubject.OnNext(SegmentStatusChange(x, state))
+                                Global.SegmentStatusChangingSubject.OnNext(SegmentStatusChange(x, state))
 
+                                oldStatus <- Some state
 
-                            let childStatus = x.Target.Status
+                                let childStatus = x.Target.Status
 
-                            match state with
-                            | Status4.Going
-                            | Status4.Homing -> oldStatus <- Some state
-                            | _ -> ()
-
-
-                            match state with
-                            | Status4.Ready    ->
-                                ()
-                            | Status4.Going    ->
-
-                                    
-                                write(x.Going, true, $"{n} VPS GOING 시작")
-                                if triggerTargetStart then
-                                    assert(childStatus = Status4.Ready || cpu.ProcessingQueue);
-                                    if childStatus = Status4.Ready then
-                                        write(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
-                                    else
-                                        logDebug $"Waiting target child [{x.Target.Name}] ready..from {x.Target.Status}"
-                                        // wait while target child available
-                                        let mutable subs:IDisposable = null
-                                        subs <-
-                                            Global.SegmentStatusChangedSubject.Where(fun ssc -> ssc.Segment = x.Target && ssc.Segment.Status = Status4.Ready)
-                                                .Subscribe(fun ssc ->
-                                                    write(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
-                                                    subs.Dispose()
-                                                )
-
-                            | Status4.Finished ->
-                                if x.Name = "VPS_L_F_Main" then
-                                    noop()
-
-                                write(targetStartTag, false, $"{n} FINISH 로 인한 {x.Target.Name} start {targetStartTag.GetName()} 끄기")
-                                write(x.Going, false, $"{n} FINISH")
-
-                                assert(x.PortE.Value)
-                                assert(x.PortR.Value = false)
-
-                            | Status4.Homing ->
-                                if triggerTargetReset then
-                                    assert(not targetStartTag.Value)        // 일반적으로... 
-                                    if childStatus = Status4.Going then
-                                        failwithlog $"Something bad happend?  trying to reset child while {x.Target.Name}={childStatus}"
-
-                                    write(targetResetTag, true, $"{n} HOMING 으로 인한 {x.Target.Name} reset 켜기")
+                                //match state with
+                                //| Status4.Going
+                                //| Status4.Homing -> oldStatus <- Some state
+                                //| _ -> ()
 
 
-                            | _ ->
-                                failwithlog "Unexpected"
+                                match state with
+                                | Status4.Ready    ->
+                                    ()
+                                | Status4.Going    ->                                    
+                                    do! write(x.Going, true, $"{n} VPS GOING 시작")
+                                    if triggerTargetStart then
+                                        assert(childStatus = Status4.Ready || cpu.ProcessingQueue);
+                                        if childStatus = Status4.Ready then
+                                            do! write(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
+                                        else
+                                            logDebug $"Waiting target child [{x.Target.Name}] ready..from {x.Target.Status}"
+                                            // wait while target child available
+                                            let mutable subs:IDisposable = null
+                                            subs <-
+                                                Global.SegmentStatusChangingSubject.Where(fun ssc -> ssc.Segment = x.Target && ssc.Segment.Status = Status4.Ready)
+                                                    .Subscribe(fun ssc ->
+                                                        task {
+                                                            do! write(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
+                                                        } |> Async.AwaitTask |> Async.RunSynchronously
+                                                        subs.Dispose()
+                                                    )
 
-                            match state with
-                            | Status4.Ready
-                            | Status4.Finished -> oldStatus <- Some state
-                            | _ -> ()
+                                | Status4.Finished ->
+                                    if x.Name = "VPS_L_F_Main" then
+                                        noop()
+
+                                    do! write(targetStartTag, false, $"{n} FINISH 로 인한 {x.Target.Name} start {targetStartTag.GetName()} 끄기")
+                                    do! write(x.Going, false, $"{n} FINISH")
+
+                                    assert(x.PortE.Value)
+                                    assert(x.PortR.Value = false)
+
+                                | Status4.Homing ->
+                                    if triggerTargetReset then
+                                        assert(not targetStartTag.Value)        // 일반적으로... 
+                                        if childStatus = Status4.Going then
+                                            failwithlog $"Something bad happend?  trying to reset child while {x.Target.Name}={childStatus}"
+
+                                        do! write(targetResetTag, true, $"{n} HOMING 으로 인한 {x.Target.Name} reset 켜기")
+
+
+                                | _ ->
+                                    failwithlog "Unexpected"
+
+                                //match state with
+                                //| Status4.Ready
+                                //| Status4.Finished -> oldStatus <- Some state
+                                //| _ -> ()
+
+                                Global.SegmentStatusChangedSubject.OnNext(SegmentStatusChange(x, state))
+
+                            } |> Async.AwaitTask |> Async.Start
 
                         ()
                 )

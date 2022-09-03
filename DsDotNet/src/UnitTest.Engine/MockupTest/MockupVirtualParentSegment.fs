@@ -4,6 +4,7 @@ namespace UnitTest.Mockup.Engine
 open Engine.Core
 open Engine.Common
 open Engine.Common.FS
+open Engine.Runner
 open System
 
 
@@ -114,7 +115,7 @@ type MockupVirtualParentSegment(name, target:MockupSegment, causalSourceSegments
 
         vps
 
-    override x.WireEvent(writer) =
+    override x.WireEvent(writer:ChangeWriter) =
         let write(bit, value, cause) =
             writer(BitChange(bit, value, cause))
 

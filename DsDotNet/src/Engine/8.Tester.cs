@@ -260,7 +260,13 @@ public class Tester
             if (qName == "VPS_L_F_Main")
             {
                 if (state == Status4.Finished)
+                {
+                    counter++;
+                    Console.WriteLine($"[{counter}] After finishing Main segment : AdvanceReturn");
+                    LogInfo($"-------------------------- [{counter}] After finishing Main segment : AdvanceReturn");
+
                     opc.Write(resetTag, true);
+                }
             }
 
 
@@ -268,9 +274,9 @@ public class Tester
             {
                 if (state == Status4.Finished)
                 {
-                    counter++;
-                    Console.WriteLine($"[{counter}] After finishing Main segment");
-                    LogInfo($"-------------------------- [{counter}] After finishing Main segment");
+                    //counter++;
+                    //Console.WriteLine($"[{counter}] After finishing Main segment");
+                    //LogInfo($"-------------------------- [{counter}] After finishing Main segment");
                     //if (counter++ % 10 == 0)
                     //{
                     //    Console.WriteLine($"[{counter}] After finishing Main segment");
@@ -407,8 +413,8 @@ public class Tester
                     counter++;
                     //if (counter++ % 100 == 0)
                     {
-                        Console.WriteLine($"[{counter}] After finishing Main segment");
-                        LogInfo($"-------------------------- [Progress: {counter}] After finishing Main segment");
+                        Console.WriteLine($"[{counter}] After finishing Main segment : HatOnHat");
+                        LogInfo($"-------------------------- [Progress: {counter}] After finishing Main segment : HatOnHat");
                         //engine.Model.Print();
                     }
                     //opc.Write(resetTag, true);
@@ -608,11 +614,11 @@ public class Tester
             var state = ssc.Status;
             if (qName == "VPS_L_F_Main")
             {
-                if (state == Status4.Finished)
-                {
-                    LogDebug($"Resetting externally {resetTag}");
-                    opc.Write(resetTag, true);
-                }
+                //if (state == Status4.Finished)
+                //{
+                //    LogDebug($"Resetting externally {resetTag} : Diamond");
+                //    opc.Write(resetTag, true);
+                //}
             }
 
 
@@ -623,11 +629,11 @@ public class Tester
                     counter++;
                     //if (counter++ % 100 == 0)
                     {
-                        Console.WriteLine($"[{counter}] After finishing Main segment");
-                        LogInfo($"-------------------------- [Progress: {counter}] After finishing Main segment");
+                        Console.WriteLine($"[{counter}] After finishing Main segment : Diamond");
+                        LogInfo($"-------------------------- [Progress: {counter}] After finishing Main segment : Diamond");
                         //engine.Model.Print();
                     }
-                    //opc.Write(resetTag, true);
+                    opc.Write(resetTag, true);
                 }
                 else if (ssc.Status == Status4.Ready)
                 {

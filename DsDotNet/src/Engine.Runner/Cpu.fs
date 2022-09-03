@@ -10,6 +10,7 @@ open System.Collections.Generic
 open Engine.Common
 open Engine.Common.FS
 open Engine.Core
+open System.Threading.Tasks
 
 [<AutoOpen>]
 module CpuModule =
@@ -25,6 +26,9 @@ module CpuModule =
         match box bit with
         | :? IBitWritable as writable ->
             if bit.Value <> bitChange.NewValue then
+                if bit.Name = "Going_VPS_L_F_Main" then
+                    noop()
+                logDebug $"Writing bit {bit} = {bitChange.NewValue} @ {bit.Cpu.Name}"
                 writable.SetValue(bitChange.NewValue)
                 bitChanged <- true
         | :? PortInfo ->
@@ -35,7 +39,8 @@ module CpuModule =
 
         if bitChanged then
             if (bit :? Tag) then
-                logDebug($"Publishing tag from CPU: {bit.Name}={bitChange.NewValue}");
+                let cpu = bitChange.Bit.Cpu
+                logDebug($"Publishing tag from CPU[{cpu.Name}]: {bit.Name}={bitChange.NewValue} by {bitChange.CauseRepr}");
                 Global.TagChangeToOpcServerSubject.OnNext(new OpcTagChange(bit.Name, bitChange.NewValue))
             Global.RawBitChangedSubject.OnNext(bitChange)
 
@@ -156,20 +161,23 @@ module CpuModule =
                         match q.TryDequeue() with
                         | true, bitChange ->
                             let bit = bitChange.Bit
+                            assert(bit.Cpu = cpu)
                             let value = bitChange.NewValue
-                            if (bit.GetName() = "AutoStart_L_F") then
+                            if (bit.GetName() = "Going_VPS_L_F_Main") then
                                 noop()
 
                             if lasts.ContainsKey(bit) then
                                 if lasts[bit] = value then
-                                    logWarn $"Skipping duplicated bit change {bit}.";
+                                    logWarn $"Skipping duplicated bit change {bit}={value} @ {cpu.Name}.";
                                     noop();
                                 else
-                                    lasts[bit] <- value;
                                     apply cpu bitChange true
+                                    lasts[bit] <- value;
                             else
                                 lasts.Add(bit, value);
                                 apply cpu bitChange true
+
+                            bitChange.TCS.SetResult(true)
 
                         | false, _ ->
                             logWarn $"Failed to deque."
@@ -239,8 +247,11 @@ type CpuExt =
 
     /// <summary> Bit 의 값 변경 처리를 CPU 에 위임.  즉시 수행되지 않고, CPU 의 Queue 에 추가 된 후, CPU thread 에서 수행된다.  </summary>
     [<Extension>]
-    static member Enqueue(cpu:Cpu, bitChange:BitChange) =
+    static member Enqueue(cpu:Cpu, bitChange:BitChange) : WriteResult =
         assert (bitChange.Bit.Cpu = cpu)
+        //assert( bitChange.Bit.Value <> bitChange.NewValue)
+        if bitChange.Bit.GetName() = "Going_VPS_L_F_Main" then
+            noop()
 
         match bitChange.Bit with
         | :? Expression
@@ -248,12 +259,12 @@ type CpuExt =
             failwith "ERROR: Expression can't be set!"
         | _ ->
             cpu.Queue.Enqueue(bitChange)
+            bitChange.TCS.Task
 
     [<Extension>] static member Enqueue(cpu:Cpu, bit:IBit, newValue:bool, cause:obj) =
                     BitChange(bit, newValue, cause) |> cpu.Enqueue
     [<Extension>] static member Enqueue(cpu:Cpu, bit:IBit, newValue:bool) =
                     BitChange(bit, newValue, null)  |> cpu.Enqueue
-
 
     [<Extension>] static member SendChange(cpu:Cpu, bit:IBit, newValue:bool, cause:obj) =
                     BitChange(bit, newValue, cause) |> cpu.SendChange

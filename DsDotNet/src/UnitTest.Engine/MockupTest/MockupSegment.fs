@@ -41,7 +41,7 @@ type MockupSegment(cpu, n) =
         seg
 
 
-    override x.WireEvent(writer) =
+    override x.WireEvent(writer:ChangeWriter) =
         let write(bit, value, cause) =
             writer(BitChange(bit, value, cause))
         Global.BitChangedSubject

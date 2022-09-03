@@ -8,6 +8,7 @@ open Engine.Core
 open Engine.Common.FS
 open Engine.Common
 open Engine.Core
+open System.Threading.Tasks
 
 
 [<AutoOpen>]
@@ -73,7 +74,7 @@ module FsSegmentModule =
             x.PrintPortPlanTags();
 
 
-        default x.WireEvent(writer) =
+        default x.WireEvent(writer:ChangeWriter) =
             let mutable oldStatus:Status4 option = None
             let n = x.QualifiedName
             let write(bit, value, cause) =
@@ -136,51 +137,56 @@ module FsSegmentModule =
                             //assert(false)
                             ()
                     else
-                        logInfo $"[{n}] Segment status : {state} {cause}"
-                        if x.Going.Value && state <> Status4.Going then
-                            write(x.Going, false, $"{n} going off by status {state}")
-                        if x.Ready.Value && state <> Status4.Ready then
-                            write(x.Ready, false, $"{n} ready off by status {state}")
-                        if state <> Status4.Ready then
-                            isInitialReady <- false
+                        task {
+                            logInfo $"[{n}] Segment status : {state} {cause}"
+                            if x.Going.Value && state <> Status4.Going then
+                                do! write(x.Going, false, $"{n} going off by status {state}")
+                            if x.Ready.Value && state <> Status4.Ready then
+                                do! write(x.Ready, false, $"{n} ready off by status {state}")
+                            if state <> Status4.Ready then
+                                isInitialReady <- false
 
-                        Global.SegmentStatusChangedSubject.OnNext(SegmentStatusChange(x, state))
+                            Global.SegmentStatusChangingSubject.OnNext(SegmentStatusChange(x, state))
 
-                        // { debug
-                        if n = "A_F_Vp" && state = Status4.Homing then
-                            noop()
-                        match state with
-                        | Status4.Ready ->  assert( [x.TagPStart; x.TagPEnd].ForAll(fun t -> not t.Value))
-                        | Status4.Going -> ()
-                        | Status4.Finished -> ()
-                        | Status4.Homing -> ()
-                        | _ -> ()
-
-                        if n = "L_F_Main" && state = Status4.Going then
-                            noop()
-                        // } debug
-
-
-                        async {
+                            // { debug
+                            if n = "A_F_Vp" && state = Status4.Homing then
+                                noop()
                             match state with
-                            | Status4.Going
-                            | Status4.Homing -> oldStatus <- Some state
+                            | Status4.Ready ->  assert( [x.TagPStart; x.TagPEnd].ForAll(fun t -> not t.Value))
+                            | Status4.Going -> ()
+                            | Status4.Finished -> ()
+                            | Status4.Homing -> ()
                             | _ -> ()
 
-                            match state with
-                            | Status4.Ready -> doReady(x, writer)
-                            | Status4.Going -> doGoing(x, writer)
-                            | Status4.Finished -> doFinish(x, writer)
-                            | Status4.Homing -> doHoming(x, writer)
-                            | _ ->
-                                failwithlog "Unexpected"
+                            if n = "L_F_Main" && state = Status4.Going then
+                                noop()
+                            // } debug
 
-                            match state with
-                            | Status4.Ready
-                            | Status4.Finished -> oldStatus <- Some state
-                            | _ -> ()
+                            oldStatus <- Some state
 
-                        } |> Async.Start
+                            //match state with
+                            //| Status4.Going
+                            //| Status4.Homing -> oldStatus <- Some state
+                            //| _ -> ()
+
+                            do!
+                                match state with
+                                | Status4.Ready -> doReady(x, writer)
+                                | Status4.Going -> doGoing(x, writer)
+                                | Status4.Finished -> doFinish(x, writer)
+                                | Status4.Homing -> doHoming(x, writer)
+                                | _ ->
+                                    failwithlog "Unexpected"
+
+                            //match state with
+                            //| Status4.Ready
+                            //| Status4.Finished -> oldStatus <- Some state
+                            //| _ -> ()
+
+                            Global.SegmentStatusChangedSubject.OnNext(SegmentStatusChange(x, state))
+
+
+                        } |> Async.AwaitTask |> Async.Start
                 )
 
         //member val ProgressInfo:GraphProgressSupportUtil.ProgressInfo = null with get, set

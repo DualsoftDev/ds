@@ -61,7 +61,7 @@ namespace Engine.Runner
 //                            let portE = segment.PortEndBits   |> Seq.exists(fun b -> b.Value)
 //                            let segStatus = getSegmentStatus portS portR portE
 //                            assert (segStatus <> previousSegmentStatus)
-//                            //Global.SegmentStatusChangedSubject.OnNext(SegmentStatusChange(segment, segStatus))
+//                            //Global.SegmentStatusChangingSubject.OnNext(SegmentStatusChange(segment, segStatus))
 //                            onSegmentStatusChanged segment segStatus
 //                            *)
 //                        ())

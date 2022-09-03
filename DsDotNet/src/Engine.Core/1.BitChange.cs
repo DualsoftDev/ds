@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+
 namespace Engine.Core;
 
 // class or record?
@@ -10,6 +12,7 @@ public class BitChange
     public DateTime Time { get; }
     public Action BeforeAction { get; set; }
     public Action AfterAction { get; set; }
+    public TaskCompletionSource<object> TCS { get; }
     public BitChange(IBit bit, bool newValue, object cause = null)
     {
         //Assert(bit.Value != newValue);
@@ -25,6 +28,7 @@ public class BitChange
         NewValue = newValue;
         Time = DateTime.Now;
         Cause = cause;
+        TCS = new TaskCompletionSource<object>();
     }
 
     public string CauseRepr => Cause switch

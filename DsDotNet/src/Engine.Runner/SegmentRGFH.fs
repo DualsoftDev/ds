@@ -26,23 +26,24 @@ module internal SegmentRGFHModule =
 
     let verifyM msg x = if not x then failwithlog $"{msg}"
     let runChildren (children:Child seq, writer:ChangeWriter) =
-        assert(children.Distinct().Count() = children.Count())
-        for child in children do
-            // todo
-            //assert(not child.Status.HasValue || child.Status = Nullable Status4.Ready)
-            child.Status <- Status4.Going
+        task {
+            assert(children.Distinct().Count() = children.Count())
+            //for child in children do
+            //    // todo
+            //    //assert(not child.Status.HasValue || child.Status = Nullable Status4.Ready)
+            //    child.Status <- Status4.Going
 
-        for child in children do
-            assert(not child.IsFlipped && (not child.Status.HasValue || child.Status.Value = Status4.Going))
-            logInfo $"Progress: Child {child.QualifiedName} starting.."
-            assert(child.TagsStart.Count <= 1)  // 일단... 체크용..
+            for child in children do
+                assert(not child.IsFlipped && (not child.Status.HasValue || child.Status.Value.IsOneOf(Status4.Ready, Status4.Finished)))
+                logInfo $"Progress: Child {child.QualifiedName} starting.."
 
-            for st in child.TagsStart do
-                let before = fun () ->
-                    //child.Status <- Status4.Going
-                    Global.ChildStatusChangedSubject.OnNext(ChildStatusChange(child, Status4.Going))
+                for st in child.TagsStart do
+                    let before = fun () ->
+                        child.Status <- Status4.Going
+                        Global.ChildStatusChangedSubject.OnNext(ChildStatusChange(child, Status4.Going))
 
-                writer(BitChange(st, true, "Starting child", BeforeAction = before))
+                    do! writer(BitChange(st, true, "Starting child", BeforeAction = before))
+        }
 
     /// Segment 별로 Going 중에 child 의 종료 모니터링.  segment 가 Going 이 아니게 되면, dispose
     let goingSubscriptions = ConcurrentDictionary<SegmentBase, IDisposable>()
@@ -82,86 +83,95 @@ module internal SegmentRGFHModule =
 
     /// tag 값의 변경으로 인해, going 중 finish 상태가 되는 child 가 존재하면 그것의 start 출력을 끊는다.
     let turnOffStartForFinishedChildren(write:BitWriter, tag:Tag, monitoringChildren:Child seq) =
-        let finishedChildren =
-            monitoringChildren
-                .Where(fun ch ->
-                    ch.Status = Nullable Status4.Going
-                    && ch.TagsEnd.Contains(tag)
-                    && ch.TagsEnd.ForAll(fun t -> t.Value))
-                    .ToArray()
-        assert(finishedChildren.Length = 0 || finishedChildren.Length = 1 )
-        let finishedChild = finishedChildren.FirstOrDefault()
-        if finishedChild <> null then
-            logInfo $"Progress: Child {finishedChild.QualifiedName} originated."
-            for st in finishedChild.TagsStart do
-                write(st, false, $"Child {finishedChild.QualifiedName} originated")
-        finishedChild
+        task {
+            let finishedChildren =
+                monitoringChildren
+                    .Where(fun ch ->
+                        ch.Status = Nullable Status4.Going
+                        && ch.TagsEnd.Contains(tag)
+                        && ch.TagsEnd.ForAll(fun t -> t.Value))
+                        .ToArray()
+            assert(finishedChildren.Length = 0 || finishedChildren.Length = 1 )
+            let finishedChild = finishedChildren.FirstOrDefault()
+            if finishedChild <> null then
+                logInfo $"Progress: Child {finishedChild.QualifiedName} originated."
+                for st in finishedChild.TagsStart do
+                    do! write(st, false, $"Child {finishedChild.QualifiedName} originated")
+            return finishedChild
+        }
 
 
-    let procReady(segment:SegmentBase, writer:ChangeWriter) =
+    let procReady(segment:SegmentBase, writer:ChangeWriter) : WriteResult =
         let seg = segment :?> Segment
         assert( [seg.TagPStart; seg.TagPReset; seg.TagPEnd].ForAll(fun t -> not t.Value ))     // A_F_Pp.TagEnd 가 true 되는 상태???
         assert( [seg.PortS :> PortInfo; seg.PortR; seg.PortE].ForAll(fun t -> not t.Value ))
         stopMonitorHoming seg
-        writer(BitChange(seg.Ready, true, null))
-        writer(BitChange(seg.TagPReset, false, null))
+        task {
+            do! writer(BitChange(seg.Ready, true, $"processing ready for {seg.QualifiedName}"))
+            do! writer(BitChange(seg.TagPReset, false, $"processing ready for {seg.QualifiedName}"))
+        }
 
     /// Going tag ON 발송 후,
     ///     - child 가 하나라도 있으면, child 의 종료를 모니터링하기 위한 subscription 후, 최초 child group(init) 만 수행
     ///         * 이후, child 종료를 감지하면, 다음 실행할 child 계속 실행하고, 없으면 해당 segment 종료
     ///     - 없으면 바로 종료
-    let procGoing(seg:SegmentBase, writer:ChangeWriter) =
+    let procGoing(seg:SegmentBase, writer:ChangeWriter) : WriteResult =
         assert( not <| homingSubscriptions.ContainsKey(seg))
         let write:BitWriter = getBitWriter writer
 
         if isChildrenOrigin(seg) then
-            write(seg.Going, true, $"{seg.QualifiedName} Segment GOING 시작")
-            assert(seg.Going.Value)
-            if seg.Children.Any() then
-                (not <| goingSubscriptions.ContainsKey(seg)) |> verifyM $"Going subscription for {seg.QualifiedName} not empty"
-                let childRxTags = seg.Children.selectMany(fun ch -> ch.TagsEnd).ToArray()
+            task {
+                do! write(seg.Going, true, $"{seg.QualifiedName} Segment GOING 시작")
+                assert(seg.Going.Value)
+                if seg.Children.Any() then
+                    (not <| goingSubscriptions.ContainsKey(seg)) |> verifyM $"Going subscription for {seg.QualifiedName} not empty"
+                    let childRxTags = seg.Children.selectMany(fun ch -> ch.TagsEnd).ToArray()
                     
-                let subs =
-                    Global.TagChangedSubject
-                        .Where(fun t -> t.Value)
-                        .Where(childRxTags.Contains)
-                        .Subscribe(fun tag ->
-                            try
-                                let finishedChild = turnOffStartForFinishedChildren(write, tag, seg.Children)
-                                if finishedChild <> null then
-                                    logInfo $"Progress: Child {finishedChild.QualifiedName} finish detected."
-                                    finishedChild.Status <- Status4.Finished
-                                    finishedChild.IsFlipped <- true
+                    let subs =
+                        Global.TagChangedSubject
+                            .Where(fun t -> t.Value)
+                            .Where(childRxTags.Contains)
+                            .Subscribe(fun tag ->
+                                task {
+                                    try
+                                        let! finishedChild = turnOffStartForFinishedChildren(write, tag, seg.Children)
+                                        if finishedChild <> null then
+                                            logInfo $"Progress: Child {finishedChild.QualifiedName} finish detected."
+                                            finishedChild.Status <- Status4.Finished
+                                            finishedChild.IsFlipped <- true
                             
-                                    if (seg.Children.ForAll(fun ch -> ch.IsFlipped)) then
-                                        write(seg.PortE, true, $"{seg.QualifiedName} GOING 끝 (모든 child end)")                                    
-                                    else
-                                        // 남은 children 중에서 다음 뒤집을 target 선정후 뒤집기
-                                        let targets =
-                                            let edges =
-                                                let finishedChildren = seg.Children.Where(fun ch -> ch.IsFlipped).ToArray()
-                                                seg.Edges
-                                                    .Where(fun e -> box e :? ISetEdge)
-                                                    .Where(fun e ->
-                                                        e.Sources.OfType<Child>()
-                                                            .ForAll(finishedChildren.Contains))
-                                            edges.Select(fun e -> e.Target)
-                                                .OfType<Child>()
-                                                .Where(fun ch -> ch.Status <> Nullable Status4.Going && not ch.IsFlipped)
-                                                .Distinct()
-                                                .ToArray()
+                                            if (seg.Children.ForAll(fun ch -> ch.IsFlipped)) then
+                                                do! write(seg.PortE, true, $"{seg.QualifiedName} GOING 끝 (모든 child end)")
+                                            else
+                                                // 남은 children 중에서 다음 뒤집을 target 선정후 뒤집기
+                                                let targets =
+                                                    let edges =
+                                                        let finishedChildren = seg.Children.Where(fun ch -> ch.IsFlipped).ToArray()
+                                                        seg.Edges
+                                                            .Where(fun e -> box e :? ISetEdge)
+                                                            .Where(fun e ->
+                                                                e.Sources.OfType<Child>()
+                                                                    .ForAll(finishedChildren.Contains))
+                                                    edges.Select(fun e -> e.Target)
+                                                        .OfType<Child>()
+                                                        .Where(fun ch -> ch.Status <> Nullable Status4.Going && not ch.IsFlipped)
+                                                        .Distinct()
+                                                        .ToArray()
 
-                                        runChildren (targets, writer)
-                            with exn ->
-                                failwithlog $"{exn}"
-                        )
-                goingSubscriptions.TryAdd(seg, subs) |> verifyM "Failed to add Going subscription"
+                                                do! runChildren (targets, writer)
+                                    with exn ->
+                                        failwithlog $"{exn}"
+                                } |> Async.AwaitTask |> Async.Start
+                            )
+                    goingSubscriptions.TryAdd(seg, subs) |> verifyM "Failed to add Going subscription"
 
-                let seg = seg :?> Segment
-                runChildren (seg.Inits, writer)
+                    let seg = seg :?> Segment
+                    do! runChildren (seg.Inits, writer)
 
-            else // no children
-                write(seg.PortE, true, $"{seg.QualifiedName} GOING 끝")
+                else // no children
+                    do! write(seg.PortE, true, $"{seg.QualifiedName} GOING 끝")
+            }// |> Async.AwaitTask |> Async.RunSynchronously
+
         else // children not at origin
             let outofOriginChildren = getOutofOriginChildren seg
             let subs = 
@@ -173,15 +183,17 @@ module internal SegmentRGFHModule =
                             ch.Status <- Status4.Ready
                             ch.DbgIsOriginating <- false
                         doGoing(seg, writer)
+                        |> ignore
                         )
 
             seg.DbgIsOriginating <- true
             for ch in outofOriginChildren do
                 ch.DbgIsOriginating <- true
-            doHoming(seg, writer)
+            let t = doHoming(seg, writer)
             originatingSubscriptions.TryAdd(seg, subs) |> verifyM "Failed to add Originating subscription"
+            t
 
-    let procFinish(segment:SegmentBase, writer:ChangeWriter) =
+    let procFinish(segment:SegmentBase, writer:ChangeWriter) : WriteResult =
         let seg = segment :?> Segment
         let write = getBitWriter writer
 
@@ -189,12 +201,15 @@ module internal SegmentRGFHModule =
             noop()
 
         stopMonitorGoing seg
+        task {
+            assert (not seg.Going.Value)
+            assert seg.TagPEnd.Value
+            //do! write(seg.Going, false, $"{seg.QualifiedName} FINISH")
+            //do! write(seg.TagPEnd, true, $"Finishing {seg.QualifiedName}")
+            do! write(seg.TagPStart, false, $"Finishing {seg.QualifiedName}")
+        }
 
-        write(seg.Going, false, $"{seg.QualifiedName} FINISH")
-        write(seg.TagPEnd, true, $"Finishing {seg.QualifiedName}")
-        write(seg.TagPStart, false, $"Finishing {seg.QualifiedName}")
-
-    let procHoming(segment:SegmentBase, writer:ChangeWriter) =
+    let procHoming(segment:SegmentBase, writer:ChangeWriter) : WriteResult =
         let seg = segment :?> Segment
 
         if seg.QualifiedName = "L_F_Main" then
@@ -208,33 +223,38 @@ module internal SegmentRGFHModule =
         for ch in seg.Children do
             ch.IsFlipped <- false
 
-        if isChildrenOrigin seg then
-            write(seg.PortE, false, $"{seg.QualifiedName} HOMING finished")
-        else
-            // 자식 원위치 맞추기
-            let childRxTags = originTargets.selectMany(fun ch -> ch.TagsEnd).ToArray()
-            assert(originTargets.Any())
-            let subs =
-                Global.TagChangedSubject
-                    .Where(fun t -> t.Value)    // ON child
-                    .Where(childRxTags.Contains)
-                    .Subscribe(fun tag ->
-                        turnOffStartForFinishedChildren(write, tag, originTargets) |> ignore
-                        // originTargets 모두 원위치인지 확인
-                        let isOrigin = originTargets.ForAll(fun ch -> ch.TagsEnd.ForAll(fun t -> t.Value))
-                        if isOrigin then
-                            stopMonitorHoming seg
-                            write(seg.PortE, false, $"{seg.QualifiedName} HOMING finished")
-                    )
-            homingSubscriptions.TryAdd(seg, subs) |> verifyM "Failed to add Homing subscription"
+        task {
+            if isChildrenOrigin seg then
+                do! write(seg.PortE, false, $"{seg.QualifiedName} HOMING finished")
+            else
+                // 자식 원위치 맞추기
+                let childRxTags = originTargets.selectMany(fun ch -> ch.TagsEnd).ToArray()
+                assert(originTargets.Any())
+                let subs =
+                    Global.TagChangedSubject
+                        .Where(fun t -> t.Value)    // ON child
+                        .Where(childRxTags.Contains)
+                        .Subscribe(fun tag ->
+                            task {
+                                let! finishedChild = turnOffStartForFinishedChildren(write, tag, originTargets)
+                                // originTargets 모두 원위치인지 확인
+                                let isOrigin = originTargets.ForAll(fun ch -> ch.TagsEnd.ForAll(fun t -> t.Value))
+                                if isOrigin then
+                                    stopMonitorHoming seg
+                                    do! write(seg.PortE, false, $"{seg.QualifiedName} HOMING finished")
+                            } |> Async.AwaitTask |> Async.Start
+                        )
+                homingSubscriptions.TryAdd(seg, subs) |> verifyM "Failed to add Homing subscription"
 
-            runChildren(originTargets, writer)
+                do! runChildren(originTargets, writer)
 
-            //// todo: fix me
-            //let et = seg.TagPEnd
-            ////if et.Type.HasFlag(TagType.External) then
-            ////    ()
-            ////else
-            //if et.Value then
-            //    //assert(false)
-            //    write(et, false, $"내부 end tag {et.Name} 강제 off by {segment.QualifiedName} homing")
+                //// todo: fix me
+                //let et = seg.TagPEnd
+                ////if et.Type.HasFlag(TagType.External) then
+                ////    ()
+                ////else
+                //if et.Value then
+                //    //assert(false)
+                //    write(et, false, $"내부 end tag {et.Name} 강제 off by {segment.QualifiedName} homing")
+
+        }

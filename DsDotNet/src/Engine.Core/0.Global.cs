@@ -44,6 +44,11 @@ public static class Global
 
     /// <summary>Engine running mode: if false, just simulation mode</summary>
     public static bool IsControlMode { get; internal set; } = false;
+#if DEBUG
+    public static bool IsDebugMode => true;
+#else
+    public static bool IsDebugMode => false;
+#endif
     internal static bool IsInUnitTest { get; }
     internal static bool IsSingleThreadMode { get; set; }
 
@@ -55,10 +60,8 @@ public static class Global
             .Select(a => a.FullName)
             .Any(n => n.StartsWith("Microsoft.VisualStudio.TestPlatform."))
             ;
-#if !DEBUG
-        if (IsSingleThreadMode)
+        if (!IsDebugMode && IsSingleThreadMode)
             throw new Exception("Running in single thread mode not allowed in production mode.");
-#endif
     }
 
     /// <summary> Do nothing </summary>

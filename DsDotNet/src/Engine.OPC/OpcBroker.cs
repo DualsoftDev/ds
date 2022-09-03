@@ -53,16 +53,20 @@ public class OpcBroker
     internal List<LsTag> LsBits = new();
     internal Dictionary<string, int> IdxLsBits = new();
 
-    internal LsConnection Conn = Core.Global.IsControlMode ?
-        new LsConnection(
-            new LsConnectionParameters(
-                "192.168.0.100", new FSharpOption<ushort>(2004),
-                TransportProtocol.Tcp, 3000.0
-            )
-        ) : null;
-
+    internal LsConnection Conn { get; }
     public OpcBroker()
     {
+        if (Core.Global.IsControlMode)
+        {
+            LogDebug("Starting PLC connection.");
+            var param = new LsConnectionParameters(
+                "192.168.0.100", new FSharpOption<ushort>(2004),
+                TransportProtocol.Tcp, 3000.0
+            );
+
+            Conn = new LsConnection(param);
+        }
+
         var subs = Core.Global.TagChangeToOpcServerSubject.Subscribe(otc =>
         {
             if (_tagDic.ContainsKey(otc.TagName))

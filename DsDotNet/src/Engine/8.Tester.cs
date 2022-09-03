@@ -296,6 +296,7 @@ public class Tester
         {
             // initial condition
             opc.Write("EndActual_A_F_Sm", true);
+            InterlockChecker.CreateFromCylinder(opc, new[] { "A_F"});
             Simulator.CreateFromCylinder(opc, new[] { "A_F" });
 
             // simulating physics
@@ -479,6 +480,7 @@ public class Tester
             opc.Write("EndActual_A_F_Sm", true);
             opc.Write("EndActual_B_F_Sm", true);
 
+            InterlockChecker.CreateFromCylinder(opc, new[] { "A_F", "B_F" });
             // simulating physics
             if (Global.IsControlMode)
             { }   // todo : 실물 연결
@@ -653,6 +655,8 @@ public class Tester
                 ;
         oneCycleHistory.Subscribe(o =>
         {
+            Assert(o.Length == 16);
+
             Assert(o[0].TagName == "StartActual_A_F_Vp" && o[0].Value == true);   // a+
             Assert(o[1].TagName == "EndActual_A_F_Sm" && o[1].Value == false);  // !A-
             Assert(o[2].TagName == "EndActual_A_F_Sp" && o[2].Value == true);   // A+
@@ -661,19 +665,22 @@ public class Tester
             Assert(o[4].TagName == "StartActual_A_F_Vm" && o[4].Value == true);   // a-
             Assert(o[5].TagName == "StartActual_B_F_Vp" && o[5].Value == true);   // b+
 
-            var notAp = o.FindIndex(otc => otc.TagName == "EndActual_A_F_Sp" && otc.Value == false);  // !A+
-            var notBm = o.FindIndex(otc => otc.TagName == "EndActual_B_F_Sm" && otc.Value == false);  // !B-
+            // oN, ofF
+            var fAp = o.FindIndex(otc => otc.TagName == "EndActual_A_F_Sp" && otc.Value == false);  // !A+
+            var fBm = o.FindIndex(otc => otc.TagName == "EndActual_B_F_Sm" && otc.Value == false);  // !B-
+            var nBp = o.FindIndex(otc => otc.TagName == "EndActual_B_F_Sp" && otc.Value == true);   // B+
+            var fbp = o.FindIndex(otc => otc.TagName == "StartActual_B_F_Vp" && otc.Value == false);  // !b+
+            var nAm = o.FindIndex(otc => otc.TagName == "EndActual_A_F_Sm" && otc.Value == true);   // A-
+            var fam = o.FindIndex(otc => otc.TagName == "StartActual_A_F_Vm" && otc.Value == false);  // !a-
 
-            Assert(notAp.IsOneOf(6, 7) && notBm.IsOneOf(6, 7));
+            Assert(fAp < nAm && nAm < fam);
+            Assert(fBm < nBp && nBp < fbp);
+
+            //Assert(fAp.IsOneOf(6, 7) && fBm.IsOneOf(6, 7));
+            Assert(new[] { nBp, fbp, nAm, fam }.ForAll(n => n.IsOneOf(8, 9, 10, 11)));
+
             //Assert(o[ 6].TagName == "EndActual_A_F_Sp"     && o[ 6].Value == false);  // !A+
             //Assert(o[ 7].TagName == "EndActual_B_F_Sm"     && o[ 7].Value == false);  // !B-
-
-            var Bp = o.FindIndex(otc => otc.TagName == "EndActual_B_F_Sp" && otc.Value == true);   // B+
-            var notbp = o.FindIndex(otc => otc.TagName == "StartActual_B_F_Vp" && otc.Value == false);  // !b+
-            var Am = o.FindIndex(otc => otc.TagName == "EndActual_A_F_Sm" && otc.Value == true);   // A-
-            var notam = o.FindIndex(otc => otc.TagName == "StartActual_A_F_Vm" && otc.Value == false);  // !a-
-            Assert(new[] { Bp, notbp, Am, notam }.ForAll(n => n.IsOneOf(8, 9, 10, 11)));
-            Assert(Bp < notbp && Am < notam);
             //Assert(o[ 8].TagName == "EndActual_B_F_Sp"     && o[ 8].Value == true);   // B+
             //Assert(o[ 9].TagName == "StartActual_B_F_Vp"   && o[ 9].Value == false);  // !b+
             //Assert(o[10].TagName == "EndActual_A_F_Sm"     && o[10].Value == true);   // A-
@@ -699,6 +706,8 @@ public class Tester
                 ;
         if (hasAddress)
         {
+            InterlockChecker.CreateFromCylinder(opc, new[] { "A_F", "B_F" });
+
             // simulating physics
             if (Global.IsControlMode)
                 {}   // todo : 실물 연결

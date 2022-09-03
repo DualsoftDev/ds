@@ -116,6 +116,7 @@ module internal SegmentRGFHModule =
 
         if isChildrenOrigin(seg) then
             write(seg.Going, true, $"{seg.QualifiedName} Segment GOING 시작")
+            assert(seg.Going.Value)
             if seg.Children.Any() then
                 (not <| goingSubscriptions.ContainsKey(seg)) |> verifyM $"Going subscription for {seg.QualifiedName} not empty"
                 let childRxTags = seg.Children.selectMany(fun ch -> ch.TagsEnd).ToArray()

@@ -46,7 +46,6 @@ namespace Engine
             Func<Bit, bool, Task> interlockChecker(string interlockName) =>
                 (bit, val) =>
                     Task.Run(() => {
-                        LogDebug($"Tag/Sensor {bit.Name} = {val}");
                         var opcOpposite = opc.GetTag(interlockName);
                         Global.Verify($"Exclusive error: {bit.Name}", !val || opcOpposite.Value == false);
                     });
@@ -89,7 +88,7 @@ namespace Engine
                         (bit, val) => Task.Run(async () =>
                         {
                             var opcOpposite = opc.GetTag($"StartActual_{f}_Vm");
-                            LogDebug($"Tag/Actuator {bit.Name} = {val}");
+                            LogDebug($"Simulating Tag/Actuator {bit.Name} = {val}");
                             if (val)
                             {
                                 Console.Beep(800, 200);

@@ -151,7 +151,10 @@ public class OpcBroker
                     Console.WriteLine("Write - " + tagName + " : " + value);
                     UpdateLsBits(tagName, value);
                 }
-                Core.Global.TagChangeFromOpcServerSubject.OnNext(new OpcTagChange(tagName, value));
+                Task.Run(() =>
+                {
+                    Core.Global.TagChangeFromOpcServerSubject.OnNext(new OpcTagChange(tagName, value));
+                });
             }
         }
 
@@ -169,7 +172,10 @@ public class OpcBroker
             {
                 Console.WriteLine("Read - " + tagName + " : " + value);
                 bit.SetValue(value);
-                Core.Global.TagChangeFromOpcServerSubject.OnNext(new OpcTagChange(tagName, value));
+                Task.Run(() =>
+                {
+                    Core.Global.TagChangeFromOpcServerSubject.OnNext(new OpcTagChange(tagName, value));
+                });
             }
         }
 

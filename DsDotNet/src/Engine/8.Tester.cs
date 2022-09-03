@@ -662,8 +662,11 @@ public class Tester
             Assert(o[2].TagName == "EndActual_A_F_Sp" && o[2].Value == true);   // A+
             Assert(o[3].TagName == "StartActual_A_F_Vp" && o[3].Value == false);  // !a+
 
-            Assert(o[4].TagName == "StartActual_A_F_Vm" && o[4].Value == true);   // a-
-            Assert(o[5].TagName == "StartActual_B_F_Vp" && o[5].Value == true);   // b+
+            //Assert(o[4].TagName == "StartActual_A_F_Vm" && o[4].Value == true);   // a-
+            //Assert(o[5].TagName == "StartActual_B_F_Vp" && o[5].Value == true);   // b+
+            var nam = o.FindIndex(otc => otc.TagName == "StartActual_A_F_Vm" && otc.Value == true);  // a-
+            var nbp = o.FindIndex(otc => otc.TagName == "StartActual_B_F_Vp" && otc.Value == true);  // b+
+            Debug.Assert(nam.IsOneOf(4, 5) && nbp.IsOneOf(4, 5));
 
             // oN, ofF
             var fAp = o.FindIndex(otc => otc.TagName == "EndActual_A_F_Sp" && otc.Value == false);  // !A+
@@ -675,9 +678,6 @@ public class Tester
 
             Assert(fAp < nAm && nAm < fam);
             Assert(fBm < nBp && nBp < fbp);
-
-            //Assert(fAp.IsOneOf(6, 7) && fBm.IsOneOf(6, 7));
-            Assert(new[] { nBp, fbp, nAm, fam }.ForAll(n => n.IsOneOf(8, 9, 10, 11)));
 
             //Assert(o[ 6].TagName == "EndActual_A_F_Sp"     && o[ 6].Value == false);  // !A+
             //Assert(o[ 7].TagName == "EndActual_B_F_Sm"     && o[ 7].Value == false);  // !B-

@@ -22,3 +22,7 @@ clean:
 
 cloc:
 	cloc Engine*
+
+warn:
+	cd Engine/bin
+	grep WARN logEngine-*.log | awk '{print $9}' |sort -u

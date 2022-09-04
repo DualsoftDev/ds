@@ -45,10 +45,10 @@ namespace Engine
 
             Func<Bit, bool, Task> interlockChecker(string interlockName) =>
                 (bit, val) =>
-                    Task.Run(() => {
+                    Task.Run(() => {    // caller 에서 await 함..
                         var opcOpposite = opc.GetTag(interlockName);
                         Global.Verify($"Exclusive error: {bit.Name}", !val || opcOpposite.Value == false);
-                    });
+                    }); // no .FireAndForget();
 
             var random = new Random();
             IEnumerable<(string, Func<Bit, bool, Task>)> generateMap()

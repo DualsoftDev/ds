@@ -28,13 +28,15 @@ public class EngineBuilder
 
         Opc.Print();
         if (Global.IsControlMode)
-            _ = Task.Run(async () => { await Opc.CommunicationPLC(); });
+            Task.Run(async () => { await Opc.CommunicationPLC(); })
+                .FireAndForget();
         foreach (var cpu in Model.Cpus)
             cpu.PrintTags();
 
         Engine = new ENGINE(Model, Opc, Cpu);
         Cpu.Engine = Engine;
-        _ = Task.Run(() => { Opc.StreamData(); });
+        Task.Run(() => { Opc.StreamData(); })
+            .FireAndForget();
     }
 
     /// <summary> Used for Unit test only.</summary>

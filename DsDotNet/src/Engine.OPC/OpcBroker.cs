@@ -17,6 +17,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Reactive.Disposables;
 using static Engine.Core.GlobalShortCuts;
+using Engine.Common;
 
 namespace Engine.OPC;
 
@@ -154,7 +155,7 @@ public class OpcBroker
                 Task.Run(() =>
                 {
                     Core.Global.TagChangeFromOpcServerSubject.OnNext(new OpcTagChange(tagName, value));
-                });
+                }).FireAndForget();
             }
         }
 
@@ -175,7 +176,7 @@ public class OpcBroker
                 Task.Run(() =>
                 {
                     Core.Global.TagChangeFromOpcServerSubject.OnNext(new OpcTagChange(tagName, value));
-                });
+                }).FireAndForget();
             }
         }
 

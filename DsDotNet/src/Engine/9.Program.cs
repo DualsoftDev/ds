@@ -2,8 +2,6 @@ using System.IO;
 using System.Configuration;
 using Engine.Common.FS;
 using System.Threading;
-using System.Windows.Forms;
-using System.Threading.Tasks;
 
 namespace Engine;
 
@@ -46,8 +44,6 @@ class Program
         //PrepareThreadPool();
         PrepareLog4Net();
         SimpleExceptionHandler.InstallExceptionHandler();
-
-        //throw new Exception("Main exception");
 
         //Tester.DoSampleTestVps();
         //Tester.DoSampleTest();

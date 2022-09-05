@@ -226,10 +226,11 @@ public class Tester
     }
 }
 [addresses] = {
-	A.F.Vp = (%Q123.23, ,);
-	A.F.Sp = (, , %I12.2);
-	A.F.Vm = (%Q123.24, ,);
-	A.F.Sm = (, , %I12.3);
+	//L.F.Main = (%0, %0,);
+	A.F.Vp = (%QX0.1.3, ,);
+	A.F.Vm = (%QX0.1.2, ,);
+	A.F.Sp = (, , %IX0.0.5);
+	A.F.Sm = (, , %IX0.0.4);
 }
 [cpus] AllCpus = {
     [cpu] Cpu = {
@@ -275,6 +276,38 @@ public class Tester
             }
         });
 
+        var actuals =
+            Global.TagChangeFromOpcServerSubject
+                .Where(otc => otc.TagName.Contains("Actual"))
+                ;
+
+        // https://stackoverflow.com/questions/8837665/how-to-split-an-observable-stream-in-chunks-dependent-on-second-stream
+        var oneCycleHistory =
+            actuals.Publish(otcs =>
+                otcs.Where(otc => otc.TagName == "StartActual_A_F_Vp" && otc.Value)       // a+ 출력 켜진 후부터
+                    .Select(obs =>
+                        otcs.TakeUntil(otc => otc.TagName == "StartActual_A_F_Vm" && !otc.Value) // a- 출력 꺼질때까지
+                        .StartWith(obs)
+                        .ToArray()))
+                .Merge()
+                ;
+
+        oneCycleHistory.Subscribe(o =>
+        {
+            Assert(o.Length == 8);
+
+            Assert(o[0].TagName == "StartActual_A_F_Vp" && o[0].Value == true);   // a+
+            Assert(o[1].TagName == "EndActual_A_F_Sm"   && o[1].Value == false);  // !A-
+            Assert(o[2].TagName == "EndActual_A_F_Sp"   && o[2].Value == true);   // A+
+            Assert(o[3].TagName == "StartActual_A_F_Vp" && o[3].Value == false);  // !a+
+
+            Assert(o[4].TagName == "StartActual_A_F_Vm" && o[4].Value == true);   // a-
+            Assert(o[5].TagName == "EndActual_A_F_Sp"   && o[5].Value == false);  // !A+
+            Assert(o[6].TagName == "EndActual_A_F_Sm"   && o[6].Value == true);   // A-
+            Assert(o[7].TagName == "StartActual_A_F_Vm" && o[7].Value == false);   // !a-
+        });
+
+
         var hasAddress =
             engine.Model.Cpus
                 .SelectMany(cpu => cpu.TagsMap.Values)
@@ -283,10 +316,23 @@ public class Tester
                 ;
         if (hasAddress)
         {
-            // initial condition
-            opc.Write("EndActual_A_F_Sm", true);
-            InterlockChecker.CreateFromCylinder(opc, new[] { "A_F"});
-            Simulator.CreateFromCylinder(opc, new[] { "A_F" });
+            InterlockChecker.CreateFromCylinder(opc, new[] { "A_F" });
+
+            // 모든 출력 끊기
+            opc.Write("StartActual_A_F_Vp", false);
+            opc.Write("StartActual_A_F_Vm", false);
+
+            // simulating physics
+            if (Global.IsControlMode)
+            { }   // todo : 실물 연결
+            else
+            {
+                //// initial condition
+                //opc.Write("EndActual_A_F_Sm", true);
+                //opc.Write("EndActual_B_F_Sm", true);
+                Simulator.CreateFromCylinder(opc, new[] { "A_F" });
+            }
+
 
             // simulating physics
             Global.BitChangedSubject
@@ -638,8 +684,8 @@ public class Tester
             Assert(o.Length == 16);
 
             Assert(o[0].TagName == "StartActual_A_F_Vp" && o[0].Value == true);   // a+
-            Assert(o[1].TagName == "EndActual_A_F_Sm"   && o[1].Value == false);  // !A-
-            Assert(o[2].TagName == "EndActual_A_F_Sp"   && o[2].Value == true);   // A+
+            Assert(o[1].TagName == "EndActual_A_F_Sm" && o[1].Value == false);  // !A-
+            Assert(o[2].TagName == "EndActual_A_F_Sp" && o[2].Value == true);   // A+
             Assert(o[3].TagName == "StartActual_A_F_Vp" && o[3].Value == false);  // !a+
 
             //Assert(o[4].TagName == "StartActual_A_F_Vm" && o[4].Value == true);   // a-
@@ -649,11 +695,11 @@ public class Tester
             Assert(nam.IsOneOf(4, 5) && nbp.IsOneOf(4, 5));
 
             // oN, ofF
-            var fAp = o.FindIndex(otc => otc.TagName == "EndActual_A_F_Sp"   && otc.Value == false);  // !A+
-            var fBm = o.FindIndex(otc => otc.TagName == "EndActual_B_F_Sm"   && otc.Value == false);  // !B-
-            var nBp = o.FindIndex(otc => otc.TagName == "EndActual_B_F_Sp"   && otc.Value == true);   // B+
+            var fAp = o.FindIndex(otc => otc.TagName == "EndActual_A_F_Sp" && otc.Value == false);  // !A+
+            var fBm = o.FindIndex(otc => otc.TagName == "EndActual_B_F_Sm" && otc.Value == false);  // !B-
+            var nBp = o.FindIndex(otc => otc.TagName == "EndActual_B_F_Sp" && otc.Value == true);   // B+
             var fbp = o.FindIndex(otc => otc.TagName == "StartActual_B_F_Vp" && otc.Value == false);  // !b+
-            var nAm = o.FindIndex(otc => otc.TagName == "EndActual_A_F_Sm"   && otc.Value == true);   // A-
+            var nAm = o.FindIndex(otc => otc.TagName == "EndActual_A_F_Sm" && otc.Value == true);   // A-
             var fam = o.FindIndex(otc => otc.TagName == "StartActual_A_F_Vm" && otc.Value == false);  // !a-
 
             Assert(fAp < nAm && nAm < fam);
@@ -667,8 +713,8 @@ public class Tester
             //Assert(o[11].TagName == "StartActual_A_F_Vm"   && o[11].Value == false);  // !a-
 
             Assert(o[12].TagName == "StartActual_B_F_Vm" && o[12].Value == true);   // b-
-            Assert(o[13].TagName == "EndActual_B_F_Sp"   && o[13].Value == false);  // !B+
-            Assert(o[14].TagName == "EndActual_B_F_Sm"   && o[14].Value == true);   // B-
+            Assert(o[13].TagName == "EndActual_B_F_Sp" && o[13].Value == false);  // !B+
+            Assert(o[14].TagName == "EndActual_B_F_Sm" && o[14].Value == true);   // B-
             Assert(o[15].TagName == "StartActual_B_F_Vm" && o[15].Value == false);   // !b-
         });
 

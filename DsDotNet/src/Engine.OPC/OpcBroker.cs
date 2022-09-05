@@ -124,8 +124,9 @@ public class OpcBroker
     public void UpdateLsBits(string tagName, bool value)
     {
         var idx = IdxLsBits[tagName];
-        LsBits[idx].Value = value;
-        Conn.WriteRandomTags(LsBits.ToArray());
+        var tag = LsBits[idx];
+        tag.Value = value;
+        Conn.WriteRandomTags(new[] {tag} );
     }
 
     public void Write(string tagName, bool value)

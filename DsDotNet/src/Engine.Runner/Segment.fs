@@ -9,6 +9,7 @@ open Engine.Common.FS
 open Engine.Common
 open Engine.Core
 open System.Threading.Tasks
+open System.Threading
 
 
 [<AutoOpen>]
@@ -75,6 +76,7 @@ module FsSegmentModule =
 
         default x.WireEvent(writer:ChangeWriter) =
             let mutable oldStatus:Status4 option = None
+            let mutable cts = new CancellationTokenSource()
             let n = x.QualifiedName
             let write(bit, value, cause) =
                 writer(BitChange(bit, value, cause))
@@ -135,6 +137,9 @@ module FsSegmentModule =
                             ()
                     else
                         task {
+                            cts.Cancel()
+                            cts <- new CancellationTokenSource()
+
                             logInfo $"[{n}] Segment status : {state} {cause}"
                             if x.Going.Value && state <> Status4.Going then
                                 do! write(x.Going, false, $"{n} going off by status {state}")

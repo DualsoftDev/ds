@@ -40,9 +40,6 @@ namespace Engine
 
         public static InterlockChecker CreateFromCylinder(OpcBroker opc, IEnumerable<string> cylinderFlowNames)   // e.g {"A_F", "B_F"}
         {
-            if (Global.IsControlMode)
-                throw new Exception("Simulation not supported in real control mode.");
-
             Func<Bit, bool, Task> interlockChecker(string interlockName) =>
                 (bit, val) =>
                     Task.Run(() => {    // caller 에서 await 함..
@@ -50,7 +47,6 @@ namespace Engine
                         Global.Verify($"Exclusive error: {bit.Name}", !val || opcOpposite.Value == false);
                     }); // no .FireAndForget();
 
-            var random = new Random();
             IEnumerable<(string, Func<Bit, bool, Task>)> generateMap()
             {
                 foreach (var f in cylinderFlowNames)

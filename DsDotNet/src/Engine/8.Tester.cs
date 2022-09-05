@@ -257,36 +257,19 @@ public class Tester
         {
             var qName = ssc.Segment.QualifiedName;
             var state = ssc.Status;
-            if (qName == "VPS_L_F_Main")
+            if (qName == "L_F_Main")
             {
                 if (state == Status4.Finished)
                 {
                     counter++;
                     Console.WriteLine($"[{counter}] After finishing Main segment : AdvanceReturn");
                     LogInfo($"-------------------------- [{counter}] After finishing Main segment : AdvanceReturn");
-
                     opc.Write(resetTag, true);
-                }
-            }
-
-
-            if (qName == "L_F_Main")
-            {
-                if (state == Status4.Finished)
-                {
-                    //counter++;
-                    //Console.WriteLine($"[{counter}] After finishing Main segment");
-                    //LogInfo($"-------------------------- [{counter}] After finishing Main segment");
-                    //if (counter++ % 10 == 0)
-                    //{
-                    //    Console.WriteLine($"[{counter}] After finishing Main segment");
-                    //    LogInfo($"-------------------------- [{counter}] After finishing Main segment");
-                    //    //engine.Model.Print();
-                    //}
-                    ////opc.Write(resetTag, true);
                 }
                 else if (ssc.Status == Status4.Ready)
                 {
+                    Console.Beep(10000, 200);
+                    Thread.Sleep(1000);
                     opc.Write(startTag, true);
                 }
             }
@@ -612,15 +595,6 @@ public class Tester
         {
             var qName = ssc.Segment.QualifiedName;
             var state = ssc.Status;
-            if (qName == "VPS_L_F_Main")
-            {
-                //if (state == Status4.Finished)
-                //{
-                //    LogDebug($"Resetting externally {resetTag} : Diamond");
-                //    opc.Write(resetTag, true);
-                //}
-            }
-
 
             if (qName == "L_F_Main")
             {
@@ -713,6 +687,12 @@ public class Tester
         if (hasAddress)
         {
             InterlockChecker.CreateFromCylinder(opc, new[] { "A_F", "B_F" });
+
+            // 모든 출력 끊기
+            opc.Write("StartActual_A_F_Vp", false);
+            opc.Write("StartActual_A_F_Vm", false);
+            opc.Write("StartActual_B_F_Vp", false);
+            opc.Write("StartActual_B_F_Vm", false);
 
             // simulating physics
             if (Global.IsControlMode)

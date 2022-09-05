@@ -44,7 +44,7 @@ public static class Global
     public static IObservable<long> TickSeconds => Observable.Interval(TimeSpan.FromSeconds(1));
 
     /// <summary>Engine running mode: if false, just simulation mode</summary>
-    public static bool IsControlMode { get; internal set; } = false;
+    public static bool IsControlMode { get; internal set; }
 #if DEBUG
     public static bool IsDebugMode => true;
 #else

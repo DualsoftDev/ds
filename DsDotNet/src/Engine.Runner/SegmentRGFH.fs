@@ -95,7 +95,8 @@ module internal SegmentRGFHModule =
         stopMonitorHoming seg
         task {
             do! writer(BitChange(seg.Ready, true, $"processing ready for {seg.QualifiedName}"))
-            do! writer(BitChange(seg.TagPReset, false, $"processing ready for {seg.QualifiedName}"))
+            assert (seg.TagPReset.Value = false)
+            //do! writer(BitChange(seg.TagPReset, false, $"processing ready for {seg.QualifiedName}"))
         }
 
     /// Going tag ON 발송 후,

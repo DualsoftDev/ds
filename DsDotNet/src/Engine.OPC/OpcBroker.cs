@@ -73,43 +73,7 @@ public class OpcBroker
         {
             var n = otc.TagName;
             if (_tagDic.ContainsKey(n))
-            {
-                var otag = _tagDic[n];
-                bool skip = false;
-                if (otag.Value == otc.Value)
-                {
-                    // todo: { Dirty hack
-                    var tags = (
-                        from cpu in Core.Global.Model.Cpus
-                        where cpu.TagsMap.ContainsKey(n)
-                        select cpu.TagsMap[n]
-                    ).ToArray()
-                    ;
-                    
-                    bool isAllEqual() => tags.ForAll(t => t.Value == otc.Value);
-                    if (isAllEqual())
-                        skip = true;
-                    else
-                    {
-                        var spin = new SpinWait();
-                        for (var i = 0; i < 10; i++)
-                            spin.SpinOnce();
-
-                        skip = isAllEqual();
-                        if (skip)
-                            Console.WriteLine();
-                    }
-                    // todo: } Dirty hack
-                }
-
-                if (skip)
-                    LogDebug($"\t\tSkipping duplicated Publishing tag[{n}] change = {otc.Value}");
-                else
-                {
-                    LogDebug($"\t\tPublishing tag[{n}] change = {otc.Value}");
-                    Write(n, otc.Value);
-                }
-            }
+                Write(n, otc.Value);
         });
         _disposables.Add(subs);
     }
@@ -175,6 +139,7 @@ public class OpcBroker
             var bit = _tagDic[tagName];
             if (bit.Value != value)
             {
+                LogDebug($"\t\tPublishing tag[{tagName}] change = {value}");
                 bit.SetValue(value);
                 if (tagToAddr.ContainsKey(tagName) && Conn != null)
                 {

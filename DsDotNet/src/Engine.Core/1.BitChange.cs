@@ -17,8 +17,8 @@ public class BitChange
     {
         //Assert(bit.Value != newValue);
 
-        //if (newValue && bit.GetName().IsOneOf("StartPlan_A_F_Vm", "StartPlan_B_F_Vp"))
-        //    Global.NoOp();
+        if (! newValue && bit.GetName().IsOneOf("ResetPlan_L_F_Main"))
+            Global.NoOp();
 
         Assert(bit != null);
         Assert(cause is null || cause is IBit || cause is string);

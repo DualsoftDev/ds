@@ -26,7 +26,7 @@ module CpuModule =
         match box bit with
         | :? IBitWritable as writable ->
             if bit.Value <> bitChange.NewValue then
-                if bit.Name = "Going_VPS_L_F_Main" then
+                if bit.Name = "ResetPlan_L_F_Main" then
                     noop()
                 logDebug $"Writing bit {bit} = {bitChange.NewValue} @ {bit.Cpu.Name}"
                 writable.SetValue(bitChange.NewValue)
@@ -163,7 +163,7 @@ module CpuModule =
                             let bit = bitChange.Bit
                             assert(bit.Cpu = cpu)
                             let value = bitChange.NewValue
-                            if (bit.GetName() = "Going_VPS_L_F_Main") then
+                            if (bit.GetName() = "ResetPlan_L_F_Main") then
                                 noop()
 
                             if lasts.ContainsKey(bit) then
@@ -249,7 +249,7 @@ type CpuExt =
     static member Enqueue(cpu:Cpu, bitChange:BitChange) : WriteResult =
         assert (bitChange.Bit.Cpu = cpu)
         //assert( bitChange.Bit.Value <> bitChange.NewValue)
-        if bitChange.Bit.GetName() = "Going_VPS_L_F_Main" then
+        if bitChange.Bit.GetName() = "ResetPlan_L_F_Main" then
             noop()
 
         match bitChange.Bit with

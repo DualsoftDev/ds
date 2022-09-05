@@ -664,22 +664,22 @@ public class Tester
             Assert(o.Length == 16);
 
             Assert(o[0].TagName == "StartActual_A_F_Vp" && o[0].Value == true);   // a+
-            Assert(o[1].TagName == "EndActual_A_F_Sm" && o[1].Value == false);  // !A-
-            Assert(o[2].TagName == "EndActual_A_F_Sp" && o[2].Value == true);   // A+
+            Assert(o[1].TagName == "EndActual_A_F_Sm"   && o[1].Value == false);  // !A-
+            Assert(o[2].TagName == "EndActual_A_F_Sp"   && o[2].Value == true);   // A+
             Assert(o[3].TagName == "StartActual_A_F_Vp" && o[3].Value == false);  // !a+
 
             //Assert(o[4].TagName == "StartActual_A_F_Vm" && o[4].Value == true);   // a-
             //Assert(o[5].TagName == "StartActual_B_F_Vp" && o[5].Value == true);   // b+
             var nam = o.FindIndex(otc => otc.TagName == "StartActual_A_F_Vm" && otc.Value == true);  // a-
             var nbp = o.FindIndex(otc => otc.TagName == "StartActual_B_F_Vp" && otc.Value == true);  // b+
-            Debug.Assert(nam.IsOneOf(4, 5) && nbp.IsOneOf(4, 5));
+            Assert(nam.IsOneOf(4, 5) && nbp.IsOneOf(4, 5));
 
             // oN, ofF
-            var fAp = o.FindIndex(otc => otc.TagName == "EndActual_A_F_Sp" && otc.Value == false);  // !A+
-            var fBm = o.FindIndex(otc => otc.TagName == "EndActual_B_F_Sm" && otc.Value == false);  // !B-
-            var nBp = o.FindIndex(otc => otc.TagName == "EndActual_B_F_Sp" && otc.Value == true);   // B+
+            var fAp = o.FindIndex(otc => otc.TagName == "EndActual_A_F_Sp"   && otc.Value == false);  // !A+
+            var fBm = o.FindIndex(otc => otc.TagName == "EndActual_B_F_Sm"   && otc.Value == false);  // !B-
+            var nBp = o.FindIndex(otc => otc.TagName == "EndActual_B_F_Sp"   && otc.Value == true);   // B+
             var fbp = o.FindIndex(otc => otc.TagName == "StartActual_B_F_Vp" && otc.Value == false);  // !b+
-            var nAm = o.FindIndex(otc => otc.TagName == "EndActual_A_F_Sm" && otc.Value == true);   // A-
+            var nAm = o.FindIndex(otc => otc.TagName == "EndActual_A_F_Sm"   && otc.Value == true);   // A-
             var fam = o.FindIndex(otc => otc.TagName == "StartActual_A_F_Vm" && otc.Value == false);  // !a-
 
             Assert(fAp < nAm && nAm < fam);
@@ -693,8 +693,8 @@ public class Tester
             //Assert(o[11].TagName == "StartActual_A_F_Vm"   && o[11].Value == false);  // !a-
 
             Assert(o[12].TagName == "StartActual_B_F_Vm" && o[12].Value == true);   // b-
-            Assert(o[13].TagName == "EndActual_B_F_Sp" && o[13].Value == false);  // !B+
-            Assert(o[14].TagName == "EndActual_B_F_Sm" && o[14].Value == true);   // B-
+            Assert(o[13].TagName == "EndActual_B_F_Sp"   && o[13].Value == false);  // !B+
+            Assert(o[14].TagName == "EndActual_B_F_Sm"   && o[14].Value == true);   // B-
             Assert(o[15].TagName == "StartActual_B_F_Vm" && o[15].Value == false);   // !b-
         });
 

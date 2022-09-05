@@ -214,6 +214,7 @@ module VirtualParentSegmentModule =
                             noop()
                         else
                             task {
+                                oldStatus <- Some state
                                 logInfo $"[{n}] VPS Segment status : {state} by {bit.Name}={on}"
 
                                 if x.Going.Value && state <> Status4.Going then
@@ -226,7 +227,6 @@ module VirtualParentSegmentModule =
 
                                 Global.SegmentStatusChangingSubject.OnNext(SegmentStatusChange(x, state))
 
-                                oldStatus <- Some state
 
                                 let childStatus = x.Target.Status
 

@@ -37,38 +37,38 @@ module PortInfoTest =
 
 
                 let wait() = wait(cpu)
-                let enqueue(bit, value) =
-                    cpu.Enqueue(bit, value)
-                    wait()
+                let enqueue(bit, value) = cpu.Enqueue(bit, value)
 
                 cpu.BuildBitDependencies()
                 let runSubscription = cpu.Run()
 
-                pts.Value === false
-                pts.Plan.Value === false
-                pts.Actual.Value === false
+                task {
+                    pts.Value === false
+                    pts.Plan.Value === false
+                    pts.Actual.Value === false
 
-                //// Expression 으로, 값을 설정할 수 없어야 한다.
-                //(fun () -> enqueue(pts, true))
-                //|> ShouldFail
+                    //// Expression 으로, 값을 설정할 수 없어야 한다.
+                    //(fun () -> enqueue(pts, true))
+                    //|> ShouldFail
 
-                enqueue(pts, true)
-                pts.Plan.Value === true
-                pts.Value === true
-                pts.Actual.Value === true
+                    do! enqueue(pts, true)
+                    pts.Plan.Value === true
+                    pts.Value === true
+                    pts.Actual.Value === true
 
-                // plan OFF 시, actual tag 도 OFF 되어야 한다.
-                enqueue(plan, false)
-                pts.Plan.Value === false
-                pts.Value === false
-                pts.Actual.Value === false
+                    // plan OFF 시, actual tag 도 OFF 되어야 한다.
+                    do! enqueue(plan, false)
+                    pts.Plan.Value === false
+                    pts.Value === false
+                    pts.Actual.Value === false
 
 
-                // pts plan tag ON 시, pts 도 ON 되어야 한다.
-                enqueue(plan, true)
-                pts.Plan.Value === true
-                pts.Value === true
-                pts.Actual.Value === true
+                    // pts plan tag ON 시, pts 도 ON 되어야 한다.
+                    do! enqueue(plan, true)
+                    pts.Plan.Value === true
+                    pts.Value === true
+                    pts.Actual.Value === true
+                } |> Async.AwaitTask |> Async.RunSynchronously
 
             let ``_PortInfoEnd Normal 테스트`` =
                 let cpu = new Cpu("dummy", new Model())
@@ -77,34 +77,34 @@ module PortInfoTest =
                 let pte = PortInfoEnd.Create(cpu, null, "_PortInfoEnd_test2", actual)
 
                 let wait() = wait(cpu)
-                let enqueue(bit, value) =
-                    cpu.Enqueue(bit, value)
-                    wait()
+                let enqueue(bit, value) = cpu.Enqueue(bit, value)
 
                 cpu.BuildBitDependencies()
                 let runSubscription = cpu.Run()
 
-                let plan = pte.Plan
-                pte.Value === false
-                pte.Plan.Value === false
-                pte.Actual.Value === false
+                task {
+                    let plan = pte.Plan
+                    pte.Value === false
+                    pte.Plan.Value === false
+                    pte.Actual.Value === false
 
-                // pte 전체 ON 하더라도, actual tag 는 ON 되지 않는다.
-                enqueue(plan, true)
-                pte.Plan.Value === true
-                pte.Value === false
-                pte.Actual.Value === false
+                    // pte 전체 ON 하더라도, actual tag 는 ON 되지 않는다.
+                    do! enqueue(plan, true)
+                    pte.Plan.Value === true
+                    pte.Value === false
+                    pte.Actual.Value === false
 
-                // actual tag ON 시, pte 전체 ON
-                enqueue(actual, true)
-                pte.Value === true
+                    // actual tag ON 시, pte 전체 ON
+                    do! enqueue(actual, true)
+                    pte.Value === true
 
-                // actual tag 흔들림시, pte 전체도 연동
-                (fun () -> enqueue(actual, false))
-                |> ShouldFailWithSubstringT<DsException> "Spatial Error:"
+                    // actual tag 흔들림시, pte 전체도 연동
+                    (fun () -> enqueue(actual, false).Wait())
+                    |> ShouldFailWithSubstringT<DsException> "Spatial Error:"
 
-                actual.Value === false
-                pte.Value === false
+                    actual.Value === false
+                    pte.Value === false
+                } |> Async.AwaitTask |> Async.RunSynchronously
 
 
             let ``_PortInfoEnd 특이 case 테스트`` =
@@ -115,35 +115,37 @@ module PortInfoTest =
                 let pte = PortInfoEnd.Create(cpu, null, "_PortInfoEnd_test3", actual)
 
                 let wait() = wait(cpu)
-                let enqueue(bit, value) =
-                    cpu.Enqueue(bit, value)
-                    wait()
+                let enqueue(bit, value) = cpu.Enqueue(bit, value)
 
                 cpu.BuildBitDependencies()
                 let runSubscription = cpu.Run()
 
-                let plan = pte.Plan
-                pte.Value === false
-                pte.Plan.Value === false
-                pte.Actual.Value === true
+                task {
+                    let plan = pte.Plan
+                    pte.Value === false
+                    pte.Plan.Value === false
+                    pte.Actual.Value === true
 
-                // actual tag ON 상태에서 plan 만 ON 시킬 수 없다.
-                (fun () -> enqueue(pte, true))
-                |> ShouldFailWithSubstringT<DsException> "Spatial Error:"
+                    // actual tag ON 상태에서 plan 만 ON 시킬 수 없다.
+                    (fun () -> enqueue(pte, true).Wait())
+                    |> ShouldFailWithSubstringT<DsException> "Spatial Error:"
 
-                pte.Value === false
-                plan.Value === false
+                    pte.Value === false
+                    plan.Value === false
 
 
-                // actual tag OFF 상태에서는 plan OFF 가능
-                enqueue(actual, false)
-                enqueue(plan, true)
-                pte.Plan.Value === true
-                pte.Actual.Value === false
-                pte.Value === false
+                    // actual tag OFF 상태에서는 plan OFF 가능
+                    do! enqueue(actual, false)
+                    do! enqueue(plan, true)
+                    pte.Plan.Value === true
+                    pte.Actual.Value === false
+                    pte.Value === false
 
-                enqueue(pte.Actual, true)
-                pte.Value === true
+                    do! enqueue(pte.Actual, true)
+                    pte.Value === true
+                } |> Async.AwaitTask |> Async.RunSynchronously
+
+
 
                 ()
             ()

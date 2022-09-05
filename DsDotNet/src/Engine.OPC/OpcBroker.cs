@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 using System.Reactive.Disposables;
 using static Engine.Core.GlobalShortCuts;
 using Engine.Common;
+using System.Threading;
 
 namespace Engine.OPC;
 
@@ -70,15 +71,43 @@ public class OpcBroker
 
         var subs = Core.Global.TagChangeToOpcServerSubject.Subscribe(otc =>
         {
-            if (_tagDic.ContainsKey(otc.TagName))
+            var n = otc.TagName;
+            if (_tagDic.ContainsKey(n))
             {
-                var otag = _tagDic[otc.TagName];
+                var otag = _tagDic[n];
+                bool skip = false;
                 if (otag.Value == otc.Value)
-                    LogDebug($"\t\tSkipping duplicated Publishing tag[{otc.TagName}] change = {otc.Value}");
+                {
+                    // todo: { Dirty hack
+                    var tags = (
+                        from cpu in Core.Global.Model.Cpus
+                        where cpu.TagsMap.ContainsKey(n)
+                        select cpu.TagsMap[n]
+                    ).ToArray()
+                    ;
+                    
+                    bool isAllEqual() => tags.ForAll(t => t.Value == otc.Value);
+                    if (isAllEqual())
+                        skip = true;
+                    else
+                    {
+                        var spin = new SpinWait();
+                        for (var i = 0; i < 10; i++)
+                            spin.SpinOnce();
+
+                        skip = isAllEqual();
+                        if (skip)
+                            Console.WriteLine();
+                    }
+                    // todo: } Dirty hack
+                }
+
+                if (skip)
+                    LogDebug($"\t\tSkipping duplicated Publishing tag[{n}] change = {otc.Value}");
                 else
                 {
-                    LogDebug($"\t\tPublishing tag[{otc.TagName}] change = {otc.Value}");
-                    Write(otc.TagName, otc.Value);
+                    LogDebug($"\t\tPublishing tag[{n}] change = {otc.Value}");
+                    Write(n, otc.Value);
                 }
             }
         });
@@ -152,10 +181,7 @@ public class OpcBroker
                     Console.WriteLine("Write - " + tagName + " : " + value);
                     UpdateLsBits(tagName, value);
                 }
-                Task.Run(() =>
-                {
-                    Core.Global.TagChangeFromOpcServerSubject.OnNext(new OpcTagChange(tagName, value));
-                }).FireAndForget();
+                Core.Global.TagChangeFromOpcServerSubject.OnNext(new OpcTagChange(tagName, value));
             }
         }
 
@@ -173,10 +199,7 @@ public class OpcBroker
             {
                 Console.WriteLine("Read - " + tagName + " : " + value);
                 bit.SetValue(value);
-                Task.Run(() =>
-                {
-                    Core.Global.TagChangeFromOpcServerSubject.OnNext(new OpcTagChange(tagName, value));
-                }).FireAndForget();
+                Core.Global.TagChangeFromOpcServerSubject.OnNext(new OpcTagChange(tagName, value));
             }
         }
 

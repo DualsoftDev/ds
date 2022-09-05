@@ -52,6 +52,7 @@ public static class Global
 #endif
 
     public static Subject<(string, bool)> DebugNotifyingSubject { get; } = new();
+    public static bool IsDebugStopAndGoStressMode { get; }
     internal static bool IsInUnitTest { get; }
     internal static bool IsSingleThreadMode { get; set; }
 

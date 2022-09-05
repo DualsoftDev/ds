@@ -92,7 +92,8 @@ module internal SegmentRGFHModule =
         let seg = segment :?> Segment
         assert( [seg.TagPStart; seg.TagPReset; seg.TagPEnd].ForAll(fun t -> not t.Value ))     // A_F_Pp.TagEnd 가 true 되는 상태???
         assert( [seg.PortS :> PortInfo; seg.PortR; seg.PortE].ForAll(fun t -> not t.Value ))
-        stopMonitorHoming seg
+        stopMonitorHoming seg   // normal case
+        stopMonitorGoing seg    // going 중에 start 끊긴 경우의 대비
         task {
             do! writer(BitChange(seg.Ready, true, $"processing ready for {seg.QualifiedName}"))
             assert (seg.TagPReset.Value = false)
@@ -107,50 +108,52 @@ module internal SegmentRGFHModule =
         assert( not <| homingSubscriptions.ContainsKey(seg))
         let write:BitWriter = getBitWriter writer
 
-        if isChildrenOrigin(seg) then
-            task {
+        /// Children 의 going 상태를 지켜 보면서 다음 child 를 순차적으로 실행
+        let createChildrenGoingMonitor() =
+            let childRxTags = seg.Children.selectMany(fun ch -> ch.TagsEnd).ToArray()
+            Global.TagChangedSubject
+                .Where(fun t -> t.Value)
+                .Where(childRxTags.Contains)
+                .Subscribe(fun tag ->
+                    task {
+                        try
+                            let! finishedChild = turnOffStartForFinishedChildren(write, tag, seg.Children)
+                            if finishedChild <> null then
+                                logInfo $"Progress: Child {finishedChild.QualifiedName} finish detected."
+                                finishedChild.Status <- Status4.Finished
+                                finishedChild.IsFlipped <- true
+                            
+                                if (seg.Children.ForAll(fun ch -> ch.IsFlipped)) then
+                                    do! write(seg.PortE, true, $"{seg.QualifiedName} GOING 끝 (모든 child end)")
+                                else
+                                    // 남은 children 중에서 다음 뒤집을 target 선정후 뒤집기
+                                    let targets =
+                                        let edges =
+                                            let finishedChildren = seg.Children.Where(fun ch -> ch.IsFlipped).ToArray()
+                                            seg.Edges
+                                                .Where(fun e -> box e :? ISetEdge)
+                                                .Where(fun e ->
+                                                    e.Sources.OfType<Child>()
+                                                        .ForAll(finishedChildren.Contains))
+                                        edges.Select(fun e -> e.Target)
+                                            .OfType<Child>()
+                                            .Where(fun ch -> ch.Status <> Nullable Status4.Going && not ch.IsFlipped)
+                                            .Distinct()
+                                            .ToArray()
+
+                                    do! runChildren (targets, writer)
+                        with exn ->
+                            failwithlog $"{exn}"
+                    } |> Async.AwaitTask |> Async.Start
+                )
+
+        task {
+            if isChildrenOrigin(seg) then
                 do! write(seg.Going, true, $"{seg.QualifiedName} Segment GOING 시작")
                 assert(seg.Going.Value)
                 if seg.Children.Any() then
-                    (not <| goingSubscriptions.ContainsKey(seg)) |> verifyM $"Going subscription for {seg.QualifiedName} not empty"
-                    let childRxTags = seg.Children.selectMany(fun ch -> ch.TagsEnd).ToArray()
-                    
-                    let subs =
-                        Global.TagChangedSubject
-                            .Where(fun t -> t.Value)
-                            .Where(childRxTags.Contains)
-                            .Subscribe(fun tag ->
-                                task {
-                                    try
-                                        let! finishedChild = turnOffStartForFinishedChildren(write, tag, seg.Children)
-                                        if finishedChild <> null then
-                                            logInfo $"Progress: Child {finishedChild.QualifiedName} finish detected."
-                                            finishedChild.Status <- Status4.Finished
-                                            finishedChild.IsFlipped <- true
-                            
-                                            if (seg.Children.ForAll(fun ch -> ch.IsFlipped)) then
-                                                do! write(seg.PortE, true, $"{seg.QualifiedName} GOING 끝 (모든 child end)")
-                                            else
-                                                // 남은 children 중에서 다음 뒤집을 target 선정후 뒤집기
-                                                let targets =
-                                                    let edges =
-                                                        let finishedChildren = seg.Children.Where(fun ch -> ch.IsFlipped).ToArray()
-                                                        seg.Edges
-                                                            .Where(fun e -> box e :? ISetEdge)
-                                                            .Where(fun e ->
-                                                                e.Sources.OfType<Child>()
-                                                                    .ForAll(finishedChildren.Contains))
-                                                    edges.Select(fun e -> e.Target)
-                                                        .OfType<Child>()
-                                                        .Where(fun ch -> ch.Status <> Nullable Status4.Going && not ch.IsFlipped)
-                                                        .Distinct()
-                                                        .ToArray()
-
-                                                do! runChildren (targets, writer)
-                                    with exn ->
-                                        failwithlog $"{exn}"
-                                } |> Async.AwaitTask |> Async.Start
-                            )
+                    (not <| goingSubscriptions.ContainsKey(seg)) |> verifyM $"Going subscription for {seg.QualifiedName} not empty"                    
+                    let subs = createChildrenGoingMonitor()
                     goingSubscriptions.TryAdd(seg, subs) |> verifyM "Failed to add Going subscription"
 
                     let seg = seg :?> Segment
@@ -158,27 +161,25 @@ module internal SegmentRGFHModule =
 
                 else // no children
                     do! write(seg.PortE, true, $"{seg.QualifiedName} GOING 끝")
-            }
 
-        else // children not at origin
-            let outofOriginChildren = getOutofOriginChildren seg
-            let subs = 
-                Global.PortChangedSubject
-                    .Where(fun pc -> pc.Bit = seg.PortE && not pc.NewValue)
-                    .Subscribe(fun pc ->
-                        stopMonitorOriginating seg
-                        for ch in outofOriginChildren do
-                            ch.Status <- Status4.Ready
-                            ch.DbgIsOriginating <- false
-                        doGoing(seg, writer)
-                        |> ignore )
+            else // children not at origin
+                let outofOriginChildren = getOutofOriginChildren seg
+                let subs = 
+                    Global.PortChangedSubject
+                        .Where(fun pc -> pc.Bit = seg.PortE && not pc.NewValue)
+                        .Subscribe(fun pc ->
+                            stopMonitorOriginating seg
+                            for ch in outofOriginChildren do
+                                ch.Status <- Status4.Ready
+                                ch.DbgIsOriginating <- false
+                            doGoing(seg, writer) |> ignore )
 
-            seg.DbgIsOriginating <- true
-            for ch in outofOriginChildren do
-                ch.DbgIsOriginating <- true
-            let t = doHoming(seg, writer)
-            originatingSubscriptions.TryAdd(seg, subs) |> verifyM "Failed to add Originating subscription"
-            t
+                seg.DbgIsOriginating <- true
+                for ch in outofOriginChildren do
+                    ch.DbgIsOriginating <- true
+                do! doHoming(seg, writer)
+                originatingSubscriptions.TryAdd(seg, subs) |> verifyM "Failed to add Originating subscription"
+        }
 
     let procFinish(segment:SegmentBase, writer:ChangeWriter) : WriteResult =
         let seg = segment :?> Segment

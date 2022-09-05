@@ -47,9 +47,9 @@ class Program
 
         //Tester.DoSampleTestVps();
         //Tester.DoSampleTest();
-        Tester.DoSampleTestAdvanceReturn();
+        //Tester.DoSampleTestAdvanceReturn();
         //Tester.DoSampleTestHatOnHat();
-        //Tester.DoSampleTestDiamond();
+        Tester.DoSampleTestDiamond();
         //Tester.DoSampleTestTriangle();
         //Tester.DoSampleTestAddressesAndLayouts();
     }

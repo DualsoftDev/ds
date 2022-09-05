@@ -158,7 +158,7 @@ module FsSegmentModule =
 
                             oldStatus <- Some state
 
-                            do!
+                            let task =
                                 match state with
                                 | Status4.Ready -> doReady(x, writer)
                                 | Status4.Going -> doGoing(x, writer)
@@ -166,6 +166,7 @@ module FsSegmentModule =
                                 | Status4.Homing -> doHoming(x, writer)
                                 | _ ->
                                     failwithlog "Unexpected"
+                            do! task
 
                             Global.SegmentStatusChangedSubject.OnNext(SegmentStatusChange(x, state))
 

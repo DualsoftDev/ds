@@ -93,7 +93,7 @@ namespace Engine
                                     .Subscribe(tpl =>
                                     {
                                         var (tag, value) = tpl;
-                                        if (tag == me && !value)
+                                        if (tag == me && !value && Global.IsDebugStopAndGoStressMode)
                                         {
                                             LogDebug($"출력 단절 {tpl.Item1} detected");
                                             keepGo = false;
@@ -130,8 +130,11 @@ namespace Engine
                                     .Where(tpl => tpl.Item1 == other && !tpl.Item2)
                                     .Subscribe(tpl =>
                                     {
-                                        LogDebug($"출력 단절 {tpl.Item1} detected");
-                                        keepGo = false;
+                                        if (Global.IsDebugStopAndGoStressMode)
+                                        {
+                                            LogDebug($"출력 단절 {tpl.Item1} detected");
+                                            keepGo = false;
+                                        }
                                     });
                                 var opcOpposite = opc.GetTag(other);
                                 LogDebug($"Tag/Actuator {bit.Name} = {val}");

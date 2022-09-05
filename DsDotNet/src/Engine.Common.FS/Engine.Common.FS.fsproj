@@ -30,6 +30,7 @@
 		<Compile Include="Module\Functions.fs" />
 		<Compile Include="Module\Collection.Algo.fs" />
 		<Compile Include="Module\ActivePattern.fs" />
+		<Compile Include="Module\QualifiedAccess\Task.fs" />
 		<Compile Include="Module\QualifiedAccess\Async.fs" />
 		<Compile Include="Module\QualifiedAccess\Seq.fs" />
 		<Compile Include="Module\QualifiedAccess\Tuple.fs" />

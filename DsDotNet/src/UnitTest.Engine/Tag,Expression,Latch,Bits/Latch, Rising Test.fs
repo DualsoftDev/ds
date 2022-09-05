@@ -23,76 +23,74 @@ module LatchTest =
 
         [<Fact>]
         member __.``Latch test`` () =
-            logInfo "============== Latch test"
-            Global.IsInUnitTest === true
-            init()
+            task {
+                logInfo "============== Latch test"
+                Global.IsInUnitTest === true
+                init()
 
 
-            let cpu = new Cpu("dummy", new Model())
+                let cpu = new Cpu("dummy", new Model())
 
-            let tSet = new TagE(cpu, null, "T1")
-            let tReset = new TagE(cpu, null, "T2")
-            let latch = new Latch(cpu, "Latch1", tSet, tReset)
+                let tSet = new TagE(cpu, null, "T1")
+                let tReset = new TagE(cpu, null, "T2")
+                let latch = new Latch(cpu, "Latch1", tSet, tReset)
 
-            let wait() = wait(cpu)
-            let enqueue(bit, value) =
-                cpu.Enqueue(bit, value)
-                wait()
-            cpu.BuildBitDependencies()
-            let runSubscription = cpu.Run()
+                let wait() = wait(cpu)
+                let enqueue(bit, value) = cpu.Enqueue(bit, value)
+                cpu.BuildBitDependencies()
+                let runSubscription = cpu.Run()
 
 
-            latch.Value === false
-            enqueue(tSet, true)
-            latch.Value === true
+                latch.Value === false
+                do! enqueue(tSet, true)
+                latch.Value === true
 
-            enqueue(tReset, true)
-            latch.Value === false
+                do! enqueue(tReset, true)
+                latch.Value === false
 
-            // tSet 조건은 여전히 true 이므로, reset 만 clear 해도 latch ON 상태로 다시 변경된다.
-            enqueue(tReset, false)
-            latch.Value === true
+                // tSet 조건은 여전히 true 이므로, reset 만 clear 해도 latch ON 상태로 다시 변경된다.
+                do! enqueue(tReset, false)
+                latch.Value === true
 
-            // set 조건만 false
-            enqueue(tSet, false)
-            latch.Value === true
+                // set 조건만 false
+                do! enqueue(tSet, false)
+                latch.Value === true
 
-            // reset 조건만 true
-            enqueue(tReset, true)
-            latch.Value === false
+                // reset 조건만 true
+                do! enqueue(tReset, true)
+                latch.Value === false
 
-            // reset 이 살아 있으므로, set 시켜도 latch 안됨
-            enqueue(tSet, true)
-            latch.Value === false
-
-            ()
+                // reset 이 살아 있으므로, set 시켜도 latch 안됨
+                do! enqueue(tSet, true)
+                latch.Value === false
+            } |> Async.AwaitTask |> Async.RunSynchronously
 
         [<Fact>]
         member __.``ResetLatch test`` () =
-            let cpu = new Cpu("dummy", new Model())
-            let going = Flag(cpu, "Going");
-            let finish = Flag(cpu, "Finish")
-            let notFinish = Not(finish)
-            let rlBSet = And(cpu, "And_rlBSet", going, notFinish)
-            let rlBReset = Flag(cpu, "Reset");
-            let latch = Latch(cpu, "rlB", rlBSet, rlBReset)
+            task {
+                let cpu = new Cpu("dummy", new Model())
+                let going = Flag(cpu, "Going");
+                let finish = Flag(cpu, "Finish")
+                let notFinish = Not(finish)
+                let rlBSet = And(cpu, "And_rlBSet", going, notFinish)
+                let rlBReset = Flag(cpu, "Reset");
+                let latch = Latch(cpu, "rlB", rlBSet, rlBReset)
 
-            let wait() = wait(cpu)
-            let enqueue(bit, value) =
-                cpu.Enqueue(bit, value)
-                wait()
-            cpu.BuildBitDependencies()
-            let runSubscription = cpu.Run()
+                let wait() = wait(cpu)
+                let enqueue(bit, value) = cpu.Enqueue(bit, value)
+                cpu.BuildBitDependencies()
+                let runSubscription = cpu.Run()
 
-            enqueue(going, true)
-            rlBSet.Value === true
-            latch.Value === true
+                do! enqueue(going, true)
+                rlBSet.Value === true
+                latch.Value === true
 
-            enqueue(rlBReset, true)
-            latch.Value === false
-            rlBSet.Value === true
+                do! enqueue(rlBReset, true)
+                latch.Value === false
+                rlBSet.Value === true
 
-            ()
+                ()
+            } |> Async.AwaitTask |> Async.RunSynchronously
 
 
         //[<Fact>]

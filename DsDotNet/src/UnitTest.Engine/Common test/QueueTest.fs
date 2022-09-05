@@ -9,6 +9,8 @@ open Engine.Common.FS
 open Xunit.Abstractions
 open System.Collections.Concurrent
 open UnitTest.Engine
+open System.Threading.Tasks
+open System.Threading
 
 [<AutoOpen>]
 module QueueTestModule =
@@ -55,3 +57,59 @@ module QueueTestModule =
 
             [| "hello"; "KWAK!"; "nice"; "TO"; "meet"; "you" |]
             |> Array.iter agent.Value.Post
+
+
+        [<Fact>]
+        member __.``AsyncTest`` () =
+            logInfo "============== AsyncTest"
+
+            let asyncGetx x = task { return x }
+            let asyncGetx2 x = Task.FromResult(x)
+
+            let n1 = asyncGetx  1 |> Task.toAsync |> Async.RunSynchronously
+            let n2 = asyncGetx2 2 |> Task.toAsync |> Async.RunSynchronously
+
+            let y =
+                task {
+                    do! Task.Delay(100)
+                    failwith "Uncaught Exception 1"
+                //} |> Task.withLogging |> Async.AwaitTask |> Async.Start
+                //} |> Async.ofTask |> Async.RunSynchronously
+                //} |> Async.AwaitTask |> Async.RunSynchronously
+                } |> Task.fireAndForget
+
+
+            task {
+                do! Task.Delay(100)
+                failwith "Uncaught Exception 2"
+            } |> Async.startTask
+
+
+            let kkk =
+                task {
+                    do! Task.Delay(200)
+                    failwith "Uncaught Exception 3"
+                    return 1
+                //} |> Async.ofTask |> Async.StartAsTask |> ignore
+                } |> Task.withLogging
+                //} |> Task.withLogging |> Async.AwaitTask |> Async.RunSynchronously
+
+
+            task {
+                do! Task.Delay(200)
+                failwith "Uncaught Exception 4"
+                return 1
+            //} |> Async.ofTask |> Async.StartAsTask |> ignore
+            //} |> Task.withLogging //|> Task.toAsync //|> Async.StartAsTask
+            } |> Task.fireAndForget
+
+            let n =
+                task {
+                    do! Task.Delay(100)
+                    //failwith "Uncaught Exception 5"
+                    return 1
+                //} |> Async.ofTask |> Async.RunSynchronously
+                } |> Task.withLogging |> Async.AwaitTask |> Async.RunSynchronously
+
+            logDebug "Done with %A" n
+            Thread.Sleep(1000)

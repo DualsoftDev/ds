@@ -3,12 +3,12 @@ namespace Engine.Runner
 open System
 open System.Linq
 open System.Reactive.Linq
-open System.Collections.Generic
 
 open Engine.Common.FS
 open Engine.Core
 open Engine.Common
 open System.Collections.Concurrent
+open System.Threading.Tasks
 
 
 [<AutoOpen>]
@@ -28,11 +28,6 @@ module internal SegmentRGFHModule =
     let runChildren (children:Child seq, writer:ChangeWriter) =
         task {
             assert(children.Distinct().Count() = children.Count())
-            //for child in children do
-            //    // todo
-            //    //assert(not child.Status.HasValue || child.Status = Nullable Status4.Ready)
-            //    child.Status <- Status4.Going
-
             for child in children do
                 assert(not child.IsFlipped && (not child.Status.HasValue || child.Status.Value.IsOneOf(Status4.Ready, Status4.Finished)))
                 logInfo $"Progress: Child {child.QualifiedName} starting.."
@@ -62,19 +57,11 @@ module internal SegmentRGFHModule =
     let stopMonitorGoing (seg:SegmentBase) =
         // stop running children
         let runningChildren = seg.Children.Where(fun ch -> ch.Status = Nullable Status4.Going)
-        if seg.Children.Any() then
-            noop()
-        for child in runningChildren do
-            noop()
         stopMonitor goingSubscriptions seg
 
     let stopMonitorHoming (seg:SegmentBase) =
         // stop homing children
         let homingChildren = seg.Children.Where(fun ch -> ch.Status = Nullable Status4.Homing)
-        if seg.Children.Any() then
-            noop()
-        for child in homingChildren do
-            noop()
         stopMonitor homingSubscriptions seg
 
     let stopMonitorOriginating (seg:SegmentBase) =
@@ -82,7 +69,7 @@ module internal SegmentRGFHModule =
 
 
     /// tag 값의 변경으로 인해, going 중 finish 상태가 되는 child 가 존재하면 그것의 start 출력을 끊는다.
-    let turnOffStartForFinishedChildren(write:BitWriter, tag:Tag, monitoringChildren:Child seq) =
+    let turnOffStartForFinishedChildren(write:BitWriter, tag:Tag, monitoringChildren:Child seq) : Task<Child> =
         task {
             let finishedChildren =
                 monitoringChildren
@@ -170,7 +157,7 @@ module internal SegmentRGFHModule =
 
                 else // no children
                     do! write(seg.PortE, true, $"{seg.QualifiedName} GOING 끝")
-            }// |> Async.AwaitTask |> Async.RunSynchronously
+            }
 
         else // children not at origin
             let outofOriginChildren = getOutofOriginChildren seg
@@ -183,8 +170,7 @@ module internal SegmentRGFHModule =
                             ch.Status <- Status4.Ready
                             ch.DbgIsOriginating <- false
                         doGoing(seg, writer)
-                        |> ignore
-                        )
+                        |> ignore )
 
             seg.DbgIsOriginating <- true
             for ch in outofOriginChildren do
@@ -247,14 +233,4 @@ module internal SegmentRGFHModule =
                 homingSubscriptions.TryAdd(seg, subs) |> verifyM "Failed to add Homing subscription"
 
                 do! runChildren(originTargets, writer)
-
-                //// todo: fix me
-                //let et = seg.TagPEnd
-                ////if et.Type.HasFlag(TagType.External) then
-                ////    ()
-                ////else
-                //if et.Value then
-                //    //assert(false)
-                //    write(et, false, $"내부 end tag {et.Name} 강제 off by {segment.QualifiedName} homing")
-
         }

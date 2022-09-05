@@ -8,8 +8,6 @@ open System.Threading.Tasks
 [<AutoOpen>]
 module PrologueModule =
     let noop() = ()
-    //type Writer = IBit*bool*obj -> unit
-
 
     type WriteResult = Task    // unit
 

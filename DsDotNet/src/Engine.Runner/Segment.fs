@@ -20,7 +20,6 @@ module FsSegmentModule =
 
         abstract member WireEvent:ChangeWriter->IDisposable
 
-
         //member x.Status = //with get() =
         //    match x.PortS.Value, x.PortR.Value, x.PortE.Value with
         //    | false, false, false -> Status4.Ready  //??
@@ -128,13 +127,11 @@ module FsSegmentModule =
                         | 'e', Status4.Finished, _ ->
                             assert(value)
 
-
-
                         | 's', Status4.Homing, true ->      // homing 중에 start port 가 켜진 상태
                             ()
                         | _ ->
-                            //logWarn $"UNKNOWN: {n} status {state} duplicated on port {bit.GetName()}={value} by {cause}"
-                            //assert(false)
+                            logWarn $"UNKNOWN: {n} status {state} duplicated on port {bit.GetName()}={value} by {cause}"
+                            assert(false)
                             ()
                     else
                         task {
@@ -157,17 +154,9 @@ module FsSegmentModule =
                             | Status4.Finished -> ()
                             | Status4.Homing -> ()
                             | _ -> ()
-
-                            if n = "L_F_Main" && state = Status4.Going then
-                                noop()
                             // } debug
 
                             oldStatus <- Some state
-
-                            //match state with
-                            //| Status4.Going
-                            //| Status4.Homing -> oldStatus <- Some state
-                            //| _ -> ()
 
                             do!
                                 match state with
@@ -177,11 +166,6 @@ module FsSegmentModule =
                                 | Status4.Homing -> doHoming(x, writer)
                                 | _ ->
                                     failwithlog "Unexpected"
-
-                            //match state with
-                            //| Status4.Ready
-                            //| Status4.Finished -> oldStatus <- Some state
-                            //| _ -> ()
 
                             Global.SegmentStatusChangedSubject.OnNext(SegmentStatusChange(x, state))
 

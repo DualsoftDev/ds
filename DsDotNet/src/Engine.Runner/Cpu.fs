@@ -218,7 +218,6 @@ module CpuModule =
                 addSubRelationship(ff.S)
                 addRelationship(ff.R, ff)
                 addSubRelationship(ff.R)
-                ()
             | :? PortInfo as pi ->
                 for mb in pi._monitoringBits.Where(fun b -> b <> null) do
                     addRelationship(mb, pi)
@@ -265,13 +264,6 @@ type CpuExt =
                     BitChange(bit, newValue, cause) |> cpu.Enqueue
     [<Extension>] static member Enqueue(cpu:Cpu, bit:IBit, newValue:bool) =
                     BitChange(bit, newValue, null)  |> cpu.Enqueue
-
-    [<Extension>] static member SendChange(cpu:Cpu, bit:IBit, newValue:bool, cause:obj) =
-                    BitChange(bit, newValue, cause) |> cpu.SendChange
-    [<Extension>] static member SendChange(cpu:Cpu, bitChange:BitChange) =
-                    CpuExt.Apply(cpu, bitChange, false)
-    [<Extension>] static member PostChange(cpu:Cpu, bit:IBit, newValue:bool, cause:obj) =
-                    BitChange(bit, newValue, cause) |> cpu.Enqueue
 
     [<Extension>] static member BuildBitDependencies(cpu:Cpu) = buildBitDependencies cpu
 

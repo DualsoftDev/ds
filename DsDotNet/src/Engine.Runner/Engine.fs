@@ -69,7 +69,6 @@ module EngineModule =
             virtualParentSegments
             |> Seq.iter(fun vps ->
                 let writer:ChangeWriter = vps.Cpu.Enqueue
-                //let writer = vps.Cpu.SendChange
                 vps.Target.WireEvent(writer) |> ignore
                 vps.WireEvent(writer) |> ignore
                 )

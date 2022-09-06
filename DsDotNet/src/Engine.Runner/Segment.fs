@@ -79,7 +79,7 @@ module FsSegmentModule =
             let mutable cts = new CancellationTokenSource()
             let n = x.QualifiedName
             let write(bit, value, cause) =
-                writer(BitChange(bit, value, cause))
+                writer(BitChange(bit, value, cause)) |> Async.AwaitTask
 
             let mutable isInitialReady = true
 
@@ -136,7 +136,7 @@ module FsSegmentModule =
                             assert(false)
                             ()
                     else
-                        task {
+                        async {
                             cts.Cancel()
                             cts <- new CancellationTokenSource()
 
@@ -176,7 +176,7 @@ module FsSegmentModule =
                             Global.SegmentStatusChangedSubject.OnNext(SegmentStatusChange(x, state))
 
 
-                        } |> Async.AwaitTask |> Async.Start
+                        } (*|> Async.AwaitTask*) |> Async.Start
                 )
 
         //member val ProgressInfo:GraphProgressSupportUtil.ProgressInfo = null with get, set

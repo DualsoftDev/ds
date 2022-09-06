@@ -26,7 +26,7 @@ module internal SegmentRGFHModule =
 
     let verifyM msg x = if not x then failwithlog $"{msg}"
     let runChildren (children:Child seq, writer:ChangeWriter) =
-        task {
+        async {
             assert(children.Distinct().Count() = children.Count())
             for child in children do
                 assert(not child.IsFlipped && (not child.Status.HasValue || child.Status.Value.IsOneOf(Status4.Ready, Status4.Finished)))
@@ -37,7 +37,7 @@ module internal SegmentRGFHModule =
                         child.Status <- Status4.Going
                         Global.ChildStatusChangedSubject.OnNext(ChildStatusChange(child, Status4.Going))
 
-                    do! writer(BitChange(st, true, "Starting child", BeforeAction = before))
+                    do! writer(BitChange(st, true, "Starting child", BeforeAction = before)) |> Async.AwaitTask
         }
 
     /// Segment 별로 Going 중에 child 의 종료 모니터링.  segment 가 Going 이 아니게 되면, dispose
@@ -94,8 +94,8 @@ module internal SegmentRGFHModule =
         assert( [seg.PortS :> PortInfo; seg.PortR; seg.PortE].ForAll(fun t -> not t.Value ))
         stopMonitorHoming seg   // normal case
         stopMonitorGoing seg    // going 중에 start 끊긴 경우의 대비
-        task {
-            do! writer(BitChange(seg.Ready, true, $"processing ready for {seg.QualifiedName}"))
+        async {
+            do! writer(BitChange(seg.Ready, true, $"processing ready for {seg.QualifiedName}")) |> Async.AwaitTask
             assert (seg.TagPReset.Value = false)
             //do! writer(BitChange(seg.TagPReset, false, $"processing ready for {seg.QualifiedName}"))
         }
@@ -147,7 +147,7 @@ module internal SegmentRGFHModule =
                     } |> Async.AwaitTask |> Async.Start
                 )
 
-        task {
+        async {
             if isChildrenOrigin(seg) then
                 do! write(seg.Going, true, $"{seg.QualifiedName} Segment GOING 시작")
                 assert(seg.Going.Value)
@@ -172,7 +172,7 @@ module internal SegmentRGFHModule =
                             for ch in outofOriginChildren do
                                 ch.Status <- Status4.Ready
                                 ch.DbgIsOriginating <- false
-                            doGoing(seg, writer) |> ignore )
+                            doGoing(seg, writer) |> Async.Start )
 
                 seg.DbgIsOriginating <- true
                 for ch in outofOriginChildren do
@@ -189,7 +189,7 @@ module internal SegmentRGFHModule =
             noop()
 
         stopMonitorGoing seg
-        task {
+        async {
             assert (not seg.Going.Value)
             assert seg.TagPEnd.Value
             //do! write(seg.Going, false, $"{seg.QualifiedName} FINISH")
@@ -211,7 +211,7 @@ module internal SegmentRGFHModule =
         for ch in seg.Children do
             ch.IsFlipped <- false
 
-        task {
+        async {
             if isChildrenOrigin seg then
                 do! write(seg.PortE, false, $"{seg.QualifiedName} HOMING finished")
             else

@@ -246,7 +246,7 @@ type CpuExt =
 
     /// <summary> Bit 의 값 변경 처리를 CPU 에 위임.  즉시 수행되지 않고, CPU 의 Queue 에 추가 된 후, CPU thread 에서 수행된다.  </summary>
     [<Extension>]
-    static member Enqueue(cpu:Cpu, bitChange:BitChange) : WriteResult =
+    static member Enqueue(cpu:Cpu, bitChange:BitChange) (*: WriteResult*) =
         assert (bitChange.Bit.Cpu = cpu)
         //assert( bitChange.Bit.Value <> bitChange.NewValue)
         if bitChange.Bit.GetName() = "ResetPlan_L_F_Main" then
@@ -258,7 +258,7 @@ type CpuExt =
             failwith "ERROR: Expression can't be set!"
         | _ ->
             cpu.Queue.Enqueue(bitChange)
-            bitChange.TCS.Task
+            bitChange.TCS.Task :> Task
 
     [<Extension>] static member Enqueue(cpu:Cpu, bit:IBit, newValue:bool, cause:obj) =
                     BitChange(bit, newValue, cause) |> cpu.Enqueue

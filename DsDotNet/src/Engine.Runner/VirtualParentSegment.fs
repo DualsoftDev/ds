@@ -176,7 +176,8 @@ module VirtualParentSegmentModule =
                                 //failwithlog $"Unknown: [{n}]{state}: Target endport => {x.Target.Name}={on}"
                                 logWarn $"Unknown: [{n}]{state}: Target endport => {x.Target.Name}={on}"
                                 ()
-                        } |> Async.AwaitTask |> Async.Start
+                        } //|> Async.AwaitTask |> Async.Start
+                        |> Task.fireAndForget
 
                     if notiVpsPortChange then
                         if oldStatus = Some state then

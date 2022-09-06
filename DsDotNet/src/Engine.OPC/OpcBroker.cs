@@ -52,8 +52,10 @@ public class OpcBroker
     // 192.168.0.100
     static public string plcAdress { get; set; }
 
-    internal List<LsTag> LsBits = new();
-    internal Dictionary<string, int> IdxLsBits = new();
+    internal List<LsTag> WritableBits = new();
+    internal List<LsTag> ReadOnlyBits = new();
+    internal Dictionary<string, int> IdxWritableBits = new();
+    internal Dictionary<string, int> IdxReadOnlyBits = new();
 
     internal LsConnection Conn { get; }
     public OpcBroker()
@@ -78,6 +80,18 @@ public class OpcBroker
         _disposables.Add(subs);
     }
 
+    public void AddLsBits(
+        string tagName, string memAddr,
+        ref List<LsTag> LsBits,
+        ref Dictionary<string, int> IdxLsBits)
+    {
+        if (Conn == null) return;
+        Console.WriteLine(tagName + " : " + memAddr);
+        LsBits.Add((LsTag)Conn.CreateTag(memAddr));
+        IdxLsBits[tagName] = IdxLsBits.Count;
+        //LsBits.Last().Value = false;
+    }
+
     public void AddTags(IEnumerable<Tag> tags)
     {
         // for LS PLC
@@ -87,7 +101,10 @@ public class OpcBroker
                 var at = (TagA)t;
                 tagToAddr[at.Name] = at.Address;
                 addrToTag[at.Address] = at.Name;
-                AddLsBits(at.Name, at.Address);
+                if (at.Address[1] == 'I')
+                    AddLsBits(at.Name, at.Address, ref ReadOnlyBits, ref IdxReadOnlyBits);
+                else
+                    AddLsBits(at.Name, at.Address, ref WritableBits, ref IdxWritableBits);
             }
 
         foreach (var opcTag in tags.Select(t => new OpcTag(t)))
@@ -112,19 +129,10 @@ public class OpcBroker
                 _tagDic.Add(opcTag.Name, opcTag);
     }
 
-    public void AddLsBits(string tagName, string memAddr)
-    {
-        if (Conn == null) return;
-        Console.WriteLine(tagName  + " : " + memAddr);
-        LsBits.Add((LsTag)Conn.CreateTag(memAddr));
-        IdxLsBits[tagName] = IdxLsBits.Count;
-        LsBits.Last().Value = false;
-    }
-
     public void UpdateLsBits(string tagName, bool value)
     {
-        var idx = IdxLsBits[tagName];
-        var tag = LsBits[idx];
+        var idx = IdxWritableBits[tagName];
+        var tag = WritableBits[idx];
         tag.Value = value;
         Conn.WriteRandomTags(new[] {tag} );
     }
@@ -199,7 +207,7 @@ public class OpcBroker
         Conn.PerRequestDelay = 20;
         if (Conn.Connect())
         {
-            Conn.AddMonitoringTags(LsBits);
+            Conn.AddMonitoringTags(ReadOnlyBits);
             Conn.Subject
                 .OfType<TagValueChangedEvent>()
                 .Subscribe(evt =>

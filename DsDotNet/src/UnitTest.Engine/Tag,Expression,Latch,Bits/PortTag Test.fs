@@ -37,7 +37,7 @@ module PortInfoTest =
 
 
                 let wait() = wait(cpu)
-                let enqueue(bit, value) = cpu.Enqueue(bit, value)
+                let enqueue(bit, value) = cpu.EnqueueAsync(bit, value)
 
                 cpu.BuildBitDependencies()
                 let runSubscription = cpu.Run()
@@ -77,7 +77,7 @@ module PortInfoTest =
                 let pte = PortInfoEnd.Create(cpu, null, "_PortInfoEnd_test2", actual)
 
                 let wait() = wait(cpu)
-                let enqueue(bit, value) = cpu.Enqueue(bit, value)
+                let enqueue(bit, value) = cpu.EnqueueAsync(bit, value)
 
                 cpu.BuildBitDependencies()
                 let runSubscription = cpu.Run()
@@ -115,7 +115,7 @@ module PortInfoTest =
                 let pte = PortInfoEnd.Create(cpu, null, "_PortInfoEnd_test3", actual)
 
                 let wait() = wait(cpu)
-                let enqueue(bit, value) = cpu.Enqueue(bit, value)
+                let enqueue(bit, value) = cpu.EnqueueAsync(bit, value)
 
                 cpu.BuildBitDependencies()
                 let runSubscription = cpu.Run()

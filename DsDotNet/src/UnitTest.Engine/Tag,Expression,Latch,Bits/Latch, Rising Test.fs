@@ -36,7 +36,7 @@ module LatchTest =
                 let latch = new Latch(cpu, "Latch1", tSet, tReset)
 
                 let wait() = wait(cpu)
-                let enqueue(bit, value) = cpu.Enqueue(bit, value)
+                let enqueue(bit, value) = cpu.EnqueueAsync(bit, value)
                 cpu.BuildBitDependencies()
                 let runSubscription = cpu.Run()
 
@@ -77,7 +77,7 @@ module LatchTest =
                 let latch = Latch(cpu, "rlB", rlBSet, rlBReset)
 
                 let wait() = wait(cpu)
-                let enqueue(bit, value) = cpu.Enqueue(bit, value)
+                let enqueue(bit, value) = cpu.EnqueueAsync(bit, value)
                 cpu.BuildBitDependencies()
                 let runSubscription = cpu.Run()
 

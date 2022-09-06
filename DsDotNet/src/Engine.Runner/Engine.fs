@@ -24,6 +24,7 @@ module EngineModule =
         doGoing  <- procGoing 
         doFinish <- procFinish
         doHoming <- procHoming
+        doEnqueueAsync <- fun (cpu:Cpu) -> cpu.EnqueueAsync
 
 
 
@@ -44,7 +45,7 @@ module EngineModule =
                     let tag = cpu.TagsMap[tagName]
                     if tag.Value <> value then
                         logDebug $"OPC Tag 변경 [{tagName}={value}] : cpu={cpu}"
-                        cpu.Enqueue(tag, value, $"OPC Tag 변경 [{tagName}={value}]")      //! setter 에서 BitChangedSubject.OnNext --> onBitChanged 가 호출된다.
+                        cpu.EnqueueAsync(tag, value, $"OPC Tag 변경 [{tagName}={value}]")      //! setter 에서 BitChangedSubject.OnNext --> onBitChanged 가 호출된다.
                         |> ignore
 
             /// OPC Server 에서 Cpu 가 가지고 있는 tag 값들을 읽어 들임
@@ -68,9 +69,9 @@ module EngineModule =
 
             virtualParentSegments
             |> Seq.iter(fun vps ->
-                let writer:ChangeWriter = vps.Cpu.Enqueue
-                vps.Target.WireEvent(writer) |> ignore
-                vps.WireEvent(writer) |> ignore
+                assert (vps.Cpu = vps.Target.Cpu)
+                vps.Target.WireEvent() |> ignore
+                vps.WireEvent() |> ignore
                 )
 
             assert( virtualParentSegments |> Seq.forall(fun vp -> vp.Status = Status4.Ready));
@@ -108,7 +109,7 @@ module EngineModule =
             let _autoStart =
                 for cpu in cpus do
                 for rf in cpu.RootFlows do
-                    cpu.Enqueue(rf.Auto, true, "Auto Flow start")
+                    cpu.EnqueueAsync(rf.Auto, true, "Auto Flow start")
 
             new CompositeDisposable(subscriptions)
 

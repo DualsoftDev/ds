@@ -7,8 +7,6 @@ open System.Reactive.Linq
 open Engine.Core
 open Engine.Common.FS
 open Engine.Common
-open Engine.Core
-open System.Threading.Tasks
 open System.Threading
 
 
@@ -19,7 +17,7 @@ module FsSegmentModule =
     type FsSegmentBase(cpu, segmentName) =
         inherit SegmentBase(cpu, segmentName)
 
-        abstract member WireEvent:ChangeWriter->IDisposable
+        abstract member WireEvent:unit->IDisposable
 
         //member x.Status = //with get() =
         //    match x.PortS.Value, x.PortR.Value, x.PortE.Value with
@@ -74,12 +72,12 @@ module FsSegmentModule =
             x.PrintPortPlanTags();
 
 
-        default x.WireEvent(writer:ChangeWriter) =
+        member x.AsyncWrite:BitWriter = getBitWriter x.Cpu
+        default x.WireEvent() =
             let mutable oldStatus:Status4 option = None
             let mutable cts = new CancellationTokenSource()
             let n = x.QualifiedName
-            let write(bit, value, cause) =
-                writer(BitChange(bit, value, cause)) |> Async.AwaitTask
+            let write = x.AsyncWrite
 
             let mutable isInitialReady = true
 
@@ -150,25 +148,17 @@ module FsSegmentModule =
 
                             Global.SegmentStatusChangingSubject.OnNext(SegmentStatusChange(x, state))
 
-                            // { debug
-                            if n = "A_F_Vp" && state = Status4.Homing then
-                                noop()
-                            match state with
-                            | Status4.Ready ->  assert( [x.TagPStart; x.TagPEnd].ForAll(fun t -> not t.Value))
-                            | Status4.Going -> ()
-                            | Status4.Finished -> ()
-                            | Status4.Homing -> ()
-                            | _ -> ()
-                            // } debug
+                            if state = Status4.Ready then
+                                assert( [x.TagPStart; x.TagPEnd].ForAll(fun t -> not t.Value))
 
                             oldStatus <- Some state
 
                             let task =
                                 match state with
-                                | Status4.Ready -> doReady(x, writer)
-                                | Status4.Going -> doGoing(x, writer)
-                                | Status4.Finished -> doFinish(x, writer)
-                                | Status4.Homing -> doHoming(x, writer)
+                                | Status4.Ready -> doReady(x)
+                                | Status4.Going -> doGoing(x)
+                                | Status4.Finished -> doFinish(x)
+                                | Status4.Homing -> doHoming(x)
                                 | _ ->
                                     failwithlog "Unexpected"
                             do! task

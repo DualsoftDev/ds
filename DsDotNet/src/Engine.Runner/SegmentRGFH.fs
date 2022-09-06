@@ -25,7 +25,7 @@ module internal SegmentRGFHModule =
         let isChildrenOrigin = getOutofOriginChildren >> Seq.isEmpty
 
     let verifyM msg x = if not x then failwithlog $"{msg}"
-    let runChildren (children:Child seq, writer:ChangeWriter) =
+    let runChildren (children:Child seq, writer:BitWriter) =
         async {
             assert(children.Distinct().Count() = children.Count())
             for child in children do
@@ -33,11 +33,9 @@ module internal SegmentRGFHModule =
                 logInfo $"Progress: Child {child.QualifiedName} starting.."
 
                 for st in child.TagsStart do
-                    let before = fun () ->
-                        child.Status <- Status4.Going
-                        Global.ChildStatusChangedSubject.OnNext(ChildStatusChange(child, Status4.Going))
-
-                    do! writer(BitChange(st, true, "Starting child", BeforeAction = before)) |> Async.AwaitTask
+                    child.Status <- Status4.Going
+                    Global.ChildStatusChangedSubject.OnNext(ChildStatusChange(child, Status4.Going))
+                    do! writer(st, true, "Starting child")
         }
 
     /// Segment 별로 Going 중에 child 의 종료 모니터링.  segment 가 Going 이 아니게 되면, dispose
@@ -88,14 +86,15 @@ module internal SegmentRGFHModule =
         }
 
 
-    let procReady(segment:SegmentBase, writer:ChangeWriter) : WriteResult =
+    let procReady(segment:SegmentBase) : WriteResult =
         let seg = segment :?> Segment
+        let write = seg.AsyncWrite
         assert( [seg.TagPStart; seg.TagPReset; seg.TagPEnd].ForAll(fun t -> not t.Value ))     // A_F_Pp.TagEnd 가 true 되는 상태???
         assert( [seg.PortS :> PortInfo; seg.PortR; seg.PortE].ForAll(fun t -> not t.Value ))
         stopMonitorHoming seg   // normal case
         stopMonitorGoing seg    // going 중에 start 끊긴 경우의 대비
         async {
-            do! writer(BitChange(seg.Ready, true, $"processing ready for {seg.QualifiedName}")) |> Async.AwaitTask
+            do! write(seg.Ready, true, $"processing ready for {seg.QualifiedName}")
             assert (seg.TagPReset.Value = false)
             //do! writer(BitChange(seg.TagPReset, false, $"processing ready for {seg.QualifiedName}"))
         }
@@ -104,9 +103,10 @@ module internal SegmentRGFHModule =
     ///     - child 가 하나라도 있으면, child 의 종료를 모니터링하기 위한 subscription 후, 최초 child group(init) 만 수행
     ///         * 이후, child 종료를 감지하면, 다음 실행할 child 계속 실행하고, 없으면 해당 segment 종료
     ///     - 없으면 바로 종료
-    let procGoing(seg:SegmentBase, writer:ChangeWriter) : WriteResult =
+    let procGoing(seg:SegmentBase) : WriteResult =
+        let seg = seg :?> Segment
         assert( not <| homingSubscriptions.ContainsKey(seg))
-        let write:BitWriter = getBitWriter writer
+        let write = seg.AsyncWrite
 
         /// Children 의 going 상태를 지켜 보면서 다음 child 를 순차적으로 실행
         let createChildrenGoingMonitor() =
@@ -141,7 +141,7 @@ module internal SegmentRGFHModule =
                                             .Distinct()
                                             .ToArray()
 
-                                    do! runChildren (targets, writer)
+                                    do! runChildren (targets, write)
                         with exn ->
                             failwithlog $"{exn}"
                     } |> Async.AwaitTask |> Async.Start
@@ -156,8 +156,7 @@ module internal SegmentRGFHModule =
                     let subs = createChildrenGoingMonitor()
                     goingSubscriptions.TryAdd(seg, subs) |> verifyM "Failed to add Going subscription"
 
-                    let seg = seg :?> Segment
-                    do! runChildren (seg.Inits, writer)
+                    do! runChildren (seg.Inits, write)
 
                 else // no children
                     do! write(seg.PortE, true, $"{seg.QualifiedName} GOING 끝")
@@ -172,18 +171,18 @@ module internal SegmentRGFHModule =
                             for ch in outofOriginChildren do
                                 ch.Status <- Status4.Ready
                                 ch.DbgIsOriginating <- false
-                            doGoing(seg, writer) |> Async.Start )
+                            doGoing seg |> Async.Start )
 
                 seg.DbgIsOriginating <- true
                 for ch in outofOriginChildren do
                     ch.DbgIsOriginating <- true
-                do! doHoming(seg, writer)
+                do! doHoming seg
                 originatingSubscriptions.TryAdd(seg, subs) |> verifyM "Failed to add Originating subscription"
         }
 
-    let procFinish(segment:SegmentBase, writer:ChangeWriter) : WriteResult =
+    let procFinish(segment:SegmentBase) : WriteResult =
         let seg = segment :?> Segment
-        let write = getBitWriter writer
+        let write = seg.AsyncWrite
 
         if seg.QualifiedName = "L_F_Main" then
             noop()
@@ -197,13 +196,13 @@ module internal SegmentRGFHModule =
             do! write(seg.TagPStart, false, $"Finishing {seg.QualifiedName}")
         }
 
-    let procHoming(segment:SegmentBase, writer:ChangeWriter) : WriteResult =
+    let procHoming(segment:SegmentBase) : WriteResult =
         let seg = segment :?> Segment
 
         if seg.QualifiedName = "L_F_Main" then
             noop()
 
-        let write:BitWriter = getBitWriter writer
+        let write = seg.AsyncWrite
 
         stopMonitorGoing seg
 
@@ -234,5 +233,5 @@ module internal SegmentRGFHModule =
                         )
                 homingSubscriptions.TryAdd(seg, subs) |> verifyM "Failed to add Homing subscription"
 
-                do! runChildren(originTargets, writer)
+                do! runChildren(originTargets, write)
         }

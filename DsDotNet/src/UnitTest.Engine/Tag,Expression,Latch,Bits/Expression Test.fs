@@ -30,7 +30,7 @@ module ExpressionTest =
 
                 let cpu = new Cpu("dummy", new Model())
                 let wait() = wait(cpu)
-                let enqueue(bit, value) = cpu.Enqueue(bit, value)
+                let enqueue(bit, value) = cpu.EnqueueAsync(bit, value)
 
 
                 let a1 = new TagE(cpu, null, "a1_test1")
@@ -73,7 +73,7 @@ module ExpressionTest =
                 let xOr = new Or(cpu, "Or1_test2", a1, a2, a3)
 
                 let wait() = wait(cpu)
-                let enqueue(bit, value) = cpu.Enqueue(bit, value)
+                let enqueue(bit, value) = cpu.EnqueueAsync(bit, value)
                 cpu.BuildBitDependencies()
                 let runSubscription = cpu.Run()
 
@@ -109,7 +109,7 @@ module ExpressionTest =
             let xNot = new Not(cpu, "Not1_test2", a1)
 
             let wait() = wait(cpu)
-            let enqueue(bit, value) = cpu.Enqueue(bit, value)
+            let enqueue(bit, value) = cpu.EnqueueAsync(bit, value)
             cpu.BuildBitDependencies()
             let runSubscription = cpu.Run()
 
@@ -145,7 +145,7 @@ module ExpressionTest =
 
 
             let wait() = wait(cpu)
-            let enqueue(bit, value) = cpu.Enqueue(bit, value)
+            let enqueue(bit, value) = cpu.EnqueueAsync(bit, value)
             cpu.BuildBitDependencies()
             let runSubscription = cpu.Run()
 
@@ -188,7 +188,7 @@ module ExpressionTest =
             let x = new Or(cpu, "a||latch", a, latch)
 
             let wait() = wait(cpu)
-            let enqueue(bit, value) = cpu.Enqueue(bit, value)
+            let enqueue(bit, value) = cpu.EnqueueAsync(bit, value)
             cpu.BuildBitDependencies()
             let runSubscription = cpu.Run()
 

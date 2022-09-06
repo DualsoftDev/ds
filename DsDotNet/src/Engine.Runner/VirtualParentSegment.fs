@@ -126,14 +126,6 @@ module VirtualParentSegmentModule =
                     let n = x.QualifiedName
                     let cause = $"bit change {bit.GetName()}={on}"
 
-                    if notiVpsPortChange || notiTargetEndPortChange then
-                        noop()
-                        if x.Name = "VPS_L_F_Main" then
-                            if notiVpsPortChange && bit = x.PortE then
-                                noop()
-
-
-
                     if notiTargetEndPortChange then
                         let cause = $"{x.Target.Name} End Port={x.Target.PortE.Value}"
 
@@ -184,9 +176,7 @@ module VirtualParentSegmentModule =
                                 ()
                             | 'e', Status4.Finished, _ ->
                                 assert(on)
-                                noop()
                             | 'e', Status4.Going, false ->  // going 중에 endport 가 꺼진다???
-                                //assert(false)
                                 noop()
                             | 's', Status4.Finished, false ->
                                 ()
@@ -196,8 +186,6 @@ module VirtualParentSegmentModule =
                                 assert not triggerTargetStart   // self start 인 경우만 허용
                             | _ ->
                                 logWarn $"UNKNOWN: {n} status {state} duplicated on port {bit.GetName()}={on} by {cause}"
-                                noop()
-
 
                             noop()
                         else
@@ -233,16 +221,11 @@ module VirtualParentSegmentModule =
                                             subs <-
                                                 Global.SegmentStatusChangingSubject.Where(fun ssc -> ssc.Segment = x.Target && ssc.Segment.Status = Status4.Ready)
                                                     .Subscribe(fun ssc ->
-                                                        task {
-                                                            do! write(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
-                                                        } |> Async.AwaitTask |> Async.RunSynchronously
-                                                        subs.Dispose()
-                                                    )
+                                                        write(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
+                                                        |> Async.RunSynchronously
+                                                        subs.Dispose() )
 
                                 | Status4.Finished ->
-                                    if x.Name = "VPS_L_F_Main" then
-                                        noop()
-
                                     do! write(targetStartTag, false, $"{n} FINISH 로 인한 {x.Target.Name} start {targetStartTag.GetName()} 끄기")
                                     do! write(x.Going, false, $"{n} FINISH")
 

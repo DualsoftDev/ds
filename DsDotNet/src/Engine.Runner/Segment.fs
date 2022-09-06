@@ -89,12 +89,8 @@ module FsSegmentModule =
                     let value = bc.NewValue
                     let cause = $"bit change {bit.GetName()}={value}"
 
-                    if x.QualifiedName = "L_F_Main" then
-                        noop()
-
                     if oldStatus = Some state then
                         logDebug $"{n} status {state} duplicated on port {bit.GetName()}={value} by {cause}"
-                        //assert(not bit.Value) // todo
 
                         let bitMatch =
                             if bit = x.PortS then 's'
@@ -166,7 +162,7 @@ module FsSegmentModule =
                             Global.SegmentStatusChangedSubject.OnNext(SegmentStatusChange(x, state))
 
 
-                        } (*|> Async.AwaitTask*) |> Async.Start
+                        } |> Async.Start
                 )
 
         //member val ProgressInfo:GraphProgressSupportUtil.ProgressInfo = null with get, set

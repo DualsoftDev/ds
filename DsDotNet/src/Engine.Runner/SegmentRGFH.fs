@@ -26,17 +26,17 @@ module internal SegmentRGFHModule =
 
     let verifyM msg x = if not x then failwithlog $"{msg}"
     let runChildren (children:Child seq, writer:BitWriter) =
-        async {
-            assert(children.Distinct().Count() = children.Count())
-            for child in children do
+        assert(children.Distinct().Count() = children.Count())
+
+        [   for child in children do
                 assert(not child.IsFlipped && (not child.Status.HasValue || child.Status.Value.IsOneOf(Status4.Ready, Status4.Finished)))
                 logInfo $"Progress: Child {child.QualifiedName} starting.."
 
                 for st in child.TagsStart do
                     child.Status <- Status4.Going
                     Global.ChildStatusChangedSubject.OnNext(ChildStatusChange(child, Status4.Going))
-                    do! writer(st, true, "Starting child")
-        }
+                    yield writer(st, true, "Starting child")
+        ] |> Async.Parallel |> Async.Ignore
 
     /// Segment 별로 Going 중에 child 의 종료 모니터링.  segment 가 Going 이 아니게 되면, dispose
     let goingSubscriptions = ConcurrentDictionary<SegmentBase, IDisposable>()
@@ -184,24 +184,17 @@ module internal SegmentRGFHModule =
         let seg = segment :?> Segment
         let write = seg.AsyncWrite
 
-        if seg.QualifiedName = "L_F_Main" then
-            noop()
-
         stopMonitorGoing seg
         async {
             assert (not seg.Going.Value)
             assert seg.TagPEnd.Value
-            //do! write(seg.Going, false, $"{seg.QualifiedName} FINISH")
-            //do! write(seg.TagPEnd, true, $"Finishing {seg.QualifiedName}")
+            // - seg.Going, false, $"{seg.QualifiedName} FINISH")
+            // - seg.TagPEnd, true, $"Finishing {seg.QualifiedName}")
             do! write(seg.TagPStart, false, $"Finishing {seg.QualifiedName}")
         }
 
     let procHoming(segment:SegmentBase) : WriteResult =
         let seg = segment :?> Segment
-
-        if seg.QualifiedName = "L_F_Main" then
-            noop()
-
         let write = seg.AsyncWrite
 
         stopMonitorGoing seg

@@ -67,8 +67,8 @@ module internal SegmentRGFHModule =
 
 
     /// tag 값의 변경으로 인해, going 중 finish 상태가 되는 child 가 존재하면 그것의 start 출력을 끊는다.
-    let turnOffStartForFinishedChildren(write:BitWriter, tag:Tag, monitoringChildren:Child seq) : Task<Child> =
-        task {
+    let turnOffStartForFinishedChildren(write:BitWriter, tag:Tag, monitoringChildren:Child seq) : Async<Child> =
+        async {
             let finishedChildren =
                 monitoringChildren
                     .Where(fun ch ->
@@ -115,7 +115,7 @@ module internal SegmentRGFHModule =
                 .Where(fun t -> t.Value)
                 .Where(childRxTags.Contains)
                 .Subscribe(fun tag ->
-                    task {
+                    async {
                         try
                             let! finishedChild = turnOffStartForFinishedChildren(write, tag, seg.Children)
                             if finishedChild <> null then
@@ -144,7 +144,7 @@ module internal SegmentRGFHModule =
                                     do! runChildren (targets, write)
                         with exn ->
                             failwithlog $"{exn}"
-                    } |> Async.AwaitTask |> Async.Start
+                    } |> Async.Start
                 )
 
         async {
@@ -222,14 +222,14 @@ module internal SegmentRGFHModule =
                         .Where(fun t -> t.Value)    // ON child
                         .Where(childRxTags.Contains)
                         .Subscribe(fun tag ->
-                            task {
+                            async {
                                 let! finishedChild = turnOffStartForFinishedChildren(write, tag, originTargets)
                                 // originTargets 모두 원위치인지 확인
                                 let isOrigin = originTargets.ForAll(fun ch -> ch.TagsEnd.ForAll(fun t -> t.Value))
                                 if isOrigin then
                                     stopMonitorHoming seg
                                     do! write(seg.PortE, false, $"{seg.QualifiedName} HOMING finished")
-                            } |> Async.AwaitTask |> Async.Start
+                            } |> Async.Start
                         )
                 homingSubscriptions.TryAdd(seg, subs) |> verifyM "Failed to add Homing subscription"
 

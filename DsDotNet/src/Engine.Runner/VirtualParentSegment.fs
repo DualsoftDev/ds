@@ -113,7 +113,7 @@ module VirtualParentSegmentModule =
             vps
 
         override x.WireEvent() =
-            let write:BitWriter = getBitWriter x.Cpu
+            let write = x.AsyncWrite
             let mutable isInitialReady = true
             Global.BitChangedSubject
                 .Subscribe(fun bc ->
@@ -137,29 +137,20 @@ module VirtualParentSegmentModule =
                     if notiTargetEndPortChange then
                         let cause = $"{x.Target.Name} End Port={x.Target.PortE.Value}"
 
-                        task {
+                        async {
                             match state, on with
                             | Status4.Going, true ->
-                                //write(targetStartTag, false, $"{n} going 끝내기 by {cause}")
-                                //write(x.Going, false, $"{n} going 끝내기 by {cause}")
+                                // - targetStartTag, false, $"{n} going 끝내기 by {cause}")
+                                // - x.Going, false, $"{n} going 끝내기 by {cause}")
                                 do! write(x.PortE, true, $"{n} FINISH 끝내기 by {cause}")
 
                                 // 가상부모 end 공지.  인위적...
                                 Global.SegmentStatusChangingSubject.OnNext(SegmentStatusChange(x, Status4.Finished))
 
-
                             | Status4.Homing, false ->
-                                //assert(not targetStartTag.Value)    // homing 중에 end port 가 꺼졌다고, 반드시 start tag 가 꺼져 있어야 한다고 볼 수는 없다.  start tag ON 이면 바로 재시작
-                                //assert(x.Going.Value = false) // 아직 write 안되었을 수도 있음
-                                //[|
-                                //    BitChange(targetResetTag, false, $"{x.Target.Name} homing 완료로 reset 끄기")
-                                //    BitChange(x.Ready, true, $"{x.Target.Name} homing 완료")
-                                //    BitChange(x.PortE, false, null)
-                                //|] |> writer  // <-- fail
                                 do! write(targetResetTag, false, $"{x.Target.Name} homing 완료로 reset 끄기")
                                 do! write(x.Ready, true, $"{x.Target.Name} homing 완료")
                                 do! write(x.PortE, false, null)
-
 
                             | Status4.Ready, true ->
                                 logInfo $"외부에서 내부 target {x.Target.Name} 실행 감지"
@@ -173,11 +164,9 @@ module VirtualParentSegmentModule =
                                 logInfo $"Children originated before going {x.Target.Name}"
 
                             | _ ->
-                                //failwithlog $"Unknown: [{n}]{state}: Target endport => {x.Target.Name}={on}"
                                 logWarn $"Unknown: [{n}]{state}: Target endport => {x.Target.Name}={on}"
                                 ()
-                        } //|> Async.AwaitTask |> Async.Start
-                        |> Task.fireAndForget
+                        } |> Async.Start
 
                     if notiVpsPortChange then
                         if oldStatus = Some state then
@@ -207,14 +196,12 @@ module VirtualParentSegmentModule =
                                 assert not triggerTargetStart   // self start 인 경우만 허용
                             | _ ->
                                 logWarn $"UNKNOWN: {n} status {state} duplicated on port {bit.GetName()}={on} by {cause}"
-                                //assert(not on)    // todo
-                                //assert(false)
                                 noop()
 
 
                             noop()
                         else
-                            task {
+                            async {
                                 oldStatus <- Some state
                                 logInfo $"[{n}] VPS Segment status : {state} by {bit.Name}={on}"
 
@@ -228,14 +215,7 @@ module VirtualParentSegmentModule =
 
                                 Global.SegmentStatusChangingSubject.OnNext(SegmentStatusChange(x, state))
 
-
                                 let childStatus = x.Target.Status
-
-                                //match state with
-                                //| Status4.Going
-                                //| Status4.Homing -> oldStatus <- Some state
-                                //| _ -> ()
-
 
                                 match state with
                                 | Status4.Ready    ->
@@ -276,19 +256,12 @@ module VirtualParentSegmentModule =
                                             failwithlog $"Something bad happend?  trying to reset child while {x.Target.Name}={childStatus}"
 
                                         do! write(targetResetTag, true, $"{n} HOMING 으로 인한 {x.Target.Name} reset 켜기")
-
-
                                 | _ ->
                                     failwithlog "Unexpected"
 
-                                //match state with
-                                //| Status4.Ready
-                                //| Status4.Finished -> oldStatus <- Some state
-                                //| _ -> ()
-
                                 Global.SegmentStatusChangedSubject.OnNext(SegmentStatusChange(x, state))
 
-                            } |> Async.AwaitTask |> Async.Start
+                            } |> Async.Start
 
                         ()
                 )

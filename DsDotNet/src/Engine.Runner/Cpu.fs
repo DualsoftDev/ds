@@ -141,7 +141,8 @@ module CpuModule =
                     waitHandle.WaitOne(TimeSpan.FromMilliseconds(50)) |> ignore
                     while (q.Count > 0 && cpu.Running) do
                         cpu.ProcessingQueue <- true
-                        assert(q.Count <= 2)
+
+                        assert(q.Count <= 5)    // 대충... 2개 이하
                         match q.TryDequeue() with
                         | true, bitChange ->
                             let bit = bitChange.Bit

@@ -38,6 +38,23 @@ module QueueTestModule =
 
         [<Fact>]
         member __.``Async computation expression extended`` () =
+            task {
+                do! Async.Sleep(1000)
+                logDebug "Slept on task"
+                do! Async.Sleep(1000)
+                logDebug "Slept on task"
+            }
+
+            // Exception will be catched
+            //async {
+            //    failwith "ERROR"
+            //} |> Async.Start
+
+            // Exception won't be catched
+            //task {
+            //    failwith "ERROR"
+            //}
+
             async {
                 let! x = Task.FromResult(30)
                 x === 30
@@ -45,7 +62,8 @@ module QueueTestModule =
                 logDebug "Slept"
                 do! Task.Delay(1000)
                 logDebug "Slept"
-            }
+            } |> Async.RunSynchronously
+
 
         [<Fact>]
         member __.``QueueTest`` () =

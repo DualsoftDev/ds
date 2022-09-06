@@ -18,6 +18,7 @@ module FsSegmentModule =
         inherit SegmentBase(cpu, segmentName)
 
         abstract member WireEvent:unit->IDisposable
+        member x.AsyncWrite:BitWriter = getBitWriter x.Cpu
 
         //member x.Status = //with get() =
         //    match x.PortS.Value, x.PortR.Value, x.PortE.Value with
@@ -72,7 +73,6 @@ module FsSegmentModule =
             x.PrintPortPlanTags();
 
 
-        member x.AsyncWrite:BitWriter = getBitWriter x.Cpu
         default x.WireEvent() =
             let mutable oldStatus:Status4 option = None
             let mutable cts = new CancellationTokenSource()

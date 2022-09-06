@@ -44,12 +44,15 @@ public static class Global
     public static IObservable<long> TickSeconds => Observable.Interval(TimeSpan.FromSeconds(1));
 
     /// <summary>Engine running mode: if false, just simulation mode</summary>
-    public static bool IsControlMode { get; internal set; } = true;
+    public static bool IsControlMode { get; internal set; }
 #if DEBUG
     public static bool IsDebugMode => true;
 #else
     public static bool IsDebugMode => false;
 #endif
+
+    public static Subject<(string, bool)> DebugNotifyingSubject { get; } = new();
+    public static bool IsDebugStopAndGoStressMode { get; }
     internal static bool IsInUnitTest { get; }
     internal static bool IsSingleThreadMode { get; set; }
 

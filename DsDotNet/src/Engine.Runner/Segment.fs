@@ -7,8 +7,7 @@ open System.Reactive.Linq
 open Engine.Core
 open Engine.Common.FS
 open Engine.Common
-open Engine.Core
-open System.Threading.Tasks
+open System.Threading
 
 
 [<AutoOpen>]
@@ -18,7 +17,8 @@ module FsSegmentModule =
     type FsSegmentBase(cpu, segmentName) =
         inherit SegmentBase(cpu, segmentName)
 
-        abstract member WireEvent:ChangeWriter->IDisposable
+        abstract member WireEvent:unit->IDisposable
+        member x.AsyncWrite:BitWriter = getBitWriter x.Cpu
 
         //member x.Status = //with get() =
         //    match x.PortS.Value, x.PortR.Value, x.PortE.Value with
@@ -73,11 +73,11 @@ module FsSegmentModule =
             x.PrintPortPlanTags();
 
 
-        default x.WireEvent(writer:ChangeWriter) =
+        default x.WireEvent() =
             let mutable oldStatus:Status4 option = None
+            let mutable cts = new CancellationTokenSource()
             let n = x.QualifiedName
-            let write(bit, value, cause) =
-                writer(BitChange(bit, value, cause))
+            let write = x.AsyncWrite
 
             let mutable isInitialReady = true
 
@@ -89,12 +89,8 @@ module FsSegmentModule =
                     let value = bc.NewValue
                     let cause = $"bit change {bit.GetName()}={value}"
 
-                    if x.QualifiedName = "L_F_Main" then
-                        noop()
-
                     if oldStatus = Some state then
                         logDebug $"{n} status {state} duplicated on port {bit.GetName()}={value} by {cause}"
-                        //assert(not bit.Value) // todo
 
                         let bitMatch =
                             if bit = x.PortS then 's'
@@ -134,7 +130,10 @@ module FsSegmentModule =
                             assert(false)
                             ()
                     else
-                        task {
+                        async {
+                            cts.Cancel()
+                            cts <- new CancellationTokenSource()
+
                             logInfo $"[{n}] Segment status : {state} {cause}"
                             if x.Going.Value && state <> Status4.Going then
                                 do! write(x.Going, false, $"{n} going off by status {state}")
@@ -145,32 +144,25 @@ module FsSegmentModule =
 
                             Global.SegmentStatusChangingSubject.OnNext(SegmentStatusChange(x, state))
 
-                            // { debug
-                            if n = "A_F_Vp" && state = Status4.Homing then
-                                noop()
-                            match state with
-                            | Status4.Ready ->  assert( [x.TagPStart; x.TagPEnd].ForAll(fun t -> not t.Value))
-                            | Status4.Going -> ()
-                            | Status4.Finished -> ()
-                            | Status4.Homing -> ()
-                            | _ -> ()
-                            // } debug
+                            if state = Status4.Ready then
+                                assert( [x.TagPStart; x.TagPEnd].ForAll(fun t -> not t.Value))
 
                             oldStatus <- Some state
 
-                            do!
+                            let task =
                                 match state with
-                                | Status4.Ready -> doReady(x, writer)
-                                | Status4.Going -> doGoing(x, writer)
-                                | Status4.Finished -> doFinish(x, writer)
-                                | Status4.Homing -> doHoming(x, writer)
+                                | Status4.Ready -> doReady(x)
+                                | Status4.Going -> doGoing(x)
+                                | Status4.Finished -> doFinish(x)
+                                | Status4.Homing -> doHoming(x)
                                 | _ ->
                                     failwithlog "Unexpected"
+                            do! task
 
                             Global.SegmentStatusChangedSubject.OnNext(SegmentStatusChange(x, state))
 
 
-                        } |> Async.AwaitTask |> Async.Start
+                        } |> Async.Start
                 )
 
         //member val ProgressInfo:GraphProgressSupportUtil.ProgressInfo = null with get, set

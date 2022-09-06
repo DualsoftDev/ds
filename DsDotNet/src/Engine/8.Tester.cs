@@ -1,5 +1,7 @@
 using System.Reactive.Linq;
 using System.Threading;
+using System.Threading.Tasks;
+
 using Engine.Graph;
 
 namespace Engine;
@@ -294,16 +296,19 @@ public class Tester
 
         oneCycleHistory.Subscribe(o =>
         {
+            if (Global.IsDebugStopAndGoStressMode)
+                return;
+
             Assert(o.Length == 8);
 
             Assert(o[0].TagName == "StartActual_A_F_Vp" && o[0].Value == true);   // a+
-            Assert(o[1].TagName == "EndActual_A_F_Sm"   && o[1].Value == false);  // !A-
-            Assert(o[2].TagName == "EndActual_A_F_Sp"   && o[2].Value == true);   // A+
+            Assert(o[1].TagName == "EndActual_A_F_Sm" && o[1].Value == false);  // !A-
+            Assert(o[2].TagName == "EndActual_A_F_Sp" && o[2].Value == true);   // A+
             Assert(o[3].TagName == "StartActual_A_F_Vp" && o[3].Value == false);  // !a+
 
             Assert(o[4].TagName == "StartActual_A_F_Vm" && o[4].Value == true);   // a-
-            Assert(o[5].TagName == "EndActual_A_F_Sp"   && o[5].Value == false);  // !A+
-            Assert(o[6].TagName == "EndActual_A_F_Sm"   && o[6].Value == true);   // A-
+            Assert(o[5].TagName == "EndActual_A_F_Sp" && o[5].Value == false);  // !A+
+            Assert(o[6].TagName == "EndActual_A_F_Sm" && o[6].Value == true);   // A-
             Assert(o[7].TagName == "StartActual_A_F_Vm" && o[7].Value == false);   // !a-
         });
 
@@ -334,9 +339,11 @@ public class Tester
             }
 
 
+            bool onceAp = true;
+            bool onceMain = true;
             // simulating physics
             Global.BitChangedSubject
-                .Subscribe(bc =>
+                .Subscribe(async bc =>
                 {
                     var n = bc.Bit.GetName();
                     var val = bc.Bit.Value;
@@ -356,7 +363,40 @@ public class Tester
                         //else if (n == "EndPlan_A_F_Sm")
                         //    opc.Write("EndActual_A_F_Sm", val);
                     }
+
+                    //if (Global.IsDebugStopAndGoStressMode && bc.Bit.Cpu.Name == "ACpu")
+                    //{
+                    //    if (onceAp && n == "StartActual_A_F_Vp" && val)
+                    //    {
+                    //        onceAp = false;
+                    //        await Task.Delay(20);
+                    //        LogInfo($"출력 끊기 simulation: {n}");
+                    //        // opc 보다 먼저 변경을 알림...
+                    //        Global.DebugNotifyingSubject.OnNext(("StartActual_A_F_Vp", false));
+                    //        opc.Write("StartActual_A_F_Vp", false);
+
+                    //        LogDebug($"출력 되살리기 simulation: {n}");
+                    //        await Task.Delay(20);
+                    //        opc.Write("StartActual_A_F_Vp", true);
+                    //    }
+
+                    //    if (!onceAp && n == "EndActual_A_F_Sm" && val)
+                    //        onceAp = true;
+                    //}
+
+                    if (Global.IsDebugStopAndGoStressMode && n == startTag && val && onceMain)
+                    {
+                        onceMain = false;
+                        await Task.Delay(50);
+                        LogInfo($"출력 끊기 simulation: {n}");
+                        opc.Write(startTag, false);
+                        await Task.Delay(50);
+                        LogDebug($"출력 되살리기 simulation: {n}");
+                        opc.Write(startTag, true);
+                    }
                 });
+
+
         }
 
         Assert(engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(startTag));
@@ -474,6 +514,9 @@ public class Tester
                 ;
         oneCycleHistory.Subscribe(o =>
         {
+            if (Global.IsDebugStopAndGoStressMode)
+                return;
+
             Assert(o[ 0].TagName == "StartActual_A_F_Vp"   && o[ 0].Value == true);   // a+
             Assert(o[ 1].TagName == "EndActual_A_F_Sm"     && o[ 1].Value == false);  // !A-
             Assert(o[ 2].TagName == "EndActual_A_F_Sp"     && o[ 2].Value == true);   // A+
@@ -681,6 +724,9 @@ public class Tester
                 ;
         oneCycleHistory.Subscribe(o =>
         {
+            if (Global.IsDebugStopAndGoStressMode)
+                return;
+
             Assert(o.Length == 16);
 
             Assert(o[0].TagName == "StartActual_A_F_Vp" && o[0].Value == true);   // a+

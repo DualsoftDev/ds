@@ -24,75 +24,76 @@ module ExpressionTest =
 
         [<Fact>]
         member __.``And test`` () =
-            logInfo "============== And test"
-            init()
+            task {
+                logInfo "============== And test"
+                init()
 
-            let cpu = new Cpu("dummy", new Model())
-            let wait() = wait(cpu)
-            let enqueue(bit, value) =
-                cpu.Enqueue(bit, value)
-                wait()
-
-
-            let a1 = new TagE(cpu, null, "a1_test1")
-            let a2 = new TagE(cpu, null, "a2_test1")
-            let a3 = new TagE(cpu, null, "a3_test1")
-            let xAnd = new And(cpu, "And1_test1", a1, a2, a3)
-
-            cpu.BuildBitDependencies()
-            let runSubscription = cpu.Run()
+                let cpu = new Cpu("dummy", new Model())
+                let wait() = wait(cpu)
+                let enqueue(bit, value) = cpu.EnqueueAsync(bit, value)
 
 
-            xAnd.Value === false
-            [a1; a2; a3] |> Seq.iter (fun x -> enqueue(x, true))
-            xAnd.Value === true
+                let a1 = new TagE(cpu, null, "a1_test1")
+                let a2 = new TagE(cpu, null, "a2_test1")
+                let a3 = new TagE(cpu, null, "a3_test1")
+                let xAnd = new And(cpu, "And1_test1", a1, a2, a3)
 
-            enqueue(a2, false)
-            xAnd.Value === false
+                cpu.BuildBitDependencies()
+                let runSubscription = cpu.Run()
 
-            enqueue(a2, true)
-            xAnd.Value === true
 
-            // And 의 값을 설정할 수 없어야 한다.
-            (fun () -> enqueue(xAnd, false)) |> ShouldFail
-            xAnd.Value === true
+                xAnd.Value === false
+                [a1; a2; a3] |> Seq.iter (fun x -> enqueue(x, true).Wait())
+                xAnd.Value === true
+
+                do! enqueue(a2, false)
+                xAnd.Value === false
+
+                do! enqueue(a2, true)
+                xAnd.Value === true
+
+                // And 의 값을 설정할 수 없어야 한다.
+                (fun () -> enqueue(xAnd, false).Wait()) |> ShouldFail
+                xAnd.Value === true
+            } |> Async.AwaitTask |> Async.RunSynchronously
+
 
 
         [<Fact>]
         member __.``Or test`` () =
-            logInfo "============== Or test"
-            init()
+            task {
+                logInfo "============== Or test"
+                init()
 
-            let cpu = new Cpu("dummy", new Model())
+                let cpu = new Cpu("dummy", new Model())
 
-            let a1 = new TagE(cpu, null, "a1_test2")
-            let a2 = new TagE(cpu, null, "a2_test2")
-            let a3 = new TagE(cpu, null, "a3_test2")
-            let xOr = new Or(cpu, "Or1_test2", a1, a2, a3)
+                let a1 = new TagE(cpu, null, "a1_test2")
+                let a2 = new TagE(cpu, null, "a2_test2")
+                let a3 = new TagE(cpu, null, "a3_test2")
+                let xOr = new Or(cpu, "Or1_test2", a1, a2, a3)
 
-            let wait() = wait(cpu)
-            let enqueue(bit, value) =
-                cpu.Enqueue(bit, value)
-                wait()
-            cpu.BuildBitDependencies()
-            let runSubscription = cpu.Run()
+                let wait() = wait(cpu)
+                let enqueue(bit, value) = cpu.EnqueueAsync(bit, value)
+                cpu.BuildBitDependencies()
+                let runSubscription = cpu.Run()
 
-            xOr.Value === false
-            enqueue(a2, true)
-            xOr.Value === true
+                xOr.Value === false
+                do! enqueue(a2, true)
+                xOr.Value === true
 
-            enqueue(a3, true)
-            xOr.Value === true
+                do! enqueue(a3, true)
+                xOr.Value === true
 
-            [a1; a2; a3] |> Seq.iter (fun x -> enqueue(x, false))
-            xOr.Value === false
+                [a1; a2; a3] |> Seq.iter (fun x -> enqueue(x, false).Wait())
+                xOr.Value === false
 
-            enqueue(a1, true)
-            xOr.Value === true
+                do! enqueue(a1, true)
+                xOr.Value === true
 
-            // Or 의 값을 설정할 수 없어야 한다.
-            (fun () -> enqueue(xOr, false)) |> ShouldFail
-            xOr.Value === true
+                // Or 의 값을 설정할 수 없어야 한다.
+                (fun () -> enqueue(xOr, false).Wait()) |> ShouldFail
+                xOr.Value === true
+            } |> Async.AwaitTask |> Async.RunSynchronously
 
 
 
@@ -108,21 +109,19 @@ module ExpressionTest =
             let xNot = new Not(cpu, "Not1_test2", a1)
 
             let wait() = wait(cpu)
-            let enqueue(bit, value) =
-                cpu.Enqueue(bit, value)
-                wait()
+            let enqueue(bit, value) = cpu.EnqueueAsync(bit, value)
             cpu.BuildBitDependencies()
             let runSubscription = cpu.Run()
 
             a1.Value === false
             xNot.Value === true
 
-            enqueue(a1, true)
+            enqueue(a1, true).Wait()
             xNot.Value === false
 
 
             // Not 의 값을 설정할 수 없어야 한다.
-            (fun () -> enqueue(xNot, true)) |> ShouldFail
+            (fun () -> enqueue(xNot, true).Wait()) |> ShouldFail
             xNot.Value === false
 
 
@@ -146,26 +145,26 @@ module ExpressionTest =
 
 
             let wait() = wait(cpu)
-            let enqueue(bit, value) =
-                cpu.Enqueue(bit, value)
-                wait()
+            let enqueue(bit, value) = cpu.EnqueueAsync(bit, value)
             cpu.BuildBitDependencies()
             let runSubscription = cpu.Run()
 
+            task {
+                x.Value === false
+                do! enqueue(a, true)
+                do! enqueue(b, true)
+                x.Value === true
+                do! enqueue(b, false)
+                x.Value === false
+
+                do! enqueue(c, true)
+                x.Value === true
+            } |> Async.AwaitTask |> Async.RunSynchronously
 
 
-            x.Value === false
-            enqueue(a, true)
-            enqueue(b, true)
-            x.Value === true
-            enqueue(b, false)
-            x.Value === false
-
-            enqueue(c, true)
-            x.Value === true
 
             // And 의 값을 설정할 수 없어야 한다.
-            (fun () -> enqueue(x, true)) |> ShouldFail
+            (fun () -> enqueue(x, true).Wait()) |> ShouldFail
 
 
         [<Fact>]
@@ -189,26 +188,27 @@ module ExpressionTest =
             let x = new Or(cpu, "a||latch", a, latch)
 
             let wait() = wait(cpu)
-            let enqueue(bit, value) =
-                cpu.Enqueue(bit, value)
-                wait()
+            let enqueue(bit, value) = cpu.EnqueueAsync(bit, value)
             cpu.BuildBitDependencies()
             let runSubscription = cpu.Run()
 
-            x.Value === false
+            task {
+                x.Value === false
 
-            enqueue(s, true)
+                do! enqueue(s, true)
 
-            latch.Value === true
-            x.Value === true
+                latch.Value === true
+                x.Value === true
 
-            enqueue(s, false)
-            latch.Value === true
-            x.Value === true
+                do! enqueue(s, false)
+                latch.Value === true
+                x.Value === true
 
-            // latch reset ON -> latch reset 및 Or expression OFF 확인
-            enqueue(r, true)
-            latch.Value === false
-            x.Value === false
+                // latch reset ON -> latch reset 및 Or expression OFF 확인
+                do! enqueue(r, true)
+                latch.Value === false
+                x.Value === false
+            } |> Async.AwaitTask |> Async.RunSynchronously
+
 
             ()

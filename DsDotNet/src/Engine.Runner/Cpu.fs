@@ -17,17 +17,10 @@ module CpuModule =
 
     let doApplyBitChange(bitChange:BitChange) =
         let bit = bitChange.Bit :?> Bit
-        //LogDebug($"\t=({indent}) Applying bitchange {bitChange}")
-
-        if bit.Name = "ResetPlan_L_F_Main" then
-            noop()
-
         let mutable bitChanged = false
         match box bit with
         | :? IBitWritable as writable ->
             if bit.Value <> bitChange.NewValue then
-                if bit.Name = "ResetPlan_L_F_Main" then
-                    noop()
                 logDebug $"Writing bit {bit} = {bitChange.NewValue} @ {bit.Cpu.Name}"
                 writable.SetValue(bitChange.NewValue)
                 bitChanged <- true
@@ -66,11 +59,6 @@ module CpuModule =
         }
 
     let apply (cpu:Cpu) (bitChange:BitChange) (withQueue:bool) =
-        //if (bitChange.Bit.Value == bitChange.NewValue)
-        //    return
-
-        //LogDebug($"\t\t=[{cpu.DbgNestingLevel}] Applying bitChange {bitChange}")   // {bitChange.Guid}
-
         let fwd = cpu.ForwardDependancyMap
         let q = cpu.Queue
 
@@ -99,19 +87,13 @@ module CpuModule =
                 match dep with
                 | :? PortInfo as pi ->
                     if bit:>IBit = pi.Plan then
-                        //Debug.Assert(pi.Plan.Value != pi.Actual?.Value)
                         if (isNull pi.Actual || pi.Plan.Value = pi.Actual.Value) then
                             bc <- BitChange(dep, bitChange.NewValue, pi.Plan)
-                        else
-                            noop()
                     elif (bit = pi.Actual) then
                         if pi.Plan.Value = pi.Actual.Value then
                             bc <- new BitChange(dep, bitChange.NewValue, pi.Actual)
-                        else
-                            noop()
                 | _ ->
                     ()
-
 
                 if isNull bc then
                     let newValue = getValue(dep)
@@ -119,6 +101,7 @@ module CpuModule =
                         BitChange(dep, newValue, null) |> doApply 
                 else
                     bc |> doApply 
+
             if bitChange.NewValue then
                 if cpu.FFSetterMap.ContainsKey(bit) then
                     for ff in cpu.FFSetterMap[bit].Where(fun ff -> not ff.Value) do
@@ -158,18 +141,17 @@ module CpuModule =
                     waitHandle.WaitOne(TimeSpan.FromMilliseconds(50)) |> ignore
                     while (q.Count > 0 && cpu.Running) do
                         cpu.ProcessingQueue <- true
+
+                        assert(q.Count <= 5)    // 대충... 2개 이하
                         match q.TryDequeue() with
                         | true, bitChange ->
                             let bit = bitChange.Bit
                             assert(bit.Cpu = cpu)
                             let value = bitChange.NewValue
-                            if (bit.GetName() = "ResetPlan_L_F_Main") then
-                                noop()
 
                             if lasts.ContainsKey(bit) then
                                 if lasts[bit] = value then
                                     logWarn $"Skipping duplicated bit change {bit}={value} @ {cpu.Name}.";
-                                    noop();
                                 else
                                     apply cpu bitChange true
                                     lasts[bit] <- value;
@@ -246,24 +228,20 @@ type CpuExt =
 
     /// <summary> Bit 의 값 변경 처리를 CPU 에 위임.  즉시 수행되지 않고, CPU 의 Queue 에 추가 된 후, CPU thread 에서 수행된다.  </summary>
     [<Extension>]
-    static member Enqueue(cpu:Cpu, bitChange:BitChange) : WriteResult =
+    static member EnqueueAsync(cpu:Cpu, bitChange:BitChange) : Task =
         assert (bitChange.Bit.Cpu = cpu)
-        //assert( bitChange.Bit.Value <> bitChange.NewValue)
-        if bitChange.Bit.GetName() = "ResetPlan_L_F_Main" then
-            noop()
-
         match bitChange.Bit with
         | :? Expression
         | :? BitReEvaluatable as re when not (re :? PortInfo) ->
             failwith "ERROR: Expression can't be set!"
         | _ ->
             cpu.Queue.Enqueue(bitChange)
-            bitChange.TCS.Task
+            bitChange.TCS.Task :> Task
 
-    [<Extension>] static member Enqueue(cpu:Cpu, bit:IBit, newValue:bool, cause:obj) =
-                    BitChange(bit, newValue, cause) |> cpu.Enqueue
-    [<Extension>] static member Enqueue(cpu:Cpu, bit:IBit, newValue:bool) =
-                    BitChange(bit, newValue, null)  |> cpu.Enqueue
+    [<Extension>] static member EnqueueAsync(cpu:Cpu, bit:IBit, newValue:bool, cause:obj) =
+                    BitChange(bit, newValue, cause) |> cpu.EnqueueAsync
+    [<Extension>] static member EnqueueAsync(cpu:Cpu, bit:IBit, newValue:bool) =
+                    BitChange(bit, newValue, null)  |> cpu.EnqueueAsync
 
     [<Extension>] static member BuildBitDependencies(cpu:Cpu) = buildBitDependencies cpu
 

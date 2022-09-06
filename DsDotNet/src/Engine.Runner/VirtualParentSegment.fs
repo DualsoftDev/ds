@@ -112,8 +112,8 @@ module VirtualParentSegmentModule =
 
             vps
 
-        override x.WireEvent(writer:ChangeWriter) =
-            let write:BitWriter = getBitWriter writer
+        override x.WireEvent() =
+            let write = x.AsyncWrite
             let mutable isInitialReady = true
             Global.BitChangedSubject
                 .Subscribe(fun bc ->
@@ -126,40 +126,23 @@ module VirtualParentSegmentModule =
                     let n = x.QualifiedName
                     let cause = $"bit change {bit.GetName()}={on}"
 
-                    if notiVpsPortChange || notiTargetEndPortChange then
-                        noop()
-                        if x.Name = "VPS_L_F_Main" then
-                            if notiVpsPortChange && bit = x.PortE then
-                                noop()
-
-
-
                     if notiTargetEndPortChange then
                         let cause = $"{x.Target.Name} End Port={x.Target.PortE.Value}"
 
-                        task {
+                        async {
                             match state, on with
                             | Status4.Going, true ->
-                                //write(targetStartTag, false, $"{n} going 끝내기 by {cause}")
-                                //write(x.Going, false, $"{n} going 끝내기 by {cause}")
+                                // - targetStartTag, false, $"{n} going 끝내기 by {cause}")
+                                // - x.Going, false, $"{n} going 끝내기 by {cause}")
                                 do! write(x.PortE, true, $"{n} FINISH 끝내기 by {cause}")
 
                                 // 가상부모 end 공지.  인위적...
                                 Global.SegmentStatusChangingSubject.OnNext(SegmentStatusChange(x, Status4.Finished))
 
-
                             | Status4.Homing, false ->
-                                //assert(not targetStartTag.Value)    // homing 중에 end port 가 꺼졌다고, 반드시 start tag 가 꺼져 있어야 한다고 볼 수는 없다.  start tag ON 이면 바로 재시작
-                                //assert(x.Going.Value = false) // 아직 write 안되었을 수도 있음
-                                //[|
-                                //    BitChange(targetResetTag, false, $"{x.Target.Name} homing 완료로 reset 끄기")
-                                //    BitChange(x.Ready, true, $"{x.Target.Name} homing 완료")
-                                //    BitChange(x.PortE, false, null)
-                                //|] |> writer  // <-- fail
                                 do! write(targetResetTag, false, $"{x.Target.Name} homing 완료로 reset 끄기")
                                 do! write(x.Ready, true, $"{x.Target.Name} homing 완료")
                                 do! write(x.PortE, false, null)
-
 
                             | Status4.Ready, true ->
                                 logInfo $"외부에서 내부 target {x.Target.Name} 실행 감지"
@@ -173,10 +156,9 @@ module VirtualParentSegmentModule =
                                 logInfo $"Children originated before going {x.Target.Name}"
 
                             | _ ->
-                                //failwithlog $"Unknown: [{n}]{state}: Target endport => {x.Target.Name}={on}"
                                 logWarn $"Unknown: [{n}]{state}: Target endport => {x.Target.Name}={on}"
                                 ()
-                        } |> Async.AwaitTask |> Async.Start
+                        } |> Async.Start
 
                     if notiVpsPortChange then
                         if oldStatus = Some state then
@@ -194,9 +176,7 @@ module VirtualParentSegmentModule =
                                 ()
                             | 'e', Status4.Finished, _ ->
                                 assert(on)
-                                noop()
                             | 'e', Status4.Going, false ->  // going 중에 endport 가 꺼진다???
-                                //assert(false)
                                 noop()
                             | 's', Status4.Finished, false ->
                                 ()
@@ -206,14 +186,10 @@ module VirtualParentSegmentModule =
                                 assert not triggerTargetStart   // self start 인 경우만 허용
                             | _ ->
                                 logWarn $"UNKNOWN: {n} status {state} duplicated on port {bit.GetName()}={on} by {cause}"
-                                //assert(not on)    // todo
-                                //assert(false)
-                                noop()
-
 
                             noop()
                         else
-                            task {
+                            async {
                                 oldStatus <- Some state
                                 logInfo $"[{n}] VPS Segment status : {state} by {bit.Name}={on}"
 
@@ -227,14 +203,7 @@ module VirtualParentSegmentModule =
 
                                 Global.SegmentStatusChangingSubject.OnNext(SegmentStatusChange(x, state))
 
-
                                 let childStatus = x.Target.Status
-
-                                //match state with
-                                //| Status4.Going
-                                //| Status4.Homing -> oldStatus <- Some state
-                                //| _ -> ()
-
 
                                 match state with
                                 | Status4.Ready    ->
@@ -252,16 +221,11 @@ module VirtualParentSegmentModule =
                                             subs <-
                                                 Global.SegmentStatusChangingSubject.Where(fun ssc -> ssc.Segment = x.Target && ssc.Segment.Status = Status4.Ready)
                                                     .Subscribe(fun ssc ->
-                                                        task {
-                                                            do! write(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
-                                                        } |> Async.AwaitTask |> Async.RunSynchronously
-                                                        subs.Dispose()
-                                                    )
+                                                        write(targetStartTag, true, $"자식 {x.Target.Name} start tag ON")
+                                                        |> Async.RunSynchronously
+                                                        subs.Dispose() )
 
                                 | Status4.Finished ->
-                                    if x.Name = "VPS_L_F_Main" then
-                                        noop()
-
                                     do! write(targetStartTag, false, $"{n} FINISH 로 인한 {x.Target.Name} start {targetStartTag.GetName()} 끄기")
                                     do! write(x.Going, false, $"{n} FINISH")
 
@@ -275,19 +239,12 @@ module VirtualParentSegmentModule =
                                             failwithlog $"Something bad happend?  trying to reset child while {x.Target.Name}={childStatus}"
 
                                         do! write(targetResetTag, true, $"{n} HOMING 으로 인한 {x.Target.Name} reset 켜기")
-
-
                                 | _ ->
                                     failwithlog "Unexpected"
 
-                                //match state with
-                                //| Status4.Ready
-                                //| Status4.Finished -> oldStatus <- Some state
-                                //| _ -> ()
-
                                 Global.SegmentStatusChangedSubject.OnNext(SegmentStatusChange(x, state))
 
-                            } |> Async.AwaitTask |> Async.Start
+                            } |> Async.Start
 
                         ()
                 )

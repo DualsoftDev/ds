@@ -17,9 +17,53 @@ module QueueTestModule =
     type N(n) =
         member val number:int = n with get, set
 
+    // http://www.fssnip.net/hv/title/Extending-async-with-await-on-tasks
+    // Author:	Tomas Petricek
+    //
+    /// Implements an extension method that overloads the standard
+    /// 'Bind' of the 'async' builder. The new overload awaits on 
+    /// a standard .NET task
+    type Microsoft.FSharp.Control.AsyncBuilder with
+        member x.Bind(t:Task<'T>, f:'T -> Async<'R>) : Async<'R>  = // for let!
+            async.Bind(Async.AwaitTask t, f)
+        member x.Bind(t:Task, f:unit -> Async<unit>) : Async<unit>  = // for do!
+            async.Bind(Async.AwaitTask t, f)
+
+
+
+
     type QueueTest(output1:ITestOutputHelper) =
 
         interface IClassFixture<Fixtures.DemoFixture>
+
+        [<Fact>]
+        member __.``Async computation expression extended`` () =
+            task {
+                do! Async.Sleep(1000)
+                logDebug "Slept on task"
+                do! Async.Sleep(1000)
+                logDebug "Slept on task"
+            }
+
+            // Exception will be catched
+            //async {
+            //    failwith "ERROR"
+            //} |> Async.Start
+
+            // Exception won't be catched
+            //task {
+            //    failwith "ERROR"
+            //}
+
+            async {
+                let! x = Task.FromResult(30)
+                x === 30
+                do! Task.Delay(1000)
+                logDebug "Slept"
+                do! Task.Delay(1000)
+                logDebug "Slept"
+            } |> Async.RunSynchronously
+
 
         [<Fact>]
         member __.``QueueTest`` () =

@@ -9,13 +9,13 @@ open System.Threading.Tasks
 module PrologueModule =
     let noop() = ()
 
-    type WriteResult = Task    // unit
+    type WriteResult = Async<unit>  //Task    // unit
 
     /// Bit * New Value * Change reason
-    type ChangeWriter = BitChange -> WriteResult
+    type ChangeWriter = BitChange -> Task  // WriteResult
 
-    type DoStatus = SegmentBase*ChangeWriter -> WriteResult
-    let private defaultDoStatus(seg:SegmentBase, writer:ChangeWriter) =
+    type DoStatus = SegmentBase -> WriteResult
+    let private defaultDoStatus(seg:SegmentBase) =
         failwith "Should be overriden"
 
     let mutable doReady:DoStatus = defaultDoStatus
@@ -23,16 +23,17 @@ module PrologueModule =
     let mutable doFinish:DoStatus = defaultDoStatus
     let mutable doHoming:DoStatus = defaultDoStatus
 
+    let mutable doEnqueueAsync:Cpu->BitChange->Task =
+        fun cpu bc -> failwith "Should be overriden"
+
 [<AutoOpen>]
 module internal BitWriterModule =
     type BitWriter = IBit * bool * obj -> WriteResult
 
-    let getBitWriter (writer:ChangeWriter) : BitWriter =
+    let getBitWriter (cpu:Cpu) : BitWriter =
+        let writer x = doEnqueueAsync cpu x |> Async.AwaitTask
         fun (bit:IBit, value, cause) ->
-            if value && bit.GetName() = "End_VPS_L_F_Main" then
-                noop()
-
-            task {
+            async {
                 match box bit with
                 | :? PortInfoEnd as ep ->
                         do! writer(EndPortChange(ep.Plan, value, cause))

@@ -1,7 +1,9 @@
 using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 using static Engine.Core.GlobalShortCuts;
+using static FParsec.ErrorMessage;
 
 
 namespace Engine
@@ -80,39 +82,78 @@ namespace Engine
             {
                 foreach (var f in cylinderFlowNames)
                 {
-                    yield return ($"StartActual_{f}_Vp",
-                        (bit, val) => Task.Run(async () =>
-                        {
-                            var opcOpposite = opc.GetTag($"StartActual_{f}_Vm");
-                            LogDebug($"Simulating Tag/Actuator {bit.Name} = {val}");
-                            if (val)
+                    {
+                        var (me, other) = ($"StartActual_{f}_Vp", $"StartActual_{f}_Vm");
+                        yield return (me,
+                            (bit, val) => Task.Run(async () =>
                             {
-                                Console.Beep(800, 200);
-                                Global.Verify($"Exclusive error: {bit.Name}", opcOpposite.Value == false);
-                                await Task.Delay(random.Next(5, 50));
-                                opc.Write($"EndActual_{f}_Sm", !val);
-                                await Task.Delay(random.Next(5, 1000));
-                                Global.Verify($"유지:{bit.Name}", bit.Value);
-                                opc.Write($"EndActual_{f}_Sp", val);
-                            }
-                        }));
+                                bool keepGo = true;
+                                using var _ =
+                                    Global.DebugNotifyingSubject
+                                    .Subscribe(tpl =>
+                                    {
+                                        var (tag, value) = tpl;
+                                        if (tag == me && !value && Global.IsDebugStopAndGoStressMode)
+                                        {
+                                            LogDebug($"출력 단절 {tpl.Item1} detected");
+                                            keepGo = false;
+                                        }
+                                    });
+                                var opcOpposite = opc.GetTag(other);
+                                LogDebug($"Simulating Tag/Actuator {bit.Name} = {val}");
+                                if (val)
+                                {
+                                    Console.Beep(800, 200);
+                                    Global.Verify($"Exclusive error: {bit.Name}", opcOpposite.Value == false);
+                                    await Task.Delay(random.Next(5, 50));
+                                    if (!keepGo)
+                                        return;
+                                    opc.Write($"EndActual_{f}_Sm", !val);
+                                    await Task.Delay(random.Next(5, 1000));
+                                    if (!keepGo)
+                                        return;
+                                    Global.Verify($"유지:{bit.Name}", bit.Value);
+                                    opc.Write($"EndActual_{f}_Sp", val);
+                                }
+                            }));
+                    }
 
-                    yield return ($"StartActual_{f}_Vm",
-                        (bit, val) => Task.Run(async () =>
-                        {
-                            var opcOpposite = opc.GetTag($"StartActual_{f}_Vp");
-                            LogDebug($"Tag/Actuator {bit.Name} = {val}");
-                            if (val)
+
+                    {
+                        var (me, other) = ($"StartActual_{f}_Vm", $"StartActual_{f}_Vp");
+                        yield return (me,
+                            (bit, val) => Task.Run(async () =>
                             {
-                                Console.Beep(1600, 200);
-                                Global.Verify($"Exclusive error: {bit.Name}", opcOpposite.Value == false);
-                                await Task.Delay(random.Next(5, 50));
-                                opc.Write($"EndActual_{f}_Sp", !val);
-                                await Task.Delay(random.Next(5, 1000));
-                                Global.Verify($"유지:{bit.Name}", bit.Value);
-                                opc.Write($"EndActual_{f}_Sm", val);
-                            }
-                        }));
+                                bool keepGo = true;
+                                using var _ =
+                                    Global.DebugNotifyingSubject
+                                    .Where(tpl => tpl.Item1 == other && !tpl.Item2)
+                                    .Subscribe(tpl =>
+                                    {
+                                        if (Global.IsDebugStopAndGoStressMode)
+                                        {
+                                            LogDebug($"출력 단절 {tpl.Item1} detected");
+                                            keepGo = false;
+                                        }
+                                    });
+                                var opcOpposite = opc.GetTag(other);
+                                LogDebug($"Tag/Actuator {bit.Name} = {val}");
+                                if (val)
+                                {
+                                    Console.Beep(1600, 200);
+                                    Global.Verify($"Exclusive error: {bit.Name}", opcOpposite.Value == false);
+                                    await Task.Delay(random.Next(5, 50));
+                                    if (!keepGo)
+                                        return;
+                                    opc.Write($"EndActual_{f}_Sp", !val);
+                                    await Task.Delay(random.Next(5, 1000));
+                                    if (!keepGo)
+                                        return;
+                                    Global.Verify($"유지:{bit.Name}", bit.Value);
+                                    opc.Write($"EndActual_{f}_Sm", val);
+                                }
+                            }));
+                    }
                 }
             }
             var cmd2sensors = generateMap().ToArray();

@@ -107,9 +107,12 @@ module EngineModule =
                 ]
 
             let _autoStart =
-                for cpu in cpus do
-                for rf in cpu.RootFlows do
-                    cpu.EnqueueAsync(rf.Auto, true, "Auto Flow start")
+                [
+                    for cpu in cpus do
+                    for rf in cpu.RootFlows do
+                        yield  cpu.EnqueueAsync(rf.Auto, true, "Auto Flow start")
+                        |> Async.AwaitTask
+                ] |> Async.Parallel |> Async.Ignore |> Async.Start
 
             new CompositeDisposable(subscriptions)
 

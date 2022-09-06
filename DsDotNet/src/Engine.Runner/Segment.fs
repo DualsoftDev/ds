@@ -89,9 +89,7 @@ module FsSegmentModule =
                     let value = bc.NewValue
                     let cause = $"bit change {bit.GetName()}={value}"
 
-                    if oldStatus = Some state then
-                        logDebug $"{n} status {state} duplicated on port {bit.GetName()}={value} by {cause}"
-
+                    let checkSameState() =
                         let bitMatch =
                             if bit = x.PortS then 's'
                             else if bit = x.PortR then 'r'
@@ -129,6 +127,11 @@ module FsSegmentModule =
                             logWarn $"UNKNOWN: {n} status {state} duplicated on port {bit.GetName()}={value} by {cause}"
                             assert(false)
                             ()
+
+                    if oldStatus = Some state then
+                        logDebug $"{n} status {state} duplicated on port {bit.GetName()}={value} by {cause}"
+                        checkSameState()
+
                     else
                         async {
                             cts.Cancel()
@@ -157,7 +160,11 @@ module FsSegmentModule =
                                 | Status4.Homing -> doHoming(x)
                                 | _ ->
                                     failwithlog "Unexpected"
+
                             do! task
+
+                            //todo: not working
+                            //Async.RunSynchronously(task, -1, cts.Token)
 
                             Global.SegmentStatusChangedSubject.OnNext(SegmentStatusChange(x, state))
 

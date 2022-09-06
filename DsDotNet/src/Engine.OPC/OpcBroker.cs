@@ -14,6 +14,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Reactive.Disposables;
 using static Engine.Core.GlobalShortCuts;
+using log4net;
 
 namespace Engine.OPC;
 
@@ -50,9 +51,15 @@ public class OpcBroker
     internal List<LsTag> LsBits = new();
     internal Dictionary<string, int> IdxLsBits = new();
 
+    // https://stackoverflow.com/questions/1372435/configure-log4net-to-write-to-multiple-files
+    public static ILog OpcLogger { get; private set; }
+
+
     internal LsConnection Conn { get; }
     public OpcBroker()
     {
+        OpcLogger = LogManager.GetLogger("OpcLogger");
+
         if (Core.Global.IsControlMode)
         {
             LogDebug("Starting PLC connection.");
@@ -69,6 +76,16 @@ public class OpcBroker
             var n = otc.TagName;
             if (_tagDic.ContainsKey(n))
                 Write(n, otc.Value);
+
+            OpcLogger.Debug($"TO: {n}={otc.Value}");
+        });
+        _disposables.Add(subs);
+
+
+        subs = Core.Global.TagChangeFromOpcServerSubject.Subscribe(otc =>
+        {
+            var n = otc.TagName;
+            OpcLogger.Debug($"FROM: {n}={otc.Value}");
         });
         _disposables.Add(subs);
     }

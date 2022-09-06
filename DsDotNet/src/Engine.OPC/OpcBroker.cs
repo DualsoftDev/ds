@@ -2,12 +2,9 @@ using Engine.Core;
 using Dsu.PLC;
 using Dsu.PLC.LS;
 using Dsu.PLC.Common;
-using Confluent.Kafka;
-using Confluent.Kafka.Admin;
 //using Newtonsoft.Json;
 //using Newtonsoft.Json.Linq;
 using Microsoft.FSharp.Core;
-using log4net;
 
 using System;
 using System.Collections.Generic;
@@ -17,8 +14,6 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Reactive.Disposables;
 using static Engine.Core.GlobalShortCuts;
-using Engine.Common;
-using System.Threading;
 
 namespace Engine.OPC;
 
@@ -210,13 +205,15 @@ public class OpcBroker
             Conn.AddMonitoringTags(ReadOnlyBits);
             Conn.Subject
                 .OfType<TagValueChangedEvent>()
-                .Subscribe(evt =>
-                    {
-                        var tag = (LsTag)evt.Tag;
-                        if (tag.Name[1] == 'I')
-                            Read(addrToTag[tag.Name], (bool)tag.Value);
-                    }
-                );
+                .Subscribe(evt => {
+                    var lsTag = (LsTag)evt.Tag;
+                    var addr = lsTag.Name;
+                    var tagName = addrToTag[addr];
+                    var value = (bool)lsTag.Value;
+                    LogDebug($"Read from channel: {tagName} = {value}");
+                    if (addr[1] == 'I')
+                        Read(tagName, value);
+                });
             Console.WriteLine("Ready!");
             await Conn.StartDataExchangeLoopAsync();
         }

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
@@ -28,6 +28,5 @@
 	  <ProjectReference Include="..\Engine.OPC\Engine.OPC.csproj" />
 	</ItemGroup>
 
-	<Import Project="..\..\.paket\Paket.Restore.targets" />
 
 </Project>

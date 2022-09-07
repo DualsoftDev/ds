@@ -1,7 +1,7 @@
 using Engine.Core;
-using Dsu.PLC;
-using Dsu.PLC.LS;
-using Dsu.PLC.Common;
+//using Dsu.PLC;
+//using Dsu.PLC.LS;
+//using Dsu.PLC.Common;
 //using Newtonsoft.Json;
 //using Newtonsoft.Json.Linq;
 using Microsoft.FSharp.Core;
@@ -67,7 +67,7 @@ public class OpcBroker
             LogDebug("Starting PLC connection.");
             var param = new LsConnectionParameters(
                 "192.168.0.100", new FSharpOption<ushort>(2004),
-                TransportProtocol.Tcp, 3000.0
+                /*TransportProtocol.Tcp,*/ 3000.0
             );
 
             Conn = new LsConnection(param);
@@ -99,7 +99,7 @@ public class OpcBroker
     {
         if (Conn == null) return;
         Console.WriteLine(tagName + " : " + memAddr);
-        LsBits.Add((LsTag)Conn.CreateTag(memAddr));
+        //LsBits.Add((LsTag)Conn.CreateTag(memAddr));
         IdxLsBits[tagName] = IdxLsBits.Count;
         //LsBits.Last().Value = false;
     }
@@ -145,8 +145,8 @@ public class OpcBroker
     {
         var idx = IdxWritableBits[tagName];
         var tag = WritableBits[idx];
-        tag.Value = value;
-        Conn.WriteRandomTags(new[] {tag} );
+        //tag.Value = value;
+        //Conn.WriteRandomTags(new[] {tag} );
     }
 
     public void Write(string tagName, bool value)
@@ -220,19 +220,20 @@ public class OpcBroker
         if (Conn.Connect())
         {
             Conn.AddMonitoringTags(ReadOnlyBits);
-            Conn.Subject
-                .OfType<TagValueChangedEvent>()
-                .Subscribe(evt => {
-                    var lsTag = (LsTag)evt.Tag;
-                    var addr = lsTag.Name;
-                    var tagName = addrToTag[addr];
-                    var value = (bool)lsTag.Value;
-                    LogDebug($"Read from channel: {tagName} = {value}");
-                    if (addr[1] == 'I')
-                        Read(tagName, value);
-                });
+            //Conn.Subject
+            //    .OfType<TagValueChangedEvent>()
+            //    .Subscribe(evt => {
+            //        var lsTag = (LsTag)evt.Tag;
+            //        var addr = lsTag.Name;
+            //        var tagName = addrToTag[addr];
+            //        var value = (bool)lsTag.Value;
+            //        LogDebug($"Read from channel: {tagName} = {value}");
+            //        if (addr[1] == 'I')
+            //            Read(tagName, value);
+            //    });
+            await Task.Delay(1);
             Console.WriteLine("Ready!");
-            await Conn.StartDataExchangeLoopAsync();
+         //   await Conn.StartDataExchangeLoopAsync();
         }
     }
 }

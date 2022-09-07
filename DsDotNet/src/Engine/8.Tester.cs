@@ -339,7 +339,7 @@ public class Tester
             }
 
 
-            bool onceAp = true;
+            //bool onceAp = true;
             bool onceMain = true;
             // simulating physics
             Global.BitChangedSubject
@@ -629,7 +629,7 @@ public class Tester
     }
 }
 [addresses] = {
-	//L.F.Main = (%0, %0,);
+	L.F.Main = (%0, %0,);
 	A.F.Vp = (%QX0.1.3, ,);
 	A.F.Vm = (%QX0.1.2, ,);
 	B.F.Vp = (%QX0.1.5, ,);

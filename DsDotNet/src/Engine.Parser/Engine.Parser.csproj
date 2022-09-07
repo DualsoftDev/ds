@@ -32,11 +32,16 @@
     <Folder Include="..\..\..\Grammar\g4s\" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Antlr4" Version="4.6.6">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Antlr4.Runtime" Version="4.6.6" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Engine.Core\Engine.Core.csproj" />
   </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <NoWarn>3021;1701;1702</NoWarn>
   </PropertyGroup>
-
-	<Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

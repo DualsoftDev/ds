@@ -28,5 +28,13 @@
 	  <ProjectReference Include="..\Engine.OPC\Engine.OPC.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Reference Include="log4net">
+	    <HintPath>..\..\exLib\log4net.dll</HintPath>
+	  </Reference>
+	  <Reference Include="System.Web" />
+	</ItemGroup>
+	
+
 
 </Project>

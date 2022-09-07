@@ -1,5 +1,5 @@
 namespace Engine.Common.FS
-open FSharpPlus
+//open FSharpPlus
 
 [<AutoOpen>]
 module PreludeAdhocPolymorphism =
@@ -84,5 +84,5 @@ module PreludeAdhocPolymorphism =
     //let inline picki f x = Fpicki $ x <| f
 
     /// tuple array 를 개별 seq 의 tuple 로 반환 : [a*b] -> [a] * [b]
-    let inline unzip tpls =
-        (tpls |> map fst, tpls |> map snd)
+    //let inline unzip tpls =
+    //    (tpls |> map fst, tpls |> map snd)

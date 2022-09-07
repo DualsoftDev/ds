@@ -4,7 +4,7 @@ open System.Linq
 open System.Xml
 open System.Xml.Linq
 open System.Runtime.CompilerServices
-open FSharpPlus
+//open FSharpPlus
 
 [<AutoOpen>]
 module DsXml =
@@ -103,5 +103,5 @@ type XmlExt =
     [<Extension>]
     static member ToStrings(xmlNodeList:XmlNodeList) =
         xmlNodeList.ToEnumerables()
-        |> map outerXml
+        |> Seq.map outerXml
 

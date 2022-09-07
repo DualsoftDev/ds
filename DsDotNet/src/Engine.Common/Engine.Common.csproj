@@ -7,5 +7,11 @@
 		<LangVersion>10.0</LangVersion>
 	</PropertyGroup>
 
+	<ItemGroup>
+	  <Reference Include="log4net">
+	    <HintPath>..\..\exLib\log4net.dll</HintPath>
+	  </Reference>
+	</ItemGroup>
+
 
 </Project>

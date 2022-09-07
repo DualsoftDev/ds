@@ -53,5 +53,14 @@
 	  <Folder Include="FSharpFSIs\" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Reference Include="log4net">
+	    <HintPath>..\..\exLib\log4net.dll</HintPath>
+	  </Reference>
+	  <Reference Include="System.Configuration" />
+	  <Reference Include="YC.QuickGraph">
+	    <HintPath>..\..\exLib\YC.QuickGraph.dll</HintPath>
+	  </Reference>
+	</ItemGroup>
 
 </Project>

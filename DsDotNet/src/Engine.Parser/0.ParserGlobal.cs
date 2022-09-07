@@ -9,6 +9,5 @@ global using Antlr4.Runtime.Tree;
 global using static System.Diagnostics.Debug;
 global using Engine.Parser.g4s;
 
-global using log4net;
 
 namespace Engine.Parser;

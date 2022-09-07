@@ -8,4 +8,15 @@
   <ItemGroup>
     <ProjectReference Include="..\Engine.Common\Engine.Common.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Reference Include="log4net">
+      <HintPath>..\..\exLib\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive">
+      <HintPath>..\..\exLib\System.Reactive.dll</HintPath>
+    </Reference>
+    <Reference Include="YC.QuickGraph">
+      <HintPath>..\..\exLib\YC.QuickGraph.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 </Project>

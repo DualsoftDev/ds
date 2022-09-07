@@ -60,7 +60,6 @@ module CpuModule =
 
     let apply (cpu:Cpu) (bitChange:BitChange) (withQueue:bool) =
         let fwd = cpu.ForwardDependancyMap
-        let q = cpu.Queue
 
         assert(cpu.FFSetterMap <> null)
         cpu.BuildFlipFlopMapOnDemand()
@@ -142,7 +141,6 @@ module CpuModule =
                     while (q.Count > 0 && cpu.Running) do
                         cpu.ProcessingQueue <- true
 
-                        assert(q.Count <= 5)    // 대충... 2개 이하
                         match q.TryDequeue() with
                         | true, bitChange ->
                             let bit = bitChange.Bit

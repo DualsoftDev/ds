@@ -24,7 +24,7 @@ module EngineModule =
         doGoing  <- procGoing 
         doFinish <- procFinish
         doHoming <- procHoming
-        doEnqueueAsync <- fun (cpu:Cpu) -> cpu.EnqueueAsync
+        doEnqueueAsync <- fun (cpu:Cpu) (bit, value, cause) -> cpu.EnqueueAsync(bit, value, cause) |> Async.AwaitTask
 
 
 

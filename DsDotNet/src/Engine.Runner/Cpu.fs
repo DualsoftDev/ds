@@ -238,10 +238,29 @@ type CpuExt =
             cpu.Queue.Enqueue(bitChange)
             bitChange.TCS.Task :> Task
 
-    [<Extension>] static member EnqueueAsync(cpu:Cpu, bit:IBit, newValue:bool, cause:obj) =
-                    BitChange(bit, newValue, cause) |> cpu.EnqueueAsync
-    [<Extension>] static member EnqueueAsync(cpu:Cpu, bit:IBit, newValue:bool) =
-                    BitChange(bit, newValue, null)  |> cpu.EnqueueAsync
+    [<Extension>]
+    static member EnqueueAsync(cpu:Cpu, bit:IBit, value:bool, cause:obj) =
+        match box bit with
+        | :? PortInfoEnd as ep ->
+            let t =
+                task {
+                    do! cpu.EnqueueAsync(EndPortChange(ep.Plan, value, cause))
+                    if ep.Cpu.IsActive && ep.Actual <> null then
+                        do! cpu.EnqueueAsync(BitChange(ep.Actual, value, $"Active CPU endport: writing actual {ep}={value}"))
+                }
+            t :> Task
+        | :? PortInfo ->
+            failwithlog "Unexpected"
+        | :? Expression
+        | :? BitReEvaluatable as re when not (re :? PortInfo) ->
+            failwith "ERROR: Expression can't be set!"
+        | _ ->
+            let bc = BitChange(bit, value, cause)
+            cpu.Queue.Enqueue(bc)
+            bc.TCS.Task :> Task
+
+
+    [<Extension>] static member EnqueueAsync(cpu:Cpu, bit:IBit, newValue:bool) = cpu.EnqueueAsync(bit, newValue, null)
 
     [<Extension>] static member BuildBitDependencies(cpu:Cpu) = buildBitDependencies cpu
 

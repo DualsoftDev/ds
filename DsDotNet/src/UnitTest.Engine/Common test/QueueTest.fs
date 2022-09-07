@@ -43,7 +43,7 @@ module QueueTestModule =
                 logDebug "Slept on task"
                 do! Async.Sleep(1000)
                 logDebug "Slept on task"
-            }
+            } |> Task.fireAndForget
 
             // Exception will be catched
             //async {

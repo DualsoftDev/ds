@@ -3,12 +3,17 @@ namespace Engine.Runner
 open System
 open System.Linq
 open System.Reactive.Linq
+open System.Threading.Tasks
 
 open Engine.Core
 open Engine.Common.FS
 open Engine.Common
 open System.Threading
 
+
+[<AutoOpen>]
+module internal BitWriterModule =
+    type BitWriter = IBit * bool * obj -> WriteResult
 
 [<AutoOpen>]
 module FsSegmentModule =    
@@ -18,7 +23,7 @@ module FsSegmentModule =
         inherit SegmentBase(cpu, segmentName)
 
         abstract member WireEvent:unit->IDisposable
-        member x.AsyncWrite:BitWriter = getBitWriter x.Cpu
+        member x.AsyncWrite(bit, value, cause) = async { do! doEnqueueAsync x.Cpu (bit, value, cause) } // BitWriter type
 
         //member x.Status = //with get() =
         //    match x.PortS.Value, x.PortR.Value, x.PortE.Value with

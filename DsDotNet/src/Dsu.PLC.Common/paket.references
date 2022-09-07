@@ -1,3 +1,4 @@
 LanguageExt.Core
 System.Reactive
 log4net
+Confluent.Kafka

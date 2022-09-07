@@ -1,12 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-	  <TargetFrameworks>net48</TargetFrameworks>
-
-    <GenerateDocumentationFile>true</GenerateDocumentationFile> 
-
+    <TargetFrameworks>net48</TargetFrameworks>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyName>Dsu.PLC.LS</AssemblyName>
   </PropertyGroup>
-
   <ItemGroup>
     <None Include="paket.references" />
     <Compile Include="Address.Convert.fs" />
@@ -20,32 +18,20 @@
     <None Include="Scripts\Script.fsx" />
     <None Include="Scripts\Cluster.fsx" />
   </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="FSharp.Control.Reactive" Version="4.5.0" />
-    <PackageReference Include="FSharpPlus" Version="1.2.4" />
-    <PackageReference Include="log4net" Version="2.0.14" />
-  </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Dsu.PLC.Common\Dsu.PLC.Common.csproj" />
     <ProjectReference Include="..\Engine.Common.FS\Engine.Common.FS.fsproj" />
     <ProjectReference Include="..\Engine.Core\Engine.Core.csproj" />
   </ItemGroup>
-
   <ItemGroup>
-    <PackageReference Update="System.ValueTuple" Version="4.5.0" />
-    <PackageReference Include="FSharp.Core" Version="6.0.0" />
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>TestDsu.PLC.FS</_Parameter1>
+    </AssemblyAttribute>
   </ItemGroup>
-  
-<ItemGroup>
+  <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-    <_Parameter1>TestDsu.PLC.FS</_Parameter1>
+      <_Parameter1>Ut.Dsu.PLC.FS</_Parameter1>
     </AssemblyAttribute>
-  </ItemGroup>  
-<ItemGroup>
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-    <_Parameter1>Ut.Dsu.PLC.FS</_Parameter1>
-    </AssemblyAttribute>
-  </ItemGroup>  
+  </ItemGroup>
+  <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

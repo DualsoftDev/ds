@@ -67,10 +67,10 @@ public class XProgram
         var lexer = new dsLexer(str);
         var tokens = new CommonTokenStream(lexer);
         var parser = new dsParser(tokens);
-        var listener_lexer = new ErrorListener<int>();
-        var listener_parser = new ErrorListener<IToken>();
-        lexer.AddErrorListener(listener_lexer);
-        parser.AddErrorListener(listener_parser);
+        //var listener_lexer = new ErrorListener<int>();
+        //var listener_parser = new ErrorListener<IToken>();
+        //lexer.AddErrorListener(listener_lexer);
+        //parser.AddErrorListener(listener_parser);
         //var tree = parser.file();
         //if (listener_lexer.had_error || listener_parser.had_error)
         //    System.Console.WriteLine("error in parse.");

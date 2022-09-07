@@ -10,7 +10,9 @@ nuget Argu
 
 
 nuget FSharpPlus
-nuget FSharp.Core
+nuget LanguageExt.Core
+nuget FSharp.Control.Reactive
+nuget Confluent.Kafka 1.9.2
 nuget log4net
 nuget System.Configuration.ConfigurationManager
 nuget System.Reactive

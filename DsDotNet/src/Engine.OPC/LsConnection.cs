@@ -1,4 +1,9 @@
-﻿using System;
+//추후 참조
+//using Dsu.PLC;
+//using Dsu.PLC.LS;
+//using Dsu.PLC.Common;
+
+using System;
 using System.Collections.Generic;
 
 namespace Engine.OPC

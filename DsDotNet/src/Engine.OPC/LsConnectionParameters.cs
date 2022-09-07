@@ -1,3 +1,8 @@
+//추후 참조
+//using Dsu.PLC;
+//using Dsu.PLC.LS;
+//using Dsu.PLC.Common;
+
 using Microsoft.FSharp.Core;
 
 namespace Engine.OPC

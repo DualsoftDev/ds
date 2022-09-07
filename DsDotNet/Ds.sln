@@ -3,10 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.2.32630.192
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "project", "project", "{BF60BC93-E09B-4E5F-9D85-95A519479D54}"
-	ProjectSection(SolutionItems) = preProject
-		README.md = README.md
-		RELEASE_NOTES.md = RELEASE_NOTES.md
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "git", "git", "{078A9C52-DDC1-46F4-9235-9E6C89C87AFD}"
 	ProjectSection(SolutionItems) = preProject
@@ -25,6 +21,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{3A857CD2-8DF3-4BF3-B7C8-1266B43BA603}"
 	ProjectSection(SolutionItems) = preProject
 		src\Doc\Hierachies.pptx = src\Doc\Hierachies.pptx
+		README.md = README.md
+		RELEASE_NOTES.md = RELEASE_NOTES.md
 		src\Doc\TagName.txt = src\Doc\TagName.txt
 		src\Doc\ToDo.txt = src\Doc\ToDo.txt
 	EndProjectSection

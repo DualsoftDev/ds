@@ -1,10 +1,20 @@
-<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
+
 	<PropertyGroup>
-		<!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
 		<TargetFramework>net48</TargetFramework>
-		<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+
+		<IsPackable>false</IsPackable>
+		<GenerateProgramFile>false</GenerateProgramFile>
 	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="FsUnit" Version="5.0.4" />
+		<PackageReference Include="FsUnit.xUnit" Version="5.0.4" />
+		<PackageReference Include="NUnit3TestAdapter" Version="3.16.1" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
+		<PackageReference Include="xunit" Version="2.4.2" />
+	</ItemGroup>
+	
 	<ItemGroup>
 		<None Include="App.config" />
 		<Compile Include="0.OnlyOnce.fs" />
@@ -28,6 +38,15 @@
 	<ItemGroup>
 		<ProjectReference Include="..\Engine.Core\Engine.Core.csproj" />
 		<ProjectReference Include="..\Engine.OPC\Engine.OPC.csproj" />
+		<ProjectReference Include="..\Engine.Runner\Engine.Runner.fsproj" />
 		<ProjectReference Include="..\Engine\Engine.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Reference Include="log4net">
+	    <HintPath>..\..\exLib\log4net.dll</HintPath>
+	  </Reference>
+	  <Reference Include="System.Reactive">
+	    <HintPath>..\..\exLib\System.Reactive.dll</HintPath>
+	  </Reference>
 	</ItemGroup>
 </Project>

@@ -792,8 +792,8 @@ public class Tester
             else
             {
                 //// initial condition
-                //opc.Write("EndActual_A_F_Sm", true);
-                //opc.Write("EndActual_B_F_Sm", true);
+                opc.Write("EndActual_A_F_Sm", true);
+                opc.Write("EndActual_B_F_Sm", true);
                 Simulator.CreateFromCylinder(opc, new[] { "A_F", "B_F" });
             }
 

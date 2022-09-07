@@ -35,3 +35,5 @@
 - segment 의 child 는 call 뿐만아니라 외부 real 도 포함할 수 있다.		Child Coin => call or 외부 segment
 
 ↑
+
+- 강연결 개발중

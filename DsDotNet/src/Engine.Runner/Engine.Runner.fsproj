@@ -31,13 +31,22 @@
 	  <Reference Include="log4net">
 	    <HintPath>..\..\exLib\log4net.dll</HintPath>
 	  </Reference>
+	  <Reference Include="QuickGraph">
+	    <HintPath>..\..\exLib\QuickGraph.dll</HintPath>
+	  </Reference>
+	  <Reference Include="QuickGraph.Data">
+	    <HintPath>..\..\exLib\QuickGraph.Data.dll</HintPath>
+	  </Reference>
+	  <Reference Include="QuickGraph.Graphviz">
+	    <HintPath>..\..\exLib\QuickGraph.Graphviz.dll</HintPath>
+	  </Reference>
+	  <Reference Include="QuickGraph.Serialization">
+	    <HintPath>..\..\exLib\QuickGraph.Serialization.dll</HintPath>
+	  </Reference>
 	  <Reference Include="System.Reactive">
 	    <HintPath>..\..\exLib\System.Reactive.dll</HintPath>
 	  </Reference>
 	  <Reference Include="System.Web" />
-	  <Reference Include="YC.QuickGraph">
-	    <HintPath>..\..\exLib\YC.QuickGraph.dll</HintPath>
-	  </Reference>
 	</ItemGroup>
 	
 

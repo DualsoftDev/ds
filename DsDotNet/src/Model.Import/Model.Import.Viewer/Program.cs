@@ -1,5 +1,7 @@
-﻿using Model.Import.Office;
+using Model.Import.Office;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -18,6 +20,8 @@ namespace Dual.Model.Import
             Application.SetCompatibleTextRenderingDefault(false);
             InstallUnhandledExceptionHandler();
             var form = new FormMain();
+         
+
             Application.Run(form);
 
             void InstallUnhandledExceptionHandler()

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Dual Inc.  All Rights Reserved.
+// Copyright (c) Dual Inc.  All Rights Reserved.
 namespace Model.Import.Office
 
 open System.Linq
@@ -11,7 +11,7 @@ module ExportModel =
     let ToText(model:DsModel) =
                                
         let callText(seg:Segment) =
-            let callName =  sprintf "%s.%s" seg.OwnerFlow (seg.ToText())
+            let callName =  seg.ToText()
             let tx, rx =
                 let txs = HashSet<string>()
                 let rxs = HashSet<string>()
@@ -51,14 +51,14 @@ module ExportModel =
             //src(s) -> tgt
             let mixEdges = tgtSegs |> Seq.map(fun (edge, tgtSeg) -> edges  |> Seq.filter(fun findEdge -> findEdge.Target.Key = tgtSeg.Key)  
                                                                            |> Seq.filter(fun findEdge -> findEdge.Causal = edge.Causal)  
-                                                                           |> Seq.map(fun edge -> edge.Source.ToName())
-                                                                   ,edge , tgtSeg.ToName())
+                                                                           |> Seq.map(fun edge -> edge.Source.ToTextInFlow())
+                                                                   ,edge , tgtSeg.ToTextInFlow())
             
             mixEdges 
             
         let subEdgeText(seg:Segment) =
             seq {
-                yield sprintf "\t\t%s = {"(seg.ToName())
+                yield sprintf "\t\t%s = {"(seg.ToTextInFlow())
                 let mergeEdges = mergeEdges  seg.MEdges
                 for srcs, edge, tgt in mergeEdges do
                     yield sprintf "\t\t\t%s %s %s;"  (srcs |> String.concat ", ") (edge.Causal.ToText()) (tgt)
@@ -67,9 +67,9 @@ module ExportModel =
 
         let subNodeText(seg:Segment) =
             seq {
-                yield sprintf "\t\t%s = {"(seg.ToName())
+                yield sprintf "\t\t%s = {"(seg.ToTextInFlow())
                 for segSub in seg.NoEdgeSegs do
-                    yield sprintf "\t\t\t%s;" (segSub.ToName())
+                    yield sprintf "\t\t\t%s;" (segSub.ToTextInFlow())
                 yield sprintf "\t\t}"
             }
 
@@ -108,7 +108,7 @@ module ExportModel =
                         yield! segmentText (flow.ExportSegs)
                         yield "\t}"
                         //Task 출력
-                        yield sprintf "\t[task] %s_path = {" flow.Name
+                        yield sprintf "\t[task] %s = {" flow.Name
                         for callSeg in flow.CallSegments() do
                             yield callText(callSeg)
 

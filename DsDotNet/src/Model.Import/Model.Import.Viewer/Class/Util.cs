@@ -1,5 +1,4 @@
-﻿using Model.Import.Office;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -8,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static Model.Import.Office.Event;
-using static Model.Import.Office.Object;
 
 namespace Dual.Model.Import
 {

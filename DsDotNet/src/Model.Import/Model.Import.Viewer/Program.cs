@@ -1,7 +1,5 @@
 ﻿using Model.Import.Office;
 using System;
-using System.Diagnostics;
-using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -56,6 +54,6 @@ namespace Dual.Model.Import
         }
     }
 
-    
+
 
 }

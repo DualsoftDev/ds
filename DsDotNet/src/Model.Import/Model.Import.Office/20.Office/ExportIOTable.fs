@@ -1,4 +1,4 @@
-﻿// Copyright (c) Dual Inc.  All Rights Reserved.
+// Copyright (c) Dual Inc.  All Rights Reserved.
 namespace Model.Import.Office
 
 open System
@@ -54,9 +54,9 @@ module ExportIOTable =
                     rowTemp.ItemArray <- (row|> Seq.cast<obj>|> Seq.toArray)
                     dt.Rows.Add(rowTemp) |> ignore)
 
-        dt.Rows.Add("내부", "변수", "", "", "'-", "'-", "'-") |> ignore
-        dt.Rows.Add("지시", "함수", "", "'-", "", "'-", "'-") |> ignore
-        dt.Rows.Add("관찰", "함수", "", "'-", "'-", "'-", "") |> ignore
+        dt.Rows.Add("내부", "변수", ""  , "'-", ""  , "'-", "'-", "'-") |> ignore
+        dt.Rows.Add("지시", "함수", ""  , "'-", "'-", ""  , "'-", "'-") |> ignore
+        dt.Rows.Add("관찰", "함수", ""  , "'-", "'-", "'-", "'-", ""  ) |> ignore
 
         dt
 

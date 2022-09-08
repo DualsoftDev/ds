@@ -1,7 +1,6 @@
 using Model.Import.Office;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -17,7 +16,7 @@ namespace Dual.Model.Import
     {
         internal void ExportTextModel(Color color)
         {
-          
+
             this.Do(() => richTextBox_ds.Clear());
             var textLines = ExportModel.ToText(_model).Split('\n');
             Random r = new Random();
@@ -26,7 +25,7 @@ namespace Dual.Model.Import
             int lineCur = 0;
             textLines.ToList().ForEach(f =>
             {
-                int pro = 50+Convert.ToInt32(Convert.ToSingle(lineCur++) / (lineCnt) * 50f);
+                int pro = 50 + Convert.ToInt32(Convert.ToSingle(lineCur++) / (lineCnt) * 50f);
                 if (color == Color.Transparent)
                 {
                     if (f.Contains("[sys]") || (f.Contains("[flow]") && !f.Contains("}"))  //[flow] F = {} 한줄제외
@@ -76,7 +75,7 @@ namespace Dual.Model.Import
                     WriteDebugMsg(DateTime.Now, MSGLevel.Error, $"{PathPPT} 불러오기 실패!!");
 
             }
-            catch  (Exception ex)
+            catch (Exception ex)
             {
                 WriteDebugMsg(DateTime.Now, MSGLevel.Error, ex.Message);
             }

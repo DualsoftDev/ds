@@ -1,7 +1,4 @@
-﻿using Model.Import.Office;
-using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using static Model.Import.Office.Model;
@@ -15,13 +12,15 @@ namespace Dual.Model.Import
         static readonly List<NodeCausal> mys = new List<NodeCausal>() { NodeCausal.MY };
         static readonly List<NodeCausal> notMys = new List<NodeCausal>() { NodeCausal.EX, NodeCausal.TR, NodeCausal.TX, NodeCausal.RX, NodeCausal.DUMMY };
         static bool org = false;
-        static List<NodeCausal> AllSeg {
+        static List<NodeCausal> AllSeg
+        {
             get
             {
                 var obj = new List<NodeCausal>();
                 obj.AddRange(mys); obj.AddRange(notMys);
                 return obj;
-            }}
+            }
+        }
 
 
         private static async Task Test(IEnumerable<Segment> rootSegs, Status status, List<NodeCausal> showList)
@@ -65,7 +64,7 @@ namespace Dual.Model.Import
             List<Segment> tgts = dicEdge.Values.Select(edge => edge.Target).Distinct().ToList();
             List<Segment> heads = dic.Values.Where(s => !tgts.Contains(s)).ToList();
             List<MEdge> findEdges = dicEdge.Values
-              //  .Where(edge => edge.Causal.IsStart)
+                //  .Where(edge => edge.Causal.IsStart)
                 .Where(edge => heads.Contains(edge.Source)).ToList();
 
             foreach (var seg in heads) dic.Remove(seg);
@@ -82,7 +81,7 @@ namespace Dual.Model.Import
 
             await Task.Run(async () =>
             {
-                foreach (var seg in runEdges.SelectMany(s=>s.Nodes).Distinct())
+                foreach (var seg in runEdges.SelectMany(s => s.Nodes).Distinct())
                 {
                     if (dicSeg.Count() == 0) break;
                     List<Segment> heads = getHeads(dicSeg, dicEdge);
@@ -99,16 +98,16 @@ namespace Dual.Model.Import
             if (model == null) return;
             if (!org) await TestORG(model);
 
-            var dicSeg  = model.ActiveSys.RootSegments().ToDictionary(d => d);
+            var dicSeg = model.ActiveSys.RootSegments().ToDictionary(d => d);
             var dicEdge = model.ActiveSys.RootEdges().ToDictionary(d => d);
 
             await Task.Run(async () =>
             {
                 List<MEdge> edges = model.ActiveSys.RootEdges().ToList();
-                foreach (var cont in edges.SelectMany(s=>s.Nodes).Distinct())
+                foreach (var cont in edges.SelectMany(s => s.Nodes).Distinct())
                 {
                     if (dicSeg.Count() == 0) break;
-                  
+
                     List<Segment> heads = getHeads(dicSeg, dicEdge);
                     await Test(heads, Status.G, AllSeg);
                     await Task.Delay(50);

@@ -29,7 +29,6 @@ namespace Dual.Model.Import
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMain));
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.xtraTabControl_My = new System.Windows.Forms.TabControl();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
@@ -141,6 +140,7 @@ namespace Dual.Model.Import
             // 
             // pictureBox_ppt
             // 
+            this.pictureBox_ppt.Image = global::Model.Import.Viewer.Properties.Resources.IMPORT_PPT;
             this.pictureBox_ppt.Location = new System.Drawing.Point(26, 10);
             this.pictureBox_ppt.Name = "pictureBox_ppt";
             this.pictureBox_ppt.Size = new System.Drawing.Size(418, 97);
@@ -150,6 +150,7 @@ namespace Dual.Model.Import
             // 
             // pictureBox_xls
             // 
+            this.pictureBox_xls.Image = global::Model.Import.Viewer.Properties.Resources.IMPORT_XLS;
             this.pictureBox_xls.Location = new System.Drawing.Point(26, 113);
             this.pictureBox_xls.Name = "pictureBox_xls";
             this.pictureBox_xls.Size = new System.Drawing.Size(418, 98);

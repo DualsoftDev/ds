@@ -1,4 +1,4 @@
-﻿// Copyright (c) Dual Inc.  All Rights Reserved.
+// Copyright (c) Dual Inc.  All Rights Reserved.
 namespace Model.Import.Office
 
 open System
@@ -64,7 +64,11 @@ module Object =
             member x.ToText() =  let _name =  this.Name.Replace(" ","_") 
                                  if(IsInvalidName(_name))  then $"\"{_name}\"" else _name
 
-            member x.ToName() =  if(nodeCausal = EX) then sprintf "EX.%s.TR" (x.ToText()) else x.ToText()
+            member x.ToTextInFlow() =  match nodeCausal with
+                                         |MY -> x.ToText()
+                                         |TR |TX |RX -> sprintf "%s.%s" x.OwnerFlow (x.ToText())
+                                         |EX         -> sprintf "EX.%s.TR" (x.ToText())
+                                         |DUMMY -> failwith "DUMMY no name";
             
             member x.ToCallText() = let callName = sprintf "%s_%s"   this.OwnerFlow (x.Name.Replace(" ","_")) 
                                     if(IsInvalidName(callName))  then $"\"{callName}\"" else callName

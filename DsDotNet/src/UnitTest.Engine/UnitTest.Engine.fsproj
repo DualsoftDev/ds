@@ -32,7 +32,6 @@
 		<None Include="Obsolete/MockupTest/VirtualParentTest.fsx" />
 		<Compile Include="Common test/QueueTest.fs" />
 		<Compile Include="Repeat Test\Diamond.fs" />
-		<None Include="paket.references" />
 		<None Include="test.ipynb" />
 	</ItemGroup>
 	<ItemGroup>

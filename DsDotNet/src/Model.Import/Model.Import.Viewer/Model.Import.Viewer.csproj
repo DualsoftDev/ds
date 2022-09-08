@@ -7,6 +7,11 @@
     
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Resources\**" />
+    <EmbeddedResource Remove="Resources\**" />
+    <None Remove="Resources\**" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Model.Import.Office\Model.Import.Office.fsproj" />
   </ItemGroup>
 
@@ -24,9 +29,5 @@
       <HintPath>..\..\..\exLib\System.Reactive.dll</HintPath>
     </Reference>
     <Reference Include="System.Windows.Forms" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Resources\" />
   </ItemGroup>
 </Project>

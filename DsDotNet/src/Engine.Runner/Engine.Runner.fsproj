@@ -18,7 +18,6 @@
 		<None Include="Obsolete\Runner.fsx" />
 		<None Include="Obsolete/ObsoleteDoRGFH.fsx" />
 		<None Include="Obsolete/Bit, Cpu.fsx" />
-		<None Include="paket.references" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -144,9 +144,9 @@ module FsSegmentModule =
 
                             logInfo $"[{n}] Segment status : {state} {cause}"
                             if x.Going.Value && state <> Status4.Going then
-                                do! write(x.Going, false, $"{n} going off by status {state}")
+                                write(x.Going, false, $"{n} going off by status {state}") |> Async.Start
                             if x.Ready.Value && state <> Status4.Ready then
-                                do! write(x.Ready, false, $"{n} ready off by status {state}")
+                                write(x.Ready, false, $"{n} ready off by status {state}")  |> Async.Start
                             if state <> Status4.Ready then
                                 isInitialReady <- false
 

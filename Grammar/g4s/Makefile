@@ -18,22 +18,27 @@ test:
 #		$(grun) ds causals < g4test/causals.txt
 #	done
 
+	@echo quoted.ds
+	$(grun) ds program < g4test/quoted.ds
 	@echo causals
 	$(grun) ds causals < g4test/causals.txt
-	@echo imports
-	$(grun) ds importStatements < g4test/imports.txt
-	@echo problem
-	$(grun) ds program < g4test/problematic.ds
-	@echo expression
-	$(grun) ds expressions < g4test/expressions.txt
 	@echo proc
 	$(grun) ds program < g4test/proc.ds
 	@echo taskFlow
 	$(grun) ds program < g4test/taskFlow.ds
 	@echo call
 	$(grun) ds calls < g4test/calls.txt
-	@echo elevator
-	$(grun) ds program < g4test/elevator_newexample.ds
+	@echo ppt
+	$(grun) ds program < g4test/ppt.ds
+
+	@echo "---------- with errors"
+
+	@echo imports
+	$(grun) ds importStatements < g4test/imports.txt
+	@echo problem
+	$(grun) ds program < g4test/problematic.ds
+	@echo expression
+	$(grun) ds expressions < g4test/expressions.txt
 
 cs:
 	java -jar antlr-4.10.1-complete.jar -package NameSpace -Dlanguage=CSharp -visitor -o CSharp/Generated g4s/ds.g4

@@ -21,6 +21,9 @@ import dsFunctions;
 
 program: (importStatement|system|cpus|layouts|addresses|comment)* EOF;        // 
 
+test:qstring EOF;
+qstring: STRING_LITERAL EOF;
+
 
 system: sysProp id '=' sysBlock;    // [sys] Seg = {..}
 sysProp: '[' 'sys' ']';
@@ -55,7 +58,7 @@ layoutsBlock
     : LBRACE (positionDef)* RBRACE
     ;
 positionDef: callPath '=' xywh;
-    callPath: IDENTIFIER DOT IDENTIFIER DOT IDENTIFIER;
+    callPath: identifier DOT identifier DOT identifier;
     xywh: LPARENTHESIS x COMMA y (COMMA w COMMA h)? RPARENTHESIS (SEIMCOLON)?;
     x: INTEGER;
     y: INTEGER;
@@ -68,7 +71,7 @@ addressesBlock
     : LBRACE (addressDef)* RBRACE
     ;
 addressDef: segmentPath '=' address;
-    segmentPath: IDENTIFIER DOT IDENTIFIER DOT IDENTIFIER;
+    segmentPath: identifier DOT identifier DOT identifier;
     address: LPARENTHESIS (startTag)? COMMA (resetTag)? COMMA (endTag)? RPARENTHESIS (SEIMCOLON)?;
     startTag: TAG_ADDRESS;
     resetTag: TAG_ADDRESS;
@@ -92,12 +95,12 @@ aliasListing:
     aliasDef '=' LBRACE (aliasMnemonic)? ( ';' aliasMnemonic)* (';')+ RBRACE
     ;
 aliasDef: identifier3;
-aliasMnemonic: IDENTIFIER;
+aliasMnemonic: identifier;
 
 
-id: IDENTIFIER;
+id: identifier;
 
-acc: LBRACKET ACCESS_SRE RBRACKET EQ LBRACE IDENTIFIER (SEIMCOLON IDENTIFIER)* SEIMCOLON? RBRACE;    // [accsre] = { A; B }
+acc: LBRACKET ACCESS_SRE RBRACKET EQ LBRACE identifier (SEIMCOLON identifier)* SEIMCOLON? RBRACE;    // [accsre] = { A; B }
 listing: id SEIMCOLON;     // A;
 parenting: id EQ LBRACE causal* RBRACE;
 
@@ -111,7 +114,7 @@ macroHeader
     | namedMacroHeader
     ;
 simpleMacroHeader: 'macro';
-namedMacroHeader: 'macro' EQ IDENTIFIER;
+namedMacroHeader: 'macro' EQ identifier;
 
 // A23 = { M.U ~ S.S3U ~ _ }
 call: id EQ LBRACE callPhrase RBRACE;
@@ -165,8 +168,8 @@ importAs
     ;
 
 importPhrase: importSystemName 'as' importAlias;
-importSystemName: IDENTIFIER;
-importAlias: IDENTIFIER;
+importSystemName: identifier;
+importAlias: identifier;
 
 
 quotedFilePath

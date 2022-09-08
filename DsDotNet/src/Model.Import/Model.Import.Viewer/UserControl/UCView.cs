@@ -1,0 +1,320 @@
+using Microsoft.Msagl.Drawing;
+using Microsoft.Msagl.GraphViewerGdi;
+using Microsoft.Msagl.Layout.Layered;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows.Forms;
+using static Model.Import.Office.Object;
+using static Model.Import.Office.Type;
+using Color = Microsoft.Msagl.Drawing.Color;
+
+namespace Dual.Model.Import
+{
+    public partial class UCView : UserControl
+    {
+        private readonly GViewer viewer = new Microsoft.Msagl.GraphViewerGdi.GViewer();
+
+
+
+        public UCView()
+        {
+            InitializeComponent();
+
+            viewer.Dock = DockStyle.Fill;
+            viewer.PanButtonPressed = true;
+            viewer.ToolBarIsVisible = false;
+
+            this.Controls.Add(viewer);
+
+
+        }
+
+        private Dictionary<Tuple<Segment, Status>, int> _dicCycle = new Dictionary<Tuple<Segment, Status>, int>();
+        private Dictionary<string, Node> _dicDrawing = new Dictionary<string, Node>();
+
+
+
+        public void SetGraph(Flow flow)
+        {
+            //sub 그래프 불가
+            //viewer.Graph.LayoutAlgorithmSettings = new Microsoft.Msagl.Layout.MDS.MdsLayoutSettings();
+            //viewer.Graph.LayoutAlgorithmSettings = new RankingLayoutSettings();
+            //sub 그래프 가능
+            viewer.Graph = new Graph() { LayoutAlgorithmSettings = new SugiyamaLayoutSettings() };
+            var layoutSetting = new Microsoft.Msagl.Layout.Layered.SugiyamaLayoutSettings();
+            layoutSetting.LayerSeparation = 50;
+            layoutSetting.NodeSeparation = 50;
+            layoutSetting.ClusterMargin = 30;
+
+
+
+
+
+            //viewer.Graph = new Graph() { LayoutAlgorithmSettings = new Microsoft.Msagl.Layout.Incremental.FastIncrementalLayoutSettings() };
+            //var layoutSetting = new Microsoft.Msagl.Layout.Incremental.FastIncrementalLayoutSettings();
+            //layoutSetting.NodeSeparation = 50;
+            //layoutSetting.ClusterMargin = 30;
+            //layoutSetting.LogScaleEdgeForces = false;
+            //layoutSetting.RepulsiveForceConstant = 0.01;
+            //layoutSetting.EdgeRoutingSettings.EdgeRoutingMode = Microsoft.Msagl.Core.Routing.EdgeRoutingMode.SugiyamaSplines;
+            //layoutSetting.Decay = 0.8;
+
+
+            viewer.Graph.LayoutAlgorithmSettings = layoutSetting;
+
+            SetBackColor(System.Drawing.Color.FromArgb(33, 33, 33));
+
+            var subDraws = flow.DrawSubs.ToList();
+
+            flow.NoEdgeSegs.ToList().ForEach(seg => DrawSegment(viewer.Graph.RootSubgraph, seg, subDraws));
+
+            drawMEdgeGraph(flow.Edges.ToList(), subDraws, viewer.Graph.RootSubgraph);
+
+            viewer.SetCalculatedLayout(viewer.CalculateLayout(viewer.Graph));
+        }
+
+
+        private void UpdateLabelText(Node nNode)
+        {
+            nNode.LabelText = nNode.LabelText.Split(';')[0];
+            nNode.Label.FontColor = Color.White;
+            nNode.Attr.Color = Color.White;
+
+        }
+
+
+
+
+        private void drawMEdgeGraph(List<MEdge> edges, List<Segment> drawSubs, Subgraph subgraph)
+        {
+            foreach (var mEdge in edges)
+                DrawMEdge(subgraph, mEdge, drawSubs);
+
+        }
+
+        private void DrawMEdge(Subgraph subgraph, MEdge edge, List<Segment> drawSubs)
+        {
+            MEdge mEdge = edge;
+
+            bool bDrawSubSrc = mEdge.Source.IsChildExist && (drawSubs == null || drawSubs.Contains(mEdge.Source));
+            bool bDrawSubTgt = mEdge.Target.IsChildExist && (drawSubs == null || drawSubs.Contains(mEdge.Target));
+
+            var mEdgeSrc = mEdge.Source;
+            var mEdgeTgt = mEdge.Target;
+            var subGSrc = new Subgraph(mEdgeSrc.UIKey);
+            var subGTgt = new Subgraph(mEdgeTgt.UIKey);
+
+            if (bDrawSubSrc) subgraph.AddSubgraph(subGSrc);
+            if (bDrawSubTgt) subgraph.AddSubgraph(subGTgt);
+            var gEdge = viewer.Graph.AddEdge(subGSrc.Id, "", subGTgt.Id);
+            DrawEdgeStyle(gEdge, mEdge, true);
+            DrawSub(subgraph, mEdgeSrc, subGSrc, gEdge.SourceNode, bDrawSubSrc);
+            DrawSub(subgraph, mEdgeTgt, subGTgt, gEdge.TargetNode, bDrawSubTgt);
+
+        }
+        private void DrawSegment(Subgraph subgraph, Segment seg, List<Segment> drawSubs)
+        {
+
+            bool bDrawSubSrc = (seg.IsChildExist || seg.NoEdgeSegs.Any()) && (drawSubs == null || drawSubs.Contains(seg));
+
+            var subGSrc = new Subgraph(seg.UIKey);
+
+            if (bDrawSubSrc) subgraph.AddSubgraph(subGSrc);
+            var gEdge = viewer.Graph.AddEdge(subGSrc.Id, "", subGSrc.Id);
+            UpdateLabelText(gEdge.SourceNode);
+            UpdateNodeView(gEdge.SourceNode, seg);
+            gEdge.IsVisible = false;
+
+            DrawSub(subgraph, seg, subGSrc, gEdge.SourceNode, bDrawSubSrc);
+
+        }
+
+        private void DrawSub(Subgraph subgraph, Segment seg, Subgraph subG, Node gNode, bool bDrawSub)
+        {
+            if (_dicDrawing.ContainsKey(gNode.Id)) return;
+            else _dicDrawing.Add(gNode.Id, gNode);
+
+            if (bDrawSub && (seg.MEdges.Any() || seg.NoEdgeSegs.Any()))
+            {
+                if (seg.MEdges.Any())
+                    drawMEdgeGraph(seg.MEdges.ToList(), null, subG);
+
+                seg.NoEdgeSegs.ToList().ForEach(subSeg => DrawSegment(subG, subSeg, null));
+            }
+            else
+                subgraph.AddNode(gNode);
+        }
+
+
+        private void DrawEdgeStyle(Edge gEdge, MEdge edge, bool model = false)
+        {
+            //gEdge.Attr.Color = Color.Black;
+            //gEdge.Label.FontColor = Color.White;
+            gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Generalization;
+
+            gEdge.Attr.Color = Color.White;
+
+            if (edge.Causal == EdgeCausal.SEdge)
+            {
+                gEdge.Attr.AddStyle(Style.Solid);
+                gEdge.Attr.Color = Color.DeepSkyBlue;
+                gEdge.Attr.LineWidth = 2;
+            }
+            else if (edge.Causal == EdgeCausal.SPush)
+            {
+                gEdge.Attr.AddStyle(Style.Solid);
+                gEdge.Attr.LineWidth = 4;
+                gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
+                gEdge.Attr.Color = Color.DeepSkyBlue;
+            }
+            else if (edge.Causal == EdgeCausal.SSTATE)
+            {
+                gEdge.Attr.AddStyle(Style.Solid);
+                gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Diamond;
+                gEdge.Attr.Color = Color.IndianRed;
+                gEdge.Attr.LineWidth = 4;
+
+            }
+            else if (edge.Causal == EdgeCausal.REdge)
+            {
+                gEdge.Attr.AddStyle(Style.Dashed);
+                gEdge.Attr.Color = Color.Green;
+                gEdge.Attr.LineWidth = 2;
+            }
+            else if (edge.Causal == EdgeCausal.RPush)
+            {
+                gEdge.Attr.AddStyle(Style.Dashed);
+                gEdge.Attr.LineWidth = 4;
+                gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
+                gEdge.Attr.Color = Color.Green;
+            }
+            else if (edge.Causal == EdgeCausal.RSTATE)
+            {
+                gEdge.Attr.AddStyle(Style.Dashed);
+                gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Diamond;
+                gEdge.Attr.Color = Color.IndianRed;
+                gEdge.Attr.LineWidth = 4;
+            }
+            else if (edge.Causal == EdgeCausal.Interlock)
+            {
+                gEdge.Attr.AddStyle(Style.Dashed);
+                gEdge.Attr.ArrowheadAtSource = ArrowStyle.Normal;
+                gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
+                gEdge.Attr.Color = Color.PaleGoldenrod;
+            }
+            else if (edge.Causal == EdgeCausal.SReset)
+            {
+                gEdge.Attr.AddStyle(Style.Solid);
+                gEdge.Attr.ArrowheadAtSource = ArrowStyle.Tee;
+                gEdge.Attr.Color = Color.PaleGoldenrod;
+            }
+
+
+
+
+            UpdateLabelText(gEdge.SourceNode);
+            UpdateLabelText(gEdge.TargetNode);
+
+            if (model)
+            {
+
+                var src = edge.SourceVertex as Segment;
+                var tgt = edge.TargetVertex as Segment;
+
+                UpdateNodeView(gEdge.SourceNode, src);
+                UpdateNodeView(gEdge.TargetNode, tgt);
+
+            }
+        }
+
+        private void UpdateNodeView(Node nNode, Segment segment)
+        {
+            {
+                //nNode.Attr.Color = Color.DarkGoldenrod;
+
+                if (segment.NodeCausal == NodeCausal.MY)
+                    nNode.Attr.Shape = Shape.Box;
+                if (segment.NodeCausal == NodeCausal.EX)
+                    nNode.Attr.Shape = Shape.Diamond;
+                if (segment.NodeCausal == NodeCausal.TR)
+                    nNode.Attr.Shape = Shape.Ellipse;
+                if (segment.NodeCausal == NodeCausal.TX)
+                    nNode.Attr.Shape = Shape.Ellipse;
+                if (segment.NodeCausal == NodeCausal.RX)
+                    nNode.Attr.Shape = Shape.Ellipse;
+                if (segment.NodeCausal == NodeCausal.DUMMY)
+                    nNode.Attr.Shape = Shape.DrawFromGeometry;
+            }
+        }
+
+        public void RefreshGraph() { viewer.Do(() => viewer.Refresh()); }
+
+
+        public void Update(Segment seg)
+        {
+
+            Node node = viewer.Graph.FindNode(seg.UIKey);
+            if (node == null)
+            {
+                if (viewer.Graph.SubgraphMap.ContainsKey(seg.UIKey))
+                    node = viewer.Graph.SubgraphMap[seg.UIKey];
+                else
+                    return;
+            }
+            //node.Attr.Color = Color.White;
+            //node.Label.FontColor = Color.White;
+            if (seg != null)
+            {
+                if (seg.NodeCausal == NodeCausal.MY)
+                    UpdateLineColor(seg.Status, node);
+                else
+                    UpdateFillColor(seg.Status, node);
+            }
+            else
+            {
+
+            }
+
+            RefreshGraph();
+        }
+
+        private static void UpdateFontColor(Status newStatus, Node node)
+        {
+            if (newStatus == Status.R) node.Label.FontColor = Color.DarkGreen;
+            else if (newStatus == Status.G) node.Label.FontColor = Color.DarkKhaki;
+            else if (newStatus == Status.F) node.Label.FontColor = Color.DarkBlue;
+            else if (newStatus == Status.H) node.Label.FontColor = Color.Black;
+        }
+
+        private static void UpdateLineColor(Status newStatus, Node node)
+        {
+            if (newStatus == Status.R) node.Attr.Color = Color.DarkOliveGreen;
+            else if (newStatus == Status.G) node.Attr.Color = Color.DarkGoldenrod;
+            else if (newStatus == Status.F) node.Attr.Color = Color.DarkBlue;
+            else if (newStatus == Status.H) node.Attr.Color = Color.DimGray;
+        }
+
+        private static void UpdateFillColor(Status newStatus, Node node)
+        {
+            if (newStatus == Status.R) node.Attr.FillColor = Color.DarkOliveGreen;
+            else if (newStatus == Status.G) node.Attr.FillColor = Color.DarkGoldenrod;
+            else if (newStatus == Status.F) node.Attr.FillColor = Color.DarkBlue;
+            else if (newStatus == Status.H) node.Attr.FillColor = Color.DimGray;
+        }
+
+        internal void SetBackColor(System.Drawing.Color color)
+        {
+            // var backColor = System.Drawing.Color.FromArgb(color.R, color.G, color.B);
+            //listBoxControl_Que.BackColor = backColor;
+            var gColor = Color.Red;
+            gColor.R = color.R;
+            gColor.G = color.G;
+            gColor.B = color.B;
+            viewer.Graph.Attr.BackgroundColor = gColor;
+        }
+
+
+
+    }
+}

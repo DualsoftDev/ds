@@ -1,0 +1,53 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework> 
+
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+	<RootNamespace>Model.Import.Office</RootNamespace>
+    <OutputType>Library</OutputType> 
+
+    <AssemblyName>Model.Import.Office</AssemblyName> 
+
+    <Version>1.0.1</Version>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath></OutputPath>
+  </PropertyGroup>
+
+
+  <ItemGroup>
+    <Compile Include="Type.fs" />
+    <Compile Include="Util\Util.fs" />
+    <Compile Include="00.Base\01.Interface.fs" />
+    <Compile Include="00.Base\02.Base.fs" />
+    <Compile Include="00.Base\03.Event, Util.fs" />
+    <Compile Include="10.Model\10.Object.fs" />
+    <Compile Include="10.Model\12.Model.fs" />
+    <Compile Include="20.Office\Util.fs" />
+    <Compile Include="20.Office\UtilPPT.fs" />
+    <Compile Include="20.Office\PPTX.fs" />
+    <Compile Include="20.Office\Check.fs" />
+    <Compile Include="20.Office\ImportModel.fs" />
+    <Compile Include="20.Office\ExportModel.fs" />
+    <Compile Include="20.Office\ImportIOTable.fs" />
+    <Compile Include="20.Office\ExportIOTable.fs" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <Reference Include="DocumentFormat.OpenXml">
+      <HintPath>..\..\..\exLib\DocumentFormat.OpenXml.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Office.Interop.Excel">
+      <HintPath>..\..\..\exLib\Microsoft.Office.Interop.Excel.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive">
+      <HintPath>..\..\..\exLib\System.Reactive.dll</HintPath>
+    </Reference>
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="6.0.5" />
+  </ItemGroup>
+</Project>

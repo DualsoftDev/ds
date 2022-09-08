@@ -28,6 +28,8 @@ test:
 	$(grun) ds program < g4test/taskFlow.ds
 	@echo call
 	$(grun) ds calls < g4test/calls.txt
+	@echo ppt
+	$(grun) ds program < g4test/ppt.ds
 
 	@echo "---------- with errors"
 

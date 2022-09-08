@@ -1,1 +1,0 @@
-/f/Git/Obsolete/dual-gits/dual/soft/Delta/Dual.Core.FS/Delta/QGraph

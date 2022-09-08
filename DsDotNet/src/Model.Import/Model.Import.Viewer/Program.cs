@@ -1,7 +1,11 @@
+using Engine.Common;
 using Model.Import.Office;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -18,43 +22,13 @@ namespace Dual.Model.Import
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            InstallUnhandledExceptionHandler();
-            var form = new FormMain();
-         
+            SimpleExceptionHandler.InstallExceptionHandler();
 
+            DllVersionChecker.IsValidExDLL(Assembly.GetExecutingAssembly());
+
+            var form = new FormMain();
             Application.Run(form);
 
-            void InstallUnhandledExceptionHandler()
-            {
-                UnhandledExceptionEventHandler unhandled = (s, e) =>
-                {
-                    System.Media.SystemSounds.Beep.Play();
-                    Event.MSGError($"{e.ExceptionObject}");
-                    var msg = $"XXX Unhandled Exception: {e} {e.ExceptionObject}";
-                    Console.WriteLine(msg);
-                };
-
-                ThreadExceptionEventHandler threadedUnhandled = (s, e) =>
-                {
-                    System.Media.SystemSounds.Beep.Play();
-                    Event.MSGError($"{e.Exception.Message}");
-                    var msg = $"Threaded unhandled Exception: {e.Exception}";
-                    Console.WriteLine(msg);
-                };
-
-                EventHandler<UnobservedTaskExceptionEventArgs> onUnobservedTaskException = (s, e) =>
-                {
-                    System.Media.SystemSounds.Beep.Play();
-                    Event.MSGError($"{e.Exception.Message}");
-                    var msg = $"Unobserved task Exception: {e.Exception}";
-                    Console.WriteLine(msg);
-
-                    // set observerd 처리 안하면 re-throw 됨
-                    e.SetObserved();
-                };
-
-                EmException.InstallUnhandledExceptionHandler(unhandled, threadedUnhandled, onUnobservedTaskException);
-            }
         }
     }
 

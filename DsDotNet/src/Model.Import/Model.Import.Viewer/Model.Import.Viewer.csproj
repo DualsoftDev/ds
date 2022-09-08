@@ -12,6 +12,7 @@
     <PackageReference Include="Microsoft.Msagl.GraphViewerGDI" Version="1.1.3" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Engine.Common\Engine.Common.csproj" />
     <ProjectReference Include="..\Model.Import.Office\Model.Import.Office.fsproj" />
   </ItemGroup>
 

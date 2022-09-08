@@ -2,6 +2,8 @@ using System.IO;
 using System.Configuration;
 using Engine.Common.FS;
 using System.Threading;
+using System.Reflection;
+using System.Windows.Forms;
 
 namespace Engine;
 
@@ -44,6 +46,7 @@ class Program
         //PrepareThreadPool();
         PrepareLog4Net();
         SimpleExceptionHandler.InstallExceptionHandler();
+        DllVersionChecker.IsValidExDLL(Assembly.GetExecutingAssembly());
 
         //Tester.DoSampleTestVps();
         //Tester.DoSampleTest();

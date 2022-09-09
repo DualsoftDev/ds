@@ -26,7 +26,7 @@ module Object =
     and
         /// 사용자가 모델링을 통해서 만든 segment (SegEditor = User)
         [<DebuggerDisplay("{ToText()}")>]
-        Seg(name:string, baseSystem:DsSystem, editor:Editor, location:Bound, nodeCausal:NodeCausal,  ownerFlo:string) as this =
+        Seg(name:string, baseSystem:DsSystem, editor:Editor, location:Bound, nodeCausal:NodeCausal,  ownerFlow:string) as this =
             inherit SegBase(name,  baseSystem)
             /// modeled edges
             let mutable status = Status.H
@@ -56,7 +56,7 @@ module Object =
             member val ShapeID = 0u with get, set
             member val CountTX = 0 with get, set
             member val CountRX = 0 with get, set
-            member x.OwnerFlo = ownerFlo
+            member x.OwnerFlow = ownerFlow
             member x.DisplayName  = if(this.Alias.IsSome) then this.Alias.Value else name
             
             ///공백은'_' 로 일괄 변환한다.
@@ -64,15 +64,15 @@ module Object =
             member x.ToText() =  let _name =  this.Name.Replace(" ","_") 
                                  if(IsInvalidName(_name))  then $"\"{_name}\"" else _name
 
-            member x.ToTextInFlo() =  match nodeCausal with
-                                         |MY -> x.ToText()
-                                         |TR |TX |RX -> sprintf "%s.%s" x.OwnerFlo (x.ToText())
+            member x.ToTextInFlow() =  match nodeCausal with
+                                         |MY         -> x.ToText()
+                                         |TR |TX |RX -> sprintf "%s_T.%s" x.OwnerFlow (x.ToText())
                                          |EX         -> sprintf "EX.%s.TR" (x.ToText())
-                                         |DUMMY -> failwith "DUMMY no name";
+                                         |DUMMY      -> failwith "DUMMY no name";
             
-            member x.ToCallText() = let callName = sprintf "%s_%s"   this.OwnerFlo (x.Name.Replace(" ","_")) 
+            member x.ToCallText() = let callName = sprintf "%s_%s"   this.OwnerFlow (x.Name.Replace(" ","_")) 
                                     if(IsInvalidName(callName))  then $"\"{callName}\"" else callName
-            member x.ToFullPath() = sprintf "%s.%s.%s" baseSystem.Name this.OwnerFlo (this.ToText())
+            member x.ToLayOutPath() = sprintf "%s.%s" baseSystem.Name (this.ToTextInFlow())
 
             member x.Update(nodeKey, nodeIdValue, nodeAlias, nodeCntTX, nodeCntRX) = 
                         this.Key <- nodeKey
@@ -300,7 +300,7 @@ module Object =
                     |> Seq.append noEdgesSegs
                     |> Seq.distinct
 
-            member x.RootFlo()    = flows
+            member x.RootFlow()    = flows
                                      |> Seq.sortBy(fun flow -> flow.Key)
                                      |> Seq.map(fun flow -> flow.Value)
                                      |> Seq.filter(fun flow -> (flow.Page = Int32.MaxValue)|>not)  //Int32.MaxValue 는 데모 flow

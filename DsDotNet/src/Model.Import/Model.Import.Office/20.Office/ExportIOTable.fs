@@ -36,17 +36,17 @@ module ExportIOTable =
         let rows =
             seq {
                 for sys in  model.TotalSystems do
-                    let flows = sys.RootFlo() |> Seq.filter(fun flow -> (flow.Page = Int32.MaxValue)|>not)
+                    let flows = sys.RootFlow() |> Seq.filter(fun flow -> (flow.Page = Int32.MaxValue)|>not)
                     //Flo 출력
                     for flow in flows do
                         //Call Task 출력
                         for callSeg in flow.CallSegs() do
                             for index in [|1..callSeg.MaxCnt|] do
                                 let causal, trx = callSeg.PrintfTRX(index, true)
-                                yield rowItems(causal, callSeg.Name, callSeg.OwnerFlo, trx)
+                                yield rowItems(causal, callSeg.Name, callSeg.OwnerFlow, trx)
                         //Ex Task 출력
                         for callSeg in flow.ExSegs() do
-                            yield rowItems(EX, callSeg.Name, callSeg.OwnerFlo, "EX")
+                            yield rowItems(EX, callSeg.Name, callSeg.OwnerFlow, "EX")
             }
         rows
         |> Seq.iter(fun row -> 

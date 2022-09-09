@@ -66,6 +66,8 @@ namespace Dual.Model.Import
                         pictureBox_xls.Visible = true;
                         button_TestORG.Visible = true;
                         button_TestStart.Visible = true;
+                        button_Compile.Visible = true;
+                        button_Run.Visible = true;
                         button_copy.Visible = false;
                     });
 
@@ -163,7 +165,7 @@ namespace Dual.Model.Import
 
         internal void CreateNewTabViewer(DsSystem sys)
         {
-            var flows = sys.RootFlo();
+            var flows = sys.RootFlow();
             var flowTotalCnt = flows.Count();
             flows.ToList().ForEach(f =>
             {

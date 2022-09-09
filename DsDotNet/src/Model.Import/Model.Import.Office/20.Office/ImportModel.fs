@@ -1,4 +1,4 @@
-﻿// Copyright (c) Dual Inc.  All Rights Reserved.
+// Copyright (c) Dual Inc.  All Rights Reserved.
 namespace Model.Import.Office
 
 open System.Linq
@@ -183,7 +183,7 @@ module ImportModel =
                 |> Seq.filter(fun node -> node.PageNum = doc.VisibleLast().PageNum)
                 |> Seq.filter(fun node -> node.Name = ""|>not)
                 |> Seq.filter(fun node -> node.NodeCausal.IsLocation)
-                |> Seq.iter(fun node -> mySys.LocationSet.TryAdd(dicSeg.[node.Key].ToFullPath(), node.Rectangle) |> ignore)
+                |> Seq.iter(fun node -> mySys.LocationSet.TryAdd(dicSeg.[node.Key].ToLayOutPath(), node.Rectangle) |> ignore)
             
                 Event.MSGInfo($"전체 장표   count [{doc.Pages.Count()}]")
                 Event.MSGInfo($"전체 도형   count [{doc.Nodes.Count()}]")

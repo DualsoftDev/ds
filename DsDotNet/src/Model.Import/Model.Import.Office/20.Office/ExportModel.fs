@@ -51,14 +51,14 @@ module ExportModel =
             //src(s) -> tgt
             let mixEdges = tgtSegs |> Seq.map(fun (edge, tgtSeg) -> edges  |> Seq.filter(fun findEdge -> findEdge.Target.Key = tgtSeg.Key)  
                                                                            |> Seq.filter(fun findEdge -> findEdge.Causal = edge.Causal)  
-                                                                           |> Seq.map(fun edge -> edge.Source.ToTextInFlo())
-                                                                   ,edge , tgtSeg.ToTextInFlo())
+                                                                           |> Seq.map(fun edge -> edge.Source.ToTextInFlow())
+                                                                   ,edge , tgtSeg.ToTextInFlow())
             
             mixEdges 
             
         let subEdgeText(seg:Seg) =
             seq {
-                yield sprintf "\t\t%s = {"(seg.ToTextInFlo())
+                yield sprintf "\t\t%s = {"(seg.ToTextInFlow())
                 let mergeEdges = mergeEdges  seg.MEdges
                 for srcs, edge, tgt in mergeEdges do
                     yield sprintf "\t\t\t%s %s %s;"  (srcs |> String.concat ", ") (edge.Causal.ToText()) (tgt)
@@ -67,9 +67,9 @@ module ExportModel =
 
         let subNodeText(seg:Seg) =
             seq {
-                yield sprintf "\t\t%s = {"(seg.ToTextInFlo())
+                yield sprintf "\t\t%s = {"(seg.ToTextInFlow())
                 for segSub in seg.NoEdgeSegs do
-                    yield sprintf "\t\t\t%s;" (segSub.ToTextInFlo())
+                    yield sprintf "\t\t\t%s;" (segSub.ToTextInFlow())
                 yield sprintf "\t\t}"
             }
 
@@ -98,9 +98,13 @@ module ExportModel =
             } 
         let mySystem = 
             seq {
+                yield sprintf "//////////////////////////////////////////////////////"
+                yield sprintf "//DTS model auto generation from %s" model.Path 
+              //  yield sprintf "//DTS model auto generation"
+                yield sprintf "//////////////////////////////////////////////////////"
                 for sys in  model.TotalSystems do
                     yield sprintf "[sys] %s = {"sys.Name
-                    let flows = sys.RootFlo() 
+                    let flows = sys.RootFlow() 
                     for flow in flows do
                         //Flo 출력
                         yield sprintf "\t[flow] %s = { \t" (flow.ToText())
@@ -108,7 +112,7 @@ module ExportModel =
                         yield! segmentText (flow.ExportSegs)
                         yield "\t}"
                         //Task 출력
-                        yield sprintf "\t[task] %s = {" (flow.ToText())
+                        yield sprintf "\t[task] %s_T = {" (flow.ToText())
                         for callSeg in flow.CallSegs() do
                             yield callText(callSeg)
 
@@ -148,7 +152,7 @@ module ExportModel =
                             yield sprintf "\t\t%s = {%s};" obs.Key obs.Value
                         yield "\t}"
 
-                yield sprintf "} //%s" model.Path 
+                yield sprintf "}"  
                 yield ""
             }
 
@@ -156,14 +160,17 @@ module ExportModel =
             seq {
                 yield sprintf "[cpus] AllCpus = {" 
                 for sys in model.TotalSystems do
-                    yield sprintf "\t[cpu] = Cpu_%s {" sys.Name
-                    let flows = sys.RootFlo() 
-                    for flow in flows do    //my CPU
-                        yield sprintf "\t\t%s.%s" sys.Name (flow.ToText())
-                    for flow in flows do    //ex CPU
+                    yield sprintf "\t[cpu] Cpu_%s = {" sys.Name
+                    let flows = sys.RootFlow() 
+                    //my CPU
+                    for flow in flows do    
+                        yield sprintf "\t\t%s.%s;" sys.Name (flow.ToText())
+                    yield "\t}"
+                    //ex CPU
+                    yield sprintf "\t[cpu] Cpu_EX = {" 
+                    for flow in flows do  
                         for callSeg in (flow.CallSegs() |> Seq.append (flow.ExSegs())) do
-                            yield sprintf "\t\tEX.%s" (callSeg.ToCallText())
-                        
+                            yield sprintf "\t\tEX.%s;" (callSeg.ToCallText())
                     yield "\t}"
                 yield "}"
             }  
@@ -171,8 +178,8 @@ module ExportModel =
         let address = 
             seq {
                 for sys in model.TotalSystems do
-                    yield sprintf "[address] = {" 
-                    let flows = sys.RootFlo() 
+                    yield sprintf "[addresses] = {" 
+                    let flows = sys.RootFlow() 
                     for flow in flows do
                         for callSeg in flow.CallSegs() do
                             for index in [|1..callSeg.MaxCnt|] do
@@ -211,10 +218,10 @@ module ExportModel =
                 
                 for sys in model.TotalSystems do
                     yield sprintf "//////////////////////////////////////////////////////"
-                    yield sprintf "//%s DS system auto generation ExSegs"sys.Name
+                    yield sprintf "//DTS auto generation %s ExSegs"sys.Name
                     yield sprintf "//////////////////////////////////////////////////////"
                     yield sprintf "[sys] EX = {" 
-                    for flow in sys.RootFlo()  do
+                    for flow in sys.RootFlow()  do
                             
                         // Call InterLock
                         for calls in flow.Interlockedges do

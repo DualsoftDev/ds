@@ -609,7 +609,7 @@ public class Tester
         engine.Wait();
     }
 
-    public static void DoSampleTestDiamond()
+    public static string GetTextDiamond()
     {
         var text = @"
 [sys] L = {
@@ -651,11 +651,15 @@ public class Tester
     }
 }
 " + CreateCylinder("A") + "\r\n" + CreateCylinder("B");
-
+        return text;
+    }
+    public static void DoSampleTestDiamond()
+    {
+        
         //Log4NetHelper.ChangeLogLevel(log4net.Core.Level.Error);
 
         Assert(!Global.IsInUnitTest);
-        var engine = new EngineBuilder(text, "Cpu").Engine;
+        var engine = new EngineBuilder(GetTextDiamond(), "Cpu").Engine;
         Program.Engine = engine;
         engine.Run();
 

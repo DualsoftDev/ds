@@ -38,15 +38,15 @@ namespace Dual.Model.Import
             this.pictureBox_xls = new System.Windows.Forms.PictureBox();
             this.button_copy = new System.Windows.Forms.Button();
             this.richTextBox_ds = new System.Windows.Forms.RichTextBox();
-            this.splitContainer4 = new System.Windows.Forms.SplitContainer();
+            this.button_Run = new System.Windows.Forms.Button();
             this.button_TestStart = new System.Windows.Forms.Button();
             this.button_TestORG = new System.Windows.Forms.Button();
+            this.splitContainer4 = new System.Windows.Forms.SplitContainer();
             this.button_ClearLog = new System.Windows.Forms.Button();
             this.richTextBox_Debug = new System.Windows.Forms.RichTextBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.splitter1 = new System.Windows.Forms.Splitter();
             this.button_Compile = new System.Windows.Forms.Button();
-            this.button_Run = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -110,10 +110,6 @@ namespace Dual.Model.Import
             // 
             // splitContainer2.Panel2
             // 
-            this.splitContainer2.Panel2.Controls.Add(this.button_Run);
-            this.splitContainer2.Panel2.Controls.Add(this.button_Compile);
-            this.splitContainer2.Panel2.Controls.Add(this.button_TestStart);
-            this.splitContainer2.Panel2.Controls.Add(this.button_TestORG);
             this.splitContainer2.Panel2.Controls.Add(this.button_copy);
             this.splitContainer2.Panel2.Controls.Add(this.richTextBox_ds);
             this.splitContainer2.Size = new System.Drawing.Size(540, 603);
@@ -187,6 +183,42 @@ namespace Dual.Model.Import
             this.richTextBox_ds.TabIndex = 2;
             this.richTextBox_ds.Text = "";
             // 
+            // button_Run
+            // 
+            this.button_Run.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_Run.Location = new System.Drawing.Point(1168, 55);
+            this.button_Run.Name = "button_Run";
+            this.button_Run.Size = new System.Drawing.Size(85, 23);
+            this.button_Run.TabIndex = 3;
+            this.button_Run.Text = "Run";
+            this.button_Run.UseVisualStyleBackColor = true;
+            this.button_Run.Visible = false;
+            this.button_Run.Click += new System.EventHandler(this.button_Run_Click);
+            // 
+            // button_TestStart
+            // 
+            this.button_TestStart.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_TestStart.Location = new System.Drawing.Point(1259, 55);
+            this.button_TestStart.Name = "button_TestStart";
+            this.button_TestStart.Size = new System.Drawing.Size(85, 23);
+            this.button_TestStart.TabIndex = 1;
+            this.button_TestStart.Text = "TEST 시작";
+            this.button_TestStart.UseVisualStyleBackColor = true;
+            this.button_TestStart.Visible = false;
+            this.button_TestStart.Click += new System.EventHandler(this.button_TestStart_Click);
+            // 
+            // button_TestORG
+            // 
+            this.button_TestORG.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_TestORG.Location = new System.Drawing.Point(1259, 29);
+            this.button_TestORG.Name = "button_TestORG";
+            this.button_TestORG.Size = new System.Drawing.Size(85, 23);
+            this.button_TestORG.TabIndex = 1;
+            this.button_TestORG.Text = "TEST원위치";
+            this.button_TestORG.UseVisualStyleBackColor = true;
+            this.button_TestORG.Visible = false;
+            this.button_TestORG.Click += new System.EventHandler(this.button_TestORG_Click);
+            // 
             // splitContainer4
             // 
             this.splitContainer4.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -200,35 +232,15 @@ namespace Dual.Model.Import
             // 
             // splitContainer4.Panel2
             // 
+            this.splitContainer4.Panel2.Controls.Add(this.button_Compile);
+            this.splitContainer4.Panel2.Controls.Add(this.button_TestStart);
+            this.splitContainer4.Panel2.Controls.Add(this.button_Run);
+            this.splitContainer4.Panel2.Controls.Add(this.button_TestORG);
             this.splitContainer4.Panel2.Controls.Add(this.button_ClearLog);
             this.splitContainer4.Panel2.Controls.Add(this.richTextBox_Debug);
             this.splitContainer4.Size = new System.Drawing.Size(1373, 746);
             this.splitContainer4.SplitterDistance = 603;
             this.splitContainer4.TabIndex = 20;
-            // 
-            // button_TestStart
-            // 
-            this.button_TestStart.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_TestStart.Location = new System.Drawing.Point(426, 340);
-            this.button_TestStart.Name = "button_TestStart";
-            this.button_TestStart.Size = new System.Drawing.Size(85, 23);
-            this.button_TestStart.TabIndex = 1;
-            this.button_TestStart.Text = "TEST 시작";
-            this.button_TestStart.UseVisualStyleBackColor = true;
-            this.button_TestStart.Visible = false;
-            this.button_TestStart.Click += new System.EventHandler(this.button_TestStart_Click);
-            // 
-            // button_TestORG
-            // 
-            this.button_TestORG.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_TestORG.Location = new System.Drawing.Point(426, 314);
-            this.button_TestORG.Name = "button_TestORG";
-            this.button_TestORG.Size = new System.Drawing.Size(85, 23);
-            this.button_TestORG.TabIndex = 1;
-            this.button_TestORG.Text = "TEST원위치";
-            this.button_TestORG.UseVisualStyleBackColor = true;
-            this.button_TestORG.Visible = false;
-            this.button_TestORG.Click += new System.EventHandler(this.button_TestORG_Click);
             // 
             // button_ClearLog
             // 
@@ -273,24 +285,14 @@ namespace Dual.Model.Import
             // button_Compile
             // 
             this.button_Compile.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_Compile.Location = new System.Drawing.Point(426, 53);
+            this.button_Compile.Location = new System.Drawing.Point(1168, 29);
             this.button_Compile.Name = "button_Compile";
             this.button_Compile.Size = new System.Drawing.Size(85, 23);
-            this.button_Compile.TabIndex = 3;
+            this.button_Compile.TabIndex = 4;
             this.button_Compile.Text = "Compile";
             this.button_Compile.UseVisualStyleBackColor = true;
+            this.button_Compile.Visible = false;
             this.button_Compile.Click += new System.EventHandler(this.button_Compile_Click);
-            // 
-            // button_Run
-            // 
-            this.button_Run.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_Run.Location = new System.Drawing.Point(426, 82);
-            this.button_Run.Name = "button_Run";
-            this.button_Run.Size = new System.Drawing.Size(85, 23);
-            this.button_Run.TabIndex = 3;
-            this.button_Run.Text = "Run";
-            this.button_Run.UseVisualStyleBackColor = true;
-            this.button_Run.Click += new System.EventHandler(this.button_Run_Click);
             // 
             // FormMain
             // 
@@ -302,6 +304,7 @@ namespace Dual.Model.Import
             this.Controls.Add(this.splitter1);
             this.Controls.Add(this.progressBar1);
             this.ForeColor = System.Drawing.Color.SlateBlue;
+            this.Icon = global::Model.Import.Viewer.Properties.Resources.logo_Dualsoft;
             this.IsMdiContainer = true;
             this.Name = "FormMain";
             this.Text = "Dualsoft";

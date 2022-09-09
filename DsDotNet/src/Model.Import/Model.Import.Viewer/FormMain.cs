@@ -139,14 +139,7 @@ namespace Dual.Model.Import
             WriteDebugMsg(DateTime.Now, MSGLevel.Info, $"클립보드복사 성공!! Ctrl+V로 붙여넣기 가능합니다.");
 
         }
-        private void button_ClearLog_Click(object sender, EventArgs e)
-        {
-            richTextBox_Debug.Clear();
-            richTextBox_Debug.AppendText($"{DateTime.Now} : Log Clear");
-
-
-
-        }
+     
         private void button_CreateExcel_Click(object sender, EventArgs e)
         {
             ExportExcel();
@@ -173,17 +166,43 @@ namespace Dual.Model.Import
             button_TestStart.Enabled = true;
         }
 
+        private void button_ClearLog_Click(object sender, EventArgs e)
+        {
+            richTextBox_Debug.Clear();
+            richTextBox_Debug.AppendText($"{DateTime.Now} : Log Clear");
+
+            try
+            {
+                var modelText = Tester.GetTextDiamond();
+                var eb = new EngineBuilder(modelText, "Cpu");
+            }
+
+            catch (Exception ex)
+            {
+                WriteDebugMsg(DateTime.Now, MSGLevel.Error, ex.Message);
+            }
+         
+
+        }
         private void button_Compile_Click(object sender, EventArgs e)
         {
-            var modelText = richTextBox_ds.Text;
+            try
+            {
+                var modelText = richTextBox_ds.Text;
+                var eb = new EngineBuilder(modelText, $"Cpu_{_model.ActiveSys.Name}");
+            }
 
-            var eb = new EngineBuilder(modelText, $"Cpu_{_model.ActiveSys.Name}");
-
+            catch (Exception ex)
+            {
+                WriteDebugMsg(DateTime.Now, MSGLevel.Error, ex.Message);
+            }
         }
 
         private void button_Run_Click(object sender, EventArgs e)
         {
 
         }
+
+      
     }
 }

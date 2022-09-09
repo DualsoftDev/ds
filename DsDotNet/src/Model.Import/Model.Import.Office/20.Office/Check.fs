@@ -1,4 +1,4 @@
-﻿// Copyright (c) Dual Inc.  All Rights Reserved.
+// Copyright (c) Dual Inc.  All Rights Reserved.
 namespace Model.Import.Office
 
 open System.Linq
@@ -70,7 +70,7 @@ module Check =
         
         let SameEdgeErr(parentNode:pptNode option, pptEdge:pptEdge, mEdge:MEdge, dicSameCheck:ConcurrentDictionary<string, MEdge>) = 
             let parentName = if(parentNode.IsSome) 
-                             then sprintf "%s.%s"  (mEdge.Source.OwnerFlo) (parentNode.Value.Name) 
+                             then sprintf "%s.%s"  (mEdge.Source.OwnerFlow) (parentNode.Value.Name) 
                              else ""
             if(dicSameCheck.TryAdd(mEdge.ToCheckText(parentName), mEdge)|>not)
                 then

@@ -1,3 +1,5 @@
+using Engine;
+using Engine.Core;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -18,7 +20,7 @@ namespace Dual.Model.Import
         private DsModel _model;
         private bool _ConvertErr = false;
 
-        public Dictionary<Flow, TabPage> DicUI;
+        public Dictionary<Flo, TabPage> DicUI;
         public string PathPPT;
         public string PathXLS;
         public bool Busy = false;
@@ -46,7 +48,7 @@ namespace Dual.Model.Import
             EventExternal.MSGSubscribe();
             EventExternal.SegSubscribe();
 
-            DicUI = new Dictionary<Flow, TabPage>();
+            DicUI = new Dictionary<Flo, TabPage>();
 
             // this.Text = UtilFile.GetVersion();
             this.Size = new Size(500, 500);
@@ -158,7 +160,7 @@ namespace Dual.Model.Import
         {
             button_TestORG.Enabled = false;
             button_TestStart.Enabled = false;
-            await SimSegment.TestORG(_model);
+            await SimSeg.TestORG(_model);
             button_TestORG.Enabled = true;
             button_TestStart.Enabled = true;
         }
@@ -166,9 +168,22 @@ namespace Dual.Model.Import
         {
             button_TestORG.Enabled = false;
             button_TestStart.Enabled = false;
-            await SimSegment.TestStart(_model);
+            await SimSeg.TestStart(_model);
             button_TestORG.Enabled = true;
             button_TestStart.Enabled = true;
+        }
+
+        private void button_Compile_Click(object sender, EventArgs e)
+        {
+            var modelText = richTextBox_ds.Text;
+
+            var eb = new EngineBuilder(modelText, $"Cpu_{_model.ActiveSys.Name}");
+
+        }
+
+        private void button_Run_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

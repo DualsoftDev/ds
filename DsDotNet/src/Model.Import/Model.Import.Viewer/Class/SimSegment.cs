@@ -7,7 +7,7 @@ using static Model.Import.Office.Type;
 
 namespace Dual.Model.Import
 {
-    public static class SimSegment
+    public static class SimSeg
     {
         static readonly List<NodeCausal> mys = new List<NodeCausal>() { NodeCausal.MY };
         static readonly List<NodeCausal> notMys = new List<NodeCausal>() { NodeCausal.EX, NodeCausal.TR, NodeCausal.TX, NodeCausal.RX, NodeCausal.DUMMY };
@@ -23,7 +23,7 @@ namespace Dual.Model.Import
         }
 
 
-        private static async Task Test(IEnumerable<Segment> rootSegs, Status status, List<NodeCausal> showList)
+        private static async Task Test(IEnumerable<Seg> rootSegs, Status status, List<NodeCausal> showList)
         {
             foreach (var seg in rootSegs)
             {
@@ -42,8 +42,8 @@ namespace Dual.Model.Import
         {
             if (model == null) return;
 
-            var rootSegs = model.ActiveSys.RootSegments();
-            var notRootSegs = model.ActiveSys.NotRootSegments();
+            var rootSegs = model.ActiveSys.RootSegs();
+            var notRootSegs = model.ActiveSys.NotRootSegs();
             await Task.Run(async () =>
             {
                 await Test(rootSegs, Status.H, AllSeg);
@@ -59,10 +59,10 @@ namespace Dual.Model.Import
 
             org = true;
         }
-        private static List<Segment> getHeads(Dictionary<Segment, Segment> dic, Dictionary<MEdge, MEdge> dicEdge)
+        private static List<Seg> getHeads(Dictionary<Seg, Seg> dic, Dictionary<MEdge, MEdge> dicEdge)
         {
-            List<Segment> tgts = dicEdge.Values.Select(edge => edge.Target).Distinct().ToList();
-            List<Segment> heads = dic.Values.Where(s => !tgts.Contains(s)).ToList();
+            List<Seg> tgts = dicEdge.Values.Select(edge => edge.Target).Distinct().ToList();
+            List<Seg> heads = dic.Values.Where(s => !tgts.Contains(s)).ToList();
             List<MEdge> findEdges = dicEdge.Values
                 //  .Where(edge => edge.Causal.IsStart)
                 .Where(edge => heads.Contains(edge.Source)).ToList();
@@ -74,7 +74,7 @@ namespace Dual.Model.Import
         }
 
 
-        private static async Task runSegment(IEnumerable<Segment> segs, IEnumerable<MEdge> runEdges)
+        private static async Task runSeg(IEnumerable<Seg> segs, IEnumerable<MEdge> runEdges)
         {
             var dicSeg = segs.ToDictionary(d => d);
             var dicEdge = runEdges.ToDictionary(d => d);
@@ -84,7 +84,7 @@ namespace Dual.Model.Import
                 foreach (var seg in runEdges.SelectMany(s => s.Nodes).Distinct())
                 {
                     if (dicSeg.Count() == 0) break;
-                    List<Segment> heads = getHeads(dicSeg, dicEdge);
+                    List<Seg> heads = getHeads(dicSeg, dicEdge);
 
                     await Test(heads, Status.G, AllSeg);
                     await Task.Delay(50);
@@ -98,7 +98,7 @@ namespace Dual.Model.Import
             if (model == null) return;
             if (!org) await TestORG(model);
 
-            var dicSeg = model.ActiveSys.RootSegments().ToDictionary(d => d);
+            var dicSeg = model.ActiveSys.RootSegs().ToDictionary(d => d);
             var dicEdge = model.ActiveSys.RootEdges().ToDictionary(d => d);
 
             await Task.Run(async () =>
@@ -108,13 +108,13 @@ namespace Dual.Model.Import
                 {
                     if (dicSeg.Count() == 0) break;
 
-                    List<Segment> heads = getHeads(dicSeg, dicEdge);
+                    List<Seg> heads = getHeads(dicSeg, dicEdge);
                     await Test(heads, Status.G, AllSeg);
                     await Task.Delay(50);
 
                     foreach (var seg in heads)
                     {
-                        await runSegment(seg.ChildSegs, seg.MEdges);
+                        await runSeg(seg.ChildSegs, seg.MEdges);
                     }
 
                     await Test(heads, Status.F, AllSeg);

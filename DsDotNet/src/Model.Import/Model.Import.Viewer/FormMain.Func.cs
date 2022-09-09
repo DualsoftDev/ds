@@ -163,7 +163,7 @@ namespace Dual.Model.Import
 
         internal void CreateNewTabViewer(DsSystem sys)
         {
-            var flows = sys.RootFlow();
+            var flows = sys.RootFlo();
             var flowTotalCnt = flows.Count();
             flows.ToList().ForEach(f =>
             {
@@ -189,7 +189,7 @@ namespace Dual.Model.Import
         }
         internal void RefreshGraph()
         {
-            foreach (KeyValuePair<Flow, TabPage> view in DicUI)
+            foreach (KeyValuePair<Flo, TabPage> view in DicUI)
             {
                 foreach (var seg in view.Key.UsedSegs)
                 {

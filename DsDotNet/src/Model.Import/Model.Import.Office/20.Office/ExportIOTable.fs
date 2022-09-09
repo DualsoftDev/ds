@@ -16,7 +16,7 @@ module ExportIOTable =
 
         let dt = new System.Data.DataTable($"{model.Name}")
         dt.Columns.Add("Case", typeof<obj>) |>ignore
-        dt.Columns.Add("Flow", typeof<string>) |>ignore
+        dt.Columns.Add("Flo", typeof<string>) |>ignore
         dt.Columns.Add("Name", typeof<string>) |>ignore
         dt.Columns.Add("Type", typeof<string>) |>ignore
         dt.Columns.Add("Size", typeof<string>) |>ignore
@@ -36,17 +36,17 @@ module ExportIOTable =
         let rows =
             seq {
                 for sys in  model.TotalSystems do
-                    let flows = sys.RootFlow() |> Seq.filter(fun flow -> (flow.Page = Int32.MaxValue)|>not)
-                    //Flow 출력
+                    let flows = sys.RootFlo() |> Seq.filter(fun flow -> (flow.Page = Int32.MaxValue)|>not)
+                    //Flo 출력
                     for flow in flows do
                         //Call Task 출력
-                        for callSeg in flow.CallSegments() do
+                        for callSeg in flow.CallSegs() do
                             for index in [|1..callSeg.MaxCnt|] do
                                 let causal, trx = callSeg.PrintfTRX(index, true)
-                                yield rowItems(causal, callSeg.Name, callSeg.OwnerFlow, trx)
+                                yield rowItems(causal, callSeg.Name, callSeg.OwnerFlo, trx)
                         //Ex Task 출력
-                        for callSeg in flow.ExSegments() do
-                            yield rowItems(EX, callSeg.Name, callSeg.OwnerFlow, "EX")
+                        for callSeg in flow.ExSegs() do
+                            yield rowItems(EX, callSeg.Name, callSeg.OwnerFlo, "EX")
             }
         rows
         |> Seq.iter(fun row -> 

@@ -13,6 +13,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Engine.Common\Engine.Common.csproj" />
+    <ProjectReference Include="..\..\Engine\Engine.csproj" />
     <ProjectReference Include="..\Model.Import.Office\Model.Import.Office.fsproj" />
   </ItemGroup>
 

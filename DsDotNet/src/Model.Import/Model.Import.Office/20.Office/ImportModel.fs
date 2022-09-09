@@ -16,8 +16,8 @@ module ImportModel =
 
     type internal ImportPowerPoint(path:string) =
         let doc = pptDoc(path)
-        let dicSeg = ConcurrentDictionary<string, Segment>()
-        let dicEdge = ConcurrentDictionary<MEdge, Segment>()  //childEdges, parentSeg
+        let dicSeg = ConcurrentDictionary<string, Seg>()
+        let dicEdge = ConcurrentDictionary<MEdge, Seg>()  //childEdges, parentSeg
         let model =  DsModel(doc.FullPath)
         let mySys= DsSystem("MY", true)
 
@@ -54,17 +54,17 @@ module ImportModel =
             updateAlias(edge.EndNode) 
             getParent(edge) |> Seq.iter(fun (parentNode, parentSeg) ->
                         
-                           mySys.Flows.[edge.PageNum].RemoveSegNoEdge(sSeg) 
-                           mySys.Flows.[edge.PageNum].RemoveSegNoEdge(eSeg) 
+                           mySys.Flos.[edge.PageNum].RemoveSegNoEdge(sSeg) 
+                           mySys.Flos.[edge.PageNum].RemoveSegNoEdge(eSeg) 
                            let mEdge = MEdge(sSeg, eSeg, edge.Causal)
 
                            if(mEdge.Causal = Interlock)
-                           then mySys.Flows.[edge.PageNum].AddInterlock(mEdge)
+                           then mySys.Flos.[edge.PageNum].AddInterlock(mEdge)
 
                            match parentNode with
                            |Some(v) -> if(v.PageNum = edge.PageNum) 
-                                       then mySys.Flows.[edge.PageNum].AddSegDrawSub(parentSeg) 
-                           |None -> mySys.Flows.[edge.PageNum].AddEdge(mEdge)
+                                       then mySys.Flos.[edge.PageNum].AddSegDrawSub(parentSeg) 
+                           |None -> mySys.Flos.[edge.PageNum].AddEdge(mEdge)
 
                            Check.SameEdgeErr(parentNode, edge, mEdge, dicSameCheck)
                            dicEdge.TryAdd(mEdge, parentSeg) |>ignore
@@ -80,8 +80,8 @@ module ImportModel =
 
                 //page 타이틀 중복체크 
                 let dicSamePage = ConcurrentDictionary<string, pptPage>()
-                let dicSameSeg  = ConcurrentDictionary<string, Segment>()
-                let dicFlowName  = ConcurrentDictionary<int, string>()
+                let dicSameSeg  = ConcurrentDictionary<string, Seg>()
+                let dicFloName  = ConcurrentDictionary<int, string>()
                 
                 doc.Pages |> Seq.iter(fun page ->  Check.SamePage(page, dicSamePage))
                 doc.Pages |> Seq.iter(fun page ->  
@@ -89,18 +89,18 @@ module ImportModel =
                                         let title = doc.GetPage(page.PageNum).Title
                                         if(title = "") then sprintf "P%d" page.PageNum else title
               
-                                    dicFlowName.TryAdd(page.PageNum, flowName)|>ignore)
+                                    dicFloName.TryAdd(page.PageNum, flowName)|>ignore)
 
                 //segment 리스트 만들기
                 doc.Nodes 
                 |> Seq.iter(fun node -> 
-                    Check.ValidFlowPath(node, dicFlowName)
-                    let realFlow, realName  = 
+                    Check.ValidFloPath(node, dicFloName)
+                    let realFlo, realName  = 
                         if(node.Name.Contains('.')) 
                         then node.Name.Split('.').[0], node.Name
-                        else dicFlowName.[node.PageNum], node.Name
+                        else dicFloName.[node.PageNum], node.Name
 
-                    let seg = Segment(realName, mySys, node.NodeCausal,  realFlow)
+                    let seg = Seg(realName, mySys, node.NodeCausal,  realFlo)
                     seg.Update(node.Key, node.Id.Value, node.Alias, node.CntTX, node.CntRX )
                     dicSeg.TryAdd(node.Key, seg) |> ignore
                     
@@ -111,11 +111,11 @@ module ImportModel =
                 doc.Nodes 
                 |> Seq.filter(fun node -> node.NodeCausal = DUMMY|>not)
                 |> Seq.iter(fun node -> 
-                                let name  = dicFlowName.[node.PageNum]
-                                let flow  = Flow(name, node.PageNum, mySys)
+                                let name  = dicFloName.[node.PageNum]
+                                let flow  = Flo(name, node.PageNum, mySys)
                                
-                                mySys.Flows.TryAdd(node.PageNum, flow)|>ignore
-                                mySys.Flows.[node.PageNum].AddSegNoEdge(dicSeg.[node.Key]))
+                                mySys.Flos.TryAdd(node.PageNum, flow)|>ignore
+                                mySys.Flos.[node.PageNum].AddSegNoEdge(dicSeg.[node.Key]))
                                 
                 //Dummy child 처리
                 doc.Parents
@@ -127,7 +127,7 @@ module ImportModel =
                     |> Seq.iter(fun child ->  
                                 let cSeg = dicSeg.[child.Key]
                                 pSeg.AddSegNoEdge(cSeg)
-                                mySys.Flows.[parent.PageNum].RemoveSegNoEdge(cSeg) 
+                                mySys.Flos.[parent.PageNum].RemoveSegNoEdge(cSeg) 
                                // child.ExistChildEdge <- true
                                 )
                 )
@@ -167,9 +167,9 @@ module ImportModel =
                             |> Seq.iter(fun child -> 
                                                 //행위 부모 할당후 
                                                 pSeg.AddSegNoEdge(dicSeg.[child.Key])
-                                                //Flow 상에서 삭제
-                                                mySys.Flows.[parent.PageNum].RemoveSegNoEdge(dicSeg.[child.Key]) 
-                                                mySys.Flows.[parent.PageNum].AddSegDrawSub(pSeg) 
+                                                //Flo 상에서 삭제
+                                                mySys.Flos.[parent.PageNum].RemoveSegNoEdge(dicSeg.[child.Key]) 
+                                                mySys.Flos.[parent.PageNum].AddSegDrawSub(pSeg) 
                                                     )
                 )
 

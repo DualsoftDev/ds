@@ -1,4 +1,4 @@
-﻿// Copyright (c) Dual Inc.  All Rights Reserved.
+// Copyright (c) Dual Inc.  All Rights Reserved.
 namespace Model.Import.Office
 
 open System.Runtime.CompilerServices
@@ -12,7 +12,7 @@ module Event =
     
     type MSGLevel = |Info | Warn | Error
     type MSGParam = |MSG of Time:DateTime * Level:MSGLevel * Message:string
-    type SegParam = |SEG of Time:DateTime * Segment:SegmentBase * Status:Status
+    type SegParam = |SEG of Time:DateTime * Seg:SegBase * Status:Status
     type ProParam = |PRO of Time:DateTime * pro:int
 
     let MSGSubject = new Subject<MSGParam>()
@@ -23,7 +23,7 @@ module Event =
     let MSGWarn (text:string)  = MSGSubject.OnNext(MSGParam.MSG (DateTime.Now, Warn, text))
     let MSGError (text:string) = MSGSubject.OnNext(MSGParam.MSG (DateTime.Now, Error, text))
     let DoWork  (pro:int) = ProcessSubject.OnNext(ProParam.PRO (DateTime.Now, pro))
-    let ChangeStatus (seg:SegmentBase, status:Status) = 
+    let ChangeStatus (seg:SegBase, status:Status) = 
         async {
             SegSubject.OnNext(SegParam.SEG (DateTime.Now, seg, status))
         } |> Async.StartImmediate

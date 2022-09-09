@@ -44,7 +44,7 @@ module ImportIOTable =
 
         let tableIO = FromExcel(path)
         
-        //Case	Flow	Name	    Type	Size	S(Output)	R(Output)	E(Input)
+        //Case	Flo	Name	    Type	Size	S(Output)	R(Output)	E(Input)
         //주소	P1	    AA	        I1	    bit	-	-	I9
         //주소	P1	    AA	        I2	    bit	-	-	I10
         //주소	S101	RBT3Right	IO	    bit	Q3	-	I13
@@ -66,8 +66,8 @@ module ImportIOTable =
                 |TagCase.Command -> sys.CommandSet.TryAdd($"{row.[2]}", $"{row.[5]}") |>ignore
                 |TagCase.Observe -> sys.ObserveSet.TryAdd($"{row.[2]}", $"{row.[7]}") |>ignore
             
-        for flow in sys.RootFlow()  do
-            flow.CallSegments() |> Seq.append (flow.ExSegments())
+        for flow in sys.RootFlo()  do
+            flow.CallSegs() |> Seq.append (flow.ExSegs())
             |> Seq.iter(fun seg -> 
                         let s, r, e = sys.AddressSet.[seg.Name]
                         seg.S <- s

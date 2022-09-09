@@ -10,7 +10,7 @@ module ExportModel =
 
     let ToText(model:DsModel) =
                                
-        let callText(seg:Segment) =
+        let callText(seg:Seg) =
             let callName =  seg.ToText()
             let tx, rx =
                 let txs = HashSet<string>()
@@ -28,7 +28,7 @@ module ExportModel =
 
             sprintf "\t\t%s\t = {%s\t~\t%s}" callName tx rx
 
-        let addressText(seg:Segment, index) =
+        let addressText(seg:Seg, index) =
             let callPath = seg.ToCallText()
             if(seg.NodeCausal = EX)
             then 
@@ -51,31 +51,31 @@ module ExportModel =
             //src(s) -> tgt
             let mixEdges = tgtSegs |> Seq.map(fun (edge, tgtSeg) -> edges  |> Seq.filter(fun findEdge -> findEdge.Target.Key = tgtSeg.Key)  
                                                                            |> Seq.filter(fun findEdge -> findEdge.Causal = edge.Causal)  
-                                                                           |> Seq.map(fun edge -> edge.Source.ToTextInFlow())
-                                                                   ,edge , tgtSeg.ToTextInFlow())
+                                                                           |> Seq.map(fun edge -> edge.Source.ToTextInFlo())
+                                                                   ,edge , tgtSeg.ToTextInFlo())
             
             mixEdges 
             
-        let subEdgeText(seg:Segment) =
+        let subEdgeText(seg:Seg) =
             seq {
-                yield sprintf "\t\t%s = {"(seg.ToTextInFlow())
+                yield sprintf "\t\t%s = {"(seg.ToTextInFlo())
                 let mergeEdges = mergeEdges  seg.MEdges
                 for srcs, edge, tgt in mergeEdges do
                     yield sprintf "\t\t\t%s %s %s;"  (srcs |> String.concat ", ") (edge.Causal.ToText()) (tgt)
                 yield sprintf "\t\t}"
             }
 
-        let subNodeText(seg:Segment) =
+        let subNodeText(seg:Seg) =
             seq {
-                yield sprintf "\t\t%s = {"(seg.ToTextInFlow())
+                yield sprintf "\t\t%s = {"(seg.ToTextInFlo())
                 for segSub in seg.NoEdgeSegs do
-                    yield sprintf "\t\t\t%s;" (segSub.ToTextInFlow())
+                    yield sprintf "\t\t\t%s;" (segSub.ToTextInFlo())
                 yield sprintf "\t\t}"
             }
 
-        //let checkDrawEdge(seg, drawSubs:Segment seq) = 
+        //let checkDrawEdge(seg, drawSubs:Seg seq) = 
         //    if(drawSubs.Contains(seg) && seg.MEdges.Any()) then true else false
-        //let checkDrawNode(seg, drawSubs:Segment seq) = 
+        //let checkDrawNode(seg, drawSubs:Seg seq) = 
         //    if(drawSubs.Contains(seg) && seg.NoEdgeSegs.Any()) then true else false
 
 
@@ -90,7 +90,7 @@ module ExportModel =
  
             } 
 
-        let segmentText(segs:Segment seq) = 
+        let segmentText(segs:Seg seq) = 
             seq {
                 for seg in segs do
                     if(seg.MEdges.Any())     then yield! subEdgeText (seg) 
@@ -100,16 +100,16 @@ module ExportModel =
             seq {
                 for sys in  model.TotalSystems do
                     yield sprintf "[sys] %s = {"sys.Name
-                    let flows = sys.RootFlow() |> Seq.filter(fun flow -> (flow.Page = Int32.MaxValue)|>not)
+                    let flows = sys.RootFlo() 
                     for flow in flows do
-                        //Flow 출력
-                        yield sprintf "\t[flow] %s = { \t" flow.Name 
+                        //Flo 출력
+                        yield sprintf "\t[flow] %s = { \t" (flow.ToText())
                         yield! edgeText    (flow.Edges)
                         yield! segmentText (flow.ExportSegs)
                         yield "\t}"
                         //Task 출력
-                        yield sprintf "\t[task] %s = {" flow.Name
-                        for callSeg in flow.CallSegments() do
+                        yield sprintf "\t[task] %s = {" (flow.ToText())
+                        for callSeg in flow.CallSegs() do
                             yield callText(callSeg)
 
                         yield "\t}"
@@ -151,18 +151,34 @@ module ExportModel =
                 yield sprintf "} //%s" model.Path 
                 yield ""
             }
-            
+
+        let cpus = 
+            seq {
+                yield sprintf "[cpus] AllCpus = {" 
+                for sys in model.TotalSystems do
+                    yield sprintf "\t[cpu] = Cpu_%s {" sys.Name
+                    let flows = sys.RootFlo() 
+                    for flow in flows do    //my CPU
+                        yield sprintf "\t\t%s.%s" sys.Name (flow.ToText())
+                    for flow in flows do    //ex CPU
+                        for callSeg in (flow.CallSegs() |> Seq.append (flow.ExSegs())) do
+                            yield sprintf "\t\tEX.%s" (callSeg.ToCallText())
+                        
+                    yield "\t}"
+                yield "}"
+            }  
+
         let address = 
             seq {
                 for sys in model.TotalSystems do
                     yield sprintf "[address] = {" 
-                    let flows = sys.RootFlow() |> Seq.filter(fun flow -> (flow.Page = Int32.MaxValue)|>not)
+                    let flows = sys.RootFlo() 
                     for flow in flows do
-                        for callSeg in flow.CallSegments() do
+                        for callSeg in flow.CallSegs() do
                             for index in [|1..callSeg.MaxCnt|] do
                             yield sprintf "\t%s" (addressText(callSeg, index))
 
-                        for exSeg in flow.ExSegments() do
+                        for exSeg in flow.ExSegs() do
                             for index in [|1..exSeg.MaxCnt|] do
                             yield sprintf "\t%s" (addressText(exSeg, index))
                     yield "}"
@@ -185,7 +201,7 @@ module ExportModel =
       
       
         let exSystem = 
-            let getTXs (segs: Segment seq) = 
+            let getTXs (segs: Seg seq) = 
                 seq {
                         for seg in segs do
                         yield sprintf "%s.TX" (seg.ToCallText()) 
@@ -195,10 +211,10 @@ module ExportModel =
                 
                 for sys in model.TotalSystems do
                     yield sprintf "//////////////////////////////////////////////////////"
-                    yield sprintf "//%s DS system auto generation ExSegments"sys.Name
+                    yield sprintf "//%s DS system auto generation ExSegs"sys.Name
                     yield sprintf "//////////////////////////////////////////////////////"
                     yield sprintf "[sys] EX = {" 
-                    for flow in sys.RootFlow()  do
+                    for flow in sys.RootFlo()  do
                             
                         // Call InterLock
                         for calls in flow.Interlockedges do
@@ -209,7 +225,7 @@ module ExportModel =
                         for call in flow.CallWithoutInterLock() do
                             yield sprintf "\t[flow] %s = { TX > RX }" (call.ToCallText()) 
                         //Ex 출력
-                        for exSeg in flow.ExSegments() do
+                        for exSeg in flow.ExSegs() do
                             yield sprintf "\t[flow] %s = { TR; }"  (exSeg.ToCallText()) 
 
                     yield "}"
@@ -218,6 +234,7 @@ module ExportModel =
 
         layout
         |> Seq.append  address
+        |> Seq.append  cpus
         |> Seq.append  exSystem
         |> Seq.append  mySystem
         |> String.concat "\r\n"

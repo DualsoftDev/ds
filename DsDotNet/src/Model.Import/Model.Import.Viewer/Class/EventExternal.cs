@@ -1,4 +1,4 @@
-﻿using Model.Import.Office;
+using Model.Import.Office;
 using System;
 using System.Linq;
 using static Model.Import.Office.Object;
@@ -28,10 +28,10 @@ namespace Dual.Model.Import
         {
             Event.SegSubject.Subscribe(rx =>
             {
-                var sys = rx.Segment.BaseSys as DsSystem;
-                var seg = rx.Segment as Segment;
+                var sys = rx.Seg.BaseSys as DsSystem;
+                var seg = rx.Seg as Seg;
 
-                sys.RootFlow().ToList().ForEach(flow =>
+                sys.RootFlo().ToList().ForEach(flow =>
                 {
                     if (flow.UsedSegs.Contains(seg))
                         if (FormMain.TheMain.DicUI.ContainsKey(flow))

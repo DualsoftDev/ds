@@ -1,4 +1,4 @@
-﻿// Copyright (c) Dual Inc.  All Rights Reserved.
+// Copyright (c) Dual Inc.  All Rights Reserved.
 namespace Model.Import.Office
 
 open System
@@ -48,8 +48,8 @@ module UtilMS =
         msgs.TryAdd(23,"1 개의 myReal 그룹지정이 되어야 합니다.") |>ignore
         msgs.TryAdd(24,"1 개의 dummy 그룹지정이 되어야 합니다.") |>ignore
         msgs.TryAdd(25,"그룹내 dummy 타입 또는 real 타입 하나는 존재 해야합니다.") |>ignore
-        msgs.TryAdd(26,"이름에 Flow경로 설정 '.' 기호는 1개 이여야 합니다. ex) flow.real") |>ignore
-        msgs.TryAdd(27,"해당이름의 Flow가 없습니다. 페이지 타이틀 확인필요 합니다.") |>ignore
+        msgs.TryAdd(26,"이름에 Flo경로 설정 '.' 기호는 1개 이여야 합니다. ex) flow.real") |>ignore
+        msgs.TryAdd(27,"해당이름의 Flo가 없습니다. 페이지 타이틀 확인필요 합니다.") |>ignore
         msgs.TryAdd(28,"") |>ignore
        
         msgs

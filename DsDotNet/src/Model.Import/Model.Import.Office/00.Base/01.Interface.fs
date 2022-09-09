@@ -12,7 +12,7 @@ module Interface =
         inherit IObject
         abstract Name:string
 
-    /// Segment interface
+    /// Seg interface
     /// Graph 상의 vertex 가 될 수 있는 segment 로 소속 고유 System 을 가짐
     type IVertex =
         inherit IObject

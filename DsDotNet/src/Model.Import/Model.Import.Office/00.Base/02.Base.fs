@@ -7,7 +7,7 @@ open System.Linq
 
 [<AutoOpen>]
 module Base =
-    /// Segment Container
+    /// Seg Container
     [<AbstractClass>]
     type SystemBase(name)  =
         interface ISystem with
@@ -16,10 +16,10 @@ module Base =
         member x.Name:string = name
         member x.ToText() = $"{name}"
        
-    /// Segment Vertex
+    /// Seg Vertex
     [<AbstractClass>]
-    type SegmentBase(name,  baseSystem:SystemBase) =
-        let noEdgeSubSegs  = ConcurrentHash<SegmentBase>()
+    type SegBase(name,  baseSystem:SystemBase) =
+        let noEdgeSubSegs  = ConcurrentHash<SegBase>()
         interface IVertex with
             member x.Name: string = x.Name
 
@@ -30,9 +30,9 @@ module Base =
         member x.AddSegNoEdge(seg) = noEdgeSubSegs.TryAdd(seg) |> ignore 
         member x.RemoveSegNoEdge(seg) = noEdgeSubSegs.TryRemove(seg) |> ignore 
 
-    /// Segment edge
+    /// Seg edge
     [<AbstractClass>]
-    type EdgeBase(src:SegmentBase, tgt:SegmentBase, edgeCausal:EdgeCausal) =
+    type EdgeBase(src:SegBase, tgt:SegBase, edgeCausal:EdgeCausal) =
         do
             if(src = tgt && edgeCausal = SEdge)
             then failwith $"SourceVertex [{src.Name}] = TargetVertex [{tgt.Name}]"

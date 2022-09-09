@@ -32,13 +32,13 @@ module Model =
             if((activeSys |> Seq.length) <> 1) then failwith "The number of ActiveSystem must be 'ONE'."
             activeSys |> Seq.head
         ///사용자 모델링 기본형 : parentSeg는 모델링시에 엣지의 부모를 할당받음
-        member x.AddEdge(edgeInfo:MEdge, parent:Segment) = x.AddEdges([edgeInfo], parent)
-        member x.AddEdges(edgeInfos:MEdge seq, parent:Segment) =
+        member x.AddEdge(edgeInfo:MEdge, parent:Seg) = x.AddEdges([edgeInfo], parent)
+        member x.AddEdges(edgeInfos:MEdge seq, parent:Seg) =
             edgeInfos |> Seq.iter (fun e -> x.EdgeAdd(e, Some parent))
 
-        member private x.EdgeAdd(mEdge:MEdge, pSeg:Segment option) =
+        member private x.EdgeAdd(mEdge:MEdge, pSeg:Seg option) =
             //시스템 등록 Check 및 사용된 UsedSegs System Add
-            mEdge.Nodes |> Seq.cast<Segment>
+            mEdge.Nodes |> Seq.cast<Seg>
             |> Seq.iter(fun seg-> 
                 if not (x.TotalSystems.Contains(seg.BaseSys)) 
                 then failwith $"model({x.Name})에 해당 {seg.ToText()}의 System 등록 필요. model.add(system) 필요합니다."

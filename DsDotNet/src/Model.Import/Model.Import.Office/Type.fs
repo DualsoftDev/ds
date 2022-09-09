@@ -63,7 +63,7 @@ module Type =
                                  |_ -> false
 
    
-    ///Segment 상태 (Default 'H') reserved
+    ///Seg 상태 (Default 'H') reserved
     type Status =
         | H ///Homing
         | R ///Ready

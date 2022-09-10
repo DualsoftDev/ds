@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-
+using Engine.Common.FS;
 using log4net;
 using log4net.Appender;
 using log4net.Core;
@@ -51,6 +52,26 @@ public class Log4NetHelper
     {
         var repo = ((log4net.Repository.Hierarchy.Hierarchy)LogManager.GetRepository());
         repo.Threshold = level;
+    }
+
+    public static ILog PrepareLog4Net(string loggerName)
+    {
+        // Configure log4net
+        var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+        var configFile = new FileInfo(config.FilePath);
+
+        log4net.Config.XmlConfigurator.ConfigureAndWatch(configFile);
+        Logger = LogManager.GetLogger(loggerName);
+        Logger.Info($"Starting Logging.");
+
+        Log4NetHelper.Logger = Logger;
+        Log4NetWrapper.SetLogger(Logger);
+        return Logger;
+
+        //var repo = (log4net.Repository.Hierarchy.Hierarchy)log4net.LogManager.GetRepository();
+        //var repoLogger = repo.GetLogger("EngineLogger", repo.LoggerFactory);
+        //var traceAppender = new TraceLogAppender();
+        //repoLogger.AddAppender(traceAppender);
     }
 
     ///// <summary>

@@ -1,3 +1,4 @@
+using Engine;
 using Model.Import.Office;
 using System;
 using System.Collections.Generic;
@@ -206,7 +207,7 @@ namespace Dual.Model.Import
             if (File.Exists(PathPPT))
                 InitModel(PathPPT);
         }
-        internal bool TestDebug()
+        internal void TestDebug()
         {
             string path = @"D:\DS\test\DS.pptx";
             bool debug = File.Exists(path);
@@ -215,8 +216,6 @@ namespace Dual.Model.Import
                 PathPPT = path;
                 InitModel(path);
             }
-
-            return debug;
         }
 
 

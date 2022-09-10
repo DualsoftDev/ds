@@ -23,6 +23,7 @@ namespace Dual.Model.Import
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             SimpleExceptionHandler.InstallExceptionHandler();
+            Engine.Core.Global.Logger = Log4NetHelper.PrepareLog4Net("ModelImportLogger");
 
             DllVersionChecker.IsValidExDLL(Assembly.GetExecutingAssembly());
 

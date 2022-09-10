@@ -8,9 +8,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Reference Include="Engine.Common.FS">
+	    <HintPath>..\Engine.Common.FS\bin\Debug\net48\Engine.Common.FS.dll</HintPath>
+	  </Reference>
 	  <Reference Include="log4net">
 	    <HintPath>..\..\exLib\log4net.dll</HintPath>
 	  </Reference>
+	  <Reference Include="System.Configuration" />
 	</ItemGroup>
 
 

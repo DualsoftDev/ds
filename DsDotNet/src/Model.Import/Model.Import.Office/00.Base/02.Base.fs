@@ -1,8 +1,9 @@
-﻿// Copyright (c) Dual Inc.  All Rights Reserved.
+// Copyright (c) Dual Inc.  All Rights Reserved.
 namespace Model.Import.Office
 
 open System
 open System.Linq
+open Engine.Base
 
 
 [<AutoOpen>]

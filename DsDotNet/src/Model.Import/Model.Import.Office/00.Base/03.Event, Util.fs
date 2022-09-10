@@ -5,17 +5,18 @@ open System.Runtime.CompilerServices
 open System
 open System.Reactive.Subjects
 
+open Engine.Base
 
 
 [<AutoOpen>]
 module Event = 
     
-    type SegParam = |SEG of Time:DateTime * Seg:SegBase * Status:Status
+    type SegParam = |SEG of Time:DateTime * Seg:SegBase * Status4:Status4
 
     let SegSubject = new Subject<SegParam>()
     /// Message 공지.
   
-    let ChangeStatus (seg:SegBase, status:Status) = 
+    let ChangeStatus (seg:SegBase, status:Status4) = 
         async {
             SegSubject.OnNext(SegParam.SEG (DateTime.Now, seg, status))
         } |> Async.StartImmediate

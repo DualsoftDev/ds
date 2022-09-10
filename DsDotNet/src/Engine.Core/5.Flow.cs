@@ -107,11 +107,11 @@ public static class FlowExtension
     public static IEnumerable<ICoin> CollectIsolatedCoins(this Flow flow, bool bySetEdge=true, bool byResetEdge=false) =>
         flow.CollectIsolatedVertex(bySetEdge, byResetEdge).OfType<ICoin>();
 
-    struct Causal
+    public struct Causal
     {
-        IVertex Source;
-        IVertex Target;
-        bool IsReset;
+        public IVertex Source;
+        public IVertex Target;
+        public bool IsReset;
         public Causal(IVertex source, IVertex target, bool isReset)
         {
             Source = source;
@@ -126,7 +126,7 @@ public static class FlowExtension
         }
     }
 
-    static IEnumerable<Causal> CollectArrow(this Edge edge)
+    public static IEnumerable<Causal> CollectArrow(this Edge edge)
     {
         bool isReset(string causalOperator)
         {
@@ -148,7 +148,7 @@ public static class FlowExtension
                 ;
     }
 
-    static IEnumerable<Causal> CollectArrow(this Flow flow)
+    public static IEnumerable<Causal> CollectArrow(this Flow flow)
     {
         foreach (var e in flow.Edges)
             foreach (var c in e.CollectArrow())

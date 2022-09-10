@@ -1,5 +1,5 @@
-﻿// Copyright (c) Dual Inc.  All Rights Reserved.
-namespace Model.Import.Office
+// Copyright (c) Dual Inc.  All Rights Reserved.
+namespace Engine.Base
 
 open System
 open System.Linq
@@ -23,10 +23,7 @@ module Type =
                                 |TR |TX |RX -> true
                                 |_ -> false
 
-            member x.IsLocation =   match x with
-                                    |TR |TX |RX| EX -> true
-                                    |_ -> false
-
+          
                                 
     ///인과의 엣지 종류
     type EdgeCausal =
@@ -63,12 +60,12 @@ module Type =
                                  |_ -> false
 
    
-    ///Seg 상태 (Default 'H') reserved
-    type Status =
-        | H ///Homing
-        | R ///Ready
-        | G ///Going
-        | F ///Finish
+    ///Seg 상태 (Default 'Homing') 
+    type Status4 =
+        | Ready 
+        | Going 
+        | Finish
+        | Homing
 
     type DataType =
             | BOOL          // BIT

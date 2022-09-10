@@ -4,6 +4,7 @@ namespace Model.Import.Office
 open System.Linq
 open System
 open System.Collections.Generic
+open Engine.Base
 
 [<AutoOpen>]
 module ExportModel =

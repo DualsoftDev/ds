@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using static Model.Import.Office.Model;
 using static Model.Import.Office.Object;
-using static Model.Import.Office.Type;
+using static Engine.Base.Type;
 
 namespace Dual.Model.Import
 {
@@ -23,7 +23,7 @@ namespace Dual.Model.Import
         }
 
 
-        private static async Task Test(IEnumerable<Seg> rootSegs, Status status, List<NodeCausal> showList)
+        private static async Task Test(IEnumerable<Seg> rootSegs, Status4 status, List<NodeCausal> showList)
         {
             foreach (var seg in rootSegs)
             {
@@ -46,15 +46,15 @@ namespace Dual.Model.Import
             var notRootSegs = model.ActiveSys.NotRootSegs();
             await Task.Run(async () =>
             {
-                await Test(rootSegs, Status.H, AllSeg);
-                await Test(notRootSegs, Status.H, AllSeg);
+                await Test(rootSegs, Status4.Homing, AllSeg);
+                await Test(notRootSegs, Status4.Homing, AllSeg);
                 await Task.Delay(10);
 
-                await Test(notRootSegs, Status.R, AllSeg);
+                await Test(notRootSegs, Status4.Ready, AllSeg);
                 await Task.Delay(10);
-                await Test(rootSegs, Status.R, notMys);
+                await Test(rootSegs, Status4.Ready, notMys);
                 await Task.Delay(10);
-                await Test(rootSegs, Status.R, mys);
+                await Test(rootSegs, Status4.Ready, mys);
             });
 
             org = true;
@@ -86,9 +86,9 @@ namespace Dual.Model.Import
                     if (dicSeg.Count() == 0) break;
                     List<Seg> heads = getHeads(dicSeg, dicEdge);
 
-                    await Test(heads, Status.G, AllSeg);
+                    await Test(heads, Status4.Going, AllSeg);
                     await Task.Delay(50);
-                    await Test(heads, Status.F, AllSeg);
+                    await Test(heads, Status4.Finish, AllSeg);
                 }
             });
         }
@@ -109,7 +109,7 @@ namespace Dual.Model.Import
                     if (dicSeg.Count() == 0) break;
 
                     List<Seg> heads = getHeads(dicSeg, dicEdge);
-                    await Test(heads, Status.G, AllSeg);
+                    await Test(heads, Status4.Going, AllSeg);
                     await Task.Delay(50);
 
                     foreach (var seg in heads)
@@ -117,7 +117,7 @@ namespace Dual.Model.Import
                         await runSeg(seg.ChildSegs, seg.MEdges);
                     }
 
-                    await Test(heads, Status.F, AllSeg);
+                    await Test(heads, Status4.Finish, AllSeg);
                 }
             });
 

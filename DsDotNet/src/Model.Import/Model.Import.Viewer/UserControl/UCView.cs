@@ -7,7 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using static Model.Import.Office.Object;
-using static Model.Import.Office.Type;
+using static Engine.Base.Type;
+
 using Color = Microsoft.Msagl.Drawing.Color;
 
 namespace Dual.Model.Import
@@ -31,7 +32,7 @@ namespace Dual.Model.Import
 
         }
 
-        private Dictionary<Tuple<Seg, Status>, int> _dicCycle = new Dictionary<Tuple<Seg, Status>, int>();
+        private Dictionary<Tuple<Seg, Status4>, int> _dicCycle = new Dictionary<Tuple<Seg, Status4>, int>();
         private Dictionary<string, Node> _dicDrawing = new Dictionary<string, Node>();
 
 
@@ -268,9 +269,9 @@ namespace Dual.Model.Import
             if (seg != null)
             {
                 if (seg.NodeCausal == NodeCausal.MY)
-                    UpdateLineColor(seg.Status, node);
+                    UpdateLineColor(seg.Status4, node);
                 else
-                    UpdateFillColor(seg.Status, node);
+                    UpdateFillColor(seg.Status4, node);
             }
             else
             {
@@ -280,28 +281,28 @@ namespace Dual.Model.Import
             RefreshGraph();
         }
 
-        private static void UpdateFontColor(Status newStatus, Node node)
+        private static void UpdateFontColor(Status4 newStatus, Node node)
         {
-            if (newStatus == Status.R) node.Label.FontColor = Color.DarkGreen;
-            else if (newStatus == Status.G) node.Label.FontColor = Color.DarkKhaki;
-            else if (newStatus == Status.F) node.Label.FontColor = Color.DarkBlue;
-            else if (newStatus == Status.H) node.Label.FontColor = Color.Black;
+            if (newStatus == Status4.Ready)         node.Label.FontColor = Color.DarkGreen;
+            else if (newStatus == Status4.Going)    node.Label.FontColor = Color.DarkKhaki;
+            else if (newStatus == Status4.Finish)   node.Label.FontColor = Color.DarkBlue;
+            else if (newStatus == Status4.Homing)   node.Label.FontColor = Color.Black;
         }
 
-        private static void UpdateLineColor(Status newStatus, Node node)
+        private static void UpdateLineColor(Status4 newStatus, Node node)
         {
-            if (newStatus == Status.R) node.Attr.Color = Color.DarkOliveGreen;
-            else if (newStatus == Status.G) node.Attr.Color = Color.DarkGoldenrod;
-            else if (newStatus == Status.F) node.Attr.Color = Color.DarkBlue;
-            else if (newStatus == Status.H) node.Attr.Color = Color.DimGray;
+          if (newStatus == Status4.Ready)        node.Attr.Color = Color.DarkOliveGreen;
+          else if (newStatus == Status4.Going)   node.Attr.Color = Color.DarkGoldenrod;
+          else if (newStatus == Status4.Finish)  node.Attr.Color = Color.DarkBlue;
+            else if (newStatus == Status4.Homing) node.Attr.Color = Color.DimGray;
         }
 
-        private static void UpdateFillColor(Status newStatus, Node node)
+        private static void UpdateFillColor(Status4 newStatus, Node node)
         {
-            if (newStatus == Status.R) node.Attr.FillColor = Color.DarkOliveGreen;
-            else if (newStatus == Status.G) node.Attr.FillColor = Color.DarkGoldenrod;
-            else if (newStatus == Status.F) node.Attr.FillColor = Color.DarkBlue;
-            else if (newStatus == Status.H) node.Attr.FillColor = Color.DimGray;
+            if (newStatus == Status4.Ready)        node.Attr.FillColor = Color.DarkOliveGreen;
+            else if (newStatus == Status4.Going)   node.Attr.FillColor = Color.DarkGoldenrod;
+            else if (newStatus == Status4.Finish)  node.Attr.FillColor = Color.DarkBlue;
+            else if (newStatus == Status4.Homing)  node.Attr.FillColor = Color.DimGray;
         }
 
         internal void SetBackColor(System.Drawing.Color color)

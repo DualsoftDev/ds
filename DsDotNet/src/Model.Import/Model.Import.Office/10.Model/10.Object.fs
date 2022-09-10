@@ -7,6 +7,7 @@ open System.Diagnostics
 open System.Collections.Concurrent
 open System.Collections.Generic
 open DocumentFormat.OpenXml
+open Engine.Base
 
 [<AutoOpen>]
 module Object =
@@ -29,7 +30,7 @@ module Object =
         Seg(name:string, baseSystem:DsSystem, editor:Editor, location:Bound, nodeCausal:NodeCausal,  ownerFlow:string) as this =
             inherit SegBase(name,  baseSystem)
             /// modeled edges
-            let mutable status = Status.H
+            let mutable status4 = Status4.Homing
             let mEdges  = ConcurrentHash<MEdge>()
 
             new (name, baseSystem, nodeCausal, ownerFlo) = Seg (name, baseSystem, Editor.User, Normal, nodeCausal,  ownerFlo)
@@ -37,9 +38,9 @@ module Object =
             new (name, baseSystem) = Seg (name, baseSystem, Editor.Engine, Normal, MY,  "")
 
             member x.NodeCausal = nodeCausal
-            member x.Status = status 
-            member x.SetStatus(s:Status) = status <- s
-                                           ChangeStatus(this, s)
+            member x.Status4 = status4 
+            member x.SetStatus(s:Status4) = status4 <- s
+                                            ChangeStatus(this, s)
 
             member x.BaseSys = baseSystem
             member x.Editor = editor

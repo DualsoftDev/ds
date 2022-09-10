@@ -11,6 +11,7 @@ open System
 open UtilPPT
 open UtilMS
 open Engine.Common.FS
+open Engine.Base
 
 
 

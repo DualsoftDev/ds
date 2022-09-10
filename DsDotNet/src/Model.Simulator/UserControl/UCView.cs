@@ -153,9 +153,13 @@ namespace Model.Simulator
             //gEdge.Attr.Color = Color.Black;
             //gEdge.Label.FontColor = Color.White;
             gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Generalization;
-
             gEdge.Attr.Color = Color.White;
 
+            edge.CollectArrow().ForEach(e =>
+            {
+
+            });
+            //edge.ContainerFlow
             //if (edge.Causal == EdgeCausal.SEdge)
             //{
             //    gEdge.Attr.AddStyle(Style.Solid);
@@ -221,7 +225,7 @@ namespace Model.Simulator
             {
 
                 //var src = edge.Sources as SegmentBase;
-                //var tgt = edge.Target as SegmentBase;
+                var tgt = edge.Target as SegmentBase;
 
                 //UpdateNodeView(gEdge.SourceNode, src);
                 //UpdateNodeView(gEdge.TargetNode, tgt);

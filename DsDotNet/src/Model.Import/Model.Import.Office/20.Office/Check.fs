@@ -6,6 +6,7 @@ open PPTX
 open System
 open System.Collections.Concurrent
 open Engine.Common.FS
+open Engine.Base
 
 [<AutoOpen>]
 module Check =

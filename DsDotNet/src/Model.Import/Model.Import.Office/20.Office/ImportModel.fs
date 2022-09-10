@@ -11,6 +11,7 @@ open System.Collections.Generic
 open System
 open Microsoft.FSharp.Collections
 open Engine.Common.FS
+open Engine.Base
 
 [<AutoOpen>]
 module ImportModel =
@@ -183,7 +184,7 @@ module ImportModel =
                 doc.Nodes 
                 |> Seq.filter(fun node -> node.PageNum = doc.VisibleLast().PageNum)
                 |> Seq.filter(fun node -> node.Name = ""|>not)
-                |> Seq.filter(fun node -> node.NodeCausal.IsLocation)
+                |> Seq.filter(fun node -> node.NodeCausal = TX || node.NodeCausal = TR || node.NodeCausal = RX || node.NodeCausal = EX )
                 |> Seq.iter(fun node -> mySys.LocationSet.TryAdd(dicSeg.[node.Key].ToLayOutPath(), node.Rectangle) |> ignore)
             
                 MSGInfo($"전체 장표   count [{doc.Pages.Count()}]")

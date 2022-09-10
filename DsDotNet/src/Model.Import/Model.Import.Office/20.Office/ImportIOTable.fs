@@ -8,6 +8,7 @@ open System.Collections.Concurrent
 open System.Collections.Generic
 open Microsoft.Office.Interop.Excel
 open Engine.Common.FS
+open Engine.Base
 
 [<AutoOpen>]
 module ImportIOTable =

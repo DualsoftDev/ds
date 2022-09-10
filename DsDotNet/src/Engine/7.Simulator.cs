@@ -7,7 +7,7 @@ using static Engine.Core.GlobalShortCuts;
 
 namespace Engine
 {
-    internal class TagChangeChecker
+    public class TagChangeChecker
     {
         public TagChangeChecker(OpcBroker opc, IEnumerable<(string, Func<Bit, bool, Task>)> actions)
         {
@@ -32,7 +32,7 @@ namespace Engine
 
     }
 
-    internal class InterlockChecker : TagChangeChecker
+    public class InterlockChecker : TagChangeChecker
     {
         public InterlockChecker(OpcBroker opc, IEnumerable<(string, Func<Bit, bool, Task>)> actions)
             : base(opc, actions)
@@ -64,7 +64,7 @@ namespace Engine
     }
 
 
-    internal class Simulator : TagChangeChecker
+    public class Simulator : TagChangeChecker
     {
         public Simulator(OpcBroker opc, IEnumerable<(string, Func<Bit, bool, Task>)> actions)
             : base(opc, actions)

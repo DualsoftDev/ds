@@ -68,7 +68,7 @@ namespace Dual.Model.Import
                         button_TestORG.Visible = true;
                         button_TestStart.Visible = true;
                         button_Compile.Visible = true;
-                        button_Run.Visible = true;
+           
                         button_copy.Visible = false;
                     });
 

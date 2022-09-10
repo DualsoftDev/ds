@@ -42,11 +42,12 @@ namespace Dual.Model.Import
             this.button_TestStart = new System.Windows.Forms.Button();
             this.button_TestORG = new System.Windows.Forms.Button();
             this.splitContainer4 = new System.Windows.Forms.SplitContainer();
+            this.button_Stop = new System.Windows.Forms.Button();
+            this.button_Compile = new System.Windows.Forms.Button();
             this.button_ClearLog = new System.Windows.Forms.Button();
             this.richTextBox_Debug = new System.Windows.Forms.RichTextBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.button_Compile = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -186,7 +187,7 @@ namespace Dual.Model.Import
             // button_Run
             // 
             this.button_Run.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_Run.Location = new System.Drawing.Point(1168, 55);
+            this.button_Run.Location = new System.Drawing.Point(1168, 29);
             this.button_Run.Name = "button_Run";
             this.button_Run.Size = new System.Drawing.Size(85, 23);
             this.button_Run.TabIndex = 3;
@@ -198,6 +199,7 @@ namespace Dual.Model.Import
             // button_TestStart
             // 
             this.button_TestStart.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_TestStart.Enabled = false;
             this.button_TestStart.Location = new System.Drawing.Point(1259, 55);
             this.button_TestStart.Name = "button_TestStart";
             this.button_TestStart.Size = new System.Drawing.Size(85, 23);
@@ -210,6 +212,7 @@ namespace Dual.Model.Import
             // button_TestORG
             // 
             this.button_TestORG.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_TestORG.Enabled = false;
             this.button_TestORG.Location = new System.Drawing.Point(1259, 29);
             this.button_TestORG.Name = "button_TestORG";
             this.button_TestORG.Size = new System.Drawing.Size(85, 23);
@@ -232,6 +235,7 @@ namespace Dual.Model.Import
             // 
             // splitContainer4.Panel2
             // 
+            this.splitContainer4.Panel2.Controls.Add(this.button_Stop);
             this.splitContainer4.Panel2.Controls.Add(this.button_Compile);
             this.splitContainer4.Panel2.Controls.Add(this.button_TestStart);
             this.splitContainer4.Panel2.Controls.Add(this.button_Run);
@@ -241,6 +245,31 @@ namespace Dual.Model.Import
             this.splitContainer4.Size = new System.Drawing.Size(1373, 746);
             this.splitContainer4.SplitterDistance = 603;
             this.splitContainer4.TabIndex = 20;
+            // 
+            // button_Stop
+            // 
+            this.button_Stop.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_Stop.Enabled = false;
+            this.button_Stop.Location = new System.Drawing.Point(1168, 55);
+            this.button_Stop.Name = "button_Stop";
+            this.button_Stop.Size = new System.Drawing.Size(85, 23);
+            this.button_Stop.TabIndex = 5;
+            this.button_Stop.Text = "Stop";
+            this.button_Stop.UseVisualStyleBackColor = true;
+            this.button_Stop.Visible = false;
+            this.button_Stop.Click += new System.EventHandler(this.button_Stop_Click);
+            // 
+            // button_Compile
+            // 
+            this.button_Compile.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_Compile.Location = new System.Drawing.Point(1168, 5);
+            this.button_Compile.Name = "button_Compile";
+            this.button_Compile.Size = new System.Drawing.Size(85, 23);
+            this.button_Compile.TabIndex = 4;
+            this.button_Compile.Text = "Compile";
+            this.button_Compile.UseVisualStyleBackColor = true;
+            this.button_Compile.Visible = false;
+            this.button_Compile.Click += new System.EventHandler(this.button_Compile_Click);
             // 
             // button_ClearLog
             // 
@@ -281,18 +310,6 @@ namespace Dual.Model.Import
             this.splitter1.Size = new System.Drawing.Size(1373, 3);
             this.splitter1.TabIndex = 22;
             this.splitter1.TabStop = false;
-            // 
-            // button_Compile
-            // 
-            this.button_Compile.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_Compile.Location = new System.Drawing.Point(1168, 29);
-            this.button_Compile.Name = "button_Compile";
-            this.button_Compile.Size = new System.Drawing.Size(85, 23);
-            this.button_Compile.TabIndex = 4;
-            this.button_Compile.Text = "Compile";
-            this.button_Compile.UseVisualStyleBackColor = true;
-            this.button_Compile.Visible = false;
-            this.button_Compile.Click += new System.EventHandler(this.button_Compile_Click);
             // 
             // FormMain
             // 
@@ -348,6 +365,7 @@ namespace Dual.Model.Import
         private System.Windows.Forms.Button button_TestORG;
         private System.Windows.Forms.Button button_Run;
         private System.Windows.Forms.Button button_Compile;
+        private System.Windows.Forms.Button button_Stop;
     }
 }
 

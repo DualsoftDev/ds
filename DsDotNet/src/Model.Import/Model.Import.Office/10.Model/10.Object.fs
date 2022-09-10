@@ -268,7 +268,7 @@ module Object =
             member val Active = active with get, set
             member val SystemID = -1   with get, set
 
-            member x.Flos      = flows
+            member x.Flows      = flows
             member x.AliasSet   = aliasSet
             member x.LocationSet   = locationSet
             member x.CommandSet   = commandSet

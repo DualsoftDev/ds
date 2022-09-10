@@ -5,6 +5,7 @@ open System.Linq
 open PPTX
 open System
 open System.Collections.Concurrent
+open Engine.Common.FS
 
 [<AutoOpen>]
 module Check =
@@ -12,7 +13,7 @@ module Check =
         let GetDemoModel(sysName:string) = 
             let sys = DsSystem(sysName, true)
             let flow = Flo("P0",  Int32.MaxValue, sys)
-            sys.Flos.TryAdd(flow.Page, flow) |> ignore
+            sys.Flows.TryAdd(flow.Page, flow) |> ignore
             flow.AddEdge( MEdge(Seg("START", sys, EX), Seg("시작인과", sys, MY), EdgeCausal.SEdge))
             flow.AddEdge( MEdge(Seg("RESET", sys, EX), Seg("복귀인과", sys, MY), EdgeCausal.REdge))
             flow.AddEdge( MEdge(Seg("START", sys, EX), Seg("시작유지", sys, MY), EdgeCausal.SPush))
@@ -66,7 +67,7 @@ module Check =
             let oldSeg = dicSegCheckSame.[seg.Name]
             if((seg.NodeCausal = oldSeg.NodeCausal)|>not) 
             then 
-                Event.MSGError($"도형오류 :타입이 다른 같은이름이 존재합니다 \t[Page{node.PageNum}: {seg.Name}({seg.NodeCausal}) != ({oldSeg.NodeCausal}) ({node.Shape.ShapeName()})]")
+                MSGError($"도형오류 :타입이 다른 같은이름이 존재합니다 \t[Page{node.PageNum}: {seg.Name}({seg.NodeCausal}) != ({oldSeg.NodeCausal}) ({node.Shape.ShapeName()})]")
         
         let SameEdgeErr(parentNode:pptNode option, pptEdge:pptEdge, mEdge:MEdge, dicSameCheck:ConcurrentDictionary<string, MEdge>) = 
             let parentName = if(parentNode.IsSome) 

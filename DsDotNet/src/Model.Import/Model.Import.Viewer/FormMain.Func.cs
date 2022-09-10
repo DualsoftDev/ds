@@ -1,4 +1,5 @@
-using Engine;
+using Engine.Common;
+using Engine.Common.FS;
 using Model.Import.Office;
 using System;
 using System.Collections.Generic;
@@ -7,6 +8,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using static Engine.Common.FS.MessageEvent;
 using static Model.Import.Office.Event;
 using static Model.Import.Office.Model;
 using static Model.Import.Office.Object;
@@ -34,7 +36,7 @@ namespace Dual.Model.Import
                     {
                         rndColor = Color.FromArgb(r.Next(130, 230), r.Next(130, 230), r.Next(130, 230));
                         this.Do(() => richTextBox_ds.ScrollToCaret());
-                        Event.DoWork(pro);
+                        ProcessEvent.DoWork(pro);
                     }
                     this.Do(() => richTextBox_ds.AppendTextColor(f, rndColor));
                 }
@@ -67,12 +69,10 @@ namespace Dual.Model.Import
                         pictureBox_xls.Visible = true;
                         button_TestORG.Visible = true;
                         button_TestStart.Visible = true;
-                        button_Compile.Visible = true;
-           
                         button_copy.Visible = false;
                     });
 
-                    Event.DoWork(0);
+                    ProcessEvent.DoWork(0);
                 }
                 else
                     WriteDebugMsg(DateTime.Now, MSGLevel.Error, $"{PathPPT} 불러오기 실패!!");
@@ -110,7 +110,7 @@ namespace Dual.Model.Import
         {
             if (UtilFile.BusyCheck()) return;
             Busy = true;
-            Event.DoWork(10);
+            ProcessEvent.DoWork(10);
 
             button_copy.Visible = false;
             button_CreateExcel.Enabled = false;
@@ -133,7 +133,7 @@ namespace Dual.Model.Import
         }
 
 
-        internal void WriteDebugMsg(DateTime time, Event.MSGLevel level, string msg)
+        internal void WriteDebugMsg(DateTime time, MSGLevel level, string msg)
         {
             this.Do(() =>
             {
@@ -143,7 +143,7 @@ namespace Dual.Model.Import
                     _ConvertErr = true;
                     color = Color.Red;
                     richTextBox_ds.AppendTextColor($"\r\n{msg}", color);
-                    Event.DoWork(0);
+                    ProcessEvent.DoWork(0);
                 }
                 if (level.IsWarn) color = Color.Purple;
                 richTextBox_Debug.AppendTextColor($"\r\n{time} : {msg}", color);
@@ -160,13 +160,18 @@ namespace Dual.Model.Import
 
             demo.TotalSystems.OrderBy(sys => sys.Name).ToList()
                   .ForEach(sys =>
-                      CreateNewTabViewer(sys)
+                      CreateNewTabViewer(sys, true)
                   );
         }
 
-        internal void CreateNewTabViewer(DsSystem sys)
+        internal void CreateNewTabViewer(DsSystem sys, bool isDemo = false)
         {
-            var flows = sys.RootFlow();
+            List<Flo> flows = new List<Flo>();
+            if (isDemo)
+                flows = sys.Flows.Values.ToList();
+            else
+                flows = sys.RootFlow().ToList();
+
             var flowTotalCnt = flows.Count();
             flows.ToList().ForEach(f =>
             {

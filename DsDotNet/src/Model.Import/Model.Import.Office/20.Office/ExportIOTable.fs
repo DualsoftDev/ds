@@ -8,6 +8,7 @@ open System
 open System.Drawing
 open System.Reflection
 open System.Data.OleDb
+open Engine.Common.FS
 
 [<AutoOpen>]
 module ExportIOTable =
@@ -103,7 +104,7 @@ module ExportIOTable =
                 workSheet.Cells.[1,colIndex+1] <- tbl.Columns.[colIndex].ColumnName
             //// rows
             for rowsIndex in [|0..rowsCnt-1|] do
-                Event.DoWork((int)(Convert.ToSingle(rowsIndex + 1) / (rowsCnt|>float32) * 100f));
+                DoWork((int)(Convert.ToSingle(rowsIndex + 1) / (rowsCnt|>float32) * 100f));
                 for colIndex in [|0..colsCnt-1|] do
                     workSheet.Cells.[rowsIndex + 2, colIndex + 1] <- tbl.Rows.[rowsIndex].[colIndex]
                     
@@ -116,7 +117,7 @@ module ExportIOTable =
         
             workSheet.SaveAs(excelFilePath)
             excelApp.Quit()
-            Event.DoWork(0)
+            DoWork(0)
             Console.WriteLine("Excel file saved!")
 
     

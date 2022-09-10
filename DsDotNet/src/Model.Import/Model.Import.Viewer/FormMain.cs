@@ -1,19 +1,12 @@
-using DocumentFormat.OpenXml.Office2016.Excel;
-using Engine;
 using Engine.Common;
-using Engine.Core;
-using Engine.Graph;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using static Engine.Runner.EngineModule;
+using static Engine.Common.FS.MessageEvent;
 using static Model.Import.Office.Event;
 using static Model.Import.Office.Model;
 using static Model.Import.Office.Object;
@@ -146,7 +139,7 @@ namespace Dual.Model.Import
             WriteDebugMsg(DateTime.Now, MSGLevel.Info, $"클립보드복사 성공!! Ctrl+V로 붙여넣기 가능합니다.");
 
         }
-     
+
         private void button_CreateExcel_Click(object sender, EventArgs e)
         {
             ExportExcel();
@@ -156,96 +149,29 @@ namespace Dual.Model.Import
             Process.Start(Path.GetDirectoryName(PathXLS));
         }
 
-     
+
 
         private void button_ClearLog_Click(object sender, EventArgs e)
         {
             richTextBox_Debug.Clear();
             richTextBox_Debug.AppendText($"{DateTime.Now} : Log Clear");
-
-            try
-            {
-                var modelText = Tester.GetTextDiamond();
-                var eb = new EngineBuilder(modelText, "Cpu");
-            }
-
-            catch (Exception ex)
-            {
-                WriteDebugMsg(DateTime.Now, MSGLevel.Error, ex.Message);
-            }
-         
-
-        }
-        Engine.Runner.EngineModule.Engine _Engine;
-        private void button_Compile_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                button_TestORG.Enabled = true;
-                button_TestStart.Enabled = true;
-                //var modelText = Tester.GetTextDiamond();
-                //_Engine = new EngineBuilder(modelText, $"Cpu").Engine;
-
-
-                var modelText = richTextBox_ds.Text;
-                _Engine = new EngineBuilder(modelText, $"Cpu_{_model.ActiveSys.Name}").Engine;
-            }
-
-            catch (Exception ex)
-            {
-                MSGError(ex.Message);
-            }
-        }
-        private  void button_TestORG_Click(object sender, EventArgs e)
-        {
-            if (_Engine == null) return;
-          
-            var engine = _Engine;
-            var reals = engine.Cpu.RootFlows.SelectMany(f => f.ChildVertices).OfType<SegmentBase>();
-            reals.ForEach(m =>
-            {
-                var progressInfo = new GraphProgressSupportUtil.ProgressInfo(m.GraphInfo);
-                progressInfo.ChildOrigin.ForEach(p =>
-                {
-                    MSGInfo($"{p.GetName()} Origin ON");
-                });
-            });
-          
         }
 
-        private  void button_TestStart_Click(object sender, EventArgs e)
+        private async void button_TestORG_Click(object sender, EventArgs e)
         {
-            if (_Engine == null) return;
-
+            button_TestORG.Enabled = false;
             button_TestStart.Enabled = false;
-            button_Run.Visible = true;
-            button_Stop.Visible = true;
-
-            _Engine.Run();
-
+            await SimSeg.TestORG(_model);
+            button_TestORG.Enabled = true;
+            button_TestStart.Enabled = true;
         }
-
-        private void button_Run_Click(object sender, EventArgs e)
+        private async void button_TestStart_Click(object sender, EventArgs e)
         {
-            if (_Engine == null) return;
-            try
-            {
-                button_Run.Enabled = false;
-                button_Stop.Enabled = true;
-
-            }
-
-            catch (Exception ex)
-            {
-                WriteDebugMsg(DateTime.Now, MSGLevel.Error, ex.Message);
-            }
-        }
-
-        private void button_Stop_Click(object sender, EventArgs e)
-        {
-            button_Run.Enabled = true;
-            button_Stop.Enabled = false;
-
+            button_TestORG.Enabled = false;
+            button_TestStart.Enabled = false;
+            await SimSeg.TestStart(_model);
+            button_TestORG.Enabled = true;
+            button_TestStart.Enabled = true;
         }
     }
 }

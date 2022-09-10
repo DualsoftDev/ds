@@ -8,6 +8,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<Compile Include="Event\Process.fs" />
+		<Compile Include="Event\Message.fs" />
 		<Compile Include="Prelude.fs" />
 		<None Include="FSharpFSIs\Microsoft.FSharp.Collections\ArrayModule.fsi" />
 		<None Include="FSharpFSIs\Microsoft.FSharp.Collections\ListModule.fsi" />
@@ -50,6 +52,10 @@
 
 	<ItemGroup>
 	  <Folder Include="FSharpFSIs\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="System.Reactive" Version="5.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>

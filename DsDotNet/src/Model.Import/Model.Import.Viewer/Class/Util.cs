@@ -1,4 +1,5 @@
-﻿using System;
+using Engine.Common;
+using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -6,6 +7,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Engine.Common.FS;
 using static Model.Import.Office.Event;
 
 namespace Dual.Model.Import
@@ -42,7 +44,7 @@ namespace Dual.Model.Import
         {
             if (FormMain.TheMain.Busy)
             {
-                MSGWarn("변환 작업중입니다.");
+                MessageEvent.MSGWarn("변환 작업중입니다.");
                 return true;
             }
             return false;
@@ -146,80 +148,7 @@ namespace Dual.Model.Import
             InstallUnhandledExceptionHandler(unhandled, threadedUnhandled, onUnobservedTaskException);
         }
     }
-    public static class UtilUI
-    {
-        public static async Task DoAsync(this System.Windows.Forms.Control control, Action action)
-        {
-            try
-            {
-                if (control.InvokeRequired)
-                {
-                    await Task.Factory.FromAsync(control.BeginInvoke(action), result => { });
-                }
-                else if (control.IsHandleCreated)
-                {
-                    action();
-                }
-                else
-                {
-                    Console.WriteLine("Error : 창 핸들을 만들기 전까지는....");
-                }
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine($"Exception on Control.Do(): {ex}");
-            }
-        }
 
-        /// <summary>
-        /// Control.Invoke is synchronous
-        /// </summary>
-        /// <param name="control"></param>
-        /// <param name="action"></param>
-        public static void Do(this System.Windows.Forms.Control control, Action action, Action<System.Windows.Forms.Control> onError = null)
-        {
-            try
-            {
-                if (control.InvokeRequired)
-                {
-                    try
-                    {
-                        control.Invoke(action);
-                    }
-                    catch (Exception ex)
-                    {
-                        if (ex is ObjectDisposedException)
-                        {
-                            Trace.WriteLine(ex);
-                        }
-                        else
-                        {
-                            throw;
-                        }
-                    }
-                }
-                else if (control.IsHandleCreated)
-                {
-                    action();
-                }
-                else
-                {
-                    if (onError == null)
-                    {
-                        Console.WriteLine("Error : Before windows handle created (2).. 창 핸들을 만들기 전까지는....");
-                    }
-                    else
-                    {
-                        onError(control);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine($"Exception on Control.Do(): {ex}");
-            }
-        }
-    }
 
 }
 

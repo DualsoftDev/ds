@@ -3,7 +3,7 @@ using System;
 using System.Reflection;
 using System.Windows.Forms;
 
-namespace Dual.Model.Import
+namespace Model.Simulator
 {
     internal static class Program
     {
@@ -16,6 +16,7 @@ namespace Dual.Model.Import
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             SimpleExceptionHandler.InstallExceptionHandler();
+            Engine.Core.Global.Logger = Log4NetHelper.PrepareLog4Net("ModelSimulator");
 
             DllVersionChecker.IsValidExDLL(Assembly.GetExecutingAssembly());
 

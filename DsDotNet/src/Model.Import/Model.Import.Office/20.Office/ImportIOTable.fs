@@ -7,6 +7,7 @@ open System.Data
 open System.Collections.Concurrent
 open System.Collections.Generic
 open Microsoft.Office.Interop.Excel
+open Engine.Common.FS
 
 [<AutoOpen>]
 module ImportIOTable =
@@ -29,7 +30,7 @@ module ImportIOTable =
                 dtResult.Columns.Add($"{column}") |> ignore
 
             for row in [|2..rowCnt|] do
-                Event.DoWork((int)(Convert.ToSingle(row + 1) / (rowCnt|>float32) * 50f));
+                DoWork((int)(Convert.ToSingle(row + 1) / (rowCnt|>float32) * 50f));
                 let newRow = dtResult.NewRow(); // DataTable에 새 행 할당
                 for column in [|1..colCnt|] do
                     let data = workSheet.Cells.[row, column]  :?> Range
@@ -74,7 +75,7 @@ module ImportIOTable =
                         seg.R <- r
                         seg.E <- e  )
 
-        Event.DoWork(0);
+        DoWork(0);
 
 
             

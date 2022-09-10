@@ -1,3 +1,4 @@
+using Engine.Common.FS;
 using Model.Import.Office;
 using System;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace Dual.Model.Import
 
         public static void ProcessSubscribe()
         {
-            Event.ProcessSubject.Subscribe(rx =>
+            ProcessEvent.ProcessSubject.Subscribe(rx =>
             {
                 FormMain.TheMain.UpdateProgressBar(rx.pro);
             });
@@ -18,7 +19,7 @@ namespace Dual.Model.Import
 
         public static void MSGSubscribe()
         {
-            Event.MSGSubject.Subscribe(rx =>
+            MessageEvent.MSGSubject.Subscribe(rx =>
                 {
                     FormMain.TheMain.WriteDebugMsg(rx.Time, rx.Level, $"{rx.Message}");
                 });

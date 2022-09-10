@@ -1,0 +1,195 @@
+using Engine;
+using Engine.Common;
+using Engine.Core;
+using Engine.Graph;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+
+using Engine.Runner;
+using static Engine.Common.FS.MessageEvent;
+
+namespace Model.Simulator
+{
+    public partial class FormMain : Form
+    {
+        public static FormMain TheMain;
+
+        private EngineModule.Engine _Engine;
+
+        public Dictionary<Flow, TabPage> DicUI;
+        public string dsTextPath;
+        public bool Busy = false;
+
+        public FormMain()
+        {
+            InitializeComponent();
+            this.KeyPreview = true;
+            this.AllowDrop = true;
+            this.DragEnter += new DragEventHandler(Form1_DragEnter);
+            this.DragDrop += new DragEventHandler(Form1_DragDrop);
+            TheMain = this;
+
+            splitContainer1.Panel1Collapsed = true;
+            splitContainer2.Panel2Collapsed = true;
+
+            richTextBox_Debug.AppendText($"{DateTime.Now} : *.pptx 를 드랍하면 시작됩니다");
+
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            EventExternal.ProcessSubscribe();
+            EventExternal.MSGSubscribe();
+
+            DicUI = new Dictionary<Flow, TabPage>();
+
+            //this.Text = UtilFile.GetVersion();
+        }
+        void Form1_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop)) e.Effect = DragDropEffects.Copy;
+        }
+        void Form1_DragDrop(object sender, DragEventArgs e)
+        {
+            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+            foreach (string file in files)
+            {
+                var extension = Path.GetExtension(file);
+                if (extension == ".ds")
+                {
+                    LoadText(file);
+                    break; //단일 파일만
+                }
+            }
+        }
+        public void UpdateProgressBar(int percent)
+        {
+            progressBar1.Do(() => progressBar1.Value = percent);
+        }
+        private void LoadText(string path)
+        {
+            try
+            {
+                if (UtilFile.BusyCheck()) return;
+                Busy = true;
+
+                dsTextPath = path;
+                progressBar1.Maximum = 100;
+                progressBar1.Step = 1;
+                progressBar1.Value = 0;
+
+                richTextBox_ds.Clear();
+                DicUI.Clear();
+
+                splitContainer1.Panel1Collapsed = false;
+                splitContainer2.Panel2Collapsed = false;
+
+                this.Size = new Size(1600, 1000);
+            }
+            catch
+            {
+                WriteDebugMsg(DateTime.Now, MSGLevel.Error, $"{dsTextPath} 불러오기 실패!!");
+            }
+        }
+        private void Form1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if ((Keys)e.KeyValue == Keys.F1) { HelpLoad(); }
+            if ((Keys)e.KeyValue == Keys.F5) { ReLoadText(); }
+            if ((Keys)e.KeyValue == Keys.F6) { TestDebug(); }
+            if ((Keys)e.KeyValue == Keys.F8) { RefreshGraph(); }
+        }
+        private void button_ClearLog_Click(object sender, EventArgs e)
+        {
+            richTextBox_Debug.Clear();
+            richTextBox_Debug.AppendText($"{DateTime.Now} : Log Clear");
+
+            try
+            {
+                var modelText = Tester.GetTextDiamond();
+                var eb = new EngineBuilder(modelText, "Cpu");
+            }
+
+            catch (Exception ex)
+            {
+                WriteDebugMsg(DateTime.Now, MSGLevel.Error, ex.Message);
+            }
+
+
+        }
+        private void button_Compile_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                button_TestORG.Enabled = true;
+                button_TestStart.Enabled = true;
+                //var modelText = Tester.GetTextDiamond();
+                //_Engine = new EngineBuilder(modelText, $"Cpu").Engine;
+
+
+                var modelText = richTextBox_ds.Text;
+                _Engine = new EngineBuilder(modelText, $"Cpu").Engine;
+            }
+
+            catch (Exception ex)
+            {
+                MSGError(ex.Message);
+            }
+        }
+        private void button_TestORG_Click(object sender, EventArgs e)
+        {
+            if (_Engine == null) return;
+
+            var engine = _Engine;
+            var reals = engine.Cpu.RootFlows.SelectMany(f => f.ChildVertices).OfType<SegmentBase>();
+            reals.ForEach(m =>
+            {
+                var progressInfo = new GraphProgressSupportUtil.ProgressInfo(m.GraphInfo);
+                progressInfo.ChildOrigin.ForEach(p =>
+                {
+                    MSGInfo($"{p.GetName()} Origin ON");
+                });
+            });
+
+        }
+        private void button_TestStart_Click(object sender, EventArgs e)
+        {
+            if (_Engine == null) return;
+
+            button_TestStart.Enabled = false;
+            button_Run.Visible = true;
+            button_Stop.Visible = true;
+
+            _Engine.Run();
+
+        }
+        private void button_Run_Click(object sender, EventArgs e)
+        {
+            if (_Engine == null) return;
+            try
+            {
+                button_Run.Enabled = false;
+                button_Stop.Enabled = true;
+
+            }
+
+            catch (Exception ex)
+            {
+                WriteDebugMsg(DateTime.Now, MSGLevel.Error, ex.Message);
+            }
+        }
+        private void button_Stop_Click(object sender, EventArgs e)
+        {
+            button_Run.Enabled = true;
+            button_Stop.Enabled = false;
+
+        }
+    }
+}

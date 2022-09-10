@@ -1,5 +1,5 @@
 
-namespace Dual.Model.Import
+namespace Model.Simulator
 {
     partial class FormMain
     {
@@ -32,15 +32,13 @@ namespace Dual.Model.Import
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.xtraTabControl_My = new System.Windows.Forms.TabControl();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
-            this.button_OpenFolder = new System.Windows.Forms.Button();
-            this.button_CreateExcel = new System.Windows.Forms.Button();
-            this.pictureBox_ppt = new System.Windows.Forms.PictureBox();
-            this.pictureBox_xls = new System.Windows.Forms.PictureBox();
-            this.button_copy = new System.Windows.Forms.Button();
             this.richTextBox_ds = new System.Windows.Forms.RichTextBox();
+            this.button_Run = new System.Windows.Forms.Button();
             this.button_TestStart = new System.Windows.Forms.Button();
             this.button_TestORG = new System.Windows.Forms.Button();
             this.splitContainer4 = new System.Windows.Forms.SplitContainer();
+            this.button_Stop = new System.Windows.Forms.Button();
+            this.button_Compile = new System.Windows.Forms.Button();
             this.button_ClearLog = new System.Windows.Forms.Button();
             this.richTextBox_Debug = new System.Windows.Forms.RichTextBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
@@ -53,8 +51,6 @@ namespace Dual.Model.Import
             this.splitContainer2.Panel1.SuspendLayout();
             this.splitContainer2.Panel2.SuspendLayout();
             this.splitContainer2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox_ppt)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox_xls)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer4)).BeginInit();
             this.splitContainer4.Panel1.SuspendLayout();
             this.splitContainer4.Panel2.SuspendLayout();
@@ -101,74 +97,18 @@ namespace Dual.Model.Import
             // splitContainer2.Panel1
             // 
             this.splitContainer2.Panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(33)))), ((int)(((byte)(33)))));
-            this.splitContainer2.Panel1.Controls.Add(this.button_OpenFolder);
-            this.splitContainer2.Panel1.Controls.Add(this.button_CreateExcel);
-            this.splitContainer2.Panel1.Controls.Add(this.pictureBox_ppt);
-            this.splitContainer2.Panel1.Controls.Add(this.pictureBox_xls);
+            this.splitContainer2.Panel1.Controls.Add(this.button_Stop);
+            this.splitContainer2.Panel1.Controls.Add(this.button_TestStart);
+            this.splitContainer2.Panel1.Controls.Add(this.button_Compile);
+            this.splitContainer2.Panel1.Controls.Add(this.button_TestORG);
+            this.splitContainer2.Panel1.Controls.Add(this.button_Run);
             // 
             // splitContainer2.Panel2
             // 
-            this.splitContainer2.Panel2.Controls.Add(this.button_copy);
             this.splitContainer2.Panel2.Controls.Add(this.richTextBox_ds);
             this.splitContainer2.Size = new System.Drawing.Size(540, 603);
             this.splitContainer2.SplitterDistance = 220;
             this.splitContainer2.TabIndex = 4;
-            // 
-            // button_OpenFolder
-            // 
-            this.button_OpenFolder.BackColor = System.Drawing.Color.DarkSeaGreen;
-            this.button_OpenFolder.Location = new System.Drawing.Point(304, 165);
-            this.button_OpenFolder.Name = "button_OpenFolder";
-            this.button_OpenFolder.Size = new System.Drawing.Size(72, 33);
-            this.button_OpenFolder.TabIndex = 4;
-            this.button_OpenFolder.Text = "폴더열기";
-            this.button_OpenFolder.UseVisualStyleBackColor = false;
-            this.button_OpenFolder.Visible = false;
-            this.button_OpenFolder.Click += new System.EventHandler(this.button_OpenFolder_Click);
-            // 
-            // button_CreateExcel
-            // 
-            this.button_CreateExcel.BackColor = System.Drawing.Color.DarkSeaGreen;
-            this.button_CreateExcel.Location = new System.Drawing.Point(82, 165);
-            this.button_CreateExcel.Name = "button_CreateExcel";
-            this.button_CreateExcel.Size = new System.Drawing.Size(72, 33);
-            this.button_CreateExcel.TabIndex = 3;
-            this.button_CreateExcel.Text = "엑셀생성";
-            this.button_CreateExcel.UseVisualStyleBackColor = false;
-            this.button_CreateExcel.Visible = false;
-            this.button_CreateExcel.Click += new System.EventHandler(this.button_CreateExcel_Click);
-            // 
-            // pictureBox_ppt
-            // 
-            this.pictureBox_ppt.Image = global::Model.Import.Viewer.Properties.Resources.IMPORT_PPT;
-            this.pictureBox_ppt.Location = new System.Drawing.Point(26, 10);
-            this.pictureBox_ppt.Name = "pictureBox_ppt";
-            this.pictureBox_ppt.Size = new System.Drawing.Size(418, 97);
-            this.pictureBox_ppt.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBox_ppt.TabIndex = 0;
-            this.pictureBox_ppt.TabStop = false;
-            // 
-            // pictureBox_xls
-            // 
-            this.pictureBox_xls.Image = global::Model.Import.Viewer.Properties.Resources.IMPORT_XLS;
-            this.pictureBox_xls.Location = new System.Drawing.Point(26, 113);
-            this.pictureBox_xls.Name = "pictureBox_xls";
-            this.pictureBox_xls.Size = new System.Drawing.Size(418, 98);
-            this.pictureBox_xls.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBox_xls.TabIndex = 1;
-            this.pictureBox_xls.TabStop = false;
-            this.pictureBox_xls.Visible = false;
-            // 
-            // button_copy
-            // 
-            this.button_copy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_copy.Location = new System.Drawing.Point(426, 13);
-            this.button_copy.Name = "button_copy";
-            this.button_copy.Size = new System.Drawing.Size(85, 34);
-            this.button_copy.TabIndex = 1;
-            this.button_copy.Text = "클립보드 모델복사";
-            this.button_copy.UseVisualStyleBackColor = true;
-            this.button_copy.Click += new System.EventHandler(this.button_copy_Click);
             // 
             // richTextBox_ds
             // 
@@ -176,15 +116,27 @@ namespace Dual.Model.Import
             this.richTextBox_ds.Dock = System.Windows.Forms.DockStyle.Fill;
             this.richTextBox_ds.Location = new System.Drawing.Point(0, 0);
             this.richTextBox_ds.Name = "richTextBox_ds";
-            this.richTextBox_ds.ReadOnly = true;
             this.richTextBox_ds.Size = new System.Drawing.Size(540, 379);
             this.richTextBox_ds.TabIndex = 2;
             this.richTextBox_ds.Text = "";
             // 
+            // button_Run
+            // 
+            this.button_Run.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_Run.Location = new System.Drawing.Point(49, 42);
+            this.button_Run.Name = "button_Run";
+            this.button_Run.Size = new System.Drawing.Size(85, 23);
+            this.button_Run.TabIndex = 3;
+            this.button_Run.Text = "Run";
+            this.button_Run.UseVisualStyleBackColor = true;
+            this.button_Run.Visible = false;
+            this.button_Run.Click += new System.EventHandler(this.button_Run_Click);
+            // 
             // button_TestStart
             // 
             this.button_TestStart.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_TestStart.Location = new System.Drawing.Point(1259, 55);
+            this.button_TestStart.Enabled = false;
+            this.button_TestStart.Location = new System.Drawing.Point(140, 68);
             this.button_TestStart.Name = "button_TestStart";
             this.button_TestStart.Size = new System.Drawing.Size(85, 23);
             this.button_TestStart.TabIndex = 1;
@@ -196,7 +148,8 @@ namespace Dual.Model.Import
             // button_TestORG
             // 
             this.button_TestORG.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_TestORG.Location = new System.Drawing.Point(1259, 29);
+            this.button_TestORG.Enabled = false;
+            this.button_TestORG.Location = new System.Drawing.Point(140, 42);
             this.button_TestORG.Name = "button_TestORG";
             this.button_TestORG.Size = new System.Drawing.Size(85, 23);
             this.button_TestORG.TabIndex = 1;
@@ -218,13 +171,36 @@ namespace Dual.Model.Import
             // 
             // splitContainer4.Panel2
             // 
-            this.splitContainer4.Panel2.Controls.Add(this.button_TestStart);
-            this.splitContainer4.Panel2.Controls.Add(this.button_TestORG);
             this.splitContainer4.Panel2.Controls.Add(this.button_ClearLog);
             this.splitContainer4.Panel2.Controls.Add(this.richTextBox_Debug);
             this.splitContainer4.Size = new System.Drawing.Size(1373, 746);
             this.splitContainer4.SplitterDistance = 603;
             this.splitContainer4.TabIndex = 20;
+            // 
+            // button_Stop
+            // 
+            this.button_Stop.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_Stop.Enabled = false;
+            this.button_Stop.Location = new System.Drawing.Point(49, 68);
+            this.button_Stop.Name = "button_Stop";
+            this.button_Stop.Size = new System.Drawing.Size(85, 23);
+            this.button_Stop.TabIndex = 5;
+            this.button_Stop.Text = "Stop";
+            this.button_Stop.UseVisualStyleBackColor = true;
+            this.button_Stop.Visible = false;
+            this.button_Stop.Click += new System.EventHandler(this.button_Stop_Click);
+            // 
+            // button_Compile
+            // 
+            this.button_Compile.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_Compile.Location = new System.Drawing.Point(49, 18);
+            this.button_Compile.Name = "button_Compile";
+            this.button_Compile.Size = new System.Drawing.Size(85, 23);
+            this.button_Compile.TabIndex = 4;
+            this.button_Compile.Text = "Compile";
+            this.button_Compile.UseVisualStyleBackColor = true;
+            this.button_Compile.Visible = false;
+            this.button_Compile.Click += new System.EventHandler(this.button_Compile_Click);
             // 
             // button_ClearLog
             // 
@@ -276,7 +252,7 @@ namespace Dual.Model.Import
             this.Controls.Add(this.splitter1);
             this.Controls.Add(this.progressBar1);
             this.ForeColor = System.Drawing.Color.SlateBlue;
-            this.Icon = global::Model.Import.Viewer.Properties.Resources.logo_Dualsoft;
+            this.Icon = global::Model.Simulator.Properties.Resources.logo_Dualsoft;
             this.IsMdiContainer = true;
             this.Name = "FormMain";
             this.Text = "Dualsoft";
@@ -290,8 +266,6 @@ namespace Dual.Model.Import
             this.splitContainer2.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
             this.splitContainer2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox_ppt)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox_xls)).EndInit();
             this.splitContainer4.Panel1.ResumeLayout(false);
             this.splitContainer4.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer4)).EndInit();
@@ -305,19 +279,17 @@ namespace Dual.Model.Import
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.SplitContainer splitContainer4;
         private System.Windows.Forms.RichTextBox richTextBox_Debug;
-        private System.Windows.Forms.PictureBox pictureBox_ppt;
-        private System.Windows.Forms.PictureBox pictureBox_xls;
         private System.Windows.Forms.Button button_ClearLog;
         private System.Windows.Forms.ProgressBar progressBar1;
         private System.Windows.Forms.TabControl xtraTabControl_My;
         private System.Windows.Forms.SplitContainer splitContainer2;
         private System.Windows.Forms.RichTextBox richTextBox_ds;
-        private System.Windows.Forms.Button button_copy;
         private System.Windows.Forms.Splitter splitter1;
-        private System.Windows.Forms.Button button_OpenFolder;
-        private System.Windows.Forms.Button button_CreateExcel;
         private System.Windows.Forms.Button button_TestStart;
         private System.Windows.Forms.Button button_TestORG;
+        private System.Windows.Forms.Button button_Run;
+        private System.Windows.Forms.Button button_Compile;
+        private System.Windows.Forms.Button button_Stop;
     }
 }
 

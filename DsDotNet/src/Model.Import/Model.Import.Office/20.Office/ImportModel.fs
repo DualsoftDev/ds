@@ -10,6 +10,7 @@ open PPTX
 open System.Collections.Generic
 open System
 open Microsoft.FSharp.Collections
+open Engine.Common.FS
 
 [<AutoOpen>]
 module ImportModel =
@@ -54,17 +55,17 @@ module ImportModel =
             updateAlias(edge.EndNode) 
             getParent(edge) |> Seq.iter(fun (parentNode, parentSeg) ->
                         
-                           mySys.Flos.[edge.PageNum].RemoveSegNoEdge(sSeg) 
-                           mySys.Flos.[edge.PageNum].RemoveSegNoEdge(eSeg) 
+                           mySys.Flows.[edge.PageNum].RemoveSegNoEdge(sSeg) 
+                           mySys.Flows.[edge.PageNum].RemoveSegNoEdge(eSeg) 
                            let mEdge = MEdge(sSeg, eSeg, edge.Causal)
 
                            if(mEdge.Causal = Interlock)
-                           then mySys.Flos.[edge.PageNum].AddInterlock(mEdge)
+                           then mySys.Flows.[edge.PageNum].AddInterlock(mEdge)
 
                            match parentNode with
                            |Some(v) -> if(v.PageNum = edge.PageNum) 
-                                       then mySys.Flos.[edge.PageNum].AddSegDrawSub(parentSeg) 
-                           |None -> mySys.Flos.[edge.PageNum].AddEdge(mEdge)
+                                       then mySys.Flows.[edge.PageNum].AddSegDrawSub(parentSeg) 
+                           |None -> mySys.Flows.[edge.PageNum].AddEdge(mEdge)
 
                            Check.SameEdgeErr(parentNode, edge, mEdge, dicSameCheck)
                            dicEdge.TryAdd(mEdge, parentSeg) |>ignore
@@ -114,8 +115,8 @@ module ImportModel =
                                 let name  = dicFloName.[node.PageNum]
                                 let flow  = Flo(name, node.PageNum, mySys)
                                
-                                mySys.Flos.TryAdd(node.PageNum, flow)|>ignore
-                                mySys.Flos.[node.PageNum].AddSegNoEdge(dicSeg.[node.Key]))
+                                mySys.Flows.TryAdd(node.PageNum, flow)|>ignore
+                                mySys.Flows.[node.PageNum].AddSegNoEdge(dicSeg.[node.Key]))
                                 
                 //Dummy child 처리
                 doc.Parents
@@ -127,7 +128,7 @@ module ImportModel =
                     |> Seq.iter(fun child ->  
                                 let cSeg = dicSeg.[child.Key]
                                 pSeg.AddSegNoEdge(cSeg)
-                                mySys.Flos.[parent.PageNum].RemoveSegNoEdge(cSeg) 
+                                mySys.Flows.[parent.PageNum].RemoveSegNoEdge(cSeg) 
                                // child.ExistChildEdge <- true
                                 )
                 )
@@ -168,8 +169,8 @@ module ImportModel =
                                                 //행위 부모 할당후 
                                                 pSeg.AddSegNoEdge(dicSeg.[child.Key])
                                                 //Flo 상에서 삭제
-                                                mySys.Flos.[parent.PageNum].RemoveSegNoEdge(dicSeg.[child.Key]) 
-                                                mySys.Flos.[parent.PageNum].AddSegDrawSub(pSeg) 
+                                                mySys.Flows.[parent.PageNum].RemoveSegNoEdge(dicSeg.[child.Key]) 
+                                                mySys.Flows.[parent.PageNum].AddSegDrawSub(pSeg) 
                                                     )
                 )
 
@@ -185,14 +186,14 @@ module ImportModel =
                 |> Seq.filter(fun node -> node.NodeCausal.IsLocation)
                 |> Seq.iter(fun node -> mySys.LocationSet.TryAdd(dicSeg.[node.Key].ToLayOutPath(), node.Rectangle) |> ignore)
             
-                Event.MSGInfo($"전체 장표   count [{doc.Pages.Count()}]")
-                Event.MSGInfo($"전체 도형   count [{doc.Nodes.Count()}]")
-                Event.MSGInfo($"전체 연결   count [{doc.Edges.Count()}]")
-                Event.MSGInfo($"전체 부모   count [{doc.Parents.Keys.Count}]")
+                MSGInfo($"전체 장표   count [{doc.Pages.Count()}]")
+                MSGInfo($"전체 도형   count [{doc.Nodes.Count()}]")
+                MSGInfo($"전체 연결   count [{doc.Edges.Count()}]")
+                MSGInfo($"전체 부모   count [{doc.Parents.Keys.Count}]")
                 model
 
             
-            with ex ->  Event.MSGError  $"{ex.Message}"
+            with ex ->  MSGError  $"{ex.Message}"
                         model
                         
            
@@ -200,9 +201,9 @@ module ImportModel =
 
     let FromPPTX(path:string) =
         let ppt = ImportPowerPoint(path)
-        Event.DoWork(20);
+        DoWork(20);
         let model = ppt.GetDsModel()
-        Event.DoWork(50);
+        DoWork(50);
         model
         
 

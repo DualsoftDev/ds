@@ -25,10 +25,10 @@ module EnumuerableExt =
 [<Extension>] // type SeqExt =
 type SeqExt =
     /// test if sequence contains the value
-    [<Extension>] static member Contains(xs:'T seq, x:'T) = xs |> Seq.contains x
+    //[<Extension>] static member Contains(xs:'T seq, x:'T) = xs |> Seq.contains x  //System.Collections.Generic 혼동
     [<Extension>] static member ContainsAnyOf(xs:'T seq, x:'T seq) = xs |> Seq.containsAnyOf x
     [<Extension>] static member ContainsAllOf(xs:'T seq, x:'T seq) = xs |> Seq.containsAllOf x
     [<Extension>] static member AllSame(xs:'T seq, x:'T) = (xs |> Seq.filter (fun s -> s = x)).length() = xs.length()
-    [<Extension>] static member Any(xs:'a seq) = not <| Seq.isEmpty xs
+    //[<Extension>] static member Any(xs:'a seq) = not <| Seq.isEmpty xs   //System.Collections.Generic 혼동
     [<Extension>] static member GetLength(xs:'a seq) = Seq.length xs
     [<Extension>] static member IsEmpty(xs:'a seq) = Seq.isEmpty xs

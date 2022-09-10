@@ -10,6 +10,7 @@ open System.IO
 open System
 open UtilPPT
 open UtilMS
+open Engine.Common.FS
 
 
 
@@ -361,7 +362,7 @@ module PPTX =
                 doc.Close()
               
             with ex -> doc.Close()
-                       Event.MSGError  $"{ex.Message}"
+                       MSGError  $"{ex.Message}"
                 
 
         member x.GetPage(pageNum:int) = pages.Values |> Seq.filter(fun p -> p.PageNum = pageNum) |> Seq.head

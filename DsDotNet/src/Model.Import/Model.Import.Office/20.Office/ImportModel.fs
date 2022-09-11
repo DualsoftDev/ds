@@ -102,7 +102,7 @@ module ImportModel =
                         then node.Name.Split('.').[0], node.Name
                         else dicFloName.[node.PageNum], node.Name
 
-                    let seg = Seg(realName, mySys, node.NodeCausal,  realFlo)
+                    let seg = Seg(realName, mySys, Editor.User, Bound.Normal, node.NodeCausal, realFlo, node.IsDummy)
                     seg.Update(node.Key, node.Id.Value, node.Alias, node.CntTX, node.CntRX )
                     dicSeg.TryAdd(node.Key, seg) |> ignore
                     
@@ -111,7 +111,7 @@ module ImportModel =
               
                 //flow 리스트 만들기
                 doc.Nodes 
-                |> Seq.filter(fun node -> node.NodeCausal = DUMMY|>not)
+                |> Seq.filter(fun node -> node.IsDummy|>not)
                 |> Seq.iter(fun node -> 
                                 let name  = dicFloName.[node.PageNum]
                                 let flow  = Flo(name, node.PageNum, mySys)
@@ -121,7 +121,7 @@ module ImportModel =
                                 
                 //Dummy child 처리
                 doc.Parents
-                |> Seq.filter(fun group -> group.Key.NodeCausal = DUMMY)
+                |> Seq.filter(fun group -> group.Key.IsDummy)
                 |> Seq.map(fun group -> group.Key, group.Value)
                 |> Seq.iter(fun (parent, children) -> 
                     let pSeg = dicSeg.[parent.Key]
@@ -140,7 +140,7 @@ module ImportModel =
                 |> Seq.iter(fun edge -> 
                                 let sSeg = dicSeg.[edge.StartNode.Key]
                                 let eSeg = dicSeg.[edge.EndNode.Key]
-                                if(sSeg.NodeCausal = DUMMY || eSeg.NodeCausal = DUMMY)
+                                if(sSeg.IsDummy || eSeg.IsDummy)
                                 then 
                                     let srcs = if(sSeg.NoEdgeSegs.Any()) then sSeg.NoEdgeSegs |> Seq.toList else [sSeg]
                                     let tgts = if(eSeg.NoEdgeSegs.Any()) then eSeg.NoEdgeSegs |> Seq.toList else [eSeg]
@@ -159,13 +159,13 @@ module ImportModel =
 
                 //NoEdge child 처리
                 doc.Parents
-                |> Seq.filter(fun group -> group.Key.NodeCausal = DUMMY |>not)
+                |> Seq.filter(fun group -> group.Key.IsDummy |>not)
                 |> Seq.map(fun group -> group.Key, group.Value)
                 |> Seq.iter(fun (parent, children) ->
                             let pSeg = dicSeg.[parent.Key]
                             children 
                             |> Seq.filter(fun child -> child.ExistChildEdge|>not) //엣지 할당 못받은 자식만
-                            |> Seq.filter(fun child -> child.NodeCausal = DUMMY|>not) 
+                            |> Seq.filter(fun child -> child.IsDummy|>not) 
                             |> Seq.iter(fun child -> 
                                                 //행위 부모 할당후 
                                                 pSeg.AddSegNoEdge(dicSeg.[child.Key])

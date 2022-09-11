@@ -245,8 +245,7 @@ namespace Dual.Model.Import
                     nNode.Attr.Shape = Shape.Ellipse;
                 if (segment.NodeCausal == NodeCausal.RX)
                     nNode.Attr.Shape = Shape.Ellipse;
-                if (segment.NodeCausal == NodeCausal.DUMMY)
-                    nNode.Attr.Shape = Shape.DrawFromGeometry;
+               
             }
         }
 

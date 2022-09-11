@@ -27,15 +27,14 @@ module Object =
     and
         /// 사용자가 모델링을 통해서 만든 segment (SegEditor = User)
         [<DebuggerDisplay("{ToText()}")>]
-        Seg(name:string, baseSystem:DsSystem, editor:Editor, location:Bound, nodeCausal:NodeCausal,  ownerFlow:string) as this =
+        Seg(name:string, baseSystem:DsSystem, editor:Editor, location:Bound, nodeCausal:NodeCausal,  ownerFlow:string, bDummy:bool) as this =
             inherit SegBase(name,  baseSystem)
             /// modeled edges
             let mutable status4 = Status4.Homing
             let mEdges  = ConcurrentHash<MEdge>()
 
-            new (name, baseSystem, nodeCausal, ownerFlo) = Seg (name, baseSystem, Editor.User, Normal, nodeCausal,  ownerFlo)
-            new (name, baseSystem, nodeCausal) = Seg (name, baseSystem, Editor.User, Normal, nodeCausal,  "")
-            new (name, baseSystem) = Seg (name, baseSystem, Editor.Engine, Normal, MY,  "")
+            new (name, baseSystem, nodeCausal) = Seg (name, baseSystem, Editor.User, Normal, nodeCausal,  "", false)
+            new (name, baseSystem) = Seg (name, baseSystem, Editor.Engine, Normal, MY,  "", false)
 
             member x.NodeCausal = nodeCausal
             member x.Status4 = status4 
@@ -69,7 +68,6 @@ module Object =
                                          |MY         -> x.ToText()
                                          |TR |TX |RX -> sprintf "%s_T.%s" x.OwnerFlow (x.ToText())
                                          |EX         -> sprintf "EX.%s.TR" (x.ToText())
-                                         |DUMMY      -> failwith "DUMMY no name";
             
             member x.ToCallText() = let callName = sprintf "%s_%s"   this.OwnerFlow (x.Name.Replace(" ","_")) 
                                     if(IsInvalidName(callName))  then $"\"{callName}\"" else callName
@@ -111,6 +109,7 @@ module Object =
                    |> Seq.append x.ChildSegs
 
         
+            member x.IsDummy = bDummy
             member x.IsChildExist = mEdges.Any()
             member x.IsChildEmpty = mEdges.IsEmpty
             member x.IsRoot =  x.Parent.IsSome && x.Parent.Value.Location = System

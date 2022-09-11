@@ -1,8 +1,6 @@
 // Copyright (c) Dual Inc.  All Rights Reserved.
 namespace Engine.Base
 
-open System
-open System.Linq
 
 [<AutoOpen>]
 module Type =
@@ -14,7 +12,6 @@ module Type =
         | TR            //지시관찰 TX RX 
         | TX            //지시만
         | RX            //관찰만
-        | DUMMY         //임시 그룹
         with
             member x.IsReal =   match x with
                                 |MY |EX -> true
@@ -23,8 +20,6 @@ module Type =
                                 |TR |TX |RX -> true
                                 |_ -> false
 
-          
-                                
     ///인과의 엣지 종류
     type EdgeCausal =
         | SEdge              // A>B	        약 시작 연결
@@ -111,16 +106,4 @@ module Type =
             | "지시" -> Command
             | "관찰" -> Observe
             |_-> failwithf "TagCase Error"
-        
-    /// 시스템 전용 문자 리스트  // '_'는 선두만 불가, '~'은 앞뒤만 가능
-    let SystemChar = [
-                ">"; "<"; "|"; "="; "-"; ";"; ":"; "'"; "\""; "["; "]" ; "{"; "}" 
-                "!"; "@"; "#"; "^"; "&"; "*";"/"; "+"; "-"; "?" 
-            ]
-
-    let IsInvalidName(name:string) = 
-        let ngName = SystemChar |> Seq.filter(fun char -> name.Contains(char))
-        ngName.Any() 
-        || name.StartsWith("_") 
-        || (name.Length > 0 && Char.IsDigit(name.[0]))
-        
+  

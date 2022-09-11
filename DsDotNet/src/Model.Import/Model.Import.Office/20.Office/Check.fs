@@ -42,11 +42,11 @@ module Check =
 
             let srcParents = doc.Parents  
                             |> Seq.filter(fun group ->group.Value.Contains(edge.StartNode)) 
-                            |> Seq.filter(fun group ->group.Key.NodeCausal = DUMMY |>not) 
+                            |> Seq.filter(fun group ->group.Key.IsDummy |>not) 
                             |> Seq.map (fun group -> group.Key)
             let tgtParents = doc.Parents
                             |> Seq.filter(fun group ->group.Value.Contains(edge.EndNode)) 
-                            |> Seq.filter(fun group ->group.Key.NodeCausal = DUMMY |>not) 
+                            |> Seq.filter(fun group ->group.Key.IsDummy |>not) 
                             |> Seq.map (fun group -> group.Key)
             if(srcParents.Count() > 1) then failError (srcParents, edge.StartNode)  
             if(tgtParents.Count() > 1) then failError (tgtParents, edge.EndNode)  

@@ -135,10 +135,11 @@ module PPTX =
         member x.IsUsing = bShow
         member x.Title = slidePart.PageTitle()
 
-    type pptNode(shape:Presentation.Shape,iPage:int, dashOutline:bool , shapeType:ShapeTypeValues, sildeSize)  =
+    type pptNode(shape:Presentation.Shape,iPage:int, dashOutline:bool , sildeSize)  =
         let mutable txCnt = 1
         let mutable rxCnt = 1
-        let mutable  name = ""
+        let mutable name = ""
+        let mutable bDuumy = false
         do 
             if(shape.InnerText.Contains("[") && shape.InnerText.EndsWith("]"))
             then 
@@ -154,24 +155,22 @@ module PPTX =
                     shape.ErrorName(22, iPage)
             else 
                 name <- shape.InnerText
+
+            bDuumy <- shape.CheckEllipse() && dashOutline
             
         member x.PageNum = iPage
         member x.Shape = shape
-        member x.ShapeTypeValues = shapeType
         member x.DashOutline = dashOutline
+        member x.IsDummy = bDuumy
         member val NodeCausal = 
-                            match shapeType with
-                                |ShapeTypeValues.Rectangle
-                                |ShapeTypeValues.FlowChartProcess  -> if(dashOutline) then EX else  MY
-                                |ShapeTypeValues.Ellipse   
-                                |ShapeTypeValues.FlowChartAlternateProcess 
-                                |ShapeTypeValues.FlowChartConnector->    
-                                    if(dashOutline) then DUMMY 
-                                    else  
-                                        if((txCnt = 0 && rxCnt = 0) || txCnt < 0 || rxCnt < 0) then shape.ErrorName(2, iPage)
-                                        else TR
-                                |_ -> shape.ErrorName(1, iPage)
-
+                            if(shape.CheckRectangle()) then if(dashOutline) then EX else  MY
+                            else 
+                            if(shape.CheckEllipse()) 
+                            then 
+                                if((txCnt = 0 && rxCnt = 0) || txCnt < 0 || rxCnt < 0)
+                                then shape.ErrorName(2, iPage)
+                                else TR
+                            else  shape.ErrorName(1, iPage)
 
         member val Id =  shape.GetId()
         member val Key =  Objkey(iPage, shape.GetId())
@@ -225,7 +224,7 @@ module PPTX =
             let dummys = 
                 ids 
                 |> Seq.map (fun id -> nodes.[ Objkey(iPage, id) ])
-                |> Seq.filter (fun node -> node.NodeCausal = DUMMY)
+                |> Seq.filter (fun node -> node.IsDummy)
             if(dummys.Count() > 1) 
             then  Office.ErrorPPT(Group, 24, $"부모수:{dummys.Count()}", iPage)
             if(parents.Count() = 0 && dummys.Count() = 0 ) 
@@ -244,7 +243,7 @@ module PPTX =
                 ids 
                 |> Seq.map (fun id -> nodes.[Objkey(iPage, id) ])
                 |> Seq.filter (fun node ->node.NodeCausal = MY |> not)
-                |> Seq.filter (fun node ->(node.NodeCausal = DUMMY|>not ||  parent.IsSome))
+                |> Seq.filter (fun node ->(node.IsDummy|>not ||  parent.IsSome))
 
             if(children.Any() |> not) 
             then  Office.ErrorPPT(Group, 12, $"자식수:0", iPage)
@@ -300,8 +299,8 @@ module PPTX =
               
                 shapes 
                 |> Seq.iter (fun (shape, page, geometry, isDash) ->
-                            let node = pptNode(shape, page,  isDash, geometry, sildeSize)
-                            if(node.Name ="" && node.NodeCausal = DUMMY|>not) then shape.ErrorName(13, page)
+                            let node = pptNode(shape, page,  isDash,  sildeSize)
+                            if(node.Name ="" && node.IsDummy|>not) then shape.ErrorName(13, page)
                             nodes.TryAdd(node.Key, node)  |>ignore )
                              
                 connections

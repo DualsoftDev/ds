@@ -10,7 +10,7 @@ namespace Dual.Model.Import
     public static class SimSeg
     {
         static readonly List<NodeCausal> mys = new List<NodeCausal>() { NodeCausal.MY };
-        static readonly List<NodeCausal> notMys = new List<NodeCausal>() { NodeCausal.EX, NodeCausal.TR, NodeCausal.TX, NodeCausal.RX, NodeCausal.DUMMY };
+        static readonly List<NodeCausal> notMys = new List<NodeCausal>() { NodeCausal.EX, NodeCausal.TR, NodeCausal.TX, NodeCausal.RX };
         static bool org = false;
         static List<NodeCausal> AllSeg
         {

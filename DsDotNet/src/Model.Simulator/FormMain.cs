@@ -18,6 +18,8 @@ using static Engine.Common.FS.MessageEvent;
 using System.ComponentModel;
 using Engine.Common.FS;
 using Task = System.Threading.Tasks.Task;
+using Microsoft.FSharp.Core;
+using static Engine.Base.DsType;
 
 namespace Model.Simulator
 {
@@ -128,7 +130,23 @@ namespace Model.Simulator
 
 
                 var modelText = richTextBox_ds.Text;
-                _Engine = new EngineBuilder(modelText, $"Cpu_MY").Engine;
+                if (modelText == "")
+                {
+                    MSGWarn("모델을 Text 영역에 가져오세요");
+                    return;
+                }
+                else
+                {
+                    xtraTabControl_My.TabPages.Clear();
+                    DicUI.Clear();
+
+                    _Engine = new EngineBuilder(modelText, $"Cpu_MY").Engine;
+
+                    _Engine.Model.Systems.ForEach(f =>
+                    {
+                        CreateNewTabViewer(f);
+                    });
+                }
             }
 
             catch (Exception ex)
@@ -144,9 +162,17 @@ namespace Model.Simulator
             var reals = engine.Cpu.RootFlows.SelectMany(f => f.ChildVertices).OfType<SegmentBase>();
             reals.ForEach(m =>
             {
+                m.Children.ForEach(c =>
+                {
+                    ((UCSim)DicUI[c.Parent.ContainerFlow].Tag).Update(c, Status4.Ready);
+                });
+
                 var progressInfo = new GraphProgressSupportUtil.ProgressInfo(m.GraphInfo);
                 progressInfo.ChildOrigin.ForEach(p =>
                 {
+                    var call = p as Child;
+                    ((UCSim)DicUI[call.Parent.ContainerFlow].Tag).Update(p, Status4.Finish);
+
                     MSGInfo($"{p.GetName()} Origin ON");
                 });
             });

@@ -192,7 +192,7 @@ partial class ElementsListener : dsBaseListener
                         QpInstanceMap.Add(fqdn, child);
                         break;
                     case SegmentBase exSeg:
-                        var exCall = new ExSegmentCall(name, exSeg);
+                        var exCall = new ExSegment(name, exSeg);
                         child = new Child(exCall, _parenting) { IsAlias = isAlias };
                         exCall.ContainerChild = child;
                         QpInstanceMap.Add(fqdn, child);

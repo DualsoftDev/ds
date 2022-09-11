@@ -55,7 +55,7 @@ module GraphProgressSupportUtil =
                 c.Prototype.QualifiedName
             else
                 c.QualifiedName
-        | :? ExSegmentCall as s ->
+        | :? ExSegment as s ->
             s.ExternalSegment.QualifiedName
         | _ -> null
 

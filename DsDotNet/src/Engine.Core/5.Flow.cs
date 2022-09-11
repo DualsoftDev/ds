@@ -131,20 +131,6 @@ public static class FlowExtension
 
     public static IEnumerable<Causal> CollectArrow(this Edge edge)
     {
-        //bool isReset(string causalOperator)
-        //{
-        //    switch (causalOperator)
-        //    {
-        //        case ">":
-        //        case ">>":
-        //            return false;
-        //        case "|>":
-        //        case "|>>":
-        //            return true;
-        //        default:
-        //            throw new Exception("ERROR");
-        //    }
-        //}
         var e = edge;
         foreach (var s in e.Sources)
             yield return new Causal(s, e.Target, DsType.EdgeCausalType(e.Operator))

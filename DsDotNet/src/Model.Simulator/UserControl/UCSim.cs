@@ -3,16 +3,13 @@ using Engine.Core;
 using Microsoft.Msagl.Drawing;
 using Microsoft.Msagl.GraphViewerGdi;
 using Microsoft.Msagl.Layout.Layered;
-using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
 using System.Windows.Forms;
-using System.Windows.Forms.VisualStyles;
-using Engine.Base;
 using Color = Microsoft.Msagl.Drawing.Color;
 using Edge = Microsoft.Msagl.Drawing.Edge;
 using static Engine.Base.DsType;
+using System;
 
 namespace Model.Simulator
 {
@@ -67,87 +64,41 @@ namespace Model.Simulator
             SegmentBase segSrc = edge.Source as SegmentBase;
             SegmentBase segTgr = edge.Target as SegmentBase;
 
-            var subGSrc = new Subgraph(segSrc.Name);
-            var subGTgt = new Subgraph(segTgr.Name);
+            var subGSrc = new Subgraph(edge.Source.GetName());
+            var subGTgt = new Subgraph(edge.Target.GetName());
+            bool hasChildSrc = segSrc != null && segSrc.Children.Any();
+            bool hasChildTgt = segTgr != null && segTgr.Children.Any();
 
-            if (segSrc.Children.Any()) subgraph.AddSubgraph(subGSrc);
-            if (segTgr.Children.Any()) subgraph.AddSubgraph(subGTgt);
+            if (hasChildSrc) subgraph.AddSubgraph(subGSrc);
+            if (hasChildTgt) subgraph.AddSubgraph(subGTgt);
 
             var gEdge = viewer.Graph.AddEdge(subGSrc.Id, "", subGTgt.Id);
             DrawEdgeStyle(gEdge, edge, true);
-            DrawSub(subgraph, segSrc, subGSrc, gEdge.SourceNode, segSrc.Children.Any());
-            DrawSub(subgraph, segTgr, subGTgt, gEdge.TargetNode, segTgr.Children.Any());
+            DrawSub(subgraph, segSrc, subGSrc, gEdge.SourceNode, hasChildSrc);
+            DrawSub(subgraph, segTgr, subGTgt, gEdge.TargetNode, hasChildTgt);
         }
 
 
         private void UpdateLabelText(Node nNode)
         {
             nNode.LabelText = nNode.LabelText.Split(';')[0];
-            nNode.Label.FontColor = Color.White;
-            nNode.Attr.Color = Color.White;
-
+            nNode.Label.FontColor = Color.Black;
+            nNode.Attr.Color = Color.Black;
+             
         }
-
-
-
-
-        //private void drawMEdgeGraph(List<Engine.Core.Edge> edges, Subgraph subgraph)
-        //{
-        //    foreach (var mEdge in edges)
-        //        DrawMEdge(subgraph, mEdge);
-        //}
-
-        private void DrawMEdge(Subgraph subgraph, Engine.Core.Edge edge)
-        {
-            Engine.Core.Edge mEdge = edge;
-
-            //bool bDrawSubSrc = mEdge.Source.IsChildExist && (drawSubs == null || drawSubs.Contains(mEdge.Source));
-            //bool bDrawSubTgt = mEdge.Target.IsChildExist && (drawSubs == null || drawSubs.Contains(mEdge.Target));
-
-            //var mEdgeSrc = mEdge.Source;
-            //var mEdgeTgt = mEdge.Target;
-            //var subGSrc = new Subgraph(mEdgeSrc.UIKey);
-            //var subGTgt = new Subgraph(mEdgeTgt.UIKey);
-
-            //if (bDrawSubSrc) subgraph.AddSubgraph(subGSrc);
-            //if (bDrawSubTgt) subgraph.AddSubgraph(subGTgt);
-            //var gEdge = viewer.Graph.AddEdge(subGSrc.Id, "", subGTgt.Id);
-            //DrawEdgeStyle(gEdge, mEdge, true);
-            //DrawSub(subgraph, mEdgeSrc, subGSrc, gEdge.SourceNode, bDrawSubSrc);
-            //DrawSub(subgraph, mEdgeTgt, subGTgt, gEdge.TargetNode, bDrawSubTgt);
-
-        }
-        private void DrawSeg(Subgraph subgraph, SegmentBase seg, List<SegmentBase> drawSubs)
-        {
-
-            //bool bDrawSubSrc = (seg.IsChildExist || seg.NoEdgeSegs.Any()) && (drawSubs == null || drawSubs.Contains(seg));
-
-            //var subGSrc = new Subgraph(seg.UIKey);
-
-            //if (bDrawSubSrc) subgraph.AddSubgraph(subGSrc);
-            //var gEdge = viewer.Graph.AddEdge(subGSrc.Id, "", subGSrc.Id);
-            //UpdateLabelText(gEdge.SourceNode);
-            //UpdateNodeView(gEdge.SourceNode, seg);
-            //gEdge.IsVisible = false;
-
-            //DrawSub(subgraph, seg, subGSrc, gEdge.SourceNode, bDrawSubSrc);
-
-        }
-
         private void DrawSub(Subgraph subgraph, SegmentBase seg, Subgraph subG, Node gNode, bool bDrawSub)
         {
             if (_dicDrawing.ContainsKey(gNode.Id)) return;
             else _dicDrawing.Add(gNode.Id, gNode);
 
-            //if (bDrawSub && (seg.MEdges.Any() || seg.NoEdgeSegs.Any()))
-            //{
-            //    if (seg.MEdges.Any())
-            //        drawMEdgeGraph(seg.MEdges.ToList(), null, subG);
+            if (bDrawSub && seg.ChildVertices.Any())
+            {
+                drawMEdgeGraph(seg.CollectArrow(), subG);
 
-            //    seg.NoEdgeSegs.ToList().ForEach(subSeg => DrawSeg(subG, subSeg, null));
-            //}
-            //else
-            //    subgraph.AddNode(gNode);
+                //seg.NoEdgeSegs.ToList().ForEach(subSeg => DrawSeg(subG, subSeg, null));
+            }
+            else
+                subgraph.AddNode(gNode);
         }
 
 
@@ -156,7 +107,7 @@ namespace Model.Simulator
             //gEdge.Attr.Color = Color.Black;
             //gEdge.Label.FontColor = Color.White;
             gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Generalization;
-            gEdge.Attr.Color = Color.White;
+            gEdge.Attr.Color = Color.Black;
 
             if (edge.EdgeCausal == EdgeCausal.SEdge)
             {
@@ -221,51 +172,49 @@ namespace Model.Simulator
                 var src = edge.Source as SegmentBase;
                 var tgt = edge.Target as SegmentBase;
 
-                UpdateNodeView(gEdge.SourceNode, src);
-                UpdateNodeView(gEdge.TargetNode, tgt);
+                UpdateNodeView(gEdge.SourceNode, src == null ? NodeCausal.TR : NodeCausal.MY);
+                UpdateNodeView(gEdge.TargetNode, tgt == null ? NodeCausal.TR : NodeCausal.MY);
             }
         }
 
-        private void UpdateNodeView(Node nNode, SegmentBase segment)
+        private void UpdateNodeView(Node nNode, NodeCausal nodeCausal)
         {
             nNode.Attr.Color = Color.DarkGoldenrod;
 
-            //if (segment.NodeCausal == NodeCausal.MY)
-            //    nNode.Attr.Shape = Shape.Box;
-            //if (segment.NodeCausal == NodeCausal.EX)
-            //    nNode.Attr.Shape = Shape.Diamond;
-            //if (segment.NodeCausal == NodeCausal.TR)
-            //    nNode.Attr.Shape = Shape.Ellipse;
-            //if (segment.NodeCausal == NodeCausal.TX)
-            //    nNode.Attr.Shape = Shape.Ellipse;
-            //if (segment.NodeCausal == NodeCausal.RX)
-            //    nNode.Attr.Shape = Shape.Ellipse;
-            //if (segment.NodeCausal == NodeCausal.DUMMY)
-            //    nNode.Attr.Shape = Shape.DrawFromGeometry;
+            if (nodeCausal == NodeCausal.MY)
+                nNode.Attr.Shape = Shape.Box;
+            if (nodeCausal  == NodeCausal.EX)
+                nNode.Attr.Shape = Shape.Diamond;
+            if (nodeCausal == NodeCausal.TR)
+                nNode.Attr.Shape = Shape.Ellipse;
+            if (nodeCausal == NodeCausal.TX)
+                nNode.Attr.Shape = Shape.Ellipse;
+            if (nodeCausal == NodeCausal.RX)
+                nNode.Attr.Shape = Shape.Ellipse;
+          
         }
 
         public void RefreshGraph() { viewer.Do(() => viewer.Refresh()); }
 
 
-        public void Update(SegmentBase seg)
+        internal void Update(IVertex seg, Status4 status4)
         {
-
-            //Node node = viewer.Graph.FindNode(seg.UIKey);
-            //if (node == null)
-            //{
-            //    if (viewer.Graph.SubgraphMap.ContainsKey(seg.UIKey))
-            //        node = viewer.Graph.SubgraphMap[seg.UIKey];
-            //    else
-            //        return;
-            //}
-            //node.Attr.Color = Color.White;
-            //node.Label.FontColor = Color.White;
+            Node node = viewer.Graph.FindNode(seg.GetName());
+            if (node == null)
+            {
+                if (viewer.Graph.SubgraphMap.ContainsKey(seg.GetName()))
+                    node = viewer.Graph.SubgraphMap[seg.GetName()];
+                else
+                    return;
+            }
+            node.Attr.Color = Color.Black;
+            node.Label.FontColor = Color.Black;
             if (seg != null)
             {
                 //if (seg.NodeCausal == NodeCausal.MY)
                 //    UpdateLineColor(seg.Status, node);
                 //else
-                //    UpdateFillColor(seg.Status, node);
+                UpdateFillColor(status4, node);
             }
             else
             {
@@ -310,7 +259,6 @@ namespace Model.Simulator
             viewer.Graph.Attr.BackgroundColor = gColor;
         }
 
-
-
+      
     }
 }

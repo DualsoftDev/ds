@@ -37,6 +37,8 @@ namespace Model.Simulator
             });
             this.Do(() => richTextBox_ds.Select(0, 0));
             this.Do(() => richTextBox_ds.ScrollToCaret());
+            //CreateNewTabViewer(sys);
+
         }
         internal void WriteDebugMsg(DateTime time, MessageEvent.MSGLevel level, string msg)
         {
@@ -67,27 +69,23 @@ namespace Model.Simulator
             //    );
         }
 
-        internal void CreateNewTabViewer(DsSystem sys, bool isDemo = false)
+        internal void CreateNewTabViewer(DsSystem sys)
         {
-            List<Flow> flows = new List<Flow>();
-            //if (isDemo)
-            //    flows = sys.Flows.Values.ToList();
-            //else
-            //    flows = sys.RootFlow().ToList();
-
+         
+            var flows = sys.RootFlows;
             var flowTotalCnt = flows.Count();
             flows.ToList().ForEach(f =>
             {
                 if (DicUI.ContainsKey(f))
                     xtraTabControl_My.SelectedTab = DicUI[f];
                 else
-                {
+                { 
                     UCSim viewer = new UCSim { Dock = DockStyle.Fill };
-                //    viewer.SetGraph(f);
+                    viewer.SetGraph(f);
                     TabPage tab = new TabPage();
                     tab.Controls.Add(viewer);
                     tab.Tag = viewer;
-                  //  tab.Text = $"{f.Name}({f.Page})";
+                    tab.Text = f.Name;
                     this.Do(() =>
                     {
                         xtraTabControl_My.TabPages.Add(tab);

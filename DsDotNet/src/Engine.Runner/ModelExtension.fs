@@ -41,7 +41,7 @@ module internal ModelModule =
                         ts.Type <- ts.Type ||| TagType.TX ||| TagType.External
                     for te in ch.TagsEnd do
                         te.Type <- te.Type ||| TagType.RX ||| TagType.External
-                | :? ExSegmentCall as exSegCall->
+                | :? ExSegment as exSegCall->
                     let ex = exSegCall.ExternalSegment :?> Segment
                     ch.TagsStart <- [ex.TagPStart :> Tag] |> ResizeArray
                     ch.TagReset <- ex.TagPReset

@@ -1,5 +1,6 @@
+using Engine.Base;
+
 namespace Engine.Core;
-using static Engine.Base.Type;
 
 public abstract class Flow : Named, IWallet
 {
@@ -112,42 +113,41 @@ public static class FlowExtension
     {
         public IVertex Source;
         public IVertex Target;
-        public bool IsReset;
-        public EdgeCausal EdgeCausal;
+        public bool IsReset => EdgeCausal.IsReset;
+        public DsType.EdgeCausal EdgeCausal;
         
-        public Causal(IVertex source, IVertex target, bool isReset)
+        public Causal(IVertex source, IVertex target, DsType.EdgeCausal edgeCausal)
         {
             Source = source;
             Target = target;
-            IsReset = isReset;
+            EdgeCausal = edgeCausal;
         }
 
         public override string ToString()
         {
-            var op = IsReset ? "|>" : ">";
-            return $"{Source} {op} {Target}";
+            return $"{Source} {EdgeCausal.ToText()} {Target}";
         }
     }
 
     public static IEnumerable<Causal> CollectArrow(this Edge edge)
     {
-        bool isReset(string causalOperator)
-        {
-            switch (causalOperator)
-            {
-                case ">":
-                case ">>":
-                    return false;
-                case "|>":
-                case "|>>":
-                    return true;
-                default:
-                    throw new Exception("ERROR");
-            }
-        }
+        //bool isReset(string causalOperator)
+        //{
+        //    switch (causalOperator)
+        //    {
+        //        case ">":
+        //        case ">>":
+        //            return false;
+        //        case "|>":
+        //        case "|>>":
+        //            return true;
+        //        default:
+        //            throw new Exception("ERROR");
+        //    }
+        //}
         var e = edge;
         foreach (var s in e.Sources)
-            yield return new Causal(s, e.Target, isReset(e.Operator))
+            yield return new Causal(s, e.Target, DsType.EdgeCausalType(e.Operator))
                 ;
     }
 

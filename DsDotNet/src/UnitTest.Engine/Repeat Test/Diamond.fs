@@ -10,6 +10,7 @@ open Xunit.Abstractions
 open UnitTest.Engine
 open Engine.Common
 open System.Diagnostics
+open Engine.Base
 
 type Diamond(output1:ITestOutputHelper) =
     let createCylinder = Tester.CreateCylinder
@@ -114,7 +115,7 @@ type Diamond(output1:ITestOutputHelper) =
         let mutable counter = 0
         Global.SegmentStatusChangedSubject.Subscribe(fun ssc ->
             if ssc.Segment.QualifiedName = "L_F_Main" then
-                if ssc.Status = Status4.Finished then
+                if ssc.Status = DsType.Status4.Finish then
                     counter <- counter + 1
                     if counter % 100 = 0 then
                         System.Console.WriteLine($"[{counter}] After finishing Main segment")

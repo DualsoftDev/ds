@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using static Model.Import.Office.Object;
-using static Engine.Base.Type;
+using static Engine.Base.DsType;
 
 using Color = Microsoft.Msagl.Drawing.Color;
 

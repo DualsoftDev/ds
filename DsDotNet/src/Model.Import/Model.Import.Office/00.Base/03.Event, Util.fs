@@ -6,6 +6,7 @@ open System
 open System.Reactive.Subjects
 
 open Engine.Base
+open Engine.Base.DsType
 
 
 [<AutoOpen>]

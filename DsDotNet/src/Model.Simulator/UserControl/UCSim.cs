@@ -8,16 +8,17 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
+using Engine.Base;
 using Color = Microsoft.Msagl.Drawing.Color;
 using Edge = Microsoft.Msagl.Drawing.Edge;
+using static Engine.Base.DsType;
 
 namespace Model.Simulator
 {
     public partial class UCSim : UserControl
     {
         private readonly GViewer viewer = new Microsoft.Msagl.GraphViewerGdi.GViewer();
-
-
 
         public UCSim()
         {
@@ -28,14 +29,9 @@ namespace Model.Simulator
             viewer.ToolBarIsVisible = false;
 
             this.Controls.Add(viewer);
-
-
         }
 
-        private Dictionary<Tuple<SegmentBase, Status4>, int> _dicCycle = new Dictionary<Tuple<SegmentBase, Status4>, int>();
         private Dictionary<string, Node> _dicDrawing = new Dictionary<string, Node>();
-
-
 
         public void SetGraph(Flow flow)
         {
@@ -50,15 +46,37 @@ namespace Model.Simulator
             layoutSetting.ClusterMargin = 30;
 
             viewer.Graph.LayoutAlgorithmSettings = layoutSetting;
-
-            //SetBackColor(System.Drawing.Color.FromArgb(33, 33, 33));
-            //var subDraws = flow.DrawSubs.ToList();
+            SetBackColor(System.Drawing.Color.FromArgb(240, 240, 240));
+            //var subDraws = flow.Edges.ToList();
+            //var a = flow.CollectArrow();
 
             //flow.NoEdgeSegs.ToList().ForEach(seg => DrawSeg(viewer.Graph.RootSubgraph, seg, subDraws));
+            drawMEdgeGraph(flow.CollectArrow(),  viewer.Graph.RootSubgraph);
 
-            //drawMEdgeGraph(flow.Edges.ToList(), subDraws, viewer.Graph.RootSubgraph);
+            viewer.SetCalculatedLayout(viewer.CalculateLayout(viewer.Graph));
+        }
 
-            //viewer.SetCalculatedLayout(viewer.CalculateLayout(viewer.Graph));
+        private void drawMEdgeGraph(IEnumerable<FlowExtension.Causal> edgeCausal, Subgraph subgraph)
+        {
+            foreach (var edge in edgeCausal)
+                DrawMEdge(subgraph, edge);
+        }
+
+        private void DrawMEdge(Subgraph subgraph, FlowExtension.Causal edge)
+        {
+            SegmentBase segSrc = edge.Source as SegmentBase;
+            SegmentBase segTgr = edge.Target as SegmentBase;
+
+            var subGSrc = new Subgraph(segSrc.Name);
+            var subGTgt = new Subgraph(segTgr.Name);
+
+            if (segSrc.Children.Any()) subgraph.AddSubgraph(subGSrc);
+            if (segTgr.Children.Any()) subgraph.AddSubgraph(subGTgt);
+
+            var gEdge = viewer.Graph.AddEdge(subGSrc.Id, "", subGTgt.Id);
+            DrawEdgeStyle(gEdge, edge, true);
+            DrawSub(subgraph, segSrc, subGSrc, gEdge.SourceNode, segSrc.Children.Any());
+            DrawSub(subgraph, segTgr, subGTgt, gEdge.TargetNode, segTgr.Children.Any());
         }
 
 
@@ -73,14 +91,13 @@ namespace Model.Simulator
 
 
 
-        private void drawMEdgeGraph(List<Engine.Core.Edge> edges, List<SegmentBase> drawSubs, Subgraph subgraph)
-        {
-            //foreach (var mEdge in edges)
-            //    DrawMEdge(subgraph, mEdge, drawSubs);
+        //private void drawMEdgeGraph(List<Engine.Core.Edge> edges, Subgraph subgraph)
+        //{
+        //    foreach (var mEdge in edges)
+        //        DrawMEdge(subgraph, mEdge);
+        //}
 
-        }
-
-        private void DrawMEdge(Subgraph subgraph, Engine.Core.Edge edge, List<SegmentBase> drawSubs)
+        private void DrawMEdge(Subgraph subgraph, Engine.Core.Edge edge)
         {
             Engine.Core.Edge mEdge = edge;
 
@@ -134,108 +151,97 @@ namespace Model.Simulator
         }
 
 
-        private void DrawEdgeStyle(Edge gEdge, Engine.Core.Edge edge, bool model = false)
+        private void DrawEdgeStyle(Edge gEdge, FlowExtension.Causal edge, bool model = false)
         {
             //gEdge.Attr.Color = Color.Black;
             //gEdge.Label.FontColor = Color.White;
             gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Generalization;
             gEdge.Attr.Color = Color.White;
 
-            edge.CollectArrow().ForEach(e =>
+            if (edge.EdgeCausal == EdgeCausal.SEdge)
             {
-            });
-            //edge.ContainerFlow
-            //if (edge.Causal == EdgeCausal.SEdge)
-            //{
-            //    gEdge.Attr.AddStyle(Style.Solid);
-            //    gEdge.Attr.Color = Color.DeepSkyBlue;
-            //    gEdge.Attr.LineWidth = 2;
-            //}
-            //else if (edge.Causal == EdgeCausal.SPush)
-            //{
-            //    gEdge.Attr.AddStyle(Style.Solid);
-            //    gEdge.Attr.LineWidth = 4;
-            //    gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
-            //    gEdge.Attr.Color = Color.DeepSkyBlue;
-            //}
-            //else if (edge.Causal == EdgeCausal.SSTATE)
-            //{
-            //    gEdge.Attr.AddStyle(Style.Solid);
-            //    gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Diamond;
-            //    gEdge.Attr.Color = Color.IndianRed;
-            //    gEdge.Attr.LineWidth = 4;
+                gEdge.Attr.AddStyle(Style.Solid);
+                gEdge.Attr.Color = Color.DeepSkyBlue;
+                gEdge.Attr.LineWidth = 2;
+            }
+            else if (edge.EdgeCausal == EdgeCausal.SPush)
+            {
+                gEdge.Attr.AddStyle(Style.Solid);
+                gEdge.Attr.LineWidth = 4;
+                gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
+                gEdge.Attr.Color = Color.DeepSkyBlue;
+            }
+            else if (edge.EdgeCausal == EdgeCausal.SSTATE)
+            {
+                gEdge.Attr.AddStyle(Style.Solid);
+                gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Diamond;
+                gEdge.Attr.Color = Color.IndianRed;
+                gEdge.Attr.LineWidth = 4;
 
-            //}
-            //else if (edge.Causal == EdgeCausal.REdge)
-            //{
-            //    gEdge.Attr.AddStyle(Style.Dashed);
-            //    gEdge.Attr.Color = Color.Green;
-            //    gEdge.Attr.LineWidth = 2;
-            //}
-            //else if (edge.Causal == EdgeCausal.RPush)
-            //{
-            //    gEdge.Attr.AddStyle(Style.Dashed);
-            //    gEdge.Attr.LineWidth = 4;
-            //    gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
-            //    gEdge.Attr.Color = Color.Green;
-            //}
-            //else if (edge.Causal == EdgeCausal.RSTATE)
-            //{
-            //    gEdge.Attr.AddStyle(Style.Dashed);
-            //    gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Diamond;
-            //    gEdge.Attr.Color = Color.IndianRed;
-            //    gEdge.Attr.LineWidth = 4;
-            //}
-            //else if (edge.Causal == EdgeCausal.Interlock)
-            //{
-            //    gEdge.Attr.AddStyle(Style.Dashed);
-            //    gEdge.Attr.ArrowheadAtSource = ArrowStyle.Normal;
-            //    gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
-            //    gEdge.Attr.Color = Color.PaleGoldenrod;
-            //}
-            //else if (edge.Causal == EdgeCausal.SReset)
-            //{
-            //    gEdge.Attr.AddStyle(Style.Solid);
-            //    gEdge.Attr.ArrowheadAtSource = ArrowStyle.Tee;
-            //    gEdge.Attr.Color = Color.PaleGoldenrod;
-            //}
-
-
-
+            }
+            else if (edge.EdgeCausal == EdgeCausal.REdge)
+            {
+                gEdge.Attr.AddStyle(Style.Dashed);
+                gEdge.Attr.Color = Color.Green;
+                gEdge.Attr.LineWidth = 2;
+            }
+            else if (edge.EdgeCausal == EdgeCausal.RPush)
+            {
+                gEdge.Attr.AddStyle(Style.Dashed);
+                gEdge.Attr.LineWidth = 4;
+                gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
+                gEdge.Attr.Color = Color.Green;
+            }
+            else if (edge.EdgeCausal == EdgeCausal.RSTATE)
+            {
+                gEdge.Attr.AddStyle(Style.Dashed);
+                gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Diamond;
+                gEdge.Attr.Color = Color.IndianRed;
+                gEdge.Attr.LineWidth = 4;
+            }
+            else if (edge.EdgeCausal == EdgeCausal.Interlock)
+            {
+                gEdge.Attr.AddStyle(Style.Dashed);
+                gEdge.Attr.ArrowheadAtSource = ArrowStyle.Normal;
+                gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
+                gEdge.Attr.Color = Color.PaleGoldenrod;
+            }
+            else if (edge.EdgeCausal == EdgeCausal.SReset)
+            {
+                gEdge.Attr.AddStyle(Style.Solid);
+                gEdge.Attr.ArrowheadAtSource = ArrowStyle.Tee;
+                gEdge.Attr.Color = Color.PaleGoldenrod;
+            }
 
             UpdateLabelText(gEdge.SourceNode);
             UpdateLabelText(gEdge.TargetNode);
 
             if (model)
             {
-
-                //var src = edge.Sources as SegmentBase;
+                var src = edge.Source as SegmentBase;
                 var tgt = edge.Target as SegmentBase;
 
-                //UpdateNodeView(gEdge.SourceNode, src);
-                //UpdateNodeView(gEdge.TargetNode, tgt);
-
+                UpdateNodeView(gEdge.SourceNode, src);
+                UpdateNodeView(gEdge.TargetNode, tgt);
             }
         }
 
         private void UpdateNodeView(Node nNode, SegmentBase segment)
         {
-            {
-                //nNode.Attr.Color = Color.DarkGoldenrod;
+            nNode.Attr.Color = Color.DarkGoldenrod;
 
-                //if (segment.NodeCausal == NodeCausal.MY)
-                //    nNode.Attr.Shape = Shape.Box;
-                //if (segment.NodeCausal == NodeCausal.EX)
-                //    nNode.Attr.Shape = Shape.Diamond;
-                //if (segment.NodeCausal == NodeCausal.TR)
-                //    nNode.Attr.Shape = Shape.Ellipse;
-                //if (segment.NodeCausal == NodeCausal.TX)
-                //    nNode.Attr.Shape = Shape.Ellipse;
-                //if (segment.NodeCausal == NodeCausal.RX)
-                //    nNode.Attr.Shape = Shape.Ellipse;
-                //if (segment.NodeCausal == NodeCausal.DUMMY)
-                //    nNode.Attr.Shape = Shape.DrawFromGeometry;
-            }
+            //if (segment.NodeCausal == NodeCausal.MY)
+            //    nNode.Attr.Shape = Shape.Box;
+            //if (segment.NodeCausal == NodeCausal.EX)
+            //    nNode.Attr.Shape = Shape.Diamond;
+            //if (segment.NodeCausal == NodeCausal.TR)
+            //    nNode.Attr.Shape = Shape.Ellipse;
+            //if (segment.NodeCausal == NodeCausal.TX)
+            //    nNode.Attr.Shape = Shape.Ellipse;
+            //if (segment.NodeCausal == NodeCausal.RX)
+            //    nNode.Attr.Shape = Shape.Ellipse;
+            //if (segment.NodeCausal == NodeCausal.DUMMY)
+            //    nNode.Attr.Shape = Shape.DrawFromGeometry;
         }
 
         public void RefreshGraph() { viewer.Do(() => viewer.Refresh()); }
@@ -273,7 +279,7 @@ namespace Model.Simulator
         {
             if (newStatus == Status4.Ready) node.Label.FontColor = Color.DarkGreen;
             else if (newStatus == Status4.Going) node.Label.FontColor = Color.DarkKhaki;
-            else if (newStatus == Status4.Finished) node.Label.FontColor = Color.DarkBlue;
+            else if (newStatus == Status4.Finish) node.Label.FontColor = Color.DarkBlue;
             else if (newStatus == Status4.Homing) node.Label.FontColor = Color.Black;
         }
 
@@ -281,7 +287,7 @@ namespace Model.Simulator
         {
             if (newStatus == Status4.Ready) node.Attr.Color = Color.DarkOliveGreen;
             else if (newStatus == Status4.Going) node.Attr.Color = Color.DarkGoldenrod;
-            else if (newStatus == Status4.Finished) node.Attr.Color = Color.DarkBlue;
+            else if (newStatus == Status4.Finish) node.Attr.Color = Color.DarkBlue;
             else if (newStatus == Status4.Homing) node.Attr.Color = Color.DimGray;
         }
 
@@ -289,7 +295,7 @@ namespace Model.Simulator
         {
             if (newStatus == Status4.Ready) node.Attr.FillColor = Color.DarkOliveGreen;
             else if (newStatus == Status4.Going) node.Attr.FillColor = Color.DarkGoldenrod;
-            else if (newStatus == Status4.Finished) node.Attr.FillColor = Color.DarkBlue;
+            else if (newStatus == Status4.Finish) node.Attr.FillColor = Color.DarkBlue;
             else if (newStatus == Status4.Homing) node.Attr.FillColor = Color.DimGray;
         }
 

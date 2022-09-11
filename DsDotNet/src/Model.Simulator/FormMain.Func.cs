@@ -28,7 +28,7 @@ namespace Model.Simulator
                     if (f.Contains("[sys]") || (f.Contains("[flow]") && !f.Contains("}"))  //[flow] F = {} 한줄제외
                     || f.Contains("[address]") || f.Contains("[layouts]") || f.Contains("//"))
                     {
-                        rndColor = Color.FromArgb(r.Next(130, 230), r.Next(130, 230), r.Next(130, 230));
+                        rndColor = Color.FromArgb(r.Next(30, 130), r.Next(30, 130), r.Next(30, 130));
                         this.Do(() => richTextBox_ds.ScrollToCaret());
                         DoWork(pro);
                     }

@@ -10,6 +10,7 @@ open System.Web.Configuration
 open Engine.Common
 open System.Collections.Generic
 open System.Threading.Tasks
+open Engine.Base
 
 [<AutoOpen>]
 module VirtualParentSegmentModule =
@@ -29,7 +30,7 @@ module VirtualParentSegmentModule =
             this.Ready <- TagE(cpu, this, $"Ready_{n}", TagType.Ready)
 
 
-        let mutable oldStatus:Status4 option = None
+        let mutable oldStatus:DsType.Status4 option = None
         let triggerTargetStart = causalSourceSegments.Any()
         let triggerTargetReset = resetSourceSegments.Any()
         let targetStartTag = target.TagPStart
@@ -137,7 +138,7 @@ module VirtualParentSegmentModule =
                                 do! write(x.PortE, true, $"{n} FINISH 끝내기 by {cause}")
 
                                 // 가상부모 end 공지.  인위적...
-                                Global.SegmentStatusChangingSubject.OnNext(SegmentStatusChange(x, Status4.Finished))
+                                Global.SegmentStatusChangingSubject.OnNext(SegmentStatusChange(x, Status4.Finish))
 
                             | Status4.Homing, false ->
                                 do! write(targetResetTag, false, $"{x.Target.Name} homing 완료로 reset 끄기")
@@ -174,11 +175,11 @@ module VirtualParentSegmentModule =
                             //    ()
                             | 'e', Status4.Ready, false ->
                                 ()
-                            | 'e', Status4.Finished, _ ->
+                            | 'e', Status4.Finish, _ ->
                                 assert(on)
                             | 'e', Status4.Going, false ->  // going 중에 endport 가 꺼진다???
                                 noop()
-                            | 's', Status4.Finished, false ->
+                            | 's', Status4.Finish, false ->
                                 ()
                             | 'r', Status4.Homing, true ->
                                 assert not triggerTargetReset   // self reset 인 경우만 허용
@@ -225,7 +226,7 @@ module VirtualParentSegmentModule =
                                                         |> Async.RunSynchronously
                                                         subs.Dispose() )
 
-                                | Status4.Finished ->
+                                | Status4.Finish ->
                                     do! write(targetStartTag, false, $"{n} FINISH 로 인한 {x.Target.Name} start {targetStartTag.GetName()} 끄기")
                                     do! write(x.Going, false, $"{n} FINISH")
 
@@ -239,8 +240,6 @@ module VirtualParentSegmentModule =
                                             failwithlog $"Something bad happend?  trying to reset child while {x.Target.Name}={childStatus}"
 
                                         do! write(targetResetTag, true, $"{n} HOMING 으로 인한 {x.Target.Name} reset 켜기")
-                                | _ ->
-                                    failwithlog "Unexpected"
 
                                 Global.SegmentStatusChangedSubject.OnNext(SegmentStatusChange(x, state))
 

@@ -2,8 +2,9 @@
 namespace Engine.Base
 
 
+
 [<AutoOpen>]
-module Type =
+module DsType =
 
     ///인과의 노드 종류
     type NodeCausal =
@@ -33,19 +34,14 @@ module Type =
         with
             member x.ToText() =
                 match x with
-                | SEdge      -> ">"
-                | SPush      -> ">>"
-                | SSTATE     -> "->"
-                | REdge      -> "|>"
-                | RPush      -> "|>>"
-                | RSTATE     -> "|->"
-                | SReset     -> "=>"
-                | Interlock  -> "<||>"
-            member x.ToCheckText() =    match x with
-                                        |SEdge |SPush |  SReset-> "Start"
-                                        |REdge |RPush |  Interlock-> "Reset"
-                                        |SSTATE  -> "SSTATE"
-                                        |RSTATE  -> "RSTATE"
+                | SEdge      -> TextSEdge
+                | SPush      -> TextSPush     
+                | SSTATE     -> TextSSTATE    
+                | REdge      -> TextREdge     
+                | RPush      -> TextRPush     
+                | RSTATE     -> TextRSTATE    
+                | SReset     -> TextSReset    
+                | Interlock  -> TextInterlock 
 
             member x.IsStart =   match x with
                                  |SEdge |SPush | SSTATE-> true
@@ -54,6 +50,17 @@ module Type =
                                  |REdge |RPush | RSTATE |Interlock-> true
                                  |_ -> false
 
+    let EdgeCausalType(txt:string) =
+            match txt with
+            | TextSEdge      -> SEdge
+            | TextSPush      -> SPush     
+            | TextSSTATE     -> SSTATE    
+            | TextREdge      -> REdge     
+            | TextRPush      -> RPush     
+            | TextRSTATE     -> RSTATE    
+            | TextSReset     -> SReset    
+            | TextInterlock  -> Interlock 
+            |_-> failwithf "EdgeCausalType Error"
    
     ///Seg 상태 (Default 'Homing') 
     type Status4 =

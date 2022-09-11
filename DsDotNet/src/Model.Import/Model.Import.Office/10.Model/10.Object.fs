@@ -8,6 +8,7 @@ open System.Collections.Concurrent
 open System.Collections.Generic
 open DocumentFormat.OpenXml
 open Engine.Base
+open Engine.Base.DsType
 
 [<AutoOpen>]
 module Object =
@@ -141,12 +142,18 @@ module Object =
             member x.IsSameSys = src.BaseSys = tgt.BaseSys
             member x.SrcSystem = src.BaseSys
             member x.TgtSystem = tgt.BaseSys
+            
+            member x.ToCheckText() =    match causal with
+                                        |SEdge |SPush |  SReset-> "Start"
+                                        |REdge |RPush |  Interlock-> "Reset"
+                                        |SSTATE  -> "SSTATE"
+                                        |RSTATE  -> "RSTATE"
 
             member x.ToText() = $"{src.ToText()}  {causal.ToText()}  {tgt.ToText()}"
             member x.ToCheckText(parentName:string) = 
                             let srcName = if(src.Alias.IsSome) then src.Alias.Value else src.ToCallText()
                             let tgtName = if(tgt.Alias.IsSome) then tgt.Alias.Value else tgt.ToCallText()
-                            $"[{parentName}]{srcName}  {causal.ToCheckText()}  {tgtName}"
+                            $"[{parentName}]{srcName}  {x.ToCheckText()}  {tgtName}"
     
     
     and

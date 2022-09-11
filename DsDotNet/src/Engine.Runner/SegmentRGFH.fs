@@ -9,6 +9,7 @@ open Engine.Core
 open Engine.Common
 open System.Collections.Concurrent
 open System.Threading.Tasks
+open Engine.Base
 
 
 [<AutoOpen>]
@@ -29,7 +30,7 @@ module internal SegmentRGFHModule =
         assert(children.Distinct().Count() = children.Count())
 
         [   for child in children do
-                assert(not child.IsFlipped && (not child.Status.HasValue || child.Status.Value.IsOneOf(Status4.Ready, Status4.Finished)))
+                //assert(not child.IsFlipped && (not child.Status.HasValue || child.Status.IsOneOf(Status4.Ready, Status4.Finish)))
                 logInfo $"Progress: Child {child.QualifiedName} starting.."
 
                 for st in child.TagsStart do
@@ -54,12 +55,12 @@ module internal SegmentRGFHModule =
 
     let stopMonitorGoing (seg:SegmentBase) =
         // stop running children
-        let runningChildren = seg.Children.Where(fun ch -> ch.Status = Nullable Status4.Going)
+        let runningChildren = seg.Children.Where(fun ch -> ch.Status = Status4.Going)
         stopMonitor goingSubscriptions seg
 
     let stopMonitorHoming (seg:SegmentBase) =
         // stop homing children
-        let homingChildren = seg.Children.Where(fun ch -> ch.Status = Nullable Status4.Homing)
+        let homingChildren = seg.Children.Where(fun ch -> ch.Status = Status4.Homing)
         stopMonitor homingSubscriptions seg
 
     let stopMonitorOriginating (seg:SegmentBase) =
@@ -72,7 +73,7 @@ module internal SegmentRGFHModule =
             let finishedChildren =
                 monitoringChildren
                     .Where(fun ch ->
-                        ch.Status = Nullable Status4.Going
+                        ch.Status =  Status4.Going
                         && ch.TagsEnd.Contains(tag)
                         && ch.TagsEnd.ForAll(fun t -> t.Value))
                         .ToArray()
@@ -117,7 +118,7 @@ module internal SegmentRGFHModule =
                             let! finishedChild = turnOffStartForFinishedChildren(write, tag, seg.Children)
                             if finishedChild <> null then
                                 logInfo $"Progress: Child {finishedChild.QualifiedName} finish detected."
-                                finishedChild.Status <- Status4.Finished
+                                finishedChild.Status <- Status4.Finish
                                 finishedChild.IsFlipped <- true
                             
                                 if (seg.Children.ForAll(fun ch -> ch.IsFlipped)) then
@@ -134,7 +135,7 @@ module internal SegmentRGFHModule =
                                                         .ForAll(finishedChildren.Contains))
                                         edges.Select(fun e -> e.Target)
                                             .OfType<Child>()
-                                            .Where(fun ch -> ch.Status <> Nullable Status4.Going && not ch.IsFlipped)
+                                            .Where(fun ch -> ch.Status <>  Status4.Going && not ch.IsFlipped)
                                             .Distinct()
                                             .ToArray()
 

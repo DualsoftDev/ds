@@ -1,4 +1,6 @@
 
+using Microsoft.Msagl.Drawing;
+
 namespace Model.Simulator
 {
     partial class FormMain
@@ -96,7 +98,7 @@ namespace Model.Simulator
             // 
             // splitContainer2.Panel1
             // 
-            this.splitContainer2.Panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(33)))), ((int)(((byte)(33)))));
+            this.splitContainer2.Panel1.BackColor = System.Drawing.SystemColors.Control;
             this.splitContainer2.Panel1.Controls.Add(this.button_Stop);
             this.splitContainer2.Panel1.Controls.Add(this.button_TestStart);
             this.splitContainer2.Panel1.Controls.Add(this.button_Compile);
@@ -167,7 +169,7 @@ namespace Model.Simulator
             // 
             // richTextBox_ds
             // 
-            this.richTextBox_ds.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(33)))), ((int)(((byte)(33)))));
+            this.richTextBox_ds.BackColor = System.Drawing.SystemColors.Control;
             this.richTextBox_ds.Dock = System.Windows.Forms.DockStyle.Fill;
             this.richTextBox_ds.Location = new System.Drawing.Point(0, 0);
             this.richTextBox_ds.Name = "richTextBox_ds";

@@ -4,6 +4,7 @@ namespace Model.Import.Office
 open System
 open System.Linq
 open Engine.Base
+open Engine.Base.DsType
 
 
 [<AutoOpen>]

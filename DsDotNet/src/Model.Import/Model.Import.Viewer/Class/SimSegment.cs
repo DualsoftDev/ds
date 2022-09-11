@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using static Model.Import.Office.Model;
 using static Model.Import.Office.Object;
-using static Engine.Base.Type;
+using static Engine.Base.DsType;
 
 namespace Dual.Model.Import
 {

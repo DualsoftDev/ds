@@ -8,7 +8,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Compile Include="Type.fs" />
+		<Compile Include="DsText.fs" />
+		<Compile Include="DsType.fs" />
 	</ItemGroup>
 	
 

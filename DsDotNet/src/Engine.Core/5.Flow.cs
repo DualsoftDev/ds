@@ -1,4 +1,5 @@
 namespace Engine.Core;
+using static Engine.Base.Type;
 
 public abstract class Flow : Named, IWallet
 {
@@ -107,11 +108,13 @@ public static class FlowExtension
     public static IEnumerable<ICoin> CollectIsolatedCoins(this Flow flow, bool bySetEdge=true, bool byResetEdge=false) =>
         flow.CollectIsolatedVertex(bySetEdge, byResetEdge).OfType<ICoin>();
 
-    public struct Causal
+    public class Causal
     {
         public IVertex Source;
         public IVertex Target;
         public bool IsReset;
+        public EdgeCausal EdgeCausal;
+        
         public Causal(IVertex source, IVertex target, bool isReset)
         {
             Source = source;

@@ -15,6 +15,9 @@ using System.Windows.Forms;
 
 using Engine.Runner;
 using static Engine.Common.FS.MessageEvent;
+using System.ComponentModel;
+using Engine.Common.FS;
+using Task = System.Threading.Tasks.Task;
 
 namespace Model.Simulator
 {
@@ -25,7 +28,7 @@ namespace Model.Simulator
         private EngineModule.Engine _Engine;
 
         public Dictionary<Flow, TabPage> DicUI;
-        public string dsTextPath;
+        public string _dsTextPath;
         public bool Busy = false;
 
         public FormMain()
@@ -37,11 +40,7 @@ namespace Model.Simulator
             this.DragDrop += new DragEventHandler(Form1_DragDrop);
             TheMain = this;
 
-            splitContainer1.Panel1Collapsed = true;
-            splitContainer2.Panel2Collapsed = true;
-
-            richTextBox_Debug.AppendText($"{DateTime.Now} : *.pptx 를 드랍하면 시작됩니다");
-
+            richTextBox_Debug.AppendText($"{DateTime.Now} : Application DS simulator is starting");
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -50,7 +49,7 @@ namespace Model.Simulator
             EventExternal.MSGSubscribe();
 
             DicUI = new Dictionary<Flow, TabPage>();
-
+            MSGInfo("*.ds 를 드랍하면 시작됩니다");
             //this.Text = UtilFile.GetVersion();
         }
         void Form1_DragEnter(object sender, DragEventArgs e)
@@ -74,29 +73,23 @@ namespace Model.Simulator
         {
             progressBar1.Do(() => progressBar1.Value = percent);
         }
-        private void LoadText(string path)
+        private async void LoadText(string path)
         {
             try
             {
-                if (UtilFile.BusyCheck()) return;
-                Busy = true;
-
-                dsTextPath = path;
-                progressBar1.Maximum = 100;
-                progressBar1.Step = 1;
-                progressBar1.Value = 0;
-
+                _dsTextPath = path;
+         
                 richTextBox_ds.Clear();
                 DicUI.Clear();
 
-                splitContainer1.Panel1Collapsed = false;
-                splitContainer2.Panel2Collapsed = false;
+                await Task.Run(() => { ExportTextModel(File.ReadAllText(path)); });
+                
+                ProcessEvent.DoWork(0);
 
-                this.Size = new Size(1600, 1000);
             }
             catch
             {
-                WriteDebugMsg(DateTime.Now, MSGLevel.Error, $"{dsTextPath} 불러오기 실패!!");
+                MSGError($"{_dsTextPath} 불러오기 실패!!");
             }
         }
         private void Form1_KeyDown(object sender, KeyEventArgs e)
@@ -135,7 +128,7 @@ namespace Model.Simulator
 
 
                 var modelText = richTextBox_ds.Text;
-                _Engine = new EngineBuilder(modelText, $"Cpu").Engine;
+                _Engine = new EngineBuilder(modelText, $"Cpu_MY").Engine;
             }
 
             catch (Exception ex)

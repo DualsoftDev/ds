@@ -32,13 +32,13 @@ namespace Model.Simulator
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.xtraTabControl_My = new System.Windows.Forms.TabControl();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
-            this.richTextBox_ds = new System.Windows.Forms.RichTextBox();
-            this.button_Run = new System.Windows.Forms.Button();
-            this.button_TestStart = new System.Windows.Forms.Button();
-            this.button_TestORG = new System.Windows.Forms.Button();
-            this.splitContainer4 = new System.Windows.Forms.SplitContainer();
             this.button_Stop = new System.Windows.Forms.Button();
+            this.button_TestStart = new System.Windows.Forms.Button();
             this.button_Compile = new System.Windows.Forms.Button();
+            this.button_TestORG = new System.Windows.Forms.Button();
+            this.button_Run = new System.Windows.Forms.Button();
+            this.richTextBox_ds = new System.Windows.Forms.RichTextBox();
+            this.splitContainer4 = new System.Windows.Forms.SplitContainer();
             this.button_ClearLog = new System.Windows.Forms.Button();
             this.richTextBox_Debug = new System.Windows.Forms.RichTextBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
@@ -110,15 +110,49 @@ namespace Model.Simulator
             this.splitContainer2.SplitterDistance = 220;
             this.splitContainer2.TabIndex = 4;
             // 
-            // richTextBox_ds
+            // button_Stop
             // 
-            this.richTextBox_ds.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(33)))), ((int)(((byte)(33)))));
-            this.richTextBox_ds.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.richTextBox_ds.Location = new System.Drawing.Point(0, 0);
-            this.richTextBox_ds.Name = "richTextBox_ds";
-            this.richTextBox_ds.Size = new System.Drawing.Size(540, 379);
-            this.richTextBox_ds.TabIndex = 2;
-            this.richTextBox_ds.Text = "";
+            this.button_Stop.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_Stop.Location = new System.Drawing.Point(49, 68);
+            this.button_Stop.Name = "button_Stop";
+            this.button_Stop.Size = new System.Drawing.Size(85, 23);
+            this.button_Stop.TabIndex = 5;
+            this.button_Stop.Text = "Stop";
+            this.button_Stop.UseVisualStyleBackColor = true;
+            this.button_Stop.Click += new System.EventHandler(this.button_Stop_Click);
+            // 
+            // button_TestStart
+            // 
+            this.button_TestStart.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_TestStart.Location = new System.Drawing.Point(140, 68);
+            this.button_TestStart.Name = "button_TestStart";
+            this.button_TestStart.Size = new System.Drawing.Size(85, 23);
+            this.button_TestStart.TabIndex = 1;
+            this.button_TestStart.Text = "TEST 시작";
+            this.button_TestStart.UseVisualStyleBackColor = true;
+            this.button_TestStart.Click += new System.EventHandler(this.button_TestStart_Click);
+            // 
+            // button_Compile
+            // 
+            this.button_Compile.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_Compile.Location = new System.Drawing.Point(49, 18);
+            this.button_Compile.Name = "button_Compile";
+            this.button_Compile.Size = new System.Drawing.Size(85, 23);
+            this.button_Compile.TabIndex = 4;
+            this.button_Compile.Text = "Compile";
+            this.button_Compile.UseVisualStyleBackColor = true;
+            this.button_Compile.Click += new System.EventHandler(this.button_Compile_Click);
+            // 
+            // button_TestORG
+            // 
+            this.button_TestORG.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_TestORG.Location = new System.Drawing.Point(140, 42);
+            this.button_TestORG.Name = "button_TestORG";
+            this.button_TestORG.Size = new System.Drawing.Size(85, 23);
+            this.button_TestORG.TabIndex = 1;
+            this.button_TestORG.Text = "TEST원위치";
+            this.button_TestORG.UseVisualStyleBackColor = true;
+            this.button_TestORG.Click += new System.EventHandler(this.button_TestORG_Click);
             // 
             // button_Run
             // 
@@ -129,34 +163,17 @@ namespace Model.Simulator
             this.button_Run.TabIndex = 3;
             this.button_Run.Text = "Run";
             this.button_Run.UseVisualStyleBackColor = true;
-            this.button_Run.Visible = false;
             this.button_Run.Click += new System.EventHandler(this.button_Run_Click);
             // 
-            // button_TestStart
+            // richTextBox_ds
             // 
-            this.button_TestStart.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_TestStart.Enabled = false;
-            this.button_TestStart.Location = new System.Drawing.Point(140, 68);
-            this.button_TestStart.Name = "button_TestStart";
-            this.button_TestStart.Size = new System.Drawing.Size(85, 23);
-            this.button_TestStart.TabIndex = 1;
-            this.button_TestStart.Text = "TEST 시작";
-            this.button_TestStart.UseVisualStyleBackColor = true;
-            this.button_TestStart.Visible = false;
-            this.button_TestStart.Click += new System.EventHandler(this.button_TestStart_Click);
-            // 
-            // button_TestORG
-            // 
-            this.button_TestORG.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_TestORG.Enabled = false;
-            this.button_TestORG.Location = new System.Drawing.Point(140, 42);
-            this.button_TestORG.Name = "button_TestORG";
-            this.button_TestORG.Size = new System.Drawing.Size(85, 23);
-            this.button_TestORG.TabIndex = 1;
-            this.button_TestORG.Text = "TEST원위치";
-            this.button_TestORG.UseVisualStyleBackColor = true;
-            this.button_TestORG.Visible = false;
-            this.button_TestORG.Click += new System.EventHandler(this.button_TestORG_Click);
+            this.richTextBox_ds.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(33)))), ((int)(((byte)(33)))));
+            this.richTextBox_ds.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.richTextBox_ds.Location = new System.Drawing.Point(0, 0);
+            this.richTextBox_ds.Name = "richTextBox_ds";
+            this.richTextBox_ds.Size = new System.Drawing.Size(540, 379);
+            this.richTextBox_ds.TabIndex = 2;
+            this.richTextBox_ds.Text = "";
             // 
             // splitContainer4
             // 
@@ -176,31 +193,6 @@ namespace Model.Simulator
             this.splitContainer4.Size = new System.Drawing.Size(1373, 746);
             this.splitContainer4.SplitterDistance = 603;
             this.splitContainer4.TabIndex = 20;
-            // 
-            // button_Stop
-            // 
-            this.button_Stop.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_Stop.Enabled = false;
-            this.button_Stop.Location = new System.Drawing.Point(49, 68);
-            this.button_Stop.Name = "button_Stop";
-            this.button_Stop.Size = new System.Drawing.Size(85, 23);
-            this.button_Stop.TabIndex = 5;
-            this.button_Stop.Text = "Stop";
-            this.button_Stop.UseVisualStyleBackColor = true;
-            this.button_Stop.Visible = false;
-            this.button_Stop.Click += new System.EventHandler(this.button_Stop_Click);
-            // 
-            // button_Compile
-            // 
-            this.button_Compile.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_Compile.Location = new System.Drawing.Point(49, 18);
-            this.button_Compile.Name = "button_Compile";
-            this.button_Compile.Size = new System.Drawing.Size(85, 23);
-            this.button_Compile.TabIndex = 4;
-            this.button_Compile.Text = "Compile";
-            this.button_Compile.UseVisualStyleBackColor = true;
-            this.button_Compile.Visible = false;
-            this.button_Compile.Click += new System.EventHandler(this.button_Compile_Click);
             // 
             // button_ClearLog
             // 

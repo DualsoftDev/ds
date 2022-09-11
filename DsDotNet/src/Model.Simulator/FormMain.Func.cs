@@ -15,16 +15,16 @@ namespace Model.Simulator
 {
     public partial class FormMain : Form
     {
-        internal void ExportTextModel(StringBuilder stb)
+        internal void ExportTextModel(string text)
         {
-            var textLines = stb.ToString().Split('\n');
+            var textLines = text.Split('\n');
             Random r = new Random();
             Color rndColor = Color.LightGoldenrodYellow;
             int lineCnt = textLines.Count();
             int lineCur = 0;
             textLines.ToList().ForEach(f =>
             {
-                int pro = 50 + Convert.ToInt32(Convert.ToSingle(lineCur++) / (lineCnt) * 50f);
+                int pro = Convert.ToInt32(Convert.ToSingle(lineCur++) / (lineCnt)*100);
                     if (f.Contains("[sys]") || (f.Contains("[flow]") && !f.Contains("}"))  //[flow] F = {} 한줄제외
                     || f.Contains("[address]") || f.Contains("[layouts]") || f.Contains("//"))
                     {
@@ -82,7 +82,7 @@ namespace Model.Simulator
                     xtraTabControl_My.SelectedTab = DicUI[f];
                 else
                 {
-                    UCView viewer = new UCView { Dock = DockStyle.Fill };
+                    UCSim viewer = new UCSim { Dock = DockStyle.Fill };
                 //    viewer.SetGraph(f);
                     TabPage tab = new TabPage();
                     tab.Controls.Add(viewer);
@@ -107,13 +107,13 @@ namespace Model.Simulator
               ////      ((UCView)view.Value.Tag).Update(seg);
               //  }
 
-                ((UCView)view.Value.Tag).RefreshGraph();
+                ((UCSim)view.Value.Tag).RefreshGraph();
             }
         }
         internal void ReLoadText()
         {
-            if (File.Exists(dsTextPath))
-                LoadText(dsTextPath);
+            if (File.Exists(_dsTextPath))
+                LoadText(_dsTextPath);
         }
         internal void TestDebug()
         {
@@ -121,7 +121,6 @@ namespace Model.Simulator
             bool debug = File.Exists(path);
             if (debug)
             {
-                dsTextPath = path;
                 LoadText(path);
             }
         }

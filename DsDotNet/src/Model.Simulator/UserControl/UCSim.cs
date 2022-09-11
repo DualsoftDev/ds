@@ -13,13 +13,13 @@ using Edge = Microsoft.Msagl.Drawing.Edge;
 
 namespace Model.Simulator
 {
-    public partial class UCView : UserControl
+    public partial class UCSim : UserControl
     {
         private readonly GViewer viewer = new Microsoft.Msagl.GraphViewerGdi.GViewer();
 
 
 
-        public UCView()
+        public UCSim()
         {
             InitializeComponent();
 
@@ -48,20 +48,6 @@ namespace Model.Simulator
             layoutSetting.LayerSeparation = 50;
             layoutSetting.NodeSeparation = 50;
             layoutSetting.ClusterMargin = 30;
-
-
-
-
-
-            //viewer.Graph = new Graph() { LayoutAlgorithmSettings = new Microsoft.Msagl.Layout.Incremental.FastIncrementalLayoutSettings() };
-            //var layoutSetting = new Microsoft.Msagl.Layout.Incremental.FastIncrementalLayoutSettings();
-            //layoutSetting.NodeSeparation = 50;
-            //layoutSetting.ClusterMargin = 30;
-            //layoutSetting.LogScaleEdgeForces = false;
-            //layoutSetting.RepulsiveForceConstant = 0.01;
-            //layoutSetting.EdgeRoutingSettings.EdgeRoutingMode = Microsoft.Msagl.Core.Routing.EdgeRoutingMode.SugiyamaSplines;
-            //layoutSetting.Decay = 0.8;
-
 
             viewer.Graph.LayoutAlgorithmSettings = layoutSetting;
 
@@ -157,7 +143,6 @@ namespace Model.Simulator
 
             edge.CollectArrow().ForEach(e =>
             {
-
             });
             //edge.ContainerFlow
             //if (edge.Causal == EdgeCausal.SEdge)

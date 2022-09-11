@@ -91,7 +91,7 @@ namespace Dual.Model.Import
         {
             if (UtilFile.BusyCheck()) return;
             Busy = true;
-            WriteDebugMsg(DateTime.Now, MSGLevel.Info, $"{PathXLS} 불러오는 중!!");
+            MSGInfo($"{PathXLS} 불러오는 중!!");
             var sys = _model.ActiveSys;
             ImportIOTable.ApplyExcel(path, sys);
             ExportTextModel(Color.FromArgb(0, 150, 0));
@@ -100,7 +100,7 @@ namespace Dual.Model.Import
                 richTextBox_ds.ScrollToCaret();
                 button_copy.Visible = true;
 
-                WriteDebugMsg(DateTime.Now, MSGLevel.Info, $"{PathXLS} 적용완료!!");
+                MSGInfo($"{PathXLS} 적용완료!!");
 
             });
             Busy = false;

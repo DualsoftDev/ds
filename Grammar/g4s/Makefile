@@ -31,6 +31,8 @@ test:
 	@echo ppt
 	$(grun) ds program < g4test/ppt.ds
 
+	@echo safety
+	$(grun) ds program < g4test/safety.ds
 	@echo "---------- with errors"
 
 	@echo imports

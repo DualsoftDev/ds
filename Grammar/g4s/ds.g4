@@ -19,7 +19,7 @@ grammar ds;
 
 import dsFunctions;
 
-program: (importStatement|system|cpus|layouts|addresses|comment)* EOF;        // 
+program: (importStatement|system|cpus|layouts|addresses|properties|comment)* EOF;        // 
 
 test:qstring EOF;
 qstring: STRING_LITERAL EOF;
@@ -71,11 +71,35 @@ addressesBlock
     : LBRACE (addressDef)* RBRACE
     ;
 addressDef: segmentPath '=' address;
-    segmentPath: identifier DOT identifier DOT identifier;
+    segmentPath: identifier3;
     address: LPARENTHESIS (startTag)? COMMA (resetTag)? COMMA (endTag)? RPARENTHESIS (SEIMCOLON)?;
     startTag: TAG_ADDRESS;
     resetTag: TAG_ADDRESS;
     endTag: TAG_ADDRESS;
+
+segmentPathN : identifier | identifier2 | identifier3;
+
+/*
+// global safety property
+[prop] {
+    [safety] = {
+        L.F.Main = {A.F.Vm; B.F.Vm}
+    }
+}
+// local safety property
+[sys] L = {
+    [flow] F = {
+        Main = { T.Cp > T.Cm; }
+        [safety] = {
+            Main = {A.F.Vm; B.F.Vm}
+        }
+    }
+}
+ */
+properties: '[' 'prop' ']' EQ LBRACE (propertyBlock)* RBRACE;
+propertyBlock: (safetyBlock);
+safetyBlock: '[' 'safety' ']' EQ LBRACE (safetyDef)* RBRACE;
+safetyDef: segmentPathN EQ LBRACE segmentPathN (SEIMCOLON segmentPathN)* RBRACE;
 
 task
     : taskProp id '=' LBRACE (listing|call)* RBRACE
@@ -83,7 +107,7 @@ task
 taskProp: '[' 'task' ']';
 
 flow
-    : flowProp id '=' LBRACE (causal|parenting|listing)* RBRACE
+    : flowProp id '=' LBRACE (causal|parenting|listing|safetyBlock)* RBRACE
     ;
 flowProp : '[' 'flow' ('of' id)? ']';
 

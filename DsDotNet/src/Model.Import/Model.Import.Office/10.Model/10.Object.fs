@@ -34,8 +34,8 @@ module Object =
             let mutable status4 = Status4.Homing
             let mEdges  = ConcurrentHash<MEdge>()
 
-            new (name, baseSystem, nodeCausal) = Seg (name, baseSystem, Editor.User, Normal, nodeCausal,  "", false)
-            new (name, baseSystem) = Seg (name, baseSystem, Editor.Engine, Normal, MY,  "", false)
+            new (name, baseSystem, nodeCausal) = Seg (name, baseSystem, Editor.User,   Normal, nodeCausal, "", false)
+            new (name, baseSystem)             = Seg (name, baseSystem, Editor.Engine, Normal, MY        , "", false)
 
             member x.NodeCausal = nodeCausal
             member x.Status4 = status4 
@@ -161,6 +161,7 @@ module Object =
             inherit SegBase(name,  baseSystem)
             let drawSubs  = ConcurrentHash<Seg>()
             let dummySeg  = ConcurrentHash<Seg>()
+            let safetys  = ConcurrentDictionary<Seg, Seg seq>()
             let edges  = ConcurrentHash<MEdge>()
             let interlocks  = ConcurrentHash<MEdge>()
             let setIL  = ConcurrentHash<HashSet<Seg>>()
@@ -190,6 +191,7 @@ module Object =
 
             member x.Edges = edges.Values |> Seq.sortBy(fun edge -> edge.Source.Name)
             member x.AddEdge(edge) = edges.TryAdd(edge) |> ignore 
+            member x.AddSafety(seg, segSafetys:Seg seq) = safetys.TryAdd(seg, segSafetys) |> ignore 
 
             member x.Interlockedges = 
                         let FullNodesIL = interlocks.Values.GetNodes() |> Seq.cast<Seg> |> HashSet

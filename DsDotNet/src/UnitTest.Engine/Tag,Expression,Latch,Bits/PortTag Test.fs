@@ -1,17 +1,16 @@
 namespace UnitTest.Engine
 
 
-open Xunit
 open Engine.Core
 open Engine.Common.FS
 open Engine.Runner
-open Xunit.Abstractions
 open System
-open System.Threading
+open NUnit.Framework
 
 [<AutoOpen>]
 module PortInfoTest =
-    type PortInfoTests1(output1:ITestOutputHelper) =
+    type PortInfoTests1() =
+        do Fixtures.SetUpTest()
 
         let init() =
             Global.BitChangedSubject
@@ -21,9 +20,8 @@ module PortInfoTest =
                 )
             |> ignore
 
-        interface IClassFixture<Fixtures.DemoFixture>
 
-        [<Fact>]
+        [<Test>]
         member __.``PortInfo test`` () =
             logInfo "============== PortInfo test"
             init()

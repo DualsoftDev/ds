@@ -1,7 +1,6 @@
 namespace UnitTest.Engine.RepeatTest
 
 
-open Xunit
 open Engine
 open Engine.Core
 open System.Linq
@@ -11,8 +10,11 @@ open UnitTest.Engine
 open Engine.Common
 open System.Diagnostics
 open Engine.Base
+open NUnit.Framework
 
 type Diamond(output1:ITestOutputHelper) =
+    do Fixtures.SetUpTest()
+    
     let createCylinder = Tester.CreateCylinder
     let address = """
 [addresses] = {
@@ -97,9 +99,8 @@ type Diamond(output1:ITestOutputHelper) =
                     ) |> ignore
 
 
-    interface IClassFixture<Fixtures.DemoFixture>
 
-    [<Fact>]
+    [<Test>]
     member __.``Diamond Test`` () =
         logInfo "============== Diamond Test"
         Log4NetHelper.ChangeLogLevel(log4net.Core.Level.Error)

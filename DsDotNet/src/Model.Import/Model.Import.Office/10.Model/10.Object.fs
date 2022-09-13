@@ -96,6 +96,7 @@ module Object =
                 then  TX, if(this.CountTX = 1) then nameTX else sprintf "%s%d" nameTX curr
                 else  RX, if(this.CountRX = 1) then nameRX else sprintf "%s%d" nameRX curr
   
+            member x.FullName = sprintf "%s.%s.%s"  baseSystem.Name this.OwnerFlow (x.ToText()) 
             member x.MEdges = mEdges.Values  |> Seq.sortBy(fun edge ->edge.ToText())
             member x.ChildSegs =
                 mEdges.Values
@@ -161,7 +162,7 @@ module Object =
             inherit SegBase(name,  baseSystem)
             let drawSubs  = ConcurrentHash<Seg>()
             let dummySeg  = ConcurrentHash<Seg>()
-            let safetys  = ConcurrentDictionary<Seg, Seg seq>()
+            let safeties  = ConcurrentDictionary<Seg, Seg seq>()
             let edges  = ConcurrentHash<MEdge>()
             let interlocks  = ConcurrentHash<MEdge>()
             let setIL  = ConcurrentHash<HashSet<Seg>>()
@@ -191,7 +192,8 @@ module Object =
 
             member x.Edges = edges.Values |> Seq.sortBy(fun edge -> edge.Source.Name)
             member x.AddEdge(edge) = edges.TryAdd(edge) |> ignore 
-            member x.AddSafety(seg, segSafetys:Seg seq) = safetys.TryAdd(seg, segSafetys) |> ignore 
+            member x.AddSafety(seg, segSafetys:Seg seq) = safeties.TryAdd(seg, segSafetys) |> ignore 
+            member x.Safeties = safeties
 
             member x.Interlockedges = 
                         let FullNodesIL = interlocks.Values.GetNodes() |> Seq.cast<Seg> |> HashSet

@@ -5,10 +5,8 @@ open System.IO
 open log4net
 open log4net.Config
 open Engine.Core
-open FsUnit
-open Xunit
-open System.IO
 open Engine.Common.FS
+open FsUnit.Xunit
 
 // FsUnit/XUnit 사용법:
 // https://github.com/fsprojects/FsUnit/tree/master/tests/FsUnit.Xunit.Test
@@ -22,13 +20,11 @@ module Fixtures =
         gLogger <- logger
         logger
 
-    type DemoFixture() =
-        //DO THE TEST SETUP HERE
-        //(THIS IS THE CONSTRUCTOR)
-        do
-            let cwd = Directory.GetCurrentDirectory()
+    let SetUpTest() = 
+            
+            let cwd = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..\"))
             sprintf "테스트 초기화 수행" |> ignore
-            let configFile = @"F:\Git\ds\DsDotNet\src\UnitTest.Engine\App.config"
+            let configFile = $@"{cwd}App.config"
             let logger = configureLog4Net "EngineLogger" configFile
 
             // 로깅 결과 파일 : UnitTest.Engine/bin/logEngine*.txt
@@ -38,14 +34,14 @@ module Fixtures =
                 failwith "config 파일 위치를 강제로 수정해 주세요."
             ()
 
-        interface IDisposable with
-            member __.Dispose () =
-                //CLEAN UP TEST DATA OR WHATEVER YOU NEED TO CLEANUP YOUR TESTS
-                ()
+        //interface IDisposable with
+        //    member __.Dispose () =
+        //        //CLEAN UP TEST DATA OR WHATEVER YOU NEED TO CLEANUP YOUR TESTS
+        //        ()
 
 //module DemoTests =
 //    type DemoTests() =
-//        [<Fact>]
+//        [<Test>]
 //        member __.``Can create a start node`` () =
 //            //DO THE TEST STUFF
 //            "INPUT" |> should equal "RESULT"

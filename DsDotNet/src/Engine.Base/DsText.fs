@@ -8,13 +8,9 @@ module Text =
     [<Literal>] 
     let TextSPush       = ">>"
     [<Literal>] 
-    let TextSSTATE      = "->"
-    [<Literal>] 
     let TextREdge       = "|>"
     [<Literal>] 
     let TextRPush       = "|>>"
-    [<Literal>] 
-    let TextRSTATE      = "|->"
     [<Literal>] 
     let TextSReset      = "=>"
     [<Literal>] 

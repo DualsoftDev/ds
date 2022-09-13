@@ -146,8 +146,6 @@ module Object =
             member x.ToCheckText() =    match causal with
                                         |SEdge |SPush |  SReset-> "Start"
                                         |REdge |RPush |  Interlock-> "Reset"
-                                        |SSTATE  -> "SSTATE"
-                                        |RSTATE  -> "RSTATE"
 
             member x.ToText() = $"{src.ToText()}  {causal.ToText()}  {tgt.ToText()}"
             member x.ToCheckText(parentName:string) = 

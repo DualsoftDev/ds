@@ -25,10 +25,8 @@ module DsType =
     type EdgeCausal =
         | SEdge              // A>B	        약 시작 연결
         | SPush              // A>>B	    강 시작 연결
-        | SSTATE             // A->B	    시작 조건(안전) 연결
         | REdge              // A|>B	    약 리셋 연결
         | RPush              // A|>>B	    강 리셋 연결
-        | RSTATE             // A|->B	    리셋 조건(안전) 연결
         | SReset             // A=>B	    약 시작 + 약 후행 리셋
         | Interlock          // A<||>B<||>C	강 상호 리셋
         with
@@ -36,28 +34,24 @@ module DsType =
                 match x with
                 | SEdge      -> TextSEdge
                 | SPush      -> TextSPush     
-                | SSTATE     -> TextSSTATE    
                 | REdge      -> TextREdge     
                 | RPush      -> TextRPush     
-                | RSTATE     -> TextRSTATE    
                 | SReset     -> TextSReset    
                 | Interlock  -> TextInterlock 
 
             member x.IsStart =   match x with
-                                 |SEdge |SPush | SSTATE-> true
+                                 |SEdge |SPush  -> true
                                  |_ -> false
             member x.IsReset =   match x with
-                                 |REdge |RPush | RSTATE |Interlock-> true
+                                 |REdge |RPush |Interlock-> true
                                  |_ -> false
 
     let EdgeCausalType(txt:string) =
             match txt with
             | TextSEdge      -> SEdge
             | TextSPush      -> SPush     
-            | TextSSTATE     -> SSTATE    
             | TextREdge      -> REdge     
             | TextRPush      -> RPush     
-            | TextRSTATE     -> RSTATE    
             | TextSReset     -> SReset    
             | TextInterlock  -> Interlock 
             |_-> failwithf "EdgeCausalType Error"

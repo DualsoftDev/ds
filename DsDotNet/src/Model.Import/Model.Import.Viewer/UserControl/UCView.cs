@@ -170,14 +170,6 @@ namespace Dual.Model.Import
                 gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
                 gEdge.Attr.Color = Color.DeepSkyBlue;
             }
-            else if (edge.Causal == EdgeCausal.SSTATE)
-            {
-                gEdge.Attr.AddStyle(Style.Solid);
-                gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Diamond;
-                gEdge.Attr.Color = Color.IndianRed;
-                gEdge.Attr.LineWidth = 4;
-
-            }
             else if (edge.Causal == EdgeCausal.REdge)
             {
                 gEdge.Attr.AddStyle(Style.Dashed);
@@ -190,13 +182,6 @@ namespace Dual.Model.Import
                 gEdge.Attr.LineWidth = 4;
                 gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
                 gEdge.Attr.Color = Color.Green;
-            }
-            else if (edge.Causal == EdgeCausal.RSTATE)
-            {
-                gEdge.Attr.AddStyle(Style.Dashed);
-                gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Diamond;
-                gEdge.Attr.Color = Color.IndianRed;
-                gEdge.Attr.LineWidth = 4;
             }
             else if (edge.Causal == EdgeCausal.Interlock)
             {
@@ -211,9 +196,6 @@ namespace Dual.Model.Import
                 gEdge.Attr.ArrowheadAtSource = ArrowStyle.Tee;
                 gEdge.Attr.Color = Color.PaleGoldenrod;
             }
-
-
-
 
             UpdateLabelText(gEdge.SourceNode);
             UpdateLabelText(gEdge.TargetNode);

@@ -122,14 +122,6 @@ namespace Model.Simulator
                 gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
                 gEdge.Attr.Color = Color.DeepSkyBlue;
             }
-            else if (edge.EdgeCausal == EdgeCausal.SSTATE)
-            {
-                gEdge.Attr.AddStyle(Style.Solid);
-                gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Diamond;
-                gEdge.Attr.Color = Color.IndianRed;
-                gEdge.Attr.LineWidth = 4;
-
-            }
             else if (edge.EdgeCausal == EdgeCausal.REdge)
             {
                 gEdge.Attr.AddStyle(Style.Dashed);
@@ -142,13 +134,6 @@ namespace Model.Simulator
                 gEdge.Attr.LineWidth = 4;
                 gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
                 gEdge.Attr.Color = Color.Green;
-            }
-            else if (edge.EdgeCausal == EdgeCausal.RSTATE)
-            {
-                gEdge.Attr.AddStyle(Style.Dashed);
-                gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Diamond;
-                gEdge.Attr.Color = Color.IndianRed;
-                gEdge.Attr.LineWidth = 4;
             }
             else if (edge.EdgeCausal == EdgeCausal.Interlock)
             {

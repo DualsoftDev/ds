@@ -15,10 +15,11 @@ class DsParser
         return parser;
     }
 
-    public static List<T> enumerateChildren<T>(IParseTree from, bool includeMe=true, Func<IParseTree, bool> predicate = null ) where T : IParseTree
+    public static List<T> enumerateChildren<T>(IParseTree from, bool includeMe=false, Func<IParseTree, bool> predicate = null ) where T : IParseTree
     {
+        Func<IParseTree, bool> pred = predicate ?? new Func<IParseTree, bool>(ctx => ctx is T);
         var result = new List<T>();
-        enumerateChildrenHelper(result, from, includeMe, predicate);
+        enumerateChildrenHelper(result, from, includeMe, pred);
         return result;
 
 
@@ -57,7 +58,7 @@ class DsParser
 
     public static IParseTree findFirstChild(IParseTree from, Func<IParseTree, bool> predicate, bool includeMe = true)
     {
-        foreach (var c in DsParser.enumerateChildren<IParseTree>(from, includeMe))
+        foreach (var c in enumerateChildren<IParseTree>(from, includeMe))
         {
             if (predicate(c))
                 return c;
@@ -68,7 +69,7 @@ class DsParser
 
     public static IParseTree findFirstAncestor(IParseTree from, Func<IParseTree, bool> predicate, bool includeMe=true)
     {
-        foreach (var c in DsParser.enumerateParents(from, includeMe))
+        foreach (var c in enumerateParents(from, includeMe))
         {
             if (predicate(c))
                 return c;

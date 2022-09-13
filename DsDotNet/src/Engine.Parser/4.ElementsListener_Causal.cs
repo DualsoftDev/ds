@@ -4,22 +4,19 @@ namespace Engine.Parser;
 
 partial class ElementsListener
 {
-    private Dictionary<dsParser.CausalTokensDNFContext, Nodes> _existings = new Dictionary<dsParser.CausalTokensDNFContext, Nodes>();
-    private Nodes addNodes(dsParser.CausalTokensDNFContext ctx)
+    private Dictionary<CausalTokensDNFContext, Nodes> _existings = new Dictionary<CausalTokensDNFContext, Nodes>();
+    private Nodes addNodes(CausalTokensDNFContext ctx)
     {
         if (this._existings.ContainsKey(ctx))
             return this._existings[ctx];
 
-        var cnfs =
-            DsParser.enumerateChildren<dsParser.CausalTokensCNFContext>(ctx, false, t => t is dsParser.CausalTokensCNFContext)
-            ;
+        var cnfs = enumerateChildren<CausalTokensCNFContext>(ctx);
 
         Nodes dnfNodes = new Nodes();
         foreach (var cnf in cnfs)
         {
             List<Node> cnfNodes = new List<Node>();
-            var causalContexts =
-                DsParser.enumerateChildren<dsParser.CausalTokenContext>(cnf, false, t => t is dsParser.CausalTokenContext);
+            var causalContexts = enumerateChildren<CausalTokenContext>(cnf);
 
             foreach (var t in causalContexts)
             {
@@ -186,7 +183,7 @@ partial class ElementsListener
         * @param opr (복합) operator
         * @param rr operator 우측의 DNF
         */
-    private void processCausal(dsParser.CausalTokensDNFContext ll, dsParser.CausalOperatorContext opr, dsParser.CausalTokensDNFContext rr)
+    private void processCausal(CausalTokensDNFContext ll, CausalOperatorContext opr, CausalTokensDNFContext rr)
     {
         Trace.WriteLine($"{ ll.GetText()} { opr.GetText()} { rr.GetText()}");
 

@@ -26,11 +26,9 @@ class SkeletonListener : dsBaseListener
     }
 
 
-    override public void EnterProgram(dsParser.ProgramContext ctx)
+    override public void EnterProgram(ProgramContext ctx)
     {
-        var cpuContexts =
-            DsParser.enumerateChildren<dsParser.CpuContext>(ctx, false, r => r is dsParser.CpuContext)
-            ;
+        var cpuContexts = enumerateChildren<CpuContext>(ctx);
 
         Dictionary<string, Cpu> dict = new();
 
@@ -45,7 +43,7 @@ class SkeletonListener : dsBaseListener
         var flowName2CpuNames =
             from cpuctx in cpuContexts
             let cpuName = cpuctx.id().GetText()
-            from flowCtx in DsParser.enumerateChildren<dsParser.FlowPathContext>(cpuctx, false, r => r is dsParser.FlowPathContext)
+            from flowCtx in enumerateChildren<FlowPathContext>(cpuctx)
             let flowName = flowCtx.GetText()
             select (flowName, createCpu(cpuName))
             ;
@@ -57,7 +55,7 @@ class SkeletonListener : dsBaseListener
         ParserHelper.FlowName2CpuMap = flowName2CpuNameMap;
     }
 
-    override public void EnterSystem(dsParser.SystemContext ctx)
+    override public void EnterSystem(SystemContext ctx)
     {
         var n = ctx.id().GetText();
         _system = new DsSystem(n, _model);
@@ -65,17 +63,17 @@ class SkeletonListener : dsBaseListener
         ParserHelper.BackwardAliasMaps.Add(_system, new Dictionary<string, string[]>());
         Trace.WriteLine($"System: {n}");
     }
-    override public void ExitSystem(dsParser.SystemContext ctx) { _system = null; }
+    override public void ExitSystem(SystemContext ctx) { _system = null; }
 
-    override public void EnterTask(dsParser.TaskContext ctx)
+    override public void EnterTask(TaskContext ctx)
     {
         var name = ctx.id().GetText();
         _task = new DsTask(name, _system);
         QpInstanceMap.Add(CurrentPath, _task);
     }
-    override public void ExitTask(dsParser.TaskContext ctx) { _task = null; }
+    override public void ExitTask(TaskContext ctx) { _task = null; }
 
-    override public void EnterFlow(dsParser.FlowContext ctx)
+    override public void EnterFlow(FlowContext ctx)
     {
         var flowName = ctx.id().GetText();
         var flowOf = ctx.flowProp().id();
@@ -85,7 +83,7 @@ class SkeletonListener : dsBaseListener
         QpInstanceMap.Add(CurrentPath, _rootFlow);
         Trace.WriteLine($"Flow: {flowName}");
     }
-    override public void ExitFlow(dsParser.FlowContext ctx) { _rootFlow = null; }
+    override public void ExitFlow(FlowContext ctx) { _rootFlow = null; }
 
 
 
@@ -96,7 +94,7 @@ class SkeletonListener : dsBaseListener
 
 
     /// <summary>CallPrototype </summary>
-    override public void EnterCall(dsParser.CallContext ctx)
+    override public void EnterCall(CallContext ctx)
     {
         var name = ctx.id().GetText();
         var label = $"{name}\n{ctx.callPhrase().GetText()}";
@@ -107,7 +105,7 @@ class SkeletonListener : dsBaseListener
     }
 
 
-    override public void EnterListing(dsParser.ListingContext ctx)
+    override public void EnterListing(ListingContext ctx)
     {
         var name = ctx.id().GetText();
         var seg = SegmentBase.Create(name, _rootFlow);
@@ -116,25 +114,25 @@ class SkeletonListener : dsBaseListener
     }
 
 
-    override public void EnterParenting(dsParser.ParentingContext ctx)
+    override public void EnterParenting(ParentingContext ctx)
     {
         Trace.WriteLine($"Parenting: {ctx.GetText()}");
         var name = ctx.id().GetText();
         _parenting = SegmentBase.Create(name, _rootFlow);
         QpInstanceMap.Add(CurrentPath, _parenting);
     }
-    override public void ExitParenting(dsParser.ParentingContext ctx) { _parenting = null; }
+    override public void ExitParenting(ParentingContext ctx) { _parenting = null; }
 
 
 
 
 
 
-    override public void EnterCpu(dsParser.CpuContext ctx)
+    override public void EnterCpu(CpuContext ctx)
     {
         //var name = ctx.id().GetText();
         //var flowPathContexts =
-        //    DsParser.enumerateChildren<dsParser.FlowPathContext>(ctx, false, r => r is dsParser.FlowPathContext)
+        //    enumerateChildren<FlowPathContext>(ctx)
         //    ;
 
         //var flows =
@@ -154,7 +152,7 @@ class SkeletonListener : dsBaseListener
     }
 
 
-    override public void ExitProgram(dsParser.ProgramContext ctx)
+    override public void ExitProgram(ProgramContext ctx)
     {
         foreach(var sys in _model.Systems)
         {

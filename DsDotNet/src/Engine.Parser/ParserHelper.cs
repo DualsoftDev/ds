@@ -122,8 +122,6 @@ public static class ParserExtension
         var chars = identifier.ToCharArray();
         var first = chars[0];
 
-        var xxx = isValidStart(first);
-        var yyy = chars.Skip(1).ForAll(isValid);
         return isValidStart(first) && chars.Skip(1).ForAll(isValid);
     }
     public static bool IsQuotationRequired(this string identifier) => ! IsValidIdentifier(identifier);

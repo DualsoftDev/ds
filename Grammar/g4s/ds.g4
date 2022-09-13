@@ -99,7 +99,10 @@ segmentPathN : identifier | identifier2 | identifier3;
 properties: '[' 'prop' ']' EQ LBRACE (propertyBlock)* RBRACE;
 propertyBlock: (safetyBlock);
 safetyBlock: '[' 'safety' ']' EQ LBRACE (safetyDef)* RBRACE;
-safetyDef: segmentPathN EQ LBRACE segmentPathN (SEIMCOLON segmentPathN)* RBRACE;
+safetyDef: safetyKey EQ LBRACE safetyValues RBRACE;
+safetyKey: segmentPathN;
+safetyValues: segmentPathN (SEIMCOLON segmentPathN)*;
+
 
 task
     : taskProp id '=' LBRACE (listing|call)* RBRACE

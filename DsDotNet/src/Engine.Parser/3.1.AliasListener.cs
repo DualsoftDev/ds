@@ -21,36 +21,36 @@ namespace Engine.Parser
             parser.Reset();
         }
 
-        override public void EnterSystem(dsParser.SystemContext ctx)
+        override public void EnterSystem(SystemContext ctx)
         {
             var name = ctx.id().GetText();
             _system = _model.Systems.First(s => s.Name == name);
         }
-        override public void ExitSystem(dsParser.SystemContext ctx) { this._system = null; }
+        override public void ExitSystem(SystemContext ctx) { this._system = null; }
 
-        override public void EnterTask(dsParser.TaskContext ctx)
+        override public void EnterTask(TaskContext ctx)
         {
             var name = ctx.id().GetText();
             _task = _system.Tasks.First(t => t.Name == name);
             Trace.WriteLine($"Task: {name}");
         }
-        override public void ExitTask(dsParser.TaskContext ctx) { _task = null; }
+        override public void ExitTask(TaskContext ctx) { _task = null; }
 
-        override public void EnterFlow(dsParser.FlowContext ctx)
+        override public void EnterFlow(FlowContext ctx)
         {
             var flowName = ctx.id().GetText();
             _rootFlow = _system.RootFlows.First(f => f.Name == flowName);
         }
-        override public void ExitFlow(dsParser.FlowContext ctx) { _rootFlow = null; }
+        override public void ExitFlow(FlowContext ctx) { _rootFlow = null; }
 
 
 
-        override public void EnterParenting(dsParser.ParentingContext ctx)
+        override public void EnterParenting(ParentingContext ctx)
         {
             var name = ctx.id().GetText();
             _parenting = (SegmentBase)QpInstanceMap[$"{CurrentPath}.{name}"];
         }
-        override public void ExitParenting(dsParser.ParentingContext ctx) { _parenting = null; }
+        override public void ExitParenting(ParentingContext ctx) { _parenting = null; }
         #endregion Boiler-plates
 
 
@@ -61,11 +61,11 @@ namespace Engine.Parser
                 P.F.Vp = { Vp1; Vp2; Vp3; }
             }
          */
-        override public void EnterAliasListing(dsParser.AliasListingContext ctx)
+        override public void EnterAliasListing(AliasListingContext ctx)
         {
             var def = ctx.aliasDef().GetText(); // e.g "P.F.Vp"
             var aliasMnemonics =    // e.g { Vp1; Vp2; Vp3; }
-                DsParser.enumerateChildren<dsParser.AliasMnemonicContext>(ctx, false, r => r is dsParser.AliasMnemonicContext)
+                enumerateChildren<AliasMnemonicContext>(ctx)
                 .Select(mne => mne.GetText())
                 .ToArray()
                 ;
@@ -75,7 +75,7 @@ namespace Engine.Parser
 
             ParserHelper.BackwardAliasMaps[_system].Add(def, aliasMnemonics);
         }
-        override public void ExitAlias(dsParser.AliasContext ctx)
+        override public void ExitAlias(AliasContext ctx)
         {
             var bwd = ParserHelper.BackwardAliasMaps[_system];
             Assert(ParserHelper.AliasNameMaps[_system].Count() == 0);

@@ -44,7 +44,7 @@ public abstract class Bit : Named, IBit
     internal Bit(string name, bool bit = false) : base(name)
     {
         _value = bit;
-        Assert(GetType().Name.Contains("OpcTag"));
+        Assert(GetType().Name.Contains("DataTag"));
     }
 
 

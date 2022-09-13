@@ -3,13 +3,13 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using static Engine.Core.GlobalShortCuts;
-
+using static Engine.Runner.DataModule;
 
 namespace Engine
 {
     public class TagChangeChecker
     {
-        public TagChangeChecker(OpcBroker opc, IEnumerable<(string, Func<Bit, bool, Task>)> actions)
+        public TagChangeChecker(DataBroker data, IEnumerable<(string, Func<Bit, bool, Task>)> actions)
         {
             var tagName2ActionMap = new Dictionary<string, Func<Bit, bool, Task>>();
 
@@ -34,17 +34,17 @@ namespace Engine
 
     public class InterlockChecker : TagChangeChecker
     {
-        public InterlockChecker(OpcBroker opc, IEnumerable<(string, Func<Bit, bool, Task>)> actions)
-            : base(opc, actions)
+        public InterlockChecker(DataBroker data, IEnumerable<(string, Func<Bit, bool, Task>)> actions)
+            : base(data, actions)
         {
         }
 
-        public static InterlockChecker CreateFromCylinder(OpcBroker opc, IEnumerable<string> cylinderFlowNames)   // e.g {"A_F", "B_F"}
+        public static InterlockChecker CreateFromCylinder(DataBroker data, IEnumerable<string> cylinderFlowNames)   // e.g {"A_F", "B_F"}
         {
             Func<Bit, bool, Task> interlockChecker(string interlockName) =>
                 (bit, val) =>
                     Task.Run(() => {    // caller 에서 await 함..
-                        var opcOpposite = opc.GetTag(interlockName);
+                        var opcOpposite = data.GetTag(interlockName);
                         Global.Verify($"Exclusive error: {bit.Name}", !val || opcOpposite.Value == false);
                     }); // no .FireAndForget();
 
@@ -59,19 +59,19 @@ namespace Engine
                 }
             }
             var cmd2sensors = generateMap().ToArray();
-            return new InterlockChecker(opc, cmd2sensors);
+            return new InterlockChecker(data, cmd2sensors);
         }
     }
 
 
     public class Simulator : TagChangeChecker
     {
-        public Simulator(OpcBroker opc, IEnumerable<(string, Func<Bit, bool, Task>)> actions)
-            : base(opc, actions)
+        public Simulator(DataBroker data, IEnumerable<(string, Func<Bit, bool, Task>)> actions)
+            : base(data, actions)
         {
         }
 
-        public static Simulator CreateFromCylinder(OpcBroker opc, IEnumerable<string> cylinderFlowNames)   // e.g {"A_F", "B_F"}
+        public static Simulator CreateFromCylinder(DataBroker data, IEnumerable<string> cylinderFlowNames)   // e.g {"A_F", "B_F"}
         {
             if (Global.IsControlMode)
                 throw new Exception("Simulation not supported in real control mode.");
@@ -98,7 +98,7 @@ namespace Engine
                                             keepGo = false;
                                         }
                                     });
-                                var opcOpposite = opc.GetTag(other);
+                                var opcOpposite = data.GetTag(other);
                                 LogDebug($"Simulating Tag/Actuator {bit.Name} = {val}");
                                 if (val)
                                 {
@@ -107,12 +107,12 @@ namespace Engine
                                     await Task.Delay(random.Next(5, 50));
                                     if (!keepGo)
                                         return;
-                                    opc.Write($"EndActual_{f}_Sm", !val);
+                                    data.Write($"EndActual_{f}_Sm", !val);
                                     await Task.Delay(random.Next(5, 1000));
                                     if (!keepGo)
                                         return;
                                     Global.Verify($"유지:{bit.Name}", bit.Value);
-                                    opc.Write($"EndActual_{f}_Sp", val);
+                                    data.Write($"EndActual_{f}_Sp", val);
                                 }
                             }));
                     }
@@ -135,7 +135,7 @@ namespace Engine
                                             keepGo = false;
                                         }
                                     });
-                                var opcOpposite = opc.GetTag(other);
+                                var opcOpposite = data.GetTag(other);
                                 LogDebug($"Tag/Actuator {bit.Name} = {val}");
                                 if (val)
                                 {
@@ -144,19 +144,19 @@ namespace Engine
                                     await Task.Delay(random.Next(5, 50));
                                     if (!keepGo)
                                         return;
-                                    opc.Write($"EndActual_{f}_Sp", !val);
+                                    data.Write($"EndActual_{f}_Sp", !val);
                                     await Task.Delay(random.Next(5, 1000));
                                     if (!keepGo)
                                         return;
                                     Global.Verify($"유지:{bit.Name}", bit.Value);
-                                    opc.Write($"EndActual_{f}_Sm", val);
+                                    data.Write($"EndActual_{f}_Sm", val);
                                 }
                             }));
                     }
                 }
             }
             var cmd2sensors = generateMap().ToArray();
-            return new Simulator(opc, cmd2sensors);
+            return new Simulator(data, cmd2sensors);
         }
     }
 }

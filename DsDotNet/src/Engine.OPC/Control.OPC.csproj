@@ -4,7 +4,7 @@
     <TargetFrameworks>net48</TargetFrameworks>
     <!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
 	  <LangVersion>10.0</LangVersion>
-	  <RootNamespace>Engine.Opc</RootNamespace>
+	  <RootNamespace>Control.Opc</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="FSharp.Core" Version="6.0.5" />

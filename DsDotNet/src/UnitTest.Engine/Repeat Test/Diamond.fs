@@ -68,7 +68,7 @@ type Diamond(output1:ITestOutputHelper) =
                 .OfType<TagA>()
                 .Any(fun t -> not <| t.Address.IsNullOrEmpty())
                 
-        let opc = engine.Opc
+        let opc = engine.Data
         if (hasAddress) then
             // initial condition
             opc.Write("EndActual_A_F_Sm", true)
@@ -109,7 +109,7 @@ type Diamond(output1:ITestOutputHelper) =
         Program.Engine <- engine
         engine.Run() |> ignore
 
-        let opc = engine.Opc
+        let opc = engine.Data
 
         let startTag = "StartPlan_L_F_Main"
         let resetTag = "ResetPlan_L_F_Main"

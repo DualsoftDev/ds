@@ -42,7 +42,6 @@
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Engine.Core\Engine.Core.csproj" />
-		<ProjectReference Include="..\Engine.OPC\Engine.OPC.csproj" />
 		<ProjectReference Include="..\Engine.Runner\Engine.Runner.fsproj" />
 		<ProjectReference Include="..\Engine\Engine.csproj" />
 	</ItemGroup>

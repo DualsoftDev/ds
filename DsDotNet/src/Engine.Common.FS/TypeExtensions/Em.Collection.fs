@@ -18,6 +18,7 @@ module EnumuerableExt =
         member x.select f = Seq.map f x
         member x.selectMany f = Seq.collect f x
         member x.where f = Seq.filter f x
+        member x.foreach  f = Seq.iter f x
         member x.realize() = Array.ofSeq x |> ignore
         member x.nonNullAny() = x <> null && x.Any()
         member x.isNullOrEmpty() = x = null || Seq.isEmpty x

@@ -34,5 +34,8 @@ class Program
         Tester.DoSampleTestDiamond();
         //Tester.DoSampleTestTriangle();
         //Tester.DoSampleTestAddressesAndLayouts();
+
+
+        //ParserTest.TestParseSafety();
     }
 }

@@ -348,3 +348,31 @@ module ModelTest2 =
                 cpEnd.Cpu === sp.TagPEnd.Owner.Cpu
 
             ()
+
+
+
+        [<Fact>]
+        member __.``Parse Safety`` () =
+            logInfo "============== Parse Safety"
+            let mutable text = """
+[sys] L = {
+    [flow] F = {
+        Main = { T.Cp > T.Cm; }
+        [safety] = {
+            Main = {P.F.Sp; P.F.Sm}
+            Main2 = {P.F.Sp; P.F.Sm}
+        }
+    }
+}
+
+[prop] = {
+    [ safety ] = {
+        L.F.Main = {P.F.Sp; P.F.Sm}
+        L.F.Main2 = {P.F.Sp; P.F.Sm}
+    }
+}
+"""
+            text <- text + sysP + cpus
+
+            let builder = new EngineBuilder(text, "Cpu")
+            ()

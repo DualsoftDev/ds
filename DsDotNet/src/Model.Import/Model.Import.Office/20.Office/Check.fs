@@ -19,8 +19,6 @@ module Check =
             flow.AddEdge( MEdge(Seg("RESET", sys, EX), Seg("복귀인과", sys, MY), EdgeCausal.REdge))
             flow.AddEdge( MEdge(Seg("START", sys, EX), Seg("시작유지", sys, MY), EdgeCausal.SPush))
             flow.AddEdge( MEdge(Seg("RESET", sys, EX), Seg("복귀유지", sys, MY), EdgeCausal.RPush))
-            flow.AddEdge( MEdge(Seg("START", sys, EX), Seg("시작조건", sys, MY), EdgeCausal.SSTATE))
-            flow.AddEdge( MEdge(Seg("RESET", sys, EX), Seg("복귀조건", sys, MY), EdgeCausal.RSTATE))
             flow.AddEdge( MEdge(Seg("ETC"  , sys, EX), Seg("상호행위간섭", sys, MY), EdgeCausal.Interlock))
             flow.AddEdge( MEdge(Seg("ETC"  , sys, EX), Seg("시작후행리셋", sys, MY), EdgeCausal.SReset))
 

@@ -114,10 +114,8 @@ module PPTX =
                     |_->  match single, tailArrow, dashLine with
                             | true, true, false ->  EdgeCausal.SEdge, isChangeHead
                             | false,true, false ->  EdgeCausal.SPush, isChangeHead
-                            | true, false,false ->  EdgeCausal.SSTATE, isChangeHead
                             | true, true, true  ->  EdgeCausal.REdge, isChangeHead
                             | false,true, true  ->  EdgeCausal.RPush, isChangeHead
-                            | true, false,true  ->  EdgeCausal.RSTATE, isChangeHead
                             | _ -> conn.ErrorConnect(3, startName, endName, iPage)
 
     let rec ValidGroup(subG:Presentation.GroupShape, shapeIds:ConcurrentHash<uint32>) =    

@@ -138,7 +138,7 @@ module PPTX =
         let mutable txCnt = 1
         let mutable rxCnt = 1
         let mutable name = ""
-        let mutable safeys = HashSet<string>()
+        let mutable safeties = HashSet<string>()
         let mutable bDuumy = false
         let updateTxRx(tailBarckets) =
             if(tailBarckets  = ""|> not)
@@ -150,22 +150,22 @@ module PPTX =
                 else 
                     shape.ErrorName(22, iPage)
 
-        let UpdateSafety(headBarckets) =
+        let updateSafety(headBarckets) =
             
             if(headBarckets = ""|> not)
-            then safeys <- headBarckets.Split(';') |> HashSet 
+            then safeties <- headBarckets.Split(';') |> HashSet 
 
         do 
             name <- shape.InnerText
             GetSquareBrackets(name, false) |> updateTxRx
-            GetSquareBrackets(name, true ) |> UpdateSafety
+            GetSquareBrackets(name, true ) |> updateSafety
             name <- GetBracketsReplaceName(name)
             bDuumy <- shape.CheckEllipse() && dashOutline
             
         member x.PageNum = iPage
         member x.Shape = shape
         member x.DashOutline = dashOutline
-        member x.Safeys = safeys
+        member x.Safeties = safeties
         member x.IsDummy = bDuumy
         member val NodeCausal = 
                             if(shape.CheckRectangle()) then if(dashOutline) then EX else  MY

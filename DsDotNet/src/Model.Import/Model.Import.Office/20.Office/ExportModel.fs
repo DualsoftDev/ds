@@ -74,11 +74,14 @@ module ExportModel =
                 yield sprintf "\t\t}"
             }
 
-        //let checkDrawEdge(seg, drawSubs:Seg seq) = 
-        //    if(drawSubs.Contains(seg) && seg.MEdges.Any()) then true else false
-        //let checkDrawNode(seg, drawSubs:Seg seq) = 
-        //    if(drawSubs.Contains(seg) && seg.NoEdgeSegs.Any()) then true else false
-
+        let safetyText(flow:Flo) =
+            seq {
+                yield sprintf "\t\t[safety]  = {" 
+                for safety in flow.Safeties do
+                    let safeList = safety.Value |> Seq.map(fun seg -> seg.FullName) |> String.concat "; "
+                    yield sprintf "\t\t\t%s = {%s}" safety.Key.Name safeList
+                yield "\t\t}"
+             }
 
         let edgeText(edges:MEdge seq) = 
             //src(s) -> tgt
@@ -107,8 +110,9 @@ module ExportModel =
                     yield sprintf "[sys] %s = {"sys.Name
                     let flows = sys.RootFlow() 
                     for flow in flows do
-                        //Flo 출력
+                        //Flow 출력
                         yield sprintf "\t[flow] %s = { \t" (flow.ToText())
+                        yield! safetyText flow
                         yield! edgeText    (flow.Edges)
                         yield! segmentText (flow.ExportSegs)
                         yield "\t}"

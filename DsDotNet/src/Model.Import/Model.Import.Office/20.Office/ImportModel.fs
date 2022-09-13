@@ -108,7 +108,7 @@ module ImportModel =
                     
                     Check.SameNode(seg, node, dicSameSeg)   )
               
-                //flow 리스트 만들기
+                //Flow 리스트 만들기
                 doc.Nodes 
                 |> Seq.filter(fun node -> node.IsDummy|>not)
                 |> Seq.iter(fun node -> 
@@ -117,9 +117,22 @@ module ImportModel =
                                
                                 mySys.Flows.TryAdd(node.PageNum, flow)|>ignore
                                 mySys.Flows.[node.PageNum].AddSegNoEdge(dicSeg.[node.Key])
-                                let safeSeg = node.Safeys   |> Seq.map(fun safe ->   dicSeg.[safe] )
+                                )
+
+                //Safety 리스트 만들기
+                doc.Nodes 
+                |> Seq.filter(fun node -> node.IsDummy|>not)
+                |> Seq.iter(fun node -> 
+                                let flowName = mySys.Flows.[node.PageNum].Name
+                                let dic = dicSeg.Values.Select(fun seg -> seg.FullName, seg) |> dict
+                                let safeSeg = 
+                                    node.Safeties   
+                                    |> Seq.map(fun safe ->  sprintf "%s.%s.%s" mySys.Name flowName safe)
+                                    |> Seq.filter(fun safeFullName -> dic.ContainsKey safeFullName)
+                                    |> Seq.map(fun safeFullName ->  dic.[safeFullName])
+
                                 if(safeSeg.Any())
-                                then mySys.Flows.[node.PageNum].AddSafety(dicSeg.[node.Key], safeSeg)
+                                    then mySys.Flows.[node.PageNum].AddSafety(dicSeg.[node.Key], safeSeg)
                                 )
                                 
                 //Dummy child 처리

@@ -26,7 +26,7 @@ namespace Model.Simulator
             {
                 int pro = Convert.ToInt32(Convert.ToSingle(lineCur++) / (lineCnt)*100);
                     if (f.Contains("[sys]") || (f.Contains("[flow]") && !f.Contains("}"))  //[flow] F = {} 한줄제외
-                    || f.Contains("[address]") || f.Contains("[layouts]") || f.Contains("//"))
+                    || f.Contains("[addresses]") || f.Contains("[layouts]") || f.Contains("//"))
                     {
                         rndColor = Color.FromArgb(r.Next(30, 130), r.Next(30, 130), r.Next(30, 130));
                         this.Do(() => richTextBox_ds.ScrollToCaret());

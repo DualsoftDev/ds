@@ -32,7 +32,7 @@ namespace Dual.Model.Import
                 if (color == Color.Transparent)
                 {
                     if (f.Contains("[sys]") || (f.Contains("[flow]") && !f.Contains("}"))  //[flow] F = {} 한줄제외
-                    || f.Contains("[address]") || f.Contains("[layouts]") || f.Contains("//"))
+                    || f.Contains("[addresses]") || f.Contains("[layouts]") || f.Contains("//"))
                     {
                         rndColor = Color.FromArgb(r.Next(130, 230), r.Next(130, 230), r.Next(130, 230));
                         this.Do(() => richTextBox_ds.ScrollToCaret());

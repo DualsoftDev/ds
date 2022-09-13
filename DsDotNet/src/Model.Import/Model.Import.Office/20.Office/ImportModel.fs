@@ -107,7 +107,6 @@ module ImportModel =
                     dicSeg.TryAdd(node.Key, seg) |> ignore
                     
                     Check.SameNode(seg, node, dicSameSeg)   )
-                 
               
                 //flow 리스트 만들기
                 doc.Nodes 
@@ -117,7 +116,11 @@ module ImportModel =
                                 let flow  = Flo(name, node.PageNum, mySys)
                                
                                 mySys.Flows.TryAdd(node.PageNum, flow)|>ignore
-                                mySys.Flows.[node.PageNum].AddSegNoEdge(dicSeg.[node.Key]))
+                                mySys.Flows.[node.PageNum].AddSegNoEdge(dicSeg.[node.Key])
+                                let safeSeg = node.Safeys   |> Seq.map(fun safe ->   dicSeg.[safe] )
+                                if(safeSeg.Any())
+                                then mySys.Flows.[node.PageNum].AddSafety(dicSeg.[node.Key], safeSeg)
+                                )
                                 
                 //Dummy child 처리
                 doc.Parents

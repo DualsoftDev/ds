@@ -12,6 +12,7 @@ open UtilPPT
 open UtilMS
 open Engine.Common.FS
 open Engine.Base
+open System.Collections.Generic
 
 
 
@@ -137,28 +138,34 @@ module PPTX =
         let mutable txCnt = 1
         let mutable rxCnt = 1
         let mutable name = ""
+        let mutable safeys = HashSet<string>()
         let mutable bDuumy = false
-        do 
-            if(shape.InnerText.Contains("[") && shape.InnerText.EndsWith("]"))
+        let updateTxRx(tailBarckets) =
+            if(tailBarckets  = ""|> not)
             then 
-                let matches = System.Text.RegularExpressions.Regex.Matches(shape.InnerText, "(?<=\[).*?(?=\])")
-                let data = matches.[matches.Count-1]
-
-                if(data.Value.Split(',').Count() > 1)
+                if(tailBarckets.Split(',').Count() > 1)
                 then 
-                    txCnt <- data.Value.Split(',').[0] |> Convert.ToInt32
-                    rxCnt <- data.Value.Split(',').[1] |> Convert.ToInt32
-                    name <- shape.InnerText.Replace($"[{data.Value}]","")
+                    txCnt <- tailBarckets.Split(',').[0] |> Convert.ToInt32
+                    rxCnt <- tailBarckets.Split(',').[1] |> Convert.ToInt32
                 else 
                     shape.ErrorName(22, iPage)
-            else 
-                name <- shape.InnerText
 
+        let UpdateSafety(headBarckets) =
+            
+            if(headBarckets = ""|> not)
+            then safeys <- headBarckets.Split(';') |> HashSet 
+
+        do 
+            name <- shape.InnerText
+            GetSquareBrackets(name, false) |> updateTxRx
+            GetSquareBrackets(name, true ) |> UpdateSafety
+            name <- GetBracketsReplaceName(name)
             bDuumy <- shape.CheckEllipse() && dashOutline
             
         member x.PageNum = iPage
         member x.Shape = shape
         member x.DashOutline = dashOutline
+        member x.Safeys = safeys
         member x.IsDummy = bDuumy
         member val NodeCausal = 
                             if(shape.CheckRectangle()) then if(dashOutline) then EX else  MY

@@ -1,23 +1,19 @@
 namespace UnitTest.Engine
 
 
-open System
 open System.Linq
-open Xunit
-open Xunit.Abstractions
-open FsUnit.Xunit
 open Engine
 open Engine.Core
 open Engine.Runner
 open Engine.Common.FS
+open NUnit.Framework
 
 [<AutoOpen>]
 module ModelTests1 =
-    type DemoTests1(output1:ITestOutputHelper) =
+    type DemoTests1() = 
+        do Fixtures.SetUpTest()
 
-        interface IClassFixture<Fixtures.DemoFixture>
-
-        [<Fact>]
+        [<Test>]
         member __.``Parse Cylinder`` () =
             logInfo "============== Parse Cylinder"
             let text = sysP + """
@@ -49,7 +45,7 @@ module ModelTests1 =
             flow === rootFlow
 
 
-        [<Fact>]
+        [<Test>]
         member __.``Parse Task`` () =
             logInfo "============== Parse Task"
             let mutable text = """
@@ -119,7 +115,7 @@ module ModelTests1 =
 
 
 
-        [<Fact>]
+        [<Test>]
         member __.``Parse Real Child`` () =
             logInfo "============== Parse Real Child"
             let mutable text = """
@@ -151,7 +147,7 @@ module ModelTests1 =
             ()
 
 
-        [<Fact>]
+        [<Test>]
         member __.``Parse Alias`` () =
             let mutable text = """
 [sys] L = {

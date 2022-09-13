@@ -1,21 +1,19 @@
 namespace UnitTest.Engine
 
 
-open Xunit
 open Engine
 open Engine.Core
 open System.Linq
 open Engine.Common.FS
-open Xunit.Abstractions
 open Engine.Runner
+open NUnit.Framework
 
 [<AutoOpen>]
 module ModelTest2 =
-    type DemoTests2(output1:ITestOutputHelper) =
+    type DemoTests2() =
+        do Fixtures.SetUpTest()
 
-        interface IClassFixture<Fixtures.DemoFixture>
-
-        [<Fact>]
+        [<Test>]
         member __.``Parse Alias & Task`` () =
             logInfo "============== Parse Alias & Task"
             let mutable text = """
@@ -73,7 +71,7 @@ module ModelTest2 =
             ()
 
 
-        [<Fact>]
+        [<Test>]
         member __.``Tag/Edge with two main`` () =
             logInfo "============== Tag/Edge with two main"
             let mutable text = """
@@ -280,7 +278,7 @@ module ModelTest2 =
 
 
 
-        [<Fact>]
+        [<Test>]
         member __.``Find object from model`` () =
             logInfo "============== Find object from model"
             let mutable text = """
@@ -351,7 +349,7 @@ module ModelTest2 =
 
 
 
-        [<Fact>]
+        [<Test>]
         member __.``Parse Safety`` () =
             logInfo "============== Parse Safety"
             let mutable text = """

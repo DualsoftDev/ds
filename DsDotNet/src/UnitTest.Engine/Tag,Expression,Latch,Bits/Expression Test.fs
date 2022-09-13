@@ -1,16 +1,16 @@
 namespace UnitTest.Engine
 
 
-open Xunit
 open Engine.Core
 open Engine.Common.FS
 open Engine.Runner
-open Xunit.Abstractions
 open System
+open NUnit.Framework
 
 [<AutoOpen>]
 module ExpressionTest =
-    type ExpressionTests1(output1:ITestOutputHelper) =
+    type ExpressionTests1() =
+        do Fixtures.SetUpTest()
         let init() =
             Global.BitChangedSubject
                 .Subscribe(fun bc ->
@@ -20,9 +20,8 @@ module ExpressionTest =
             |> ignore
 
 
-        interface IClassFixture<Fixtures.DemoFixture>
 
-        [<Fact>]
+        [<Test>]
         member __.``And test`` () =
             task {
                 logInfo "============== And test"
@@ -59,7 +58,7 @@ module ExpressionTest =
 
 
 
-        [<Fact>]
+        [<Test>]
         member __.``Or test`` () =
             task {
                 logInfo "============== Or test"
@@ -97,7 +96,7 @@ module ExpressionTest =
 
 
 
-        [<Fact>]
+        [<Test>]
         member __.``Not test`` () =
             logInfo "============== Not test"
             init()
@@ -125,7 +124,7 @@ module ExpressionTest =
             xNot.Value === false
 
 
-        [<Fact>]
+        [<Test>]
         member __.``복합 expression test`` () =
             logInfo "============== 복합 expression test"
             init()
@@ -167,7 +166,7 @@ module ExpressionTest =
             (fun () -> enqueue(x, true).Wait()) |> ShouldFail
 
 
-        [<Fact>]
+        [<Test>]
         member __.``(+Latch)복합 expression test`` () =
             logInfo "============== 복합(+Latch) expression test"
             init()

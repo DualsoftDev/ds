@@ -1,21 +1,19 @@
 namespace UnitTest.Engine
 
 
-open Xunit
 open Engine
 open Engine.Core
 open Engine.Runner
 open System.Linq
 open Engine.Common.FS
-open Xunit.Abstractions
+open NUnit.Framework
 
 [<AutoOpen>]
 module EdgeTest =
-    type EdgeTests1(output1:ITestOutputHelper) =
+    type EdgeTests1() =
 
-        interface IClassFixture<Fixtures.DemoFixture>
 
-        [<Fact>]
+        [<Test>]
         member __.``Parser detail test`` () =
             logInfo "============== Parser detail test"
             let mutable text = """

@@ -1,16 +1,12 @@
 namespace Common
 
 
-open Xunit
-open Engine
-open Engine.Core
-open System.Linq
 open Engine.Common.FS
-open Xunit.Abstractions
 open System.Collections.Concurrent
 open UnitTest.Engine
 open System.Threading.Tasks
 open System.Threading
+open NUnit.Framework
 
 [<AutoOpen>]
 module QueueTestModule =
@@ -32,11 +28,11 @@ module QueueTestModule =
 
 
 
-    type QueueTest(output1:ITestOutputHelper) =
+    type QueueTest() =
+        do Fixtures.SetUpTest()
 
-        interface IClassFixture<Fixtures.DemoFixture>
 
-        [<Fact>]
+        [<Test>]
         member __.``Async computation expression extended`` () =
             task {
                 do! Async.Sleep(1000)
@@ -65,7 +61,7 @@ module QueueTestModule =
             } |> Async.RunSynchronously
 
 
-        [<Fact>]
+        [<Test>]
         member __.``QueueTest`` () =
             logInfo "============== QueueTest"
             let q = new ConcurrentQueue<N>()
@@ -80,7 +76,7 @@ module QueueTestModule =
             for n in q do
                 logDebug $"{n.number}"
 
-        [<Fact>]
+        [<Test>]
         member __.``MailboxProcessorTest`` () =
             logInfo "============== MailboxProcessorTest"
 
@@ -103,7 +99,7 @@ module QueueTestModule =
             |> Array.iter agent.Value.Post
 
 
-        [<Fact>]
+        [<Test>]
         member __.``AsyncTest`` () =
             logInfo "============== AsyncTest"
 

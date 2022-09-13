@@ -1,19 +1,17 @@
 namespace UnitTest.Engine
 
 
-open Xunit
 open Engine.Common.FS
 open Engine.Parser
-open Xunit.Abstractions
 open System
+open NUnit.Framework
 
 [<AutoOpen>]
 module ParserTestModule =
-    type ParserTest(output1:ITestOutputHelper) =
+    type ParserTest() =
+        do Fixtures.SetUpTest()
 
-        interface IClassFixture<Fixtures.DemoFixture>
-
-        [<Fact>]
+        [<Test>]
         member __.``Quotation test`` () =
             logInfo "============== Quotation"
             let isValid = ParserExtension.IsValidIdentifier

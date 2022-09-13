@@ -54,6 +54,7 @@ public abstract class Flow : Named, IWallet
 public class RootFlow : Flow
 {
     public DsSystem System { get; set; }
+    public FlowTask FlowTask { get; set; }
     public string QualifiedName => $"{System.Name}_{Name}";
     public RootFlow(Cpu cpu, string name, DsSystem system)
         : base(cpu, name)

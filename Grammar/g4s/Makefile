@@ -34,6 +34,8 @@ test:
 	@echo safety
 	$(grun) ds program < g4test/safety.ds
 	@echo "---------- with errors"
+	@echo flowTask
+	$(grun) ds program < g4test/flowTask.ds
 
 	@echo imports
 	$(grun) ds importStatements < g4test/imports.txt

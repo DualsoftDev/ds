@@ -28,7 +28,7 @@ qstring: STRING_LITERAL EOF;
 system: sysProp id '=' sysBlock;    // [sys] Seg = {..}
 sysProp: '[' 'sys' ']';
 sysBlock
-    : LBRACE (task|flow|listing|alias|parenting|causal|call|acc|macro)* RBRACE
+    : LBRACE (sysTask|flow|listing|alias|parenting|causal|call|acc|macro)* RBRACE
     ;
 
 
@@ -104,13 +104,16 @@ safetyKey: segmentPathN;
 safetyValues: segmentPathN (SEIMCOLON segmentPathN)*;
 
 
-task
+sysTask
     : taskProp id '=' LBRACE (listing|call)* RBRACE
     ;
 taskProp: '[' 'task' ']';
 
+// flow 내에 정의되는 task.  id 를 갖지 않는다.
+flowTask: taskProp EQ LBRACE (listing|call)* RBRACE;
+
 flow
-    : flowProp id '=' LBRACE (causal|parenting|listing|safetyBlock)* RBRACE
+    : flowProp id '=' LBRACE (causal|parenting|listing|safetyBlock|flowTask)* RBRACE
     ;
 flowProp : '[' 'flow' ('of' id)? ']';
 

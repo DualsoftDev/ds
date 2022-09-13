@@ -1,19 +1,41 @@
-﻿namespace Engine.Core;
+namespace Engine.Core;
 
-[DebuggerDisplay("{ToText()}")]
-public class DsTask : Named
+
+public abstract class DsTask : Named
 {
     public DsSystem System;
-    public List<CallPrototype> CallPrototypes = new();
-
     public DsTask(string name, DsSystem system)
         : base(name)
     {
         System = system;
-        system.Tasks.Add(this);
     }
-
+    public List<CallPrototype> CallPrototypes = new();
     public string QualifiedName => $"{System.Name}_{Name}";
     public override string ToText() => $"{QualifiedName}[{this.GetType().Name}], #call proto={CallPrototypes.Count}";
+}
+
+
+
+/// <summary> System 하부에 정의된 task </summary>
+[DebuggerDisplay("{ToText()}")]
+public class SysTask : DsTask
+{
+    public SysTask(string name, DsSystem system)
+        : base(name, system)
+    {
+        system.Tasks.Add(this);
+    }
+}
+
+
+/// <summary> (System/) Flow 하부에 정의된 task </summary>
+[DebuggerDisplay("{ToText()}")]
+public class FlowTask : DsTask
+{
+    public FlowTask(RootFlow flow)
+        : base("", flow.System)
+    {
+        flow.FlowTask = this;
+    }
 }
 

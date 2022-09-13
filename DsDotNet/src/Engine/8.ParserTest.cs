@@ -56,5 +56,53 @@ namespace Engine
             Program.Engine = engine;
             engine.Run();
         }
+
+        public static void TestParseFlowTask()
+        {
+            var text = @"
+[sys] L = {
+    [flow] F = {
+        Main = { Cp > global.Cm; }
+        // flowTask.  flow 내에 정의된 task.  anonymous.  no id
+        [task] = {
+            Cp = {P.F.Vp ~ P.F.Sp}
+            Cm = {P.F.Vm ~ P.F.Sm}
+        }
+    }
+
+    // sysTask.  system 내에 정의된 task.  id 명을 갖는다.
+    [task] global = {
+        Cp = {P.F.Vp ~ P.F.Sp}
+        Cm = {P.F.Vm ~ P.F.Sm}
+    }
+}
+
+[sys] P = {
+    [flow] F = {
+        Vp > Pp > Sp;
+        Vm > Pm > Sm;
+
+        Pp |> Sm;
+        Pm |> Sp;
+        Vp <||> Vm;
+    }
+}
+
+[cpus] AllCpus = {
+    [cpu] Cpu = {
+        L.F;
+    }
+    [cpu] PCpu = {
+        P.F;
+    }
+}
+
+";
+            var engine = new EngineBuilder(text, "Cpu").Engine;
+            Program.Engine = engine;
+            engine.Run();
+        }
+
+
     }
 }

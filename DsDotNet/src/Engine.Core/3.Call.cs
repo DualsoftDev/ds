@@ -25,7 +25,7 @@ public class Xywh
 
 public class CallPrototype : CallBase
 {
-    public DsTask Task;
+    public DsTask Task;     // SysTask or FlowTask
 
     /// <summary> 주로 target system 의 segment </summary>
     public List<ITxRx> TXs = new(); // empty 이면 '_' 를 의미

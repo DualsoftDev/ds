@@ -57,13 +57,13 @@ partial class ElementsListener : dsBaseListener
     }
     override public void ExitSystem(SystemContext ctx) { this._system = null; }
 
-    override public void EnterTask(TaskContext ctx)
+    override public void EnterSysTask(SysTaskContext ctx)
     {
         var name = ctx.id().GetText();
         _task = _system.Tasks.First(t => t.Name == name);
         Trace.WriteLine($"Task: {name}");
     }
-    override public void ExitTask(TaskContext ctx) { _task = null; }
+    override public void ExitSysTask(SysTaskContext ctx) { _task = null; }
 
     override public void EnterFlow(FlowContext ctx)
     {

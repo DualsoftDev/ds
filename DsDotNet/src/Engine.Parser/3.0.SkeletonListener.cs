@@ -65,13 +65,22 @@ class SkeletonListener : dsBaseListener
     }
     override public void ExitSystem(SystemContext ctx) { _system = null; }
 
-    override public void EnterTask(TaskContext ctx)
+    override public void EnterSysTask(SysTaskContext ctx)
     {
         var name = ctx.id().GetText();
-        _task = new DsTask(name, _system);
+        _task = new SysTask(name, _system);
         QpInstanceMap.Add(CurrentPath, _task);
     }
-    override public void ExitTask(TaskContext ctx) { _task = null; }
+    override public void ExitSysTask(SysTaskContext ctx) { _task = null; }
+
+    override public void EnterFlowTask(FlowTaskContext ctx)
+    {
+        var task = new FlowTask(_rootFlow);
+        _rootFlow.FlowTask = task;
+        QpInstanceMap.Add(CurrentPath, task);
+    }
+    override public void ExitFlowTask(FlowTaskContext ctx) { _task = null; }
+
 
     override public void EnterFlow(FlowContext ctx)
     {
@@ -99,9 +108,21 @@ class SkeletonListener : dsBaseListener
         var name = ctx.id().GetText();
         var label = $"{name}\n{ctx.callPhrase().GetText()}";
         var callph = ctx.callPhrase();
-        var call = new CallPrototype(name, _task);
-        QpDefinitionMap.Add($"{CurrentPath}.{name}", call);
-        Trace.WriteLine($"CALL: {name}");
+
+        if (ctx.Parent is FlowTaskContext flowTask)
+        {
+            Debug.Assert(_task is null);
+            var call = new CallPrototype(name, _rootFlow.FlowTask);
+            QpDefinitionMap.Add($"{CurrentPath}.{name}", call);
+            Console.WriteLine();
+        }
+        else if (ctx.Parent is SysTaskContext sysTask)
+        {
+            Debug.Assert(_task is SysTask);
+            var call = new CallPrototype(name, (SysTask)_task);
+            QpDefinitionMap.Add($"{CurrentPath}.{name}", call);
+            Trace.WriteLine($"CALL: {name}");
+        }
     }
 
 

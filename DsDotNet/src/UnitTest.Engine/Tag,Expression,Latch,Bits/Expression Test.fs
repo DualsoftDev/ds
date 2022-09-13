@@ -42,7 +42,8 @@ module ExpressionTest =
 
 
                 xAnd.Value === false
-                [a1; a2; a3] |> Seq.iter (fun x -> enqueue(x, true).Wait())
+                for x in [a1; a2; a3] do
+                    do! enqueue(x, true)                    
                 xAnd.Value === true
 
                 do! enqueue(a2, false)
@@ -83,7 +84,8 @@ module ExpressionTest =
                 do! enqueue(a3, true)
                 xOr.Value === true
 
-                [a1; a2; a3] |> Seq.iter (fun x -> enqueue(x, false).Wait())
+                for x in [a1; a2; a3] do
+                    do! enqueue(x, false)                    
                 xOr.Value === false
 
                 do! enqueue(a1, true)

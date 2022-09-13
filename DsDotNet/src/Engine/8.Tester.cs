@@ -609,7 +609,7 @@ public class Tester
         engine.Wait();
     }
 
-    public static string GetTextDiamond()
+    public static string GetTextDiamondNormal()
     {
         var text = @"
 [sys] L = {
@@ -625,6 +625,52 @@ public class Tester
             T.Ap <||> T.Am;
             T.Bp <||> T.Bm;
             T.Ap > T.Am, T.Bp > T.Bm;
+        }
+    }
+}
+[addresses] = {
+	L.F.Main = (%0, %0,);
+	A.F.Vp = (%QX0.1.3, ,);
+	A.F.Vm = (%QX0.1.2, ,);
+	B.F.Vp = (%QX0.1.5, ,);
+	B.F.Vm = (%QX0.1.4, ,);
+	A.F.Sp = (, , %IX0.0.5);
+	A.F.Sm = (, , %IX0.0.4);
+	B.F.Sp = (, , %IX0.0.7);
+	B.F.Sm = (, , %IX0.0.6);
+}
+[cpus] AllCpus = {
+    [cpu] Cpu = {
+        L.F;
+    }
+    [cpu] ACpu = {
+        A.F;
+    }
+    [cpu] BCpu = {
+        B.F;
+    }
+}
+" + CreateCylinder("A") + "\r\n" + CreateCylinder("B");
+        return text;
+    }
+
+    /// <summary>Diamond with flow task</summary>
+    public static string GetTextDiamond()
+    {
+        var text = @"
+[sys] L = {
+    [flow] F = {
+        Main = {
+            // 정보로서의 Call 상호 리셋
+            Ap <||> Am;
+            Bp <||> Bm;
+            Ap > Am, Bp > Bm;
+        }
+        [task] = {
+            Ap = {A.F.Vp ~ A.F.Sp}
+            Am = {A.F.Vm ~ A.F.Sm}
+            Bp = {B.F.Vp ~ B.F.Sp}
+            Bm = {B.F.Vm ~ B.F.Sm}
         }
     }
 }

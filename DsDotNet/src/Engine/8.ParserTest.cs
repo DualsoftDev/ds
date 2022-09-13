@@ -102,7 +102,5 @@ namespace Engine
             Program.Engine = engine;
             engine.Run();
         }
-
-
     }
 }

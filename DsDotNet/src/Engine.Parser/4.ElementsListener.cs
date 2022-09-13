@@ -145,7 +145,9 @@ partial class ElementsListener : dsBaseListener
     {
         var name = ctx.id().GetText();
         var label = $"{name}\n{ctx.callPhrase().GetText()}";
-        var call = _task.CallPrototypes.First(c => c.Name == name);
+
+        var callPrototypes = (_task == null) ? _rootFlow.FlowTask.CallPrototypes : _task.CallPrototypes;            
+        var call = callPrototypes.First(c => c.Name == name);
 
         var callph = ctx.callPhrase();
         var txs = ParserHelper.FindObjects<SegmentBase>(callph.segments(0).GetText());
@@ -223,6 +225,12 @@ partial class ElementsListener : dsBaseListener
                     target = QpDefinitionMap[targetName];   // definition 우선시
                 else if (QpInstanceMap.ContainsKey(targetName))
                     target = QpInstanceMap[targetName];
+                else if (_rootFlow?.FlowTask != null)
+                {
+                    var flowTask = _rootFlow.FlowTask;
+                    if (flowTask.CallPrototypes.Exists(cp => cp.Name == targetName))
+                        target = flowTask.CallPrototypes.First(cp => cp.Name == targetName);
+                }
 
                 switch (target)
                 {

@@ -331,8 +331,8 @@ module ModelTest2 =
                 let cpStart = cp.TagsStart |> Seq.exactlyOne
                 let vpStart = vp.TagPStart
                 cpStart.Name === vpStart.Name
-                cpStart === vpStart
-                cpStart.Cpu === vpStart.Owner.Cpu
+                cpStart =!= vpStart
+                cpStart.Cpu =!= vpStart.Owner.Cpu
 
                 let pp = model.FindObject<Segment>("P.F.Pp");
                 pp.Name === "Pp"
@@ -342,8 +342,8 @@ module ModelTest2 =
                 sp.Name === "Sp"
                 let cpEnd = cp.TagsEnd |> Seq.exactlyOne
                 cpEnd.Name === sp.TagPEnd.Name
-                cpEnd === sp.TagPEnd
-                cpEnd.Cpu === sp.TagPEnd.Owner.Cpu
+                cpEnd =!= sp.TagPEnd
+                cpEnd.Cpu =!= sp.TagPEnd.Owner.Cpu
 
             ()
 

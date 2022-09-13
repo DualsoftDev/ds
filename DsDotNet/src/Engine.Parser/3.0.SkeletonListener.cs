@@ -77,7 +77,7 @@ class SkeletonListener : dsBaseListener
     {
         var task = new FlowTask(_rootFlow);
         _rootFlow.FlowTask = task;
-        QpInstanceMap.Add(CurrentPath, task);
+        //QpDefinitionMap.Add(CurrentPath, task);
     }
     override public void ExitFlowTask(FlowTaskContext ctx) { _task = null; }
 

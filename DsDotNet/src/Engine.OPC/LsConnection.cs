@@ -6,7 +6,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Engine.OPC
+namespace Control.OPC
 {
     internal class LsConnection
     {

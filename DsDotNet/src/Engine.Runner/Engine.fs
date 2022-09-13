@@ -8,7 +8,6 @@ open System.Reactive.Linq
 
 open Engine.Common.FS
 open Engine.Core
-open Engine.OPC
 open Engine.Base
 
 [<AutoOpen>]
@@ -29,12 +28,12 @@ module EngineModule =
 
 
 
-    type Engine(model:Model, opc:OpcBroker, activeCpu:Cpu) =
+    type Engine(model:Model, data:DataBroker, activeCpu:Cpu) =
         let cpus = model.Cpus
 
         interface IEngine
         member _.Model = model
-        member _.Opc = opc
+        member _.Data = data
         member _.Cpu = activeCpu
 
 
@@ -51,8 +50,8 @@ module EngineModule =
 
             /// OPC Server 에서 Cpu 가 가지고 있는 tag 값들을 읽어 들임
             /// Engine 최초 구동 시, 수행됨.
-            let readTagsFromOpc (cpu:Cpu) (opc:OpcBroker) =
-                let tpls = opc.ReadTags(cpu.TagsMap.map(fun t -> t.Key))
+            let readTagsFromOpc (cpu:Cpu) (data:DataBroker) =
+                let tpls = data.ReadTags(cpu.TagsMap.map(fun t -> t.Key))
                 for tName, value in tpls do
                     let tag = cpu.TagsMap[tName]
                     if tag.Value <> value then
@@ -102,7 +101,7 @@ module EngineModule =
                             cpusA |> Seq.iter(fun cpu -> onOpcTagChanged cpu tc))
 
                     for cpu in cpus do
-                        readTagsFromOpc cpu opc
+                        readTagsFromOpc cpu data
 
                         yield cpu.Run()
                 ]

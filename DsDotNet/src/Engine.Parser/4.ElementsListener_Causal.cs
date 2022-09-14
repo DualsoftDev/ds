@@ -124,7 +124,7 @@ partial class ElementsListener
 
         IEnumerable<string> split()
         {
-            foreach (var o in new[] { "|>>", "<<|", ">>", "<<", })
+            foreach (var o in new[] { "||>", "<||", ">>", "<<", })
             {
                 if (op.Contains(o))
                 {
@@ -213,15 +213,15 @@ partial class ElementsListener
                     var rvs = FindVertices(context, r);
 
                     Assert(l != null && r != null);   // 'node not found');
-                    if (lvs.Length == 0) throw new Exception($"Parse error: {l.id} not found");
-                    if (rvs.Length == 0) throw new Exception($"Parse error: {r.id} not found");
+                    if (lvs.Length == 0) throw new ParserException($"Parse error: {l.id} not found", ll);
+                    if (rvs.Length == 0) throw new ParserException($"Parse error: {r.id} not found", rr);
 
                     Edge e = null;
                     switch (op)
                     {
                         case "|>" : e = new WeakResetEdge  (flow, lvs, op, rvs[0]); break;
                         case ">"  : e = new WeakSetEdge    (flow, lvs, op, rvs[0]); break;
-                        case "|>>": e = new StrongResetEdge(flow, lvs, op, rvs[0]); break;
+                        case "||>": e = new StrongResetEdge(flow, lvs, op, rvs[0]); break;
                         case ">>" : e = new StrongSetEdge  (flow, lvs, op, rvs[0]); break;
 
                         case "<|":
@@ -232,9 +232,9 @@ partial class ElementsListener
                             Assert(lvs.Length == 1);
                             e = new WeakSetEdge(flow, rvs, ">", lvs[0]);
                             break;
-                        case "<<|":
+                        case "<||":
                             Assert(lvs.Length == 1);
-                            e = new StrongResetEdge(flow, rvs, "|>>", lvs[0]);
+                            e = new StrongResetEdge(flow, rvs, "||>", lvs[0]);
                             break;
                         case "<<":
                             Assert(lvs.Length == 1);

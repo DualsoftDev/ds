@@ -1,9 +1,5 @@
-using System.IO;
-using System.Configuration;
-using Engine.Common.FS;
 using System.Threading;
 using System.Reflection;
-using System.Windows.Forms;
 
 namespace Engine;
 
@@ -31,12 +27,13 @@ class Program
         //Tester.DoSampleTest();
         //Tester.DoSampleTestAdvanceReturn();
         //Tester.DoSampleTestHatOnHat();
-        Tester.DoSampleTestDiamond();
+        //Tester.DoSampleTestDiamond();
         //Tester.DoSampleTestTriangle();
         //Tester.DoSampleTestAddressesAndLayouts();
 
 
         //ParserTest.TestParseSafety();
         //ParserTest.TestParseFlowTask();
+        ParserTest.TestParseStrongCausal();
     }
 }

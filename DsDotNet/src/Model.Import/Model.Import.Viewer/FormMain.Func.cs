@@ -50,6 +50,7 @@ namespace Dual.Model.Import
         {
             try
             {
+                this.Do(() => button_comfile.Enabled = false);
                 var lstModel = new List<DsModel>() { ImportModel.FromPPTX(PathPPT) };
                 if (lstModel.Where(w => w == null).Any())
                     return;
@@ -76,6 +77,8 @@ namespace Dual.Model.Import
                 }
                 else
                     WriteDebugMsg(DateTime.Now, MSGLevel.Error, $"{PathPPT} 불러오기 실패!!");
+
+                this.Do(() => button_comfile.Enabled = true);
 
             }
             catch (Exception ex)

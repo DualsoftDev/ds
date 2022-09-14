@@ -4,7 +4,7 @@ public static class ModelParser
 {
     public static Model ParseFromString(string text)
     {
-        var parser = DsParser.FromDocument(text);
+        var (parser, errors) = DsParser.FromDocument(text);
         var helper = new ParserHelper();
 
         var sListener = new SkeletonListener(parser, helper);

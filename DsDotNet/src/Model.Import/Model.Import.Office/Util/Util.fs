@@ -6,6 +6,7 @@ open System.Linq
 open System.Diagnostics
 open System.Collections.Concurrent
 open System.Runtime.CompilerServices
+open Engine.Parser
 
 [<AutoOpen>]
 module Util =
@@ -22,18 +23,10 @@ module Util =
         member x.TryAdd(item:'T) = x.TryAdd(item, item)
 
 
-          
-    /// 시스템 전용 문자 리스트  // '_'는 선두만 불가, '~'은 앞뒤만 가능
-    let SystemChar = [
-                ">"; "<"; "|"; "="; "-"; ";"; ":"; "'"; "\""; "["; "]" ; "{"; "}" 
-                "!"; "@"; "#"; "^"; "&"; "*";"/"; "+"; "-"; "?" 
-            ]
 
-    let IsInvalidName(name:string) = 
-        let ngName = SystemChar |> Seq.filter(fun char -> name.Contains(char))
-        ngName.Any() 
-        || name.StartsWith("_") 
-        || (name.Length > 0 && Char.IsDigit(name.[0]))
+    let GetValidName(name:string) = 
+        if(ParserExtension.IsValidIdentifier(name))  then name else $"\"{name}\"" 
+        
 
 
     let GetSquareBrackets(name:string, bHead:bool) = 

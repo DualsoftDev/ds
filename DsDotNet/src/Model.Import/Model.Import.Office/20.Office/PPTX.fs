@@ -165,7 +165,7 @@ module PPTX =
         member x.PageNum = iPage
         member x.Shape = shape
         member x.DashOutline = dashOutline
-        member x.Safeties = safeties
+        member x.Safeties = safeties.select(fun safe -> Util.GetValidName(safe))
         member x.IsDummy = bDuumy
         member val NodeCausal = 
                             if(shape.CheckRectangle()) then if(dashOutline) then EX else  MY

@@ -12,6 +12,7 @@ open System
 open Microsoft.FSharp.Collections
 open Engine.Common.FS
 open Engine.Base
+open Engine.Parser
 
 [<AutoOpen>]
 module ImportModel =
@@ -42,11 +43,15 @@ module ImportModel =
 
         let updateAlias(node:pptNode) = 
             if(node.Alias.IsSome) 
-            then if(mySys.AliasSet.Keys.Contains(node.Name))
-                 then mySys.AliasSet.[node.Name].Add( node.Alias.Value )|> ignore
+            then 
+                let name = Util.GetValidName(node.Name) 
+                let alias = $"\"{node.Alias.Value}\"";  //별칭은 무조건 "" 감싸기
+                if(mySys.AliasSet.Keys.Contains(name))  
+                 then mySys.AliasSet.[name].Add( alias)|> ignore
                  else let set = HashSet<string>()
-                      set.Add(node.Alias.Value)|> ignore
-                      mySys.AliasSet.TryAdd(node.Name, set ) |> ignore
+                      let name =  Util.GetValidName(node.Name)  
+                      set.Add(alias)|> ignore
+                      mySys.AliasSet.TryAdd(name, set ) |> ignore
 
         let dicSameCheck = ConcurrentDictionary<string, MEdge>()
         let convertEdge(edge:pptEdge) = 
@@ -91,7 +96,7 @@ module ImportModel =
                                         let title = doc.GetPage(page.PageNum).Title
                                         if(title = "") then sprintf "P%d" page.PageNum else title
               
-                                    dicFloName.TryAdd(page.PageNum, flowName)|>ignore)
+                                    dicFloName.TryAdd(page.PageNum, Util.GetValidName(flowName))|>ignore)
 
                 //segment 리스트 만들기
                 doc.Nodes 
@@ -123,12 +128,17 @@ module ImportModel =
                 doc.Nodes 
                 |> Seq.filter(fun node -> node.IsDummy|>not)
                 |> Seq.iter(fun node -> 
-                                let flowName = mySys.Flows.[node.PageNum].Name
+                                let flowName =  mySys.Flows.[node.PageNum].Name
                                 let dic = dicSeg.Values.Select(fun seg -> seg.FullName, seg) |> dict
                                 let safeSeg = 
+                                    node.Safeties   //세이프티 입력 미등록 이름오류 체크
+                                    |> Seq.map(fun safe ->  sprintf "%s.%s.%s" mySys.Name flowName safe)
+                                    |> Seq.iter(fun safeFullName -> if(dic.ContainsKey safeFullName|>not) 
+                                                                    then Office.ErrorName(node.Shape, 28, node.PageNum))
+
+
                                     node.Safeties   
                                     |> Seq.map(fun safe ->  sprintf "%s.%s.%s" mySys.Name flowName safe)
-                                    |> Seq.filter(fun safeFullName -> dic.ContainsKey safeFullName)
                                     |> Seq.map(fun safeFullName ->  dic.[safeFullName])
 
                                 if(safeSeg.Any())

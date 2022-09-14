@@ -213,8 +213,8 @@ partial class ElementsListener
                     var rvs = FindVertices(context, r);
 
                     Assert(l != null && r != null);   // 'node not found');
-                    if (lvs.Length == 0) throw new Exception($"Parse error: {l.id} not found");
-                    if (rvs.Length == 0) throw new Exception($"Parse error: {r.id} not found");
+                    if (lvs.Length == 0) throw new ParserException($"Parse error: {l.id} not found", ll);
+                    if (rvs.Length == 0) throw new ParserException($"Parse error: {r.id} not found", rr);
 
                     Edge e = null;
                     switch (op)

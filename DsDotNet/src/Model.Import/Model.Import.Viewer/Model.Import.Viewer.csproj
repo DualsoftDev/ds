@@ -4,6 +4,8 @@
     <TargetFrameworks>net48</TargetFrameworks>
     <RootNamespace>Model.Import.Viewer</RootNamespace>
     <OutputType>WinExe</OutputType>
+    <ApplicationIcon />
+    <StartupObject />
     
   </PropertyGroup>
   <ItemGroup>

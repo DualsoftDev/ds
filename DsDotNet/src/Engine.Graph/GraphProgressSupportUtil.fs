@@ -6,15 +6,14 @@ open QuickGraph
 open Engine.Common.FS.Graph.QuickGraph.GraphAlgorithm
 open Engine.Core
 
-
 [<AutoOpen>]
-module GraphProgressSupportUtil =
-    let private changeToChild (v:IVertex) =
-        match v with
-        | :? Child -> v:?>Child
-        | _ -> null
+module private GraphCalculatingUtil = 
+    let removeDuplicates (source:'T seq) = 
+        source
+        |> Seq.collect id
+        |> Seq.distinct
 
-    let private checkIntersect
+    let checkIntersect
             (sourceSeq:'T seq)
             (shatteredSeqs:'T seq seq) =
         shatteredSeqs
@@ -24,31 +23,23 @@ module GraphProgressSupportUtil =
             )
         )
 
-    let private checkIsAlias (segment:IVertex) =
+    let checkIsAlias (segment:IVertex) =
         match segment with
         | :? Child as c -> c.IsAlias
         | _ -> false
 
-    let private getResetEdges (allEdges:Edge array) =
-        allEdges
-        |> Seq.filter(isResetEdge)
-        |> edges2QgEdge
-
-    let private getRouteFromStart
-            (v:IVertex) (route:IVertex seq) =
-        route
-        |> Seq.takeWhile(fun rv -> rv <> v)
-        |> Seq.append(seq{v})
-        |> Array.ofSeq
-
-    let private getSegmentsFromEdges (edges:QgEdge seq) =
+    let getAllAliases (edges:QgEdge seq) =
         edges
         |> Seq.map(fun e -> seq{e.Source; e.Target;})
-        |> Seq.collect id
-        |> Seq.distinct
+        |> removeDuplicates
+        |> Seq.filter(checkIsAlias)
 
-    let private getAliasTarget (v:IVertex) =
-        let child = changeToChild v
+    let getAliasTarget (v:IVertex) =
+        let child = 
+            match v with
+            | :? Child -> v:?>Child
+            | _ -> null
+
         match child.Coin with
         | :? Call as c ->
             if child.IsAlias then
@@ -59,15 +50,7 @@ module GraphProgressSupportUtil =
             s.ExternalSegment.QualifiedName
         | _ -> null
 
-    let private getAllAliases (edges:QgEdge seq) =
-        getSegmentsFromEdges edges
-        |> Seq.filter(checkIsAlias)
-
-    let private getAliasResets (resetEdges:QgEdge seq) =
-        resetEdges
-        |> Seq.filter(fun e -> checkIsAlias e.Target)
-
-    let private getMutualDummyResets (resetEdges:QgEdge seq) =
+    let getMutualDummyResets (resetEdges:QgEdge seq) =
         resetEdges
         |> Seq.map(fun e ->
             resetEdges
@@ -79,16 +62,9 @@ module GraphProgressSupportUtil =
             |> Seq.distinct
         )
         |> Seq.filter(fun e -> e.Count() <> 0)
-        |> Seq.collect id
-        |> Seq.distinct
+        |> removeDuplicates
 
-    let private getReverseResets
-            (myRoute:IVertex list) (resetEdges:QgEdge seq) =
-        resetEdges
-        |> Seq.map(fun r -> seq{r.Target; r.Source;})
-        |> checkIntersect myRoute
-
-    let private getTraverseOrder
+    let getTraverseOrder
             (inits:IVertex list)
             (orderEdges:AdjacencyGraph<IVertex, QgEdge>) =
         let q = Queue<V>()
@@ -103,7 +79,7 @@ module GraphProgressSupportUtil =
         |]
         |> Array.distinct
 
-    let private getIndexedMap (traverseOrder:IVertex array) =
+    let getIndexedMap (traverseOrder:IVertex array) =
         let mutable i = 1
         [|
             for v in traverseOrder do
@@ -112,63 +88,17 @@ module GraphProgressSupportUtil =
         |]
         |> Map.ofArray
 
-    let private getAllRoutes
+    let getAllRoutes
             (inits:IVertex list) (lasts:IVertex list)
             (orderEdges:AdjacencyGraph<IVertex, QgEdge>) =
-        inits
-        |> Seq.collect(fun s ->
-            lasts
-            |> Seq.collect(fun e ->
-                getAllPaths orderEdges s e
-            )
-        )
+        seq {
+            for s in inits do
+                for e in lasts do
+                    getAllPaths orderEdges s e
+        }
+        |> removeDuplicates
 
-    let private filterResetsInMyRoute
-            (myRoute:IVertex list)
-            (resets:QgEdge seq) (isBidirectional:bool) =
-        resets
-        |> Seq.map(fun r ->
-            if isBidirectional = true then
-                seq{seq{r.Source; r.Target;}; seq{r.Target; r.Source;};}
-            else
-                seq{seq{r.Source; r.Target;}}
-        )
-        |> Seq.map(fun arst ->
-            arst |> checkIntersect myRoute
-        )
-        |> Seq.collect id
-        |> Seq.distinct
-
-    let private getNonCausalMutualResets
-            (allRoutes:IVertex list seq) (mutualResets:QgEdge seq) =
-        let mutualResetNodesInMyRoutes =
-            allRoutes
-            |> Seq.map(fun r ->
-                mutualResets
-                |> Seq.map(fun e -> seq{e.Source; e.Target;})
-                |> Seq.filter(fun e ->
-                    Enumerable.SequenceEqual(
-                        Enumerable.Intersect(r, e), e
-                    )
-                )
-                |> Seq.collect id
-            )
-            |> Seq.collect id
-
-        let mutualResetsInMyRoutes =
-            mutualResetNodesInMyRoutes
-            |> Seq.map(fun v ->
-                mutualResets
-                |> Seq.filter(fun e ->
-                    e.Source = v || e.Target = v
-                )
-            )
-            |> Seq.collect id
-            |> Seq.distinct
-
-        mutualResets |> Seq.except(mutualResetsInMyRoutes)
-
-    let private getMutualResetedSegmentsInMyRoute
+    let getMutualResetedSegmentsInMyRoute
             (myMutualResets:IVertex seq seq) (myRoute:IVertex array)
             (nowSegment:IVertex) (toBeOn:bool) =
         myMutualResets
@@ -186,15 +116,60 @@ module GraphProgressSupportUtil =
             else getComponant (e.Reverse()) toBeOn
         )
 
-    let private getMutualResetedSegmentsWithOtherRoutes
+    let getMutualResetedSegmentsWithOtherRoutes
             (nonCausalMutualResets:QgEdge seq) (nowSegment:IVertex) =
         nonCausalMutualResets
-        |> Seq.filter(fun e ->
-            e.Source = nowSegment || e.Target = nowSegment
-        )
+        |> Seq.filter(fun e -> e.Source = nowSegment || e.Target = nowSegment)
         |> Seq.map(fun e -> seq{e.Source; e.Target;})
 
-    let private findMutualResets (allEdges:QgEdge seq) =
+    let getAliasMutualResetedSegmentsInMyRoute
+            (myMutualResets:string seq seq)
+            (solidRouteNames:string seq) (nowSegment:IVertex) =
+        let nowName = getAliasTarget nowSegment
+        myMutualResets
+        |> Seq.map(fun e ->
+            let containFirst = solidRouteNames.Contains(e.First())
+            let containLast = solidRouteNames.Contains(e.Last())
+
+            if e.Contains(nowName) then nowName
+            elif containFirst && containLast then e.Last()
+            elif containFirst && containLast = false then e.First()
+            else e.Last()
+        )
+
+    let getLinkedAliases
+            (allAliases:IVertex seq) (alias:IVertex) =
+        allAliases
+        |>Seq.filter(fun v ->
+            alias <> v &&
+            getAliasTarget v = getAliasTarget alias
+        )
+
+    let getPredictedDontCareSegments
+            (route:IVertex list) (dummyResets:QgEdge seq)
+            (myRoute:IVertex array) (nowSegment:IVertex) =
+        dummyResets
+        |> Seq.map(fun r -> seq{r.Target; r.Source;})
+        |> checkIntersect route
+        |> Seq.map(fun e ->
+            let containFirst = myRoute.Contains(e.First())
+            let containLast = myRoute.Contains(e.Last())
+
+            if e.First() = nowSegment then e.Last()
+            elif containFirst && containLast then e.First()
+            elif containFirst && containLast = false then e.Last()
+            else e.First()
+        )
+        |> Seq.distinct
+
+    let getRouteFromStart
+            (v:IVertex) (route:IVertex seq) =
+        route
+        |> Seq.takeWhile(fun rv -> rv <> v)
+        |> Seq.append(seq{v})
+        |> Array.ofSeq
+
+    let findMutualResets (allEdges:QgEdge seq) =
         let resets =
             allEdges
             |> Seq.filter(fun e -> isResetEdge e.OriginalEdge)
@@ -213,47 +188,9 @@ module GraphProgressSupportUtil =
                 reverseTgt = orgTgt
             )
         )
-        |> Seq.collect id
+        |> removeDuplicates
 
-    let private getAliasMutualResetedSegmentsInMyRoute
-            (myMutualResets:string seq seq)
-            (solidRouteNames:string seq) (nowSegment:IVertex) =
-        let nowName = getAliasTarget nowSegment
-        myMutualResets
-        |> Seq.map(fun e ->
-            let containFirst = solidRouteNames.Contains(e.First())
-            let containLast = solidRouteNames.Contains(e.Last())
-
-            if e.Contains(nowName) then nowName
-            elif containFirst && containLast then e.Last()
-            elif containFirst && containLast = false then e.First()
-            else e.Last()
-        )
-
-    let private getLinkedAliases
-            (alias:IVertex) (allAliases:IVertex seq) =
-        allAliases
-        |>Seq.filter(fun v ->
-            alias <> v &&
-            getAliasTarget v = getAliasTarget alias
-        )
-
-    let private getPredictedDontCareSegments
-            (route:IVertex list) (dummyResets:QgEdge seq)
-            (myRoute:IVertex array) (nowSegment:IVertex) =
-        getReverseResets route dummyResets
-        |> Seq.map(fun e ->
-            let containFirst = myRoute.Contains(e.First())
-            let containLast = myRoute.Contains(e.Last())
-
-            if e.First() = nowSegment then e.Last()
-            elif containFirst && containLast then e.First()
-            elif containFirst && containLast = false then e.Last()
-            else e.First()
-        )
-        |> Seq.distinct
-
-    let private getAliasMutualResetOnList
+    let getAliasMutualResetOnList
             (nowSegment:IVertex) (solidRoutes:IVertex list seq)
             (allEdges:QgEdge seq) (allAliases:IVertex seq) =
         solidRoutes
@@ -271,31 +208,73 @@ module GraphProgressSupportUtil =
                     | 0 -> nowSegment
                     | _ -> seg.First()
 
-            let nsr = sr |> Seq.map(fun vv -> getAliasTarget vv)
+            let nsr = sr |> Seq.map(getAliasTarget)
             let nowNsr =
                 getRouteFromStart nowSeg sr
-                |> Seq.map(fun vv -> getAliasTarget vv)
+                |> Seq.map(getAliasTarget)
             let amr =
                 aliasMutualResets
-                |> Seq.map(fun ee ->
-                    seq{getAliasTarget ee.Source; getAliasTarget ee.Target;}
+                |> Seq.map(fun e ->
+                    seq{getAliasTarget e.Source; getAliasTarget e.Target;}
                 )
                 |> checkIntersect nsr
 
             getAliasMutualResetedSegmentsInMyRoute amr nowNsr nowSeg
             |> Seq.map(fun mr ->
                 sr
-                |> Seq.filter(fun vv ->
-                    getAliasTarget vv = mr
+                |> Seq.filter(fun v ->
+                    getAliasTarget v = mr
                 )
             )
             |> Seq.collect id
-            |> Seq.map(fun vv -> getLinkedAliases vv allAliases)
+            |> Seq.map(getLinkedAliases allAliases)
             |> Seq.collect id
         )
         |> Seq.collect id
 
-    let private getCalculationTargets
+    let getNonCausalMutualResets
+            (allRoutes:IVertex list seq) (mutualResets:QgEdge seq) =
+        let mutualResetNodesInMyRoutes =
+            allRoutes
+            |> Seq.map(fun r ->
+                mutualResets
+                |> Seq.map(fun e -> seq{e.Source; e.Target;})
+                |> checkIntersect r
+                |> Seq.collect id
+            )
+            |> Seq.collect id
+            
+        let mutualResetsInMyRoutes =
+            seq {
+                for v in mutualResetNodesInMyRoutes do
+                    mutualResets
+                    |> Seq.filter(fun e ->
+                        e.Source = v || e.Target = v
+                    )
+            }
+            |> removeDuplicates
+
+        mutualResets |> Seq.except(mutualResetsInMyRoutes)
+        
+    let filterResetsInMyRoute
+            (myRoute:IVertex list)
+            (resets:QgEdge seq) (isBidirectional:bool) =
+        resets
+        |> Seq.map(fun r ->
+            let forward = seq{r.Source; r.Target;}
+            let backward = seq{r.Target; r.Source;}
+
+            if isBidirectional then
+                seq{forward; backward;}
+            else
+                seq{forward}
+        )
+        |> Seq.map(fun arst ->
+            arst |> checkIntersect myRoute
+        )
+        |> removeDuplicates
+
+    let getCalculationTargets
             (nowSegment:IVertex) (allRoutes:IVertex list seq)
             (solidRoutes:IVertex list seq) (dummyResets:QgEdge seq)
             (mutualResets:QgEdge seq) (allEdges:QgEdge seq) =
@@ -322,7 +301,7 @@ module GraphProgressSupportUtil =
 
             segmentsToOn
             |> Seq.append(
-                getLinkedAliases nowSegment allAliases
+                getLinkedAliases allAliases nowSegment
                 |> Seq.filter(fun l -> segmentsToOn.Contains((l, 1)) = false)
                 |> Seq.map(fun l -> (l, 0))
             )
@@ -340,10 +319,23 @@ module GraphProgressSupportUtil =
                 )
             )
         )
-        |> Seq.collect id
-        |> Seq.distinct
+        |> removeDuplicates
 
-    let private getOrigins
+    let getProgressMap
+            (traverseOrder:IVertex array) (allRoutes:IVertex list seq)
+            (solidRoutes:IVertex list seq) (dummyResets:QgEdge seq)
+            (mutualResets:QgEdge seq) (allEdges:QgEdge seq) =
+        traverseOrder
+        |> Seq.map(fun v ->
+            (
+                v.GetQualifiedName(),
+                getCalculationTargets
+                    v allRoutes solidRoutes dummyResets mutualResets allEdges
+            )
+        )
+        |> Map.ofSeq
+
+    let getOrigins
             (solidRoutes:IVertex list seq) (mutualResets:QgEdge seq)
             (allEdges:QgEdge seq) =
         let allAliases = getAllAliases allEdges
@@ -362,32 +354,21 @@ module GraphProgressSupportUtil =
                     Seq.empty
             )
         )
-        |> Seq.collect id
-        |> Seq.distinct
+        |> removeDuplicates
 
-    let private getProgressMap
-            (traverseOrder:IVertex array) (allRoutes:IVertex list seq)
-            (solidRoutes:IVertex list seq) (dummyResets:QgEdge seq)
-            (mutualResets:QgEdge seq) (allEdges:QgEdge seq) =
-        traverseOrder
-        |> Seq.map(fun v ->
-            (
-                v.GetQualifiedName(),
-                getCalculationTargets
-                    v allRoutes solidRoutes dummyResets mutualResets allEdges
-            )
-        )
-        |> Map.ofSeq
+
+[<AutoOpen>]
+module GraphProgressSupportUtil =
 
     type ProgressInfo (gri:GraphInfo) =
         // child flow included whole reset edges
-        let resetEdges = getResetEdges gri.Edges
+        let resetEdges = gri.Edges |> Seq.filter(isResetEdge) |> edges2QgEdge
 
         // mutual reset edges (dummy connection, just for calls)
         let mutualResets = getMutualDummyResets resetEdges
 
         // reset edges connected to alias node (working like causal edges)
-        let aliasResets = getAliasResets resetEdges
+        let aliasResets = resetEdges |> Seq.filter(fun e -> checkIsAlias e.Target)
 
         // without alias reset edges
         let dummyResets = resetEdges |> Seq.except(aliasResets)
@@ -438,9 +419,7 @@ module GraphProgressSupportUtil =
             | _ ->
                 printfn "\bIndexed childrens"
                 indexedChildren
-                |> Seq.iter(fun m ->
-                    printfn "%A : %A" m.Key m.Value
-                )
+                |> Seq.iter(fun m -> printfn "%A : %A" m.Key m.Value)
 
         // print the child segemtns to be 'ON' in progress(Theta)
         let printPreCaculatedTargets() =
@@ -451,8 +430,7 @@ module GraphProgressSupportUtil =
                 calculationTargetsInProgress
                 |> Seq.iter(fun m ->
                     printf "%A : [ " m.Key
-                    m.Value
-                    |> Seq.iter(fun v -> printf "%A; " v)//(v.GetQualifiedName()))
+                    m.Value |> Seq.iter(fun v -> printf "%A; " v)
                     printfn "]"
                 )
 
@@ -473,4 +451,3 @@ module GraphProgressSupportUtil =
         member x.PrintOrigin() = printOrigin()
         member x.PrintPreCaculatedTargets() = printPreCaculatedTargets()
         member x.PrintIndexedChildren() = printIndexedChildren()
-

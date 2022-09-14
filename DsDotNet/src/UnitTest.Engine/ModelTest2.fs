@@ -355,10 +355,15 @@ module ModelTest2 =
             let mutable text = """
 [sys] L = {
     [flow] F = {
-        Main = { T.Cp > T.Cm; }
+        Main = { Cp > Cm; }
+        Main2 = { Cm > Cp; }
         [safety] = {
             Main = {P.F.Sp; P.F.Sm}
             Main2 = {P.F.Sp; P.F.Sm}
+        }
+        [task] = {
+            Cp = {P.F.Vp ~ P.F.Sp}
+            Cm = {P.F.Vm ~ P.F.Sm}
         }
     }
 }
@@ -373,4 +378,6 @@ module ModelTest2 =
             text <- text + sysP + cpus
 
             let builder = new EngineBuilder(text, "Cpu")
+            let model = builder.Model
+            let main = model.FindObject<Segment>("L.F.Main");
             ()

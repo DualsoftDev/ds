@@ -1,6 +1,7 @@
 [sys] L = {
     [flow] F = {
         Main = { T.Cp > T.Cm; }
+        // in-flow safety
         [safety] = {
             Main = {P.F.Sp; P.F.Sm}
             Main2 = {P.F.Sp; P.F.Sm}
@@ -20,6 +21,7 @@
 }
 
 [prop] = {
+    // Global safety
     [ safety ] = {
         L.F.Main = {P.F.Sp; P.F.Sm}
         L.F.Main2 = {P.F.Sp; P.F.Sm}

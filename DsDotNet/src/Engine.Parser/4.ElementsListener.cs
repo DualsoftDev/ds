@@ -79,45 +79,6 @@ partial class ElementsListener : dsBaseListener
         flowOfName = null;
     }
 
-    public override void EnterSafetyBlock([NotNull] SafetyBlockContext context)
-    {
-        var safetyDefs = enumerateChildren<SafetyDefContext>(context);
-        //foreach (var safetyDef in safetyDefs)
-        //{
-        //    var key= findFirstChild(safetyDef, t => t is SafetyKeyContext).GetText();
-        //    var valueHeader = findFirstChild(safetyDef, t => t is SafetyValuesContext);
-        //    var values =
-        //        enumerateChildren<SegmentPathNContext>(valueHeader)
-        //        .Select(ctx => ctx.GetText())
-        //        ;
-        //    Console.WriteLine();
-        //}
-
-        var kvs = (
-            from safetyDef in safetyDefs
-            let key = findFirstChild(safetyDef, t => t is SafetyKeyContext).GetText()
-            let valueHeader = findFirstChild(safetyDef, t => t is SafetyValuesContext)
-            let values = enumerateChildren<SegmentPathNContext>(valueHeader).Select(ctx => ctx.GetText()).ToArray()
-            select (key, values)
-        ).ToDictionary(tpl => tpl.key, tpl => tpl.values)
-            ;
-
-
-
-        switch (context.Parent)
-        {
-            case PropertyBlockContext propBlock:   // global prop safety
-                Console.WriteLine(propBlock.ToString());
-                break;
-            case FlowContext flow:
-                Console.WriteLine(flow.ToString());         // in flow safety
-                break;
-            default:
-                throw new Exception("ERROR");
-        }
-
-        base.EnterSafetyBlock(context);
-    }
 
     override public void EnterListing(ListingContext ctx) { }
 
@@ -139,6 +100,47 @@ partial class ElementsListener : dsBaseListener
 
 
 
+    public override void EnterSafetyBlock([NotNull] SafetyBlockContext ctx)
+    {
+        var safetyDefs = enumerateChildren<SafetyDefContext>(ctx);
+        /*
+         * safety block 을 parsing 해서 key / value 의 dictionary 로 저장
+         * 
+        [safety] = {
+            Main = {P.F.Sp; P.F.Sm}
+            Main2 = {P.F.Sp; P.F.Sm}
+        }
+        => "Main" = {"P.F.Sp"; "P.F.Sm"}
+           "Main2" = {"P.F.Sp"; "P.F.Sm"}
+         */
+        var safetyKvs =
+            from safetyDef in safetyDefs
+            let key = findFirstChild(safetyDef, t => t is SafetyKeyContext).GetText()
+            let valueHeader = enumerateChildren<SafetyValuesContext>(safetyDef).First()
+            let values = enumerateChildren<SegmentPathNContext>(valueHeader).Select(ctx => ctx.GetText()).ToArray()
+            select (key, values)
+            ;
+
+        SegmentBase getKey(string segPath)
+        {
+            // global prop safety
+            if (ctx.Parent is PropertyBlockContext && QpInstanceMap.ContainsKey(segPath))
+                return (SegmentBase)QpInstanceMap[segPath];
+
+            // in flow safety
+            var key = $"{CurrentPath}.{segPath}";
+            if (ctx.Parent is FlowContext && QpInstanceMap.ContainsKey(key))
+                return (SegmentBase)QpInstanceMap[key];
+
+            return null;
+        }
+
+        foreach (var (key, values) in safetyKvs)
+        {
+            var keySegment = getKey(key);
+            keySegment.SafetyConditions = values.Select(safety => (SegmentBase)QpInstanceMap[safety]).ToArray();
+        }
+    }
 
 
     override public void EnterCall(CallContext ctx)

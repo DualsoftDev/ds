@@ -1,5 +1,6 @@
 using System.Threading;
 using System.Reflection;
+using Engine.Common.FS;
 
 namespace Engine;
 
@@ -23,6 +24,8 @@ class Program
         SimpleExceptionHandler.InstallExceptionHandler();
         DllVersionChecker.IsValidExDLL(Assembly.GetExecutingAssembly());
         Global.Logger = Log4NetHelper.PrepareLog4Net("EngineLogger");
+        Log4NetWrapper.SetLogger(Logger);
+
         //Tester.DoSampleTestVps();
         //Tester.DoSampleTest();
         //Tester.DoSampleTestAdvanceReturn();

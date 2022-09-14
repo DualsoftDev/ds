@@ -116,7 +116,7 @@ module Object =
             member x.IsChildExist = mEdges.Any()
             member x.IsChildEmpty = mEdges.IsEmpty
             member x.IsRoot =  x.Parent.IsSome && x.Parent.Value.Location = System
-            member x.UIKey:string =  $"{x.FinalName};{x.Key}"
+            member x.UIKey:string =  $"{x.Name};{x.Key}"
             member val Key : string = "" with get, set
             member val Parent : Seg option = None with get, set
             member val S = "" with get, set
@@ -215,12 +215,17 @@ module Object =
             member x.AddDummySeg(seg) = dummySeg.TryAdd(seg) |> ignore 
 
             member x.NoEdgeSegs = x.NoEdgeSubSegs  |> Seq.cast<Seg>
-            member x.ExportSegs = edges.Values
-                                    |> Seq.collect(fun edge -> edge.Nodes) 
-                                    |> Seq.append x.NoEdgeSubSegs 
-                                    |> Seq.cast<Seg> 
+            member x.ExportSegs = 
+                                    let noEdgeSegs = edges.Values
+                                                    |> Seq.collect(fun edge -> edge.Nodes
+                                                                            |> Seq.collect(fun node -> node.NoEdgeSubSegs))
+                                                    |> Seq.append x.NoEdgeSubSegs 
+                                                    |> Seq.cast<Seg> 
+                                    edges.Values
+                                    |> Seq.collect(fun edge -> edge.Nodes) |> Seq.cast<Seg> 
                                     |> Seq.filter(fun seg -> seg.MEdges.Any()) 
                                     |> Seq.distinctBy(fun seg -> seg.Name)
+                                    |> Seq.append noEdgeSegs
 
             member x.UsedSegs = let children = 
                                     edges.Values.GetNodes()

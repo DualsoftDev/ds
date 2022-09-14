@@ -49,7 +49,6 @@ module ImportModel =
                 if(mySys.AliasSet.Keys.Contains(name))  
                  then mySys.AliasSet.[name].Add( alias)|> ignore
                  else let set = HashSet<string>()
-                      let name =  Util.GetValidName(node.Name)  
                       set.Add(alias)|> ignore
                       mySys.AliasSet.TryAdd(name, set ) |> ignore
 
@@ -193,6 +192,8 @@ module ImportModel =
                             |> Seq.filter(fun child -> child.ExistChildEdge|>not) //엣지 할당 못받은 자식만
                             |> Seq.filter(fun child -> child.IsDummy|>not) 
                             |> Seq.iter(fun child -> 
+                                                updateAlias(child) 
+                                                
                                                 //행위 부모 할당후 
                                                 pSeg.AddSegNoEdge(dicSeg.[child.Key])
                                                 //Flo 상에서 삭제

@@ -27,12 +27,13 @@ class Program
         //Tester.DoSampleTest();
         //Tester.DoSampleTestAdvanceReturn();
         //Tester.DoSampleTestHatOnHat();
-        Tester.DoSampleTestDiamond();
+        //Tester.DoSampleTestDiamond();
         //Tester.DoSampleTestTriangle();
         //Tester.DoSampleTestAddressesAndLayouts();
 
 
         //ParserTest.TestParseSafety();
         //ParserTest.TestParseFlowTask();
+        ParserTest.TestParseStrongCausal();
     }
 }

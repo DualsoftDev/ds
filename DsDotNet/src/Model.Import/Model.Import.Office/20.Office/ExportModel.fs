@@ -27,7 +27,7 @@ module ExportModel =
 
                 (txs |> String.concat ", " ), (rxs |> String.concat ", ") 
 
-            sprintf "\t\t%s\t = {%s\t~\t%s}" callName tx rx
+            sprintf "\t\t\t%s\t = {%s\t~\t%s}" callName tx rx
 
         let addressText(seg:Seg, index) =
             let callPath = seg.ToCallText()
@@ -59,19 +59,15 @@ module ExportModel =
             
         let subEdgeText(seg:Seg) =
             seq {
-                yield sprintf "\t\t%s = {"(seg.ToTextInFlow())
                 let mergeEdges = mergeEdges  seg.MEdges
                 for srcs, edge, tgt in mergeEdges do
                     yield sprintf "\t\t\t%s %s %s;"  (srcs |> String.concat ", ") (edge.Causal.ToText()) (tgt)
-                yield sprintf "\t\t}"
             }
 
         let subNodeText(seg:Seg) =
             seq {
-                yield sprintf "\t\t%s = {"(seg.ToTextInFlow())
                 for segSub in seg.NoEdgeSegs do
                     yield sprintf "\t\t\t%s;" (segSub.ToTextInFlow())
-                yield sprintf "\t\t}"
             }
 
         let safetyText(flow:Flo) =
@@ -97,8 +93,12 @@ module ExportModel =
         let segmentText(segs:Seg seq) = 
             seq {
                 for seg in segs do
-                    if(seg.MEdges.Any())     then yield! subEdgeText (seg) 
-                    if(seg.NoEdgeSegs.Any()) then yield! subNodeText (seg) 
+                    if(seg.MEdges.Any() || seg.NoEdgeSegs.Any())    
+                    then 
+                        yield sprintf "\t\t%s = {"(seg.ToTextInFlow())
+                        yield! subEdgeText (seg) 
+                        yield! subNodeText (seg) 
+                        yield sprintf "\t\t}"
             } 
         let mySystem = 
             seq {
@@ -111,16 +111,17 @@ module ExportModel =
                     let flows = sys.RootFlow() 
                     for flow in flows do
                         //Flow 출력
+
                         yield sprintf "\t[flow] %s = { \t" (flow.ToText())
-                        yield! safetyText flow
+                        if(flow.Safeties.Any()) then yield! safetyText flow 
                         yield! edgeText    (flow.Edges)
                         yield! segmentText (flow.ExportSegs)
-                        yield "\t}"
                         //Task 출력
-                        yield sprintf "\t[task] %s_T = {" (flow.ToText())
+                        yield sprintf "\t\t[task] = {" 
                         for callSeg in flow.CallSegs() do
                             yield callText(callSeg)
 
+                        yield "\t\t}"
                         yield "\t}"
 
 
@@ -213,10 +214,17 @@ module ExportModel =
       
       
         let exSystem = 
-            let getTXs (segs: Seg seq) = 
+            let getTRXs (segs: Seg seq ,skip:NodeCausal, bReset:bool) = 
                 seq {
                         for seg in segs do
-                        yield sprintf "%s.TX" (seg.ToCallText()) 
+                            for index in [|1..seg.MaxCnt|] do
+                                let causal, text = seg.PrintfTRX(index)
+                                if(causal = skip|>not)
+                                then
+                                    let text = (text.Replace("TR", (if(skip = TX) then "RX" else "TX")))
+                                    if(bReset) 
+                                    then yield sprintf "%s.%s" (seg.ToCallText()) text
+                                    else yield sprintf "%s"  text
                 }|> String.concat ", "
                 
             seq {
@@ -232,7 +240,10 @@ module ExportModel =
                         for calls in flow.Interlockedges do
                             for call in calls  do
                                 let resets = calls |> Seq.filter(fun seg -> seg = call|>not)
-                                yield sprintf "\t[flow] %s = { TX > RX <| %s; }" (call.ToCallText()) (getTXs resets)
+                                let txs =  getTRXs ([call], RX ,false)
+                                let rxs =  getTRXs ([call], TX, false)
+                                let resetTxs =  getTRXs (resets, RX, true)
+                                yield sprintf "\t[flow] %s = { %s > %s <| %s; }" (call.ToCallText()) txs rxs resetTxs
                         // Call Without InterLock
                         for call in flow.CallWithoutInterLock() do
                             yield sprintf "\t[flow] %s = { TX > RX }" (call.ToCallText()) 

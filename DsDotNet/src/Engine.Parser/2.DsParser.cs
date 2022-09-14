@@ -2,7 +2,7 @@ namespace Engine.Parser;
 
 class DsParser
 {
-    public static dsParser FromDocument(string text)
+    public static (dsParser, ParserError[]) FromDocument(string text, bool throwOnError=true)
     {
         var str = new AntlrInputStream(text);
         System.Console.WriteLine(text);
@@ -10,9 +10,14 @@ class DsParser
         var tokens = new CommonTokenStream(lexer);
         var parser = new dsParser(tokens);
 
-        //var listener_lexer = new ErrorListener<int>();
-        //var listener_parser = new ErrorListener<IToken>();
-        return parser;
+        var listener_lexer = new ErrorListener<int>(throwOnError);
+        var listener_parser = new ErrorListener<IToken>(throwOnError);
+        lexer.AddErrorListener(listener_lexer);
+        parser.AddErrorListener(listener_parser);
+        var tree = parser.program();
+        var errors = listener_lexer.Errors.Concat(listener_parser.Errors).ToArray();
+
+        return (parser, errors);
     }
 
     public static List<T> enumerateChildren<T>(IParseTree from, bool includeMe=false, Func<IParseTree, bool> predicate = null ) where T : IParseTree

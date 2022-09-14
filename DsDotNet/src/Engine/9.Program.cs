@@ -1,9 +1,6 @@
-using System.IO;
-using System.Configuration;
-using Engine.Common.FS;
 using System.Threading;
 using System.Reflection;
-using System.Windows.Forms;
+using Engine.Common.FS;
 
 namespace Engine;
 
@@ -27,16 +24,19 @@ class Program
         SimpleExceptionHandler.InstallExceptionHandler();
         DllVersionChecker.IsValidExDLL(Assembly.GetExecutingAssembly());
         Global.Logger = Log4NetHelper.PrepareLog4Net("EngineLogger");
+        Log4NetWrapper.SetLogger(Logger);
+
         //Tester.DoSampleTestVps();
         //Tester.DoSampleTest();
         //Tester.DoSampleTestAdvanceReturn();
         //Tester.DoSampleTestHatOnHat();
-        Tester.DoSampleTestDiamond();
+        //Tester.DoSampleTestDiamond();
         //Tester.DoSampleTestTriangle();
         //Tester.DoSampleTestAddressesAndLayouts();
 
 
         //ParserTest.TestParseSafety();
         //ParserTest.TestParseFlowTask();
+        ParserTest.TestParseStrongCausal();
     }
 }

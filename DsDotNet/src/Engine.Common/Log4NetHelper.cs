@@ -4,7 +4,6 @@ using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Engine.Common.FS;
 using log4net;
 using log4net.Appender;
 using log4net.Core;
@@ -65,7 +64,6 @@ public class Log4NetHelper
         Logger.Info($"Starting Logging.");
 
         Log4NetHelper.Logger = Logger;
-        Log4NetWrapper.SetLogger(Logger);
         return Logger;
 
         //var repo = (log4net.Repository.Hierarchy.Hierarchy)log4net.LogManager.GetRepository();

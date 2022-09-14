@@ -1,0 +1,6 @@
+[sys] L = {
+    [task] T = {
+        Cp = {P.F.Vp.X.Y ~ P.F.Sp}
+        Cm = {P.F.Vm ~ P.F.Sm}
+    }
+}

@@ -49,6 +49,8 @@ public abstract partial class SegmentBase : ChildFlow, IVertex, ICoin, IWallet, 
 
     internal Tuple<string, string, string> Addresses { get; set; } = new Tuple<string, string, string>(null, null, null);
 
+    public SegmentBase[] SafetyConditions { get; set; }
+
     public bool IsResetFirst { get; internal set; } = true;
 
     public virtual void Epilogue()

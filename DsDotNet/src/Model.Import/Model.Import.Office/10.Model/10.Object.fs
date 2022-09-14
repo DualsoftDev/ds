@@ -9,6 +9,7 @@ open System.Collections.Generic
 open DocumentFormat.OpenXml
 open Engine.Base
 open Engine.Base.DsType
+open Engine.Parser
 
 [<AutoOpen>]
 module Object =
@@ -58,21 +59,21 @@ module Object =
             member val CountTX = 0 with get, set
             member val CountRX = 0 with get, set
             member x.OwnerFlow = ownerFlow
-            member x.DisplayName  = if(this.Alias.IsSome) then this.Alias.Value else name
-            
-            ///공백은'_' 로 일괄 변환한다.
+            ///Alias 는 무조건 "" 로 이름 앞뒤에 배치
+            member x.FinalName  = if(this.Alias.IsSome) then $"\"{this.Alias.Value}\"" else x.ToText()
             ///금칙 문자 및 선두숫자가 있으면 "" 로 이름 앞뒤에 배치한다.
-            member x.ToText() =  let _name =  this.Name.Replace(" ","_") 
-                                 if(IsInvalidName(_name))  then $"\"{_name}\"" else _name
+            member x.ToText() =  Util.GetValidName(name) 
+            member x.ToCallText() = let call = sprintf "%s_%s"  (ownerFlow.TrimStart('\"').TrimEnd('\"')) name
+                                    Util.GetValidName(call)
 
             member x.ToTextInFlow() =  match nodeCausal with
                                          |MY         -> x.ToText()
-                                         |TR |TX |RX -> sprintf "%s_T.%s" x.OwnerFlow (x.ToText())
-                                         |EX         -> sprintf "EX.%s.TR" (x.ToText())
+                                         |TR |TX |RX -> sprintf "%s" (x.FinalName)
+                                         |EX         -> sprintf "EX.%s.TR" (x.FinalName)
             
-            member x.ToCallText() = let callName = sprintf "%s_%s"   this.OwnerFlow (x.Name.Replace(" ","_")) 
-                                    if(IsInvalidName(callName))  then $"\"{callName}\"" else callName
-            member x.ToLayOutPath() = sprintf "%s.%s" baseSystem.Name (this.ToTextInFlow())
+
+            member x.ToLayOutPath() = sprintf "%s.%s" baseSystem.Name (this.ToText())
+            //member x.ToExSysText()  = sprintf "%s.%s" baseSystem.Name (this.ToText())
 
             member x.Update(nodeKey, nodeIdValue, nodeAlias, nodeCntTX, nodeCntRX) = 
                         this.Key <- nodeKey
@@ -115,7 +116,7 @@ module Object =
             member x.IsChildExist = mEdges.Any()
             member x.IsChildEmpty = mEdges.IsEmpty
             member x.IsRoot =  x.Parent.IsSome && x.Parent.Value.Location = System
-            member x.UIKey:string =  $"{x.DisplayName};{x.Key}"
+            member x.UIKey:string =  $"{x.Name};{x.Key}"
             member val Key : string = "" with get, set
             member val Parent : Seg option = None with get, set
             member val S = "" with get, set
@@ -129,7 +130,7 @@ module Object =
            
                 x.AddMEdge(edge)
 
-            member x.NoEdgeSegs = x.NoEdgeSubSegs |> Seq.cast<Seg> |> Seq.sortBy(fun s -> s.DisplayName)
+            member x.NoEdgeSegs = x.NoEdgeSubSegs |> Seq.cast<Seg> |> Seq.sortBy(fun s -> s.FinalName)
 
      
 
@@ -185,9 +186,7 @@ module Object =
                                 then update (edge);getLink (edge.Source, find, full))
 
             member x.Name = name
-            member x.ToText() =  let _name =  x.Name.Replace(" ","_") 
-                                 if(IsInvalidName(_name))  then $"\"{_name}\"" else _name
-
+            member x.ToText() =  name
             member x.Page = index
 
             member x.Edges = edges.Values |> Seq.sortBy(fun edge -> edge.Source.Name)
@@ -216,12 +215,17 @@ module Object =
             member x.AddDummySeg(seg) = dummySeg.TryAdd(seg) |> ignore 
 
             member x.NoEdgeSegs = x.NoEdgeSubSegs  |> Seq.cast<Seg>
-            member x.ExportSegs = edges.Values
-                                    |> Seq.collect(fun edge -> edge.Nodes) 
-                                    |> Seq.append x.NoEdgeSubSegs 
-                                    |> Seq.cast<Seg> 
+            member x.ExportSegs = 
+                                    let noEdgeSegs = edges.Values
+                                                    |> Seq.collect(fun edge -> edge.Nodes
+                                                                            |> Seq.collect(fun node -> node.NoEdgeSubSegs))
+                                                    |> Seq.append x.NoEdgeSubSegs 
+                                                    |> Seq.cast<Seg> 
+                                    edges.Values
+                                    |> Seq.collect(fun edge -> edge.Nodes) |> Seq.cast<Seg> 
                                     |> Seq.filter(fun seg -> seg.MEdges.Any()) 
                                     |> Seq.distinctBy(fun seg -> seg.Name)
+                                    |> Seq.append noEdgeSegs
 
             member x.UsedSegs = let children = 
                                     edges.Values.GetNodes()

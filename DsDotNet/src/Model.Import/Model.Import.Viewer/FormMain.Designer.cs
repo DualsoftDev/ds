@@ -45,6 +45,7 @@ namespace Dual.Model.Import
             this.richTextBox_Debug = new System.Windows.Forms.RichTextBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.splitter1 = new System.Windows.Forms.Splitter();
+            this.button_comfile = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -218,6 +219,7 @@ namespace Dual.Model.Import
             // 
             // splitContainer4.Panel2
             // 
+            this.splitContainer4.Panel2.Controls.Add(this.button_comfile);
             this.splitContainer4.Panel2.Controls.Add(this.button_TestStart);
             this.splitContainer4.Panel2.Controls.Add(this.button_TestORG);
             this.splitContainer4.Panel2.Controls.Add(this.button_ClearLog);
@@ -265,6 +267,18 @@ namespace Dual.Model.Import
             this.splitter1.Size = new System.Drawing.Size(1373, 3);
             this.splitter1.TabIndex = 22;
             this.splitter1.TabStop = false;
+            // 
+            // button_comfile
+            // 
+            this.button_comfile.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_comfile.Enabled = false;
+            this.button_comfile.Location = new System.Drawing.Point(1259, 110);
+            this.button_comfile.Name = "button_comfile";
+            this.button_comfile.Size = new System.Drawing.Size(85, 23);
+            this.button_comfile.TabIndex = 2;
+            this.button_comfile.Text = "DS언어 체크";
+            this.button_comfile.UseVisualStyleBackColor = true;
+            this.button_comfile.Click += new System.EventHandler(this.button_comfile_Click);
             // 
             // FormMain
             // 
@@ -318,6 +332,7 @@ namespace Dual.Model.Import
         private System.Windows.Forms.Button button_CreateExcel;
         private System.Windows.Forms.Button button_TestStart;
         private System.Windows.Forms.Button button_TestORG;
+        private System.Windows.Forms.Button button_comfile;
     }
 }
 

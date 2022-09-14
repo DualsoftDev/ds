@@ -10,7 +10,7 @@ module Text =
     [<Literal>] 
     let TextREdge       = "|>"
     [<Literal>] 
-    let TextRPush       = "|>>"
+    let TextRPush       = "||>"
     [<Literal>] 
     let TextSReset      = "=>"
     [<Literal>] 

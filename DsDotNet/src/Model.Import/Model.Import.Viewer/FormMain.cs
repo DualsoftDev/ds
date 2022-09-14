@@ -1,4 +1,6 @@
+using Engine;
 using Engine.Common;
+using Engine.Core;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -113,7 +115,7 @@ namespace Dual.Model.Import
                 splitContainer1.Panel1Collapsed = false;
                 splitContainer2.Panel2Collapsed = false;
                 button_OpenFolder.Visible = false;
-
+                
                 this.Size = new Size(1600, 1000);
                 HelpLoad();
                 Task.Run(() => { ImportPPT(); });
@@ -172,6 +174,19 @@ namespace Dual.Model.Import
             await SimSeg.TestStart(_model);
             button_TestORG.Enabled = true;
             button_TestStart.Enabled = true;
+        }
+
+        private void button_comfile_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var engine = new EngineBuilder(richTextBox_ds.Text, $"Cpu_MY").Engine;
+            }
+
+            catch (Exception ex)
+            {
+                MSGError(ex.Message);
+            }
         }
     }
 }

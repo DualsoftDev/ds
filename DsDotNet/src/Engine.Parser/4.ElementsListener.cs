@@ -219,7 +219,7 @@ partial class ElementsListener : dsBaseListener
                         targetName = n;
                         break;
                     default:
-                        throw new Exception("ERROR");
+                        throw new ParserException($"ERROR: {targetName} length error.", ctx);
                 }
 
                 object target = null;
@@ -249,7 +249,7 @@ partial class ElementsListener : dsBaseListener
                         QpInstanceMap.Add(fqdn, child);
                         break;
                     default:
-                        throw new Exception($"ERRROR: Unknown target for {targetName}");
+                        throw new ParserException($"ERRROR: Unknown target for {targetName}", ctx);
                 }
             }
         }
@@ -278,7 +278,7 @@ partial class ElementsListener : dsBaseListener
 
         var layouts = enumerateChildren<LayoutsContext>(ctx).ToArray();
         if (layouts.Length > 1)
-            throw new Exception("Layouts block should exist only once");
+            throw new ParserException("Layouts block should exist only once", ctx);
 
         var positionDefs = enumerateChildren<PositionDefContext>(ctx).ToArray();
         foreach(var posiDef in positionDefs)
@@ -298,7 +298,7 @@ partial class ElementsListener : dsBaseListener
         //}
         var addresses = enumerateChildren<AddressesContext>(ctx).ToArray();
         if (addresses.Length > 1)
-            throw new Exception("Layouts block should exist only once");
+            throw new ParserException("Layouts block should exist only once", ctx);
 
         var addressDefs = enumerateChildren<AddressDefContext>(ctx).ToArray();
         foreach (var addrDef in addressDefs)

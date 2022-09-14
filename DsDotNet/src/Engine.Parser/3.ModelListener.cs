@@ -77,7 +77,7 @@ class ModelListener : dsBaseListener
                     QpInstanceMap.Add(fqdn, call);
                     break;
                 default:
-                    throw new Exception("ERROR");
+                    throw new ParserException("ERROR: CallPrototype expected.", ctx);
             }
         }
 

@@ -1,3 +1,5 @@
+using Engine.Base;
+
 namespace Engine.Core;
 
 public abstract class Flow : Named, IWallet
@@ -52,6 +54,7 @@ public abstract class Flow : Named, IWallet
 public class RootFlow : Flow
 {
     public DsSystem System { get; set; }
+    public FlowTask FlowTask { get; set; }
     public string QualifiedName => $"{System.Name}_{Name}";
     public RootFlow(Cpu cpu, string name, DsSystem system)
         : base(cpu, name)
@@ -107,48 +110,35 @@ public static class FlowExtension
     public static IEnumerable<ICoin> CollectIsolatedCoins(this Flow flow, bool bySetEdge=true, bool byResetEdge=false) =>
         flow.CollectIsolatedVertex(bySetEdge, byResetEdge).OfType<ICoin>();
 
-    struct Causal
+    public class Causal
     {
-        IVertex Source;
-        IVertex Target;
-        bool IsReset;
-        public Causal(IVertex source, IVertex target, bool isReset)
+        public IVertex Source;
+        public IVertex Target;
+        public bool IsReset => EdgeCausal.IsReset;
+        public DsType.EdgeCausal EdgeCausal;
+        
+        public Causal(IVertex source, IVertex target, DsType.EdgeCausal edgeCausal)
         {
             Source = source;
             Target = target;
-            IsReset = isReset;
+            EdgeCausal = edgeCausal;
         }
 
         public override string ToString()
         {
-            var op = IsReset ? "|>" : ">";
-            return $"{Source} {op} {Target}";
+            return $"{Source} {EdgeCausal.ToText()} {Target}";
         }
     }
 
-    static IEnumerable<Causal> CollectArrow(this Edge edge)
+    public static IEnumerable<Causal> CollectArrow(this Edge edge)
     {
-        bool isReset(string causalOperator)
-        {
-            switch (causalOperator)
-            {
-                case ">":
-                case ">>":
-                    return false;
-                case "|>":
-                case "|>>":
-                    return true;
-                default:
-                    throw new Exception("ERROR");
-            }
-        }
         var e = edge;
         foreach (var s in e.Sources)
-            yield return new Causal(s, e.Target, isReset(e.Operator))
+            yield return new Causal(s, e.Target, DsType.EdgeCausalType(e.Operator))
                 ;
     }
 
-    static IEnumerable<Causal> CollectArrow(this Flow flow)
+    public static IEnumerable<Causal> CollectArrow(this Flow flow)
     {
         foreach (var e in flow.Edges)
             foreach (var c in e.CollectArrow())

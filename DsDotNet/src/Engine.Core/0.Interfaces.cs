@@ -1,12 +1,5 @@
 namespace Engine.Core;
 
-public enum Status4
-{
-    Ready = 0,
-    Going,
-    Finished,
-    Homing
-}
 
 public interface IVertex : IBit { }
 public interface IEdge : IBit { }

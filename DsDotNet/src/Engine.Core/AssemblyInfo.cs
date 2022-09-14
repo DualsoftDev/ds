@@ -19,6 +19,6 @@ using System.Runtime.InteropServices;
 [assembly: InternalsVisibleTo("Engine")]
 [assembly: InternalsVisibleTo("Engine.Runner")]
 [assembly: InternalsVisibleTo("Engine.Parser")]
-[assembly: InternalsVisibleTo("Engine.Opc")]
+//[assembly: InternalsVisibleTo("Control.OPC")]
 //[assembly: InternalsVisibleTo("Engine.Graph")]
 [assembly: InternalsVisibleTo("UnitTest.Engine")]

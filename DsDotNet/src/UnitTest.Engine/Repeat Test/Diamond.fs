@@ -1,7 +1,6 @@
 namespace UnitTest.Engine.RepeatTest
 
 
-open Xunit
 open Engine
 open Engine.Core
 open System.Linq
@@ -10,8 +9,12 @@ open Xunit.Abstractions
 open UnitTest.Engine
 open Engine.Common
 open System.Diagnostics
+open Engine.Base
+open NUnit.Framework
 
 type Diamond(output1:ITestOutputHelper) =
+    do Fixtures.SetUpTest()
+    
     let createCylinder = Tester.CreateCylinder
     let address = """
 [addresses] = {
@@ -65,7 +68,7 @@ type Diamond(output1:ITestOutputHelper) =
                 .OfType<TagA>()
                 .Any(fun t -> not <| t.Address.IsNullOrEmpty())
                 
-        let opc = engine.Opc
+        let opc = engine.Data
         if (hasAddress) then
             // initial condition
             opc.Write("EndActual_A_F_Sm", true)
@@ -96,9 +99,8 @@ type Diamond(output1:ITestOutputHelper) =
                     ) |> ignore
 
 
-    interface IClassFixture<Fixtures.DemoFixture>
 
-    [<Fact>]
+    [<Test>]
     member __.``Diamond Test`` () =
         logInfo "============== Diamond Test"
         Log4NetHelper.ChangeLogLevel(log4net.Core.Level.Error)
@@ -107,14 +109,14 @@ type Diamond(output1:ITestOutputHelper) =
         Program.Engine <- engine
         engine.Run() |> ignore
 
-        let opc = engine.Opc
+        let opc = engine.Data
 
         let startTag = "StartPlan_L_F_Main"
         let resetTag = "ResetPlan_L_F_Main"
         let mutable counter = 0
         Global.SegmentStatusChangedSubject.Subscribe(fun ssc ->
             if ssc.Segment.QualifiedName = "L_F_Main" then
-                if ssc.Status = Status4.Finished then
+                if ssc.Status = DsType.Status4.Finish then
                     counter <- counter + 1
                     if counter % 100 = 0 then
                         System.Console.WriteLine($"[{counter}] After finishing Main segment")

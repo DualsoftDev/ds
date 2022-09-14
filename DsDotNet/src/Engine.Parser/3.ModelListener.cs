@@ -21,36 +21,36 @@ class ModelListener : dsBaseListener
         parser.Reset();
     }
 
-    override public void EnterSystem(dsParser.SystemContext ctx)
+    override public void EnterSystem(SystemContext ctx)
     {
         var name = ctx.id().GetText();
         _system = _model.Systems.First(s => s.Name == name);
     }
-    override public void ExitSystem(dsParser.SystemContext ctx) { this._system = null; }
+    override public void ExitSystem(SystemContext ctx) { this._system = null; }
 
-    override public void EnterTask(dsParser.TaskContext ctx)
+    override public void EnterSysTask(SysTaskContext ctx)
     {
         var name = ctx.id().GetText();
         _task = _system.Tasks.First(t => t.Name == name);
         Trace.WriteLine($"Task: {name}");
     }
-    override public void ExitTask(dsParser.TaskContext ctx) { _task = null; }
+    override public void ExitSysTask(SysTaskContext ctx) { _task = null; }
 
-    override public void EnterFlow(dsParser.FlowContext ctx)
+    override public void EnterFlow(FlowContext ctx)
     {
         var flowName = ctx.id().GetText();
         _rootFlow = _system.RootFlows.First(f => f.Name == flowName);
     }
-    override public void ExitFlow(dsParser.FlowContext ctx) { _rootFlow = null; }
+    override public void ExitFlow(FlowContext ctx) { _rootFlow = null; }
 
 
 
-    override public void EnterParenting(dsParser.ParentingContext ctx)
+    override public void EnterParenting(ParentingContext ctx)
     {
         var name = ctx.id().GetText();
         _parenting = (SegmentBase)QpInstanceMap[$"{CurrentPath}.{name}"];
     }
-    override public void ExitParenting(dsParser.ParentingContext ctx) { _parenting = null; }
+    override public void ExitParenting(ParentingContext ctx) { _parenting = null; }
     #endregion Boiler-plates
 
 
@@ -61,11 +61,10 @@ class ModelListener : dsBaseListener
 
 
 
-    override public void EnterCausalPhrase(dsParser.CausalPhraseContext ctx)
+    override public void EnterCausalPhrase(CausalPhraseContext ctx)
     {
         var names =
-            DsParser.enumerateChildren<dsParser.SegmentContext>(
-                ctx, false, r => r is dsParser.SegmentContext)
+            enumerateChildren<SegmentContext>(ctx)
             .Select(segCtx => segCtx.GetText())
             ;
 
@@ -117,18 +116,18 @@ class ModelListener : dsBaseListener
 
 
 
-    override public void EnterCausals(dsParser.CausalsContext ctx)
+    override public void EnterCausals(CausalsContext ctx)
     {
         Trace.WriteLine($"Causals: {ctx.GetText()}");
     }
-    //override public void ExitCausals(dsParser.CausalsContext ctx) {}
+    //override public void ExitCausals(CausalsContext ctx) {}
 
 
 
 
 
 
-    override public void ExitProgram(dsParser.ProgramContext ctx) {}
+    override public void ExitProgram(ProgramContext ctx) {}
 
 
     // ParseTreeListener<> method

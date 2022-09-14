@@ -1,30 +1,29 @@
-﻿using Model.Import.Office;
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using static Model.Import.Office.Model;
 using static Model.Import.Office.Object;
-using static Model.Import.Office.Type;
+using static Engine.Base.DsType;
 
 namespace Dual.Model.Import
 {
-    public static class SimSegment
+    public static class SimSeg
     {
         static readonly List<NodeCausal> mys = new List<NodeCausal>() { NodeCausal.MY };
-        static readonly List<NodeCausal> notMys = new List<NodeCausal>() { NodeCausal.EX, NodeCausal.TR, NodeCausal.TX, NodeCausal.RX, NodeCausal.DUMMY };
+        static readonly List<NodeCausal> notMys = new List<NodeCausal>() { NodeCausal.EX, NodeCausal.TR, NodeCausal.TX, NodeCausal.RX };
         static bool org = false;
-        static List<NodeCausal> AllSeg {
+        static List<NodeCausal> AllSeg
+        {
             get
             {
                 var obj = new List<NodeCausal>();
                 obj.AddRange(mys); obj.AddRange(notMys);
                 return obj;
-            }}
+            }
+        }
 
 
-        private static async Task Test(IEnumerable<Segment> rootSegs, Status status, List<NodeCausal> showList)
+        private static async Task Test(IEnumerable<Seg> rootSegs, Status4 status, List<NodeCausal> showList)
         {
             foreach (var seg in rootSegs)
             {
@@ -43,29 +42,29 @@ namespace Dual.Model.Import
         {
             if (model == null) return;
 
-            var rootSegs = model.ActiveSys.RootSegments();
-            var notRootSegs = model.ActiveSys.NotRootSegments();
+            var rootSegs = model.ActiveSys.RootSegs();
+            var notRootSegs = model.ActiveSys.NotRootSegs();
             await Task.Run(async () =>
             {
-                await Test(rootSegs, Status.H, AllSeg);
-                await Test(notRootSegs, Status.H, AllSeg);
+                await Test(rootSegs, Status4.Homing, AllSeg);
+                await Test(notRootSegs, Status4.Homing, AllSeg);
                 await Task.Delay(10);
 
-                await Test(notRootSegs, Status.R, AllSeg);
+                await Test(notRootSegs, Status4.Ready, AllSeg);
                 await Task.Delay(10);
-                await Test(rootSegs, Status.R, notMys);
+                await Test(rootSegs, Status4.Ready, notMys);
                 await Task.Delay(10);
-                await Test(rootSegs, Status.R, mys);
+                await Test(rootSegs, Status4.Ready, mys);
             });
 
             org = true;
         }
-        private static List<Segment> getHeads(Dictionary<Segment, Segment> dic, Dictionary<MEdge, MEdge> dicEdge)
+        private static List<Seg> getHeads(Dictionary<Seg, Seg> dic, Dictionary<MEdge, MEdge> dicEdge)
         {
-            List<Segment> tgts = dicEdge.Values.Select(edge => edge.Target).Distinct().ToList();
-            List<Segment> heads = dic.Values.Where(s => !tgts.Contains(s)).ToList();
+            List<Seg> tgts = dicEdge.Values.Select(edge => edge.Target).Distinct().ToList();
+            List<Seg> heads = dic.Values.Where(s => !tgts.Contains(s)).ToList();
             List<MEdge> findEdges = dicEdge.Values
-              //  .Where(edge => edge.Causal.IsStart)
+                //  .Where(edge => edge.Causal.IsStart)
                 .Where(edge => heads.Contains(edge.Source)).ToList();
 
             foreach (var seg in heads) dic.Remove(seg);
@@ -75,21 +74,21 @@ namespace Dual.Model.Import
         }
 
 
-        private static async Task runSegment(IEnumerable<Segment> segs, IEnumerable<MEdge> runEdges)
+        private static async Task runSeg(IEnumerable<Seg> segs, IEnumerable<MEdge> runEdges)
         {
             var dicSeg = segs.ToDictionary(d => d);
             var dicEdge = runEdges.ToDictionary(d => d);
 
             await Task.Run(async () =>
             {
-                foreach (var seg in runEdges.SelectMany(s=>s.Nodes).Distinct())
+                foreach (var seg in runEdges.SelectMany(s => s.Nodes).Distinct())
                 {
                     if (dicSeg.Count() == 0) break;
-                    List<Segment> heads = getHeads(dicSeg, dicEdge);
+                    List<Seg> heads = getHeads(dicSeg, dicEdge);
 
-                    await Test(heads, Status.G, AllSeg);
+                    await Test(heads, Status4.Going, AllSeg);
                     await Task.Delay(50);
-                    await Test(heads, Status.F, AllSeg);
+                    await Test(heads, Status4.Finish, AllSeg);
                 }
             });
         }
@@ -99,26 +98,26 @@ namespace Dual.Model.Import
             if (model == null) return;
             if (!org) await TestORG(model);
 
-            var dicSeg  = model.ActiveSys.RootSegments().ToDictionary(d => d);
+            var dicSeg = model.ActiveSys.RootSegs().ToDictionary(d => d);
             var dicEdge = model.ActiveSys.RootEdges().ToDictionary(d => d);
 
             await Task.Run(async () =>
             {
                 List<MEdge> edges = model.ActiveSys.RootEdges().ToList();
-                foreach (var cont in edges.SelectMany(s=>s.Nodes).Distinct())
+                foreach (var cont in edges.SelectMany(s => s.Nodes).Distinct())
                 {
                     if (dicSeg.Count() == 0) break;
-                  
-                    List<Segment> heads = getHeads(dicSeg, dicEdge);
-                    await Test(heads, Status.G, AllSeg);
+
+                    List<Seg> heads = getHeads(dicSeg, dicEdge);
+                    await Test(heads, Status4.Going, AllSeg);
                     await Task.Delay(50);
 
                     foreach (var seg in heads)
                     {
-                        await runSegment(seg.ChildSegs, seg.MEdges);
+                        await runSeg(seg.ChildSegs, seg.MEdges);
                     }
 
-                    await Test(heads, Status.F, AllSeg);
+                    await Test(heads, Status4.Finish, AllSeg);
                 }
             });
 

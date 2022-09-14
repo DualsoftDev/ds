@@ -1,3 +1,5 @@
+using Engine.Base;
+
 namespace Engine.Core;
 
 /// <summary> Segment 내에 배치된 `Child`.  SubCall 또는 ExSegmentCall 를 Coin 으로 갖는 wrapper</summary>
@@ -12,7 +14,7 @@ public class Child : Named, IVertex, ICoin
     public bool IsCall => Coin is SubCall;
     public bool IsAlias { get; set; }
     // 부모가 바라본 child 상태
-    public Status4? Status
+    public DsType.Status4 Status
     {
         get => Parent.ChildStatusMap[this].Item2;
         set
@@ -20,7 +22,7 @@ public class Child : Named, IVertex, ICoin
             var (flipped, oldState) = Parent.ChildStatusMap[this];
             if (oldState != value)
             {
-                Global.ChildStatusChangedSubject.OnNext(new ChildStatusChange(this, value.Value, flipped));
+                Global.ChildStatusChangedSubject.OnNext(new ChildStatusChange(this, value, flipped));
                 Parent.ChildStatusMap[this] = (Parent.ChildStatusMap[this].Item1, value);
             }
         }

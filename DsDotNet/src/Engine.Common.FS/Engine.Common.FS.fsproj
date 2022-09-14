@@ -8,6 +8,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<Compile Include="Event\Process.fs" />
+		<Compile Include="Event\Message.fs" />
 		<Compile Include="Prelude.fs" />
 		<None Include="FSharpFSIs\Microsoft.FSharp.Collections\ArrayModule.fsi" />
 		<None Include="FSharpFSIs\Microsoft.FSharp.Collections\ListModule.fsi" />
@@ -53,13 +55,26 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <PackageReference Include="System.Reactive" Version="5.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <Reference Include="log4net">
 	    <HintPath>..\..\exLib\log4net.dll</HintPath>
 	  </Reference>
-	  <Reference Include="System.Configuration" />
-	  <Reference Include="YC.QuickGraph">
-	    <HintPath>..\..\exLib\YC.QuickGraph.dll</HintPath>
+	  <Reference Include="QuickGraph">
+	    <HintPath>..\..\exLib\QuickGraph.dll</HintPath>
 	  </Reference>
+	  <Reference Include="QuickGraph.Data">
+	    <HintPath>..\..\exLib\QuickGraph.Data.dll</HintPath>
+	  </Reference>
+	  <Reference Include="QuickGraph.Graphviz">
+	    <HintPath>..\..\exLib\QuickGraph.Graphviz.dll</HintPath>
+	  </Reference>
+	  <Reference Include="QuickGraph.Serialization">
+	    <HintPath>..\..\exLib\QuickGraph.Serialization.dll</HintPath>
+	  </Reference>
+	  <Reference Include="System.Configuration" />
 	</ItemGroup>
 
 </Project>

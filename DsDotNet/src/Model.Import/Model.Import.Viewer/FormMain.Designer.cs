@@ -29,7 +29,6 @@ namespace Dual.Model.Import
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMain));
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.xtraTabControl_My = new System.Windows.Forms.TabControl();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
@@ -39,9 +38,9 @@ namespace Dual.Model.Import
             this.pictureBox_xls = new System.Windows.Forms.PictureBox();
             this.button_copy = new System.Windows.Forms.Button();
             this.richTextBox_ds = new System.Windows.Forms.RichTextBox();
-            this.splitContainer4 = new System.Windows.Forms.SplitContainer();
             this.button_TestStart = new System.Windows.Forms.Button();
             this.button_TestORG = new System.Windows.Forms.Button();
+            this.splitContainer4 = new System.Windows.Forms.SplitContainer();
             this.button_ClearLog = new System.Windows.Forms.Button();
             this.richTextBox_Debug = new System.Windows.Forms.RichTextBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
@@ -141,6 +140,7 @@ namespace Dual.Model.Import
             // 
             // pictureBox_ppt
             // 
+            this.pictureBox_ppt.Image = global::Model.Import.Viewer.Properties.Resources.IMPORT_PPT;
             this.pictureBox_ppt.Location = new System.Drawing.Point(26, 10);
             this.pictureBox_ppt.Name = "pictureBox_ppt";
             this.pictureBox_ppt.Size = new System.Drawing.Size(418, 97);
@@ -150,6 +150,7 @@ namespace Dual.Model.Import
             // 
             // pictureBox_xls
             // 
+            this.pictureBox_xls.Image = global::Model.Import.Viewer.Properties.Resources.IMPORT_XLS;
             this.pictureBox_xls.Location = new System.Drawing.Point(26, 113);
             this.pictureBox_xls.Name = "pictureBox_xls";
             this.pictureBox_xls.Size = new System.Drawing.Size(418, 98);
@@ -161,9 +162,9 @@ namespace Dual.Model.Import
             // button_copy
             // 
             this.button_copy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_copy.Location = new System.Drawing.Point(436, 13);
+            this.button_copy.Location = new System.Drawing.Point(426, 13);
             this.button_copy.Name = "button_copy";
-            this.button_copy.Size = new System.Drawing.Size(75, 34);
+            this.button_copy.Size = new System.Drawing.Size(85, 34);
             this.button_copy.TabIndex = 1;
             this.button_copy.Text = "클립보드 모델복사";
             this.button_copy.UseVisualStyleBackColor = true;
@@ -179,6 +180,30 @@ namespace Dual.Model.Import
             this.richTextBox_ds.Size = new System.Drawing.Size(540, 379);
             this.richTextBox_ds.TabIndex = 2;
             this.richTextBox_ds.Text = "";
+            // 
+            // button_TestStart
+            // 
+            this.button_TestStart.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_TestStart.Location = new System.Drawing.Point(1259, 55);
+            this.button_TestStart.Name = "button_TestStart";
+            this.button_TestStart.Size = new System.Drawing.Size(85, 23);
+            this.button_TestStart.TabIndex = 1;
+            this.button_TestStart.Text = "TEST 시작";
+            this.button_TestStart.UseVisualStyleBackColor = true;
+            this.button_TestStart.Visible = false;
+            this.button_TestStart.Click += new System.EventHandler(this.button_TestStart_Click);
+            // 
+            // button_TestORG
+            // 
+            this.button_TestORG.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_TestORG.Location = new System.Drawing.Point(1259, 29);
+            this.button_TestORG.Name = "button_TestORG";
+            this.button_TestORG.Size = new System.Drawing.Size(85, 23);
+            this.button_TestORG.TabIndex = 1;
+            this.button_TestORG.Text = "TEST원위치";
+            this.button_TestORG.UseVisualStyleBackColor = true;
+            this.button_TestORG.Visible = false;
+            this.button_TestORG.Click += new System.EventHandler(this.button_TestORG_Click);
             // 
             // splitContainer4
             // 
@@ -201,36 +226,12 @@ namespace Dual.Model.Import
             this.splitContainer4.SplitterDistance = 603;
             this.splitContainer4.TabIndex = 20;
             // 
-            // button_TestStart
-            // 
-            this.button_TestStart.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_TestStart.Location = new System.Drawing.Point(1269, 57);
-            this.button_TestStart.Name = "button_TestStart";
-            this.button_TestStart.Size = new System.Drawing.Size(75, 23);
-            this.button_TestStart.TabIndex = 1;
-            this.button_TestStart.Text = "시작";
-            this.button_TestStart.UseVisualStyleBackColor = true;
-            this.button_TestStart.Visible = false;
-            this.button_TestStart.Click += new System.EventHandler(this.button_TestStart_Click);
-            // 
-            // button_TestORG
-            // 
-            this.button_TestORG.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_TestORG.Location = new System.Drawing.Point(1269, 31);
-            this.button_TestORG.Name = "button_TestORG";
-            this.button_TestORG.Size = new System.Drawing.Size(75, 23);
-            this.button_TestORG.TabIndex = 1;
-            this.button_TestORG.Text = "원위치";
-            this.button_TestORG.UseVisualStyleBackColor = true;
-            this.button_TestORG.Visible = false;
-            this.button_TestORG.Click += new System.EventHandler(this.button_TestORG_Click);
-            // 
             // button_ClearLog
             // 
             this.button_ClearLog.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_ClearLog.Location = new System.Drawing.Point(1269, 5);
+            this.button_ClearLog.Location = new System.Drawing.Point(1259, 5);
             this.button_ClearLog.Name = "button_ClearLog";
-            this.button_ClearLog.Size = new System.Drawing.Size(75, 23);
+            this.button_ClearLog.Size = new System.Drawing.Size(85, 23);
             this.button_ClearLog.TabIndex = 1;
             this.button_ClearLog.Text = "Clear Log";
             this.button_ClearLog.UseVisualStyleBackColor = true;
@@ -275,6 +276,7 @@ namespace Dual.Model.Import
             this.Controls.Add(this.splitter1);
             this.Controls.Add(this.progressBar1);
             this.ForeColor = System.Drawing.Color.SlateBlue;
+            this.Icon = global::Model.Import.Viewer.Properties.Resources.logo_Dualsoft;
             this.IsMdiContainer = true;
             this.Name = "FormMain";
             this.Text = "Dualsoft";

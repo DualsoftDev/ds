@@ -1,12 +1,13 @@
 using Engine.Parser;
 using Engine.Runner;
 using System.Threading.Tasks;
+using static Engine.Runner.DataModule;
 
 namespace Engine;
 
 public class EngineBuilder
 {
-    public OpcBroker Opc { get; }
+    public DataBroker Data { get; }
     public Cpu Cpu { get; }
     public Model Model { get; }
     public ENGINE Engine { get; }
@@ -18,24 +19,24 @@ public class EngineBuilder
         Model = ModelParser.ParseFromString(modelText);
         Global.Model = Model;
 
-        Opc = new OpcBroker();
+        Data = new DataBroker();
         Cpu = Model.Cpus.First(cpu => cpu.Name == activeCpuName);
         Cpu.IsActive = true;
 
         Model.BuildGraphInfo();
 
-        Model.Epilogue(Opc);
+        Model.Epilogue(Data);
 
-        Opc.Print();
-        if (Global.IsControlMode)
-            Task.Run(async () => { await Opc.CommunicationPLC(); })
-                .FireAndForget();
+        //if (Global.IsControlMode)
+        //    Task.Run(async () => { await Data.CommunicationPLC(); })
+        //        .FireAndForget();
+        Data.CommunicationPLC();
         foreach (var cpu in Model.Cpus)
             cpu.PrintTags();
 
-        Engine = new ENGINE(Model, Opc, Cpu);
+        Engine = new ENGINE(Model, Data, Cpu);
         Cpu.Engine = Engine;
-        Task.Run(() => { Opc.StreamData(); })
+        Task.Run(() => { Data.StreamData(); })
             .FireAndForget();
     }
 
@@ -43,7 +44,7 @@ public class EngineBuilder
     internal EngineBuilder(string modelText)
     {
         EngineModule.Initialize();
-        Opc = new OpcBroker();
+        Data = new DataBroker();
         Model = ModelParser.ParseFromString(modelText);
     }
 }

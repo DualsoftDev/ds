@@ -19,13 +19,16 @@ grammar ds;
 
 import dsFunctions;
 
-program: (importStatement|system|cpus|layouts|addresses|comment)* EOF;        // 
+program: (importStatement|system|cpus|layouts|addresses|properties|comment)* EOF;        // 
+
+test:qstring EOF;
+qstring: STRING_LITERAL EOF;
 
 
 system: sysProp id '=' sysBlock;    // [sys] Seg = {..}
 sysProp: '[' 'sys' ']';
 sysBlock
-    : LBRACE (task|flow|listing|alias|parenting|causal|call|acc|macro)* RBRACE
+    : LBRACE (sysTask|flow|listing|alias|parenting|causal|call|acc|macro)* RBRACE
     ;
 
 
@@ -55,7 +58,7 @@ layoutsBlock
     : LBRACE (positionDef)* RBRACE
     ;
 positionDef: callPath '=' xywh;
-    callPath: IDENTIFIER DOT IDENTIFIER DOT IDENTIFIER;
+    callPath: identifier DOT identifier DOT identifier;
     xywh: LPARENTHESIS x COMMA y (COMMA w COMMA h)? RPARENTHESIS (SEIMCOLON)?;
     x: INTEGER;
     y: INTEGER;
@@ -68,19 +71,49 @@ addressesBlock
     : LBRACE (addressDef)* RBRACE
     ;
 addressDef: segmentPath '=' address;
-    segmentPath: IDENTIFIER DOT IDENTIFIER DOT IDENTIFIER;
+    segmentPath: identifier3;
     address: LPARENTHESIS (startTag)? COMMA (resetTag)? COMMA (endTag)? RPARENTHESIS (SEIMCOLON)?;
     startTag: TAG_ADDRESS;
     resetTag: TAG_ADDRESS;
     endTag: TAG_ADDRESS;
 
-task
+segmentPathN : identifier | identifier2 | identifier3;
+
+/*
+// global safety property
+[prop] {
+    [safety] = {
+        L.F.Main = {A.F.Vm; B.F.Vm}
+    }
+}
+// local safety property
+[sys] L = {
+    [flow] F = {
+        Main = { T.Cp > T.Cm; }
+        [safety] = {
+            Main = {A.F.Vm; B.F.Vm}
+        }
+    }
+}
+ */
+properties: '[' 'prop' ']' EQ LBRACE (propertyBlock)* RBRACE;
+propertyBlock: (safetyBlock);
+safetyBlock: '[' 'safety' ']' EQ LBRACE (safetyDef)* RBRACE;
+safetyDef: safetyKey EQ LBRACE safetyValues RBRACE;
+safetyKey: segmentPathN;
+safetyValues: segmentPathN (SEIMCOLON segmentPathN)*;
+
+
+sysTask
     : taskProp id '=' LBRACE (listing|call)* RBRACE
     ;
 taskProp: '[' 'task' ']';
 
+// flow 내에 정의되는 task.  id 를 갖지 않는다.
+flowTask: taskProp EQ LBRACE (listing|call)* RBRACE;
+
 flow
-    : flowProp id '=' LBRACE (causal|parenting|listing)* RBRACE
+    : flowProp id '=' LBRACE (causal|parenting|listing|safetyBlock|flowTask)* RBRACE
     ;
 flowProp : '[' 'flow' ('of' id)? ']';
 
@@ -92,12 +125,12 @@ aliasListing:
     aliasDef '=' LBRACE (aliasMnemonic)? ( ';' aliasMnemonic)* (';')+ RBRACE
     ;
 aliasDef: identifier3;
-aliasMnemonic: IDENTIFIER;
+aliasMnemonic: identifier;
 
 
-id: IDENTIFIER;
+id: identifier;
 
-acc: LBRACKET ACCESS_SRE RBRACKET EQ LBRACE IDENTIFIER (SEIMCOLON IDENTIFIER)* SEIMCOLON? RBRACE;    // [accsre] = { A; B }
+acc: LBRACKET ACCESS_SRE RBRACKET EQ LBRACE identifier (SEIMCOLON identifier)* SEIMCOLON? RBRACE;    // [accsre] = { A; B }
 listing: id SEIMCOLON;     // A;
 parenting: id EQ LBRACE causal* RBRACE;
 
@@ -111,7 +144,7 @@ macroHeader
     | namedMacroHeader
     ;
 simpleMacroHeader: 'macro';
-namedMacroHeader: 'macro' EQ IDENTIFIER;
+namedMacroHeader: 'macro' EQ identifier;
 
 // A23 = { M.U ~ S.S3U ~ _ }
 call: id EQ LBRACE callPhrase RBRACE;
@@ -165,8 +198,8 @@ importAs
     ;
 
 importPhrase: importSystemName 'as' importAlias;
-importSystemName: IDENTIFIER;
-importAlias: IDENTIFIER;
+importSystemName: identifier;
+importAlias: identifier;
 
 
 quotedFilePath

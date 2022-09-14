@@ -1,12 +1,14 @@
+using Engine.Common;
+using Engine.Common.FS;
 using Model.Import.Office;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using static Engine.Common.FS.MessageEvent;
 using static Model.Import.Office.Event;
 using static Model.Import.Office.Model;
 using static Model.Import.Office.Object;
@@ -17,7 +19,7 @@ namespace Dual.Model.Import
     {
         internal void ExportTextModel(Color color)
         {
-          
+
             this.Do(() => richTextBox_ds.Clear());
             var textLines = ExportModel.ToText(_model).Split('\n');
             Random r = new Random();
@@ -26,15 +28,15 @@ namespace Dual.Model.Import
             int lineCur = 0;
             textLines.ToList().ForEach(f =>
             {
-                int pro = 50+Convert.ToInt32(Convert.ToSingle(lineCur++) / (lineCnt) * 50f);
+                int pro = 50 + Convert.ToInt32(Convert.ToSingle(lineCur++) / (lineCnt) * 50f);
                 if (color == Color.Transparent)
                 {
                     if (f.Contains("[sys]") || (f.Contains("[flow]") && !f.Contains("}"))  //[flow] F = {} 한줄제외
-                    || f.Contains("[address]") || f.Contains("[layouts]") || f.Contains("//"))
+                    || f.Contains("[addresses]") || f.Contains("[layouts]") || f.Contains("//"))
                     {
                         rndColor = Color.FromArgb(r.Next(130, 230), r.Next(130, 230), r.Next(130, 230));
                         this.Do(() => richTextBox_ds.ScrollToCaret());
-                        Event.DoWork(pro);
+                        ProcessEvent.DoWork(pro);
                     }
                     this.Do(() => richTextBox_ds.AppendTextColor(f, rndColor));
                 }
@@ -70,13 +72,13 @@ namespace Dual.Model.Import
                         button_copy.Visible = false;
                     });
 
-                    Event.DoWork(0);
+                    ProcessEvent.DoWork(0);
                 }
                 else
                     WriteDebugMsg(DateTime.Now, MSGLevel.Error, $"{PathPPT} 불러오기 실패!!");
 
             }
-            catch  (Exception ex)
+            catch (Exception ex)
             {
                 WriteDebugMsg(DateTime.Now, MSGLevel.Error, ex.Message);
             }
@@ -89,7 +91,7 @@ namespace Dual.Model.Import
         {
             if (UtilFile.BusyCheck()) return;
             Busy = true;
-            WriteDebugMsg(DateTime.Now, MSGLevel.Info, $"{PathXLS} 불러오는 중!!");
+            MSGInfo($"{PathXLS} 불러오는 중!!");
             var sys = _model.ActiveSys;
             ImportIOTable.ApplyExcel(path, sys);
             ExportTextModel(Color.FromArgb(0, 150, 0));
@@ -98,7 +100,7 @@ namespace Dual.Model.Import
                 richTextBox_ds.ScrollToCaret();
                 button_copy.Visible = true;
 
-                WriteDebugMsg(DateTime.Now, MSGLevel.Info, $"{PathXLS} 적용완료!!");
+                MSGInfo($"{PathXLS} 적용완료!!");
 
             });
             Busy = false;
@@ -108,7 +110,7 @@ namespace Dual.Model.Import
         {
             if (UtilFile.BusyCheck()) return;
             Busy = true;
-            Event.DoWork(10);
+            ProcessEvent.DoWork(10);
 
             button_copy.Visible = false;
             button_CreateExcel.Enabled = false;
@@ -131,7 +133,7 @@ namespace Dual.Model.Import
         }
 
 
-        internal void WriteDebugMsg(DateTime time, Event.MSGLevel level, string msg)
+        internal void WriteDebugMsg(DateTime time, MSGLevel level, string msg)
         {
             this.Do(() =>
             {
@@ -141,7 +143,7 @@ namespace Dual.Model.Import
                     _ConvertErr = true;
                     color = Color.Red;
                     richTextBox_ds.AppendTextColor($"\r\n{msg}", color);
-                    Event.DoWork(0);
+                    ProcessEvent.DoWork(0);
                 }
                 if (level.IsWarn) color = Color.Purple;
                 richTextBox_Debug.AppendTextColor($"\r\n{time} : {msg}", color);
@@ -158,13 +160,18 @@ namespace Dual.Model.Import
 
             demo.TotalSystems.OrderBy(sys => sys.Name).ToList()
                   .ForEach(sys =>
-                      CreateNewTabViewer(sys)
+                      CreateNewTabViewer(sys, true)
                   );
         }
 
-        internal void CreateNewTabViewer(DsSystem sys)
+        internal void CreateNewTabViewer(DsSystem sys, bool isDemo = false)
         {
-            var flows = sys.RootFlow();
+            List<Flo> flows = new List<Flo>();
+            if (isDemo)
+                flows = sys.Flows.Values.ToList();
+            else
+                flows = sys.RootFlow().ToList();
+
             var flowTotalCnt = flows.Count();
             flows.ToList().ForEach(f =>
             {
@@ -190,7 +197,7 @@ namespace Dual.Model.Import
         }
         internal void RefreshGraph()
         {
-            foreach (KeyValuePair<Flow, TabPage> view in DicUI)
+            foreach (KeyValuePair<Flo, TabPage> view in DicUI)
             {
                 foreach (var seg in view.Key.UsedSegs)
                 {
@@ -205,7 +212,7 @@ namespace Dual.Model.Import
             if (File.Exists(PathPPT))
                 InitModel(PathPPT);
         }
-        internal bool TestDebug()
+        internal void TestDebug()
         {
             string path = @"D:\DS\test\DS.pptx";
             bool debug = File.Exists(path);
@@ -214,8 +221,6 @@ namespace Dual.Model.Import
                 PathPPT = path;
                 InitModel(path);
             }
-
-            return debug;
         }
 
 

@@ -1,4 +1,5 @@
-﻿using Model.Import.Office;
+using Engine.Common.FS;
+using Model.Import.Office;
 using System;
 using System.Linq;
 using static Model.Import.Office.Object;
@@ -10,7 +11,7 @@ namespace Dual.Model.Import
 
         public static void ProcessSubscribe()
         {
-            Event.ProcessSubject.Subscribe(rx =>
+            ProcessEvent.ProcessSubject.Subscribe(rx =>
             {
                 FormMain.TheMain.UpdateProgressBar(rx.pro);
             });
@@ -18,7 +19,7 @@ namespace Dual.Model.Import
 
         public static void MSGSubscribe()
         {
-            Event.MSGSubject.Subscribe(rx =>
+            MessageEvent.MSGSubject.Subscribe(rx =>
                 {
                     FormMain.TheMain.WriteDebugMsg(rx.Time, rx.Level, $"{rx.Message}");
                 });
@@ -28,14 +29,14 @@ namespace Dual.Model.Import
         {
             Event.SegSubject.Subscribe(rx =>
             {
-                var sys = rx.Segment.BaseSys as DsSystem;
-                var seg = rx.Segment as Segment;
+                var sys = rx.Seg.BaseSys as DsSystem;
+                var seg = rx.Seg as Seg;
 
                 sys.RootFlow().ToList().ForEach(flow =>
                 {
                     if (flow.UsedSegs.Contains(seg))
                         if (FormMain.TheMain.DicUI.ContainsKey(flow))
-                         ((UCView)FormMain.TheMain.DicUI[flow].Tag).Update(seg);
+                            ((UCView)FormMain.TheMain.DicUI[flow].Tag).Update(seg);
                 });
             });
         }

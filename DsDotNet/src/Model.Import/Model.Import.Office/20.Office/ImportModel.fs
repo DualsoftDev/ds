@@ -1,4 +1,4 @@
-﻿// Copyright (c) Dual Inc.  All Rights Reserved.
+// Copyright (c) Dual Inc.  All Rights Reserved.
 namespace Model.Import.Office
 
 open System.Linq
@@ -10,14 +10,16 @@ open PPTX
 open System.Collections.Generic
 open System
 open Microsoft.FSharp.Collections
+open Engine.Common.FS
+open Engine.Base
 
 [<AutoOpen>]
 module ImportModel =
 
     type internal ImportPowerPoint(path:string) =
         let doc = pptDoc(path)
-        let dicSeg = ConcurrentDictionary<string, Segment>()
-        let dicEdge = ConcurrentDictionary<MEdge, Segment>()  //childEdges, parentSeg
+        let dicSeg = ConcurrentDictionary<string, Seg>()
+        let dicEdge = ConcurrentDictionary<MEdge, Seg>()  //childEdges, parentSeg
         let model =  DsModel(doc.FullPath)
         let mySys= DsSystem("MY", true)
 
@@ -80,8 +82,8 @@ module ImportModel =
 
                 //page 타이틀 중복체크 
                 let dicSamePage = ConcurrentDictionary<string, pptPage>()
-                let dicSameSeg  = ConcurrentDictionary<string, Segment>()
-                let dicFlowName  = ConcurrentDictionary<int, string>()
+                let dicSameSeg  = ConcurrentDictionary<string, Seg>()
+                let dicFloName  = ConcurrentDictionary<int, string>()
                 
                 doc.Pages |> Seq.iter(fun page ->  Check.SamePage(page, dicSamePage))
                 doc.Pages |> Seq.iter(fun page ->  
@@ -89,37 +91,53 @@ module ImportModel =
                                         let title = doc.GetPage(page.PageNum).Title
                                         if(title = "") then sprintf "P%d" page.PageNum else title
               
-                                    dicFlowName.TryAdd(page.PageNum, flowName)|>ignore)
+                                    dicFloName.TryAdd(page.PageNum, flowName)|>ignore)
 
                 //segment 리스트 만들기
                 doc.Nodes 
                 |> Seq.iter(fun node -> 
-                    Check.ValidFlowPath(node, dicFlowName)
-                    let realFlow, realName  = 
+                    Check.ValidFloPath(node, dicFloName)
+                    let realFlo, realName  = 
                         if(node.Name.Contains('.')) 
                         then node.Name.Split('.').[0], node.Name
-                        else dicFlowName.[node.PageNum], node.Name
+                        else dicFloName.[node.PageNum], node.Name
 
-                    let seg = Segment(realName, mySys, node.NodeCausal,  realFlow)
+                    let seg = Seg(realName, mySys, Editor.User, Bound.Normal, node.NodeCausal, realFlo, node.IsDummy)
                     seg.Update(node.Key, node.Id.Value, node.Alias, node.CntTX, node.CntRX )
                     dicSeg.TryAdd(node.Key, seg) |> ignore
                     
                     Check.SameNode(seg, node, dicSameSeg)   )
-                 
               
-                //flow 리스트 만들기
+                //Flow 리스트 만들기
                 doc.Nodes 
-                |> Seq.filter(fun node -> node.NodeCausal = DUMMY|>not)
+                |> Seq.filter(fun node -> node.IsDummy|>not)
                 |> Seq.iter(fun node -> 
-                                let name  = dicFlowName.[node.PageNum]
-                                let flow  = Flow(name, node.PageNum, mySys)
+                                let name  = dicFloName.[node.PageNum]
+                                let flow  = Flo(name, node.PageNum, mySys)
                                
                                 mySys.Flows.TryAdd(node.PageNum, flow)|>ignore
-                                mySys.Flows.[node.PageNum].AddSegNoEdge(dicSeg.[node.Key]))
+                                mySys.Flows.[node.PageNum].AddSegNoEdge(dicSeg.[node.Key])
+                                )
+
+                //Safety 리스트 만들기
+                doc.Nodes 
+                |> Seq.filter(fun node -> node.IsDummy|>not)
+                |> Seq.iter(fun node -> 
+                                let flowName = mySys.Flows.[node.PageNum].Name
+                                let dic = dicSeg.Values.Select(fun seg -> seg.FullName, seg) |> dict
+                                let safeSeg = 
+                                    node.Safeties   
+                                    |> Seq.map(fun safe ->  sprintf "%s.%s.%s" mySys.Name flowName safe)
+                                    |> Seq.filter(fun safeFullName -> dic.ContainsKey safeFullName)
+                                    |> Seq.map(fun safeFullName ->  dic.[safeFullName])
+
+                                if(safeSeg.Any())
+                                    then mySys.Flows.[node.PageNum].AddSafety(dicSeg.[node.Key], safeSeg)
+                                )
                                 
                 //Dummy child 처리
                 doc.Parents
-                |> Seq.filter(fun group -> group.Key.NodeCausal = DUMMY)
+                |> Seq.filter(fun group -> group.Key.IsDummy)
                 |> Seq.map(fun group -> group.Key, group.Value)
                 |> Seq.iter(fun (parent, children) -> 
                     let pSeg = dicSeg.[parent.Key]
@@ -138,7 +156,7 @@ module ImportModel =
                 |> Seq.iter(fun edge -> 
                                 let sSeg = dicSeg.[edge.StartNode.Key]
                                 let eSeg = dicSeg.[edge.EndNode.Key]
-                                if(sSeg.NodeCausal = DUMMY || eSeg.NodeCausal = DUMMY)
+                                if(sSeg.IsDummy || eSeg.IsDummy)
                                 then 
                                     let srcs = if(sSeg.NoEdgeSegs.Any()) then sSeg.NoEdgeSegs |> Seq.toList else [sSeg]
                                     let tgts = if(eSeg.NoEdgeSegs.Any()) then eSeg.NoEdgeSegs |> Seq.toList else [eSeg]
@@ -157,17 +175,17 @@ module ImportModel =
 
                 //NoEdge child 처리
                 doc.Parents
-                |> Seq.filter(fun group -> group.Key.NodeCausal = DUMMY |>not)
+                |> Seq.filter(fun group -> group.Key.IsDummy |>not)
                 |> Seq.map(fun group -> group.Key, group.Value)
                 |> Seq.iter(fun (parent, children) ->
                             let pSeg = dicSeg.[parent.Key]
                             children 
                             |> Seq.filter(fun child -> child.ExistChildEdge|>not) //엣지 할당 못받은 자식만
-                            |> Seq.filter(fun child -> child.NodeCausal = DUMMY|>not) 
+                            |> Seq.filter(fun child -> child.IsDummy|>not) 
                             |> Seq.iter(fun child -> 
                                                 //행위 부모 할당후 
                                                 pSeg.AddSegNoEdge(dicSeg.[child.Key])
-                                                //Flow 상에서 삭제
+                                                //Flo 상에서 삭제
                                                 mySys.Flows.[parent.PageNum].RemoveSegNoEdge(dicSeg.[child.Key]) 
                                                 mySys.Flows.[parent.PageNum].AddSegDrawSub(pSeg) 
                                                     )
@@ -182,17 +200,17 @@ module ImportModel =
                 doc.Nodes 
                 |> Seq.filter(fun node -> node.PageNum = doc.VisibleLast().PageNum)
                 |> Seq.filter(fun node -> node.Name = ""|>not)
-                |> Seq.filter(fun node -> node.NodeCausal.IsLocation)
-                |> Seq.iter(fun node -> mySys.LocationSet.TryAdd(dicSeg.[node.Key].ToFullPath(), node.Rectangle) |> ignore)
+                |> Seq.filter(fun node -> node.NodeCausal = TX || node.NodeCausal = TR || node.NodeCausal = RX || node.NodeCausal = EX )
+                |> Seq.iter(fun node -> mySys.LocationSet.TryAdd(dicSeg.[node.Key].ToLayOutPath(), node.Rectangle) |> ignore)
             
-                Event.MSGInfo($"전체 장표   count [{doc.Pages.Count()}]")
-                Event.MSGInfo($"전체 도형   count [{doc.Nodes.Count()}]")
-                Event.MSGInfo($"전체 연결   count [{doc.Edges.Count()}]")
-                Event.MSGInfo($"전체 부모   count [{doc.Parents.Keys.Count}]")
+                MSGInfo($"전체 장표   count [{doc.Pages.Count()}]")
+                MSGInfo($"전체 도형   count [{doc.Nodes.Count()}]")
+                MSGInfo($"전체 연결   count [{doc.Edges.Count()}]")
+                MSGInfo($"전체 부모   count [{doc.Parents.Keys.Count}]")
                 model
 
             
-            with ex ->  Event.MSGError  $"{ex.Message}"
+            with ex ->  MSGError  $"{ex.Message}"
                         model
                         
            
@@ -200,9 +218,9 @@ module ImportModel =
 
     let FromPPTX(path:string) =
         let ppt = ImportPowerPoint(path)
-        Event.DoWork(20);
+        DoWork(20);
         let model = ppt.GetDsModel()
-        Event.DoWork(50);
+        DoWork(50);
         model
         
 

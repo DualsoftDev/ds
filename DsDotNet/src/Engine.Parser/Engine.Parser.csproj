@@ -53,4 +53,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <NoWarn>3021;1701;1702</NoWarn>
   </PropertyGroup>
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="if not exist g4s (mklink /j g4s ..\..\..\Grammar\g4s)" />
+  </Target>
 </Project>

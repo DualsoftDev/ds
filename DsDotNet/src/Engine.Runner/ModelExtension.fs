@@ -6,7 +6,6 @@ open System.Runtime.CompilerServices
 
 open Engine.Common.FS
 open Engine.Core
-open Engine.OPC
 open Engine.Graph
 
 [<AutoOpen>]
@@ -41,7 +40,7 @@ module internal ModelModule =
                         ts.Type <- ts.Type ||| TagType.TX ||| TagType.External
                     for te in ch.TagsEnd do
                         te.Type <- te.Type ||| TagType.RX ||| TagType.External
-                | :? ExSegmentCall as exSegCall->
+                | :? ExSegment as exSegCall->
                     let ex = exSegCall.ExternalSegment :?> Segment
                     ch.TagsStart <- [ex.TagPStart :> Tag] |> ResizeArray
                     ch.TagReset <- ex.TagPReset
@@ -73,7 +72,7 @@ module internal ModelModule =
                 t.Type <- t.Type ||| TagType.Plan ||| TagType.External
                 
     /// Tag 이름 변경으로 인한, cpu 의 BitMap/TagsMap 갱신 및 OPC tag 갱신
-    let rebuildMap(model:Model, opc:OpcBroker) =
+    let rebuildMap(model:Model, data:DataBroker) =
         for cpu in model.Cpus do
             let cpuBits = cpu.BitsMap.Values.ToHashSet()
             let oldKeys = cpu.BitsMap.Where(fun kv -> cpuBits.Contains(kv.Value)).Select(fun kv -> kv.Key).ToArray()
@@ -90,7 +89,7 @@ module internal ModelModule =
                 | _ ->
                     ()
 
-            opc.AddTags(cpuBits.OfType<Tag>())
+            data.AddTags(cpuBits.OfType<Tag>())
 
     let checkCpu(model:Model) =
         let check(cpu:Cpu) =
@@ -138,13 +137,13 @@ module internal ModelPrintModule =
 [<Extension>] // type Segment =
 type ModelExt =
     [<Extension>]
-    static member Epilogue(model:Model, opc:OpcBroker) =
+    static member Epilogue(model:Model, data:DataBroker) =
         for segment in getRootSegments model do
             segment.Epilogue()
 
         renameBits(model)
         markChildren(model)
-        rebuildMap(model, opc)
+        rebuildMap(model, data)
         checkCpu(model)
 
     [<Extension>]

@@ -1,5 +1,7 @@
 // from cytoscpaeVisitor.ts
 
+using Antlr4.Runtime.Misc;
+
 namespace Engine.Parser;
 
 //enum NodeType = "system" | "task" | "call" | "proc" | "func" | "segment" | "expression" | "conjunction";
@@ -43,27 +45,27 @@ partial class ElementsListener : dsBaseListener
     {
         ParserHelper = helper;
 
-        this.allParserRules = DsParser.getAllParseRules(parser);
+        this.allParserRules = getAllParseRules(parser);
         parser.Reset();
     }
 
 
-    override public void EnterSystem(dsParser.SystemContext ctx)
+    override public void EnterSystem(SystemContext ctx)
     {
         var name = ctx.id().GetText();
         _system = _model.Systems.First(s => s.Name == name);
     }
-    override public void ExitSystem(dsParser.SystemContext ctx) { this._system = null; }
+    override public void ExitSystem(SystemContext ctx) { this._system = null; }
 
-    override public void EnterTask(dsParser.TaskContext ctx)
+    override public void EnterSysTask(SysTaskContext ctx)
     {
         var name = ctx.id().GetText();
         _task = _system.Tasks.First(t => t.Name == name);
         Trace.WriteLine($"Task: {name}");
     }
-    override public void ExitTask(dsParser.TaskContext ctx) { _task = null; }
+    override public void ExitSysTask(SysTaskContext ctx) { _task = null; }
 
-    override public void EnterFlow(dsParser.FlowContext ctx)
+    override public void EnterFlow(FlowContext ctx)
     {
         var flowName = ctx.id().GetText();
         _rootFlow = _system.RootFlows.First(f => f.Name == flowName);
@@ -71,13 +73,53 @@ partial class ElementsListener : dsBaseListener
         var flowOf = ctx.flowProp().id();
         this.flowOfName = flowOf == null ? flowName : flowOf.GetText();
     }
-    override public void ExitFlow(dsParser.FlowContext ctx)
+    override public void ExitFlow(FlowContext ctx)
     {
         _rootFlow = null;
         flowOfName = null;
     }
 
-    override public void EnterListing(dsParser.ListingContext ctx) { }
+    public override void EnterSafetyBlock([NotNull] SafetyBlockContext context)
+    {
+        var safetyDefs = enumerateChildren<SafetyDefContext>(context);
+        //foreach (var safetyDef in safetyDefs)
+        //{
+        //    var key= findFirstChild(safetyDef, t => t is SafetyKeyContext).GetText();
+        //    var valueHeader = findFirstChild(safetyDef, t => t is SafetyValuesContext);
+        //    var values =
+        //        enumerateChildren<SegmentPathNContext>(valueHeader)
+        //        .Select(ctx => ctx.GetText())
+        //        ;
+        //    Console.WriteLine();
+        //}
+
+        var kvs = (
+            from safetyDef in safetyDefs
+            let key = findFirstChild(safetyDef, t => t is SafetyKeyContext).GetText()
+            let valueHeader = findFirstChild(safetyDef, t => t is SafetyValuesContext)
+            let values = enumerateChildren<SegmentPathNContext>(valueHeader).Select(ctx => ctx.GetText()).ToArray()
+            select (key, values)
+        ).ToDictionary(tpl => tpl.key, tpl => tpl.values)
+            ;
+
+
+
+        switch (context.Parent)
+        {
+            case PropertyBlockContext propBlock:   // global prop safety
+                Console.WriteLine(propBlock.ToString());
+                break;
+            case FlowContext flow:
+                Console.WriteLine(flow.ToString());         // in flow safety
+                break;
+            default:
+                throw new Exception("ERROR");
+        }
+
+        base.EnterSafetyBlock(context);
+    }
+
+    override public void EnterListing(ListingContext ctx) { }
 
     #endregion Boiler-plates
 
@@ -86,8 +128,8 @@ partial class ElementsListener : dsBaseListener
 
 
     /** causal operator 왼쪽 */
-    private dsParser.CausalTokensDNFContext left;
-    private dsParser.CausalOperatorContext op;
+    private CausalTokensDNFContext left;
+    private CausalOperatorContext op;
 
 
     private string flowOfName;      // [flow of A]F={..} -> A
@@ -99,11 +141,13 @@ partial class ElementsListener : dsBaseListener
 
 
 
-    override public void EnterCall(dsParser.CallContext ctx)
+    override public void EnterCall(CallContext ctx)
     {
         var name = ctx.id().GetText();
         var label = $"{name}\n{ctx.callPhrase().GetText()}";
-        var call = _task.CallPrototypes.First(c => c.Name == name);
+
+        var callPrototypes = (_task == null) ? _rootFlow.FlowTask.CallPrototypes : _task.CallPrototypes;            
+        var call = callPrototypes.First(c => c.Name == name);
 
         var callph = ctx.callPhrase();
         var txs = ParserHelper.FindObjects<SegmentBase>(callph.segments(0).GetText());
@@ -114,15 +158,15 @@ partial class ElementsListener : dsBaseListener
     }
 
 
-    override public void EnterParenting(dsParser.ParentingContext ctx) {
+    override public void EnterParenting(ParentingContext ctx) {
         var name = ctx.id().GetText();
         _parenting = (SegmentBase)QpInstanceMap[$"{CurrentPath}.{name}"];
     }
-    override public void ExitParenting(dsParser.ParentingContext ctx) { _parenting = null; }
+    override public void ExitParenting(ParentingContext ctx) { _parenting = null; }
 
 
 
-    override public void EnterCausalPhrase(dsParser.CausalPhraseContext ctx) {
+    override public void EnterCausalPhrase(CausalPhraseContext ctx) {
         this.left = null;
         this.op = null;
 
@@ -135,8 +179,7 @@ partial class ElementsListener : dsBaseListener
 
 
         var names =
-            DsParser.enumerateChildren<dsParser.SegmentContext>(
-                ctx, false, r => r is dsParser.SegmentContext)
+            enumerateChildren<SegmentContext>(ctx)
             .Select(segCtx => segCtx.GetText())
             .ToArray()
             ;
@@ -182,6 +225,12 @@ partial class ElementsListener : dsBaseListener
                     target = QpDefinitionMap[targetName];   // definition 우선시
                 else if (QpInstanceMap.ContainsKey(targetName))
                     target = QpInstanceMap[targetName];
+                else if (_rootFlow?.FlowTask != null)
+                {
+                    var flowTask = _rootFlow.FlowTask;
+                    if (flowTask.CallPrototypes.Exists(cp => cp.Name == targetName))
+                        target = flowTask.CallPrototypes.First(cp => cp.Name == targetName);
+                }
 
                 switch (target)
                 {
@@ -192,7 +241,7 @@ partial class ElementsListener : dsBaseListener
                         QpInstanceMap.Add(fqdn, child);
                         break;
                     case SegmentBase exSeg:
-                        var exCall = new ExSegmentCall(name, exSeg);
+                        var exCall = new ExSegment(name, exSeg);
                         child = new Child(exCall, _parenting) { IsAlias = isAlias };
                         exCall.ContainerChild = child;
                         QpInstanceMap.Add(fqdn, child);
@@ -203,7 +252,7 @@ partial class ElementsListener : dsBaseListener
             }
         }
     }
-    override public void EnterCausalTokensDNF(dsParser.CausalTokensDNFContext ctx) {
+    override public void EnterCausalTokensDNF(CausalTokensDNFContext ctx) {
         if (this.left != null)
         {
             Assert(this.op != null);  //, 'operator expected');
@@ -216,28 +265,20 @@ partial class ElementsListener : dsBaseListener
 
         this.left = ctx;
     }
-    override public void EnterCausalOperator(dsParser.CausalOperatorContext ctx) { this.op = ctx; }
+    override public void EnterCausalOperator(CausalOperatorContext ctx) { this.op = ctx; }
 
-    override public void ExitProgram(dsParser.ProgramContext ctx)
+    override public void ExitProgram(ProgramContext ctx)
     {
         //[layouts] = {
         //       L.T.Cp = (30, 50)            // xy
         //       L.T.Cm = (60, 50, 20, 20)    // xywh
         //}
 
-        var layouts =
-            DsParser.enumerateChildren<dsParser.LayoutsContext>(
-                ctx, false, r => r is dsParser.LayoutsContext)
-            .ToArray()
-            ;
+        var layouts = enumerateChildren<LayoutsContext>(ctx).ToArray();
         if (layouts.Length > 1)
             throw new Exception("Layouts block should exist only once");
 
-        var positionDefs =
-            DsParser.enumerateChildren<dsParser.PositionDefContext>(
-                ctx, false, r => r is dsParser.PositionDefContext)
-            .ToArray()
-            ;
+        var positionDefs = enumerateChildren<PositionDefContext>(ctx).ToArray();
         foreach(var posiDef in positionDefs)
         {
             var callPath = posiDef.callPath().GetText();
@@ -253,19 +294,11 @@ partial class ElementsListener : dsBaseListener
         //    B.F.Bm = (%Q123.25, , %I12.3);
         //    B.F.Bp = (%Q123.26, , %I12.4);
         //}
-        var addresses =
-            DsParser.enumerateChildren<dsParser.AddressesContext>(
-                ctx, false, r => r is dsParser.AddressesContext)
-            .ToArray()
-            ;
+        var addresses = enumerateChildren<AddressesContext>(ctx).ToArray();
         if (addresses.Length > 1)
             throw new Exception("Layouts block should exist only once");
 
-        var addressDefs =
-            DsParser.enumerateChildren<dsParser.AddressDefContext>(
-                ctx, false, r => r is dsParser.AddressDefContext)
-            .ToArray()
-            ;
+        var addressDefs = enumerateChildren<AddressDefContext>(ctx).ToArray();
         foreach (var addrDef in addressDefs)
         {
             var segPath = addrDef.segmentPath().GetText();            

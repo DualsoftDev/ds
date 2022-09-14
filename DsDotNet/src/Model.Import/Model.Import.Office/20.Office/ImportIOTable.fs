@@ -1,4 +1,4 @@
-﻿// Copyright (c) Dual Inc.  All Rights Reserved.
+// Copyright (c) Dual Inc.  All Rights Reserved.
 namespace Model.Import.Office
 
 open System.Linq
@@ -7,6 +7,8 @@ open System.Data
 open System.Collections.Concurrent
 open System.Collections.Generic
 open Microsoft.Office.Interop.Excel
+open Engine.Common.FS
+open Engine.Base
 
 [<AutoOpen>]
 module ImportIOTable =
@@ -29,7 +31,7 @@ module ImportIOTable =
                 dtResult.Columns.Add($"{column}") |> ignore
 
             for row in [|2..rowCnt|] do
-                Event.DoWork((int)(Convert.ToSingle(row + 1) / (rowCnt|>float32) * 50f));
+                DoWork((int)(Convert.ToSingle(row + 1) / (rowCnt|>float32) * 50f));
                 let newRow = dtResult.NewRow(); // DataTable에 새 행 할당
                 for column in [|1..colCnt|] do
                     let data = workSheet.Cells.[row, column]  :?> Range
@@ -44,7 +46,7 @@ module ImportIOTable =
 
         let tableIO = FromExcel(path)
         
-        //Case	Flow	Name	    Type	Size	S(Output)	R(Output)	E(Input)
+        //Case	Flo	Name	    Type	Size	S(Output)	R(Output)	E(Input)
         //주소	P1	    AA	        I1	    bit	-	-	I9
         //주소	P1	    AA	        I2	    bit	-	-	I10
         //주소	S101	RBT3Right	IO	    bit	Q3	-	I13
@@ -62,19 +64,19 @@ module ImportIOTable =
             then 
                 match TagToType($"{row.[0]}") with
                 |TagCase.Address  -> sys.AddressSet.TryAdd($"{row.[2]}", Tuple.Create($"{row.[5]}", $"{row.[6]}", $"{row.[7]}")) |>ignore
-                |TagCase.Variable -> sys.VariableSet.TryAdd($"{row.[2]}", Type.DataToType($"{row.[4]}")) |>ignore
+                |TagCase.Variable -> sys.VariableSet.TryAdd($"{row.[2]}", DsType.DataToType($"{row.[4]}")) |>ignore
                 |TagCase.Command -> sys.CommandSet.TryAdd($"{row.[2]}", $"{row.[5]}") |>ignore
                 |TagCase.Observe -> sys.ObserveSet.TryAdd($"{row.[2]}", $"{row.[7]}") |>ignore
             
         for flow in sys.RootFlow()  do
-            flow.CallSegments() |> Seq.append (flow.ExSegments())
+            flow.CallSegs() |> Seq.append (flow.ExSegs())
             |> Seq.iter(fun seg -> 
                         let s, r, e = sys.AddressSet.[seg.Name]
                         seg.S <- s
                         seg.R <- r
                         seg.E <- e  )
 
-        Event.DoWork(0);
+        DoWork(0);
 
 
             

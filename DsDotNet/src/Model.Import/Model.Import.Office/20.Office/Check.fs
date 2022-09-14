@@ -1,26 +1,26 @@
-﻿// Copyright (c) Dual Inc.  All Rights Reserved.
+// Copyright (c) Dual Inc.  All Rights Reserved.
 namespace Model.Import.Office
 
 open System.Linq
 open PPTX
 open System
 open System.Collections.Concurrent
+open Engine.Common.FS
+open Engine.Base
 
 [<AutoOpen>]
 module Check =
 
         let GetDemoModel(sysName:string) = 
             let sys = DsSystem(sysName, true)
-            let flow = Flow("P0",  Int32.MaxValue, sys)
+            let flow = Flo("P0",  Int32.MaxValue, sys)
             sys.Flows.TryAdd(flow.Page, flow) |> ignore
-            flow.AddEdge( MEdge(Segment("START", sys, EX), Segment("시작인과", sys, MY), EdgeCausal.SEdge))
-            flow.AddEdge( MEdge(Segment("RESET", sys, EX), Segment("복귀인과", sys, MY), EdgeCausal.REdge))
-            flow.AddEdge( MEdge(Segment("START", sys, EX), Segment("시작유지", sys, MY), EdgeCausal.SPush))
-            flow.AddEdge( MEdge(Segment("RESET", sys, EX), Segment("복귀유지", sys, MY), EdgeCausal.RPush))
-            flow.AddEdge( MEdge(Segment("START", sys, EX), Segment("시작조건", sys, MY), EdgeCausal.SSTATE))
-            flow.AddEdge( MEdge(Segment("RESET", sys, EX), Segment("복귀조건", sys, MY), EdgeCausal.RSTATE))
-            flow.AddEdge( MEdge(Segment("ETC"  , sys, EX), Segment("상호행위간섭", sys, MY), EdgeCausal.Interlock))
-            flow.AddEdge( MEdge(Segment("ETC"  , sys, EX), Segment("시작후행리셋", sys, MY), EdgeCausal.SReset))
+            flow.AddEdge( MEdge(Seg("START", sys, EX), Seg("시작인과", sys, MY), EdgeCausal.SEdge))
+            flow.AddEdge( MEdge(Seg("RESET", sys, EX), Seg("복귀인과", sys, MY), EdgeCausal.REdge))
+            flow.AddEdge( MEdge(Seg("START", sys, EX), Seg("시작유지", sys, MY), EdgeCausal.SPush))
+            flow.AddEdge( MEdge(Seg("RESET", sys, EX), Seg("복귀유지", sys, MY), EdgeCausal.RPush))
+            flow.AddEdge( MEdge(Seg("ETC"  , sys, EX), Seg("상호행위간섭", sys, MY), EdgeCausal.Interlock))
+            flow.AddEdge( MEdge(Seg("ETC"  , sys, EX), Seg("시작후행리셋", sys, MY), EdgeCausal.SReset))
 
             //모델만들기 및 시스템 등록
             let model = DsModel("testModel");
@@ -40,33 +40,33 @@ module Check =
 
             let srcParents = doc.Parents  
                             |> Seq.filter(fun group ->group.Value.Contains(edge.StartNode)) 
-                            |> Seq.filter(fun group ->group.Key.NodeCausal = DUMMY |>not) 
+                            |> Seq.filter(fun group ->group.Key.IsDummy |>not) 
                             |> Seq.map (fun group -> group.Key)
             let tgtParents = doc.Parents
                             |> Seq.filter(fun group ->group.Value.Contains(edge.EndNode)) 
-                            |> Seq.filter(fun group ->group.Key.NodeCausal = DUMMY |>not) 
+                            |> Seq.filter(fun group ->group.Key.IsDummy |>not) 
                             |> Seq.map (fun group -> group.Key)
             if(srcParents.Count() > 1) then failError (srcParents, edge.StartNode)  
             if(tgtParents.Count() > 1) then failError (tgtParents, edge.EndNode)  
 
-        let ValidFlowPath(node:pptNode, dicFlowName:ConcurrentDictionary<int, string>) =
+        let ValidFloPath(node:pptNode, dicFloName:ConcurrentDictionary<int, string>) =
             if(node.Name.Contains('.'))
             then 
                 let paths = node.Name.Split('.')
-                if(dicFlowName.Values.Contains(paths.[0])|> not)
+                if(dicFloName.Values.Contains(paths.[0])|> not)
                 then Office.ErrorName(node.Shape, 27, node.PageNum)
                 else if(node.Name.Split('.').Length > 2)
                 then Office.ErrorName(node.Shape, 26, node.PageNum)
 
 
-        let SameNode(seg:Segment, node:pptNode, dicSegCheckSame:ConcurrentDictionary<string, Segment>) =
+        let SameNode(seg:Seg, node:pptNode, dicSegCheckSame:ConcurrentDictionary<string, Seg>) =
             if(dicSegCheckSame.ContainsKey(seg.Name)|>not)
             then dicSegCheckSame.TryAdd(seg.Name, seg)|> ignore
 
             let oldSeg = dicSegCheckSame.[seg.Name]
             if((seg.NodeCausal = oldSeg.NodeCausal)|>not) 
             then 
-                Event.MSGError($"도형오류 :타입이 다른 같은이름이 존재합니다 \t[Page{node.PageNum}: {seg.Name}({seg.NodeCausal}) != ({oldSeg.NodeCausal}) ({node.Shape.ShapeName()})]")
+                MSGError($"도형오류 :타입이 다른 같은이름이 존재합니다 \t[Page{node.PageNum}: {seg.Name}({seg.NodeCausal}) != ({oldSeg.NodeCausal}) ({node.Shape.ShapeName()})]")
         
         let SameEdgeErr(parentNode:pptNode option, pptEdge:pptEdge, mEdge:MEdge, dicSameCheck:ConcurrentDictionary<string, MEdge>) = 
             let parentName = if(parentNode.IsSome) 

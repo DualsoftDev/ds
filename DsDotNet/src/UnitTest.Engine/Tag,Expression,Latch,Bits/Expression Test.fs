@@ -1,16 +1,16 @@
 namespace UnitTest.Engine
 
 
-open Xunit
 open Engine.Core
 open Engine.Common.FS
 open Engine.Runner
-open Xunit.Abstractions
 open System
+open NUnit.Framework
 
 [<AutoOpen>]
 module ExpressionTest =
-    type ExpressionTests1(output1:ITestOutputHelper) =
+    type ExpressionTests1() =
+        do Fixtures.SetUpTest()
         let init() =
             Global.BitChangedSubject
                 .Subscribe(fun bc ->
@@ -20,9 +20,8 @@ module ExpressionTest =
             |> ignore
 
 
-        interface IClassFixture<Fixtures.DemoFixture>
 
-        [<Fact>]
+        [<Test>]
         member __.``And test`` () =
             task {
                 logInfo "============== And test"
@@ -43,7 +42,8 @@ module ExpressionTest =
 
 
                 xAnd.Value === false
-                [a1; a2; a3] |> Seq.iter (fun x -> enqueue(x, true).Wait())
+                for x in [a1; a2; a3] do
+                    do! enqueue(x, true)                    
                 xAnd.Value === true
 
                 do! enqueue(a2, false)
@@ -59,7 +59,7 @@ module ExpressionTest =
 
 
 
-        [<Fact>]
+        [<Test>]
         member __.``Or test`` () =
             task {
                 logInfo "============== Or test"
@@ -84,7 +84,8 @@ module ExpressionTest =
                 do! enqueue(a3, true)
                 xOr.Value === true
 
-                [a1; a2; a3] |> Seq.iter (fun x -> enqueue(x, false).Wait())
+                for x in [a1; a2; a3] do
+                    do! enqueue(x, false)                    
                 xOr.Value === false
 
                 do! enqueue(a1, true)
@@ -97,7 +98,7 @@ module ExpressionTest =
 
 
 
-        [<Fact>]
+        [<Test>]
         member __.``Not test`` () =
             logInfo "============== Not test"
             init()
@@ -125,7 +126,7 @@ module ExpressionTest =
             xNot.Value === false
 
 
-        [<Fact>]
+        [<Test>]
         member __.``복합 expression test`` () =
             logInfo "============== 복합 expression test"
             init()
@@ -167,7 +168,7 @@ module ExpressionTest =
             (fun () -> enqueue(x, true).Wait()) |> ShouldFail
 
 
-        [<Fact>]
+        [<Test>]
         member __.``(+Latch)복합 expression test`` () =
             logInfo "============== 복합(+Latch) expression test"
             init()

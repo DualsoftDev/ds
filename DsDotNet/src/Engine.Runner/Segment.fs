@@ -9,6 +9,7 @@ open Engine.Core
 open Engine.Common.FS
 open Engine.Common
 open System.Threading
+open Engine.Base
 
 
 [<AutoOpen>]
@@ -79,7 +80,7 @@ module FsSegmentModule =
 
 
         default x.WireEvent() =
-            let mutable oldStatus:Status4 option = None
+            let mutable oldStatus:DsType.Status4 option = None
             let mutable cts = new CancellationTokenSource()
             let n = x.QualifiedName
             let write = x.AsyncWrite
@@ -102,7 +103,7 @@ module FsSegmentModule =
                             else failwithlog "ERROR"
 
                         match bitMatch, state, value with
-                        | 's', Status4.Finished, false -> // finish 도중에 start port 꺼져서 finish 완료되려는 시점
+                        | 's', Status4.Finish, false -> // finish 도중에 start port 꺼져서 finish 완료되려는 시점
                             // case1 : Reset port 켜지는 시점
                             // case2 : EndPort 꺼지는 시점에 : Reset port 는 아직 살아 있으므로 homing 
                             ()
@@ -123,7 +124,7 @@ module FsSegmentModule =
                             x.DbgIsOriginating <- false
                         | 'e', Status4.Going, true ->
                             logDebug $"\t\tAbout to finished going: [{n}] status : {state} {cause}"
-                        | 'e', Status4.Finished, _ ->
+                        | 'e', Status4.Finish, _ ->
                             assert(value)
 
                         | 's', Status4.Homing, true ->      // homing 중에 start port 가 켜진 상태
@@ -144,9 +145,9 @@ module FsSegmentModule =
 
                             logInfo $"[{n}] Segment status : {state} {cause}"
                             if x.Going.Value && state <> Status4.Going then
-                                do! write(x.Going, false, $"{n} going off by status {state}")
+                                write(x.Going, false, $"{n} going off by status {state}") |> Async.Start
                             if x.Ready.Value && state <> Status4.Ready then
-                                do! write(x.Ready, false, $"{n} ready off by status {state}")
+                                write(x.Ready, false, $"{n} ready off by status {state}")  |> Async.Start
                             if state <> Status4.Ready then
                                 isInitialReady <- false
 
@@ -161,10 +162,9 @@ module FsSegmentModule =
                                 match state with
                                 | Status4.Ready -> doReady(x)
                                 | Status4.Going -> doGoing(x)
-                                | Status4.Finished -> doFinish(x)
+                                | Status4.Finish -> doFinish(x)
                                 | Status4.Homing -> doHoming(x)
-                                | _ ->
-                                    failwithlog "Unexpected"
+                                    
 
                             do! task
 

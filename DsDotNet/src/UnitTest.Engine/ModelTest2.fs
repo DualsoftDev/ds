@@ -1,21 +1,19 @@
 namespace UnitTest.Engine
 
 
-open Xunit
 open Engine
 open Engine.Core
 open System.Linq
 open Engine.Common.FS
-open Xunit.Abstractions
 open Engine.Runner
+open NUnit.Framework
 
 [<AutoOpen>]
 module ModelTest2 =
-    type DemoTests2(output1:ITestOutputHelper) =
+    type DemoTests2() =
+        do Fixtures.SetUpTest()
 
-        interface IClassFixture<Fixtures.DemoFixture>
-
-        [<Fact>]
+        [<Test>]
         member __.``Parse Alias & Task`` () =
             logInfo "============== Parse Alias & Task"
             let mutable text = """
@@ -73,7 +71,7 @@ module ModelTest2 =
             ()
 
 
-        [<Fact>]
+        [<Test>]
         member __.``Tag/Edge with two main`` () =
             logInfo "============== Tag/Edge with two main"
             let mutable text = """
@@ -280,7 +278,7 @@ module ModelTest2 =
 
 
 
-        [<Fact>]
+        [<Test>]
         member __.``Find object from model`` () =
             logInfo "============== Find object from model"
             let mutable text = """
@@ -333,8 +331,8 @@ module ModelTest2 =
                 let cpStart = cp.TagsStart |> Seq.exactlyOne
                 let vpStart = vp.TagPStart
                 cpStart.Name === vpStart.Name
-                cpStart === vpStart
-                cpStart.Cpu === vpStart.Owner.Cpu
+                cpStart =!= vpStart
+                cpStart.Cpu =!= vpStart.Owner.Cpu
 
                 let pp = model.FindObject<Segment>("P.F.Pp");
                 pp.Name === "Pp"
@@ -344,7 +342,35 @@ module ModelTest2 =
                 sp.Name === "Sp"
                 let cpEnd = cp.TagsEnd |> Seq.exactlyOne
                 cpEnd.Name === sp.TagPEnd.Name
-                cpEnd === sp.TagPEnd
-                cpEnd.Cpu === sp.TagPEnd.Owner.Cpu
+                cpEnd =!= sp.TagPEnd
+                cpEnd.Cpu =!= sp.TagPEnd.Owner.Cpu
 
+            ()
+
+
+
+        [<Test>]
+        member __.``Parse Safety`` () =
+            logInfo "============== Parse Safety"
+            let mutable text = """
+[sys] L = {
+    [flow] F = {
+        Main = { T.Cp > T.Cm; }
+        [safety] = {
+            Main = {P.F.Sp; P.F.Sm}
+            Main2 = {P.F.Sp; P.F.Sm}
+        }
+    }
+}
+
+[prop] = {
+    [ safety ] = {
+        L.F.Main = {P.F.Sp; P.F.Sm}
+        L.F.Main2 = {P.F.Sp; P.F.Sm}
+    }
+}
+"""
+            text <- text + sysP + cpus
+
+            let builder = new EngineBuilder(text, "Cpu")
             ()

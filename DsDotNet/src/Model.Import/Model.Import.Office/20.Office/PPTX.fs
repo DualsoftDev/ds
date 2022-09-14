@@ -1,4 +1,4 @@
-﻿// Copyright (c) Dual Inc.  All Rights Reserved.
+// Copyright (c) Dual Inc.  All Rights Reserved.
 namespace Model.Import.Office
 
 open System.Linq
@@ -10,6 +10,9 @@ open System.IO
 open System
 open UtilPPT
 open UtilMS
+open Engine.Common.FS
+open Engine.Base
+open System.Collections.Generic
 
 
 
@@ -112,10 +115,8 @@ module PPTX =
                     |_->  match single, tailArrow, dashLine with
                             | true, true, false ->  EdgeCausal.SEdge, isChangeHead
                             | false,true, false ->  EdgeCausal.SPush, isChangeHead
-                            | true, false,false ->  EdgeCausal.SSTATE, isChangeHead
                             | true, true, true  ->  EdgeCausal.REdge, isChangeHead
                             | false,true, true  ->  EdgeCausal.RPush, isChangeHead
-                            | true, false,true  ->  EdgeCausal.RSTATE, isChangeHead
                             | _ -> conn.ErrorConnect(3, startName, endName, iPage)
 
     let rec ValidGroup(subG:Presentation.GroupShape, shapeIds:ConcurrentHash<uint32>) =    
@@ -133,43 +134,48 @@ module PPTX =
         member x.IsUsing = bShow
         member x.Title = slidePart.PageTitle()
 
-    type pptNode(shape:Presentation.Shape,iPage:int, dashOutline:bool , shapeType:ShapeTypeValues, sildeSize)  =
+    type pptNode(shape:Presentation.Shape,iPage:int, dashOutline:bool , sildeSize)  =
         let mutable txCnt = 1
         let mutable rxCnt = 1
-        let mutable  name = ""
-        do 
-            if(shape.InnerText.Contains("[") && shape.InnerText.EndsWith("]"))
+        let mutable name = ""
+        let mutable safeties = HashSet<string>()
+        let mutable bDuumy = false
+        let updateTxRx(tailBarckets) =
+            if(tailBarckets  = ""|> not)
             then 
-                let matches = System.Text.RegularExpressions.Regex.Matches(shape.InnerText, "(?<=\[).*?(?=\])")
-                let data = matches.[matches.Count-1]
-
-                if(data.Value.Split(',').Count() > 1)
+                if(tailBarckets.Split(',').Count() > 1)
                 then 
-                    txCnt <- data.Value.Split(',').[0] |> Convert.ToInt32
-                    rxCnt <- data.Value.Split(',').[1] |> Convert.ToInt32
-                    name <- shape.InnerText.Replace($"[{data.Value}]","")
+                    txCnt <- tailBarckets.Split(',').[0] |> Convert.ToInt32
+                    rxCnt <- tailBarckets.Split(',').[1] |> Convert.ToInt32
                 else 
                     shape.ErrorName(22, iPage)
-            else 
-                name <- shape.InnerText
+
+        let updateSafety(headBarckets) =
+            
+            if(headBarckets = ""|> not)
+            then safeties <- headBarckets.Split(';') |> HashSet 
+
+        do 
+            name <- shape.InnerText
+            GetSquareBrackets(name, false) |> updateTxRx
+            GetSquareBrackets(name, true ) |> updateSafety
+            name <- GetBracketsReplaceName(name)
+            bDuumy <- shape.CheckEllipse() && dashOutline
             
         member x.PageNum = iPage
         member x.Shape = shape
-        member x.ShapeTypeValues = shapeType
         member x.DashOutline = dashOutline
+        member x.Safeties = safeties
+        member x.IsDummy = bDuumy
         member val NodeCausal = 
-                            match shapeType with
-                                |ShapeTypeValues.Rectangle
-                                |ShapeTypeValues.FlowChartProcess  -> if(dashOutline) then EX else  MY
-                                |ShapeTypeValues.Ellipse   
-                                |ShapeTypeValues.FlowChartAlternateProcess 
-                                |ShapeTypeValues.FlowChartConnector->    
-                                    if(dashOutline) then DUMMY 
-                                    else  
-                                        if((txCnt = 0 && rxCnt = 0) || txCnt < 0 || rxCnt < 0) then shape.ErrorName(2, iPage)
-                                        else TR
-                                |_ -> shape.ErrorName(1, iPage)
-
+                            if(shape.CheckRectangle()) then if(dashOutline) then EX else  MY
+                            else 
+                            if(shape.CheckEllipse()) 
+                            then 
+                                if((txCnt = 0 && rxCnt = 0) || txCnt < 0 || rxCnt < 0)
+                                then shape.ErrorName(2, iPage)
+                                else TR
+                            else  shape.ErrorName(1, iPage)
 
         member val Id =  shape.GetId()
         member val Key =  Objkey(iPage, shape.GetId())
@@ -223,7 +229,7 @@ module PPTX =
             let dummys = 
                 ids 
                 |> Seq.map (fun id -> nodes.[ Objkey(iPage, id) ])
-                |> Seq.filter (fun node -> node.NodeCausal = DUMMY)
+                |> Seq.filter (fun node -> node.IsDummy)
             if(dummys.Count() > 1) 
             then  Office.ErrorPPT(Group, 24, $"부모수:{dummys.Count()}", iPage)
             if(parents.Count() = 0 && dummys.Count() = 0 ) 
@@ -242,7 +248,7 @@ module PPTX =
                 ids 
                 |> Seq.map (fun id -> nodes.[Objkey(iPage, id) ])
                 |> Seq.filter (fun node ->node.NodeCausal = MY |> not)
-                |> Seq.filter (fun node ->(node.NodeCausal = DUMMY|>not ||  parent.IsSome))
+                |> Seq.filter (fun node ->(node.IsDummy|>not ||  parent.IsSome))
 
             if(children.Any() |> not) 
             then  Office.ErrorPPT(Group, 12, $"자식수:0", iPage)
@@ -298,8 +304,8 @@ module PPTX =
               
                 shapes 
                 |> Seq.iter (fun (shape, page, geometry, isDash) ->
-                            let node = pptNode(shape, page,  isDash, geometry, sildeSize)
-                            if(node.Name ="" && node.NodeCausal = DUMMY|>not) then shape.ErrorName(13, page)
+                            let node = pptNode(shape, page,  isDash,  sildeSize)
+                            if(node.Name ="" && node.IsDummy|>not) then shape.ErrorName(13, page)
                             nodes.TryAdd(node.Key, node)  |>ignore )
                              
                 connections
@@ -361,7 +367,7 @@ module PPTX =
                 doc.Close()
               
             with ex -> doc.Close()
-                       Event.MSGError  $"{ex.Message}"
+                       MSGError  $"{ex.Message}"
                 
 
         member x.GetPage(pageNum:int) = pages.Values |> Seq.filter(fun p -> p.PageNum = pageNum) |> Seq.head

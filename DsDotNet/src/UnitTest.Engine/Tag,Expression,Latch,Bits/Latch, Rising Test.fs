@@ -1,16 +1,16 @@
 namespace UnitTest.Engine
 
 
-open Xunit
 open Engine.Core
 open Engine.Runner
 open Engine.Common.FS
-open Xunit.Abstractions
 open System
+open NUnit.Framework
 
 [<AutoOpen>]
 module LatchTest =
-    type LatchTests1(output1:ITestOutputHelper) =
+    type LatchTests1() =
+        do Fixtures.SetUpTest()
         let init() =
             Global.BitChangedSubject
                 .Subscribe(fun bc ->
@@ -19,9 +19,8 @@ module LatchTest =
                 )
             |> ignore
 
-        interface IClassFixture<Fixtures.DemoFixture>
 
-        [<Fact>]
+        [<Test>]
         member __.``Latch test`` () =
             task {
                 logInfo "============== Latch test"
@@ -65,7 +64,7 @@ module LatchTest =
                 latch.Value === false
             } |> Async.AwaitTask |> Async.RunSynchronously
 
-        [<Fact>]
+        [<Test>]
         member __.``ResetLatch test`` () =
             task {
                 let cpu = new Cpu("dummy", new Model())
@@ -93,7 +92,7 @@ module LatchTest =
             } |> Async.AwaitTask |> Async.RunSynchronously
 
 
-        //[<Fact>]
+        //[<Test>]
         //member __.``Obsolete Rising test`` () =
         //    logInfo "============== Rising test"
         //    init()

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net48</TargetFrameworks>
+    <!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
+	  <LangVersion>10.0</LangVersion>
+	  <RootNamespace>Control.Opc</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="FSharp.Core" Version="6.0.5" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Engine.Common\Engine.Common.csproj" />
+    <ProjectReference Include="..\Engine.Core\Engine.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Confluent.Kafka">
+      <HintPath>..\..\exLib\Confluent.Kafka.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net">
+      <HintPath>..\..\exLib\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive">
+      <HintPath>..\..\exLib\System.Reactive.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>

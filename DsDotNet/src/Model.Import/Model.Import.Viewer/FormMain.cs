@@ -1,28 +1,26 @@
-using Model.Import.Office;
+using Engine.Common;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static Engine.Common.FS.MessageEvent;
 using static Model.Import.Office.Event;
 using static Model.Import.Office.Model;
 using static Model.Import.Office.Object;
-using static Model.Import.Office.Type;
 
 namespace Dual.Model.Import
 {
     public partial class FormMain : Form
     {
         public static FormMain TheMain;
-        
-        private DsModel _model;
-        private bool _ConvertErr = false;   
 
-        public Dictionary<Flow, TabPage> DicUI;
+        private DsModel _model;
+        private bool _ConvertErr = false;
+
+        public Dictionary<Flo, TabPage> DicUI;
         public string PathPPT;
         public string PathXLS;
         public bool Busy = false;
@@ -41,7 +39,7 @@ namespace Dual.Model.Import
             button_copy.Visible = false;
 
             richTextBox_Debug.AppendText($"{DateTime.Now} : *.pptx 를 드랍하면 시작됩니다");
-            
+
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -50,12 +48,12 @@ namespace Dual.Model.Import
             EventExternal.MSGSubscribe();
             EventExternal.SegSubscribe();
 
-            DicUI = new Dictionary<Flow, TabPage>();
+            DicUI = new Dictionary<Flo, TabPage>();
 
-           // this.Text = UtilFile.GetVersion();
+            // this.Text = UtilFile.GetVersion();
             this.Size = new Size(500, 500);
 
-         
+
         }
 
         void Form1_DragEnter(object sender, DragEventArgs e)
@@ -94,10 +92,10 @@ namespace Dual.Model.Import
         {
             progressBar1.Do(() => progressBar1.Value = percent);
         }
-     
+
         private void InitModel(string path)
         {
-          
+
             try
             {
                 if (UtilFile.BusyCheck()) return;
@@ -122,11 +120,11 @@ namespace Dual.Model.Import
             }
             catch
             {
-                WriteDebugMsg(DateTime.Now, MSGLevel.Error, $"{ PathPPT} 불러오기 실패!!");
+                WriteDebugMsg(DateTime.Now, MSGLevel.Error, $"{PathPPT} 불러오기 실패!!");
             }
 
         }
-     
+
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
             if ((Keys)e.KeyValue == Keys.F1) { HelpLoad(); }
@@ -141,14 +139,7 @@ namespace Dual.Model.Import
             WriteDebugMsg(DateTime.Now, MSGLevel.Info, $"클립보드복사 성공!! Ctrl+V로 붙여넣기 가능합니다.");
 
         }
-        private void button_ClearLog_Click(object sender, EventArgs e)
-        {
-            richTextBox_Debug.Clear();
-            richTextBox_Debug.AppendText($"{DateTime.Now} : Log Clear");
 
-          
-
-        }
         private void button_CreateExcel_Click(object sender, EventArgs e)
         {
             ExportExcel();
@@ -158,11 +149,19 @@ namespace Dual.Model.Import
             Process.Start(Path.GetDirectoryName(PathXLS));
         }
 
+
+
+        private void button_ClearLog_Click(object sender, EventArgs e)
+        {
+            richTextBox_Debug.Clear();
+            richTextBox_Debug.AppendText($"{DateTime.Now} : Log Clear");
+        }
+
         private async void button_TestORG_Click(object sender, EventArgs e)
         {
             button_TestORG.Enabled = false;
             button_TestStart.Enabled = false;
-            await  SimSegment.TestORG(_model);
+            await SimSeg.TestORG(_model);
             button_TestORG.Enabled = true;
             button_TestStart.Enabled = true;
         }
@@ -170,7 +169,7 @@ namespace Dual.Model.Import
         {
             button_TestORG.Enabled = false;
             button_TestStart.Enabled = false;
-            await SimSegment.TestStart(_model);
+            await SimSeg.TestStart(_model);
             button_TestORG.Enabled = true;
             button_TestStart.Enabled = true;
         }

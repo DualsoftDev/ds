@@ -1,10 +1,10 @@
-﻿namespace Engine.Core;
+namespace Engine.Core;
 
 public class DsSystem : Named
 {
     public Model Model;
     public List<RootFlow> RootFlows = new();
-    public List<DsTask> Tasks = new();
+    public List<SysTask> Tasks = new();
     public DsSystem(string name, Model model)
         : base(name)
     {

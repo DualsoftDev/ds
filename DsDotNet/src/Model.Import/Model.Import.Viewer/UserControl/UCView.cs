@@ -1,3 +1,4 @@
+using Engine.Common;
 using Microsoft.Msagl.Drawing;
 using Microsoft.Msagl.GraphViewerGdi;
 using Microsoft.Msagl.Layout.Layered;
@@ -6,7 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using static Model.Import.Office.Object;
-using static Model.Import.Office.Type;
+using static Engine.Base.DsType;
+
 using Color = Microsoft.Msagl.Drawing.Color;
 
 namespace Dual.Model.Import
@@ -30,12 +32,12 @@ namespace Dual.Model.Import
 
         }
 
-        private Dictionary<Tuple<Segment, Status>, int> _dicCycle = new Dictionary<Tuple<Segment, Status>, int>();
+        private Dictionary<Tuple<Seg, Status4>, int> _dicCycle = new Dictionary<Tuple<Seg, Status4>, int>();
         private Dictionary<string, Node> _dicDrawing = new Dictionary<string, Node>();
 
 
 
-        public void SetGraph(Flow flow)
+        public void SetGraph(Flo flow)
         {
             //sub 그래프 불가
             //viewer.Graph.LayoutAlgorithmSettings = new Microsoft.Msagl.Layout.MDS.MdsLayoutSettings();
@@ -67,7 +69,7 @@ namespace Dual.Model.Import
 
             var subDraws = flow.DrawSubs.ToList();
 
-            flow.NoEdgeSegs.ToList().ForEach(seg => DrawSegment(viewer.Graph.RootSubgraph, seg, subDraws));
+            flow.NoEdgeSegs.ToList().ForEach(seg => DrawSeg(viewer.Graph.RootSubgraph, seg, subDraws));
 
             drawMEdgeGraph(flow.Edges.ToList(), subDraws, viewer.Graph.RootSubgraph);
 
@@ -86,14 +88,14 @@ namespace Dual.Model.Import
 
 
 
-        private void drawMEdgeGraph(List<MEdge> edges, List<Segment> drawSubs, Subgraph subgraph)
+        private void drawMEdgeGraph(List<MEdge> edges, List<Seg> drawSubs, Subgraph subgraph)
         {
             foreach (var mEdge in edges)
                 DrawMEdge(subgraph, mEdge, drawSubs);
 
         }
 
-        private void DrawMEdge(Subgraph subgraph, MEdge edge, List<Segment> drawSubs)
+        private void DrawMEdge(Subgraph subgraph, MEdge edge, List<Seg> drawSubs)
         {
             MEdge mEdge = edge;
 
@@ -113,7 +115,7 @@ namespace Dual.Model.Import
             DrawSub(subgraph, mEdgeTgt, subGTgt, gEdge.TargetNode, bDrawSubTgt);
 
         }
-        private void DrawSegment(Subgraph subgraph, Segment seg, List<Segment> drawSubs)
+        private void DrawSeg(Subgraph subgraph, Seg seg, List<Seg> drawSubs)
         {
 
             bool bDrawSubSrc = (seg.IsChildExist || seg.NoEdgeSegs.Any()) && (drawSubs == null || drawSubs.Contains(seg));
@@ -130,7 +132,7 @@ namespace Dual.Model.Import
 
         }
 
-        private void DrawSub(Subgraph subgraph, Segment seg, Subgraph subG, Node gNode, bool bDrawSub)
+        private void DrawSub(Subgraph subgraph, Seg seg, Subgraph subG, Node gNode, bool bDrawSub)
         {
             if (_dicDrawing.ContainsKey(gNode.Id)) return;
             else _dicDrawing.Add(gNode.Id, gNode);
@@ -140,7 +142,7 @@ namespace Dual.Model.Import
                 if (seg.MEdges.Any())
                     drawMEdgeGraph(seg.MEdges.ToList(), null, subG);
 
-                seg.NoEdgeSegs.ToList().ForEach(subSeg => DrawSegment(subG, subSeg, null));
+                seg.NoEdgeSegs.ToList().ForEach(subSeg => DrawSeg(subG, subSeg, null));
             }
             else
                 subgraph.AddNode(gNode);
@@ -168,14 +170,6 @@ namespace Dual.Model.Import
                 gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
                 gEdge.Attr.Color = Color.DeepSkyBlue;
             }
-            else if (edge.Causal == EdgeCausal.SSTATE)
-            {
-                gEdge.Attr.AddStyle(Style.Solid);
-                gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Diamond;
-                gEdge.Attr.Color = Color.IndianRed;
-                gEdge.Attr.LineWidth = 4;
-
-            }
             else if (edge.Causal == EdgeCausal.REdge)
             {
                 gEdge.Attr.AddStyle(Style.Dashed);
@@ -188,13 +182,6 @@ namespace Dual.Model.Import
                 gEdge.Attr.LineWidth = 4;
                 gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
                 gEdge.Attr.Color = Color.Green;
-            }
-            else if (edge.Causal == EdgeCausal.RSTATE)
-            {
-                gEdge.Attr.AddStyle(Style.Dashed);
-                gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Diamond;
-                gEdge.Attr.Color = Color.IndianRed;
-                gEdge.Attr.LineWidth = 4;
             }
             else if (edge.Causal == EdgeCausal.Interlock)
             {
@@ -210,17 +197,14 @@ namespace Dual.Model.Import
                 gEdge.Attr.Color = Color.PaleGoldenrod;
             }
 
-
-
-
             UpdateLabelText(gEdge.SourceNode);
             UpdateLabelText(gEdge.TargetNode);
 
             if (model)
             {
 
-                var src = edge.SourceVertex as Segment;
-                var tgt = edge.TargetVertex as Segment;
+                var src = edge.SourceVertex as Seg;
+                var tgt = edge.TargetVertex as Seg;
 
                 UpdateNodeView(gEdge.SourceNode, src);
                 UpdateNodeView(gEdge.TargetNode, tgt);
@@ -228,7 +212,7 @@ namespace Dual.Model.Import
             }
         }
 
-        private void UpdateNodeView(Node nNode, Segment segment)
+        private void UpdateNodeView(Node nNode, Seg segment)
         {
             {
                 //nNode.Attr.Color = Color.DarkGoldenrod;
@@ -243,15 +227,14 @@ namespace Dual.Model.Import
                     nNode.Attr.Shape = Shape.Ellipse;
                 if (segment.NodeCausal == NodeCausal.RX)
                     nNode.Attr.Shape = Shape.Ellipse;
-                if (segment.NodeCausal == NodeCausal.DUMMY)
-                    nNode.Attr.Shape = Shape.DrawFromGeometry;
+               
             }
         }
 
         public void RefreshGraph() { viewer.Do(() => viewer.Refresh()); }
 
 
-        public void Update(Segment seg)
+        public void Update(Seg seg)
         {
 
             Node node = viewer.Graph.FindNode(seg.UIKey);
@@ -267,9 +250,9 @@ namespace Dual.Model.Import
             if (seg != null)
             {
                 if (seg.NodeCausal == NodeCausal.MY)
-                    UpdateLineColor(seg.Status, node);
+                    UpdateLineColor(seg.Status4, node);
                 else
-                    UpdateFillColor(seg.Status, node);
+                    UpdateFillColor(seg.Status4, node);
             }
             else
             {
@@ -279,28 +262,28 @@ namespace Dual.Model.Import
             RefreshGraph();
         }
 
-        private static void UpdateFontColor(Status newStatus, Node node)
+        private static void UpdateFontColor(Status4 newStatus, Node node)
         {
-            if (newStatus == Status.R) node.Label.FontColor = Color.DarkGreen;
-            else if (newStatus == Status.G) node.Label.FontColor = Color.DarkKhaki;
-            else if (newStatus == Status.F) node.Label.FontColor = Color.DarkBlue;
-            else if (newStatus == Status.H) node.Label.FontColor = Color.Black;
+            if (newStatus == Status4.Ready)         node.Label.FontColor = Color.DarkGreen;
+            else if (newStatus == Status4.Going)    node.Label.FontColor = Color.DarkKhaki;
+            else if (newStatus == Status4.Finish)   node.Label.FontColor = Color.DarkBlue;
+            else if (newStatus == Status4.Homing)   node.Label.FontColor = Color.Black;
         }
 
-        private static void UpdateLineColor(Status newStatus, Node node)
+        private static void UpdateLineColor(Status4 newStatus, Node node)
         {
-            if (newStatus == Status.R) node.Attr.Color = Color.DarkOliveGreen;
-            else if (newStatus == Status.G) node.Attr.Color = Color.DarkGoldenrod;
-            else if (newStatus == Status.F) node.Attr.Color = Color.DarkBlue;
-            else if (newStatus == Status.H) node.Attr.Color = Color.DimGray;
+          if (newStatus == Status4.Ready)        node.Attr.Color = Color.DarkOliveGreen;
+          else if (newStatus == Status4.Going)   node.Attr.Color = Color.DarkGoldenrod;
+          else if (newStatus == Status4.Finish)  node.Attr.Color = Color.DarkBlue;
+            else if (newStatus == Status4.Homing) node.Attr.Color = Color.DimGray;
         }
 
-        private static void UpdateFillColor(Status newStatus, Node node)
+        private static void UpdateFillColor(Status4 newStatus, Node node)
         {
-            if (newStatus == Status.R) node.Attr.FillColor = Color.DarkOliveGreen;
-            else if (newStatus == Status.G) node.Attr.FillColor = Color.DarkGoldenrod;
-            else if (newStatus == Status.F) node.Attr.FillColor = Color.DarkBlue;
-            else if (newStatus == Status.H) node.Attr.FillColor = Color.DimGray;
+            if (newStatus == Status4.Ready)        node.Attr.FillColor = Color.DarkOliveGreen;
+            else if (newStatus == Status4.Going)   node.Attr.FillColor = Color.DarkGoldenrod;
+            else if (newStatus == Status4.Finish)  node.Attr.FillColor = Color.DarkBlue;
+            else if (newStatus == Status4.Homing)  node.Attr.FillColor = Color.DimGray;
         }
 
         internal void SetBackColor(System.Drawing.Color color)

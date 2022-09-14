@@ -25,7 +25,7 @@ public class Xywh
 
 public class CallPrototype : CallBase
 {
-    public DsTask Task;
+    public DsTask Task;     // SysTask or FlowTask
 
     /// <summary> 주로 target system 의 segment </summary>
     public List<ITxRx> TXs = new(); // empty 이면 '_' 를 의미
@@ -126,12 +126,12 @@ public class RootCall : Call
 
 /// <summary> 외부 segment 에 대한 호출 </summary>
 [DebuggerDisplay("[{ToText()}]")]
-public class ExSegmentCall: Coin
+public class ExSegment: Coin
 {
     public SegmentBase ExternalSegment;
     public Child ContainerChild { get; set; }
 
-    public ExSegmentCall(string aliasName, SegmentBase externalSegment)
+    public ExSegment(string aliasName, SegmentBase externalSegment)
         : base(aliasName)
     {
         ExternalSegment = externalSegment;

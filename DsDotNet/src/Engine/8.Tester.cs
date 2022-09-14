@@ -1,7 +1,7 @@
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-
+using Engine.Base;
 using Engine.Graph;
 
 namespace Engine;
@@ -100,7 +100,7 @@ public class Tester
         Program.Engine = engine;
         engine.Run();
 
-        var opc = engine.Opc;
+        var data = engine.Data;
 
         //var resetTag = "Reset_L_F_Main";
         //if (engine.Cpu.BitsMap.ContainsKey(resetTag))
@@ -109,23 +109,23 @@ public class Tester
         //    var main = children.OfType<Segment>().FirstOrDefault(c => c.Name == "Main");
         //    var edges = main.Edges.ToArray();
 
-        //    opc.Write(resetTag, true);
-        //    opc.Write(resetTag, false);
-        //    opc.Write("ManualStart_L_F_Main", true);
-        //    //opc.Write(resetTag, true);
+        //    data.Write(resetTag, true);
+        //    data.Write(resetTag, false);
+        //    data.Write("ManualStart_L_F_Main", true);
+        //    //data.Write(resetTag, true);
 
-        //    opc.Write("AutoStart_L_F_Main", true);
+        //    data.Write("AutoStart_L_F_Main", true);
         //}
 
         var startTag = "Start_L_F_Main";
         if (engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(startTag))
         {
-            opc.Write(startTag, true);
-            opc.Write("Auto_L_F", true);
-            //opc.Write(resetTag, true);
+            data.Write(startTag, true);
+            data.Write("Auto_L_F", true);
+            //data.Write(resetTag, true);
 
-            //opc.Write("AutoStart_L_F_Main", true);
-            //opc.Write("ManualStart_A_F_Pp", true);
+            //data.Write("AutoStart_L_F_Main", true);
+            //data.Write("ManualStart_A_F_Pp", true);
         }
 
         engine.Wait();
@@ -206,7 +206,7 @@ public class Tester
         Program.Engine = engine;
         engine.Run();
 
-        var opc = engine.Opc;
+        var Data = engine.Data;
 
         engine.Wait();
     }
@@ -251,7 +251,7 @@ public class Tester
         engine.Run();
 
 
-        var opc = engine.Opc;
+        var data = engine.Data;
 
         var startTag = "StartPlan_L_F_Main";
         var resetTag = "ResetPlan_L_F_Main";
@@ -262,18 +262,18 @@ public class Tester
             var state = ssc.Status;
             if (qName == "L_F_Main")
             {
-                if (state == Status4.Finished)
+                if (state == DsType.Status4.Finish)
                 {
                     counter++;
                     Console.WriteLine($"[{counter}] After finishing Main segment : AdvanceReturn");
                     LogInfo($"-------------------------- [{counter}] After finishing Main segment : AdvanceReturn");
-                    opc.Write(resetTag, true);
+                    data.Write(resetTag, true);
                 }
-                else if (ssc.Status == Status4.Ready)
+                else if (ssc.Status == DsType.Status4.Ready)
                 {
                     Console.Beep(10000, 200);
                     Thread.Sleep(1000);
-                    opc.Write(startTag, true);
+                    data.Write(startTag, true);
                 }
             }
         });
@@ -321,11 +321,11 @@ public class Tester
                 ;
         if (hasAddress)
         {
-            InterlockChecker.CreateFromCylinder(opc, new[] { "A_F" });
+            InterlockChecker.CreateFromCylinder(data, new[] { "A_F" });
 
             // 모든 출력 끊기
-            opc.Write("StartActual_A_F_Vp", false);
-            opc.Write("StartActual_A_F_Vm", false);
+            data.Write("StartActual_A_F_Vp", false);
+            data.Write("StartActual_A_F_Vm", false);
 
             // simulating physics
             if (Global.IsControlMode)
@@ -333,9 +333,9 @@ public class Tester
             else
             {
                 //// initial condition
-                //opc.Write("EndActual_A_F_Sm", true);
-                //opc.Write("EndActual_B_F_Sm", true);
-                Simulator.CreateFromCylinder(opc, new[] { "A_F" });
+                //data.Write("EndActual_A_F_Sm", true);
+                //data.Write("EndActual_B_F_Sm", true);
+                Simulator.CreateFromCylinder(data, new[] { "A_F" });
             }
 
 
@@ -354,14 +354,14 @@ public class Tester
                     {
                         LogInfo($"Simualting Plan for Sensor {n} value={val}");
                         if (n == "StartPlan_A_F_Vp")
-                            opc.Write("StartActual_A_F_Vp", val);
+                            data.Write("StartActual_A_F_Vp", val);
                         else if (n == "StartPlan_A_F_Vm")
-                            opc.Write("StartActual_A_F_Vm", val);
+                            data.Write("StartActual_A_F_Vm", val);
 
                         //if (n == "EndPlan_A_F_Sp")
-                        //    opc.Write("EndActual_A_F_Sp", val);
+                        //    data.Write("EndActual_A_F_Sp", val);
                         //else if (n == "EndPlan_A_F_Sm")
-                        //    opc.Write("EndActual_A_F_Sm", val);
+                        //    data.Write("EndActual_A_F_Sm", val);
                     }
 
                     //if (Global.IsDebugStopAndGoStressMode && bc.Bit.Cpu.Name == "ACpu")
@@ -373,11 +373,11 @@ public class Tester
                     //        LogInfo($"출력 끊기 simulation: {n}");
                     //        // opc 보다 먼저 변경을 알림...
                     //        Global.DebugNotifyingSubject.OnNext(("StartActual_A_F_Vp", false));
-                    //        opc.Write("StartActual_A_F_Vp", false);
+                    //        data.Write("StartActual_A_F_Vp", false);
 
                     //        LogDebug($"출력 되살리기 simulation: {n}");
                     //        await Task.Delay(20);
-                    //        opc.Write("StartActual_A_F_Vp", true);
+                    //        data.Write("StartActual_A_F_Vp", true);
                     //    }
 
                     //    if (!onceAp && n == "EndActual_A_F_Sm" && val)
@@ -389,10 +389,10 @@ public class Tester
                         onceMain = false;
                         await Task.Delay(50);
                         LogInfo($"출력 끊기 simulation: {n}");
-                        opc.Write(startTag, false);
+                        data.Write(startTag, false);
                         await Task.Delay(50);
                         LogDebug($"출력 되살리기 simulation: {n}");
-                        opc.Write(startTag, true);
+                        data.Write(startTag, true);
                     }
                 });
 
@@ -400,8 +400,8 @@ public class Tester
         }
 
         Assert(engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(startTag));
-        opc.Write("Auto_L_F", true);
-        opc.Write(startTag, true);
+        data.Write("Auto_L_F", true);
+        data.Write(startTag, true);
 
         engine.Wait();
     }
@@ -456,7 +456,7 @@ public class Tester
         Program.Engine = engine;
         engine.Run();
 
-        var opc = engine.Opc;
+        var data = engine.Data;
 
         var startTag = "StartPlan_L_F_Main";
         var resetTag = "ResetPlan_L_F_Main";
@@ -467,17 +467,17 @@ public class Tester
             var state = ssc.Status;
             if (qName == "VPS_L_F_Main")
             {
-                if (state == Status4.Finished)
+                if (state == DsType.Status4.Finish)
                 {
                     LogDebug($"Resetting externally {resetTag}");
-                    opc.Write(resetTag, true);
+                    data.Write(resetTag, true);
                 }
             }
 
 
             if (qName == "L_F_Main")
             {
-                if (state == Status4.Finished)
+                if (state == DsType.Status4.Finish)
                 {
                     counter++;
                     //if (counter++ % 100 == 0)
@@ -486,13 +486,13 @@ public class Tester
                         LogInfo($"-------------------------- [Progress: {counter}] After finishing Main segment : HatOnHat");
                         //engine.Model.Print();
                     }
-                    //opc.Write(resetTag, true);
+                    //data.Write(resetTag, true);
                 }
-                else if (ssc.Status == Status4.Ready)
+                else if (ssc.Status == DsType.Status4.Ready)
                 {
                     Console.Beep(10000, 200);
                     Thread.Sleep(1000);
-                    opc.Write(startTag, true);
+                    data.Write(startTag, true);
                 }
             }
         });
@@ -555,15 +555,15 @@ public class Tester
         if (hasAddress)
         {
             // initial condition
-            opc.Write("EndActual_A_F_Sm", true);
-            opc.Write("EndActual_B_F_Sm", true);
+            data.Write("EndActual_A_F_Sm", true);
+            data.Write("EndActual_B_F_Sm", true);
 
-            InterlockChecker.CreateFromCylinder(opc, new[] { "A_F", "B_F" });
+            InterlockChecker.CreateFromCylinder(data, new[] { "A_F", "B_F" });
             // simulating physics
             if (Global.IsControlMode)
             { }   // todo : 실물 연결
             else
-                Simulator.CreateFromCylinder(opc, new[] { "A_F", "B_F" });
+                Simulator.CreateFromCylinder(data, new[] { "A_F", "B_F" });
 
             Global.BitChangedSubject
                 .Subscribe(bc =>
@@ -580,36 +580,36 @@ public class Tester
                         if (val)
                         {
                             if (n == "StartPlan_A_F_Vp")
-                                opc.Write("StartActual_A_F_Vp", val);
+                                data.Write("StartActual_A_F_Vp", val);
                             else if (n == "StartPlan_B_F_Vp")
-                                opc.Write("StartActual_B_F_Vp", val);
+                                data.Write("StartActual_B_F_Vp", val);
                             else if (n == "StartPlan_A_F_Vm")
-                                opc.Write("StartActual_A_F_Vm", val);
+                                data.Write("StartActual_A_F_Vm", val);
                             else if (n == "StartPlan_B_F_Vm")
-                                opc.Write("StartActual_B_F_Vm", val);
+                                data.Write("StartActual_B_F_Vm", val);
                         }
 
                         //else if (n == "EndPlan_A_F_Sp")
-                        //    opc.Write("EndActual_A_F_Sp", val);
+                        //    data.Write("EndActual_A_F_Sp", val);
                         //else if (n == "EndPlan_A_F_Sm")
-                        //    opc.Write("EndActual_A_F_Sm", val);
+                        //    data.Write("EndActual_A_F_Sm", val);
                         //else if (n == "EndPlan_B_F_Sp")
-                        //    opc.Write("EndActual_B_F_Sp", val);
+                        //    data.Write("EndActual_B_F_Sp", val);
                         //else if (n == "EndPlan_B_F_Sm")
-                        //    opc.Write("EndActual_B_F_Sm", val);
+                        //    data.Write("EndActual_B_F_Sm", val);
                     }
                 });
         }
 
 
         Assert(engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(startTag));
-        opc.Write(startTag, true);
-        opc.Write("Auto_L_F", true);
+        data.Write(startTag, true);
+        data.Write("Auto_L_F", true);
 
         engine.Wait();
     }
 
-    public static void DoSampleTestDiamond()
+    public static string GetTextDiamondNormal()
     {
         var text = @"
 [sys] L = {
@@ -651,11 +651,61 @@ public class Tester
     }
 }
 " + CreateCylinder("A") + "\r\n" + CreateCylinder("B");
+        return text;
+    }
 
+    /// <summary>Diamond with flow task</summary>
+    public static string GetTextDiamond()
+    {
+        var text = @"
+[sys] L = {
+    [flow] F = {
+        Main = {
+            // 정보로서의 Call 상호 리셋
+            Ap <||> Am;
+            Bp <||> Bm;
+            Ap > Am, Bp > Bm;
+        }
+        [task] = {
+            Ap = {A.F.Vp ~ A.F.Sp}
+            Am = {A.F.Vm ~ A.F.Sm}
+            Bp = {B.F.Vp ~ B.F.Sp}
+            Bm = {B.F.Vm ~ B.F.Sm}
+        }
+    }
+}
+[addresses] = {
+	L.F.Main = (%0, %0,);
+	A.F.Vp = (%QX0.1.3, ,);
+	A.F.Vm = (%QX0.1.2, ,);
+	B.F.Vp = (%QX0.1.5, ,);
+	B.F.Vm = (%QX0.1.4, ,);
+	A.F.Sp = (, , %IX0.0.5);
+	A.F.Sm = (, , %IX0.0.4);
+	B.F.Sp = (, , %IX0.0.7);
+	B.F.Sm = (, , %IX0.0.6);
+}
+[cpus] AllCpus = {
+    [cpu] Cpu = {
+        L.F;
+    }
+    [cpu] ACpu = {
+        A.F;
+    }
+    [cpu] BCpu = {
+        B.F;
+    }
+}
+" + CreateCylinder("A") + "\r\n" + CreateCylinder("B");
+        return text;
+    }
+    public static void DoSampleTestDiamond()
+    {
+        
         //Log4NetHelper.ChangeLogLevel(log4net.Core.Level.Error);
 
         Assert(!Global.IsInUnitTest);
-        var engine = new EngineBuilder(text, "Cpu").Engine;
+        var engine = new EngineBuilder(GetTextDiamond(), "Cpu").Engine;
         Program.Engine = engine;
         engine.Run();
 
@@ -675,7 +725,7 @@ public class Tester
             t.PrintOrigin();
         }
 
-        var opc = engine.Opc;
+        var data = engine.Data;
 
         var startTag = "StartPlan_L_F_Main";
         var resetTag = "ResetPlan_L_F_Main";
@@ -687,7 +737,7 @@ public class Tester
 
             if (qName == "L_F_Main")
             {
-                if (state == Status4.Finished)
+                if (state == DsType.Status4.Finish)
                 {
                     counter++;
                     //if (counter++ % 100 == 0)
@@ -696,13 +746,13 @@ public class Tester
                         LogInfo($"-------------------------- [Progress: {counter}] After finishing Main segment : Diamond");
                         //engine.Model.Print();
                     }
-                    opc.Write(resetTag, true);
+                    data.Write(resetTag, true);
                 }
-                else if (ssc.Status == Status4.Ready)
+                else if (ssc.Status == DsType.Status4.Ready)
                 {
                     Console.Beep(10000, 200);
                     Thread.Sleep(1000);
-                    opc.Write(startTag, true);
+                    data.Write(startTag, true);
                 }
             }
         });
@@ -778,13 +828,13 @@ public class Tester
                 ;
         if (hasAddress)
         {
-            InterlockChecker.CreateFromCylinder(opc, new[] { "A_F", "B_F" });
+            InterlockChecker.CreateFromCylinder(data, new[] { "A_F", "B_F" });
 
             // 모든 출력 끊기
-            opc.Write("StartActual_A_F_Vp", false);
-            opc.Write("StartActual_A_F_Vm", false);
-            opc.Write("StartActual_B_F_Vp", false);
-            opc.Write("StartActual_B_F_Vm", false);
+            data.Write("StartActual_A_F_Vp", false);
+            data.Write("StartActual_A_F_Vm", false);
+            data.Write("StartActual_B_F_Vp", false);
+            data.Write("StartActual_B_F_Vm", false);
 
             // simulating physics
             if (Global.IsControlMode)
@@ -792,9 +842,9 @@ public class Tester
             else
             {
                 //// initial condition
-                opc.Write("EndActual_A_F_Sm", true);
-                opc.Write("EndActual_B_F_Sm", true);
-                Simulator.CreateFromCylinder(opc, new[] { "A_F", "B_F" });
+                data.Write("EndActual_A_F_Sm", true);
+                data.Write("EndActual_B_F_Sm", true);
+                Simulator.CreateFromCylinder(data, new[] { "A_F", "B_F" });
             }
 
             Global.BitChangedSubject
@@ -812,31 +862,31 @@ public class Tester
                         if (val)
                         {
                             if (n == "StartPlan_A_F_Vp")
-                                opc.Write("StartActual_A_F_Vp", val);
+                                data.Write("StartActual_A_F_Vp", val);
                             else if (n == "StartPlan_B_F_Vp")
-                                opc.Write("StartActual_B_F_Vp", val);
+                                data.Write("StartActual_B_F_Vp", val);
                             else if (n == "StartPlan_A_F_Vm")
-                                opc.Write("StartActual_A_F_Vm", val);
+                                data.Write("StartActual_A_F_Vm", val);
                             else if (n == "StartPlan_B_F_Vm")
-                                opc.Write("StartActual_B_F_Vm", val);
+                                data.Write("StartActual_B_F_Vm", val);
                         }
 
                         //else if (n == "EndPlan_A_F_Sp")
-                        //    opc.Write("EndActual_A_F_Sp", val);
+                        //    data.Write("EndActual_A_F_Sp", val);
                         //else if (n == "EndPlan_A_F_Sm")
-                        //    opc.Write("EndActual_A_F_Sm", val);
+                        //    data.Write("EndActual_A_F_Sm", val);
                         //else if (n == "EndPlan_B_F_Sp")
-                        //    opc.Write("EndActual_B_F_Sp", val);
+                        //    data.Write("EndActual_B_F_Sp", val);
                         //else if (n == "EndPlan_B_F_Sm")
-                        //    opc.Write("EndActual_B_F_Sm", val);
+                        //    data.Write("EndActual_B_F_Sm", val);
                     }
                 });
         }
 
 
         Assert(engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(startTag));
-        opc.Write(startTag, true);
-        opc.Write("Auto_L_F", true);
+        data.Write(startTag, true);
+        data.Write("Auto_L_F", true);
 
         engine.Wait();
     }
@@ -864,7 +914,7 @@ public class Tester
         Program.Engine = engine;
         engine.Run();
 
-        var opc = engine.Opc;
+        var Data = engine.Data;
 
         var startTag = "StartPlan_L_F_B";
 
@@ -878,7 +928,7 @@ public class Tester
         bool first = true;
         var finished =
             Global.SegmentStatusChangedSubject
-            .Where(ssc => ssc.Status == Status4.Finished && ssc.Segment.GetType().Name == "Segment")
+            .Where(ssc => ssc.Status == DsType.Status4.Finish && ssc.Segment.GetType().Name == "Segment")
             ;
         var _counterSubscription = finished.Subscribe(ssc =>
             {
@@ -892,7 +942,7 @@ public class Tester
                     LogInfo("-------------------------- End of Main segment");
                     if (first)
                     {
-                        opc.Write(startTag, false);
+                        Data.Write(startTag, false);
                         first = false;
                     }
                 }
@@ -905,8 +955,8 @@ public class Tester
         });
 
         Assert(engine.Model.Cpus.SelectMany(cpu => cpu.BitsMap.Keys).Contains(startTag));
-        opc.Write(startTag, true);
-        opc.Write("Auto_L_F", true);
+        Data.Write(startTag, true);
+        Data.Write("Auto_L_F", true);
 
         engine.Wait();
     }
@@ -954,19 +1004,19 @@ public class Tester
         Program.Engine = engine;
         engine.Run();
 
-        var opc = engine.Opc;
+        var Data = engine.Data;
 
         Global.BitChangedSubject
             .Where(bc => bc.Bit.GetName() == "epexL_F_Main_default" && bc.Bit.Value)
             .Subscribe(bc =>
             {
-                //opc.Write("AutoStart_L_F", false);
-                opc.Write("AutoReset_L_F", true);
+                //data.Write("AutoStart_L_F", false);
+                Data.Write("AutoReset_L_F", true);
             });
 
-        opc.Write("AutoStart_L_F", true);
-        //opc.Write("ManualStart_L_F_Main", true);
-        //opc.Write("ManualStart_A_F_Pp", true);
+        Data.Write("AutoStart_L_F", true);
+        //data.Write("ManualStart_L_F_Main", true);
+        //data.Write("ManualStart_A_F_Pp", true);
 
         engine.Wait();
     }

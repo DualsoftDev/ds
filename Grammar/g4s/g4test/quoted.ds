@@ -1,0 +1,19 @@
+[sys] "Test L" = {
+    [task] "711 Task" = {
+        Cp = {"Top Level"."Mid.Level"."769\"Cell" ~ P.F.Sp}     // {Top Level}.{Mid.Level}.{769"Cell}
+        "Call.With Special" = {" With Space".".With.Dot"."WithQuote\"Cell" ~ P.F.Sp} // {Call.With Special} = { With Space}.{.With.Dot}.{WithQuote"Cell}
+    }
+
+    [flow] "711 AD" = {
+        "WithDot.Seg1" > "WithSpace Seg2";
+    }
+	[flow] S711_AD = { 	//S711_AD
+		"1st AutoRun" > "WORK.Hello";
+		WORK = {
+			"1st_CLAMP" <||> "1st_UNCLAMP";
+			"2ndCLAMP", PART_AD_ON > "RobotWeld_‘G";
+			"2nd_UNCLAMP" => "1st_UNCLAMP";
+			"RobotWeld_‘G" > "2nd_UNCLAMP";
+		}
+	}
+}

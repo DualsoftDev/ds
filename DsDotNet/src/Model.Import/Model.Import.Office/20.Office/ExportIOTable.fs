@@ -1,4 +1,4 @@
-﻿// Copyright (c) Dual Inc.  All Rights Reserved.
+// Copyright (c) Dual Inc.  All Rights Reserved.
 namespace Model.Import.Office
 
 open System
@@ -8,6 +8,8 @@ open System
 open System.Drawing
 open System.Reflection
 open System.Data.OleDb
+open Engine.Common.FS
+open Engine.Base
 
 [<AutoOpen>]
 module ExportIOTable =
@@ -16,7 +18,7 @@ module ExportIOTable =
 
         let dt = new System.Data.DataTable($"{model.Name}")
         dt.Columns.Add("Case", typeof<obj>) |>ignore
-        dt.Columns.Add("Flow", typeof<string>) |>ignore
+        dt.Columns.Add("Flo", typeof<string>) |>ignore
         dt.Columns.Add("Name", typeof<string>) |>ignore
         dt.Columns.Add("Type", typeof<string>) |>ignore
         dt.Columns.Add("Size", typeof<string>) |>ignore
@@ -37,15 +39,15 @@ module ExportIOTable =
             seq {
                 for sys in  model.TotalSystems do
                     let flows = sys.RootFlow() |> Seq.filter(fun flow -> (flow.Page = Int32.MaxValue)|>not)
-                    //Flow 출력
+                    //Flo 출력
                     for flow in flows do
                         //Call Task 출력
-                        for callSeg in flow.CallSegments() do
+                        for callSeg in flow.CallSegs() do
                             for index in [|1..callSeg.MaxCnt|] do
                                 let causal, trx = callSeg.PrintfTRX(index, true)
                                 yield rowItems(causal, callSeg.Name, callSeg.OwnerFlow, trx)
                         //Ex Task 출력
-                        for callSeg in flow.ExSegments() do
+                        for callSeg in flow.ExSegs() do
                             yield rowItems(EX, callSeg.Name, callSeg.OwnerFlow, "EX")
             }
         rows
@@ -54,9 +56,9 @@ module ExportIOTable =
                     rowTemp.ItemArray <- (row|> Seq.cast<obj>|> Seq.toArray)
                     dt.Rows.Add(rowTemp) |> ignore)
 
-        dt.Rows.Add("내부", "변수", "", "", "'-", "'-", "'-") |> ignore
-        dt.Rows.Add("지시", "함수", "", "'-", "", "'-", "'-") |> ignore
-        dt.Rows.Add("관찰", "함수", "", "'-", "'-", "'-", "") |> ignore
+        dt.Rows.Add("내부", "변수", ""  , "'-", ""  , "'-", "'-", "'-") |> ignore
+        dt.Rows.Add("지시", "함수", ""  , "'-", "'-", ""  , "'-", "'-") |> ignore
+        dt.Rows.Add("관찰", "함수", ""  , "'-", "'-", "'-", "'-", ""  ) |> ignore
 
         dt
 
@@ -103,7 +105,7 @@ module ExportIOTable =
                 workSheet.Cells.[1,colIndex+1] <- tbl.Columns.[colIndex].ColumnName
             //// rows
             for rowsIndex in [|0..rowsCnt-1|] do
-                Event.DoWork((int)(Convert.ToSingle(rowsIndex + 1) / (rowsCnt|>float32) * 100f));
+                DoWork((int)(Convert.ToSingle(rowsIndex + 1) / (rowsCnt|>float32) * 100f));
                 for colIndex in [|0..colsCnt-1|] do
                     workSheet.Cells.[rowsIndex + 2, colIndex + 1] <- tbl.Rows.[rowsIndex].[colIndex]
                     
@@ -116,7 +118,7 @@ module ExportIOTable =
         
             workSheet.SaveAs(excelFilePath)
             excelApp.Quit()
-            Event.DoWork(0)
+            DoWork(0)
             Console.WriteLine("Excel file saved!")
 
     

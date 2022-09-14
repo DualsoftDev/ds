@@ -1,35 +1,27 @@
-﻿// Copyright (c) Dual Inc.  All Rights Reserved.
+// Copyright (c) Dual Inc.  All Rights Reserved.
 namespace Model.Import.Office
 
 open System.Runtime.CompilerServices
 open System
 open System.Reactive.Subjects
 
+open Engine.Base
+open Engine.Base.DsType
 
 
 [<AutoOpen>]
 module Event = 
     
-    type MSGLevel = |Info | Warn | Error
-    type MSGParam = |MSG of Time:DateTime * Level:MSGLevel * Message:string
-    type SegParam = |SEG of Time:DateTime * Segment:SegmentBase * Status:Status
-    type ProParam = |PRO of Time:DateTime * pro:int
+    type SegParam = |SEG of Time:DateTime * Seg:SegBase * Status4:Status4
 
-    let MSGSubject = new Subject<MSGParam>()
     let SegSubject = new Subject<SegParam>()
-    let ProcessSubject = new Subject<ProParam>()
     /// Message 공지.
-    let MSGInfo (text:string)  = MSGSubject.OnNext(MSGParam.MSG (DateTime.Now, Info, text))
-    let MSGWarn (text:string)  = MSGSubject.OnNext(MSGParam.MSG (DateTime.Now, Warn, text))
-    let MSGError (text:string) = MSGSubject.OnNext(MSGParam.MSG (DateTime.Now, Error, text))
-    let DoWork  (pro:int) = ProcessSubject.OnNext(ProParam.PRO (DateTime.Now, pro))
-    let ChangeStatus (seg:SegmentBase, status:Status) = 
+  
+    let ChangeStatus (seg:SegBase, status:Status4) = 
         async {
             SegSubject.OnNext(SegParam.SEG (DateTime.Now, seg, status))
         } |> Async.StartImmediate
         
-      
-
     [<Extension>]
     type DsUtil =
 

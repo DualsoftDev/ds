@@ -14,7 +14,7 @@ public abstract class Coin : Named, ICoin
     public virtual Cpu Cpu { get; set; }
 
     public Coin(string name)
-        :base(name)
+        : base(name)
     {
     }
 

@@ -1,5 +1,5 @@
-using System.Threading.Tasks;
 using Engine.Base;
+using System.Threading.Tasks;
 
 namespace Engine.Core;
 
@@ -18,7 +18,7 @@ public class BitChange
     {
         //Assert(bit.Value != newValue);
 
-        if (! newValue && bit.GetName().IsOneOf("ResetPlan_L_F_Main"))
+        if (!newValue && bit.GetName().IsOneOf("ResetPlan_L_F_Main"))
             Global.NoOp();
 
         Assert(bit != null);
@@ -77,7 +77,7 @@ public record SegmentStatusChange
 
 public record ChildStatusChange
 {
-    public ChildStatusChange(Child child, DsType.Status4 status, bool isFlipped=false)
+    public ChildStatusChange(Child child, DsType.Status4 status, bool isFlipped = false)
     {
         Child = child;
         Status = status;

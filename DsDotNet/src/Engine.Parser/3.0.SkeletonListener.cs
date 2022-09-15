@@ -49,7 +49,7 @@ class SkeletonListener : dsBaseListener
             ;
 
         var flowName2CpuNameMap =
-            flowName2CpuNames.ToDictionary(tpl => tpl.Item1, tpl=>tpl.Item2)
+            flowName2CpuNames.ToDictionary(tpl => tpl.Item1, tpl => tpl.Item2)
             ;
 
         ParserHelper.FlowName2CpuMap = flowName2CpuNameMap;
@@ -175,7 +175,7 @@ class SkeletonListener : dsBaseListener
 
     override public void ExitProgram(ProgramContext ctx)
     {
-        foreach(var sys in _model.Systems)
+        foreach (var sys in _model.Systems)
         {
             foreach (var flow in sys.RootFlows)
             {

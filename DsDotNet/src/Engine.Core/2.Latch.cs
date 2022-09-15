@@ -6,7 +6,7 @@ public class Latch : BitReEvaluatable, IBitWritable
     internal IBit _resetCondition { get; }
 
     public Latch(Cpu cpu, string name, IBit setCondition, IBit resetCondition)
-        : base(cpu, name, new[] {setCondition, resetCondition})
+        : base(cpu, name, new[] { setCondition, resetCondition })
     {
         Assert(setCondition != null && resetCondition != null);
         _setCondition = setCondition;

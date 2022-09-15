@@ -47,7 +47,7 @@ public class Child : Named, IVertex, ICoin
 
     CompositeDisposable _disposables = new();
     public Child(Coin coin, SegmentBase parent)
-        :base(coin.Name)
+        : base(coin.Name)
     {
         Parent = parent;
         Coin = coin;

@@ -10,7 +10,6 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using static Engine.Common.FS.MessageEvent;
-using static Model.Import.Office.Event;
 using static Model.Import.Office.Model;
 using static Model.Import.Office.Object;
 
@@ -18,7 +17,7 @@ namespace Dual.Model.Import
 {
     public partial class FormMain : Form
     {
-        internal void ExportTextModel(Color color, string dsText, bool bShowLine =false)
+        internal void ExportTextModel(Color color, string dsText, bool bShowLine = false)
         {
 
             this.Do(() => richTextBox_ds.Clear());
@@ -29,11 +28,11 @@ namespace Dual.Model.Import
             int lineCnt = textLines.Count();
             int lineCur = 0;
             this.Do(() =>
-            { 
+            {
                 textLines.ToList().ForEach(f =>
                 {
                     int pro = 50 + Convert.ToInt32(Convert.ToSingle(lineCur++) / (lineCnt) * 50f);
-                    if(bShowLine) richTextBox_ds.AppendText(lineCur.ToString("000"));
+                    if (bShowLine) richTextBox_ds.AppendText(lineCur.ToString("000"));
 
                     if (color == Color.Transparent)
                     {

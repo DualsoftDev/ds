@@ -13,7 +13,7 @@ internal class FlipFlop : Bit, IBitWritable
     public void SetValue(bool newValue) => _value = newValue;
 
 
-    public FlipFlop(Cpu cpu, string name, IBit set, IBit reset, bool value=false)
+    public FlipFlop(Cpu cpu, string name, IBit set, IBit reset, bool value = false)
         : base(cpu, name, value)
     {
         Assert(set != null && reset != null);

@@ -1,6 +1,5 @@
 using Engine.Common.FS;
 using System;
-using System.Linq;
 
 namespace Model.Simulator
 {

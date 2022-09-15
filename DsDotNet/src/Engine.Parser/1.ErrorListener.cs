@@ -24,7 +24,7 @@ public class ErrorListener<Symbol> : ConsoleErrorListener<Symbol>
 {
     bool _throwOnerror;
     public List<ParserError> Errors = new();
-    public ErrorListener(bool throwOnError=false)
+    public ErrorListener(bool throwOnError = false)
     {
         _throwOnerror = throwOnError;
     }

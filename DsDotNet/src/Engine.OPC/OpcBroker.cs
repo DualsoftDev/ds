@@ -3,17 +3,6 @@
 //using Dsu.PLC.Common;
 //using Newtonsoft.Json;
 //using Newtonsoft.Json.Linq;
-using Microsoft.FSharp.Core;
-
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
-using System.Reactive.Disposables;
-using static Engine.Core.GlobalShortCuts;
-using log4net;
 
 namespace Control.OPC
 {

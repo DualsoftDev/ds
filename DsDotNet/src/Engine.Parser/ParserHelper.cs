@@ -124,5 +124,5 @@ public static class ParserExtension
 
         return isValidStart(first) && chars.Skip(1).ForAll(isValid);
     }
-    public static bool IsQuotationRequired(this string identifier) => ! IsValidIdentifier(identifier);
+    public static bool IsQuotationRequired(this string identifier) => !IsValidIdentifier(identifier);
 }

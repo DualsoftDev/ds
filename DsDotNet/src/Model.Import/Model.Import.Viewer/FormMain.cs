@@ -1,15 +1,12 @@
 using Engine;
 using Engine.Common;
-using Engine.Core;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using static Engine.Common.FS.MessageEvent;
-using static Model.Import.Office.Event;
 using static Model.Import.Office.Model;
 using static Model.Import.Office.Object;
 
@@ -23,7 +20,7 @@ namespace Dual.Model.Import
         private string _dsText;
         private bool _ConvertErr = false;
 
-        public Dictionary<Flo, TabPage> DicUI;  
+        public Dictionary<Flo, TabPage> DicUI;
         public string PathPPT;
         public string PathXLS;
         public bool Busy = false;
@@ -79,7 +76,7 @@ namespace Dual.Model.Import
             if (lstPPTXLS[0] != null && lstPPTXLS[1] != null)
             {
                 PathPPT = lstPPTXLS[0];
-                InitModel(  lstPPTXLS[0]);
+                InitModel(lstPPTXLS[0]);
                 PathXLS = lstPPTXLS[1];
                 ImportExcel(lstPPTXLS[1]);
             }
@@ -127,7 +124,7 @@ namespace Dual.Model.Import
                 splitContainer1.Panel1Collapsed = false;
                 splitContainer2.Panel2Collapsed = false;
                 button_OpenFolder.Visible = false;
-                
+
                 this.Size = new Size(1600, 1000);
                 HelpLoad();
                 ImportPPT();

@@ -5,59 +5,59 @@ public class XProgram
 {
     static void Main(string[] args)
     {
-//            var text = @"
-//[sys] L = {
-//    [task] T = {
-//        Cp = {P.F.Vp ~ P.F.Sp}
-//        Cm = {P.F.Vm ~ P.F.Sm}
-//    }
-//    [flow] F = {
-//        Main = { T.Cp > T.Cm > X.xx; }
-//        //parenting = {A > B > C; C |> B; }
-//        //T.C1 <||> T.C2;
-//        //A, B > C > D, E;
-//        //T.C1 > T.C2;
-//    }
-//}
-//[sys] P = {
-//    [flow] F = {
-//        Vp > Pp > Sp;
-//        Vm > Pm > Sm;
-//    }
-//}
-//";
-////            text = @"
-////[sys]MyElevatorSystem = {
-////    [task]M = {
-////        U;
-////        D;
-////        A12 = { M.U ~ S.S2U }
-////    }
-////    [task]B = { X; Y;  }
-////    [task]T = { A21; X;  }
-////    [flow] M = {U;D;}         //1모터 2방향 연결
+        //            var text = @"
+        //[sys] L = {
+        //    [task] T = {
+        //        Cp = {P.F.Vp ~ P.F.Sp}
+        //        Cm = {P.F.Vm ~ P.F.Sm}
+        //    }
+        //    [flow] F = {
+        //        Main = { T.Cp > T.Cm > X.xx; }
+        //        //parenting = {A > B > C; C |> B; }
+        //        //T.C1 <||> T.C2;
+        //        //A, B > C > D, E;
+        //        //T.C1 > T.C2;
+        //    }
+        //}
+        //[sys] P = {
+        //    [flow] F = {
+        //        Vp > Pp > Sp;
+        //        Vm > Pm > Sm;
+        //    }
+        //}
+        //";
+        ////            text = @"
+        ////[sys]MyElevatorSystem = {
+        ////    [task]M = {
+        ////        U;
+        ////        D;
+        ////        A12 = { M.U ~ S.S2U }
+        ////    }
+        ////    [task]B = { X; Y;  }
+        ////    [task]T = { A21; X;  }
+        ////    [flow] M = {U;D;}         //1모터 2방향 연결
 
-////    [flow of B]remember_call_set = {
-////        // 호출 Set기억
-////        @pushr(A), #g(A), M.U > Set1F <| T.A21 ? T.X;
-////        //A, B ? C > D, E;
-////        myFlow = {A > B > C; C |> B; }
-////    }
-////}";
-//            var parser = DsParser.FromDocument(text);
-//            var listener = new ModelListener(parser);
-//            ParseTreeWalker.Default.Walk(listener, parser.program());
-//            Trace.WriteLine("--- End of model listener");
-//            var model = listener.Model;
+        ////    [flow of B]remember_call_set = {
+        ////        // 호출 Set기억
+        ////        @pushr(A), #g(A), M.U > Set1F <| T.A21 ? T.X;
+        ////        //A, B ? C > D, E;
+        ////        myFlow = {A > B > C; C |> B; }
+        ////    }
+        ////}";
+        //            var parser = DsParser.FromDocument(text);
+        //            var listener = new ModelListener(parser);
+        //            ParseTreeWalker.Default.Walk(listener, parser.program());
+        //            Trace.WriteLine("--- End of model listener");
+        //            var model = listener.Model;
 
-//            parser.Reset();
-//            var elistener = new ElementsListener(parser, model);
-//            ParseTreeWalker.Default.Walk(elistener, parser.program());
+        //            parser.Reset();
+        //            var elistener = new ElementsListener(parser, model);
+        //            ParseTreeWalker.Default.Walk(elistener, parser.program());
 
-//            //Try("1 + 2 + 3");
-//            //Try("1 2 + 3");
-//            //Try("1 + +");
-//            System.Console.WriteLine("Done");
+        //            //Try("1 + 2 + 3");
+        //            //Try("1 2 + 3");
+        //            //Try("1 + +");
+        //            System.Console.WriteLine("Done");
     }
 
     static void Try(string input)

@@ -58,7 +58,7 @@ public class DllVersionChecker
                 else
                     assemblyAll[reference.FullName].Add(Tuple.Create(reference, assembly));
             }
-           
+
         }
         return assemblyAll.OrderBy(o => o.Key).ToDictionary(d => d.Key, d => d.Value);
     }

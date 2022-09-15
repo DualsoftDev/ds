@@ -7,7 +7,7 @@ public class Model
     /// <summary> 가상 부모 목록.  debugging 용 </summary>
     public SegmentBase[] VPSs { get; set; }
 
-  
+
 }
 public static class ModelExtension
 {

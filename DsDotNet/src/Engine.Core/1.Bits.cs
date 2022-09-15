@@ -1,5 +1,3 @@
-using System.Threading.Tasks;
-
 namespace Engine.Core;
 
 [DebuggerDisplay("{ToText()}")]
@@ -7,7 +5,7 @@ public abstract class Bit : Named, IBit
 {
     protected bool _value;
     public virtual bool Value => _value;    //{ get => _value; set => _value = value; }
-    public List<IBit> Containers { get; } = new ();
+    public List<IBit> Containers { get; } = new();
 
     public Cpu Cpu { get; set; }
     public Bit(Cpu cpu, string name, bool bit = false) : base(name)
@@ -20,7 +18,7 @@ public abstract class Bit : Named, IBit
     }
 
     /// <summary>  Bit 생성 이전에 동일 이름이 존재하는지 check 하기 위한 용도. </summary>
-    public static T GetExistingBit<T>(Cpu cpu, string name) where T: Bit
+    public static T GetExistingBit<T>(Cpu cpu, string name) where T : Bit
     {
         if (cpu.BitsMap.ContainsKey(name))
         {
@@ -78,7 +76,8 @@ public static class BitExtension
         return bit switch
         {
             BitReEvaluatable eval =>
-                new Func<string>(() => {
+                new Func<string>(() =>
+                {
                     var inners = eval._monitoringBits.Select(b => getText(b, expand));
                     return eval switch
                     {

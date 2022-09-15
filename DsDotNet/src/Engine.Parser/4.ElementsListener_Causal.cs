@@ -44,10 +44,10 @@ partial class ElementsListener
                     switch (dotCount)
                     {
                         case 0:
-                            id = $"{ taskId}.{ text}";
+                            id = $"{taskId}.{text}";
                             break;
                         case 1:
-                            id = $"{taskId}.{ text}";
+                            id = $"{taskId}.{text}";
                             //parentId = $"{taskId}.{text.Split(new[] { '.' })[0]}";
                             break;
                     }
@@ -161,11 +161,12 @@ partial class ElementsListener
     IVertex[] FindVertices(string context, Node node)
     {
         string specs = node.id;
-        return specs.Split(new[] { ',' }).Select(sp => {
+        return specs.Split(new[] { ',' }).Select(sp =>
+        {
             var spec = sp;
             if (QpInstanceMap.ContainsKey($"{context}.{sp}"))
                 spec = $"{context}.{sp}";
-            if (! QpInstanceMap.ContainsKey(spec))
+            if (!QpInstanceMap.ContainsKey(spec))
             {
                 if (ParserHelper.AliasNameMaps[_system].ContainsKey(node.label))
                     spec = ParserHelper.AliasNameMaps[_system][node.label];
@@ -185,7 +186,7 @@ partial class ElementsListener
         */
     private void processCausal(CausalTokensDNFContext ll, CausalOperatorContext opr, CausalTokensDNFContext rr)
     {
-        Trace.WriteLine($"{ ll.GetText()} { opr.GetText()} { rr.GetText()}");
+        Trace.WriteLine($"{ll.GetText()} {opr.GetText()} {rr.GetText()}");
 
         var ls = this.addNodes(ll);
         var rs = this.addNodes(rr);
@@ -219,10 +220,10 @@ partial class ElementsListener
                     Edge e = null;
                     switch (op)
                     {
-                        case "|>" : e = new WeakResetEdge  (flow, lvs, op, rvs[0]); break;
-                        case ">"  : e = new WeakSetEdge    (flow, lvs, op, rvs[0]); break;
+                        case "|>": e = new WeakResetEdge(flow, lvs, op, rvs[0]); break;
+                        case ">": e = new WeakSetEdge(flow, lvs, op, rvs[0]); break;
                         case "||>": e = new StrongResetEdge(flow, lvs, op, rvs[0]); break;
-                        case ">>" : e = new StrongSetEdge  (flow, lvs, op, rvs[0]); break;
+                        case ">>": e = new StrongSetEdge(flow, lvs, op, rvs[0]); break;
 
                         case "<|":
                             Assert(lvs.Length == 1);

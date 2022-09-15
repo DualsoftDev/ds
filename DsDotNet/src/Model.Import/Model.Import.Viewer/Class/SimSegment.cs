@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using static Engine.Base.DsType;
 using static Model.Import.Office.Model;
 using static Model.Import.Office.Object;
-using static Engine.Base.DsType;
 
 namespace Dual.Model.Import
 {

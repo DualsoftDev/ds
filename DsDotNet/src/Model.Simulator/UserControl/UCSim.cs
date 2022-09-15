@@ -6,10 +6,9 @@ using Microsoft.Msagl.Layout.Layered;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
+using static Engine.Base.DsType;
 using Color = Microsoft.Msagl.Drawing.Color;
 using Edge = Microsoft.Msagl.Drawing.Edge;
-using static Engine.Base.DsType;
-using System;
 
 namespace Model.Simulator
 {
@@ -48,7 +47,7 @@ namespace Model.Simulator
             //var a = flow.CollectArrow();
 
             //flow.NoEdgeSegs.ToList().ForEach(seg => DrawSeg(viewer.Graph.RootSubgraph, seg, subDraws));
-            drawMEdgeGraph(flow.CollectArrow(),  viewer.Graph.RootSubgraph);
+            drawMEdgeGraph(flow.CollectArrow(), viewer.Graph.RootSubgraph);
 
             viewer.SetCalculatedLayout(viewer.CalculateLayout(viewer.Graph));
         }
@@ -84,7 +83,7 @@ namespace Model.Simulator
             nNode.LabelText = nNode.LabelText.Split(';')[0];
             nNode.Label.FontColor = Color.Black;
             nNode.Attr.Color = Color.Black;
-             
+
         }
         private void DrawSub(Subgraph subgraph, SegmentBase seg, Subgraph subG, Node gNode, bool bDrawSub)
         {
@@ -168,7 +167,7 @@ namespace Model.Simulator
 
             if (nodeCausal == NodeCausal.MY)
                 nNode.Attr.Shape = Shape.Box;
-            if (nodeCausal  == NodeCausal.EX)
+            if (nodeCausal == NodeCausal.EX)
                 nNode.Attr.Shape = Shape.Diamond;
             if (nodeCausal == NodeCausal.TR)
                 nNode.Attr.Shape = Shape.Ellipse;
@@ -176,7 +175,7 @@ namespace Model.Simulator
                 nNode.Attr.Shape = Shape.Ellipse;
             if (nodeCausal == NodeCausal.RX)
                 nNode.Attr.Shape = Shape.Ellipse;
-          
+
         }
 
         public void RefreshGraph() { viewer.Do(() => viewer.Refresh()); }
@@ -244,6 +243,6 @@ namespace Model.Simulator
             viewer.Graph.Attr.BackgroundColor = gColor;
         }
 
-      
+
     }
 }

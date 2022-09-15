@@ -13,7 +13,7 @@ namespace Control.OPC
         private FSharpOption<ushort> fSharpOption;
         private double v2;
 
-        public LsConnectionParameters(string v1, FSharpOption<ushort> fSharpOption,  double v2)
+        public LsConnectionParameters(string v1, FSharpOption<ushort> fSharpOption, double v2)
         {
             this.v1 = v1;
             this.fSharpOption = fSharpOption;

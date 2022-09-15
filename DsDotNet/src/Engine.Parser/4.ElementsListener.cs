@@ -5,14 +5,16 @@ using Antlr4.Runtime.Misc;
 namespace Engine.Parser;
 
 //enum NodeType = "system" | "task" | "call" | "proc" | "func" | "segment" | "expression" | "conjunction";
-enum NodeType {
+enum NodeType
+{
     system,
     task, call, proc, func, segment, expression, conjunction,
     segmentAlias,
     callAlias,
 };
 
-class Node {
+class Node
+{
     public string id;
     public string label;
     public string parentId;
@@ -31,11 +33,11 @@ partial class ElementsListener : dsBaseListener
 {
     #region Boiler-plates
     public ParserHelper ParserHelper;
-    Model    _model => ParserHelper.Model;
-    DsSystem _system    { get => ParserHelper._system;    set => ParserHelper._system = value; }
-    DsTask   _task      { get => ParserHelper._task;      set => ParserHelper._task = value; }
-    RootFlow _rootFlow  { get => ParserHelper._rootFlow;  set => ParserHelper._rootFlow = value; }
-    SegmentBase  _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
+    Model _model => ParserHelper.Model;
+    DsSystem _system { get => ParserHelper._system; set => ParserHelper._system = value; }
+    DsTask _task { get => ParserHelper._task; set => ParserHelper._task = value; }
+    RootFlow _rootFlow { get => ParserHelper._rootFlow; set => ParserHelper._rootFlow = value; }
+    SegmentBase _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
 
     string CurrentPath => ParserHelper.CurrentPath;
     Dictionary<string, object> QpInstanceMap => ParserHelper.QualifiedInstancePathMap;
@@ -148,7 +150,7 @@ partial class ElementsListener : dsBaseListener
         var name = ctx.id().GetText();
         var label = $"{name}\n{ctx.callPhrase().GetText()}";
 
-        var callPrototypes = (_task == null) ? _rootFlow.FlowTask.CallPrototypes : _task.CallPrototypes;            
+        var callPrototypes = (_task == null) ? _rootFlow.FlowTask.CallPrototypes : _task.CallPrototypes;
         var call = callPrototypes.First(c => c.Name == name);
 
         var callph = ctx.callPhrase();
@@ -160,7 +162,8 @@ partial class ElementsListener : dsBaseListener
     }
 
 
-    override public void EnterParenting(ParentingContext ctx) {
+    override public void EnterParenting(ParentingContext ctx)
+    {
         var name = ctx.id().GetText();
         _parenting = (SegmentBase)QpInstanceMap[$"{CurrentPath}.{name}"];
     }
@@ -168,7 +171,8 @@ partial class ElementsListener : dsBaseListener
 
 
 
-    override public void EnterCausalPhrase(CausalPhraseContext ctx) {
+    override public void EnterCausalPhrase(CausalPhraseContext ctx)
+    {
         this.left = null;
         this.op = null;
 
@@ -206,7 +210,7 @@ partial class ElementsListener : dsBaseListener
 
                 var nameComponents = n.Split(new[] { '.' }).ToArray();
                 string targetName = n;
-                switch(nameComponents.Length)
+                switch (nameComponents.Length)
                 {
                     case 1:
                         isAlias = ParserHelper.AliasNameMaps[_system].ContainsKey(n);
@@ -254,7 +258,8 @@ partial class ElementsListener : dsBaseListener
             }
         }
     }
-    override public void EnterCausalTokensDNF(CausalTokensDNFContext ctx) {
+    override public void EnterCausalTokensDNF(CausalTokensDNFContext ctx)
+    {
         if (this.left != null)
         {
             Assert(this.op != null);  //, 'operator expected');
@@ -281,7 +286,7 @@ partial class ElementsListener : dsBaseListener
             throw new ParserException("Layouts block should exist only once", ctx);
 
         var positionDefs = enumerateChildren<PositionDefContext>(ctx).ToArray();
-        foreach(var posiDef in positionDefs)
+        foreach (var posiDef in positionDefs)
         {
             var callPath = posiDef.callPath().GetText();
             var cp = (CallPrototype)QpDefinitionMap[callPath];
@@ -303,7 +308,7 @@ partial class ElementsListener : dsBaseListener
         var addressDefs = enumerateChildren<AddressDefContext>(ctx).ToArray();
         foreach (var addrDef in addressDefs)
         {
-            var segPath = addrDef.segmentPath().GetText();            
+            var segPath = addrDef.segmentPath().GetText();
             var seg = (SegmentBase)QpInstanceMap[segPath];
             var sre = addrDef.address();
             var (s, r, e) = (sre.startTag()?.GetText(), sre.resetTag()?.GetText(), sre.endTag()?.GetText());
@@ -320,8 +325,8 @@ partial class ElementsListener : dsBaseListener
 
 
     // ParseTreeListener<> method
-    override public void VisitTerminal(ITerminalNode node)     { return; }
-    override public void VisitErrorNode(IErrorNode node)        { return; }
+    override public void VisitTerminal(ITerminalNode node) { return; }
+    override public void VisitErrorNode(IErrorNode node) { return; }
     override public void EnterEveryRule(ParserRuleContext ctx) { return; }
     override public void ExitEveryRule(ParserRuleContext ctx) { return; }
 }

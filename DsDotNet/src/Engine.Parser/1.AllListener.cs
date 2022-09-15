@@ -11,7 +11,7 @@ class AllListener : dsBaseListener
     public ParserResult r = new ParserResult();
 
     // ParseTreeListener<> method
-    public override void VisitTerminal(ITerminalNode node)     { this.r.terminals.Add(node); }
+    public override void VisitTerminal(ITerminalNode node) { this.r.terminals.Add(node); }
     public override void VisitErrorNode(IErrorNode node)
     {
         this.r.errors.Add(node);

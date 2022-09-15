@@ -1,27 +1,19 @@
 using Engine;
 using Engine.Common;
+using Engine.Common.FS;
 using Engine.Core;
 using Engine.Graph;
+using Engine.Runner;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-
-
-using Engine.Runner;
-using static Engine.Common.FS.MessageEvent;
-using System.ComponentModel;
-using Engine.Common.FS;
-using Task = System.Threading.Tasks.Task;
-using Microsoft.FSharp.Core;
 using static Engine.Base.DsType;
-using Engine.Base;
-using System.Xml.Linq;
+using static Engine.Common.FS.MessageEvent;
+using Task = System.Threading.Tasks.Task;
 
 namespace Model.Simulator
 {
@@ -83,13 +75,13 @@ namespace Model.Simulator
             try
             {
                 _dsTextPath = path;
-         
+
                 richTextBox_ds.Clear();
                 DicUI.Clear();
 
                 _dsText = File.ReadAllText(path);
                 await Task.Run(() => { ExportTextModel(Color.Black, _dsText); });
-                
+
                 ProcessEvent.DoWork(0);
 
             }
@@ -138,11 +130,11 @@ namespace Model.Simulator
                     var patternHead = "^\\d*;"; // 첫 ; 내용 제거
                     var replaceName = System.Text.RegularExpressions.Regex.Replace(f, patternHead, "");
 
-                    _dsText += (replaceName+"\n");
+                    _dsText += (replaceName + "\n");
                 });
 
-     
-                ExportTextModel(Color.Transparent, _dsText, true); 
+
+                ExportTextModel(Color.Transparent, _dsText, true);
 
                 if (_dsText == "")
                 {

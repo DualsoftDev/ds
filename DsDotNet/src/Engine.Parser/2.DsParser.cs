@@ -2,7 +2,7 @@ namespace Engine.Parser;
 
 class DsParser
 {
-    public static (dsParser, ParserError[]) FromDocument(string text, bool throwOnError=true)
+    public static (dsParser, ParserError[]) FromDocument(string text, bool throwOnError = true)
     {
         var str = new AntlrInputStream(text);
         System.Console.WriteLine(text);
@@ -20,7 +20,7 @@ class DsParser
         return (parser, errors);
     }
 
-    public static List<T> enumerateChildren<T>(IParseTree from, bool includeMe=false, Func<IParseTree, bool> predicate = null ) where T : IParseTree
+    public static List<T> enumerateChildren<T>(IParseTree from, bool includeMe = false, Func<IParseTree, bool> predicate = null) where T : IParseTree
     {
         Func<IParseTree, bool> pred = predicate ?? new Func<IParseTree, bool>(ctx => ctx is T);
         var result = new List<T>();
@@ -72,7 +72,7 @@ class DsParser
         return null;
     }
 
-    public static IParseTree findFirstAncestor(IParseTree from, Func<IParseTree, bool> predicate, bool includeMe=true)
+    public static IParseTree findFirstAncestor(IParseTree from, Func<IParseTree, bool> predicate, bool includeMe = true)
     {
         foreach (var c in enumerateParents(from, includeMe))
         {

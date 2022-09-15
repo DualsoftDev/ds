@@ -19,15 +19,18 @@ public abstract class PortInfo : BitReEvaluatable//, IBitWritable
 
     IBit _plan;
     Tag _actual;
-    public IBit Plan {
+    public IBit Plan
+    {
         get => _plan;
-        set {
+        set
+        {
             _plan = value;
             _monitoringBits = new[] { _plan, _actual };
         }
     }
     /// <summary> Allow null </summary>
-    public Tag Actual {
+    public Tag Actual
+    {
         get => _actual;
         set
         {
@@ -57,7 +60,7 @@ public abstract class PortInfoCommand : PortInfo
     }
 
 }
-    /// <summary> Start 명령용 정보(Plan) + 물리(Actual) </summary>
+/// <summary> Start 명령용 정보(Plan) + 물리(Actual) </summary>
 public class PortInfoStart : PortInfoCommand
 {
     public PortInfoStart(Cpu cpu, SegmentBase segment, string name, IBit plan, Tag actual)

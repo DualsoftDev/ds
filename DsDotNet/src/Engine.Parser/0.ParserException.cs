@@ -39,7 +39,7 @@ namespace Engine.Parser
             return $"{posi} near\r\n'{ambient}'";
         }
         public ParserException(string message, RuleContext ctx)
-            : base( $"{message} on {CreatePositionInfo(ctx)}")
+            : base($"{message} on {CreatePositionInfo(ctx)}")
         {
         }
 

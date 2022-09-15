@@ -3,18 +3,18 @@ namespace Engine.Core;
 [Flags]
 public enum TagType
 {
-    None     = 0,
-    Q        = 1 << 0,
-    I        = 1 << 1,
-    M        = 1 << 2,
-    Special  = 1 << 5,
+    None = 0,
+    Q = 1 << 0,
+    I = 1 << 1,
+    M = 1 << 2,
+    Special = 1 << 5,
 
     // segment tag
-    Start    = 1 << 11,
-    Reset    = 1 << 12,
-    End      = 1 << 13,
-    Going    = 1 << 14,
-    Ready    = 1 << 15,
+    Start = 1 << 11,
+    Reset = 1 << 12,
+    End = 1 << 13,
+    Going = 1 << 14,
+    Ready = 1 << 15,
 
     /// <summary> 공정(flow) auto start, auto reset </summary>
     Auto = 1 << 18,
@@ -27,7 +27,7 @@ public enum TagType
 
     // call tag
     TX = 1 << 25,
-    RX       = 1 << 26,
+    RX = 1 << 26,
 };
 
 
@@ -42,7 +42,7 @@ public abstract class Tag : Bit, IBitReadWritable, ITxRx
     protected Tag(Cpu ownerCpu, ICoin owner, string name, TagType tagType = TagType.None, bool value = false)
         : base(ownerCpu, name, value)
     {
-        Assert(! ownerCpu.TagsMap.ContainsKey(name));
+        Assert(!ownerCpu.TagsMap.ContainsKey(name));
         //LogDebug($"Creating tag {name}");
 
         Owner = owner;
@@ -68,14 +68,14 @@ public class TagP : Tag
 {
     public TagP(Cpu ownerCpu, ICoin owner, string name, TagType tagType, bool value = false)
         : base(ownerCpu, owner, name, tagType, value)
-    {}
+    { }
 }
 
 
 /// <summary> Tag Etc : flow auto, going/ready tag,</summary>
 public class TagE : Tag
 {
-    public TagE(Cpu ownerCpu, ICoin owner, string name, TagType tagType=TagType.Etc, bool value = false)
+    public TagE(Cpu ownerCpu, ICoin owner, string name, TagType tagType = TagType.Etc, bool value = false)
         : base(ownerCpu, owner, name, tagType, value)
     { }
 }

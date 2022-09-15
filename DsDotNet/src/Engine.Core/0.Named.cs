@@ -2,7 +2,7 @@ namespace Engine.Core;
 
 
 [DebuggerDisplay("{ToText()}")]
-public class Named: INamed
+public class Named : INamed
 {
     public string Name { get; set; }
 

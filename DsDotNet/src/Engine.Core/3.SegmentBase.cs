@@ -1,7 +1,6 @@
 namespace Engine.Core;
 
 using Engine.Base;
-using System.Threading;
 
 /// <summary>Segment 생성 함수.  Segment 에서 상속받은 class 객체를 생성하기 위함. (e.g Engine.Runner.FsSegment)</summary>
 public delegate SegmentBase SegmentCreator(string segmentName, RootFlow rootFlow);
@@ -11,7 +10,8 @@ public abstract partial class SegmentBase : ChildFlow, IVertex, ICoin, IWallet, 
 {
     public RootFlow ContainerFlow { get; internal set; }
     Cpu _cpu;
-    public new Cpu Cpu {
+    public new Cpu Cpu
+    {
         get => _cpu;
         set
         {
@@ -82,7 +82,7 @@ public abstract partial class SegmentBase : ChildFlow, IVertex, ICoin, IWallet, 
         };
 
 
-    internal SegmentBase(Cpu cpu, string name, string startTagName=null, string resetTagName=null, string endTagName=null)
+    internal SegmentBase(Cpu cpu, string name, string startTagName = null, string resetTagName = null, string endTagName = null)
         : base(cpu, name)
     {
         _cpu = cpu;
@@ -108,9 +108,9 @@ public abstract partial class SegmentBase : ChildFlow, IVertex, ICoin, IWallet, 
     }
 }
 
-class DummySegment: SegmentBase
+class DummySegment : SegmentBase
 {
-    public DummySegment(Cpu cpu, string name, string startTagName=null, string resetTagName=null, string endTagName=null)
+    public DummySegment(Cpu cpu, string name, string startTagName = null, string resetTagName = null, string endTagName = null)
         : base(cpu, name, startTagName, resetTagName, endTagName)
     {
     }

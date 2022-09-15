@@ -4,14 +4,10 @@ using Engine.Common.FS;
 using Engine.Core;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
-using static Engine.Common.FS.ProcessEvent;
-using static System.Resources.ResXFileRef;
 
 namespace Model.Simulator
 {
@@ -32,7 +28,7 @@ namespace Model.Simulator
                 textLines.ToList().ForEach(f =>
                 {
                     int pro = 50 + Convert.ToInt32(Convert.ToSingle(lineCur++) / (lineCnt) * 50f);
-                    if (bShowLine) richTextBox_ds.AppendTextColor(lineCur.ToString("000")+";", Color.White);
+                    if (bShowLine) richTextBox_ds.AppendTextColor(lineCur.ToString("000") + ";", Color.White);
 
                     if (color == Color.Transparent)
                     {
@@ -43,7 +39,7 @@ namespace Model.Simulator
                             this.Do(() => richTextBox_ds.ScrollToCaret());
                             ProcessEvent.DoWork(pro);
                         }
-                        richTextBox_ds.AppendTextColor(f+"\n", rndColor);
+                        richTextBox_ds.AppendTextColor(f + "\n", rndColor);
                     }
                     else
                         richTextBox_ds.AppendTextColor(f, color);
@@ -88,7 +84,7 @@ namespace Model.Simulator
 
         internal void CreateNewTabViewer(DsSystem sys)
         {
-         
+
             var flows = sys.RootFlows;
             var flowTotalCnt = flows.Count();
             flows.ToList().ForEach(f =>
@@ -96,7 +92,7 @@ namespace Model.Simulator
                 if (DicUI.ContainsKey(f))
                     xtraTabControl_My.SelectedTab = DicUI[f];
                 else
-                { 
+                {
                     UCSim viewer = new UCSim { Dock = DockStyle.Fill };
                     viewer.SetGraph(f);
                     TabPage tab = new TabPage();
@@ -117,10 +113,10 @@ namespace Model.Simulator
         {
             foreach (KeyValuePair<Flow, TabPage> view in DicUI)
             {
-              //  foreach (var seg in view.Key.UsedSegs)
-              //  {
-              ////      ((UCView)view.Value.Tag).Update(seg);
-              //  }
+                //  foreach (var seg in view.Key.UsedSegs)
+                //  {
+                ////      ((UCView)view.Value.Tag).Update(seg);
+                //  }
 
                 ((UCSim)view.Value.Tag).RefreshGraph();
             }

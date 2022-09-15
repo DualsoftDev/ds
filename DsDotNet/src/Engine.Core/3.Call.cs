@@ -2,7 +2,7 @@ namespace Engine.Core;
 
 public abstract class CallBase : Coin
 {
-    public CallBase(string name) : base(name) {}
+    public CallBase(string name) : base(name) { }
 }
 
 
@@ -34,7 +34,8 @@ public class CallPrototype : CallBase
 
     public override bool Value
     {
-        get {
+        get
+        {
             bool getRxValue(ITxRx rx)
             {
                 switch (rx)
@@ -89,7 +90,7 @@ public class SubCall : Call
     public Child ContainerChild { get; set; }
     public SubCall(string name, ChildFlow flow, CallPrototype protoType)
         : base(name, flow, protoType)
-    {}
+    { }
 }
 
 /// <summary> Root 에 배치된 Call </summary>
@@ -126,7 +127,7 @@ public class RootCall : Call
 
 /// <summary> 외부 segment 에 대한 호출 </summary>
 [DebuggerDisplay("[{ToText()}]")]
-public class ExSegment: Coin
+public class ExSegment : Coin
 {
     public SegmentBase ExternalSegment;
     public Child ContainerChild { get; set; }
@@ -152,7 +153,7 @@ public static class CallExtension
     }
     public static string GetQualifiedName(this ICoin coin)
     {
-        switch(coin)
+        switch (coin)
         {
             case RootCall rootCall:
                 var rootFlow = rootCall.Container;
@@ -167,9 +168,9 @@ public static class CallExtension
             case Call call:
                 return call.Container switch
                 {
-                    SegmentBase seg   => $"{seg.QualifiedName}_{call.Name}",
+                    SegmentBase seg => $"{seg.QualifiedName}_{call.Name}",
                     RootFlow flow => $"{flow.QualifiedName}_{call.Name}",
-                    _             => throw new Exception("ERROR"),
+                    _ => throw new Exception("ERROR"),
                 };
             default:
                 throw new Exception("ERROR");

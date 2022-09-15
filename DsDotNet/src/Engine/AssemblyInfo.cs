@@ -1,7 +1,5 @@
-using System.Runtime.InteropServices;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 // In SDK-style projects such as this one, several assembly attributes that were historically
 // defined in this file are now automatically added during build and populated with

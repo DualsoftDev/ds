@@ -126,21 +126,21 @@ namespace Engine.Common
             }
         }
 
-		/// <summary>
-		/// Select Non null element from enumerable
-		/// </summary>
-		public static IEnumerable<TResult> OfNotNull<TResult>(this IEnumerable<TResult> source) where TResult : class
-		{
-			if (source == null) throw new ArgumentNullException("source");
-			foreach (var s in source)
-			{
-				if ( s != null )
-					yield return s;
-			}
-		}
+        /// <summary>
+        /// Select Non null element from enumerable
+        /// </summary>
+        public static IEnumerable<TResult> OfNotNull<TResult>(this IEnumerable<TResult> source) where TResult : class
+        {
+            if (source == null) throw new ArgumentNullException("source");
+            foreach (var s in source)
+            {
+                if (s != null)
+                    yield return s;
+            }
+        }
 
-		// http://stackoverflow.com/questions/2471588/how-to-get-index-using-linq
-		public static Nullable<int> FindIndex<T>(this IEnumerable<T> items, Predicate<T> predicate)
+        // http://stackoverflow.com/questions/2471588/how-to-get-index-using-linq
+        public static Nullable<int> FindIndex<T>(this IEnumerable<T> items, Predicate<T> predicate)
         {
             int index = 0;
             foreach (var item in items)
@@ -204,7 +204,7 @@ namespace Engine.Common
         }
 
 
-		private static Tuple<bool, T> ExtractFirst<T>(this IEnumerable<T> seq)
+        private static Tuple<bool, T> ExtractFirst<T>(this IEnumerable<T> seq)
         {
             using (var enumerator = seq.GetEnumerator())
             {
@@ -261,16 +261,16 @@ namespace Engine.Common
             return input;
         }
 
-		public static bool ForAll<T>(this IEnumerable<T> source, Func<T, bool> predicate)
-		{
-			foreach (var s in source)
-			{
-				if (!predicate(s))
-					return false;
-			}
+        public static bool ForAll<T>(this IEnumerable<T> source, Func<T, bool> predicate)
+        {
+            foreach (var s in source)
+            {
+                if (!predicate(s))
+                    return false;
+            }
 
-			return true;
-		}
+            return true;
+        }
 
         public static bool ForAll<T>(this IEnumerable<T> source, Func<T, int, bool> predicate)
         {
@@ -286,29 +286,29 @@ namespace Engine.Common
 
 
         public static bool NoForAll<T>(this IEnumerable<T> source, Func<T, bool> predicate)
-		{
-			foreach (var s in source)
-			{
-				if (predicate(s))
-					return false;
-			}
+        {
+            foreach (var s in source)
+            {
+                if (predicate(s))
+                    return false;
+            }
 
-			return true;
-		}
+            return true;
+        }
 
 
-		/// <summary>
-		/// source 를 n 개씩 분할한 sequence 를 반환
-		/// http://stackoverflow.com/questions/419019/split-list-into-sublists-with-linq
-		/// </summary>
-		public static IEnumerable<IEnumerable<T>> SplitByN<T>(this IEnumerable<T> source, int n)
-	    {
-			return source
-				.Select((x, i) => new { Index = i, Value = x })
-				.GroupBy(x => x.Index / n)
-				.Select(x => x.Select(v => v.Value))
-				;
-		}
+        /// <summary>
+        /// source 를 n 개씩 분할한 sequence 를 반환
+        /// http://stackoverflow.com/questions/419019/split-list-into-sublists-with-linq
+        /// </summary>
+        public static IEnumerable<IEnumerable<T>> SplitByN<T>(this IEnumerable<T> source, int n)
+        {
+            return source
+                .Select((x, i) => new { Index = i, Value = x })
+                .GroupBy(x => x.Index / n)
+                .Select(x => x.Select(v => v.Value))
+                ;
+        }
 
         public static IEnumerable<T> EveryNth<T>(this IEnumerable<T> source, int n)
         {
@@ -317,9 +317,9 @@ namespace Engine.Common
 
 
         public static IEnumerable<TResult> Zip2<TS1, TS2, TResult>(
-			this IEnumerable<TS1> s1,
-		    IEnumerable<TS2> s2,
-			Func<TS1, TS2, TResult> resultSelector) => s1.Zip(s2, resultSelector);
+            this IEnumerable<TS1> s1,
+            IEnumerable<TS2> s2,
+            Func<TS1, TS2, TResult> resultSelector) => s1.Zip(s2, resultSelector);
 
 #if RISK_SONARQUBE
         public static IEnumerable<TResult> Zip3<TS1, TS2, TS3, TResult>(
@@ -355,24 +355,24 @@ namespace Engine.Common
 		}
 #endif
 
-	    public static IEnumerable<int> MinMaxRange(int min, int hop, int max)
-	    {
-			if (hop <= 0)
-				throw new ArgumentException("hop counter should be positive.");
+        public static IEnumerable<int> MinMaxRange(int min, int hop, int max)
+        {
+            if (hop <= 0)
+                throw new ArgumentException("hop counter should be positive.");
 
-		    for (int i = min; i <= max; i += hop)
-			    yield return i;
-	    }
+            for (int i = min; i <= max; i += hop)
+                yield return i;
+        }
 
-	    public static IEnumerable<int> MinMaxRange(int min, int max) => Enumerable.Range(min, max - min);
+        public static IEnumerable<int> MinMaxRange(int min, int max) => Enumerable.Range(min, max - min);
 
-	    public static IEnumerable<string> HexRange(int start, int count)
-	    {
-		    foreach (var h in Enumerable.Range(start, count))
-		    {
-			    yield return $"{h:X}";
-		    }
-	    }
+        public static IEnumerable<string> HexRange(int start, int count)
+        {
+            foreach (var h in Enumerable.Range(start, count))
+            {
+                yield return $"{h:X}";
+            }
+        }
 
 
         /// <summary>
@@ -410,7 +410,7 @@ namespace Engine.Common
         /// == EmLinq.GenerateRange(1, n => n*10+1).Take(4)
         public static IEnumerable<T> GenerateRange<T>(T from, Func<T, T> next, Predicate<T> terminateCondition)
         {
-            while (! terminateCondition(from))
+            while (!terminateCondition(from))
             {
                 yield return from;
                 from = next(from);

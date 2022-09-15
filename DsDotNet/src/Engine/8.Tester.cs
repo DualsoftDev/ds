@@ -1,8 +1,8 @@
+using Engine.Base;
+using Engine.Graph;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Engine.Base;
-using Engine.Graph;
 
 namespace Engine;
 
@@ -517,27 +517,27 @@ public class Tester
             if (Global.IsDebugStopAndGoStressMode)
                 return;
 
-            Assert(o[ 0].TagName == "StartActual_A_F_Vp"   && o[ 0].Value == true);   // a+
-            Assert(o[ 1].TagName == "EndActual_A_F_Sm"     && o[ 1].Value == false);  // !A-
-            Assert(o[ 2].TagName == "EndActual_A_F_Sp"     && o[ 2].Value == true);   // A+
-            Assert(o[ 3].TagName == "StartActual_A_F_Vp"   && o[ 3].Value == false);  // !a+
+            Assert(o[0].TagName == "StartActual_A_F_Vp" && o[0].Value == true);   // a+
+            Assert(o[1].TagName == "EndActual_A_F_Sm" && o[1].Value == false);  // !A-
+            Assert(o[2].TagName == "EndActual_A_F_Sp" && o[2].Value == true);   // A+
+            Assert(o[3].TagName == "StartActual_A_F_Vp" && o[3].Value == false);  // !a+
 
 
-            Assert(o[ 4].TagName == "StartActual_B_F_Vp"   && o[ 4].Value == true);   // b+
-            Assert(o[ 5].TagName == "EndActual_B_F_Sm"     && o[ 5].Value == false);  // !B-
-            Assert(o[ 6].TagName == "EndActual_B_F_Sp"     && o[ 6].Value == true);   // B+
-            Assert(o[ 7].TagName == "StartActual_B_F_Vp"   && o[ 7].Value == false);  // !b+
+            Assert(o[4].TagName == "StartActual_B_F_Vp" && o[4].Value == true);   // b+
+            Assert(o[5].TagName == "EndActual_B_F_Sm" && o[5].Value == false);  // !B-
+            Assert(o[6].TagName == "EndActual_B_F_Sp" && o[6].Value == true);   // B+
+            Assert(o[7].TagName == "StartActual_B_F_Vp" && o[7].Value == false);  // !b+
 
 
-            Assert(o[ 8].TagName == "StartActual_B_F_Vm"   && o[ 8].Value == true);   // b-
-            Assert(o[ 9].TagName == "EndActual_B_F_Sp"     && o[ 9].Value == false);  // !B+
-            Assert(o[10].TagName == "EndActual_B_F_Sm"     && o[10].Value == true);   // B-
-            Assert(o[11].TagName == "StartActual_B_F_Vm"   && o[11].Value == false);  // !b-
+            Assert(o[8].TagName == "StartActual_B_F_Vm" && o[8].Value == true);   // b-
+            Assert(o[9].TagName == "EndActual_B_F_Sp" && o[9].Value == false);  // !B+
+            Assert(o[10].TagName == "EndActual_B_F_Sm" && o[10].Value == true);   // B-
+            Assert(o[11].TagName == "StartActual_B_F_Vm" && o[11].Value == false);  // !b-
 
-            Assert(o[12].TagName == "StartActual_A_F_Vm"   && o[12].Value == true);   // a-
-            Assert(o[13].TagName == "EndActual_A_F_Sp"     && o[13].Value == false);  // !A+
-            Assert(o[14].TagName == "EndActual_A_F_Sm"     && o[14].Value == true);   // A-
-            Assert(o[15].TagName == "StartActual_A_F_Vm"   && o[15].Value == false);  // !a-
+            Assert(o[12].TagName == "StartActual_A_F_Vm" && o[12].Value == true);   // a-
+            Assert(o[13].TagName == "EndActual_A_F_Sp" && o[13].Value == false);  // !A+
+            Assert(o[14].TagName == "EndActual_A_F_Sm" && o[14].Value == true);   // A-
+            Assert(o[15].TagName == "StartActual_A_F_Vm" && o[15].Value == false);  // !a-
         });
 
         //actuals
@@ -701,7 +701,7 @@ public class Tester
     }
     public static void DoSampleTestDiamond()
     {
-        
+
         //Log4NetHelper.ChangeLogLevel(log4net.Core.Level.Error);
 
         Assert(!Global.IsInUnitTest);
@@ -838,7 +838,7 @@ public class Tester
 
             // simulating physics
             if (Global.IsControlMode)
-                {}   // todo : 실물 연결
+            { }   // todo : 실물 연결
             else
             {
                 //// initial condition

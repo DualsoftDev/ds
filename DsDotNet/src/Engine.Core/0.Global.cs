@@ -1,26 +1,24 @@
+global using Engine.Common;
+global using log4net;
 global using System;
 global using System.Collections.Generic;
-global using System.Linq;
-global using System.Reactive.Subjects;
-global using System.Reactive.Linq;
-global using System.Reactive.Disposables;
 global using System.Diagnostics;
-
-global using log4net;
-global using BitDic = System.Collections.Generic.Dictionary<string, Engine.Core.IBit>;
-global using TagDic = System.Collections.Generic.Dictionary<string, Engine.Core.Tag>;
-global using Engine.Common;
-
+global using System.Linq;
+global using System.Reactive.Disposables;
+global using System.Reactive.Linq;
+global using System.Reactive.Subjects;
 global using static Engine.Core.GlobalShortCuts;
 global using static System.Diagnostics.Debug;
+global using BitDic = System.Collections.Generic.Dictionary<string, Engine.Core.IBit>;
+global using TagDic = System.Collections.Generic.Dictionary<string, Engine.Core.Tag>;
 
 namespace Engine.Core;
 
 public static class GlobalShortCuts
 {
     public static void LogDebug(object message) => Global.Logger.Debug(message);
-    public static void LogInfo (object message) => Global.Logger.Info(message);
-    public static void LogWarn (object message) => Global.Logger.Warn(message);
+    public static void LogInfo(object message) => Global.Logger.Info(message);
+    public static void LogWarn(object message) => Global.Logger.Warn(message);
     public static void LogError(object message) => Global.Logger.Error(message);
 }
 
@@ -69,7 +67,7 @@ public static class Global
     }
 
     /// <summary> Do nothing </summary>
-    public static void NoOp() {}
+    public static void NoOp() { }
     public static void Verify(string message, bool condition)
     {
         if (!condition)

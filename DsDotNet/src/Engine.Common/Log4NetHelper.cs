@@ -1,12 +1,10 @@
-using System;
+using log4net;
+using log4net.Appender;
+using log4net.Core;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
-using log4net;
-using log4net.Appender;
-using log4net.Core;
 
 namespace Engine.Common;
 

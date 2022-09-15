@@ -1,8 +1,5 @@
 using System.Reactive.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-
-using static Engine.Core.GlobalShortCuts;
 using static Engine.Runner.DataModule;
 
 namespace Engine
@@ -43,7 +40,8 @@ namespace Engine
         {
             Func<Bit, bool, Task> interlockChecker(string interlockName) =>
                 (bit, val) =>
-                    Task.Run(() => {    // caller 에서 await 함..
+                    Task.Run(() =>
+                    {    // caller 에서 await 함..
                         var opcOpposite = data.GetTag(interlockName);
                         Global.Verify($"Exclusive error: {bit.Name}", !val || opcOpposite.Value == false);
                     }); // no .FireAndForget();
@@ -54,8 +52,8 @@ namespace Engine
                 {
                     yield return ($"StartActual_{f}_Vp", interlockChecker($"StartActual_{f}_Vm"));
                     yield return ($"StartActual_{f}_Vm", interlockChecker($"StartActual_{f}_Vp"));
-                    yield return ($"EndActual_{  f}_Sp", interlockChecker($"EndActual_{  f}_Sm"));
-                    yield return ($"EndActual_{  f}_Sm", interlockChecker($"EndActual_{  f}_Sp"));
+                    yield return ($"EndActual_{f}_Sp", interlockChecker($"EndActual_{f}_Sm"));
+                    yield return ($"EndActual_{f}_Sm", interlockChecker($"EndActual_{f}_Sp"));
                 }
             }
             var cmd2sensors = generateMap().ToArray();

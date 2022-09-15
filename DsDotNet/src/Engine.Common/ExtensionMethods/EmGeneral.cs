@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Reflection;
 
 namespace Engine.Common
 {
@@ -69,7 +68,7 @@ namespace Engine.Common
         [Pure]
         public static bool Toggle(this bool fact, bool toggle)
         {
-            return toggle ? ! fact : fact;
+            return toggle ? !fact : fact;
         }
 
         [Pure]

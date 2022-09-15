@@ -86,7 +86,7 @@ public static class FlowExtension
 {
     public static DsSystem GetSystem(this Flow flow)
     {
-        switch(flow)
+        switch (flow)
         {
             case RootFlow rf: return rf.System;
             case SegmentBase seg: return seg.ContainerFlow.System;
@@ -107,7 +107,7 @@ public static class FlowExtension
             .Except(verticesFromEdge)
             ;
     }
-    public static IEnumerable<ICoin> CollectIsolatedCoins(this Flow flow, bool bySetEdge=true, bool byResetEdge=false) =>
+    public static IEnumerable<ICoin> CollectIsolatedCoins(this Flow flow, bool bySetEdge = true, bool byResetEdge = false) =>
         flow.CollectIsolatedVertex(bySetEdge, byResetEdge).OfType<ICoin>();
 
     public class Causal
@@ -116,7 +116,7 @@ public static class FlowExtension
         public IVertex Target;
         public bool IsReset => EdgeCausal.IsReset;
         public DsType.EdgeCausal EdgeCausal;
-        
+
         public Causal(IVertex source, IVertex target, DsType.EdgeCausal edgeCausal)
         {
             Source = source;
@@ -143,7 +143,7 @@ public static class FlowExtension
         foreach (var e in flow.Edges)
             foreach (var c in e.CollectArrow())
                 yield return c;
-                    ;
+        ;
     }
 
     /// <summary>

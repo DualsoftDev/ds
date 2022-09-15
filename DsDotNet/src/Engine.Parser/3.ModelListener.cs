@@ -4,11 +4,11 @@ class ModelListener : dsBaseListener
 {
     #region Boiler-plates
     public ParserHelper ParserHelper;
-    Model    _model => ParserHelper.Model;
-    DsSystem _system    { get => ParserHelper._system;    set => ParserHelper._system = value; }
-    DsTask   _task      { get => ParserHelper._task;      set => ParserHelper._task = value; }
-    RootFlow _rootFlow  { get => ParserHelper._rootFlow;  set => ParserHelper._rootFlow = value; }
-    SegmentBase  _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
+    Model _model => ParserHelper.Model;
+    DsSystem _system { get => ParserHelper._system; set => ParserHelper._system = value; }
+    DsTask _task { get => ParserHelper._task; set => ParserHelper._task = value; }
+    RootFlow _rootFlow { get => ParserHelper._rootFlow; set => ParserHelper._rootFlow = value; }
+    SegmentBase _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
     /// <summary> Qualified Path Map </summary>
     Dictionary<string, object> QpInstanceMap => ParserHelper.QualifiedInstancePathMap;
     Dictionary<string, object> QpDefinitionMap => ParserHelper.QualifiedDefinitionPathMap;
@@ -127,12 +127,12 @@ class ModelListener : dsBaseListener
 
 
 
-    override public void ExitProgram(ProgramContext ctx) {}
+    override public void ExitProgram(ProgramContext ctx) { }
 
 
     // ParseTreeListener<> method
-    override public void VisitTerminal(ITerminalNode node)     { return; }
-    override public void VisitErrorNode(IErrorNode node)        { return; }
+    override public void VisitTerminal(ITerminalNode node) { return; }
+    override public void VisitErrorNode(IErrorNode node) { return; }
     override public void EnterEveryRule(ParserRuleContext ctx) { return; }
     override public void ExitEveryRule(ParserRuleContext ctx) { return; }
 }

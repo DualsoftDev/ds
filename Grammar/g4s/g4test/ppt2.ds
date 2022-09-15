@@ -100,7 +100,8 @@
         EMGBTN = { F1; F2; F3; F5; FF };
     }
     [auto] = {
-        AutoBTN2; AutoBTN = { F2 };
+        //AutoBTN2;     Empty not allowed
+        AutoBTN = { F2 };
         AutoBTN = { F1; F3; F5; FF };
     }
     [start] = {

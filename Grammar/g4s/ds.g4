@@ -28,7 +28,7 @@ qstring: STRING_LITERAL EOF;
 system: sysProp id '=' sysBlock;    // [sys] Seg = {..}
 sysProp: '[' 'sys' ']';
 sysBlock
-    : LBRACE (flow|listing|alias|parenting|causal|call)* RBRACE       // acc|sysTask|macro
+    : LBRACE (flow|listing|alias|parenting|causal|call|buttons)* RBRACE       // acc|sysTask|macro
     ;
 
 
@@ -105,7 +105,7 @@ safetyValues: segmentPathN (SEIMCOLON segmentPathN)*;
 
 
 flow
-    : flowProp id '=' LBRACE (causal|parenting|listing|safetyBlock)* RBRACE     // |flowTask
+    : flowProp id '=' LBRACE (causal|parenting|call|listing|safetyBlock)* RBRACE     // |flowTask
     ;
 flowProp : '[' 'flow' ('of' id)? ']';
 
@@ -128,6 +128,19 @@ parenting: id EQ LBRACE causal* RBRACE;
 // A23 = { M.U ~ S.S3U ~ _ }
 call: id EQ LBRACE callPhrase RBRACE;
 callPhrase: segments TILDE segments (TILDE segments)?;
+calls: (call SEIMCOLON)+ ;
+
+buttons:emergencyButtons|autoButtons|startButtons|resetButtons;
+emergencyButtons :'[' ('emg_in'|'emg') ']'     EQ buttonBlock;
+autoButtons      :'[' ('auto_in'|'auto') ']'   EQ buttonBlock;
+startButtons     :'[' ('start_in'|'start') ']' EQ buttonBlock;
+resetButtons     :'[' ('reset_in'|'reset') ']' EQ buttonBlock;
+buttonBlock: LBRACE (() | ((SEIMCOLON)* buttonDef)* (SEIMCOLON)*) RBRACE;
+buttonDef: buttonName EQ LBRACE (() | flowName (SEIMCOLON flowName)* (SEIMCOLON)?) RBRACE;
+buttonName: identifier;
+flowName : identifier;
+
+
 
 // B.F1 > Set1F <| T.A21;
 causal
@@ -137,8 +150,8 @@ causal
 
 // debugging purpose {
 causals: causal* (causalPhrase)?;
+
 expressions: (expression SEIMCOLON)+ ;
-calls: (call SEIMCOLON)+ ;
 // } debugging purpose
 
 

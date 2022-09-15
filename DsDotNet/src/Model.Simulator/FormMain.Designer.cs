@@ -45,6 +45,7 @@ namespace Model.Simulator
             this.richTextBox_Debug = new System.Windows.Forms.RichTextBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.splitter1 = new System.Windows.Forms.Splitter();
+            this.button_HideLine = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -101,6 +102,7 @@ namespace Model.Simulator
             this.splitContainer2.Panel1.BackColor = System.Drawing.SystemColors.Control;
             this.splitContainer2.Panel1.Controls.Add(this.button_Stop);
             this.splitContainer2.Panel1.Controls.Add(this.button_TestStart);
+            this.splitContainer2.Panel1.Controls.Add(this.button_HideLine);
             this.splitContainer2.Panel1.Controls.Add(this.button_Compile);
             this.splitContainer2.Panel1.Controls.Add(this.button_TestORG);
             this.splitContainer2.Panel1.Controls.Add(this.button_Run);
@@ -235,6 +237,16 @@ namespace Model.Simulator
             this.splitter1.TabIndex = 22;
             this.splitter1.TabStop = false;
             // 
+            // button_HideLine
+            // 
+            this.button_HideLine.Location = new System.Drawing.Point(170, 18);
+            this.button_HideLine.Name = "button_HideLine";
+            this.button_HideLine.Size = new System.Drawing.Size(85, 23);
+            this.button_HideLine.TabIndex = 4;
+            this.button_HideLine.Text = "라인숨기기";
+            this.button_HideLine.UseVisualStyleBackColor = true;
+            this.button_HideLine.Click += new System.EventHandler(this.button_HideLine_Click);
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
@@ -283,6 +295,7 @@ namespace Model.Simulator
         private System.Windows.Forms.Button button_Run;
         private System.Windows.Forms.Button button_Compile;
         private System.Windows.Forms.Button button_Stop;
+        private System.Windows.Forms.Button button_HideLine;
     }
 }
 

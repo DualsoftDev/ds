@@ -121,19 +121,9 @@ namespace Model.Simulator
             {
                 button_TestORG.Enabled = true;
                 button_TestStart.Enabled = true;
-                //var modelText = Tester.GetTextDiamond();
-                //_Engine = new EngineBuilder(modelText, $"Cpu").Engine;
-                _dsText = "";
-                var textLines = richTextBox_ds.Text.Split('\n');
-                textLines.ForEach(f =>
-                {
-                    var patternHead = "^\\d*;"; // 첫 ; 내용 제거
-                    var replaceName = System.Text.RegularExpressions.Regex.Replace(f, patternHead, "");
-
-                    _dsText += (replaceName + "\n");
-                });
 
 
+                RefreshText();
                 ExportTextModel(Color.Transparent, _dsText, true);
 
                 if (_dsText == "")
@@ -160,6 +150,21 @@ namespace Model.Simulator
                 MSGError(ex.Message);
             }
         }
+
+        private void RefreshText()
+        {
+            _dsText = "";
+            var textLines = richTextBox_ds.Text.Split('\n');
+            textLines.ForEach(f =>
+            {
+                var patternHead = "^\\d*;"; // 첫 ; 내용 제거
+                var replaceName = System.Text.RegularExpressions.Regex.Replace(f, patternHead, "");
+
+                _dsText += (replaceName + "\n");
+            });
+            richTextBox_ds.Text = _dsText;
+        }
+
         private void button_TestORG_Click(object sender, EventArgs e)
         {
             if (_Engine == null) return;
@@ -214,6 +219,12 @@ namespace Model.Simulator
         {
             button_Run.Enabled = true;
             button_Stop.Enabled = false;
+
+        }
+
+        private void button_HideLine_Click(object sender, EventArgs e)
+        {
+            RefreshText();
 
         }
     }

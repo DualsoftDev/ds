@@ -9,6 +9,7 @@ global using System.Diagnostics;
 global using log4net;
 global using BitDic = System.Collections.Generic.Dictionary<string, Engine.Core.IBit>;
 global using TagDic = System.Collections.Generic.Dictionary<string, Engine.Core.Tag>;
+global using ButtonDic = System.Collections.Generic.Dictionary<string, Engine.Core.RootFlow[]>;
 global using Engine.Common;
 
 global using static Engine.Core.GlobalShortCuts;

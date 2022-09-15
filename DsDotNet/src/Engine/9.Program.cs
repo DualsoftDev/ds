@@ -30,7 +30,7 @@ class Program
         //Tester.DoSampleTest();
         //Tester.DoSampleTestAdvanceReturn();
         //Tester.DoSampleTestHatOnHat();
-        Tester.DoSampleTestDiamond();
+        //Tester.DoSampleTestDiamond();
         //Tester.DoSampleTestTriangle();
         //Tester.DoSampleTestAddressesAndLayouts();
 
@@ -38,5 +38,7 @@ class Program
         //ParserTest.TestParseSafety();
         //ParserTest.TestParseFlowTask();
         //ParserTest.TestParseStrongCausal();
+        //ParserTest.TestParseButtons();
+        ParserTest.TestParsePpt();
     }
 }

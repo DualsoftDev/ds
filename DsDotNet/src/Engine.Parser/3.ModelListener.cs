@@ -114,6 +114,39 @@ class ModelListener : dsBaseListener
     //override public void ExitCausals(CausalsContext ctx) {}
 
 
+    override public void EnterButtons (ButtonsContext ctx)
+    {
+        var first = findFirstChild<ParserRuleContext>(ctx);
+        var targetDic =
+            first switch
+            {
+                EmergencyButtonsContext => _system.EmergencyButtons,
+                AutoButtonsContext => _system.AutoButtons,
+                StartButtonsContext => _system.StartButtons,
+                ResetButtonsContext => _system.ResetButtons,
+                _ => throw new Exception("ERROR"),
+            };
+        var buttonDefs = enumerateChildren<ButtonDefContext>(first).ToArray();
+        foreach (var bd in buttonDefs)
+        {
+            var buttonName = findFirstChild<ButtonNameContext>(bd).GetText();
+            var flows = (
+                    from flowNameCtx in enumerateChildren<FlowNameContext>(bd)
+                    let flowName = flowNameCtx.GetText()
+                    let flow = QpInstanceMap[$"{_system.Name}.{flowName}"] as RootFlow
+                    select flow
+                ).ToArray();
+            
+            targetDic.Add(buttonName, flows);
+
+            Console.WriteLine();
+        }
+
+        Console.WriteLine();
+        //EmergencyButtonsContext
+        //ctx
+        //base.EnterButtons
+    }
 
 
 

@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Engine
 {
     internal static class ParserTest
@@ -146,5 +140,183 @@ namespace Engine
             engine.Run();
         }
 
+        public static void TestParseButtons()
+        {
+            var text = @"
+[sys] My = {
+    [flow] F1 = { A > B; }
+    [flow] F2 = { A > B; }
+    [flow] F3 = { A > B; }
+    [flow] F4 = { A > B; }
+    [flow] F5 = { A > B; }
+    [emg] = {
+        EmptyButton = {};
+        EmptyButton2 = {}
+        EMGBTN3 = { F3; F5 };
+        EMGBTN = { F1; F2; F3; F5; };
+    }
+    [emg] = {
+    }
+    [auto] = {
+        //AutoBTN2;     Empty not allowed
+        AutoBTN = { F2 };
+        AutoBTN2 = { F1; F3; F5; };
+    }
+    [start] = {
+        StartBTN_FF = { F2 };
+        StartBTN1 = { F1; };
+    }
+    [reset] = {
+        ResetBTN = { F1; F2; F3; F5; };
+    }
+}
+
+[cpus] AllCpus = {
+    [cpu] Cpu = {
+        My.F1;
+        My.F2;
+        My.F3;
+        My.F4;
+        My.F5;
+    }
+}
+
+";
+            var engine = new EngineBuilder(text, "Cpu").Engine;
+            Program.Engine = engine;
+            engine.Run();
+        }
+
+        public static void TestParsePpt()
+        {
+            var text = @"
+//////////////////////////////////////////////////////
+//DTS model auto generation from D:\DS\test\DS.pptx
+//////////////////////////////////////////////////////
+[sys] MY = {
+    [flow] F1 = {
+        R1 > R2;
+        R2 |> R1;
+        R2 = {
+            C1 <||> C4;
+            C1 > C4;
+        }
+        R1 = {
+            C1 <||> C4;
+            C1 > C2;
+            C1 > C3;
+            C2, C3 > C4;
+            C3 <||> C2;
+        }
+        C1     = {EX.F1_C1.TX    ~    EX.F1_C1.RX}
+        C4     = {EX.F1_C4.TX    ~    EX.F1_C4.RX}
+        C2     = {EX.F1_C2.TX    ~    EX.F1_C2.RX}
+        C3     = {EX.F1_C3.TX    ~    EX.F1_C3.RX}
+        ResetBTN     = {EX.F1_ResetBTN.TX    ~    EX.F1_ResetBTN.RX}
+    }
+    [flow] F2 = {
+        R1 > R2;
+        R2 |> R1;
+        R1 = {
+            C1 <||> C4;
+            C1 > C2;
+            C1 > C3;
+            C2, C3 > C4;
+            C3 <||> C2;
+        }
+        R2 = {
+            C1 <||> C4;
+            C1 > C4;
+        }
+        C1     = {EX.F2_C1.TX    ~    EX.F2_C1.RX}
+        C4     = {EX.F2_C4.TX    ~    EX.F2_C4.RX}
+        C3     = {EX.F2_C3.TX    ~    EX.F2_C3.RX}
+        C2     = {EX.F2_C2.TX    ~    EX.F2_C2.RX}
+        ResetBTN     = {EX.F2_ResetBTN.TX    ~    EX.F2_ResetBTN.RX}
+    }
+    [flow] F3 = {
+        R1 > R2;
+        R2 |> R1;
+        R1 = {
+            C1 <||> C4;
+            C1 > C2;
+            C1 > C3;
+            C2, C3 > C4;
+            C3 <||> C2;
+        }
+        R2 = {
+            C1 <||> C4;
+            C1 > C4;
+        }
+        C1     = {EX.F3_C1.TX    ~    EX.F3_C1.RX}
+        C2     = {EX.F3_C2.TX    ~    EX.F3_C2.RX}
+        C4     = {EX.F3_C4.TX    ~    EX.F3_C4.RX}
+        C3     = {EX.F3_C3.TX    ~    EX.F3_C3.RX}
+        ResetBTN     = {EX.F3_ResetBTN.TX    ~    EX.F3_ResetBTN.RX}
+    }
+    [flow] F5 = {
+        R1 > R2;
+        R2 |> R1;
+        R2 = {
+            C1 <||> C4;
+            C1 > C4;
+        }
+        R1 = {
+            C1 <||> C4;
+            C1 > C2;
+            C1 > C3;
+            C2, C3 > C4;
+            C3 <||> C2;
+        }
+        C1     = {EX.F5_C1.TX    ~    EX.F5_C1.RX}
+        C4     = {EX.F5_C4.TX1, EX.F5_C4.TX2, EX.F5_C4.TX3, EX.F5_C4.TX4, EX.F5_C4.TX5    ~    EX.F5_C4.RX1, EX.F5_C4.RX2, EX.F5_C4.RX3, EX.F5_C4.RX4, EX.F5_C4.RX5, EX.F5_C4.RX6}
+        C2     = {EX.F5_C2.TX    ~    EX.F5_C2.RX}
+        C3     = {EX.F5_C3.TX    ~    EX.F5_C3.RX}
+        ResetBTN     = {EX.F5_ResetBTN.TX    ~    EX.F5_ResetBTN.RX}
+    }
+    [flow] FF = {
+        ""F1.R2"", ""F2.R2"", ""F3.R2"", ""F5.C4"", ""F5.R2"" > RR1;
+        RR1 |> ""F2.R2"";
+        RR1 |> ""F3.R2"";
+        RR1 |> ""F1.R2"";
+        RR1 = {
+            CC1 <||> CC2;
+            CC1 > CC2;
+        }
+        CC1     = {EX.FF_CC1.TX    ~    EX.FF_CC1.RX}
+        CC2     = {EX.FF_CC2.TX    ~    EX.FF_CC2.RX}
+        ResetBTN     = {EX.FF_ResetBTN.TX    ~    EX.FF_ResetBTN.RX}
+    }
+    [emg] = {
+        EMGBTN3 = { F3; F5 };
+        EMGBTN = { F1; F2; F3; F5; FF };
+    }
+    [auto] = {
+        //AutoBTN2;     Empty not allowed
+        //AutoBTN = { F2 };
+        AutoBTN = { F1; F3; F5; FF };
+    }
+    [start] = {
+        StartBTN_FF = { FF };
+        StartBTN1 = { F1 };
+    }
+    [reset] = {
+        ResetBTN = { F1; F2; F3; F5; FF };
+    }
+}
+[cpus] AllCpus = {
+    [cpu] Cpu = {
+        MY.F1;
+        MY.F2;
+        MY.F3;
+        MY.F5;
+        MY.FF;
+    }
+}
+";
+            var engine = new EngineBuilder(text, "Cpu").Engine;
+            Program.Engine = engine;
+            engine.Run();
+        }
     }
 }

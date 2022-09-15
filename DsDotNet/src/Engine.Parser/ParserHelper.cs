@@ -57,7 +57,7 @@ public class ParserHelper
             return (T)dict[qualifiedName];
 
         if (creator == null)
-            throw new Exception("ERROR");
+            throw new Exception($"ERROR: failed to create {qualifiedName}");
 
         var t = creator();
         dict[qualifiedName] = t;

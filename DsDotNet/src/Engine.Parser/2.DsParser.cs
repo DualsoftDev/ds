@@ -61,7 +61,7 @@ class DsParser
     }
 
 
-    public static IParseTree findFirstChild(IParseTree from, Func<IParseTree, bool> predicate, bool includeMe = true)
+    public static IParseTree findFirstChild(IParseTree from, Func<IParseTree, bool> predicate, bool includeMe = false)
     {
         foreach (var c in enumerateChildren<IParseTree>(from, includeMe))
         {
@@ -71,6 +71,8 @@ class DsParser
 
         return null;
     }
+    public static T findFirstChild<T>(IParseTree from, bool includeMe = false) where T: IParseTree =>
+        enumerateChildren<T>(from, includeMe).FirstOrDefault();
 
     public static IParseTree findFirstAncestor(IParseTree from, Func<IParseTree, bool> predicate, bool includeMe=true)
     {

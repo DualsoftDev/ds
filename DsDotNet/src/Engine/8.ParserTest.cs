@@ -102,5 +102,49 @@ namespace Engine
             Program.Engine = engine;
             engine.Run();
         }
+
+        public static void TestParseStrongCausal()
+        {
+            var text = @"
+[sys] L = {
+    [flow] F = {
+        Main = {
+            Cp >> Cm;
+            Cp ||> Cm;
+            Cp <|| Cm;
+        }
+        [task] = {
+            Cp = {P.F.Vp ~ P.F.Sp}
+            Cm = {P.F.Vm ~ P.F.Sm}
+        }
+    }
+}
+
+[sys] P = {
+    [flow] F = {
+        Vp > Pp > Sp;
+        Vm > Pm > Sm;
+
+        Pp |> Sm;
+        Pm |> Sp;
+        Vp <||> Vm;
+    }
+}
+
+[cpus] AllCpus = {
+    [cpu] Cpu = {
+        L.F;
+    }
+    [cpu] PCpu = {
+        P.F;
+    }
+}
+
+";
+            var engine = new EngineBuilder(text, "Cpu").Engine;
+            Program.Engine = engine;
+            engine.Run();
+        }
+
     }
 }

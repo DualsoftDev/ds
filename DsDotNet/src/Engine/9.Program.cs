@@ -1,11 +1,11 @@
 using System.Threading;
 using System.Reflection;
+using Engine.Common.FS;
 
 namespace Engine;
 
 class Program
 {
-    public static ILog Logger { get; private set; }
     public static ENGINE Engine { get; set; }
 
    
@@ -22,17 +22,21 @@ class Program
         //PrepareThreadPool();
         SimpleExceptionHandler.InstallExceptionHandler();
         DllVersionChecker.IsValidExDLL(Assembly.GetExecutingAssembly());
-        Global.Logger = Log4NetHelper.PrepareLog4Net("EngineLogger");
+        var logger = Log4NetHelper.PrepareLog4Net("EngineLogger");
+        Log4NetWrapper.SetLogger(logger);
+        Global.Logger = logger;
+
         //Tester.DoSampleTestVps();
         //Tester.DoSampleTest();
         //Tester.DoSampleTestAdvanceReturn();
         //Tester.DoSampleTestHatOnHat();
-        Tester.DoSampleTestDiamond();
+        //Tester.DoSampleTestDiamond();
         //Tester.DoSampleTestTriangle();
         //Tester.DoSampleTestAddressesAndLayouts();
 
 
         //ParserTest.TestParseSafety();
         //ParserTest.TestParseFlowTask();
+        ParserTest.TestParseStrongCausal();
     }
 }

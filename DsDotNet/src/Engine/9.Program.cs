@@ -6,7 +6,6 @@ namespace Engine;
 
 class Program
 {
-    public static ILog Logger { get; private set; }
     public static ENGINE Engine { get; set; }
 
    
@@ -23,8 +22,9 @@ class Program
         //PrepareThreadPool();
         SimpleExceptionHandler.InstallExceptionHandler();
         DllVersionChecker.IsValidExDLL(Assembly.GetExecutingAssembly());
-        Global.Logger = Log4NetHelper.PrepareLog4Net("EngineLogger");
-        Log4NetWrapper.SetLogger(Logger);
+        var logger = Log4NetHelper.PrepareLog4Net("EngineLogger");
+        Log4NetWrapper.SetLogger(logger);
+        Global.Logger = logger;
 
         //Tester.DoSampleTestVps();
         //Tester.DoSampleTest();

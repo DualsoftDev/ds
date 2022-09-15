@@ -15,3 +15,16 @@ module Text =
     let TextSReset      = "=>"
     [<Literal>] 
     let TextInterlock   = "<||>"
+    [<Literal>] 
+    let TextFlow   = "flow"
+    [<Literal>] 
+    let TextSystem = "sys"
+    [<Literal>] 
+    let TextEmergenyBTN   = "emg_in"
+    [<Literal>] 
+    let TextAutoBTN = "auto_in"
+    [<Literal>] 
+    let TextResetBTN   = "reset_in"
+    [<Literal>] 
+    let TextStartBTN   = "start_in"
+  

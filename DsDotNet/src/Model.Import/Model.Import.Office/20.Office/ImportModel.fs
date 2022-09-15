@@ -151,9 +151,10 @@ module ImportModel =
                                 //Auto
                                 if(node.IsAutoBtn) 
                                 then 
-                                    if(mySys.AutoSet.ContainsKey(node.Name))
-                                    then mySys.AutoSet.[node.Name].Add(mySys.Flows.[node.PageNum]) |>ignore
-                                    else mySys.AutoSet.TryAdd(node.Name, [mySys.Flows.[node.PageNum]] |> List) |>ignore
+                                    let name = GetValidName(node.Name)
+                                    if(mySys.AutoSet.ContainsKey(name))
+                                    then mySys.AutoSet.[name].Add(mySys.Flows.[node.PageNum]) |>ignore
+                                    else mySys.AutoSet.TryAdd(name, [mySys.Flows.[node.PageNum]] |> List) |>ignore
                                 //Safety
                                 let safeSeg = 
                                     node.Safeties   //세이프티 입력 미등록 이름오류 체크

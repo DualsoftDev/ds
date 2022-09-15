@@ -136,7 +136,7 @@ module ExportModel =
                     //EmgSet 출력
                     if(sys.EmgSet.Any())
                     then 
-                        yield sprintf "\t[emg] = {" 
+                        yield sprintf "\t[%s] = {"  TextEmergenyBTN
                         for emg in sys.EmgSet do
                             yield sprintf "\t\t%s = { %s };" emg.Key (emg.Value |>Seq.map(fun flo-> flo.ToText()) |> String.concat "; ") 
                         yield "\t}"
@@ -144,7 +144,7 @@ module ExportModel =
                     //AutoSet 출력
                     if(sys.AutoSet.Any())
                     then 
-                        yield sprintf "\t[auto] = {" 
+                        yield sprintf "\t[%s] = {"  TextAutoBTN
                         for auto in sys.AutoSet do
                             yield sprintf "\t\t%s = { %s };" auto.Key (auto.Value |>Seq.map(fun flo-> flo.ToText()) |> String.concat "; ") 
                         yield "\t}"
@@ -152,7 +152,7 @@ module ExportModel =
                     //StartSet 출력
                     if(sys.StartSet.Any())
                     then 
-                        yield sprintf "\t[start] = {" 
+                        yield sprintf "\t[%s] = {"  TextStartBTN
                         for start in sys.StartSet do
                             yield sprintf "\t\t%s = { %s };" start.Key (start.Value |>Seq.map(fun flo-> flo.ToText()) |> String.concat "; ") 
                         yield "\t}"
@@ -160,7 +160,7 @@ module ExportModel =
                     //ResetSet 출력
                     if(sys.ResetSet.Any())
                     then 
-                        yield sprintf "\t[reset] = {" 
+                        yield sprintf "\t[%s] = {"  TextResetBTN
                         for reset in sys.ResetSet do
                             yield sprintf "\t\t%s = { %s };" reset.Key (reset.Value |>Seq.map(fun flo-> flo.ToText()) |> String.concat "; ") 
                         yield "\t}"

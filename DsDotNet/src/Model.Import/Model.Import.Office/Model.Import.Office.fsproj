@@ -23,14 +23,14 @@
     <Compile Include="00.Base\03.Event, Util.fs" />
     <Compile Include="10.Model\10.Object.fs" />
     <Compile Include="10.Model\12.Model.fs" />
-    <Compile Include="20.Office\Util.fs" />
-    <Compile Include="20.Office\UtilPPT.fs" />
-    <Compile Include="20.Office\PPTX.fs" />
-    <Compile Include="20.Office\Check.fs" />
-    <Compile Include="20.Office\ImportModel.fs" />
-    <Compile Include="20.Office\ExportModel.fs" />
-    <Compile Include="20.Office\ImportIOTable.fs" />
-    <Compile Include="20.Office\ExportIOTable.fs" />
+    <Compile Include="Util.fs" />
+    <Compile Include="UtilPPT.fs" />
+    <Compile Include="PPTX.fs" />
+    <Compile Include="Check.fs" />
+    <Compile Include="ImportModel.fs" />
+    <Compile Include="ExportModel.fs" />
+    <Compile Include="ImportIOTable.fs" />
+    <Compile Include="ExportIOTable.fs" />
   </ItemGroup>
 
 

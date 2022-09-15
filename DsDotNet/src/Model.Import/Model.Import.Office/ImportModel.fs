@@ -45,7 +45,7 @@ module ImportModel =
             if(node.Alias.IsSome) 
             then 
                 let name = Util.GetValidName(node.Name) 
-                let alias = $"\"{node.Alias.Value}\"";  //별칭은 무조건 "" 감싸기
+                let alias = node.Alias.Value
 
                 if(flow.AliasSet.Keys.Contains(name))  
                  then flow.AliasSet.[name].Add( alias)|> ignore

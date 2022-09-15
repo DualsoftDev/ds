@@ -73,9 +73,9 @@ module ImportIOTable =
             flow.NotMySegs()
             |> Seq.iter(fun seg -> 
                         let s, r, e = sys.AddressSet.[seg.Name]
-                        seg.S <- s
-                        seg.R <- r
-                        seg.E <- e  )
+                        seg.S <- if(s = "") then None else Some(s) 
+                        seg.R <- if(r = "") then None else Some(r) 
+                        seg.E <- if(e = "") then None else Some(e)    )
 
         DoWork(0);
 

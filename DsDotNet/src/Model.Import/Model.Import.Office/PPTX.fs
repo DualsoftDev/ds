@@ -284,7 +284,7 @@ module PPTX =
                                sameNodes 
                                |> Seq.iter(fun node -> 
                                    cnt <- cnt+1
-                                   node.Alias <-Some(sprintf "%s_Copy%d" node.Name cnt))
+                                   node.Alias <-Some(Util.GetValidName(sprintf "%s_Copy%d" node.Name cnt)))
                            )
 
             children |> Seq.iter(fun child -> childSet.TryAdd(child)|>ignore)

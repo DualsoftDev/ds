@@ -36,17 +36,17 @@ module ExportModel =
             if(seg.NodeCausal = EX)
             then 
                 let ex = sprintf "EX.%s.EX" callPath
-                sprintf "%-40s \t= (%s,%s,%s)" ex seg.S seg.R seg.E
+                sprintf "%-40s \t= (%s,%s,%s)" ex seg.TextStart seg.TextReset seg.TextEnd
             else
                 let causal, text = seg.PrintfTRX(index)
                 match causal with
                 |TR ->  let tx = sprintf "EX.%s.%s" callPath (text.Replace("TR", "TX"))
                         let rx = sprintf "EX.%s.%s" callPath (text.Replace("TR", "RX"))
-                        sprintf "%-40s \t= (%s, , )\r\n\t%-40s \t= (, ,%s)"  tx seg.S rx seg.E 
+                        sprintf "%-40s \t= (%s, , )\r\n\t%-40s \t= (, ,%s)"  tx seg.TextStart rx seg.TextEnd 
                 |TX ->  let tx = sprintf "EX.%s.%s" callPath text
-                        sprintf "%-40s \t= (%s, , )"  tx seg.S
+                        sprintf "%-40s \t= (%s, , )"  tx seg.TextStart
                 |RX ->  let rx = sprintf "EX.%s.%s" callPath text
-                        sprintf "%-40s \t= (, ,%s)"  rx seg.E
+                        sprintf "%-40s \t= (, ,%s)"  rx seg.TextEnd
                 |_ -> failwithf "ERR";
 
         let mergeEdges(edges:MEdge seq) =

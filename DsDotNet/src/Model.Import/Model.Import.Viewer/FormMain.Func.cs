@@ -114,6 +114,7 @@ namespace Dual.Model.Import
                 button_copy.Visible = true;
 
                 MSGInfo($"{PathXLS} 적용완료!!");
+                MSGWarn($"파워포인트와 엑셀을 동시에 가져오면 IO 매칭된 설정값을 가져올수 있습니다.!!");
 
             });
             Busy = false;

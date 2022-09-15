@@ -27,12 +27,13 @@ module ExportIOTable =
         dt.Columns.Add("E(Input)" , typeof<string>) |>ignore
 
 
-        let rowItems(causal:NodeCausal, name:string, flowName:string, trx:string) =
+        let rowItems(causal:NodeCausal, seg:Seg, trx:string) =
+            let flowName, name = seg.Name, seg.OwnerFlow
             match causal with
-            |TR ->  ["주소"; flowName; name; trx; "bit"; "";   "'-"; ""]
-            |TX  -> ["주소"; flowName; name; trx; "bit"; "";   "'-"; "'-"]
-            |RX  -> ["주소"; flowName; name; trx; "bit"; "'-"; "'-"; ""]
-            |EX  -> ["주소"; flowName; name; trx; "bit"; ""; ""; ""]
+            |TR ->  ["주소"; flowName; name; trx; "bit"; seg.TextStart; "'-"          ; seg.TextEnd]
+            |TX  -> ["주소"; flowName; name; trx; "bit"; seg.TextStart; "'-"          ; "'-"]
+            |RX  -> ["주소"; flowName; name; trx; "bit"; "'-"         ; "'-"          ; seg.TextEnd]
+            |EX  -> ["주소"; flowName; name; trx; "bit"; seg.TextStart; seg.TextReset ; seg.TextEnd]
             |_ -> failwithf "ERR";
 
         let rows =
@@ -45,10 +46,10 @@ module ExportIOTable =
                         for callSeg in flow.CallSegs() do
                             for index in [|1..callSeg.MaxCnt|] do
                                 let causal, trx = callSeg.PrintfTRX(index, true)
-                                yield rowItems(causal, callSeg.Name, callSeg.OwnerFlow, trx)
+                                yield rowItems(causal, callSeg, trx)
                         //Ex Task 출력
                         for callSeg in flow.ExRealSegs() do
-                            yield rowItems(EX, callSeg.Name, callSeg.OwnerFlow, "EX")
+                            yield rowItems(EX, callSeg, "EX")
             }
         rows
         |> Seq.iter(fun row -> 

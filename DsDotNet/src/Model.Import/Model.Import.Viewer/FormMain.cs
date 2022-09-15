@@ -75,18 +75,29 @@ namespace Dual.Model.Import
                 if (extension == ".xlsx")
                     lstPPTXLS[1] = file;
             }
-            if (lstPPTXLS[0] != null)
+
+            if (lstPPTXLS[0] != null && lstPPTXLS[1] != null)
             {
                 PathPPT = lstPPTXLS[0];
-                InitModel(lstPPTXLS[0]);
+                InitModel(  lstPPTXLS[0]);
+                PathXLS = lstPPTXLS[1];
+                ImportExcel(lstPPTXLS[1]);
             }
-            if (lstPPTXLS[1] != null)
+            else
             {
-                if (PathXLS == lstPPTXLS[1])
-                    ImportExcel(lstPPTXLS[1]);
-                else
+                if (lstPPTXLS[0] != null)
                 {
-                    MSGError($"{PathPPT} 모델로 부터 자동생성된 {PathXLS} 파일을 로드 해야 합니다.");
+                    PathPPT = lstPPTXLS[0];
+                    InitModel(lstPPTXLS[0]);
+                }
+                if (lstPPTXLS[1] != null)
+                {
+                    if (PathXLS == lstPPTXLS[1])
+                        ImportExcel(lstPPTXLS[1]);
+                    else
+                    {
+                        MSGError($"{PathPPT} 모델로 부터 자동생성된 {PathXLS} 파일을 로드 해야 합니다.");
+                    }
                 }
             }
         }
@@ -119,7 +130,7 @@ namespace Dual.Model.Import
                 
                 this.Size = new Size(1600, 1000);
                 HelpLoad();
-                Task.Run(() => { ImportPPT(); });
+                ImportPPT();
             }
             catch
             {

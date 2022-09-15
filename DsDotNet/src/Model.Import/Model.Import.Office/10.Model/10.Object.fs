@@ -70,7 +70,7 @@ module Object =
 
             ///금칙 문자 및 선두숫자가 있으면 "" 로 이름 앞뒤에 배치한다.
             ///Alias 는 무조건 "" 로 이름 앞뒤에 배치
-            member x.SegName  = sprintf "%s" (if(this.Alias.IsSome) then $"\"{this.Alias.Value}\"" else Util.GetValidName(name))
+            member x.SegName  = sprintf "%s" (if(this.Alias.IsSome) then this.Alias.Value else Util.GetValidName(name))
             member x.FlowNSeg = sprintf "%s.%s"  ownerFlow (Util.GetValidName(name))
             member x.FullName = sprintf "%s.%s.%s" baseSystem.Name  ownerFlow (Util.GetValidName(name))  
             member x.PathName = sprintf "%s(%s)" x.FullName (if(x.Parent.IsSome) then x.Parent.Value.Name else "Root")
@@ -118,10 +118,13 @@ module Object =
             member x.UIKey:string =  $"{x.Name};{x.Key}"
             member val Key : string = "" with get, set
             member val Parent : Seg option = None with get, set
-            member val S = "" with get, set
-            member val R = "" with get, set
-            member val E = "" with get, set
+            member val S : string option = None  with get, set
+            member val R : string option = None  with get, set
+            member val E : string option = None  with get, set
 
+            member x.TextStart = if(x.S.IsSome) then x.S.Value else ""
+            member x.TextReset = if(x.R.IsSome) then x.R.Value else ""
+            member x.TextEnd   = if(x.E.IsSome) then x.E.Value else ""
 
             member x.AddChildNSetParent(edge:MEdge) =  
                 edge.Source.Parent <- Some(x)  
@@ -198,7 +201,10 @@ module Object =
             member x.AliasSet   = aliasSet
 
             member x.Interlockedges = 
-                        let FullNodesIL = interlocks.Values.GetNodes() |> Seq.cast<Seg> |> HashSet
+                        let FullNodesIL = interlocks.Values.GetNodes() 
+                                            |> Seq.cast<Seg>
+                                            |> Seq.filter(fun seg -> seg.Alias.IsNone)
+                                            |> HashSet
                         interlocks.Values.GetNodes()
                                         |> Seq.cast<Seg>
                                         |> Seq.filter(fun seg -> FullNodesIL.Contains(seg))

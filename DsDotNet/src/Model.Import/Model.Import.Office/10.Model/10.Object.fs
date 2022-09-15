@@ -29,14 +29,14 @@ module Object =
     and
         /// 사용자가 모델링을 통해서 만든 segment (SegEditor = User)
         [<DebuggerDisplay("{ToText()}")>]
-        Seg(name:string, baseSystem:DsSystem, editor:Editor, location:Bound, nodeCausal:NodeCausal,  ownerFlow:string, bDummy:bool) as this =
+        Seg(name:string, baseSystem:DsSystem, editor:Editor, location:Bound, nodeCausal:NodeCausal,  ownerFlow:string, bDummy:bool, bBtn:bool) as this =
             inherit SegBase(name,  baseSystem)
             /// modeled edges
             let mutable status4 = Status4.Homing
             let mEdges  = ConcurrentHash<MEdge>()
 
-            new (name, baseSystem, nodeCausal) = Seg (name, baseSystem, Editor.User,   Normal, nodeCausal, "", false)
-            new (name, baseSystem)             = Seg (name, baseSystem, Editor.Engine, Normal, MY        , "", false)
+            new (name, baseSystem, nodeCausal) = Seg (name, baseSystem, Editor.User,   Normal, nodeCausal, "", false, false)
+            new (name, baseSystem)             = Seg (name, baseSystem, Editor.Engine, Normal, MY        , "", false, false)
 
             member x.NodeCausal = nodeCausal
             member x.Status4 = status4 
@@ -113,6 +113,7 @@ module Object =
 
         
             member x.IsDummy = bDummy
+            member x.IsButton = bBtn
             member x.IsChildExist = mEdges.Any()
             member x.IsChildEmpty = mEdges.IsEmpty
             member x.IsRoot =  x.Parent.IsSome && x.Parent.Value.Location = System
@@ -167,6 +168,7 @@ module Object =
             let edges  = ConcurrentHash<MEdge>()
             let interlocks  = ConcurrentHash<MEdge>()
             let setIL  = ConcurrentHash<HashSet<Seg>>()
+            let aliasSet  = ConcurrentDictionary<string, HashSet<string>>()
 
             let rec getLink(start:Seg, find:HashSet<Seg>, full:HashSet<Seg>) =
                 let update (edge:MEdge) =
@@ -193,6 +195,7 @@ module Object =
             member x.AddEdge(edge) = edges.TryAdd(edge) |> ignore 
             member x.AddSafety(seg, segSafetys:Seg seq) = safeties.TryAdd(seg, segSafetys) |> ignore 
             member x.Safeties = safeties
+            member x.AliasSet   = aliasSet
 
             member x.Interlockedges = 
                         let FullNodesIL = interlocks.Values.GetNodes() |> Seq.cast<Seg> |> HashSet
@@ -243,6 +246,7 @@ module Object =
             
             member x.CallSegs() = x.UsedSegs
                                         |> Seq.filter(fun seg -> seg.NodeCausal.IsCall)
+                                        |> Seq.filter(fun seg -> seg.IsButton|>not)
                                         |> Seq.distinctBy(fun seg -> seg.Name)
 
             member x.CallWithoutInterLock() 
@@ -261,13 +265,15 @@ module Object =
             inherit SystemBase(name)
             let mutable sysSeg: System.Lazy<Seg> = null
             let flows  = ConcurrentDictionary<int, Flo>()
-            let aliasSet  = ConcurrentDictionary<string, HashSet<string>>()
             let locationSet  = ConcurrentDictionary<string, System.Drawing.Rectangle>()
             let commandSet  = ConcurrentDictionary<string, string>()
             let observeSet  = ConcurrentDictionary<string, string>()
             let variableSet  = ConcurrentDictionary<string, DataType>()
             let addressSet  = ConcurrentDictionary<string, Tuple<string, string, string>>()
             let noEdgesSegs = flows |> Seq.collect(fun f-> f.Value.NoEdgeSubSegs) |> Seq.cast<Seg>
+            let emgSet  = ConcurrentDictionary<string, List<Flo>>()
+            let startSet  = ConcurrentDictionary<string, List<Flo>>()
+            let autoSet   = ConcurrentDictionary<string, List<Flo>>()
 
             new (name:string)       = new DsSystem(name,  false)
             new (name, active:bool) = new DsSystem(name,  active)
@@ -282,12 +288,14 @@ module Object =
             member val SystemID = -1   with get, set
 
             member x.Flows      = flows
-            member x.AliasSet   = aliasSet
             member x.LocationSet   = locationSet
             member x.CommandSet   = commandSet
             member x.ObserveSet   = observeSet
             member x.VariableSet   = variableSet
             member x.AddressSet   = addressSet
+            member x.EmgSet   = emgSet
+            member x.StartSet   = startSet
+            member x.AutoSet   = autoSet
             
             member x.Segs()     =   let segs = 
                                         x.SysSeg.ChildSegsSubAll 

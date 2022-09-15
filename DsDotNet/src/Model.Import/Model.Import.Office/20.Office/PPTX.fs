@@ -140,6 +140,9 @@ module PPTX =
         let mutable name = ""
         let mutable safeties = HashSet<string>()
         let mutable bDuumy = false
+        let mutable bEmg = false
+        let mutable bAuto = false
+        let mutable bStart = false
         let updateTxRx(tailBarckets) =
             if(tailBarckets  = ""|> not)
             then 
@@ -161,16 +164,22 @@ module PPTX =
             GetSquareBrackets(name, true ) |> updateSafety
             name <- GetBracketsReplaceName(name)
             bDuumy <- shape.CheckEllipse() && dashOutline
+            bEmg  <- shape.CheckNoSmoking() 
+            bAuto  <- shape.CheckBlockArc() 
+            bStart  <- shape.CheckDonutShape() 
             
         member x.PageNum = iPage
         member x.Shape = shape
         member x.DashOutline = dashOutline
         member x.Safeties = safeties.select(fun safe -> Util.GetValidName(safe))
         member x.IsDummy = bDuumy
+        member x.IsEmgBtn = bEmg
+        member x.IsAutoBtn= bAuto
+        member x.IsStartBtn = bStart
         member val NodeCausal = 
                             if(shape.CheckRectangle()) then if(dashOutline) then EX else  MY
                             else 
-                            if(shape.CheckEllipse()) 
+                            if(shape.CheckEllipse() || shape.CheckDonutShape()|| shape.CheckBlockArc()|| shape.CheckNoSmoking() ) 
                             then 
                                 if((txCnt = 0 && rxCnt = 0) || txCnt < 0 || rxCnt < 0)
                                 then shape.ErrorName(2, iPage)

@@ -26,8 +26,9 @@ module ExportModel =
                     |_ -> failwithf "ERR";
 
                 (txs |> String.concat ", " ), (rxs |> String.concat ", ") 
-
-            sprintf "\t\t\t%s\t = {%s\t~\t%s}" callName tx rx
+            let tx = if(tx = "") then "_" else tx
+            let rx = if(rx = "") then "_" else rx
+            sprintf "\t\t%s\t = {%s\t~\t%s}" callName tx rx
 
         let addressText(seg:Seg, index) =
             let callPath = seg.ToCallText()
@@ -113,27 +114,49 @@ module ExportModel =
                         //Flow 출력
 
                         yield sprintf "\t[flow] %s = { \t" (flow.ToText())
-                        if(flow.Safeties.Any()) then yield! safetyText flow 
+                        
                         yield! edgeText    (flow.Edges)
                         yield! segmentText (flow.ExportSegs)
                         //Task 출력
-                        yield sprintf "\t\t[task] = {" 
                         for callSeg in flow.CallSegs() do
                             yield callText(callSeg)
+                        
+                        //Alias 출력
+                        if(flow.AliasSet.Any())
+                        then 
+                            yield sprintf "\t\t[alias] = {" 
+                            for alias in flow.AliasSet do
+                                yield sprintf "\t\t\t%s = { %s }" alias.Key (alias.Value |> String.concat "; ") 
+                            yield "\t\t}"
+                        //Safeties  출력
+                        if(flow.Safeties.Any()) then yield! safetyText flow 
 
-                        yield "\t\t}"
                         yield "\t}"
 
-
-                    //Alias 출력
-                    if(sys.AliasSet.Any())
+                    //EmgSet 출력
+                    if(sys.EmgSet.Any())
                     then 
-                        yield sprintf "\t[alias] = {" 
-                        for alias in sys.AliasSet do
-                            yield sprintf "\t\t%s = { %s }" alias.Key (alias.Value |> String.concat "; ") 
+                        yield sprintf "\t[emg] = {" 
+                        for emg in sys.EmgSet do
+                            yield sprintf "\t\t%s = { %s };" emg.Key (emg.Value |>Seq.map(fun flo-> flo.ToText()) |> String.concat "; ") 
                         yield "\t}"
-
-                  
+                    
+                    //AutoSet 출력
+                    if(sys.AutoSet.Any())
+                    then 
+                        yield sprintf "\t[auto] = {" 
+                        for auto in sys.AutoSet do
+                            yield sprintf "\t\t%s = { %s };" auto.Key (auto.Value |>Seq.map(fun flo-> flo.ToText()) |> String.concat "; ") 
+                        yield "\t}"
+                    
+                    //StartSet 출력
+                    if(sys.StartSet.Any())
+                    then 
+                        yield sprintf "\t[start] = {" 
+                        for start in sys.StartSet do
+                            yield sprintf "\t\t%s = { %s };" start.Key (start.Value |>Seq.map(fun flo-> flo.ToText()) |> String.concat "; ") 
+                        yield "\t}"
+                    
                     //Variable 출력
                     if(sys.VariableSet.Any())
                     then 

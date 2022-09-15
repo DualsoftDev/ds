@@ -51,8 +51,8 @@ module private GraphCalculatingUtil =
         | _ -> null
 
     let getMutualDummyResets (resetEdges:QgEdge seq) =
-        resetEdges
-        |> Seq.map(fun e ->
+        seq {
+        for e in resetEdges do
             resetEdges
             |> Seq.filter(fun ee ->
                 e <> ee &&
@@ -60,8 +60,9 @@ module private GraphCalculatingUtil =
                 ee.Source = e.Target
             )
             |> Seq.distinct
-        )
-        |> Seq.filter(fun e -> e.Count() <> 0)
+        }
+        |> Seq.filter(fun e -> 
+            e.Count() <> 0)
         |> removeDuplicates
 
     let getTraverseOrder
@@ -92,9 +93,9 @@ module private GraphCalculatingUtil =
             (inits:IVertex list) (lasts:IVertex list)
             (orderEdges:AdjacencyGraph<IVertex, QgEdge>) =
         seq {
-            for s in inits do
-                for e in lasts do
-                    getAllPaths orderEdges s e
+        for s in inits do
+            for e in lasts do
+                getAllPaths orderEdges s e
         }
         |> removeDuplicates
 
@@ -174,8 +175,8 @@ module private GraphCalculatingUtil =
             allEdges
             |> Seq.filter(fun e -> isResetEdge e.OriginalEdge)
 
-        resets
-        |> Seq.map(fun e ->
+        seq {
+        for e in resets do
             let orgSrc = getAliasTarget e.Source
             let orgTgt = getAliasTarget e.Target
 
@@ -187,7 +188,7 @@ module private GraphCalculatingUtil =
                 orgSrc = reverseSrc &&
                 reverseTgt = orgTgt
             )
-        )
+        }
         |> removeDuplicates
 
     let getAliasMutualResetOnList
@@ -246,11 +247,11 @@ module private GraphCalculatingUtil =
             
         let mutualResetsInMyRoutes =
             seq {
-                for v in mutualResetNodesInMyRoutes do
-                    mutualResets
-                    |> Seq.filter(fun e ->
-                        e.Source = v || e.Target = v
-                    )
+            for v in mutualResetNodesInMyRoutes do
+                mutualResets
+                |> Seq.filter(fun e ->
+                    e.Source = v || e.Target = v
+                )
             }
             |> removeDuplicates
 
@@ -307,6 +308,7 @@ module private GraphCalculatingUtil =
             )
             |> Seq.append(
                 getMutualResetedSegmentsInMyRoute mr myRoute nowSegment false
+                |> Seq.filter(fun l -> segmentsToOn.Contains((l, 1)) = false)
                 |> Seq.map(fun v -> (v, 0))
             )
             |> Seq.append(
@@ -359,7 +361,6 @@ module private GraphCalculatingUtil =
 
 [<AutoOpen>]
 module GraphProgressSupportUtil =
-
     type ProgressInfo (gri:GraphInfo) =
         // child flow included whole reset edges
         let resetEdges = gri.Edges |> Seq.filter(isResetEdge) |> edges2QgEdge
@@ -372,11 +373,12 @@ module GraphProgressSupportUtil =
 
         // without alias reset edges
         let dummyResets = resetEdges |> Seq.except(aliasResets)
-
+        
         // causal edges + alias reset edges = order edges
         let orderEdges =
             gri.SolidGraph.Edges
             |> Seq.append(aliasResets)
+            |> Seq.except(mutualResets)
             |> GraphExtensions.ToAdjacencyGraph
 
         // just causal edges
@@ -415,7 +417,7 @@ module GraphProgressSupportUtil =
         // print children with index
         let printIndexedChildren() =
             match indexedChildren.Count with
-            | 0 -> ()
+            | 0 -> printfn "\nThere are no indexed children"
             | _ ->
                 printfn "\bIndexed childrens"
                 indexedChildren
@@ -424,7 +426,7 @@ module GraphProgressSupportUtil =
         // print the child segemtns to be 'ON' in progress(Theta)
         let printPreCaculatedTargets() =
             match calculationTargetsInProgress.Count with
-            | 0 -> ()
+            | 0 -> printfn "\nThere are no calculation targets"
             | _ ->
                 printfn "\nCheck segemtns to be 'ON' in progress(Theta)"
                 calculationTargetsInProgress
@@ -437,7 +439,7 @@ module GraphProgressSupportUtil =
         // print children's origin
         let printOrigin() =
             match childOrigin.Count() with
-            | 0 -> ()
+            | 0 -> printfn "\nThere are no origins"
             | _ ->
                 printfn "\nCheck segemtns to be 'ON' in origin state"
                 childOrigin

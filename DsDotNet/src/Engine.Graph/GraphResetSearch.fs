@@ -76,12 +76,12 @@ module GraphResetSearch =
             )
         )
 
-    let checkCallResetSource(task:DsTask seq) =
-        task
-        |> Seq.iter(fun t ->
-            let cpts = t.CallPrototypes
-            cpts
-            |> Seq.iter(fun c ->
-                searchCallTargets cpts c
-            )
-        )
+    //let checkCallResetSource(task:DsTask seq) =
+    //    task
+    //    |> Seq.iter(fun t ->
+    //        let cpts = t.CallPrototypes
+    //        cpts
+    //        |> Seq.iter(fun c ->
+    //            searchCallTargets cpts c
+    //        )
+    //    )

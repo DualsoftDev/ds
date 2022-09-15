@@ -14,7 +14,6 @@ public class ParserHelper
 
     public Model Model { get; } = new Model();
     internal DsSystem _system;
-    internal DsTask _task;
     internal RootFlow _rootFlow;
     internal SegmentBase _parenting;
 
@@ -24,8 +23,6 @@ public class ParserHelper
     {
         get
         {
-            if (_task != null)
-                return $"{_system.Name}.{_task.Name}";
             if (_parenting != null)
                 return $"{_system.Name}.{_rootFlow.Name}.{_parenting.Name}";
             if (_rootFlow != null)
@@ -75,9 +72,6 @@ public class ParserHelper
             String.Join(".", names.Where(n => n != null))
             ;
         var sysName = _system.Name;
-        var tasks = _system.Tasks.Select(t => t.Name);
-        if (tasks.Any(t => name.StartsWith($"{t}.")))
-            return concat(sysName, name);
 
         var nameComponents = name.Split(new[] { '.' }).ToArray();
         var middleName = _rootFlow.Name;

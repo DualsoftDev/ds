@@ -23,7 +23,7 @@ public abstract partial class SegmentBase : ChildFlow, IVertex, ICoin, IWallet, 
     public string QualifiedName =>
         (ContainerFlow == null)
         ? Name
-        : $"{ContainerFlow.QualifiedName}_{Name}"
+        : $"{ContainerFlow.QualifiedName}.{Name}"
         ;
 
     public PortInfoStart PortS { get; set; }

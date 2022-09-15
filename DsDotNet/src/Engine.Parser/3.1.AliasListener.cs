@@ -6,7 +6,6 @@ namespace Engine.Parser
         public ParserHelper ParserHelper;
         Model _model => ParserHelper.Model;
         DsSystem _system { get => ParserHelper._system; set => ParserHelper._system = value; }
-        DsTask _task { get => ParserHelper._task; set => ParserHelper._task = value; }
         RootFlow _rootFlow { get => ParserHelper._rootFlow; set => ParserHelper._rootFlow = value; }
         SegmentBase _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
         /// <summary> Qualified Path Map </summary>
@@ -27,14 +26,6 @@ namespace Engine.Parser
             _system = _model.Systems.First(s => s.Name == name);
         }
         override public void ExitSystem(SystemContext ctx) { this._system = null; }
-
-        override public void EnterSysTask(SysTaskContext ctx)
-        {
-            var name = ctx.id().GetText();
-            _task = _system.Tasks.First(t => t.Name == name);
-            Trace.WriteLine($"Task: {name}");
-        }
-        override public void ExitSysTask(SysTaskContext ctx) { _task = null; }
 
         override public void EnterFlow(FlowContext ctx)
         {

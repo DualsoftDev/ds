@@ -11,6 +11,7 @@ open NUnit.Framework
 [<AutoOpen>]
 module EdgeTest =
     type EdgeTests1() =
+        do Fixtures.SetUpTest()
 
 
         [<Test>]
@@ -18,13 +19,12 @@ module EdgeTest =
             logInfo "============== Parser detail test"
             let mutable text = """
 [sys] L = {
-    [task] T = {
+    [flow] F = {
+        Main = { Cp > Cm; }
         Cp = {P.F.Vp ~ P.F.Sp}
         Cm = {P.F.Vm ~ P.F.Sm}
     }
-    [flow] F = {
-        Main = { T.Cp > T.Cm; }
-    }
+}
 
 [sys] P = {
     [flow] F = {
@@ -35,7 +35,6 @@ module EdgeTest =
         Pm |> Sp;
         Vp <||> Vm;
     }
-}
 }
 """
             text <- text + (*sysP +*) cpus
@@ -77,16 +76,16 @@ module EdgeTest =
             let ``subflow check`` =
                 let edge = main.Edges |> Seq.exactlyOne
 
-                let vpStart = cpu.TagsMap["L_F_Main_T.Cp_P_F_Vp_Start"]
-                let spEnd = cpu.TagsMap["L_F_Main_T.Cp_P_F_Sp_End"]
+                let vpStart = cpu.TagsMap["L_F_Main.Cp_P_F_Vp_Start"]
+                let spEnd = cpu.TagsMap["L_F_Main.Cp_P_F_Sp_End"]
                 cpu.TagsMap.ContainsKey(vpStart.Name) |> ShouldBeTrue
                 cpu.TagsMap.ContainsKey(spEnd.Name) |> ShouldBeTrue
                 cpu.ForwardDependancyMap[spEnd].Contains(edge) |> ShouldBeTrue
 
 
 
-                let vmStart = cpu.TagsMap["L_F_Main_T.Cm_P_F_Vm_Start"]
-                let smEnd = cpu.TagsMap["L_F_Main_T.Cm_P_F_Sm_End"]
+                let vmStart = cpu.TagsMap["L_F_Main.Cm_P_F_Vm_Start"]
+                let smEnd = cpu.TagsMap["L_F_Main.Cm_P_F_Sm_End"]
                 cpu.TagsMap.ContainsKey(vmStart.Name) |> ShouldBeTrue
                 cpu.TagsMap.ContainsKey(smEnd.Name) |> ShouldBeTrue
                 cpu.ForwardDependancyMap[edge].Contains(vmStart) |> ShouldBeTrue
@@ -100,8 +99,8 @@ module EdgeTest =
                 let vp = otherRootFlow.Coins.OfType<Segment>() |> Seq.find(fun seg -> seg.Name = "Vp")
                 let pp = otherRootFlow.Coins.OfType<Segment>() |> Seq.find(fun seg -> seg.Name = "Pp")
                 let sp = otherRootFlow.Coins.OfType<Segment>() |> Seq.find(fun seg -> seg.Name = "Sp")
-                let vpStart2 = otherCpu.TagsMap["L_F_Main_T.Cp_P_F_Vp_Start"]
-                let spEnd2 = otherCpu.TagsMap["L_F_Main_T.Cp_P_F_Sp_End"]
+                let vpStart2 = otherCpu.TagsMap["L_F_Main.Cp_P_F_Vp_Start"]
+                let spEnd2 = otherCpu.TagsMap["L_F_Main.Cp_P_F_Sp_End"]
                 vp.TagPStart === vpStart2
                 sp.TagPEnd === spEnd2
                 vpStart =!= vpStart2
@@ -119,7 +118,7 @@ module EdgeTest =
                 let ppStart2 = otherCpu.TagsMap["P_F_Pp_Start"]
                 let ppEndt2 = otherCpu.TagsMap["P_F_Pp_End"]
                 let spStart2 = otherCpu.TagsMap["P_F_Sp_Start"]
-                let spEnd2 = otherCpu.TagsMap["L_F_Main_T.Cp_P_F_Sp_End"]
+                let spEnd2 = otherCpu.TagsMap["L_F_Main.Cp_P_F_Sp_End"]
 
                 otherCpu.ForwardDependancyMap[vpEnd2].Contains(eVp2Pp) |> ShouldBeTrue
                 otherCpu.ForwardDependancyMap[eVp2Pp].Contains(ppStart2) |> ShouldBeTrue

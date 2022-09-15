@@ -51,7 +51,7 @@ public class Child : Named, IVertex, ICoin
     {
         Parent = parent;
         Coin = coin;
-        QualifiedName = $"{parent.QualifiedName}_{coin.Name}";
+        QualifiedName = $"{parent.QualifiedName}.{coin.Name}";
         Parent.AddChildVertex(this);
     }
 

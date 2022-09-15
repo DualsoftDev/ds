@@ -10,11 +10,11 @@ public abstract class Flow : Named, IWallet
     HashSet<IVertex> _childVertices = new();
     /// <summary> {RootCall, Segment, Child} instances </summary>
     public IEnumerable<IVertex> ChildVertices => _childVertices;
-    public void AddChildVertices(IEnumerable<IVertex> children)// 임시
-    {
-        foreach (var child in children)
-            AddChildVertex(child);
-    }
+    //public void AddChildVertices(IEnumerable<IVertex> children)// 임시
+    //{
+    //    foreach (var child in children)
+    //        AddChildVertex(child);
+    //}
     public void AddChildVertex(IVertex child)
     {
         Assert(this is RootFlow || child is Child);
@@ -54,8 +54,9 @@ public abstract class Flow : Named, IWallet
 public class RootFlow : Flow
 {
     public DsSystem System { get; set; }
-    public FlowTask FlowTask { get; set; }
-    public string QualifiedName => $"{System.Name}_{Name}";
+    public List<CallPrototype> CallPrototypes = new();
+
+    public string QualifiedName => $"{System.Name}.{Name}";
     public RootFlow(Cpu cpu, string name, DsSystem system)
         : base(cpu, name)
     {

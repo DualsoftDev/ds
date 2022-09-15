@@ -25,8 +25,7 @@ public class Xywh
 
 public class CallPrototype : CallBase
 {
-    public DsTask Task;     // SysTask or FlowTask
-
+    public RootFlow RootFlow { get; }
     /// <summary> 주로 target system 의 segment </summary>
     public List<ITxRx> TXs = new(); // empty 이면 '_' 를 의미
     public List<ITxRx> RXs = new(); // empty 이면 '_' 를 의미
@@ -49,14 +48,14 @@ public class CallPrototype : CallBase
         set => throw new Exception("ERROR");
     }
 
-    public CallPrototype(string name, DsTask task)
+    public CallPrototype(string name, RootFlow flow)
         : base(name)
     {
-        Task = task;
-        task.CallPrototypes.Add(this);
+        RootFlow = flow;
+        flow.CallPrototypes.Add(this);
     }
 
-    public override string QualifiedName => $"{Task.QualifiedName}_{Name}";
+    public override string QualifiedName => $"{RootFlow.QualifiedName}.{Name}";
 
     public Xywh Xywh { get; set; }
 
@@ -160,6 +159,8 @@ public static class CallExtension
                 return $"{system.Name}.{rootFlow.Name}.{rootCall.Name}";
             case SegmentBase rootSegment:
                 return rootSegment.QualifiedName;
+            case CallPrototype cp:
+                return cp.QualifiedName;
 
             case Child child:
                 return child.QualifiedName;
@@ -167,8 +168,8 @@ public static class CallExtension
             case Call call:
                 return call.Container switch
                 {
-                    SegmentBase seg   => $"{seg.QualifiedName}_{call.Name}",
-                    RootFlow flow => $"{flow.QualifiedName}_{call.Name}",
+                    SegmentBase seg   => $"{seg.QualifiedName}.{call.Name}",
+                    RootFlow flow => $"{flow.QualifiedName}.{call.Name}",
                     _             => throw new Exception("ERROR"),
                 };
             default:

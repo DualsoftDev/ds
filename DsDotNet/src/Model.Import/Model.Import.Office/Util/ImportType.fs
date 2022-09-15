@@ -14,4 +14,11 @@ module ImportType =
         | EmergencyBTN         //비상 버튼
        
 
+    let BtnToType(txt:string) =
+            match txt with
+            | "비상" -> StartBTN
+            | "자동" -> ResetBTN
+            | "시작" -> AutoBTN
+            | "리셋" -> EmergencyBTN
+            |_-> failwithf "BtnToType Error"
     

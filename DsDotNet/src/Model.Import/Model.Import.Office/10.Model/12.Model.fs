@@ -1,4 +1,4 @@
-﻿// Copyright (c) Dual Inc.  All Rights Reserved.
+// Copyright (c) Dual Inc.  All Rights Reserved.
 namespace Model.Import.Office
 open Util
 open System.IO
@@ -41,7 +41,7 @@ module Model =
             mEdge.Nodes |> Seq.cast<Seg>
             |> Seq.iter(fun seg-> 
                 if not (x.TotalSystems.Contains(seg.BaseSys)) 
-                then failwith $"model({x.Name})에 해당 {seg.ToText()}의 System 등록 필요. model.add(system) 필요합니다."
+                then failwith $"model({x.Name})에 해당 {seg.SegName}의 System 등록 필요. model.add(system) 필요합니다."
                 else
                     if pSeg.IsNone then seg.Parent <- Some(seg.BaseSys.SysSeg)
                     )

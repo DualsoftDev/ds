@@ -49,7 +49,7 @@ module Check =
             if(srcParents.Count() > 1) then failError (srcParents, edge.StartNode)  
             if(tgtParents.Count() > 1) then failError (tgtParents, edge.EndNode)  
 
-        let ValidFloPath(node:pptNode, dicFloName:ConcurrentDictionary<int, string>) =
+        let ValidFlowPath(node:pptNode, dicFloName:ConcurrentDictionary<int, string>) =
             if(node.Name.Contains('.'))
             then 
                 let paths = node.Name.Split('.')
@@ -60,13 +60,13 @@ module Check =
 
 
         let SameNode(seg:Seg, node:pptNode, dicSegCheckSame:ConcurrentDictionary<string, Seg>) =
-            if(dicSegCheckSame.ContainsKey(seg.Name)|>not)
-            then dicSegCheckSame.TryAdd(seg.Name, seg)|> ignore
+            if(dicSegCheckSame.ContainsKey(seg.FlowNSeg)|>not)
+            then dicSegCheckSame.TryAdd(seg.FlowNSeg, seg)|> ignore
 
-            let oldSeg = dicSegCheckSame.[seg.Name]
+            let oldSeg = dicSegCheckSame.[seg.FlowNSeg]
             if((seg.NodeCausal = oldSeg.NodeCausal)|>not) 
             then 
-                MSGError($"도형오류 :타입이 다른 같은이름이 존재합니다 \t[Page{node.PageNum}: {seg.Name}({seg.NodeCausal}) != ({oldSeg.NodeCausal}) ({node.Shape.ShapeName()})]")
+                MSGError($"도형오류 :타입이 다른 같은이름이 존재합니다 \t[Page{node.PageNum}: {seg.FlowNSeg}({seg.NodeCausal}) != ({oldSeg.NodeCausal}) ({node.Shape.ShapeName()})]")
         
         let SameEdgeErr(parentNode:pptNode option, pptEdge:pptEdge, mEdge:MEdge, dicSameCheck:ConcurrentDictionary<string, MEdge>) = 
             let parentName = if(parentNode.IsSome) 

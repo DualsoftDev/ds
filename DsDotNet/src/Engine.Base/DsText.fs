@@ -2,7 +2,7 @@
 namespace Engine.Base
 
 [<AutoOpen>]
-module Text = 
+module DsText = 
     [<Literal>] 
     let TextSEdge       = ">"
     [<Literal>] 
@@ -19,6 +19,10 @@ module Text =
     let TextFlow   = "flow"
     [<Literal>] 
     let TextSystem = "sys"
+    [<Literal>] 
+    let TextAddress = "addresses"
+    [<Literal>] 
+    let TextLayout = "layouts"
     [<Literal>] 
     let TextEmergencyBTN   = "emg_in"
     [<Literal>] 

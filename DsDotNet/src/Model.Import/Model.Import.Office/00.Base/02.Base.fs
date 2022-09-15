@@ -21,16 +21,16 @@ module Base =
     /// Seg Vertex
     [<AbstractClass>]
     type SegBase(name,  baseSystem:SystemBase) =
-        let noEdgeSubSegs  = ConcurrentHash<SegBase>()
+        let noEdgeBaseSegs  = ConcurrentHash<SegBase>()
         interface IVertex with
             member x.Name: string = x.Name
 
         member x.Name: string = name
         ///ppt에서 불러온 pptShape.Key와 같음
         member x.BaseSys = baseSystem
-        member x.NoEdgeSubSegs = noEdgeSubSegs.Values |> Seq.sortBy(fun seg -> seg.Name)
-        member x.AddSegNoEdge(seg) = noEdgeSubSegs.TryAdd(seg) |> ignore 
-        member x.RemoveSegNoEdge(seg) = noEdgeSubSegs.TryRemove(seg) |> ignore 
+        member x.NoEdgeBaseSegs = noEdgeBaseSegs.Values |> Seq.sortBy(fun seg -> seg.Name)
+        member x.AddSegNoEdge(seg) = noEdgeBaseSegs.TryAdd(seg) |> ignore 
+        member x.RemoveSegNoEdge(seg) = noEdgeBaseSegs.TryRemove(seg) |> ignore 
 
     /// Seg edge
     [<AbstractClass>]

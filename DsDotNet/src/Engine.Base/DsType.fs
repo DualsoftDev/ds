@@ -110,4 +110,4 @@ module DsType =
             | "관찰" -> Observe
             | "버튼" -> Button
             |_-> failwithf "TagCase Error"
-  
+    

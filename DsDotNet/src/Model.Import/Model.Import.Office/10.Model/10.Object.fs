@@ -16,9 +16,10 @@ module Object =
 
     // 행위 Bound 정의
     type Bound =
-        | Normal    //사용자 정의한 대부분 Seg
-        | External  //외부 행위의 인에 해당하는 Engine에서 만들어낸 Dummy Seg
-        | System    //ParentRoot  Seg 의 부모 Seg(전원시 Going 비전원시 Ready)
+        | ThisFlow         //나의 System 의 이 Flow        내부 행위정의
+        | OtherFlow        //나의 System 의 다른 Flow     에서 행위 가져옴
+        | ExSeg            //외부 System 의 에서 행위(real) 가져옴
+        | ExBtn            //외부 System 의 에서 버튼(call) 가져옴
 
     //Seg 편집자
     type Editor =
@@ -28,52 +29,51 @@ module Object =
     /// Start/Reset/End relay tuple
     and
         /// 사용자가 모델링을 통해서 만든 segment (SegEditor = User)
-        [<DebuggerDisplay("{ToText()}")>]
-        Seg(name:string, baseSystem:DsSystem, editor:Editor, location:Bound, nodeCausal:NodeCausal,  ownerFlow:string, bDummy:bool, bBtn:bool) as this =
+        [<DebuggerDisplay("{FullName}")>]
+        Seg(name:string, baseSystem:DsSystem, editor:Editor, bound:Bound, nodeCausal:NodeCausal, ownerFlow:string, bDummy:bool) as this =
             inherit SegBase(name,  baseSystem)
             /// modeled edges
             let mutable status4 = Status4.Homing
             let mEdges  = ConcurrentHash<MEdge>()
 
-            new (name, baseSystem, nodeCausal) = Seg (name, baseSystem, Editor.User,   Normal, nodeCausal, "", false, false)
-            new (name, baseSystem)             = Seg (name, baseSystem, Editor.Engine, Normal, MY        , "", false, false)
+            new (name, baseSystem, nodeCausal) = Seg (name, baseSystem, Editor.User,   ThisFlow, nodeCausal, "", false)
+            new (name, baseSystem)             = Seg (name, baseSystem, Editor.Engine, ThisFlow, MY        , "", false)
 
             member x.NodeCausal = nodeCausal
             member x.Status4 = status4 
             member x.SetStatus(s:Status4) = status4 <- s
-                                            ChangeStatus(this, s)
 
             member x.BaseSys = baseSystem
             member x.Editor = editor
-            member x.Location = location
+            member x.Bound = bound
             member x.RemoveMEdge(edge:MEdge) = mEdges.TryRemove(edge) |> ignore
             member x.AddMEdge(edge:MEdge) =
                     mEdges.TryAdd(edge) |> ignore
                     let src = edge.Source
                     let tgt = edge.Target
-                    if(this = src) then failwith $"parent [{this.ToText()}] = SourceVertex [{src.ToText()}]"
-                    if(this = tgt) then failwith $"parent [{this.ToText()}] = TargetVertex [{tgt.ToText()}]"
+                    if(this = src) then failwith $"parent [{this.SegName}] = SourceVertex [{src.SegName}]"
+                    if(this = tgt) then failwith $"parent [{this.SegName}] = TargetVertex [{tgt.SegName}]"
 
             member val Alias :string  option = None with get, set
             member val ShapeID = 0u with get, set
             member val CountTX = 0 with get, set
             member val CountRX = 0 with get, set
             member x.OwnerFlow = ownerFlow
-            ///Alias 는 무조건 "" 로 이름 앞뒤에 배치
-            member x.FinalName  = if(this.Alias.IsSome) then $"\"{this.Alias.Value}\"" else x.ToText()
-            ///금칙 문자 및 선두숫자가 있으면 "" 로 이름 앞뒤에 배치한다.
-            member x.ToText() =  Util.GetValidName(name) 
             member x.ToCallText() = let call = sprintf "%s_%s"  (ownerFlow.TrimStart('\"').TrimEnd('\"')) name
                                     Util.GetValidName(call)
 
             member x.ToTextInFlow() =  match nodeCausal with
-                                         |MY         -> x.ToText()
-                                         |TR |TX |RX -> sprintf "%s" (x.FinalName)
-                                         |EX         -> sprintf "EX.%s.TR" (x.FinalName)
-            
+                                         |EX -> sprintf "EX.%s.TR" (x.SegName)
+                                         |_  -> if(ThisFlow = bound) 
+                                                then x.SegName
+                                                else x.FlowNSeg
 
-            member x.ToLayOutPath() = sprintf "%s.%s" baseSystem.Name (this.ToText())
-            //member x.ToExSysText()  = sprintf "%s.%s" baseSystem.Name (this.ToText())
+            ///금칙 문자 및 선두숫자가 있으면 "" 로 이름 앞뒤에 배치한다.
+            ///Alias 는 무조건 "" 로 이름 앞뒤에 배치
+            member x.SegName  = sprintf "%s" (if(this.Alias.IsSome) then $"\"{this.Alias.Value}\"" else Util.GetValidName(name))
+            member x.FlowNSeg = sprintf "%s.%s"  ownerFlow (Util.GetValidName(name))
+            member x.FullName = sprintf "%s.%s.%s" baseSystem.Name  ownerFlow (Util.GetValidName(name))  
+            member x.PathName = sprintf "%s(%s)" x.FullName (if(x.Parent.IsSome) then x.Parent.Value.Name else "Root")
 
             member x.Update(nodeKey, nodeIdValue, nodeAlias, nodeCntTX, nodeCntRX) = 
                         this.Key <- nodeKey
@@ -97,7 +97,6 @@ module Object =
                 then  TX, if(this.CountTX = 1) then nameTX else sprintf "%s%d" nameTX curr
                 else  RX, if(this.CountRX = 1) then nameRX else sprintf "%s%d" nameRX curr
   
-            member x.FullName = sprintf "%s.%s.%s"  baseSystem.Name this.OwnerFlow (x.ToText()) 
             member x.MEdges = mEdges.Values  |> Seq.sortBy(fun edge ->edge.ToText())
             member x.ChildSegs =
                 mEdges.Values
@@ -110,13 +109,12 @@ module Object =
                    x.ChildSegs
                    |> Seq.collect(fun e -> e.ChildSegsSubAll)
                    |> Seq.append x.ChildSegs
-
+                   |> Seq.append x.NoEdgeSegs
         
             member x.IsDummy = bDummy
-            member x.IsButton = bBtn
             member x.IsChildExist = mEdges.Any()
             member x.IsChildEmpty = mEdges.IsEmpty
-            member x.IsRoot =  x.Parent.IsSome && x.Parent.Value.Location = System
+            member x.IsRoot =  x.Parent.IsSome && x.Parent.Value.Bound = ThisFlow
             member x.UIKey:string =  $"{x.Name};{x.Key}"
             member val Key : string = "" with get, set
             member val Parent : Seg option = None with get, set
@@ -131,13 +129,13 @@ module Object =
            
                 x.AddMEdge(edge)
 
-            member x.NoEdgeSegs = x.NoEdgeSubSegs |> Seq.cast<Seg> |> Seq.sortBy(fun s -> s.FinalName)
+            member x.NoEdgeSegs = x.NoEdgeBaseSegs |> Seq.cast<Seg> |> Seq.sortBy(fun s -> s.SegName)
 
      
 
     and
         /// Modeled Edge : 사용자가 작성한 모델 상의 segment 간의 연결 edge (Wire)
-        [<DebuggerDisplay("{Source.ToText()}{Causal.ToText()}{Target.ToText()}")>]
+        [<DebuggerDisplay("{Source.FullName}{Causal.ToText()}{Target.FullName}")>]
         MEdge(src:Seg, tgt:Seg, causal:EdgeCausal) =
             inherit EdgeBase(src, tgt, causal)
             member x.Source = src
@@ -150,11 +148,13 @@ module Object =
                                         |SEdge |SPush |  SReset-> "Start"
                                         |REdge |RPush |  Interlock-> "Reset"
 
-            member x.ToText() = $"{src.ToText()}  {causal.ToText()}  {tgt.ToText()}"
+            member x.ToText() = $"{src.SegName}  {causal.ToText()}  {tgt.SegName}"
             member x.ToCheckText(parentName:string) = 
                             let srcName = if(src.Alias.IsSome) then src.Alias.Value else src.ToCallText()
                             let tgtName = if(tgt.Alias.IsSome) then tgt.Alias.Value else tgt.ToCallText()
                             $"[{parentName}]{srcName}  {x.ToCheckText()}  {tgtName}"
+
+            member x.GetSegs() = [src;tgt]
     
     
     and
@@ -216,56 +216,35 @@ module Object =
 
             member x.DummySeg = dummySeg.Values 
             member x.AddDummySeg(seg) = dummySeg.TryAdd(seg) |> ignore 
+            member x.NoEdgeSegs =  x.NoEdgeBaseSegs  |> Seq.cast<Seg>
 
-            member x.NoEdgeSegs = x.NoEdgeSubSegs  |> Seq.cast<Seg>
-            member x.ExportSegs = 
-                                    let noEdgeSegs = edges.Values
-                                                    |> Seq.collect(fun edge -> edge.Nodes
-                                                                            |> Seq.collect(fun node -> node.NoEdgeSubSegs))
-                                                    |> Seq.append x.NoEdgeSubSegs 
-                                                    |> Seq.cast<Seg> 
+            member x.UsedSegs =
+                let rootUsedSegs  = 
+                    edges 
+                    |> Seq.collect(fun edge -> edge.Key.GetSegs())
+                    |> Seq.append x.NoEdgeSegs
 
-                                    let noEdgeSegsSub = x.NoEdgeSubSegs |> Seq.cast<Seg> |> Seq.collect(fun node -> node.ChildSegsSubAll)
-
-                                    let children = 
-                                        edges.Values.GetNodes()
-                                        |> Seq.cast<Seg>
-                                        |> Seq.collect (fun node -> node.ChildSegsSubAll)
-
-                                    edges.Values
-                                    |> Seq.collect(fun edge -> edge.Nodes) |> Seq.cast<Seg> 
-                                    |> Seq.filter(fun seg -> seg.MEdges.Any()) 
-                                    |> Seq.append noEdgeSegs
-                                    |> Seq.append noEdgeSegsSub
-                                    |> Seq.append children
-                                    |> Seq.distinctBy(fun seg -> seg.Name)
-
-            //member x.UsedSegs = let children = 
-            //                        edges.Values.GetNodes()
-            //                        |> Seq.cast<Seg>
-            //                        |> Seq.collect (fun node -> node.ChildSegsSubAll)
-            //                    x.NoEdgeSubSegs 
-            //                    |> Seq.cast<Seg>
-            //                    |> Seq.collect (fun parent -> parent.MEdges.GetNodes())
-            //                    |> Seq.append (x.Edges.GetNodes())
-            //                    |> Seq.cast<Seg>
-            //                    |> Seq.append children
-            //                    |> Seq.append (x.NoEdgeSubSegs |> Seq.cast<Seg>)
-            //                    |> Seq.toList
-
-            
-            member x.CallSegs() = x.ExportSegs
+                rootUsedSegs 
+                |> Seq.collect (fun node -> node.ChildSegsSubAll)
+                |> Seq.append rootUsedSegs
+                |> Seq.distinctBy(fun seg -> seg.PathName)
+                    
+            member x.CallSegs() = x.UsedSegs
                                         |> Seq.filter(fun seg -> seg.NodeCausal.IsCall)
-                                        |> Seq.filter(fun seg -> seg.IsButton|>not)
-                                        |> Seq.distinctBy(fun seg -> seg.Name)
+                                        |> Seq.filter(fun seg -> seg.Bound = ThisFlow)
 
-            member x.CallWithoutInterLock() 
-                = x.CallSegs()
-                  |> Seq.filter(fun seg -> interlocks.Values.GetNodes().Contains(seg)|>not)
+            member x.ExRealSegs() = x.UsedSegs
+                                        |> Seq.filter(fun seg -> seg.NodeCausal.IsReal)
+                                        |> Seq.filter(fun seg -> seg.Bound = ExSeg)
 
-            member x.ExSegs() = x.ExportSegs
-                                        |> Seq.filter(fun seg -> seg.NodeCausal = EX)
-                                        |> Seq.distinctBy(fun seg -> seg.Name)
+            member x.BtnSegs()  =  x.UsedSegs 
+                                        |> Seq.filter(fun seg -> seg.Bound = ExBtn)
+
+            member x.NotMySegs() =  x.CallSegs() |> Seq.append (x.ExRealSegs())
+            member x.CallWithoutInterLock()  = 
+                x.CallSegs()
+                |> Seq.filter(fun seg -> interlocks.Values.GetNodes().Contains(seg)|>not)
+            
 
               
     and
@@ -280,7 +259,7 @@ module Object =
             let observeSet  = ConcurrentDictionary<string, string>()
             let variableSet  = ConcurrentDictionary<string, DataType>()
             let addressSet  = ConcurrentDictionary<string, Tuple<string, string, string>>()
-            let noEdgesSegs = flows |> Seq.collect(fun f-> f.Value.NoEdgeSubSegs) |> Seq.cast<Seg>
+            let noEdgesSegs = flows |> Seq.collect(fun f-> f.Value.NoEdgeSegs)
             let emgSet  = ConcurrentDictionary<string, List<Flo>>()
             let startSet  = ConcurrentDictionary<string, List<Flo>>()
             let resetSet  = ConcurrentDictionary<string, List<Flo>>()
@@ -330,6 +309,13 @@ module Object =
                 |AutoBTN ->      autoSet
                 |EmergencyBTN -> emgSet
 
+            member x.AssignAddress(typeString, nameString, valueString) = 
+                match BtnToType(typeString) with
+                |StartBTN ->     startSet
+                |ResetBTN ->     resetSet
+                |AutoBTN ->      autoSet
+                |EmergencyBTN -> emgSet
+
             member x.Segs() =   let segs = 
                                         x.SysSeg.ChildSegsSubAll 
                                         |> Seq.append (noEdgesSegs)
@@ -359,4 +345,9 @@ module Object =
                                      |> Seq.map(fun flow -> flow.Value)
                                      |> Seq.filter(fun flow -> (flow.Page = Int32.MaxValue)|>not)  //Int32.MaxValue 는 데모 flow
             
+            member x.BtnSegs()    = 
+                                    let a = 
+                                        x.RootFlow() 
+                                        |> Seq.collect(fun flow -> flow.BtnSegs())
+                                    a |> Seq.distinctBy(fun seg -> seg.SegName)
          

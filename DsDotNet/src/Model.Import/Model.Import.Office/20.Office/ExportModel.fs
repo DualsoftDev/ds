@@ -13,7 +13,7 @@ module ExportModel =
     let ToText(model:DsModel) =
                                
         let callText(seg:Seg) =
-            let callName =  seg.ToText()
+            let callName =  seg.SegName
             let tx, rx =
                 let txs = HashSet<string>()
                 let rxs = HashSet<string>()
@@ -32,7 +32,7 @@ module ExportModel =
             sprintf "\t\t%s\t = {%s\t~\t%s}" callName tx rx
 
         let addressText(seg:Seg, index) =
-            let callPath = seg.ToCallText()
+            let callPath =  if(seg.Bound = ExBtn) then seg.SegName else seg.ToCallText()
             if(seg.NodeCausal = EX)
             then 
                 let ex = sprintf "EX.%s.EX" callPath
@@ -126,7 +126,7 @@ module ExportModel =
                         yield sprintf "\t[flow] %s = { \t" (flow.ToText())
                         
                         yield! edgeText    (flow.Edges)
-                        yield! segmentText (flow.ExportSegs)
+                        yield! segmentText (flow.UsedSegs)
                         //Task 출력
                         for callSeg in flow.CallSegs() do
                             yield callText(callSeg)
@@ -190,7 +190,7 @@ module ExportModel =
                     //ex CPU
                     yield sprintf "\t[cpu] Cpu_EX = {" 
                     for flow in flows do  
-                        for callSeg in (flow.CallSegs() |> Seq.append (flow.ExSegs())) do
+                        for callSeg in flow.NotMySegs() do
                             yield sprintf "\t\tEX.%s;" (callSeg.ToCallText())
                     yield "\t}"
                 yield "}"
@@ -202,13 +202,12 @@ module ExportModel =
                     yield sprintf "[addresses] = {" 
                     let flows = sys.RootFlow() 
                     for flow in flows do
-                        for callSeg in flow.CallSegs() do
+                        for callSeg in flow.NotMySegs() do
                             for index in [|1..callSeg.MaxCnt|] do
                             yield sprintf "\t%s" (addressText(callSeg, index))
-
-                        for exSeg in flow.ExSegs() do
-                            for index in [|1..exSeg.MaxCnt|] do
-                            yield sprintf "\t%s" (addressText(exSeg, index))
+                    for exSeg in sys.BtnSegs() do
+                        for index in [|1..exSeg.MaxCnt|] do
+                        yield sprintf "\t%s" (addressText(exSeg, index))
                     yield "}"
             }
 
@@ -263,7 +262,7 @@ module ExportModel =
                         for call in flow.CallWithoutInterLock() do
                             yield sprintf "\t[flow] %s = { TX > RX }" (call.ToCallText()) 
                         //Ex 출력
-                        for exSeg in flow.ExSegs() do
+                        for exSeg in flow.ExRealSegs() do
                             yield sprintf "\t[flow] %s = { TR; }"  (exSeg.ToCallText()) 
 
                     yield "}"

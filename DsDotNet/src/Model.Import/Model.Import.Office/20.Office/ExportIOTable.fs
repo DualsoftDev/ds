@@ -47,7 +47,7 @@ module ExportIOTable =
                                 let causal, trx = callSeg.PrintfTRX(index, true)
                                 yield rowItems(causal, callSeg.Name, callSeg.OwnerFlow, trx)
                         //Ex Task 출력
-                        for callSeg in flow.ExSegs() do
+                        for callSeg in flow.ExRealSegs() do
                             yield rowItems(EX, callSeg.Name, callSeg.OwnerFlow, "EX")
             }
         rows

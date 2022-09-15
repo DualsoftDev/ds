@@ -1,3 +1,4 @@
+using Engine.Base;
 using Engine.Common;
 using Engine.Common.FS;
 using Model.Import.Office;
@@ -36,8 +37,8 @@ namespace Dual.Model.Import
 
                     if (color == Color.Transparent)
                     {
-                        if (f.Contains("[sys]") || (f.Contains("[flow]") && !f.Contains("}"))  //[flow] F = {} 한줄제외
-                        || f.Contains("[addresses]") || f.Contains("[layouts]") || f.Contains("//"))
+                        if (f.Contains($"[{DsText.TextSystem}]") || (f.Contains($"[{DsText.TextFlow}]") && !f.Contains("}"))  //[flow] F = {} 한줄제외
+                        || f.Contains($"[{DsText.TextAddress}]") || f.Contains($"[{DsText.TextLayout}]") || f.Contains("//"))
                         {
                             rndColor = Color.FromArgb(r.Next(130, 230), r.Next(130, 230), r.Next(130, 230));
                             this.Do(() => richTextBox_ds.ScrollToCaret());
@@ -160,9 +161,9 @@ namespace Dual.Model.Import
                 {
                     if (level.IsWarn) color = Color.Purple;
                     richTextBox_Debug.AppendTextColor($"\r\n{time} : {msg}", color);
-                    richTextBox_Debug.ScrollToCaret();
                 }
-               
+
+                richTextBox_Debug.ScrollToCaret();
             });
         }
 
@@ -214,7 +215,7 @@ namespace Dual.Model.Import
         {
             foreach (KeyValuePair<Flo, TabPage> view in DicUI)
             {
-                foreach (var seg in view.Key.ExportSegs)
+                foreach (var seg in view.Key.UsedSegs)
                 {
                     ((UCView)view.Value.Tag).Update(seg);
                 }

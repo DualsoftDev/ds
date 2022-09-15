@@ -101,14 +101,21 @@ module ImportModel =
                 //segment 리스트 만들기
                 doc.Nodes 
                 |> Seq.iter(fun node -> 
-                    Check.ValidFloPath(node, dicFloName)
-                    let realFlo, realName  = 
+                    Check.ValidFlowPath(node, dicFloName)
+
+                    let realFlo, realName, bMyFlow  = 
                         if(node.Name.Contains('.')) 
-                        then node.Name.Split('.').[0], node.Name
-                        else dicFloName.[node.PageNum], node.Name
-                    let btn = node.IsEmgBtn ||node.IsStartBtn ||node.IsAutoBtn 
-                    let seg = Seg(realName, mySys, Editor.User, Bound.Normal, node.NodeCausal, realFlo, node.IsDummy, btn)
-                    seg.Update(node.Key, node.Id.Value, node.Alias, node.CntTX, node.CntRX )
+                        then node.Name.Split('.').[0] , node.Name.Split('.').[1], false
+                        else dicFloName.[node.PageNum], node.Name, true
+
+                    let btn = node.IsEmgBtn || node.IsStartBtn || node.IsAutoBtn || node.IsResetBtn 
+                    let bound = if(btn) then ExBtn
+                                else if(node.NodeCausal= EX) then ExSeg
+                                else if(bMyFlow) then ThisFlow else OtherFlow
+
+                    let seg = Seg(realName, mySys, Editor.User, bound, node.NodeCausal, realFlo, node.IsDummy)
+
+                    seg.Update(node.Key, node.Id.Value, node.Alias, node.CntTX, node.CntRX)
                     dicSeg.TryAdd(node.Key, seg) |> ignore
                     
                     Check.SameNode(seg, node, dicSameSeg)   )
@@ -220,8 +227,9 @@ module ImportModel =
                 doc.Nodes 
                 |> Seq.filter(fun node -> node.PageNum = doc.VisibleLast().PageNum)
                 |> Seq.filter(fun node -> node.Name = ""|>not)
+                |> Seq.filter(fun node -> dicSeg.[node.Key].Bound = ThisFlow)
                 |> Seq.filter(fun node -> node.NodeCausal = TX || node.NodeCausal = TR || node.NodeCausal = RX || node.NodeCausal = EX )
-                |> Seq.iter(fun node -> mySys.LocationSet.TryAdd(dicSeg.[node.Key].ToLayOutPath(), node.Rectangle) |> ignore)
+                |> Seq.iter(fun node -> mySys.LocationSet.TryAdd(dicSeg.[node.Key].FullName, node.Rectangle) |> ignore)
             
                 MSGInfo($"전체 장표   count [{doc.Pages.Count()}]")
                 MSGInfo($"전체 도형   count [{doc.Nodes.Count()}]")

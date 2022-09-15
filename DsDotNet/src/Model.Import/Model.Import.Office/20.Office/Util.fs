@@ -49,9 +49,11 @@ module UtilMS =
         msgs.TryAdd(24,"1 개의 dummy 그룹지정이 되어야 합니다.") |>ignore
         msgs.TryAdd(25,"그룹내 dummy 타입 또는 real 타입 하나는 존재 해야합니다.") |>ignore
         msgs.TryAdd(26,"이름에 Flow경로 설정 '.' 기호는 1개 이여야 합니다. ex) flow.real") |>ignore
-        msgs.TryAdd(27,"해당이름의 Flow가 없습니다. 페이지 타이틀 확인필요 합니다.") |>ignore
+        msgs.TryAdd(27,"해당이름의 Flow가 없거나 이름에 '.' or ';' 사용은 안됩니다. (이름에 '.' or ';' 제거 혹은 다른 페이지 타이틀 이름 확인필요)") |>ignore
         msgs.TryAdd(28,"Safety 이름이 시스템 내부에 존재하지 않습니다.") |>ignore
-        msgs.TryAdd(29,"") |>ignore
+        msgs.TryAdd(29,"이름에 '.' or ';' 사용은 안됩니다.") |>ignore
+        msgs.TryAdd(30,"버튼 타입은 출력값은 입력 불가입니다. [0, N] 수량을 사용하세요") |>ignore
+        msgs.TryAdd(31,"") |>ignore
        
         msgs
         

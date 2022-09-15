@@ -134,7 +134,7 @@ module PPTX =
         member x.IsUsing = bShow
         member x.Title = slidePart.PageTitle()
 
-    type pptNode(shape:Presentation.Shape,iPage:int, dashOutline:bool , sildeSize)  =
+    type pptNode(shape:Presentation.Shape, iPage:int, dashOutline:bool , sildeSize)  =
         let mutable txCnt = 1
         let mutable rxCnt = 1
         let mutable name = ""
@@ -160,6 +160,8 @@ module PPTX =
             then safeties <- headBarckets.Split(';') |> HashSet 
 
         do 
+            if(shape.InnerText.Contains(";")) then shape.ErrorName(29, iPage)
+
             name <- shape.InnerText
             GetSquareBrackets(name, false) |> updateTxRx
             GetSquareBrackets(name, true ) |> updateSafety
@@ -180,13 +182,19 @@ module PPTX =
         member x.IsStartBtn = bStart
         member x.IsResetBtn = bReset
         member val NodeCausal = 
+
                             if(shape.CheckRectangle()) then if(dashOutline) then EX else  MY
-                            else 
-                            if(shape.CheckEllipse() || shape.CheckDonutShape()|| shape.CheckBlockArc()|| shape.CheckNoSmoking()|| shape.CheckResetShape() ) 
+                            else if(shape.CheckEllipse()) 
                             then 
                                 if((txCnt = 0 && rxCnt = 0) || txCnt < 0 || rxCnt < 0)
                                 then shape.ErrorName(2, iPage)
                                 else TR
+                            else if(shape.CheckDonutShape() || shape.CheckBlockArc()
+                                  || shape.CheckNoSmoking() || shape.CheckResetShape()) 
+                            then 
+                                if(txCnt = 1) then txCnt <- 0 //초기값 Tx 0으로 제한 1이상 입력시 사용자 고지
+                                if(rxCnt <= 0 || txCnt > 1) then shape.ErrorName(30, iPage)
+                                else RX
                             else  shape.ErrorName(1, iPage)
 
         member val Id =  shape.GetId()

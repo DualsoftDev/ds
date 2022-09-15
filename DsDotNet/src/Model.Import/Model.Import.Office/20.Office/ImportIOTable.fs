@@ -67,10 +67,10 @@ module ImportIOTable =
                 |TagCase.Variable -> sys.VariableSet.TryAdd($"{row.[2]}", DsType.DataToType($"{row.[4]}")) |>ignore
                 |TagCase.Command -> sys.CommandSet.TryAdd($"{row.[2]}", $"{row.[5]}") |>ignore
                 |TagCase.Observe -> sys.ObserveSet.TryAdd($"{row.[2]}", $"{row.[7]}") |>ignore
-                |TagCase.Button  -> ()//sys.ObserveSet.TryAdd($"{row.[2]}", $"{row.[7]}") |>ignore
+                |TagCase.Button  -> sys.AssignAddress($"{row.[1]}",$"{row.[2]}", $"{row.[7]}")|>ignore
             
         for flow in sys.RootFlow()  do
-            flow.CallSegs() |> Seq.append (flow.ExSegs())
+            flow.NotMySegs()
             |> Seq.iter(fun seg -> 
                         let s, r, e = sys.AddressSet.[seg.Name]
                         seg.S <- s

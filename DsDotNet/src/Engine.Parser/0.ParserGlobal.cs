@@ -7,9 +7,8 @@ global using Engine.Core;
 global using Antlr4.Runtime;
 global using Antlr4.Runtime.Tree;
 global using static System.Diagnostics.Debug;
-global using Engine.Parser.g4s;
 
 global using static Engine.Parser.DsParser;
-global using static Engine.Parser.g4s.dsParser;
+global using static Engine.Parser.dsParser;
 
 namespace Engine.Parser;

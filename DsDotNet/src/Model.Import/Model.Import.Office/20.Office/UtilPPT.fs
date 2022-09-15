@@ -76,7 +76,15 @@ module UtilPPT =
                 System.Drawing.Rectangle(x,y,w,h)
     
 
-       
+        [<Extension>] 
+        static member CheckDonutShape(shape:#Shape) = 
+            if(Office.CheckShapes(shape) |> not) then false
+            else
+                let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
+                (  geometry.Preset.Value = Drawing.ShapeTypeValues.Donut
+                )    
+
+
         [<Extension>] 
         static member CheckEllipse(shape:#Shape) = 
             if(Office.CheckShapes(shape) |> not) then false
@@ -93,8 +101,20 @@ module UtilPPT =
                     let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
                     (  geometry.Preset.Value = Drawing.ShapeTypeValues.Rectangle
                     || geometry.Preset.Value = Drawing.ShapeTypeValues.FlowChartProcess)    
-           
-      
+
+        [<Extension>] 
+        static member CheckNoSmoking(shape:#Shape) = 
+                if(Office.CheckShapes(shape) |> not) then false
+                else
+                    let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
+                    geometry.Preset.Value = Drawing.ShapeTypeValues.NoSmoking
+
+        [<Extension>] 
+        static member CheckBlockArc(shape:#Shape) = 
+                if(Office.CheckShapes(shape) |> not) then false
+                else
+                    let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
+                    geometry.Preset.Value = Drawing.ShapeTypeValues.BlockArc   
 
         [<Extension>] 
         static member IsDashShape(shape:#Shape) = 
@@ -165,7 +185,9 @@ module UtilPPT =
         [<Extension>] 
         static member Shapes(page:int, commonSlideData:CommonSlideData) = 
                         commonSlideData.ShapeTree.Descendants<Shape>()
-                        |> Seq.filter(fun  shape -> shape.CheckRectangle() || shape.CheckEllipse())
+                        |> Seq.filter(fun  shape -> shape.CheckRectangle() 
+                                                 || shape.CheckEllipse()   || shape.CheckDonutShape()
+                                                 || shape.CheckNoSmoking() || shape.CheckBlockArc())
                         |> Seq.map(fun  shape -> 
                                 
                                 let geometry = shape.Descendants<Drawing.PresetGeometry>().FirstOrDefault().Preset.Value

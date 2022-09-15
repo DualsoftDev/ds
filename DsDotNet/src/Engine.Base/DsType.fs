@@ -84,13 +84,14 @@ module DsType =
             | "float"| "single" -> FLOAT
             | "double" -> DOUBLE
             |_-> failwithf "DataToType Error"
-    
+     
     ///인터페이스 Tag 기본 형식
     type TagCase =
         | Address
         | Variable
         | Command
         | Observe
+        | Button
         with
             member x.ToText() =
                 match x with
@@ -98,6 +99,7 @@ module DsType =
                 | Variable     -> "내부"
                 | Command      -> "지시"
                 | Observe      -> "관찰"
+                | Button       -> "버튼"
           
 
     let TagToType(txt:string) =
@@ -106,5 +108,6 @@ module DsType =
             | "내부" -> Variable
             | "지시" -> Command
             | "관찰" -> Observe
+            | "버튼" -> Button
             |_-> failwithf "TagCase Error"
   

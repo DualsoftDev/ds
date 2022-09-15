@@ -60,6 +60,13 @@ module ExportIOTable =
         dt.Rows.Add("지시", "함수", ""  , "'-", "'-", ""  , "'-", "'-") |> ignore
         dt.Rows.Add("관찰", "함수", ""  , "'-", "'-", "'-", "'-", ""  ) |> ignore
 
+        for sys in  model.TotalSystems do
+            for btn in  sys.EmgSet do
+                dt.Rows.Add("버튼", "비상", btn.Key  , "'-", "'-", "'-", "'-", ""  ) |> ignore
+            for btn in  sys.AutoSet do
+                dt.Rows.Add("버튼", "자동", btn.Key  , "'-", "'-", "'-", "'-", ""  ) |> ignore
+            for btn in  sys.StartSet do
+                dt.Rows.Add("버튼", "시작", btn.Key  , "'-", "'-", "'-", "'-", ""  ) |> ignore
         dt
 
  

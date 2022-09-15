@@ -126,7 +126,7 @@ partial class ElementsListener
         {
             foreach (var o in new[] { "||>", "<||", ">>", "<<", })
             {
-                if (op.Contains(o))
+                if (op.Contains(o) && op != "<||>")
                 {
                     yield return o;
                     op = op.Replace(o, "");

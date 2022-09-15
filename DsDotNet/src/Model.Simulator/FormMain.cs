@@ -20,6 +20,8 @@ using Engine.Common.FS;
 using Task = System.Threading.Tasks.Task;
 using Microsoft.FSharp.Core;
 using static Engine.Base.DsType;
+using Engine.Base;
+using System.Xml.Linq;
 
 namespace Model.Simulator
 {
@@ -28,6 +30,7 @@ namespace Model.Simulator
         public static FormMain TheMain;
 
         private EngineModule.Engine _Engine;
+        private string _dsText;
 
         public Dictionary<Flow, TabPage> DicUI;
         public string _dsTextPath;
@@ -84,7 +87,8 @@ namespace Model.Simulator
                 richTextBox_ds.Clear();
                 DicUI.Clear();
 
-                await Task.Run(() => { ExportTextModel(File.ReadAllText(path)); });
+                _dsText = File.ReadAllText(path);
+                await Task.Run(() => { ExportTextModel(Color.Black, _dsText); });
                 
                 ProcessEvent.DoWork(0);
 
@@ -127,10 +131,20 @@ namespace Model.Simulator
                 button_TestStart.Enabled = true;
                 //var modelText = Tester.GetTextDiamond();
                 //_Engine = new EngineBuilder(modelText, $"Cpu").Engine;
+                _dsText = "";
+                var textLines = richTextBox_ds.Text.Split('\n');
+                textLines.ForEach(f =>
+                {
+                    var patternHead = "^\\d*;"; // 첫 ; 내용 제거
+                    var replaceName = System.Text.RegularExpressions.Regex.Replace(f, patternHead, "");
 
+                    _dsText += (replaceName+"\n");
+                });
 
-                var modelText = richTextBox_ds.Text;
-                if (modelText == "")
+     
+                ExportTextModel(Color.Transparent, _dsText, true); 
+
+                if (_dsText == "")
                 {
                     MSGWarn("모델을 Text 영역에 가져오세요");
                     return;
@@ -140,7 +154,7 @@ namespace Model.Simulator
                     xtraTabControl_My.TabPages.Clear();
                     DicUI.Clear();
 
-                    _Engine = new EngineBuilder(modelText, $"Cpu_MY").Engine;
+                    _Engine = new EngineBuilder(_dsText, $"Cpu_MY").Engine;
 
                     _Engine.Model.Systems.ForEach(f =>
                     {

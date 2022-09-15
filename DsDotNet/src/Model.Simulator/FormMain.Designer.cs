@@ -115,7 +115,7 @@ namespace Model.Simulator
             // button_Stop
             // 
             this.button_Stop.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_Stop.Location = new System.Drawing.Point(49, 68);
+            this.button_Stop.Location = new System.Drawing.Point(335, 182);
             this.button_Stop.Name = "button_Stop";
             this.button_Stop.Size = new System.Drawing.Size(85, 23);
             this.button_Stop.TabIndex = 5;
@@ -126,7 +126,7 @@ namespace Model.Simulator
             // button_TestStart
             // 
             this.button_TestStart.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_TestStart.Location = new System.Drawing.Point(140, 68);
+            this.button_TestStart.Location = new System.Drawing.Point(426, 182);
             this.button_TestStart.Name = "button_TestStart";
             this.button_TestStart.Size = new System.Drawing.Size(85, 23);
             this.button_TestStart.TabIndex = 1;
@@ -136,7 +136,6 @@ namespace Model.Simulator
             // 
             // button_Compile
             // 
-            this.button_Compile.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Compile.Location = new System.Drawing.Point(49, 18);
             this.button_Compile.Name = "button_Compile";
             this.button_Compile.Size = new System.Drawing.Size(85, 23);
@@ -148,7 +147,7 @@ namespace Model.Simulator
             // button_TestORG
             // 
             this.button_TestORG.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_TestORG.Location = new System.Drawing.Point(140, 42);
+            this.button_TestORG.Location = new System.Drawing.Point(426, 156);
             this.button_TestORG.Name = "button_TestORG";
             this.button_TestORG.Size = new System.Drawing.Size(85, 23);
             this.button_TestORG.TabIndex = 1;
@@ -159,7 +158,7 @@ namespace Model.Simulator
             // button_Run
             // 
             this.button_Run.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_Run.Location = new System.Drawing.Point(49, 42);
+            this.button_Run.Location = new System.Drawing.Point(335, 156);
             this.button_Run.Name = "button_Run";
             this.button_Run.Size = new System.Drawing.Size(85, 23);
             this.button_Run.TabIndex = 3;

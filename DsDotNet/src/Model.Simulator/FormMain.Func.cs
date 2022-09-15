@@ -1,3 +1,4 @@
+using Engine.Base;
 using Engine.Common;
 using Engine.Common.FS;
 using Engine.Core;
@@ -10,36 +11,49 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using static Engine.Common.FS.ProcessEvent;
+using static System.Resources.ResXFileRef;
 
 namespace Model.Simulator
 {
     public partial class FormMain : Form
     {
-        internal void ExportTextModel(string text)
+        internal void ExportTextModel(Color color, string dsText, bool bShowLine = false)
         {
-            var textLines = text.Split('\n');
+
+            this.Do(() => richTextBox_ds.Clear());
+
+            var textLines = dsText.Split('\n');
             Random r = new Random();
             Color rndColor = Color.LightGoldenrodYellow;
             int lineCnt = textLines.Count();
             int lineCur = 0;
-            textLines.ToList().ForEach(f =>
+            this.Do(() =>
             {
-                int pro = Convert.ToInt32(Convert.ToSingle(lineCur++) / (lineCnt)*100);
-                    if (f.Contains("[sys]") || (f.Contains("[flow]") && !f.Contains("}"))  //[flow] F = {} 한줄제외
-                    || f.Contains("[addresses]") || f.Contains("[layouts]") || f.Contains("//"))
+                textLines.ToList().ForEach(f =>
+                {
+                    int pro = 50 + Convert.ToInt32(Convert.ToSingle(lineCur++) / (lineCnt) * 50f);
+                    if (bShowLine) richTextBox_ds.AppendTextColor(lineCur.ToString("000")+";", Color.White);
+
+                    if (color == Color.Transparent)
                     {
-                        rndColor = Color.FromArgb(r.Next(30, 130), r.Next(30, 130), r.Next(30, 130));
-                        this.Do(() => richTextBox_ds.ScrollToCaret());
-                        DoWork(pro);
+                        if (f.Contains($"[{DsText.TextSystem}]") || (f.Contains($"[{DsText.TextFlow}]") && !f.Contains("}"))  //[flow] F = {} 한줄제외
+                        || f.Contains($"[{DsText.TextAddress}]") || f.Contains($"[{DsText.TextLayout}]") || f.Contains("//"))
+                        {
+                            rndColor = Color.FromArgb(r.Next(0, 100), r.Next(0, 100), r.Next(0, 100));
+                            this.Do(() => richTextBox_ds.ScrollToCaret());
+                            ProcessEvent.DoWork(pro);
+                        }
+                        richTextBox_ds.AppendTextColor(f+"\n", rndColor);
                     }
-                    this.Do(() => richTextBox_ds.AppendTextColor(f, rndColor));
-            
+                    else
+                        richTextBox_ds.AppendTextColor(f, color);
+                });
             });
+
             this.Do(() => richTextBox_ds.Select(0, 0));
             this.Do(() => richTextBox_ds.ScrollToCaret());
-            //CreateNewTabViewer(sys);
-
         }
+
         internal void WriteDebugMsg(DateTime time, MessageEvent.MSGLevel level, string msg)
         {
             this.Do(() =>
@@ -47,12 +61,15 @@ namespace Model.Simulator
                 var color = Color.Black;
                 if (level.IsError)
                 {
-                    color = Color.Red;
-                    richTextBox_ds.AppendTextColor($"\r\n{msg}", color);
-                    DoWork(0);
+                    richTextBox_Debug.AppendTextColor($"\r\n{msg}", Color.Red);
+                    ProcessEvent.DoWork(0);
                 }
-                if (level.IsWarn) color = Color.Purple;
-                richTextBox_Debug.AppendTextColor($"\r\n{time} : {msg}", color);
+                else
+                {
+                    if (level.IsWarn) color = Color.Purple;
+                    richTextBox_Debug.AppendTextColor($"\r\n{time} : {msg}", color);
+                }
+
                 richTextBox_Debug.ScrollToCaret();
             });
         }
@@ -85,7 +102,7 @@ namespace Model.Simulator
                     TabPage tab = new TabPage();
                     tab.Controls.Add(viewer);
                     tab.Tag = viewer;
-                    tab.Text = f.Name;
+                    tab.Text = $"[{f.System.Name}]{f.Name}";
                     this.Do(() =>
                     {
                         xtraTabControl_My.TabPages.Add(tab);

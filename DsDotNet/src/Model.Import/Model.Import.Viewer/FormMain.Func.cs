@@ -18,7 +18,7 @@ namespace Dual.Model.Import
 {
     public partial class FormMain : Form
     {
-        internal void ExportTextModel(Color color, string dsText)
+        internal void ExportTextModel(Color color, string dsText, bool bShowLine =false)
         {
 
             this.Do(() => richTextBox_ds.Clear());
@@ -33,7 +33,7 @@ namespace Dual.Model.Import
                 textLines.ToList().ForEach(f =>
                 {
                     int pro = 50 + Convert.ToInt32(Convert.ToSingle(lineCur++) / (lineCnt) * 50f);
-                    richTextBox_ds.AppendText(lineCur.ToString("000"));
+                    if(bShowLine) richTextBox_ds.AppendText(lineCur.ToString("000"));
 
                     if (color == Color.Transparent)
                     {

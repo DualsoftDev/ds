@@ -260,7 +260,7 @@ module ExportModel =
                                 yield sprintf "\t[flow] %s = { %s > %s <| %s; }" (call.ToCallText()) txs rxs resetTxs
                         // Call Without InterLock
                         for call in flow.CallWithoutInterLock() do
-                            yield sprintf "\t[flow] %s = { TX > RX }" (call.ToCallText()) 
+                            yield sprintf "\t[flow] %s = { TX > RX; }" (call.ToCallText()) 
                         //Ex 출력
                         for exSeg in flow.ExRealSegs() do
                             yield sprintf "\t[flow] %s = { TR; }"  (exSeg.ToCallText()) 

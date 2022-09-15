@@ -192,7 +192,7 @@ namespace Dual.Model.Import
         {
             try
             {
-
+                ExportTextModel(Color.Transparent, _dsText, true);
                 var engine = new EngineBuilder(_dsText, $"Cpu_MY").Engine;
             }
 

@@ -31,6 +31,9 @@ test:
 	@echo ppt
 	$(grun) ds program < g4test/ppt.ds
 
+	@echo ppt2
+	$(grun) ds program < g4test/ppt2.ds
+
 	@echo safety
 	$(grun) ds program < g4test/safety.ds
 

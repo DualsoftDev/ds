@@ -51,7 +51,7 @@ public class ButtonManager : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
     {
         mySequence = DOTween.Sequence();
 
-        mySequence.Append(img.DOColor(Color.black, 0.5f));
+        mySequence.Append(img.DOColor(Color.grey, 0.5f));
         mySequence.Append(img.DOColor(Color.white, 0.5f)).OnComplete(ChangeColor);
     }
 

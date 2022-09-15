@@ -28,7 +28,7 @@ qstring: STRING_LITERAL EOF;
 system: sysProp id '=' sysBlock;    // [sys] Seg = {..}
 sysProp: '[' 'sys' ']';
 sysBlock
-    : LBRACE (sysTask|flow|listing|alias|parenting|causal|call|macro)* RBRACE       // acc|
+    : LBRACE (flow|listing|alias|parenting|causal|call)* RBRACE       // acc|sysTask|macro
     ;
 
 
@@ -104,16 +104,8 @@ safetyKey: segmentPathN;
 safetyValues: segmentPathN (SEIMCOLON segmentPathN)*;
 
 
-sysTask
-    : taskProp id '=' LBRACE (listing|call)* RBRACE
-    ;
-taskProp: '[' 'task' ']';
-
-// flow 내에 정의되는 task.  id 를 갖지 않는다.
-flowTask: taskProp EQ LBRACE (listing|call)* RBRACE;
-
 flow
-    : flowProp id '=' LBRACE (causal|parenting|listing|safetyBlock|flowTask)* RBRACE
+    : flowProp id '=' LBRACE (causal|parenting|listing|safetyBlock)* RBRACE     // |flowTask
     ;
 flowProp : '[' 'flow' ('of' id)? ']';
 
@@ -132,18 +124,6 @@ id: identifier;
 
 listing: id SEIMCOLON;     // A;
 parenting: id EQ LBRACE causal* RBRACE;
-
-/*
- * MACRO definitions
- */
-// [macro=T] = { (call)* }
-macro: LBRACKET macroHeader RBRACKET EQ LBRACE (call)* RBRACE;
-macroHeader
-    : simpleMacroHeader
-    | namedMacroHeader
-    ;
-simpleMacroHeader: 'macro';
-namedMacroHeader: 'macro' EQ identifier;
 
 // A23 = { M.U ~ S.S3U ~ _ }
 call: id EQ LBRACE callPhrase RBRACE;

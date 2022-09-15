@@ -2,9 +2,6 @@
 	[flow] S711 = { 	//S711
 		Clamp > S;
 	}
-	[task] S711_path = {
-		"S711.Clamp"	 = {EX.S711_Clamp.TX1, EX.S711_Clamp.TX2	~	EX.S711_Clamp.RX1, EX.S711_Clamp.RX2, EX.S711_Clamp.RX3, EX.S711_Clamp.RX4, EX.S711_Clamp.RX5, EX.S711_Clamp.RX6}
-	}
 	[flow] S711_AD = { 	//S711_AD
 		AutoRun > WORK;
 		WORK = {
@@ -23,20 +20,6 @@
 			"RobotUnload_‘G" > PART_OFF;
 			"RobotWeld_‘G" > "2nd_UNCLAMP";
 		}
-	}
-	[task] S711_AD_path = {
-		"S711_AD.PinDOWN"	 = {EX.S711_AD_PinDOWN.TX	~	EX.S711_AD_PinDOWN.RX}
-		"S711_AD.PinUP"	 = {EX.S711_AD_PinUP.TX	~	EX.S711_AD_PinUP.RX}
-		"S711_AD.1st_UNCLAMP"	 = {EX.S711_AD_1st_UNCLAMP.TX	~	EX.S711_AD_1st_UNCLAMP.RX}
-		"S711_AD.RobotUnload_‘G"	 = {EX."S711_AD_RobotUnload_‘G".TX	~	EX."S711_AD_RobotUnload_‘G".RX}
-		"S711_AD.1st_CLAMP"	 = {EX.S711_AD_1st_CLAMP.TX	~	EX.S711_AD_1st_CLAMP.RX}
-		"S711_AD.2ndCLAMP"	 = {EX.S711_AD_2ndCLAMP.TX	~	EX.S711_AD_2ndCLAMP.RX}
-		"S711_AD.PART_AD_ON"	 = {EX.S711_AD_PART_AD_ON.TX	~	EX.S711_AD_PART_AD_ON.RX}
-		"S711_AD.RobotWeld_‘G"	 = {EX."S711_AD_RobotWeld_‘G".TX	~	EX."S711_AD_RobotWeld_‘G".RX}
-		"S711_AD.2nd_UNCLAMP"	 = {EX.S711_AD_2nd_UNCLAMP.TX	~	EX.S711_AD_2nd_UNCLAMP.RX}
-		"S711_AD.RobotLoad_‘G"	 = {EX."S711_AD_RobotLoad_‘G".TX	~	EX."S711_AD_RobotLoad_‘G".RX}
-		"S711_AD.PART_OFF"	 = {EX.S711_AD_PART_OFF.TX	~	EX.S711_AD_PART_OFF.RX}
-		"S711_AD.AutoRun"	 = {EX.S711_AD_AutoRun.TX	~	EX.S711_AD_AutoRun.RX}
 	}
 } //C:\Users\kwak\Downloads\DS.pptx
 

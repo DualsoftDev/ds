@@ -286,6 +286,15 @@ module Object =
             let resetSet  = ConcurrentDictionary<string, List<Flo>>()
             let autoSet   = ConcurrentDictionary<string, List<Flo>>()
             
+            let updateBtn (btnType:BtnType, btnName, btnFlow) = 
+                let name = GetValidName(btnName)
+                match btnType with
+                |StartBTN ->    if(startSet.ContainsKey(name)) then startSet.[name].Add(btnFlow) |>ignore else startSet.TryAdd(name, [btnFlow] |> List) |>ignore
+                |ResetBTN ->    if(resetSet.ContainsKey(name)) then resetSet.[name].Add(btnFlow) |>ignore else resetSet.TryAdd(name, [btnFlow] |> List) |>ignore
+                |AutoBTN ->     if(autoSet.ContainsKey(name))  then autoSet.[name].Add(btnFlow)  |>ignore else autoSet.TryAdd(name,  [btnFlow] |> List) |>ignore
+                |EmergencyBTN-> if(emgSet.ContainsKey(name))   then emgSet.[name].Add(btnFlow)   |>ignore else emgSet.TryAdd(name,   [btnFlow] |> List) |>ignore
+
+
             new (name:string)       = new DsSystem(name,  false)
             new (name, active:bool) = new DsSystem(name,  active)
 
@@ -308,15 +317,27 @@ module Object =
             member x.StartSet   = startSet
             member x.ResetSet   = resetSet
             member x.AutoSet   = autoSet
-            
-            member x.Segs()     =   let segs = 
+
+            member x.TryAddStartBTN(name, flow) = updateBtn(StartBTN, name, flow)
+            member x.TryAddResetBTN(name, flow) = updateBtn(ResetBTN, name, flow)
+            member x.TryAddAutoBTN(name, flow) = updateBtn(AutoBTN, name, flow)
+            member x.TryAddEmergBTN(name, flow) = updateBtn(EmergencyBTN, name, flow)
+
+            member x.GetBtnSet(btnType:BtnType) = 
+                match btnType with
+                |StartBTN ->     startSet
+                |ResetBTN ->     resetSet
+                |AutoBTN ->      autoSet
+                |EmergencyBTN -> emgSet
+
+            member x.Segs() =   let segs = 
                                         x.SysSeg.ChildSegsSubAll 
                                         |> Seq.append (noEdgesSegs)
 
-                                    segs
-                                    |> Seq.collect(fun seg -> seg.ChildSegsSubAll) |> Seq.append segs
-                                    |> Seq.sortBy(fun seg -> seg.Name)
-                                    |> Seq.distinct
+                                segs
+                                |> Seq.collect(fun seg -> seg.ChildSegsSubAll) |> Seq.append segs
+                                |> Seq.sortBy(fun seg -> seg.Name)
+                                |> Seq.distinct
             
 
             member x.RootEdges()    = x.SysSeg.MEdges 

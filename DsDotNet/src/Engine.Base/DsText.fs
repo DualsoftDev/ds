@@ -20,7 +20,7 @@ module Text =
     [<Literal>] 
     let TextSystem = "sys"
     [<Literal>] 
-    let TextEmergenyBTN   = "emg_in"
+    let TextEmergencyBTN   = "emg_in"
     [<Literal>] 
     let TextAutoBTN = "auto_in"
     [<Literal>] 

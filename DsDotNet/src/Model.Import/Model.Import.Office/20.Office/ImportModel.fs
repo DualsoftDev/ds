@@ -130,31 +130,13 @@ module ImportModel =
                 |> Seq.iter(fun node -> 
                                 let flowName =  mySys.Flows.[node.PageNum].Name
                                 let dic = dicSeg.Values.Select(fun seg -> seg.FullName, seg) |> dict
-                                //EMG
-                                if(node.IsEmgBtn) 
-                                then 
-                                    if(mySys.EmgSet.ContainsKey(node.Name))
-                                    then mySys.EmgSet.[node.Name].Add(mySys.Flows.[node.PageNum]) |>ignore
-                                    else mySys.EmgSet.TryAdd(node.Name, [mySys.Flows.[node.PageNum]] |> List) |>ignore
-                                //Start
-                                if(node.IsStartBtn) 
-                                then 
-                                    if(mySys.StartSet.ContainsKey(node.Name))
-                                    then mySys.StartSet.[node.Name].Add(mySys.Flows.[node.PageNum]) |>ignore
-                                    else mySys.StartSet.TryAdd(node.Name, [mySys.Flows.[node.PageNum]] |> List) |>ignore
-                                //Reset
-                                if(node.IsResetBtn) 
-                                then 
-                                    if(mySys.ResetSet.ContainsKey(node.Name))
-                                    then mySys.ResetSet.[node.Name].Add(mySys.Flows.[node.PageNum]) |>ignore
-                                    else mySys.ResetSet.TryAdd(node.Name, [mySys.Flows.[node.PageNum]] |> List) |>ignore
-                                //Auto
-                                if(node.IsAutoBtn) 
-                                then 
-                                    let name = GetValidName(node.Name)
-                                    if(mySys.AutoSet.ContainsKey(name))
-                                    then mySys.AutoSet.[name].Add(mySys.Flows.[node.PageNum]) |>ignore
-                                    else mySys.AutoSet.TryAdd(name, [mySys.Flows.[node.PageNum]] |> List) |>ignore
+                               
+                                //Start, Reset, Auto, Emg 버튼
+                                if(node.IsStartBtn) then mySys.TryAddStartBTN(node.Name, mySys.Flows.[node.PageNum])
+                                if(node.IsResetBtn) then mySys.TryAddResetBTN(node.Name, mySys.Flows.[node.PageNum])
+                                if(node.IsAutoBtn)  then mySys.TryAddAutoBTN(node.Name, mySys.Flows.[node.PageNum])
+                                if(node.IsEmgBtn)   then mySys.TryAddEmergBTN(node.Name, mySys.Flows.[node.PageNum])
+                                
                                 //Safety
                                 let safeSeg = 
                                     node.Safeties   //세이프티 입력 미등록 이름오류 체크

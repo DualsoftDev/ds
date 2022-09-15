@@ -20,9 +20,10 @@ namespace Dual.Model.Import
         public static FormMain TheMain;
 
         private DsModel _model;
+        private string _dsText;
         private bool _ConvertErr = false;
 
-        public Dictionary<Flo, TabPage> DicUI;
+        public Dictionary<Flo, TabPage> DicUI;  
         public string PathPPT;
         public string PathXLS;
         public bool Busy = false;
@@ -180,7 +181,8 @@ namespace Dual.Model.Import
         {
             try
             {
-                var engine = new EngineBuilder(richTextBox_ds.Text, $"Cpu_MY").Engine;
+
+                var engine = new EngineBuilder(_dsText, $"Cpu_MY").Engine;
             }
 
             catch (Exception ex)

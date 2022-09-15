@@ -17,32 +17,39 @@ namespace Dual.Model.Import
 {
     public partial class FormMain : Form
     {
-        internal void ExportTextModel(Color color)
+        internal void ExportTextModel(Color color, string dsText)
         {
 
             this.Do(() => richTextBox_ds.Clear());
-            var textLines = ExportModel.ToText(_model).Split('\n');
+
+            var textLines = dsText.Split('\n');
             Random r = new Random();
             Color rndColor = Color.LightGoldenrodYellow;
             int lineCnt = textLines.Count();
             int lineCur = 0;
-            textLines.ToList().ForEach(f =>
-            {
-                int pro = 50 + Convert.ToInt32(Convert.ToSingle(lineCur++) / (lineCnt) * 50f);
-                if (color == Color.Transparent)
+            this.Do(() =>
+            { 
+                textLines.ToList().ForEach(f =>
                 {
-                    if (f.Contains("[sys]") || (f.Contains("[flow]") && !f.Contains("}"))  //[flow] F = {} 한줄제외
-                    || f.Contains("[addresses]") || f.Contains("[layouts]") || f.Contains("//"))
+                    int pro = 50 + Convert.ToInt32(Convert.ToSingle(lineCur++) / (lineCnt) * 50f);
+                    richTextBox_ds.AppendText(lineCur.ToString("000"));
+
+                    if (color == Color.Transparent)
                     {
-                        rndColor = Color.FromArgb(r.Next(130, 230), r.Next(130, 230), r.Next(130, 230));
-                        this.Do(() => richTextBox_ds.ScrollToCaret());
-                        ProcessEvent.DoWork(pro);
+                        if (f.Contains("[sys]") || (f.Contains("[flow]") && !f.Contains("}"))  //[flow] F = {} 한줄제외
+                        || f.Contains("[addresses]") || f.Contains("[layouts]") || f.Contains("//"))
+                        {
+                            rndColor = Color.FromArgb(r.Next(130, 230), r.Next(130, 230), r.Next(130, 230));
+                            this.Do(() => richTextBox_ds.ScrollToCaret());
+                            ProcessEvent.DoWork(pro);
+                        }
+                        richTextBox_ds.AppendTextColor(f, rndColor);
                     }
-                    this.Do(() => richTextBox_ds.AppendTextColor(f, rndColor));
-                }
-                else
-                    this.Do(() => richTextBox_ds.AppendTextColor(f, color));
+                    else
+                        richTextBox_ds.AppendTextColor(f, color);
+                });
             });
+
             this.Do(() => richTextBox_ds.Select(0, 0));
             this.Do(() => richTextBox_ds.ScrollToCaret());
         }
@@ -59,7 +66,8 @@ namespace Dual.Model.Import
 
                 if (!_ConvertErr)
                 {
-                    ExportTextModel(Color.Transparent);
+                    _dsText = ExportModel.ToText(_model);
+                    ExportTextModel(Color.Transparent, _dsText);
                     this.Do(() => xtraTabControl_My.TabPages.Clear());
                     foreach (var sys in _model.TotalSystems.OrderBy(sys => sys.Name))
                         CreateNewTabViewer(sys);
@@ -97,7 +105,8 @@ namespace Dual.Model.Import
             MSGInfo($"{PathXLS} 불러오는 중!!");
             var sys = _model.ActiveSys;
             ImportIOTable.ApplyExcel(path, sys);
-            ExportTextModel(Color.FromArgb(0, 150, 0));
+            _dsText = ExportModel.ToText(_model);
+            ExportTextModel(Color.FromArgb(0, 150, 0), _dsText);
             this.Do(() =>
             {
                 richTextBox_ds.ScrollToCaret();
@@ -144,13 +153,16 @@ namespace Dual.Model.Import
                 if (level.IsError)
                 {
                     _ConvertErr = true;
-                    color = Color.Red;
-                    richTextBox_ds.AppendTextColor($"\r\n{msg}", color);
+                    richTextBox_Debug.AppendTextColor($"\r\n{msg}", Color.Red);
                     ProcessEvent.DoWork(0);
                 }
-                if (level.IsWarn) color = Color.Purple;
-                richTextBox_Debug.AppendTextColor($"\r\n{time} : {msg}", color);
-                richTextBox_Debug.ScrollToCaret();
+                else
+                {
+                    if (level.IsWarn) color = Color.Purple;
+                    richTextBox_Debug.AppendTextColor($"\r\n{time} : {msg}", color);
+                    richTextBox_Debug.ScrollToCaret();
+                }
+               
             });
         }
 

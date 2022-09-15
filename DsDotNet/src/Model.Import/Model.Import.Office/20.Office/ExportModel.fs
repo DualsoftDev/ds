@@ -5,6 +5,7 @@ open System.Linq
 open System
 open System.Collections.Generic
 open Engine.Base
+open System.Collections.Concurrent
 
 [<AutoOpen>]
 module ExportModel =
@@ -101,6 +102,15 @@ module ExportModel =
                         yield! subNodeText (seg) 
                         yield sprintf "\t\t}"
             } 
+
+        let btnText(propName:string, set: ConcurrentDictionary<string, List<Flo>>) = 
+            seq {
+                        yield sprintf "\t[%s] = {"  propName
+                        for emg in set do
+                            yield sprintf "\t\t%s = { %s };" emg.Key (emg.Value |>Seq.map(fun flo-> flo.ToText()) |> String.concat "; ") 
+                        yield "\t}"
+            } 
+
         let mySystem = 
             seq {
                 yield sprintf "//////////////////////////////////////////////////////"
@@ -133,37 +143,11 @@ module ExportModel =
 
                         yield "\t}"
 
-                    //EmgSet 출력
-                    if(sys.EmgSet.Any())
-                    then 
-                        yield sprintf "\t[%s] = {"  TextEmergenyBTN
-                        for emg in sys.EmgSet do
-                            yield sprintf "\t\t%s = { %s };" emg.Key (emg.Value |>Seq.map(fun flo-> flo.ToText()) |> String.concat "; ") 
-                        yield "\t}"
-                    
-                    //AutoSet 출력
-                    if(sys.AutoSet.Any())
-                    then 
-                        yield sprintf "\t[%s] = {"  TextAutoBTN
-                        for auto in sys.AutoSet do
-                            yield sprintf "\t\t%s = { %s };" auto.Key (auto.Value |>Seq.map(fun flo-> flo.ToText()) |> String.concat "; ") 
-                        yield "\t}"
-                    
-                    //StartSet 출력
-                    if(sys.StartSet.Any())
-                    then 
-                        yield sprintf "\t[%s] = {"  TextStartBTN
-                        for start in sys.StartSet do
-                            yield sprintf "\t\t%s = { %s };" start.Key (start.Value |>Seq.map(fun flo-> flo.ToText()) |> String.concat "; ") 
-                        yield "\t}"
-
-                    //ResetSet 출력
-                    if(sys.ResetSet.Any())
-                    then 
-                        yield sprintf "\t[%s] = {"  TextResetBTN
-                        for reset in sys.ResetSet do
-                            yield sprintf "\t\t%s = { %s };" reset.Key (reset.Value |>Seq.map(fun flo-> flo.ToText()) |> String.concat "; ") 
-                        yield "\t}"
+                    //EmgSet AutoSet StartSet ResetSet 출력
+                    if(sys.EmgSet.Any()) then yield! btnText(TextEmergencyBTN, sys.GetBtnSet(EmergencyBTN))
+                    if(sys.AutoSet.Any()) then yield! btnText(TextAutoBTN, sys.GetBtnSet(AutoBTN))
+                    if(sys.StartSet.Any())then yield! btnText(TextStartBTN, sys.GetBtnSet(StartBTN))
+                    if(sys.ResetSet.Any())then yield! btnText(TextResetBTN, sys.GetBtnSet(ResetBTN))
                     
                     //Variable 출력
                     if(sys.VariableSet.Any())

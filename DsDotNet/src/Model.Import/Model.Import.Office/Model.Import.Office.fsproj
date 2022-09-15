@@ -16,6 +16,7 @@
 
 
   <ItemGroup>
+    <Compile Include="Util\ImportType.fs" />
     <Compile Include="Util\Util.fs" />
     <Compile Include="00.Base\01.Interface.fs" />
     <Compile Include="00.Base\02.Base.fs" />

@@ -29,13 +29,13 @@ public class ErrorListener<Symbol> : ConsoleErrorListener<Symbol>
         _throwOnerror = throwOnError;
     }
 
-    public override void SyntaxError(IRecognizer recognizer, Symbol offendingSymbol, int line,
+    public override void SyntaxError(TextWriter output, IRecognizer recognizer, Symbol offendingSymbol, int line,
         int col, string msg, RecognitionException e)
     {
         var dsFile = recognizer.GrammarFileName;
         var dsParser = recognizer as dsParser;
         var ambient = dsParser.RuleContext.GetText();
-        base.SyntaxError(recognizer, offendingSymbol, line, col, msg, e);
+        base.SyntaxError(output, recognizer, offendingSymbol, line, col, msg, e);
         Global.Logger.Error($"Parser error on [{line}:{col}]@{dsFile}: {msg}");
         Errors.Add(new ParserError(line, col, msg, ambient));
         if (_throwOnerror)

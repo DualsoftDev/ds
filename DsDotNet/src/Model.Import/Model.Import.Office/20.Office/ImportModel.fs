@@ -142,6 +142,12 @@ module ImportModel =
                                     if(mySys.StartSet.ContainsKey(node.Name))
                                     then mySys.StartSet.[node.Name].Add(mySys.Flows.[node.PageNum]) |>ignore
                                     else mySys.StartSet.TryAdd(node.Name, [mySys.Flows.[node.PageNum]] |> List) |>ignore
+                                //Reset
+                                if(node.IsResetBtn) 
+                                then 
+                                    if(mySys.ResetSet.ContainsKey(node.Name))
+                                    then mySys.ResetSet.[node.Name].Add(mySys.Flows.[node.PageNum]) |>ignore
+                                    else mySys.ResetSet.TryAdd(node.Name, [mySys.Flows.[node.PageNum]] |> List) |>ignore
                                 //Auto
                                 if(node.IsAutoBtn) 
                                 then 

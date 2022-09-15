@@ -143,6 +143,7 @@ module PPTX =
         let mutable bEmg = false
         let mutable bAuto = false
         let mutable bStart = false
+        let mutable bReset = false
         let updateTxRx(tailBarckets) =
             if(tailBarckets  = ""|> not)
             then 
@@ -167,6 +168,7 @@ module PPTX =
             bEmg  <- shape.CheckNoSmoking() 
             bAuto  <- shape.CheckBlockArc() 
             bStart  <- shape.CheckDonutShape() 
+            bReset  <- shape.CheckResetShape() 
             
         member x.PageNum = iPage
         member x.Shape = shape
@@ -176,10 +178,11 @@ module PPTX =
         member x.IsEmgBtn = bEmg
         member x.IsAutoBtn= bAuto
         member x.IsStartBtn = bStart
+        member x.IsResetBtn = bReset
         member val NodeCausal = 
                             if(shape.CheckRectangle()) then if(dashOutline) then EX else  MY
                             else 
-                            if(shape.CheckEllipse() || shape.CheckDonutShape()|| shape.CheckBlockArc()|| shape.CheckNoSmoking() ) 
+                            if(shape.CheckEllipse() || shape.CheckDonutShape()|| shape.CheckBlockArc()|| shape.CheckNoSmoking()|| shape.CheckResetShape() ) 
                             then 
                                 if((txCnt = 0 && rxCnt = 0) || txCnt < 0 || rxCnt < 0)
                                 then shape.ErrorName(2, iPage)

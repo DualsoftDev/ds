@@ -202,7 +202,7 @@ namespace Dual.Model.Import
         {
             foreach (KeyValuePair<Flo, TabPage> view in DicUI)
             {
-                foreach (var seg in view.Key.UsedSegs)
+                foreach (var seg in view.Key.ExportSegs)
                 {
                     ((UCView)view.Value.Tag).Update(seg);
                 }

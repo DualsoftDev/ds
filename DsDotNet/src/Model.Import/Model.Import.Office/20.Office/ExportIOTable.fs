@@ -67,6 +67,8 @@ module ExportIOTable =
                 dt.Rows.Add("버튼", "자동", btn.Key  , "'-", "'-", "'-", "'-", ""  ) |> ignore
             for btn in  sys.StartSet do
                 dt.Rows.Add("버튼", "시작", btn.Key  , "'-", "'-", "'-", "'-", ""  ) |> ignore
+            for btn in  sys.ResetSet do
+                dt.Rows.Add("버튼", "리셋", btn.Key  , "'-", "'-", "'-", "'-", ""  ) |> ignore
         dt
 
  

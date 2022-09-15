@@ -34,7 +34,7 @@ namespace Dual.Model.Import
 
                 sys.RootFlow().ToList().ForEach(flow =>
                 {
-                    if (flow.UsedSegs.Contains(seg))
+                    if (flow.ExportSegs.Contains(seg))
                         if (FormMain.TheMain.DicUI.ContainsKey(flow))
                             ((UCView)FormMain.TheMain.DicUI[flow].Tag).Update(seg);
                 });

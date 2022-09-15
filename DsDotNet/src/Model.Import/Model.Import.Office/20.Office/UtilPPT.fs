@@ -77,6 +77,14 @@ module UtilPPT =
     
 
         [<Extension>] 
+        static member CheckResetShape(shape:#Shape) = 
+            if(Office.CheckShapes(shape) |> not) then false
+            else
+                let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
+                (  geometry.Preset.Value = Drawing.ShapeTypeValues.Bevel
+                )    
+                
+        [<Extension>] 
         static member CheckDonutShape(shape:#Shape) = 
             if(Office.CheckShapes(shape) |> not) then false
             else
@@ -186,7 +194,7 @@ module UtilPPT =
         static member Shapes(page:int, commonSlideData:CommonSlideData) = 
                         commonSlideData.ShapeTree.Descendants<Shape>()
                         |> Seq.filter(fun  shape -> shape.CheckRectangle() 
-                                                 || shape.CheckEllipse()   || shape.CheckDonutShape()
+                                                 || shape.CheckEllipse()   || shape.CheckDonutShape()|| shape.CheckResetShape()
                                                  || shape.CheckNoSmoking() || shape.CheckBlockArc())
                         |> Seq.map(fun  shape -> 
                                 

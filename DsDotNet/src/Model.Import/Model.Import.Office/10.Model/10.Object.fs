@@ -224,27 +224,37 @@ module Object =
                                                                             |> Seq.collect(fun node -> node.NoEdgeSubSegs))
                                                     |> Seq.append x.NoEdgeSubSegs 
                                                     |> Seq.cast<Seg> 
+
+                                    let noEdgeSegsSub = x.NoEdgeSubSegs |> Seq.cast<Seg> |> Seq.collect(fun node -> node.ChildSegsSubAll)
+
+                                    let children = 
+                                        edges.Values.GetNodes()
+                                        |> Seq.cast<Seg>
+                                        |> Seq.collect (fun node -> node.ChildSegsSubAll)
+
                                     edges.Values
                                     |> Seq.collect(fun edge -> edge.Nodes) |> Seq.cast<Seg> 
                                     |> Seq.filter(fun seg -> seg.MEdges.Any()) 
-                                    |> Seq.distinctBy(fun seg -> seg.Name)
                                     |> Seq.append noEdgeSegs
+                                    |> Seq.append noEdgeSegsSub
+                                    |> Seq.append children
+                                    |> Seq.distinctBy(fun seg -> seg.Name)
 
-            member x.UsedSegs = let children = 
-                                    edges.Values.GetNodes()
-                                    |> Seq.cast<Seg>
-                                    |> Seq.collect (fun node -> node.ChildSegsSubAll)
-                                x.NoEdgeSubSegs 
-                                |> Seq.cast<Seg>
-                                |> Seq.collect (fun parent -> parent.MEdges.GetNodes())
-                                |> Seq.append (x.Edges.GetNodes())
-                                |> Seq.cast<Seg>
-                                |> Seq.append children
-                                |> Seq.append (x.NoEdgeSubSegs |> Seq.cast<Seg>)
-                                |> Seq.toList
+            //member x.UsedSegs = let children = 
+            //                        edges.Values.GetNodes()
+            //                        |> Seq.cast<Seg>
+            //                        |> Seq.collect (fun node -> node.ChildSegsSubAll)
+            //                    x.NoEdgeSubSegs 
+            //                    |> Seq.cast<Seg>
+            //                    |> Seq.collect (fun parent -> parent.MEdges.GetNodes())
+            //                    |> Seq.append (x.Edges.GetNodes())
+            //                    |> Seq.cast<Seg>
+            //                    |> Seq.append children
+            //                    |> Seq.append (x.NoEdgeSubSegs |> Seq.cast<Seg>)
+            //                    |> Seq.toList
 
             
-            member x.CallSegs() = x.UsedSegs
+            member x.CallSegs() = x.ExportSegs
                                         |> Seq.filter(fun seg -> seg.NodeCausal.IsCall)
                                         |> Seq.filter(fun seg -> seg.IsButton|>not)
                                         |> Seq.distinctBy(fun seg -> seg.Name)
@@ -253,7 +263,7 @@ module Object =
                 = x.CallSegs()
                   |> Seq.filter(fun seg -> interlocks.Values.GetNodes().Contains(seg)|>not)
 
-            member x.ExSegs() = x.UsedSegs
+            member x.ExSegs() = x.ExportSegs
                                         |> Seq.filter(fun seg -> seg.NodeCausal = EX)
                                         |> Seq.distinctBy(fun seg -> seg.Name)
 
@@ -273,8 +283,9 @@ module Object =
             let noEdgesSegs = flows |> Seq.collect(fun f-> f.Value.NoEdgeSubSegs) |> Seq.cast<Seg>
             let emgSet  = ConcurrentDictionary<string, List<Flo>>()
             let startSet  = ConcurrentDictionary<string, List<Flo>>()
+            let resetSet  = ConcurrentDictionary<string, List<Flo>>()
             let autoSet   = ConcurrentDictionary<string, List<Flo>>()
-
+            
             new (name:string)       = new DsSystem(name,  false)
             new (name, active:bool) = new DsSystem(name,  active)
 
@@ -295,6 +306,7 @@ module Object =
             member x.AddressSet   = addressSet
             member x.EmgSet   = emgSet
             member x.StartSet   = startSet
+            member x.ResetSet   = resetSet
             member x.AutoSet   = autoSet
             
             member x.Segs()     =   let segs = 

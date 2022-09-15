@@ -67,6 +67,7 @@ module ImportIOTable =
                 |TagCase.Variable -> sys.VariableSet.TryAdd($"{row.[2]}", DsType.DataToType($"{row.[4]}")) |>ignore
                 |TagCase.Command -> sys.CommandSet.TryAdd($"{row.[2]}", $"{row.[5]}") |>ignore
                 |TagCase.Observe -> sys.ObserveSet.TryAdd($"{row.[2]}", $"{row.[7]}") |>ignore
+                |TagCase.Button  -> ()//sys.ObserveSet.TryAdd($"{row.[2]}", $"{row.[7]}") |>ignore
             
         for flow in sys.RootFlow()  do
             flow.CallSegs() |> Seq.append (flow.ExSegs())

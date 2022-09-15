@@ -156,6 +156,14 @@ module ExportModel =
                         for start in sys.StartSet do
                             yield sprintf "\t\t%s = { %s };" start.Key (start.Value |>Seq.map(fun flo-> flo.ToText()) |> String.concat "; ") 
                         yield "\t}"
+
+                    //ResetSet 출력
+                    if(sys.ResetSet.Any())
+                    then 
+                        yield sprintf "\t[reset] = {" 
+                        for reset in sys.ResetSet do
+                            yield sprintf "\t\t%s = { %s };" reset.Key (reset.Value |>Seq.map(fun flo-> flo.ToText()) |> String.concat "; ") 
+                        yield "\t}"
                     
                     //Variable 출력
                     if(sys.VariableSet.Any())

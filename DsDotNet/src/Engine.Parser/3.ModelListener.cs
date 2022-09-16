@@ -12,6 +12,7 @@ class ModelListener : dsBaseListener
     Dictionary<string, object> QpInstanceMap => ParserHelper.QualifiedInstancePathMap;
     Dictionary<string, object> QpDefinitionMap => ParserHelper.QualifiedDefinitionPathMap;
 
+    string[] CurrentPathNameComponents => ParserHelper.CurrentPathNameComponents;
     string CurrentPath => ParserHelper.CurrentPath;
 
     public ModelListener(dsParser parser, ParserHelper helper)

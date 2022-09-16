@@ -137,7 +137,7 @@ namespace Model.Simulator
                     xtraTabControl_My.TabPages.Clear();
                     DicUI.Clear();
 
-                    _Engine = new EngineBuilder(_dsText, null).Engine;      // null cpu means simulation mode.
+                    _Engine = new EngineBuilder(_dsText, ParserOptions.Create4Simulation()).Engine;
 
                     _Engine.Model.Systems.ForEach(f =>
                     {

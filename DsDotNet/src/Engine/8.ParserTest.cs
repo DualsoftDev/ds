@@ -455,11 +455,17 @@ namespace Engine
 [sys] ""my.favorite.system!!"" = {
     [flow] "" my flow. "" = {
         R1 > R2;
-        C1     = {EX.""이상한. flow"".TX    ~    EX.F1_C1.RX}
+        C1     = {EX.""이상한. flow"".TX    ~    EX.""이상한. flow"".RX}
+    }
+}
+[sys] EX = {
+    [flow] ""이상한. flow"" = {    
+        TX;
+        RX;
     }
 }
 ";
-            var engine = new EngineBuilder(text, ParserOptions.Create4SimulationWhileIgnoringExtSegCall()).Engine;
+            var engine = new EngineBuilder(text, ParserOptions.Create4Simulation()).Engine;
             Program.Engine = engine;
             engine.Run();
         }

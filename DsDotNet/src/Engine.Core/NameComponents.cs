@@ -20,9 +20,10 @@ public record ParserOptions
             AllowSkipExternalSegment = false
         };
 
-    public static ParserOptions Create4Simulation(string activeCpuName) =>
+    public static ParserOptions Create4Simulation(string activeCpuName=null) =>
         new ParserOptions { ActiveCpuName = activeCpuName, };
-    public static ParserOptions Create4SimulationWhileIgnoringExtSegCall() => new ParserOptions {};
+    public static ParserOptions Create4SimulationWhileIgnoringExtSegCall() =>
+        new ParserOptions { AllowSkipExternalSegment  = false, };
 
     public bool Verify() => IsSimulationMode || (ActiveCpuName != null && !AllowSkipExternalSegment);
 }

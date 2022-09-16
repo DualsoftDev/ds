@@ -25,20 +25,21 @@ public class ParserHelper
         ParserOptions = options;
     }
 
-    internal string CurrentPath
+    internal string[] CurrentPathNameComponents
     {
         get
         {
             if (_parenting != null)
-                return $"{_system.Name}.{_rootFlow.Name}.{_parenting.Name}";
+                return new[] {_system.Name, _rootFlow.Name, _parenting.Name};
             if (_rootFlow != null)
-                return $"{_system.Name}.{_rootFlow.Name}";
+                return new[] { _system.Name, _rootFlow.Name};
             if (_system != null)
-                return _system.Name;
+                return new[] { _system.Name };
 
             throw new Exception("ERROR");
         }
     }
+    internal string CurrentPath => CurrentPathNameComponents.Combine();
 
 
 

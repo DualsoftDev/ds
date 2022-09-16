@@ -12,6 +12,7 @@ namespace Engine.Parser
         Dictionary<string, object> QpInstanceMap => ParserHelper.QualifiedInstancePathMap;
         Dictionary<string, object> QpDefinitionMap => ParserHelper.QualifiedDefinitionPathMap;
 
+        string[] CurrentPathNameComponents => ParserHelper.CurrentPathNameComponents;
         string CurrentPath => ParserHelper.CurrentPath;
 
         public AliasListener(dsParser parser, ParserHelper helper)

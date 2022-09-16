@@ -1,7 +1,15 @@
 [sys] MY = {
-    [flow] F1 = {
-        R1 > R2;
-        C1     = {EX.F1_C1.TX    ~    EX.F1_C1.RX}
-        ResetBTN     = {EX.F1_ResetBTN.TX    ~    EX.F1_ResetBTN.RX}
+    [flow] FFF = {     
+        EX."FFF.EXT".EX > R2;
     }
 }
+
+
+
+//////////////////////////////////////////////////////
+//DTS auto generation MY ExSegs
+//////////////////////////////////////////////////////
+[sys] EX = {
+    [flow] "FFF.EXT" = { EX; }
+}
+

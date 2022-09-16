@@ -38,6 +38,7 @@ partial class ElementsListener : dsBaseListener
     RootFlow _rootFlow  { get => ParserHelper._rootFlow;  set => ParserHelper._rootFlow = value; }
     SegmentBase  _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
 
+    string[] CurrentPathNameComponents => ParserHelper.CurrentPathNameComponents;
     string CurrentPath => ParserHelper.CurrentPath;
     Dictionary<string, object> QpInstanceMap => ParserHelper.QualifiedInstancePathMap;
     Dictionary<string, object> QpDefinitionMap => ParserHelper.QualifiedDefinitionPathMap;

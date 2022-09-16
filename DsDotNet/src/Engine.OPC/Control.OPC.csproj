@@ -7,7 +7,7 @@
 	  <RootNamespace>Control.Opc</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="FSharp.Core" Version="6.0.5" />
+    <PackageReference Include="FSharp.Core" Version="6.0.6" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Engine.Common\Engine.Common.csproj" />

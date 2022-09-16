@@ -16,12 +16,24 @@ public class EngineBuilder
     {
         EngineModule.Initialize();
 
-        Model = ModelParser.ParseFromString(modelText);
+        bool simulationMode = activeCpuName.IsNullOrEmpty();
+
+        var helper = ModelParser.ParseFromString2(modelText, simulationMode);
+        Model = helper.Model;
         Global.Model = Model;
 
         Data = new DataBroker();
-        Cpu = Model.Cpus.First(cpu => cpu.Name == activeCpuName);
-        Cpu.IsActive = true;
+
+        if (simulationMode)
+        {
+            Cpu = Model.Cpus.First();
+            Cpu.IsActive = true;
+        }
+        else
+        {
+            Cpu = Model.Cpus.First(cpu => cpu.Name == activeCpuName);
+            Cpu.IsActive = true;
+        }
 
         Model.BuildGraphInfo();
 
@@ -45,6 +57,6 @@ public class EngineBuilder
     {
         EngineModule.Initialize();
         Data = new DataBroker();
-        Model = ModelParser.ParseFromString(modelText);
+        Model = ModelParser.ParseFromString(modelText, true);
     }
 }

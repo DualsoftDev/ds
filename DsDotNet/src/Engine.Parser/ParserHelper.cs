@@ -17,7 +17,12 @@ public class ParserHelper
     internal RootFlow _rootFlow;
     internal SegmentBase _parenting;
 
-    internal Dictionary<string, Cpu> FlowName2CpuMap;
+    public Dictionary<string, Cpu> FlowName2CpuMap;
+
+    public ParserHelper(bool isSimulationMode)
+    {
+        IsSimulationMode = isSimulationMode;
+    }
 
     internal string CurrentPath
     {
@@ -33,6 +38,9 @@ public class ParserHelper
             throw new Exception("ERROR");
         }
     }
+
+    public bool IsSimulationMode { get; set; }
+
 
     public T FindObject<T>(string qualifiedName) where T : class => PickQualifiedPathObject<T>(qualifiedName);
 

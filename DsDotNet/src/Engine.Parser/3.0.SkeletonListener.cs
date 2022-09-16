@@ -1,3 +1,5 @@
+using Engine.Common;
+
 namespace Engine.Parser;
 
 
@@ -69,7 +71,24 @@ class SkeletonListener : dsBaseListener
     {
         var flowName = ctx.id().GetText();
         var flowOf = ctx.flowProp().id();
-        var cpu = ParserHelper.FlowName2CpuMap[$"{CurrentPath}.{flowName}"];
+
+        var flowFqdn = $"{CurrentPath}.{flowName}";
+        var cpuAssigned = ParserHelper.FlowName2CpuMap.ContainsKey(flowFqdn);
+        if (!ParserHelper.IsSimulationMode && !cpuAssigned)
+            throw new Exception($"No CPU assignment for flow [{flowFqdn}");
+
+        Cpu cpu = null;
+        if (cpuAssigned)
+            cpu = ParserHelper.FlowName2CpuMap[$"{CurrentPath}.{flowName}"];
+        else
+        {
+            // simulation mode.
+            cpu = new Cpu("DummyCpu", _model);
+            ParserHelper.FlowName2CpuMap.Add(flowFqdn, cpu);
+            if (ParserHelper.FlowName2CpuMap.Values.ForAll(cpu => ! cpu.IsActive))
+                cpu.IsActive = true;    // 강제로 active cpu 할당
+        }
+
         _rootFlow = new RootFlow(cpu, flowName, _system);
         cpu.RootFlows.Add(_rootFlow);
         QpInstanceMap.Add(CurrentPath, _rootFlow);

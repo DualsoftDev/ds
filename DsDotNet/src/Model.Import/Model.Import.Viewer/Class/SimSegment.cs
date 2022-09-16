@@ -61,10 +61,10 @@ namespace Dual.Model.Import
         }
         private static List<Seg> getHeads(Dictionary<Seg, Seg> dic, Dictionary<MEdge, MEdge> dicEdge)
         {
-            List<Seg> tgts = dicEdge.Values.Select(edge => edge.Target).Distinct().ToList();
+            List<Seg> tgts = dicEdge.Values.Where(w=>w.Causal.IsStart).Select(edge => edge.Target).Distinct().ToList();
             List<Seg> heads = dic.Values.Where(s => !tgts.Contains(s)).ToList();
             List<MEdge> findEdges = dicEdge.Values
-                //  .Where(edge => edge.Causal.IsStart)
+                .Where(edge => edge.Causal.IsStart)
                 .Where(edge => heads.Contains(edge.Source)).ToList();
 
             foreach (var seg in heads) dic.Remove(seg);
@@ -98,13 +98,16 @@ namespace Dual.Model.Import
             if (model == null) return;
             if (!org) await TestORG(model);
 
-            var dicSeg = model.ActiveSys.RootSegs().ToDictionary(d => d);
+            var dicSeg  = model.ActiveSys.RootSegs().ToDictionary(d => d);
             var dicEdge = model.ActiveSys.RootEdges().ToDictionary(d => d);
 
             await Task.Run(async () =>
             {
                 List<MEdge> edges = model.ActiveSys.RootEdges().ToList();
-                foreach (var cont in edges.SelectMany(s => s.Nodes).Distinct())
+                var segs = edges.SelectMany(s => s.Nodes).ToList();
+                segs.AddRange(dicSeg.Values);
+
+                foreach (var cont in segs.Distinct())
                 {
                     if (dicSeg.Count() == 0) break;
 

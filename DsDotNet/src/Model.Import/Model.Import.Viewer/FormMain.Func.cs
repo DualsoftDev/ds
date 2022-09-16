@@ -32,7 +32,7 @@ namespace Dual.Model.Import
                 textLines.ToList().ForEach(f =>
                 {
                     int pro = 50 + Convert.ToInt32(Convert.ToSingle(lineCur++) / (lineCnt) * 50f);
-                    if (bShowLine) richTextBox_ds.AppendText(lineCur.ToString("000"));
+                    if (bShowLine) richTextBox_ds.AppendText(lineCur.ToString("000")+";");
 
                     if (color == Color.Transparent)
                     {
@@ -43,7 +43,7 @@ namespace Dual.Model.Import
                             this.Do(() => richTextBox_ds.ScrollToCaret());
                             ProcessEvent.DoWork(pro);
                         }
-                        richTextBox_ds.AppendTextColor(f, rndColor);
+                        richTextBox_ds.AppendTextColor(f+"\n", rndColor);
                     }
                     else
                         richTextBox_ds.AppendTextColor(f, color);
@@ -52,6 +52,7 @@ namespace Dual.Model.Import
 
             this.Do(() => richTextBox_ds.Select(0, 0));
             this.Do(() => richTextBox_ds.ScrollToCaret());
+            ProcessEvent.DoWork(0);
         }
         internal void ImportPPT()
         {

@@ -2,6 +2,7 @@ using Engine;
 using Engine.Common;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -197,6 +198,23 @@ namespace Dual.Model.Import
             {
                 MSGError(ex.Message);
             }
+        }
+        private void RefreshText()
+        {
+            _dsText = "";
+            var textLines = richTextBox_ds.Text.Split('\n');
+            textLines.ForEach(f =>
+            {
+                var patternHead = "^\\d*;"; // 첫 ; 내용 제거
+                var replaceName = System.Text.RegularExpressions.Regex.Replace(f, patternHead, "");
+
+                _dsText += (replaceName + "\n");
+            });
+            ExportTextModel(Color.Transparent, _dsText, false);
+        }
+        private void button_HideLine_Click(object sender, EventArgs e)
+        {
+            RefreshText();
         }
     }
 }

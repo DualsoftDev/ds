@@ -42,6 +42,7 @@ module Object =
             member x.NodeCausal = nodeCausal
             member x.Status4 = status4 
             member x.SetStatus(s:Status4) = status4 <- s
+                                            ChangeStatus(this, s)
 
             member x.BaseSys = baseSystem
             member x.Editor = editor

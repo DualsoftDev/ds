@@ -170,7 +170,7 @@ module Object =
             let dummySeg  = ConcurrentHash<Seg>()
             let safeties  = ConcurrentDictionary<Seg, Seg seq>()
             let edges  = ConcurrentHash<MEdge>()
-            let interlocks  = ConcurrentHash<MEdge>()
+            let interlocks  = ConcurrentDictionary<string, MEdge>()
             let setIL  = ConcurrentHash<HashSet<Seg>>()
             let aliasSet  = ConcurrentDictionary<string, HashSet<string>>()
 
@@ -216,7 +216,7 @@ module Object =
                                             )
                         setIL.Values
 
-            member x.AddInterlock(edge) = interlocks.TryAdd(edge) |> ignore 
+            member x.AddInterlock(edge:MEdge) = interlocks.TryAdd(edge.ToText() , edge) |> ignore 
 
             member x.DrawSubs = drawSubs.Values |> Seq.sortBy(fun seg -> seg.Name)
             member x.AddSegDrawSub(seg) = drawSubs.TryAdd(seg) |> ignore 
@@ -239,10 +239,12 @@ module Object =
             member x.CallSegs() = x.UsedSegs
                                         |> Seq.filter(fun seg -> seg.NodeCausal.IsCall)
                                         |> Seq.filter(fun seg -> seg.Bound = ThisFlow)
+                                        |> Seq.distinctBy(fun seg -> seg.FullName)
 
             member x.ExRealSegs() = x.UsedSegs
                                         |> Seq.filter(fun seg -> seg.NodeCausal.IsReal)
                                         |> Seq.filter(fun seg -> seg.Bound = ExSeg)
+                                        |> Seq.distinctBy(fun seg -> seg.FullName)
 
             member x.BtnSegs()  =  x.UsedSegs 
                                         |> Seq.filter(fun seg -> seg.Bound = ExBtn)

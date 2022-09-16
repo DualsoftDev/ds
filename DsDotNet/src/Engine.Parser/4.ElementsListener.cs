@@ -40,8 +40,8 @@ partial class ElementsListener : dsBaseListener
 
     string[] CurrentPathNameComponents => ParserHelper.CurrentPathNameComponents;
     string CurrentPath => ParserHelper.CurrentPath;
-    Dictionary<string, object> QpInstanceMap => ParserHelper.QualifiedInstancePathMap;
-    Dictionary<string, object> QpDefinitionMap => ParserHelper.QualifiedDefinitionPathMap;
+    Dictionary<(DsSystem, string), object> QpInstanceMap => ParserHelper.QpInstanceMap;
+    Dictionary<(DsSystem, string), object> QpDefinitionMap => ParserHelper.QpDefinitionMap;
 
     public ElementsListener(dsParser parser, ParserHelper helper)
     {
@@ -118,13 +118,13 @@ partial class ElementsListener : dsBaseListener
         SegmentBase getKey(string segPath)
         {
             // global prop safety
-            if (ctx.Parent is PropertyBlockContext && QpInstanceMap.ContainsKey(segPath))
-                return (SegmentBase)QpInstanceMap[segPath];
+            if (ctx.Parent is PropertyBlockContext && QpInstanceMap.ContainsKey((_system, segPath)))
+                return (SegmentBase)QpInstanceMap[(_system, segPath)];
 
             // in flow safety
             var key = $"{CurrentPath}.{segPath}";
-            if (ctx.Parent is FlowContext && QpInstanceMap.ContainsKey(key))
-                return (SegmentBase)QpInstanceMap[key];
+            if (ctx.Parent is FlowContext && QpInstanceMap.ContainsKey((_system, key)))
+                return (SegmentBase)QpInstanceMap[(_system, key)];
 
             return null;
         }
@@ -132,7 +132,7 @@ partial class ElementsListener : dsBaseListener
         foreach (var (key, values) in safetyKvs)
         {
             var keySegment = getKey(key);
-            keySegment.SafetyConditions = values.Select(safety => (SegmentBase)QpInstanceMap[safety]).ToArray();
+            keySegment.SafetyConditions = values.Select(safety => (SegmentBase)QpInstanceMap[(_system, safety)]).ToArray();
         }
     }
 
@@ -146,8 +146,8 @@ partial class ElementsListener : dsBaseListener
         var call = callPrototypes.First(c => c.Name == name);
 
         var callph = ctx.callPhrase();
-        var txs = ParserHelper.FindObjects<SegmentBase>(callph.segments(0).GetText());
-        var rxs = ParserHelper.FindObjects<SegmentBase>(callph.segments(1).GetText());
+        var txs = ParserHelper.FindObjects<SegmentBase>(_system, callph.segments(0).GetText());
+        var rxs = ParserHelper.FindObjects<SegmentBase>(_system, callph.segments(1).GetText());
         if (ParserHelper.ParserOptions.AllowSkipExternalSegment)
         {
             txs = txs.Where(t => t != null).ToArray();
@@ -162,7 +162,7 @@ partial class ElementsListener : dsBaseListener
     override public void EnterParenting(ParentingContext ctx)
     {
         var name = ctx.id().GetText();
-        _parenting = (SegmentBase)QpInstanceMap[$"{CurrentPath}.{name}"];
+        _parenting = (SegmentBase)QpInstanceMap[(_system, $"{CurrentPath}.{name}")];
     }
     override public void ExitParenting(ParentingContext ctx) { _parenting = null; }
 
@@ -202,7 +202,7 @@ partial class ElementsListener : dsBaseListener
                 Child child = null;
                 bool isAlias = false;
                 var fqdn = $"{CurrentPath}.{n}";
-                if (QpInstanceMap.ContainsKey(fqdn))
+                if (QpInstanceMap.ContainsKey((_system, fqdn)))
                     continue;
 
                 var nameComponents = n.Split(new[] { '.' }).ToArray();
@@ -224,10 +224,11 @@ partial class ElementsListener : dsBaseListener
                 }
 
                 object target = null;
-                if (QpDefinitionMap.ContainsKey(targetName))
-                    target = QpDefinitionMap[targetName];   // definition 우선시
-                else if (QpInstanceMap.ContainsKey(targetName))
-                    target = QpInstanceMap[targetName];
+                var key = (_system, targetName);
+                if (QpDefinitionMap.ContainsKey(key))
+                    target = QpDefinitionMap[key];   // definition 우선시
+                else if (QpInstanceMap.ContainsKey(key))
+                    target = QpInstanceMap[key];
                 else if (_rootFlow != null)
                 {
                     if (_rootFlow.CallPrototypes.Exists(cp => cp.Name == targetName))
@@ -240,13 +241,13 @@ partial class ElementsListener : dsBaseListener
                         var subCall = new SubCall(name, _parenting, cp);
                         child = new Child(subCall, _parenting) { IsAlias = isAlias };
                         subCall.ContainerChild = child;
-                        QpInstanceMap.Add(fqdn, child);
+                        QpInstanceMap.Add((_system, fqdn), child);
                         break;
                     case SegmentBase exSeg:
                         var exCall = new ExSegment(name, exSeg);
                         child = new Child(exCall, _parenting) { IsAlias = isAlias };
                         exCall.ContainerChild = child;
-                        QpInstanceMap.Add(fqdn, child);
+                        QpInstanceMap.Add((_system, fqdn), child);
                         break;
                     default:
                         throw new ParserException($"ERRROR: Unknown target for {targetName}", ctx);
@@ -285,7 +286,7 @@ partial class ElementsListener : dsBaseListener
         foreach (var posiDef in positionDefs)
         {
             var callPath = posiDef.callPath().GetText();
-            var cp = (CallPrototype)QpDefinitionMap[callPath];
+            var cp = (CallPrototype)QpDefinitionMap[(_system, callPath)];
             var xywh = posiDef.xywh();
             var (x, y, w, h) = (xywh.x().GetText(), xywh.y().GetText(), xywh.w()?.GetText(), xywh.h()?.GetText());
             cp.Xywh = new Xywh(int.Parse(x), int.Parse(y), w == null ? null : int.Parse(w), h == null ? null : int.Parse(h));
@@ -305,7 +306,7 @@ partial class ElementsListener : dsBaseListener
         foreach (var addrDef in addressDefs)
         {
             var segPath = addrDef.segmentPath().GetText();
-            var seg = (SegmentBase)QpInstanceMap[segPath];
+            var seg = (SegmentBase)QpInstanceMap[(_system, segPath)];
             var sre = addrDef.address();
             var (s, r, e) = (sre.startTag()?.GetText(), sre.resetTag()?.GetText(), sre.endTag()?.GetText());
             seg.Addresses = Tuple.Create(s, r, e);

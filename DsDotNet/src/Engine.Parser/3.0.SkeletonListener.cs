@@ -15,8 +15,8 @@ class SkeletonListener : dsBaseListener
     RootFlow _rootFlow { get => ParserHelper._rootFlow; set => ParserHelper._rootFlow = value; }
     SegmentBase _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
     /// <summary> Qualified Path Map </summary>
-    Dictionary<string, object> QpInstanceMap => ParserHelper.QualifiedInstancePathMap;
-    Dictionary<string, object> QpDefinitionMap => ParserHelper.QualifiedDefinitionPathMap;
+    Dictionary<(DsSystem, string), object> QpInstanceMap => ParserHelper.QpInstanceMap;
+    Dictionary<(DsSystem, string), object> QpDefinitionMap => ParserHelper.QpDefinitionMap;
 
     string[] CurrentPathNameComponents => ParserHelper.CurrentPathNameComponents;
     string CurrentPath => ParserHelper.CurrentPath;
@@ -92,7 +92,7 @@ class SkeletonListener : dsBaseListener
 
         _rootFlow = new RootFlow(cpu, flowName, _system);
         cpu.RootFlows.Add(_rootFlow);
-        QpInstanceMap.Add(CurrentPath, _rootFlow);
+        QpInstanceMap.Add((_system, CurrentPath), _rootFlow);
         Trace.WriteLine($"Flow: {flowName}");
     }
     override public void ExitFlow(FlowContext ctx) { _rootFlow = null; }
@@ -113,7 +113,7 @@ class SkeletonListener : dsBaseListener
         var callph = ctx.callPhrase();
 
         var call = new CallPrototype(name, _rootFlow);
-        QpDefinitionMap.Add($"{CurrentPath}.{name}", call);
+        QpDefinitionMap.Add((_system, $"{CurrentPath}.{name}"), call);
     }
 
 
@@ -121,8 +121,9 @@ class SkeletonListener : dsBaseListener
     {
         var name = ctx.id().GetText();
         var seg = SegmentBase.Create(name, _rootFlow);
-        QpDefinitionMap.Add($"{CurrentPath}.{name}", seg);
-        QpInstanceMap.Add($"{CurrentPath}.{name}", seg);
+        var key = (_system, $"{CurrentPath}.{name}");
+        QpDefinitionMap.Add(key, seg);
+        QpInstanceMap.Add(key, seg);
     }
 
 
@@ -131,7 +132,7 @@ class SkeletonListener : dsBaseListener
         Trace.WriteLine($"Parenting: {ctx.GetText()}");
         var name = ctx.id().GetText();
         _parenting = SegmentBase.Create(name, _rootFlow);
-        QpInstanceMap.Add(CurrentPath, _parenting);
+        QpInstanceMap.Add((_system, CurrentPath), _parenting);
     }
     override public void ExitParenting(ParentingContext ctx) { _parenting = null; }
 

@@ -5,10 +5,10 @@ namespace Engine.Parser;
 
 public class ParserHelper
 {
-    public Dictionary<string, object> QualifiedInstancePathMap = new();
+    public Dictionary<(DsSystem, string), object> QpInstanceMap = new();
 
     /// <summary> Alias, CallPrototype 에 대한 path </summary>
-    public Dictionary<string, object> QualifiedDefinitionPathMap = new();
+    public Dictionary<(DsSystem, string), object> QpDefinitionMap = new();
     public Dictionary<DsSystem, Dictionary<string, string>> AliasNameMaps = new();
     public Dictionary<DsSystem, Dictionary<string, string[]>> BackwardAliasMaps = new();
 
@@ -43,9 +43,9 @@ public class ParserHelper
 
 
 
-    public T FindObject<T>(string qualifiedName) where T : class => PickQualifiedPathObject<T>(qualifiedName);
+    public T FindObject<T>(DsSystem system, string qualifiedName) where T : class => PickQualifiedPathObject<T>(system, qualifiedName);
 
-    public T[] FindObjects<T>(string qualifiedNames) where T : class
+    public T[] FindObjects<T>(DsSystem system, string qualifiedNames) where T : class
     {
         if (qualifiedNames == "_")
             return Array.Empty<T>();
@@ -53,17 +53,18 @@ public class ParserHelper
         return
             qualifiedNames
                 .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(name => FindObject<T>(name))
+                .Select(name => FindObject<T>(system, name))
                 .ToArray()
                 ;
     }
 
 
-    T PickQualifiedPathObject<T>(string qualifiedName, Func<T> creator = null) where T : class
+    T PickQualifiedPathObject<T>(DsSystem system, string qualifiedName, Func<T> creator = null) where T : class
     {
-        var dict = QualifiedInstancePathMap;
-        if (dict.ContainsKey(qualifiedName))
-            return (T)dict[qualifiedName];
+        var key = (system, qualifiedName);
+        var dict = QpInstanceMap;
+        if (dict.ContainsKey(key))
+            return (T)dict[key];
 
         if (creator == null)
         {
@@ -73,7 +74,7 @@ public class ParserHelper
         }
 
         var t = creator();
-        dict[qualifiedName] = t;
+        dict[key] = t;
 
         return t;
     }

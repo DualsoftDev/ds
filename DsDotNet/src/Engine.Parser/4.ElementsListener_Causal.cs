@@ -164,15 +164,15 @@ partial class ElementsListener
         return specs.Split(new[] { ',' }).Select(sp =>
         {
             var spec = sp;
-            if (QpInstanceMap.ContainsKey($"{context}.{sp}"))
+            if (QpInstanceMap.ContainsKey((_system, $"{context}.{sp}")))
                 spec = $"{context}.{sp}";
-            if (!QpInstanceMap.ContainsKey(spec))
+            if (!QpInstanceMap.ContainsKey((_system, spec)))
             {
                 if (ParserHelper.AliasNameMaps[_system].ContainsKey(node.label))
                     spec = ParserHelper.AliasNameMaps[_system][node.label];
             }
 
-            var vertex = QpInstanceMap[spec] as IVertex;
+            var vertex = QpInstanceMap[(_system, spec)] as IVertex;
             return vertex;
         }).ToArray();
     }

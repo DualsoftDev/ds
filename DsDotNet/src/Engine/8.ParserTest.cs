@@ -1,3 +1,5 @@
+using Engine.Parser;
+
 namespace Engine
 {
     internal static class ParserTest
@@ -46,7 +48,7 @@ namespace Engine
 }
 
 ";
-            var engine = new EngineBuilder(text, "Cpu").Engine;
+            var engine = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu")).Engine;
             Program.Engine = engine;
             engine.Run();
         }
@@ -88,7 +90,7 @@ namespace Engine
 }
 
 ";
-            var engine = new EngineBuilder(text, "Cpu").Engine;
+            var engine = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu")).Engine;
             Program.Engine = engine;
             engine.Run();
         }
@@ -135,7 +137,7 @@ namespace Engine
 }
 
 ";
-            var engine = new EngineBuilder(text, "Cpu").Engine;
+            var engine = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu")).Engine;
             Program.Engine = engine;
             engine.Run();
         }
@@ -267,7 +269,7 @@ namespace Engine
     }
 }
 ";
-            var engine = new EngineBuilder(text, "Cpu").Engine;
+            var engine = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu")).Engine;
             Program.Engine = engine;
             engine.Run();
         }
@@ -313,7 +315,7 @@ namespace Engine
 }
 
 ";
-            var engine = new EngineBuilder(text, "Cpu").Engine;
+            var engine = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu")).Engine;
             Program.Engine = engine;
             engine.Run();
         }
@@ -442,7 +444,7 @@ namespace Engine
 }
 
 ";
-            var engine = new EngineBuilder(text, "Cpu").Engine;
+            var engine = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu")).Engine;
             Program.Engine = engine;
             engine.Run();
         }
@@ -457,7 +459,7 @@ namespace Engine
     }
 }
 ";
-            var engine = new EngineBuilder(text, null).Engine;
+            var engine = new EngineBuilder(text, ParserOptions.Create4SimulationWhileIgnoringExtSegCall()).Engine;
             Program.Engine = engine;
             engine.Run();
         }

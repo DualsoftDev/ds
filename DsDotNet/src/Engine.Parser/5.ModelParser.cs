@@ -2,10 +2,10 @@ namespace Engine.Parser;
 
 public static class ModelParser
 {
-    public static ParserHelper ParseFromString2(string text, bool simulationMode)
+    public static ParserHelper ParseFromString2(string text, ParserOptions options)
     {
         var (parser, errors) = DsParser.FromDocument(text);
-        var helper = new ParserHelper(simulationMode);
+        var helper = new ParserHelper(options);
 
         var sListener = new SkeletonListener(parser, helper);
         ParseTreeWalker.Default.Walk(sListener, parser.program());
@@ -27,6 +27,6 @@ public static class ModelParser
         return helper;
     }
 
-    public static Model ParseFromString(string text, bool simulationMode) => ParseFromString2(text, simulationMode).Model;
+    public static Model ParseFromString(string text, ParserOptions options) => ParseFromString2(text, options).Model;
 
 }

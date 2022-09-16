@@ -7,6 +7,26 @@ using System.Threading.Tasks;
 
 namespace Engine.Core;
 
+public record ParserOptions
+{
+    public string ActiveCpuName { get; set; } = null;
+    public bool IsSimulationMode { get; set; } = true;
+    public bool AllowSkipExternalSegment { get; set; } = true;
+    public static ParserOptions Create4Runtime(string activeCpuName) =>
+        new ParserOptions
+        {
+            ActiveCpuName = activeCpuName,
+            IsSimulationMode = false,
+            AllowSkipExternalSegment = false
+        };
+
+    public static ParserOptions Create4Simulation(string activeCpuName) =>
+        new ParserOptions { ActiveCpuName = activeCpuName, };
+    public static ParserOptions Create4SimulationWhileIgnoringExtSegCall() => new ParserOptions {};
+
+    public bool Verify() => IsSimulationMode || (ActiveCpuName != null && !AllowSkipExternalSegment);
+}
+
 public static class ParserExtension
 {
     /// <summary>

@@ -1,5 +1,7 @@
 using Engine.Base;
 using Engine.Graph;
+using Engine.Parser;
+
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -96,7 +98,7 @@ public class Tester
 ";
 
         Assert(!Global.IsInUnitTest);
-        var engine = new EngineBuilder(text, "Cpu").Engine;
+        var engine = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu")).Engine;
         Program.Engine = engine;
         engine.Run();
 
@@ -202,7 +204,7 @@ public class Tester
 
 ";
         Assert(!Global.IsInUnitTest);
-        var engine = new EngineBuilder(text, "Cpu").Engine;
+        var engine = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu")).Engine;
         Program.Engine = engine;
         engine.Run();
 
@@ -246,7 +248,7 @@ public class Tester
 ;
 
         Assert(!Global.IsInUnitTest);
-        var engine = new EngineBuilder(text, "Cpu").Engine;
+        var engine = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu")).Engine;
         Program.Engine = engine;
         engine.Run();
 
@@ -452,7 +454,7 @@ public class Tester
         //Log4NetHelper.ChangeLogLevel(log4net.Core.Level.Error);
 
         Assert(!Global.IsInUnitTest);
-        var engine = new EngineBuilder(text, "Cpu").Engine;
+        var engine = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu")).Engine;
         Program.Engine = engine;
         engine.Run();
 
@@ -705,7 +707,7 @@ public class Tester
         //Log4NetHelper.ChangeLogLevel(log4net.Core.Level.Error);
 
         Assert(!Global.IsInUnitTest);
-        var engine = new EngineBuilder(GetTextDiamond(), "Cpu").Engine;
+        var engine = new EngineBuilder(GetTextDiamond(), ParserOptions.Create4Simulation("Cpu")).Engine;
         Program.Engine = engine;
         engine.Run();
 
@@ -910,7 +912,7 @@ public class Tester
 ";
 
         Assert(!Global.IsInUnitTest);
-        var engine = new EngineBuilder(text, "Cpu").Engine;
+        var engine = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu")).Engine;
         Program.Engine = engine;
         engine.Run();
 
@@ -1000,7 +1002,7 @@ public class Tester
 ";
 
         Assert(!Global.IsInUnitTest);
-        var engine = new EngineBuilder(text, "Cpu").Engine;
+        var engine = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu")).Engine;
         Program.Engine = engine;
         engine.Run();
 
@@ -1191,7 +1193,7 @@ public class Tester
 ";
 
         Assert(!Global.IsInUnitTest);
-        var engine = new EngineBuilder(text, "Cpu").Engine;
+        var engine = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu")).Engine;
         Program.Engine = engine;
         engine.Run();
 

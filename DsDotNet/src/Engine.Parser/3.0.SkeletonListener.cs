@@ -74,7 +74,7 @@ class SkeletonListener : dsBaseListener
 
         var flowFqdn = $"{CurrentPath}.{flowName}";
         var cpuAssigned = ParserHelper.FlowName2CpuMap.ContainsKey(flowFqdn);
-        if (!ParserHelper.IsSimulationMode && !cpuAssigned)
+        if (!ParserHelper.ParserOptions.IsSimulationMode && !cpuAssigned)
             throw new Exception($"No CPU assignment for flow [{flowFqdn}");
 
         Cpu cpu = null;

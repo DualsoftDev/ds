@@ -147,6 +147,11 @@ partial class ElementsListener : dsBaseListener
         var callph = ctx.callPhrase();
         var txs = ParserHelper.FindObjects<SegmentBase>(callph.segments(0).GetText());
         var rxs = ParserHelper.FindObjects<SegmentBase>(callph.segments(1).GetText());
+        if (ParserHelper.ParserOptions.AllowSkipExternalSegment)
+        {
+            txs = txs.Where(t => t != null).ToArray();
+            rxs = rxs.Where(t => t != null).ToArray();
+        }
         call.TXs.AddRange(txs);
         call.RXs.AddRange(rxs);
         //Trace.WriteLine($"Call: {name} = {txs.Select(tx => tx.Name)} ~ {rx?.Name}");

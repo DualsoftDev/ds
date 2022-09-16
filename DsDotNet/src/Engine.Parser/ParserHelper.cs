@@ -19,9 +19,10 @@ public class ParserHelper
 
     public Dictionary<string, Cpu> FlowName2CpuMap;
 
-    public ParserHelper(bool isSimulationMode)
+    public ParserOptions ParserOptions { get; set; }
+    public ParserHelper(ParserOptions options)
     {
-        IsSimulationMode = isSimulationMode;
+        ParserOptions = options;
     }
 
     internal string CurrentPath
@@ -39,7 +40,6 @@ public class ParserHelper
         }
     }
 
-    public bool IsSimulationMode { get; set; }
 
 
     public T FindObject<T>(string qualifiedName) where T : class => PickQualifiedPathObject<T>(qualifiedName);
@@ -65,7 +65,11 @@ public class ParserHelper
             return (T)dict[qualifiedName];
 
         if (creator == null)
+        {
+            if (ParserOptions.AllowSkipExternalSegment)
+                return null;
             throw new Exception($"ERROR: failed to create {qualifiedName}");
+        }
 
         var t = creator();
         dict[qualifiedName] = t;

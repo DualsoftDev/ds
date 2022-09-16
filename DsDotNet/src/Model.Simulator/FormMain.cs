@@ -3,6 +3,7 @@ using Engine.Common;
 using Engine.Common.FS;
 using Engine.Core;
 using Engine.Graph;
+using Engine.Parser;
 using Engine.Runner;
 using System;
 using System.Collections.Generic;
@@ -105,7 +106,7 @@ namespace Model.Simulator
             try
             {
                 var modelText = Tester.GetTextDiamond();
-                var eb = new EngineBuilder(modelText, "Cpu");
+                var eb = new EngineBuilder(modelText, ParserOptions.Create4Simulation("Cpu"));
             }
 
             catch (Exception ex)

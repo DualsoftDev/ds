@@ -14,25 +14,27 @@ public class EngineBuilder
     public Model Model { get; }
     public ENGINE Engine { get; }
 
-    public EngineBuilder(string modelText, string activeCpuName)
+    public EngineBuilder(string modelText, ParserOptions options)
     {
+        if (! options.Verify())
+            throw new Exception($"ParserOptions error: {options}");
+
         EngineModule.Initialize();
 
-        bool simulationMode = activeCpuName.IsNullOrEmpty();
-
-        var helper = ModelParser.ParseFromString2(modelText, simulationMode);
+        var helper = ModelParser.ParseFromString2(modelText, options);
         Model = helper.Model;
         Global.Model = Model;
 
         Data = new DataBroker();
 
-        if (simulationMode)
+        if (options.IsSimulationMode)
         {
             Cpu = Model.Cpus.First();
             Cpu.IsActive = true;
         }
         else
         {
+            var activeCpuName = options.ActiveCpuName;
             Cpu = Model.Cpus.FirstOrDefault(cpu => cpu.Name == activeCpuName);
             if (Cpu == null)
                 throw new Exception($"Failed to find cpu name : [{activeCpuName}]");
@@ -62,6 +64,6 @@ public class EngineBuilder
     {
         EngineModule.Initialize();
         Data = new DataBroker();
-        Model = ModelParser.ParseFromString(modelText, true);
+        Model = ModelParser.ParseFromString(modelText, ParserOptions.Create4SimulationWhileIgnoringExtSegCall());
     }
 }

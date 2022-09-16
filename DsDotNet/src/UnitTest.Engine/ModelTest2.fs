@@ -34,7 +34,7 @@ module ModelTest2 =
 """
             text <- text + sysP + cpus
 
-            let builder = new EngineBuilder(text, "Cpu")
+            let builder = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu"))
             ( builder.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
             let system = builder.Model.Systems |> Seq.find(fun s -> s.Name = "L")
             let cpu = builder.Cpu
@@ -85,7 +85,7 @@ module ModelTest2 =
 """
             text <- text + sysP + cpus
 
-            let builder = new EngineBuilder(text, "Cpu")
+            let builder = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu"))
             ( builder.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
             let system = builder.Model.Systems |> Seq.find(fun s -> s.Name = "L")
 
@@ -298,7 +298,7 @@ module ModelTest2 =
 """
             text <- text + sysP + cpus
 
-            let builder = new EngineBuilder(text, "Cpu")
+            let builder = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu"))
             let model = builder.Model
 
             let ``model object inspection`` =
@@ -375,7 +375,7 @@ module ModelTest2 =
 """
             text <- text + sysP + cpus
 
-            let builder = new EngineBuilder(text, "Cpu")
+            let builder = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu"))
             let model = builder.Model
             let main = model.FindObject<Segment>("L.F.Main");
             ()

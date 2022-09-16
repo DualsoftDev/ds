@@ -55,9 +55,10 @@ class ModelListener : dsBaseListener
 
     override public void EnterCausalPhrase(CausalPhraseContext ctx)
     {
-        var names =
+        var nameComponentss =
             enumerateChildren<SegmentContext>(ctx)
-            .Select(segCtx => segCtx.GetText())
+            .Select(segCtx => enumerateChildren<IdentifierContext>(segCtx).Select(idf => idf.GetText()).ToArray())
+            .ToArray()
             ;
 
         void createFromDefinition(object target, string n, string fqdn)
@@ -68,6 +69,10 @@ class ModelListener : dsBaseListener
                     var call = new RootCall(n, _rootFlow, cp);
                     QpInstanceMap.Add(fqdn, call);
                     break;
+                case SegmentBase exSeg:
+                    var exSegCall = new ExSegment(fqdn, exSeg);
+                    QpInstanceMap.Add(fqdn, exSegCall);
+                    break;
                 default:
                     throw new ParserException("ERROR: CallPrototype expected.", ctx);
             }
@@ -75,33 +80,47 @@ class ModelListener : dsBaseListener
 
         if (_parenting == null)
         {
-            foreach (var n in names)
+            foreach (var ns in nameComponentss)
             {
-                var fqdn = $"{CurrentPath}.{n}";
-                if (ParserHelper.AliasNameMaps[_system].ContainsKey(n))
+                var name = ns.Combine();
+                switch (ns.Length)
                 {
-                    var targetName = ParserHelper.AliasNameMaps[_system][n];
-                    var target = QpDefinitionMap[targetName];
-                    createFromDefinition(target, n, fqdn);
-                }
-                else
-                {
-                    if (!QpInstanceMap.ContainsKey(fqdn))
-                    {
-                        var fullPrototypeName = ParserHelper.ToFQDN(n);
-                        if (QpDefinitionMap.ContainsKey(fullPrototypeName))
+                    case 1:
                         {
-                            var def = QpDefinitionMap[fullPrototypeName];
-                            createFromDefinition(def, n, fqdn);
-                            continue;
+                            var fqdn = $"{CurrentPath}.{name}";
+                            if (ParserHelper.AliasNameMaps[_system].ContainsKey(name))
+                            {
+                                var targetName = ParserHelper.AliasNameMaps[_system][name];
+                                var target = QpDefinitionMap[targetName];
+                                createFromDefinition(target, name, fqdn);
+                            }
+                            else
+                            {
+                                if (!QpInstanceMap.ContainsKey(fqdn))
+                                {
+                                    var fullPrototypeName = ParserHelper.ToFQDN(name);
+                                    if (QpDefinitionMap.ContainsKey(fullPrototypeName))
+                                    {
+                                        var def = QpDefinitionMap[fullPrototypeName];
+                                        createFromDefinition(def, name, fqdn);
+                                        continue;
+                                    }
+                                    var seg = SegmentBase.Create(name, _rootFlow);
+                                    QpInstanceMap.Add(fqdn, seg);
+                                }
+                            }
                         }
-                        //if (n.Contains("."))
-                        //{
-                        //}
-                        var seg = SegmentBase.Create(n, _rootFlow);
-                        QpInstanceMap.Add(fqdn, seg);
-                    }
+
+                        break;
+                    case 3:     // 외부 real 호출
+                        {
+                            var fqdn = ns.Combine();
+                            var def = QpDefinitionMap[fqdn];
+                            createFromDefinition(def, name, fqdn);
+                        }
+                        break;
                 }
+
             }
         }
     }

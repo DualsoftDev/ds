@@ -146,8 +146,14 @@ type ModelExt =
         rebuildMap(model, data)
         checkCpu(model)
 
+        let grammar = serializeModel(model)
+        logDebug $"---------- Serialized model:\r\n{grammar}\r\n"
+
+
     [<Extension>]
     static member Print(model:Model) = printModel model
+    [<Extension>]
+    static member ToGrammarText(model:Model) = serializeModel model
 
     [<Extension>]
     static member BuildGraphInfo(model:Model) =

@@ -937,7 +937,7 @@ public class Tester
                 var avg = (int)coutner.Values.Average(s => s);
                 Assert(coutner.Values.ForAll(v => Math.Abs(avg - v) <= 1));
 
-                if (ssc.Segment.QualifiedName == "L_F_B")
+                if (ssc.Segment.QualifiedName == "L.F.B")
                 {
                     LogInfo("-------------------------- End of Main segment");
                     if (first)

@@ -19,14 +19,11 @@ public static class ModelExtension
         if (n == 1 || sys == null)
             return sys as T;
 
-        var task = sys.Tasks.FirstOrDefault(t => t.Name == tokens[1]);
-        if (task != null)
+        foreach(var rf in sys.RootFlows)
         {
-            if (n == 2)
-                return task as T;
-            var callProto = task.CallPrototypes.FirstOrDefault(c => c.Name == tokens[2]);
-            Assert(n == 3);
-            return callProto as T;
+            var cp = rf.CallPrototypes.FirstOrDefault(cp => cp.GetQualifiedName() == qualifiedName);
+            if (cp != null)
+                return cp as T;
         }
 
         var flow = sys.RootFlows.FirstOrDefault(f => f.Name == tokens[1]);

@@ -50,7 +50,8 @@ module ModelTests1 =
             logInfo "============== Parse Task"
             let mutable text = """
 [sys] L = {
-    [task] T = {
+    [flow] F = {
+        Main = { Cp > Cm > C22; }
         Cp = {P.F.Vp ~ P.F.Sp}
         Cm = {P.F.Vm ~ P.F.Sm}
         C00 = { _ ~ _ }
@@ -60,9 +61,6 @@ module ModelTests1 =
         C20 = {P.F.Vp, P.F.Vm ~ _ }
         C21 = {P.F.Vp, P.F.Vm ~ P.F.Sm }
         C22 = {P.F.Vp, P.F.Vm ~ P.F.Sp, P.F.Sm }
-    }
-    [flow] F = {
-        Main = { T.Cp > T.Cm > T.C22; }
     }
 }
 """
@@ -81,8 +79,8 @@ module ModelTests1 =
             fakeCpu.BackwardDependancyMap.Keys |> Seq.map(fun k -> k.Cpu) |> Seq.forall( (=) fakeCpu) |> ShouldBeTrue
 
 
-            let task = system.Tasks |> Seq.exactlyOne
-            let callProtos = task.CallPrototypes |> Seq.map(fun c -> c.Name, c) |> Tuple.toDictionary
+            let flow = system.RootFlows |> Seq.exactlyOne
+            let callProtos = flow.CallPrototypes |> Seq.map(fun c -> c.Name, c) |> Tuple.toDictionary
             (callProtos.Keys, ["Cp"; "Cm"; "C00"; "C01"; "C02"; "C10"; "C20"; "C21"; "C22"; ])
             |> seqEq
 
@@ -99,13 +97,13 @@ module ModelTests1 =
             let main = flow.Coins |> Enumerable.OfType<SegmentBase> |> Seq.find(fun seg -> seg.Name = "Main")
             main.Name === "Main"
             let childrenNames = main.ChildVertices |> Enumerable.OfType<Child> |> Seq.map(fun soc -> soc.Name)
-            (childrenNames, ["T.Cp"; "T.Cm"; "T.C22"]) |> setEq
+            (childrenNames, ["Cp"; "Cm"; "C22"]) |> setEq
 
             let checkC22Instance_ =
-                let c22 = main.Children |> Seq.find(fun child -> child.Name = "T.C22")
-                c22.QualifiedName === "L_F_Main_T.C22"
-                (c22.TagsStart.Select(fun t -> t.Name), ["Start_P_F_Vp"; "Start_P_F_Vm"]) |> setEq
-                (c22.TagsEnd.Select(fun t -> t.Name), ["End_P_F_Sp"; "End_P_F_Sm"]) |> setEq
+                let c22 = main.Children |> Seq.find(fun child -> child.Name = "C22")
+                c22.QualifiedName === "L.F.Main.C22"
+                (c22.TagsStart.Select(fun t -> t.Name), ["StartPlan_P.F.Vp"; "StartPlan_P.F.Vm"]) |> setEq
+                (c22.TagsEnd.Select(fun t -> t.Name), ["EndPlan_P.F.Sp"; "EndPlan_P.F.Sm"]) |> setEq
 
 
             flow.Cpu === cpu
@@ -154,15 +152,14 @@ module ModelTests1 =
     [alias] = {
         P.F.Vp = { Vp1; Vp2; Vp3; }
         P.F.Vm = { Vm1; Vm2; Vm3; }
-        L.T.A = {A1; A2; A3;}
-    }
-    [task] T = {
-        A = {P.F.Vp ~ P.F.Sp}
+        L.F.A = {A1; A2; A3;}
     }
 
     [flow] F = {
         Main = { Vp1 > Vp2 > A1; }
+        A = {P.F.Vp ~ P.F.Sp}
     }
+}
 """
             text <- text + sysP + cpus
 

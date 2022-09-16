@@ -89,3 +89,15 @@ public class StrongResetEdge : ResetEdge, IStrongEdge
     { }
 }
 
+public static class EdgeExtension
+{
+    public static string GetOperator(this Edge edge) =>
+        edge switch
+        {
+            WeakSetEdge => ">",
+            StrongSetEdge => ">>",
+            WeakResetEdge => "|>",
+            StrongResetEdge => "||>",
+            _ => throw new NotImplementedException($"Edge type {edge.GetType().Name} not implemented."),
+        };
+}

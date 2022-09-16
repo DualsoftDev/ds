@@ -342,9 +342,9 @@ namespace Engine
             Front_Con_W > Front_1Stopper_Adv;
             Front_Pos_Sen > Front_Con_W;
             Front_Usb_Cyl_ADV <||> Front_Usb_Cyl_RET;
-            Front_Usb_Cyl_ADV > EX.Work.TR;
+            Front_Usb_Cyl_ADV > EX.Work_Work.TR;
             Front_Usb_Cyl_RET > Front_1Stopper_RET;
-            EX.Work.TR > Front_Usb_Cyl_RET;
+            EX.Work_Work.TR > Front_Usb_Cyl_RET;
         }
         Front_Usb_Cyl_RET     = {EX.Work_Front_Usb_Cyl_RET.TX    ~    EX.Work_Front_Usb_Cyl_RET.RX}
         Front_Con_W     = {EX.Work_Front_Con_W.TX    ~    _}
@@ -423,7 +423,7 @@ namespace Engine
     EX.Rear_Rear_Cyl_Push_RET.RX                 = (, ,)
     EX.Rear_Rear_Con_W.TX                        = (, , )
     EX.Rear_Rear_Pos_Sen.RX                      = (, ,)
-    EX.Work_Work.EX                              = (,,)
+    EX.Work_Work.TR                              = (,,)
     EX.Work_Front_Usb_Cyl_RET.TX                 = (, , )
     EX.Work_Front_Usb_Cyl_RET.RX                 = (, ,)
     EX.Work_Front_Con_W.TX                       = (, , )
@@ -435,10 +435,10 @@ namespace Engine
     EX.Work_Front_Usb_Cyl_ADV.TX                 = (, , )
     EX.Work_Front_Usb_Cyl_ADV.RX                 = (, ,)
     EX.Work_Front_1pos_Sen.RX                    = (, ,)
-    EX.AutoBTN.RX                                = (, ,)
-    EX.EMGBTN.RX                                 = (, ,)
-    EX.ResetBTN.RX                               = (, ,)
-    EX.StartBTN1.RX                              = (, ,)
+    //EX.AutoBTN.RX                                = (, ,)
+    //EX.EMGBTN.RX                                 = (, ,)
+    //EX.ResetBTN.RX                               = (, ,)
+    //EX.StartBTN1.RX                              = (, ,)
 }
 
 ";
@@ -446,5 +446,21 @@ namespace Engine
             Program.Engine = engine;
             engine.Run();
         }
+
+        public static void TestParseQualifiedName()
+        {
+            var text = @"
+[sys] ""my.favorite.system!!"" = {
+    [flow] "" my flow. "" = {
+        R1 > R2;
+        C1     = {EX.""ภฬป๓วั. flow"".TX    ~    EX.F1_C1.RX}
+    }
+}
+";
+            var engine = new EngineBuilder(text, null).Engine;
+            Program.Engine = engine;
+            engine.Run();
+        }
+
     }
 }

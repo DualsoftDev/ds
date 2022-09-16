@@ -1,3 +1,5 @@
+using Antlr4.Runtime;
+
 using Engine.Parser;
 using Engine.Runner;
 using System.Threading.Tasks;
@@ -31,7 +33,10 @@ public class EngineBuilder
         }
         else
         {
-            Cpu = Model.Cpus.First(cpu => cpu.Name == activeCpuName);
+            Cpu = Model.Cpus.FirstOrDefault(cpu => cpu.Name == activeCpuName);
+            if (Cpu == null)
+                throw new Exception($"Failed to find cpu name : [{activeCpuName}]");
+
             Cpu.IsActive = true;
         }
 

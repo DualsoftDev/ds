@@ -77,7 +77,8 @@ addressDef: segmentPath '=' address;
     resetTag: TAG_ADDRESS;
     endTag: TAG_ADDRESS;
 
-segmentPathN : identifier | identifier2 | identifier3;
+segmentPathN: path1_3;
+path1_3 : identifier | identifier2 | identifier3;
 
 /*
 // global safety property
@@ -100,8 +101,8 @@ properties: '[' 'prop' ']' EQ LBRACE (propertyBlock)* RBRACE;
 propertyBlock: (safetyBlock);
 safetyBlock: '[' 'safety' ']' EQ LBRACE (safetyDef)* RBRACE;
 safetyDef: safetyKey EQ LBRACE safetyValues RBRACE;
-safetyKey: segmentPathN;
-safetyValues: segmentPathN (SEIMCOLON segmentPathN)*;
+safetyKey: path1_3;
+safetyValues: path1_3 (SEIMCOLON path1_3)*;
 
 
 flow
@@ -123,7 +124,8 @@ aliasMnemonic: identifier;
 id: identifier;
 
 listing: id SEIMCOLON;     // A;
-parenting: id EQ LBRACE causal* RBRACE;
+//listing1_3 : path1_3 SEIMCOLON;
+parenting: id EQ LBRACE (causal)* RBRACE;
 
 // A23 = { M.U ~ S.S3U ~ _ }
 call: id EQ LBRACE callPhrase RBRACE;
@@ -156,7 +158,7 @@ expressions: (expression SEIMCOLON)+ ;
 
 
 causalPhrase
-    : causalTokensDNF (causalOperator causalTokensDNF)+
+    : causalToken | (causalTokensDNF (causalOperator causalTokensDNF)+)
     ;
 
 causalToken

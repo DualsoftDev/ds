@@ -323,7 +323,7 @@ namespace Engine
             var text = @"
 [sys] MY = {
     [flow] Rear = {     
-        Á¦Ç°°ø±Þ = {
+        ì œí’ˆê³µê¸‰ = {
             Rear_Con_W > Rear_Pos_Sen;
             Rear_Cyl_Push_ADV > Rear_Cyl_Push_RET;
             Rear_Cyl_Push_RET <||> Rear_Cyl_Push_ADV;
@@ -335,7 +335,7 @@ namespace Engine
         Rear_Pos_Sen     = {_    ~    EX.Rear_Rear_Pos_Sen.RX}
     }
     [flow] Work = {     
-        ÀÛ¾÷°øÁ¤ = {
+        ìž‘ì—…ê³µì • = {
             Front_1Stopper_Adv <||> Front_1Stopper_RET;
             Front_1Stopper_Adv > Front_1pos_Sen;
             Front_1pos_Sen > Front_Usb_Cyl_ADV;
@@ -355,9 +355,9 @@ namespace Engine
         Front_1pos_Sen     = {_    ~    EX.Work_Front_1pos_Sen.RX}
     }
     [flow] Model_Auto = {     
-        SSSS > Rear.Á¦Ç°°ø±Þ;
-        Work.ÀÛ¾÷°øÁ¤ > Front.¹èÃâ°øÁ¤;
-        Rear.Á¦Ç°°ø±Þ > Work.ÀÛ¾÷°øÁ¤;
+        SSSS > Rear.ì œí’ˆê³µê¸‰;
+        Work.ìž‘ì—…ê³µì • > Front.ë°°ì¶œê³µì •;
+        Rear.ì œí’ˆê³µê¸‰ > Work.ìž‘ì—…ê³µì •;
     }
     [emg_in] = {
         EMGBTN = { Work; Model_Auto };
@@ -443,6 +443,21 @@ namespace Engine
 
 ";
             var engine = new EngineBuilder(text, "Cpu").Engine;
+            Program.Engine = engine;
+            engine.Run();
+        }
+        public static void TestError2()
+        {
+            var text = @"
+[sys] MY = {
+    [flow] Rear = {     
+        R1 = {
+            C1;
+        }
+    }
+}
+";
+            var engine = new EngineBuilder(text, null).Engine;
             Program.Engine = engine;
             engine.Run();
         }

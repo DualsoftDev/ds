@@ -1,7 +1,20 @@
 [sys] MY = {
     [flow] F1 = {
-        R1 > R2;
-        C1     = {EX.F1_C1.TX    ~    EX.F1_C1.RX}
-        ResetBTN     = {EX.F1_ResetBTN.TX    ~    EX.F1_ResetBTN.RX}
+        R1 = {
+            C1;
+        }
+        작업공정 = {
+                    Front_1Stopper_Adv <||> Front_1Stopper_RET;
+                    Front_1Stopper_Adv > Front_1pos_Sen;
+                    Front_1pos_Sen > Front_Usb_Cyl_ADV;
+                    Front_Con_W > Front_1Stopper_Adv;
+                    Front_Pos_Sen > Front_Con_W;
+                    Front_Usb_Cyl_ADV <||> Front_Usb_Cyl_RET;
+                    Front_Usb_Cyl_ADV > EX.Robot1_1st_work.TR;
+                    Front_Usb_Cyl_RET > Front_1Stopper_RET;
+                    EX.Robot1_1st_work.TR > Front_Usb_Cyl_RET;
+                    EX.Robot1_1st_work.TR;
+        }
+
     }
 }

@@ -40,6 +40,7 @@ class Program
         //ParserTest.TestParseButtons();
         //ParserTest.TestParsePpt();
         //ParserTest.TestSerialize();
-        ParserTest.TestError();
+        //ParserTest.TestError();
+        ParserTest.TestError2();
     }
 }

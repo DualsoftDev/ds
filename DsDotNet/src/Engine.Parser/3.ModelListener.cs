@@ -4,11 +4,10 @@ class ModelListener : dsBaseListener
 {
     #region Boiler-plates
     public ParserHelper ParserHelper;
-    Model _model => ParserHelper.Model;
-    DsSystem _system { get => ParserHelper._system; set => ParserHelper._system = value; }
-    DsTask _task { get => ParserHelper._task; set => ParserHelper._task = value; }
-    RootFlow _rootFlow { get => ParserHelper._rootFlow; set => ParserHelper._rootFlow = value; }
-    SegmentBase _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
+    Model    _model => ParserHelper.Model;
+    DsSystem _system    { get => ParserHelper._system;    set => ParserHelper._system = value; }
+    RootFlow _rootFlow  { get => ParserHelper._rootFlow;  set => ParserHelper._rootFlow = value; }
+    SegmentBase  _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
     /// <summary> Qualified Path Map </summary>
     Dictionary<string, object> QpInstanceMap => ParserHelper.QualifiedInstancePathMap;
     Dictionary<string, object> QpDefinitionMap => ParserHelper.QualifiedDefinitionPathMap;
@@ -27,14 +26,6 @@ class ModelListener : dsBaseListener
         _system = _model.Systems.First(s => s.Name == name);
     }
     override public void ExitSystem(SystemContext ctx) { this._system = null; }
-
-    override public void EnterSysTask(SysTaskContext ctx)
-    {
-        var name = ctx.id().GetText();
-        _task = _system.Tasks.First(t => t.Name == name);
-        Trace.WriteLine($"Task: {name}");
-    }
-    override public void ExitSysTask(SysTaskContext ctx) { _task = null; }
 
     override public void EnterFlow(FlowContext ctx)
     {
@@ -96,16 +87,16 @@ class ModelListener : dsBaseListener
                 {
                     if (!QpInstanceMap.ContainsKey(fqdn))
                     {
-                        if (n.Contains("."))
+                        var fullPrototypeName = ParserHelper.ToFQDN(n);
+                        if (QpDefinitionMap.ContainsKey(fullPrototypeName))
                         {
-                            var fullPrototypeName = ParserHelper.ToFQDN(n);
-                            if (QpDefinitionMap.ContainsKey(fullPrototypeName))
-                            {
-                                var def = QpDefinitionMap[fullPrototypeName];
-                                createFromDefinition(def, n, fqdn);
-                                continue;
-                            }
+                            var def = QpDefinitionMap[fullPrototypeName];
+                            createFromDefinition(def, n, fqdn);
+                            continue;
                         }
+                        //if (n.Contains("."))
+                        //{
+                        //}
                         var seg = SegmentBase.Create(n, _rootFlow);
                         QpInstanceMap.Add(fqdn, seg);
                     }
@@ -123,6 +114,39 @@ class ModelListener : dsBaseListener
     //override public void ExitCausals(CausalsContext ctx) {}
 
 
+    override public void EnterButtons (ButtonsContext ctx)
+    {
+        var first = findFirstChild<ParserRuleContext>(ctx);
+        var targetDic =
+            first switch
+            {
+                EmergencyButtonsContext => _system.EmergencyButtons,
+                AutoButtonsContext => _system.AutoButtons,
+                StartButtonsContext => _system.StartButtons,
+                ResetButtonsContext => _system.ResetButtons,
+                _ => throw new Exception("ERROR"),
+            };
+        var buttonDefs = enumerateChildren<ButtonDefContext>(first).ToArray();
+        foreach (var bd in buttonDefs)
+        {
+            var buttonName = findFirstChild<ButtonNameContext>(bd).GetText();
+            var flows = (
+                    from flowNameCtx in enumerateChildren<FlowNameContext>(bd)
+                    let flowName = flowNameCtx.GetText()
+                    let flow = QpInstanceMap[$"{_system.Name}.{flowName}"] as RootFlow
+                    select flow
+                ).ToArray();
+            
+            targetDic.Add(buttonName, flows);
+
+            Console.WriteLine();
+        }
+
+        Console.WriteLine();
+        //EmergencyButtonsContext
+        //ctx
+        //base.EnterButtons
+    }
 
 
 

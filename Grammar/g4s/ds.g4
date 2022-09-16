@@ -19,7 +19,7 @@ grammar ds;
 
 import dsFunctions;
 
-program: (importStatement|system|cpus|layouts|addresses|properties|comment)* EOF;        // 
+program: (system|cpus|layouts|addresses|properties|comment)* EOF;        // importStatement|
 
 test:qstring EOF;
 qstring: STRING_LITERAL EOF;
@@ -28,7 +28,7 @@ qstring: STRING_LITERAL EOF;
 system: sysProp id '=' sysBlock;    // [sys] Seg = {..}
 sysProp: '[' 'sys' ']';
 sysBlock
-    : LBRACE (sysTask|flow|listing|alias|parenting|causal|call|acc|macro)* RBRACE
+    : LBRACE (flow|listing|alias|parenting|causal|call|buttons)* RBRACE       // acc|sysTask|macro
     ;
 
 
@@ -104,16 +104,8 @@ safetyKey: segmentPathN;
 safetyValues: segmentPathN (SEIMCOLON segmentPathN)*;
 
 
-sysTask
-    : taskProp id '=' LBRACE (listing|call)* RBRACE
-    ;
-taskProp: '[' 'task' ']';
-
-// flow 내에 정의되는 task.  id 를 갖지 않는다.
-flowTask: taskProp EQ LBRACE (listing|call)* RBRACE;
-
 flow
-    : flowProp id '=' LBRACE (causal|parenting|listing|safetyBlock|flowTask)* RBRACE
+    : flowProp id '=' LBRACE (causal|parenting|call|listing|safetyBlock)* RBRACE     // |flowTask
     ;
 flowProp : '[' 'flow' ('of' id)? ']';
 
@@ -130,25 +122,25 @@ aliasMnemonic: identifier;
 
 id: identifier;
 
-acc: LBRACKET ACCESS_SRE RBRACKET EQ LBRACE identifier (SEIMCOLON identifier)* SEIMCOLON? RBRACE;    // [accsre] = { A; B }
 listing: id SEIMCOLON;     // A;
 parenting: id EQ LBRACE causal* RBRACE;
-
-/*
- * MACRO definitions
- */
-// [macro=T] = { (call)* }
-macro: LBRACKET macroHeader RBRACKET EQ LBRACE (call)* RBRACE;
-macroHeader
-    : simpleMacroHeader
-    | namedMacroHeader
-    ;
-simpleMacroHeader: 'macro';
-namedMacroHeader: 'macro' EQ identifier;
 
 // A23 = { M.U ~ S.S3U ~ _ }
 call: id EQ LBRACE callPhrase RBRACE;
 callPhrase: segments TILDE segments (TILDE segments)?;
+calls: (call SEIMCOLON)+ ;
+
+buttons:emergencyButtons|autoButtons|startButtons|resetButtons;
+emergencyButtons :'[' ('emg_in'|'emg') ']'     EQ buttonBlock;
+autoButtons      :'[' ('auto_in'|'auto') ']'   EQ buttonBlock;
+startButtons     :'[' ('start_in'|'start') ']' EQ buttonBlock;
+resetButtons     :'[' ('reset_in'|'reset') ']' EQ buttonBlock;
+buttonBlock: LBRACE (() | ((SEIMCOLON)* buttonDef)* (SEIMCOLON)*) RBRACE;
+buttonDef: buttonName EQ LBRACE (() | flowName (SEIMCOLON flowName)* (SEIMCOLON)?) RBRACE;
+buttonName: identifier;
+flowName : identifier;
+
+
 
 // B.F1 > Set1F <| T.A21;
 causal
@@ -158,11 +150,9 @@ causal
 
 // debugging purpose {
 causals: causal* (causalPhrase)?;
-importStatements: importStatement+ ;
-expressions: (expression SEIMCOLON)+ ;
-calls: (call SEIMCOLON)+ ;
-// } debugging purpose
 
+expressions: (expression SEIMCOLON)+ ;
+// } debugging purpose
 
 
 causalPhrase
@@ -172,11 +162,11 @@ causalPhrase
 causalToken
     : proc
     | func
-    | segmentValue  // '(A)' or '(A.B)'
     | expression
     | segment       // 'A' or 'A.B'
+//  | segmentValue  // '(A)' or '(A.B)'
     ;
-segmentValue: LPARENTHESIS segment RPARENTHESIS;
+//segmentValue: LPARENTHESIS segment RPARENTHESIS;
 
 causalTokensDNF
     : causalTokensCNF ('?' causalTokensCNF)*
@@ -184,30 +174,6 @@ causalTokensDNF
 causalTokensCNF
     : causalToken (',' causalToken)*
     ;
-
-importFinal
-    : '!#import' importAs 'from' quotedFilePath
-    ;
-importStatement : importFinal SEIMCOLON;
-
-importAs
-    : importPhrase
-    | LBRACE importPhrase
-        (COMMA importPhrase)* (COMMA)?
-        RBRACE
-    ;
-
-importPhrase: importSystemName 'as' importAlias;
-importSystemName: identifier;
-importAlias: identifier;
-
-
-quotedFilePath
-    : DQUOTE (~DQUOTE)* DQUOTE
-    | SQUOTE (~SQUOTE)* SQUOTE
-    ;
-
-
 
 
 
@@ -229,30 +195,6 @@ causalOperator
     | '|><'         // CAUSAL_BWD_AND_RESET_FWD
     ;
 
-// causalOperator
-//     : causalFwdOperator
-//     | causalBwdOperator
-//     | causalFBOperator
-//     ;
-
-// causalFwdOperator
-//     : CAUSAL_FWD
-//     | CAUSAL_RESET_FWD
-//     | CAUSAL_FWD_AND_RESET_FWD  // '>|>' | '|>>';
-//     ;
-// causalBwdOperator
-//     : CAUSAL_BWD
-//     | CAUSAL_RESET_BWD
-//     | CAUSAL_BWD_AND_RESET_BWD  // '<<|' | '<|<';
-//     ;
-// causalFBOperator
-//     : CAUSAL_RESET_FB           // <||>
-//     | CAUSAL_FWD_AND_RESET_BWD  // '><|';
-//     | CAUSAL_BWD_AND_RESET_FWD  // '|><';
-//     ;
-
-
-
 CAUSAL_FWD: GT; // '>'
 CAUSAL_BWD: LT; // '<'
 CAUSAL_RESET_FWD: '|>';
@@ -262,12 +204,6 @@ CAUSAL_FWD_AND_RESET_BWD: '><|' | '=>';
 CAUSAL_FWD_AND_RESET_FWD: '>|>' | '|>>';
 CAUSAL_BWD_AND_RESET_BWD: '<<|' | '<|<';
 CAUSAL_BWD_AND_RESET_FWD: '|><';
-
-
-sys_: 'sys';
-
-
-ACCESS_SRE: ('accsre'|'accsr'|'accre'|'accse'|'accs'|'accr'|'acce');
 
 
 // TOKEN

@@ -31,19 +31,17 @@ test:
 	@echo ppt
 	$(grun) ds program < g4test/ppt.ds
 
-	@echo ppt2
-	$(grun) ds program < g4test/ppt2.ds
-
 	@echo safety
 	$(grun) ds program < g4test/safety.ds
-
-	@echo flowTask
-	$(grun) ds program < g4test/flowTask.ds
 
 	@echo strong
 	$(grun) ds program < g4test/strong.ds
 
 	@echo "---------- with errors"
+
+	@echo ppt2
+	$(grun) ds program < g4test/ppt2.ds
+
 	@echo imports
 	$(grun) ds importStatements < g4test/imports.txt
 	@echo problem

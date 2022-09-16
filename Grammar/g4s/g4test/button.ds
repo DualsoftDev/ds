@@ -1,0 +1,22 @@
+[sys] My = {
+    [emg] = {
+        EmptyButton = {};
+        EmptyButton = {}
+        EMGBTN3 = { F3; F5 };
+        EMGBTN = { F1; F2; F3; F5; FF; };
+    }
+    [emg] = {
+    }
+    [auto] = {
+        //AutoBTN2;     Empty not allowed
+        AutoBTN = { F2 };
+        AutoBTN = { F1; F3; F5; FF };
+    }
+    [start] = {
+        StartBTN_FF = { FF };
+        StartBTN1 = { F1; };
+    }
+    [reset] = {
+        ResetBTN = { F1; F2; F3; F5; FF };
+    }
+}

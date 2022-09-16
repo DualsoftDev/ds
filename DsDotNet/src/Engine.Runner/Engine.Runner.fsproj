@@ -14,6 +14,7 @@
 		<Compile Include="SegmentRGFH.fs" />
 		<Compile Include="Cpu.fs" />
 		<Compile Include="DataBroker.fs" />
+		<Compile Include="ModelSerializer.fs" />
 		<Compile Include="ModelExtension.fs" />
 		<Compile Include="Engine.fs" />
 		<None Include="Obsolete\Runner.fsx" />

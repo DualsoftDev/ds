@@ -6,7 +6,7 @@ open System.Linq
 open System.Diagnostics
 open System.Collections.Concurrent
 open System.Runtime.CompilerServices
-open Engine.Parser
+open Engine.Core
 
 [<AutoOpen>]
 module Util =

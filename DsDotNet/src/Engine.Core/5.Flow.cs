@@ -56,7 +56,8 @@ public class RootFlow : Flow
     public DsSystem System { get; set; }
     public List<CallPrototype> CallPrototypes = new();
 
-    public string QualifiedName => $"{System.Name}.{Name}";
+    public string[] NameComponents => new[] { System.Name, Name };
+    public string QualifiedName => NameComponents.Combine();
     public RootFlow(Cpu cpu, string name, DsSystem system)
         : base(cpu, name)
     {

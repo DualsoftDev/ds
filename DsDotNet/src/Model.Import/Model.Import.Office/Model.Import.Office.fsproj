@@ -44,7 +44,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Engine.Base\Engine.Base.fsproj" />
     <ProjectReference Include="..\..\Engine.Common.FS\Engine.Common.FS.fsproj" />
-    <ProjectReference Include="..\..\Engine.Parser\Engine.Parser.csproj" />
+    <ProjectReference Include="..\..\Engine.Core\Engine.Core.csproj" />
   </ItemGroup>
 
 

@@ -3,16 +3,12 @@ namespace Model.Import.Office
 
 open System.Linq
 open System.Collections.Concurrent
-open DocumentFormat.OpenXml.Packaging
-open DocumentFormat.OpenXml.Drawing
 open DocumentFormat.OpenXml
 open PPTX
 open System.Collections.Generic
-open System
 open Microsoft.FSharp.Collections
 open Engine.Common.FS
 open Engine.Base
-open Engine.Parser
 
 [<AutoOpen>]
 module ImportModel =

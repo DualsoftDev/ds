@@ -51,11 +51,12 @@ public class Child : Named, IVertex, ICoin
     {
         Parent = parent;
         Coin = coin;
-        QualifiedName = $"{parent.QualifiedName}.{coin.Name}";
+        NameComponents = parent.NameComponents.Concat(new[] { coin.Name }).ToArray();
         Parent.AddChildVertex(this);
     }
 
-    public string QualifiedName { get; }
+    public string[] NameComponents { get; }
+    public string QualifiedName => NameComponents.Combine();
     public bool Value { get => Coin.Value; set => Coin.Value = value; }
     public virtual bool Evaluate() => Value;
 

@@ -20,7 +20,9 @@ public abstract class Coin : Named, ICoin
 
 
     bool IsChildrenStartPoint() => true;
-    public virtual string QualifiedName { get; }
+
+    public virtual string[] NameComponents { get; }
+    public virtual string QualifiedName => NameComponents.Combine();
     public override string ToString() => ToText();
     public override string ToText() => $"{QualifiedName}[{this.GetType().Name}]";
     public virtual void Going() => throw new Exception("ERROR");

@@ -3,7 +3,7 @@ namespace UnitTest.Engine
 
 
 open Engine.Common.FS
-open Engine.Parser
+open Engine.Core
 open System
 open NUnit.Framework
 

@@ -64,7 +64,7 @@ module Object =
                                     Util.GetValidName(call)
 
             member x.ToTextInFlow() =  match nodeCausal with
-                                         |EX -> sprintf "EX.%s.TR" (x.SegName)
+                                         |EX -> sprintf "EX.%s.TR" (x.ToCallText())
                                          |_  -> if(ThisFlow = bound) 
                                                 then x.SegName
                                                 else x.FlowNSeg
@@ -216,7 +216,10 @@ module Object =
                                             )
                         setIL.Values
 
-            member x.AddInterlock(edge:MEdge) = interlocks.TryAdd(edge.ToText() , edge) |> ignore 
+            member x.AddInterlock(edge:MEdge) = 
+                    if(interlocks.TryAdd(edge.ToText() , edge) )
+                    then ()
+                    else ()
 
             member x.DrawSubs = drawSubs.Values |> Seq.sortBy(fun seg -> seg.Name)
             member x.AddSegDrawSub(seg) = drawSubs.TryAdd(seg) |> ignore 

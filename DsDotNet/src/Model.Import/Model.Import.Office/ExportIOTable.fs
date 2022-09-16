@@ -28,7 +28,7 @@ module ExportIOTable =
 
 
         let rowItems(causal:NodeCausal, seg:Seg, trx:string) =
-            let flowName, name = seg.Name, seg.OwnerFlow
+            let flowName, name =  seg.OwnerFlow, seg.Name
             match causal with
             |TR ->  ["주소"; flowName; name; trx; "bit"; seg.TextStart; "'-"          ; seg.TextEnd]
             |TX  -> ["주소"; flowName; name; trx; "bit"; seg.TextStart; "'-"          ; "'-"]

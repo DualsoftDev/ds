@@ -36,9 +36,9 @@ class Program
 
 
         //ParserTest.TestParseSafety();
-        //ParserTest.TestParseFlowTask();
         //ParserTest.TestParseStrongCausal();
         //ParserTest.TestParseButtons();
-        ParserTest.TestParsePpt();
+        //ParserTest.TestParsePpt();
+        ParserTest.TestSerialize();
     }
 }

@@ -1,0 +1,119 @@
+[sys] MY = {
+    [flow] Rear = {     
+        제품공급 = {
+            Rear_Con_W > Rear_Pos_Sen;
+            Rear_Cyl_Push_ADV > Rear_Cyl_Push_RET;
+            Rear_Cyl_Push_RET <||> Rear_Cyl_Push_ADV;
+            Rear_Pos_Sen > Rear_Cyl_Push_ADV;
+        }
+        Rear_Cyl_Push_ADV     = {EX.Rear_Rear_Cyl_Push_ADV.TX    ~    EX.Rear_Rear_Cyl_Push_ADV.RX}
+        Rear_Cyl_Push_RET     = {EX.Rear_Rear_Cyl_Push_RET.TX    ~    EX.Rear_Rear_Cyl_Push_RET.RX}
+        Rear_Con_W     = {EX.Rear_Rear_Con_W.TX    ~    _}
+        Rear_Pos_Sen     = {_    ~    EX.Rear_Rear_Pos_Sen.RX}
+    }
+    [flow] Work = {     
+        작업공정 = {
+            Front_1Stopper_Adv <||> Front_1Stopper_RET;
+            Front_1Stopper_Adv > Front_1pos_Sen;
+            Front_1pos_Sen > Front_Usb_Cyl_ADV;
+            Front_Con_W > Front_1Stopper_Adv;
+            Front_Pos_Sen > Front_Con_W;
+            Front_Usb_Cyl_ADV <||> Front_Usb_Cyl_RET;
+            Front_Usb_Cyl_ADV > EX.Work.TR;
+            Front_Usb_Cyl_RET > Front_1Stopper_RET;
+            EX.Work.TR > Front_Usb_Cyl_RET;
+        }
+        Front_Usb_Cyl_RET     = {EX.Work_Front_Usb_Cyl_RET.TX    ~    EX.Work_Front_Usb_Cyl_RET.RX}
+        Front_Con_W     = {EX.Work_Front_Con_W.TX    ~    _}
+        Front_1Stopper_Adv     = {EX.Work_Front_1Stopper_Adv.TX    ~    EX.Work_Front_1Stopper_Adv.RX}
+        Front_Pos_Sen     = {_    ~    EX.Work_Front_Pos_Sen.RX}
+        Front_1Stopper_RET     = {EX.Work_Front_1Stopper_RET.TX    ~    EX.Work_Front_1Stopper_RET.RX}
+        Front_Usb_Cyl_ADV     = {EX.Work_Front_Usb_Cyl_ADV.TX    ~    EX.Work_Front_Usb_Cyl_ADV.RX}
+        Front_1pos_Sen     = {_    ~    EX.Work_Front_1pos_Sen.RX}
+    }
+    [flow] Model_Auto = {     
+        SSSS > Rear.제품공급;
+        Work.작업공정 > Front.배출공정;
+        Rear.제품공급 > Work.작업공정;
+    }
+    [emg_in] = {
+        EMGBTN = { Work; Model_Auto };
+    }
+    [auto_in] = {
+        AutoBTN = { Work; Model_Auto };
+    }
+    [start_in] = {
+        StartBTN1 = { Work; Model_Auto };
+    }
+    [reset_in] = {
+        ResetBTN = { Work; Model_Auto };
+    }
+}
+
+
+
+//////////////////////////////////////////////////////
+//DTS auto generation MY ExSegs
+//////////////////////////////////////////////////////
+[sys] EX = {
+    [flow] Rear_Rear_Cyl_Push_RET = { TX > RX <| Rear_Rear_Cyl_Push_ADV.TX; }
+    [flow] Rear_Rear_Cyl_Push_ADV = { TX > RX <| Rear_Rear_Cyl_Push_RET.TX; }
+    [flow] Rear_Rear_Con_W = { TX > RX; }
+    [flow] Rear_Rear_Pos_Sen = { TX > RX; }
+    [flow] Work_Front_Usb_Cyl_ADV = { TX > RX <| Work_Front_Usb_Cyl_RET.TX; }
+    [flow] Work_Front_Usb_Cyl_RET = { TX > RX <| Work_Front_Usb_Cyl_ADV.TX; }
+    [flow] Work_Front_1Stopper_Adv = { TX > RX <| Work_Front_1Stopper_RET.TX; }
+    [flow] Work_Front_1Stopper_RET = { TX > RX <| Work_Front_1Stopper_Adv.TX; }
+    [flow] Work_Front_Con_W = { TX > RX; }
+    [flow] Work_Front_Pos_Sen = { TX > RX; }
+    [flow] Work_Front_1pos_Sen = { TX > RX; }
+    [flow] Work_Work = { TR; }
+}
+
+
+
+[cpus] AllCpus = {
+    [cpu] Cpu_MY = {
+        MY.Rear;
+        MY.Work;
+        MY.Model_Auto;
+    }
+    [cpu] Cpu_EX = {
+        EX.Rear_Rear_Cyl_Push_ADV;
+        EX.Rear_Rear_Cyl_Push_RET;
+        EX.Rear_Rear_Con_W;
+        EX.Rear_Rear_Pos_Sen;
+        EX.Work_Work;
+        EX.Work_Front_Usb_Cyl_RET;
+        EX.Work_Front_Con_W;
+        EX.Work_Front_1Stopper_Adv;
+        EX.Work_Front_Pos_Sen;
+        EX.Work_Front_1Stopper_RET;
+        EX.Work_Front_Usb_Cyl_ADV;
+        EX.Work_Front_1pos_Sen;
+    }
+}
+[addresses] = {
+    EX.Rear_Rear_Cyl_Push_ADV.TX                 = (, , )
+    EX.Rear_Rear_Cyl_Push_ADV.RX                 = (, ,)
+    EX.Rear_Rear_Cyl_Push_RET.TX                 = (, , )
+    EX.Rear_Rear_Cyl_Push_RET.RX                 = (, ,)
+    EX.Rear_Rear_Con_W.TX                        = (, , )
+    EX.Rear_Rear_Pos_Sen.RX                      = (, ,)
+    EX.Work_Work.EX                              = (,,)
+    EX.Work_Front_Usb_Cyl_RET.TX                 = (, , )
+    EX.Work_Front_Usb_Cyl_RET.RX                 = (, ,)
+    EX.Work_Front_Con_W.TX                       = (, , )
+    EX.Work_Front_1Stopper_Adv.TX                = (, , )
+    EX.Work_Front_1Stopper_Adv.RX                = (, ,)
+    EX.Work_Front_Pos_Sen.RX                     = (, ,)
+    EX.Work_Front_1Stopper_RET.TX                = (, , )
+    EX.Work_Front_1Stopper_RET.RX                = (, ,)
+    EX.Work_Front_Usb_Cyl_ADV.TX                 = (, , )
+    EX.Work_Front_Usb_Cyl_ADV.RX                 = (, ,)
+    EX.Work_Front_1pos_Sen.RX                    = (, ,)
+    EX.AutoBTN.RX                                = (, ,)
+    EX.EMGBTN.RX                                 = (, ,)
+    EX.ResetBTN.RX                               = (, ,)
+    EX.StartBTN1.RX                              = (, ,)
+}

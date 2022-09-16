@@ -39,6 +39,7 @@ class Program
         //ParserTest.TestParseStrongCausal();
         //ParserTest.TestParseButtons();
         //ParserTest.TestParsePpt();
-        ParserTest.TestSerialize();
+        //ParserTest.TestSerialize();
+        ParserTest.TestError();
     }
 }

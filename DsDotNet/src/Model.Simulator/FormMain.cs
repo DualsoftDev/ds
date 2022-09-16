@@ -143,6 +143,9 @@ namespace Model.Simulator
                         CreateNewTabViewer(f);
                     });
                 }
+
+                ProcessEvent.DoWork(0);
+
             }
 
             catch (Exception ex)

@@ -31,9 +31,11 @@ module internal ModelSerializerModule =
 
     let serializeCallPrototype (callPrototype:CallPrototype) (indent:int) =
         let tab = getTab indent
+        let underscore x = if x = "" then "_" else x
         let txs = String.Join(", ", callPrototype.TXs.Select(serializeTxRx))
         let rxs = String.Join(", ", callPrototype.RXs.Select(serializeTxRx))
-        $"{tab}{callPrototype.Name} = {lb} {txs} ~ {rxs} {rb}"
+        $"{tab}{callPrototype.Name} = {lb} {underscore txs} ~ {underscore rxs} {rb}"
+
     let serializeEdge (edge:Edge) (indent:int) =
         let tab = getTab indent
         let sources = String.Join(", ", edge.Sources.Cast<Named>().select(name).ToArray())

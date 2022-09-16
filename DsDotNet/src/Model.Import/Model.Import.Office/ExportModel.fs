@@ -239,7 +239,7 @@ module ExportModel =
                                     if(bReset) 
                                     then yield sprintf "%s.%s" (seg.ToCallText()) text
                                     else yield sprintf "%s"  text
-                }|> String.concat ", "
+                }
                 
             seq {
                 
@@ -254,16 +254,20 @@ module ExportModel =
                         for calls in flow.Interlockedges do
                             for call in calls  do
                                 let resets = calls |> Seq.filter(fun seg -> seg = call|>not)
-                                let txs =  getTRXs ([call], RX ,false)
-                                let rxs =  getTRXs ([call], TX, false)
-                                let resetTxs =  getTRXs (resets, RX, true)
+                                let txs =  getTRXs ([call], RX ,false)|> String.concat ", "
+                                let rxs =  getTRXs ([call], TX, false)|> String.concat ", "
+                                let resetTxs =  getTRXs (resets, RX, true)|> String.concat ", "
                                 yield sprintf "\t[flow] %s = { %s > %s <| %s; }" (call.ToCallText()) txs rxs resetTxs
                         // Call Without InterLock
-                        for call in flow.CallWithoutInterLock() do
+                        let noInterLocks =flow.CallWithoutInterLock()
+                        for call in noInterLocks do
                             yield sprintf "\t[flow] %s = { TX > RX; }" (call.ToCallText()) 
                         //Ex 출력
                         for exSeg in flow.ExRealSegs() do
-                            yield sprintf "\t[flow] %s = { TR; }"  (exSeg.ToCallText()) 
+                            yield sprintf "\t[flow] %s = { EX; }"  (exSeg.ToCallText()) 
+                    //Ex 버튼 출력
+                    for exSeg in sys.BtnSegs() do
+                        yield sprintf "\t[flow] %s = { %s; }"  exSeg.SegName  (getTRXs ([exSeg], TX ,false)|> String.concat "; ")
 
                     yield "}"
                     yield ""

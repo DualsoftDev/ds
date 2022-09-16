@@ -64,7 +64,7 @@ module Object =
                                     Util.GetValidName(call)
 
             member x.ToTextInFlow() =  match nodeCausal with
-                                         |EX -> sprintf "EX.%s.TR" (x.SegName)
+                                         |EX -> sprintf "EX.%s.EX" (x.ToCallText())
                                          |_  -> if(ThisFlow = bound) 
                                                 then x.SegName
                                                 else x.FlowNSeg
@@ -216,7 +216,10 @@ module Object =
                                             )
                         setIL.Values
 
-            member x.AddInterlock(edge:MEdge) = interlocks.TryAdd(edge.ToText() , edge) |> ignore 
+            member x.AddInterlock(edge:MEdge) = 
+                    if(interlocks.TryAdd(edge.ToText() , edge) )
+                    then ()
+                    else ()
 
             member x.DrawSubs = drawSubs.Values |> Seq.sortBy(fun seg -> seg.Name)
             member x.AddSegDrawSub(seg) = drawSubs.TryAdd(seg) |> ignore 
@@ -246,15 +249,18 @@ module Object =
                                         |> Seq.filter(fun seg -> seg.Bound = ExSeg)
                                         |> Seq.distinctBy(fun seg -> seg.FullName)
 
-            member x.BtnSegs()  =  x.UsedSegs 
-                                        |> Seq.filter(fun seg -> seg.Bound = ExBtn)
+            //member x.BtnSegs()  =  x.UsedSegs 
+            //                            |> Seq.filter(fun seg -> seg.Bound = ExBtn)
+            //                            |> Seq.distinctBy(fun seg -> seg.SegName)
 
             member x.NotMySegs() =  x.CallSegs() |> Seq.append (x.ExRealSegs())
             member x.CallWithoutInterLock()  = 
+                let dicInterLockName = 
+                    x.Interlockedges 
+                    |> Seq.collect(fun segs ->segs |> Seq.map(fun seg -> seg.FullName))
                 x.CallSegs()
-                |> Seq.filter(fun seg -> interlocks.Values.GetNodes().Contains(seg)|>not)
-            
-
+                |> Seq.filter(fun seg -> 
+                    dicInterLockName.Contains(seg.FullName)|>not)
               
     and
         [<DebuggerDisplay("{Name}")>]
@@ -355,8 +361,8 @@ module Object =
                                      |> Seq.filter(fun flow -> (flow.Page = Int32.MaxValue)|>not)  //Int32.MaxValue 는 데모 flow
             
             member x.BtnSegs()    = 
-                                    let a = 
-                                        x.RootFlow() 
-                                        |> Seq.collect(fun flow -> flow.BtnSegs())
-                                    a |> Seq.distinctBy(fun seg -> seg.SegName)
-         
+                                    x.RootFlow() 
+                                    |> Seq.collect(fun flow -> flow.UsedSegs)
+                                    |> Seq.filter(fun seg -> seg.Bound = ExBtn)
+                                    |> Seq.distinctBy(fun seg -> seg.SegName)
+

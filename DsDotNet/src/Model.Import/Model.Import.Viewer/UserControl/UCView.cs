@@ -216,17 +216,21 @@ namespace Dual.Model.Import
             {
                 //nNode.Attr.Color = Color.DarkGoldenrod;
 
-                if (segment.NodeCausal == NodeCausal.MY)
-                    nNode.Attr.Shape = Shape.Box;
-                if (segment.NodeCausal == NodeCausal.EX)
-                    nNode.Attr.Shape = Shape.Diamond;
-                if (segment.NodeCausal == NodeCausal.TR)
-                    nNode.Attr.Shape = Shape.Ellipse;
-                if (segment.NodeCausal == NodeCausal.TX)
-                    nNode.Attr.Shape = Shape.Ellipse;
-                if (segment.NodeCausal == NodeCausal.RX)
-                    nNode.Attr.Shape = Shape.Ellipse;
-
+                if (segment.Bound == Bound.ExBtn)
+                    nNode.Attr.Shape = Shape.Plaintext;
+                else
+                {
+                    if (segment.NodeCausal == NodeCausal.MY)
+                        nNode.Attr.Shape = Shape.Box;
+                    if (segment.NodeCausal == NodeCausal.EX)
+                        nNode.Attr.Shape = Shape.Diamond;
+                    if (segment.NodeCausal == NodeCausal.TR)
+                        nNode.Attr.Shape = Shape.Ellipse;
+                    if (segment.NodeCausal == NodeCausal.TX)
+                        nNode.Attr.Shape = Shape.Ellipse;
+                    if (segment.NodeCausal == NodeCausal.RX)
+                        nNode.Attr.Shape = Shape.Ellipse;
+                }
             }
         }
 

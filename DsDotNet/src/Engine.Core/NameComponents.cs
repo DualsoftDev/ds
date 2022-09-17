@@ -52,6 +52,7 @@ public static class ParserExtension
     }
     public static bool IsQuotationRequired(this string identifier) => !IsValidIdentifier(identifier);
 
+    /// <summary> path 구성 요소 array 를 '.' 으로 combine </summary>
     public static string Combine(this string[] nameComponents) =>
         string.Join(".", nameComponents.Select(n => n.IsQuotationRequired() ? $"\"{n}\"" : n));
 }

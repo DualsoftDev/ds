@@ -499,6 +499,7 @@ namespace Engine
     }
     [flow] F = {
         Main = {
+            AVp1 |> Am1;
             // 정보로서의 Call 상호 리셋
             Ap1 <||> Am1;
             Ap1 > Am1, Ap2 > Am2;

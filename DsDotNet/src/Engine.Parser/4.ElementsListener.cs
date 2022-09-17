@@ -164,8 +164,19 @@ partial class ElementsListener : dsBaseListener
         var call = callPrototypes.First(c => c.Name == name);
 
         var callph = ctx.callPhrase();
-        var txs = ParserHelper.FindObjects<SegmentBase>(_system, callph.segments(0).GetText());
-        var rxs = ParserHelper.FindObjects<SegmentBase>(_system, callph.segments(1).GetText());
+        SegmentBase[] findSegments(SegmentsContext txrxCtx)
+        {
+            var nss = enumerateChildren<SegmentContext>(txrxCtx).Select(collectNameComponents);
+            return (
+                from ns in nss
+                let sys = _model.Systems.First(sys => sys.Name == ns[0])
+                select ParserHelper.FindObject<SegmentBase>(sys, ns.Combine())
+            ).ToArray();
+        }
+
+        var txs = findSegments(callph.segments(0));
+        var rxs = findSegments(callph.segments(1));
+
         if (ParserHelper.ParserOptions.AllowSkipExternalSegment)
         {
             txs = txs.Where(t => t != null).ToArray();
@@ -199,12 +210,11 @@ partial class ElementsListener : dsBaseListener
         Trace.WriteLine($"\tCausalPhrase all: {left.GetText()}, {op.GetText()}, {rights.GetText()}");
 
 
-        var names =
+        var nameComponentss =
             enumerateChildren<SegmentContext>(ctx)
-            .Select(segCtx => segCtx.GetText())
+            .Select(collectNameComponents)
             .ToArray()
             ;
-
         if (_parenting == null)
         {
             /*
@@ -213,19 +223,17 @@ partial class ElementsListener : dsBaseListener
         }
         else
         {
-            foreach (var name in names)
+            foreach (var ns in nameComponentss)
             {
-                //var n = ParserHelper.ToFQDN(name);
-                var n = name;
+                var n = ns.Combine();
                 Child child = null;
                 bool isAlias = false;
                 var fqdn = $"{CurrentPath}.{n}";
                 if (QpInstanceMap.ContainsKey((_system, fqdn)))
                     continue;
 
-                var nameComponents = n.Split(new[] { '.' }).ToArray();
                 string targetName = n;
-                switch (nameComponents.Length)
+                switch (ns.Length)
                 {
                     case 1:
                         isAlias = ParserHelper.AliasNameMaps[_system].ContainsKey(n);
@@ -242,7 +250,12 @@ partial class ElementsListener : dsBaseListener
                 }
 
                 object target = null;
-                var key = (_system, targetName);
+                var sys =
+                    targetName.StartsWith($"{_system.Name}.")
+                    ? _system
+                    : _model.Systems.First(sys => targetName.StartsWith($"{sys.Name}."))
+                    ;
+                var key = (sys, targetName);
                 if (QpDefinitionMap.ContainsKey(key))
                     target = QpDefinitionMap[key];   // definition 우선시
                 else if (QpInstanceMap.ContainsKey(key))
@@ -256,13 +269,13 @@ partial class ElementsListener : dsBaseListener
                 switch (target)
                 {
                     case CallPrototype cp:
-                        var subCall = new SubCall(name, _parenting, cp);
+                        var subCall = new SubCall(n, _parenting, cp);
                         child = new Child(subCall, _parenting) { IsAlias = isAlias };
                         subCall.ContainerChild = child;
                         QpInstanceMap.Add((_system, fqdn), child);
                         break;
                     case SegmentBase exSeg:
-                        var exCall = new ExSegment(name, exSeg);
+                        var exCall = new ExSegment(n, exSeg);
                         child = new Child(exCall, _parenting) { IsAlias = isAlias };
                         exCall.ContainerChild = child;
                         QpInstanceMap.Add((_system, fqdn), child);

@@ -1,3 +1,5 @@
+using Engine.Common;
+
 namespace Engine.Parser
 {
     class AliasListener : dsBaseListener
@@ -55,15 +57,24 @@ namespace Engine.Parser
          */
         override public void EnterAliasListing(AliasListingContext ctx)
         {
-            var def = ctx.aliasDef().GetText(); // e.g "P.F.Vp"
+            var defs = collectNameComponents(ctx.aliasDef()); // e.g "P.F.Vp" -> [| "P"; "F"; "Vp" |]
             var aliasMnemonics =    // e.g { Vp1; Vp2; Vp3; }
                 enumerateChildren<AliasMnemonicContext>(ctx)
-                .Select(mne => mne.GetText())
+                .Select(mne => collectNameComponents(mne))
+                .Do(ns => Assert(ns.Count() == 1))      // Vp1 등은 '.' 허용 안함
+                .Select(ns => ns[0])
                 .ToArray()
                 ;
             Assert(aliasMnemonics.Length == aliasMnemonics.Distinct().Count());
 
-            //var defInstance = _model.FindObject<object>(def);
+            var def = (
+                defs.Length switch
+                {
+                    2 when defs[0] != _system.Name => defs.Prepend(_system.Name),
+                    3 => defs,
+                    _ => throw new Exception("ERROR"),
+                }).ToArray().Combine();
+
 
             ParserHelper.BackwardAliasMaps[_system].Add(def, aliasMnemonics);
         }

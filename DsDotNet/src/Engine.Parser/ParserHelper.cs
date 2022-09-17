@@ -1,8 +1,3 @@
-using Engine.Common;
-
-using System.Collections.Generic;
-using System.Globalization;
-
 namespace Engine.Parser;
 
 public class ParserHelper
@@ -11,6 +6,9 @@ public class ParserHelper
 
     /// <summary> Alias, CallPrototype 에 대한 path </summary>
     public Dictionary<(DsSystem, string), object> QpDefinitionMap = new();
+
+    // alias : ppt 도형으로 modeling 하면 문제가 되지 않으나, text grammar 로 서술할 경우, 
+    // 동일 이름의 call 등이 중복 사용되면, line 을 나누어서 기술할 때, unique 하게 결정할 수 없어서 도입.
     public Dictionary<DsSystem, Dictionary<string, string>> AliasNameMaps = new();
     public Dictionary<DsSystem, Dictionary<string, string[]>> BackwardAliasMaps = new();
 

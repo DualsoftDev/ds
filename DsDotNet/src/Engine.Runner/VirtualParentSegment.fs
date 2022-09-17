@@ -261,8 +261,8 @@ module VirtualParentSegmentModule =
                 assert(resetEdges.Length = 0 || resetEdges.Length = 1)
                 // todo : resetEdge.Length > 1 인 경우, OR 로 해석해서 구성해야 한다.
 
-                let causalSources = setEdges.selectMany(fun e -> e.Sources).Cast<Segment>().ToArray()
-                let resetSources = resetEdges.selectMany(fun e -> e.Sources).Cast<Segment>().ToArray()
+                let causalSources = setEdges.selectMany(fun e -> e.Sources).OfType<Segment>().ToArray()
+                let resetSources = resetEdges.selectMany(fun e -> e.Sources).OfType<Segment>().ToArray()
 
                 yield VirtualParentSegment.Create(target, auto, causalSources, resetSources)
         |]

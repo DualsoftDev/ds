@@ -51,7 +51,7 @@ public class Child : Named, IVertex, ICoin
     {
         Parent = parent;
         Coin = coin;
-        NameComponents = parent.NameComponents.Concat(new[] { coin.Name }).ToArray();
+        NameComponents = parent.NameComponents.Append(coin.Name).ToArray();
         Parent.AddChildVertex(this);
     }
 

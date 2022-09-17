@@ -24,7 +24,7 @@ public abstract partial class SegmentBase : ChildFlow, IVertex, ICoin, IWallet, 
     public string[] NameComponents =>
         (ContainerFlow == null)
         ? new[] { Name }
-        : ContainerFlow.NameComponents.Concat(new [] {Name}).ToArray()
+        : ContainerFlow.NameComponents.Append(Name).ToArray()
         ;
     public string QualifiedName => NameComponents.Combine();
 

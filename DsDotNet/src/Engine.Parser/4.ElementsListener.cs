@@ -233,29 +233,26 @@ partial class ElementsListener : dsBaseListener
                     continue;
 
                 string targetName = n;
+                var key = (_system, n);
                 switch (ns.Length)
                 {
                     case 1:
                         isAlias = ParserHelper.AliasNameMaps[_system].ContainsKey(n);
-                        targetName = isAlias ? ParserHelper.AliasNameMaps[_system][n] : n;
+                        if (isAlias)
+                            key = (_system, ParserHelper.AliasNameMaps[_system][n]);
                         break;
                     case 2:
-                        targetName = $"{_system.Name}.{n}";
+                        key = (_system, $"{_system.Name}.{n}");
                         break;
                     case 3:
-                        targetName = n;
+                        var exsys = _model.Systems.First(sys => targetName.StartsWith($"{sys.Name}."));
+                        key = (exsys, n);
                         break;
                     default:
                         throw new ParserException($"ERROR: {targetName} length error.", ctx);
                 }
 
                 object target = null;
-                var sys =
-                    targetName.StartsWith($"{_system.Name}.")
-                    ? _system
-                    : _model.Systems.First(sys => targetName.StartsWith($"{sys.Name}."))
-                    ;
-                var key = (sys, targetName);
                 if (QpDefinitionMap.ContainsKey(key))
                     target = QpDefinitionMap[key];   // definition 우선시
                 else if (QpInstanceMap.ContainsKey(key))
@@ -336,8 +333,10 @@ partial class ElementsListener : dsBaseListener
         var addressDefs = enumerateChildren<AddressDefContext>(ctx).ToArray();
         foreach (var addrDef in addressDefs)
         {
-            var segPath = addrDef.segmentPath().GetText();
-            var seg = (SegmentBase)QpInstanceMap[(_system, segPath)];
+            var segNs = collectNameComponents(addrDef.segmentPath());
+            var segPath = segNs.Combine();
+            var sys = _model.Systems.First(sys => sys.Name == segNs[0]);
+            var seg = (SegmentBase)QpInstanceMap[(sys, segPath)];
             var sre = addrDef.address();
             var (s, r, e) = (sre.startTag()?.GetText(), sre.resetTag()?.GetText(), sre.endTag()?.GetText());
             seg.Addresses = Tuple.Create(s, r, e);

@@ -1,5 +1,3 @@
-using System.Xml.Linq;
-
 using Nodes = System.Collections.Generic.List<System.Object>;
 
 namespace Engine.Parser;
@@ -124,9 +122,16 @@ partial class ElementsListener
 
         IEnumerable<string> split()
         {
+            if (op == "<||>")
+            {
+                yield return "<||";
+                yield return "||>";
+                yield break;
+            }
+
             foreach (var o in new[] { "||>", "<||", ">>", "<<", })
             {
-                if (op.Contains(o) && op != "<||>")
+                if (op.Contains(o))
                 {
                     yield return o;
                     op = op.Replace(o, "");
@@ -178,20 +183,7 @@ partial class ElementsListener
         {
             case Node node:
                 return new[] { helper(node.ids.Combine()) };
-                //return node.ids.Select(sp =>
-                //{
-                //    var spec = sp;
-                //    if (QpInstanceMap.ContainsKey((_system, $"{context}.{sp}")))
-                //        spec = $"{context}.{sp}";
-                //    if (!QpInstanceMap.ContainsKey((_system, spec)))
-                //    {
-                //        if (ParserHelper.AliasNameMaps[_system].ContainsKey(node.label))
-                //            spec = ParserHelper.AliasNameMaps[_system][node.label];
-                //    }
 
-                //    var vertex = QpInstanceMap[(_system, spec)] as IVertex;
-                //    return vertex;
-                //}).ToArray();
             case NodeConjunction nodeConjunction:
                 return
                     nodeConjunction.idss

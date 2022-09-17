@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Engine.Core;
 
@@ -53,13 +48,6 @@ public static class ParserExtension
     public static bool IsQuotationRequired(this string identifier) => !IsValidIdentifier(identifier);
 
     /// <summary> path 구성 요소 array 를 '.' 으로 combine </summary>
-    public static string Combine(this string[] nameComponents) =>
-        string.Join(".", nameComponents.Select(n => n.IsQuotationRequired() ? $"\"{n}\"" : n));
+    public static string Combine(this string[] nameComponents, string separator=".") =>
+        string.Join(separator, nameComponents.Select(n => n.IsQuotationRequired() ? $"\"{n}\"" : n));
 }
-
-//public class NameComponents
-//{
-//    public List<string> Names = new();
-//    public string QualifiedName =>
-//        string.Join(".", Names.Select(n => n.IsQuotationRequired() ? $"\"{n}\"" : n));
-//}

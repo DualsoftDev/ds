@@ -58,7 +58,7 @@ module internal ModelSerializerModule =
                 | :? ChildFlow as cf ->
                     yield! serializeFlow cf indent
                 | :? Child as child ->
-                    //yield child.QualifiedName
+                    yield $"{tab}/* Child={child.QualifiedName} */"
                     ()
                 | _ -> failwithlog "ERROR"
             for edge in flow.Edges do

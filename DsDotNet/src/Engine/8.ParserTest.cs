@@ -498,14 +498,14 @@ namespace Engine
         A.F.Vp = {AVp1;}
     }
     [flow] F = {
+        Ap = {A.F.Vp ~ A.F.Sp}
+        Am = {A.F.Vm ~ A.F.Sm}
         Main = {
             AVp1 |> Am1;
             // 정보로서의 Call 상호 리셋
             Ap1 <||> Am1;
             Ap1 > Am1, Ap2 > Am2;
         }
-        Ap = {A.F.Vp ~ A.F.Sp}
-        Am = {A.F.Vm ~ A.F.Sm}
     }
 }
 

@@ -1,5 +1,10 @@
+using Antlr4.Runtime;
+
 using Engine.Parser;
 using Engine.Runner;
+
+using log4net.Repository.Hierarchy;
+
 using System.Threading.Tasks;
 using static Engine.Runner.DataModule;
 
@@ -12,44 +17,58 @@ public class EngineBuilder
     public Model Model { get; }
     public ENGINE Engine { get; }
 
-    public EngineBuilder(string modelText, string activeCpuName)
+    public EngineBuilder(string modelText, ParserOptions options)
     {
-        EngineModule.Initialize();
-
-        bool simulationMode = activeCpuName.IsNullOrEmpty();
-
-        var helper = ModelParser.ParseFromString2(modelText, simulationMode);
-        Model = helper.Model;
-        Global.Model = Model;
-
-        Data = new DataBroker();
-
-        if (simulationMode)
+        try
         {
-            Cpu = Model.Cpus.First();
-            Cpu.IsActive = true;
+            if (! options.Verify())
+                throw new Exception($"ParserOptions error: {options}");
+
+            EngineModule.Initialize();
+
+            var helper = ModelParser.ParseFromString2(modelText, options);
+            Model = helper.Model;
+            Global.Model = Model;
+
+            Data = new DataBroker();
+
+            if (options.IsSimulationMode)
+            {
+                Cpu = Model.Cpus.First();
+                Cpu.IsActive = true;
+            }
+            else
+            {
+                var activeCpuName = options.ActiveCpuName;
+                Cpu = Model.Cpus.FirstOrDefault(cpu => cpu.Name == activeCpuName);
+                if (Cpu == null)
+                    throw new Exception($"Failed to find cpu name : [{activeCpuName}]");
+
+                Cpu.IsActive = true;
+            }
+
+            Model.BuildGraphInfo();
+
+            Model.Epilogue(Data);
+
+            //if (Global.IsControlMode)
+            //    Task.Run(async () => { await Data.CommunicationPLC(); })
+            //        .FireAndForget();
+            Data.CommunicationPLC();
+            foreach (var cpu in Model.Cpus)
+                cpu.PrintTags();
+
+            Engine = new ENGINE(Model, Data, Cpu);
+            Cpu.Engine = Engine;
+            Task.Run(() => { Data.StreamData(); })
+                .FireAndForget();
+
         }
-        else
+        catch (Exception ex)
         {
-            Cpu = Model.Cpus.First(cpu => cpu.Name == activeCpuName);
-            Cpu.IsActive = true;
+            LogError($"{ex}");
+            throw;
         }
-
-        Model.BuildGraphInfo();
-
-        Model.Epilogue(Data);
-
-        //if (Global.IsControlMode)
-        //    Task.Run(async () => { await Data.CommunicationPLC(); })
-        //        .FireAndForget();
-        Data.CommunicationPLC();
-        foreach (var cpu in Model.Cpus)
-            cpu.PrintTags();
-
-        Engine = new ENGINE(Model, Data, Cpu);
-        Cpu.Engine = Engine;
-        Task.Run(() => { Data.StreamData(); })
-            .FireAndForget();
     }
 
     /// <summary> Used for Unit test only.</summary>
@@ -57,6 +76,6 @@ public class EngineBuilder
     {
         EngineModule.Initialize();
         Data = new DataBroker();
-        Model = ModelParser.ParseFromString(modelText, true);
+        Model = ModelParser.ParseFromString(modelText, ParserOptions.Create4SimulationWhileIgnoringExtSegCall());
     }
 }

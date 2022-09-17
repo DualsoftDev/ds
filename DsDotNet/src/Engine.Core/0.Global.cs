@@ -13,7 +13,6 @@ global using BitDic = System.Collections.Generic.Dictionary<string, Engine.Core.
 global using TagDic = System.Collections.Generic.Dictionary<string, Engine.Core.Tag>;
 global using ButtonDic = System.Collections.Generic.Dictionary<string, Engine.Core.RootFlow[]>;
 
-
 namespace Engine.Core;
 
 public static class GlobalShortCuts

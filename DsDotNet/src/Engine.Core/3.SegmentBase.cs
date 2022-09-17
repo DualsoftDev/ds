@@ -20,11 +20,13 @@ public abstract partial class SegmentBase : ChildFlow, IVertex, ICoin, IWallet, 
             _cpu = value;
         }
     }
-    public string QualifiedName =>
+
+    public string[] NameComponents =>
         (ContainerFlow == null)
-        ? Name
-        : $"{ContainerFlow.QualifiedName}.{Name}"
+        ? new[] { Name }
+        : ContainerFlow.NameComponents.Append(Name).ToArray()
         ;
+    public string QualifiedName => NameComponents.Combine();
 
     public PortInfoStart PortS { get; set; }
     public PortInfoReset PortR { get; set; }

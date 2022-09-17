@@ -116,7 +116,7 @@ aliasProp: '[' 'alias' ']';
 aliasListing:
     aliasDef '=' LBRACE (aliasMnemonic)? ( ';' aliasMnemonic)* (';')+ RBRACE
     ;
-aliasDef: identifier3;
+aliasDef: (identifier2|identifier3);
 aliasMnemonic: identifier;
 
 

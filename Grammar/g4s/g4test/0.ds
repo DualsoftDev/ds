@@ -1,7 +1,14 @@
-[sys] MY = {
-    [flow] F1 = {
-        R1 > R2;
-        C1     = {EX.F1_C1.TX    ~    EX.F1_C1.RX}
-        ResetBTN     = {EX.F1_ResetBTN.TX    ~    EX.F1_ResetBTN.RX}
+[sys] L = {
+    [flow] F = {
+        Main = {
+            // 정보로서의 Call 상호 리셋
+            Ap <||> Am;
+            Bp <||> Bm;
+            Ap > Am, Bp > Bm;
+        }
+        Ap = {A.F.Vp ~ A.F.Sp}
+        Am = {A.F.Vm ~ A.F.Sm}
+        Bp = {B.F.Vp ~ B.F.Sp}
+        Bm = {B.F.Vm ~ B.F.Sm}
     }
 }

@@ -1,3 +1,5 @@
+using Engine.Parser;
+
 namespace Engine
 {
     internal static class ParserTest
@@ -46,7 +48,7 @@ namespace Engine
 }
 
 ";
-            var engine = new EngineBuilder(text, "Cpu").Engine;
+            var engine = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu")).Engine;
             Program.Engine = engine;
             engine.Run();
         }
@@ -88,7 +90,7 @@ namespace Engine
 }
 
 ";
-            var engine = new EngineBuilder(text, "Cpu").Engine;
+            var engine = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu")).Engine;
             Program.Engine = engine;
             engine.Run();
         }
@@ -135,7 +137,7 @@ namespace Engine
 }
 
 ";
-            var engine = new EngineBuilder(text, "Cpu").Engine;
+            var engine = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu")).Engine;
             Program.Engine = engine;
             engine.Run();
         }
@@ -267,7 +269,7 @@ namespace Engine
     }
 }
 ";
-            var engine = new EngineBuilder(text, "Cpu").Engine;
+            var engine = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu")).Engine;
             Program.Engine = engine;
             engine.Run();
         }
@@ -313,7 +315,7 @@ namespace Engine
 }
 
 ";
-            var engine = new EngineBuilder(text, "Cpu").Engine;
+            var engine = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu")).Engine;
             Program.Engine = engine;
             engine.Run();
         }
@@ -323,7 +325,7 @@ namespace Engine
             var text = @"
 [sys] MY = {
     [flow] Rear = {     
-        Á¦Ç°°ø±Ş = {
+        ì œí’ˆê³µê¸‰ = {
             Rear_Con_W > Rear_Pos_Sen;
             Rear_Cyl_Push_ADV > Rear_Cyl_Push_RET;
             Rear_Cyl_Push_RET <||> Rear_Cyl_Push_ADV;
@@ -335,16 +337,16 @@ namespace Engine
         Rear_Pos_Sen     = {_    ~    EX.Rear_Rear_Pos_Sen.RX}
     }
     [flow] Work = {     
-        ÀÛ¾÷°øÁ¤ = {
+        ì‘ì—…ê³µì • = {
             Front_1Stopper_Adv <||> Front_1Stopper_RET;
             Front_1Stopper_Adv > Front_1pos_Sen;
             Front_1pos_Sen > Front_Usb_Cyl_ADV;
             Front_Con_W > Front_1Stopper_Adv;
             Front_Pos_Sen > Front_Con_W;
             Front_Usb_Cyl_ADV <||> Front_Usb_Cyl_RET;
-            Front_Usb_Cyl_ADV > EX.Work.TR;
+            Front_Usb_Cyl_ADV > EX.Work_Work.TR;
             Front_Usb_Cyl_RET > Front_1Stopper_RET;
-            EX.Work.TR > Front_Usb_Cyl_RET;
+            EX.Work_Work.TR > Front_Usb_Cyl_RET;
         }
         Front_Usb_Cyl_RET     = {EX.Work_Front_Usb_Cyl_RET.TX    ~    EX.Work_Front_Usb_Cyl_RET.RX}
         Front_Con_W     = {EX.Work_Front_Con_W.TX    ~    _}
@@ -355,9 +357,9 @@ namespace Engine
         Front_1pos_Sen     = {_    ~    EX.Work_Front_1pos_Sen.RX}
     }
     [flow] Model_Auto = {     
-        SSSS > Rear.Á¦Ç°°ø±Ş;
-        Work.ÀÛ¾÷°øÁ¤ > Front.¹èÃâ°øÁ¤;
-        Rear.Á¦Ç°°ø±Ş > Work.ÀÛ¾÷°øÁ¤;
+        SSSS > Rear.ì œí’ˆê³µê¸‰;
+        Work.ì‘ì—…ê³µì • > Front.ë°°ì¶œê³µì •;
+        Rear.ì œí’ˆê³µê¸‰ > Work.ì‘ì—…ê³µì •;
     }
     [emg_in] = {
         EMGBTN = { Work; Model_Auto };
@@ -423,7 +425,7 @@ namespace Engine
     EX.Rear_Rear_Cyl_Push_RET.RX                 = (, ,)
     EX.Rear_Rear_Con_W.TX                        = (, , )
     EX.Rear_Rear_Pos_Sen.RX                      = (, ,)
-    EX.Work_Work.EX                              = (,,)
+    EX.Work_Work.TR                              = (,,)
     EX.Work_Front_Usb_Cyl_RET.TX                 = (, , )
     EX.Work_Front_Usb_Cyl_RET.RX                 = (, ,)
     EX.Work_Front_Con_W.TX                       = (, , )
@@ -435,16 +437,83 @@ namespace Engine
     EX.Work_Front_Usb_Cyl_ADV.TX                 = (, , )
     EX.Work_Front_Usb_Cyl_ADV.RX                 = (, ,)
     EX.Work_Front_1pos_Sen.RX                    = (, ,)
-    EX.AutoBTN.RX                                = (, ,)
-    EX.EMGBTN.RX                                 = (, ,)
-    EX.ResetBTN.RX                               = (, ,)
-    EX.StartBTN1.RX                              = (, ,)
+    //EX.AutoBTN.RX                                = (, ,)
+    //EX.EMGBTN.RX                                 = (, ,)
+    //EX.ResetBTN.RX                               = (, ,)
+    //EX.StartBTN1.RX                              = (, ,)
 }
 
 ";
-            var engine = new EngineBuilder(text, "Cpu").Engine;
+            var engine = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu")).Engine;
             Program.Engine = engine;
             engine.Run();
         }
+
+        public static void TestParseQualifiedName()
+        {
+            var text = @"
+[sys] ""my.favorite.system!!"" = {
+    [flow] "" my flow. "" = {
+        R1 > R2;
+        C1     = {EX.""ì´ìƒí•œ. flow"".TX    ~    EX.""ì´ìƒí•œ. flow"".RX}
+    }
+}
+[sys] EX = {
+    [flow] ""ì´ìƒí•œ. flow"" = {    
+        TX;
+        RX;
+    }
+}
+";
+            var engine = new EngineBuilder(text, ParserOptions.Create4Simulation()).Engine;
+            Program.Engine = engine;
+            engine.Run();
+        }
+
+        public static void TestParseExternalSegmentCall()
+        {
+            var text = @"
+[sys] MY = {
+    [flow] FFF = {     
+        EX.""FFF.EXT"".EX > R2;
+    }
+}
+
+[sys] EX = {
+    [flow] ""FFF.EXT"" = { EX; }
+}
+";
+            var engine = new EngineBuilder(text, ParserOptions.Create4Simulation()).Engine;
+            Program.Engine = engine;
+            engine.Run();
+        }
+
+        public static void TestParseAliases()
+        {
+            var text = @"
+[sys] my = {
+    [alias] = {
+        F.Ap = { Ap1; Ap2; Ap3; }
+        my.F.Am = { Am1; Am2; Am3; }    // system name optional
+        A.F.Vp = {AVp1;}
+    }
+    [flow] F = {
+        Ap = {A.F.Vp ~ A.F.Sp}
+        Am = {A.F.Vm ~ A.F.Sm}
+        Main = {
+            AVp1 |> Am1;
+            // ì •ë³´ë¡œì„œì˜ Call ìƒí˜¸ ë¦¬ì…‹
+            Ap1 <||> Am1;
+            Ap1 > Am1, Ap2 > Am2;
+        }
+    }
+}
+
+" + Tester.CreateCylinder("A");
+            var engine = new EngineBuilder(text, ParserOptions.Create4Simulation()).Engine;
+            Program.Engine = engine;
+            engine.Run();
+        }
+
     }
 }

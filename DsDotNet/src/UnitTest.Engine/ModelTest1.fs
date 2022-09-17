@@ -24,7 +24,7 @@ module ModelTests1 =
 }
 """
 
-            let builder = new EngineBuilder(text, "Cpu")
+            let builder = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu"))
             let system = builder.Model.Systems |> Seq.exactlyOne
             let cpu = builder.Cpu
             cpu.Name === "Cpu"
@@ -65,7 +65,7 @@ module ModelTests1 =
 }
 """
             text <- text + sysP + cpus
-            let builder = new EngineBuilder(text, "Cpu")
+            let builder = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu"))
             ( builder.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
             let system = builder.Model.Systems |> Seq.find(fun s -> s.Name = "L")
             let cpu = builder.Cpu
@@ -129,7 +129,7 @@ module ModelTests1 =
 }
 """
             text <- text + cpus;
-            let builder = new EngineBuilder(text, "Cpu")
+            let builder = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu"))
             ( builder.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
             let system = builder.Model.Systems |> Seq.find(fun s -> s.Name = "L")
             let cpu = builder.Cpu
@@ -163,7 +163,7 @@ module ModelTests1 =
 """
             text <- text + sysP + cpus
 
-            let builder = new EngineBuilder(text, "Cpu")
+            let builder = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu"))
             ( builder.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
             let system = builder.Model.Systems |> Seq.find(fun s -> s.Name = "L")
             let cpu = builder.Cpu

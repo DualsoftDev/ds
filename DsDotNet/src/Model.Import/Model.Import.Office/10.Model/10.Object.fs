@@ -9,7 +9,6 @@ open System.Collections.Generic
 open DocumentFormat.OpenXml
 open Engine.Base
 open Engine.Base.DsType
-open Engine.Parser
 
 [<AutoOpen>]
 module Object =

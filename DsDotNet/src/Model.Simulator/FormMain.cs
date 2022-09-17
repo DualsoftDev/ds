@@ -3,6 +3,7 @@ using Engine.Common;
 using Engine.Common.FS;
 using Engine.Core;
 using Engine.Graph;
+using Engine.Parser;
 using Engine.Runner;
 using System;
 using System.Collections.Generic;
@@ -105,7 +106,7 @@ namespace Model.Simulator
             try
             {
                 var modelText = Tester.GetTextDiamond();
-                var eb = new EngineBuilder(modelText, "Cpu");
+                var eb = new EngineBuilder(modelText, ParserOptions.Create4Simulation("Cpu"));
             }
 
             catch (Exception ex)
@@ -136,7 +137,7 @@ namespace Model.Simulator
                     xtraTabControl_My.TabPages.Clear();
                     DicUI.Clear();
 
-                    _Engine = new EngineBuilder(_dsText, null).Engine;      // null cpu means simulation mode.
+                    _Engine = new EngineBuilder(_dsText, ParserOptions.Create4Simulation()).Engine;
 
                     _Engine.Model.Systems.ForEach(f =>
                     {

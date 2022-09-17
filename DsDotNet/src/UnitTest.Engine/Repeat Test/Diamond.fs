@@ -105,7 +105,7 @@ type Diamond(output1:ITestOutputHelper) =
         logInfo "============== Diamond Test"
         Log4NetHelper.ChangeLogLevel(log4net.Core.Level.Error)
 
-        let engine = EngineBuilder(text, "Cpu").Engine
+        let engine = EngineBuilder(text, ParserOptions.Create4Simulation("Cpu")).Engine
         Program.Engine <- engine
         engine.Run() |> ignore
 

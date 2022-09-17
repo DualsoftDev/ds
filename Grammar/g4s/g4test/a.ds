@@ -1,0 +1,15 @@
+[sys] EX = {
+    
+            [flow] F1_C1 = { TX > RX ;}
+            [flow] F1_C4 = { TX > RX ;}
+}
+
+
+
+[cpus] AllCpus = {
+    [cpu] Cpu = {
+        EX.F1_C1;
+        EX.F1_C4;
+    }
+}
+

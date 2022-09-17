@@ -1,0 +1,6 @@
+[sys] "my.favorite.system!!" = {
+    [flow] " my flow. " = {
+        R1 > R2;
+        C1     = {EX."이상한. flow".TX    ~    EX.F1_C1.RX}
+    }
+}

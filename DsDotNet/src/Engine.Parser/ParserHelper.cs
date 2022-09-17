@@ -1,14 +1,14 @@
-using Engine.Common;
-using System.Globalization;
-
 namespace Engine.Parser;
 
 public class ParserHelper
 {
-    public Dictionary<string, object> QualifiedInstancePathMap = new();
+    public Dictionary<(DsSystem, string), object> QpInstanceMap = new();
 
     /// <summary> Alias, CallPrototype 에 대한 path </summary>
-    public Dictionary<string, object> QualifiedDefinitionPathMap = new();
+    public Dictionary<(DsSystem, string), object> QpDefinitionMap = new();
+
+    // alias : ppt 도형으로 modeling 하면 문제가 되지 않으나, text grammar 로 서술할 경우, 
+    // 동일 이름의 call 등이 중복 사용되면, line 을 나누어서 기술할 때, unique 하게 결정할 수 없어서 도입.
     public Dictionary<DsSystem, Dictionary<string, string>> AliasNameMaps = new();
     public Dictionary<DsSystem, Dictionary<string, string[]>> BackwardAliasMaps = new();
 
@@ -19,32 +19,35 @@ public class ParserHelper
 
     public Dictionary<string, Cpu> FlowName2CpuMap;
 
-    public ParserHelper(bool isSimulationMode)
+    public ParserOptions ParserOptions { get; set; }
+    public ParserHelper(ParserOptions options)
     {
-        IsSimulationMode = isSimulationMode;
+        ParserOptions = options;
     }
 
-    internal string CurrentPath
+    internal string[] CurrentPathNameComponents
     {
         get
         {
-            if (_parenting != null)
-                return $"{_system.Name}.{_rootFlow.Name}.{_parenting.Name}";
-            if (_rootFlow != null)
-                return $"{_system.Name}.{_rootFlow.Name}";
-            if (_system != null)
-                return _system.Name;
-
-            throw new Exception("ERROR");
+            IEnumerable<string> helper()
+            {
+                if (_system != null)
+                    yield return _system.Name;
+                if (_rootFlow != null)
+                    yield return _rootFlow.Name;
+                if (_parenting != null)
+                    yield return _parenting.Name;
+            }
+            return helper().ToArray();
         }
     }
+    internal string CurrentPath => CurrentPathNameComponents.Combine();
 
-    public bool IsSimulationMode { get; set; }
 
 
-    public T FindObject<T>(string qualifiedName) where T : class => PickQualifiedPathObject<T>(qualifiedName);
+    public T FindObject<T>(DsSystem system, string qualifiedName) where T : class => PickQualifiedPathObject<T>(system, qualifiedName);
 
-    public T[] FindObjects<T>(string qualifiedNames) where T : class
+    public T[] FindObjects<T>(DsSystem system, string qualifiedNames) where T : class
     {
         if (qualifiedNames == "_")
             return Array.Empty<T>();
@@ -52,23 +55,28 @@ public class ParserHelper
         return
             qualifiedNames
                 .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(name => FindObject<T>(name))
+                .Select(name => FindObject<T>(system, name))
                 .ToArray()
                 ;
     }
 
 
-    T PickQualifiedPathObject<T>(string qualifiedName, Func<T> creator = null) where T : class
+    T PickQualifiedPathObject<T>(DsSystem system, string qualifiedName, Func<T> creator = null) where T : class
     {
-        var dict = QualifiedInstancePathMap;
-        if (dict.ContainsKey(qualifiedName))
-            return (T)dict[qualifiedName];
+        var key = (system, qualifiedName);
+        var dict = QpInstanceMap;
+        if (dict.ContainsKey(key))
+            return (T)dict[key];
 
         if (creator == null)
+        {
+            if (ParserOptions.AllowSkipExternalSegment)
+                return null;
             throw new Exception($"ERROR: failed to create {qualifiedName}");
+        }
 
         var t = creator();
-        dict[qualifiedName] = t;
+        dict[key] = t;
 
         return t;
     }
@@ -104,27 +112,3 @@ public class ParserHelper
 }
 
 
-public static class ParserExtension
-{
-    /// <summary>
-    /// DS 문법에서 사용하는 identifier (Segment, flow, call 등의 이름)가 적법한지 검사.
-    /// 적법하지 않으면 double quote 로 감싸주어야 한다.
-    /// </summary>
-    public static bool IsValidIdentifier(this string identifier)
-    {
-        if (identifier.IsNullOrEmpty())
-            throw new ArgumentNullException(nameof(identifier));
-        if (identifier == "_")
-            return true;
-
-        bool isHangul(char ch) => char.GetUnicodeCategory(ch) == UnicodeCategory.OtherLetter;
-        bool isValidStart(char ch) => ch == '_' || char.IsLetter(ch) || isHangul(ch);
-        bool isValid(char ch) => isValidStart(ch) || char.IsDigit(ch);
-
-        var chars = identifier.ToCharArray();
-        var first = chars[0];
-
-        return isValidStart(first) && chars.Skip(1).ForAll(isValid);
-    }
-    public static bool IsQuotationRequired(this string identifier) => !IsValidIdentifier(identifier);
-}

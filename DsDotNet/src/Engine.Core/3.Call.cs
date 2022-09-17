@@ -56,8 +56,7 @@ public class CallPrototype : CallBase
         flow.CallPrototypes.Add(this);
     }
 
-    public override string QualifiedName => $"{RootFlow.QualifiedName}.{Name}";
-
+    public override string[] NameComponents => RootFlow.NameComponents.Append(Name).ToArray();
     public Xywh Xywh { get; set; }
 
 }

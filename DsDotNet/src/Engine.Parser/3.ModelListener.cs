@@ -57,7 +57,7 @@ class ModelListener : dsBaseListener
     {
         var nameComponentss =
             enumerateChildren<SegmentContext>(ctx)
-            .Select(segCtx => enumerateChildren<IdentifierContext>(segCtx).Select(idf => idf.GetText()).ToArray())
+            .Select(collectNameComponents)
             .ToArray()
             ;
 

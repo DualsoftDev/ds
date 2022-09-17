@@ -86,6 +86,11 @@ class DsParser
     }
 
 
+    public static string[] collectNameComponents(IParseTree from) =>
+        enumerateChildren<IdentifierContext>(from).Select(idf => idf.GetText()).ToArray();
+
+
+
 
     public static ParserResult getParseResult(dsParser parser)
     {

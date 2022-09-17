@@ -13,18 +13,36 @@ enum NodeType
     callAlias,
 };
 
-class Node
+abstract class NodeBase
 {
-    public string id;
     public string label;
-    public string parentId;
+    public string[] parentIds;
     public NodeType type;
-    public Node(string id, string label, string parentId, NodeType type)
+    public NodeBase(string label, string[] parentIds, NodeType type)
     {
-        this.id = id;
         this.label = label;
-        this.parentId = parentId;
+        this.parentIds = parentIds;
         this.type = type;
+    }
+}
+
+class Node : NodeBase
+{
+    public string[] ids;
+    public Node(string[] ids, string label, string[] parentIds, NodeType type)
+        : base(label, parentIds, type)
+    {
+        this.ids = ids;
+    }
+
+}
+class NodeConjunction : NodeBase
+{
+    public string[][] idss;
+    public NodeConjunction(string[][] idss, string label, string[] parentIds, NodeType type)
+        : base(label, parentIds, type)
+    {
+        this.idss = idss;
     }
 }
 
@@ -90,7 +108,7 @@ partial class ElementsListener : dsBaseListener
     private string flowOfName;      // [flow of A]F={..} -> A
     private List<ParserRuleContext> allParserRules;
 
-    Dictionary<string, Node> nodes = new Dictionary<string, Node>();
+    Dictionary<string, NodeBase> nodes = new Dictionary<string, NodeBase>();
 
 
 

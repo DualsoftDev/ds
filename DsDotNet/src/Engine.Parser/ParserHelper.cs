@@ -1,4 +1,6 @@
 using Engine.Common;
+
+using System.Collections.Generic;
 using System.Globalization;
 
 namespace Engine.Parser;
@@ -29,14 +31,16 @@ public class ParserHelper
     {
         get
         {
-            if (_parenting != null)
-                return new[] {_system.Name, _rootFlow.Name, _parenting.Name};
-            if (_rootFlow != null)
-                return new[] { _system.Name, _rootFlow.Name};
-            if (_system != null)
-                return new[] { _system.Name };
-
-            throw new Exception("ERROR");
+            IEnumerable<string> helper()
+            {
+                if (_system != null)
+                    yield return _system.Name;
+                if (_rootFlow != null)
+                    yield return _rootFlow.Name;
+                if (_parenting != null)
+                    yield return _parenting.Name;
+            }
+            return helper().ToArray();
         }
     }
     internal string CurrentPath => CurrentPathNameComponents.Combine();

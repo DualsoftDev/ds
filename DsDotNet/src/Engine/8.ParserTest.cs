@@ -325,7 +325,7 @@ namespace Engine
             var text = @"
 [sys] MY = {
     [flow] Rear = {     
-        Á¦Ç°°ø±Þ = {
+        ì œí’ˆê³µê¸‰ = {
             Rear_Con_W > Rear_Pos_Sen;
             Rear_Cyl_Push_ADV > Rear_Cyl_Push_RET;
             Rear_Cyl_Push_RET <||> Rear_Cyl_Push_ADV;
@@ -337,7 +337,7 @@ namespace Engine
         Rear_Pos_Sen     = {_    ~    EX.Rear_Rear_Pos_Sen.RX}
     }
     [flow] Work = {     
-        ÀÛ¾÷°øÁ¤ = {
+        ìž‘ì—…ê³µì • = {
             Front_1Stopper_Adv <||> Front_1Stopper_RET;
             Front_1Stopper_Adv > Front_1pos_Sen;
             Front_1pos_Sen > Front_Usb_Cyl_ADV;
@@ -357,9 +357,9 @@ namespace Engine
         Front_1pos_Sen     = {_    ~    EX.Work_Front_1pos_Sen.RX}
     }
     [flow] Model_Auto = {     
-        SSSS > Rear.Á¦Ç°°ø±Þ;
-        Work.ÀÛ¾÷°øÁ¤ > Front.¹èÃâ°øÁ¤;
-        Rear.Á¦Ç°°ø±Þ > Work.ÀÛ¾÷°øÁ¤;
+        SSSS > Rear.ì œí’ˆê³µê¸‰;
+        Work.ìž‘ì—…ê³µì • > Front.ë°°ì¶œê³µì •;
+        Rear.ì œí’ˆê³µê¸‰ > Work.ìž‘ì—…ê³µì •;
     }
     [emg_in] = {
         EMGBTN = { Work; Model_Auto };
@@ -455,11 +455,11 @@ namespace Engine
 [sys] ""my.favorite.system!!"" = {
     [flow] "" my flow. "" = {
         R1 > R2;
-        C1     = {EX.""ÀÌ»óÇÑ. flow"".TX    ~    EX.""ÀÌ»óÇÑ. flow"".RX}
+        C1     = {EX.""ì´ìƒí•œ. flow"".TX    ~    EX.""ì´ìƒí•œ. flow"".RX}
     }
 }
 [sys] EX = {
-    [flow] ""ÀÌ»óÇÑ. flow"" = {    
+    [flow] ""ì´ìƒí•œ. flow"" = {    
         TX;
         RX;
     }
@@ -469,6 +469,25 @@ namespace Engine
             Program.Engine = engine;
             engine.Run();
         }
+
+        public static void TestParseExternalSegmentCall()
+        {
+            var text = @"
+[sys] MY = {
+    [flow] FFF = {     
+        EX.""FFF.EXT"".EX > R2;
+    }
+}
+
+[sys] EX = {
+    [flow] ""FFF.EXT"" = { EX; }
+}
+";
+            var engine = new EngineBuilder(text, ParserOptions.Create4Simulation()).Engine;
+            Program.Engine = engine;
+            engine.Run();
+        }
+
 
     }
 }

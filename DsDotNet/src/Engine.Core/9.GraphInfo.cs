@@ -1,3 +1,4 @@
+using Engine.Core.Obsolete;
 using QuickGraph;
 
 namespace Engine.Core;

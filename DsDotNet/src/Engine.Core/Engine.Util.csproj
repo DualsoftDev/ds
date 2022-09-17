@@ -6,10 +6,15 @@
     <LangVersion>10.0</LangVersion>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="0.Interfaces.csx" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Obsolete\0.Interfaces.csx" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="System.Reactive" Version="5.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Engine.Base\Engine.Base.fsproj" />
     <ProjectReference Include="..\Engine.Common\Engine.Common.csproj" />
   </ItemGroup>
   <ItemGroup>

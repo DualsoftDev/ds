@@ -8,12 +8,12 @@ open System.Collections.Concurrent
 open System.Collections.Generic
 open Microsoft.Office.Interop.Excel
 open Engine.Common.FS
-open Engine.Base
+open Engine.Core
 
 [<AutoOpen>]
 module ImportIOTable =
 
-    let ApplyExcel(path:string, sys:DsSystem) =
+    let ApplyExcel(path:string, sys:DsSys) =
         let FromExcel(path:string) =
             
             let excelApp = new ApplicationClass(Visible = false)

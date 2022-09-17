@@ -3,12 +3,13 @@ namespace Model.Import.Office
 
 open System
 open System.Linq
-open Engine.Base
-open Engine.Base.DsType
+open Engine.Core
+open System.Collections.Concurrent
 
-
+ 
 [<AutoOpen>]
-module Base =
+module DsBase =
+  
     /// Seg Container
     [<AbstractClass>]
     type SystemBase(name)  =
@@ -21,7 +22,7 @@ module Base =
     /// Seg Vertex
     [<AbstractClass>]
     type SegBase(name,  baseSystem:SystemBase) =
-        let noEdgeBaseSegs  = ConcurrentHash<SegBase>()
+        let noEdgeBaseSegs  = ConcurrentDictionary<SegBase, SegBase>()
         interface IVertex with
             member x.Name: string = x.Name
 
@@ -29,7 +30,7 @@ module Base =
         ///ppt에서 불러온 pptShape.Key와 같음
         member x.BaseSys = baseSystem
         member x.NoEdgeBaseSegs = noEdgeBaseSegs.Values |> Seq.sortBy(fun seg -> seg.Name)
-        member x.AddSegNoEdge(seg) = noEdgeBaseSegs.TryAdd(seg) |> ignore 
+        member x.AddSegNoEdge(seg) = noEdgeBaseSegs.TryAdd(seg, seg) |> ignore 
         member x.RemoveSegNoEdge(seg) = noEdgeBaseSegs.TryRemove(seg) |> ignore 
 
     /// Seg edge

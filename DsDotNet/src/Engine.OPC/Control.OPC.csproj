@@ -11,7 +11,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Engine.Common\Engine.Common.csproj" />
-    <ProjectReference Include="..\Engine.Core\Engine.Core.csproj" />
+    <ProjectReference Include="..\Engine.Core\Engine.Util.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Confluent.Kafka">

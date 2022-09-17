@@ -1,4 +1,5 @@
-using Engine.Base;
+
+using Engine.Core.Obsolete;
 
 namespace Engine.Core;
 
@@ -135,7 +136,7 @@ public static class FlowExtension
     {
         var e = edge;
         foreach (var s in e.Sources)
-            yield return new Causal(s, e.Target, DsType.EdgeCausalType(e.Operator))
+            yield return new Causal(s, e.Target, null/*DsType.EdgeCausalType(e.Operator)*/)
                 ;
     }
 

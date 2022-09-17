@@ -17,7 +17,7 @@ module Util =
                         Trace.WriteLine ($"{DateTime.Now.Second}.{DateTime.Now.Millisecond} {text}") 
 
   
-    /// ConcurrentDictionary 를 이용한 hash
+  /// ConcurrentDictionary 를 이용한 hash
     type ConcurrentHash<'T>() =
         inherit ConcurrentDictionary<'T, 'T>()
         member x.TryAdd(item:'T) = x.TryAdd(item, item)

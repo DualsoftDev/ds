@@ -1,4 +1,5 @@
-using Engine.Base;
+
+using Engine.Core.Obsolete;
 
 namespace Engine.Core;
 
@@ -14,7 +15,7 @@ public class Child : Named, IVertex, ICoin
     public bool IsCall => Coin is SubCall;
     public bool IsAlias { get; set; }
     // 부모가 바라본 child 상태
-    public DsType.Status4 Status
+    public DsType.Status4Temp Status
     {
         get => Parent.ChildStatusMap[this].Item2;
         set

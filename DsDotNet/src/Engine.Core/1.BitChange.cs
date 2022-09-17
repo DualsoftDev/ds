@@ -1,5 +1,5 @@
-using Engine.Base;
 using System.Threading.Tasks;
+using Engine.Core.Obsolete;
 
 namespace Engine.Core;
 
@@ -64,20 +64,20 @@ public record OpcTagChange
 
 public record SegmentStatusChange
 {
-    public SegmentStatusChange(SegmentBase segment, DsType.Status4 status)
+    public SegmentStatusChange(SegmentBase segment, DsType.Status4Temp status)
     {
         Segment = segment;
         Status = status;
     }
 
     public SegmentBase Segment { get; }
-    public DsType.Status4 Status { get; set; }
+    public DsType.Status4Temp Status { get; set; }
 }
 
 
 public record ChildStatusChange
 {
-    public ChildStatusChange(Child child, DsType.Status4 status, bool isFlipped = false)
+    public ChildStatusChange(Child child, DsType.Status4Temp status, bool isFlipped = false)
     {
         Child = child;
         Status = status;
@@ -85,6 +85,6 @@ public record ChildStatusChange
     }
 
     public Child Child { get; }
-    public DsType.Status4 Status { get; }
+    public DsType.Status4Temp Status { get; }
     public bool IsFlipped { get; }
 }

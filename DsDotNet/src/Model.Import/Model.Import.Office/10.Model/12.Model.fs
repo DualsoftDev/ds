@@ -9,16 +9,16 @@ module Model =
     /// 모델 생성시, ActiveSystem은 반드시 시스템 중 하나 지정되어야 한다.(AddEdge시 Active 기준 부모 탐색)
     type DsModel(name:string) =
         
-        let systems =  ConcurrentHash<DsSystem>()
+        let systems =  ConcurrentHash<DsSys>()
 
         member x.Path = name
         member x.Name = Path.GetFileNameWithoutExtension(name) 
      
         //모델에 시스템 등록 및 삭제
-        member x.Add(sys:DsSystem) = systems.TryAdd(sys)
-        member x.AddRange(newSystems:DsSystem seq) = 
+        member x.Add(sys:DsSys) = systems.TryAdd(sys)
+        member x.AddRange(newSystems:DsSys seq) = 
             newSystems |> Seq.iter (fun sys -> x.Add(sys) |> ignore)
-        member x.Remove(sys:DsSystem) = systems.TryRemove(sys)
+        member x.Remove(sys:DsSys) = systems.TryRemove(sys)
 
         /// TotalSystems
         member x.TotalSystems      = systems.Values

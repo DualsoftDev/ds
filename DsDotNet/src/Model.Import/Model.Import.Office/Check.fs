@@ -6,13 +6,13 @@ open PPTX
 open System
 open System.Collections.Concurrent
 open Engine.Common.FS
-open Engine.Base
+open Engine.Core
 
 [<AutoOpen>]
 module Check =
 
         let GetDemoModel(sysName:string) = 
-            let sys = DsSystem(sysName, true)
+            let sys = DsSys(sysName, true)
             let flow = Flo("P0",  Int32.MaxValue, sys)
             sys.Flows.TryAdd(flow.Page, flow) |> ignore
             flow.AddEdge( MEdge(Seg("START", sys, EX), Seg("시작인과", sys, MY), EdgeCausal.SEdge))

@@ -1,3 +1,5 @@
+using Engine.Core.Obsolete;
+
 namespace Engine.Core;
 
 /// <summary> 다른 bit 요소(monitoringBits)에 의해서 값이 변경될 수 있는 bit 에 대한 추상 class </summary>

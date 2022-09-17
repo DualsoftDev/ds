@@ -5,8 +5,8 @@ open System.Runtime.CompilerServices
 open System
 open System.Reactive.Subjects
 
-open Engine.Base
-open Engine.Base.DsType
+open Engine.Core
+open Engine.Core.DsType
 
 
 [<AutoOpen>]

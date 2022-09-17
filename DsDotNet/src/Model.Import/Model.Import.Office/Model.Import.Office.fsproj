@@ -18,8 +18,6 @@
   <ItemGroup>
     <Compile Include="Util\ImportType.fs" />
     <Compile Include="Util\Util.fs" />
-    <Compile Include="00.Base\01.Interface.fs" />
-    <Compile Include="00.Base\02.Base.fs" />
     <Compile Include="00.Base\03.Event, Util.fs" />
     <Compile Include="10.Model\10.Object.fs" />
     <Compile Include="10.Model\12.Model.fs" />
@@ -42,7 +40,7 @@
 
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Engine.Base\Engine.Base.fsproj" />
+    <ProjectReference Include="..\..\Engine.Base\Engine.Core.fsproj" />
     <ProjectReference Include="..\..\Engine.Common.FS\Engine.Common.FS.fsproj" />
     <ProjectReference Include="..\..\Engine.Parser\Engine.Parser.csproj" />
   </ItemGroup>

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using static Engine.Base.DsType;
+using static Engine.Core.DsType;
 using static Model.Import.Office.Model;
 using static Model.Import.Office.Object;
 

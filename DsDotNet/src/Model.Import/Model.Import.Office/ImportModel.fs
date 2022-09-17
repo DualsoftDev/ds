@@ -11,7 +11,7 @@ open System.Collections.Generic
 open System
 open Microsoft.FSharp.Collections
 open Engine.Common.FS
-open Engine.Base
+open Engine.Core
 open Engine.Parser
 
 [<AutoOpen>]
@@ -22,7 +22,7 @@ module ImportModel =
         let dicSeg = ConcurrentDictionary<string, Seg>()
         let dicEdge = ConcurrentDictionary<MEdge, Seg>()  //childEdges, parentSeg
         let model =  DsModel(doc.FullPath)
-        let mySys= DsSystem("MY", true)
+        let mySys= DsSys("MY", true)
 
         let getParent(edge:pptEdge) = 
            Check.SameParent(doc, edge)

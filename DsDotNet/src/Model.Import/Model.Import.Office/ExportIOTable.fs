@@ -9,7 +9,7 @@ open System.Drawing
 open System.Reflection
 open System.Data.OleDb
 open Engine.Common.FS
-open Engine.Base
+open Engine.Core
 
 [<AutoOpen>]
 module ExportIOTable =

@@ -1,4 +1,4 @@
-using Engine.Base;
+using Engine.Core;
 using Engine.Common;
 using Engine.Common.FS;
 using Model.Import.Office;
@@ -181,7 +181,7 @@ namespace Dual.Model.Import
                   );
         }
 
-        internal void CreateNewTabViewer(DsSystem sys, bool isDemo = false)
+        internal void CreateNewTabViewer(DsSys sys, bool isDemo = false)
         {
             List<Flo> flows = new List<Flo>();
             if (isDemo)

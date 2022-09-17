@@ -33,7 +33,7 @@
 		<PackageReference Include="Antlr4BuildTasks" Version="8.17" PrivateAssets="all" />
 	</ItemGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\Engine.Core\Engine.Core.csproj" />
+		<ProjectReference Include="..\Engine.Core\Engine.Util.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 		<Reference Include="log4net">

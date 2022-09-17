@@ -10,7 +10,6 @@ open System.Web.Configuration
 open Engine.Common
 open System.Collections.Generic
 open System.Threading.Tasks
-open Engine.Base
 
 [<AutoOpen>]
 module VirtualParentSegmentModule =

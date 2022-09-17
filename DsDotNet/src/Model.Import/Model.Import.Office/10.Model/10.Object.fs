@@ -7,8 +7,8 @@ open System.Diagnostics
 open System.Collections.Concurrent
 open System.Collections.Generic
 open DocumentFormat.OpenXml
-open Engine.Base
-open Engine.Base.DsType
+open Engine.Core
+open Engine.Core.DsType
 open Engine.Parser
 
 [<AutoOpen>]
@@ -30,7 +30,7 @@ module Object =
     and
         /// 사용자가 모델링을 통해서 만든 segment (SegEditor = User)
         [<DebuggerDisplay("{FullName}")>]
-        Seg(name:string, baseSystem:DsSystem, editor:Editor, bound:Bound, nodeCausal:NodeCausal, ownerFlow:string, bDummy:bool) as this =
+        Seg(name:string, baseSystem:DsSys, editor:Editor, bound:Bound, nodeCausal:NodeCausal, ownerFlow:string, bDummy:bool) as this =
             inherit SegBase(name,  baseSystem)
             /// modeled edges
             let mutable status4 = Status4.Homing
@@ -265,7 +265,7 @@ module Object =
     and
         [<DebuggerDisplay("{Name}")>]
         /// System 내부 Seg의 내외부 Seg간 시작/리셋 연결 정보 구조
-        DsSystem(name:string, active:bool)  =
+        DsSys(name:string, active:bool)  =
             inherit SystemBase(name)
             let mutable sysSeg: System.Lazy<Seg> = null
             let flows  = ConcurrentDictionary<int, Flo>()
@@ -289,8 +289,8 @@ module Object =
                 |EmergencyBTN-> if(emgSet.ContainsKey(name))   then emgSet.[name].Add(btnFlow)   |>ignore else emgSet.TryAdd(name,   [btnFlow] |> List) |>ignore
 
 
-            new (name:string)       = new DsSystem(name,  false)
-            new (name, active:bool) = new DsSystem(name,  active)
+            new (name:string)       = new DsSys(name,  false)
+            new (name, active:bool) = new DsSys(name,  active)
 
             member x.SysSeg =
                 if isNull sysSeg then

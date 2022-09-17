@@ -1,4 +1,4 @@
-namespace Engine.Core;
+namespace Engine.Core.Obsolete;
 
 
 public interface IVertex : IBit { }

@@ -29,7 +29,7 @@ namespace Dual.Model.Import
         {
             Event.SegSubject.Subscribe(rx =>
             {
-                var sys = rx.Seg.BaseSys as DsSystem;
+                var sys = rx.Seg.BaseSys as DsSys;
                 var seg = rx.Seg as Seg;
 
                 sys.RootFlow().ToList().ForEach(flow =>

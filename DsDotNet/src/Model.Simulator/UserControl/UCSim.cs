@@ -1,12 +1,13 @@
 using Engine.Common;
 using Engine.Core;
+using Engine.Core.Obsolete;
 using Microsoft.Msagl.Drawing;
 using Microsoft.Msagl.GraphViewerGdi;
 using Microsoft.Msagl.Layout.Layered;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
-using static Engine.Base.DsType;
+using static Engine.Core.DsType;
 using Color = Microsoft.Msagl.Drawing.Color;
 using Edge = Microsoft.Msagl.Drawing.Edge;
 

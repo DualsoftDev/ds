@@ -1,13 +1,13 @@
-using Engine.Base;
+using Engine.Core;
 using Engine.Common;
 using Engine.Common.FS;
-using Engine.Core;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using static Model.Import.Office.Object;
 
 namespace Model.Simulator
 {
@@ -82,7 +82,7 @@ namespace Model.Simulator
             //    );
         }
 
-        internal void CreateNewTabViewer(DsSystem sys)
+        internal void CreateNewTabViewer(DsSys sys)
         {
 
             var flows = sys.RootFlows;

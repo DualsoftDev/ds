@@ -262,14 +262,14 @@ public class Tester
             var state = ssc.Status;
             if (qName == "L_F_Main")
             {
-                if (state == DsType.Status4.Finish)
+                if (state == DsType.Status4Temp.Finish)
                 {
                     counter++;
                     Console.WriteLine($"[{counter}] After finishing Main segment : AdvanceReturn");
                     LogInfo($"-------------------------- [{counter}] After finishing Main segment : AdvanceReturn");
                     data.Write(resetTag, true);
                 }
-                else if (ssc.Status == DsType.Status4.Ready)
+                else if (ssc.Status == DsType.Status4Temp.Ready)
                 {
                     Console.Beep(10000, 200);
                     Thread.Sleep(1000);
@@ -467,7 +467,7 @@ public class Tester
             var state = ssc.Status;
             if (qName == "VPS_L_F_Main")
             {
-                if (state == DsType.Status4.Finish)
+                if (state == DsType.Status4Temp.Finish)
                 {
                     LogDebug($"Resetting externally {resetTag}");
                     data.Write(resetTag, true);
@@ -477,7 +477,7 @@ public class Tester
 
             if (qName == "L_F_Main")
             {
-                if (state == DsType.Status4.Finish)
+                if (state == DsType.Status4Temp.Finish)
                 {
                     counter++;
                     //if (counter++ % 100 == 0)
@@ -488,7 +488,7 @@ public class Tester
                     }
                     //data.Write(resetTag, true);
                 }
-                else if (ssc.Status == DsType.Status4.Ready)
+                else if (ssc.Status == DsType.Status4Temp.Ready)
                 {
                     Console.Beep(10000, 200);
                     Thread.Sleep(1000);
@@ -737,7 +737,7 @@ public class Tester
 
             if (qName == "L_F_Main")
             {
-                if (state == DsType.Status4.Finish)
+                if (state == DsType.Status4Temp.Finish)
                 {
                     counter++;
                     //if (counter++ % 100 == 0)
@@ -748,7 +748,7 @@ public class Tester
                     }
                     data.Write(resetTag, true);
                 }
-                else if (ssc.Status == DsType.Status4.Ready)
+                else if (ssc.Status == DsType.Status4Temp.Ready)
                 {
                     Console.Beep(10000, 200);
                     Thread.Sleep(1000);
@@ -928,7 +928,7 @@ public class Tester
         bool first = true;
         var finished =
             Global.SegmentStatusChangedSubject
-            .Where(ssc => ssc.Status == DsType.Status4.Finish && ssc.Segment.GetType().Name == "Segment")
+            .Where(ssc => ssc.Status == DsType.Status4Temp.Finish && ssc.Segment.GetType().Name == "Segment")
             ;
         var _counterSubscription = finished.Subscribe(ssc =>
             {

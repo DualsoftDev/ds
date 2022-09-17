@@ -80,8 +80,7 @@ module Array =
     let filteri (f:int -> 't -> bool) (xs: array<'t>) =
         xs |> Seq.filteri f |> Array.ofSeq
 
-    let cast<'a> source =
-        source |> Seq.cast<'a> |> Array.ofSeq
+    let append<'a> (xs:'a array) (x:'a) = xs.Append(x).ToArray()
 
     /// 원본 array arr 의 pos 위치에 값 value 를 삽입하여 생성한 사본 array 반환
     let insertAt (arr: array<'t>) (pos:int) (value:'t) =

@@ -488,6 +488,31 @@ namespace Engine
             engine.Run();
         }
 
+        public static void TestParseAliases()
+        {
+            var text = @"
+[sys] my = {
+    [alias] = {
+        F.Ap = { Ap1; Ap2; Ap3; }
+        my.F.Am = { Am1; Am2; Am3; }    // system name optional
+        A.F.Vp = {AVp1;}
+    }
+    [flow] F = {
+        Main = {
+            // 정보로서의 Call 상호 리셋
+            Ap1 <||> Am1;
+            Ap1 > Am1, Ap2 > Am2;
+        }
+        Ap = {A.F.Vp ~ A.F.Sp}
+        Am = {A.F.Vm ~ A.F.Sm}
+    }
+}
+
+" + Tester.CreateCylinder("A");
+            var engine = new EngineBuilder(text, ParserOptions.Create4Simulation()).Engine;
+            Program.Engine = engine;
+            engine.Run();
+        }
 
     }
 }

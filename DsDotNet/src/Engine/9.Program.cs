@@ -42,6 +42,7 @@ class Program
         //ParserTest.TestSerialize();
         //ParserTest.TestError();
         //ParserTest.TestParseQualifiedName();
-        ParserTest.TestParseExternalSegmentCall();
+        //ParserTest.TestParseExternalSegmentCall();
+        ParserTest.TestParseAliases();
     }
 }

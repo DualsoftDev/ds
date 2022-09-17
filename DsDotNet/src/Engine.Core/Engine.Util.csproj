@@ -7,8 +7,10 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="0.Interfaces.csx" />
+    <None Remove="0.Named.csx" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Obsolete\0.Named.csx" />
     <Compile Include="Obsolete\0.Interfaces.csx" />
   </ItemGroup>
   <ItemGroup>

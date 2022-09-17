@@ -1,3 +1,5 @@
+using Engine.Core.Obsolete;
+
 namespace Engine.Core;
 
 public class DsSystem : Named

@@ -1,6 +1,4 @@
-using Engine.Core.Obsolete;
-
-namespace Engine.Core;
+namespace Engine.Core.Obsolete;
 
 
 [DebuggerDisplay("{ToText()}")]
@@ -12,7 +10,7 @@ public class Named : INamed
     {
         Name = name;
     }
-    public virtual string ToText() => $"{Name}[{this.GetType().Name}]";
+    public virtual string ToText() => $"{Name}[{GetType().Name}]";
     public override string ToString() => ToText();
 }
 

@@ -8,11 +8,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Compile Include="Interface.fs" />
-		<Compile Include="InterfaceClass.fs" />
 		<Compile Include="DsText.fs" />
 		<Compile Include="DsType.fs" />
-		<Compile Include="DsBase.fs" />
+		<Compile Include="Interface.fs" />
+		<Compile Include="InterfaceClass.fs" />
 	</ItemGroup>
 
 	<ItemGroup>

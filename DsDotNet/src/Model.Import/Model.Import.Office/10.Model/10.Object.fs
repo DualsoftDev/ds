@@ -35,6 +35,7 @@ module Object =
             /// modeled edges
             let mutable status4 = Status4.Homing
             let mEdges  = ConcurrentHash<MEdge>()
+            let noEdgeBaseSegs  = ConcurrentDictionary<SegBase, SegBase>()
 
             new (name, baseSystem, nodeCausal) = Seg (name, baseSystem, Editor.User,   ThisFlow, nodeCausal, "", false)
             new (name, baseSystem)             = Seg (name, baseSystem, Editor.Engine, ThisFlow, MY        , "", false)
@@ -122,6 +123,9 @@ module Object =
             member val S : string option = None  with get, set
             member val R : string option = None  with get, set
             member val E : string option = None  with get, set
+            member x.NoEdgeBaseSegs = noEdgeBaseSegs.Values |> Seq.sortBy(fun seg -> seg.Name)
+            member x.AddSegNoEdge(seg) = noEdgeBaseSegs.TryAdd(seg, seg) |> ignore 
+            member x.RemoveSegNoEdge(seg) = noEdgeBaseSegs.TryRemove(seg) |> ignore 
 
             member x.TextStart = if(x.S.IsSome) then x.S.Value else ""
             member x.TextReset = if(x.R.IsSome) then x.R.Value else ""
@@ -173,6 +177,7 @@ module Object =
             let interlocks  = ConcurrentDictionary<string, MEdge>()
             let setIL  = ConcurrentHash<HashSet<Seg>>()
             let aliasSet  = ConcurrentDictionary<string, HashSet<string>>()
+            let noEdgeBaseSegs  = ConcurrentDictionary<SegBase, SegBase>()
 
             let rec getLink(start:Seg, find:HashSet<Seg>, full:HashSet<Seg>) =
                 let update (edge:MEdge) =
@@ -190,6 +195,9 @@ module Object =
                 |> Seq.iter(fun edge -> 
                                 if(find.Contains(edge.Source)|>not || find.Contains(edge.Target)|>not)
                                 then update (edge);getLink (edge.Source, find, full))
+            member x.NoEdgeBaseSegs = noEdgeBaseSegs.Values |> Seq.sortBy(fun seg -> seg.Name)
+            member x.AddSegNoEdge(seg) = noEdgeBaseSegs.TryAdd(seg, seg) |> ignore 
+            member x.RemoveSegNoEdge(seg) = noEdgeBaseSegs.TryRemove(seg) |> ignore 
 
             member x.Name = name
             member x.ToText() =  name

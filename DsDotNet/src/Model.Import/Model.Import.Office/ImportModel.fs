@@ -12,7 +12,7 @@ open System
 open Microsoft.FSharp.Collections
 open Engine.Common.FS
 open Engine.Core
-open Engine.Parser
+open Engine.Util
 
 [<AutoOpen>]
 module ImportModel =

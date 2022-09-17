@@ -191,8 +191,8 @@ namespace Dual.Model.Import
             try
             {
                 ExportTextModel(Color.Transparent, _dsText, true);
-                var engine = new EngineBuilder(_dsText, null).Engine;
-                MSGWarn("언어체크 성공 !!!!");
+                //var engine = new EngineBuilder(_dsText, null).Engine;
+                //MSGWarn("언어체크 성공 !!!!");
             }
 
             catch (Exception ex)

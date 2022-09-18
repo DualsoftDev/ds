@@ -33,12 +33,24 @@ public class ErrorListener<Symbol> : ConsoleErrorListener<Symbol>
         int col, string msg, RecognitionException e)
     {
         var dsFile = recognizer.GrammarFileName;
-        var dsParser = recognizer as dsParser;
-        var ambient = dsParser.RuleContext.GetText();
-        base.SyntaxError(output, recognizer, offendingSymbol, line, col, msg, e);
-        Global.Logger.Error($"Parser error on [{line}:{col}]@{dsFile}: {msg}");
-        Errors.Add(new ParserError(line, col, msg, ambient));
-        if (_throwOnerror)
-            throw new ParserException($"{msg} near {ambient}", line, col);
+        switch (recognizer)
+        {
+            case dsParser parser:
+                var ambient = parser.RuleContext.GetText();
+                base.SyntaxError(output, recognizer, offendingSymbol, line, col, msg, e);
+                Global.Logger.Error($"Parser error on [{line}:{col}]@{dsFile}: {msg}");
+                Errors.Add(new ParserError(line, col, msg, ambient));
+                if (_throwOnerror)
+                    throw new ParserException($"{msg} near {ambient}", line, col);
+                break;
+            case dsLexer lexer:
+                Global.Logger.Error($"Lexer error on [{line}:{col}]@{dsFile}: {msg}");
+                Errors.Add(new ParserError(line, col, msg, ""));
+                if (_throwOnerror)
+                    throw new ParserException($"Lexical error : {msg}", line, col);
+                break;
+            default:
+                throw new Exception("ERROR");
+        }
     }
 }

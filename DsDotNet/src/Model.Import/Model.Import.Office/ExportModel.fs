@@ -12,7 +12,7 @@ module ExportModel =
 
     let ToText(model:DsModel) =
                                
-        let callText(seg:Seg) =
+        let callText(seg:MSeg) =
             let callName =  seg.SegName
             let tx, rx =
                 let txs = HashSet<string>()
@@ -31,7 +31,7 @@ module ExportModel =
             let rx = if(rx = "") then "_" else rx
             sprintf "\t\t%s\t = {%s\t~\t%s}" callName tx rx
 
-        let addressText(seg:Seg, index) =
+        let addressText(seg:MSeg, index) =
             let callPath =  if(seg.Bound = ExBtn) then seg.SegName else seg.ToCallText()
             if(seg.NodeCausal = EX)
             then 
@@ -59,14 +59,14 @@ module ExportModel =
             
             mixEdges 
             
-        let subEdgeText(seg:Seg) =
+        let subEdgeText(seg:MSeg) =
             seq {
                 let mergeEdges = mergeEdges  seg.MEdges
                 for srcs, edge, tgt in mergeEdges do
                     yield sprintf "\t\t\t%s %s %s;"  (srcs |> String.concat ", ") (edge.Causal.ToText()) (tgt)
             }
 
-        let subNodeText(seg:Seg) =
+        let subNodeText(seg:MSeg) =
             seq {
                 for segSub in seg.NoEdgeSegs do
                     yield sprintf "\t\t\t%s;" (segSub.ToTextInFlow())
@@ -92,7 +92,7 @@ module ExportModel =
  
             } 
 
-        let segmentText(segs:Seg seq) = 
+        let segmentText(segs:MSeg seq) = 
             seq {
                 for seg in segs do
                     if(seg.MEdges.Any() || seg.NoEdgeSegs.Any())    
@@ -228,7 +228,7 @@ module ExportModel =
       
       
         let exSystem = 
-            let getTRXs (segs: Seg seq ,skip:NodeCausal, bReset:bool) = 
+            let getTRXs (segs: MSeg seq ,skip:NodeCausal, bReset:bool) = 
                 seq {
                         for seg in segs do
                             for index in [|1..seg.MaxCnt|] do

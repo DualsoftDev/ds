@@ -1,6 +1,8 @@
 // Copyright (c) Dual Inc.  All Rights Reserved.
 namespace Engine.Core
 
+open System.Collections.Generic
+
 [<AutoOpen>]
 module Interface =
 
@@ -14,21 +16,27 @@ module Interface =
         inherit IBit
         inherit INamed
 
+   
     /// 정의(2/4) 서쪽: DS 모델은 원인(들)/결과의 관계를 갖는다.
-    type IEdge =
-        abstract SourceVertexes:IVertex seq
-        abstract TargetVertex  :IVertex
-        
+    type IEdge = 
+        abstract Source  :IVertex 
+        abstract Target  :IVertex
+        abstract Causal  :EdgeCausal
+
     /// 정의(3/4) 동쪽: DS 모델은 능동행위가 수동행위를 포함한다.
     type IActive =
         abstract Active:IVertex 
-        abstract Passives:IVertex seq
+        abstract Passives:IVertex HashSet
 
     /// 정의(4/4) 북쪽: DS 모델은 고유 흐름을 갖는다.
     type IFlow =  abstract IsDag:bool;
     
 
-    //DS 모델요소
+
+    type ICall = 
+        abstract TXs  :IVertex HashSet 
+        abstract RXs  :IVertex HashSet
+    
     type ISystem    = inherit INamed
     type ICpu       = inherit INamed
     type IAlias     = inherit INamed

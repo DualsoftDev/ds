@@ -27,7 +27,7 @@ module ExportIOTable =
         dt.Columns.Add("E(Input)" , typeof<string>) |>ignore
 
 
-        let rowItems(causal:NodeCausal, seg:Seg, trx:string) =
+        let rowItems(causal:NodeCausal, seg:MSeg, trx:string) =
             let flowName, name =  seg.OwnerFlow, seg.Name
             match causal with
             |TR ->  ["주소"; flowName; name; trx; "bit"; seg.TextStart; "'-"          ; seg.TextEnd]

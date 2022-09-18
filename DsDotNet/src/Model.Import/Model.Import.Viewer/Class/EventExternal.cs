@@ -1,5 +1,5 @@
 using Engine.Common.FS;
-using Model.Import.Office;
+using Engine.Core;
 using System;
 using System.Linq;
 using static Model.Import.Office.Object;
@@ -27,10 +27,10 @@ namespace Dual.Model.Import
 
         public static void SegSubscribe()
         {
-            Event.SegSubject.Subscribe(rx =>
+            CoreEvent.SegSubject.Subscribe(rx =>
             {
-                var sys = rx.Seg.BaseSys as DsSys;
-                var seg = rx.Seg as Seg;
+                var seg = rx.Seg as MSeg;
+                var sys = seg.BaseSys;
 
                 sys.RootFlow().ToList().ForEach(flow =>
                 {

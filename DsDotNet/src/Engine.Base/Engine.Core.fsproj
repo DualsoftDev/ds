@@ -15,6 +15,9 @@
 		<Compile Include="DsType.fs" />
 		<Compile Include="Interface.fs" />
 		<Compile Include="InterfaceClass.fs" />
+		<Compile Include="CoreUtil.fs" />
+		<Compile Include="CoreEvent.fs" />
+		<Compile Include="CoreClass.fs" />
 	</ItemGroup>
 
 	<ItemGroup>

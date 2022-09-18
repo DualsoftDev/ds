@@ -31,7 +31,7 @@ namespace Dual.Model.Import
 
         }
 
-        private Dictionary<Tuple<Seg, Status4>, int> _dicCycle = new Dictionary<Tuple<Seg, Status4>, int>();
+        private Dictionary<Tuple<MSeg, Status4>, int> _dicCycle = new Dictionary<Tuple<MSeg, Status4>, int>();
         private Dictionary<string, Node> _dicDrawing = new Dictionary<string, Node>();
 
 
@@ -87,14 +87,14 @@ namespace Dual.Model.Import
 
 
 
-        private void drawMEdgeGraph(List<MEdge> edges, List<Seg> drawSubs, Subgraph subgraph)
+        private void drawMEdgeGraph(List<MEdge> edges, List<MSeg> drawSubs, Subgraph subgraph)
         {
             foreach (var mEdge in edges)
                 DrawMEdge(subgraph, mEdge, drawSubs);
 
         }
 
-        private void DrawMEdge(Subgraph subgraph, MEdge edge, List<Seg> drawSubs)
+        private void DrawMEdge(Subgraph subgraph, MEdge edge, List<MSeg> drawSubs)
         {
             MEdge mEdge = edge;
 
@@ -114,7 +114,7 @@ namespace Dual.Model.Import
             DrawSub(subgraph, mEdgeTgt, subGTgt, gEdge.TargetNode, bDrawSubTgt);
 
         }
-        private void DrawSeg(Subgraph subgraph, Seg seg, List<Seg> drawSubs)
+        private void DrawSeg(Subgraph subgraph, MSeg seg, List<MSeg> drawSubs)
         {
 
             bool bDrawSubSrc = (seg.IsChildExist || seg.NoEdgeSegs.Any()) && (drawSubs == null || drawSubs.Contains(seg));
@@ -131,7 +131,7 @@ namespace Dual.Model.Import
 
         }
 
-        private void DrawSub(Subgraph subgraph, Seg seg, Subgraph subG, Node gNode, bool bDrawSub)
+        private void DrawSub(Subgraph subgraph, MSeg seg, Subgraph subG, Node gNode, bool bDrawSub)
         {
             if (_dicDrawing.ContainsKey(gNode.Id)) return;
             else _dicDrawing.Add(gNode.Id, gNode);
@@ -202,8 +202,8 @@ namespace Dual.Model.Import
             if (model)
             {
 
-                var src = edge.Source as Seg;
-                var tgt = edge.Target as Seg;
+                var src = edge.Source as MSeg;
+                var tgt = edge.Target as MSeg;
 
                 UpdateNodeView(gEdge.SourceNode, src);
                 UpdateNodeView(gEdge.TargetNode, tgt);
@@ -211,7 +211,7 @@ namespace Dual.Model.Import
             }
         }
 
-        private void UpdateNodeView(Node nNode, Seg segment)
+        private void UpdateNodeView(Node nNode, MSeg segment)
         {
             {
                 //nNode.Attr.Color = Color.DarkGoldenrod;
@@ -237,7 +237,7 @@ namespace Dual.Model.Import
         public void RefreshGraph() { viewer.Do(() => viewer.Refresh()); }
 
 
-        public void Update(Seg seg)
+        public void Update(MSeg seg)
         {
 
             Node node = viewer.Graph.FindNode(seg.UIKey);

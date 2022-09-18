@@ -19,8 +19,8 @@ module ImportModel =
 
     type internal ImportPowerPoint(path:string) =
         let doc = pptDoc(path)
-        let dicSeg = ConcurrentDictionary<string, Seg>()
-        let dicEdge = ConcurrentDictionary<MEdge, Seg>()  //childEdges, parentSeg
+        let dicSeg = ConcurrentDictionary<string, MSeg>()
+        let dicEdge = ConcurrentDictionary<MEdge, MSeg>()  //childEdges, parentSeg
         let model =  DsModel(doc.FullPath)
         let mySys= DsSys("MY", true)
 
@@ -87,7 +87,7 @@ module ImportModel =
 
                 //page 타이틀 중복체크 
                 let dicSamePage = ConcurrentDictionary<string, pptPage>()
-                let dicSameSeg  = ConcurrentDictionary<string, Seg>()
+                let dicSameSeg  = ConcurrentDictionary<string, MSeg>()
                 let dicFloName  = ConcurrentDictionary<int, string>()
                 
                 doc.Pages |> Seq.iter(fun page ->  Check.SamePage(page, dicSamePage))
@@ -113,7 +113,7 @@ module ImportModel =
                                 else if(node.NodeCausal= EX) then ExSeg
                                 else if(bMyFlow) then ThisFlow else OtherFlow
 
-                    let seg = Seg(realName, mySys, Editor.User, bound, node.NodeCausal, realFlo, node.IsDummy)
+                    let seg = MSeg(realName, mySys, Editor.User, bound, node.NodeCausal, realFlo, node.IsDummy)
 
                     seg.Update(node.Key, node.Id.Value, node.Alias, node.CntTX, node.CntRX)
                     dicSeg.TryAdd(node.Key, seg) |> ignore

@@ -24,27 +24,20 @@ module Object =
         | User      //사용자 
         | Engine    //Dualsoft Engine 자동 생성
     
-    and
-        DsNode(name)  = interface IVertex with member _.Name = name
+ 
     and
         /// 사용자가 모델링을 통해서 만든 segment (SegEditor = User)
         [<DebuggerDisplay("{FullName}")>]
-        Seg(name:string, baseSystem:DsSys, editor:Editor, bound:Bound, nodeCausal:NodeCausal, ownerFlow:string, bDummy:bool) as this =
-            inherit SegBase(DsNode(name), [],  baseSystem)
-            /// modeled edges
-            let mutable status4 = Status4.Homing
+        MSeg(name:string, baseSystem:DsSys, editor:Editor, bound:Bound, nodeCausal:NodeCausal, ownerFlow:string, bDummy:bool) as this =
+            inherit Segment(name,   baseSystem)
             let mEdges  = ConcurrentHash<MEdge>()
-            let noEdgeBaseSegs  = ConcurrentDictionary<Seg, Seg>()
+            let noEdgeBaseSegs  = ConcurrentDictionary<MSeg, MSeg>()
 
-            new (name, baseSystem, nodeCausal) = Seg (name, baseSystem, Editor.User,   ThisFlow, nodeCausal, "", false)
-            new (name, baseSystem)             = Seg (name, baseSystem, Editor.Engine, ThisFlow, MY        , "", false)
+            new (name, baseSystem, nodeCausal) = MSeg (name, baseSystem, Editor.User,   ThisFlow, nodeCausal, "", false)
+            new (name, baseSystem)             = MSeg (name, baseSystem, Editor.Engine, ThisFlow, MY        , "", false)
+
        
-            member x.Name = name
             member x.NodeCausal = nodeCausal
-            member x.Status4 = status4 
-            member x.SetStatus(s:Status4) = status4 <- s
-                                            ChangeStatus(this, s)
-
             member x.BaseSys = baseSystem
             member x.Editor = editor
             member x.Bound = bound
@@ -103,7 +96,7 @@ module Object =
             member x.ChildSegs =
                 mEdges.Values
                 |> Seq.collect(fun e -> e.Nodes)
-                |> Seq.cast<Seg>
+                |> Seq.cast<MSeg>
                 |> Seq.distinct
 
             //재귀적으로 자식 Seg를 가져옴 (다른시스템은 Root까지)
@@ -119,7 +112,7 @@ module Object =
             member x.IsRoot =  x.Parent.IsSome && x.Parent.Value.Bound = ThisFlow
             member x.UIKey:string =  $"{x.Name};{x.Key}"
             member val Key : string = "" with get, set
-            member val Parent : Seg option = None with get, set
+            member val Parent : MSeg option = None with get, set
             member val S : string option = None  with get, set
             member val R : string option = None  with get, set
             member val E : string option = None  with get, set
@@ -137,21 +130,22 @@ module Object =
            
                 x.AddMEdge(edge)
 
-            member x.NoEdgeSegs = x.NoEdgeBaseSegs |> Seq.cast<Seg> |> Seq.sortBy(fun s -> s.SegName)
+            member x.NoEdgeSegs = x.NoEdgeBaseSegs |> Seq.cast<MSeg> |> Seq.sortBy(fun s -> s.SegName)
 
      
 
     and
         /// Modeled Edge : 사용자가 작성한 모델 상의 segment 간의 연결 edge (Wire)
         [<DebuggerDisplay("{Source.FullName}{Causal.ToText()}{Target.FullName}")>]
-        MEdge(src:Seg, tgt:Seg, causal:EdgeCausal) =
-            inherit CausalBase(src, tgt, causal)
+        MEdge(src:MSeg, tgt:MSeg, causal:EdgeCausal) =
+            inherit DsEdge(src, tgt, causal)
             member x.Source = src
             member x.Target = tgt
             member x.IsSameSys = src.BaseSys = tgt.BaseSys
             member x.SrcSystem = src.BaseSys
             member x.TgtSystem = tgt.BaseSys
             member x.Nodes = [src;tgt]
+            member x.Causal = causal
             
             member x.ToCheckText() =    match causal with
                                         |SEdge |SPush |  SReset-> "Start"
@@ -170,28 +164,28 @@ module Object =
         /// Flo : 페이지별 구성
         [<DebuggerDisplay("{Name}")>]
         Flo(name:string, index:int, baseSystem)  =
-            let drawSubs  = ConcurrentHash<Seg>()
-            let dummySeg  = ConcurrentHash<Seg>()
-            let safeties  = ConcurrentDictionary<Seg, Seg seq>()
+            let drawSubs  = ConcurrentHash<MSeg>()
+            let dummySeg  = ConcurrentHash<MSeg>()
+            let safeties  = ConcurrentDictionary<MSeg, MSeg seq>()
             let edges  = ConcurrentHash<MEdge>()
             let interlocks  = ConcurrentDictionary<string, MEdge>()
-            let setIL  = ConcurrentHash<HashSet<Seg>>()
+            let setIL  = ConcurrentHash<HashSet<MSeg>>()
             let aliasSet  = ConcurrentDictionary<string, HashSet<string>>()
-            let noEdgeBaseSegs  = ConcurrentDictionary<Seg, Seg>()
+            let noEdgeBaseSegs  = ConcurrentDictionary<MSeg, MSeg>()
 
-            let rec getLink(start:Seg, find:HashSet<Seg>, full:HashSet<Seg>) =
+            let rec getLink(start:MSeg, find:HashSet<MSeg>, full:HashSet<MSeg>) =
                 let update (edge:MEdge) =
                     find.Add(edge.Source) |>ignore   
                     find.Add(edge.Target) |>ignore
                     full.Remove(edge.Source) |> ignore
                     full.Remove(edge.Target) |> ignore
 
-                interlocks.Values.GetSrcSame(start) 
+                interlocks.Values.GetSrcSame(start.Vertex) 
                 |> Seq.iter(fun edge -> 
                                 if(find.Contains(edge.Source)|>not || find.Contains(edge.Target)|>not)
                                 then update (edge);getLink (edge.Target, find, full))
                                         
-                interlocks.Values.GetTgtSame(start) 
+                interlocks.Values.GetTgtSame(start.Vertex) 
                 |> Seq.iter(fun edge -> 
                                 if(find.Contains(edge.Source)|>not || find.Contains(edge.Target)|>not)
                                 then update (edge);getLink (edge.Source, find, full))
@@ -205,20 +199,20 @@ module Object =
 
             member x.Edges = edges.Values |> Seq.sortBy(fun edge -> edge.Source.Name)
             member x.AddEdge(edge) = edges.TryAdd(edge) |> ignore 
-            member x.AddSafety(seg, segSafetys:Seg seq) = safeties.TryAdd(seg, segSafetys) |> ignore 
+            member x.AddSafety(seg, segSafetys:MSeg seq) = safeties.TryAdd(seg, segSafetys) |> ignore 
             member x.Safeties = safeties
             member x.AliasSet   = aliasSet
 
             member x.Interlockedges = 
-                        let FullNodesIL = interlocks.Values.GetNodes() 
-                                            |> Seq.cast<Seg>
+                        let FullNodesIL = interlocks.Values
+                                            |> Seq.collect(fun seg -> [seg.Source;seg.Target])
                                             |> Seq.filter(fun seg -> seg.Alias.IsNone)
                                             |> HashSet
-                        interlocks.Values.GetNodes()
-                                        |> Seq.cast<Seg>
+                        interlocks.Values
+                                        |> Seq.collect(fun seg -> [seg.Source;seg.Target])
                                         |> Seq.filter(fun seg -> FullNodesIL.Contains(seg))
                                         |> Seq.iter(fun seg -> 
-                                                    let findSet = HashSet<Seg>()
+                                                    let findSet = HashSet<MSeg>()
                                                     getLink (seg, findSet, FullNodesIL)
                                                     if(findSet.Any()) then setIL.TryAdd(findSet) |> ignore
                                             )
@@ -234,7 +228,7 @@ module Object =
 
             member x.DummySeg = dummySeg.Values 
             member x.AddDummySeg(seg) = dummySeg.TryAdd(seg) |> ignore 
-            member x.NoEdgeSegs =  x.NoEdgeBaseSegs  |> Seq.cast<Seg>
+            member x.NoEdgeSegs =  x.NoEdgeBaseSegs  |> Seq.cast<MSeg>
 
             member x.UsedSegs =
                 let rootUsedSegs  = 
@@ -274,7 +268,7 @@ module Object =
             inherit SysBase(name)
 
 
-            let mutable sysSeg: System.Lazy<Seg> = null
+            let mutable sysSeg: System.Lazy<MSeg> = null
             let flows  = ConcurrentDictionary<int, Flo>()
             let locationSet  = ConcurrentDictionary<string, System.Drawing.Rectangle>()
             let commandSet  = ConcurrentDictionary<string, string>()
@@ -301,7 +295,7 @@ module Object =
             member x.Name = name
             member x.SysSeg =
                 if isNull sysSeg then
-                    sysSeg <- Lazy(fun () -> Seg("(ENG)Main_"+name, x))
+                    sysSeg <- Lazy(fun () -> MSeg("(ENG)Main_"+name, x))
                 sysSeg.Value
 
             member val Debug = false   with get, set
@@ -351,8 +345,9 @@ module Object =
             member x.RootEdges()    = x.SysSeg.MEdges 
 
             member x.NotRootSegs() = 
-                x.SysSeg.MEdges.GetNodes()
-                    |> Seq.cast<Seg>
+                x.SysSeg.MEdges
+                    |> Seq.collect(fun seg -> [seg.Source;seg.Target])
+                    |> Seq.cast<MSeg>
                     |> Seq.append noEdgesSegs
                     |> Seq.collect(fun seg -> seg.ChildSegs)
                     |> Seq.distinct
@@ -398,13 +393,13 @@ module Object =
                 if((activeSys |> Seq.length) <> 1) then failwith "The number of ActiveSystem must be 'ONE'."
                 activeSys |> Seq.head
             ///사용자 모델링 기본형 : parentSeg는 모델링시에 엣지의 부모를 할당받음
-            member x.AddEdge(edgeInfo:MEdge, parent:Seg) = x.AddEdges([edgeInfo], parent)
-            member x.AddEdges(edgeInfos:MEdge seq, parent:Seg) =
+            member x.AddEdge(edgeInfo:MEdge, parent:MSeg) = x.AddEdges([edgeInfo], parent)
+            member x.AddEdges(edgeInfos:MEdge seq, parent:MSeg) =
                 edgeInfos |> Seq.iter (fun e -> x.EdgeAdd(e, Some parent))
 
-            member private x.EdgeAdd(mEdge:MEdge, pSeg:Seg option) =
+            member private x.EdgeAdd(mEdge:MEdge, pSeg:MSeg option) =
                 //시스템 등록 Check 및 사용된 UsedSegs System Add
-                mEdge.Nodes |> Seq.cast<Seg>
+                mEdge.Nodes |> Seq.cast<MSeg>
                 |> Seq.iter(fun seg-> 
                     if not (x.TotalSystems.Contains(seg.BaseSys)) 
                     then failwith $"model({x.Name})에 해당 {seg.SegName}의 System 등록 필요. model.add(system) 필요합니다."

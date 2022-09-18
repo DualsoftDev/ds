@@ -1,48 +1,55 @@
 // Copyright (c) Dual Inc.  All Rights Reserved.
 namespace Engine.Core
 
+open System.Collections.Generic
+
 [<AutoOpen>]
 module InterfaceClass =
 
     // 이름이 필요한 객체
-    [<AbstractClass>]
     type Named(name)  =
         interface INamed with
             member _.Name = name
         member   x.ToText() = $"{name}[{x.GetType().Name}]"
   
+    /// 인과 연결가능 객체
+    type VertexBase(name)  =
+        interface IVertex with
+            member _.Name = name
+
     /// Segment Container
     [<AbstractClass>]
     type SysBase(name)  =
         interface ISystem with
             member _.Name = name
        
-    /// Segment
+    /// Real Segment
     [<AbstractClass>]
-    type SegBase(active:IVertex, passives:IVertex seq, baseSys:SysBase) =
+    type SegBase(active:VertexBase, sysBase:SysBase) =
         interface IActive with
-            member x.Active  : IVertex     = active 
-            member x.Passives: IVertex seq = passives
+            member _.Active : IVertex = active 
+            member val Passives  =  HashSet<IVertex>() 
 
-        member x.Vertex = (x :> IActive).Active
-        member x.BaseSys = baseSys
-     
+        member x.SysBase = sysBase
+
+        member x.Vertex   = (x :> IActive).Active
+        member x.Children = (x :> IActive).Passives
+
+        member x.Add   (child:IVertex) = x.Children.Add(child) 
+        member x.Remove(child:IVertex) = x.Children.Remove(child) 
+    /// Call Segment
+    and
+        CallBase(call:VertexBase, parent:SegBase) =
+        interface ICall with
+            member val TXs  =  HashSet<IVertex>() 
+            member val RXs  =  HashSet<IVertex>() 
+   
     /// Segment Edge
     [<AbstractClass>]
-    type EdgeBase(srcs:SegBase seq, tgt:SegBase) =
+    type EdgeBase(source:IVertex, target:IVertex , edgeCausal:EdgeCausal) =
         interface IEdge with
-            member _.SourceVertexes = srcs |> Seq.map(fun src -> src.Vertex)
-            member _.TargetVertex   = tgt.Vertex
+            member _.Source = source
+            member _.Target = target
+            member _.Causal = edgeCausal
 
-        member x.Sources = srcs
-        member x.Target = tgt
-        
-    /// Causal Arrow
-    [<AbstractClass>]
-    type CausalBase(source, target, edgeCausal:EdgeCausal) =
-        member x.Source:SegBase = source
-        member x.Target:SegBase = target
-        member x.Nodes = [source;target]
-        member x.Causal:EdgeCausal = edgeCausal
-        member x.IsReset = edgeCausal.IsReset
         member x.ToText() = $"{source} {edgeCausal.ToText()} {target}";

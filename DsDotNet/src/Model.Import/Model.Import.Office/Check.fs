@@ -15,12 +15,12 @@ module Check =
             let sys = DsSys(sysName, true)
             let flow = Flo("P0",  Int32.MaxValue, sys)
             sys.Flows.TryAdd(flow.Page, flow) |> ignore
-            flow.AddEdge( MEdge(Seg("START", sys, EX), Seg("시작인과", sys, MY), EdgeCausal.SEdge))
-            flow.AddEdge( MEdge(Seg("RESET", sys, EX), Seg("복귀인과", sys, MY), EdgeCausal.REdge))
-            flow.AddEdge( MEdge(Seg("START", sys, EX), Seg("시작유지", sys, MY), EdgeCausal.SPush))
-            flow.AddEdge( MEdge(Seg("RESET", sys, EX), Seg("복귀유지", sys, MY), EdgeCausal.RPush))
-            flow.AddEdge( MEdge(Seg("ETC"  , sys, EX), Seg("상호행위간섭", sys, MY), EdgeCausal.Interlock))
-            flow.AddEdge( MEdge(Seg("ETC"  , sys, EX), Seg("시작후행리셋", sys, MY), EdgeCausal.SReset))
+            flow.AddEdge( MEdge(MSeg("START", sys, EX), MSeg("시작인과", sys, MY), EdgeCausal.SEdge))
+            flow.AddEdge( MEdge(MSeg("RESET", sys, EX), MSeg("복귀인과", sys, MY), EdgeCausal.REdge))
+            flow.AddEdge( MEdge(MSeg("START", sys, EX), MSeg("시작유지", sys, MY), EdgeCausal.SPush))
+            flow.AddEdge( MEdge(MSeg("RESET", sys, EX), MSeg("복귀유지", sys, MY), EdgeCausal.RPush))
+            flow.AddEdge( MEdge(MSeg("ETC"  , sys, EX), MSeg("상호행위간섭", sys, MY), EdgeCausal.Interlock))
+            flow.AddEdge( MEdge(MSeg("ETC"  , sys, EX), MSeg("시작후행리셋", sys, MY), EdgeCausal.SReset))
 
             //모델만들기 및 시스템 등록
             let model = DsModel("testModel");
@@ -59,7 +59,7 @@ module Check =
                 then Office.ErrorName(node.Shape, 26, node.PageNum)
 
 
-        let SameNode(seg:Seg, node:pptNode, dicSegCheckSame:ConcurrentDictionary<string, Seg>) =
+        let SameNode(seg:MSeg, node:pptNode, dicSegCheckSame:ConcurrentDictionary<string, MSeg>) =
             if(dicSegCheckSame.ContainsKey(seg.FlowNSeg)|>not)
             then dicSegCheckSame.TryAdd(seg.FlowNSeg, seg)|> ignore
 

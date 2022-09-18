@@ -14,11 +14,11 @@ open Engine.Core
 [<AutoOpen>]
 module ExportIOTable =
 
-    let ToTable(model:DsModel) =
+    let ToTable(model:ImportModel) =
 
         let dt = new System.Data.DataTable($"{model.Name}")
         dt.Columns.Add("Case", typeof<obj>) |>ignore
-        dt.Columns.Add("Flo", typeof<string>) |>ignore
+        dt.Columns.Add("MFlow", typeof<string>) |>ignore
         dt.Columns.Add("Name", typeof<string>) |>ignore
         dt.Columns.Add("Type", typeof<string>) |>ignore
         dt.Columns.Add("Size", typeof<string>) |>ignore
@@ -28,19 +28,19 @@ module ExportIOTable =
 
 
         let rowItems(causal:NodeCausal, seg:MSeg, trx:string) =
-            let flowName, name =  seg.OwnerFlow, seg.Name
+            let MFlowName, name =  seg.OwnerMFlow, seg.Name
             match causal with
-            |TR ->  ["주소"; flowName; name; trx; "bit"; seg.TextStart; "'-"          ; seg.TextEnd]
-            |TX  -> ["주소"; flowName; name; trx; "bit"; seg.TextStart; "'-"          ; "'-"]
-            |RX  -> ["주소"; flowName; name; trx; "bit"; "'-"         ; "'-"          ; seg.TextEnd]
-            |EX  -> ["주소"; flowName; name; trx; "bit"; seg.TextStart; seg.TextReset ; seg.TextEnd]
+            |TR ->  ["주소"; MFlowName; name; trx; "bit"; seg.TextStart; "'-"          ; seg.TextEnd]
+            |TX  -> ["주소"; MFlowName; name; trx; "bit"; seg.TextStart; "'-"          ; "'-"]
+            |RX  -> ["주소"; MFlowName; name; trx; "bit"; "'-"         ; "'-"          ; seg.TextEnd]
+            |EX  -> ["주소"; MFlowName; name; trx; "bit"; seg.TextStart; seg.TextReset ; seg.TextEnd]
             |_ -> failwithf "ERR";
 
         let rows =
             seq {
                 for sys in  model.TotalSystems do
-                    let flows = sys.RootFlow() |> Seq.filter(fun flow -> (flow.Page = Int32.MaxValue)|>not)
-                    //Flo 출력
+                    let flows = sys.RootMFlow() |> Seq.filter(fun flow -> (flow.Page = Int32.MaxValue)|>not)
+                    //MFlow 출력
                     for flow in flows do
                         //Call Task 출력
                         for callSeg in flow.CallSegs() do
@@ -75,7 +75,7 @@ module ExportIOTable =
  
 
 
-    let ToFiie(model:DsModel, excelFilePath:string) = 
+    let ToFiie(model:ImportModel, excelFilePath:string) = 
         let DisableCellStyle(range:Microsoft.Office.Interop.Excel.Range ) =
             range.Interior.Color <- Color.LightGray;
             range.Font.Bold <- true;
@@ -91,7 +91,7 @@ module ExportIOTable =
                    range.EntireColumn.AutoFit() |> ignore
 
 
-        let tbl = ToTable(model:DsModel)
+        let tbl = ToTable(model:ImportModel)
         if (tbl = null || tbl.Columns.Count = 0)
         then failwithf "ExportToExcel: Null or empty input table!\n"
         else 

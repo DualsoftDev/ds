@@ -14,8 +14,8 @@ module Object =
 
     // 행위 Bound 정의
     type Bound =
-        | ThisFlow         //나의 System 의 이 Flow        내부 행위정의
-        | OtherFlow        //나의 System 의 다른 Flow     에서 행위 가져옴
+        | ThisMFlow         //나의 System 의 이 MFlow        내부 행위정의
+        | OtherMFlow        //나의 System 의 다른 MFlow     에서 행위 가져옴
         | ExSeg            //외부 System 의 에서 행위(real) 가져옴
         | ExBtn            //외부 System 의 에서 버튼(call) 가져옴
 
@@ -28,13 +28,13 @@ module Object =
     and
         /// 사용자가 모델링을 통해서 만든 segment (SegEditor = User)
         [<DebuggerDisplay("{FullName}")>]
-        MSeg(name:string, baseSystem:DsSys, editor:Editor, bound:Bound, nodeCausal:NodeCausal, ownerFlow:string, bDummy:bool) as this =
+        MSeg(name:string, baseSystem:MSys, editor:Editor, bound:Bound, nodeCausal:NodeCausal, ownerMFlow:string, bDummy:bool) as this =
             inherit Segment(name,   baseSystem)
             let mEdges  = ConcurrentHash<MEdge>()
             let noEdgeBaseSegs  = ConcurrentDictionary<MSeg, MSeg>()
 
-            new (name, baseSystem, nodeCausal) = MSeg (name, baseSystem, Editor.User,   ThisFlow, nodeCausal, "", false)
-            new (name, baseSystem)             = MSeg (name, baseSystem, Editor.Engine, ThisFlow, MY        , "", false)
+            new (name, baseSystem, nodeCausal) = MSeg (name, baseSystem, Editor.User,   ThisMFlow, nodeCausal, "", false)
+            new (name, baseSystem)             = MSeg (name, baseSystem, Editor.Engine, ThisMFlow, MY        , "", false)
 
        
             member x.NodeCausal = nodeCausal
@@ -53,21 +53,21 @@ module Object =
             member val ShapeID = 0u with get, set
             member val CountTX = 0 with get, set
             member val CountRX = 0 with get, set
-            member x.OwnerFlow = ownerFlow
-            member x.ToCallText() = let call = sprintf "%s_%s"  (ownerFlow.TrimStart('\"').TrimEnd('\"')) name
+            member x.OwnerMFlow = ownerMFlow
+            member x.ToCallText() = let call = sprintf "%s_%s"  (ownerMFlow.TrimStart('\"').TrimEnd('\"')) name
                                     Util.GetValidName(call)
 
-            member x.ToTextInFlow() =  match nodeCausal with
+            member x.ToTextInMFlow() =  match nodeCausal with
                                          |EX -> sprintf "EX.%s.EX" (x.ToCallText())
-                                         |_  -> if(ThisFlow = bound) 
+                                         |_  -> if(ThisMFlow = bound) 
                                                 then x.SegName
-                                                else x.FlowNSeg
+                                                else x.MFlowNSeg
 
             ///금칙 문자 및 선두숫자가 있으면 "" 로 이름 앞뒤에 배치한다.
             ///Alias 는 무조건 "" 로 이름 앞뒤에 배치
             member x.SegName  = sprintf "%s" (if(this.Alias.IsSome) then this.Alias.Value else Util.GetValidName(name))
-            member x.FlowNSeg = sprintf "%s.%s"  ownerFlow (Util.GetValidName(name))
-            member x.FullName = sprintf "%s.%s.%s" baseSystem.Name  ownerFlow (Util.GetValidName(name))  
+            member x.MFlowNSeg = sprintf "%s.%s"  ownerMFlow (Util.GetValidName(name))
+            member x.FullName = sprintf "%s.%s.%s" baseSystem.Name  ownerMFlow (Util.GetValidName(name))  
             member x.PathName = sprintf "%s(%s)" x.FullName (if(x.Parent.IsSome) then x.Parent.Value.Name else "Root")
 
             member x.Update(nodeKey, nodeIdValue, nodeAlias, nodeCntTX, nodeCntRX) = 
@@ -109,7 +109,7 @@ module Object =
             member x.IsDummy = bDummy
             member x.IsChildExist = mEdges.Any()
             member x.IsChildEmpty = mEdges.IsEmpty
-            member x.IsRoot =  x.Parent.IsSome && x.Parent.Value.Bound = ThisFlow
+            member x.IsRoot =  x.Parent.IsSome && x.Parent.Value.Bound = ThisMFlow
             member x.UIKey:string =  $"{x.Name};{x.Key}"
             member val Key : string = "" with get, set
             member val Parent : MSeg option = None with get, set
@@ -161,9 +161,9 @@ module Object =
     
     
     and
-        /// Flo : 페이지별 구성
+        /// MFlow : 페이지별 구성
         [<DebuggerDisplay("{Name}")>]
-        Flo(name:string, index:int, baseSystem)  =
+        MFlow(name:string, index:int, baseSystem)  =
             let drawSubs  = ConcurrentHash<MSeg>()
             let dummySeg  = ConcurrentHash<MSeg>()
             let safeties  = ConcurrentDictionary<MSeg, MSeg seq>()
@@ -243,7 +243,7 @@ module Object =
                     
             member x.CallSegs() = x.UsedSegs
                                         |> Seq.filter(fun seg -> seg.NodeCausal.IsCall)
-                                        |> Seq.filter(fun seg -> seg.Bound = ThisFlow)
+                                        |> Seq.filter(fun seg -> seg.Bound = ThisMFlow)
                                         |> Seq.distinctBy(fun seg -> seg.FullName)
 
             member x.ExRealSegs() = x.UsedSegs
@@ -264,34 +264,33 @@ module Object =
     and
         [<DebuggerDisplay("{Name}")>]
         /// System 내부 Seg의 내외부 Seg간 시작/리셋 연결 정보 구조
-        DsSys(name:string, active:bool)  =
+        MSys(name:string, active:bool)  =
             inherit SysBase(name)
 
-
             let mutable sysSeg: System.Lazy<MSeg> = null
-            let flows  = ConcurrentDictionary<int, Flo>()
+            let mFlows  = ConcurrentDictionary<int, MFlow>()
             let locationSet  = ConcurrentDictionary<string, System.Drawing.Rectangle>()
             let commandSet  = ConcurrentDictionary<string, string>()
             let observeSet  = ConcurrentDictionary<string, string>()
             let variableSet  = ConcurrentDictionary<string, DataType>()
             let addressSet  = ConcurrentDictionary<string, Tuple<string, string, string>>()
-            let noEdgesSegs = flows |> Seq.collect(fun f-> f.Value.NoEdgeSegs)
-            let emgSet  = ConcurrentDictionary<string, List<Flo>>()
-            let startSet  = ConcurrentDictionary<string, List<Flo>>()
-            let resetSet  = ConcurrentDictionary<string, List<Flo>>()
-            let autoSet   = ConcurrentDictionary<string, List<Flo>>()
+            let noEdgesSegs = mFlows |> Seq.collect(fun f-> f.Value.NoEdgeSegs)
+            let emgSet  = ConcurrentDictionary<string, List<MFlow>>()
+            let startSet  = ConcurrentDictionary<string, List<MFlow>>()
+            let resetSet  = ConcurrentDictionary<string, List<MFlow>>()
+            let autoSet   = ConcurrentDictionary<string, List<MFlow>>()
             
-            let updateBtn (btnType:BtnType, btnName, btnFlow) = 
+            let updateBtn (btnType:BtnType, btnName, btnMFlow) = 
                 let name = GetValidName(btnName)
                 match btnType with
-                |StartBTN ->    if(startSet.ContainsKey(name)) then startSet.[name].Add(btnFlow) |>ignore else startSet.TryAdd(name, [btnFlow] |> List) |>ignore
-                |ResetBTN ->    if(resetSet.ContainsKey(name)) then resetSet.[name].Add(btnFlow) |>ignore else resetSet.TryAdd(name, [btnFlow] |> List) |>ignore
-                |AutoBTN ->     if(autoSet.ContainsKey(name))  then autoSet.[name].Add(btnFlow)  |>ignore else autoSet.TryAdd(name,  [btnFlow] |> List) |>ignore
-                |EmergencyBTN-> if(emgSet.ContainsKey(name))   then emgSet.[name].Add(btnFlow)   |>ignore else emgSet.TryAdd(name,   [btnFlow] |> List) |>ignore
+                |StartBTN ->    if(startSet.ContainsKey(name)) then startSet.[name].Add(btnMFlow) |>ignore else startSet.TryAdd(name, [btnMFlow] |> List) |>ignore
+                |ResetBTN ->    if(resetSet.ContainsKey(name)) then resetSet.[name].Add(btnMFlow) |>ignore else resetSet.TryAdd(name, [btnMFlow] |> List) |>ignore
+                |AutoBTN ->     if(autoSet.ContainsKey(name))  then autoSet.[name].Add(btnMFlow)  |>ignore else autoSet.TryAdd(name,  [btnMFlow] |> List) |>ignore
+                |EmergencyBTN-> if(emgSet.ContainsKey(name))   then emgSet.[name].Add(btnMFlow)   |>ignore else emgSet.TryAdd(name,   [btnMFlow] |> List) |>ignore
 
 
-            new (name:string)       = new DsSys(name,  false)
-            new (name, active:bool) = new DsSys(name,  active)
+            new (name:string)       = new MSys(name,  false)
+            new (name, active:bool) = new MSys(name,  active)
             member x.Name = name
             member x.SysSeg =
                 if isNull sysSeg then
@@ -302,7 +301,7 @@ module Object =
             member val Active = active with get, set
             member val SystemID = -1   with get, set
 
-            member x.Flows      = flows
+            member x.MFlows      = mFlows
             member x.LocationSet   = locationSet
             member x.CommandSet   = commandSet
             member x.ObserveSet   = observeSet
@@ -313,10 +312,10 @@ module Object =
             member x.ResetSet   = resetSet
             member x.AutoSet   = autoSet
 
-            member x.TryAddStartBTN(name, flow) = updateBtn(StartBTN, name, flow)
-            member x.TryAddResetBTN(name, flow) = updateBtn(ResetBTN, name, flow)
-            member x.TryAddAutoBTN(name, flow) = updateBtn(AutoBTN, name, flow)
-            member x.TryAddEmergBTN(name, flow) = updateBtn(EmergencyBTN, name, flow)
+            member x.TryAddStartBTN(name, mFlow) = updateBtn(StartBTN, name, mFlow)
+            member x.TryAddResetBTN(name, mFlow) = updateBtn(ResetBTN, name, mFlow)
+            member x.TryAddAutoBTN(name,  mFlow) = updateBtn(AutoBTN, name, mFlow)
+            member x.TryAddEmergBTN(name, mFlow) = updateBtn(EmergencyBTN, name, mFlow)
 
             member x.GetBtnSet(btnType:BtnType) = 
                 match btnType with
@@ -357,29 +356,29 @@ module Object =
                     |> Seq.append noEdgesSegs
                     |> Seq.distinct
 
-            member x.RootFlow()    = flows
+            member x.RootMFlow()    = mFlows
                                      |> Seq.sortBy(fun flow -> flow.Key)
                                      |> Seq.map(fun flow -> flow.Value)
-                                     |> Seq.filter(fun flow -> (flow.Page = Int32.MaxValue)|>not)  //Int32.MaxValue 는 데모 flow
+                                     |> Seq.filter(fun flow -> (flow.Page = Int32.MaxValue)|>not)  //Int32.MaxValue 는 데모 MFlow
             
             member x.BtnSegs()    = 
-                                    x.RootFlow() 
+                                    x.RootMFlow() 
                                     |> Seq.collect(fun flow -> flow.UsedSegs)
                                     |> Seq.filter(fun seg -> seg.Bound = ExBtn)
                                     |> Seq.distinctBy(fun seg -> seg.SegName)
 
     and 
-       DsModel(name:string) =
-            let systems =  ConcurrentHash<DsSys>()
+       ImportModel(name:string) =
+            let systems =  ConcurrentHash<MSys>()
 
             member x.Path = name
             member x.Name = Path.GetFileNameWithoutExtension(name) 
      
             //모델에 시스템 등록 및 삭제
-            member x.Add(sys:DsSys) = systems.TryAdd(sys)
-            member x.AddRange(newSystems:DsSys seq) = 
+            member x.Add(sys:MSys) = systems.TryAdd(sys)
+            member x.AddRange(newSystems:MSys seq) = 
                 newSystems |> Seq.iter (fun sys -> x.Add(sys) |> ignore)
-            member x.Remove(sys:DsSys) = systems.TryRemove(sys)
+            member x.Remove(sys:MSys) = systems.TryRemove(sys)
 
             /// TotalSystems
             member x.TotalSystems      = systems.Values

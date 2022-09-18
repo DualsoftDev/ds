@@ -1,8 +1,10 @@
+using Model.Import.Office;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using static Engine.Core.DsType;
 using static Model.Import.Office.Object;
+using ImportModel = Model.Import.Office.Object.ImportModel;
 
 namespace Dual.Model.Import
 {
@@ -37,7 +39,7 @@ namespace Dual.Model.Import
             }
         }
 
-        public static async Task TestORG(DsModel model)
+        public static async Task TestORG(ImportModel model)
         {
             if (model == null) return;
 
@@ -92,7 +94,7 @@ namespace Dual.Model.Import
             });
         }
 
-        public static async Task TestStart(DsModel model)
+        public static async Task TestStart(ImportModel model)
         {
             if (model == null) return;
             if (!org) await TestORG(model);

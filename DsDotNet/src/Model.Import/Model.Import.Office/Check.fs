@@ -12,20 +12,20 @@ open Engine.Core
 module Check =
 
         let GetDemoModel(sysName:string) = 
-            let sys = DsSys(sysName, true)
-            let flow = Flo("P0",  Int32.MaxValue, sys)
-            sys.Flows.TryAdd(flow.Page, flow) |> ignore
-            flow.AddEdge( MEdge(MSeg("START", sys, EX), MSeg("시작인과", sys, MY), EdgeCausal.SEdge))
-            flow.AddEdge( MEdge(MSeg("RESET", sys, EX), MSeg("복귀인과", sys, MY), EdgeCausal.REdge))
-            flow.AddEdge( MEdge(MSeg("START", sys, EX), MSeg("시작유지", sys, MY), EdgeCausal.SPush))
-            flow.AddEdge( MEdge(MSeg("RESET", sys, EX), MSeg("복귀유지", sys, MY), EdgeCausal.RPush))
-            flow.AddEdge( MEdge(MSeg("ETC"  , sys, EX), MSeg("상호행위간섭", sys, MY), EdgeCausal.Interlock))
-            flow.AddEdge( MEdge(MSeg("ETC"  , sys, EX), MSeg("시작후행리셋", sys, MY), EdgeCausal.SReset))
+            let sys = MSys(sysName, true)
+            let MFlow = MFlow("P0",  Int32.MaxValue, sys)
+            sys.MFlows.TryAdd(MFlow.Page, MFlow) |> ignore
+            MFlow.AddEdge( MEdge(MSeg("START", sys, EX), MSeg("시작인과", sys, MY), EdgeCausal.SEdge))
+            MFlow.AddEdge( MEdge(MSeg("RESET", sys, EX), MSeg("복귀인과", sys, MY), EdgeCausal.REdge))
+            MFlow.AddEdge( MEdge(MSeg("START", sys, EX), MSeg("시작유지", sys, MY), EdgeCausal.SPush))
+            MFlow.AddEdge( MEdge(MSeg("RESET", sys, EX), MSeg("복귀유지", sys, MY), EdgeCausal.RPush))
+            MFlow.AddEdge( MEdge(MSeg("ETC"  , sys, EX), MSeg("상호행위간섭", sys, MY), EdgeCausal.Interlock))
+            MFlow.AddEdge( MEdge(MSeg("ETC"  , sys, EX), MSeg("시작후행리셋", sys, MY), EdgeCausal.SReset))
 
             //모델만들기 및 시스템 등록
-            let model = DsModel("testModel");
+            let model = ImportModel("testModel");
             model.Add(sys) |> ignore
-            model.AddEdges(flow.Edges, sys.SysSeg)
+            model.AddEdges(MFlow.Edges, sys.SysSeg)
             model
 
         let SameParent(doc:pptDoc, edge:pptEdge) =
@@ -49,28 +49,28 @@ module Check =
             if(srcParents.Count() > 1) then failError (srcParents, edge.StartNode)  
             if(tgtParents.Count() > 1) then failError (tgtParents, edge.EndNode)  
 
-        let ValidFlowPath(node:pptNode, dicFloName:ConcurrentDictionary<int, string>) =
+        let ValidMFlowPath(node:pptNode, dicMFlowName:ConcurrentDictionary<int, string>) =
             if(node.Name.Contains('.'))
             then 
                 let paths = node.Name.Split('.')
-                if(dicFloName.Values.Contains(paths.[0])|> not)
+                if(dicMFlowName.Values.Contains(paths.[0])|> not)
                 then Office.ErrorName(node.Shape, 27, node.PageNum)
                 else if(node.Name.Split('.').Length > 2)
                 then Office.ErrorName(node.Shape, 26, node.PageNum)
 
 
         let SameNode(seg:MSeg, node:pptNode, dicSegCheckSame:ConcurrentDictionary<string, MSeg>) =
-            if(dicSegCheckSame.ContainsKey(seg.FlowNSeg)|>not)
-            then dicSegCheckSame.TryAdd(seg.FlowNSeg, seg)|> ignore
+            if(dicSegCheckSame.ContainsKey(seg.MFlowNSeg)|>not)
+            then dicSegCheckSame.TryAdd(seg.MFlowNSeg, seg)|> ignore
 
-            let oldSeg = dicSegCheckSame.[seg.FlowNSeg]
+            let oldSeg = dicSegCheckSame.[seg.MFlowNSeg]
             if((seg.NodeCausal = oldSeg.NodeCausal)|>not) 
             then 
-                MSGError($"도형오류 :타입이 다른 같은이름이 존재합니다 \t[Page{node.PageNum}: {seg.FlowNSeg}({seg.NodeCausal}) != ({oldSeg.NodeCausal}) ({node.Shape.ShapeName()})]")
+                MSGError($"도형오류 :타입이 다른 같은이름이 존재합니다 \t[Page{node.PageNum}: {seg.MFlowNSeg}({seg.NodeCausal}) != ({oldSeg.NodeCausal}) ({node.Shape.ShapeName()})]")
         
         let SameEdgeErr(parentNode:pptNode option, pptEdge:pptEdge, mEdge:MEdge, dicSameCheck:ConcurrentDictionary<string, MEdge>) = 
             let parentName = if(parentNode.IsSome) 
-                             then sprintf "%s.%s"  (mEdge.Source.OwnerFlow) (parentNode.Value.Name) 
+                             then sprintf "%s.%s"  (mEdge.Source.OwnerMFlow) (parentNode.Value.Name) 
                              else ""
             if(dicSameCheck.TryAdd(mEdge.ToCheckText(parentName), mEdge)|>not)
                 then

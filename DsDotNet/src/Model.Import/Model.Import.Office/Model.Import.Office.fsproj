@@ -22,8 +22,8 @@
     <Compile Include="UtilPPT.fs" />
     <Compile Include="PPTX.fs" />
     <Compile Include="Check.fs" />
-    <Compile Include="ImportModel.fs" />
-    <Compile Include="ExportModel.fs" />
+    <Compile Include="ImportM.fs" />
+    <Compile Include="ExportM.fs" />
     <Compile Include="ImportIOTable.fs" />
     <Compile Include="ExportIOTable.fs" />
   </ItemGroup>

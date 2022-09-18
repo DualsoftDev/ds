@@ -1,4 +1,5 @@
 using Engine.Common;
+using Engine.Core;
 using Microsoft.Msagl.Drawing;
 using Microsoft.Msagl.GraphViewerGdi;
 using Microsoft.Msagl.Layout.Layered;
@@ -9,6 +10,7 @@ using System.Windows.Forms;
 using static Engine.Core.DsType;
 using static Model.Import.Office.Object;
 using Color = Microsoft.Msagl.Drawing.Color;
+using Edge = Microsoft.Msagl.Drawing.Edge;
 
 namespace Dual.Model.Import
 {
@@ -36,7 +38,7 @@ namespace Dual.Model.Import
 
 
 
-        public void SetGraph(Flo flow)
+        public void SetGraph(MFlow flow)
         {
             //sub 그래프 불가
             //viewer.Graph.LayoutAlgorithmSettings = new Microsoft.Msagl.Layout.MDS.MdsLayoutSettings();

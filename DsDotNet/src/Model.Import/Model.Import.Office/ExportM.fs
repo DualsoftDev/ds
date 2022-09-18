@@ -8,9 +8,9 @@ open Engine.Core
 open System.Collections.Concurrent
 
 [<AutoOpen>]
-module ExportModel =
+module ExportM =
 
-    let ToText(model:DsModel) =
+    let ToText(model:ImportModel) =
                                
         let callText(seg:MSeg) =
             let callName =  seg.SegName
@@ -54,8 +54,8 @@ module ExportModel =
             //src(s) -> tgt
             let mixEdges = tgtSegs |> Seq.map(fun (edge, tgtSeg) -> edges  |> Seq.filter(fun findEdge -> findEdge.Target.Key = tgtSeg.Key)  
                                                                            |> Seq.filter(fun findEdge -> findEdge.Causal = edge.Causal)  
-                                                                           |> Seq.map(fun edge -> edge.Source.ToTextInFlow())
-                                                                   ,edge , tgtSeg.ToTextInFlow())
+                                                                           |> Seq.map(fun edge -> edge.Source.ToTextInMFlow())
+                                                                   ,edge , tgtSeg.ToTextInMFlow())
             
             mixEdges 
             
@@ -69,10 +69,10 @@ module ExportModel =
         let subNodeText(seg:MSeg) =
             seq {
                 for segSub in seg.NoEdgeSegs do
-                    yield sprintf "\t\t\t%s;" (segSub.ToTextInFlow())
+                    yield sprintf "\t\t\t%s;" (segSub.ToTextInMFlow())
             }
 
-        let safetyText(flow:Flo) =
+        let safetyText(flow:MFlow) =
             seq {
                 yield sprintf "\t\t[safety]  = {" 
                 for safety in flow.Safeties do
@@ -97,17 +97,17 @@ module ExportModel =
                 for seg in segs do
                     if(seg.MEdges.Any() || seg.NoEdgeSegs.Any())    
                     then 
-                        yield sprintf "\t\t%s = {"(seg.ToTextInFlow())
+                        yield sprintf "\t\t%s = {"(seg.ToTextInMFlow())
                         yield! subEdgeText (seg) 
                         yield! subNodeText (seg) 
                         yield sprintf "\t\t}"
             } 
 
-        let btnText(propName:string, set: ConcurrentDictionary<string, List<Flo>>) = 
+        let btnText(propName:string, set: ConcurrentDictionary<string, List<MFlow>>) = 
             seq {
                         yield sprintf "\t[%s] = {"  propName
                         for emg in set do
-                            yield sprintf "\t\t%s = { %s };" emg.Key (emg.Value |>Seq.map(fun flo-> flo.ToText()) |> String.concat "; ") 
+                            yield sprintf "\t\t%s = { %s };" emg.Key (emg.Value |>Seq.map(fun flow-> flow.ToText()) |> String.concat "; ") 
                         yield "\t}"
             } 
 
@@ -119,11 +119,11 @@ module ExportModel =
                 yield sprintf "//////////////////////////////////////////////////////"
                 for sys in  model.TotalSystems do
                     yield sprintf "[sys] %s = {"sys.Name
-                    let flows = sys.RootFlow() 
+                    let flows = sys.RootMFlow() 
                     for flow in flows do
-                        //Flow 출력
+                        //MFlow 출력
 
-                        yield sprintf "\t[flow] %s = { \t" (flow.ToText())
+                        yield sprintf "\t[MFlow] %s = { \t" (flow.ToText())
                         
                         yield! edgeText    (flow.Edges)
                         yield! segmentText (flow.UsedSegs)
@@ -182,7 +182,7 @@ module ExportModel =
                 yield sprintf "[cpus] AllCpus = {" 
                 for sys in model.TotalSystems do
                     yield sprintf "\t[cpu] Cpu_%s = {" sys.Name
-                    let flows = sys.RootFlow() 
+                    let flows = sys.RootMFlow() 
                     //my CPU
                     for flow in flows do    
                         yield sprintf "\t\t%s.%s;" sys.Name (flow.ToText())
@@ -200,7 +200,7 @@ module ExportModel =
             seq {
                 for sys in model.TotalSystems do
                     yield sprintf "[addresses] = {" 
-                    let flows = sys.RootFlow() 
+                    let flows = sys.RootMFlow() 
                     for flow in flows do
                         for callSeg in flow.NotMySegs() do
                             for index in [|1..callSeg.MaxCnt|] do
@@ -248,7 +248,7 @@ module ExportModel =
                     yield sprintf "//DTS auto generation %s ExSegs"sys.Name
                     yield sprintf "//////////////////////////////////////////////////////"
                     yield sprintf "[sys] EX = {" 
-                    for flow in sys.RootFlow()  do
+                    for flow in sys.RootMFlow()  do
                             
                         // Call InterLock
                         for calls in flow.Interlockedges do
@@ -257,17 +257,17 @@ module ExportModel =
                                 let txs =  getTRXs ([call], RX ,false)|> String.concat ", "
                                 let rxs =  getTRXs ([call], TX, false)|> String.concat ", "
                                 let resetTxs =  getTRXs (resets, RX, true)|> String.concat ", "
-                                yield sprintf "\t[flow] %s = { %s > %s <| %s; }" (call.ToCallText()) txs rxs resetTxs
+                                yield sprintf "\t[MFlow] %s = { %s > %s <| %s; }" (call.ToCallText()) txs rxs resetTxs
                         // Call Without InterLock
                         let noInterLocks =flow.CallWithoutInterLock()
                         for call in noInterLocks do
-                            yield sprintf "\t[flow] %s = { TX > RX; }" (call.ToCallText()) 
+                            yield sprintf "\t[MFlow] %s = { TX > RX; }" (call.ToCallText()) 
                         //Ex 출력
                         for exSeg in flow.ExRealSegs() do
-                            yield sprintf "\t[flow] %s = { EX; }"  (exSeg.ToCallText()) 
+                            yield sprintf "\t[MFlow] %s = { EX; }"  (exSeg.ToCallText()) 
                     //Ex 버튼 출력
                     for exSeg in sys.BtnSegs() do
-                        yield sprintf "\t[flow] %s = { %s; }"  exSeg.SegName  (getTRXs ([exSeg], TX ,false)|> String.concat "; ")
+                        yield sprintf "\t[MFlow] %s = { %s; }"  exSeg.SegName  (getTRXs ([exSeg], TX ,false)|> String.concat "; ")
 
                     yield "}"
                     yield ""

@@ -14,11 +14,11 @@ namespace Dual.Model.Import
     {
         public static FormMain TheMain;
 
-        private DsModel _model;
+        private ImportModel _model;
         private string _dsText;
         private bool _ConvertErr = false;
 
-        public Dictionary<Flo, TabPage> DicUI;
+        public Dictionary<MFlow, TabPage> DicUI;
         public string PathPPT;
         public string PathXLS;
         public bool Busy = false;
@@ -46,7 +46,7 @@ namespace Dual.Model.Import
             EventExternal.MSGSubscribe();
             EventExternal.SegSubscribe();
 
-            DicUI = new Dictionary<Flo, TabPage>();
+            DicUI = new Dictionary<MFlow, TabPage>();
 
             // this.Text = UtilFile.GetVersion();
             this.Size = new Size(500, 500);

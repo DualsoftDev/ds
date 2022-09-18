@@ -13,7 +13,7 @@ open Engine.Core
 [<AutoOpen>]
 module ImportIOTable =
 
-    let ApplyExcel(path:string, sys:DsSys) =
+    let ApplyExcel(path:string, sys:MSys) =
         let FromExcel(path:string) =
             
             let excelApp = new ApplicationClass(Visible = false)
@@ -46,7 +46,7 @@ module ImportIOTable =
 
         let tableIO = FromExcel(path)
         
-        //Case	Flo	Name	    Type	Size	S(Output)	R(Output)	E(Input)
+        //Case	MFlow	Name	    Type	Size	S(Output)	R(Output)	E(Input)
         //주소	P1	    AA	        I1	    bit	-	-	I9
         //주소	P1	    AA	        I2	    bit	-	-	I10
         //주소	S101	RBT3Right	IO	    bit	Q3	-	I13
@@ -69,7 +69,7 @@ module ImportIOTable =
                 |TagCase.Observe -> sys.ObserveSet.TryAdd($"{row.[2]}", $"{row.[7]}") |>ignore
                 |TagCase.Button  -> sys.AssignAddress($"{row.[1]}",$"{row.[2]}", $"{row.[7]}")|>ignore
             
-        for flow in sys.RootFlow()  do
+        for flow in sys.RootMFlow()  do
             flow.NotMySegs()
             |> Seq.iter(fun seg -> 
                         let s, r, e = sys.AddressSet.[seg.Name]

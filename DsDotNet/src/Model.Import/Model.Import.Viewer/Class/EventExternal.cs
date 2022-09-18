@@ -32,7 +32,7 @@ namespace Dual.Model.Import
                 var seg = rx.Seg as MSeg;
                 var sys = seg.BaseSys;
 
-                sys.RootFlow().ToList().ForEach(flow =>
+                sys.RootMFlow().ToList().ForEach(flow =>
                 {
                     if (flow.UsedSegs.Contains(seg))
                         if (FormMain.TheMain.DicUI.ContainsKey(flow))

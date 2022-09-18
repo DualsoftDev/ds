@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using static Engine.Common.FS.MessageEvent;
 using static Engine.Core.DsTextProperty;
 using static Model.Import.Office.Object;
+using ImportModel = Model.Import.Office.Object.ImportModel;
 
 namespace Dual.Model.Import
 {
@@ -58,7 +59,7 @@ namespace Dual.Model.Import
             try
             {
                 this.Do(() => button_comfile.Enabled = false);
-                var lstModel = new List<DsModel>() { ImportModel.FromPPTX(PathPPT) };
+                var lstModel = new List<ImportModel>() { ImportM.FromPPTX(PathPPT) };
                 if (lstModel.Where(w => w == null).Any())
                     return;
 
@@ -66,7 +67,7 @@ namespace Dual.Model.Import
 
                 if (!_ConvertErr)
                 {
-                    _dsText = ExportModel.ToText(_model);
+                    _dsText = ExportM.ToText(_model);
                     ExportTextModel(Color.Transparent, _dsText);
                     this.Do(() => xtraTabControl_My.TabPages.Clear());
                     foreach (var sys in _model.TotalSystems.OrderBy(sys => sys.Name))
@@ -105,7 +106,7 @@ namespace Dual.Model.Import
             MSGInfo($"{PathXLS} 불러오는 중!!");
             var sys = _model.ActiveSys;
             ImportIOTable.ApplyExcel(path, sys);
-            _dsText = ExportModel.ToText(_model);
+            _dsText = ExportM.ToText(_model);
             ExportTextModel(Color.FromArgb(0, 150, 0), _dsText);
             this.Do(() =>
             {
@@ -169,7 +170,7 @@ namespace Dual.Model.Import
 
         internal void HelpLoad()
         {
-            DsModel demo = Check.GetDemoModel("test");
+            ImportModel demo = Check.GetDemoModel("test");
             splitContainer1.Panel1Collapsed = false;
 
             this.Size = new Size(1600, 1000);
@@ -180,13 +181,13 @@ namespace Dual.Model.Import
                   );
         }
 
-        internal void CreateNewTabViewer(DsSys sys, bool isDemo = false)
+        internal void CreateNewTabViewer(MSys sys, bool isDemo = false)
         {
-            List<Flo> flows = new List<Flo>();
+            List<MFlow> flows = new List<MFlow>();
             if (isDemo)
-                flows = sys.Flows.Values.ToList();
+                flows = sys.MFlows.Values.ToList();
             else
-                flows = sys.RootFlow().ToList();
+                flows = sys.RootMFlow().ToList();
 
             var flowTotalCnt = flows.Count();
             flows.ToList().ForEach(f =>
@@ -213,7 +214,7 @@ namespace Dual.Model.Import
         }
         internal void RefreshGraph()
         {
-            foreach (KeyValuePair<Flo, TabPage> view in DicUI)
+            foreach (KeyValuePair<MFlow, TabPage> view in DicUI)
             {
                 foreach (var seg in view.Key.UsedSegs)
                 {

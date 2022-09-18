@@ -15,14 +15,14 @@ open Engine.Core
 open Engine.Util
 
 [<AutoOpen>]
-module ImportModel =
+module ImportM =
 
     type internal ImportPowerPoint(path:string) =
         let doc = pptDoc(path)
         let dicSeg = ConcurrentDictionary<string, MSeg>()
         let dicEdge = ConcurrentDictionary<MEdge, MSeg>()  //childEdges, parentSeg
-        let model =  DsModel(doc.FullPath)
-        let mySys= DsSys("MY", true)
+        let model =  ImportModel(doc.FullPath)
+        let mySys= MSys("MY", true)
 
         let getParent(edge:pptEdge) = 
            Check.SameParent(doc, edge)
@@ -41,7 +41,7 @@ module ImportModel =
                then parents |> Seq.toArray
                else [(None ,mySys.SysSeg)] |> Seq.toArray
 
-        let updateAlias(node:pptNode, flow:Flo) = 
+        let updateAlias(node:pptNode, flow:MFlow) = 
             if(node.Alias.IsSome) 
             then 
                 let name = Util.GetValidName(node.Name) 
@@ -57,28 +57,28 @@ module ImportModel =
         let convertEdge(edge:pptEdge) = 
             let sSeg = dicSeg.[edge.StartNode.Key]
             let eSeg = dicSeg.[edge.EndNode.Key]
-            updateAlias(edge.StartNode, mySys.Flows.[edge.PageNum]) 
-            updateAlias(edge.EndNode, mySys.Flows.[edge.PageNum]) 
+            updateAlias(edge.StartNode, mySys.MFlows.[edge.PageNum]) 
+            updateAlias(edge.EndNode, mySys.MFlows.[edge.PageNum]) 
             getParent(edge) |> Seq.iter(fun (parentNode, parentSeg) ->
                         
-                           mySys.Flows.[edge.PageNum].RemoveSegNoEdge(sSeg) 
-                           mySys.Flows.[edge.PageNum].RemoveSegNoEdge(eSeg) 
+                           mySys.MFlows.[edge.PageNum].RemoveSegNoEdge(sSeg) 
+                           mySys.MFlows.[edge.PageNum].RemoveSegNoEdge(eSeg) 
                            let mEdge = MEdge(sSeg, eSeg, edge.Causal)
 
                            if(mEdge.Causal = Interlock)
-                           then mySys.Flows.[edge.PageNum].AddInterlock(mEdge)
+                           then mySys.MFlows.[edge.PageNum].AddInterlock(mEdge)
 
                            match parentNode with
                            |Some(v) -> if(v.PageNum = edge.PageNum) 
-                                       then mySys.Flows.[edge.PageNum].AddSegDrawSub(parentSeg) 
-                           |None -> mySys.Flows.[edge.PageNum].AddEdge(mEdge)
+                                       then mySys.MFlows.[edge.PageNum].AddSegDrawSub(parentSeg) 
+                           |None -> mySys.MFlows.[edge.PageNum].AddEdge(mEdge)
 
                            Check.SameEdgeErr(parentNode, edge, mEdge, dicSameCheck)
                            dicEdge.TryAdd(mEdge, parentSeg) |>ignore
                           )
 
         
-        member internal x.GetDsModel() = 
+        member internal x.GetImportModel() = 
             try
             
                 //모델만들기 및 시스템 등록
@@ -88,76 +88,76 @@ module ImportModel =
                 //page 타이틀 중복체크 
                 let dicSamePage = ConcurrentDictionary<string, pptPage>()
                 let dicSameSeg  = ConcurrentDictionary<string, MSeg>()
-                let dicFloName  = ConcurrentDictionary<int, string>()
+                let dicMFlowName  = ConcurrentDictionary<int, string>()
                 
                 doc.Pages |> Seq.iter(fun page ->  Check.SamePage(page, dicSamePage))
                 doc.Pages |> Seq.iter(fun page ->  
-                                    let flowName = 
+                                    let MFlowName = 
                                         let title = doc.GetPage(page.PageNum).Title
                                         if(title = "") then sprintf "P%d" page.PageNum else title
               
-                                    dicFloName.TryAdd(page.PageNum, Util.GetValidName(flowName))|>ignore)
+                                    dicMFlowName.TryAdd(page.PageNum, Util.GetValidName(MFlowName))|>ignore)
 
                 //segment 리스트 만들기
                 doc.Nodes 
                 |> Seq.iter(fun node -> 
-                    Check.ValidFlowPath(node, dicFloName)
+                    Check.ValidMFlowPath(node, dicMFlowName)
 
-                    let realFlo, realName, bMyFlow  = 
+                    let realMFlow, realName, bMyMFlow  = 
                         if(node.Name.Contains('.')) 
                         then node.Name.Split('.').[0] , node.Name.Split('.').[1], false
-                        else dicFloName.[node.PageNum], node.Name, true
+                        else dicMFlowName.[node.PageNum], node.Name, true
 
                     let btn = node.IsEmgBtn || node.IsStartBtn || node.IsAutoBtn || node.IsResetBtn 
                     let bound = if(btn) then ExBtn
                                 else if(node.NodeCausal= EX) then ExSeg
-                                else if(bMyFlow) then ThisFlow else OtherFlow
+                                else if(bMyMFlow) then ThisMFlow else OtherMFlow
 
-                    let seg = MSeg(realName, mySys, Editor.User, bound, node.NodeCausal, realFlo, node.IsDummy)
+                    let seg = MSeg(realName, mySys, Editor.User, bound, node.NodeCausal, realMFlow, node.IsDummy)
 
                     seg.Update(node.Key, node.Id.Value, node.Alias, node.CntTX, node.CntRX)
                     dicSeg.TryAdd(node.Key, seg) |> ignore
                     
                     Check.SameNode(seg, node, dicSameSeg)   )
               
-                //Flow 리스트 만들기
+                //MFlow 리스트 만들기
                 doc.Nodes 
                 |> Seq.filter(fun node -> node.IsDummy|>not)
                 |> Seq.iter(fun node -> 
-                                let name  = dicFloName.[node.PageNum]
-                                let flow  = Flo(name, node.PageNum, mySys)
+                                let name  = dicMFlowName.[node.PageNum]
+                                let MFlow  = MFlow(name, node.PageNum, mySys)
                                
-                                mySys.Flows.TryAdd(node.PageNum, flow)|>ignore
-                                mySys.Flows.[node.PageNum].AddSegNoEdge(dicSeg.[node.Key])
+                                mySys.MFlows.TryAdd(node.PageNum, MFlow)|>ignore
+                                mySys.MFlows.[node.PageNum].AddSegNoEdge(dicSeg.[node.Key])
                                 )
 
                 //Safety & EMG & Start & Auto 리스트 만들기
                 doc.Nodes 
                 |> Seq.filter(fun node -> node.IsDummy|>not)
                 |> Seq.iter(fun node -> 
-                                let flowName =  mySys.Flows.[node.PageNum].Name
+                                let MFlowName =  mySys.MFlows.[node.PageNum].Name
                                 let dic = dicSeg.Values.Select(fun seg -> seg.FullName, seg) |> dict
                                
                                 //Start, Reset, Auto, Emg 버튼
-                                if(node.IsStartBtn) then mySys.TryAddStartBTN(node.Name, mySys.Flows.[node.PageNum])
-                                if(node.IsResetBtn) then mySys.TryAddResetBTN(node.Name, mySys.Flows.[node.PageNum])
-                                if(node.IsAutoBtn)  then mySys.TryAddAutoBTN(node.Name, mySys.Flows.[node.PageNum])
-                                if(node.IsEmgBtn)   then mySys.TryAddEmergBTN(node.Name, mySys.Flows.[node.PageNum])
+                                if(node.IsStartBtn) then mySys.TryAddStartBTN(node.Name, mySys.MFlows.[node.PageNum])
+                                if(node.IsResetBtn) then mySys.TryAddResetBTN(node.Name, mySys.MFlows.[node.PageNum])
+                                if(node.IsAutoBtn)  then mySys.TryAddAutoBTN(node.Name, mySys.MFlows.[node.PageNum])
+                                if(node.IsEmgBtn)   then mySys.TryAddEmergBTN(node.Name, mySys.MFlows.[node.PageNum])
                                 
                                 //Safety
                                 let safeSeg = 
                                     node.Safeties   //세이프티 입력 미등록 이름오류 체크
-                                    |> Seq.map(fun safe ->  sprintf "%s.%s.%s" mySys.Name flowName safe)
+                                    |> Seq.map(fun safe ->  sprintf "%s.%s.%s" mySys.Name MFlowName safe)
                                     |> Seq.iter(fun safeFullName -> if(dic.ContainsKey safeFullName|>not) 
                                                                     then Office.ErrorName(node.Shape, 28, node.PageNum))
 
 
                                     node.Safeties   
-                                    |> Seq.map(fun safe ->  sprintf "%s.%s.%s" mySys.Name flowName safe)
+                                    |> Seq.map(fun safe ->  sprintf "%s.%s.%s" mySys.Name MFlowName safe)
                                     |> Seq.map(fun safeFullName ->  dic.[safeFullName])
 
                                 if(safeSeg.Any())
-                                    then mySys.Flows.[node.PageNum].AddSafety(dicSeg.[node.Key], safeSeg)
+                                    then mySys.MFlows.[node.PageNum].AddSafety(dicSeg.[node.Key], safeSeg)
                                 )
                                 
                 //Dummy child 처리
@@ -170,7 +170,7 @@ module ImportModel =
                     |> Seq.iter(fun child ->  
                                 let cSeg = dicSeg.[child.Key]
                                 pSeg.AddSegNoEdge(cSeg)
-                                mySys.Flows.[parent.PageNum].RemoveSegNoEdge(cSeg) 
+                                mySys.MFlows.[parent.PageNum].RemoveSegNoEdge(cSeg) 
                                // child.ExistChildEdge <- true
                                 )
                 )
@@ -208,13 +208,13 @@ module ImportModel =
                             |> Seq.filter(fun child -> child.ExistChildEdge|>not) //엣지 할당 못받은 자식만
                             |> Seq.filter(fun child -> child.IsDummy|>not) 
                             |> Seq.iter(fun child -> 
-                                                updateAlias(child, mySys.Flows.[parent.PageNum]) 
+                                                updateAlias(child, mySys.MFlows.[parent.PageNum]) 
                                                 
                                                 //행위 부모 할당후 
                                                 pSeg.AddSegNoEdge(dicSeg.[child.Key])
-                                                //Flo 상에서 삭제
-                                                mySys.Flows.[parent.PageNum].RemoveSegNoEdge(dicSeg.[child.Key]) 
-                                                mySys.Flows.[parent.PageNum].AddSegDrawSub(pSeg) 
+                                                //MFlow 상에서 삭제
+                                                mySys.MFlows.[parent.PageNum].RemoveSegNoEdge(dicSeg.[child.Key]) 
+                                                mySys.MFlows.[parent.PageNum].AddSegDrawSub(pSeg) 
                                                     )
                 )
 
@@ -227,7 +227,7 @@ module ImportModel =
                 doc.Nodes 
                 |> Seq.filter(fun node -> node.PageNum = doc.VisibleLast().PageNum)
                 |> Seq.filter(fun node -> node.Name = ""|>not)
-                |> Seq.filter(fun node -> dicSeg.[node.Key].Bound = ThisFlow)
+                |> Seq.filter(fun node -> dicSeg.[node.Key].Bound = ThisMFlow)
                 |> Seq.filter(fun node -> node.NodeCausal = TX || node.NodeCausal = TR || node.NodeCausal = RX || node.NodeCausal = EX )
                 |> Seq.iter(fun node -> mySys.LocationSet.TryAdd(dicSeg.[node.Key].FullName, node.Rectangle) |> ignore)
             
@@ -247,7 +247,7 @@ module ImportModel =
     let FromPPTX(path:string) =
         let ppt = ImportPowerPoint(path)
         DoWork(20);
-        let model = ppt.GetDsModel()
+        let model = ppt.GetImportModel()
         DoWork(50);
         model
         

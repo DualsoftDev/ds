@@ -90,7 +90,7 @@ module Base =
             func()
             failwith "No exception matched!"
         with
-        | :? 'ex as excpt when excpt.ToString().Contains substring ->
+        | :? 'ex as excpt when excpt.Message.Contains substring ->
             tracefn $"Got expected exception:\r\n{excpt}"
             ()  // OK
         | _ as err ->

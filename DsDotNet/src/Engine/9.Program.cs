@@ -28,21 +28,6 @@ class Program
         Log4NetWrapper.SetLogger(logger);
         Global.Logger = logger;
 
-        void Test(string text)
-        {
-            if (!text.Contains("[cpus]"))
-                text += @"
-[cpus] AllCpus = {
-    [cpu] DummyCpu = {
-        X.Y;
-    }
-}
-";
-            var engine = new EngineBuilder(text, ParserOptions.Create4Simulation()).Engine;
-            Program.Engine = engine;
-            engine.Run();
-        }
-
         //Tester.DoSampleTestVps();
         //Tester.DoSampleTest();
         //Tester.DoSampleTestAdvanceReturn();
@@ -54,7 +39,7 @@ class Program
 
         //ParserTest.TestParseSafety();
         //ParserTest.TestParseStrongCausal();
-        //ParserTest.TestParseButtons();
+        ParserTest.TestParseButtons();
         //ParserTest.TestParsePpt();
         //ParserTest.TestSerialize();
         //ParserTest.TestError();
@@ -62,13 +47,13 @@ class Program
         //ParserTest.TestParseExternalSegmentCall();
         //ParserTest.TestParseAliases();
 
-        //Test(InvalidDuplicationTest.DupSystemNameModel);
-        //Test(InvalidDuplicationTest.DupFlowNameModel);
-        //Test(InvalidDuplicationTest.DupParentingModel1);
-        //Test(InvalidDuplicationTest.DupParentingModel2);
-        //Test(InvalidDuplicationTest.DupParentingModel3);
-        //Test(InvalidDuplicationTest.DupCallPrototypeModel);
-        //Test(InvalidDuplicationTest.DupParentingWithCallPrototypeModel);
-        Test(InvalidDuplicationTest.DupCallTxModel);
+        //InvalidDuplicationTest.Test(InvalidDuplicationTest.DupSystemNameModel);
+        //InvalidDuplicationTest.Test(InvalidDuplicationTest.DupFlowNameModel);
+        //InvalidDuplicationTest.Test(InvalidDuplicationTest.DupParentingModel1);
+        //InvalidDuplicationTest.Test(InvalidDuplicationTest.DupParentingModel2);
+        //InvalidDuplicationTest.Test(InvalidDuplicationTest.DupParentingModel3);
+        //InvalidDuplicationTest.Test(InvalidDuplicationTest.DupCallPrototypeModel);
+        //InvalidDuplicationTest.Test(InvalidDuplicationTest.DupParentingWithCallPrototypeModel);
+        //InvalidDuplicationTest.Test(InvalidDuplicationTest.DupCallTxModel);
     }
 }

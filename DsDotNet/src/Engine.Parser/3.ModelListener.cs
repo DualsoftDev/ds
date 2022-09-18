@@ -1,3 +1,5 @@
+using Engine.Common;
+
 namespace Engine.Parser;
 
 class ModelListener : dsBaseListener
@@ -138,7 +140,7 @@ class ModelListener : dsBaseListener
 
     override public void EnterButtons (ButtonsContext ctx)
     {
-        var first = findFirstChild<ParserRuleContext>(ctx);
+        var first = findFirstChild<ParserRuleContext>(ctx);     // {Emergency, Auto, Start, Reset}ButtonsContext
         var targetDic =
             first switch
             {
@@ -148,6 +150,14 @@ class ModelListener : dsBaseListener
                 ResetButtonsContext => _system.ResetButtons,
                 _ => throw new Exception("ERROR"),
             };
+
+        var category = first.GetChild(1).GetText();       // [| '[', category, ']', buttonBlock |] 에서 category 만 추려냄 (e.g 'emg')
+        var key = (_system, category);
+        if (ParserHelper.ButtonCategories.Contains(key))
+            throw new Exception($"Duplicated button category {category} near {ctx.GetText()}");
+        else
+            ParserHelper.ButtonCategories.Add(key);
+
         var buttonDefs = enumerateChildren<ButtonDefContext>(first).ToArray();
         foreach (var bd in buttonDefs)
         {
@@ -158,27 +168,29 @@ class ModelListener : dsBaseListener
                     let flow = QpInstanceMap[(_system, $"{_system.Name}.{flowName}")] as RootFlow
                     select flow
                 ).ToArray();
-            
+
+            var duplicatedFlows = flows.FindDuplicates();
+            if (duplicatedFlows.Any())
+            {
+                var dupNames = string.Join(", ", duplicatedFlows.Select(flow => flow.QualifiedName));
+                throw new Exception($"Duplicated flow(s) {dupNames} near {ctx.GetText()}.");
+            }
+
+            if (targetDic.ContainsKey(buttonName))
+                throw new Exception($"Duplicated button name [{buttonName}] near {ctx.GetText()}");
             targetDic.Add(buttonName, flows);
-
-            Console.WriteLine();
         }
-
-        Console.WriteLine();
-        //EmergencyButtonsContext
-        //ctx
-        //base.EnterButtons
     }
 
 
 
 
-    override public void ExitProgram(ProgramContext ctx) { }
+    //override public void ExitProgram(ProgramContext ctx) { }
 
 
-    // ParseTreeListener<> method
-    override public void VisitTerminal(ITerminalNode node) { return; }
-    override public void VisitErrorNode(IErrorNode node) { return; }
-    override public void EnterEveryRule(ParserRuleContext ctx) { return; }
-    override public void ExitEveryRule(ParserRuleContext ctx) { return; }
+    //// ParseTreeListener<> method
+    //override public void VisitTerminal(ITerminalNode node) { return; }
+    //override public void VisitErrorNode(IErrorNode node) { return; }
+    //override public void EnterEveryRule(ParserRuleContext ctx) { return; }
+    //override public void ExitEveryRule(ParserRuleContext ctx) { return; }
 }

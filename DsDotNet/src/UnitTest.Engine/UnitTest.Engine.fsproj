@@ -31,6 +31,7 @@
 		<Compile Include="1.ModelExtension.fs" />
 		<Compile Include="ModelTest1.fs" />
 		<Compile Include="ModelTest2.fs" />
+		<Compile Include="Parse.Duplicated.Test.fs" />
 		<Compile Include="EdgeTest.fs" />
 		<Compile Include="Tag,Expression,Latch,Bits\Latch, Rising Test.fs" />
 		<Compile Include="Tag,Expression,Latch,Bits\PortTag Test.fs" />

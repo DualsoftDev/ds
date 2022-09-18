@@ -12,6 +12,9 @@ public class ParserHelper
     public Dictionary<DsSystem, Dictionary<string, string>> AliasNameMaps = new();
     public Dictionary<DsSystem, Dictionary<string, string[]>> BackwardAliasMaps = new();
 
+    // button category 중복 check 용
+    public HashSet<(DsSystem, string)> ButtonCategories = new();
+
     public Model Model { get; } = new Model();
     internal DsSystem _system;
     internal RootFlow _rootFlow;

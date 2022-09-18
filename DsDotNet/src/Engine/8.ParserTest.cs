@@ -110,8 +110,6 @@ namespace Engine
         EMGBTN3 = { F3; F5 };
         EMGBTN = { F1; F2; F3; F5; };
     }
-    [emg] = {
-    }
     [auto] = {
         //AutoBTN2;     Empty not allowed
         AutoBTN = { F2 };

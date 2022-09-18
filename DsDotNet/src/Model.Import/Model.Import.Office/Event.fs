@@ -25,9 +25,9 @@ module Event =
     [<Extension>]
     type DsUtil =
 
-        [<Extension>] static member GetTgtSame (edges:#EdgeBase seq, target) = edges  |> Seq.filter (fun edge -> edge.TargetVertex = target)  
-        [<Extension>] static member GetSrcSame (edges:#EdgeBase seq, source) = edges  |> Seq.filter (fun edge -> edge.SourceVertex = source)  
-        [<Extension>] static member GetStartCaual     (edges:#EdgeBase seq)  = edges |> Seq.filter (fun edge -> edge.Causal = SEdge)  
-        [<Extension>] static member GetResetCaual     (edges:#EdgeBase seq)  = edges |> Seq.filter (fun edge -> edge.Causal = REdge)  
-        [<Extension>] static member GetNodes          (edges:#EdgeBase seq)  = edges |> Seq.collect (fun edge -> [edge.SourceVertex;edge.TargetVertex])
-        [<Extension>] static member GetNodesDistinct  (edges:#EdgeBase seq)  = edges.GetNodes() |> Seq.distinct 
+        [<Extension>] static member GetTgtSame (edges:#CausalBase seq, target) = edges |> Seq.filter (fun edge -> edge.Target = target)  
+        [<Extension>] static member GetSrcSame (edges:#CausalBase seq, source) = edges |> Seq.filter (fun edge -> edge.Source = source)  
+        [<Extension>] static member GetStartCaual     (edges:#CausalBase seq)  = edges |> Seq.filter (fun edge -> edge.Causal = SEdge)  
+        [<Extension>] static member GetResetCaual     (edges:#CausalBase seq)  = edges |> Seq.filter (fun edge -> edge.Causal = REdge)  
+        [<Extension>] static member GetNodes          (edges:#CausalBase seq)  = edges |> Seq.collect (fun edge -> [edge.Source ;edge.Target])
+        [<Extension>] static member GetNodesDistinct  (edges:#CausalBase seq)  = edges.GetNodes() |> Seq.distinct 

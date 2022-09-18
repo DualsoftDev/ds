@@ -171,9 +171,9 @@ public static class CallExtension
             case Call call:
                 return call.Container switch
                 {
-                    SegmentBase seg   => $"{seg.QualifiedName}.{call.Name}",
+                    SegmentBase seg => $"{seg.QualifiedName}.{call.Name}",
                     RootFlow flow => $"{flow.QualifiedName}.{call.Name}",
-                    _             => throw new Exception("ERROR"),
+                    _ => throw new Exception("ERROR"),
                 };
             default:
                 throw new Exception("ERROR");

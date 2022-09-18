@@ -6,6 +6,6 @@ namespace DsType
         public string ToText() => "";
         public string EdgeCausalType() => "";
 
-        
+
     }
 }

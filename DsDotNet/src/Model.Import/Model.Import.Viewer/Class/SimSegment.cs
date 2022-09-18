@@ -60,7 +60,7 @@ namespace Dual.Model.Import
         }
         private static List<Seg> getHeads(Dictionary<Seg, Seg> dic, Dictionary<MEdge, MEdge> dicEdge)
         {
-            List<Seg> tgts = dicEdge.Values.Where(w=>w.Causal.IsStart).Select(edge => edge.Target).Distinct().ToList();
+            List<Seg> tgts = dicEdge.Values.Where(w => w.Causal.IsStart).Select(edge => edge.Target).Distinct().ToList();
             List<Seg> heads = dic.Values.Where(s => !tgts.Contains(s)).ToList();
             List<MEdge> findEdges = dicEdge.Values
                 .Where(edge => edge.Causal.IsStart)
@@ -97,7 +97,7 @@ namespace Dual.Model.Import
             if (model == null) return;
             if (!org) await TestORG(model);
 
-            var dicSeg  = model.ActiveSys.RootSegs().ToDictionary(d => d);
+            var dicSeg = model.ActiveSys.RootSegs().ToDictionary(d => d);
             var dicEdge = model.ActiveSys.RootEdges().ToDictionary(d => d);
 
             await Task.Run(async () =>

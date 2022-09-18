@@ -19,7 +19,7 @@ public static class ModelExtension
         if (n == 1 || sys == null)
             return sys as T;
 
-        foreach(var rf in sys.RootFlows)
+        foreach (var rf in sys.RootFlows)
         {
             var cp = rf.CallPrototypes.FirstOrDefault(cp => cp.GetQualifiedName() == qualifiedName);
             if (cp != null)

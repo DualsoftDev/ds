@@ -6,11 +6,7 @@ open System.Linq
 open System.Diagnostics
 open System.Collections.Concurrent
 open System.Collections.Generic
-open DocumentFormat.OpenXml
 open Engine.Core
-open Engine.Core.DsType
-open Engine.Core.DsTextProperty
-open Engine.Util
 open System.IO
 
 [<AutoOpen>]
@@ -28,20 +24,22 @@ module Object =
         | User      //사용자 
         | Engine    //Dualsoft Engine 자동 생성
     
-    /// Start/Reset/End relay tuple
+    and
+        DsNode(name)  = interface IVertex with member _.Name = name
     and
         /// 사용자가 모델링을 통해서 만든 segment (SegEditor = User)
         [<DebuggerDisplay("{FullName}")>]
         Seg(name:string, baseSystem:DsSys, editor:Editor, bound:Bound, nodeCausal:NodeCausal, ownerFlow:string, bDummy:bool) as this =
-            inherit SegBase(name,  baseSystem)
+            inherit SegBase(DsNode(name), [],  baseSystem)
             /// modeled edges
             let mutable status4 = Status4.Homing
             let mEdges  = ConcurrentHash<MEdge>()
-            let noEdgeBaseSegs  = ConcurrentDictionary<SegBase, SegBase>()
+            let noEdgeBaseSegs  = ConcurrentDictionary<Seg, Seg>()
 
             new (name, baseSystem, nodeCausal) = Seg (name, baseSystem, Editor.User,   ThisFlow, nodeCausal, "", false)
             new (name, baseSystem)             = Seg (name, baseSystem, Editor.Engine, ThisFlow, MY        , "", false)
-
+       
+            member x.Name = name
             member x.NodeCausal = nodeCausal
             member x.Status4 = status4 
             member x.SetStatus(s:Status4) = status4 <- s
@@ -147,12 +145,13 @@ module Object =
         /// Modeled Edge : 사용자가 작성한 모델 상의 segment 간의 연결 edge (Wire)
         [<DebuggerDisplay("{Source.FullName}{Causal.ToText()}{Target.FullName}")>]
         MEdge(src:Seg, tgt:Seg, causal:EdgeCausal) =
-            inherit EdgeBase(src, tgt, causal)
+            inherit CausalBase(src, tgt, causal)
             member x.Source = src
             member x.Target = tgt
             member x.IsSameSys = src.BaseSys = tgt.BaseSys
             member x.SrcSystem = src.BaseSys
             member x.TgtSystem = tgt.BaseSys
+            member x.Nodes = [src;tgt]
             
             member x.ToCheckText() =    match causal with
                                         |SEdge |SPush |  SReset-> "Start"
@@ -171,7 +170,6 @@ module Object =
         /// Flo : 페이지별 구성
         [<DebuggerDisplay("{Name}")>]
         Flo(name:string, index:int, baseSystem)  =
-            inherit SegBase(name,  baseSystem)
             let drawSubs  = ConcurrentHash<Seg>()
             let dummySeg  = ConcurrentHash<Seg>()
             let safeties  = ConcurrentDictionary<Seg, Seg seq>()
@@ -179,7 +177,7 @@ module Object =
             let interlocks  = ConcurrentDictionary<string, MEdge>()
             let setIL  = ConcurrentHash<HashSet<Seg>>()
             let aliasSet  = ConcurrentDictionary<string, HashSet<string>>()
-            let noEdgeBaseSegs  = ConcurrentDictionary<SegBase, SegBase>()
+            let noEdgeBaseSegs  = ConcurrentDictionary<Seg, Seg>()
 
             let rec getLink(start:Seg, find:HashSet<Seg>, full:HashSet<Seg>) =
                 let update (edge:MEdge) =
@@ -273,7 +271,9 @@ module Object =
         [<DebuggerDisplay("{Name}")>]
         /// System 내부 Seg의 내외부 Seg간 시작/리셋 연결 정보 구조
         DsSys(name:string, active:bool)  =
-            inherit SystemBase(name)
+            inherit SysBase(name)
+
+
             let mutable sysSeg: System.Lazy<Seg> = null
             let flows  = ConcurrentDictionary<int, Flo>()
             let locationSet  = ConcurrentDictionary<string, System.Drawing.Rectangle>()
@@ -298,7 +298,7 @@ module Object =
 
             new (name:string)       = new DsSys(name,  false)
             new (name, active:bool) = new DsSys(name,  active)
-
+            member x.Name = name
             member x.SysSeg =
                 if isNull sysSeg then
                     sysSeg <- Lazy(fun () -> Seg("(ENG)Main_"+name, x))

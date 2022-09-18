@@ -202,8 +202,8 @@ namespace Dual.Model.Import
             if (model)
             {
 
-                var src = edge.SourceVertex as Seg;
-                var tgt = edge.TargetVertex as Seg;
+                var src = edge.Source as Seg;
+                var tgt = edge.Target as Seg;
 
                 UpdateNodeView(gEdge.SourceNode, src);
                 UpdateNodeView(gEdge.TargetNode, tgt);

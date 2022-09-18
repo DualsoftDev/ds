@@ -1,5 +1,7 @@
 using Engine.Common;
 
+using System.Windows.Input;
+
 namespace Engine.Parser;
 
 
@@ -92,7 +94,11 @@ class SkeletonListener : dsBaseListener
 
         _rootFlow = new RootFlow(cpu, flowName, _system);
         cpu.RootFlows.Add(_rootFlow);
-        QpInstanceMap.Add((_system, CurrentPath), _rootFlow);
+        var key = (_system, CurrentPath);
+        if (QpInstanceMap.ContainsKey(key))
+            throw new Exception($"Duplicated flow name [{flowName}] on {_rootFlow.QualifiedName}.");
+
+        QpInstanceMap.Add(key, _rootFlow);
         Trace.WriteLine($"Flow: {flowName}");
     }
     override public void ExitFlow(FlowContext ctx) { _rootFlow = null; }
@@ -113,7 +119,11 @@ class SkeletonListener : dsBaseListener
         var callph = ctx.callPhrase();
 
         var call = new CallPrototype(name, _rootFlow);
-        QpDefinitionMap.Add((_system, $"{CurrentPath}.{name}"), call);
+        var key = (_system, $"{CurrentPath}.{name}");
+        if (QpDefinitionMap.ContainsKey(key) || QpInstanceMap.ContainsKey(key))
+            throw new Exception($"Duplicated call definition [{CurrentPath}.{name}].");
+
+        QpDefinitionMap.Add(key, call);
     }
 
 
@@ -122,6 +132,9 @@ class SkeletonListener : dsBaseListener
         var name = ctx.id().GetText();
         var seg = SegmentBase.Create(name, _rootFlow);
         var key = (_system, $"{CurrentPath}.{name}");
+        if (QpDefinitionMap.ContainsKey(key) || QpInstanceMap.ContainsKey(key))
+            throw new Exception($"Duplicated listing [{CurrentPath}.{name}].");
+
         QpDefinitionMap.Add(key, seg);
         QpInstanceMap.Add(key, seg);
     }
@@ -132,7 +145,11 @@ class SkeletonListener : dsBaseListener
         Trace.WriteLine($"Parenting: {ctx.GetText()}");
         var name = ctx.id().GetText();
         _parenting = SegmentBase.Create(name, _rootFlow);
-        QpInstanceMap.Add((_system, CurrentPath), _parenting);
+
+        var key = (_system, CurrentPath);
+        if (QpInstanceMap.ContainsKey(key))
+            throw new Exception($"Duplicated parenting name [{CurrentPath}] on {_rootFlow.QualifiedName}.");
+        QpInstanceMap.Add(key, _parenting);
     }
     override public void ExitParenting(ParentingContext ctx) { _parenting = null; }
 

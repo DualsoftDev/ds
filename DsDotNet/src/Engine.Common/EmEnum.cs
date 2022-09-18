@@ -86,8 +86,17 @@ public static class EmEnuerable
     public static IEnumerable<T> Do<T>(this IEnumerable<T> xs, Action<T> action)
     {
         var xxs = xs.ToArray();
-        foreach(var x in xxs)
+        foreach (var x in xxs)
             action(x);
         return xxs;
+    }
+
+    public static IEnumerable<T> FindDuplicates<T>(this IEnumerable<T> xs)
+    {
+        return
+            xs.GroupBy(x => x)
+                .Where(g => g.Count() > 1)
+                .Select(g => g.Key)
+                ;
     }
 }

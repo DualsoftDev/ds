@@ -34,7 +34,7 @@ public class EngineBuilder
 
             if (options.IsSimulationMode)
             {
-                Cpu = Model.Cpus.First();
+                Cpu = Model.Cpus.FirstOrDefault();
                 Cpu.IsActive = true;
             }
             else

@@ -2,6 +2,8 @@
 
 using Antlr4.Runtime.Misc;
 
+using Engine.Common;
+
 namespace Engine.Parser;
 
 //enum NodeType = "system" | "task" | "call" | "proc" | "func" | "segment" | "expression" | "conjunction";
@@ -182,6 +184,16 @@ partial class ElementsListener : dsBaseListener
             txs = txs.Where(t => t != null).ToArray();
             rxs = rxs.Where(t => t != null).ToArray();
         }
+
+        string concat(IEnumerable<string> xs) => string.Join(", ", xs);
+
+        var txDup = txs.Cast<SegmentBase>().Select(x => x.QualifiedName).FindDuplicates();
+        if (txDup.Any())
+            throw new Exception($"Duplicated TXs [{concat(txDup)}] near {ctx.GetText()}");
+        var rxDup = rxs.Cast<SegmentBase>().Select(x => x.QualifiedName).FindDuplicates();
+        if (rxDup.Any())
+            throw new Exception($"Duplicated RXs [{concat(rxDup)}] near {ctx.GetText()}");
+
         call.TXs.AddRange(txs);
         call.RXs.AddRange(rxs);
         //Trace.WriteLine($"Call: {name} = {txs.Select(tx => tx.Name)} ~ {rx?.Name}");
@@ -240,6 +252,9 @@ partial class ElementsListener : dsBaseListener
                         isAlias = ParserHelper.AliasNameMaps[_system].ContainsKey(n);
                         if (isAlias)
                             key = (_system, ParserHelper.AliasNameMaps[_system][n]);
+                        else
+                            key = (_system, $"{_rootFlow.QualifiedName}.{n}");
+
                         break;
                     case 2:
                         key = (_system, $"{_system.Name}.{n}");

@@ -3,68 +3,48 @@ namespace Model.Import.Office
 
 open System
 open System.Linq
-open System.Runtime.CompilerServices
-
-open DocumentFormat.OpenXml
+open System.Diagnostics
 open System.Collections.Concurrent
+open System.Runtime.CompilerServices
+open Engine.Util
 
 [<AutoOpen>]
-module UtilMS = 
+module Util =
 
-    type ErrorCase  = Shape | Conn | Page | Group | Name 
-        with
-        member x.ToText() =
-            match x with
-            |Shape -> "도형오류"
-            |Conn  -> "연결오류"
-            |Page  -> "장표오류"
-            |Group -> "그룹오류"
-            |Name  -> "이름오류"
+    type E =
+        /// relay 변화를 Trace.WriteLine   
+        [<Extension>] static member ConsolLogAction(text:string) = 
+                        Trace.WriteLine ($"{DateTime.Now.Second}.{DateTime.Now.Millisecond} {text}") 
 
-    let DicErr = 
-        let msgs = ConcurrentDictionary<int, string>()
-        msgs.TryAdd(1,"Call에 점선은 지정된 모양이 아닙니다.") |>ignore
-        msgs.TryAdd(2,"이름 마지막에 [#,#] 형식은 하나 이상 양의 정수이어야 합니다.") |>ignore
-        msgs.TryAdd(3,"기능이 없는 연결입니다.") |>ignore
-        msgs.TryAdd(4,"edge not connected") |>ignore
-        msgs.TryAdd(5,"start not connected") |>ignore
-        msgs.TryAdd(6,"end not connected") |>ignore
-        msgs.TryAdd(7,"there is no edge direction ") |>ignore
-        msgs.TryAdd(8,"SReset edge는 한쪽이 둥근화살표 입니다.") |>ignore
-        msgs.TryAdd(9,"양방향 edge 끝 화살표는 하나 이상 입니다") |>ignore
-        msgs.TryAdd(10,"Interlock edge는  점선만 가능합니다") |>ignore
-        msgs.TryAdd(11,"sp") |>ignore
-        msgs.TryAdd(12,"children은 call or exReal만 가능합니다.") |>ignore
-        msgs.TryAdd(13,"도형의 이름이 없거나 Dummy 그룹은 점선 원형입니다.") |>ignore
-        msgs.TryAdd(14,"edge 연결가능도형 아님") |>ignore
-        msgs.TryAdd(15,"edge not connected 시작 화살표 연결필요") |>ignore
-        msgs.TryAdd(16,"edge not connected 끝   화살표 연결필요") |>ignore
-        msgs.TryAdd(17,"Real의 내부자식은 한번만 정의 되어야 합니다.") |>ignore
-        msgs.TryAdd(18,"Dummy 그룹은 사각형 내부에서만 사용가능합니다.") |>ignore
-        msgs.TryAdd(19,"Dummy 그룹은 중복된 자식을 가질 수 없습니다.") |>ignore
-        msgs.TryAdd(20,"중복된 화살표 연결이 존재합니다.") |>ignore
-        msgs.TryAdd(21,"동일한 이름의 페이지 타이틀이 존재합니다.") |>ignore
-        msgs.TryAdd(22,"이름 마지막에 [#,#] 형식으로 입력 ex) name[TX개수, RX개수] ") |>ignore
-        msgs.TryAdd(23,"1 개의 myReal 그룹지정이 되어야 합니다.") |>ignore
-        msgs.TryAdd(24,"1 개의 dummy 그룹지정이 되어야 합니다.") |>ignore
-        msgs.TryAdd(25,"그룹내 dummy 타입 또는 real 타입 하나는 존재 해야합니다.") |>ignore
-        msgs.TryAdd(26,"이름에 Flow경로 설정 '.' 기호는 1개 이여야 합니다. ex) flow.real") |>ignore
-        msgs.TryAdd(27,"해당이름의 Flow가 없거나 이름에 '.' or ';' 사용은 안됩니다. (이름에 '.' or ';' 제거 혹은 다른 페이지 타이틀 이름 확인필요)") |>ignore
-        msgs.TryAdd(28,"Safety 이름이 시스템 내부에 존재하지 않습니다.") |>ignore
-        msgs.TryAdd(29,"이름에 '.' or ';' 사용은 안됩니다.") |>ignore
-        msgs.TryAdd(30,"버튼 타입은 출력값은 입력 불가입니다. [0, N] 수량을 사용하세요") |>ignore
-        msgs.TryAdd(31,"") |>ignore
-       
-        msgs
+  
+  /// ConcurrentDictionary 를 이용한 hash
+    type ConcurrentHash<'T>() =
+        inherit ConcurrentDictionary<'T, 'T>()
+        member x.TryAdd(item:'T) = x.TryAdd(item, item)
+
+    let GetValidName(name:string) = 
+        if (String.IsNullOrEmpty(name)) 
+            then ""
+        else 
+            if(ParserExtension.IsValidIdentifier(name))  then name else $"\"{name}\"" 
         
-    [<Extension>]
-    type Office =
-            
-        [<Extension>]
-        static member ErrorPPT(case:ErrorCase, id:int,  objName:string, page:int, ?userName:string) = 
-            let itemName =  if(userName.IsSome && (userName.Value = ""|>not))
-                            then $"[Page{page}:{objName}({userName.Value})" 
-                            else $"[Page{page}:{objName}" 
-            failwithf  $"[{case.ToText()}] {DicErr.[id]} \t\t\t{itemName}]"
+    let GetSquareBrackets(name:string, bHead:bool) = 
+        let pattern   = "(?<=\[).*?(?=\])"  //대괄호 안에 내용은 무조건 가져온다
+        let matches     = System.Text.RegularExpressions.Regex.Matches(name, pattern)
+        if(bHead)
+        then 
+            if(name.StartsWith("[") && name.Contains("]")) 
+            then matches.[0].Value else ""
+        else 
+            if(name.EndsWith("]")   && name.Contains("[")) 
+            then matches.[matches.Count-1].Value else ""
 
-        
+    //특수 대괄호 제거후 순수 이름 추출 
+    //[yy]xx[xxx]Name[1,3] => xx[xxx]Name  
+    //앞뒤가 아닌 대괄호는 사용자 이름 뒷단에서 "xx[xxx]Name" 처리
+    let GetBracketsReplaceName(name:string) = 
+        let patternHead   = "^\[[^]]*]" // 첫 대괄호 제거
+        let replaceName = System.Text.RegularExpressions.Regex.Replace(name, patternHead, "")
+        let patternTail   = "\[[^]]*]$" // 끝 대괄호 제거
+        let replaceName = System.Text.RegularExpressions.Regex.Replace(replaceName, patternTail, "")
+        replaceName

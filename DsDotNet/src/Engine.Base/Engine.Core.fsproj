@@ -8,7 +8,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Compile Include="DsText.fs" />
+		<Compile Include="Text\DsText.fs" />
+		<Compile Include="Text\DsTextProperty.fs" />
+		<Compile Include="Text\DsTextDataType.fs" />
+		<Compile Include="Text\DsTextExport.fs" />
 		<Compile Include="DsType.fs" />
 		<Compile Include="Interface.fs" />
 		<Compile Include="InterfaceClass.fs" />

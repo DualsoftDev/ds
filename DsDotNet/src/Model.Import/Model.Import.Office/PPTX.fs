@@ -9,7 +9,7 @@ open DocumentFormat.OpenXml
 open System.IO
 open System
 open UtilPPT
-open UtilMS
+open UtilError
 open Engine.Common.FS
 open Engine.Core
 open System.Collections.Generic

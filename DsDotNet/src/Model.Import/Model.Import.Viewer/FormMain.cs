@@ -8,7 +8,6 @@ using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 using static Engine.Common.FS.MessageEvent;
-using static Model.Import.Office.Model;
 using static Model.Import.Office.Object;
 
 namespace Dual.Model.Import

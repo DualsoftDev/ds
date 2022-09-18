@@ -54,7 +54,11 @@ module DsType =
             | TextRPush      -> RPush     
             | TextSReset     -> SReset    
             | TextInterlock  -> Interlock 
-            |_-> failwithf "EdgeCausalType Error"
+            |_-> failwithf $"'{txt}' EdgeCausalType Error check type [
+                            , {TextSEdge}, {TextSPush}
+                            , {TextREdge}, {TextRPush}
+                            , {TextSReset}, {TextInterlock}]"
+            
    
     ///Seg 상태 (Default 'Homing') 
     type Status4 =
@@ -67,23 +71,26 @@ module DsType =
             | BOOL          // BIT
             | BYTE          // USINT8
             | WORD          // UINT16
-            | DWORD         //UDINT32
-            | LWORD         //ULINT64
-            | STRING        //TEXT
-            | FLOAT         //Single
-            | DOUBLE        //Double
+            | DWORD         // UDINT32
+            | LWORD         // ULINT64
+            | STRING        // TEXT
+            | FLOAT         // Single
+            | DOUBLE        // Double
 
     let DataToType(txt:string) =
             match txt.ToLower() with
-            | "bit" | "bool" -> BOOL
-            | "byte" -> BYTE
-            | "word" -> WORD
-            | "dword" -> DWORD
-            | "lword" -> LWORD
-            | "string" -> STRING
-            | "float"| "single" -> FLOAT
-            | "double" -> DOUBLE
-            |_-> failwithf "DataToType Error"
+            | TextBit | TextBool -> BOOL
+            | TextByte -> BYTE
+            | TextWord -> WORD
+            | TextDword -> DWORD
+            | TextLword -> LWORD
+            | TextString  -> STRING
+            | TextSingle | TextFloat -> FLOAT
+            | TextDouble -> DOUBLE
+            |_-> failwithf $"'{txt}' DataToType Error check type [
+                                  {TextBit}, {TextBool}, {TextByte}
+                                , {TextWord}, {TextDword}, {TextLword}
+                                , {TextString}, {TextSingle}, {TextFloat}, {TextDouble}]"
      
     ///인터페이스 Tag 기본 형식
     type TagCase =
@@ -95,19 +102,42 @@ module DsType =
         with
             member x.ToText() =
                 match x with
-                | Address      -> "주소"
-                | Variable     -> "내부"
-                | Command      -> "지시"
-                | Observe      -> "관찰"
-                | Button       -> "버튼"
+                | Address      -> TextAddress  
+                | Variable     -> TextVariable 
+                | Command      -> TextCommand  
+                | Observe      -> TextObserve  
+                | Button       -> TextButton   
           
 
     let TagToType(txt:string) =
             match txt with
-            | "주소" -> Address
-            | "내부" -> Variable
-            | "지시" -> Command
-            | "관찰" -> Observe
-            | "버튼" -> Button
-            |_-> failwithf "TagCase Error"
+            | TextAddress   -> Address
+            | TextVariable  -> Variable
+            | TextCommand   -> Command
+            | TextObserve   -> Observe
+            | TextButton    -> Button
+            |_-> failwithf $"'{txt}' TagCase Error check type [
+                            , {TextAddress}, {TextVariable}
+                            , {TextCommand}, {TextObserve}
+                            , {TextButton}]"
+
+
+    ///BtnType 인과의 노드 종류
+    type BtnType =
+        | StartBTN            //시작 버튼
+        | ResetBTN            //리셋 버튼
+        | AutoBTN             //자동 버튼
+        | EmergencyBTN        //비상 버튼
+       
+
+    let BtnToType(txt:string) =
+            match txt with
+            | TextStartBtn -> StartBTN
+            | TextResetBtn -> ResetBTN
+            | TextAutoBtn -> AutoBTN
+            | TextEmgBtn -> EmergencyBTN
+            |_-> failwithf $"'{txt}' BtnToType Error check type [
+                            , {TextStartBtn}, {TextResetBtn}
+                            , {TextAutoBtn}, {TextEmgBtn}]"
+
     

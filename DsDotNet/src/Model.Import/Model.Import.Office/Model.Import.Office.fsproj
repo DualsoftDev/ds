@@ -16,12 +16,10 @@
 
 
   <ItemGroup>
-    <Compile Include="Util\ImportType.fs" />
-    <Compile Include="Util\Util.fs" />
-    <Compile Include="00.Base\03.Event, Util.fs" />
-    <Compile Include="10.Model\10.Object.fs" />
-    <Compile Include="10.Model\12.Model.fs" />
     <Compile Include="Util.fs" />
+    <Compile Include="Event.fs" />
+    <Compile Include="Object.fs" />
+    <Compile Include="UtilError.fs" />
     <Compile Include="UtilPPT.fs" />
     <Compile Include="PPTX.fs" />
     <Compile Include="Check.fs" />

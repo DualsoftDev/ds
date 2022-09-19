@@ -124,7 +124,7 @@ module ExportM =
                     for flow in flows do
                         //MFlow 출력
 
-                        yield sprintf "\t[%s] %s = { \t" TextFlow (flow.ToText())
+                        yield sprintf "\t[%s] %s = { \t" TextFlow flow.ValidName
                         
                         yield! edgeText    (flow.Edges)
                         yield! segmentText (flow.UsedSegs)

@@ -13,7 +13,7 @@ module Check =
 
         let GetDemoModel(sysName:string) = 
             let sys = MSys(sysName, true)
-            let mFlow = MFlow("P0",  Int32.MaxValue, sys)
+            let mFlow = MFlow("P0",  Int32.MaxValue)
             sys.MFlows.TryAdd(mFlow.Page, mFlow) |> ignore
             mFlow.AddEdge( MEdge(MSeg("START", sys, EX), MSeg("시작인과", sys, MY), EdgeCausal.SEdge))
             mFlow.AddEdge( MEdge(MSeg("RESET", sys, EX), MSeg("복귀인과", sys, MY), EdgeCausal.REdge))

@@ -59,9 +59,9 @@ module Object =
 
             ///금칙 문자 및 선두숫자가 있으면 "" 로 이름 앞뒤에 배치한다.
             ///Alias 는 무조건 "" 로 이름 앞뒤에 배치
-            member x.SegName  = sprintf "%s" (if(this.Alias.IsSome) then this.Alias.Value else NameUtil.GetValidName(name))
-            member x.MFlowNSeg= sprintf "%s.%s"  ownerMFlow (NameUtil.GetValidName(name))
-            member x.FullName = sprintf "%s.%s.%s" baseSystem.Name  ownerMFlow (NameUtil.GetValidName(name))  
+            member x.SegName  = sprintf "%s" (if(this.Alias.IsSome) then this.Alias.Value else x.ValidName)
+            member x.MFlowNSeg= sprintf "%s.%s"  ownerMFlow x.ValidName
+            member x.FullName = sprintf "%s.%s.%s" baseSystem.Name  ownerMFlow x.ValidName  
             member x.PathName = sprintf "%s(%s)" x.FullName (if(x.Parent.IsSome) then x.Parent.Value.Name else "Root")
 
             member x.Update(nodeKey, nodeIdValue, nodeAlias, nodeCntTX, nodeCntRX) = 
@@ -157,7 +157,7 @@ module Object =
     and
         /// MFlow : 페이지별 구성
         [<DebuggerDisplay("{Name}")>]
-        MFlow(name:string, index:int, baseSystem)  =
+        MFlow(name:string, index:int)  =
             inherit RootFlow(name)
             let drawSubs  = ConcurrentHash<MSeg>()
             let dummySeg  = ConcurrentHash<MSeg>()
@@ -188,8 +188,6 @@ module Object =
             member x.AddSegNoEdge(seg) = noEdgeBaseSegs.TryAdd(seg, seg) |> ignore 
             member x.RemoveSegNoEdge(seg) = noEdgeBaseSegs.TryRemove(seg) |> ignore 
 
-            member x.Name = name
-            member x.ToText() =  name
             member x.Page = index
 
             member x.Edges = edges.Values |> Seq.sortBy(fun edge -> edge.Source.Name)

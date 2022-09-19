@@ -46,7 +46,7 @@ module ImportM =
             then 
                 let name = 
                     if(seg.NodeType.IsCall)
-                    then NameUtil.GetValidName(seg.Name)
+                    then seg.ValidName
                     else sprintf "EX.%s.EX" (seg.ToCallText())
 
                 let alias = seg.Alias.Value
@@ -96,11 +96,11 @@ module ImportM =
                 
                 doc.Pages |> Seq.iter(fun page ->  Check.SamePage(page, dicSamePage))
                 doc.Pages |> Seq.iter(fun page ->  
-                                    let MFlowName = 
+                                    let mFlowName = 
                                         let title = doc.GetPage(page.PageNum).Title
                                         if(title = "") then sprintf "P%d" page.PageNum else title
               
-                                    dicMFlowName.TryAdd(page.PageNum, NameUtil.GetValidName(MFlowName))|>ignore)
+                                    dicMFlowName.TryAdd(page.PageNum, mFlowName)|>ignore)
 
                 //segment 리스트 만들기
                 doc.Nodes 
@@ -129,7 +129,8 @@ module ImportM =
                 |> Seq.filter(fun node -> node.IsDummy|>not)
                 |> Seq.iter(fun node -> 
                                 let name  = dicMFlowName.[node.PageNum]
-                                let MFlow  = MFlow(name, node.PageNum, mySys)
+                                if(mySys.Name = name) then Office.ErrorPPT(ErrorCase.Name, 31, $"시스템이름 : {mySys.Name}", node.PageNum, $"페이지이름 : {name}")
+                                let MFlow  = MFlow(name, node.PageNum)
 
                                 //Flow 중복 추가 해결 필요 test ahn
                                 mySys.RootFlows.Add(MFlow) |> ignore

@@ -24,9 +24,9 @@ module CoreFlow =
         member x.AddEdge(edge) = edges.Add(edge)
         member x.RemoveEdge(edge) = edges.Remove(edge)
 
-        //Add    인과처리 대상 DAG 의 Head 부분
+        //Add    singleNodes
         member x.AddSingleNode(node)    = singleNodes.Add(node)
-        //Remove 인과처리 대상 DAG 의 Head 부분
+        //Remove singleNodes
         member x.RemoveSingleNode(node) = singleNodes.Remove(node)
         member x.Singles = singleNodes
         member x.Nodes = (x :>IFlow).Nodes
@@ -47,7 +47,6 @@ module CoreFlow =
     type RootFlow(name)  =
         inherit Flow(name)
         member x.FlowName = name
-        member x.ValidName = NameUtil.GetValidName(name)
     
     [<DebuggerDisplay("{name}")>]
     type ChildFlow(name)  =

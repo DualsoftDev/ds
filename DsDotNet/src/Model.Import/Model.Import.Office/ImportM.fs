@@ -87,7 +87,7 @@ module ImportM =
             
                 //모델만들기 및 시스템 등록
                 model.Add(mySys) |> ignore
-                model.SetActive(mySys)
+                //model.SetActive(mySys)
 
                 //page 타이틀 중복체크 
                 let dicSamePage = ConcurrentDictionary<string, pptPage>()

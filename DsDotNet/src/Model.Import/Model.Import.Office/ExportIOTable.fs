@@ -38,8 +38,8 @@ module ExportIOTable =
 
         let rows =
             seq {
-                for sys in  model.TotalSystems do
-                    let flows = sys.RootMFlow() |> Seq.filter(fun flow -> (flow.Page = Int32.MaxValue)|>not)
+                for sys in  model.Systems do
+                    let flows = sys.RootFlows |> Seq.cast<MFlow> |> Seq.filter(fun flow -> (flow.Page = Int32.MaxValue)|>not)
                     //MFlow 출력
                     for flow in flows do
                         //Call Task 출력
@@ -61,7 +61,8 @@ module ExportIOTable =
         dt.Rows.Add("지시", "함수", ""  , "'-", "'-", ""  , "'-", "'-") |> ignore
         dt.Rows.Add("관찰", "함수", ""  , "'-", "'-", "'-", "'-", ""  ) |> ignore
 
-        for sys in  model.TotalSystems do
+        for sys in  model.Systems do
+            let sys = sys :?> MSys
             for btn in  sys.EmgSet do
                 dt.Rows.Add("버튼", "비상", btn.Key  , "'-", "'-", "'-", "'-", ""  ) |> ignore
             for btn in  sys.AutoSet do

@@ -46,6 +46,7 @@ module CoreFlow =
     type RootFlow(name)  =
         inherit Flow()
         member x.FlowName = name
+        member x.ValidName = NameUtil.GetValidName(name)
     
     [<DebuggerDisplay("{name}")>]
     type ChildFlow()  =

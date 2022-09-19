@@ -8,12 +8,13 @@ open System.Collections.Generic
 module CoreStruct =
 
     [<DebuggerDisplay("{name}")>]
-    type DsSystem(name:string, model:DsModel)  =
+    type DsSystem(name:string)  =
         inherit SysBase(name)
         let rootFlows = HashSet<RootFlow>()
         
-        member x.Model = model
         member x.RootFlows = rootFlows
+        member x.ValidName = NameUtil.GetValidName(name)
+        //나의 시스템 Flag
         member val Active = false
 
 
@@ -37,30 +38,9 @@ module CoreStruct =
             member x.SysActives  = 
                 let activeSys = systems |> Seq.filter (fun sys -> sys.Active)
                 if((activeSys |> Seq.length) <> 1) then failwith "한개 이상의 Active 시스템 설정이 필요합니다."
-
-            ///사용자 모델링 기본형 : parentSeg는 모델링시에 엣지의 부모를 할당받음
-            //member x.AddEdge(edgeInfo:DsEdge, parent:Segment) = x.AddEdges([edgeInfo], parent)
-            //member x.AddEdges(edgeInfos:DsEdge seq, parent:Segment) =
-            //    edgeInfos |> Seq.iter (fun e -> x.EdgeAdd(e, Some parent))
-
-            //member private x.EdgeAdd(edge:DsEdge, pSeg:Segment option) =
-            //    //시스템 등록 Check 및 사용된 UsedSegs System Add
-            //    edge.Nodes |> Seq.cast<Segment>
-            //    |> Seq.iter(fun seg-> 
-            //        let mySystem = seg.SysBase:?> DsSystem
-            //        if not (x.Systems.Contains(mySystem)) 
-            //        then failwith $"model({x.Name})에 해당 {seg.Name}의 System 등록 필요. model.add(system) 필요합니다."
-            //        else ())
-            //            //if pSeg.IsNone then seg.SetParent(seg.BaseSys.SysSeg))
-                        
-
-            //    let newParent = if pSeg.IsSome 
-            //                    then pSeg.Value 
-            //                    else edge.Target.SysBase.SystemSeg :?> Segment
-
-            //    newParent.ChildFlow.AddEdge(edge) |> ignore
-
-            
+            member x.AllFlows      = systems |> Seq.collect(fun sys -> sys.RootFlows) |> HashSet
 
 
-            
+            //시스템 인과 추가 방법 모델에서만 가능
+            member x.AddEdge(edgeInfo:DsEdge, parent:Segment)    = parent.ChildFlow.AddEdge(edgeInfo) |> ignore
+            member x.AddEdge(edgeInfo:DsEdge, rootFlow:RootFlow) = rootFlow.AddEdge(edgeInfo) |> ignore

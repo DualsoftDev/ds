@@ -117,9 +117,10 @@ module ExportM =
                 yield sprintf "//DTS model auto generation from %s" model.Path 
               //  yield sprintf "//DTS model auto generation"
                 yield sprintf "//////////////////////////////////////////////////////"
-                for sys in  model.TotalSystems do
-                    yield sprintf "[%s] %s = {"  TextSystem sys.Name
-                    let flows = sys.RootMFlow() 
+                for sys in  model.Systems do
+                    yield sprintf "[%s] %s = {"  TextSystem sys.ValidName
+                    let sys = sys :?> MSys
+                    let flows = sys.RootFlows |> Seq.cast<MFlow>
                     for flow in flows do
                         //MFlow 출력
 
@@ -180,9 +181,10 @@ module ExportM =
         let cpus = 
             seq {
                 yield sprintf "[%s] AllCpus = {" TextCpus
-                for sys in model.TotalSystems do
-                    yield sprintf "\t[%s] Cpu_%s = {" TextCpu sys.Name
-                    let flows = sys.RootMFlow() 
+                for sys in model.Systems do
+                    yield sprintf "\t[%s] Cpu_%s = {" TextCpu sys.ValidName
+                    let sys = sys :?> MSys
+                    let flows = sys.RootFlows |> Seq.cast<MFlow>
                     //my CPU
                     for flow in flows do    
                         yield sprintf "\t\t%s.%s;" sys.Name (flow.ToText())
@@ -198,9 +200,10 @@ module ExportM =
 
         let address = 
             seq {
-                for sys in model.TotalSystems do    
+                for sys in model.Systems do    
                     yield sprintf "[%s] = {"  TextAddress
-                    let flows = sys.RootMFlow() 
+                    let sys = sys :?> MSys
+                    let flows = sys.RootFlows |> Seq.cast<MFlow>
                     for flow in flows do
                         for callSeg in flow.NotMySegs() do
                             for index in [|1..callSeg.MaxCnt|] do
@@ -213,7 +216,8 @@ module ExportM =
 
         let layout = 
             seq {
-                for sys in model.TotalSystems do
+                for sys in model.Systems do
+                    let sys = sys :?> MSys
                     if(sys.LocationSet.Any())
                     then 
                         yield sprintf "[%s] = {" TextLayout
@@ -243,12 +247,14 @@ module ExportM =
                 
             seq {
                 
-                for sys in model.TotalSystems do
+                for sys in model.Systems do
                     yield sprintf "//////////////////////////////////////////////////////"
-                    yield sprintf "//DTS auto generation %s ExSegs"sys.Name
+                    yield sprintf "//DTS auto generation %s ExSegs"sys.ValidName
                     yield sprintf "//////////////////////////////////////////////////////"
                     yield sprintf "[%s] EX = {" TextSystem
-                    for flow in sys.RootMFlow()  do
+                    let flows = sys.RootFlows |> Seq.cast<MFlow>
+                    let sys = sys :?> MSys
+                    for flow in flows do
                             
                         // Call InterLock
                         for calls in flow.Interlockedges do

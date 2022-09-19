@@ -21,7 +21,7 @@ module Util =
         if (String.IsNullOrEmpty(name)) 
             then ""
         else 
-            if(ParserExtension.IsValidIdentifier(name))  then name else $"\"{name}\"" 
+            if(NameUtil.IsValidIdentifier(name))  then name else $"\"{name}\"" 
         
     let GetSquareBrackets(name:string, bHead:bool) = 
         let pattern   = "(?<=\[).*?(?=\])"  //대괄호 안에 내용은 무조건 가져온다

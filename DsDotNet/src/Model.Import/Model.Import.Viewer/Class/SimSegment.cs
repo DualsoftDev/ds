@@ -43,15 +43,15 @@ namespace Dual.Model.Import
         {
             if (model == null) return;
 
-            var rootSegs = model.ActiveSys.RootSegs();
-            var notRootSegs = model.ActiveSys.NotRootSegs();
+            var rootSegs = model.AllFlows.SelectMany(s => s.Nodes).Cast<MSeg>();
+
+         
             await Task.Run(async () =>
             {
                 await Test(rootSegs, Status4.Homing, AllSeg);
-                await Test(notRootSegs, Status4.Homing, AllSeg);
                 await Task.Delay(10);
 
-                await Test(notRootSegs, Status4.Ready, AllSeg);
+                await Test(rootSegs, Status4.Ready, AllSeg);
                 await Task.Delay(10);
                 await Test(rootSegs, Status4.Ready, notMys);
                 await Task.Delay(10);
@@ -99,12 +99,12 @@ namespace Dual.Model.Import
             if (model == null) return;
             if (!org) await TestORG(model);
 
-            var dicSeg = model.ActiveSys.RootSegs().ToDictionary(d => d);
-            var dicEdge = model.ActiveSys.RootEdges().ToDictionary(d => d);
+            var dicSeg = model.AllFlows.SelectMany(s=>s.Nodes).Cast<MSeg>().ToDictionary(d => d);
+            var dicEdge = model.AllFlows.SelectMany(s=>s.Edges).Cast<MEdge>().ToDictionary(d => d);
 
             await Task.Run(async () =>
             {
-                List<MEdge> edges = model.ActiveSys.RootEdges().ToList();
+                List<MEdge> edges = model.AllFlows.SelectMany(s => s.Edges).Cast<MEdge>().ToList();
                 var segs = edges.SelectMany(s => s.Nodes).ToList();
                 segs.AddRange(dicSeg.Values);
 

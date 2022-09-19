@@ -18,7 +18,7 @@ module Util =
         [<Extension>] static member GetNodes   (edges:#IEdge seq)  = edges |> Seq.collect (fun edge -> [edge.Source;edge.Target])  
     
     [<Extension>]
-    type ParserExtension =
+    type NameUtil =
         /// DS 문법에서 사용하는 identifier (Segment, flow, call 등의 이름)가 적법한지 검사.
         /// 적법하지 않으면 double quote 로 감싸주어야 한다.
         [<Extension>] static member IsValidIdentifier (identifier:string) = 
@@ -39,5 +39,8 @@ module Util =
                                  okHead && okTail
 
         [<Extension>] static member IsQuotationRequired (identifier:string) = 
-                        ParserExtension.IsValidIdentifier(identifier)|>not
+                       NameUtil.IsValidIdentifier(identifier)|>not
+        [<Extension>] static member GetValidName (identifier:string) = 
+                       if(NameUtil.IsValidIdentifier(identifier))
+                       then identifier else $"\"{identifier}\""
         

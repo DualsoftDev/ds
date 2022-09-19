@@ -16,16 +16,18 @@ module InterfaceClass =
     type VertexBase(name)  =
         interface IVertex with
             member _.Name = name
+        member x.Name = (x:>IVertex).Name
      
     /// Segment Edge
     [<AbstractClass>]
     type EdgeBase(source:IVertex, target:IVertex , edgeCausal:EdgeCausal) =
         interface IEdge with
-            member _.Source = source
-            member _.Target = target
-            member _.Causal = edgeCausal
+            member _.ToText() = $"{source} {edgeCausal.ToText()} {target}";
+            member _.Source   = source
+            member _.Target   = target
+            member _.Causal   = edgeCausal
 
-        member x.ToText() = $"{source} {edgeCausal.ToText()} {target}";
+        member x.ToText() = (x:>IEdge).ToText()
 
 
     /// Segment Container
@@ -41,11 +43,10 @@ module InterfaceClass =
     [<AbstractClass>]
     type SegBase(vertex:VertexBase, childFlow:IFlow) =
         interface IActive with
-            member _.Children  = 
-                childFlow.Edges
-                |> Seq.collect (fun edge -> [edge.Source;edge.Target])     
+            member _.Children  =  childFlow.Nodes
+        interface IVertex with
+            member this.Name: string = vertex.Name
 
-        member x.Vertex = vertex
         member x.Children = (x :> IActive).Children
 
     /// Call Segment

@@ -12,7 +12,7 @@ open System
 open Microsoft.FSharp.Collections
 open Engine.Common.FS
 open Engine.Core
-open Engine.Util
+open Engine.Core.Util
 
 [<AutoOpen>]
 module ImportM =

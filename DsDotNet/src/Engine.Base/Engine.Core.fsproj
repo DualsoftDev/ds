@@ -23,7 +23,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\Engine.Core\Engine.Util.csproj" />
+	  <PackageReference Include="System.Reactive" Version="5.0.0" />
 	</ItemGroup>
 	
 

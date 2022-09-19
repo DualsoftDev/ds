@@ -2,12 +2,12 @@
 namespace Model.Import.Office
 
 open System
+open System.IO
 open System.Linq
 open System.Diagnostics
 open System.Collections.Concurrent
 open System.Collections.Generic
 open Engine.Core
-open System.IO
 
 [<AutoOpen>]
 module Object =
@@ -29,21 +29,22 @@ module Object =
         /// 사용자가 모델링을 통해서 만든 segment (SegEditor = User)
         [<DebuggerDisplay("{FullName}")>]
         MSeg(name:string, baseSystem:MSys, editor:Editor, bound:Bound, nodeCausal:NodeCausal, ownerMFlow:string, bDummy:bool) as this =
-            inherit Segment(name,   baseSystem)
-            let mEdges  = ConcurrentHash<MEdge>()
+            inherit Segment(name, ChildFlow())
+            let mySeg  = this :> Segment
+            let mEdges = mySeg.ChildFlow.Edges
             let noEdgeBaseSegs  = ConcurrentDictionary<MSeg, MSeg>()
 
             new (name, baseSystem, nodeCausal) = MSeg (name, baseSystem, Editor.User,   ThisMFlow, nodeCausal, "", false)
             new (name, baseSystem)             = MSeg (name, baseSystem, Editor.Engine, ThisMFlow, MY        , "", false)
 
        
-            member x.NodeCausal = nodeCausal
+            member x.NodeCausal = nodeCausal 
             member x.BaseSys = baseSystem
             member x.Editor = editor
             member x.Bound = bound
-            member x.RemoveMEdge(edge:MEdge) = mEdges.TryRemove(edge) |> ignore
+            member x.RemoveMEdge(edge:MEdge) =  mySeg.ChildFlow.RemoveEdge(edge) |> ignore
             member x.AddMEdge(edge:MEdge) =
-                    mEdges.TryAdd(edge) |> ignore
+                    mySeg.ChildFlow.AddEdge(edge) |> ignore
                     let src = edge.Source
                     let tgt = edge.Target
                     if(this = src) then failwith $"parent [{this.SegName}] = SourceVertex [{src.SegName}]"
@@ -94,10 +95,9 @@ module Object =
                 then  TX, if(this.CountTX = 1) then nameTX else sprintf "%s%d" nameTX curr
                 else  RX, if(this.CountRX = 1) then nameRX else sprintf "%s%d" nameRX curr
   
-            member x.MEdges = mEdges.Values  |> Seq.sortBy(fun edge ->edge.ToText())
+            member x.MEdges = mEdges |> Seq.sortBy(fun edge ->edge.ToText()) |> Seq.cast<MEdge>
             member x.ChildSegs =
-                mEdges.Values
-                |> Seq.collect(fun e -> e.Nodes)
+                mySeg.Children
                 |> Seq.cast<MSeg>
                 |> Seq.distinct
 
@@ -182,12 +182,12 @@ module Object =
                     full.Remove(edge.Source) |> ignore
                     full.Remove(edge.Target) |> ignore
 
-                interlocks.Values.GetSrcSame(start.Vertex) 
+                interlocks.Values.GetSrcSame(start) 
                 |> Seq.iter(fun edge -> 
                                 if(find.Contains(edge.Source)|>not || find.Contains(edge.Target)|>not)
                                 then update (edge);getLink (edge.Target, find, full))
                                         
-                interlocks.Values.GetTgtSame(start.Vertex) 
+                interlocks.Values.GetTgtSame(start) 
                 |> Seq.iter(fun edge -> 
                                 if(find.Contains(edge.Source)|>not || find.Contains(edge.Target)|>not)
                                 then update (edge);getLink (edge.Source, find, full))

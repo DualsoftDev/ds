@@ -21,11 +21,15 @@ module Interface =
         abstract Source  :IVertex 
         abstract Target  :IVertex
         abstract Causal  :EdgeCausal
+        abstract ToText  :unit -> string
+
 
     /// 정의(3/4) 동쪽: DS 모델은 능동행위가 수동행위를 포함한다.
     type IActive = abstract Children:IVertex seq
     /// 정의(4/4) 북쪽: DS 모델은 고유 흐름을 갖는다.
-    type IFlow   = abstract Edges:IEdge seq
+    type IFlow   =
+        abstract Edges:IEdge seq
+        abstract Nodes:IVertex seq
 
     type ICall = 
         abstract Node :IVertex  

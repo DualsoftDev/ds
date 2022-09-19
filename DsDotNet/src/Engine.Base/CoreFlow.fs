@@ -9,7 +9,7 @@ module CoreFlow =
 
     /// Flow Edge
     [<AbstractClass>]
-    type Flow(cpu:ICpu) =
+    type Flow() =
         //엣지연결 리스트
         let edges = HashSet<IEdge>() 
         //엣지연결 없이 혼자있는 자식
@@ -18,27 +18,31 @@ module CoreFlow =
         let singles = HashSet<IVertex>() 
         interface IFlow with
             member _.Edges = edges
+            member _.Nodes = edges.GetNodes() |> Seq.append singles
 
         member x.Edges = (x :> IFlow).Edges
+        member x.AddEdge(edge) = edges.Add(edge)
+        member x.RemoveEdge(edge) = edges.Remove(edge)
+        member x.Nodes = (x :> IFlow).Nodes
         member x.Singles = singles
-        member x.Cpu = cpu
-        member x.GetNodes() = x.Edges.GetNodes() 
-                                |> Seq.append singles
+                                
          
     [<DebuggerDisplay("{name}")>]
     type DsCpu(name:string)  =
+        let assignFlows = HashSet<IFlow>() 
         interface ICpu with
             member _.Name = name
 
         member x.CpuName = (x:> ICpu).Name
+        member x.AssignFlows = assignFlows
 
     [<DebuggerDisplay("{name}")>]
-    type RootFlow(cpu:DsCpu)  =
-        inherit Flow(cpu)
+    type RootFlow()  =
+        inherit Flow()
     
     [<DebuggerDisplay("{name}")>]
-    type ChildFlow(cpu:DsCpu)  =
-        inherit Flow(cpu)
+    type ChildFlow()  =
+        inherit Flow()
 
         
 

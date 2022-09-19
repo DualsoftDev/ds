@@ -10,7 +10,8 @@ module InterfaceClass =
     type Named(name)  =
         interface INamed with
             member _.Name = name
-        member   x.ToText() = $"{name}[{x.GetType().Name}]"
+        member x.ToText() = $"{name}[{x.GetType().Name}]"
+        member x.ValidName = NameUtil.GetValidName(name)
   
     /// 인과 연결가능 객체
     type VertexBase(name)  =
@@ -34,11 +35,12 @@ module InterfaceClass =
     /// Segment Container
     [<AbstractClass>]
     type SysBase(name)  =
+        inherit Named(name)
         let rootFlows = HashSet<IFlow>() 
         interface ISystem with
-            member _.Name = name
+            member _.Flows = rootFlows
 
-        member x.RootFlows = rootFlows
+        member x.RootFlows = (x:>ISystem).Flows
        
     /// Real Segment
     [<AbstractClass>]

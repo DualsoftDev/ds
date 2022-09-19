@@ -13,7 +13,6 @@ module CoreStruct =
         let rootFlows = HashSet<RootFlow>()
         
         member x.RootFlows = rootFlows
-        member x.ValidName = NameUtil.GetValidName(name)
         //나의 시스템 Flag
         member val Active = false
 

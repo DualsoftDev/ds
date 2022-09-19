@@ -47,7 +47,7 @@ module Object =
 
             member x.OwnerMFlow = ownerMFlow
             member x.ToCallText() = let call = sprintf "%s_%s"  (ownerMFlow.TrimStart('\"').TrimEnd('\"')) name
-                                    Util.GetValidName(call)
+                                    NameUtil.GetValidName(call)
 
             member x.ToTextInMFlow() =  match nodeCausal with
                                          |EX -> if(this.Alias.IsSome) 
@@ -59,9 +59,9 @@ module Object =
 
             ///금칙 문자 및 선두숫자가 있으면 "" 로 이름 앞뒤에 배치한다.
             ///Alias 는 무조건 "" 로 이름 앞뒤에 배치
-            member x.SegName  = sprintf "%s" (if(this.Alias.IsSome) then this.Alias.Value else Util.GetValidName(name))
-            member x.MFlowNSeg= sprintf "%s.%s"  ownerMFlow (Util.GetValidName(name))
-            member x.FullName = sprintf "%s.%s.%s" baseSystem.Name  ownerMFlow (Util.GetValidName(name))  
+            member x.SegName  = sprintf "%s" (if(this.Alias.IsSome) then this.Alias.Value else NameUtil.GetValidName(name))
+            member x.MFlowNSeg= sprintf "%s.%s"  ownerMFlow (NameUtil.GetValidName(name))
+            member x.FullName = sprintf "%s.%s.%s" baseSystem.Name  ownerMFlow (NameUtil.GetValidName(name))  
             member x.PathName = sprintf "%s(%s)" x.FullName (if(x.Parent.IsSome) then x.Parent.Value.Name else "Root")
 
             member x.Update(nodeKey, nodeIdValue, nodeAlias, nodeCntTX, nodeCntRX) = 
@@ -276,7 +276,7 @@ module Object =
             let autoSet   = ConcurrentDictionary<string, List<MFlow>>()
             
             let updateBtn (btnType:BtnType, btnName, btnMFlow) = 
-                let name = GetValidName(btnName)
+                let name = NameUtil.GetValidName(btnName)
                 match btnType with
                 |StartBTN ->    if(startSet.ContainsKey(name)) then startSet.[name].Add(btnMFlow) |>ignore else startSet.TryAdd(name, [btnMFlow] |> List) |>ignore
                 |ResetBTN ->    if(resetSet.ContainsKey(name)) then resetSet.[name].Add(btnMFlow) |>ignore else resetSet.TryAdd(name, [btnMFlow] |> List) |>ignore

@@ -175,7 +175,7 @@ module PPTX =
         member x.PageNum = iPage
         member x.Shape = shape
         member x.DashOutline = dashOutline
-        member x.Safeties = safeties.select(fun safe -> Util.GetValidName(safe))
+        member x.Safeties = safeties.select(fun safe -> NameUtil.GetValidName(safe))
         member x.IsDummy = bDuumy
         member x.IsEmgBtn = bEmg
         member x.IsAutoBtn= bAuto
@@ -284,7 +284,7 @@ module PPTX =
                                sameNodes 
                                |> Seq.iter(fun node -> 
                                    cnt <- cnt+1
-                                   node.Alias <-Some(Util.GetValidName(sprintf "%s_Copy%d" node.Name cnt)))
+                                   node.Alias <-Some(NameUtil.GetValidName(sprintf "%s_Copy%d" node.Name cnt)))
                            )
 
             children |> Seq.iter(fun child -> childSet.TryAdd(child)|>ignore)

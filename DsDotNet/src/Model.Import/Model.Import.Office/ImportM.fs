@@ -46,7 +46,7 @@ module ImportM =
             then 
                 let name = 
                     if(seg.NodeCausal.IsCall)
-                    then Util.GetValidName(seg.Name)
+                    then NameUtil.GetValidName(seg.Name)
                     else sprintf "EX.%s.EX" (seg.ToCallText())
 
                 let alias = seg.Alias.Value
@@ -100,7 +100,7 @@ module ImportM =
                                         let title = doc.GetPage(page.PageNum).Title
                                         if(title = "") then sprintf "P%d" page.PageNum else title
               
-                                    dicMFlowName.TryAdd(page.PageNum, Util.GetValidName(MFlowName))|>ignore)
+                                    dicMFlowName.TryAdd(page.PageNum, NameUtil.GetValidName(MFlowName))|>ignore)
 
                 //segment 리스트 만들기
                 doc.Nodes 
@@ -130,7 +130,9 @@ module ImportM =
                 |> Seq.iter(fun node -> 
                                 let name  = dicMFlowName.[node.PageNum]
                                 let MFlow  = MFlow(name, node.PageNum, mySys)
-                               
+
+                                //Flow 중복 추가 해결 필요 test ahn
+                                mySys.RootFlows.Add(MFlow) |> ignore
                                 mySys.MFlows.TryAdd(node.PageNum, MFlow)|>ignore
                                 mySys.MFlows.[node.PageNum].AddSegNoEdge(dicSeg.[node.Key])
                                 )

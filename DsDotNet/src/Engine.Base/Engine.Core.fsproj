@@ -9,6 +9,7 @@
 
 	<ItemGroup>
 		<Compile Include="Text\DsText.fs" />
+		<Compile Include="Text\DsTextUtil.fs" />
 		<Compile Include="Text\DsTextProperty.fs" />
 		<Compile Include="Text\DsTextDataType.fs" />
 		<Compile Include="Text\DsTextExport.fs" />

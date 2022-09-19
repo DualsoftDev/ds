@@ -17,12 +17,7 @@ module Util =
         inherit ConcurrentDictionary<'T, 'T>()
         member x.TryAdd(item:'T) = x.TryAdd(item, item)
 
-    let GetValidName(name:string) = 
-        if (String.IsNullOrEmpty(name)) 
-            then ""
-        else 
-            if(NameUtil.IsValidIdentifier(name))  then name else $"\"{name}\"" 
-        
+    
     let GetSquareBrackets(name:string, bHead:bool) = 
         let pattern   = "(?<=\[).*?(?=\])"  //대괄호 안에 내용은 무조건 가져온다
         let matches     = System.Text.RegularExpressions.Regex.Matches(name, pattern)

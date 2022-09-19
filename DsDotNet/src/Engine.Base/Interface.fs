@@ -37,7 +37,9 @@ module Interface =
         abstract TXs  :IVertex seq 
         abstract RXs  :IVertex seq
     
-    type ISystem    = inherit INamed
+    type ISystem    = 
+        abstract Flows:IFlow seq
+        
     type ICpu       = inherit INamed
     type IAlias     = inherit INamed
     type ITxRx      = inherit INamed

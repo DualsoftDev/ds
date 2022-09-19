@@ -12,6 +12,7 @@ enum NodeType
     system,
     task, call, proc, func, segment, expression, conjunction,
     segmentAlias,
+    externalSegmentCall,
     callAlias,
 };
 
@@ -34,6 +35,7 @@ class Node : NodeBase
     public Node(string[] ids, string label, string[] parentIds, NodeType type)
         : base(label, parentIds, type)
     {
+        Assert(ids.Length <= 4);        // MAX: Sys > Flow > Parenting > Name
         this.ids = ids;
     }
 
@@ -168,7 +170,10 @@ partial class ElementsListener : dsBaseListener
         var callph = ctx.callPhrase();
         SegmentBase[] findSegments(SegmentsContext txrxCtx)
         {
-            var nss = enumerateChildren<SegmentContext>(txrxCtx).Select(collectNameComponents);
+            if (txrxCtx.GetText() == "_")
+                return Array.Empty<SegmentBase>();
+
+            var nss = enumerateChildren<SegmentContext>(txrxCtx).Select(collectNameComponents).ToArray();
             return (
                 from ns in nss
                 let sys = _model.Systems.First(sys => sys.Name == ns[0])

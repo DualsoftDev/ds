@@ -16,23 +16,37 @@ module InterfaceClass =
     type VertexBase(name)  =
         interface IVertex with
             member _.Name = name
+     
+    /// Segment Edge
+    [<AbstractClass>]
+    type EdgeBase(source:IVertex, target:IVertex , edgeCausal:EdgeCausal) =
+        interface IEdge with
+            member _.Source = source
+            member _.Target = target
+            member _.Causal = edgeCausal
+
+        member x.ToText() = $"{source} {edgeCausal.ToText()} {target}";
+
 
     /// Segment Container
     [<AbstractClass>]
     type SysBase(name)  =
+        let rootFlows = HashSet<IFlow>() 
         interface ISystem with
             member _.Name = name
+
+        member x.RootFlows = rootFlows
        
     /// Real Segment
     [<AbstractClass>]
-    type SegBase(vertex:VertexBase, sysBase:SysBase) =
-        let children = HashSet<IVertex>() 
+    type SegBase(vertex:VertexBase, childFlow:IFlow) =
         interface IActive with
-            member _.Children : IVertex seq = children  
+            member _.Children  = 
+                childFlow.Edges
+                |> Seq.collect (fun edge -> [edge.Source;edge.Target])     
 
         member x.Vertex = vertex
-        member x.SysBase = sysBase
-        member x.Children = children
+        member x.Children = (x :> IActive).Children
 
     /// Call Segment
     and
@@ -47,23 +61,4 @@ module InterfaceClass =
 
         member x.TXs = (x :>ICall).TXs
         member x.RXs = (x :>ICall).RXs
-   
-    /// Segment Edge
-    [<AbstractClass>]
-    type EdgeBase(source:IVertex, target:IVertex , edgeCausal:EdgeCausal) =
-        interface IEdge with
-            member _.Source = source
-            member _.Target = target
-            member _.Causal = edgeCausal
-
-        member x.ToText() = $"{source} {edgeCausal.ToText()} {target}";
-
-
-    /// Flow Edge
-    [<AbstractClass>]
-    type FlowBase() =
-        let edges = HashSet<IEdge>() 
-        interface IFlow with
-            member _.Edges: seq<IEdge> = edges
-              
-
+  

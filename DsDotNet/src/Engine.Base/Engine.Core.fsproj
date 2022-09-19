@@ -17,7 +17,9 @@
 		<Compile Include="InterfaceClass.fs" />
 		<Compile Include="CoreUtil.fs" />
 		<Compile Include="CoreEvent.fs" />
+		<Compile Include="CoreFlow.fs" />
 		<Compile Include="CoreClass.fs" />
+		<Compile Include="CoreStruct.fs" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -9,11 +9,9 @@ module CoreClass =
 
    /// 사용자가 모델링을 통해서 만든 segment (SegEditor = User)
     [<DebuggerDisplay("{ToText()}")>]
-    type Segment(name:string, baseSys:SysBase) as this =
-            inherit SegBase(VertexBase(name),  baseSys)
+    type Segment(name:string, childFlow:ChildFlow) as this =
+            inherit SegBase(VertexBase(name),  childFlow)
             let mutable status4 = Status4.Homing
-            let mEdges  = HashSet<DsEdge>()
-
             new (name, baseSys) = Segment (name, baseSys)
             
             member x.Name = name
@@ -28,3 +26,4 @@ module CoreClass =
         [<DebuggerDisplay("{Source.ToText()}{Causal.ToText()}{Target.ToText()}")>]
         DsEdge(src:Segment, tgt:Segment, causal:EdgeCausal) =
             inherit EdgeBase(src.Vertex, tgt.Vertex, causal)
+     

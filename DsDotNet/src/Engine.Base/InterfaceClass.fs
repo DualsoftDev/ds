@@ -25,24 +25,28 @@ module InterfaceClass =
        
     /// Real Segment
     [<AbstractClass>]
-    type SegBase(active:VertexBase, sysBase:SysBase) =
+    type SegBase(vertex:VertexBase, sysBase:SysBase) =
+        let children = HashSet<IVertex>() 
         interface IActive with
-            member _.Active : IVertex = active 
-            member val Passives  =  HashSet<IVertex>() 
+            member _.Children : IVertex seq = children  
 
+        member x.Vertex = vertex
         member x.SysBase = sysBase
+        member x.Children = children
 
-        member x.Vertex   = (x :> IActive).Active
-        member x.Children = (x :> IActive).Passives
-
-        member x.Add   (child:IVertex) = x.Children.Add(child) 
-        member x.Remove(child:IVertex) = x.Children.Remove(child) 
     /// Call Segment
     and
+        [<AbstractClass>]
         CallBase(call:VertexBase, parent:SegBase) =
+        let txs = HashSet<IVertex>() 
+        let rxs = HashSet<IVertex>() 
         interface ICall with
-            member val TXs  =  HashSet<IVertex>() 
-            member val RXs  =  HashSet<IVertex>() 
+            member _.Node = call
+            member _.TXs  = txs
+            member _.RXs  = rxs
+
+        member x.TXs = (x :>ICall).TXs
+        member x.RXs = (x :>ICall).RXs
    
     /// Segment Edge
     [<AbstractClass>]

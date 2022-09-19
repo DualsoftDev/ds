@@ -24,18 +24,15 @@ module Interface =
         abstract Causal  :EdgeCausal
 
     /// 정의(3/4) 동쪽: DS 모델은 능동행위가 수동행위를 포함한다.
-    type IActive =
-        abstract Active:IVertex 
-        abstract Passives:IVertex HashSet
-
+    type IActive = abstract Children:IVertex seq
     /// 정의(4/4) 북쪽: DS 모델은 고유 흐름을 갖는다.
-    type IFlow =  abstract IsDag:bool;
-    
+    type IFlow   = abstract IsDag:bool;
 
 
     type ICall = 
-        abstract TXs  :IVertex HashSet 
-        abstract RXs  :IVertex HashSet
+        abstract Node  :IVertex  
+        abstract TXs  :IVertex seq 
+        abstract RXs  :IVertex seq
     
     type ISystem    = inherit INamed
     type ICpu       = inherit INamed

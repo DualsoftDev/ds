@@ -33,7 +33,7 @@ module ExportM =
 
         let addressText(seg:MSeg, index) =
             let callPath =  if(seg.Bound = ExBtn) then seg.SegName else seg.ToCallText()
-            if(seg.NodeCausal = EX)
+            if(seg.NodeType = EX)
             then 
                 let ex = sprintf "EX.%s.EX" callPath
                 sprintf "%-40s \t= (%s,%s,%s)" ex seg.TextStart seg.TextReset seg.TextEnd
@@ -232,7 +232,7 @@ module ExportM =
       
       
         let exSystem = 
-            let getTRXs (segs: MSeg seq ,skip:NodeCausal, bReset:bool) = 
+            let getTRXs (segs: MSeg seq ,skip:NodeType, bReset:bool) = 
                 seq {
                         for seg in segs do
                             for index in [|1..seg.MaxCnt|] do

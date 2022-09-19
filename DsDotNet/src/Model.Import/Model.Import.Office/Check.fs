@@ -64,9 +64,9 @@ module Check =
             then dicSegCheckSame.TryAdd(seg.MFlowNSeg, seg)|> ignore
 
             let oldSeg = dicSegCheckSame.[seg.MFlowNSeg]
-            if((seg.NodeCausal = oldSeg.NodeCausal)|>not) 
+            if((seg.NodeType = oldSeg.NodeType)|>not) 
             then 
-                MSGError($"도형오류 :타입이 다른 같은이름이 존재합니다 \t[Page{node.PageNum}: {seg.MFlowNSeg}({seg.NodeCausal}) != ({oldSeg.NodeCausal}) ({node.Shape.ShapeName()})]")
+                MSGError($"도형오류 :타입이 다른 같은이름이 존재합니다 \t[Page{node.PageNum}: {seg.MFlowNSeg}({seg.NodeType}) != ({oldSeg.NodeType}) ({node.Shape.ShapeName()})]")
         
         let SameEdgeErr(parentNode:pptNode option, pptEdge:pptEdge, mEdge:MEdge, dicSameCheck:ConcurrentDictionary<string, MEdge>) = 
             let parentName = if(parentNode.IsSome) 

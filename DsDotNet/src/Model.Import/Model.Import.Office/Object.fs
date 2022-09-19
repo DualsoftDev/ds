@@ -22,14 +22,14 @@ module Object =
     and
         /// 사용자가 모델링을 통해서 만든 segment (SegEditor = User)
         [<DebuggerDisplay("{FullName}")>]
-        MSeg(name:string, baseSystem:MSys, bound:Bound, nodeCausal:NodeCausal, ownerMFlow:string, bDummy:bool) as this =
+        MSeg(name:string, baseSystem:MSys, bound:Bound, nodeType:NodeType, ownerMFlow:string, bDummy:bool) as this =
             inherit Segment(name, ChildFlow(name), RootFlow(ownerMFlow))
             let mEdges = (this :> Segment).ChildFlow.Edges
             let mChildFlow = (this :> Segment).ChildFlow
 
-            new (name, baseSystem, nodeCausal) = MSeg (name, baseSystem,  ThisFlow, nodeCausal, "", false)
+            new (name, baseSystem, nodeType) = MSeg (name, baseSystem,  ThisFlow, nodeType, "", false)
        
-            member x.NodeCausal = nodeCausal 
+            member x.NodeType = nodeType 
             member x.BaseSys = baseSystem
             member x.Bound = bound
             member x.RemoveMEdge(edge:MEdge) =  mChildFlow.RemoveEdge(edge) |> ignore
@@ -49,7 +49,7 @@ module Object =
             member x.ToCallText() = let call = sprintf "%s_%s"  (ownerMFlow.TrimStart('\"').TrimEnd('\"')) name
                                     NameUtil.GetValidName(call)
 
-            member x.ToTextInMFlow() =  match nodeCausal with
+            member x.ToTextInMFlow() =  match nodeType with
                                          |EX -> if(this.Alias.IsSome) 
                                                 then this.Alias.Value 
                                                 else sprintf "EX.%s.EX" (x.ToCallText())
@@ -237,12 +237,12 @@ module Object =
                 |> Seq.distinctBy(fun seg -> seg.PathName)
                     
             member x.CallSegs() = x.UsedSegs
-                                        |> Seq.filter(fun seg -> seg.NodeCausal.IsCall)
+                                        |> Seq.filter(fun seg -> seg.NodeType.IsCall)
                                         |> Seq.filter(fun seg -> seg.Bound = ThisFlow)
                                         |> Seq.distinctBy(fun seg -> seg.FullName)
 
             member x.ExRealSegs() = x.UsedSegs
-                                        |> Seq.filter(fun seg -> seg.NodeCausal.IsReal)
+                                        |> Seq.filter(fun seg -> seg.NodeType.IsReal)
                                         |> Seq.filter(fun seg -> seg.Bound = ExSeg)
                                         |> Seq.distinctBy(fun seg -> seg.FullName)
 
@@ -290,7 +290,7 @@ module Object =
             member x.Name = name
             member x.SysSeg =
                 if isNull sysSeg then
-                    sysSeg <- Lazy(fun () -> MSeg("(ENG)Main_"+name, x, NodeCausal.MY))
+                    sysSeg <- Lazy(fun () -> MSeg("(ENG)Main_"+name, x, NodeType.MY))
                 sysSeg.Value
 
             member val Debug = false   with get, set

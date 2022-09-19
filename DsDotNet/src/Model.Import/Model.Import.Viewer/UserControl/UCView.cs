@@ -222,15 +222,15 @@ namespace Dual.Model.Import
                     nNode.Attr.Shape = Shape.Plaintext;
                 else
                 {
-                    if (segment.NodeCausal == NodeCausal.MY)
+                    if (segment.NodeType == NodeType.MY)
                         nNode.Attr.Shape = Shape.Box;
-                    if (segment.NodeCausal == NodeCausal.EX)
+                    if (segment.NodeType == NodeType.EX)
                         nNode.Attr.Shape = Shape.Diamond;
-                    if (segment.NodeCausal == NodeCausal.TR)
+                    if (segment.NodeType == NodeType.TR)
                         nNode.Attr.Shape = Shape.Ellipse;
-                    if (segment.NodeCausal == NodeCausal.TX)
+                    if (segment.NodeType == NodeType.TX)
                         nNode.Attr.Shape = Shape.Ellipse;
-                    if (segment.NodeCausal == NodeCausal.RX)
+                    if (segment.NodeType == NodeType.RX)
                         nNode.Attr.Shape = Shape.Ellipse;
                 }
             }
@@ -254,7 +254,7 @@ namespace Dual.Model.Import
             //node.Label.FontColor = Color.White;
             if (seg != null)
             {
-                if (seg.NodeCausal == NodeCausal.MY)
+                if (seg.NodeType == NodeType.MY)
                     UpdateLineColor(seg.Status4, node);
                 else
                     UpdateFillColor(seg.Status4, node);

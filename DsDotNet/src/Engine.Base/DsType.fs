@@ -7,7 +7,7 @@ namespace Engine.Core
 module DsType =
 
     ///인과의 노드 종류
-    type NodeCausal =
+    type NodeType =
         | MY            //실제 나의 시스템 1 bit
         | EX            //실제 다른 시스템 1 bit
         | TR            //지시관찰 TX RX 

@@ -10,27 +10,27 @@ namespace Dual.Model.Import
 {
     public static class SimSeg
     {
-        static readonly List<NodeCausal> mys = new List<NodeCausal>() { NodeCausal.MY };
-        static readonly List<NodeCausal> notMys = new List<NodeCausal>() { NodeCausal.EX, NodeCausal.TR, NodeCausal.TX, NodeCausal.RX };
+        static readonly List<NodeType> mys = new List<NodeType>() { NodeType.MY };
+        static readonly List<NodeType> notMys = new List<NodeType>() { NodeType.EX, NodeType.TR, NodeType.TX, NodeType.RX };
         static bool org = false;
-        static List<NodeCausal> AllSeg
+        static List<NodeType> AllSeg
         {
             get
             {
-                var obj = new List<NodeCausal>();
+                var obj = new List<NodeType>();
                 obj.AddRange(mys); obj.AddRange(notMys);
                 return obj;
             }
         }
 
 
-        private static async Task Test(IEnumerable<MSeg> rootSegs, Status4 status, List<NodeCausal> showList)
+        private static async Task Test(IEnumerable<MSeg> rootSegs, Status4 status, List<NodeType> showList)
         {
             foreach (var seg in rootSegs)
             {
                 await Task.Run(async () =>
                  {
-                     if (showList.Contains(seg.NodeCausal))
+                     if (showList.Contains(seg.NodeType))
                      {
                          seg.SetStatus(status);
                          await Task.Delay(1);

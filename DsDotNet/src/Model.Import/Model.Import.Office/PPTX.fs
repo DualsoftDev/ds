@@ -181,7 +181,7 @@ module PPTX =
         member x.IsAutoBtn= bAuto
         member x.IsStartBtn = bStart
         member x.IsResetBtn = bReset
-        member val NodeCausal = 
+        member val NodeType = 
 
                             if(shape.CheckRectangle()) then if(dashOutline) then EX else  MY
                             else if(shape.CheckEllipse()) 
@@ -243,7 +243,7 @@ module PPTX =
             let parents = 
                 ids 
                 |> Seq.map (fun id -> nodes.[ Objkey(iPage, id) ])
-                |> Seq.filter (fun node -> node.NodeCausal = MY)
+                |> Seq.filter (fun node -> node.NodeType = MY)
             if(parents.Count() > 1) 
             then  Office.ErrorPPT(Group, 23, $"부모수:{parents.Count()}", iPage)
             let dummys = 
@@ -267,7 +267,7 @@ module PPTX =
             let children = 
                 ids 
                 |> Seq.map (fun id -> nodes.[Objkey(iPage, id) ])
-                |> Seq.filter (fun node ->node.NodeCausal = MY |> not)
+                |> Seq.filter (fun node ->node.NodeType = MY |> not)
                 |> Seq.filter (fun node ->(node.IsDummy|>not ||  parent.IsSome))
 
             if(children.Any() |> not) 

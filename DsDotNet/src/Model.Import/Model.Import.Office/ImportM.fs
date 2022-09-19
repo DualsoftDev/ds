@@ -45,7 +45,7 @@ module ImportM =
             if(seg.Alias.IsSome) 
             then 
                 let name = 
-                    if(seg.NodeCausal.IsCall)
+                    if(seg.NodeType.IsCall)
                     then NameUtil.GetValidName(seg.Name)
                     else sprintf "EX.%s.EX" (seg.ToCallText())
 
@@ -114,10 +114,10 @@ module ImportM =
 
                     let btn = node.IsEmgBtn || node.IsStartBtn || node.IsAutoBtn || node.IsResetBtn 
                     let bound = if(btn) then ExBtn
-                                else if(node.NodeCausal= EX) then ExSeg
+                                else if(node.NodeType= EX) then ExSeg
                                 else if(bMyMFlow) then ThisFlow else OtherFlow
 
-                    let seg = MSeg(realName, mySys,  bound, node.NodeCausal, realMFlow, node.IsDummy)
+                    let seg = MSeg(realName, mySys,  bound, node.NodeType, realMFlow, node.IsDummy)
 
                     seg.Update(node.Key, node.Id.Value, node.Alias, node.CntTX, node.CntRX)
                     dicSeg.TryAdd(node.Key, seg) |> ignore
@@ -234,7 +234,7 @@ module ImportM =
                 |> Seq.filter(fun node -> node.PageNum = doc.VisibleLast().PageNum)
                 |> Seq.filter(fun node -> node.Name = ""|>not)
                 |> Seq.filter(fun node -> dicSeg.[node.Key].Bound = ThisFlow)
-                |> Seq.filter(fun node -> node.NodeCausal = TX || node.NodeCausal = TR || node.NodeCausal = RX || node.NodeCausal = EX )
+                |> Seq.filter(fun node -> node.NodeType = TX || node.NodeType = TR || node.NodeType = RX || node.NodeType = EX )
                 |> Seq.iter(fun node -> mySys.LocationSet.TryAdd(dicSeg.[node.Key].FullName, node.Rectangle) |> ignore)
             
                 MSGInfo($"전체 장표   count [{doc.Pages.Count()}]")

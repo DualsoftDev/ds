@@ -27,6 +27,7 @@ module InterfaceClass =
             member _.Target   = target
             member _.Causal   = edgeCausal
 
+        member x.Nodes = [source;target]
         member x.ToText() = (x:>IEdge).ToText()
 
 

@@ -14,37 +14,27 @@ module Object =
 
     // 행위 Bound 정의
     type Bound =
-        | ThisMFlow         //나의 System 의 이 MFlow        내부 행위정의
-        | OtherMFlow        //나의 System 의 다른 MFlow     에서 행위 가져옴
+        | ThisFlow         //나의 System 의 이 MFlow        내부 행위정의
+        | OtherFlow        //나의 System 의 다른 MFlow     에서 행위 가져옴
         | ExSeg            //외부 System 의 에서 행위(real) 가져옴
         | ExBtn            //외부 System 의 에서 버튼(call) 가져옴
 
-    //Seg 편집자
-    type Editor =
-        | User      //사용자 
-        | Engine    //Dualsoft Engine 자동 생성
-    
- 
     and
         /// 사용자가 모델링을 통해서 만든 segment (SegEditor = User)
         [<DebuggerDisplay("{FullName}")>]
-        MSeg(name:string, baseSystem:MSys, editor:Editor, bound:Bound, nodeCausal:NodeCausal, ownerMFlow:string, bDummy:bool) as this =
-            inherit Segment(name, ChildFlow())
-            let mySeg  = this :> Segment
-            let mEdges = mySeg.ChildFlow.Edges
-            let noEdgeBaseSegs  = ConcurrentDictionary<MSeg, MSeg>()
+        MSeg(name:string, baseSystem:MSys, bound:Bound, nodeCausal:NodeCausal, ownerMFlow:string, bDummy:bool) as this =
+            inherit Segment(name, ChildFlow(), RootFlow(ownerMFlow))
+            let mEdges = (this :> Segment).ChildFlow.Edges
+            let mChildFlow = (this :> Segment).ChildFlow
 
-            new (name, baseSystem, nodeCausal) = MSeg (name, baseSystem, Editor.User,   ThisMFlow, nodeCausal, "", false)
-            new (name, baseSystem)             = MSeg (name, baseSystem, Editor.Engine, ThisMFlow, MY        , "", false)
-
+            new (name, baseSystem, nodeCausal) = MSeg (name, baseSystem,  ThisFlow, nodeCausal, "", false)
        
             member x.NodeCausal = nodeCausal 
             member x.BaseSys = baseSystem
-            member x.Editor = editor
             member x.Bound = bound
-            member x.RemoveMEdge(edge:MEdge) =  mySeg.ChildFlow.RemoveEdge(edge) |> ignore
+            member x.RemoveMEdge(edge:MEdge) =  mChildFlow.RemoveEdge(edge) |> ignore
             member x.AddMEdge(edge:MEdge) =
-                    mySeg.ChildFlow.AddEdge(edge) |> ignore
+                    mChildFlow.AddEdge(edge) |> ignore
                     let src = edge.Source
                     let tgt = edge.Target
                     if(this = src) then failwith $"parent [{this.SegName}] = SourceVertex [{src.SegName}]"
@@ -54,6 +44,7 @@ module Object =
             member val ShapeID = 0u with get, set
             member val CountTX = 0 with get, set
             member val CountRX = 0 with get, set
+
             member x.OwnerMFlow = ownerMFlow
             member x.ToCallText() = let call = sprintf "%s_%s"  (ownerMFlow.TrimStart('\"').TrimEnd('\"')) name
                                     Util.GetValidName(call)
@@ -62,14 +53,14 @@ module Object =
                                          |EX -> if(this.Alias.IsSome) 
                                                 then this.Alias.Value 
                                                 else sprintf "EX.%s.EX" (x.ToCallText())
-                                         |_  -> if(Bound.ThisMFlow = bound) 
+                                         |_  -> if(Bound.ThisFlow = bound) 
                                                 then x.SegName
                                                 else x.MFlowNSeg
 
             ///금칙 문자 및 선두숫자가 있으면 "" 로 이름 앞뒤에 배치한다.
             ///Alias 는 무조건 "" 로 이름 앞뒤에 배치
             member x.SegName  = sprintf "%s" (if(this.Alias.IsSome) then this.Alias.Value else Util.GetValidName(name))
-            member x.MFlowNSeg = sprintf "%s.%s"  ownerMFlow (Util.GetValidName(name))
+            member x.MFlowNSeg= sprintf "%s.%s"  ownerMFlow (Util.GetValidName(name))
             member x.FullName = sprintf "%s.%s.%s" baseSystem.Name  ownerMFlow (Util.GetValidName(name))  
             member x.PathName = sprintf "%s(%s)" x.FullName (if(x.Parent.IsSome) then x.Parent.Value.Name else "Root")
 
@@ -97,7 +88,7 @@ module Object =
   
             member x.MEdges = mEdges |> Seq.sortBy(fun edge ->edge.ToText()) |> Seq.cast<MEdge>
             member x.ChildSegs =
-                mySeg.Children
+                mChildFlow.Nodes
                 |> Seq.cast<MSeg>
                 |> Seq.distinct
 
@@ -111,16 +102,17 @@ module Object =
             member x.IsDummy = bDummy
             member x.IsChildExist = x.ChildSegsSubAll.Any()
             member x.IsChildEmpty = x.IsChildExist|>not
-            member x.IsRoot =  x.Parent.IsSome && x.Parent.Value.Bound = ThisMFlow
+            member x.IsRoot =  x.Parent.IsSome && x.Parent.Value.Bound = ThisFlow
             member x.UIKey:string =  $"{x.Name};{x.Key}"
             member val Key : string = "" with get, set
             member val Parent : MSeg option = None with get, set
-            member val S : string option = None  with get, set
-            member val R : string option = None  with get, set
-            member val E : string option = None  with get, set
-            member x.NoEdgeBaseSegs = noEdgeBaseSegs.Values |> Seq.sortBy(fun seg -> seg.Name)
-            member x.AddSegNoEdge(seg) = noEdgeBaseSegs.TryAdd(seg, seg) |> ignore 
-            member x.RemoveSegNoEdge(seg) = noEdgeBaseSegs.TryRemove(seg) |> ignore 
+            member val S : string option = None    with get, set
+            member val R : string option = None    with get, set
+            member val E : string option = None    with get, set
+
+            member x.NoEdgeBaseSegs      = mChildFlow.Singles  |> Seq.cast<MSeg> |> Seq.sortBy(fun seg -> seg.Name)
+            member x.AddSegNoEdge(seg)   = mChildFlow.AddSingleNode(seg)         |> ignore
+            member x.RemoveSegNoEdge(seg)= mChildFlow.RemoveSingleNode(seg)      |> ignore
 
             member x.TextStart = if(x.S.IsSome) then x.S.Value else ""
             member x.TextReset = if(x.R.IsSome) then x.R.Value else ""
@@ -245,7 +237,7 @@ module Object =
                     
             member x.CallSegs() = x.UsedSegs
                                         |> Seq.filter(fun seg -> seg.NodeCausal.IsCall)
-                                        |> Seq.filter(fun seg -> seg.Bound = ThisMFlow)
+                                        |> Seq.filter(fun seg -> seg.Bound = ThisFlow)
                                         |> Seq.distinctBy(fun seg -> seg.FullName)
 
             member x.ExRealSegs() = x.UsedSegs
@@ -293,10 +285,11 @@ module Object =
 
             new (name:string)       = new MSys(name,  false)
             new (name, active:bool) = new MSys(name,  active)
+
             member x.Name = name
             member x.SysSeg =
                 if isNull sysSeg then
-                    sysSeg <- Lazy(fun () -> MSeg("(ENG)Main_"+name, x))
+                    sysSeg <- Lazy(fun () -> MSeg("(ENG)Main_"+name, x, NodeCausal.MY))
                 sysSeg.Value
 
             member val Debug = false   with get, set

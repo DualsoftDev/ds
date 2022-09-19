@@ -115,9 +115,9 @@ module ImportM =
                     let btn = node.IsEmgBtn || node.IsStartBtn || node.IsAutoBtn || node.IsResetBtn 
                     let bound = if(btn) then ExBtn
                                 else if(node.NodeCausal= EX) then ExSeg
-                                else if(bMyMFlow) then ThisMFlow else OtherMFlow
+                                else if(bMyMFlow) then ThisFlow else OtherFlow
 
-                    let seg = MSeg(realName, mySys, Editor.User, bound, node.NodeCausal, realMFlow, node.IsDummy)
+                    let seg = MSeg(realName, mySys,  bound, node.NodeCausal, realMFlow, node.IsDummy)
 
                     seg.Update(node.Key, node.Id.Value, node.Alias, node.CntTX, node.CntRX)
                     dicSeg.TryAdd(node.Key, seg) |> ignore
@@ -231,7 +231,7 @@ module ImportM =
                 doc.Nodes 
                 |> Seq.filter(fun node -> node.PageNum = doc.VisibleLast().PageNum)
                 |> Seq.filter(fun node -> node.Name = ""|>not)
-                |> Seq.filter(fun node -> dicSeg.[node.Key].Bound = ThisMFlow)
+                |> Seq.filter(fun node -> dicSeg.[node.Key].Bound = ThisFlow)
                 |> Seq.filter(fun node -> node.NodeCausal = TX || node.NodeCausal = TR || node.NodeCausal = RX || node.NodeCausal = EX )
                 |> Seq.iter(fun node -> mySys.LocationSet.TryAdd(dicSeg.[node.Key].FullName, node.Rectangle) |> ignore)
             

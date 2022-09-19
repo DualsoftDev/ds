@@ -12,20 +12,25 @@ module CoreFlow =
     type Flow() =
         //엣지연결 리스트
         let edges = HashSet<IEdge>() 
-        //엣지연결 없이 혼자있는 자식
         //ChildFlow 일 경우 : 인과처리 대상 DAG 의 Head 부분
         //RootFlow  일 경우 : 인과처리 아님 Spare
-        let singles = HashSet<IVertex>() 
+        let singleNodes = HashSet<IVertex>() 
         interface IFlow with
             member _.Edges = edges
-            member _.Nodes = edges.GetNodes() |> Seq.append singles
+            member _.Nodes = edges.GetNodes() |> Seq.append singleNodes 
 
         member x.Edges = (x :> IFlow).Edges
         member x.AddEdge(edge) = edges.Add(edge)
         member x.RemoveEdge(edge) = edges.Remove(edge)
-        member x.Nodes = (x :> IFlow).Nodes
-        member x.Singles = singles
-                                
+
+        //Add    인과처리 대상 DAG 의 Head 부분
+        member x.AddSingleNode(node)    = singleNodes.Add(node)
+        //Remove 인과처리 대상 DAG 의 Head 부분
+        member x.RemoveSingleNode(node) = singleNodes.Remove(node)
+        member x.Singles = singleNodes
+        member x.Nodes = (x :>IFlow).Nodes
+
+
          
     [<DebuggerDisplay("{name}")>]
     type DsCpu(name:string)  =
@@ -36,15 +41,14 @@ module CoreFlow =
         member x.CpuName = (x:> ICpu).Name
         member x.AssignFlows = assignFlows
 
+
     [<DebuggerDisplay("{name}")>]
-    type RootFlow()  =
+    type RootFlow(name)  =
         inherit Flow()
+        member x.FlowName = name
     
     [<DebuggerDisplay("{name}")>]
     type ChildFlow()  =
         inherit Flow()
-
         
-
-
         

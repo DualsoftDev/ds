@@ -3,7 +3,6 @@ namespace Engine.Core
 
 open System.Runtime.CompilerServices
 open System
-open System.Linq
 open System.Globalization
 
 [<AutoOpen>]

@@ -22,4 +22,29 @@ module DsTextProperty =
     [<Literal>] 
     let TextAddress = "addresses"
     [<Literal>] 
+    let TextSafety = "safety"
+    [<Literal>] 
+    let TextAlias = "alias"
+    [<Literal>] 
     let TextLayout = "layouts"
+    
+    [<Literal>] 
+    let TextVariable = "variable"
+    [<Literal>] 
+    let TextCommand = "command"
+    [<Literal>] 
+    let TextObserve = "observe"
+    [<Literal>] 
+    let TextCpus = "cpus"
+    [<Literal>] 
+    let TextCpu= "cpu"
+
+
+    
+
+    
+
+    
+
+    
+    

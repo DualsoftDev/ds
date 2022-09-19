@@ -74,7 +74,7 @@ module ExportM =
 
         let safetyText(flow:MFlow) =
             seq {
-                yield sprintf "\t\t[safety]  = {" 
+                yield sprintf "\t\t[%s]  = {" TextSafety
                 for safety in flow.Safeties do
                     let safeList = safety.Value |> Seq.map(fun seg -> seg.FullName) |> String.concat "; "
                     yield sprintf "\t\t\t%s = {%s}" safety.Key.Name safeList
@@ -118,12 +118,12 @@ module ExportM =
               //  yield sprintf "//DTS model auto generation"
                 yield sprintf "//////////////////////////////////////////////////////"
                 for sys in  model.TotalSystems do
-                    yield sprintf "[sys] %s = {"sys.Name
+                    yield sprintf "[%s] %s = {"  TextSystem sys.Name
                     let flows = sys.RootMFlow() 
                     for flow in flows do
                         //MFlow 출력
 
-                        yield sprintf "\t[MFlow] %s = { \t" (flow.ToText())
+                        yield sprintf "\t[%s] %s = { \t" TextFlow (flow.ToText())
                         
                         yield! edgeText    (flow.Edges)
                         yield! segmentText (flow.UsedSegs)
@@ -134,7 +134,7 @@ module ExportM =
                         //Alias 출력
                         if(flow.AliasSet.Any())
                         then 
-                            yield sprintf "\t\t[alias] = {" 
+                            yield sprintf "\t\t[%s] = {" TextAlias
                             for alias in flow.AliasSet do
                                 yield sprintf "\t\t\t%s = { %s }" alias.Key (alias.Value |> String.concat "; ") 
                             yield "\t\t}"
@@ -152,7 +152,7 @@ module ExportM =
                     //Variable 출력
                     if(sys.VariableSet.Any())
                     then 
-                        yield sprintf "\t[variable] = {" 
+                        yield sprintf "\t[%s] = {"  TextVariable
                         for variable in sys.VariableSet do
                             yield sprintf "\t\t%s(%s);" variable.Key (variable.Value.ToString())
                         yield "\t}"
@@ -160,7 +160,7 @@ module ExportM =
                     //Command 출력
                     if(sys.CommandSet.Any())
                     then 
-                        yield sprintf "\t[command] = {" 
+                        yield sprintf "\t[%s] = {" TextCommand
                         for cmd in sys.CommandSet do
                             yield sprintf "\t\t%s = {%s};" cmd.Key cmd.Value
                         yield "\t}"
@@ -168,7 +168,7 @@ module ExportM =
                     //Command 출력
                     if(sys.ObserveSet.Any())
                     then 
-                        yield sprintf "\t[observe] = {" 
+                        yield sprintf "\t[%s] = {"  TextObserve
                         for obs in sys.ObserveSet do
                             yield sprintf "\t\t%s = {%s};" obs.Key obs.Value
                         yield "\t}"
@@ -179,16 +179,16 @@ module ExportM =
 
         let cpus = 
             seq {
-                yield sprintf "[cpus] AllCpus = {" 
+                yield sprintf "[%s] AllCpus = {" TextCpus
                 for sys in model.TotalSystems do
-                    yield sprintf "\t[cpu] Cpu_%s = {" sys.Name
+                    yield sprintf "\t[%s] Cpu_%s = {" TextCpu sys.Name
                     let flows = sys.RootMFlow() 
                     //my CPU
                     for flow in flows do    
                         yield sprintf "\t\t%s.%s;" sys.Name (flow.ToText())
                     yield "\t}"
                     //ex CPU
-                    yield sprintf "\t[cpu] Cpu_EX = {" 
+                    yield sprintf "\t[%s] Cpu_EX = {" TextCpu
                     for flow in flows do  
                         for callSeg in flow.NotMySegs() do
                             yield sprintf "\t\tEX.%s;" (callSeg.ToCallText())
@@ -198,8 +198,8 @@ module ExportM =
 
         let address = 
             seq {
-                for sys in model.TotalSystems do
-                    yield sprintf "[addresses] = {" 
+                for sys in model.TotalSystems do    
+                    yield sprintf "[%s] = {"  TextAddress
                     let flows = sys.RootMFlow() 
                     for flow in flows do
                         for callSeg in flow.NotMySegs() do
@@ -216,7 +216,7 @@ module ExportM =
                 for sys in model.TotalSystems do
                     if(sys.LocationSet.Any())
                     then 
-                        yield sprintf "[layouts] = {" 
+                        yield sprintf "[%s] = {" TextLayout
                         for rect in sys.LocationSet do
                             let x = rect.Value.X
                             let y = rect.Value.Y
@@ -247,7 +247,7 @@ module ExportM =
                     yield sprintf "//////////////////////////////////////////////////////"
                     yield sprintf "//DTS auto generation %s ExSegs"sys.Name
                     yield sprintf "//////////////////////////////////////////////////////"
-                    yield sprintf "[sys] EX = {" 
+                    yield sprintf "[%s] EX = {" TextSystem
                     for flow in sys.RootMFlow()  do
                             
                         // Call InterLock
@@ -257,17 +257,17 @@ module ExportM =
                                 let txs =  getTRXs ([call], RX ,false)|> String.concat ", "
                                 let rxs =  getTRXs ([call], TX, false)|> String.concat ", "
                                 let resetTxs =  getTRXs (resets, RX, true)|> String.concat ", "
-                                yield sprintf "\t[MFlow] %s = { %s > %s <| %s; }" (call.ToCallText()) txs rxs resetTxs
+                                yield sprintf "\t[%s] %s = { %s > %s <| %s; }" TextFlow (call.ToCallText()) txs rxs resetTxs
                         // Call Without InterLock
                         let noInterLocks =flow.CallWithoutInterLock()
                         for call in noInterLocks do
-                            yield sprintf "\t[MFlow] %s = { TX > RX; }" (call.ToCallText()) 
+                            yield sprintf "\t[%s] %s = { TX > RX; }" TextFlow (call.ToCallText()) 
                         //Ex 출력
                         for exSeg in flow.ExRealSegs() do
-                            yield sprintf "\t[MFlow] %s = { EX; }"  (exSeg.ToCallText()) 
+                            yield sprintf "\t[%s] %s = { EX; }"  TextFlow (exSeg.ToCallText()) 
                     //Ex 버튼 출력
                     for exSeg in sys.BtnSegs() do
-                        yield sprintf "\t[MFlow] %s = { %s; }"  exSeg.SegName  (getTRXs ([exSeg], TX ,false)|> String.concat "; ")
+                        yield sprintf "\t[%s] %s = { %s; }"  TextFlow exSeg.SegName  (getTRXs ([exSeg], TX ,false)|> String.concat "; ")
 
                     yield "}"
                     yield ""

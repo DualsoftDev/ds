@@ -41,11 +41,15 @@ module ImportM =
                then parents |> Seq.toArray
                else [(None ,mySys.SysSeg)] |> Seq.toArray
 
-        let updateAlias(node:pptNode, flow:MFlow) = 
-            if(node.Alias.IsSome) 
+        let updateAlias(seg:MSeg, flow:MFlow) = 
+            if(seg.Alias.IsSome) 
             then 
-                let name = Util.GetValidName(node.Name) 
-                let alias = node.Alias.Value
+                let name = 
+                    if(seg.NodeCausal.IsCall)
+                    then Util.GetValidName(seg.Name)
+                    else sprintf "EX.%s.EX" (seg.ToCallText())
+
+                let alias = seg.Alias.Value
 
                 if(flow.AliasSet.Keys.Contains(name))  
                  then flow.AliasSet.[name].Add( alias)|> ignore
@@ -57,8 +61,8 @@ module ImportM =
         let convertEdge(edge:pptEdge) = 
             let sSeg = dicSeg.[edge.StartNode.Key]
             let eSeg = dicSeg.[edge.EndNode.Key]
-            updateAlias(edge.StartNode, mySys.MFlows.[edge.PageNum]) 
-            updateAlias(edge.EndNode, mySys.MFlows.[edge.PageNum]) 
+            updateAlias(sSeg, mySys.MFlows.[edge.PageNum]) 
+            updateAlias(eSeg, mySys.MFlows.[edge.PageNum]) 
             getParent(edge) |> Seq.iter(fun (parentNode, parentSeg) ->
                         
                            mySys.MFlows.[edge.PageNum].RemoveSegNoEdge(sSeg) 
@@ -208,7 +212,7 @@ module ImportM =
                             |> Seq.filter(fun child -> child.ExistChildEdge|>not) //엣지 할당 못받은 자식만
                             |> Seq.filter(fun child -> child.IsDummy|>not) 
                             |> Seq.iter(fun child -> 
-                                                updateAlias(child, mySys.MFlows.[parent.PageNum]) 
+                                                updateAlias(dicSeg.[child.Key], mySys.MFlows.[parent.PageNum]) 
                                                 
                                                 //행위 부모 할당후 
                                                 pSeg.AddSegNoEdge(dicSeg.[child.Key])

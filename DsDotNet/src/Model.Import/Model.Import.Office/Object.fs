@@ -58,8 +58,10 @@ module Object =
                                     Util.GetValidName(call)
 
             member x.ToTextInMFlow() =  match nodeCausal with
-                                         |EX -> sprintf "EX.%s.EX" (x.ToCallText())
-                                         |_  -> if(ThisMFlow = bound) 
+                                         |EX -> if(this.Alias.IsSome) 
+                                                then this.Alias.Value 
+                                                else sprintf "EX.%s.EX" (x.ToCallText())
+                                         |_  -> if(Bound.ThisMFlow = bound) 
                                                 then x.SegName
                                                 else x.MFlowNSeg
 
@@ -107,8 +109,8 @@ module Object =
                    |> Seq.append x.NoEdgeSegs
         
             member x.IsDummy = bDummy
-            member x.IsChildExist = mEdges.Any()
-            member x.IsChildEmpty = mEdges.IsEmpty
+            member x.IsChildExist = x.ChildSegsSubAll.Any()
+            member x.IsChildEmpty = x.IsChildExist|>not
             member x.IsRoot =  x.Parent.IsSome && x.Parent.Value.Bound = ThisMFlow
             member x.UIKey:string =  $"{x.Name};{x.Key}"
             member val Key : string = "" with get, set

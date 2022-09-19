@@ -63,8 +63,6 @@ class SkeletonListener : dsBaseListener
     {
         var n = ctx.id().GetText();
         _system = new DsSystem(n, _model);
-        ParserHelper.AliasNameMaps.Add(_system, new Dictionary<string, string>());
-        ParserHelper.BackwardAliasMaps.Add(_system, new Dictionary<string, string[]>());
         Trace.WriteLine($"System: {n}");
     }
     override public void ExitSystem(SystemContext ctx) { _system = null; }
@@ -93,6 +91,9 @@ class SkeletonListener : dsBaseListener
         }
 
         _rootFlow = new RootFlow(cpu, flowName, _system);
+        ParserHelper.AliasNameMaps.Add(_rootFlow, new Dictionary<string, string>());
+        ParserHelper.BackwardAliasMaps.Add(_rootFlow, new Dictionary<string, string[]>());
+
         cpu.RootFlows.Add(_rootFlow);
         var key = (_system, CurrentPath);
         if (QpInstanceMap.ContainsKey(key))

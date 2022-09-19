@@ -55,8 +55,8 @@ class Program
         //ParserTest.Test(ParserTest.Error, "Cpu");
         //ParserTest.Test(ParserTest.QualifiedName);
         //ParserTest.Test(ParserTest.ExternalSegmentCall);
-        ParserTest.Test(ParserTest.ExternalSegmentCallConfusing);
-        //ParserTest.Test(ParserTest.Aliases);
+        //ParserTest.Test(ParserTest.ExternalSegmentCallConfusing);
+        ParserTest.Test(ParserTest.Aliases);
         //ParserTest.Test(ParserTest.Serialize, "Cpu");
 
 

@@ -70,18 +70,19 @@ namespace Engine.Parser
             var def = (
                 defs.Length switch
                 {
+                    1 => CurrentPathNameComponents.Append(defs[0]),
                     2 when defs[0] != _system.Name => defs.Prepend(_system.Name),
                     3 => defs,
                     _ => throw new Exception("ERROR"),
                 }).ToArray().Combine();
 
 
-            ParserHelper.BackwardAliasMaps[_system].Add(def, aliasMnemonics);
+            ParserHelper.BackwardAliasMaps[_rootFlow].Add(def, aliasMnemonics);
         }
         override public void ExitAlias(AliasContext ctx)
         {
-            var bwd = ParserHelper.BackwardAliasMaps[_system];
-            Assert(ParserHelper.AliasNameMaps[_system].Count() == 0);
+            var bwd = ParserHelper.BackwardAliasMaps[_rootFlow];
+            Assert(ParserHelper.AliasNameMaps[_rootFlow].Count() == 0);
             Assert(bwd.Values.Count() == bwd.Values.Distinct().Count());
             var reversed =
                 from tpl in bwd
@@ -91,7 +92,7 @@ namespace Engine.Parser
                 ;
 
             foreach ((var mnemonic, var target) in reversed)
-                ParserHelper.AliasNameMaps[_system].Add(mnemonic, target);
+                ParserHelper.AliasNameMaps[_rootFlow].Add(mnemonic, target);
         }
     }
 }

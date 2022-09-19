@@ -9,8 +9,8 @@ public class ParserHelper
 
     // alias : ppt 도형으로 modeling 하면 문제가 되지 않으나, text grammar 로 서술할 경우, 
     // 동일 이름의 call 등이 중복 사용되면, line 을 나누어서 기술할 때, unique 하게 결정할 수 없어서 도입.
-    public Dictionary<DsSystem, Dictionary<string, string>> AliasNameMaps = new();
-    public Dictionary<DsSystem, Dictionary<string, string[]>> BackwardAliasMaps = new();
+    public Dictionary<RootFlow, Dictionary<string, string>> AliasNameMaps = new();
+    public Dictionary<RootFlow, Dictionary<string, string[]>> BackwardAliasMaps = new();
 
     // button category 중복 check 용
     public HashSet<(DsSystem, string)> ButtonCategories = new();
@@ -100,7 +100,7 @@ public class ParserHelper
         switch (nameComponents.Length)
         {
             case 1:
-                if (AliasNameMaps[_system].ContainsKey(name))
+                if (AliasNameMaps[_rootFlow].ContainsKey(name))
                     return name;
                 return concat(sysName, middleName, parentingName, name);
             case 2:

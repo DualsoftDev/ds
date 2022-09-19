@@ -90,9 +90,9 @@ class ModelListener : dsBaseListener
                     case 1:
                         {
                             var fqdn = $"{CurrentPath}.{name}";
-                            if (ParserHelper.AliasNameMaps[_system].ContainsKey(name))
+                            if (ParserHelper.AliasNameMaps[_rootFlow].ContainsKey(name))
                             {
-                                var targetName = ParserHelper.AliasNameMaps[_system][name];
+                                var targetName = ParserHelper.AliasNameMaps[_rootFlow][name];
                                 var target = QpDefinitionMap[(_system, targetName)];
                                 createFromDefinition(target, name, fqdn);
                             }

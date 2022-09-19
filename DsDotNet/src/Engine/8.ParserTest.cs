@@ -466,11 +466,6 @@ namespace Engine
 
         public static string Aliases = @"
 [sys] my = {
-    [alias] = {
-        F.Ap = { Ap1; Ap2; Ap3; }
-        my.F.Am = { Am1; Am2; Am3; }    // system name optional
-        //A.F.Vp = {AVp1;}  // invalid: 자신 시스템에 정의된 것만 alias
-    }
     [flow] F = {
         Ap = {A.F.Vp ~ A.F.Sp}
         Am = {A.F.Vm ~ A.F.Sm}
@@ -480,6 +475,12 @@ namespace Engine
             Ap1 <||> Am1;
             Ap1 > Am1, Ap2 > Am2;
         }
+        [alias] = {
+            Ap = { Ap1; Ap2; Ap3; }
+            Am = { Am1; Am2; Am3; }    // system name optional
+            //Vp = {AVp1;}  // invalid: 자신 시스템에 정의된 것만 alias
+        }
+
     }
 }
 

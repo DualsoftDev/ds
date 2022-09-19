@@ -59,7 +59,7 @@ partial class ElementsListener
                         _ => throw new Exception("ERROR"),
                     };
 
-                    if (n == 1 && ParserHelper.AliasNameMaps[_system].ContainsKey(text))
+                    if (n == 1 && ParserHelper.AliasNameMaps[_rootFlow].ContainsKey(text))
                         nodeType = NodeType.segmentAlias;
 
                     var node = new Node(ids, label: text, parentIds: flowIds, nodeType);
@@ -181,8 +181,8 @@ partial class ElementsListener
                 spec = $"{context}.{spec}";
             if (!QpInstanceMap.ContainsKey((_system, spec)))
             {
-                if (ParserHelper.AliasNameMaps[_system].ContainsKey(nodebase.label))
-                    spec = ParserHelper.AliasNameMaps[_system][nodebase.label];
+                if (ParserHelper.AliasNameMaps[_rootFlow].ContainsKey(nodebase.label))
+                    spec = ParserHelper.AliasNameMaps[_rootFlow][nodebase.label];
             }
 
             var vertex = QpInstanceMap[(_system, spec)] as IVertex;

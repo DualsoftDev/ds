@@ -254,9 +254,9 @@ partial class ElementsListener : dsBaseListener
                 switch (ns.Length)
                 {
                     case 1:
-                        isAlias = ParserHelper.AliasNameMaps[_system].ContainsKey(n);
+                        isAlias = ParserHelper.AliasNameMaps[_rootFlow].ContainsKey(n);
                         if (isAlias)
-                            key = (_system, ParserHelper.AliasNameMaps[_system][n]);
+                            key = (_system, ParserHelper.AliasNameMaps[_rootFlow][n]);
                         else
                             key = (_system, $"{_rootFlow.QualifiedName}.{n}");
 

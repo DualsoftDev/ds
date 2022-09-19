@@ -57,3 +57,13 @@ module InterfaceClass =
             member _.Causal = edgeCausal
 
         member x.ToText() = $"{source} {edgeCausal.ToText()} {target}";
+
+
+    /// Flow Edge
+    [<AbstractClass>]
+    type FlowBase() =
+        let edges = HashSet<IEdge>() 
+        interface IFlow with
+            member _.Edges: seq<IEdge> = edges
+              
+

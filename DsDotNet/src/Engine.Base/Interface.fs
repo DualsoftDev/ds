@@ -15,7 +15,6 @@ module Interface =
     type IVertex =
         inherit IBit
         inherit INamed
-
    
     /// 정의(2/4) 서쪽: DS 모델은 원인(들)/결과의 관계를 갖는다.
     type IEdge = 
@@ -26,11 +25,10 @@ module Interface =
     /// 정의(3/4) 동쪽: DS 모델은 능동행위가 수동행위를 포함한다.
     type IActive = abstract Children:IVertex seq
     /// 정의(4/4) 북쪽: DS 모델은 고유 흐름을 갖는다.
-    type IFlow   = abstract IsDag:bool;
-
+    type IFlow   = abstract Edges:IEdge seq
 
     type ICall = 
-        abstract Node  :IVertex  
+        abstract Node :IVertex  
         abstract TXs  :IVertex seq 
         abstract RXs  :IVertex seq
     
@@ -38,13 +36,16 @@ module Interface =
     type ICpu       = inherit INamed
     type IAlias     = inherit INamed
     type ITxRx      = inherit INamed
+
     type IAutoTag   = inherit IBit
-    type IWeakEdge  = inherit IEdge
-    type ISetEdge   = inherit IEdge
-    type IResetEdge = inherit IEdge
+
+    type IWeakEdge   = inherit IEdge
+    type ISetEdge    = inherit IEdge
+    type IResetEdge  = inherit IEdge
     type IStrongEdge = inherit IEdge
 
     type IEngine    = inherit INamed
+
     type IBitReadable = inherit IBit
     type IBitWritable = 
         inherit IBit

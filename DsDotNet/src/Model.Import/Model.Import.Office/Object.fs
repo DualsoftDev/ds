@@ -23,7 +23,7 @@ module Object =
         /// 사용자가 모델링을 통해서 만든 segment (SegEditor = User)
         [<DebuggerDisplay("{FullName}")>]
         MSeg(name:string, baseSystem:MSys, bound:Bound, nodeCausal:NodeCausal, ownerMFlow:string, bDummy:bool) as this =
-            inherit Segment(name, ChildFlow(), RootFlow(ownerMFlow))
+            inherit Segment(name, ChildFlow(name), RootFlow(ownerMFlow))
             let mEdges = (this :> Segment).ChildFlow.Edges
             let mChildFlow = (this :> Segment).ChildFlow
 

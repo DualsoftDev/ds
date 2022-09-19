@@ -9,7 +9,8 @@ module CoreFlow =
 
     /// Flow Edge
     [<AbstractClass>]
-    type Flow() =
+    type Flow(name) =
+        inherit Named(name)
         //엣지연결 리스트
         let edges = HashSet<IEdge>() 
         //ChildFlow 일 경우 : 인과처리 대상 DAG 의 Head 부분
@@ -44,12 +45,12 @@ module CoreFlow =
 
     [<DebuggerDisplay("{name}")>]
     type RootFlow(name)  =
-        inherit Flow()
+        inherit Flow(name)
         member x.FlowName = name
         member x.ValidName = NameUtil.GetValidName(name)
     
     [<DebuggerDisplay("{name}")>]
-    type ChildFlow()  =
-        inherit Flow()
+    type ChildFlow(name)  =
+        inherit Flow(name)
         
         

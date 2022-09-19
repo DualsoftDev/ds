@@ -2,6 +2,7 @@
 namespace Engine.Core
 
 open System.Collections.Generic
+open System
 
 [<AutoOpen>]
 module InterfaceClass =
@@ -10,14 +11,16 @@ module InterfaceClass =
     type Named(name)  =
         interface INamed with
             member _.Name = name
-        member x.ToText() = $"{name}[{x.GetType().Name}]"
+        member x.Name = (x:>INamed).Name
         member x.ValidName = NameUtil.GetValidName(name)
+        member x.ToText() = $"{name}[{x.GetType().Name}]"
   
     /// 인과 연결가능 객체
     type VertexBase(name)  =
-        interface IVertex with
-            member _.Name = name
-        member x.Name = (x:>IVertex).Name
+        inherit Named(name)
+        interface IVertex with 
+            member _.ID  = Guid.NewGuid().ToString()
+        member x.ID  = (x:>IVertex).ID
      
     /// Segment Edge
     [<AbstractClass>]
@@ -44,22 +47,22 @@ module InterfaceClass =
        
     /// Real Segment
     [<AbstractClass>]
-    type SegBase(vertex:VertexBase, childFlow:IFlow) =
+    type SegBase(name:string, childFlow:IFlow) =
+        inherit VertexBase(name)
         interface IActive with
             member _.Children  =  childFlow.Nodes
-        interface IVertex with
-            member this.Name: string = vertex.Name
 
         member x.Children = (x :> IActive).Children
 
     /// Call Segment
     and
         [<AbstractClass>]
-        CallBase(call:VertexBase, parent:SegBase) =
+        CallBase(name:string, parent:SegBase) as this =
+        inherit VertexBase(name)
         let txs = HashSet<IVertex>() 
         let rxs = HashSet<IVertex>() 
         interface ICall with
-            member _.Node = call
+            member _.Node = this :> IVertex
             member _.TXs  = txs
             member _.RXs  = rxs
 

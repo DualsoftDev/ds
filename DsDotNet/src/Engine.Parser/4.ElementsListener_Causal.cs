@@ -59,7 +59,7 @@ partial class ElementsListener
                         _ => throw new Exception("ERROR"),
                     };
 
-                    if (n == 1 && ParserHelper.AliasNameMaps[_rootFlow].ContainsKey(text))
+                    if (n == 1 && _rootFlow.AliasNameMaps.ContainsKey(ns))
                         nodeType = NodeType.segmentAlias;
 
                     var node = new Node(ids, label: text, parentIds: flowIds, nodeType);

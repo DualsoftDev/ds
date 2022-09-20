@@ -82,6 +82,13 @@ public static class ParserExtension
         }
 
         var flow = model.FindFlow(fqdn);
-        return flow?.InstanceMap[fqdn[2]];
+        if (flow == null)
+            return null;
+
+        var name = fqdn[2];
+        if (flow.InstanceMap.ContainsKey(name))
+            return flow.InstanceMap[name];
+
+        return flow.CallPrototypes.FirstOrDefault(cp => cp.Name == name);
     }
 }

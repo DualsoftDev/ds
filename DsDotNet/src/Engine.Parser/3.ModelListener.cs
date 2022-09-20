@@ -10,7 +10,6 @@ class ModelListener : dsBaseListener
     DsSystem _system    { get => ParserHelper._system;    set => ParserHelper._system = value; }
     RootFlow _rootFlow  { get => ParserHelper._rootFlow;  set => ParserHelper._rootFlow = value; }
     SegmentBase  _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
-    Dictionary<(DsSystem, string), object> QpDefinitionMap => ParserHelper.QpDefinitionMap;
 
     string[] CurrentPathNameComponents => ParserHelper.CurrentPathNameComponents;
     string CurrentPath => ParserHelper.CurrentPath;
@@ -61,17 +60,18 @@ class ModelListener : dsBaseListener
             .ToArray()
             ;
 
-        void createFromDefinition(object target, string n, string fqdn)
+        void createFromDefinition(object target, string[] ns)
         {
             switch (target)
             {
                 case CallPrototype cp:
-                    var call = new RootCall(n, _rootFlow, cp);
-                    _rootFlow.InstanceMap.Add(n, call);
+                    var name = ns.Last();
+                    var call = new RootCall(name, _rootFlow, cp);
+                    _rootFlow.InstanceMap.Add(name, call);
                     break;
                 case SegmentBase exSeg:
-                    var exSegCall = new ExSegment(fqdn, exSeg);
-                    _rootFlow.InstanceMap.Add(fqdn, exSegCall);
+                    var exSegCall = new ExSegment(ns.Combine(), exSeg);
+                    _rootFlow.InstanceMap.Add(ns.Combine(), exSegCall);
                     break;
                 default:
                     throw new ParserException("ERROR: CallPrototype expected.", ctx);
@@ -87,24 +87,25 @@ class ModelListener : dsBaseListener
                 {
                     case 1:
                         {
-                            var fqdn = $"{CurrentPath}.{name}";
-                            if (ParserHelper.AliasNameMaps[_rootFlow].ContainsKey(name))
+                            var fqdn = CurrentPathNameComponents.Append(name).ToArray();
+                            if (_rootFlow.AliasNameMaps.ContainsKey(fqdn))
                             {
-                                var targetName = ParserHelper.AliasNameMaps[_rootFlow][name];
-                                var target = QpDefinitionMap[(_system, targetName)];
-                                createFromDefinition(target, name, fqdn);
+                                var targetName = _rootFlow.AliasNameMaps[fqdn];
+                                var target = _model.Find(targetName);
+                                createFromDefinition(target, fqdn);
                             }
                             else
                             {
                                 if (!_rootFlow.InstanceMap.ContainsKey(name))
                                 {
-                                    var fullPrototypeName = ParserHelper.ToFQDN(name);
-                                    if (QpDefinitionMap.ContainsKey((_system, fullPrototypeName)))
+                                    var fullPrototypeName = ParserHelper.ToFQDN(ns);
+                                    var target = _model.Find(fullPrototypeName);
+                                    if (target != null)
                                     {
-                                        var def = QpDefinitionMap[(_system, fullPrototypeName)];
-                                        createFromDefinition(def, name, fqdn);
+                                        createFromDefinition(target, fqdn);
                                         continue;
                                     }
+
                                     var seg = SegmentBase.Create(name, _rootFlow);
                                     _rootFlow.InstanceMap.Add(name, seg);
                                 }
@@ -114,11 +115,8 @@ class ModelListener : dsBaseListener
                         break;
                     case 3:     // 외부 real 호출
                         {
-                            var fqdn = ns.Combine();
-                            Assert(_system.Name != ns[0]);
-                            var exSystem = _model.Systems.First(s => s.Name == ns[0]);
-                            var def = QpDefinitionMap[(exSystem, fqdn)];
-                            createFromDefinition(def, name, fqdn);
+                            var def = _model.Find(ns);
+                            createFromDefinition(def, ns);
                         }
                         break;
                 }

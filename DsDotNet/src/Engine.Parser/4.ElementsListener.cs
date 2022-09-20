@@ -62,8 +62,6 @@ partial class ElementsListener : dsBaseListener
 
     string[] CurrentPathNameComponents => ParserHelper.CurrentPathNameComponents;
     string CurrentPath => ParserHelper.CurrentPath;
-    Dictionary<(DsSystem, string), object> QpDefinitionMap => ParserHelper.QpDefinitionMap;
-
     public ElementsListener(dsParser parser, ParserHelper helper)
     {
         ParserHelper = helper;
@@ -245,44 +243,38 @@ partial class ElementsListener : dsBaseListener
                 Child child = null;
                 bool isAlias = false;
                 var fqdn = $"{CurrentPath}.{n}";
-                if (_model.Find(CurrentPathNameComponents.Append(n).ToArray()) != null)
+                if (ns.Length == 1 && _model.Find(CurrentPathNameComponents.Append(n).ToArray()) != null)
                     continue;
 
                 string targetName = n;
-                var key = (_system, n);
+                var key = ns;
                 switch (ns.Length)
                 {
                     case 1:
-                        isAlias = ParserHelper.AliasNameMaps[_rootFlow].ContainsKey(n);
+                        isAlias = _rootFlow.AliasNameMaps.ContainsKey(ns);
                         if (isAlias)
-                            key = (_system, ParserHelper.AliasNameMaps[_rootFlow][n]);
+                            key = _rootFlow.AliasNameMaps[ns];
                         else
-                            key = (_system, $"{_rootFlow.QualifiedName}.{n}");
+                            key = CurrentPathNameComponents.Append(n).ToArray();
 
                         break;
-                    case 2:
-                        key = (_system, $"{_system.Name}.{n}");
-                        break;
-                    case 3:
-                        var exsys = _model.Systems.First(sys => targetName.StartsWith($"{sys.Name}."));
-                        key = (exsys, n);
-                        break;
+                    //case 2:
+                    //    key = (_system, $"{_system.Name}.{n}");
+                    //    break;
+                    //case 3:
+                    //    var exsys = _model.Systems.First(sys => targetName.StartsWith($"{sys.Name}."));
+                    //    key = (exsys, n);
+                    //    break;
                     default:
                         throw new ParserException($"ERROR: {targetName} length error.", ctx);
                 }
 
-                // todo : fix me!!!!!!!!!!!
-                Assert(false);
                 object target = null;
-                if (QpDefinitionMap.ContainsKey(key))
-                    target = QpDefinitionMap[key];   // definition 우선시
-                //else if (QpInstanceMap.ContainsKey(key))
-                //    target = QpInstanceMap[key];
-                else if (_rootFlow != null)
-                {
-                    if (_rootFlow.CallPrototypes.Exists(cp => cp.Name == targetName))
-                        target = _rootFlow.CallPrototypes.First(cp => cp.Name == targetName);
-                }
+                var callproto = _rootFlow.CallPrototypes.FirstOrDefault(cp => cp.Name == n);   // definition 우선시
+                if (callproto != null)
+                    target = callproto;
+                else if (_model.Find(key) != null)
+                    target = _model.Find(key);
 
                 var instanceMap = _parenting == null ? _rootFlow.InstanceMap : _parenting.InstanceMap;
                 switch (target)
@@ -335,8 +327,8 @@ partial class ElementsListener : dsBaseListener
         var positionDefs = enumerateChildren<PositionDefContext>(ctx).ToArray();
         foreach (var posiDef in positionDefs)
         {
-            var callPath = posiDef.callPath().GetText();
-            var cp = (CallPrototype)QpDefinitionMap[(_system, callPath)];
+            var callPath = collectNameComponents(posiDef.callPath());
+            var cp = (CallPrototype)_model.Find(callPath);
             var xywh = posiDef.xywh();
             var (x, y, w, h) = (xywh.x().GetText(), xywh.y().GetText(), xywh.w()?.GetText(), xywh.h()?.GetText());
             cp.Xywh = new Xywh(int.Parse(x), int.Parse(y), w == null ? null : int.Parse(w), h == null ? null : int.Parse(h));

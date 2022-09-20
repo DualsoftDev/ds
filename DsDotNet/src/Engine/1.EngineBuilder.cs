@@ -28,7 +28,6 @@ public class EngineBuilder
 
             var helper = ModelParser.ParseFromString2(modelText, options);
             Model = helper.Model;
-            Model.UserData = helper.BackwardAliasMaps;
             Global.Model = Model;
 
             Data = new DataBroker();

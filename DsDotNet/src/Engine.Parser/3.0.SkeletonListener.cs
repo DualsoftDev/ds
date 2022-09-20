@@ -16,7 +16,6 @@ class SkeletonListener : dsBaseListener
     DsSystem _system { get => ParserHelper._system; set => ParserHelper._system = value; }
     RootFlow _rootFlow { get => ParserHelper._rootFlow; set => ParserHelper._rootFlow = value; }
     SegmentBase _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
-    Dictionary<(DsSystem, string), object> QpDefinitionMap => ParserHelper.QpDefinitionMap;
 
     string[] CurrentPathNameComponents => ParserHelper.CurrentPathNameComponents;
     string CurrentPath => ParserHelper.CurrentPath;
@@ -88,13 +87,12 @@ class SkeletonListener : dsBaseListener
                 cpu.IsActive = true;    // 강제로 active cpu 할당
         }
 
-        if (cpu.RootFlows.Any(f => f.Name == flowName))
-            throw new Exception($"Duplicated flow name [{flowName}] on {_rootFlow.QualifiedName}.");
+        var rf = cpu.RootFlows.FirstOrDefault(f => f.Name == flowName);
+        if (rf != null)
+            throw new Exception($"Duplicated flow name [{flowName}] on {rf.QualifiedName}.");
 
         _rootFlow = new RootFlow(cpu, flowName, _system);
         cpu.RootFlows.Add(_rootFlow);
-        ParserHelper.AliasNameMaps.Add(_rootFlow, new Dictionary<string, string>());
-        ParserHelper.BackwardAliasMaps.Add(_rootFlow, new Dictionary<string, string[]>());
     }
     override public void ExitFlow(FlowContext ctx) { _rootFlow = null; }
 
@@ -113,12 +111,11 @@ class SkeletonListener : dsBaseListener
         var label = $"{name}\n{ctx.callPhrase().GetText()}";
         var callph = ctx.callPhrase();
 
-        var call = new CallPrototype(name, _rootFlow);
-        var key = (_system, $"{CurrentPath}.{name}");
-        if (QpDefinitionMap.ContainsKey(key) || _rootFlow.InstanceMap.ContainsKey(name))
+        if (_rootFlow.CallPrototypes.Any(cp => cp.Name == name) || _rootFlow.InstanceMap.ContainsKey(name))
             throw new Exception($"Duplicated call definition [{CurrentPath}.{name}].");
 
-        QpDefinitionMap.Add(key, call);
+        var call = new CallPrototype(name, _rootFlow);
+        Assert(_rootFlow.CallPrototypes.Contains(call));
     }
 
 
@@ -127,10 +124,9 @@ class SkeletonListener : dsBaseListener
         var name = ctx.id().GetText();
         var seg = SegmentBase.Create(name, _rootFlow);
         var key = (_system, $"{CurrentPath}.{name}");
-        if (QpDefinitionMap.ContainsKey(key) || _rootFlow.InstanceMap.ContainsKey(name))
+        if (_rootFlow.CallPrototypes.Any(cp => cp.Name == name) || _rootFlow.InstanceMap.ContainsKey(name))
             throw new Exception($"Duplicated listing [{CurrentPath}.{name}].");
 
-        QpDefinitionMap.Add(key, seg);
         _rootFlow.InstanceMap.Add(name, seg);
     }
 

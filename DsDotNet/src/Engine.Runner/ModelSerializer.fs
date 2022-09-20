@@ -50,14 +50,14 @@ module internal ModelSerializerModule =
             | :? RootFlow as rf ->
                 yield $"{tab}[flow] {flow.Name} = {lb}"
 
-                let bwdAliasNameMaps = Global.Model.UserData :?> Dictionary<RootFlow, Dictionary<string, string[]>>
-                if bwdAliasNameMaps.ContainsKey(rf) && bwdAliasNameMaps[rf].Count > 0 then
+                let bwd = rf.BackwardAliasMaps
+                if bwd.Count > 0 then
                     let tab = getTab indent
                     yield $"{tab}[alias] = {lb}"
-                    for KeyValue(k, v) in bwdAliasNameMaps[rf] do
+                    for KeyValue(k, v) in bwd do
                         let tab = getTab (indent+1)
                         let mnemonics = String.Join("; ", v)
-                        yield $"{tab}{k} = {lb} {mnemonics} {rb}"
+                        yield $"{tab}{k.Last()} = {lb} {mnemonics} {rb}"
                     yield $"{tab}{rb}"
 
                 for cp in rf.CallPrototypes do

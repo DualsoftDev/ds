@@ -10,7 +10,6 @@ namespace Engine.Parser
         DsSystem _system { get => ParserHelper._system; set => ParserHelper._system = value; }
         RootFlow _rootFlow { get => ParserHelper._rootFlow; set => ParserHelper._rootFlow = value; }
         SegmentBase _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
-        Dictionary<(DsSystem, string), object> QpDefinitionMap => ParserHelper.QpDefinitionMap;
 
         string[] CurrentPathNameComponents => ParserHelper.CurrentPathNameComponents;
         string CurrentPath => ParserHelper.CurrentPath;
@@ -72,15 +71,15 @@ namespace Engine.Parser
                     2 when defs[0] != _system.Name => defs.Prepend(_system.Name),
                     3 => defs,
                     _ => throw new Exception("ERROR"),
-                }).ToArray().Combine();
+                }).ToArray();
 
 
-            ParserHelper.BackwardAliasMaps[_rootFlow].Add(def, aliasMnemonics);
+            _rootFlow.BackwardAliasMaps.Add(def, aliasMnemonics);
         }
         override public void ExitAlias(AliasContext ctx)
         {
-            var bwd = ParserHelper.BackwardAliasMaps[_rootFlow];
-            Assert(ParserHelper.AliasNameMaps[_rootFlow].Count() == 0);
+            var bwd = _rootFlow.BackwardAliasMaps;
+            Assert(_rootFlow.AliasNameMaps.Count() == 0);
             Assert(bwd.Values.Count() == bwd.Values.Distinct().Count());
             var reversed =
                 from tpl in bwd
@@ -90,7 +89,7 @@ namespace Engine.Parser
                 ;
 
             foreach ((var mnemonic, var target) in reversed)
-                ParserHelper.AliasNameMaps[_rootFlow].Add(mnemonic, target);
+                _rootFlow.AliasNameMaps.Add(mnemonic.Divide(), target);
         }
     }
 }

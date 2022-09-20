@@ -10,13 +10,13 @@ module Interface =
     type IBit = interface end
     /// 이름
     type INamed  = abstract Name:string
-    ///고유값 Guid.NewGuid().ToString()
+    /// 고유값 Guid.NewGuid().ToString()
     type IUniqueId = abstract ID:string 
 
     /// 정의(1/4) 남쪽: DS 기본유닛은 Bit인 단일 자원이다.
     type IVertex =
         inherit IBit
-        inherit IUniqueId
+     //   inherit IUniqueId
    
     /// 정의(2/4) 서쪽: DS 모델은 원인(들)/결과의 관계를 갖는다.
     type IEdge = 

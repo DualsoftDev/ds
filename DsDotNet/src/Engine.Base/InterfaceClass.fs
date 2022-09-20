@@ -19,8 +19,9 @@ module InterfaceClass =
     type VertexBase(name)  =
         inherit Named(name)
         interface IVertex with 
-            member _.ID  = Guid.NewGuid().ToString()
-        member x.ID  = (x:>IVertex).ID
+        //사용 아직 안함(필요시 오픈)
+        //    member _.ID  = Guid.NewGuid().ToString()
+        //member x.ID  = (x:>IVertex).ID
      
     /// Segment Edge
     [<AbstractClass>]

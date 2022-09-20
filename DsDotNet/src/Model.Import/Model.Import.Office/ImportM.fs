@@ -94,8 +94,8 @@ module ImportM =
                 let dicSameSeg  = ConcurrentDictionary<string, MSeg>()
                 let dicMFlowName  = ConcurrentDictionary<int, string>()
                 
-                doc.Pages |> Seq.iter(fun page ->  Check.SamePage(page, dicSamePage))
-                doc.Pages |> Seq.iter(fun page ->  
+                doc.Pages |> Seq.filter(fun page -> page.IsUsing)
+                          |> Seq.iter(fun page ->  
                                     let mFlowName = 
                                         let title = doc.GetPage(page.PageNum).Title
                                         if(title = "") then sprintf "P%d" page.PageNum else title
@@ -125,17 +125,19 @@ module ImportM =
                     Check.SameNode(seg, node, dicSameSeg)   )
               
                 //MFlow 리스트 만들기
-                doc.Nodes 
-                |> Seq.filter(fun node -> node.IsDummy|>not)
-                |> Seq.iter(fun node -> 
-                                let name  = dicMFlowName.[node.PageNum]
-                                if(mySys.Name = name) then Office.ErrorPPT(ErrorCase.Name, 31, $"시스템이름 : {mySys.Name}", node.PageNum, $"페이지이름 : {name}")
-                                let MFlow  = MFlow(name, node.PageNum)
+                dicMFlowName
+                |> Seq.iter(fun flow -> 
+                                let pageNum  = flow.Key
+                                let name  = flow.Value
+                                if(mySys.Name = name) then Office.ErrorPPT(ErrorCase.Name, 31, $"시스템이름 : {mySys.Name}", pageNum, $"페이지이름 : {name}")
+                                let mFlow  = MFlow(name, pageNum)
 
                                 //Flow 중복 추가 해결 필요 test ahn
-                                mySys.RootFlows.Add(MFlow) |> ignore
-                                mySys.MFlows.TryAdd(node.PageNum, MFlow)|>ignore
-                                mySys.MFlows.[node.PageNum].AddSegNoEdge(dicSeg.[node.Key])
+                                if(mySys.AddFlow(mFlow)|>not) 
+                                then 
+                                    Office.ErrorPPT(Page, 21, $"{name},  Same Page->{(mySys.GetFlow(name):?>MFlow).Page}",  pageNum)
+                                //mySys.MFlows.TryAdd(node.PageNum, mFlow)|>ignore
+                                //mySys.MFlows.[node.PageNum].AddSegNoEdge(dicSeg.[node.Key])
                                 )
 
                 //Safety & EMG & Start & Auto 리스트 만들기

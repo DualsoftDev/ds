@@ -3,6 +3,7 @@ namespace Engine.Core
 
 open System.Diagnostics
 open System.Collections.Generic
+open System.Collections.Concurrent
 
 [<AutoOpen>]
 module CoreStruct =
@@ -10,9 +11,11 @@ module CoreStruct =
     [<DebuggerDisplay("{name}")>]
     type DsSystem(name:string)  =
         inherit SysBase(name)
-        let rootFlows = HashSet<RootFlow>()
+        let dicRootFlow = ConcurrentDictionary<string, RootFlow>()
         
-        member x.RootFlows = rootFlows
+        member x.RootFlows = dicRootFlow.Values
+        member x.AddFlow(flow:RootFlow) = dicRootFlow.TryAdd(flow.Name, flow);
+        member x.GetFlow(name:string)   = dicRootFlow.[name];
         //나의 시스템 Flag
         member val Active = false
 

@@ -46,7 +46,6 @@ module CoreFlow =
     [<DebuggerDisplay("{name}")>]
     type RootFlow(name)  =
         inherit Flow(name)
-        member x.FlowName = name
     
     [<DebuggerDisplay("{name}")>]
     type ChildFlow(name)  =

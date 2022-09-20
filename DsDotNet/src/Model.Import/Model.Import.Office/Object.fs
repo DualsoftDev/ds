@@ -295,6 +295,11 @@ module Object =
             member val Active = active with get, set
             member val SystemID = -1   with get, set
 
+            member x.AddFlowPage(flow:RootFlow, page:int) = 
+                //test ahn
+                x.AddFlow(flow);
+
+            member x.GetFlow(page:int)      = mFlows.[page]
             member x.MFlows      = mFlows
             member x.LocationSet   = locationSet
             member x.CommandSet   = commandSet

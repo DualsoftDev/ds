@@ -41,7 +41,6 @@ class Program
         ParserTest.Test(ParserTest.Buttons, "Cpu");
         ParserTest.Test(ParserTest.Dup, "Cpu");
         ParserTest.Test(ParserTest.Ppt, "Cpu");
-        ParserTest.Test(ParserTest.Serialize, "Cpu");
         ParserTest.Test(ParserTest.QualifiedName);
         ParserTest.Test(ParserTest.Aliases);
         ParserTest.Test(ParserTest.Serialize, "Cpu");

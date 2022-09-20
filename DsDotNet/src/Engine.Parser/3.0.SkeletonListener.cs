@@ -64,7 +64,7 @@ class SkeletonListener : dsBaseListener
 
     override public void EnterFlow(FlowContext ctx)
     {
-        var flowName = ctx.id().GetText();
+        var flowName = ctx.id().GetText().DeQuoteNameComponentOnDemand();
         var flowOf = ctx.flowProp().id();
 
         var flowFqdn = $"{ParserHelper.CurrentPath}.{flowName}";

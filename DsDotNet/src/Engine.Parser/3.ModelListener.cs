@@ -32,7 +32,7 @@ class ModelListener : dsBaseListener
 
     override public void EnterFlow(FlowContext ctx)
     {
-        var flowName = ctx.id().GetText();
+        var flowName = ctx.id().GetText().DeQuoteNameComponentOnDemand();
         _rootFlow = _system.RootFlows.First(f => f.Name == flowName);
     }
     override public void ExitFlow(FlowContext ctx) { _rootFlow = null; }
@@ -73,7 +73,7 @@ class ModelListener : dsBaseListener
         switch (ns.Length)
         {
             case 1:
-                var last = ns[0];
+                var last = fqdn;
                 if (_rootFlow.AliasNameMaps.ContainsKey(last))
                 {
                     var aliasTarget = _rootFlow.AliasNameMaps[last];
@@ -110,11 +110,15 @@ class ModelListener : dsBaseListener
                     var target = _model.Find(ns);
                     switch (target)
                     {
+                        case null:
+                            throw new ParserException($"ERROR : failed to find [{ns.Combine()}]", ctx);
+
                         case SegmentBase exSeg when _parenting != null:
                             var exSegCall = new ExSegment(ns.Combine(), exSeg);
                             var child = new Child(exSegCall, _parenting);
                             instanceMap.Add(ns.Combine(), child);
                             break;
+
                         default:
                             throw new ParserException("ERROR : unknown??.", ctx);
                     }

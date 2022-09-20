@@ -47,6 +47,19 @@ public static class ParserExtension
     }
     public static bool IsQuotationRequired(this string identifier) => !IsValidIdentifier(identifier);
 
+    static string _doubleQuote = @"""";
+    public static string DeQuoteNameComponentOnDemand(this string compo) =>
+        compo.StartsWith(_doubleQuote) && compo.EndsWith(_doubleQuote)
+        ? compo.Substring(1, compo.Length - 2)
+        : compo
+        ;
+    public static string QuoteNameComponentOnDemand(this string compo) =>
+        compo.IsQuotationRequired()
+        ? $"{_doubleQuote}{compo}{_doubleQuote}"
+        : compo
+        ;
+
+
     /// <summary> path 구성 요소 array 를 '.' 으로 combine </summary>
     public static string Combine(this string[] nameComponents, string separator=".") =>
         string.Join(separator, nameComponents.Select(n => n.IsQuotationRequired() ? $"\"{n}\"" : n));
@@ -93,7 +106,7 @@ public static class ParserExtension
         if (flow == null)
             return null;
 
-        var name = fqdn[2];
+        var name = fqdn[2].QuoteNameComponentOnDemand();
         if (flow.InstanceMap.ContainsKey(name))
             return flow.InstanceMap[name];
 

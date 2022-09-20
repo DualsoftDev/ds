@@ -59,9 +59,9 @@ namespace Engine
             Cp >> Cm;
             Cp ||> Cm;
             Cp <|| Cm;
-            Cp = {P.F.Vp ~ P.F.Sp}
-            Cm = {P.F.Vm ~ P.F.Sm}
         }
+        Cp = {P.F.Vp ~ P.F.Sp}
+        Cm = {P.F.Vm ~ P.F.Sm}
     }
 }
 
@@ -247,6 +247,16 @@ namespace Engine
     }
 }
 ";
+
+        public static string Dup = @"
+[sys] L = {
+    [flow] FF = {
+        A, ""F2.R2"" > C;
+        C |> ""F2.R2"";
+    }
+}
+";
+
 
         public static string Serialize = @"
 [sys] L = {

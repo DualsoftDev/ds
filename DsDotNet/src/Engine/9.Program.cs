@@ -47,12 +47,13 @@ class Program
         //ParserTest.TestParseExternalSegmentCall();
         //ParserTest.TestParseAliases();
 
-        ParserTest.Test(ParserTest.Safety, "Cpu");
-        ParserTest.Test(ParserTest.StrongCausal, "Cpu");
-        ParserTest.Test(ParserTest.Buttons, "Cpu");
-        ParserTest.Test(ParserTest.Ppt, "Cpu");
-        ParserTest.Test(ParserTest.Serialize, "Cpu");
-        ParserTest.Test(ParserTest.Error, "Cpu");
+        //ParserTest.Test(ParserTest.Safety, "Cpu");
+        //ParserTest.Test(ParserTest.StrongCausal, "Cpu");
+        //ParserTest.Test(ParserTest.Buttons, "Cpu");
+        //ParserTest.Test(ParserTest.Dup, "Cpu");
+        //ParserTest.Test(ParserTest.Ppt, "Cpu");
+        //ParserTest.Test(ParserTest.Serialize, "Cpu");
+        //ParserTest.Test(ParserTest.Error, "Cpu");
         ParserTest.Test(ParserTest.QualifiedName);
         ParserTest.Test(ParserTest.ExternalSegmentCall);
         ParserTest.Test(ParserTest.ExternalSegmentCallConfusing);

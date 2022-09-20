@@ -29,7 +29,7 @@ namespace Engine.Parser
 
         override public void EnterFlow(FlowContext ctx)
         {
-            var flowName = ctx.id().GetText();
+            var flowName = ctx.id().GetText().DeQuoteNameComponentOnDemand();
             _rootFlow = _system.RootFlows.First(f => f.Name == flowName);
         }
         override public void ExitFlow(FlowContext ctx) { _rootFlow = null; }

@@ -95,7 +95,7 @@ public class ParserHelper
         switch (ns.Length)
         {
             case 1:
-                if (_rootFlow.AliasNameMaps.ContainsKey(ns))
+                if (_rootFlow.AliasNameMaps.ContainsKey(ns[0]))
                     return ns;
                 break;
             //case 2:

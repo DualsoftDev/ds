@@ -1,5 +1,10 @@
+using Antlr4.Runtime.Misc;
+
 using Engine.Common;
 using Engine.Core;
+
+using System.Collections.Generic;
+using System.Xml.Linq;
 
 namespace Engine.Parser;
 
@@ -46,145 +51,221 @@ class ModelListener : dsBaseListener
 
 
 
-
-
-
-
-    override public void EnterCausalPhrase(CausalPhraseContext ctx)
+    override public void EnterCausalToken(CausalTokenContext ctx)
     {
-        var nameComponentss =
-            enumerateChildren<SegmentContext>(ctx)
-            .Select(collectNameComponents)
-            .ToArray()
-            ;
+        var container = (Flow)_parenting ?? _rootFlow;
+        var instanceMap = container.InstanceMap;
+        var ns = collectNameComponents(ctx);
+        var fqdn = ns.Combine();
+        if (instanceMap.ContainsKey(fqdn))
+            return;
 
-        if (_parenting == null)
+        void createInstanceFromCallPrototype(CallPrototype cp, string callName, Dictionary<string, object> instanceMap)
         {
-            void createFromDefinition(object target, string[] ns)
-            {
-                switch (target)
-                {
-                    case CallPrototype cp:
-                        var name = ns.Last();
-                        var call = new RootCall(name, _rootFlow, cp);
-                        _rootFlow.InstanceMap.Add(name, call);
-                        break;
-                    case SegmentBase exSeg:
-                        var exSegCall = new ExSegment(ns.Combine(), exSeg);
-                        _rootFlow.InstanceMap.Add(ns.Combine(), exSegCall);
-                        break;
-                    default:
-                        throw new ParserException("ERROR: CallPrototype expected.", ctx);
-                }
-            }
-
-            foreach (var ns in nameComponentss)
-            {
-                var name = ns.Combine();
-                switch (ns.Length)
-                {
-                    case 1:
-                        var fqdn = ParserHelper.GetCurrentPathComponents(name);
-                        if (_rootFlow.AliasNameMaps.ContainsKey(ns))
-                        {
-                            var targetName = _rootFlow.AliasNameMaps[fqdn];
-                            var target = _model.Find(targetName);
-                            createFromDefinition(target, fqdn);
-                        }
-                        else
-                        {
-                            if (!_rootFlow.InstanceMap.ContainsKey(name))
-                            {
-                                var fullPrototypeName = ParserHelper.ToFQDN(ns);
-                                var target = _model.Find(fullPrototypeName);
-                                if (target != null)
-                                {
-                                    createFromDefinition(target, fqdn);
-                                    continue;
-                                }
-
-                                var seg = SegmentBase.Create(name, _rootFlow);
-                                _rootFlow.InstanceMap.Add(name, seg);
-                            }
-                        }
-                        break;
-                    case 3:     // 외부 real 호출
-                        var def = _model.Find(ns);
-                        createFromDefinition(def, ns);
-                        break;
-                }
-            }
+            object instance =
+                _parenting == null
+                ? new RootCall(callName, _rootFlow, cp)
+                : new Child(new SubCall(callName, _parenting, cp), _parenting)
+                ;
+            instanceMap.Add(callName, instance);
         }
-        else
-        {
-            void createFromDefinition(object target, string[] ns, bool isAlias)
-            {
-                switch (target)
-                {
-                    case CallPrototype cp:
-                        var name = ns.Last();
-                        if (! _parenting.InstanceMap.ContainsKey(name))
-                        {
-                            var subCall = new SubCall(name, _parenting, cp);
-                            var child = new Child(subCall, _parenting) { IsAlias = isAlias };
-                            subCall.ContainerChild = child;
-                            _parenting.InstanceMap.Add(name, child);
-                        }
-                        break;
 
-                    case SegmentBase exSeg:
-                        if (!_parenting.InstanceMap.ContainsKey(ns.Combine()))
-                        {
+        switch (ns.Length)
+        {
+            case 1:
+                var last = ns[0];
+                if (_rootFlow.AliasNameMaps.ContainsKey(last))
+                {
+                    var aliasTarget = _rootFlow.AliasNameMaps[last];
+                    var target = _model.Find(aliasTarget);
+
+                    switch (target)
+                    {
+                        case CallPrototype cp:
+                            createInstanceFromCallPrototype(cp, last, instanceMap);
+                            break;
+                        default:
+                            throw new ParserException("ERROR: CallPrototype expected.", ctx);
+                    }
+                }
+                else
+                {
+                    var cp = _rootFlow.CallPrototypes.FirstOrDefault(cp => cp.Name == last);
+                    if (cp != null)
+                        createInstanceFromCallPrototype(cp, last, instanceMap);
+                    else if (_parenting == null)
+                    {
+                        // 내부 없는 단순 root segment.  e.g "Vp"
+                        // @sa EnterListing()
+                        var seg = SegmentBase.Create(last, _rootFlow);
+                        _rootFlow.InstanceMap.Add(last, seg);
+                    }
+                    else
+                        Assert(false);
+
+                }
+                break;
+            case 3:
+                {
+                    var target = _model.Find(ns);
+                    switch (target)
+                    {
+                        case SegmentBase exSeg when _parenting != null:
                             var exSegCall = new ExSegment(ns.Combine(), exSeg);
-                            var child = new Child(exSegCall, _parenting) { IsAlias = isAlias };
-                            exSegCall.ContainerChild = child;
-                            _parenting.InstanceMap.Add(ns.Combine(), child);
-                        }
-                        break;
-
-                    default:
-                        throw new ParserException("ERROR: CallPrototype expected.", ctx);
+                            var child = new Child(exSegCall, _parenting);
+                            instanceMap.Add(ns.Combine(), child);
+                            break;
+                        default:
+                            throw new ParserException("ERROR : unknown??.", ctx);
+                    }
                 }
-            }
-
-            foreach (var ns in nameComponentss)
-            {
-                var name = ns.Combine();
-                switch (ns.Length)
-                {
-                    case 1:
-                        var fqdn = ParserHelper.GetCurrentPathComponents(name);
-                        if (_rootFlow.AliasNameMaps.ContainsKey(ns))
-                        {
-                            var targetName = _rootFlow.AliasNameMaps[ns];
-                            var target = _model.Find(targetName);
-                            createFromDefinition(target, fqdn, true);
-                        }
-                        else
-                        {
-                            if (!_rootFlow.InstanceMap.ContainsKey(name))
-                            {
-                                var fullPrototypeName = ParserHelper.ToFQDN(ns);
-                                var target = _model.Find(fullPrototypeName);
-                                if (target != null)
-                                {
-                                    createFromDefinition(target, fqdn, false);
-                                    continue;
-                                }
-
-                                var seg = SegmentBase.Create(name, _rootFlow);
-                                _rootFlow.InstanceMap.Add(name, seg);
-                            }
-                        }
-                        break;
-                    case 3:     // 외부 real 호출
-                        var def = _model.Find(ns);
-                        createFromDefinition(def, ns, false);
-                        break;
-                }
-            }
+                break;
+            default:
+                throw new Exception("ERROR");
         }
+
+        Console.WriteLine();
     }
+
+
+
+
+
+    //override public void EnterCausalPhrase(CausalPhraseContext ctx)
+    //{
+    //    var nameComponentss =
+    //        enumerateChildren<SegmentContext>(ctx)
+    //        .Select(collectNameComponents)
+    //        .ToArray()
+    //        ;
+
+    //    if (_parenting == null)
+    //    {
+    //        void createFromDefinition(object target, string[] ns)
+    //        {
+    //            switch (target)
+    //            {
+    //                case CallPrototype cp:
+    //                    var name = ns.Last();
+    //                    var call = new RootCall(name, _rootFlow, cp);
+    //                    _rootFlow.InstanceMap.Add(name, call);
+    //                    break;
+    //                case SegmentBase exSeg:
+    //                    var exSegCall = new ExSegment(ns.Combine(), exSeg);
+    //                    _rootFlow.InstanceMap.Add(ns.Combine(), exSegCall);
+    //                    break;
+    //                default:
+    //                    throw new ParserException("ERROR: CallPrototype expected.", ctx);
+    //            }
+    //        }
+
+    //        foreach (var ns in nameComponentss)
+    //        {
+    //            var name = ns.Combine();
+    //            switch (ns.Length)
+    //            {
+    //                case 1:
+    //                    var fqdn = ParserHelper.GetCurrentPathComponents(name);
+    //                    if (_rootFlow.AliasNameMaps.ContainsKey(ns))
+    //                    {
+    //                        var targetName = _rootFlow.AliasNameMaps[fqdn];
+    //                        var target = _model.Find(targetName);
+    //                        createFromDefinition(target, fqdn);
+    //                    }
+    //                    else
+    //                    {
+    //                        if (!_rootFlow.InstanceMap.ContainsKey(name))
+    //                        {
+    //                            var fullPrototypeName = ParserHelper.ToFQDN(ns);
+    //                            var target = _model.Find(fullPrototypeName);
+    //                            if (target != null)
+    //                            {
+    //                                createFromDefinition(target, fqdn);
+    //                                continue;
+    //                            }
+
+    //                            var seg = SegmentBase.Create(name, _rootFlow);
+    //                            _rootFlow.InstanceMap.Add(name, seg);
+    //                        }
+    //                    }
+    //                    break;
+    //                case 3:     // 외부 real 호출
+    //                    var def = _model.Find(ns);
+    //                    createFromDefinition(def, ns);
+    //                    break;
+    //            }
+    //        }
+    //    }
+    //    else
+    //    {
+    //        void createFromDefinition(object target, string[] ns, bool isAlias)
+    //        {
+    //            switch (target)
+    //            {
+    //                case CallPrototype cp:
+    //                    var name = ns.Last();
+    //                    if (! _parenting.InstanceMap.ContainsKey(name))
+    //                    {
+    //                        var subCall = new SubCall(name, _parenting, cp);
+    //                        var child = new Child(subCall, _parenting) { IsAlias = isAlias };
+    //                        subCall.ContainerChild = child;
+    //                        _parenting.InstanceMap.Add(name, child);
+    //                    }
+    //                    break;
+
+    //                case SegmentBase exSeg:
+    //                    if (!_parenting.InstanceMap.ContainsKey(ns.Combine()))
+    //                    {
+    //                        var exSegCall = new ExSegment(ns.Combine(), exSeg);
+    //                        var child = new Child(exSegCall, _parenting) { IsAlias = isAlias };
+    //                        exSegCall.ContainerChild = child;
+    //                        _parenting.InstanceMap.Add(ns.Combine(), child);
+    //                    }
+    //                    break;
+
+    //                default:
+    //                    throw new ParserException("ERROR: CallPrototype expected.", ctx);
+    //            }
+    //        }
+
+    //        foreach (var ns in nameComponentss)
+    //        {
+    //            var name = ns.Combine();
+    //            switch (ns.Length)
+    //            {
+    //                case 1:
+    //                    var fqdn = ParserHelper.GetCurrentPathComponents(name);
+    //                    if (_rootFlow.AliasNameMaps.ContainsKey(ns))
+    //                    {
+    //                        var targetName = _rootFlow.AliasNameMaps[ns];
+    //                        var target = _model.Find(targetName);
+    //                        createFromDefinition(target, fqdn, true);
+    //                    }
+    //                    else
+    //                    {
+    //                        if (!_rootFlow.InstanceMap.ContainsKey(name))
+    //                        {
+    //                            var fullPrototypeName = ParserHelper.ToFQDN(ns);
+    //                            var target = _model.Find(fullPrototypeName);
+    //                            if (target != null)
+    //                            {
+    //                                createFromDefinition(target, fqdn, false);
+    //                                continue;
+    //                            }
+
+    //                            var seg = SegmentBase.Create(name, _rootFlow);
+    //                            _rootFlow.InstanceMap.Add(name, seg);
+    //                        }
+    //                    }
+    //                    break;
+    //                case 3:     // 외부 real 호출
+    //                    var def = _model.Find(ns);
+    //                    createFromDefinition(def, ns, false);
+    //                    break;
+    //            }
+    //        }
+    //    }
+    //}
 
 
 

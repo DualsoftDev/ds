@@ -247,10 +247,10 @@ partial class ElementsListener : dsBaseListener
                             var fqdn = ParserHelper.GetCurrentPath3Components(ns[0]);
                             if (_model.Find(fqdn) != null)
                                 continue;
-                            isAlias = _rootFlow.AliasNameMaps.ContainsKey(ns);
+                            isAlias = _rootFlow.AliasNameMaps.ContainsKey(ns[0]);
                             var key =
                                 isAlias
-                                ? _rootFlow.AliasNameMaps[ns]
+                                ? _rootFlow.AliasNameMaps[ns[0]]
                                 : fqdn
                                 ;
                             target = _model.Find(key);

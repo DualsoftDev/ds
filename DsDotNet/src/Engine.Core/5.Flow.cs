@@ -79,8 +79,8 @@ public class RootFlow : Flow
     // alias : ppt 도형으로 modeling 하면 문제가 되지 않으나, text grammar 로 서술할 경우, 
     // 동일 이름의 call 등이 중복 사용되면, line 을 나누어서 기술할 때, unique 하게 결정할 수 없어서 도입.
     // e.g Ap = { Ap1; Ap2;}
-    /// <summary> mnemonic -> target : "My.F.Ap1" -> "My.F.Ap", "My.F.Ap2" -> "My.F.Ap" </summary>
-    public Dictionary<string[], string[]> AliasNameMaps = new(NameComponentsComparer.Instance);
+    /// <summary> mnemonic -> target : "Ap1" -> "My.F.Ap", "My.F.Ap2" -> "My.F.Ap" </summary>
+    public Dictionary<string, string[]> AliasNameMaps = new();
     /// <summary>target -> mnemonics : "My.F.Ap" -> ["Ap1"; "Ap2"] </summary>
     public Dictionary<string[], string[]> BackwardAliasMaps = new(NameComponentsComparer.Instance);
 

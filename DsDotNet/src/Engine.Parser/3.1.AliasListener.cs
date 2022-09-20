@@ -49,7 +49,7 @@ namespace Engine.Parser
 
         /*
             [alias] = {
-                P.F.Vp = { Vp1; Vp2; Vp3; }
+                Ap = { Ap1; Ap2; Ap3; }
             }
          */
         override public void EnterAliasListing(AliasListingContext ctx)
@@ -89,7 +89,7 @@ namespace Engine.Parser
                 ;
 
             foreach ((var mnemonic, var target) in reversed)
-                _rootFlow.AliasNameMaps.Add(mnemonic.Divide(), target);
+                _rootFlow.AliasNameMaps.Add(mnemonic, target);
         }
     }
 }

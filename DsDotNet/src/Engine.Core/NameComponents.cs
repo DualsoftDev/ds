@@ -83,7 +83,7 @@ public static class ParserExtension
                 return parenting.InstanceMap[fqdn[3]];
 
             var aliasMap = parenting.ContainerFlow.AliasNameMaps;
-            var aliasKey = new[] { fqdn[3] };
+            var aliasKey = fqdn[3];
             if (aliasMap.ContainsKey(aliasKey))
                 return model.Find(aliasMap[aliasKey]);
             return null;

@@ -20,7 +20,7 @@ namespace Engine
         Cm = {P.F.Vm ~ P.F.Sm}
         [safety] = {
             Main = {P.F.Sp; P.F.Sm}
-            Main2 = {P.F.Sp; P.F.Sm}
+            // Main2 = {P.F.Sp; P.F.Sm}
         }
     }
 }
@@ -39,7 +39,7 @@ namespace Engine
 [prop] = {
     [ safety ] = {
         L.F.Main = {P.F.Sp; P.F.Sm}
-        L.F.Main2 = {P.F.Sp; P.F.Sm}
+        //L.F.Main2 = {P.F.Sp; P.F.Sm}
     }
 }
 [cpus] AllCpus = {
@@ -59,8 +59,6 @@ namespace Engine
             Cp >> Cm;
             Cp ||> Cm;
             Cp <|| Cm;
-        }
-        [task] = {
             Cp = {P.F.Vp ~ P.F.Sp}
             Cm = {P.F.Vm ~ P.F.Sm}
         }

@@ -59,7 +59,7 @@ partial class ElementsListener
                         _ => throw new Exception("ERROR"),
                     };
 
-                    if (n == 1 && _rootFlow.AliasNameMaps.ContainsKey(ns))
+                    if (n == 1 && _rootFlow.AliasNameMaps.ContainsKey(ns[0]))
                         nodeType = NodeType.segmentAlias;
 
                     var node = new Node(ids, label: text, parentIds: flowIds, nodeType);
@@ -220,7 +220,7 @@ partial class ElementsListener
     {
         Trace.WriteLine($"{ll.GetText()} {opr.GetText()} {rr.GetText()}");
 
-        if (rr.GetText() == "Pp")
+        if (ll.GetText() == "Cp")
             Console.WriteLine();
 
         var ls = this.addNodes(ll);

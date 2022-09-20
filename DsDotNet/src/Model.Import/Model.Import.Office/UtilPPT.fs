@@ -92,13 +92,17 @@ module UtilPPT =
                 (  geometry.Preset.Value = Drawing.ShapeTypeValues.Donut
                 )    
 
-
         [<Extension>] 
         static member CheckEllipse(shape:#Shape) = 
             if(Office.CheckShapes(shape) |> not) then false
             else
                 let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
-                (  geometry.Preset.Value = Drawing.ShapeTypeValues.Ellipse
+                let round =  
+                    if(geometry.Preset.Value = Drawing.ShapeTypeValues.RoundRectangle)
+                    then let shapeGuide = geometry.Descendants<Drawing.AdjustValueList>().First().Descendants<Drawing.ShapeGuide>()
+                         shapeGuide.Any()|>not || shapeGuide.First().Formula.Value = "val 0" |> not
+                    else false
+                (  geometry.Preset.Value = Drawing.ShapeTypeValues.Ellipse || round
                 || geometry.Preset.Value = Drawing.ShapeTypeValues.FlowChartAlternateProcess   
                 || geometry.Preset.Value = Drawing.ShapeTypeValues.FlowChartConnector)    
 

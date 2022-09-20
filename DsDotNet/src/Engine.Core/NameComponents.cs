@@ -76,8 +76,16 @@ public static class ParserExtension
         if (n == 4)
         {
             var parenting = model.FindParenting(fqdn);
-            if (parenting != null && parenting.InstanceMap.ContainsKey(fqdn[3]))
+            if (parenting == null)
+                return null;
+
+            if (parenting.InstanceMap.ContainsKey(fqdn[3]))
                 return parenting.InstanceMap[fqdn[3]];
+
+            var aliasMap = parenting.ContainerFlow.AliasNameMaps;
+            var aliasKey = new[] { fqdn[3] };
+            if (aliasMap.ContainsKey(aliasKey))
+                return model.Find(aliasMap[aliasKey]);
             return null;
         }
 
@@ -91,4 +99,6 @@ public static class ParserExtension
 
         return flow.CallPrototypes.FirstOrDefault(cp => cp.Name == name);
     }
+
+    public static T Find<T>(this Model model, string[] fqdn) where T : class => model.Find(fqdn) as T;
 }

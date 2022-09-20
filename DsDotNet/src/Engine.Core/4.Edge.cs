@@ -17,6 +17,7 @@ public abstract partial class Edge : IEdge
     {
         Assert(sources.All(s => s != null));
         Assert(target != null);
+        Assert(sources.Append(target).All(n => n is Child || n is SegmentBase || n is RootCall || n is SubCall));
 
         ContainerFlow = containerFlow;
         Sources = sources;

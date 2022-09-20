@@ -3,6 +3,7 @@
 using Antlr4.Runtime.Misc;
 
 using Engine.Common;
+using Engine.Core;
 
 namespace Engine.Parser;
 
@@ -60,8 +61,6 @@ partial class ElementsListener : dsBaseListener
     RootFlow _rootFlow  { get => ParserHelper._rootFlow;  set => ParserHelper._rootFlow = value; }
     SegmentBase  _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
 
-    string[] CurrentPathNameComponents => ParserHelper.CurrentPathNameComponents;
-    string CurrentPath => ParserHelper.CurrentPath;
     public ElementsListener(dsParser parser, ParserHelper helper)
     {
         ParserHelper = helper;
@@ -239,60 +238,62 @@ partial class ElementsListener : dsBaseListener
         {
             foreach (var ns in nameComponentss)
             {
-                var n = ns.Combine();
-                Child child = null;
+                object target = null;
                 bool isAlias = false;
-                var fqdn = $"{CurrentPath}.{n}";
-                if (ns.Length == 1 && _model.Find(CurrentPathNameComponents.Append(n).ToArray()) != null)
-                    continue;
-
-                string targetName = n;
-                var key = ns;
                 switch (ns.Length)
                 {
                     case 1:
-                        isAlias = _rootFlow.AliasNameMaps.ContainsKey(ns);
-                        if (isAlias)
-                            key = _rootFlow.AliasNameMaps[ns];
-                        else
-                            key = CurrentPathNameComponents.Append(n).ToArray();
-
+                        {
+                            var fqdn = ParserHelper.GetCurrentPath3Components(ns[0]);
+                            if (_model.Find(fqdn) != null)
+                                continue;
+                            isAlias = _rootFlow.AliasNameMaps.ContainsKey(ns);
+                            var key =
+                                isAlias
+                                ? _rootFlow.AliasNameMaps[ns]
+                                : fqdn
+                                ;
+                            target = _model.Find(key);
+                        }
                         break;
-                    //case 2:
-                    //    key = (_system, $"{_system.Name}.{n}");
-                    //    break;
-                    //case 3:
-                    //    var exsys = _model.Systems.First(sys => targetName.StartsWith($"{sys.Name}."));
-                    //    key = (exsys, n);
-                    //    break;
-                    default:
-                        throw new ParserException($"ERROR: {targetName} length error.", ctx);
+                    case 3:
+                        target = _model.Find(ns);
+                        break;
                 }
+                if (target is RootCall)
+                    continue;
 
-                object target = null;
-                var callproto = _rootFlow.CallPrototypes.FirstOrDefault(cp => cp.Name == n);   // definition 우선시
-                if (callproto != null)
-                    target = callproto;
-                else if (_model.Find(key) != null)
-                    target = _model.Find(key);
-
-                var instanceMap = _parenting == null ? _rootFlow.InstanceMap : _parenting.InstanceMap;
-                switch (target)
                 {
-                    case CallPrototype cp:
-                        var subCall = new SubCall(n, _parenting, cp);
-                        child = new Child(subCall, _parenting) { IsAlias = isAlias };
-                        subCall.ContainerChild = child;
-                        instanceMap.Add(n, child);
-                        break;
-                    case SegmentBase exSeg:
-                        var exCall = new ExSegment(n, exSeg);
-                        child = new Child(exCall, _parenting) { IsAlias = isAlias };
-                        exCall.ContainerChild = child;
-                        instanceMap.Add(n, child);
-                        break;
-                    default:
-                        throw new ParserException($"ERRROR: Unknown target for {targetName}", ctx);
+                    var instanceMap = _parenting == null ? _rootFlow.InstanceMap : _parenting.InstanceMap;
+                    var subName = ns.Combine();
+                    Child child = null;
+                    if (instanceMap.ContainsKey(subName))
+                    {
+                        child = instanceMap[subName] as Child;
+                        if (child != null)
+                            continue;
+                    }
+
+                    switch (target)
+                    {
+                        case CallPrototype cp:
+                            if (! instanceMap.ContainsKey(subName))
+                            {
+                                var subCall = new SubCall(subName, _parenting, cp);
+                                child = new Child(subCall, _parenting) { IsAlias = isAlias };
+                                subCall.ContainerChild = child;
+                                instanceMap.Add(subName, child);
+                            }
+                            break;
+                        case SegmentBase exSeg:
+                            var exCall = new ExSegment(subName, exSeg);
+                            child = new Child(exCall, _parenting) { IsAlias = isAlias };
+                            exCall.ContainerChild = child;
+                            instanceMap.Add(subName, child);
+                            break;
+                        default:
+                            throw new ParserException($"ERRROR: Unknown target for {subName}", ctx);
+                    }
                 }
             }
         }

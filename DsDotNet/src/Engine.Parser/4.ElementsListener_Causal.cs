@@ -220,7 +220,7 @@ partial class ElementsListener
     {
         Trace.WriteLine($"{ll.GetText()} {opr.GetText()} {rr.GetText()}");
 
-        if (rr.GetText() == "MyOtherFlow.A")
+        if (rr.GetText() == "Pp")
             Console.WriteLine();
 
         var ls = this.addNodes(ll);

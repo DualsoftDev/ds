@@ -19,6 +19,12 @@ public class ParserHelper
         ParserOptions = options;
     }
 
+
+    internal string[] GetCurrentPathComponents(string lastName) =>
+        CurrentPathNameComponents.Append(lastName).ToArray();
+    internal string[] GetCurrentPath3Components(string lastName) =>
+        CurrentPathNameComponents.Take(2).Append(lastName).ToArray();
+
     internal string[] CurrentPathNameComponents
     {
         get
@@ -100,7 +106,7 @@ public class ParserHelper
             //default:
             //    throw new Exception("ERROR");
         }
-        return CurrentPathNameComponents.Append(name).ToArray();
+        return GetCurrentPathComponents(name);
     }
 }
 

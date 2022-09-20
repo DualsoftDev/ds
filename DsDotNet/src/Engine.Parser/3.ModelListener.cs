@@ -1,4 +1,5 @@
 using Engine.Common;
+using Engine.Core;
 
 namespace Engine.Parser;
 
@@ -10,9 +11,6 @@ class ModelListener : dsBaseListener
     DsSystem _system    { get => ParserHelper._system;    set => ParserHelper._system = value; }
     RootFlow _rootFlow  { get => ParserHelper._rootFlow;  set => ParserHelper._rootFlow = value; }
     SegmentBase  _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
-
-    string[] CurrentPathNameComponents => ParserHelper.CurrentPathNameComponents;
-    string CurrentPath => ParserHelper.CurrentPath;
 
     public ModelListener(dsParser parser, ParserHelper helper)
     {
@@ -60,67 +58,130 @@ class ModelListener : dsBaseListener
             .ToArray()
             ;
 
-        void createFromDefinition(object target, string[] ns)
-        {
-            switch (target)
-            {
-                case CallPrototype cp:
-                    var name = ns.Last();
-                    var call = new RootCall(name, _rootFlow, cp);
-                    _rootFlow.InstanceMap.Add(name, call);
-                    break;
-                case SegmentBase exSeg:
-                    var exSegCall = new ExSegment(ns.Combine(), exSeg);
-                    _rootFlow.InstanceMap.Add(ns.Combine(), exSegCall);
-                    break;
-                default:
-                    throw new ParserException("ERROR: CallPrototype expected.", ctx);
-            }
-        }
-
         if (_parenting == null)
         {
+            void createFromDefinition(object target, string[] ns)
+            {
+                switch (target)
+                {
+                    case CallPrototype cp:
+                        var name = ns.Last();
+                        var call = new RootCall(name, _rootFlow, cp);
+                        _rootFlow.InstanceMap.Add(name, call);
+                        break;
+                    case SegmentBase exSeg:
+                        var exSegCall = new ExSegment(ns.Combine(), exSeg);
+                        _rootFlow.InstanceMap.Add(ns.Combine(), exSegCall);
+                        break;
+                    default:
+                        throw new ParserException("ERROR: CallPrototype expected.", ctx);
+                }
+            }
+
             foreach (var ns in nameComponentss)
             {
                 var name = ns.Combine();
                 switch (ns.Length)
                 {
                     case 1:
+                        var fqdn = ParserHelper.GetCurrentPathComponents(name);
+                        if (_rootFlow.AliasNameMaps.ContainsKey(ns))
                         {
-                            var fqdn = CurrentPathNameComponents.Append(name).ToArray();
-                            if (_rootFlow.AliasNameMaps.ContainsKey(fqdn))
+                            var targetName = _rootFlow.AliasNameMaps[fqdn];
+                            var target = _model.Find(targetName);
+                            createFromDefinition(target, fqdn);
+                        }
+                        else
+                        {
+                            if (!_rootFlow.InstanceMap.ContainsKey(name))
                             {
-                                var targetName = _rootFlow.AliasNameMaps[fqdn];
-                                var target = _model.Find(targetName);
-                                createFromDefinition(target, fqdn);
-                            }
-                            else
-                            {
-                                if (!_rootFlow.InstanceMap.ContainsKey(name))
+                                var fullPrototypeName = ParserHelper.ToFQDN(ns);
+                                var target = _model.Find(fullPrototypeName);
+                                if (target != null)
                                 {
-                                    var fullPrototypeName = ParserHelper.ToFQDN(ns);
-                                    var target = _model.Find(fullPrototypeName);
-                                    if (target != null)
-                                    {
-                                        createFromDefinition(target, fqdn);
-                                        continue;
-                                    }
-
-                                    var seg = SegmentBase.Create(name, _rootFlow);
-                                    _rootFlow.InstanceMap.Add(name, seg);
+                                    createFromDefinition(target, fqdn);
+                                    continue;
                                 }
+
+                                var seg = SegmentBase.Create(name, _rootFlow);
+                                _rootFlow.InstanceMap.Add(name, seg);
                             }
                         }
-
                         break;
                     case 3:     // 외부 real 호출
-                        {
-                            var def = _model.Find(ns);
-                            createFromDefinition(def, ns);
-                        }
+                        var def = _model.Find(ns);
+                        createFromDefinition(def, ns);
                         break;
                 }
+            }
+        }
+        else
+        {
+            void createFromDefinition(object target, string[] ns, bool isAlias)
+            {
+                switch (target)
+                {
+                    case CallPrototype cp:
+                        var name = ns.Last();
+                        if (! _parenting.InstanceMap.ContainsKey(name))
+                        {
+                            var subCall = new SubCall(name, _parenting, cp);
+                            var child = new Child(subCall, _parenting) { IsAlias = isAlias };
+                            subCall.ContainerChild = child;
+                            _parenting.InstanceMap.Add(name, child);
+                        }
+                        break;
 
+                    case SegmentBase exSeg:
+                        if (!_parenting.InstanceMap.ContainsKey(ns.Combine()))
+                        {
+                            var exSegCall = new ExSegment(ns.Combine(), exSeg);
+                            var child = new Child(exSegCall, _parenting) { IsAlias = isAlias };
+                            exSegCall.ContainerChild = child;
+                            _parenting.InstanceMap.Add(ns.Combine(), child);
+                        }
+                        break;
+
+                    default:
+                        throw new ParserException("ERROR: CallPrototype expected.", ctx);
+                }
+            }
+
+            foreach (var ns in nameComponentss)
+            {
+                var name = ns.Combine();
+                switch (ns.Length)
+                {
+                    case 1:
+                        var fqdn = ParserHelper.GetCurrentPathComponents(name);
+                        if (_rootFlow.AliasNameMaps.ContainsKey(ns))
+                        {
+                            var targetName = _rootFlow.AliasNameMaps[ns];
+                            var target = _model.Find(targetName);
+                            createFromDefinition(target, fqdn, true);
+                        }
+                        else
+                        {
+                            if (!_rootFlow.InstanceMap.ContainsKey(name))
+                            {
+                                var fullPrototypeName = ParserHelper.ToFQDN(ns);
+                                var target = _model.Find(fullPrototypeName);
+                                if (target != null)
+                                {
+                                    createFromDefinition(target, fqdn, false);
+                                    continue;
+                                }
+
+                                var seg = SegmentBase.Create(name, _rootFlow);
+                                _rootFlow.InstanceMap.Add(name, seg);
+                            }
+                        }
+                        break;
+                    case 3:     // 외부 real 호출
+                        var def = _model.Find(ns);
+                        createFromDefinition(def, ns, false);
+                        break;
+                }
             }
         }
     }

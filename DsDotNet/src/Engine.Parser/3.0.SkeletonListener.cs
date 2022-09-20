@@ -17,9 +17,6 @@ class SkeletonListener : dsBaseListener
     RootFlow _rootFlow { get => ParserHelper._rootFlow; set => ParserHelper._rootFlow = value; }
     SegmentBase _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
 
-    string[] CurrentPathNameComponents => ParserHelper.CurrentPathNameComponents;
-    string CurrentPath => ParserHelper.CurrentPath;
-
     public SkeletonListener(dsParser parser, ParserHelper helper)
     {
         ParserHelper = helper;
@@ -70,14 +67,14 @@ class SkeletonListener : dsBaseListener
         var flowName = ctx.id().GetText();
         var flowOf = ctx.flowProp().id();
 
-        var flowFqdn = $"{CurrentPath}.{flowName}";
+        var flowFqdn = $"{ParserHelper.CurrentPath}.{flowName}";
         var cpuAssigned = ParserHelper.FlowName2CpuMap.ContainsKey(flowFqdn);
         if (!ParserHelper.ParserOptions.IsSimulationMode && !cpuAssigned)
             throw new Exception($"No CPU assignment for flow [{flowFqdn}");
 
         Cpu cpu = null;
         if (cpuAssigned)
-            cpu = ParserHelper.FlowName2CpuMap[$"{CurrentPath}.{flowName}"];
+            cpu = ParserHelper.FlowName2CpuMap[flowFqdn];
         else
         {
             // simulation mode.
@@ -112,7 +109,7 @@ class SkeletonListener : dsBaseListener
         var callph = ctx.callPhrase();
 
         if (_rootFlow.CallPrototypes.Any(cp => cp.Name == name) || _rootFlow.InstanceMap.ContainsKey(name))
-            throw new Exception($"Duplicated call definition [{CurrentPath}.{name}].");
+            throw new Exception($"Duplicated call definition [{ParserHelper.CurrentPath}.{name}].");
 
         var call = new CallPrototype(name, _rootFlow);
         Assert(_rootFlow.CallPrototypes.Contains(call));
@@ -123,9 +120,8 @@ class SkeletonListener : dsBaseListener
     {
         var name = ctx.id().GetText();
         var seg = SegmentBase.Create(name, _rootFlow);
-        var key = (_system, $"{CurrentPath}.{name}");
         if (_rootFlow.CallPrototypes.Any(cp => cp.Name == name) || _rootFlow.InstanceMap.ContainsKey(name))
-            throw new Exception($"Duplicated listing [{CurrentPath}.{name}].");
+            throw new Exception($"Duplicated listing [{ParserHelper.CurrentPath}.{name}].");
 
         _rootFlow.InstanceMap.Add(name, seg);
     }
@@ -138,7 +134,7 @@ class SkeletonListener : dsBaseListener
         _parenting = SegmentBase.Create(name, _rootFlow);
 
         if (_rootFlow.InstanceMap.ContainsKey(name))
-            throw new Exception($"Duplicated parenting name [{CurrentPath}] on {_rootFlow.QualifiedName}.");
+            throw new Exception($"Duplicated parenting name [{ParserHelper.CurrentPath}] on {_rootFlow.QualifiedName}.");
         _rootFlow.InstanceMap.Add(name, _parenting);
     }
     override public void ExitParenting(ParentingContext ctx) { _parenting = null; }

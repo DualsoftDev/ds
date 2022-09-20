@@ -67,11 +67,11 @@ namespace Engine.Parser
             var def = (
                 defs.Length switch
                 {
-                    1 => CurrentPathNameComponents.Append(defs[0]),
-                    2 when defs[0] != _system.Name => defs.Prepend(_system.Name),
+                    1 => ParserHelper.GetCurrentPathComponents(defs[0]),
+                    2 when defs[0] != _system.Name => defs.Prepend(_system.Name).ToArray(),
                     3 => defs,
                     _ => throw new Exception("ERROR"),
-                }).ToArray();
+                });
 
 
             _rootFlow.BackwardAliasMaps.Add(def, aliasMnemonics);

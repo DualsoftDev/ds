@@ -13,7 +13,7 @@ module CoreStruct =
         inherit SysBase(name)
         let dicRootFlow = ConcurrentDictionary<string, RootFlow>()
         
-        member x.RootFlows = dicRootFlow.Values
+        member x.RootFlows() = dicRootFlow.Values
         member x.AddFlow(flow:RootFlow) = dicRootFlow.TryAdd(flow.Name, flow);
         member x.GetFlow(name:string)   = dicRootFlow.[name];
         //나의 시스템 Flag
@@ -40,7 +40,7 @@ module CoreStruct =
             member x.SysActives  = 
                 let activeSys = systems |> Seq.filter (fun sys -> sys.Active)
                 if((activeSys |> Seq.length) <> 1) then failwith "한개 이상의 Active 시스템 설정이 필요합니다."
-            member x.AllFlows      = systems |> Seq.collect(fun sys -> sys.RootFlows) |> HashSet
+            member x.AllFlows      = systems |> Seq.collect(fun sys -> sys.RootFlows()) |> HashSet
 
 
             //시스템 인과 추가 방법 모델에서만 가능

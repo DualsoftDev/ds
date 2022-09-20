@@ -120,7 +120,7 @@ module ExportM =
                 for sys in  model.Systems do
                     yield sprintf "[%s] %s = {"  TextSystem sys.ValidName
                     let sys = sys :?> MSys
-                    let flows = sys.RootFlows |> Seq.cast<MFlow>
+                    let flows = sys.RootFlows() |> Seq.cast<MFlow>
                     for flow in flows do
                         //MFlow 출력
 
@@ -184,7 +184,7 @@ module ExportM =
                 for sys in model.Systems do
                     yield sprintf "\t[%s] Cpu_%s = {" TextCpu sys.ValidName
                     let sys = sys :?> MSys
-                    let flows = sys.RootFlows |> Seq.cast<MFlow>
+                    let flows = sys.RootFlows() |> Seq.cast<MFlow>
                     //my CPU
                     for flow in flows do    
                         yield sprintf "\t\t%s.%s;" sys.Name (flow.ToText())
@@ -192,7 +192,7 @@ module ExportM =
                     //ex CPU
                     yield sprintf "\t[%s] Cpu_EX = {" TextCpu
                     for flow in flows do  
-                        for callSeg in flow.NotMySegs() do
+                        for callSeg in flow.CallNExRealSegs() do
                             yield sprintf "\t\tEX.%s;" (callSeg.ToCallText())
                     yield "\t}"
                 yield "}"
@@ -203,9 +203,9 @@ module ExportM =
                 for sys in model.Systems do    
                     yield sprintf "[%s] = {"  TextAddress
                     let sys = sys :?> MSys
-                    let flows = sys.RootFlows |> Seq.cast<MFlow>
+                    let flows = sys.RootFlows() |> Seq.cast<MFlow>
                     for flow in flows do
-                        for callSeg in flow.NotMySegs() do
+                        for callSeg in flow.CallNExRealSegs() do
                             for index in [|1..callSeg.MaxCnt|] do
                             yield sprintf "\t%s" (addressText(callSeg, index))
                     for exSeg in sys.BtnSegs() do
@@ -252,7 +252,7 @@ module ExportM =
                     yield sprintf "//DTS auto generation %s ExSegs"sys.ValidName
                     yield sprintf "//////////////////////////////////////////////////////"
                     yield sprintf "[%s] EX = {" TextSystem
-                    let flows = sys.RootFlows |> Seq.cast<MFlow>
+                    let flows = sys.RootFlows() |> Seq.cast<MFlow>
                     let sys = sys :?> MSys
                     for flow in flows do
                             

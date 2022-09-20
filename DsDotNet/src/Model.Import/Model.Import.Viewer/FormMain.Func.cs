@@ -183,11 +183,11 @@ namespace Dual.Model.Import
 
         internal void CreateNewTabViewer(MSys sys, bool isDemo = false)
         {
-            List<MFlow> flows = new List<MFlow>();
-            if (isDemo)
-                flows = sys.MFlows.Values.ToList();
-            else
-                flows = sys.RootMFlow().ToList();
+            List<MFlow> flows = sys.RootFlows().Cast<MFlow>().ToList();
+            //if (isDemo)
+            //    flows = sys.RootFlows.Values.ToList();
+            //else
+            //    flows = sys.RootMFlow().ToList();
 
             var flowTotalCnt = flows.Count();
             flows.ToList().ForEach(f =>

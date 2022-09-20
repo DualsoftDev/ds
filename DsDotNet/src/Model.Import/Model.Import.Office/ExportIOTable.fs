@@ -39,7 +39,7 @@ module ExportIOTable =
         let rows =
             seq {
                 for sys in  model.Systems do
-                    let flows = sys.RootFlows |> Seq.cast<MFlow> |> Seq.filter(fun flow -> (flow.Page = Int32.MaxValue)|>not)
+                    let flows = sys.RootFlows() |> Seq.cast<MFlow> |> Seq.filter(fun flow -> (flow.Page = Int32.MaxValue)|>not)
                     //MFlow 출력
                     for flow in flows do
                         //Call Task 출력

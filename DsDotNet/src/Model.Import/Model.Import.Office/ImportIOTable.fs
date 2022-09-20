@@ -70,7 +70,8 @@ module ImportIOTable =
                 |TagCase.Button  -> sys.AssignAddress($"{row.[1]}",$"{row.[2]}", $"{row.[7]}")|>ignore
             
         for flow in sys.RootMFlow()  do
-            flow.NotMySegs()
+            let mFlow = flow :?> MFlow
+            mFlow.CallNExRealSegs()
             |> Seq.iter(fun seg -> 
                         let s, r, e = sys.AddressSet.[seg.Name]
                         seg.S <- if(s = "") then None else Some(s) 

@@ -223,17 +223,20 @@ module Object =
             member x.AddDummySeg(seg) = dummySeg.TryAdd(seg) |> ignore 
             member x.NoEdgeSegs =  x.NoEdgeBaseSegs  |> Seq.cast<MSeg>
 
-            member x.UsedSegs =
-                let rootUsedSegs  = 
-                    edges 
-                    |> Seq.collect(fun edge -> edge.Key.GetSegs())
-                    |> Seq.append x.NoEdgeSegs
+            //member x.UsedSegs =
+            //    x.AllSegments |> Seq.cast<MSeg>
 
-                rootUsedSegs 
-                |> Seq.collect (fun node -> node.ChildSegsSubAll)
-                |> Seq.append rootUsedSegs
-                |> Seq.distinctBy(fun seg -> seg.PathName)
+                //let rootUsedSegs  = 
+                //    edges 
+                //    |> Seq.collect(fun edge -> edge.Key.GetSegs())
+                //    |> Seq.append x.NoEdgeSegs
+
+                //rootUsedSegs 
+                //|> Seq.collect (fun node -> node.ChildSegsSubAll)
+                //|> Seq.append rootUsedSegs
+                //|> Seq.distinctBy(fun seg -> seg.PathName)
                     
+            member x.UsedSegs   = x.UsedSegments   |> Seq.cast<MSeg>
             member x.CallSegs() = x.UsedSegs
                                         |> Seq.filter(fun seg -> seg.NodeType.IsCall)
                                         |> Seq.filter(fun seg -> seg.Bound = ThisFlow)
@@ -245,9 +248,9 @@ module Object =
                                         |> Seq.distinctBy(fun seg -> seg.FullName)
 
 
-            member x.NotMySegs() =  x.CallSegs() |> Seq.append (x.ExRealSegs())
+            member x.CallNExRealSegs() =  x.CallSegs() |> Seq.append (x.ExRealSegs())
             member x.CallWithoutInterLock()  = 
-                let dicInterLockName = 
+                let dicInterLockName =  
                     x.Interlockedges 
                     |> Seq.collect(fun segs ->segs |> Seq.map(fun seg -> seg.FullName))
                 x.CallSegs()
@@ -257,17 +260,16 @@ module Object =
     and
         [<DebuggerDisplay("{Name}")>]
         /// System 내부 Seg의 내외부 Seg간 시작/리셋 연결 정보 구조
-        MSys(name:string, active:bool)  =
+        MSys(name:string, active:bool) as this  =
             inherit DsSystem(name)
 
             let mutable sysSeg: System.Lazy<MSeg> = null
-            let mFlows  = ConcurrentDictionary<int, MFlow>()
             let locationSet  = ConcurrentDictionary<string, System.Drawing.Rectangle>()
             let commandSet  = ConcurrentDictionary<string, string>()
             let observeSet  = ConcurrentDictionary<string, string>()
             let variableSet  = ConcurrentDictionary<string, DataType>()
             let addressSet  = ConcurrentDictionary<string, Tuple<string, string, string>>()
-            let noEdgesSegs = mFlows |> Seq.collect(fun f-> f.Value.NoEdgeSegs)
+            //let noEdgesSegs = mFlows |> Seq.collect(fun f-> f.Value.NoEdgeSegs)
             let emgSet  = ConcurrentDictionary<string, List<MFlow>>()
             let startSet  = ConcurrentDictionary<string, List<MFlow>>()
             let resetSet  = ConcurrentDictionary<string, List<MFlow>>()
@@ -295,12 +297,19 @@ module Object =
             member val Active = active with get, set
             member val SystemID = -1   with get, set
 
-            member x.AddFlowPage(flow:RootFlow, page:int) = 
-                //test ahn
-                x.AddFlow(flow);
+            //member x.AddFlowPage(flow:RootFlow, page:int) = 
+            //    //test ahn
+            //    //mFlows.TryAdd(page, flow :?> MFlow) |> ignore
+            //    x.AddFlow(flow);
 
-            member x.GetFlow(page:int)      = mFlows.[page]
-            member x.MFlows      = mFlows
+            //member x.GetFlow(page:int)      = mFlows.[page]
+            //member x.MFlows      = mFlows
+            member x.SingleNodes   = this.RootFlows() 
+                                        |> Seq.collect(fun flow -> flow.Singles)
+                                        |> Seq.cast<MSeg>
+            member x.AllNodes  = this.RootFlows() 
+                                        |> Seq.collect(fun flow -> flow.Nodes)
+                                        |> Seq.cast<MSeg>
             member x.LocationSet   = locationSet
             member x.CommandSet   = commandSet
             member x.ObserveSet   = observeSet
@@ -332,7 +341,7 @@ module Object =
 
             member x.Segs() =   let segs = 
                                         x.SysSeg.ChildSegsSubAll 
-                                        |> Seq.append (noEdgesSegs)
+                                        |> Seq.append (x.SingleNodes)
 
                                 segs
                                 |> Seq.collect(fun seg -> seg.ChildSegsSubAll) |> Seq.append segs
@@ -346,25 +355,19 @@ module Object =
                 x.SysSeg.MEdges
                     |> Seq.collect(fun seg -> [seg.Source;seg.Target])
                     |> Seq.cast<MSeg>
-                    |> Seq.append noEdgesSegs
+                    |> Seq.append x.SingleNodes
                     |> Seq.collect(fun seg -> seg.ChildSegs)
                     |> Seq.distinct
 
             member x.RootSegs() =
                 x.SysSeg.ChildSegs
-                    |> Seq.append noEdgesSegs
+                    |> Seq.append x.SingleNodes
                     |> Seq.distinct
 
-            member x.RootMFlow()    = mFlows
-                                     |> Seq.sortBy(fun flow -> flow.Key)
-                                     |> Seq.map(fun flow -> flow.Value)
-                                     |> Seq.filter(fun flow -> (flow.Page = Int32.MaxValue)|>not)  //Int32.MaxValue 는 데모 MFlow
-            
-            member x.BtnSegs()    = 
-                                    x.RootMFlow() 
-                                    |> Seq.collect(fun flow -> flow.UsedSegs)
-                                    |> Seq.filter(fun seg -> seg.Bound = ExBtn)
-                                    |> Seq.distinctBy(fun seg -> seg.SegName)
+            member x.RootMFlow()  = this.RootFlows() |> Seq.sortBy(fun flow -> flow.Name)
+            member x.BtnSegs()    = this.AllNodes
+                                        |> Seq.filter(fun seg -> seg.Bound = ExBtn)
+                                        |> Seq.distinctBy(fun seg -> seg.SegName)
 
     and 
        ImportModel(name:string) as this =

@@ -121,8 +121,7 @@ module ImportM =
 
                     seg.Update(node.Key, node.Id.Value, node.Alias, node.CntTX, node.CntRX)
                     dicSeg.TryAdd(node.Key, seg) |> ignore
-                    
-                    Check.SameNode(seg, node, dicSameSeg)   )
+                    if(node.IsDummy |> not) then  Check.SameNode(seg, node, dicSameSeg)   )
               
                 //MFlow 리스트 만들기
                 dicMFlowName

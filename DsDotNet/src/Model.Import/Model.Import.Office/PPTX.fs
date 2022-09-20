@@ -250,7 +250,7 @@ module PPTX =
                 ids 
                 |> Seq.map (fun id -> nodes.[ Objkey(iPage, id) ])
                 |> Seq.filter (fun node -> node.IsDummy)
-            if(dummys.Count() > 1) 
+            if(parents.Count() = 0 && dummys.Count() > 1) 
             then  Office.ErrorPPT(Group, 24, $"부모수:{dummys.Count()}", iPage)
             if(parents.Count() = 0 && dummys.Count() = 0 ) 
             then  Office.ErrorPPT(Group, 25, $"도형 타입확인", iPage)
@@ -328,18 +328,7 @@ module PPTX =
                             if(node.Name ="" && node.IsDummy|>not) then shape.ErrorName(13, page)
                             nodes.TryAdd(node.Key, node)  |>ignore )
                              
-                connections
-                |> Seq.iter (fun (slide, conns) -> 
-                    conns 
-                          |> Seq.iter (fun (conn, Id, startId, endId) ->
-                            let iPage = pages.[slide].PageNum
-                            if(startId = 0u && endId = 0u) then  conn.ErrorConnect(4, "","", iPage)
-                            if(nodes.ContainsKey(Objkey(iPage, startId))|>not) then  conn.ErrorConnect(14, "",$"{(nodes.[Objkey(iPage, endId)]).Name}", iPage) 
-                            if(nodes.ContainsKey(Objkey(iPage, endId))|>not)   then  conn.ErrorConnect(14, $"{(nodes.[Objkey(iPage, startId)]).Name}", "", iPage) 
-                            if(startId = 0u) then  conn.ErrorConnect(15, "",$"{(nodes.[Objkey(iPage, endId)]).Name}", iPage) 
-                            if(endId = 0u) then    conn.ErrorConnect(16, $"{(nodes.[Objkey(iPage, startId)]).Name}", "", iPage) 
-                            edges.TryAdd(pptEdge(conn, Id, iPage ,startId, endId,  nodes)) |>ignore 
-                        ))
+             
                 
                 let dicFakeSub = ConcurrentHash<Presentation.GroupShape>()
                 allGroups |> Seq.iter (fun group -> SubGroup(group, dicFakeSub))
@@ -365,8 +354,6 @@ module PPTX =
                             else
                                 let errorChild = pptGroup.Children |> Seq.map(fun node -> node.Name) |> String.concat ", "
                                 Office.ErrorPPT(Group, 19, $"{errorChild}", pptGroup.PageNum) 
-                            
-                          
                 
                 groups
                 |> Seq.iter (fun (slide, groupSet) -> 
@@ -382,6 +369,23 @@ module PPTX =
                             then makeRealGroup (pptGroup(pages.[slide].PageNum, shapeIds.Values, nodes))
                     )
                 )
+
+                connections
+                |> Seq.iter (fun (slide, conns) -> 
+                    conns 
+                          |> Seq.iter (fun (conn, Id, startId, endId) ->
+                            let iPage = pages.[slide].PageNum
+                            let nodeName = 
+                                if(nodes.ContainsKey(Objkey(iPage, endId)))
+                                then nodes.[Objkey(iPage, endId)].Name else ""
+
+                            if(startId = 0u && endId = 0u) then  conn.ErrorConnect(4, "","", iPage)
+                            if(nodes.ContainsKey(Objkey(iPage, startId))|>not) then  conn.ErrorConnect(14, "",$"{nodeName}", iPage) 
+                            if(nodes.ContainsKey(Objkey(iPage, endId))|>not)   then  conn.ErrorConnect(14, $"{nodeName}", "", iPage) 
+                            if(startId = 0u) then  conn.ErrorConnect(15, "", $"{nodeName}", iPage) 
+                            if(endId = 0u) then    conn.ErrorConnect(16, $"{nodeName}", "", iPage) 
+                            edges.TryAdd(pptEdge(conn, Id, iPage ,startId, endId,  nodes)) |>ignore 
+                        ))
 
              
                 doc.Close()

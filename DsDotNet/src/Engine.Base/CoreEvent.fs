@@ -1,7 +1,6 @@
 // Copyright (c) Dual Inc.  All Rights Reserved.
 namespace Engine.Core
 
-open System.Runtime.CompilerServices
 open System
 open System.Reactive.Subjects
 
@@ -18,5 +17,5 @@ module CoreEvent =
     let ChangeStatus (seg:SegBase, status:Status4) = 
         async {
             SegSubject.OnNext(SegParam.SEG (DateTime.Now, seg, status))
-        } |> Async.StartImmediate
+        } |> Async.StartImmediate 
         

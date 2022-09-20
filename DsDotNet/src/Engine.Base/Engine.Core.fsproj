@@ -9,6 +9,7 @@
 
 	<ItemGroup>
 		<Compile Include="Text\DsText.fs" />
+		<Compile Include="Text\DsTextUtil.fs" />
 		<Compile Include="Text\DsTextProperty.fs" />
 		<Compile Include="Text\DsTextDataType.fs" />
 		<Compile Include="Text\DsTextExport.fs" />
@@ -17,11 +18,13 @@
 		<Compile Include="InterfaceClass.fs" />
 		<Compile Include="CoreUtil.fs" />
 		<Compile Include="CoreEvent.fs" />
+		<Compile Include="CoreFlow.fs" />
 		<Compile Include="CoreClass.fs" />
+		<Compile Include="CoreStruct.fs" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\Engine.Core\Engine.Util.csproj" />
+	  <PackageReference Include="System.Reactive" Version="5.0.0" />
 	</ItemGroup>
 	
 

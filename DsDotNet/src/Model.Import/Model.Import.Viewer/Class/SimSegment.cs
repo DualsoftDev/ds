@@ -10,27 +10,27 @@ namespace Dual.Model.Import
 {
     public static class SimSeg
     {
-        static readonly List<NodeCausal> mys = new List<NodeCausal>() { NodeCausal.MY };
-        static readonly List<NodeCausal> notMys = new List<NodeCausal>() { NodeCausal.EX, NodeCausal.TR, NodeCausal.TX, NodeCausal.RX };
+        static readonly List<NodeType> mys = new List<NodeType>() { NodeType.MY };
+        static readonly List<NodeType> notMys = new List<NodeType>() { NodeType.EX, NodeType.TR, NodeType.TX, NodeType.RX };
         static bool org = false;
-        static List<NodeCausal> AllSeg
+        static List<NodeType> AllSeg
         {
             get
             {
-                var obj = new List<NodeCausal>();
+                var obj = new List<NodeType>();
                 obj.AddRange(mys); obj.AddRange(notMys);
                 return obj;
             }
         }
 
 
-        private static async Task Test(IEnumerable<MSeg> rootSegs, Status4 status, List<NodeCausal> showList)
+        private static async Task Test(IEnumerable<MSeg> rootSegs, Status4 status, List<NodeType> showList)
         {
             foreach (var seg in rootSegs)
             {
                 await Task.Run(async () =>
                  {
-                     if (showList.Contains(seg.NodeCausal))
+                     if (showList.Contains(seg.NodeType))
                      {
                          seg.SetStatus(status);
                          await Task.Delay(1);
@@ -43,15 +43,15 @@ namespace Dual.Model.Import
         {
             if (model == null) return;
 
-            var rootSegs = model.ActiveSys.RootSegs();
-            var notRootSegs = model.ActiveSys.NotRootSegs();
+            var rootSegs = model.AllFlows.SelectMany(s => s.Nodes).Cast<MSeg>();
+
+         
             await Task.Run(async () =>
             {
                 await Test(rootSegs, Status4.Homing, AllSeg);
-                await Test(notRootSegs, Status4.Homing, AllSeg);
                 await Task.Delay(10);
 
-                await Test(notRootSegs, Status4.Ready, AllSeg);
+                await Test(rootSegs, Status4.Ready, AllSeg);
                 await Task.Delay(10);
                 await Test(rootSegs, Status4.Ready, notMys);
                 await Task.Delay(10);
@@ -99,12 +99,12 @@ namespace Dual.Model.Import
             if (model == null) return;
             if (!org) await TestORG(model);
 
-            var dicSeg = model.ActiveSys.RootSegs().ToDictionary(d => d);
-            var dicEdge = model.ActiveSys.RootEdges().ToDictionary(d => d);
+            var dicSeg = model.AllFlows.SelectMany(s=>s.Nodes).Cast<MSeg>().ToDictionary(d => d);
+            var dicEdge = model.AllFlows.SelectMany(s=>s.Edges).Cast<MEdge>().ToDictionary(d => d);
 
             await Task.Run(async () =>
             {
-                List<MEdge> edges = model.ActiveSys.RootEdges().ToList();
+                List<MEdge> edges = model.AllFlows.SelectMany(s => s.Edges).Cast<MEdge>().ToList();
                 var segs = edges.SelectMany(s => s.Nodes).ToList();
                 segs.AddRange(dicSeg.Values);
 

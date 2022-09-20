@@ -174,13 +174,13 @@ module PPTX =
         member x.PageNum = iPage
         member x.Shape = shape
         member x.DashOutline = dashOutline
-        member x.Safeties = safeties.select(fun safe -> Util.GetValidName(safe))
+        member x.Safeties = safeties.select(fun safe -> NameUtil.GetValidName(safe))
         member x.IsDummy = bDuumy
         member x.IsEmgBtn = bEmg
         member x.IsAutoBtn= bAuto
         member x.IsStartBtn = bStart
         member x.IsResetBtn = bReset
-        member val NodeCausal = 
+        member val NodeType = 
 
                             if(shape.CheckRectangle()) then if(dashOutline) then EX else  MY
                             else if(shape.CheckEllipse()) 
@@ -242,7 +242,7 @@ module PPTX =
             let parents = 
                 ids 
                 |> Seq.map (fun id -> nodes.[ Objkey(iPage, id) ])
-                |> Seq.filter (fun node -> node.NodeCausal = MY)
+                |> Seq.filter (fun node -> node.NodeType = MY)
             if(parents.Count() > 1) 
             then  Office.ErrorPPT(Group, 23, $"부모수:{parents.Count()}", iPage)
             let dummys = 
@@ -266,7 +266,7 @@ module PPTX =
             let children = 
                 ids 
                 |> Seq.map (fun id -> nodes.[Objkey(iPage, id) ])
-                |> Seq.filter (fun node ->node.NodeCausal = MY |> not)
+                |> Seq.filter (fun node ->node.NodeType = MY |> not)
                 |> Seq.filter (fun node ->(node.IsDummy|>not ||  parent.IsSome))
 
             if(children.Any() |> not) 
@@ -283,7 +283,7 @@ module PPTX =
                                sameNodes 
                                |> Seq.iter(fun node -> 
                                    cnt <- cnt+1
-                                   node.Alias <-Some(Util.GetValidName(sprintf "%s_Copy%d" node.Name cnt)))
+                                   node.Alias <-Some(NameUtil.GetValidName(sprintf "%s_Copy%d" node.Name cnt)))
                            )
 
             children |> Seq.iter(fun child -> childSet.TryAdd(child)|>ignore)

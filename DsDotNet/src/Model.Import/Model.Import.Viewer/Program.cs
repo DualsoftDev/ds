@@ -20,9 +20,9 @@ namespace Dual.Model.Import
             SimpleExceptionHandler.InstallExceptionHandler();
 
             DllVersionChecker.IsValidExDLL(Assembly.GetExecutingAssembly());
-            var logger = Log4NetHelper.PrepareLog4Net("ModelImport");
-            Log4NetWrapper.SetLogger(logger);
-            Global.Logger = logger;
+            //var logger = Log4NetHelper.PrepareLog4Net("ModelImport");
+            //Log4NetWrapper.SetLogger(logger);
+            //Global.Logger = logger;
 
             var form = new FormMain();
             Application.Run(form);

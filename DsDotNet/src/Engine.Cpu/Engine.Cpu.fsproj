@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
+		<TargetFramework>net48</TargetFramework>
+		<RootNamespace>Engine.Cpu</RootNamespace>
+		<LangVersion>6.0</LangVersion>
+	</PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Memory.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Engine.Base\Engine.Core.fsproj" />
+  </ItemGroup>
+</Project>

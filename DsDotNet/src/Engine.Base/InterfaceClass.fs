@@ -2,6 +2,7 @@
 namespace Engine.Core
 
 open System.Collections.Generic
+open System
 
 [<AutoOpen>]
 module InterfaceClass =
@@ -10,60 +11,61 @@ module InterfaceClass =
     type Named(name)  =
         interface INamed with
             member _.Name = name
-        member   x.ToText() = $"{name}[{x.GetType().Name}]"
+        member x.Name = (x:>INamed).Name
+        member x.ValidName = NameUtil.GetValidName(name)
+        member x.ToText() = $"{name}[{x.GetType().Name}]"
   
     /// 인과 연결가능 객체
     type VertexBase(name)  =
-        interface IVertex with
-            member _.Name = name
+        inherit Named(name)
+        interface IVertex with 
+            member _.ID  = Guid.NewGuid().ToString()
+        member x.ID  = (x:>IVertex).ID
+     
+    /// Segment Edge
+    [<AbstractClass>]
+    type EdgeBase(source:IVertex, target:IVertex , edgeCausal:EdgeCausal) =
+        interface IEdge with
+            member _.ToText() = $"{source} {edgeCausal.ToText()} {target}";
+            member _.Source   = source
+            member _.Target   = target
+            member _.Causal   = edgeCausal
+
+        member x.Nodes = [source;target]
+        member x.ToText() = (x:>IEdge).ToText()
+
 
     /// Segment Container
     [<AbstractClass>]
     type SysBase(name)  =
+        inherit Named(name)
+        let rootFlows = HashSet<IFlow>() 
         interface ISystem with
-            member _.Name = name
+            member _.Flows = rootFlows
+
+        member x.RootFlows = (x:>ISystem).Flows
        
     /// Real Segment
     [<AbstractClass>]
-    type SegBase(vertex:VertexBase, sysBase:SysBase) =
-        let children = HashSet<IVertex>() 
+    type SegBase(name:string, childFlow:IFlow) =
+        inherit VertexBase(name)
         interface IActive with
-            member _.Children : IVertex seq = children  
+            member _.Children  =  childFlow.Nodes
 
-        member x.Vertex = vertex
-        member x.SysBase = sysBase
-        member x.Children = children
+        member x.Children = (x :> IActive).Children
 
     /// Call Segment
     and
         [<AbstractClass>]
-        CallBase(call:VertexBase, parent:SegBase) =
+        CallBase(name:string, parent:SegBase) as this =
+        inherit VertexBase(name)
         let txs = HashSet<IVertex>() 
         let rxs = HashSet<IVertex>() 
         interface ICall with
-            member _.Node = call
+            member _.Node = this :> IVertex
             member _.TXs  = txs
             member _.RXs  = rxs
 
         member x.TXs = (x :>ICall).TXs
         member x.RXs = (x :>ICall).RXs
-   
-    /// Segment Edge
-    [<AbstractClass>]
-    type EdgeBase(source:IVertex, target:IVertex , edgeCausal:EdgeCausal) =
-        interface IEdge with
-            member _.Source = source
-            member _.Target = target
-            member _.Causal = edgeCausal
-
-        member x.ToText() = $"{source} {edgeCausal.ToText()} {target}";
-
-
-    /// Flow Edge
-    [<AbstractClass>]
-    type FlowBase() =
-        let edges = HashSet<IEdge>() 
-        interface IFlow with
-            member _.Edges: seq<IEdge> = edges
-              
-
+  

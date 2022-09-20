@@ -53,7 +53,8 @@ module UtilError =
         msgs.TryAdd(28,"Safety 이름이 시스템 내부에 존재하지 않습니다.") |>ignore
         msgs.TryAdd(29,"이름에 '.' or ';' 사용은 안됩니다.") |>ignore
         msgs.TryAdd(30,"버튼 타입은 출력값은 입력 불가입니다. [0, N] 수량을 사용하세요") |>ignore
-        msgs.TryAdd(31,"") |>ignore
+        msgs.TryAdd(31,"시스템 이름과 Flow이름이 같으면 안됩니다.") |>ignore
+        msgs.TryAdd(32,"") |>ignore
        
         msgs
         

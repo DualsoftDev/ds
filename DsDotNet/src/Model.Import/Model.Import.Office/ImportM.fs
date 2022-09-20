@@ -12,7 +12,7 @@ open System
 open Microsoft.FSharp.Collections
 open Engine.Common.FS
 open Engine.Core
-open Engine.Util
+open Engine.Core.Util
 
 [<AutoOpen>]
 module ImportM =
@@ -45,8 +45,8 @@ module ImportM =
             if(seg.Alias.IsSome) 
             then 
                 let name = 
-                    if(seg.NodeCausal.IsCall)
-                    then Util.GetValidName(seg.Name)
+                    if(seg.NodeType.IsCall)
+                    then seg.ValidName
                     else sprintf "EX.%s.EX" (seg.ToCallText())
 
                 let alias = seg.Alias.Value
@@ -87,7 +87,7 @@ module ImportM =
             
                 //모델만들기 및 시스템 등록
                 model.Add(mySys) |> ignore
-                model.SetActive(mySys)
+                //model.SetActive(mySys)
 
                 //page 타이틀 중복체크 
                 let dicSamePage = ConcurrentDictionary<string, pptPage>()
@@ -96,11 +96,11 @@ module ImportM =
                 
                 doc.Pages |> Seq.iter(fun page ->  Check.SamePage(page, dicSamePage))
                 doc.Pages |> Seq.iter(fun page ->  
-                                    let MFlowName = 
+                                    let mFlowName = 
                                         let title = doc.GetPage(page.PageNum).Title
                                         if(title = "") then sprintf "P%d" page.PageNum else title
               
-                                    dicMFlowName.TryAdd(page.PageNum, Util.GetValidName(MFlowName))|>ignore)
+                                    dicMFlowName.TryAdd(page.PageNum, mFlowName)|>ignore)
 
                 //segment 리스트 만들기
                 doc.Nodes 
@@ -114,10 +114,10 @@ module ImportM =
 
                     let btn = node.IsEmgBtn || node.IsStartBtn || node.IsAutoBtn || node.IsResetBtn 
                     let bound = if(btn) then ExBtn
-                                else if(node.NodeCausal= EX) then ExSeg
-                                else if(bMyMFlow) then ThisMFlow else OtherMFlow
+                                else if(node.NodeType= EX) then ExSeg
+                                else if(bMyMFlow) then ThisFlow else OtherFlow
 
-                    let seg = MSeg(realName, mySys, Editor.User, bound, node.NodeCausal, realMFlow, node.IsDummy)
+                    let seg = MSeg(realName, mySys,  bound, node.NodeType, realMFlow, node.IsDummy)
 
                     seg.Update(node.Key, node.Id.Value, node.Alias, node.CntTX, node.CntRX)
                     dicSeg.TryAdd(node.Key, seg) |> ignore
@@ -129,8 +129,11 @@ module ImportM =
                 |> Seq.filter(fun node -> node.IsDummy|>not)
                 |> Seq.iter(fun node -> 
                                 let name  = dicMFlowName.[node.PageNum]
-                                let MFlow  = MFlow(name, node.PageNum, mySys)
-                               
+                                if(mySys.Name = name) then Office.ErrorPPT(ErrorCase.Name, 31, $"시스템이름 : {mySys.Name}", node.PageNum, $"페이지이름 : {name}")
+                                let MFlow  = MFlow(name, node.PageNum)
+
+                                //Flow 중복 추가 해결 필요 test ahn
+                                mySys.RootFlows.Add(MFlow) |> ignore
                                 mySys.MFlows.TryAdd(node.PageNum, MFlow)|>ignore
                                 mySys.MFlows.[node.PageNum].AddSegNoEdge(dicSeg.[node.Key])
                                 )
@@ -231,8 +234,8 @@ module ImportM =
                 doc.Nodes 
                 |> Seq.filter(fun node -> node.PageNum = doc.VisibleLast().PageNum)
                 |> Seq.filter(fun node -> node.Name = ""|>not)
-                |> Seq.filter(fun node -> dicSeg.[node.Key].Bound = ThisMFlow)
-                |> Seq.filter(fun node -> node.NodeCausal = TX || node.NodeCausal = TR || node.NodeCausal = RX || node.NodeCausal = EX )
+                |> Seq.filter(fun node -> dicSeg.[node.Key].Bound = ThisFlow)
+                |> Seq.filter(fun node -> node.NodeType = TX || node.NodeType = TR || node.NodeType = RX || node.NodeType = EX )
                 |> Seq.iter(fun node -> mySys.LocationSet.TryAdd(dicSeg.[node.Key].FullName, node.Rectangle) |> ignore)
             
                 MSGInfo($"전체 장표   count [{doc.Pages.Count()}]")

@@ -70,8 +70,8 @@ namespace Dual.Model.Import
                     _dsText = ExportM.ToText(_model);
                     ExportTextModel(Color.Transparent, _dsText);
                     this.Do(() => xtraTabControl_My.TabPages.Clear());
-                    foreach (var sys in _model.TotalSystems.OrderBy(sys => sys.Name))
-                        CreateNewTabViewer(sys);
+                    foreach (var sys in _model.Systems.OrderBy(sys => sys.ValidName))
+                        CreateNewTabViewer((MSys)sys);
                     WriteDebugMsg(DateTime.Now, MSGLevel.Info, $"{PathPPT} 불러오기 성공!!");
                     this.Do(() =>
                     {
@@ -104,7 +104,7 @@ namespace Dual.Model.Import
             if (UtilFile.BusyCheck()) return;
             Busy = true;
             MSGInfo($"{PathXLS} 불러오는 중!!");
-            var sys = _model.ActiveSys;
+            var sys = _model.Systems.First() as MSys;
             ImportIOTable.ApplyExcel(path, sys);
             _dsText = ExportM.ToText(_model);
             ExportTextModel(Color.FromArgb(0, 150, 0), _dsText);
@@ -175,9 +175,9 @@ namespace Dual.Model.Import
 
             this.Size = new Size(1600, 1000);
 
-            demo.TotalSystems.OrderBy(sys => sys.Name).ToList()
+            demo.Systems.OrderBy(sys => sys.ValidName).ToList()
                   .ForEach(sys =>
-                      CreateNewTabViewer(sys, true)
+                      CreateNewTabViewer((MSys)sys, true)
                   );
         }
 

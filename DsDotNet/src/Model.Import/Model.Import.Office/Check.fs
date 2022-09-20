@@ -13,19 +13,19 @@ module Check =
 
         let GetDemoModel(sysName:string) = 
             let sys = MSys(sysName, true)
-            let MFlow = MFlow("P0",  Int32.MaxValue, sys)
-            sys.MFlows.TryAdd(MFlow.Page, MFlow) |> ignore
-            MFlow.AddEdge( MEdge(MSeg("START", sys, EX), MSeg("시작인과", sys, MY), EdgeCausal.SEdge))
-            MFlow.AddEdge( MEdge(MSeg("RESET", sys, EX), MSeg("복귀인과", sys, MY), EdgeCausal.REdge))
-            MFlow.AddEdge( MEdge(MSeg("START", sys, EX), MSeg("시작유지", sys, MY), EdgeCausal.SPush))
-            MFlow.AddEdge( MEdge(MSeg("RESET", sys, EX), MSeg("복귀유지", sys, MY), EdgeCausal.RPush))
-            MFlow.AddEdge( MEdge(MSeg("ETC"  , sys, EX), MSeg("상호행위간섭", sys, MY), EdgeCausal.Interlock))
-            MFlow.AddEdge( MEdge(MSeg("ETC"  , sys, EX), MSeg("시작후행리셋", sys, MY), EdgeCausal.SReset))
+            let mFlow = MFlow("P0",  Int32.MaxValue)
+            sys.MFlows.TryAdd(mFlow.Page, mFlow) |> ignore
+            mFlow.AddEdge( MEdge(MSeg("START", sys, EX), MSeg("시작인과", sys, MY), EdgeCausal.SEdge))
+            mFlow.AddEdge( MEdge(MSeg("RESET", sys, EX), MSeg("복귀인과", sys, MY), EdgeCausal.REdge))
+            mFlow.AddEdge( MEdge(MSeg("START", sys, EX), MSeg("시작유지", sys, MY), EdgeCausal.SPush))
+            mFlow.AddEdge( MEdge(MSeg("RESET", sys, EX), MSeg("복귀유지", sys, MY), EdgeCausal.RPush))
+            mFlow.AddEdge( MEdge(MSeg("ETC"  , sys, EX), MSeg("상호행위간섭", sys, MY), EdgeCausal.Interlock))
+            mFlow.AddEdge( MEdge(MSeg("ETC"  , sys, EX), MSeg("시작후행리셋", sys, MY), EdgeCausal.SReset))
 
             //모델만들기 및 시스템 등록
             let model = ImportModel("testModel");
             model.Add(sys) |> ignore
-            model.AddEdges(MFlow.Edges, sys.SysSeg)
+            model.AddEdges(mFlow.Edges, mFlow)
             model
 
         let SameParent(doc:pptDoc, edge:pptEdge) =
@@ -64,9 +64,9 @@ module Check =
             then dicSegCheckSame.TryAdd(seg.MFlowNSeg, seg)|> ignore
 
             let oldSeg = dicSegCheckSame.[seg.MFlowNSeg]
-            if((seg.NodeCausal = oldSeg.NodeCausal)|>not) 
+            if((seg.NodeType = oldSeg.NodeType)|>not) 
             then 
-                MSGError($"도형오류 :타입이 다른 같은이름이 존재합니다 \t[Page{node.PageNum}: {seg.MFlowNSeg}({seg.NodeCausal}) != ({oldSeg.NodeCausal}) ({node.Shape.ShapeName()})]")
+                MSGError($"도형오류 :타입이 다른 같은이름이 존재합니다 \t[Page{node.PageNum}: {seg.MFlowNSeg}({seg.NodeType}) != ({oldSeg.NodeType}) ({node.Shape.ShapeName()})]")
         
         let SameEdgeErr(parentNode:pptNode option, pptEdge:pptEdge, mEdge:MEdge, dicSameCheck:ConcurrentDictionary<string, MEdge>) = 
             let parentName = if(parentNode.IsSome) 

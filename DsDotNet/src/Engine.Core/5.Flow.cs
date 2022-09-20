@@ -1,5 +1,7 @@
 using Engine.Base;
 
+using System.Security.Policy;
+
 namespace Engine.Core;
 
 public abstract class Flow : Named, IWallet
@@ -46,6 +48,8 @@ public abstract class Flow : Named, IWallet
     {
         Cpu = cpu;
     }
+
+    public Dictionary<string, object> InstanceMap = new();
 }
 
 
@@ -71,6 +75,15 @@ public class RootFlow : Flow
     public IEnumerable<SegmentBase> RootSegments => ChildVertices.OfType<SegmentBase>();
 
     public override string ToText() => $"{QualifiedName}, #seg={RootSegments.Count()}, #chilren={ChildVertices.Count()}, #edges={Edges.Count()}";
+
+    // alias : ppt 도형으로 modeling 하면 문제가 되지 않으나, text grammar 로 서술할 경우, 
+    // 동일 이름의 call 등이 중복 사용되면, line 을 나누어서 기술할 때, unique 하게 결정할 수 없어서 도입.
+    // e.g Ap = { Ap1; Ap2;}
+    /// <summary> mnemonic -> target : "Ap1" -> "My.F.Ap", "My.F.Ap2" -> "My.F.Ap" </summary>
+    public Dictionary<string, string[]> AliasNameMaps = new();
+    /// <summary>target -> mnemonics : "My.F.Ap" -> ["Ap1"; "Ap2"] </summary>
+    public Dictionary<string[], string[]> BackwardAliasMaps = new(NameComponentsComparer.Instance);
+
 }
 
 public class ChildFlow : Flow
@@ -83,6 +96,13 @@ public class ChildFlow : Flow
     public IEnumerable<Child> Children => ChildVertices.OfType<Child>();
 }
 
+public class NameComponentsComparer : IEqualityComparer<string[]>
+{
+    public bool Equals(string[] x, string[] y) => x.Length == y.Length && x.SequenceEqual(y);
+
+    public int GetHashCode(string[] obj) => (int)obj.Average(ob => ob.GetHashCode());
+    public static NameComponentsComparer Instance { get; } = new NameComponentsComparer();
+}
 
 public static class FlowExtension
 {

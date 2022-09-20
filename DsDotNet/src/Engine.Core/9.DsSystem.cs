@@ -13,8 +13,8 @@ public class DsSystem : Named
         : base(name)
     {
         Model = model;
-        if (model.Systems.Exists(sys => sys.Name == name))
-            throw new Exception($"System name [{name}] duplicated.");
+        if (model.Systems.Any(sys => sys.Name == name))
+            throw new Exception($"Duplicated system name [{name}].");
 
         model.Systems.Add(this);
     }

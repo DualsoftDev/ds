@@ -20,7 +20,7 @@ namespace Engine
         Cm = {P.F.Vm ~ P.F.Sm}
         [safety] = {
             Main = {P.F.Sp; P.F.Sm}
-            Main2 = {P.F.Sp; P.F.Sm}
+            // Main2 = {P.F.Sp; P.F.Sm}
         }
     }
 }
@@ -39,7 +39,7 @@ namespace Engine
 [prop] = {
     [ safety ] = {
         L.F.Main = {P.F.Sp; P.F.Sm}
-        L.F.Main2 = {P.F.Sp; P.F.Sm}
+        //L.F.Main2 = {P.F.Sp; P.F.Sm}
     }
 }
 [cpus] AllCpus = {
@@ -60,10 +60,8 @@ namespace Engine
             Cp ||> Cm;
             Cp <|| Cm;
         }
-        [task] = {
-            Cp = {P.F.Vp ~ P.F.Sp}
-            Cm = {P.F.Vm ~ P.F.Sm}
-        }
+        Cp = {P.F.Vp ~ P.F.Sp}
+        Cm = {P.F.Vm ~ P.F.Sm}
     }
 }
 
@@ -250,6 +248,16 @@ namespace Engine
 }
 ";
 
+        public static string Dup = @"
+[sys] L = {
+    [flow] FF = {
+        A, ""F2.R2"" > C;
+        C |> ""F2.R2"";
+    }
+}
+";
+
+
         public static string Serialize = @"
 [sys] L = {
     [flow] F = {
@@ -430,7 +438,10 @@ namespace Engine
         public static string ExternalSegmentCall = @"
 [sys] MY = {
     [flow] FFF = {
-        EX.""FFF.EXT"".EX > R2;
+        Main = {
+            EX.""FFF.EXT"".EX > R2;
+        }
+        R2 = {_ ~ _}
     }
 }
 
@@ -445,7 +456,9 @@ namespace Engine
         A > B;
     }
     [flow] FFF = {
-        C > MyOtherFlow.A;
+        Main = {
+            MyOtherFlow.A > MyOtherFlow.B;
+        }
     }
 }
 ";

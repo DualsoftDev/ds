@@ -1,17 +1,8 @@
 namespace Engine.Parser;
 
+
 public class ParserHelper
 {
-    public Dictionary<(DsSystem, string), object> QpInstanceMap = new();
-
-    /// <summary> Alias, CallPrototype 에 대한 path </summary>
-    public Dictionary<(DsSystem, string), object> QpDefinitionMap = new();
-
-    // alias : ppt 도형으로 modeling 하면 문제가 되지 않으나, text grammar 로 서술할 경우, 
-    // 동일 이름의 call 등이 중복 사용되면, line 을 나누어서 기술할 때, unique 하게 결정할 수 없어서 도입.
-    public Dictionary<RootFlow, Dictionary<string, string>> AliasNameMaps = new();
-    public Dictionary<RootFlow, Dictionary<string, string[]>> BackwardAliasMaps = new();
-
     // button category 중복 check 용
     public HashSet<(DsSystem, string)> ButtonCategories = new();
 
@@ -27,6 +18,12 @@ public class ParserHelper
     {
         ParserOptions = options;
     }
+
+
+    internal string[] GetCurrentPathComponents(string lastName) =>
+        CurrentPathNameComponents.Append(lastName).ToArray();
+    internal string[] GetCurrentPath3Components(string lastName) =>
+        CurrentPathNameComponents.Take(2).Append(lastName).ToArray();
 
     internal string[] CurrentPathNameComponents
     {
@@ -48,9 +45,9 @@ public class ParserHelper
 
 
 
-    public T FindObject<T>(DsSystem system, string qualifiedName) where T : class => PickQualifiedPathObject<T>(system, qualifiedName);
+    public T FindObject<T>(string[] qualifiedName) where T : class => PickQualifiedPathObject<T>(qualifiedName);
 
-    public T[] FindObjects<T>(DsSystem system, string qualifiedNames) where T : class
+    public T[] FindObjects<T>(DsSystem system, RootFlow flow, string qualifiedNames) where T : class
     {
         if (qualifiedNames == "_")
             return Array.Empty<T>();
@@ -58,18 +55,17 @@ public class ParserHelper
         return
             qualifiedNames
                 .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(name => FindObject<T>(system, name))
+                .Select(name => FindObject<T>(name.Divide()))
                 .ToArray()
                 ;
     }
 
 
-    T PickQualifiedPathObject<T>(DsSystem system, string qualifiedName, Func<T> creator = null) where T : class
+    T PickQualifiedPathObject<T>(string[] qualifiedName, Func<T> creator = null) where T : class
     {
-        var key = (system, qualifiedName);
-        var dict = QpInstanceMap;
-        if (dict.ContainsKey(key))
-            return (T)dict[key];
+        T target = (T)Model.Find(qualifiedName);
+        if (target != null)
+            return target;
 
         if (creator == null)
         {
@@ -79,38 +75,38 @@ public class ParserHelper
         }
 
         var t = creator();
-        dict[key] = t;
+        Model.FindFlow(qualifiedName).InstanceMap[qualifiedName.Last()] = t;
 
         return t;
     }
 
 
-    public string ToFQDN(string name)
+    public string[] ToFQDN(string[] ns)
     {
-        string concat(params string[] names) =>
-            String.Join(".", names.Where(n => n != null))
-            ;
+        //string concat(params string[] names) =>
+        //    String.Join(".", names.Where(n => n != null))
+        //    ;
         var sysName = _system.Name;
-
-        var nameComponents = name.Split(new[] { '.' }).ToArray();
-        var middleName = _rootFlow.Name;
-        var mid = name.StartsWith($"{middleName}.") ? null : middleName;
+        var flowName = _rootFlow.Name;
+        var name = ns.Last();
+        var mid = name.StartsWith($"{flowName}.") ? null : flowName;
         var parentingName = _parenting?.Name;
         var par = name.StartsWith($"{parentingName}.") ? null : parentingName;
-        switch (nameComponents.Length)
+        switch (ns.Length)
         {
             case 1:
-                if (AliasNameMaps[_rootFlow].ContainsKey(name))
-                    return name;
-                return concat(sysName, middleName, parentingName, name);
-            case 2:
-                Assert(!name.StartsWith(sysName));
-                return concat(sysName, mid, par, name);
-            case 3:
-                return name;
-            default:
-                throw new Exception("ERROR");
+                if (_rootFlow.AliasNameMaps.ContainsKey(ns[0]))
+                    return ns;
+                break;
+            //case 2:
+            //    Assert(!name.StartsWith(sysName));
+            //    return concat(sysName, mid, par, name);
+            //case 3:
+            //    return name;
+            //default:
+            //    throw new Exception("ERROR");
         }
+        return GetCurrentPathComponents(name);
     }
 }
 

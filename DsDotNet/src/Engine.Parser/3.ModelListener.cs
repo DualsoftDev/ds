@@ -1,4 +1,10 @@
+using Antlr4.Runtime.Misc;
+
 using Engine.Common;
+using Engine.Core;
+
+using System.Collections.Generic;
+using System.Xml.Linq;
 
 namespace Engine.Parser;
 
@@ -10,12 +16,6 @@ class ModelListener : dsBaseListener
     DsSystem _system    { get => ParserHelper._system;    set => ParserHelper._system = value; }
     RootFlow _rootFlow  { get => ParserHelper._rootFlow;  set => ParserHelper._rootFlow = value; }
     SegmentBase  _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
-    /// <summary> Qualified Path Map </summary>
-    Dictionary<(DsSystem, string), object> QpInstanceMap => ParserHelper.QpInstanceMap;
-    Dictionary<(DsSystem, string), object> QpDefinitionMap => ParserHelper.QpDefinitionMap;
-
-    string[] CurrentPathNameComponents => ParserHelper.CurrentPathNameComponents;
-    string CurrentPath => ParserHelper.CurrentPath;
 
     public ModelListener(dsParser parser, ParserHelper helper)
     {
@@ -32,7 +32,7 @@ class ModelListener : dsBaseListener
 
     override public void EnterFlow(FlowContext ctx)
     {
-        var flowName = ctx.id().GetText();
+        var flowName = ctx.id().GetText().DeQuoteNameComponentOnDemand();
         _rootFlow = _system.RootFlows.First(f => f.Name == flowName);
     }
     override public void ExitFlow(FlowContext ctx) { _rootFlow = null; }
@@ -42,7 +42,7 @@ class ModelListener : dsBaseListener
     override public void EnterParenting(ParentingContext ctx)
     {
         var name = ctx.id().GetText();
-        _parenting = (SegmentBase)QpInstanceMap[(_system, $"{CurrentPath}.{name}")];
+        _parenting = (SegmentBase)_rootFlow.InstanceMap[name];
     }
     override public void ExitParenting(ParentingContext ctx) { _parenting = null; }
     #endregion Boiler-plates
@@ -51,84 +51,89 @@ class ModelListener : dsBaseListener
 
 
 
-
-
-
-
-    override public void EnterCausalPhrase(CausalPhraseContext ctx)
+    override public void EnterCausalToken(CausalTokenContext ctx)
     {
-        var nameComponentss =
-            enumerateChildren<SegmentContext>(ctx)
-            .Select(collectNameComponents)
-            .ToArray()
-            ;
+        var container = (Flow)_parenting ?? _rootFlow;
+        var instanceMap = container.InstanceMap;
+        var ns = collectNameComponents(ctx);
+        var fqdn = ns.Combine();
+        if (instanceMap.ContainsKey(fqdn))
+            return;
 
-        void createFromDefinition(object target, string n, string fqdn)
+        void createInstanceFromCallPrototype(CallPrototype cp, string callName, Dictionary<string, object> instanceMap)
         {
-            switch (target)
-            {
-                case CallPrototype cp:
-                    var call = new RootCall(n, _rootFlow, cp);
-                    QpInstanceMap.Add((_system, fqdn), call);
-                    break;
-                case SegmentBase exSeg:
-                    var exSegCall = new ExSegment(fqdn, exSeg);
-                    QpInstanceMap.Add((_system, fqdn), exSegCall);
-                    break;
-                default:
-                    throw new ParserException("ERROR: CallPrototype expected.", ctx);
-            }
+            object instance =
+                _parenting == null
+                ? new RootCall(callName, _rootFlow, cp)
+                : new Child(new SubCall(callName, _parenting, cp), _parenting)
+                ;
+            instanceMap.Add(callName, instance);
         }
 
-        if (_parenting == null)
+        switch (ns.Length)
         {
-            foreach (var ns in nameComponentss)
-            {
-                var name = ns.Combine();
-                switch (ns.Length)
+            case 1:
+                var last = fqdn;
+                if (_rootFlow.AliasNameMaps.ContainsKey(last))
                 {
-                    case 1:
-                        {
-                            var fqdn = $"{CurrentPath}.{name}";
-                            if (ParserHelper.AliasNameMaps[_rootFlow].ContainsKey(name))
-                            {
-                                var targetName = ParserHelper.AliasNameMaps[_rootFlow][name];
-                                var target = QpDefinitionMap[(_system, targetName)];
-                                createFromDefinition(target, name, fqdn);
-                            }
-                            else
-                            {
-                                if (!QpInstanceMap.ContainsKey((_system, fqdn)))
-                                {
-                                    var fullPrototypeName = ParserHelper.ToFQDN(name);
-                                    if (QpDefinitionMap.ContainsKey((_system, fullPrototypeName)))
-                                    {
-                                        var def = QpDefinitionMap[(_system, fullPrototypeName)];
-                                        createFromDefinition(def, name, fqdn);
-                                        continue;
-                                    }
-                                    var seg = SegmentBase.Create(name, _rootFlow);
-                                    QpInstanceMap.Add((_system, fqdn), seg);
-                                }
-                            }
-                        }
+                    var aliasTarget = _rootFlow.AliasNameMaps[last];
+                    var target = _model.Find(aliasTarget);
 
-                        break;
-                    case 3:     // 외부 real 호출
-                        {
-                            var fqdn = ns.Combine();
-                            Assert(_system.Name != ns[0]);
-                            var exSystem = _model.Systems.First(s => s.Name == ns[0]);
-                            var def = QpDefinitionMap[(exSystem, fqdn)];
-                            createFromDefinition(def, name, fqdn);
-                        }
-                        break;
+                    switch (target)
+                    {
+                        case CallPrototype cp:
+                            createInstanceFromCallPrototype(cp, last, instanceMap);
+                            break;
+                        default:
+                            throw new ParserException("ERROR: CallPrototype expected.", ctx);
+                    }
                 }
+                else
+                {
+                    var cp = _rootFlow.CallPrototypes.FirstOrDefault(cp => cp.Name == last);
+                    if (cp != null)
+                        createInstanceFromCallPrototype(cp, last, instanceMap);
+                    else if (_parenting == null)
+                    {
+                        // 내부 없는 단순 root segment.  e.g "Vp"
+                        // @sa EnterListing()
+                        var seg = SegmentBase.Create(last, _rootFlow);
+                        _rootFlow.InstanceMap.Add(last, seg);
+                    }
+                    else
+                        Assert(false);
 
-            }
+                }
+                break;
+            case 2:
+            case 3:
+                {
+                    if (ns.Length == 2)
+                        ns = ns.Prepend(_system.Name).ToArray();    // flow.seg => sys.flow.seg
+
+                    var target = _model.Find(ns);
+                    switch (target)
+                    {
+                        case null:
+                            throw new ParserException($"ERROR : failed to find [{ns.Combine()}]", ctx);
+
+                        case SegmentBase exSeg when _parenting != null:
+                            var exSegCall = new ExSegment(ns.Combine(), exSeg);
+                            var child = new Child(exSegCall, _parenting);
+                            instanceMap.Add(ns.Combine(), child);
+                            break;
+
+                        default:
+                            throw new ParserException("ERROR : unknown??.", ctx);
+                    }
+                }
+                break;
+            default:
+                throw new Exception("ERROR");
         }
-    }
 
+        Console.WriteLine();
+    }
 
 
     override public void EnterCausals(CausalsContext ctx)
@@ -165,7 +170,7 @@ class ModelListener : dsBaseListener
             var flows = (
                     from flowNameCtx in enumerateChildren<FlowNameContext>(bd)
                     let flowName = flowNameCtx.GetText()
-                    let flow = QpInstanceMap[(_system, $"{_system.Name}.{flowName}")] as RootFlow
+                    let flow = _system.RootFlows.First(rf => rf.Name == flowName)
                     select flow
                 ).ToArray();
 

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
@@ -31,7 +31,6 @@
 		<Compile Include="1.ModelExtension.fs" />
 		<Compile Include="ModelTest1.fs" />
 		<Compile Include="ModelTest2.fs" />
-		<Compile Include="Parse.Duplicated.Test.fs" />
 		<Compile Include="EdgeTest.fs" />
 		<Compile Include="Tag,Expression,Latch,Bits\Latch, Rising Test.fs" />
 		<Compile Include="Tag,Expression,Latch,Bits\PortTag Test.fs" />
@@ -39,6 +38,8 @@
 		<Compile Include="Common test/QueueTest.fs" />
 		<Compile Include="Repeat Test\Diamond.fs" />
 		<Compile Include="Parser\ParserTest.fs" />
+		<Compile Include="Parser\Parse.Duplicated.Test.fs" />
+		<Compile Include="Parser\Parse.OK.fs" />
 		<None Include="test.ipynb" />
 	</ItemGroup>
 	<ItemGroup>

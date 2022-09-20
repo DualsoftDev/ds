@@ -10,9 +10,6 @@ namespace Engine.Parser
         DsSystem _system { get => ParserHelper._system; set => ParserHelper._system = value; }
         RootFlow _rootFlow { get => ParserHelper._rootFlow; set => ParserHelper._rootFlow = value; }
         SegmentBase _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
-        /// <summary> Qualified Path Map </summary>
-        Dictionary<(DsSystem, string), object> QpInstanceMap => ParserHelper.QpInstanceMap;
-        Dictionary<(DsSystem, string), object> QpDefinitionMap => ParserHelper.QpDefinitionMap;
 
         string[] CurrentPathNameComponents => ParserHelper.CurrentPathNameComponents;
         string CurrentPath => ParserHelper.CurrentPath;
@@ -32,7 +29,7 @@ namespace Engine.Parser
 
         override public void EnterFlow(FlowContext ctx)
         {
-            var flowName = ctx.id().GetText();
+            var flowName = ctx.id().GetText().DeQuoteNameComponentOnDemand();
             _rootFlow = _system.RootFlows.First(f => f.Name == flowName);
         }
         override public void ExitFlow(FlowContext ctx) { _rootFlow = null; }
@@ -42,7 +39,7 @@ namespace Engine.Parser
         override public void EnterParenting(ParentingContext ctx)
         {
             var name = ctx.id().GetText();
-            _parenting = (SegmentBase)QpInstanceMap[(_system, $"{CurrentPath}.{name}")];
+            _parenting = (SegmentBase)_rootFlow.InstanceMap[name];
         }
         override public void ExitParenting(ParentingContext ctx) { _parenting = null; }
         #endregion Boiler-plates
@@ -52,7 +49,7 @@ namespace Engine.Parser
 
         /*
             [alias] = {
-                P.F.Vp = { Vp1; Vp2; Vp3; }
+                Ap = { Ap1; Ap2; Ap3; }
             }
          */
         override public void EnterAliasListing(AliasListingContext ctx)
@@ -70,19 +67,19 @@ namespace Engine.Parser
             var def = (
                 defs.Length switch
                 {
-                    1 => CurrentPathNameComponents.Append(defs[0]),
-                    2 when defs[0] != _system.Name => defs.Prepend(_system.Name),
+                    1 => ParserHelper.GetCurrentPathComponents(defs[0]),
+                    2 when defs[0] != _system.Name => defs.Prepend(_system.Name).ToArray(),
                     3 => defs,
                     _ => throw new Exception("ERROR"),
-                }).ToArray().Combine();
+                });
 
 
-            ParserHelper.BackwardAliasMaps[_rootFlow].Add(def, aliasMnemonics);
+            _rootFlow.BackwardAliasMaps.Add(def, aliasMnemonics);
         }
         override public void ExitAlias(AliasContext ctx)
         {
-            var bwd = ParserHelper.BackwardAliasMaps[_rootFlow];
-            Assert(ParserHelper.AliasNameMaps[_rootFlow].Count() == 0);
+            var bwd = _rootFlow.BackwardAliasMaps;
+            Assert(_rootFlow.AliasNameMaps.Count() == 0);
             Assert(bwd.Values.Count() == bwd.Values.Distinct().Count());
             var reversed =
                 from tpl in bwd
@@ -92,7 +89,7 @@ namespace Engine.Parser
                 ;
 
             foreach ((var mnemonic, var target) in reversed)
-                ParserHelper.AliasNameMaps[_rootFlow].Add(mnemonic, target);
+                _rootFlow.AliasNameMaps.Add(mnemonic, target);
         }
     }
 }

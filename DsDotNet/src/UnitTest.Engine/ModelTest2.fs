@@ -18,17 +18,15 @@ module ModelTest2 =
             logInfo "============== Parse Alias & Task"
             let mutable text = """
 [sys] L = {
-    [alias] = {
-        P.F.Vp = { Vp1; Vp2; Vp3; }
-        P.F.Vm = { Vm1; Vm2; Vm3; }
-        L.F.Cp = {Cp1; Cp2; Cp3;}
-        L.F.Cm = {Cm1; Cm2; Cm3;}
-    }
     [flow] F = {
         Main = { Cp2 |> Cm2; }
         Cm > Cp;
         Cp = {P.F.Vp ~ P.F.Sp}
         Cm = {P.F.Vm ~ P.F.Sm}
+        [alias] = {
+            Cp = {Cp1; Cp2; Cp3;}
+            Cm = {Cm1; Cm2; Cm3;}
+        }
     }
 }
 """

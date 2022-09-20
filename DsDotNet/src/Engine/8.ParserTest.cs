@@ -4,20 +4,24 @@ namespace Engine
 {
     internal static class ParserTest
     {
-        public static void TestParseSafety()
+        public static void Test(string text, string activeCpuName = null)
         {
-            var text = @"
+            var engine = new EngineBuilder(text, ParserOptions.Create4Simulation(activeCpuName)).Engine;
+            Program.Engine = engine;
+            engine.Run();
+        }
+
+
+        public static string Safety = @"
 [sys] L = {
     [flow] F = {
-        Main = { T.Cp > T.Cm; }
+        Main = { Cp > Cm; }
+        Cp = {P.F.Vp ~ P.F.Sp}
+        Cm = {P.F.Vm ~ P.F.Sm}
         [safety] = {
             Main = {P.F.Sp; P.F.Sm}
             Main2 = {P.F.Sp; P.F.Sm}
         }
-    }
-    [task] T = {
-        Cp = {P.F.Vp ~ P.F.Sp}
-        Cm = {P.F.Vm ~ P.F.Sm}
     }
 }
 
@@ -48,13 +52,7 @@ namespace Engine
 }
 
 ";
-            var engine = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu")).Engine;
-            Program.Engine = engine;
-            engine.Run();
-        }
-        public static void TestParseStrongCausal()
-        {
-            var text = @"
+        public static string StrongCausal = @"
 [sys] L = {
     [flow] F = {
         Main = {
@@ -90,14 +88,8 @@ namespace Engine
 }
 
 ";
-            var engine = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu")).Engine;
-            Program.Engine = engine;
-            engine.Run();
-        }
 
-        public static void TestParseButtons()
-        {
-            var text = @"
+        public static string Buttons = @"
 [sys] My = {
     [flow] F1 = { A > B; }
     [flow] F2 = { A > B; }
@@ -133,19 +125,9 @@ namespace Engine
         My.F5;
     }
 }
-
 ";
-            var engine = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu")).Engine;
-            Program.Engine = engine;
-            engine.Run();
-        }
 
-        public static void TestParsePpt()
-        {
-            var text = @"
-//////////////////////////////////////////////////////
-//DTS model auto generation from D:\DS\test\DS.pptx
-//////////////////////////////////////////////////////
+        public static string Ppt = @"
 [sys] MY = {
     [flow] F1 = {
         R1 > R2;
@@ -267,14 +249,8 @@ namespace Engine
     }
 }
 ";
-            var engine = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu")).Engine;
-            Program.Engine = engine;
-            engine.Run();
-        }
 
-        public static void TestSerialize()
-        {
-            var text = @"
+        public static string Serialize = @"
 [sys] L = {
     [flow] F = {
         Main = { Cp > Cm; }
@@ -311,18 +287,11 @@ namespace Engine
         P.F;
     }
 }
-
 ";
-            var engine = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu")).Engine;
-            Program.Engine = engine;
-            engine.Run();
-        }
 
-        public static void TestError()
-        {
-            var text = @"
+        public static string Error = @"
 [sys] MY = {
-    [flow] Rear = {     
+    [flow] Rear = {
         제품공급 = {
             Rear_Con_W > Rear_Pos_Sen;
             Rear_Cyl_Push_ADV > Rear_Cyl_Push_RET;
@@ -334,7 +303,7 @@ namespace Engine
         Rear_Con_W     = {EX.Rear_Rear_Con_W.TX    ~    _}
         Rear_Pos_Sen     = {_    ~    EX.Rear_Rear_Pos_Sen.RX}
     }
-    [flow] Work = {     
+    [flow] Work = {
         작업공정 = {
             Front_1Stopper_Adv <||> Front_1Stopper_RET;
             Front_1Stopper_Adv > Front_1pos_Sen;
@@ -354,7 +323,7 @@ namespace Engine
         Front_Usb_Cyl_ADV     = {EX.Work_Front_Usb_Cyl_ADV.TX    ~    EX.Work_Front_Usb_Cyl_ADV.RX}
         Front_1pos_Sen     = {_    ~    EX.Work_Front_1pos_Sen.RX}
     }
-    [flow] Model_Auto = {     
+    [flow] Model_Auto = {
         SSSS > Rear.제품공급;
         Work.작업공정 > Front.배출공정;
         Rear.제품공급 > Work.작업공정;
@@ -442,14 +411,8 @@ namespace Engine
 }
 
 ";
-            var engine = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu")).Engine;
-            Program.Engine = engine;
-            engine.Run();
-        }
 
-        public static void TestParseQualifiedName()
-        {
-            var text = @"
+        public static string QualifiedName = @"
 [sys] ""my.favorite.system!!"" = {
     [flow] "" my flow. "" = {
         R1 > R2;
@@ -457,22 +420,16 @@ namespace Engine
     }
 }
 [sys] EX = {
-    [flow] ""이상한. flow"" = {    
+    [flow] ""이상한. flow"" = {
         TX;
         RX;
     }
 }
 ";
-            var engine = new EngineBuilder(text, ParserOptions.Create4Simulation()).Engine;
-            Program.Engine = engine;
-            engine.Run();
-        }
 
-        public static void TestParseExternalSegmentCall()
-        {
-            var text = @"
+        public static string ExternalSegmentCall = @"
 [sys] MY = {
-    [flow] FFF = {     
+    [flow] FFF = {
         EX.""FFF.EXT"".EX > R2;
     }
 }
@@ -481,25 +438,44 @@ namespace Engine
     [flow] ""FFF.EXT"" = { EX; }
 }
 ";
-            var engine = new EngineBuilder(text, ParserOptions.Create4Simulation()).Engine;
-            Program.Engine = engine;
-            engine.Run();
-        }
 
-        public static void TestParseAliases()
-        {
-            var text = @"
+        public static string ExternalSegmentCallConfusing = @"
+[sys] MY = {
+    [flow] MyOtherFlow = {
+        A > B;
+    }
+    [flow] FFF = {
+        C > MyOtherFlow.A;
+    }
+}
+";
+        public static string ExternalSegmentCallConfusing2 = @"
+[sys] MY = {
+    [alias] = {
+        MyOtherFlow.A = { MyOtherFlow_A; }
+    }
+    [flow] MyOtherFlow = {
+        A > B;
+    }
+    [flow] FFF = {
+        C > MyOtherFlow_A;
+    }
+}
+";
+
+
+        public static string Aliases = @"
 [sys] my = {
     [alias] = {
         F.Ap = { Ap1; Ap2; Ap3; }
         my.F.Am = { Am1; Am2; Am3; }    // system name optional
-        A.F.Vp = {AVp1;}
+        //A.F.Vp = {AVp1;}  // invalid: 자신 시스템에 정의된 것만 alias
     }
     [flow] F = {
         Ap = {A.F.Vp ~ A.F.Sp}
         Am = {A.F.Vm ~ A.F.Sm}
         Main = {
-            AVp1 |> Am1;
+            // AVp1 |> Am1;
             // 정보로서의 Call 상호 리셋
             Ap1 <||> Am1;
             Ap1 > Am1, Ap2 > Am2;
@@ -508,10 +484,5 @@ namespace Engine
 }
 
 " + Tester.CreateCylinder("A");
-            var engine = new EngineBuilder(text, ParserOptions.Create4Simulation()).Engine;
-            Program.Engine = engine;
-            engine.Run();
-        }
-
     }
 }

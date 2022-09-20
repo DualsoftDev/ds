@@ -35,24 +35,34 @@ partial class ElementsListener
                 else
                 {
                     // count number of '.' from text
-                    var taskId = new[] { _system.Name, this.flowOfName };
+                    var flowIds = new[] { _system.Name, this.flowOfName };
                     if (_parenting != null)
-                        taskId = taskId.Append(_parenting.Name).ToArray();
+                        flowIds = flowIds.Append(_parenting.Name).ToArray();
 
                     var n = ns.Length;
 
+                    var nodeType = NodeType.segment;
                     var ids = n switch
                     {
-                        1 or 2 => taskId.Concat(ns).ToArray(),
+                        1 => flowIds.Concat(ns).ToArray(),
+                        2 => new Func<string[]>(() =>
+                        {
+                            if (_system.RootFlows.Any(rf => rf.Name == ns[0]))  // Sys.Flow + OtherFlow.Seg => Sys.OtherFlow.Seg
+                            {
+                                nodeType = NodeType.externalSegmentCall;
+                                return ns.Prepend(_system.Name).ToArray();
+                            }
+
+                            return flowIds.Concat(ns).ToArray();
+                        }).Invoke(),
                         3 => ns,
                         _ => throw new Exception("ERROR"),
                     };
 
-                    var nodeType = NodeType.segment;
                     if (n == 1 && ParserHelper.AliasNameMaps[_system].ContainsKey(text))
                         nodeType = NodeType.segmentAlias;
 
-                    var node = new Node(ids, label: text, parentIds: taskId, nodeType);
+                    var node = new Node(ids, label: text, parentIds: flowIds, nodeType);
                     cnfNodes.Add(node);
                 }
                 foreach (var n in cnfNodes)
@@ -204,6 +214,9 @@ partial class ElementsListener
     private void processCausal(CausalTokensDNFContext ll, CausalOperatorContext opr, CausalTokensDNFContext rr)
     {
         Trace.WriteLine($"{ll.GetText()} {opr.GetText()} {rr.GetText()}");
+
+        if (rr.GetText() == "MyOtherFlow.A")
+            Console.WriteLine();
 
         var ls = this.addNodes(ll);
         var rs = this.addNodes(rr);

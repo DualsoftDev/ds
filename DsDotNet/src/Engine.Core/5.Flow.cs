@@ -1,5 +1,7 @@
 using Engine.Base;
 
+using System.Security.Policy;
+
 namespace Engine.Core;
 
 public abstract class Flow : Named, IWallet
@@ -46,6 +48,8 @@ public abstract class Flow : Named, IWallet
     {
         Cpu = cpu;
     }
+
+    public Dictionary<string, object> InstanceMap = new();
 }
 
 

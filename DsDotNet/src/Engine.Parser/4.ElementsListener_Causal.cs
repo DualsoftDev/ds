@@ -173,31 +173,36 @@ partial class ElementsListener
 
 
 
-    IVertex[] FindVertices(string context, NodeBase nodebase)
+    IVertex[] FindVertices(SegmentBase parenting, NodeBase nodebase)
     {
-        IVertex helper(string spec)
+        IVertex helper(string[] spec)
         {
-            if (QpInstanceMap.ContainsKey((_system, $"{context}.{spec}")))
-                spec = $"{context}.{spec}";
-            if (!QpInstanceMap.ContainsKey((_system, spec)))
-            {
-                if (ParserHelper.AliasNameMaps[_rootFlow].ContainsKey(nodebase.label))
-                    spec = ParserHelper.AliasNameMaps[_rootFlow][nodebase.label];
-            }
+            var obj = _model.Find(spec);
+            if (obj is IVertex vtx)
+                return vtx;
+            return null;
 
-            var vertex = QpInstanceMap[(_system, spec)] as IVertex;
-            return vertex;
+            // todo: fix me
+            //if (QpInstanceMap.ContainsKey((_system, $"{context}.{spec}")))
+            //    spec = $"{context}.{spec}";
+            //if (!QpInstanceMap.ContainsKey((_system, spec)))
+            //{
+            //    if (ParserHelper.AliasNameMaps[_rootFlow].ContainsKey(nodebase.label))
+            //        spec = ParserHelper.AliasNameMaps[_rootFlow][nodebase.label];
+            //}
+
+            //var vertex = QpInstanceMap[(_system, spec)] as IVertex;
+            //return vertex;
         }
 
         switch (nodebase)
         {
             case Node node:
-                return new[] { helper(node.ids.Combine()) };
+                return new[] { helper(node.ids) };
 
             case NodeConjunction nodeConjunction:
                 return
                     nodeConjunction.idss
-                    .Select(ids => ids.Combine())
                     .Select(helper)
                     .ToArray();
         }
@@ -238,10 +243,8 @@ partial class ElementsListener
                     Flow flow = (Flow)_parenting ?? _rootFlow;   // target flow
                     Assert(flow.Cpu != null);
 
-                    var context = _parenting == null ? "" : CurrentPath;
-
-                    var lvs = FindVertices(context, l);
-                    var rvs = FindVertices(context, r);
+                    var lvs = FindVertices(_parenting, l);
+                    var rvs = FindVertices(_parenting, r);
 
                     Assert(l != null && r != null);   // 'node not found');
                     if (lvs.Length == 0) throw new ParserException($"Parse error: {l.label} not found", ll);

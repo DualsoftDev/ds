@@ -10,8 +10,6 @@ namespace Engine.Parser
         DsSystem _system { get => ParserHelper._system; set => ParserHelper._system = value; }
         RootFlow _rootFlow { get => ParserHelper._rootFlow; set => ParserHelper._rootFlow = value; }
         SegmentBase _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
-        /// <summary> Qualified Path Map </summary>
-        Dictionary<(DsSystem, string), object> QpInstanceMap => ParserHelper.QpInstanceMap;
         Dictionary<(DsSystem, string), object> QpDefinitionMap => ParserHelper.QpDefinitionMap;
 
         string[] CurrentPathNameComponents => ParserHelper.CurrentPathNameComponents;
@@ -42,7 +40,7 @@ namespace Engine.Parser
         override public void EnterParenting(ParentingContext ctx)
         {
             var name = ctx.id().GetText();
-            _parenting = (SegmentBase)QpInstanceMap[(_system, $"{CurrentPath}.{name}")];
+            _parenting = (SegmentBase)_rootFlow.InstanceMap[name];
         }
         override public void ExitParenting(ParentingContext ctx) { _parenting = null; }
         #endregion Boiler-plates

@@ -16,8 +16,6 @@ class SkeletonListener : dsBaseListener
     DsSystem _system { get => ParserHelper._system; set => ParserHelper._system = value; }
     RootFlow _rootFlow { get => ParserHelper._rootFlow; set => ParserHelper._rootFlow = value; }
     SegmentBase _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
-    /// <summary> Qualified Path Map </summary>
-    Dictionary<(DsSystem, string), object> QpInstanceMap => ParserHelper.QpInstanceMap;
     Dictionary<(DsSystem, string), object> QpDefinitionMap => ParserHelper.QpDefinitionMap;
 
     string[] CurrentPathNameComponents => ParserHelper.CurrentPathNameComponents;
@@ -90,17 +88,13 @@ class SkeletonListener : dsBaseListener
                 cpu.IsActive = true;    // 강제로 active cpu 할당
         }
 
-        _rootFlow = new RootFlow(cpu, flowName, _system);
-        ParserHelper.AliasNameMaps.Add(_rootFlow, new Dictionary<string, string>());
-        ParserHelper.BackwardAliasMaps.Add(_rootFlow, new Dictionary<string, string[]>());
-
-        cpu.RootFlows.Add(_rootFlow);
-        var key = (_system, CurrentPath);
-        if (QpInstanceMap.ContainsKey(key))
+        if (cpu.RootFlows.Any(f => f.Name == flowName))
             throw new Exception($"Duplicated flow name [{flowName}] on {_rootFlow.QualifiedName}.");
 
-        QpInstanceMap.Add(key, _rootFlow);
-        Trace.WriteLine($"Flow: {flowName}");
+        _rootFlow = new RootFlow(cpu, flowName, _system);
+        cpu.RootFlows.Add(_rootFlow);
+        ParserHelper.AliasNameMaps.Add(_rootFlow, new Dictionary<string, string>());
+        ParserHelper.BackwardAliasMaps.Add(_rootFlow, new Dictionary<string, string[]>());
     }
     override public void ExitFlow(FlowContext ctx) { _rootFlow = null; }
 
@@ -121,7 +115,7 @@ class SkeletonListener : dsBaseListener
 
         var call = new CallPrototype(name, _rootFlow);
         var key = (_system, $"{CurrentPath}.{name}");
-        if (QpDefinitionMap.ContainsKey(key) || QpInstanceMap.ContainsKey(key))
+        if (QpDefinitionMap.ContainsKey(key) || _rootFlow.InstanceMap.ContainsKey(name))
             throw new Exception($"Duplicated call definition [{CurrentPath}.{name}].");
 
         QpDefinitionMap.Add(key, call);
@@ -133,11 +127,11 @@ class SkeletonListener : dsBaseListener
         var name = ctx.id().GetText();
         var seg = SegmentBase.Create(name, _rootFlow);
         var key = (_system, $"{CurrentPath}.{name}");
-        if (QpDefinitionMap.ContainsKey(key) || QpInstanceMap.ContainsKey(key))
+        if (QpDefinitionMap.ContainsKey(key) || _rootFlow.InstanceMap.ContainsKey(name))
             throw new Exception($"Duplicated listing [{CurrentPath}.{name}].");
 
         QpDefinitionMap.Add(key, seg);
-        QpInstanceMap.Add(key, seg);
+        _rootFlow.InstanceMap.Add(name, seg);
     }
 
 
@@ -147,10 +141,9 @@ class SkeletonListener : dsBaseListener
         var name = ctx.id().GetText();
         _parenting = SegmentBase.Create(name, _rootFlow);
 
-        var key = (_system, CurrentPath);
-        if (QpInstanceMap.ContainsKey(key))
+        if (_rootFlow.InstanceMap.ContainsKey(name))
             throw new Exception($"Duplicated parenting name [{CurrentPath}] on {_rootFlow.QualifiedName}.");
-        QpInstanceMap.Add(key, _parenting);
+        _rootFlow.InstanceMap.Add(name, _parenting);
     }
     override public void ExitParenting(ParentingContext ctx) { _parenting = null; }
 

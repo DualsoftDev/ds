@@ -10,8 +10,6 @@ class ModelListener : dsBaseListener
     DsSystem _system    { get => ParserHelper._system;    set => ParserHelper._system = value; }
     RootFlow _rootFlow  { get => ParserHelper._rootFlow;  set => ParserHelper._rootFlow = value; }
     SegmentBase  _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
-    /// <summary> Qualified Path Map </summary>
-    Dictionary<(DsSystem, string), object> QpInstanceMap => ParserHelper.QpInstanceMap;
     Dictionary<(DsSystem, string), object> QpDefinitionMap => ParserHelper.QpDefinitionMap;
 
     string[] CurrentPathNameComponents => ParserHelper.CurrentPathNameComponents;
@@ -42,7 +40,7 @@ class ModelListener : dsBaseListener
     override public void EnterParenting(ParentingContext ctx)
     {
         var name = ctx.id().GetText();
-        _parenting = (SegmentBase)QpInstanceMap[(_system, $"{CurrentPath}.{name}")];
+        _parenting = (SegmentBase)_rootFlow.InstanceMap[name];
     }
     override public void ExitParenting(ParentingContext ctx) { _parenting = null; }
     #endregion Boiler-plates
@@ -69,11 +67,11 @@ class ModelListener : dsBaseListener
             {
                 case CallPrototype cp:
                     var call = new RootCall(n, _rootFlow, cp);
-                    QpInstanceMap.Add((_system, fqdn), call);
+                    _rootFlow.InstanceMap.Add(n, call);
                     break;
                 case SegmentBase exSeg:
                     var exSegCall = new ExSegment(fqdn, exSeg);
-                    QpInstanceMap.Add((_system, fqdn), exSegCall);
+                    _rootFlow.InstanceMap.Add(fqdn, exSegCall);
                     break;
                 default:
                     throw new ParserException("ERROR: CallPrototype expected.", ctx);
@@ -98,7 +96,7 @@ class ModelListener : dsBaseListener
                             }
                             else
                             {
-                                if (!QpInstanceMap.ContainsKey((_system, fqdn)))
+                                if (!_rootFlow.InstanceMap.ContainsKey(name))
                                 {
                                     var fullPrototypeName = ParserHelper.ToFQDN(name);
                                     if (QpDefinitionMap.ContainsKey((_system, fullPrototypeName)))
@@ -108,7 +106,7 @@ class ModelListener : dsBaseListener
                                         continue;
                                     }
                                     var seg = SegmentBase.Create(name, _rootFlow);
-                                    QpInstanceMap.Add((_system, fqdn), seg);
+                                    _rootFlow.InstanceMap.Add(name, seg);
                                 }
                             }
                         }
@@ -165,7 +163,7 @@ class ModelListener : dsBaseListener
             var flows = (
                     from flowNameCtx in enumerateChildren<FlowNameContext>(bd)
                     let flowName = flowNameCtx.GetText()
-                    let flow = QpInstanceMap[(_system, $"{_system.Name}.{flowName}")] as RootFlow
+                    let flow = _system.RootFlows.First(rf => rf.Name == flowName)
                     select flow
                 ).ToArray();
 

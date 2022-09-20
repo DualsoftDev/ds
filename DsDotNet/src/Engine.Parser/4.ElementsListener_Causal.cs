@@ -177,22 +177,13 @@ partial class ElementsListener
     {
         IVertex helper(string[] spec)
         {
+            if (parenting != null && parenting.InstanceMap.ContainsKey(spec.Combine()))
+                return parenting.InstanceMap[spec.Combine()] as IVertex;
+
             var obj = _model.Find(spec);
             if (obj is IVertex vtx)
                 return vtx;
             return null;
-
-            // todo: fix me
-            //if (QpInstanceMap.ContainsKey((_system, $"{context}.{spec}")))
-            //    spec = $"{context}.{spec}";
-            //if (!QpInstanceMap.ContainsKey((_system, spec)))
-            //{
-            //    if (ParserHelper.AliasNameMaps[_rootFlow].ContainsKey(nodebase.label))
-            //        spec = ParserHelper.AliasNameMaps[_rootFlow][nodebase.label];
-            //}
-
-            //var vertex = QpInstanceMap[(_system, spec)] as IVertex;
-            //return vertex;
         }
 
         switch (nodebase)
@@ -280,10 +271,8 @@ partial class ElementsListener
                             break;
                     }
                     flow.AddEdge(e);
-
                 }
             }
         }
     }
-
 }

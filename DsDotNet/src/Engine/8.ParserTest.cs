@@ -438,7 +438,10 @@ namespace Engine
         public static string ExternalSegmentCall = @"
 [sys] MY = {
     [flow] FFF = {
-        EX.""FFF.EXT"".EX > R2;
+        Main = {
+            EX.""FFF.EXT"".EX > R2;
+        }
+        R2 = {_ ~ _}
     }
 }
 
@@ -453,7 +456,9 @@ namespace Engine
         A > B;
     }
     [flow] FFF = {
-        C > MyOtherFlow.A;
+        Main = {
+            MyOtherFlow.A > MyOtherFlow.B;
+        }
     }
 }
 ";

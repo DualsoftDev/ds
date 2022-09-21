@@ -7,7 +7,7 @@ namespace Engine.Parser;
 
 /// <summary>
 /// System, Flow, Task, Cpu
-/// Parenting, Listing, CallPrototype, 구조까지 생성
+/// Parenting, Listing, CallPrototype, Aliasing 구조까지 생성
 /// </summary>
 class SkeletonListener : dsBaseListener
 {
@@ -141,7 +141,50 @@ class SkeletonListener : dsBaseListener
 
 
 
+    /*
+        [alias] = {
+            Ap = { Ap1; Ap2; Ap3; }
+        }
+     */
+    override public void EnterAliasListing(AliasListingContext ctx)
+    {
+        var defs = collectNameComponents(ctx.aliasDef()); // e.g "P.F.Vp" -> [| "P"; "F"; "Vp" |]
+        var aliasMnemonics =    // e.g { Vp1; Vp2; Vp3; }
+            enumerateChildren<AliasMnemonicContext>(ctx)
+            .Select(mne => collectNameComponents(mne))
+            .Do(ns => Assert(ns.Count() == 1))      // Vp1 등은 '.' 허용 안함
+            .Select(ns => ns[0])
+            .ToArray()
+            ;
+        Assert(aliasMnemonics.Length == aliasMnemonics.Distinct().Count());
 
+        var def = (
+            defs.Length switch
+            {
+                1 => ParserHelper.GetCurrentPathComponents(defs[0]),
+                2 when defs[0] != _system.Name => defs.Prepend(_system.Name).ToArray(),
+                3 => defs,
+                _ => throw new Exception("ERROR"),
+            });
+
+
+        _rootFlow.BackwardAliasMaps.Add(def, aliasMnemonics);
+    }
+    override public void ExitAlias(AliasContext ctx)
+    {
+        var bwd = _rootFlow.BackwardAliasMaps;
+        Assert(_rootFlow.AliasNameMaps.Count() == 0);
+        Assert(bwd.Values.Count() == bwd.Values.Distinct().Count());
+        var reversed =
+            from tpl in bwd
+            let k = tpl.Key
+            from v in tpl.Value
+            select (v, k)
+            ;
+
+        foreach ((var mnemonic, var target) in reversed)
+            _rootFlow.AliasNameMaps.Add(mnemonic, target);
+    }
 
 
     override public void EnterCpu(CpuContext ctx)

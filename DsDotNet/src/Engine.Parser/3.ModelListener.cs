@@ -95,10 +95,13 @@ class ModelListener : dsBaseListener
                         createInstanceFromCallPrototype(cp, last, instanceMap);
                     else if (_parenting == null)
                     {
-                        // 내부 없는 단순 root segment.  e.g "Vp"
-                        // @sa EnterListing()
-                        var seg = SegmentBase.Create(last, _rootFlow);
-                        _rootFlow.InstanceMap.Add(last, seg);
+                        if (!_rootFlow.InstanceMap.ContainsKey(last))
+                        {
+                            // 내부 없는 단순 root segment.  e.g "Vp"
+                            // @sa EnterListing()
+                            var seg = SegmentBase.Create(last, _rootFlow);
+                            _rootFlow.InstanceMap.Add(last, seg);
+                        }
                     }
                     else
                         Assert(false);

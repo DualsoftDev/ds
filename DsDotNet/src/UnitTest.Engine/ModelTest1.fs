@@ -149,15 +149,14 @@ module ModelTests1 =
         member __.``Parse Alias`` () =
             let mutable text = """
 [sys] L = {
-    [alias] = {
-        P.F.Vp = { Vp1; Vp2; Vp3; }
-        P.F.Vm = { Vm1; Vm2; Vm3; }
-        L.F.A = {A1; A2; A3;}
-    }
-
     [flow] F = {
         Main = { Vp1 > Vp2 > A1; }
         A = {P.F.Vp ~ P.F.Sp}
+        [alias] = {
+            P.F.Vp = { Vp1; Vp2; Vp3; }
+            P.F.Vm = { Vm1; Vm2; Vm3; }
+            A = {A1; A2; A3;}
+        }
     }
 }
 """

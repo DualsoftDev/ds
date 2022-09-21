@@ -107,8 +107,6 @@ class DsParser
     public static List<IParseTree> getAllParseTrees(dsParser parser)
     {
         ParserResult r = getParseResult(parser);
-        //return [].concat.apply([], [r.rules, r.terminals, r.errors]);
-
 
         return r.rules.Cast<IParseTree>()
             .Concat(r.terminals.Cast<IParseTree>())

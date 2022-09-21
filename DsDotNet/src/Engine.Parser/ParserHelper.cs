@@ -22,8 +22,6 @@ public class ParserHelper
 
     internal string[] GetCurrentPathComponents(string lastName) =>
         CurrentPathNameComponents.Append(lastName).ToArray();
-    internal string[] GetCurrentPath3Components(string lastName) =>
-        CurrentPathNameComponents.Take(2).Append(lastName).ToArray();
 
     internal string[] CurrentPathNameComponents
     {
@@ -45,69 +43,40 @@ public class ParserHelper
 
 
 
-    public T FindObject<T>(string[] qualifiedName) where T : class => PickQualifiedPathObject<T>(qualifiedName);
+    //public T FindObject<T>(string[] qualifiedName) where T : class => PickQualifiedPathObject<T>(qualifiedName);
 
-    public T[] FindObjects<T>(DsSystem system, RootFlow flow, string qualifiedNames) where T : class
-    {
-        if (qualifiedNames == "_")
-            return Array.Empty<T>();
+    //public T[] FindObjects<T>(DsSystem system, RootFlow flow, string qualifiedNames) where T : class
+    //{
+    //    if (qualifiedNames == "_")
+    //        return Array.Empty<T>();
 
-        return
-            qualifiedNames
-                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(name => FindObject<T>(name.Divide()))
-                .ToArray()
-                ;
-    }
-
-
-    T PickQualifiedPathObject<T>(string[] qualifiedName, Func<T> creator = null) where T : class
-    {
-        T target = (T)Model.Find(qualifiedName);
-        if (target != null)
-            return target;
-
-        if (creator == null)
-        {
-            if (ParserOptions.AllowSkipExternalSegment)
-                return null;
-            throw new Exception($"ERROR: failed to create {qualifiedName}");
-        }
-
-        var t = creator();
-        Model.FindFlow(qualifiedName).InstanceMap[qualifiedName.Last()] = t;
-
-        return t;
-    }
+    //    return
+    //        qualifiedNames
+    //            .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+    //            .Select(name => FindObject<T>(name.Divide()))
+    //            .ToArray()
+    //            ;
+    //}
 
 
-    public string[] ToFQDN(string[] ns)
-    {
-        //string concat(params string[] names) =>
-        //    String.Join(".", names.Where(n => n != null))
-        //    ;
-        var sysName = _system.Name;
-        var flowName = _rootFlow.Name;
-        var name = ns.Last();
-        var mid = name.StartsWith($"{flowName}.") ? null : flowName;
-        var parentingName = _parenting?.Name;
-        var par = name.StartsWith($"{parentingName}.") ? null : parentingName;
-        switch (ns.Length)
-        {
-            case 1:
-                if (_rootFlow.AliasNameMaps.ContainsKey(ns[0]))
-                    return ns;
-                break;
-            //case 2:
-            //    Assert(!name.StartsWith(sysName));
-            //    return concat(sysName, mid, par, name);
-            //case 3:
-            //    return name;
-            //default:
-            //    throw new Exception("ERROR");
-        }
-        return GetCurrentPathComponents(name);
-    }
+    //T PickQualifiedPathObject<T>(string[] qualifiedName, Func<T> creator = null) where T : class
+    //{
+    //    T target = (T)Model.Find(qualifiedName);
+    //    if (target != null)
+    //        return target;
+
+    //    if (creator == null)
+    //    {
+    //        if (ParserOptions.AllowSkipExternalSegment)
+    //            return null;
+    //        throw new Exception($"ERROR: failed to create {qualifiedName}");
+    //    }
+
+    //    var t = creator();
+    //    Model.FindFlow(qualifiedName).InstanceMap[qualifiedName.Last()] = t;
+
+    //    return t;
+    //}
 }
 
 

@@ -479,6 +479,12 @@ namespace Engine
     }
 }
 ";
+        public static string MyFlowReference = @"
+[sys] EX = {
+	[flow] F1_C3 = { TX > RX <| F1_C2.TX; }
+	[flow] F1_C2 = { TX > RX <| TX; }
+}
+";
 
 
         public static string Aliases = @"

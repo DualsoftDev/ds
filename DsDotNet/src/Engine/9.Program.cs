@@ -36,16 +36,17 @@ class Program
         //Tester.DoSampleTestTriangle();
         //Tester.DoSampleTestAddressesAndLayouts();
 
-        ParserTest.Test(ParserTest.Safety, "Cpu");
-        ParserTest.Test(ParserTest.StrongCausal, "Cpu");
-        ParserTest.Test(ParserTest.Buttons, "Cpu");
-        ParserTest.Test(ParserTest.Dup, "Cpu");
-        ParserTest.Test(ParserTest.Ppt, "Cpu");
-        ParserTest.Test(ParserTest.QualifiedName);
-        ParserTest.Test(ParserTest.Aliases);
-        ParserTest.Test(ParserTest.Serialize, "Cpu");
-        ParserTest.Test(ParserTest.ExternalSegmentCall);
-        ParserTest.Test(ParserTest.ExternalSegmentCallConfusing);
+        //ParserTest.Test(ParserTest.Safety, "Cpu");
+        //ParserTest.Test(ParserTest.StrongCausal, "Cpu");
+        //ParserTest.Test(ParserTest.Buttons, "Cpu");
+        //ParserTest.Test(ParserTest.Dup, "Cpu");
+        //ParserTest.Test(ParserTest.Ppt, "Cpu");
+        //ParserTest.Test(ParserTest.QualifiedName);
+        //ParserTest.Test(ParserTest.Aliases);
+        //ParserTest.Test(ParserTest.Serialize, "Cpu");
+        //ParserTest.Test(ParserTest.ExternalSegmentCall);
+        //ParserTest.Test(ParserTest.ExternalSegmentCallConfusing);
+        ParserTest.Test(ParserTest.MyFlowReference);
 
         //ParserTest.Test(ParserTest.Error, "Cpu");
 

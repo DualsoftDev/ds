@@ -1,9 +1,4 @@
-[sys] MY = {
-    [flow] FFF = {
-             EX.FFF_EXT.EX > R2;
-    }
-}
-
 [sys] EX = {
-    [flow] FFF_EXT = { EX; }
+	[flow] F1_C3 = { TX > RX <| F1_C2.TX; }
+	[flow] F1_C2 = { TX > RX <| TX; }
 }

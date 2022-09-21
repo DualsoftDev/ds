@@ -6,20 +6,7 @@ namespace Engine.Core
 [<AutoOpen>]
 module DsType =
 
-    ///인과의 노드 종류
-    type NodeType =
-        | MY            //실제 나의 시스템 1 bit
-        | EX            //실제 다른 시스템 1 bit
-        | TR            //지시관찰 TX RX 
-        | TX            //지시만
-        | RX            //관찰만
-        with
-            member x.IsReal =   match x with
-                                |MY |EX -> true
-                                |_ -> false
-            member x.IsCall =   match x with
-                                |TR |TX |RX -> true
-                                |_ -> false
+   
 
     ///인과의 엣지 종류
     type EdgeCausal =

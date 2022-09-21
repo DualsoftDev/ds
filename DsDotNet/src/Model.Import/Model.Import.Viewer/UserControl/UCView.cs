@@ -224,8 +224,8 @@ namespace Dual.Model.Import
                 {
                     if (segment.NodeType == NodeType.MY)
                         nNode.Attr.Shape = Shape.Box;
-                    if (segment.NodeType == NodeType.EX)
-                        nNode.Attr.Shape = Shape.Diamond;
+                    //if (segment.NodeType == NodeType.EX)
+                    //    nNode.Attr.Shape = Shape.Diamond;
                     if (segment.NodeType == NodeType.TR)
                         nNode.Attr.Shape = Shape.Ellipse;
                     if (segment.NodeType == NodeType.TX)

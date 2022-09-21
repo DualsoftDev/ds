@@ -63,19 +63,18 @@ module ImportIOTable =
             if($"{row.[2]}" = ""|>not) //name 존재시만
             then 
                 match TagToType($"{row.[0]}") with
-                |TagCase.Address  -> sys.AddressSet.TryAdd($"{row.[2]}", Tuple.Create($"{row.[5]}", $"{row.[6]}", $"{row.[7]}")) |>ignore
+                |TagCase.Address  -> sys.AddressSet.TryAdd($"{row.[2]}", Tuple.Create($"{row.[5]}", $"{row.[6]}")) |>ignore
                 |TagCase.Variable -> sys.VariableSet.TryAdd($"{row.[2]}", DsType.DataToType($"{row.[4]}")) |>ignore
                 |TagCase.Command -> sys.CommandSet.TryAdd($"{row.[2]}", $"{row.[5]}") |>ignore
-                |TagCase.Observe -> sys.ObserveSet.TryAdd($"{row.[2]}", $"{row.[7]}") |>ignore
-                |TagCase.Button  -> sys.AssignAddress($"{row.[1]}",$"{row.[2]}", $"{row.[7]}")|>ignore
+                |TagCase.Observe -> sys.ObserveSet.TryAdd($"{row.[2]}", $"{row.[6]}") |>ignore
+                |TagCase.Button  -> sys.AssignAddress($"{row.[1]}",$"{row.[2]}", $"{row.[6]}")|>ignore
             
         for flow in sys.RootMFlow()  do
             let mFlow = flow :?> MFlow
-            mFlow.CallNExRealSegs()
+            mFlow.CallSegs()
             |> Seq.iter(fun seg -> 
-                        let s, r, e = sys.AddressSet.[seg.Name]
+                        let s, e = sys.AddressSet.[seg.Name]
                         seg.S <- if(s = "") then None else Some(s) 
-                        seg.R <- if(r = "") then None else Some(r) 
                         seg.E <- if(e = "") then None else Some(e)    )
 
         DoWork(0);

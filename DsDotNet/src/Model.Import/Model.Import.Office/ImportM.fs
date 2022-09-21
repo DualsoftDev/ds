@@ -115,7 +115,6 @@ module ImportM =
 
                     let btn = node.IsEmgBtn || node.IsStartBtn || node.IsAutoBtn || node.IsResetBtn 
                     let bound = if(btn) then ExBtn
-                                else if(node.NodeType= EX) then ExSeg
                                 else if(bMyMFlow) then ThisFlow else OtherFlow
 
                     let seg = MSeg(realName, mySys,  bound, node.NodeType, realMFlow, node.IsDummy)
@@ -235,7 +234,7 @@ module ImportM =
                 |> Seq.filter(fun node -> node.PageNum = doc.VisibleLast().PageNum)
                 |> Seq.filter(fun node -> node.Name = ""|>not)
                 |> Seq.filter(fun node -> dicSeg.[node.Key].Bound = ThisFlow)
-                |> Seq.filter(fun node -> node.NodeType = TX || node.NodeType = TR || node.NodeType = RX || node.NodeType = EX )
+                |> Seq.filter(fun node -> node.NodeType = TX || node.NodeType = TR || node.NodeType = RX )
                 |> Seq.iter(fun node -> mySys.LocationSet.TryAdd(dicSeg.[node.Key].FullName, node.Rectangle) |> ignore)
             
                 MSGInfo($"전체 장표   count [{doc.Pages.Count()}]")

@@ -33,21 +33,16 @@ module ExportM =
 
         let addressText(seg:MSeg, index) =
             let callPath =  if(seg.Bound = ExBtn) then seg.SegName else seg.ToCallText()
-            if(seg.NodeType = EX)
-            then 
-                let ex = sprintf "EX.%s.EX" callPath
-                sprintf "%-40s \t= (%s,%s,%s)" ex seg.TextStart seg.TextReset seg.TextEnd
-            else
-                let causal, text = seg.PrintfTRX(index)
-                match causal with
-                |TR ->  let tx = sprintf "EX.%s.%s" callPath (text.Replace("TR", "TX"))
-                        let rx = sprintf "EX.%s.%s" callPath (text.Replace("TR", "RX"))
-                        sprintf "%-40s \t= (%s, , )\r\n\t%-40s \t= (, ,%s)"  tx seg.TextStart rx seg.TextEnd 
-                |TX ->  let tx = sprintf "EX.%s.%s" callPath text
-                        sprintf "%-40s \t= (%s, , )"  tx seg.TextStart
-                |RX ->  let rx = sprintf "EX.%s.%s" callPath text
-                        sprintf "%-40s \t= (, ,%s)"  rx seg.TextEnd
-                |_ -> failwithf "ERR";
+            let causal, text = seg.PrintfTRX(index)
+            match causal with
+            |TR ->  let tx = sprintf "EX.%s.%s" callPath (text.Replace("TR", "TX"))
+                    let rx = sprintf "EX.%s.%s" callPath (text.Replace("TR", "RX"))
+                    sprintf "%-40s \t= (%s, , )\r\n\t%-40s \t= (, ,%s)"  tx seg.TextStart rx seg.TextEnd 
+            |TX ->  let tx = sprintf "EX.%s.%s" callPath text
+                    sprintf "%-40s \t= (%s, , )"  tx seg.TextStart
+            |RX ->  let rx = sprintf "EX.%s.%s" callPath text
+                    sprintf "%-40s \t= (, ,%s)"  rx seg.TextEnd
+            |_ -> failwithf "ERR";
 
         let mergeEdges(edges:MEdge seq) =
             let tgtSegs = edges    |> Seq.map(fun edge -> edge, edge.Target) |> Seq.distinctBy(fun (edge, tgtSeg) -> edge.Causal.ToText()+tgtSeg.Key)
@@ -127,7 +122,7 @@ module ExportM =
                         yield sprintf "\t[%s] %s = { \t" TextFlow flow.ValidName
                         
                         yield! edgeText    (flow.Edges)
-                        yield! segmentText (flow.UsedSegs)
+                        yield! segmentText (flow.UsedMSegs)
                         //Task 출력
                         for callSeg in flow.CallSegs() do
                             yield callText(callSeg)
@@ -192,7 +187,7 @@ module ExportM =
                     //ex CPU
                     yield sprintf "\t[%s] Cpu_EX = {" TextCpu
                     for flow in flows do  
-                        for callSeg in flow.CallNExRealSegs() do
+                        for callSeg in flow.CallSegs() do
                             yield sprintf "\t\tEX.%s;" (callSeg.ToCallText())
                     yield "\t}"
                 yield "}"
@@ -205,7 +200,7 @@ module ExportM =
                     let sys = sys :?> MSys
                     let flows = sys.RootFlows() |> Seq.cast<MFlow>
                     for flow in flows do
-                        for callSeg in flow.CallNExRealSegs() do
+                        for callSeg in flow.CallSegs() do
                             for index in [|1..callSeg.MaxCnt|] do
                             yield sprintf "\t%s" (addressText(callSeg, index))
                     for exSeg in sys.BtnSegs() do
@@ -268,9 +263,9 @@ module ExportM =
                         let noInterLocks =flow.CallWithoutInterLock()
                         for call in noInterLocks do
                             yield sprintf "\t[%s] %s = { TX > RX; }" TextFlow (call.ToCallText()) 
-                        //Ex 출력
-                        for exSeg in flow.ExRealSegs() do
-                            yield sprintf "\t[%s] %s = { EX; }"  TextFlow (exSeg.ToCallText()) 
+                        ////Ex 출력
+                        //for exSeg in flow.ExRealSegs() do
+                        //    yield sprintf "\t[%s] %s = { EX; }"  TextFlow (exSeg.ToCallText()) 
                     //Ex 버튼 출력
                     for exSeg in sys.BtnSegs() do
                         yield sprintf "\t[%s] %s = { %s; }"  TextFlow exSeg.SegName  (getTRXs ([exSeg], TX ,false)|> String.concat "; ")

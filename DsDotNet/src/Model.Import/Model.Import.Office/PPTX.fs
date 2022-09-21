@@ -182,7 +182,7 @@ module PPTX =
         member x.IsResetBtn = bReset
         member val NodeType = 
 
-                            if(shape.CheckRectangle()) then if(dashOutline) then EX else  MY
+                            if(shape.CheckRectangle()) then  MY
                             else if(shape.CheckEllipse()) 
                             then 
                                 if((txCnt = 0 && rxCnt = 0) || txCnt < 0 || rxCnt < 0)

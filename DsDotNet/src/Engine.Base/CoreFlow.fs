@@ -46,8 +46,8 @@ module CoreFlow =
     [<DebuggerDisplay("{name}")>]
     type RootFlow(name)  =
         inherit Flow(name)
-        member x.RootSegments = x.Nodes
-        member x.UsedSegments = x.Nodes 
+        member x.RootSegs = x.Nodes
+        member x.UsedSegs = x.Nodes 
                                 |> Seq.cast<IActive> 
                                 |> Seq.collect(fun parent ->parent.Children)
                                 |> Seq.append x.Nodes

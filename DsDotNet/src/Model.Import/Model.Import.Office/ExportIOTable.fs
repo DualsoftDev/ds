@@ -17,24 +17,22 @@ module ExportIOTable =
     let ToTable(model:ImportModel) =
 
         let dt = new System.Data.DataTable($"{model.Name}")
-        dt.Columns.Add("Case", typeof<obj>) |>ignore
+        dt.Columns.Add("Case", typeof<string>) |>ignore
         dt.Columns.Add("MFlow", typeof<string>) |>ignore
         dt.Columns.Add("Name", typeof<string>) |>ignore
         dt.Columns.Add("Type", typeof<string>) |>ignore
         dt.Columns.Add("Size", typeof<string>) |>ignore
-        dt.Columns.Add("S(Output)", typeof<string>) |>ignore
-        dt.Columns.Add("R(Output)", typeof<string>) |>ignore
-        dt.Columns.Add("E(Input)" , typeof<string>) |>ignore
+        dt.Columns.Add("Output", typeof<string>) |>ignore
+        dt.Columns.Add("Input" , typeof<string>) |>ignore
 
 
         let rowItems(causal:NodeType, seg:MSeg, trx:string) =
             let MFlowName, name =  seg.OwnerMFlow, seg.Name
             match causal with
-            |TR ->  ["주소"; MFlowName; name; trx; "bit"; seg.TextStart; "'-"          ; seg.TextEnd]
-            |TX  -> ["주소"; MFlowName; name; trx; "bit"; seg.TextStart; "'-"          ; "'-"]
-            |RX  -> ["주소"; MFlowName; name; trx; "bit"; "'-"         ; "'-"          ; seg.TextEnd]
-            |EX  -> ["주소"; MFlowName; name; trx; "bit"; seg.TextStart; seg.TextReset ; seg.TextEnd]
-            |_ -> failwithf "ERR";
+            |TR ->  ["주소"; MFlowName; name; trx; "bit"; seg.TextStart  ; seg.TextEnd]
+            |TX  -> ["주소"; MFlowName; name; trx; "bit"; seg.TextStart  ; "'-"]
+            |RX  -> ["주소"; MFlowName; name; trx; "bit"; "'-"           ; seg.TextEnd]
+            |MY -> failwithf "ERR";
 
         let rows =
             seq {
@@ -47,9 +45,9 @@ module ExportIOTable =
                             for index in [|1..callSeg.MaxCnt|] do
                                 let causal, trx = callSeg.PrintfTRX(index, true)
                                 yield rowItems(causal, callSeg, trx)
-                        //Ex Task 출력
-                        for callSeg in flow.ExRealSegs() do
-                            yield rowItems(EX, callSeg, "EX")
+                        ////Ex Task 출력
+                        //for callSeg in flow.ExRealSegs() do
+                        //    yield rowItems(EX, callSeg, "EX")
             }
         rows
         |> Seq.iter(fun row -> 
@@ -57,20 +55,20 @@ module ExportIOTable =
                     rowTemp.ItemArray <- (row|> Seq.cast<obj>|> Seq.toArray)
                     dt.Rows.Add(rowTemp) |> ignore)
 
-        dt.Rows.Add("내부", "변수", ""  , "'-", ""  , "'-", "'-", "'-") |> ignore
-        dt.Rows.Add("지시", "함수", ""  , "'-", "'-", ""  , "'-", "'-") |> ignore
-        dt.Rows.Add("관찰", "함수", ""  , "'-", "'-", "'-", "'-", ""  ) |> ignore
+        dt.Rows.Add("내부", "변수", ""  , "'-", ""  , "'-", "'-") |> ignore
+        dt.Rows.Add("지시", "함수", ""  , "'-", "'-", ""  , "'-") |> ignore
+        dt.Rows.Add("관찰", "함수", ""  , "'-", "'-", "'-", ""  ) |> ignore
 
         for sys in  model.Systems do
             let sys = sys :?> MSys
             for btn in  sys.EmgSet do
-                dt.Rows.Add("버튼", "비상", btn.Key  , "'-", "'-", "'-", "'-", ""  ) |> ignore
+                dt.Rows.Add("버튼", "비상", btn.Key  , "'-", "'-", "'-",  ""  ) |> ignore
             for btn in  sys.AutoSet do
-                dt.Rows.Add("버튼", "자동", btn.Key  , "'-", "'-", "'-", "'-", ""  ) |> ignore
+                dt.Rows.Add("버튼", "자동", btn.Key  , "'-", "'-", "'-",  ""  ) |> ignore
             for btn in  sys.StartSet do
-                dt.Rows.Add("버튼", "시작", btn.Key  , "'-", "'-", "'-", "'-", ""  ) |> ignore
+                dt.Rows.Add("버튼", "시작", btn.Key  , "'-", "'-", "'-",  ""  ) |> ignore
             for btn in  sys.ResetSet do
-                dt.Rows.Add("버튼", "리셋", btn.Key  , "'-", "'-", "'-", "'-", ""  ) |> ignore
+                dt.Rows.Add("버튼", "리셋", btn.Key  , "'-", "'-", "'-",  ""  ) |> ignore
         dt
 
  

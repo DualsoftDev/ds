@@ -216,7 +216,7 @@ namespace Dual.Model.Import
         {
             foreach (KeyValuePair<MFlow, TabPage> view in DicUI)
             {
-                foreach (var seg in view.Key.UsedSegs)
+                foreach (var seg in view.Key.UsedMSegs)
                 {
                     ((UCView)view.Value.Tag).Update(seg);
                 }

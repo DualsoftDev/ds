@@ -12,12 +12,24 @@ open Engine.Core
 [<AutoOpen>]
 module Object =
 
+ ///인과의 노드 종류
+    type NodeType =
+        | MY            //실제 나의 시스템 1 bit
+        | TR            //지시관찰 TX RX 
+        | TX            //지시만
+        | RX            //관찰만
+        with
+            member x.IsReal =   match x with
+                                |MY  -> true
+                                |_ -> false
+            member x.IsCall =   match x with
+                                |TR |TX |RX -> true
+                                |_ -> false
     // 행위 Bound 정의
     type Bound =
-        | ThisFlow         //나의 System 의 이 MFlow        내부 행위정의
-        | OtherFlow        //나의 System 의 다른 MFlow     에서 행위 가져옴
-        | ExSeg            //외부 System 의 에서 행위(real) 가져옴
-        | ExBtn            //외부 System 의 에서 버튼(call) 가져옴
+        | ThisFlow         //이   MFlow        내부 행위정의
+        | OtherFlow        //다른 MFlow     에서 행위 가져옴
+        | ExBtn            //버튼(call) 가져옴
 
     and
         /// 사용자가 모델링을 통해서 만든 segment (SegEditor = User)
@@ -49,11 +61,8 @@ module Object =
             member x.ToCallText() = let call = sprintf "%s_%s"  (ownerMFlow.TrimStart('\"').TrimEnd('\"')) name
                                     NameUtil.GetValidName(call)
 
-            member x.ToTextInMFlow() =  match nodeType with
-                                         |EX -> if(this.Alias.IsSome) 
-                                                then this.Alias.Value 
-                                                else sprintf "EX.%s.EX" (x.ToCallText())
-                                         |_  -> if(Bound.ThisFlow = bound) 
+            member x.ToTextInMFlow() = 
+                                         if(Bound.ThisFlow = bound) 
                                                 then x.SegName
                                                 else x.MFlowNSeg
 
@@ -236,19 +245,19 @@ module Object =
                 //|> Seq.append rootUsedSegs
                 //|> Seq.distinctBy(fun seg -> seg.PathName)
                     
-            member x.UsedSegs   = x.UsedSegments   |> Seq.cast<MSeg>
-            member x.CallSegs() = x.UsedSegs
+            member x.UsedMSegs   = x.UsedSegs   |> Seq.cast<MSeg>
+            member x.CallSegs() = x.UsedMSegs
                                         |> Seq.filter(fun seg -> seg.NodeType.IsCall)
                                         |> Seq.filter(fun seg -> seg.Bound = ThisFlow)
                                         |> Seq.distinctBy(fun seg -> seg.FullName)
 
-            member x.ExRealSegs() = x.UsedSegs
-                                        |> Seq.filter(fun seg -> seg.NodeType.IsReal)
-                                        |> Seq.filter(fun seg -> seg.Bound = ExSeg)
-                                        |> Seq.distinctBy(fun seg -> seg.FullName)
+            //member x.ExRealSegs() = x.UsedSegs
+            //                            |> Seq.filter(fun seg -> seg.NodeType.IsReal)
+            //                            |> Seq.filter(fun seg -> seg.Bound = ExSeg)
+            //                            |> Seq.distinctBy(fun seg -> seg.FullName)
 
 
-            member x.CallNExRealSegs() =  x.CallSegs() |> Seq.append (x.ExRealSegs())
+            //member x.CallNExRealSegs() =  x.CallSegs() |> Seq.append (x.ExRealSegs())
             member x.CallWithoutInterLock()  = 
                 let dicInterLockName =  
                     x.Interlockedges 
@@ -268,7 +277,7 @@ module Object =
             let commandSet  = ConcurrentDictionary<string, string>()
             let observeSet  = ConcurrentDictionary<string, string>()
             let variableSet  = ConcurrentDictionary<string, DataType>()
-            let addressSet  = ConcurrentDictionary<string, Tuple<string, string, string>>()
+            let addressSet  = ConcurrentDictionary<string, Tuple<string, string>>()
             //let noEdgesSegs = mFlows |> Seq.collect(fun f-> f.Value.NoEdgeSegs)
             let emgSet  = ConcurrentDictionary<string, List<MFlow>>()
             let startSet  = ConcurrentDictionary<string, List<MFlow>>()

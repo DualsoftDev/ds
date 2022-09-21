@@ -36,21 +36,16 @@ module Object =
         [<DebuggerDisplay("{FullName}")>]
         MSeg(name:string, baseSystem:MSys, bound:Bound, nodeType:NodeType, ownerMFlow:string, bDummy:bool) as this =
             inherit Segment(name, ChildFlow(name), RootFlow(ownerMFlow))
-            let mEdges = (this :> Segment).ChildFlow.Edges
             let mChildFlow = (this :> Segment).ChildFlow
+            let mEdges = mChildFlow.Edges |> Seq.cast<MEdge>
+            let mChildSegs   = mChildFlow.Nodes |> Seq.cast<MSeg>
 
             new (name, baseSystem, nodeType) = MSeg (name, baseSystem,  ThisFlow, nodeType, "", false)
        
+            member x.ChildFlow = mChildFlow 
             member x.NodeType = nodeType 
             member x.BaseSys = baseSystem
             member x.Bound = bound
-            member x.RemoveMEdge(edge:MEdge) =  mChildFlow.RemoveEdge(edge) |> ignore
-            member x.AddMEdge(edge:MEdge) =
-                    mChildFlow.AddEdge(edge) |> ignore
-                    let src = edge.Source
-                    let tgt = edge.Target
-                    if(this = src) then failwith $"parent [{this.SegName}] = SourceVertex [{src.SegName}]"
-                    if(this = tgt) then failwith $"parent [{this.SegName}] = TargetVertex [{tgt.SegName}]"
 
             member val Alias :string  option = None with get, set
             member val ShapeID = 0u with get, set
@@ -96,46 +91,26 @@ module Object =
                 else  RX, if(this.CountRX = 1) then nameRX else sprintf "%s%d" nameRX curr
   
             member x.MEdges = mEdges |> Seq.sortBy(fun edge ->edge.ToText()) |> Seq.cast<MEdge>
-            member x.ChildSegs =
-                mChildFlow.Nodes
-                |> Seq.cast<MSeg>
-                |> Seq.distinct
-
-            //재귀적으로 자식 Seg를 가져옴 (다른시스템은 Root까지)
+            member x.ChildSegs = mChildSegs
+            //재귀적으로 자식 Seg를 가져옴
             member x.ChildSegsSubAll =
-                   x.ChildSegs
+                   mChildSegs
                    |> Seq.collect(fun e -> e.ChildSegsSubAll)
                    |> Seq.append x.ChildSegs
-                   |> Seq.append x.NoEdgeSegs
-        
+
+            member x.NoEdgeSegs      = mChildFlow.Singles  |> Seq.cast<MSeg> |> Seq.sortBy(fun seg -> seg.Name)
             member x.IsDummy = bDummy
-            member x.IsChildExist = x.ChildSegsSubAll.Any()
+            member x.IsChildExist = mChildFlow.Nodes.Any()
             member x.IsChildEmpty = x.IsChildExist|>not
             member x.IsRoot =  x.Parent.IsSome && x.Parent.Value.Bound = ThisFlow
             member x.UIKey:string =  $"{x.Name};{x.Key}"
             member val Key : string = "" with get, set
             member val Parent : MSeg option = None with get, set
             member val S : string option = None    with get, set
-            member val R : string option = None    with get, set
             member val E : string option = None    with get, set
 
-            member x.NoEdgeBaseSegs      = mChildFlow.Singles  |> Seq.cast<MSeg> |> Seq.sortBy(fun seg -> seg.Name)
-            member x.AddSegNoEdge(seg)   = mChildFlow.AddSingleNode(seg)         |> ignore
-            member x.RemoveSegNoEdge(seg)= mChildFlow.RemoveSingleNode(seg)      |> ignore
-
-            member x.TextStart = if(x.S.IsSome) then x.S.Value else ""
-            member x.TextReset = if(x.R.IsSome) then x.R.Value else ""
-            member x.TextEnd   = if(x.E.IsSome) then x.E.Value else ""
-
-            member x.AddChildNSetParent(edge:MEdge) =  
-                edge.Source.Parent <- Some(x)  
-                edge.Target.Parent <- Some(x)  
-           
-                x.AddMEdge(edge)
-
-            member x.NoEdgeSegs = x.NoEdgeBaseSegs |> Seq.cast<MSeg> |> Seq.sortBy(fun s -> s.SegName)
-
-     
+            member x.TagStart = if(x.S.IsSome) then x.S.Value else ""
+            member x.TagEnd   = if(x.E.IsSome) then x.E.Value else ""
 
     and
         /// Modeled Edge : 사용자가 작성한 모델 상의 segment 간의 연결 edge (Wire)
@@ -166,16 +141,18 @@ module Object =
     and
         /// MFlow : 페이지별 구성
         [<DebuggerDisplay("{Name}")>]
-        MFlow(name:string, index:int)  =
+        MFlow(name:string, index:int) as this  =
             inherit RootFlow(name)
+            let mRootFlow = (this :> RootFlow)
+            let mEdges       = mRootFlow.Edges |> Seq.cast<MEdge>
+            let mChildSegs   = mRootFlow.Nodes |> Seq.cast<MSeg>
+
             let drawSubs  = ConcurrentHash<MSeg>()
             let dummySeg  = ConcurrentHash<MSeg>()
-            let safeties  = ConcurrentDictionary<MSeg, MSeg seq>()
-            let edges  = ConcurrentHash<MEdge>()
-            let interlocks  = ConcurrentDictionary<string, MEdge>()
             let setIL  = ConcurrentHash<HashSet<MSeg>>()
+            let safeties  = ConcurrentDictionary<MSeg, MSeg seq>()
+            let interlocks  = ConcurrentDictionary<string, MEdge>()
             let aliasSet  = ConcurrentDictionary<string, HashSet<string>>()
-            let noEdgeBaseSegs  = ConcurrentDictionary<MSeg, MSeg>()
 
             let rec getLink(start:MSeg, find:HashSet<MSeg>, full:HashSet<MSeg>) =
                 let update (edge:MEdge) =
@@ -193,14 +170,10 @@ module Object =
                 |> Seq.iter(fun edge -> 
                                 if(find.Contains(edge.Source)|>not || find.Contains(edge.Target)|>not)
                                 then update (edge);getLink (edge.Source, find, full))
-            member x.NoEdgeBaseSegs = noEdgeBaseSegs.Values |> Seq.sortBy(fun seg -> seg.Name)
-            member x.AddSegNoEdge(seg) = noEdgeBaseSegs.TryAdd(seg, seg) |> ignore 
-            member x.RemoveSegNoEdge(seg) = noEdgeBaseSegs.TryRemove(seg) |> ignore 
 
             member x.Page = index
 
-            member x.Edges = edges.Values |> Seq.sortBy(fun edge -> edge.Source.Name)
-            member x.AddEdge(edge) = edges.TryAdd(edge) |> ignore 
+            member x.MEdges = mEdges |> Seq.sortBy(fun edge -> edge.Source.Name)
             member x.AddSafety(seg, segSafetys:MSeg seq) = safeties.TryAdd(seg, segSafetys) |> ignore 
             member x.Safeties = safeties
             member x.AliasSet   = aliasSet
@@ -230,34 +203,14 @@ module Object =
 
             member x.DummySeg = dummySeg.Values 
             member x.AddDummySeg(seg) = dummySeg.TryAdd(seg) |> ignore 
-            member x.NoEdgeSegs =  x.NoEdgeBaseSegs  |> Seq.cast<MSeg>
 
-            //member x.UsedSegs =
-            //    x.AllSegments |> Seq.cast<MSeg>
-
-                //let rootUsedSegs  = 
-                //    edges 
-                //    |> Seq.collect(fun edge -> edge.Key.GetSegs())
-                //    |> Seq.append x.NoEdgeSegs
-
-                //rootUsedSegs 
-                //|> Seq.collect (fun node -> node.ChildSegsSubAll)
-                //|> Seq.append rootUsedSegs
-                //|> Seq.distinctBy(fun seg -> seg.PathName)
-                    
             member x.UsedMSegs   = x.UsedSegs   |> Seq.cast<MSeg>
             member x.CallSegs() = x.UsedMSegs
                                         |> Seq.filter(fun seg -> seg.NodeType.IsCall)
                                         |> Seq.filter(fun seg -> seg.Bound = ThisFlow)
                                         |> Seq.distinctBy(fun seg -> seg.FullName)
 
-            //member x.ExRealSegs() = x.UsedSegs
-            //                            |> Seq.filter(fun seg -> seg.NodeType.IsReal)
-            //                            |> Seq.filter(fun seg -> seg.Bound = ExSeg)
-            //                            |> Seq.distinctBy(fun seg -> seg.FullName)
 
-
-            //member x.CallNExRealSegs() =  x.CallSegs() |> Seq.append (x.ExRealSegs())
             member x.CallWithoutInterLock()  = 
                 let dicInterLockName =  
                     x.Interlockedges 

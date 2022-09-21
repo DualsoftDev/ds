@@ -77,7 +77,7 @@ namespace Dual.Model.Import
 
         private static async Task runSeg(IEnumerable<MSeg> segs, IEnumerable<MEdge> runEdges)
         {
-            var dicSeg = segs.ToDictionary(d => d);
+            var dicSeg = segs.Distinct().ToDictionary(d => d);
             var dicEdge = runEdges.ToDictionary(d => d);
 
             await Task.Run(async () =>
@@ -99,7 +99,7 @@ namespace Dual.Model.Import
             if (model == null) return;
             if (!org) await TestORG(model);
 
-            var dicSeg = model.AllFlows.SelectMany(s=>s.Nodes).Cast<MSeg>().ToDictionary(d => d);
+            var dicSeg  = model.AllFlows.SelectMany(s=>s.Nodes).Distinct().Cast<MSeg>().ToDictionary(d => d);
             var dicEdge = model.AllFlows.SelectMany(s=>s.Edges).Cast<MEdge>().ToDictionary(d => d);
 
             await Task.Run(async () =>

@@ -70,9 +70,9 @@ namespace Dual.Model.Import
 
             var subDraws = flow.DrawSubs.ToList();
 
-            flow.NoEdgeSegs.ToList().ForEach(seg => DrawSeg(viewer.Graph.RootSubgraph, seg, subDraws));
+            flow.Singles.Cast<MSeg>().ToList().ForEach(seg => DrawSeg(viewer.Graph.RootSubgraph, seg, subDraws));
 
-            drawMEdgeGraph(flow.Edges.ToList(), subDraws, viewer.Graph.RootSubgraph);
+            drawMEdgeGraph(flow.MEdges.ToList(), subDraws, viewer.Graph.RootSubgraph);
 
             viewer.SetCalculatedLayout(viewer.CalculateLayout(viewer.Graph));
         }

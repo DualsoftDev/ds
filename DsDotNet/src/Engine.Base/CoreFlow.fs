@@ -20,16 +20,16 @@ module CoreFlow =
             member _.Edges = edges
             member _.Nodes = edges.GetNodes() |> Seq.append singleNodes 
 
+        member x.Nodes = (x :> IFlow).Nodes
         member x.Edges = (x :> IFlow).Edges
         member x.AddEdge(edge) = edges.Add(edge)
         member x.RemoveEdge(edge) = edges.Remove(edge)
 
+        member x.Singles = singleNodes
         //Add    singleNodes
         member x.AddSingleNode(node)    = singleNodes.Add(node)
         //Remove singleNodes
         member x.RemoveSingleNode(node) = singleNodes.Remove(node)
-        member x.Singles = singleNodes
-        member x.Nodes = (x :>IFlow).Nodes
 
 
          
@@ -46,11 +46,9 @@ module CoreFlow =
     [<DebuggerDisplay("{name}")>]
     type RootFlow(name)  =
         inherit Flow(name)
-        member x.RootSegs = x.Nodes
-        member x.UsedSegs = x.Nodes 
-                                |> Seq.cast<IActive> 
-                                |> Seq.collect(fun parent ->parent.Children)
-                                |> Seq.append x.Nodes
+        member x.UsedSegs = x.Nodes |> Seq.cast<IActive> 
+                                    |> Seq.collect(fun parent ->parent.Children)
+                                    |> Seq.append x.Nodes
     
     [<DebuggerDisplay("{name}")>]
     type ChildFlow(name)  =

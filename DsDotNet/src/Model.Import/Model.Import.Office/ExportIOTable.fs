@@ -29,9 +29,9 @@ module ExportIOTable =
         let rowItems(causal:NodeType, seg:MSeg, trx:string) =
             let MFlowName, name =  seg.OwnerMFlow, seg.Name
             match causal with
-            |TR ->  ["주소"; MFlowName; name; trx; "bit"; seg.TextStart  ; seg.TextEnd]
-            |TX  -> ["주소"; MFlowName; name; trx; "bit"; seg.TextStart  ; "'-"]
-            |RX  -> ["주소"; MFlowName; name; trx; "bit"; "'-"           ; seg.TextEnd]
+            |TR ->  ["주소"; MFlowName; name; trx; "bit"; seg.TagStart  ; seg.TagEnd]
+            |TX  -> ["주소"; MFlowName; name; trx; "bit"; seg.TagStart  ; "'-"]
+            |RX  -> ["주소"; MFlowName; name; trx; "bit"; "'-"           ; seg.TagEnd]
             |MY -> failwithf "ERR";
 
         let rows =

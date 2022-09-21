@@ -15,17 +15,17 @@ module Check =
             let sys = MSys(sysName, true)
             let mFlow = MFlow("P0",  Int32.MaxValue)
             sys.AddFlow(mFlow) |> ignore
-            mFlow.AddEdge( MEdge(MSeg("START", sys, TR), MSeg("시작인과", sys, MY), EdgeCausal.SEdge))
-            mFlow.AddEdge( MEdge(MSeg("RESET", sys, TR), MSeg("복귀인과", sys, MY), EdgeCausal.REdge))
-            mFlow.AddEdge( MEdge(MSeg("START", sys, TR), MSeg("시작유지", sys, MY), EdgeCausal.SPush))
-            mFlow.AddEdge( MEdge(MSeg("RESET", sys, TR), MSeg("복귀유지", sys, MY), EdgeCausal.RPush))
-            mFlow.AddEdge( MEdge(MSeg("ETC"  , sys, TR), MSeg("상호행위간섭", sys, MY), EdgeCausal.Interlock))
-            mFlow.AddEdge( MEdge(MSeg("ETC"  , sys, TR), MSeg("시작후행리셋", sys, MY), EdgeCausal.SReset))
+            mFlow.AddEdge( MEdge(MSeg("START", sys, TR), MSeg("시작인과", sys, MY), EdgeCausal.SEdge))         |> ignore
+            mFlow.AddEdge( MEdge(MSeg("RESET", sys, TR), MSeg("복귀인과", sys, MY), EdgeCausal.REdge))         |> ignore
+            mFlow.AddEdge( MEdge(MSeg("START", sys, TR), MSeg("시작유지", sys, MY), EdgeCausal.SPush))         |> ignore
+            mFlow.AddEdge( MEdge(MSeg("RESET", sys, TR), MSeg("복귀유지", sys, MY), EdgeCausal.RPush))         |> ignore
+            mFlow.AddEdge( MEdge(MSeg("ETC"  , sys, TR), MSeg("상호행위간섭", sys, MY), EdgeCausal.Interlock)) |> ignore
+            mFlow.AddEdge( MEdge(MSeg("ETC"  , sys, TR), MSeg("시작후행리셋", sys, MY), EdgeCausal.SReset))    |> ignore
 
             //모델만들기 및 시스템 등록
             let model = ImportModel("testModel");
             model.Add(sys) |> ignore
-            model.AddEdges(mFlow.Edges, mFlow)
+            model.AddEdges(mFlow.MEdges, mFlow)
             model
 
         let SameParent(doc:pptDoc, edge:pptEdge) =

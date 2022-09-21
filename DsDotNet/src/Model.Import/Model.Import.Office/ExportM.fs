@@ -37,11 +37,11 @@ module ExportM =
             match causal with
             |TR ->  let tx = sprintf "EX.%s.%s" callPath (text.Replace("TR", "TX"))
                     let rx = sprintf "EX.%s.%s" callPath (text.Replace("TR", "RX"))
-                    sprintf "%-40s \t= (%s, , )\r\n\t%-40s \t= (, ,%s)"  tx seg.TextStart rx seg.TextEnd 
+                    sprintf "%-40s \t= (%s, , )\r\n\t%-40s \t= (, ,%s)"  tx seg.TagStart rx seg.TagEnd 
             |TX ->  let tx = sprintf "EX.%s.%s" callPath text
-                    sprintf "%-40s \t= (%s, , )"  tx seg.TextStart
+                    sprintf "%-40s \t= (%s, , )"  tx seg.TagStart
             |RX ->  let rx = sprintf "EX.%s.%s" callPath text
-                    sprintf "%-40s \t= (, ,%s)"  rx seg.TextEnd
+                    sprintf "%-40s \t= (, ,%s)"  rx seg.TagEnd
             |_ -> failwithf "ERR";
 
         let mergeEdges(edges:MEdge seq) =
@@ -121,7 +121,7 @@ module ExportM =
 
                         yield sprintf "\t[%s] %s = { \t" TextFlow flow.ValidName
                         
-                        yield! edgeText    (flow.Edges)
+                        yield! edgeText    (flow.MEdges)
                         yield! segmentText (flow.UsedMSegs)
                         //Task 출력
                         for callSeg in flow.CallSegs() do

@@ -66,8 +66,8 @@ module ImportM =
             updateAlias(eSeg, dicFlow.[edge.PageNum]) 
             getParent(edge) |> Seq.iter(fun (parentNode, parentSeg) ->
                         
-                           dicFlow.[edge.PageNum].RemoveSegNoEdge(sSeg) 
-                           dicFlow.[edge.PageNum].RemoveSegNoEdge(eSeg) 
+                           dicFlow.[edge.PageNum].RemoveSingleNode(sSeg) |> ignore
+                           dicFlow.[edge.PageNum].RemoveSingleNode(eSeg) |> ignore
                            let mEdge = MEdge(sSeg, eSeg, edge.Causal)
 
                            if(mEdge.Causal = Interlock)
@@ -76,7 +76,7 @@ module ImportM =
                            match parentNode with
                            |Some(v) -> if(v.PageNum = edge.PageNum) 
                                        then dicFlow.[edge.PageNum].AddSegDrawSub(parentSeg) 
-                           |None -> dicFlow.[edge.PageNum].AddEdge(mEdge)
+                           |None -> dicFlow.[edge.PageNum].AddEdge(mEdge) |> ignore
 
                            Check.SameEdgeErr(parentNode, edge, mEdge, dicSameCheck)
                            dicEdge.TryAdd(mEdge, parentSeg) |>ignore
@@ -175,8 +175,8 @@ module ImportM =
                     children 
                     |> Seq.iter(fun child ->  
                                 let cSeg = dicSeg.[child.Key]
-                                pSeg.AddSegNoEdge(cSeg)
-                                dicFlow.[parent.PageNum].RemoveSegNoEdge(cSeg) 
+                                pSeg.ChildFlow.AddSingleNode(cSeg) |> ignore
+                                dicFlow.[parent.PageNum].RemoveSingleNode(cSeg) |> ignore
                                // child.ExistChildEdge <- true
                                 )
                 )
@@ -217,9 +217,9 @@ module ImportM =
                                                 updateAlias(dicSeg.[child.Key], dicFlow.[parent.PageNum]) 
                                                 
                                                 //행위 부모 할당후 
-                                                pSeg.AddSegNoEdge(dicSeg.[child.Key])
+                                                pSeg.ChildFlow.AddSingleNode(dicSeg.[child.Key]) |> ignore
                                                 //MFlow 상에서 삭제
-                                                dicFlow.[parent.PageNum].RemoveSegNoEdge(dicSeg.[child.Key]) 
+                                                dicFlow.[parent.PageNum].RemoveSingleNode(dicSeg.[child.Key]) |> ignore 
                                                 dicFlow.[parent.PageNum].AddSegDrawSub(pSeg) 
                                                     )
                 )

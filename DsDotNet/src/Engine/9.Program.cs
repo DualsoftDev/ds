@@ -44,10 +44,10 @@ class Program
         ParserTest.Test(ParserTest.QualifiedName);
         ParserTest.Test(ParserTest.Aliases);
         ParserTest.Test(ParserTest.Serialize, "Cpu");
-
         ParserTest.Test(ParserTest.ExternalSegmentCall);
         ParserTest.Test(ParserTest.ExternalSegmentCallConfusing);
-        ParserTest.Test(ParserTest.Error, "Cpu");
+
+        //ParserTest.Test(ParserTest.Error, "Cpu");
 
         //InvalidDuplicationTest.Test(InvalidDuplicationTest.DupSystemNameModel);
         //InvalidDuplicationTest.Test(InvalidDuplicationTest.DupFlowNameModel);

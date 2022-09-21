@@ -25,14 +25,14 @@ class ModelListener : dsBaseListener
 
     override public void EnterSystem(SystemContext ctx)
     {
-        var name = ctx.id().GetText();
+        var name = ctx.id().GetText().DeQuoteOnDemand();
         _system = _model.Systems.First(s => s.Name == name);
     }
     override public void ExitSystem(SystemContext ctx) { this._system = null; }
 
     override public void EnterFlow(FlowContext ctx)
     {
-        var flowName = ctx.id().GetText().DeQuoteNameComponentOnDemand();
+        var flowName = ctx.id().GetText().DeQuoteOnDemand();
         _rootFlow = _system.RootFlows.First(f => f.Name == flowName);
     }
     override public void ExitFlow(FlowContext ctx) { _rootFlow = null; }
@@ -41,7 +41,7 @@ class ModelListener : dsBaseListener
 
     override public void EnterParenting(ParentingContext ctx)
     {
-        var name = ctx.id().GetText();
+        var name = ctx.id().GetText().DeQuoteOnDemand();
         _parenting = (SegmentBase)_rootFlow.InstanceMap[name];
     }
     override public void ExitParenting(ParentingContext ctx) { _parenting = null; }
@@ -73,7 +73,7 @@ class ModelListener : dsBaseListener
         switch (ns.Length)
         {
             case 1:
-                var last = fqdn;
+                var last = fqdn.DeQuoteOnDemand();
                 if (_rootFlow.AliasNameMaps.ContainsKey(last))
                 {
                     var aliasTarget = _rootFlow.AliasNameMaps[last];

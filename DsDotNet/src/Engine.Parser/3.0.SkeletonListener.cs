@@ -55,16 +55,16 @@ class SkeletonListener : dsBaseListener
 
     override public void EnterSystem(SystemContext ctx)
     {
-        var n = ctx.id().GetText();
-        _system = new DsSystem(n, _model);
-        Trace.WriteLine($"System: {n}");
+        var name = ctx.id().GetText().DeQuoteOnDemand();
+        _system = new DsSystem(name, _model);
+        Trace.WriteLine($"System: {name}");
     }
     override public void ExitSystem(SystemContext ctx) { _system = null; }
 
 
     override public void EnterFlow(FlowContext ctx)
     {
-        var flowName = ctx.id().GetText().DeQuoteNameComponentOnDemand();
+        var flowName = ctx.id().GetText().DeQuoteOnDemand();
         var flowOf = ctx.flowProp().id();
 
         var flowFqdn = $"{ParserHelper.CurrentPath}.{flowName}";
@@ -104,7 +104,7 @@ class SkeletonListener : dsBaseListener
     /// <summary>CallPrototype </summary>
     override public void EnterCall(CallContext ctx)
     {
-        var name = ctx.id().GetText();
+        var name = ctx.id().GetText().DeQuoteOnDemand();
         var label = $"{name}\n{ctx.callPhrase().GetText()}";
         var callph = ctx.callPhrase();
 
@@ -118,7 +118,7 @@ class SkeletonListener : dsBaseListener
 
     override public void EnterListing(ListingContext ctx)
     {
-        var name = ctx.id().GetText();
+        var name = ctx.id().GetText().DeQuoteOnDemand();
         var seg = SegmentBase.Create(name, _rootFlow);
         if (_rootFlow.CallPrototypes.Any(cp => cp.Name == name) || _rootFlow.InstanceMap.ContainsKey(name))
             throw new Exception($"Duplicated listing [{ParserHelper.CurrentPath}.{name}].");
@@ -130,7 +130,7 @@ class SkeletonListener : dsBaseListener
     override public void EnterParenting(ParentingContext ctx)
     {
         Trace.WriteLine($"Parenting: {ctx.GetText()}");
-        var name = ctx.id().GetText();
+        var name = ctx.id().GetText().DeQuoteOnDemand();
         _parenting = SegmentBase.Create(name, _rootFlow);
 
         if (_rootFlow.InstanceMap.ContainsKey(name))

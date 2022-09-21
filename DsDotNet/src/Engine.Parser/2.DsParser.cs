@@ -94,7 +94,7 @@ class DsParser
             ? compo.Substring(1, compo.Length - 2)
             : compo
             ;
-        return enumerateChildren<IdentifierContext>(from).Select(idf => idf.GetText().DeQuoteNameComponentOnDemand()).ToArray();
+        return enumerateChildren<IdentifierContext>(from).Select(idf => idf.GetText().DeQuoteOnDemand()).ToArray();
     }
 
 

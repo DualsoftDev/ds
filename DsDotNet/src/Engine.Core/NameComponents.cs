@@ -48,12 +48,14 @@ public static class ParserExtension
     public static bool IsQuotationRequired(this string identifier) => !IsValidIdentifier(identifier);
 
     static string _doubleQuote = @"""";
-    public static string DeQuoteNameComponentOnDemand(this string compo) =>
+    /// <summary>이름 구성 요소에서 맨 앞, 맨 뒤의 double quote 가 있으면 이를 제거한 문자열 반환 </summary>
+    public static string DeQuoteOnDemand(this string compo) =>
         compo.StartsWith(_doubleQuote) && compo.EndsWith(_doubleQuote)
         ? compo.Substring(1, compo.Length - 2)
         : compo
         ;
-    public static string QuoteNameComponentOnDemand(this string compo) =>
+    /// <summary>이름 구성 요소에 특수 문자가 포함된 경우, 맨 앞, 맨 뒤에 double quote 를 추가한 문자열 반환 </summary>
+    public static string QuoteOnDemand(this string compo) =>
         compo.IsQuotationRequired()
         ? $"{_doubleQuote}{compo}{_doubleQuote}"
         : compo
@@ -106,7 +108,7 @@ public static class ParserExtension
         if (flow == null)
             return null;
 
-        var name = fqdn[2].QuoteNameComponentOnDemand();
+        var name = fqdn[2];
         if (flow.InstanceMap.ContainsKey(name))
             return flow.InstanceMap[name];
 

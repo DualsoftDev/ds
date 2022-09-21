@@ -72,14 +72,14 @@ partial class ElementsListener : dsBaseListener
 
     override public void EnterSystem(SystemContext ctx)
     {
-        var name = ctx.id().GetText();
+        var name = ctx.id().GetText().DeQuoteOnDemand();
         _system = _model.Systems.First(s => s.Name == name);
     }
     override public void ExitSystem(SystemContext ctx) { this._system = null; }
 
     override public void EnterFlow(FlowContext ctx)
     {
-        var flowName = ctx.id().GetText().DeQuoteNameComponentOnDemand();
+        var flowName = ctx.id().GetText().DeQuoteOnDemand();
         _rootFlow = _system.RootFlows.First(f => f.Name == flowName);
 
         var flowOf = ctx.flowProp().id();
@@ -161,7 +161,7 @@ partial class ElementsListener : dsBaseListener
 
     override public void EnterCall(CallContext ctx)
     {
-        var name = ctx.id().GetText();
+        var name = ctx.id().GetText().DeQuoteOnDemand();
         var label = $"{name}\n{ctx.callPhrase().GetText()}";
 
         var callPrototypes = _rootFlow.CallPrototypes;
@@ -203,7 +203,7 @@ partial class ElementsListener : dsBaseListener
 
     override public void EnterParenting(ParentingContext ctx)
     {
-        var name = ctx.id().GetText();
+        var name = ctx.id().GetText().DeQuoteOnDemand();
         _parenting = (SegmentBase)_rootFlow.InstanceMap[name];
     }
     override public void ExitParenting(ParentingContext ctx) { _parenting = null; }

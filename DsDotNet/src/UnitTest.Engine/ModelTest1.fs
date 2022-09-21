@@ -150,20 +150,30 @@ module ModelTests1 =
             let mutable text = """
 [sys] L = {
     [flow] F = {
-        Main = { Vp1 > Vp2 > A1; }
-        A = {P.F.Vp ~ P.F.Sp}
-        [alias] = {
-            P.F.Vp = { Vp1; Vp2; Vp3; }
-            P.F.Vm = { Vm1; Vm2; Vm3; }
-            L.F.A = {A1; A2; A3;}
+        Main = {
+            // 정보로서의 Call 상호 리셋
+            Ap <||> Am;
+            Bp <||> Bm;
+            Ap > Am, Bp > Bm > Ap1 > Am1, Bp1 > Bm1;
         }
+        Ap = {A.F.Vp ~ A.F.Sp}
+        Am = {A.F.Vm ~ A.F.Sm}
+        Bp = {B.F.Vp ~ B.F.Sp}
+        Bm = {B.F.Vm ~ B.F.Sm}
+        [alias] = {
+            Ap = { Ap1; Ap2; }
+            Am = { Am1; Am2; }
+            Bp = { Bp1; Bp2; }
+            Bm = { Bm1; Bm2; }
+        }
+
     }
 }
 """
-            text <- text + sysP + cpus
+            text <- text + Tester.CreateCylinder("A") + Tester.CreateCylinder("B") + cpus
 
             let builder = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu"))
-            ( builder.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
+            ( builder.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "A"; "B"] ) |> setEq
             let system = builder.Model.Systems |> Seq.find(fun s -> s.Name = "L")
             let cpu = builder.Cpu
 

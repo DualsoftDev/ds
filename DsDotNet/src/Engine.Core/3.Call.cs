@@ -157,8 +157,10 @@ public static class CallExtension
                 var rootFlow = rootCall.Container;
                 var system = rootFlow.GetSystem();
                 return $"{system.Name}.{rootFlow.Name}.{rootCall.Name}";
+
             case SegmentBase rootSegment:
                 return rootSegment.QualifiedName;
+
             case CallPrototype cp:
                 return cp.QualifiedName;
 
@@ -172,6 +174,7 @@ public static class CallExtension
                     RootFlow flow => $"{flow.QualifiedName}.{call.Name}",
                     _             => throw new Exception("ERROR"),
                 };
+
             default:
                 throw new Exception("ERROR");
         }

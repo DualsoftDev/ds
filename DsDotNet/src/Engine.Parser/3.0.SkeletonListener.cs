@@ -137,7 +137,8 @@ class SkeletonListener : dsBaseListener
     }
     override public void ExitParenting(ParentingContext ctx) { _parenting = null; }
 
-    // 최종 이름이 '.' 을 포함하지 않는 root segment 는 우선 생성
+
+    // parenting 이 아닌, root flow 하단의 단일 root segment 는 우선 생성
     override public void EnterCausalToken(CausalTokenContext ctx)
     {
         if (_parenting != null)
@@ -154,8 +155,16 @@ class SkeletonListener : dsBaseListener
         if (_rootFlow.CallPrototypes.Any(cp => cp.Name == last))
             return;
 
-        Console.WriteLine();
         if (_rootFlow.InstanceMap.ContainsKey(last))
+            return;
+
+        // 같은 이름의 parenting 이 존재하면, 내부가 존재하는 root segemnt 이므로, skip
+        var flowContext = findFirstAncestor<FlowContext>(ctx);
+        var hasParentingDefinition =
+            enumerateChildren<ParentingContext>(flowContext)
+                .Select(parentingCtx => parentingCtx.id().GetText().DeQuoteOnDemand())
+                .Contains(last);
+        if (hasParentingDefinition)
             return;
 
         // 내부 없는 단순 root segment.  e.g "Vp"

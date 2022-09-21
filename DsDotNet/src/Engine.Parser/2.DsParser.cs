@@ -84,6 +84,12 @@ class DsParser
 
         return null;
     }
+    public static T findFirstAncestor<T>(IParseTree from, bool includeMe = false) where T : IParseTree
+    {
+        var pred = (IParseTree parseTree) => parseTree is T;
+        return (T)findFirstAncestor(from, pred, includeMe);
+    }
+
 
 
     public static string[] collectNameComponents(IParseTree from) =>

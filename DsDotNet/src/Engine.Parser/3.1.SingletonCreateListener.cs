@@ -2,7 +2,7 @@ using Engine.Common;
 
 namespace Engine.Parser
 {
-    class AliasListener : dsBaseListener
+    class SingletonCreateListener : dsBaseListener
     {
         #region Boiler-plates
         public ParserHelper ParserHelper;
@@ -14,7 +14,7 @@ namespace Engine.Parser
         string[] CurrentPathNameComponents => ParserHelper.CurrentPathNameComponents;
         string CurrentPath => ParserHelper.CurrentPath;
 
-        public AliasListener(dsParser parser, ParserHelper helper)
+        public SingletonCreateListener(dsParser parser, ParserHelper helper)
         {
             ParserHelper = helper;
             parser.Reset();

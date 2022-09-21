@@ -94,15 +94,7 @@ class ModelListener : dsBaseListener
                     if (cp != null)
                         createInstanceFromCallPrototype(cp, last, instanceMap);
                     else if (_parenting == null)
-                    {
-                        if (!_rootFlow.InstanceMap.ContainsKey(last))
-                        {
-                            // 내부 없는 단순 root segment.  e.g "Vp"
-                            // @sa EnterListing()
-                            var seg = SegmentBase.Create(last, _rootFlow);
-                            _rootFlow.InstanceMap.Add(last, seg);
-                        }
-                    }
+                        Assert(_rootFlow.InstanceMap.ContainsKey(last));
                     else
                         Assert(false);
 

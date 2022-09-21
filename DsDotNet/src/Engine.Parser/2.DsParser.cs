@@ -86,19 +86,11 @@ class DsParser
     }
 
 
-    public static string[] collectNameComponents(IParseTree from)
-    {
-        var dq = @"""";
-        string deQuote(string compo) =>
-            compo.StartsWith(dq) && compo.EndsWith(dq)
-            ? compo.Substring(1, compo.Length - 2)
-            : compo
+    public static string[] collectNameComponents(IParseTree from) =>
+        enumerateChildren<IdentifierContext>(from)
+            .Select(idf => idf.GetText().DeQuoteOnDemand())
+            .ToArray()
             ;
-        return enumerateChildren<IdentifierContext>(from).Select(idf => idf.GetText().DeQuoteOnDemand()).ToArray();
-    }
-
-
-
 
     public static ParserResult getParseResult(dsParser parser)
     {

@@ -139,6 +139,32 @@ class SkeletonListener : dsBaseListener
     }
     override public void ExitParenting(ParentingContext ctx) { _parenting = null; }
 
+    // 최종 이름이 '.' 을 포함하지 않는 root segment 는 우선 생성
+    override public void EnterCausalToken(CausalTokenContext ctx)
+    {
+        if (_parenting != null)
+            return;
+
+        var ns = collectNameComponents(ctx);
+        if (ns.Length > 1)
+            return;
+
+        var last = ns[0].DeQuoteOnDemand();
+        if (_rootFlow.AliasNameMaps.ContainsKey(ns[0]))
+            return;
+
+        if (_rootFlow.CallPrototypes.Any(cp => cp.Name == last))
+            return;
+
+        Console.WriteLine();
+        if (_rootFlow.InstanceMap.ContainsKey(last))
+            return;
+
+        // 내부 없는 단순 root segment.  e.g "Vp"
+        // @sa EnterListing()
+        var seg = SegmentBase.Create(last, _rootFlow);
+        _rootFlow.InstanceMap.Add(last, seg);
+    }
 
 
     /*

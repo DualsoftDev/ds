@@ -25,7 +25,7 @@ test:qstring EOF;
 qstring: STRING_LITERAL EOF;
 
 
-system: sysProp id '=' sysBlock;    // [sys] Seg = {..}
+system: sysProp identifier1 '=' sysBlock;    // [sys] Seg = {..}
 sysProp: '[' 'sys' ']';
 sysBlock
     : LBRACE (flow|listing|parenting|causal|call|buttons)* RBRACE       // acc|sysTask|macro
@@ -40,32 +40,32 @@ sysBlock
 }
  */
 
-cpus: cpusProp (id)? '=' cpusBlock;
+cpus: cpusProp (identifier1)? '=' cpusBlock;
 cpusProp: '[' 'cpus' ']';
 cpusBlock
     : LBRACE (cpu)* RBRACE
     ;
 
-cpu: cpuProp id '=' cpuBlock;    // [cpu] Cpu = {..}
+cpu: cpuProp identifier1 '=' cpuBlock;    // [cpu] Cpu = {..}
 cpuProp: '[' 'cpu' ']';
 cpuBlock
     : LBRACE flowPath (SEIMCOLON flowPath)* SEIMCOLON? RBRACE
     ;
 
-layouts: layoutProp (id)? '=' layoutsBlock;
+layouts: layoutProp (identifier1)? '=' layoutsBlock;
 layoutProp: '[' 'layouts' ']';
 layoutsBlock
     : LBRACE (positionDef)* RBRACE
     ;
 positionDef: callPath '=' xywh;
-    callPath: identifier DOT identifier DOT identifier;
+    callPath: identifier3;
     xywh: LPARENTHESIS x COMMA y (COMMA w COMMA h)? RPARENTHESIS (SEIMCOLON)?;
     x: INTEGER;
     y: INTEGER;
     w: INTEGER;
     h: INTEGER;
 
-addresses: addressesProp (id)? '=' addressesBlock;
+addresses: addressesProp (identifier1)? '=' addressesBlock;
 addressesProp: '[' 'addresses' ']';
 addressesBlock
     : LBRACE (addressDef)* RBRACE
@@ -77,7 +77,6 @@ addressDef: segmentPath '=' address;
     resetTag: TAG_ADDRESS;
     endTag: TAG_ADDRESS;
 
-segmentPathN : identifier | identifier2 | identifier3;
 
 /*
 // global safety property
@@ -100,33 +99,31 @@ properties: '[' 'prop' ']' EQ LBRACE (propertyBlock)* RBRACE;
 propertyBlock: (safetyBlock);
 safetyBlock: '[' 'safety' ']' EQ LBRACE (safetyDef)* RBRACE;
 safetyDef: safetyKey EQ LBRACE safetyValues RBRACE;
-safetyKey: segmentPathN;
-safetyValues: segmentPathN (SEIMCOLON segmentPathN)*;
+safetyKey: identifier123;
+safetyValues: identifier123 (SEIMCOLON identifier123)*;
 
 
 flow
-    : flowProp id '=' LBRACE (causal|parenting|call|listing|safetyBlock|alias)* RBRACE     // |flowTask
+    : flowProp identifier1 '=' LBRACE (causal|parenting|call|listing|safetyBlock|alias)* RBRACE     // |flowTask
     ;
-flowProp : '[' 'flow' ('of' id)? ']';
+flowProp : '[' 'flow' ('of' identifier1)? ']';
 
 alias
-    : aliasProp (id)? '=' LBRACE (aliasListing)* RBRACE
+    : aliasProp (identifier1)? '=' LBRACE (aliasListing)* RBRACE
     ;
 aliasProp: '[' 'alias' ']';
 aliasListing:
     aliasDef '=' LBRACE (aliasMnemonic)? ( ';' aliasMnemonic)* (';')+ RBRACE
     ;
-aliasDef: segmentPathN;     //(identifier2|identifier3);
-aliasMnemonic: identifier;
+aliasDef: identifier123;     //(identifier2|identifier3);
+aliasMnemonic: identifier1;
 
 
-id: identifier;
-
-listing: id SEIMCOLON;     // A;
-parenting: id EQ LBRACE causal* RBRACE;
+listing: identifier1 SEIMCOLON;     // A;
+parenting: identifier1 EQ LBRACE causal* RBRACE;
 
 // A23 = { M.U ~ S.S3U ~ _ }
-call: id EQ LBRACE callPhrase RBRACE;
+call: identifier1 EQ LBRACE callPhrase RBRACE;
 callPhrase: segments TILDE segments (TILDE segments)?;
 calls: (call SEIMCOLON)+ ;
 
@@ -137,8 +134,8 @@ startButtons     :'[' ('start_in'|'start') ']' EQ buttonBlock;
 resetButtons     :'[' ('reset_in'|'reset') ']' EQ buttonBlock;
 buttonBlock: LBRACE (() | ((SEIMCOLON)* buttonDef)* (SEIMCOLON)*) RBRACE;
 buttonDef: buttonName EQ LBRACE (() | flowName (SEIMCOLON flowName)* (SEIMCOLON)?) RBRACE;
-buttonName: identifier;
-flowName : identifier;
+buttonName: identifier1;
+flowName : identifier1;
 
 
 
@@ -163,10 +160,10 @@ causalToken
     : proc
     | func
     | expression
-    | segment       // 'A' or 'A.B'
+    | identifier123       // 'A' or 'A.B'
 //  | segmentValue  // '(A)' or '(A.B)'
     ;
-//segmentValue: LPARENTHESIS segment RPARENTHESIS;
+//segmentValue: LPARENTHESIS identifier123 RPARENTHESIS;
 
 causalTokensDNF
     : causalTokensCNF ('?' causalTokensCNF)*

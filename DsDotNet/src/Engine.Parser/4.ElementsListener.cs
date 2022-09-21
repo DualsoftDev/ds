@@ -70,17 +70,17 @@ partial class ElementsListener : dsBaseListener
 
     override public void EnterSystem(SystemContext ctx)
     {
-        var name = ctx.id().GetText().DeQuoteOnDemand();
+        var name = ctx.identifier1().GetText().DeQuoteOnDemand();
         _system = _model.Systems.First(s => s.Name == name);
     }
     override public void ExitSystem(SystemContext ctx) { this._system = null; }
 
     override public void EnterFlow(FlowContext ctx)
     {
-        var flowName = ctx.id().GetText().DeQuoteOnDemand();
+        var flowName = ctx.identifier1().GetText().DeQuoteOnDemand();
         _rootFlow = _system.RootFlows.First(f => f.Name == flowName);
 
-        var flowOf = ctx.flowProp().id();
+        var flowOf = ctx.flowProp().identifier1();
         this.flowOfName = flowOf == null ? flowName : flowOf.GetText();
     }
     override public void ExitFlow(FlowContext ctx)
@@ -127,7 +127,7 @@ partial class ElementsListener : dsBaseListener
             from safetyDef in safetyDefs
             let key = collectNameComponents(findFirstChild(safetyDef, t => t is SafetyKeyContext))   // ["Main"] or ["My", "Flow", "Main"]
             let valueHeader = enumerateChildren<SafetyValuesContext>(safetyDef).First()
-            let values = enumerateChildren<SegmentPathNContext>(valueHeader).Select(collectNameComponents).ToArray()
+            let values = enumerateChildren<Identifier123Context>(valueHeader).Select(collectNameComponents).ToArray()
             select (key, values)
             ;
 
@@ -159,7 +159,7 @@ partial class ElementsListener : dsBaseListener
 
     override public void EnterCall(CallContext ctx)
     {
-        var name = ctx.id().GetText().DeQuoteOnDemand();
+        var name = ctx.identifier1().GetText().DeQuoteOnDemand();
         var label = $"{name}\n{ctx.callPhrase().GetText()}";
 
         var callPrototypes = _rootFlow.CallPrototypes;
@@ -171,7 +171,7 @@ partial class ElementsListener : dsBaseListener
             if (txrxCtx.GetText() == "_")
                 return Array.Empty<SegmentBase>();
 
-            var nss = enumerateChildren<SegmentContext>(txrxCtx).Select(collectNameComponents).ToArray();
+            var nss = enumerateChildren<Identifier123Context>(txrxCtx).Select(collectNameComponents).ToArray();
             return nss.Select(ns => (SegmentBase)_model.Find(ns)).ToArray();
         }
 
@@ -201,7 +201,7 @@ partial class ElementsListener : dsBaseListener
 
     override public void EnterParenting(ParentingContext ctx)
     {
-        var name = ctx.id().GetText().DeQuoteOnDemand();
+        var name = ctx.identifier1().GetText().DeQuoteOnDemand();
         _parenting = (SegmentBase)_rootFlow.InstanceMap[name];
     }
     override public void ExitParenting(ParentingContext ctx) { _parenting = null; }

@@ -1,7 +1,7 @@
 grammar dsLexer;
 
 
-identifier: STRING_LITERAL | IDENTIFIER;
+identifier1: STRING_LITERAL | IDENTIFIER;
 // STRING_LITERAL : '"' (~('"' | '\\' | '\r' | '\n' | ' ') | '\\' ('"' | '\\'))* '"';
 STRING_LITERAL : '"' (~('"' | '\\' | '\r' | '\n') | '\\' ('"' | '\\'))* '"';
 
@@ -28,8 +28,8 @@ fragment VALID_ID_CHAR
 
 
 
-identifier2: identifier DOT identifier;
-identifier3: identifier DOT identifier DOT identifier;
+identifier2: identifier1 DOT identifier1;
+identifier3: identifier1 DOT identifier1 DOT identifier1;
 
 TAG_ADDRESS: VALID_TAG_START VALID_TAG_CHAR*;
 fragment VALID_TAG_START
@@ -46,15 +46,15 @@ fragment VALID_TAG_CHAR
 
 // M.U, M.D
 segments: segmentsDNF*;
-// - Segment 규격
-// - 0 DOT: TagName
-// - 1 DOT: TaskName.SegmentName  : mysystem 을 가정하고 있음.  필요한가?
-// - 2 DOT: System.TaskName.SegmentName
-segment: (identifier | identifier2 | identifier3);
+// // - Segment 규격
+// // - 0 DOT: TagName
+// // - 1 DOT: TaskName.SegmentName  : mysystem 을 가정하고 있음.  필요한가?
+// // - 2 DOT: System.TaskName.SegmentName
+identifier123: (identifier1 | identifier2 | identifier3);
 
 flowPath: identifier2;
 
-segmentsCNF: segment (COMMA segment)*;
+segmentsCNF: identifier123 (COMMA identifier123)*;
 segmentsDNF: segmentsCNF (OR2 segmentsCNF)*;
 
 

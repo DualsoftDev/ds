@@ -93,7 +93,7 @@ class DsParser
 
 
     public static string[] collectNameComponents(IParseTree from) =>
-        enumerateChildren<IdentifierContext>(from)
+        enumerateChildren<Identifier1Context>(from)
             .Select(idf => idf.GetText().DeQuoteOnDemand())
             .ToArray()
             ;

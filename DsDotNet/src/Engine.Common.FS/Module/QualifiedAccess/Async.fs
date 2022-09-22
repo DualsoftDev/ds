@@ -13,11 +13,11 @@ module Async =
     /// see EmLinq_Task.cs:: FireAndForget 
     // https://theburningmonk.com/2012/10/f-helper-functions-to-convert-between-asyncunit-and-task/
     let ofTask<'T> (task: Task<'T>) : Async<'T> = 
-        task |> Task.withLogging |> Async.AwaitTask
+        task |> TaskHelper.withLogging |> Async.AwaitTask
 
     let toTask<'T> (work: Async<'T>) : Task<'T> =
-        Task.Run(fun () -> work |> Async.RunSynchronously) |> Task.withLogging
+        Task.Run(fun () -> work |> Async.RunSynchronously) |> TaskHelper.withLogging
 
     let startTask (task: Task) = 
-        task |> Task.withLoggingInternal |> ignore
+        task |> TaskHelper.withLoggingInternal |> ignore
 

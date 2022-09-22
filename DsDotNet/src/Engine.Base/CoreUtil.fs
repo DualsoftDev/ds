@@ -16,4 +16,6 @@ module Util =
         [<Extension>] static member GetStartCaual     (edges:#IEdge seq)  = edges |> Seq.filter (fun edge -> edge.Causal.IsStart)  
         [<Extension>] static member GetResetCaual     (edges:#IEdge seq)  = edges |> Seq.filter (fun edge -> edge.Causal.IsReset)  
         [<Extension>] static member GetNodes   (edges:#IEdge seq)  = edges |> Seq.collect (fun edge -> [edge.Source;edge.Target])  
+        [<Extension>] static member GetNextNodes (edges:#IEdge seq, source) = edges.GetSrcSame(source) |> Seq.map (fun edge -> edge.Target)  
+        [<Extension>] static member GetPrevNodes (edges:#IEdge seq, target) = edges.GetTgtSame(target) |> Seq.map (fun edge -> edge.Source)  
     

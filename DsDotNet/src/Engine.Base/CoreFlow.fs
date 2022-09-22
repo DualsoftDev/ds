@@ -51,7 +51,14 @@ module CoreFlow =
                                     |> Seq.append x.Nodes
     
     [<DebuggerDisplay("{name}")>]
-    type ChildFlow(name)  =
+    type ChildFlow(name) as this =
         inherit Flow(name)
-        
+        let srcs = this.Edges |> Seq.map(fun edge -> edge.Source) |> Seq.distinct    
+        let tgts = this.Edges |> Seq.map(fun edge -> edge.Target) |> Seq.distinct
+
+        member x.HeadNodes = srcs |> Seq.except tgts
+        member x.TailNodes = tgts |> Seq.except srcs
+        member x.NextNodes(currNode:IVertex) = this.Edges.GetNextNodes(currNode)
+        member x.PrevNodes(currNode:IVertex) = this.Edges.GetPrevNodes(currNode)
+             
         

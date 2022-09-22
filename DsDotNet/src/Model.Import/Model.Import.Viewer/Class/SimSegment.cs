@@ -1,3 +1,4 @@
+using Engine.Common.FS;
 using Model.Import.Office;
 using System.Collections.Generic;
 using System.Linq;
@@ -60,19 +61,19 @@ namespace Dual.Model.Import
 
             org = true;
         }
-        private static List<MSeg> getHeads(Dictionary<MSeg, MSeg> dic, Dictionary<MEdge, MEdge> dicEdge)
-        {
-            List<MSeg> tgts = dicEdge.Values.Where(w => w.Causal.IsStart).Select(edge => edge.Target).Distinct().ToList();
-            List<MSeg> heads = dic.Values.Where(s => !tgts.Contains(s)).ToList();
-            List<MEdge> findEdges = dicEdge.Values
-                .Where(edge => edge.Causal.IsStart)
-                .Where(edge => heads.Contains(edge.Source)).ToList();
+        //private static List<MSeg> getHeads(Dictionary<MSeg, MSeg> dic, Dictionary<MEdge, MEdge> dicEdge)
+        //{
+        //    List<MSeg> tgts = dicEdge.Values.Where(w => w.Causal.IsStart).Select(edge => edge.Target).Distinct().ToList();
+        //    List<MSeg> heads = dic.Values.Where(s => !tgts.Contains(s)).ToList();
+        //    List<MEdge> findEdges = dicEdge.Values
+        //        .Where(edge => edge.Causal.IsStart)
+        //        .Where(edge => heads.Contains(edge.Source)).ToList();
 
-            foreach (var seg in heads) dic.Remove(seg);
-            foreach (var edge in findEdges) dicEdge.Remove(edge);
+        //    foreach (var seg in heads) dic.Remove(seg);
+        //    foreach (var edge in findEdges) dicEdge.Remove(edge);
 
-            return heads;
-        }
+        //    return heads;
+        //}
 
 
         private static async Task runSeg(IEnumerable<MSeg> segs, IEnumerable<MEdge> runEdges)
@@ -85,7 +86,7 @@ namespace Dual.Model.Import
                 foreach (var seg in runEdges.SelectMany(s => s.Nodes).Distinct())
                 {
                     if (dicSeg.Count() == 0) break;
-                    List<MSeg> heads = getHeads(dicSeg, dicEdge);
+                    List<MSeg> heads = seg.ChildFlow.HeadNodes.Cast<MSeg>().ToList();
 
                     await Test(heads, Status4.Going, AllSeg);
                     await Task.Delay(50);
@@ -112,7 +113,8 @@ namespace Dual.Model.Import
                 {
                     if (dicSeg.Count() == 0) break;
 
-                    List<MSeg> heads = getHeads(dicSeg, dicEdge);
+                    if (cont.NodeType == NodeType.MY) { }
+                    List<MSeg> heads = cont.ChildFlow.HeadNodes.Cast<MSeg>().ToList();
                     await Test(heads, Status4.Going, AllSeg);
                     await Task.Delay(50);
 

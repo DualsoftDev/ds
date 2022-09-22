@@ -4,7 +4,7 @@ open System.Threading.Tasks
 open System.Runtime.CompilerServices
 
 [<RequireQualifiedAccess>]
-module Task =
+module TaskHelper =
     // https://theburningmonk.com/2012/10/f-helper-functions-to-convert-between-asyncunit-and-task/
     let withLogging<'T> (task: Task<'T>) : Task<'T> = 
         // rethrow exception from preceding task if it fauled

@@ -182,7 +182,7 @@ module ExportM =
                     let flows = sys.RootFlows() |> Seq.cast<MFlow>
                     //my CPU
                     for flow in flows do    
-                        yield sprintf "\t\t%s.%s;" sys.Name (flow.ToText())
+                        yield sprintf "\t\t%s.%s;" sys.ValidName (flow.ValidName)
                     yield "\t}"
                     //ex CPU
                     yield sprintf "\t[%s] Cpu_EX = {" TextCpu

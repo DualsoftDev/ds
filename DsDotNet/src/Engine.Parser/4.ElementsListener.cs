@@ -89,9 +89,6 @@ partial class ElementsListener : dsBaseListener
         flowOfName = null;
     }
 
-
-    override public void EnterListing(ListingContext ctx) { }
-
     #endregion Boiler-plates
 
 

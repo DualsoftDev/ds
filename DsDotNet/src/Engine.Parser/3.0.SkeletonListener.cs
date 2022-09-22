@@ -114,7 +114,7 @@ class SkeletonListener : dsBaseListener
     }
 
 
-    override public void EnterListing(ListingContext ctx)
+    override public void EnterIdentifier1Listing(Identifier1ListingContext ctx)
     {
         var name = ctx.identifier1().GetText().DeQuoteOnDemand();
         var seg = SegmentBase.Create(name, _rootFlow);
@@ -165,6 +165,13 @@ class SkeletonListener : dsBaseListener
                 .Select(parentingCtx => parentingCtx.identifier1().GetText().DeQuoteOnDemand())
                 .Contains(last);
         if (hasParentingDefinition)
+            return;
+
+        var hasCallPrototypeDefinition =
+            enumerateChildren<CallContext>(flowContext)
+                .Select(callCtx => callCtx.identifier1().GetText().DeQuoteOnDemand())
+                .Contains(last);
+        if (hasCallPrototypeDefinition)
             return;
 
         // 내부 없는 단순 root segment.  e.g "Vp"

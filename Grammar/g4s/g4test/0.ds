@@ -1,9 +1,8 @@
 [sys] MY = {
     [flow] FF = {     
         RR > Ex1;
-        RR = {
-            C1 > C2;
-        }
+        C2 |> C1;
+        RR = { C1 > C2; }
         C1     = {EX.FF_C1.TX    ~    EX.FF_C1.RX}
         C2     = {EX.FF_C2.TX    ~    EX.FF_C2.RX}
     }

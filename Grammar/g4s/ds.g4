@@ -28,7 +28,7 @@ qstring: STRING_LITERAL EOF;
 system: sysProp identifier1 '=' sysBlock;    // [sys] Seg = {..}
 sysProp: '[' 'sys' ']';
 sysBlock
-    : LBRACE (flow|listing|parenting|causal|call|buttons)* RBRACE       // acc|sysTask|macro
+    : LBRACE (flow|identifier1Listing|parenting|causal|call|buttons)* RBRACE       // acc|sysTask|macro
     ;
 
 
@@ -104,7 +104,7 @@ safetyValues: identifier123 (SEIMCOLON identifier123)*;
 
 
 flow
-    : flowProp identifier1 '=' LBRACE (causal|parenting|call|listing|safetyBlock|alias)* RBRACE     // |flowTask
+    : flowProp identifier1 '=' LBRACE (causal|parenting|call|identifier1Listing|safetyBlock|alias)* RBRACE     // |flowTask
     ;
 flowProp : '[' 'flow' ('of' identifier1)? ']';
 
@@ -119,8 +119,8 @@ aliasDef: identifier123;     //(identifier2|identifier3);
 aliasMnemonic: identifier1;
 
 
-listing: identifier1 SEIMCOLON;     // A;
-parenting: identifier1 EQ LBRACE (causal|listing)* RBRACE;
+identifier1Listing: identifier1 SEIMCOLON;     // A;
+parenting: identifier1 EQ LBRACE (causal|identifier1Listing)* RBRACE;
 
 // A23 = { M.U ~ S.S3U ~ _ }
 call: identifier1 EQ LBRACE callPhrase RBRACE;

@@ -78,18 +78,22 @@ module internal ModelSerializerModule =
                     yield serializeCallPrototype cp indent
             | _ -> yield $"{tab}{flow.Name} = {lb}"
 
-            for iso in flow.IsolatedCoins do
-                match iso with
-                | :? ChildFlow as cf when cf.ChildVertices.Any() ->
-                    yield! serializeFlow cf indent
-                | :? ChildFlow as cf ->
-                    yield $"{getTab indent}{cf.Name};"
-                | :? Child as child ->
-                    yield $"{tab}/* Child={child.QualifiedName} */"
-                    ()
-                | _ -> failwithlog "ERROR"
             for edge in flow.Edges do
                 yield serializeEdge edge indent
+
+            let covered = flow.Edges.SelectMany(fun e -> e.Vertices).Distinct().ToArray()
+            for cf in flow.ChildVertices.OfType<SegmentBase>() do
+                if cf.ChildVertices.Any() || not <| covered.Contains(cf) then
+                    yield! serializeFlow cf indent
+                //match iso with
+                //| :? ChildFlow as cf when cf.ChildVertices.Any() ->
+                //    yield! serializeFlow cf indent
+                //| :? ChildFlow as cf ->
+                //    yield $"{getTab indent}{cf.Name};"
+                //| :? Child as child ->
+                //    yield $"{tab}/* Child={child.QualifiedName} */"
+                //    ()
+                //| _ -> failwithlog "ERROR"
             //for child in flow.ChildVertices do
             //    serializeChild child
             yield tab + "}"

@@ -508,5 +508,78 @@ namespace Engine
 }
 
 " + Tester.CreateCylinder("A");
+
+
+        public static string Diamond = @"
+[sys] L = {
+    [flow] F = {
+        Main = {
+            // 정보로서의 Call 상호 리셋
+            Ap <||> Am;
+            Bp <||> Bm;
+            Ap > Am, Bp > Bm > Ap1 > Am1, Bp1 > Bm1;
+        }
+        Ap = {A.F.Vp ~ A.F.Sp}
+        Am = {A.F.Vm ~ A.F.Sm}
+        Bp = {B.F.Vp ~ B.F.Sp}
+        Bm = {B.F.Vm ~ B.F.Sm}
+        [alias] = {
+            Ap = { Ap1; Ap2; }
+            Am = { Am1; Am2; }
+            Bp = { Bp1; Bp2; }
+            Bm = { Bm1; Bm2; }
+        }
+
+    }
+}
+
+" + Tester.CreateCylinder("A") + Tester.CreateCylinder("B");
+
+        public static string Call3 = @"
+[sys] MY = {
+    [flow] FF = {     
+        RR > Ex1;
+        C2 |> C1;
+        RR = { C1 > C2; }
+        C1     = {EX.FF_C1.TX    ~    EX.FF_C1.RX}
+        C2     = {EX.FF_C2.TX    ~    EX.FF_C2.RX}
+    }
+}
+
+
+
+//////////////////////////////////////////////////////
+//DTS auto generation MY ExSegs
+//////////////////////////////////////////////////////
+[sys] EX = {
+    [flow] FF_C1 = { TX > RX; }
+    [flow] FF_C2 = { TX > RX; }
+}
+
+
+
+[cpus] AllCpus = {
+    [cpu] Cpu_MY = {
+        MY.FF;
+    }
+    [cpu] Cpu_EX = {
+        EX.FF_C1;
+        EX.FF_C2;
+    }
+}
+[addresses] = {
+    EX.FF_C1.TX                                  = (, , )
+    EX.FF_C1.RX                                  = (, ,)
+    EX.FF_C2.TX                                  = (, , )
+    EX.FF_C2.RX                                  = (, ,)
+}
+[layouts] = {
+    MY.FF.C1 = (1395,330,179,104)
+    MY.FF.C2 = (1620,267,158,104)
+}
+"
+;
+
+
     }
 }

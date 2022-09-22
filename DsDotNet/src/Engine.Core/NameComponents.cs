@@ -84,7 +84,7 @@ public static class ParserExtension
     }
 
 
-    public static object Find(this Model model, string[] fqdn)
+    public static IEnumerable<object> FindAll(this Model model, string[] fqdn)
     {
         var n = fqdn.Length;
         Assert(n >= 3);
@@ -92,28 +92,34 @@ public static class ParserExtension
         {
             var parenting = model.FindParenting(fqdn);
             if (parenting == null)
-                return null;
+                yield break;
 
             if (parenting.InstanceMap.ContainsKey(fqdn[3]))
-                return parenting.InstanceMap[fqdn[3]];
+                yield return parenting.InstanceMap[fqdn[3]];
 
             var aliasMap = parenting.ContainerFlow.AliasNameMaps;
             var aliasKey = fqdn[3];
             if (aliasMap.ContainsKey(aliasKey))
-                return model.Find(aliasMap[aliasKey]);
-            return null;
+                foreach (var alias in model.FindAll(aliasMap[aliasKey]))
+                    yield return alias;
+            yield break;
         }
 
         var flow = model.FindFlow(fqdn);
         if (flow == null)
-            return null;
+            yield break;
 
         var name = fqdn[2];
         if (flow.InstanceMap.ContainsKey(name))
-            return flow.InstanceMap[name];
+            yield return flow.InstanceMap[name];
 
-        return flow.CallPrototypes.FirstOrDefault(cp => cp.Name == name);
+        var cp = flow.CallPrototypes.FirstOrDefault(cp => cp.Name == name);
+        if (cp != null)
+            yield return cp;
     }
+    public static object Find(this Model model, string[] fqdn) => FindAll(model, fqdn).FirstOrDefault();
 
-    public static T Find<T>(this Model model, string[] fqdn) where T : class => model.Find(fqdn) as T;
+
+    public static T Find<T>(this Model model, string[] fqdn) where T : class =>
+        (T)model.FindAll(fqdn).FirstOrDefault(x => x.GetType() == typeof(T));
 }

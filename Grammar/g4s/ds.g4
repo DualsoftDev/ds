@@ -120,11 +120,12 @@ aliasMnemonic: identifier1;
 
 
 listing: identifier1 SEIMCOLON;     // A;
-parenting: identifier1 EQ LBRACE causal* RBRACE;
+parenting: identifier1 EQ LBRACE (causal|listing)* RBRACE;
 
 // A23 = { M.U ~ S.S3U ~ _ }
 call: identifier1 EQ LBRACE callPhrase RBRACE;
-callPhrase: segments TILDE segments (TILDE segments)?;
+callPhrase: callComponents TILDE callComponents (TILDE callComponents)?;
+    callComponents: identifier123DNF*;
 calls: (call SEIMCOLON)+ ;
 
 buttons:emergencyButtons|autoButtons|startButtons|resetButtons;
@@ -156,14 +157,6 @@ causalPhrase
     : causalTokensDNF (causalOperator causalTokensDNF)+
     ;
 
-causalToken
-    : proc
-    | func
-    | expression
-    | identifier123       // 'A' or 'A.B'
-//  | segmentValue  // '(A)' or '(A.B)'
-    ;
-//segmentValue: LPARENTHESIS identifier123 RPARENTHESIS;
 
 causalTokensDNF
     : causalTokensCNF ('?' causalTokensCNF)*
@@ -172,6 +165,14 @@ causalTokensCNF
     : causalToken (',' causalToken)*
     ;
 
+causalToken
+    : proc
+    | func
+    | expression
+    | identifier1
+//  | segmentValue  // '(A)' or '(A.B)'
+    ;
+//segmentValue: LPARENTHESIS identifier123 RPARENTHESIS;
 
 
 causalOperator

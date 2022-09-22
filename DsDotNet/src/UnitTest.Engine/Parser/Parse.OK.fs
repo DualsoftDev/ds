@@ -24,4 +24,4 @@ module ParseOKTest =
         [<Test>] member __.``Serialize``     () = checkParseOK(ParserTest.Serialize, "Cpu")
         [<Test>] member __.``ExternalSegmentCall`` () = checkParseOK(ParserTest.ExternalSegmentCall, null)
         [<Test>] member __.``ExternalSegmentCallConfusing`` () = checkParseOK(ParserTest.ExternalSegmentCallConfusing, null)
-        [<Test>] member __.``Error``         () = checkParseOK(ParserTest.Error, "Cpu")
+        [<Test>] member __.``XError``         () = checkParseOK(ParserTest.Error, "Cpu")

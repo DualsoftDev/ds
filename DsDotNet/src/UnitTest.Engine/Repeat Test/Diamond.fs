@@ -101,7 +101,7 @@ type Diamond(output1:ITestOutputHelper) =
 
 
     [<Test>]
-    member __.``Diamond Test`` () =
+    member __.``XDiamond Test`` () =
         logInfo "============== Diamond Test"
         Log4NetHelper.ChangeLogLevel(log4net.Core.Level.Error)
 

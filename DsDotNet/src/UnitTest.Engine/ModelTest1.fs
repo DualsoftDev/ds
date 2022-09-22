@@ -146,7 +146,7 @@ module ModelTests1 =
 
 
         [<Test>]
-        member __.``Parse Alias`` () =
+        member __.``XParse Alias`` () =
             let mutable text = """
 [sys] L = {
     [flow] F = {

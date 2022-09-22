@@ -44,8 +44,6 @@ fragment VALID_TAG_CHAR
 //    : '%' | VALID_ID_CHAR;   //|DOT)*;
 
 
-// M.U, M.D
-segments: segmentsDNF*;
 // // - Segment 규격
 // // - 0 DOT: TagName
 // // - 1 DOT: TaskName.SegmentName  : mysystem 을 가정하고 있음.  필요한가?
@@ -54,8 +52,8 @@ identifier123: (identifier1 | identifier2 | identifier3);
 
 flowPath: identifier2;
 
-segmentsCNF: identifier123 (COMMA identifier123)*;
-segmentsDNF: segmentsCNF (OR2 segmentsCNF)*;
+identifier123CNF: identifier123 (COMMA identifier123)*;
+identifier123DNF: identifier123CNF (OR2 identifier123CNF)*;
 
 
 

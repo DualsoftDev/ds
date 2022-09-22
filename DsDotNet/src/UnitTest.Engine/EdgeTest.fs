@@ -15,7 +15,7 @@ module EdgeTest =
 
 
         [<Test>]
-        member __.``Parser detail test`` () =
+        member __.``XParser detail test`` () =
             logInfo "============== Parser detail test"
             let mutable text = """
 [sys] L = {

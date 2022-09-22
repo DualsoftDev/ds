@@ -27,8 +27,9 @@ public class CallPrototype : CallBase
 {
     public RootFlow RootFlow { get; }
     /// <summary> 주로 target system 의 segment </summary>
-    public List<ITxRx> TXs = new(); // empty 이면 '_' 를 의미
-    public List<ITxRx> RXs = new(); // empty 이면 '_' 를 의미
+    public List<SegmentBase> TXs = new(); // empty 이면 '_' 를 의미
+    public List<SegmentBase> RXs = new(); // empty 이면 '_' 를 의미
+    public List<SegmentBase> Resets = new(); // empty 이면 '_' 를 의미
     public IVertex ResetSrouce;
 
     public override bool Value

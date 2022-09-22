@@ -14,7 +14,7 @@ module ModelTest2 =
         do Fixtures.SetUpTest()
 
         [<Test>]
-        member __.``Parse Alias & Task`` () =
+        member __.``XParse Alias & Task`` () =
             logInfo "============== Parse Alias & Task"
             let mutable text = """
 [sys] L = {

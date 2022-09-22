@@ -22,7 +22,7 @@ module PortInfoTest =
 
 
         [<Test>]
-        member __.``PortInfo test`` () =
+        member __.``XPortInfo test`` () =
             logInfo "============== PortInfo test"
             init()
 

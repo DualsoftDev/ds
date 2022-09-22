@@ -166,17 +166,18 @@ partial class ElementsListener : dsBaseListener
         var call = callPrototypes.First(c => c.Name == name);
 
         var callph = ctx.callPhrase();
-        SegmentBase[] findSegments(SegmentsContext txrxCtx)
+        SegmentBase[] findSegments(ParserRuleContext txrxCtx)
         {
-            if (txrxCtx.GetText() == "_")
+            if (txrxCtx == null || txrxCtx.GetText() == "_")
                 return Array.Empty<SegmentBase>();
 
             var nss = enumerateChildren<Identifier123Context>(txrxCtx).Select(collectNameComponents).ToArray();
             return nss.Select(ns => (SegmentBase)_model.Find(ns)).ToArray();
         }
 
-        var txs = findSegments(callph.segments(0));
-        var rxs = findSegments(callph.segments(1));
+        var txs = findSegments(callph.callComponents(0));
+        var rxs = findSegments(callph.callComponents(1));
+        var resets = findSegments(callph.callComponents(2));
 
         if (ParserHelper.ParserOptions.AllowSkipExternalSegment)
         {
@@ -195,6 +196,7 @@ partial class ElementsListener : dsBaseListener
 
         call.TXs.AddRange(txs);
         call.RXs.AddRange(rxs);
+        call.Resets.AddRange(resets);
         //Trace.WriteLine($"Call: {name} = {txs.Select(tx => tx.Name)} ~ {rx?.Name}");
     }
 

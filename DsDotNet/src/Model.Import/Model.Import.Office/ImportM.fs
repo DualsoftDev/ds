@@ -43,20 +43,15 @@ module ImportM =
                else [(None ,mySys.SysSeg)] |> Seq.toArray
 
         let updateAlias(seg:MSeg, flow:MFlow) = 
-            if(seg.Alias.IsSome) 
+            if(seg.IsAlias) 
             then 
-                let name = 
-                    if(seg.NodeType.IsCall)
-                    then seg.ValidName
-                    else sprintf "EX.%s.EX" (seg.ToCallText())
-
-                let alias = seg.Alias.Value.Name
-
-                if(flow.AliasSet.Keys.Contains(name))  
-                 then flow.AliasSet.[name].Add( alias)|> ignore
+                let aliasName = seg.ValidName 
+                let orginName = seg.Alias.Value.ValidName 
+                if(flow.AliasSet.Keys.Contains(orginName))  
+                 then flow.AliasSet.[orginName].Add(aliasName)|> ignore
                  else let set = HashSet<string>()
-                      set.Add(alias)|> ignore
-                      flow.AliasSet.TryAdd(name, set ) |> ignore
+                      set.Add(aliasName)|> ignore
+                      flow.AliasSet.TryAdd(orginName, set ) |> ignore
 
         let dicSameCheck = ConcurrentDictionary<string, MEdge>()
         let convertEdge(edge:pptEdge) = 
@@ -92,7 +87,7 @@ module ImportM =
 
                 //page 타이틀 중복체크 
                 let dicSamePage = ConcurrentDictionary<string, pptPage>()
-                let dicSameSeg  = ConcurrentDictionary<string, MSeg>()
+                let dicSameNode  = ConcurrentDictionary<string, pptNode>()
                 let dicSameFlow = ConcurrentDictionary<int, string>()
                 
                 doc.Pages |> Seq.filter(fun page -> page.IsUsing)
@@ -107,6 +102,7 @@ module ImportM =
                 doc.Nodes 
                 |> Seq.iter(fun node -> 
                     Check.ValidMFlowPath(node, dicSameFlow)
+                    Check.CheckSameNodeType(node, dicSameNode, dicSameFlow)
 
                     let realMFlow, realName, bMyMFlow  = 
                         if(node.Name.Contains('.')) 
@@ -116,20 +112,21 @@ module ImportM =
                     let btn = node.IsEmgBtn || node.IsStartBtn || node.IsAutoBtn || node.IsResetBtn 
                     let bound = if(btn) then ExBtn
                                 else if(bMyMFlow) then ThisFlow else OtherFlow
+                    
+
+                    let seg = MSeg(realName, mySys,  bound, node.NodeType, realMFlow, node.IsDummy)
+                    seg.Update(node.Key, node.Id.Value, node.CntTX, node.CntRX)
+                    dicSeg.TryAdd(node.Key, seg) |> ignore
+
+                
                     if(node.Alias.IsSome)
                     then
-                        let seg = MSeg(realName, mySys,  bound, node.NodeType, realMFlow, node.IsDummy)
-                        seg.Update(node.Key, node.Id.Value,  node.CntTX, node.CntRX)
-                        dicSeg.TryAdd(node.Key, seg) |> ignore
-                        if(node.IsDummy |> not) then  Check.SameNode(seg, node, dicSameSeg)
-                    else
-                        let seg = MSeg(realName, mySys,  bound, node.NodeType, realMFlow, node.IsDummy)
-                        seg.Update(node.Key, node.Id.Value,  node.CntTX, node.CntRX)
-                        dicSeg.TryAdd(node.Key, seg) |> ignore
-                        if(node.IsDummy |> not) then  Check.SameNode(seg, node, dicSameSeg)
-                        
-                        
-                        )
+                        let aliasName = node.Alias.Value
+                        let aliasSeg = MSeg(aliasName, mySys, ThisFlow, seg.NodeType, seg.OwnerMFlow, false)
+                        aliasSeg.Update(node.Key, node.Id.Value, 0,0)
+                        aliasSeg.Alias <- Some(seg)
+                        dicSeg.TryUpdate(node.Key, aliasSeg, seg) |> ignore
+                    )
 
                 
               

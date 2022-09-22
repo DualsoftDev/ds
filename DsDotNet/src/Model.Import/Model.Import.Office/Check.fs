@@ -59,15 +59,17 @@ module Check =
                 then Office.ErrorName(node.Shape, 26, node.PageNum)
 
 
-        let SameNode(seg:MSeg, node:pptNode, dicSegCheckSame:ConcurrentDictionary<string, MSeg>) =
-            if(dicSegCheckSame.ContainsKey(seg.MFlowNSeg)|>not)
-            then dicSegCheckSame.TryAdd(seg.MFlowNSeg, seg)|> ignore
+        let CheckSameNodeType(node:pptNode, dicSegCheckSame:ConcurrentDictionary<string, pptNode>, dicMFlowName:ConcurrentDictionary<int, string>) =
 
-            let oldSeg = dicSegCheckSame.[seg.MFlowNSeg]
-            if((seg.NodeType = oldSeg.NodeType)|>not) 
+            let nodekey = sprintf "%s;%s" dicMFlowName.[node.PageNum] node.Name
+            if(dicSegCheckSame.ContainsKey(nodekey)|>not)
+            then dicSegCheckSame.TryAdd(nodekey, node)|> ignore
+
+            let oldNode = dicSegCheckSame.[nodekey]
+            if((node.NodeType = oldNode.NodeType)|>not) 
             then 
-                MSGError($"도형오류 :타입이 다른 같은이름이 존재합니다 \t[Page{node.PageNum}: {seg.MFlowNSeg}({seg.NodeType}) != ({oldSeg.NodeType}) ({node.Shape.ShapeName()})]")
-        
+                MSGError($"도형오류 :타입이 다른 같은이름이 존재합니다 \t[Page{node.PageNum}: {nodekey}({node.NodeType}) != ({oldNode.NodeType}) ({node.Shape.ShapeName()})]")
+
         let SameEdgeErr(parentNode:pptNode option, pptEdge:pptEdge, mEdge:MEdge, dicSameCheck:ConcurrentDictionary<string, MEdge>) = 
             let parentName = if(parentNode.IsSome) 
                              then sprintf "%s.%s"  (mEdge.Source.OwnerMFlow) (parentNode.Value.Name) 

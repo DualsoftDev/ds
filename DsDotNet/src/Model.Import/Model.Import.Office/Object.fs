@@ -56,13 +56,13 @@ module Object =
                                     NameUtil.GetValidName(call)
 
             member x.ToTextInMFlow() = 
-                                         if(Bound.ThisFlow = bound) 
-                                                then x.SegName
-                                                else x.MFlowNSeg
+                                            if(Bound.ThisFlow = bound) 
+                                            then x.SegName
+                                            else x.MFlowNSeg
 
             ///금칙 문자 및 선두숫자가 있으면 "" 로 이름 앞뒤에 배치한다.
             ///Alias 는 무조건 "" 로 이름 앞뒤에 배치
-            member x.SegName  = sprintf "%s" (if(this.IsAlias) then this.Alias.Value.Name else x.ValidName)
+            member x.SegName  = sprintf "%s" x.ValidName//(if(this.IsAlias) then x.ValidName else this.Alias.Value.ValidName)
             member x.MFlowNSeg= sprintf "%s.%s"  ownerMFlow x.ValidName
             member x.FullName = sprintf "%s.%s.%s" baseSystem.Name  ownerMFlow x.ValidName  
             member x.PathName = sprintf "%s(%s)" x.FullName (if(x.Parent.IsSome) then x.Parent.Value.Name else "Root")
@@ -203,9 +203,12 @@ module Object =
             member x.AddDummySeg(seg) = dummySeg.TryAdd(seg) |> ignore 
 
             member x.UsedMSegs   = x.UsedSegs   |> Seq.cast<MSeg>
-            member x.CallSegs() = x.UsedMSegs
+            member x.CallSegs() = 
+                                        x.UsedMSegs
                                         |> Seq.filter(fun seg -> seg.NodeType.IsCall)
                                         |> Seq.filter(fun seg -> seg.Bound = ThisFlow)
+                                        |> Seq.map(fun seg -> if seg.IsAlias then seg.Alias.Value else seg)
+                                        |> Seq.cast<MSeg>
                                         |> Seq.distinctBy(fun seg -> seg.FullName)
 
 

@@ -17,8 +17,8 @@ module CoreFlow =
         //ChildFlow 일 경우 : 인과처리 대상 DAG 의 Head 부분
         //RootFlow  일 경우 : 인과처리 아님 Spare
         let singleNodes = HashSet<IVertex>() 
-        let srcs = edges |> Seq.map(fun edge -> edge.Source) |> Seq.distinct    
-        let tgts = edges |> Seq.map(fun edge -> edge.Target) |> Seq.distinct
+        let srcs = edges.GetStartCaual() |> Seq.map(fun edge -> edge.Source) |> Seq.distinct    
+        let tgts = edges.GetStartCaual() |> Seq.map(fun edge -> edge.Target) |> Seq.distinct
 
         interface IFlow with
             member _.Edges = edges
@@ -40,9 +40,9 @@ module CoreFlow =
         ///Start Edge 기준으로 이전 Vertex 들을 찾음
         member x.PrevNodes(currNode:IVertex) = edges.GetPrevNodes(currNode)
         ///Flow Edge 연결상 시작점
-        member x.HeadNodes = srcs |> Seq.except tgts
+        member x.HeadNodes = (srcs |> Seq.except tgts) |> Seq.append singleNodes
         ///Flow Edge 연결상 끝점
-        member x.TailNodes = tgts |> Seq.except srcs
+        member x.TailNodes = (tgts |> Seq.except srcs) |> Seq.append singleNodes
        
          
     [<DebuggerDisplay("{name}")>]

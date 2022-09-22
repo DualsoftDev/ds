@@ -102,7 +102,7 @@ class SkeletonListener : dsBaseListener
 
 
     /// <summary>CallPrototype </summary>
-    override public void EnterCall(CallContext ctx)
+    override public void EnterCallDef(CallDefContext ctx)
     {
         var name = ctx.identifier1().GetText().DeQuoteOnDemand();
         var label = $"{name}\n{ctx.callPhrase().GetText()}";
@@ -173,7 +173,7 @@ class SkeletonListener : dsBaseListener
             return;
 
         var hasCallPrototypeDefinition =
-            enumerateChildren<CallContext>(flowContext)
+            enumerateChildren<CallDefContext>(flowContext)
                 .Select(callCtx => callCtx.identifier1().GetText().DeQuoteOnDemand())
                 .Contains(last);
         if (hasCallPrototypeDefinition)

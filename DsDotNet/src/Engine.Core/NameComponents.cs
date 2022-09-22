@@ -111,6 +111,15 @@ public static class ParserExtension
     }
     public static object Find(this Model model, string[] fqdn) => FindAll(model, fqdn).FirstOrDefault();
 
+
+    public static IEnumerable<object> FindAll(this DsSystem system, string[] fqdn)
+    {
+        var n = fqdn;
+        if (fqdn[0] != system.Name)
+            n = fqdn.Prepend(system.Name).ToArray();
+        return system.Model.FindAll(n);
+    }
+
     public static IEnumerable<object> FindAll(this Flow flow, string name)
     {
         if (flow.InstanceMap.ContainsKey(name))
@@ -123,9 +132,18 @@ public static class ParserExtension
                 yield return cp;
         }
     }
-    public static object Find(this Flow flow, string name) => FindAll(flow, name).FirstOrDefault();
 
+    public static object Find(this Flow flow, string name) => FindAll(flow, name).FirstOrDefault();
+    public static T Find<T>(this Flow flow, string name) where T : class =>
+        (T)flow.FindAll(name).FirstOrDefault(x => x.GetType() == typeof(T));
+
+    public static object Find(this DsSystem system, string[] fqdn) => FindAll(system, fqdn).FirstOrDefault();
+    public static T Find<T>(this DsSystem system, string[] fqdn) where T : class =>
+        (T)system.FindAll(fqdn).FirstOrDefault(x => x.GetType() == typeof(T));
 
     public static T Find<T>(this Model model, string[] fqdn) where T : class =>
         (T)model.FindAll(fqdn).FirstOrDefault(x => x.GetType() == typeof(T));
 }
+
+
+

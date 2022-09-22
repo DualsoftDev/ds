@@ -158,7 +158,7 @@ partial class ElementsListener : dsBaseListener
     }
 
 
-    override public void EnterCall(CallContext ctx)
+    override public void EnterCallDef(CallDefContext ctx)
     {
         var name = ctx.identifier1().GetText().DeQuoteOnDemand();
         var label = $"{name}\n{ctx.callPhrase().GetText()}";

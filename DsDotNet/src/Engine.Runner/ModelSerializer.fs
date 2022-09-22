@@ -42,6 +42,20 @@ module internal ModelSerializerModule =
         let target = name (edge.Target :?> Named)
         $"{tab}{sources} {edge.GetOperator()} {target};"
 
+    let serializeCoin (coin:ICoin) (indent:int) =
+        let tab = getTab indent
+        match coin with
+        | :? RootCall as rc ->
+            $"{tab}{rc.Name};"
+        | :? Segment as x ->
+            $"{tab}/* {x.Name}; // -- segment */"
+        | :? SubCall as x ->
+            $"{tab}/* {x.Name}; // --subcall */"
+        | :? Child as x ->
+            $"{tab}/* {x.Name}; // --child */"
+        | _ ->
+            failwith "ERROR"
+
     let rec serializeFlow (flow:Flow) (indent:int) =
         let tab = getTab indent
         let indent = indent + 1
@@ -77,6 +91,7 @@ module internal ModelSerializerModule =
 
                 for cp in rf.CallPrototypes do
                     yield serializeCallPrototype cp indent
+
             | :? Segment as seg ->
                 let covered = seg.Edges.SelectMany(fun e -> e.Vertices)
                 let xs = seg.Children.Select(fun ch -> ch.Coin).Cast<IVertex>().Except(covered).Cast<Coin>().ToArray()
@@ -93,6 +108,9 @@ module internal ModelSerializerModule =
 
             for edge in flow.Edges do
                 yield serializeEdge edge indent
+
+            for iso in flow.IsolatedCoins do
+                yield serializeCoin iso indent
 
             let covered = flow.Edges.SelectMany(fun e -> e.Vertices).Distinct().ToArray()
             for cf in flow.ChildVertices.OfType<SegmentBase>() do

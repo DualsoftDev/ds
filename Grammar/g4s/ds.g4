@@ -105,7 +105,7 @@ safetyValues: identifier123 (SEIMCOLON identifier123)*;
 
 flow
     : flowProp identifier1 '=' LBRACE (
-        causal|parenting|call
+        causal|parenting|callDef
         |identifier12Listing
         |safetyBlock|alias)* RBRACE     // |flowTask
     ;
@@ -128,10 +128,10 @@ identifier12Listing: (identifier1Listing | identifier2Listing);
 parenting: identifier1 EQ LBRACE (causal|identifier12Listing)* RBRACE;
 
 // A23 = { M.U ~ S.S3U ~ _ }
-call: identifier1 EQ LBRACE callPhrase RBRACE;
+callDef: identifier1 EQ LBRACE callPhrase RBRACE;
 callPhrase: callComponents TILDE callComponents;    // (TILDE callComponents)?;
     callComponents: identifier123DNF*;
-calls: (call SEIMCOLON)+ ;
+callDefs: (callDef SEIMCOLON)+ ;
 
 buttons:emergencyButtons|autoButtons|startButtons|resetButtons;
 emergencyButtons :'[' ('emg_in'|'emg') ']'     EQ buttonBlock;

@@ -100,7 +100,11 @@ class ModelListener : dsBaseListener
                 {
                     var (flowName, lastName) = (ns[0], ns[1]);
                     var flow = _system.RootFlows.FirstOrDefault(rf => rf.Name == flowName);
-                    var target = flow.Find(ns[1]);
+                    var targets = flow.FindAll(ns[1]).ToArray();    // call def 과 call instance 둘다 존재할 수 있다.
+                    var target = 
+                        targets.Length > 1
+                        ? flow.Find<CallPrototype>(ns[1])   // 복수 존재시, call def 를 우선
+                        : targets.FirstOrDefault();
                     switch (target)
                     {
                         case null:

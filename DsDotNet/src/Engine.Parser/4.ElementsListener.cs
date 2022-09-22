@@ -17,36 +17,40 @@ enum NodeType
 
 abstract class NodeBase
 {
-    public string label;
     public string[] parentIds;
     public NodeType type;
-    public NodeBase(string label, string[] parentIds, NodeType type)
+    public NodeBase(string[] parentIds, NodeType type)
     {
-        this.label = label;
         this.parentIds = parentIds;
         this.type = type;
     }
+    public abstract string GetLabel();
 }
 
 class Node : NodeBase
 {
     public string[] ids;
+    public string label;
     public Node(string[] ids, string label, string[] parentIds, NodeType type)
-        : base(label, parentIds, type)
+        : base(parentIds, type)
     {
         Assert(ids.Length <= 4);        // MAX: Sys > Flow > Parenting > Name
         this.ids = ids;
+        this.label = label;
     }
-
+    public override string GetLabel() => label;
 }
 class NodeConjunction : NodeBase
 {
     public string[][] idss;
-    public NodeConjunction(string[][] idss, string label, string[] parentIds, NodeType type)
-        : base(label, parentIds, type)
+    public string[] labels;
+    public NodeConjunction(string[][] idss, string[] labels, string[] parentIds, NodeType type)
+        : base(parentIds, type)
     {
         this.idss = idss;
+        this.labels = labels;
     }
+    public override string GetLabel() => string.Join(", ", labels);
 }
 
 

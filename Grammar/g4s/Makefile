@@ -29,7 +29,7 @@ test:
 	@echo taskFlow
 	$(grun) ds program < g4test/taskFlow.ds
 	@echo call
-	$(grun) ds calls < g4test/calls.txt
+	$(grun) ds program < g4test/call.ds
 	@echo ppt
 	$(grun) ds program < g4test/ppt.ds
 

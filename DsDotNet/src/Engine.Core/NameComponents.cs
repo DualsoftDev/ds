@@ -83,7 +83,6 @@ public static class ParserExtension
         return seg;
     }
 
-
     public static IEnumerable<object> FindAll(this Model model, string[] fqdn)
     {
         var n = fqdn.Length;
@@ -106,18 +105,25 @@ public static class ParserExtension
         }
 
         var flow = model.FindFlow(fqdn);
-        if (flow == null)
-            yield break;
+        if (flow != null)
+            foreach(var x in flow.FindAll(fqdn[2]))
+                yield return x;
+    }
+    public static object Find(this Model model, string[] fqdn) => FindAll(model, fqdn).FirstOrDefault();
 
-        var name = fqdn[2];
+    public static IEnumerable<object> FindAll(this Flow flow, string name)
+    {
         if (flow.InstanceMap.ContainsKey(name))
             yield return flow.InstanceMap[name];
 
-        var cp = flow.CallPrototypes.FirstOrDefault(cp => cp.Name == name);
-        if (cp != null)
-            yield return cp;
+        if (flow is RootFlow rootFlow)
+        {
+            var cp = rootFlow.CallPrototypes.FirstOrDefault(cp => cp.Name == name);
+            if (cp != null)
+                yield return cp;
+        }
     }
-    public static object Find(this Model model, string[] fqdn) => FindAll(model, fqdn).FirstOrDefault();
+    public static object Find(this Flow flow, string name) => FindAll(flow, name).FirstOrDefault();
 
 
     public static T Find<T>(this Model model, string[] fqdn) where T : class =>

@@ -576,12 +576,14 @@ namespace Engine
 
         public static string MyOtherFlowCall = @"
 [sys] MY = {
-    [flow] F1 = {
-        R3 = { C1; }
-        C1  = {EX.F1_C1.TX   ~ EX.F1_C1.RX}
-    }
     [flow] F2 = {
         F1.C1 > F1.R3;
+        R1;
+    }
+    [flow] F1 = {
+        R3 = { C1; F2.R1; }
+        //R3;
+        C1  = {EX.F1_C1.TX   ~ EX.F1_C1.RX}
     }
 }
 [sys] EX = {

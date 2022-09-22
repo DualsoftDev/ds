@@ -45,6 +45,8 @@ module FsSegmentModule =
         member x.TagPReset = x.BitPReset :?> TagP
         override x.Epilogue() =
             base.Epilogue()
+
+            let xxx = segmentName
             
             let n = x.QualifiedName
             this.Going <- TagE(cpu, this, $"Going_{n}", TagType.Going)

@@ -1,3 +1,8 @@
+using Engine.Core;
+
+using System.Reflection.Emit;
+using System.Xml.Linq;
+
 using Nodes = System.Collections.Generic.List<System.Object>;
 
 namespace Engine.Parser;
@@ -97,10 +102,11 @@ partial class ElementsListener
             if (append && isArray)
             {
                 var idss = array.Select(n => n.ids).ToArray();
+                var labels = array.Select(n => n.label).ToArray();
                 var id = string.Join(",", idss.Select(ids => ids.Combine()));
                 cnfTokens.Add(id);
 
-                var conj = new NodeConjunction(idss, label: "", parentIds: new[] { flowOfName }, NodeType.conjunction);      // todo check flowOfName
+                var conj = new NodeConjunction(idss, labels, parentIds: new[] { flowOfName }, NodeType.conjunction);      // todo check flowOfName
                 this.nodes[id] = conj;
             }
             else
@@ -175,27 +181,32 @@ partial class ElementsListener
 
     IVertex[] FindVertices(SegmentBase parenting, NodeBase nodebase)
     {
-        IVertex helper(string[] spec)
+        IVertex helper(string[] spec, string label)
         {
             if (parenting != null && parenting.InstanceMap.ContainsKey(spec.Combine()))
                 return parenting.InstanceMap[spec.Combine()] as IVertex;
 
-            var obj = _model.Find(spec);
-            if (obj is IVertex vtx)
-                return vtx;
-            return null;
+            RootFlow flow = _model.FindFlow(nodebase.parentIds);
+            var obj = flow.Find(label);
+            if (obj == null)
+                obj = _model.Find(spec);
+
+            return obj as IVertex;
         }
 
         switch (nodebase)
         {
             case Node node:
-                return new[] { helper(node.ids) };
+                return new[] { helper(node.ids, node.label) };
 
             case NodeConjunction nodeConjunction:
                 return
-                    nodeConjunction.idss
-                    .Select(helper)
-                    .ToArray();
+                    (   from n in Enumerable.Range(0, nodeConjunction.idss.Length-1)
+                        let ids = nodeConjunction.idss[n]
+                        let label = nodeConjunction.labels[n]
+                        select helper(ids, label)
+                    ).ToArray()
+                    ;
         }
         throw new NotImplementedException("ERROR");
     }
@@ -236,10 +247,12 @@ partial class ElementsListener
 
                     var lvs = FindVertices(_parenting, l);
                     var rvs = FindVertices(_parenting, r);
+                    Assert(lvs.All(l => l is not CallPrototype));
+                    Assert(rvs.All(l => l is not CallPrototype));
 
                     Assert(l != null && r != null);   // 'node not found');
-                    if (lvs.Length == 0) throw new ParserException($"Parse error: {l.label} not found", ll);
-                    if (rvs.Length == 0) throw new ParserException($"Parse error: {r.label} not found", rr);
+                    if (lvs.Length == 0) throw new ParserException($"Parse error: {l.GetLabel()} not found", ll);
+                    if (rvs.Length == 0) throw new ParserException($"Parse error: {r.GetLabel()} not found", rr);
 
                     Edge e = null;
                     switch (op)

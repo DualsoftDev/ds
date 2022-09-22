@@ -1,4 +1,5 @@
 using Engine.Common;
+using Engine.Core;
 
 namespace Engine.Parser;
 
@@ -96,21 +97,28 @@ class ModelListener : dsBaseListener
                 break;
             case 2:
                 // A.B => my_system_other_flow.{call, real}
-            case 3:
                 {
-                    if (ns.Length == 2)
-                        ns = ns.Prepend(_system.Name).ToArray();    // flow.seg => sys.flow.seg
-
-                    var target = _model.Find(ns);
+                    var (flowName, lastName) = (ns[0], ns[1]);
+                    var flow = _system.RootFlows.FirstOrDefault(rf => rf.Name == flowName);
+                    var target = flow.Find(ns[1]);
                     switch (target)
                     {
                         case null:
                             throw new ParserException($"ERROR : failed to find [{ns.Combine()}]", ctx);
 
-                        case SegmentBase exSeg when _parenting != null:
+                        case SegmentBase exSeg: //when _parenting != null:
                             var exSegCall = new ExSegment(ns.Combine(), exSeg);
-                            var child = new Child(exSegCall, _parenting);
-                            instanceMap.Add(ns.Combine(), child);
+                            if (_parenting == null)
+                                instanceMap.Add(ns.Combine(), exSegCall);
+                            else
+                            {
+                                var child = new Child(exSegCall, _parenting);
+                                instanceMap.Add(ns.Combine(), child);
+                            }
+                            break;
+
+                        case CallPrototype cp:
+                            createInstanceFromCallPrototype(cp, ns.Combine(), instanceMap);
                             break;
 
                         default:

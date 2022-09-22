@@ -72,7 +72,7 @@ public class RootFlow : Flow
 
     public TagE Auto { get; }
 
-    public IEnumerable<SegmentBase> RootSegments => ChildVertices.OfType<SegmentBase>();
+    public IEnumerable<SegmentBase> RootSegments => ChildVertices.OfType<SegmentBase>().Where(seg => !(seg is ExSegment));
 
     public override string ToText() => $"{QualifiedName}, #seg={RootSegments.Count()}, #chilren={ChildVertices.Count()}, #edges={Edges.Count()}";
 

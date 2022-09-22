@@ -28,7 +28,7 @@ qstring: STRING_LITERAL EOF;
 system: sysProp identifier1 '=' sysBlock;    // [sys] Seg = {..}
 sysProp: '[' 'sys' ']';
 sysBlock
-    : LBRACE (flow|identifier1Listing|parenting|causal|call|buttons)* RBRACE       // acc|sysTask|macro
+    : LBRACE (flow|buttons)* RBRACE       // identifier1Listing|parenting|causal|call
     ;
 
 
@@ -120,7 +120,9 @@ aliasMnemonic: identifier1;
 
 
 identifier1Listing: identifier1 SEIMCOLON;     // A;
-parenting: identifier1 EQ LBRACE (causal|identifier1Listing)* RBRACE;
+identifier2Listing: identifier2 SEIMCOLON;     // A;
+identifier12Listing: (identifier1Listing | identifier2Listing);
+parenting: identifier1 EQ LBRACE (causal|identifier12Listing)* RBRACE;
 
 // A23 = { M.U ~ S.S3U ~ _ }
 call: identifier1 EQ LBRACE callPhrase RBRACE;

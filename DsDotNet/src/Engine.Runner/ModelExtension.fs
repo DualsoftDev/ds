@@ -138,7 +138,7 @@ module internal ModelPrintModule =
 type ModelExt =
     [<Extension>]
     static member Epilogue(model:Model, data:DataBroker) =
-        for segment in getRootSegments model do
+        for segment in getRootSegments model |> Seq.distinct do
             segment.Epilogue()
 
         renameBits(model)

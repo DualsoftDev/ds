@@ -5,7 +5,8 @@ namespace Engine.Parser;
 
 /// <summary>
 /// System, Flow, Task, Cpu
-/// Parenting, Listing, CallPrototype, Aliasing 구조까지 생성
+/// Parenting(껍데기만), Listing(root flow toplevel 만),
+/// CallPrototype, Aliasing 구조까지 생성
 /// </summary>
 class SkeletonListener : dsBaseListener
 {

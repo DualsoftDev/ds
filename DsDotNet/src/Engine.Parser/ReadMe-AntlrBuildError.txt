@@ -10,3 +10,17 @@ Engine.Parser project file 은 paket 적용을 받지 말아야 한다.
 	- System.Runtime.CompilerServices.Unsafe
 
 
+Sys0
+	Flow0
+		Parenting0
+			MyCall;
+			Flow1.Call;
+			Flow1.Real;
+		EmptySegment;
+		MyCall;
+		Flow1.Call;
+		Flow1.Real;
+
+		MyCall = {Sys1.Flow0.Seg0 ~ Sys1.Flow0.Seg0}
+	Flow1
+		

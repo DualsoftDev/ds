@@ -10,6 +10,9 @@ public abstract class Bit : Named, IBit
     public Cpu Cpu { get; set; }
     public Bit(Cpu cpu, string name, bool bit = false) : base(name)
     {
+        if (name == "Going_MY.F1.R3")
+            Console.WriteLine();
+
         Assert(cpu != null);
 
         _value = bit;

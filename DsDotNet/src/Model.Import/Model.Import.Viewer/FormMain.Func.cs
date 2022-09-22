@@ -183,7 +183,7 @@ namespace Dual.Model.Import
 
         internal void CreateNewTabViewer(MSys sys, bool isDemo = false)
         {
-            List<MFlow> flows = sys.RootFlows().Cast<MFlow>().ToList();
+            List<MFlow> flows = sys.RootFlows().Cast<MFlow>().OrderBy(o => o.Page).ToList();
             //if (isDemo)
             //    flows = sys.RootFlows.Values.ToList();
             //else

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using static Engine.Common.FS.MessageEvent;
 using static Model.Import.Office.Object;
@@ -167,22 +168,8 @@ namespace Dual.Model.Import
             richTextBox_Debug.AppendText($"{DateTime.Now} : Log Clear");
         }
 
-        private async void button_TestORG_Click(object sender, EventArgs e)
-        {
-            button_TestORG.Enabled = false;
-            button_TestStart.Enabled = false;
-            await SimSeg.TestORG(_model);
-            button_TestORG.Enabled = true;
-            button_TestStart.Enabled = true;
-        }
-        private async void button_TestStart_Click(object sender, EventArgs e)
-        {
-            button_TestORG.Enabled = false;
-            button_TestStart.Enabled = false;
-            await SimSeg.TestStart(_model);
-            button_TestORG.Enabled = true;
-            button_TestStart.Enabled = true;
-        }
+      
+      
 
         private void button_comfile_Click(object sender, EventArgs e)
         {
@@ -222,5 +209,24 @@ namespace Dual.Model.Import
         {
             RefreshText();
         }
+        private async void button_TestStart_Click(object sender, EventArgs e)
+        {
+            button_TestORG.Enabled = false;
+            button_TestStart.Enabled = false;
+            await SimSeg.TestStart(_model);
+            button_TestORG.Enabled = true;
+            button_TestStart.Enabled = true;
+        }
+
+        private async void button_TestORG_Click(object sender, EventArgs e)
+        {
+            await Task.Run(async () =>
+            {
+                await Task.Delay(100);
+
+
+            });
+        }
+
     }
 }

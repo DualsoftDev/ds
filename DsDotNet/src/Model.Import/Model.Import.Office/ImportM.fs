@@ -138,7 +138,6 @@ module ImportM =
                                 if(mySys.Name = name) then Office.ErrorPPT(ErrorCase.Name, 31, $"시스템이름 : {mySys.Name}", pageNum, $"페이지이름 : {name}")
                                 let mFlow  = MFlow(name, pageNum)
                                 dicFlow.TryAdd(pageNum, mFlow) |> ignore
-
                                 if(mySys.AddFlow(mFlow)|>not) 
                                 then 
                                     Office.ErrorPPT(Page, 21, $"{name},  Same Page->{(mySys.GetFlow(name):?>MFlow).Page}",  pageNum)
@@ -184,10 +183,10 @@ module ImportM =
                                 let cSeg = dicSeg.[child.Key]
                                 pSeg.ChildFlow.AddSingleNode(cSeg) |> ignore
                                 dicFlow.[parent.PageNum].RemoveSingleNode(cSeg) |> ignore
-                               // child.ExistChildEdge <- true
                                 )
                 )
-            
+
+             
             
                 //edge 리스트 만들기 (pptEdge를 변환하여 dicEdge에 등록)
                 doc.Edges 
@@ -210,6 +209,16 @@ module ImportM =
                                 else 
                                     convertEdge(edge)
                                 )
+
+                //Root Flow AddSingleNode
+                doc.Nodes 
+                |> Seq.filter(fun node -> node.IsDummy|>not)
+                |> Seq.filter(fun node -> dicEdge.Keys.GetNodes().Contains(dicSeg.[node.Key])|>not)
+                |> Seq.iter(fun node -> 
+                                let mFlow =  dicFlow.[node.PageNum]
+                                mFlow.AddSingleNode(dicSeg.[node.Key]) |> ignore
+                      )
+            
 
                 //NoEdge child 처리
                 doc.Parents

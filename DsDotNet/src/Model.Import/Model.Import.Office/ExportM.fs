@@ -115,7 +115,7 @@ module ExportM =
                 for sys in  model.Systems do
                     yield sprintf "[%s] %s = {"  TextSystem sys.ValidName
                     let sys = sys :?> MSys
-                    let flows = sys.RootFlows() |> Seq.cast<MFlow>
+                    let flows = sys.OrderPageRootFlows()
                     for flow in flows do
                         //MFlow 출력
 
@@ -179,7 +179,7 @@ module ExportM =
                 for sys in model.Systems do
                     yield sprintf "\t[%s] Cpu_%s = {" TextCpu sys.ValidName
                     let sys = sys :?> MSys
-                    let flows = sys.RootFlows() |> Seq.cast<MFlow>
+                    let flows = sys.OrderPageRootFlows()
                     //my CPU
                     for flow in flows do    
                         yield sprintf "\t\t%s.%s;" sys.ValidName (flow.ValidName)
@@ -198,7 +198,7 @@ module ExportM =
                 for sys in model.Systems do    
                     yield sprintf "[%s] = {"  TextAddress
                     let sys = sys :?> MSys
-                    let flows = sys.RootFlows() |> Seq.cast<MFlow>
+                    let flows = sys.OrderPageRootFlows()
                     for flow in flows do
                         for callSeg in flow.CallSegs() do
                             for index in [|1..callSeg.MaxCnt|] do
@@ -247,8 +247,8 @@ module ExportM =
                     yield sprintf "//DTS auto generation %s ExSegs"sys.ValidName
                     yield sprintf "//////////////////////////////////////////////////////"
                     yield sprintf "[%s] EX = {" TextSystem
-                    let flows = sys.RootFlows() |> Seq.cast<MFlow>
                     let sys = sys :?> MSys
+                    let flows = sys.OrderPageRootFlows()
                     for flow in flows do
                             
                         // Call InterLock
@@ -267,8 +267,8 @@ module ExportM =
                         //for exSeg in flow.ExRealSegs() do
                         //    yield sprintf "\t[%s] %s = { EX; }"  TextFlow (exSeg.ToCallText()) 
                     //Ex 버튼 출력
-                    for exSeg in sys.BtnSegs() do
-                        yield sprintf "\t[%s] %s = { %s; }"  TextFlow exSeg.SegName  (getTRXs ([exSeg], TX ,false)|> String.concat "; ")
+                    for btn in sys.BtnSegs() do
+                        yield sprintf "\t[%s] %s = { %s; }"  TextFlow btn.SegName  (getTRXs ([btn], TX ,false)|> String.concat "; ")
 
                     yield "}"
                     yield ""

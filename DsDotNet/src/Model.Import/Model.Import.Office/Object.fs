@@ -101,7 +101,9 @@ module Object =
             member x.IsChildExist = mChildFlow.Nodes.Any()
             member x.IsChildEmpty = x.IsChildExist|>not
             member x.IsRoot =  x.Parent.IsSome && x.Parent.Value.Bound = ThisFlow
-            member x.UIKey:string =  $"{x.Name};{x.Key}"
+            member x.UIKey:string =  
+                                let name = if(x.IsAlias) then x.Alias.Value.Name else x.Name
+                                $"{name};{x.Key}"
             member val Key : string = "" with get, set
             member val Parent : MSeg option = None with get, set
             member val S : string option = None    with get, set
@@ -123,15 +125,14 @@ module Object =
             member x.Nodes = [src;tgt]
             member x.Causal = causal
             
-            member x.ToCheckText() =    match causal with
-                                        |SEdge |SPush |  SReset-> "Start"
-                                        |REdge |RPush |  Interlock-> "Reset"
+           
 
             member x.ToText() = $"{src.SegName}  {causal.ToText()}  {tgt.SegName}"
             member x.ToCheckText(parentName:string) = 
-                            let srcName = if(src.IsAlias) then src.Alias.Value.Name else src.ToCallText()
-                            let tgtName = if(tgt.IsAlias) then tgt.Alias.Value.Name else tgt.ToCallText()
-                            $"[{parentName}]{srcName}  {x.ToCheckText()}  {tgtName}"
+                            let  checkText = match causal with
+                                             |SEdge |SPush |  SReset-> "Start"
+                                             |REdge |RPush |  Interlock-> "Reset"
+                            $"[{parentName}]{src.ToCallText()}  {checkText}  {tgt.ToCallText()}"
 
             member x.GetSegs() = [src;tgt]
     
@@ -259,14 +260,11 @@ module Object =
             member val Debug = false   with get, set
             member val Active = active with get, set
             member val SystemID = -1   with get, set
+            member x.OrderPageRootFlows() = 
+                this.RootFlows() 
+                 |> Seq.cast<MFlow>
+                 |> Seq.sortBy(fun flow -> flow.Page) 
 
-            //member x.AddFlowPage(flow:RootFlow, page:int) = 
-            //    //test ahn
-            //    //mFlows.TryAdd(page, flow :?> MFlow) |> ignore
-            //    x.AddFlow(flow);
-
-            //member x.GetFlow(page:int)      = mFlows.[page]
-            //member x.MFlows      = mFlows
             member x.SingleNodes   = this.RootFlows() 
                                         |> Seq.collect(fun flow -> flow.Singles)
                                         |> Seq.cast<MSeg>

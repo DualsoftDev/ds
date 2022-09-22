@@ -306,10 +306,10 @@ namespace Engine
             Rear_Cyl_Push_RET <||> Rear_Cyl_Push_ADV;
             Rear_Pos_Sen > Rear_Cyl_Push_ADV;
         }
-        Rear_Cyl_Push_ADV     = {EX.Rear_Rear_Cyl_Push_ADV.TX    ~    EX.Rear_Rear_Cyl_Push_ADV.RX}
-        Rear_Cyl_Push_RET     = {EX.Rear_Rear_Cyl_Push_RET.TX    ~    EX.Rear_Rear_Cyl_Push_RET.RX}
-        Rear_Con_W     = {EX.Rear_Rear_Con_W.TX    ~    _}
-        Rear_Pos_Sen     = {_    ~    EX.Rear_Rear_Pos_Sen.RX}
+        Rear_Cyl_Push_ADV = {EX.Rear_Rear_Cyl_Push_ADV.TX    ~    EX.Rear_Rear_Cyl_Push_ADV.RX}
+        Rear_Cyl_Push_RET = {EX.Rear_Rear_Cyl_Push_RET.TX    ~    EX.Rear_Rear_Cyl_Push_RET.RX}
+        Rear_Con_W        = {EX.Rear_Rear_Con_W.TX    ~    _}
+        Rear_Pos_Sen      = {_    ~    EX.Rear_Rear_Pos_Sen.RX}
     }
     [flow] Work = {
         작업공정 = {
@@ -323,13 +323,13 @@ namespace Engine
             Front_Usb_Cyl_RET > Front_1Stopper_RET;
             EX.Work_Work.TR > Front_Usb_Cyl_RET;
         }
-        Front_Usb_Cyl_RET     = {EX.Work_Front_Usb_Cyl_RET.TX    ~    EX.Work_Front_Usb_Cyl_RET.RX}
-        Front_Con_W     = {EX.Work_Front_Con_W.TX    ~    _}
-        Front_1Stopper_Adv     = {EX.Work_Front_1Stopper_Adv.TX    ~    EX.Work_Front_1Stopper_Adv.RX}
-        Front_Pos_Sen     = {_    ~    EX.Work_Front_Pos_Sen.RX}
-        Front_1Stopper_RET     = {EX.Work_Front_1Stopper_RET.TX    ~    EX.Work_Front_1Stopper_RET.RX}
-        Front_Usb_Cyl_ADV     = {EX.Work_Front_Usb_Cyl_ADV.TX    ~    EX.Work_Front_Usb_Cyl_ADV.RX}
-        Front_1pos_Sen     = {_    ~    EX.Work_Front_1pos_Sen.RX}
+        Front_Usb_Cyl_RET  = {EX.Work_Front_Usb_Cyl_RET.TX     ~    EX.Work_Front_Usb_Cyl_RET.RX}
+        Front_Con_W        = {EX.Work_Front_Con_W.TX           ~    _}
+        Front_1Stopper_Adv = {EX.Work_Front_1Stopper_Adv.TX    ~    EX.Work_Front_1Stopper_Adv.RX}
+        Front_Pos_Sen      = {_                                ~    EX.Work_Front_Pos_Sen.RX}
+        Front_1Stopper_RET = {EX.Work_Front_1Stopper_RET.TX    ~    EX.Work_Front_1Stopper_RET.RX}
+        Front_Usb_Cyl_ADV  = {EX.Work_Front_Usb_Cyl_ADV.TX     ~    EX.Work_Front_Usb_Cyl_ADV.RX}
+        Front_1pos_Sen     = {_                                ~    EX.Work_Front_1pos_Sen.RX}
     }
     [flow] Model_Auto = {
         SSSS > Rear.제품공급;
@@ -394,28 +394,24 @@ namespace Engine
     }
 }
 [addresses] = {
-    EX.Rear_Rear_Cyl_Push_ADV.TX                 = (, , )
-    EX.Rear_Rear_Cyl_Push_ADV.RX                 = (, ,)
-    EX.Rear_Rear_Cyl_Push_RET.TX                 = (, , )
-    EX.Rear_Rear_Cyl_Push_RET.RX                 = (, ,)
-    EX.Rear_Rear_Con_W.TX                        = (, , )
-    EX.Rear_Rear_Pos_Sen.RX                      = (, ,)
-    EX.Work_Work.TR                              = (,,)
-    EX.Work_Front_Usb_Cyl_RET.TX                 = (, , )
-    EX.Work_Front_Usb_Cyl_RET.RX                 = (, ,)
-    EX.Work_Front_Con_W.TX                       = (, , )
-    EX.Work_Front_1Stopper_Adv.TX                = (, , )
-    EX.Work_Front_1Stopper_Adv.RX                = (, ,)
-    EX.Work_Front_Pos_Sen.RX                     = (, ,)
-    EX.Work_Front_1Stopper_RET.TX                = (, , )
-    EX.Work_Front_1Stopper_RET.RX                = (, ,)
-    EX.Work_Front_Usb_Cyl_ADV.TX                 = (, , )
-    EX.Work_Front_Usb_Cyl_ADV.RX                 = (, ,)
-    EX.Work_Front_1pos_Sen.RX                    = (, ,)
-    //EX.AutoBTN.RX                                = (, ,)
-    //EX.EMGBTN.RX                                 = (, ,)
-    //EX.ResetBTN.RX                               = (, ,)
-    //EX.StartBTN1.RX                              = (, ,)
+    EX.Rear_Rear_Cyl_Push_ADV.TX  = (, , )
+    EX.Rear_Rear_Cyl_Push_ADV.RX  = (, ,)
+    EX.Rear_Rear_Cyl_Push_RET.TX  = (, , )
+    EX.Rear_Rear_Cyl_Push_RET.RX  = (, ,)
+    EX.Rear_Rear_Con_W.TX         = (, , )
+    EX.Rear_Rear_Pos_Sen.RX       = (, ,)
+    EX.Work_Work.TR               = (,,)
+    EX.Work_Front_Usb_Cyl_RET.TX  = (, , )
+    EX.Work_Front_Usb_Cyl_RET.RX  = (, ,)
+    EX.Work_Front_Con_W.TX        = (, , )
+    EX.Work_Front_1Stopper_Adv.TX = (, , )
+    EX.Work_Front_1Stopper_Adv.RX = (, ,)
+    EX.Work_Front_Pos_Sen.RX      = (, ,)
+    EX.Work_Front_1Stopper_RET.TX = (, , )
+    EX.Work_Front_1Stopper_RET.RX = (, ,)
+    EX.Work_Front_Usb_Cyl_ADV.TX  = (, , )
+    EX.Work_Front_Usb_Cyl_ADV.RX  = (, ,)
+    EX.Work_Front_1pos_Sen.RX     = (, ,)
 }
 
 ";
@@ -537,48 +533,62 @@ namespace Engine
 
         public static string Call3 = @"
 [sys] MY = {
-    [flow] FF = {     
-        RR > Ex1;
-        C2 |> C1;
-        RR = { C1 > C2; }
-        C1     = {EX.FF_C1.TX    ~    EX.FF_C1.RX}
-        C2     = {EX.FF_C2.TX    ~    EX.FF_C2.RX}
+    [flow] F1 = {     
+        ER1 > R1;
+        R2 = { ER2 > C1; }
+        R3 = { C1; }
+        R1 = { C1; }
+        ER1 = {EX.F1_ER1.EXT ~ EX.F1_ER1.EXT }
+        ER2 = {EX.F1_ER2.EXT ~ EX.F1_ER2.EXT }
+        C1  = {EX.F1_C1.TX   ~ EX.F1_C1.RX}
     }
 }
 
-
-
-//////////////////////////////////////////////////////
-//DTS auto generation MY ExSegs
-//////////////////////////////////////////////////////
 [sys] EX = {
-    [flow] FF_C1 = { TX > RX; }
-    [flow] FF_C2 = { TX > RX; }
+    [flow] F1_ER1 = { EXT; }
+    [flow] F1_ER2 = { EXT; }
+    [flow] F1_C1 = { TX > RX; }
 }
-
-
 
 [cpus] AllCpus = {
     [cpu] Cpu_MY = {
-        MY.FF;
+        MY.F1;
     }
     [cpu] Cpu_EX = {
-        EX.FF_C1;
-        EX.FF_C2;
+        EX.F1_ER1;
+        EX.F1_ER2;
+        EX.F1_C1;
     }
 }
 [addresses] = {
-    EX.FF_C1.TX                                  = (, , )
-    EX.FF_C1.RX                                  = (, ,)
-    EX.FF_C2.TX                                  = (, , )
-    EX.FF_C2.RX                                  = (, ,)
+    EX.F1_ER1.EXT = (,,)
+    EX.F1_ER2.EXT = (,,)
+    EX.F1_C1.TX   = (, , )
+    EX.F1_C1.RX   = (, ,)
 }
 [layouts] = {
-    MY.FF.C1 = (1395,330,179,104)
-    MY.FF.C2 = (1620,267,158,104)
+    MY.F1.C1 = (1309,405,205,83)
+    MY.F1.ER2 = (571,803,173,58)
+    MY.F1.ER1 = (297,441,173,58)
 }
 "
 ;
+
+        public static string MyOtherFlowCall = @"
+[sys] MY = {
+    [flow] F1 = {
+        R3 = { C1; }
+        C1  = {EX.F1_C1.TX   ~ EX.F1_C1.RX}
+    }
+    [flow] F2 = {
+        F1.C1 > F1.R3;
+    }
+}
+[sys] EX = {
+    [flow] F1_C1 = { TX > RX; }
+}
+";
+
 
 
     }

@@ -26,4 +26,5 @@ module ParseOKTest =
         [<Test>] member __.``ExternalSegmentCall`` () = checkParseOK(ParserTest.ExternalSegmentCall, null)
         [<Test>] member __.``ExternalSegmentCallConfusing`` () = checkParseOK(ParserTest.ExternalSegmentCallConfusing, null)
         [<Test>] member __.``Call3``         () = checkParseOK(ParserTest.Call3, null)
+        [<Test>] member __.``MyOtherFlowCall``() = checkParseOK(ParserTest.MyOtherFlowCall, null)
         [<Test>] member __.``XError``         () = checkParseOK(ParserTest.Error, "Cpu")

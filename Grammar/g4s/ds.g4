@@ -124,7 +124,7 @@ parenting: identifier1 EQ LBRACE (causal|identifier1Listing)* RBRACE;
 
 // A23 = { M.U ~ S.S3U ~ _ }
 call: identifier1 EQ LBRACE callPhrase RBRACE;
-callPhrase: callComponents TILDE callComponents (TILDE callComponents)?;
+callPhrase: callComponents TILDE callComponents;    // (TILDE callComponents)?;
     callComponents: identifier123DNF*;
 calls: (call SEIMCOLON)+ ;
 

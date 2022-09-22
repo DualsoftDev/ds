@@ -116,6 +116,9 @@ class SkeletonListener : dsBaseListener
 
     override public void EnterIdentifier1Listing(Identifier1ListingContext ctx)
     {
+        if (_parenting != null)
+            return;
+
         var name = ctx.identifier1().GetText().DeQuoteOnDemand();
         var seg = SegmentBase.Create(name, _rootFlow);
         if (_rootFlow.CallPrototypes.Any(cp => cp.Name == name) || _rootFlow.InstanceMap.ContainsKey(name))

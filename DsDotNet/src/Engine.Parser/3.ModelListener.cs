@@ -95,6 +95,7 @@ class ModelListener : dsBaseListener
                 }
                 break;
             case 2:
+                // A.B => my_system_other_flow.{call, real}
             case 3:
                 {
                     if (ns.Length == 2)

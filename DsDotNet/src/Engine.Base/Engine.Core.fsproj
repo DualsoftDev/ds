@@ -21,6 +21,7 @@
 		<Compile Include="CoreFlow.fs" />
 		<Compile Include="CoreClass.fs" />
 		<Compile Include="CoreStruct.fs" />
+		<Compile Include="CoreGraph.fs" />
 	</ItemGroup>
 
 	<ItemGroup>

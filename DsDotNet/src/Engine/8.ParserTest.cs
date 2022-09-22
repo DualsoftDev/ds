@@ -577,8 +577,10 @@ namespace Engine
         public static string MyOtherFlowCall = @"
 [sys] MY = {
     [flow] F2 = {
-        F1.C1 > F1.R3;
         R1;
+        F1.R3;          // External segment call
+        F1.C1;          // External call call
+        F1.C1 > F1.R3;
     }
     [flow] F1 = {
         R3 = { C1; F2.R1; }

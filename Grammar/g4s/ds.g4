@@ -104,7 +104,10 @@ safetyValues: identifier123 (SEIMCOLON identifier123)*;
 
 
 flow
-    : flowProp identifier1 '=' LBRACE (causal|parenting|call|identifier1Listing|safetyBlock|alias)* RBRACE     // |flowTask
+    : flowProp identifier1 '=' LBRACE (
+        causal|parenting|call
+        |identifier12Listing
+        |safetyBlock|alias)* RBRACE     // |flowTask
     ;
 flowProp : '[' 'flow' ('of' identifier1)? ']';
 

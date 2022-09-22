@@ -1,3 +1,5 @@
+using Antlr4.Runtime.Misc;
+
 using Engine.Core;
 
 using System.Windows.Forms;
@@ -74,5 +76,35 @@ namespace Engine.Parser
             }
             Console.WriteLine();
         }
+
+        /// <summary> Flow 바로 밑에 존재하는 "A.B;" 형태의 처리</summary>
+        /// 
+        /// 
+        /// <param name="ctx"></param>
+        override public void EnterIdentifier2Listing(Identifier2ListingContext ctx)
+        {
+            // parenting 이 존재할 때의 A.B 처리는 EnterParenting 에서 이미 수행했으므로 skip
+            if (_parenting != null)
+                return;
+
+            var id2 = collectNameComponents(ctx);
+            var fqdn = id2.Prepend(_system.Name).ToArray();
+            var objs = _model.FindAll(fqdn).ToArray();
+            var obj = objs.FirstOrDefault();
+            if (objs.Length > 1)        // call prototype 과, call 이 동시에 존재하는 경우
+                Console.WriteLine();
+
+            switch(obj)
+            {
+                case SegmentBase seg:
+                    break;
+                case CallPrototype cp:
+                    break;
+                default:
+                    break;
+            }
+            Console.WriteLine();
+        }
+
     }
 }

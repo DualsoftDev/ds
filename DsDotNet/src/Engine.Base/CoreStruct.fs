@@ -4,6 +4,8 @@ namespace Engine.Core
 open System.Diagnostics
 open System.Collections.Generic
 open System.Collections.Concurrent
+open CoreFlow
+open CoreClass
 
 [<AutoOpen>]
 module CoreStruct =
@@ -13,6 +15,7 @@ module CoreStruct =
         inherit SysBase(name)
         let dicRootFlow = ConcurrentDictionary<string, RootFlow>()
       
+        override x.ToText() = name
         member x.RootFlows() = dicRootFlow.Values
         member x.AddFlow(flow:RootFlow) = dicRootFlow.TryAdd(flow.Name, flow);
         member x.GetFlow(name:string)   = dicRootFlow.[name];
@@ -20,21 +23,20 @@ module CoreStruct =
         member val Active = false
         
         //시스템 버튼 소속 Flow 정보
-        member val BtnEmgSet   = ConcurrentDictionary<string, List<RootFlow>>()
-        member val BtnStartSet = ConcurrentDictionary<string, List<RootFlow>>()
-        member val BtnResetSet = ConcurrentDictionary<string, List<RootFlow>>()
-        member val BtnAutoSet  = ConcurrentDictionary<string, List<RootFlow>>()
+        member val EmergencyButtons = ConcurrentDictionary<string, List<RootFlow>>()
+        member val AutoButtons      = ConcurrentDictionary<string, List<RootFlow>>()
+        member val StartButtons     = ConcurrentDictionary<string, List<RootFlow>>()
+        member val ResetButtons     = ConcurrentDictionary<string, List<RootFlow>>()
          
     and
         [<DebuggerDisplay("{name}")>]
-        DsModel(name:string) =
+        DsModel() =
             let systems = HashSet<DsSystem>()
             let cpus    = HashSet<ICpu>()
             let vpss    = HashSet<RootFlow>()
             member x.Cpus = cpus
             /// <summary> 가상 부모 목록.  debugging 용 </summary>
             member x.VPSs = vpss
-            member x.Name = name
 
             //모델에 시스템 등록 및 삭제
             member x.Add(sys:DsSystem) = systems.Add(sys)

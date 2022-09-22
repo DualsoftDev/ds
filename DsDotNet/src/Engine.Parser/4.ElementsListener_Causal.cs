@@ -18,51 +18,58 @@ partial class ElementsListener
             List<Node> cnfNodes = new List<Node>();
             var causalContexts = enumerateChildren<CausalTokenContext>(cnf);
 
-            foreach (var t in causalContexts)
+            foreach (var cc in causalContexts)
             {
-                var text = t.GetText();
+                var ns = collectNameComponents(cc);
+                var text = cc.GetText();
                 if (text.StartsWith("#"))
                 {
-                    var node = new Node(id: text, label: text, null, NodeType.func);
+                    var node = new Node(ids: ns, label: text, null, NodeType.func);
                     cnfNodes.Add(node);
                 }
                 else if (text.StartsWith("@"))
                 {
-                    var node = new Node(id: text, label: text, null, NodeType.proc);
+                    var node = new Node(ids: ns, label: text, null, NodeType.proc);
                     cnfNodes.Add(node);
                 }
                 else
                 {
                     // count number of '.' from text
-                    var dotCount = text.Split(new[] { '.' }).Length - 1;
-                    string id = text;
-                    var taskId = $"{_system.Name}.{this.flowOfName}";
+                    var flowIds = new[] { _system.Name, this.flowOfName };
                     if (_parenting != null)
-                        taskId = $"{taskId}.{_parenting.Name}";
+                        flowIds = flowIds.Append(_parenting.Name).ToArray();
 
-                    var parentId = taskId;
-                    switch (dotCount)
-                    {
-                        case 0:
-                            id = $"{taskId}.{text}";
-                            break;
-                        case 1:
-                            id = $"{taskId}.{text}";
-                            //parentId = $"{taskId}.{text.Split(new[] { '.' })[0]}";
-                            break;
-                    }
+                    var n = ns.Length;
 
                     var nodeType = NodeType.segment;
-                    if (dotCount == 0 && ParserHelper.AliasNameMaps[_system].ContainsKey(text))
+                    var ids = n switch
+                    {
+                        1 => flowIds.Concat(ns).ToArray(),
+                        2 => new Func<string[]>(() =>
+                        {
+                            if (_system.ParserRootFlows.Any(rf => rf.Name == ns[0]))  // Sys.Flow + OtherFlow.Seg => Sys.OtherFlow.Seg
+                            {
+                                nodeType = NodeType.externalParserSegmentCall;
+                                return ns.Prepend(_system.Name).ToArray();
+                            }
+
+                            return flowIds.Concat(ns).ToArray();
+                        }).Invoke(),
+                        3 => ns,
+                        _ => throw new Exception("ERROR"),
+                    };
+
+                    if (n == 1 && _rootFlow.AliasNameMaps.ContainsKey(ns[0]))
                         nodeType = NodeType.segmentAlias;
 
-                    var node = new Node(id, label: text, parentId: taskId, nodeType);
+                    var node = new Node(ids, label: text, parentIds: flowIds, nodeType);
                     cnfNodes.Add(node);
                 }
                 foreach (var n in cnfNodes)
                 {
-                    if (!this.nodes.ContainsKey(n.id))
-                        this.nodes[n.id] = n;
+                    var key = n.ids.Combine();
+                    if (!this.nodes.ContainsKey(key))
+                        this.nodes[key] = n;
                 }
             }
             dnfNodes.Add(cnfNodes);
@@ -89,21 +96,22 @@ partial class ElementsListener
 
             if (append && isArray)
             {
-                var id = string.Join(",", array.Select(n => n.id));
+                var idss = array.Select(n => n.ids).ToArray();
+                var id = string.Join(",", idss.Select(ids => ids.Combine()));
                 cnfTokens.Add(id);
 
-                var conj = new Node(id, label: "", parentId: flowOfName, NodeType.conjunction);
+                var conj = new NodeConjunction(idss, label: "", parentIds: new[] { flowOfName }, NodeType.conjunction);      // todo check flowOfName
                 this.nodes[id] = conj;
             }
             else
             {
                 if (isArray)
-                    foreach (var id in array.Select(n => n.id))
+                    foreach (var id in array.Select(n => n.ids.Combine()))
                         cnfTokens.Add(id);
                 else
                 {
                     var token = array == null ? (x as Node) : array[0];
-                    cnfTokens.Add(token.id);
+                    cnfTokens.Add(token.ids.Combine());
                 }
             }
         }
@@ -124,9 +132,16 @@ partial class ElementsListener
 
         IEnumerable<string> split()
         {
+            if (op == "<||>")
+            {
+                yield return "<||";
+                yield return "||>";
+                yield break;
+            }
+
             foreach (var o in new[] { "||>", "<||", ">>", "<<", })
             {
-                if (op.Contains(o) && op != "<||>")
+                if (op.Contains(o))
                 {
                     yield return o;
                     op = op.Replace(o, "");
@@ -158,23 +173,31 @@ partial class ElementsListener
 
 
 
-    IVertex[] FindVertices(string context, Node node)
+    IVertex[] FindVertices(ParserSegment parenting, NodeBase nodebase)
     {
-        string specs = node.id;
-        return specs.Split(new[] { ',' }).Select(sp =>
+        IVertex helper(string[] spec)
         {
-            var spec = sp;
-            if (QpInstanceMap.ContainsKey($"{context}.{sp}"))
-                spec = $"{context}.{sp}";
-            if (!QpInstanceMap.ContainsKey(spec))
-            {
-                if (ParserHelper.AliasNameMaps[_system].ContainsKey(node.label))
-                    spec = ParserHelper.AliasNameMaps[_system][node.label];
-            }
+            if (parenting != null && parenting.InstanceMap.ContainsKey(spec.Combine()))
+                return parenting.InstanceMap[spec.Combine()] as IVertex;
 
-            var vertex = QpInstanceMap[spec] as IVertex;
-            return vertex;
-        }).ToArray();
+            var obj = _model.Find(spec);
+            if (obj is IVertex vtx)
+                return vtx;
+            return null;
+        }
+
+        switch (nodebase)
+        {
+            case Node node:
+                return new[] { helper(node.ids) };
+
+            case NodeConjunction nodeConjunction:
+                return
+                    nodeConjunction.idss
+                    .Select(helper)
+                    .ToArray();
+        }
+        throw new NotImplementedException("ERROR");
     }
 
 
@@ -187,6 +210,9 @@ partial class ElementsListener
     private void processCausal(CausalTokensDNFContext ll, CausalOperatorContext opr, CausalTokensDNFContext rr)
     {
         Trace.WriteLine($"{ll.GetText()} {opr.GetText()} {rr.GetText()}");
+
+        if (ll.GetText() == "Cp")
+            Console.WriteLine();
 
         var ls = this.addNodes(ll);
         var rs = this.addNodes(rr);
@@ -208,14 +234,12 @@ partial class ElementsListener
                     Flow flow = (Flow)_parenting ?? _rootFlow;   // target flow
                     Assert(flow.Cpu != null);
 
-                    var context = _parenting == null ? "" : CurrentPath;
-
-                    var lvs = FindVertices(context, l);
-                    var rvs = FindVertices(context, r);
+                    var lvs = FindVertices(_parenting, l);
+                    var rvs = FindVertices(_parenting, r);
 
                     Assert(l != null && r != null);   // 'node not found');
-                    if (lvs.Length == 0) throw new ParserException($"Parse error: {l.id} not found", ll);
-                    if (rvs.Length == 0) throw new ParserException($"Parse error: {r.id} not found", rr);
+                    if (lvs.Length == 0) throw new ParserException($"Parse error: {l.label} not found", ll);
+                    if (rvs.Length == 0) throw new ParserException($"Parse error: {r.label} not found", rr);
 
                     Edge e = null;
                     switch (op)
@@ -247,10 +271,8 @@ partial class ElementsListener
                             break;
                     }
                     flow.AddEdge(e);
-
                 }
             }
         }
     }
-
 }

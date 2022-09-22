@@ -4,21 +4,16 @@ namespace Engine.Parser;
 
 
 /// <summary>
-/// System, Flow, Task, Cpu
-/// Parenting, Listing, CallPrototype, 구조까지 생성
+/// ParserSystem, Flow, Task, Cpu
+/// Parenting, Listing, CallPrototype, Aliasing 구조까지 생성
 /// </summary>
 class SkeletonListener : dsBaseListener
 {
     public ParserHelper ParserHelper;
-    Model _model => ParserHelper.Model;
-    DsSystem _system { get => ParserHelper._system; set => ParserHelper._system = value; }
-    RootFlow _rootFlow { get => ParserHelper._rootFlow; set => ParserHelper._rootFlow = value; }
-    SegmentBase _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
-    /// <summary> Qualified Path Map </summary>
-    Dictionary<string, object> QpInstanceMap => ParserHelper.QualifiedInstancePathMap;
-    Dictionary<string, object> QpDefinitionMap => ParserHelper.QualifiedDefinitionPathMap;
-
-    string CurrentPath => ParserHelper.CurrentPath;
+    ParserModel _model => ParserHelper.Model;
+    ParserSystem _system { get => ParserHelper._system; set => ParserHelper._system = value; }
+    ParserRootFlow _rootFlow { get => ParserHelper._rootFlow; set => ParserHelper._rootFlow = value; }
+    ParserSegment _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
 
     public SkeletonListener(dsParser parser, ParserHelper helper)
     {
@@ -31,13 +26,13 @@ class SkeletonListener : dsBaseListener
     {
         var cpuContexts = enumerateChildren<CpuContext>(ctx);
 
-        Dictionary<string, Cpu> dict = new();
+        Dictionary<string, ParserCpu> dict = new();
 
-        Cpu createCpu(string cpuName)
+        ParserCpu createCpu(string cpuName)
         {
             if (dict.ContainsKey(cpuName))
                 return dict[cpuName];
-            var cpu = new Cpu(cpuName, ParserHelper.Model);
+            var cpu = new ParserCpu(cpuName, ParserHelper.Model);
             dict[cpuName] = cpu;
             return cpu;
         }
@@ -58,41 +53,41 @@ class SkeletonListener : dsBaseListener
 
     override public void EnterSystem(SystemContext ctx)
     {
-        var n = ctx.id().GetText();
-        _system = new DsSystem(n, _model);
-        ParserHelper.AliasNameMaps.Add(_system, new Dictionary<string, string>());
-        ParserHelper.BackwardAliasMaps.Add(_system, new Dictionary<string, string[]>());
-        Trace.WriteLine($"System: {n}");
+        var name = ctx.id().GetText().DeQuoteOnDemand();
+        _system = new ParserSystem(name, _model);
+        Trace.WriteLine($"ParserSystem: {name}");
     }
     override public void ExitSystem(SystemContext ctx) { _system = null; }
 
 
     override public void EnterFlow(FlowContext ctx)
     {
-        var flowName = ctx.id().GetText();
+        var flowName = ctx.id().GetText().DeQuoteOnDemand();
         var flowOf = ctx.flowProp().id();
 
-        var flowFqdn = $"{CurrentPath}.{flowName}";
+        var flowFqdn = $"{ParserHelper.CurrentPath}.{flowName}";
         var cpuAssigned = ParserHelper.FlowName2CpuMap.ContainsKey(flowFqdn);
-        if (!ParserHelper.IsSimulationMode && !cpuAssigned)
+        if (!ParserHelper.ParserOptions.IsSimulationMode && !cpuAssigned)
             throw new Exception($"No CPU assignment for flow [{flowFqdn}");
 
-        Cpu cpu = null;
+        ParserCpu cpu = null;
         if (cpuAssigned)
-            cpu = ParserHelper.FlowName2CpuMap[$"{CurrentPath}.{flowName}"];
+            cpu = ParserHelper.FlowName2CpuMap[flowFqdn];
         else
         {
             // simulation mode.
-            cpu = new Cpu("DummyCpu", _model);
+            cpu = new ParserCpu("DummyCpu", _model);
             ParserHelper.FlowName2CpuMap.Add(flowFqdn, cpu);
             if (ParserHelper.FlowName2CpuMap.Values.ForAll(cpu => ! cpu.IsActive))
                 cpu.IsActive = true;    // 강제로 active cpu 할당
         }
 
-        _rootFlow = new RootFlow(cpu, flowName, _system);
-        cpu.RootFlows.Add(_rootFlow);
-        QpInstanceMap.Add(CurrentPath, _rootFlow);
-        Trace.WriteLine($"Flow: {flowName}");
+        var rf = cpu.ParserRootFlows.FirstOrDefault(f => f.Name == flowName);
+        if (rf != null)
+            throw new Exception($"Duplicated flow name [{flowName}] on {rf.QualifiedName}.");
+
+        _rootFlow = new ParserRootFlow(cpu, flowName, _system);
+        cpu.ParserRootFlows.Add(_rootFlow);
     }
     override public void ExitFlow(FlowContext ctx) { _rootFlow = null; }
 
@@ -107,36 +102,122 @@ class SkeletonListener : dsBaseListener
     /// <summary>CallPrototype </summary>
     override public void EnterCall(CallContext ctx)
     {
-        var name = ctx.id().GetText();
+        var name = ctx.id().GetText().DeQuoteOnDemand();
         var label = $"{name}\n{ctx.callPhrase().GetText()}";
         var callph = ctx.callPhrase();
 
+        if (_rootFlow.CallPrototypes.Any(cp => cp.Name == name) || _rootFlow.InstanceMap.ContainsKey(name))
+            throw new Exception($"Duplicated call definition [{ParserHelper.CurrentPath}.{name}].");
+
         var call = new CallPrototype(name, _rootFlow);
-        QpDefinitionMap.Add($"{CurrentPath}.{name}", call);
+        Assert(_rootFlow.CallPrototypes.Contains(call));
     }
 
 
     override public void EnterListing(ListingContext ctx)
     {
-        var name = ctx.id().GetText();
-        var seg = SegmentBase.Create(name, _rootFlow);
-        QpDefinitionMap.Add($"{CurrentPath}.{name}", seg);
-        QpInstanceMap.Add($"{CurrentPath}.{name}", seg);
+        var name = ctx.id().GetText().DeQuoteOnDemand();
+        var seg = ParserSegment.Create(name, _rootFlow);
+        if (_rootFlow.CallPrototypes.Any(cp => cp.Name == name) || _rootFlow.InstanceMap.ContainsKey(name))
+            throw new Exception($"Duplicated listing [{ParserHelper.CurrentPath}.{name}].");
+
+        _rootFlow.InstanceMap.Add(name, seg);
     }
 
 
     override public void EnterParenting(ParentingContext ctx)
     {
         Trace.WriteLine($"Parenting: {ctx.GetText()}");
-        var name = ctx.id().GetText();
-        _parenting = SegmentBase.Create(name, _rootFlow);
-        QpInstanceMap.Add(CurrentPath, _parenting);
+        var name = ctx.id().GetText().DeQuoteOnDemand();
+        _parenting = ParserSegment.Create(name, _rootFlow);
+
+        if (_rootFlow.InstanceMap.ContainsKey(name))
+            throw new Exception($"Duplicated parenting name [{ParserHelper.CurrentPath}] on {_rootFlow.QualifiedName}.");
+        _rootFlow.InstanceMap.Add(name, _parenting);
     }
     override public void ExitParenting(ParentingContext ctx) { _parenting = null; }
 
 
+    // parenting 이 아닌, root flow 하단의 단일 root segment 는 우선 생성
+    override public void EnterCausalToken(CausalTokenContext ctx)
+    {
+        if (_parenting != null)
+            return;
+
+        var ns = collectNameComponents(ctx);
+        if (ns.Length > 1)
+            return;
+
+        var last = ns[0].DeQuoteOnDemand();
+        if (_rootFlow.AliasNameMaps.ContainsKey(ns[0]))
+            return;
+
+        if (_rootFlow.CallPrototypes.Any(cp => cp.Name == last))
+            return;
+
+        if (_rootFlow.InstanceMap.ContainsKey(last))
+            return;
+
+        // 같은 이름의 parenting 이 존재하면, 내부가 존재하는 root segemnt 이므로, skip
+        var flowContext = findFirstAncestor<FlowContext>(ctx);
+        var hasParentingDefinition =
+            enumerateChildren<ParentingContext>(flowContext)
+                .Select(parentingCtx => parentingCtx.id().GetText().DeQuoteOnDemand())
+                .Contains(last);
+        if (hasParentingDefinition)
+            return;
+
+        // 내부 없는 단순 root segment.  e.g "Vp"
+        // @sa EnterListing()
+        var seg = ParserSegment.Create(last, _rootFlow);
+        _rootFlow.InstanceMap.Add(last, seg);
+    }
 
 
+    /*
+        [alias] = {
+            Ap = { Ap1; Ap2; Ap3; }
+        }
+     */
+    override public void EnterAliasListing(AliasListingContext ctx)
+    {
+        var defs = collectNameComponents(ctx.aliasDef()); // e.g "P.F.Vp" -> [| "P"; "F"; "Vp" |]
+        var aliasMnemonics =    // e.g { Vp1; Vp2; Vp3; }
+            enumerateChildren<AliasMnemonicContext>(ctx)
+            .Select(mne => collectNameComponents(mne))
+            .Do(ns => Assert(ns.Count() == 1))      // Vp1 등은 '.' 허용 안함
+            .Select(ns => ns[0])
+            .ToArray()
+            ;
+        Assert(aliasMnemonics.Length == aliasMnemonics.Distinct().Count());
+
+        var def = (
+            defs.Length switch
+            {
+                1 => ParserHelper.GetCurrentPathComponents(defs[0]),
+                2 when defs[0] != _system.Name => defs.Prepend(_system.Name).ToArray(),
+                3 => defs,
+                _ => throw new Exception("ERROR"),
+            });
+
+
+        _rootFlow.BackwardAliasMaps.Add(def, aliasMnemonics);
+    }
+    override public void ExitAlias(AliasContext ctx)
+    {
+        var bwd = _rootFlow.BackwardAliasMaps;
+        Assert(_rootFlow.AliasNameMaps.Count() == 0);
+        Assert(bwd.Values.Count() == bwd.Values.Distinct().Count());
+        var reversed =
+            from tpl in bwd
+            let k = tpl.Key
+            from v in tpl.Value
+            select (v, k)
+            ;
+
+        foreach ((var mnemonic, var target) in reversed)
+            _rootFlow.AliasNameMaps.Add(mnemonic, target);
+    }
 
 
     override public void EnterCpu(CpuContext ctx)
@@ -153,23 +234,23 @@ class SkeletonListener : dsBaseListener
         //        var dot_ = fpc.GetChild(1).GetText();
         //        var flowName = fpc.GetChild(2).GetText();
 
-        //        var system = _model.Systems.FirstOrDefault(sys => sys.Name == systemName);
-        //        var flow = system.RootFlows.FirstOrDefault(f => f.Name == flowName);
+        //        var system = _model.ParserSystems.FirstOrDefault(sys => sys.Name == systemName);
+        //        var flow = system.ParserRootFlows.FirstOrDefault(f => f.Name == flowName);
         //        return flow;
         //    })
         //    .ToArray()
         //    ;
-        //var cpu_ = new Cpu(name, _model) { RootFlows = flows };
+        //var cpu_ = new Cpu(name, _model) { ParserRootFlows = flows };
     }
 
 
     override public void ExitProgram(ProgramContext ctx)
     {
-        foreach (var sys in _model.Systems)
+        foreach (var sys in _model.ParserSystems)
         {
-            foreach (var flow in sys.RootFlows)
+            foreach (var flow in sys.ParserRootFlows)
             {
-                foreach (var seg in flow.RootSegments)
+                foreach (var seg in flow.RootParserSegments)
                     Assert(seg.Cpu != null && seg.Cpu == flow.Cpu);
             }
         }

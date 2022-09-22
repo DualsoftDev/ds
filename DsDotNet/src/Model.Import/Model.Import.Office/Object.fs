@@ -8,6 +8,9 @@ open System.Diagnostics
 open System.Collections.Concurrent
 open System.Collections.Generic
 open Engine.Core
+open Engine.Core.CoreClass
+open Engine.Core.CoreFlow
+open Engine.Core.CoreStruct
 
 [<AutoOpen>]
 module Object =
@@ -34,13 +37,13 @@ module Object =
     and
         /// 사용자가 모델링을 통해서 만든 segment (SegEditor = User)
         [<DebuggerDisplay("{FullName}")>]
-        MSeg(name:string, baseSystem:MSys, bound:Bound, nodeType:NodeType, ownerMFlow:string, bDummy:bool) as this =
-            inherit Segment(name, ChildFlow(name))
+        MSeg(name:string, baseSystem:MSys, bound:Bound, nodeType:NodeType, rootFlow:RootFlow, bDummy:bool) as this =
+            inherit Segment(name, ChildFlow(name, rootFlow))
             let mChildFlow = (this :> Segment).ChildFlow
             let mEdges = mChildFlow.Edges |> Seq.cast<MEdge>
             let mChildSegs   = mChildFlow.Nodes |> Seq.cast<MSeg>
-
-            new (name, baseSystem, nodeType) = MSeg (name, baseSystem,  ThisFlow, nodeType, "", false)
+            let ownerMFlow = rootFlow.Name
+            new (name, baseSystem, rootFlow, nodeType) = MSeg (name, baseSystem,  ThisFlow, nodeType, rootFlow, false)
        
             member x.ChildFlow = mChildFlow 
             member x.NodeType = nodeType 
@@ -140,8 +143,8 @@ module Object =
     and
         /// MFlow : 페이지별 구성
         [<DebuggerDisplay("{Name}")>]
-        MFlow(name:string, index:int) as this  =
-            inherit RootFlow(name)
+        MFlow(name:string, system:DsSystem, index:int) as this  =
+            inherit RootFlow(name, system)
             let mRootFlow = (this :> RootFlow)
             let mEdges       = mRootFlow.Edges |> Seq.cast<MEdge>
             let mChildSegs   = mRootFlow.Nodes |> Seq.cast<MSeg>
@@ -228,6 +231,7 @@ module Object =
         MSys(name:string, active:bool) as this  =
             inherit DsSystem(name)
 
+            let systemFlow = RootFlow(name, this)
             let mutable sysSeg: System.Lazy<MSeg> = null
             let locationSet  = ConcurrentDictionary<string, System.Drawing.Rectangle>()
             let commandSet  = ConcurrentDictionary<string, string>()
@@ -235,10 +239,10 @@ module Object =
             let variableSet  = ConcurrentDictionary<string, DataType>()
             let addressSet  = ConcurrentDictionary<string, Tuple<string, string>>()
             //let noEdgesSegs = mFlows |> Seq.collect(fun f-> f.Value.NoEdgeSegs)
-            let emgSet  =  this.BtnEmgSet 
-            let startSet = this.BtnStartSet     
-            let resetSet = this.BtnResetSet 
-            let autoSet  = this.BtnAutoSet 
+            let emgSet  =  this.EmergencyButtons 
+            let startSet = this.AutoButtons     
+            let resetSet = this.StartButtons 
+            let autoSet  = this.ResetButtons 
             
             let updateBtn (btnType:BtnType, btnName, btnMFlow) = 
                 let name = NameUtil.GetValidName(btnName)
@@ -255,7 +259,7 @@ module Object =
             member x.Name = name
             member x.SysSeg =
                 if isNull sysSeg then
-                    sysSeg <- Lazy(fun () -> MSeg("(ENG)Main_"+name, x, NodeType.MY))
+                    sysSeg <- Lazy(fun () -> MSeg("(ENG)Main_"+name, x, systemFlow, MY))
                 sysSeg.Value
 
             member val Debug = false   with get, set
@@ -333,7 +337,7 @@ module Object =
 
     and 
        ImportModel(name:string) as this =
-            inherit DsModel(name)
+            inherit DsModel()
             
 
             member x.Path = name

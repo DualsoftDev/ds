@@ -84,8 +84,19 @@ class DsParser
 
         return null;
     }
+    public static T findFirstAncestor<T>(IParseTree from, bool includeMe = false) where T : IParseTree
+    {
+        var pred = (IParseTree parseTree) => parseTree is T;
+        return (T)findFirstAncestor(from, pred, includeMe);
+    }
 
 
+
+    public static string[] collectNameComponents(IParseTree from) =>
+        enumerateChildren<IdentifierContext>(from)
+            .Select(idf => idf.GetText().DeQuoteOnDemand())
+            .ToArray()
+            ;
 
     public static ParserResult getParseResult(dsParser parser)
     {
@@ -102,8 +113,6 @@ class DsParser
     public static List<IParseTree> getAllParseTrees(dsParser parser)
     {
         ParserResult r = getParseResult(parser);
-        //return [].concat.apply([], [r.rules, r.terminals, r.errors]);
-
 
         return r.rules.Cast<IParseTree>()
             .Concat(r.terminals.Cast<IParseTree>())

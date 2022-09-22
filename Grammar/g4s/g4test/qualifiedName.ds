@@ -1,0 +1,16 @@
+[sys] "my.favorite.system!!" = {
+    [flow] " my flow. " = {
+        R1 > R2;
+        C1 = {
+            EX."이상한. flow".TX,
+            EX."이상한. flow"."NameWith\"Quote"
+            ~ EX."이상한. flow"."R.X"}
+    }
+}
+[sys] EX = {
+    [flow] "이상한. flow" = {
+        TX;
+        "R.X";
+        "NameWith\"Quote";
+    }
+}

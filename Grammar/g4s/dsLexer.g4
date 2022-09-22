@@ -46,10 +46,10 @@ fragment VALID_TAG_CHAR
 
 // M.U, M.D
 segments: segmentsDNF*;
-// - Segment 규격
+// - ParserSegment 규격
 // - 0 DOT: TagName
-// - 1 DOT: TaskName.SegmentName  : mysystem 을 가정하고 있음.  필요한가?
-// - 2 DOT: System.TaskName.SegmentName
+// - 1 DOT: TaskName.ParserSegmentName  : mysystem 을 가정하고 있음.  필요한가?
+// - 2 DOT: System.TaskName.ParserSegmentName
 segment: (identifier | identifier2 | identifier3);
 
 flowPath: identifier2;

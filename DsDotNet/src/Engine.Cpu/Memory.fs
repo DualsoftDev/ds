@@ -5,3 +5,4 @@ module Memory =
 
     type Bit(name) = 
         member x.Name = name
+  

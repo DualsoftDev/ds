@@ -10,4 +10,11 @@ global using static Engine.Parser.dsParser;
 global using static Engine.Parser.DsParser;
 global using static System.Diagnostics.Debug;
 
+global using static Engine.Core.CoreClass;
+global using static Engine.Core.CoreFlow;
+global using static Engine.Core.CoreStruct;
+global using static Engine.Core.Interface;
+global using static Engine.Cpu.Cpu;
+global using TagDic = System.Collections.Generic.Dictionary<string, Engine.Parser.Tag>;
+
 namespace Engine.Parser;

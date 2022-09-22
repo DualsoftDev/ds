@@ -111,6 +111,6 @@ public class PortInfoEnd : PortInfo
     {
         // Plan 설정 이후에, Actual 센서가 이미 Plan 설정하려는 값과 동일한 상태로 먼저 바뀌어 있는 상태
         if (Actual != null && newPlanValue == Actual.Value)
-            throw new DsException($"Spatial Error: Plan[{Plan}={newPlanValue}] <> Actual[{Actual.Value}]");
+            throw new Common.DsException($"Spatial Error: Plan[{Plan}={newPlanValue}] <> Actual[{Actual.Value}]");
     }
 }

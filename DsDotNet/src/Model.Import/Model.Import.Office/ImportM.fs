@@ -23,7 +23,7 @@ module ImportM =
         let dicEdge = ConcurrentDictionary<MEdge, MSeg>()  //childEdges, parentSeg
         let dicFlow  = ConcurrentDictionary<int, MFlow>()
         let model =  ImportModel(doc.FullPath)
-        let mySys= MSys("MY", true)
+        let mySys = MSys("MY", true)
 
         let getParent(edge:pptEdge) = 
            Check.SameParent(doc, edge)
@@ -98,6 +98,20 @@ module ImportM =
               
                                     dicSameFlow.TryAdd(page.PageNum, mFlowName)|>ignore)
 
+                  
+                //MFlow 리스트 만들기
+                dicSameFlow
+                |> Seq.iter(fun flow -> 
+                                let pageNum  = flow.Key
+                                let name  = flow.Value
+                                if(mySys.Name = name) then Office.ErrorPPT(ErrorCase.Name, 31, $"시스템이름 : {mySys.Name}", pageNum, $"페이지이름 : {name}")
+                                let mFlow  = MFlow(name, mySys, pageNum)
+                                dicFlow.TryAdd(pageNum, mFlow) |> ignore
+                                if(mySys.AddFlow(mFlow)|>not) 
+                                then 
+                                    Office.ErrorPPT(Page, 21, $"{name},  Same Page->{(mySys.GetFlow(name):?>MFlow).Page}",  pageNum)
+                                )
+
                 //segment 리스트 만들기
                 doc.Nodes 
                 |> Seq.iter(fun node -> 
@@ -113,8 +127,9 @@ module ImportM =
                     let bound = if(btn) then ExBtn
                                 else if(bMyMFlow) then ThisFlow else OtherFlow
                     
+                    
 
-                    let seg = MSeg(realName, mySys,  bound, node.NodeType, realMFlow, node.IsDummy)
+                    let seg = MSeg(realName, mySys,  bound, node.NodeType, dicFlow.[node.PageNum], node.IsDummy)
                     seg.Update(node.Key, node.Id.Value, node.CntTX, node.CntRX)
                     dicSeg.TryAdd(node.Key, seg) |> ignore
 
@@ -122,26 +137,14 @@ module ImportM =
                     if(node.Alias.IsSome)
                     then
                         let aliasName = node.Alias.Value
-                        let aliasSeg = MSeg(aliasName, mySys, ThisFlow, seg.NodeType, seg.OwnerMFlow, false)
+                        let aliasSeg = MSeg(aliasName, mySys, ThisFlow, seg.NodeType, dicFlow.[node.PageNum], false)
                         aliasSeg.Update(node.Key, node.Id.Value, 0,0)
                         aliasSeg.Alias <- Some(seg)
                         dicSeg.TryUpdate(node.Key, aliasSeg, seg) |> ignore
                     )
 
                 
-              
-                //MFlow 리스트 만들기
-                dicSameFlow
-                |> Seq.iter(fun flow -> 
-                                let pageNum  = flow.Key
-                                let name  = flow.Value
-                                if(mySys.Name = name) then Office.ErrorPPT(ErrorCase.Name, 31, $"시스템이름 : {mySys.Name}", pageNum, $"페이지이름 : {name}")
-                                let mFlow  = MFlow(name, pageNum)
-                                dicFlow.TryAdd(pageNum, mFlow) |> ignore
-                                if(mySys.AddFlow(mFlow)|>not) 
-                                then 
-                                    Office.ErrorPPT(Page, 21, $"{name},  Same Page->{(mySys.GetFlow(name):?>MFlow).Page}",  pageNum)
-                                )
+            
 
                 //Safety & EMG & Start & Auto 리스트 만들기
                 doc.Nodes 

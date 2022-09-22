@@ -4,6 +4,8 @@
             C1 >> C2;
             C2 ||> C3;
             C4 <|| C5;
-             }
+        }
+        Cp = {P.F.Vp ~ P.F.Sp}
+        Cm = {P.F.Vm ~ P.F.Sm}
     }
 }

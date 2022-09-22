@@ -3,6 +3,8 @@ namespace Engine.Core
 
 open System.Diagnostics
 open System.Collections.Generic
+open Engine.Core.CoreFlow
+open Engine.Core
 
 [<AutoOpen>]
 module CoreClass =
@@ -13,6 +15,7 @@ module CoreClass =
         inherit SegBase(name,  childFlow)
         let mutable status4 = Status4.Homing
             
+        override x.ToText() = childFlow.QualifiedName
         member x.Name = name
         member x.Status4 = status4 
         member x.SetStatus(status:Status4) = 
@@ -20,6 +23,7 @@ module CoreClass =
             ChangeStatus(this, status)
 
         member x.ChildFlow = childFlow
+        member x.RootFlow = childFlow.ContainerFlow
       
     
     /// Call segment 
@@ -27,6 +31,8 @@ module CoreClass =
     type CallSeg(name:string, parent:Segment) =
         inherit CallBase(name,  parent)
         let mutable status4 = Status4.Homing
+
+        override x.ToText() = $"{parent.RootFlow.QualifiedName}.{name}({parent.Name})"
             
         member x.Name = name
         member x.Status4 = status4 

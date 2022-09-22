@@ -1,0 +1,41 @@
+[sys] L = {
+    [flow] F = {
+        Main = {
+            // 정보로서의 Call 상호 리셋
+            Ap <||> Am;
+            Bp <||> Bm;
+            Ap > Am, Bp > Bm > Ap1 > Am1, Bp1 > Bm1;
+        }
+        Ap = {A.F.Vp ~ A.F.Sp}
+        Am = {A.F.Vm ~ A.F.Sm}
+        Bp = {B.F.Vp ~ B.F.Sp}
+        Bm = {B.F.Vm ~ B.F.Sm}
+        [alias] = {
+            Ap = { Ap1; Ap2; }
+            Am = { Am1; Am2; }
+            Bp = { Bp1; Bp2; }
+            Bm = { Bm1; Bm2; }
+        }
+
+    }
+}
+[sys] A = {
+    [flow] F = {
+        Vp > Pp > Sp;
+        Vm > Pm > Sm;
+
+        Vp |> Pm |> Sp;
+        Vm |> Pp |> Sm;
+        Vp <||> Vm;
+    }
+}
+[sys] B = {
+    [flow] F = {
+        Vp > Pp > Sp;
+        Vm > Pm > Sm;
+
+        Vp |> Pm |> Sp;
+        Vm |> Pp |> Sm;
+        Vp <||> Vm;
+    }
+}

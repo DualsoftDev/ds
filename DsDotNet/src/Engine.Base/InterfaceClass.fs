@@ -8,14 +8,18 @@ open System
 module InterfaceClass =
 
     // 이름이 필요한 객체
-    type Named(name)  =
+    [<AbstractClass>]
+    type Named(name) as this =
         interface INamed with
             member _.Name = name
+            member _.ToText() = $"{name}[{this.GetType().Name}]"
         member x.Name = (x:>INamed).Name
+        //member x.ToText() = (x:>INamed).ToText()
         member x.ValidName = NameUtil.GetValidName(name)
-        member x.ToText() = $"{name}[{x.GetType().Name}]"
+        abstract ToText  :unit -> string
   
     /// 인과 연결가능 객체
+    [<AbstractClass>]
     type VertexBase(name)  =
         inherit Named(name)
         interface IVertex  

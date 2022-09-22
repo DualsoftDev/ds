@@ -1,18 +1,18 @@
+using Engine.Common;
+using static Engine.Core.CoreClass;
+using static Engine.Core.CoreFlow;
+using static Engine.Core.CoreStruct;
+
 namespace Engine.Parser;
 
 class ModelListener : dsBaseListener
 {
     #region Boiler-plates
     public ParserHelper ParserHelper;
-    Model    _model => ParserHelper.Model;
-    DsSystem _system    { get => ParserHelper._system;    set => ParserHelper._system = value; }
-    RootFlow _rootFlow  { get => ParserHelper._rootFlow;  set => ParserHelper._rootFlow = value; }
-    SegmentBase  _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
-    /// <summary> Qualified Path Map </summary>
-    Dictionary<string, object> QpInstanceMap => ParserHelper.QualifiedInstancePathMap;
-    Dictionary<string, object> QpDefinitionMap => ParserHelper.QualifiedDefinitionPathMap;
-
-    string CurrentPath => ParserHelper.CurrentPath;
+    ParserModel    _model => ParserHelper.Model;
+    ParserSystem _system    { get => ParserHelper._system;    set => ParserHelper._system = value; }
+    ParserRootFlow _rootFlow  { get => ParserHelper._rootFlow;  set => ParserHelper._rootFlow = value; }
+    ParserSegment  _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
 
     public ModelListener(dsParser parser, ParserHelper helper)
     {
@@ -22,15 +22,15 @@ class ModelListener : dsBaseListener
 
     override public void EnterSystem(SystemContext ctx)
     {
-        var name = ctx.id().GetText();
-        _system = _model.Systems.First(s => s.Name == name);
+        var name = ctx.id().GetText().DeQuoteOnDemand();
+        _system = _model.ParserSystems.First(s => s.Name == name);
     }
     override public void ExitSystem(SystemContext ctx) { this._system = null; }
 
     override public void EnterFlow(FlowContext ctx)
     {
-        var flowName = ctx.id().GetText();
-        _rootFlow = _system.RootFlows.First(f => f.Name == flowName);
+        var flowName = ctx.id().GetText().DeQuoteOnDemand();
+        _rootFlow = _system.ParserRootFlows.First(f => f.Name == flowName);
     }
     override public void ExitFlow(FlowContext ctx) { _rootFlow = null; }
 
@@ -38,8 +38,8 @@ class ModelListener : dsBaseListener
 
     override public void EnterParenting(ParentingContext ctx)
     {
-        var name = ctx.id().GetText();
-        _parenting = (SegmentBase)QpInstanceMap[$"{CurrentPath}.{name}"];
+        var name = ctx.id().GetText().DeQuoteOnDemand();
+        _parenting = (ParserSegment)_rootFlow.InstanceMap[name];
     }
     override public void ExitParenting(ParentingContext ctx) { _parenting = null; }
     #endregion Boiler-plates
@@ -48,63 +48,84 @@ class ModelListener : dsBaseListener
 
 
 
-
-
-
-
-    override public void EnterCausalPhrase(CausalPhraseContext ctx)
+    override public void EnterCausalToken(CausalTokenContext ctx)
     {
-        var names =
-            enumerateChildren<SegmentContext>(ctx)
-            .Select(segCtx => segCtx.GetText())
-            ;
+        var container = (Flow)_parenting ?? _rootFlow;
+        var instanceMap = container.InstanceMap;
+        var ns = collectNameComponents(ctx);
+        var fqdn = ns.Combine();
+        if (instanceMap.ContainsKey(fqdn))
+            return;
 
-        void createFromDefinition(object target, string n, string fqdn)
+        void createInstanceFromCallPrototype(CallPrototype cp, string callName, Dictionary<string, object> instanceMap)
         {
-            switch (target)
-            {
-                case CallPrototype cp:
-                    var call = new RootCall(n, _rootFlow, cp);
-                    QpInstanceMap.Add(fqdn, call);
-                    break;
-                default:
-                    throw new ParserException("ERROR: CallPrototype expected.", ctx);
-            }
+            object instance =
+                _parenting == null
+                ? new RootCall(callName, _rootFlow, cp)
+                : new Child(new SubCall(callName, _parenting, cp), _parenting)
+                ;
+            instanceMap.Add(callName, instance);
         }
 
-        if (_parenting == null)
+        switch (ns.Length)
         {
-            foreach (var n in names)
-            {
-                var fqdn = $"{CurrentPath}.{n}";
-                if (ParserHelper.AliasNameMaps[_system].ContainsKey(n))
+            case 1:
+                var last = fqdn.DeQuoteOnDemand();
+                if (_rootFlow.AliasNameMaps.ContainsKey(last))
                 {
-                    var targetName = ParserHelper.AliasNameMaps[_system][n];
-                    var target = QpDefinitionMap[targetName];
-                    createFromDefinition(target, n, fqdn);
+                    var aliasTarget = _rootFlow.AliasNameMaps[last];
+                    var target = _model.Find(aliasTarget);
+
+                    switch (target)
+                    {
+                        case CallPrototype cp:
+                            createInstanceFromCallPrototype(cp, last, instanceMap);
+                            break;
+                        default:
+                            throw new ParserException("ERROR: CallPrototype expected.", ctx);
+                    }
                 }
                 else
                 {
-                    if (!QpInstanceMap.ContainsKey(fqdn))
+                    var cp = _rootFlow.CallPrototypes.FirstOrDefault(cp => cp.Name == last);
+                    if (cp != null)
+                        createInstanceFromCallPrototype(cp, last, instanceMap);
+                    else if (_parenting == null)
+                        Assert(_rootFlow.InstanceMap.ContainsKey(last));
+                    else
+                        Assert(false);
+
+                }
+                break;
+            case 2:
+            case 3:
+                {
+                    if (ns.Length == 2)
+                        ns = ns.Prepend(_system.Name).ToArray();    // flow.seg => sys.flow.seg
+
+                    var target = _model.Find(ns);
+                    switch (target)
                     {
-                        var fullPrototypeName = ParserHelper.ToFQDN(n);
-                        if (QpDefinitionMap.ContainsKey(fullPrototypeName))
-                        {
-                            var def = QpDefinitionMap[fullPrototypeName];
-                            createFromDefinition(def, n, fqdn);
-                            continue;
-                        }
-                        //if (n.Contains("."))
-                        //{
-                        //}
-                        var seg = SegmentBase.Create(n, _rootFlow);
-                        QpInstanceMap.Add(fqdn, seg);
+                        case null:
+                            throw new ParserException($"ERROR : failed to find [{ns.Combine()}]", ctx);
+
+                        case ParserSegment exSeg when _parenting != null:
+                            var exSegCall = new ExParserSegment(ns.Combine(), exSeg);
+                            var child = new Child(exSegCall, _parenting);
+                            instanceMap.Add(ns.Combine(), child);
+                            break;
+
+                        default:
+                            throw new ParserException("ERROR : unknown??.", ctx);
                     }
                 }
-            }
+                break;
+            default:
+                throw new Exception("ERROR");
         }
-    }
 
+        Console.WriteLine();
+    }
 
 
     override public void EnterCausals(CausalsContext ctx)
@@ -116,7 +137,7 @@ class ModelListener : dsBaseListener
 
     override public void EnterButtons (ButtonsContext ctx)
     {
-        var first = findFirstChild<ParserRuleContext>(ctx);
+        var first = findFirstChild<ParserRuleContext>(ctx);     // {Emergency, Auto, Start, Reset}ButtonsContext
         var targetDic =
             first switch
             {
@@ -126,6 +147,14 @@ class ModelListener : dsBaseListener
                 ResetButtonsContext => _system.ResetButtons,
                 _ => throw new Exception("ERROR"),
             };
+
+        var category = first.GetChild(1).GetText();       // [| '[', category, ']', buttonBlock |] 에서 category 만 추려냄 (e.g 'emg')
+        var key = (_system, category);
+        if (ParserHelper.ButtonCategories.Contains(key))
+            throw new Exception($"Duplicated button category {category} near {ctx.GetText()}");
+        else
+            ParserHelper.ButtonCategories.Add(key);
+
         var buttonDefs = enumerateChildren<ButtonDefContext>(first).ToArray();
         foreach (var bd in buttonDefs)
         {
@@ -133,30 +162,32 @@ class ModelListener : dsBaseListener
             var flows = (
                     from flowNameCtx in enumerateChildren<FlowNameContext>(bd)
                     let flowName = flowNameCtx.GetText()
-                    let flow = QpInstanceMap[$"{_system.Name}.{flowName}"] as RootFlow
+                    let flow = _system.ParserRootFlows().First(rf => rf.Name == flowName)
                     select flow
                 ).ToArray();
-            
+
+            var duplicatedFlows = flows.FindDuplicates();
+            if (duplicatedFlows.Any())
+            {
+                var dupNames = string.Join(", ", duplicatedFlows.Select(flow => flow.QualifiedName));
+                throw new Exception($"Duplicated flow(s) {dupNames} near {ctx.GetText()}.");
+            }
+
+            if (targetDic.ContainsKey(buttonName))
+                throw new Exception($"Duplicated button name [{buttonName}] near {ctx.GetText()}");
             targetDic.Add(buttonName, flows);
-
-            Console.WriteLine();
         }
-
-        Console.WriteLine();
-        //EmergencyButtonsContext
-        //ctx
-        //base.EnterButtons
     }
 
 
 
 
-    override public void ExitProgram(ProgramContext ctx) { }
+    //override public void ExitProgram(ProgramContext ctx) { }
 
 
-    // ParseTreeListener<> method
-    override public void VisitTerminal(ITerminalNode node) { return; }
-    override public void VisitErrorNode(IErrorNode node) { return; }
-    override public void EnterEveryRule(ParserRuleContext ctx) { return; }
-    override public void ExitEveryRule(ParserRuleContext ctx) { return; }
+    //// ParseTreeListener<> method
+    //override public void VisitTerminal(ITerminalNode node) { return; }
+    //override public void VisitErrorNode(IErrorNode node) { return; }
+    //override public void EnterEveryRule(ParserRuleContext ctx) { return; }
+    //override public void ExitEveryRule(ParserRuleContext ctx) { return; }
 }

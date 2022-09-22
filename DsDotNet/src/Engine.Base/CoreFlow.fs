@@ -45,32 +45,33 @@ module CoreFlow =
         member x.TailNodes = (tgts |> Seq.except srcs) |> Seq.append singleNodes
        
          
-    [<DebuggerDisplay("{name}")>]
-    type DsCpu(name:string)  =
-        let assignFlows = HashSet<IFlow>() 
-        interface ICpu with
-            member _.Name = name
-
-        member x.CpuName = (x:> ICpu).Name
-        member x.AssignFlows = assignFlows
-
+    
 
     [<DebuggerDisplay("{name}")>]
-    type RootFlow(name)  =
+    type RootFlow(name, system:SysBase)  =
         inherit Flow(name)
+
+        override x.ToText() = x.QualifiedName
+        member x.System = system;
+        member x.QualifiedName = $"{system.Name}.{name}";
+        member val InstanceMap  = Dictionary<string, obj>();
+
         //Flow 내부에 사용된 모든 Node (ChildFlow 내부도 포함)
         member x.UsedSegs = x.Nodes |> Seq.cast<IActive> 
                                     |> Seq.collect(fun parent ->parent.Children)
                                     |> Seq.append x.Nodes
     
     [<DebuggerDisplay("{name}")>]
-    type ChildFlow(name) as this =
+    type ChildFlow(name, rootFlow:RootFlow) as this =
         inherit Flow(name)
         let rec search(currNode:IVertex, isBack:bool) = 
                if(isBack)
                then this.PrevNodes(currNode) |> Seq.collect(fun node -> search(node, isBack))
                else this.NextNodes(currNode) |> Seq.collect(fun node -> search(node, isBack))
   
+        override x.ToText() = x.QualifiedName
+        member x.QualifiedName = $"{rootFlow.QualifiedName}.{name}";
+        member x.ContainerFlow  = rootFlow
         member x.GetStartEdges() = this.Edges.GetStartCaual()
         member x.GetResetEdges() = this.Edges.GetResetCaual()
         

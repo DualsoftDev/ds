@@ -28,7 +28,7 @@ qstring: STRING_LITERAL EOF;
 system: sysProp id '=' sysBlock;    // [sys] Seg = {..}
 sysProp: '[' 'sys' ']';
 sysBlock
-    : LBRACE (flow|listing|alias|parenting|causal|call|buttons)* RBRACE       // acc|sysTask|macro
+    : LBRACE (flow|listing|parenting|causal|call|buttons)* RBRACE       // acc|sysTask|macro
     ;
 
 
@@ -105,7 +105,7 @@ safetyValues: segmentPathN (SEIMCOLON segmentPathN)*;
 
 
 flow
-    : flowProp id '=' LBRACE (causal|parenting|call|listing|safetyBlock)* RBRACE     // |flowTask
+    : flowProp id '=' LBRACE (causal|parenting|call|listing|safetyBlock|alias)* RBRACE     // |flowTask
     ;
 flowProp : '[' 'flow' ('of' id)? ']';
 
@@ -116,7 +116,7 @@ aliasProp: '[' 'alias' ']';
 aliasListing:
     aliasDef '=' LBRACE (aliasMnemonic)? ( ';' aliasMnemonic)* (';')+ RBRACE
     ;
-aliasDef: identifier3;
+aliasDef: segmentPathN;     //(identifier2|identifier3);
 aliasMnemonic: identifier;
 
 

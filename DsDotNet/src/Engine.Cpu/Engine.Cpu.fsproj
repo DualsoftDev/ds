@@ -9,6 +9,7 @@
   <ItemGroup>
     <Compile Include="Interface.fs" />
     <Compile Include="Loader.fs" />
+    <Compile Include="Cpu.fs" />
     <Compile Include="Memory.fs" />
   </ItemGroup>
 

@@ -137,7 +137,7 @@ module ImportM =
                     if(node.Alias.IsSome)
                     then
                         let aliasName = node.Alias.Value
-                        let aliasSeg = MSeg(aliasName, mySys, ThisFlow, seg.NodeType, dicFlow.[node.PageNum], false)
+                        let aliasSeg = MSeg(aliasName, mySys, ThisFlow, seg.NodeType, dicFlow.[node.PageNum], seg.IsDummy)
                         aliasSeg.Update(node.Key, node.Id.Value, 0,0)
                         aliasSeg.Alias <- Some(seg)
                         dicSeg.TryUpdate(node.Key, aliasSeg, seg) |> ignore
@@ -151,7 +151,7 @@ module ImportM =
                 |> Seq.filter(fun node -> node.IsDummy|>not)
                 |> Seq.iter(fun node -> 
                                 let mFlowName =  dicSameFlow.[node.PageNum]
-                                let dic = dicSeg.Values.Select(fun seg -> seg.FullName, seg) |> dict
+                                let dic = dicSeg.Values.where(fun w-> w.IsDummy|>not).Select(fun seg -> seg.FullName, seg) |> dict
                                
                                 //Start, Reset, Auto, Emg 버튼
                                 if(node.IsStartBtn) then mySys.TryAddStartBTN(node.Name, dicFlow.[node.PageNum])

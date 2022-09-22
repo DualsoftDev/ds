@@ -51,7 +51,7 @@ module PPTX =
     let IsDummyGroup(subG:GroupShape) = 
                     let haveDummy = 
                         subG.Descendants<Presentation.Shape>() 
-                        |> Seq.filter(fun shape -> shape.CheckEllipse())
+                        |> Seq.filter(fun shape -> shape.CheckEllipse()||shape.CheckRectangle())
                         |> Seq.filter(fun shape -> shape.IsDashShape())
                         |> Seq.filter(fun shape -> shape.InnerText.Length = 0)
                         |> Seq.length > 0
@@ -165,9 +165,9 @@ module PPTX =
             GetSquareBrackets(name, false) |> updateTxRx
             GetSquareBrackets(name, true ) |> updateSafety
             name <- GetBracketsReplaceName(name)
-            bDuumy <- shape.CheckEllipse() && dashOutline
-            bEmg  <- shape.CheckNoSmoking() 
-            bAuto  <- shape.CheckBlockArc() 
+            bDuumy  <- (shape.CheckEllipse()||shape.CheckRectangle()) && dashOutline
+            bEmg    <- shape.CheckNoSmoking() 
+            bAuto   <- shape.CheckBlockArc() 
             bStart  <- shape.CheckDonutShape() 
             bReset  <- shape.CheckResetShape() 
             
@@ -242,6 +242,7 @@ module PPTX =
             let parents = 
                 ids 
                 |> Seq.map (fun id -> nodes.[ Objkey(iPage, id) ])
+                |> Seq.filter (fun node -> node.IsDummy|>not)
                 |> Seq.filter (fun node -> node.NodeType = MY)
             if(parents.Count() > 1) 
             then  Office.ErrorPPT(Group, 23, $"부모수:{parents.Count()}", iPage)
@@ -276,7 +277,9 @@ module PPTX =
                            |> Seq.map(fun f->f.Name)
                            |> Seq.distinct
             nameList |> Seq.iter(fun name -> 
-                           let sameNodes = children |> Seq.filter(fun f -> f.Name = name)
+                           let sameNodes = children 
+                                            |> Seq.filter(fun f -> f.Name = "" |>not)
+                                            |> Seq.filter(fun f -> f.Name = name)
                            if(sameNodes.Count() > 1)
                            then 
                                let mutable cnt = 0

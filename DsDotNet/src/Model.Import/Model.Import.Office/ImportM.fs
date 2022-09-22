@@ -242,7 +242,14 @@ module ImportM =
                 |> Seq.filter(fun node -> node.Name = ""|>not)
                 |> Seq.filter(fun node -> dicSeg.[node.Key].Bound = ThisFlow)
                 |> Seq.filter(fun node -> node.NodeType = TX || node.NodeType = TR || node.NodeType = RX )
-                |> Seq.iter(fun node -> mySys.LocationSet.TryAdd(dicSeg.[node.Key].FullName, node.Rectangle) |> ignore)
+                |> Seq.distinctBy(fun node -> node.Name)
+                |> Seq.iter(fun node -> 
+                            if(node.Alias.IsSome)
+                            then 
+                                mySys.LocationSet.TryAdd((dicSeg.[node.Key].Alias.Value:?>MSeg).FullName, node.Rectangle) |> ignore
+                            else
+                                mySys.LocationSet.TryAdd(dicSeg.[node.Key].FullName, node.Rectangle) |> ignore
+                                )
             
                 MSGInfo($"전체 장표   count [{doc.Pages.Count()}]")
                 MSGInfo($"전체 도형   count [{doc.Nodes.Count()}]")

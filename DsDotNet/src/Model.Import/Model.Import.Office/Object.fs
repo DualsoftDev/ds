@@ -35,7 +35,7 @@ module Object =
         /// 사용자가 모델링을 통해서 만든 segment (SegEditor = User)
         [<DebuggerDisplay("{FullName}")>]
         MSeg(name:string, baseSystem:MSys, bound:Bound, nodeType:NodeType, ownerMFlow:string, bDummy:bool) as this =
-            inherit Segment(name, ChildFlow(name), RootFlow(ownerMFlow))
+            inherit Segment(name, ChildFlow(name))
             let mChildFlow = (this :> Segment).ChildFlow
             let mEdges = mChildFlow.Edges |> Seq.cast<MEdge>
             let mChildSegs   = mChildFlow.Nodes |> Seq.cast<MSeg>
@@ -47,7 +47,6 @@ module Object =
             member x.BaseSys = baseSystem
             member x.Bound = bound
 
-            member val Alias :string  option = None with get, set
             member val ShapeID = 0u with get, set
             member val CountTX = 0 with get, set
             member val CountRX = 0 with get, set
@@ -63,15 +62,14 @@ module Object =
 
             ///금칙 문자 및 선두숫자가 있으면 "" 로 이름 앞뒤에 배치한다.
             ///Alias 는 무조건 "" 로 이름 앞뒤에 배치
-            member x.SegName  = sprintf "%s" (if(this.Alias.IsSome) then this.Alias.Value else x.ValidName)
+            member x.SegName  = sprintf "%s" (if(this.IsAlias) then this.Alias.Value.Name else x.ValidName)
             member x.MFlowNSeg= sprintf "%s.%s"  ownerMFlow x.ValidName
             member x.FullName = sprintf "%s.%s.%s" baseSystem.Name  ownerMFlow x.ValidName  
             member x.PathName = sprintf "%s(%s)" x.FullName (if(x.Parent.IsSome) then x.Parent.Value.Name else "Root")
 
-            member x.Update(nodeKey, nodeIdValue, nodeAlias, nodeCntTX, nodeCntRX) = 
+            member x.Update(nodeKey, nodeIdValue, nodeCntTX, nodeCntRX) = 
                         this.Key <- nodeKey
                         this.ShapeID <- nodeIdValue
-                        this.Alias <- nodeAlias
                         this.CountTX <- nodeCntTX
                         this.CountRX <- nodeCntRX
 
@@ -131,8 +129,8 @@ module Object =
 
             member x.ToText() = $"{src.SegName}  {causal.ToText()}  {tgt.SegName}"
             member x.ToCheckText(parentName:string) = 
-                            let srcName = if(src.Alias.IsSome) then src.Alias.Value else src.ToCallText()
-                            let tgtName = if(tgt.Alias.IsSome) then tgt.Alias.Value else tgt.ToCallText()
+                            let srcName = if(src.IsAlias) then src.Alias.Value.Name else src.ToCallText()
+                            let tgtName = if(tgt.IsAlias) then tgt.Alias.Value.Name else tgt.ToCallText()
                             $"[{parentName}]{srcName}  {x.ToCheckText()}  {tgtName}"
 
             member x.GetSegs() = [src;tgt]
@@ -339,6 +337,10 @@ module Object =
             member x.Path = name
             member x.Name = Path.GetFileNameWithoutExtension(name) 
             member x.AddEdges(edges, rootFlow:RootFlow) = 
-                edges|> Seq.iter(fun edge ->  this.AddEdge(edge, rootFlow)|>ignore)
+
+                edges|> Seq.iter(fun (edge: #DsEdge) -> 
+                
+                         //   edge.Target.Alias <- Some(edge.Source)
+                            this.AddEdge(edge, rootFlow)|>ignore)
      
             

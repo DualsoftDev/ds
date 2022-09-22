@@ -18,10 +18,13 @@ module InterfaceClass =
     /// 인과 연결가능 객체
     type VertexBase(name)  =
         inherit Named(name)
-        interface IVertex with 
+        interface IVertex  
         //사용 아직 안함(필요시 오픈)
         //    member _.ID  = Guid.NewGuid().ToString()
         //member x.ID  = (x:>IVertex).ID
+
+        member val Alias : VertexBase option = None  with get, set
+        member x.IsAlias = x.Alias.IsSome
      
     /// Segment Edge
     [<AbstractClass>]

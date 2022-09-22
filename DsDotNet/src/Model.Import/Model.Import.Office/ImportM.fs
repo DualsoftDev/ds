@@ -50,7 +50,7 @@ module ImportM =
                     then seg.ValidName
                     else sprintf "EX.%s.EX" (seg.ToCallText())
 
-                let alias = seg.Alias.Value
+                let alias = seg.Alias.Value.Name
 
                 if(flow.AliasSet.Keys.Contains(name))  
                  then flow.AliasSet.[name].Add( alias)|> ignore
@@ -116,12 +116,22 @@ module ImportM =
                     let btn = node.IsEmgBtn || node.IsStartBtn || node.IsAutoBtn || node.IsResetBtn 
                     let bound = if(btn) then ExBtn
                                 else if(bMyMFlow) then ThisFlow else OtherFlow
+                    if(node.Alias.IsSome)
+                    then
+                        let seg = MSeg(realName, mySys,  bound, node.NodeType, realMFlow, node.IsDummy)
+                        seg.Update(node.Key, node.Id.Value,  node.CntTX, node.CntRX)
+                        dicSeg.TryAdd(node.Key, seg) |> ignore
+                        if(node.IsDummy |> not) then  Check.SameNode(seg, node, dicSameSeg)
+                    else
+                        let seg = MSeg(realName, mySys,  bound, node.NodeType, realMFlow, node.IsDummy)
+                        seg.Update(node.Key, node.Id.Value,  node.CntTX, node.CntRX)
+                        dicSeg.TryAdd(node.Key, seg) |> ignore
+                        if(node.IsDummy |> not) then  Check.SameNode(seg, node, dicSameSeg)
+                        
+                        
+                        )
 
-                    let seg = MSeg(realName, mySys,  bound, node.NodeType, realMFlow, node.IsDummy)
-
-                    seg.Update(node.Key, node.Id.Value, node.Alias, node.CntTX, node.CntRX)
-                    dicSeg.TryAdd(node.Key, seg) |> ignore
-                    if(node.IsDummy |> not) then  Check.SameNode(seg, node, dicSameSeg)   )
+                
               
                 //MFlow 리스트 만들기
                 dicSameFlow

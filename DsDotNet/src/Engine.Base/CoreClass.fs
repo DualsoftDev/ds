@@ -7,23 +7,29 @@ open System.Collections.Generic
 [<AutoOpen>]
 module CoreClass =
 
-   /// 사용자가 모델링을 통해서 만든 segment (SegEditor = User)
+    /// Real segment 
     [<DebuggerDisplay("{ToText()}")>]
-    type Segment(name:string, childFlow:ChildFlow, rootFlow:RootFlow) as this =
-            inherit SegBase(name,  childFlow)
-            let mutable status4 = Status4.Homing
+    type Segment(name:string, childFlow:ChildFlow) as this =
+        inherit SegBase(name,  childFlow)
+        let mutable status4 = Status4.Homing
             
-            member x.Name = name
-            member x.Status4 = status4 
-            member x.SetStatus(status:Status4) = 
-                status4 <- status
-                ChangeStatus(this, status)
+        member x.Name = name
+        member x.Status4 = status4 
+        member x.SetStatus(status:Status4) = 
+            status4 <- status
+            ChangeStatus(this, status)
 
-            member x.ChildFlow = childFlow
-            member x.RootFlow = rootFlow
-            member x.AliasTarget = Some(this) // test ahn
-            member x.IsAlias = x.AliasTarget.IsSome// test ahn
-
+        member x.ChildFlow = childFlow
+      
+    
+    /// Call segment 
+    [<DebuggerDisplay("{ToText()}")>]
+    type CallSeg(name:string, parent:Segment) =
+        inherit CallBase(name,  parent)
+        let mutable status4 = Status4.Homing
+            
+        member x.Name = name
+        member x.Status4 = status4 
             
      and
         /// Modeled Edge : 사용자가 작성한 모델 상의 segment 간의 연결 edge (Wire)

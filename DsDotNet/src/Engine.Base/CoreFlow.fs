@@ -66,9 +66,10 @@ module CoreFlow =
     [<DebuggerDisplay("{name}")>]
     type ChildFlow(name) as this =
         inherit Flow(name)
-        let rec search(currNode:IVertex, back:bool) = 
-               this.PrevNodes(currNode)
-               |> Seq.collect(fun node -> search(node, back))
+        let rec search(currNode:IVertex, isBack:bool) = 
+               if(isBack)
+               then this.PrevNodes(currNode) |> Seq.collect(fun node -> search(node, isBack))
+               else this.NextNodes(currNode) |> Seq.collect(fun node -> search(node, isBack))
   
         member x.GetStartEdges() = this.Edges.GetStartCaual()
         member x.GetResetEdges() = this.Edges.GetResetCaual()

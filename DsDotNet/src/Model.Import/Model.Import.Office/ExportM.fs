@@ -98,11 +98,11 @@ module ExportM =
                         yield sprintf "\t\t}"
             } 
 
-        let btnText(propName:string, set: ConcurrentDictionary<string, List<MFlow>>) = 
+        let btnText(propName:string, set: ConcurrentDictionary<string, List<RootFlow>>) = 
             seq {
                         yield sprintf "\t[%s] = {"  propName
-                        for emg in set do
-                            yield sprintf "\t\t%s = { %s };" emg.Key (emg.Value |>Seq.map(fun flow-> flow.ToText()) |> String.concat "; ") 
+                        for btn in set do
+                            yield sprintf "\t\t%s = { %s };" btn.Key (btn.Value |>Seq.map(fun flow-> flow.ValidName) |> String.concat "; ") 
                         yield "\t}"
             } 
 

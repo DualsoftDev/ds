@@ -1,4 +1,5 @@
 using Engine.Common;
+using Engine.Cpu;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -187,9 +188,16 @@ namespace Dual.Model.Import
         {
             try
             {
-                ExportTextModel(Color.Transparent, _dsText, true);
                 //var engine = new EngineBuilder(_dsText, null).Engine;
-                //MSGWarn("언어체크 성공 !!!!");
+
+
+                if (Loader.PreCheck())
+                    MSGWarn("언어체크 성공 !!!!");
+                else
+                    MSGWarn("언어체크 실패 !!!!");
+
+
+                ExportTextModel(Color.Transparent, _dsText, true);
             }
 
             catch (Exception ex)

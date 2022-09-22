@@ -232,10 +232,10 @@ module Object =
             let variableSet  = ConcurrentDictionary<string, DataType>()
             let addressSet  = ConcurrentDictionary<string, Tuple<string, string>>()
             //let noEdgesSegs = mFlows |> Seq.collect(fun f-> f.Value.NoEdgeSegs)
-            let emgSet  = ConcurrentDictionary<string, List<MFlow>>()
-            let startSet  = ConcurrentDictionary<string, List<MFlow>>()
-            let resetSet  = ConcurrentDictionary<string, List<MFlow>>()
-            let autoSet   = ConcurrentDictionary<string, List<MFlow>>()
+            let emgSet  =  this.BtnEmgSet 
+            let startSet = this.BtnStartSet     
+            let resetSet = this.BtnResetSet 
+            let autoSet  = this.BtnAutoSet 
             
             let updateBtn (btnType:BtnType, btnName, btnMFlow) = 
                 let name = NameUtil.GetValidName(btnName)

@@ -3,6 +3,7 @@ namespace Engine.Core
 
 open System.Diagnostics
 open System.Collections.Generic
+open System.Linq
 
 [<AutoOpen>]
 module CoreFlow =
@@ -65,10 +66,15 @@ module CoreFlow =
     [<DebuggerDisplay("{name}")>]
     type ChildFlow(name) as this =
         inherit Flow(name)
+        let rec search(currNode:IVertex, back:bool) = 
+               this.PrevNodes(currNode)
+               |> Seq.collect(fun node -> search(node, back))
   
         member x.GetStartEdges() = this.Edges.GetStartCaual()
         member x.GetResetEdges() = this.Edges.GetResetCaual()
         
-        member x.IsBackward(a:IVertex, b:IVertex) = Some(true)  
-        member x.IsForward (a:IVertex, b:IVertex) = Some(true)  
+        member x.IsBackward(currNode:IVertex, queryNode:IVertex) =
+               search(currNode, true).Contains(queryNode)
+        member x.IsForward (currNode:IVertex, queryNode:IVertex) = 
+               search(currNode, false).Contains(queryNode)
            

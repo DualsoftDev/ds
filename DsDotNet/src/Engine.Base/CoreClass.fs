@@ -21,8 +21,10 @@ module CoreClass =
 
             member x.ChildFlow = childFlow
             member x.RootFlow = rootFlow
+            member x.AliasTarget = Some(this) // test ahn
+            member x.IsAlias = x.AliasTarget.IsSome// test ahn
 
-
+            
      and
         /// Modeled Edge : 사용자가 작성한 모델 상의 segment 간의 연결 edge (Wire)
         [<DebuggerDisplay("{Source.ToText()}{Causal.ToText()}{Target.ToText()}")>]

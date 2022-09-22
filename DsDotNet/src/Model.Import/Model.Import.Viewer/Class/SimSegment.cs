@@ -1,5 +1,9 @@
+using DocumentFormat.OpenXml.Spreadsheet;
 using Engine.Common.FS;
+using Engine.Core;
+using Microsoft.Msagl.Core.DataStructures;
 using Model.Import.Office;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -44,55 +48,21 @@ namespace Dual.Model.Import
         {
             if (model == null) return;
 
-            var rootSegs = model.AllFlows.SelectMany(s => s.Nodes).Cast<MSeg>();
-
+            var segs = model.AllFlows.SelectMany(s => s.UsedSegs).Cast<MSeg>();
          
             await Task.Run(async () =>
             {
-                await Test(rootSegs, Status4.Homing, AllSeg);
+                await Test(segs, Status4.Homing, AllSeg);
                 await Task.Delay(10);
 
-                await Test(rootSegs, Status4.Ready, AllSeg);
+                await Test(segs, Status4.Ready, AllSeg);
                 await Task.Delay(10);
-                await Test(rootSegs, Status4.Ready, notMys);
+                await Test(segs, Status4.Ready, notMys);
                 await Task.Delay(10);
-                await Test(rootSegs, Status4.Ready, mys);
+                await Test(segs, Status4.Ready, mys);
             });
 
             org = true;
-        }
-        //private static List<MSeg> getHeads(Dictionary<MSeg, MSeg> dic, Dictionary<MEdge, MEdge> dicEdge)
-        //{
-        //    List<MSeg> tgts = dicEdge.Values.Where(w => w.Causal.IsStart).Select(edge => edge.Target).Distinct().ToList();
-        //    List<MSeg> heads = dic.Values.Where(s => !tgts.Contains(s)).ToList();
-        //    List<MEdge> findEdges = dicEdge.Values
-        //        .Where(edge => edge.Causal.IsStart)
-        //        .Where(edge => heads.Contains(edge.Source)).ToList();
-
-        //    foreach (var seg in heads) dic.Remove(seg);
-        //    foreach (var edge in findEdges) dicEdge.Remove(edge);
-
-        //    return heads;
-        //}
-
-
-        private static async Task runSeg(IEnumerable<MSeg> segs, IEnumerable<MEdge> runEdges)
-        {
-            var dicSeg = segs.Distinct().ToDictionary(d => d);
-            var dicEdge = runEdges.ToDictionary(d => d);
-
-            await Task.Run(async () =>
-            {
-                foreach (var seg in runEdges.SelectMany(s => s.Nodes).Distinct())
-                {
-                    if (dicSeg.Count() == 0) break;
-                    List<MSeg> heads = seg.ChildFlow.HeadNodes.Cast<MSeg>().ToList();
-
-                    await Test(heads, Status4.Going, AllSeg);
-                    await Task.Delay(50);
-                    await Test(heads, Status4.Finish, AllSeg);
-                }
-            });
         }
 
         public static async Task TestStart(ImportModel model)
@@ -101,28 +71,24 @@ namespace Dual.Model.Import
             if (!org) await TestORG(model);
 
             var dicSeg  = model.AllFlows.SelectMany(s=>s.Nodes).Distinct().Cast<MSeg>().ToDictionary(d => d);
-            var dicEdge = model.AllFlows.SelectMany(s=>s.Edges).Cast<MEdge>().ToDictionary(d => d);
 
             await Task.Run(async () =>
             {
-                List<MEdge> edges = model.AllFlows.SelectMany(s => s.Edges).Cast<MEdge>().ToList();
-                var segs = edges.SelectMany(s => s.Nodes).ToList();
-                segs.AddRange(dicSeg.Values);
+                //List<MEdge> edges = model.AllFlows.SelectMany(s => s.Edges).Cast<MEdge>().ToList();
+                //var segs = edges.SelectMany(s => s.Nodes).ToList();
+                //segs.AddRange(dicSeg.Values);
 
-                foreach (var cont in segs.Distinct())
+
+
+                foreach (var cont in dicSeg.Values)
                 {
                     if (dicSeg.Count() == 0) break;
 
-                    if (cont.NodeType == NodeType.MY) { }
                     List<MSeg> heads = cont.ChildFlow.HeadNodes.Cast<MSeg>().ToList();
                     await Test(heads, Status4.Going, AllSeg);
                     await Task.Delay(50);
 
-                    foreach (var seg in heads)
-                    {
-                        await runSeg(seg.ChildSegs, seg.MEdges);
-                    }
-
+                    await runSeg(cont, heads, cont.ChildFlow);
                     await Test(heads, Status4.Finish, AllSeg);
                 }
             });
@@ -130,9 +96,29 @@ namespace Dual.Model.Import
             org = false;
         }
 
+        private static async Task runSeg(MSeg parent, List<MSeg> heads, CoreFlow.ChildFlow childFlow)
+        {
+            if (parent != null)
+                await GoingFinish(new List<MSeg>() { parent });
 
+            await GoingFinish(heads);
+            foreach (var curr in heads)
+            {
+                List<MSeg> nextHeads = childFlow.NextNodes(curr).Cast<MSeg>().ToList();
+                await runSeg(null, nextHeads, childFlow);
+            }
 
+        }
 
+        private static async Task GoingFinish(List<MSeg> heads)
+        {
+            await Task.Run(async () =>
+            {
+                await Test(heads, Status4.Going, AllSeg);
+                await Task.Delay(50);
+                await Test(heads, Status4.Finish, AllSeg);
+            });
+        }
     }
 
 }

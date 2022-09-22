@@ -68,11 +68,10 @@ namespace Dual.Model.Import
 
             SetBackColor(System.Drawing.Color.FromArgb(33, 33, 33));
 
-            var subDraws = flow.DrawSubs.ToList();
 
-            flow.Singles.Cast<MSeg>().ToList().ForEach(seg => DrawSeg(viewer.Graph.RootSubgraph, seg, subDraws));
+            flow.Singles.Cast<MSeg>().ToList().ForEach(seg => DrawSeg(viewer.Graph.RootSubgraph, seg));
 
-            drawMEdgeGraph(flow.MEdges.ToList(), subDraws, viewer.Graph.RootSubgraph);
+            drawMEdgeGraph(flow.MEdges.ToList(), viewer.Graph.RootSubgraph);
 
             viewer.SetCalculatedLayout(viewer.CalculateLayout(viewer.Graph));
         }
@@ -89,19 +88,19 @@ namespace Dual.Model.Import
 
 
 
-        private void drawMEdgeGraph(List<MEdge> edges, List<MSeg> drawSubs, Subgraph subgraph)
+        private void drawMEdgeGraph(List<MEdge> edges,  Subgraph subgraph)
         {
             foreach (var mEdge in edges)
-                DrawMEdge(subgraph, mEdge, drawSubs);
+                DrawMEdge(subgraph, mEdge);
 
         }
 
-        private void DrawMEdge(Subgraph subgraph, MEdge edge, List<MSeg> drawSubs)
+        private void DrawMEdge(Subgraph subgraph, MEdge edge)
         {
             MEdge mEdge = edge;
 
-            bool bDrawSubSrc = mEdge.Source.IsChildExist && (drawSubs == null || drawSubs.Contains(mEdge.Source));
-            bool bDrawSubTgt = mEdge.Target.IsChildExist && (drawSubs == null || drawSubs.Contains(mEdge.Target));
+            bool bDrawSubSrc = mEdge.Source.IsChildExist ;
+            bool bDrawSubTgt = mEdge.Target.IsChildExist ;
 
             var mEdgeSrc = mEdge.Source;
             var mEdgeTgt = mEdge.Target;
@@ -116,10 +115,10 @@ namespace Dual.Model.Import
             DrawSub(subgraph, mEdgeTgt, subGTgt, gEdge.TargetNode, bDrawSubTgt);
 
         }
-        private void DrawSeg(Subgraph subgraph, MSeg seg, List<MSeg> drawSubs)
+        private void DrawSeg(Subgraph subgraph, MSeg seg)
         {
 
-            bool bDrawSubSrc = (seg.IsChildExist || seg.NoEdgeSegs.Any()) && (drawSubs == null || drawSubs.Contains(seg));
+            bool bDrawSubSrc = (seg.IsChildExist || seg.NoEdgeSegs.Any());
 
             var subGSrc = new Subgraph(seg.UIKey);
 
@@ -141,9 +140,9 @@ namespace Dual.Model.Import
             if (bDrawSub && (seg.MEdges.Any() || seg.NoEdgeSegs.Any()))
             {
                 if (seg.MEdges.Any())
-                    drawMEdgeGraph(seg.MEdges.ToList(), null, subG);
+                    drawMEdgeGraph(seg.MEdges.ToList(),  subG);
 
-                seg.NoEdgeSegs.ToList().ForEach(subSeg => DrawSeg(subG, subSeg, null));
+                seg.NoEdgeSegs.ToList().ForEach(subSeg => DrawSeg(subG, subSeg));
             }
             else
                 subgraph.AddNode(gNode);

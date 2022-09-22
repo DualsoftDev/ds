@@ -16,6 +16,9 @@ module CoreFlow =
         //ChildFlow 일 경우 : 인과처리 대상 DAG 의 Head 부분
         //RootFlow  일 경우 : 인과처리 아님 Spare
         let singleNodes = HashSet<IVertex>() 
+        let srcs = edges |> Seq.map(fun edge -> edge.Source) |> Seq.distinct    
+        let tgts = edges |> Seq.map(fun edge -> edge.Target) |> Seq.distinct
+
         interface IFlow with
             member _.Edges = edges
             member _.Nodes = edges.GetNodes() |> Seq.append singleNodes 
@@ -31,7 +34,15 @@ module CoreFlow =
         //Remove singleNodes
         member x.RemoveSingleNode(node) = singleNodes.Remove(node)
 
-
+        ///Start Edge 기준으로 다음 Vertex 들을 찾음
+        member x.NextNodes(currNode:IVertex) = edges.GetNextNodes(currNode)
+        ///Start Edge 기준으로 이전 Vertex 들을 찾음
+        member x.PrevNodes(currNode:IVertex) = edges.GetPrevNodes(currNode)
+        ///Flow Edge 연결상 시작점
+        member x.HeadNodes = srcs |> Seq.except tgts
+        ///Flow Edge 연결상 끝점
+        member x.TailNodes = tgts |> Seq.except srcs
+       
          
     [<DebuggerDisplay("{name}")>]
     type DsCpu(name:string)  =
@@ -46,6 +57,7 @@ module CoreFlow =
     [<DebuggerDisplay("{name}")>]
     type RootFlow(name)  =
         inherit Flow(name)
+        //Flow 내부에 사용된 모든 Node (ChildFlow 내부도 포함)
         member x.UsedSegs = x.Nodes |> Seq.cast<IActive> 
                                     |> Seq.collect(fun parent ->parent.Children)
                                     |> Seq.append x.Nodes
@@ -53,17 +65,10 @@ module CoreFlow =
     [<DebuggerDisplay("{name}")>]
     type ChildFlow(name) as this =
         inherit Flow(name)
-        let srcs = this.Edges |> Seq.map(fun edge -> edge.Source) |> Seq.distinct    
-        let tgts = this.Edges |> Seq.map(fun edge -> edge.Target) |> Seq.distinct
-
-        member x.HeadNodes = srcs |> Seq.except tgts
-        member x.TailNodes = tgts |> Seq.except srcs
-        member x.NextNodes(currNode:IVertex) = this.Edges.GetNextNodes(currNode)
-        member x.PrevNodes(currNode:IVertex) = this.Edges.GetPrevNodes(currNode)
-
-        member x.IsBackward(a:IVertex, b:IVertex) = Some(true)  
-        member x.IsForward(a:IVertex, b:IVertex) = Some(true)  
-             
+  
         member x.GetStartEdges() = this.Edges.GetStartCaual()
         member x.GetResetEdges() = this.Edges.GetResetCaual()
         
+        member x.IsBackward(a:IVertex, b:IVertex) = Some(true)  
+        member x.IsForward (a:IVertex, b:IVertex) = Some(true)  
+           

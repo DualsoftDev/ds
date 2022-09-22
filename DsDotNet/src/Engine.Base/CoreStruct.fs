@@ -12,21 +12,18 @@ module CoreStruct =
     type DsSystem(name:string)  =
         inherit SysBase(name)
         let dicRootFlow = ConcurrentDictionary<string, RootFlow>()
-        let emgSet  = ConcurrentDictionary<string, List<RootFlow>>()
-        let startSet  = ConcurrentDictionary<string, List<RootFlow>>()
-        let resetSet  = ConcurrentDictionary<string, List<RootFlow>>()
-        let autoSet   = ConcurrentDictionary<string, List<RootFlow>>()
-        
+      
         member x.RootFlows() = dicRootFlow.Values
         member x.AddFlow(flow:RootFlow) = dicRootFlow.TryAdd(flow.Name, flow);
         member x.GetFlow(name:string)   = dicRootFlow.[name];
         //나의 시스템 Flag
         member val Active = false
-
-        member val BtnEmgSet = ConcurrentDictionary<string, List<RootFlow>>()
-        member val BtnStartSet = startSet
-        member val BtnResetSet = resetSet
-        member val BtnAutoSet = autoSet
+        
+        //시스템 버튼 소속 Flow 정보
+        member val BtnEmgSet   = ConcurrentDictionary<string, List<RootFlow>>()
+        member val BtnStartSet = ConcurrentDictionary<string, List<RootFlow>>()
+        member val BtnResetSet = ConcurrentDictionary<string, List<RootFlow>>()
+        member val BtnAutoSet  = ConcurrentDictionary<string, List<RootFlow>>()
          
     and
         [<DebuggerDisplay("{name}")>]

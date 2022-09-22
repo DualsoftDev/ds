@@ -93,10 +93,11 @@ type FsGraphInfo(flows:Flow seq, isRootFlow:bool) =
         [|
             while not isRootFlow && q.Count > 0 do
                 let v = q.Dequeue()
-                let oes = graph.OutEdges(v).Where(fun e -> box e :? ISetEdge)
-                let ooes = oes |> Seq.map(fun (e:QgEdge) -> e.OriginalEdge) |> Array.ofSeq
-                yield VertexAndOutgoingEdges(v, ooes)
-                oes |> Seq.map (fun e -> e.Target) |> Seq.iter q.Enqueue
+                if graph.Vertices.Contains(v) then
+                    let oes = graph.OutEdges(v).Where(fun e -> box e :? ISetEdge)
+                    let ooes = oes |> Seq.map(fun (e:QgEdge) -> e.OriginalEdge) |> Array.ofSeq
+                    yield VertexAndOutgoingEdges(v, ooes)
+                    oes |> Seq.map (fun e -> e.Target) |> Seq.iter q.Enqueue
         |]
 
     override x.Edges                with get() = edges

@@ -53,12 +53,12 @@ namespace Dual.Model.Import
             await Task.Run(async () =>
             {
                 await Test(segs, Status4.Homing, AllSeg);
-                await Task.Delay(10);
+                await Task.Delay(5);
 
                 await Test(segs, Status4.Ready, AllSeg);
-                await Task.Delay(10);
+                await Task.Delay(5);
                 await Test(segs, Status4.Ready, notMys);
-                await Task.Delay(10);
+                await Task.Delay(5);
                 await Test(segs, Status4.Ready, mys);
             });
 
@@ -86,7 +86,7 @@ namespace Dual.Model.Import
 
                     List<MSeg> heads = cont.ChildFlow.HeadNodes.Cast<MSeg>().ToList();
                     await Test(heads, Status4.Going, AllSeg);
-                    await Task.Delay(50);
+                    await Task.Delay(5);
 
                     await runSeg(cont, heads, cont.ChildFlow);
                     await Test(heads, Status4.Finish, AllSeg);
@@ -115,7 +115,7 @@ namespace Dual.Model.Import
             await Task.Run(async () =>
             {
                 await Test(heads, Status4.Going, AllSeg);
-                await Task.Delay(50);
+                await Task.Delay(5);
                 await Test(heads, Status4.Finish, AllSeg);
             });
         }

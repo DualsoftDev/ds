@@ -210,6 +210,7 @@ module Object =
                                         |> Seq.filter(fun seg -> seg.Bound = ThisFlow)
                                         |> Seq.map(fun seg -> if seg.IsAlias then seg.Alias.Value else seg)
                                         |> Seq.cast<MSeg>
+                                        |> Seq.sortBy(fun seg -> seg.FullName)
                                         |> Seq.distinctBy(fun seg -> seg.FullName)
 
 

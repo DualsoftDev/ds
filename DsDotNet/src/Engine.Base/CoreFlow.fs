@@ -60,5 +60,10 @@ module CoreFlow =
         member x.TailNodes = tgts |> Seq.except srcs
         member x.NextNodes(currNode:IVertex) = this.Edges.GetNextNodes(currNode)
         member x.PrevNodes(currNode:IVertex) = this.Edges.GetPrevNodes(currNode)
+
+        member x.IsBackward(a:IVertex, b:IVertex) = Some(true)  
+        member x.IsForward(a:IVertex, b:IVertex) = Some(true)  
              
+        member x.GetStartEdges() = this.Edges.GetStartCaual()
+        member x.GetResetEdges() = this.Edges.GetResetCaual()
         

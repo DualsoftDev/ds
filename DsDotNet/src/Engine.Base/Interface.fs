@@ -6,12 +6,12 @@ open System.Collections.Generic
 [<AutoOpen>]
 module Interface =
 
+
     /// Dualsoft object 공리 : 시스템 모든것은 비트다
     type IBit = interface end
     /// 이름
     type INamed  =
-        abstract Name:string
-        abstract ToText  :unit -> string
+         abstract Name:string with get,set
     /// 고유값 Guid.NewGuid().ToString()
     type IUniqueId = abstract ID:string 
 
@@ -35,6 +35,11 @@ module Interface =
     type IFlow   =
         abstract Edges:IEdge seq
         abstract Nodes:IVertex seq
+
+
+    type IEdges = 
+        abstract Sources  :IVertex seq
+        abstract Target  :IVertex
 
     type ICall = 
         abstract Node :IVertex  

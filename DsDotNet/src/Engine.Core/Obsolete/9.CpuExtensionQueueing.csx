@@ -1,7 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Engine.Core;
+namespace Engine.Base;
 
 /// <summary>
 /// Queue 이용한 구현

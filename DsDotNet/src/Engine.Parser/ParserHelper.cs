@@ -1,23 +1,17 @@
-using static Engine.Core.CoreClass;
-using static Engine.Core.CoreFlow;
-using  Engine.Core;
-using static Engine.Core.CoreStruct;
-using static Engine.Cpu.Cpu;
-
 namespace Engine.Parser;
 
 
 public class ParserHelper
 {
     // button category 중복 check 용
-    public HashSet<(ParserSystem, string)> ButtonCategories = new();
+    public HashSet<(DsSystem, string)> ButtonCategories = new();
 
-    public ParserModel Model { get; } = new ParserModel();
-    internal ParserSystem _system;
-    internal ParserRootFlow _rootFlow;
-    internal ParserSegment _parenting;
+    public Model Model { get; } = new Model();
+    internal DsSystem _system;
+    internal RootFlow _rootFlow;
+    internal SegmentBase _parenting;
 
-    public Dictionary<string, ParserCpu> FlowName2CpuMap;
+    public Dictionary<string, Cpu> FlowName2CpuMap;
 
     public ParserOptions ParserOptions { get; set; }
     public ParserHelper(ParserOptions options)
@@ -49,40 +43,40 @@ public class ParserHelper
 
 
 
-    public T FindObject<T>(string[] qualifiedName) where T : class => PickQualifiedPathObject<T>(qualifiedName);
+    //public T FindObject<T>(string[] qualifiedName) where T : class => PickQualifiedPathObject<T>(qualifiedName);
 
-    public T[] FindObjects<T>(ParserSystem system, ParserRootFlow flow, string qualifiedNames) where T : class
-    {
-        if (qualifiedNames == "_")
-            return Array.Empty<T>();
+    //public T[] FindObjects<T>(DsSystem system, RootFlow flow, string qualifiedNames) where T : class
+    //{
+    //    if (qualifiedNames == "_")
+    //        return Array.Empty<T>();
 
-        return
-            qualifiedNames
-                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(name => FindObject<T>(name.Divide()))
-                .ToArray()
-                ;
-    }
+    //    return
+    //        qualifiedNames
+    //            .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+    //            .Select(name => FindObject<T>(name.Divide()))
+    //            .ToArray()
+    //            ;
+    //}
 
 
-    T PickQualifiedPathObject<T>(string[] qualifiedName, Func<T> creator = null) where T : class
-    {
-        T target = (T)Model.Find(qualifiedName);
-        if (target != null)
-            return target;
+    //T PickQualifiedPathObject<T>(string[] qualifiedName, Func<T> creator = null) where T : class
+    //{
+    //    T target = (T)Model.Find(qualifiedName);
+    //    if (target != null)
+    //        return target;
 
-        if (creator == null)
-        {
-            if (ParserOptions.AllowSkipExternalParserSegment)
-                return null;
-            throw new Exception($"ERROR: failed to create {qualifiedName}");
-        }
+    //    if (creator == null)
+    //    {
+    //        if (ParserOptions.AllowSkipExternalSegment)
+    //            return null;
+    //        throw new Exception($"ERROR: failed to create {qualifiedName}");
+    //    }
 
-        var t = creator();
-        Model.FindFlow(qualifiedName).InstanceMap[qualifiedName.Last()] = t;
+    //    var t = creator();
+    //    Model.FindFlow(qualifiedName).InstanceMap[qualifiedName.Last()] = t;
 
-        return t;
-    }
+    //    return t;
+    //}
 }
 
 

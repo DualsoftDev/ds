@@ -9,14 +9,14 @@ module InterfaceClass =
 
     // 이름이 필요한 객체
     [<AbstractClass>]
-    type Named(name) as this =
+    type Named(name) =
+        let mutable name = name
         interface INamed with
-            member _.Name = name
-            member _.ToText() = $"{name}[{this.GetType().Name}]"
-        member x.Name = (x:>INamed).Name
-        //member x.ToText() = (x:>INamed).ToText()
+            member _.Name with get () = name and set (v) = name <- v
+
+        member val Name : string = name with get, set
         member x.ValidName = NameUtil.GetValidName(name)
-        abstract ToText  :unit -> string
+        abstract ToText : unit -> string
   
     /// 인과 연결가능 객체
     [<AbstractClass>]

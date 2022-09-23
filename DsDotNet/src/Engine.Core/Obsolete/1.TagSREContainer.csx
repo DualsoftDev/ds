@@ -1,4 +1,4 @@
-//namespace Engine.Core;
+//namespace Engine.Base;
 
 //public interface ITagSREContainer {
 //    Action<IEnumerable<Tag>> AddTagsFunc { get; }

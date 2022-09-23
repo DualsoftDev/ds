@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net48</TargetFrameworks>
-    <RootNamespace>Engine.Core</RootNamespace>
+    <RootNamespace>Engine.Base</RootNamespace>
     <LangVersion>10.0</LangVersion>
   </PropertyGroup>
   <ItemGroup>
@@ -17,7 +17,9 @@
     <PackageReference Include="System.Reactive" Version="5.0.0" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Engine.Base\Engine.Core.fsproj" />
     <ProjectReference Include="..\Engine.Common\Engine.Common.csproj" />
+    <ProjectReference Include="..\Engine.Cpu\Engine.Cpu.fsproj" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="log4net">

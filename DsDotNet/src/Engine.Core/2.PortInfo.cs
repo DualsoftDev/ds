@@ -1,13 +1,10 @@
-using Engine.Core.Obsolete;
-using Engine.Util;
-
-namespace Engine.Core;
+namespace Engine.Base;
 
 
 /// <summary> 정보(Plan) + 물리(Actual) </summary>
 public abstract class PortInfo : BitReEvaluatable//, IBitWritable
 {
-    protected PortInfo(Cpu cpu, SegmentBase segment, string name, IBit plan, Tag actual)
+    protected PortInfo(Cpu cpu, SegmentBase segment, string name, ICpuBit plan, Tag actual)
         : base(cpu, name, plan, actual)
     {
         Plan = plan;
@@ -20,9 +17,9 @@ public abstract class PortInfo : BitReEvaluatable//, IBitWritable
     /// <summary> 내부 추적용 Tag 이름 : QualifiedName + 기능명.  e.g "L.F.Main.AutoStart.  사용자가 지정하는 이름과는 별개 </summary>
     public string InternalName { get; set; }
 
-    IBit _plan;
+    ICpuBit _plan;
     Tag _actual;
-    public IBit Plan
+    public ICpuBit Plan
     {
         get => _plan;
         set
@@ -47,7 +44,7 @@ public abstract class PortInfo : BitReEvaluatable//, IBitWritable
 /// <summary> 지시(Start or Reset) 용 정보(Plan) + 물리(Actual) </summary>
 public abstract class PortInfoCommand : PortInfo
 {
-    protected PortInfoCommand(Cpu cpu, SegmentBase segment, string name, IBit plan, Tag actual)
+    protected PortInfoCommand(Cpu cpu, SegmentBase segment, string name, ICpuBit plan, Tag actual)
         : base(cpu, segment, name, plan, actual)
     {
     }
@@ -66,7 +63,7 @@ public abstract class PortInfoCommand : PortInfo
 /// <summary> Start 명령용 정보(Plan) + 물리(Actual) </summary>
 public class PortInfoStart : PortInfoCommand
 {
-    public PortInfoStart(Cpu cpu, SegmentBase segment, string name, IBit plan, Tag actual)
+    public PortInfoStart(Cpu cpu, SegmentBase segment, string name, ICpuBit plan, Tag actual)
         : base(cpu, segment, name, plan, actual)
     {
     }
@@ -74,7 +71,7 @@ public class PortInfoStart : PortInfoCommand
 /// <summary> Reset 명령용 정보(Plan) + 물리(Actual) </summary>
 public class PortInfoReset : PortInfoCommand
 {
-    public PortInfoReset(Cpu cpu, SegmentBase segment, string name, IBit plan, Tag actual)
+    public PortInfoReset(Cpu cpu, SegmentBase segment, string name, ICpuBit plan, Tag actual)
         : base(cpu, segment, name, plan, actual)
     {
     }
@@ -111,6 +108,6 @@ public class PortInfoEnd : PortInfo
     {
         // Plan 설정 이후에, Actual 센서가 이미 Plan 설정하려는 값과 동일한 상태로 먼저 바뀌어 있는 상태
         if (Actual != null && newPlanValue == Actual.Value)
-            throw new Common.DsException($"Spatial Error: Plan[{Plan}={newPlanValue}] <> Actual[{Actual.Value}]");
+            throw new DsException($"Spatial Error: Plan[{Plan}={newPlanValue}] <> Actual[{Actual.Value}]");
     }
 }

@@ -4,22 +4,27 @@ open Engine.Core
 [<AutoOpen>]
 module Interface =
 
+    type ICpuBit = 
+        inherit IBit
+        inherit ICpu
+        abstract Value: bool 
+
     type IAlias     = inherit INamed
     type ITxRx      = inherit INamed
 
-    type IAutoTag   = inherit IBit
+    type IAutoTag   = inherit ICpuBit
 
-    type IWeakEdge   = inherit IEdge
-    type ISetEdge    = inherit IEdge
-    type IResetEdge  = inherit IEdge
-    type IStrongEdge = inherit IEdge
+    type IWeakEdge   = inherit IEdges
+    type ISetEdge    = inherit IEdges
+    type IResetEdge  = inherit IEdges
+    type IStrongEdge = inherit IEdges
 
     type IEngine    = inherit INamed
 
-    type IBitReadable = inherit IBit
+    type IBitReadable = inherit ICpuBit
     type IBitWritable = 
-        inherit IBit
-        abstract SetValue:bool;
+        inherit ICpuBit
+        abstract SetValue: bool -> unit
     type IBitReadWritable = 
         inherit IBitReadable
         inherit IBitWritable

@@ -11,7 +11,7 @@ enum NodeType
     system,
     task, call, proc, func, segment, expression, conjunction,
     segmentAlias,
-    externalParserSegmentCall,
+    externalSegmentCall,
     callAlias,
 };
 
@@ -54,10 +54,10 @@ partial class ElementsListener : dsBaseListener
 {
     #region Boiler-plates
     public ParserHelper ParserHelper;
-    ParserModel    _model => ParserHelper.Model;
-    ParserSystem _system    { get => ParserHelper._system;    set => ParserHelper._system = value; }
-    ParserRootFlow _rootFlow  { get => ParserHelper._rootFlow;  set => ParserHelper._rootFlow = value; }
-    ParserSegment  _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
+    Model    _model => ParserHelper.Model;
+    DsSystem _system    { get => ParserHelper._system;    set => ParserHelper._system = value; }
+    RootFlow _rootFlow  { get => ParserHelper._rootFlow;  set => ParserHelper._rootFlow = value; }
+    SegmentBase  _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
 
     public ElementsListener(dsParser parser, ParserHelper helper)
     {
@@ -71,14 +71,14 @@ partial class ElementsListener : dsBaseListener
     override public void EnterSystem(SystemContext ctx)
     {
         var name = ctx.id().GetText().DeQuoteOnDemand();
-        _system = _model.ParserSystems.First(s => s.Name == name);
+        _system = _model.Systems.First(s => s.Name == name);
     }
     override public void ExitSystem(SystemContext ctx) { this._system = null; }
 
     override public void EnterFlow(FlowContext ctx)
     {
         var flowName = ctx.id().GetText().DeQuoteOnDemand();
-        _rootFlow = _system.ParserRootFlows.First(f => f.Name == flowName);
+        _rootFlow = _system.RootFlows.First(f => f.Name == flowName);
 
         var flowOf = ctx.flowProp().id();
         this.flowOfName = flowOf == null ? flowName : flowOf.GetText();
@@ -131,18 +131,18 @@ partial class ElementsListener : dsBaseListener
             select (key, values)
             ;
 
-        ParserSegment getKey(string[] segPath)
+        SegmentBase getKey(string[] segPath)
         {
             switch(ctx.Parent)
             {
                 // global prop safety
                 case PropertyBlockContext:
                     var flow = _model.FindFlow(segPath);
-                    return (ParserSegment)flow.InstanceMap[segPath[2]];
+                    return (SegmentBase)flow.InstanceMap[segPath[2]];
 
                 // in flow safety
                 case FlowContext:
-                    return (ParserSegment)_rootFlow.InstanceMap[segPath[0]];
+                    return (SegmentBase)_rootFlow.InstanceMap[segPath[0]];
 
                 default:
                     throw new Exception("ERROR");
@@ -151,8 +151,8 @@ partial class ElementsListener : dsBaseListener
 
         foreach (var (key, values) in safetyKvs)
         {
-            var keyParserSegment = getKey(key);
-            keyParserSegment.SafetyConditions = values.Select(safety => (ParserSegment)_model.Find(safety)).ToArray();
+            var keySegment = getKey(key);
+            keySegment.SafetyConditions = values.Select(safety => (SegmentBase)_model.Find(safety)).ToArray();
         }
     }
 
@@ -166,19 +166,19 @@ partial class ElementsListener : dsBaseListener
         var call = callPrototypes.First(c => c.Name == name);
 
         var callph = ctx.callPhrase();
-        ParserSegment[] findParserSegments(ParserSegmentsContext txrxCtx)
+        SegmentBase[] findSegments(SegmentsContext txrxCtx)
         {
             if (txrxCtx.GetText() == "_")
-                return Array.Empty<ParserSegment>();
+                return Array.Empty<SegmentBase>();
 
-            var nss = enumerateChildren<ParserSegmentContext>(txrxCtx).Select(collectNameComponents).ToArray();
-            return nss.Select(ns => (ParserSegment)_model.Find(ns)).ToArray();
+            var nss = enumerateChildren<SegmentContext>(txrxCtx).Select(collectNameComponents).ToArray();
+            return nss.Select(ns => (SegmentBase)_model.Find(ns)).ToArray();
         }
 
-        var txs = findParserSegments(callph.segments(0));
-        var rxs = findParserSegments(callph.segments(1));
+        var txs = findSegments(callph.segments(0));
+        var rxs = findSegments(callph.segments(1));
 
-        if (ParserHelper.ParserOptions.AllowSkipExternalParserSegment)
+        if (ParserHelper.ParserOptions.AllowSkipExternalSegment)
         {
             txs = txs.Where(t => t != null).ToArray();
             rxs = rxs.Where(t => t != null).ToArray();
@@ -186,10 +186,10 @@ partial class ElementsListener : dsBaseListener
 
         string concat(IEnumerable<string> xs) => string.Join(", ", xs);
 
-        var txDup = txs.Cast<ParserSegment>().Select(x => x.QualifiedName).FindDuplicates();
+        var txDup = txs.Cast<SegmentBase>().Select(x => x.QualifiedName).FindDuplicates();
         if (txDup.Any())
             throw new Exception($"Duplicated TXs [{concat(txDup)}] near {ctx.GetText()}");
-        var rxDup = rxs.Cast<ParserSegment>().Select(x => x.QualifiedName).FindDuplicates();
+        var rxDup = rxs.Cast<SegmentBase>().Select(x => x.QualifiedName).FindDuplicates();
         if (rxDup.Any())
             throw new Exception($"Duplicated RXs [{concat(rxDup)}] near {ctx.GetText()}");
 
@@ -202,7 +202,7 @@ partial class ElementsListener : dsBaseListener
     override public void EnterParenting(ParentingContext ctx)
     {
         var name = ctx.id().GetText().DeQuoteOnDemand();
-        _parenting = (ParserSegment)_rootFlow.InstanceMap[name];
+        _parenting = (SegmentBase)_rootFlow.InstanceMap[name];
     }
     override public void ExitParenting(ParentingContext ctx) { _parenting = null; }
 
@@ -251,7 +251,7 @@ partial class ElementsListener : dsBaseListener
         }
 
         //[addresses] = {
-        //    A.F.Am = (%Q123.23, , %I12.1);        // FQParserSegmentName = (Start, Reset, End) Tag address
+        //    A.F.Am = (%Q123.23, , %I12.1);        // FQSegmentName = (Start, Reset, End) Tag address
         //    A.F.Ap = (%Q123.24, , %I12.2);
         //    B.F.Bm = (%Q123.25, , %I12.3);
         //    B.F.Bp = (%Q123.26, , %I12.4);
@@ -264,7 +264,7 @@ partial class ElementsListener : dsBaseListener
         foreach (var addrDef in addressDefs)
         {
             var segNs = collectNameComponents(addrDef.segmentPath());
-            var seg = (ParserSegment)_model.Find(segNs);
+            var seg = (SegmentBase)_model.Find(segNs);
             var sre = addrDef.address();
             var (s, r, e) = (sre.startTag()?.GetText(), sre.resetTag()?.GetText(), sre.endTag()?.GetText());
             seg.Addresses = Tuple.Create(s, r, e);

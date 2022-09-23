@@ -7,14 +7,17 @@ global using System.Linq;
 global using System.Reactive.Disposables;
 global using System.Reactive.Linq;
 global using System.Reactive.Subjects;
-global using static Engine.Core.GlobalShortCuts;
+global using static Engine.Base.GlobalShortCuts;
 global using static System.Diagnostics.Debug;
-global using BitDic = System.Collections.Generic.Dictionary<string, Engine.Core.Obsolete.IBit>;
-global using ButtonDic = System.Collections.Generic.Dictionary<string, Engine.Core.RootFlow[]>;
-global using TagDic = System.Collections.Generic.Dictionary<string, Engine.Core.Tag>;
+global using static Engine.Core.Interface;
+global using static Engine.Core.InterfaceClass;
+global using static Engine.Cpu.Interface;
 
+global using BitDic = System.Collections.Generic.Dictionary<string, Engine.Cpu.Interface.ICpuBit>;
+global using TagDic = System.Collections.Generic.Dictionary<string, Engine.Base.Tag>;
+global using ButtonDic = System.Collections.Generic.Dictionary<string, Engine.Base.RootFlow[]>;
 
-namespace Engine.Core;
+namespace Engine.Base;
 
 public static class GlobalShortCuts
 {

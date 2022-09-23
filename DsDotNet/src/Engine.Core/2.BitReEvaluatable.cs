@@ -1,13 +1,11 @@
-using Engine.Core.Obsolete;
-
-namespace Engine.Core;
+namespace Engine.Base;
 
 /// <summary> 다른 bit 요소(monitoringBits)에 의해서 값이 변경될 수 있는 bit 에 대한 추상 class </summary>
 public abstract class BitReEvaluatable : Bit, IBitReadable
 {
-    internal IBit[] _monitoringBits;
+    internal ICpuBit[] _monitoringBits;
     public abstract bool Evaluate();
-    protected BitReEvaluatable(Cpu cpu, string name, params IBit[] monitoringBits)
+    protected BitReEvaluatable(Cpu cpu, string name, params ICpuBit[] monitoringBits)
         : base(name, cpu)
     {
         // PortInfo 의 경우, plan 대비 actual 에 null 을 허용

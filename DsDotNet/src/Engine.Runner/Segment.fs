@@ -9,6 +9,7 @@ open Engine.Core
 open Engine.Common.FS
 open Engine.Common
 open System.Threading
+open Engine.Base
 
 
 [<AutoOpen>]

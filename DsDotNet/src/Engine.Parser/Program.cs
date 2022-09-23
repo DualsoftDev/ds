@@ -27,7 +27,7 @@ public class XProgram
         //}
         //";
         ////            text = @"
-        ////[sys]MyElevatorParserSystem = {
+        ////[sys]MyElevatorSystem = {
         ////    [task]M = {
         ////        U;
         ////        D;

@@ -8,6 +8,7 @@ open System.Reactive.Linq
 
 open Engine.Common.FS
 open Engine.Core
+open Engine.Base
 
 [<AutoOpen>]
 module EngineModule =
@@ -73,7 +74,7 @@ module EngineModule =
                 vps.WireEvent() |> ignore
                 )
 
-            assert( virtualParentSegments |> Seq.forall(fun vp -> vp.Status = Status4.Ready));
+            assert( virtualParentSegments |> Seq.forall(fun vp -> vp.Status = DsType.Status4.Ready));
 
 
             logInfo "Start F# Engine running..."

@@ -10,10 +10,10 @@ module Cpu =
   
     [<DebuggerDisplay("{name}")>]
     type DsCpu(name:string)  =
+        let mutable name = name
         let assignFlows = HashSet<IFlow>() 
         interface ICpu with
-            member _.ToText(): string = name
-            member _.Name = name
+            member _.Name with get () = name and set (v) = name <- v
 
         member x.CpuName = (x:> ICpu).Name
         member x.AssignFlows = assignFlows

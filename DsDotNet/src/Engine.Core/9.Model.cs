@@ -1,4 +1,4 @@
-namespace Engine.Core;
+namespace Engine.Base;
 
 public class Model
 {
@@ -6,8 +6,6 @@ public class Model
     public List<Cpu> Cpus { get; } = new();
     /// <summary> 가상 부모 목록.  debugging 용 </summary>
     public SegmentBase[] VPSs { get; set; }
-
-
 }
 public static class ModelExtension
 {
@@ -19,7 +17,7 @@ public static class ModelExtension
         if (n == 1 || sys == null)
             return sys as T;
 
-        foreach (var rf in sys.RootFlows)
+        foreach(var rf in sys.RootFlows)
         {
             var cp = rf.CallPrototypes.FirstOrDefault(cp => cp.GetQualifiedName() == qualifiedName);
             if (cp != null)

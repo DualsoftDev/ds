@@ -1,7 +1,6 @@
 // Template generated code from Antlr4BuildTasks.Template v 8.17
 namespace Engine.Parser;
 
-using Engine.Common;
 using System.IO;
 
 public class ParserError

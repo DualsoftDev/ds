@@ -2,6 +2,8 @@ using Engine.Common.FS;
 using System.Reflection;
 using System.Threading;
 
+using static System.Net.Mime.MediaTypeNames;
+
 namespace Engine;
 
 class Program
@@ -34,12 +36,27 @@ class Program
         //Tester.DoSampleTestTriangle();
         //Tester.DoSampleTestAddressesAndLayouts();
 
+        //ParserTest.Test(ParserTest.Safety, "Cpu");
+        //ParserTest.Test(ParserTest.StrongCausal, "Cpu");
+        //ParserTest.Test(ParserTest.Buttons, "Cpu");
+        //ParserTest.Test(ParserTest.Dup, "Cpu");
+        //ParserTest.Test(ParserTest.Ppt, "Cpu");
+        //ParserTest.Test(ParserTest.QualifiedName);
+        //ParserTest.Test(ParserTest.Aliases);
+        //ParserTest.Test(ParserTest.Serialize, "Cpu");
+        //ParserTest.Test(ParserTest.ExternalSegmentCall);
+        //ParserTest.Test(ParserTest.ExternalSegmentCallConfusing);
+        ParserTest.Test(ParserTest.MyFlowReference);
 
-        //ParserTest.TestParseSafety();
-        //ParserTest.TestParseStrongCausal();
-        //ParserTest.TestParseButtons();
-        //ParserTest.TestParsePpt();
-        //ParserTest.TestSerialize();
-        ParserTest.TestError();
+        //ParserTest.Test(ParserTest.Error, "Cpu");
+
+        //InvalidDuplicationTest.Test(InvalidDuplicationTest.DupSystemNameModel);
+        //InvalidDuplicationTest.Test(InvalidDuplicationTest.DupFlowNameModel);
+        //InvalidDuplicationTest.Test(InvalidDuplicationTest.DupParentingModel1);
+        //InvalidDuplicationTest.Test(InvalidDuplicationTest.DupParentingModel2);
+        //InvalidDuplicationTest.Test(InvalidDuplicationTest.DupParentingModel3);
+        //InvalidDuplicationTest.Test(InvalidDuplicationTest.DupCallPrototypeModel);
+        //InvalidDuplicationTest.Test(InvalidDuplicationTest.DupParentingWithCallPrototypeModel);
+        //InvalidDuplicationTest.Test(InvalidDuplicationTest.DupCallTxModel);
     }
 }

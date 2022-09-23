@@ -1,6 +1,4 @@
-using Engine.Core.Obsolete;
-
-namespace Engine.Core;
+namespace Engine.Base;
 
 public abstract class CallBase : Coin
 {
@@ -42,7 +40,7 @@ public class CallPrototype : CallBase
                 switch (rx)
                 {
                     case SegmentBase seg: return seg.TagPEnd.Value;
-                    case IBit bit: return bit.Value;   // todo TAG 아닌 경우 처리 필요함.
+                    case ICpuBit bit: return bit.Value;   // todo TAG 아닌 경우 처리 필요함.
                 }
                 throw new Exception("Unknown type ERROR");
             }
@@ -58,8 +56,7 @@ public class CallPrototype : CallBase
         flow.CallPrototypes.Add(this);
     }
 
-    public override string QualifiedName => $"{RootFlow.QualifiedName}.{Name}";
-
+    public override string[] NameComponents => RootFlow.NameComponents.Append(Name).ToArray();
     public Xywh Xywh { get; set; }
 
 }
@@ -160,8 +157,10 @@ public static class CallExtension
                 var rootFlow = rootCall.Container;
                 var system = rootFlow.GetSystem();
                 return $"{system.Name}.{rootFlow.Name}.{rootCall.Name}";
+
             case SegmentBase rootSegment:
                 return rootSegment.QualifiedName;
+
             case CallPrototype cp:
                 return cp.QualifiedName;
 
@@ -171,10 +170,11 @@ public static class CallExtension
             case Call call:
                 return call.Container switch
                 {
-                    SegmentBase seg => $"{seg.QualifiedName}.{call.Name}",
+                    SegmentBase seg   => $"{seg.QualifiedName}.{call.Name}",
                     RootFlow flow => $"{flow.QualifiedName}.{call.Name}",
-                    _ => throw new Exception("ERROR"),
+                    _             => throw new Exception("ERROR"),
                 };
+
             default:
                 throw new Exception("ERROR");
         }

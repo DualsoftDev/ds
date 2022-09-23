@@ -1,21 +1,27 @@
+using Engine.Parser;
+
 namespace Engine
 {
     internal static class ParserTest
     {
-        public static void TestParseSafety()
+        public static void Test(string text, string activeCpuName = null)
         {
-            var text = @"
+            var engine = new EngineBuilder(text, ParserOptions.Create4Simulation(activeCpuName)).Engine;
+            Program.Engine = engine;
+            engine.Run();
+        }
+
+
+        public static string Safety = @"
 [sys] L = {
     [flow] F = {
-        Main = { T.Cp > T.Cm; }
-        [safety] = {
-            Main = {P.F.Sp; P.F.Sm}
-            Main2 = {P.F.Sp; P.F.Sm}
-        }
-    }
-    [task] T = {
+        Main = { Cp > Cm; }
         Cp = {P.F.Vp ~ P.F.Sp}
         Cm = {P.F.Vm ~ P.F.Sm}
+        [safety] = {
+            Main = {P.F.Sp; P.F.Sm}
+            // Main2 = {P.F.Sp; P.F.Sm}
+        }
     }
 }
 
@@ -33,7 +39,7 @@ namespace Engine
 [prop] = {
     [ safety ] = {
         L.F.Main = {P.F.Sp; P.F.Sm}
-        L.F.Main2 = {P.F.Sp; P.F.Sm}
+        //L.F.Main2 = {P.F.Sp; P.F.Sm}
     }
 }
 [cpus] AllCpus = {
@@ -46,13 +52,7 @@ namespace Engine
 }
 
 ";
-            var engine = new EngineBuilder(text, "Cpu").Engine;
-            Program.Engine = engine;
-            engine.Run();
-        }
-        public static void TestParseStrongCausal()
-        {
-            var text = @"
+        public static string StrongCausal = @"
 [sys] L = {
     [flow] F = {
         Main = {
@@ -60,10 +60,8 @@ namespace Engine
             Cp ||> Cm;
             Cp <|| Cm;
         }
-        [task] = {
-            Cp = {P.F.Vp ~ P.F.Sp}
-            Cm = {P.F.Vm ~ P.F.Sm}
-        }
+        Cp = {P.F.Vp ~ P.F.Sp}
+        Cm = {P.F.Vm ~ P.F.Sm}
     }
 }
 
@@ -88,14 +86,8 @@ namespace Engine
 }
 
 ";
-            var engine = new EngineBuilder(text, "Cpu").Engine;
-            Program.Engine = engine;
-            engine.Run();
-        }
 
-        public static void TestParseButtons()
-        {
-            var text = @"
+        public static string Buttons = @"
 [sys] My = {
     [flow] F1 = { A > B; }
     [flow] F2 = { A > B; }
@@ -107,8 +99,6 @@ namespace Engine
         EmptyButton2 = {}
         EMGBTN3 = { F3; F5 };
         EMGBTN = { F1; F2; F3; F5; };
-    }
-    [emg] = {
     }
     [auto] = {
         //AutoBTN2;     Empty not allowed
@@ -133,19 +123,9 @@ namespace Engine
         My.F5;
     }
 }
-
 ";
-            var engine = new EngineBuilder(text, "Cpu").Engine;
-            Program.Engine = engine;
-            engine.Run();
-        }
 
-        public static void TestParsePpt()
-        {
-            var text = @"
-//////////////////////////////////////////////////////
-//DTS model auto generation from D:\DS\test\DS.pptx
-//////////////////////////////////////////////////////
+        public static string Ppt = @"
 [sys] MY = {
     [flow] F1 = {
         R1 > R2;
@@ -267,14 +247,18 @@ namespace Engine
     }
 }
 ";
-            var engine = new EngineBuilder(text, "Cpu").Engine;
-            Program.Engine = engine;
-            engine.Run();
-        }
 
-        public static void TestSerialize()
-        {
-            var text = @"
+        public static string Dup = @"
+[sys] L = {
+    [flow] FF = {
+        A, ""F2.R2"" > C;
+        C |> ""F2.R2"";
+    }
+}
+";
+
+
+        public static string Serialize = @"
 [sys] L = {
     [flow] F = {
         Main = { Cp > Cm; }
@@ -311,19 +295,12 @@ namespace Engine
         P.F;
     }
 }
-
 ";
-            var engine = new EngineBuilder(text, "Cpu").Engine;
-            Program.Engine = engine;
-            engine.Run();
-        }
 
-        public static void TestError()
-        {
-            var text = @"
+        public static string Error = @"
 [sys] MY = {
-    [flow] Rear = {     
-        Á¦Ç°°ø±Ş = {
+    [flow] Rear = {
+        ì œí’ˆê³µê¸‰ = {
             Rear_Con_W > Rear_Pos_Sen;
             Rear_Cyl_Push_ADV > Rear_Cyl_Push_RET;
             Rear_Cyl_Push_RET <||> Rear_Cyl_Push_ADV;
@@ -334,17 +311,17 @@ namespace Engine
         Rear_Con_W     = {EX.Rear_Rear_Con_W.TX    ~    _}
         Rear_Pos_Sen     = {_    ~    EX.Rear_Rear_Pos_Sen.RX}
     }
-    [flow] Work = {     
-        ÀÛ¾÷°øÁ¤ = {
+    [flow] Work = {
+        ì‘ì—…ê³µì • = {
             Front_1Stopper_Adv <||> Front_1Stopper_RET;
             Front_1Stopper_Adv > Front_1pos_Sen;
             Front_1pos_Sen > Front_Usb_Cyl_ADV;
             Front_Con_W > Front_1Stopper_Adv;
             Front_Pos_Sen > Front_Con_W;
             Front_Usb_Cyl_ADV <||> Front_Usb_Cyl_RET;
-            Front_Usb_Cyl_ADV > EX.Work.TR;
+            Front_Usb_Cyl_ADV > EX.Work_Work.TR;
             Front_Usb_Cyl_RET > Front_1Stopper_RET;
-            EX.Work.TR > Front_Usb_Cyl_RET;
+            EX.Work_Work.TR > Front_Usb_Cyl_RET;
         }
         Front_Usb_Cyl_RET     = {EX.Work_Front_Usb_Cyl_RET.TX    ~    EX.Work_Front_Usb_Cyl_RET.RX}
         Front_Con_W     = {EX.Work_Front_Con_W.TX    ~    _}
@@ -354,10 +331,10 @@ namespace Engine
         Front_Usb_Cyl_ADV     = {EX.Work_Front_Usb_Cyl_ADV.TX    ~    EX.Work_Front_Usb_Cyl_ADV.RX}
         Front_1pos_Sen     = {_    ~    EX.Work_Front_1pos_Sen.RX}
     }
-    [flow] Model_Auto = {     
-        SSSS > Rear.Á¦Ç°°ø±Ş;
-        Work.ÀÛ¾÷°øÁ¤ > Front.¹èÃâ°øÁ¤;
-        Rear.Á¦Ç°°ø±Ş > Work.ÀÛ¾÷°øÁ¤;
+    [flow] Model_Auto = {
+        SSSS > Rear.ì œí’ˆê³µê¸‰;
+        Work.ì‘ì—…ê³µì • > Front.ë°°ì¶œê³µì •;
+        Rear.ì œí’ˆê³µê¸‰ > Work.ì‘ì—…ê³µì •;
     }
     [emg_in] = {
         EMGBTN = { Work; Model_Auto };
@@ -423,7 +400,7 @@ namespace Engine
     EX.Rear_Rear_Cyl_Push_RET.RX                 = (, ,)
     EX.Rear_Rear_Con_W.TX                        = (, , )
     EX.Rear_Rear_Pos_Sen.RX                      = (, ,)
-    EX.Work_Work.EX                              = (,,)
+    EX.Work_Work.TR                              = (,,)
     EX.Work_Front_Usb_Cyl_RET.TX                 = (, , )
     EX.Work_Front_Usb_Cyl_RET.RX                 = (, ,)
     EX.Work_Front_Con_W.TX                       = (, , )
@@ -435,16 +412,101 @@ namespace Engine
     EX.Work_Front_Usb_Cyl_ADV.TX                 = (, , )
     EX.Work_Front_Usb_Cyl_ADV.RX                 = (, ,)
     EX.Work_Front_1pos_Sen.RX                    = (, ,)
-    EX.AutoBTN.RX                                = (, ,)
-    EX.EMGBTN.RX                                 = (, ,)
-    EX.ResetBTN.RX                               = (, ,)
-    EX.StartBTN1.RX                              = (, ,)
+    //EX.AutoBTN.RX                                = (, ,)
+    //EX.EMGBTN.RX                                 = (, ,)
+    //EX.ResetBTN.RX                               = (, ,)
+    //EX.StartBTN1.RX                              = (, ,)
 }
 
 ";
-            var engine = new EngineBuilder(text, "Cpu").Engine;
-            Program.Engine = engine;
-            engine.Run();
+
+        public static string QualifiedName = @"
+[sys] ""my.favorite.system!!"" = {
+    [flow] "" my flow. "" = {
+        R1 > R2;
+        C1 = {
+            EX.""ì´ìƒí•œ. flow"".TX,
+            EX.""ì´ìƒí•œ. flow"".""NameWith\""Quote""
+            ~ EX.""ì´ìƒí•œ. flow"".""R.X""}
+    }
+}
+[sys] EX = {
+    [flow] ""ì´ìƒí•œ. flow"" = {
+        TX;
+        ""R.X"";
+        ""NameWith\""Quote"";
+    }
+}
+";
+
+        public static string ExternalSegmentCall = @"
+[sys] MY = {
+    [flow] FFF = {
+        Main = {
+            EX.""FFF.EXT"".EX > R2;
         }
+        R2 = {_ ~ _}
+    }
+}
+
+[sys] EX = {
+    [flow] ""FFF.EXT"" = { EX; }
+}
+";
+
+        public static string ExternalSegmentCallConfusing = @"
+[sys] MY = {
+    [flow] MyOtherFlow = {
+        A > B;
+    }
+    [flow] FFF = {
+        Main = {
+            MyOtherFlow.A > MyOtherFlow.B;
+        }
+    }
+}
+";
+        public static string ExternalSegmentCallConfusing2 = @"
+[sys] MY = {
+    [alias] = {
+        MyOtherFlow.A = { MyOtherFlow_A; }
+    }
+    [flow] MyOtherFlow = {
+        A > B;
+    }
+    [flow] FFF = {
+        C > MyOtherFlow_A;
+    }
+}
+";
+        public static string MyFlowReference = @"
+[sys] EX = {
+	[flow] F1_C3 = { TX > RX <| F1_C2.TX; }
+	[flow] F1_C2 = { TX > RX <| TX; }
+}
+";
+
+
+        public static string Aliases = @"
+[sys] my = {
+    [flow] F = {
+        Ap = {A.F.Vp ~ A.F.Sp}
+        Am = {A.F.Vm ~ A.F.Sm}
+        Main = {
+            // AVp1 |> Am1;
+            // ì •ë³´ë¡œì„œì˜ Call ìƒí˜¸ ë¦¬ì…‹
+            Ap1 <||> Am1;
+            Ap1 > Am1, Ap2 > Am2;
+        }
+        [alias] = {
+            Ap = { Ap1; Ap2; Ap3; }
+            Am = { Am1; Am2; Am3; }    // system name optional
+            //Vp = {AVp1;}  // invalid: ìì‹  ì‹œìŠ¤í…œì— ì •ì˜ëœ ê²ƒë§Œ alias
+        }
+
+    }
+}
+
+" + Tester.CreateCylinder("A");
     }
 }

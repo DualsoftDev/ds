@@ -1,13 +1,11 @@
-using Engine.Core.Obsolete;
-
-namespace Engine.Core;
+namespace Engine.Base;
 
 [DebuggerDisplay("{ToText()}")]
-public abstract class Bit : Named, IBit
+public abstract class Bit : Named, ICpuBit
 {
     protected bool _value;
     public virtual bool Value => _value;    //{ get => _value; set => _value = value; }
-    public List<IBit> Containers { get; } = new();
+    public List<ICpuBit> Containers { get; } = new();
 
     public Cpu Cpu { get; set; }
     public Bit(Cpu cpu, string name, bool bit = false) : base(name)
@@ -54,7 +52,7 @@ public abstract class Bit : Named, IBit
 
 public static class BitExtension
 {
-    public static string GetName(this IBit bit)
+    public static string GetName(this ICpuBit bit)
     {
         return bit switch
         {
@@ -63,7 +61,7 @@ public static class BitExtension
         };
     }
 
-    public static void SetName(this IBit bit, string name)
+    public static void SetName(this ICpuBit bit, string name)
     {
         if (bit is Named named)
             named.Name = name;
@@ -71,9 +69,9 @@ public static class BitExtension
             throw new Exception("ERROR");
     }
 
-    public static string ToText(this IBit bit, bool expand = false)
+    public static string ToText(this ICpuBit bit, bool expand = false)
     {
-        string getText(IBit bit, bool expand) => expand ? bit.ToText(true) : bit.GetName();
+        string getText(ICpuBit bit, bool expand) => expand ? bit.ToText(true) : bit.GetName();
 
         return bit switch
         {

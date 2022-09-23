@@ -1,4 +1,4 @@
-namespace Engine.Util;
+namespace Engine.Base;
 
 public class DsException : Exception
 {

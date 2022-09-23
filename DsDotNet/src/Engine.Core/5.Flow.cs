@@ -1,7 +1,8 @@
 
-using Engine.Core.Obsolete;
+using System.Security.Policy;
+using static Engine.Core.DsType;
 
-namespace Engine.Core;
+namespace Engine.Base;
 
 public abstract class Flow : Named, IWallet
 {
@@ -47,6 +48,8 @@ public abstract class Flow : Named, IWallet
     {
         Cpu = cpu;
     }
+
+    public Dictionary<string, object> InstanceMap = new();
 }
 
 
@@ -57,7 +60,8 @@ public class RootFlow : Flow
     public DsSystem System { get; set; }
     public List<CallPrototype> CallPrototypes = new();
 
-    public string QualifiedName => $"{System.Name}.{Name}";
+    public string[] NameComponents => new[] { System.Name, Name };
+    public string QualifiedName => NameComponents.Combine();
     public RootFlow(Cpu cpu, string name, DsSystem system)
         : base(cpu, name)
     {
@@ -71,6 +75,15 @@ public class RootFlow : Flow
     public IEnumerable<SegmentBase> RootSegments => ChildVertices.OfType<SegmentBase>();
 
     public override string ToText() => $"{QualifiedName}, #seg={RootSegments.Count()}, #chilren={ChildVertices.Count()}, #edges={Edges.Count()}";
+
+    // alias : ppt 도형으로 modeling 하면 문제가 되지 않으나, text grammar 로 서술할 경우, 
+    // 동일 이름의 call 등이 중복 사용되면, line 을 나누어서 기술할 때, unique 하게 결정할 수 없어서 도입.
+    // e.g Ap = { Ap1; Ap2;}
+    /// <summary> mnemonic -> target : "Ap1" -> "My.F.Ap", "My.F.Ap2" -> "My.F.Ap" </summary>
+    public Dictionary<string, string[]> AliasNameMaps = new();
+    /// <summary>target -> mnemonics : "My.F.Ap" -> ["Ap1"; "Ap2"] </summary>
+    public Dictionary<string[], string[]> BackwardAliasMaps = new(NameComponentsComparer.Instance);
+
 }
 
 public class ChildFlow : Flow
@@ -81,8 +94,20 @@ public class ChildFlow : Flow
     }
 
     public IEnumerable<Child> Children => ChildVertices.OfType<Child>();
+
+    public override string ToText()
+    {
+        return Name;
+    }
 }
 
+public class NameComponentsComparer : IEqualityComparer<string[]>
+{
+    public bool Equals(string[] x, string[] y) => x.Length == y.Length && x.SequenceEqual(y);
+
+    public int GetHashCode(string[] obj) => (int)obj.Average(ob => ob.GetHashCode());
+    public static NameComponentsComparer Instance { get; } = new NameComponentsComparer();
+}
 
 public static class FlowExtension
 {
@@ -117,9 +142,9 @@ public static class FlowExtension
         public IVertex Source;
         public IVertex Target;
         public bool IsReset => EdgeCausal.IsReset;
-        public DsType.EdgeCausal EdgeCausal;
+        public EdgeCausal EdgeCausal;
 
-        public Causal(IVertex source, IVertex target, DsType.EdgeCausal edgeCausal)
+        public Causal(IVertex source, IVertex target, EdgeCausal edgeCausal)
         {
             Source = source;
             Target = target;
@@ -136,7 +161,7 @@ public static class FlowExtension
     {
         var e = edge;
         foreach (var s in e.Sources)
-            yield return new Causal(s, e.Target, null/*DsType.EdgeCausalType(e.Operator)*/)
+            yield return new Causal(s, e.Target, EdgeCausalType(e.Operator))
                 ;
     }
 

@@ -1,5 +1,7 @@
 using Engine.Base;
 using Engine.Graph;
+using Engine.Parser;
+
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -96,7 +98,7 @@ public class Tester
 ";
 
         Assert(!Global.IsInUnitTest);
-        var engine = new EngineBuilder(text, "Cpu").Engine;
+        var engine = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu")).Engine;
         Program.Engine = engine;
         engine.Run();
 
@@ -202,7 +204,7 @@ public class Tester
 
 ";
         Assert(!Global.IsInUnitTest);
-        var engine = new EngineBuilder(text, "Cpu").Engine;
+        var engine = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu")).Engine;
         Program.Engine = engine;
         engine.Run();
 
@@ -246,7 +248,7 @@ public class Tester
 ;
 
         Assert(!Global.IsInUnitTest);
-        var engine = new EngineBuilder(text, "Cpu").Engine;
+        var engine = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu")).Engine;
         Program.Engine = engine;
         engine.Run();
 
@@ -262,14 +264,14 @@ public class Tester
             var state = ssc.Status;
             if (qName == "L_F_Main")
             {
-                if (state == DsType.Status4Temp.Finish)
+                if (state == DsType.Status4.Finish)
                 {
                     counter++;
                     Console.WriteLine($"[{counter}] After finishing Main segment : AdvanceReturn");
                     LogInfo($"-------------------------- [{counter}] After finishing Main segment : AdvanceReturn");
                     data.Write(resetTag, true);
                 }
-                else if (ssc.Status == DsType.Status4Temp.Ready)
+                else if (ssc.Status == DsType.Status4.Ready)
                 {
                     Console.Beep(10000, 200);
                     Thread.Sleep(1000);
@@ -452,7 +454,7 @@ public class Tester
         //Log4NetHelper.ChangeLogLevel(log4net.Core.Level.Error);
 
         Assert(!Global.IsInUnitTest);
-        var engine = new EngineBuilder(text, "Cpu").Engine;
+        var engine = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu")).Engine;
         Program.Engine = engine;
         engine.Run();
 
@@ -467,7 +469,7 @@ public class Tester
             var state = ssc.Status;
             if (qName == "VPS_L_F_Main")
             {
-                if (state == DsType.Status4Temp.Finish)
+                if (state == DsType.Status4.Finish)
                 {
                     LogDebug($"Resetting externally {resetTag}");
                     data.Write(resetTag, true);
@@ -477,7 +479,7 @@ public class Tester
 
             if (qName == "L_F_Main")
             {
-                if (state == DsType.Status4Temp.Finish)
+                if (state == DsType.Status4.Finish)
                 {
                     counter++;
                     //if (counter++ % 100 == 0)
@@ -488,7 +490,7 @@ public class Tester
                     }
                     //data.Write(resetTag, true);
                 }
-                else if (ssc.Status == DsType.Status4Temp.Ready)
+                else if (ssc.Status == DsType.Status4.Ready)
                 {
                     Console.Beep(10000, 200);
                     Thread.Sleep(1000);
@@ -613,19 +615,17 @@ public class Tester
     {
         var text = @"
 [sys] L = {
-    [task] T = {
+    [flow] F = {
+        Main = {
+            // 정보로서의 Call 상호 리셋
+            Ap <||> Am;
+            Bp <||> Bm;
+            Ap > Am, Bp > Bm;
+        }
         Ap = {A.F.Vp ~ A.F.Sp}
         Am = {A.F.Vm ~ A.F.Sm}
         Bp = {B.F.Vp ~ B.F.Sp}
         Bm = {B.F.Vm ~ B.F.Sm}
-    }
-    [flow] F = {
-        Main = {
-            // 정보로서의 Call 상호 리셋
-            T.Ap <||> T.Am;
-            T.Bp <||> T.Bm;
-            T.Ap > T.Am, T.Bp > T.Bm;
-        }
     }
 }
 [addresses] = {
@@ -666,12 +666,10 @@ public class Tester
             Bp <||> Bm;
             Ap > Am, Bp > Bm;
         }
-        [task] = {
-            Ap = {A.F.Vp ~ A.F.Sp}
-            Am = {A.F.Vm ~ A.F.Sm}
-            Bp = {B.F.Vp ~ B.F.Sp}
-            Bm = {B.F.Vm ~ B.F.Sm}
-        }
+        Ap = {A.F.Vp ~ A.F.Sp}
+        Am = {A.F.Vm ~ A.F.Sm}
+        Bp = {B.F.Vp ~ B.F.Sp}
+        Bm = {B.F.Vm ~ B.F.Sm}
     }
 }
 [addresses] = {
@@ -705,7 +703,7 @@ public class Tester
         //Log4NetHelper.ChangeLogLevel(log4net.Core.Level.Error);
 
         Assert(!Global.IsInUnitTest);
-        var engine = new EngineBuilder(GetTextDiamond(), "Cpu").Engine;
+        var engine = new EngineBuilder(GetTextDiamond(), ParserOptions.Create4Simulation("Cpu")).Engine;
         Program.Engine = engine;
         engine.Run();
 
@@ -737,7 +735,7 @@ public class Tester
 
             if (qName == "L_F_Main")
             {
-                if (state == DsType.Status4Temp.Finish)
+                if (state == DsType.Status4.Finish)
                 {
                     counter++;
                     //if (counter++ % 100 == 0)
@@ -748,7 +746,7 @@ public class Tester
                     }
                     data.Write(resetTag, true);
                 }
-                else if (ssc.Status == DsType.Status4Temp.Ready)
+                else if (ssc.Status == DsType.Status4.Ready)
                 {
                     Console.Beep(10000, 200);
                     Thread.Sleep(1000);
@@ -910,7 +908,7 @@ public class Tester
 ";
 
         Assert(!Global.IsInUnitTest);
-        var engine = new EngineBuilder(text, "Cpu").Engine;
+        var engine = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu")).Engine;
         Program.Engine = engine;
         engine.Run();
 
@@ -928,7 +926,7 @@ public class Tester
         bool first = true;
         var finished =
             Global.SegmentStatusChangedSubject
-            .Where(ssc => ssc.Status == DsType.Status4Temp.Finish && ssc.Segment.GetType().Name == "Segment")
+            .Where(ssc => ssc.Status == DsType.Status4.Finish && ssc.Segment.GetType().Name == "Segment")
             ;
         var _counterSubscription = finished.Subscribe(ssc =>
             {
@@ -1000,7 +998,7 @@ public class Tester
 ";
 
         Assert(!Global.IsInUnitTest);
-        var engine = new EngineBuilder(text, "Cpu").Engine;
+        var engine = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu")).Engine;
         Program.Engine = engine;
         engine.Run();
 
@@ -1191,7 +1189,7 @@ public class Tester
 ";
 
         Assert(!Global.IsInUnitTest);
-        var engine = new EngineBuilder(text, "Cpu").Engine;
+        var engine = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu")).Engine;
         Program.Engine = engine;
         engine.Run();
 

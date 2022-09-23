@@ -1,5 +1,5 @@
 //using System.Threading;
-//namespace Engine.Core.Obsolete
+//namespace Engine.Base.Obsolete
 //{
 
 //    internal CancellationTokenSource MovingCancellationTokenSource { get; set; }

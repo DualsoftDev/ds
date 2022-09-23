@@ -9,6 +9,7 @@ open Engine.Core
 open Engine.Common
 open System.Collections.Concurrent
 open System.Threading.Tasks
+open Engine.Base
 
 
 [<AutoOpen>]

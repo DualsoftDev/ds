@@ -1,7 +1,7 @@
 
-using Engine.Core.Obsolete;
+using static Engine.Core.DsType;
 
-namespace Engine.Core;
+namespace Engine.Base;
 
 /// <summary> Segment 내에 배치된 `Child`.  SubCall 또는 ExSegmentCall 를 Coin 으로 갖는 wrapper</summary>
 ///
@@ -15,7 +15,7 @@ public class Child : Named, IVertex, ICoin
     public bool IsCall => Coin is SubCall;
     public bool IsAlias { get; set; }
     // 부모가 바라본 child 상태
-    public DsType.Status4Temp Status
+    public Status4 Status
     {
         get => Parent.ChildStatusMap[this].Item2;
         set
@@ -52,11 +52,12 @@ public class Child : Named, IVertex, ICoin
     {
         Parent = parent;
         Coin = coin;
-        QualifiedName = $"{parent.QualifiedName}.{coin.Name}";
+        NameComponents = parent.NameComponents.Append(coin.Name).ToArray();
         Parent.AddChildVertex(this);
     }
 
-    public string QualifiedName { get; }
+    public string[] NameComponents { get; }
+    public string QualifiedName => NameComponents.Combine();
     public bool Value { get => Coin.Value; set => Coin.Value = value; }
     public virtual bool Evaluate() => Value;
 

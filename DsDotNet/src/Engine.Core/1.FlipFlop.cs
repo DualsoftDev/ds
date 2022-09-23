@@ -1,6 +1,4 @@
-using Engine.Core.Obsolete;
-
-namespace Engine.Core;
+namespace Engine.Base;
 
 
 /// <summary>
@@ -10,12 +8,13 @@ namespace Engine.Core;
 /// </summary>
 internal class FlipFlop : Bit, IBitWritable
 {
-    public IBit S { get; }
-    public IBit R { get; }
+    public ICpuBit S { get; }
+    public ICpuBit R { get; }
+
     public void SetValue(bool newValue) => _value = newValue;
 
 
-    public FlipFlop(Cpu cpu, string name, IBit set, IBit reset, bool value = false)
+    public FlipFlop(Cpu cpu, string name, ICpuBit set, ICpuBit reset, bool value = false)
         : base(cpu, name, value)
     {
         Assert(set != null && reset != null);

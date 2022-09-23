@@ -1,5 +1,3 @@
-using static Engine.Core.CoreStruct;
-
 namespace Engine.Parser;
 
 public static class ModelParser
@@ -24,6 +22,6 @@ public static class ModelParser
         return helper;
     }
 
-    public static ParserModel ParseFromString(string text, ParserOptions options) => ParseFromString2(text, options).Model;
+    public static Model ParseFromString(string text, ParserOptions options) => ParseFromString2(text, options).Model;
 
 }

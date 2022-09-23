@@ -1,6 +1,6 @@
-using Engine.Core.Obsolete;
+using static Engine.Core.InterfaceClass;
 
-namespace Engine.Core;
+namespace Engine.Base;
 
 /// <summary> Segment Or Call base </summary>
 [DebuggerDisplay("{ToText()}")]
@@ -22,7 +22,9 @@ public abstract class Coin : Named, ICoin
 
 
     bool IsChildrenStartPoint() => true;
-    public virtual string QualifiedName { get; }
+
+    public virtual string[] NameComponents { get; }
+    public virtual string QualifiedName => NameComponents.Combine();
     public override string ToString() => ToText();
     public override string ToText() => $"{QualifiedName}[{this.GetType().Name}]";
     public virtual void Going() => throw new Exception("ERROR");

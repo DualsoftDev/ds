@@ -1,14 +1,14 @@
-using Engine.Core.Obsolete;
 
-namespace Engine.Core;
+
+namespace Engine.Base;
 
 [DebuggerDisplay("{ToText()}")]
-public abstract partial class Edge : IEdge
+public abstract partial class Edge : IEdges
 {
     public Flow ContainerFlow;
 
     /// <summary> Conjuction : 사용자가 모델링한 source vertices</summary>
-    public IVertex[] Sources { get; internal set; }
+    public IEnumerable<IVertex> Sources { get; internal set; }
 
     /// <summary>사용자가 모델링한 target vertex</summary>
     public IVertex Target { get; internal set; }
@@ -19,6 +19,7 @@ public abstract partial class Edge : IEdge
     {
         Assert(sources.All(s => s != null));
         Assert(target != null);
+        Assert(sources.Append(target).All(n => n is Child || n is SegmentBase || n is RootCall || n is SubCall));
 
         ContainerFlow = containerFlow;
         Sources = sources;

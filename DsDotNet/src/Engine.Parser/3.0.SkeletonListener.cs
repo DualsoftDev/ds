@@ -4,16 +4,16 @@ namespace Engine.Parser;
 
 
 /// <summary>
-/// ParserSystem, Flow, Task, Cpu
+/// System, Flow, Task, Cpu
 /// Parenting, Listing, CallPrototype, Aliasing 구조까지 생성
 /// </summary>
 class SkeletonListener : dsBaseListener
 {
     public ParserHelper ParserHelper;
-    ParserModel _model => ParserHelper.Model;
-    ParserSystem _system { get => ParserHelper._system; set => ParserHelper._system = value; }
-    ParserRootFlow _rootFlow { get => ParserHelper._rootFlow; set => ParserHelper._rootFlow = value; }
-    ParserSegment _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
+    Model _model => ParserHelper.Model;
+    DsSystem _system { get => ParserHelper._system; set => ParserHelper._system = value; }
+    RootFlow _rootFlow { get => ParserHelper._rootFlow; set => ParserHelper._rootFlow = value; }
+    SegmentBase _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
 
     public SkeletonListener(dsParser parser, ParserHelper helper)
     {
@@ -26,13 +26,13 @@ class SkeletonListener : dsBaseListener
     {
         var cpuContexts = enumerateChildren<CpuContext>(ctx);
 
-        Dictionary<string, ParserCpu> dict = new();
+        Dictionary<string, Cpu> dict = new();
 
-        ParserCpu createCpu(string cpuName)
+        Cpu createCpu(string cpuName)
         {
             if (dict.ContainsKey(cpuName))
                 return dict[cpuName];
-            var cpu = new ParserCpu(cpuName, ParserHelper.Model);
+            var cpu = new Cpu(cpuName, ParserHelper.Model);
             dict[cpuName] = cpu;
             return cpu;
         }
@@ -54,8 +54,8 @@ class SkeletonListener : dsBaseListener
     override public void EnterSystem(SystemContext ctx)
     {
         var name = ctx.id().GetText().DeQuoteOnDemand();
-        _system = new ParserSystem(name, _model);
-        Trace.WriteLine($"ParserSystem: {name}");
+        _system = new DsSystem(name, _model);
+        Trace.WriteLine($"System: {name}");
     }
     override public void ExitSystem(SystemContext ctx) { _system = null; }
 
@@ -70,24 +70,24 @@ class SkeletonListener : dsBaseListener
         if (!ParserHelper.ParserOptions.IsSimulationMode && !cpuAssigned)
             throw new Exception($"No CPU assignment for flow [{flowFqdn}");
 
-        ParserCpu cpu = null;
+        Cpu cpu = null;
         if (cpuAssigned)
             cpu = ParserHelper.FlowName2CpuMap[flowFqdn];
         else
         {
             // simulation mode.
-            cpu = new ParserCpu("DummyCpu", _model);
+            cpu = new Cpu("DummyCpu", _model);
             ParserHelper.FlowName2CpuMap.Add(flowFqdn, cpu);
             if (ParserHelper.FlowName2CpuMap.Values.ForAll(cpu => ! cpu.IsActive))
                 cpu.IsActive = true;    // 강제로 active cpu 할당
         }
 
-        var rf = cpu.ParserRootFlows.FirstOrDefault(f => f.Name == flowName);
+        var rf = cpu.RootFlows.FirstOrDefault(f => f.Name == flowName);
         if (rf != null)
             throw new Exception($"Duplicated flow name [{flowName}] on {rf.QualifiedName}.");
 
-        _rootFlow = new ParserRootFlow(cpu, flowName, _system);
-        cpu.ParserRootFlows.Add(_rootFlow);
+        _rootFlow = new RootFlow(cpu, flowName, _system);
+        cpu.RootFlows.Add(_rootFlow);
     }
     override public void ExitFlow(FlowContext ctx) { _rootFlow = null; }
 
@@ -117,7 +117,7 @@ class SkeletonListener : dsBaseListener
     override public void EnterListing(ListingContext ctx)
     {
         var name = ctx.id().GetText().DeQuoteOnDemand();
-        var seg = ParserSegment.Create(name, _rootFlow);
+        var seg = SegmentBase.Create(name, _rootFlow);
         if (_rootFlow.CallPrototypes.Any(cp => cp.Name == name) || _rootFlow.InstanceMap.ContainsKey(name))
             throw new Exception($"Duplicated listing [{ParserHelper.CurrentPath}.{name}].");
 
@@ -129,7 +129,7 @@ class SkeletonListener : dsBaseListener
     {
         Trace.WriteLine($"Parenting: {ctx.GetText()}");
         var name = ctx.id().GetText().DeQuoteOnDemand();
-        _parenting = ParserSegment.Create(name, _rootFlow);
+        _parenting = SegmentBase.Create(name, _rootFlow);
 
         if (_rootFlow.InstanceMap.ContainsKey(name))
             throw new Exception($"Duplicated parenting name [{ParserHelper.CurrentPath}] on {_rootFlow.QualifiedName}.");
@@ -169,7 +169,7 @@ class SkeletonListener : dsBaseListener
 
         // 내부 없는 단순 root segment.  e.g "Vp"
         // @sa EnterListing()
-        var seg = ParserSegment.Create(last, _rootFlow);
+        var seg = SegmentBase.Create(last, _rootFlow);
         _rootFlow.InstanceMap.Add(last, seg);
     }
 
@@ -234,23 +234,23 @@ class SkeletonListener : dsBaseListener
         //        var dot_ = fpc.GetChild(1).GetText();
         //        var flowName = fpc.GetChild(2).GetText();
 
-        //        var system = _model.ParserSystems.FirstOrDefault(sys => sys.Name == systemName);
-        //        var flow = system.ParserRootFlows.FirstOrDefault(f => f.Name == flowName);
+        //        var system = _model.Systems.FirstOrDefault(sys => sys.Name == systemName);
+        //        var flow = system.RootFlows.FirstOrDefault(f => f.Name == flowName);
         //        return flow;
         //    })
         //    .ToArray()
         //    ;
-        //var cpu_ = new Cpu(name, _model) { ParserRootFlows = flows };
+        //var cpu_ = new Cpu(name, _model) { RootFlows = flows };
     }
 
 
     override public void ExitProgram(ProgramContext ctx)
     {
-        foreach (var sys in _model.ParserSystems)
+        foreach (var sys in _model.Systems)
         {
-            foreach (var flow in sys.ParserRootFlows)
+            foreach (var flow in sys.RootFlows)
             {
-                foreach (var seg in flow.RootParserSegments)
+                foreach (var seg in flow.RootSegments)
                     Assert(seg.Cpu != null && seg.Cpu == flow.Cpu);
             }
         }

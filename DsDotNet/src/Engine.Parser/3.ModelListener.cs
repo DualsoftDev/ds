@@ -1,7 +1,4 @@
 using Engine.Common;
-using static Engine.Core.CoreClass;
-using static Engine.Core.CoreFlow;
-using static Engine.Core.CoreStruct;
 
 namespace Engine.Parser;
 
@@ -9,10 +6,10 @@ class ModelListener : dsBaseListener
 {
     #region Boiler-plates
     public ParserHelper ParserHelper;
-    ParserModel    _model => ParserHelper.Model;
-    ParserSystem _system    { get => ParserHelper._system;    set => ParserHelper._system = value; }
-    ParserRootFlow _rootFlow  { get => ParserHelper._rootFlow;  set => ParserHelper._rootFlow = value; }
-    ParserSegment  _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
+    Model    _model => ParserHelper.Model;
+    DsSystem _system    { get => ParserHelper._system;    set => ParserHelper._system = value; }
+    RootFlow _rootFlow  { get => ParserHelper._rootFlow;  set => ParserHelper._rootFlow = value; }
+    SegmentBase  _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
 
     public ModelListener(dsParser parser, ParserHelper helper)
     {
@@ -23,14 +20,14 @@ class ModelListener : dsBaseListener
     override public void EnterSystem(SystemContext ctx)
     {
         var name = ctx.id().GetText().DeQuoteOnDemand();
-        _system = _model.ParserSystems.First(s => s.Name == name);
+        _system = _model.Systems.First(s => s.Name == name);
     }
     override public void ExitSystem(SystemContext ctx) { this._system = null; }
 
     override public void EnterFlow(FlowContext ctx)
     {
         var flowName = ctx.id().GetText().DeQuoteOnDemand();
-        _rootFlow = _system.ParserRootFlows.First(f => f.Name == flowName);
+        _rootFlow = _system.RootFlows.First(f => f.Name == flowName);
     }
     override public void ExitFlow(FlowContext ctx) { _rootFlow = null; }
 
@@ -39,7 +36,7 @@ class ModelListener : dsBaseListener
     override public void EnterParenting(ParentingContext ctx)
     {
         var name = ctx.id().GetText().DeQuoteOnDemand();
-        _parenting = (ParserSegment)_rootFlow.InstanceMap[name];
+        _parenting = (SegmentBase)_rootFlow.InstanceMap[name];
     }
     override public void ExitParenting(ParentingContext ctx) { _parenting = null; }
     #endregion Boiler-plates
@@ -109,8 +106,8 @@ class ModelListener : dsBaseListener
                         case null:
                             throw new ParserException($"ERROR : failed to find [{ns.Combine()}]", ctx);
 
-                        case ParserSegment exSeg when _parenting != null:
-                            var exSegCall = new ExParserSegment(ns.Combine(), exSeg);
+                        case SegmentBase exSeg when _parenting != null:
+                            var exSegCall = new ExSegment(ns.Combine(), exSeg);
                             var child = new Child(exSegCall, _parenting);
                             instanceMap.Add(ns.Combine(), child);
                             break;
@@ -162,7 +159,7 @@ class ModelListener : dsBaseListener
             var flows = (
                     from flowNameCtx in enumerateChildren<FlowNameContext>(bd)
                     let flowName = flowNameCtx.GetText()
-                    let flow = _system.ParserRootFlows().First(rf => rf.Name == flowName)
+                    let flow = _system.RootFlows.First(rf => rf.Name == flowName)
                     select flow
                 ).ToArray();
 

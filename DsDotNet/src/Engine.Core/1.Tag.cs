@@ -1,6 +1,5 @@
-using Engine.Core.Obsolete;
 
-namespace Engine.Core;
+namespace Engine.Base;
 
 [Flags]
 public enum TagType

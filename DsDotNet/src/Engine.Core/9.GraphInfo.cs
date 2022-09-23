@@ -1,7 +1,6 @@
-using Engine.Core.Obsolete;
 using QuickGraph;
 
-namespace Engine.Core;
+namespace Engine.Base;
 
 public class QgEdge : QuickGraph.IEdge<IVertex>
 {

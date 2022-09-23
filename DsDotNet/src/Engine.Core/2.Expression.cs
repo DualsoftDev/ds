@@ -1,6 +1,4 @@
-using Engine.Core.Obsolete;
-
-namespace Engine.Core;
+namespace Engine.Base;
 
 public abstract class Expression : BitReEvaluatable
 {
@@ -14,7 +12,7 @@ public abstract class Expression : BitReEvaluatable
     }
     public override bool Evaluate() => throw new Exception("Should be redefined");
 
-    protected Expression(Cpu cpu, string name, params IBit[] monitoringBits)
+    protected Expression(Cpu cpu, string name, params ICpuBit[] monitoringBits)
         : base(cpu, name, monitoringBits)
     {
         // override 된 Value 를 생성자에서 호출 가능함.
@@ -27,7 +25,7 @@ public abstract class Expression : BitReEvaluatable
 public class And : Expression
 {
     public override bool Evaluate() => _monitoringBits.All(b => b.Value);
-    public And(Cpu cpu, string name, params IBit[] bits)
+    public And(Cpu cpu, string name, params ICpuBit[] bits)
         : base(cpu, name, bits)
     {
     }
@@ -35,7 +33,7 @@ public class And : Expression
 public class Or : Expression
 {
     public override bool Evaluate() => _monitoringBits.Any(b => b.Value);
-    public Or(Cpu cpu, string name, params IBit[] bits)
+    public Or(Cpu cpu, string name, params ICpuBit[] bits)
         : base(cpu, name, bits)
     {
     }
@@ -45,8 +43,8 @@ public class Not : Expression
 {
     public override bool Evaluate() => !_monitoringBits[0].Value;
 
-    public IBit Bit;
-    public Not(Cpu cpu, string name, IBit bit)
+    public ICpuBit Bit;
+    public Not(Cpu cpu, string name, ICpuBit bit)
         : base(cpu, name, bit)
     {
     }

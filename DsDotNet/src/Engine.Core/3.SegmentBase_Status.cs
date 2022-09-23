@@ -1,5 +1,7 @@
 
-namespace Engine.Core;
+using static Engine.Core.DsType;
+
+namespace Engine.Base;
 
 partial class SegmentBase
 {
@@ -30,6 +32,6 @@ partial class SegmentBase
     //}
 
     /// <summary> Flip 여부 * Status </summary>
-    public Dictionary<Child, (bool, DsType.Status4Temp)> ChildStatusMap { get; internal set; }
+    public Dictionary<Child, (bool, Status4)> ChildStatusMap { get; internal set; }
 
 }

@@ -1,6 +1,4 @@
-using Engine.Core.Obsolete;
-
-namespace Engine.Core;
+namespace Engine.Base;
 
 public class Flag : Bit, IBitReadWritable
 {

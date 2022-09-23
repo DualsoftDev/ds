@@ -48,15 +48,45 @@ module internal ModelSerializerModule =
         [
             match flow with
             | :? RootFlow as rf ->
-                yield $"{tab}[flow] {flow.Name} = {lb}"
+                yield $"{tab}[flow] {flow.Name.QuoteOnDemand()} = {lb}"
+
+                let segWithSafety =
+                    rf.RootSegments
+                        .Where(fun seg -> seg.SafetyConditions <> null)
+                        .ToArray()
+                if segWithSafety.Any() then
+                    let tab = getTab indent
+                    yield $"{tab}[safety] = {lb}"
+                    for seg in segWithSafety do
+                        let tab = getTab (indent+1)
+                        let safeties = String.Join("; ", seg.SafetyConditions.Select(fun sc -> sc.QualifiedName))
+                        yield $"{tab}{seg.Name} = {lb} {safeties} {rb}"
+                    yield $"{tab}{rb}"
+
+
+                let bwd = rf.BackwardAliasMaps
+                if bwd.Count > 0 then
+                    let tab = getTab indent
+                    yield $"{tab}[alias] = {lb}"
+                    for KeyValue(k, v) in bwd do
+                        let tab = getTab (indent+1)
+                        let mnemonics = String.Join("; ", v)
+                        yield $"{tab}{k.Last()} = {lb} {mnemonics} {rb}"
+                    yield $"{tab}{rb}"
+
                 for cp in rf.CallPrototypes do
                     yield serializeCallPrototype cp indent
             | _ -> yield $"{tab}{flow.Name} = {lb}"
 
             for iso in flow.IsolatedCoins do
                 match iso with
-                | :? ChildFlow as cf ->
+                | :? ChildFlow as cf when cf.ChildVertices.Any() ->
                     yield! serializeFlow cf indent
+                | :? ChildFlow as cf ->
+                    yield $"{getTab indent}{cf.Name};"
+                | :? Child as child ->
+                    yield $"{tab}/* Child={child.QualifiedName} */"
+                    ()
                 | _ -> failwithlog "ERROR"
             for edge in flow.Edges do
                 yield serializeEdge edge indent
@@ -81,7 +111,7 @@ module internal ModelSerializerModule =
         ]
     let serializeSystem (system:DsSystem) =
         [
-            yield $"[sys] {system.Name} = " + "{"
+            yield $"[sys] {system.Name.QuoteOnDemand()} = " + "{"
             for flow in system.RootFlows do
                 yield! serializeFlow flow 1
 

@@ -47,9 +47,9 @@ partial class ElementsListener
                         1 => flowIds.Concat(ns).ToArray(),
                         2 => new Func<string[]>(() =>
                         {
-                            if (_system.ParserRootFlows.Any(rf => rf.Name == ns[0]))  // Sys.Flow + OtherFlow.Seg => Sys.OtherFlow.Seg
+                            if (_system.RootFlows.Any(rf => rf.Name == ns[0]))  // Sys.Flow + OtherFlow.Seg => Sys.OtherFlow.Seg
                             {
-                                nodeType = NodeType.externalParserSegmentCall;
+                                nodeType = NodeType.externalSegmentCall;
                                 return ns.Prepend(_system.Name).ToArray();
                             }
 
@@ -173,7 +173,7 @@ partial class ElementsListener
 
 
 
-    IVertex[] FindVertices(ParserSegment parenting, NodeBase nodebase)
+    IVertex[] FindVertices(SegmentBase parenting, NodeBase nodebase)
     {
         IVertex helper(string[] spec)
         {

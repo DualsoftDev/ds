@@ -12,7 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "git", "git", "{078A9C52-DDC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Engine", "src\Engine\Engine.csproj", "{56B03815-608A-4EEA-98B2-5D3E1D26C6DF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Engine.Util", "src\Engine.Core\Engine.Util.csproj", "{EE1C858D-5749-4AC6-B00F-16B8A650E3CC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Engine.Base", "src\Engine.Core\Engine.Base.csproj", "{EE1C858D-5749-4AC6-B00F-16B8A650E3CC}"
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Engine.Graph", "src\Engine.Graph\Engine.Graph.fsproj", "{42828943-9DAC-4F1E-9BBD-E14DCFFCA76A}"
 EndProject

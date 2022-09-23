@@ -1,13 +1,11 @@
-using Engine.Core.Obsolete;
-
-namespace Engine.Core;
+namespace Engine.Base;
 
 public class Latch : BitReEvaluatable, IBitWritable
 {
-    internal IBit _setCondition { get; }
-    internal IBit _resetCondition { get; }
+    internal ICpuBit _setCondition { get; }
+    internal ICpuBit _resetCondition { get; }
 
-    public Latch(Cpu cpu, string name, IBit setCondition, IBit resetCondition)
+    public Latch(Cpu cpu, string name, ICpuBit setCondition, ICpuBit resetCondition)
         : base(cpu, name, new[] { setCondition, resetCondition })
     {
         Assert(setCondition != null && resetCondition != null);
@@ -16,7 +14,7 @@ public class Latch : BitReEvaluatable, IBitWritable
         _value = Evaluate();
     }
 
-    public static Latch Create(Cpu cpu, string name, IBit setCondition, IBit resetCondition)
+    public static Latch Create(Cpu cpu, string name, ICpuBit setCondition, ICpuBit resetCondition)
     {
         var existing = GetExistingBit<Latch>(cpu, name);
         if (existing != null)

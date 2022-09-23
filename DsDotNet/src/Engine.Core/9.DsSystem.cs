@@ -1,6 +1,4 @@
-using Engine.Core.Obsolete;
-
-namespace Engine.Core;
+namespace Engine.Base;
 
 public class DsSystem : Named
 {
@@ -15,7 +13,15 @@ public class DsSystem : Named
         : base(name)
     {
         Model = model;
+        if (model.Systems.Any(sys => sys.Name == name))
+            throw new Exception($"Duplicated system name [{name}].");
+
         model.Systems.Add(this);
+    }
+
+    public override string ToText()
+    {
+        return Name;
     }
 }
 

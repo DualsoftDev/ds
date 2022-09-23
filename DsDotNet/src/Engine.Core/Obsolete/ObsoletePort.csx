@@ -1,4 +1,4 @@
-//namespace Engine.Core.Obsolete;
+//namespace Engine.Base.Obsolete;
 //#if false
 
 //[DebuggerDisplay("{QualifiedName}")]

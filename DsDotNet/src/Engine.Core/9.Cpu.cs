@@ -1,6 +1,4 @@
-using Engine.Core.Obsolete;
-
-namespace Engine.Core;
+namespace Engine.Base;
 
 public class Cpu : Named, ICpu
 {
@@ -29,17 +27,17 @@ public class Cpu : Named, ICpu
     public bool Running { get; set; } = true;
     public bool NeedWait => Running && (ProcessingQueue || Queue.Count > 0);
 
-    internal Dictionary<IBit, FlipFlop[]> FFSetterMap;
-    internal Dictionary<IBit, FlipFlop[]> FFResetterMap;
+    internal Dictionary<ICpuBit, FlipFlop[]> FFSetterMap;
+    internal Dictionary<ICpuBit, FlipFlop[]> FFResetterMap;
     internal int DbgNestingLevel { get; set; }
     public int DbgThreadId { get; internal set; }
 
     public GraphInfo GraphInfo { get; set; }
 
     /// <summary> bit 간 순방향 의존성 map </summary>
-    public Dictionary<IBit, HashSet<IBit>> ForwardDependancyMap { get; } = new();
+    public Dictionary<ICpuBit, HashSet<ICpuBit>> ForwardDependancyMap { get; } = new();
     /// <summary> bit 간 역방향 의존성 map </summary>
-    public Dictionary<IBit, HashSet<IBit>> BackwardDependancyMap { get; internal set; }
+    public Dictionary<ICpuBit, HashSet<ICpuBit>> BackwardDependancyMap { get; internal set; }
     /// <summary> this Cpu 관련 tags.  Root segment 의 S/R/E 및 call 의 Tx, Rx </summary>
     public BitDic BitsMap { get; } = new();
     public TagDic TagsMap { get; } = new();

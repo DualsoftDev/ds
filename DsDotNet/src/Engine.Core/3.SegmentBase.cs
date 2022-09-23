@@ -1,6 +1,7 @@
-using Engine.Core.Obsolete;
+using static Engine.Core.DsType;
 
-namespace Engine.Core;
+namespace Engine.Base;
+
 
 /// <summary>Segment 생성 함수.  Segment 에서 상속받은 class 객체를 생성하기 위함. (e.g Engine.Runner.FsSegment)</summary>
 public delegate SegmentBase SegmentCreator(string segmentName, RootFlow rootFlow);
@@ -20,11 +21,13 @@ public abstract partial class SegmentBase : ChildFlow, IVertex, ICoin, IWallet, 
             _cpu = value;
         }
     }
-    public string QualifiedName =>
+
+    public string[] NameComponents =>
         (ContainerFlow == null)
-        ? Name
-        : $"{ContainerFlow.QualifiedName}.{Name}"
+        ? new[] { Name }
+        : ContainerFlow.NameComponents.Append(Name).ToArray()
         ;
+    public string QualifiedName => NameComponents.Combine();
 
     public PortInfoStart PortS { get; set; }
     public PortInfoReset PortR { get; set; }
@@ -58,7 +61,7 @@ public abstract partial class SegmentBase : ChildFlow, IVertex, ICoin, IWallet, 
         // child 의 최초 상태 등록 : null (vs Homing?)
         ChildStatusMap =
             Children
-            .ToDictionary(child => child, _ => (false, DsType.Status4Temp.Homing))// Status4.Homing)
+            .ToDictionary(child => child, _ => (false, Status4.Homing))// Status4.Homing)
             ;
     }
 
@@ -89,13 +92,13 @@ public abstract partial class SegmentBase : ChildFlow, IVertex, ICoin, IWallet, 
     }
 
 
-    public DsType.Status4Temp Status =>
+    public Status4 Status =>
         (PortS.Value, PortR.Value, PortE.Value) switch
         {
-            (false, false, false) => DsType.Status4Temp.Ready,  //??
-            (true, false, false) => DsType.Status4Temp.Going,
-            (_, false, true) => DsType.Status4Temp.Finish,
-            (_, true, _) => DsType.Status4Temp.Homing,
+            (false, false, false) => Status4.Ready,  //??
+            (true, false, false) => Status4.Going,
+            (_, false, true) => Status4.Finish,
+            (_, true, _) => Status4.Homing,
         };
 
     /// <summary>Going 시 원위치 맞추기 작업 중 flag.  Debugging purpose</summary>

@@ -1,12 +1,13 @@
-using Engine.Core.Obsolete;
 using System.Threading.Tasks;
+using Engine.Core;
+using static Engine.Core.DsType;
 
-namespace Engine.Core;
+namespace Engine.Base;
 
 // class or record?
 public class BitChange
 {
-    public IBit Bit { get; }
+    public ICpuBit Bit { get; }
     public bool NewValue { get; }
     /// <summary>IBit or string description</summary>
     public object Cause { get; }
@@ -14,7 +15,7 @@ public class BitChange
     public Action BeforeAction { get; set; }
     public Action AfterAction { get; set; }
     public TaskCompletionSource<object> TCS { get; }
-    public BitChange(IBit bit, bool newValue, object cause = null)
+    public BitChange(ICpuBit bit, bool newValue, object cause = null)
     {
         //Assert(bit.Value != newValue);
 
@@ -22,7 +23,7 @@ public class BitChange
             Global.NoOp();
 
         Assert(bit != null);
-        Assert(cause is null || cause is IBit || cause is string);
+        Assert(cause is null || cause is ICpuBit || cause is string);
         //Assert(bit.Value != newValue);
 
         Bit = bit;
@@ -34,7 +35,7 @@ public class BitChange
 
     public string CauseRepr => Cause switch
     {
-        IBit b => $"{b.GetName()}={b.Value}",
+        ICpuBit b => $"{b.GetName()}={b.Value}",
         string s => s,
         null => null,
         _ => throw new Exception("ERROR"),
@@ -45,7 +46,7 @@ public class BitChange
 
 public class EndPortChange : BitChange
 {
-    public EndPortChange(IBit bit, bool newValue, object cause = null)
+    public EndPortChange(ICpuBit bit, bool newValue, object cause = null)
         : base(bit, newValue, cause)
     {
     }
@@ -64,20 +65,20 @@ public record OpcTagChange
 
 public record SegmentStatusChange
 {
-    public SegmentStatusChange(SegmentBase segment, DsType.Status4Temp status)
+    public SegmentStatusChange(SegmentBase segment, Status4 status)
     {
         Segment = segment;
         Status = status;
     }
 
     public SegmentBase Segment { get; }
-    public DsType.Status4Temp Status { get; set; }
+    public Status4 Status { get; set; }
 }
 
 
 public record ChildStatusChange
 {
-    public ChildStatusChange(Child child, DsType.Status4Temp status, bool isFlipped = false)
+    public ChildStatusChange(Child child, Status4 status, bool isFlipped = false)
     {
         Child = child;
         Status = status;
@@ -85,6 +86,6 @@ public record ChildStatusChange
     }
 
     public Child Child { get; }
-    public DsType.Status4Temp Status { get; }
+    public Status4 Status { get; }
     public bool IsFlipped { get; }
 }

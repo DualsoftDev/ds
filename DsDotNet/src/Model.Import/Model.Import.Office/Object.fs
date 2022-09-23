@@ -233,8 +233,8 @@ module Object =
     and
         [<DebuggerDisplay("{Name}")>]
         /// System 내부 Seg의 내외부 Seg간 시작/리셋 연결 정보 구조
-        MSys(name:string, active:bool) as this  =
-            inherit DsSystem(name)
+        MSys(name:string, active:bool, model:Model) as this  =
+            inherit DsSystem(name, model)
 
             let systemFlow = RootFlow(name, this)
             let mutable sysSeg: System.Lazy<MSeg> = null
@@ -258,8 +258,8 @@ module Object =
                 |EmergencyBTN-> if(emgSet.ContainsKey(name))   then emgSet.[name].Add(btnMFlow)   |>ignore else emgSet.TryAdd(name,   [btnMFlow] |> List) |>ignore
 
 
-            new (name:string)       = new MSys(name,  false)
-            new (name, active:bool) = new MSys(name,  active)
+            //new (name:string)       = new MSys(name,  false)
+            //new (name, active:bool) = new MSys(name,  active)
 
             member x.Name = name
             member x.SysSeg =
@@ -271,14 +271,14 @@ module Object =
             member val Active = active with get, set
             member val SystemID = -1   with get, set
             member x.OrderPageRootFlows() = 
-                this.RootFlows() 
+                this.RootFlows 
                  |> Seq.cast<MFlow>
                  |> Seq.sortBy(fun flow -> flow.Page) 
 
-            member x.SingleNodes   = this.RootFlows() 
+            member x.SingleNodes   = this.RootFlows
                                         |> Seq.collect(fun flow -> flow.Singles)
                                         |> Seq.cast<MSeg>
-            member x.AllNodes  = this.RootFlows() 
+            member x.AllNodes  = this.RootFlows
                                         |> Seq.collect(fun flow -> flow.Nodes)
                                         |> Seq.cast<MSeg>
             member x.LocationSet   = locationSet
@@ -335,7 +335,7 @@ module Object =
                     |> Seq.append x.SingleNodes
                     |> Seq.distinct
 
-            member x.RootMFlow()  = this.RootFlows() |> Seq.sortBy(fun flow -> flow.Name)
+            member x.RootMFlow()  = this.RootFlows |> Seq.sortBy(fun flow -> flow.Name)
             member x.BtnSegs()    = this.AllNodes
                                         |> Seq.filter(fun seg -> seg.Bound = ExBtn)
                                         |> Seq.distinctBy(fun seg -> seg.SegName)

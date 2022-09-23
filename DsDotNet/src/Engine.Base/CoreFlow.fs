@@ -54,13 +54,19 @@ module CoreFlow =
         override x.ToText() = x.QualifiedName
         member x.System = system;
         member x.QualifiedName = $"{system.Name}.{name}";
-        member val InstanceMap  = Dictionary<string, obj>();
 
         //Flow 내부에 사용된 모든 Node (ChildFlow 내부도 포함)
         member x.UsedSegs = x.Nodes |> Seq.cast<IActive> 
                                     |> Seq.collect(fun parent ->parent.Children)
                                     |> Seq.append x.Nodes
-    
+        
+        //parser 전용 추후  상속받을 예정??
+        member val InstanceMap  = Dictionary<string, obj>();
+        member val AliasNameMaps  = Dictionary<string, string[]>();
+        member val BackwardAliasMaps  = Dictionary<string[], string[]>();
+        member val CallPrototypes  = List<obj>();
+    //public List<CallPrototype> CallPrototypes = new();
+
     [<DebuggerDisplay("{name}")>]
     type ChildFlow(name, rootFlow:RootFlow) as this =
         inherit Flow(name)

@@ -1,4 +1,4 @@
-namespace Engine.Cpu
+namespace Engine.CpuUnit
 
 open Engine.Core
 

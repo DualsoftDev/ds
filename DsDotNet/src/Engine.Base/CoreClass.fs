@@ -21,7 +21,14 @@ module CoreClass =
        
         member x.ChildFlow = childFlow
         member x.RootFlow = childFlow.ContainerFlow
-      
+        //parser 전용 추후  상속받을 예정??
+        member val InstanceMap  = Dictionary<string, obj>();
+        member val SafetyConditions  = HashSet<SegmentBase>();
+    
+    //parser 전용 추후  상속받을 예정??
+    type ExSegment(name:string, segmentBase:SegmentBase)  =
+        member x.Name = name
+        member x.SegmentBase = segmentBase
     
     /// Call segment 
     [<DebuggerDisplay("{ToText()}")>]
@@ -33,13 +40,3 @@ module CoreClass =
             
         member x.Name = name
         member val Status4 = status4 with get, set
-            
-     
-    /// Modeled Edge : 사용자가 작성한 모델 상의 segment 간의 연결 edge (Wire)
-    [<DebuggerDisplay("{Source.ToText()}{Causal.ToText()}{Target.ToText()}")>]
-    type DsEdge(src:SegmentBase, tgt:SegmentBase, causal:EdgeCausal) as this =
-        inherit EdgeBase(src, tgt, causal)
-        member x.Nodes = (this:>EdgeBase).Nodes
-        member x.Source = src
-        member x.Target = tgt
-

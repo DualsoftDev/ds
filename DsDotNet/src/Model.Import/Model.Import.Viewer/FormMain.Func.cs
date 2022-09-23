@@ -11,7 +11,7 @@ using System.Security.Cryptography;
 using System.Windows.Forms;
 using static Engine.Common.FS.MessageEvent;
 using static Engine.Core.DsTextProperty;
-using static Engine.Cpu.CpuUnit;
+using static Engine.CpuUnit.CpuUnit;
 using static Model.Import.Office.Object;
 using ImportModel = Model.Import.Office.Object.ImportModel;
 
@@ -185,7 +185,7 @@ namespace Dual.Model.Import
 
         internal void CreateNewTabViewer(MSys sys, bool isDemo = false)
         {
-            List<MFlow> flows = sys.RootFlows().Cast<MFlow>().OrderBy(o => o.Page).ToList();
+            List<MFlow> flows = sys.RootFlows.Cast<MFlow>().OrderBy(o => o.Page).ToList();
             //if (isDemo)
             //    flows = sys.RootFlows.Values.ToList();
             //else

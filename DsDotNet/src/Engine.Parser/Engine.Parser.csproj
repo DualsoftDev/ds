@@ -21,6 +21,11 @@
 		<LangVersion>10.0</LangVersion>
 	</PropertyGroup>
 	<ItemGroup>
+	  <Compile Remove="Obsolete\**" />
+	  <EmbeddedResource Remove="Obsolete\**" />
+	  <None Remove="Obsolete\**" />
+	</ItemGroup>
+	<ItemGroup>
 		<Antlr4 Include="..\..\..\Grammar\g4s\ds.g4" Link="g4s\ds.g4">
 			<Visitor>true</Visitor>
 			<Package>Engine.Parser</Package>
@@ -36,16 +41,11 @@
 		<Reference Include="log4net">
 			<HintPath>..\..\exLib\log4net.dll</HintPath>
 		</Reference>
-		<Reference Include="System.Reactive">
-			<HintPath>..\..\exLib\System.Reactive.dll</HintPath>
-		</Reference>
 	</ItemGroup>
 	<ItemGroup>
-	  <Folder Include="Obsolete\" />
-	</ItemGroup>
-	<ItemGroup>
+	  <ProjectReference Include="..\Engine.Base\Engine.Core.fsproj" />
 	  <ProjectReference Include="..\Engine.Common\Engine.Common.csproj" />
-	  <ProjectReference Include="..\Engine.Cpu\Engine.Cpu.fsproj" />
+	  <ProjectReference Include="..\Engine.CpuUnit\Engine.CpuUnit.fsproj" />
 	</ItemGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<NoWarn>3021;1701;1702</NoWarn>

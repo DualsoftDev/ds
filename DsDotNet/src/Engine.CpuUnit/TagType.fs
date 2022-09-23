@@ -1,5 +1,5 @@
 // Copyright (c) Dual Inc.  All Rights Reserved.
-namespace Engine.Cpu
+namespace Engine.CpuUnit
 
 open System
 

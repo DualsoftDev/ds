@@ -11,9 +11,9 @@ global using static Engine.Base.GlobalShortCuts;
 global using static System.Diagnostics.Debug;
 global using static Engine.Core.Interface;
 global using static Engine.Core.InterfaceClass;
-global using static Engine.Cpu.Interface;
+global using static Engine.CpuUnit.Interface;
 
-global using BitDic = System.Collections.Generic.Dictionary<string, Engine.Cpu.Interface.ICpuBit>;
+global using BitDic = System.Collections.Generic.Dictionary<string, Engine.CpuUnit.Interface.ICpuBit>;
 global using TagDic = System.Collections.Generic.Dictionary<string, Engine.Base.Tag>;
 global using ButtonDic = System.Collections.Generic.Dictionary<string, Engine.Base.RootFlow[]>;
 

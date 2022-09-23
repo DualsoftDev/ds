@@ -27,7 +27,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Engine.Base\Engine.Core.fsproj" />
     <ProjectReference Include="..\Engine.Common\Engine.Common.csproj" />
-    <ProjectReference Include="..\Engine.Cpu\Engine.Cpu.fsproj" />
+    <ProjectReference Include="..\Engine.CpuUnit\Engine.CpuUnit.fsproj" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="log4net">

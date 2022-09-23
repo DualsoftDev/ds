@@ -23,7 +23,7 @@ module ImportM =
         let dicEdge = ConcurrentDictionary<MEdge, MSeg>()  //childEdges, parentSeg
         let dicFlow  = ConcurrentDictionary<int, MFlow>()
         let model =  ImportModel(doc.FullPath)
-        let mySys = MSys("MY", true)
+        let mySys = MSys("MY", true, model)
 
         let getParent(edge:pptEdge) = 
            Check.SameParent(doc, edge)

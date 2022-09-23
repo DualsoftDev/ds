@@ -12,7 +12,8 @@ open Engine.Core
 module Check =
 
         let GetDemoModel(sysName:string) = 
-            let sys = MSys(sysName, true)
+            let model = ImportModel("testModel");
+            let sys = MSys(sysName, true, model)
             let mFlow = MFlow("P0", sys, Int32.MaxValue)
             sys.AddFlow(mFlow) |> ignore
             mFlow.AddEdge( MEdge(MSeg("START", sys,mFlow, TR), MSeg("시작인과", sys,mFlow, MY), EdgeCausal.SEdge))         |> ignore
@@ -23,7 +24,6 @@ module Check =
             mFlow.AddEdge( MEdge(MSeg("ETC"  , sys,mFlow, TR), MSeg("시작후행리셋", sys,mFlow, MY), EdgeCausal.SReset))    |> ignore
 
             //모델만들기 및 시스템 등록
-            let model = ImportModel("testModel");
             model.Add(sys) |> ignore
             model.AddEdges(mFlow.MEdges, mFlow)
             model

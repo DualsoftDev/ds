@@ -75,15 +75,15 @@ public static class ParserExtension
     public static RootFlow FindFlow(this Model model, string[] nameComponents)
     {
         var system = model.FindParserSystem(nameComponents);
-        var flow = system?.RootFlows().FirstOrDefault(rf => rf.Name == nameComponents[1]);
+        var flow = system?.RootFlows.FirstOrDefault(rf => rf.Name == nameComponents[1]);
         return flow;
     }
 
-    public static ParserSegment FindParenting(this Model model, string[] nameComponents)
+    public static SegmentBase FindParenting(this Model model, string[] nameComponents)
     {
         Assert(nameComponents.Length >= 3);
         var flow = model.FindFlow(nameComponents);
-        var seg = flow?.InstanceMap[nameComponents[2]] as ParserSegment;
+        var seg = flow?.InstanceMap[nameComponents[2]] as SegmentBase;
         return seg;
     }
 

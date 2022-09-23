@@ -105,14 +105,6 @@ namespace Engine
         
         public static void Test(string text)
         {
-            if (!text.Contains("[cpus]"))
-                text += @"
-[cpus] AllCpus = {
-    [cpu] DummyCpu = {
-        X.Y;
-    }
-}
-";
             var engine = new EngineBuilder(text, ParserOptions.Create4Simulation()).Engine;
             Program.Engine = engine;
             engine.Run();

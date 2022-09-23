@@ -186,8 +186,11 @@ partial class ElementsListener
             if (parenting != null && parenting.InstanceMap.ContainsKey(spec.Combine()))
                 return parenting.InstanceMap[spec.Combine()] as IVertex;
 
-            RootFlow flow = _model.FindFlow(nodebase.parentIds);
-            var obj = flow.Find(label);
+            //var flow = _system.Find<Flow>(nodebase.parentIds); //  RootFlows.First(rf => rf.Name == nodebase.parentIds.Combine());
+            var flow = _system.Find(nodebase.parentIds); //  RootFlows.First(rf => rf.Name == nodebase.parentIds.Combine());
+            if (flow == null)
+                Console.WriteLine();
+            var obj = ((Flow)flow).Find(label);
             if (obj == null)
                 obj = _model.Find(spec);
 

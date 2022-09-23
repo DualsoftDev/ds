@@ -3,7 +3,7 @@ namespace Engine.Core;
 public class Cpu : Named, ICpu
 {
     public IEngine Engine { get; set; }
-    public Model Model { get; }
+    public DsSystem System { get; }
 
     /// <summary> My System 의 Cpu 인지 여부</summary>
     public bool IsActive { get; set; }
@@ -42,10 +42,9 @@ public class Cpu : Named, ICpu
     public BitDic BitsMap { get; } = new();
     public TagDic TagsMap { get; } = new();
 
-    public Cpu(string name, Model model) : base(name)
+    public Cpu(string name, DsSystem system) : base(name)
     {
-        Model = model;
-        model.Cpus.Add(this);
+        System = system;
     }
 
     public override string ToText() => $"Cpu [{Name}={DbgThreadId}]";

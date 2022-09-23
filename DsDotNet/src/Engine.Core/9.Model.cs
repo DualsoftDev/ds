@@ -3,7 +3,7 @@ namespace Engine.Core;
 public class Model
 {
     public List<DsSystem> Systems = new();
-    public List<Cpu> Cpus { get; } = new();
+    public IEnumerable<Cpu> Cpus => Systems.Select(sys => sys.Cpu);
     /// <summary> 가상 부모 목록.  debugging 용 </summary>
     public SegmentBase[] VPSs { get; set; }
 }

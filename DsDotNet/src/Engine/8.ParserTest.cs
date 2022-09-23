@@ -7,8 +7,8 @@ namespace Engine
         public static void Test(string text, string activeCpuName = null)
         {
             var engine = new EngineBuilder(text, ParserOptions.Create4Simulation(activeCpuName)).Engine;
-            Program.Engine = engine;
-            engine.Run();
+            //Program.Engine = engine;
+            //engine.Run();
         }
 
 
@@ -42,15 +42,6 @@ namespace Engine
         //L.F.Main2 = {P.F.Sp; P.F.Sm}
     }
 }
-[cpus] AllCpus = {
-    [cpu] Cpu = {
-        L.F;
-    }
-    [cpu] PCpu = {
-        P.F;
-    }
-}
-
 ";
         public static string StrongCausal = @"
 [sys] L = {
@@ -73,15 +64,6 @@ namespace Engine
         Pp |> Sm;
         Pm |> Sp;
         Vp <||> Vm;
-    }
-}
-
-[cpus] AllCpus = {
-    [cpu] Cpu = {
-        L.F;
-    }
-    [cpu] PCpu = {
-        P.F;
     }
 }
 
@@ -114,15 +96,6 @@ namespace Engine
     }
 }
 
-[cpus] AllCpus = {
-    [cpu] Cpu = {
-        My.F1;
-        My.F2;
-        My.F3;
-        My.F4;
-        My.F5;
-    }
-}
 ";
 
         public static string Ppt = @"
@@ -237,15 +210,6 @@ namespace Engine
         ResetBTN = { F1; F2; F3; F5; FF };
     }
 }
-[cpus] AllCpus = {
-    [cpu] Cpu = {
-        MY.F1;
-        MY.F2;
-        MY.F3;
-        MY.F5;
-        MY.FF;
-    }
-}
 ";
 
         public static string Dup = @"
@@ -287,14 +251,6 @@ namespace Engine
     }
 }
 
-[cpus] AllCpus = {
-    [cpu] Cpu = {
-        L.F;
-    }
-    [cpu] PCpu = {
-        P.F;
-    }
-}
 ";
 
         public static string Error = @"
@@ -371,28 +327,6 @@ namespace Engine
 }
 
 
-
-[cpus] AllCpus = {
-    [cpu] Cpu_MY = {
-        MY.Rear;
-        MY.Work;
-        MY.Model_Auto;
-    }
-    [cpu] Cpu_EX = {
-        EX.Rear_Rear_Cyl_Push_ADV;
-        EX.Rear_Rear_Cyl_Push_RET;
-        EX.Rear_Rear_Con_W;
-        EX.Rear_Rear_Pos_Sen;
-        EX.Work_Work;
-        EX.Work_Front_Usb_Cyl_RET;
-        EX.Work_Front_Con_W;
-        EX.Work_Front_1Stopper_Adv;
-        EX.Work_Front_Pos_Sen;
-        EX.Work_Front_1Stopper_RET;
-        EX.Work_Front_Usb_Cyl_ADV;
-        EX.Work_Front_1pos_Sen;
-    }
-}
 [addresses] = {
     EX.Rear_Rear_Cyl_Push_ADV.TX  = (, , )
     EX.Rear_Rear_Cyl_Push_ADV.RX  = (, ,)
@@ -550,16 +484,6 @@ namespace Engine
     [flow] F1_C1 = { TX > RX; }
 }
 
-[cpus] AllCpus = {
-    [cpu] Cpu_MY = {
-        MY.F1;
-    }
-    [cpu] Cpu_EX = {
-        EX.F1_ER1;
-        EX.F1_ER2;
-        EX.F1_C1;
-    }
-}
 [addresses] = {
     EX.F1_ER1.EXT = (,,)
     EX.F1_ER2.EXT = (,,)

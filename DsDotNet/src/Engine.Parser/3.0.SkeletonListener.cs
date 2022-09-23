@@ -24,34 +24,7 @@ class SkeletonListener : dsBaseListener
     }
 
 
-    override public void EnterProgram(ProgramContext ctx)
-    {
-        var cpuContexts = enumerateChildren<CpuContext>(ctx);
-
-        Dictionary<string, Cpu> dict = new();
-
-        Cpu createCpu(string cpuName)
-        {
-            if (dict.ContainsKey(cpuName))
-                return dict[cpuName];
-            var cpu = new Cpu(cpuName, ParserHelper.Model);
-            dict[cpuName] = cpu;
-            return cpu;
-        }
-        var flowName2CpuNames =
-            from cpuctx in cpuContexts
-            let cpuName = cpuctx.identifier1().GetText()
-            from flowCtx in enumerateChildren<FlowPathContext>(cpuctx)
-            let flowName = flowCtx.GetText()
-            select (flowName, createCpu(cpuName))
-            ;
-
-        var flowName2CpuNameMap =
-            flowName2CpuNames.ToDictionary(tpl => tpl.Item1, tpl => tpl.Item2)
-            ;
-
-        ParserHelper.FlowName2CpuMap = flowName2CpuNameMap;
-    }
+    //override public void EnterProgram(ProgramContext ctx)    {}
 
     override public void EnterSystem(SystemContext ctx)
     {
@@ -68,28 +41,8 @@ class SkeletonListener : dsBaseListener
         var flowOf = ctx.flowProp().identifier1();
 
         var flowFqdn = $"{ParserHelper.CurrentPath}.{flowName}";
-        var cpuAssigned = ParserHelper.FlowName2CpuMap.ContainsKey(flowFqdn);
-        if (!ParserHelper.ParserOptions.IsSimulationMode && !cpuAssigned)
-            throw new Exception($"No CPU assignment for flow [{flowFqdn}");
 
-        Cpu cpu = null;
-        if (cpuAssigned)
-            cpu = ParserHelper.FlowName2CpuMap[flowFqdn];
-        else
-        {
-            // simulation mode.
-            cpu = new Cpu("DummyCpu", _model);
-            ParserHelper.FlowName2CpuMap.Add(flowFqdn, cpu);
-            if (ParserHelper.FlowName2CpuMap.Values.ForAll(cpu => ! cpu.IsActive))
-                cpu.IsActive = true;    // 강제로 active cpu 할당
-        }
-
-        var rf = cpu.RootFlows.FirstOrDefault(f => f.Name == flowName);
-        if (rf != null)
-            throw new Exception($"Duplicated flow name [{flowName}] on {rf.QualifiedName}.");
-
-        _rootFlow = new RootFlow(cpu, flowName, _system);
-        cpu.RootFlows.Add(_rootFlow);
+        _rootFlow = new RootFlow(flowName, _system);
     }
     override public void ExitFlow(FlowContext ctx) { _rootFlow = null; }
 
@@ -229,30 +182,6 @@ class SkeletonListener : dsBaseListener
 
         foreach ((var mnemonic, var target) in reversed)
             _rootFlow.AliasNameMaps.Add(mnemonic, target);
-    }
-
-
-    override public void EnterCpu(CpuContext ctx)
-    {
-        //var name = ctx.identifier1().GetText();
-        //var flowPathContexts =
-        //    enumerateChildren<FlowPathContext>(ctx)
-        //    ;
-
-        //var flows =
-        //    flowPathContexts.Select(fpc =>
-        //    {
-        //        var systemName = fpc.GetChild(0).GetText();
-        //        var dot_ = fpc.GetChild(1).GetText();
-        //        var flowName = fpc.GetChild(2).GetText();
-
-        //        var system = _model.Systems.FirstOrDefault(sys => sys.Name == systemName);
-        //        var flow = system.RootFlows.FirstOrDefault(f => f.Name == flowName);
-        //        return flow;
-        //    })
-        //    .ToArray()
-        //    ;
-        //var cpu_ = new Cpu(name, _model) { RootFlows = flows };
     }
 
 

@@ -129,9 +129,9 @@ module internal ModelPrintModule =
         for segment in getRootSegments model do
             printSegment segment
 
-        if Global.Model.VPSs <> null then
+        if model.VPSs <> null then
             logDebug ":::::::: Virtual Parent Segments"
-            for vps in Global.Model.VPSs do
+            for vps in model.VPSs do
                 printSegment vps
 
 [<Extension>] // type Segment =

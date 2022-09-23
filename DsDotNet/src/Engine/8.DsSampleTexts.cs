@@ -13,11 +13,6 @@ class DsSampleTexts
         Vp <||> Vm;
     }
 }
-[cpus] AllCpus = {
-    [cpu] Cpu = {
-        P.F;
-    }
-}
 ";
 
     public static string CylinderCell = @"
@@ -38,11 +33,6 @@ class DsSampleTexts
         Pp |> Sm;
         Pm |> Sp;
         Vp <||> Vm;
-    }
-}
-[cpus] AllCpus = {
-    [cpu] Cpu = {
-        it.F;
     }
 }
 ";

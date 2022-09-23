@@ -1,8 +1,12 @@
+using Antlr4.Runtime;
+
 namespace Engine.Parser;
 
 class DsParser
 {
-    public static (dsParser, ParserError[]) FromDocument(string text, bool throwOnError = true)
+    public static (dsParser, RuleContext, ParserError[]) FromDocument(
+        string text, Func<dsParser, RuleContext> predExtract,
+        bool throwOnError = true)
     {
         var str = new AntlrInputStream(text);
         System.Console.WriteLine(text);
@@ -17,8 +21,15 @@ class DsParser
         var tree = parser.program();
         var errors = listener_lexer.Errors.Concat(listener_parser.Errors).ToArray();
 
+        return (parser, tree, errors);
+    }
+    public static (dsParser, ParserError[]) FromDocument(string text, bool throwOnError = true)
+    {
+        var func = (dsParser parser) => parser.program();
+        var(parser, tree, errors) = FromDocument(text, func, throwOnError);
         return (parser, errors);
     }
+
 
     public static List<T> enumerateChildren<T>(IParseTree from, bool includeMe = false, Func<IParseTree, bool> predicate = null) where T : IParseTree
     {

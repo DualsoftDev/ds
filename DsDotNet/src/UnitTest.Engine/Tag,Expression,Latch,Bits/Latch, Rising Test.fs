@@ -28,7 +28,7 @@ module LatchTest =
                 init()
 
 
-                let cpu = new Cpu("dummy", new Model())
+                let cpu = new Cpu("dummy", new DsSystem("dummy", new Model()))
 
                 let tSet = new TagE(cpu, null, "T1")
                 let tReset = new TagE(cpu, null, "T2")
@@ -67,12 +67,12 @@ module LatchTest =
         [<Test>]
         member __.``ResetLatch test`` () =
             task {
-                let cpu = new Cpu("dummy", new Model())
-                let going = Flag(cpu, "Going");
+                let cpu = createDummyCpu()
+                let going = Flag(cpu, "Going")
                 let finish = Flag(cpu, "Finish")
                 let notFinish = Not(finish)
                 let rlBSet = And(cpu, "And_rlBSet", going, notFinish)
-                let rlBReset = Flag(cpu, "Reset");
+                let rlBReset = Flag(cpu, "Reset")
                 let latch = Latch(cpu, "rlB", rlBSet, rlBReset)
 
                 let wait() = wait(cpu)

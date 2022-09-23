@@ -83,14 +83,6 @@ public class Tester
         Vp <||> Vm;
     }
 }
-[cpus] AllCpus = {
-    [cpu] Cpu = {
-        L.F;
-    }
-    [cpu] OtherCpu = {
-        P.F;
-    }
-}
 [layouts] = {
        L.T.Cp = (30, 50)            // xy
        L.T.Cm = (60, 50, 20, 20)    // xywh
@@ -187,21 +179,6 @@ public class Tester
 	EX_Bm_Bp.F.Bm = (%Q123.25, , %I12.3);
 	EX_Bm_Bp.F.Bp = (%Q123.26, , %I12.4);
 }
-
-[cpus] AllCpus = {
-	[cpu] Cpu = {
-		LS_Demo.page01;
-		LS_Demo.page02;
-		LS_Demo.page03;
-	}
-	[cpu] ACpu = {
-		EX_Am_Ap.F;
-	}
-	[cpu] BCpu = {
-		EX_Bm_Bp.F;
-	}
-}
-
 ";
         Assert(!Global.IsInUnitTest);
         var engine = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu")).Engine;
@@ -235,14 +212,6 @@ public class Tester
 	A.F.Vm = (%QX0.1.2, ,);
 	A.F.Sp = (, , %IX0.0.5);
 	A.F.Sm = (, , %IX0.0.4);
-}
-[cpus] AllCpus = {
-    [cpu] Cpu = {
-        L.F;
-    }
-    [cpu] ACpu = {
-        A.F;
-    }
 }
 " + CreateCylinder("A")
 ;
@@ -438,17 +407,6 @@ public class Tester
 	B.F.Sp = (, , %I12.3);
 	B.F.Sm = (, , %I12.3);
 }
-[cpus] AllCpus = {
-    [cpu] Cpu = {
-        L.F;
-    }
-    [cpu] ACpu = {
-        A.F;
-    }
-    [cpu] BCpu = {
-        B.F;
-    }
-}
 " + CreateCylinder("A") + "\r\n" + CreateCylinder("B");
 
         //Log4NetHelper.ChangeLogLevel(log4net.Core.Level.Error);
@@ -639,17 +597,6 @@ public class Tester
 	B.F.Sp = (, , %IX0.0.7);
 	B.F.Sm = (, , %IX0.0.6);
 }
-[cpus] AllCpus = {
-    [cpu] Cpu = {
-        L.F;
-    }
-    [cpu] ACpu = {
-        A.F;
-    }
-    [cpu] BCpu = {
-        B.F;
-    }
-}
 " + CreateCylinder("A") + "\r\n" + CreateCylinder("B");
         return text;
     }
@@ -682,17 +629,6 @@ public class Tester
 	A.F.Sm = (, , %IX0.0.4);
 	B.F.Sp = (, , %IX0.0.7);
 	B.F.Sm = (, , %IX0.0.6);
-}
-[cpus] AllCpus = {
-    [cpu] Cpu = {
-        L.F;
-    }
-    [cpu] ACpu = {
-        A.F;
-    }
-    [cpu] BCpu = {
-        B.F;
-    }
 }
 " + CreateCylinder("A") + "\r\n" + CreateCylinder("B");
         return text;
@@ -897,12 +833,6 @@ public class Tester
     [flow] F = {
         R > G > B > R;
         R, G |> B |> G |> R        
-    }
-}
-
-[cpus] AllCpus = {
-    [cpu] Cpu = {
-        L.F;
     }
 }
 ";

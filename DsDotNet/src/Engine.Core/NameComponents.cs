@@ -66,6 +66,9 @@ public static class ParserExtension
     public static string Combine(this string[] nameComponents, string separator=".") =>
         string.Join(separator, nameComponents.Select(n => n.IsQuotationRequired() ? $"\"{n}\"" : n));
     public static string[] Divide(this string qualifiedName) => qualifiedName.Split(new[] { '.' }).ToArray();
+
+
+
     public static DsSystem FindSystem(this Model model, string[] nameComponents) =>
         model.Systems.FirstOrDefault(sys => sys.Name == nameComponents[0]);
     public static RootFlow FindFlow(this Model model, string[] nameComponents)
@@ -86,7 +89,7 @@ public static class ParserExtension
     public static IEnumerable<object> FindAll(this Model model, string[] fqdn)
     {
         var n = fqdn.Length;
-        Assert(n >= 3);
+        Assert(n >= 2);
         if (n == 4)
         {
             var parenting = model.FindParenting(fqdn);
@@ -106,8 +109,13 @@ public static class ParserExtension
 
         var flow = model.FindFlow(fqdn);
         if (flow != null)
-            foreach(var x in flow.FindAll(fqdn[2]))
-                yield return x;
+        {
+            if (fqdn.Length == 2)
+                yield return flow;
+            else
+                foreach(var x in flow.FindAll(fqdn[2]))
+                    yield return x;
+        }
     }
     public static object Find(this Model model, string[] fqdn) => FindAll(model, fqdn).FirstOrDefault();
 

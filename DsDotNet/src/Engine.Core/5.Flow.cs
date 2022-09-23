@@ -62,12 +62,12 @@ public class RootFlow : Flow
 
     public string[] NameComponents => new[] { System.Name, Name };
     public string QualifiedName => NameComponents.Combine();
-    public RootFlow(Cpu cpu, string name, DsSystem system)
-        : base(cpu, name)
+    public RootFlow(string name, DsSystem system)
+        : base(system.Cpu, name)
     {
         System = system;
         system.RootFlows.Add(this);
-        Auto = new TagE(cpu, null, $"Auto_{name}_{EmLinq.UniqueId()}", TagType.Auto);
+        Auto = new TagE(System.Cpu, null, $"Auto_{name}_{EmLinq.UniqueId()}", TagType.Auto);
     }
 
     public TagE Auto { get; }

@@ -40,3 +40,5 @@ module ModelTest_Common =
     let wait(cpu:Cpu) =
         while cpu.NeedWait do
             Thread.Sleep(50)
+
+    let createDummyCpu() = new Cpu("dummy", new DsSystem("dummy", new Model()))

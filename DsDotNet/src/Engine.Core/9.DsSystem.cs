@@ -3,6 +3,9 @@ namespace Engine.Core;
 public class DsSystem : Named
 {
     public Model Model;
+    /// <summary> CPU host ip or domain name</summary>
+    public string Ip { get; set; }
+    public Cpu Cpu { get; }
     public List<RootFlow> RootFlows = new();
     public ButtonDic EmergencyButtons { get; } = new();
     public ButtonDic AutoButtons { get; } = new();
@@ -12,6 +15,7 @@ public class DsSystem : Named
     public DsSystem(string name, Model model)
         : base(name)
     {
+        Cpu = new Cpu(name, this);
         Model = model;
         if (model.Systems.Any(sys => sys.Name == name))
             throw new Exception($"Duplicated system name [{name}].");

@@ -1,6 +1,27 @@
 grammar dsObsolete;
 import dsLexer;
 
+/*
+[cpus] AllCpus = {
+    [cpu] Cpu = {
+        L.F;
+    }
+}
+ */
+
+cpus: '[' 'cpus' ']' (identifier1)? '=' cpusBlock;
+cpusBlock
+    : LBRACE (cpu)* RBRACE
+    ;
+
+cpu: cpuProp identifier1 '=' cpuBlock;    // [cpu] Cpu = {..}
+cpuProp: '[' 'cpu' ']';
+cpuBlock
+    : LBRACE flowPath (SEIMCOLON flowPath)* SEIMCOLON? RBRACE
+    ;
+
+
+
 quotedFilePath
     : DQUOTE (~DQUOTE)* DQUOTE
     | SQUOTE (~SQUOTE)* SQUOTE

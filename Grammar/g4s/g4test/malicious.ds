@@ -1,0 +1,5 @@
+[sys] My = {
+    [flow] F = {
+        A . B > C . D;
+    }
+}

@@ -19,44 +19,24 @@ grammar ds;
 
 import dsFunctions;
 
-program: (system|cpus|layouts|addresses|properties|comment)* EOF;        // importStatement|
+program: (system|layouts|addresses|properties|comment)* EOF;        // importStatement|cpus
 
 test:qstring EOF;
 qstring: STRING_LITERAL EOF;
 
 
-system: sysProp identifier1 '=' sysBlock;    // [sys] Seg = {..}
-sysProp: '[' 'sys' ']';
-sysBlock
-    : LBRACE (flow|buttons)* RBRACE       // identifier1Listing|parenting|causal|call
-    ;
+system: '[' 'sys' (('ip'|'host') '=' host)? ']' identifier1 '=' sysBlock;    // [sys] Seg = {..}
+    sysBlock
+        : LBRACE (flow|buttons)* RBRACE       // identifier1Listing|parenting|causal|call
+        ;
+    host: ipv4 | domainName;
+    domainName: identifier1234;
+    ipv4: IPV4;
 
-
-/*
-[cpus] AllCpus = {
-    [cpu] Cpu = {
-        L.F;
-    }
-}
- */
-
-cpus: cpusProp (identifier1)? '=' cpusBlock;
-cpusProp: '[' 'cpus' ']';
-cpusBlock
-    : LBRACE (cpu)* RBRACE
-    ;
-
-cpu: cpuProp identifier1 '=' cpuBlock;    // [cpu] Cpu = {..}
-cpuProp: '[' 'cpu' ']';
-cpuBlock
-    : LBRACE flowPath (SEIMCOLON flowPath)* SEIMCOLON? RBRACE
-    ;
-
-layouts: layoutProp (identifier1)? '=' layoutsBlock;
-layoutProp: '[' 'layouts' ']';
-layoutsBlock
-    : LBRACE (positionDef)* RBRACE
-    ;
+layouts: '[' 'layouts' ']' (identifier1)? '=' layoutsBlock;
+    layoutsBlock
+        : LBRACE (positionDef)* RBRACE
+        ;
 positionDef: callPath '=' xywh;
     callPath: identifier3;
     xywh: LPARENTHESIS x COMMA y (COMMA w COMMA h)? RPARENTHESIS (SEIMCOLON)?;
@@ -65,8 +45,7 @@ positionDef: callPath '=' xywh;
     w: INTEGER;
     h: INTEGER;
 
-addresses: addressesProp (identifier1)? '=' addressesBlock;
-addressesProp: '[' 'addresses' ']';
+addresses: '[' 'addresses' ']' (identifier1)? '=' addressesBlock;
 addressesBlock
     : LBRACE (addressDef)* RBRACE
     ;
@@ -97,10 +76,10 @@ addressDef: segmentPath '=' address;
  */
 properties: '[' 'prop' ']' EQ LBRACE (propertyBlock)* RBRACE;
 propertyBlock: (safetyBlock);
-safetyBlock: '[' 'safety' ']' EQ LBRACE (safetyDef)* RBRACE;
-safetyDef: safetyKey EQ LBRACE safetyValues RBRACE;
-safetyKey: identifier123;
-safetyValues: identifier123 (SEIMCOLON identifier123)*;
+    safetyBlock: '[' 'safety' ']' EQ LBRACE (safetyDef)* RBRACE;
+    safetyDef: safetyKey EQ LBRACE safetyValues RBRACE;
+    safetyKey: identifier123;
+    safetyValues: identifier123 (SEIMCOLON identifier123)*;
 
 
 flow

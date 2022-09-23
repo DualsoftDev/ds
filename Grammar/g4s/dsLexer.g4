@@ -31,6 +31,8 @@ fragment VALID_ID_CHAR
 identifier2: identifier1 DOT identifier1;
 identifier3: identifier1 DOT identifier1 DOT identifier1;
 
+identifier4: identifier1 DOT identifier1 DOT identifier1 DOT identifier1;  // for host name 
+
 TAG_ADDRESS: VALID_TAG_START VALID_TAG_CHAR*;
 fragment VALID_TAG_START
    : PERCENT   // | ('a' .. 'z') | ('A' .. 'Z') | '_' | HANGUL_CHAR
@@ -55,7 +57,10 @@ flowPath: identifier2;
 identifier123CNF: identifier123 (COMMA identifier123)*;
 identifier123DNF: identifier123CNF (OR2 identifier123CNF)*;
 
+identifier1234: (identifier1 | identifier2 | identifier3 | identifier4);
 
+IPV4: [1-9][0-9]*'.'('0'|[1-9][0-9]*)'.'('0'|[1-9][0-9]*)'.'('0'|[1-9][0-9]*);
+// IPV4: (INTEGER)(DOT) INTEGER DOT INTEGER DOT INTEGER;
 
 comment: BLOCK_COMMENT | LINE_COMMENT;
 BLOCK_COMMENT : '/*' (BLOCK_COMMENT|.)*? '*/' -> channel(HIDDEN) ;

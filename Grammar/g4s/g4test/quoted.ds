@@ -1,4 +1,4 @@
-[sys] "Test L" = {
+[sys ip=192.168.0.1] "Test L" = {
     [flow] "711 AD" = {
         "WithDot.Seg1" > "WithSpace Seg2";
     }

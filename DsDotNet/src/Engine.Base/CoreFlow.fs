@@ -45,10 +45,9 @@ module CoreFlow =
         member x.TailNodes = (tgts |> Seq.except srcs) |> Seq.append singleNodes
 
     [<DebuggerDisplay("{name}")>]
-    type RootFlow(cpu:ICpu, name, system:SysBase)  =
+    type RootFlow(name, system:SysBase)  =
         inherit Flow(name)
 
-        new (name, system) = RootFlow(name, system)
 
         override x.ToText() = x.QualifiedName
         member x.System = system;

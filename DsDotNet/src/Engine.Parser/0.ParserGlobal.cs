@@ -10,12 +10,11 @@ global using static Engine.Parser.dsParser;
 global using static Engine.Parser.DsParser;
 global using static System.Diagnostics.Debug;
 global using static Engine.Core.Interface;
-global using static Engine.CpuUnit.Interface;
-global using static Engine.Core.InterfaceClass;
 global using static Engine.Core.CoreClass;
 global using static Engine.Core.CoreFlow;
 global using static Engine.Core.CoreStruct;
 global using static Engine.CpuUnit.CpuUnit;
 global using static Engine.Core.CoreEdge;
+global using static Engine.Core.TempParser;
 
 namespace Engine.Parser;

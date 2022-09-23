@@ -34,4 +34,12 @@ module TextUtil =
         [<Extension>] static member GetValidName (identifier:string) = 
                        if(NameUtil.IsValidIdentifier(identifier))
                        then identifier else $"\"{identifier}\""
+
+
+
+                       
+        [<Extension>] static member Combine    (nameComponents:string seq)  = 
+                        nameComponents |> Seq.map (fun name -> if NameUtil.IsQuotationRequired(name) then $"\"{name}\"" else name)
+                                       |> String.concat "."
+    
         

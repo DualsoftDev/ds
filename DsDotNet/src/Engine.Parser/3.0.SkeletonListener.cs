@@ -250,8 +250,8 @@ class SkeletonListener : dsBaseListener
         {
             foreach (var flow in sys.RootFlows)
             {
-                foreach (var seg in flow.RootSegments)
-                    Assert(seg.Cpu != null && seg.Cpu == flow.Cpu);
+                //foreach (var seg in flow.RootSegments)
+                //    Assert(seg.Cpu != null && seg.Cpu == flow.Cpu);
             }
         }
     }

@@ -152,7 +152,7 @@ partial class ElementsListener : dsBaseListener
         foreach (var (key, values) in safetyKvs)
         {
             var keySegment = getKey(key);
-            keySegment.SafetyConditions = values.Select(safety => (SegmentBase)_model.Find(safety)).ToArray();
+            keySegment.SafetyConditions = values.Select(safety => (SegmentBase)_model.Find(safety)).ToList();
         }
     }
 

@@ -65,15 +65,15 @@ module InterfaceClass =
     /// Call Segment
     and
         [<AbstractClass>]
-        CallBase(name:string, parent:SegBase) as this =
+        CallBase(name:string) as this =
         inherit VertexBase(name)
-        let txs = HashSet<IVertex>() 
-        let rxs = HashSet<IVertex>() 
+        let txs = List<IVertex>() 
+        let rxs = List<IVertex>() 
         interface ICall with
             member _.Node = this :> IVertex
             member _.TXs  = txs
             member _.RXs  = rxs
 
-        member x.TXs = (x :>ICall).TXs
-        member x.RXs = (x :>ICall).RXs
+        member val TXs = txs with get,set
+        member val RXs = rxs with get,set
   

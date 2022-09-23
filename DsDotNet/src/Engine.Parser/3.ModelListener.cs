@@ -172,7 +172,7 @@ class ModelListener : dsBaseListener
 
             if (targetDic.ContainsKey(buttonName))
                 throw new Exception($"Duplicated button name [{buttonName}] near {ctx.GetText()}");
-            targetDic.Add(buttonName, flows);
+            targetDic.TryAdd(buttonName, flows.ToList());
         }
     }
 

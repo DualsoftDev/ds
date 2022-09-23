@@ -232,7 +232,7 @@ partial class ElementsListener
                     var r = this.nodes[strR];
 
                     Flow flow = (Flow)_parenting ?? _rootFlow;   // target flow
-                    Assert(flow.Cpu != null);
+                    //Assert(flow.Cpu != null);
 
                     var lvs = FindVertices(_parenting, l);
                     var rvs = FindVertices(_parenting, r);
@@ -270,7 +270,7 @@ partial class ElementsListener
                             Assert(false);    //, `invalid operator: ${ op}`);
                             break;
                     }
-                    flow.AddEdge(e);
+                    flow.AddEdge((IEdge)e);
                 }
             }
         }

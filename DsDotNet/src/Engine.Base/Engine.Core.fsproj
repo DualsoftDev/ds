@@ -22,6 +22,7 @@
 		<Compile Include="CoreEdge.fs" />
 		<Compile Include="CoreStruct.fs" />
 		<Compile Include="CoreGraph.fs" />
+		<Compile Include="TempParser.fs" />
 	</ItemGroup>
 	
 

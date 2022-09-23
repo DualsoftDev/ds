@@ -33,6 +33,7 @@ module Interface =
         abstract Children:IVertex seq
     /// 정의(4/4) 북쪽: DS 모델은 고유 흐름을 갖는다.
     type IFlow   =
+        inherit INamed
         abstract Edges:IEdge seq
         abstract Nodes:IVertex seq
 

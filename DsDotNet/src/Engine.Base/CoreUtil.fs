@@ -20,7 +20,8 @@ module Util =
         [<Extension>] static member GetStartNodes     (edges:#IEdge seq)  = edges.GetStartCaual() |> Seq.map (fun edge -> edge.Source)  
         [<Extension>] static member GetResetNodes     (edges:#IEdge seq)  = edges.GetResetCaual() |> Seq.map (fun edge -> edge.Target)  
         [<Extension>] static member GetNodes   (edges:#IEdge seq)  = edges |> Seq.collect (fun edge -> [edge.Source;edge.Target])  
-        
+        //    public static string Combine(this string[] nameComponents, string separator=".") =>
+        //string.Join(separator, nameComponents.Select(n => n.IsQuotationRequired() ? $"\"{n}\"" : n));
         ///Start Edge 기준으로 다음 Vertex 들을 찾음
         [<Extension>] static member GetNextNodes (edges:#IEdge seq, source) = 
                                 edges.GetSrcSame(source) 
@@ -34,4 +35,3 @@ module Util =
                                 |> Seq.map    (fun edge -> edge.Source) 
 
 
-    

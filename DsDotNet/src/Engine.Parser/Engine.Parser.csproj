@@ -45,7 +45,6 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\Engine.Common\Engine.Common.csproj" />
-	  <ProjectReference Include="..\Engine.Core\Engine.Base.csproj" />
 	  <ProjectReference Include="..\Engine.Cpu\Engine.Cpu.fsproj" />
 	</ItemGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

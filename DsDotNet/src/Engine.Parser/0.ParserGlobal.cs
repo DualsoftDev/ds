@@ -12,5 +12,9 @@ global using static System.Diagnostics.Debug;
 global using static Engine.Core.Interface;
 global using static Engine.Cpu.Interface;
 global using static Engine.Core.InterfaceClass;
+global using static Engine.Core.CoreClass;
+global using static Engine.Core.CoreFlow;
+global using static Engine.Core.CoreStruct;
+global using static Engine.Cpu.CpuUnit;
 
 namespace Engine.Parser;

@@ -5,8 +5,8 @@ open System
 open System.Collections.Generic
 
 [<AutoOpen>]
-module Loader =
-   
+module CpuLoader =
+    ///CPU에 이식전에 모델 오류 항목 사전체크 (하위모듈에서 필수 체크후 CPU 전송)
     let PreCheck() = 
 
 

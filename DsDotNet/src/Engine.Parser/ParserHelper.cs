@@ -1,3 +1,5 @@
+using Engine.Cpu;
+
 namespace Engine.Parser;
 
 
@@ -11,7 +13,7 @@ public class ParserHelper
     internal RootFlow _rootFlow;
     internal SegmentBase _parenting;
 
-    public Dictionary<string, Cpu> FlowName2CpuMap;
+    public Dictionary<string, CpuUnit.Cpu> FlowName2CpuMap;
 
     public ParserOptions ParserOptions { get; set; }
     public ParserHelper(ParserOptions options)

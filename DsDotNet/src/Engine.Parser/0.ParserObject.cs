@@ -1,3 +1,5 @@
+using Engine.Cpu;
+
 namespace Engine.Parser;
 
 
@@ -16,7 +18,7 @@ public class ParserRootFlow : RootFlow
     public Dictionary<string, string[]> AliasNameMaps = new();
     /// <summary>target -> mnemonics : "My.F.Ap" -> ["Ap1"; "Ap2"] </summary>
     public Dictionary<string[], string[]> BackwardAliasMaps = new(ParserExtension.NameComponentsComparer.Instance);
-    public virtual ParserCpu Cpu { get; }
+    public virtual CpuUnit.Cpu Cpu { get; }
     public List<CallPrototype> CallPrototypes = new();
 
 
@@ -36,7 +38,7 @@ public class ParserChildFlow : ChildFlow
 
 public class ParserSystem : DsSystem
 {
-    public ParserSystem(string name, ParserModel model)
+    public ParserSystem(string name, Model model)
         : base(name)
     {
     }
@@ -44,27 +46,27 @@ public class ParserSystem : DsSystem
     public List<ParserRootFlow> ParserRootFlows = new();
 }
 
-public class ParserModel : DsModel
-{
-    public ParserModel()
-        : base()
-    {
-    }
-    public List<ParserSystem> ParserSystems = new();
-}
+//public class ParserModel : Model
+//{
+//    public ParserModel()
+//        : base()
+//    {
+//    }
+//    public List<ParserSystem> ParserSystems = new();
+//}
 
-public class ParserCpu : DsCpu
-{
-    public ParserCpu(string name, ParserModel model)
-        : base(name)
-    {
-    }
-    public TagDic TagsMap { get; } = new();
+//public class ParserCpu : Cpu.CpuUnit.Cpu
+//{
+//    public ParserCpu(string name, Model model)
+//        : base(name)
+//    {
+//    }
+//    public TagDic TagsMap { get; } = new();
 
-    public List<ParserRootFlow> ParserRootFlows = new();
-}
+//    public List<ParserRootFlow> ParserRootFlows = new();
+//}
 
-public class ParserSegment : Segment
+public class ParserSegment : SegmentBase
 {
     public ParserSegment(string name, ParserChildFlow childFlow)
         : base(name, childFlow)

@@ -30,7 +30,7 @@ module CoreStruct =
          
     and
         [<DebuggerDisplay("{name}")>]
-        DsModel() =
+        Model() =
             let systems = HashSet<DsSystem>()
             let cpus    = HashSet<ICpu>()
             let vpss    = HashSet<RootFlow>()
@@ -51,5 +51,5 @@ module CoreStruct =
 
 
             //시스템 인과 추가 방법 모델에서만 가능
-            member x.AddEdge(edgeInfo:DsEdge, parent:Segment)    = parent.ChildFlow.AddEdge(edgeInfo) |> ignore
+            member x.AddEdge(edgeInfo:DsEdge, parent:SegmentBase)    = parent.ChildFlow.AddEdge(edgeInfo) |> ignore
             member x.AddEdge(edgeInfo:DsEdge, rootFlow:RootFlow) = rootFlow.AddEdge(edgeInfo) |> ignore

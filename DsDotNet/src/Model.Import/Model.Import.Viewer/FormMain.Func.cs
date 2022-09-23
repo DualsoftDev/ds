@@ -11,7 +11,7 @@ using System.Security.Cryptography;
 using System.Windows.Forms;
 using static Engine.Common.FS.MessageEvent;
 using static Engine.Core.DsTextProperty;
-using static Engine.Cpu.Cpu;
+using static Engine.Cpu.CpuUnit;
 using static Model.Import.Office.Object;
 using ImportModel = Model.Import.Office.Object.ImportModel;
 
@@ -66,7 +66,6 @@ namespace Dual.Model.Import
                     return;
 
                 _model = lstModel.First();
-                DsCpu cpu = new DsCpu("MasterCpu", _model);
 
                 if (!_ConvertErr)
                 {

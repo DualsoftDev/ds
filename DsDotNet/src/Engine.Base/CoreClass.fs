@@ -11,7 +11,7 @@ module CoreClass =
 
     /// Real segment 
     [<DebuggerDisplay("{ToText()}")>]
-    type Segment(name:string, childFlow:ChildFlow)  =
+    type SegmentBase(name:string, childFlow:ChildFlow)  =
         inherit SegBase(name,  childFlow)
         let mutable status4 = Status4.Homing
             
@@ -25,7 +25,7 @@ module CoreClass =
     
     /// Call segment 
     [<DebuggerDisplay("{ToText()}")>]
-    type CallSeg(name:string, parent:Segment) =
+    type CallSeg(name:string, parent:SegmentBase) =
         inherit CallBase(name,  parent)
         let mutable status4 = Status4.Homing
 
@@ -34,12 +34,12 @@ module CoreClass =
         member x.Name = name
         member val Status4 = status4 with get, set
             
-     and
-        /// Modeled Edge : 사용자가 작성한 모델 상의 segment 간의 연결 edge (Wire)
-        [<DebuggerDisplay("{Source.ToText()}{Causal.ToText()}{Target.ToText()}")>]
-        DsEdge(src:Segment, tgt:Segment, causal:EdgeCausal) as this =
-            inherit EdgeBase(src, tgt, causal)
-            member x.Nodes = (this:>EdgeBase).Nodes
-            member x.Source = src
-            member x.Target = tgt
      
+    /// Modeled Edge : 사용자가 작성한 모델 상의 segment 간의 연결 edge (Wire)
+    [<DebuggerDisplay("{Source.ToText()}{Causal.ToText()}{Target.ToText()}")>]
+    type DsEdge(src:SegmentBase, tgt:SegmentBase, causal:EdgeCausal) as this =
+        inherit EdgeBase(src, tgt, causal)
+        member x.Nodes = (this:>EdgeBase).Nodes
+        member x.Source = src
+        member x.Target = tgt
+

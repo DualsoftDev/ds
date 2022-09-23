@@ -178,7 +178,7 @@ namespace Dual.Model.Import
                 //var engine = new EngineBuilder(_dsText, null).Engine;
 
 
-                if (Loader.PreCheck())
+                if (CpuLoader.PreCheck())
                     MSGWarn("언어체크 성공 !!!!");
                 else
                     MSGWarn("언어체크 실패 !!!!");

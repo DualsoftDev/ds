@@ -70,16 +70,16 @@ public static class ParserExtension
     public static string Combine(this string[] nameComponents, string separator=".") =>
         string.Join(separator, nameComponents.Select(n => n.IsQuotationRequired() ? $"\"{n}\"" : n));
     public static string[] Divide(this string qualifiedName) => qualifiedName.Split(new[] { '.' }).ToArray();
-    public static ParserSystem FindParserSystem(this ParserModel model, string[] nameComponents) =>
-        model.ParserSystems.FirstOrDefault(sys => sys.Name == nameComponents[0]);
-    public static ParserRootFlow FindFlow(this ParserModel model, string[] nameComponents)
+    public static DsSystem FindParserSystem(this Model model, string[] nameComponents) =>
+        model.Systems.FirstOrDefault(sys => sys.Name == nameComponents[0]);
+    public static RootFlow FindFlow(this Model model, string[] nameComponents)
     {
         var system = model.FindParserSystem(nameComponents);
-        var flow = system?.ParserRootFlows.FirstOrDefault(rf => rf.Name == nameComponents[1]);
+        var flow = system?.RootFlows().FirstOrDefault(rf => rf.Name == nameComponents[1]);
         return flow;
     }
 
-    public static ParserSegment FindParenting(this ParserModel model, string[] nameComponents)
+    public static ParserSegment FindParenting(this Model model, string[] nameComponents)
     {
         Assert(nameComponents.Length >= 3);
         var flow = model.FindFlow(nameComponents);
@@ -88,7 +88,7 @@ public static class ParserExtension
     }
 
 
-    public static object Find(this ParserModel model, string[] fqdn)
+    public static object Find(this Model model, string[] fqdn)
     {
         var n = fqdn.Length;
         Assert(n >= 3);
@@ -119,7 +119,7 @@ public static class ParserExtension
         return flow.CallPrototypes.FirstOrDefault(cp => cp.Name == name);
     }
 
-    public static T Find<T>(this ParserModel model, string[] fqdn) where T : class => model.Find(fqdn) as T;
+    public static T Find<T>(this Model model, string[] fqdn) where T : class => model.Find(fqdn) as T;
 
     public class NameComponentsComparer : IEqualityComparer<string[]>
     {

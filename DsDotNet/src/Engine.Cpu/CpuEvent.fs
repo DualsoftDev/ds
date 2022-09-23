@@ -8,7 +8,7 @@ open Engine.Core
 
 
 [<AutoOpen>]
-module CoreEvent = 
+module CpuEvent = 
     
     type BitParam = |BIT of Time:DateTime * Bit:IBit * Value:bool
 

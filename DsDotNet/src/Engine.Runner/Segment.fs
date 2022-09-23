@@ -20,8 +20,8 @@ module internal BitWriterModule =
 module FsSegmentModule =    
     /// Common base class for *Real* root segment and Virtual Parent Segment
     [<AbstractClass>]
-    type FsSegmentBase(cpu, segmentName) =
-        inherit SegmentBase(cpu, segmentName)
+    type FsSegmentBase(flow:RootFlow, segmentName) =
+        inherit SegmentBase(flow, segmentName)
 
         abstract member WireEvent:unit->IDisposable
         member x.AsyncWrite(bit, value, cause) = async { do! doEnqueueAsync x.Cpu (bit, value, cause) } // BitWriter type
@@ -34,8 +34,9 @@ module FsSegmentModule =
         //    | _, true, _          -> Status4.Homing
 
     /// Real Root Segment
-    type Segment(cpu, segmentName) as this =
-        inherit FsSegmentBase(cpu, segmentName)
+    type Segment(flow:RootFlow, segmentName) as this =
+        inherit FsSegmentBase(flow, segmentName)
+        let cpu = flow.Cpu
 
         member val Inits:Child array = null with get, set
         member val Lasts:Child array = null with get, set

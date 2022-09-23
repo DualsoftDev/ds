@@ -49,7 +49,7 @@ namespace Engine.Parser
             foreach(var call in myFlowCallCtxs)
             {
                 var cp = _rootFlow.CallPrototypes.FirstOrDefault(cp => cp.Name == call);
-                object instance = new Child(new SubCall(call, _parenting, cp), _parenting);
+                var instance = new Child(new SubCall(call, _parenting, cp), _parenting);
                 _parenting.InstanceMap.Add(call, instance);
             }
 
@@ -63,14 +63,14 @@ namespace Engine.Parser
                 var childName = otherFlowCall.Combine();
                 if (cp != null)
                 {
-                    object instance = new Child(new SubCall(childName, _parenting, cp), _parenting);
+                    var instance = new Child(new SubCall(childName, _parenting, cp), _parenting);
                     _parenting.InstanceMap.Add(childName, instance);
                 }
                 else if (exSeg != null)
                 {
                     Console.WriteLine();
                     var segCall = new ExSegment(childName, exSeg);
-                    object instance = new Child(segCall, _parenting);
+                    var instance = new Child(segCall, _parenting);
                     _parenting.InstanceMap.Add(childName, instance);
                 }
             }

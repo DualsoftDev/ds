@@ -49,13 +49,13 @@ public abstract class Flow : Named, IWallet
         Cpu = cpu;
     }
 
-    public Dictionary<string, object> InstanceMap = new();
+    public Dictionary<string, IParserObject> InstanceMap = new();
 }
 
 
 
 [DebuggerDisplay("[{ToText()}]")]
-public class RootFlow : Flow
+public class RootFlow : Flow, IParserObject
 {
     public DsSystem System { get; set; }
     public List<CallPrototype> CallPrototypes = new();
@@ -84,12 +84,25 @@ public class RootFlow : Flow
     /// <summary>target -> mnemonics : "My.F.Ap" -> ["Ap1"; "Ap2"] </summary>
     public Dictionary<string[], string[]> BackwardAliasMaps = new(NameComponentsComparer.Instance);
 
+    public IEnumerable<IParserObject> Spit()
+    {
+        foreach (var cp in CallPrototypes)
+            yield return cp;
+        foreach (var rs in RootSegments)
+        {
+            yield return rs;
+            foreach (var x in rs.Spit())
+                yield return x;
+        }
+        foreach (var x in InstanceMap.Values)
+            yield return x;
+    }
 }
 
 public class ChildFlow : Flow
 {
-    public ChildFlow(Cpu cpu, string name)
-        : base(cpu, name)
+    public ChildFlow(RootFlow rootFlow, string name)
+        : base(rootFlow.Cpu, name)
     {
     }
 

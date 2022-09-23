@@ -55,9 +55,9 @@ class ModelListener : dsBaseListener
         if (instanceMap.ContainsKey(fqdn))
             return;
 
-        void createInstanceFromCallPrototype(CallPrototype cp, string callName, Dictionary<string, object> instanceMap)
+        void createInstanceFromCallPrototype(CallPrototype cp, string callName, Dictionary<string, IParserObject> instanceMap)
         {
-            object instance =
+            IParserObject instance =
                 _parenting == null
                 ? new RootCall(callName, _rootFlow, cp)
                 : new Child(new SubCall(callName, _parenting, cp), _parenting)

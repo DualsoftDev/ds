@@ -18,7 +18,7 @@ module VirtualParentSegmentModule =
         , causalSourceSegments:Segment seq
         , resetSourceSegments:Segment seq
     ) as this =
-        inherit FsSegmentBase(target.Cpu, $"VPS_{target.QualifiedName}")
+        inherit FsSegmentBase(target.ContainerFlow, $"VPS_{target.QualifiedName}")
 
         let cpu = target.Cpu
         do

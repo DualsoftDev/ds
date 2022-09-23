@@ -1,6 +1,6 @@
 namespace Engine.Core;
 
-public class DsSystem : Named
+public class DsSystem : Named, IParserObject
 {
     public Model Model;
     /// <summary> CPU host ip or domain name</summary>
@@ -21,6 +21,16 @@ public class DsSystem : Named
             throw new Exception($"Duplicated system name [{name}].");
 
         model.Systems.Add(this);
+    }
+
+    public IEnumerable<IParserObject> Spit()
+    {
+        foreach (var rf in RootFlows)
+        {
+            yield return rf;
+            foreach (var x in rf.Spit())
+                yield return x;
+        }
     }
 }
 

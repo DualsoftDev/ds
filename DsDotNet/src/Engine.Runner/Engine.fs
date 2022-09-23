@@ -15,8 +15,7 @@ module EngineModule =
     let Initialize() =
         SegmentBase.Create <-
             fun name (rootFlow:RootFlow) ->
-                let seg = Segment(rootFlow.Cpu, name)
-                seg.ContainerFlow <- rootFlow
+                let seg = Segment(rootFlow, name)
                 rootFlow.AddChildVertex(seg)
                 seg
 

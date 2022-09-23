@@ -1,3 +1,5 @@
+using Microsoft.FSharp.Collections;
+
 namespace Engine.Core;
 
 public abstract class CallBase : Coin
@@ -23,7 +25,7 @@ public class Xywh
     public int? H { get; }
 }
 
-public class CallPrototype : CallBase
+public class CallPrototype : CallBase, IParserObject
 {
     public RootFlow RootFlow { get; }
     /// <summary> 주로 target system 의 segment </summary>
@@ -59,7 +61,7 @@ public class CallPrototype : CallBase
 
     public override string[] NameComponents => RootFlow.NameComponents.Append(Name).ToArray();
     public Xywh Xywh { get; set; }
-
+    public IEnumerable<IParserObject> Spit() => Enumerable.Empty<IParserObject>();
 }
 
 
@@ -93,7 +95,7 @@ public class SubCall : Call
 }
 
 /// <summary> Root 에 배치된 Call </summary>
-public class RootCall : Call
+public class RootCall : Call, IParserObject
 {
     TagDic _txTags = new();
     TagDic _rxTags = new();
@@ -113,6 +115,8 @@ public class RootCall : Call
     public void AddRxTags(IEnumerable<Tag> tags) => AddTags(_rxTags, tags);
     public void AddTxTags(IEnumerable<Tag> tags) => AddTags(_txTags, tags);
 
+    public IEnumerable<IParserObject> Spit() => Enumerable.Empty<IParserObject>();
+
     public RootCall(string name, RootFlow flow, CallPrototype protoType)
         : base(name, flow, protoType)
     {
@@ -126,7 +130,7 @@ public class RootCall : Call
 
 /// <summary> 외부 segment 에 대한 호출 </summary>
 [DebuggerDisplay("[{ToText()}]")]
-public class ExSegment : Coin
+public class ExSegment : Coin, IParserObject
 {
     public SegmentBase ExternalSegment;
     public Child ContainerChild { get; set; }
@@ -137,7 +141,7 @@ public class ExSegment : Coin
         ExternalSegment = externalSegment;
     }
     public override string ToText() => $"{Name}={ExternalSegment.QualifiedName}";
-
+    public IEnumerable<IParserObject> Spit() => Enumerable.Empty<IParserObject>();
 }
 
 public static class CallExtension

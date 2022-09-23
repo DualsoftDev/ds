@@ -7,10 +7,17 @@
 	</PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="TagType.fs" />
     <Compile Include="Interface.fs" />
     <Compile Include="Loader.fs" />
-    <Compile Include="Cpu.fs" />
-    <Compile Include="Memory.fs" />
+    <Compile Include="CpuEvent.fs" />
+    <Compile Include="CpuUnit.fs" />
+    <Compile Include="CpuTag.fs" />
+    <Compile Include="CpuBit.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Reactive" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>

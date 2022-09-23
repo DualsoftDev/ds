@@ -50,6 +50,11 @@ module Object =
             member x.BaseSys = baseSystem
             member x.Bound = bound
 
+            member x.SetStatus(status:Status4) = 
+                    this.Status4 <- status
+                    ChangeStatus(this, status)
+
+
             member val ShapeID = 0u with get, set
             member val CountTX = 0 with get, set
             member val CountRX = 0 with get, set

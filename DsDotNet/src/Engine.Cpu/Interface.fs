@@ -7,7 +7,7 @@ module Interface =
     type ICpuBit = 
         inherit IBit
         inherit ICpu
-        abstract Value: bool 
+        abstract Value: bool with get, set
 
     type IAlias     = inherit INamed
     type ITxRx      = inherit INamed

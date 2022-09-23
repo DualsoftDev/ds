@@ -40,24 +40,24 @@
 //            _ends[tag.Name] = tag;
 //    }
 
-//    public void AddTags(params Tag[] tags)
+//public void AddTags(params Tag[] tags)
+//{
+//    foreach (var tag in tags)
 //    {
-//        foreach (var tag in tags)
-//        {
-//            TagDic dic = null;
-//            if (tag.Type.HasFlag(TagType.Start))
-//                dic = _starts;
-//            else if (tag.Type.HasFlag(TagType.Reset))
-//                dic = _resets;
-//            else if (tag.Type.HasFlag(TagType.End))
-//                dic = _ends;
-//            else if (tag.Type.HasFlag(TagType.Going))
-//                dic = _goings;
-//            else
-//                throw new Exception("Tag type is not supported.");
+//        TagDic dic = null;
+//        if (tag.Type.HasFlag(TagType.Start))
+//            dic = _starts;
+//        else if (tag.Type.HasFlag(TagType.Reset))
+//            dic = _resets;
+//        else if (tag.Type.HasFlag(TagType.End))
+//            dic = _ends;
+//        else if (tag.Type.HasFlag(TagType.Going))
+//            dic = _goings;
+//        else
+//            throw new Exception("Tag type is not supported.");
 
-//            dic[tag.Name] = tag;
-//        }
+//        dic[tag.Name] = tag;
 //    }
+//}
 
 //}

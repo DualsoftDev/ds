@@ -8,6 +8,8 @@ public abstract class Bit : Named, ICpuBit
     public List<ICpuBit> Containers { get; } = new();
 
     public Cpu Cpu { get; set; }
+    bool ICpuBit.Value { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
     public Bit(Cpu cpu, string name, bool bit = false) : base(name)
     {
         Assert(cpu != null);

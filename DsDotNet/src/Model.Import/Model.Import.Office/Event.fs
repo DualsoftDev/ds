@@ -1,8 +1,9 @@
 // Copyright (c) Dual Inc.  All Rights Reserved.
-namespace Engine.Core
+namespace Model.Import.Office
 
 open System
 open System.Reactive.Subjects
+open Engine.Core
 
 
 

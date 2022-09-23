@@ -11,17 +11,14 @@ module CoreClass =
 
     /// Real segment 
     [<DebuggerDisplay("{ToText()}")>]
-    type Segment(name:string, childFlow:ChildFlow) as this =
+    type Segment(name:string, childFlow:ChildFlow)  =
         inherit SegBase(name,  childFlow)
         let mutable status4 = Status4.Homing
             
         override x.ToText() = childFlow.QualifiedName
         member x.Name = name
-        member x.Status4 = status4 
-        member x.SetStatus(status:Status4) = 
-            status4 <- status
-            ChangeStatus(this, status)
-
+        member val Status4 = status4 with get, set
+       
         member x.ChildFlow = childFlow
         member x.RootFlow = childFlow.ContainerFlow
       
@@ -35,7 +32,7 @@ module CoreClass =
         override x.ToText() = $"{parent.RootFlow.QualifiedName}.{name}({parent.Name})"
             
         member x.Name = name
-        member x.Status4 = status4 
+        member val Status4 = status4 with get, set
             
      and
         /// Modeled Edge : 사용자가 작성한 모델 상의 segment 간의 연결 edge (Wire)

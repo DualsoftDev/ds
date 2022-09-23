@@ -17,15 +17,10 @@
 		<Compile Include="Interface.fs" />
 		<Compile Include="InterfaceClass.fs" />
 		<Compile Include="CoreUtil.fs" />
-		<Compile Include="CoreEvent.fs" />
 		<Compile Include="CoreFlow.fs" />
 		<Compile Include="CoreClass.fs" />
 		<Compile Include="CoreStruct.fs" />
 		<Compile Include="CoreGraph.fs" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <PackageReference Include="System.Reactive" Version="5.0.0" />
 	</ItemGroup>
 	
 

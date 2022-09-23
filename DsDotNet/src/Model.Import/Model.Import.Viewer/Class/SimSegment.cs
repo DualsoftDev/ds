@@ -28,7 +28,6 @@ namespace Dual.Model.Import
             }
         }
 
-
         private static async Task Test(IEnumerable<MSeg> rootSegs, Status4 status, List<NodeType> showList)
         {
             foreach (var seg in rootSegs)
@@ -74,12 +73,6 @@ namespace Dual.Model.Import
 
             await Task.Run(async () =>
             {
-                //List<MEdge> edges = model.AllFlows.SelectMany(s => s.Edges).Cast<MEdge>().ToList();
-                //var segs = edges.SelectMany(s => s.Nodes).ToList();
-                //segs.AddRange(dicSeg.Values);
-
-
-
                 foreach (var cont in dicSeg.Values)
                 {
                     if (dicSeg.Count() == 0) break;

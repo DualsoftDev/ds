@@ -8,7 +8,7 @@ module Interface =
 
 
     /// Dualsoft object 공리 : 시스템 모든것은 비트다
-    type IBit = interface end
+    type IBit  = interface end
     /// 이름
     type INamed  =
          abstract Name:string with get,set
@@ -49,5 +49,5 @@ module Interface =
     type ISystem    = 
         abstract Flows:IFlow seq
 
-    type ICpu       = inherit INamed
+    type ICpu       = interface end
         

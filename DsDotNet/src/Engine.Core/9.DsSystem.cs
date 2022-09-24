@@ -23,12 +23,12 @@ public class DsSystem : Named, IParserObject
         model.Systems.Add(this);
     }
 
-    public IEnumerable<IParserObject> Spit()
+    public IEnumerable<IParserObject> SpitParserObjects()
     {
+        yield return this;
         foreach (var rf in RootFlows)
         {
-            yield return rf;
-            foreach (var x in rf.Spit())
+            foreach (var x in rf.SpitParserObjects())
                 yield return x;
         }
     }

@@ -7,12 +7,12 @@ public class Model:  IParserObject
     /// <summary> 가상 부모 목록.  debugging 용 </summary>
     public SegmentBase[] VPSs { get; set; }
 
-    public IEnumerable<IParserObject> Spit()
+    public IEnumerable<IParserObject> SpitParserObjects()
     {
+        yield return this;
         foreach(var sys in Systems)
         {
-            yield return sys;
-            foreach(var x in sys.Spit())
+            foreach(var x in sys.SpitParserObjects())
                 yield return x;
         }
     }

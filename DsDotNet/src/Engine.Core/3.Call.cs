@@ -61,7 +61,7 @@ public class CallPrototype : CallBase, IParserObject
 
     public override string[] NameComponents => RootFlow.NameComponents.Append(Name).ToArray();
     public Xywh Xywh { get; set; }
-    public IEnumerable<IParserObject> Spit() => Enumerable.Empty<IParserObject>();
+    public IEnumerable<IParserObject> SpitParserObjects() { yield return this; }
 }
 
 
@@ -115,7 +115,7 @@ public class RootCall : Call, IParserObject
     public void AddRxTags(IEnumerable<Tag> tags) => AddTags(_rxTags, tags);
     public void AddTxTags(IEnumerable<Tag> tags) => AddTags(_txTags, tags);
 
-    public IEnumerable<IParserObject> Spit() => Enumerable.Empty<IParserObject>();
+    public IEnumerable<IParserObject> SpitParserObjects() { yield return this; }
 
     public RootCall(string name, RootFlow flow, CallPrototype protoType)
         : base(name, flow, protoType)
@@ -141,7 +141,7 @@ public class ExSegment : Coin, IParserObject
         ExternalSegment = externalSegment;
     }
     public override string ToText() => $"{Name}={ExternalSegment.QualifiedName}";
-    public IEnumerable<IParserObject> Spit() => Enumerable.Empty<IParserObject>();
+    public IEnumerable<IParserObject> SpitParserObjects() { yield return this; }
 }
 
 public static class CallExtension

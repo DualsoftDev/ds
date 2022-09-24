@@ -1,5 +1,7 @@
 using Engine.Base;
 
+using System.Runtime.CompilerServices;
+
 namespace Engine.Core;
 
 /// <summary> Segment 내에 배치된 `Child`.  SubCall 또는 ExSegmentCall 를 Coin 으로 갖는 wrapper</summary>
@@ -64,5 +66,5 @@ public class Child : Named, IVertex, ICoin, IParserObject
 
     public override string ToString() => ToText();
     public override string ToText() => $"{QualifiedName}[{this.GetType().Name}] : " + (IsCall ? "CALL" : "ExSegmentCall");
-    public IEnumerable<IParserObject> Spit() => Enumerable.Empty<IParserObject>();
+    public IEnumerable<IParserObject> SpitParserObjects()    { yield return this; }
 }

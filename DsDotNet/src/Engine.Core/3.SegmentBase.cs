@@ -80,12 +80,6 @@ public abstract partial class SegmentBase : ChildFlow, IVertex, ICoin, IWallet, 
     {
     }
 
-    public IEnumerable<IParserObject> Spit()
-    {
-        foreach(var v in InstanceMap.Values)
-            yield return v;
-    }
-
 
     public DsType.Status4 Status =>
         (PortS.Value, PortR.Value, PortE.Value) switch

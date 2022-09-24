@@ -49,5 +49,5 @@ public interface ICpu { }
 public interface IEngine { }
 public interface IParserObject
 {
-    IEnumerable<IParserObject> Spit();
+    IEnumerable<IParserObject> SpitParserObjects();
 }

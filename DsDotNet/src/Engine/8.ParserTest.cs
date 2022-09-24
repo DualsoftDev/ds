@@ -8,7 +8,7 @@ namespace Engine
         {
             var engine = new EngineBuilder(text, ParserOptions.Create4Simulation(activeCpuName)).Engine;
             var model = engine.Model;
-            var xs = model.Spit().ToArray();
+            var xs = model.SpitParserObjects().ToArray();
             Console.WriteLine();
             //Program.Engine = engine;
             //engine.Run();

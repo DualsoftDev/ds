@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net48</TargetFrameworks>
+    <!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
+	  <LangVersion>10.0</LangVersion>
+	  <RootNamespace>Control.Opc</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="FSharp.Core" Version="6.0.6" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Engine\Engine.Base\Engine.Base.csproj" />
+    <ProjectReference Include="..\..\Engine\Engine.Common.FS\Engine.Common.FS.fsproj" />
+    <ProjectReference Include="..\..\Engine\Engine.Common\Engine.Common.csproj" />
+    <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
+    <ProjectReference Include="..\..\Engine\Engine.CpuUnit\Engine.CpuUnit.fsproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Confluent.Kafka">
+      <HintPath>..\..\..\exLib\Confluent.Kafka.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net">
+      <HintPath>..\..\..\exLib\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive">
+      <HintPath>..\..\exLib\System.Reactive.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>

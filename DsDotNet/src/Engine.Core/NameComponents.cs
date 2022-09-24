@@ -63,8 +63,13 @@ public static class ParserExtension
 
 
     /// <summary> path 구성 요소 array 를 '.' 으로 combine </summary>
-    public static string Combine(this string[] nameComponents, string separator=".") =>
-        string.Join(separator, nameComponents.Select(n => n.IsQuotationRequired() ? $"\"{n}\"" : n));
+    public static string Combine(this string[] nameComponents, string separator=".")
+    {
+        if (nameComponents.Length == 1)
+            return nameComponents[0];
+
+        return string.Join(separator, nameComponents.Select(n => n.IsQuotationRequired() ? $"\"{n}\"" : n));
+    }
     public static string[] Divide(this string qualifiedName) => qualifiedName.Split(new[] { '.' }).ToArray();
 
 

@@ -38,43 +38,6 @@ public class ParserHelper
         }
     }
     internal string CurrentPath => CurrentPathNameComponents.Combine();
-
-
-
-    //public T FindObject<T>(string[] qualifiedName) where T : class => PickQualifiedPathObject<T>(qualifiedName);
-
-    //public T[] FindObjects<T>(DsSystem system, RootFlow flow, string qualifiedNames) where T : class
-    //{
-    //    if (qualifiedNames == "_")
-    //        return Array.Empty<T>();
-
-    //    return
-    //        qualifiedNames
-    //            .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-    //            .Select(name => FindObject<T>(name.Divide()))
-    //            .ToArray()
-    //            ;
-    //}
-
-
-    //T PickQualifiedPathObject<T>(string[] qualifiedName, Func<T> creator = null) where T : class
-    //{
-    //    T target = (T)Model.Find(qualifiedName);
-    //    if (target != null)
-    //        return target;
-
-    //    if (creator == null)
-    //    {
-    //        if (ParserOptions.AllowSkipExternalSegment)
-    //            return null;
-    //        throw new Exception($"ERROR: failed to create {qualifiedName}");
-    //    }
-
-    //    var t = creator();
-    //    Model.FindFlow(qualifiedName).InstanceMap[qualifiedName.Last()] = t;
-
-    //    return t;
-    //}
 }
 
 

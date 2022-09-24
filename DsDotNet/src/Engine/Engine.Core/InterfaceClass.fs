@@ -40,10 +40,12 @@ module InterfaceClass =
             member _.Flows = rootFlows
 
         member x.RootFlows = (x:>ISystem).Flows
-  
+        abstract AddFlow : IFlow -> bool
+        
     /// Call Segment
     [<AbstractClass>]
     type CallBase(name:string) as this =
+        inherit Named(name)
         let txs = List<IVertex>() 
         let rxs = List<IVertex>() 
 

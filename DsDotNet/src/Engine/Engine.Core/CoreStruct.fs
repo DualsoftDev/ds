@@ -11,15 +11,21 @@ open CoreClass
 module CoreStruct =
 
     [<DebuggerDisplay("{name}")>]
-    type DsSystem(name:string, model:Model)  =
+    type DsSystem(name:string, model:Model) as this =
         inherit SysBase(name)
+        do model.Add(this) |> ignore
         let dicRootFlow = ConcurrentDictionary<string, RootFlow>()
-      
-        override x.ToText() = name
+
         member x.Model = model
         member x.RootFlows = dicRootFlow.Values
-        member x.AddFlow(flow:RootFlow) = dicRootFlow.TryAdd(flow.Name, flow);
-        member x.GetFlow(name:string)   = dicRootFlow.[name];
+
+        override x.ToText() = name
+        override x.AddFlow(flow:IFlow)  = 
+                    let flow = flow :?> RootFlow
+                    dicRootFlow.TryAdd(flow.Name, flow);
+
+        member x.GetFlow(name:string)  
+                    = dicRootFlow.[name];
         //나의 시스템 Flag
         member val Active = false
         

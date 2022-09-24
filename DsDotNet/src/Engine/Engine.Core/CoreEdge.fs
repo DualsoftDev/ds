@@ -22,6 +22,10 @@ module CoreEdge =
         member x.Sources = srcs
         member x.Target = tgt
         member x.Operator = op
+        member x.GetDsEdges() = 
+                    let causal = EdgeCausalType(op)
+                    let target = tgt:?>SegmentBase
+                    srcs |> Seq.map(fun src -> DsEdge(src:?>SegmentBase, target, causal))
 
     type WeakResetEdge(flow:Flow, srcs:IVertex seq, op:string, tgt:IVertex) =
         inherit Edge(flow, srcs, op, tgt)

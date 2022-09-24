@@ -26,7 +26,7 @@ module CoreFlow =
 
         member x.Nodes = (this :> IFlow).Nodes
         member x.Edges = (this :> IFlow).Edges
-        member x.AddEdge(edge) = edges.Add(edge)
+        member x.AddEdge(edge:IEdge)  = edges.Add(edge)
         member x.RemoveEdge(edge) = edges.Remove(edge)
 
         member x.Singles = singleNodes
@@ -52,8 +52,9 @@ module CoreFlow =
 
 
     [<DebuggerDisplay("{name}")>]
-    type RootFlow(name, system:SysBase)  =
+    type RootFlow(name, system:SysBase) as this =
         inherit Flow(name)
+        do system.AddFlow(this) |> ignore
 
         new (cpu:ICpu, name, system) = RootFlow(name, system)
         override x.ToText() = x.QualifiedName

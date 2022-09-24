@@ -11,10 +11,8 @@ module CoreGraph =
 
     [<DebuggerDisplay("{name}")>]
     type DsGraph(name:string)  =
-        inherit SysBase(name)
         let dicRootFlow = ConcurrentDictionary<string, RootFlow>()
 
-        override x.ToText() = name
         member x.RootFlows() = dicRootFlow.Values
         member x.AddFlow(flow:RootFlow) = dicRootFlow.TryAdd(flow.Name, flow);
         member x.GetFlow(name:string)   = dicRootFlow.[name];

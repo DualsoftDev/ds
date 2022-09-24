@@ -32,20 +32,20 @@ namespace Model.Simulator
         private void InitializeComponent()
         {
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.xtraTabControl_My = new System.Windows.Forms.TabControl();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.button_Stop = new System.Windows.Forms.Button();
             this.button_TestStart = new System.Windows.Forms.Button();
+            this.button_HideLine = new System.Windows.Forms.Button();
             this.button_Compile = new System.Windows.Forms.Button();
             this.button_TestORG = new System.Windows.Forms.Button();
             this.button_Run = new System.Windows.Forms.Button();
             this.richTextBox_ds = new System.Windows.Forms.RichTextBox();
+            this.xtraTabControl_My = new System.Windows.Forms.TabControl();
             this.splitContainer4 = new System.Windows.Forms.SplitContainer();
             this.button_ClearLog = new System.Windows.Forms.Button();
             this.richTextBox_Debug = new System.Windows.Forms.RichTextBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.button_HideLine = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -69,25 +69,14 @@ namespace Model.Simulator
             // 
             // splitContainer1.Panel1
             // 
-            this.splitContainer1.Panel1.Controls.Add(this.xtraTabControl_My);
+            this.splitContainer1.Panel1.Controls.Add(this.splitContainer2);
             // 
             // splitContainer1.Panel2
             // 
-            this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
-            this.splitContainer1.Size = new System.Drawing.Size(1373, 603);
-            this.splitContainer1.SplitterDistance = 829;
+            this.splitContainer1.Panel2.Controls.Add(this.xtraTabControl_My);
+            this.splitContainer1.Size = new System.Drawing.Size(1373, 658);
+            this.splitContainer1.SplitterDistance = 677;
             this.splitContainer1.TabIndex = 18;
-            // 
-            // xtraTabControl_My
-            // 
-            this.xtraTabControl_My.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.xtraTabControl_My.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.xtraTabControl_My.HotTrack = true;
-            this.xtraTabControl_My.Location = new System.Drawing.Point(0, 0);
-            this.xtraTabControl_My.Name = "xtraTabControl_My";
-            this.xtraTabControl_My.SelectedIndex = 0;
-            this.xtraTabControl_My.Size = new System.Drawing.Size(829, 603);
-            this.xtraTabControl_My.TabIndex = 6;
             // 
             // splitContainer2
             // 
@@ -110,31 +99,39 @@ namespace Model.Simulator
             // splitContainer2.Panel2
             // 
             this.splitContainer2.Panel2.Controls.Add(this.richTextBox_ds);
-            this.splitContainer2.Size = new System.Drawing.Size(540, 603);
-            this.splitContainer2.SplitterDistance = 220;
-            this.splitContainer2.TabIndex = 4;
+            this.splitContainer2.Size = new System.Drawing.Size(677, 658);
+            this.splitContainer2.SplitterDistance = 56;
+            this.splitContainer2.TabIndex = 5;
             // 
             // button_Stop
             // 
             this.button_Stop.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_Stop.Location = new System.Drawing.Point(335, 182);
+            this.button_Stop.Location = new System.Drawing.Point(472, 182);
             this.button_Stop.Name = "button_Stop";
             this.button_Stop.Size = new System.Drawing.Size(85, 23);
             this.button_Stop.TabIndex = 5;
             this.button_Stop.Text = "Stop";
             this.button_Stop.UseVisualStyleBackColor = true;
-            this.button_Stop.Click += new System.EventHandler(this.button_Stop_Click);
             // 
             // button_TestStart
             // 
             this.button_TestStart.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_TestStart.Location = new System.Drawing.Point(426, 182);
+            this.button_TestStart.Location = new System.Drawing.Point(563, 182);
             this.button_TestStart.Name = "button_TestStart";
             this.button_TestStart.Size = new System.Drawing.Size(85, 23);
             this.button_TestStart.TabIndex = 1;
             this.button_TestStart.Text = "TEST 시작";
             this.button_TestStart.UseVisualStyleBackColor = true;
-            this.button_TestStart.Click += new System.EventHandler(this.button_TestStart_Click);
+            // 
+            // button_HideLine
+            // 
+            this.button_HideLine.Location = new System.Drawing.Point(170, 18);
+            this.button_HideLine.Name = "button_HideLine";
+            this.button_HideLine.Size = new System.Drawing.Size(85, 23);
+            this.button_HideLine.TabIndex = 4;
+            this.button_HideLine.Text = "라인숨기기";
+            this.button_HideLine.UseVisualStyleBackColor = true;
+            this.button_HideLine.Click += new System.EventHandler(this.button_HideLine_Click);
             // 
             // button_Compile
             // 
@@ -149,34 +146,44 @@ namespace Model.Simulator
             // button_TestORG
             // 
             this.button_TestORG.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_TestORG.Location = new System.Drawing.Point(426, 156);
+            this.button_TestORG.Location = new System.Drawing.Point(563, 156);
             this.button_TestORG.Name = "button_TestORG";
             this.button_TestORG.Size = new System.Drawing.Size(85, 23);
             this.button_TestORG.TabIndex = 1;
             this.button_TestORG.Text = "TEST원위치";
             this.button_TestORG.UseVisualStyleBackColor = true;
-            this.button_TestORG.Click += new System.EventHandler(this.button_TestORG_Click);
             // 
             // button_Run
             // 
             this.button_Run.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_Run.Location = new System.Drawing.Point(335, 156);
+            this.button_Run.Location = new System.Drawing.Point(472, 156);
             this.button_Run.Name = "button_Run";
             this.button_Run.Size = new System.Drawing.Size(85, 23);
             this.button_Run.TabIndex = 3;
             this.button_Run.Text = "Run";
             this.button_Run.UseVisualStyleBackColor = true;
-            this.button_Run.Click += new System.EventHandler(this.button_Run_Click);
             // 
             // richTextBox_ds
             // 
             this.richTextBox_ds.BackColor = System.Drawing.SystemColors.Control;
             this.richTextBox_ds.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.richTextBox_ds.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.richTextBox_ds.Location = new System.Drawing.Point(0, 0);
             this.richTextBox_ds.Name = "richTextBox_ds";
-            this.richTextBox_ds.Size = new System.Drawing.Size(540, 379);
+            this.richTextBox_ds.Size = new System.Drawing.Size(677, 598);
             this.richTextBox_ds.TabIndex = 2;
             this.richTextBox_ds.Text = "";
+            // 
+            // xtraTabControl_My
+            // 
+            this.xtraTabControl_My.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.xtraTabControl_My.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.xtraTabControl_My.HotTrack = true;
+            this.xtraTabControl_My.Location = new System.Drawing.Point(0, 0);
+            this.xtraTabControl_My.Name = "xtraTabControl_My";
+            this.xtraTabControl_My.SelectedIndex = 0;
+            this.xtraTabControl_My.Size = new System.Drawing.Size(692, 658);
+            this.xtraTabControl_My.TabIndex = 6;
             // 
             // splitContainer4
             // 
@@ -194,7 +201,7 @@ namespace Model.Simulator
             this.splitContainer4.Panel2.Controls.Add(this.button_ClearLog);
             this.splitContainer4.Panel2.Controls.Add(this.richTextBox_Debug);
             this.splitContainer4.Size = new System.Drawing.Size(1373, 746);
-            this.splitContainer4.SplitterDistance = 603;
+            this.splitContainer4.SplitterDistance = 658;
             this.splitContainer4.TabIndex = 20;
             // 
             // button_ClearLog
@@ -215,7 +222,7 @@ namespace Model.Simulator
             this.richTextBox_Debug.Location = new System.Drawing.Point(0, 0);
             this.richTextBox_Debug.Name = "richTextBox_Debug";
             this.richTextBox_Debug.ReadOnly = true;
-            this.richTextBox_Debug.Size = new System.Drawing.Size(1373, 139);
+            this.richTextBox_Debug.Size = new System.Drawing.Size(1373, 84);
             this.richTextBox_Debug.TabIndex = 0;
             this.richTextBox_Debug.Text = "";
             // 
@@ -237,16 +244,6 @@ namespace Model.Simulator
             this.splitter1.TabIndex = 22;
             this.splitter1.TabStop = false;
             // 
-            // button_HideLine
-            // 
-            this.button_HideLine.Location = new System.Drawing.Point(170, 18);
-            this.button_HideLine.Name = "button_HideLine";
-            this.button_HideLine.Size = new System.Drawing.Size(85, 23);
-            this.button_HideLine.TabIndex = 4;
-            this.button_HideLine.Text = "라인숨기기";
-            this.button_HideLine.UseVisualStyleBackColor = true;
-            this.button_HideLine.Click += new System.EventHandler(this.button_HideLine_Click);
-            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
@@ -260,6 +257,7 @@ namespace Model.Simulator
             this.Icon = global::Model.Simulator.Properties.Resources.logo_Dualsoft;
             this.IsMdiContainer = true;
             this.Name = "FormMain";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Dualsoft";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
@@ -287,15 +285,15 @@ namespace Model.Simulator
         private System.Windows.Forms.Button button_ClearLog;
         private System.Windows.Forms.ProgressBar progressBar1;
         private System.Windows.Forms.TabControl xtraTabControl_My;
-        private System.Windows.Forms.SplitContainer splitContainer2;
-        private System.Windows.Forms.RichTextBox richTextBox_ds;
         private System.Windows.Forms.Splitter splitter1;
+        private System.Windows.Forms.SplitContainer splitContainer2;
+        private System.Windows.Forms.Button button_Stop;
         private System.Windows.Forms.Button button_TestStart;
+        private System.Windows.Forms.Button button_HideLine;
+        private System.Windows.Forms.Button button_Compile;
         private System.Windows.Forms.Button button_TestORG;
         private System.Windows.Forms.Button button_Run;
-        private System.Windows.Forms.Button button_Compile;
-        private System.Windows.Forms.Button button_Stop;
-        private System.Windows.Forms.Button button_HideLine;
+        private System.Windows.Forms.RichTextBox richTextBox_ds;
     }
 }
 

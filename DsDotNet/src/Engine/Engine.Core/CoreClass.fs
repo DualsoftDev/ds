@@ -59,6 +59,7 @@ module CoreClass =
         let mutable status4 = Status4.Homing
 
             
+        override x.ToText() = name
         member x.Name = name
         member x.RootFlow = rootFlow
         member val Status4 = status4 with get, set
@@ -66,8 +67,9 @@ module CoreClass =
 
     [<DebuggerDisplay("{ToText()}")>]
     /// CallPrototype
-    type CallPrototype(name:string, rootFlow:RootFlow) =
+    type CallPrototype(name:string, rootFlow:RootFlow) as this =
         inherit CallBase(name)
-        //do rootFlow.CallPrototypes.Add(this)
+        do rootFlow.CallPrototypes.Add(this)
+        override x.ToText() = name
         member val Xywh:Xywh = Xywh(0,0,Some(0),Some(0)) with get,set
 

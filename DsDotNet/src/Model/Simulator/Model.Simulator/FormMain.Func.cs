@@ -14,36 +14,22 @@ namespace Model.Simulator
 {
     public partial class FormMain : Form
     {
-        internal void ExportTextModel(Color color, string dsText, bool bShowLine = false)
+        internal void ExportTextModel(string dsText, bool bShowLine = false)
         {
 
             this.Do(() => richTextBox_ds.Clear());
 
             var textLines = dsText.Split('\n');
-            Random r = new Random();
-            Color rndColor = Color.LightGoldenrodYellow;
-            int lineCnt = textLines.Count();
-            int lineCur = 0;
+            Color rndColor = Color.Black;
+          
             this.Do(() =>
             {
+                int lineCur = 0;
                 textLines.ToList().ForEach(f =>
                 {
-                    int pro = 50 + Convert.ToInt32(Convert.ToSingle(lineCur++) / (lineCnt) * 50f);
-                    if (bShowLine) richTextBox_ds.AppendTextColor(lineCur.ToString("000") + ";", Color.White);
+                    if (bShowLine) richTextBox_ds.AppendText((lineCur++).ToString("000") + ";");
 
-                    if (color == Color.Transparent)
-                    {
-                        if (f.Contains($"[{DsTextProperty.TextSystem}]") || (f.Contains($"[{DsTextProperty.TextFlow}]") && !f.Contains("}"))  //[flow] F = {} 한줄제외
-                        || f.Contains($"[{DsTextProperty.TextAddress}]") || f.Contains($"[{DsTextProperty.TextLayout}]") || f.Contains("//"))
-                        {
-                            rndColor = Color.FromArgb(r.Next(0, 100), r.Next(0, 100), r.Next(0, 100));
-                            this.Do(() => richTextBox_ds.ScrollToCaret());
-                            ProcessEvent.DoWork(pro);
-                        }
-                        richTextBox_ds.AppendTextColor(f + "\n", rndColor);
-                    }
-                    else
-                        richTextBox_ds.AppendTextColor(f, color);
+                    richTextBox_ds.AppendText(f + "\n");
                 });
             });
 

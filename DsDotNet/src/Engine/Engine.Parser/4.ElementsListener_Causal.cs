@@ -1,3 +1,4 @@
+using Engine.Common;
 using Nodes = System.Collections.Generic.List<System.Object>;
 
 namespace Engine.Parser;
@@ -270,7 +271,7 @@ partial class ElementsListener
                             Assert(false);    //, `invalid operator: ${ op}`);
                             break;
                     }
-                    flow.AddEdge((IEdge)e);
+                    e.GetDsEdges().ForAll(edge => flow.AddEdge(edge));
                 }
             }
         }

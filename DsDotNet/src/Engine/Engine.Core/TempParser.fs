@@ -10,12 +10,12 @@ open CoreFlow
 module TempParser =
 
     [<AbstractClass>]
-    type Call(name:string,  rootFlow:RootFlow, cp:CallPrototype )  =
+    type Call(name:string,  rootFlow:RootFlow, cp:CallPrototype)  =
         inherit CallBase(name)
         member x.RootFlow = rootFlow
         member x.CallPrototype = cp
 
-    type SubCall(name:string,  parenting:SegmentBase, cp:CallPrototype )  =
+    type SubCall(name:string,  parenting:SegmentBase, cp:CallPrototype)  =
         member x.Name = name
         member x.CallPrototype = parenting
         member x.SegmentBase = cp
@@ -28,11 +28,10 @@ module TempParser =
         member x.SubCall = subCall
         member x.SegmentBase = SegmentBase
     
-    type RootCall(name:string,  rootFlow:RootFlow, cp:CallPrototype )  =
+    type RootCall(name:string,  rootFlow:RootFlow, cp:CallPrototype)  =
         inherit Call(name, rootFlow, cp)
         member x.Name = name
         member x.RootFlow = rootFlow
         member x.CallPrototype = cp
         
-
-
+        override x.ToText() = name

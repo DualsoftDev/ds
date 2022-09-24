@@ -38,6 +38,7 @@ namespace Model.Simulator
             this.DragDrop += new DragEventHandler(Form1_DragDrop);
             TheMain = this;
 
+
             richTextBox_Debug.AppendText($"{DateTime.Now} : Application DS simulator is starting");
         }
 
@@ -49,6 +50,8 @@ namespace Model.Simulator
             DicUI = new Dictionary<Flow, TabPage>();
             MSGInfo("*.ds 를 드랍하면 시작됩니다");
             //this.Text = UtilFile.GetVersion();
+
+
         }
         void Form1_DragEnter(object sender, DragEventArgs e)
         {
@@ -81,7 +84,7 @@ namespace Model.Simulator
                 DicUI.Clear();
 
                 _dsText = File.ReadAllText(path);
-                await Task.Run(() => { ExportTextModel(Color.Black, _dsText); });
+                await Task.Run(() => { ExportTextModel( _dsText); });
 
                 ProcessEvent.DoWork(0);
 
@@ -125,7 +128,7 @@ namespace Model.Simulator
 
 
                 RefreshText();
-                ExportTextModel(Color.Transparent, _dsText, true);
+                ExportTextModel(_dsText, true);
 
                 if (_dsText == "")
                 {
@@ -137,7 +140,8 @@ namespace Model.Simulator
                     xtraTabControl_My.TabPages.Clear();
                     DicUI.Clear();
 
-                    //_Model = new EngineBuilder(_dsText, ParserOptions.Create4Simulation()).Engine;
+                    var helper = ModelParser.ParseFromString2(_dsText, ParserOptions.Create4Simulation());
+                    _Model = helper.Model;
 
                     _Model.Systems.ForEach(f =>
                     {
@@ -166,41 +170,8 @@ namespace Model.Simulator
 
                 _dsText += (replaceName + "\n");
             });
+            _dsText = _dsText.TrimEnd('\n');
             richTextBox_ds.Text = _dsText;
-        }
-
-        private void button_TestORG_Click(object sender, EventArgs e)
-        {
-            if (_Model == null) return;
-
-
-        }
-        private void button_TestStart_Click(object sender, EventArgs e)
-        {
-
-            if (_Model == null) return;
-
-        }
-        private void button_Run_Click(object sender, EventArgs e)
-        {
-            if (_Model == null) return;
-            try
-            {
-                button_Run.Enabled = false;
-                button_Stop.Enabled = true;
-
-            }
-
-            catch (Exception ex)
-            {
-                WriteDebugMsg(DateTime.Now, MSGLevel.Error, ex.Message);
-            }
-        }
-        private void button_Stop_Click(object sender, EventArgs e)
-        {
-            button_Run.Enabled = true;
-            button_Stop.Enabled = false;
-
         }
 
         private void button_HideLine_Click(object sender, EventArgs e)
@@ -208,5 +179,6 @@ namespace Model.Simulator
             RefreshText();
 
         }
+
     }
 }

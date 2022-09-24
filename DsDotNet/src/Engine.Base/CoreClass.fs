@@ -9,12 +9,23 @@ open System
 
 [<AutoOpen>]
 module CoreClass =
+   
 
-    /// Real segment 
+   /// Real Segment
+    [<AbstractClass>]
+    type SegBase(name:string, childFlow:IFlow) =
+        inherit Flow(name)
+       
+        interface IActive with
+            member _.Children  =  childFlow.Nodes
+
+        member x.Children = (x :> IActive).Children
+
     [<DebuggerDisplay("{ToText()}")>]
     type SegmentBase(name:string, childFlow:ChildFlow)  =
         inherit SegBase(name,  childFlow)
         let mutable status4 = Status4.Homing
+        interface IVertex 
             
         override x.ToText() = childFlow.QualifiedName
         member x.Name = name
@@ -36,14 +47,10 @@ module CoreClass =
                     rootFlow.AddChildVertex(seg)
                     seg
 
-
-
-
     //parser 전용 추후  상속받을 예정??
     type ExSegment(name:string, segmentBase:SegmentBase)  =
         member x.Name = name
         member x.SegmentBase = segmentBase
-
 
     /// Call segment 
     [<DebuggerDisplay("{ToText()}")>]
@@ -51,9 +58,16 @@ module CoreClass =
         inherit CallBase(name)
         let mutable status4 = Status4.Homing
 
-        override x.ToText() = name
             
         member x.Name = name
         member x.RootFlow = rootFlow
         member val Status4 = status4 with get, set
+
+
+    [<DebuggerDisplay("{ToText()}")>]
+    /// CallPrototype
+    type CallPrototype(name:string, rootFlow:RootFlow) =
+        inherit CallBase(name)
+        //do rootFlow.CallPrototypes.Add(this)
+        member val Xywh:Xywh = Xywh(0,0,Some(0),Some(0)) with get,set
 

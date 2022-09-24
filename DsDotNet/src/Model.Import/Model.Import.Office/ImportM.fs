@@ -258,7 +258,7 @@ module ImportM =
                 |> Seq.iter(fun node -> 
                             if(node.Alias.IsSome)
                             then 
-                                mySys.LocationSet.TryAdd((dicSeg.[node.Key].Alias.Value:?>MSeg).FullName, node.Rectangle) |> ignore
+                                mySys.LocationSet.TryAdd((dicSeg.[node.Key].Alias.Value).FullName, node.Rectangle) |> ignore
                             else
                                 mySys.LocationSet.TryAdd(dicSeg.[node.Key].FullName, node.Rectangle) |> ignore
                                 )

@@ -10,7 +10,7 @@ module CoreFlow =
 
     /// Flow Edge
     [<AbstractClass>]
-    type Flow(name) =
+    type Flow(name) as this =
         inherit Named(name)
         //엣지연결 리스트
         let edges = HashSet<IEdge>() 
@@ -19,13 +19,13 @@ module CoreFlow =
         let singleNodes = HashSet<IVertex>() 
         let srcs = edges.GetStartCaual() |> Seq.map(fun edge -> edge.Source) |> Seq.distinct    
         let tgts = edges.GetStartCaual() |> Seq.map(fun edge -> edge.Target) |> Seq.distinct
-
+    
         interface IFlow with
             member _.Edges = edges
             member _.Nodes = edges.GetNodes() |> Seq.append singleNodes 
 
-        member x.Nodes = (x :> IFlow).Nodes
-        member x.Edges = (x :> IFlow).Edges
+        member x.Nodes = (this :> IFlow).Nodes
+        member x.Edges = (this :> IFlow).Edges
         member x.AddEdge(edge) = edges.Add(edge)
         member x.RemoveEdge(edge) = edges.Remove(edge)
 
@@ -44,11 +44,15 @@ module CoreFlow =
         ///Flow Edge 연결상 끝점
         member x.TailNodes = (tgts |> Seq.except srcs) |> Seq.append singleNodes
 
+        //parser 전용 추후  상속받을 예정??
+        member val InstanceMap       = Dictionary<string, obj>();
+
+
     [<DebuggerDisplay("{name}")>]
     type RootFlow(name, system:SysBase)  =
         inherit Flow(name)
 
-
+        new (cpu:ICpu, name, system) = RootFlow(name, system)
         override x.ToText() = x.QualifiedName
         member x.System = system;
         member x.QualifiedName = $"{system.Name}.{name}";
@@ -59,34 +63,21 @@ module CoreFlow =
                                     |> Seq.append x.Nodes
         
         //parser 전용 추후  상속받을 예정??
-        member val InstanceMap  = Dictionary<string, obj>();
-        member val AliasNameMaps  = Dictionary<string, string[]>();
-        member val BackwardAliasMaps  = Dictionary<string[], string[]>();
-        member val CallPrototypes  = List<CallPrototype>();
+        member val AliasNameMaps     = Dictionary<string, string[]>();
+        member val BackwardAliasMaps = Dictionary<string[], string[]>();
+        member val CallPrototypes    = List<CallBase>();
         
         member x.AddChildVertex(v) = x.AddSingleNode(v) |>ignore
         member x.NameComponents = [|system.Name;name|]
-        member x.RootSegments = x.Nodes |> Seq.cast<SegBase>
+        member x.RootSegments = x.Nodes 
 
-
-            //public IEnumerable<SegmentBase> RootSegments => ChildVertices.OfType<SegmentBase>();
-
-    //public List<CallPrototype> CallPrototypes = new();
-
-    /// CallPrototype
     and
         Xywh(x, y, w, h) =
             member val X = x;
             member val Y = y;
             member val W : int option  = w;
             member val H : int option  = h;
-    and 
-        [<DebuggerDisplay("{ToText()}")>]
-        CallPrototype(name:string, rootFlow:RootFlow) as this =
-            inherit CallBase(name)
-            do rootFlow.CallPrototypes.Add(this)
-            override x.ToText() = name
-            member val Xywh:Xywh = Xywh(0,0,Some(0),Some(0)) with get,set
+   
                 
 
     [<DebuggerDisplay("{name}")>]

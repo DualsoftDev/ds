@@ -86,7 +86,7 @@ class ModelListener : dsBaseListener
                 {
                     var cp = _rootFlow.CallPrototypes.FirstOrDefault(cp => cp.Name == last);
                     if (cp != null)
-                        createInstanceFromCallPrototype(cp, last, instanceMap);
+                        createInstanceFromCallPrototype((CallPrototype)cp, last, instanceMap);
                     else if (_parenting == null)
                         Assert(_rootFlow.InstanceMap.ContainsKey(last));
                     else

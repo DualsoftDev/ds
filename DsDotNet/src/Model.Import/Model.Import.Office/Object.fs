@@ -109,6 +109,9 @@ module Object =
             member x.IsChildExist = mChildFlow.Nodes.Any()
             member x.IsChildEmpty = x.IsChildExist|>not
             member x.IsRoot =  x.Parent.IsSome && x.Parent.Value.Bound = ThisFlow
+            member val Alias : MSeg option = None  with get, set
+            member x.IsAlias = x.Alias.IsSome
+
             member x.UIKey:string =  
                                 let name = if(x.IsAlias) then x.Alias.Value.Name else x.Name
                                 $"{name};{x.Key}"

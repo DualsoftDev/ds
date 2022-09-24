@@ -17,18 +17,6 @@ module InterfaceClass =
         member val Name : string = name with get, set
         member x.ValidName = NameUtil.GetValidName(name)
         abstract ToText : unit -> string
-  
-    /// 인과 연결가능 객체
-    [<AbstractClass>]
-    type VertexBase(name)  =
-        inherit Named(name)
-        interface IVertex  
-        //사용 아직 안함(필요시 오픈)
-        //    member _.ID  = Guid.NewGuid().ToString()
-        //member x.ID  = (x:>IVertex).ID
-
-        member val Alias : VertexBase option = None  with get, set
-        member x.IsAlias = x.Alias.IsSome
      
     /// Segment Edge
     [<AbstractClass>]
@@ -52,23 +40,14 @@ module InterfaceClass =
             member _.Flows = rootFlows
 
         member x.RootFlows = (x:>ISystem).Flows
-       
-    /// Real Segment
-    [<AbstractClass>]
-    type SegBase(name:string, childFlow:IFlow) =
-        inherit VertexBase(name)
-        interface IActive with
-            member _.Children  =  childFlow.Nodes
-
-        member x.Children = (x :> IActive).Children
-
+  
     /// Call Segment
-    and
-        [<AbstractClass>]
-        CallBase(name:string) as this =
-        inherit VertexBase(name)
+    [<AbstractClass>]
+    type CallBase(name:string) as this =
         let txs = List<IVertex>() 
         let rxs = List<IVertex>() 
+
+        interface IVertex  
         interface ICall with
             member _.Node = this :> IVertex
             member _.TXs  = txs
@@ -76,4 +55,7 @@ module InterfaceClass =
 
         member val TXs = txs with get,set
         member val RXs = rxs with get,set
-  
+
+        member val Alias : IVertex option = None  with get, set
+        member x.IsAlias = x.Alias.IsSome
+        member x.Name = name

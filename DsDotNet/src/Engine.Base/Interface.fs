@@ -14,7 +14,7 @@ module Interface =
          abstract Name:string with get,set
     /// 고유값 Guid.NewGuid().ToString()
     type IUniqueId = abstract ID:string 
-
+   
     /// 정의(1/4) 남쪽: DS 기본유닛은 Bit인 단일 자원이다.
     type IVertex =
         inherit IBit
@@ -27,13 +27,12 @@ module Interface =
         abstract Causal  :EdgeCausal
         abstract ToText  :unit -> string
 
-
     /// 정의(3/4) 동쪽: DS 모델은 능동행위가 수동행위를 포함한다.
     type IActive =
         abstract Children:IVertex seq
+
     /// 정의(4/4) 북쪽: DS 모델은 고유 흐름을 갖는다.
     type IFlow   =
-        inherit INamed
         abstract Edges:IEdge seq
         abstract Nodes:IVertex seq
 

@@ -21,16 +21,6 @@ module ModelTest_Common =
     }
 }
 """
-    let cpus = """
-[cpus] AllCpus = {
-    [cpu] Cpu = {
-        L.F;
-    }
-    [cpu] FakeCpu = {
-        P.F;
-    }
-}
-"""
 
 
     let seqEq(a, b) = Enumerable.SequenceEqual(a, b) |> ShouldBeTrue

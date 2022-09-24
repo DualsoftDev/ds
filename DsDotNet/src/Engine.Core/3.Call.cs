@@ -115,11 +115,14 @@ public class RootCall : Call, IParserObject
     public void AddRxTags(IEnumerable<Tag> tags) => AddTags(_rxTags, tags);
     public void AddTxTags(IEnumerable<Tag> tags) => AddTags(_txTags, tags);
 
+    public RootFlow RootFlow { get; }
+    public override string[] NameComponents => RootFlow.NameComponents.Append(Name).ToArray();
     public IEnumerable<IParserObject> SpitParserObjects() { yield return this; }
 
     public RootCall(string name, RootFlow flow, CallPrototype protoType)
         : base(name, flow, protoType)
     {
+        RootFlow = flow;
         // root flow 에서만 child vertices 에 추가.   (child flow 에서는 Child 로 wrapping 해서 추가됨.)
         flow.AddChildVertex(this);
     }

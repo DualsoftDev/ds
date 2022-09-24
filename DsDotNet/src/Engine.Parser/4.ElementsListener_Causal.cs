@@ -179,35 +179,29 @@ partial class ElementsListener
 
 
 
-    IVertex[] FindVertices(SegmentBase parenting, NodeBase nodebase)
+    IVertex[] FindVertices(NodeBase nodebase)
     {
-        IVertex helper(string[] spec, string label)
+        IVertex helper(string[] spec)
         {
-            if (parenting != null && parenting.InstanceMap.ContainsKey(spec.Combine()))
-                return parenting.InstanceMap[spec.Combine()] as IVertex;
+            var objs = _model.SpitParserObjects().Where(obj => obj.NameComponents.IsEqual(spec)).ToArray();
+            if (objs.Length > 1)
+                objs = objs.Where(obj => obj is not CallPrototype).ToArray();
+            if (objs.Length == 1)
+                return objs[0] as IVertex;
 
-            //var flow = _system.Find<Flow>(nodebase.parentIds); //  RootFlows.First(rf => rf.Name == nodebase.parentIds.Combine());
-            var flow = _system.Find(nodebase.parentIds); //  RootFlows.First(rf => rf.Name == nodebase.parentIds.Combine());
-            if (flow == null)
-                Console.WriteLine();
-            var obj = ((Flow)flow).Find(label);
-            if (obj == null)
-                obj = _model.Find(spec);
-
-            return obj as IVertex;
+            throw new Exception("ERROR: Not implemented");      // 무엇을 정해야 하는지??
         }
 
         switch (nodebase)
         {
             case Node node:
-                return new[] { helper(node.ids, node.label) };
+                return new[] { helper(node.ids) };
 
             case NodeConjunction nodeConjunction:
                 return
                     (   from n in Enumerable.Range(0, nodeConjunction.idss.Length-1)
                         let ids = nodeConjunction.idss[n]
-                        let label = nodeConjunction.labels[n]
-                        select helper(ids, label)
+                        select helper(ids)
                     ).ToArray()
                     ;
         }
@@ -248,8 +242,8 @@ partial class ElementsListener
                     Flow flow = (Flow)_parenting ?? _rootFlow;   // target flow
                     Assert(flow.Cpu != null);
 
-                    var lvs = FindVertices(_parenting, l);
-                    var rvs = FindVertices(_parenting, r);
+                    var lvs = FindVertices(l);
+                    var rvs = FindVertices(r);
                     Assert(lvs.All(l => l is not CallPrototype));
                     Assert(rvs.All(l => l is not CallPrototype));
 

@@ -30,14 +30,12 @@ module ModelTest2 =
     }
 }
 """
-            text <- text + sysP + cpus
+            text <- text + sysP
 
             let builder = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu"))
             ( builder.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
             let system = builder.Model.Systems |> Seq.find(fun s -> s.Name = "L")
             let cpu = builder.Cpu
-            cpu.Name === "Cpu"
-
             cpu.BuildBitDependencies()
 
             cpu.ForwardDependancyMap.Keys |> Seq.map(fun k -> k.Cpu) |> Seq.forall( (=) cpu) |> ShouldBeTrue
@@ -81,7 +79,7 @@ module ModelTest2 =
     }
 }
 """
-            text <- text + sysP + cpus
+            text <- text + sysP
 
             let builder = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu"))
             ( builder.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
@@ -89,8 +87,6 @@ module ModelTest2 =
 
 
             let cpu = builder.Cpu
-            cpu.Name === "Cpu"
-
             cpu.BuildBitDependencies()
 
             cpu.ForwardDependancyMap.Keys |> Seq.map(fun k -> k.Cpu) |> Seq.forall( (=) cpu) |> ShouldBeTrue
@@ -294,7 +290,7 @@ module ModelTest2 =
     }
 }
 """
-            text <- text + sysP + cpus
+            text <- text + sysP
 
             let builder = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu"))
             let model = builder.Model
@@ -371,7 +367,7 @@ module ModelTest2 =
     }
 }
 """
-            text <- text + sysP + cpus
+            text <- text + sysP
 
             let builder = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu"))
             let model = builder.Model

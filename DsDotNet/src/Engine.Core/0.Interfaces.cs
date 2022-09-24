@@ -50,4 +50,5 @@ public interface IEngine { }
 public interface IParserObject
 {
     IEnumerable<IParserObject> SpitParserObjects();
+    string[] NameComponents { get; }
 }

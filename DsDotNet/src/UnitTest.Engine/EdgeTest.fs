@@ -37,8 +37,6 @@ module EdgeTest =
     }
 }
 """
-            text <- text + (*sysP +*) cpus
-
             let builder = new EngineBuilder(text)
             let model = builder.Model
             let activeCpuName = "Cpu"

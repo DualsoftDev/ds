@@ -12,7 +12,7 @@ public abstract partial class SegmentBase : ChildFlow, IVertex, ICoin, IWallet, 
     //public override Cpu Cpu { get => ContainerFlow.Cpu; set { } }
     Cpu IBit.Cpu { get => ContainerFlow.Cpu; set => Assert(value == ContainerFlow.Cpu); }
 
-    public string[] NameComponents =>
+    public override string[] NameComponents =>
         (ContainerFlow == null)
         ? new[] { Name }
         : ContainerFlow.NameComponents.Append(Name).ToArray()
@@ -78,6 +78,7 @@ public abstract partial class SegmentBase : ChildFlow, IVertex, ICoin, IWallet, 
     internal SegmentBase(RootFlow flow, string name, string startTagName = null, string resetTagName = null, string endTagName = null)
         : base(flow, name)
     {
+        ContainerFlow = flow;
     }
 
 

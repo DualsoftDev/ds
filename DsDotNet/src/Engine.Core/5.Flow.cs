@@ -50,7 +50,9 @@ public abstract class Flow : Named, IWallet, IParserObject
     }
 
     public Dictionary<string, IParserObject> InstanceMap = new();
-    public IEnumerable<IParserObject> SpitParserObjects()
+
+    public abstract string[] NameComponents { get; }
+    public virtual IEnumerable<IParserObject> SpitParserObjects()
     {
         yield return this;
         foreach (var x in InstanceMap.Values.OfType<IParserObject>().SelectMany(cp => cp.SpitParserObjects()))
@@ -66,7 +68,7 @@ public class RootFlow : Flow, IParserObject
     public DsSystem System { get; set; }
     public List<CallPrototype> CallPrototypes = new();
 
-    public string[] NameComponents => new[] { System.Name, Name };
+    public override string[] NameComponents => new[] { System.Name, Name };
     public string QualifiedName => NameComponents.Combine();
     public RootFlow(string name, DsSystem system)
         : base(system.Cpu, name)
@@ -90,7 +92,7 @@ public class RootFlow : Flow, IParserObject
     /// <summary>target -> mnemonics : "My.F.Ap" -> ["Ap1"; "Ap2"] </summary>
     public Dictionary<string[], string[]> BackwardAliasMaps = new(NameComponentsComparer.Instance);
 
-    public IEnumerable<IParserObject> SpitParserObjects()
+    public override IEnumerable<IParserObject> SpitParserObjects()
     {
         yield return this;
         foreach (var x in CallPrototypes.SelectMany(cp => cp.SpitParserObjects()))
@@ -102,9 +104,9 @@ public class RootFlow : Flow, IParserObject
     }
 }
 
-public class ChildFlow : Flow
+public abstract class ChildFlow : Flow
 {
-    public ChildFlow(RootFlow rootFlow, string name)
+    protected ChildFlow(RootFlow rootFlow, string name)
         : base(rootFlow.Cpu, name)
     {
     }
@@ -112,9 +114,15 @@ public class ChildFlow : Flow
     public IEnumerable<Child> Children => ChildVertices.OfType<Child>();
 }
 
+
+public static class ArrayContentsComparer
+{
+    /// <summary> array 내용 비교 </summary>
+    public static bool IsEqual(this string[] x, string[] y) => x.Length == y.Length && x.SequenceEqual(y);
+}
 public class NameComponentsComparer : IEqualityComparer<string[]>
 {
-    public bool Equals(string[] x, string[] y) => x.Length == y.Length && x.SequenceEqual(y);
+    public bool Equals(string[] x, string[] y) => x.IsEqual(y);
 
     public int GetHashCode(string[] obj) => (int)obj.Average(ob => ob.GetHashCode());
     public static NameComponentsComparer Instance { get; } = new NameComponentsComparer();

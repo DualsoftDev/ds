@@ -17,12 +17,10 @@ public class DsSystem : Named, IParserObject
     {
         Cpu = new Cpu(name, this);
         Model = model;
-        if (model.Systems.Any(sys => sys.Name == name))
-            throw new Exception($"Duplicated system name [{name}].");
-
         model.Systems.Add(this);
     }
 
+    public string[] NameComponents => new[] {Name};
     public IEnumerable<IParserObject> SpitParserObjects()
     {
         yield return this;

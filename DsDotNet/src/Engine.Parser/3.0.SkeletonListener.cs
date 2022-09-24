@@ -29,6 +29,9 @@ class SkeletonListener : dsBaseListener
     override public void EnterSystem(SystemContext ctx)
     {
         var name = ctx.identifier1().GetText().DeQuoteOnDemand();
+        if (_model.Systems.Any(sys => sys.Name == name))
+            throw new Exception($"Duplicated system name [{name}].");
+
         _system = new DsSystem(name, _model);
         Trace.WriteLine($"System: {name}");
     }
@@ -38,9 +41,8 @@ class SkeletonListener : dsBaseListener
     override public void EnterFlow(FlowContext ctx)
     {
         var flowName = ctx.identifier1().GetText().DeQuoteOnDemand();
-        var flowOf = ctx.flowProp().identifier1();
-
-        var flowFqdn = $"{ParserHelper.CurrentPath}.{flowName}";
+        if (_system.RootFlows.Any(rf => rf.Name == flowName))
+            throw new Exception($"Duplicated flow definition [{flowName}] in system {_system.Name}.");
 
         _rootFlow = new RootFlow(flowName, _system);
     }

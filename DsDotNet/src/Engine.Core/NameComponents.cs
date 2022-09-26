@@ -72,90 +72,97 @@ public static class ParserExtension
     }
     public static string[] Divide(this string qualifiedName) => qualifiedName.Split(new[] { '.' }).ToArray();
 
+    public static IEnumerable<IParserObject> FindAll(this IParserObject from, string[] nameComponents) =>
+        from.SpitParserObjects().Where(obj => obj.NameComponents.IsEqual(nameComponents));
+
+    public static IParserObject FindFirst(this IParserObject from, string[] nameComponents) =>
+        from.FindAll(nameComponents).FirstOrDefault();
+
+    public static T FindFirst<T>(this IParserObject from, string[] nameComponents) =>
+        (T)from.FindAll(nameComponents).FirstOrDefault(x => typeof(T).IsAssignableFrom(x.GetType()));
+
+    //public static DsSystem FindSystem(this Model model, string[] nameComponents) =>
+    //    model.Systems.FirstOrDefault(sys => sys.Name == nameComponents[0]);
+    //public static RootFlow FindFlow(this Model model, string[] nameComponents)
+    //{
+    //    var system = model.FindSystem(nameComponents);
+    //    var flow = system?.RootFlows.FirstOrDefault(rf => rf.Name == nameComponents[1]);
+    //    return flow;
+    //}
+
+    //public static SegmentBase FindParenting(this Model model, string[] nameComponents)
+    //{
+    //    Assert(nameComponents.Length >= 3);
+    //    var flow = model.FindFlow(nameComponents);
+    //    var seg = flow?.InstanceMap[nameComponents[2]] as SegmentBase;
+    //    return seg;
+    //}
+
+    //public static IEnumerable<object> FindAll(this Model model, string[] fqdn)
+    //{
+    //    var n = fqdn.Length;
+    //    Assert(n >= 2);
+    //    if (n == 4)
+    //    {
+    //        var parenting = model.FindParenting(fqdn);
+    //        if (parenting == null)
+    //            yield break;
+
+    //        if (parenting.InstanceMap.ContainsKey(fqdn[3]))
+    //            yield return parenting.InstanceMap[fqdn[3]];
+
+    //        var aliasMap = parenting.ContainerFlow.AliasNameMaps;
+    //        var aliasKey = fqdn[3];
+    //        if (aliasMap.ContainsKey(aliasKey))
+    //            foreach (var alias in model.FindAll(aliasMap[aliasKey]))
+    //                yield return alias;
+    //        yield break;
+    //    }
+
+    //    var flow = model.FindFlow(fqdn);
+    //    if (flow != null)
+    //    {
+    //        if (fqdn.Length == 2)
+    //            yield return flow;
+    //        else
+    //            foreach(var x in flow.FindAll(fqdn[2]))
+    //                yield return x;
+    //    }
+    //}
+    //public static object Find(this Model model, string[] fqdn) => FindAll(model, fqdn).FirstOrDefault();
 
 
-    public static DsSystem FindSystem(this Model model, string[] nameComponents) =>
-        model.Systems.FirstOrDefault(sys => sys.Name == nameComponents[0]);
-    public static RootFlow FindFlow(this Model model, string[] nameComponents)
-    {
-        var system = model.FindSystem(nameComponents);
-        var flow = system?.RootFlows.FirstOrDefault(rf => rf.Name == nameComponents[1]);
-        return flow;
-    }
+    //public static IEnumerable<object> FindAll(this DsSystem system, string[] fqdn)
+    //{
+    //    var n = fqdn;
+    //    if (fqdn[0] != system.Name)
+    //        n = fqdn.Prepend(system.Name).ToArray();
+    //    return system.Model.FindAll(n);
+    //}
 
-    public static SegmentBase FindParenting(this Model model, string[] nameComponents)
-    {
-        Assert(nameComponents.Length >= 3);
-        var flow = model.FindFlow(nameComponents);
-        var seg = flow?.InstanceMap[nameComponents[2]] as SegmentBase;
-        return seg;
-    }
+    //public static IEnumerable<object> FindAll(this Flow flow, string name)
+    //{
+    //    if (flow.InstanceMap.ContainsKey(name))
+    //        yield return flow.InstanceMap[name];
 
-    public static IEnumerable<object> FindAll(this Model model, string[] fqdn)
-    {
-        var n = fqdn.Length;
-        Assert(n >= 2);
-        if (n == 4)
-        {
-            var parenting = model.FindParenting(fqdn);
-            if (parenting == null)
-                yield break;
+    //    if (flow is RootFlow rootFlow)
+    //    {
+    //        var cp = rootFlow.CallPrototypes.FirstOrDefault(cp => cp.Name == name);
+    //        if (cp != null)
+    //            yield return cp;
+    //    }
+    //}
 
-            if (parenting.InstanceMap.ContainsKey(fqdn[3]))
-                yield return parenting.InstanceMap[fqdn[3]];
+    //public static object Find(this Flow flow, string name) => FindAll(flow, name).FirstOrDefault();
+    //public static T Find<T>(this Flow flow, string name) where T : class =>
+    //    (T)flow.FindAll(name).FirstOrDefault(x => x.GetType() == typeof(T));
 
-            var aliasMap = parenting.ContainerFlow.AliasNameMaps;
-            var aliasKey = fqdn[3];
-            if (aliasMap.ContainsKey(aliasKey))
-                foreach (var alias in model.FindAll(aliasMap[aliasKey]))
-                    yield return alias;
-            yield break;
-        }
+    //public static object Find(this DsSystem system, string[] fqdn) => FindAll(system, fqdn).FirstOrDefault();
+    //public static T Find<T>(this DsSystem system, string[] fqdn) where T : class =>
+    //    (T)system.FindAll(fqdn).FirstOrDefault(x => x.GetType() == typeof(T));
 
-        var flow = model.FindFlow(fqdn);
-        if (flow != null)
-        {
-            if (fqdn.Length == 2)
-                yield return flow;
-            else
-                foreach(var x in flow.FindAll(fqdn[2]))
-                    yield return x;
-        }
-    }
-    public static object Find(this Model model, string[] fqdn) => FindAll(model, fqdn).FirstOrDefault();
-
-
-    public static IEnumerable<object> FindAll(this DsSystem system, string[] fqdn)
-    {
-        var n = fqdn;
-        if (fqdn[0] != system.Name)
-            n = fqdn.Prepend(system.Name).ToArray();
-        return system.Model.FindAll(n);
-    }
-
-    public static IEnumerable<object> FindAll(this Flow flow, string name)
-    {
-        if (flow.InstanceMap.ContainsKey(name))
-            yield return flow.InstanceMap[name];
-
-        if (flow is RootFlow rootFlow)
-        {
-            var cp = rootFlow.CallPrototypes.FirstOrDefault(cp => cp.Name == name);
-            if (cp != null)
-                yield return cp;
-        }
-    }
-
-    public static object Find(this Flow flow, string name) => FindAll(flow, name).FirstOrDefault();
-    public static T Find<T>(this Flow flow, string name) where T : class =>
-        (T)flow.FindAll(name).FirstOrDefault(x => x.GetType() == typeof(T));
-
-    public static object Find(this DsSystem system, string[] fqdn) => FindAll(system, fqdn).FirstOrDefault();
-    public static T Find<T>(this DsSystem system, string[] fqdn) where T : class =>
-        (T)system.FindAll(fqdn).FirstOrDefault(x => x.GetType() == typeof(T));
-
-    public static T Find<T>(this Model model, string[] fqdn) where T : class =>
-        (T)model.FindAll(fqdn).FirstOrDefault(x => x.GetType() == typeof(T));
+    //public static T Find<T>(this Model model, string[] fqdn) where T : class =>
+    //    (T)model.FindAll(fqdn).FirstOrDefault(x => x.GetType() == typeof(T));
 }
 
 

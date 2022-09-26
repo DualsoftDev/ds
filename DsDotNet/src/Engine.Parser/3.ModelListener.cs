@@ -72,7 +72,7 @@ class ModelListener : dsBaseListener
                 if (_rootFlow.AliasNameMaps.ContainsKey(last))
                 {
                     var aliasTarget = _rootFlow.AliasNameMaps[last];
-                    var target = _model.Find(aliasTarget);
+                    var target = _model.FindFirst(aliasTarget);
 
                     switch (target)
                     {
@@ -98,13 +98,22 @@ class ModelListener : dsBaseListener
             case 2:
                 // A.B => my_system_other_flow.{call, real}
                 {
-                    var (flowName, lastName) = (ns[0], ns[1]);
-                    var flow = _system.RootFlows.FirstOrDefault(rf => rf.Name == flowName);
-                    var targets = flow.FindAll(ns[1]).ToArray();    // call def 과 call instance 둘다 존재할 수 있다.
-                    var target = 
-                        targets.Length > 1
-                        ? flow.Find<CallPrototype>(ns[1])   // 복수 존재시, call def 를 우선
-                        : targets.FirstOrDefault();
+                    var targets = _model.FindAll(ParserHelper.CurrentPathNameComponents.Concat(ns).ToArray());
+                    var target = targets.FirstOrDefault();
+                    if (targets.Count() > 1)    // 복수 존재시, call def 를 우선
+                    {
+                        target = targets.OfType<CallPrototype>().FirstOrDefault();
+                        if (target == null)
+                            throw new Exception("ERROR");
+                    }
+
+                    //var (flowName, lastName) = (ns[0], ns[1]);
+                    //var flow = _system.RootFlows.FirstOrDefault(rf => rf.Name == flowName);
+                    //var targets = flow.FindAll(ns[1]).ToArray();    // call def 과 call instance 둘다 존재할 수 있다.
+                    //var target = 
+                    //    targets.Length > 1
+                    //    ? flow.Find<CallPrototype>(ns[1])   
+                    //    : targets.FirstOrDefault();
                     switch (target)
                     {
                         case null:

@@ -53,9 +53,8 @@ namespace Engine.Parser
             if (_parenting != null)
                 return;
 
-            var callns = collectNameComponents(ctx);
-            var callName = callns.Combine();
-            var cp = _rootFlow.Find<CallPrototype>(callName);
+            var callName = collectNameComponents(ctx)[0];
+            var cp = _rootFlow.FindFirst<CallPrototype>(ParserHelper.GetCurrentPathComponents(callName));
             if (cp == null)
             {
                 // Real listing : 3.0.SkeletonListener 에서 이미 만들어져 있어야 한다.
@@ -77,7 +76,7 @@ namespace Engine.Parser
 
             var ns = collectNameComponents(ctx);
             var name2 = ns.Combine();
-            var target = _system.Find(ns);
+            var target = _system.FindFirst(ns);
             switch(target)
             {
                 case CallPrototype cp:

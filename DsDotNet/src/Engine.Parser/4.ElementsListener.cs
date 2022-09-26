@@ -138,8 +138,7 @@ partial class ElementsListener : dsBaseListener
             {
                 // global prop safety
                 case PropertyBlockContext:
-                    var flow = _model.FindFlow(segPath);
-                    return (SegmentBase)flow.InstanceMap[segPath[2]];
+                    return _model.FindFirst<SegmentBase>(segPath);
 
                 // in flow safety
                 case FlowContext:
@@ -153,7 +152,7 @@ partial class ElementsListener : dsBaseListener
         foreach (var (key, values) in safetyKvs)
         {
             var keySegment = getKey(key);
-            keySegment.SafetyConditions = values.Select(safety => (SegmentBase)_model.Find(safety)).ToArray();
+            keySegment.SafetyConditions = values.Select(safety => _model.FindFirst<SegmentBase>(safety)).ToArray();
         }
     }
 
@@ -173,7 +172,7 @@ partial class ElementsListener : dsBaseListener
                 return Array.Empty<SegmentBase>();
 
             var nss = enumerateChildren<Identifier123Context>(txrxCtx).Select(collectNameComponents).ToArray();
-            return nss.Select(ns => (SegmentBase)_model.Find(ns)).ToArray();
+            return nss.Select(ns => _model.FindFirst<SegmentBase>(ns)).ToArray();
         }
 
         var txs = findSegments(callph.callComponents(0));
@@ -247,7 +246,7 @@ partial class ElementsListener : dsBaseListener
         foreach (var posiDef in positionDefs)
         {
             var callPath = collectNameComponents(posiDef.callPath());
-            var cp = _model.Find<CallPrototype>(callPath);
+            var cp = _model.FindFirst<CallPrototype>(callPath);
             var xywh = posiDef.xywh();
             var (x, y, w, h) = (xywh.x().GetText(), xywh.y().GetText(), xywh.w()?.GetText(), xywh.h()?.GetText());
             cp.Xywh = new Xywh(int.Parse(x), int.Parse(y), w == null ? null : int.Parse(w), h == null ? null : int.Parse(h));
@@ -267,7 +266,7 @@ partial class ElementsListener : dsBaseListener
         foreach (var addrDef in addressDefs)
         {
             var segNs = collectNameComponents(addrDef.segmentPath());
-            var seg = (SegmentBase)_model.Find(segNs);
+            var seg = _model.FindFirst<SegmentBase>(segNs);
             var sre = addrDef.address();
             var (s, r, e) = (sre.startTag()?.GetText(), sre.resetTag()?.GetText(), sre.endTag()?.GetText());
             seg.Addresses = Tuple.Create(s, r, e);

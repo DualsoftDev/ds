@@ -12,52 +12,53 @@ module InterfaceClass =
     type Named(name) =
         let mutable name = name
         interface INamed with
-            member _.Name with get () = name and set (v) = name <- v
+            member _.Name with get () = name //and set (v) = name <- v
 
         member val Name : string = name with get, set
         member x.ValidName = NameUtil.GetValidName(name)
         abstract ToText : unit -> string
+        default x.ToText() = name
      
-    /// Segment Edge
-    [<AbstractClass>]
-    type EdgeBase(source:IVertex, target:IVertex , edgeCausal:EdgeCausal) =
-        interface IEdge with
-            member _.ToText() = $"{source} {edgeCausal.ToText()} {target}";
-            member _.Source   = source
-            member _.Target   = target
-            member _.Causal   = edgeCausal
+//    /// Segment Edge
+//    [<AbstractClass>]
+//    type EdgeBase(source:IVertex, target:IVertex , edgeCausal:EdgeCausal) =
+//        interface IEdge with
+//            member _.ToText() = $"{source} {edgeCausal.ToText()} {target}";
+//            member _.Source   = source
+//            member _.Target   = target
+//            member _.Causal   = edgeCausal
 
-        member x.Nodes = [source;target]
-        member x.ToText() = (x:>IEdge).ToText()
+//        member x.Nodes = [source;target]
+//        member x.ToText() = (x:>IEdge).ToText()
 
 
-    /// Segment Container
-    [<AbstractClass>]
-    type SysBase(name)  =
-        inherit Named(name)
-        let rootFlows = HashSet<IFlow>() 
-        interface ISystem with
-            member _.Flows = rootFlows
+//    /// Segment Container
+//    [<AbstractClass>]
+//    type SysBase(name)  =
+//        inherit Named(name)
+//        let rootFlows = HashSet<IFlow>() 
+//        interface ISystem with
+//            member _.Flows = rootFlows
 
-        member x.RootFlows = (x:>ISystem).Flows
-        abstract AddFlow : IFlow -> bool
+//        member x.RootFlows = (x:>ISystem).Flows
+//        abstract AddFlow : IFlow -> bool
         
-    /// Call Segment
-    [<AbstractClass>]
-    type CallBase(name:string) as this =
-        inherit Named(name)
-        let txs = List<IVertex>() 
-        let rxs = List<IVertex>() 
+//    /// Call Segment
+//    [<AbstractClass>]
+//    type CallBase(name:string) as this =
+//        inherit Named(name)
+//        let txs = List<IVertex>() 
+//        let rxs = List<IVertex>() 
 
-        interface IVertex  
-        interface ICall with
-            member _.Node = this :> IVertex
-            member _.TXs  = txs
-            member _.RXs  = rxs
+//        interface IVertex  
+//        interface ICall with
+//            member _.Node = this :> IVertex
+//            member _.TXs  = txs
+//            member _.RXs  = rxs
 
-        member val TXs = txs with get,set
-        member val RXs = rxs with get,set
+//        member val TXs = txs with get,set
+//        member val RXs = rxs with get,set
 
-        member val Alias : IVertex option = None  with get, set
-        member x.IsAlias = x.Alias.IsSome
-        member x.Name = name
+//        member val Alias : IVertex option = None  with get, set
+//        member x.IsAlias = x.Alias.IsSome
+//        member x.Name = name

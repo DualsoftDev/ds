@@ -10,8 +10,17 @@ module Interface =
     /// Dualsoft object 공리 : 시스템 모든것은 비트다
     type IBit  = interface end
     /// 이름
+    [<AllowNullLiteral>]
     type INamed  =
-         abstract Name:string with get,set
+         abstract Name:string with get  //,set
+    type IRenameable =
+        inherit INamed
+        abstract Name:string with set
+    type IQualifiedNamed =
+        abstract QualifiedName:string with get  //,set
+        //default x.QualifiedName = x.NameComponents.Combine()
+        abstract NameComponents:string[] with get
+
     /// 고유값 Guid.NewGuid().ToString()
     type IUniqueId = abstract ID:string 
    
@@ -20,34 +29,35 @@ module Interface =
         inherit IBit
      //   inherit IUniqueId
    
-    /// 정의(2/4) 서쪽: DS 모델은 원인(들)/결과의 관계를 갖는다.
-    type IEdge = 
-        abstract Source  :IVertex 
-        abstract Target  :IVertex
-        abstract Causal  :EdgeCausal
-        abstract ToText  :unit -> string
+    ///// 정의(2/4) 서쪽: DS 모델은 원인(들)/결과의 관계를 갖는다.
+    //type IEdge = 
+    //    abstract Source  :IVertex 
+    //    abstract Target  :IVertex
+    //    abstract Causal  :EdgeCausal
+    //    abstract ToText  :unit -> string
 
     /// 정의(3/4) 동쪽: DS 모델은 능동행위가 수동행위를 포함한다.
     type IActive =
         abstract Children:IVertex seq
 
-    /// 정의(4/4) 북쪽: DS 모델은 고유 흐름을 갖는다.
-    type IFlow   =
-        abstract Edges:IEdge seq
-        abstract Nodes:IVertex seq
+    ///// 정의(4/4) 북쪽: DS 모델은 고유 흐름을 갖는다.
+    //type IFlow   =
+    //    abstract Edges:IEdge seq
+    //    abstract Nodes:IVertex seq
 
 
-    type IEdges = 
-        abstract Sources  :IVertex seq
-        abstract Target  :IVertex
+    //type IEdges = 
+    //    abstract Sources  :IVertex seq
+    //    abstract Target  :IVertex
 
-    type ICall = 
-        abstract Node :IVertex  
-        abstract TXs  :IVertex seq 
-        abstract RXs  :IVertex seq
+    //type ICall = 
+    //    abstract Node :IVertex  
+    //    abstract TXs  :IVertex seq 
+    //    abstract RXs  :IVertex seq
     
-    type ISystem    = 
-        abstract Flows:IFlow seq
+    //type ISystem    = 
+    //    abstract Flows:IFlow seq
 
+    [<AllowNullLiteral>]
     type ICpu       = interface end
         

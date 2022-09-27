@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
+		<OutputType>Exe</OutputType>
 		<!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
 		<TargetFramework>net48</TargetFramework>
 		<RootNamespace>Engine.Base</RootNamespace>
@@ -22,7 +23,11 @@
 		<Compile Include="CoreEdge.fs" />
 		<Compile Include="CoreStruct.fs" />
 		<Compile Include="CoreGraph.fs" />
+		<Compile Include="Prolog.fs" />
+		<Compile Include="Graph.fs" />
+		<Compile Include="Core.fs" />
 		<Compile Include="TempParser.fs" />
+		<Compile Include="Program.fs" />
 	</ItemGroup>
 	
 

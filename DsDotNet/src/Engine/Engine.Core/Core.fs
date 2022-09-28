@@ -2,6 +2,7 @@
 namespace Engine.Core
 
 open System.Collections.Generic
+open System.Linq
 
 [<AutoOpen>]
 module CoreModule =
@@ -16,6 +17,14 @@ module CoreModule =
 
     let private createQualifiedNamedHashSet<'T when 'T:> IQualifiedNamed>() =
         new HashSet<'T>(Seq.empty<'T>, qualifiedNameComparer<'T>())        
+
+    type NameComponents = string[]
+    let private nameComponentsComparer() = {
+        new IEqualityComparer<NameComponents> with
+            member _.Equals(x:NameComponents, y:NameComponents) = Enumerable.SequenceEqual(x, y)
+            member _.GetHashCode(x:NameComponents) = x.Average(fun s -> s.GetHashCode()) |> int
+    }
+
 
     type Model() =
         member val Systems = createNamedHashSet<DsSystem>()
@@ -42,6 +51,8 @@ module CoreModule =
     and Flow private(name:string, system:DsSystem) =
         inherit Graph<IFlowVertex, InFlowEdge>()
         member val CallPrototypes = createNamedHashSet<CallPrototype>()
+        /// alias.target = [| mnemonic1; ... ; mnemonicn; |]
+        member val AliasMap = Dictionary<NameComponents, HashSet<string>>(nameComponentsComparer())
 
         interface INamed with
             member val Name = name  // with get, set

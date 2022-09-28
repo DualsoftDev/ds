@@ -1,0 +1,44 @@
+[sys ip = 192.168.0.1] My = {
+    [flow] F = {
+        Main = {
+            // diamond
+            Ap1 > Am1 > Bm1;
+            Ap1 > Bp1 > Bm1;
+
+            // diamond 2nd
+            Bm1 >
+            Ap2 > Am2 > Bm2;
+            Ap2 > Bp2 > Bm2;
+
+            Bm2 > A."+";
+        }
+        R1 > Main2 > C."+";
+
+        [alias] = {
+            A."+" = { Ap1; Ap2; }
+            A."-" = { Am1; Am2; }
+            B."+" = { Bp1; Bp2; }
+            B."-" = { Bm1; Bm2; }
+            My.F.Main = { Main2 }
+        }
+    }
+}
+[sys] A = {
+    [flow] F = {
+        Vp > Pp > Sp;
+        Vm > Pm > Sm;
+
+        Vp |> Pm |> Sp;
+        Vm |> Pp |> Sm;
+        Vp <||> Vm;
+    }
+    [interface] = {
+        "+" = { F.Vp ~ F.Sp }
+        "-" = { F.Vm ~ F.Sm }
+        // 정보로서의 상호 리셋
+        "+" <||> "-";
+    }
+}
+[sys] B = @copy_system("A")
+[sys] C = @copy_system("A")
+

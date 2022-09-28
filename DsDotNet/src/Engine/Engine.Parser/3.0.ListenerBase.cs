@@ -1,0 +1,49 @@
+using Engine.Common;
+
+namespace Engine.Parser;
+
+
+/// <summary>
+/// System, Flow, Task, Cpu
+/// Parenting(껍데기만),
+/// Segment Listing(root flow toplevel 만),
+/// CallPrototype, Aliasing 구조까지 생성
+/// </summary>
+class ListenerBase : dsBaseListener
+{
+    public ParserHelper ParserHelper;
+    protected Model _model => ParserHelper.Model;
+    protected DsSystem _system { get => ParserHelper._system; set => ParserHelper._system = value; }
+    protected Flow _rootFlow { get => ParserHelper._rootFlow; set => ParserHelper._rootFlow = value; }
+    protected Segment _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
+
+    public ListenerBase(dsParser parser, ParserHelper helper)
+    {
+        ParserHelper = helper;
+        parser.Reset();
+    }
+
+
+    override public void EnterSystem(SystemContext ctx)
+    {
+        var name = ctx.identifier1().GetText().DeQuoteOnDemand();
+        _system = _model.Systems.First(s => s.Name == name);
+    }
+    override public void ExitSystem(SystemContext ctx) { this._system = null; }
+
+    override public void EnterFlow(FlowContext ctx)
+    {
+        var flowName = ctx.identifier1().GetText().DeQuoteOnDemand();
+        _rootFlow = _system.Flows.First(f => f.Name == flowName);
+    }
+    override public void ExitFlow(FlowContext ctx) { _rootFlow = null; }
+
+
+
+    override public void EnterParenting(ParentingContext ctx)
+    {
+        var name = ctx.identifier1().GetText().DeQuoteOnDemand();
+        _parenting = (Segment)_rootFlow.Vertices.FindWithName(name);
+    }
+    override public void ExitParenting(ParentingContext ctx) { _parenting = null; }
+}

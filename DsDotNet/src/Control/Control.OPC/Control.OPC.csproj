@@ -10,7 +10,6 @@
     <PackageReference Include="FSharp.Core" Version="6.0.6" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Engine\Engine.Base\Engine.Base.Obsolete.csproj" />
     <ProjectReference Include="..\..\Engine\Engine.Common.FS\Engine.Common.FS.fsproj" />
     <ProjectReference Include="..\..\Engine\Engine.Common\Engine.Common.csproj" />
     <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />

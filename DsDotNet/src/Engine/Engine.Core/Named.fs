@@ -47,7 +47,7 @@ type NameUtil =
     [<Extension>] static member IsValidIdentifier (identifier:string) = isValidIdentifier identifier
     [<Extension>] static member IsQuotationRequired (identifier:string) = isValidIdentifier(identifier) |> not
     [<Extension>] static member QuoteOnDemand (identifier:string) = quoteOnDemand identifier                       
-    [<Extension>] static member DequoteOnDemand (identifier:string) = deQuoteOnDemand identifier                       
+    [<Extension>] static member DeQuoteOnDemand (identifier:string) = deQuoteOnDemand identifier                       
     [<Extension>] static member Combine (nameComponents:string seq) = nameComponents |> Seq.map quoteOnDemand |> String.concat "."
 
     [<Extension>]

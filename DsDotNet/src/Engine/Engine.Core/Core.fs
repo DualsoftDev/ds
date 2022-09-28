@@ -24,13 +24,27 @@ module CoreModule =
             member _.GetHashCode(x:NameComponents) = x.Average(fun s -> s.GetHashCode()) |> int
     }
 
+    type FqdnObject(name:string, parent:IQualifiedNamed) =
+        inherit Named(name)
+        interface IQualifiedNamed with
+            member val NameComponents = [| yield! parent.NameComponents; name |]
+            member x.QualifiedName = x.NameComponents.Combine()
+        member x.Name with get() = (x :> INamed).Name
+        member x.NameComponents = (x :> IQualifiedNamed).NameComponents
+        member x.QualifiedName = (x :> IQualifiedNamed).QualifiedName
+
 
     type Model() =
         member val Systems = createNamedHashSet<DsSystem>()
         //member x.Cpus = x.Systems.Select(fun sys -> sys.Cpu)
+        interface IQualifiedNamed with
+            member val Name = null //failwith "ERROR"
+            member val NameComponents = Array.empty<string>
+            member x.QualifiedName = null  //failwith "ERROR"
+
 
     and DsSystem private (name:string, cpu:ICpu, model:Model) =
-        inherit Named(name)
+        inherit FqdnObject(name, model)
 
         //new (name, model) = DsSystem(name, null, model)
         member val Flows = createNamedHashSet<Flow>()
@@ -50,77 +64,44 @@ module CoreModule =
             system
          
     and Flow private(name:string, system:DsSystem) =
-        inherit Graph<IFlowVertex, InFlowEdge>()
+        inherit FqdnObject(name, system)
         /// alias.target = [| mnemonic1; ... ; mnemonicn; |]
+        member val Graph = Graph<IFlowVertex, InFlowEdge>()
         member val AliasMap = Dictionary<NameComponents, HashSet<string>>(nameComponentsComparer())
-
-        interface INamed with
-            member val Name = name  // with get, set
-        interface IQualifiedNamed with
-            member val NameComponents = [|system.Name; name|]
-            member x.QualifiedName = x.NameComponents.Combine()
-        member x.Name with get() = (x :> INamed).Name
-        member x.NameComponents = (x :> IQualifiedNamed).NameComponents
-        member x.QualifiedName = (x :> IQualifiedNamed).QualifiedName
         static member Create(name:string, system:DsSystem) =
             let flow = Flow(name, system)
             system.Flows.Add(flow) |> verify $"Duplicated flow name [{name}]"
             flow
 
     and Segment private (name:string, flow:Flow) =
-        inherit Graph<IChildVertex, InSegmentEdge>()
+        inherit FqdnObject(name, flow)
         interface IFlowVertex
+        member val Graph = Graph<IChildVertex, InSegmentEdge>()
         member val Flow = flow
-
-        interface INamed with
-            member val Name = name  // with get, set
-        interface IQualifiedNamed with
-            member val NameComponents = [| yield! flow.NameComponents; name|]
-            member x.QualifiedName = x.NameComponents.Combine()
-        member x.Name with get() = (x :> INamed).Name
-        member x.NameComponents = (x :> IQualifiedNamed).NameComponents
-        member x.QualifiedName = (x :> IQualifiedNamed).QualifiedName
         static member Create(name, flow) =
             let segment = Segment(name, flow)
-            flow.AddVertex(segment) |> verify $"Duplicated segment name [{name}]"
+            flow.Graph.AddVertex(segment) |> verify $"Duplicated segment name [{name}]"
             segment
 
 
     and SegmentAlias private (name:string, segment:Segment) =
-        member _.ReferenceSegment = segment
-
+        inherit FqdnObject(name, segment.Flow)
         interface IFlowVertex
-
-        interface INamed with
-            member val Name = name  // with get, set
-        interface IQualifiedNamed with
-            member val NameComponents = [| yield! segment.Flow.NameComponents; name|]
-            member x.QualifiedName = x.NameComponents.Combine()
-        member x.Name with get() = (x :> INamed).Name
-        member x.NameComponents = (x :> IQualifiedNamed).NameComponents
-        member x.QualifiedName = (x :> IQualifiedNamed).QualifiedName
+        member _.ReferenceSegment = segment
         static member Create(name, segment) =
             let alias = SegmentAlias(name, segment)
-            segment.Flow.AddVertex(alias) |> verify $"Duplicated segment name [{name}]"
+            segment.Flow.Graph.AddVertex(alias) |> verify $"Duplicated segment name [{name}]"
             alias
 
     and Child private (name:string, callPrototype:InterfacePrototype, segment:Segment) =
-        inherit Named(name)
+        inherit FqdnObject(name, segment)
         interface IChildVertex
         member _.Segment = segment
         member _.CallPrototype = callPrototype
 
-        interface INamed with
-            member val Name = name  // with get, set
-        interface IQualifiedNamed with
-            member val NameComponents = [| yield! segment.Flow.NameComponents; name|]
-            member x.QualifiedName = x.NameComponents.Combine()
-        member x.Name with get() = (x :> INamed).Name
-        member x.NameComponents = (x :> IQualifiedNamed).NameComponents
-        member x.QualifiedName = (x :> IQualifiedNamed).QualifiedName
         static member Create(name, interfacePrototype:InterfacePrototype, segment) =
             let child = Child(name, interfacePrototype, segment)
-            segment.AddVertex(child) |> verify $"Duplicated child name [{name}]"
+            segment.Graph.AddVertex(child) |> verify $"Duplicated child name [{name}]"
             child
 
     //and ChildAlias private (name:string, child:Child) =
@@ -142,7 +123,7 @@ module CoreModule =
     //        alias
 
     and InterfacePrototype private (name:string, system:DsSystem) =
-        inherit Named(name)
+        inherit FqdnObject(name, system)
         
         member val TXs = createQualifiedNamedHashSet<Segment>()
         member val RXs = createQualifiedNamedHashSet<Segment>()

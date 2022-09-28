@@ -10,13 +10,15 @@ module Interface =
     /// Dualsoft object 공리 : 시스템 모든것은 비트다
     type IBit  = interface end
     /// 이름
-    [<AllowNullLiteral>]
     type INamed  =
          abstract Name:string with get  //,set
+
     type IRenameable =
         inherit INamed
         abstract Name:string with set
+
     type IQualifiedNamed =
+        inherit INamed
         abstract QualifiedName:string with get  //,set
         //default x.QualifiedName = x.NameComponents.Combine()
         abstract NameComponents:string[] with get

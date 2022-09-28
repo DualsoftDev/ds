@@ -24,8 +24,8 @@ module Exercise =
         let edgeExResetVpVm = InFlowEdge(segExVp, segExVm, EdgeType.Reset ||| EdgeType.Strong)
         let edgeExResetVmVp = InFlowEdge(segExVm, segExVp, EdgeType.Reset ||| EdgeType.Strong)
 
-        flowEx.AddEdges([edgeExVpPp; edgeExPpSp; edgeExVmPm; edgeExPmSm]) |> verify "Duplicated!"
-        flowEx.AddEdges([edgeExResetVpVm; edgeExResetVmVp]) |> verify "Duplicated!"
+        flowEx.Graph.AddEdges([edgeExVpPp; edgeExPpSp; edgeExVmPm; edgeExPmSm]) |> verify "Duplicated!"
+        flowEx.Graph.AddEdges([edgeExResetVpVm; edgeExResetVmVp]) |> verify "Duplicated!"
 
         let system = DsSystem.Create("my", cpu, model)
         let flow = Flow.Create("F", system)
@@ -41,7 +41,7 @@ module Exercise =
         let childCp = Child.Create("\"C+\"", cp, seg)
         let childCm = Child.Create("\"C-\"", cm, seg)
         let childEdgeCpCm = InSegmentEdge(childCp, childCm, EdgeType.Default)
-        seg.AddEdge(childEdgeCpCm) |> verify "Duplicated!"
+        seg.Graph.AddEdge(childEdgeCpCm) |> verify "Duplicated!"
 
         let key1 = [|"my"; "flow"; "seg1"|]
         let values1 = HashSet<string>([|"seg2"|]);

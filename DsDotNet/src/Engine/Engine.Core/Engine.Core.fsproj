@@ -9,21 +9,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Compile Include="Text\DsText.fs" />
-		<Compile Include="Text\DsTextUtil.fs" />
-		<Compile Include="Text\DsTextProperty.fs" />
-		<Compile Include="Text\DsTextDataType.fs" />
-		<Compile Include="Text\DsTextExport.fs" />
+		<Compile Include="Constants.fs" />
 		<Compile Include="DsType.fs" />
 		<Compile Include="Interface.fs" />
-		<Compile Include="InterfaceClass.fs" />
-		<Compile Include="CoreUtil.fs" />
-		<Compile Include="CoreFlow.fs" />
-		<Compile Include="CoreClass.fs" />
-		<Compile Include="CoreEdge.fs" />
-		<Compile Include="CoreStruct.fs" />
-		<Compile Include="CoreGraph.fs" />
 		<Compile Include="Prolog.fs" />
+		<Compile Include="Named.fs" />
 		<Compile Include="Graph.fs" />
 		<Compile Include="Core.fs" />
 		<Compile Include="TempParser.fs" />

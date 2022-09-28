@@ -1,7 +1,6 @@
 // from cytoscpaeVisitor.ts
 
 using Antlr4.Runtime.Misc;
-using Engine.Common;
 
 namespace Engine.Parser;
 
@@ -60,8 +59,8 @@ partial class ElementsListener : dsBaseListener
     public ParserHelper ParserHelper;
     Model    _model => ParserHelper.Model;
     DsSystem _system    { get => ParserHelper._system;    set => ParserHelper._system = value; }
-    RootFlow _rootFlow  { get => ParserHelper._rootFlow;  set => ParserHelper._rootFlow = value; }
-    SegmentBase  _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
+    Flow _rootFlow  { get => ParserHelper._rootFlow;  set => ParserHelper._rootFlow = value; }
+    Segment  _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
 
     public ElementsListener(dsParser parser, ParserHelper helper)
     {
@@ -82,7 +81,7 @@ partial class ElementsListener : dsBaseListener
     override public void EnterFlow(FlowContext ctx)
     {
         var flowName = ctx.identifier1().GetText().DeQuoteOnDemand();
-        _rootFlow = _system.RootFlows.First(f => f.Name == flowName);
+        _rootFlow = _system.Flows.First(f => f.Name == flowName);
 
         var flowOf = ctx.flowProp().identifier1();
         this.flowOfName = flowOf == null ? flowName : flowOf.GetText();
@@ -132,17 +131,17 @@ partial class ElementsListener : dsBaseListener
             select (key, values)
             ;
 
-        SegmentBase getKey(string[] segPath)
+        Segment getKey(string[] segPath)
         {
             switch(ctx.Parent)
             {
                 // global prop safety
                 case PropertyBlockContext:
-                    return _model.FindFirst<SegmentBase>(segPath);
+                    return _model.FindFirst<Segment>(segPath);
 
                 // in flow safety
                 case FlowContext:
-                    return (SegmentBase)_rootFlow.InstanceMap[segPath[0]];
+                    return (Segment)_rootFlow.InstanceMap[segPath[0]];
 
                 default:
                     throw new Exception("ERROR");
@@ -152,7 +151,7 @@ partial class ElementsListener : dsBaseListener
         foreach (var (key, values) in safetyKvs)
         {
             var keySegment = getKey(key);
-            keySegment.SafetyConditions = values.Select(safety => _model.FindFirst<SegmentBase>(safety)).ToArray();
+            keySegment.SafetyConditions = values.Select(safety => _model.FindFirst<Segment>(safety)).ToArray();
         }
     }
 
@@ -166,13 +165,13 @@ partial class ElementsListener : dsBaseListener
         var call = callPrototypes.First(c => c.Name == name);
 
         var callph = ctx.callPhrase();
-        SegmentBase[] findSegments(ParserRuleContext txrxCtx)
+        Segment[] findSegments(ParserRuleContext txrxCtx)
         {
             if (txrxCtx == null || txrxCtx.GetText() == "_")
-                return Array.Empty<SegmentBase>();
+                return Array.Empty<Segment>();
 
             var nss = enumerateChildren<Identifier123Context>(txrxCtx).Select(collectNameComponents).ToArray();
-            return nss.Select(ns => _model.FindFirst<SegmentBase>(ns)).ToArray();
+            return nss.Select(ns => _model.FindFirst<Segment>(ns)).ToArray();
         }
 
         var txs = findSegments(callph.callComponents(0));
@@ -187,10 +186,10 @@ partial class ElementsListener : dsBaseListener
 
         string concat(IEnumerable<string> xs) => string.Join(", ", xs);
 
-        var txDup = txs.Cast<SegmentBase>().Select(x => x.QualifiedName).FindDuplicates();
+        var txDup = txs.Cast<Segment>().Select(x => x.QualifiedName).FindDuplicates();
         if (txDup.Any())
             throw new Exception($"Duplicated TXs [{concat(txDup)}] near {ctx.GetText()}");
-        var rxDup = rxs.Cast<SegmentBase>().Select(x => x.QualifiedName).FindDuplicates();
+        var rxDup = rxs.Cast<Segment>().Select(x => x.QualifiedName).FindDuplicates();
         if (rxDup.Any())
             throw new Exception($"Duplicated RXs [{concat(rxDup)}] near {ctx.GetText()}");
 
@@ -204,7 +203,7 @@ partial class ElementsListener : dsBaseListener
     override public void EnterParenting(ParentingContext ctx)
     {
         var name = ctx.identifier1().GetText().DeQuoteOnDemand();
-        _parenting = (SegmentBase)_rootFlow.InstanceMap[name];
+        _parenting = (Segment)_rootFlow.InstanceMap[name];
     }
     override public void ExitParenting(ParentingContext ctx) { _parenting = null; }
 
@@ -266,7 +265,7 @@ partial class ElementsListener : dsBaseListener
         foreach (var addrDef in addressDefs)
         {
             var segNs = collectNameComponents(addrDef.segmentPath());
-            var seg = _model.FindFirst<SegmentBase>(segNs);
+            var seg = _model.FindFirst<Segment>(segNs);
             var sre = addrDef.address();
             var (s, r, e) = (sre.startTag()?.GetText(), sre.resetTag()?.GetText(), sre.endTag()?.GetText());
             seg.Addresses = Tuple.Create(s, r, e);

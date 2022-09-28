@@ -1,5 +1,3 @@
-using Engine.Common;
-
 namespace Engine.Parser;
 
 
@@ -14,8 +12,8 @@ class SkeletonListener : dsBaseListener
     public ParserHelper ParserHelper;
     Model _model => ParserHelper.Model;
     DsSystem _system { get => ParserHelper._system; set => ParserHelper._system = value; }
-    RootFlow _rootFlow { get => ParserHelper._rootFlow; set => ParserHelper._rootFlow = value; }
-    SegmentBase _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
+    Flow _rootFlow { get => ParserHelper._rootFlow; set => ParserHelper._rootFlow = value; }
+    Segment _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
 
     public SkeletonListener(dsParser parser, ParserHelper helper)
     {
@@ -29,10 +27,8 @@ class SkeletonListener : dsBaseListener
     override public void EnterSystem(SystemContext ctx)
     {
         var name = ctx.identifier1().GetText().DeQuoteOnDemand();
-        if (_model.Systems.Any(sys => sys.Name == name))
-            throw new Exception($"Duplicated system name [{name}].");
-
-        _system = new DsSystem(name, _model);
+        ICpu cpu = null;    // todo
+        _system = DsSystem.Create(name, cpu, _model);
         Trace.WriteLine($"System: {name}");
     }
     override public void ExitSystem(SystemContext ctx) { _system = null; }
@@ -41,10 +37,7 @@ class SkeletonListener : dsBaseListener
     override public void EnterFlow(FlowContext ctx)
     {
         var flowName = ctx.identifier1().GetText().DeQuoteOnDemand();
-        if (_system.RootFlows.Any(rf => rf.Name == flowName))
-            throw new Exception($"Duplicated flow definition [{flowName}] in system {_system.Name}.");
-
-        _rootFlow = new RootFlow(flowName, _system);
+        _rootFlow = Flow.Create(flowName, _system);
     }
     override public void ExitFlow(FlowContext ctx) { _rootFlow = null; }
 
@@ -77,7 +70,7 @@ class SkeletonListener : dsBaseListener
             return;
 
         var name = ctx.identifier1().GetText().DeQuoteOnDemand();
-        var seg = SegmentBase.Create(name, _rootFlow);
+        var seg = Segment.Create(name, _rootFlow);
         if (_rootFlow.CallPrototypes.Any(cp => cp.Name == name) || _rootFlow.InstanceMap.ContainsKey(name))
             throw new Exception($"Duplicated listing [{ParserHelper.CurrentPath}.{name}].");
 
@@ -89,7 +82,7 @@ class SkeletonListener : dsBaseListener
     {
         Trace.WriteLine($"Parenting: {ctx.GetText()}");
         var name = ctx.identifier1().GetText().DeQuoteOnDemand();
-        _parenting = SegmentBase.Create(name, _rootFlow);
+        _parenting = Segment.Create(name, _rootFlow);
 
         if (_rootFlow.InstanceMap.ContainsKey(name))
             throw new Exception($"Duplicated parenting name [{ParserHelper.CurrentPath}] on {_rootFlow.QualifiedName}.");
@@ -136,7 +129,7 @@ class SkeletonListener : dsBaseListener
 
         // 내부 없는 단순 root segment.  e.g "Vp"
         // @sa EnterListing()
-        var seg = SegmentBase.Create(last, _rootFlow);
+        var seg = Segment.Create(last, _rootFlow);
         _rootFlow.InstanceMap.Add(last, seg);
     }
 

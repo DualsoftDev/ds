@@ -1,4 +1,3 @@
-using Engine.Common;
 using Engine.Core;
 
 namespace Engine.Parser;
@@ -9,8 +8,8 @@ class ModelListener : dsBaseListener
     public ParserHelper ParserHelper;
     Model    _model => ParserHelper.Model;
     DsSystem _system    { get => ParserHelper._system;    set => ParserHelper._system = value; }
-    RootFlow _rootFlow  { get => ParserHelper._rootFlow;  set => ParserHelper._rootFlow = value; }
-    SegmentBase  _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
+    Flow _rootFlow  { get => ParserHelper._rootFlow;  set => ParserHelper._rootFlow = value; }
+    Segment  _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
 
     public ModelListener(dsParser parser, ParserHelper helper)
     {
@@ -28,7 +27,7 @@ class ModelListener : dsBaseListener
     override public void EnterFlow(FlowContext ctx)
     {
         var flowName = ctx.identifier1().GetText().DeQuoteOnDemand();
-        _rootFlow = _system.RootFlows.First(f => f.Name == flowName);
+        _rootFlow = _system.Flows.First(f => f.Name == flowName);
     }
     override public void ExitFlow(FlowContext ctx) { _rootFlow = null; }
 
@@ -37,7 +36,7 @@ class ModelListener : dsBaseListener
     override public void EnterParenting(ParentingContext ctx)
     {
         var name = ctx.identifier1().GetText().DeQuoteOnDemand();
-        _parenting = (SegmentBase)_rootFlow.InstanceMap[name];
+        _parenting = (Segment)_rootFlow.InstanceMap[name];
     }
     override public void ExitParenting(ParentingContext ctx) { _parenting = null; }
     #endregion Boiler-plates
@@ -108,7 +107,7 @@ class ModelListener : dsBaseListener
                     }
 
                     //var (flowName, lastName) = (ns[0], ns[1]);
-                    //var flow = _system.RootFlows.FirstOrDefault(rf => rf.Name == flowName);
+                    //var flow = _system.Flows.FirstOrDefault(rf => rf.Name == flowName);
                     //var targets = flow.FindAll(ns[1]).ToArray();    // call def 과 call instance 둘다 존재할 수 있다.
                     //var target = 
                     //    targets.Length > 1
@@ -119,7 +118,7 @@ class ModelListener : dsBaseListener
                         case null:
                             throw new ParserException($"ERROR : failed to find [{ns.Combine()}]", ctx);
 
-                        case SegmentBase exSeg: //when _parenting != null:
+                        case Segment exSeg: //when _parenting != null:
                             var exSegCall = new ExSegment(ns.Combine(), exSeg);
                             if (_parenting == null)
                                 instanceMap.Add(ns.Combine(), exSegCall);
@@ -181,7 +180,7 @@ class ModelListener : dsBaseListener
             var flows = (
                     from flowNameCtx in enumerateChildren<FlowNameContext>(bd)
                     let flowName = flowNameCtx.GetText()
-                    let flow = _system.RootFlows.First(rf => rf.Name == flowName)
+                    let flow = _system.Flows.First(rf => rf.Name == flowName)
                     select flow
                 ).ToArray();
 

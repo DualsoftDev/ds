@@ -47,7 +47,7 @@ partial class ElementsListener
                         1 => flowIds.Concat(ns).ToArray(),
                         2 => new Func<string[]>(() =>
                         {
-                            if (_system.RootFlows.Any(rf => rf.Name == ns[0]))  // Sys.Flow + OtherFlow.Seg => Sys.OtherFlow.Seg
+                            if (_system.Flows.Any(rf => rf.Name == ns[0]))  // Sys.Flow + OtherFlow.Seg => Sys.OtherFlow.Seg
                             {
                                 nodeType = NodeType.externalSegmentCall;
                                 return ns.Prepend(_system.Name).ToArray();

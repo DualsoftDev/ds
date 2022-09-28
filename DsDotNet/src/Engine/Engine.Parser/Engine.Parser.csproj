@@ -33,14 +33,12 @@
 		<PackageReference Include="Antlr4BuildTasks" Version="8.17" PrivateAssets="all" />
 	</ItemGroup>
 	<ItemGroup>
+		<ProjectReference Include="..\Engine.Common\Engine.Common.csproj" />
 		<ProjectReference Include="..\Engine.Core\Engine.Core.fsproj" />
 	</ItemGroup>
 	<ItemGroup>
 		<Reference Include="log4net">
-			<HintPath>..\..\exLib\log4net.dll</HintPath>
-		</Reference>
-		<Reference Include="System.Reactive">
-			<HintPath>..\..\exLib\System.Reactive.dll</HintPath>
+			<HintPath>..\..\..\exLib\log4net.dll</HintPath>
 		</Reference>
 	</ItemGroup>
 	<ItemGroup>

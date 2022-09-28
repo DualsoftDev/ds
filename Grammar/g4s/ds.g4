@@ -27,7 +27,7 @@ qstring: STRING_LITERAL EOF;
 
 system: '[' 'sys' (('ip'|'host') '=' host)? ']' identifier1 '=' sysBlock;    // [sys] Seg = {..}
     sysBlock
-        : LBRACE (flow|buttons)* RBRACE       // identifier1Listing|parenting|causal|call
+        : LBRACE (flow | interfaces | buttons)* RBRACE       // identifier1Listing|parenting|causal|call
         ;
     host: ipv4 | domainName;
     domainName: identifier1234;
@@ -84,21 +84,32 @@ propertyBlock: (safetyBlock);
 
 flow
     : flowProp identifier1 '=' LBRACE (
-        causal|parenting|callDef
-        |identifier12Listing
-        |safetyBlock|alias)* RBRACE     // |flowTask
+        causal | parenting | identifier12Listing
+        | alias
+        | safetyBlock)* RBRACE     // |flowTask|callDef
     ;
 flowProp : '[' 'flow' ('of' identifier1)? ']';
 
-alias
-    : aliasProp (identifier1)? '=' LBRACE (aliasListing)* RBRACE
-    ;
-aliasProp: '[' 'alias' ']';
-aliasListing:
-    aliasDef '=' LBRACE (aliasMnemonic)? ( ';' aliasMnemonic)* (';')+ RBRACE
-    ;
-aliasDef: identifier123;     //(identifier2|identifier3);
-aliasMnemonic: identifier1;
+interfaces
+    : interfaceProp (identifier1)? '=' LBRACE (interfaceListing)* RBRACE;
+    interfaceProp: '[' 'interfaces' ']';
+    interfaceListing: (interfaceDef (';')?) | interfaceResetDef;
+
+    // A23 = { M.U ~ S.S3U ~ _ }
+    interfaceDef: identifier1 EQ LBRACE serPhrase RBRACE;
+    serPhrase: callComponents TILDE callComponents (TILDE callComponents)?;
+        callComponents: identifier123DNF*;
+    //callDefs: (callDef SEIMCOLON)+ ;
+    interfaceResetDef: identifier1 causalOperatorReset identifier1 (';')?;
+
+
+alias: aliasProp (identifier1)? '=' LBRACE (aliasListing)* RBRACE;
+    aliasProp: '[' 'aliases' ']';
+    aliasListing:
+        aliasDef '=' LBRACE (aliasMnemonic)? ( ';' aliasMnemonic)* (';')+ RBRACE
+        ;
+    aliasDef: identifier12;     // {타시스템}.{interface명} or { (my system / flow /) segment 명}
+    aliasMnemonic: identifier1;
 
 
 identifier1Listing: identifier1 SEIMCOLON;     // A;
@@ -106,11 +117,6 @@ identifier2Listing: identifier2 SEIMCOLON;     // A;
 identifier12Listing: (identifier1Listing | identifier2Listing);
 parenting: identifier1 EQ LBRACE (causal|identifier12Listing)* RBRACE;
 
-// A23 = { M.U ~ S.S3U ~ _ }
-callDef: identifier1 EQ LBRACE callPhrase RBRACE;
-callPhrase: callComponents TILDE callComponents;    // (TILDE callComponents)?;
-    callComponents: identifier123DNF*;
-callDefs: (callDef SEIMCOLON)+ ;
 
 buttons:emergencyButtons|autoButtons|startButtons|resetButtons;
 emergencyButtons :'[' ('emg_in'|'emg') ']'     EQ buttonBlock;
@@ -162,19 +168,22 @@ causalToken
 causalOperator
     : '>>'  // CAUSAL_FWD_STRONG
     | '>'   // CAUSAL_FWD
-    | '||>'  // CAUSAL_RESET_FWD_STRONG
-    | '|>'  // CAUSAL_RESET_FWD
     | '>|>'  //CAUSAL_FWD_AND_RESET_FWD
     | '<<'   // CAUSAL_BWD_STRONG
     | '<'   // CAUSAL_BWD
-    | '<||'  // CAUSAL_RESET_BWD_STRONG
-    | '<|'  // CAUSAL_RESET_BWD
     | '<|<' // CAUSAL_BWD_AND_RESET_BWD
-    | '<<||>>'        // CAUSAL_RESET_FB_STRONG
-    | '<||>'        // CAUSAL_RESET_FB
     | '><|'         // CAUSAL_FWD_AND_RESET_BWD
     | '=>'          // CAUSAL_FWD_AND_RESET_BWD
     | '|><'         // CAUSAL_BWD_AND_RESET_FWD
+    | causalOperatorReset
+    ;
+causalOperatorReset
+    : '||>'  // CAUSAL_RESET_FWD_STRONG
+    | '|>'  // CAUSAL_RESET_FWD
+    | '<||'  // CAUSAL_RESET_BWD_STRONG
+    | '<|'  // CAUSAL_RESET_BWD
+    | '<<||>>'        // CAUSAL_RESET_FB_STRONG
+    | '<||>'        // CAUSAL_RESET_FB
     ;
 
 CAUSAL_FWD: GT; // '>'

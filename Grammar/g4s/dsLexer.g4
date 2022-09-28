@@ -51,6 +51,7 @@ fragment VALID_TAG_CHAR
 // // - 1 DOT: TaskName.SegmentName  : mysystem 을 가정하고 있음.  필요한가?
 // // - 2 DOT: System.TaskName.SegmentName
 identifier123: (identifier1 | identifier2 | identifier3);
+identifier12: (identifier1 | identifier2);
 
 flowPath: identifier2;
 

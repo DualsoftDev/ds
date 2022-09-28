@@ -12,14 +12,18 @@
 
             Bm2 > A."+";
         }
-        R1 > Main2 > C."+";
+        R1              // define my local terminal real segment
+            > Main2     // aliased to my real segment
+            > C."+"     // direct call interface wrapper segment
+            > Ap1       // aliased to interface
+            ;
 
-        [alias] = {
+        [aliases] = {
             A."+" = { Ap1; Ap2; }
             A."-" = { Am1; Am2; }
             B."+" = { Bp1; Bp2; }
             B."-" = { Bm1; Bm2; }
-            My.F.Main = { Main2 }
+            Main = { Main2; }
         }
     }
 }
@@ -32,7 +36,7 @@
         Vm |> Pp |> Sm;
         Vp <||> Vm;
     }
-    [interface] = {
+    [interfaces] = {
         "+" = { F.Vp ~ F.Sp }
         "-" = { F.Vm ~ F.Sm }
         // 정보로서의 상호 리셋

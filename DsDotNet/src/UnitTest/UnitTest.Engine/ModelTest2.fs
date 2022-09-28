@@ -117,10 +117,10 @@ module ModelTest2 =
             let mutable main2Cp:Child = null
             let mutable main1Cm:Child = null
             let mutable main2Cm:Child = null
-            let mutable main1CpProto:CallPrototype = null
-            let mutable main2CpProto:CallPrototype = null
-            let mutable main1CmProto:CallPrototype = null
-            let mutable main2CmProto:CallPrototype = null
+            let mutable main1CpProto:InterfacePrototype = null
+            let mutable main2CpProto:InterfacePrototype = null
+            let mutable main1CmProto:InterfacePrototype = null
+            let mutable main2CmProto:InterfacePrototype = null
 
             let ``check children`` =
                 let main1Children = main1.ChildVertices |> Enumerable.OfType<Child> |> Array.ofSeq

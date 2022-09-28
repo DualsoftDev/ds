@@ -33,7 +33,8 @@ module TextUtil =
     type Named(name) =
         let mutable name = name
         interface INamed with
-            member _.Name with get () = name //and set (v) = name <- v
+            //member _.Name with get () = name //and set (v) = name <- v
+            member x.Name with get () = x.Name
 
         member val Name : string = name with get, set
         abstract ToText : unit -> string

@@ -34,6 +34,8 @@ module CoreModule =
 
         //new (name, model) = DsSystem(name, null, model)
         member val Flows = createNamedHashSet<Flow>()
+        member val InterfacePrototypes = createNamedHashSet<InterfacePrototype>()
+
         member _.Model = model
         member _.Cpu = cpu
 
@@ -49,7 +51,6 @@ module CoreModule =
          
     and Flow private(name:string, system:DsSystem) =
         inherit Graph<IFlowVertex, InFlowEdge>()
-        member val CallPrototypes = createNamedHashSet<CallPrototype>()
         /// alias.target = [| mnemonic1; ... ; mnemonicn; |]
         member val AliasMap = Dictionary<NameComponents, HashSet<string>>(nameComponentsComparer())
 
@@ -103,7 +104,7 @@ module CoreModule =
             segment.Flow.AddVertex(alias) |> verify $"Duplicated segment name [{name}]"
             alias
 
-    and Child private (name:string, callPrototype:CallPrototype, segment:Segment) =
+    and Child private (name:string, callPrototype:InterfacePrototype, segment:Segment) =
         inherit Named(name)
         interface IChildVertex
         member _.Segment = segment
@@ -117,9 +118,8 @@ module CoreModule =
         member x.Name with get() = (x :> INamed).Name
         member x.NameComponents = (x :> IQualifiedNamed).NameComponents
         member x.QualifiedName = (x :> IQualifiedNamed).QualifiedName
-        static member Create(name, callPrototype:CallPrototype, segment) =
-            let child = Child(name, callPrototype, segment)
-            callPrototype.Users.Add(child) |> verify $"Duplicated call prototype usage on same child [{name}]"
+        static member Create(name, interfacePrototype:InterfacePrototype, segment) =
+            let child = Child(name, interfacePrototype, segment)
             segment.AddVertex(child) |> verify $"Duplicated child name [{name}]"
             child
 
@@ -141,7 +141,7 @@ module CoreModule =
     //        child.Segment.AddVertex(alias) |> verify $"Duplicated child name [{name}]"
     //        alias
 
-    and CallPrototype private (name:string, flow:Flow) =
+    and InterfacePrototype private (name:string, system:DsSystem) =
         inherit Named(name)
         
         member val TXs = createQualifiedNamedHashSet<Segment>()
@@ -150,12 +150,11 @@ module CoreModule =
         member x.AddTXs(txs:Segment seq) = txs |> Seq.forall(fun tx -> x.TXs.Add(tx))
         member x.AddRXs(rxs:Segment seq) = rxs |> Seq.forall(fun rx -> x.TXs.Add(rx))
         member x.AddResets(resets:Segment seq) = resets |> Seq.forall(fun r -> x.TXs.Add(r))
-        /// this CallPrototype 을 사용하는(user) Child 목록
-        member val Users:HashSet<Child> = HashSet<Child>()
+        member _.System = system
 
-        static member Create(name, flow) =
-            let cp = CallPrototype(name, flow)
-            flow.CallPrototypes.Add(cp) |> verify $"Duplicated call prototype name [{name}]"
+        static member Create(name, system) =
+            let cp = InterfacePrototype(name, system)
+            system.InterfacePrototypes.Add(cp) |> verify $"Duplicated interface prototype name [{name}]"
             cp
 
         //member val Xywh:Xywh = Xywh(0,0,Some(0),Some(0)) with get,set

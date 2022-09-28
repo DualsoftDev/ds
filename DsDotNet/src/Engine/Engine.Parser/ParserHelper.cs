@@ -1,5 +1,14 @@
 namespace Engine.Parser;
 
+using static Engine.Core.TextUtil;
+
+//using TagDic = System.Collections.Generic.Dictionary<string, Engine.Core.Tag>;
+//class AliasKey : Named
+//{
+//    public AliasKey(string name) : base(name)
+//    {
+//    }
+//}
 
 public class ParserHelper
 {

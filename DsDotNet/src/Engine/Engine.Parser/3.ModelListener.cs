@@ -1,4 +1,5 @@
 using Engine.Common;
+using Engine.Core;
 
 namespace Engine.Parser;
 
@@ -8,8 +9,8 @@ class ModelListener : dsBaseListener
     public ParserHelper ParserHelper;
     Model    _model => ParserHelper.Model;
     DsSystem _system    { get => ParserHelper._system;    set => ParserHelper._system = value; }
-    Flow _rootFlow  { get => ParserHelper._rootFlow;  set => ParserHelper._rootFlow = value; }
-    Segment _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
+    RootFlow _rootFlow  { get => ParserHelper._rootFlow;  set => ParserHelper._rootFlow = value; }
+    SegmentBase  _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
 
     public ModelListener(dsParser parser, ParserHelper helper)
     {
@@ -27,7 +28,7 @@ class ModelListener : dsBaseListener
     override public void EnterFlow(FlowContext ctx)
     {
         var flowName = ctx.identifier1().GetText().DeQuoteOnDemand();
-        _rootFlow = _system.Flows.First(f => f.Name == flowName);
+        _rootFlow = _system.RootFlows.First(f => f.Name == flowName);
     }
     override public void ExitFlow(FlowContext ctx) { _rootFlow = null; }
 
@@ -36,9 +37,8 @@ class ModelListener : dsBaseListener
     override public void EnterParenting(ParentingContext ctx)
     {
         var name = ctx.identifier1().GetText().DeQuoteOnDemand();
-        _parenting = (Segment)_rootFlow.Vertices.FindWithName(name);
+        _parenting = (SegmentBase)_rootFlow.InstanceMap[name];
     }
-
     override public void ExitParenting(ParentingContext ctx) { _parenting = null; }
     #endregion Boiler-plates
 
@@ -55,9 +55,9 @@ class ModelListener : dsBaseListener
         if (instanceMap.ContainsKey(fqdn))
             return;
 
-        void createInstanceFromCallPrototype(CallPrototype cp, string callName, Dictionary<string, object> instanceMap)
+        void createInstanceFromCallPrototype(CallPrototype cp, string callName, Dictionary<string, IParserObject> instanceMap)
         {
-            object instance =
+            IParserObject instance =
                 _parenting == null
                 ? new RootCall(callName, _rootFlow, cp)
                 : new Child(new SubCall(callName, _parenting, cp), _parenting)
@@ -72,7 +72,7 @@ class ModelListener : dsBaseListener
                 if (_rootFlow.AliasNameMaps.ContainsKey(last))
                 {
                     var aliasTarget = _rootFlow.AliasNameMaps[last];
-                    var target = _model.Find(aliasTarget);
+                    var target = _model.FindFirst(aliasTarget);
 
                     switch (target)
                     {
@@ -87,7 +87,7 @@ class ModelListener : dsBaseListener
                 {
                     var cp = _rootFlow.CallPrototypes.FirstOrDefault(cp => cp.Name == last);
                     if (cp != null)
-                        createInstanceFromCallPrototype((CallPrototype)cp, last, instanceMap);
+                        createInstanceFromCallPrototype(cp, last, instanceMap);
                     else if (_parenting == null)
                         Assert(_rootFlow.InstanceMap.ContainsKey(last));
                     else
@@ -96,21 +96,42 @@ class ModelListener : dsBaseListener
                 }
                 break;
             case 2:
-            case 3:
+                // A.B => my_system_other_flow.{call, real}
                 {
-                    if (ns.Length == 2)
-                        ns = ns.Prepend(_system.Name).ToArray();    // flow.seg => sys.flow.seg
+                    var targets = _model.FindAll(ParserHelper.CurrentPathNameComponents.Concat(ns).ToArray());
+                    var target = targets.FirstOrDefault();
+                    if (targets.Count() > 1)    // 복수 존재시, call def 를 우선
+                    {
+                        target = targets.OfType<CallPrototype>().FirstOrDefault();
+                        if (target == null)
+                            throw new Exception("ERROR");
+                    }
 
-                    var target = _model.Find(ns);
+                    //var (flowName, lastName) = (ns[0], ns[1]);
+                    //var flow = _system.RootFlows.FirstOrDefault(rf => rf.Name == flowName);
+                    //var targets = flow.FindAll(ns[1]).ToArray();    // call def 과 call instance 둘다 존재할 수 있다.
+                    //var target = 
+                    //    targets.Length > 1
+                    //    ? flow.Find<CallPrototype>(ns[1])   
+                    //    : targets.FirstOrDefault();
                     switch (target)
                     {
                         case null:
                             throw new ParserException($"ERROR : failed to find [{ns.Combine()}]", ctx);
 
-                        case SegmentBase exSeg when _parenting != null:
+                        case SegmentBase exSeg: //when _parenting != null:
                             var exSegCall = new ExSegment(ns.Combine(), exSeg);
-                            var child = new Child(exSegCall, _parenting);
-                            instanceMap.Add(ns.Combine(), child);
+                            if (_parenting == null)
+                                instanceMap.Add(ns.Combine(), exSegCall);
+                            else
+                            {
+                                var child = new Child(exSegCall, _parenting);
+                                instanceMap.Add(ns.Combine(), child);
+                            }
+                            break;
+
+                        case CallPrototype cp:
+                            createInstanceFromCallPrototype(cp, ns.Combine(), instanceMap);
                             break;
 
                         default:
@@ -173,7 +194,7 @@ class ModelListener : dsBaseListener
 
             if (targetDic.ContainsKey(buttonName))
                 throw new Exception($"Duplicated button name [{buttonName}] near {ctx.GetText()}");
-            targetDic.TryAdd(buttonName, flows.ToList());
+            targetDic.Add(buttonName, flows);
         }
     }
 

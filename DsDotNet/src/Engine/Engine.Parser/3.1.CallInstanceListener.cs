@@ -8,8 +8,8 @@ namespace Engine.Parser
         public ParserHelper ParserHelper;
         Model _model => ParserHelper.Model;
         DsSystem _system { get => ParserHelper._system; set => ParserHelper._system = value; }
-        Flow _rootFlow { get => ParserHelper._rootFlow; set => ParserHelper._rootFlow = value; }
-        Segment _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
+        RootFlow _rootFlow { get => ParserHelper._rootFlow; set => ParserHelper._rootFlow = value; }
+        SegmentBase _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
 
         public CallInstanceListener(dsParser parser, ParserHelper helper)
         {
@@ -27,7 +27,7 @@ namespace Engine.Parser
         override public void EnterFlow(FlowContext ctx)
         {
             var flowName = ctx.identifier1().GetText().DeQuoteOnDemand();
-            _rootFlow = _system.Flows.First(f => f.Name == flowName);
+            _rootFlow = _system.RootFlows.First(f => f.Name == flowName);
         }
         override public void ExitFlow(FlowContext ctx) { _rootFlow = null; }
 
@@ -36,7 +36,7 @@ namespace Engine.Parser
         override public void EnterParenting(ParentingContext ctx)
         {
             var name = ctx.identifier1().GetText().DeQuoteOnDemand();
-            _parenting = (Segment)_rootFlow.Vertices.FindWithName(name);
+            _parenting = (SegmentBase)_rootFlow.InstanceMap[name];
         }
         override public void ExitParenting(ParentingContext ctx) { _parenting = null; }
         #endregion Boiler-plates

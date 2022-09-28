@@ -60,8 +60,8 @@ partial class ElementsListener : dsBaseListener
     public ParserHelper ParserHelper;
     Model    _model => ParserHelper.Model;
     DsSystem _system    { get => ParserHelper._system;    set => ParserHelper._system = value; }
-    Flow _rootFlow  { get => ParserHelper._rootFlow;  set => ParserHelper._rootFlow = value; }
-    Segment _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
+    RootFlow _rootFlow  { get => ParserHelper._rootFlow;  set => ParserHelper._rootFlow = value; }
+    SegmentBase  _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
 
     public ElementsListener(dsParser parser, ParserHelper helper)
     {
@@ -82,7 +82,7 @@ partial class ElementsListener : dsBaseListener
     override public void EnterFlow(FlowContext ctx)
     {
         var flowName = ctx.identifier1().GetText().DeQuoteOnDemand();
-        _rootFlow = _system.Flows.First(f => f.Name == flowName);
+        _rootFlow = _system.RootFlows.First(f => f.Name == flowName);
 
         var flowOf = ctx.flowProp().identifier1();
         this.flowOfName = flowOf == null ? flowName : flowOf.GetText();

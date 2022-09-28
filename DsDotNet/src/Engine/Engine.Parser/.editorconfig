@@ -1,1 +1,16 @@
-../.editorconfig
+# https://www.lesstif.com/software-architect/editorconfig-maintain-consistent-coding-styles-129008089.html
+
+# top-most EditorConfig file
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+
+
+
+[*.fs]
+charset = utf-8
+end_of_line = lf
+
+

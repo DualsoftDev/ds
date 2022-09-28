@@ -41,7 +41,7 @@ module SpitModuleHelper =
             yield system, system.NameComponents
             for flow in system.Flows do
                 yield! spit(flow)
-            for itf in system.InterfacePrototypes do
+            for itf in system.Api.Items do
                 yield itf, itf.NameComponents
         |]
     and spitModel (model:Model) : SpitResult =

@@ -43,12 +43,13 @@ module CoreModule =
             member x.QualifiedName = null  //failwith "ERROR"
 
 
-    and DsSystem private (name:string, cpu:ICpu, model:Model) =
+    and DsSystem private (name:string, cpu:ICpu, model:Model) as this =
         inherit FqdnObject(name, model)
 
         //new (name, model) = DsSystem(name, null, model)
         member val Flows = createNamedHashSet<Flow>()
-        member val InterfacePrototypes = createNamedHashSet<InterfacePrototype>()
+        //member val Api = new Api(this)
+        member val Api:Api = null with get, set
 
         member _.Model = model
         member _.Cpu = cpu
@@ -93,13 +94,13 @@ module CoreModule =
             segment.Flow.Graph.AddVertex(alias) |> verify $"Duplicated segment name [{name}]"
             alias
 
-    and Child private (name:string, callPrototype:InterfacePrototype, segment:Segment) =
+    and Child private (name:string, callPrototype:ApiItem, segment:Segment) =
         inherit FqdnObject(name, segment)
         interface IChildVertex
         member _.Segment = segment
         member _.CallPrototype = callPrototype
 
-        static member Create(name, interfacePrototype:InterfacePrototype, segment) =
+        static member Create(name, interfacePrototype:ApiItem, segment) =
             let child = Child(name, interfacePrototype, segment)
             segment.Graph.AddVertex(child) |> verify $"Duplicated child name [{name}]"
             child
@@ -122,7 +123,14 @@ module CoreModule =
     //        child.Segment.AddVertex(alias) |> verify $"Duplicated child name [{name}]"
     //        alias
 
-    and InterfacePrototype private (name:string, system:DsSystem) =
+    and 
+        [<AllowNullLiteral>]
+        Api(system:DsSystem) =
+            member val Items = createNamedHashSet<ApiItem>()
+            member val ResetInfos = ResizeArray<ApiResetInfo>()
+            member _.System = system
+
+    and ApiItem private (name:string, system:DsSystem) =
         inherit FqdnObject(name, system)
         
         member val TXs = createQualifiedNamedHashSet<Segment>()
@@ -134,12 +142,21 @@ module CoreModule =
         member _.System = system
 
         static member Create(name, system) =
-            let cp = InterfacePrototype(name, system)
-            system.InterfacePrototypes.Add(cp) |> verify $"Duplicated interface prototype name [{name}]"
+            let cp = ApiItem(name, system)
+            system.Api.Items.Add(cp) |> verify $"Duplicated interface prototype name [{name}]"
             cp
 
         //member val Xywh:Xywh = Xywh(0,0,Some(0),Some(0)) with get,set
         //override x.ToText() = name
+
+    and ApiResetInfo private (system:DsSystem, operand1:string, operator:string, operand2:string) =
+        member val Operand1 = operand1
+        member val Operand2 = operand2
+        member val Operator = operator
+        static member Create(system, operand1:string, operator:string, operand2:string) =
+            let ri = ApiResetInfo(system, operand1, operator, operand2)
+            system.Api.ResetInfos.Add(ri) //|> verify $"Duplicated interface prototype name [{name}]"
+            ri
 
     and ButtonDic = Dictionary<string, ResizeArray<Flow>>
 

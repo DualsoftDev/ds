@@ -7,6 +7,8 @@ global using static System.Diagnostics.Debug;
 global using log4net;
 global using Antlr4.Runtime;
 global using Antlr4.Runtime.Tree;
+global using Antlr4.Runtime.Misc;
+global using Engine.Common;
 global using Engine.Core;
 
 global using static Engine.Parser.dsParser;

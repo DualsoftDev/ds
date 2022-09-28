@@ -30,11 +30,11 @@ module Exercise =
         let system = DsSystem.Create("my", cpu, model)
         let flow = Flow.Create("F", system)
         let seg = Segment.Create("R1", flow)
-        let cp = InterfacePrototype.Create("\"C+\"", system)
+        let cp = ApiItem.Create("\"C+\"", system)
         cp.TXs.Add(segExVp)  |> verify "Duplicated!"
         cp.RXs.Add(segExSp)  |> verify "Duplicated!"
 
-        let cm = InterfacePrototype.Create("\"C-\"", system)
+        let cm = ApiItem.Create("\"C-\"", system)
         cm.TXs.Add(segExVm)  |> verify "Duplicated!"
         cm.RXs.Add(segExSm)  |> verify "Duplicated!"
 

@@ -1,6 +1,4 @@
-using Antlr4.Runtime.Misc;
 
-using Engine.Common;
 
 namespace Engine.Parser;
 
@@ -53,16 +51,33 @@ class SkeletonListener : ListenerBase
         map.Add(alias, mnemonics);
     }
 
+
+    public override void EnterInterfaces([NotNull] InterfacesContext ctx)
+    {
+        _system.Api = new Api(_system);
+    }
+
+
     public override void EnterInterfaceDef([NotNull] InterfaceDefContext ctx)
     {
-        var hash = _system.InterfacePrototypes;
+        var hash = _system.Api.Items;
         var interrfaceNameCtx = findFirstChild<InterfaceNameContext>(ctx);
         var interfaceName = collectNameComponents(interrfaceNameCtx)[0];
         var serCtx = enumerateChildren<CallComponentsContext>(ctx);
 
         // 이번 stage 에서 일단 interface 이름만 이용해서 빈 interface 객체를 생성하고,
         // TXs, RXs, Resets 은 다음 listener stage 에서 채움..
-        var api = InterfacePrototype.Create(interfaceName, _system);
+        var api = ApiItem.Create(interfaceName, _system);
         hash.Add(api);
+    }
+
+    public override void EnterInterfaceResetDef([NotNull] InterfaceResetDefContext ctx)
+    {
+        var operands =
+            enumerateChildren<Identifier1Context>(ctx)
+            .Select(ctx => ctx.GetText())
+            .ToArray();
+        var operator_ = findFirstChild<CausalOperatorResetContext>(ctx).GetText();
+        var ri_ = ApiResetInfo.Create(_system, operands[0], operator_, operands[1]);
     }
 }

@@ -16,6 +16,7 @@
 		<Compile Include="Named.fs" />
 		<Compile Include="Graph.fs" />
 		<Compile Include="Core.fs" />
+		<Compile Include="Core.Util.fs" />
 		<Compile Include="Program.fs" />
 	</ItemGroup>
 	

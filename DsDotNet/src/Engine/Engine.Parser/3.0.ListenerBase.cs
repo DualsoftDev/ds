@@ -43,7 +43,7 @@ class ListenerBase : dsBaseListener
     override public void EnterParenting(ParentingContext ctx)
     {
         var name = ctx.identifier1().GetText().DeQuoteOnDemand();
-        _parenting = (Segment)_rootFlow.Vertices.FindWithName(name);
+        _parenting = (Segment)_rootFlow.Graph.Vertices.FindWithName(name);
     }
     override public void ExitParenting(ParentingContext ctx) { _parenting = null; }
 }

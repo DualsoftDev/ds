@@ -65,8 +65,8 @@ module CoreModule =
          
     and Flow private(name:string, system:DsSystem) =
         inherit FqdnObject(name, system)
-        /// alias.target = [| mnemonic1; ... ; mnemonicn; |]
         member val Graph = Graph<IFlowVertex, InFlowEdge>()
+        /// alias.target = [| mnemonic1; ... ; mnemonicn; |]
         member val AliasMap = Dictionary<NameComponents, HashSet<string>>(nameComponentsComparer())
         static member Create(name:string, system:DsSystem) =
             let flow = Flow(name, system)

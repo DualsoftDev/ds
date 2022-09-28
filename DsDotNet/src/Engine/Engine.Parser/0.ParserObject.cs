@@ -28,6 +28,18 @@ public record ParserOptions
     public bool Verify() => IsSimulationMode || (ActiveCpuName != null && !AllowSkipExternalSegment);
 }
 
+public enum GraphVertexType
+{
+    None = 0,
+    System = 1 << 0,
+    Flow = 1 << 1,
+    Segment = 1 << 2,       // not child
+    Parenting = 1 << 6,
+    Child = 1 << 10,        // not Segment
+    Call = 1 << 11,
+    Aliased = 1 << 12,      // not direct call
+}
+
 public static class ParserExtension
 {
     ///// <summary>

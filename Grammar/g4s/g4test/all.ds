@@ -1,21 +1,26 @@
 [sys ip = 192.168.0.1] My = {
-    [flow] F = {
-        Main = {
+    [flow] F = {        // GraphVertexType.Flow
+        Main        // GraphVertexType.{ Segment | Parenting }
+        > R3        // GraphVertexType.{ Segment }
+        ;
+        Main = {        // GraphVertexType.{ Segment | Parenting }
             // diamond
             Ap1 > Am1 > Bm1;
             Ap1 > Bp1 > Bm1;
 
             // diamond 2nd
-            Bm1 >
+            Bm1 >               // GraphVertexType.{ Child | Call | Aliased }
             Ap2 > Am2 > Bm2;
             Ap2 > Bp2 > Bm2;
 
-            Bm2 > A."+";
+            Bm2
+            > A."+"             // GraphVertexType.{ Child | Call }
+            ;
         }
-        R1              // define my local terminal real segment
-            > C."+"     // direct interface call wrapper segment
-            > Main2     // aliased to my real segment
-            > Ap1       // aliased to interface
+        R1              // define my local terminal real segment    // GraphVertexType.{ Segment }
+            > C."+"     // direct interface call wrapper segment    // GraphVertexType.{ Call }
+            > Main2     // aliased to my real segment               // GraphVertexType.{ Segment | Aliased }
+            > Ap1       // aliased to interface                     // GraphVertexType.{ Segment | Aliased | Call }
             ;
 
         [aliases] = {

@@ -90,6 +90,7 @@ public static class EmEnuerable
             action(x);
         return xxs;
     }
+    public static IEnumerable<T> Pipe<T>(this IEnumerable<T> xs, Action<T> action) => Do(xs, action);
 
     public static IEnumerable<T> FindDuplicates<T>(this IEnumerable<T> xs)
     {

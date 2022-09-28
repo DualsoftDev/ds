@@ -1,12 +1,13 @@
+using Antlr4.Runtime.Misc;
+
 using Engine.Common;
 
 namespace Engine.Parser;
 
 
 /// <summary>
-/// System, Flow,
-/// Parenting(껍데기만),
-/// Interface 구조까지 생성
+/// System, Flow, Parenting(껍데기만),
+/// Interface name map 구조까지 생성
 /// </summary>
 class SkeletonListener : ListenerBase
 {
@@ -34,5 +35,34 @@ class SkeletonListener : ListenerBase
         Trace.WriteLine($"Parenting: {ctx.GetText()}");
         var name = ctx.identifier1().GetText().DeQuoteOnDemand();
         _parenting = Segment.Create(name, _rootFlow);
+    }
+
+    public override void EnterAliasListing(AliasListingContext ctx)
+    {
+        var map = _rootFlow.AliasMap;
+
+        var aliasDef = findFirstChild<AliasDefContext>(ctx);
+        var alias = collectNameComponents(aliasDef);
+
+        var mnemonics =
+            enumerateChildren<AliasMnemonicContext>(ctx)
+                .Select(mctx => collectNameComponents(mctx))
+                .Pipe(mne => Assert(mne.Length == 1))
+                .Select(mne => mne[0])
+                .ToHashSet();
+        map.Add(alias, mnemonics);
+    }
+
+    public override void EnterInterfaceDef([NotNull] InterfaceDefContext ctx)
+    {
+        var hash = _system.InterfacePrototypes;
+        var interrfaceNameCtx = findFirstChild<InterfaceNameContext>(ctx);
+        var interfaceName = collectNameComponents(interrfaceNameCtx)[0];
+        var serCtx = enumerateChildren<CallComponentsContext>(ctx);
+
+        // 이번 stage 에서 일단 interface 이름만 이용해서 빈 interface 객체를 생성하고,
+        // TXs, RXs, Resets 은 다음 listener stage 에서 채움..
+        var api = InterfacePrototype.Create(interfaceName, _system);
+        hash.Add(api);
     }
 }

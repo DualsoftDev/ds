@@ -96,7 +96,8 @@ interfaces
     interfaceListing: (interfaceDef (';')?) | interfaceResetDef;
 
     // A23 = { M.U ~ S.S3U ~ _ }
-    interfaceDef: identifier1 EQ LBRACE serPhrase RBRACE;
+    interfaceDef: interfaceName EQ LBRACE serPhrase RBRACE;
+    interfaceName: identifier1;
     serPhrase: callComponents TILDE callComponents (TILDE callComponents)?;
         callComponents: identifier123DNF*;
     //callDefs: (callDef SEIMCOLON)+ ;

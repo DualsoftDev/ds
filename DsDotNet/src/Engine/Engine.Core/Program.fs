@@ -1,6 +1,6 @@
 // Learn more about F# at http://fsharp.org
 open Engine.Core
-open System
+open System.Linq
 open Engine.Core.CoreModule
 open System.Collections.Generic
 
@@ -43,7 +43,7 @@ module Exercise =
         let childEdgeCpCm = InSegmentEdge(childCp, childCm, EdgeType.Default)
         seg.Graph.AddEdge(childEdgeCpCm) |> verify "Duplicated!"
 
-        let key1 = [|"my"; "flow"; "seg1"|]
+        let key1 = [|"seg1"|]
         let values1 = HashSet<string>([|"seg2"|]);
         flow.AliasMap.Add(key1, values1)
         flow.AliasMap[key1].Add("seg3") |> verify "Duplicated!"
@@ -54,4 +54,5 @@ module Exercise =
 let main argv =
     printfn "Hello World from F#!"
     let model = Exercise.createSample()
+    let xs = model.Spit().ToArray()
     0 // return an integer exit code

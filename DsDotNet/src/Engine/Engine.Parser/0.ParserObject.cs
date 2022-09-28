@@ -72,18 +72,18 @@ public static class ParserExtension
     public static string[] Divide(this string qualifiedName) => qualifiedName.Split(new[] { '.' }).ToArray();
     public static DsSystem FindSystem(this Model model, string[] nameComponents) =>
         model.Systems.FirstOrDefault(sys => sys.Name == nameComponents[0]);
-    public static RootFlow FindFlow(this Model model, string[] nameComponents)
+    public static Flow FindFlow(this Model model, string[] nameComponents)
     {
         var system = model.FindSystem(nameComponents);
-        var flow = system?.RootFlows.FirstOrDefault(rf => rf.Name == nameComponents[1]);
+        var flow = system?.Flows.FirstOrDefault(rf => rf.Name == nameComponents[1]);
         return flow;
     }
 
-    public static SegmentBase FindParenting(this Model model, string[] nameComponents)
+    public static Segment FindParenting(this Model model, string[] nameComponents)
     {
         Assert(nameComponents.Length >= 3);
         var flow = model.FindFlow(nameComponents);
-        var seg = flow?.InstanceMap[nameComponents[2]] as SegmentBase;
+        var seg = flow?.Vertices[nameComponents[2]] as Segment;
         return seg;
     }
 

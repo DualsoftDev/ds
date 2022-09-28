@@ -18,7 +18,6 @@ module CoreModule =
     let private createQualifiedNamedHashSet<'T when 'T:> IQualifiedNamed>() =
         new HashSet<'T>(Seq.empty<'T>, qualifiedNameComparer<'T>())        
 
-    type NameComponents = string[]
     let private nameComponentsComparer() = {
         new IEqualityComparer<NameComponents> with
             member _.Equals(x:NameComponents, y:NameComponents) = Enumerable.SequenceEqual(x, y)

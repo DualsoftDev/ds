@@ -12,8 +12,8 @@ class SkeletonListener : dsBaseListener
     public ParserHelper ParserHelper;
     Model _model => ParserHelper.Model;
     DsSystem _system { get => ParserHelper._system; set => ParserHelper._system = value; }
-    RootFlow _rootFlow { get => ParserHelper._rootFlow; set => ParserHelper._rootFlow = value; }
-    SegmentBase _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
+    Flow _rootFlow { get => ParserHelper._rootFlow; set => ParserHelper._rootFlow = value; }
+    Segment _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
 
     public SkeletonListener(dsParser parser, ParserHelper helper)
     {
@@ -100,9 +100,9 @@ class SkeletonListener : dsBaseListener
 
 
     /// <summary>CallPrototype </summary>
-    override public void EnterCall(CallContext ctx)
+    override public void EnterCallDef(CallDefContext ctx)
     {
-        var name = ctx.id().GetText().DeQuoteOnDemand();
+        var name = ctx.identifier1().GetText().DeQuoteOnDemand();
         var label = $"{name}\n{ctx.callPhrase().GetText()}";
         var callph = ctx.callPhrase();
 
@@ -114,10 +114,13 @@ class SkeletonListener : dsBaseListener
     }
 
 
-    override public void EnterListing(ListingContext ctx)
+    override public void EnterIdentifier1Listing(Identifier1ListingContext ctx)
     {
-        var name = ctx.id().GetText().DeQuoteOnDemand();
-        var seg = SegmentBase.Create(name, _rootFlow);
+        if (_parenting != null)
+            return;
+
+        var name = ctx.identifier1().GetText().DeQuoteOnDemand();
+        var seg = Segment.Create(name, _rootFlow);
         if (_rootFlow.CallPrototypes.Any(cp => cp.Name == name) || _rootFlow.InstanceMap.ContainsKey(name))
             throw new Exception($"Duplicated listing [{ParserHelper.CurrentPath}.{name}].");
 
@@ -128,12 +131,8 @@ class SkeletonListener : dsBaseListener
     override public void EnterParenting(ParentingContext ctx)
     {
         Trace.WriteLine($"Parenting: {ctx.GetText()}");
-        var name = ctx.id().GetText().DeQuoteOnDemand();
-        _parenting = SegmentBase.Create(name, _rootFlow);
-
-        if (_rootFlow.InstanceMap.ContainsKey(name))
-            throw new Exception($"Duplicated parenting name [{ParserHelper.CurrentPath}] on {_rootFlow.QualifiedName}.");
-        _rootFlow.InstanceMap.Add(name, _parenting);
+        var name = ctx.identifier1().GetText().DeQuoteOnDemand();
+        _parenting = Segment.Create(name, _rootFlow);
     }
     override public void ExitParenting(ParentingContext ctx) { _parenting = null; }
 
@@ -162,16 +161,24 @@ class SkeletonListener : dsBaseListener
         var flowContext = findFirstAncestor<FlowContext>(ctx);
         var hasParentingDefinition =
             enumerateChildren<ParentingContext>(flowContext)
-                .Select(parentingCtx => parentingCtx.id().GetText().DeQuoteOnDemand())
+                .Select(parentingCtx => parentingCtx.identifier1().GetText().DeQuoteOnDemand())
                 .Contains(last);
         if (hasParentingDefinition)
             return;
 
+        var hasCallPrototypeDefinition =
+            enumerateChildren<CallDefContext>(flowContext)
+                .Select(callCtx => callCtx.identifier1().GetText().DeQuoteOnDemand())
+                .Contains(last);
+        if (hasCallPrototypeDefinition)
+            return;
+
         // 내부 없는 단순 root segment.  e.g "Vp"
         // @sa EnterListing()
-        var seg = SegmentBase.Create(last, _rootFlow);
+        var seg = Segment.Create(last, _rootFlow);
         _rootFlow.InstanceMap.Add(last, seg);
     }
+
 
 
     /*
@@ -217,30 +224,6 @@ class SkeletonListener : dsBaseListener
 
         foreach ((var mnemonic, var target) in reversed)
             _rootFlow.AliasNameMaps.Add(mnemonic, target);
-    }
-
-
-    override public void EnterCpu(CpuContext ctx)
-    {
-        //var name = ctx.id().GetText();
-        //var flowPathContexts =
-        //    enumerateChildren<FlowPathContext>(ctx)
-        //    ;
-
-        //var flows =
-        //    flowPathContexts.Select(fpc =>
-        //    {
-        //        var systemName = fpc.GetChild(0).GetText();
-        //        var dot_ = fpc.GetChild(1).GetText();
-        //        var flowName = fpc.GetChild(2).GetText();
-
-        //        var system = _model.Systems.FirstOrDefault(sys => sys.Name == systemName);
-        //        var flow = system.RootFlows.FirstOrDefault(f => f.Name == flowName);
-        //        return flow;
-        //    })
-        //    .ToArray()
-        //    ;
-        //var cpu_ = new Cpu(name, _model) { RootFlows = flows };
     }
 
 

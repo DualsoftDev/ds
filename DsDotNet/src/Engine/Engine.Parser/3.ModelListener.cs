@@ -8,8 +8,8 @@ class ModelListener : dsBaseListener
     public ParserHelper ParserHelper;
     Model    _model => ParserHelper.Model;
     DsSystem _system    { get => ParserHelper._system;    set => ParserHelper._system = value; }
-    RootFlow _rootFlow  { get => ParserHelper._rootFlow;  set => ParserHelper._rootFlow = value; }
-    SegmentBase  _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
+    Flow _rootFlow  { get => ParserHelper._rootFlow;  set => ParserHelper._rootFlow = value; }
+    Segment _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
 
     public ModelListener(dsParser parser, ParserHelper helper)
     {
@@ -19,15 +19,15 @@ class ModelListener : dsBaseListener
 
     override public void EnterSystem(SystemContext ctx)
     {
-        var name = ctx.id().GetText().DeQuoteOnDemand();
+        var name = ctx.identifier1().GetText().DeQuoteOnDemand();
         _system = _model.Systems.First(s => s.Name == name);
     }
     override public void ExitSystem(SystemContext ctx) { this._system = null; }
 
     override public void EnterFlow(FlowContext ctx)
     {
-        var flowName = ctx.id().GetText().DeQuoteOnDemand();
-        _rootFlow = _system.RootFlows.First(f => f.Name == flowName);
+        var flowName = ctx.identifier1().GetText().DeQuoteOnDemand();
+        _rootFlow = _system.Flows.First(f => f.Name == flowName);
     }
     override public void ExitFlow(FlowContext ctx) { _rootFlow = null; }
 
@@ -35,9 +35,10 @@ class ModelListener : dsBaseListener
 
     override public void EnterParenting(ParentingContext ctx)
     {
-        var name = ctx.id().GetText().DeQuoteOnDemand();
-        _parenting = (SegmentBase)_rootFlow.InstanceMap[name];
+        var name = ctx.identifier1().GetText().DeQuoteOnDemand();
+        _parenting = (Segment)_rootFlow.Vertices.FindWithName(name);
     }
+
     override public void ExitParenting(ParentingContext ctx) { _parenting = null; }
     #endregion Boiler-plates
 

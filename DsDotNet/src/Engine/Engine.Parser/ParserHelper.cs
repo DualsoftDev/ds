@@ -8,10 +8,8 @@ public class ParserHelper
 
     public Model Model { get; } = new Model();
     internal DsSystem _system;
-    internal RootFlow _rootFlow;
-    internal SegmentBase _parenting;
-
-    public Dictionary<string, Cpu> FlowName2CpuMap;
+    internal Flow _rootFlow;
+    internal Segment _parenting;
 
     public ParserOptions ParserOptions { get; set; }
     public ParserHelper(ParserOptions options)

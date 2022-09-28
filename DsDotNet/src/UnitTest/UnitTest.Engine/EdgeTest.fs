@@ -15,7 +15,7 @@ module EdgeTest =
 
 
         [<Test>]
-        member __.``Parser detail test`` () =
+        member __.``XParser detail test`` () =
             logInfo "============== Parser detail test"
             let mutable text = """
 [sys] L = {
@@ -37,8 +37,6 @@ module EdgeTest =
     }
 }
 """
-            text <- text + (*sysP +*) cpus
-
             let builder = new EngineBuilder(text)
             let model = builder.Model
             let activeCpuName = "Cpu"

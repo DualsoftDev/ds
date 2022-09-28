@@ -40,9 +40,9 @@ module GraphResetSearch =
         | _ ->
             failwith "[error] find source native graph"
 
-    let targetResetMarker(srcs:ITxRx seq) (tgts:ITxRx seq) =
-        let sourceSegs = srcs |> Seq.map(fun v -> v:?>IVertex)
-        let targetSegs = tgts |> Seq.map(fun v -> v:?>IVertex)
+    let targetResetMarker(srcs:#ITxRx seq) (tgts:#ITxRx seq) =
+        let sourceSegs = srcs |> Seq.map(fun v -> box v:?>IVertex)
+        let targetSegs = tgts |> Seq.map(fun v -> box v:?>IVertex)
 
         targetSegs
         |> Seq.map(fun ts ->

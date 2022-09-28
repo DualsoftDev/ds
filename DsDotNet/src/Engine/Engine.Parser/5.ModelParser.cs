@@ -11,6 +11,16 @@ public static class ModelParser
         ParseTreeWalker.Default.Walk(sListener, parser.program());
         Trace.WriteLine("--- End of skeleton listener");
 
+        var cListener = new CallInstanceListener(parser, helper);
+        ParseTreeWalker.Default.Walk(cListener, parser.program());
+        Trace.WriteLine("--- End of call instance listener");
+        
+
+        var pListener = new ParentingFillListener(parser, helper);
+        ParseTreeWalker.Default.Walk(pListener, parser.program());
+        Trace.WriteLine("--- End of parenting fill listener");
+
+
         var mListener = new ModelListener(parser, helper);
         ParseTreeWalker.Default.Walk(mListener, parser.program());
         Trace.WriteLine("--- End of model listener");

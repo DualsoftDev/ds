@@ -16,18 +16,11 @@ module ModelTests1 =
         [<Test>]
         member __.``Parse Cylinder`` () =
             logInfo "============== Parse Cylinder"
-            let text = sysP + """
-[cpus] AllCpus = {
-    [cpu] Cpu = {
-        P.F;
-    }
-}
-"""
+            let text = sysP
 
             let builder = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu"))
             let system = builder.Model.Systems |> Seq.exactlyOne
             let cpu = builder.Cpu
-            cpu.Name === "Cpu"
             system.Name === "P"
             let flow = system.RootFlows |> Seq.exactlyOne
             flow.Name === "F"
@@ -41,8 +34,6 @@ module ModelTests1 =
             |> ShouldBeTrue
 
             flow.Cpu === cpu
-            let rootFlow = cpu.RootFlows |> Seq.exactlyOne
-            flow === rootFlow
 
 
         [<Test>]
@@ -64,7 +55,7 @@ module ModelTests1 =
     }
 }
 """
-            text <- text + sysP + cpus
+            text <- text + sysP
             let builder = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu"))
             ( builder.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
             let system = builder.Model.Systems |> Seq.find(fun s -> s.Name = "L")
@@ -90,7 +81,6 @@ module ModelTests1 =
                 (txs |> Seq.map(fun tx -> tx.Name), ["Vp"; "Vm"]) |> setEq
 
 
-            cpu.Name === "Cpu"
             system.Name === "L"
             let flow = system.RootFlows |> Seq.exactlyOne
             flow.Name === "F"
@@ -107,46 +97,9 @@ module ModelTests1 =
 
 
             flow.Cpu === cpu
-            let rootFlow = cpu.RootFlows |> Seq.exactlyOne
-            flow === rootFlow
-
-
-
 
         [<Test>]
-        member __.``Parse Real Child`` () =
-            logInfo "============== Parse Real Child"
-            let mutable text = """
-[sys] L = {
-    [flow] F = {
-        Main = { P.F.Vp > P.F.Vm; }
-    }
-}
-[sys] P = {
-    [flow] F = {
-        Vp > Vm;
-    }
-}
-"""
-            text <- text + cpus;
-            let builder = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu"))
-            ( builder.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "P"] ) |> setEq
-            let system = builder.Model.Systems |> Seq.find(fun s -> s.Name = "L")
-            let cpu = builder.Cpu
-
-            cpu.Name === "Cpu"
-            system.Name === "L"
-            let flow = system.RootFlows |> Seq.exactlyOne
-            flow.Name === "F"
-            let main = flow.Coins |> Enumerable.OfType<SegmentBase> |> Seq.find(fun seg -> seg.Name = "Main")
-            main.Name === "Main"
-            let childrenNames = main.ChildVertices |> Enumerable.OfType<Child> |> Seq.map(fun soc -> soc.Name)
-            (childrenNames, ["P.F.Vp"; "P.F.Vm";]) |> setEq
-            ()
-
-
-        [<Test>]
-        member __.``Parse Alias`` () =
+        member __.``XParse Alias`` () =
             let mutable text = """
 [sys] L = {
     [flow] F = {
@@ -170,14 +123,13 @@ module ModelTests1 =
     }
 }
 """
-            text <- text + Tester.CreateCylinder("A") + Tester.CreateCylinder("B") + cpus
+            text <- text + Tester.CreateCylinder("A") + Tester.CreateCylinder("B")
 
             let builder = new EngineBuilder(text, ParserOptions.Create4Simulation("Cpu"))
             ( builder.Model.Systems |> Seq.map(fun s -> s.Name), ["L"; "A"; "B"] ) |> setEq
             let system = builder.Model.Systems |> Seq.find(fun s -> s.Name = "L")
             let cpu = builder.Cpu
 
-            cpu.Name === "Cpu"
             system.Name === "L"
             let flow = system.RootFlows |> Seq.exactlyOne
             flow.Name === "F"

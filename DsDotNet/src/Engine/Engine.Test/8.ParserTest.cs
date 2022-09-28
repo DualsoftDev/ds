@@ -4,6 +4,15 @@ namespace Engine
 {
     internal static class ParserTest
     {
+        public static void Test(string text, string activeCpuName = null)
+        {
+            var engine = new EngineBuilder(text, ParserOptions.Create4Simulation(activeCpuName)).Engine;
+            var model = engine.Model;
+            var xs = model.SpitParserObjects().ToArray();
+            Console.WriteLine();
+            //Program.Engine = engine;
+            //engine.Run();
+        }
 
 
         public static string Safety = @"
@@ -36,15 +45,6 @@ namespace Engine
         //L.F.Main2 = {P.F.Sp; P.F.Sm}
     }
 }
-[cpus] AllCpus = {
-    [cpu] Cpu = {
-        L.F;
-    }
-    [cpu] PCpu = {
-        P.F;
-    }
-}
-
 ";
         public static string StrongCausal = @"
 [sys] L = {
@@ -67,15 +67,6 @@ namespace Engine
         Pp |> Sm;
         Pm |> Sp;
         Vp <||> Vm;
-    }
-}
-
-[cpus] AllCpus = {
-    [cpu] Cpu = {
-        L.F;
-    }
-    [cpu] PCpu = {
-        P.F;
     }
 }
 
@@ -108,15 +99,6 @@ namespace Engine
     }
 }
 
-[cpus] AllCpus = {
-    [cpu] Cpu = {
-        My.F1;
-        My.F2;
-        My.F3;
-        My.F4;
-        My.F5;
-    }
-}
 ";
 
         public static string Ppt = @"
@@ -231,15 +213,6 @@ namespace Engine
         ResetBTN = { F1; F2; F3; F5; FF };
     }
 }
-[cpus] AllCpus = {
-    [cpu] Cpu = {
-        MY.F1;
-        MY.F2;
-        MY.F3;
-        MY.F5;
-        MY.FF;
-    }
-}
 ";
 
         public static string Dup = @"
@@ -281,14 +254,6 @@ namespace Engine
     }
 }
 
-[cpus] AllCpus = {
-    [cpu] Cpu = {
-        L.F;
-    }
-    [cpu] PCpu = {
-        P.F;
-    }
-}
 ";
 
         public static string Error = @"
@@ -300,10 +265,10 @@ namespace Engine
             Rear_Cyl_Push_RET <||> Rear_Cyl_Push_ADV;
             Rear_Pos_Sen > Rear_Cyl_Push_ADV;
         }
-        Rear_Cyl_Push_ADV     = {EX.Rear_Rear_Cyl_Push_ADV.TX    ~    EX.Rear_Rear_Cyl_Push_ADV.RX}
-        Rear_Cyl_Push_RET     = {EX.Rear_Rear_Cyl_Push_RET.TX    ~    EX.Rear_Rear_Cyl_Push_RET.RX}
-        Rear_Con_W     = {EX.Rear_Rear_Con_W.TX    ~    _}
-        Rear_Pos_Sen     = {_    ~    EX.Rear_Rear_Pos_Sen.RX}
+        Rear_Cyl_Push_ADV = {EX.Rear_Rear_Cyl_Push_ADV.TX    ~    EX.Rear_Rear_Cyl_Push_ADV.RX}
+        Rear_Cyl_Push_RET = {EX.Rear_Rear_Cyl_Push_RET.TX    ~    EX.Rear_Rear_Cyl_Push_RET.RX}
+        Rear_Con_W        = {EX.Rear_Rear_Con_W.TX    ~    _}
+        Rear_Pos_Sen      = {_    ~    EX.Rear_Rear_Pos_Sen.RX}
     }
     [flow] Work = {
         작업공정 = {
@@ -317,13 +282,13 @@ namespace Engine
             Front_Usb_Cyl_RET > Front_1Stopper_RET;
             EX.Work_Work.TR > Front_Usb_Cyl_RET;
         }
-        Front_Usb_Cyl_RET     = {EX.Work_Front_Usb_Cyl_RET.TX    ~    EX.Work_Front_Usb_Cyl_RET.RX}
-        Front_Con_W     = {EX.Work_Front_Con_W.TX    ~    _}
-        Front_1Stopper_Adv     = {EX.Work_Front_1Stopper_Adv.TX    ~    EX.Work_Front_1Stopper_Adv.RX}
-        Front_Pos_Sen     = {_    ~    EX.Work_Front_Pos_Sen.RX}
-        Front_1Stopper_RET     = {EX.Work_Front_1Stopper_RET.TX    ~    EX.Work_Front_1Stopper_RET.RX}
-        Front_Usb_Cyl_ADV     = {EX.Work_Front_Usb_Cyl_ADV.TX    ~    EX.Work_Front_Usb_Cyl_ADV.RX}
-        Front_1pos_Sen     = {_    ~    EX.Work_Front_1pos_Sen.RX}
+        Front_Usb_Cyl_RET  = {EX.Work_Front_Usb_Cyl_RET.TX     ~    EX.Work_Front_Usb_Cyl_RET.RX}
+        Front_Con_W        = {EX.Work_Front_Con_W.TX           ~    _}
+        Front_1Stopper_Adv = {EX.Work_Front_1Stopper_Adv.TX    ~    EX.Work_Front_1Stopper_Adv.RX}
+        Front_Pos_Sen      = {_                                ~    EX.Work_Front_Pos_Sen.RX}
+        Front_1Stopper_RET = {EX.Work_Front_1Stopper_RET.TX    ~    EX.Work_Front_1Stopper_RET.RX}
+        Front_Usb_Cyl_ADV  = {EX.Work_Front_Usb_Cyl_ADV.TX     ~    EX.Work_Front_Usb_Cyl_ADV.RX}
+        Front_1pos_Sen     = {_                                ~    EX.Work_Front_1pos_Sen.RX}
     }
     [flow] Model_Auto = {
         SSSS > Rear.제품공급;
@@ -365,51 +330,25 @@ namespace Engine
 }
 
 
-
-[cpus] AllCpus = {
-    [cpu] Cpu_MY = {
-        MY.Rear;
-        MY.Work;
-        MY.Model_Auto;
-    }
-    [cpu] Cpu_EX = {
-        EX.Rear_Rear_Cyl_Push_ADV;
-        EX.Rear_Rear_Cyl_Push_RET;
-        EX.Rear_Rear_Con_W;
-        EX.Rear_Rear_Pos_Sen;
-        EX.Work_Work;
-        EX.Work_Front_Usb_Cyl_RET;
-        EX.Work_Front_Con_W;
-        EX.Work_Front_1Stopper_Adv;
-        EX.Work_Front_Pos_Sen;
-        EX.Work_Front_1Stopper_RET;
-        EX.Work_Front_Usb_Cyl_ADV;
-        EX.Work_Front_1pos_Sen;
-    }
-}
 [addresses] = {
-    EX.Rear_Rear_Cyl_Push_ADV.TX                 = (, , )
-    EX.Rear_Rear_Cyl_Push_ADV.RX                 = (, ,)
-    EX.Rear_Rear_Cyl_Push_RET.TX                 = (, , )
-    EX.Rear_Rear_Cyl_Push_RET.RX                 = (, ,)
-    EX.Rear_Rear_Con_W.TX                        = (, , )
-    EX.Rear_Rear_Pos_Sen.RX                      = (, ,)
-    EX.Work_Work.TR                              = (,,)
-    EX.Work_Front_Usb_Cyl_RET.TX                 = (, , )
-    EX.Work_Front_Usb_Cyl_RET.RX                 = (, ,)
-    EX.Work_Front_Con_W.TX                       = (, , )
-    EX.Work_Front_1Stopper_Adv.TX                = (, , )
-    EX.Work_Front_1Stopper_Adv.RX                = (, ,)
-    EX.Work_Front_Pos_Sen.RX                     = (, ,)
-    EX.Work_Front_1Stopper_RET.TX                = (, , )
-    EX.Work_Front_1Stopper_RET.RX                = (, ,)
-    EX.Work_Front_Usb_Cyl_ADV.TX                 = (, , )
-    EX.Work_Front_Usb_Cyl_ADV.RX                 = (, ,)
-    EX.Work_Front_1pos_Sen.RX                    = (, ,)
-    //EX.AutoBTN.RX                                = (, ,)
-    //EX.EMGBTN.RX                                 = (, ,)
-    //EX.ResetBTN.RX                               = (, ,)
-    //EX.StartBTN1.RX                              = (, ,)
+    EX.Rear_Rear_Cyl_Push_ADV.TX  = (, , )
+    EX.Rear_Rear_Cyl_Push_ADV.RX  = (, ,)
+    EX.Rear_Rear_Cyl_Push_RET.TX  = (, , )
+    EX.Rear_Rear_Cyl_Push_RET.RX  = (, ,)
+    EX.Rear_Rear_Con_W.TX         = (, , )
+    EX.Rear_Rear_Pos_Sen.RX       = (, ,)
+    EX.Work_Work.TR               = (,,)
+    EX.Work_Front_Usb_Cyl_RET.TX  = (, , )
+    EX.Work_Front_Usb_Cyl_RET.RX  = (, ,)
+    EX.Work_Front_Con_W.TX        = (, , )
+    EX.Work_Front_1Stopper_Adv.TX = (, , )
+    EX.Work_Front_1Stopper_Adv.RX = (, ,)
+    EX.Work_Front_Pos_Sen.RX      = (, ,)
+    EX.Work_Front_1Stopper_RET.TX = (, , )
+    EX.Work_Front_1Stopper_RET.RX = (, ,)
+    EX.Work_Front_Usb_Cyl_ADV.TX  = (, , )
+    EX.Work_Front_Usb_Cyl_ADV.RX  = (, ,)
+    EX.Work_Front_1pos_Sen.RX     = (, ,)
 }
 
 ";
@@ -502,5 +441,88 @@ namespace Engine
 }
 
 " + Tester.CreateCylinder("A");
+
+
+        public static string Diamond = @"
+[sys] L = {
+    [flow] F = {
+        Main = {
+            // 정보로서의 Call 상호 리셋
+            Ap <||> Am;
+            Bp <||> Bm;
+            Ap > Am, Bp > Bm > Ap1 > Am1, Bp1 > Bm1;
+        }
+        Ap = {A.F.Vp ~ A.F.Sp}
+        Am = {A.F.Vm ~ A.F.Sm}
+        Bp = {B.F.Vp ~ B.F.Sp}
+        Bm = {B.F.Vm ~ B.F.Sm}
+        [alias] = {
+            Ap = { Ap1; Ap2; }
+            Am = { Am1; Am2; }
+            Bp = { Bp1; Bp2; }
+            Bm = { Bm1; Bm2; }
+        }
+
+    }
+}
+
+" + Tester.CreateCylinder("A") + Tester.CreateCylinder("B");
+
+        public static string Call3 = @"
+[sys] MY = {
+    [flow] F1 = {     
+        ER1 > R1;
+        R2 = { ER2 > C1; }
+        R3 = { C1; }
+        R1 = { C1; }
+        ER1 = {EX.F1_ER1.EXT ~ EX.F1_ER1.EXT }
+        ER2 = {EX.F1_ER2.EXT ~ EX.F1_ER2.EXT }
+        C1  = {EX.F1_C1.TX   ~ EX.F1_C1.RX}
+    }
+}
+
+[sys] EX = {
+    [flow] F1_ER1 = { EXT; }
+    [flow] F1_ER2 = { EXT; }
+    [flow] F1_C1 = { TX > RX; }
+}
+
+[addresses] = {
+    EX.F1_ER1.EXT = (,,)
+    EX.F1_ER2.EXT = (,,)
+    EX.F1_C1.TX   = (, , )
+    EX.F1_C1.RX   = (, ,)
+}
+[layouts] = {
+    MY.F1.C1 = (1309,405,205,83)
+    MY.F1.ER2 = (571,803,173,58)
+    MY.F1.ER1 = (297,441,173,58)
+}
+"
+;
+
+        public static string MyOtherFlowCall = @"
+[sys] MY = {
+    [flow] F2 = {
+        R1;
+        F1.R3;          // External segment call
+        F1.C2;          // External call call
+        F1.C1 > F1.R3;
+    }
+    [flow] F1 = {
+        R3 = { C1; F2.R1; }
+        R4;
+        C1  = {EX.F1_C1.TX   ~ EX.F1_C1.RX}
+        C2  = {EX.F1_C1.TX   ~ EX.F1_C1.RX}
+        C;
+    }
+}
+[sys] EX = {
+    [flow] F1_C1 = { TX > RX; }
+}
+";
+
+
+
     }
 }

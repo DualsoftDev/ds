@@ -27,7 +27,7 @@ module ExpressionTest =
                 logInfo "============== And test"
                 init()
 
-                let cpu = new Cpu("dummy", new Model())
+                let cpu = createDummyCpu()
                 let wait() = wait(cpu)
                 let enqueue(bit, value) = cpu.EnqueueAsync(bit, value)
 
@@ -65,7 +65,7 @@ module ExpressionTest =
                 logInfo "============== Or test"
                 init()
 
-                let cpu = new Cpu("dummy", new Model())
+                let cpu = createDummyCpu()
 
                 let a1 = new TagE(cpu, null, "a1_test2")
                 let a2 = new TagE(cpu, null, "a2_test2")
@@ -103,7 +103,7 @@ module ExpressionTest =
             logInfo "============== Not test"
             init()
 
-            let cpu = new Cpu("dummy", new Model())
+            let cpu = createDummyCpu()
 
 
             let a1 = new TagE(cpu, null, "a1_test3")
@@ -131,7 +131,7 @@ module ExpressionTest =
             logInfo "============== 복합 expression test"
             init()
 
-            let cpu = new Cpu("dummy", new Model())
+            let cpu = createDummyCpu()
 
             // x = a && (b || ( c && !d))
 
@@ -173,7 +173,7 @@ module ExpressionTest =
             logInfo "============== 복합(+Latch) expression test"
             init()
 
-            let cpu = new Cpu("dummy", new Model())
+            let cpu = createDummyCpu()
 
             // x = a || latch
             // latch :

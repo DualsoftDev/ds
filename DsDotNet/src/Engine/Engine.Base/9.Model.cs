@@ -1,11 +1,22 @@
 namespace Engine.Base;
 
-public class Model
+public class Model:  IParserObject
 {
     public List<DsSystem> Systems = new();
-    public List<Cpu> Cpus { get; } = new();
+    public IEnumerable<Cpu> Cpus => Systems.Select(sys => sys.Cpu);
     /// <summary> 가상 부모 목록.  debugging 용 </summary>
     public SegmentBase[] VPSs { get; set; }
+
+    public string[] NameComponents => null;
+    public IEnumerable<IParserObject> SpitParserObjects()
+    {
+        //yield return this;
+        foreach(var sys in Systems)
+        {
+            foreach(var x in sys.SpitParserObjects())
+                yield return x;
+        }
+    }
 }
 public static class ModelExtension
 {

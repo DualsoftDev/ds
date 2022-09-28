@@ -1,10 +1,13 @@
 [sys] MY = {
-    [flow] FF = {     
-        RR > Ex1;
-        RR = {
-            C1 > C2;
-        }
-        C1     = {EX.FF_C1.TX    ~    EX.FF_C1.RX}
-        C2     = {EX.FF_C2.TX    ~    EX.FF_C2.RX}
+    [flow] F2 = {
+        R1;
+        F1.R3;          // External segment call
+        F1.C1;          // External call call
+        F1.C1 > F1.R3;
+    }
+    [flow] F1 = {
+        R3 = { C1; F2.R1;}
+        C1  = {EX.F1_C1.TX   ~ EX.F1_C1.RX}
+        C1;     // RootCall
     }
 }

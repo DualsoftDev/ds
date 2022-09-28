@@ -24,7 +24,7 @@ expression
     | expression ('||') expression
 
     | LPARENTHESIS expression RPARENTHESIS
-    | segment
+    | identifier123
     | number
     | string
     ;
@@ -39,7 +39,7 @@ string
     ;
 
 segValue
-    : segment
+    : identifier123
     | func
     ;
 value
@@ -49,9 +49,9 @@ value
     ;
 
 // unary function : #fun(args)
-funcSet: POUND 'set' LPARENTHESIS segment RPARENTHESIS;
-funcG: POUND 'g' LPARENTHESIS segment RPARENTHESIS;
-funcH: POUND 'h' LPARENTHESIS segment RPARENTHESIS;
+funcSet: POUND 'set' LPARENTHESIS identifier123 RPARENTHESIS;
+funcG: POUND 'g' LPARENTHESIS identifier123 RPARENTHESIS;
+funcH: POUND 'h' LPARENTHESIS identifier123 RPARENTHESIS;
 
 // binary function : #fun(arg1, arg2)
 funcLatch: POUND 'latch' LPARENTHESIS segValue COMMA segValue RPARENTHESIS;
@@ -121,17 +121,17 @@ proc
     | procSelfReset
     ;
 
-procAssign: AT LPARENTHESIS segment EQ expression RPARENTHESIS;    // @(C = #sin(#num(B)))
+procAssign: AT LPARENTHESIS identifier123 EQ expression RPARENTHESIS;    // @(C = #sin(#num(B)))
 procSleepMs: AT 'ms' LPARENTHESIS (INTEGER|value) RPARENTHESIS;    // @ms(500)
 procSleepS: AT 's' LPARENTHESIS (INTEGER|value) RPARENTHESIS;    // @s(2)
 
-procStartFirst: AT 'sf' LPARENTHESIS segment RPARENTHESIS;    // @sf(A)
-procLastFirst: AT 'lf' LPARENTHESIS segment RPARENTHESIS;    // @lf(A)
-procPushStart: AT 'pushs' LPARENTHESIS segment RPARENTHESIS;    // @pushs(A)
-procPushReset: AT 'pushr' LPARENTHESIS segment RPARENTHESIS;    // @pushr(A)
-procPushStartReset: AT 'pushsr' LPARENTHESIS segment RPARENTHESIS;    // @pushr(A)
+procStartFirst: AT 'sf' LPARENTHESIS identifier123 RPARENTHESIS;    // @sf(A)
+procLastFirst: AT 'lf' LPARENTHESIS identifier123 RPARENTHESIS;    // @lf(A)
+procPushStart: AT 'pushs' LPARENTHESIS identifier123 RPARENTHESIS;    // @pushs(A)
+procPushReset: AT 'pushr' LPARENTHESIS identifier123 RPARENTHESIS;    // @pushr(A)
+procPushStartReset: AT 'pushsr' LPARENTHESIS identifier123 RPARENTHESIS;    // @pushr(A)
 
-procOnlyStart: AT 'onlys' LPARENTHESIS segment RPARENTHESIS;    // @onlys(A)
-procOnlyReset: AT 'onlyr' LPARENTHESIS segment RPARENTHESIS;    // @onlyr(A)
-procSelfStart: AT 'selfs' LPARENTHESIS segment RPARENTHESIS;    // @selfs(A)
-procSelfReset: AT 'selfr' LPARENTHESIS segment RPARENTHESIS;    // @selfr(A)
+procOnlyStart: AT 'onlys' LPARENTHESIS identifier123 RPARENTHESIS;    // @onlys(A)
+procOnlyReset: AT 'onlyr' LPARENTHESIS identifier123 RPARENTHESIS;    // @onlyr(A)
+procSelfStart: AT 'selfs' LPARENTHESIS identifier123 RPARENTHESIS;    // @selfs(A)
+procSelfReset: AT 'selfr' LPARENTHESIS identifier123 RPARENTHESIS;    // @selfr(A)

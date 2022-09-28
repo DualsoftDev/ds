@@ -2,7 +2,13 @@ using Engine;
 using Engine.Common;
 using Engine.Common.FS;
 using Engine.Core;
+<<<<<<< HEAD:DsDotNet/src/Model/Simulator/Model.Simulator/FormMain.cs
 using Engine.Parser;
+=======
+using Engine.Graph;
+using Engine.Parser;
+using Engine.Runner;
+>>>>>>> bDotNet2:DsDotNet/src/Model.Simulator/FormMain.cs
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -109,7 +115,11 @@ namespace Model.Simulator
             try
             {
                 var modelText = Tester.GetTextDiamond();
+<<<<<<< HEAD:DsDotNet/src/Model/Simulator/Model.Simulator/FormMain.cs
                 //var eb = new EngineBuilder(modelText, ParserOptions.Create4Simulation("Cpu"));
+=======
+                var eb = new EngineBuilder(modelText, ParserOptions.Create4Simulation("Cpu"));
+>>>>>>> bDotNet2:DsDotNet/src/Model.Simulator/FormMain.cs
             }
 
             catch (Exception ex)
@@ -140,8 +150,12 @@ namespace Model.Simulator
                     xtraTabControl_My.TabPages.Clear();
                     DicUI.Clear();
 
+<<<<<<< HEAD:DsDotNet/src/Model/Simulator/Model.Simulator/FormMain.cs
                     var helper = ModelParser.ParseFromString2(_dsText, ParserOptions.Create4Simulation());
                     _Model = helper.Model;
+=======
+                    _Engine = new EngineBuilder(_dsText, ParserOptions.Create4Simulation()).Engine;
+>>>>>>> bDotNet2:DsDotNet/src/Model.Simulator/FormMain.cs
 
                     _Model.Systems.ForEach(f =>
                     {

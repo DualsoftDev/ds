@@ -23,12 +23,13 @@ public class Xywh
     public int? H { get; }
 }
 
-public class CallPrototype : CallBase
+public class CallPrototype : CallBase, IParserObject
 {
     public RootFlow RootFlow { get; }
     /// <summary> 주로 target system 의 segment </summary>
-    public List<ITxRx> TXs = new(); // empty 이면 '_' 를 의미
-    public List<ITxRx> RXs = new(); // empty 이면 '_' 를 의미
+    public List<SegmentBase> TXs = new(); // empty 이면 '_' 를 의미
+    public List<SegmentBase> RXs = new(); // empty 이면 '_' 를 의미
+    public List<SegmentBase> Resets = new(); // empty 이면 '_' 를 의미
     public IVertex ResetSrouce;
 
     public override bool Value
@@ -58,7 +59,7 @@ public class CallPrototype : CallBase
 
     public override string[] NameComponents => RootFlow.NameComponents.Append(Name).ToArray();
     public Xywh Xywh { get; set; }
-
+    public IEnumerable<IParserObject> SpitParserObjects() { yield return this; }
 }
 
 
@@ -92,7 +93,7 @@ public class SubCall : Call
 }
 
 /// <summary> Root 에 배치된 Call </summary>
-public class RootCall : Call
+public class RootCall : Call, IParserObject
 {
     TagDic _txTags = new();
     TagDic _rxTags = new();
@@ -112,9 +113,14 @@ public class RootCall : Call
     public void AddRxTags(IEnumerable<Tag> tags) => AddTags(_rxTags, tags);
     public void AddTxTags(IEnumerable<Tag> tags) => AddTags(_txTags, tags);
 
+    public RootFlow RootFlow { get; }
+    public override string[] NameComponents => RootFlow.NameComponents.Append(Name).ToArray();
+    public IEnumerable<IParserObject> SpitParserObjects() { yield return this; }
+
     public RootCall(string name, RootFlow flow, CallPrototype protoType)
         : base(name, flow, protoType)
     {
+        RootFlow = flow;
         // root flow 에서만 child vertices 에 추가.   (child flow 에서는 Child 로 wrapping 해서 추가됨.)
         flow.AddChildVertex(this);
     }
@@ -125,7 +131,7 @@ public class RootCall : Call
 
 /// <summary> 외부 segment 에 대한 호출 </summary>
 [DebuggerDisplay("[{ToText()}]")]
-public class ExSegment : Coin
+public class ExSegment : Coin, IParserObject
 {
     public SegmentBase ExternalSegment;
     public Child ContainerChild { get; set; }
@@ -136,7 +142,7 @@ public class ExSegment : Coin
         ExternalSegment = externalSegment;
     }
     public override string ToText() => $"{Name}={ExternalSegment.QualifiedName}";
-
+    public IEnumerable<IParserObject> SpitParserObjects() { yield return this; }
 }
 
 public static class CallExtension

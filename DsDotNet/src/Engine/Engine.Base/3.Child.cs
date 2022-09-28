@@ -7,7 +7,7 @@ namespace Engine.Base;
 ///
 ///
 [DebuggerDisplay("{ToText()}")]
-public class Child : Named, IVertex, ICoin
+public class Child : Named, IVertex, ICoin, IParserObject
 {
     public SegmentBase Parent { get; }
     /// <summary>Call or ExSegmentCall</summary>
@@ -65,4 +65,5 @@ public class Child : Named, IVertex, ICoin
 
     public override string ToString() => ToText();
     public override string ToText() => $"{QualifiedName}[{this.GetType().Name}] : " + (IsCall ? "CALL" : "ExSegmentCall");
+    public IEnumerable<IParserObject> SpitParserObjects()    { yield return this; }
 }

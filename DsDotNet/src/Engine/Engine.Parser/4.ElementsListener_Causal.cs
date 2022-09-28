@@ -98,10 +98,11 @@ partial class ElementsListener
             if (append && isArray)
             {
                 var idss = array.Select(n => n.ids).ToArray();
+                var labels = array.Select(n => n.label).ToArray();
                 var id = string.Join(",", idss.Select(ids => ids.Combine()));
                 cnfTokens.Add(id);
 
-                var conj = new NodeConjunction(idss, label: "", parentIds: new[] { flowOfName }, NodeType.conjunction);      // todo check flowOfName
+                var conj = new NodeConjunction(idss, labels, parentIds: new[] { flowOfName }, NodeType.conjunction);      // todo check flowOfName
                 this.nodes[id] = conj;
             }
             else
@@ -174,17 +175,17 @@ partial class ElementsListener
 
 
 
-    IVertex[] FindVertices(SegmentBase parenting, NodeBase nodebase)
+    IVertex[] FindVertices(NodeBase nodebase)
     {
         IVertex helper(string[] spec)
         {
-            if (parenting != null && parenting.InstanceMap.ContainsKey(spec.Combine()))
-                return parenting.InstanceMap[spec.Combine()] as IVertex;
+            var objs = _model.SpitParserObjects().Where(obj => obj.NameComponents.IsEqual(spec)).ToArray();
+            if (objs.Length > 1)
+                objs = objs.Where(obj => obj is not CallPrototype).ToArray();
+            if (objs.Length == 1)
+                return objs[0] as IVertex;
 
-            var obj = _model.Find(spec);
-            if (obj is IVertex vtx)
-                return vtx;
-            return null;
+            throw new Exception("ERROR: Not implemented");      // 무엇을 정해야 하는지??
         }
 
         switch (nodebase)
@@ -194,9 +195,11 @@ partial class ElementsListener
 
             case NodeConjunction nodeConjunction:
                 return
-                    nodeConjunction.idss
-                    .Select(helper)
-                    .ToArray();
+                    (   from n in Enumerable.Range(0, nodeConjunction.idss.Length-1)
+                        let ids = nodeConjunction.idss[n]
+                        select helper(ids)
+                    ).ToArray()
+                    ;
         }
         throw new NotImplementedException("ERROR");
     }
@@ -233,14 +236,16 @@ partial class ElementsListener
                     var r = this.nodes[strR];
 
                     Flow flow = (Flow)_parenting ?? _rootFlow;   // target flow
-                    //Assert(flow.Cpu != null);
+                    Assert(flow.Cpu != null);
 
-                    var lvs = FindVertices(_parenting, l);
-                    var rvs = FindVertices(_parenting, r);
+                    var lvs = FindVertices(l);
+                    var rvs = FindVertices(r);
+                    Assert(lvs.All(l => l is not CallPrototype));
+                    Assert(rvs.All(l => l is not CallPrototype));
 
                     Assert(l != null && r != null);   // 'node not found');
-                    if (lvs.Length == 0) throw new ParserException($"Parse error: {l.label} not found", ll);
-                    if (rvs.Length == 0) throw new ParserException($"Parse error: {r.label} not found", rr);
+                    if (lvs.Length == 0) throw new ParserException($"Parse error: {l.GetLabel()} not found", ll);
+                    if (rvs.Length == 0) throw new ParserException($"Parse error: {r.GetLabel()} not found", rr);
 
                     Edge e = null;
                     switch (op)
@@ -271,7 +276,7 @@ partial class ElementsListener
                             Assert(false);    //, `invalid operator: ${ op}`);
                             break;
                     }
-                    e.GetDsEdges().ForAll(edge => flow.AddEdge(edge));
+                    flow.AddEdge(e);
                 }
             }
         }

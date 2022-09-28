@@ -7,22 +7,13 @@ namespace Engine.Base;
 public delegate SegmentBase SegmentCreator(string segmentName, RootFlow rootFlow);
 
 [DebuggerDisplay("{ToText(),nq}")]
-public abstract partial class SegmentBase : ChildFlow, IVertex, ICoin, IWallet, ITxRx
+public abstract partial class SegmentBase : ChildFlow, IVertex, ICoin, IWallet, ITxRx, IParserObject
 {
-    public RootFlow ContainerFlow { get; internal set; }
-    Cpu _cpu;
-    public new Cpu Cpu
-    {
-        get => _cpu;
-        set
-        {
-            if (ContainerFlow != null)
-                Assert(value == ContainerFlow.Cpu);
-            _cpu = value;
-        }
-    }
+    public RootFlow ContainerFlow { get; }
+    //public override Cpu Cpu { get => ContainerFlow.Cpu; set { } }
+    Cpu IBit.Cpu { get => ContainerFlow.Cpu; set => Assert(value == ContainerFlow.Cpu); }
 
-    public string[] NameComponents =>
+    public override string[] NameComponents =>
         (ContainerFlow == null)
         ? new[] { Name }
         : ContainerFlow.NameComponents.Append(Name).ToArray()
@@ -79,16 +70,16 @@ public abstract partial class SegmentBase : ChildFlow, IVertex, ICoin, IWallet, 
         (string name, RootFlow containerFlow) =>
         {
             Assert(Global.IsInUnitTest);        // should be overriden if not unit test
-            var seg = new DummySegment(containerFlow.Cpu, name) { ContainerFlow = containerFlow };
+            var seg = new DummySegment(containerFlow, name);
             containerFlow.AddChildVertex(seg);
             return seg;
         };
 
 
-    internal SegmentBase(Cpu cpu, string name, string startTagName = null, string resetTagName = null, string endTagName = null)
-        : base(cpu, name)
+    internal SegmentBase(RootFlow flow, string name, string startTagName = null, string resetTagName = null, string endTagName = null)
+        : base(flow, name)
     {
-        _cpu = cpu;
+        ContainerFlow = flow;
     }
 
 
@@ -103,6 +94,7 @@ public abstract partial class SegmentBase : ChildFlow, IVertex, ICoin, IWallet, 
 
     /// <summary>Going 시 원위치 맞추기 작업 중 flag.  Debugging purpose</summary>
     public bool DbgIsOriginating { get; set; }
+
     public override string ToString() => ToText();
     public override string ToText()
     {
@@ -113,8 +105,8 @@ public abstract partial class SegmentBase : ChildFlow, IVertex, ICoin, IWallet, 
 
 class DummySegment : SegmentBase
 {
-    public DummySegment(Cpu cpu, string name, string startTagName = null, string resetTagName = null, string endTagName = null)
-        : base(cpu, name, startTagName, resetTagName, endTagName)
+    public DummySegment(RootFlow flow, string name, string startTagName = null, string resetTagName = null, string endTagName = null)
+        : base(flow, name, startTagName, resetTagName, endTagName)
     {
     }
 }

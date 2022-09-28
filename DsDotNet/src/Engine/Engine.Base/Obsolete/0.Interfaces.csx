@@ -47,3 +47,8 @@ public interface IResetEdge : IEdge { }
 
 public interface ICpu { }
 public interface IEngine { }
+public interface IParserObject
+{
+    IEnumerable<IParserObject> SpitParserObjects();
+    string[] NameComponents { get; }
+}

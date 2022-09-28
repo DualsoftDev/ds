@@ -17,36 +17,40 @@ enum NodeType
 
 abstract class NodeBase
 {
-    public string label;
     public string[] parentIds;
     public NodeType type;
-    public NodeBase(string label, string[] parentIds, NodeType type)
+    public NodeBase(string[] parentIds, NodeType type)
     {
-        this.label = label;
         this.parentIds = parentIds;
         this.type = type;
     }
+    public abstract string GetLabel();
 }
 
 class Node : NodeBase
 {
     public string[] ids;
+    public string label;
     public Node(string[] ids, string label, string[] parentIds, NodeType type)
-        : base(label, parentIds, type)
+        : base(parentIds, type)
     {
         Assert(ids.Length <= 4);        // MAX: Sys > Flow > Parenting > Name
         this.ids = ids;
+        this.label = label;
     }
-
+    public override string GetLabel() => label;
 }
 class NodeConjunction : NodeBase
 {
     public string[][] idss;
-    public NodeConjunction(string[][] idss, string label, string[] parentIds, NodeType type)
-        : base(label, parentIds, type)
+    public string[] labels;
+    public NodeConjunction(string[][] idss, string[] labels, string[] parentIds, NodeType type)
+        : base(parentIds, type)
     {
         this.idss = idss;
+        this.labels = labels;
     }
+    public override string GetLabel() => string.Join(", ", labels);
 }
 
 
@@ -70,17 +74,17 @@ partial class ElementsListener : dsBaseListener
 
     override public void EnterSystem(SystemContext ctx)
     {
-        var name = ctx.id().GetText().DeQuoteOnDemand();
+        var name = ctx.identifier1().GetText().DeQuoteOnDemand();
         _system = _model.Systems.First(s => s.Name == name);
     }
     override public void ExitSystem(SystemContext ctx) { this._system = null; }
 
     override public void EnterFlow(FlowContext ctx)
     {
-        var flowName = ctx.id().GetText().DeQuoteOnDemand();
+        var flowName = ctx.identifier1().GetText().DeQuoteOnDemand();
         _rootFlow = _system.RootFlows.First(f => f.Name == flowName);
 
-        var flowOf = ctx.flowProp().id();
+        var flowOf = ctx.flowProp().identifier1();
         this.flowOfName = flowOf == null ? flowName : flowOf.GetText();
     }
     override public void ExitFlow(FlowContext ctx)
@@ -88,9 +92,6 @@ partial class ElementsListener : dsBaseListener
         _rootFlow = null;
         flowOfName = null;
     }
-
-
-    override public void EnterListing(ListingContext ctx) { }
 
     #endregion Boiler-plates
 
@@ -127,7 +128,7 @@ partial class ElementsListener : dsBaseListener
             from safetyDef in safetyDefs
             let key = collectNameComponents(findFirstChild(safetyDef, t => t is SafetyKeyContext))   // ["Main"] or ["My", "Flow", "Main"]
             let valueHeader = enumerateChildren<SafetyValuesContext>(safetyDef).First()
-            let values = enumerateChildren<SegmentPathNContext>(valueHeader).Select(collectNameComponents).ToArray()
+            let values = enumerateChildren<Identifier123Context>(valueHeader).Select(collectNameComponents).ToArray()
             select (key, values)
             ;
 
@@ -137,8 +138,7 @@ partial class ElementsListener : dsBaseListener
             {
                 // global prop safety
                 case PropertyBlockContext:
-                    var flow = _model.FindFlow(segPath);
-                    return (SegmentBase)flow.InstanceMap[segPath[2]];
+                    return _model.FindFirst<SegmentBase>(segPath);
 
                 // in flow safety
                 case FlowContext:
@@ -152,31 +152,32 @@ partial class ElementsListener : dsBaseListener
         foreach (var (key, values) in safetyKvs)
         {
             var keySegment = getKey(key);
-            keySegment.SafetyConditions = values.Select(safety => (SegmentBase)_model.Find(safety)).ToList();
+            keySegment.SafetyConditions = values.Select(safety => _model.FindFirst<SegmentBase>(safety)).ToArray();
         }
     }
 
 
-    override public void EnterCall(CallContext ctx)
+    override public void EnterCallDef(CallDefContext ctx)
     {
-        var name = ctx.id().GetText().DeQuoteOnDemand();
+        var name = ctx.identifier1().GetText().DeQuoteOnDemand();
         var label = $"{name}\n{ctx.callPhrase().GetText()}";
 
         var callPrototypes = _rootFlow.CallPrototypes;
         var call = callPrototypes.First(c => c.Name == name);
 
         var callph = ctx.callPhrase();
-        SegmentBase[] findSegments(SegmentsContext txrxCtx)
+        SegmentBase[] findSegments(ParserRuleContext txrxCtx)
         {
-            if (txrxCtx.GetText() == "_")
+            if (txrxCtx == null || txrxCtx.GetText() == "_")
                 return Array.Empty<SegmentBase>();
 
-            var nss = enumerateChildren<SegmentContext>(txrxCtx).Select(collectNameComponents).ToArray();
-            return nss.Select(ns => (SegmentBase)_model.Find(ns)).ToArray();
+            var nss = enumerateChildren<Identifier123Context>(txrxCtx).Select(collectNameComponents).ToArray();
+            return nss.Select(ns => _model.FindFirst<SegmentBase>(ns)).ToArray();
         }
 
-        var txs = findSegments(callph.segments(0));
-        var rxs = findSegments(callph.segments(1));
+        var txs = findSegments(callph.callComponents(0));
+        var rxs = findSegments(callph.callComponents(1));
+        var resets = findSegments(callph.callComponents(2));
 
         if (ParserHelper.ParserOptions.AllowSkipExternalSegment)
         {
@@ -195,13 +196,14 @@ partial class ElementsListener : dsBaseListener
 
         call.TXs.AddRange(txs);
         call.RXs.AddRange(rxs);
+        call.Resets.AddRange(resets);
         //Trace.WriteLine($"Call: {name} = {txs.Select(tx => tx.Name)} ~ {rx?.Name}");
     }
 
 
     override public void EnterParenting(ParentingContext ctx)
     {
-        var name = ctx.id().GetText().DeQuoteOnDemand();
+        var name = ctx.identifier1().GetText().DeQuoteOnDemand();
         _parenting = (SegmentBase)_rootFlow.InstanceMap[name];
     }
     override public void ExitParenting(ParentingContext ctx) { _parenting = null; }
@@ -244,7 +246,7 @@ partial class ElementsListener : dsBaseListener
         foreach (var posiDef in positionDefs)
         {
             var callPath = collectNameComponents(posiDef.callPath());
-            var cp = (CallPrototype)_model.Find(callPath);
+            var cp = _model.FindFirst<CallPrototype>(callPath);
             var xywh = posiDef.xywh();
             var (x, y, w, h) = (xywh.x().GetText(), xywh.y().GetText(), xywh.w()?.GetText(), xywh.h()?.GetText());
             cp.Xywh = new Xywh(int.Parse(x), int.Parse(y), w == null ? null : int.Parse(w), h == null ? null : int.Parse(h));
@@ -264,7 +266,7 @@ partial class ElementsListener : dsBaseListener
         foreach (var addrDef in addressDefs)
         {
             var segNs = collectNameComponents(addrDef.segmentPath());
-            var seg = (SegmentBase)_model.Find(segNs);
+            var seg = _model.FindFirst<SegmentBase>(segNs);
             var sre = addrDef.address();
             var (s, r, e) = (sre.startTag()?.GetText(), sre.resetTag()?.GetText(), sre.endTag()?.GetText());
             seg.Addresses = Tuple.Create(s, r, e);

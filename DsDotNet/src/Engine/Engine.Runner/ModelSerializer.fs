@@ -42,9 +42,24 @@ module internal ModelSerializerModule =
         let target = name (edge.Target :?> Named)
         $"{tab}{sources} {edge.GetOperator()} {target};"
 
+    let serializeCoin (coin:ICoin) (indent:int) =
+        let tab = getTab indent
+        match coin with
+        | :? RootCall as rc ->
+            $"{tab}{rc.Name};"
+        | :? Segment as x ->
+            $"{tab}/* {x.Name}; // -- segment */"
+        | :? SubCall as x ->
+            $"{tab}/* {x.Name}; // --subcall */"
+        | :? Child as x ->
+            $"{tab}/* {x.Name}; // --child */"
+        | _ ->
+            failwith "ERROR"
+
     let rec serializeFlow (flow:Flow) (indent:int) =
         let tab = getTab indent
         let indent = indent + 1
+        let mutable closeBrace = true
         [
             match flow with
             | :? RootFlow as rf ->
@@ -76,23 +91,36 @@ module internal ModelSerializerModule =
 
                 for cp in rf.CallPrototypes do
                     yield serializeCallPrototype cp indent
-            | _ -> yield $"{tab}{flow.Name} = {lb}"
 
-            for iso in flow.IsolatedCoins do
-                match iso with
-                | :? ChildFlow as cf when cf.ChildVertices.Any() ->
-                    yield! serializeFlow cf indent
-                | :? ChildFlow as cf ->
-                    yield $"{getTab indent}{cf.Name};"
-                | :? Child as child ->
-                    yield $"{tab}/* Child={child.QualifiedName} */"
-                    ()
-                | _ -> failwithlog "ERROR"
+            | :? Segment as seg ->
+                let covered = seg.Edges.SelectMany(fun e -> e.Vertices)
+                let xs = seg.Children.Select(fun ch -> ch.Coin).Cast<IVertex>().Except(covered).Cast<Coin>().ToArray()
+                if xs.IsEmpty() then
+                    closeBrace <- false
+
+                yield $"{tab}{flow.Name}" + if xs.IsEmpty() then ";" else $" = {lb}"
+                for x in xs do
+                    yield $"{tab}  {x.Name};"
+
+            | _ ->
+                yield $"{tab}{flow.Name};"
+
+
             for edge in flow.Edges do
                 yield serializeEdge edge indent
+
+            for iso in flow.IsolatedCoins do
+                yield serializeCoin iso indent
+
+            let covered = flow.Edges.SelectMany(fun e -> e.Vertices).Distinct().ToArray()
+            for cf in flow.ChildVertices.OfType<SegmentBase>() do
+                if cf.ChildVertices.Any() || not <| covered.Contains(cf) then
+                    yield! serializeFlow cf indent
+
             //for child in flow.ChildVertices do
             //    serializeChild child
-            yield tab + "}"
+            if closeBrace then
+                yield tab + $"{rb}"
         ]
 
     type ButtonDic = Dictionary<string, RootFlow[]>

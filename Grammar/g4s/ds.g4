@@ -19,54 +19,33 @@ grammar ds;
 
 import dsFunctions;
 
-program: (system|cpus|layouts|addresses|properties|comment)* EOF;        // importStatement|
+program: (system|layouts|addresses|properties|comment)* EOF;        // importStatement|cpus
 
 test:qstring EOF;
 qstring: STRING_LITERAL EOF;
 
 
-system: sysProp id '=' sysBlock;    // [sys] Seg = {..}
-sysProp: '[' 'sys' ']';
-sysBlock
-    : LBRACE (flow|listing|parenting|causal|call|buttons)* RBRACE       // acc|sysTask|macro
-    ;
+system: '[' 'sys' (('ip'|'host') '=' host)? ']' identifier1 '=' sysBlock;    // [sys] Seg = {..}
+    sysBlock
+        : LBRACE (flow|buttons)* RBRACE       // identifier1Listing|parenting|causal|call
+        ;
+    host: ipv4 | domainName;
+    domainName: identifier1234;
+    ipv4: IPV4;
 
-
-/*
-[cpus] AllCpus = {
-    [cpu] Cpu = {
-        L.F;
-    }
-}
- */
-
-cpus: cpusProp (id)? '=' cpusBlock;
-cpusProp: '[' 'cpus' ']';
-cpusBlock
-    : LBRACE (cpu)* RBRACE
-    ;
-
-cpu: cpuProp id '=' cpuBlock;    // [cpu] Cpu = {..}
-cpuProp: '[' 'cpu' ']';
-cpuBlock
-    : LBRACE flowPath (SEIMCOLON flowPath)* SEIMCOLON? RBRACE
-    ;
-
-layouts: layoutProp (id)? '=' layoutsBlock;
-layoutProp: '[' 'layouts' ']';
-layoutsBlock
-    : LBRACE (positionDef)* RBRACE
-    ;
+layouts: '[' 'layouts' ']' (identifier1)? '=' layoutsBlock;
+    layoutsBlock
+        : LBRACE (positionDef)* RBRACE
+        ;
 positionDef: callPath '=' xywh;
-    callPath: identifier DOT identifier DOT identifier;
+    callPath: identifier3;
     xywh: LPARENTHESIS x COMMA y (COMMA w COMMA h)? RPARENTHESIS (SEIMCOLON)?;
     x: INTEGER;
     y: INTEGER;
     w: INTEGER;
     h: INTEGER;
 
-addresses: addressesProp (id)? '=' addressesBlock;
-addressesProp: '[' 'addresses' ']';
+addresses: '[' 'addresses' ']' (identifier1)? '=' addressesBlock;
 addressesBlock
     : LBRACE (addressDef)* RBRACE
     ;
@@ -77,7 +56,6 @@ addressDef: segmentPath '=' address;
     resetTag: TAG_ADDRESS;
     endTag: TAG_ADDRESS;
 
-segmentPathN : identifier | identifier2 | identifier3;
 
 /*
 // global safety property
@@ -98,37 +76,41 @@ segmentPathN : identifier | identifier2 | identifier3;
  */
 properties: '[' 'prop' ']' EQ LBRACE (propertyBlock)* RBRACE;
 propertyBlock: (safetyBlock);
-safetyBlock: '[' 'safety' ']' EQ LBRACE (safetyDef)* RBRACE;
-safetyDef: safetyKey EQ LBRACE safetyValues RBRACE;
-safetyKey: segmentPathN;
-safetyValues: segmentPathN (SEIMCOLON segmentPathN)*;
+    safetyBlock: '[' 'safety' ']' EQ LBRACE (safetyDef)* RBRACE;
+    safetyDef: safetyKey EQ LBRACE safetyValues RBRACE;
+    safetyKey: identifier123;
+    safetyValues: identifier123 (SEIMCOLON identifier123)*;
 
 
 flow
-    : flowProp id '=' LBRACE (causal|parenting|call|listing|safetyBlock|alias)* RBRACE     // |flowTask
+    : flowProp identifier1 '=' LBRACE (
+        causal|parenting|callDef
+        |identifier12Listing
+        |safetyBlock|alias)* RBRACE     // |flowTask
     ;
-flowProp : '[' 'flow' ('of' id)? ']';
+flowProp : '[' 'flow' ('of' identifier1)? ']';
 
 alias
-    : aliasProp (id)? '=' LBRACE (aliasListing)* RBRACE
+    : aliasProp (identifier1)? '=' LBRACE (aliasListing)* RBRACE
     ;
 aliasProp: '[' 'alias' ']';
 aliasListing:
     aliasDef '=' LBRACE (aliasMnemonic)? ( ';' aliasMnemonic)* (';')+ RBRACE
     ;
-aliasDef: segmentPathN;     //(identifier2|identifier3);
-aliasMnemonic: identifier;
+aliasDef: identifier123;     //(identifier2|identifier3);
+aliasMnemonic: identifier1;
 
 
-id: identifier;
-
-listing: id SEIMCOLON;     // A;
-parenting: id EQ LBRACE causal* RBRACE;
+identifier1Listing: identifier1 SEIMCOLON;     // A;
+identifier2Listing: identifier2 SEIMCOLON;     // A;
+identifier12Listing: (identifier1Listing | identifier2Listing);
+parenting: identifier1 EQ LBRACE (causal|identifier12Listing)* RBRACE;
 
 // A23 = { M.U ~ S.S3U ~ _ }
-call: id EQ LBRACE callPhrase RBRACE;
-callPhrase: segments TILDE segments (TILDE segments)?;
-calls: (call SEIMCOLON)+ ;
+callDef: identifier1 EQ LBRACE callPhrase RBRACE;
+callPhrase: callComponents TILDE callComponents;    // (TILDE callComponents)?;
+    callComponents: identifier123DNF*;
+callDefs: (callDef SEIMCOLON)+ ;
 
 buttons:emergencyButtons|autoButtons|startButtons|resetButtons;
 emergencyButtons :'[' ('emg_in'|'emg') ']'     EQ buttonBlock;
@@ -137,8 +119,8 @@ startButtons     :'[' ('start_in'|'start') ']' EQ buttonBlock;
 resetButtons     :'[' ('reset_in'|'reset') ']' EQ buttonBlock;
 buttonBlock: LBRACE (() | ((SEIMCOLON)* buttonDef)* (SEIMCOLON)*) RBRACE;
 buttonDef: buttonName EQ LBRACE (() | flowName (SEIMCOLON flowName)* (SEIMCOLON)?) RBRACE;
-buttonName: identifier;
-flowName : identifier;
+buttonName: identifier1;
+flowName : identifier1;
 
 
 
@@ -159,14 +141,6 @@ causalPhrase
     : causalTokensDNF (causalOperator causalTokensDNF)+
     ;
 
-causalToken
-    : proc
-    | func
-    | expression
-    | segment       // 'A' or 'A.B'
-//  | segmentValue  // '(A)' or '(A.B)'
-    ;
-//segmentValue: LPARENTHESIS segment RPARENTHESIS;
 
 causalTokensDNF
     : causalTokensCNF ('?' causalTokensCNF)*
@@ -175,6 +149,14 @@ causalTokensCNF
     : causalToken (',' causalToken)*
     ;
 
+causalToken
+    : proc
+    | func
+    | expression
+    | identifier1
+//  | segmentValue  // '(A)' or '(A.B)'
+    ;
+//segmentValue: LPARENTHESIS identifier123 RPARENTHESIS;
 
 
 causalOperator

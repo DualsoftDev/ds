@@ -18,16 +18,18 @@ test:
 #		$(grun) ds causals < g4test/causals.txt
 #	done
 
-	@echo quoted.ds
+	@echo quoted
 	$(grun) ds program < g4test/quoted.ds
 	@echo causals
 	$(grun) ds causals < g4test/causals.txt
+	@echo diamond
+	$(grun) ds program < g4test/diamond.ds
 	@echo proc
 	$(grun) ds program < g4test/proc.ds
 	@echo taskFlow
 	$(grun) ds program < g4test/taskFlow.ds
 	@echo call
-	$(grun) ds calls < g4test/calls.txt
+	$(grun) ds program < g4test/call.ds
 	@echo ppt
 	$(grun) ds program < g4test/ppt.ds
 

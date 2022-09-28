@@ -4,7 +4,7 @@ using static Engine.Core.DsType;
 
 namespace Engine.Base;
 
-public abstract class Flow : Named, IWallet
+public abstract class Flow : Named, IWallet, IParserObject
 {
     public virtual Cpu Cpu { get; }
 
@@ -49,30 +49,38 @@ public abstract class Flow : Named, IWallet
         Cpu = cpu;
     }
 
-    public Dictionary<string, object> InstanceMap = new();
+    public Dictionary<string, IParserObject> InstanceMap = new();
+
+    public abstract string[] NameComponents { get; }
+    public virtual IEnumerable<IParserObject> SpitParserObjects()
+    {
+        yield return this;
+        foreach (var x in InstanceMap.Values.OfType<IParserObject>().SelectMany(cp => cp.SpitParserObjects()))
+            yield return x;
+    }
 }
 
 
 
 [DebuggerDisplay("[{ToText()}]")]
-public class RootFlow : Flow
+public class RootFlow : Flow, IParserObject
 {
     public DsSystem System { get; set; }
     public List<CallPrototype> CallPrototypes = new();
 
-    public string[] NameComponents => new[] { System.Name, Name };
+    public override string[] NameComponents => new[] { System.Name, Name };
     public string QualifiedName => NameComponents.Combine();
-    public RootFlow(Cpu cpu, string name, DsSystem system)
-        : base(cpu, name)
+    public RootFlow(string name, DsSystem system)
+        : base(system.Cpu, name)
     {
         System = system;
         system.RootFlows.Add(this);
-        Auto = new TagE(cpu, null, $"Auto_{name}_{EmLinq.UniqueId()}", TagType.Auto);
+        Auto = new TagE(System.Cpu, null, $"Auto_{name}_{EmLinq.UniqueId()}", TagType.Auto);
     }
 
     public TagE Auto { get; }
 
-    public IEnumerable<SegmentBase> RootSegments => ChildVertices.OfType<SegmentBase>();
+    public IEnumerable<SegmentBase> RootSegments => ChildVertices.OfType<SegmentBase>().Where(seg => !(seg is ExSegment));
 
     public override string ToText() => $"{QualifiedName}, #seg={RootSegments.Count()}, #chilren={ChildVertices.Count()}, #edges={Edges.Count()}";
 
@@ -84,12 +92,22 @@ public class RootFlow : Flow
     /// <summary>target -> mnemonics : "My.F.Ap" -> ["Ap1"; "Ap2"] </summary>
     public Dictionary<string[], string[]> BackwardAliasMaps = new(NameComponentsComparer.Instance);
 
+    public override IEnumerable<IParserObject> SpitParserObjects()
+    {
+        yield return this;
+        foreach (var x in CallPrototypes.SelectMany(cp => cp.SpitParserObjects()))
+            yield return x;
+
+        var subs = RootSegments.Concat(InstanceMap.Values).Distinct();
+        foreach (var x in subs.SelectMany(cp => cp.SpitParserObjects()))
+            yield return x;
+    }
 }
 
-public class ChildFlow : Flow
+public abstract class ChildFlow : Flow
 {
-    public ChildFlow(Cpu cpu, string name)
-        : base(cpu, name)
+    protected ChildFlow(RootFlow rootFlow, string name)
+        : base(rootFlow.Cpu, name)
     {
     }
 
@@ -101,9 +119,27 @@ public class ChildFlow : Flow
     }
 }
 
+public static class ArrayContentsComparer
+{
+    /// <summary> array 내용 비교 </summary>
+    public static bool IsEqual(this string[] x, string[] y) => x.Length == y.Length && x.SequenceEqual(y);
+}
 public class NameComponentsComparer : IEqualityComparer<string[]>
 {
-    public bool Equals(string[] x, string[] y) => x.Length == y.Length && x.SequenceEqual(y);
+    public bool Equals(string[] x, string[] y) => x.IsEqual(y);
+
+    public int GetHashCode(string[] obj) => (int)obj.Average(ob => ob.GetHashCode());
+    public static NameComponentsComparer Instance { get; } = new NameComponentsComparer();
+}
+
+public static class ArrayContentsComparer
+{
+    /// <summary> array 내용 비교 </summary>
+    public static bool IsEqual(this string[] x, string[] y) => x.Length == y.Length && x.SequenceEqual(y);
+}
+public class NameComponentsComparer : IEqualityComparer<string[]>
+{
+    public bool Equals(string[] x, string[] y) => x.IsEqual(y);
 
     public int GetHashCode(string[] obj) => (int)obj.Average(ob => ob.GetHashCode());
     public static NameComponentsComparer Instance { get; } = new NameComponentsComparer();

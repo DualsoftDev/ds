@@ -21,16 +21,6 @@ module ModelTest_Common =
     }
 }
 """
-    let cpus = """
-[cpus] AllCpus = {
-    [cpu] Cpu = {
-        L.F;
-    }
-    [cpu] FakeCpu = {
-        P.F;
-    }
-}
-"""
 
 
     let seqEq(a, b) = Enumerable.SequenceEqual(a, b) |> ShouldBeTrue
@@ -40,3 +30,5 @@ module ModelTest_Common =
     let wait(cpu:Cpu) =
         while cpu.NeedWait do
             Thread.Sleep(50)
+
+    let createDummyCpu() = new Cpu("dummy", new DsSystem("dummy", new Model()))

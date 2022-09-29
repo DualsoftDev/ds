@@ -8,6 +8,7 @@ public class Program
         var text = @"
 [sys ip = 192.168.0.1] My = {
     [flow] F = {        // GraphVertexType.Flow
+        C1, C2 > C3, C4 |> C5;
         Main        // GraphVertexType.{ Segment | Parenting }
         > R3        // GraphVertexType.{ Segment }
         ;
@@ -26,7 +27,7 @@ public class Program
             ;
         }
         R1              // define my local terminal real segment    // GraphVertexType.{ Segment }
-            > C.""+""     // direct interface call wrapper segment    // GraphVertexType.{ Call }
+            //> C.""+""     // direct interface call wrapper segment    // GraphVertexType.{ Call }
             > Main2     // aliased to my real segment               // GraphVertexType.{ Segment | Aliased }
             > Ap1       // aliased to interface                     // GraphVertexType.{ Segment | Aliased | Call }
             ;

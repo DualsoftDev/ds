@@ -41,6 +41,8 @@ module TextUtil =
         abstract ToText : unit -> string
         default x.ToText() = name
      
+    let isStringArrayEqaul (ns1:string seq, ns2:string seq) = Enumerable.SequenceEqual(ns1, ns2)
+
     let internal nameComparer<'T when 'T:> INamed>() = {
         new IEqualityComparer<'T> with
             member _.Equals(x:'T, y:'T) = x.Name = y.Name
@@ -59,9 +61,10 @@ module TextUtil =
     let internal createQualifiedNamedHashSet<'T when 'T:> IQualifiedNamed>() =
         new HashSet<'T>(Seq.empty<'T>, qualifiedNameComparer<'T>())        
 
+
     let internal nameComponentsComparer() = {
         new IEqualityComparer<NameComponents> with
-            member _.Equals(x:NameComponents, y:NameComponents) = Enumerable.SequenceEqual(x, y)
+            member _.Equals(x:NameComponents, y:NameComponents) = isStringArrayEqaul(x, y)
             member _.GetHashCode(x:NameComponents) = x.Average(fun s -> s.GetHashCode()) |> int
     }
 
@@ -86,7 +89,7 @@ type NameUtil =
     [<Extension>] static member DeQuoteOnDemand (identifier:string) = deQuoteOnDemand identifier                       
     [<Extension>] static member Combine (nameComponents:string seq) = combine "." nameComponents 
     [<Extension>] static member Combine (nameComponents:string seq, separator) = combine separator nameComponents 
-    [<Extension>] static member IsStringArrayEqaul (ns1:string seq, ns2:string seq) = Enumerable.SequenceEqual(ns1, ns2)
+    [<Extension>] static member IsStringArrayEqaul (ns1:string seq, ns2:string seq) = isStringArrayEqaul(ns1, ns2)
     [<Extension>] static member CreateNameComparer() = nameComparer()
     [<Extension>] static member CreateNameComponentsComparer() = nameComponentsComparer()
     

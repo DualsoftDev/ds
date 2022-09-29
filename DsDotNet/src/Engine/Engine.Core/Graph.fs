@@ -1,9 +1,11 @@
 // Copyright (c) Dual Inc.  All Rights Reserved.
 namespace Engine.Core
 
+open System.Runtime.CompilerServices
 open System.Collections.Generic
 open System
 open System.Linq
+open Engine.Common.FS
 
 [<AutoOpen>]
 module GraphModule =
@@ -33,10 +35,12 @@ module GraphModule =
     [<AbstractClass>]
     type EdgeBase<'T>(source:'T, target:'T, edgeType:EdgeType) =
         interface IEdge<'T> with
-            member _.Source = source
-            member _.Target = target
-        member val EdgeType = EdgeType.Default with get, set
-    
+            member x.Source = x.Source
+            member x.Target = x.Target
+        member _.Source = source
+        member _.Target = target
+        member val EdgeType = edgeType
+
     type ICoin =
         inherit IChildVertex
 
@@ -89,5 +93,63 @@ module GraphModule =
                     .Distinct()
                     .Where(fun tgt -> not <| x.GetOutgoingEdges(tgt).Any())
             x.Islands.Concat(lasts)
+
+
+
+[<AutoOpen>]
+module internal GraphHelperModule =
+    let dumpGraph(graph:Graph<_, _>) =
+        let g = graph
+        let text =
+            [   for e in g.Edges do
+                    e.ToString()
+                for i in g.Islands do
+                    match box i with
+                    | :? IQualifiedNamed as v -> v.QualifiedName
+                    | _ -> i.Name
+            ] |> String.concat "\r\n"
+
+        logDebug "%s" text
+        tracefn "%s" text
+        text
+
+
+
+[<Extension>]
+type GraphHelper =
+    [<Extension>] static member Dump(graph:Graph<_, _>) = dumpGraph(graph)
+    [<Extension>]
+    static member ToText(edgeType:EdgeType) =
+        let t = edgeType
+        if t.HasFlag(EdgeType.Reset) then
+            if t.HasFlag(EdgeType.Strong) then
+                if t.HasFlag(EdgeType.Bidirectional) then
+                    "<||>"
+                elif t.HasFlag(EdgeType.Reversed) then
+                    "<||"
+                else
+                    "||>"
+            else
+                if t.HasFlag(EdgeType.Bidirectional) then
+                    "<|>"
+                elif t.HasFlag(EdgeType.Reversed) then
+                    "<|"
+                else
+                    "|>"
+        else
+            if t.HasFlag(EdgeType.Bidirectional) then
+                failwith "ERROR"
+            if t.HasFlag(EdgeType.Strong) then
+                if t.HasFlag(EdgeType.Reversed) then
+                    "<<"
+                else
+                    ">>"
+            else
+                if t.HasFlag(EdgeType.Reversed) then
+                    "<"
+                else
+                    ">"
+
+
 
 

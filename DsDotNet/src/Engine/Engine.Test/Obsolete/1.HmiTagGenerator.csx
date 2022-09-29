@@ -1,6 +1,6 @@
 using Engine.Graph;
 
-namespace Engine;
+namespace Engine.Sample;
 
 public static class HmiTagGenerator
 {

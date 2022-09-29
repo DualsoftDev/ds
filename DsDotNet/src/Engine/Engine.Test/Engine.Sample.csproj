@@ -4,6 +4,7 @@
 		<OutputType>Exe</OutputType>
 		<TargetFrameworks>net48;</TargetFrameworks>
 		<!--<TargetFrameworks>net48;netcoreapp3.1</TargetFrameworks>-->
+		<RootNamespace>Engine.Sample</RootNamespace>
 		<LangVersion>10.0</LangVersion>
 		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
 		<OutputPath>$(SolutionDir)\bin</OutputPath>
@@ -12,6 +13,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Engine.Common\Engine.Common.csproj" />
+		<ProjectReference Include="..\Engine.Core\Engine.Core.fsproj" />
 		<ProjectReference Include="..\Engine.Parser\Engine.Parser.csproj" />
 	</ItemGroup>
 

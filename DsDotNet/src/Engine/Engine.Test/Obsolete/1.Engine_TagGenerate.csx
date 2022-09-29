@@ -2,7 +2,7 @@ using Engine.Core;
 using Engine.Graph;
 
 
-namespace Engine;
+namespace Engine.Sample;
 
 //partial class EngineBuilder
 //{

@@ -4,7 +4,7 @@ using System.Threading;
 
 using static System.Net.Mime.MediaTypeNames;
 
-namespace Engine;
+namespace Engine.Sample;
 
 class Program
 {
@@ -26,6 +26,7 @@ class Program
         var logger = Log4NetHelper.PrepareLog4Net("EngineLogger");
         Log4NetWrapper.SetLogger(logger);
         Global.Logger = logger;
+        Engine.Parser.Global.Logger = logger;
 
         //Tester.DoSampleTestVps();
         //Tester.DoSampleTest();
@@ -35,19 +36,18 @@ class Program
         //Tester.DoSampleTestTriangle();
         //Tester.DoSampleTestAddressesAndLayouts();
 
-        //ParserTest.Test(ParserTest.Safety, "Cpu");
-        //ParserTest.Test(ParserTest.StrongCausal, "Cpu");
-        //ParserTest.Test(ParserTest.Buttons, "Cpu");
-        //ParserTest.Test(ParserTest.Dup, "Cpu");
-        //ParserTest.Test(ParserTest.Ppt, "Cpu");
-        //ParserTest.Test(ParserTest.QualifiedName);
-        //ParserTest.Test(ParserTest.Aliases);
-        //ParserTest.Test(ParserTest.Serialize, "Cpu");
-        //ParserTest.Test(ParserTest.ExternalSegmentCall);
-        //ParserTest.Test(ParserTest.ExternalSegmentCallConfusing);
-        //ParserTest.Test(ParserTest.MyFlowReference);
-
-        //ParserTest.Test(ParserTest.Error, "Cpu");
+        SampleRunner.Run(ParserTest.Safety);
+        SampleRunner.Run(ParserTest.StrongCausal);
+        SampleRunner.Run(ParserTest.Buttons);
+        SampleRunner.Run(ParserTest.Dup);
+        SampleRunner.Run(ParserTest.Ppt);
+        SampleRunner.Run(ParserTest.QualifiedName);
+        SampleRunner.Run(ParserTest.Aliases);
+        SampleRunner.Run(ParserTest.Serialize);
+        SampleRunner.Run(ParserTest.ExternalSegmentCall);
+        SampleRunner.Run(ParserTest.ExternalSegmentCallConfusing);
+        SampleRunner.Run(ParserTest.MyFlowReference);
+        SampleRunner.Run(ParserTest.Error);
 
         //InvalidDuplicationTest.Test(InvalidDuplicationTest.DupSystemNameModel);
         //InvalidDuplicationTest.Test(InvalidDuplicationTest.DupFlowNameModel);

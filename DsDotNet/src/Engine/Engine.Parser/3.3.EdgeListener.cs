@@ -12,6 +12,45 @@ class EdgeListener : ListenerBase
         UpdateModelSpits();
     }
 
+
+    override public void EnterButtons(ButtonsContext ctx)
+    {
+        var first = findFirstChild<ParserRuleContext>(ctx);     // {Emergency, Auto, Start, Reset}ButtonsContext
+        var targetDic =
+            first switch
+            {
+                EmergencyButtonsContext => _system.EmergencyButtons,
+                AutoButtonsContext => _system.AutoButtons,
+                StartButtonsContext => _system.StartButtons,
+                ResetButtonsContext => _system.ResetButtons,
+                _ => throw new Exception("ERROR"),
+            };
+
+        var category = first.GetChild(1).GetText();       // [| '[', category, ']', buttonBlock |] 에서 category 만 추려냄 (e.g 'emg')
+        var key = (_system, category);
+        if (ParserHelper.ButtonCategories.Contains(key))
+            throw new Exception($"Duplicated button category {category} near {ctx.GetText()}");
+        else
+            ParserHelper.ButtonCategories.Add(key);
+
+        var buttonDefs = enumerateChildren<ButtonDefContext>(first).ToArray();
+        foreach (var bd in buttonDefs)
+        {
+            var buttonName = findFirstChild<ButtonNameContext>(bd).GetText();
+            var flows =
+                enumerateChildren<FlowNameContext>(bd)
+                .Select(flowCtx => flowCtx.GetText())
+                .Pipe(flowName => Verify($"Flow [{flowName}] not exists!", !_system.Flows.Any(f => f.Name == flowName)))
+                .Select(flowName => _system.Flows.First(f => f.Name == flowName))
+                .ToArray()
+                ;
+
+            if (!targetDic.ContainsKey(buttonName))
+                targetDic.Add(buttonName, new List<Flow>());
+
+            targetDic[buttonName].AddRange(flows);
+        }
+    }
     override public void EnterCausalPhrase(CausalPhraseContext ctx)
     {
         var children = ctx.children.ToArray();      // (CausalTokensDNF CausalOperator)+ CausalTokensDNF
@@ -20,11 +59,15 @@ class EdgeListener : ListenerBase
         object findToken(CausalTokenContext ctx)
         {
             var path = AppendPathElement(collectNameComponents(ctx));
-            var token =
+            if (path.Length == 5)
+                path = AppendPathElement(collectNameComponents(ctx).Combine());
+            var matches =
                 _modelSpits
-                .Where(spit =>
-                    spit.NameComponents.IsStringArrayEqaul(path)
-                    && (spit.Obj is SegmentBase || spit.Obj is Child))
+                .Where(spit => spit.NameComponents.IsStringArrayEqaul(path))
+                ;
+            var token = 
+                matches
+                .Where(spit =>spit.Obj is SegmentBase || spit.Obj is Child)
                 .Select(spit => spit.Obj)
                 .FirstOrDefault();
                 ;
@@ -43,11 +86,11 @@ class EdgeListener : ListenerBase
                 {
                     var l = findToken(left);
                     var r = findToken(right);
-                    if (l == null || r == null)
-                    {
-                        Assert(false);
-                        continue;
-                    }
+                    if (l == null)
+                        throw new ParserException($"ERROR: failed to find [{left.GetText()}]", ctx);
+                    if (r == null)
+                        throw new ParserException($"ERROR: failed to find [{right.GetText()}]", ctx);
+
                     if (_parenting == null)
                         _rootFlow.CreateEdges(l as SegmentBase, r as SegmentBase, op);
                     else

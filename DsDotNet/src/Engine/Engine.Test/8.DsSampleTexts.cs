@@ -1,4 +1,4 @@
-namespace Engine;
+namespace Engine.Sample;
 
 class DsSampleTexts
 {

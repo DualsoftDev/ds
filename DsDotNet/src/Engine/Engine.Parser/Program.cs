@@ -86,7 +86,17 @@ public class Program
             var (p, type_) = (kv.Key, kv.Value);
             var types = type_.ToString("F");
             Trace.WriteLine(p.Combine("/")+$":{types}");
-        }    
+        }
+
+        Trace.WriteLine("---- Spit result");
+        foreach(var spit in model.Spit())
+        {
+            var tName = spit.Obj.GetType().Name;
+            var name = spit.NameComponents.Combine();
+            Trace.WriteLine($"{name}:{tName}");
+
+        }
+
 
         System.Console.WriteLine("Done");
     }

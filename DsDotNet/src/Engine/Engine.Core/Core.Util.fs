@@ -25,6 +25,10 @@ module SpitModuleHelper =
             for ch in segment.Graph.Vertices do
                 yield! spit(ch)
         |]
+    and spitSegmentAlias (segmentAlias:SegmentAlias) : SpitResults =
+        [|
+            yield SpitResult(segmentAlias, segmentAlias.NameComponents)
+        |]
     and spitFlow (flow:Flow) : SpitResults =
         [|
             let fns = flow.NameComponents
@@ -69,6 +73,7 @@ module SpitModuleHelper =
         | :? Flow     as f -> spitFlow f
         | :? Segment  as s -> spitSegment s
         | :? Child    as c -> spitChild c
+        | :? SegmentAlias  as s -> spitSegmentAlias s
     ()
 
 open SpitModuleHelper

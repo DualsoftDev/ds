@@ -32,18 +32,13 @@ class ElementListener : ListenerBase
         if (existing.Where(spit => spit.Obj is SegmentBase || spit.Obj is Child).Any())
             return;
 
-        var pathWithoutParenting =
-            _parenting == null
-            ? null
-            : new[] { _system.Name, _rootFlow.Name }.Concat(ns).ToArray()
-            ;
+        var pathWithoutParenting = new[] { _system.Name, _rootFlow.Name }.Concat(ns).ToArray();
 
         var matches =
             _modelSpits
             .Where(spitResult =>
                 Enumerable.SequenceEqual(spitResult.NameComponents, path)
-                || (pathWithoutParenting != null
-                    && Enumerable.SequenceEqual(spitResult.NameComponents, pathWithoutParenting)))
+                || Enumerable.SequenceEqual(spitResult.NameComponents, pathWithoutParenting))
             .Select(spitResult => spitResult.Obj)
             .ToArray()
             ;
@@ -55,31 +50,34 @@ class ElementListener : ListenerBase
             var alias = matches.OfType<SpitObjAlias>().FirstOrDefault();
             if (alias != null)
             {
-                if (_parenting == null)
-                {
-                    Assert(false);
-                }
-                else
-                {
-                    Assert(ns.Length == 1);
-                    var aliasKey =
-                        matches
-                            .OfType<SpitObjAlias>()
-                            .Where(alias => alias.Mnemonic.IsStringArrayEqaul(pathWithoutParenting))
-                            .Select(alias => alias.Key)
-                            .FirstOrDefault()
-                            ;
+                var aliasKey =
+                    matches
+                        .OfType<SpitObjAlias>()
+                        .Where(alias => alias.Mnemonic.IsStringArrayEqaul(pathWithoutParenting))
+                        .Select(alias => alias.Key)
+                        .FirstOrDefault()
+                        ;
 
-                    var aliasObj =
-                        _modelSpitObjects
-                            .OfType<ApiItem>()
-                            .Where(api => api.NameComponents.IsStringArrayEqaul(aliasKey))
-                            .FirstOrDefault();
-                    Assert(aliasObj != null);
-                    ChildAliased.Create(ns[0], aliasObj, _parenting);
-                    return;
+
+                switch(aliasKey.Length)
+                {
+                    case 2:
+                        var apiItem =
+                            _modelSpitObjects
+                                .OfType<ApiItem>()
+                                .Where(api => api.NameComponents.IsStringArrayEqaul(aliasKey))
+                                .FirstOrDefault();
+                        Assert(apiItem != null);
+
+                        if (_parenting == null)
+                            SegmentAlias.Create(ns.Combine(), _rootFlow, aliasKey);
+                        else
+                            ChildAliased.Create(ns.Combine(), apiItem, _parenting);
+                        return;
+                    case 1:
+                        Assert(false);
+                        break;
                 }
-                Console.WriteLine();
             }
 
             var directCall =
@@ -101,7 +99,8 @@ class ElementListener : ListenerBase
             var prop = _elements[path];
             if (_parenting == null)
             {
-                Assert(ns.Length == 1);
+                if(ns.Length != 1)
+                    throw new ParserException($"ERROR: unknown token [{ns.Combine()}].", ctx);
                 Segment.Create(ns[0], _rootFlow);
                 return;
             }

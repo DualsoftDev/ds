@@ -15,11 +15,11 @@
 -->
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<OutputType>Exe</OutputType>
 		<!--<OutputType>Library</OutputType>-->
 		<TargetFramework>net48</TargetFramework>
 		<RootNamespace>Engine.Parser</RootNamespace>
 		<LangVersion>10.0</LangVersion>
+		<OutputPath>$(SolutionDir)\bin</OutputPath>
 	</PropertyGroup>
 	<ItemGroup>
 		<Antlr4 Include="..\..\..\..\Grammar\g4s\ds.g4" Link="g4s\ds.g4">

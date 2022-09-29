@@ -37,12 +37,13 @@ class EdgeListener : ListenerBase
         foreach (var bd in buttonDefs)
         {
             var buttonName = findFirstChild<ButtonNameContext>(bd).GetText();
-            var flows = (
-                    from flowNameCtx in enumerateChildren<FlowNameContext>(bd)
-                    let flowName = flowNameCtx.GetText()
-                    let flow = _system.Flows.First(fl => fl.Name == flowName)
-                    select flow
-                ).ToArray();
+            var flows =
+                enumerateChildren<FlowNameContext>(bd)
+                .Select(flowCtx => flowCtx.GetText())
+                .Pipe(flowName => Verify($"Flow [{flowName}] not exists!", !_system.Flows.Any(f => f.Name == flowName)))
+                .Select(flowName => _system.Flows.First(f => f.Name == flowName))
+                .ToArray()
+                ;
 
             if (!targetDic.ContainsKey(buttonName))
                 targetDic.Add(buttonName, new List<Flow>());

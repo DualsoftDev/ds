@@ -1,20 +1,10 @@
 using Engine.Parser;
+using Engine.Sample;
 
 namespace Engine
 {
     internal static class ParserTest
     {
-        public static void Test(string text, string activeCpuName = null)
-        {
-            var engine = new EngineBuilder(text, ParserOptions.Create4Simulation(activeCpuName)).Engine;
-            var model = engine.Model;
-            var xs = model.SpitParserObjects().ToArray();
-            Console.WriteLine();
-            //Program.Engine = engine;
-            //engine.Run();
-        }
-
-
         public static string Safety = @"
 [sys] L = {
     [flow] F = {
@@ -440,7 +430,7 @@ namespace Engine
     }
 }
 
-" + Tester.CreateCylinder("A");
+" + SampleRunner.CreateCylinder("A");
 
 
         public static string Diamond = @"
@@ -466,7 +456,7 @@ namespace Engine
     }
 }
 
-" + Tester.CreateCylinder("A") + Tester.CreateCylinder("B");
+" + SampleRunner.CreateCylinder("A") + SampleRunner.CreateCylinder("B");
 
         public static string Call3 = @"
 [sys] MY = {
@@ -521,8 +511,5 @@ namespace Engine
     [flow] F1_C1 = { TX > RX; }
 }
 ";
-
-
-
     }
 }

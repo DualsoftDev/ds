@@ -2,9 +2,8 @@
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using static Engine.Core.CoreClass;
 
-namespace Engine;
+namespace Engine.Sample;
 
 [Flags]
 public enum EnumTest

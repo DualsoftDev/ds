@@ -6,4 +6,4 @@ global using System.Diagnostics;
 global using System.Linq;
 global using static System.Diagnostics.Debug;
 
-namespace Engine;
+namespace Engine.Sample;

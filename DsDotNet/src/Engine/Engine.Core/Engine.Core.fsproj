@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<OutputType>Exe</OutputType>
 		<!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
 		<TargetFramework>net48</TargetFramework>
 		<RootNamespace>Engine.Base</RootNamespace>
 		<LangVersion>6.0</LangVersion>
+		<OutputPath>$(SolutionDir)\bin</OutputPath>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -17,7 +17,7 @@
 		<Compile Include="Graph.fs" />
 		<Compile Include="Core.fs" />
 		<Compile Include="Core.Util.fs" />
-		<Compile Include="Program.fs" />
+		<!--<Compile Include="Program.fs" />-->
 	</ItemGroup>
 
 	<ItemGroup>

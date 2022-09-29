@@ -3,6 +3,7 @@
         Main        // GraphVertexType.{ Segment | Parenting }
         > R3        // GraphVertexType.{ Segment }
         ;
+        C1, C2 > C3, C4 |> C5;
         Main = {        // GraphVertexType.{ Segment | Parenting }
             // diamond
             Ap1 > Am1 > Bm1;
@@ -23,7 +24,7 @@
             > Ap1       // aliased to interface                     // GraphVertexType.{ Segment | Aliased | Call }
             ;
         R2;
-        
+
         [aliases] = {
             A."+" = { Ap1; Ap2; }
             A."-" = { Am1; Am2; }

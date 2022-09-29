@@ -38,13 +38,28 @@ module CoreModule =
          
     and Flow private(name:string, system:DsSystem) =
         inherit FqdnObject(name, system)
-        member val Graph = Graph<IFlowVertex, InFlowEdge>()     // todo: IFlowVertex -> SegmentBase
+        member val Graph = Graph<SegmentBase, InFlowEdge>()     // todo: IFlowVertex -> SegmentBase
         /// alias.target = [| mnemonic1; ... ; mnemonicn; |]
         member val AliasMap = Dictionary<NameComponents, HashSet<string>>(nameComponentsComparer())
         static member Create(name:string, system:DsSystem) =
             let flow = Flow(name, system)
             system.Flows.Add(flow) |> verify $"Duplicated flow name [{name}]"
             flow
+
+    and InFlowEdge private (source:SegmentBase, target:SegmentBase, edgeType:EdgeType) =
+        inherit EdgeBase<SegmentBase>(source, target, edgeType)
+        static member Create(flow:Flow, source, target, edgeType) =
+            let edge = InFlowEdge(source, target, edgeType)
+            flow.Graph.AddEdge(edge) |> verify $"Duplicated edge [{source.Name}{edgeType}{target.Name}]"
+            edge
+
+    and InSegmentEdge private (source:Child, target:Child, edgeType:EdgeType) =
+        inherit EdgeBase<Child>(source, target, edgeType)
+        static member Create(segment:Segment, source, target, edgeType) =
+            let edge = InSegmentEdge(source, target, edgeType)
+            let gr:Graph<_, _> = segment.Graph
+            segment.Graph.AddEdge(edge) |> verify $"Duplicated edge [{source.Name}{edgeType}{target.Name}]"
+            edge
 
     and [<AbstractClass>]
         SegmentBase (name:string, flow:Flow) =
@@ -54,7 +69,7 @@ module CoreModule =
     // normal segment : leaf, stem(parenting)
     and Segment private (name:string, flow:Flow) =
         inherit SegmentBase(name, flow)
-        member val Graph = Graph<IChildVertex, InSegmentEdge>()
+        member val Graph = Graph<Child, InSegmentEdge>()
         member val Flow = flow
         static member Create(name, flow) =
             let segment = Segment(name, flow)

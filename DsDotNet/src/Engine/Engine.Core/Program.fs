@@ -13,19 +13,19 @@ module Exercise =
         let segExVp = Segment.Create("Vp", flowEx)
         let segExPp = Segment.Create("Pp", flowEx)
         let segExSp = Segment.Create("Sp", flowEx)
-        let edgeExVpPp = InFlowEdge(segExVp, segExPp, EdgeType.Default)
-        let edgeExPpSp = InFlowEdge(segExPp, segExSp, EdgeType.Default)
+        let edgeExVpPp = flowEx.CreateEdges(segExVp, segExPp, ">")
+        let edgeExPpSp = flowEx.CreateEdges(segExPp, segExSp, ">")
         let segExVm = Segment.Create("Vm", flowEx)
         let segExPm = Segment.Create("Pm", flowEx)
         let segExSm = Segment.Create("Sm", flowEx)
-        let edgeExVmPm = InFlowEdge(segExVm, segExPm, EdgeType.Default)
-        let edgeExPmSm = InFlowEdge(segExPm, segExSm, EdgeType.Default)
+        let edgeExVmPm = flowEx.CreateEdges(segExVm, segExPm, ">")
+        let edgeExPmSm = flowEx.CreateEdges(segExPm, segExSm, ">")
 
-        let edgeExResetVpVm = InFlowEdge(segExVp, segExVm, EdgeType.Reset ||| EdgeType.Strong)
-        let edgeExResetVmVp = InFlowEdge(segExVm, segExVp, EdgeType.Reset ||| EdgeType.Strong)
+        let edgeExResetVpVm = flowEx.CreateEdges(segExVp, segExVm, "||>")
+        let edgeExResetVmVp = flowEx.CreateEdges(segExVm, segExVp, "||>")
 
-        flowEx.Graph.AddEdges([edgeExVpPp; edgeExPpSp; edgeExVmPm; edgeExPmSm]) |> verify "Duplicated!"
-        flowEx.Graph.AddEdges([edgeExResetVpVm; edgeExResetVmVp]) |> verify "Duplicated!"
+        flowEx.Graph.AddEdges([edgeExVpPp; edgeExPpSp; edgeExVmPm; edgeExPmSm] |> Seq.collect id) |> verify "Duplicated!"
+        flowEx.Graph.AddEdges([edgeExResetVpVm; edgeExResetVmVp] |> Seq.collect id) |> verify "Duplicated!"
 
         let system = DsSystem.Create("my", cpu, model)
         let flow = Flow.Create("F", system)
@@ -40,13 +40,13 @@ module Exercise =
 
         let childCp = ChildApiCall.Create(cp, seg)
         let childCm = ChildApiCall.Create(cm, seg)
-        let childEdgeCpCm = InSegmentEdge(childCp, childCm, EdgeType.Default)
-        seg.Graph.AddEdge(childEdgeCpCm) |> verify "Duplicated!"
+        let childEdgeCpCm = seg.CreateEdges(childCp, childCm, ">")
+        seg.Graph.AddEdges(childEdgeCpCm) |> verify "Duplicated!"
 
         let childCp2 = ChildAliased.Create("\"C+2\"", cp, seg)
         let childCm2 = ChildAliased.Create("\"C-2\"", cm, seg)
-        let childEdgeCpCm2 = InSegmentEdge(childCp2, childCm2, EdgeType.Default)
-        seg.Graph.AddEdge(childEdgeCpCm2) |> verify "Duplicated!"
+        let childEdgeCpCm2 = seg.CreateEdges(childCp2, childCm2, ">")
+        seg.Graph.AddEdges(childEdgeCpCm2) |> verify "Duplicated!"
 
 
         let key1 = [|"seg1"|]

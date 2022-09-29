@@ -8,6 +8,7 @@ public class Program
         var text = @"
 [sys ip = 192.168.0.1] My = {
     [flow] F = {        // GraphVertexType.Flow
+        C1, C2 > C3, C4 |> C5;
         Main        // GraphVertexType.{ Segment | Parenting }
         > R3        // GraphVertexType.{ Segment }
         ;
@@ -26,7 +27,7 @@ public class Program
             ;
         }
         R1              // define my local terminal real segment    // GraphVertexType.{ Segment }
-            > C.""+""     // direct interface call wrapper segment    // GraphVertexType.{ Call }
+            //> C.""+""     // direct interface call wrapper segment    // GraphVertexType.{ Call }
             > Main2     // aliased to my real segment               // GraphVertexType.{ Segment | Aliased }
             > Ap1       // aliased to interface                     // GraphVertexType.{ Segment | Aliased | Call }
             ;
@@ -56,7 +57,25 @@ public class Program
         // 정보로서의 상호 리셋
         ""+"" <||> ""-"";
     }
-}";
+}
+[sys] B = {
+    [flow] F = {
+        Vp > Pp > Sp;
+        Vm > Pm > Sm;
+
+        Vp |> Pm |> Sp;
+        Vm |> Pp |> Sm;
+        Vp <||> Vm;
+    }
+    [interfaces] = {
+        ""+"" = { F.Vp ~ F.Sp }
+        ""-"" = { F.Vm ~ F.Sm }
+        // 정보로서의 상호 리셋
+        ""+"" <||> ""-"";
+    }
+}
+";
+
 
         var helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation());
         var model = helper.Model;
@@ -68,7 +87,17 @@ public class Program
             var (p, type_) = (kv.Key, kv.Value);
             var types = type_.ToString("F");
             Trace.WriteLine(p.Combine("/")+$":{types}");
-        }    
+        }
+
+        Trace.WriteLine("---- Spit result");
+        foreach(var spit in model.Spit())
+        {
+            var tName = spit.Obj.GetType().Name;
+            var name = spit.NameComponents.Combine();
+            Trace.WriteLine($"{name}:{tName}");
+
+        }
+
 
         System.Console.WriteLine("Done");
     }

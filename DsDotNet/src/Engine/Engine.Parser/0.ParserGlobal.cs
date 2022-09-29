@@ -15,6 +15,7 @@ global using static Engine.Parser.dsParser;
 global using static Engine.Parser.DsParser;
 global using static Engine.Core.CoreModule;
 global using static Engine.Core.Interface;
+global using static Engine.Core.SpitModuleHelper;
 
 namespace Engine.Parser;
 public static class Global

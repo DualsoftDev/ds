@@ -11,14 +11,14 @@ public static class ModelParser
         ParseTreeWalker.Default.Walk(sListener, parser.program());
         Trace.WriteLine("--- End of skeleton listener");
 
-        var eListener = new ElementListener(parser, helper);
-        ParseTreeWalker.Default.Walk(eListener, parser.program());
+        var eleListener = new ElementListener(parser, helper);
+        ParseTreeWalker.Default.Walk(eleListener, parser.program());
         Trace.WriteLine("--- End of element listener");
 
 
-        //var pListener = new ParentingFillListener(parser, helper);
-        //ParseTreeWalker.Default.Walk(pListener, parser.program());
-        //Trace.WriteLine("--- End of parenting fill listener");
+        var edgeListener = new EdgeListener(parser, helper);
+        ParseTreeWalker.Default.Walk(edgeListener, parser.program());
+        Trace.WriteLine("--- End of edge listener");
 
 
         //var mListener = new ModelListener(parser, helper);

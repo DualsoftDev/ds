@@ -22,6 +22,8 @@ public class ParserHelper
     internal Flow _rootFlow;
     internal Segment _parenting;
     internal Dictionary<string[], GraphVertexType> _elements = new (NameUtil.CreateNameComponentsComparer());
+    internal SpitResult[] _modelSpits;
+    internal object[] _modelSpitObjects;
 
     public ParserOptions ParserOptions { get; set; }
     public ParserHelper(ParserOptions options)

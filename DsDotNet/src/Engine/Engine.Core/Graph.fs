@@ -24,9 +24,11 @@ module GraphModule =
 
     [<Flags>]
     type EdgeType =
-    | Default = 0b0000000    // Start, Weak
-    | Reset   = 0b0000001    // else start
-    | Strong  = 0b0000010    // else weak
+    | Default       = 0b0000000    // Start, Weak
+    | Reset         = 0b0000001    // else start
+    | Strong        = 0b0000010    // else weak
+    | Reversed      = 0b0000100    // direction reversed : <, <|, <||, etc
+    | Bidirectional = 0b0001000    // 양방향.  <||>
 
     [<AbstractClass>]
     type EdgeBase<'T>(source:'T, target:'T, edgeType:EdgeType) =
@@ -34,12 +36,6 @@ module GraphModule =
             member _.Source = source
             member _.Target = target
         member val EdgeType = EdgeType.Default with get, set
-
-    type InFlowEdge(source:IFlowVertex, target:IFlowVertex, edgeType:EdgeType) =
-        inherit EdgeBase<IFlowVertex>(source, target, edgeType)
-
-    type InSegmentEdge(source:IChildVertex, target:IChildVertex, edgeType:EdgeType) =
-        inherit EdgeBase<IChildVertex>(source, target, edgeType)
     
     type ICoin =
         inherit IChildVertex

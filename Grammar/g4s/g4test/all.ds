@@ -22,7 +22,8 @@
             > Main2     // aliased to my real segment               // GraphVertexType.{ Segment | Aliased }
             > Ap1       // aliased to interface                     // GraphVertexType.{ Segment | Aliased | Call }
             ;
-
+        R2;
+        
         [aliases] = {
             A."+" = { Ap1; Ap2; }
             A."-" = { Am1; Am2; }

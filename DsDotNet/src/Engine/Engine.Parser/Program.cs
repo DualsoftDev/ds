@@ -30,6 +30,7 @@ public class Program
             > Main2     // aliased to my real segment               // GraphVertexType.{ Segment | Aliased }
             > Ap1       // aliased to interface                     // GraphVertexType.{ Segment | Aliased | Call }
             ;
+        R2;
 
         [aliases] = {
             A.""+"" = { Ap1; Ap2; }
@@ -62,8 +63,12 @@ public class Program
         //Try("1 + 2 + 3");
         //Try("1 2 + 3");
         //Try("1 + +");
-        foreach (var p in helper._paths)
-            Trace.WriteLine(p.Combine("/"));
+        foreach (var kv in helper._elements)
+        {
+            var (p, type_) = (kv.Key, kv.Value);
+            var types = type_.ToString("F");
+            Trace.WriteLine(p.Combine("/")+$":{types}");
+        }    
 
         System.Console.WriteLine("Done");
     }

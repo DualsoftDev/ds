@@ -21,7 +21,7 @@ public class ParserHelper
     internal DsSystem _system;
     internal Flow _rootFlow;
     internal Segment _parenting;
-    internal HashSet<string[]> _paths = new HashSet<string[]>(NameUtil.CreateNameComponentsComparer());
+    internal Dictionary<string[], GraphVertexType> _elements = new (NameUtil.CreateNameComponentsComparer());
 
     public ParserOptions ParserOptions { get; set; }
     public ParserHelper(ParserOptions options)
@@ -32,6 +32,8 @@ public class ParserHelper
 
     internal string[] AppendPathElement(string lastName) =>
         CurrentPathElements.Append(lastName).ToArray();
+    internal string[] AppendPathElement(string[] lastNames) =>
+        CurrentPathElements.Concat(lastNames).ToArray();
 
     internal string[] CurrentPathElements
     {

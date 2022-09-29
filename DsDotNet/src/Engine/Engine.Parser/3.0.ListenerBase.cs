@@ -18,9 +18,17 @@ class ListenerBase : dsBaseListener
     protected DsSystem _system { get => ParserHelper._system; set => ParserHelper._system = value; }
     protected Flow _rootFlow { get => ParserHelper._rootFlow; set => ParserHelper._rootFlow = value; }
     protected Segment _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
-    protected HashSet<string[]> _paths => ParserHelper._paths;
+    protected Dictionary<string[], GraphVertexType> _elements => ParserHelper._elements;
+    protected void AddElement(string[] path, GraphVertexType elementType)
+    {
+        if (_elements.ContainsKey(path))
+            _elements[path] |= elementType;
+        else
+            _elements.Add(path, elementType);
+    }
 
     protected string[] AppendPathElement(string name) => ParserHelper.AppendPathElement(name);
+    protected string[] AppendPathElement(string[] names) => ParserHelper.AppendPathElement(names);
     protected string[] CurrentPathElements => ParserHelper.CurrentPathElements;
 
     public ListenerBase(dsParser parser, ParserHelper helper)

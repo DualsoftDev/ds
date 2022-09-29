@@ -90,12 +90,21 @@ public class Program
         }
 
         Trace.WriteLine("---- Spit result");
-        foreach(var spit in model.Spit())
+        var spits = model.Spit();
+        foreach(var spit in spits)
         {
             var tName = spit.Obj.GetType().Name;
             var name = spit.NameComponents.Combine();
             Trace.WriteLine($"{name}:{tName}");
         }
+
+        var spitObjs = spits.Select(spit => spit.Obj);
+        var flowGraphs = spitObjs.OfType<Flow>().Select(f => f.Graph);
+        var segGraphs = spitObjs.OfType<Segment>().Select(s => s.Graph);
+        foreach (var gr in flowGraphs)
+            gr.Dump();
+        foreach (var gr in segGraphs)
+            gr.Dump();
 
         System.Console.WriteLine("Done");
     }

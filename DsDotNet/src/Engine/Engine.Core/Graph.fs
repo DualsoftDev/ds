@@ -1,9 +1,11 @@
 // Copyright (c) Dual Inc.  All Rights Reserved.
 namespace Engine.Core
 
+open System.Runtime.CompilerServices
 open System.Collections.Generic
 open System
 open System.Linq
+open Engine.Common.FS
 
 [<AutoOpen>]
 module GraphModule =
@@ -89,5 +91,34 @@ module GraphModule =
                     .Distinct()
                     .Where(fun tgt -> not <| x.GetOutgoingEdges(tgt).Any())
             x.Islands.Concat(lasts)
+
+
+
+[<AutoOpen>]
+module internal GraphHelperModule =
+    let dumpGraph(graph:Graph<_, _>) =
+        let g = graph
+        let text =
+            [   for e in g.Edges do
+                    match box e.Source, box e.Target with
+                    | (:? IQualifiedNamed as s), (:? IQualifiedNamed as t) ->
+                        $"{s.QualifiedName} -> {t.QualifiedName}"
+                    | _ ->
+                        $"{e.Source.Name} -> {e.Target.Name}"
+                for i in g.Islands do
+                    match box i with
+                    | :? IQualifiedNamed as v -> v.QualifiedName
+                    | _ -> i.Name
+            ] |> String.concat "\r\n"
+
+        logDebug "%s" text
+        tracefn "%s" text
+        text
+
+
+
+[<Extension>]
+type GraphHelper =
+    [<Extension>] static member Dump(graph:Graph<_, _>) = dumpGraph(graph)
 
 

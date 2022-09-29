@@ -74,6 +74,7 @@ module SpitModuleHelper =
         | :? Segment  as s -> spitSegment s
         | :? Child    as c -> spitChild c
         | :? SegmentAlias  as s -> spitSegmentAlias s
+        | _ -> failwith $"ERROR: Unknown type {obj}"
     ()
 
 open SpitModuleHelper
@@ -133,3 +134,4 @@ type EdgeHelper =
                     createFlowEdges(flow, source, target, operator)
     [<Extension>] static member CreateEdges(segment:Segment, source:Child, target:Child, operator:string) =
                     createChildEdges(segment, source, target, operator)
+

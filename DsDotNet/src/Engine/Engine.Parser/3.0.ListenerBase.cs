@@ -60,4 +60,12 @@ class ListenerBase : dsBaseListener
         _parenting = (Segment)_rootFlow.Graph.Vertices.FindWithName(name);
     }
     override public void ExitParenting(ParentingContext ctx) { _parenting = null; }
+
+    //protected IVertex FindVertex(string[] nameComponents)
+    //{
+    //    if (_parenting == null)
+    //    {
+    //        _rootFlow.Graph.
+    //    }
+    //}
 }

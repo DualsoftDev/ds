@@ -22,10 +22,20 @@ class ElementListener : ListenerBase
     override public void EnterCausalToken(CausalTokenContext ctx)
     {
         var path = AppendPathElement(collectNameComponents(ctx));
+        var matches =
+            _system.Spit()
+            .Where(spitResult => Enumerable.SequenceEqual(spitResult.NameComponents, path))
+            .ToArray()
+            ;
         var prop = _elements[path];
         if (_parenting == null)
-            //vType |= GraphVertexType.Segment;
-            Console.WriteLine();
+        {
+
+        }
+        else
+        {
+
+        }
         Console.WriteLine();
     }
 

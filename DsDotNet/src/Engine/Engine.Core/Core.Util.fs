@@ -4,69 +4,77 @@ open System.Runtime.CompilerServices
 open System.Linq
 
 module SpitModuleHelper =
-    type Alias(nameCompoents:string[]) =
-        member x.NameComponents = nameCompoents
+    type SpitObjAlias(key:NameComponents, mnemonic:NameComponents) =
+        member x.Key = key
+        member x.Mnemonic = mnemonic
 
-    type SpitResult = (obj * string[])[]
-    let rec spitChild (child:Child) : SpitResult =
+    type SpitResult(obj:obj, nameComponents:NameComponents) =
+        member val Obj = obj
+        member val NameComponents = nameComponents
+
+    type SpitResults = SpitResult[]
+    let rec spitChild (child:Child) : SpitResults =
         [|
-            yield child, child.NameComponents
+            yield SpitResult(child, child.NameComponents)
         |]
-    and spitSegment (segment:Segment) : SpitResult =
+    and spitSegment (segment:Segment) : SpitResults =
         [|
-            yield segment, segment.NameComponents
+            yield SpitResult(segment, segment.NameComponents)
             for ch in segment.Graph.Vertices do
                 yield! spit(ch)
         |]
-    and spitFlow (flow:Flow) : SpitResult =
+    and spitFlow (flow:Flow) : SpitResults =
         [|
             let fns = flow.NameComponents
-            yield flow, fns
+            yield SpitResult(flow, fns)
             for flowVertex in flow.Graph.Vertices do
                 yield! spit(flowVertex)
 
             // A."+" = { Ap1; Ap2; }    : alias=A."+", mnemonics = [Ap1; Ap2;]
             // Main = { Main2; }
-            for KeyValue(alias, mnemonics) in flow.AliasMap do
+            for KeyValue(aliasKey, mnemonics) in flow.AliasMap do
             for m in mnemonics do
-                let alias2 =
-                    match alias.Length with
-                    | 2 -> alias            // A."+"
-                    | 1 -> fns.Append(alias[0]).ToArray()   // My.Flow + Main
+                let aliasKey2 =
+                    match aliasKey.Length with
+                    | 2 -> aliasKey            // A."+"
+                    | 1 -> fns.Append(aliasKey[0]).ToArray()   // My.Flow + Main
                     | _ -> failwith "ERROR"
-                yield Alias([| yield! fns; m |]), alias2       // [ My.Flow.Ap1, A."+";  My.Flow.Main2, My.Flow.Main; ...]
+
+                let mnemonicFqdn = [| yield! fns; m |]
+                let alias = SpitObjAlias(aliasKey2, mnemonicFqdn)
+                yield SpitResult(alias, aliasKey2)       // key -> alias : [ My.Flow.Ap1, A."+";  My.Flow.Main2, My.Flow.Main; ...]
+                yield SpitResult(alias, mnemonicFqdn)    // mne -> alias
         |]
-    and spitSystem (system:DsSystem) : SpitResult =
+    and spitSystem (system:DsSystem) : SpitResults =
         [|
-            yield system, system.NameComponents
+            yield SpitResult(system, system.NameComponents)
             for flow in system.Flows do
                 yield! spit(flow)
             if system.Api <> null then
                 for itf in system.Api.Items do
-                    yield itf, itf.NameComponents
+                    yield SpitResult(itf, itf.NameComponents)
         |]
-    and spitModel (model:Model) : SpitResult =
+    and spitModel (model:Model) : SpitResults =
         [|
-            yield model, [||]
+            yield SpitResult(model, [||])
             for sys in model.Systems do
                 yield! spit(sys)
         |]
-    and spit(obj:obj) : SpitResult =
+    and spit(obj:obj) : SpitResults =
         match obj with
-        | :? Model as m -> spitModel m
+        | :? Model    as m -> spitModel m
         | :? DsSystem as s -> spitSystem s
-        | :? Flow as f -> spitFlow f
-        | :? Segment as s -> spitSegment s
-        | :? Child as c -> spitChild c
+        | :? Flow     as f -> spitFlow f
+        | :? Segment  as s -> spitSegment s
+        | :? Child    as c -> spitChild c
     ()
 
 open SpitModuleHelper
 
 [<Extension>]
 type SpitModule =
-
-    [<Extension>] static member Spit (model:Model) = spitModel model
+    [<Extension>] static member Spit (model:Model)     = spitModel model
     [<Extension>] static member Spit (system:DsSystem) = spitSystem system
-    [<Extension>] static member Spit (flow:Flow) = spitFlow flow
+    [<Extension>] static member Spit (flow:Flow)       = spitFlow flow
     [<Extension>] static member Spit (segment:Segment) = spitSegment segment
 

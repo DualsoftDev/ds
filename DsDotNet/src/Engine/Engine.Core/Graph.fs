@@ -73,3 +73,24 @@ module GraphModule =
         member x.AddVertex(vertex:'V)    = x.AddVertices([vertex])
         member x.RemoveVertex(vertex:'V) = x.RemoveVertices([vertex])
 
+        member private x.ConnectedVertices = x.Edges |> Seq.collect(fun e -> [e.Source; e.Target]) |> Seq.distinct
+        member x.Islands = x.Vertices.Except(x.ConnectedVertices)
+        member x.GetIncomingEdges(vertex:'V) = x.Edges.Where(fun e -> e.Target = vertex)
+        member x.GetOutgoingEdges(vertex:'V) = x.Edges.Where(fun e -> e.Source = vertex)
+        member x.GetEdges(vertex:'V) = x.GetIncomingEdges(vertex).Concat(x.GetOutgoingEdges(vertex))
+        member x.GetIncomingVertices(vertex:'V) = x.GetIncomingEdges(vertex).Select(fun e -> e.Target)
+        member x.GetOutgoingVertices(vertex:'V) = x.GetOutgoingEdges(vertex).Select(fun e -> e.Source)
+        member x.Inits =
+            let inits =
+                x.Edges.Select(fun e -> e.Source)
+                    .Distinct()
+                    .Where(fun src -> not <| x.GetIncomingEdges(src).Any())
+            x.Islands.Concat(inits)
+        member x.Lasts =
+            let lasts =
+                x.Edges.Select(fun e -> e.Target)
+                    .Distinct()
+                    .Where(fun tgt -> not <| x.GetOutgoingEdges(tgt).Any())
+            x.Islands.Concat(lasts)
+
+

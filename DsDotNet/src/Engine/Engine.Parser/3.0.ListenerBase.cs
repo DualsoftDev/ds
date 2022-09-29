@@ -61,11 +61,11 @@ class ListenerBase : dsBaseListener
     }
     override public void ExitParenting(ParentingContext ctx) { _parenting = null; }
 
-    //protected IVertex FindVertex(string[] nameComponents)
-    //{
-    //    if (_parenting == null)
-    //    {
-    //        _rootFlow.Graph.
-    //    }
-    //}
+    protected IVertex FindVertex(string[] nameComponents)
+    {
+        if (_parenting == null)
+        {
+            _rootFlow.Graph.
+        }
+    }
 }

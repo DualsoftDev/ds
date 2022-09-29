@@ -72,6 +72,7 @@ module GraphModule =
         member x.RemoveEdge(edge:'E)     = x.RemoveEdges([edge])
         member x.AddVertex(vertex:'V)    = x.AddVertices([vertex])
         member x.RemoveVertex(vertex:'V) = x.RemoveVertices([vertex])
+        member x.FindVertex(name:string) = vs.FirstOrDefault(fun v -> v.Name = name)
 
         member private x.ConnectedVertices = x.Edges |> Seq.collect(fun e -> [e.Source; e.Target]) |> Seq.distinct
         member x.Islands = x.Vertices.Except(x.ConnectedVertices)

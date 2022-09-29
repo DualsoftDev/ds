@@ -20,18 +20,21 @@ class EdgeListener : ListenerBase
         object findToken(CausalTokenContext ctx)
         {
             var path = AppendPathElement(collectNameComponents(ctx));
-            return _modelSpits
+            var token =
+                _modelSpits
                 .Where(spit =>
                     spit.NameComponents.IsStringArrayEqaul(path)
                     && (spit.Obj is SegmentBase || spit.Obj is Child))
                 .Select(spit => spit.Obj)
                 .FirstOrDefault();
                 ;
+            Assert(token != null);
+            return token;
         }
         for (int i = 0; i < children.Length - 2; i+=2)
         {
             var lefts = enumerateChildren<CausalTokenContext>(children[i]);         // CausalTokensCNFContext
-            var op = children[i+1] as CausalOperatorContext;
+            var op = children[i + 1].GetText();
             var rights = enumerateChildren<CausalTokenContext>(children[i+2]);
 
             foreach (var left in lefts)
@@ -40,7 +43,10 @@ class EdgeListener : ListenerBase
                 {
                     var l = findToken(left);
                     var r = findToken(right);
-                    Console.WriteLine();
+                    if (_parenting == null)
+                        _rootFlow.CreateEdges(l as SegmentBase, r as SegmentBase, op);
+                    else
+                        _parenting.CreateEdges(l as Child, r as Child, op);
                 }
             }
             Console.WriteLine();

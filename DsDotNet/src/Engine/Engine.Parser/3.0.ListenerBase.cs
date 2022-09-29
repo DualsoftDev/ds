@@ -19,6 +19,9 @@ class ListenerBase : dsBaseListener
     protected Flow _rootFlow { get => ParserHelper._rootFlow; set => ParserHelper._rootFlow = value; }
     protected Segment _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
     protected Dictionary<string[], GraphVertexType> _elements => ParserHelper._elements;
+    protected SpitResult[] _modelSpits { get => ParserHelper._modelSpits; set => ParserHelper._modelSpits = value; }
+    protected object[] _modelSpitObjects { get => ParserHelper._modelSpitObjects; set => ParserHelper._modelSpitObjects = value; }
+
     protected void AddElement(string[] path, GraphVertexType elementType)
     {
         if (_elements.ContainsKey(path))
@@ -30,6 +33,13 @@ class ListenerBase : dsBaseListener
     protected string[] AppendPathElement(string name) => ParserHelper.AppendPathElement(name);
     protected string[] AppendPathElement(string[] names) => ParserHelper.AppendPathElement(names);
     protected string[] CurrentPathElements => ParserHelper.CurrentPathElements;
+    protected void UpdateModelSpits()
+    {
+        _modelSpits = _model.Spit().ToArray();
+        _modelSpitObjects = _modelSpits.Select(spit => spit.Obj).ToArray();
+    }
+
+
 
     public ListenerBase(dsParser parser, ParserHelper helper)
     {
@@ -37,6 +47,10 @@ class ListenerBase : dsBaseListener
         parser.Reset();
     }
 
+    public override void EnterProgram([NotNull] ProgramContext ctx)
+    {
+        UpdateModelSpits();
+    }
 
     override public void EnterSystem(SystemContext ctx)
     {
@@ -61,11 +75,11 @@ class ListenerBase : dsBaseListener
     }
     override public void ExitParenting(ParentingContext ctx) { _parenting = null; }
 
-    protected IVertex FindVertex(string[] nameComponents)
-    {
-        if (_parenting == null)
-        {
-            _rootFlow.Graph.
-        }
-    }
+    //protected IVertex FindVertex(string[] fqdn)
+    //{
+    //    if (_parenting == null)
+    //    {
+    //        _rootFlow.Graph.
+    //    }
+    //}
 }

@@ -86,6 +86,7 @@ type NameUtil =
     [<Extension>] static member DeQuoteOnDemand (identifier:string) = deQuoteOnDemand identifier                       
     [<Extension>] static member Combine (nameComponents:string seq) = combine "." nameComponents 
     [<Extension>] static member Combine (nameComponents:string seq, separator) = combine separator nameComponents 
+    [<Extension>] static member IsStringArrayEqaul (ns1:string seq, ns2:string seq) = Enumerable.SequenceEqual(ns1, ns2)
     [<Extension>] static member CreateNameComparer() = nameComparer()
     [<Extension>] static member CreateNameComponentsComparer() = nameComponentsComparer()
     

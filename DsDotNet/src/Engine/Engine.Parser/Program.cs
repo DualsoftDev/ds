@@ -56,7 +56,25 @@ public class Program
         // 정보로서의 상호 리셋
         ""+"" <||> ""-"";
     }
-}";
+}
+[sys] B = {
+    [flow] F = {
+        Vp > Pp > Sp;
+        Vm > Pm > Sm;
+
+        Vp |> Pm |> Sp;
+        Vm |> Pp |> Sm;
+        Vp <||> Vm;
+    }
+    [interfaces] = {
+        ""+"" = { F.Vp ~ F.Sp }
+        ""-"" = { F.Vm ~ F.Sm }
+        // 정보로서의 상호 리셋
+        ""+"" <||> ""-"";
+    }
+}
+";
+
 
         var helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation());
         var model = helper.Model;

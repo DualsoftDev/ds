@@ -2,12 +2,14 @@ namespace Engine.Core
 
 open System.Runtime.CompilerServices
 open System.Linq
+open System.Diagnostics
 
 module SpitModuleHelper =
     type SpitObjAlias(key:NameComponents, mnemonic:NameComponents) =
         member x.Key = key
         member x.Mnemonic = mnemonic
 
+    [<DebuggerDisplay("Obj={Obj}, Names={NameComponents}")>]
     type SpitResult(obj:obj, nameComponents:NameComponents) =
         member val Obj = obj
         member val NameComponents = nameComponents

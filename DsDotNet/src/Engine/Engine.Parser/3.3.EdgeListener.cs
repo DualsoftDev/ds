@@ -43,6 +43,11 @@ class EdgeListener : ListenerBase
                 {
                     var l = findToken(left);
                     var r = findToken(right);
+                    if (l == null || r == null)
+                    {
+                        Assert(false);
+                        continue;
+                    }
                     if (_parenting == null)
                         _rootFlow.CreateEdges(l as SegmentBase, r as SegmentBase, op);
                     else

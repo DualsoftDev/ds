@@ -12,6 +12,44 @@ class EdgeListener : ListenerBase
         UpdateModelSpits();
     }
 
+
+    override public void EnterButtons(ButtonsContext ctx)
+    {
+        var first = findFirstChild<ParserRuleContext>(ctx);     // {Emergency, Auto, Start, Reset}ButtonsContext
+        var targetDic =
+            first switch
+            {
+                EmergencyButtonsContext => _system.EmergencyButtons,
+                AutoButtonsContext => _system.AutoButtons,
+                StartButtonsContext => _system.StartButtons,
+                ResetButtonsContext => _system.ResetButtons,
+                _ => throw new Exception("ERROR"),
+            };
+
+        var category = first.GetChild(1).GetText();       // [| '[', category, ']', buttonBlock |] 에서 category 만 추려냄 (e.g 'emg')
+        var key = (_system, category);
+        if (ParserHelper.ButtonCategories.Contains(key))
+            throw new Exception($"Duplicated button category {category} near {ctx.GetText()}");
+        else
+            ParserHelper.ButtonCategories.Add(key);
+
+        var buttonDefs = enumerateChildren<ButtonDefContext>(first).ToArray();
+        foreach (var bd in buttonDefs)
+        {
+            var buttonName = findFirstChild<ButtonNameContext>(bd).GetText();
+            var flows = (
+                    from flowNameCtx in enumerateChildren<FlowNameContext>(bd)
+                    let flowName = flowNameCtx.GetText()
+                    let flow = _system.Flows.First(fl => fl.Name == flowName)
+                    select flow
+                ).ToArray();
+
+            if (!targetDic.ContainsKey(buttonName))
+                targetDic.Add(buttonName, new List<Flow>());
+
+            targetDic[buttonName].AddRange(flows);
+        }
+    }
     override public void EnterCausalPhrase(CausalPhraseContext ctx)
     {
         var children = ctx.children.ToArray();      // (CausalTokensDNF CausalOperator)+ CausalTokensDNF

@@ -41,6 +41,11 @@ public class Program
             Main = { Main2; }
         }
     }
+    [emg] = {
+        EMGBTN = { F; };
+        //EmptyButton = {};
+        //NonExistingFlowButton = { F1; };
+    }
 }
 [sys] A = {
     [flow] F = {

@@ -20,12 +20,14 @@ class SkeletonListener : ListenerBase
         ICpu cpu = null;    // todo
         _system = DsSystem.Create(name, cpu, _model);
         Trace.WriteLine($"System: {name}");
+        _paths.Add(CurrentPathElements);
     }
 
     override public void EnterFlow(FlowContext ctx)
     {
         var flowName = ctx.identifier1().GetText().DeQuoteOnDemand();
         _rootFlow = Flow.Create(flowName, _system);
+        _paths.Add(CurrentPathElements);
     }
 
     override public void EnterParenting(ParentingContext ctx)
@@ -33,7 +35,13 @@ class SkeletonListener : ListenerBase
         Trace.WriteLine($"Parenting: {ctx.GetText()}");
         var name = ctx.identifier1().GetText().DeQuoteOnDemand();
         _parenting = Segment.Create(name, _rootFlow);
+        _paths.Add(CurrentPathElements);
     }
+    override public void EnterCausalToken(CausalTokenContext ctx)
+    {
+        _paths.Add(CurrentPathElements.Concat(collectNameComponents(ctx)).ToArray());
+    }
+
 
     public override void EnterAliasListing(AliasListingContext ctx)
     {
@@ -63,7 +71,17 @@ class SkeletonListener : ListenerBase
         var hash = _system.Api.Items;
         var interrfaceNameCtx = findFirstChild<InterfaceNameContext>(ctx);
         var interfaceName = collectNameComponents(interrfaceNameCtx)[0];
-        var serCtx = enumerateChildren<CallComponentsContext>(ctx);
+        var ser =
+            enumerateChildren<CallComponentsContext>(ctx)
+            .Select(collectNameComponents)
+            .Pipe(callComponent => Assert(callComponent.Length == 2))
+            .Select(callCompnent => callCompnent.Prepend(_system.Name).ToArray())
+            ;
+
+        _paths.Add(AppendPathElement(interfaceName));
+        foreach(var cc in ser)
+            _paths.Add(cc);
+
 
         // 이번 stage 에서 일단 interface 이름만 이용해서 빈 interface 객체를 생성하고,
         // TXs, RXs, Resets 은 다음 listener stage 에서 채움..

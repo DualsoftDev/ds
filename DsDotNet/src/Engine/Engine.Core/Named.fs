@@ -5,6 +5,7 @@ open System.Runtime.CompilerServices
 open System
 open System.Linq
 open System.Globalization
+open System.Collections.Generic
 
 [<AutoOpen>]
 module TextUtil = 
@@ -25,7 +26,7 @@ module TextUtil =
     let private quote(s:string) = $"{dq}{s}{dq}"
     let internal quoteOnDemand(s:string) = if isValidIdentifier s then s else $"\"{s}\""
     let internal deQuoteOnDemand(s:string) = if s.StartsWith(dq) && s.EndsWith(dq) then s.Substring(1, s.Length - 2) else s
- 
+    let internal combine (separator:string) (nameComponents:string seq) = nameComponents |> Seq.map quoteOnDemand |> String.concat separator
     type NameComponents = string[]
 
     // 이름이 필요한 객체
@@ -40,6 +41,40 @@ module TextUtil =
         abstract ToText : unit -> string
         default x.ToText() = name
      
+    let internal nameComparer<'T when 'T:> INamed>() = {
+        new IEqualityComparer<'T> with
+            member _.Equals(x:'T, y:'T) = x.Name = y.Name
+            member _.GetHashCode(x) = x.Name.GetHashCode()
+    }
+
+    let internal createNamedHashSet<'T when 'T:> INamed>() =
+        new HashSet<'T>(Seq.empty<'T>, nameComparer<'T>())
+
+    let internal qualifiedNameComparer<'T when 'T:> IQualifiedNamed>() = {
+        new IEqualityComparer<'T> with
+            member _.Equals(x:'T, y:'T) = x.QualifiedName = y.QualifiedName
+            member _.GetHashCode(x) = x.QualifiedName.GetHashCode()
+    }
+
+    let internal createQualifiedNamedHashSet<'T when 'T:> IQualifiedNamed>() =
+        new HashSet<'T>(Seq.empty<'T>, qualifiedNameComparer<'T>())        
+
+    let internal nameComponentsComparer() = {
+        new IEqualityComparer<NameComponents> with
+            member _.Equals(x:NameComponents, y:NameComponents) = Enumerable.SequenceEqual(x, y)
+            member _.GetHashCode(x:NameComponents) = x.Average(fun s -> s.GetHashCode()) |> int
+    }
+
+    type FqdnObject(name:string, parent:IQualifiedNamed) =
+        inherit Named(name)
+        interface IQualifiedNamed with
+            member val NameComponents = [| yield! parent.NameComponents; name |]
+            member x.QualifiedName = combine "." x.NameComponents
+        member x.Name with get() = (x :> INamed).Name
+        member x.NameComponents = (x :> IQualifiedNamed).NameComponents
+        member x.QualifiedName = (x :> IQualifiedNamed).QualifiedName
+
+
 
 [<Extension>]
 type NameUtil =
@@ -49,7 +84,11 @@ type NameUtil =
     [<Extension>] static member IsQuotationRequired (identifier:string) = isValidIdentifier(identifier) |> not
     [<Extension>] static member QuoteOnDemand (identifier:string) = quoteOnDemand identifier                       
     [<Extension>] static member DeQuoteOnDemand (identifier:string) = deQuoteOnDemand identifier                       
-    [<Extension>] static member Combine (nameComponents:string seq) = nameComponents |> Seq.map quoteOnDemand |> String.concat "."
+    [<Extension>] static member Combine (nameComponents:string seq) = combine "." nameComponents 
+    [<Extension>] static member Combine (nameComponents:string seq, separator) = combine separator nameComponents 
+    [<Extension>] static member CreateNameComparer() = nameComparer()
+    [<Extension>] static member CreateNameComponentsComparer() = nameComponentsComparer()
+    
 
     [<Extension>]
     static member FindWithName (namedObjects:#INamed seq, name:string) =

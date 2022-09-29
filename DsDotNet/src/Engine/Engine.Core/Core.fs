@@ -6,34 +6,6 @@ open System.Linq
 
 [<AutoOpen>]
 module CoreModule =
-    let private createNamedHashSet<'T when 'T:> INamed>() =
-        new HashSet<'T>(Seq.empty<'T>, nameComparer<'T>())
-
-    let private qualifiedNameComparer<'T when 'T:> IQualifiedNamed>() = {
-        new IEqualityComparer<'T> with
-            member _.Equals(x:'T, y:'T) = x.QualifiedName = y.QualifiedName
-            member _.GetHashCode(x) = x.QualifiedName.GetHashCode()
-    }
-
-    let private createQualifiedNamedHashSet<'T when 'T:> IQualifiedNamed>() =
-        new HashSet<'T>(Seq.empty<'T>, qualifiedNameComparer<'T>())        
-
-    let private nameComponentsComparer() = {
-        new IEqualityComparer<NameComponents> with
-            member _.Equals(x:NameComponents, y:NameComponents) = Enumerable.SequenceEqual(x, y)
-            member _.GetHashCode(x:NameComponents) = x.Average(fun s -> s.GetHashCode()) |> int
-    }
-
-    type FqdnObject(name:string, parent:IQualifiedNamed) =
-        inherit Named(name)
-        interface IQualifiedNamed with
-            member val NameComponents = [| yield! parent.NameComponents; name |]
-            member x.QualifiedName = x.NameComponents.Combine()
-        member x.Name with get() = (x :> INamed).Name
-        member x.NameComponents = (x :> IQualifiedNamed).NameComponents
-        member x.QualifiedName = (x :> IQualifiedNamed).QualifiedName
-
-
     type Model() =
         member val Systems = createNamedHashSet<DsSystem>()
         //member x.Cpus = x.Systems.Select(fun sys -> sys.Cpu)

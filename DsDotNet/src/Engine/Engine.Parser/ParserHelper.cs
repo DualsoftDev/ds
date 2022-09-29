@@ -1,5 +1,7 @@
 namespace Engine.Parser;
 
+using System.Runtime.InteropServices;
+
 using static Engine.Core.TextUtil;
 
 //using TagDic = System.Collections.Generic.Dictionary<string, Engine.Core.Tag>;
@@ -19,6 +21,7 @@ public class ParserHelper
     internal DsSystem _system;
     internal Flow _rootFlow;
     internal Segment _parenting;
+    internal HashSet<string[]> _paths = new HashSet<string[]>(NameUtil.CreateNameComponentsComparer());
 
     public ParserOptions ParserOptions { get; set; }
     public ParserHelper(ParserOptions options)
@@ -27,10 +30,10 @@ public class ParserHelper
     }
 
 
-    internal string[] GetCurrentPathComponents(string lastName) =>
-        CurrentPathNameComponents.Append(lastName).ToArray();
+    internal string[] AppendPathElement(string lastName) =>
+        CurrentPathElements.Append(lastName).ToArray();
 
-    internal string[] CurrentPathNameComponents
+    internal string[] CurrentPathElements
     {
         get
         {
@@ -46,7 +49,7 @@ public class ParserHelper
             return helper().ToArray();
         }
     }
-    internal string CurrentPath => CurrentPathNameComponents.Combine();
+    internal string CurrentPath => CurrentPathElements.Combine();
 }
 
 

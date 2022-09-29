@@ -62,6 +62,9 @@ public class Program
         //Try("1 + 2 + 3");
         //Try("1 2 + 3");
         //Try("1 + +");
+        foreach (var p in helper._paths)
+            Trace.WriteLine(p.Combine("/"));
+
         System.Console.WriteLine("Done");
     }
 

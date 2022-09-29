@@ -44,12 +44,6 @@ module GraphModule =
     type ICoin =
         inherit IChildVertex
 
-    let internal nameComparer<'T when 'T:> INamed>() = {
-        new IEqualityComparer<'T> with
-            member _.Equals(x:'T, y:'T) = x.Name = y.Name
-            member _.GetHashCode(x) = x.Name.GetHashCode()
-    }
-
     type Graph<'V, 'E
         when 'V :> INamed and 'V : equality        
         and 'E :> IEdge<'V> and 'E: equality> (

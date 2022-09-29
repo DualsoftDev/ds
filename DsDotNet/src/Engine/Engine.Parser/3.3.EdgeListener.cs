@@ -20,11 +20,15 @@ class EdgeListener : ListenerBase
         object findToken(CausalTokenContext ctx)
         {
             var path = AppendPathElement(collectNameComponents(ctx));
-            var token =
+            if (path.Length == 5)
+                path = AppendPathElement(collectNameComponents(ctx).Combine());
+            var matches =
                 _modelSpits
-                .Where(spit =>
-                    spit.NameComponents.IsStringArrayEqaul(path)
-                    && (spit.Obj is SegmentBase || spit.Obj is Child))
+                .Where(spit => spit.NameComponents.IsStringArrayEqaul(path))
+                ;
+            var token = 
+                matches
+                .Where(spit =>spit.Obj is SegmentBase || spit.Obj is Child)
                 .Select(spit => spit.Obj)
                 .FirstOrDefault();
                 ;
@@ -43,11 +47,11 @@ class EdgeListener : ListenerBase
                 {
                     var l = findToken(left);
                     var r = findToken(right);
-                    if (l == null || r == null)
-                    {
-                        Assert(false);
-                        continue;
-                    }
+                    if (l == null)
+                        throw new ParserException($"ERROR: failed to find [{left.GetText()}]", ctx);
+                    if (r == null)
+                        throw new ParserException($"ERROR: failed to find [{right.GetText()}]", ctx);
+
                     if (_parenting == null)
                         _rootFlow.CreateEdges(l as SegmentBase, r as SegmentBase, op);
                     else

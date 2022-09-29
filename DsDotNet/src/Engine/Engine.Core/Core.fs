@@ -2,7 +2,6 @@
 namespace Engine.Core
 
 open System.Collections.Generic
-open System.Linq
 
 [<AutoOpen>]
 module CoreModule =
@@ -52,6 +51,7 @@ module CoreModule =
             let edge = InFlowEdge(source, target, edgeType)
             flow.Graph.AddEdge(edge) |> verify $"Duplicated edge [{source.Name}{edgeType}{target.Name}]"
             edge
+        override x.ToString() = $"{x.Source.QualifiedName} {x.EdgeType.ToText()} {x.Target.QualifiedName}"
 
     and InSegmentEdge private (source:Child, target:Child, edgeType:EdgeType) =
         inherit EdgeBase<Child>(source, target, edgeType)
@@ -60,6 +60,7 @@ module CoreModule =
             let gr:Graph<_, _> = segment.Graph
             segment.Graph.AddEdge(edge) |> verify $"Duplicated edge [{source.Name}{edgeType}{target.Name}]"
             edge
+        override x.ToString() = $"{x.Source.QualifiedName} {x.EdgeType.ToText()} {x.Target.QualifiedName}"
 
     and [<AbstractClass>]
         SegmentBase (name:string, flow:Flow) =
@@ -135,8 +136,7 @@ module CoreModule =
         inherit FqdnObject(name, system)
         interface IFlowVertex
         interface IChildVertex
-        
-        
+                
         member val TXs = createQualifiedNamedHashSet<Segment>()
         member val RXs = createQualifiedNamedHashSet<Segment>()
         member val Resets = createQualifiedNamedHashSet<Segment>()

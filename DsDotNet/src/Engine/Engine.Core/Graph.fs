@@ -56,8 +56,8 @@ module GraphModule =
         let vs = new HashSet<'V>(vertices, nameComparer<'V>())
         let es = new HashSet<'E>(edges, edgeComparer)
         new () = Graph<'V, 'E>(Seq.empty<'V>, Seq.empty<'E>)
-        member _.Vertices = vs.ToArray()
-        member _.Edges = es.ToArray()
+        member _.Vertices = vs
+        member _.Edges = es
         member _.AddEdges(edges:'E seq) =
             edges
             |> Seq.forall(fun e ->

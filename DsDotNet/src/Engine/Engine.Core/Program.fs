@@ -38,10 +38,16 @@ module Exercise =
         cm.TXs.Add(segExVm)  |> verify "Duplicated!"
         cm.RXs.Add(segExSm)  |> verify "Duplicated!"
 
-        let childCp = Child.Create("\"C+\"", cp, seg)
-        let childCm = Child.Create("\"C-\"", cm, seg)
+        let childCp = ChildApiCall.Create(cp, seg)
+        let childCm = ChildApiCall.Create(cm, seg)
         let childEdgeCpCm = InSegmentEdge(childCp, childCm, EdgeType.Default)
         seg.Graph.AddEdge(childEdgeCpCm) |> verify "Duplicated!"
+
+        let childCp2 = ChildAliased.Create("\"C+2\"", cp, seg)
+        let childCm2 = ChildAliased.Create("\"C-2\"", cm, seg)
+        let childEdgeCpCm2 = InSegmentEdge(childCp2, childCm2, EdgeType.Default)
+        seg.Graph.AddEdge(childEdgeCpCm2) |> verify "Duplicated!"
+
 
         let key1 = [|"seg1"|]
         let values1 = HashSet<string>([|"seg2"|]);

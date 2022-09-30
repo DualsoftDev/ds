@@ -1,0 +1,23 @@
+
+
+//////////////////////////////////////////////////////
+//DTS auto generation MY ExSegs
+//////////////////////////////////////////////////////
+[sys] EX = {
+    [flow] F1_ER1 = { EXT; }
+    [flow] F1_ER2 = { EXT; }
+    [flow] F1_C1 = { TX > RX; }
+}
+
+
+[prop] = {
+    [addresses] = {
+        EX.F1_ER1.EXT                                = (,,)
+        EX.F1_ER2.EXT                                = (,,)
+        EX.F1_C1.TX                                  = (, , )
+        EX.F1_C1.RX                                  = (, ,)
+    }
+    [layouts] = {   // System.{Interface 명} = (x, y, w, h)
+        A."+" = (1309,405,205,83)
+    }
+}

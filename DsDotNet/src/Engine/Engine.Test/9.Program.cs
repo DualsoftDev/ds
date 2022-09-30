@@ -28,6 +28,8 @@ class Program
         Global.Logger = logger;
         Engine.Parser.Global.Logger = logger;
 
+        logger.Info("Sample Runner started.");
+
         //Tester.DoSampleTestVps();
         //Tester.DoSampleTest();
         //Tester.DoSampleTestAdvanceReturn();
@@ -35,6 +37,8 @@ class Program
         //Tester.DoSampleTestDiamond();
         //Tester.DoSampleTestTriangle();
         //Tester.DoSampleTestAddressesAndLayouts();
+
+        Engine.Parser.Program.Main(null);
 
         SampleRunner.Run(ParserTest.Safety);
         SampleRunner.Run(ParserTest.StrongCausal);

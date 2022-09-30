@@ -72,6 +72,8 @@ module CoreModule =
         inherit SegmentBase(name, flow)
         member val Graph = Graph<Child, InSegmentEdge>()
         member val Flow = flow
+        member val SafetyConditions = createQualifiedNamedHashSet<Segment>()
+        member val Addresses:Addresses = null with get, set
         static member Create(name, flow) =
             let segment = Segment(name, flow)
             flow.Graph.AddVertex(segment) |> verify $"Duplicated segment name [{name}]"
@@ -144,6 +146,7 @@ module CoreModule =
         member x.AddRXs(rxs:Segment seq) = rxs |> Seq.forall(fun rx -> x.TXs.Add(rx))
         member x.AddResets(resets:Segment seq) = resets |> Seq.forall(fun r -> x.TXs.Add(r))
         member _.System = system
+        member val Xywh:Xywh = null with get, set
 
         static member Create(name, system) =
             let cp = ApiItem(name, system)

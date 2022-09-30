@@ -19,7 +19,7 @@ grammar ds;
 
 import dsFunctions;
 
-program: (system|layouts|addresses|properties|comment)* EOF;        // importStatement|cpus
+program: (system|properties|comment)* EOF;        // importStatement|cpus
 
 test:qstring EOF;
 qstring: STRING_LITERAL EOF;
@@ -37,8 +37,8 @@ layouts: '[' 'layouts' ']' (identifier1)? '=' layoutsBlock;
     layoutsBlock
         : LBRACE (positionDef)* RBRACE
         ;
-positionDef: callPath '=' xywh;
-    callPath: identifier3;
+positionDef: apiPath '=' xywh;
+    apiPath: identifier2;
     xywh: LPARENTHESIS x COMMA y (COMMA w COMMA h)? RPARENTHESIS (SEIMCOLON)?;
     x: INTEGER;
     y: INTEGER;
@@ -75,8 +75,8 @@ addressDef: segmentPath '=' address;
 }
  */
 properties: '[' 'prop' ']' EQ LBRACE (propertyBlock)* RBRACE;
-propertyBlock: (safetyBlock);
-    safetyBlock: '[' 'safety' ']' EQ LBRACE (safetyDef)* RBRACE;
+propertyBlock: (addresses|safety|layouts);
+    safety: '[' 'safety' ']' EQ LBRACE (safetyDef)* RBRACE;
     safetyDef: safetyKey EQ LBRACE safetyValues RBRACE;
     safetyKey: identifier123;
     safetyValues: identifier123 (SEIMCOLON identifier123)*;
@@ -86,7 +86,7 @@ flow
     : flowProp identifier1 '=' LBRACE (
         causal | parenting | identifier12Listing
         | alias
-        | safetyBlock)* RBRACE     // |flowTask|callDef
+        | safety)* RBRACE     // |flowTask|callDef
     ;
 flowProp : '[' 'flow' ('of' identifier1)? ']';
 

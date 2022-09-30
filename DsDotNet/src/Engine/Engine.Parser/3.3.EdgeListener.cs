@@ -77,28 +77,29 @@ class EdgeListener : ListenerBase
             ;
 
 
-        //SegmentBase getKey(string[] segPath)
-        //{
-        //    switch (ctx.Parent)
-        //    {
-        //        // global prop safety
-        //        case PropertyBlockContext:
-        //            return _model.FindFirst<SegmentBase>(segPath);
-
-        //        // in flow safety
-        //        case FlowContext:
-        //            return (SegmentBase)_rootFlow.InstanceMap[segPath[0]];
-
-        //        default:
-        //            throw new Exception("ERROR");
-        //    }
-        //}
-
         foreach (var (key, values) in safetyKvs)
         {
-            Console.WriteLine();
-            //var keySegment = getKey(key);
-            //keySegment.SafetyConditions = values.Select(safety => _model.FindFirst<SegmentBase>(safety)).ToArray();
+            Segment seg = null;
+            switch(key.Length)
+            {
+                case 1:
+                    Assert(ctx.Parent is FlowContext);
+                    seg = _model.FindGraphVertex<Segment>(AppendPathElement(key[0]));
+                    break;
+                case 3:
+                    Assert(ctx.Parent is PropertyBlockContext);
+                    seg = _model.FindGraphVertex<Segment>(key);
+                    break;
+                default:
+                    throw new ParserException($"Invalid safety key[{key.Combine()}]", ctx);
+            }
+
+            foreach (var cond in values.Select(v => _model.FindGraphVertex(v) as Segment))
+            {
+                var added = seg.SafetyConditions.Add(cond);
+                if (!added)
+                    throw new ParserException($"Safety condition [{cond.QualifiedName}] duplicated on safety key[{key.Combine()}]", ctx);
+            }
         }
     }
 

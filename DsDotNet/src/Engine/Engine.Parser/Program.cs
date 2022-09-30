@@ -84,8 +84,16 @@ public class Program
 }
 [prop] = {
     // Global safety
-    [ safety ] = {
+    [safety] = {
         My.F.Main = {B.F.Sp; B.F.Sm}
+    }
+    [addresses] = {
+        My.F.Main = (%Q1234.2343, , )
+    }
+    [layouts] = {
+        MY.F.Main.""A.+"" = (1309,405,205,83)
+        MY.F.Main.2 = (571,803,173,58)
+        MY.F.Main.1 = (297,441,173,58)
     }
 }
 ";

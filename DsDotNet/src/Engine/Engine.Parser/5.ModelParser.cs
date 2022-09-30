@@ -20,15 +20,6 @@ public static class ModelParser
         ParseTreeWalker.Default.Walk(edgeListener, parser.program());
         Trace.WriteLine("--- End of edge listener");
 
-
-        //var mListener = new ModelListener(parser, helper);
-        //ParseTreeWalker.Default.Walk(mListener, parser.program());
-        //Trace.WriteLine("--- End of model listener");
-
-        //parser.Reset();
-        //var eListener = new ElementsListener(parser, helper);
-        //ParseTreeWalker.Default.Walk(eListener, parser.program());
-
         return helper;
     }
 

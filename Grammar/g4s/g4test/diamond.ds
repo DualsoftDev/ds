@@ -6,15 +6,11 @@
             Bp <||> Bm;
             Ap > Am, Bp > Bm > Ap1 > Am1, Bp1 > Bm1;
         }
-        Ap = {A.F.Vp ~ A.F.Sp}
-        Am = {A.F.Vm ~ A.F.Sm}
-        Bp = {B.F.Vp ~ B.F.Sp}
-        Bm = {B.F.Vm ~ B.F.Sm}
-        [alias] = {
-            Ap = { Ap1; Ap2; }
-            Am = { Am1; Am2; }
-            Bp = { Bp1; Bp2; }
-            Bm = { Bm1; Bm2; }
+        [aliases] = {
+            A.P = { Ap; Ap1; Ap2; }
+            A.M = { Am; Am1; Am2; }
+            B.P = { Bp; Bp1; Bp2; }
+            B.M = { Bm; Bm1; Bm2; }
         }
 
     }
@@ -28,6 +24,13 @@
         Vm |> Pp |> Sm;
         Vp <||> Vm;
     }
+    [interfaces] = {
+        P = { F.Vp ~ F.Sp }
+        M = { F.Vm ~ F.Sm }
+        // 정보로서의 상호 리셋
+        P <||> M;
+    }
+
 }
 [sys] B = {
     [flow] F = {
@@ -37,5 +40,11 @@
         Vp |> Pm |> Sp;
         Vm |> Pp |> Sm;
         Vp <||> Vm;
+    }
+    [interfaces] = {
+        P = { F.Vp ~ F.Sp }
+        M = { F.Vm ~ F.Sm }
+        // 정보로서의 상호 리셋
+        P <||> M;
     }
 }

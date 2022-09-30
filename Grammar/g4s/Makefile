@@ -30,6 +30,8 @@ test:
 	$(grun) ds program < g4test/taskFlow.ds
 	@echo call
 	$(grun) ds program < g4test/call.ds
+	@echo call3
+	$(grun) ds program < g4test/call3.ds
 	@echo ppt
 	$(grun) ds program < g4test/ppt.ds
 

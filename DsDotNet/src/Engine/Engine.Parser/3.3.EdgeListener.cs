@@ -55,7 +55,7 @@ class EdgeListener : ListenerBase
     }
 
 
-    public override void EnterSafetyBlock([NotNull] SafetyBlockContext ctx)
+    public override void EnterSafety([NotNull] SafetyContext ctx)
     {
         var safetyDefs = enumerateChildren<SafetyDefContext>(ctx);
         /*

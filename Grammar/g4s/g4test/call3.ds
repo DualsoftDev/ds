@@ -1,22 +1,3 @@
-[sys] MY = {
-    [flow] F1 = {     
-        ER1 > R1;
-        R2 = {
-            ER2 > C1;
-        }
-        R3 = {
-            C1;
-        }
-        R1 = {
-            C1;
-        }
-        ER1     = {EX.F1_ER1.EXT~    EX.F1_ER1.EXT~    EX.F1_ER1.EXT}
-        ER2     = {EX.F1_ER2.EXT~    EX.F1_ER2.EXT~    EX.F1_ER2.EXT}
-        C1     = {EX.F1_C1.TX    ~    EX.F1_C1.RX}
-        ERX     = {EX.F1_ER1.EXT, EX.F2_ER1.EXT ~    EX.F1_ER1.EXT~    EX.F1_ER1.EXT}
-    }
-}
-
 
 
 //////////////////////////////////////////////////////
@@ -29,26 +10,17 @@
 }
 
 
-
-[cpus] AllCpus = {
-    [cpu] Cpu_MY = {
-        MY.F1;
+[prop] = {
+    [addresses] = {
+        EX.F1_ER1.EXT                                = (,,)
+        EX.F1_ER2.EXT                                = (,,)
+        EX.F1_C1.TX                                  = (, , )
+        EX.F1_C1.RX                                  = (, ,)
     }
-    [cpu] Cpu_EX = {
-        EX.F1_ER1;
-        EX.F1_ER2;
-        EX.F1_C1;
+    [layouts] = {
+        MY.F1.Container."A.+" = (1309,405,205,83)
+        MY.F1.C1.X = (1309,405,205,83)
+        MY.F1.ER2.Call = (571,803,173,58)
+        MY.F1.ER1.Y = (297,441,173,58)
     }
 }
-[addresses] = {
-    EX.F1_ER1.EXT                                = (,,)
-    EX.F1_ER2.EXT                                = (,,)
-    EX.F1_C1.TX                                  = (, , )
-    EX.F1_C1.RX                                  = (, ,)
-}
-[layouts] = {
-    MY.F1.C1 = (1309,405,205,83)
-    MY.F1.ER2 = (571,803,173,58)
-    MY.F1.ER1 = (297,441,173,58)
-}
-

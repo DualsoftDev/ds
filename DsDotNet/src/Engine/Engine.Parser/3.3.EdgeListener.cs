@@ -1,3 +1,5 @@
+using System.Runtime.InteropServices;
+
 namespace Engine.Parser;
 
 
@@ -40,7 +42,7 @@ class EdgeListener : ListenerBase
             var flows =
                 enumerateChildren<FlowNameContext>(bd)
                 .Select(flowCtx => flowCtx.GetText())
-                .Pipe(flowName => Verify($"Flow [{flowName}] not exists!", !_system.Flows.Any(f => f.Name == flowName)))
+                .Pipe(flowName => Verify($"Flow [{flowName}] not exists!", _system.Flows.Any(f => f.Name == flowName)))
                 .Select(flowName => _system.Flows.First(f => f.Name == flowName))
                 .ToArray()
                 ;
@@ -51,6 +53,57 @@ class EdgeListener : ListenerBase
             targetDic[buttonName].AddRange(flows);
         }
     }
+
+
+    public override void EnterSafetyBlock([NotNull] SafetyBlockContext ctx)
+    {
+        var safetyDefs = enumerateChildren<SafetyDefContext>(ctx);
+        /*
+         * safety block 을 parsing 해서 key / value 의 dictionary 로 저장
+         * 
+        [safety] = {
+            Main = {P.F.Sp; P.F.Sm}
+            Main2 = {P.F.Sp; P.F.Sm}
+        }
+        => "Main" = {"P.F.Sp"; "P.F.Sm"}
+           "Main2" = {"P.F.Sp"; "P.F.Sm"}
+         */
+        var safetyKvs =
+            from safetyDef in safetyDefs
+            let key = collectNameComponents(findFirstChild(safetyDef, t => t is SafetyKeyContext))   // ["Main"] or ["My", "Flow", "Main"]
+            let valueHeader = enumerateChildren<SafetyValuesContext>(safetyDef).First()
+            let values = enumerateChildren<Identifier123Context>(valueHeader).Select(collectNameComponents).ToArray()
+            select (key, values)
+            ;
+
+
+        //SegmentBase getKey(string[] segPath)
+        //{
+        //    switch (ctx.Parent)
+        //    {
+        //        // global prop safety
+        //        case PropertyBlockContext:
+        //            return _model.FindFirst<SegmentBase>(segPath);
+
+        //        // in flow safety
+        //        case FlowContext:
+        //            return (SegmentBase)_rootFlow.InstanceMap[segPath[0]];
+
+        //        default:
+        //            throw new Exception("ERROR");
+        //    }
+        //}
+
+        foreach (var (key, values) in safetyKvs)
+        {
+            Console.WriteLine();
+            //var keySegment = getKey(key);
+            //keySegment.SafetyConditions = values.Select(safety => _model.FindFirst<SegmentBase>(safety)).ToArray();
+        }
+    }
+
+
+
     override public void EnterCausalPhrase(CausalPhraseContext ctx)
     {
         var children = ctx.children.ToArray();      // (CausalTokensDNF CausalOperator)+ CausalTokensDNF

@@ -3,7 +3,7 @@ namespace Engine.Parser;
 
 public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
         var text = @"
 [sys ip = 192.168.0.1] My = {
@@ -39,6 +39,9 @@ public class Program
             B.""+"" = { Bp1; Bp2; }
             B.""-"" = { Bm1; Bm2; }
             Main = { Main2; }
+        }
+        [safety] = {
+            Main = {A.F.Sp; A.F.Sm}
         }
     }
     [emg] = {
@@ -77,6 +80,12 @@ public class Program
         ""-"" = { F.Vm ~ F.Sm }
         // 정보로서의 상호 리셋
         ""+"" <||> ""-"";
+    }
+}
+[prop] = {
+    // Global safety
+    [ safety ] = {
+        My.F.Main = {B.F.Sp; B.F.Sm}
     }
 }
 ";

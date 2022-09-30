@@ -37,8 +37,8 @@ layouts: '[' 'layouts' ']' (identifier1)? '=' layoutsBlock;
     layoutsBlock
         : LBRACE (positionDef)* RBRACE
         ;
-positionDef: callPath '=' xywh;
-    callPath: identifier4;
+positionDef: apiPath '=' xywh;
+    apiPath: identifier2;
     xywh: LPARENTHESIS x COMMA y (COMMA w COMMA h)? RPARENTHESIS (SEIMCOLON)?;
     x: INTEGER;
     y: INTEGER;

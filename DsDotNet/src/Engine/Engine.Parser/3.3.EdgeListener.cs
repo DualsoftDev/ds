@@ -1,5 +1,3 @@
-using System.Runtime.InteropServices;
-
 namespace Engine.Parser;
 
 
@@ -13,97 +11,6 @@ class EdgeListener : ListenerBase
     {
         UpdateModelSpits();
     }
-
-
-    override public void EnterButtons(ButtonsContext ctx)
-    {
-        var first = findFirstChild<ParserRuleContext>(ctx);     // {Emergency, Auto, Start, Reset}ButtonsContext
-        var targetDic =
-            first switch
-            {
-                EmergencyButtonsContext => _system.EmergencyButtons,
-                AutoButtonsContext => _system.AutoButtons,
-                StartButtonsContext => _system.StartButtons,
-                ResetButtonsContext => _system.ResetButtons,
-                _ => throw new Exception("ERROR"),
-            };
-
-        var category = first.GetChild(1).GetText();       // [| '[', category, ']', buttonBlock |] 에서 category 만 추려냄 (e.g 'emg')
-        var key = (_system, category);
-        if (ParserHelper.ButtonCategories.Contains(key))
-            throw new Exception($"Duplicated button category {category} near {ctx.GetText()}");
-        else
-            ParserHelper.ButtonCategories.Add(key);
-
-        var buttonDefs = enumerateChildren<ButtonDefContext>(first).ToArray();
-        foreach (var bd in buttonDefs)
-        {
-            var buttonName = findFirstChild<ButtonNameContext>(bd).GetText();
-            var flows =
-                enumerateChildren<FlowNameContext>(bd)
-                .Select(flowCtx => flowCtx.GetText())
-                .Pipe(flowName => Verify($"Flow [{flowName}] not exists!", _system.Flows.Any(f => f.Name == flowName)))
-                .Select(flowName => _system.Flows.First(f => f.Name == flowName))
-                .ToArray()
-                ;
-
-            if (!targetDic.ContainsKey(buttonName))
-                targetDic.Add(buttonName, new List<Flow>());
-
-            targetDic[buttonName].AddRange(flows);
-        }
-    }
-
-
-    public override void EnterSafety([NotNull] SafetyContext ctx)
-    {
-        var safetyDefs = enumerateChildren<SafetyDefContext>(ctx);
-        /*
-         * safety block 을 parsing 해서 key / value 의 dictionary 로 저장
-         * 
-        [safety] = {
-            Main = {P.F.Sp; P.F.Sm}
-            Main2 = {P.F.Sp; P.F.Sm}
-        }
-        => "Main" = {"P.F.Sp"; "P.F.Sm"}
-           "Main2" = {"P.F.Sp"; "P.F.Sm"}
-         */
-        var safetyKvs =
-            from safetyDef in safetyDefs
-            let key = collectNameComponents(findFirstChild(safetyDef, t => t is SafetyKeyContext))   // ["Main"] or ["My", "Flow", "Main"]
-            let valueHeader = enumerateChildren<SafetyValuesContext>(safetyDef).First()
-            let values = enumerateChildren<Identifier123Context>(valueHeader).Select(collectNameComponents).ToArray()
-            select (key, values)
-            ;
-
-
-        foreach (var (key, values) in safetyKvs)
-        {
-            Segment seg = null;
-            switch(key.Length)
-            {
-                case 1:
-                    Assert(ctx.Parent is FlowContext);
-                    seg = _model.FindGraphVertex<Segment>(AppendPathElement(key[0]));
-                    break;
-                case 3:
-                    Assert(ctx.Parent is PropertyBlockContext);
-                    seg = _model.FindGraphVertex<Segment>(key);
-                    break;
-                default:
-                    throw new ParserException($"Invalid safety key[{key.Combine()}]", ctx);
-            }
-
-            foreach (var cond in values.Select(v => _model.FindGraphVertex(v) as Segment))
-            {
-                var added = seg.SafetyConditions.Add(cond);
-                if (!added)
-                    throw new ParserException($"Safety condition [{cond.QualifiedName}] duplicated on safety key[{key.Combine()}]", ctx);
-            }
-        }
-    }
-
-
 
     override public void EnterCausalPhrase(CausalPhraseContext ctx)
     {

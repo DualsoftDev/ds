@@ -20,6 +20,10 @@ public static class ModelParser
         ParseTreeWalker.Default.Walk(edgeListener, parser.program());
         Trace.WriteLine("--- End of edge listener");
 
+        var etcListener = new EtcListener(parser, helper);
+        ParseTreeWalker.Default.Walk(etcListener, parser.program());
+        Trace.WriteLine("--- End of etc listener");
+
         return helper;
     }
 

@@ -24,10 +24,17 @@ module internal ModelFindModule =
         else
             failwith "ERROR"
 
+    let findApiItem(model:Model, apiPath:NameComponents) =
+        let sysName, apiKey = apiPath[0], apiPath[1]
+        let sys = model.Systems.First(fun sys -> sys.Name = apiPath[0])
+        let x = sys.Api.Items.FindWithName(apiKey)
+        x
+
 [<Extension>]
 type ModelFindHelper =
     [<Extension>] static member FindGraphVertex(model:Model, fqdn:NameComponents) = findGraphVertex(model, fqdn)
     [<Extension>] static member FindGraphVertex<'V when 'V :> IVertex>(model:Model, fqdn:NameComponents) = findGraphVertexT<'V>(model, fqdn)
+    [<Extension>] static member FindApiItem(model:Model, apiPath:NameComponents) = findApiItem(model, apiPath)
 
 
 

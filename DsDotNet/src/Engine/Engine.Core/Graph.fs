@@ -94,8 +94,6 @@ module GraphModule =
                     .Where(fun tgt -> not <| x.GetOutgoingEdges(tgt).Any())
             x.Islands.Concat(lasts)
 
-
-
 [<AutoOpen>]
 module internal GraphHelperModule =
     let dumpGraph(graph:Graph<_, _>) =

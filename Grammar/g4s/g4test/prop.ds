@@ -17,10 +17,7 @@
         EX.F1_C1.TX                                  = (, , )
         EX.F1_C1.RX                                  = (, ,)
     }
-    [layouts] = {
-        MY.F1.Container."A.+" = (1309,405,205,83)
-        MY.F1.C1.X = (1309,405,205,83)
-        MY.F1.ER2.Call = (571,803,173,58)
-        MY.F1.ER1.Y = (297,441,173,58)
+    [layouts] = {   // System.{Interface 명} = (x, y, w, h)
+        A."+" = (1309,405,205,83)
     }
 }

@@ -7,6 +7,7 @@ open log4net.Config
 open Engine.Core
 open Engine.Common.FS
 open FsUnit.Xunit
+open Engine.Common
 
 // FsUnit/XUnit 사용법:
 // https://github.com/fsprojects/FsUnit/tree/master/tests/FsUnit.Xunit.Test

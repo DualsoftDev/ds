@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
@@ -25,28 +25,27 @@
 	</ItemGroup>
 	
 	<ItemGroup>
+		<None Include="Obsolete\0.ModelTest_Common.fsx" />
+		<None Include="Obsolete\1.ModelExtension.fsx" />
+		<None Include="Obsolete\ModelTest1.fsx" />
+		<None Include="Obsolete\ModelTest2.fsx" />
+		<None Include="Obsolete\EdgeTest.fsx" />
+		<None Include="Obsolete\Tag,Expression,Latch,Bits\Latch, Rising Test.fsx" />
+		<None Include="Obsolete\Tag,Expression,Latch,Bits\PortTag Test.fsx" />
+		<None Include="Obsolete\Tag,Expression,Latch,Bits\Expression Test.fsx" />
+		<None Include="Obsolete\Common test\QueueTest.fsx" />
+		<None Include="Obsolete\Repeat Test\Diamond.fsx" />
+		<None Include="Obsolete\Parser\ParserTest.fsx" />
+		<None Include="Obsolete\Parser\Parse.Duplicated.Test.fsx" />
+		<None Include="Obsolete\Parser\Parse.OK.fsx" />
+		<None Include="Obsolete\test.ipynb" />
 		<None Include="App.config" />
 		<Compile Include="0.OnlyOnce.fs" />
-		<Compile Include="0.ModelTest_Common.fs" />
-		<Compile Include="1.ModelExtension.fs" />
-		<Compile Include="ModelTest1.fs" />
-		<Compile Include="ModelTest2.fs" />
-		<Compile Include="EdgeTest.fs" />
-		<Compile Include="Tag,Expression,Latch,Bits\Latch, Rising Test.fs" />
-		<Compile Include="Tag,Expression,Latch,Bits\PortTag Test.fs" />
-		<Compile Include="Tag,Expression,Latch,Bits\Expression Test.fs" />
-		<Compile Include="Common test/QueueTest.fs" />
-		<Compile Include="Repeat Test\Diamond.fs" />
-		<Compile Include="Parser\ParserTest.fs" />
-		<Compile Include="Parser\Parse.Duplicated.Test.fs" />
-		<Compile Include="Parser\Parse.OK.fs" />
-		<None Include="test.ipynb" />
 	</ItemGroup>
 	
 	<ItemGroup>
-		<ProjectReference Include="..\..\Engine.Runner\Engine.Runner.fsproj" />
+		<ProjectReference Include="..\..\Engine\Engine.Common\Engine.Common.csproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
-		<ProjectReference Include="..\..\Engine\Engine.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 	  <Reference Include="log4net">

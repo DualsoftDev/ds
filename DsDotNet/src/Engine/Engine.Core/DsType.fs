@@ -32,12 +32,12 @@ module DsType =
 
     let EdgeCausalType(txt:string) =
         match txt with
-        | TextSEdge      -> SEdge
-        | TextSPush      -> SPush     
-        | TextREdge      -> REdge     
-        | TextRPush      -> RPush     
-        | TextSReset     -> SReset    
-        | TextInterlock  -> Interlock 
+        | TextSEdge  | TextSEdgeRev     -> SEdge    
+        | TextSPush  | TextSPushRev     -> SPush     
+        | TextREdge  | TextREdgeRev     -> REdge     
+        | TextRPush  | TextRPushRev     -> RPush     
+        | TextSReset | TextSResetRev    -> SReset    
+        | TextInterlock                 -> Interlock 
         |_-> failwithf $"'{txt}' EdgeCausalType Error check type [
             , {TextSEdge}, {TextSPush}
             , {TextREdge}, {TextRPush}

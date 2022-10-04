@@ -14,10 +14,6 @@ module Interface =
 
     type IAutoTag   = inherit ICpuBit
 
-    type IWeakEdge   = inherit IEdges
-    type ISetEdge    = inherit IEdges
-    type IResetEdge  = inherit IEdges
-    type IStrongEdge = inherit IEdges
 
     type IEngine    = inherit INamed
 

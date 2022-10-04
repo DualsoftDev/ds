@@ -2,13 +2,7 @@ using Engine;
 using Engine.Common;
 using Engine.Common.FS;
 using Engine.Core;
-<<<<<<< HEAD:DsDotNet/src/Model/Simulator/Model.Simulator/FormMain.cs
 using Engine.Parser;
-=======
-using Engine.Graph;
-using Engine.Parser;
-using Engine.Runner;
->>>>>>> bDotNet2:DsDotNet/src/Model.Simulator/FormMain.cs
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -17,9 +11,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Windows.Forms;
 using static Engine.Common.FS.MessageEvent;
-using static Engine.Core.CoreClass;
-using static Engine.Core.CoreFlow;
-using static Engine.Core.DsType;
+using static Engine.Core.CoreModule;
 using Task = System.Threading.Tasks.Task;
 
 namespace Model.Simulator
@@ -28,7 +20,7 @@ namespace Model.Simulator
     {
         public static FormMain TheMain;
 
-        private CoreStruct.Model _Model = new CoreStruct.Model();
+        private CoreModule.Model _Model = new CoreModule.Model();
         private string _dsText;
 
         public Dictionary<Flow, TabPage> DicUI;
@@ -111,23 +103,6 @@ namespace Model.Simulator
         {
             richTextBox_Debug.Clear();
             richTextBox_Debug.AppendText($"{DateTime.Now} : Log Clear");
-
-            try
-            {
-                var modelText = Tester.GetTextDiamond();
-<<<<<<< HEAD:DsDotNet/src/Model/Simulator/Model.Simulator/FormMain.cs
-                //var eb = new EngineBuilder(modelText, ParserOptions.Create4Simulation("Cpu"));
-=======
-                var eb = new EngineBuilder(modelText, ParserOptions.Create4Simulation("Cpu"));
->>>>>>> bDotNet2:DsDotNet/src/Model.Simulator/FormMain.cs
-            }
-
-            catch (Exception ex)
-            {
-                WriteDebugMsg(DateTime.Now, MSGLevel.Error, ex.Message);
-            }
-
-
         }
         private void button_Compile_Click(object sender, EventArgs e)
         {
@@ -150,12 +125,9 @@ namespace Model.Simulator
                     xtraTabControl_My.TabPages.Clear();
                     DicUI.Clear();
 
-<<<<<<< HEAD:DsDotNet/src/Model/Simulator/Model.Simulator/FormMain.cs
-                    var helper = ModelParser.ParseFromString2(_dsText, ParserOptions.Create4Simulation());
-                    _Model = helper.Model;
-=======
-                    _Engine = new EngineBuilder(_dsText, ParserOptions.Create4Simulation()).Engine;
->>>>>>> bDotNet2:DsDotNet/src/Model.Simulator/FormMain.cs
+                    //var helper = ModelParser.ParseFromString2(_dsText, ParserOptions.Create4Simulation());
+                    //_Model = helper.Model;
+                    //_Engine = new EngineBuilder(_dsText, ParserOptions.Create4Simulation()).Engine;
 
                     _Model.Systems.ForEach(f =>
                     {

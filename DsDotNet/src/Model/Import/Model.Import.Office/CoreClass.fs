@@ -10,7 +10,7 @@ module CoreClass =
    
 
     [<DebuggerDisplay("{ToText()}")>]
-    type Segment(name:string, childFlow:ChildFlow)  =
+    type SegBase(name:string, childFlow:ChildFlow)  =
         inherit Named(name)
         let mutable status4 = Status4.Homing
         interface IVertex 
@@ -25,7 +25,7 @@ module CoreClass =
    
    /// Modeled Edge : 사용자가 작성한 모델 상의 segment 간의 연결 edge (Wire)
     [<DebuggerDisplay("ToText()")>]
-    type DsEdge(src:Segment, tgt:Segment, causal:EdgeCausal) =
+    type DsEdge(src:SegBase, tgt:SegBase, causal:EdgeCausal) =
         interface IEdge with
             member _.Source  = src
             member _.Target  = tgt

@@ -16,7 +16,7 @@ module ConvertM =
     let dicChild = ConcurrentDictionary<string, string>()
 
     ///mEdges   -> CoreModule.Child
-    let private convertChildren(mSeg:Segment, coreSeg:CoreModule.Segment, coreSys:CoreModule.DsSystem) =   
+    let private convertChildren(mSeg:MSeg, coreSeg:CoreModule.Segment, coreSys:CoreModule.DsSystem) =   
         let getNode(seg:MSeg) = coreSeg.Graph.FindVertex($"{seg.BaseSys.Name}.{seg.ValidName}")
         ///MSeg   -> CoreModule.Child
         let convertChild(mSeg:MSeg) = 

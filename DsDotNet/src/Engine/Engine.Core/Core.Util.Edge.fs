@@ -7,20 +7,34 @@ open System.Runtime.CompilerServices
 module internal EdgeModule =
     let getEdgeType(operator:string) =
         match operator with
-        | ">"   -> EdgeType.Default
-        | ">>"  -> EdgeType.Strong
-        | "|>"  -> EdgeType.Reset
-        | "||>" -> EdgeType.Reset  ||| EdgeType.Strong
+        | TextSEdge -> EdgeType.Default //">"  
+        | TextSPush -> EdgeType.Strong  //">>" 
+        | TextREdge -> EdgeType.Reset   //"|>"  
+        | TextRPush -> EdgeType.Reset  ||| EdgeType.Strong //"||>" 
 
-        | "<"   -> EdgeType.Reversed
-        | "<<"  -> EdgeType.Reversed ||| EdgeType.Strong
-        | "<|"  -> EdgeType.Reversed ||| EdgeType.Reset
-        | "<||" -> EdgeType.Reversed ||| EdgeType.Reset  ||| EdgeType.Strong
+        | TextSEdgeRev -> EdgeType.Reversed //"<"   
+        | TextSPushRev -> EdgeType.Reversed ||| EdgeType.Strong //"<<"  
+        | TextREdgeRev -> EdgeType.Reversed ||| EdgeType.Reset //"<|" 
+        | TextRPushRev -> EdgeType.Reversed ||| EdgeType.Reset  ||| EdgeType.Strong //"<||" 
 
-        | "<|>" -> EdgeType.Reset  ||| EdgeType.Bidirectional
-        | "<||>" -> EdgeType.Reset  ||| EdgeType.Strong ||| EdgeType.Bidirectional
-
+        | TextInterlock -> EdgeType.Reset  ||| EdgeType.Bidirectional ||| EdgeType.Strong //"<||>" 
+        | TextInterlockWeak -> EdgeType.Reset  ||| EdgeType.Bidirectional //"<|>"
+        //| TextSReset   "=>" 후행리셋 처리필요
+        //| TextSResetRev"<="
         | _ -> failwith "ERROR"
+
+    let getEdgeText(edgeType:EdgeType) =
+        if(  edgeType.HasFlag(EdgeType.Default))                        then TextSEdge 
+        elif(edgeType.HasFlag(EdgeType.Reversed))                       then TextSEdgeRev
+        elif(edgeType.HasFlag(EdgeType.Strong))                         then TextSPush 
+        elif(edgeType.HasFlag(EdgeType.Reversed ||| EdgeType.Strong))   then TextSPushRev
+        elif(edgeType.HasFlag(EdgeType.Reset))                          then TextREdge 
+        elif(edgeType.HasFlag(EdgeType.Reset ||| EdgeType.Reversed))    then TextREdgeRev 
+        elif(edgeType.HasFlag(EdgeType.Reset ||| EdgeType.Strong))      then TextRPush
+        elif(edgeType.HasFlag(EdgeType.Reversed ||| EdgeType.Reset ||| EdgeType.Strong))       then TextRPushRev
+        elif(edgeType.HasFlag(EdgeType.Reset ||| EdgeType.Bidirectional ||| EdgeType.Strong )) then TextInterlock
+        elif(edgeType.HasFlag(EdgeType.Reset ||| EdgeType.Bidirectional))                      then TextInterlockWeak
+        else failwith "ERROR"
 
     let createFlowEdges(flow:Flow, source:SegmentBase, target:SegmentBase, operator:string) =
         let eType = getEdgeType(operator)
@@ -53,4 +67,6 @@ type EdgeHelper =
 
     [<Extension>] static member GetEdgeType(edgeCausal:EdgeCausal) =
                     getEdgeType(edgeCausal.ToText())
+    [<Extension>] static member GetEdgeCausal(edgeType:EdgeType) =
+                    getEdgeText(edgeType) |> EdgeCausalType
 

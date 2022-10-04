@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using static Engine.Core.CoreFlow;
+using static Engine.Core.CoreModule;
 using static Engine.Core.CoreStruct;
 
 namespace Model.Simulator
@@ -72,7 +73,7 @@ namespace Model.Simulator
         internal void CreateNewTabViewer(DsSystem sys)
         {
 
-            var flows = sys.RootFlows;
+            var flows = sys.Flows;
             var flowTotalCnt = flows.Count();
             flows.ToList().ForEach(f =>
             {

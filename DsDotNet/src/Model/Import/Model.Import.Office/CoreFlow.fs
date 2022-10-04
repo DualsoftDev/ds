@@ -10,7 +10,7 @@ module CoreFlow =
 
     /// Flow Edge
     [<AbstractClass>]
-    type Flow(name) as this =
+    type FlowBase(name) as this =
         inherit Named(name)
         //엣지연결 리스트
         let edges = HashSet<IEdge>() 
@@ -46,7 +46,7 @@ module CoreFlow =
 
 
     type RootFlow(name, system:SysBase) =
-        inherit Flow(name)
+        inherit FlowBase(name)
         //do system.AddFlow(this) |> ignore
 
         new (cpu:ICpu, name, system) = RootFlow(name, system)
@@ -60,7 +60,7 @@ module CoreFlow =
                 
 
     type ChildFlow(name) as this =
-        inherit Flow(name)
+        inherit FlowBase(name)
         let rec search(currNode:IVertex, isBack:bool) = 
                if(isBack)
                then this.PrevNodes(currNode) |> Seq.collect(fun node -> search(node, isBack))

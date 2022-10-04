@@ -4,12 +4,18 @@ namespace Engine.Core
 [<AutoOpen>]
 module DsText = 
     //edge    
-    let [<Literal>] TextSEdge     = ">"
-    let [<Literal>] TextSPush     = ">>"
-    let [<Literal>] TextREdge     = "|>"
-    let [<Literal>] TextRPush     = "||>"
-    let [<Literal>] TextSReset    = "=>"
-    let [<Literal>] TextInterlock = "<||>"
+    let [<Literal>] TextSEdge         = ">"
+    let [<Literal>] TextSEdgeRev      = "<"
+    let [<Literal>] TextSPush         = ">>"
+    let [<Literal>] TextSPushRev      = "<<"
+    let [<Literal>] TextREdge         = "|>"
+    let [<Literal>] TextREdgeRev      = "<|"
+    let [<Literal>] TextRPush         = "||>"
+    let [<Literal>] TextRPushRev      = "<||"
+    let [<Literal>] TextSReset        = "=>"
+    let [<Literal>] TextSResetRev     = "<="
+    let [<Literal>] TextInterlockWeak = "<|>"
+    let [<Literal>] TextInterlock     = "<||>"
   
 [<AutoOpen>]
 module DsTextDataType =    

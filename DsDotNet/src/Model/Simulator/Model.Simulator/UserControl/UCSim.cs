@@ -8,8 +8,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using static Engine.Core.CoreClass;
-using static Engine.Core.CoreEdge;
 using static Engine.Core.CoreFlow;
+using static Engine.Core.CoreModule;
 using static Engine.Core.DsType;
 using static Engine.Core.Interface;
 using static Model.Import.Office.Object;
@@ -53,32 +53,38 @@ namespace Model.Simulator
             //var a = flow.CollectArrow();
 
             //flow.NoEdgeSegs.ToList().ForEach(seg => DrawSeg(viewer.Graph.RootSubgraph, seg, subDraws));
-            drawMEdgeGraph(flow.CollectArrow(), viewer.Graph.RootSubgraph);
+            drawMEdgeGraph(flow.Graph.Edges, viewer.Graph.RootSubgraph);
 
             viewer.SetCalculatedLayout(viewer.CalculateLayout(viewer.Graph));
         }
 
-        private void drawMEdgeGraph(IEnumerable<IEdge> edgeCausal, Subgraph subgraph)
+        private void drawMEdgeGraph(IEnumerable<InFlowEdge> edges, Subgraph subgraph)
         {
-            foreach (var edge in edgeCausal)
-                DrawMEdge(subgraph, edge);
+            foreach (var edge in edges)
+                DrawMEdge(subgraph, edge, null);
         }
 
-        private void DrawMEdge(Subgraph subgraph, IEdge edge)
+        private void drawMEdgeGraph(IEnumerable<InSegmentEdge> edges, Subgraph subgraph)
         {
-            SegmentBase segSrc = edge.Source as SegmentBase;
-            SegmentBase segTgr = edge.Target as SegmentBase;
+            foreach (var edge in edges)
+                DrawMEdge(subgraph, null, edge);
+        }
+
+        private void DrawMEdge(Subgraph subgraph, InFlowEdge edge, InSegmentEdge segEdge)
+        {
+            Segment segSrc = edge.Source as Segment;
+            Segment segTgr = edge.Target as Segment;
 
             var subGSrc = new Subgraph(segSrc.Name);
             var subGTgt = new Subgraph(segTgr.Name);
-            bool hasChildSrc = segSrc != null && segSrc.Children.Any();
-            bool hasChildTgt = segTgr != null && segTgr.Children.Any();
+            bool hasChildSrc = segSrc != null && segSrc.Graph.Vertices.Any();
+            bool hasChildTgt = segTgr != null && segTgr.Graph.Vertices.Any();
 
             if (hasChildSrc) subgraph.AddSubgraph(subGSrc);
             if (hasChildTgt) subgraph.AddSubgraph(subGTgt);
 
             var gEdge = viewer.Graph.AddEdge(subGSrc.Id, "", subGTgt.Id);
-            DrawEdgeStyle(gEdge, edge as DsEdge, true);
+            DrawEdgeStyle(gEdge, edge, true);
             DrawSub(subgraph, segSrc, subGSrc, gEdge.SourceNode, hasChildSrc);
             DrawSub(subgraph, segTgr, subGTgt, gEdge.TargetNode, hasChildTgt);
         }
@@ -91,14 +97,14 @@ namespace Model.Simulator
             nNode.Attr.Color = Color.Black;
 
         }
-        private void DrawSub(Subgraph subgraph, SegmentBase seg, Subgraph subG, Node gNode, bool bDrawSub)
+        private void DrawSub(Subgraph subgraph, Segment seg, Subgraph subG, Node gNode, bool bDrawSub)
         {
             if (_dicDrawing.ContainsKey(gNode.Id)) return;
             else _dicDrawing.Add(gNode.Id, gNode);
 
-            if (bDrawSub && seg.Nodes.Any())
+            if (bDrawSub && seg.Graph.Vertices.Any())
             {
-                drawMEdgeGraph(seg.CollectArrow(), subG);
+                drawMEdgeGraph(seg.Graph.Edges, subG);
 
                 //seg.NoEdgeSegs.ToList().ForEach(subSeg => DrawSeg(subG, subSeg, null));
             }
@@ -107,47 +113,47 @@ namespace Model.Simulator
         }
 
 
-        private void DrawEdgeStyle(Edge gEdge, DsEdge edge, bool model = false)
+        private void DrawEdgeStyle(Edge gEdge, InFlowEdge edge, bool model = false)
         {
             //gEdge.Attr.Color = Color.Black;
             //gEdge.Label.FontColor = Color.White;
             gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Generalization;
             gEdge.Attr.Color = Color.Black;
 
-            if (edge.Causal == EdgeCausal.SEdge)
+            if (EdgeHelper.GetEdgeCausal(edge.EdgeType) == EdgeCausal.SEdge)
             {
                 gEdge.Attr.AddStyle(Style.Solid);
                 gEdge.Attr.Color = Color.DeepSkyBlue;
                 gEdge.Attr.LineWidth = 2;
             }
-            else if (edge.Causal == EdgeCausal.SPush)
+            else if (EdgeHelper.GetEdgeCausal(edge.EdgeType) == EdgeCausal.SPush)
             {
                 gEdge.Attr.AddStyle(Style.Solid);
                 gEdge.Attr.LineWidth = 4;
                 gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
                 gEdge.Attr.Color = Color.DeepSkyBlue;
             }
-            else if (edge.Causal == EdgeCausal.REdge)
+            else if (EdgeHelper.GetEdgeCausal(edge.EdgeType) == EdgeCausal.REdge)
             {
                 gEdge.Attr.AddStyle(Style.Dashed);
                 gEdge.Attr.Color = Color.Green;
                 gEdge.Attr.LineWidth = 2;
             }
-            else if (edge.Causal == EdgeCausal.RPush)
+            else if (EdgeHelper.GetEdgeCausal(edge.EdgeType) == EdgeCausal.RPush)
             {
                 gEdge.Attr.AddStyle(Style.Dashed);
                 gEdge.Attr.LineWidth = 4;
                 gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
                 gEdge.Attr.Color = Color.Green;
             }
-            else if (edge.Causal == EdgeCausal.Interlock)
+            else if (EdgeHelper.GetEdgeCausal(edge.EdgeType) == EdgeCausal.Interlock)
             {
                 gEdge.Attr.AddStyle(Style.Dashed);
                 gEdge.Attr.ArrowheadAtSource = ArrowStyle.Normal;
                 gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
                 gEdge.Attr.Color = Color.PaleGoldenrod;
             }
-            else if (edge.Causal == EdgeCausal.SReset)
+            else if (EdgeHelper.GetEdgeCausal(edge.EdgeType) == EdgeCausal.SReset)
             {
                 gEdge.Attr.AddStyle(Style.Solid);
                 gEdge.Attr.ArrowheadAtSource = ArrowStyle.Tee;
@@ -159,8 +165,8 @@ namespace Model.Simulator
 
             if (model)
             {
-                var src = edge.Source as SegmentBase;
-                var tgt = edge.Target as SegmentBase;
+                var src = edge.Source as Segment;
+                var tgt = edge.Target as Segment;
 
                 UpdateNodeView(gEdge.SourceNode, src == null ? NodeType.TR : NodeType.MY);
                 UpdateNodeView(gEdge.TargetNode, tgt == null ? NodeType.TR : NodeType.MY);

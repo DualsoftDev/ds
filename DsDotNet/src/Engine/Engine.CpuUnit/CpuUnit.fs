@@ -10,7 +10,7 @@ module CpuUnit =
   
     [<DebuggerDisplay("{name}")>]
     type Cpu(name:string, model:Model)  =
-        let rootFlows = HashSet<RootFlow>() 
+        let rootFlows = HashSet<Flow>() 
         interface ICpu 
 
         member x.Name = name

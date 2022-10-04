@@ -15,7 +15,7 @@ module CpuEvent =
     let SegSubject = new Subject<BitParam>()
     /// Message 공지.
   
-    let ChangeStatus (seg:SegBase, bit, value) = 
+    let ChangeStatus (seg:Segment, bit, value) = 
         async {
             SegSubject.OnNext(BitParam.BIT (DateTime.Now, bit, value))
         } |> Async.StartImmediate 

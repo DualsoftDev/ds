@@ -1,13 +1,9 @@
-using Engine;
 using Engine.Common;
 using Engine.Common.FS;
 using Engine.Core;
-using Engine.Parser;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Reactive.Linq;
 using System.Windows.Forms;
 using static Engine.Common.FS.MessageEvent;
@@ -82,7 +78,7 @@ namespace Model.Simulator
                 DicUI.Clear();
 
                 _dsText = File.ReadAllText(path);
-                await Task.Run(() => { ExportTextModel( _dsText); });
+                await Task.Run(() => { ExportTextModel(_dsText); });
 
                 ProcessEvent.DoWork(0);
 

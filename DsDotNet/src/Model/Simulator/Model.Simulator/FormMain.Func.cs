@@ -1,15 +1,12 @@
 using Engine.Common;
 using Engine.Common.FS;
-using Engine.Core;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
-using static Engine.Core.CoreFlow;
 using static Engine.Core.CoreModule;
-using static Engine.Core.CoreStruct;
 
 namespace Model.Simulator
 {
@@ -22,7 +19,7 @@ namespace Model.Simulator
 
             var textLines = dsText.Split('\n');
             Color rndColor = Color.Black;
-          
+
             this.Do(() =>
             {
                 int lineCur = 0;

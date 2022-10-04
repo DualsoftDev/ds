@@ -1,5 +1,4 @@
 using Engine.Common;
-using Engine.Core;
 using Microsoft.Msagl.Drawing;
 using Microsoft.Msagl.GraphViewerGdi;
 using Microsoft.Msagl.Layout.Layered;
@@ -88,7 +87,7 @@ namespace Dual.Model.Import
 
 
 
-        private void drawMEdgeGraph(List<MEdge> edges,  Subgraph subgraph)
+        private void drawMEdgeGraph(List<MEdge> edges, Subgraph subgraph)
         {
             foreach (var mEdge in edges)
                 DrawMEdge(subgraph, mEdge);
@@ -99,8 +98,8 @@ namespace Dual.Model.Import
         {
             MEdge mEdge = edge;
 
-            bool bDrawSubSrc = mEdge.Source.IsChildExist ;
-            bool bDrawSubTgt = mEdge.Target.IsChildExist ;
+            bool bDrawSubSrc = mEdge.Source.IsChildExist;
+            bool bDrawSubTgt = mEdge.Target.IsChildExist;
 
             var mEdgeSrc = mEdge.Source;
             var mEdgeTgt = mEdge.Target;
@@ -140,7 +139,7 @@ namespace Dual.Model.Import
             if (bDrawSub && (seg.MEdges.Any() || seg.Singles.Any()))
             {
                 if (seg.MEdges.Any())
-                    drawMEdgeGraph(seg.MEdges.ToList(),  subG);
+                    drawMEdgeGraph(seg.MEdges.ToList(), subG);
 
                 seg.Singles.ToList().ForEach(subSeg => DrawSeg(subG, subSeg));
             }

@@ -52,7 +52,7 @@ namespace Dual.Model.Import
 
             _DicMyUI = new Dictionary<MFlow, TabPage>();
             _DicExUI = new Dictionary<MFlow, TabPage>();
-            
+
             _Demo = ImportCheck.GetDemoModel("test");
 
             // this.Text = UtilFile.GetVersion();
@@ -124,7 +124,7 @@ namespace Dual.Model.Import
                 richTextBox_ds.Clear();
                 _DicMyUI.Clear();
                 _DicExUI.Clear();
-                    
+
                 xtraTabControl_My.TabPages.Clear();
                 xtraTabControl_Ex.TabPages.Clear();
 
@@ -175,8 +175,8 @@ namespace Dual.Model.Import
             richTextBox_Debug.AppendText($"{DateTime.Now} : Log Clear");
         }
 
-      
-      
+
+
 
         private void button_comfile_Click(object sender, EventArgs e)
         {

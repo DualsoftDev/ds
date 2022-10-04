@@ -7,12 +7,9 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Windows.Forms;
 using static Engine.Common.FS.MessageEvent;
-using static Engine.Core.CoreModule;
 using static Engine.Core.DsTextProperty;
-using static Engine.CpuUnit.CpuUnit;
 using static Model.Import.Office.Object;
 
 namespace Dual.Model.Import

@@ -1,9 +1,3 @@
-using DocumentFormat.OpenXml.Spreadsheet;
-using Engine.Common.FS;
-using Engine.Core;
-using Microsoft.Msagl.Core.DataStructures;
-using Model.Import.Office;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -48,7 +42,7 @@ namespace Dual.Model.Import
             if (model == null) return;
 
             var segs = model.AllFlows.SelectMany(s => s.Nodes).Cast<MSeg>();
-         
+
             await Task.Run(async () =>
             {
                 await Test(segs, Status4.Homing, AllSeg);
@@ -69,7 +63,7 @@ namespace Dual.Model.Import
             if (model == null) return;
             if (!org) await TestORG(model);
 
-            var dicSeg  = model.AllFlows.SelectMany(s=>s.Nodes).Distinct().Cast<MSeg>().ToDictionary(d => d);
+            var dicSeg = model.AllFlows.SelectMany(s => s.Nodes).Distinct().Cast<MSeg>().ToDictionary(d => d);
 
             await Task.Run(async () =>
             {

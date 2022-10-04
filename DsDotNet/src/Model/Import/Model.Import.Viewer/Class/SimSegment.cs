@@ -9,7 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using static Engine.Core.DsType;
 using static Model.Import.Office.Object;
-using ImportModel = Model.Import.Office.Object.ImportModel;
+using ImportModel = Model.Import.Office.Object.MModel;
 
 namespace Dual.Model.Import
 {
@@ -47,7 +47,7 @@ namespace Dual.Model.Import
         {
             if (model == null) return;
 
-            var segs = model.AllFlows.SelectMany(s => s.UsedSegs).Cast<MSeg>();
+            var segs = model.AllFlows.SelectMany(s => s.Nodes).Cast<MSeg>();
          
             await Task.Run(async () =>
             {
@@ -77,19 +77,19 @@ namespace Dual.Model.Import
                 {
                     if (dicSeg.Count() == 0) break;
 
-                    List<MSeg> heads = cont.ChildFlow.HeadNodes.Cast<MSeg>().ToList();
-                    await Test(heads, Status4.Going, AllSeg);
+                    //List<MSeg> heads = cont.ChildFlow.HeadNodes.Cast<MSeg>().ToList();
+                    //await Test(heads, Status4.Going, AllSeg);
                     await Task.Delay(5);
 
-                    await runSeg(cont, heads, cont.ChildFlow);
-                    await Test(heads, Status4.Finish, AllSeg);
+                    //await runSeg(cont, heads, cont.ChildFlow);
+                    //await Test(heads, Status4.Finish, AllSeg);
                 }
             });
 
             org = false;
         }
 
-        private static async Task runSeg(MSeg parent, List<MSeg> heads, CoreFlow.ChildFlow childFlow)
+        private static async Task runSeg(MSeg parent, List<MSeg> heads, MFlow flow)
         {
             if (parent != null)
                 await GoingFinish(new List<MSeg>() { parent });
@@ -97,8 +97,8 @@ namespace Dual.Model.Import
             await GoingFinish(heads);
             foreach (var curr in heads)
             {
-                List<MSeg> nextHeads = childFlow.NextNodes(curr).Cast<MSeg>().ToList();
-                await runSeg(null, nextHeads, childFlow);
+                //List<MSeg> nextHeads = childFlow.NextNodes(curr).Cast<MSeg>().ToList();
+                //await runSeg(null, nextHeads, childFlow);
             }
 
         }

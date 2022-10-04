@@ -118,17 +118,17 @@ namespace Dual.Model.Import
         private void DrawSeg(Subgraph subgraph, MSeg seg)
         {
 
-            bool bDrawSubSrc = (seg.IsChildExist || seg.NoEdgeSegs.Any());
+            bool bDrawSub = (seg.IsChildExist || seg.Singles.Any());
 
-            var subGSrc = new Subgraph(seg.UIKey);
+            var subG = new Subgraph(seg.UIKey);
 
-            if (bDrawSubSrc) subgraph.AddSubgraph(subGSrc);
-            var gEdge = viewer.Graph.AddEdge(subGSrc.Id, "", subGSrc.Id);
+            if (bDrawSub) subgraph.AddSubgraph(subG);
+            var gEdge = viewer.Graph.AddEdge(subG.Id, "", subG.Id);
             UpdateLabelText(gEdge.SourceNode);
             UpdateNodeView(gEdge.SourceNode, seg);
             gEdge.IsVisible = false;
 
-            DrawSub(subgraph, seg, subGSrc, gEdge.SourceNode, bDrawSubSrc);
+            DrawSub(subgraph, seg, subG, gEdge.SourceNode, bDrawSub);
 
         }
 
@@ -137,12 +137,12 @@ namespace Dual.Model.Import
             if (_dicDrawing.ContainsKey(gNode.Id)) return;
             else _dicDrawing.Add(gNode.Id, gNode);
 
-            if (bDrawSub && (seg.MEdges.Any() || seg.NoEdgeSegs.Any()))
+            if (bDrawSub && (seg.MEdges.Any() || seg.Singles.Any()))
             {
                 if (seg.MEdges.Any())
                     drawMEdgeGraph(seg.MEdges.ToList(),  subG);
 
-                seg.NoEdgeSegs.ToList().ForEach(subSeg => DrawSeg(subG, subSeg));
+                seg.Singles.ToList().ForEach(subSeg => DrawSeg(subG, subSeg));
             }
             else
                 subgraph.AddNode(gNode);
@@ -225,12 +225,14 @@ namespace Dual.Model.Import
                         nNode.Attr.Shape = Shape.Box;
                     //if (segment.NodeType == NodeType.EX)
                     //    nNode.Attr.Shape = Shape.Diamond;
-                    if (segment.NodeType == NodeType.TR)
+                    if (segment.NodeType == NodeType.TR
+                        || segment.NodeType == NodeType.TX
+                        || segment.NodeType == NodeType.RX)
                         nNode.Attr.Shape = Shape.Ellipse;
-                    if (segment.NodeType == NodeType.TX)
-                        nNode.Attr.Shape = Shape.Ellipse;
-                    if (segment.NodeType == NodeType.RX)
-                        nNode.Attr.Shape = Shape.Ellipse;
+                    if (segment.NodeType == NodeType.IF)
+                        nNode.Attr.Shape = Shape.InvHouse;
+                    if (segment.NodeType == NodeType.COPY)
+                        nNode.Attr.Shape = Shape.Octagon;
                 }
             }
         }

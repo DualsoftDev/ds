@@ -8,9 +8,6 @@ open System.Diagnostics
 open System.Collections.Concurrent
 open System.Collections.Generic
 open Engine.Core
-open Engine.Core.CoreClass
-open Engine.Core.CoreFlow
-open Engine.Core.CoreStruct
 
 [<AutoOpen>]
 module Object =
@@ -21,6 +18,8 @@ module Object =
         | TR            //지시관찰 TX RX 
         | TX            //지시만
         | RX            //관찰만
+        | IF            //인터페이스
+        | COPY          //시스템복사 
         with
             member x.IsReal =   match x with
                                 |MY  -> true
@@ -38,8 +37,8 @@ module Object =
         /// 사용자가 모델링을 통해서 만든 segment (SegEditor = User)
         [<DebuggerDisplay("{FullName}")>]
         MSeg(name:string, baseSystem:MSys, bound:Bound, nodeType:NodeType, rootFlow:RootFlow, bDummy:bool) as this =
-            inherit SegmentBase(name, ChildFlow(name, rootFlow))
-            let mChildFlow = (this :> SegmentBase).ChildFlow
+            inherit Segment(name, ChildFlow(name))
+            let mChildFlow = (this :> Segment).ChildFlow
             let mEdges = mChildFlow.Edges |> Seq.cast<MEdge>
             let mChildSegs   = mChildFlow.Nodes |> Seq.cast<MSeg>
             let ownerMFlow = rootFlow.Name
@@ -61,7 +60,7 @@ module Object =
 
             member x.OwnerMFlow = ownerMFlow
             member x.ToCallText() = let call = sprintf "%s_%s"  (ownerMFlow.TrimStart('\"').TrimEnd('\"')) name
-                                    NameUtil.GetValidName(call)
+                                    NameUtil.QuoteOnDemand(call)
 
             member x.ToTextInMFlow() = 
                                             if(Bound.ThisFlow = bound) 
@@ -70,10 +69,10 @@ module Object =
 
             ///금칙 문자 및 선두숫자가 있으면 "" 로 이름 앞뒤에 배치한다.
             ///Alias 는 무조건 "" 로 이름 앞뒤에 배치
-            member x.SegName  = sprintf "%s" x.ValidName//(if(this.IsAlias) then x.ValidName else this.Alias.Value.ValidName)
-            member x.MFlowNSeg= sprintf "%s.%s"  ownerMFlow x.ValidName
-            member x.FullName = sprintf "%s.%s.%s" baseSystem.Name  ownerMFlow x.ValidName  
-            member x.PathName = sprintf "%s(%s)" x.FullName (if(x.Parent.IsSome) then x.Parent.Value.Name else "Root")
+            member x.SegName    = sprintf "%s" x.ValidName//(if(this.IsAlias) then x.ValidName else this.Alias.Value.ValidName)
+            member x.MFlowNSeg  = sprintf "%s.%s"  ownerMFlow x.ValidName
+            member x.FullName   = sprintf "%s.%s.%s" baseSystem.Name  ownerMFlow x.ValidName  
+            member x.PathName   = sprintf "%s(%s)" x.FullName (if(x.Parent.IsSome) then x.Parent.Value.Name else "Root")
 
             member x.Update(nodeKey, nodeIdValue, nodeCntTX, nodeCntRX) = 
                         this.Key <- nodeKey
@@ -104,18 +103,16 @@ module Object =
                    |> Seq.collect(fun e -> e.ChildSegsSubAll)
                    |> Seq.append x.ChildSegs
 
-            member x.NoEdgeSegs      = mChildFlow.Singles  |> Seq.cast<MSeg> |> Seq.sortBy(fun seg -> seg.Name)
+            member x.Singles      = mChildFlow.Singles  |> Seq.cast<MSeg> |> Seq.sortBy(fun seg -> seg.Name)
             member x.IsDummy = bDummy
             member x.IsChildExist = mChildFlow.Nodes.Any()
             member x.IsChildEmpty = x.IsChildExist|>not
-            member x.IsRoot =  x.Parent.IsSome && x.Parent.Value.Bound = ThisFlow
-            member val Alias : MSeg option = None  with get, set
+            member x.IsRoot =  x.Parent.IsNone
             member x.IsAlias = x.Alias.IsSome
+            member x.UIKey:string =    $"{if(x.IsAlias) then x.Alias.Value.Name else x.Name};{x.Key}" 
 
-            member x.UIKey:string =  
-                                let name = if(x.IsAlias) then x.Alias.Value.Name else x.Name
-                                $"{name};{x.Key}"
             member val Key : string = "" with get, set
+            member val Alias : MSeg option = None  with get, set
             member val Parent : MSeg option = None with get, set
             member val S : string option = None    with get, set
             member val E : string option = None    with get, set
@@ -151,13 +148,9 @@ module Object =
     and
         /// MFlow : 페이지별 구성
         [<DebuggerDisplay("{Name}")>]
-        MFlow(name:string, system:DsSystem, index:int) as this  =
+        MFlow private (name:string, system:MSys, index:int) as this  =
             inherit RootFlow(name, system)
-            let mRootFlow = (this :> RootFlow)
-            let mEdges       = mRootFlow.Edges |> Seq.cast<MEdge>
-            let mChildSegs   = mRootFlow.Nodes |> Seq.cast<MSeg>
-
-            let drawSubs  = ConcurrentHash<MSeg>()
+            let mEdges       = (this :> RootFlow).Edges |> Seq.cast<MEdge>
             let dummySeg  = ConcurrentHash<MSeg>()
             let setIL  = ConcurrentHash<HashSet<MSeg>>()
             let safeties  = ConcurrentDictionary<MSeg, MSeg seq>()
@@ -181,8 +174,15 @@ module Object =
                                 if(find.Contains(edge.Source)|>not || find.Contains(edge.Target)|>not)
                                 then update (edge);getLink (edge.Source, find, full))
 
-            member x.Page = index
+            static member Create(name, sys, pageNum) =
+                let mFlow = MFlow(name, sys, pageNum)
+                if sys.Add(mFlow) |>not then failwith $"Duplicated flow name [{name}]"
+                mFlow
 
+            member x.Page = index
+            member x.System = system;
+
+            member x.CopyMEdges() = mEdges |> Seq.map(fun edge ->    MEdge(edge.Source, edge.Target, edge.Causal))
             member x.MEdges = mEdges |> Seq.sortBy(fun edge -> edge.Source.Name)
             member x.AddSafety(seg, segSafetys:MSeg seq) = safeties.TryAdd(seg, segSafetys) |> ignore 
             member x.Safeties = safeties
@@ -207,9 +207,6 @@ module Object =
                     if(interlocks.TryAdd(edge.ToText() , edge) )
                     then ()
                     else ()
-
-            member x.DrawSubs = drawSubs.Values |> Seq.sortBy(fun seg -> seg.Name)
-            member x.AddSegDrawSub(seg) = drawSubs.TryAdd(seg) |> ignore 
 
             member x.DummySeg = dummySeg.Values 
             member x.AddDummySeg(seg) = dummySeg.TryAdd(seg) |> ignore 
@@ -236,8 +233,8 @@ module Object =
     and
         [<DebuggerDisplay("{Name}")>]
         /// System 내부 Seg의 내외부 Seg간 시작/리셋 연결 정보 구조
-        MSys(name:string, active:bool, model:Model) as this  =
-            inherit DsSystem(name, model)
+        MSys private (name:string, active:bool, model:Model) as this  =
+            inherit MSystem(name, model)
 
             let systemFlow = RootFlow(name, this)
             let mutable sysSeg: System.Lazy<MSeg> = null
@@ -246,6 +243,7 @@ module Object =
             let observeSet  = ConcurrentDictionary<string, string>()
             let variableSet  = ConcurrentDictionary<string, DataType>()
             let addressSet  = ConcurrentDictionary<string, Tuple<string, string>>()
+            let dicIf =  ConcurrentDictionary<string, MInterface>()
             //let noEdgesSegs = mFlows |> Seq.collect(fun f-> f.Value.NoEdgeSegs)
             let emgSet  =  this.EmergencyButtons 
             let startSet = this.AutoButtons     
@@ -253,7 +251,7 @@ module Object =
             let autoSet  = this.ResetButtons 
             
             let updateBtn (btnType:BtnType, btnName, btnMFlow) = 
-                let name = NameUtil.GetValidName(btnName)
+                let name = NameUtil.QuoteOnDemand(btnName)
                 match btnType with
                 |StartBTN ->    if(startSet.ContainsKey(name)) then startSet.[name].Add(btnMFlow) |>ignore else startSet.TryAdd(name, [btnMFlow] |> List) |>ignore
                 |ResetBTN ->    if(resetSet.ContainsKey(name)) then resetSet.[name].Add(btnMFlow) |>ignore else resetSet.TryAdd(name, [btnMFlow] |> List) |>ignore
@@ -261,9 +259,17 @@ module Object =
                 |EmergencyBTN-> if(emgSet.ContainsKey(name))   then emgSet.[name].Add(btnMFlow)   |>ignore else emgSet.TryAdd(name,   [btnMFlow] |> List) |>ignore
 
 
-            //new (name:string)       = new MSys(name,  false)
-            //new (name, active:bool) = new MSys(name,  active)
+            static member Create(name:string, active:bool, model:MModel) =
+                let system = MSys(name, active, model)
+                if model.Add(system) |>not then failwith $"Duplicated system name [{name}]"
+                system
 
+            member x.AddInterface(ifName:string, txs:IVertex seq , rxs:IVertex seq ) =
+                                dicIf.TryAdd(ifName, MInterface(ifName, txs, rxs)) |> ignore
+
+            member x.IFNames     =  dicIf |> Seq.map(fun dic-> dic.Value.Name)
+            member x.IFFullNames =  dicIf |> Seq.map(fun dic-> name+"."+dic.Value.Name)
+            member x.IFs         =  dicIf.Values
             member x.Name = name
             member x.SysSeg =
                 if isNull sysSeg then
@@ -322,39 +328,33 @@ module Object =
                                 |> Seq.sortBy(fun seg -> seg.Name)
                                 |> Seq.distinct
             
-
-            member x.RootEdges()    = x.SysSeg.MEdges 
-
-            member x.NotRootSegs() = 
-                x.SysSeg.MEdges
-                    |> Seq.collect(fun seg -> [seg.Source;seg.Target])
-                    |> Seq.cast<MSeg>
-                    |> Seq.append x.SingleNodes
-                    |> Seq.collect(fun seg -> seg.ChildSegs)
-                    |> Seq.distinct
-
-            member x.RootSegs() =
-                x.SysSeg.ChildSegs
-                    |> Seq.append x.SingleNodes
-                    |> Seq.distinct
-
+            member x.Flows = this.RootFlows   |> Seq.cast<MFlow>
+           
             member x.RootMFlow()  = this.RootFlows |> Seq.sortBy(fun flow -> flow.Name)
             member x.BtnSegs()    = this.AllNodes
                                         |> Seq.filter(fun seg -> seg.Bound = ExBtn)
                                         |> Seq.distinctBy(fun seg -> seg.SegName)
 
     and 
-       ImportModel(name:string) as this =
+        [<DebuggerDisplay("{Name}")>]
+       MModel(name:string) as this  =
             inherit Model()
-            
+            let systems = ConcurrentDictionary<string, MSys>()
 
+            //모델에 시스템 등록 및 삭제
+            member x.Add(sys:MSys) = systems.TryAdd(sys.Name, sys)
+            member x.Remove(sys:MSys) = systems.TryRemove(sys.Name)
+
+            /// TotalSystems
+            member x.DicSystems      = systems
+            member x.Systems      = systems.Values
+            member x.ActiveSys      = systems.Values |> Seq.filter(fun w-> w.Active) |> Seq.head
+            //member x.SysActives  = 
+            //    let activeSys = systems.Values |> Seq.filter (fun sys -> sys.Active)
+            //    if((activeSys |> Seq.length) <> 1) then failwith "한개 이상의 Active 시스템 설정이 필요합니다."
+            member x.AllFlows      = systems.Values |> Seq.collect(fun sys -> sys.RootFlows) 
             member x.Path = name
             member x.Name = Path.GetFileNameWithoutExtension(name) 
-            member x.AddEdges(edges, rootFlow:RootFlow) = 
-
-                edges|> Seq.iter(fun (edge: #DsEdge) -> 
-                
-                         //   edge.Target.Alias <- Some(edge.Source)
-                            this.AddEdge(edge, rootFlow)|>ignore)
-     
-            
+            member x.Flows = this.AllFlows |> Seq.cast<MFlow> 
+            member x.GetFlow(page:int) = x.Flows.Where(fun flow -> flow.Page = page) |> Seq.head
+          

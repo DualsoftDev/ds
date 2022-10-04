@@ -90,13 +90,13 @@ module UtilPPT =
             else
                 let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
                 (  geometry.Preset.Value = Drawing.ShapeTypeValues.Donut
-                )    
+                )  
+
         [<Extension>] 
         static member CheckRound(geometry:#Drawing.PresetGeometry) = 
-            if(geometry.Preset.Value = Drawing.ShapeTypeValues.RoundRectangle)
-                    then let shapeGuide = geometry.Descendants<Drawing.AdjustValueList>().First().Descendants<Drawing.ShapeGuide>()
+                         let shapeGuide = geometry.Descendants<Drawing.AdjustValueList>().First().Descendants<Drawing.ShapeGuide>()
                          shapeGuide.Any()|>not || shapeGuide.First().Formula.Value = "val 0" |> not
-                    else false
+                      
 
         [<Extension>] 
         static member CheckEllipse(shape:#Shape) = 
@@ -108,6 +108,8 @@ module UtilPPT =
                || (geometry.Preset.Value = Drawing.ShapeTypeValues.RoundRectangle && round)
                 || geometry.Preset.Value = Drawing.ShapeTypeValues.FlowChartAlternateProcess   
                 || geometry.Preset.Value = Drawing.ShapeTypeValues.FlowChartConnector)    
+        
+     
 
         [<Extension>] 
         static member CheckRectangle(shape:#Shape) = 
@@ -117,7 +119,25 @@ module UtilPPT =
                     let round =  geometry.CheckRound()
                     (   geometry.Preset.Value = Drawing.ShapeTypeValues.Rectangle
                     || (geometry.Preset.Value = Drawing.ShapeTypeValues.RoundRectangle && round|>not)
+                    || (geometry.Preset.Value = Drawing.ShapeTypeValues.FoldedCorner && round|>not)
+                    || (geometry.Preset.Value = Drawing.ShapeTypeValues.HomePlate && round|>not)
                     ||  geometry.Preset.Value = Drawing.ShapeTypeValues.FlowChartProcess)    
+        
+        [<Extension>] 
+        static member CheckFoldedCorner(shape:#Shape) = 
+                if(Office.CheckShapes(shape) |> not) then false
+                else
+                    let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
+                    let round =  geometry.CheckRound()
+                    (   geometry.Preset.Value = Drawing.ShapeTypeValues.FoldedCorner && round )
+        
+        [<Extension>] 
+        static member CheckHomePlate(shape:#Shape) = 
+                if(Office.CheckShapes(shape) |> not) then false
+                else
+                    let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
+                    let round =  geometry.CheckRound()
+                    (   geometry.Preset.Value = Drawing.ShapeTypeValues.HomePlate && round )
 
         [<Extension>] 
         static member CheckNoSmoking(shape:#Shape) = 
@@ -202,9 +222,11 @@ module UtilPPT =
         [<Extension>] 
         static member Shapes(page:int, commonSlideData:CommonSlideData) = 
                         commonSlideData.ShapeTree.Descendants<Shape>()
-                        |> Seq.filter(fun  shape -> shape.CheckRectangle() 
-                                                 || shape.CheckEllipse()   || shape.CheckDonutShape()|| shape.CheckResetShape()
-                                                 || shape.CheckNoSmoking() || shape.CheckBlockArc())
+                        |> Seq.filter(fun  shape -> shape.CheckRectangle() || shape.CheckEllipse() 
+                                                   || shape.CheckDonutShape()|| shape.CheckResetShape()
+                                                   || shape.CheckNoSmoking() || shape.CheckBlockArc()
+                                                   || shape.CheckFoldedCorner() || shape.CheckHomePlate()
+                                                   )
                         |> Seq.map(fun  shape -> 
                                 
                                 let geometry = shape.Descendants<Drawing.PresetGeometry>().FirstOrDefault().Preset.Value

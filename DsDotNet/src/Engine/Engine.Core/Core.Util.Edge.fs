@@ -51,6 +51,6 @@ type EdgeHelper =
     [<Extension>] static member CreateEdges(segment:Segment, source:Child, target:Child, operator:string) =
                     createChildEdges(segment, source, target, operator)
 
-
-
+    [<Extension>] static member GetEdgeType(edgeCausal:EdgeCausal) =
+                    getEdgeType(edgeCausal.ToText())
 

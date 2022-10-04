@@ -17,9 +17,17 @@ open System.Collections.Generic
 
 [<AutoOpen>]
 module PPTX =
-       
+
+    let TextMySys = "MY"
     let Objkey(iPage, Id) = $"{iPage}page{Id}"
     let SysName(iPage) = sprintf "page%3d" iPage 
+
+    let GetSysNFlow(name:string, pageNum:int) = 
+            if(name.Contains('.')) then name.Split('.').[0], name.Split('.').[1]
+            elif(name = "")        then TextMySys, sprintf "P%d" pageNum
+            else                        TextMySys, name
+            
+
 
     ///전체 사용된 화살표 반환 (앞뒤연결 필수)
     let Connections(doc:PresentationDocument) = 
@@ -127,25 +135,53 @@ module PPTX =
             ValidGroup(childGroup, shapeIds) |> ignore)
         true
 
+    let GetAliasName(names:string seq) =  
+        let usedNames = HashSet<string>()
+        seq {
+                let copyName(name, cnt) = sprintf "%s_Copy%d" name cnt
+                let newName(testName) = 
+                    if  names |> Seq.filter (fun name -> name = testName) |> Seq.length = 1
+                    then usedNames.Add(testName) |>ignore
+                         testName
+                    else 
+                        let mutable cnt = 1
+                        let mutable copy = copyName(testName, cnt)
+                        while usedNames.Contains(copy) do
+                            cnt <- cnt + 1
+                            copy <- copyName(testName, cnt) 
+
+                        usedNames.Add(copy) |>ignore
+                        copy
+
+                for name in names do
+                    yield name, newName(name)
+            }
+
+
     type pptPage(slidePart:SlidePart, iPage:int , bShow:bool) =
         member x.PageNum = iPage
         member x.SlidePart = slidePart
         member x.IsUsing = bShow
         member x.Title = slidePart.PageTitle()
 
-    type pptNode(shape:Presentation.Shape, iPage:int, dashOutline:bool , sildeSize)  =
+    type pptNode(shape:Presentation.Shape, iPage:int, dashOutline:bool , sildeSize, pageTitle:string)  =
         let mutable txCnt = 1
         let mutable rxCnt = 1
         let mutable name = ""
-        let mutable safeties = HashSet<string>()
+        let mutable copySystems = HashSet<string>()
+        let mutable safeties    = HashSet<string>()
+        let mutable ifName    = ""
+        let mutable ifTXs    = HashSet<string>()
+        let mutable ifRXs    = HashSet<string>()
         let mutable bDuumy = false
         let mutable bEmg = false
         let mutable bAuto = false
         let mutable bStart = false
         let mutable bReset = false
-        let updateTxRx(tailBarckets) =
-            if(tailBarckets  = ""|> not)
-            then 
+        let mutable nodeType:NodeType = NodeType.MY
+        let trimStartEnd(text:string) =   text.TrimStart(' ').TrimEnd(' ')
+        let trimStartEndSeq(texts:string seq) =  texts  |> Seq.map(fun name -> trimStartEnd name) 
+        let updateTxRx(tailBarckets:string) =
                 if(tailBarckets.Split(',').Count() > 1)
                 then 
                     txCnt <- tailBarckets.Split(',').[0] |> Convert.ToInt32
@@ -153,18 +189,52 @@ module PPTX =
                 else 
                     shape.ErrorName(22, iPage)
 
-        let updateSafety(headBarckets) =
+        let updateSafety(barckets:string)  = safeties <- barckets.Split(';') |> HashSet
+        let updateCopySys(barckets:string) = 
+            if  (trimStartEnd barckets).All(fun c -> Char.IsDigit(c))
+            then 
+                 copySystems <- [for i in [1..Convert.ToInt32(barckets)] do yield sprintf "%s%d" name i]
+                                |> Seq.map(fun sys -> $"{pageTitle}_{sys}") |> HashSet
+            else copySystems <- barckets.Split(',') |> trimStartEndSeq 
+                                |> Seq.map(fun sys -> $"{pageTitle}_{sys}") |> HashSet 
             
-            if(headBarckets = ""|> not)
-            then safeties <- headBarckets.Split(';') |> HashSet 
-
+        let updateIF(text:string)      = 
+            ifName <- GetBracketsReplaceName(text) |> trimStartEnd
+            let txrx = GetSquareBrackets(shape.InnerText, false)
+            if(txrx.Contains('~'))
+            then 
+                let txs = txrx.Split('~')[0]
+                let rxs = txrx.Split('~')[1]
+                ifTXs  <- txs.Split(',') |> trimStartEndSeq |> HashSet 
+                ifRXs  <- rxs.Split(',') |> trimStartEndSeq |> HashSet 
+        
         do 
-            if(shape.InnerText.Contains(";")) then shape.ErrorName(29, iPage)
+            nodeType <- 
+                if(shape.CheckRectangle()) then  MY
+                elif(shape.CheckHomePlate()) then  IF
+                elif(shape.CheckFoldedCorner()) then  COPY
+                elif(shape.CheckEllipse()) 
+                then 
+                    if((txCnt = 0 && rxCnt = 0) || txCnt < 0 || rxCnt < 0)
+                    then shape.ErrorName(2, iPage)
+                    else TR
+                else if(shape.CheckDonutShape() || shape.CheckBlockArc()
+                        || shape.CheckNoSmoking() || shape.CheckResetShape()) 
+                then 
+                    if(txCnt = 1) then txCnt <- 0 //초기값 Tx 0으로 제한 1이상 입력시 사용자 고지
+                    if(rxCnt <= 0 || txCnt > 1) then shape.ErrorName(30, iPage)
+                    else RX
+                else  shape.ErrorName(1, iPage)
 
-            name <- shape.InnerText
-            GetSquareBrackets(name, false) |> updateTxRx
-            GetSquareBrackets(name, true ) |> updateSafety
-            name <- GetBracketsReplaceName(name)
+            name <-  GetBracketsReplaceName(shape.InnerText)
+            match nodeType with
+            |TX|RX|TR ->
+                     GetSquareBrackets(shape.InnerText, false) |> fun text -> if text = ""|>not then updateTxRx text
+                     GetSquareBrackets(shape.InnerText, true ) |> fun text -> if text = ""|>not then updateSafety text
+            |IF ->   updateIF shape.InnerText
+            |COPY -> GetSquareBrackets(shape.InnerText, false) |> fun text -> if text = ""|>not then updateCopySys  text 
+            |_ -> ()
+
             bDuumy  <- (shape.CheckEllipse()||shape.CheckRectangle()) && dashOutline
             bEmg    <- shape.CheckNoSmoking() 
             bAuto   <- shape.CheckBlockArc() 
@@ -174,35 +244,26 @@ module PPTX =
         member x.PageNum = iPage
         member x.Shape = shape
         member x.DashOutline = dashOutline
-        member x.Safeties = safeties.select(fun safe -> NameUtil.GetValidName(safe))
+        member x.Safeties = safeties.select(fun s -> NameUtil.QuoteOnDemand(s))
+        member x.CopySys  = copySystems.select(fun s -> NameUtil.QuoteOnDemand(s))
+        member x.IfName      = ifName
+        member x.IfTxs       = ifTXs
+        member x.IfRxs       = ifRXs
         member x.IsDummy = bDuumy
         member x.IsEmgBtn = bEmg
         member x.IsAutoBtn= bAuto
         member x.IsStartBtn = bStart
         member x.IsResetBtn = bReset
-        member val NodeType = 
-
-                            if(shape.CheckRectangle()) then  MY
-                            else if(shape.CheckEllipse()) 
-                            then 
-                                if((txCnt = 0 && rxCnt = 0) || txCnt < 0 || rxCnt < 0)
-                                then shape.ErrorName(2, iPage)
-                                else TR
-                            else if(shape.CheckDonutShape() || shape.CheckBlockArc()
-                                  || shape.CheckNoSmoking() || shape.CheckResetShape()) 
-                            then 
-                                if(txCnt = 1) then txCnt <- 0 //초기값 Tx 0으로 제한 1이상 입력시 사용자 고지
-                                if(rxCnt <= 0 || txCnt > 1) then shape.ErrorName(30, iPage)
-                                else RX
-                            else  shape.ErrorName(1, iPage)
-
+        member x.NodeType = nodeType
+        member x.CallName    = assert(nodeType.IsCall); $"{pageTitle}_{name}"  
+        
         member val Id =  shape.GetId()
         member val Key =  Objkey(iPage, shape.GetId())
         member val Name =   name
+        member val NameOrg =   shape.InnerText
         member val CntTX =  txCnt
         member val CntRX =  rxCnt
         member val Alias :string  option = None with get, set
-        member val ExistChildEdge :bool = false with get, set
         member val Rectangle :System.Drawing.Rectangle =   shape.GetPosition(sildeSize)
 
     and 
@@ -227,9 +288,13 @@ module PPTX =
     
         member val Name =  conn.EdgeName()
         member val Key =  Objkey(iPage, iEdge)
-        member val Text = if(reverse)
-                            then $"{endNode.Name}{causal.ToText()}{startNode.Name}";
-                            else $"{startNode.Name}{causal.ToText()}{endNode.Name}";
+        member x.Text = 
+                            let sName = if startNode.Alias.IsSome then  startNode.Alias.Value else startNode.Name
+                            let eName = if endNode.Alias.IsSome   then  endNode.Alias.Value   else endNode.Name
+                            if(reverse)
+                            then $"{iPage};{eName}{causal.ToText()}{sName}";
+                            else $"{iPage};{sName}{causal.ToText()}{eName}";
+
         member val Causal:EdgeCausal = causal
     
     and 
@@ -272,22 +337,15 @@ module PPTX =
 
             if(children.Any() |> not) 
             then  Office.ErrorPPT(Group, 12, $"자식수:0", iPage)
+            //let names  = children|> Seq.map(fun f->f.Name)
 
-            let nameList = children 
-                           |> Seq.map(fun f->f.Name)
-                           |> Seq.distinct
-            nameList |> Seq.iter(fun name -> 
-                           let sameNodes = children 
-                                            |> Seq.filter(fun f -> f.Name = "" |>not)
-                                            |> Seq.filter(fun f -> f.Name = name)
-                           if(sameNodes.Count() > 1)
-                           then 
-                               let mutable cnt = 0
-                               sameNodes 
-                               |> Seq.iter(fun node -> 
-                                   cnt <- cnt+1
-                                   node.Alias <-Some(NameUtil.GetValidName(sprintf "%s_Copy%d" node.Name cnt)))
-                           )
+            //(children, GetAliasName(names))
+            //||> Seq.map2(fun node  nameSet -> node,  nameSet)
+            //|> Seq.iter(fun (node, (name, newName)) -> 
+            //               if(name  = newName |> not)
+            //               then 
+            //                    node.Alias <- Some(newName)
+            //               )
 
             children |> Seq.iter(fun child -> childSet.TryAdd(child)|>ignore)
         
@@ -324,9 +382,21 @@ module PPTX =
                 |> Seq.iter (fun (slidePart, show, page) -> 
                     pages.TryAdd(slidePart, pptPage(slidePart, page, show)) |>ignore )
               
+                let dicShape = ConcurrentDictionary<int, HashSet<Tuple<Shape,bool>>>() 
+                shapes 
+                |> Seq.iter (fun (shape, page, geometry, isDash) -> 
+                            if(dicShape.ContainsKey(page)|>not)
+                            then dicShape.TryAdd(page, HashSet<Tuple<Shape,bool>>()) |> ignore
+                            dicShape.[page].Add(shape, isDash) |> ignore
+                )
+
                 shapes 
                 |> Seq.iter (fun (shape, page, geometry, isDash) ->
-                            let node = pptNode(shape, page,  isDash,  sildeSize)
+
+                            let pagePPT = pages.Values.where(fun w->w.PageNum = page).First()
+                            let sysName, flowName = GetSysNFlow(pagePPT.Title, pagePPT.PageNum)
+
+                            let node = pptNode(shape, page,  isDash,  sildeSize, flowName)
                             if(node.Name ="" && node.IsDummy|>not) then shape.ErrorName(13, page)
                             nodes.TryAdd(node.Key, node)  |>ignore )
                              
@@ -350,12 +420,13 @@ module PPTX =
                 let makeDummyGroup ( pptGroup:pptGroup ) =
                         if(pptGroup.DummyParent.IsSome)
                         then 
-                            if((pptGroup.Children |> Seq.distinctBy(fun node -> node.Name)).Count() = pptGroup.Children.Count )
-                            then
-                                parents.TryAdd(pptGroup.DummyParent.Value, pptGroup.Children)|>ignore
-                            else
-                                let errorChild = pptGroup.Children |> Seq.map(fun node -> node.Name) |> String.concat ", "
-                                Office.ErrorPPT(Group, 19, $"{errorChild}", pptGroup.PageNum) 
+                            parents.TryAdd(pptGroup.DummyParent.Value, pptGroup.Children)|>ignore
+                            //if((pptGroup.Children |> Seq.distinctBy(fun node -> node.Name)).Count() = pptGroup.Children.Count )
+                            //then
+                            //    parents.TryAdd(pptGroup.DummyParent.Value, pptGroup.Children)|>ignore
+                            //else
+                            //    let errorChild = pptGroup.Children |> Seq.map(fun node -> node.Name) |> String.concat ", "
+                            //    Office.ErrorPPT(Group, 19, $"{errorChild}", pptGroup.PageNum) 
                 
                 groups
                 |> Seq.iter (fun (slide, groupSet) -> 
@@ -388,7 +459,7 @@ module PPTX =
                             if(endId = 0u) then    conn.ErrorConnect(16, $"{nodeName}", "", iPage) 
                             edges.TryAdd(pptEdge(conn, Id, iPage ,startId, endId,  nodes)) |>ignore 
                         ))
-
+                         
              
                 doc.Close()
               
@@ -397,7 +468,6 @@ module PPTX =
                 
 
         member x.GetPage(pageNum:int) = pages.Values |> Seq.filter(fun p -> p.PageNum = pageNum) |> Seq.head
-        member x.VisibleLast() = pages.Values.OrderByDescending(fun p -> p.PageNum) |> Seq.filter(fun p -> p.IsUsing) |> Seq.head
         member val Pages = pages.Values.OrderBy(fun p -> p.PageNum)
 
         member val Nodes = nodes.Values.OrderBy(fun p -> p.PageNum)

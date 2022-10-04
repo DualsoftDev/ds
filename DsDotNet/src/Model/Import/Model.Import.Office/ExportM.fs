@@ -2,19 +2,16 @@
 namespace Model.Import.Office
 
 open System.Linq
-open System
 open System.Collections.Generic
 open Engine.Core
 open System.Collections.Concurrent
 
 [<AutoOpen>]
 module ExportM =
-
-    let ToText(model:ImportModel) =
-                               
+    let ToText(model:MModel) =
         let callText(seg:MSeg) =
             let callName =  seg.SegName
-            let tx, rx =
+            let tx, rx = 
                 let txs = HashSet<string>()
                 let rxs = HashSet<string>()
                 for index in [|1..seg.MaxCnt|] do
@@ -63,7 +60,7 @@ module ExportM =
 
         let subNodeText(seg:MSeg) =
             seq {
-                for segSub in seg.NoEdgeSegs do
+                for segSub in seg.Singles do
                     yield sprintf "\t\t\t%s;" (segSub.ToTextInMFlow())
             }
 
@@ -90,12 +87,13 @@ module ExportM =
         let segmentText(segs:MSeg seq) = 
             seq {
                 for seg in segs do
-                    if(seg.MEdges.Any() || seg.NoEdgeSegs.Any())    
+                    if(seg.MEdges.Any() || seg.Singles.Any())    
                     then 
                         yield sprintf "\t\t%s = {"(seg.ToTextInMFlow())
                         yield! subEdgeText (seg) 
                         yield! subNodeText (seg) 
                         yield sprintf "\t\t}"
+                        
             } 
 
         let btnText(propName:string, set: ConcurrentDictionary<string, List<RootFlow>>) = 
@@ -114,7 +112,6 @@ module ExportM =
                 yield sprintf "//////////////////////////////////////////////////////"
                 for sys in  model.Systems do
                     yield sprintf "[%s] %s = {"  TextSystem sys.ValidName
-                    let sys = sys :?> MSys
                     let flows = sys.OrderPageRootFlows()
                     for flow in flows do
                         //MFlow 출력
@@ -122,7 +119,7 @@ module ExportM =
                         yield sprintf "\t[%s] %s = { \t" TextFlow flow.ValidName
                         
                         yield! edgeText    (flow.MEdges)
-                        yield! segmentText (flow.UsedMSegs)
+                        yield! segmentText (flow.UsedMSegs |> Seq.cast<MSeg>)
                         //Task 출력
                         for callSeg in flow.CallSegs() do
                             yield callText(callSeg)
@@ -178,7 +175,6 @@ module ExportM =
                 yield sprintf "[%s] AllCpus = {" TextCpus
                 for sys in model.Systems do
                     yield sprintf "\t[%s] Cpu_%s = {" TextCpu sys.ValidName
-                    let sys = sys :?> MSys
                     let flows = sys.OrderPageRootFlows()
                     //my CPU
                     for flow in flows do    
@@ -197,7 +193,6 @@ module ExportM =
             seq {
                 for sys in model.Systems do    
                     yield sprintf "[%s] = {"  TextAddress
-                    let sys = sys :?> MSys
                     let flows = sys.OrderPageRootFlows()
                     for flow in flows do
                         for callSeg in flow.CallSegs() do
@@ -212,7 +207,6 @@ module ExportM =
         let layout = 
             seq {
                 for sys in model.Systems do
-                    let sys = sys :?> MSys
                     if(sys.LocationSet.Any())
                     then 
                         yield sprintf "[%s] = {" TextLayout
@@ -247,7 +241,6 @@ module ExportM =
                     yield sprintf "//DTS auto generation %s ExSegs"sys.ValidName
                     yield sprintf "//////////////////////////////////////////////////////"
                     yield sprintf "[%s] EX = {" TextSystem
-                    let sys = sys :?> MSys
                     let flows = sys.OrderPageRootFlows()
                     for flow in flows do
                             
@@ -279,7 +272,7 @@ module ExportM =
         |> Seq.append  cpus
         |> Seq.append  exSystem
         |> Seq.append  mySystem
-        |> String.concat "\r\n"
+        |> String.concat "\r\n" 
 
 
 

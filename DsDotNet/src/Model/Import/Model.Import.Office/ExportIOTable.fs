@@ -2,19 +2,15 @@
 namespace Model.Import.Office
 
 open System
-open Microsoft.Office.Interop
 open Microsoft.Office.Interop.Excel
-open System
 open System.Drawing
 open System.Reflection
-open System.Data.OleDb
 open Engine.Common.FS
-open Engine.Core
 
 [<AutoOpen>]
 module ExportIOTable =
 
-    let ToTable(model:ImportModel) =
+    let ToTable(model:MModel) =
 
         let dt = new System.Data.DataTable($"{model.Name}")
         dt.Columns.Add("Case", typeof<string>) |>ignore
@@ -32,12 +28,12 @@ module ExportIOTable =
             |TR ->  ["주소"; MFlowName; name; trx; "bit"; seg.TagStart  ; seg.TagEnd]
             |TX  -> ["주소"; MFlowName; name; trx; "bit"; seg.TagStart  ; "'-"]
             |RX  -> ["주소"; MFlowName; name; trx; "bit"; "'-"           ; seg.TagEnd]
-            |MY -> failwithf "ERR";
+            |_ -> failwithf "ERR";
 
         let rows =
             seq {
                 for sys in  model.Systems do
-                    let flows = sys.RootFlows |> Seq.cast<MFlow> |> Seq.filter(fun flow -> (flow.Page = Int32.MaxValue)|>not)
+                    let flows = sys.Flows |> Seq.cast<MFlow> |> Seq.filter(fun flow -> (flow.Page = Int32.MaxValue)|>not)
                     //MFlow 출력
                     for flow in flows do
                         //Call Task 출력
@@ -60,7 +56,6 @@ module ExportIOTable =
         dt.Rows.Add("관찰", "함수", ""  , "'-", "'-", "'-", ""  ) |> ignore
 
         for sys in  model.Systems do
-            let sys = sys :?> MSys
             for btn in  sys.EmgSet do
                 dt.Rows.Add("버튼", "비상", btn.Key  , "'-", "'-", "'-",  ""  ) |> ignore
             for btn in  sys.AutoSet do
@@ -74,7 +69,7 @@ module ExportIOTable =
  
 
 
-    let ToFiie(model:ImportModel, excelFilePath:string) = 
+    let ToFiie(model:MModel, excelFilePath:string) = 
         let DisableCellStyle(range:Microsoft.Office.Interop.Excel.Range ) =
             range.Interior.Color <- Color.LightGray;
             range.Font.Bold <- true;
@@ -90,7 +85,7 @@ module ExportIOTable =
                    range.EntireColumn.AutoFit() |> ignore
 
 
-        let tbl = ToTable(model:ImportModel)
+        let tbl = ToTable(model:MModel)
         if (tbl = null || tbl.Columns.Count = 0)
         then failwithf "ExportToExcel: Null or empty input table!\n"
         else 

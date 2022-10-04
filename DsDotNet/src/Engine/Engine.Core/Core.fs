@@ -14,7 +14,7 @@ module CoreModule =
             member x.QualifiedName = null  //failwith "ERROR"
 
 
-    and DsSystem private (name:string, cpu:ICpu, model:Model) =
+    and DsSystem private (name:string, cpu:ICpu option, model:Model) =
         inherit FqdnObject(name, model)
 
         //new (name, model) = DsSystem(name, null, model)
@@ -40,6 +40,7 @@ module CoreModule =
         member val Graph = Graph<SegmentBase, InFlowEdge>()     // todo: IFlowVertex -> SegmentBase
         /// alias.target = [| mnemonic1; ... ; mnemonicn; |]
         member val AliasMap = Dictionary<NameComponents, HashSet<string>>(nameComponentsComparer())
+        member x.System = system
         static member Create(name:string, system:DsSystem) =
             let flow = Flow(name, system)
             system.Flows.Add(flow) |> verify $"Duplicated flow name [{name}]"

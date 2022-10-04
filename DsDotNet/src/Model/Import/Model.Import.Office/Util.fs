@@ -1,12 +1,7 @@
 // Copyright (c) Dual Inc.  All Rights Reserved.
 namespace Model.Import.Office
 
-open System
-open System.Linq
-open System.Diagnostics
 open System.Collections.Concurrent
-open System.Runtime.CompilerServices
-open Engine.Core.Util
 
 [<AutoOpen>]
 module Util =

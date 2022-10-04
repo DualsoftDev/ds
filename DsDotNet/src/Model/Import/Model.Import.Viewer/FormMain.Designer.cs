@@ -31,22 +31,25 @@ namespace Dual.Model.Import
         {
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.xtraTabControl_My = new System.Windows.Forms.TabControl();
+            this.splitter2 = new System.Windows.Forms.Splitter();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.button_OpenFolder = new System.Windows.Forms.Button();
             this.button_CreateExcel = new System.Windows.Forms.Button();
             this.pictureBox_ppt = new System.Windows.Forms.PictureBox();
             this.pictureBox_xls = new System.Windows.Forms.PictureBox();
-            this.button_copy = new System.Windows.Forms.Button();
+            this.splitContainer5 = new System.Windows.Forms.SplitContainer();
             this.richTextBox_ds = new System.Windows.Forms.RichTextBox();
+            this.xtraTabControl_Ex = new System.Windows.Forms.TabControl();
+            this.button_copy = new System.Windows.Forms.Button();
             this.button_TestStart = new System.Windows.Forms.Button();
             this.button_TestORG = new System.Windows.Forms.Button();
             this.splitContainer4 = new System.Windows.Forms.SplitContainer();
+            this.button_HideLine = new System.Windows.Forms.Button();
             this.button_comfile = new System.Windows.Forms.Button();
             this.button_ClearLog = new System.Windows.Forms.Button();
             this.richTextBox_Debug = new System.Windows.Forms.RichTextBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.button_HideLine = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -57,6 +60,10 @@ namespace Dual.Model.Import
             this.splitContainer2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_ppt)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_xls)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer5)).BeginInit();
+            this.splitContainer5.Panel1.SuspendLayout();
+            this.splitContainer5.Panel2.SuspendLayout();
+            this.splitContainer5.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer4)).BeginInit();
             this.splitContainer4.Panel1.SuspendLayout();
             this.splitContainer4.Panel2.SuspendLayout();
@@ -73,11 +80,12 @@ namespace Dual.Model.Import
             // splitContainer1.Panel1
             // 
             this.splitContainer1.Panel1.Controls.Add(this.xtraTabControl_My);
+            this.splitContainer1.Panel1.Controls.Add(this.splitter2);
             // 
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
-            this.splitContainer1.Size = new System.Drawing.Size(1373, 603);
+            this.splitContainer1.Size = new System.Drawing.Size(1373, 667);
             this.splitContainer1.SplitterDistance = 829;
             this.splitContainer1.TabIndex = 18;
             // 
@@ -86,11 +94,19 @@ namespace Dual.Model.Import
             this.xtraTabControl_My.Dock = System.Windows.Forms.DockStyle.Fill;
             this.xtraTabControl_My.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.xtraTabControl_My.HotTrack = true;
-            this.xtraTabControl_My.Location = new System.Drawing.Point(0, 0);
+            this.xtraTabControl_My.Location = new System.Drawing.Point(3, 0);
             this.xtraTabControl_My.Name = "xtraTabControl_My";
             this.xtraTabControl_My.SelectedIndex = 0;
-            this.xtraTabControl_My.Size = new System.Drawing.Size(829, 603);
-            this.xtraTabControl_My.TabIndex = 6;
+            this.xtraTabControl_My.Size = new System.Drawing.Size(826, 667);
+            this.xtraTabControl_My.TabIndex = 8;
+            // 
+            // splitter2
+            // 
+            this.splitter2.Location = new System.Drawing.Point(0, 0);
+            this.splitter2.Name = "splitter2";
+            this.splitter2.Size = new System.Drawing.Size(3, 667);
+            this.splitter2.TabIndex = 7;
+            this.splitter2.TabStop = false;
             // 
             // splitContainer2
             // 
@@ -110,9 +126,9 @@ namespace Dual.Model.Import
             // 
             // splitContainer2.Panel2
             // 
+            this.splitContainer2.Panel2.Controls.Add(this.splitContainer5);
             this.splitContainer2.Panel2.Controls.Add(this.button_copy);
-            this.splitContainer2.Panel2.Controls.Add(this.richTextBox_ds);
-            this.splitContainer2.Size = new System.Drawing.Size(540, 603);
+            this.splitContainer2.Size = new System.Drawing.Size(540, 667);
             this.splitContainer2.SplitterDistance = 220;
             this.splitContainer2.TabIndex = 4;
             // 
@@ -161,6 +177,47 @@ namespace Dual.Model.Import
             this.pictureBox_xls.TabStop = false;
             this.pictureBox_xls.Visible = false;
             // 
+            // splitContainer5
+            // 
+            this.splitContainer5.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer5.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer5.Name = "splitContainer5";
+            this.splitContainer5.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitContainer5.Panel1
+            // 
+            this.splitContainer5.Panel1.Controls.Add(this.richTextBox_ds);
+            // 
+            // splitContainer5.Panel2
+            // 
+            this.splitContainer5.Panel2.Controls.Add(this.xtraTabControl_Ex);
+            this.splitContainer5.Size = new System.Drawing.Size(540, 443);
+            this.splitContainer5.SplitterDistance = 221;
+            this.splitContainer5.TabIndex = 3;
+            // 
+            // richTextBox_ds
+            // 
+            this.richTextBox_ds.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(33)))), ((int)(((byte)(33)))));
+            this.richTextBox_ds.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.richTextBox_ds.Location = new System.Drawing.Point(0, 0);
+            this.richTextBox_ds.Name = "richTextBox_ds";
+            this.richTextBox_ds.ReadOnly = true;
+            this.richTextBox_ds.Size = new System.Drawing.Size(540, 221);
+            this.richTextBox_ds.TabIndex = 2;
+            this.richTextBox_ds.Text = "";
+            // 
+            // xtraTabControl_Ex
+            // 
+            this.xtraTabControl_Ex.Alignment = System.Windows.Forms.TabAlignment.Bottom;
+            this.xtraTabControl_Ex.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.xtraTabControl_Ex.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.xtraTabControl_Ex.HotTrack = true;
+            this.xtraTabControl_Ex.Location = new System.Drawing.Point(0, 0);
+            this.xtraTabControl_Ex.Name = "xtraTabControl_Ex";
+            this.xtraTabControl_Ex.SelectedIndex = 0;
+            this.xtraTabControl_Ex.Size = new System.Drawing.Size(540, 218);
+            this.xtraTabControl_Ex.TabIndex = 6;
+            // 
             // button_copy
             // 
             this.button_copy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -171,17 +228,6 @@ namespace Dual.Model.Import
             this.button_copy.Text = "클립보드 모델복사";
             this.button_copy.UseVisualStyleBackColor = true;
             this.button_copy.Click += new System.EventHandler(this.button_copy_Click);
-            // 
-            // richTextBox_ds
-            // 
-            this.richTextBox_ds.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(33)))), ((int)(((byte)(33)))));
-            this.richTextBox_ds.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.richTextBox_ds.Location = new System.Drawing.Point(0, 0);
-            this.richTextBox_ds.Name = "richTextBox_ds";
-            this.richTextBox_ds.ReadOnly = true;
-            this.richTextBox_ds.Size = new System.Drawing.Size(540, 379);
-            this.richTextBox_ds.TabIndex = 2;
-            this.richTextBox_ds.Text = "";
             // 
             // button_TestStart
             // 
@@ -227,8 +273,19 @@ namespace Dual.Model.Import
             this.splitContainer4.Panel2.Controls.Add(this.button_ClearLog);
             this.splitContainer4.Panel2.Controls.Add(this.richTextBox_Debug);
             this.splitContainer4.Size = new System.Drawing.Size(1373, 746);
-            this.splitContainer4.SplitterDistance = 603;
+            this.splitContainer4.SplitterDistance = 667;
             this.splitContainer4.TabIndex = 20;
+            // 
+            // button_HideLine
+            // 
+            this.button_HideLine.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_HideLine.Location = new System.Drawing.Point(1259, 117);
+            this.button_HideLine.Name = "button_HideLine";
+            this.button_HideLine.Size = new System.Drawing.Size(85, 23);
+            this.button_HideLine.TabIndex = 5;
+            this.button_HideLine.Text = "라인숨기기";
+            this.button_HideLine.UseVisualStyleBackColor = true;
+            this.button_HideLine.Click += new System.EventHandler(this.button_HideLine_Click);
             // 
             // button_comfile
             // 
@@ -260,7 +317,7 @@ namespace Dual.Model.Import
             this.richTextBox_Debug.Location = new System.Drawing.Point(0, 0);
             this.richTextBox_Debug.Name = "richTextBox_Debug";
             this.richTextBox_Debug.ReadOnly = true;
-            this.richTextBox_Debug.Size = new System.Drawing.Size(1373, 139);
+            this.richTextBox_Debug.Size = new System.Drawing.Size(1373, 75);
             this.richTextBox_Debug.TabIndex = 0;
             this.richTextBox_Debug.Text = "";
             // 
@@ -281,17 +338,6 @@ namespace Dual.Model.Import
             this.splitter1.Size = new System.Drawing.Size(1373, 3);
             this.splitter1.TabIndex = 22;
             this.splitter1.TabStop = false;
-            // 
-            // button_HideLine
-            // 
-            this.button_HideLine.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_HideLine.Location = new System.Drawing.Point(1259, 117);
-            this.button_HideLine.Name = "button_HideLine";
-            this.button_HideLine.Size = new System.Drawing.Size(85, 23);
-            this.button_HideLine.TabIndex = 5;
-            this.button_HideLine.Text = "라인숨기기";
-            this.button_HideLine.UseVisualStyleBackColor = true;
-            this.button_HideLine.Click += new System.EventHandler(this.button_HideLine_Click);
             // 
             // FormMain
             // 
@@ -319,6 +365,10 @@ namespace Dual.Model.Import
             this.splitContainer2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_ppt)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_xls)).EndInit();
+            this.splitContainer5.Panel1.ResumeLayout(false);
+            this.splitContainer5.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer5)).EndInit();
+            this.splitContainer5.ResumeLayout(false);
             this.splitContainer4.Panel1.ResumeLayout(false);
             this.splitContainer4.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer4)).EndInit();
@@ -336,7 +386,7 @@ namespace Dual.Model.Import
         private System.Windows.Forms.PictureBox pictureBox_xls;
         private System.Windows.Forms.Button button_ClearLog;
         private System.Windows.Forms.ProgressBar progressBar1;
-        private System.Windows.Forms.TabControl xtraTabControl_My;
+        private System.Windows.Forms.TabControl xtraTabControl_Ex;
         private System.Windows.Forms.SplitContainer splitContainer2;
         private System.Windows.Forms.RichTextBox richTextBox_ds;
         private System.Windows.Forms.Button button_copy;
@@ -347,6 +397,9 @@ namespace Dual.Model.Import
         private System.Windows.Forms.Button button_TestORG;
         private System.Windows.Forms.Button button_comfile;
         private System.Windows.Forms.Button button_HideLine;
+        private System.Windows.Forms.TabControl xtraTabControl_My;
+        private System.Windows.Forms.Splitter splitter2;
+        private System.Windows.Forms.SplitContainer splitContainer5;
     }
 }
 

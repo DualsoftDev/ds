@@ -1,3 +1,5 @@
+using Microsoft.FSharp.Core;
+
 namespace Engine.Parser;
 
 
@@ -18,7 +20,7 @@ class SkeletonListener : ListenerBase
     {
         var name = ctx.identifier1().GetText().DeQuoteOnDemand();
         ICpu cpu = null;    // todo
-        _system = DsSystem.Create(name, cpu, _model);
+        _system = DsSystem.Create(name, null, _model);
         Trace.WriteLine($"System: {name}");
         AddElement(CurrentPathElements, GraphVertexType.System);
     }

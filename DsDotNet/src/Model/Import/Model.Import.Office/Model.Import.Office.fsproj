@@ -16,14 +16,21 @@
 
 
   <ItemGroup>
+    <Compile Include="InterfaceClass.fs" />
+    <Compile Include="CoreUtil.fs" />
+    <Compile Include="CoreFlow.fs" />
+    <Compile Include="CoreClass.fs" />
+    <Compile Include="CoreStruct.fs" />
     <Compile Include="Event.fs" />
     <Compile Include="Util.fs" />
     <Compile Include="Object.fs" />
     <Compile Include="UtilError.fs" />
     <Compile Include="UtilPPT.fs" />
     <Compile Include="PPTX.fs" />
-    <Compile Include="Check.fs" />
+    <Compile Include="ImportCheck.fs" />
+    <Compile Include="ImportUtil.fs" />
     <Compile Include="ImportM.fs" />
+    <Compile Include="ConvertM.fs" />
     <Compile Include="ExportM.fs" />
     <Compile Include="ImportIOTable.fs" />
     <Compile Include="ExportIOTable.fs" />

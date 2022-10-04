@@ -1,6 +1,6 @@
 using Engine.Common;
 using Engine.CpuUnit;
-using Engine.Parser;
+using Model.Import.Office;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -17,11 +17,12 @@ namespace Dual.Model.Import
     {
         public static FormMain TheMain;
 
-        private ImportModel _model;
+        private MModel _model;
         private string _dsText;
         private bool _ConvertErr = false;
-
-        public Dictionary<MFlow, TabPage> DicUI;
+        private MModel _Demo;
+        public Dictionary<MFlow, TabPage> _DicMyUI;
+        public Dictionary<MFlow, TabPage> _DicExUI;
         public string PathPPT;
         public string PathXLS;
         public bool Busy = false;
@@ -49,12 +50,13 @@ namespace Dual.Model.Import
             EventExternal.MSGSubscribe();
             EventExternal.SegSubscribe();
 
-            DicUI = new Dictionary<MFlow, TabPage>();
+            _DicMyUI = new Dictionary<MFlow, TabPage>();
+            _DicExUI = new Dictionary<MFlow, TabPage>();
+            
+            _Demo = ImportCheck.GetDemoModel("test");
 
             // this.Text = UtilFile.GetVersion();
             this.Size = new Size(500, 500);
-
-
         }
 
         void Form1_DragEnter(object sender, DragEventArgs e)
@@ -120,19 +122,23 @@ namespace Dual.Model.Import
 
                 _ConvertErr = false;
                 richTextBox_ds.Clear();
-                DicUI.Clear();
+                _DicMyUI.Clear();
+                _DicExUI.Clear();
+                    
+                xtraTabControl_My.TabPages.Clear();
+                xtraTabControl_Ex.TabPages.Clear();
 
                 splitContainer1.Panel1Collapsed = false;
                 splitContainer2.Panel2Collapsed = false;
                 button_OpenFolder.Visible = false;
 
                 this.Size = new Size(1600, 1000);
-                HelpLoad();
                 ImportPPT();
             }
             catch
             {
                 WriteDebugMsg(DateTime.Now, MSGLevel.Error, $"{PathPPT} 불러오기 실패!!");
+                Busy = false;
             }
 
         }
@@ -176,7 +182,7 @@ namespace Dual.Model.Import
         {
             try
             {
-                var helper = ModelParser.ParseFromString2(_dsText, ParserOptions.Create4Simulation());
+                //var helper = ModelParser.ParseFromString2(_dsText, ParserOptions.Create4Simulation());
 
                 if (CpuLoader.PreCheck())
                     MSGWarn("언어체크 성공 !!!!");

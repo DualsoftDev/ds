@@ -28,19 +28,19 @@ namespace Dual.Model.Import
 
         public static void SegSubscribe()
         {
-            CoreEvent.SegSubject.Subscribe(rx =>
-            {
-                var seg = rx.Seg as MSeg;
-                var sys = seg.BaseSys;
+            //CoreEvent.SegSubject.Subscribe(rx =>
+            //{
+            //    var seg = rx.Seg as MSeg;
+            //    var sys = seg.BaseSys;
 
-                sys.RootMFlow().ToList().ForEach(f =>
-                {
-                    var flow = f as MFlow;
-                    if (flow.UsedSegs.Contains(seg))
-                        if (FormMain.TheMain.DicUI.ContainsKey(flow))
-                            ((UCView)FormMain.TheMain.DicUI[flow].Tag).Update(seg);
-                });
-            });
+            //    sys.RootMFlow().ToList().ForEach(f =>
+            //    {
+            //        var flow = f as MFlow;
+            //        if (flow.UsedSegs.Contains(seg))
+            //            if (FormMain.TheMain.DicUI.ContainsKey(flow))
+            //                ((UCView)FormMain.TheMain.DicUI[flow].Tag).Update(seg);
+            //    });
+            //});
         }
     }
 

@@ -10,10 +10,10 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Windows.Forms;
 using static Engine.Common.FS.MessageEvent;
+using static Engine.Core.CoreModule;
 using static Engine.Core.DsTextProperty;
 using static Engine.CpuUnit.CpuUnit;
 using static Model.Import.Office.Object;
-using ImportModel = Model.Import.Office.Object.ImportModel;
 
 namespace Dual.Model.Import
 {
@@ -61,7 +61,7 @@ namespace Dual.Model.Import
             try
             {
                 this.Do(() => button_comfile.Enabled = false);
-                var lstModel = new List<ImportModel>() { ImportM.FromPPTX(PathPPT) };
+                var lstModel = new List<MModel>() { ImportM.FromPPTX(PathPPT) };
                 if (lstModel.Where(w => w == null).Any())
                     return;
 
@@ -70,10 +70,11 @@ namespace Dual.Model.Import
                 if (!_ConvertErr)
                 {
                     _dsText = ExportM.ToText(_model);
+                    var dsCore = ConvertM.ToDs(_model);
                     ExportTextModel(Color.Transparent, _dsText);
-                    this.Do(() => xtraTabControl_My.TabPages.Clear());
+                    this.Do(() => xtraTabControl_Ex.TabPages.Clear());
                     foreach (var sys in _model.Systems.OrderBy(sys => sys.ValidName))
-                        CreateNewTabViewer((MSys)sys);
+                        CreateNewTabViewer(sys);
                     WriteDebugMsg(DateTime.Now, MSGLevel.Info, $"{PathPPT} 불러오기 성공!!");
                     this.Do(() =>
                     {
@@ -172,30 +173,29 @@ namespace Dual.Model.Import
 
         internal void HelpLoad()
         {
-            ImportModel demo = Check.GetDemoModel("test");
             splitContainer1.Panel1Collapsed = false;
 
             this.Size = new Size(1600, 1000);
 
-            demo.Systems.OrderBy(sys => sys.ValidName).ToList()
+            _Demo.Systems.OrderBy(sys => sys.ValidName).ToList()
                   .ForEach(sys =>
-                      CreateNewTabViewer((MSys)sys, true)
+                      CreateNewTabViewer(sys, true)
                   );
         }
 
         internal void CreateNewTabViewer(MSys sys, bool isDemo = false)
         {
-            List<MFlow> flows = sys.RootFlows.Cast<MFlow>().OrderBy(o => o.Page).ToList();
-            //if (isDemo)
-            //    flows = sys.RootFlows.Values.ToList();
-            //else
-            //    flows = sys.RootMFlow().ToList();
+            List<MFlow> flows = sys.Flows.Cast<MFlow>().OrderBy(o => o.Page).ToList();
 
-            var flowTotalCnt = flows.Count();
             flows.ToList().ForEach(f =>
             {
-                if (DicUI.ContainsKey(f))
-                    xtraTabControl_My.SelectedTab = DicUI[f];
+                if (_DicMyUI.ContainsKey(f) || _DicExUI.ContainsKey(f))
+                {
+                    if (f.System.Active)
+                        xtraTabControl_My.SelectedTab = _DicMyUI[f];
+                    else
+                        xtraTabControl_Ex.SelectedTab = _DicExUI[f];
+                }
                 else
                 {
                     UCView viewer = new UCView { Dock = DockStyle.Fill };
@@ -203,20 +203,28 @@ namespace Dual.Model.Import
                     TabPage tab = new TabPage();
                     tab.Controls.Add(viewer);
                     tab.Tag = viewer;
-                    tab.Text = $"{f.Name}({f.Page})";
+                    tab.Text = $"{f.System.Name}.{f.Name}({f.Page})";
                     this.Do(() =>
                     {
-                        xtraTabControl_My.TabPages.Add(tab);
-                        xtraTabControl_My.SelectedTab = tab;
-
-                        DicUI.Add(f, tab);
+                        if (f.System.Active)
+                        {
+                            xtraTabControl_My.TabPages.Add(tab);
+                            xtraTabControl_My.SelectedTab = tab;
+                            _DicMyUI.Add(f, tab);
+                        }
+                        else
+                        {
+                            xtraTabControl_Ex.TabPages.Add(tab);
+                            xtraTabControl_Ex.SelectedTab = tab;
+                            _DicExUI.Add(f, tab);
+                        }
                     });
                 }
             });
         }
         internal void RefreshGraph()
         {
-            foreach (KeyValuePair<MFlow, TabPage> view in DicUI)
+            foreach (KeyValuePair<MFlow, TabPage> view in _DicMyUI)
             {
                 foreach (var seg in view.Key.UsedMSegs)
                 {

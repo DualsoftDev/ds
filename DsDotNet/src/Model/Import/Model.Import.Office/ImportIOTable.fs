@@ -1,11 +1,7 @@
 // Copyright (c) Dual Inc.  All Rights Reserved.
 namespace Model.Import.Office
 
-open System.Linq
 open System
-open System.Data
-open System.Collections.Concurrent
-open System.Collections.Generic
 open Microsoft.Office.Interop.Excel
 open Engine.Common.FS
 open Engine.Core
@@ -69,9 +65,8 @@ module ImportIOTable =
                 |TagCase.Observe -> sys.ObserveSet.TryAdd($"{row.[2]}", $"{row.[6]}") |>ignore
                 |TagCase.Button  -> sys.AssignAddress($"{row.[1]}",$"{row.[2]}", $"{row.[6]}")|>ignore
             
-        for flow in sys.RootMFlow()  do
-            let mFlow = flow :?> MFlow
-            mFlow.CallSegs()
+        for flow in sys.Flows  do
+            flow.CallSegs()
             |> Seq.iter(fun seg -> 
                         let s, e = sys.AddressSet.[seg.Name]
                         seg.S <- if(s = "") then None else Some(s) 

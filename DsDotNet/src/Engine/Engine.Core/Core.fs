@@ -2,6 +2,7 @@
 namespace Engine.Core
 
 open System.Collections.Generic
+open System.Diagnostics
 
 [<AutoOpen>]
 module CoreModule =
@@ -65,11 +66,12 @@ module CoreModule =
 
     and [<AbstractClass>]
         SegmentBase (name:string, flow:Flow) =
-            inherit FqdnObject(name, flow)
-            interface IFlowVertex
+        inherit FqdnObject(name, flow)
+        interface IFlowVertex
 
     // normal segment : leaf, stem(parenting)
-    and Segment private (name:string, flow:Flow) =
+    and  [<DebuggerDisplay("{QualifiedName}")>]
+        Segment private (name:string, flow:Flow) =
         inherit SegmentBase(name, flow)
         member val Graph = Graph<Child, InSegmentEdge>()
         member val Flow = flow
@@ -81,7 +83,9 @@ module CoreModule =
             segment
 
 
-    and [<AbstractClass>] SegmentEquivalent (name:string, flow:Flow) = inherit SegmentBase(name, flow)
+    and [<AbstractClass>]
+        SegmentEquivalent (name:string, flow:Flow) =
+        inherit SegmentBase(name, flow)
 
     and SegmentAlias(mnemonic:string, flow:Flow, aliasKey:string[]) =
         inherit SegmentBase(mnemonic, flow)
@@ -109,10 +113,10 @@ module CoreModule =
 
     and [<AbstractClass>]
         Child (name:string, apiItem:ApiItem, segment:Segment) =
-            inherit FqdnObject(name, segment)
-            interface IChildVertex
-            member _.Segment = segment
-            member _.ApiItem = apiItem
+        inherit FqdnObject(name, segment)
+        interface IChildVertex
+        member _.Segment = segment
+        member _.ApiItem = apiItem
 
     and ChildApiCall private (apiItem:ApiItem, segment:Segment) =
         inherit Child(apiItem.QualifiedName, apiItem, segment)

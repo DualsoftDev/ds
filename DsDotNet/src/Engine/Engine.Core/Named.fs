@@ -3,6 +3,7 @@ namespace Engine.Core
 
 open System.Runtime.CompilerServices
 open System
+open System.Diagnostics
 open System.Linq
 open System.Globalization
 open System.Collections.Generic
@@ -31,6 +32,7 @@ module TextUtil =
 
     // 이름이 필요한 객체
     [<AbstractClass>]
+    [<DebuggerDisplay("{Name}")>]
     type Named(name) =
         let mutable name = name
         interface INamed with

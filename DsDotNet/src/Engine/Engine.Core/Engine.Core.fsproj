@@ -19,6 +19,7 @@
 		<Compile Include="Core.Util.Spit.fs" />
 		<Compile Include="Core.Util.Edge.fs" />
 		<Compile Include="Core.Util.Find.fs" />
+		<Compile Include="Core.Util.ToDsText.fs" />
 		<!--<Compile Include="Program.fs" />-->
 	</ItemGroup>
 

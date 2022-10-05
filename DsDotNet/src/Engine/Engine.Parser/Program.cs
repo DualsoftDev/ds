@@ -3,9 +3,7 @@ namespace Engine.Parser;
 
 public class Program
 {
-    public static void Main(string[] args)
-    {
-        var text = @"
+    static string EveryScenarioText = @"
 [sys ip = 192.168.0.1] My = {
     [flow] F = {        // GraphVertexType.Flow
         C1, C2 > C3, C4 |> C5;
@@ -66,26 +64,12 @@ public class Program
         ""+"" <||> ""-"";
     }
 }
-[sys] B = {
-    [flow] F = {
-        Vp > Pp > Sp;
-        Vm > Pm > Sm;
-
-        Vp |> Pm |> Sp;
-        Vm |> Pp |> Sm;
-        Vp <||> Vm;
-    }
-    [interfaces] = {
-        ""+"" = { F.Vp ~ F.Sp }
-        ""-"" = { F.Vm ~ F.Sm }
-        // 정보로서의 상호 리셋
-        ""+"" <||> ""-"";
-    }
-}
+[sys] B = @copy_system(A);
+[sys] C = @copy_system(A);
 [prop] = {
     // Global safety
     [safety] = {
-        My.F.Main = {B.F.Sp; B.F.Sm}
+        My.F.Main = {B.F.Sp; B.F.Sm; C.F.Sp}
     }
     [addresses] = {
         My.F.Main = (%Q1234.2343, , )
@@ -97,6 +81,8 @@ public class Program
 ";
 
 
+    static void ParseNormal(string text)
+    {
         var helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation());
         var model = helper.Model;
         //Try("1 + 2 + 3");
@@ -127,6 +113,58 @@ public class Program
             gr.Dump();
 
         System.Console.WriteLine("Done");
+    }
+
+    static void testBidirectional()
+    {
+        var values = new[]
+        {
+            (1, 3),
+            (2, 5),
+            (3, 1),
+            (7, 4),
+            (5, 9),
+            (6, 2),
+            (7, 3),
+            (5, 2),
+        };
+        var processed = new HashSet<(int, int)>();
+
+        IEnumerable<(int, int)[]> helper()
+        {
+            foreach (var value in values)
+            {
+                if (processed.Contains(value))
+                    continue;
+                processed.Add(value);
+
+                var reverse = (value.Item2, value.Item1);
+                if (values.Contains(reverse))
+                {
+                    yield return new[] { value, reverse };
+                    processed.Add(reverse);
+                }
+                else
+                    yield return new[] { value };
+            }
+        }
+
+        var xx = helper().ToArray();
+
+        var gr =
+            values.GroupBy(tpl => values.Contains((tpl.Item2, tpl.Item1)))
+                .ToArray();
+        Console.WriteLine();
+    }
+    public static void Main(string[] args)
+    {
+        testBidirectional();
+        //ParseNormal(EveryScenarioText);
+
+
+        var text = ModelParser.ExpandSystemCopy(EveryScenarioText);
+        ParseNormal(text);
+        Console.WriteLine();
     }
 
     static void Try(string input)

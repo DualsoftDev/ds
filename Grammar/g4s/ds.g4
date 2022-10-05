@@ -25,14 +25,18 @@ test:qstring EOF;
 qstring: STRING_LITERAL EOF;
 
 
-system: '[' 'sys' (('ip'|'host') '=' host)? ']' identifier1 '=' sysBlock;    // [sys] Seg = {..}
+system: '[' 'sys' (('ip'|'host') '=' host)? ']' systemName '=' (sysBlock|sysCopySpec);    // [sys] Seg = {..}
     sysBlock
         : LBRACE (flow | interfaces | buttons)* RBRACE       // identifier1Listing|parenting|causal|call
         ;
     host: ipv4 | domainName;
     domainName: identifier1234;
     ipv4: IPV4;
+    systemName:identifier1;
 
+//[sys] B = @copy_system(A);
+sysCopySpec: '@' 'copy_system' LPARENTHESIS sourceSystemName RPARENTHESIS SEIMCOLON;
+    sourceSystemName:identifier1;
 layouts: '[' 'layouts' ']' (identifier1)? '=' layoutsBlock;
     layoutsBlock
         : LBRACE (positionDef)* RBRACE
@@ -83,16 +87,14 @@ propertyBlock: (addresses|safety|layouts);
 
 
 flow
-    : flowProp identifier1 '=' LBRACE (
+    : '[' 'flow' ']' identifier1 '=' LBRACE (
         causal | parenting | identifier12Listing
         | alias
         | safety)* RBRACE     // |flowTask|callDef
     ;
-flowProp : '[' 'flow' ('of' identifier1)? ']';
 
 interfaces
-    : interfaceProp (identifier1)? '=' LBRACE (interfaceListing)* RBRACE;
-    interfaceProp: '[' 'interfaces' ']';
+    : '[' 'interfaces' ']' (identifier1)? '=' LBRACE (interfaceListing)* RBRACE;
     interfaceListing: (interfaceDef (';')?) | interfaceResetDef;
 
     // A23 = { M.U ~ S.S3U ~ _ }
@@ -104,8 +106,7 @@ interfaces
     interfaceResetDef: identifier1 causalOperatorReset identifier1 (';')?;
 
 
-alias: aliasProp (identifier1)? '=' LBRACE (aliasListing)* RBRACE;
-    aliasProp: '[' 'aliases' ']';
+alias: '[' 'aliases' ']' (identifier1)? '=' LBRACE (aliasListing)* RBRACE;
     aliasListing:
         aliasDef '=' LBRACE (aliasMnemonic)? ( ';' aliasMnemonic)* (';')+ RBRACE
         ;

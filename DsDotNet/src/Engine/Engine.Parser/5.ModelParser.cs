@@ -1,12 +1,11 @@
+using Antlr4.Runtime;
+
 namespace Engine.Parser;
 
 public static class ModelParser
 {
-    public static ParserHelper ParseFromString2(string text, ParserOptions options)
+    static void Walk(dsParser parser, ParserHelper helper)
     {
-        var (parser, errors) = DsParser.FromDocument(text);
-        var helper = new ParserHelper(options);
-
         var sListener = new SkeletonListener(parser, helper);
         ParseTreeWalker.Default.Walk(sListener, parser.program());
         Trace.WriteLine("--- End of skeleton listener");
@@ -23,10 +22,62 @@ public static class ModelParser
         var etcListener = new EtcListener(parser, helper);
         ParseTreeWalker.Default.Walk(etcListener, parser.program());
         Trace.WriteLine("--- End of etc listener");
+    }
+    public static ParserHelper ParseFromString2(string text, ParserOptions options)
+    {
+        var (parser, errors) = DsParser.FromDocument(text);
+        var helper = new ParserHelper(options);
+
+        Walk(parser, helper);
 
         return helper;
     }
 
     public static Model ParseFromString(string text, ParserOptions options) => ParseFromString2(text, options).Model;
+
+
+    public static void ParsePartial(string text, ParserHelper helper, Func<dsParser, RuleContext> predExtract=null)
+    {
+        if (predExtract == null)
+            predExtract = new Func<dsParser, RuleContext>((dsParser parser) => parser.program());
+        var (parser, ast, parserErrors) = FromDocument(text, predExtract);
+        Walk(parser, helper);
+    }
+
+    // [sys] B = @copy_system(A)
+    public static string ExpandSystemCopy(string text)
+    {
+        IEnumerable<string> helper()
+        {
+            yield return text;
+
+            var (parser, errors) = DsParser.FromDocument(text);
+            var helper = new ParserHelper(ParserOptions.Create4Simulation());
+
+            parser.Reset();
+            var sysCtxMap =
+                enumerateChildren<SystemContext>(parser.program())
+                .ToDictionary(ctx => findFirstChild<SystemNameContext>(ctx).GetText(), ctx => ctx)    //ctx => findFirstChild<SysCopySpecContext>(ctx))
+                ;
+            var copySysCtxs = sysCtxMap.Where(kv => findFirstChild<SysCopySpecContext>(kv.Value) != null).ToArray();
+
+            foreach (var kv in copySysCtxs)
+            {
+                var newSysName = kv.Key;
+                var srcSysName = findFirstChild<SourceSystemNameContext>(kv.Value).GetText();
+                var sysText = sysCtxMap[srcSysName].GetText();
+                yield return "\r\n";
+                yield return sysText.Replace($"[sys]{srcSysName}", $"[sys]{newSysName}");
+            }
+        }
+
+        return string.Join("\r\n", helper());
+
+        //var sListener = new CopySystemListener(parser, helper);
+        //ParseTreeWalker.Default.Walk(sListener, parser.program());
+        //Trace.WriteLine("--- End of copy system listener");
+
+        //return null;
+    }
 
 }

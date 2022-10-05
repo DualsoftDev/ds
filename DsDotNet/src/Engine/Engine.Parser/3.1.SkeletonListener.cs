@@ -16,11 +16,14 @@ class SkeletonListener : ListenerBase
 
     override public void EnterSystem(SystemContext ctx)
     {
-        var name = ctx.identifier1().GetText().DeQuoteOnDemand();
-        ICpu cpu = null;    // todo
-        _system = DsSystem.Create(name, cpu, _model);
-        Trace.WriteLine($"System: {name}");
-        AddElement(CurrentPathElements, GraphVertexType.System);
+        if (findFirstChild<SysBlockContext>(ctx) != null)
+        {
+            var name = ctx.systemName().GetText().DeQuoteOnDemand();
+            ICpu cpu = null;    // todo
+            _system = DsSystem.Create(name, cpu, _model);
+            Trace.WriteLine($"System: {name}");
+            AddElement(CurrentPathElements, GraphVertexType.System);
+        }
     }
 
     override public void EnterFlow(FlowContext ctx)

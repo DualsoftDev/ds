@@ -50,6 +50,6 @@
         "+" <||> "-";
     }
 }
-[sys] B = @copy_system("A")
-[sys] C = @copy_system("A")
+[sys] B = @copy_system(A);
+[sys] C = @copy_system(A);
 

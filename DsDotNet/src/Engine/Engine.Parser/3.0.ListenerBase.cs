@@ -54,7 +54,7 @@ class ListenerBase : dsBaseListener
 
     override public void EnterSystem(SystemContext ctx)
     {
-        var name = ctx.identifier1().GetText().DeQuoteOnDemand();
+        var name = ctx.systemName().GetText().DeQuoteOnDemand();
         _system = _model.Systems.First(s => s.Name == name);
     }
     override public void ExitSystem(SystemContext ctx) { this._system = null; }

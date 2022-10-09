@@ -22,7 +22,7 @@ class SkeletonListener : ListenerBase
         {
             var name = ctx.systemName().GetText().DeQuoteOnDemand();
             ICpu cpu = null;    // todo
-            _system = DsSystem.Create(name, cpu, _model);
+            _system = DsSystem.Create(name, FSharpOption<ICpu>.None, _model);
             Trace.WriteLine($"System: {name}");
             AddElement(CurrentPathElements, GraphVertexType.System);
         }

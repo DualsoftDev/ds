@@ -464,7 +464,7 @@ module PPTX =
                 doc.Close()
               
             with ex -> doc.Close()
-                       MSGError  $"{ex.Message}"
+                       failwithf  $"{ex.Message}"
                 
 
         member x.GetPage(pageNum:int) = pages.Values |> Seq.filter(fun p -> p.PageNum = pageNum) |> Seq.head

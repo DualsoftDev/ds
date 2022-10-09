@@ -35,15 +35,15 @@ module DsTextDataType =
 [<AutoOpen>]
 module DsTextExport =    
     //export Excel
-    let [<Literal>] TextAddress  = "주소"
-    let [<Literal>] TextVariable = "내부"
-    let [<Literal>] TextCommand  = "지시"
-    let [<Literal>] TextObserve  = "관찰"
-    let [<Literal>] TextButton   = "버튼"
-    let [<Literal>] TextEmgBtn   = "비상"
-    let [<Literal>] TextAutoBtn  = "자동"
-    let [<Literal>] TextResetBtn = "리셋"
-    let [<Literal>] TextStartBtn = "시작"
+    let [<Literal>] TextAddressDev  = "주소"
+    let [<Literal>] TextVariable    = "내부"
+    let [<Literal>] TextCommand     = "지시"
+    let [<Literal>] TextObserve     = "관찰"
+    let [<Literal>] TextButton      = "버튼"
+    let [<Literal>] TextEmgBtn      = "비상"
+    let [<Literal>] TextAutoBtn     = "자동"
+    let [<Literal>] TextResetBtn    = "리셋"
+    let [<Literal>] TextStartBtn    = "시작"
 
 
 [<AutoOpen>]

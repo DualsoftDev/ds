@@ -86,7 +86,7 @@ module DsType =
     with
         member x.ToText() =
             match x with
-            | Address      -> TextAddress  
+            | Address      -> TextAddressDev  
             | Variable     -> TextVariable 
             | Command      -> TextCommand  
             | Observe      -> TextObserve  
@@ -95,13 +95,13 @@ module DsType =
 
     let TagToType(txt:string) =
         match txt with
-        | TextAddress   -> Address
-        | TextVariable  -> Variable
-        | TextCommand   -> Command
-        | TextObserve   -> Observe
-        | TextButton    -> Button
+        | TextAddressDev   -> Address
+        | TextVariable     -> Variable
+        | TextCommand      -> Command
+        | TextObserve      -> Observe
+        | TextButton       -> Button
         |_-> failwithf $"'{txt}' TagCase Error check type [
-                , {TextAddress}, {TextVariable}
+                , {TextAddressDev}, {TextVariable}
                 , {TextCommand}, {TextObserve}
                 , {TextButton}]"
 

@@ -82,10 +82,9 @@ module ImportCheck =
         //page 타이틀 중복체크 
         let SamePageErr(pptPages:pptPage seq) = 
             let dicPage = ConcurrentDictionary<string, int>()
-            pptPages.where(fun page  ->  page.IsUsing)
+            pptPages.where(fun page  ->  page.IsUsing && page.Title = ""|> not)
                     .foreach(fun page-> 
-                let sysName, title = GetSysNFlow(page.Title, page.PageNum)
-                if(dicPage.TryAdd(title, page.PageNum)|>not)
+                if(dicPage.TryAdd(page.Title, page.PageNum)|>not)
                 then Office.ErrorPPT(Page, 21, $"{page.Title},  Same Page({dicPage.[page.Title]})",  page.PageNum)
             )
         

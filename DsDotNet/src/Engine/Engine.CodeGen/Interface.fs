@@ -1,4 +1,4 @@
-namespace Engine.CpuUnit
+namespace Engine.CodeGen
 open Engine.Core
 
 [<AutoOpen>]
@@ -8,6 +8,10 @@ module Interface =
         inherit IBit
         inherit ICpu
         abstract Value: bool with get, set
+
+    type IGate = 
+        inherit IBit
+        abstract Update: unit -> unit
 
     type IAlias     = inherit INamed
     type ITxRx      = inherit INamed

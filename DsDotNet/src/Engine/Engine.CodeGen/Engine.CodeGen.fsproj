@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
+		<TargetFramework>net48</TargetFramework>
+		<RootNamespace>Engine.CodeGen</RootNamespace>
+		<LangVersion>6.0</LangVersion>
+	</PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="TagType.fs" />
+    <Compile Include="Interface.fs" />
+    <Compile Include="CpuLoader.fs" />
+    <Compile Include="CpuEvent.fs" />
+    <Compile Include="CpuUnit.fs" />
+    <Compile Include="CpuBit.fs" />
+    <Compile Include="CpuTag.fs" />
+    <Compile Include="Evaluate.fs" />
+    <Compile Include="Gate.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Engine.Core\Engine.Core.fsproj" />
+  </ItemGroup>
+</Project>

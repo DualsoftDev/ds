@@ -1,4 +1,4 @@
-namespace Engine.CpuUnit
+namespace Engine.CodeGen
 
 open Engine.Core
 open System

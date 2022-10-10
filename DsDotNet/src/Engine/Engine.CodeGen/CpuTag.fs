@@ -1,4 +1,4 @@
-namespace Engine.CpuUnit
+namespace Engine.CodeGen
 
 open Engine.Core
 
@@ -26,7 +26,3 @@ module CpuTag =
     type TagP(cpu:Cpu, name, tagType:TagType) = 
         inherit Tag(cpu, name, tagType)
 
-///// <summary> Tag Etc : flow auto, going/ready tag,</summary>
-    type TagE(cpu:Cpu, name, tagType:TagType, address) = 
-        inherit Tag(cpu, name, tagType)
-        member x.Address = address

@@ -24,7 +24,7 @@ module UtilError =
     let DicErr = 
         let msgs = ConcurrentDictionary<int, string>()
         msgs.TryAdd(1,"Call에 점선은 지정된 모양이 아닙니다.") |>ignore
-        msgs.TryAdd(2,"이름 마지막에 [#,#] 형식은 하나 이상 양의 정수이어야 합니다.") |>ignore
+        msgs.TryAdd(2,"이름 마지막에 [#;#] 형식은 하나 이상 양의 정수이어야 합니다.") |>ignore
         msgs.TryAdd(3,"기능이 없는 연결입니다.") |>ignore
         msgs.TryAdd(4,"edge not connected") |>ignore
         msgs.TryAdd(5,"start not connected") |>ignore

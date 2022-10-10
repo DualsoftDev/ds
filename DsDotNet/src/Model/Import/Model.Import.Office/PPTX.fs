@@ -182,20 +182,21 @@ module PPTX =
         let trimStartEnd(text:string) =   text.TrimStart(' ').TrimEnd(' ')
         let trimStartEndSeq(texts:string seq) =  texts  |> Seq.map(fun name -> trimStartEnd name) 
         let updateTxRx(tailBarckets:string) =
-                if(tailBarckets.Split(',').Count() > 1)
+                if(tailBarckets.Split(';').Count() > 1)
                 then 
-                    txCnt <- tailBarckets.Split(',').[0] |> Convert.ToInt32
-                    rxCnt <- tailBarckets.Split(',').[1] |> Convert.ToInt32
+                    txCnt <- tailBarckets.Split(';').[0] |> Convert.ToInt32
+                    rxCnt <- tailBarckets.Split(';').[1] |> Convert.ToInt32
                 else 
                     shape.ErrorName(22, iPage)
 
-        let updateSafety(barckets:string)  = safeties <- barckets.Split(';') |> HashSet
+        let updateSafety(barckets:string)  = safeties <- barckets.Split(';') 
+                                             |> Seq.map(fun sys -> $"{pageTitle}_{sys}") |> HashSet 
         let updateCopySys(barckets:string) = 
             if  (trimStartEnd barckets).All(fun c -> Char.IsDigit(c))
             then 
                  copySystems <- [for i in [1..Convert.ToInt32(barckets)] do yield sprintf "%s%d" name i]
                                 |> Seq.map(fun sys -> $"{pageTitle}_{sys}") |> HashSet
-            else copySystems <- barckets.Split(',') |> trimStartEndSeq 
+            else copySystems <- barckets.Split(';') |> trimStartEndSeq 
                                 |> Seq.map(fun sys -> $"{pageTitle}_{sys}") |> HashSet 
             
         let updateIF(text:string)      = 
@@ -205,8 +206,8 @@ module PPTX =
             then 
                 let txs = txrx.Split('~')[0]
                 let rxs = txrx.Split('~')[1]
-                ifTXs  <- txs.Split(',') |> trimStartEndSeq |> HashSet 
-                ifRXs  <- rxs.Split(',') |> trimStartEndSeq |> HashSet 
+                ifTXs  <- txs.Split(';') |> trimStartEndSeq |> HashSet 
+                ifRXs  <- rxs.Split(';') |> trimStartEndSeq |> HashSet 
         
         do 
             nodeType <- 

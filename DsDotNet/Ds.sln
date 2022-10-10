@@ -55,6 +55,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Engine.Core.Obsolete", "src
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Engine.CodeGen", "src\Engine\Engine.CodeGen\Engine.CodeGen.fsproj", "{62AFF7EE-BE93-42A2-980C-CFC42B53B747}"
 EndProject
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Engine.Runner", "src\Engine\Engine.Runner\Engine.Runner.fsproj", "{BC716AB4-F94A-46B9-967C-3EC6BA5A603D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -113,6 +115,9 @@ Global
 		{62AFF7EE-BE93-42A2-980C-CFC42B53B747}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{62AFF7EE-BE93-42A2-980C-CFC42B53B747}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{62AFF7EE-BE93-42A2-980C-CFC42B53B747}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BC716AB4-F94A-46B9-967C-3EC6BA5A603D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC716AB4-F94A-46B9-967C-3EC6BA5A603D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC716AB4-F94A-46B9-967C-3EC6BA5A603D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -136,6 +141,7 @@ Global
 		{9EDB7A93-4EAD-41D2-89BA-AC4BA5A77DAF} = {BF60BC93-E09B-4E5F-9D85-95A519479D54}
 		{F8EAE8B8-6C54-4B7D-8B6C-A7BB953AD4D2} = {BCF8AC63-491C-4D8E-81EC-88032ED4CF05}
 		{62AFF7EE-BE93-42A2-980C-CFC42B53B747} = {BF60BC93-E09B-4E5F-9D85-95A519479D54}
+		{BC716AB4-F94A-46B9-967C-3EC6BA5A603D} = {BCF8AC63-491C-4D8E-81EC-88032ED4CF05}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8B36D7B1-CD69-44C5-8E57-DE46AC18C1F7}

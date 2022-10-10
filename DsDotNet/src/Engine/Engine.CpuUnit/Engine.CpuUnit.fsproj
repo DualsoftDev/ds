@@ -4,9 +4,21 @@
 		<TargetFramework>net48</TargetFramework>
 		<RootNamespace>Engine.CpuUnit</RootNamespace>
 		<LangVersion>6.0</LangVersion>
+		<OutputType>Exe</OutputType>
 	</PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Interface.fs" />
+    <Compile Include="Bit.fs" />
+    <Compile Include="Evaluate.fs" />
+    <Compile Include="Gate.fs" />
     <Compile Include="Process.fs" />
+    <Compile Include="Loader.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\..\exLib\Newtonsoft.Json.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>

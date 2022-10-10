@@ -1,0 +1,29 @@
+namespace Engine.CodeGen
+
+open System.Diagnostics
+open System.Collections.Generic
+open Engine.Core
+open Newtonsoft.Json
+
+[<AutoOpen>]
+module CpuGenModule =
+  
+    let GenCpuText(model:Model) = 
+        let testText = 
+            """
+            [
+                {
+                "GeteName": "GateAND",
+                "Out": "O1",
+                "In1": "A;B;C;D"
+                },
+                {
+                "GeteName": "GateSR",
+                "Out": "O1",
+                "In1": "A;!B;C;D",
+                "In2": "E;F"
+                }
+            ]
+            """
+       
+        testText

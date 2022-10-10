@@ -24,7 +24,7 @@ module UtilError =
     let DicErr = 
         let msgs = ConcurrentDictionary<int, string>()
         msgs.TryAdd(1,"Call에 점선은 지정된 모양이 아닙니다.") |>ignore
-        msgs.TryAdd(2,"이름 마지막에 [#,#] 형식은 하나 이상 양의 정수이어야 합니다.") |>ignore
+        msgs.TryAdd(2,"이름 마지막에 [#;#] 형식은 하나 이상 양의 정수이어야 합니다.") |>ignore
         msgs.TryAdd(3,"기능이 없는 연결입니다.") |>ignore
         msgs.TryAdd(4,"edge not connected") |>ignore
         msgs.TryAdd(5,"start not connected") |>ignore
@@ -58,7 +58,8 @@ module UtilError =
         msgs.TryAdd(33,"외부 시스템에 해당 인터페이스가 없습니다.") |>ignore
         msgs.TryAdd(34,"외부 시스템에 동일한 Copy 시스템을 만들려 했습니다.") |>ignore
         msgs.TryAdd(35,"외부 시스템 인터페이스 이름만 존재 합니다. '인터페이스이름[tx1 ~ rx1,rx2]' 와 같은형식으로 입력 해야합니다.") |>ignore
-        msgs.TryAdd(36,"") |>ignore
+        msgs.TryAdd(36,"행위이름이 EXCEL 이름 열에 없습니다.") |>ignore
+        msgs.TryAdd(37,"") |>ignore
        
         msgs
         

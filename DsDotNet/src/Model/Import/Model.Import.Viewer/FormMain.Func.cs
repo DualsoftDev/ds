@@ -101,25 +101,37 @@ namespace Dual.Model.Import
         }
         internal void ImportExcel(string path)
         {
-            if (UtilFile.BusyCheck()) return;
-            Busy = true;
-            MSGInfo($"{PathXLS} 불러오는 중!!");
-            var sys = _model.Systems.First() as MSys;
-            ImportIOTable.ApplyExcel(path, sys);
-            _dsText = ExportM.ToText(_model);
-            ExportTextModel(Color.FromArgb(0, 150, 0), _dsText);
-            this.Do(() =>
+            try
             {
-                richTextBox_ds.ScrollToCaret();
-                button_copy.Visible = true;
 
-                MSGInfo($"{PathXLS} 적용완료!!");
-                MSGWarn($"파워포인트와 엑셀을 동시에 가져오면 IO 매칭된 설정값을 가져올수 있습니다.!!");
+                if (UtilFile.BusyCheck()) return;
+                Busy = true;
+                MSGInfo($"{PathXLS} 불러오는 중!!");
+                ImportIOTable.ApplyExcel(path, _model.ActiveSys);
+                _dsText = ExportM.ToText(_model);
+                ExportTextModel(Color.FromArgb(0, 150, 0), _dsText);
+                this.Do(() =>
+                {
+                    richTextBox_ds.ScrollToCaret();
+                    button_copy.Visible = true;
 
-            });
-            Busy = false;
+                    MSGInfo($"{PathXLS} 적용완료!!");
+                    MSGWarn($"파워포인트와 엑셀을 동시에 가져오면 IO 매칭된 설정값을 가져올수 있습니다.!!");
+
+                });
+            }
+
+            catch (Exception ex)
+            {
+                WriteDebugMsg(DateTime.Now, MSGLevel.Error, ex.Message);
+            }
+            finally
+            {
+                Busy = false;
+            }
 
         }
+
         internal void ExportExcel()
         {
             if (UtilFile.BusyCheck()) return;

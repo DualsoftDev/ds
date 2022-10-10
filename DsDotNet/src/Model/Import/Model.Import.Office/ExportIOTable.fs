@@ -6,28 +6,35 @@ open Microsoft.Office.Interop.Excel
 open System.Drawing
 open System.Reflection
 open Engine.Common.FS
+open Engine.Core
 
 [<AutoOpen>]
 module ExportIOTable =
 
     let ToTable(model:MModel) =
+        let sampleCommandName = "'CMD1"
+        let sampleCommand     = "'@Delay(0)"
+        let sampleConditionName = "'CON1"
+        let sampleCondition = "'@Delay(0)"
 
         let dt = new System.Data.DataTable($"{model.Name}")
-        dt.Columns.Add("Case", typeof<string>) |>ignore
-        dt.Columns.Add("MFlow", typeof<string>) |>ignore
-        dt.Columns.Add("Name", typeof<string>) |>ignore
-        dt.Columns.Add("Type", typeof<string>) |>ignore
-        dt.Columns.Add("Size", typeof<string>) |>ignore
-        dt.Columns.Add("Output", typeof<string>) |>ignore
-        dt.Columns.Add("Input" , typeof<string>) |>ignore
+        dt.Columns.Add($"{IOColumn.Case}"       , typeof<string>) |>ignore
+        dt.Columns.Add($"{IOColumn.Flow}"       , typeof<string>) |>ignore
+        dt.Columns.Add($"{IOColumn.Name}"       , typeof<string>) |>ignore
+        dt.Columns.Add($"{IOColumn.Type}"       , typeof<string>) |>ignore
+        dt.Columns.Add($"{IOColumn.Size}"       , typeof<string>) |>ignore
+        dt.Columns.Add($"{IOColumn.Output}"     , typeof<string>) |>ignore
+        dt.Columns.Add($"{IOColumn.Input}"      , typeof<string>) |>ignore
+        dt.Columns.Add($"{IOColumn.Command}"    , typeof<string>) |>ignore
+        dt.Columns.Add($"{IOColumn.Observe}"    , typeof<string>) |>ignore
 
 
         let rowItems(causal:NodeType, seg:MSeg, trx:string) =
             let MFlowName, name =  seg.OwnerMFlow, seg.Name
             match causal with
-            |TR ->  ["주소"; MFlowName; name; trx; "bit"; seg.TagStart  ; seg.TagEnd]
-            |TX  -> ["주소"; MFlowName; name; trx; "bit"; seg.TagStart  ; "'-"]
-            |RX  -> ["주소"; MFlowName; name; trx; "bit"; "'-"           ; seg.TagEnd]
+            |TR ->  ["주소"; MFlowName; name; trx; "bit"; seg.TagStart  ; seg.TagEnd; sampleCommandName; sampleConditionName]
+            |TX  -> ["주소"; MFlowName; name; trx; "bit"; seg.TagStart  ; "'-"; sampleCommandName; "'-"]
+            |RX  -> ["주소"; MFlowName; name; trx; "bit"; "'-"           ; seg.TagEnd; "'-"; sampleConditionName;]
             |_ -> failwithf "ERR";
 
         let rows =
@@ -51,19 +58,26 @@ module ExportIOTable =
                     rowTemp.ItemArray <- (row|> Seq.cast<obj>|> Seq.toArray)
                     dt.Rows.Add(rowTemp) |> ignore)
 
-        dt.Rows.Add("내부", "변수", ""  , "'-", ""  , "'-", "'-") |> ignore
-        dt.Rows.Add("지시", "함수", ""  , "'-", "'-", ""  , "'-") |> ignore
-        dt.Rows.Add("관찰", "함수", ""  , "'-", "'-", "'-", ""  ) |> ignore
-
+       
         for sys in  model.Systems do
             for btn in  sys.EmgSet do
-                dt.Rows.Add("버튼", "비상", btn.Key  , "'-", "'-", "'-",  ""  ) |> ignore
+                dt.Rows.Add(TextButton, TextEmgBtn, btn.Key  , "'-", "'-", "'-",  "" , "'-", "'-" ) |> ignore
             for btn in  sys.AutoSet do
-                dt.Rows.Add("버튼", "자동", btn.Key  , "'-", "'-", "'-",  ""  ) |> ignore
+                dt.Rows.Add(TextButton, TextAutoBtn, btn.Key  , "'-", "'-", "'-",  "" , "'-", "'-" ) |> ignore
             for btn in  sys.StartSet do
-                dt.Rows.Add("버튼", "시작", btn.Key  , "'-", "'-", "'-",  ""  ) |> ignore
+                dt.Rows.Add(TextButton, TextStartBtn, btn.Key  , "'-", "'-", "'-",  "" , "'-", "'-" ) |> ignore
             for btn in  sys.ResetSet do
-                dt.Rows.Add("버튼", "리셋", btn.Key  , "'-", "'-", "'-",  ""  ) |> ignore
+                dt.Rows.Add(TextButton, TextResetBtn, btn.Key  , "'-", "'-", "'-",  "" , "'-", "'-" ) |> ignore
+
+
+        dt.Rows.Add("'-", "'-", "'-","'-", "'-", "'-","'-", "'-","'-") |> ignore
+        dt.Rows.Add("'-", "'-", "'-","'-", "'-", "'-","'-", "'-","'-") |> ignore
+        dt.Rows.Add("'-", "'-", "'-","'-", "'-", "'-","'-", "'-","'-") |> ignore
+
+        dt.Rows.Add(TextVariable, "변수", ""  , "'-", ""  , "'-", "'-", "'-", "'-") |> ignore
+        dt.Rows.Add(TextCommand, "함수", sampleCommandName    , "'-", "'-", sampleCommand  , "'-") |> ignore
+        dt.Rows.Add(TextObserve, "함수", sampleConditionName  , "'-", "'-", sampleCondition, "'-") |> ignore
+
         dt
 
  
@@ -75,6 +89,9 @@ module ExportIOTable =
             range.Font.Bold <- true;
             range.Borders.LineStyle <- XlLineStyle.xlContinuous;
             range.Borders.Weight <- 2;
+
+        let CellMerge(range:Microsoft.Office.Interop.Excel.Range ) =
+            range.Merge(true)
 
         let EnableCellStyle(range:Microsoft.Office.Interop.Excel.Range ) =
                    range.Interior.Color <- Color.LightYellow;
@@ -112,11 +129,14 @@ module ExportIOTable =
                 DoWork((int)(Convert.ToSingle(rowsIndex + 1) / (rowsCnt|>float32) * 100f));
                 for colIndex in [|0..colsCnt-1|] do
                     workSheet.Cells.[rowsIndex + 2, colIndex + 1] <- tbl.Rows.[rowsIndex].[colIndex]
-                    
-                    if(tbl.Rows.[rowsIndex].[colIndex].ToString() = "")
+                    let cellText =tbl.Rows.[rowsIndex].[colIndex].ToString()
+                    if(cellText = "" || (cellText.StartsWith("'") && cellText.StartsWith("'-")|>not))
                     then 
-                        let excelCellrange = workSheet.Range(workSheet.Cells.[rowsIndex + 2, colIndex + 1], workSheet.Cells.[rowsIndex + 2, colIndex + 1]);
+                        let excelCellrange = workSheet.Range(workSheet.Cells.[rowsIndex + 2, colIndex + 1], workSheet.Cells.[rowsIndex + 2, colIndex + 1])
                         EnableCellStyle(excelCellrange)
+
+                    if(colIndex = 0 && (cellText = TextCommand||cellText = TextObserve))
+                    then CellMerge(workSheet.Range(workSheet.Cells.[rowsIndex + 2, colIndex + 6], workSheet.Cells.[rowsIndex + 2, colIndex + 9]))
 
             workSheet.Range(workSheet.Cells.[1, 1], workSheet.Cells.[rowsCnt + 1, colsCnt]) |> AutoFitNFilterColumn
         

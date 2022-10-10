@@ -5,13 +5,14 @@ open Engine.Core
 
 [<AutoOpen>]
 module GraphUtils =
-    [<DebuggerDisplay("{name}")>]
-    type DsGraph(graph:Graph<'V, 'E>) =
+    type DsGraph(graph:Graph<Child, InSegmentEdge>) =
         /// Get node index map(key:name, value:idx)
-        member x.Indices = getIndexedMap graph
+        member x.Indices = graph |> getIndexedMap
+        
+        member x.AllResets = graph |> getAllResets
 
         /// Get all routes of child DAGs
-        member x.Origins = getOrigins graph
+        member x.Origins = graph |> getOrigins
         
         /// Get pre-calculated targets that 
         /// child segments to be 'ON' in progress(Theta)

@@ -8,6 +8,17 @@ open Engine.Core
 
 [<AutoOpen>]
 module ImportIOTable =
+       
+    type IOColumn =
+    | Case      = 0
+    | Flow     = 1
+    | Name      = 2
+    | Type      = 3
+    | Size      = 4
+    | Output    = 5
+    | Input     = 6
+    | Command   = 7
+    | Observe   = 8
 
     let ApplyExcel(path:string, sys:MSys) =
         let FromExcel(path:string) =
@@ -54,24 +65,30 @@ module ImportIOTable =
         sys.VariableSet.Clear();
         sys.CommandSet.Clear();
         sys.ObserveSet.Clear();
+        try
 
-        for row in tableIO.Rows do
-            if($"{row.[2]}" = ""|>not) //name 존재시만
-            then 
-                match TagToType($"{row.[0]}") with
-                |TagCase.Address  -> sys.AddressSet.TryAdd($"{row.[2]}", Tuple.Create($"{row.[5]}", $"{row.[6]}")) |>ignore
-                |TagCase.Variable -> sys.VariableSet.TryAdd($"{row.[2]}", DsType.DataToType($"{row.[4]}")) |>ignore
-                |TagCase.Command -> sys.CommandSet.TryAdd($"{row.[2]}", $"{row.[5]}") |>ignore
-                |TagCase.Observe -> sys.ObserveSet.TryAdd($"{row.[2]}", $"{row.[6]}") |>ignore
-                |TagCase.Button  -> sys.AssignAddress($"{row.[1]}",$"{row.[2]}", $"{row.[6]}")|>ignore
+            for row in tableIO.Rows do
+                if($"{row.[2]}" = ""|>not && $"{row.[2]}" = "-"|>not) //name 존재시만
+                then 
+                    match TagToType($"{row.[0]}") with
+                    |TagCase.Address  -> sys.AddressSet .TryAdd($"{row.[(int)IOColumn.Name]}", Tuple.Create($"{row.[(int)IOColumn.Output]}", $"{row.[(int)IOColumn.Input]}")) |>ignore
+                    |TagCase.Variable -> sys.VariableSet.TryAdd($"{row.[(int)IOColumn.Name]}", DsType.DataToType($"{row.[(int)IOColumn.Size]}")) |>ignore
+                    |TagCase.Command  -> sys.CommandSet .TryAdd($"{row.[(int)IOColumn.Name]}", $"{row.[(int)IOColumn.Output]}") |>ignore
+                    |TagCase.Observe  -> sys.ObserveSet .TryAdd($"{row.[(int)IOColumn.Name]}", $"{row.[(int)IOColumn.Input]}") |>ignore
+                    |TagCase.Button   -> sys.AssignAddress($"{row.[(int)IOColumn.Flow]}",$"{row.[(int)IOColumn.Name]}", $"{row.[(int)IOColumn.Input]}")|>ignore
             
-        for flow in sys.Flows  do
-            flow.CallSegs()
-            |> Seq.iter(fun seg -> 
-                        let s, e = sys.AddressSet.[seg.Name]
-                        seg.S <- if(s = "") then None else Some(s) 
-                        seg.E <- if(e = "") then None else Some(e)    )
+            for flow in sys.Flows  do
+                flow.CallSegs()
+                |> Seq.iter(fun seg -> 
 
+                            if (sys.AddressSet.ContainsKey(seg.Name)|>not)
+                            then Office.ErrorPPT(ErrorCase.Name, 36, $"행위 이름 : {seg.Name}", flow.Page) 
+
+                            let s, e = sys.AddressSet.[seg.Name]
+                            seg.S <- if(s = "") then None else Some(s) 
+                            seg.E <- if(e = "") then None else Some(e)    )
+
+        with ex ->  failwithf  $"{ex.Message}"
         DoWork(0);
 
 

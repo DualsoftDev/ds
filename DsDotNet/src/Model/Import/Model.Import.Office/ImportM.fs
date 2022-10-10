@@ -75,7 +75,7 @@ module ImportM =
                 MSGInfo($"전체 부모   count [{doc.Parents.Keys.Count}]")
                 model
 
-            with ex ->  MSGError  $"{ex.Message}"
+            with ex ->  failwithf  $"{ex.Message}"
                         model
                     
 

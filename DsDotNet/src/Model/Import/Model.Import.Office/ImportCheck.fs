@@ -82,10 +82,9 @@ module ImportCheck =
         //page 타이틀 중복체크 
         let SamePageErr(pptPages:pptPage seq) = 
             let dicPage = ConcurrentDictionary<string, int>()
-            pptPages.where(fun page  ->  page.IsUsing)
+            pptPages.where(fun page  ->  page.IsUsing && page.Title = ""|> not)
                     .foreach(fun page-> 
-                let sysName, title = GetSysNFlow(page.Title, page.PageNum)
-                if(dicPage.TryAdd(title, page.PageNum)|>not)
+                if(dicPage.TryAdd(page.Title, page.PageNum)|>not)
                 then Office.ErrorPPT(Page, 21, $"{page.Title},  Same Page({dicPage.[page.Title]})",  page.PageNum)
             )
         
@@ -119,10 +118,8 @@ module ImportCheck =
                )
 
             let myFlowNames  = model.Flows.where(fun flow -> flow.System.Name = TextMySys).select(fun s->s.Name)
-            let exSysFlows   = model.Flows.where(fun flow -> flow.System.Name = TextMySys|>not)
-            let exSysNames   = model.Systems.where(fun sys->sys.Name = TextMySys|>not).select(fun sys -> sys.Name)                     
-            let exSysIFNames = exSysFlows.selectMany(fun flow->flow.System.IFFullNames)
-            
+            let exSysNamesDic  = model.Systems.where(fun sys->sys.Name = TextMySys|>not).select(fun sys -> sys.Name, sys) |> dict                     
+          
             nodes.foreach(fun node -> 
                 if(node.Name.Contains('.'))
                 then
@@ -135,15 +132,21 @@ module ImportCheck =
                         then Office.ErrorName(node.Shape, 27, node.PageNum)
                     elif node.NodeType.IsCall
                     then 
-                        //let flow  = model.GetFlow(node.PageNum)
-                        //let sys = $"{flow.Name}_{node.Name.Split('.').[0]}"
-                        //let mIf = node.Name.Split('.').[1]
 
-                        if(exSysNames.Contains(node.CallName.Split('.').[0])|> not)
-                        then Office.ErrorName(node.Shape, 32, node.PageNum)
+                        let callSys, callIf = node.CallName.Split('.').[0], node.CallName.Split('.').[1] 
 
-                        if(exSysIFNames.Contains(node.CallName)|> not)
-                        then Office.ErrorName(node.Shape, 33, node.PageNum)
+                        if(exSysNamesDic.ContainsKey(callSys)|> not)
+                        then 
+                             let exSysNamesText = exSysNamesDic.Keys |> Seq.sort |> String.concat ";\n"                    
+                             let errText = $"\n{callSys} 시스템은 \n[{exSysNamesText}]에 없습니다."
+                             Office.ErrorPPT(ErrorCase.Name, 32, Office.ShapeName(node.Shape), node.PageNum, errText)
+                        else 
+                             let libSys = exSysNamesDic.[callSys]
+                             if (libSys.IFNames.Contains(callIf)|> not)
+                             then 
+                                 let libSysIFText = libSys.IFNames |> String.concat "; "                    
+                                 let errText = $"{callIf} 행위는  {libSys.Name} = [{libSysIFText}]에 없습니다."
+                                 Office.ErrorPPT(ErrorCase.Name, 33, Office.ShapeName(node.Shape), node.PageNum, errText)
             )
             checkNodeName(nodes) 
             checkSameNodeType(nodes, model) 

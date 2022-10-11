@@ -44,13 +44,23 @@ public static class ModelParser
         Walk(parser, helper);
     }
 
+    static string omitSystemCopy(string text, SystemContext[] sysCopies )
+    {
+        var ranges = sysCopies.Select(ctx => (ctx.Start.StartIndex, ctx.Stop.StopIndex)).ToArray();
+        var chars =
+            text
+                .Where((ch, n) => ranges.ForAll(r => !n.InClosedRange(r.StartIndex, r.StopIndex)))
+                .Select((ch, _) => ch)
+                .ToArray()
+                ;
+        return new string(chars);
+    }
+
     // [sys] B = @copy_system(A)
     public static string ExpandSystemCopy(string text)
     {
         IEnumerable<string> helper()
         {
-            yield return text;
-
             var (parser, errors) = DsParser.FromDocument(text);
             var helper = new ParserHelper(ParserOptions.Create4Simulation());
 
@@ -60,6 +70,8 @@ public static class ModelParser
                 .ToDictionary(ctx => findFirstChild<SystemNameContext>(ctx).GetText(), ctx => ctx)    //ctx => findFirstChild<SysCopySpecContext>(ctx))
                 ;
             var copySysCtxs = sysCtxMap.Where(kv => findFirstChild<SysCopySpecContext>(kv.Value) != null).ToArray();
+            var textWithoutSysCopy = omitSystemCopy(text, copySysCtxs.Select(kv => kv.Value).ToArray());
+            yield return textWithoutSysCopy;
 
             foreach (var kv in copySysCtxs)
             {

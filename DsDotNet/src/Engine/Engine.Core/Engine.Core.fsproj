@@ -26,6 +26,10 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\Engine.Common.FS\Engine.Common.FS.fsproj" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Update="FSharp.Core" Version="6.0.6" />
+	</ItemGroup>
 	
 
 

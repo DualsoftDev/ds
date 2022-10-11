@@ -162,8 +162,7 @@ public class Program
         //ParseNormal(EveryScenarioText);
 
 
-        var text = ModelParser.ExpandSystemCopy(EveryScenarioText);
-        ParseNormal(text);
+        ParseNormal(EveryScenarioText);
         Console.WriteLine();
     }
 

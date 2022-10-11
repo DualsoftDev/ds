@@ -4,12 +4,11 @@ namespace Engine.Parser;
 
 class DsParser
 {
-    public static (dsParser, RuleContext, ParserError[]) FromDocument(
+    public static (dsParser, RuleContext, ParserError[]) ParseText(
         string text, Func<dsParser, RuleContext> predExtract,
         bool throwOnError = true)
     {
         var str = new AntlrInputStream(text);
-        System.Console.WriteLine(text);
         var lexer = new dsLexer(str);
         var tokens = new CommonTokenStream(lexer);
         var parser = new dsParser(tokens);
@@ -23,6 +22,57 @@ class DsParser
 
         return (parser, tree, errors);
     }
+
+    static string ExpandSystemCopy(string text)
+    {
+        string omitSystemCopy(string text, SystemContext[] sysCopies)
+        {
+            foreach (var cc in sysCopies)
+                Global.Logger?.Debug($"Replacing @copy_system(): {cc.GetText()}");
+
+            var ranges = sysCopies.Select(ctx => (ctx.Start.StartIndex, ctx.Stop.StopIndex)).ToArray();
+            var chars =
+                text
+                    .Where((ch, n) => ranges.ForAll(r => !n.InClosedRange(r.StartIndex, r.StopIndex)))
+                    .Select((ch, _) => ch)
+                    .ToArray()
+                    ;
+            return new string(chars);
+        }
+
+        IEnumerable<string> helper()
+        {
+            var func = (dsParser parser) => parser.program();
+            var (parser, _, _) = DsParser.ParseText(text, func);
+            parser.Reset();
+            var sysCtxMap =
+                enumerateChildren<SystemContext>(parser.program())
+                .ToDictionary(ctx => findFirstChild<SystemNameContext>(ctx).GetText(), ctx => ctx)    //ctx => findFirstChild<SysCopySpecContext>(ctx))
+                ;
+            var copySysCtxs = sysCtxMap.Where(kv => findFirstChild<SysCopySpecContext>(kv.Value) != null).ToArray();
+            var textWithoutSysCopy = omitSystemCopy(text, copySysCtxs.Select(kv => kv.Value).ToArray());
+            yield return textWithoutSysCopy;
+
+            foreach (var kv in copySysCtxs)
+            {
+                var newSysName = kv.Key;
+                var srcSysName = findFirstChild<SourceSystemNameContext>(kv.Value).GetText();
+                var sysText = sysCtxMap[srcSysName].GetText();
+                yield return "\r\n";
+                yield return sysText.Replace($"[sys]{srcSysName}", $"[sys]{newSysName}");
+            }
+        }
+
+        return string.Join("\r\n", helper());
+    }
+    public static (dsParser, RuleContext, ParserError[]) FromDocument(
+        string text, Func<dsParser, RuleContext> predExtract,
+        bool throwOnError = true)
+    {
+        var expanded = ExpandSystemCopy(text);
+        return ParseText(expanded, predExtract, throwOnError);
+    }
+
     public static (dsParser, ParserError[]) FromDocument(string text, bool throwOnError = true)
     {
         var func = (dsParser parser) => parser.program();

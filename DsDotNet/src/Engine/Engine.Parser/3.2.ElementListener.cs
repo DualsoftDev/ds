@@ -16,7 +16,42 @@ class ElementListener : ListenerBase
     {
         base.EnterParenting(ctx);
     }
+    public override void EnterInterfaceDef(InterfaceDefContext ctx)
+    {
+        var hash = _system.Api.Items;
+        var interrfaceNameCtx = findFirstChild<InterfaceNameContext>(ctx);
+        var interfaceName = collectNameComponents(interrfaceNameCtx)[0];
+        string[][] collectCallComponents(CallComponentsContext ctx) =>
+            enumerateChildren<Identifier123Context>(ctx)
+                .Select(collectNameComponents)
+                .ToArray()
+                ;
+        bool isWildcard(string[] cc) => cc.Length == 1 && cc[0] == "_";
+        Segment[] findSegments(string[][] fqdns) =>
+            fqdns
+            .Where(fqdn => fqdn != null)
+            .Select(s => _model.FindGraphVertex<Segment>(s))
+            .Pipe(x => Assert(x != null))
+            .ToArray()
+            ;
+        var ser =   // { start ~ end ~ reset }
+            enumerateChildren<CallComponentsContext>(ctx)
+            .Select(collectCallComponents)
+            .Pipe(callComponents => Assert(callComponents.ForAll(cc => cc.Length == 2 || isWildcard(cc))))
+            .Select(callCompnents => callCompnents.Select(cc => isWildcard(cc) ? null : cc.Prepend(_system.Name).ToArray()).ToArray())
+            .ToArray()
+            ;
+        var item = hash.First(it => it.Name == interfaceName);
+        var n = ser.Length;
 
+        Assert(n == 2 || n == 3);
+        item.AddTXs(findSegments(ser[0]));
+        item.AddRXs(findSegments(ser[1]));
+        if (n == 3)
+            item.AddResets(findSegments(ser[2]));
+
+        Console.WriteLine();
+    }
     override public void EnterCausalToken(CausalTokenContext ctx)
     {
         var ns = collectNameComponents(ctx);

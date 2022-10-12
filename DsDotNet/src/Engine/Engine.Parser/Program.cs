@@ -85,6 +85,8 @@ public class Program
     {
         var helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation());
         var model = helper.Model;
+
+        var xxx = model.ToDsText();
         //Try("1 + 2 + 3");
         //Try("1 2 + 3");
         //Try("1 + +");

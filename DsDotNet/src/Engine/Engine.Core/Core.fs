@@ -15,7 +15,7 @@ module CoreModule =
             member x.QualifiedName = null  //failwith "ERROR"
 
 
-    and DsSystem private (name:string, cpu:ICpu option, model:Model) =
+    and DsSystem private (name:string, host:string, cpu:ICpu option, model:Model) =
         inherit FqdnObject(name, model)
 
         //new (name, model) = DsSystem(name, null, model)
@@ -25,14 +25,15 @@ module CoreModule =
 
         member _.Model = model
         member _.Cpu = cpu
+        member _.Host = host
 
         //시스템 버튼 소속 Flow 정보
         member val EmergencyButtons = ButtonDic()
         member val AutoButtons      = ButtonDic()
         member val StartButtons     = ButtonDic()
         member val ResetButtons     = ButtonDic()
-        static member Create(name, cpu, model) =
-            let system = DsSystem(name, cpu, model)
+        static member Create(name, host, cpu, model) =
+            let system = DsSystem(name, host, cpu, model)
             model.Systems.Add(system) |> verify $"Duplicated system name [{name}]"
             system
 
@@ -148,8 +149,8 @@ module CoreModule =
         member val RXs = createQualifiedNamedHashSet<Segment>()
         member val Resets = createQualifiedNamedHashSet<Segment>()
         member x.AddTXs(txs:Segment seq) = txs |> Seq.forall(fun tx -> x.TXs.Add(tx))
-        member x.AddRXs(rxs:Segment seq) = rxs |> Seq.forall(fun rx -> x.TXs.Add(rx))
-        member x.AddResets(resets:Segment seq) = resets |> Seq.forall(fun r -> x.TXs.Add(r))
+        member x.AddRXs(rxs:Segment seq) = rxs |> Seq.forall(fun rx -> x.RXs.Add(rx))
+        member x.AddResets(resets:Segment seq) = resets |> Seq.forall(fun r -> x.Resets.Add(r))
         member _.System = system
         member val Xywh:Xywh = null with get, set
 

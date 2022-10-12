@@ -22,9 +22,11 @@ class SkeletonListener : ListenerBase
         {
             var name = ctx.systemName().GetText().DeQuoteOnDemand();
             ICpu cpu = null;    // todo
-            _system = DsSystem.Create(name, FSharpOption<ICpu>.None, _model);
+            var host = findFirstChild<HostContext>(ctx)?.GetText();
+            _system = DsSystem.Create(name, host, FSharpOption<ICpu>.None, _model);
             Trace.WriteLine($"System: {name}");
             AddElement(CurrentPathElements, GraphVertexType.System);
+
         }
     }
 
@@ -113,15 +115,39 @@ class SkeletonListener : ListenerBase
         var hash = _system.Api.Items;
         var interrfaceNameCtx = findFirstChild<InterfaceNameContext>(ctx);
         var interfaceName = collectNameComponents(interrfaceNameCtx)[0];
-        var ser =
+        string[][] collectCallComponents(CallComponentsContext ctx) =>
+            enumerateChildren<Identifier123Context>(ctx)
+                .Select(collectNameComponents)
+                .ToArray()
+                ;
+        //string[][] collectCallComponents(CallComponentsContext ctx)
+        //{
+        //    var xx = enumerateChildren<Identifier123Context>(ctx).ToArray();
+        //    var yy = xx.Select(collectNameComponents)
+        //        .ToArray()
+        //        ;
+        //    return yy;
+
+        //}
+
+        //var xxxser =
+        //    enumerateChildren<CallComponentsContext>(ctx).ToArray();
+        //var zxxxser =
+        //    collectCallComponents(xxxser[0]).ToArray();
+        //var xxser =
+        //    enumerateChildren<CallComponentsContext>(ctx)
+        //    .Select(collectCallComponents).ToArray();
+
+        var ser =   // { start ~ end ~ reset }
             enumerateChildren<CallComponentsContext>(ctx)
-            .Select(collectNameComponents)
-            .Pipe(callComponent => Assert(callComponent.Length == 2))
-            .Select(callCompnent => callCompnent.Prepend(_system.Name).ToArray())
+            .Select(collectCallComponents)
+            .Pipe(callComponents => Assert(callComponents.ForAll(cc => cc.Length == 2 || cc[0] == "_")))
+            .Select(callCompnents => callCompnents.Select(cc => cc.Prepend(_system.Name).ToArray()).ToArray())
+            .ToArray()
             ;
 
         AddElement(AppendPathElement(interfaceName), GraphVertexType.ApiKey);
-        foreach(var cc in ser)
+        foreach(var cc in ser.SelectMany(x => x))
             AddElement(cc, GraphVertexType.ApiSER);
 
 

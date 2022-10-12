@@ -36,7 +36,6 @@ class CopySystemListener : dsBaseListener   //ListenerBase
                     ;
 
             var srcSys = ParserHelper.Model.Systems.First(sys => sys.Name == srcSysName);
-            Console.WriteLine();
         }
     }
 }

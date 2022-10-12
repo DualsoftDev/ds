@@ -35,7 +35,7 @@ module CoreModule =
             let system = DsSystem(name, cpu, model)
             model.Systems.Add(system) |> verify $"Duplicated system name [{name}]"
             system
-         
+
     and Flow private(name:string, system:DsSystem) =
         inherit FqdnObject(name, system)
         member val Graph = Graph<SegmentBase, InFlowEdge>()     // todo: IFlowVertex -> SegmentBase
@@ -70,7 +70,7 @@ module CoreModule =
         interface IFlowVertex
 
     // normal segment : leaf, stem(parenting)
-    and  [<DebuggerDisplay("{QualifiedName}")>]
+    and [<DebuggerDisplay("{QualifiedName}")>]
         Segment private (name:string, flow:Flow) =
         inherit SegmentBase(name, flow)
         member val Graph = Graph<Child, InSegmentEdge>()
@@ -143,7 +143,7 @@ module CoreModule =
         inherit FqdnObject(name, system)
         interface IFlowVertex
         interface IChildVertex
-                
+
         member val TXs = createQualifiedNamedHashSet<Segment>()
         member val RXs = createQualifiedNamedHashSet<Segment>()
         member val Resets = createQualifiedNamedHashSet<Segment>()

@@ -57,7 +57,6 @@ class SkeletonListener : ListenerBase
     {
         var ns = AppendPathElement(collectNameComponents(ctx));
         AddElement(ns, GraphVertexType.Segment);
-        Console.WriteLine();
     }
 
     override public void EnterCausalToken(CausalTokenContext ctx)
@@ -81,14 +80,14 @@ class SkeletonListener : ListenerBase
         var alias = collectNameComponents(aliasDef);
         switch(alias.Length)
         {
-            case 2: // {타시스템}.{interface명} or 
+            case 2: // {타시스템}.{interface명} or
                 AddElement(alias, GraphVertexType.AliaseKey);
                 break;
             case 1: // { (my system / flow /) segment 명 }
                 AddElement(AppendPathElement(alias[0]), GraphVertexType.AliaseKey);
                 break;
             default:
-                throw new Exception("ERROR");                
+                throw new Exception("ERROR");
         }
 
         var mnemonics =

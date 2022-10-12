@@ -101,10 +101,7 @@ class ElementListener : ListenerBase
                 return;
             }
             else
-            {
                 Assert(false);
-            }
-            Console.WriteLine();
         }
         finally
         {
@@ -115,8 +112,8 @@ class ElementListener : ListenerBase
 
     override public void EnterIdentifier12Listing(Identifier12ListingContext ctx)
     {
+        // side effects
         var path = AppendPathElement(collectNameComponents(ctx));
         var prop = _elements[path];
-        Console.WriteLine();
     }
 }

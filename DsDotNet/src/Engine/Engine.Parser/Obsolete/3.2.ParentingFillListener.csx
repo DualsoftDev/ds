@@ -62,18 +62,16 @@ namespace Engine.Parser
                 }
                 else if (exSeg != null)
                 {
-                    Console.WriteLine();
                     var segCall = new ExSegment(childName, exSeg);
                     var instance = new Child(segCall, _parenting);
                     _parenting.InstanceMap.Add(childName, instance);
                 }
             }
-            Console.WriteLine();
         }
 
         /// <summary> Flow 바로 밑에 존재하는 "A.B;" 형태의 처리</summary>
-        /// 
-        /// 
+        ///
+        ///
         /// <param name="ctx"></param>
         override public void EnterIdentifier2Listing(Identifier2ListingContext ctx)
         {
@@ -97,8 +95,6 @@ namespace Engine.Parser
                 default:
                     break;
             }
-            Console.WriteLine();
         }
-
     }
 }

@@ -44,8 +44,8 @@ namespace Engine.Parser
 
 
         /// <summary> Flow 바로 밑에 존재하는 "Call;" 형태의 처리</summary>
-        /// 
-        /// 
+        ///
+        ///
         /// <param name="ctx"></param>
         override public void EnterIdentifier1Listing(Identifier1ListingContext ctx)
         {
@@ -65,7 +65,6 @@ namespace Engine.Parser
                 var rootCall = new RootCall(callName, _rootFlow, cp);
                 _rootFlow.InstanceMap.Add(callName, rootCall);
             }
-            Console.WriteLine();
         }
 
         override public void EnterIdentifier2Listing(Identifier2ListingContext ctx)
@@ -91,9 +90,6 @@ namespace Engine.Parser
                 default:
                     throw new Exception("ERROR");
             }
-
-            Console.WriteLine();
         }
-
     }
 }

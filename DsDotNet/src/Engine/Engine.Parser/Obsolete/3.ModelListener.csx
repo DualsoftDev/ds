@@ -141,8 +141,6 @@ class ModelListener : dsBaseListener
             default:
                 throw new Exception("ERROR");
         }
-
-        Console.WriteLine();
     }
 
 

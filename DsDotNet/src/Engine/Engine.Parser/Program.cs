@@ -154,7 +154,6 @@ public class Program
         var gr =
             values.GroupBy(tpl => values.Contains((tpl.Item2, tpl.Item1)))
                 .ToArray();
-        Console.WriteLine();
     }
     public static void Main(string[] args)
     {
@@ -163,7 +162,6 @@ public class Program
 
 
         ParseNormal(EveryScenarioText);
-        Console.WriteLine();
     }
 
     static void Try(string input)

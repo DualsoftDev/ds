@@ -4,7 +4,7 @@
 		<TargetFramework>net48</TargetFramework>
 		<RootNamespace>Engine.CodeGen</RootNamespace>
 		<LangVersion>6.0</LangVersion>
-		<OutputType>Library</OutputType>
+		<OutputType>Exe</OutputType>
 	</PropertyGroup>
 
   <ItemGroup>

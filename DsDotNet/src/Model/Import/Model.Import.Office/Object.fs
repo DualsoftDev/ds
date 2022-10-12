@@ -64,15 +64,13 @@ module Object =
 
             member x.ToTextInMFlow() = 
                                             if(Bound.ThisFlow = bound) 
-                                            then x.SegName
-                                            else x.MFlowNSeg
+                                            then x.Name
+                                            else sprintf "%s.%s"  ownerMFlow x.ValidName
 
             ///금칙 문자 및 선두숫자가 있으면 "" 로 이름 앞뒤에 배치한다.
             ///Alias 는 무조건 "" 로 이름 앞뒤에 배치
-            member x.SegName    = sprintf "%s" x.ValidName//(if(this.IsAlias) then x.ValidName else this.Alias.Value.ValidName)
-            member x.MFlowNSeg  = sprintf "%s.%s"  ownerMFlow x.ValidName
             member x.FullName   = sprintf "%s.%s.%s" baseSystem.Name  ownerMFlow x.ValidName  
-            member x.PathName   = sprintf "%s(%s)" x.FullName (if(x.Parent.IsSome) then x.Parent.Value.Name else "Root")
+            member x.CallName   = sprintf "%s.%s(%s)" ownerMFlow x.Name  (if(x.Parent.IsSome) then x.Parent.Value.Name else "Root")
 
             member x.Update(nodeKey, nodeIdValue, nodeCntTX, nodeCntRX) = 
                         this.Key <- nodeKey
@@ -135,7 +133,7 @@ module Object =
             
            
 
-            member x.ToText() = $"{src.SegName}  {causal.ToText()}  {tgt.SegName}"
+            member x.ToText() = $"{src.Name}  {causal.ToText()}  {tgt.Name}"
             member x.ToCheckText(parentName:string) = 
                             let  checkText = match causal with
                                              |SEdge |SPush |  SReset-> "Start"
@@ -333,7 +331,7 @@ module Object =
             member x.RootMFlow()  = this.RootFlows |> Seq.sortBy(fun flow -> flow.Name)
             member x.BtnSegs()    = this.AllNodes
                                         |> Seq.filter(fun seg -> seg.Bound = ExBtn)
-                                        |> Seq.distinctBy(fun seg -> seg.SegName)
+                                        |> Seq.distinctBy(fun seg -> seg.Name)
 
     and 
         [<DebuggerDisplay("{Name}")>]

@@ -36,12 +36,15 @@ module ImportM =
                  
 
                 //alias Setting, Safety & EMG & Start & Auto 리스트 만들기
-                MakeAlias    (doc.Nodes, model)
+                MakeAlias    (doc.Nodes, model, doc.Parents)
                 MakeBtn      (doc.Nodes, model)
 
                 
                 //segment 리스트 만들기
-                MakeSegment(doc.Nodes, model, dicSeg)
+                MakeSegment(doc.Nodes, model, dicSeg, doc.Parents)
+                //parent 리스트 만들기
+                MakeParent(doc.Nodes, model, dicSeg, doc.Parents)
+                
                 //Safety 만들기
                 MakeSafety(doc.Nodes, model, dicSeg)
                 //Dummy child 처리

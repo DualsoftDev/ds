@@ -138,17 +138,18 @@ module PPTX =
     let GetAliasName(names:string seq) =  
         let usedNames = HashSet<string>()
         seq {
-                let copyName(name, cnt) = sprintf "%s_Copy%d" name cnt
+                let copyName(name, cnt) = sprintf "Copy%d_%s" cnt name 
                 let newName(testName) = 
                     if  names |> Seq.filter (fun name -> name = testName) |> Seq.length = 1
                     then usedNames.Add(testName) |>ignore
                          testName
                     else 
-                        let mutable cnt = 1
-                        let mutable copy = copyName(testName, cnt)
+                        let mutable cnt = 0
+                        let mutable copy = testName
                         while usedNames.Contains(copy) do
+                            if(cnt > 0)
+                            then copy <- copyName(testName, cnt) 
                             cnt <- cnt + 1
-                            copy <- copyName(testName, cnt) 
 
                         usedNames.Add(copy) |>ignore
                         copy
@@ -265,6 +266,7 @@ module PPTX =
         member val CntTX =  txCnt
         member val CntRX =  rxCnt
         member val Alias :string  option = None with get, set
+        member val AliasKey :string  = "" with get, set
         member val Rectangle :System.Drawing.Rectangle =   shape.GetPosition(sildeSize)
 
     and 
@@ -290,11 +292,11 @@ module PPTX =
         member val Name =  conn.EdgeName()
         member val Key =  Objkey(iPage, iEdge)
         member x.Text = 
-                            let sName = if startNode.Alias.IsSome then  startNode.Alias.Value else startNode.Name
-                            let eName = if endNode.Alias.IsSome   then  endNode.Alias.Value   else endNode.Name
+                            //let sName = if startNode.Alias.IsSome then  startNode.Alias.Value else startNode.Name
+                            //let eName = if endNode.Alias.IsSome   then  endNode.Alias.Value   else endNode.Name
                             if(reverse)
-                            then $"{iPage};{eName}{causal.ToText()}{sName}";
-                            else $"{iPage};{sName}{causal.ToText()}{eName}";
+                            then $"{iPage};{endNode.Key}{causal.ToText()}{startNode.Key}";
+                            else $"{iPage};{startNode.Key}{causal.ToText()}{endNode.Key}";
 
         member val Causal:EdgeCausal = causal
     
@@ -338,15 +340,7 @@ module PPTX =
 
             if(children.Any() |> not) 
             then  Office.ErrorPPT(Group, 12, $"자식수:0", iPage)
-            //let names  = children|> Seq.map(fun f->f.Name)
-
-            //(children, GetAliasName(names))
-            //||> Seq.map2(fun node  nameSet -> node,  nameSet)
-            //|> Seq.iter(fun (node, (name, newName)) -> 
-            //               if(name  = newName |> not)
-            //               then 
-            //                    node.Alias <- Some(newName)
-            //               )
+         
 
             children |> Seq.iter(fun child -> childSet.TryAdd(child)|>ignore)
         
@@ -422,12 +416,7 @@ module PPTX =
                         if(pptGroup.DummyParent.IsSome)
                         then 
                             parents.TryAdd(pptGroup.DummyParent.Value, pptGroup.Children)|>ignore
-                            //if((pptGroup.Children |> Seq.distinctBy(fun node -> node.Name)).Count() = pptGroup.Children.Count )
-                            //then
-                            //    parents.TryAdd(pptGroup.DummyParent.Value, pptGroup.Children)|>ignore
-                            //else
-                            //    let errorChild = pptGroup.Children |> Seq.map(fun node -> node.Name) |> String.concat ", "
-                            //    Office.ErrorPPT(Group, 19, $"{errorChild}", pptGroup.PageNum) 
+                          
                 
                 groups
                 |> Seq.iter (fun (slide, groupSet) -> 

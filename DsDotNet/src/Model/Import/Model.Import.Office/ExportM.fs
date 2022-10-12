@@ -10,7 +10,7 @@ open System.Collections.Concurrent
 module ExportM =
     let ToText(model:MModel) =
         let callText(seg:MSeg) =
-            let callName =  seg.SegName
+            let callName =  seg.ValidName
             let tx, rx = 
                 let txs = HashSet<string>()
                 let rxs = HashSet<string>()
@@ -29,7 +29,7 @@ module ExportM =
             sprintf "\t\t%s\t = {%s\t~\t%s}" callName tx rx
 
         let addressText(seg:MSeg, index) =
-            let callPath =  if(seg.Bound = ExBtn) then seg.SegName else seg.ToCallText()
+            let callPath =  if(seg.Bound = ExBtn) then seg.ValidName else seg.ToCallText()
             let causal, text = seg.PrintfTRX(index)
             match causal with
             |TR ->  let tx = sprintf "EX.%s.%s" callPath (text.Replace("TR", "TX"))
@@ -261,7 +261,7 @@ module ExportM =
                         //    yield sprintf "\t[%s] %s = { EX; }"  TextFlow (exSeg.ToCallText()) 
                     //Ex 버튼 출력
                     for btn in sys.BtnSegs() do
-                        yield sprintf "\t[%s] %s = { %s; }"  TextFlow btn.SegName  (getTRXs ([btn], TX ,false)|> String.concat "; ")
+                        yield sprintf "\t[%s] %s = { %s; }"  TextFlow btn.ValidName  (getTRXs ([btn], TX ,false)|> String.concat "; ")
 
                     yield "}"
                     yield ""

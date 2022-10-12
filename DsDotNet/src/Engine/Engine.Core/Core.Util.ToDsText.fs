@@ -8,7 +8,6 @@ open Engine.Common.FS
 module internal ToDsTextModule =
     let getTab n = Seq.init n (fun _ -> "    ") |> String.concat ""
     let lb, rb = "{", "}"
-    let joinLines xs = xs |> String.concat "\r\n"
 
     let segmentToDs (segmentBase:SegmentBase) (indent:int) =
         [
@@ -99,13 +98,70 @@ module internal ToDsTextModule =
         ] |> joinLines
 
     let modelToDs (model:Model) =
+        let tab = getTab 1
+        let tab2 = getTab 2
         [
             for s in model.Systems do
-                systemToDs s
+                yield systemToDs s
+
             // prop
             //      safety
             //      addresses
             //      layouts
+            let spits = model.Spit()
+            let segs = spits.Select(fun spit -> spit.Obj).OfType<Segment>().ToArray()
+
+            let withSafeties = segs.Where(fun seg -> seg.SafetyConditions.Any())
+            let safeties =
+                [
+                    if withSafeties.Any() then
+                        yield $"{tab}[safety] = {lb}"
+                        for seg in withSafeties do
+                            let conds = seg.SafetyConditions.Select(fun seg -> seg.QualifiedName).JoinWith("; ") + ";"
+                            yield $"{tab2}{seg.QualifiedName} = {lb} {conds} {rb}"
+                        yield $"{tab}{rb}"
+                ] |> joinLines
+
+            let withAddresses = segs.Where(fun seg -> seg.Addresses <> null)
+            let addresses =
+                [
+                    if withAddresses.Any() then
+                        yield $"{tab}[addresses] = {lb}"
+                        for seg in withAddresses do
+                            let ads = seg.Addresses
+                            
+                            yield $"{tab2}{seg.QualifiedName} = ( {ads.Start}, {ads.End}, {ads.Reset} )"
+                        yield $"{tab}{rb}"
+
+                ] |> joinLines
+
+            let withLayouts =
+                model.Systems
+                    .Where(fun sys -> sys.Api <> null)
+                    .SelectMany(fun sys -> sys.Api.Items.Where(fun ai -> ai.Xywh <> null))
+                    ;
+            let layouts =
+                [
+                    if withLayouts.Any() then
+                        yield $"{tab}[layouts] = {lb}"
+                        for apiItem in withLayouts do
+                            let xywh = apiItem.Xywh
+                            let posi =
+                                if xywh.W.HasValue then
+                                    $"({xywh.X}, {xywh.Y}, {xywh.W.Value}, {xywh.H.Value})"
+                                else
+                                    $"({xywh.X}, {xywh.Y})"
+                            yield $"{tab2}{apiItem.QualifiedName} = {posi}"
+                            
+                        yield $"{tab}{rb}"
+                ] |> joinLines
+
+            if safeties.Any() || addresses.Any() || layouts.Any() then
+                yield $"[prop] = {lb}"
+                if safeties.Any()  then yield safeties
+                if addresses.Any() then yield addresses
+                if layouts.Any()   then yield layouts
+                yield rb
         ] |> joinLines
 
 

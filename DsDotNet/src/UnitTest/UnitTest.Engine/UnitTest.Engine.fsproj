@@ -52,4 +52,7 @@
 	    <HintPath>..\..\..\exLib\log4net.dll</HintPath>
 	  </Reference>
 	</ItemGroup>
+	<ItemGroup>
+	  <PackageReference Update="FSharp.Core" Version="6.0.6" />
+	</ItemGroup>
 </Project>

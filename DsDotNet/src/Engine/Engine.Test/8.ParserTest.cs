@@ -9,16 +9,17 @@ namespace Engine
 [sys] L = {
     [flow] F = {
         Main = { Cp > Cm; }
-        Cp = {P.F.Vp ~ P.F.Sp}
-        Cm = {P.F.Vm ~ P.F.Sm}
+        [aliases] = {
+            C.P = { Cp; Cp1; Ap2; }
+            C.M = { Cm; Cm1; Cm2; }
+        }
         [safety] = {
-            Main = {P.F.Sp; P.F.Sm}
-            // Main2 = {P.F.Sp; P.F.Sm}
+            Main = {C.F.Sp; C.F.Sm}
         }
     }
 }
 
-[sys] P = {
+[sys] C = {
     [flow] F = {
         Vp > Pp > Sp;
         Vm > Pm > Sm;
@@ -27,12 +28,17 @@ namespace Engine
         Pm |> Sp;
         Vp <||> Vm;
     }
+    [interfaces] = {
+        P = { F.Vp ~ F.Sp }
+        M = { F.Vm ~ F.Sm }
+        // 정보로서의 상호 리셋
+        P <||> M;
+    }
 }
 
 [prop] = {
     [ safety ] = {
-        L.F.Main = {P.F.Sp; P.F.Sm}
-        //L.F.Main2 = {P.F.Sp; P.F.Sm}
+        L.F.Main = {C.F.Sp; C.F.Sm}
     }
 }
 ";
@@ -44,12 +50,14 @@ namespace Engine
             Cp ||> Cm;
             Cp <|| Cm;
         }
-        Cp = {P.F.Vp ~ P.F.Sp}
-        Cm = {P.F.Vm ~ P.F.Sm}
+        [aliases] = {
+            A.P = { Cp; Cp1; Ap2; }
+            A.M = { Cm; Cm1; Cm2; }
+        }
     }
 }
 
-[sys] P = {
+[sys] A = {
     [flow] F = {
         Vp > Pp > Sp;
         Vm > Pm > Sm;
@@ -57,6 +65,12 @@ namespace Engine
         Pp |> Sm;
         Pm |> Sp;
         Vp <||> Vm;
+    }
+    [interfaces] = {
+        P = { F.Vp ~ F.Sp }
+        M = { F.Vm ~ F.Sm }
+        // 정보로서의 상호 리셋
+        P <||> M;
     }
 }
 

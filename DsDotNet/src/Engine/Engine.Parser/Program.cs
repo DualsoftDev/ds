@@ -48,7 +48,7 @@ public class Program
         //NonExistingFlowButton = { F1; };
     }
 }
-[sys] A = {
+[sys ip=1.2.3.4] A = {
     [flow] F = {
         Vp > Pp > Sp;
         Vm > Pm > Sm;
@@ -162,8 +162,7 @@ public class Program
         //ParseNormal(EveryScenarioText);
 
 
-        var text = ModelParser.ExpandSystemCopy(EveryScenarioText);
-        ParseNormal(text);
+        ParseNormal(EveryScenarioText);
         Console.WriteLine();
     }
 

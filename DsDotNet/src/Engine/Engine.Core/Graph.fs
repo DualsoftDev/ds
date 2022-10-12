@@ -107,8 +107,9 @@ module internal GraphHelperModule =
                     | _ -> i.Name
             ] |> String.concat "\r\n"
 
-        logDebug "%s" text
-        tracefn "%s" text
+        if text.Any() then
+            logDebug "%s" text
+
         text
 
 

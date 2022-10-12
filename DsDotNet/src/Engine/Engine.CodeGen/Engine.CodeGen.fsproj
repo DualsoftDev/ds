@@ -4,6 +4,7 @@
 		<TargetFramework>net48</TargetFramework>
 		<RootNamespace>Engine.CodeGen</RootNamespace>
 		<LangVersion>6.0</LangVersion>
+		<OutputType>Exe</OutputType>
 	</PropertyGroup>
 
   <ItemGroup>
@@ -17,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Model\Import\Model.Import.Office\Model.Import.Office.fsproj" />
     <ProjectReference Include="..\Engine.Core\Engine.Core.fsproj" />
   </ItemGroup>
 
@@ -24,5 +26,9 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\..\exLib\Newtonsoft.Json.dll</HintPath>
     </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="6.0.6" />
   </ItemGroup>
 </Project>

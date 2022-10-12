@@ -48,7 +48,7 @@ public class Program
         //NonExistingFlowButton = { F1; };
     }
 }
-[sys] A = {
+[sys ip=1.2.3.4] A = {
     [flow] F = {
         Vp > Pp > Sp;
         Vm > Pm > Sm;

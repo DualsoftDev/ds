@@ -1,5 +1,9 @@
 using Antlr4.Runtime;
 
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+
 namespace Engine.Parser;
 
 class DsParser
@@ -23,8 +27,15 @@ class DsParser
         return (parser, tree, errors);
     }
 
+
+    /// <summary>
+    /// 주어진 text 내에서 [sys] B = @copy_system(A); 와 같이 copy_system 으로 정의된 영역을 
+    /// 치환한 text 를 반환한다.  system A 정의 영역을 찾아서 system B 로 치환한 text 반환
+    /// 이때, copy 구문은 삭제한다.
+    /// </summary>
     static string ExpandSystemCopy(string text)
     {
+        /// 원본 text 에서 copy_system 구문을 제외한 나머지 text 를 반환한다.
         string omitSystemCopy(string text, SystemContext[] sysCopies)
         {
             foreach (var cc in sysCopies)
@@ -40,6 +51,29 @@ class DsParser
             return new string(chars);
         }
 
+        // see RuleContext.GetText()
+        string ToText(RuleContext ctx)
+        {
+            if (ctx.ChildCount == 0)
+                return string.Empty;
+
+            var sb = new StringBuilder();
+            var last = " ";
+            for (int i = 0; i < ctx.ChildCount; i++)
+            {
+                var ch = ctx.GetChild(i);
+                var text = ch is RuleContext rc ? ToText(rc) : ch.GetText();
+
+                // [sys ip = 123.2...] 에서 sys token 과 ip token 사이 공백을 삽입한다.
+                if (Char.IsLetterOrDigit(last.LastOrDefault()) && Char.IsLetterOrDigit(text[0]))
+                    sb.Append(" ");
+                last = text;
+                sb.Append(text);
+            }
+
+            return sb.ToString();
+        }
+
         IEnumerable<string> helper()
         {
             var func = (dsParser parser) => parser.program();
@@ -50,21 +84,29 @@ class DsParser
                 .ToDictionary(ctx => findFirstChild<SystemNameContext>(ctx).GetText(), ctx => ctx)    //ctx => findFirstChild<SysCopySpecContext>(ctx))
                 ;
             var copySysCtxs = sysCtxMap.Where(kv => findFirstChild<SysCopySpecContext>(kv.Value) != null).ToArray();
+
+            // 원본 full text 에서 copy_system 구문 삭제한 text 반환
             var textWithoutSysCopy = omitSystemCopy(text, copySysCtxs.Select(kv => kv.Value).ToArray());
             yield return textWithoutSysCopy;
 
             foreach (var kv in copySysCtxs)
             {
+                yield return "\r\n";
+
                 var newSysName = kv.Key;
                 var srcSysName = findFirstChild<SourceSystemNameContext>(kv.Value).GetText();
-                var sysText = sysCtxMap[srcSysName].GetText();
-                yield return "\r\n";
-                yield return sysText.Replace($"[sys]{srcSysName}", $"[sys]{newSysName}");
+                // 원본 시스템의 text 를 사본 system text 로 치환해서 생성
+                var sysText = ToText(sysCtxMap[srcSysName]);
+                var pattern = @"(\[sys([^\]]*\]))([^=]*)=";
+                var replaced = Regex.Replace(sysText, pattern, $"$1{newSysName}=");
+                yield return replaced;
             }
         }
 
         return string.Join("\r\n", helper());
     }
+
+
     public static (dsParser, RuleContext, ParserError[]) FromDocument(
         string text, Func<dsParser, RuleContext> predExtract,
         bool throwOnError = true)
@@ -166,11 +208,11 @@ class DsParser
         return listener.r;
     }
 
-    /**
-     * parser tree 상의 모든 node (rule context, terminal node, error node) 을 반환한다.
-     * @param text DS Document (Parser input)
-     * @returns
-     */
+    /// <summary>
+    /// parser tree 상의 모든 node (rule context, terminal node, error node) 을 반환한다.
+    /// </summary>
+    /// <param name="parser">text DS Document (Parser input)</param>
+    /// <returns></returns>
     public static List<IParseTree> getAllParseTrees(dsParser parser)
     {
         ParserResult r = getParseResult(parser);
@@ -183,11 +225,7 @@ class DsParser
     }
 
 
-    /**
-     * parser tree 상의 모든 rule 을 반환한다.
-     * @param text DS Document (Parser input)
-     * @returns
-     */
+    /// <summary>parser tree 상의 모든 rule 을 반환한다.</summary>
     public static List<ParserRuleContext> getAllParseRules(dsParser parser)
     {
         ParserResult r = getParseResult(parser);

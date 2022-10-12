@@ -61,21 +61,39 @@ module internal ToDsTextModule =
                 yield flowToDs f indent
 
             let tab = getTab indent
+            let tab2 = getTab (indent+1)
 
             let api = system.Api
             if api <> null then
                 yield $"{tab}[interfaces] = {lb}"
                 for item in api.Items do
-                    let tab = getTab (indent+1)
                     let ser =
                         let ifnull (onNull:string) (x:string) = if x.isNullOrEmpty() then onNull else x
-                        let s = item.TXs.Select(fun tx -> tx.QualifiedName) |> String.concat(", ") |> ifnull "_"
-                        let e = item.RXs.Select(fun rx -> rx.QualifiedName) |> String.concat(", ") |> ifnull "_"
-                        let r = item.Resets.Select(fun rx -> rx.QualifiedName) |> String.concat(", ")
+                        let qNames (xs:Segment seq) = xs.Select(fun tx -> tx.QualifiedName) |> String.concat(", ")
+                        let s = qNames(item.TXs) |> ifnull "_"
+                        let e = qNames(item.RXs) |> ifnull "_"
+                        let r = qNames(item.Resets)
                         if r.isNullOrEmpty() then $"{s} ~ {e}" else $"{s} ~ {e} ~ {r}"
+                    yield $"{tab2}{item.Name.QuoteOnDemand()} = {lb} {ser} {rb}"
 
-                    yield $"{tab}{item.Name.QuoteOnDemand()} = {lb} {ser} {rb}"
+                for ri in api.ResetInfos do
+                    yield $"{tab2}{ri.Operand1} {ri.Operator} {ri.Operand2};"
+                    
                 yield $"{tab}{rb}"
+
+            let buttonsToDs(category:string, btns:ButtonDic) =
+                [
+                    if btns.Count > 0 then
+                        yield $"{tab}[{category}] = {lb}"
+                        for KeyValue(k, v) in btns do
+                            let flows = (v.Select(fun f -> f.NameComponents.Skip(1).Combine()) |> String.concat ";") + ";"
+                            yield $"{tab2}{k} = {lb} {flows} {rb}"
+                        yield $"{tab}{rb}"
+                ] |> joinLines
+            yield buttonsToDs("auto" , system.AutoButtons)
+            yield buttonsToDs("emg"  , system.EmergencyButtons)
+            yield buttonsToDs("start", system.StartButtons)
+            yield buttonsToDs("reset", system.ResetButtons)
 
             yield rb
         ] |> joinLines
@@ -84,6 +102,10 @@ module internal ToDsTextModule =
         [
             for s in model.Systems do
                 systemToDs s
+            // prop
+            //      safety
+            //      addresses
+            //      layouts
         ] |> joinLines
 
 

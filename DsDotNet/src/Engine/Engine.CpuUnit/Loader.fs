@@ -8,7 +8,7 @@ module CpuLoader =
     let BitMap = ConcurrentDictionary<string, Bit>()
     
     type CodeUnit() = 
-         member val GeteName = "" with get, set
+         member val GateName = "" with get, set
          member val Out   = "" with get, set
          member val In1  = "" with get, set //Sets, Ors, Ands, ...
          member val In2  = "" with get, set //Resets
@@ -27,12 +27,12 @@ module CpuLoader =
             """
             [
                 {
-                "GeteName": "GateAND",
+                "GateName": "GateAND",
                 "Out": "O1",
                 "In1": "A;B;C;D"
                 },
                 {
-                "GeteName": "GateSR",
+                "GateName": "GateSR",
                 "Out": "O1",
                 "In1": "A;!B;C;D",
                 "In2": "E;F"
@@ -47,7 +47,7 @@ module CpuLoader =
         codeUnits |> Seq.iter(fun codeUnit -> UpdateBitMap codeUnit)
         codeUnits |> Seq.map (fun codeUnit ->
         
-            match codeUnit.GeteName with
+            match codeUnit.GateName with
             |"GateAND" -> let gateAND = GateAND(BitMap.[codeUnit.Out])
                           codeUnit.In1.Split(';') |> Seq.iter(fun bit->  gateAND.Add(BitMap.[bit.TrimStart('!')], bit.StartsWith("!"))|>ignore)
                           gateAND :> Gate
@@ -61,7 +61,7 @@ module CpuLoader =
                           codeUnit.In2.Split(';') |> Seq.iter(fun bit->  gateSR.AddRst(BitMap.[bit.TrimStart('!')], bit.StartsWith("!"))|>ignore)
                           gateSR :> Gate
 
-            |_ -> failwith $"{codeUnit.GeteName} is not gateName"
+            |_ -> failwith $"{codeUnit.GateName} is not gateName"
         ) |> Seq.toList
 
     [<EntryPoint>]        

@@ -13,12 +13,12 @@ module CpuGenModule =
             """
             [
                 {
-                "GeteName": "GateAND",
+                "GateName": "GateAND",
                 "Out": "O1",
                 "In1": "A;B;C;D"
                 },
                 {
-                "GeteName": "GateSR",
+                "GateName": "GateSR",
                 "Out": "O1",
                 "In1": "A;!B;C;D",
                 "In2": "E;F"

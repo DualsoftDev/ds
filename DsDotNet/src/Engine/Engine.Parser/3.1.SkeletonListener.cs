@@ -21,10 +21,11 @@ class SkeletonListener : ListenerBase
         if (findFirstChild<SysBlockContext>(ctx) != null)
         {
             var name = ctx.systemName().GetText().DeQuoteOnDemand();
-            ICpu cpu = null;    // todo
-            _system = DsSystem.Create(name, FSharpOption<ICpu>.None, _model);
+            var host = findFirstChild<HostContext>(ctx)?.GetText();
+            _system = DsSystem.Create(name, host, FSharpOption<ICpu>.None, _model);
             Trace.WriteLine($"System: {name}");
             AddElement(CurrentPathElements, GraphVertexType.System);
+
         }
     }
 
@@ -45,7 +46,7 @@ class SkeletonListener : ListenerBase
         var children =
             enumerateChildren<CausalTokenContext>(ctx)
                 .Select(ctctx => collectNameComponents(ctctx).ToArray())
-                .Pipe(childNameComponts => Assert(childNameComponts.Length.IsOneOf(1, 2)))
+                .Tap(childNameComponts => Assert(childNameComponts.Length.IsOneOf(1, 2)))
                 .Select(childNameComponts => AppendPathElement(childNameComponts))
                 .ToArray()
                 ;
@@ -57,7 +58,6 @@ class SkeletonListener : ListenerBase
     {
         var ns = AppendPathElement(collectNameComponents(ctx));
         AddElement(ns, GraphVertexType.Segment);
-        Console.WriteLine();
     }
 
     override public void EnterCausalToken(CausalTokenContext ctx)
@@ -81,20 +81,20 @@ class SkeletonListener : ListenerBase
         var alias = collectNameComponents(aliasDef);
         switch(alias.Length)
         {
-            case 2: // {타시스템}.{interface명} or 
+            case 2: // {타시스템}.{interface명} or
                 AddElement(alias, GraphVertexType.AliaseKey);
                 break;
             case 1: // { (my system / flow /) segment 명 }
                 AddElement(AppendPathElement(alias[0]), GraphVertexType.AliaseKey);
                 break;
             default:
-                throw new Exception("ERROR");                
+                throw new Exception("ERROR");
         }
 
         var mnemonics =
             enumerateChildren<AliasMnemonicContext>(ctx)
                 .Select(mctx => collectNameComponents(mctx))
-                .Pipe(mne => Assert(mne.Length == 1))
+                .Tap(mne => Assert(mne.Length == 1))
                 .Select(mne => mne[0])
                 .ToHashSet();
         map.Add(alias, mnemonics);
@@ -114,15 +114,22 @@ class SkeletonListener : ListenerBase
         var hash = _system.Api.Items;
         var interrfaceNameCtx = findFirstChild<InterfaceNameContext>(ctx);
         var interfaceName = collectNameComponents(interrfaceNameCtx)[0];
-        var ser =
+        string[][] collectCallComponents(CallComponentsContext ctx) =>
+            enumerateChildren<Identifier123Context>(ctx)
+                .Select(collectNameComponents)
+                .ToArray()
+                ;
+
+        var ser =   // { start ~ end ~ reset }
             enumerateChildren<CallComponentsContext>(ctx)
-            .Select(collectNameComponents)
-            .Pipe(callComponent => Assert(callComponent.Length == 2))
-            .Select(callCompnent => callCompnent.Prepend(_system.Name).ToArray())
+            .Select(collectCallComponents)
+            .Tap(callComponents => Assert(callComponents.ForAll(cc => cc.Length == 2 || cc[0] == "_")))
+            .Select(callCompnents => callCompnents.Select(cc => cc.Prepend(_system.Name).ToArray()).ToArray())
+            .ToArray()
             ;
 
         AddElement(AppendPathElement(interfaceName), GraphVertexType.ApiKey);
-        foreach(var cc in ser)
+        foreach(var cc in ser.SelectMany(x => x))
             AddElement(cc, GraphVertexType.ApiSER);
 
 
@@ -132,13 +139,21 @@ class SkeletonListener : ListenerBase
         hash.Add(api);
     }
 
-    public override void EnterInterfaceResetDef([NotNull] InterfaceResetDefContext ctx)
+    public override void EnterInterfaceResetDef(InterfaceResetDefContext ctx)
     {
-        var operands =
-            enumerateChildren<Identifier1Context>(ctx)
+        // I1 <||> I2 <||> I3;  ==> [| I1; <||>; I2; <||>; I3; |]
+        var terms =
+            enumerateChildren<RuleContext>(ctx, false, tree => tree is Identifier1Context || tree is CausalOperatorResetContext)
             .Select(ctx => ctx.GetText())
             .ToArray();
-        var operator_ = findFirstChild<CausalOperatorResetContext>(ctx).GetText();
-        var ri_ = ApiResetInfo.Create(_system, operands[0], operator_, operands[1]);
+
+        // I1 <||> I2 와 I2 <||> I3 에 대해서 해석
+        for (var i = 0; i < terms.Length - 2; i += 2)
+        {
+            var opnd1 = terms[i];
+            var op = terms[i+1];
+            var opnd2 = terms[i+2];
+            var ri_ = ApiResetInfo.Create(_system, opnd1, op, opnd2);
+        }
     }
 }

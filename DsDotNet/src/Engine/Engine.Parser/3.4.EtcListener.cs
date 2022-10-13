@@ -39,7 +39,7 @@ class EtcListener : ListenerBase
             var flows =
                 enumerateChildren<FlowNameContext>(bd)
                 .Select(flowCtx => flowCtx.GetText())
-                .Pipe(flowName => Verify($"Flow [{flowName}] not exists!", _system.Flows.Any(f => f.Name == flowName)))
+                .Tap(flowName => Verify($"Flow [{flowName}] not exists!", _system.Flows.Any(f => f.Name == flowName)))
                 .Select(flowName => _system.Flows.First(f => f.Name == flowName))
                 .ToArray()
                 ;

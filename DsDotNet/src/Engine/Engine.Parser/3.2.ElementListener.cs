@@ -17,6 +17,42 @@ class ElementListener : ListenerBase
         base.EnterParenting(ctx);
     }
 
+    public override void EnterInterfaceDef(InterfaceDefContext ctx)
+    {
+        var hash = _system.Api.Items;
+        var interrfaceNameCtx = findFirstChild<InterfaceNameContext>(ctx);
+        var interfaceName = collectNameComponents(interrfaceNameCtx)[0];
+        string[][] collectCallComponents(CallComponentsContext ctx) =>
+            enumerateChildren<Identifier123Context>(ctx)
+                .Select(collectNameComponents)
+                .ToArray()
+                ;
+        bool isWildcard(string[] cc) => cc.Length == 1 && cc[0] == "_";
+        Segment[] findSegments(string[][] fqdns) =>
+            fqdns
+            .Where(fqdn => fqdn != null)
+            .Select(s => _model.FindGraphVertex<Segment>(s))
+            .Tap(x => Assert(x != null))
+            .ToArray()
+            ;
+        var ser =   // { start ~ end ~ reset }
+            enumerateChildren<CallComponentsContext>(ctx)
+            .Select(collectCallComponents)
+            .Tap(callComponents => Assert(callComponents.ForAll(cc => cc.Length == 2 || isWildcard(cc))))
+            .Select(callCompnents => callCompnents.Select(cc => isWildcard(cc) ? null : cc.Prepend(_system.Name).ToArray()).ToArray())
+            .ToArray()
+            ;
+        var item = hash.First(it => it.Name == interfaceName);
+        var n = ser.Length;
+
+        Assert(n == 2 || n == 3);
+        item.AddTXs(findSegments(ser[0]));
+        item.AddRXs(findSegments(ser[1]));
+        if (n == 3)
+            item.AddResets(findSegments(ser[2]));
+
+        Console.WriteLine();
+    }
     override public void EnterCausalToken(CausalTokenContext ctx)
     {
         var ns = collectNameComponents(ctx);
@@ -101,10 +137,7 @@ class ElementListener : ListenerBase
                 return;
             }
             else
-            {
                 Assert(false);
-            }
-            Console.WriteLine();
         }
         finally
         {
@@ -115,8 +148,10 @@ class ElementListener : ListenerBase
 
     override public void EnterIdentifier12Listing(Identifier12ListingContext ctx)
     {
+        // side effects
         var path = AppendPathElement(collectNameComponents(ctx));
         var prop = _elements[path];
-        Console.WriteLine();
+        Assert(_parenting == null);
+        Segment.Create(path.Last(), _rootFlow);
     }
 }

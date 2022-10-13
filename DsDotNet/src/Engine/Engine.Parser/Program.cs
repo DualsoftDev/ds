@@ -79,12 +79,37 @@ public class Program
     }
 }
 ";
+    static string DuplicatedEdgesText = @"
+[sys] B = {
+    [flow] F = {
+        Vp > Pp;
+        Vp |> Pp;
+    }
+}
+";
 
+    static string SplittedMRIEdgesText = @"
+[sys] A = {
+    [flow] F = {
+        a1 > a2 > a3 > a4;
+    }
+    [interfaces] = {
+        I1 = { F.a1 ~ F.a2 }
+        I2 = { F.a2 ~ F.a3 }
+        I3 = { F.a3 ~ F.a1 }
+        // 정보로서의 상호 리셋
+        I1 <||> I2 <||> I3 ||> I4;
+    }
+}
+";
 
     static void ParseNormal(string text)
     {
         var helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation());
         var model = helper.Model;
+        model.CreateMRIEdgesTransitiveClosure();
+
+        var xxx = model.ToDsText();
         //Try("1 + 2 + 3");
         //Try("1 2 + 3");
         //Try("1 + +");
@@ -115,55 +140,12 @@ public class Program
         System.Console.WriteLine("Done");
     }
 
-    static void testBidirectional()
-    {
-        var values = new[]
-        {
-            (1, 3),
-            (2, 5),
-            (3, 1),
-            (7, 4),
-            (5, 9),
-            (6, 2),
-            (7, 3),
-            (5, 2),
-        };
-        var processed = new HashSet<(int, int)>();
 
-        IEnumerable<(int, int)[]> helper()
-        {
-            foreach (var value in values)
-            {
-                if (processed.Contains(value))
-                    continue;
-                processed.Add(value);
-
-                var reverse = (value.Item2, value.Item1);
-                if (values.Contains(reverse))
-                {
-                    yield return new[] { value, reverse };
-                    processed.Add(reverse);
-                }
-                else
-                    yield return new[] { value };
-            }
-        }
-
-        var xx = helper().ToArray();
-
-        var gr =
-            values.GroupBy(tpl => values.Contains((tpl.Item2, tpl.Item1)))
-                .ToArray();
-        Console.WriteLine();
-    }
     public static void Main(string[] args)
     {
-        testBidirectional();
+        ParseNormal(SplittedMRIEdgesText);
+        //ParseNormal(DuplicatedEdgesText);
         //ParseNormal(EveryScenarioText);
-
-
-        ParseNormal(EveryScenarioText);
-        Console.WriteLine();
     }
 
     static void Try(string input)

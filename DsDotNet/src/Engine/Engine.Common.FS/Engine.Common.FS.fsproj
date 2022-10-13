@@ -44,6 +44,7 @@
 		<Compile Include="Module\QualifiedAccess\Map.fs" />
 		<Compile Include="Module\Print.fs" />
 		<Compile Include="Module\TcpIp.fs" />
+		<Compile Include="Module\String.fs" />
 		<Compile Include="TypeExtensions\Xml.fs" />
 		<Compile Include="TypeExtensions\Em.Collection.fs" />
 		<Compile Include="Graph\QuickGraph.fs" />

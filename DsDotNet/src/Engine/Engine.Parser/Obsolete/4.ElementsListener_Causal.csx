@@ -214,9 +214,6 @@ partial class ElementsListener
     {
         Trace.WriteLine($"{ll.GetText()} {opr.GetText()} {rr.GetText()}");
 
-        if (ll.GetText() == "Cp")
-            Console.WriteLine();
-
         var ls = this.addNodes(ll);
         var rs = this.addNodes(rr);
 

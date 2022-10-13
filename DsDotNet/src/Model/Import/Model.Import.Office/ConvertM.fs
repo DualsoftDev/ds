@@ -84,7 +84,7 @@ module ConvertM =
         //시스템 변환
         pptModel.Systems
         |> Seq.iter(fun sys ->
-            DsSystem.Create(sys.Name, None, coreModel) |>ignore
+            DsSystem.Create(sys.Name, null, None, coreModel) |>ignore
             )
 
         //시스템 별 Flow 변환

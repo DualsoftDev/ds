@@ -26,7 +26,7 @@ class EdgeListener : ListenerBase
                 _modelSpits
                 .Where(spit => spit.NameComponents.IsStringArrayEqaul(path))
                 ;
-            var token = 
+            var token =
                 matches
                 .Where(spit =>spit.Obj is SegmentBase || spit.Obj is Child)
                 .Select(spit => spit.Obj)
@@ -58,8 +58,6 @@ class EdgeListener : ListenerBase
                         _parenting.CreateEdges(l as Child, r as Child, op);
                 }
             }
-            Console.WriteLine();
         }
     }
-
 }

@@ -1,5 +1,6 @@
 namespace Engine.Core
 
+open System.Linq
 open System.Runtime.CompilerServices
 
 
@@ -57,6 +58,12 @@ module internal EdgeModule =
             else
                 yield InSegmentEdge.Create(segment, source, target, eType)
         |]
+
+    /// 상호 reset 정보 확장
+    let createMutualResetTransitiveEdges(system:DsSystem) =
+        if system.Api <> null then
+            let mris = system.Api.ResetInfos.Where(fun ri -> ri.Operator = "<||>")  // mutual reset infos
+            ()
 
 [<Extension>]
 type EdgeHelper =

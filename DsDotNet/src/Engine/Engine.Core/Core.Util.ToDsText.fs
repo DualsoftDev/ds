@@ -23,13 +23,8 @@ module internal ToDsTextModule =
                         for e in es do
                             yield $"{tab2}{e.Source.Name} {e.EdgeType.ToText()} {e.Target.Name};"
                     yield $"{tab}{rb}"
-                //for v in segment.Graph.Vertices do
-                //    ()
-            | :? SegmentAlias as ali ->
-                ()//SegmentAlias.Create(ali.Name, targetFlow, ali.AliasKey)
-            | :? SegmentApiCall as call ->
-                //let apiItem = copyApiItem(call.ApiItem)
-                //SegmentApiCall.Create(apiItem, targetFlow)
+            | :? SegmentAlias 
+            | :? SegmentApiCall ->
                 ()
             | _ ->
                 failwith "ERROR"

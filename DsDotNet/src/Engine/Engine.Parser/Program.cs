@@ -79,7 +79,17 @@ public class Program
     }
 }
 ";
-
+    static string DuplicatedEdgesText = @"
+[sys] B = {
+    [flow] F = {
+        Vp > Pp;
+        Vp > Pp;
+        Vm > Pm;
+        Vp |> Pp;
+        Vm |> Pm;
+    }
+}
+";
 
     static void ParseNormal(string text)
     {
@@ -117,53 +127,10 @@ public class Program
         System.Console.WriteLine("Done");
     }
 
-    static void testBidirectional()
-    {
-        var values = new[]
-        {
-            (1, 3),
-            (2, 5),
-            (3, 1),
-            (7, 4),
-            (5, 9),
-            (6, 2),
-            (7, 3),
-            (5, 2),
-        };
-        var processed = new HashSet<(int, int)>();
 
-        IEnumerable<(int, int)[]> helper()
-        {
-            foreach (var value in values)
-            {
-                if (processed.Contains(value))
-                    continue;
-                processed.Add(value);
-
-                var reverse = (value.Item2, value.Item1);
-                if (values.Contains(reverse))
-                {
-                    yield return new[] { value, reverse };
-                    processed.Add(reverse);
-                }
-                else
-                    yield return new[] { value };
-            }
-        }
-
-        var xx = helper().ToArray();
-
-        var gr =
-            values.GroupBy(tpl => values.Contains((tpl.Item2, tpl.Item1)))
-                .ToArray();
-        Console.WriteLine();
-    }
     public static void Main(string[] args)
     {
-        testBidirectional();
-        //ParseNormal(EveryScenarioText);
-
-
+        ParseNormal(DuplicatedEdgesText);
         ParseNormal(EveryScenarioText);
     }
 

@@ -21,7 +21,6 @@ class SkeletonListener : ListenerBase
         if (findFirstChild<SysBlockContext>(ctx) != null)
         {
             var name = ctx.systemName().GetText().DeQuoteOnDemand();
-            ICpu cpu = null;    // todo
             var host = findFirstChild<HostContext>(ctx)?.GetText();
             _system = DsSystem.Create(name, host, FSharpOption<ICpu>.None, _model);
             Trace.WriteLine($"System: {name}");

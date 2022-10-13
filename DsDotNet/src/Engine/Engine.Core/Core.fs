@@ -167,8 +167,8 @@ module CoreModule =
     /// API 의 reset 정보:  "+" <||> "-";
     and ApiResetInfo private (system:DsSystem, operand1:string, operator:string, operand2:string) =
         member val Operand1 = operand1  // "+"
-        member val Operand2 = operand2  // "<||>"
-        member val Operator = operator  // "-"
+        member val Operand2 = operand2  // "-"
+        member val Operator = operator  // "<||>"
         static member Create(system, operand1:string, operator:string, operand2:string) =
             let ri = ApiResetInfo(system, operand1, operator, operand2)
             system.Api.ResetInfos.Add(ri) //|> verify $"Duplicated interface prototype name [{name}]"

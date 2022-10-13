@@ -112,6 +112,30 @@ module internal GraphHelperModule =
 
         text
 
+    let groupDuplexEdges(graph:Graph<'V, 'E>) =
+        let duplexEdgeComparer = {
+            new IEqualityComparer<'V*'V> with
+            member _.Equals(x:'V*'V, y:'V*'V) =
+                let s1, t1 = x
+                let s2, t2 = y
+                (s1 = s2 && t1 = t2) || (s1 = t2 && t1 = s2)
+            member _.GetHashCode(x:'V*'V) = //0//x.It   x.Average(fun s -> s.GetHashCode()) |> int
+                let s, t = x
+                s.GetHashCode()/2 + t.GetHashCode()/2
+        }
+
+        let duplexDic = Dictionary<'V*'V, HashSet<'E>>(duplexEdgeComparer)
+
+        let g = graph
+        for e in g.Edges do
+            let key = (e.Source, e.Target)
+            if not <| duplexDic.ContainsKey(key) then
+                duplexDic.Add(key, HashSet<'E>())
+            duplexDic[key].Add(e) |> verify
+
+        duplexDic
+
+
 
 
 [<Extension>]

@@ -16,6 +16,7 @@ class ElementListener : ListenerBase
     {
         base.EnterParenting(ctx);
     }
+
     public override void EnterInterfaceDef(InterfaceDefContext ctx)
     {
         var hash = _system.Api.Items;
@@ -150,5 +151,7 @@ class ElementListener : ListenerBase
         // side effects
         var path = AppendPathElement(collectNameComponents(ctx));
         var prop = _elements[path];
+        Assert(_parenting == null);
+        Segment.Create(path.Last(), _rootFlow);
     }
 }

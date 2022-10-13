@@ -8,13 +8,23 @@ open Engine.Common.FS
 module internal ToDsTextModule =
     let getTab n = Seq.init n (fun _ -> "    ") |> String.concat ""
     let lb, rb = "{", "}"
+    let combineLines = ofNotNullAny >> joinLines
 
     let segmentToDs (segmentBase:SegmentBase) (indent:int) =
+        let tab = getTab indent
+        let tab2 = getTab (indent + 1)
         [
             match segmentBase with
             | :? Segment as segment ->
-                for v in segment.Graph.Vertices do
-                    ()
+                let ess = groupDuplexEdges segment.Graph
+                if ess.Any() then
+                    yield $"{tab}{segment.Name} = {lb}"
+                    for KeyValue(_, es) in ess do
+                        for e in es do
+                            yield $"{tab2}{e.Source.Name} {e.EdgeType.ToText()} {e.Target.Name};"
+                    yield $"{tab}{rb}"
+                //for v in segment.Graph.Vertices do
+                //    ()
             | :? SegmentAlias as ali ->
                 ()//SegmentAlias.Create(ali.Name, targetFlow, ali.AliasKey)
             | :? SegmentApiCall as call ->
@@ -23,13 +33,23 @@ module internal ToDsTextModule =
                 ()
             | _ ->
                 failwith "ERROR"
-        ]
+        ] |> combineLines
 
     let flowGraphToDs (graph:Graph<SegmentBase, InFlowEdge>) (indent:int) =
+        let tab = getTab indent
+        let ess = groupDuplexEdges graph
         [
+            for KeyValue(_, es) in ess do
+                for e in es do
+                    yield $"{tab}{e.Source.Name} {e.EdgeType.ToText()} {e.Target.Name};"
+
             for v in graph.Vertices do
-                yield! segmentToDs v indent
-        ] |> joinLines
+                yield segmentToDs v indent
+
+            let islands = graph.Islands
+            for island in islands do
+                yield $"{tab}{island.Name};"
+        ] |> combineLines
 
     let flowToDs (flow:Flow) (indent:int) =
         let tab = getTab indent
@@ -48,7 +68,7 @@ module internal ToDsTextModule =
                 yield $"{tab}{rb}"
                         
             yield $"{tab}{rb}"
-        ] |> joinLines
+        ] |> combineLines
 
     let systemToDs (system:DsSystem) =
         [
@@ -88,14 +108,14 @@ module internal ToDsTextModule =
                             let flows = (v.Select(fun f -> f.NameComponents.Skip(1).Combine()) |> String.concat ";") + ";"
                             yield $"{tab2}{k} = {lb} {flows} {rb}"
                         yield $"{tab}{rb}"
-                ] |> joinLines
+                ] |> combineLines
             yield buttonsToDs("auto" , system.AutoButtons)
             yield buttonsToDs("emg"  , system.EmergencyButtons)
             yield buttonsToDs("start", system.StartButtons)
             yield buttonsToDs("reset", system.ResetButtons)
 
             yield rb
-        ] |> joinLines
+        ] |> combineLines
 
     let modelToDs (model:Model) =
         let tab = getTab 1
@@ -120,7 +140,7 @@ module internal ToDsTextModule =
                             let conds = seg.SafetyConditions.Select(fun seg -> seg.QualifiedName).JoinWith("; ") + ";"
                             yield $"{tab2}{seg.QualifiedName} = {lb} {conds} {rb}"
                         yield $"{tab}{rb}"
-                ] |> joinLines
+                ] |> combineLines
 
             let withAddresses = segs.Where(fun seg -> seg.Addresses <> null)
             let addresses =
@@ -133,7 +153,7 @@ module internal ToDsTextModule =
                             yield $"{tab2}{seg.QualifiedName} = ( {ads.Start}, {ads.End}, {ads.Reset} )"
                         yield $"{tab}{rb}"
 
-                ] |> joinLines
+                ] |> combineLines
 
             let withLayouts =
                 model.Systems
@@ -154,7 +174,7 @@ module internal ToDsTextModule =
                             yield $"{tab2}{apiItem.QualifiedName} = {posi}"
                             
                         yield $"{tab}{rb}"
-                ] |> joinLines
+                ] |> combineLines
 
             if safeties.Any() || addresses.Any() || layouts.Any() then
                 yield $"[prop] = {lb}"
@@ -162,10 +182,11 @@ module internal ToDsTextModule =
                 if addresses.Any() then yield addresses
                 if layouts.Any()   then yield layouts
                 yield rb
-        ] |> joinLines
+        ] |> combineLines
 
 
 [<Extension>]
 type ToDsTextModuleHelper =
     [<Extension>] static member ToDsText(model:Model) = modelToDs(model)
+    [<Extension>] static member ToDsText(system:DsSystem) = systemToDs(system)
 

@@ -80,7 +80,7 @@ module ConvertM =
         
         pptModel.Systems
         |> Seq.iter(fun sys ->
-            let coreSys = DsSystem.Create(sys.Name, None, coreModel)
+            let coreSys = DsSystem.Create(sys.Name, null, None, coreModel)
             addFlows(coreSys, sys.Flows)  )
 
 

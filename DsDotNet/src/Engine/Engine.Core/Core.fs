@@ -34,7 +34,7 @@ module CoreModule =
         member val ResetButtons     = ButtonDic()
         static member Create(name, host, cpu, model) =
             let system = DsSystem(name, host, cpu, model)
-            model.Systems.Add(system) |> verify $"Duplicated system name [{name}]"
+            model.Systems.Add(system) |> verifyM $"Duplicated system name [{name}]"
             system
 
     and Flow private(name:string, system:DsSystem) =
@@ -45,14 +45,14 @@ module CoreModule =
         member x.System = system
         static member Create(name:string, system:DsSystem) =
             let flow = Flow(name, system)
-            system.Flows.Add(flow) |> verify $"Duplicated flow name [{name}]"
+            system.Flows.Add(flow) |> verifyM $"Duplicated flow name [{name}]"
             flow
 
     and InFlowEdge private (source:SegmentBase, target:SegmentBase, edgeType:EdgeType) =
         inherit EdgeBase<SegmentBase>(source, target, edgeType)
         static member Create(flow:Flow, source, target, edgeType) =
             let edge = InFlowEdge(source, target, edgeType)
-            flow.Graph.AddEdge(edge) |> verify $"Duplicated edge [{source.Name}{edgeType}{target.Name}]"
+            flow.Graph.AddEdge(edge) |> verifyM $"Duplicated edge [{source.Name}{edgeType.ToText()}{target.Name}]"
             edge
         override x.ToString() = $"{x.Source.QualifiedName} {x.EdgeType.ToText()} {x.Target.QualifiedName}"
 
@@ -61,7 +61,7 @@ module CoreModule =
         static member Create(segment:Segment, source, target, edgeType) =
             let edge = InSegmentEdge(source, target, edgeType)
             let gr:Graph<_, _> = segment.Graph
-            segment.Graph.AddEdge(edge) |> verify $"Duplicated edge [{source.Name}{edgeType}{target.Name}]"
+            segment.Graph.AddEdge(edge) |> verifyM $"Duplicated edge [{source.Name}{edgeType}{target.Name}]"
             edge
         override x.ToString() = $"{x.Source.QualifiedName} {x.EdgeType.ToText()} {x.Target.QualifiedName}"
 
@@ -80,7 +80,7 @@ module CoreModule =
         member val Addresses:Addresses = null with get, set
         static member Create(name, flow) =
             let segment = Segment(name, flow)
-            flow.Graph.AddVertex(segment) |> verify $"Duplicated segment name [{name}]"
+            flow.Graph.AddVertex(segment) |> verifyM $"Duplicated segment name [{name}]"
             segment
 
 
@@ -93,7 +93,7 @@ module CoreModule =
         member _.AliasKey = aliasKey
         static member Create(name, flow, aliasKey) =
             let alias = SegmentAlias(name, flow, aliasKey)
-            flow.Graph.AddVertex(alias) |> verify $"Duplicated segment name [{name}]"
+            flow.Graph.AddVertex(alias) |> verifyM $"Duplicated segment name [{name}]"
             alias
 
     /// flow 에서 직접 외부 system 의 api 호출한 경우.  R1 > A.Plus;  에서 A system 의 Plus interface 를 직접 호출한 경우
@@ -123,7 +123,7 @@ module CoreModule =
         inherit Child(apiItem.QualifiedName, apiItem, segment)
         static member Create(apiItem, segment) =
             let child = ChildApiCall(apiItem, segment)
-            segment.Graph.AddVertex(child) |> verify $"Duplicated child name [{apiItem.QualifiedName}]"
+            segment.Graph.AddVertex(child) |> verifyM $"Duplicated child name [{apiItem.QualifiedName}]"
             child
 
     and ChildAliased private (mnemonic:string, apiItem:ApiItem, segment:Segment) =
@@ -131,7 +131,7 @@ module CoreModule =
 
         static member Create(mnemonic, apiItem, segment) =
             let child = ChildAliased(mnemonic, apiItem, segment)
-            segment.Graph.AddVertex(child) |> verify $"Duplicated child name [{mnemonic}]"
+            segment.Graph.AddVertex(child) |> verifyM $"Duplicated child name [{mnemonic}]"
             child
 
     and [<AllowNullLiteral>]
@@ -158,7 +158,7 @@ module CoreModule =
             let cp = ApiItem(name, system)
             if isNull system.Api then
                 system.Api <- Api(system)
-            system.Api.Items.Add(cp) |> verify $"Duplicated interface prototype name [{name}]"
+            system.Api.Items.Add(cp) |> verifyM $"Duplicated interface prototype name [{name}]"
             cp
 
         //member val Xywh:Xywh = Xywh(0,0,Some(0),Some(0)) with get,set

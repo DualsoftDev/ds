@@ -13,8 +13,9 @@ module GraphModule =
         inherit IVertex
         inherit INamed
     type IEdge<'V> =
-        abstract Source  :'V 
-        abstract Target  :'V
+        abstract Source :'V 
+        abstract Target :'V
+        abstract Value  :obj
 
     /// vertex on a flow
     type IFlowVertex =
@@ -37,6 +38,7 @@ module GraphModule =
         interface IEdge<'T> with
             member x.Source = x.Source
             member x.Target = x.Target
+            member x.Value = x.EdgeType
         member _.Source = source
         member _.Target = target
         member val EdgeType = edgeType
@@ -50,21 +52,23 @@ module GraphModule =
             vertices:'V seq, edges:'E seq) =
         let edgeComparer = {
             new IEqualityComparer<'E> with
-                member _.Equals(x:'E, y:'E) = x.Source = y.Source && x.Target = y.Target
-                member _.GetHashCode(x) = x.GetHashCode()
+                member _.Equals(x:'E, y:'E) = x.Source = y.Source && x.Target = y.Target && x.Value = y.Value
+                member _.GetHashCode(x) = x.Source.GetHashCode()/2 + x.Target.GetHashCode()/2
         }
         let vs = new HashSet<'V>(vertices, nameComparer<'V>())
         let es = new HashSet<'E>(edges, edgeComparer)
         new () = Graph<'V, 'E>(Seq.empty<'V>, Seq.empty<'E>)
         member _.Vertices = vs
         member _.Edges = es
+        /// 중복 edge 삽입은 허용되지 않으나, 중복된 항목이 존재하면 이를 무시하고 false 를 반환.  중복이 없으면 true 반환
         member _.AddEdges(edges:'E seq) =
             edges
             |> Seq.forall(fun e ->
                 [ e.Source; e.Target ]
                 |> Seq.filter(fun v -> not <| vs.Contains(v))
                 |> Seq.iter(fun v -> vs.Add(v) |> ignore)
-                es.Add(e))
+                es.Add(e))  // |> verifyMessage $"Duplicated edge [{e.Source.Name} -> {e.Target.Name}]"
+
         member _.RemoveEdges(edges:'E seq)       = edges    |> Seq.forall es.Remove
         member _.AddVertices(vertices:'V seq)    = vertices |> Seq.forall vs.Add
         member _.RemoveVertices(vertices:'V seq) = vertices |> Seq.forall vs.Remove

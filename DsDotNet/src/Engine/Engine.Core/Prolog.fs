@@ -5,9 +5,13 @@ open System
 
 [<AutoOpen>]
 module PrologModule =
-    let internal verify (message:string) condition =
+    /// verify with message
+    let internal verifyM (message:string) condition =
         if not condition then
             failwith message
+    let internal verifyMessage (message:string) condition =
+        verifyM message condition
+        condition
 
 [<AllowNullLiteral>]
 type Xywh(x:int, y:int, w:Nullable<int>, h:Nullable<int>) =

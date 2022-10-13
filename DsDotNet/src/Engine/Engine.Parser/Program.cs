@@ -83,7 +83,6 @@ public class Program
 [sys] B = {
     [flow] F = {
         Vp > Pp;
-        Vp > Pp;
         Vm > Pm;
         Vp |> Pp;
         Vm |> Pm;

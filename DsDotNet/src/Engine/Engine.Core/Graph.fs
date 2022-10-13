@@ -120,16 +120,22 @@ module internal GraphHelperModule =
 
         text
 
+    /// 양방향 edge 검색.
+    ///
+    /// - A > B 와 B > A (혹은 A |> B) 등 복수개의 양방향 edge 가 존재하면
+    /// duplexDic[(A, B)] == duplexDic[(B, A)] 값에 A <-> B 모든 edge 를 저장.
+    ///
+    /// - 단방향 simplex edge 는 값에 하나만 저장됨
     let groupDuplexEdges(graph:Graph<'V, 'E>) =
         let duplexEdgeComparer = {
             new IEqualityComparer<'V*'V> with
-            member _.Equals(x:'V*'V, y:'V*'V) =
-                let s1, t1 = x
-                let s2, t2 = y
-                (s1 = s2 && t1 = t2) || (s1 = t2 && t1 = s2)
-            member _.GetHashCode(x:'V*'V) = //0//x.It   x.Average(fun s -> s.GetHashCode()) |> int
-                let s, t = x
-                s.GetHashCode()/2 + t.GetHashCode()/2
+                member _.Equals(x:'V*'V, y:'V*'V) =
+                    let s1, t1 = x
+                    let s2, t2 = y
+                    (s1 = s2 && t1 = t2) || (s1 = t2 && t1 = s2)
+                member _.GetHashCode(x:'V*'V) =
+                    let s, t = x
+                    s.GetHashCode()/2 + t.GetHashCode()/2
         }
 
         let duplexDic = Dictionary<'V*'V, HashSet<'E>>(duplexEdgeComparer)

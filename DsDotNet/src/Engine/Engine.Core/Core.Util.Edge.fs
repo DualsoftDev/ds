@@ -62,7 +62,7 @@ module internal EdgeModule =
         |]
 
     /// 상호 reset 정보(Mutual Reset Info) 확장
-    let createMRIEdgesTransitiveClosure(flow:Flow) =    // graph:Graph<'V, 'E>
+    let private createMRIEdgesTransitiveClosure4Graph(graph:Graph<'V, 'E>, edgeCreator:'V*'V*EdgeType -> IEdge<'V>) =
         // todo: system 의 flow 에 대해서 MRI 를 갖는 real 들의 MRI edge 생성
         // https://www.tutorialspoint.com/Transitive-closure-of-a-Graph
         (*
@@ -78,15 +78,16 @@ module internal EdgeModule =
                Display the transMat
             End
         *)
+        let originalGraph = graph
         let es =
-            flow.Graph.Edges
+            originalGraph.Edges
                 .OfType<EdgeBase<'V>>()
                 .Where(fun e -> e.EdgeType.HasFlag(EdgeType.Strong ||| EdgeType.Reset))
                 .ToArray()
 
         let gr = Graph(Seq.empty, es)
         let vs = gr.Vertices.ToArray()
-        let dic = Dictionary<'V*'V, bool>()
+        let dic = Dictionary<'V*'V, bool>()     // v1 -> v2 : reachable?
         for i in vs do
             for j in vs do
             if i <> j then
@@ -103,9 +104,13 @@ module internal EdgeModule =
 
         for KeyValue( (i, j), v) in dic do
             // i -> j 의 reset edge 가 존재하고, j -> i 로도 reset edge 가 존재해야 하지만, 실제 j -> i reset edge 가 없는 경우
-            if v && dic[(j, i)] && flow.Graph.FindEdges(j, i).isNullOrEmpty() then
-                InFlowEdge.Create(flow, j, i, EdgeType.Reset ||| EdgeType.Strong ||| EdgeType.AugmentedTransitiveClosure) |> ignore
-        ()
+            if v && dic[(j, i)] && originalGraph.FindEdges(j, i).isNullOrEmpty() then
+                edgeCreator(j, i, EdgeType.Reset ||| EdgeType.Strong ||| EdgeType.AugmentedTransitiveClosure) |> ignore
+
+    let createMRIEdgesTransitiveClosure(flow:Flow) =
+        let edgeCreator = fun (s, t, edgeType) -> InFlowEdge.Create(flow, s, t, edgeType) :> IEdge<SegmentBase>
+        createMRIEdgesTransitiveClosure4Graph(flow.Graph, edgeCreator)
+
     let createMRIEdgesTransitiveClosure4System(system:DsSystem) =
         for f in system.Flows do
             createMRIEdgesTransitiveClosure f

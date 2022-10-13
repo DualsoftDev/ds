@@ -174,7 +174,6 @@ module PPTX =
         let mutable ifName    = ""
         let mutable ifTXs    = HashSet<string>()
         let mutable ifRXs    = HashSet<string>()
-        let mutable bDuumy = false
         let mutable bEmg = false
         let mutable bAuto = false
         let mutable bStart = false
@@ -190,8 +189,8 @@ module PPTX =
                 else 
                     shape.ErrorName(22, iPage)
 
-        let updateSafety(barckets:string)  = safeties <- barckets.Split(';') 
-                                             |> Seq.map(fun sys -> $"{pageTitle}_{sys}") |> HashSet 
+        let updateSafety(barckets:string)  = safeties <- barckets.Split(';')  |> HashSet 
+                                            //             |> Seq.map(fun name -> $"{pageTitle}_{name}") |> HashSet 
         let updateCopySys(barckets:string) = 
             if  (trimStartEnd barckets).All(fun c -> Char.IsDigit(c))
             then 
@@ -212,20 +211,26 @@ module PPTX =
         
         do 
             nodeType <- 
-                if(shape.CheckRectangle()) then  MY
-                elif(shape.CheckHomePlate()) then  IF
+                if(shape.CheckRectangle())      then  MY
+                elif(shape.CheckHomePlate())    then  IF
                 elif(shape.CheckFoldedCorner()) then  COPY
-                elif(shape.CheckEllipse()) 
+                elif(shape.CheckDonutShape() 
+                    || shape.CheckBlockArc() 
+                    || shape.CheckNoSmoking() 
+                    || shape.CheckResetShape()) then  BUTTON
+                elif(shape.CheckEllipse())
                 then 
-                    if((txCnt = 0 && rxCnt = 0) || txCnt < 0 || rxCnt < 0)
-                    then shape.ErrorName(2, iPage)
-                    else TR
-                else if(shape.CheckDonutShape() || shape.CheckBlockArc()
-                        || shape.CheckNoSmoking() || shape.CheckResetShape()) 
-                then 
-                    if(txCnt = 1) then txCnt <- 0 //초기값 Tx 0으로 제한 1이상 입력시 사용자 고지
-                    if(rxCnt <= 0 || txCnt > 1) then shape.ErrorName(30, iPage)
-                    else RX
+                    if(dashOutline) 
+                    then DUMMY
+                    else 
+                        if((txCnt = 0 && rxCnt = 0) || txCnt < 0 || rxCnt < 0)
+                        then shape.ErrorName(2, iPage)
+                        else 
+                            if (txCnt > 0 && rxCnt > 0) then TR
+                            elif (txCnt = 0) then RX
+                            elif (rxCnt = 0) then TX
+                            else shape.ErrorName(2, iPage)
+
                 else  shape.ErrorName(1, iPage)
 
             name <-  GetBracketsReplaceName(shape.InnerText)
@@ -237,7 +242,6 @@ module PPTX =
             |COPY -> GetSquareBrackets(shape.InnerText, false) |> fun text -> if text = ""|>not then updateCopySys  text 
             |_ -> ()
 
-            bDuumy  <- (shape.CheckEllipse()||shape.CheckRectangle()) && dashOutline
             bEmg    <- shape.CheckNoSmoking() 
             bAuto   <- shape.CheckBlockArc() 
             bStart  <- shape.CheckDonutShape() 
@@ -246,17 +250,17 @@ module PPTX =
         member x.PageNum = iPage
         member x.Shape = shape
         member x.DashOutline = dashOutline
-        member x.Safeties = safeties.select(fun s -> NameUtil.QuoteOnDemand(s))
+        member x.Safeties = safeties
         member x.CopySys  = copySystems.select(fun s -> NameUtil.QuoteOnDemand(s))
         member x.IfName      = ifName
         member x.IfTxs       = ifTXs
         member x.IfRxs       = ifRXs
-        member x.IsDummy = bDuumy
         member x.IsEmgBtn = bEmg
         member x.IsAutoBtn= bAuto
         member x.IsStartBtn = bStart
         member x.IsResetBtn = bReset
         member x.NodeType = nodeType
+        member x.IsDummy  = nodeType = DUMMY
         member x.CallName    = assert(nodeType.IsCall); $"{pageTitle}_{name}"  
         
         member val Id =  shape.GetId()
@@ -310,14 +314,13 @@ module PPTX =
             let parents = 
                 ids 
                 |> Seq.map (fun id -> nodes.[ Objkey(iPage, id) ])
-                |> Seq.filter (fun node -> node.IsDummy|>not)
                 |> Seq.filter (fun node -> node.NodeType = MY)
             if(parents.Count() > 1) 
             then  Office.ErrorPPT(Group, 23, $"부모수:{parents.Count()}", iPage)
             let dummys = 
                 ids 
                 |> Seq.map (fun id -> nodes.[ Objkey(iPage, id) ])
-                |> Seq.filter (fun node -> node.IsDummy)
+                |> Seq.filter (fun node -> node.NodeType = DUMMY)
             if(parents.Count() = 0 && dummys.Count() > 1) 
             then  Office.ErrorPPT(Group, 24, $"부모수:{dummys.Count()}", iPage)
             if(parents.Count() = 0 && dummys.Count() = 0 ) 
@@ -336,7 +339,7 @@ module PPTX =
                 ids 
                 |> Seq.map (fun id -> nodes.[Objkey(iPage, id) ])
                 |> Seq.filter (fun node ->node.NodeType = MY |> not)
-                |> Seq.filter (fun node ->(node.IsDummy|>not ||  parent.IsSome))
+                |> Seq.filter (fun node ->(node.NodeType = DUMMY|>not ||  parent.IsSome))
 
             if(children.Any() |> not) 
             then  Office.ErrorPPT(Group, 12, $"자식수:0", iPage)
@@ -392,7 +395,7 @@ module PPTX =
                             let sysName, flowName = GetSysNFlow(pagePPT.Title, pagePPT.PageNum)
 
                             let node = pptNode(shape, page,  isDash,  sildeSize, flowName)
-                            if(node.Name ="" && node.IsDummy|>not) then shape.ErrorName(13, page)
+                            if(node.Name ="" && node.NodeType = DUMMY|>not) then shape.ErrorName(13, page)
                             nodes.TryAdd(node.Key, node)  |>ignore )
                              
              

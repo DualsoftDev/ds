@@ -20,6 +20,8 @@ module Object =
         | RX            //관찰만
         | IF            //인터페이스
         | COPY          //시스템복사 
+        | DUMMY         //그룹더미 
+        | BUTTON        //버튼 emg,start, ...
         with
             member x.IsReal =   match x with
                                 |MY  -> true

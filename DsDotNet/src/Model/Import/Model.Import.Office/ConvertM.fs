@@ -28,8 +28,8 @@ module ConvertM =
 
          ///MEdge   -> CoreModule.Flow
         let convertChildEdge(mEdge:MEdge, coreSeg:CoreModule.Segment) = 
-            let src = coreSeg.Graph.FindVertex(mEdge.Source.Name)
-            let tgt = coreSeg.Graph.FindVertex(mEdge.Target.Name)
+            let src = coreSeg.Graph.FindVertex(dicChild.[mEdge.Source.FullName].QualifiedName)
+            let tgt = coreSeg.Graph.FindVertex(dicChild.[mEdge.Target.FullName].QualifiedName)
             let edgeType = EdgeHelper.GetEdgeType(mEdge.Causal)
 
             let findList = coreSeg.Graph.Vertices |> Seq.map(fun v->v.Name) |> String.concat "\n " 

@@ -99,8 +99,11 @@ module ImportUtil =
             )
         //parent 리스트 만들기
         let MakeParent(pptNodes:pptNode seq, model:MModel, dicSeg:ConcurrentDictionary<string, MSeg>, parents:ConcurrentDictionary<pptNode, seq<pptNode>>) = 
-            let dicParent = parents |> Seq.collect(fun parentChilren -> 
-                                                       parentChilren.Value |> Seq.map(fun child -> child, parentChilren.Key)) |> dict
+            let dicParent = parents 
+                            |> Seq.filter(fun parentChildren -> parentChildren.Key.IsDummy|>not)
+                            |> Seq.collect(fun parentChildren -> 
+                                                       parentChildren.Value 
+                                                       |> Seq.map(fun child -> child, parentChildren.Key)) |> dict
             pptNodes
             |> Seq.iter(fun node -> 
                 if(dicParent.ContainsKey(node))
@@ -267,18 +270,18 @@ module ImportUtil =
             |> Seq.iter(fun node -> 
                     let flow = model.GetFlow(node.PageNum)
                     let mFlowName =  flow.Name
-                    let dic = dicSeg.Values.where(fun w-> w.IsDummy|>not).Select(fun seg -> seg.FullName, seg) |> dict
+                    let dic = dicSeg.Values.where(fun w-> w.IsDummy|>not).Select(fun seg -> seg.Name, seg) |> dict
                    
                     //Safety
                     let safeSeg = 
                         node.Safeties   //세이프티 입력 미등록 이름오류 체크
-                        |> Seq.map(fun safe ->  sprintf "%s.%s.%s" mySys.Name mFlowName safe)
+                        |> Seq.map(fun safe ->  sprintf "%s_%s" mFlowName safe)
                         |> Seq.iter(fun safeFullName -> if(dic.ContainsKey safeFullName|>not) 
                                                         then Office.ErrorName(node.Shape, 28, node.PageNum))
 
 
                         node.Safeties   
-                        |> Seq.map(fun safe ->  sprintf "%s.%s.%s" mySys.Name mFlowName safe)
+                        |> Seq.map(fun safe ->  sprintf "%s_%s" mFlowName safe)
                         |> Seq.map(fun safeFullName ->  dic.[safeFullName])
 
                     if(safeSeg.Any())

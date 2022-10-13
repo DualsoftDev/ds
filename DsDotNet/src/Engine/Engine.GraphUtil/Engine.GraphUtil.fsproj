@@ -1,11 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net48</TargetFramework>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-  </PropertyGroup>
+	<PropertyGroup>
+		<!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
+		<TargetFramework>net48</TargetFramework>
+		<RootNamespace>Engine.GraphUtil</RootNamespace>
+		<LangVersion>6.0</LangVersion>
+		<OutputType>Library</OutputType>
+	</PropertyGroup>
 
-  <ItemGroup>
+
+	<ItemGroup>
     <Compile Include="CalculationUtils.fs" />
     <Compile Include="GraphAlgorithms.fs" />
     <Compile Include="GraphUtils.fs" />

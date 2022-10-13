@@ -40,7 +40,9 @@ module ExportIOTable =
         let rows =
             seq {
                 for sys in  model.Systems do
-                    let flows = sys.Flows |> Seq.cast<MFlow> |> Seq.filter(fun flow -> (flow.Page = Int32.MaxValue)|>not)
+                    let flows = sys.Flows |> Seq.cast<MFlow> 
+                                          |> Seq.filter(fun flow -> (flow.Page = Int32.MaxValue)|>not)
+                                          |> Seq.filter(fun flow -> flow.System.Active)
                     //MFlow 출력
                     for flow in flows do
                         //Call Task 출력
@@ -48,9 +50,6 @@ module ExportIOTable =
                             for index in [|1..callSeg.MaxCnt|] do
                                 let causal, trx = callSeg.PrintfTRX(index, true)
                                 yield rowItems(causal, callSeg, trx)
-                        ////Ex Task 출력
-                        //for callSeg in flow.ExRealSegs() do
-                        //    yield rowItems(EX, callSeg, "EX")
             }
         rows
         |> Seq.iter(fun row -> 

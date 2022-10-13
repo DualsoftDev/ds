@@ -9,46 +9,49 @@ open System.Collections.Concurrent
 ///Msys   -> CoreModule.DsSystem
 ///MFlow  -> CoreModule.Flow
 ///MSeg   -> CoreModule.Segment
+///MSeg(IsChild) -> CoreModule.Child
 module ConvertM =
-
-    ///mEdges   -> CoreModule.Child
-    let private convertChildren(mSeg:MSeg, coreSeg:CoreModule.Segment, coreModel:CoreModule.Model) =   
-        //중복 등록 체크용
-        let dicChild = ConcurrentDictionary<string, ApiItem>()
-
-        ///MSeg   -> CoreModule.Child
-        let convertChild(mChildSeg:MSeg) = 
-            if mChildSeg.IsAlias
-            then ChildAliased.Create(mChildSeg.Name, dicChild.[mChildSeg.Alias.Value.FullName], coreSeg) :> Child
-            else 
-                 let orgApi = ApiItem.Create(mChildSeg.Name, coreModel.FindSystem(mChildSeg.BaseSys.Name))
-                 dicChild.TryAdd(mChildSeg.FullName, orgApi) |> ignore
-
-                 ChildApiCall.Create(orgApi, coreSeg) :> Child
-
-         ///MEdge   -> CoreModule.Flow
-        let convertChildEdge(mEdge:MEdge, coreSeg:CoreModule.Segment) = 
-            let src = coreSeg.Graph.FindVertex(dicChild.[mEdge.Source.FullName].QualifiedName)
-            let tgt = coreSeg.Graph.FindVertex(dicChild.[mEdge.Target.FullName].QualifiedName)
-            let edgeType = EdgeHelper.GetEdgeType(mEdge.Causal)
-
-            let findList = coreSeg.Graph.Vertices |> Seq.map(fun v->v.Name) |> String.concat "\n " 
-            try if(src.Name = null) then ()    with ex -> failwithf $"{findList}에서 \n{mEdge.Source.Name}를 찾을 수 없습니다."
-            try if(tgt.Name = null) then ()    with ex -> failwithf $"{findList}에서 \n{mEdge.Target.Name}를 찾을 수 없습니다."
-
-
-            InSegmentEdge.Create(coreSeg, src, tgt, edgeType)
-            
-
-        mSeg.ChildFlow.Nodes |> Seq.cast<MSeg> 
-                             |> Seq.sortBy(fun seg -> seg.IsAlias)
-                             |> Seq.iter(fun node -> coreSeg.Graph.AddVertex(convertChild (node)) |>ignore)
-        mSeg.ChildFlow.Edges |> Seq.cast<MEdge> 
-                             |> Seq.iter(fun edge -> coreSeg.Graph.AddEdge  (convertChildEdge (edge, coreSeg)) |>ignore)
     
     let ToDs(pptModel:MModel) =
         let coreModel = CoreModule.Model()
 
+        ///mEdges   -> CoreModule.Child
+        let convertChildren(mSeg:MSeg, coreSeg:CoreModule.Segment, coreModel:CoreModule.Model) =   
+            //중복 등록 체크용
+            let dicChild = ConcurrentDictionary<string, ApiItem>()
+
+            ///MSeg   -> CoreModule.Child
+            let convertChild(mChildSeg:MSeg) = 
+                if mChildSeg.IsAlias
+                then ChildAliased.Create(mChildSeg.Name, dicChild.[mChildSeg.Alias.Value.FullName], coreSeg) :> Child
+                else 
+                     let orgApi = ApiItem.Create(mChildSeg.Name, coreModel.FindSystem(mChildSeg.BaseSys.Name))
+                     dicChild.TryAdd(mChildSeg.FullName, orgApi) |> ignore
+
+                     ChildApiCall.Create(orgApi, coreSeg) :> Child
+
+             ///MEdge   -> CoreModule.Flow
+            let convertChildEdge(mEdge:MEdge, coreSeg:CoreModule.Segment) = 
+                let src = coreSeg.Graph.FindVertex(dicChild.[mEdge.Source.FullName].QualifiedName)
+                let tgt = coreSeg.Graph.FindVertex(dicChild.[mEdge.Target.FullName].QualifiedName)
+                let edgeType = EdgeHelper.GetEdgeType(mEdge.Causal)
+
+                let findList = coreSeg.Graph.Vertices |> Seq.map(fun v->v.Name) |> String.concat "\n " 
+                try if(src.Name = null) then ()    with ex -> failwithf $"{findList}에서 \n{mEdge.Source.Name}를 찾을 수 없습니다."
+                try if(tgt.Name = null) then ()    with ex -> failwithf $"{findList}에서 \n{mEdge.Target.Name}를 찾을 수 없습니다."
+
+
+                InSegmentEdge.Create(coreSeg, src, tgt, edgeType)
+            
+
+            mSeg.ChildFlow.Nodes |> Seq.cast<MSeg> 
+                                 |> Seq.sortBy(fun seg -> seg.IsAlias)
+                                 |> Seq.filter(fun seg -> seg.IsDummy|>not)
+                                 |> Seq.iter(fun node -> coreSeg.Graph.AddVertex(convertChild (node)) |>ignore)
+            mSeg.ChildFlow.Edges |> Seq.cast<MEdge> 
+                                 |> Seq.filter(fun edge -> edge.IsDummy|>not)
+                                 |> Seq.iter(fun edge -> coreSeg.Graph.AddEdge  (convertChildEdge (edge, coreSeg)) |>ignore)
+    
         //CoreModule.Flow 에 pptEdge 등록
         let addInFlowEdges(coreFlow:CoreModule.Flow, mFlow:MFlow) =
             ///MSeg   -> CoreModule.Segment
@@ -70,8 +73,10 @@ module ConvertM =
                 InFlowEdge.Create(coreFlow, src, tgt, edgeType)
 
             mFlow.Nodes |> Seq.distinct |> Seq.cast<MSeg> 
+                        |> Seq.filter(fun seg -> seg.IsDummy|>not)
                         |> Seq.iter(fun node -> coreFlow.Graph.AddVertex(convertSeg (node, coreFlow)) |>ignore)
             mFlow.Edges |> Seq.cast<MEdge> 
+                        |> Seq.filter(fun edge -> edge.IsDummy|>not)
                         |> Seq.iter(fun edge -> coreFlow.Graph.AddEdge(convertRootEdge (edge, coreFlow)) |>ignore)
 
         //CoreModule.DsSystem 에 pptFlow 등록
@@ -83,15 +88,11 @@ module ConvertM =
         
         //시스템 변환
         pptModel.Systems
-        |> Seq.iter(fun sys ->
-            DsSystem.Create(sys.Name, null, None, coreModel) |>ignore
-            )
-
+        |> Seq.iter(fun sys -> DsSystem.Create(sys.Name, null, None, coreModel) |>ignore)
+        
         //시스템 별 Flow 변환
         pptModel.Systems
-        |> Seq.iter(fun sys ->
-            addFlows(coreModel.FindSystem(sys.Name), sys.Flows)
-            )
+        |> Seq.iter(fun sys -> addFlows(coreModel.FindSystem(sys.Name), sys.Flows))
 
         coreModel
 

@@ -45,9 +45,9 @@ namespace Dual.Model.Import
             //sub 그래프 가능
             viewer.Graph = new Graph() { LayoutAlgorithmSettings = new SugiyamaLayoutSettings() };
             var layoutSetting = new Microsoft.Msagl.Layout.Layered.SugiyamaLayoutSettings();
-            layoutSetting.LayerSeparation = 50;
-            layoutSetting.NodeSeparation = 50;
-            layoutSetting.ClusterMargin = 30;
+            layoutSetting.LayerSeparation = 30;
+            layoutSetting.NodeSeparation = 30;
+            layoutSetting.ClusterMargin = 20;
 
 
 
@@ -89,9 +89,11 @@ namespace Dual.Model.Import
 
         private void drawMEdgeGraph(List<MEdge> edges, Subgraph subgraph)
         {
-            foreach (var mEdge in edges)
-                DrawMEdge(subgraph, mEdge);
-
+            edges.ForEach(f =>
+            {
+                if (!f.IsSkipUI)
+                    DrawMEdge(subgraph, f);
+            });
         }
 
         private void DrawMEdge(Subgraph subgraph, MEdge edge)
@@ -222,8 +224,11 @@ namespace Dual.Model.Import
                 {
                     if (segment.NodeType == NodeType.MY)
                         nNode.Attr.Shape = Shape.Box;
-                    //if (segment.NodeType == NodeType.EX)
-                    //    nNode.Attr.Shape = Shape.Diamond;
+                    if (segment.NodeType == NodeType.DUMMY)
+                    {
+                        nNode.Attr.Shape = Shape.Box;
+                        nNode.Attr.FillColor = Color.Black;
+                    }
                     if (segment.NodeType == NodeType.TR
                         || segment.NodeType == NodeType.TX
                         || segment.NodeType == NodeType.RX)

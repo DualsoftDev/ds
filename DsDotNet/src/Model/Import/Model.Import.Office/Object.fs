@@ -130,6 +130,8 @@ module Object =
             member x.TgtSystem = tgt.BaseSys
             member x.Nodes = [src;tgt]
             member x.Causal = causal
+            member val IsDummy = false with get,set
+            member val IsSkipUI= false with get,set
             
            
 
@@ -209,15 +211,14 @@ module Object =
             member x.DummySeg = dummySeg.Values 
             member x.AddDummySeg(seg) = dummySeg.TryAdd(seg) |> ignore 
 
-            member x.UsedMSegs   = x.UsedSegs   |> Seq.cast<MSeg>
-            member x.CallSegs() = 
-                                        x.UsedMSegs
-                                        |> Seq.filter(fun seg -> seg.NodeType.IsCall)
-                                        |> Seq.filter(fun seg -> seg.Bound = ThisFlow)
-                                        |> Seq.map(fun seg -> if seg.IsAlias then seg.Alias.Value else seg)
-                                        |> Seq.cast<MSeg>
-                                        |> Seq.sortBy(fun seg -> seg.FullName)
-                                        |> Seq.distinctBy(fun seg -> seg.FullName)
+            member x.UsedMSegs  = x.UsedSegs   |> Seq.cast<MSeg>
+            member x.CallSegs() = x.UsedMSegs
+                                    |> Seq.filter(fun seg -> seg.NodeType.IsCall)
+                                    |> Seq.filter(fun seg -> seg.Bound = OtherFlow)
+                                    |> Seq.map(fun seg -> if seg.IsAlias then seg.Alias.Value else seg)
+                                    |> Seq.cast<MSeg>
+                                    |> Seq.sortBy(fun seg -> seg.FullName)
+                                    |> Seq.distinctBy(fun seg -> seg.FullName)
 
 
             member x.CallWithoutInterLock()  = 

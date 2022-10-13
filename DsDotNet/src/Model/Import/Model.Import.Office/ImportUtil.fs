@@ -194,25 +194,24 @@ module ImportUtil =
                             Some(group.Key), dicSeg.[group.Key.Key]  )
         
                     if(newParents.Any())
-                        then newParents |> Seq.toArray
-                        else [(None , sysSeg)] |> Seq.toArray
+                        then newParents |> Seq.head
+                        else (None , sysSeg)
 
                 let sSeg = dicSeg.[edge.StartNode.Key]
                 let eSeg = dicSeg.[edge.EndNode.Key]
                
-                getParent(edge) |> Seq.iter(fun (parentNode, parentSeg) ->
-                        
-                               let mEdge = MEdge(sSeg, eSeg, edge.Causal)
+                let parentNode, parentSeg= getParent(edge) 
+                let mEdge = MEdge(sSeg, eSeg, edge.Causal)
 
-                               if(mEdge.Causal = Interlock)
-                               then mFlow.AddInterlock(mEdge)
+                if(mEdge.Causal = Interlock)
+                then mFlow.AddInterlock(mEdge)
 
-                               if(parentNode.IsNone) 
-                               then mFlow.AddEdge(mEdge) |> ignore
-                               else parentSeg.ChildFlow.AddEdge(mEdge) |> ignore
-                                  
-                                    
-                              )
+                if(parentNode.IsNone) 
+                then mFlow.AddEdge(mEdge) |> ignore
+                else parentSeg.ChildFlow.AddEdge(mEdge) |> ignore
+                mEdge
+
+
             pptEdges
                 |> Seq.iter(fun edge -> 
                     let flow = model.GetFlow(edge.PageNum)
@@ -220,6 +219,8 @@ module ImportUtil =
                     let eSeg = dicSeg.[edge.EndNode.Key]
                     if(sSeg.IsDummy || eSeg.IsDummy)
                     then 
+                        convertEdge(edge,  mySys.SysSeg, flow, dicSeg).IsDummy <- true
+
                         let srcs = if(sSeg.Singles.Any()) then sSeg.Singles |> Seq.toList else [sSeg]
                         let tgts = if(eSeg.Singles.Any()) then eSeg.Singles |> Seq.toList else [eSeg]
 
@@ -228,9 +229,9 @@ module ImportUtil =
                                 tgts
                                 |> Seq.iter(fun tgt -> 
                                     let edge = pptEdge(edge.ConnectionShape, edge.Id, edge.PageNum, src.ShapeID, tgt.ShapeID , doc.DicNodes)
-                                    convertEdge(edge,  mySys.SysSeg, flow, dicSeg)  ))
+                                    convertEdge(edge,  mySys.SysSeg, flow, dicSeg).IsSkipUI <- true  ))
                     else 
-                        convertEdge(edge, mySys.SysSeg, flow, dicSeg)
+                        convertEdge(edge, mySys.SysSeg, flow, dicSeg) |> ignore
                     )
 
         //Dummy child 처리

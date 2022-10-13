@@ -36,7 +36,8 @@ module internal ToDsTextModule =
         [
             for KeyValue(_, es) in ess do
                 for e in es do
-                    yield $"{tab}{e.Source.Name} {e.EdgeType.ToText()} {e.Target.Name};"
+                    let commentOnAugmented = if e.EdgeType.HasFlag(EdgeType.AugmentedTransitiveClosure) then "//" else ""
+                    yield $"{tab}{commentOnAugmented}{e.Source.Name} {e.EdgeType.ToText()} {e.Target.Name};"
 
             for v in graph.Vertices do
                 yield segmentToDs v indent

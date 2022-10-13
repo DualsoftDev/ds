@@ -104,7 +104,7 @@ module internal EdgeModule =
         for KeyValue( (i, j), v) in dic do
             // i -> j 의 reset edge 가 존재하고, j -> i 로도 reset edge 가 존재해야 하지만, 실제 j -> i reset edge 가 없는 경우
             if v && dic[(j, i)] && flow.Graph.FindEdges(j, i).isNullOrEmpty() then
-                InFlowEdge.Create(flow, j, i, EdgeType.Reset ||| EdgeType.Strong) |> ignore
+                InFlowEdge.Create(flow, j, i, EdgeType.Reset ||| EdgeType.Strong ||| EdgeType.AugmentedTransitiveClosure) |> ignore
         ()
     let createMRIEdgesTransitiveClosure4System(system:DsSystem) =
         for f in system.Flows do

@@ -27,11 +27,12 @@ module GraphModule =
 
     [<Flags>]
     type EdgeType =
-    | Default       = 0b0000000    // Start, Weak
-    | Reset         = 0b0000001    // else start
-    | Strong        = 0b0000010    // else weak
-    | Reversed      = 0b0000100    // direction reversed : <, <|, <||, etc
-    | Bidirectional = 0b0001000    // 양방향.  <||>
+    | Default                    = 0b0000000    // Start, Weak
+    | Reset                      = 0b0000001    // else start
+    | Strong                     = 0b0000010    // else weak
+    | Reversed                   = 0b0000100    // direction reversed : <, <|, <||, etc
+    | Bidirectional              = 0b0001000    // 양방향.  <||>
+    | AugmentedTransitiveClosure = 0b0010000    // 강한 상호 reset 관계 확장 edge
 
     [<AbstractClass>]
     type EdgeBase<'V>(source:'V, target:'V, edgeType:EdgeType) =

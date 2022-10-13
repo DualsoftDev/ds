@@ -34,8 +34,8 @@ module GraphModule =
     | Bidirectional = 0b0001000    // 양방향.  <||>
 
     [<AbstractClass>]
-    type EdgeBase<'T>(source:'T, target:'T, edgeType:EdgeType) =
-        interface IEdge<'T> with
+    type EdgeBase<'V>(source:'V, target:'V, edgeType:EdgeType) =
+        interface IEdge<'V> with
             member x.Source = x.Source
             member x.Target = x.Target
             member x.Value = x.EdgeType
@@ -55,6 +55,7 @@ module GraphModule =
                 member _.Equals(x:'E, y:'E) = x.Source = y.Source && x.Target = y.Target && x.Value = y.Value
                 member _.GetHashCode(x) = x.Source.GetHashCode()/2 + x.Target.GetHashCode()/2
         }
+        let vertices = vertices @@ edges.selectMany(fun e -> [e.Source; e.Target]) |> Seq.distinct
         let vs = new HashSet<'V>(vertices, nameComparer<'V>())
         let es = new HashSet<'E>(edges, edgeComparer)
         new () = Graph<'V, 'E>(Seq.empty<'V>, Seq.empty<'E>)
@@ -77,6 +78,8 @@ module GraphModule =
         member x.AddVertex(vertex:'V)    = x.AddVertices([vertex])
         member x.RemoveVertex(vertex:'V) = x.RemoveVertices([vertex])
         member x.FindVertex(name:string) = vs.FirstOrDefault(fun v -> v.Name = name)
+        member x.FindEdges(source:string, target:string) = es.Where(fun e -> e.Source.Name = source && e.Target.Name = target)
+        member x.FindEdges(source:'V, target:'V) = es.Where(fun e -> e.Source = source && e.Target = target)
 
         member private x.ConnectedVertices = x.Edges |> Seq.collect(fun e -> [e.Source; e.Target]) |> Seq.distinct
         member x.Islands = x.Vertices.Except(x.ConnectedVertices)

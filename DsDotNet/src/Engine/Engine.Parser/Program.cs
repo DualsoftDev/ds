@@ -91,6 +91,7 @@ public class Program
     static string SplittedMRIEdgesText = @"
 [sys] A = {
     [flow] F = {
+        a1 <||> a2 <||> a3 <||> a4;
         a1 > a2 > a3 > a4;
     }
     [interfaces] = {
@@ -107,7 +108,6 @@ public class Program
     {
         var helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation());
         var model = helper.Model;
-        model.CreateMRIEdgesTransitiveClosure();
 
         var xxx = model.ToDsText();
         //Try("1 + 2 + 3");

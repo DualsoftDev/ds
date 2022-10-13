@@ -32,13 +32,13 @@ class ElementListener : ListenerBase
             fqdns
             .Where(fqdn => fqdn != null)
             .Select(s => _model.FindGraphVertex<Segment>(s))
-            .Pipe(x => Assert(x != null))
+            .Tap(x => Assert(x != null))
             .ToArray()
             ;
         var ser =   // { start ~ end ~ reset }
             enumerateChildren<CallComponentsContext>(ctx)
             .Select(collectCallComponents)
-            .Pipe(callComponents => Assert(callComponents.ForAll(cc => cc.Length == 2 || isWildcard(cc))))
+            .Tap(callComponents => Assert(callComponents.ForAll(cc => cc.Length == 2 || isWildcard(cc))))
             .Select(callCompnents => callCompnents.Select(cc => isWildcard(cc) ? null : cc.Prepend(_system.Name).ToArray()).ToArray())
             .ToArray()
             ;

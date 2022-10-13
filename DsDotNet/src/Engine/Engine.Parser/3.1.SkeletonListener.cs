@@ -46,7 +46,7 @@ class SkeletonListener : ListenerBase
         var children =
             enumerateChildren<CausalTokenContext>(ctx)
                 .Select(ctctx => collectNameComponents(ctctx).ToArray())
-                .Pipe(childNameComponts => Assert(childNameComponts.Length.IsOneOf(1, 2)))
+                .Tap(childNameComponts => Assert(childNameComponts.Length.IsOneOf(1, 2)))
                 .Select(childNameComponts => AppendPathElement(childNameComponts))
                 .ToArray()
                 ;
@@ -94,7 +94,7 @@ class SkeletonListener : ListenerBase
         var mnemonics =
             enumerateChildren<AliasMnemonicContext>(ctx)
                 .Select(mctx => collectNameComponents(mctx))
-                .Pipe(mne => Assert(mne.Length == 1))
+                .Tap(mne => Assert(mne.Length == 1))
                 .Select(mne => mne[0])
                 .ToHashSet();
         map.Add(alias, mnemonics);
@@ -119,28 +119,11 @@ class SkeletonListener : ListenerBase
                 .Select(collectNameComponents)
                 .ToArray()
                 ;
-        //string[][] collectCallComponents(CallComponentsContext ctx)
-        //{
-        //    var xx = enumerateChildren<Identifier123Context>(ctx).ToArray();
-        //    var yy = xx.Select(collectNameComponents)
-        //        .ToArray()
-        //        ;
-        //    return yy;
-
-        //}
-
-        //var xxxser =
-        //    enumerateChildren<CallComponentsContext>(ctx).ToArray();
-        //var zxxxser =
-        //    collectCallComponents(xxxser[0]).ToArray();
-        //var xxser =
-        //    enumerateChildren<CallComponentsContext>(ctx)
-        //    .Select(collectCallComponents).ToArray();
 
         var ser =   // { start ~ end ~ reset }
             enumerateChildren<CallComponentsContext>(ctx)
             .Select(collectCallComponents)
-            .Pipe(callComponents => Assert(callComponents.ForAll(cc => cc.Length == 2 || cc[0] == "_")))
+            .Tap(callComponents => Assert(callComponents.ForAll(cc => cc.Length == 2 || cc[0] == "_")))
             .Select(callCompnents => callCompnents.Select(cc => cc.Prepend(_system.Name).ToArray()).ToArray())
             .ToArray()
             ;

@@ -59,11 +59,10 @@ module internal EdgeModule =
                 yield InSegmentEdge.Create(segment, source, target, eType)
         |]
 
-    /// 상호 reset 정보 확장
-    let createMutualResetTransitiveEdges(system:DsSystem) =
-        if system.Api <> null then
-            let mris = system.Api.ResetInfos.Where(fun ri -> ri.Operator = "<||>")  // mutual reset infos
-            ()
+    /// 상호 reset 정보(Mutual Reset Info) 확장
+    let createMRIEdgesTransitiveClosure(system:DsSystem) =
+        // todo: system 의 flow 에 대해서 MRI 를 갖는 real 들의 MRI edge 생성
+        ()
 
 [<Extension>]
 type EdgeHelper =
@@ -77,3 +76,6 @@ type EdgeHelper =
     [<Extension>] static member GetEdgeCausal(edgeType:EdgeType) =
                     getEdgeText(edgeType) |> EdgeCausalType
 
+    [<Extension>] static member CreateMRIEdgesTransitiveClosure(model:Model) =
+                    for sys in model.Systems do
+                        createMRIEdgesTransitiveClosure sys

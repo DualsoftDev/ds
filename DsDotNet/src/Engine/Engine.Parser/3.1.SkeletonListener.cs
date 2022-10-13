@@ -139,13 +139,21 @@ class SkeletonListener : ListenerBase
         hash.Add(api);
     }
 
-    public override void EnterInterfaceResetDef([NotNull] InterfaceResetDefContext ctx)
+    public override void EnterInterfaceResetDef(InterfaceResetDefContext ctx)
     {
-        var operands =
-            enumerateChildren<Identifier1Context>(ctx)
+        // I1 <||> I2 <||> I3;  ==> [| I1; <||>; I2; <||>; I3; |]
+        var terms =
+            enumerateChildren<RuleContext>(ctx, false, tree => tree is Identifier1Context || tree is CausalOperatorResetContext)
             .Select(ctx => ctx.GetText())
             .ToArray();
-        var operator_ = findFirstChild<CausalOperatorResetContext>(ctx).GetText();
-        var ri_ = ApiResetInfo.Create(_system, operands[0], operator_, operands[1]);
+
+        // I1 <||> I2 와 I2 <||> I3 에 대해서 해석
+        for (var i = 0; i < terms.Length - 2; i += 2)
+        {
+            var opnd1 = terms[i];
+            var op = terms[i+1];
+            var opnd2 = terms[i+2];
+            var ri_ = ApiResetInfo.Create(_system, opnd1, op, opnd2);
+        }
     }
 }

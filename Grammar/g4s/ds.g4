@@ -103,7 +103,7 @@ interfaces
     serPhrase: callComponents TILDE callComponents (TILDE callComponents)?;
         callComponents: identifier123DNF*;
     //callDefs: (callDef SEIMCOLON)+ ;
-    interfaceResetDef: identifier1 causalOperatorReset identifier1 (';')?;
+    interfaceResetDef: identifier1 (causalOperatorReset identifier1)+ (';')?;
 
 
 alias: '[' 'aliases' ']' (identifier1)? '=' LBRACE (aliasListing)* RBRACE;

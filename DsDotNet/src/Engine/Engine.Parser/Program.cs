@@ -83,9 +83,22 @@ public class Program
 [sys] B = {
     [flow] F = {
         Vp > Pp;
-        Vm > Pm;
         Vp |> Pp;
-        Vm |> Pm;
+    }
+}
+";
+
+    static string SplittedMRIEdgesText = @"
+[sys] A = {
+    [flow] F = {
+        a1 > a2 > a3 > a4;
+    }
+    [interfaces] = {
+        I1 = { F.a1 ~ F.a2 }
+        I2 = { F.a2 ~ F.a3 }
+        I3 = { F.a3 ~ F.a1 }
+        // 정보로서의 상호 리셋
+        I1 <||> I2 <||> I3 ||> I4;
     }
 }
 ";
@@ -94,6 +107,7 @@ public class Program
     {
         var helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation());
         var model = helper.Model;
+        model.CreateMRIEdgesTransitiveClosure();
 
         var xxx = model.ToDsText();
         //Try("1 + 2 + 3");
@@ -129,8 +143,9 @@ public class Program
 
     public static void Main(string[] args)
     {
-        ParseNormal(DuplicatedEdgesText);
-        ParseNormal(EveryScenarioText);
+        ParseNormal(SplittedMRIEdgesText);
+        //ParseNormal(DuplicatedEdgesText);
+        //ParseNormal(EveryScenarioText);
     }
 
     static void Try(string input)

@@ -1,5 +1,4 @@
 using Engine.Common;
-using Engine.CodeGen;
 using Model.Import.Office;
 using System;
 using System.Collections.Generic;
@@ -184,8 +183,8 @@ namespace Dual.Model.Import
             {
                 //var helper = ModelParser.ParseFromString2(_dsText, ParserOptions.Create4Simulation());
 
-                if (CpuLoader.PreCheck())
-                    MSGWarn("언어체크 성공 !!!!");
+                //if (CpuLoader.PreCheck())
+                //    MSGWarn("언어체크 성공 !!!!");
 
                 ExportTextModel(Color.Transparent, _dsText, true);
             }

@@ -27,8 +27,8 @@ module ImportUtil =
 
 
         //ExSys 및 Flow 만들기
-        let MakeExSys(pptPages:pptPage seq, model:MModel) = 
-             pptPages
+        let MakeExSys(doc:pptDoc, model:MModel) = 
+            doc.Pages
                 |> Seq.filter(fun page -> page.IsUsing)
                 |> Seq.iter  (fun page -> 
                     let sysName, flowName = GetSysNFlow(page.Title, page.PageNum)
@@ -36,6 +36,11 @@ module ImportUtil =
                     then MSys.Create(sysName, false, model) |> ignore
                     )
 
+            doc.Nodes 
+            |> Seq.filter(fun node -> node.NodeType = COPY) 
+            |> Seq.iter(fun node -> 
+                    node.CopySys.foreach(fun sysName -> MSys.Create(sysName, false, model) |> ignore)
+                    )
         
         //MFlow 리스트 만들기
         let MakeFlows(pptPages:pptPage seq, model:MModel) = 
@@ -112,16 +117,15 @@ module ImportUtil =
             pptNodes
             |> Seq.sortBy(fun node -> node.Alias.IsSome)
             |> Seq.iter(fun node -> 
-                let flow = model.GetFlow(node.PageNum)
-                let realName, bMyMFlow  = 
-                    if(node.NodeType.IsCall) 
-                    then node.CallName, flow.System.Active
-                    else node.NameOrg,  flow.System.Active
+                
+                let flow  = model.GetFlow(node.PageNum)
+                let sys   = if(node.NodeType.IsCall) 
+                            then model.DicSystems.[node.CallName.Split('.').[0]]
+                            else model.DicSystems.[TextMySys]
 
-                let sys    = model.DicSystems.[flow.System.Name]
-                let btn = node.IsEmgBtn || node.IsStartBtn || node.IsAutoBtn || node.IsResetBtn 
+                let btn   = node.IsEmgBtn || node.IsStartBtn || node.IsAutoBtn || node.IsResetBtn 
                 let bound = if(btn) then ExBtn
-                            else if(bMyMFlow) then ThisFlow else OtherFlow
+                            else if(node.NodeType.IsCall) then OtherFlow else ThisFlow
 
              
                 if(node.Alias.IsSome)
@@ -133,27 +137,28 @@ module ImportUtil =
                     aliasSeg.Alias <- Some(segOrg)
                     dicSeg.TryAdd(node.Key, aliasSeg) |> ignore
                 else 
-                    let seg = MSeg(realName, sys,  bound, node.NodeType, flow, node.IsDummy)
+                    let name =  if(node.NodeType.IsCall) then node.CallName else node.NameOrg
+                    let seg = MSeg(name, sys,  bound, node.NodeType, flow, node.IsDummy)
                     seg.Update(node.Key, node.Id.Value, node.CntTX, node.CntRX)
                     dicSeg.TryAdd(node.Key, seg) |> ignore
                 )
 
+     
+      
         let MakeCopySystem(doc:pptDoc, model:MModel) = 
             doc.Nodes 
                 |> Seq.filter(fun node -> node.NodeType = COPY) 
                 |> Seq.iter(fun node -> 
-                        let flow  = model.GetFlow(node.PageNum)
-                        
                         node.CopySys.foreach(fun sysName ->
-                            let exSys = MSys.Create(sysName, false, model) 
-                            let sys   = model.DicSystems.[node.Name]
-                            sys.Flows.foreach(fun f ->  
+                            let exSys = model.DicSystems.[sysName]
+                            let libSys   = model.DicSystems.[node.Name]
+                            libSys.Flows.foreach(fun f ->  
                                 let flow = MFlow.Create(f.Name, exSys, f.Page) 
                                 let flowEdges = f.CopyMEdges()
 
                                 flowEdges.foreach(fun edge -> flow.AddEdge(edge) |> ignore ))
 
-                            sys.IFs.foreach(fun f-> exSys.AddInterface(f.Name, f.TXs, f.RXs)|> ignore)
+                            libSys.IFs.foreach(fun f-> exSys.AddInterface(f.Name, f.TXs, f.RXs)|> ignore)
                             )
                 )
 

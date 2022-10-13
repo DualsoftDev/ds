@@ -21,9 +21,9 @@ module PPTX =
     let TextMySys = "MY"
     let Objkey(iPage, Id) = $"{iPage}page{Id}"
     let SysName(iPage) = sprintf "page%3d" iPage 
-
+    let CopyName(name:string, cnt) = sprintf "Copy%d_%s" cnt (name.Replace(".", "_")) 
     let GetSysNFlow(name:string, pageNum:int) = 
-            if(name.Contains('.')) then name.Split('.').[0], name.Split('.').[1]
+            if(name.StartsWith("\\")) then (name.TrimStart('\\')), "exflow"
             elif(name = "")        then TextMySys, sprintf "P%d" pageNum
             else                        TextMySys, name
             
@@ -138,7 +138,7 @@ module PPTX =
     let GetAliasName(names:string seq) =  
         let usedNames = HashSet<string>()
         seq {
-                let copyName(name, cnt) = sprintf "Copy%d_%s" cnt name 
+                
                 let newName(testName) = 
                     if  names |> Seq.filter (fun name -> name = testName) |> Seq.length = 1
                     then usedNames.Add(testName) |>ignore
@@ -148,7 +148,7 @@ module PPTX =
                         let mutable copy = testName
                         while usedNames.Contains(copy) do
                             if(cnt > 0)
-                            then copy <- copyName(testName, cnt) 
+                            then copy <- CopyName(testName, cnt) 
                             cnt <- cnt + 1
 
                         usedNames.Add(copy) |>ignore

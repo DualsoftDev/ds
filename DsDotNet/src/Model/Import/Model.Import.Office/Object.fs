@@ -67,10 +67,8 @@ module Object =
                                             then x.Name
                                             else sprintf "%s.%s"  ownerMFlow x.ValidName
 
-            ///금칙 문자 및 선두숫자가 있으면 "" 로 이름 앞뒤에 배치한다.
-            ///Alias 는 무조건 "" 로 이름 앞뒤에 배치
-            member x.FullName   = sprintf "%s.%s.%s" baseSystem.Name  ownerMFlow x.ValidName  
-            member x.CallName   = sprintf "%s.%s(%s)" ownerMFlow x.Name  (if(x.Parent.IsSome) then x.Parent.Value.Name else "Root")
+            member x.FullName   = sprintf "%s.%s.%s(%s)" baseSystem.Name  ownerMFlow x.Name    (if(x.Parent.IsSome) then x.Parent.Value.Name else "Root")
+            //member x.CallName   = sprintf "%s(%s)"  (x.Name.Split('.').[1]) (if(x.Parent.IsSome) then x.Parent.Value.Name else "Root")
 
             member x.Update(nodeKey, nodeIdValue, nodeCntTX, nodeCntRX) = 
                         this.Key <- nodeKey

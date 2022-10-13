@@ -28,7 +28,7 @@ module ImportM =
                 ImportCheck.SamePageErr(doc.Pages) |> ignore
 
                 //ExSys 및 Flow 만들기
-                MakeExSys(doc.Pages, model) |> ignore
+                MakeExSys(doc, model) |> ignore
                 //MFlow 리스트 만들기
                 MakeFlows(doc.Pages, model) |> ignore
                 // system, flow 이름 중복체크 
@@ -61,7 +61,7 @@ module ImportM =
                 MakeInterface(doc.Nodes, model, dicSeg)
                 
                 ImportCheck.CopySystemErr(doc.Nodes, model) |> ignore
-                //exSys  만들기
+                //exSysCopy  만들기
                 MakeCopySystem(doc,  model)
              
                 //유효 이름 체크

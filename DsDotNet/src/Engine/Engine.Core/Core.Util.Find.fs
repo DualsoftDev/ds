@@ -31,11 +31,15 @@ module internal ModelFindModule =
         let x = sys.Api.Items.FindWithName(apiKey)
         x
 
+    let findSystem(model:Model, systemName:string) =
+        model.Systems.First(fun sys -> sys.Name = systemName)
+
 [<Extension>]
 type ModelFindHelper =
     [<Extension>] static member FindGraphVertex(model:Model, fqdn:NameComponents) = findGraphVertex(model, fqdn)
     [<Extension>] static member FindGraphVertex<'V when 'V :> IVertex>(model:Model, fqdn:NameComponents) = findGraphVertexT<'V>(model, fqdn)
     [<Extension>] static member FindApiItem(model:Model, apiPath:NameComponents) = findApiItem(model, apiPath)
+    [<Extension>] static member FindSystem(model:Model, systemName:string) = findSystem(model, systemName)
 
 
 //// system copy : 

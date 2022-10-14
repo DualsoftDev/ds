@@ -114,7 +114,7 @@ module internal ToDsTextModule =
 
     let systemToDs (system:DsSystem) =
         [
-            let ip = if system.Host <> null then $" ip = {system.Host}" else ":"
+            let ip = if system.Host <> null then $" ip = {system.Host}" else ""
             yield $"[sys{ip}] {system.Name} = {lb}"
             let indent = 1
 
@@ -160,6 +160,9 @@ module internal ToDsTextModule =
         ] |> combineLines
 
     let modelToDs (model:Model) =
+        let xx = "a\nB\nc\na\nb\n".SplitByLine()
+        let yy = "a\nB\nc\na\nb\n".Split([|'\r'; '\n'|])
+
         let tab = getTab 1
         let tab2 = getTab 2
         [

@@ -37,6 +37,11 @@ module internal ToDsTextModule =
         [
             for i in inits do
             for chain in chainFrom [] i do
+                (*
+                   (A -> B) -> (B -> C)
+                   => "A -> " + "B -> " + "C"
+                   => "A -> B -> C";
+                *)
                 let chained = chain.Select(fun e -> $"{e.Source.Name} {e.EdgeType.ToText()} ").JoinWith("")
                 yield $"{tab}{chained}{chain.Last().Target.Name};"
         ]
@@ -65,34 +70,24 @@ module internal ToDsTextModule =
                     yield $"{tab}{es[0].ToText()};"
 
             for v in vertices.OfType<Segment>() do
-                yield vertexToDs v indent
+                yield segmentToDs v indent
 
             let islands = vertices.Except(edges.Collect(fun e -> e.GetVertices()))
             for island in islands do
                 yield $"{tab}{island.Name}; // island"
         ] |> combineLines
 
-    and vertexToDs (vertex:INamed) (indent:int) =
+    and segmentToDs (segment:Segment) (indent:int) =
         let tab = getTab indent
         [
-            match vertex with
-            | :? Segment as segment ->
-                let subGraph = segment.Graph
-                if subGraph.Edges.any() then
-                    yield $"{tab}{segment.Name} = {lb}"
-                    let es = subGraph.Edges.Cast<EdgeBase<Child>>().ToArray()
-                    let vs = subGraph.Vertices
-                    yield graphEntitiesToDs vs es (indent+1)
-                    yield $"{tab}{rb}"
-
-            //| :? SegmentAlias 
-            //| :? SegmentApiCall ->
-            //    ()
-            | _ ->
-                failwith "ERROR"
+            let subGraph = segment.Graph
+            if subGraph.Edges.any() then
+                yield $"{tab}{segment.Name} = {lb}"
+                let es = subGraph.Edges.Cast<EdgeBase<Child>>().ToArray()
+                let vs = subGraph.Vertices
+                yield graphEntitiesToDs vs es (indent+1)
+                yield $"{tab}{rb}"
         ] |> combineLines
-
-
 
     let flowGraphToDs (graph:Graph<SegmentBase, InFlowEdge>) (indent:int) =
         let es = graph.Edges.OfType<EdgeBase<SegmentBase>>().ToArray()

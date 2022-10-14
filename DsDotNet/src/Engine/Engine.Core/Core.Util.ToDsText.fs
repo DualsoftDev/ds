@@ -3,6 +3,8 @@ namespace Engine.Core
 open System.Runtime.CompilerServices
 open System.Linq
 open Engine.Common.FS
+open System.Collections.Generic
+open GraphModule
 
 [<AutoOpen>]
 module internal ToDsTextModule =
@@ -10,13 +12,44 @@ module internal ToDsTextModule =
     let lb, rb = "{", "}"
     let combineLines = ofNotNullAny >> joinLines
 
+    /// Edge 를 최대한 한줄로 세운 것을 우선으로 출력하고, 나머지 대충 출력
+    let edgesToDs<'V when 'V :> INamed and 'V : equality>(edges:EdgeBase<'V> seq) (indent:int) =
+        let gr = Graph(Seq.empty, edges)    // 계산용 graph
+        let processed = HashSet<EdgeBase<'V>>()
+        let inits, vs = gr.Inits, gr.Vertices
+
+        /// v 에서 시작하는 chain edges 찾기
+        let rec chainFrom (results:EdgeBase<'V> list) v : EdgeBase<'V> list list =
+            [
+                let es = gr.GetOutgoingEdges(v).Where(processed.Contains >> not).ToArray()
+                let mutable res = results
+                if es.Any() then
+                    for e in es do
+                        processed.Add(e) |> ignore
+                        yield! chainFrom (e::res) e.Target
+                        res <- []
+                else
+                    yield res |> List.rev
+            ]
+
+        /// 주어진 edge 로 임시 생성한 graph 의 init 에서부터 chain 을 구해서 출력
+        let tab = getTab indent
+        [
+            for i in inits do
+            for chain in chainFrom [] i do
+                let chained = chain.Select(fun e -> $"{e.Source.Name} {e.EdgeType.ToText()} ").JoinWith("")
+                yield $"{tab}{chained}{chain.Last().Target.Name};"
+        ]
+
     let rec graphEntitiesToDs<'V when 'V :> INamed and 'V : equality> (vertices:'V seq) (edges:EdgeBase<'V> seq) (indent:int) =
         let tab = getTab indent
         [
-            // start �ΰ�(reset �ΰ� �ƴ� ��) ���� ���
-            let startEdges = edges.OfNotStrongResetEdge().ToArray()
-            for e in startEdges do
-                yield $"{tab}{e.ToText()};"
+            // start 인과(reset 인과 아닌 것) 먼저 출력
+            let startEdges = edges.OfNotResetEdge().ToArray()
+            yield! edgesToDs startEdges indent
+
+            let startEdges = edges.OfWeakResetEdge().ToArray()
+            yield! edgesToDs startEdges indent
 
             let resetEdges = edges.OfStrongResetEdge().ToArray()
             let ess = groupDuplexEdges resetEdges

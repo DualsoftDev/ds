@@ -287,40 +287,10 @@ module Seq =
         else
             xs |> Seq.reduce f |> Some
 
-    // https://stackoverflow.com/questions/2521254/f-equivalent-to-enumerable-oftypea
-    let ofType111<'a> (xs: seq<_>) =
-        xs |> Seq.cast<obj> |> Seq.filter(fun x -> x :? 'a) |> Seq.cast<'a>
-
-    // https://gist.github.com/kos59125/3780229
-    /// Seq 중에서 type 에 맞는 것만 골라냄
-    let ofType<'a> (xs:System.Collections.IEnumerable): seq<'a> =
-        let resultType = typeof<'a>
-
-        seq {
-            for x in xs do
-                match x with
-                | null -> ()
-                | _ ->
-                    if resultType.IsAssignableFrom(x.GetType())
-                    then yield (downcast x)
-        }    /// Seq 중에서 주어진 type 이 아닌 것만 골라냄.
-    /// obj 의 sequence 로 반환되므로 필요시 다시 casting 해서 써야 한다.
-    let ofNotType<'a> (xs:System.Collections.IEnumerable) =
-        let resultType = typeof<'a>
-
-        seq {
-            for x in xs do
-                match x with
-                | null -> ()
-                | _ ->
-                    if not <| resultType.IsAssignableFrom(x.GetType())
-                    then yield x
-        }    /// Seq 중에서 type 에 맞는 것만 골라냄.  ofType<'a> 과 동일
-
-    let whereType<'a> = ofType<'a>
-    /// Seq 중에서 주어진 type 이 아닌 것만 골라냄.   ofNotType<'a> 과 동일
-    let whereNotType<'a> = ofNotType<'a>
-
+    let ofType<'a>(xs:_ seq) = xs.OfType<'a>()
+    let ofNotType<'a>(xs:'b seq) =
+        let ofs = xs.OfType<'a>().Cast<'b>()
+        xs.Except(ofs)
 
     /// Sequence 에 뭐라도 있는지 검사
     let any xs = not <| Seq.isEmpty xs

@@ -7,6 +7,8 @@ public class Program
 [sys ip = 192.168.0.1] My = {
     [flow] F = {        // GraphVertexType.Flow
         C1, C2 > C3, C4 |> C5;
+C3 > C5 > C6;
+C4 > C5;
         Main        // GraphVertexType.{ Segment | Parenting }
         > R3        // GraphVertexType.{ Segment }
         ;

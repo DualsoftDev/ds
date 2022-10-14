@@ -158,6 +158,7 @@ module internal GraphHelperModule =
 [<Extension>]
 type GraphHelper =
     [<Extension>] static member Dump(graph:Graph<_, _>) = dumpGraph(graph)
+    [<Extension>] static member GetVertices(edge:IEdge<'V>) = [edge.Source; edge.Target]
     [<Extension>]
     static member ToText(edgeType:EdgeType) =
         let t = edgeType

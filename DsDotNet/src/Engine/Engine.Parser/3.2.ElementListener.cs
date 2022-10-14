@@ -151,7 +151,9 @@ class ElementListener : ListenerBase
         // side effects
         var path = AppendPathElement(collectNameComponents(ctx));
         var prop = _elements[path];
-        Assert(_parenting == null);
+        if (_parenting != null)
+            throw new ParserException($"ERROR: identifier [{path.Combine()}] not allowed!", ctx);
+
         Segment.Create(path.Last(), _rootFlow);
     }
 }

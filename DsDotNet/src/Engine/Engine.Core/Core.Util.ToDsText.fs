@@ -10,41 +10,58 @@ module internal ToDsTextModule =
     let lb, rb = "{", "}"
     let combineLines = ofNotNullAny >> joinLines
 
-    let segmentToDs (segmentBase:SegmentBase) (indent:int) =
+    let rec graphEntitiesToDs<'V when 'V :> INamed and 'V : equality> (vertices:'V seq) (edges:EdgeBase<'V> seq) (indent:int) =
         let tab = getTab indent
-        let tab2 = getTab (indent + 1)
         [
-            match segmentBase with
+            let startEdges = edges.OfNotStrongResetEdge().ToArray()
+            for e in startEdges do
+                yield $"{tab}{e.ToText()};"
+            let resetEdges = edges.OfStrongResetEdge().ToArray()
+            let ess = groupDuplexEdges resetEdges
+            for KeyValue(_, es) in ess do
+                let es = es.ToArray()
+                if es.Length = 2 then
+                    assert(es[0].EdgeType.HasFlag(EdgeType.AugmentedTransitiveClosure) = es[1].EdgeType.HasFlag(EdgeType.AugmentedTransitiveClosure))
+                    assert(es[0].Source = es[1].Target && es[0].Target = es[1].Source)
+                    let commentOnAugmented = if es[0].EdgeType.HasFlag(EdgeType.AugmentedTransitiveClosure) then "//" else ""
+                    yield $"{tab}{commentOnAugmented}{es[0].Source.Name} <||> {es[0].Target.Name};"
+                else
+                    assert(es.Length = 1)
+                    yield $"{tab}{es[0].ToText()};"
+
+            for v in vertices.OfType<Segment>() do
+                yield vertexToDs v indent
+
+            let islands = vertices.Except(edges.selectMany(fun e -> e.GetVertices()))
+            for island in islands do
+                yield $"{tab}{island.Name}; // island"
+        ] |> combineLines
+
+    and vertexToDs (vertex:INamed) (indent:int) =
+        let tab = getTab indent
+        [
+            match vertex with
             | :? Segment as segment ->
-                let ess = groupDuplexEdges segment.Graph
-                if ess.Any() then
+                let subGraph = segment.Graph
+                if subGraph.Edges.any() then
                     yield $"{tab}{segment.Name} = {lb}"
-                    for KeyValue(_, es) in ess do
-                        for e in es do
-                            yield $"{tab2}{e.Source.Name} {e.EdgeType.ToText()} {e.Target.Name};"
+                    let es = subGraph.Edges.Cast<EdgeBase<Child>>().ToArray()
+                    let vs = subGraph.Vertices
+                    yield graphEntitiesToDs vs es (indent+1)
                     yield $"{tab}{rb}"
-            | :? SegmentAlias 
-            | :? SegmentApiCall ->
-                ()
+
+            //| :? SegmentAlias 
+            //| :? SegmentApiCall ->
+            //    ()
             | _ ->
                 failwith "ERROR"
         ] |> combineLines
 
+
+
     let flowGraphToDs (graph:Graph<SegmentBase, InFlowEdge>) (indent:int) =
-        let tab = getTab indent
-        let ess = groupDuplexEdges graph
-        [
-            for KeyValue(_, es) in ess do
-                for e in es do
-                    yield $"{tab}{e.Source.Name} {e.EdgeType.ToText()} {e.Target.Name};"
-
-            for v in graph.Vertices do
-                yield segmentToDs v indent
-
-            let islands = graph.Islands
-            for island in islands do
-                yield $"{tab}{island.Name};"
-        ] |> combineLines
+        let es = graph.Edges.OfType<EdgeBase<SegmentBase>>().ToArray()
+        graphEntitiesToDs graph.Vertices es indent
 
     let flowToDs (flow:Flow) (indent:int) =
         let tab = getTab indent

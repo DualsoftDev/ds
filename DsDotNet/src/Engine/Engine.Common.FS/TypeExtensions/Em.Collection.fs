@@ -33,3 +33,8 @@ type SeqExt =
     //[<Extension>] static member Any(xs:'a seq) = not <| Seq.isEmpty xs   //System.Collections.Generic 혼동
     [<Extension>] static member GetLength(xs:'a seq) = Seq.length xs
     [<Extension>] static member IsEmpty(xs:'a seq) = Seq.isEmpty xs
+    [<Extension>] static member GroupByToDictionary<'V, 'K when 'K: equality>(xs:'V seq, keySelector:'V->'K) =
+                    xs.GroupBy(keySelector)
+                        .Select(fun g -> g.Key, g.ToArray())
+                        |> dict
+                        |> Dictionary

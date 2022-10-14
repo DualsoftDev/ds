@@ -27,15 +27,16 @@ module GraphModule =
 
     [<Flags>]
     type EdgeType =
-    | Default       = 0b0000000    // Start, Weak
-    | Reset         = 0b0000001    // else start
-    | Strong        = 0b0000010    // else weak
-    | Reversed      = 0b0000100    // direction reversed : <, <|, <||, etc
-    | Bidirectional = 0b0001000    // 양방향.  <||>
+    | Default                    = 0b0000000    // Start, Weak
+    | Reset                      = 0b0000001    // else start
+    | Strong                     = 0b0000010    // else weak
+    | Reversed                   = 0b0000100    // direction reversed : <, <|, <||, etc
+    | Bidirectional              = 0b0001000    // 양방향.  <||>
+    | AugmentedTransitiveClosure = 0b0010000    // 강한 상호 reset 관계 확장 edge
 
     [<AbstractClass>]
-    type EdgeBase<'T>(source:'T, target:'T, edgeType:EdgeType) =
-        interface IEdge<'T> with
+    type EdgeBase<'V>(source:'V, target:'V, edgeType:EdgeType) =
+        interface IEdge<'V> with
             member x.Source = x.Source
             member x.Target = x.Target
             member x.Value = x.EdgeType
@@ -55,6 +56,7 @@ module GraphModule =
                 member _.Equals(x:'E, y:'E) = x.Source = y.Source && x.Target = y.Target && x.Value = y.Value
                 member _.GetHashCode(x) = x.Source.GetHashCode()/2 + x.Target.GetHashCode()/2
         }
+        let vertices = vertices @@ edges.selectMany(fun e -> [e.Source; e.Target]) |> Seq.distinct
         let vs = new HashSet<'V>(vertices, nameComparer<'V>())
         let es = new HashSet<'E>(edges, edgeComparer)
         new () = Graph<'V, 'E>(Seq.empty<'V>, Seq.empty<'E>)
@@ -77,6 +79,8 @@ module GraphModule =
         member x.AddVertex(vertex:'V)    = x.AddVertices([vertex])
         member x.RemoveVertex(vertex:'V) = x.RemoveVertices([vertex])
         member x.FindVertex(name:string) = vs.FirstOrDefault(fun v -> v.Name = name)
+        member x.FindEdges(source:string, target:string) = es.Where(fun e -> e.Source.Name = source && e.Target.Name = target)
+        member x.FindEdges(source:'V, target:'V) = es.Where(fun e -> e.Source = source && e.Target = target)
 
         member private x.ConnectedVertices = x.Edges |> Seq.collect(fun e -> [e.Source; e.Target]) |> Seq.distinct
         member x.Islands = x.Vertices.Except(x.ConnectedVertices)
@@ -116,22 +120,31 @@ module internal GraphHelperModule =
 
         text
 
-    let groupDuplexEdges(graph:Graph<'V, 'E>) =
+    /// 양방향 edge 검색.
+    ///
+    /// - A > B 와 B > A (혹은 A |> B) 등 복수개의 양방향 edge 가 존재하면
+    /// duplexDic[(A, B)] == duplexDic[(B, A)] 값에 A <-> B 모든 edge 를 저장.
+    ///
+    /// - 단방향 simplex edge 는 값에 하나만 저장됨
+    let groupDuplexEdges<'V, 'E
+            when 'V :> INamed and 'V : equality        
+            and 'E :> IEdge<'V> and 'E: equality>
+            (edges:'E seq) =
+
         let duplexEdgeComparer = {
             new IEqualityComparer<'V*'V> with
-            member _.Equals(x:'V*'V, y:'V*'V) =
-                let s1, t1 = x
-                let s2, t2 = y
-                (s1 = s2 && t1 = t2) || (s1 = t2 && t1 = s2)
-            member _.GetHashCode(x:'V*'V) = //0//x.It   x.Average(fun s -> s.GetHashCode()) |> int
-                let s, t = x
-                s.GetHashCode()/2 + t.GetHashCode()/2
+                member _.Equals(x:'V*'V, y:'V*'V) =
+                    let s1, t1 = x
+                    let s2, t2 = y
+                    (s1 = s2 && t1 = t2) || (s1 = t2 && t1 = s2)
+                member _.GetHashCode(x:'V*'V) =
+                    let s, t = x
+                    s.GetHashCode()/2 + t.GetHashCode()/2
         }
 
         let duplexDic = Dictionary<'V*'V, HashSet<'E>>(duplexEdgeComparer)
 
-        let g = graph
-        for e in g.Edges do
+        for e in edges do
             let key = (e.Source, e.Target)
             if not <| duplexDic.ContainsKey(key) then
                 duplexDic.Add(key, HashSet<'E>())
@@ -145,6 +158,7 @@ module internal GraphHelperModule =
 [<Extension>]
 type GraphHelper =
     [<Extension>] static member Dump(graph:Graph<_, _>) = dumpGraph(graph)
+    [<Extension>] static member GetVertices(edge:IEdge<'V>) = [edge.Source; edge.Target]
     [<Extension>]
     static member ToText(edgeType:EdgeType) =
         let t = edgeType

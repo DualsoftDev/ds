@@ -30,6 +30,10 @@ public static class ModelParser
 
         Walk(parser, helper);
 
+        var model = helper.Model;
+        model.CreateMRIEdgesTransitiveClosure();
+
+
         return helper;
     }
 

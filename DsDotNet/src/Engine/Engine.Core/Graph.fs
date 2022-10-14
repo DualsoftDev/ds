@@ -126,7 +126,11 @@ module internal GraphHelperModule =
     /// duplexDic[(A, B)] == duplexDic[(B, A)] 값에 A <-> B 모든 edge 를 저장.
     ///
     /// - 단방향 simplex edge 는 값에 하나만 저장됨
-    let groupDuplexEdges(graph:Graph<'V, 'E>) =
+    let groupDuplexEdges<'V, 'E
+            when 'V :> INamed and 'V : equality        
+            and 'E :> IEdge<'V> and 'E: equality>
+            (edges:'E seq) =
+
         let duplexEdgeComparer = {
             new IEqualityComparer<'V*'V> with
                 member _.Equals(x:'V*'V, y:'V*'V) =
@@ -140,8 +144,7 @@ module internal GraphHelperModule =
 
         let duplexDic = Dictionary<'V*'V, HashSet<'E>>(duplexEdgeComparer)
 
-        let g = graph
-        for e in g.Edges do
+        for e in edges do
             let key = (e.Source, e.Target)
             if not <| duplexDic.ContainsKey(key) then
                 duplexDic.Add(key, HashSet<'E>())

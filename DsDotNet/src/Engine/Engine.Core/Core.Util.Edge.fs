@@ -61,6 +61,13 @@ module internal EdgeModule =
                 yield InSegmentEdge.Create(segment, source, target, eType)
         |]
 
+    let ofStrongResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) =
+            edges.Where(fun e -> e.EdgeType.HasFlag(EdgeType.Strong ||| EdgeType.Reset))
+    let ofNotStrongResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) =
+            edges.Except(ofStrongResetEdge edges)
+
+    let toText<'V, 'E when 'V :> INamed and 'E :> EdgeBase<'V>> (e:'E) = $"{e.Source.Name} {e.EdgeType.ToText()} {e.Target.Name}"
+
     /// 상호 reset 정보(Mutual Reset Info) 확장
     let private createMRIEdgesTransitiveClosure4Graph(graph:Graph<'V, 'E>, edgeCreator:'V*'V*EdgeType -> IEdge<'V>) =
         // todo: system 의 flow 에 대해서 MRI 를 갖는 real 들의 MRI edge 생성
@@ -100,11 +107,11 @@ module internal EdgeModule =
             for j in vs do
             for k in vs do
             if i <> j then
-                dic[(i, j)] <- dic[(i, j)] || (i <> k && dic[(i, k)] && dic[(i, k)])
+                dic[(i, j)] <- dic[(i, j)] || (i <> k && dic[(i, k)] && dic[(k, j)])
 
         for KeyValue( (i, j), v) in dic do
             // i -> j 의 reset edge 가 존재하고, j -> i 로도 reset edge 가 존재해야 하지만, 실제 j -> i reset edge 가 없는 경우
-            if v && dic[(j, i)] && originalGraph.FindEdges(j, i).isNullOrEmpty() then
+            if v && dic[(j, i)] && originalGraph.FindEdges(j, i) |> ofStrongResetEdge |> Seq.isEmpty then
                 edgeCreator(j, i, EdgeType.Reset ||| EdgeType.Strong ||| EdgeType.AugmentedTransitiveClosure) |> ignore
 
     let createMRIEdgesTransitiveClosure(flow:Flow) =
@@ -130,3 +137,8 @@ type EdgeHelper =
     [<Extension>] static member CreateMRIEdgesTransitiveClosure(model:Model) =
                     for sys in model.Systems do
                         createMRIEdgesTransitiveClosure4System sys
+
+    [<Extension>] static member OfStrongResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofStrongResetEdge edges
+    [<Extension>] static member OfNotStrongResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofNotStrongResetEdge edges
+    [<Extension>] static member ToText<'V, 'E when 'V :> INamed and 'E :> EdgeBase<'V>> (edge:'E) = toText edge
+

@@ -16,12 +16,12 @@ module internal ToDsTextModule =
         [
             match segmentBase with
             | :? Segment as segment ->
-                let ess = groupDuplexEdges segment.Graph
+                let ess = groupDuplexEdges segment.Graph.Edges
                 if ess.Any() then
                     yield $"{tab}{segment.Name} = {lb}"
                     for KeyValue(_, es) in ess do
                         for e in es do
-                            yield $"{tab2}{e.Source.Name} {e.EdgeType.ToText()} {e.Target.Name};"
+                            yield $"{tab2}{e.ToText()};"
                     yield $"{tab}{rb}"
             | :? SegmentAlias 
             | :? SegmentApiCall ->
@@ -32,12 +32,23 @@ module internal ToDsTextModule =
 
     let flowGraphToDs (graph:Graph<SegmentBase, InFlowEdge>) (indent:int) =
         let tab = getTab indent
-        let ess = groupDuplexEdges graph
         [
+            let startEdges = graph.Edges.OfNotStrongResetEdge().ToArray()
+            for e in startEdges do
+                yield $"{tab}{e.ToText()};"
+
+            let resetEdges = graph.Edges.OfStrongResetEdge().ToArray()
+            let ess = groupDuplexEdges resetEdges
             for KeyValue(_, es) in ess do
-                for e in es do
-                    let commentOnAugmented = if e.EdgeType.HasFlag(EdgeType.AugmentedTransitiveClosure) then "//" else ""
-                    yield $"{tab}{commentOnAugmented}{e.Source.Name} {e.EdgeType.ToText()} {e.Target.Name};"
+                let es = es.ToArray()
+                if es.Length = 2 then
+                    assert(es[0].EdgeType.HasFlag(EdgeType.AugmentedTransitiveClosure) = es[1].EdgeType.HasFlag(EdgeType.AugmentedTransitiveClosure))
+                    assert(es[0].Source = es[1].Target && es[0].Target = es[1].Source)
+                    let commentOnAugmented = if es[0].EdgeType.HasFlag(EdgeType.AugmentedTransitiveClosure) then "//" else ""
+                    yield $"{tab}{commentOnAugmented}{es[0].Source.Name} <||> {es[0].Target.Name};"
+                else
+                    assert(es.Length = 1)
+                    yield $"{tab}{es[0].ToText()};"
 
             for v in graph.Vertices do
                 yield segmentToDs v indent

@@ -91,7 +91,12 @@ public class Program
     static string SplittedMRIEdgesText = @"
 [sys] A = {
     [flow] F = {
-        a1 <||> a2 <||> a3 <||> a4;
+        //a1 <||> a2 <||> a3 <||> a4;
+
+        a1 <||> a2;
+        a2 ||> a3;  a3 ||> a2;
+        a3 <||> a4;
+
         a1 > a2 > a3 > a4;
     }
     [interfaces] = {
@@ -145,7 +150,7 @@ public class Program
     {
         ParseNormal(SplittedMRIEdgesText);
         //ParseNormal(DuplicatedEdgesText);
-        //ParseNormal(EveryScenarioText);
+        ParseNormal(EveryScenarioText);
     }
 
     static void Try(string input)

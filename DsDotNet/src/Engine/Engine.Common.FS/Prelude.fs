@@ -30,4 +30,9 @@ let verify x = if not x then failwith "ERROR"
 let failwithf format =
     Printf.ksprintf failwith format
 
+let noop() = ()
+
+// https://stackoverflow.com/questions/11696484/type-does-not-have-null-as-a-proper-value
+/// [<AllowNullLiteral>] 을 사용할 수 없는 객체에 대한 강제 null check
+let inline isItNull (x:^T when ^T : not struct) = obj.ReferenceEquals (x, null)
 

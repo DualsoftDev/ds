@@ -137,7 +137,7 @@ class ElementListener : ListenerBase
                 return;
             }
             else
-                Assert(false);
+                throw new ParserException($"ERROR: unknown token [{ns.Combine()}].", ctx);
         }
         finally
         {

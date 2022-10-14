@@ -42,8 +42,8 @@ module internal ToDsTextModule =
                    => "A -> " + "B -> " + "C"
                    => "A -> B -> C";
                 *)
-                let chained = chain.Select(fun e -> $"{e.Source.Name} {e.EdgeType.ToText()} ").JoinWith("")
-                yield $"{tab}{chained}{chain.Last().Target.Name};"
+                let chained = chain.Select(fun e -> $"{e.Source.Name.QuoteOnDemand()} {e.EdgeType.ToText()} ").JoinWith("")
+                yield $"{tab}{chained}{chain.Last().Target.Name.QuoteOnDemand()};"
         ]
 
     let rec graphEntitiesToDs<'V when 'V :> INamed and 'V : equality> (vertices:'V seq) (edges:EdgeBase<'V> seq) (indent:int) =
@@ -64,7 +64,7 @@ module internal ToDsTextModule =
                     assert(es[0].EdgeType.HasFlag(EdgeType.AugmentedTransitiveClosure) = es[1].EdgeType.HasFlag(EdgeType.AugmentedTransitiveClosure))
                     assert(es[0].Source = es[1].Target && es[0].Target = es[1].Source)
                     let commentOnAugmented = if es[0].EdgeType.HasFlag(EdgeType.AugmentedTransitiveClosure) then "//" else ""
-                    yield $"{tab}{commentOnAugmented}{es[0].Source.Name} <||> {es[0].Target.Name};"
+                    yield $"{tab}{commentOnAugmented}{es[0].Source.Name.QuoteOnDemand()} <||> {es[0].Target.Name.QuoteOnDemand()};"
                 else
                     assert(es.Length = 1)
                     yield $"{tab}{es[0].ToText()};"
@@ -82,7 +82,7 @@ module internal ToDsTextModule =
         [
             let subGraph = segment.Graph
             if subGraph.Edges.any() then
-                yield $"{tab}{segment.Name} = {lb}"
+                yield $"{tab}{segment.Name.QuoteOnDemand()} = {lb}"
                 let es = subGraph.Edges.Cast<EdgeBase<Child>>().ToArray()
                 let vs = subGraph.Vertices
                 yield graphEntitiesToDs vs es (indent+1)
@@ -96,7 +96,7 @@ module internal ToDsTextModule =
     let flowToDs (flow:Flow) (indent:int) =
         let tab = getTab indent
         [
-            yield $"{tab}[flow] {flow.Name} = {lb}"
+            yield $"{tab}[flow] {flow.Name.QuoteOnDemand()} = {lb}"
             yield flowGraphToDs flow.Graph (indent+1)
 
             let alias = flow.AliasMap

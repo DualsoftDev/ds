@@ -3,6 +3,7 @@ namespace Engine.Core
 
 open System.Collections.Generic
 open System.Diagnostics
+open Engine.Common.FS
 
 [<AutoOpen>]
 module CoreModule =
@@ -74,6 +75,9 @@ module CoreModule =
     and [<DebuggerDisplay("{QualifiedName}")>]
         Segment private (name:string, flow:Flow) =
         inherit SegmentBase(name, flow)
+        do
+            if name.Contains(".") then
+                noop()
         member val Graph = Graph<Child, InSegmentEdge>()
         member val Flow = flow
         member val SafetyConditions = createQualifiedNamedHashSet<Segment>()
@@ -87,9 +91,15 @@ module CoreModule =
     and [<AbstractClass>]
         SegmentEquivalent (name:string, flow:Flow) =
         inherit SegmentBase(name, flow)
+        do
+            if name.Contains(".") then
+                noop()
 
     and SegmentAlias(mnemonic:string, flow:Flow, aliasKey:string[]) =
         inherit SegmentBase(mnemonic, flow)
+        do
+            if mnemonic.Contains(".") then
+                noop()
         member _.AliasKey = aliasKey
         static member Create(name, flow, aliasKey) =
             let alias = SegmentAlias(name, flow, aliasKey)

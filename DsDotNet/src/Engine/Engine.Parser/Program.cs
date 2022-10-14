@@ -5,6 +5,19 @@ public class Program
 {
     static string EveryScenarioText = @"
 [sys ip = 192.168.0.1] My = {
+    [flow] MyFlow = {
+        Seg1 > Seg2;
+        Seg1 = {
+            A.""+"" > A.""-"";
+        }
+    }
+    [flow] ""Flow.Complex"" = {
+        ""#Seg.Complex#"" > Seg;
+        ""#Seg.Complex#"" = {
+            A.""+"" > A.""-"";
+        }
+    }
+
     [flow] F = {        // GraphVertexType.Flow
         C1, C2 > C3, C4 |> C5;
 C3 > C5 > C6;

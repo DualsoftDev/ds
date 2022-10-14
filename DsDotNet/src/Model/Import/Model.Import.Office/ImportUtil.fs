@@ -39,7 +39,7 @@ module ImportUtil =
             doc.Nodes 
             |> Seq.filter(fun node -> node.NodeType = COPY) 
             |> Seq.iter(fun node -> 
-                    node.CopySys.foreach(fun sysName -> MSys.Create(sysName, false, model) |> ignore)
+                    node.CopySys.ForEach(fun sysName -> MSys.Create(sysName, false, model) |> ignore)
                     )
         
         //MFlow 리스트 만들기
@@ -152,16 +152,16 @@ module ImportUtil =
             doc.Nodes 
                 |> Seq.filter(fun node -> node.NodeType = COPY) 
                 |> Seq.iter(fun node -> 
-                        node.CopySys.foreach(fun sysName ->
+                        node.CopySys.ForEach(fun sysName ->
                             let exSys = model.DicSystems.[sysName]
                             let libSys   = model.DicSystems.[node.Name]
-                            libSys.Flows.foreach(fun f ->  
+                            libSys.Flows.ForEach(fun f ->  
                                 let flow = MFlow.Create(f.Name, exSys, f.Page) 
                                 let flowEdges = f.CopyMEdges()
 
-                                flowEdges.foreach(fun edge -> flow.AddEdge(edge) |> ignore ))
+                                flowEdges.ForEach(fun edge -> flow.AddEdge(edge) |> ignore ))
 
-                            libSys.IFs.foreach(fun f-> exSys.AddInterface(f.Name, f.TXs, f.RXs)|> ignore)
+                            libSys.IFs.ForEach(fun f-> exSys.AddInterface(f.Name, f.TXs, f.RXs)|> ignore)
                             )
                 )
 
@@ -271,7 +271,7 @@ module ImportUtil =
             |> Seq.iter(fun node -> 
                     let flow = model.GetFlow(node.PageNum)
                     let mFlowName =  flow.Name
-                    let dic = dicSeg.Values.where(fun w-> w.IsDummy|>not).Select(fun seg -> seg.Name, seg) |> dict
+                    let dic = dicSeg.Values.Filter(fun w-> w.IsDummy|>not).Select(fun seg -> seg.Name, seg) |> dict
                    
                     //Safety
                     let safeSeg = 

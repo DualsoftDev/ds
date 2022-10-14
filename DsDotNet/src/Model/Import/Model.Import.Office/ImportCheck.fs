@@ -64,7 +64,7 @@ module ImportCheck =
                     if(model.DicSystems.ContainsKey(node.Name)|> not)
                     then Office.ErrorName(node.Shape, 33, node.PageNum)
 
-                    node.CopySys.foreach(fun sysName -> 
+                    node.CopySys.ForEach(fun sysName -> 
                         if dicName.TryAdd(sysName, sysName)|> not
                         then Office.ErrorName(node.Shape, 34, node.PageNum)
                         )
@@ -82,8 +82,8 @@ module ImportCheck =
         //page 타이틀 중복체크 
         let SamePageErr(pptPages:pptPage seq) = 
             let dicPage = ConcurrentDictionary<string, int>()
-            pptPages.where(fun page  ->  page.IsUsing && page.Title = ""|> not)
-                    .foreach(fun page-> 
+            pptPages.Filter(fun page  ->  page.IsUsing && page.Title = ""|> not)
+                    .ForEach(fun page-> 
                 if(dicPage.TryAdd(page.Title, page.PageNum)|>not)
                 then Office.ErrorPPT(Page, 21, $"{page.Title},  Same Page({dicPage.[page.Title]})",  page.PageNum)
             )
@@ -91,19 +91,19 @@ module ImportCheck =
         //page 타이틀 중복체크 
         let SameSysFlowName(flows:MFlow seq) = 
             let dicFlow = ConcurrentDictionary<string, int>()
-            flows.foreach(fun flow-> dicFlow.TryAdd(flow.Name, flow.Page)|>ignore)
-            flows.foreach(fun flow->
+            flows.ForEach(fun flow-> dicFlow.TryAdd(flow.Name, flow.Page)|>ignore)
+            flows.ForEach(fun flow->
                 if dicFlow.ContainsKey(flow.System.Name)
                 then Office.ErrorPPT(ErrorCase.Name, 31, $"시스템이름 : {flow.System.Name}",flow.Page, $"중복페이지 : {dicFlow.[flow.System.Name]}")  )
 
         let ValidPath(nodes:pptNode seq, model:MModel) =
             let checkNodeName(nodes:pptNode seq) =
-                nodes.where(fun node -> node.NodeType.IsCall || node.NodeType.IsReal)
-                     .foreach(fun node -> if node.Name.Contains(";") then node.Shape.ErrorName(29, node.PageNum))
+                nodes.Filter(fun node -> node.NodeType.IsCall || node.NodeType.IsReal)
+                     .ForEach(fun node -> if node.Name.Contains(";") then node.Shape.ErrorName(29, node.PageNum))
                 
             let checkSameNodeType(nodes:pptNode seq, model:MModel) =
                 let dicSame = ConcurrentDictionary<string, pptNode>()
-                nodes.foreach(fun node -> 
+                nodes.ForEach(fun node -> 
                     let flow = model.GetFlow(node.PageNum)
                 
                     let nodekey = sprintf "%s;%s" flow.Name node.Name
@@ -117,10 +117,10 @@ module ImportCheck =
 
                )
 
-            let myFlowNames  = model.Flows.where(fun flow -> flow.System.Name = TextMySys).select(fun s->s.Name)
-            let exSysNamesDic  = model.Systems.where(fun sys->sys.Name = TextMySys|>not).select(fun sys -> sys.Name, sys) |> dict                     
+            let myFlowNames  = model.Flows.Filter(fun flow -> flow.System.Name = TextMySys).Map(fun s->s.Name)
+            let exSysNamesDic  = model.Systems.Filter(fun sys->sys.Name = TextMySys|>not).Map(fun sys -> sys.Name, sys) |> dict                     
           
-            nodes.foreach(fun node -> 
+            nodes.ForEach(fun node -> 
                 if(node.Name.Contains('.'))
                 then
                     if(node.Name.Split('.').Length > 2)

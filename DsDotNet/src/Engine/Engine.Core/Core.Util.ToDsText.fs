@@ -13,9 +13,11 @@ module internal ToDsTextModule =
     let rec graphEntitiesToDs<'V when 'V :> INamed and 'V : equality> (vertices:'V seq) (edges:EdgeBase<'V> seq) (indent:int) =
         let tab = getTab indent
         [
+            // start 인과(reset 인과 아닌 것) 먼저 출력
             let startEdges = edges.OfNotStrongResetEdge().ToArray()
             for e in startEdges do
                 yield $"{tab}{e.ToText()};"
+
             let resetEdges = edges.OfStrongResetEdge().ToArray()
             let ess = groupDuplexEdges resetEdges
             for KeyValue(_, es) in ess do
@@ -32,7 +34,7 @@ module internal ToDsTextModule =
             for v in vertices.OfType<Segment>() do
                 yield vertexToDs v indent
 
-            let islands = vertices.Except(edges.selectMany(fun e -> e.GetVertices()))
+            let islands = vertices.Except(edges.Collect(fun e -> e.GetVertices()))
             for island in islands do
                 yield $"{tab}{island.Name}; // island"
         ] |> combineLines
@@ -99,12 +101,12 @@ module internal ToDsTextModule =
                 yield $"{tab}[interfaces] = {lb}"
                 for item in api.Items do
                     let ser =
-                        let ifnull (onNull:string) (x:string) = if x.isNullOrEmpty() then onNull else x
+                        let ifnull (onNull:string) (x:string) = if x.IsNullOrEmpty() then onNull else x
                         let qNames (xs:Segment seq) = xs.Select(fun tx -> tx.QualifiedName) |> String.concat(", ")
                         let s = qNames(item.TXs) |> ifnull "_"
                         let e = qNames(item.RXs) |> ifnull "_"
                         let r = qNames(item.Resets)
-                        if r.isNullOrEmpty() then $"{s} ~ {e}" else $"{s} ~ {e} ~ {r}"
+                        if r.IsNullOrEmpty() then $"{s} ~ {e}" else $"{s} ~ {e} ~ {r}"
                     yield $"{tab2}{item.Name.QuoteOnDemand()} = {lb} {ser} {rb}"
 
                 for ri in api.ResetInfos do

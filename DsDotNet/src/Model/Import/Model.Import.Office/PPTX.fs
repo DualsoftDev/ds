@@ -251,7 +251,7 @@ module PPTX =
         member x.Shape = shape
         member x.DashOutline = dashOutline
         member x.Safeties = safeties
-        member x.CopySys  = copySystems.select(fun s -> NameUtil.QuoteOnDemand(s))
+        member x.CopySys  = copySystems.Map(fun s -> NameUtil.QuoteOnDemand(s))
         member x.IfName      = ifName
         member x.IfTxs       = ifTXs
         member x.IfRxs       = ifRXs
@@ -391,7 +391,7 @@ module PPTX =
                 shapes 
                 |> Seq.iter (fun (shape, page, geometry, isDash) ->
 
-                            let pagePPT = pages.Values.where(fun w->w.PageNum = page).First()
+                            let pagePPT = pages.Values.Filter(fun w->w.PageNum = page).First()
                             let sysName, flowName = GetSysNFlow(pagePPT.Title, pagePPT.PageNum)
 
                             let node = pptNode(shape, page,  isDash,  sildeSize, flowName)

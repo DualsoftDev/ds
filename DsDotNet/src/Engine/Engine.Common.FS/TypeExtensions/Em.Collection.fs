@@ -11,17 +11,15 @@ module EnumuerableExt =
     type IEnumerable<'T> with
         member x.isEmpty() = Seq.isEmpty x
         member x.length() = Seq.length x
-        member x.map f = Seq.map f x
         member x.any() = Seq.isEmpty x |> not 
         member x.any f = Seq.tryFind f x |> Option.isSome
-
-        member x.select f = Seq.map f x
-        member x.selectMany f = Seq.collect f x
-        member x.where f = Seq.filter f x
-        member x.foreach  f = Seq.iter f x
         member x.realize() = Array.ofSeq x |> ignore
-        member x.nonNullAny() = x <> null && x.Any()
-        member x.isNullOrEmpty() = x = null || Seq.isEmpty x
+
+    let groupByToDictionary<'V, 'K when 'K: equality>(xs:'V seq) (keySelector:'V->'K) =
+        xs.GroupBy(keySelector)
+            .Select(fun g -> g.Key, g.ToArray())
+            |> dict
+            |> Dictionary
 
 [<Extension>] // type SeqExt =
 type SeqExt =
@@ -33,8 +31,12 @@ type SeqExt =
     //[<Extension>] static member Any(xs:'a seq) = not <| Seq.isEmpty xs   //System.Collections.Generic 혼동
     [<Extension>] static member GetLength(xs:'a seq) = Seq.length xs
     [<Extension>] static member IsEmpty(xs:'a seq) = Seq.isEmpty xs
-    [<Extension>] static member GroupByToDictionary<'V, 'K when 'K: equality>(xs:'V seq, keySelector:'V->'K) =
-                    xs.GroupBy(keySelector)
-                        .Select(fun g -> g.Key, g.ToArray())
-                        |> dict
-                        |> Dictionary
+    [<Extension>] static member GroupByToDictionary<'V, 'K when 'K: equality>(xs:'V seq, keySelector:'V->'K) = groupByToDictionary xs keySelector
+
+    [<Extension>] static member Collect(xs:'a seq, f)    = Seq.collect f xs
+    [<Extension>] static member Map(xs:'a seq, f)        = Seq.map f xs
+    [<Extension>] static member Filter(xs:'a seq, f)     = Seq.filter f xs
+    [<Extension>] static member ForEach(xs:'a seq, f)    = Seq.iter f xs
+    [<Extension>] static member IsNullOrEmpty(xs:'a seq) = xs = null || Seq.isEmpty xs
+    [<Extension>] static member NonNullAny(xs:'a seq)    = xs <> null && xs.Any()
+    

@@ -14,26 +14,31 @@ module ConvertM =
     
     let ToDs(pptModel:MModel) =
         let coreModel = CoreModule.Model()
+        //중복 등록 체크용
+        let dicChild = ConcurrentDictionary<string, ApiItem>()
 
         ///mEdges   -> CoreModule.Child
         let convertChildren(mSeg:MSeg, coreSeg:CoreModule.Segment, coreModel:CoreModule.Model) =   
-            //중복 등록 체크용
-            let dicChild = ConcurrentDictionary<string, ApiItem>()
 
             ///MSeg   -> CoreModule.Child
             let convertChild(mChildSeg:MSeg) = 
                 if mChildSeg.IsAlias
-                then ChildAliased.Create(mChildSeg.Name, dicChild.[mChildSeg.Alias.Value.FullName], coreSeg) :> Child
+                then ChildAliased.Create(mChildSeg.Name, dicChild.[mChildSeg.Alias.Value.Name], coreSeg) :> Child
                 else 
-                     let orgApi = ApiItem.Create(mChildSeg.Name, coreModel.FindSystem(mChildSeg.BaseSys.Name))
-                     dicChild.TryAdd(mChildSeg.FullName, orgApi) |> ignore
+                     let api = 
+                        if dicChild.ContainsKey(mChildSeg.Name) 
+                        then dicChild.[mChildSeg.Name]
+                        else 
+                            let newApi= ApiItem.Create(mChildSeg.Name, coreModel.FindSystem(mChildSeg.BaseSys.Name))
+                            dicChild.TryAdd(mChildSeg.Name, newApi) |> ignore
+                            newApi
 
-                     ChildApiCall.Create(orgApi, coreSeg) :> Child
+                     ChildApiCall.Create(api, coreSeg) :> Child
 
              ///MEdge   -> CoreModule.Flow
             let convertChildEdge(mEdge:MEdge, coreSeg:CoreModule.Segment) = 
-                let src = coreSeg.Graph.FindVertex(dicChild.[mEdge.Source.FullName].QualifiedName)
-                let tgt = coreSeg.Graph.FindVertex(dicChild.[mEdge.Target.FullName].QualifiedName)
+                let src = coreSeg.Graph.FindVertex(dicChild.[mEdge.Source.Name].QualifiedName)
+                let tgt = coreSeg.Graph.FindVertex(dicChild.[mEdge.Target.Name].QualifiedName)
                 let edgeType = EdgeHelper.GetEdgeType(mEdge.Causal)
 
                 let findList = coreSeg.Graph.Vertices |> Seq.map(fun v->v.Name) |> String.concat "\n " 

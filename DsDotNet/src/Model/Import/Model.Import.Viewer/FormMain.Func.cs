@@ -1,5 +1,6 @@
 using Engine.Common;
 using Engine.Common.FS;
+using Engine.Core;
 using Model.Import.Office;
 using System;
 using System.Collections.Generic;
@@ -35,7 +36,7 @@ namespace Dual.Model.Import
 
                     if (color == Color.Transparent)
                     {
-                        if (f.Contains($"[{TextSystem}]") || (f.Contains($"[{TextFlow}]") && !f.Contains("}"))  //[flow] F = {} 한줄제외
+                        if (f.StartsWith($"[{TextSystem}") || (f.Contains($"[{TextFlow}]"))  //[flow] F = {} 한줄제외
                         || f.Contains($"[{TextAddress}]") || f.Contains($"[{TextLayout}]") || f.Contains("//"))
                         {
                             rndColor = Color.FromArgb(r.Next(130, 230), r.Next(130, 230), r.Next(130, 230));
@@ -66,8 +67,8 @@ namespace Dual.Model.Import
 
                 if (!_ConvertErr)
                 {
-                    _dsText = ExportM.ToText(_model);
-                    //  var dsCore = ConvertM.ToDs(_model);
+                    var dsCore = ConvertM.ToDs(_model);
+                    _dsText = ToDsTextModuleHelper.ToDsText(dsCore);
                     ExportTextModel(Color.Transparent, _dsText);
                     this.Do(() => xtraTabControl_Ex.TabPages.Clear());
                     foreach (var sys in _model.Systems.OrderBy(sys => sys.ValidName))

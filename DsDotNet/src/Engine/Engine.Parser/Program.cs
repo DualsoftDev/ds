@@ -124,6 +124,471 @@ C4 > C5;
 }
 ";
 
+    static string PptGeneratedText = @"
+[sys] SIDE_QTR_Handling = {
+    [flow] exflow = {
+        ""LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]"" <||> ""WELDING [Robot_진입OK3 ~ Robot_작업완료3]"";
+        ""LOADING1 [Robot_진입OK1 ~ Robot_작업완료1]"" <||> ""LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]"";
+        ""WELDING [Robot_진입OK3 ~ Robot_작업완료3]"" <||> ""UNLOADING [Robot_진입OK4 ~ Robot_작업완료4]"";
+    }
+    [interfaces] = {
+        ""SIDE_QTR_Handling.LOADING1"" = { _ ~ _ }
+        ""SIDE_QTR_Handling.LOADING2"" = { _ ~ _ }
+    }
+}
+[sys] Pin = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vp |> Sm;
+        Vm |> Sp;
+        ""UP [Vp ~ Sp]"" <||> ""DOWN[Vm ~ Sm]"";
+    }
+}
+[sys] MY = {
+    [flow] S101 = {
+        ""S101_Handling.LOADING1"" > ""S101_F_APRON_U131.ADV"" > ""S101_F_APRON_P132_134Unit.UP"" > ""S101_F_APRON.CLAMP"" > ""S101_Handling.LOADING2"" > ""S101_DASH_P112.UP"" > ""S101_DASH_P114.LATCH"" > ""S101_DASH.CLAMP"" > ""S101_Weld.WELDING"" > ""S101_DASH.UNCLAMP"" > ""S101_DASH_P114.UNLATCH"" > ""S101_DASH_U111_1.UNLATCH"" > ""S101_Handling.UNLOADING"" > ""S101_F_APRON_P104.UP"";
+        ""S101_DASH_P114.UNLATCH"" > ""S101_DASH_U115.UNLATCH"" > ""S101_Handling.UNLOADING"";
+        ""S101_DASH_P114.UNLATCH"" > ""S101_DASH_UNIT.RET"" > ""S101_Handling.UNLOADING"";
+        ""S101_DASH.UNCLAMP"" > ""S101_F_APRON_P132_134Unit.DOWN"" > ""S101_DASH_U111_1.UNLATCH"";
+        ""S101_F_APRON_P132_134Unit.DOWN"" > ""S101_DASH_U115.UNLATCH"";
+        ""S101_F_APRON_P132_134Unit.DOWN"" > ""S101_DASH_UNIT.RET"";
+        ""S101_DASH.UNCLAMP"" > ""S101_F_APRON_U131.RET"" > ""S101_DASH_U111_1.UNLATCH"";
+        ""S101_F_APRON_U131.RET"" > ""S101_DASH_U115.UNLATCH"";
+        ""S101_F_APRON_U131.RET"" > ""S101_DASH_UNIT.RET"";
+        ""S101_Weld.WELDING"" > ""S101_DASH_P112.DOWN"" > ""S101_DASH_P114.UNLATCH"";
+        ""S101_DASH_P112.DOWN"" > ""S101_F_APRON_P132_134Unit.DOWN"";
+        ""S101_DASH_P112.DOWN"" > ""S101_F_APRON_U131.RET"";
+        ""S101_Weld.WELDING"" > ""S101_F_APRON.UNCLAMP"" > ""S101_DASH_P114.UNLATCH"";
+        ""S101_F_APRON.UNCLAMP"" > ""S101_F_APRON_P132_134Unit.DOWN"";
+        ""S101_F_APRON.UNCLAMP"" > ""S101_F_APRON_U131.RET"";
+        ""S101_Weld.WELDING"" > ""S101_F_APRON_P104.DOWN"" > ""S101_DASH_P114.UNLATCH"";
+        ""S101_F_APRON_P104.DOWN"" > ""S101_F_APRON_P132_134Unit.DOWN"";
+        ""S101_F_APRON_P104.DOWN"" > ""S101_F_APRON_U131.RET"";
+        ""S101_Weld.WELDING"" > ""S101_F_APRON_U133.UNCLAMP"" > ""S101_DASH_P114.UNLATCH"";
+        ""S101_F_APRON_U133.UNCLAMP"" > ""S101_F_APRON_P132_134Unit.DOWN"";
+        ""S101_F_APRON_U133.UNCLAMP"" > ""S101_F_APRON_U131.RET"";
+        ""S101_DASH_P114.LATCH"" > ""S101_DASH_U111_1.LATCH"" > ""S101_Weld.WELDING"";
+        ""S101_Handling.LOADING2"" > ""S101_DASH_U115.LATCH"" > ""S101_DASH_P114.LATCH"";
+        ""S101_Handling.LOADING2"" > ""S101_DASH_UNIT.ADV"" > ""S101_DASH_P114.LATCH"";
+        ""S101_F_APRON_P132_134Unit.UP"" > ""S101_F_APRON_U133.CLAMP"" > ""S101_Handling.LOADING2"";
+    }
+    [flow] SIDE_REINF = {
+        ""#201-1"" = {
+            SIDE_REINF_Handling.""SIDE_REINF_Handling.LOADING1"" > SIDE_REINF_REINF_Shift.""SIDE_REINF_REINF_Shift.ADV"" > SIDE_REINF_REINF_Pin.""SIDE_REINF_REINF_Pin.UP"" > SIDE_REINF_Handling.""SIDE_REINF_Handling.LOADING2"" > SIDE_REINF_REINF1_Clamp.""SIDE_REINF_REINF1_Clamp.CLAMP"" > SIDE_REINF_Weld.""SIDE_REINF_Weld.WELDING"" > SIDE_REINF_REINF1_Clamp.""SIDE_REINF_REINF1_Clamp.UNCLAMP"";
+            SIDE_REINF_Weld.""SIDE_REINF_Weld.WELDING"" > SIDE_REINF_REINF2_Clamp.""SIDE_REINF_REINF2_Clamp.UNCLAMP"";
+            SIDE_REINF_Weld.""SIDE_REINF_Weld.WELDING"" > SIDE_REINF_REINF_Pin.""SIDE_REINF_REINF_Pin.DOWN"";
+            SIDE_REINF_Weld.""SIDE_REINF_Weld.WELDING"" > SIDE_REINF_REINF_Shift.""SIDE_REINF_REINF_Shift.RET"";
+            SIDE_REINF_Handling.""SIDE_REINF_Handling.LOADING2"" > SIDE_REINF_REINF2_Clamp.""SIDE_REINF_REINF2_Clamp.CLAMP"" > SIDE_REINF_Weld.""SIDE_REINF_Weld.WELDING"";
+        }
+    }
+    [flow] SIDE_QTR = {
+        ""SIDE_MAIN.#205"" > ""#205-1"" > ""#205-2"";
+        ""#205-1"" = {
+            SIDE_QTR_Handling.""SIDE_QTR_Handling.LOADING1"" > SIDE_QTR_REINF_Shift.""SIDE_QTR_REINF_Shift.ADV"" > SIDE_QTR_REINF_Pin.""SIDE_QTR_REINF_Pin.UP"" > SIDE_QTR_Handling.""SIDE_QTR_Handling.LOADING2"" > SIDE_QTR_REINF1_Clamp.""SIDE_QTR_REINF1_Clamp.CLAMP"" > SIDE_QTR_Weld.""SIDE_QTR_Weld.WELDING"" > SIDE_QTR_REINF1_Clamp.""SIDE_QTR_REINF1_Clamp.UNCLAMP"";
+            SIDE_QTR_Weld.""SIDE_QTR_Weld.WELDING"" > SIDE_QTR_REINF2_Clamp.""SIDE_QTR_REINF2_Clamp.UNCLAMP"";
+            SIDE_QTR_Weld.""SIDE_QTR_Weld.WELDING"" > SIDE_QTR_REINF_Pin.""SIDE_QTR_REINF_Pin.DOWN"";
+            SIDE_QTR_Weld.""SIDE_QTR_Weld.WELDING"" > SIDE_QTR_REINF_Shift.""SIDE_QTR_REINF_Shift.RET"";
+            SIDE_QTR_Handling.""SIDE_QTR_Handling.LOADING2"" > SIDE_QTR_REINF2_Clamp.""SIDE_QTR_REINF2_Clamp.CLAMP"" > SIDE_QTR_Weld.""SIDE_QTR_Weld.WELDING"";
+        }
+        ""#205-2"" = {
+            SIDE_QTR_Handling.""SIDE_QTR_Handling.LOADING1"" > SIDE_QTR_REINF_Shift.""SIDE_QTR_REINF_Shift.ADV"" > SIDE_QTR_REINF_Pin.""SIDE_QTR_REINF_Pin.UP"" > SIDE_QTR_Handling.""SIDE_QTR_Handling.LOADING2"" > SIDE_QTR_REINF1_Clamp.""SIDE_QTR_REINF1_Clamp.CLAMP"" > SIDE_QTR_Weld.""SIDE_QTR_Weld.WELDING"" > SIDE_QTR_REINF1_Clamp.""SIDE_QTR_REINF1_Clamp.UNCLAMP"";
+            SIDE_QTR_Weld.""SIDE_QTR_Weld.WELDING"" > SIDE_QTR_REINF2_Clamp.""SIDE_QTR_REINF2_Clamp.UNCLAMP"";
+            SIDE_QTR_Weld.""SIDE_QTR_Weld.WELDING"" > SIDE_QTR_REINF_Pin.""SIDE_QTR_REINF_Pin.DOWN"";
+            SIDE_QTR_Weld.""SIDE_QTR_Weld.WELDING"" > SIDE_QTR_REINF_Shift.""SIDE_QTR_REINF_Shift.RET"";
+            SIDE_QTR_Handling.""SIDE_QTR_Handling.LOADING2"" > SIDE_QTR_REINF2_Clamp.""SIDE_QTR_REINF2_Clamp.CLAMP"" > SIDE_QTR_Weld.""SIDE_QTR_Weld.WELDING"";
+        }
+    }
+    [flow] SIDE_MAIN = {
+        ""SIDE_REINF.#201-1"" > ""#201"" > ""#202"" > ""#205"" > ""SIDE_QTR.#205-2"" > ""#206"";
+        ""#201"" = {
+            SIDE_MAIN_Handling.""SIDE_MAIN_Handling.LOADING1"" > SIDE_MAIN_REINF_Shift.""SIDE_MAIN_REINF_Shift.ADV"" > SIDE_MAIN_REINF_Pin.""SIDE_MAIN_REINF_Pin.UP"" > SIDE_MAIN_Handling.""SIDE_MAIN_Handling.LOADING2"" > SIDE_MAIN_REINF1_Clamp.""SIDE_MAIN_REINF1_Clamp.CLAMP"" > SIDE_MAIN_Weld.""SIDE_MAIN_Weld.WELDING"" > SIDE_MAIN_REINF1_Clamp.""SIDE_MAIN_REINF1_Clamp.UNCLAMP"";
+            SIDE_MAIN_Weld.""SIDE_MAIN_Weld.WELDING"" > SIDE_MAIN_REINF2_Clamp.""SIDE_MAIN_REINF2_Clamp.UNCLAMP"";
+            SIDE_MAIN_Weld.""SIDE_MAIN_Weld.WELDING"" > SIDE_MAIN_REINF_Pin.""SIDE_MAIN_REINF_Pin.DOWN"";
+            SIDE_MAIN_Weld.""SIDE_MAIN_Weld.WELDING"" > SIDE_MAIN_REINF_Shift.""SIDE_MAIN_REINF_Shift.RET"";
+            SIDE_MAIN_Handling.""SIDE_MAIN_Handling.LOADING2"" > SIDE_MAIN_REINF2_Clamp.""SIDE_MAIN_REINF2_Clamp.CLAMP"" > SIDE_MAIN_Weld.""SIDE_MAIN_Weld.WELDING"";
+        }
+        ""#202"" = {
+            SIDE_MAIN_Handling.""SIDE_MAIN_Handling.LOADING1"" > SIDE_MAIN_REINF_Shift.""SIDE_MAIN_REINF_Shift.ADV"" > SIDE_MAIN_REINF_Pin.""SIDE_MAIN_REINF_Pin.UP"" > SIDE_MAIN_Handling.""SIDE_MAIN_Handling.LOADING2"" > SIDE_MAIN_REINF1_Clamp.""SIDE_MAIN_REINF1_Clamp.CLAMP"" > SIDE_MAIN_Weld.""SIDE_MAIN_Weld.WELDING"" > SIDE_MAIN_REINF1_Clamp.""SIDE_MAIN_REINF1_Clamp.UNCLAMP"";
+            SIDE_MAIN_Weld.""SIDE_MAIN_Weld.WELDING"" > SIDE_MAIN_REINF2_Clamp.""SIDE_MAIN_REINF2_Clamp.UNCLAMP"";
+            SIDE_MAIN_Weld.""SIDE_MAIN_Weld.WELDING"" > SIDE_MAIN_REINF_Pin.""SIDE_MAIN_REINF_Pin.DOWN"";
+            SIDE_MAIN_Weld.""SIDE_MAIN_Weld.WELDING"" > SIDE_MAIN_REINF_Shift.""SIDE_MAIN_REINF_Shift.RET"";
+            SIDE_MAIN_Handling.""SIDE_MAIN_Handling.LOADING2"" > SIDE_MAIN_REINF2_Clamp.""SIDE_MAIN_REINF2_Clamp.CLAMP"" > SIDE_MAIN_Weld.""SIDE_MAIN_Weld.WELDING"";
+        }
+        ""#206"" = {
+            SIDE_MAIN_Handling.""SIDE_MAIN_Handling.LOADING1"" > SIDE_MAIN_REINF_Shift.""SIDE_MAIN_REINF_Shift.ADV"" > SIDE_MAIN_REINF_Pin.""SIDE_MAIN_REINF_Pin.UP"" > SIDE_MAIN_Handling.""SIDE_MAIN_Handling.LOADING2"" > SIDE_MAIN_REINF1_Clamp.""SIDE_MAIN_REINF1_Clamp.CLAMP"" > SIDE_MAIN_Weld.""SIDE_MAIN_Weld.WELDING"" > SIDE_MAIN_REINF1_Clamp.""SIDE_MAIN_REINF1_Clamp.UNCLAMP"";
+            SIDE_MAIN_Weld.""SIDE_MAIN_Weld.WELDING"" > SIDE_MAIN_REINF2_Clamp.""SIDE_MAIN_REINF2_Clamp.UNCLAMP"";
+            SIDE_MAIN_Weld.""SIDE_MAIN_Weld.WELDING"" > SIDE_MAIN_REINF_Pin.""SIDE_MAIN_REINF_Pin.DOWN"";
+            SIDE_MAIN_Weld.""SIDE_MAIN_Weld.WELDING"" > SIDE_MAIN_REINF_Shift.""SIDE_MAIN_REINF_Shift.RET"";
+            SIDE_MAIN_Handling.""SIDE_MAIN_Handling.LOADING2"" > SIDE_MAIN_REINF2_Clamp.""SIDE_MAIN_REINF2_Clamp.CLAMP"" > SIDE_MAIN_Weld.""SIDE_MAIN_Weld.WELDING"";
+        }
+        ""#205"" = {
+            SIDE_MAIN_Handling.""SIDE_MAIN_Handling.LOADING1"" > SIDE_MAIN_REINF_Shift.""SIDE_MAIN_REINF_Shift.ADV"" > SIDE_MAIN_REINF_Pin.""SIDE_MAIN_REINF_Pin.UP"" > SIDE_MAIN_Handling.""SIDE_MAIN_Handling.LOADING2"" > SIDE_MAIN_REINF1_Clamp.""SIDE_MAIN_REINF1_Clamp.CLAMP"" > SIDE_MAIN_Weld.""SIDE_MAIN_Weld.WELDING"" > SIDE_MAIN_REINF1_Clamp.""SIDE_MAIN_REINF1_Clamp.UNCLAMP"";
+            SIDE_MAIN_Weld.""SIDE_MAIN_Weld.WELDING"" > SIDE_MAIN_REINF2_Clamp.""SIDE_MAIN_REINF2_Clamp.UNCLAMP"";
+            SIDE_MAIN_Weld.""SIDE_MAIN_Weld.WELDING"" > SIDE_MAIN_REINF_Pin.""SIDE_MAIN_REINF_Pin.DOWN"";
+            SIDE_MAIN_Weld.""SIDE_MAIN_Weld.WELDING"" > SIDE_MAIN_REINF_Shift.""SIDE_MAIN_REINF_Shift.RET"";
+            SIDE_MAIN_Handling.""SIDE_MAIN_Handling.LOADING2"" > SIDE_MAIN_REINF2_Clamp.""SIDE_MAIN_REINF2_Clamp.CLAMP"" > SIDE_MAIN_Weld.""SIDE_MAIN_Weld.WELDING"";
+        }
+    }
+}
+[sys] S101_F_APRON_P104 = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vp |> Sm;
+        Vm |> Sp;
+        ""UP [Vp ~ Sp]"" <||> ""DOWN[Vm ~ Sm]"";
+    }
+}
+[sys] SIDE_MAIN_REINF_Pin = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vp |> Sm;
+        Vm |> Sp;
+        ""UP [Vp ~ Sp]"" <||> ""DOWN[Vm ~ Sm]"";
+    }
+    [interfaces] = {
+        ""SIDE_MAIN_REINF_Pin.UP"" = { _ ~ _ }
+        ""SIDE_MAIN_REINF_Pin.DOWN"" = { _ ~ _ }
+    }
+}
+[sys] S101_F_APRON_U133 = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vp |> Sm;
+        Vm |> Sp;
+        ""CLAMP [Vp ~ Sp]"" <||> ""UNCLAMP [Vm ~ Sm]"";
+    }
+}
+[sys] SIDE_REINF_Weld = {
+    [flow] exflow = {
+        ""LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]"" <||> ""WELDING [Robot_진입OK3 ~ Robot_작업완료3]"";
+        ""LOADING1 [Robot_진입OK1 ~ Robot_작업완료1]"" <||> ""LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]"";
+        ""WELDING [Robot_진입OK3 ~ Robot_작업완료3]"" <||> ""UNLOADING [Robot_진입OK4 ~ Robot_작업완료4]"";
+    }
+    [interfaces] = {
+        ""SIDE_REINF_Weld.WELDING"" = { _ ~ _ }
+    }
+}
+[sys] SIDE_MAIN_Handling = {
+    [flow] exflow = {
+        ""LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]"" <||> ""WELDING [Robot_진입OK3 ~ Robot_작업완료3]"";
+        ""LOADING1 [Robot_진입OK1 ~ Robot_작업완료1]"" <||> ""LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]"";
+        ""WELDING [Robot_진입OK3 ~ Robot_작업완료3]"" <||> ""UNLOADING [Robot_진입OK4 ~ Robot_작업완료4]"";
+    }
+    [interfaces] = {
+        ""SIDE_MAIN_Handling.LOADING2"" = { _ ~ _ }
+        ""SIDE_MAIN_Handling.LOADING1"" = { _ ~ _ }
+    }
+}
+[sys] S101_F_APRON_U131 = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vm |> Sp;
+        Vp |> Sm;
+        ""ADV [Vp ~ Sp]"" <||> ""RET[Vm ~ Sm]"";
+    }
+}
+[sys] SIDE_REINF_REINF2_Clamp = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vp |> Sm;
+        Vm |> Sp;
+        ""CLAMP [Vp ~ Sp]"" <||> ""UNCLAMP [Vm ~ Sm]"";
+    }
+    [interfaces] = {
+        ""SIDE_REINF_REINF2_Clamp.CLAMP"" = { _ ~ _ }
+        ""SIDE_REINF_REINF2_Clamp.UNCLAMP"" = { _ ~ _ }
+    }
+}
+[sys] SIDE_REINF_Handling = {
+    [flow] exflow = {
+        ""LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]"" <||> ""WELDING [Robot_진입OK3 ~ Robot_작업완료3]"";
+        ""LOADING1 [Robot_진입OK1 ~ Robot_작업완료1]"" <||> ""LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]"";
+        ""WELDING [Robot_진입OK3 ~ Robot_작업완료3]"" <||> ""UNLOADING [Robot_진입OK4 ~ Robot_작업완료4]"";
+    }
+    [interfaces] = {
+        ""SIDE_REINF_Handling.LOADING2"" = { _ ~ _ }
+        ""SIDE_REINF_Handling.LOADING1"" = { _ ~ _ }
+    }
+}
+[sys] SIDE_MAIN_REINF1_Clamp = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vp |> Sm;
+        Vm |> Sp;
+        ""CLAMP [Vp ~ Sp]"" <||> ""UNCLAMP [Vm ~ Sm]"";
+    }
+    [interfaces] = {
+        ""SIDE_MAIN_REINF1_Clamp.CLAMP"" = { _ ~ _ }
+        ""SIDE_MAIN_REINF1_Clamp.UNCLAMP"" = { _ ~ _ }
+    }
+}
+[sys] SIDE_QTR_REINF1_Clamp = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vp |> Sm;
+        Vm |> Sp;
+        ""CLAMP [Vp ~ Sp]"" <||> ""UNCLAMP [Vm ~ Sm]"";
+    }
+    [interfaces] = {
+        ""SIDE_QTR_REINF1_Clamp.CLAMP"" = { _ ~ _ }
+        ""SIDE_QTR_REINF1_Clamp.UNCLAMP"" = { _ ~ _ }
+    }
+}
+[sys] S101_DASH_P114 = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vm |> Sp;
+        Vp |> Sm;
+        ""LATCH[Vp ~ Sp]"" <||> ""UNLATCH [Vm ~ Sm]"";
+    }
+}
+[sys] S101_DASH_U111_1 = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vm |> Sp;
+        Vp |> Sm;
+        ""LATCH[Vp ~ Sp]"" <||> ""UNLATCH [Vm ~ Sm]"";
+    }
+}
+[sys] Shift = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vm |> Sp;
+        Vp |> Sm;
+        ""ADV [Vp ~ Sp]"" <||> ""RET[Vm ~ Sm]"";
+    }
+}
+[sys] SIDE_QTR_REINF_Shift = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vm |> Sp;
+        Vp |> Sm;
+        ""ADV [Vp ~ Sp]"" <||> ""RET[Vm ~ Sm]"";
+    }
+    [interfaces] = {
+        ""SIDE_QTR_REINF_Shift.ADV"" = { _ ~ _ }
+        ""SIDE_QTR_REINF_Shift.RET"" = { _ ~ _ }
+    }
+}
+[sys] S101_F_APRON_P132_134Unit = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vp |> Sm;
+        Vm |> Sp;
+        ""UP [Vp ~ Sp]"" <||> ""DOWN[Vm ~ Sm]"";
+    }
+}
+[sys] Robot = {
+    [flow] exflow = {
+        ""LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]"" <||> ""WELDING [Robot_진입OK3 ~ Robot_작업완료3]"";
+        ""LOADING1 [Robot_진입OK1 ~ Robot_작업완료1]"" <||> ""LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]"";
+        ""WELDING [Robot_진입OK3 ~ Robot_작업완료3]"" <||> ""UNLOADING [Robot_진입OK4 ~ Robot_작업완료4]"";
+    }
+}
+[sys] SIDE_MAIN_REINF2_Clamp = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vp |> Sm;
+        Vm |> Sp;
+        ""CLAMP [Vp ~ Sp]"" <||> ""UNCLAMP [Vm ~ Sm]"";
+    }
+    [interfaces] = {
+        ""SIDE_MAIN_REINF2_Clamp.CLAMP"" = { _ ~ _ }
+        ""SIDE_MAIN_REINF2_Clamp.UNCLAMP"" = { _ ~ _ }
+    }
+}
+[sys] S101_DASH = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vp |> Sm;
+        Vm |> Sp;
+        ""CLAMP [Vp ~ Sp]"" <||> ""UNCLAMP [Vm ~ Sm]"";
+    }
+}
+[sys] S101_DASH_U115 = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vm |> Sp;
+        Vp |> Sm;
+        ""LATCH[Vp ~ Sp]"" <||> ""UNLATCH [Vm ~ Sm]"";
+    }
+}
+[sys] S101_DASH_P112 = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vp |> Sm;
+        Vm |> Sp;
+        ""UP [Vp ~ Sp]"" <||> ""DOWN[Vm ~ Sm]"";
+    }
+}
+[sys] S101_Handling = {
+    [flow] exflow = {
+        ""LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]"" <||> ""WELDING [Robot_진입OK3 ~ Robot_작업완료3]"";
+        ""LOADING1 [Robot_진입OK1 ~ Robot_작업완료1]"" <||> ""LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]"";
+        ""WELDING [Robot_진입OK3 ~ Robot_작업완료3]"" <||> ""UNLOADING [Robot_진입OK4 ~ Robot_작업완료4]"";
+    }
+}
+[sys] SIDE_QTR_REINF_Pin = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vp |> Sm;
+        Vm |> Sp;
+        ""UP [Vp ~ Sp]"" <||> ""DOWN[Vm ~ Sm]"";
+    }
+    [interfaces] = {
+        ""SIDE_QTR_REINF_Pin.UP"" = { _ ~ _ }
+        ""SIDE_QTR_REINF_Pin.DOWN"" = { _ ~ _ }
+    }
+}
+[sys] S101_DASH_UNIT = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vm |> Sp;
+        Vp |> Sm;
+        ""ADV [Vp ~ Sp]"" <||> ""RET[Vm ~ Sm]"";
+    }
+}
+[sys] SIDE_REINF_REINF_Shift = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vm |> Sp;
+        Vp |> Sm;
+        ""ADV [Vp ~ Sp]"" <||> ""RET[Vm ~ Sm]"";
+    }
+    [interfaces] = {
+        ""SIDE_REINF_REINF_Shift.ADV"" = { _ ~ _ }
+        ""SIDE_REINF_REINF_Shift.RET"" = { _ ~ _ }
+    }
+}
+[sys] SIDE_QTR_Weld = {
+    [flow] exflow = {
+        ""LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]"" <||> ""WELDING [Robot_진입OK3 ~ Robot_작업완료3]"";
+        ""LOADING1 [Robot_진입OK1 ~ Robot_작업완료1]"" <||> ""LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]"";
+        ""WELDING [Robot_진입OK3 ~ Robot_작업완료3]"" <||> ""UNLOADING [Robot_진입OK4 ~ Robot_작업완료4]"";
+    }
+    [interfaces] = {
+        ""SIDE_QTR_Weld.WELDING"" = { _ ~ _ }
+    }
+}
+[sys] Latch = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vm |> Sp;
+        Vp |> Sm;
+        ""LATCH[Vp ~ Sp]"" <||> ""UNLATCH [Vm ~ Sm]"";
+    }
+}
+[sys] SIDE_REINF_REINF_Pin = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vp |> Sm;
+        Vm |> Sp;
+        ""UP [Vp ~ Sp]"" <||> ""DOWN[Vm ~ Sm]"";
+    }
+    [interfaces] = {
+        ""SIDE_REINF_REINF_Pin.UP"" = { _ ~ _ }
+        ""SIDE_REINF_REINF_Pin.DOWN"" = { _ ~ _ }
+    }
+}
+[sys] SIDE_MAIN_Weld = {
+    [flow] exflow = {
+        ""LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]"" <||> ""WELDING [Robot_진입OK3 ~ Robot_작업완료3]"";
+        ""LOADING1 [Robot_진입OK1 ~ Robot_작업완료1]"" <||> ""LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]"";
+        ""WELDING [Robot_진입OK3 ~ Robot_작업완료3]"" <||> ""UNLOADING [Robot_진입OK4 ~ Robot_작업완료4]"";
+    }
+    [interfaces] = {
+        ""SIDE_MAIN_Weld.WELDING"" = { _ ~ _ }
+    }
+}
+[sys] SIDE_MAIN_REINF_Shift = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vm |> Sp;
+        Vp |> Sm;
+        ""ADV [Vp ~ Sp]"" <||> ""RET[Vm ~ Sm]"";
+    }
+    [interfaces] = {
+        ""SIDE_MAIN_REINF_Shift.ADV"" = { _ ~ _ }
+        ""SIDE_MAIN_REINF_Shift.RET"" = { _ ~ _ }
+    }
+}
+[sys] S101_F_APRON = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vp |> Sm;
+        Vm |> Sp;
+        ""CLAMP [Vp ~ Sp]"" <||> ""UNCLAMP [Vm ~ Sm]"";
+    }
+}
+[sys] S101_Weld = {
+    [flow] exflow = {
+        ""LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]"" <||> ""WELDING [Robot_진입OK3 ~ Robot_작업완료3]"";
+        ""LOADING1 [Robot_진입OK1 ~ Robot_작업완료1]"" <||> ""LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]"";
+        ""WELDING [Robot_진입OK3 ~ Robot_작업완료3]"" <||> ""UNLOADING [Robot_진입OK4 ~ Robot_작업완료4]"";
+    }
+}
+[sys] SIDE_REINF_REINF1_Clamp = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vp |> Sm;
+        Vm |> Sp;
+        ""CLAMP [Vp ~ Sp]"" <||> ""UNCLAMP [Vm ~ Sm]"";
+    }
+    [interfaces] = {
+        ""SIDE_REINF_REINF1_Clamp.CLAMP"" = { _ ~ _ }
+        ""SIDE_REINF_REINF1_Clamp.UNCLAMP"" = { _ ~ _ }
+    }
+}
+[sys] SIDE_QTR_REINF2_Clamp = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vp |> Sm;
+        Vm |> Sp;
+        ""CLAMP [Vp ~ Sp]"" <||> ""UNCLAMP [Vm ~ Sm]"";
+    }
+    [interfaces] = {
+        ""SIDE_QTR_REINF2_Clamp.CLAMP"" = { _ ~ _ }
+        ""SIDE_QTR_REINF2_Clamp.UNCLAMP"" = { _ ~ _ }
+    }
+}
+[sys] Clamp = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vp |> Sm;
+        Vm |> Sp;
+        ""CLAMP [Vp ~ Sp]"" <||> ""UNCLAMP [Vm ~ Sm]"";
+    }
+}";
+
+
+
     static void ParseNormal(string text)
     {
         var helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation());
@@ -165,7 +630,8 @@ C4 > C5;
     {
         //ParseNormal(SplittedMRIEdgesText);
         //ParseNormal(DuplicatedEdgesText);
-        ParseNormal(EveryScenarioText);
+        //ParseNormal(EveryScenarioText);
+        ParseNormal(PptGeneratedText);
     }
 
     static void Try(string input)

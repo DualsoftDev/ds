@@ -67,29 +67,33 @@ module internal ToDsTextModule =
                     assert(es[0].EdgeType.HasFlag(EdgeType.AugmentedTransitiveClosure) = es[1].EdgeType.HasFlag(EdgeType.AugmentedTransitiveClosure))
                     assert(es[0].Source = es[1].Target && es[0].Target = es[1].Source)
                     let commentOnAugmented = if es[0].EdgeType.HasFlag(EdgeType.AugmentedTransitiveClosure) then "//" else ""
-                    yield $"{tab}{commentOnAugmented}{es[0].Source.Name.QuoteOnDemand()} <||> {es[0].Target.Name.QuoteOnDemand()};"
+                    yield $"{tab}{commentOnAugmented}{es[0].Source.NameComponents.GetRelativeName(baseNameComponents)} <||> {es[0].Target.NameComponents.GetRelativeName(baseNameComponents)};"
                 else
                     assert(es.Length = 1)
                     yield $"{tab}{es[0].ToText()};"
 
-            for v in vertices.OfType<Segment>() do
-                yield segmentToDs v indent
+            let segments = vertices.OfType<Segment>().ToArray()
+            for v in segments do
+                yield segmentToDs baseNameComponents v indent
 
-            let islands = vertices.Except(edges.Collect(fun e -> e.GetVertices()))
+            let islands =
+                vertices
+                    .Where(fun v -> (box v) :? Segment &&  not <| segments.Contains( (box v) :?> Segment))
+                    .Except((*segments @@*) edges.Collect(fun e -> e.GetVertices()))
             for island in islands do
-                yield $"{tab}{island.Name}; // island"
+                yield $"{tab}{island.NameComponents.GetRelativeName(baseNameComponents)}; // island"
         ] |> combineLines
 
-    and segmentToDs (segment:Segment) (indent:int) =
+    and segmentToDs (baseNameComponents:NameComponents) (segment:Segment) (indent:int) =
         let tab = getTab indent
         [
-            let baseNameComponents = segment.NameComponents
+            //let baseNameComponents = segment.NameComponents
             let subGraph = segment.Graph
             if subGraph.Edges.any() then
-                yield $"{tab}{segment.Name.QuoteOnDemand()} = {lb}"
+                yield $"{tab}{segment.NameComponents.GetRelativeName(baseNameComponents)} = {lb}"
                 let es = subGraph.Edges.Cast<EdgeBase<Child>>().ToArray()
                 let vs = subGraph.Vertices
-                yield graphEntitiesToDs baseNameComponents vs es (indent+1)
+                yield graphEntitiesToDs segment.NameComponents vs es (indent+1)
                 yield $"{tab}{rb}"
         ] |> combineLines
 

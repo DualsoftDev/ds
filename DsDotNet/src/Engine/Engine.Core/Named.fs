@@ -91,6 +91,7 @@ module TextUtil =
             helper xs ys
         let numSameStart = countSameStartElements referencePath fqdn
         let relativeNameComponents = fqdn.Skip(numSameStart).Select(quoteOnDemand).ToArray()
+        assert(relativeNameComponents.NonNullAny())
         combine "." relativeNameComponents
 
     type FqdnObject(name:string, parent:IQualifiedNamed) =

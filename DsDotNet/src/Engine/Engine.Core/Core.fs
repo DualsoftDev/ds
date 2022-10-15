@@ -75,31 +75,24 @@ module CoreModule =
     and [<DebuggerDisplay("{QualifiedName}")>]
         Segment private (name:string, flow:Flow) =
         inherit SegmentBase(name, flow)
-        do
-            if name.Contains(".") then
-                noop()
         member val Graph = Graph<Child, InSegmentEdge>()
         member val Flow = flow
         member val SafetyConditions = createQualifiedNamedHashSet<Segment>()
         member val Addresses:Addresses = null with get, set
-        static member Create(name, flow) =
+        static member Create(name:string, flow) =
+            if (name.Contains(".") && not <| (name.StartsWith("\"") && name.EndsWith("\""))) then
+                logWarn $"Suspicious segment name [{name}]. Check it."
+
             let segment = Segment(name, flow)
             flow.Graph.AddVertex(segment) |> verifyM $"Duplicated segment name [{name}]"
             segment
 
-
     and [<AbstractClass>]
         SegmentEquivalent (name:string, flow:Flow) =
         inherit SegmentBase(name, flow)
-        do
-            if name.Contains(".") then
-                noop()
 
     and SegmentAlias(mnemonic:string, flow:Flow, aliasKey:string[]) =
         inherit SegmentBase(mnemonic, flow)
-        do
-            if mnemonic.Contains(".") then
-                noop()
         member _.AliasKey = aliasKey
         static member Create(name, flow, aliasKey) =
             let alias = SegmentAlias(name, flow, aliasKey)
@@ -131,10 +124,15 @@ module CoreModule =
 
     and ChildApiCall private (apiItem:ApiItem, segment:Segment) =
         inherit Child(apiItem.QualifiedName, apiItem, segment)
-        static member Create(apiItem, segment) =
-            let child = ChildApiCall(apiItem, segment)
-            segment.Graph.AddVertex(child) |> verifyM $"Duplicated child name [{apiItem.QualifiedName}]"
-            child
+        static member CreateOnDemand(apiItem:ApiItem, segment:Segment) =
+            let gr = segment.Graph
+            let existing = gr.FindVertex(apiItem.QualifiedName)
+            if existing |> isItNull then
+                let child = ChildApiCall(apiItem, segment)
+                gr.AddVertex(child) |> verifyM $"Duplicated child name [{apiItem.QualifiedName}]"
+                child
+            else
+                existing :?> ChildApiCall
 
     and ChildAliased private (mnemonic:string, apiItem:ApiItem, segment:Segment) =
         inherit Child(mnemonic, apiItem, segment)

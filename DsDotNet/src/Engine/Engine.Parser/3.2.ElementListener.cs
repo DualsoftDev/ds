@@ -123,7 +123,7 @@ class ElementListener : ListenerBase
                 if (_parenting == null)
                     SegmentApiCall.Create(directCall, _rootFlow);
                 else
-                    ChildApiCall.Create(directCall, _parenting);
+                    ChildApiCall.CreateOnDemand(directCall, _parenting);
                 return;
             }
 

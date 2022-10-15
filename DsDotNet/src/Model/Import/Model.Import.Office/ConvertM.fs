@@ -33,7 +33,7 @@ module ConvertM =
                             dicChild.TryAdd(mChildSeg.Name, newApi) |> ignore
                             newApi
 
-                     ChildApiCall.Create(api, coreSeg) :> Child
+                     ChildApiCall.CreateOnDemand(api, coreSeg) :> Child
 
              ///MEdge   -> CoreModule.Flow
             let convertChildEdge(mEdge:MEdge, coreSeg:CoreModule.Segment) = 

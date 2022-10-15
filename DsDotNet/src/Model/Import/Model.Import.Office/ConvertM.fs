@@ -73,9 +73,13 @@ module ConvertM =
 
                 let src = coreFlow.Graph.FindVertex(mEdge.Source.Name)
                 let tgt = coreFlow.Graph.FindVertex(mEdge.Target.Name)
-                let edgeType = EdgeHelper.GetEdgeType(mEdge.Causal)
-
-                InFlowEdge.Create(coreFlow, src, tgt, edgeType)
+                
+                if( mEdge.Causal = EdgeCausal.SReset)
+                then 
+                     InFlowEdge.Create(coreFlow, src, tgt, EdgeType.Default) |> ignore
+                     InFlowEdge.Create(coreFlow, tgt, src, EdgeType.Reset)
+                else 
+                     InFlowEdge.Create(coreFlow, src, tgt, EdgeHelper.GetEdgeType(mEdge.Causal))
 
             mFlow.Nodes |> Seq.distinct |> Seq.cast<MSeg> 
                         |> Seq.filter(fun seg -> seg.IsDummy|>not)

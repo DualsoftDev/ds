@@ -7,6 +7,8 @@ open System.Diagnostics
 open System.Linq
 open System.Globalization
 open System.Collections.Generic
+open System.Runtime.InteropServices
+open System.Text.RegularExpressions
 
 [<AutoOpen>]
 module TextUtil = 
@@ -25,7 +27,16 @@ module TextUtil =
             isValidStart(first) && chars.Skip(1).All(isValid)
     let private dq = "\""
     let private quote(s:string) = $"{dq}{s}{dq}"
-    let internal quoteOnDemand(s:string) = if isValidIdentifier s then s else $"\"{s}\""
+    let internal quoteOnDemand(s:string) =
+        let q = "\""
+        let pattern = @$".*\.\{dq}.*\{dq}(\.*)?"
+        if (s.StartsWith("\"") && s.EndsWith("\""))
+            || isValidIdentifier s
+            || Regex.IsMatch(s, pattern)        // xxx."yyy"
+            then
+            s
+        else
+            $"\"{s}\""
     let internal deQuoteOnDemand(s:string) = if s.StartsWith(dq) && s.EndsWith(dq) then s.Substring(1, s.Length - 2) else s
     let internal combine (separator:string) (nameComponents:string seq) = nameComponents |> Seq.map quoteOnDemand |> String.concat separator
     type NameComponents = string[]
@@ -70,6 +81,20 @@ module TextUtil =
             member _.GetHashCode(x:NameComponents) = x.Average(fun s -> s.GetHashCode()) |> int
     }
 
+    let getRelativeName(referencePath:NameComponents) (fqdn:NameComponents) =
+        let (|List|) xs = List.ofSeq xs
+        let rec countSameStartElements xs ys =
+            let xs = xs |> List.ofSeq
+            let ys = ys |> List.ofSeq
+            let rec helper xs ys =
+                match xs, ys with
+                | x::xx, y::yy when x = y -> 1 + (helper xx yy)
+                | _ -> 0
+            helper xs ys
+        let numSameStart = countSameStartElements referencePath fqdn
+        let relativeNameComponents = fqdn.Skip(numSameStart).Select(quoteOnDemand).ToArray()
+        combine "." relativeNameComponents
+
     type FqdnObject(name:string, parent:IQualifiedNamed) =
         inherit Named(name)
         interface IQualifiedNamed with
@@ -89,11 +114,11 @@ type NameUtil =
     [<Extension>] static member IsQuotationRequired (identifier:string) = isValidIdentifier(identifier) |> not
     [<Extension>] static member QuoteOnDemand (identifier:string) = quoteOnDemand identifier                       
     [<Extension>] static member DeQuoteOnDemand (identifier:string) = deQuoteOnDemand identifier                       
-    [<Extension>] static member Combine (nameComponents:string seq) = combine "." nameComponents 
-    [<Extension>] static member Combine (nameComponents:string seq, separator) = combine separator nameComponents 
+    [<Extension>] static member Combine (nameComponents:string seq, [<Optional; DefaultParameterValue(".")>]separator) = combine separator nameComponents 
     [<Extension>] static member IsStringArrayEqaul (ns1:string seq, ns2:string seq) = isStringArrayEqaul(ns1, ns2)
     [<Extension>] static member CreateNameComparer() = nameComparer()
     [<Extension>] static member CreateNameComponentsComparer() = nameComponentsComparer()
+    [<Extension>] static member GetRelativeName(fqdn:NameComponents, referencePath:NameComponents) = getRelativeName referencePath fqdn
     
 
     [<Extension>]

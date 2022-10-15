@@ -13,7 +13,8 @@ module internal ToDsTextModule =
     let combineLines = ofNotNullAny >> joinLines
 
     /// Edge 를 최대한 한줄로 세운 것을 우선으로 출력하고, 나머지 대충 출력
-    let edgesToDs<'V when 'V :> INamed and 'V : equality>(edges:EdgeBase<'V> seq) (indent:int) =
+    let edgesToDs<'V when 'V :> FqdnObject and 'V : equality>
+            (baseNameComponents:NameComponents) (edges:EdgeBase<'V> seq) (indent:int) =
         let gr = Graph(Seq.empty, edges)    // 계산용 graph
         let processed = HashSet<EdgeBase<'V>>()
         let inits, vs = gr.Inits, gr.Vertices
@@ -42,19 +43,21 @@ module internal ToDsTextModule =
                    => "A -> " + "B -> " + "C"
                    => "A -> B -> C";
                 *)
-                let chained = chain.Select(fun e -> $"{e.Source.Name.QuoteOnDemand()} {e.EdgeType.ToText()} ").JoinWith("")
-                yield $"{tab}{chained}{chain.Last().Target.Name.QuoteOnDemand()};"
+                let chained = chain.Select(fun e -> $"{e.Source.NameComponents.GetRelativeName(baseNameComponents)} {e.EdgeType.ToText()} ").JoinWith("")
+                yield $"{tab}{chained}{chain.Last().Target.NameComponents.GetRelativeName(baseNameComponents)};"
         ]
 
-    let rec graphEntitiesToDs<'V when 'V :> INamed and 'V : equality> (vertices:'V seq) (edges:EdgeBase<'V> seq) (indent:int) =
+    let rec graphEntitiesToDs<'V when 'V :> FqdnObject and 'V : equality>
+        (baseNameComponents:NameComponents) (vertices:'V seq) (edges:EdgeBase<'V> seq) (indent:int) =
+
         let tab = getTab indent
         [
             // start 인과(reset 인과 아닌 것) 먼저 출력
             let startEdges = edges.OfNotResetEdge().ToArray()
-            yield! edgesToDs startEdges indent
+            yield! edgesToDs baseNameComponents startEdges indent
 
             let startEdges = edges.OfWeakResetEdge().ToArray()
-            yield! edgesToDs startEdges indent
+            yield! edgesToDs baseNameComponents startEdges indent
 
             let resetEdges = edges.OfStrongResetEdge().ToArray()
             let ess = groupDuplexEdges resetEdges
@@ -80,24 +83,27 @@ module internal ToDsTextModule =
     and segmentToDs (segment:Segment) (indent:int) =
         let tab = getTab indent
         [
+            let baseNameComponents = segment.NameComponents
             let subGraph = segment.Graph
             if subGraph.Edges.any() then
                 yield $"{tab}{segment.Name.QuoteOnDemand()} = {lb}"
                 let es = subGraph.Edges.Cast<EdgeBase<Child>>().ToArray()
                 let vs = subGraph.Vertices
-                yield graphEntitiesToDs vs es (indent+1)
+                yield graphEntitiesToDs baseNameComponents vs es (indent+1)
                 yield $"{tab}{rb}"
         ] |> combineLines
 
-    let flowGraphToDs (graph:Graph<SegmentBase, InFlowEdge>) (indent:int) =
+    let flowGraphToDs (flow:Flow) (indent:int) =
+        let graph = flow.Graph
+        let baseNameComponents = flow.NameComponents
         let es = graph.Edges.OfType<EdgeBase<SegmentBase>>().ToArray()
-        graphEntitiesToDs graph.Vertices es indent
+        graphEntitiesToDs baseNameComponents graph.Vertices es indent
 
     let flowToDs (flow:Flow) (indent:int) =
         let tab = getTab indent
         [
             yield $"{tab}[flow] {flow.Name.QuoteOnDemand()} = {lb}"
-            yield flowGraphToDs flow.Graph (indent+1)
+            yield flowGraphToDs flow (indent+1)
 
             let alias = flow.AliasMap
             if alias.Count > 0 then

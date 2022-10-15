@@ -127,12 +127,12 @@ module CoreModule =
         static member CreateOnDemand(apiItem:ApiItem, segment:Segment) =
             let gr = segment.Graph
             let existing = gr.FindVertex(apiItem.QualifiedName)
-            if existing |> isItNull then
+            if existing.IsNonNull() then
+                existing :?> ChildApiCall
+            else
                 let child = ChildApiCall(apiItem, segment)
                 gr.AddVertex(child) |> verifyM $"Duplicated child name [{apiItem.QualifiedName}]"
                 child
-            else
-                existing :?> ChildApiCall
 
     and ChildAliased private (mnemonic:string, apiItem:ApiItem, segment:Segment) =
         inherit Child(mnemonic, apiItem, segment)

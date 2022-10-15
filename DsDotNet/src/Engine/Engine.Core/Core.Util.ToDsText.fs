@@ -138,10 +138,9 @@ module internal ToDsTextModule =
                 yield $"{tab}[interfaces] = {lb}"
                 for item in api.Items do
                     let ser =
-                        let ifnull (onNull:string) (x:string) = if x.IsNullOrEmpty() then onNull else x
                         let qNames (xs:Segment seq) = xs.Select(fun tx -> tx.QualifiedName) |> String.concat(", ")
-                        let s = qNames(item.TXs) |> ifnull "_"
-                        let e = qNames(item.RXs) |> ifnull "_"
+                        let s = qNames(item.TXs) |> nonNullSelector "_"
+                        let e = qNames(item.RXs) |> nonNullSelector "_"
                         let r = qNames(item.Resets)
                         if r.IsNullOrEmpty() then $"{s} ~ {e}" else $"{s} ~ {e} ~ {r}"
                     yield $"{tab2}{item.Name.QuoteOnDemand()} = {lb} {ser} {rb}"

@@ -2,6 +2,7 @@
 module Engine.Common.FS.Prelude
 
 open System
+open System.Runtime.CompilerServices
 
 let dispose (x:#IDisposable) = if x <> null then x.Dispose()
 let toString x = x.ToString()
@@ -36,3 +37,12 @@ let noop() = ()
 /// [<AllowNullLiteral>] 을 사용할 수 없는 객체에 대한 강제 null check
 let inline isItNull (x:^T when ^T : not struct) = obj.ReferenceEquals (x, null)
 
+let inline nonNullSelector (nonNullValue:^T when ^T : not struct) (x:^T when ^T : not struct) =
+    if isItNull x then nonNullValue else x
+
+
+[<Extension>]
+type PreludeExt =
+    [<Extension>] static member IsNull(x) = isItNull x
+    [<Extension>] static member IsNonNull(x) = not <| isItNull x
+    [<Extension>] static member NonNullSelector(nonNullValue, x) = nonNullSelector nonNullValue x

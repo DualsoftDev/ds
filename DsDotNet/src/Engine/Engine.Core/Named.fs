@@ -9,6 +9,7 @@ open System.Globalization
 open System.Collections.Generic
 open System.Runtime.InteropServices
 open System.Text.RegularExpressions
+open Engine.Common.FS
 
 [<AutoOpen>]
 module TextUtil = 
@@ -82,10 +83,7 @@ module TextUtil =
     }
 
     let getRelativeName(referencePath:NameComponents) (fqdn:NameComponents) =
-        let (|List|) xs = List.ofSeq xs
-        let rec countSameStartElements xs ys =
-            let xs = xs |> List.ofSeq
-            let ys = ys |> List.ofSeq
+        let rec countSameStartElements (FList(xs)) (FList(ys)) =
             let rec helper xs ys =
                 match xs, ys with
                 | x::xx, y::yy when x = y -> 1 + (helper xx yy)

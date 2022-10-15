@@ -14,7 +14,7 @@ module internal ToDsTextModule =
 
     /// Edge 를 최대한 한줄로 세운 것을 우선으로 출력하고, 나머지 대충 출력
     let edgesToDs<'V when 'V :> FqdnObject and 'V : equality>
-            (baseNameComponents:NameComponents) (edges:EdgeBase<'V> seq) (indent:int) =
+            (basis:NameComponents) (edges:EdgeBase<'V> seq) (indent:int) =
         let gr = Graph(Seq.empty, edges)    // 계산용 graph
         let processed = HashSet<EdgeBase<'V>>()
         let inits, vs = gr.Inits, gr.Vertices
@@ -43,21 +43,21 @@ module internal ToDsTextModule =
                    => "A -> " + "B -> " + "C"
                    => "A -> B -> C";
                 *)
-                let chained = chain.Select(fun e -> $"{e.Source.NameComponents.GetRelativeName(baseNameComponents)} {e.EdgeType.ToText()} ").JoinWith("")
-                yield $"{tab}{chained}{chain.Last().Target.NameComponents.GetRelativeName(baseNameComponents)};"
+                let chained = chain.Select(fun e -> $"{e.Source.GetRelativeName(basis)} {e.EdgeType.ToText()} ").JoinWith("")
+                yield $"{tab}{chained}{chain.Last().Target.GetRelativeName(basis)};"
         ]
 
     let rec graphEntitiesToDs<'V when 'V :> FqdnObject and 'V : equality>
-        (baseNameComponents:NameComponents) (vertices:'V seq) (edges:EdgeBase<'V> seq) (indent:int) =
+        (basis:NameComponents) (vertices:'V seq) (edges:EdgeBase<'V> seq) (indent:int) =
 
         let tab = getTab indent
         [
             // start 인과(reset 인과 아닌 것) 먼저 출력
             let startEdges = edges.OfNotResetEdge().ToArray()
-            yield! edgesToDs baseNameComponents startEdges indent
+            yield! edgesToDs basis startEdges indent
 
             let startEdges = edges.OfWeakResetEdge().ToArray()
-            yield! edgesToDs baseNameComponents startEdges indent
+            yield! edgesToDs basis startEdges indent
 
             let resetEdges = edges.OfStrongResetEdge().ToArray()
             let ess = groupDuplexEdges resetEdges
@@ -67,30 +67,29 @@ module internal ToDsTextModule =
                     assert(es[0].EdgeType.HasFlag(EdgeType.AugmentedTransitiveClosure) = es[1].EdgeType.HasFlag(EdgeType.AugmentedTransitiveClosure))
                     assert(es[0].Source = es[1].Target && es[0].Target = es[1].Source)
                     let commentOnAugmented = if es[0].EdgeType.HasFlag(EdgeType.AugmentedTransitiveClosure) then "//" else ""
-                    yield $"{tab}{commentOnAugmented}{es[0].Source.NameComponents.GetRelativeName(baseNameComponents)} <||> {es[0].Target.NameComponents.GetRelativeName(baseNameComponents)};"
+                    yield $"{tab}{commentOnAugmented}{es[0].Source.GetRelativeName(basis)} <||> {es[0].Target.NameComponents.GetRelativeName(basis)};"
                 else
                     assert(es.Length = 1)
                     yield $"{tab}{es[0].ToText()};"
 
             let segments = vertices.OfType<Segment>().ToArray()
             for v in segments do
-                yield segmentToDs baseNameComponents v indent
+                yield segmentToDs basis v indent
 
             let islands =
                 vertices
                     .Where(fun v -> (box v) :? Segment &&  not <| segments.Contains( (box v) :?> Segment))
                     .Except((*segments @@*) edges.Collect(fun e -> e.GetVertices()))
             for island in islands do
-                yield $"{tab}{island.NameComponents.GetRelativeName(baseNameComponents)}; // island"
+                yield $"{tab}{island.GetRelativeName(basis)}; // island"
         ] |> combineLines
 
-    and segmentToDs (baseNameComponents:NameComponents) (segment:Segment) (indent:int) =
+    and segmentToDs (basis:NameComponents) (segment:Segment) (indent:int) =
         let tab = getTab indent
         [
-            //let baseNameComponents = segment.NameComponents
             let subGraph = segment.Graph
             if subGraph.Edges.any() then
-                yield $"{tab}{segment.NameComponents.GetRelativeName(baseNameComponents)} = {lb}"
+                yield $"{tab}{segment.GetRelativeName(basis)} = {lb}"
                 let es = subGraph.Edges.Cast<EdgeBase<Child>>().ToArray()
                 let vs = subGraph.Vertices
                 yield graphEntitiesToDs segment.NameComponents vs es (indent+1)
@@ -99,9 +98,9 @@ module internal ToDsTextModule =
 
     let flowGraphToDs (flow:Flow) (indent:int) =
         let graph = flow.Graph
-        let baseNameComponents = flow.NameComponents
+        let basis = flow.NameComponents
         let es = graph.Edges.OfType<EdgeBase<SegmentBase>>().ToArray()
-        graphEntitiesToDs baseNameComponents graph.Vertices es indent
+        graphEntitiesToDs basis graph.Vertices es indent
 
     let flowToDs (flow:Flow) (indent:int) =
         let tab = getTab indent
@@ -170,9 +169,6 @@ module internal ToDsTextModule =
         ] |> combineLines
 
     let modelToDs (model:Model) =
-        let xx = "a\nB\nc\na\nb\n".SplitByLine()
-        let yy = "a\nB\nc\na\nb\n".Split([|'\r'; '\n'|])
-
         let tab = getTab 1
         let tab2 = getTab 2
         [

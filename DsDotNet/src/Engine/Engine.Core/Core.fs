@@ -9,7 +9,6 @@ open Engine.Common.FS
 module CoreModule =
     type Model() =
         member val Systems = createNamedHashSet<DsSystem>()
-        //member x.Cpus = x.Systems.Select(fun sys -> sys.Cpu)
         interface IQualifiedNamed with
             member val Name = null //failwith "ERROR"
             member val NameComponents = Array.empty<string>
@@ -19,13 +18,8 @@ module CoreModule =
     and DsSystem private (name:string, host:string, cpu:ICpu option, model:Model) =
         inherit FqdnObject(name, model)
 
-        do
-            let x:Model = null :> Model
-            ()
-
         //new (name, model) = DsSystem(name, null, model)
         member val Flows = createNamedHashSet<Flow>()
-        //member val Api = new Api(this)
         member val Api:Api = null with get, set
 
         member _.Model = model
@@ -75,7 +69,7 @@ module CoreModule =
         inherit FqdnObject(name, flow)
         interface IFlowVertex
 
-    // normal segment : leaf, stem(parenting)
+    /// normal segment : leaf, stem(parenting)
     and [<DebuggerDisplay("{QualifiedName}")>]
         Segment private (name:string, flow:Flow) =
         inherit SegmentBase(name, flow)

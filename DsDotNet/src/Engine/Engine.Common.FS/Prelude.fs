@@ -19,11 +19,6 @@ let inline name x = ( ^T: (member Name:string) x )
 /// x.Value 을 반환
 let inline value x = (^T : (member Value : 'v) x)
 
-//#r "nuget: FSharpPlus"
-//open FSharpPlus
-
-//[1..10] |> sum
-
 
 let verify x = if not x then failwith "ERROR"
 
@@ -34,8 +29,11 @@ let failwithf format =
 let noop() = ()
 
 // https://stackoverflow.com/questions/11696484/type-does-not-have-null-as-a-proper-value
-/// [<AllowNullLiteral>] 을 사용할 수 없는 객체에 대한 강제 null check
-let inline isItNull (x:^T when ^T : not struct) = obj.ReferenceEquals (x, null)
+/// [<AllowNullLiteral>] 을 사용할 수 없는 객체에 대한 강제 null check.  use sparingly
+let inline isItNull (x:'T when 'T : not struct) = obj.ReferenceEquals (x, null)
+
+/// [<AllowNullLiteral>] 을 사용할 수 없는 F# class 에 대한 null instance 강제 생성.  use sparingly
+let getNull<'T when 'T : not struct>():'T = Operators.Unchecked.defaultof<'T>
 
 let inline nonNullSelector (nonNullValue:^T when ^T : not struct) (x:^T when ^T : not struct) =
     if isItNull x then nonNullValue else x

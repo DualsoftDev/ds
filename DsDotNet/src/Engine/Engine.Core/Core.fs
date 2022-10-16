@@ -19,6 +19,10 @@ module CoreModule =
     and DsSystem private (name:string, host:string, cpu:ICpu option, model:Model) =
         inherit FqdnObject(name, model)
 
+        do
+            let x:Model = null :> Model
+            ()
+
         //new (name, model) = DsSystem(name, null, model)
         member val Flows = createNamedHashSet<Flow>()
         //member val Api = new Api(this)

@@ -4,9 +4,19 @@ module Engine.Common.FS.ActivePattern
 open System
 open System.Text.RegularExpressions
 open System.Globalization
+open System.Collections.Generic
 
 /// Active pattern for Functional F# list
 let (|FList|) xs = List.ofSeq xs
+let (|Array|) xs = Array.ofSeq xs
+let (|Hash|) (xs:'X seq) = xs |> HashSet
+
+/// Sequence 의 Head, Tail pair 반환
+let (|HeadAndTail|_|) (FList(xs)) =
+    match xs with
+    | [] -> None
+    | h::ts -> Some(h, ts)
+
 
 /// Sequence 의 Init, Last pair 반환
 let (|InitAndLast|_|) (FList(xs)) =
@@ -29,6 +39,8 @@ let (|FirstRegexGroupPattern|_|) pattern input =
     let m = Regex(pattern).Match(input)
     if m.Success then Some m.Groups.[1].Value
     else None
+
+let (|RegexMatches|_|) (pattern:string) x = if Regex.IsMatch(x, pattern) then Some() else None
 
 let (|StartsWith|_|) (needle:string) (haystack : string) = if haystack.StartsWith(needle) then Some() else None
 let (|EndsWith|_|) (needle:string) (haystack : string) = if haystack.EndsWith(needle) then Some() else None

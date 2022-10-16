@@ -8,8 +8,9 @@ open System.Linq
 open System.Globalization
 open System.Collections.Generic
 open System.Runtime.InteropServices
-open System.Text.RegularExpressions
 open Engine.Common.FS
+open System.Text.RegularExpressions
+
 
 [<AutoOpen>]
 module TextUtil = 
@@ -26,19 +27,24 @@ module TextUtil =
             let chars = identifier.ToCharArray()
             let first = chars[0]
             isValidStart(first) && chars.Skip(1).All(isValid)
+    let (|ValidIdentifier|) x = if isValidIdentifier x then Some x else None
     let private dq = "\""
     let private quote(s:string) = $"{dq}{s}{dq}"
     let internal quoteOnDemand(s:string) =
-        let q = "\""
         let pattern = @$".*\.\{dq}.*\{dq}(\.*)?"
-        if (s.StartsWith("\"") && s.EndsWith("\""))
-            || isValidIdentifier s
-            || Regex.IsMatch(s, pattern)        // xxx."yyy"
-            then
-            s
-        else
-            $"\"{s}\""
-    let internal deQuoteOnDemand(s:string) = if s.StartsWith(dq) && s.EndsWith(dq) then s.Substring(1, s.Length - 2) else s
+        match s with
+        | ValidIdentifier x when x.IsSome -> s
+
+        | RegexMatches "\"(.*)\""   // "#specidal#"
+        | RegexMatches pattern -> s // xxx."yyy"
+
+        | _ -> quote s
+
+    let internal deQuoteOnDemand(s:string) =
+        match s with
+        | RegexPattern "\"(.*)\"" [inner] -> inner
+        | _ -> s
+
     let internal combine (separator:string) (nameComponents:string seq) = nameComponents |> Seq.map quoteOnDemand |> String.concat separator
     type NameComponents = string[]
 
@@ -48,7 +54,6 @@ module TextUtil =
     type Named(name) =
         let mutable name = name
         interface INamed with
-            //member _.Name with get () = name //and set (v) = name <- v
             member x.Name with get () = x.Name
 
         member val Name : string = name with get, set
@@ -102,7 +107,8 @@ module TextUtil =
         member x.Name with get() = (x :> INamed).Name
         member x.NameComponents = (x :> IQualifiedNamed).NameComponents
         member x.QualifiedName = (x :> IQualifiedNamed).QualifiedName
-        member x.GetRelativeName(referencePath:NameComponents) = getRelativeName referencePath x.NameComponents
+        member x.GetRelativeName(referencePath:NameComponents) =
+            getRelativeName referencePath x.NameComponents
 
 
 

@@ -29,6 +29,8 @@ type StringExt =
     [<Extension>] static member IsNullOrEmpty(x:string) = isNullOrEmpty x
     [<Extension>] static member NonNullAny(x:string) = notNullAny x
     [<Extension>] static member OfNotNullAny(xs:string seq) = ofNotNullAny xs
+    [<Extension>] static member EncloseWith(x:string, wrapper:string) = $"{wrapper}{x}{wrapper}"
+    [<Extension>] static member EncloseWith2(x:string, start:string, end_:string) = $"{start}{x}{end_}"
     
 
 

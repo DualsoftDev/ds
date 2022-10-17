@@ -36,15 +36,18 @@ module ConvertM =
 
                      ChildApiCall.CreateOnDemand(api, coreSeg) :> Child
 
+            let gr = coreSeg.Graph
              ///MEdge   -> CoreModule.Flow
             let convertChildEdge(mEdge:MEdge, coreSeg:CoreModule.Segment) = 
-                let src = coreSeg.Graph.FindVertex(dicChild.[mEdge.Source.Name].QualifiedName)
-                let tgt = coreSeg.Graph.FindVertex(dicChild.[mEdge.Target.Name].QualifiedName)
-                let edgeType = EdgeHelper.GetEdgeType(mEdge.Causal)
+                let s = dicChild.[mEdge.Source.Name].QualifiedName
+                let t = dicChild.[mEdge.Target.Name].QualifiedName
+                let src = gr.FindVertex(s)
+                let tgt = gr.FindVertex(t)
+                let edgeType = mEdge.Causal.GetEdgeType()
 
-                let findList = coreSeg.Graph.Vertices |> Seq.map(fun v->v.Name) |> String.concat "\n " 
-                if(Prelude.PreludeExt.IsNull(src)) then failwithf $"[{findList}]에서 \n{dicChild.[mEdge.Source.Name].QualifiedName}를 찾을 수 없습니다."
-                if(Prelude.PreludeExt.IsNull(tgt)) then failwithf $"[{findList}]에서 \n{dicChild.[mEdge.Source.Name].QualifiedName}를 찾을 수 없습니다."
+                let findList = gr.Vertices |> Seq.map(fun v->v.Name) |> String.concat "\n " 
+                if(src.IsNull()) then failwithf $"[{findList}]에서 \n{s}를 찾을 수 없습니다."
+                if(tgt.IsNull()) then failwithf $"[{findList}]에서 \n{t}를 찾을 수 없습니다."
 
 
                 InSegmentEdge.Create(coreSeg, src, tgt, edgeType)
@@ -53,10 +56,10 @@ module ConvertM =
             mSeg.ChildFlow.Nodes |> Seq.cast<MSeg> 
                                  |> Seq.sortBy(fun seg -> seg.IsAlias)
                                  |> Seq.filter(fun seg -> seg.IsDummy|>not)
-                                 |> Seq.iter(fun node -> coreSeg.Graph.AddVertex(convertChild (node)) |>ignore)
+                                 |> Seq.iter(fun node -> gr.AddVertex(convertChild (node)) |>ignore)
             mSeg.ChildFlow.Edges |> Seq.cast<MEdge> 
                                  |> Seq.filter(fun edge -> edge.IsDummy|>not)
-                                 |> Seq.iter(fun edge -> coreSeg.Graph.AddEdge  (convertChildEdge (edge, coreSeg)) |>ignore)
+                                 |> Seq.iter(fun edge -> gr.AddEdge  (convertChildEdge (edge, coreSeg)) |>ignore)
     
         //CoreModule.Flow 에 pptEdge 등록
         let addInFlowEdges(coreFlow:CoreModule.Flow, mFlow:MFlow) =
@@ -72,12 +75,14 @@ module ConvertM =
             ///MEdge   -> CoreModule.Flow
             let convertRootEdge(mEdge:MEdge, coreFlow:CoreModule.Flow) = 
 
-                let src = coreFlow.Graph.FindVertex(mEdge.Source.ValidName)
-                let tgt = coreFlow.Graph.FindVertex(mEdge.Target.ValidName)
+                let s = mEdge.Source.ValidName
+                let t = mEdge.Target.ValidName
+                let src = coreFlow.Graph.FindVertex(s)
+                let tgt = coreFlow.Graph.FindVertex(t)
 
                 let findList = coreFlow.Graph.Vertices |> Seq.map(fun v->v.Name) |> String.concat "\n " 
-                if(Prelude.PreludeExt.IsNull(src)) then failwithf $"[{findList}]에서 \n{mEdge.Source.ValidName}를 찾을 수 없습니다."
-                if(Prelude.PreludeExt.IsNull(tgt)) then failwithf $"[{findList}]에서 \n{mEdge.Target.ValidName}를 찾을 수 없습니다."
+                if(src.IsNull()) then failwithf $"[{findList}]에서 \n{s}를 찾을 수 없습니다."
+                if(tgt.IsNull()) then failwithf $"[{findList}]에서 \n{t}를 찾을 수 없습니다."
                 
                 if( mEdge.Causal = EdgeCausal.SReset)
                 then 

@@ -19,7 +19,7 @@ grammar ds;
 
 import dsFunctions;
 
-program: (system|properties|comment)* EOF;        // importStatement|cpus
+model: (system|properties|comment)* EOF;        // importStatement|cpus
 
 test:qstring EOF;
 qstring: STRING_LITERAL EOF;

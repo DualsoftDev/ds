@@ -47,7 +47,7 @@ class ListenerBase : dsBaseListener
         parser.Reset();
     }
 
-    public override void EnterProgram([NotNull] ProgramContext ctx)
+    public override void EnterModel(ModelContext ctx)
     {
         UpdateModelSpits();
     }

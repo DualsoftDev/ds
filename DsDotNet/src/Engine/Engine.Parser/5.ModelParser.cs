@@ -7,20 +7,20 @@ public static class ModelParser
     static void Walk(dsParser parser, ParserHelper helper)
     {
         var sListener = new SkeletonListener(parser, helper);
-        ParseTreeWalker.Default.Walk(sListener, parser.program());
+        ParseTreeWalker.Default.Walk(sListener, parser.model());
         Trace.WriteLine("--- End of skeleton listener");
 
         var eleListener = new ElementListener(parser, helper);
-        ParseTreeWalker.Default.Walk(eleListener, parser.program());
+        ParseTreeWalker.Default.Walk(eleListener, parser.model());
         Trace.WriteLine("--- End of element listener");
 
 
         var edgeListener = new EdgeListener(parser, helper);
-        ParseTreeWalker.Default.Walk(edgeListener, parser.program());
+        ParseTreeWalker.Default.Walk(edgeListener, parser.model());
         Trace.WriteLine("--- End of edge listener");
 
         var etcListener = new EtcListener(parser, helper);
-        ParseTreeWalker.Default.Walk(etcListener, parser.program());
+        ParseTreeWalker.Default.Walk(etcListener, parser.model());
         Trace.WriteLine("--- End of etc listener");
     }
     public static ParserHelper ParseFromString2(string text, ParserOptions options)
@@ -43,7 +43,7 @@ public static class ModelParser
     public static void ParsePartial(string text, ParserHelper helper, Func<dsParser, RuleContext> predExtract=null)
     {
         if (predExtract == null)
-            predExtract = new Func<dsParser, RuleContext>((dsParser parser) => parser.program());
+            predExtract = new Func<dsParser, RuleContext>((dsParser parser) => parser.model());
         var (parser, ast, parserErrors) = FromDocument(text, predExtract);
         Walk(parser, helper);
     }

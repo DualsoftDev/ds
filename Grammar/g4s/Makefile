@@ -19,37 +19,37 @@ test:
 #	done
 
 	@echo quoted
-	$(grun) ds program < g4test/quoted.ds
+	$(grun) ds model < g4test/quoted.ds
 	@echo causals
 	$(grun) ds causals < g4test/causals.txt
 	@echo diamond
-	$(grun) ds program < g4test/diamond.ds
+	$(grun) ds model < g4test/diamond.ds
 	@echo proc
-	$(grun) ds program < g4test/proc.ds
+	$(grun) ds model < g4test/proc.ds
 	@echo taskFlow
-	$(grun) ds program < g4test/taskFlow.ds
+	$(grun) ds model < g4test/taskFlow.ds
 	@echo call
-	$(grun) ds program < g4test/call.ds
+	$(grun) ds model < g4test/call.ds
 	@echo prop
-	$(grun) ds program < g4test/prop.ds
+	$(grun) ds model < g4test/prop.ds
 	@echo ppt
-	$(grun) ds program < g4test/ppt.ds
+	$(grun) ds model < g4test/ppt.ds
 
 	@echo safety
-	$(grun) ds program < g4test/safety.ds
+	$(grun) ds model < g4test/safety.ds
 
 	@echo strong
-	$(grun) ds program < g4test/strong.ds
+	$(grun) ds model < g4test/strong.ds
 
 	@echo "---------- with errors"
 
 	@echo ppt2
-	$(grun) ds program < g4test/ppt2.ds
+	$(grun) ds model < g4test/ppt2.ds
 
 	@echo imports
 	$(grun) ds importStatements < g4test/imports.txt
 	@echo problem
-	$(grun) ds program < g4test/problematic.ds
+	$(grun) ds model < g4test/problematic.ds
 	@echo expression
 	$(grun) ds expressions < g4test/expressions.txt
 

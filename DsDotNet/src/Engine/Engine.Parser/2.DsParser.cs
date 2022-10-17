@@ -21,7 +21,7 @@ class DsParser
         var listener_parser = new ErrorListener<IToken>(throwOnError);
         lexer.AddErrorListener(listener_lexer);
         parser.AddErrorListener(listener_parser);
-        var tree = parser.program();
+        var tree = parser.model();
         var errors = listener_lexer.Errors.Concat(listener_parser.Errors).ToArray();
 
         return (parser, tree, errors);
@@ -76,11 +76,11 @@ class DsParser
 
         IEnumerable<string> helper()
         {
-            var func = (dsParser parser) => parser.program();
+            var func = (dsParser parser) => parser.model();
             var (parser, _, _) = DsParser.ParseText(text, func);
             parser.Reset();
             var sysCtxMap =
-                enumerateChildren<SystemContext>(parser.program())
+                enumerateChildren<SystemContext>(parser.model())
                 .ToDictionary(ctx => findFirstChild<SystemNameContext>(ctx).GetText(), ctx => ctx)    //ctx => findFirstChild<SysCopySpecContext>(ctx))
                 ;
             var copySysCtxs = sysCtxMap.Where(kv => findFirstChild<SysCopySpecContext>(kv.Value) != null).ToArray();
@@ -117,7 +117,7 @@ class DsParser
 
     public static (dsParser, ParserError[]) FromDocument(string text, bool throwOnError = true)
     {
-        var func = (dsParser parser) => parser.program();
+        var func = (dsParser parser) => parser.model();
         var(parser, tree, errors) = FromDocument(text, func, throwOnError);
         return (parser, errors);
     }
@@ -204,7 +204,7 @@ class DsParser
     public static ParserResult getParseResult(dsParser parser)
     {
         var listener = new AllListener();
-        ParseTreeWalker.Default.Walk(listener, parser.program());
+        ParseTreeWalker.Default.Walk(listener, parser.model());
         return listener.r;
     }
 

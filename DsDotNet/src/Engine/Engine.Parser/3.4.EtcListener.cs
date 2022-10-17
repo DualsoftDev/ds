@@ -100,7 +100,7 @@ class EtcListener : ListenerBase
         }
     }
 
-    override public void ExitProgram(ProgramContext ctx)
+    override public void ExitModel(ModelContext ctx)
     {
         //[layouts] = {
         //       L.T.Cp = (30, 50)            // xy

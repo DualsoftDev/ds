@@ -14,7 +14,7 @@ class CopySystemListener : dsBaseListener   //ListenerBase
     }
 
 
-    public override void EnterProgram(ProgramContext ctx)
+    public override void EnterModel(ModelContext ctx)
     {
         var sysCtxs = enumerateChildren<SystemContext>(ctx).ToArray();
         Console.WriteLine();
@@ -29,9 +29,9 @@ class CopySystemListener : dsBaseListener   //ListenerBase
             var srcSysName = findFirstChild<SourceSystemNameContext>(sysCopyCtx).GetText();
             var newSysName = findFirstChild<SystemNameContext>(ctx).GetText();
 
-            var sysCtxs = enumerateChildren<SystemContext>(_parser.program()).ToArray();
+            var sysCtxs = enumerateChildren<SystemContext>(_parser.model()).ToArray();
             var srcSysCtx =
-                enumerateChildren<SystemContext>(_parser.program())
+                enumerateChildren<SystemContext>(_parser.model())
                     .FirstOrDefault(sysctx => findFirstChild<SystemNameContext>(sysctx).GetText() == srcSysName)
                     ;
 

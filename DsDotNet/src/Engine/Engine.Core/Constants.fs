@@ -1,21 +1,26 @@
 // Copyright (c) Dual Inc.  All Rights Reserved.
 namespace Engine.Core
 
+open System
+
 [<AutoOpen>]
 module DsText = 
     //edge    
     let [<Literal>] TextSEdge         = ">"
-    let [<Literal>] TextSEdgeRev      = "<"
     let [<Literal>] TextSPush         = ">>"
-    let [<Literal>] TextSPushRev      = "<<"
     let [<Literal>] TextREdge         = "|>"
-    let [<Literal>] TextREdgeRev      = "<|"
     let [<Literal>] TextRPush         = "||>"
-    let [<Literal>] TextRPushRev      = "<||"
-    let [<Literal>] TextSReset        = "=>"
-    let [<Literal>] TextSResetRev     = "<="
-    let [<Literal>] TextInterlockWeak = "<|>"
-    let [<Literal>] TextInterlock     = "<||>"
+
+
+    //<ahn>
+    let [<Obsolete>] [<Literal>] TextSReset        = "=>"
+    let [<Obsolete>] [<Literal>] TextInterlockWeak = "<|>"
+    let [<Obsolete>] [<Literal>] TextInterlock     = "<||>"
+    let [<Obsolete>] [<Literal>] TextSEdgeRev      = "<"
+    let [<Obsolete>] [<Literal>] TextSPushRev      = "<<"
+    let [<Obsolete>] [<Literal>] TextREdgeRev      = "<|"
+    let [<Obsolete>] [<Literal>] TextRPushRev      = "<||"
+    let [<Obsolete>] [<Literal>] TextSResetRev     = "<="
   
 [<AutoOpen>]
 module DsTextDataType =    

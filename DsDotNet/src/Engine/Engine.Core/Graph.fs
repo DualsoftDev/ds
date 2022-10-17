@@ -14,20 +14,22 @@ module GraphModule =
         inherit INamed
 
     [<Flags>]
-    type EdgeType =
+    type EdgeCausal =
     | Default                    = 0b0000000    // Start, Weak
     | Reset                      = 0b0000001    // else start
     | Strong                     = 0b0000010    // else weak
-    | Reversed                   = 0b0000100    // direction reversed : <, <|, <||, etc
-    | Bidirectional              = 0b0001000    // 양방향.  <||>
-    | AugmentedTransitiveClosure = 0b0010000    // 강한 상호 reset 관계 확장 edge
+    | AugmentedTransitiveClosure = 0b0000100    // 강한 상호 reset 관계 확장 edge
+
+    // runtime edge 는 Reversed / Bindrectional 을 포함하지 않는다.
+    | Reversed                   = 0b0001000    // direction reversed : <, <|, <||, etc
+    | Bidirectional              = 0b0010000    // 양방향.  <||>
+
+    type EdgeType = EdgeCausal
 
     type IEdge<'V> =
         abstract Source :'V    //방향을 고려안한 위치상 왼쪽   Vertex
         abstract Target :'V    //방향을 고려안한 위치상 오른쪽 Vertex
         abstract EdgeType  :EdgeType 
-        abstract SrcArrow  :'V //방향을 고려한 from Vertex
-        abstract TgtArrow  :'V //방향을 고려한 to   Vertex
 
     /// vertex on a flow
     type IFlowVertex =
@@ -39,12 +41,17 @@ module GraphModule =
 
     [<AbstractClass>]
     type EdgeBase<'V>(source:'V, target:'V, edgeType:EdgeType) =
+        do
+            let et = edgeType
+            if et.HasFlag(EdgeType.Bidirectional) then
+                failwithlogf "Runtime edge does not allow Reversed flag."
+            if et.HasFlag(EdgeType.Reversed) then
+                failwithlogf "Runtime edge does not allow Bidirectional flag."
+
         interface IEdge<'V> with
             member x.Source = x.Source
             member x.Target = x.Target
             member x.EdgeType  = x.EdgeType
-            override _.SrcArrow = if edgeType.HasFlag(EdgeType.Reversed) then target else source
-            override _.TgtArrow = if edgeType.HasFlag(EdgeType.Reversed) then source else target
 
         member _.Source = source
         member _.Target = target
@@ -54,8 +61,8 @@ module GraphModule =
         inherit IChildVertex
 
     type Graph<'V, 'E
-        when 'V :> INamed and 'V : equality        
-        and 'E :> IEdge<'V> and 'E: equality> (
+            when 'V :> INamed and 'V : equality        
+            and 'E :> IEdge<'V> and 'E: equality> (
             vertices:'V seq, edges:'E seq) =
         let edgeComparer = {
             new IEqualityComparer<'E> with
@@ -90,25 +97,23 @@ module GraphModule =
 
         member private x.ConnectedVertices = x.Edges |> Seq.collect(fun e -> [e.Source; e.Target]) |> Seq.distinct
         member x.Islands = x.Vertices.Except(x.ConnectedVertices)
-        member x.GetIncomingEdges(vertex:'V) = x.Edges.Where(fun e -> e.TgtArrow = vertex)
-        member x.GetOutgoingEdges(vertex:'V) = x.Edges.Where(fun e -> if e.EdgeType.HasFlag(EdgeType.Reversed)
-                                                                        then e.Target = vertex
-                                                                        else e.Source = vertex )
+        member x.GetIncomingEdges(vertex:'V) = x.Edges.Where(fun e -> e.Target = vertex)
+        member x.GetOutgoingEdges(vertex:'V) = x.Edges.Where(fun e -> e.Source = vertex )
         member x.GetEdges(vertex:'V) = x.GetIncomingEdges(vertex).Concat(x.GetOutgoingEdges(vertex))
-        member x.GetIncomingVertices(vertex:'V) = x.GetIncomingEdges(vertex).Select(fun e -> e.SrcArrow)
-        member x.GetOutgoingVertices(vertex:'V) = x.GetOutgoingEdges(vertex).Select(fun e -> e.TgtArrow)
+        member x.GetIncomingVertices(vertex:'V) = x.GetIncomingEdges(vertex).Select(fun e -> e.Source)
+        member x.GetOutgoingVertices(vertex:'V) = x.GetOutgoingEdges(vertex).Select(fun e -> e.Target)
         member x.Inits =
             let inits =
-                x.Edges.Select(fun e -> e.SrcArrow)
-                    .Distinct()
+                x.Edges.Select(fun e -> e.Source)
                     .Where(fun src -> not <| x.GetIncomingEdges(src).Any())
-            x.Islands.Concat(inits)
+                    .Distinct()
+            x.Islands @@ inits
         member x.Lasts =
             let lasts =
-                x.Edges.Select(fun e -> e.TgtArrow)
-                    .Distinct()
+                x.Edges.Select(fun e -> e.Target)
                     .Where(fun tgt -> not <| x.GetOutgoingEdges(tgt).Any())
-            x.Islands.Concat(lasts)
+                    .Distinct()
+            x.Islands @@ lasts
 
 [<AutoOpen>]
 module internal GraphHelperModule =

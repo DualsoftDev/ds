@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using static Engine.Core.DsType;
+using static Engine.Core.EdgeModule;
 using static Model.Import.Office.Object;
 using Color = Microsoft.Msagl.Drawing.Color;
 using Edge = Microsoft.Msagl.Drawing.Edge;
@@ -158,45 +159,48 @@ namespace Dual.Model.Import
 
             gEdge.Attr.Color = Color.White;
 
-            if (edge.Causal == EdgeCausal.SEdge)
+            var et = edge.Causal;
+            if (et == SEdge)
             {
                 gEdge.Attr.AddStyle(Style.Solid);
                 gEdge.Attr.Color = Color.DeepSkyBlue;
                 gEdge.Attr.LineWidth = 2;
             }
-            else if (edge.Causal == EdgeCausal.SPush)
+            else if (et == SPush)
             {
                 gEdge.Attr.AddStyle(Style.Solid);
                 gEdge.Attr.LineWidth = 4;
                 gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
                 gEdge.Attr.Color = Color.DeepSkyBlue;
             }
-            else if (edge.Causal == EdgeCausal.REdge)
+            else if (et == REdge)
             {
                 gEdge.Attr.AddStyle(Style.Dashed);
                 gEdge.Attr.Color = Color.Green;
                 gEdge.Attr.LineWidth = 2;
             }
-            else if (edge.Causal == EdgeCausal.RPush)
+            else if (et == RPush)
             {
                 gEdge.Attr.AddStyle(Style.Dashed);
                 gEdge.Attr.LineWidth = 4;
                 gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
                 gEdge.Attr.Color = Color.Green;
             }
-            else if (edge.Causal == EdgeCausal.Interlock)
-            {
-                gEdge.Attr.AddStyle(Style.Dashed);
-                gEdge.Attr.ArrowheadAtSource = ArrowStyle.Normal;
-                gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
-                gEdge.Attr.Color = Color.PaleGoldenrod;
-            }
-            else if (edge.Causal == EdgeCausal.SReset)
-            {
-                gEdge.Attr.AddStyle(Style.Solid);
-                gEdge.Attr.ArrowheadAtSource = ArrowStyle.Tee;
-                gEdge.Attr.Color = Color.PaleGoldenrod;
-            }
+
+            //<ahn>
+            //else if (edge.Causal == EdgeCausal.Interlock)
+            //{
+            //    gEdge.Attr.AddStyle(Style.Dashed);
+            //    gEdge.Attr.ArrowheadAtSource = ArrowStyle.Normal;
+            //    gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
+            //    gEdge.Attr.Color = Color.PaleGoldenrod;
+            //}
+            //else if (edge.Causal == EdgeCausal.SReset)
+            //{
+            //    gEdge.Attr.AddStyle(Style.Solid);
+            //    gEdge.Attr.ArrowheadAtSource = ArrowStyle.Tee;
+            //    gEdge.Attr.Color = Color.PaleGoldenrod;
+            //}
 
             UpdateLabelText(gEdge.SourceNode);
             UpdateLabelText(gEdge.TargetNode);

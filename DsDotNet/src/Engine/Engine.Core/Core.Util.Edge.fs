@@ -4,62 +4,67 @@ open System.Linq
 open System.Runtime.CompilerServices
 open System.Collections.Generic
 open Engine.Common.FS
+open System
 
 
 [<AutoOpen>]
-module internal EdgeModule =
-    let getEdgeType(operator:string) =
-        match operator with
-        | TextSEdge -> EdgeType.Default //">"  
-        | TextSPush -> EdgeType.Strong  //">>" 
-        | TextREdge -> EdgeType.Reset   //"|>"  
-        | TextRPush -> EdgeType.Reset  ||| EdgeType.Strong //"||>" 
+module EdgeModule =
+    ///인과의 엣지 종류
+    let [<Literal>] SEdge = EdgeType.Default              // A>B	        약 시작 연결
+    let [<Literal>] SPush = EdgeType.Strong              // A>>B	    강 시작 연결
+    let [<Literal>] REdge = EdgeType.Reset              // A|>B	    약 리셋 연결
+    let [<Literal>] RPush = EdgeType.Reset ||| EdgeType.Strong              // A|>>B	    강 리셋 연결
 
-        | TextSEdgeRev -> EdgeType.Reversed //"<"   
-        | TextSPushRev -> EdgeType.Reversed ||| EdgeType.Strong //"<<"  
-        | TextREdgeRev -> EdgeType.Reversed ||| EdgeType.Reset //"<|" 
-        | TextRPushRev -> EdgeType.Reversed ||| EdgeType.Reset  ||| EdgeType.Strong //"<||" 
 
-        | TextInterlock -> EdgeType.Reset  ||| EdgeType.Bidirectional ||| EdgeType.Strong //"<||>" 
-        | TextInterlockWeak -> EdgeType.Reset  ||| EdgeType.Bidirectional //"<|>"
-        //| TextSReset   "=>" 후행리셋 처리필요
-        //| TextSResetRev"<="
-        | _ -> failwith "ERROR"
+    //<ahn>
+    let [<Obsolete>] [<Literal>] SReset = 0
+    let [<Obsolete>] [<Literal>] Interlock = 0
 
-    let getEdgeText(edgeType:EdgeType) =
-        if(  edgeType.HasFlag(EdgeType.Default))                        then TextSEdge 
-        elif(edgeType.HasFlag(EdgeType.Reversed))                       then TextSEdgeRev
-        elif(edgeType.HasFlag(EdgeType.Strong))                         then TextSPush 
-        elif(edgeType.HasFlag(EdgeType.Reversed ||| EdgeType.Strong))   then TextSPushRev
-        elif(edgeType.HasFlag(EdgeType.Reset))                          then TextREdge 
-        elif(edgeType.HasFlag(EdgeType.Reset ||| EdgeType.Reversed))    then TextREdgeRev 
-        elif(edgeType.HasFlag(EdgeType.Reset ||| EdgeType.Strong))      then TextRPush
-        elif(edgeType.HasFlag(EdgeType.Reversed ||| EdgeType.Reset ||| EdgeType.Strong))       then TextRPushRev
-        elif(edgeType.HasFlag(EdgeType.Reset ||| EdgeType.Bidirectional ||| EdgeType.Strong )) then TextInterlock
-        elif(edgeType.HasFlag(EdgeType.Reset ||| EdgeType.Bidirectional))                      then TextInterlockWeak
-        else failwith "ERROR"
+
+    let internal edgeTypeTuples =
+        [
+            SEdge, TextSEdge
+            SPush, TextSPush     
+            REdge, TextREdge     
+            RPush, TextRPush     
+        ] |> Tuple.toDictionary
+
+    /// source 와 target 을 edge operator 에 따라서 확장 생성
+    let createEdgesReArranged(source:'V, operator:string, target:'V) =
+        [
+            match operator with
+            | "<|>" ->
+                yield source, REdge, target
+                yield target, REdge, source
+
+            | "<||>" ->
+                yield source, RPush, target
+                yield target, RPush, source
+
+            | ">"   -> yield source, SEdge, target
+            | "|>"  -> yield source, REdge, target
+            | "||>" -> yield source, SPush, target
+
+            | "<"   -> yield target, SEdge, source
+            | "<|"  -> yield target, REdge, source
+            | "<||" -> yield target, RPush, source
+
+            | _ ->
+                failwithlogf $"Unknown causal operator [{operator}]."
+        ]
 
     let createFlowEdges(flow:Flow, source:SegmentBase, target:SegmentBase, operator:string) =
-        let eType = getEdgeType(operator)
         [|
-            if eType.HasFlag(EdgeType.Bidirectional) then
-                let single = eType &&& (~~~ EdgeType.Bidirectional)
-                yield InFlowEdge.Create(flow, source, target, single)
-                yield InFlowEdge.Create(flow, target, source, single)
-            else
-                yield InFlowEdge.Create(flow, source, target, eType)
+            for src, op, tgt in createEdgesReArranged(source, operator, target) do
+                yield InFlowEdge.Create(flow, src, tgt, op)
         |]
 
     let createChildEdges(segment:Segment, source:Child, target:Child, operator:string) =
-        let eType = getEdgeType(operator)
         [|
-            if eType.HasFlag(EdgeType.Bidirectional) then
-                let single = eType &&& (~~~ EdgeType.Bidirectional)
-                yield InSegmentEdge.Create(segment, source, target, single)
-                yield InSegmentEdge.Create(segment, target, source, single)
-            else
-                yield InSegmentEdge.Create(segment, source, target, eType)
+            for src, op, tgt in createEdgesReArranged(source, operator, target) do
+                yield InSegmentEdge.Create(segment, src, tgt, op)
         |]
+
 
     let ofResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) =
             edges.Where(fun e -> e.EdgeType.HasFlag(EdgeType.Reset))
@@ -130,16 +135,18 @@ module internal EdgeModule =
             createMRIEdgesTransitiveClosure f
 
 [<Extension>]
-type EdgeHelper =
+type EdgeExt =
+    [<Extension>] static member ToText(edgeType:EdgeType) = edgeTypeTuples[edgeType]
+    [<Extension>] static member IsStart(edgeType:EdgeType) = edgeType = SEdge || edgeType = SPush
+    [<Extension>] static member IsReset(edgeType:EdgeType) = edgeType = REdge || edgeType = RPush
+    [<Extension>] static member GetEdgeType(causal:string) =    // EdgeCausalType
+                    edgeTypeTuples.Where(fun kv -> kv.Value = causal).Select(fun kv -> kv.Key).First()
+
+   
     [<Extension>] static member CreateEdges(flow:Flow, source:SegmentBase, target:SegmentBase, operator:string) =
                     createFlowEdges(flow, source, target, operator)
     [<Extension>] static member CreateEdges(segment:Segment, source:Child, target:Child, operator:string) =
                     createChildEdges(segment, source, target, operator)
-
-    [<Extension>] static member GetEdgeType(edgeCausal:EdgeCausal) =
-                    getEdgeType(edgeCausal.ToText())
-    [<Extension>] static member GetEdgeCausal(edgeType:EdgeType) =
-                    getEdgeText(edgeType) |> EdgeCausalType
 
     [<Extension>] static member CreateMRIEdgesTransitiveClosure(model:Model) =
                     for sys in model.Systems do

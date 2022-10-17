@@ -203,8 +203,9 @@ module ImportUtil =
                 let parentNode, parentSeg= getParent(edge) 
                 let mEdge = MEdge(sSeg, eSeg, edge.Causal)
 
-                if(mEdge.Causal = Interlock)
-                then mFlow.AddInterlock(mEdge)
+                //<ahn>
+                //if(mEdge.Causal = Interlock)
+                //then mFlow.AddInterlock(mEdge)
 
                 if(parentNode.IsNone) 
                 then mFlow.AddEdge(mEdge) |> ignore

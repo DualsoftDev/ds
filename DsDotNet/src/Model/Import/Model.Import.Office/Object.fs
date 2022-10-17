@@ -138,8 +138,11 @@ module Object =
             member x.ToText() = $"{src.Name}  {causal.ToText()}  {tgt.Name}"
             member x.ToCheckText(parentName:string) = 
                             let  checkText = match causal with
-                                             |SEdge |SPush |  SReset-> "Start"
-                                             |REdge |RPush |  Interlock-> "Reset"
+                                             //|SEdge |SPush |  SReset-> "Start"
+                                             //|REdge |RPush |  Interlock-> "Reset"
+                                             // <ahn>
+                                             |SEdge |SPush -> "Start"
+                                             |REdge |RPush -> "Reset"
                             $"[{parentName}]{src.ToCallText()}  {checkText}  {tgt.ToCallText()}"
 
             member x.GetSegs() = [src;tgt]

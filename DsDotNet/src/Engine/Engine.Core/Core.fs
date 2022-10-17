@@ -49,7 +49,7 @@ module CoreModule =
 
     and InFlowEdge private (source:SegmentBase, target:SegmentBase, edgeType:EdgeType) =
         inherit EdgeBase<SegmentBase>(source, target, edgeType)
-        static member Create(flow:Flow, source, target, edgeType) =
+        static member Create(flow:Flow, source, target, edgeType:EdgeType) =
             let edge = InFlowEdge(source, target, edgeType)
             flow.Graph.AddEdge(edge) |> verifyM $"Duplicated edge [{source.Name}{edgeType.ToText()}{target.Name}]"
             edge
@@ -57,7 +57,7 @@ module CoreModule =
 
     and InSegmentEdge private (source:Child, target:Child, edgeType:EdgeType) =
         inherit EdgeBase<Child>(source, target, edgeType)
-        static member Create(segment:Segment, source, target, edgeType) =
+        static member Create(segment:Segment, source, target, edgeType:EdgeType) =
             let edge = InSegmentEdge(source, target, edgeType)
             let gr:Graph<_, _> = segment.Graph
             segment.Graph.AddEdge(edge) |> verifyM $"Duplicated edge [{source.Name}{edgeType}{target.Name}]"

@@ -113,18 +113,23 @@ module PPTX =
                             if((headArrow || tailArrow)|>not)   then  conn.ErrorConnect(9, startName, endName, iPage)  
                             if(not headArrow && not tailArrow)  then  conn.ErrorConnect(10, startName, endName, iPage) 
 
-                    //인과 타입과 <START, END> 역전여부
-                    match existHead, existTail, dashLine with
-                    |true, true, true  ->    EdgeCausal.Interlock, false
-                    |true, true, false  ->  if(not headArrow &&  tailArrow) then EdgeCausal.SReset, false
-                                            else EdgeCausal.SReset, true //반대로 뒤집기 필요
-                    // dashLine 점선라인, single 한줄라인
-                    |_->  match single, tailArrow, dashLine with
-                            | true, true, false ->  EdgeCausal.SEdge, isChangeHead
-                            | false,true, false ->  EdgeCausal.SPush, isChangeHead
-                            | true, true, true  ->  EdgeCausal.REdge, isChangeHead
-                            | false,true, true  ->  EdgeCausal.RPush, isChangeHead
-                            | _ -> conn.ErrorConnect(3, startName, endName, iPage)
+
+                    //<ahn>
+                    ////인과 타입과 <START, END> 역전여부
+                    //match existHead, existTail, dashLine with
+                    //|true, true, true  ->    EdgeCausal.Interlock, false
+                    //|true, true, false  ->  if(not headArrow &&  tailArrow) then EdgeCausal.SReset, false
+                    //                        else EdgeCausal.SReset, true //반대로 뒤집기 필요
+                    //// dashLine 점선라인, single 한줄라인
+                    //|_->  match single, tailArrow, dashLine with
+                    //        | true, true, false ->  SEdge, isChangeHead
+                    //        | false,true, false ->  SPush, isChangeHead
+                    //        | true, true, true  ->  REdge, isChangeHead
+                    //        | false,true, true  ->  RPush, isChangeHead
+                    //        | _ -> conn.ErrorConnect(3, startName, endName, iPage)
+
+                    //<ahn> --> 컴파일을 위해서 아무 값이나 return
+                    SEdge, false
 
     let rec ValidGroup(subG:Presentation.GroupShape, shapeIds:ConcurrentHash<uint32>) =    
         subG.Descendants<Presentation.Shape>() 
@@ -276,7 +281,7 @@ module PPTX =
     and 
         pptEdge(conn:Presentation.ConnectionShape,  iEdge:UInt32Value, iPage:int ,startId:uint32, endId:uint32, nodes:ConcurrentDictionary<string, pptNode>) =
         let mutable reverse = false
-        let mutable causal:EdgeCausal = EdgeCausal.SEdge
+        let mutable causal:EdgeCausal = SEdge
         let startKey = Objkey(iPage, startId)
         let endKey   = Objkey(iPage, endId) 
         let startNode = nodes.[startKey]

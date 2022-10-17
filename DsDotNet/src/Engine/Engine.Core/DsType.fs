@@ -1,49 +1,12 @@
 // Copyright (c) Dual Inc.  All Rights Reserved.
 namespace Engine.Core
 
+open System.Linq
+open System.Runtime.CompilerServices
+open Engine.Common.FS
+
 [<AutoOpen>]
 module DsType =
-    ///인과의 엣지 종류
-    type EdgeCausal =
-        | SEdge              // A>B	        약 시작 연결
-        | SPush              // A>>B	    강 시작 연결
-        | REdge              // A|>B	    약 리셋 연결
-        | RPush              // A|>>B	    강 리셋 연결
-        | SReset             // A=>B	    약 시작 + 약 후행 리셋
-        | Interlock          // A<||>B<||>C	강 상호 리셋
-    with
-        member x.ToText() =
-            match x with
-            | SEdge      -> TextSEdge
-            | SPush      -> TextSPush     
-            | REdge      -> TextREdge     
-            | RPush      -> TextRPush     
-            | SReset     -> TextSReset    
-            | Interlock  -> TextInterlock 
-
-        member x.IsStart = 
-            match x with
-            | SEdge |SPush -> true
-            | _ -> false
-        member x.IsReset =
-            match x with
-            | REdge |RPush |Interlock -> true
-            | _ -> false
-
-    let EdgeCausalType(txt:string) =
-        match txt with
-        | TextSEdge  | TextSEdgeRev     -> SEdge    
-        | TextSPush  | TextSPushRev     -> SPush     
-        | TextREdge  | TextREdgeRev     -> REdge     
-        | TextRPush  | TextRPushRev     -> RPush     
-        | TextSReset | TextSResetRev    -> SReset    
-        | TextInterlock                 -> Interlock 
-        |_-> failwithf $"'{txt}' EdgeCausalType Error check type [
-            , {TextSEdge}, {TextSPush}
-            , {TextREdge}, {TextRPush}
-            , {TextSReset}, {TextInterlock}]"
-            
-   
     ///Seg 상태 (Default 'Homing') 
     type Status4 =
         | Ready 
@@ -124,4 +87,5 @@ module DsType =
                 , {TextStartBtn}, {TextResetBtn}
                 , {TextAutoBtn}, {TextEmgBtn}]"
 
-    
+
+

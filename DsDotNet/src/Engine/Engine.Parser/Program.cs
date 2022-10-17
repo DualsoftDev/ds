@@ -630,8 +630,8 @@ C4 > C5;
     {
         //ParseNormal(SplittedMRIEdgesText);
         //ParseNormal(DuplicatedEdgesText);
-        //ParseNormal(EveryScenarioText);
-        ParseNormal(PptGeneratedText);
+        ParseNormal(EveryScenarioText);
+        //ParseNormal(PptGeneratedText);
     }
 
     static void Try(string input)

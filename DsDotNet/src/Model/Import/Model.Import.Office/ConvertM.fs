@@ -43,7 +43,7 @@ module ConvertM =
                 let t = dicChild.[mEdge.Target.Name].QualifiedName
                 let src = gr.FindVertex(s)
                 let tgt = gr.FindVertex(t)
-                let edgeType = mEdge.Causal.GetEdgeType()
+                let edgeType = mEdge.Causal
 
                 let findList = gr.Vertices |> Seq.map(fun v->v.Name) |> String.concat "\n " 
                 if(src.IsNull()) then failwithf $"[{findList}]에서 \n{s}를 찾을 수 없습니다."
@@ -84,12 +84,17 @@ module ConvertM =
                 if(src.IsNull()) then failwithf $"[{findList}]에서 \n{s}를 찾을 수 없습니다."
                 if(tgt.IsNull()) then failwithf $"[{findList}]에서 \n{t}를 찾을 수 없습니다."
                 
-                if( mEdge.Causal = EdgeCausal.SReset)
-                then 
-                     InFlowEdge.Create(coreFlow, src, tgt, EdgeType.Default) |> ignore
-                     InFlowEdge.Create(coreFlow, tgt, src, EdgeType.Reset)
-                else 
-                     InFlowEdge.Create(coreFlow, src, tgt, EdgeHelper.GetEdgeType(mEdge.Causal))
+
+                //<ahn>
+                //if( mEdge.Causal = EdgeCausal.SReset)
+                //then 
+                //     InFlowEdge.Create(coreFlow, src, tgt, EdgeType.Default) |> ignore
+                //     InFlowEdge.Create(coreFlow, tgt, src, EdgeType.Reset)
+                //else 
+                //     InFlowEdge.Create(coreFlow, src, tgt, mEdge.Causal)
+
+                //<ahn> --> 컴파일을 위해서 아무 값이나 return
+                InFlowEdge.Create(coreFlow, src, tgt, mEdge.Causal)
 
             mFlow.Nodes |> Seq.distinct |> Seq.cast<MSeg> 
                         |> Seq.filter(fun seg -> seg.IsDummy|>not)

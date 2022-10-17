@@ -86,30 +86,22 @@ module private GraphCalculationUtils =
         |> Array.distinct
     
     /// Get ordered routes from start to end
-    let visitFromHeadToTail
-            (now:Child) (tail:Child) 
+    let visitFromSourceToTarget
+            (now:Child) (target:Child) 
             (graph:Graph<Child, InSegmentEdge>) =
         let rec searchNodes
-                (now:Child) (tail:Child)
+                (now:Child) (target:Child)
                 (graph:Graph<Child, InSegmentEdge>) 
                 (path:Child list) =
             [
                 let nowPath = path.Append(now) |> List.ofSeq
-                if now <> tail then
+                if now <> target then
                     for node in graph.GetOutgoingVertices(now) do
-                        yield! searchNodes node tail graph nowPath
+                        yield! searchNodes node target graph nowPath
                 else
                     yield nowPath
             ]
-        searchNodes now tail graph []
-
-    /// Get all ordered routes of child DAGs
-    let getAllRoutes (graph:Graph<Child, InSegmentEdge>) =
-        [
-            for head in graph.Inits do
-            for tail in graph.Lasts do
-                visitFromHeadToTail head tail graph
-        ]
+        searchNodes now target graph []
 
     /// Get all resets
     let getOneWayResets 
@@ -117,13 +109,18 @@ module private GraphCalculationUtils =
             (resets:seq<Child option * string * Child option>) =
         resets
         |> Seq.filter(fun e -> 
-            let (source, r, target) = e
+            let (head, r, tail) = e
             r <> TextInterlock &&
-            source.IsSome && target.IsSome
+            head.IsSome && tail.IsSome
         )
         |> Seq.map(fun e -> 
-            let (source, _, target) = e
-            seq { source.Value; target.Value; }
+            let (head, r, tail) = e
+            if r = TextRPush then
+                seq { head.Value; tail.Value; }
+            elif r = TextRPushRev then
+                seq { tail.Value; head.Value; }
+            else
+                Seq.empty
         )
         |> Seq.except(mutualResets)
 
@@ -152,14 +149,6 @@ module private GraphCalculationUtils =
             )
         )
 
-    /// Get foward direction resets
-    let getFowardResets (resets:Child seq seq) (route:Child list) = 
-        resets |> checkIntersect route
-    
-    /// Get backward direction resets
-    let getBackwardResets (resets:Child seq seq) (route:Child list) = 
-        resets |> checkIntersect (route.Reverse())
-
     /// Get incoming resets
     let getIncomingResets (resets:'V seq seq) (node:'V) =
         resets
@@ -171,20 +160,6 @@ module private GraphCalculationUtils =
         resets 
         |> Seq.filter(fun e -> node = e.First())
         |> Seq.map(fun e -> e.Last())
-        
-    /// Get first detected nodes in DAG to remove aliases
-    let removeAliases (allRoutes:Child list seq) =
-        allRoutes
-        |> Seq.map(fun route ->
-            let nodeMaps = new Dictionary<ApiItem, Child>()
-            route 
-            |> Seq.iter(fun v ->
-                let seg = v.ApiItem
-                if not (nodeMaps.ContainsKey(seg)) then
-                    nodeMaps.Add(seg, v)
-            )
-            nodeMaps
-        )
         
     /// Get mutual reset chains : All nodes are mutually resets themselves
     let getMutualResetChains (sort:bool) (resets:Child seq seq) =
@@ -251,25 +226,9 @@ module private GraphCalculationUtils =
                     else
                         now |> addToResult candidates sort
                         
+        // Remove duplicates
         removeDuplicatesInList candidates
         
-    /// get detected reset chains in all routes
-    let getDetectedResetChains 
-            (resetChains:Child list seq) (allRoutes:Child list seq) =
-        allRoutes
-        |> removeAliases // leave first detected segments in each routes
-        |> Seq.collect(fun segs ->
-            let route = segs |> Seq.map(fun s -> s.Value)
-            resetChains
-            |> Seq.map(fun chain ->
-                Enumerable.Intersect(route, chain) |> List.ofSeq
-            )
-        )
-        |> Seq.distinct
-        |> Seq.filter(fun r -> r.Count() > 0) |> removeDuplicatesInList
-        |> Seq.map(fun r -> r |> Seq.ofList) |> getMutualResetChains false
-        |> removeAliases |> Seq.map(Seq.map(fun s -> s.Value))
-    
     /// get origin map
     let getOriginMaps 
             (graphNode:Child seq) (offByOneWayBackwardResets:Child seq) 
@@ -304,8 +263,38 @@ module private GraphCalculationUtils =
                                 | _ -> allNodes.Add(node, 1)
                         else
                             allNodes.Add(node, 2)
-                            
             if not (allNodes.ContainsKey(node)) then
                 allNodes.Add(node, 3)
-        
         allNodes
+
+    let getCallMap (graph:Graph<Child, InSegmentEdge>) =
+        let getNameOfApiItem (api:ApiItem) = $"{api.System.Name}.{api.Name}"
+        let callMap = new Dictionary<string, ResizeArray<Child>>()
+        graph.Vertices 
+        |> Seq.iter(fun v -> 
+            let apiName = getNameOfApiItem v.ApiItem
+            if not (callMap.ContainsKey(apiName)) then
+                callMap.Add(apiName, new ResizeArray<Child>(0))
+            callMap.[apiName].Add(v)
+        )
+        callMap
+
+    let getAliasHeads 
+            (graph:Graph<Child, InSegmentEdge>)
+            (callMap:Dictionary<string, ResizeArray<Child>>) =
+        [
+        for calls in callMap do
+            if calls.Value.Count > 1 then
+                for now in calls.Value do
+                for call in calls.Value do
+                    if now <> call then
+                        let fromTo = 
+                            visitFromSourceToTarget now call graph 
+                            |> removeDuplicates
+                        let intersected = 
+                            Enumerable.Intersect(fromTo, calls.Value)
+                        if intersected.Count() = calls.Value.Count then
+                            yield intersected.First()
+            else
+                yield calls.Value.Item(0)
+        ]

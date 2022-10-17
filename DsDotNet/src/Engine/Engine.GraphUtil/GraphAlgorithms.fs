@@ -1,6 +1,7 @@
 namespace Engine.GraphUtil
 
 open System.Linq
+open System.Collections.Generic
 open Engine.Core
 
 [<AutoOpen>]
@@ -18,19 +19,10 @@ module internal GraphAlgorithms =
     
     /// Get origin status of child nodes
     let getOrigins (graph:Graph<Child, InSegmentEdge>) =
-        let allRoutesPerHeads = graph |> getAllRoutes
-        let allRoutes = allRoutesPerHeads |> removeDuplicates
         let rawResets = graph |> getAllResets
         let mutualResets = rawResets |> getMutualResets
         let oneWayResets = rawResets |> getOneWayResets mutualResets
-        let oneWayBackwardResets = 
-            allRoutes |> Seq.map(getBackwardResets oneWayResets)
         let resetChains = mutualResets |> getMutualResetChains true
-        let detectedChains = 
-            allRoutes |> getDetectedResetChains resetChains
-        let offByOneWayBackwardResets = 
-            oneWayBackwardResets 
-            |> Seq.collect(Seq.map(fun e -> e.Last())) |> Seq.distinct
         let structedChains = 
             resetChains 
             |> Seq.map(fun resets -> 
@@ -44,32 +36,35 @@ module internal GraphAlgorithms =
                 )
                 |> Map.ofSeq
             )
-        let offByMutualResetChains =
-            let detectedChainHeads = 
-                detectedChains |> Seq.map(fun c -> c.First())
-            let toBeZero = 
-                resetChains
-                |> Seq.map(
-                    Seq.map(fun v -> 
-                        (
-                            v.ApiItem, 
-                            detectedChainHeads.Contains(v)
-                        )
-                    )
-                )
-                |> Seq.map(fun r -> 
-                    r |> Seq.filter(fun v -> snd v = true) 
-                    |> Seq.distinct
-                )
-                |> Seq.filter(fun c -> c.Count() = 1)
-                |> Seq.collect(Seq.map(fun v -> fst v))
+        let callMap = getCallMap graph
+        let aliasHeads = getAliasHeads graph callMap
+        let offByOneWayBackwardResets = 
             [
-                for chain in structedChains do
-                for seg in toBeZero do
-                    if chain.ContainsKey(seg.QualifiedName) then
-                        yield chain.[seg.QualifiedName]
+            for reset in oneWayResets do
+                let src = reset.First()
+                let tgt = reset.Last()
+                let backward = visitFromSourceToTarget tgt src graph
+                if backward.Count() > 0 then
+                    yield tgt
             ]
-            |> Seq.collect id
+        let offByMutualResetChains =
+            let detectedChain = 
+                resetChains.Where(fun chain -> 
+                    Enumerable.Intersect(chain, aliasHeads).Count() > 0
+                )
+            [
+            for chain in detectedChain do
+                for now in chain do
+                for node in chain do
+                    if now <> node then
+                        let fromTo = 
+                            visitFromSourceToTarget now node graph 
+                            |> removeDuplicates
+                        let intersected = 
+                            Enumerable.Intersect(fromTo, chain)
+                        if intersected.Count() = chain.Count() then
+                            yield now
+            ]
 
         getOriginMaps 
             graph.Vertices 

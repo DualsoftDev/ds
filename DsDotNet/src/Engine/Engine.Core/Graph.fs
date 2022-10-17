@@ -90,7 +90,7 @@ module GraphModule =
 
         member private x.ConnectedVertices = x.Edges |> Seq.collect(fun e -> [e.Source; e.Target]) |> Seq.distinct
         member x.Islands = x.Vertices.Except(x.ConnectedVertices)
-        member x.GetIncomingEdges(vertex:'V) = x.Edges.Where(fun e -> e.SrcArrow = vertex)
+        member x.GetIncomingEdges(vertex:'V) = x.Edges.Where(fun e -> e.TgtArrow = vertex)
         member x.GetOutgoingEdges(vertex:'V) = x.Edges.Where(fun e -> if e.EdgeType.HasFlag(EdgeType.Reversed)
                                                                         then e.Target = vertex
                                                                         else e.Source = vertex )

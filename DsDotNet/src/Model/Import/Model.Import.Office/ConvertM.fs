@@ -3,6 +3,7 @@ namespace Model.Import.Office
 
 open Engine.Core
 open System.Collections.Concurrent
+open Engine.Common.FS
 
 [<AutoOpen>]
 ///MModel -> CoreModule.Model
@@ -42,8 +43,8 @@ module ConvertM =
                 let edgeType = EdgeHelper.GetEdgeType(mEdge.Causal)
 
                 let findList = coreSeg.Graph.Vertices |> Seq.map(fun v->v.Name) |> String.concat "\n " 
-                try if(src.Name = null) then ()    with ex -> failwithf $"{findList}에서 \n{mEdge.Source.Name}를 찾을 수 없습니다."
-                try if(tgt.Name = null) then ()    with ex -> failwithf $"{findList}에서 \n{mEdge.Target.Name}를 찾을 수 없습니다."
+                if(Prelude.PreludeExt.IsNull(src)) then failwithf $"[{findList}]에서 \n{dicChild.[mEdge.Source.Name].QualifiedName}를 찾을 수 없습니다."
+                if(Prelude.PreludeExt.IsNull(tgt)) then failwithf $"[{findList}]에서 \n{dicChild.[mEdge.Source.Name].QualifiedName}를 찾을 수 없습니다."
 
 
                 InSegmentEdge.Create(coreSeg, src, tgt, edgeType)
@@ -62,17 +63,21 @@ module ConvertM =
             ///MSeg   -> CoreModule.Segment
             let convertSeg(mSeg:MSeg, coreFlow:CoreModule.Flow) = 
                 if mSeg.IsAlias
-                then SegmentAlias.Create(mSeg.Name, coreFlow, mSeg.Alias.Value.FullName.Split('.')) :> SegmentBase
+                then SegmentAlias.Create(mSeg.ValidName, coreFlow, mSeg.Alias.Value.FullName.Split('.')) :> SegmentBase
                 else 
-                     let coreSeg = Segment.Create(mSeg.Name, coreFlow)
+                     let coreSeg = Segment.Create(mSeg.ValidName, coreFlow)
                      convertChildren (mSeg, coreSeg, coreModel)  |> ignore
                      coreSeg :> SegmentBase
 
             ///MEdge   -> CoreModule.Flow
             let convertRootEdge(mEdge:MEdge, coreFlow:CoreModule.Flow) = 
 
-                let src = coreFlow.Graph.FindVertex(mEdge.Source.Name)
-                let tgt = coreFlow.Graph.FindVertex(mEdge.Target.Name)
+                let src = coreFlow.Graph.FindVertex(mEdge.Source.ValidName)
+                let tgt = coreFlow.Graph.FindVertex(mEdge.Target.ValidName)
+
+                let findList = coreFlow.Graph.Vertices |> Seq.map(fun v->v.Name) |> String.concat "\n " 
+                if(Prelude.PreludeExt.IsNull(src)) then failwithf $"[{findList}]에서 \n{mEdge.Source.ValidName}를 찾을 수 없습니다."
+                if(Prelude.PreludeExt.IsNull(tgt)) then failwithf $"[{findList}]에서 \n{mEdge.Target.ValidName}를 찾을 수 없습니다."
                 
                 if( mEdge.Causal = EdgeCausal.SReset)
                 then 

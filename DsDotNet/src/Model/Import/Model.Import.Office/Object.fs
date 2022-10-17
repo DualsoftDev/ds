@@ -69,7 +69,7 @@ module Object =
                                             then x.Name
                                             else sprintf "%s.%s"  ownerMFlow x.ValidName
 
-            member x.FullName   = sprintf "%s.%s.%s(%s)" baseSystem.Name  ownerMFlow x.Name    (if(x.Parent.IsSome) then x.Parent.Value.Name else "Root")
+            member x.FullName   = sprintf "%s.%s.%s" baseSystem.Name  ownerMFlow x.ValidName//    (if(x.Parent.IsSome) then x.Parent.Value.ValidName else "Root")
             //member x.CallName   = sprintf "%s(%s)"  (x.Name.Split('.').[1]) (if(x.Parent.IsSome) then x.Parent.Value.Name else "Root")
 
             member x.Update(nodeKey, nodeIdValue, nodeCntTX, nodeCntRX) = 

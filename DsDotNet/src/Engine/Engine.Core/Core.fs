@@ -78,7 +78,7 @@ module CoreModule =
         member val SafetyConditions = createQualifiedNamedHashSet<Segment>()
         member val Addresses:Addresses = null with get, set
         static member Create(name:string, flow) =
-            if (name.Contains(".") && not <| (name.StartsWith("\"") && name.EndsWith("\""))) then
+            if (name.Contains(".") (*&& not <| (name.StartsWith("\"") && name.EndsWith("\""))*)) then
                 logWarn $"Suspicious segment name [{name}]. Check it."
 
             let segment = Segment(name, flow)
@@ -90,7 +90,7 @@ module CoreModule =
         inherit SegmentBase(name, flow)
 
     and SegmentAlias(mnemonic:string, flow:Flow, aliasKey:string[]) =
-        inherit SegmentBase(mnemonic, flow)
+        inherit SegmentEquivalent(mnemonic, flow)
         member _.AliasKey = aliasKey
         static member Create(name, flow, aliasKey) =
             let alias = SegmentAlias(name, flow, aliasKey)
@@ -99,7 +99,7 @@ module CoreModule =
 
     /// flow 에서 직접 외부 system 의 api 호출한 경우.  R1 > A.Plus;  에서 A system 의 Plus interface 를 직접 호출한 경우
     and SegmentApiCall(apiItem:ApiItem, flow:Flow) =
-        inherit SegmentBase(apiItem.QualifiedName, flow)
+        inherit SegmentEquivalent(apiItem.QualifiedName, flow)
         member _.ApiItem = apiItem
         static member Create(apiItem:ApiItem, flow:Flow) =
             let existing = flow.Graph.Vertices |> Seq.tryFind(fun v -> v.Name = apiItem.QualifiedName)

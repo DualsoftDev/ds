@@ -1,0 +1,19 @@
+
+Sys / F / Seg
+Sys / F / MySegAlias
+Sys / F / SegApiCall (=OtherSys.ApiName)
+Sys / F / SegExCall (=MyF.Seg2)
+
+Sys / F / Seg / ChildApiCall (=Sys2.Plus)
+Sys / F / Seg / ChildAlias (=X)
+
+
+Sys / [interfaces] = {
+	ApiName = { F.Seg ~ F.Seg ~ F.Seg }
+    ApiName1 <||> ApiName2;
+}
+
+Sys / MyF / [aliases] = {
+    Sys2.Plus = { Plus1; Plus2; }
+    MySeg = {MySegAlias1; MySeg2; MySeg3;}
+}

@@ -112,18 +112,18 @@ class ElementListener : ListenerBase
                 }
             }
 
-            var directCall =
+            var apiCall =
                 _modelSpitObjects
                     .OfType<ApiItem>()
                     .Where(api => api.NameComponents.IsStringArrayEqaul(ns))
                     .FirstOrDefault();
 
-            if (directCall != null)
+            if (apiCall != null)
             {
                 if (_parenting == null)
-                    SegmentApiCall.Create(directCall, _rootFlow);
+                    SegmentApiCall.Create(apiCall, _rootFlow);
                 else
-                    ChildApiCall.CreateOnDemand(directCall, _parenting);
+                    ChildApiCall.CreateOnDemand(apiCall, _parenting);
                 return;
             }
 

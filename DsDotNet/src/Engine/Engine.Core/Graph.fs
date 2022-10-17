@@ -15,7 +15,7 @@ module GraphModule =
     type IEdge<'V> =
         abstract Source :'V 
         abstract Target :'V
-        abstract Value  :obj
+        abstract Value  :obj //GraphModule.EdgeType
 
     /// vertex on a flow
     type IFlowVertex =
@@ -84,8 +84,13 @@ module GraphModule =
 
         member private x.ConnectedVertices = x.Edges |> Seq.collect(fun e -> [e.Source; e.Target]) |> Seq.distinct
         member x.Islands = x.Vertices.Except(x.ConnectedVertices)
-        member x.GetIncomingEdges(vertex:'V) = x.Edges.Where(fun e -> e.Target = vertex)
-        member x.GetOutgoingEdges(vertex:'V) = x.Edges.Where(fun e -> e.Source = vertex)
+        member x.GetIncomingEdges(vertex:'V) = x.Edges.Where(fun e -> if (e.Value :?> EdgeType).HasFlag(EdgeType.Reversed)
+                                                                        then e.Source = vertex
+                                                                        else e.Target = vertex )
+                                                                       
+        member x.GetOutgoingEdges(vertex:'V) = x.Edges.Where(fun e -> if (e.Value :?> EdgeType).HasFlag(EdgeType.Reversed)
+                                                                        then e.Target = vertex
+                                                                        else e.Source = vertex )
         member x.GetEdges(vertex:'V) = x.GetIncomingEdges(vertex).Concat(x.GetOutgoingEdges(vertex))
         member x.GetIncomingVertices(vertex:'V) = x.GetIncomingEdges(vertex).Select(fun e -> e.Source)
         member x.GetOutgoingVertices(vertex:'V) = x.GetOutgoingEdges(vertex).Select(fun e -> e.Target)

@@ -35,6 +35,19 @@ class EdgeListener : ListenerBase
             Assert(token != null);
             return token;
         }
+
+        /*
+            children[0] > children[2] > children[4]     where (child[1] = '>', child[3] = '>') 
+            ===> children[0] > children[2],
+                 children[2] > children[4]
+
+            e.g "A, B > C, D > E"
+            ===> children[0] = {A; B},
+                 children[2] = {C; D},
+                 children[4] = {E}, 
+
+            todo: "A, B" 와 "A ? B" 에 대한 구분 없음.
+         */
         for (int i = 0; i < children.Length - 2; i+=2)
         {
             var lefts = enumerateChildren<CausalTokenContext>(children[i]);         // CausalTokensCNFContext

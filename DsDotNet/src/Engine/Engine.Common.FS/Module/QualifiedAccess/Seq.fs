@@ -4,6 +4,7 @@ open System.Linq
 open System.Collections.Generic
 open System
 open System.Runtime.CompilerServices
+#nowarn "0064"
 
 [<AutoOpen>]
 module SeqPrelude =
@@ -380,3 +381,16 @@ module SeqModule =
     let incrementalKeywordGenerator = Seq.incrementalKeywordGenerator
 
 
+module private testMe = 
+    let ofType<'a>(xs:_ seq) = xs.OfType<'a>()
+    let ofNotType<'a>(xs:'b seq) =
+        let ofs = xs.OfType<'a>().Cast<'b>()
+        xs.Except(ofs)
+
+    let xs = [1:>obj; 'a'; "hello"; DateTime.Now]
+    let strings     = xs.OfType<string>()
+    let strings2    = xs |> ofType<string> |> Array.ofSeq
+    let nonStrings  = xs |> ofNotType<string> |> Array.ofSeq
+    let strings3    = ofType<string> xs |> Array.ofSeq
+    let nonStrings2 = ofNotType<string> xs |> Array.ofSeq
+    ()

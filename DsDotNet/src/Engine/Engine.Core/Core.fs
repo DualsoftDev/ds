@@ -79,7 +79,6 @@ module CoreModule =
         member val Graph = Graph<NodeInReal, InSegmentEdge>()
         member val Flow = flow
         member val SafetyConditions = createQualifiedNamedHashSet<RealInFlow>()
-        member val Addresses:Addresses = null with get, set
         static member Create(name:string, flow) =
             if (name.Contains(".") (*&& not <| (name.StartsWith("\"") && name.EndsWith("\""))*)) then
                 logWarn $"Suspicious segment name [{name}]. Check it."
@@ -99,9 +98,6 @@ module CoreModule =
     /// flow 에서 직접 외부 system 의 api 호출한 경우.  R1 > A.Plus;  에서 A system 의 Plus interface 를 직접 호출한 경우
     and CallInFlow(apiItem:ApiItem, flow:Flow) =
         inherit NodeInFlow(apiItem.QualifiedName, flow)
-
-        //interface ICall with
-        //    member x.Addresses = x.Addresses
         member _.ApiItem = apiItem
         static member Create(apiItem:ApiItem, flow:Flow) =
             let existing = flow.Graph.Vertices |> Seq.tryFind(fun v -> v.Name = apiItem.QualifiedName)
@@ -124,8 +120,8 @@ module CoreModule =
 
     and CallInReal private (apiItem:ApiItem, segment:RealInFlow) =
         inherit NodeInReal(apiItem.QualifiedName, apiItem, segment)
-        //interface ICall with
-        //    member x.Addresses = x.Addresses
+        interface ICall with
+            member x.Addresses = x.Addresses
         static member CreateOnDemand(apiItem:ApiItem, segment:RealInFlow) =
             let gr = segment.Graph
             let existing = gr.FindVertex(apiItem.QualifiedName)
@@ -135,6 +131,8 @@ module CoreModule =
                 let child = CallInReal(apiItem, segment)
                 gr.AddVertex(child) |> verifyM $"Duplicated child name [{apiItem.QualifiedName}]"
                 child
+
+        member val Addresses = null with get, set
 
     and AliasInReal private (mnemonic:string, apiItem:ApiItem, segment:RealInFlow) =
         inherit NodeInReal(mnemonic, apiItem, segment)
@@ -163,6 +161,7 @@ module CoreModule =
         member x.AddResets(resets:RealInFlow seq) = resets |> Seq.forall(fun r -> x.Resets.Add(r))
         member _.System = system
         member val Xywh:Xywh = null with get, set
+        member val Addresses:Addresses = null with get, set
 
         static member Create(name, system) =
             let cp = ApiItem(name, system)

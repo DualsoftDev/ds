@@ -192,7 +192,8 @@ module internal ToDsTextModule =
                         yield $"{tab}{rb}"
                 ] |> combineLines
 
-            let withAddresses = segs.Where(fun seg -> seg.Addresses <> null)
+            let apiItems = spits.Select(fun spit -> spit.Obj).OfType<ApiItem>().ToArray()
+            let withAddresses = apiItems.Where(fun apiItem -> apiItem.Addresses <> null)
             let addresses =
                 [
                     if withAddresses.Any() then
@@ -200,7 +201,7 @@ module internal ToDsTextModule =
                         for seg in withAddresses do
                             let ads = seg.Addresses
                             
-                            yield $"{tab2}{seg.QualifiedName} = ( {ads.Start}, {ads.End})"
+                            yield $"{tab2}{seg.QualifiedName} = ( {ads.TX}, {ads.RX})"
                         yield $"{tab}{rb}"
 
                 ] |> combineLines

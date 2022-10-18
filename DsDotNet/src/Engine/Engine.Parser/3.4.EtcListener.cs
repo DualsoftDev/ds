@@ -122,10 +122,10 @@ class EtcListener : ListenerBase
         }
 
         //[addresses] = {
-        //    A.F.Am = (%Q123.23, , %I12.1);        // FQSegmentName = (Start, Reset, End) Tag address
-        //    A.F.Ap = (%Q123.24, , %I12.2);
-        //    B.F.Bm = (%Q123.25, , %I12.3);
-        //    B.F.Bp = (%Q123.26, , %I12.4);
+        //    A.F.Am = (%Q123.23, %I12.1);        // FQSegmentName = (Start, Reset) Tag address
+        //    A.F.Ap = (%Q123.24, %I12.2);
+        //    B.F.Bm = (%Q123.25, %I12.3);
+        //    B.F.Bp = (%Q123.26, %I12.4);
         //}
         var addresses = enumerateChildren<AddressesContext>(ctx).ToArray();
         if (addresses.Length > 1)
@@ -135,10 +135,15 @@ class EtcListener : ListenerBase
         foreach (var addrDef in addressDefs)
         {
             var segNs = collectNameComponents(addrDef.segmentPath());
-            var seg = _model.FindGraphVertex<RealInFlow>(segNs);
+            var api =
+                _model.Spit()
+                .Where(o => o.Obj is ApiItem && o.NameComponents.IsStringArrayEqaul(segNs))
+                .FirstOrDefault();
+
+            var apiItem = api.Obj as ApiItem;
             var sre = addrDef.address();
             var (s, e) = (sre.startTag()?.GetText(), sre.endTag()?.GetText());
-            seg.Addresses = new Addresses(s, e);
+            apiItem.Addresses = new Addresses(s, e);
         }
     }
 }

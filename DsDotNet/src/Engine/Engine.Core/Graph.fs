@@ -14,7 +14,7 @@ module GraphModule =
         inherit INamed
 
     [<Flags>]
-    type EdgeCausal =
+    type EdgeType =
     | Default                    = 0b0000000    // Start, Weak
     | Reset                      = 0b0000001    // else start
     | Strong                     = 0b0000010    // else weak
@@ -23,8 +23,6 @@ module GraphModule =
     // runtime edge 는 Reversed / Bindrectional 을 포함하지 않는다.
     | Reversed                   = 0b0001000    // direction reversed : <, <|, <||, etc
     | Bidirectional              = 0b0010000    // 양방향.  <||>
-
-    type EdgeType = EdgeCausal
 
     type IEdge<'V> =
         abstract Source :'V    //방향을 고려안한 위치상 왼쪽   Vertex
@@ -192,7 +190,7 @@ type GraphHelper =
                     "|>"
         else
             if t.HasFlag(EdgeType.Bidirectional) then
-                failwith "ERROR"
+                failwith "Bidirectional 은 Strong, Reset와 같이 사용가능합니다. ERROR"
             if t.HasFlag(EdgeType.Strong) then
                 if t.HasFlag(EdgeType.Reversed) then
                     "<<"

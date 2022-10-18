@@ -3,8 +3,8 @@ namespace Model.Import.Office
 
 open System.Linq
 open System.Collections.Generic
-open Engine.Core
 open System.Collections.Concurrent
+open Engine.Core
 
 [<AutoOpen>]
 module ExportM =

@@ -6,21 +6,18 @@ open System
 [<AutoOpen>]
 module DsText = 
     //edge    
-    let [<Literal>] TextSEdge         = ">"
-    let [<Literal>] TextSPush         = ">>"
-    let [<Literal>] TextREdge         = "|>"
-    let [<Literal>] TextRPush         = "||>"
-
-
-    //<ahn>
-    let [<Obsolete>] [<Literal>] TextSReset        = "=>"
-    let [<Obsolete>] [<Literal>] TextInterlockWeak = "<|>"
-    let [<Obsolete>] [<Literal>] TextInterlock     = "<||>"
-    let [<Obsolete>] [<Literal>] TextSEdgeRev      = "<"
-    let [<Obsolete>] [<Literal>] TextSPushRev      = "<<"
-    let [<Obsolete>] [<Literal>] TextREdgeRev      = "<|"
-    let [<Obsolete>] [<Literal>] TextRPushRev      = "<||"
-    let [<Obsolete>] [<Literal>] TextSResetRev     = "<="
+    let [<Literal>] TextStartEdge         = ">"
+    let [<Literal>] TextStartPush         = ">>"
+    let [<Literal>] TextResetEdge         = "|>"
+    let [<Literal>] TextResetPush         = "||>"
+    let [<Literal>] TextStartReset        = "=>"
+    let [<Literal>] TextInterlockWeak     = "<|>"
+    let [<Literal>] TextInterlock         = "<||>"
+    let [<Literal>] TextStartEdgeRev      = "<"
+    let [<Literal>] TextStartPushRev      = "<<"
+    let [<Literal>] TextResetEdgeRev      = "<|"
+    let [<Literal>] TextResetPushRev      = "<||"
+    let [<Literal>] TextStartResetRev     = "<="
   
 [<AutoOpen>]
 module DsTextDataType =    

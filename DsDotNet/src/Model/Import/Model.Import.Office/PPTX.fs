@@ -10,8 +10,9 @@ open System.IO
 open System
 open UtilPPT
 open Engine.Common.FS
-open Engine.Core
+open Model.Import.Office
 open System.Collections.Generic
+open Engine.Core
 
 
 
@@ -21,11 +22,12 @@ module PPTX =
     let TextMySys = "MY"
     let Objkey(iPage, Id) = $"{iPage}page{Id}"
     let SysName(iPage) = sprintf "page%3d" iPage 
+    let TrimStartEndSpace(name:string) = name.TrimStart(' ').TrimEnd(' ')
     let CopyName(name:string, cnt) = sprintf "Copy%d_%s" cnt (name.Replace(".", "_")) 
     let GetSysNFlow(name:string, pageNum:int) = 
-            if(name.StartsWith("\\")) then (name.TrimStart('\\')), "exflow"
+            if(name.StartsWith("$")) then (TrimStartEndSpace(name.TrimStart('$'))), "exflow"
             elif(name = "")        then TextMySys, sprintf "P%d" pageNum
-            else                        TextMySys, name
+            else                        TextMySys, TrimStartEndSpace(name)
             
 
 
@@ -114,22 +116,19 @@ module PPTX =
                             if(not headArrow && not tailArrow)  then  conn.ErrorConnect(10, startName, endName, iPage) 
 
 
-                    //<ahn>
-                    ////인과 타입과 <START, END> 역전여부
-                    //match existHead, existTail, dashLine with
-                    //|true, true, true  ->    EdgeCausal.Interlock, false
-                    //|true, true, false  ->  if(not headArrow &&  tailArrow) then EdgeCausal.SReset, false
-                    //                        else EdgeCausal.SReset, true //반대로 뒤집기 필요
-                    //// dashLine 점선라인, single 한줄라인
-                    //|_->  match single, tailArrow, dashLine with
-                    //        | true, true, false ->  SEdge, isChangeHead
-                    //        | false,true, false ->  SPush, isChangeHead
-                    //        | true, true, true  ->  REdge, isChangeHead
-                    //        | false,true, true  ->  RPush, isChangeHead
-                    //        | _ -> conn.ErrorConnect(3, startName, endName, iPage)
+                    //인과 타입과 <START, END> 역전여부
+                    match existHead, existTail, dashLine with
+                    |true, true, true  ->   Interlock , false
+                    |true, true, false  ->  if(not headArrow &&  tailArrow) then StartReset , false
+                                            else StartReset, true //반대로 뒤집기 필요
+                    // dashLine 점선라인, single 한줄라인
+                    |_->  match single, tailArrow, dashLine with
+                            | true, true, false ->  StartEdge, isChangeHead
+                            | false,true, false ->  StartPush, isChangeHead
+                            | true, true, true  ->  ResetEdge, isChangeHead
+                            | false,true, true  ->  ResetPush, isChangeHead
+                            | _ -> conn.ErrorConnect(3, startName, endName, iPage)
 
-                    //<ahn> --> 컴파일을 위해서 아무 값이나 return
-                    SEdge, false
 
     let rec ValidGroup(subG:Presentation.GroupShape, shapeIds:ConcurrentHash<uint32>) =    
         subG.Descendants<Presentation.Shape>() 
@@ -256,7 +255,7 @@ module PPTX =
         member x.Shape = shape
         member x.DashOutline = dashOutline
         member x.Safeties = safeties
-        member x.CopySys  = copySystems.Map(fun s -> NameUtil.QuoteOnDemand(s))
+        member x.CopySys  = copySystems
         member x.IfName      = ifName
         member x.IfTxs       = ifTXs
         member x.IfRxs       = ifRXs
@@ -281,7 +280,7 @@ module PPTX =
     and 
         pptEdge(conn:Presentation.ConnectionShape,  iEdge:UInt32Value, iPage:int ,startId:uint32, endId:uint32, nodes:ConcurrentDictionary<string, pptNode>) =
         let mutable reverse = false
-        let mutable causal:EdgeCausal = SEdge
+        let mutable causal:EdgeType = EdgeType.Default
         let startKey = Objkey(iPage, startId)
         let endKey   = Objkey(iPage, endId) 
         let startNode = nodes.[startKey]
@@ -307,7 +306,7 @@ module PPTX =
                             then $"{iPage};{endNode.Key}{causal.ToText()}{startNode.Key}";
                             else $"{iPage};{startNode.Key}{causal.ToText()}{endNode.Key}";
 
-        member val Causal:EdgeCausal = causal
+        member val Causal:EdgeType = causal
     
     and 
         pptGroup(iPage:int, ids:uint32 seq, nodes:ConcurrentDictionary<string, pptNode>) =

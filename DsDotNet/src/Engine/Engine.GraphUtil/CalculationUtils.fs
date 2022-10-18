@@ -115,9 +115,9 @@ module private GraphCalculationUtils =
         )
         |> Seq.map(fun e -> 
             let (head, r, tail) = e
-            if r = TextRPush then
+            if r = TextResetPush then
                 seq { head.Value; tail.Value; }
-            elif r = TextRPushRev then
+            elif r = TextResetPushRev then
                 seq { tail.Value; head.Value; }
             else
                 Seq.empty

@@ -6,7 +6,7 @@ open PPTX
 open System
 open System.Collections.Concurrent
 open Engine.Common.FS
-open Engine.Core
+open Model.Import.Office
 open System.Collections.Generic
 
 [<AutoOpen>]
@@ -16,14 +16,13 @@ module ImportCheck =
             let model = MModel("testModel");
             let sys   = MSys.Create(sysName, true, model)
             let mFlow = MFlow.Create("P0", sys, Int32.MaxValue)
-            mFlow.AddEdge(MEdge(MSeg("START", sys,mFlow, TR), MSeg("시작인과", sys,mFlow, MY), SEdge))         |> ignore
-            mFlow.AddEdge(MEdge(MSeg("RESET", sys,mFlow, TR), MSeg("복귀인과", sys,mFlow, MY), REdge))         |> ignore
-            mFlow.AddEdge(MEdge(MSeg("START", sys,mFlow, TR), MSeg("시작유지", sys,mFlow, MY), SPush))         |> ignore
-            mFlow.AddEdge(MEdge(MSeg("RESET", sys,mFlow, TR), MSeg("복귀유지", sys,mFlow, MY), RPush))         |> ignore
+            mFlow.AddEdge(MEdge(MSeg("START", sys,mFlow, TR), MSeg("시작인과", sys,mFlow, MY), StartEdge))         |> ignore
+            mFlow.AddEdge(MEdge(MSeg("RESET", sys,mFlow, TR), MSeg("복귀인과", sys,mFlow, MY), ResetEdge))         |> ignore
+            mFlow.AddEdge(MEdge(MSeg("START", sys,mFlow, TR), MSeg("시작유지", sys,mFlow, MY), StartPush))         |> ignore
+            mFlow.AddEdge(MEdge(MSeg("RESET", sys,mFlow, TR), MSeg("복귀유지", sys,mFlow, MY), ResetPush))         |> ignore
 
-            //<ahn>
-            //mFlow.AddEdge(MEdge(MSeg("ETC"  , sys,mFlow, TR), MSeg("상호행위간섭", sys,mFlow, MY), EdgeCausal.Interlock)) |> ignore
-            //mFlow.AddEdge(MEdge(MSeg("ETC"  , sys,mFlow, TR), MSeg("시작후행리셋", sys,mFlow, MY), EdgeCausal.SReset))    |> ignore
+            mFlow.AddEdge(MEdge(MSeg("ETC"  , sys,mFlow, TR), MSeg("상호행위간섭", sys,mFlow, MY), Interlock)) |> ignore
+            mFlow.AddEdge(MEdge(MSeg("ETC"  , sys,mFlow, TR), MSeg("시작후행리셋", sys,mFlow, MY), StartReset))    |> ignore
 
             model
 

@@ -24,13 +24,13 @@ module ConvertM =
             ///MSeg   -> CoreModule.Child
             let convertChild(mChildSeg:MSeg) = 
                 if mChildSeg.IsAlias
-                then AliasInReal.Create(mChildSeg.Name, dicChild.[mChildSeg.Alias.Value.Name], coreSeg) :> NodeInReal
+                then AliasInReal.Create(mChildSeg.AliasName, dicChild.[mChildSeg.AliasOrg.Value.Name], coreSeg) :> NodeInReal
                 else 
                      let api = 
                         if dicChild.ContainsKey(mChildSeg.Name) 
                         then dicChild.[mChildSeg.Name]
                         else 
-                            let newApi= ApiItem.Create(mChildSeg.Name, coreModel.FindSystem(mChildSeg.BaseSys.Name))
+                            let newApi= ApiItem.Create(mChildSeg.ApiName, coreModel.FindSystem(mChildSeg.BaseSys.Name))
                             dicChild.TryAdd(mChildSeg.Name, newApi) |> ignore
                             newApi
 
@@ -66,7 +66,7 @@ module ConvertM =
             ///MSeg   -> CoreModule.Segment
             let convertSeg(mSeg:MSeg, coreFlow:CoreModule.Flow) = 
                 if mSeg.IsAlias
-                then AliasInFlow.Create(mSeg.ValidName, coreFlow, mSeg.Alias.Value.FullName.Split('.')) :> NodeInFlow
+                then AliasInFlow.Create(mSeg.ValidName, coreFlow, mSeg.AliasOrg.Value.FullName.Split('.')) :> NodeInFlow
                 else 
                      let coreSeg = RealInFlow.Create(mSeg.ValidName, coreFlow)
                      convertChildren (mSeg, coreSeg, coreModel)  |> ignore
@@ -85,16 +85,16 @@ module ConvertM =
                 if(tgt.IsNull()) then failwithf $"[{findList}]에서 \n{t}를 찾을 수 없습니다."
                 
 
-                //<ahn>
-                //if( mEdge.Causal = EdgeCausal.SReset)
-                //then 
-                //     InFlowEdge.Create(coreFlow, src, tgt, EdgeType.Default) |> ignore
-                //     InFlowEdge.Create(coreFlow, tgt, src, EdgeType.Reset)
-                //else 
-                //     InFlowEdge.Create(coreFlow, src, tgt, mEdge.Causal)
-
-                //<ahn> --> 컴파일을 위해서 아무 값이나 return
-                InFlowEdge.Create(coreFlow, src, tgt, mEdge.Causal)
+                if(mEdge.Causal = Interlock)
+                then 
+                     InFlowEdge.Create(coreFlow, src, tgt, ResetPush ) |> ignore
+                     InFlowEdge.Create(coreFlow, tgt, src, ResetPush)
+                elif(mEdge.Causal = StartReset)
+                then 
+                     InFlowEdge.Create(coreFlow, src, tgt, StartEdge) |> ignore
+                     InFlowEdge.Create(coreFlow, tgt, src, ResetEdge)
+                else 
+                     InFlowEdge.Create(coreFlow, src, tgt, mEdge.Causal)
 
             mFlow.Nodes |> Seq.distinct |> Seq.cast<MSeg> 
                         |> Seq.filter(fun seg -> seg.IsDummy|>not)

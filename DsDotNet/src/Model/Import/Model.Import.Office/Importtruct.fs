@@ -1,15 +1,16 @@
 // Copyright (c) Dual Inc.  All Rights Reserved.
-namespace Engine.Core
+namespace Model.Import.Office
 
 open System.Diagnostics
 open System.Collections.Generic
 open System.Collections.Concurrent
+open Engine.Core
 
 [<AutoOpen>]
 module CoreStruct =
 
     [<DebuggerDisplay("{name}")>]
-    type MSystem(name:string, model:Model) =
+    type MSystem(name:string, model:ModelBase) =
         inherit SysBase(name)
         let dicRootFlow = ConcurrentDictionary<string, RootFlow>()
 
@@ -32,7 +33,7 @@ module CoreStruct =
          
     and
         [<DebuggerDisplay("{name}")>]
-        Model() =
+        ModelBase() =
             let cpus    = HashSet<ICpu>()
             member x.Cpus = cpus
       

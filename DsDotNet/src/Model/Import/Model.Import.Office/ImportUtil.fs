@@ -7,6 +7,7 @@ open PPTX
 open System.Collections.Generic
 open Microsoft.FSharp.Collections
 open Engine.Common.FS
+open Model.Import.Office
 open Engine.Core
 
 [<AutoOpen>]
@@ -16,7 +17,7 @@ module ImportUtil =
         //flow.AliasSet 업데이트
         let UpdateAlias(seg:MSeg, flow:MFlow) = 
             let aliasName = seg.ValidName 
-            let orginName = seg.Alias.Value.ValidName 
+            let orginName = seg.AliasOrg.Value.ValidName 
             if(flow.AliasSet.Keys.Contains(orginName))  
                 then flow.AliasSet.[orginName].Add(aliasName)|> ignore
                 else let set = HashSet<string>()
@@ -137,7 +138,7 @@ module ImportUtil =
                     let aliasName = node.Alias.Value
                     let aliasSeg = MSeg(aliasName, mySys, ThisFlow, segOrg.NodeType, flow, segOrg.IsDummy)
                     aliasSeg.Update(node.Key, node.Id.Value, 0,0)
-                    aliasSeg.Alias <- Some(segOrg)
+                    aliasSeg.AliasOrg <- Some(segOrg)
                     dicSeg.TryAdd(node.Key, aliasSeg) |> ignore
                 else 
                     let name =  if(node.NodeType.IsCall) then node.CallName else node.NameOrg
@@ -203,9 +204,8 @@ module ImportUtil =
                 let parentNode, parentSeg= getParent(edge) 
                 let mEdge = MEdge(sSeg, eSeg, edge.Causal)
 
-                //<ahn>
-                //if(mEdge.Causal = Interlock)
-                //then mFlow.AddInterlock(mEdge)
+                if(mEdge.Causal = Interlock)
+                then mFlow.AddInterlock(mEdge)
 
                 if(parentNode.IsNone) 
                 then mFlow.AddEdge(mEdge) |> ignore
@@ -259,7 +259,7 @@ module ImportUtil =
                 |> Seq.iter(fun node -> 
                             if(node.Alias.IsSome)
                             then 
-                                mySys.LocationSet.TryAdd((dicSeg.[node.Key].Alias.Value).FullName, node.Rectangle) |> ignore
+                                mySys.LocationSet.TryAdd((dicSeg.[node.Key].AliasOrg.Value).FullName, node.Rectangle) |> ignore
                             else
                                 mySys.LocationSet.TryAdd(dicSeg.[node.Key].FullName, node.Rectangle) |> ignore
                                 )

@@ -1,11 +1,24 @@
 // Copyright (c) Dual Inc.  All Rights Reserved.
-namespace Engine.Core
+namespace Model.Import.Office
 
 open System.Runtime.CompilerServices
+open Engine.Core
 
 [<AutoOpen>]
-module Util = 
+module UtilEdge = 
     
+    let [<Literal>] StartEdge         = EdgeType.Default                                // A>B	        약 시작 연결
+    let [<Literal>] StartPush         = EdgeType.Strong                                 // A>>B	        강 시작 연결    
+    let [<Literal>] ResetEdge         = EdgeType.Reset                                  // A|>B	        약 리셋 연결
+    let [<Literal>] ResetPush         = EdgeType.Reset ||| EdgeType.Strong              // A||>B	    강 리셋 연결     
+    let [<Literal>] StartReset        = EdgeType.Reset ||| EdgeType.Bidirectional       // A<||>B	    인터락 연결        
+    let [<Literal>] Interlock         = EdgeType.Reset ||| EdgeType.Bidirectional ||| EdgeType.Strong          
+    let [<Literal>] StartEdgeRev      = EdgeType.Default                          ||| EdgeType.Reversed   
+    let [<Literal>] StartPushRev      = EdgeType.Strong                           ||| EdgeType.Reversed   
+    let [<Literal>] ResetEdgeRev      = EdgeType.Reset                            ||| EdgeType.Reversed   
+    let [<Literal>] ResetPushRev      = EdgeType.Reset ||| EdgeType.Strong        ||| EdgeType.Reversed   
+    let [<Literal>] StartResetRev     = EdgeType.Reset ||| EdgeType.Bidirectional ||| EdgeType.Reversed   
+
     [<Extension>]
     type EdgeUtil =
 

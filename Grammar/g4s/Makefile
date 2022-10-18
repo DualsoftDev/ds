@@ -13,6 +13,8 @@ grun:
 tokens:
 	$(grun) ds model -tokens < g4test/prop.ds
 
+cli:
+	echo "[sys] A = {}" | $(grun) ds model -tokens
 gui:
 	$(grun) ds model -gui < g4test/prop.ds
 

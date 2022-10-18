@@ -21,7 +21,6 @@ type Xywh(x:int, y:int, w:Nullable<int>, h:Nullable<int>) =
     member z.H = h
 
 [<AllowNullLiteral>]
-type Addresses(start:string, end_:string, reset:string) =
+type Addresses(start:string, end_:string) =
     member x.Start = start
     member x.End   = end_
-    member x.Reset = reset

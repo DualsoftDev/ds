@@ -87,7 +87,7 @@ C4 > C5;
         My.F.Main = {B.F.Sp; B.F.Sm; C.F.Sp}
     }
     [addresses] = {
-        My.F.Main = (%Q1234.2343, , )
+        A.""+"" = (%Q1234.2343, )
     }
     [layouts] = {
         A.""+"" = (1309,405,205,83)

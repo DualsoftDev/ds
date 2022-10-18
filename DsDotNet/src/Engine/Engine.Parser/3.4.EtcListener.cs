@@ -137,8 +137,8 @@ class EtcListener : ListenerBase
             var segNs = collectNameComponents(addrDef.segmentPath());
             var seg = _model.FindGraphVertex<RealInFlow>(segNs);
             var sre = addrDef.address();
-            var (s, r, e) = (sre.startTag()?.GetText(), sre.resetTag()?.GetText(), sre.endTag()?.GetText());
-            seg.Addresses = new Addresses(s, r, e);
+            var (s, e) = (sre.startTag()?.GetText(), sre.endTag()?.GetText());
+            seg.Addresses = new Addresses(s, e);
         }
     }
 }

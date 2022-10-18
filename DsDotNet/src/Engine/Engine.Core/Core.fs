@@ -7,6 +7,8 @@ open Engine.Common.FS
 
 [<AutoOpen>]
 module CoreModule =
+    type ICall =
+        abstract Addresses:Addresses
     type Model() =
         member val Systems = createNamedHashSet<DsSystem>()
         interface IQualifiedNamed with
@@ -97,6 +99,9 @@ module CoreModule =
     /// flow 에서 직접 외부 system 의 api 호출한 경우.  R1 > A.Plus;  에서 A system 의 Plus interface 를 직접 호출한 경우
     and CallInFlow(apiItem:ApiItem, flow:Flow) =
         inherit NodeInFlow(apiItem.QualifiedName, flow)
+
+        //interface ICall with
+        //    member x.Addresses = x.Addresses
         member _.ApiItem = apiItem
         static member Create(apiItem:ApiItem, flow:Flow) =
             let existing = flow.Graph.Vertices |> Seq.tryFind(fun v -> v.Name = apiItem.QualifiedName)
@@ -119,6 +124,8 @@ module CoreModule =
 
     and CallInReal private (apiItem:ApiItem, segment:RealInFlow) =
         inherit NodeInReal(apiItem.QualifiedName, apiItem, segment)
+        //interface ICall with
+        //    member x.Addresses = x.Addresses
         static member CreateOnDemand(apiItem:ApiItem, segment:RealInFlow) =
             let gr = segment.Graph
             let existing = gr.FindVertex(apiItem.QualifiedName)

@@ -54,10 +54,9 @@ addressesBlock
     : LBRACE (addressDef)* RBRACE
     ;
 addressDef: segmentPath '=' address;
-    segmentPath: identifier3;
-    address: LPARENTHESIS (startTag)? COMMA (resetTag)? COMMA (endTag)? RPARENTHESIS (SEIMCOLON)?;
+    segmentPath: identifier2;
+    address: LPARENTHESIS (startTag)? COMMA (endTag)? RPARENTHESIS (SEIMCOLON)?;
     startTag: TAG_ADDRESS;
-    resetTag: TAG_ADDRESS;
     endTag: TAG_ADDRESS;
 
 

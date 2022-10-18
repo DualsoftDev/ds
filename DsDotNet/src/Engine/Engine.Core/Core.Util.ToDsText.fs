@@ -200,7 +200,7 @@ module internal ToDsTextModule =
                         for seg in withAddresses do
                             let ads = seg.Addresses
                             
-                            yield $"{tab2}{seg.QualifiedName} = ( {ads.Start}, {ads.End}, {ads.Reset} )"
+                            yield $"{tab2}{seg.QualifiedName} = ( {ads.Start}, {ads.End})"
                         yield $"{tab}{rb}"
 
                 ] |> combineLines

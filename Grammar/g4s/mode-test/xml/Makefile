@@ -7,7 +7,8 @@ grun=java -Xmx500M -cp /usr/local/lib/antlr-4.10.1-complete.jar:. org.antlr.v4.g
 # pp. 225
 grun:
 	@java -version
-	@$(antlr4) XMLLexer.g4 	# must be done first to get ModeTagsLexer.tokens
+# must be done first to get ModeTagsLexer.tokens
+	@$(antlr4) XMLLexer.g4
 	@$(antlr4) XMLParser.g4
 	@javac XML*.java
 	@echo "Hello <name>John</name>" | $(grun) XML document -tokens

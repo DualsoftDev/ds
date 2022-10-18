@@ -28,10 +28,10 @@ class ElementListener : ListenerBase
                 .ToArray()
                 ;
         bool isWildcard(string[] cc) => cc.Length == 1 && cc[0] == "_";
-        Segment[] findSegments(string[][] fqdns) =>
+        RealSegment[] findSegments(string[][] fqdns) =>
             fqdns
             .Where(fqdn => fqdn != null)
-            .Select(s => _model.FindGraphVertex<Segment>(s))
+            .Select(s => _model.FindGraphVertex<RealSegment>(s))
             .Tap(x => Assert(x != null))
             .ToArray()
             ;
@@ -74,7 +74,7 @@ class ElementListener : ListenerBase
             .Select(spitResult => spitResult.Obj)
             .ToArray()
             ;
-        if (matches.OfType<Segment>().Any())
+        if (matches.OfType<RealSegment>().Any())
             return;
 
         try
@@ -102,9 +102,9 @@ class ElementListener : ListenerBase
                         Assert(apiItem != null);
 
                         if (_parenting == null)
-                            SegmentAlias.Create(ns.Combine(), _rootFlow, aliasKey);
+                            InFlowAlias.Create(ns.Combine(), _rootFlow, aliasKey);
                         else
-                            ChildAliased.Create(ns.Combine(), apiItem, _parenting);
+                            InRealAlias.Create(ns.Combine(), apiItem, _parenting);
                         return;
                     case 1:
                         Assert(false);
@@ -121,9 +121,9 @@ class ElementListener : ListenerBase
             if (apiCall != null)
             {
                 if (_parenting == null)
-                    SegmentApiCall.Create(apiCall, _rootFlow);
+                    InFlowApiCall.Create(apiCall, _rootFlow);
                 else
-                    ChildApiCall.CreateOnDemand(apiCall, _parenting);
+                    InRealApiCall.CreateOnDemand(apiCall, _parenting);
                 return;
             }
 
@@ -133,7 +133,7 @@ class ElementListener : ListenerBase
             {
                 if(ns.Length != 1)
                     throw new ParserException($"ERROR: unknown token [{ns.Combine()}].", ctx);
-                Segment.Create(ns[0], _rootFlow);
+                RealSegment.Create(ns[0], _rootFlow);
                 return;
             }
             else
@@ -154,6 +154,6 @@ class ElementListener : ListenerBase
         if (_parenting != null)
             throw new ParserException($"ERROR: identifier [{path.Combine()}] not allowed!", ctx);
 
-        Segment.Create(path.Last(), _rootFlow);
+        RealSegment.Create(path.Last(), _rootFlow);
     }
 }

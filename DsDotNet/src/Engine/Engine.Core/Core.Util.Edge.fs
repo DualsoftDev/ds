@@ -59,7 +59,7 @@ module EdgeModule =
                 yield InFlowEdge.Create(flow, src, tgt, op)
         |]
 
-    let createChildEdges(segment:Segment, source:Child, target:Child, operator:string) =
+    let createChildEdges(segment:RealSegment, source:Child, target:Child, operator:string) =
         [|
             for src, op, tgt in createEdgesReArranged(source, operator, target) do
                 yield InSegmentEdge.Create(segment, src, tgt, op)
@@ -145,7 +145,7 @@ type EdgeExt =
    
     [<Extension>] static member CreateEdges(flow:Flow, source:SegmentBase, target:SegmentBase, operator:string) =
                     createFlowEdges(flow, source, target, operator)
-    [<Extension>] static member CreateEdges(segment:Segment, source:Child, target:Child, operator:string) =
+    [<Extension>] static member CreateEdges(segment:RealSegment, source:Child, target:Child, operator:string) =
                     createChildEdges(segment, source, target, operator)
 
     [<Extension>] static member CreateMRIEdgesTransitiveClosure(model:Model) =

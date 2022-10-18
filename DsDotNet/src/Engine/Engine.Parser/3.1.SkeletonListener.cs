@@ -40,7 +40,7 @@ class SkeletonListener : ListenerBase
     {
         Trace.WriteLine($"Parenting: {ctx.GetText()}");
         var name = ctx.identifier1().GetText().DeQuoteOnDemand();
-        _parenting = Segment.Create(name, _rootFlow);
+        _parenting = RealSegment.Create(name, _rootFlow);
         AddElement(CurrentPathElements, GraphVertexType.Segment | GraphVertexType.Parenting);
 
         var children =

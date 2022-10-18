@@ -72,19 +72,19 @@ module internal ToDsTextModule =
                     assert(es.Length = 1)
                     yield $"{tab}{es[0].ToText()};"
 
-            let segments = vertices.OfType<Segment>().ToArray()
+            let segments = vertices.OfType<RealSegment>().ToArray()
             for v in segments do
                 yield segmentToDs basis v indent
 
             let islands =
                 vertices
-                    .Where(fun v -> (box v) :? Segment &&  not <| segments.Contains( (box v) :?> Segment))
+                    .Where(fun v -> (box v) :? RealSegment &&  not <| segments.Contains( (box v) :?> RealSegment))
                     .Except((*segments @@*) edges.Collect(fun e -> e.GetVertices()))
             for island in islands do
                 yield $"{tab}{island.GetRelativeName(basis)}; // island"
         ] |> combineLines
 
-    and segmentToDs (basis:NameComponents) (segment:Segment) (indent:int) =
+    and segmentToDs (basis:NameComponents) (segment:RealSegment) (indent:int) =
         let tab = getTab indent
         [
             let subGraph = segment.Graph
@@ -138,7 +138,7 @@ module internal ToDsTextModule =
                 yield $"{tab}[interfaces] = {lb}"
                 for item in api.Items do
                     let ser =
-                        let qNames (xs:Segment seq) = xs.Select(fun tx -> tx.QualifiedName) |> String.concat(", ")
+                        let qNames (xs:RealSegment seq) = xs.Select(fun tx -> tx.QualifiedName) |> String.concat(", ")
                         let s = qNames(item.TXs) |> nonNullSelector "_"
                         let e = qNames(item.RXs) |> nonNullSelector "_"
                         let r = qNames(item.Resets)
@@ -179,7 +179,7 @@ module internal ToDsTextModule =
             //      addresses
             //      layouts
             let spits = model.Spit()
-            let segs = spits.Select(fun spit -> spit.Obj).OfType<Segment>().ToArray()
+            let segs = spits.Select(fun spit -> spit.Obj).OfType<RealSegment>().ToArray()
 
             let withSafeties = segs.Where(fun seg -> seg.SafetyConditions.Any())
             let safeties =

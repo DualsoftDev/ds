@@ -76,22 +76,22 @@ class EtcListener : ListenerBase
 
         foreach (var (key, values) in safetyKvs)
         {
-            Segment seg = null;
+            RealSegment seg = null;
             switch (key.Length)
             {
                 case 1:
                     Assert(ctx.Parent is FlowContext);
-                    seg = _model.FindGraphVertex<Segment>(AppendPathElement(key[0]));
+                    seg = _model.FindGraphVertex<RealSegment>(AppendPathElement(key[0]));
                     break;
                 case 3:
                     Assert(ctx.Parent is PropertyBlockContext);
-                    seg = _model.FindGraphVertex<Segment>(key);
+                    seg = _model.FindGraphVertex<RealSegment>(key);
                     break;
                 default:
                     throw new ParserException($"Invalid safety key[{key.Combine()}]", ctx);
             }
 
-            foreach (var cond in values.Select(v => _model.FindGraphVertex(v) as Segment))
+            foreach (var cond in values.Select(v => _model.FindGraphVertex(v) as RealSegment))
             {
                 var added = seg.SafetyConditions.Add(cond);
                 if (!added)
@@ -135,7 +135,7 @@ class EtcListener : ListenerBase
         foreach (var addrDef in addressDefs)
         {
             var segNs = collectNameComponents(addrDef.segmentPath());
-            var seg = _model.FindGraphVertex<Segment>(segNs);
+            var seg = _model.FindGraphVertex<RealSegment>(segNs);
             var sre = addrDef.address();
             var (s, r, e) = (sre.startTag()?.GetText(), sre.resetTag()?.GetText(), sre.endTag()?.GetText());
             seg.Addresses = new Addresses(s, r, e);

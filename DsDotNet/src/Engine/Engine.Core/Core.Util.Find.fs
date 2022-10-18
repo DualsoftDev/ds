@@ -15,7 +15,7 @@ module internal ModelFindModule =
         | 2 -> model.Systems.First(fun sys -> sys.Name = fqdn[0]).Flows.First(fun f -> f.Name = fqdn[1])
         | 3 -> model.Systems.First(fun sys -> sys.Name = fqdn[0]).Flows.First(fun f -> f.Name = fqdn[1]).Graph.FindVertex(fqdn[2])
         | 4 ->
-            let seg = model.Systems.First(fun sys -> sys.Name = fqdn[0]).Flows.First(fun f -> f.Name = fqdn[1]).Graph.FindVertex(fqdn[2]) :?> Segment
+            let seg = model.Systems.First(fun sys -> sys.Name = fqdn[0]).Flows.First(fun f -> f.Name = fqdn[1]).Graph.FindVertex(fqdn[2]) :?> RealSegment
             seg.Graph.FindVertex(fqdn[3])
         | _ -> failwith "ERROR"
     let findGraphVertexT<'V when 'V :> IVertex>(model:Model, fqdn:NameComponents) =
@@ -56,11 +56,11 @@ type ModelFindHelper =
 //        match s with
 //        | :? Segment ->
 //            Segment.Create(s.Name, targetFlow)
-//        | :? SegmentAlias as ali ->
-//            SegmentAlias.Create(s.Name, targetFlow, ali.AliasKey)
-//        | :? SegmentApiCall as call ->
+//        | :? InFlowAlias as ali ->
+//            InFlowAlias.Create(s.Name, targetFlow, ali.AliasKey)
+//        | :? InFlowApiCall as call ->
 //            let apiItem = copyApiItem(call.ApiItem)
-//            SegmentApiCall.Create(apiItem, targetFlow)
+//            InFlowApiCall.Create(apiItem, targetFlow)
 //        | _ ->
 //            failwith "ERROR"
         

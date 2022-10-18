@@ -17,7 +17,7 @@ class ListenerBase : dsBaseListener
     protected Model _model => ParserHelper.Model;
     protected DsSystem _system { get => ParserHelper._system; set => ParserHelper._system = value; }
     protected Flow _rootFlow { get => ParserHelper._rootFlow; set => ParserHelper._rootFlow = value; }
-    protected Segment _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
+    protected RealSegment _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
     protected Dictionary<string[], GraphVertexType> _elements => ParserHelper._elements;
     protected SpitResult[] _modelSpits { get => ParserHelper._modelSpits; set => ParserHelper._modelSpits = value; }
     protected object[] _modelSpitObjects { get => ParserHelper._modelSpitObjects; set => ParserHelper._modelSpitObjects = value; }
@@ -71,7 +71,7 @@ class ListenerBase : dsBaseListener
     override public void EnterParenting(ParentingContext ctx)
     {
         var name = ctx.identifier1().GetText().DeQuoteOnDemand();
-        _parenting = (Segment)_rootFlow.Graph.Vertices.FindWithName(name);
+        _parenting = (RealSegment)_rootFlow.Graph.Vertices.FindWithName(name);
     }
     override public void ExitParenting(ParentingContext ctx) { _parenting = null; }
 

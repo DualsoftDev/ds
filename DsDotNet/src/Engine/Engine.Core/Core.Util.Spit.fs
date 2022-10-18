@@ -19,13 +19,13 @@ module SpitModuleHelper =
         [|
             yield SpitResult(child, child.NameComponents)
         |]
-    and spitSegment (segment:Segment) : SpitResults =
+    and spitSegment (segment:RealSegment) : SpitResults =
         [|
             yield SpitResult(segment, segment.NameComponents)
             for ch in segment.Graph.Vertices do
                 yield! spit(ch)
         |]
-    and spitSegmentAlias (segmentAlias:SegmentAlias) : SpitResults =
+    and spitInFlowAlias (segmentAlias:InFlowAlias) : SpitResults =
         [|
             yield SpitResult(segmentAlias, segmentAlias.NameComponents)
         |]
@@ -71,9 +71,9 @@ module SpitModuleHelper =
         | :? Model    as m -> spitModel m
         | :? DsSystem as s -> spitSystem s
         | :? Flow     as f -> spitFlow f
-        | :? Segment  as s -> spitSegment s
+        | :? RealSegment  as s -> spitSegment s
         | :? Child    as c -> spitChild c
-        | :? SegmentAlias  as s -> spitSegmentAlias s
+        | :? InFlowAlias  as s -> spitInFlowAlias s
         | _ -> failwith $"ERROR: Unknown type {obj}"
     ()
 
@@ -84,5 +84,5 @@ type SpitModule =
     [<Extension>] static member Spit (model:Model)     = spitModel model
     [<Extension>] static member Spit (system:DsSystem) = spitSystem system
     [<Extension>] static member Spit (flow:Flow)       = spitFlow flow
-    [<Extension>] static member Spit (segment:Segment) = spitSegment segment
+    [<Extension>] static member Spit (segment:RealSegment) = spitSegment segment
 

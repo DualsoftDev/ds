@@ -19,12 +19,12 @@ module ConvertM =
         let dicChild = ConcurrentDictionary<string, ApiItem>()
 
         ///mEdges   -> CoreModule.Child
-        let convertChildren(mSeg:MSeg, coreSeg:CoreModule.Segment, coreModel:CoreModule.Model) =   
+        let convertChildren(mSeg:MSeg, coreSeg:CoreModule.RealSegment, coreModel:CoreModule.Model) =   
 
             ///MSeg   -> CoreModule.Child
             let convertChild(mChildSeg:MSeg) = 
                 if mChildSeg.IsAlias
-                then ChildAliased.Create(mChildSeg.Name, dicChild.[mChildSeg.Alias.Value.Name], coreSeg) :> Child
+                then InRealAlias.Create(mChildSeg.Name, dicChild.[mChildSeg.Alias.Value.Name], coreSeg) :> Child
                 else 
                      let api = 
                         if dicChild.ContainsKey(mChildSeg.Name) 
@@ -34,11 +34,11 @@ module ConvertM =
                             dicChild.TryAdd(mChildSeg.Name, newApi) |> ignore
                             newApi
 
-                     ChildApiCall.CreateOnDemand(api, coreSeg) :> Child
+                     InRealApiCall.CreateOnDemand(api, coreSeg) :> Child
 
             let gr = coreSeg.Graph
              ///MEdge   -> CoreModule.Flow
-            let convertChildEdge(mEdge:MEdge, coreSeg:CoreModule.Segment) = 
+            let convertChildEdge(mEdge:MEdge, coreSeg:CoreModule.RealSegment) = 
                 let s = dicChild.[mEdge.Source.Name].QualifiedName
                 let t = dicChild.[mEdge.Target.Name].QualifiedName
                 let src = gr.FindVertex(s)
@@ -66,9 +66,9 @@ module ConvertM =
             ///MSeg   -> CoreModule.Segment
             let convertSeg(mSeg:MSeg, coreFlow:CoreModule.Flow) = 
                 if mSeg.IsAlias
-                then SegmentAlias.Create(mSeg.ValidName, coreFlow, mSeg.Alias.Value.FullName.Split('.')) :> SegmentBase
+                then InFlowAlias.Create(mSeg.ValidName, coreFlow, mSeg.Alias.Value.FullName.Split('.')) :> SegmentBase
                 else 
-                     let coreSeg = Segment.Create(mSeg.ValidName, coreFlow)
+                     let coreSeg = RealSegment.Create(mSeg.ValidName, coreFlow)
                      convertChildren (mSeg, coreSeg, coreModel)  |> ignore
                      coreSeg :> SegmentBase
 

@@ -20,7 +20,7 @@ public class ParserHelper
     public Model Model { get; } = new Model();
     internal DsSystem _system;
     internal Flow _rootFlow;
-    internal RealSegment _parenting;
+    internal RealInFlow _parenting;
     internal Dictionary<string[], GraphVertexType> _elements = new (NameUtil.CreateNameComponentsComparer());
     internal SpitResult[] _modelSpits;
     internal object[] _modelSpitObjects;

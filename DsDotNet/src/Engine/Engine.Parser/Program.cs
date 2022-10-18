@@ -616,7 +616,7 @@ C4 > C5;
 
         var spitObjs = spits.Select(spit => spit.Obj);
         var flowGraphs = spitObjs.OfType<Flow>().Select(f => f.Graph);
-        var segGraphs = spitObjs.OfType<RealSegment>().Select(s => s.Graph);
+        var segGraphs = spitObjs.OfType<RealInFlow>().Select(s => s.Graph);
         foreach (var gr in flowGraphs)
             gr.Dump();
         foreach (var gr in segGraphs)

@@ -15,7 +15,7 @@ module internal ModelFindModule =
         | 2 -> model.Systems.First(fun sys -> sys.Name = fqdn[0]).Flows.First(fun f -> f.Name = fqdn[1])
         | 3 -> model.Systems.First(fun sys -> sys.Name = fqdn[0]).Flows.First(fun f -> f.Name = fqdn[1]).Graph.FindVertex(fqdn[2])
         | 4 ->
-            let seg = model.Systems.First(fun sys -> sys.Name = fqdn[0]).Flows.First(fun f -> f.Name = fqdn[1]).Graph.FindVertex(fqdn[2]) :?> RealSegment
+            let seg = model.Systems.First(fun sys -> sys.Name = fqdn[0]).Flows.First(fun f -> f.Name = fqdn[1]).Graph.FindVertex(fqdn[2]) :?> RealInFlow
             seg.Graph.FindVertex(fqdn[3])
         | _ -> failwith "ERROR"
     let findGraphVertexT<'V when 'V :> IVertex>(model:Model, fqdn:NameComponents) =

@@ -26,16 +26,16 @@ module private GraphCalculationUtils =
         result
 
     /// Get reset informations from graph
-    let getAllResets (graph:Graph<Child, InSegmentEdge>) =
+    let getAllResets (graph:Graph<NodeInReal, InSegmentEdge>) =
         let getNameOfApiItem (api:ApiItem) = $"{api.System.Name}.{api.Name}"
 
-        let getCallMap (graph:Graph<Child, InSegmentEdge>) =
-            let callMap = new Dictionary<string, ResizeArray<Child>>()
+        let getCallMap (graph:Graph<NodeInReal, InSegmentEdge>) =
+            let callMap = new Dictionary<string, ResizeArray<NodeInReal>>()
             graph.Vertices 
             |> Seq.iter(fun v -> 
                 let apiName = getNameOfApiItem v.ApiItem
                 if not (callMap.ContainsKey(apiName)) then
-                    callMap.Add(apiName, new ResizeArray<Child>(0))
+                    callMap.Add(apiName, new ResizeArray<NodeInReal>(0))
                 callMap.[apiName].Add(v)
             )
             callMap
@@ -45,12 +45,12 @@ module private GraphCalculationUtils =
             let tgt = info.Operand2.Replace("\"", "")
             $"{system}.{src}", info.Operator, $"{system}.{tgt}"
 
-        let getResetInfo (node:Child) = 
+        let getResetInfo (node:NodeInReal) = 
             let api = node.ApiItem.System.Api
             api.ResetInfos |> Seq.map(makeName api.System.Name)
 
         let generateResetRelationShips 
-                (callMap:Dictionary<string, ResizeArray<Child>>)
+                (callMap:Dictionary<string, ResizeArray<NodeInReal>>)
                 (resets:string * string * string) =
             let (source, operator, target) = resets
             [
@@ -73,8 +73,8 @@ module private GraphCalculationUtils =
         |> Seq.collect(generateResetRelationShips callMap)
 
     /// Get ordered graph nodes to calculate the node index
-    let getTraverseOrder (graph:Graph<Child, InSegmentEdge>) =
-        let q = Queue<Child>()
+    let getTraverseOrder (graph:Graph<NodeInReal, InSegmentEdge>) =
+        let q = Queue<NodeInReal>()
         graph.Inits |> Seq.iter q.Enqueue
         [|
             while q.Count > 0 do
@@ -87,12 +87,12 @@ module private GraphCalculationUtils =
     
     /// Get ordered routes from start to end
     let visitFromSourceToTarget
-            (now:Child) (target:Child) 
-            (graph:Graph<Child, InSegmentEdge>) =
+            (now:NodeInReal) (target:NodeInReal) 
+            (graph:Graph<NodeInReal, InSegmentEdge>) =
         let rec searchNodes
-                (now:Child) (target:Child)
-                (graph:Graph<Child, InSegmentEdge>) 
-                (path:Child list) =
+                (now:NodeInReal) (target:NodeInReal)
+                (graph:Graph<NodeInReal, InSegmentEdge>) 
+                (path:NodeInReal list) =
             [
                 let nowPath = path.Append(now) |> List.ofSeq
                 if now <> target then
@@ -105,8 +105,8 @@ module private GraphCalculationUtils =
 
     /// Get all resets
     let getOneWayResets 
-            (mutualResets:Child seq seq) 
-            (resets:seq<Child option * string * Child option>) =
+            (mutualResets:NodeInReal seq seq) 
+            (resets:seq<NodeInReal option * string * NodeInReal option>) =
         resets
         |> Seq.filter(fun e -> 
             let (head, r, tail) = e
@@ -125,7 +125,7 @@ module private GraphCalculationUtils =
         |> Seq.except(mutualResets)
 
     /// Get mutual resets
-    let getMutualResets (resets:seq<Child option * string * Child option>) =
+    let getMutualResets (resets:seq<NodeInReal option * string * NodeInReal option>) =
         resets 
         |> Seq.filter(fun e -> 
             let (source, r, target) = e
@@ -141,7 +141,7 @@ module private GraphCalculationUtils =
     
     /// Check intersect between two sequences
     let checkIntersect 
-            (sourceSeq:Child seq) (shatteredSeqs:Child seq seq) =
+            (sourceSeq:NodeInReal seq) (shatteredSeqs:NodeInReal seq seq) =
         shatteredSeqs
         |> Seq.filter(fun sr ->
             Enumerable.SequenceEqual(
@@ -162,13 +162,13 @@ module private GraphCalculationUtils =
         |> Seq.map(fun e -> e.Last())
         
     /// Get mutual reset chains : All nodes are mutually resets themselves
-    let getMutualResetChains (sort:bool) (resets:Child seq seq) =
+    let getMutualResetChains (sort:bool) (resets:NodeInReal seq seq) =
         let nodes = resets |> Seq.map(fun e -> e.First()) |> Seq.distinct
-        let globalChains = new ResizeArray<Child ResizeArray>(0)
-        let candidates = new ResizeArray<Child list>(0)
+        let globalChains = new ResizeArray<NodeInReal ResizeArray>(0)
+        let candidates = new ResizeArray<NodeInReal list>(0)
         
         let addToChain 
-                (chain:ResizeArray<Child>) (addHead:bool) (target:Child) = 
+                (chain:ResizeArray<NodeInReal>) (addHead:bool) (target:NodeInReal) = 
             let targets = 
                 match addHead with 
                 | true -> getIncomingResets resets target
@@ -188,8 +188,8 @@ module private GraphCalculationUtils =
             added
             
         let addToResult 
-                (result: ResizeArray<Child list>) 
-                (sort:bool) (target:Child seq) =
+                (result: ResizeArray<NodeInReal list>) 
+                (sort:bool) (target:NodeInReal seq) =
             let candidate = 
                 let tgt = target |> Seq.distinct
                 match sort with
@@ -202,7 +202,7 @@ module private GraphCalculationUtils =
         for node in nodes do
             let mutable continued = true
             let checkInList = globalChains |> removeDuplicates
-            let localChains = new ResizeArray<Child>(0)
+            let localChains = new ResizeArray<NodeInReal>(0)
             if not (checkInList.Contains(node)) then
                 localChains.Add(node)
                 while continued do
@@ -231,10 +231,10 @@ module private GraphCalculationUtils =
         
     /// get origin map
     let getOriginMaps 
-            (graphNode:Child seq) (offByOneWayBackwardResets:Child seq) 
-            (offByMutualResetChains:Child seq) 
-            (structedChains:seq<Map<string, seq<Child>>>) =
-        let allNodes = new Dictionary<Child, int>()
+            (graphNode:NodeInReal seq) (offByOneWayBackwardResets:NodeInReal seq) 
+            (offByMutualResetChains:NodeInReal seq) 
+            (structedChains:seq<Map<string, seq<NodeInReal>>>) =
+        let allNodes = new Dictionary<NodeInReal, int>()
         let oneWay = offByOneWayBackwardResets |> Seq.map(fun v -> v.ApiItem)
         let mutual = offByMutualResetChains |> Seq.map(fun v -> v.ApiItem)
         let toBeZero = oneWay.Concat(mutual) |> Seq.distinct
@@ -267,21 +267,21 @@ module private GraphCalculationUtils =
                 allNodes.Add(node, 3)
         allNodes
 
-    let getCallMap (graph:Graph<Child, InSegmentEdge>) =
+    let getCallMap (graph:Graph<NodeInReal, InSegmentEdge>) =
         let getNameOfApiItem (api:ApiItem) = $"{api.System.Name}.{api.Name}"
-        let callMap = new Dictionary<string, ResizeArray<Child>>()
+        let callMap = new Dictionary<string, ResizeArray<NodeInReal>>()
         graph.Vertices 
         |> Seq.iter(fun v -> 
             let apiName = getNameOfApiItem v.ApiItem
             if not (callMap.ContainsKey(apiName)) then
-                callMap.Add(apiName, new ResizeArray<Child>(0))
+                callMap.Add(apiName, new ResizeArray<NodeInReal>(0))
             callMap.[apiName].Add(v)
         )
         callMap
 
     let getAliasHeads 
-            (graph:Graph<Child, InSegmentEdge>)
-            (callMap:Dictionary<string, ResizeArray<Child>>) =
+            (graph:Graph<NodeInReal, InSegmentEdge>)
+            (callMap:Dictionary<string, ResizeArray<NodeInReal>>) =
         [
         for calls in callMap do
             if calls.Value.Count > 1 then

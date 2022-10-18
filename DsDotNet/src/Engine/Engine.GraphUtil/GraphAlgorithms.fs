@@ -7,7 +7,7 @@ open Engine.Core
 [<AutoOpen>]
 module internal GraphAlgorithms = 
     /// Get node index map(key:name, value:idx)
-    let getIndexedMap (graph:Graph<Child, InSegmentEdge>) =
+    let getIndexedMap (graph:Graph<NodeInReal, InSegmentEdge>) =
         let traverseOrder = getTraverseOrder graph
         let mutable i = 1
         [
@@ -18,7 +18,7 @@ module internal GraphAlgorithms =
         |> Map.ofList
     
     /// Get origin status of child nodes
-    let getOrigins (graph:Graph<Child, InSegmentEdge>) =
+    let getOrigins (graph:Graph<NodeInReal, InSegmentEdge>) =
         let rawResets = graph |> getAllResets
         let mutualResets = rawResets |> getMutualResets
         let oneWayResets = rawResets |> getOneWayResets mutualResets
@@ -73,6 +73,6 @@ module internal GraphAlgorithms =
 
     /// Get pre-calculated targets that 
     /// child segments to be 'ON' in progress(Theta)
-    let getThetaTargets (graph:Graph<SegmentBase, InFlowEdge>) = 
+    let getThetaTargets (graph:Graph<NodeInFlow, InFlowEdge>) = 
         // To do...
         ()

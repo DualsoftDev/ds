@@ -1,7 +1,27 @@
-grammar dsLexer;
+lexer grammar dsLexer;
 
 
-identifier1: STRING_LITERAL | IDENTIFIER;
+SYS: 'sys';
+IP: 'ip';
+HOST: 'host';
+COPY_SYSTEM: 'copy_system';
+LAYOUTS: 'layouts';
+ADDRESSES: 'addresses';
+PROP: 'prop';
+SAFETY: 'safety';
+FLOW: 'flow';
+INTERFACES: 'interfaces';
+ALIASES: 'aliases';
+EMG_IN: 'emg_in';
+EMG: 'emg';
+AUTO_IN: 'auto_in';
+AUTO: 'auto';
+START_IN: 'start_in';
+START: 'start';
+RESET_IN: 'reset_in';
+RESET: 'reset';
+
+
 // STRING_LITERAL : '"' (~('"' | '\\' | '\r' | '\n' | ' ') | '\\' ('"' | '\\'))* '"';
 STRING_LITERAL : '"' (~('"' | '\\' | '\r' | '\n') | '\\' ('"' | '\\'))* '"';
 
@@ -28,11 +48,6 @@ fragment VALID_ID_CHAR
 
 
 
-identifier2: identifier1 DOT identifier1;
-identifier3: identifier1 DOT identifier1 DOT identifier1;
-
-identifier4: identifier1 DOT identifier1 DOT identifier1 DOT identifier1;  // for host name 
-
 TAG_ADDRESS: VALID_TAG_START VALID_TAG_CHAR*;
 fragment VALID_TAG_START
    : PERCENT   // | ('a' .. 'z') | ('A' .. 'Z') | '_' | HANGUL_CHAR
@@ -46,24 +61,10 @@ fragment VALID_TAG_CHAR
 //    : '%' | VALID_ID_CHAR;   //|DOT)*;
 
 
-// // - Segment 규격
-// // - 0 DOT: TagName
-// // - 1 DOT: TaskName.SegmentName  : mysystem 을 가정하고 있음.  필요한가?
-// // - 2 DOT: System.TaskName.SegmentName
-identifier123: (identifier1 | identifier2 | identifier3);
-identifier12: (identifier1 | identifier2);
-
-flowPath: identifier2;
-
-identifier123CNF: identifier123 (COMMA identifier123)*;
-identifier123DNF: identifier123CNF (OR2 identifier123CNF)*;
-
-identifier1234: (identifier1 | identifier2 | identifier3 | identifier4);
 
 IPV4: [1-9][0-9]*'.'('0'|[1-9][0-9]*)'.'('0'|[1-9][0-9]*)'.'('0'|[1-9][0-9]*);
 // IPV4: (INTEGER)(DOT) INTEGER DOT INTEGER DOT INTEGER;
 
-comment: BLOCK_COMMENT | LINE_COMMENT;
 BLOCK_COMMENT : '/*' (BLOCK_COMMENT|.)*? '*/' -> channel(HIDDEN) ;
 LINE_COMMENT  : '//' .*? ('\n'|EOF) -> channel(HIDDEN) ;
 
@@ -121,3 +122,34 @@ HANGUL_CHAR: [\uAC00-\uD7A3]+;
 // LINE_COMMENT
 //     : '//' ~[\r\n]* -> skip
 // ;
+
+CAUSAL_FWD: GT; // '>'
+CAUSAL_BWD: LT; // '<'
+CAUSAL_RESET_FWD: '|>';
+CAUSAL_RESET_BWD: '<|';
+CAUSAL_RESET_FB: '<||>';
+CAUSAL_FWD_AND_RESET_BWD: '><|' | '=>';
+CAUSAL_FWD_AND_RESET_FWD: '>|>' | '|>>';
+CAUSAL_BWD_AND_RESET_BWD: '<<|' | '<|<';
+CAUSAL_BWD_AND_RESET_FWD: '|><';
+
+
+
+QUESTION: '?';
+FWDANGLEBRACKETx2: '>>';
+FWDANGLEBRACKET: '>';
+// FWDANGLEBRACKET_PIPE_FWDANGLEBRACKET: '>|>';    // CAUSAL_FWD_AND_RESET_FWD
+BWDANGLEBRACKETx2: '<<';
+BWDANGLEBRACKET: '<';
+// BWDANGLEBRACKET_PIPE_BWDANGLEBRACKET: '<|<';    // CAUSAL_BWD_AND_RESET_BWD
+// FWDANGLEBRACKET_BWDANGLEBRACKET_PIPE: '><|';
+// '=>';
+CAUSAL_RESET_STRONG_FWD: '||>';
+CAUSAL_RESET_STRONG_BWD: '<||';
+CAUSAL_RESET_STRONG_BIDIRECTION: '<<||>>';
+
+
+
+// TOKEN
+//    : ('0' .. '9' | 'a' .. 'z' | 'A' .. 'Z' | '-' | ' ' | '/' | '_' | ':' | ',')+
+//    ;

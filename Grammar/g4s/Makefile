@@ -6,7 +6,8 @@ grun=java -Xmx500M -cp /usr/local/lib/antlr-4.10.1-complete.jar:. org.antlr.v4.g
 
 grun:
 	@java -version
-	@$(antlr4) ds.g4
+	@$(antlr4) dsLexer.g4
+	@$(antlr4) dsParser.g4
 	@javac *.java
 	@echo 'echo "A || B, #g(X), C > D, E || F;" | grun ds causals -gui'
 

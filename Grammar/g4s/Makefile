@@ -10,6 +10,11 @@ grun:
 	@javac *.java
 	@echo 'echo "A || B, #g(X), C > D, E || F;" | grun ds causals -gui'
 
+tokens:
+	$(grun) ds model -tokens < g4test/prop.ds
+
+gui:
+	$(grun) ds model -gui < g4test/prop.ds
 
 test:
 	@export CLASSPATH=".:/usr/local/lib/antlr-4.10.1-complete.jar:$$CLASSPATH"
@@ -59,12 +64,10 @@ cs:
 clean:
 	@rm -rf CSharp/Generated
 	@rm -rf *.interp *.tokens
-	rm -rf *.java *.class 
+	rm -rf *.java *.class
 
 
 all: g4 grun test
-
-
 
 xxx:
 	dotnet new -i Antlr4BuildTasks.Templates

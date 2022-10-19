@@ -29,13 +29,19 @@ module GraphModule =
         abstract Target :'V    //방향을 고려안한 위치상 오른쪽 Vertex
         abstract EdgeType  :EdgeType 
 
-    /// vertex on a flow
-    type IFlowVertex =
-        inherit INamedVertex
+    ///// vertex on a flow
+    //type IFlowVertex =
+    //    inherit INamedVertex
 
-    /// vertex on a segment
-    type IChildVertex =
-        inherit INamedVertex
+    ///// vertex on a segment
+    //type IChildVertex =
+    //    inherit INamedVertex
+
+    ///Vertex의 부모의 타입을 구분한다.
+    type ParentType = 
+    | NoneParent //flow/ApiItem 부모는 없다
+    | Flow //Real/Call/Alias 의 부모
+    | Real //Call/Alias      의 부모
 
     [<AbstractClass>]
     type EdgeBase<'V>(source:'V, target:'V, edgeType:EdgeType) =
@@ -55,8 +61,8 @@ module GraphModule =
         member _.Target = target
         member _.EdgeType = edgeType
      
-    type ICoin =
-        inherit IChildVertex
+    //type ICoin =
+    //    inherit IChildVertex
 
     type Graph<'V, 'E
             when 'V :> INamed and 'V : equality        

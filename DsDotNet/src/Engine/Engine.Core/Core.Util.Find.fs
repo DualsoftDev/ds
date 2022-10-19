@@ -15,7 +15,7 @@ module internal ModelFindModule =
         | 2 -> model.Systems.First(fun sys -> sys.Name = fqdn[0]).Flows.First(fun f -> f.Name = fqdn[1])
         | 3 -> model.Systems.First(fun sys -> sys.Name = fqdn[0]).Flows.First(fun f -> f.Name = fqdn[1]).Graph.FindVertex(fqdn[2])
         | 4 ->
-            let seg = model.Systems.First(fun sys -> sys.Name = fqdn[0]).Flows.First(fun f -> f.Name = fqdn[1]).Graph.FindVertex(fqdn[2]) :?> RealInFlow
+            let seg = model.Systems.First(fun sys -> sys.Name = fqdn[0]).Flows.First(fun f -> f.Name = fqdn[1]).Graph.FindVertex(fqdn[2]) :?> Real
             seg.Graph.FindVertex(fqdn[3])
         | _ -> failwith "ERROR"
     let findGraphVertexT<'V when 'V :> IVertex>(model:Model, fqdn:NameComponents) =
@@ -28,7 +28,7 @@ module internal ModelFindModule =
     let findApiItem(model:Model, apiPath:NameComponents) =
         let sysName, apiKey = apiPath[0], apiPath[1]
         let sys = model.Systems.First(fun sys -> sys.Name = apiPath[0])
-        let x = sys.Api.Items.FindWithName(apiKey)
+        let x = sys.ApiItems.FindWithName(apiKey)
         x
 
     let findSystem(model:Model, systemName:string) =

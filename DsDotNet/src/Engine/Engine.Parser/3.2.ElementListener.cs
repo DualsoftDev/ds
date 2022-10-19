@@ -1,3 +1,5 @@
+using static Engine.Core.GraphModule;
+
 namespace Engine.Parser;
 
 
@@ -19,7 +21,7 @@ class ElementListener : ListenerBase
 
     public override void EnterInterfaceDef(InterfaceDefContext ctx)
     {
-        var hash = _system.Api.Items;
+        var hash = _system.ApiItems;
         var interrfaceNameCtx = findFirstChild<InterfaceNameContext>(ctx);
         var interfaceName = collectNameComponents(interrfaceNameCtx)[0];
         string[][] collectCallComponents(CallComponentsContext ctx) =>
@@ -28,10 +30,10 @@ class ElementListener : ListenerBase
                 .ToArray()
                 ;
         bool isWildcard(string[] cc) => cc.Length == 1 && cc[0] == "_";
-        RealInFlow[] findSegments(string[][] fqdns) =>
+        Real[] findSegments(string[][] fqdns) =>
             fqdns
             .Where(fqdn => fqdn != null)
-            .Select(s => _model.FindGraphVertex<RealInFlow>(s))
+            .Select(s => _model.FindGraphVertex<Real>(s))
             .Tap(x => Assert(x != null))
             .ToArray()
             ;
@@ -59,7 +61,7 @@ class ElementListener : ListenerBase
         var path = AppendPathElement(ns);
 
         var existing = _modelSpits.Where(spit => spit.NameComponents.IsStringArrayEqaul(path)).ToArray();
-        if (existing.Where(spit => spit.Obj is NodeInFlow || spit.Obj is NodeInReal).Any())
+        if (existing.Where(spit => spit.Obj is VertexBase).Any())
             return;
 
         var pathWithoutParenting = new[] { _system.Name, _rootFlow.Name }.Concat(ns).ToArray();
@@ -72,7 +74,7 @@ class ElementListener : ListenerBase
             .Select(spitResult => spitResult.Obj)
             .ToArray()
             ;
-        if (matches.OfType<RealInFlow>().Any())
+        if (matches.OfType<Real>().Any())
             return;
 
         try
@@ -100,9 +102,9 @@ class ElementListener : ListenerBase
                         Assert(apiItem != null);
 
                         if (_parenting == null)
-                            AliasInFlow.Create(ns.Combine(), _rootFlow, aliasKey);
-                        else
-                            AliasInReal.Create(ns.Combine(), apiItem, _parenting);
+                            Alias.CreateInFlow(ns.Combine(), aliasKey, _rootFlow);
+                        else 
+                            Alias.CreateInReal(ns.Combine(), apiItem, _parenting);
                         return;
                     case 1:
                         Assert(false);
@@ -119,9 +121,9 @@ class ElementListener : ListenerBase
             if (apiCall != null)
             {
                 if (_parenting == null)
-                    CallInFlow.Create(apiCall, _rootFlow);
+                    Call.CreateInFlow(apiCall, _rootFlow);
                 else
-                    CallInReal.CreateOnDemand(apiCall, _parenting);
+                    Call.CreateInReal(apiCall, _parenting);
                 return;
             }
 
@@ -131,7 +133,7 @@ class ElementListener : ListenerBase
             {
                 if(ns.Length != 1)
                     throw new ParserException($"ERROR: unknown token [{ns.Combine()}].", ctx);
-                RealInFlow.Create(ns[0], _rootFlow);
+                Real.Create(ns[0], _rootFlow);
                 return;
             }
             else
@@ -152,6 +154,6 @@ class ElementListener : ListenerBase
         if (_parenting != null)
             throw new ParserException($"ERROR: identifier [{path.Combine()}] not allowed!", ctx);
 
-        RealInFlow.Create(path.Last(), _rootFlow);
+        Real.Create(path.Last(), _rootFlow);
     }
 }

@@ -15,17 +15,17 @@ module SpitModuleHelper =
         member val NameComponents = nameComponents
 
     type SpitResults = SpitResult[]
-    let rec spitChild (child:NodeInReal) : SpitResults =
+    let rec spitCall (child:VertexBase) : SpitResults =
         [|
             yield SpitResult(child, child.NameComponents)
         |]
-    and spitSegment (segment:RealInFlow) : SpitResults =
+    and spitSegment (segment:Real) : SpitResults =
         [|
             yield SpitResult(segment, segment.NameComponents)
             for ch in segment.Graph.Vertices do
                 yield! spit(ch)
         |]
-    and spitInFlowAlias (segmentAlias:AliasInFlow) : SpitResults =
+    and spitAlias (segmentAlias:Alias) : SpitResults =
         [|
             yield SpitResult(segmentAlias, segmentAlias.NameComponents)
         |]
@@ -56,8 +56,7 @@ module SpitModuleHelper =
             yield SpitResult(system, system.NameComponents)
             for flow in system.Flows do
                 yield! spit(flow)
-            if system.Api <> null then
-                for itf in system.Api.Items do
+                for itf in system.ApiItems do
                     yield SpitResult(itf, itf.NameComponents)
         |]
     and spitModel (model:Model) : SpitResults =
@@ -71,9 +70,9 @@ module SpitModuleHelper =
         | :? Model    as m -> spitModel m
         | :? DsSystem as s -> spitSystem s
         | :? Flow     as f -> spitFlow f
-        | :? RealInFlow  as s -> spitSegment s
-        | :? NodeInReal    as c -> spitChild c
-        | :? AliasInFlow  as s -> spitInFlowAlias s
+        | :? Real     as r -> spitSegment r
+        | :? Call     as c -> spitCall c
+        | :? Alias    as a -> spitAlias a
         | _ -> failwith $"ERROR: Unknown type {obj}"
     ()
 
@@ -84,5 +83,7 @@ type SpitModule =
     [<Extension>] static member Spit (model:Model)     = spitModel model
     [<Extension>] static member Spit (system:DsSystem) = spitSystem system
     [<Extension>] static member Spit (flow:Flow)       = spitFlow flow
-    [<Extension>] static member Spit (segment:RealInFlow) = spitSegment segment
+    [<Extension>] static member Spit (segment:Real)    = spitSegment segment
+    [<Extension>] static member Spit (call:Call)       = spitCall call
+    [<Extension>] static member Spit (alias:Alias)     = spitAlias alias
 

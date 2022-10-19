@@ -40,7 +40,7 @@ class SkeletonListener : ListenerBase
     {
         Trace.WriteLine($"Parenting: {ctx.GetText()}");
         var name = ctx.identifier1().GetText().DeQuoteOnDemand();
-        _parenting = RealInFlow.Create(name, _rootFlow);
+        _parenting = Real.Create(name, _rootFlow);
         AddElement(CurrentPathElements, GraphVertexType.Segment | GraphVertexType.Parenting);
 
         var children =
@@ -105,13 +105,13 @@ class SkeletonListener : ListenerBase
 
     public override void EnterInterfaces([NotNull] InterfacesContext ctx)
     {
-        _system.Api = new Api(_system);
+        //_system.Api = new Api(_system);
     }
 
 
     public override void EnterInterfaceDef([NotNull] InterfaceDefContext ctx)
     {
-        var hash = _system.Api.Items;
+        var hash = _system.ApiItems;
         var interrfaceNameCtx = findFirstChild<InterfaceNameContext>(ctx);
         var interfaceName = collectNameComponents(interrfaceNameCtx)[0];
         string[][] collectCallComponents(CallComponentsContext ctx) =>

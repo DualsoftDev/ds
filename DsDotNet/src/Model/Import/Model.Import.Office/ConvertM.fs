@@ -19,12 +19,12 @@ module ConvertM =
         let dicChild = ConcurrentDictionary<string, ApiItem>()
 
         ///mEdges   -> CoreModule.Child
-        let convertChildren(mSeg:MSeg, coreSeg:CoreModule.RealInFlow, coreModel:CoreModule.Model) =   
+        let convertChildren(mSeg:MSeg, coreSeg:CoreModule.Real, coreModel:CoreModule.Model) =   
 
             ///MSeg   -> CoreModule.Child
             let convertChild(mChildSeg:MSeg) = 
                 if mChildSeg.IsAlias
-                then AliasInReal.Create(mChildSeg.AliasName, dicChild.[mChildSeg.AliasOrg.Value.Name], coreSeg) :> NodeInReal
+                then Alias.CreateInReal(mChildSeg.AliasName, dicChild.[mChildSeg.AliasOrg.Value.Name], coreSeg) :> VertexBase
                 else 
                      let api = 
                         if dicChild.ContainsKey(mChildSeg.Name) 
@@ -34,11 +34,11 @@ module ConvertM =
                             dicChild.TryAdd(mChildSeg.Name, newApi) |> ignore
                             newApi
 
-                     CallInReal.CreateOnDemand(api, coreSeg) :> NodeInReal
+                     Call.CreateInReal(api, coreSeg) :> VertexBase
 
             let gr = coreSeg.Graph
              ///MEdge   -> CoreModule.Flow
-            let convertChildEdge(mEdge:MEdge, coreSeg:CoreModule.RealInFlow) = 
+            let convertChildEdge(mEdge:MEdge, coreSeg:CoreModule.Real) = 
                 let s = dicChild.[mEdge.Source.Name].QualifiedName
                 let t = dicChild.[mEdge.Target.Name].QualifiedName
                 let src = gr.FindVertex(s)
@@ -50,7 +50,7 @@ module ConvertM =
                 if(tgt.IsNull()) then failwithf $"[{findList}]에서 \n{t}를 찾을 수 없습니다."
 
 
-                InSegmentEdge.Create(coreSeg, src, tgt, edgeType)
+                InRealEdge.Create(coreSeg, src, tgt, edgeType)
             
 
             mSeg.ChildFlow.Nodes |> Seq.cast<MSeg> 
@@ -66,11 +66,11 @@ module ConvertM =
             ///MSeg   -> CoreModule.Segment
             let convertSeg(mSeg:MSeg, coreFlow:CoreModule.Flow) = 
                 if mSeg.IsAlias
-                then AliasInFlow.Create(mSeg.ValidName, coreFlow, mSeg.AliasOrg.Value.FullName.Split('.')) :> NodeInFlow
+                then Alias.CreateInFlow(mSeg.ValidName, mSeg.AliasOrg.Value.FullName.Split('.'), coreFlow) :> VertexBase
                 else 
-                     let coreSeg = RealInFlow.Create(mSeg.ValidName, coreFlow)
+                     let coreSeg = Real.Create(mSeg.ValidName, coreFlow)
                      convertChildren (mSeg, coreSeg, coreModel)  |> ignore
-                     coreSeg :> NodeInFlow
+                     coreSeg :> VertexBase
 
             ///MEdge   -> CoreModule.Flow
             let convertRootEdge(mEdge:MEdge, coreFlow:CoreModule.Flow) = 

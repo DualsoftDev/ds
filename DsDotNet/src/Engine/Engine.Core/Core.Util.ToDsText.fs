@@ -72,25 +72,25 @@ module internal ToDsTextModule =
                     assert(es.Length = 1)
                     yield $"{tab}{es[0].ToText()};"
 
-            let segments = vertices.OfType<RealInFlow>().ToArray()
+            let segments = vertices.OfType<Real>().ToArray()
             for v in segments do
                 yield segmentToDs basis v indent
 
             let islands =
                 vertices
-                    .Where(fun v -> (box v) :? RealInFlow &&  not <| segments.Contains( (box v) :?> RealInFlow))
+                    .Where(fun v -> (box v) :? Real &&  not <| segments.Contains( (box v) :?> Real))
                     .Except((*segments @@*) edges.Collect(fun e -> e.GetVertices()))
             for island in islands do
                 yield $"{tab}{island.GetRelativeName(basis)}; // island"
         ] |> combineLines
 
-    and segmentToDs (basis:NameComponents) (segment:RealInFlow) (indent:int) =
+    and segmentToDs (basis:NameComponents) (segment:Real) (indent:int) =
         let tab = getTab indent
         [
             let subGraph = segment.Graph
             if subGraph.Edges.any() then
                 yield $"{tab}{segment.GetRelativeName(basis)} = {lb}"
-                let es = subGraph.Edges.Cast<EdgeBase<NodeInReal>>().ToArray()
+                let es = subGraph.Edges.Cast<EdgeBase<VertexBase>>().ToArray()
                 let vs = subGraph.Vertices
                 yield graphEntitiesToDs segment.NameComponents vs es (indent+1)
                 yield $"{tab}{rb}"
@@ -99,7 +99,7 @@ module internal ToDsTextModule =
     let flowGraphToDs (flow:Flow) (indent:int) =
         let graph = flow.Graph
         let basis = flow.NameComponents
-        let es = graph.Edges.OfType<EdgeBase<NodeInFlow>>().ToArray()
+        let es = graph.Edges.OfType<EdgeBase<VertexBase>>().ToArray()
         graphEntitiesToDs basis graph.Vertices es indent
 
     let flowToDs (flow:Flow) (indent:int) =
@@ -133,18 +133,17 @@ module internal ToDsTextModule =
             let tab = getTab indent
             let tab2 = getTab (indent+1)
 
-            let api = system.Api
-            if api <> null then
+            if system.ApiItems.Any() then
                 yield $"{tab}[interfaces] = {lb}"
-                for item in api.Items do
+                for item in system.ApiItems do
                     let ser =
-                        let qNames (xs:RealInFlow seq) = xs.Select(fun tx -> tx.QualifiedName) |> String.concat(", ")
+                        let qNames (xs:Real seq) = xs.Select(fun tx -> tx.QualifiedName) |> String.concat(", ")
                         let s = qNames(item.TXs) |> nonNullSelector "_"
                         let e = qNames(item.RXs) |> nonNullSelector "_"
                         $"{s} ~ {e}"
                     yield $"{tab2}{item.Name.QuoteOnDemand()} = {lb} {ser} {rb}"
 
-                for ri in api.ResetInfos do
+                for ri in system.ApiResetInfos do
                     yield $"{tab2}{ri.Operand1} {ri.Operator} {ri.Operand2};"
                     
                 yield $"{tab}{rb}"
@@ -178,7 +177,7 @@ module internal ToDsTextModule =
             //      addresses
             //      layouts
             let spits = model.Spit()
-            let segs = spits.Select(fun spit -> spit.Obj).OfType<RealInFlow>().ToArray()
+            let segs = spits.Select(fun spit -> spit.Obj).OfType<Real>().ToArray()
 
             let withSafeties = segs.Where(fun seg -> seg.SafetyConditions.Any())
             let safeties =
@@ -207,8 +206,7 @@ module internal ToDsTextModule =
 
             let withLayouts =
                 model.Systems
-                    .Where(fun sys -> sys.Api <> null)
-                    .SelectMany(fun sys -> sys.Api.Items.Where(fun ai -> ai.Xywh <> null))
+                    .SelectMany(fun sys -> sys.ApiItems.Where(fun ai -> ai.Xywh <> null))
                     ;
             let layouts =
                 [

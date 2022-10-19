@@ -40,18 +40,18 @@ class Program
 
         Engine.Parser.Program.Main(null);
 
-        SampleRunner.Run(ParserTest.Safety);
-        SampleRunner.Run(ParserTest.StrongCausal);
-        SampleRunner.Run(ParserTest.Buttons);
-        SampleRunner.Run(ParserTest.Dup);
-        SampleRunner.Run(ParserTest.Ppt);
-        SampleRunner.Run(ParserTest.QualifiedName);
-        SampleRunner.Run(ParserTest.Aliases);
-        SampleRunner.Run(ParserTest.Serialize);
-        SampleRunner.Run(ParserTest.ExternalSegmentCall);
-        SampleRunner.Run(ParserTest.ExternalSegmentCallConfusing);
-        SampleRunner.Run(ParserTest.MyFlowReference);
-        SampleRunner.Run(ParserTest.Error);
+        //SampleRunner.Run(ParserTest.Safety);
+        //SampleRunner.Run(ParserTest.StrongCausal);
+        //SampleRunner.Run(ParserTest.Buttons);
+        //SampleRunner.Run(ParserTest.Dup);
+        //SampleRunner.Run(ParserTest.Ppt);
+        //SampleRunner.Run(ParserTest.QualifiedName);
+        //SampleRunner.Run(ParserTest.Aliases);
+        //SampleRunner.Run(ParserTest.Serialize);
+        //SampleRunner.Run(ParserTest.ExternalSegmentCall);
+        //SampleRunner.Run(ParserTest.ExternalSegmentCallConfusing);
+        //SampleRunner.Run(ParserTest.MyFlowReference);
+        //SampleRunner.Run(ParserTest.Error);
 
         //InvalidDuplicationTest.Test(InvalidDuplicationTest.DupSystemNameModel);
         //InvalidDuplicationTest.Test(InvalidDuplicationTest.DupFlowNameModel);

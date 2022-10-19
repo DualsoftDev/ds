@@ -26,16 +26,15 @@ module private GraphCalculationUtils =
         result
 
     /// Get reset informations from graph
-    let getAllResets (graph:Graph<NodeInReal, InSegmentEdge>) =
-        let getNameOfApiItem (api:ApiItem) = $"{api.System.Name}.{api.Name}"
-
-        let getCallMap (graph:Graph<NodeInReal, InSegmentEdge>) =
-            let callMap = new Dictionary<string, ResizeArray<NodeInReal>>()
+    let getAllResets (graph:Graph<VertexBase, InRealEdge>) =
+        let getCallMap (graph:Graph<VertexBase, InRealEdge>) =
+            let callMap = new Dictionary<string, ResizeArray<Call>>()
             graph.Vertices 
+            |> Seq.cast<Call>
             |> Seq.iter(fun v -> 
-                let apiName = getNameOfApiItem v.ApiItem
+                let apiName =  $"{v.System.Name}.{v.Name}" 
                 if not (callMap.ContainsKey(apiName)) then
-                    callMap.Add(apiName, new ResizeArray<NodeInReal>(0))
+                    callMap.Add(apiName, new ResizeArray<Call>(0))
                 callMap.[apiName].Add(v)
             )
             callMap
@@ -45,12 +44,11 @@ module private GraphCalculationUtils =
             let tgt = info.Operand2.Replace("\"", "")
             $"{system}.{src}", info.Operator, $"{system}.{tgt}"
 
-        let getResetInfo (node:NodeInReal) = 
-            let api = node.ApiItem.System.Api
-            api.ResetInfos |> Seq.map(makeName api.System.Name)
+        let getResetInfo (node:Call) = 
+            node.System.ApiResetInfos |> Seq.map(makeName node.System.Name)
 
         let generateResetRelationShips 
-                (callMap:Dictionary<string, ResizeArray<NodeInReal>>)
+                (callMap:Dictionary<string, ResizeArray<Call>>)
                 (resets:string * string * string) =
             let (source, operator, target) = resets
             [
@@ -69,12 +67,13 @@ module private GraphCalculationUtils =
 
         let callMap = getCallMap graph
         graph.Vertices 
+        |> Seq.cast<Call>
         |> Seq.collect(getResetInfo) |> Seq.distinct
         |> Seq.collect(generateResetRelationShips callMap)
 
     /// Get ordered graph nodes to calculate the node index
-    let getTraverseOrder (graph:Graph<NodeInReal, InSegmentEdge>) =
-        let q = Queue<NodeInReal>()
+    let getTraverseOrder (graph:Graph<VertexBase, InRealEdge>) =
+        let q = Queue<VertexBase>()
         graph.Inits |> Seq.iter q.Enqueue
         [|
             while q.Count > 0 do
@@ -87,17 +86,17 @@ module private GraphCalculationUtils =
     
     /// Get ordered routes from start to end
     let visitFromSourceToTarget
-            (now:NodeInReal) (target:NodeInReal) 
-            (graph:Graph<NodeInReal, InSegmentEdge>) =
+            (now:Call) (target:Call) 
+            (graph:Graph<VertexBase, InRealEdge>) =
         let rec searchNodes
-                (now:NodeInReal) (target:NodeInReal)
-                (graph:Graph<NodeInReal, InSegmentEdge>) 
-                (path:NodeInReal list) =
+                (now:Call) (target:Call)
+                (graph:Graph<VertexBase, InRealEdge>) 
+                (path:Call list) =
             [
                 let nowPath = path.Append(now) |> List.ofSeq
                 if now <> target then
                     for node in graph.GetOutgoingVertices(now) do
-                        yield! searchNodes node target graph nowPath
+                        yield! searchNodes (node:?>Call) target graph nowPath
                 else
                     yield nowPath
             ]
@@ -105,8 +104,8 @@ module private GraphCalculationUtils =
 
     /// Get all resets
     let getOneWayResets 
-            (mutualResets:NodeInReal seq seq) 
-            (resets:seq<NodeInReal option * string * NodeInReal option>) =
+            (mutualResets:Call seq seq) 
+            (resets:seq<Call option * string * Call option>) =
         resets
         |> Seq.filter(fun e -> 
             let (head, r, tail) = e
@@ -125,7 +124,7 @@ module private GraphCalculationUtils =
         |> Seq.except(mutualResets)
 
     /// Get mutual resets
-    let getMutualResets (resets:seq<NodeInReal option * string * NodeInReal option>) =
+    let getMutualResets (resets:seq<Call option * string * Call option>) =
         resets 
         |> Seq.filter(fun e -> 
             let (source, r, target) = e
@@ -141,7 +140,7 @@ module private GraphCalculationUtils =
     
     /// Check intersect between two sequences
     let checkIntersect 
-            (sourceSeq:NodeInReal seq) (shatteredSeqs:NodeInReal seq seq) =
+            (sourceSeq:VertexBase seq) (shatteredSeqs:VertexBase seq seq) =
         shatteredSeqs
         |> Seq.filter(fun sr ->
             Enumerable.SequenceEqual(
@@ -162,13 +161,13 @@ module private GraphCalculationUtils =
         |> Seq.map(fun e -> e.Last())
         
     /// Get mutual reset chains : All nodes are mutually resets themselves
-    let getMutualResetChains (sort:bool) (resets:NodeInReal seq seq) =
+    let getMutualResetChains (sort:bool) (resets:Call seq seq) =
         let nodes = resets |> Seq.map(fun e -> e.First()) |> Seq.distinct
-        let globalChains = new ResizeArray<NodeInReal ResizeArray>(0)
-        let candidates = new ResizeArray<NodeInReal list>(0)
+        let globalChains = new ResizeArray<Call ResizeArray>(0)
+        let candidates = new ResizeArray<Call list>(0)
         
         let addToChain 
-                (chain:ResizeArray<NodeInReal>) (addHead:bool) (target:NodeInReal) = 
+                (chain:ResizeArray<Call>) (addHead:bool) (target:Call) = 
             let targets = 
                 match addHead with 
                 | true -> getIncomingResets resets target
@@ -188,8 +187,8 @@ module private GraphCalculationUtils =
             added
             
         let addToResult 
-                (result: ResizeArray<NodeInReal list>) 
-                (sort:bool) (target:NodeInReal seq) =
+                (result: ResizeArray<Call list>) 
+                (sort:bool) (target:Call seq) =
             let candidate = 
                 let tgt = target |> Seq.distinct
                 match sort with
@@ -202,7 +201,7 @@ module private GraphCalculationUtils =
         for node in nodes do
             let mutable continued = true
             let checkInList = globalChains |> removeDuplicates
-            let localChains = new ResizeArray<NodeInReal>(0)
+            let localChains = new ResizeArray<Call>(0)
             if not (checkInList.Contains(node)) then
                 localChains.Add(node)
                 while continued do
@@ -231,10 +230,10 @@ module private GraphCalculationUtils =
         
     /// get origin map
     let getOriginMaps 
-            (graphNode:NodeInReal seq) (offByOneWayBackwardResets:NodeInReal seq) 
-            (offByMutualResetChains:NodeInReal seq) 
-            (structedChains:seq<Map<string, seq<NodeInReal>>>) =
-        let allNodes = new Dictionary<NodeInReal, int>()
+            (graphNode:Call seq) (offByOneWayBackwardResets:Call seq) 
+            (offByMutualResetChains:Call seq) 
+            (structedChains:seq<Map<string, seq<Call>>>) =
+        let allNodes = new Dictionary<Call, int>()
         let oneWay = offByOneWayBackwardResets |> Seq.map(fun v -> v.ApiItem)
         let mutual = offByMutualResetChains |> Seq.map(fun v -> v.ApiItem)
         let toBeZero = oneWay.Concat(mutual) |> Seq.distinct
@@ -267,21 +266,21 @@ module private GraphCalculationUtils =
                 allNodes.Add(node, 3)
         allNodes
 
-    let getCallMap (graph:Graph<NodeInReal, InSegmentEdge>) =
-        let getNameOfApiItem (api:ApiItem) = $"{api.System.Name}.{api.Name}"
-        let callMap = new Dictionary<string, ResizeArray<NodeInReal>>()
+    let getCallMap (graph:Graph<VertexBase, InRealEdge>) =
+        let callMap = new Dictionary<string, ResizeArray<Call>>()
         graph.Vertices 
+        |> Seq.cast<Call>
         |> Seq.iter(fun v -> 
-            let apiName = getNameOfApiItem v.ApiItem
+            let apiName = $"{v.System.Name}.{v.Name}"
             if not (callMap.ContainsKey(apiName)) then
-                callMap.Add(apiName, new ResizeArray<NodeInReal>(0))
+                callMap.Add(apiName, new ResizeArray<Call>(0))
             callMap.[apiName].Add(v)
         )
         callMap
 
     let getAliasHeads 
-            (graph:Graph<NodeInReal, InSegmentEdge>)
-            (callMap:Dictionary<string, ResizeArray<NodeInReal>>) =
+            (graph:Graph<VertexBase, InRealEdge>)
+            (callMap:Dictionary<string, ResizeArray<Call>>) =
         [
         for calls in callMap do
             if calls.Value.Count > 1 then

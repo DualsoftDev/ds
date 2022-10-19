@@ -76,22 +76,22 @@ class EtcListener : ListenerBase
 
         foreach (var (key, values) in safetyKvs)
         {
-            RealInFlow seg = null;
+            Real seg = null;
             switch (key.Length)
             {
                 case 1:
                     Assert(ctx.Parent is FlowContext);
-                    seg = _model.FindGraphVertex<RealInFlow>(AppendPathElement(key[0]));
+                    seg = _model.FindGraphVertex<Real>(AppendPathElement(key[0]));
                     break;
                 case 3:
                     Assert(ctx.Parent is PropertyBlockContext);
-                    seg = _model.FindGraphVertex<RealInFlow>(key);
+                    seg = _model.FindGraphVertex<Real>(key);
                     break;
                 default:
                     throw new ParserException($"Invalid safety key[{key.Combine()}]", ctx);
             }
 
-            foreach (var cond in values.Select(v => _model.FindGraphVertex(v) as RealInFlow))
+            foreach (var cond in values.Select(v => _model.FindGraphVertex(v) as Real))
             {
                 var added = seg.SafetyConditions.Add(cond);
                 if (!added)

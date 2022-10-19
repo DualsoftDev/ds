@@ -195,11 +195,68 @@ class DsParser
 
 
 
-    public static string[] collectNameComponents(IParseTree from) =>
-        enumerateChildren<Identifier1Context>(from)
-            .Select(idf => idf.GetText().DeQuoteOnDemand())
-            .ToArray()
-            ;
+    public static string[] collectNameComponents(IParseTree from)
+    {
+        IEnumerable<string> splitName(string name)
+        {
+            var sub = new List<char>();
+            var q = false;
+            var prev = ' ';
+            for(int i = 0; i < name.Length; i++)
+            {
+                var ch = name[i];
+                sub.Add(ch);
+                
+                switch(ch)
+                {
+                    case '\\':
+                        var next = name[++i];
+                        sub.Add(next);
+                        prev = next;
+                        continue;
+
+                    case '.' when q:
+                        break;
+
+                    case '.':
+                        sub.RemoveTail();
+                        yield return new string(sub.ToArray());
+                        sub.Clear();
+                        break;
+
+                    case '"' when prev != '\\':
+                        sub.RemoveTail();
+                        if (q)
+                        {
+                            yield return new string(sub.ToArray());
+                            sub.Clear();
+                        }
+                        else
+                        {
+                            q = true;
+                        }
+                        break;
+
+                }
+            }
+            if (sub.Any())
+                yield return new string(sub.ToArray());
+        }
+        var idCtx = findFirstChild(from,
+                        tree =>
+                            tree is Identifier1Context
+                            || tree is Identifier2Context
+                            || tree is Identifier3Context
+                            || tree is Identifier4Context,
+                        true);
+        var name = idCtx.GetText();
+        return splitName(name).ToArray();
+        //return
+        //    enumerateChildren<Identifier1Context>(from)
+        //        .Select(idf => idf.GetText().DeQuoteOnDemand())
+        //        .ToArray()
+        //        ;
+    }
 
     public static ParserResult getParseResult(dsParser parser)
     {

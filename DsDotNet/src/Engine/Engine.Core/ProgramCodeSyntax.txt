@@ -1,0 +1,32 @@
+<@    // start program
+
+// global 변수 선언 및 초기화
+bool B101 = false;
+word W13 = 0;
+string S27 = "Hello";
+
+
+
+// 사용자 정의 method
+void CMD1() { Delay(0); }       // Delay : 시스템 제공 method
+
+// 사용자 정의 function
+int Wait(int delay) {
+    Delay(delay);
+    return delay + W13;
+}
+
+// Entry point
+void Main() {
+    bool turnOn = %I101.3;  // local 변수에 PLC tag 값 대입
+    B101 = W13 > 0 || S27 == "Hello";   // global 변수에 수식 평가 후 대입
+    int delay = Wait(1000); // local 변수에 사용자 함수 수행 값 대입
+    %Q100.0 = true;         // PLC tag 에 값 할당
+}
+
+
+// 기타
+//      조건식, 루프, array, 구조체, ...
+
+
+@>    // end program

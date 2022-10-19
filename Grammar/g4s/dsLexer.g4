@@ -1,57 +1,43 @@
 grammar dsLexer;
 
-
-identifier1: STRING_LITERAL | IDENTIFIER;
-// STRING_LITERAL : '"' (~('"' | '\\' | '\r' | '\n' | ' ') | '\\' ('"' | '\\'))* '"';
-STRING_LITERAL : '"' (~('"' | '\\' | '\r' | '\n') | '\\' ('"' | '\\'))* '"';
-
-// identifier: QUOTED_IDENTIFIER | IDENTIFIER;
-// QUOTED_IDENTIFIER : '"' STRING_LITERAL '"';
-// fragment STRING_LITERAL: (~('"' | '\\' | '\r' | '\n' | ' ') | '\\' ('"' | '\\'))*;
+WS: [ \t\r\n]+ -> skip;
+comment: BLOCK_COMMENT | LINE_COMMENT;
+BLOCK_COMMENT : '/*' (BLOCK_COMMENT|.)*? '*/' -> channel(HIDDEN) ;
+LINE_COMMENT  : '//' .*? ('\n'|EOF) -> channel(HIDDEN) ;
 
 
-// identifier: quotedIdentifier | simpleIdentifier;
-// simpleIdentifier: IDENTIFIER;
-// quotedIdentifier : '"' STRING_LITERAL '"';
-// fragment STRING_LITERAL: (~('"' | '\\' | '\r' | '\n' | ' ') | '\\' ('"' | '\\'))*;
+fragment Identifier: ValidIdStart ValidIdChar*;
+    fragment HangulChar: [\uAC00-\uD7A3]+;
+
+    fragment ValidIdStart
+    : ('a' .. 'z') | ('A' .. 'Z') | '_' | HangulChar
+    ;
+
+    fragment ValidIdChar
+    : ValidIdStart | ('0' .. '9') | HangulChar
+    ;
 
 
+fragment QuotedStringLiteral : '"' (~('"' | '\\' | '\r' | '\n') | '\\' ('"' | '\\'))* '"';
 
-IDENTIFIER: VALID_ID_START VALID_ID_CHAR*;
-fragment VALID_ID_START
-   : ('a' .. 'z') | ('A' .. 'Z') | '_' | HANGUL_CHAR
-   ;
+fragment Compo: Identifier|QuotedStringLiteral;
 
-fragment VALID_ID_CHAR
-   : VALID_ID_START | ('0' .. '9') | HANGUL_CHAR
-   ;
+IDENTIFIER1: Compo;
+IDENTIFIER2: Compo '.' Compo;
+IDENTIFIER3: Compo '.' Compo '.' Compo;
+IDENTIFIER4: Compo '.' Compo '.' Compo '.' Compo;
 
-
-
-identifier2: identifier1 DOT identifier1;
-identifier3: identifier1 DOT identifier1 DOT identifier1;
-
-identifier4: identifier1 DOT identifier1 DOT identifier1 DOT identifier1;  // for host name 
-
-TAG_ADDRESS: VALID_TAG_START VALID_TAG_CHAR*;
-fragment VALID_TAG_START
-   : PERCENT   // | ('a' .. 'z') | ('A' .. 'Z') | '_' | HANGUL_CHAR
-   ;
-
-fragment VALID_TAG_CHAR
-   : DOT | VALID_ID_CHAR | ('0' .. '9') | HANGUL_CHAR
-   ;
-// TAG_ADDRESS: TAG_CHAR+;
-// fragment TAG_CHAR
-//    : '%' | VALID_ID_CHAR;   //|DOT)*;
-
+identifier1: IDENTIFIER1;
+identifier2: IDENTIFIER2;
+identifier3: IDENTIFIER3;
+identifier4: IDENTIFIER4;
 
 // // - Segment 규격
 // // - 0 DOT: TagName
 // // - 1 DOT: TaskName.SegmentName  : mysystem 을 가정하고 있음.  필요한가?
 // // - 2 DOT: System.TaskName.SegmentName
-identifier123: (identifier1 | identifier2 | identifier3);
-identifier12: (identifier1 | identifier2);
+identifier12: identifier1 | identifier2;
+identifier123: identifier12 | identifier3;
 
 flowPath: identifier2;
 
@@ -63,9 +49,14 @@ identifier1234: (identifier1 | identifier2 | identifier3 | identifier4);
 IPV4: [1-9][0-9]*'.'('0'|[1-9][0-9]*)'.'('0'|[1-9][0-9]*)'.'('0'|[1-9][0-9]*);
 // IPV4: (INTEGER)(DOT) INTEGER DOT INTEGER DOT INTEGER;
 
-comment: BLOCK_COMMENT | LINE_COMMENT;
-BLOCK_COMMENT : '/*' (BLOCK_COMMENT|.)*? '*/' -> channel(HIDDEN) ;
-LINE_COMMENT  : '//' .*? ('\n'|EOF) -> channel(HIDDEN) ;
+TAG_ADDRESS: ValidTagStart ValidTagChar*;
+fragment ValidTagStart
+   : PERCENT   // | ('a' .. 'z') | ('A' .. 'Z') | '_' | HANGUL_CHAR
+   ;
+fragment ValidTagChar
+   : DOT | ValidIdChar | ('0' .. '9') | HangulChar
+   ;
+
 
 SQUOTE: '\'';
 DQUOTE: '"';
@@ -105,7 +96,6 @@ OR2: '||';
 EQ2: '==';
 NEQ: '!=';
 //NEWLINE: '\r'? '\n';
-WS: [ \t\r\n]+ -> skip;
 
 INTEGER: [1-9][0-9]*;
 FLOAT: [1-9][0-9]*('.'[0-9]+)?;

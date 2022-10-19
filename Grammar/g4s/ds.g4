@@ -21,10 +21,6 @@ import dsFunctions;
 
 model: (system|properties|comment)* EOF;        // importStatement|cpus
 
-test:qstring EOF;
-qstring: STRING_LITERAL EOF;
-
-
 system: '[' 'sys' (('ip'|'host') '=' host)? ']' systemName '=' (sysBlock|sysCopySpec);    // [sys] Seg = {..}
     sysBlock
         : LBRACE (flow | interfaces | buttons)* RBRACE       // identifier1Listing|parenting|causal|call

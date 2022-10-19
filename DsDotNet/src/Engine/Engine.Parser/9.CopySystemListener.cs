@@ -1,6 +1,6 @@
 namespace Engine.Parser;
 
-class CopySystemListener : dsBaseListener   //ListenerBase
+class CopySystemListener : dsParserBaseListener   //ListenerBase
 {
     public ParserHelper ParserHelper;
     dsParser _parser;

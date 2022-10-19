@@ -15,13 +15,18 @@
 // https://github.com/tunnelvisionlabs/antlr4ts
 // ds-master/dsvs/dsvse/server$ yarn antlr4ts src/ds-language.g4
 
-grammar ds;
+parser grammar dsParser;
 
-import dsFunctions;
+options { tokenVocab=dsLexer; } // use tokens from dsLexer.g4
+
 
 model: (system|properties|comment)* EOF;        // importStatement|cpus
 
-system: '[' 'sys' (('ip'|'host') '=' host)? ']' systemName '=' (sysBlock|sysCopySpec);    // [sys] Seg = {..}
+test:qstring EOF;
+qstring: STRING_LITERAL EOF;
+
+
+system: '[' SYS ((IP|HOST) '=' host)? ']' systemName '=' (sysBlock|sysCopySpec);    // [sys] Seg = {..}
     sysBlock
         : LBRACE (flow | interfaces | buttons)* RBRACE       // identifier1Listing|parenting|causal|call
         ;
@@ -50,9 +55,10 @@ addressesBlock
     : LBRACE (addressDef)* RBRACE
     ;
 addressDef: segmentPath '=' address;
-    segmentPath: identifier2;
-    address: LPARENTHESIS (startTag)? COMMA (endTag)? RPARENTHESIS (SEIMCOLON)?;
+    segmentPath: identifier3;
+    address: LPARENTHESIS (startTag)? COMMA (resetTag)? COMMA (endTag)? RPARENTHESIS (SEIMCOLON)?;
     startTag: TAG_ADDRESS;
+    resetTag: TAG_ADDRESS;
     endTag: TAG_ADDRESS;
 
 
@@ -133,11 +139,11 @@ causal
     ;
 
 
-// debugging purpose {
-causals: causal* (causalPhrase)?;
+// // debugging purpose {
+// causals: causal* (causalPhrase)?;
 
-expressions: (expression SEIMCOLON)+ ;
-// } debugging purpose
+// expressions: (expression SEIMCOLON)+ ;
+// // } debugging purpose
 
 
 causalPhrase
@@ -153,10 +159,10 @@ causalTokensCNF
     ;
 
 causalToken
-    : proc
-    | func
-    | expression
-    | identifier1
+    : identifier1
+//     | proc
+//     | func
+//     | expression
 //  | segmentValue  // '(A)' or '(A.B)'
     ;
 //segmentValue: LPARENTHESIS identifier123 RPARENTHESIS;
@@ -165,13 +171,14 @@ causalToken
 causalOperator
     : '>>'  // CAUSAL_FWD_STRONG
     | '>'   // CAUSAL_FWD
-    | '>|>'  //CAUSAL_FWD_AND_RESET_FWD
+    | CAUSAL_FWD_AND_RESET_FWD  // '>|>' | '|>>';
     | '<<'   // CAUSAL_BWD_STRONG
     | '<'   // CAUSAL_BWD
-    | '<|<' // CAUSAL_BWD_AND_RESET_BWD
-    | '><|'         // CAUSAL_FWD_AND_RESET_BWD
-    | '=>'          // CAUSAL_FWD_AND_RESET_BWD
+    | CAUSAL_BWD_AND_RESET_BWD  // '<<|' | '<|<';
+    // | '=>'          // CAUSAL_FWD_AND_RESET_BWD
     | '|><'         // CAUSAL_BWD_AND_RESET_FWD
+    | CAUSAL_FWD_AND_RESET_BWD  // '><|' | '=>';
+
     | causalOperatorReset
     ;
 causalOperatorReset
@@ -183,17 +190,27 @@ causalOperatorReset
     | '<||>'        // CAUSAL_RESET_FB
     ;
 
-CAUSAL_FWD: GT; // '>'
-CAUSAL_BWD: LT; // '<'
-CAUSAL_RESET_FWD: '|>';
-CAUSAL_RESET_BWD: '<|';
-CAUSAL_RESET_FB: '<||>';
-CAUSAL_FWD_AND_RESET_BWD: '><|' | '=>';
-CAUSAL_FWD_AND_RESET_FWD: '>|>' | '|>>';
-CAUSAL_BWD_AND_RESET_BWD: '<<|' | '<|<';
-CAUSAL_BWD_AND_RESET_FWD: '|><';
+identifier1: STRING_LITERAL | IDENTIFIER;
 
 
-// TOKEN
-//    : ('0' .. '9' | 'a' .. 'z' | 'A' .. 'Z' | '-' | ' ' | '/' | '_' | ':' | ',')+
-//    ;
+comment: BLOCK_COMMENT | LINE_COMMENT;
+
+identifier2: identifier1 DOT identifier1;
+identifier3: identifier1 DOT identifier1 DOT identifier1;
+
+identifier4: identifier1 DOT identifier1 DOT identifier1 DOT identifier1;  // for host name 
+
+
+// // - Segment 규격
+// // - 0 DOT: TagName
+// // - 1 DOT: TaskName.SegmentName  : mysystem 을 가정하고 있음.  필요한가?
+// // - 2 DOT: System.TaskName.SegmentName
+identifier12: (identifier1 | identifier2);
+identifier123: (identifier1 | identifier2 | identifier3);
+
+flowPath: identifier2;
+
+identifier123CNF: identifier123 (COMMA identifier123)*;
+identifier123DNF: identifier123CNF (OR2 identifier123CNF)*;
+
+identifier1234: (identifier1 | identifier2 | identifier3 | identifier4);

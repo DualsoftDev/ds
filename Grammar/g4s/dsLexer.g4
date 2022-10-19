@@ -1,12 +1,32 @@
-grammar dsLexer;
+lexer grammar dsLexer;
+
+
+SYS: 'sys';
+IP: 'ip';
+HOST: 'host';
+COPY_SYSTEM: 'copy_system';
+LAYOUTS: 'layouts';
+ADDRESSES: 'addresses';
+PROP: 'prop';
+SAFETY: 'safety';
+FLOW: 'flow';
+INTERFACES: 'interfaces';
+ALIASES: 'aliases';
+EMG_IN: 'emg_in';
+EMG: 'emg';
+AUTO_IN: 'auto_in';
+AUTO: 'auto';
+START_IN: 'start_in';
+START: 'start';
+RESET_IN: 'reset_in';
+RESET: 'reset';
 
 WS: [ \t\r\n]+ -> skip;
-comment: BLOCK_COMMENT | LINE_COMMENT;
 BLOCK_COMMENT : '/*' (BLOCK_COMMENT|.)*? '*/' -> channel(HIDDEN) ;
 LINE_COMMENT  : '//' .*? ('\n'|EOF) -> channel(HIDDEN) ;
 
-
 fragment Identifier: ValidIdStart ValidIdChar*;
+   // lexical rule for hangul characters
     fragment HangulChar: [\uAC00-\uD7A3]+;
 
     fragment ValidIdStart
@@ -27,35 +47,17 @@ IDENTIFIER2: Compo '.' Compo;
 IDENTIFIER3: Compo '.' Compo '.' Compo;
 IDENTIFIER4: Compo '.' Compo '.' Compo '.' Compo;
 
-identifier1: IDENTIFIER1;
-identifier2: IDENTIFIER2;
-identifier3: IDENTIFIER3;
-identifier4: IDENTIFIER4;
-
-// // - Segment 규격
-// // - 0 DOT: TagName
-// // - 1 DOT: TaskName.SegmentName  : mysystem 을 가정하고 있음.  필요한가?
-// // - 2 DOT: System.TaskName.SegmentName
-identifier12: identifier1 | identifier2;
-identifier123: identifier12 | identifier3;
-
-flowPath: identifier2;
-
-identifier123CNF: identifier123 (COMMA identifier123)*;
-identifier123DNF: identifier123CNF (OR2 identifier123CNF)*;
-
-identifier1234: (identifier1 | identifier2 | identifier3 | identifier4);
 
 IPV4: [1-9][0-9]*'.'('0'|[1-9][0-9]*)'.'('0'|[1-9][0-9]*)'.'('0'|[1-9][0-9]*);
 // IPV4: (INTEGER)(DOT) INTEGER DOT INTEGER DOT INTEGER;
 
 TAG_ADDRESS: ValidTagStart ValidTagChar*;
-fragment ValidTagStart
-   : PERCENT   // | ('a' .. 'z') | ('A' .. 'Z') | '_' | HANGUL_CHAR
-   ;
-fragment ValidTagChar
-   : DOT | ValidIdChar | ('0' .. '9') | HangulChar
-   ;
+   fragment ValidTagStart
+      : '%'   // | ('a' .. 'z') | ('A' .. 'Z') | '_' | HANGUL_CHAR
+      ;
+   fragment ValidTagChar
+      : DOT | ValidIdChar | ('0' .. '9') | HangulChar
+      ;
 
 
 SQUOTE: '\'';
@@ -78,17 +80,10 @@ AT: '@';
 POUND: '#';
 PLUS: '+';
 MINUS: '-';
-MUL: STAR;
-DIV: SLASH;
-MOD: PERCENT;
-fragment STAR: '*';
-fragment SLASH: '/';
-fragment PERCENT: '%';
+MUL: '*';
+DIV: '/';
+MOD: '%';
 
-fragment RANGLE: '>';
-fragment LANGLE: '<';
-GT: RANGLE;
-LT: LANGLE;
 GTE: '>=';
 LTE: '<=';
 
@@ -100,14 +95,33 @@ NEQ: '!=';
 INTEGER: [1-9][0-9]*;
 FLOAT: [1-9][0-9]*('.'[0-9]+)?;
 
-// lexical rule for hangul characters
-HANGUL_CHAR: [\uAC00-\uD7A3]+;
+
+// Close Angle Bracket
+Cab: '>';
+CabCab: '>>';
+
+// Open Angle Bracket
+Oab: '<';
+OabOab: '<<';
+
+PipeCab: '|>';
+CabPipe: '<|';
+OabPipePipeCab: '<||>';
+CabOabPipe: '><|';
+EqualCab: '=>';
+CabPipeCab: '>|>';
+PipeCabCab: '|>>';
+OabOabPipe: '<<|';
+OabPipeOab: '<|<';
+PipeCabOab: '|><';
+PipePipeOab: '||>';
+CabPipePipe: '<||';
+OabOabPipePipeCabCab: '<<||>>';
 
 
-// COMMENT
-//     : '/*' .*? '*/' -> skip
-// ;
+QUESTION: '?';
 
-// LINE_COMMENT
-//     : '//' ~[\r\n]* -> skip
-// ;
+
+// TOKEN
+//    : ('0' .. '9' | 'a' .. 'z' | 'A' .. 'Z' | '-' | ' ' | '/' | '_' | ':' | ',')+
+//    ;

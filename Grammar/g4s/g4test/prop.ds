@@ -12,10 +12,10 @@
 
 [prop] = {
     [addresses] = {
-        EX.F1_ER1.EXT                                = (,,)
-        EX.F1_ER2.EXT                                = (,,)
-        EX.F1_C1.TX                                  = (, , )
-        EX.F1_C1.RX                                  = (, ,)
+        EX.Minus                                = (,)
+        EX.Plus                                = (,)
+        EX.TX                                  = (, )
+        EX.RX                                  = (, )
     }
     [layouts] = {   // System.{Interface 명} = (x, y, w, h)
         A."+" = (1309,405,205,83)

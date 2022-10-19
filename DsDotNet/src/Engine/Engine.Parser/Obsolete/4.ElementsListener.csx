@@ -53,7 +53,7 @@ class NodeConjunction : NodeBase
 }
 
 
-partial class ElementsListener : dsBaseListener
+partial class ElementsListener : dsParserBaseListener
 {
     #region Boiler-plates
     public ParserHelper ParserHelper;

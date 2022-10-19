@@ -2,7 +2,7 @@ using Engine.Core;
 
 namespace Engine.Parser;
 
-class ModelListener : dsBaseListener
+class ModelListener : dsParserBaseListener
 {
     #region Boiler-plates
     public ParserHelper ParserHelper;

@@ -24,7 +24,7 @@ module ConvertM =
             ///MSeg   -> CoreModule.Child
             let convertChild(mChildSeg:MSeg) = 
                 if mChildSeg.IsAlias
-                then Alias.CreateInReal(mChildSeg.AliasName, dicChild.[mChildSeg.AliasOrg.Value.Name], coreSeg) :> VertexBase
+                then Alias.CreateInReal(mChildSeg.AliasName, dicChild.[mChildSeg.AliasOrg.Value.Name], coreSeg) :> Vertex
                 else 
                      let api = 
                         if dicChild.ContainsKey(mChildSeg.Name) 
@@ -34,7 +34,7 @@ module ConvertM =
                             dicChild.TryAdd(mChildSeg.Name, newApi) |> ignore
                             newApi
 
-                     Call.CreateInReal(api, coreSeg) :> VertexBase
+                     Call.CreateInReal(api, coreSeg) :> Vertex
 
             let gr = coreSeg.Graph
              ///MEdge   -> CoreModule.Flow
@@ -66,11 +66,11 @@ module ConvertM =
             ///MSeg   -> CoreModule.Segment
             let convertSeg(mSeg:MSeg, coreFlow:CoreModule.Flow) = 
                 if mSeg.IsAlias
-                then Alias.CreateInFlow(mSeg.ValidName, mSeg.AliasOrg.Value.FullName.Split('.'), coreFlow) :> VertexBase
+                then Alias.CreateInFlow(mSeg.ValidName, mSeg.AliasOrg.Value.FullName.Split('.'), coreFlow) :> Vertex
                 else 
                      let coreSeg = Real.Create(mSeg.ValidName, coreFlow)
                      convertChildren (mSeg, coreSeg, coreModel)  |> ignore
-                     coreSeg :> VertexBase
+                     coreSeg :> Vertex
 
             ///MEdge   -> CoreModule.Flow
             let convertRootEdge(mEdge:MEdge, coreFlow:CoreModule.Flow) = 

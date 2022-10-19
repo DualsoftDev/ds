@@ -45,13 +45,13 @@ module EdgeModule =
                 failwithlogf $"Unknown causal operator [{operator}]."
         ]
 
-    let createFlowEdges(flow:Flow, source:VertexBase, target:VertexBase, operator:string) =
+    let createFlowEdges(flow:Flow, source:Vertex, target:Vertex, operator:string) =
         [|
             for src, op, tgt in createEdgesReArranged(source, operator, target) do
                 yield InFlowEdge.Create(flow, src, tgt, op)
         |]
 
-    let createChildEdges(segment:Real, source:VertexBase, target:VertexBase, operator:string) =
+    let createChildEdges(segment:Real, source:Vertex, target:Vertex, operator:string) =
         [|
             for src, op, tgt in createEdgesReArranged(source, operator, target) do
                 yield InRealEdge.Create(segment, src, tgt, op)
@@ -119,7 +119,7 @@ module EdgeModule =
                 edgeCreator(j, i, EdgeType.Reset ||| EdgeType.Strong ||| EdgeType.AugmentedTransitiveClosure) |> ignore
 
     let createMRIEdgesTransitiveClosure(flow:Flow) =
-        let edgeCreator = fun (s, t, edgeType) -> InFlowEdge.Create(flow, s, t, edgeType) :> IEdge<VertexBase>
+        let edgeCreator = fun (s, t, edgeType) -> InFlowEdge.Create(flow, s, t, edgeType) :> IEdge<Vertex>
         createMRIEdgesTransitiveClosure4Graph(flow.Graph, edgeCreator)
 
     let createMRIEdgesTransitiveClosure4System(system:DsSystem) =
@@ -135,9 +135,9 @@ type EdgeExt =
                     edgeTypeTuples.Where(fun kv -> kv.Value = causal).Select(fun kv -> kv.Key).First()
 
    
-    [<Extension>] static member CreateEdges(flow:Flow, source:VertexBase, target:VertexBase, operator:string) =
+    [<Extension>] static member CreateEdges(flow:Flow, source:Vertex, target:Vertex, operator:string) =
                     createFlowEdges(flow, source, target, operator)
-    [<Extension>] static member CreateEdges(segment:Real, source:VertexBase, target:VertexBase, operator:string) =
+    [<Extension>] static member CreateEdges(segment:Real, source:Vertex, target:Vertex, operator:string) =
                     createChildEdges(segment, source, target, operator)
 
     [<Extension>] static member CreateMRIEdgesTransitiveClosure(model:Model) =

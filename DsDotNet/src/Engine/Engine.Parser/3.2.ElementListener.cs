@@ -61,7 +61,7 @@ class ElementListener : ListenerBase
         var path = AppendPathElement(ns);
 
         var existing = _modelSpits.Where(spit => spit.NameComponents.IsStringArrayEqaul(path)).ToArray();
-        if (existing.Where(spit => spit.Obj is VertexBase).Any())
+        if (existing.Where(spit => spit.Obj is Vertex).Any())
             return;
 
         var pathWithoutParenting = new[] { _system.Name, _rootFlow.Name }.Concat(ns).ToArray();

@@ -15,7 +15,7 @@ module SpitModuleHelper =
         member val NameComponents = nameComponents
 
     type SpitResults = SpitResult[]
-    let rec spitCall (child:VertexBase) : SpitResults =
+    let rec spitCall (child:Vertex) : SpitResults =
         [|
             yield SpitResult(child, child.NameComponents)
         |]

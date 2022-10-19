@@ -26,8 +26,8 @@ module private GraphCalculationUtils =
         result
 
     /// Get reset informations from graph
-    let getAllResets (graph:Graph<VertexBase, InRealEdge>) =
-        let getCallMap (graph:Graph<VertexBase, InRealEdge>) =
+    let getAllResets (graph:Graph<Vertex, InRealEdge>) =
+        let getCallMap (graph:Graph<Vertex, InRealEdge>) =
             let callMap = new Dictionary<string, ResizeArray<Call>>()
             graph.Vertices 
             |> Seq.cast<Call>
@@ -72,8 +72,8 @@ module private GraphCalculationUtils =
         |> Seq.collect(generateResetRelationShips callMap)
 
     /// Get ordered graph nodes to calculate the node index
-    let getTraverseOrder (graph:Graph<VertexBase, InRealEdge>) =
-        let q = Queue<VertexBase>()
+    let getTraverseOrder (graph:Graph<Vertex, InRealEdge>) =
+        let q = Queue<Vertex>()
         graph.Inits |> Seq.iter q.Enqueue
         [|
             while q.Count > 0 do
@@ -87,10 +87,10 @@ module private GraphCalculationUtils =
     /// Get ordered routes from start to end
     let visitFromSourceToTarget
             (now:Call) (target:Call) 
-            (graph:Graph<VertexBase, InRealEdge>) =
+            (graph:Graph<Vertex, InRealEdge>) =
         let rec searchNodes
                 (now:Call) (target:Call)
-                (graph:Graph<VertexBase, InRealEdge>) 
+                (graph:Graph<Vertex, InRealEdge>) 
                 (path:Call list) =
             [
                 let nowPath = path.Append(now) |> List.ofSeq
@@ -140,7 +140,7 @@ module private GraphCalculationUtils =
     
     /// Check intersect between two sequences
     let checkIntersect 
-            (sourceSeq:VertexBase seq) (shatteredSeqs:VertexBase seq seq) =
+            (sourceSeq:Vertex seq) (shatteredSeqs:Vertex seq seq) =
         shatteredSeqs
         |> Seq.filter(fun sr ->
             Enumerable.SequenceEqual(
@@ -266,7 +266,7 @@ module private GraphCalculationUtils =
                 allNodes.Add(node, 3)
         allNodes
 
-    let getCallMap (graph:Graph<VertexBase, InRealEdge>) =
+    let getCallMap (graph:Graph<Vertex, InRealEdge>) =
         let callMap = new Dictionary<string, ResizeArray<Call>>()
         graph.Vertices 
         |> Seq.cast<Call>
@@ -279,7 +279,7 @@ module private GraphCalculationUtils =
         callMap
 
     let getAliasHeads 
-            (graph:Graph<VertexBase, InRealEdge>)
+            (graph:Graph<Vertex, InRealEdge>)
             (callMap:Dictionary<string, ResizeArray<Call>>) =
         [
         for calls in callMap do

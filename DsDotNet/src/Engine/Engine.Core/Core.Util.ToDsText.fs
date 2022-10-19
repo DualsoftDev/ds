@@ -90,7 +90,7 @@ module internal ToDsTextModule =
             let subGraph = segment.Graph
             if subGraph.Edges.any() then
                 yield $"{tab}{segment.GetRelativeName(basis)} = {lb}"
-                let es = subGraph.Edges.Cast<EdgeBase<VertexBase>>().ToArray()
+                let es = subGraph.Edges.Cast<EdgeBase<Vertex>>().ToArray()
                 let vs = subGraph.Vertices
                 yield graphEntitiesToDs segment.NameComponents vs es (indent+1)
                 yield $"{tab}{rb}"
@@ -99,7 +99,7 @@ module internal ToDsTextModule =
     let flowGraphToDs (flow:Flow) (indent:int) =
         let graph = flow.Graph
         let basis = flow.NameComponents
-        let es = graph.Edges.OfType<EdgeBase<VertexBase>>().ToArray()
+        let es = graph.Edges.OfType<EdgeBase<Vertex>>().ToArray()
         graphEntitiesToDs basis graph.Vertices es indent
 
     let flowToDs (flow:Flow) (indent:int) =

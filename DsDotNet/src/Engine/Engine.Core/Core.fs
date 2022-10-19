@@ -40,7 +40,7 @@ module CoreModule =
 
     and Flow private (name:string, system:DsSystem) =
         inherit FqdnObject(name, system)
-        member val Graph = Graph<VertexBase, InFlowEdge>()     
+        member val Graph = Graph<Vertex, InFlowEdge>()     
         member val AliasMap = Dictionary<NameComponents, HashSet<string>>(nameComponentsComparer())
         member x.System = system
         static member Create(name:string, system:DsSystem) =
@@ -53,7 +53,7 @@ module CoreModule =
 
     /// leaf or stem(parenting)
     and [<AbstractClass>]
-        VertexBase (name:string, parent:ParentWrapper) =
+        Vertex (name:string, parent:ParentWrapper) =
         inherit FqdnObject(name, parent.Core)
         interface INamedVertex
         //member _.System = parent.System
@@ -62,8 +62,8 @@ module CoreModule =
     /// Segment (DS Basic Unit)
     and [<DebuggerDisplay("{QualifiedName}")>]
         Real private (name:string, flow:Flow) =
-        inherit VertexBase(name, Flow(flow))
-        member val Graph = Graph<VertexBase, InRealEdge>()
+        inherit Vertex(name, Flow flow)
+        member val Graph = Graph<Vertex, InRealEdge>()
         member val Flow = flow
         member val SafetyConditions = createQualifiedNamedHashSet<Real>() 
         static member Create(name:string, flow) =
@@ -76,28 +76,30 @@ module CoreModule =
 
     /// 외부 시스템 호출 객체
     and Call private (apiItem:ApiItem, parent:ParentWrapper) =
-        inherit VertexBase(apiItem.QualifiedName, parent)
+        inherit Vertex(apiItem.QualifiedName, parent)
         member _.ApiItem = apiItem
-        static member CreateInFlow(apiItem:ApiItem, flow:Flow) = Call.Create(apiItem, Flow flow)
-        static member CreateInReal(apiItem:ApiItem, real:Real) = Call.Create(apiItem, ParentWrapper.Real real)
-        static member private Create(apiItem:ApiItem, parent:ParentWrapper) = 
-            let call = Call(apiItem, parent)
-            match parent with
-            | Flow flow ->  flow.Graph.AddVertex(call)
-            | Real real ->  real.Graph.AddVertex(call)
-            |> verifyM $"Duplicated call name [{apiItem.QualifiedName}]"
+
+        static member CreateInFlow(apiItem:ApiItem, flow:Flow) =
+            let call = Call(apiItem, Flow flow)
+            flow.Graph.AddVertex(call) |> verifyM $"Duplicated call name [{apiItem.QualifiedName}]"
             call
+
+        static member CreateInReal(apiItem:ApiItem, real:Real) =
+            let call = Call(apiItem, Real real)
+            real.Graph.AddVertex(call) |> verifyM $"Duplicated call name [{apiItem.QualifiedName}]"
+            call
+
       
     and Alias private (mnemonic:string, parent:ParentWrapper, aliasKey:string[]) =
-        inherit VertexBase(mnemonic, parent)
+        inherit Vertex(mnemonic, parent)
 
         static member CreateInFlow(name, aliasKey, flow:Flow) =
             let alias = Alias(name, Flow flow, aliasKey)
             flow.Graph.AddVertex(alias) |> verifyM $"Duplicated segment name [{name}]"
             alias
-        static member CreateInReal(mnemonic, apiItem:ApiItem, segment:Real) =
-            let child = Alias(mnemonic, ParentWrapper.Real segment, apiItem.NameComponents)
-            segment.Graph.AddVertex(child) |> verifyM $"Duplicated child name [{mnemonic}]"
+        static member CreateInReal(mnemonic, apiItem:ApiItem, real:Real) =
+            let child = Alias(mnemonic, Real real, apiItem.NameComponents)
+            real.Graph.AddVertex(child) |> verifyM $"Duplicated child name [{mnemonic}]"
             child
     
         member _.AliasKey = aliasKey  
@@ -149,16 +151,16 @@ module CoreModule =
 
     and ButtonDic = Dictionary<string, ResizeArray<Flow>>
 
-    and InFlowEdge private (source:VertexBase, target:VertexBase, edgeType:EdgeType) =
-        inherit EdgeBase<VertexBase>(source, target, edgeType)
+    and InFlowEdge private (source:Vertex, target:Vertex, edgeType:EdgeType) =
+        inherit EdgeBase<Vertex>(source, target, edgeType)
         static member Create(flow:Flow, source, target, edgeType:EdgeType) =
             let edge = InFlowEdge(source, target, edgeType)
             flow.Graph.AddEdge(edge) |> verifyM $"Duplicated edge [{source.Name}{edgeType.ToText()}{target.Name}]"
             edge
         override x.ToString() = $"{x.Source.QualifiedName} {x.EdgeType.ToText()} {x.Target.QualifiedName}"
 
-    and InRealEdge private (source:VertexBase, target:VertexBase, edgeType:EdgeType) =
-        inherit EdgeBase<VertexBase>(source, target, edgeType)
+    and InRealEdge private (source:Vertex, target:Vertex, edgeType:EdgeType) =
+        inherit EdgeBase<Vertex>(source, target, edgeType)
         static member Create(segment:Real, source, target, edgeType:EdgeType) =
             let edge = InRealEdge(source, target, edgeType)
             let gr:Graph<_, _> = segment.Graph

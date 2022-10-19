@@ -10,7 +10,7 @@ open PPTX
 open System.Collections.Generic
 open Microsoft.FSharp.Collections
 open Engine.Common.FS
-open Engine.Core
+open Model.Import.Office
 
 [<AutoOpen>]
 module ImportM =

@@ -28,14 +28,8 @@ test:
 
 	@echo quoted
 	$(grun) ds model < g4test/quoted.ds
-	@echo causals
-	$(grun) ds causals < g4test/causals.txt
 	@echo diamond
 	$(grun) ds model < g4test/diamond.ds
-	@echo proc
-	$(grun) ds model < g4test/proc.ds
-	@echo taskFlow
-	$(grun) ds model < g4test/taskFlow.ds
 	@echo call
 	$(grun) ds model < g4test/call.ds
 	@echo prop
@@ -51,6 +45,12 @@ test:
 
 	@echo "---------- with errors"
 
+	@echo causals
+	$(grun) ds causals < g4test/causals.txt
+	@echo proc
+	$(grun) ds model < g4test/proc.ds
+	@echo taskFlow
+	$(grun) ds model < g4test/taskFlow.ds
 	@echo ppt2
 	$(grun) ds model < g4test/ppt2.ds
 

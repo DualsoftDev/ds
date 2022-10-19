@@ -7,6 +7,7 @@ open System.Linq
 open System.Diagnostics
 open System.Collections.Concurrent
 open System.Collections.Generic
+open Model.Import.Office
 open Engine.Core
 
 [<AutoOpen>]
@@ -70,7 +71,8 @@ module Object =
                                             else sprintf "%s.%s"  ownerMFlow x.ValidName
 
             member x.FullName   = sprintf "%s.%s.%s" baseSystem.Name  ownerMFlow x.ValidName//    (if(x.Parent.IsSome) then x.Parent.Value.ValidName else "Root")
-            //member x.CallName   = sprintf "%s(%s)"  (x.Name.Split('.').[1]) (if(x.Parent.IsSome) then x.Parent.Value.Name else "Root")
+            member x.ApiName    = sprintf "%s"  (x.Name.Split('.').[1]) 
+            member x.AliasName  = sprintf "%s"  (x.Name.Split('.').[1]) 
 
             member x.Update(nodeKey, nodeIdValue, nodeCntTX, nodeCntRX) = 
                         this.Key <- nodeKey
@@ -106,11 +108,11 @@ module Object =
             member x.IsChildExist = mChildFlow.Nodes.Any()
             member x.IsChildEmpty = x.IsChildExist|>not
             member x.IsRoot =  x.Parent.IsNone
-            member x.IsAlias = x.Alias.IsSome
-            member x.UIKey:string =    $"{if(x.IsAlias) then x.Alias.Value.Name else x.Name};{x.Key}" 
+            member x.IsAlias = x.AliasOrg.IsSome
+            member x.UIKey:string =    $"{if(x.IsAlias) then x.AliasOrg.Value.Name else x.Name};{x.Key}" 
 
             member val Key : string = "" with get, set
-            member val Alias : MSeg option = None  with get, set
+            member val AliasOrg : MSeg option = None  with get, set
             member val Parent : MSeg option = None with get, set
             member val S : string option = None    with get, set
             member val E : string option = None    with get, set
@@ -121,7 +123,7 @@ module Object =
     and
         /// Modeled Edge : 사용자가 작성한 모델 상의 segment 간의 연결 edge (Wire)
         [<DebuggerDisplay("{Source.FullName}{Causal.ToText()}{Target.FullName}")>]
-        MEdge(src:MSeg, tgt:MSeg, causal:EdgeCausal) =
+        MEdge(src:MSeg, tgt:MSeg, causal:EdgeType) =
             inherit DsEdge(src, tgt, causal)
             member x.Source = src
             member x.Target = tgt
@@ -137,12 +139,7 @@ module Object =
 
             member x.ToText() = $"{src.Name}  {causal.ToText()}  {tgt.Name}"
             member x.ToCheckText(parentName:string) = 
-                            let  checkText = match causal with
-                                             //|SEdge |SPush |  SReset-> "Start"
-                                             //|REdge |RPush |  Interlock-> "Reset"
-                                             // <ahn>
-                                             |SEdge |SPush -> "Start"
-                                             |REdge |RPush -> "Reset"
+                            let  checkText = if causal.IsStart() then "Start" else "Reset"
                             $"[{parentName}]{src.ToCallText()}  {checkText}  {tgt.ToCallText()}"
 
             member x.GetSegs() = [src;tgt]
@@ -194,7 +191,7 @@ module Object =
             member x.Interlockedges = 
                         let FullNodesIL = interlocks.Values
                                             |> Seq.collect(fun seg -> [seg.Source;seg.Target])
-                                            |> Seq.filter(fun seg -> seg.Alias.IsNone)
+                                            |> Seq.filter(fun seg -> seg.AliasOrg.IsNone)
                                             |> HashSet
                         interlocks.Values
                                         |> Seq.collect(fun seg -> [seg.Source;seg.Target])
@@ -218,7 +215,7 @@ module Object =
             member x.CallSegs() = x.UsedMSegs
                                     |> Seq.filter(fun seg -> seg.NodeType.IsCall)
                                     |> Seq.filter(fun seg -> seg.Bound = OtherFlow)
-                                    |> Seq.map(fun seg -> if seg.IsAlias then seg.Alias.Value else seg)
+                                    |> Seq.map(fun seg -> if seg.IsAlias then seg.AliasOrg.Value else seg)
                                     |> Seq.cast<MSeg>
                                     |> Seq.sortBy(fun seg -> seg.FullName)
                                     |> Seq.distinctBy(fun seg -> seg.FullName)
@@ -235,8 +232,8 @@ module Object =
     and
         [<DebuggerDisplay("{Name}")>]
         /// System 내부 Seg의 내외부 Seg간 시작/리셋 연결 정보 구조
-        MSys private (name:string, active:bool, model:Model) as this  =
-            inherit MSystem(name, model)
+        MSys private (name:string, active:bool, model:MModel) as this  =
+            inherit MSystem(name, model:>ModelBase)
 
             let systemFlow = RootFlow(name, this)
             let mutable sysSeg: System.Lazy<MSeg> = null
@@ -246,7 +243,6 @@ module Object =
             let variableSet  = ConcurrentDictionary<string, DataType>()
             let addressSet  = ConcurrentDictionary<string, Tuple<string, string>>()
             let dicIf =  ConcurrentDictionary<string, MInterface>()
-            //let noEdgesSegs = mFlows |> Seq.collect(fun f-> f.Value.NoEdgeSegs)
             let emgSet  =  this.EmergencyButtons 
             let startSet = this.AutoButtons     
             let resetSet = this.StartButtons 
@@ -340,7 +336,7 @@ module Object =
     and 
         [<DebuggerDisplay("{Name}")>]
        MModel(name:string) as this  =
-            inherit Model()
+            inherit ModelBase()
             let systems = ConcurrentDictionary<string, MSys>()
 
             //모델에 시스템 등록 및 삭제

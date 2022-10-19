@@ -28,7 +28,7 @@ class EdgeListener : ListenerBase
                 ;
             var token =
                 matches
-                .Where(spit =>spit.Obj is SegmentBase || spit.Obj is Child)
+                .Where(spit =>spit.Obj is NodeInFlow || spit.Obj is NodeInReal)
                 .Select(spit => spit.Obj)
                 .FirstOrDefault();
                 ;
@@ -66,9 +66,9 @@ class EdgeListener : ListenerBase
                         throw new ParserException($"ERROR: failed to find [{right.GetText()}]", ctx);
 
                     if (_parenting == null)
-                        _rootFlow.CreateEdges(l as SegmentBase, r as SegmentBase, op);
+                        _rootFlow.CreateEdges(l as NodeInFlow, r as NodeInFlow, op);
                     else
-                        _parenting.CreateEdges(l as Child, r as Child, op);
+                        _parenting.CreateEdges(l as NodeInReal, r as NodeInReal, op);
                 }
             }
         }

@@ -70,8 +70,8 @@ namespace Model.Simulator
 
         private void DrawMEdge(Subgraph subgraph, InFlowEdge edge, InSegmentEdge segEdge)
         {
-            var segSrc = edge.Source as RealSegment;
-            var segTgr = edge.Target as RealSegment;
+            var segSrc = edge.Source as RealInFlow;
+            var segTgr = edge.Target as RealInFlow;
 
             var subGSrc = new Subgraph(segSrc.Name);
             var subGTgt = new Subgraph(segTgr.Name);
@@ -95,7 +95,7 @@ namespace Model.Simulator
             nNode.Attr.Color = Color.Black;
 
         }
-        private void DrawSub(Subgraph subgraph, RealSegment seg, Subgraph subG, Node gNode, bool bDrawSub)
+        private void DrawSub(Subgraph subgraph, RealInFlow seg, Subgraph subG, Node gNode, bool bDrawSub)
         {
             if (_dicDrawing.ContainsKey(gNode.Id)) return;
             else _dicDrawing.Add(gNode.Id, gNode);
@@ -166,8 +166,8 @@ namespace Model.Simulator
 
             if (model)
             {
-                var src = edge.Source as RealSegment;
-                var tgt = edge.Target as RealSegment;
+                var src = edge.Source as RealInFlow;
+                var tgt = edge.Target as RealInFlow;
 
                 UpdateNodeView(gEdge.SourceNode, src == null ? NodeType.TR : NodeType.MY);
                 UpdateNodeView(gEdge.TargetNode, tgt == null ? NodeType.TR : NodeType.MY);
@@ -194,7 +194,7 @@ namespace Model.Simulator
 
         internal void Update(IVertex iSeg, Status4 status4)
         {
-            var seg = iSeg as SegmentBase;
+            var seg = iSeg as NodeInFlow;
             Node node = viewer.Graph.FindNode(seg.Name);
             if (node == null)
             {

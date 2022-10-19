@@ -5,7 +5,7 @@ open Engine.Core
 
 [<AutoOpen>]
 module GraphUtils =
-    type DsGraph(graph:Graph<Child, InSegmentEdge>) =
+    type DsGraph(graph:Graph<NodeInReal, InSegmentEdge>) =
         /// Get node index map(key:name, value:idx)
         member x.Indices = graph |> getIndexedMap
         

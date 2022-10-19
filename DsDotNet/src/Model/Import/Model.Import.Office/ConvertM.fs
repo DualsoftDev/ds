@@ -19,26 +19,26 @@ module ConvertM =
         let dicChild = ConcurrentDictionary<string, ApiItem>()
 
         ///mEdges   -> CoreModule.Child
-        let convertChildren(mSeg:MSeg, coreSeg:CoreModule.RealSegment, coreModel:CoreModule.Model) =   
+        let convertChildren(mSeg:MSeg, coreSeg:CoreModule.RealInFlow, coreModel:CoreModule.Model) =   
 
             ///MSeg   -> CoreModule.Child
             let convertChild(mChildSeg:MSeg) = 
                 if mChildSeg.IsAlias
-                then InRealAlias.Create(mChildSeg.Name, dicChild.[mChildSeg.Alias.Value.Name], coreSeg) :> Child
+                then AliasInReal.Create(mChildSeg.AliasName, dicChild.[mChildSeg.AliasOrg.Value.Name], coreSeg) :> NodeInReal
                 else 
                      let api = 
                         if dicChild.ContainsKey(mChildSeg.Name) 
                         then dicChild.[mChildSeg.Name]
                         else 
-                            let newApi= ApiItem.Create(mChildSeg.Name, coreModel.FindSystem(mChildSeg.BaseSys.Name))
+                            let newApi= ApiItem.Create(mChildSeg.ApiName, coreModel.FindSystem(mChildSeg.BaseSys.Name))
                             dicChild.TryAdd(mChildSeg.Name, newApi) |> ignore
                             newApi
 
-                     InRealApiCall.CreateOnDemand(api, coreSeg) :> Child
+                     CallInReal.CreateOnDemand(api, coreSeg) :> NodeInReal
 
             let gr = coreSeg.Graph
              ///MEdge   -> CoreModule.Flow
-            let convertChildEdge(mEdge:MEdge, coreSeg:CoreModule.RealSegment) = 
+            let convertChildEdge(mEdge:MEdge, coreSeg:CoreModule.RealInFlow) = 
                 let s = dicChild.[mEdge.Source.Name].QualifiedName
                 let t = dicChild.[mEdge.Target.Name].QualifiedName
                 let src = gr.FindVertex(s)
@@ -66,11 +66,11 @@ module ConvertM =
             ///MSeg   -> CoreModule.Segment
             let convertSeg(mSeg:MSeg, coreFlow:CoreModule.Flow) = 
                 if mSeg.IsAlias
-                then InFlowAlias.Create(mSeg.ValidName, coreFlow, mSeg.Alias.Value.FullName.Split('.')) :> SegmentBase
+                then AliasInFlow.Create(mSeg.ValidName, coreFlow, mSeg.AliasOrg.Value.FullName.Split('.')) :> NodeInFlow
                 else 
-                     let coreSeg = RealSegment.Create(mSeg.ValidName, coreFlow)
+                     let coreSeg = RealInFlow.Create(mSeg.ValidName, coreFlow)
                      convertChildren (mSeg, coreSeg, coreModel)  |> ignore
-                     coreSeg :> SegmentBase
+                     coreSeg :> NodeInFlow
 
             ///MEdge   -> CoreModule.Flow
             let convertRootEdge(mEdge:MEdge, coreFlow:CoreModule.Flow) = 
@@ -85,16 +85,16 @@ module ConvertM =
                 if(tgt.IsNull()) then failwithf $"[{findList}]에서 \n{t}를 찾을 수 없습니다."
                 
 
-                //<ahn>
-                //if( mEdge.Causal = EdgeCausal.SReset)
-                //then 
-                //     InFlowEdge.Create(coreFlow, src, tgt, EdgeType.Default) |> ignore
-                //     InFlowEdge.Create(coreFlow, tgt, src, EdgeType.Reset)
-                //else 
-                //     InFlowEdge.Create(coreFlow, src, tgt, mEdge.Causal)
-
-                //<ahn> --> 컴파일을 위해서 아무 값이나 return
-                InFlowEdge.Create(coreFlow, src, tgt, mEdge.Causal)
+                if(mEdge.Causal = Interlock)
+                then 
+                     InFlowEdge.Create(coreFlow, src, tgt, ResetPush ) |> ignore
+                     InFlowEdge.Create(coreFlow, tgt, src, ResetPush)
+                elif(mEdge.Causal = StartReset)
+                then 
+                     InFlowEdge.Create(coreFlow, src, tgt, StartEdge) |> ignore
+                     InFlowEdge.Create(coreFlow, tgt, src, ResetEdge)
+                else 
+                     InFlowEdge.Create(coreFlow, src, tgt, mEdge.Causal)
 
             mFlow.Nodes |> Seq.distinct |> Seq.cast<MSeg> 
                         |> Seq.filter(fun seg -> seg.IsDummy|>not)
@@ -109,7 +109,14 @@ module ConvertM =
                 let coreFlow = Flow.Create(mflow.Name, coreSys) 
                 addInFlowEdges(coreFlow, mflow)
                 )
-        
+
+        let getFlows(mflow:ResizeArray<RootFlow>) =
+            mflow 
+            |> Seq.cast<MFlow>
+            |> Seq.map(fun flow -> coreModel.FindGraphVertex([|flow.System.Name; flow.Name|]))
+            |> Seq.cast<Flow>
+            |> ResizeArray
+
         //시스템 변환
         pptModel.Systems
         |> Seq.iter(fun sys -> DsSystem.Create(sys.Name, null, None, coreModel) |>ignore)
@@ -118,6 +125,17 @@ module ConvertM =
         pptModel.Systems
         |> Seq.iter(fun sys -> addFlows(coreModel.FindSystem(sys.Name), sys.Flows))
 
+        
+        //시스템 별 버튼 반영
+        pptModel.Systems
+        |> Seq.iter(fun pptSys -> 
+            let coreSys = coreModel.FindSystem(pptSys.Name)
+            pptSys.EmergencyButtons.ForEach(fun btn -> coreSys.EmergencyButtons.Add(btn.Key, getFlows(btn.Value)))
+            pptSys.AutoButtons.ForEach(fun btn -> coreSys.AutoButtons.Add(btn.Key, getFlows(btn.Value)))
+            pptSys.StartButtons.ForEach(fun btn -> coreSys.StartButtons.Add(btn.Key, getFlows(btn.Value)))
+            pptSys.ResetButtons.ForEach(fun btn -> coreSys.ResetButtons.Add(btn.Key, getFlows(btn.Value)))
+                )
+          
         coreModel
 
 

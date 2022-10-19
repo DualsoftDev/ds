@@ -9,57 +9,49 @@ open System
 
 [<AutoOpen>]
 module EdgeModule =
-    ///인과의 엣지 종류
-    let [<Literal>] SEdge = EdgeType.Default              // A>B	        약 시작 연결
-    let [<Literal>] SPush = EdgeType.Strong              // A>>B	    강 시작 연결
-    let [<Literal>] REdge = EdgeType.Reset              // A|>B	    약 리셋 연결
-    let [<Literal>] RPush = EdgeType.Reset ||| EdgeType.Strong              // A|>>B	    강 리셋 연결
-
-
-    //<ahn>
-    let [<Obsolete>] [<Literal>] SReset = 0
-    let [<Obsolete>] [<Literal>] Interlock = 0
 
 
     let internal edgeTypeTuples =
         [
-            SEdge, TextSEdge
-            SPush, TextSPush     
-            REdge, TextREdge     
-            RPush, TextRPush     
+            EdgeType.Default, TextStartEdge
+            EdgeType.Default ||| EdgeType.Strong, TextStartPush     
+            EdgeType.Reset, TextResetEdge     
+            EdgeType.Reset ||| EdgeType.Strong , TextResetPush     
         ] |> Tuple.toDictionary
 
     /// source 와 target 을 edge operator 에 따라서 확장 생성
     let createEdgesReArranged(source:'V, operator:string, target:'V) =
         [
             match operator with
-            | "<|>" ->
-                yield source, REdge, target
-                yield target, REdge, source
+            | TextInterlockWeak -> //"<|>" 
+                yield source, EdgeType.Reset, target
+                yield target, EdgeType.Reset, source
 
-            | "<||>" ->
-                yield source, RPush, target
-                yield target, RPush, source
+            | TextInterlock -> //"<||>" 
+                yield source, EdgeType.Reset ||| EdgeType.Strong , target
+                yield target, EdgeType.Reset ||| EdgeType.Strong , source
+            
+            | TextStartEdge  -> yield source, EdgeType.Default, target  //">" 
+            | TextStartPush  -> yield source, EdgeType.Default ||| EdgeType.Strong, target //">>" 
+            | TextResetEdge  -> yield source, EdgeType.Reset, target //"|>"
+            | TextResetPush  -> yield source, EdgeType.Reset ||| EdgeType.Strong, target //"||>"
 
-            | ">"   -> yield source, SEdge, target
-            | "|>"  -> yield source, REdge, target
-            | "||>" -> yield source, SPush, target
-
-            | "<"   -> yield target, SEdge, source
-            | "<|"  -> yield target, REdge, source
-            | "<||" -> yield target, RPush, source
+            | TextStartEdgeRev  -> yield target, EdgeType.Default, source   //"<"
+            | TextStartPushRev  -> yield target, EdgeType.Default ||| EdgeType.Strong, source   //"<<"
+            | TextResetEdgeRev  -> yield target, EdgeType.Reset, source //"<|"
+            | TextResetPushRev  -> yield target, EdgeType.Reset ||| EdgeType.Strong, source //"<||"
 
             | _ ->
                 failwithlogf $"Unknown causal operator [{operator}]."
         ]
 
-    let createFlowEdges(flow:Flow, source:SegmentBase, target:SegmentBase, operator:string) =
+    let createFlowEdges(flow:Flow, source:NodeInFlow, target:NodeInFlow, operator:string) =
         [|
             for src, op, tgt in createEdgesReArranged(source, operator, target) do
                 yield InFlowEdge.Create(flow, src, tgt, op)
         |]
 
-    let createChildEdges(segment:RealSegment, source:Child, target:Child, operator:string) =
+    let createChildEdges(segment:RealInFlow, source:NodeInReal, target:NodeInReal, operator:string) =
         [|
             for src, op, tgt in createEdgesReArranged(source, operator, target) do
                 yield InSegmentEdge.Create(segment, src, tgt, op)
@@ -127,7 +119,7 @@ module EdgeModule =
                 edgeCreator(j, i, EdgeType.Reset ||| EdgeType.Strong ||| EdgeType.AugmentedTransitiveClosure) |> ignore
 
     let createMRIEdgesTransitiveClosure(flow:Flow) =
-        let edgeCreator = fun (s, t, edgeType) -> InFlowEdge.Create(flow, s, t, edgeType) :> IEdge<SegmentBase>
+        let edgeCreator = fun (s, t, edgeType) -> InFlowEdge.Create(flow, s, t, edgeType) :> IEdge<NodeInFlow>
         createMRIEdgesTransitiveClosure4Graph(flow.Graph, edgeCreator)
 
     let createMRIEdgesTransitiveClosure4System(system:DsSystem) =
@@ -137,15 +129,15 @@ module EdgeModule =
 [<Extension>]
 type EdgeExt =
     [<Extension>] static member ToText(edgeType:EdgeType) = edgeTypeTuples[edgeType]
-    [<Extension>] static member IsStart(edgeType:EdgeType) = edgeType = SEdge || edgeType = SPush
-    [<Extension>] static member IsReset(edgeType:EdgeType) = edgeType = REdge || edgeType = RPush
+    [<Extension>] static member IsStart(edgeType:EdgeType) = edgeType.HasFlag(EdgeType.Reset)|> not
+    [<Extension>] static member IsReset(edgeType:EdgeType) = edgeType.HasFlag(EdgeType.Reset) 
     [<Extension>] static member GetEdgeType(causal:string) =    // EdgeCausalType
                     edgeTypeTuples.Where(fun kv -> kv.Value = causal).Select(fun kv -> kv.Key).First()
 
    
-    [<Extension>] static member CreateEdges(flow:Flow, source:SegmentBase, target:SegmentBase, operator:string) =
+    [<Extension>] static member CreateEdges(flow:Flow, source:NodeInFlow, target:NodeInFlow, operator:string) =
                     createFlowEdges(flow, source, target, operator)
-    [<Extension>] static member CreateEdges(segment:RealSegment, source:Child, target:Child, operator:string) =
+    [<Extension>] static member CreateEdges(segment:RealInFlow, source:NodeInReal, target:NodeInReal, operator:string) =
                     createChildEdges(segment, source, target, operator)
 
     [<Extension>] static member CreateMRIEdgesTransitiveClosure(model:Model) =

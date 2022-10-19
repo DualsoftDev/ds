@@ -7,6 +7,8 @@ open Engine.Common.FS
 
 [<AutoOpen>]
 module CoreModule =
+    type ICall =
+        abstract Addresses:Addresses
     type Model() =
         member val Systems = createNamedHashSet<DsSystem>()
         interface IQualifiedNamed with
@@ -38,7 +40,7 @@ module CoreModule =
 
     and Flow private(name:string, system:DsSystem) =
         inherit FqdnObject(name, system)
-        member val Graph = Graph<SegmentBase, InFlowEdge>()     // todo: IFlowVertex -> SegmentBase
+        member val Graph = Graph<NodeInFlow, InFlowEdge>()     // todo: IFlowVertex -> SegmentBase
         /// alias.target = [| mnemonic1; ... ; mnemonicn; |]
         member val AliasMap = Dictionary<NameComponents, HashSet<string>>(nameComponentsComparer())
         member x.System = system
@@ -47,17 +49,17 @@ module CoreModule =
             system.Flows.Add(flow) |> verifyM $"Duplicated flow name [{name}]"
             flow
 
-    and InFlowEdge private (source:SegmentBase, target:SegmentBase, edgeType:EdgeType) =
-        inherit EdgeBase<SegmentBase>(source, target, edgeType)
+    and InFlowEdge private (source:NodeInFlow, target:NodeInFlow, edgeType:EdgeType) =
+        inherit EdgeBase<NodeInFlow>(source, target, edgeType)
         static member Create(flow:Flow, source, target, edgeType:EdgeType) =
             let edge = InFlowEdge(source, target, edgeType)
             flow.Graph.AddEdge(edge) |> verifyM $"Duplicated edge [{source.Name}{edgeType.ToText()}{target.Name}]"
             edge
         override x.ToString() = $"{x.Source.QualifiedName} {x.EdgeType.ToText()} {x.Target.QualifiedName}"
 
-    and InSegmentEdge private (source:Child, target:Child, edgeType:EdgeType) =
-        inherit EdgeBase<Child>(source, target, edgeType)
-        static member Create(segment:RealSegment, source, target, edgeType:EdgeType) =
+    and InSegmentEdge private (source:NodeInReal, target:NodeInReal, edgeType:EdgeType) =
+        inherit EdgeBase<NodeInReal>(source, target, edgeType)
+        static member Create(segment:RealInFlow, source, target, edgeType:EdgeType) =
             let edge = InSegmentEdge(source, target, edgeType)
             let gr:Graph<_, _> = segment.Graph
             segment.Graph.AddEdge(edge) |> verifyM $"Duplicated edge [{source.Name}{edgeType}{target.Name}]"
@@ -65,78 +67,78 @@ module CoreModule =
         override x.ToString() = $"{x.Source.QualifiedName} {x.EdgeType.ToText()} {x.Target.QualifiedName}"
 
     and [<AbstractClass>]
-        SegmentBase (name:string, flow:Flow) =
+        NodeInFlow (name:string, flow:Flow) =
         inherit FqdnObject(name, flow)
         interface IFlowVertex
 
     /// normal segment : leaf, stem(parenting)
+    /// RealInReal //Real안에 Real은 불가능한 객체
     and [<DebuggerDisplay("{QualifiedName}")>]
-        RealSegment private (name:string, flow:Flow) =
-        inherit SegmentBase(name, flow)
-        member val Graph = Graph<Child, InSegmentEdge>()
+        RealInFlow private (name:string, flow:Flow) =
+        inherit NodeInFlow(name, flow)
+        member val Graph = Graph<NodeInReal, InSegmentEdge>()
         member val Flow = flow
-        member val SafetyConditions = createQualifiedNamedHashSet<RealSegment>()
-        member val Addresses:Addresses = null with get, set
+        member val SafetyConditions = createQualifiedNamedHashSet<RealInFlow>()
         static member Create(name:string, flow) =
             if (name.Contains(".") (*&& not <| (name.StartsWith("\"") && name.EndsWith("\""))*)) then
                 logWarn $"Suspicious segment name [{name}]. Check it."
 
-            let segment = RealSegment(name, flow)
+            let segment = RealInFlow(name, flow)
             flow.Graph.AddVertex(segment) |> verifyM $"Duplicated segment name [{name}]"
             segment
 
-    and [<AbstractClass>]
-        SegmentEquivalent (name:string, flow:Flow) =
-        inherit SegmentBase(name, flow)
-
-    and InFlowAlias(mnemonic:string, flow:Flow, aliasKey:string[]) =
-        inherit SegmentEquivalent(mnemonic, flow)
+    and AliasInFlow(mnemonic:string, flow:Flow, aliasKey:string[]) =
+        inherit NodeInFlow(mnemonic, flow)
         member _.AliasKey = aliasKey
         static member Create(name, flow, aliasKey) =
-            let alias = InFlowAlias(name, flow, aliasKey)
+            let alias = AliasInFlow(name, flow, aliasKey)
             flow.Graph.AddVertex(alias) |> verifyM $"Duplicated segment name [{name}]"
             alias
 
     /// flow 에서 직접 외부 system 의 api 호출한 경우.  R1 > A.Plus;  에서 A system 의 Plus interface 를 직접 호출한 경우
-    and InFlowApiCall(apiItem:ApiItem, flow:Flow) =
-        inherit SegmentEquivalent(apiItem.QualifiedName, flow)
+    and CallInFlow(apiItem:ApiItem, flow:Flow) =
+        inherit NodeInFlow(apiItem.QualifiedName, flow)
         member _.ApiItem = apiItem
         static member Create(apiItem:ApiItem, flow:Flow) =
             let existing = flow.Graph.Vertices |> Seq.tryFind(fun v -> v.Name = apiItem.QualifiedName)
             match existing with
             | None ->
-                let api = InFlowApiCall(apiItem, flow)
+                let api = CallInFlow(apiItem, flow)
                 flow.Graph.AddVertex(api) |> ignore // |> verify $"Duplicated segment name [{apiItem.QualifiedName}]"
                 api
             | Some(api) ->
-                assert (api :? InFlowApiCall)
-                api :?> InFlowApiCall
+                assert (api :? CallInFlow)
+                api :?> CallInFlow
 
 
     and [<AbstractClass>]
-        Child (name:string, apiItem:ApiItem, segment:RealSegment) =
+        NodeInReal (name:string, apiItem:ApiItem, segment:RealInFlow) =
         inherit FqdnObject(name, segment)
         interface IChildVertex
         member _.Segment = segment
         member _.ApiItem = apiItem
 
-    and InRealApiCall private (apiItem:ApiItem, segment:RealSegment) =
-        inherit Child(apiItem.QualifiedName, apiItem, segment)
-        static member CreateOnDemand(apiItem:ApiItem, segment:RealSegment) =
+    and CallInReal private (apiItem:ApiItem, segment:RealInFlow) =
+        inherit NodeInReal(apiItem.QualifiedName, apiItem, segment)
+        interface ICall with
+            member x.Addresses = x.Addresses
+        static member CreateOnDemand(apiItem:ApiItem, segment:RealInFlow) =
             let gr = segment.Graph
             let existing = gr.FindVertex(apiItem.QualifiedName)
             if existing.IsNonNull() then
-                existing :?> InRealApiCall
+                existing :?> CallInReal
             else
-                let child = InRealApiCall(apiItem, segment)
+                let child = CallInReal(apiItem, segment)
                 gr.AddVertex(child) |> verifyM $"Duplicated child name [{apiItem.QualifiedName}]"
                 child
 
-    and InRealAlias private (mnemonic:string, apiItem:ApiItem, segment:RealSegment) =
-        inherit Child(mnemonic, apiItem, segment)
+        member val Addresses = null with get, set
+
+    and AliasInReal private (mnemonic:string, apiItem:ApiItem, segment:RealInFlow) =
+        inherit NodeInReal(mnemonic, apiItem, segment)
 
         static member Create(mnemonic, apiItem, segment) =
-            let child = InRealAlias(mnemonic, apiItem, segment)
+            let child = AliasInReal(mnemonic, apiItem, segment)
             segment.Graph.AddVertex(child) |> verifyM $"Duplicated child name [{mnemonic}]"
             child
 
@@ -151,14 +153,13 @@ module CoreModule =
         interface IFlowVertex
         interface IChildVertex
 
-        member val TXs = createQualifiedNamedHashSet<RealSegment>()
-        member val RXs = createQualifiedNamedHashSet<RealSegment>()
-        member val Resets = createQualifiedNamedHashSet<RealSegment>()
-        member x.AddTXs(txs:RealSegment seq) = txs |> Seq.forall(fun tx -> x.TXs.Add(tx))
-        member x.AddRXs(rxs:RealSegment seq) = rxs |> Seq.forall(fun rx -> x.RXs.Add(rx))
-        member x.AddResets(resets:RealSegment seq) = resets |> Seq.forall(fun r -> x.Resets.Add(r))
+        member val TXs = createQualifiedNamedHashSet<RealInFlow>()
+        member val RXs = createQualifiedNamedHashSet<RealInFlow>()
+        member x.AddTXs(txs:RealInFlow seq) = txs |> Seq.forall(fun tx -> x.TXs.Add(tx))
+        member x.AddRXs(rxs:RealInFlow seq) = rxs |> Seq.forall(fun rx -> x.RXs.Add(rx))
         member _.System = system
         member val Xywh:Xywh = null with get, set
+        member val Addresses:Addresses = null with get, set
 
         static member Create(name, system) =
             let cp = ApiItem(name, system)

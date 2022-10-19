@@ -76,22 +76,22 @@ class EtcListener : ListenerBase
 
         foreach (var (key, values) in safetyKvs)
         {
-            RealSegment seg = null;
+            RealInFlow seg = null;
             switch (key.Length)
             {
                 case 1:
                     Assert(ctx.Parent is FlowContext);
-                    seg = _model.FindGraphVertex<RealSegment>(AppendPathElement(key[0]));
+                    seg = _model.FindGraphVertex<RealInFlow>(AppendPathElement(key[0]));
                     break;
                 case 3:
                     Assert(ctx.Parent is PropertyBlockContext);
-                    seg = _model.FindGraphVertex<RealSegment>(key);
+                    seg = _model.FindGraphVertex<RealInFlow>(key);
                     break;
                 default:
                     throw new ParserException($"Invalid safety key[{key.Combine()}]", ctx);
             }
 
-            foreach (var cond in values.Select(v => _model.FindGraphVertex(v) as RealSegment))
+            foreach (var cond in values.Select(v => _model.FindGraphVertex(v) as RealInFlow))
             {
                 var added = seg.SafetyConditions.Add(cond);
                 if (!added)
@@ -122,10 +122,10 @@ class EtcListener : ListenerBase
         }
 
         //[addresses] = {
-        //    A.F.Am = (%Q123.23, , %I12.1);        // FQSegmentName = (Start, Reset, End) Tag address
-        //    A.F.Ap = (%Q123.24, , %I12.2);
-        //    B.F.Bm = (%Q123.25, , %I12.3);
-        //    B.F.Bp = (%Q123.26, , %I12.4);
+        //    A.F.Am = (%Q123.23, %I12.1);        // FQSegmentName = (Start, Reset) Tag address
+        //    A.F.Ap = (%Q123.24, %I12.2);
+        //    B.F.Bm = (%Q123.25, %I12.3);
+        //    B.F.Bp = (%Q123.26, %I12.4);
         //}
         var addresses = enumerateChildren<AddressesContext>(ctx).ToArray();
         if (addresses.Length > 1)
@@ -135,10 +135,15 @@ class EtcListener : ListenerBase
         foreach (var addrDef in addressDefs)
         {
             var segNs = collectNameComponents(addrDef.segmentPath());
-            var seg = _model.FindGraphVertex<RealSegment>(segNs);
+            var api =
+                _model.Spit()
+                .Where(o => o.Obj is ApiItem && o.NameComponents.IsStringArrayEqaul(segNs))
+                .FirstOrDefault();
+
+            var apiItem = api.Obj as ApiItem;
             var sre = addrDef.address();
-            var (s, r, e) = (sre.startTag()?.GetText(), sre.resetTag()?.GetText(), sre.endTag()?.GetText());
-            seg.Addresses = new Addresses(s, r, e);
+            var (s, e) = (sre.startTag()?.GetText(), sre.endTag()?.GetText());
+            apiItem.Addresses = new Addresses(s, e);
         }
     }
 }

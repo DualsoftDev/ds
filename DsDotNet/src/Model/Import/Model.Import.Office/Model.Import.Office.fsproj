@@ -17,10 +17,10 @@
 
   <ItemGroup>
     <Compile Include="InterfaceClass.fs" />
-    <Compile Include="CoreUtil.fs" />
-    <Compile Include="CoreFlow.fs" />
-    <Compile Include="CoreClass.fs" />
-    <Compile Include="CoreStruct.fs" />
+    <Compile Include="EdgeUtil.fs" />
+    <Compile Include="ImportFlow.fs" />
+    <Compile Include="ImportClass.fs" />
+    <Compile Include="Importtruct.fs" />
     <Compile Include="Event.fs" />
     <Compile Include="Util.fs" />
     <Compile Include="Object.fs" />

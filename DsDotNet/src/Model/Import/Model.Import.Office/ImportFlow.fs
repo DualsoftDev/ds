@@ -1,9 +1,10 @@
 // Copyright (c) Dual Inc.  All Rights Reserved.
-namespace Engine.Core
+namespace Model.Import.Office
 
 open System.Diagnostics
 open System.Collections.Generic
 open System.Linq
+open Engine.Core
 
 [<AutoOpen>]
 module CoreFlow =
@@ -11,7 +12,7 @@ module CoreFlow =
     /// Flow Edge
     [<AbstractClass>]
     type FlowBase(name) as this =
-        inherit Named(name)
+        inherit Name(name)
         //엣지연결 리스트
         let edges = HashSet<IEdge>() 
         //ChildFlow 일 경우 : 인과처리 대상 DAG 의 Head 부분

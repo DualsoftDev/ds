@@ -15,17 +15,17 @@ module SpitModuleHelper =
         member val NameComponents = nameComponents
 
     type SpitResults = SpitResult[]
-    let rec spitChild (child:Child) : SpitResults =
+    let rec spitChild (child:NodeInReal) : SpitResults =
         [|
             yield SpitResult(child, child.NameComponents)
         |]
-    and spitSegment (segment:RealSegment) : SpitResults =
+    and spitSegment (segment:RealInFlow) : SpitResults =
         [|
             yield SpitResult(segment, segment.NameComponents)
             for ch in segment.Graph.Vertices do
                 yield! spit(ch)
         |]
-    and spitInFlowAlias (segmentAlias:InFlowAlias) : SpitResults =
+    and spitInFlowAlias (segmentAlias:AliasInFlow) : SpitResults =
         [|
             yield SpitResult(segmentAlias, segmentAlias.NameComponents)
         |]
@@ -71,9 +71,9 @@ module SpitModuleHelper =
         | :? Model    as m -> spitModel m
         | :? DsSystem as s -> spitSystem s
         | :? Flow     as f -> spitFlow f
-        | :? RealSegment  as s -> spitSegment s
-        | :? Child    as c -> spitChild c
-        | :? InFlowAlias  as s -> spitInFlowAlias s
+        | :? RealInFlow  as s -> spitSegment s
+        | :? NodeInReal    as c -> spitChild c
+        | :? AliasInFlow  as s -> spitInFlowAlias s
         | _ -> failwith $"ERROR: Unknown type {obj}"
     ()
 
@@ -84,5 +84,5 @@ type SpitModule =
     [<Extension>] static member Spit (model:Model)     = spitModel model
     [<Extension>] static member Spit (system:DsSystem) = spitSystem system
     [<Extension>] static member Spit (flow:Flow)       = spitFlow flow
-    [<Extension>] static member Spit (segment:RealSegment) = spitSegment segment
+    [<Extension>] static member Spit (segment:RealInFlow) = spitSegment segment
 

@@ -21,7 +21,10 @@ options { tokenVocab=dsLexer; } // use tokens from dsLexer.g4
 
 
 model: (system|properties|comment)* EOF;        // importStatement|cpus
-comment: BLOCK_COMMENT | LINE_COMMENT;
+
+test:qstring EOF;
+qstring: STRING_LITERAL EOF;
+
 
 system: '[' SYS ((IP|HOST) '=' host)? ']' systemName '=' (sysBlock|sysCopySpec);    // [sys] Seg = {..}
     sysBlock
@@ -47,14 +50,15 @@ positionDef: apiPath '=' xywh;
     w: INTEGER;
     h: INTEGER;
 
-addresses: '[' 'addresses' ']' (identifier12)? '=' addressesBlock;
+addresses: '[' 'addresses' ']' (identifier1)? '=' addressesBlock;
 addressesBlock
     : LBRACE (addressDef)* RBRACE
     ;
 addressDef: segmentPath '=' address;
-    segmentPath: identifier2;
-    address: LPARENTHESIS (startTag)? COMMA (endTag)? RPARENTHESIS (SEIMCOLON)?;
+    segmentPath: identifier3;
+    address: LPARENTHESIS (startTag)? COMMA (resetTag)? COMMA (endTag)? RPARENTHESIS (SEIMCOLON)?;
     startTag: TAG_ADDRESS;
+    resetTag: TAG_ADDRESS;
     endTag: TAG_ADDRESS;
 
 
@@ -155,7 +159,7 @@ causalTokensCNF
     ;
 
 causalToken
-    : identifier12
+    : identifier1
 //     | proc
 //     | func
 //     | expression
@@ -165,15 +169,15 @@ causalToken
 
 
 causalOperator
-    : '>'   // CAUSAL_FWD
-    | '>>'  // CAUSAL_FWD_STRONG
-    | '>|>'    | '|>>'
+    : '>>'  // CAUSAL_FWD_STRONG
+    | '>'   // CAUSAL_FWD
+    | CAUSAL_FWD_AND_RESET_FWD  // '>|>' | '|>>';
     | '<<'   // CAUSAL_BWD_STRONG
     | '<'   // CAUSAL_BWD
-    | '<<|' | '<|<'
+    | CAUSAL_BWD_AND_RESET_BWD  // '<<|' | '<|<';
     // | '=>'          // CAUSAL_FWD_AND_RESET_BWD
     | '|><'         // CAUSAL_BWD_AND_RESET_FWD
-    | '><|' | '=>'
+    | CAUSAL_FWD_AND_RESET_BWD  // '><|' | '=>';
 
     | causalOperatorReset
     ;
@@ -186,10 +190,15 @@ causalOperatorReset
     | '<||>'        // CAUSAL_RESET_FB
     ;
 
-identifier1: IDENTIFIER1;
-identifier2: IDENTIFIER2;
-identifier3: IDENTIFIER3;
-identifier4: IDENTIFIER4;
+identifier1: STRING_LITERAL | IDENTIFIER;
+
+
+comment: BLOCK_COMMENT | LINE_COMMENT;
+
+identifier2: identifier1 DOT identifier1;
+identifier3: identifier1 DOT identifier1 DOT identifier1;
+
+identifier4: identifier1 DOT identifier1 DOT identifier1 DOT identifier1;  // for host name 
 
 
 // // - Segment 규격

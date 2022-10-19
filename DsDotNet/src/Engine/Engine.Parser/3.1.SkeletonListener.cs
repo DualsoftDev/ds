@@ -40,8 +40,11 @@ class SkeletonListener : ListenerBase
     {
         Trace.WriteLine($"Parenting: {ctx.GetText()}");
         var name = ctx.identifier1().GetText().DeQuoteOnDemand();
-        _parenting = RealSegment.Create(name, _rootFlow);
+        _parenting = RealInFlow.Create(name, _rootFlow);
         AddElement(CurrentPathElements, GraphVertexType.Segment | GraphVertexType.Parenting);
+
+        var xxx = enumerateChildren<CausalTokenContext>(ctx).ToArray();
+        var yyy = xxx.Select(ctctx => collectNameComponents(ctctx).ToArray()).ToArray();
 
         var children =
             enumerateChildren<CausalTokenContext>(ctx)

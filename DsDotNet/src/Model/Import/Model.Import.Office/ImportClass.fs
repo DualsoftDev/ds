@@ -1,8 +1,9 @@
 // Copyright (c) Dual Inc.  All Rights Reserved.
-namespace Engine.Core
+namespace Model.Import.Office
 
 open System.Diagnostics
-open Engine.Core.CoreFlow
+open Model.Import.Office.CoreFlow
+open Model.Import.Office
 open Engine.Core
 
 [<AutoOpen>]
@@ -11,7 +12,7 @@ module CoreClass =
 
     [<DebuggerDisplay("{ToText()}")>]
     type SegBase(name:string, childFlow:ChildFlow)  =
-        inherit Named(name)
+        inherit Name(name)
         let mutable status4 = Status4.Homing
         interface IVertex 
         interface IActive with
@@ -25,7 +26,7 @@ module CoreClass =
    
    /// Modeled Edge : 사용자가 작성한 모델 상의 segment 간의 연결 edge (Wire)
     [<DebuggerDisplay("ToText()")>]
-    type DsEdge(src:SegBase, tgt:SegBase, causal:EdgeCausal) =
+    type DsEdge(src:SegBase, tgt:SegBase, causal:EdgeType) =
         interface IEdge with
             member _.Source  = src
             member _.Target  = tgt

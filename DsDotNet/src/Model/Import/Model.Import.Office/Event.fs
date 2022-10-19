@@ -3,8 +3,9 @@ namespace Model.Import.Office
 
 open System
 open System.Reactive.Subjects
-open Engine.Core
+open Model.Import.Office
 
+open Engine.Core
 
 
 [<AutoOpen>]

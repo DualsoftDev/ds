@@ -1,7 +1,8 @@
 // Copyright (c) Dual Inc.  All Rights Reserved.
-namespace Engine.Core
+namespace Model.Import.Office
 
 open System.Collections.Generic
+open Engine.Core
 
 [<AutoOpen>]
 module InterfaceClass =
@@ -9,7 +10,7 @@ module InterfaceClass =
     type IEdge = 
         abstract Source  :IVertex 
         abstract Target  :IVertex
-        abstract Causal  :EdgeCausal
+        abstract Causal  :EdgeType
         abstract ToText  :unit -> string
 
     type IFlow   =
@@ -28,7 +29,7 @@ module InterfaceClass =
         abstract Flows:IFlow seq
     // 이름이 필요한 객체
     [<AbstractClass>]
-    type Named(name) =
+    type Name(name) =
         let mutable name = name
         interface INamed with
             member _.Name with get () = name
@@ -39,7 +40,7 @@ module InterfaceClass =
     /// Segment Container
     [<AbstractClass>]
     type SysBase(name)  =
-        inherit Named(name)
+        inherit Name(name)
         let rootFlows = HashSet<IFlow>() 
         interface ISystem with
             member _.Flows = rootFlows
@@ -49,7 +50,7 @@ module InterfaceClass =
  
     /// Call Segment
     type MInterface(name:string, txs:IVertex seq , rxs:IVertex seq ) as this =
-        inherit Named(name)
+        inherit Name(name)
 
         interface IVertex  
         interface ICall with

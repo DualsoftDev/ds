@@ -87,7 +87,7 @@ C4 > C5;
         My.F.Main = {B.F.Sp; B.F.Sm; C.F.Sp}
     }
     [addresses] = {
-        My.F.Main = (%Q1234.2343, , )
+        A.""+"" = (%Q1234.2343, %I1234.2343)
     }
     [layouts] = {
         A.""+"" = (1309,405,205,83)
@@ -616,7 +616,7 @@ C4 > C5;
 
         var spitObjs = spits.Select(spit => spit.Obj);
         var flowGraphs = spitObjs.OfType<Flow>().Select(f => f.Graph);
-        var segGraphs = spitObjs.OfType<RealSegment>().Select(s => s.Graph);
+        var segGraphs = spitObjs.OfType<RealInFlow>().Select(s => s.Graph);
         foreach (var gr in flowGraphs)
             gr.Dump();
         foreach (var gr in segGraphs)
@@ -631,7 +631,7 @@ C4 > C5;
         //ParseNormal(SplittedMRIEdgesText);
         //ParseNormal(DuplicatedEdgesText);
         ParseNormal(EveryScenarioText);
-        //ParseNormal(PptGeneratedText);
+        ParseNormal(PptGeneratedText);
     }
 
     static void Try(string input)

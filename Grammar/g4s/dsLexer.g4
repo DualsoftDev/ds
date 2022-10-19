@@ -21,52 +21,44 @@ START: 'start';
 RESET_IN: 'reset_in';
 RESET: 'reset';
 
-
-// STRING_LITERAL : '"' (~('"' | '\\' | '\r' | '\n' | ' ') | '\\' ('"' | '\\'))* '"';
-STRING_LITERAL : '"' (~('"' | '\\' | '\r' | '\n') | '\\' ('"' | '\\'))* '"';
-
-// identifier: QUOTED_IDENTIFIER | IDENTIFIER;
-// QUOTED_IDENTIFIER : '"' STRING_LITERAL '"';
-// fragment STRING_LITERAL: (~('"' | '\\' | '\r' | '\n' | ' ') | '\\' ('"' | '\\'))*;
+WS: [ \t\r\n]+ -> skip;
+BLOCK_COMMENT : '/*' (BLOCK_COMMENT|.)*? '*/' -> channel(HIDDEN) ;
+LINE_COMMENT  : '//' .*? ('\n'|EOF) -> channel(HIDDEN) ;
 
 
-// identifier: quotedIdentifier | simpleIdentifier;
-// simpleIdentifier: IDENTIFIER;
-// quotedIdentifier : '"' STRING_LITERAL '"';
-// fragment STRING_LITERAL: (~('"' | '\\' | '\r' | '\n' | ' ') | '\\' ('"' | '\\'))*;
+fragment Identifier: ValidIdStart ValidIdChar*;
+    fragment HangulChar: [\uAC00-\uD7A3]+;
+
+    fragment ValidIdStart
+    : ('a' .. 'z') | ('A' .. 'Z') | '_' | HangulChar
+    ;
+
+    fragment ValidIdChar
+    : ValidIdStart | ('0' .. '9') | HangulChar
+    ;
 
 
+fragment QuotedStringLiteral : '"' (~('"' | '\\' | '\r' | '\n') | '\\' ('"' | '\\'))* '"';
 
-IDENTIFIER: VALID_ID_START VALID_ID_CHAR*;
-fragment VALID_ID_START
-   : ('a' .. 'z') | ('A' .. 'Z') | '_' | HANGUL_CHAR
-   ;
+fragment Compo: Identifier|QuotedStringLiteral;
 
-fragment VALID_ID_CHAR
-   : VALID_ID_START | ('0' .. '9') | HANGUL_CHAR
-   ;
-
-
-
-TAG_ADDRESS: VALID_TAG_START VALID_TAG_CHAR*;
-fragment VALID_TAG_START
-   : PERCENT   // | ('a' .. 'z') | ('A' .. 'Z') | '_' | HANGUL_CHAR
-   ;
-
-fragment VALID_TAG_CHAR
-   : DOT | VALID_ID_CHAR | ('0' .. '9') | HANGUL_CHAR
-   ;
-// TAG_ADDRESS: TAG_CHAR+;
-// fragment TAG_CHAR
-//    : '%' | VALID_ID_CHAR;   //|DOT)*;
-
+IDENTIFIER1: Compo;
+IDENTIFIER2: Compo '.' Compo;
+IDENTIFIER3: Compo '.' Compo '.' Compo;
+IDENTIFIER4: Compo '.' Compo '.' Compo '.' Compo;
 
 
 IPV4: [1-9][0-9]*'.'('0'|[1-9][0-9]*)'.'('0'|[1-9][0-9]*)'.'('0'|[1-9][0-9]*);
 // IPV4: (INTEGER)(DOT) INTEGER DOT INTEGER DOT INTEGER;
 
-BLOCK_COMMENT : '/*' (BLOCK_COMMENT|.)*? '*/' -> channel(HIDDEN) ;
-LINE_COMMENT  : '//' .*? ('\n'|EOF) -> channel(HIDDEN) ;
+TAG_ADDRESS: ValidTagStart ValidTagChar*;
+fragment ValidTagStart
+   : PERCENT   // | ('a' .. 'z') | ('A' .. 'Z') | '_' | HANGUL_CHAR
+   ;
+fragment ValidTagChar
+   : DOT | ValidIdChar | ('0' .. '9') | HangulChar
+   ;
+
 
 SQUOTE: '\'';
 DQUOTE: '"';
@@ -95,10 +87,10 @@ fragment STAR: '*';
 fragment SLASH: '/';
 fragment PERCENT: '%';
 
-fragment RANGLE: '>';
-fragment LANGLE: '<';
-GT: RANGLE;
-LT: LANGLE;
+// fragment RANGLE: '>';
+// fragment LANGLE: '<';
+// GT: RANGLE;
+// LT: LANGLE;
 GTE: '>=';
 LTE: '<=';
 
@@ -106,7 +98,6 @@ OR2: '||';
 EQ2: '==';
 NEQ: '!=';
 //NEWLINE: '\r'? '\n';
-WS: [ \t\r\n]+ -> skip;
 
 INTEGER: [1-9][0-9]*;
 FLOAT: [1-9][0-9]*('.'[0-9]+)?;
@@ -123,30 +114,55 @@ HANGUL_CHAR: [\uAC00-\uD7A3]+;
 //     : '//' ~[\r\n]* -> skip
 // ;
 
-CAUSAL_FWD: GT; // '>'
-CAUSAL_BWD: LT; // '<'
-CAUSAL_RESET_FWD: '|>';
-CAUSAL_RESET_BWD: '<|';
-CAUSAL_RESET_FB: '<||>';
-CAUSAL_FWD_AND_RESET_BWD: '><|' | '=>';
-CAUSAL_FWD_AND_RESET_FWD: '>|>' | '|>>';
-CAUSAL_BWD_AND_RESET_BWD: '<<|' | '<|<';
-CAUSAL_BWD_AND_RESET_FWD: '|><';
+// Close Angle Bracket
+Cab: '>';
+CabCab: '>>';
+// BWDANGLEBRACKETx2: '<<';
+// BWDANGLEBRACKET: '<';
+
+// Open Angle Bracket
+Oab: '<';
+OabOab: '<<';
+
+PipeCab: '|>';
+CabPipe: '<|';
+OabPipePipeCab: '<||>';
+CabOabPipe: '><|';
+EqualCab: '=>';
+CabPipeCab: '>|>';
+PipeCabCab: '|>>';
+OabOabPipe: '<<|';
+OabPipeOab: '<|<';
+PipeCabOab: '|><';
+PipePipeOab: '||>';
+CabPipePipe: '<||';
+OabOabPipePipeCabCab: '<<||>>';
+
+
+// CAUSAL_FWD: '>';
+// CAUSAL_BWD: '<';
+// CAUSAL_RESET_FWD: '|>';
+// CAUSAL_RESET_BWD: '<|';
+// CAUSAL_RESET_FB: '<||>';
+// CAUSAL_FWD_AND_RESET_BWD: '><|' | '=>';
+// CAUSAL_FWD_AND_RESET_FWD: '>|>' | '|>>';
+// CAUSAL_BWD_AND_RESET_BWD: '<<|' | '<|<';
+// CAUSAL_BWD_AND_RESET_FWD: '|><';
 
 
 
 QUESTION: '?';
-FWDANGLEBRACKETx2: '>>';
-FWDANGLEBRACKET: '>';
-// FWDANGLEBRACKET_PIPE_FWDANGLEBRACKET: '>|>';    // CAUSAL_FWD_AND_RESET_FWD
-BWDANGLEBRACKETx2: '<<';
-BWDANGLEBRACKET: '<';
-// BWDANGLEBRACKET_PIPE_BWDANGLEBRACKET: '<|<';    // CAUSAL_BWD_AND_RESET_BWD
-// FWDANGLEBRACKET_BWDANGLEBRACKET_PIPE: '><|';
-// '=>';
-CAUSAL_RESET_STRONG_FWD: '||>';
-CAUSAL_RESET_STRONG_BWD: '<||';
-CAUSAL_RESET_STRONG_BIDIRECTION: '<<||>>';
+// FWDANGLEBRACKETx2: '>>';
+// FWDANGLEBRACKET: '>';
+// // FWDANGLEBRACKET_PIPE_FWDANGLEBRACKET: '>|>';    // CAUSAL_FWD_AND_RESET_FWD
+// BWDANGLEBRACKETx2: '<<';
+// BWDANGLEBRACKET: '<';
+// // BWDANGLEBRACKET_PIPE_BWDANGLEBRACKET: '<|<';    // CAUSAL_BWD_AND_RESET_BWD
+// // FWDANGLEBRACKET_BWDANGLEBRACKET_PIPE: '><|';
+// // '=>';
+// CAUSAL_RESET_STRONG_FWD: '||>';
+// CAUSAL_RESET_STRONG_BWD: '<||';
+// CAUSAL_RESET_STRONG_BIDIRECTION: '<<||>>';
 
 
 

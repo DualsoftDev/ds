@@ -1,94 +1,462 @@
-[sys] DS = {
-	[flow] S711 = { 	//S711
-		Clamp > S;
-	}
-	[flow] S711_AD = { 	//S711_AD
-		AutoRun > WORK;
-		WORK = {
-			"1st_CLAMP" <||> "1st_UNCLAMP";
-			"1st_CLAMP" > "2ndCLAMP";
-			"1st_UNCLAMP" > PinDOWN;
-			"1st_UNCLAMP" > "RobotUnload_‘G";
-			"2ndCLAMP", PART_AD_ON > "RobotWeld_‘G";
-			"2nd_UNCLAMP" => "1st_UNCLAMP";     // 원본은 '->'   일단 => 로 테스트
-			"2nd_UNCLAMP" <||> "2ndCLAMP";
-			"2nd_UNCLAMP" > "1st_UNCLAMP";
-			PART_AD_ON, "RobotLoad_‘G" > "1st_CLAMP";
-			PinDOWN <||> PinUP;
-			PinDOWN, "RobotUnload_‘G" > PinUP;
-			"RobotLoad_‘G" > PART_AD_ON;
-			"RobotUnload_‘G" > PART_OFF;
-			"RobotWeld_‘G" > "2nd_UNCLAMP";
-		}
-	}
-} //C:\Users\kwak\Downloads\DS.pptx
 
-//////////////////////////////////////////////////////
-//DS DS system auto generation ExSegments
-//////////////////////////////////////////////////////
-[sys] EX = {
-	[flow] S711_Clamp = { TX > RX; }
-	[flow] S711_AD_2nd_UNCLAMP = { TX > RX <| S711_AD_2ndCLAMP.TX; }
-	[flow] S711_AD_2ndCLAMP = { TX > RX <| S711_AD_2nd_UNCLAMP.TX; }
-	[flow] S711_AD_PinDOWN = { TX > RX <| S711_AD_PinUP.TX; }
-	[flow] S711_AD_PinUP = { TX > RX <| S711_AD_PinDOWN.TX; }
-	[flow] S711_AD_1st_CLAMP = { TX > RX <| S711_AD_1st_UNCLAMP.TX; }
-	[flow] S711_AD_1st_UNCLAMP = { TX > RX <| S711_AD_1st_CLAMP.TX; }
-	[flow] "S711_AD_RobotUnload_‘G" = { TX > RX; }
-	[flow] S711_AD_PART_AD_ON = { TX > RX; }
-	[flow] "S711_AD_RobotWeld_‘G" = { TX > RX; }
-	[flow] "S711_AD_RobotLoad_‘G" = { TX > RX; }
-	[flow] S711_AD_PART_OFF = { TX > RX; }
-	[flow] S711_AD_AutoRun = { TX > RX; }
+[sys] SIDE_QTR_Handling = {
+    [flow] exflow = {
+        "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]" <||> "WELDING [Robot_진입OK3 ~ Robot_작업완료3]";
+        "LOADING1 [Robot_진입OK1 ~ Robot_작업완료1]" <||> "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]";
+        "WELDING [Robot_진입OK3 ~ Robot_작업완료3]" <||> "UNLOADING [Robot_진입OK4 ~ Robot_작업완료4]";
+    }
+    [interfaces] = {
+        "SIDE_QTR_Handling.LOADING1" = { _ ~ _ }
+        "SIDE_QTR_Handling.LOADING2" = { _ ~ _ }
+    }
 }
-
-[prop] = {
-	[addresses] = {
-		EX.S711_Clamp.TX1                        	= (, , )
-		EX.S711_Clamp.RX1                        	= (, ,)
-		EX.S711_Clamp.TX2                        	= (, , )
-		EX.S711_Clamp.RX2                        	= (, ,)
-		EX.S711_Clamp.RX3                        	= (, ,)
-		EX.S711_Clamp.RX4                        	= (, ,)
-		EX.S711_Clamp.RX5                        	= (, ,)
-		EX.S711_Clamp.RX6                        	= (, ,)
-		EX.S711_AD_PinDOWN.TX                    	= (, , )
-		EX.S711_AD_PinDOWN.RX                    	= (, ,)
-		EX.S711_AD_PinUP.TX                      	= (, , )
-		EX.S711_AD_PinUP.RX                      	= (, ,)
-		EX.S711_AD_1st_UNCLAMP.TX                	= (, , )
-		EX.S711_AD_1st_UNCLAMP.RX                	= (, ,)
-		EX."S711_AD_RobotUnload_‘G".TX             	= (, , )
-		EX."S711_AD_RobotUnload_‘G".RX             	= (, ,)
-		EX.S711_AD_1st_CLAMP.TX                  	= (, , )
-		EX.S711_AD_1st_CLAMP.RX                  	= (, ,)
-		EX.S711_AD_2ndCLAMP.TX                   	= (, , )
-		EX.S711_AD_2ndCLAMP.RX                   	= (, ,)
-		EX.S711_AD_PART_AD_ON.TX                 	= (, , )
-		EX.S711_AD_PART_AD_ON.RX                 	= (, ,)
-		EX."S711_AD_RobotWeld_‘G".TX               	= (, , )
-		EX."S711_AD_RobotWeld_‘G".RX               	= (, ,)
-		EX.S711_AD_2nd_UNCLAMP.TX                	= (, , )
-		EX.S711_AD_2nd_UNCLAMP.RX                	= (, ,)
-		EX."S711_AD_RobotLoad_‘G".TX               	= (, , )
-		EX."S711_AD_RobotLoad_‘G".RX               	= (, ,)
-		EX.S711_AD_PART_OFF.TX                   	= (, , )
-		EX.S711_AD_PART_OFF.RX                   	= (, ,)
-		EX.S711_AD_AutoRun.TX                    	= (, , )
-		EX.S711_AD_AutoRun.RX                    	= (, ,)
-	}
-	[layouts] = {
-		DS.S711_AD."RobotUnload_‘G" = (888,526,156,53)
-		DS.S711_AD.PinUP = (595,631,156,53)
-		DS.S711_AD.AutoRun = (569,956,364,105)
-		DS.S711_AD."2ndCLAMP" = (793,326,156,53)
-		DS.S711_AD.PART_AD_ON = (1241,357,156,53)
-		DS.S711_AD."RobotLoad_‘G" = (934,179,156,53)
-		DS.S711_AD."1st_UNCLAMP" = (504,404,156,53)
-		DS.S711_AD."1st_CLAMP" = (543,212,156,53)
-		DS.S711_AD."2nd_UNCLAMP" = (465,314,156,53)
-		DS.S711_AD.PinDOWN = (595,521,156,53)
-		DS.S711_AD.PART_OFF = (1035,622,156,53)
-		DS.S711_AD."RobotWeld_‘G" = (790,441,156,53)
-	}
+[sys] Pin = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vp |> Sm;
+        Vm |> Sp;
+        "UP [Vp ~ Sp]" <||> "DOWN[Vm ~ Sm]";
+    }
+}
+[sys] MY = {
+    [flow] S101 = {
+        "S101_Handling.LOADING1" > "S101_F_APRON_U131.ADV" > "S101_F_APRON_P132_134Unit.UP" > "S101_F_APRON.CLAMP" > "S101_Handling.LOADING2" > "S101_DASH_P112.UP" > "S101_DASH_P114.LATCH" > "S101_DASH.CLAMP" > "S101_Weld.WELDING" > "S101_DASH.UNCLAMP" > "S101_DASH_P114.UNLATCH" > "S101_DASH_U111_1.UNLATCH" > "S101_Handling.UNLOADING" > "S101_F_APRON_P104.UP";
+        "S101_DASH_P114.UNLATCH" > "S101_DASH_U115.UNLATCH" > "S101_Handling.UNLOADING";
+        "S101_DASH_P114.UNLATCH" > "S101_DASH_UNIT.RET" > "S101_Handling.UNLOADING";
+        "S101_DASH.UNCLAMP" > "S101_F_APRON_P132_134Unit.DOWN" > "S101_DASH_U111_1.UNLATCH";
+        "S101_F_APRON_P132_134Unit.DOWN" > "S101_DASH_U115.UNLATCH";
+        "S101_F_APRON_P132_134Unit.DOWN" > "S101_DASH_UNIT.RET";
+        "S101_DASH.UNCLAMP" > "S101_F_APRON_U131.RET" > "S101_DASH_U111_1.UNLATCH";
+        "S101_F_APRON_U131.RET" > "S101_DASH_U115.UNLATCH";
+        "S101_F_APRON_U131.RET" > "S101_DASH_UNIT.RET";
+        "S101_Weld.WELDING" > "S101_DASH_P112.DOWN" > "S101_DASH_P114.UNLATCH";
+        "S101_DASH_P112.DOWN" > "S101_F_APRON_P132_134Unit.DOWN";
+        "S101_DASH_P112.DOWN" > "S101_F_APRON_U131.RET";
+        "S101_Weld.WELDING" > "S101_F_APRON.UNCLAMP" > "S101_DASH_P114.UNLATCH";
+        "S101_F_APRON.UNCLAMP" > "S101_F_APRON_P132_134Unit.DOWN";
+        "S101_F_APRON.UNCLAMP" > "S101_F_APRON_U131.RET";
+        "S101_Weld.WELDING" > "S101_F_APRON_P104.DOWN" > "S101_DASH_P114.UNLATCH";
+        "S101_F_APRON_P104.DOWN" > "S101_F_APRON_P132_134Unit.DOWN";
+        "S101_F_APRON_P104.DOWN" > "S101_F_APRON_U131.RET";
+        "S101_Weld.WELDING" > "S101_F_APRON_U133.UNCLAMP" > "S101_DASH_P114.UNLATCH";
+        "S101_F_APRON_U133.UNCLAMP" > "S101_F_APRON_P132_134Unit.DOWN";
+        "S101_F_APRON_U133.UNCLAMP" > "S101_F_APRON_U131.RET";
+        "S101_DASH_P114.LATCH" > "S101_DASH_U111_1.LATCH" > "S101_Weld.WELDING";
+        "S101_Handling.LOADING2" > "S101_DASH_U115.LATCH" > "S101_DASH_P114.LATCH";
+        "S101_Handling.LOADING2" > "S101_DASH_UNIT.ADV" > "S101_DASH_P114.LATCH";
+        "S101_F_APRON_P132_134Unit.UP" > "S101_F_APRON_U133.CLAMP" > "S101_Handling.LOADING2";
+    }
+    [flow] SIDE_REINF = {
+        "#201-1" = {
+            SIDE_REINF_Handling."SIDE_REINF_Handling.LOADING1" > SIDE_REINF_REINF_Shift."SIDE_REINF_REINF_Shift.ADV" > SIDE_REINF_REINF_Pin."SIDE_REINF_REINF_Pin.UP" > SIDE_REINF_Handling."SIDE_REINF_Handling.LOADING2" > SIDE_REINF_REINF1_Clamp."SIDE_REINF_REINF1_Clamp.CLAMP" > SIDE_REINF_Weld."SIDE_REINF_Weld.WELDING" > SIDE_REINF_REINF1_Clamp."SIDE_REINF_REINF1_Clamp.UNCLAMP";
+            SIDE_REINF_Weld."SIDE_REINF_Weld.WELDING" > SIDE_REINF_REINF2_Clamp."SIDE_REINF_REINF2_Clamp.UNCLAMP";
+            SIDE_REINF_Weld."SIDE_REINF_Weld.WELDING" > SIDE_REINF_REINF_Pin."SIDE_REINF_REINF_Pin.DOWN";
+            SIDE_REINF_Weld."SIDE_REINF_Weld.WELDING" > SIDE_REINF_REINF_Shift."SIDE_REINF_REINF_Shift.RET";
+            SIDE_REINF_Handling."SIDE_REINF_Handling.LOADING2" > SIDE_REINF_REINF2_Clamp."SIDE_REINF_REINF2_Clamp.CLAMP" > SIDE_REINF_Weld."SIDE_REINF_Weld.WELDING";
+        }
+    }
+    [flow] SIDE_QTR = {
+        "SIDE_MAIN.#205" > "#205-1" > "#205-2";
+        "#205-1" = {
+            SIDE_QTR_Handling."SIDE_QTR_Handling.LOADING1" > SIDE_QTR_REINF_Shift."SIDE_QTR_REINF_Shift.ADV" > SIDE_QTR_REINF_Pin."SIDE_QTR_REINF_Pin.UP" > SIDE_QTR_Handling."SIDE_QTR_Handling.LOADING2" > SIDE_QTR_REINF1_Clamp."SIDE_QTR_REINF1_Clamp.CLAMP" > SIDE_QTR_Weld."SIDE_QTR_Weld.WELDING" > SIDE_QTR_REINF1_Clamp."SIDE_QTR_REINF1_Clamp.UNCLAMP";
+            SIDE_QTR_Weld."SIDE_QTR_Weld.WELDING" > SIDE_QTR_REINF2_Clamp."SIDE_QTR_REINF2_Clamp.UNCLAMP";
+            SIDE_QTR_Weld."SIDE_QTR_Weld.WELDING" > SIDE_QTR_REINF_Pin."SIDE_QTR_REINF_Pin.DOWN";
+            SIDE_QTR_Weld."SIDE_QTR_Weld.WELDING" > SIDE_QTR_REINF_Shift."SIDE_QTR_REINF_Shift.RET";
+            SIDE_QTR_Handling."SIDE_QTR_Handling.LOADING2" > SIDE_QTR_REINF2_Clamp."SIDE_QTR_REINF2_Clamp.CLAMP" > SIDE_QTR_Weld."SIDE_QTR_Weld.WELDING";
+        }
+        "#205-2" = {
+            SIDE_QTR_Handling."SIDE_QTR_Handling.LOADING1" > SIDE_QTR_REINF_Shift."SIDE_QTR_REINF_Shift.ADV" > SIDE_QTR_REINF_Pin."SIDE_QTR_REINF_Pin.UP" > SIDE_QTR_Handling."SIDE_QTR_Handling.LOADING2" > SIDE_QTR_REINF1_Clamp."SIDE_QTR_REINF1_Clamp.CLAMP" > SIDE_QTR_Weld."SIDE_QTR_Weld.WELDING" > SIDE_QTR_REINF1_Clamp."SIDE_QTR_REINF1_Clamp.UNCLAMP";
+            SIDE_QTR_Weld."SIDE_QTR_Weld.WELDING" > SIDE_QTR_REINF2_Clamp."SIDE_QTR_REINF2_Clamp.UNCLAMP";
+            SIDE_QTR_Weld."SIDE_QTR_Weld.WELDING" > SIDE_QTR_REINF_Pin."SIDE_QTR_REINF_Pin.DOWN";
+            SIDE_QTR_Weld."SIDE_QTR_Weld.WELDING" > SIDE_QTR_REINF_Shift."SIDE_QTR_REINF_Shift.RET";
+            SIDE_QTR_Handling."SIDE_QTR_Handling.LOADING2" > SIDE_QTR_REINF2_Clamp."SIDE_QTR_REINF2_Clamp.CLAMP" > SIDE_QTR_Weld."SIDE_QTR_Weld.WELDING";
+        }
+    }
+    [flow] SIDE_MAIN = {
+        "SIDE_REINF.#201-1" > "#201" > "#202" > "#205" > "SIDE_QTR.#205-2" > "#206";
+        "#201" = {
+            SIDE_MAIN_Handling."SIDE_MAIN_Handling.LOADING1" > SIDE_MAIN_REINF_Shift."SIDE_MAIN_REINF_Shift.ADV" > SIDE_MAIN_REINF_Pin."SIDE_MAIN_REINF_Pin.UP" > SIDE_MAIN_Handling."SIDE_MAIN_Handling.LOADING2" > SIDE_MAIN_REINF1_Clamp."SIDE_MAIN_REINF1_Clamp.CLAMP" > SIDE_MAIN_Weld."SIDE_MAIN_Weld.WELDING" > SIDE_MAIN_REINF1_Clamp."SIDE_MAIN_REINF1_Clamp.UNCLAMP";
+            SIDE_MAIN_Weld."SIDE_MAIN_Weld.WELDING" > SIDE_MAIN_REINF2_Clamp."SIDE_MAIN_REINF2_Clamp.UNCLAMP";
+            SIDE_MAIN_Weld."SIDE_MAIN_Weld.WELDING" > SIDE_MAIN_REINF_Pin."SIDE_MAIN_REINF_Pin.DOWN";
+            SIDE_MAIN_Weld."SIDE_MAIN_Weld.WELDING" > SIDE_MAIN_REINF_Shift."SIDE_MAIN_REINF_Shift.RET";
+            SIDE_MAIN_Handling."SIDE_MAIN_Handling.LOADING2" > SIDE_MAIN_REINF2_Clamp."SIDE_MAIN_REINF2_Clamp.CLAMP" > SIDE_MAIN_Weld."SIDE_MAIN_Weld.WELDING";
+        }
+        "#202" = {
+            SIDE_MAIN_Handling."SIDE_MAIN_Handling.LOADING1" > SIDE_MAIN_REINF_Shift."SIDE_MAIN_REINF_Shift.ADV" > SIDE_MAIN_REINF_Pin."SIDE_MAIN_REINF_Pin.UP" > SIDE_MAIN_Handling."SIDE_MAIN_Handling.LOADING2" > SIDE_MAIN_REINF1_Clamp."SIDE_MAIN_REINF1_Clamp.CLAMP" > SIDE_MAIN_Weld."SIDE_MAIN_Weld.WELDING" > SIDE_MAIN_REINF1_Clamp."SIDE_MAIN_REINF1_Clamp.UNCLAMP";
+            SIDE_MAIN_Weld."SIDE_MAIN_Weld.WELDING" > SIDE_MAIN_REINF2_Clamp."SIDE_MAIN_REINF2_Clamp.UNCLAMP";
+            SIDE_MAIN_Weld."SIDE_MAIN_Weld.WELDING" > SIDE_MAIN_REINF_Pin."SIDE_MAIN_REINF_Pin.DOWN";
+            SIDE_MAIN_Weld."SIDE_MAIN_Weld.WELDING" > SIDE_MAIN_REINF_Shift."SIDE_MAIN_REINF_Shift.RET";
+            SIDE_MAIN_Handling."SIDE_MAIN_Handling.LOADING2" > SIDE_MAIN_REINF2_Clamp."SIDE_MAIN_REINF2_Clamp.CLAMP" > SIDE_MAIN_Weld."SIDE_MAIN_Weld.WELDING";
+        }
+        "#206" = {
+            SIDE_MAIN_Handling."SIDE_MAIN_Handling.LOADING1" > SIDE_MAIN_REINF_Shift."SIDE_MAIN_REINF_Shift.ADV" > SIDE_MAIN_REINF_Pin."SIDE_MAIN_REINF_Pin.UP" > SIDE_MAIN_Handling."SIDE_MAIN_Handling.LOADING2" > SIDE_MAIN_REINF1_Clamp."SIDE_MAIN_REINF1_Clamp.CLAMP" > SIDE_MAIN_Weld."SIDE_MAIN_Weld.WELDING" > SIDE_MAIN_REINF1_Clamp."SIDE_MAIN_REINF1_Clamp.UNCLAMP";
+            SIDE_MAIN_Weld."SIDE_MAIN_Weld.WELDING" > SIDE_MAIN_REINF2_Clamp."SIDE_MAIN_REINF2_Clamp.UNCLAMP";
+            SIDE_MAIN_Weld."SIDE_MAIN_Weld.WELDING" > SIDE_MAIN_REINF_Pin."SIDE_MAIN_REINF_Pin.DOWN";
+            SIDE_MAIN_Weld."SIDE_MAIN_Weld.WELDING" > SIDE_MAIN_REINF_Shift."SIDE_MAIN_REINF_Shift.RET";
+            SIDE_MAIN_Handling."SIDE_MAIN_Handling.LOADING2" > SIDE_MAIN_REINF2_Clamp."SIDE_MAIN_REINF2_Clamp.CLAMP" > SIDE_MAIN_Weld."SIDE_MAIN_Weld.WELDING";
+        }
+        "#205" = {
+            SIDE_MAIN_Handling."SIDE_MAIN_Handling.LOADING1" > SIDE_MAIN_REINF_Shift."SIDE_MAIN_REINF_Shift.ADV" > SIDE_MAIN_REINF_Pin."SIDE_MAIN_REINF_Pin.UP" > SIDE_MAIN_Handling."SIDE_MAIN_Handling.LOADING2" > SIDE_MAIN_REINF1_Clamp."SIDE_MAIN_REINF1_Clamp.CLAMP" > SIDE_MAIN_Weld."SIDE_MAIN_Weld.WELDING" > SIDE_MAIN_REINF1_Clamp."SIDE_MAIN_REINF1_Clamp.UNCLAMP";
+            SIDE_MAIN_Weld."SIDE_MAIN_Weld.WELDING" > SIDE_MAIN_REINF2_Clamp."SIDE_MAIN_REINF2_Clamp.UNCLAMP";
+            SIDE_MAIN_Weld."SIDE_MAIN_Weld.WELDING" > SIDE_MAIN_REINF_Pin."SIDE_MAIN_REINF_Pin.DOWN";
+            SIDE_MAIN_Weld."SIDE_MAIN_Weld.WELDING" > SIDE_MAIN_REINF_Shift."SIDE_MAIN_REINF_Shift.RET";
+            SIDE_MAIN_Handling."SIDE_MAIN_Handling.LOADING2" > SIDE_MAIN_REINF2_Clamp."SIDE_MAIN_REINF2_Clamp.CLAMP" > SIDE_MAIN_Weld."SIDE_MAIN_Weld.WELDING";
+        }
+    }
+}
+[sys] S101_F_APRON_P104 = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vp |> Sm;
+        Vm |> Sp;
+        "UP [Vp ~ Sp]" <||> "DOWN[Vm ~ Sm]";
+    }
+}
+[sys] SIDE_MAIN_REINF_Pin = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vp |> Sm;
+        Vm |> Sp;
+        "UP [Vp ~ Sp]" <||> "DOWN[Vm ~ Sm]";
+    }
+    [interfaces] = {
+        "SIDE_MAIN_REINF_Pin.UP" = { _ ~ _ }
+        "SIDE_MAIN_REINF_Pin.DOWN" = { _ ~ _ }
+    }
+}
+[sys] S101_F_APRON_U133 = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vp |> Sm;
+        Vm |> Sp;
+        "CLAMP [Vp ~ Sp]" <||> "UNCLAMP [Vm ~ Sm]";
+    }
+}
+[sys] SIDE_REINF_Weld = {
+    [flow] exflow = {
+        "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]" <||> "WELDING [Robot_진입OK3 ~ Robot_작업완료3]";
+        "LOADING1 [Robot_진입OK1 ~ Robot_작업완료1]" <||> "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]";
+        "WELDING [Robot_진입OK3 ~ Robot_작업완료3]" <||> "UNLOADING [Robot_진입OK4 ~ Robot_작업완료4]";
+    }
+    [interfaces] = {
+        "SIDE_REINF_Weld.WELDING" = { _ ~ _ }
+    }
+}
+[sys] SIDE_MAIN_Handling = {
+    [flow] exflow = {
+        "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]" <||> "WELDING [Robot_진입OK3 ~ Robot_작업완료3]";
+        "LOADING1 [Robot_진입OK1 ~ Robot_작업완료1]" <||> "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]";
+        "WELDING [Robot_진입OK3 ~ Robot_작업완료3]" <||> "UNLOADING [Robot_진입OK4 ~ Robot_작업완료4]";
+    }
+    [interfaces] = {
+        "SIDE_MAIN_Handling.LOADING2" = { _ ~ _ }
+        "SIDE_MAIN_Handling.LOADING1" = { _ ~ _ }
+    }
+}
+[sys] S101_F_APRON_U131 = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vm |> Sp;
+        Vp |> Sm;
+        "ADV [Vp ~ Sp]" <||> "RET[Vm ~ Sm]";
+    }
+}
+[sys] SIDE_REINF_REINF2_Clamp = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vp |> Sm;
+        Vm |> Sp;
+        "CLAMP [Vp ~ Sp]" <||> "UNCLAMP [Vm ~ Sm]";
+    }
+    [interfaces] = {
+        "SIDE_REINF_REINF2_Clamp.CLAMP" = { _ ~ _ }
+        "SIDE_REINF_REINF2_Clamp.UNCLAMP" = { _ ~ _ }
+    }
+}
+[sys] SIDE_REINF_Handling = {
+    [flow] exflow = {
+        "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]" <||> "WELDING [Robot_진입OK3 ~ Robot_작업완료3]";
+        "LOADING1 [Robot_진입OK1 ~ Robot_작업완료1]" <||> "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]";
+        "WELDING [Robot_진입OK3 ~ Robot_작업완료3]" <||> "UNLOADING [Robot_진입OK4 ~ Robot_작업완료4]";
+    }
+    [interfaces] = {
+        "SIDE_REINF_Handling.LOADING2" = { _ ~ _ }
+        "SIDE_REINF_Handling.LOADING1" = { _ ~ _ }
+    }
+}
+[sys] SIDE_MAIN_REINF1_Clamp = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vp |> Sm;
+        Vm |> Sp;
+        "CLAMP [Vp ~ Sp]" <||> "UNCLAMP [Vm ~ Sm]";
+    }
+    [interfaces] = {
+        "SIDE_MAIN_REINF1_Clamp.CLAMP" = { _ ~ _ }
+        "SIDE_MAIN_REINF1_Clamp.UNCLAMP" = { _ ~ _ }
+    }
+}
+[sys] SIDE_QTR_REINF1_Clamp = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vp |> Sm;
+        Vm |> Sp;
+        "CLAMP [Vp ~ Sp]" <||> "UNCLAMP [Vm ~ Sm]";
+    }
+    [interfaces] = {
+        "SIDE_QTR_REINF1_Clamp.CLAMP" = { _ ~ _ }
+        "SIDE_QTR_REINF1_Clamp.UNCLAMP" = { _ ~ _ }
+    }
+}
+[sys] S101_DASH_P114 = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vm |> Sp;
+        Vp |> Sm;
+        "LATCH[Vp ~ Sp]" <||> "UNLATCH [Vm ~ Sm]";
+    }
+}
+[sys] S101_DASH_U111_1 = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vm |> Sp;
+        Vp |> Sm;
+        "LATCH[Vp ~ Sp]" <||> "UNLATCH [Vm ~ Sm]";
+    }
+}
+[sys] Shift = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vm |> Sp;
+        Vp |> Sm;
+        "ADV [Vp ~ Sp]" <||> "RET[Vm ~ Sm]";
+    }
+}
+[sys] SIDE_QTR_REINF_Shift = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vm |> Sp;
+        Vp |> Sm;
+        "ADV [Vp ~ Sp]" <||> "RET[Vm ~ Sm]";
+    }
+    [interfaces] = {
+        "SIDE_QTR_REINF_Shift.ADV" = { _ ~ _ }
+        "SIDE_QTR_REINF_Shift.RET" = { _ ~ _ }
+    }
+}
+[sys] S101_F_APRON_P132_134Unit = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vp |> Sm;
+        Vm |> Sp;
+        "UP [Vp ~ Sp]" <||> "DOWN[Vm ~ Sm]";
+    }
+}
+[sys] Robot = {
+    [flow] exflow = {
+        "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]" <||> "WELDING [Robot_진입OK3 ~ Robot_작업완료3]";
+        "LOADING1 [Robot_진입OK1 ~ Robot_작업완료1]" <||> "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]";
+        "WELDING [Robot_진입OK3 ~ Robot_작업완료3]" <||> "UNLOADING [Robot_진입OK4 ~ Robot_작업완료4]";
+    }
+}
+[sys] SIDE_MAIN_REINF2_Clamp = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vp |> Sm;
+        Vm |> Sp;
+        "CLAMP [Vp ~ Sp]" <||> "UNCLAMP [Vm ~ Sm]";
+    }
+    [interfaces] = {
+        "SIDE_MAIN_REINF2_Clamp.CLAMP" = { _ ~ _ }
+        "SIDE_MAIN_REINF2_Clamp.UNCLAMP" = { _ ~ _ }
+    }
+}
+[sys] S101_DASH = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vp |> Sm;
+        Vm |> Sp;
+        "CLAMP [Vp ~ Sp]" <||> "UNCLAMP [Vm ~ Sm]";
+    }
+}
+[sys] S101_DASH_U115 = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vm |> Sp;
+        Vp |> Sm;
+        "LATCH[Vp ~ Sp]" <||> "UNLATCH [Vm ~ Sm]";
+    }
+}
+[sys] S101_DASH_P112 = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vp |> Sm;
+        Vm |> Sp;
+        "UP [Vp ~ Sp]" <||> "DOWN[Vm ~ Sm]";
+    }
+}
+[sys] S101_Handling = {
+    [flow] exflow = {
+        "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]" <||> "WELDING [Robot_진입OK3 ~ Robot_작업완료3]";
+        "LOADING1 [Robot_진입OK1 ~ Robot_작업완료1]" <||> "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]";
+        "WELDING [Robot_진입OK3 ~ Robot_작업완료3]" <||> "UNLOADING [Robot_진입OK4 ~ Robot_작업완료4]";
+    }
+}
+[sys] SIDE_QTR_REINF_Pin = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vp |> Sm;
+        Vm |> Sp;
+        "UP [Vp ~ Sp]" <||> "DOWN[Vm ~ Sm]";
+    }
+    [interfaces] = {
+        "SIDE_QTR_REINF_Pin.UP" = { _ ~ _ }
+        "SIDE_QTR_REINF_Pin.DOWN" = { _ ~ _ }
+    }
+}
+[sys] S101_DASH_UNIT = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vm |> Sp;
+        Vp |> Sm;
+        "ADV [Vp ~ Sp]" <||> "RET[Vm ~ Sm]";
+    }
+}
+[sys] SIDE_REINF_REINF_Shift = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vm |> Sp;
+        Vp |> Sm;
+        "ADV [Vp ~ Sp]" <||> "RET[Vm ~ Sm]";
+    }
+    [interfaces] = {
+        "SIDE_REINF_REINF_Shift.ADV" = { _ ~ _ }
+        "SIDE_REINF_REINF_Shift.RET" = { _ ~ _ }
+    }
+}
+[sys] SIDE_QTR_Weld = {
+    [flow] exflow = {
+        "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]" <||> "WELDING [Robot_진입OK3 ~ Robot_작업완료3]";
+        "LOADING1 [Robot_진입OK1 ~ Robot_작업완료1]" <||> "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]";
+        "WELDING [Robot_진입OK3 ~ Robot_작업완료3]" <||> "UNLOADING [Robot_진입OK4 ~ Robot_작업완료4]";
+    }
+    [interfaces] = {
+        "SIDE_QTR_Weld.WELDING" = { _ ~ _ }
+    }
+}
+[sys] Latch = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vm |> Sp;
+        Vp |> Sm;
+        "LATCH[Vp ~ Sp]" <||> "UNLATCH [Vm ~ Sm]";
+    }
+}
+[sys] SIDE_REINF_REINF_Pin = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vp |> Sm;
+        Vm |> Sp;
+        "UP [Vp ~ Sp]" <||> "DOWN[Vm ~ Sm]";
+    }
+    [interfaces] = {
+        "SIDE_REINF_REINF_Pin.UP" = { _ ~ _ }
+        "SIDE_REINF_REINF_Pin.DOWN" = { _ ~ _ }
+    }
+}
+[sys] SIDE_MAIN_Weld = {
+    [flow] exflow = {
+        "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]" <||> "WELDING [Robot_진입OK3 ~ Robot_작업완료3]";
+        "LOADING1 [Robot_진입OK1 ~ Robot_작업완료1]" <||> "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]";
+        "WELDING [Robot_진입OK3 ~ Robot_작업완료3]" <||> "UNLOADING [Robot_진입OK4 ~ Robot_작업완료4]";
+    }
+    [interfaces] = {
+        "SIDE_MAIN_Weld.WELDING" = { _ ~ _ }
+    }
+}
+[sys] SIDE_MAIN_REINF_Shift = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vm |> Sp;
+        Vp |> Sm;
+        "ADV [Vp ~ Sp]" <||> "RET[Vm ~ Sm]";
+    }
+    [interfaces] = {
+        "SIDE_MAIN_REINF_Shift.ADV" = { _ ~ _ }
+        "SIDE_MAIN_REINF_Shift.RET" = { _ ~ _ }
+    }
+}
+[sys] S101_F_APRON = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vp |> Sm;
+        Vm |> Sp;
+        "CLAMP [Vp ~ Sp]" <||> "UNCLAMP [Vm ~ Sm]";
+    }
+}
+[sys] S101_Weld = {
+    [flow] exflow = {
+        "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]" <||> "WELDING [Robot_진입OK3 ~ Robot_작업완료3]";
+        "LOADING1 [Robot_진입OK1 ~ Robot_작업완료1]" <||> "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]";
+        "WELDING [Robot_진입OK3 ~ Robot_작업완료3]" <||> "UNLOADING [Robot_진입OK4 ~ Robot_작업완료4]";
+    }
+}
+[sys] SIDE_REINF_REINF1_Clamp = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vp |> Sm;
+        Vm |> Sp;
+        "CLAMP [Vp ~ Sp]" <||> "UNCLAMP [Vm ~ Sm]";
+    }
+    [interfaces] = {
+        "SIDE_REINF_REINF1_Clamp.CLAMP" = { _ ~ _ }
+        "SIDE_REINF_REINF1_Clamp.UNCLAMP" = { _ ~ _ }
+    }
+}
+[sys] SIDE_QTR_REINF2_Clamp = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vp |> Sm;
+        Vm |> Sp;
+        "CLAMP [Vp ~ Sp]" <||> "UNCLAMP [Vm ~ Sm]";
+    }
+    [interfaces] = {
+        "SIDE_QTR_REINF2_Clamp.CLAMP" = { _ ~ _ }
+        "SIDE_QTR_REINF2_Clamp.UNCLAMP" = { _ ~ _ }
+    }
+}
+[sys] Clamp = {
+    [flow] exflow = {
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
+        Vp |> Sm;
+        Vm |> Sp;
+        "CLAMP [Vp ~ Sp]" <||> "UNCLAMP [Vm ~ Sm]";
+    }
 }

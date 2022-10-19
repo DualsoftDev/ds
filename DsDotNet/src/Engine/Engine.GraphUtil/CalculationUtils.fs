@@ -32,7 +32,7 @@ module private GraphCalculationUtils =
             graph.Vertices 
             |> Seq.cast<Call>
             |> Seq.iter(fun v -> 
-                let apiName =  $"{v.System.Name}.{v.Name}" 
+                let apiName =  $"{v.GetSystem().Name}.{v.Name}" 
                 if not (callMap.ContainsKey(apiName)) then
                     callMap.Add(apiName, new ResizeArray<Call>(0))
                 callMap.[apiName].Add(v)
@@ -45,7 +45,7 @@ module private GraphCalculationUtils =
             $"{system}.{src}", info.Operator, $"{system}.{tgt}"
 
         let getResetInfo (node:Call) = 
-            node.System.ApiResetInfos |> Seq.map(makeName node.System.Name)
+            node.GetSystem().ApiResetInfos |> Seq.map(makeName (node.GetSystem().Name))
 
         let generateResetRelationShips 
                 (callMap:Dictionary<string, ResizeArray<Call>>)
@@ -271,7 +271,7 @@ module private GraphCalculationUtils =
         graph.Vertices 
         |> Seq.cast<Call>
         |> Seq.iter(fun v -> 
-            let apiName = $"{v.System.Name}.{v.Name}"
+            let apiName = $"{v.GetSystem().Name}.{v.Name}"
             if not (callMap.ContainsKey(apiName)) then
                 callMap.Add(apiName, new ResizeArray<Call>(0))
             callMap.[apiName].Add(v)

@@ -37,12 +37,6 @@ module GraphModule =
     //type IChildVertex =
     //    inherit INamedVertex
 
-    ///Vertex의 부모의 타입을 구분한다.
-    type ParentType = 
-    | NoneParent //flow/ApiItem 부모는 없다
-    | Flow //Real/Call/Alias 의 부모
-    | Real //Call/Alias      의 부모
-
     [<AbstractClass>]
     type EdgeBase<'V>(source:'V, target:'V, edgeType:EdgeType) =
         do

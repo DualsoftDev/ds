@@ -6,7 +6,7 @@ class ParserResult
     public List<ITerminalNode> terminals = new();
     public List<IErrorNode> errors = new();
 }
-class AllListener : dsBaseListener
+class AllListener : dsParserBaseListener
 {
     public ParserResult r = new ParserResult();
 

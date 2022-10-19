@@ -48,8 +48,6 @@ class ElementListener : ListenerBase
         Assert(n == 2 || n == 3);
         item.AddTXs(findSegments(ser[0]));
         item.AddRXs(findSegments(ser[1]));
-        if (n == 3)
-            item.AddResets(findSegments(ser[2]));
 
         Console.WriteLine();
     }

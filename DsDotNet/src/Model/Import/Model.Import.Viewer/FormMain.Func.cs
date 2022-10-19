@@ -251,7 +251,8 @@ namespace Dual.Model.Import
         }
         internal void TestDebug()
         {
-            string path = @"D:\DS\test\DS.pptx";
+
+            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\..\..\"))+ "Model.Import.Office\\sample\\DS.pptx";
             bool debug = File.Exists(path);
             if (debug)
             {

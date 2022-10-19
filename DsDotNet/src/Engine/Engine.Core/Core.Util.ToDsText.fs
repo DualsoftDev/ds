@@ -141,8 +141,7 @@ module internal ToDsTextModule =
                         let qNames (xs:RealInFlow seq) = xs.Select(fun tx -> tx.QualifiedName) |> String.concat(", ")
                         let s = qNames(item.TXs) |> nonNullSelector "_"
                         let e = qNames(item.RXs) |> nonNullSelector "_"
-                        let r = qNames(item.Resets)
-                        if r.IsNullOrEmpty() then $"{s} ~ {e}" else $"{s} ~ {e} ~ {r}"
+                        $"{s} ~ {e}"
                     yield $"{tab2}{item.Name.QuoteOnDemand()} = {lb} {ser} {rb}"
 
                 for ri in api.ResetInfos do

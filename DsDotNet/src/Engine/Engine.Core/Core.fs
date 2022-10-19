@@ -155,10 +155,8 @@ module CoreModule =
 
         member val TXs = createQualifiedNamedHashSet<RealInFlow>()
         member val RXs = createQualifiedNamedHashSet<RealInFlow>()
-        member val Resets = createQualifiedNamedHashSet<RealInFlow>()
         member x.AddTXs(txs:RealInFlow seq) = txs |> Seq.forall(fun tx -> x.TXs.Add(tx))
         member x.AddRXs(rxs:RealInFlow seq) = rxs |> Seq.forall(fun rx -> x.RXs.Add(rx))
-        member x.AddResets(resets:RealInFlow seq) = resets |> Seq.forall(fun r -> x.Resets.Add(r))
         member _.System = system
         member val Xywh:Xywh = null with get, set
         member val Addresses:Addresses = null with get, set

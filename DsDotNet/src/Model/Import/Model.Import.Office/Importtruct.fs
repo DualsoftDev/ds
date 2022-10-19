@@ -26,10 +26,10 @@ module CoreStruct =
     
 
         //시스템 버튼 소속 Flow 정보
-        member val EmergencyButtons = ConcurrentDictionary<string, List<RootFlow>>()
-        member val AutoButtons      = ConcurrentDictionary<string, List<RootFlow>>()
-        member val StartButtons     = ConcurrentDictionary<string, List<RootFlow>>()
-        member val ResetButtons     = ConcurrentDictionary<string, List<RootFlow>>()
+        member val EmergencyButtons = ConcurrentDictionary<string, ResizeArray<RootFlow>>()
+        member val AutoButtons      = ConcurrentDictionary<string, ResizeArray<RootFlow>>()
+        member val StartButtons     = ConcurrentDictionary<string, ResizeArray<RootFlow>>()
+        member val ResetButtons     = ConcurrentDictionary<string, ResizeArray<RootFlow>>()
          
     and
         [<DebuggerDisplay("{name}")>]

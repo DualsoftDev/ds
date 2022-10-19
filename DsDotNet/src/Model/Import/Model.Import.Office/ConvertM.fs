@@ -109,7 +109,14 @@ module ConvertM =
                 let coreFlow = Flow.Create(mflow.Name, coreSys) 
                 addInFlowEdges(coreFlow, mflow)
                 )
-        
+
+        let getFlows(mflow:ResizeArray<RootFlow>) =
+            mflow 
+            |> Seq.cast<MFlow>
+            |> Seq.map(fun flow -> coreModel.FindGraphVertex([|flow.System.Name; flow.Name|]))
+            |> Seq.cast<Flow>
+            |> ResizeArray
+
         //시스템 변환
         pptModel.Systems
         |> Seq.iter(fun sys -> DsSystem.Create(sys.Name, null, None, coreModel) |>ignore)
@@ -118,6 +125,17 @@ module ConvertM =
         pptModel.Systems
         |> Seq.iter(fun sys -> addFlows(coreModel.FindSystem(sys.Name), sys.Flows))
 
+        
+        //시스템 별 버튼 반영
+        pptModel.Systems
+        |> Seq.iter(fun pptSys -> 
+            let coreSys = coreModel.FindSystem(pptSys.Name)
+            pptSys.EmergencyButtons.ForEach(fun btn -> coreSys.EmergencyButtons.Add(btn.Key, getFlows(btn.Value)))
+            pptSys.AutoButtons.ForEach(fun btn -> coreSys.AutoButtons.Add(btn.Key, getFlows(btn.Value)))
+            pptSys.StartButtons.ForEach(fun btn -> coreSys.StartButtons.Add(btn.Key, getFlows(btn.Value)))
+            pptSys.ResetButtons.ForEach(fun btn -> coreSys.ResetButtons.Add(btn.Key, getFlows(btn.Value)))
+                )
+          
         coreModel
 
 

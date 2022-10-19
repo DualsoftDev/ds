@@ -21,10 +21,9 @@
 		<Compile Include="Core.Util.Find.fs" />
 		<Compile Include="Core.Util.ToDsText.fs" />
 		<Content Include="ValidSyntax.txt" />
+		<Content Include="ProgramCodeSyntax.txt" />
 		<!--<Compile Include="Program.fs" />-->
 	</ItemGroup>
-
-	<ItemGroup />
 
 	<ItemGroup>
 	  <ProjectReference Include="..\Engine.Common.FS\Engine.Common.FS.fsproj" />

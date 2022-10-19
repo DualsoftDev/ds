@@ -43,6 +43,9 @@ class SkeletonListener : ListenerBase
         _parenting = RealInFlow.Create(name, _rootFlow);
         AddElement(CurrentPathElements, GraphVertexType.Segment | GraphVertexType.Parenting);
 
+        var xxx = enumerateChildren<CausalTokenContext>(ctx).ToArray();
+        var yyy = xxx.Select(ctctx => collectNameComponents(ctctx).ToArray()).ToArray();
+
         var children =
             enumerateChildren<CausalTokenContext>(ctx)
                 .Select(ctctx => collectNameComponents(ctctx).ToArray())

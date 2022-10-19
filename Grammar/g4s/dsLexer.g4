@@ -25,8 +25,8 @@ WS: [ \t\r\n]+ -> skip;
 BLOCK_COMMENT : '/*' (BLOCK_COMMENT|.)*? '*/' -> channel(HIDDEN) ;
 LINE_COMMENT  : '//' .*? ('\n'|EOF) -> channel(HIDDEN) ;
 
-
 fragment Identifier: ValidIdStart ValidIdChar*;
+   // lexical rule for hangul characters
     fragment HangulChar: [\uAC00-\uD7A3]+;
 
     fragment ValidIdStart
@@ -52,12 +52,12 @@ IPV4: [1-9][0-9]*'.'('0'|[1-9][0-9]*)'.'('0'|[1-9][0-9]*)'.'('0'|[1-9][0-9]*);
 // IPV4: (INTEGER)(DOT) INTEGER DOT INTEGER DOT INTEGER;
 
 TAG_ADDRESS: ValidTagStart ValidTagChar*;
-fragment ValidTagStart
-   : PERCENT   // | ('a' .. 'z') | ('A' .. 'Z') | '_' | HANGUL_CHAR
-   ;
-fragment ValidTagChar
-   : DOT | ValidIdChar | ('0' .. '9') | HangulChar
-   ;
+   fragment ValidTagStart
+      : '%'   // | ('a' .. 'z') | ('A' .. 'Z') | '_' | HANGUL_CHAR
+      ;
+   fragment ValidTagChar
+      : DOT | ValidIdChar | ('0' .. '9') | HangulChar
+      ;
 
 
 SQUOTE: '\'';
@@ -80,17 +80,10 @@ AT: '@';
 POUND: '#';
 PLUS: '+';
 MINUS: '-';
-MUL: STAR;
-DIV: SLASH;
-MOD: PERCENT;
-fragment STAR: '*';
-fragment SLASH: '/';
-fragment PERCENT: '%';
+MUL: '*';
+DIV: '/';
+MOD: '%';
 
-// fragment RANGLE: '>';
-// fragment LANGLE: '<';
-// GT: RANGLE;
-// LT: LANGLE;
 GTE: '>=';
 LTE: '<=';
 
@@ -102,23 +95,10 @@ NEQ: '!=';
 INTEGER: [1-9][0-9]*;
 FLOAT: [1-9][0-9]*('.'[0-9]+)?;
 
-// lexical rule for hangul characters
-HANGUL_CHAR: [\uAC00-\uD7A3]+;
-
-
-// COMMENT
-//     : '/*' .*? '*/' -> skip
-// ;
-
-// LINE_COMMENT
-//     : '//' ~[\r\n]* -> skip
-// ;
 
 // Close Angle Bracket
 Cab: '>';
 CabCab: '>>';
-// BWDANGLEBRACKETx2: '<<';
-// BWDANGLEBRACKET: '<';
 
 // Open Angle Bracket
 Oab: '<';
@@ -139,31 +119,7 @@ CabPipePipe: '<||';
 OabOabPipePipeCabCab: '<<||>>';
 
 
-// CAUSAL_FWD: '>';
-// CAUSAL_BWD: '<';
-// CAUSAL_RESET_FWD: '|>';
-// CAUSAL_RESET_BWD: '<|';
-// CAUSAL_RESET_FB: '<||>';
-// CAUSAL_FWD_AND_RESET_BWD: '><|' | '=>';
-// CAUSAL_FWD_AND_RESET_FWD: '>|>' | '|>>';
-// CAUSAL_BWD_AND_RESET_BWD: '<<|' | '<|<';
-// CAUSAL_BWD_AND_RESET_FWD: '|><';
-
-
-
 QUESTION: '?';
-// FWDANGLEBRACKETx2: '>>';
-// FWDANGLEBRACKET: '>';
-// // FWDANGLEBRACKET_PIPE_FWDANGLEBRACKET: '>|>';    // CAUSAL_FWD_AND_RESET_FWD
-// BWDANGLEBRACKETx2: '<<';
-// BWDANGLEBRACKET: '<';
-// // BWDANGLEBRACKET_PIPE_BWDANGLEBRACKET: '<|<';    // CAUSAL_BWD_AND_RESET_BWD
-// // FWDANGLEBRACKET_BWDANGLEBRACKET_PIPE: '><|';
-// // '=>';
-// CAUSAL_RESET_STRONG_FWD: '||>';
-// CAUSAL_RESET_STRONG_BWD: '<||';
-// CAUSAL_RESET_STRONG_BIDIRECTION: '<<||>>';
-
 
 
 // TOKEN

@@ -2,8 +2,8 @@
 namespace Engine.Core
 
 open System.Collections.Generic
-open System.Diagnostics
 open System.Runtime.CompilerServices
+open System.Diagnostics
 open Engine.Common.FS
 
 [<AutoOpen>]
@@ -40,7 +40,7 @@ module CoreModule =
 
     and Flow private (name:string, system:DsSystem) =
         inherit FqdnObject(name, system)
-        member val Graph = Graph<Vertex, InFlowEdge>()     
+        member val Graph = Graph<Vertex, Edge>()     
         member val AliasMap = Dictionary<NameComponents, HashSet<string>>(nameComponentsComparer())
         member x.System = system
         static member Create(name:string, system:DsSystem) =
@@ -63,7 +63,7 @@ module CoreModule =
     and [<DebuggerDisplay("{QualifiedName}")>]
         Real private (name:string, flow:Flow) =
         inherit Vertex(name, Flow flow)
-        member val Graph = Graph<Vertex, InRealEdge>()
+        member val Graph = Graph<Vertex, Edge>()
         member val Flow = flow
         member val SafetyConditions = createQualifiedNamedHashSet<Real>() 
         static member Create(name:string, flow) =
@@ -151,20 +151,11 @@ module CoreModule =
 
     and ButtonDic = Dictionary<string, ResizeArray<Flow>>
 
-    and InFlowEdge private (source:Vertex, target:Vertex, edgeType:EdgeType) =
+    and Edge private (source:Vertex, target:Vertex, edgeType:EdgeType) =
         inherit EdgeBase<Vertex>(source, target, edgeType)
-        static member Create(flow:Flow, source, target, edgeType:EdgeType) =
-            let edge = InFlowEdge(source, target, edgeType)
-            flow.Graph.AddEdge(edge) |> verifyM $"Duplicated edge [{source.Name}{edgeType.ToText()}{target.Name}]"
-            edge
-        override x.ToString() = $"{x.Source.QualifiedName} {x.EdgeType.ToText()} {x.Target.QualifiedName}"
-
-    and InRealEdge private (source:Vertex, target:Vertex, edgeType:EdgeType) =
-        inherit EdgeBase<Vertex>(source, target, edgeType)
-        static member Create(segment:Real, source, target, edgeType:EdgeType) =
-            let edge = InRealEdge(source, target, edgeType)
-            let gr:Graph<_, _> = segment.Graph
-            segment.Graph.AddEdge(edge) |> verifyM $"Duplicated edge [{source.Name}{edgeType}{target.Name}]"
+        static member Create(graph:Graph<_,_>, source, target, edgeType:EdgeType) =
+            let edge = Edge(source, target, edgeType)
+            graph.AddEdge(edge) |> verifyM $"Duplicated edge [{source.Name}{edgeType.ToText()}{target.Name}]"
             edge
         override x.ToString() = $"{x.Source.QualifiedName} {x.EdgeType.ToText()} {x.Target.QualifiedName}"
 

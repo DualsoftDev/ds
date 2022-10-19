@@ -56,7 +56,7 @@ namespace Model.Simulator
             viewer.SetCalculatedLayout(viewer.CalculateLayout(viewer.Graph));
         }
 
-        private void drawMEdgeGraph(IEnumerable<InFlowEdge> edges, Subgraph subgraph)
+        private void drawMEdgeGraph(IEnumerable<Edge> edges, Subgraph subgraph)
         {
             foreach (var edge in edges)
                 DrawMEdge(subgraph, edge, null);
@@ -68,7 +68,7 @@ namespace Model.Simulator
                 DrawMEdge(subgraph, null, edge);
         }
 
-        private void DrawMEdge(Subgraph subgraph, InFlowEdge edge, InSegmentEdge segEdge)
+        private void DrawMEdge(Subgraph subgraph, Edge edge, InSegmentEdge segEdge)
         {
             var segSrc = edge.Source as RealInFlow;
             var segTgr = edge.Target as RealInFlow;
@@ -111,7 +111,7 @@ namespace Model.Simulator
         }
 
 
-        private void DrawEdgeStyle(Edge gEdge, InFlowEdge edge, bool model = false)
+        private void DrawEdgeStyle(Edge gEdge, Edge edge, bool model = false)
         {
             //gEdge.Attr.Color = Color.Black;
             //gEdge.Label.FontColor = Color.White;

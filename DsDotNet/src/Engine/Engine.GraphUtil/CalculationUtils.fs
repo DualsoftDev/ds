@@ -26,8 +26,8 @@ module private GraphCalculationUtils =
         result
 
     /// Get reset informations from graph
-    let getAllResets (graph:Graph<Vertex, InRealEdge>) =
-        let getCallMap (graph:Graph<Vertex, InRealEdge>) =
+    let getAllResets (graph:Graph<Vertex, Edge>) =
+        let getCallMap (graph:Graph<Vertex, Edge>) =
             let callMap = new Dictionary<string, ResizeArray<Call>>()
             graph.Vertices 
             |> Seq.cast<Call>
@@ -72,7 +72,7 @@ module private GraphCalculationUtils =
         |> Seq.collect(generateResetRelationShips callMap)
 
     /// Get ordered graph nodes to calculate the node index
-    let getTraverseOrder (graph:Graph<Vertex, InRealEdge>) =
+    let getTraverseOrder (graph:Graph<Vertex, Edge>) =
         let q = Queue<Vertex>()
         graph.Inits |> Seq.iter q.Enqueue
         [|
@@ -87,10 +87,10 @@ module private GraphCalculationUtils =
     /// Get ordered routes from start to end
     let visitFromSourceToTarget
             (now:Call) (target:Call) 
-            (graph:Graph<Vertex, InRealEdge>) =
+            (graph:Graph<Vertex, Edge>) =
         let rec searchNodes
                 (now:Call) (target:Call)
-                (graph:Graph<Vertex, InRealEdge>) 
+                (graph:Graph<Vertex, Edge>) 
                 (path:Call list) =
             [
                 let nowPath = path.Append(now) |> List.ofSeq
@@ -266,7 +266,7 @@ module private GraphCalculationUtils =
                 allNodes.Add(node, 3)
         allNodes
 
-    let getCallMap (graph:Graph<Vertex, InRealEdge>) =
+    let getCallMap (graph:Graph<Vertex, Edge>) =
         let callMap = new Dictionary<string, ResizeArray<Call>>()
         graph.Vertices 
         |> Seq.cast<Call>
@@ -279,7 +279,7 @@ module private GraphCalculationUtils =
         callMap
 
     let getAliasHeads 
-            (graph:Graph<Vertex, InRealEdge>)
+            (graph:Graph<Vertex, Edge>)
             (callMap:Dictionary<string, ResizeArray<Call>>) =
         [
         for calls in callMap do

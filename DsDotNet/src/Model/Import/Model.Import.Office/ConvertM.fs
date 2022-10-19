@@ -50,7 +50,7 @@ module ConvertM =
                 if(tgt.IsNull()) then failwithf $"[{findList}]에서 \n{t}를 찾을 수 없습니다."
 
 
-                InRealEdge.Create(coreSeg, src, tgt, edgeType)
+                Edge.Create(coreSeg.Graph, src, tgt, edgeType)
             
 
             mSeg.ChildFlow.Nodes |> Seq.cast<MSeg> 
@@ -62,7 +62,7 @@ module ConvertM =
                                  |> Seq.iter(fun edge -> gr.AddEdge  (convertChildEdge (edge, coreSeg)) |>ignore)
     
         //CoreModule.Flow 에 pptEdge 등록
-        let addInFlowEdges(coreFlow:CoreModule.Flow, mFlow:MFlow) =
+        let addEdges(coreFlow:CoreModule.Flow, mFlow:MFlow) =
             ///MSeg   -> CoreModule.Segment
             let convertSeg(mSeg:MSeg, coreFlow:CoreModule.Flow) = 
                 if mSeg.IsAlias
@@ -77,24 +77,24 @@ module ConvertM =
 
                 let s = mEdge.Source.ValidName
                 let t = mEdge.Target.ValidName
-                let src = coreFlow.Graph.FindVertex(s)
-                let tgt = coreFlow.Graph.FindVertex(t)
+                let graph = coreFlow.Graph
+                let src = graph.FindVertex(s)
+                let tgt = graph.FindVertex(t)
 
-                let findList = coreFlow.Graph.Vertices |> Seq.map(fun v->v.Name) |> String.concat "\n " 
+                let findList = graph.Vertices |> Seq.map(fun v->v.Name) |> String.concat "\n " 
                 if(src.IsNull()) then failwithf $"[{findList}]에서 \n{s}를 찾을 수 없습니다."
                 if(tgt.IsNull()) then failwithf $"[{findList}]에서 \n{t}를 찾을 수 없습니다."
                 
-
                 if(mEdge.Causal = Interlock)
                 then 
-                     InFlowEdge.Create(coreFlow, src, tgt, ResetPush ) |> ignore
-                     InFlowEdge.Create(coreFlow, tgt, src, ResetPush)
+                     Edge.Create(graph, src, tgt, ResetPush ) |> ignore
+                     Edge.Create(graph, tgt, src, ResetPush)
                 elif(mEdge.Causal = StartReset)
                 then 
-                     InFlowEdge.Create(coreFlow, src, tgt, StartEdge) |> ignore
-                     InFlowEdge.Create(coreFlow, tgt, src, ResetEdge)
+                     Edge.Create(graph, src, tgt, StartEdge) |> ignore
+                     Edge.Create(graph, tgt, src, ResetEdge)
                 else 
-                     InFlowEdge.Create(coreFlow, src, tgt, mEdge.Causal)
+                     Edge.Create(graph, src, tgt, mEdge.Causal)
 
             mFlow.Nodes |> Seq.distinct |> Seq.cast<MSeg> 
                         |> Seq.filter(fun seg -> seg.IsDummy|>not)
@@ -107,7 +107,7 @@ module ConvertM =
         let addFlows(coreSys:DsSystem, mFlows:MFlow seq) =
             mFlows |> Seq.iter(fun mflow ->
                 let coreFlow = Flow.Create(mflow.Name, coreSys) 
-                addInFlowEdges(coreFlow, mflow)
+                addEdges(coreFlow, mflow)
                 )
 
         let getFlows(mflow:ResizeArray<RootFlow>) =

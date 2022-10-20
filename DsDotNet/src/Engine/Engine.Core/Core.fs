@@ -33,6 +33,9 @@ module CoreModule =
         member val StartButtons     = ButtonDic()
         member val ResetButtons     = ButtonDic()
 
+        ///시스템 핸들링 대상여부   true : mySystem / false : exSystem
+        member val Active = false with get, set 
+
         static member Create(name, host, cpu, model) =
             let system = DsSystem(name, host, cpu, model)
             model.Systems.Add(system) |> verifyM $"Duplicated system name [{name}]"

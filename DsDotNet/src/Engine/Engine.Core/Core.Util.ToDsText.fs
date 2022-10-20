@@ -78,7 +78,7 @@ module internal ToDsTextModule =
 
             let islands =
                 vertices
-                    .Where(fun v -> (box v) :? Real &&  not <| segments.Contains( (box v) :?> Real))
+                   // .Where(fun v -> (box v) :? Real &&  not <| segments.Contains( (box v) :?> Real))
                     .Except((*segments @@*) edges.Collect(fun e -> e.GetVertices()))
             for island in islands do
                 yield $"{tab}{island.GetRelativeName(basis)}; // island"

@@ -30,6 +30,8 @@ module Object =
             member x.IsCall =   match x with
                                 |TR |TX |RX -> true
                                 |_ -> false
+
+            member x.IsRealorCall =  x.IsReal || x.IsCall 
     // 행위 Bound 정의
     type Bound =
         | ThisFlow         //이   MFlow        내부 행위정의
@@ -62,17 +64,20 @@ module Object =
             member val CountRX = 0 with get, set
 
             member x.OwnerMFlow = ownerMFlow
-            member x.ToCallText() = let call = sprintf "%s_%s"  (ownerMFlow.TrimStart('\"').TrimEnd('\"')) name
-                                    NameUtil.QuoteOnDemand(call)
+            //member x.ToCallText() = let call = sprintf "%s_%s"  (ownerMFlow.TrimStart('\"').TrimEnd('\"')) name
+            //                        NameUtil.QuoteOnDemand(call)
 
             member x.ToTextInMFlow() = 
-                                            if(Bound.ThisFlow = bound) 
-                                            then x.Name
-                                            else sprintf "%s.%s"  ownerMFlow x.ValidName
+                                if(Bound.ThisFlow = bound) 
+                                then x.Name
+                                else sprintf "%s.%s"  ownerMFlow x.ValidName
 
             member x.FullName   = sprintf "%s.%s.%s" baseSystem.Name  ownerMFlow x.ValidName//    (if(x.Parent.IsSome) then x.Parent.Value.ValidName else "Root")
             member x.ApiName    = sprintf "%s"  (x.Name.Split('.').[1]) 
-            member x.AliasName  = sprintf "%s"  (x.Name.Split('.').[1]) 
+            member x.ValidName =  
+                                if nodeType.IsCall
+                                then sprintf "%s.%s" (NameUtil.QuoteOnDemand(x.Name.Split('.').[0])) (x.Name.Split('.').[1])
+                                else NameUtil.QuoteOnDemand(x.Name)
 
             member x.Update(nodeKey, nodeIdValue, nodeCntTX, nodeCntRX) = 
                         this.Key <- nodeKey
@@ -122,7 +127,7 @@ module Object =
 
     and
         /// Modeled Edge : 사용자가 작성한 모델 상의 segment 간의 연결 edge (Wire)
-        [<DebuggerDisplay("{Source.FullName}{Causal.ToText()}{Target.FullName}")>]
+        [<DebuggerDisplay("[{Source.FullName}]\t{Causal}\t[{Target.FullName}]")>]
         MEdge(src:MSeg, tgt:MSeg, causal:EdgeType) =
             inherit DsEdge(src, tgt, causal)
             member x.Source = src
@@ -135,12 +140,10 @@ module Object =
             member val IsDummy = false with get,set
             member val IsSkipUI= false with get,set
             
-           
-
             member x.ToText() = $"{src.Name}  {causal.ToText()}  {tgt.Name}"
             member x.ToCheckText(parentName:string) = 
                             let  checkText = if causal.IsStart() then "Start" else "Reset"
-                            $"[{parentName}]{src.ToCallText()}  {checkText}  {tgt.ToCallText()}"
+                            $"[{parentName}]{src.Name}  {checkText}  {tgt.Name}"
 
             member x.GetSegs() = [src;tgt]
     

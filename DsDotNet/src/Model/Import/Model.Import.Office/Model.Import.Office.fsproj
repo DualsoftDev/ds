@@ -31,7 +31,6 @@
     <Compile Include="ImportUtil.fs" />
     <Compile Include="ImportM.fs" />
     <Compile Include="ConvertM.fs" />
-    <Compile Include="ExportM.fs" />
     <Compile Include="ImportIOTable.fs" />
     <Compile Include="ExportIOTable.fs" />
   </ItemGroup>

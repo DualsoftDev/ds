@@ -17,23 +17,22 @@ module ConvertM =
         let coreModel = CoreModule.Model()
         //중복 등록 체크용
         let dicChild = ConcurrentDictionary<string, ApiItem>()
+        let getApi(mSeg:MSeg) = 
+                if dicChild.ContainsKey(mSeg.Name) 
+                then dicChild.[mSeg.Name]
+                else 
+                    let newApi= ApiItem.Create(mSeg.ApiName, coreModel.FindSystem(mSeg.BaseSys.Name))
+                    dicChild.TryAdd(mSeg.Name, newApi) |> ignore
+                    newApi
 
-        ///mEdges   -> CoreModule.Child
         let convertChildren(mSeg:MSeg, coreSeg:CoreModule.Real, coreModel:CoreModule.Model) =   
 
-            ///MSeg   -> CoreModule.Child
+            ///MSeg   -> CoreModule.Call or CoreModule.Alias
             let convertChild(mChildSeg:MSeg) = 
                 if mChildSeg.IsAlias
-                then Alias.CreateInReal(mChildSeg.AliasName, dicChild.[mChildSeg.AliasOrg.Value.Name], coreSeg) :> Vertex
+                then Alias.CreateInReal(mChildSeg.ApiName, dicChild.[mChildSeg.AliasOrg.Value.Name], coreSeg) :> Vertex
                 else 
-                     let api = 
-                        if dicChild.ContainsKey(mChildSeg.Name) 
-                        then dicChild.[mChildSeg.Name]
-                        else 
-                            let newApi= ApiItem.Create(mChildSeg.ApiName, coreModel.FindSystem(mChildSeg.BaseSys.Name))
-                            dicChild.TryAdd(mChildSeg.Name, newApi) |> ignore
-                            newApi
-
+                     let api = getApi(mChildSeg)
                      Call.CreateInReal(api, coreSeg) :> Vertex
 
             let gr = coreSeg.Graph
@@ -55,22 +54,25 @@ module ConvertM =
 
             mSeg.ChildFlow.Nodes |> Seq.cast<MSeg> 
                                  |> Seq.sortBy(fun seg -> seg.IsAlias)
-                                 |> Seq.filter(fun seg -> seg.IsDummy|>not)
+                                 |> Seq.filter(fun seg -> seg.NodeType.IsReal || seg.NodeType.IsCall)
                                  |> Seq.iter(fun node -> gr.AddVertex(convertChild (node)) |>ignore)
             mSeg.ChildFlow.Edges |> Seq.cast<MEdge> 
                                  |> Seq.filter(fun edge -> edge.IsDummy|>not)
                                  |> Seq.iter(fun edge -> gr.AddEdge  (convertChildEdge (edge, coreSeg)) |>ignore)
-    
-        //CoreModule.Flow 에 pptEdge 등록
-        let addEdges(coreFlow:CoreModule.Flow, mFlow:MFlow) =
-            ///MSeg   -> CoreModule.Segment
+       
+           
+        //CoreModule.DsSystem 에 pptFlow 등록
+        let addFlows(coreSys:DsSystem, mFlows:MFlow seq) =
+             ///MSeg   -> CoreModule.Segment
             let convertSeg(mSeg:MSeg, coreFlow:CoreModule.Flow) = 
-                if mSeg.IsAlias
-                then Alias.CreateInFlow(mSeg.ValidName, mSeg.AliasOrg.Value.FullName.Split('.'), coreFlow) :> Vertex
-                else 
-                     let coreSeg = Real.Create(mSeg.ValidName, coreFlow)
-                     convertChildren (mSeg, coreSeg, coreModel)  |> ignore
-                     coreSeg :> Vertex
+                    if mSeg.IsAlias
+                    then Alias.CreateInFlow(mSeg.ValidName, mSeg.AliasOrg.Value.FullName.Split('.'), coreFlow) :> Vertex
+                    else 
+                        if mSeg.NodeType.IsReal
+                            then let coreSeg = Real.Create(mSeg.ValidName, coreFlow)
+                                 convertChildren (mSeg, coreSeg, coreModel)  |> ignore
+                                 coreSeg :> Vertex
+                            else Call.CreateInFlow(getApi(mSeg), coreFlow)
 
             ///MEdge   -> CoreModule.Flow
             let convertRootEdge(mEdge:MEdge, coreFlow:CoreModule.Flow) = 
@@ -87,28 +89,31 @@ module ConvertM =
                 
                 if(mEdge.Causal = Interlock)
                 then 
-                     Edge.Create(graph, src, tgt, ResetPush ) |> ignore
-                     Edge.Create(graph, tgt, src, ResetPush)
+                        Edge.Create(graph, src, tgt, ResetPush ) |> ignore
+                        Edge.Create(graph, tgt, src, ResetPush)
                 elif(mEdge.Causal = StartReset)
                 then 
-                     Edge.Create(graph, src, tgt, StartEdge) |> ignore
-                     Edge.Create(graph, tgt, src, ResetEdge)
+                        Edge.Create(graph, src, tgt, StartEdge) |> ignore
+                        Edge.Create(graph, tgt, src, ResetEdge)
                 else 
-                     Edge.Create(graph, src, tgt, mEdge.Causal)
+                        Edge.Create(graph, src, tgt, mEdge.Causal)
+        
 
-            mFlow.Nodes |> Seq.distinct |> Seq.cast<MSeg> 
-                        |> Seq.filter(fun seg -> seg.IsDummy|>not)
-                        |> Seq.iter(fun node -> coreFlow.Graph.AddVertex(convertSeg (node, coreFlow)) |>ignore)
-            mFlow.Edges |> Seq.cast<MEdge> 
-                        |> Seq.filter(fun edge -> edge.IsDummy|>not)
-                        |> Seq.iter(fun edge -> coreFlow.Graph.AddEdge(convertRootEdge (edge, coreFlow)) |>ignore)
-
-        //CoreModule.DsSystem 에 pptFlow 등록
-        let addFlows(coreSys:DsSystem, mFlows:MFlow seq) =
             mFlows |> Seq.iter(fun mflow ->
                 let coreFlow = Flow.Create(mflow.Name, coreSys) 
-                addEdges(coreFlow, mflow)
+                mflow.Nodes |> Seq.cast<MSeg> 
+                            |> Seq.distinctBy(fun seg -> seg.FullName) 
+                            |> Seq.filter(fun seg -> seg.NodeType.IsRealorCall)
+                            |> Seq.iter(fun node  -> coreFlow.Graph.AddVertex(convertSeg (node, coreFlow)) |>ignore)
+                        
+                mflow.Edges |> Seq.cast<MEdge> 
+                            |> Seq.filter(fun edge -> edge.IsDummy|>not)
+                            |> Seq.filter(fun edge -> edge.Source.NodeType.IsRealorCall && edge.Target.NodeType.IsRealorCall)
+                            |> Seq.iter(fun edge -> coreFlow.Graph.AddEdge(convertRootEdge (edge, coreFlow)) |>ignore)
+  
                 )
+
+
 
         let getFlows(mflow:ResizeArray<RootFlow>) =
             mflow 
@@ -123,7 +128,10 @@ module ConvertM =
         
         //시스템 별 Flow 변환
         pptModel.Systems
-        |> Seq.iter(fun sys -> addFlows(coreModel.FindSystem(sys.Name), sys.Flows))
+        |> Seq.iter(fun sys -> 
+                let coreSys = coreModel.FindSystem(sys.Name)
+                if sys.Active then coreSys.Active <- true
+                addFlows(coreSys, sys.Flows))
 
         
         //시스템 별 버튼 반영

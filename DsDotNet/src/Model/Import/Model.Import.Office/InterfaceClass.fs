@@ -35,7 +35,6 @@ module InterfaceClass =
             member _.Name with get () = name
 
         member val Name : string = name with get
-        member x.ValidName = NameUtil.QuoteOnDemand(name)
      
     /// Segment Container
     [<AbstractClass>]

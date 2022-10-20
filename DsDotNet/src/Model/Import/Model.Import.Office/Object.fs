@@ -40,7 +40,7 @@ module Object =
 
     and
         /// 사용자가 모델링을 통해서 만든 segment (SegEditor = User)
-        [<DebuggerDisplay("{FullName}")>]
+        [<DebuggerDisplay("{name}")>]
         MSeg(name:string, baseSystem:MSys, bound:Bound, nodeType:NodeType, rootFlow:RootFlow, bDummy:bool) as this =
             inherit SegBase(name, ChildFlow(name))
             let mChildFlow = (this :> SegBase).ChildFlow
@@ -52,6 +52,7 @@ module Object =
             member x.ChildFlow = mChildFlow 
             member x.NodeType = nodeType 
             member x.BaseSys = baseSystem
+            member x.OwnerMFlow = ownerMFlow
             member x.Bound = bound
 
             member x.SetStatus(status:Status4) = 
@@ -63,10 +64,6 @@ module Object =
             member val CountTX = 0 with get, set
             member val CountRX = 0 with get, set
 
-            member x.OwnerMFlow = ownerMFlow
-            //member x.ToCallText() = let call = sprintf "%s_%s"  (ownerMFlow.TrimStart('\"').TrimEnd('\"')) name
-            //                        NameUtil.QuoteOnDemand(call)
-
             member x.ToTextInMFlow() = 
                                 if(Bound.ThisFlow = bound) 
                                 then x.Name
@@ -74,8 +71,12 @@ module Object =
 
             member x.FullName   = sprintf "%s.%s.%s" baseSystem.Name  ownerMFlow x.ValidName//    (if(x.Parent.IsSome) then x.Parent.Value.ValidName else "Root")
             member x.ApiName    = sprintf "%s"  (x.Name.Split('.').[1]) 
+
+
             member x.ValidName =  
-                                if nodeType.IsCall
+                                if x.IsAlias
+                                then x.AliasOrg.Value.ValidName
+                                elif nodeType.IsCall
                                 then sprintf "%s.%s" (NameUtil.QuoteOnDemand(x.Name.Split('.').[0])) (x.Name.Split('.').[1])
                                 else NameUtil.QuoteOnDemand(x.Name)
 
@@ -137,6 +138,8 @@ module Object =
             member x.TgtSystem = tgt.BaseSys
             member x.Nodes = [src;tgt]
             member x.Causal = causal
+            member x.IsRealorCall = src.NodeType.IsRealorCall && tgt.NodeType.IsRealorCall 
+            member x.IsInterfaceEdge = src.NodeType = IF && tgt.NodeType = IF
             member val IsDummy = false with get,set
             member val IsSkipUI= false with get,set
             

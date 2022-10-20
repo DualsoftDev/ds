@@ -18,11 +18,11 @@ module ConvertM =
         //중복 등록 체크용
         let dicChild = ConcurrentDictionary<string, ApiItem>()
         let getApi(mSeg:MSeg) = 
-                if dicChild.ContainsKey(mSeg.Name) 
-                then dicChild.[mSeg.Name]
+                if dicChild.ContainsKey(mSeg.ValidName) 
+                then dicChild.[mSeg.ValidName]
                 else 
                     let newApi= ApiItem.Create(mSeg.ApiName, coreModel.FindSystem(mSeg.BaseSys.Name))
-                    dicChild.TryAdd(mSeg.Name, newApi) |> ignore
+                    dicChild.TryAdd(mSeg.ValidName, newApi) |> ignore
                     newApi
 
         let convertChildren(mSeg:MSeg, coreSeg:CoreModule.Real, coreModel:CoreModule.Model) =   
@@ -30,7 +30,7 @@ module ConvertM =
             ///MSeg   -> CoreModule.Call or CoreModule.Alias
             let convertChild(mChildSeg:MSeg) = 
                 if mChildSeg.IsAlias
-                then Alias.CreateInReal(mChildSeg.ApiName, dicChild.[mChildSeg.AliasOrg.Value.Name], coreSeg) :> Vertex
+                then Alias.CreateInReal(mChildSeg.Name, dicChild.[mChildSeg.ValidName], coreSeg) :> Vertex
                 else 
                      let api = getApi(mChildSeg)
                      Call.CreateInReal(api, coreSeg) :> Vertex
@@ -38,8 +38,8 @@ module ConvertM =
             let gr = coreSeg.Graph
              ///MEdge   -> CoreModule.Flow
             let convertChildEdge(mEdge:MEdge, coreSeg:CoreModule.Real) = 
-                let s = dicChild.[mEdge.Source.Name].QualifiedName
-                let t = dicChild.[mEdge.Target.Name].QualifiedName
+                let s = dicChild.[mEdge.Source.ValidName].QualifiedName
+                let t = dicChild.[mEdge.Target.ValidName].QualifiedName
                 let src = gr.FindVertex(s)
                 let tgt = gr.FindVertex(t)
                 let edgeType = mEdge.Causal
@@ -66,7 +66,7 @@ module ConvertM =
              ///MSeg   -> CoreModule.Segment
             let convertSeg(mSeg:MSeg, coreFlow:CoreModule.Flow) = 
                     if mSeg.IsAlias
-                    then Alias.CreateInFlow(mSeg.ValidName, mSeg.AliasOrg.Value.FullName.Split('.'), coreFlow) :> Vertex
+                    then Alias.CreateInFlow(mSeg.Name, mSeg.ValidName.Split('.'), coreFlow) :> Vertex
                     else 
                         if mSeg.NodeType.IsReal
                             then let coreSeg = Real.Create(mSeg.ValidName, coreFlow)
@@ -99,17 +99,18 @@ module ConvertM =
                         Edge.Create(graph, src, tgt, mEdge.Causal)
         
 
-            mFlows |> Seq.iter(fun mflow ->
-                let coreFlow = Flow.Create(mflow.Name, coreSys) 
-                mflow.Nodes |> Seq.cast<MSeg> 
-                            |> Seq.distinctBy(fun seg -> seg.FullName) 
-                            |> Seq.filter(fun seg -> seg.NodeType.IsRealorCall)
-                            |> Seq.iter(fun node  -> coreFlow.Graph.AddVertex(convertSeg (node, coreFlow)) |>ignore)
+            mFlows |> Seq.sortBy(fun mflow -> mflow.Page)
+                   |> Seq.iter(fun mflow ->
+                        let coreFlow = Flow.Create(mflow.Name, coreSys) 
+                        mflow.Nodes |> Seq.cast<MSeg> 
+                                    |> Seq.distinctBy(fun seg -> seg.FullName) 
+                                    |> Seq.filter(fun seg -> seg.NodeType.IsRealorCall)
+                                    |> Seq.iter(fun node  -> coreFlow.Graph.AddVertex(convertSeg (node, coreFlow)) |>ignore)
                         
-                mflow.Edges |> Seq.cast<MEdge> 
-                            |> Seq.filter(fun edge -> edge.IsDummy|>not)
-                            |> Seq.filter(fun edge -> edge.Source.NodeType.IsRealorCall && edge.Target.NodeType.IsRealorCall)
-                            |> Seq.iter(fun edge -> coreFlow.Graph.AddEdge(convertRootEdge (edge, coreFlow)) |>ignore)
+                        mflow.Edges |> Seq.cast<MEdge> 
+                                    |> Seq.filter(fun edge -> edge.IsDummy|>not)
+                                    |> Seq.filter(fun edge -> edge.IsInterfaceEdge|> not)   //인페이스와 일반 노드 연결시 에러체크 필요 test ahn
+                                    |> Seq.iter(fun edge -> coreFlow.Graph.AddEdge(convertRootEdge (edge, coreFlow)) |>ignore)
   
                 )
 
@@ -128,6 +129,7 @@ module ConvertM =
         
         //시스템 별 Flow 변환
         pptModel.Systems
+        |> Seq.sortBy(fun sys -> sys.Active|>not)
         |> Seq.iter(fun sys -> 
                 let coreSys = coreModel.FindSystem(sys.Name)
                 if sys.Active then coreSys.Active <- true

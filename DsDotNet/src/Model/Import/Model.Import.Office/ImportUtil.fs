@@ -68,23 +68,34 @@ module ImportUtil =
                                         node.AliasKey <- orgNode.Key)
                 
             let dicFlowNodes = model.Flows 
+                                |> Seq.sortBy(fun flow -> flow.Page)
                                 |> Seq.map(fun flow -> flow.Page, pptNodes |> Seq.filter(fun node -> node.PageNum = flow.Page)
                                 ) |> dict
+            
+
+            let children = parents |> Seq.collect(fun parentSet -> parentSet.Value)
+            let callInFlowSet = dicFlowNodes
+                                |> Seq.map(fun flowNodes -> 
+                                         flowNodes.Value 
+                                         |> Seq.filter(fun node -> node.NodeType.IsCall && children.Contains(node)|>not)
+                                         )
 
             let realSet = dicFlowNodes
-                          |> Seq.map(fun flowNodes -> 
+                                |> Seq.map(fun flowNodes -> 
                                          flowNodes.Value |> Seq.filter(fun node -> node.NodeType.IsReal))
-
-            let callSet = realSet 
-                          |> Seq.collect(fun reals -> reals)
-                          |> Seq.filter(fun real -> parents.ContainsKey(real))
-                          |> Seq.map(fun real -> 
-                                        dicFlowNodes.[real.PageNum] 
-                                        |> Seq.filter(fun node -> node.NodeType.IsCall)
-                                        |> Seq.filter(fun node -> parents.[real].Contains(node) ))
+            
+           
+            let callInRealSet = realSet 
+                                  |> Seq.collect(fun reals -> reals)
+                                  |> Seq.filter(fun real -> parents.ContainsKey(real))
+                                  |> Seq.map(fun real -> 
+                                                dicFlowNodes.[real.PageNum] 
+                                                |> Seq.filter(fun node -> node.NodeType.IsCall)
+                                                |> Seq.filter(fun node -> parents.[real].Contains(node) ))
             
             realSet |> Seq.iter settingAlias
-            callSet |> Seq.iter settingAlias
+            callInFlowSet |> Seq.iter settingAlias
+            callInRealSet |> Seq.iter settingAlias
            
 
         //Interface 만들기

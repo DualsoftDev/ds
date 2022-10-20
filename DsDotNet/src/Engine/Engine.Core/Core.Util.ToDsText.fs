@@ -169,7 +169,7 @@ module internal ToDsTextModule =
         let tab = getTab 1
         let tab2 = getTab 2
         [
-            for s in model.Systems do
+            for s in model.Systems.OrderBy(fun s->s.Active|>not) do//mySystem 부터 출력
                 yield systemToDs s
 
             // prop

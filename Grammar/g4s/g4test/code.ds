@@ -1,0 +1,16 @@
+[sys] My = {
+    [flow] F = {
+        A > B;
+    }
+}
+
+<{
+    int hhhh = 100;
+    map rx10 = delay(100);
+
+    // void f(int x) {
+    //     int x = y(100);
+    // }
+    
+    // int count = -abcd + 30 + sin(50);     //  
+}>

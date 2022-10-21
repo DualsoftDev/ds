@@ -103,6 +103,41 @@ C4 > C5;
 }
 ";
 
+    static string AdoptoedText = @"
+[sys] My = {
+    [flow] F = {
+        Seg1 > Seg2;
+        Seg1 = {
+            F.""+"" > F.""-"";
+        }
+    }
+    [flow] F2 = {
+        F.Seg1 > Seg;
+        Seg = {
+            F.""+"" > F.""-"";
+        }
+    }
+}
+
+[sys] F = {
+    [flow] F = {
+        Vp > Pp > Sp;
+        Vm > Pm > Sm;
+
+        Vp |> Pm |> Sp;
+        Vm |> Pp |> Sm;
+        Vp <||> Vm;
+    }
+    [interfaces] = {
+        ""+"" = { F.Vp ~ F.Sp }
+        ""-"" = { F.Vm ~ F.Sm }
+        Seg1 = { F.Vp ~ F.Sp }
+        // 정보로서의 상호 리셋
+        ""+"" <||> ""-"";
+    }
+}
+";
+
     static string SplittedMRIEdgesText = @"
 [sys] A = {
     [flow] F = {
@@ -630,6 +665,7 @@ C4 > C5;
     {
         //ParseNormal(SplittedMRIEdgesText);
         //ParseNormal(DuplicatedEdgesText);
+        ParseNormal(AdoptoedText);
         ParseNormal(EveryScenarioText);
         ParseNormal(PptGeneratedText);
     }

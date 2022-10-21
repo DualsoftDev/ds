@@ -165,12 +165,42 @@ module internal ToDsTextModule =
             yield rb
         ] |> combineLines
 
+
+    let codeBlockToDs (model:Model) =
+        let funApp (funApp:FunctionApplication) =
+            let pgs (argGroups:ParameterGroup seq) =
+                argGroups.Select(fun ag -> ag.JoinWith ", ")
+                    .JoinWith " ~ "                
+            $"{funApp.FunctionName} = {pgs funApp.ParameterGroups}"
+        let vars = model.Variables
+        let cmds = model.Commands
+        let obss = model.Observes
+        [
+            if vars.Any() then
+                yield "[variables] = {"
+                for var in vars do
+                    yield $"    {var.Name} = @({var.Type}, {var.InitValue})"
+                yield "}"
+            if cmds.Any() then
+                yield "[commands] = {"
+                for cmd in cmds do
+                    yield $"    {cmd.Name} = @({funApp cmd.FunctionApplication})"
+                yield "}"
+            if obss.Any() then
+                yield "[observes] = {"
+                for obs in obss do
+                    yield $"    {obs.Name} = @({funApp obs.FunctionApplication})"
+                yield "}"
+        ] |> combineLines
+
     let modelToDs (model:Model) =
         let tab = getTab 1
         let tab2 = getTab 2
         [
-            for s in model.Systems.OrderBy(fun s->s.Active|>not) do//mySystem 부터 출력
+            for s in model.Systems.OrderBy(fun s -> not s.Active) do//mySystem 부터 출력
                 yield systemToDs s
+
+            yield codeBlockToDs model
 
             // prop
             //      safety

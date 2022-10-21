@@ -3,7 +3,7 @@ namespace Engine.Parser;
 
 public class Program
 {
-    static string EveryScenarioText = @"
+    public static string EveryScenarioText = @"
 [sys ip = 192.168.0.1] My = {
     [flow] MyFlow = {
         Seg1 > Seg2;

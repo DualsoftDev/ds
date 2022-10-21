@@ -3,6 +3,7 @@ namespace Engine.Core
 
 open System.Collections.Generic
 open System.Runtime.CompilerServices
+open System.Runtime.InteropServices
 open System.Diagnostics
 open Engine.Common.FS
 
@@ -74,6 +75,27 @@ module CoreModule =
             flow.Graph.AddVertex(segment) |> verifyM $"Duplicated segment name [{name}]"
             segment
 
+    and Alias private (mnemonic:string, parent:ParentWrapper, aliasKey:string[], isOtherFlowCall:bool) =
+        inherit Vertex(mnemonic, parent)
+        member _.IsOtherFlowCall = isOtherFlowCall
+
+        static member CreateInFlow(name, aliasKey, flow:Flow, [<Optional; DefaultParameterValue(false)>] isOtherFlowCall) =
+            let alias = Alias(name, Flow flow, aliasKey, isOtherFlowCall)
+            flow.Graph.AddVertex(alias) |> verifyM $"Duplicated segment name [{name}]"
+            alias
+        static member CreateInReal(mnemonic, apiItem:ApiItem, real:Real) =
+            let child = Alias(mnemonic, Real real, apiItem.NameComponents, false)
+            real.Graph.AddVertex(child) |> verifyM $"Duplicated child name [{mnemonic}]"
+            child
+    
+        member _.AliasKey = aliasKey
+        override x.GetRelativeName(referencePath:NameComponents) =
+            if isOtherFlowCall then
+                aliasKey[1..].Combine()
+            else
+                base.GetRelativeName(referencePath)
+        
+
     /// 외부 시스템 호출 객체
     and Call private (apiItem:ApiItem, parent:ParentWrapper) =
         inherit Vertex(apiItem.QualifiedName, parent)
@@ -90,20 +112,6 @@ module CoreModule =
             call
 
       
-    and Alias private (mnemonic:string, parent:ParentWrapper, aliasKey:string[]) =
-        inherit Vertex(mnemonic, parent)
-
-        static member CreateInFlow(name, aliasKey, flow:Flow) =
-            let alias = Alias(name, Flow flow, aliasKey)
-            flow.Graph.AddVertex(alias) |> verifyM $"Duplicated segment name [{name}]"
-            alias
-        static member CreateInReal(mnemonic, apiItem:ApiItem, real:Real) =
-            let child = Alias(mnemonic, Real real, apiItem.NameComponents)
-            real.Graph.AddVertex(child) |> verifyM $"Duplicated child name [{mnemonic}]"
-            child
-    
-        member _.AliasKey = aliasKey  
-
     and ApiItem private (name:string, system:DsSystem) =
         inherit FqdnObject(name, system)
         interface INamedVertex

@@ -78,6 +78,11 @@ module CoreModule =
             flow.Graph.AddVertex(segment) |> verifyM $"Duplicated segment name [{name}]"
             segment
 
+    and AliasTargetType =
+        | NullTarget
+        | RealTarget of Real
+        | CallTarget of ApiItem
+
     and Alias private (mnemonic:string, parent:ParentWrapper, aliasKey:string[], isOtherFlowCall:bool) =
         inherit Vertex(mnemonic, parent)
         member _.IsOtherFlowCall = isOtherFlowCall
@@ -92,6 +97,9 @@ module CoreModule =
             child
     
         member _.AliasKey = aliasKey
+        member val Target = NullTarget with get, set
+        member x.SetTarget(apiItem) = x.Target <- CallTarget apiItem
+        member x.SetTarget(real) = x.Target <- RealTarget real
         override x.GetRelativeName(referencePath:NameComponents) =
             if isOtherFlowCall then
                 aliasKey[1..].Combine()

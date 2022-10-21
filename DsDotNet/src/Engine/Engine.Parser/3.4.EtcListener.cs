@@ -145,5 +145,15 @@ class EtcListener : ListenerBase
             var (s, e) = (sre.startTag()?.GetText(), sre.endTag()?.GetText());
             apiItem.Addresses = new Addresses(s, e);
         }
+
+        foreach (var alias in _model.Spit().Where(o => o.Obj is Alias))
+        {
+            var al = alias.Obj as Alias;
+            var targetSys = _model.FindSystem(al.AliasKey[0]);
+            if (targetSys != al.Parent.System)
+                al.SetTarget(_model.FindApiItem(al.AliasKey));
+            else
+                al.SetTarget(_model.FindGraphVertex(al.AliasKey) as Real);
+        }
     }
 }

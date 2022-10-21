@@ -127,6 +127,10 @@ class ElementListener : ListenerBase
                         ;
                 switch (aliasKey.Length)
                 {
+                    case 3:     // my flow real 에 대한 alias
+                        Assert(aliasKey[0] == _system.Name && aliasKey[1] == _rootFlow.Name);
+                        Alias.CreateInFlow(ns.Combine(), aliasKey, _rootFlow);
+                        return;
                     case 2:
                         var apiItem =
                             _modelSpitObjects

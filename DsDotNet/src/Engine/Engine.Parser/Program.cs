@@ -697,7 +697,7 @@ C4 > C5;
     {
         //ParseNormal(SplittedMRIEdgesText);
         //ParseNormal(DuplicatedEdgesText);
-        ParseNormal(AdoptoedValidText);
+        //ParseNormal(AdoptoedValidText);
         //ParseNormal(AdoptoedAmbiguousText);
         ParseNormal(EveryScenarioText);
         ParseNormal(PptGeneratedText);

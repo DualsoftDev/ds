@@ -4,7 +4,7 @@ open System.Diagnostics
 open System.Collections.Generic
 open Engine.Core
 open Newtonsoft.Json
-open Model.Import.Office
+open Engine.Parser
 
 [<AutoOpen>]
 module HmiGenModule =
@@ -29,9 +29,12 @@ module HmiGenModule =
 
     [<EntryPoint>]        
     let main argv = 
-        let pptModel  = ImportM.FromPPTX(@"D:\ds\test\ds.pptx")
-        let coreModel = ConvertM.ToDs(pptModel);
-        let json = GenHmiCpuText(coreModel)
+    
+        let helper = ModelParser.ParseFromString2(Program.EveryScenarioText, ParserOptions.Create4Simulation());
+        let model = helper.Model;
+        let xxx = model.ToDsText();
+
+        let json = GenHmiCpuText(model)
 
         0
 

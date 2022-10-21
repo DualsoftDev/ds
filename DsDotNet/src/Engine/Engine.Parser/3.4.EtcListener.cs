@@ -1,5 +1,8 @@
 namespace Engine.Parser;
 
+using System.Runtime.Remoting.Contexts;
+
+using static Engine.Core.CodeElements;
 
 /// <summary>
 /// 모든 vertex 가 생성 된 이후, edge 연결 작업 수행
@@ -99,6 +102,48 @@ class EtcListener : ListenerBase
             }
         }
     }
+
+
+    FunctionApplication CreateFunctionApplication(FunApplicationContext context)
+    {
+        var funName = findFirstChild<FunNameContext>(context).GetText();
+        var argGroups =
+            enumerateChildren<ArgumentGroupContext>(context)
+            .Select(argGrpCtx =>
+                enumerateChildren<ArgumentContext>(argGrpCtx)
+                .Select(arg => arg.GetText())
+                .ToArray()
+                )
+            .ToArray()
+            ;
+        var funAppl = new FunctionApplication(funName, argGroups);
+        return funAppl;
+    }
+
+    override public void EnterVariableDef(VariableDefContext context)
+    {
+        var varName = findFirstChild<VarNameContext>(context).GetText();
+        var varType = findFirstChild<VarTypeContext>(context).GetText();
+        var init = findFirstChild<ArgumentContext>(context).GetText();
+        _model.Variables.Add(new Variable(varName, varType, init));
+    }
+    override public void EnterCommandDef(CommandDefContext context)
+    {
+        var cmdName = findFirstChild<CmdNameContext>(context).GetText();
+        var funApplCtx = findFirstChild<FunApplicationContext>(context);
+        var funAppl = CreateFunctionApplication(funApplCtx);
+        var command = new Command(cmdName, funAppl);
+        _model.Commands.Add(command);
+    }
+    override public void EnterObserveDef(ObserveDefContext context)
+    {
+        var obsName = findFirstChild<ObserveNameContext>(context).GetText();
+        var funApplCtx = findFirstChild<FunApplicationContext>(context);
+        var funAppl = CreateFunctionApplication(funApplCtx);
+        var observes = new Observe(obsName, funAppl);
+        _model.Observes.Add(observes);
+    }
+
 
     override public void ExitModel(ModelContext ctx)
     {

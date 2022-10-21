@@ -12,6 +12,10 @@ module CoreModule =
     ///Top level structure
     type Model() =
         member val Systems = createNamedHashSet<DsSystem>()
+        member val Variables = ResizeArray<Variable>()
+        member val Commands = ResizeArray<Command>()
+        member val Observes = ResizeArray<Observe>()
+
         interface IQualifiedNamed with
             member val Name = null 
             member val NameComponents = Array.empty<string>

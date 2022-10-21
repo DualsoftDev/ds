@@ -20,10 +20,10 @@ parser grammar dsParser;
 options { tokenVocab=dsLexer; } // use tokens from dsLexer.g4
 
 
-model: (system|properties|comment)* EOF;        // importStatement|cpus
+model: (system|properties|variables|commands|observes|comment)* EOF;        // importStatement|cpus
 comment: BLOCK_COMMENT | LINE_COMMENT;
 
-system: '[' SYS ((IP|HOST) '=' host)? ']' systemName '=' (sysBlock|sysCopySpec);    // [sys] Seg = {..}
+system: '[' 'sys' (('ip'|'host') '=' host)? ']' systemName '=' (sysBlock|sysCopySpec);    // [sys] Seg = {..}
     sysBlock
         : LBRACE (flow | interfaces | buttons)* RBRACE       // identifier1Listing|parenting|causal|call
         ;
@@ -205,3 +205,27 @@ identifier123CNF: identifier123 (COMMA identifier123)*;
 identifier123DNF: identifier123CNF (OR2 identifier123CNF)*;
 
 identifier1234: (identifier1 | identifier2 | identifier3 | identifier4);
+
+
+variables: '[' 'variables' ']' '=' '{' variableDef* '}';
+    variableDef: varName '=' '(' varType ',' argumentGroups ')';     // R100   = (Word, 0)
+    varName: IDENTIFIER1;
+    argumentGroups: argumentGroup ('~' argumentGroup)*;
+    argumentGroup: argument (',' argument)*;
+    argument: int | float | varIdentifier;
+    varIdentifier: IDENTIFIER1;
+    int: INTEGER;
+    float:FLOAT;
+    varType: 'int' | 'word' | 'float' | 'dword';
+
+
+funApplication: funName '=' argumentGroups;
+
+commands: '[' 'commands' ']' '=' '{' commandDef* '}';
+    commandDef: cmdName '=' '(' '@' funApplication ')';     // CMD1 = (@Delay= 0)
+    cmdName: IDENTIFIER1;
+    funName:IDENTIFIER1;
+observes: '[' 'observes' ']' '=' '{' observeDef* '}';
+    observeDef: observeName '=' '(' '@' funApplication ')';     // CMD1 = (@Delay= 0)
+    observeName:IDENTIFIER1;
+    //funName:IDENTIFIER1;

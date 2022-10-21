@@ -1,3 +1,5 @@
+using System.Xml.Linq;
+
 using static Engine.Core.GraphModule;
 using static Engine.Core.TextUtil;
 
@@ -66,29 +68,47 @@ class ElementListener : ListenerBase
             return;
 
         var pathWithoutParenting = new[] { _system.Name, _rootFlow.Name }.Concat(ns).ToArray();
-        var pathAdapted = ns.Length == 2 ? new[] { _system.Name }.Concat(ns).ToArray() : new string[] {} ;
 
+        // narrow match
         var matches =
             _modelSpits
             .Where(spitResult =>
                 Enumerable.SequenceEqual(spitResult.NameComponents, path)
-                || Enumerable.SequenceEqual(spitResult.NameComponents, pathWithoutParenting)
-                || Enumerable.SequenceEqual(spitResult.NameComponents, pathAdapted)
-                || Enumerable.SequenceEqual(spitResult.NameComponents, ns)
+                || Enumerable.SequenceEqual(spitResult.NameComponents, pathWithoutParenting))
+            .Select(spitResult => spitResult.Obj)
+            .ToArray()
+            ;
+
+        var pathAdapted = ns.Length == 2 ? new[] { _system.Name }.Concat(ns).ToArray() : new string[] { };
+
+        // 나의 시스템의 다른 flow 에 존재하는 segment 호출
+        var extendedMatches =
+            _modelSpits
+            .Where(spitResult =>
+                (pathAdapted.Any() && Enumerable.SequenceEqual(spitResult.NameComponents, pathAdapted))
+                //|| Enumerable.SequenceEqual(spitResult.NameComponents, ns)
                 )
             .Select(spitResult => spitResult.Obj)
             .ToArray()
             ;
 
-        if (matches.Length > 1)
-        {
-            var names = string.Join(", ", matches.Cast<FqdnObject>().Select(m => m.QualifiedName));
-            throw new ParserException($"Ambiguous entry [{names}]", ctx);
-        }
+        // 다른 시스템의 API 호출
+        var apiCall =
+            _modelSpitObjects
+                .OfType<ApiItem>()
+                .Where(api => api.NameComponents.IsStringArrayEqaul(ns))
+                .FirstOrDefault();
+
         Assert(matches.Length.IsOneOf(0, 1));
 
-        if (matches.OfType<Real>().Any(r => r.NameComponents.IsStringArrayEqaul(pathAdapted)))
+        // API call 과 나의 시스템의 다른 flow 에 존재하는 segment 호출이 헷갈리지 않도록 
+        if (extendedMatches.OfType<Real>().Any(r => r.NameComponents.IsStringArrayEqaul(pathAdapted)))
+        {
+            if (apiCall != null)
+                throw new ParserException($"Ambiguous entry [{apiCall.QualifiedName}] and [{pathAdapted.Combine()}]", ctx);
             Alias.CreateInFlow(ns.Combine(), pathAdapted, _rootFlow, true);
+            return;
+        }
 
         if (matches.OfType<Real>().Any())
             return;
@@ -105,9 +125,7 @@ class ElementListener : ListenerBase
                         .Select(alias => alias.Key)
                         .FirstOrDefault()
                         ;
-
-
-                switch(aliasKey.Length)
+                switch (aliasKey.Length)
                 {
                     case 2:
                         var apiItem =
@@ -128,11 +146,6 @@ class ElementListener : ListenerBase
                 }
             }
 
-            var apiCall =
-                _modelSpitObjects
-                    .OfType<ApiItem>()
-                    .Where(api => api.NameComponents.IsStringArrayEqaul(ns))
-                    .FirstOrDefault();
 
             if (apiCall != null)
             {

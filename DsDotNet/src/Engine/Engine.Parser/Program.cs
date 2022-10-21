@@ -103,7 +103,40 @@ C4 > C5;
 }
 ";
 
-    static string AdoptoedText = @"
+    static string AdoptoedValidText = @"
+[sys] My = {
+    [flow] F = {
+        Seg1 > Seg2;
+        Seg1 = {
+            A.""+"" > A.""-"";
+        }
+    }
+    [flow] F2 = {
+        F.Seg1 > Seg;
+        Seg = {
+            A.""+"" > A.""-"";
+        }
+    }
+}
+
+[sys] A = {
+    [flow] F = {
+        Vp > Pp > Sp;
+        Vm > Pm > Sm;
+
+        Vp |> Pm |> Sp;
+        Vm |> Pp |> Sm;
+        Vp <||> Vm;
+    }
+    [interfaces] = {
+        ""+"" = { F.Vp ~ F.Sp }
+        ""-"" = { F.Vm ~ F.Sm }
+        // 정보로서의 상호 리셋
+        ""+"" <||> ""-"";
+    }
+}
+";
+    static string AdoptoedAmbiguousText = @"
 [sys] My = {
     [flow] F = {
         Seg1 > Seg2;
@@ -137,7 +170,6 @@ C4 > C5;
     }
 }
 ";
-
     static string SplittedMRIEdgesText = @"
 [sys] A = {
     [flow] F = {
@@ -665,7 +697,8 @@ C4 > C5;
     {
         //ParseNormal(SplittedMRIEdgesText);
         //ParseNormal(DuplicatedEdgesText);
-        ParseNormal(AdoptoedText);
+        ParseNormal(AdoptoedValidText);
+        //ParseNormal(AdoptoedAmbiguousText);
         ParseNormal(EveryScenarioText);
         ParseNormal(PptGeneratedText);
     }

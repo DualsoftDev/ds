@@ -15,20 +15,16 @@ module SpitModuleHelper =
         member val NameComponents = nameComponents
 
     type SpitResults = SpitResult[]
-    let rec spitCall (child:Vertex) : SpitResults =
-        [|
-            yield SpitResult(child, child.NameComponents)
-        |]
+    let rec spitCall (call:Call) : SpitResults =
+        [| yield SpitResult(call, call.NameComponents) |]
     and spitSegment (segment:Real) : SpitResults =
         [|
             yield SpitResult(segment, segment.NameComponents)
             for ch in segment.Graph.Vertices do
                 yield! spit(ch)
         |]
-    and spitAlias (segmentAlias:Alias) : SpitResults =
-        [|
-            yield SpitResult(segmentAlias, segmentAlias.NameComponents)
-        |]
+    and spitAlias (alias:Alias) : SpitResults =
+        [| yield SpitResult(alias, alias.NameComponents) |]
     and spitFlow (flow:Flow) : SpitResults =
         [|
             let fns = flow.NameComponents

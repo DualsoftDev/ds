@@ -31,8 +31,8 @@ class EdgeListener : ListenerBase
                 ;
             var token =
                 matches
-                .Where(spit =>spit.Obj is Vertex)
-                .Select(spit => spit.Obj)
+                .Where(spit =>spit.GetCore() is Vertex)
+                .Select(spit => spit.GetCore())
                 .FirstOrDefault();
                 ;
             Assert(token != null);

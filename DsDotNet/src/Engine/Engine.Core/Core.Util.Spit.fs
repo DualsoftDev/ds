@@ -5,30 +5,42 @@ open System.Linq
 open System.Diagnostics
 
 module SpitModuleHelper =
-    type SpitObjAlias(key:NameComponents, mnemonic:NameComponents) =
-        member x.Key = key
-        member x.Mnemonic = mnemonic
+    type SpitOnlyAlias = { AliasKey:NameComponents; Mnemonic:NameComponents }
 
-    [<DebuggerDisplay("Obj={Obj}, Names={NameComponents}")>]
-    type SpitResult(obj:obj, nameComponents:NameComponents) =
-        member val Obj = obj
-        member val NameComponents = nameComponents
+    type SpitCoreType =
+        | SpitModel    of Model
+        | SpitDsSystem of DsSystem
+        | SpitFlow     of Flow
+        | SpitReal     of Real
+        | SpitCall     of Call
+        | SpitAlias    of Alias
+        | SpitOnlyAlias of SpitOnlyAlias
+        | SpitApiItem   of ApiItem
+        | SpitVariable  of Variable
+        | SpitCommand   of Command
+        | SpitObserve   of Observe
+
+    [<DebuggerDisplay("Obj={SpitObj}, Names={NameComponents}")>]
+    type SpitResult =
+        { SpitObj:SpitCoreType; NameComponents:NameComponents }
+        static member Create(core, nameComponents) = {SpitObj = core; NameComponents = nameComponents}
 
     type SpitResults = SpitResult[]
+
     let rec spitCall (call:Call) : SpitResults =
-        [| yield SpitResult(call, call.NameComponents) |]
+        [| yield SpitResult.Create(SpitCall call, call.NameComponents) |]
     and spitSegment (segment:Real) : SpitResults =
         [|
-            yield SpitResult(segment, segment.NameComponents)
+            yield SpitResult.Create(SpitReal segment, segment.NameComponents)
             for ch in segment.Graph.Vertices do
                 yield! spit(ch)
         |]
     and spitAlias (alias:Alias) : SpitResults =
-        [| yield SpitResult(alias, alias.NameComponents) |]
+        [| yield SpitResult.Create(SpitAlias alias, alias.NameComponents) |]
     and spitFlow (flow:Flow) : SpitResults =
         [|
             let fns = flow.NameComponents
-            yield SpitResult(flow, fns)
+            yield SpitResult.Create(SpitFlow flow, fns)
             for flowVertex in flow.Graph.Vertices do
                 yield! spit(flowVertex)
 
@@ -43,23 +55,30 @@ module SpitModuleHelper =
                     | _ -> failwith "ERROR"
 
                 let mnemonicFqdn = [| yield! fns; m |]
-                let alias = SpitObjAlias(aliasKey2, mnemonicFqdn)
-                yield SpitResult(alias, aliasKey2)       // key -> alias : [ My.Flow.Ap1, A."+";  My.Flow.Main2, My.Flow.Main; ...]
-                yield SpitResult(alias, mnemonicFqdn)    // mne -> alias
+                let alias = { AliasKey = aliasKey2; Mnemonic = mnemonicFqdn}
+                yield SpitResult.Create(SpitOnlyAlias alias, aliasKey2)       // key -> alias : [ My.Flow.Ap1, A."+";  My.Flow.Main2, My.Flow.Main; ...]
+                yield SpitResult.Create(SpitOnlyAlias alias, mnemonicFqdn)    // mne -> alias
         |]
     and spitSystem (system:DsSystem) : SpitResults =
         [|
-            yield SpitResult(system, system.NameComponents)
+            yield SpitResult.Create(SpitDsSystem system, system.NameComponents)
             for flow in system.Flows do
                 yield! spit(flow)
                 for itf in system.ApiItems do
-                    yield SpitResult(itf, itf.NameComponents)
+                    yield SpitResult.Create(SpitApiItem itf, itf.NameComponents)
         |]
     and spitModel (model:Model) : SpitResults =
         [|
-            yield SpitResult(model, [||])
+            yield SpitResult.Create(SpitModel model, [||])
             for sys in model.Systems do
                 yield! spit(sys)
+
+            for x in model.Variables do
+                yield SpitResult.Create(SpitVariable x, [| x.Name |] )
+            for x in model.Commands do
+                yield SpitResult.Create(SpitCommand x, [| x.Name |] )
+            for x in model.Observes do
+                yield SpitResult.Create(SpitObserve x, [| x.Name |] )
         |]
     and spit(obj:obj) : SpitResults =
         match obj with
@@ -82,4 +101,21 @@ type SpitModule =
     [<Extension>] static member Spit (segment:Real)    = spitSegment segment
     [<Extension>] static member Spit (call:Call)       = spitCall call
     [<Extension>] static member Spit (alias:Alias)     = spitAlias alias
+    
+    [<Extension>]
+    static member GetCore (spit:SpitResult):obj = 
+        match spit.SpitObj with
+        | SpitModel     c -> c
+        | SpitDsSystem  c -> c
+        | SpitFlow      c -> c
+        | SpitReal      c -> c
+        | SpitCall      c -> c
+        | SpitAlias     c -> c
+        | SpitOnlyAlias c -> c
+        | SpitApiItem   c -> c
+        | SpitVariable  c -> c
+        | SpitCommand   c -> c
+        | SpitObserve   c -> c
+        
+
 

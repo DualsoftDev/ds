@@ -5,6 +5,7 @@ open System.Linq
 open Engine.Common.FS
 open System.Collections.Generic
 open GraphModule
+open SpitModuleHelper
 
 [<AutoOpen>]
 module internal ToDsTextModule =
@@ -207,7 +208,7 @@ module internal ToDsTextModule =
             //      addresses
             //      layouts
             let spits = model.Spit()
-            let segs = spits.Select(fun spit -> spit.Obj).OfType<Real>().ToArray()
+            let segs = spits.Select(fun spit -> spit.GetCore()).OfType<Real>().ToArray()
 
             let withSafeties = segs.Where(fun seg -> seg.SafetyConditions.Any())
             let safeties =
@@ -220,7 +221,7 @@ module internal ToDsTextModule =
                         yield $"{tab}{rb}"
                 ] |> combineLines
 
-            let apiItems = spits.Select(fun spit -> spit.Obj).OfType<ApiItem>().ToArray()
+            let apiItems = spits.Select(fun spit -> spit.GetCore()).OfType<ApiItem>().ToArray()
             let withAddresses = apiItems.Where(fun apiItem -> apiItem.Addresses <> null)
             let addresses =
                 [

@@ -147,6 +147,7 @@ class EtcListener : ListenerBase
 
     override public void ExitModel(ModelContext ctx)
     {
+        UpdateModelSpits();
         //[layouts] = {
         //       L.T.Cp = (30, 50)            // xy
         //       L.T.Cm = (60, 50, 20, 20)    // xywh
@@ -182,18 +183,18 @@ class EtcListener : ListenerBase
             var segNs = collectNameComponents(addrDef.segmentPath());
             var api =
                 _model.Spit()
-                .Where(o => o.Obj is ApiItem && o.NameComponents.IsStringArrayEqaul(segNs))
+                .Where(o => o.GetCore() is ApiItem && o.NameComponents.IsStringArrayEqaul(segNs))
                 .FirstOrDefault();
 
-            var apiItem = api.Obj as ApiItem;
+            var apiItem = api.GetCore() as ApiItem;
             var sre = addrDef.address();
             var (s, e) = (sre.startTag()?.GetText(), sre.endTag()?.GetText());
             apiItem.Addresses = new Addresses(s, e);
         }
 
-        foreach (var alias in _model.Spit().Where(o => o.Obj is Alias))
+        foreach (var alias in _model.Spit().Where(o => o.GetCore() is Alias))
         {
-            var al = alias.Obj as Alias;
+            var al = alias.GetCore() as Alias;
             var targetSys = _model.FindSystem(al.AliasKey[0]);
             if (targetSys != al.Parent.System)
                 al.SetTarget(_model.FindApiItem(al.AliasKey));

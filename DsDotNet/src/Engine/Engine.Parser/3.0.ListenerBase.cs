@@ -36,7 +36,7 @@ class ListenerBase : dsParserBaseListener
     protected void UpdateModelSpits()
     {
         _modelSpits = _model.Spit().ToArray();
-        _modelSpitObjects = _modelSpits.Select(spit => spit.Obj).ToArray();
+        _modelSpitObjects = _modelSpits.Select(spit => spit.GetCore()).ToArray();
     }
 
 

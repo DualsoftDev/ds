@@ -64,7 +64,7 @@ class ElementListener : ListenerBase
         var path = AppendPathElement(ns);
 
         var existing = _modelSpits.Where(spit => spit.NameComponents.IsStringArrayEqaul(path)).ToArray();
-        if (existing.Where(spit => spit.Obj is Vertex).Any())
+        if (existing.Where(spit => spit.GetCore() is Vertex).Any())
             return;
 
         var pathWithoutParenting = new[] { _system.Name, _rootFlow.Name }.Concat(ns).ToArray();
@@ -75,7 +75,7 @@ class ElementListener : ListenerBase
             .Where(spitResult =>
                 Enumerable.SequenceEqual(spitResult.NameComponents, path)
                 || Enumerable.SequenceEqual(spitResult.NameComponents, pathWithoutParenting))
-            .Select(spitResult => spitResult.Obj)
+            .Select(spitResult => spitResult.GetCore())
             .ToArray()
             ;
 
@@ -88,7 +88,7 @@ class ElementListener : ListenerBase
                 (pathAdapted.Any() && Enumerable.SequenceEqual(spitResult.NameComponents, pathAdapted))
                 //|| Enumerable.SequenceEqual(spitResult.NameComponents, ns)
                 )
-            .Select(spitResult => spitResult.Obj)
+            .Select(spitResult => spitResult.GetCore())
             .ToArray()
             ;
 
@@ -115,14 +115,14 @@ class ElementListener : ListenerBase
 
         try
         {
-            var alias = matches.OfType<SpitObjAlias>().FirstOrDefault();
+            var alias = matches.OfType<SpitOnlyAlias>().FirstOrDefault();
             if (alias != null)
             {
                 var aliasKey =
                     matches
-                        .OfType<SpitObjAlias>()
+                        .OfType<SpitOnlyAlias>()
                         .Where(alias => alias.Mnemonic.IsStringArrayEqaul(pathWithoutParenting))
-                        .Select(alias => alias.Key)
+                        .Select(alias => alias.AliasKey)
                         .FirstOrDefault()
                         ;
                 switch (aliasKey.Length)

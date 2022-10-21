@@ -24,12 +24,12 @@ internal class SampleRunner
         var spits = model.Spit();
         foreach (var spit in spits)
         {
-            var tName = spit.Obj.GetType().Name;
+            var tName = spit.GetCore().GetType().Name;
             var name = spit.NameComponents.Combine();
             Trace.WriteLine($"{name}:{tName}");
         }
 
-        var spitObjs = spits.Select(spit => spit.Obj);
+        var spitObjs = spits.Select(spit => spit.GetCore());
         var flowGraphs = spitObjs.OfType<Flow>().Select(f => f.Graph);
         var segGraphs = spitObjs.OfType<Real>().Select(s => s.Graph);
         foreach (var gr in flowGraphs)

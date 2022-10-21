@@ -19,12 +19,15 @@ class EdgeListener : ListenerBase
 
         object findToken(CausalTokenContext ctx)
         {
-            var path = AppendPathElement(collectNameComponents(ctx));
+            var ns = collectNameComponents(ctx);
+            var path = AppendPathElement(ns);
             if (path.Length == 5)
-                path = AppendPathElement(collectNameComponents(ctx).Combine());
+                path = AppendPathElement(ns.Combine());
             var matches =
                 _modelSpits
-                .Where(spit => spit.NameComponents.IsStringArrayEqaul(path))
+                .Where(spit => spit.NameComponents.IsStringArrayEqaul(path)
+                                || spit.NameComponents.IsStringArrayEqaul(AppendPathElement(new[] {ns.Combine()}))
+                )
                 ;
             var token =
                 matches

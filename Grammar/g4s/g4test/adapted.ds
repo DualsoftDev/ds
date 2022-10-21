@@ -1,0 +1,31 @@
+[sys] My = {
+    [flow] F = {
+        Seg1 > Seg2;
+        Seg1 = {
+            A."+" > A."-";
+        }
+    }
+    [flow] F2 = {
+        F.Seg1 > Seg;
+        Seg = {
+            A."+" > A."-";
+        }
+    }
+}
+
+[sys] A = {
+    [flow] F = {
+        Vp > Pp > Sp;
+        Vm > Pm > Sm;
+
+        Vp |> Pm |> Sp;
+        Vm |> Pp |> Sm;
+        Vp <||> Vm;
+    }
+    [interfaces] = {
+        "+" = { F.Vp ~ F.Sp }
+        "-" = { F.Vm ~ F.Sm }
+        // 정보로서의 상호 리셋
+        "+" <||> "-";
+    }
+}

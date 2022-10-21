@@ -9,7 +9,6 @@ open System.Globalization
 open System.Collections.Generic
 open System.Runtime.InteropServices
 open Engine.Common.FS
-open System.Text.RegularExpressions
 
 
 [<AutoOpen>]
@@ -107,7 +106,8 @@ module TextUtil =
         member x.Name with get() = (x :> INamed).Name
         member x.NameComponents = (x :> IQualifiedNamed).NameComponents
         member x.QualifiedName = (x :> IQualifiedNamed).QualifiedName
-        member x.GetRelativeName(referencePath:NameComponents) =
+        abstract member GetRelativeName: NameComponents -> string
+        default x.GetRelativeName(referencePath:NameComponents) =
             getRelativeName referencePath x.NameComponents
 
 

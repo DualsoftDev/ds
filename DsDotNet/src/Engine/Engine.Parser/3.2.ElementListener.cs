@@ -1,4 +1,5 @@
 using static Engine.Core.GraphModule;
+using static Engine.Core.TextUtil;
 
 namespace Engine.Parser;
 
@@ -65,15 +66,30 @@ class ElementListener : ListenerBase
             return;
 
         var pathWithoutParenting = new[] { _system.Name, _rootFlow.Name }.Concat(ns).ToArray();
+        var pathAdapted = ns.Length == 2 ? new[] { _system.Name }.Concat(ns).ToArray() : new string[] {} ;
 
         var matches =
             _modelSpits
             .Where(spitResult =>
                 Enumerable.SequenceEqual(spitResult.NameComponents, path)
-                || Enumerable.SequenceEqual(spitResult.NameComponents, pathWithoutParenting))
+                || Enumerable.SequenceEqual(spitResult.NameComponents, pathWithoutParenting)
+                || Enumerable.SequenceEqual(spitResult.NameComponents, pathAdapted)
+                || Enumerable.SequenceEqual(spitResult.NameComponents, ns)
+                )
             .Select(spitResult => spitResult.Obj)
             .ToArray()
             ;
+
+        if (matches.Length > 1)
+        {
+            var names = string.Join(", ", matches.Cast<FqdnObject>().Select(m => m.QualifiedName));
+            throw new ParserException($"Ambiguous entry [{names}]", ctx);
+        }
+        Assert(matches.Length.IsOneOf(0, 1));
+
+        if (matches.OfType<Real>().Any(r => r.NameComponents.IsStringArrayEqaul(pathAdapted)))
+            Alias.CreateInFlow(ns.Combine(), pathAdapted, _rootFlow, true);
+
         if (matches.OfType<Real>().Any())
             return;
 

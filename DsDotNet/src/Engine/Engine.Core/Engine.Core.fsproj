@@ -15,6 +15,7 @@
 		<Compile Include="Prolog.fs" />
 		<Compile Include="Named.fs" />
 		<Compile Include="Graph.fs" />
+		<Compile Include="CodeElements.fs" />
 		<Compile Include="Core.fs" />
 		<Compile Include="Core.Util.Spit.fs" />
 		<Compile Include="Core.Util.Edge.fs" />

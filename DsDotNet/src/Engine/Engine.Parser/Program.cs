@@ -94,6 +94,35 @@ C4 > C5;
     }
 }
 ";
+
+    static string CodeElementsText = @"
+[sys] My = {
+    [flow] F = {
+        Seg1;
+    }
+}
+
+[variables] = { //이름 = (타입,초기값)
+    R100   = (word, 0)
+    R101   = (word, 0)
+    R102   = (word, 5)
+    R103   = (dword, 0)
+    PI     = (float, 3.1415)
+}
+
+[commands] = {
+    CMD1   = (@Delay= 0)
+    CMD2   = (@Delay= 30)
+    CMD3   = (@add= 30, 50 ~ R103)  //30+R101 = R103
+}
+
+[observes] = {
+    CON1   = (@GT = R102, 5)
+    CON2   = (@Delay = 30)
+    CON3   = (@Not = Tag1)
+}
+
+";
     static string DuplicatedEdgesText = @"
 [sys] B = {
     [flow] F = {
@@ -699,6 +728,7 @@ C4 > C5;
         //ParseNormal(DuplicatedEdgesText);
         //ParseNormal(AdoptoedValidText);
         //ParseNormal(AdoptoedAmbiguousText);
+        ParseNormal(CodeElementsText);
         ParseNormal(EveryScenarioText);
         ParseNormal(PptGeneratedText);
     }

@@ -20,6 +20,14 @@ START_IN: 'start_in';
 START: 'start';
 RESET_IN: 'reset_in';
 RESET: 'reset';
+VARIABLES: 'variables';
+COMMANDS: 'commands';
+OBSERVES: 'observes';
+WORDTYPE: 'word';
+DWORDTYPE: 'dword';
+INTTYPE: 'int';
+FLOATTYPE: 'float';
+
 
 WS: [ \t\r\n]+ -> skip;
 BLOCK_COMMENT : '/*' (BLOCK_COMMENT|.)*? '*/' -> channel(HIDDEN) ;
@@ -46,7 +54,6 @@ IDENTIFIER1: Compo;
 IDENTIFIER2: Compo '.' Compo;
 IDENTIFIER3: Compo '.' Compo '.' Compo;
 IDENTIFIER4: Compo '.' Compo '.' Compo '.' Compo;
-
 
 IPV4: [1-9][0-9]*'.'('0'|[1-9][0-9]*)'.'('0'|[1-9][0-9]*)'.'('0'|[1-9][0-9]*);
 // IPV4: (INTEGER)(DOT) INTEGER DOT INTEGER DOT INTEGER;
@@ -92,7 +99,7 @@ EQ2: '==';
 NEQ: '!=';
 //NEWLINE: '\r'? '\n';
 
-INTEGER: [1-9][0-9]*;
+INTEGER: '0'|[1-9][0-9]*;
 FLOAT: [1-9][0-9]*('.'[0-9]+)?;
 
 

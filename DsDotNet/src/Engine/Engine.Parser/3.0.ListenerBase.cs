@@ -16,7 +16,7 @@ class ListenerBase : dsParserBaseListener
     public ParserHelper ParserHelper;
     protected Model _model => ParserHelper.Model;
     protected DsSystem _system { get => ParserHelper._system; set => ParserHelper._system = value; }
-    protected Flow _rootFlow { get => ParserHelper._rootFlow; set => ParserHelper._rootFlow = value; }
+    protected Flow _flow { get => ParserHelper._flow; set => ParserHelper._flow = value; }
     protected Real _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
     protected Dictionary<string[], GraphVertexType> _elements => ParserHelper._elements;
     protected SpitResult[] _modelSpits { get => ParserHelper._modelSpits; set => ParserHelper._modelSpits = value; }
@@ -62,16 +62,16 @@ class ListenerBase : dsParserBaseListener
     override public void EnterFlow(FlowContext ctx)
     {
         var flowName = ctx.identifier1().GetText().DeQuoteOnDemand();
-        _rootFlow = _system.Flows.First(f => f.Name == flowName);
+        _flow = _system.Flows.First(f => f.Name == flowName);
     }
-    override public void ExitFlow(FlowContext ctx) { _rootFlow = null; }
+    override public void ExitFlow(FlowContext ctx) { _flow = null; }
 
 
 
     override public void EnterParenting(ParentingContext ctx)
     {
         var name = ctx.identifier1().GetText().DeQuoteOnDemand();
-        _parenting = (Real)_rootFlow.Graph.Vertices.FindWithName(name);
+        _parenting = (Real)_flow.Graph.Vertices.FindWithName(name);
     }
     override public void ExitParenting(ParentingContext ctx) { _parenting = null; }
 
@@ -79,7 +79,7 @@ class ListenerBase : dsParserBaseListener
     //{
     //    if (_parenting == null)
     //    {
-    //        _rootFlow.Graph.
+    //        _flow.Graph.
     //    }
     //}
 }

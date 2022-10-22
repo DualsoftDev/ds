@@ -19,7 +19,7 @@ public class ParserHelper
 
     public Model Model { get; } = new Model();
     internal DsSystem _system;
-    internal Flow _rootFlow;
+    internal Flow _flow;
     internal Real _parenting;
     internal Dictionary<string[], GraphVertexType> _elements = new (NameUtil.CreateNameComponentsComparer());
     internal SpitResult[] _modelSpits;
@@ -45,8 +45,8 @@ public class ParserHelper
             {
                 if (_system != null)
                     yield return _system.Name;
-                if (_rootFlow != null)
-                    yield return _rootFlow.Name;
+                if (_flow != null)
+                    yield return _flow.Name;
                 if (_parenting != null)
                     yield return _parenting.Name;
             }

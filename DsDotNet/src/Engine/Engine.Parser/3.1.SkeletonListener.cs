@@ -32,7 +32,7 @@ class SkeletonListener : ListenerBase
     override public void EnterFlow(FlowContext ctx)
     {
         var flowName = ctx.identifier1().GetText().DeQuoteOnDemand();
-        _rootFlow = Flow.Create(flowName, _system);
+        _flow = Flow.Create(flowName, _system);
         AddElement(CurrentPathElements, GraphVertexType.Flow);
     }
 
@@ -40,7 +40,7 @@ class SkeletonListener : ListenerBase
     {
         Trace.WriteLine($"Parenting: {ctx.GetText()}");
         var name = ctx.identifier1().GetText().DeQuoteOnDemand();
-        _parenting = Real.Create(name, _rootFlow);
+        _parenting = Real.Create(name, _flow);
         AddElement(CurrentPathElements, GraphVertexType.Segment | GraphVertexType.Parenting);
 
         var xxx = enumerateChildren<CausalTokenContext>(ctx).ToArray();
@@ -78,7 +78,7 @@ class SkeletonListener : ListenerBase
 
     public override void EnterAliasListing(AliasListingContext ctx)
     {
-        var map = _rootFlow.AliasMap;
+        var map = _flow.AliasMap;
 
         var aliasDef = findFirstChild<AliasDefContext>(ctx);
         var alias = collectNameComponents(aliasDef);

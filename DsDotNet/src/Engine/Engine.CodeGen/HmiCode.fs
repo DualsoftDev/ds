@@ -132,9 +132,9 @@ module HmiGenModule =
             addToUsedIn hmiInfos device system.Name
             addToUsedIn hmiInfos device flow.QualifiedName
 
-            let parent = call.Parent.Core
-            if parent :? Real then
-                addToUsedIn hmiInfos device parent.QualifiedName
+            match call.Parent with
+            | Real realParent -> addToUsedIn hmiInfos device realParent.QualifiedName
+            | _ -> ()
 
 
         let hmiInfos = new Dictionary<string, Info>()

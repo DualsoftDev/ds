@@ -67,7 +67,7 @@ class ElementListener : ListenerBase
         if (existing.Where(spit => spit.GetCore() is Vertex).Any())
             return;
 
-        var pathWithoutParenting = new[] { _system.Name, _rootFlow.Name }.Concat(ns).ToArray();
+        var pathWithoutParenting = new[] { _system.Name, _flow.Name }.Concat(ns).ToArray();
 
         // narrow match
         var matches =
@@ -106,7 +106,7 @@ class ElementListener : ListenerBase
         {
             if (apiCall != null)
                 throw new ParserException($"Ambiguous entry [{apiCall.QualifiedName}] and [{pathAdapted.Combine()}]", ctx);
-            Alias.CreateInFlow(ns.Combine(), pathAdapted, _rootFlow, true);
+            Alias.CreateInFlow(ns.Combine(), pathAdapted, _flow, true);
             return;
         }
 
@@ -128,8 +128,8 @@ class ElementListener : ListenerBase
                 switch (aliasKey.Length)
                 {
                     case 3:     // my flow real 에 대한 alias
-                        Assert(aliasKey[0] == _system.Name && aliasKey[1] == _rootFlow.Name);
-                        Alias.CreateInFlow(ns.Combine(), aliasKey, _rootFlow);
+                        Assert(aliasKey[0] == _system.Name && aliasKey[1] == _flow.Name);
+                        Alias.CreateInFlow(ns.Combine(), aliasKey, _flow);
                         return;
                     case 2:
                         var apiItem =
@@ -140,7 +140,7 @@ class ElementListener : ListenerBase
                         Assert(apiItem != null);
 
                         if (_parenting == null)
-                            Alias.CreateInFlow(ns.Combine(), aliasKey, _rootFlow);
+                            Alias.CreateInFlow(ns.Combine(), aliasKey, _flow);
                         else 
                             Alias.CreateInReal(ns.Combine(), apiItem, _parenting);
                         return;
@@ -154,7 +154,7 @@ class ElementListener : ListenerBase
             if (apiCall != null)
             {
                 if (_parenting == null)
-                    Call.CreateInFlow(apiCall, _rootFlow);
+                    Call.CreateInFlow(apiCall, _flow);
                 else
                     Call.CreateInReal(apiCall, _parenting);
                 return;
@@ -166,7 +166,7 @@ class ElementListener : ListenerBase
             {
                 if(ns.Length != 1)
                     throw new ParserException($"ERROR: unknown token [{ns.Combine()}].", ctx);
-                Real.Create(ns[0], _rootFlow);
+                Real.Create(ns[0], _flow);
                 return;
             }
             else
@@ -187,6 +187,6 @@ class ElementListener : ListenerBase
         if (_parenting != null)
             throw new ParserException($"ERROR: identifier [{path.Combine()}] not allowed!", ctx);
 
-        Real.Create(path.Last(), _rootFlow);
+        Real.Create(path.Last(), _flow);
     }
 }

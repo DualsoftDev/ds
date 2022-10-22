@@ -69,7 +69,7 @@ class EdgeListener : ListenerBase
                         throw new ParserException($"ERROR: failed to find [{right.GetText()}]", ctx);
 
                     if (_parenting == null)
-                        _rootFlow.CreateEdges(l as Vertex, r as Vertex, op);
+                        _flow.CreateEdges(l as Vertex, r as Vertex, op);
                     else
                         _parenting.CreateEdges(l as Vertex, r as Vertex, op);
                 }

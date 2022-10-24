@@ -27,7 +27,7 @@ module ImportM =
                 let dicVertex = ConcurrentDictionary<string, Vertex>()
                 let dicSeg = ConcurrentDictionary<string, MSeg>()
                 MSys.Create(TextMySys, true, model) |> ignore
-                let mySystem = DsSystem.Create(TextMySys, "localhost", None, coreModel)  //new 
+                let mySystem = DsSystem.Create(TextMySys, "localhost", coreModel)  //new 
                 mySystem.Active <- true;
 
                 //page 타이틀 이름 중복체크 (없으면 P0, P1, ... 자동생성)

@@ -49,13 +49,13 @@ module ImportUtil =
                 |> Seq.iter  (fun page -> 
                     let sysName, flowName = GetSysNFlow(page.Title, page.PageNum)
                     if sysName = TextMySys |>not
-                    then DsSystem.Create(sysName, "", None, model) |> ignore
+                    then DsSystem.Create(sysName, "", model) |> ignore
                     )
 
             doc.Nodes 
             |> Seq.filter(fun node -> node.NodeType = COPY) 
             |> Seq.iter(fun node -> 
-                    node.CopySys.ForEach(fun sysName -> DsSystem.Create(sysName, "", None, model) |> ignore)
+                    node.CopySys.ForEach(fun sysName -> DsSystem.Create(sysName, "", model) |> ignore)
                     )
 
         

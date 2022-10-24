@@ -34,6 +34,5 @@ module CoreStruct =
     and
         [<DebuggerDisplay("{name}")>]
         ModelBase() =
-            let cpus    = HashSet<ICpu>()
-            member x.Cpus = cpus
+            class end
       

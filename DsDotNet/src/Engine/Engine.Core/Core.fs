@@ -21,7 +21,7 @@ module CoreModule =
             member val NameComponents = Array.empty<string>
             member x.QualifiedName = null  
 
-    and DsSystem private (name:string, host:string, cpu:ICpu option, model:Model) =
+    and DsSystem private (name:string, host:string, model:Model) =
         inherit FqdnObject(name, model)
 
         member val Flows    = createNamedHashSet<Flow>()
@@ -29,7 +29,6 @@ module CoreModule =
         member val ApiResetInfos = HashSet<ApiResetInfo>() with get, set
 
         member _.Model = model
-        member _.Cpu = cpu
         member _.Host = host
 
         //시스템 버튼 소속 Flow 정보
@@ -41,8 +40,8 @@ module CoreModule =
         ///시스템 핸들링 대상여부   true : mySystem / false : exSystem
         member val Active = false with get, set 
 
-        static member Create(name, host, cpu, model) =
-            let system = DsSystem(name, host, cpu, model)
+        static member Create(name, host, model) =
+            let system = DsSystem(name, host, model)
             model.Systems.Add(system) |> verifyM $"Duplicated system name [{name}]"
             system
 

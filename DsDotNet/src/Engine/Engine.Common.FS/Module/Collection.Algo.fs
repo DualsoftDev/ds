@@ -106,7 +106,7 @@ module CollectionAlgorithm =
         let rnd = new System.Random()
         let rec scramble2 xs =
             /// Removes an element from a sequence.
-            let remove n sqn = sqn |> Seq.filter (fun x -> x <> n)
+            let remove n xs = xs |> Seq.filter (fun x -> x <> n)
 
             seq {
                 let x = xs |> Seq.item (rnd.Next(0, xs |> Seq.length))
@@ -154,9 +154,8 @@ module CollectionAlgorithm =
     /// 주어진 sequence 를 계속 circular population 한다.
     // https://riptutorial.com/fsharp/example/18041/infinite-repeating-sequences
     let generateCircularSeq xs = seq { while true do yield! xs}
-
-    //for i in [1;2;3;4;5;6;7;8;9;10] |> generateCircularSeq |> Seq.take 12 do
-    //    i |> System.Console.WriteLine
+    //generateCircularSeq [1..3] |> Seq.take 10 |> List.ofSeq
+    //val it: int list = [1; 2; 3; 1; 2; 3; 1; 2; 3; 1]
 
 
     /// <summary>
@@ -168,6 +167,8 @@ module CollectionAlgorithm =
         xs |> Seq.mapi (fun i el -> el, i)              // Add index to element
            |> Seq.filter (fun (el, i) -> i % n = n - 1) // Take every nth element
            |> Seq.map fst                               // Drop index from the result
+    //> [1..100] |> everyNth 11;;
+    //val it: seq<int> = seq [11; 22; 33; 44; ...]
 
 
     // C# : EmConsecutive.ToConsecutiveGroups

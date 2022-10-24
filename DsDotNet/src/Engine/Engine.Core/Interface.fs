@@ -59,6 +59,4 @@ module Interface =
     
     //type ISystem    = 
     //    abstract Flows:IFlow seq
-
-    type ICpu       = interface end
         

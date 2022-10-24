@@ -22,7 +22,7 @@ class SkeletonListener : ListenerBase
         {
             var name = ctx.systemName().GetText().DeQuoteOnDemand();
             var host = findFirstChild<HostContext>(ctx)?.GetText();
-            _system = DsSystem.Create(name, host, FSharpOption<ICpu>.None, _model);
+            _system = DsSystem.Create(name, host, _model);
             Trace.WriteLine($"System: {name}");
             AddElement(CurrentPathElements, GraphVertexType.System);
 

@@ -1,4 +1,6 @@
 // Template generated code from Antlr4BuildTasks.Template v 8.17
+using static Engine.Core.SpitModuleHelper.SpitCoreType;
+
 namespace Engine.Parser;
 
 public class Program
@@ -96,7 +98,7 @@ C4 > C5;
 }
 ";
 
-    static string CodeElementsText = @"
+    public static string CodeElementsText = @"
 [sys] My = {
     [flow] F = {
         Seg1;
@@ -124,7 +126,7 @@ C4 > C5;
 }
 
 ";
-    static string DuplicatedEdgesText = @"
+    public static string DuplicatedEdgesText = @"
 [sys] B = {
     [flow] F = {
         Vp > Pp;
@@ -133,7 +135,7 @@ C4 > C5;
 }
 ";
 
-    static string AdoptoedValidText = @"
+    public static string AdoptoedValidText = @"
 [sys] My = {
     [flow] F = {
         Seg1 > Seg2;
@@ -166,7 +168,7 @@ C4 > C5;
     }
 }
 ";
-    static string AdoptoedAmbiguousText = @"
+    public static string AdoptoedAmbiguousText = @"
 [sys] My = {
     [flow] F = {
         Seg1 > Seg2;
@@ -200,7 +202,7 @@ C4 > C5;
     }
 }
 ";
-    static string SplittedMRIEdgesText = @"
+    public static string SplittedMRIEdgesText = @"
 [sys] A = {
     [flow] F = {
         //a1 <||> a2 <||> a3 <||> a4;
@@ -706,18 +708,12 @@ C4 > C5;
         var spits = model.Spit();
         foreach(var spit in spits)
         {
-            var tName = spit.GetCore().GetType().Name;
-            var name = spit.NameComponents.Combine();
-            Trace.WriteLine($"{name}:{tName}");
+            switch (spit.SpitObj)
+            {
+                case SpitFlow f: f.Item.Graph.Dump(); break;
+                case SpitReal r: r.Item.Graph.Dump(); break;
+            }
         }
-
-        var spitObjs = spits.Select(spit => spit.GetCore());
-        var flowGraphs = spitObjs.OfType<Flow>().Select(f => f.Graph);
-        var segGraphs = spitObjs.OfType<Real>().Select(s => s.Graph);
-        foreach (var gr in flowGraphs)
-            gr.Dump();
-        foreach (var gr in segGraphs)
-            gr.Dump();
 
         System.Console.WriteLine("Done");
     }
@@ -729,8 +725,8 @@ C4 > C5;
         //ParseNormal(DuplicatedEdgesText);
         //ParseNormal(AdoptoedValidText);
         //ParseNormal(AdoptoedAmbiguousText);
-        ParseNormal(CodeElementsText);
-        ParseNormal(EveryScenarioText);
+        //ParseNormal(CodeElementsText);
+        //ParseNormal(EveryScenarioText);
         ParseNormal(PptGeneratedText);
     }
 

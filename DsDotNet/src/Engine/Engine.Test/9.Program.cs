@@ -40,7 +40,7 @@ class Program
 
         Engine.Parser.Program.Main(null);
 
-        //SampleRunner.Run(ParserTest.Safety);
+        SampleRunner.Run(ParserTest.Safety);
         //SampleRunner.Run(ParserTest.StrongCausal);
         //SampleRunner.Run(ParserTest.Buttons);
         //SampleRunner.Run(ParserTest.Dup);

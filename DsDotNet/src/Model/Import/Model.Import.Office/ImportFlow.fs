@@ -50,7 +50,6 @@ module CoreFlow =
         inherit FlowBase(name)
         //do system.AddFlow(this) |> ignore
 
-        new (cpu:ICpu, name, system) = RootFlow(name, system)
         member x.QualifiedName = $"{system.Name}.{name}";
 
         //Flow 내부에 사용된 모든 Node (ChildFlow 내부도 포함)

@@ -23,8 +23,6 @@ module CpuUnit =
     
     [<DebuggerDisplay("{name}")>]
     type Cpu(name:string, system:DsSystem)  =
-        interface ICpu 
-
         member x.Name = name
         member x.System = system
         member val Running = false with get, set

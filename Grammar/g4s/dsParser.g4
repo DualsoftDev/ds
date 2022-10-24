@@ -53,9 +53,13 @@ addressesBlock
     ;
 addressDef: segmentPath '=' address;
     segmentPath: identifier2;
-    address: LPARENTHESIS (startTag)? COMMA (endTag)? RPARENTHESIS (SEIMCOLON)?;
-    startTag: TAG_ADDRESS;
-    endTag: TAG_ADDRESS;
+    address: LPARENTHESIS (startItem)? COMMA (endItem)? RPARENTHESIS (SEIMCOLON)?;
+    startItem: addressItem;
+    endItem: addressItem;
+    addressItem: tagAddress | funAddress;
+    tagAddress: TAG_ADDRESS;
+    funAddress: IDENTIFIER1;
+
 
 
 /*
@@ -212,10 +216,10 @@ variables: '[' 'variables' ']' '=' '{' variableDef* '}';
     varName: IDENTIFIER1;
     argumentGroups: argumentGroup ('~' argumentGroup)*;
     argumentGroup: argument (',' argument)*;
-    argument: int | float | varIdentifier;
+    argument: intValue | floatValue | varIdentifier;
     varIdentifier: IDENTIFIER1;
-    int: INTEGER;
-    float:FLOAT;
+    intValue: INTEGER;
+    floatValue:FLOAT;
     varType: 'int' | 'word' | 'float' | 'dword';
 
 

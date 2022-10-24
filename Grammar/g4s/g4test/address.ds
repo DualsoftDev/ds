@@ -1,1 +1,13 @@
-(%Q1234.2343, , )
+[prop] = {
+    // Global safety
+    [safety] = {
+        My.F.Main = {B.F.Sp; B.F.Sm; C.F.Sp}
+    }
+    [addresses] = {
+        A."+" = (%Q1234.2343, %I1234.2343)
+        A."-" = (START, END)
+    }
+    [layouts] = {
+        A."+" = (1309,405,205,83)
+    }
+}

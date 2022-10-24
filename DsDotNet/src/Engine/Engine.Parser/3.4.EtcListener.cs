@@ -188,7 +188,7 @@ class EtcListener : ListenerBase
 
             var apiItem = api.GetCore() as ApiItem;
             var sre = addrDef.address();
-            var (s, e) = (sre.startTag()?.GetText(), sre.endTag()?.GetText());
+            var (s, e) = (sre.startItem()?.GetText(), sre.endItem()?.GetText());
             apiItem.Addresses = new Addresses(s, e);
         }
 

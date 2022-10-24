@@ -185,3 +185,13 @@ module CoreModule =
 [<Extension>]
 type CoreExt =
     [<Extension>] static member GetSystem(call:Call) = call.Parent.System
+    [<Extension>] static member AddButton(sys:DsSystem, btnType:BtnType, btnName: string, flow:Flow) = 
+                    let dicButton = match btnType with
+                                    |StartBTN       -> sys.StartButtons
+                                    |ResetBTN       -> sys.ResetButtons
+                                    |EmergencyBTN   -> sys.EmergencyButtons
+                                    |AutoBTN        -> sys.AutoButtons
+
+                    if dicButton.ContainsKey btnName
+                    then dicButton.[btnName].Add(flow)
+                    else dicButton.Add(btnName, ResizeArray[|flow|] )

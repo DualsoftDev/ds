@@ -11,6 +11,7 @@ open System.Collections.Generic
 open Microsoft.FSharp.Collections
 open Engine.Common.FS
 open Model.Import.Office
+open Engine.Core
 
 [<AutoOpen>]
 module ImportM =
@@ -18,33 +19,53 @@ module ImportM =
     type internal ImportPowerPoint(path:string) =
         let doc   = pptDoc(path)
         let model = MModel(doc.FullPath)
+        let coreModel = CoreModule.Model()
 
         member internal x.GetImportModel() = 
             try
+        
+                let dicVertex = ConcurrentDictionary<string, Vertex>()
                 let dicSeg = ConcurrentDictionary<string, MSeg>()
                 MSys.Create(TextMySys, true, model) |> ignore
+                let mySystem = DsSystem.Create(TextMySys, "localhost", None, coreModel)  //new 
+                mySystem.Active <- true;
 
                 //page 타이틀 이름 중복체크 (없으면 P0, P1, ... 자동생성)
                 ImportCheck.SamePageErr(doc.Pages) |> ignore
 
-                //ExSys 및 Flow 만들기
-                MakeExSys(doc, model) |> ignore
-                //MFlow 리스트 만들기
-                MakeFlows(doc.Pages, model) |> ignore
+                //ExSys  만들기
+                MakeExSys(doc, model) |> ignore//old 삭제예정
+                MakeExSystem(doc, coreModel) |> ignore //new 
+
+
+                //Flow 리스트 만들기
+                MakeFlos(doc.Pages, model) |> ignore //old 삭제예정
+                let dicFlow = Dictionary<int, Flow>() // page , flow
+                MakeFlows(doc.Pages, coreModel, dicFlow) |> ignore //new 
+
                 // system, flow 이름 중복체크 
-                ImportCheck.SameSysFlowName(model.Flows) |> ignore
+                ImportCheck.SameSysFlow(model.Flows) |> ignore//old 삭제예정
+                ImportCheck.SameSysFlowName(coreModel.Systems, dicFlow) |> ignore //new
                  
 
                 //alias Setting, Safety & EMG & Start & Auto 리스트 만들기
-                MakeAlias    (doc.Nodes, model, doc.Parents)
-                MakeBtn      (doc.Nodes, model)
+                MakeAlias    (doc.Nodes, model, doc.Parents) //new
+
+                MakeBtn      (doc.Nodes, model)//old 삭제예정
+                MakeButtons  (doc.Nodes, coreModel, dicFlow) //new
 
                 
                 //segment 리스트 만들기
-                MakeSegment(doc.Nodes, model, dicSeg, doc.Parents)
+                MakeSeg(doc.Nodes, model, dicSeg, doc.Parents)//old
+                MakeSegment(doc.Nodes, coreModel, dicVertex, dicFlow) //new
+
+
+
                 //parent 리스트 만들기
                 MakeParent(doc.Nodes, model, dicSeg, doc.Parents)
+                MakeParents(doc.Nodes, coreModel, dicVertex, doc.Parents)
                 
+
                 //Safety 만들기
                 MakeSafety(doc.Nodes, model, dicSeg)
                 //Dummy child 처리

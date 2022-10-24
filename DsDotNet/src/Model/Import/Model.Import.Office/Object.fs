@@ -61,8 +61,6 @@ module Object =
 
 
             member val ShapeID = 0u with get, set
-            member val CountTX = 0 with get, set
-            member val CountRX = 0 with get, set
 
             member x.ToTextInMFlow() = 
                                 if(Bound.ThisFlow = bound) 
@@ -83,23 +81,6 @@ module Object =
             member x.Update(nodeKey, nodeIdValue, nodeCntTX, nodeCntRX) = 
                         this.Key <- nodeKey
                         this.ShapeID <- nodeIdValue
-                        this.CountTX <- nodeCntTX
-                        this.CountRX <- nodeCntRX
-
-            member x.MaxCnt  = 
-                        if(this.CountTX >= this.CountRX) 
-                        then this.CountTX else this.CountRX
-
-            member x.PrintfTRX (curr:int, ?bAddress:bool) =
-                let nameTR =  if(bAddress.IsSome && bAddress.Value) then "IO" else "TR"
-                let nameTX =  if(bAddress.IsSome && bAddress.Value) then "O" else "TX"
-                let nameRX =  if(bAddress.IsSome && bAddress.Value) then "I" else "RX"
-                
-                if(this.CountTX >= curr && this.CountRX >= curr) 
-                then  TR, if(this.CountTX = 1) then nameTR else sprintf "%s%d" nameTR curr
-                else if(this.CountRX < curr) 
-                then  TX, if(this.CountTX = 1) then nameTX else sprintf "%s%d" nameTX curr
-                else  RX, if(this.CountRX = 1) then nameRX else sprintf "%s%d" nameRX curr
   
             member x.MEdges = mEdges |> Seq.sortBy(fun edge ->edge.ToText()) |> Seq.cast<MEdge>
             member x.ChildSegs = mChildSegs

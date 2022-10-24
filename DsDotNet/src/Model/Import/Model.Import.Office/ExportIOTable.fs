@@ -29,12 +29,12 @@ module ExportIOTable =
         dt.Columns.Add($"{IOColumn.Observe}"    , typeof<string>) |>ignore
 
 
-        let rowItems(causal:NodeType, seg:MSeg, trx:string) =
+        let rowItems(seg:MSeg) =
             let MFlowName, name =  seg.OwnerMFlow, seg.Name
-            match causal with
-            |TR ->  ["주소"; MFlowName; name; trx; "bit"; seg.TagStart  ; seg.TagEnd; sampleCommandName; sampleConditionName]
-            |TX  -> ["주소"; MFlowName; name; trx; "bit"; seg.TagStart  ; "'-"; sampleCommandName; "'-"]
-            |RX  -> ["주소"; MFlowName; name; trx; "bit"; "'-"           ; seg.TagEnd; "'-"; sampleConditionName;]
+            match seg.NodeType with
+            |TR ->  ["주소"; MFlowName; name; "IO"; "bit"; seg.TagStart  ; seg.TagEnd; sampleCommandName; sampleConditionName]
+            |TX  -> ["주소"; MFlowName; name; "OUT"; "bit"; seg.TagStart  ; "'-"; sampleCommandName; "'-"]
+            |RX  -> ["주소"; MFlowName; name; "IN" ; "bit"; "'-"          ; seg.TagEnd; "'-"; sampleConditionName;]
             |_ -> failwithf "ERR";
 
         let rows =
@@ -47,9 +47,7 @@ module ExportIOTable =
                     for flow in flows do
                         //Call Task 출력
                         for callSeg in flow.CallSegs() do
-                            for index in [|1..callSeg.MaxCnt|] do
-                                let causal, trx = callSeg.PrintfTRX(index, true)
-                                yield rowItems(causal, callSeg, trx)
+                            yield rowItems(callSeg)
             }
         rows
         |> Seq.iter(fun row -> 

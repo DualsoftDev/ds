@@ -8,6 +8,7 @@ open System.Collections.Concurrent
 open Engine.Common.FS
 open Model.Import.Office
 open System.Collections.Generic
+open Engine.Core
 
 [<AutoOpen>]
 module ImportCheck =
@@ -90,12 +91,24 @@ module ImportCheck =
             )
         
         //page 타이틀 중복체크 
-        let SameSysFlowName(flows:MFlow seq) = 
+        let SameSysFlow(flows:MFlow seq) = 
             let dicFlow = ConcurrentDictionary<string, int>()
             flows.ForEach(fun flow-> dicFlow.TryAdd(flow.Name, flow.Page)|>ignore)
             flows.ForEach(fun flow->
                 if dicFlow.ContainsKey(flow.System.Name)
                 then Office.ErrorPPT(ErrorCase.Name, 31, $"시스템이름 : {flow.System.Name}",flow.Page, $"중복페이지 : {dicFlow.[flow.System.Name]}")  )
+
+        //page 타이틀 중복체크 
+        let SameSysFlowName(systems:DsSystem seq, dicFlow: Dictionary<int, Flow>) = 
+            let sysNames = systems.Select(fun s->s.Name)
+            systems.ForEach(fun sys->
+                sys.Flows.ForEach(fun flow -> 
+                    if sysNames.Contains(flow.Name) 
+                    then 
+                        let page = dicFlow.Where(fun w-> w.Value = flow).First().Key                    
+                        Office.ErrorPPT(ErrorCase.Name, 31, $"시스템이름 : {flow.System.Name}",page, $"중복페이지 : {page}")  )
+                    )
+
 
         let ValidPath(nodes:pptNode seq, model:MModel) =
             let checkNodeName(nodes:pptNode seq) =

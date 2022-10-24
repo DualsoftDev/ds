@@ -42,9 +42,25 @@ module ImportUtil =
             |> Seq.iter(fun node -> 
                     node.CopySys.ForEach(fun sysName -> MSys.Create(sysName, false, model) |> ignore)
                     )
+
+        let MakeExSystem(doc:pptDoc, model:CoreModule.Model) = 
+            doc.Pages
+                |> Seq.filter(fun page -> page.IsUsing)
+                |> Seq.iter  (fun page -> 
+                    let sysName, flowName = GetSysNFlow(page.Title, page.PageNum)
+                    if sysName = TextMySys |>not
+                    then DsSystem.Create(sysName, "", None, model) |> ignore
+                    )
+
+            doc.Nodes 
+            |> Seq.filter(fun node -> node.NodeType = COPY) 
+            |> Seq.iter(fun node -> 
+                    node.CopySys.ForEach(fun sysName -> DsSystem.Create(sysName, "", None, model) |> ignore)
+                    )
+
         
         //MFlow 리스트 만들기
-        let MakeFlows(pptPages:pptPage seq, model:MModel) = 
+        let MakeFlos(pptPages:pptPage seq, model:MModel) = 
              pptPages
                 |> Seq.filter(fun page -> page.IsUsing)
                 |> Seq.iter  (fun page -> 
@@ -53,6 +69,18 @@ module ImportUtil =
                     let sys    = model.DicSystems.[sysName]
                     MFlow.Create(flowName, sys, pageNum) |> ignore
                     )
+
+        //MFlow 리스트 만들기
+        let MakeFlows(pptPages:pptPage seq, model:Model, dicFlow:Dictionary<int, Flow>) = 
+             pptPages
+                |> Seq.filter(fun page -> page.IsUsing)
+                |> Seq.iter  (fun page -> 
+                    let pageNum  = page.PageNum
+                    let sysName, flowName = GetSysNFlow(page.Title, page.PageNum)
+                    let sys    = model.FindSystem(sysName)      //.[sysName]
+                    dicFlow.Add(  pageNum,  Flow.Create(flowName, sys) ) |> ignore
+                    )
+
 
 
         //alias Setting
@@ -126,8 +154,25 @@ module ImportUtil =
                     child.Parent <- Some(parent)
                 )
 
+        //parent 리스트 만들기
+        let MakeParents(pptNodes:pptNode seq, model:Model, dicSeg:ConcurrentDictionary<string, Vertex>, parents:ConcurrentDictionary<pptNode, seq<pptNode>>) = 
+            let dicParent = parents 
+                            |> Seq.filter(fun parentChildren -> parentChildren.Key.IsDummy|>not)
+                            |> Seq.collect(fun parentChildren -> 
+                                                       parentChildren.Value 
+                                                       |> Seq.map(fun child -> child, parentChildren.Key)) |> dict
+            pptNodes
+            |> Seq.iter(fun node -> 
+                if(dicParent.ContainsKey(node))
+                then 
+                    let child  = dicSeg.[node.Key]
+                    let parent = dicSeg.[dicParent.[node].Key]
+                    ()
+                   // child.Parent <- Some(parent)
+                )
+                
         //segment 리스트 만들기
-        let MakeSegment(pptNodes:pptNode seq, model:MModel, dicSeg:ConcurrentDictionary<string, MSeg>, parents:ConcurrentDictionary<pptNode, seq<pptNode>>) = 
+        let MakeSeg(pptNodes:pptNode seq, model:MModel, dicSeg:ConcurrentDictionary<string, MSeg>, parents:ConcurrentDictionary<pptNode, seq<pptNode>>) = 
             let mySys = model.ActiveSys
             pptNodes
             |> Seq.sortBy(fun node -> node.Alias.IsSome)
@@ -156,6 +201,40 @@ module ImportUtil =
                     let seg = MSeg(name, sys,  bound, node.NodeType, flow, node.IsDummy)
                     seg.Update(node.Key, node.Id.Value, node.CntTX, node.CntRX)
                     dicSeg.TryAdd(node.Key, seg) |> ignore
+                )
+
+      //segment 리스트 만들기
+        let MakeSegment(pptNodes:pptNode seq, model:Model, dicSeg:ConcurrentDictionary<string, Vertex>, dicFlow:Dictionary<int, Flow>) = 
+            let mySys = model.Systems.Where(fun w->w.Active).First();
+            pptNodes
+            |> Seq.sortBy(fun node -> node.Alias.IsSome)
+            |> Seq.iter(fun node -> 
+                
+                let flow  = dicFlow.[node.PageNum]
+                let sys   = if(node.NodeType.IsCall) 
+                            then model.FindSystem(node.CallName.Split('.').[0])
+                            else mySys
+
+                let btn   = node.IsEmgBtn || node.IsStartBtn || node.IsAutoBtn || node.IsResetBtn 
+                let bound = if(btn) then ExBtn
+                            else if(node.NodeType.IsCall) then OtherFlow else ThisFlow
+
+             
+                if(node.Alias.IsSome)
+                then
+                    let segOrg = dicSeg.[node.AliasKey]
+                    let aliasName = node.Alias.Value
+                    let alias = Alias.CreateInFlow(aliasName, segOrg.NameComponents, flow)
+                    //let aliasSeg = MSeg(aliasName, mySys, ThisFlow, segOrg.NodeType, flow, segOrg.IsDummy)
+                    //aliasSeg.Update(node.Key, node.Id.Value, 0,0)
+                    //aliasSeg.AliasOrg <- Some(segOrg)
+                    dicSeg.TryAdd(node.Key, alias) |> ignore
+                else 
+                    let name =  if(node.NodeType.IsCall) then node.CallName else node.NameOrg
+                    let real = Real.Create(name, flow)
+                    //let seg = MSeg(name, sys,  bound, node.NodeType, flow, node.IsDummy)
+                    //seg.Update(node.Key, node.Id.Value, node.CntTX, node.CntRX)
+                    dicSeg.TryAdd(node.Key, real) |> ignore
                 )
 
      
@@ -315,5 +394,20 @@ module ImportUtil =
                     if(node.IsAutoBtn)  then mySys.TryAddAutoBTN(node.Name,  flow)
                     if(node.IsEmgBtn)   then mySys.TryAddEmergBTN(node.Name, flow)
                     
+                    ) 
+        //EMG & Start & Auto 리스트 만들기
+        let MakeButtons(pptNodes:pptNode seq, model:Model, dicFlow: Dictionary<int, Flow>) = 
+            let mySys = model.Systems.Where(fun w->w.Active).First();
+            pptNodes
+            |> Seq.filter(fun node -> node.IsDummy|>not)
+            |> Seq.iter(fun node -> 
+                    let flow = dicFlow.[node.PageNum]
+                               
+                    //Start, Reset, Auto, Emg 버튼
+                    if(node.IsStartBtn) then mySys.AddButton(BtnType.AutoBTN, node.Name, flow)
+                    if(node.IsResetBtn) then mySys.AddButton(BtnType.ResetBTN,node.Name, flow)
+                    if(node.IsAutoBtn) then mySys.AddButton(BtnType.AutoBTN,node.Name, flow)
+                    if(node.IsEmgBtn) then mySys.AddButton(BtnType.EmergencyBTN ,node.Name, flow)
                     )
+        
                                 

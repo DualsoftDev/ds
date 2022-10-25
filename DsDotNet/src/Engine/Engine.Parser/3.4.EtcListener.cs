@@ -22,9 +22,9 @@ class EtcListener : ListenerBase
             first switch
             {
                 EmergencyButtonsContext => _system.EmergencyButtons,
-                AutoButtonsContext => _system.AutoButtons,
-                StartButtonsContext => _system.StartButtons,
-                ResetButtonsContext => _system.ResetButtons,
+                AutoButtonsContext      => _system.AutoButtons,
+                StartButtonsContext     => _system.StartButtons,
+                ResetButtonsContext     => _system.ResetButtons,
                 _ => throw new Exception("ERROR"),
             };
 
@@ -70,9 +70,9 @@ class EtcListener : ListenerBase
          */
         var safetyKvs =
             from safetyDef in safetyDefs
-            let key = collectNameComponents(findFirstChild(safetyDef, t => t is SafetyKeyContext))   // ["Main"] or ["My", "Flow", "Main"]
+            let key         = collectNameComponents(findFirstChild(safetyDef, t => t is SafetyKeyContext))   // ["Main"] or ["My", "Flow", "Main"]
             let valueHeader = enumerateChildren<SafetyValuesContext>(safetyDef).First()
-            let values = enumerateChildren<Identifier123Context>(valueHeader).Select(collectNameComponents).ToArray()
+            let values      = enumerateChildren<Identifier123Context>(valueHeader).Select(collectNameComponents).ToArray()
             select (key, values)
             ;
 
@@ -124,23 +124,23 @@ class EtcListener : ListenerBase
     {
         var varName = findFirstChild<VarNameContext>(context).GetText();
         var varType = findFirstChild<VarTypeContext>(context).GetText();
-        var init = findFirstChild<ArgumentContext>(context).GetText();
+        var init    = findFirstChild<ArgumentContext>(context).GetText();
         _model.Variables.Add(new Variable(varName, varType, init));
     }
     override public void EnterCommandDef(CommandDefContext context)
     {
-        var cmdName = findFirstChild<CmdNameContext>(context).GetText();
+        var cmdName    = findFirstChild<CmdNameContext>(context).GetText();
         var funApplCtx = findFirstChild<FunApplicationContext>(context);
-        var funAppl = CreateFunctionApplication(funApplCtx);
-        var command = new Command(cmdName, funAppl);
+        var funAppl    = CreateFunctionApplication(funApplCtx);
+        var command    = new Command(cmdName, funAppl);
         _model.Commands.Add(command);
     }
     override public void EnterObserveDef(ObserveDefContext context)
     {
-        var obsName = findFirstChild<ObserveNameContext>(context).GetText();
+        var obsName    = findFirstChild<ObserveNameContext>(context).GetText();
         var funApplCtx = findFirstChild<FunApplicationContext>(context);
-        var funAppl = CreateFunctionApplication(funApplCtx);
-        var observes = new Observe(obsName, funAppl);
+        var funAppl    = CreateFunctionApplication(funApplCtx);
+        var observes   = new Observe(obsName, funAppl);
         _model.Observes.Add(observes);
     }
 

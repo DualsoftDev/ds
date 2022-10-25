@@ -417,7 +417,7 @@ module ModelTests1 =
             //compare ParserTest.ExternalSegmentCallConfusing ""
             //compare ParserTest.MyFlowReference ""
             //compare ParserTest.Error ""
-            compare ParserTest.QualifiedName answerQualifiedName        // todo : C1 island 없어야 ...
+            compare ParserTest.QualifiedName answerQualifiedName
             
             
             

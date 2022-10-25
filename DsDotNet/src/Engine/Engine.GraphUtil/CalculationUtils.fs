@@ -25,30 +25,46 @@ module private GraphCalculationUtils =
                 result.Add(now)
         result
 
+    let getApiName (vertex:Vertex) = 
+        match vertex with
+        | :? Call as c -> c.Name.Replace("\"", "")
+        | :? Alias as a -> a.AliasKey |> String.concat "."
+        | _ -> failwith $"type error of {vertex}"
+
+    let getVertexTarget (vertex:Vertex) = 
+        match vertex with
+        | :? Call as c -> c.ApiItem
+        | :? Alias as a -> 
+            match a.Target with
+            | CallTarget ct -> ct
+            | _ -> failwith $"type error of {vertex}"
+        | _ -> failwith $"type error of {vertex}"
+
+    let getCallMap (graph:Graph<Vertex, Edge>) =
+        let callMap = new Dictionary<string, ResizeArray<Vertex>>()
+        graph.Vertices
+        |> Seq.iter(fun v -> 
+            let apiName = getApiName v
+            if not (callMap.ContainsKey(apiName)) then
+                callMap.Add(apiName, new ResizeArray<Vertex>(0))
+            callMap.[apiName].Add(v)
+        )
+        callMap
+
     /// Get reset informations from graph
     let getAllResets (graph:Graph<Vertex, Edge>) =
-        let getCallMap (graph:Graph<Vertex, Edge>) =
-            let callMap = new Dictionary<string, ResizeArray<Call>>()
-            graph.Vertices 
-            |> Seq.cast<Call>
-            |> Seq.iter(fun v -> 
-                let apiName =  $"{v.GetSystem().Name}.{v.Name}" 
-                if not (callMap.ContainsKey(apiName)) then
-                    callMap.Add(apiName, new ResizeArray<Call>(0))
-                callMap.[apiName].Add(v)
-            )
-            callMap
-
         let makeName (system:string) (info:ApiResetInfo) = 
             let src = info.Operand1.Replace("\"", "")
             let tgt = info.Operand2.Replace("\"", "")
             $"{system}.{src}", info.Operator, $"{system}.{tgt}"
 
-        let getResetInfo (node:Call) = 
-            node.GetSystem().ApiResetInfos |> Seq.map(makeName (node.GetSystem().Name))
+        let getResetInfo (node:Vertex) = 
+            let vertexSystem = (getVertexTarget node).System
+            vertexSystem.ApiResetInfos 
+            |> Seq.map(makeName (vertexSystem.QualifiedName.Replace("\"", "")))
 
         let generateResetRelationShips 
-                (callMap:Dictionary<string, ResizeArray<Call>>)
+                (callMap:Dictionary<string, ResizeArray<Vertex>>)
                 (resets:string * string * string) =
             let (source, operator, target) = resets
             [
@@ -67,7 +83,6 @@ module private GraphCalculationUtils =
 
         let callMap = getCallMap graph
         graph.Vertices 
-        |> Seq.cast<Call>
         |> Seq.collect(getResetInfo) |> Seq.distinct
         |> Seq.collect(generateResetRelationShips callMap)
 
@@ -86,17 +101,17 @@ module private GraphCalculationUtils =
     
     /// Get ordered routes from start to end
     let visitFromSourceToTarget
-            (now:Call) (target:Call) 
+            (now:Vertex) (target:Vertex) 
             (graph:Graph<Vertex, Edge>) =
         let rec searchNodes
-                (now:Call) (target:Call)
+                (now:Vertex) (target:Vertex)
                 (graph:Graph<Vertex, Edge>) 
-                (path:Call list) =
+                (path:Vertex list) =
             [
                 let nowPath = path.Append(now) |> List.ofSeq
                 if now <> target then
                     for node in graph.GetOutgoingVertices(now) do
-                        yield! searchNodes (node:?>Call) target graph nowPath
+                        yield! searchNodes node target graph nowPath
                 else
                     yield nowPath
             ]
@@ -104,8 +119,8 @@ module private GraphCalculationUtils =
 
     /// Get all resets
     let getOneWayResets 
-            (mutualResets:Call seq seq) 
-            (resets:seq<Call option * string * Call option>) =
+            (mutualResets:Vertex seq seq) 
+            (resets:seq<Vertex option * string * Vertex option>) =
         resets
         |> Seq.filter(fun e -> 
             let (head, r, tail) = e
@@ -124,7 +139,7 @@ module private GraphCalculationUtils =
         |> Seq.except(mutualResets)
 
     /// Get mutual resets
-    let getMutualResets (resets:seq<Call option * string * Call option>) =
+    let getMutualResets (resets:seq<Vertex option * string * Vertex option>) =
         resets 
         |> Seq.filter(fun e -> 
             let (source, r, target) = e
@@ -161,13 +176,13 @@ module private GraphCalculationUtils =
         |> Seq.map(fun e -> e.Last())
         
     /// Get mutual reset chains : All nodes are mutually resets themselves
-    let getMutualResetChains (sort:bool) (resets:Call seq seq) =
+    let getMutualResetChains (sort:bool) (resets:Vertex seq seq) =
         let nodes = resets |> Seq.map(fun e -> e.First()) |> Seq.distinct
-        let globalChains = new ResizeArray<Call ResizeArray>(0)
-        let candidates = new ResizeArray<Call list>(0)
+        let globalChains = new ResizeArray<Vertex ResizeArray>(0)
+        let candidates = new ResizeArray<Vertex list>(0)
         
         let addToChain 
-                (chain:ResizeArray<Call>) (addHead:bool) (target:Call) = 
+                (chain:ResizeArray<Vertex>) (addHead:bool) (target:Vertex) = 
             let targets = 
                 match addHead with 
                 | true -> getIncomingResets resets target
@@ -187,8 +202,8 @@ module private GraphCalculationUtils =
             added
             
         let addToResult 
-                (result: ResizeArray<Call list>) 
-                (sort:bool) (target:Call seq) =
+                (result: ResizeArray<Vertex list>) 
+                (sort:bool) (target:Vertex seq) =
             let candidate = 
                 let tgt = target |> Seq.distinct
                 match sort with
@@ -201,7 +216,7 @@ module private GraphCalculationUtils =
         for node in nodes do
             let mutable continued = true
             let checkInList = globalChains |> removeDuplicates
-            let localChains = new ResizeArray<Call>(0)
+            let localChains = new ResizeArray<Vertex>(0)
             if not (checkInList.Contains(node)) then
                 localChains.Add(node)
                 while continued do
@@ -230,21 +245,21 @@ module private GraphCalculationUtils =
         
     /// get origin map
     let getOriginMaps 
-            (graphNode:Call seq) (offByOneWayBackwardResets:Call seq) 
-            (offByMutualResetChains:Call seq) 
-            (structedChains:seq<Map<string, seq<Call>>>) =
-        let allNodes = new Dictionary<Call, int>()
-        let oneWay = offByOneWayBackwardResets |> Seq.map(fun v -> v.ApiItem)
-        let mutual = offByMutualResetChains |> Seq.map(fun v -> v.ApiItem)
+            (graphNode:Vertex seq) (offByOneWayBackwardResets:Vertex seq) 
+            (offByMutualResetChains:Vertex seq) 
+            (structedChains:seq<Map<string, seq<Vertex>>>) =
+        let allNodes = new Dictionary<Vertex, int>()
+        let oneWay = offByOneWayBackwardResets |> Seq.map(getVertexTarget)
+        let mutual = offByMutualResetChains |> Seq.map(getVertexTarget)
         let toBeZero = oneWay.Concat(mutual) |> Seq.distinct
 
         for node in graphNode do
-            if toBeZero.Contains(node.ApiItem) &&
+            if toBeZero.Contains(getVertexTarget node) &&
                     not (allNodes.ContainsKey(node)) then
                 allNodes.Add(node, 0)
             else
                 for resets in structedChains do
-                    let nowName = node.ApiItem.QualifiedName
+                    let nowName = (getVertexTarget node).QualifiedName
                     if resets.ContainsKey(nowName) && 
                             not (allNodes.ContainsKey(node)) then
                         if resets.Count = 2 then
@@ -266,21 +281,9 @@ module private GraphCalculationUtils =
                 allNodes.Add(node, 3)
         allNodes
 
-    let getCallMap (graph:Graph<Vertex, Edge>) =
-        let callMap = new Dictionary<string, ResizeArray<Call>>()
-        graph.Vertices 
-        |> Seq.cast<Call>
-        |> Seq.iter(fun v -> 
-            let apiName = $"{v.GetSystem().Name}.{v.Name}"
-            if not (callMap.ContainsKey(apiName)) then
-                callMap.Add(apiName, new ResizeArray<Call>(0))
-            callMap.[apiName].Add(v)
-        )
-        callMap
-
     let getAliasHeads 
             (graph:Graph<Vertex, Edge>)
-            (callMap:Dictionary<string, ResizeArray<Call>>) =
+            (callMap:Dictionary<string, ResizeArray<Vertex>>) =
         [
         for calls in callMap do
             if calls.Value.Count > 1 then

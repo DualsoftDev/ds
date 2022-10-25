@@ -1,7 +1,6 @@
 namespace Engine.GraphUtil
 
 open System.Linq
-open System.Collections.Generic
 open Engine.Core
 
 [<AutoOpen>]
@@ -27,13 +26,12 @@ module internal GraphAlgorithms =
             resetChains 
             |> Seq.map(fun resets -> 
                 resets
-                |> Seq.cast<Call>
-                |> Seq.map(fun seg -> seg.ApiItem) 
+                |> Seq.map(getVertexTarget)
                 |> Seq.distinct
                 |> Seq.map(fun seg ->
                     seg.QualifiedName,
                     resetChains 
-                    |> Seq.collect(Seq.filter(fun s -> s.ApiItem = seg))
+                    |> Seq.collect(Seq.filter(fun s -> getVertexTarget s = seg))
                 )
                 |> Map.ofSeq
             )
@@ -68,7 +66,7 @@ module internal GraphAlgorithms =
             ]
 
         getOriginMaps 
-            (graph.Vertices |> Seq.cast<Call>)
+            graph.Vertices
             offByOneWayBackwardResets offByMutualResetChains 
             structedChains
 

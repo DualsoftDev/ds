@@ -14,10 +14,10 @@ module private ModelComparisonHelper =
         let toArray (xs:string) = xs.SplitByLine() |> Seq.where(fun x -> x.Trim().Any()) |> Array.ofSeq
         let xs = toArray xs
         let ys = toArray ys
-        xs.Length === ys.Length
         for (x, y) in Seq.zip xs ys do
-            if x <> y then
+            if x.Trim() <> y.Trim() then
                 failwithf "[%s] <> [%s]" x y
+        xs.Length === ys.Length
 
     [<AutoOpen>]           
     module ModelAnswers =
@@ -210,7 +210,6 @@ module private ModelComparisonHelper =
         Main = {
             Cp > Cm;
         }
-        Main; // island
         [aliases] = {
             C.P = { Cp; Cp1; Ap2; }
             C.M = { Cm; Cm1; Cm2; }
@@ -244,7 +243,6 @@ module private ModelComparisonHelper =
             Cp >> Cm;
             Cp <||> Cm;
         }
-        Main; // island
         [aliases] = {
             A.P = { Cp; Cp1; Ap2; }
             A.M = { Cm; Cm1; Cm2; }
@@ -318,7 +316,6 @@ module private ModelComparisonHelper =
         C1 = {
             EX."이상한. Api" > EX."Dummy. Api";
         }
-        C1; // island
     }
 }
 [sys] EX = {
@@ -341,7 +338,7 @@ module private ModelComparisonHelper =
             Ap1 > Ap2 > Am2;
             Ap1 <||> Am1;
         }
-        Main; // island
+
         [aliases] = {
             A."+" = { Ap1; Ap2; Ap3; }
             A."-" = { Am1; Am2; Am3; }

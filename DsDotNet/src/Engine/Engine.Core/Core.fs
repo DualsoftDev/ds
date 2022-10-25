@@ -27,11 +27,13 @@ module CoreModule =
         member val Flows    = createNamedHashSet<Flow>()
         member val ApiItems = createNamedHashSet<ApiItem>()
         member val ApiResetInfos = HashSet<ApiResetInfo>() with get, set
+        ///시스템 전체시작 버튼누름시 수행되야하는 Real목록
+        member val StartPoints = createQualifiedNamedHashSet<Real>() 
 
         member _.Model = model
         member _.Host = host
 
-        //시스템 버튼 소속 Flow 정보
+        ///시스템 버튼 소속 Flow 정보
         member val EmergencyButtons = ButtonDic()
         member val AutoButtons      = ButtonDic()
         member val StartButtons     = ButtonDic()
@@ -72,6 +74,7 @@ module CoreModule =
         inherit Vertex(name, Flow flow)
         member val Graph = Graph<Vertex, Edge>()
         member val Flow = flow
+
         member val SafetyConditions = createQualifiedNamedHashSet<Real>() 
         static member Create(name:string, flow) =
             if (name.Contains(".") (*&& not <| (name.StartsWith("\"") && name.EndsWith("\""))*)) then

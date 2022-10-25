@@ -178,26 +178,28 @@ class EtcListener : ListenerBase
             throw new ParserException("Layouts block should exist only once", ctx);
 
         var addressDefs = enumerateChildren<AddressDefContext>(ctx).ToArray();
+        //<<kwak>> help
         foreach (var addrDef in addressDefs)
         {
             var segNs = collectNameComponents(addrDef.segmentPath());
-            var api =
+            var call =
                 _model.Spit()
-                .Where(o => o.GetCore() is ApiItem && o.NameComponents.IsStringArrayEqaul(segNs))
+                .Where(o => o.GetCore() is Call && o.NameComponents.IsStringArrayEqaul(segNs))
                 .FirstOrDefault();
 
-            var apiItem = api.GetCore() as ApiItem;
+            var callCore = call.GetCore() as Call;
             var sre = addrDef.address();
             var (s, e) = (sre.startItem()?.GetText(), sre.endItem()?.GetText());
-            apiItem.Addresses = new Addresses(s, e);
+            callCore.Addresses = new Addresses(s, e);
         }
+        //<<kwak>> help
 
         foreach (var alias in _model.Spit().Where(o => o.GetCore() is Alias))
         {
             var al = alias.GetCore() as Alias;
             var targetSys = _model.FindSystem(al.AliasKey[0]);
             if (targetSys != al.Parent.System)
-                al.SetTarget(_model.FindApiItem(al.AliasKey));
+                al.SetTarget(_model.FindCall(al.AliasKey));
             else
                 al.SetTarget(_model.FindGraphVertex(al.AliasKey) as Real);
         }

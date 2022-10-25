@@ -87,7 +87,7 @@ module CoreModule =
     and AliasTargetType =
         | NullTarget
         | RealTarget of Real
-        | CallTarget of ApiItem
+        | CallTarget of Call
 
     and Alias private (mnemonic:string, parent:ParentWrapper, aliasKey:string[], isOtherFlowCall:bool) =
         inherit Vertex(mnemonic, parent)
@@ -104,7 +104,7 @@ module CoreModule =
     
         member _.AliasKey = aliasKey
         member val Target = NullTarget with get, set
-        member x.SetTarget(apiItem) = x.Target <- CallTarget apiItem
+        member x.SetTarget(call) = x.Target <- CallTarget call
         member x.SetTarget(real) = x.Target <- RealTarget real
         override x.GetRelativeName(referencePath:NameComponents) =
             if isOtherFlowCall then
@@ -117,6 +117,8 @@ module CoreModule =
     and Call private (apiItem:ApiItem, parent:ParentWrapper) =
         inherit Vertex(apiItem.QualifiedName, parent)
         member _.ApiItem = apiItem
+        member _.System = parent.System
+        member val Addresses:Addresses = null with get, set
 
         static member CreateInFlow(apiItem:ApiItem, flow:Flow) =
             let call = Call(apiItem, Flow flow)
@@ -139,7 +141,6 @@ module CoreModule =
         member x.AddRXs(rxs:Real seq) = rxs |> Seq.forall(fun rx -> x.RXs.Add(rx))
         member _.System = system
         member val Xywh:Xywh = null with get, set
-        member val Addresses:Addresses = null with get, set
 
         static member Create(name, system) =
             let cp = ApiItem(name, system)

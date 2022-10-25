@@ -30,10 +30,10 @@ module private GraphCalculationUtils =
         | :? Call as c -> c.Name.Replace("\"", "")
         | :? Alias as a -> a.AliasKey |> String.concat "."
         | _ -> failwith $"type error of {vertex}"
-
+        //<<shin>> help
     let getVertexTarget (vertex:Vertex) = 
         match vertex with
-        | :? Call as c -> c.ApiItem
+        | :? Call as c -> c
         | :? Alias as a -> 
             match a.Target with
             | CallTarget ct -> ct

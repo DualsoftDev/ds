@@ -29,6 +29,11 @@ module internal ModelFindModule =
         let x = sys.ApiItems.FindWithName(apiKey)
         x
 
+    
+    let findCall(model:Model, callPath:NameComponents) =
+        let x = findGraphVertex(model, callPath) :?> Call
+        x
+
     let findSystem(model:Model, systemName:string) =
         model.Systems.First(fun sys -> sys.Name = systemName)
 
@@ -38,6 +43,7 @@ type ModelFindHelper =
     [<Extension>] static member FindGraphVertex<'V when 'V :> IVertex>(model:Model, fqdn:NameComponents) = findGraphVertexT<'V>(model, fqdn)
     [<Extension>] static member FindApiItem(model:Model, apiPath:NameComponents) = findApiItem(model, apiPath)
     [<Extension>] static member FindSystem(model:Model, systemName:string) = findSystem(model, systemName)
+    [<Extension>] static member FindCall(model:Model, callPath:NameComponents) = findCall(model, callPath)
 
 
 

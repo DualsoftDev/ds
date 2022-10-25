@@ -100,7 +100,7 @@ type SpitModule =
     [<Extension>] static member Spit (flow:Flow)       = spitFlow flow
     [<Extension>] static member Spit (segment:Real)    = spitSegment segment
     [<Extension>] static member Spit (call:Call)       = spitCall call
-    [<Extension>] static member Spit (alias:Alias)     = spitAlias alias
+    //[<Extension>] static member Spit (alias:Alias)     = spitAlias alias
     
     [<Extension>]
     static member GetCore (spit:SpitResult):obj = 

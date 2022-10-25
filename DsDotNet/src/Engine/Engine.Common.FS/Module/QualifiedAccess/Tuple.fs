@@ -38,27 +38,46 @@ module Tuple =
         static member ($) (Tuple1st, (x1,_,_)) = x1
         static member ($) (Tuple1st, (x1,_,_,_)) = x1
         static member ($) (Tuple1st, (x1,_,_,_,_)) = x1
-        // more overloads
+        static member ($) (Tuple1st, (x1,_,_,_,_,_)) = x1
+        static member ($) (Tuple1st, (x1,_,_,_,_,_,_)) = x1
+        static member ($) (Tuple1st, (x1,_,_,_,_,_,_,_)) = x1
     type Tuple2nd = Tuple2nd with
         static member ($) (Tuple2nd, (_,x1)) = x1
         static member ($) (Tuple2nd, (_,x1,_)) = x1
         static member ($) (Tuple2nd, (_,x1,_,_)) = x1
         static member ($) (Tuple2nd, (_,x1,_,_,_)) = x1
-        // more overloads
+        static member ($) (Tuple2nd, (_,x1,_,_,_,_)) = x1
+        static member ($) (Tuple2nd, (_,x1,_,_,_,_,_)) = x1
+        static member ($) (Tuple2nd, (_,x1,_,_,_,_,_,_)) = x1
     type Tuple3rd = Tuple3rd with
         static member ($) (Tuple3rd, (_,_,x1)) = x1
         static member ($) (Tuple3rd, (_,_,x1,_)) = x1
         static member ($) (Tuple3rd, (_,_,x1,_,_)) = x1
-        // more overloads
+        static member ($) (Tuple3rd, (_,_,x1,_,_,_)) = x1
+        static member ($) (Tuple3rd, (_,_,x1,_,_,_,_)) = x1
     type Tuple4th = Tuple4th with
         static member ($) (Tuple4th, (_,_,_,x1)) = x1
         static member ($) (Tuple4th, (_,_,_,x1,_)) = x1
-        // more overloads
+        static member ($) (Tuple4th, (_,_,_,x1,_,_)) = x1
+        static member ($) (Tuple4th, (_,_,_,x1,_,_,_)) = x1
+    type Tuple5th = Tuple5th with
+        static member ($) (Tuple5th, (_,_,_,_,x1)) = x1
+        static member ($) (Tuple5th, (_,_,_,_,x1,_)) = x1
+        static member ($) (Tuple5th, (_,_,_,_,x1,_,_)) = x1        
+    type Tuple6th = Tuple6th with
+        static member ($) (Tuple6th, (_,_,_,_,_,x1)) = x1
+        static member ($) (Tuple6th, (_,_,_,_,_,x1,_)) = x1        
+    type Tuple7th = Tuple7th with
+        static member ($) (Tuple7th, (_,_,_,_,_,_,x1)) = x1
+
 
     let inline tuple1st x = Tuple1st $ x
     let inline tuple2nd x = Tuple2nd $ x
     let inline tuple3rd x = Tuple3rd $ x
     let inline tuple4th x = Tuple4th $ x
+    let inline tuple5th x = Tuple5th $ x
+    let inline tuple6th x = Tuple6th $ x
+    let inline tuple7th x = Tuple7th $ x
 
     // https://stackoverflow.com/questions/14115260/extension-methods-for-f-tuples 도 참고... 동작하지 않는 듯..
 

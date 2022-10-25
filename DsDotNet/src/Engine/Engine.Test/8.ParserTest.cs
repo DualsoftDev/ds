@@ -5,7 +5,45 @@ namespace Engine
 {
     internal static class ParserTest
     {
-        public static string Safety = @"
+        public static string SafetyValid = @"
+[sys] L = {
+    [flow] F = {
+        Main = { Cp > Cm; }
+        [aliases] = {
+            C.P = { Cp; Cp1; Ap2; }
+            C.M = { Cm; Cm1; Cm2; }
+        }
+        [safety] = {
+            Main = {C.F.Sp; C.F.Sm}
+        }
+    }
+}
+
+[sys] C = {
+    [flow] F = {
+        Vp > Pp > Sp;
+        Vm > Pm > Sm;
+
+        Pp |> Sm;
+        Pm |> Sp;
+        Vp <||> Vm;
+    }
+    [interfaces] = {
+        P = { F.Vp ~ F.Sp }
+        M = { F.Vm ~ F.Sm }
+        // 정보로서의 상호 리셋
+        P <||> M;
+    }
+}
+
+[prop] = {
+    [ safety ] = {
+        L.F.Main = {C.F.Vp; C.F.Vm}
+    }
+}
+";
+
+        public static string SafetyDuplicatedInvalid = @"
 [sys] L = {
     [flow] F = {
         Main = { Cp > Cm; }
@@ -42,6 +80,7 @@ namespace Engine
     }
 }
 ";
+
         public static string StrongCausal = @"
 [sys] L = {
     [flow] F = {
@@ -229,37 +268,6 @@ namespace Engine
 ";
 
 
-        public static string Serialize = @"
-[sys] L = {
-    [flow] F = {
-        Main = { Cp > Cm; }
-        Cp = {P.F.Vp ~ P.F.Sp}
-        Cm = {P.F.Vm ~ P.F.Sm}
-        Cx = {P.F.Vm ~ _}
-    }
-
-    [start] = {
-        StartBTN_FF = { F };
-        StartBTN1 = { F; };
-    }
-    [reset] = {
-        ResetBTN = { F };
-    }
-}
-
-[sys] P = {
-    [flow] F = {
-        Vp > Pp > Sp;
-        Vm > Pm > Sm;
-
-        Pp |> Sm;
-        Pm |> Sp;
-        Vp <||> Vm;
-    }
-}
-
-";
-
         public static string Error = @"
 [sys] MY = {
     [flow] Rear = {
@@ -362,17 +370,23 @@ namespace Engine
     [flow] "" my flow. "" = {
         R1 > R2;
         C1 = {
-            EX.""이상한. flow"".TX,
-            EX.""이상한. flow"".""NameWith\""Quote""
-            ~ EX.""이상한. flow"".""R.X""}
+            EX.""이상한. Api"" >
+            EX.""Dummy. Api""
+            // > EX.""이상한. Api""
+            ; }
     }
 }
 [sys] EX = {
-    [flow] ""이상한. flow"" = {
+    [flow] F = {
         TX;
         ""R.X"";
         ""NameWith\""Quote"";
     }
+    [interfaces] = {
+        ""이상한. Api"" = { F.TX ~ F.""R.X"" }
+        ""Dummy. Api"" = { _ ~ _ }
+    }
+
 }
 ";
 
@@ -427,17 +441,15 @@ namespace Engine
         public static string Aliases = @"
 [sys] my = {
     [flow] F = {
-        Ap = {A.F.Vp ~ A.F.Sp}
-        Am = {A.F.Vm ~ A.F.Sm}
         Main = {
             // AVp1 |> Am1;
             // 정보로서의 Call 상호 리셋
             Ap1 <||> Am1;
             Ap1 > Am1, Ap2 > Am2;
         }
-        [alias] = {
-            Ap = { Ap1; Ap2; Ap3; }
-            Am = { Am1; Am2; Am3; }    // system name optional
+        [aliases] = {
+            A.""+"" = { Ap1; Ap2; Ap3; }
+            A.""-"" = { Am1; Am2; Am3; }    // system name optional
             //Vp = {AVp1;}  // invalid: 자신 시스템에 정의된 것만 alias
         }
 

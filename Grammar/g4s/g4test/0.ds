@@ -1,90 +1,22 @@
-
-[sys ip = 192.168.0.1] My = {
-    [flow] MyFlow = {
-        Seg1 > Seg2;
-        Seg1 = {
-            A."+" > A."-";
-        }
-    }
-    [flow] "Flow.Complex" = {
-        "#Seg.Complex#" > Seg;
-        "#Seg.Complex#" = {
-            A."+" > A."-";
-        }
-    }
-
-    [flow] F = {        // GraphVertexType.Flow
-        C1, C2 > C3, C4 |> C5;
-C3 > C5 > C6;
-C4 > C5;
-        Main        // GraphVertexType.{ Segment | Parenting }
-        > R3        // GraphVertexType.{ Segment }
-        ;
-        Main = {        // GraphVertexType.{ Segment | Parenting }
-            // diamond
-            Ap1 > Am1 > Bm1;
-            Ap1 > Bp1 > Bm1;
-
-            // diamond 2nd
-            Bm1 >               // GraphVertexType.{ Child | Call | Aliased }
-            Ap2 > Am2 > Bm2;
-            Ap2 > Bp2 > Bm2;
-
-            Bm2
-            > A."+"             // GraphVertexType.{ Child | Call }
-            ;
-        }
-        R1              // define my local terminal real segment    // GraphVertexType.{ Segment }
-            //> C."+"     // direct interface call wrapper segment    // GraphVertexType.{ Call }
-            > Main2     // aliased to my real segment               // GraphVertexType.{ Segment | Aliased }
-            > Ap1       // aliased to interface                     // GraphVertexType.{ Segment | Aliased | Call }
-            ;
-        R2;
-
-        [aliases] = {
-            A."+" = { Ap1; Ap2; }
-            A."-" = { Am1; Am2; }
-            B."+" = { Bp1; Bp2; }
-            B."-" = { Bm1; Bm2; }
-            Main = { Main2; }
-        }
-        [safety] = {
-            Main = {A.F.Sp; A.F.Sm}
-        }
-    }
-    [emg] = {
-        EMGBTN = { F; };
-        //EmptyButton = {};
-        //NonExistingFlowButton = { F1; };
+[sys] "my.favorite.system!!" = {
+    [flow] " my flow. " = {
+        R1 > R2;
+        C1 = {
+            EX."이상한. Api" >
+            EX."Dummy. Api"
+            // > EX."이상한. Api"
+            ; }
     }
 }
-[sys ip=1.2.3.4] A = {
+[sys] EX = {
     [flow] F = {
-        Vp > Pp > Sp;
-        Vm > Pm > Sm;
-
-        Vp |> Pm |> Sp;
-        Vm |> Pp |> Sm;
-        Vp <||> Vm;
+        TX;
+        "R.X";
+        "NameWith\"Quote";
     }
     [interfaces] = {
-        "+" = { F.Vp ~ F.Sp }
-        "-" = { F.Vm ~ F.Sm }
-        // 정보로서의 상호 리셋
-        "+" <||> "-";
+        "이상한. Api" = { F.TX ~ F."R.X" }
+        "Dummy. Api" = { _ ~ _ }
     }
-}
-[sys] B = @copy_system(A);
-[sys] C = @copy_system(A);
-[prop] = {
-    // Global safety
-    [safety] = {
-        My.F.Main = {B.F.Sp; B.F.Sm; C.F.Sp}
-    }
-    [addresses] = {
-        A."+" = (%Q1234.2343, %I1234.2343)
-    }
-    [layouts] = {
-        A."+" = (1309,405,205,83)
-    }
+
 }

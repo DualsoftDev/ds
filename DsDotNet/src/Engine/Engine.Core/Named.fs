@@ -34,8 +34,8 @@ module TextUtil =
         match s with
         | ValidIdentifier x when x.IsSome -> s
 
-        | RegexMatches "\"(.*)\""   // "#specidal#"
-        | RegexMatches pattern -> s // xxx."yyy"
+        | ( RegexMatches "\"(.*)\""   // "#specidal#"
+          | RegexMatches pattern ) -> s // xxx."yyy"
 
         | _ -> quote s
 

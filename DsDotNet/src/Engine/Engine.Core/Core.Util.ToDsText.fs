@@ -139,8 +139,9 @@ module internal ToDsTextModule =
                 for item in system.ApiItems do
                     let ser =
                         let qNames (xs:Real seq) = xs.Select(fun tx -> tx.QualifiedName) |> String.concat(", ")
-                        let s = qNames(item.TXs) |> nonNullSelector "_"
-                        let e = qNames(item.RXs) |> nonNullSelector "_"
+                        let coverWithUnderScore (x:string) = if x.IsNullOrEmpty() then "_" else x
+                        let s = qNames(item.TXs) |> coverWithUnderScore
+                        let e = qNames(item.RXs) |> coverWithUnderScore
                         $"{s} ~ {e}"
                     yield $"{tab2}{item.Name.QuoteOnDemand()} = {lb} {ser} {rb}"
 

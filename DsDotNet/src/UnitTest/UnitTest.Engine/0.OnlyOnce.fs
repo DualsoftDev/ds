@@ -17,7 +17,8 @@ module Fixtures =
     let configureLog4Net (loggerName:string) log4netConfigFile =
         XmlConfigurator.Configure(new FileInfo(log4netConfigFile)) |> ignore
         let logger = LogManager.GetLogger(loggerName)
-        Global.Logger <- logger
+        Engine.Common.Global.Logger <- logger
+        Engine.Parser.Global.Logger <- logger
         gLogger <- logger
         logger
 

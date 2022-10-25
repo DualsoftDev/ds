@@ -49,6 +49,12 @@ internal class SampleRunner
         Vm |> Pp |> Sm;
         Vp <||> Vm;
     }
+    [interfaces] = {
+        ""+"" = { F.Vp ~ F.Sp }
+        ""-"" = { F.Vm ~ F.Sm }
+        // 정보로서의 상호 리셋
+        ""+"" <||> ""-"";
+    }
 }";
 
 }

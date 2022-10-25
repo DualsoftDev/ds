@@ -40,7 +40,7 @@ class Program
 
         Engine.Parser.Program.Main(null);
 
-        SampleRunner.Run(ParserTest.Safety);
+        SampleRunner.Run(ParserTest.SafetyValid);
         //SampleRunner.Run(ParserTest.StrongCausal);
         //SampleRunner.Run(ParserTest.Buttons);
         //SampleRunner.Run(ParserTest.Dup);
@@ -53,13 +53,13 @@ class Program
         //SampleRunner.Run(ParserTest.MyFlowReference);
         //SampleRunner.Run(ParserTest.Error);
 
-        //InvalidDuplicationTest.Test(InvalidDuplicationTest.DupSystemNameModel);
-        //InvalidDuplicationTest.Test(InvalidDuplicationTest.DupFlowNameModel);
-        //InvalidDuplicationTest.Test(InvalidDuplicationTest.DupParentingModel1);
-        //InvalidDuplicationTest.Test(InvalidDuplicationTest.DupParentingModel2);
-        //InvalidDuplicationTest.Test(InvalidDuplicationTest.DupParentingModel3);
-        //InvalidDuplicationTest.Test(InvalidDuplicationTest.DupCallPrototypeModel);
-        //InvalidDuplicationTest.Test(InvalidDuplicationTest.DupParentingWithCallPrototypeModel);
-        //InvalidDuplicationTest.Test(InvalidDuplicationTest.DupCallTxModel);
+        InvalidDuplicationTest.Test(InvalidDuplicationTest.DupSystemNameModel);
+        InvalidDuplicationTest.Test(InvalidDuplicationTest.DupFlowNameModel);
+        InvalidDuplicationTest.Test(InvalidDuplicationTest.DupParentingModel1);
+        InvalidDuplicationTest.Test(InvalidDuplicationTest.DupParentingModel2);
+        InvalidDuplicationTest.Test(InvalidDuplicationTest.DupParentingModel3);
+        InvalidDuplicationTest.Test(InvalidDuplicationTest.DupCallPrototypeModel);
+        InvalidDuplicationTest.Test(InvalidDuplicationTest.DupParentingWithCallPrototypeModel);
+        InvalidDuplicationTest.Test(InvalidDuplicationTest.DupCallTxModel);
     }
 }

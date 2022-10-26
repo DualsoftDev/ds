@@ -183,7 +183,7 @@ class EtcListener : ListenerBase
         {
             var segNs = collectNameComponents(addrDef.segmentPath());
             var call =
-                _model.Spit()
+                _modelSpits
                 .Where(o => o.GetCore() is Call && o.NameComponents.IsStringArrayEqaul(segNs))
                 .FirstOrDefault();
 
@@ -194,7 +194,7 @@ class EtcListener : ListenerBase
         }
         //<<kwak>> help
 
-        foreach (var alias in _model.Spit().Where(o => o.GetCore() is Alias))
+        foreach (var alias in _modelSpits.Where(o => o.GetCore() is Alias))
         {
             var al = alias.GetCore() as Alias;
             var targetSys = _model.FindSystem(al.AliasKey[0]);

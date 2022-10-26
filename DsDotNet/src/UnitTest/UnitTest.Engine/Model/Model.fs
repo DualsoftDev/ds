@@ -419,5 +419,10 @@ module ModelTests1 =
             //compare ParserTest.Error ""
             compare ParserTest.QualifiedName answerQualifiedName
             
-            
+        [<Test>]
+        member __.``Model duplication test`` () =
+            (fun () -> compare InvalidDuplicationTest.DupSystemNameModel "") |> ShouldFailWithSubstringT "An item with the same key has already been added"
+            (fun () -> compare InvalidDuplicationTest.DupFlowNameModel "")   |> ShouldFailWithSubstringT "Duplicated"
+            (fun () -> compare InvalidDuplicationTest.DupParentingModel1 "") |> ShouldFailWithSubstringT "Duplicated"
+            (fun () -> compare InvalidDuplicationTest.DupParentingModel2 "") |> ShouldFailWithSubstringT "Duplicated"
             

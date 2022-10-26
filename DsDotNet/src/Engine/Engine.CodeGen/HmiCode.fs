@@ -19,8 +19,12 @@ module HmiGenModule =
     | None      = 0
     | Start     = 7
     | Reset     = 8
-    | Emergency = 9
-    | Auto      = 10
+    | On        = 9
+    | Off       = 10
+    | Run       = 11
+    | Emergency = 12
+    | Auto      = 13
+    | Clear     = 14
     
     type Info = {
         name:string;
@@ -78,21 +82,78 @@ module HmiGenModule =
                     target, genInfo target category ButtonType.None parent
                 )
                 
-        let addButtons 
-                (system:DsSystem)
-                (hmiInfos:Dictionary<string, Info>)
+        let addButton 
+                (btnName:string) (systemName:string)
+                (buttonType:ButtonType) (hmiInfos:Dictionary<string, Info>) =
+            hmiInfos.Add(
+                btnName,
+                genInfo btnName Category.Button buttonType systemName
+            )
+
+        let addFlowButton
+                (btnName:string) (systemName:string) (flowNames:string list)
+                (buttonType:ButtonType) (hmiInfos:Dictionary<string, Info>) =
+            if hmiInfos.ContainsKey(btnName) = false then
+                addButton btnName systemName buttonType hmiInfos
+                for flow in flowNames do hmiInfos.[btnName].targets.Add(flow)
+
+        let addGroupButtons
+                (system:DsSystem) (hmiInfos:Dictionary<string, Info>)
                 (buttonsInFlow:Dictionary<string, ResizeArray<Flow>>) 
                 (buttonType:ButtonType) =
             for btn in buttonsInFlow do
                 let btnName = btn.Key
-                let flows = btn.Value
-                if hmiInfos.ContainsKey(btnName) = false then
-                    hmiInfos.Add(
-                        btnName,
-                        genInfo btnName Category.Button buttonType system.Name
-                    )
+                let flowNames = [ for flow in btn.Value do flow.QualifiedName ]
+                addFlowButton btnName system.Name flowNames buttonType hmiInfos
+
+        let addUnionButtons
+                (system:DsSystem) (flow:Flow)
+                (hmiInfos:Dictionary<string, Info>) 
+                (btnTargetMap:Dictionary<ButtonType, ResizeArray<string>>) =
+            let flowName = $"{flow.QualifiedName}"
+            let btnNames = [
+                "EMSTOPof", ButtonType.Emergency;
+                "ATMANUof", ButtonType.Auto;
+                "CLEAR_of", ButtonType.Clear;
+            ]
+            for name, btnType in btnNames do
+                let btnName = $"{name}__{flowName}"
+                if not (btnTargetMap.ContainsKey(btnType)) || 
+                        not (btnTargetMap.[btnType].Contains(flowName)) then
+                    addFlowButton 
+                        btnName system.Name [flowName] btnType hmiInfos
+
+        let addGlobalButtons 
+                (model:Model) (hmiInfos:Dictionary<string, Info>) =
+            let getFlowNames (hmiInfos:Dictionary<string, Info>) = 
+                hmiInfos 
+                |> Seq.filter(fun info -> 
+                    info.Value.category = Category.Flow
+                )
+                |> Seq.map(fun info -> info.Value.name)
+
+            let buttons = [
+                "RUN", ButtonType.Run;
+                "EMSTOP", ButtonType.Emergency;
+                "ATMANU", ButtonType.Auto;
+                "CLEAR", ButtonType.Clear;
+            ]
+            let flows = getFlowNames hmiInfos
+            for button, btnType in buttons do
+                addButton button null btnType hmiInfos
+                match btnType with
+                | ButtonType.Run ->
+                    for sys in model.Systems do
+                        for sp in sys.StartPoints do 
+                            hmiInfos.[button].targets.Add(sp.QualifiedName)
+                | ButtonType.Emergency
+                | ButtonType.Auto
+                | ButtonType.Clear ->
                     for flow in flows do
-                        hmiInfos.[btnName].targets.Add(flow.QualifiedName)
+                        hmiInfos.[button].targets.Add(flow)
+                | _ ->
+                    failwith "type error"
+                    
                         
         let addInterface 
                 (api:ApiItem) (hmiInfos:Dictionary<string, Info>) =
@@ -107,8 +168,7 @@ module HmiGenModule =
                 )
             
         let addDevice
-                (model:Model)
-                (system:DsSystem) (flow:Flow)
+                (model:Model) (system:DsSystem) (flow:Flow)
                 (hmiInfos:Dictionary<string, Info>) (call:Vertex) = 
             let addToUsedIn 
                     (hmiInfos:Dictionary<string, Info>)
@@ -118,9 +178,12 @@ module HmiGenModule =
 
             let (device, api) = 
                 match call with
-                | :? Call as c -> c.ApiItem.System.Name, Some(c.ApiItem)
-                | :? Alias as a -> a.AliasKey.[0], Some(model.FindApiItem a.AliasKey)
-                | _ -> null, None
+                | :? Call as c -> 
+                    c.ApiItem.System.Name, Some(c.ApiItem)
+                | :? Alias as a -> 
+                    a.AliasKey.[0], Some(model.FindApiItem a.AliasKey)
+                | _ -> 
+                    null, None
 
             if hmiInfos.ContainsKey(device) = false then
                 hmiInfos.Add(
@@ -133,21 +196,26 @@ module HmiGenModule =
             addToUsedIn hmiInfos device flow.QualifiedName
 
             match call.Parent with
-            | Real realParent -> addToUsedIn hmiInfos device realParent.QualifiedName
-            | _ -> ()
-
+            | Real realParent -> 
+                addToUsedIn hmiInfos device realParent.QualifiedName
+            | _ -> 
+                ()
 
         let hmiInfos = new Dictionary<string, Info>()
         for sys in model.Systems do
-            //if sys.Name = "My" then // to check
+            // if sys.Name = "My" then // to check
             if sys.Active then
                 addSystemFlowReal sys hmiInfos
-                addButtons sys hmiInfos sys.AutoButtons ButtonType.Auto
-                addButtons sys hmiInfos sys.StartButtons ButtonType.Start
-                addButtons sys hmiInfos sys.ResetButtons ButtonType.Reset
-                addButtons sys hmiInfos sys.EmergencyButtons ButtonType.Emergency
+                addGroupButtons sys hmiInfos sys.AutoButtons ButtonType.Auto
+                addGroupButtons sys hmiInfos sys.ResetButtons ButtonType.Clear
+                addGroupButtons sys hmiInfos sys.EmergencyButtons ButtonType.Emergency
+                let btnTgtMap = 
+                    new Dictionary<ButtonType, ResizeArray<string>>()
+                for info in hmiInfos do
+                    btnTgtMap.Add(info.Value.botton_type, info.Value.targets)
                 for flow in sys.Flows do
                     addSystemFlowReal flow hmiInfos
+                    addUnionButtons sys flow hmiInfos btnTgtMap
                     for rootSeg in flow.Graph.Vertices do
                         match rootSeg with
                         | :? Real as real -> 
@@ -166,14 +234,17 @@ module HmiGenModule =
                                 printfn $"alias target error of {alias}"
                         | _ -> 
                             printfn "unknown type has detected"
+        
+        addGlobalButtons model hmiInfos
 
+        let initializer = {
+                mode = "init";
+                initializer = [ for info in hmiInfos.Values do yield info ];
+            }
         let settings = JsonSerializerSettings()
         settings.Converters.Add(Converters.StringEnumConverter())
         JsonConvert.SerializeObject(
-            {
-                mode = "init";
-                initializer = [ for info in hmiInfos.Values do yield info ];
-            }, 
+            initializer, 
             // Formatting.Indented, // to visual check
             settings
         )
@@ -184,8 +255,6 @@ module HmiGenModule =
             ModelParser.ParseFromString2(Program.EveryScenarioText, 
             ParserOptions.Create4Simulation());
         let model = helper.Model;
-        let xxx = model.ToDsText();
         let json = GenHmiCpuText(model)
         printfn "%A" (json.ToString())
-
         0

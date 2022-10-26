@@ -269,12 +269,11 @@ module PPTX =
         
         member val Id =  shape.GetId()
         member val Key =  Objkey(iPage, shape.GetId())
-        member val Name =   name
+        member val Name =   name with get, set
         member val NameOrg =   shape.InnerText
         member val CntTX =  txCnt
         member val CntRX =  rxCnt
-        member val Alias :string  option = None with get, set
-        member val AliasKey :string  = "" with get, set
+        member val Alias :pptNode  option = None with get, set
         member val Rectangle :System.Drawing.Rectangle =   shape.GetPosition(sildeSize)
 
     and 

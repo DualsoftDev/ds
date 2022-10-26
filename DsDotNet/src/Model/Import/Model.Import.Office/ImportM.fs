@@ -24,8 +24,7 @@ module ImportM =
         member internal x.GetImportModel() = 
             try
         
-                let dicVertex = ConcurrentDictionary<string, Vertex>()
-                let dicSeg = ConcurrentDictionary<string, MSeg>()
+                let dicSeg = Dictionary<string, MSeg>()
                 MSys.Create(TextMySys, true, model) |> ignore
                 let mySystem = DsSystem.Create(TextMySys, "localhost", coreModel)  //new 
                 mySystem.Active <- true;
@@ -57,21 +56,30 @@ module ImportM =
                 
                 //segment 리스트 만들기
                 MakeSeg(doc.Nodes, model, dicSeg, doc.Parents)//old
-                MakeSegment(doc.Nodes, coreModel, dicVertex, dicFlow) //new
+                let dicVertex = Dictionary<string, Vertex>()
+                MakeSegment(doc.Nodes, coreModel, doc.Parents, dicFlow, dicVertex) //new
 
 
 
                 //parent 리스트 만들기
                 MakeParent(doc.Nodes, model, dicSeg, doc.Parents)
-                MakeParents(doc.Nodes, coreModel, dicVertex, doc.Parents)
+           //     MakeParents(doc.Nodes, coreModel, dicVertex, doc.Parents)
                 
 
                 //Safety 만들기
-                MakeSafety(doc.Nodes, model, dicSeg)
+              //  MakeSafety(doc.Nodes, model, dicSeg) //old
+                MakeSafeties(doc.Nodes, coreModel, dicFlow, dicVertex)  //new
                 //Dummy child 처리
-                MakeDummy(doc.Parents, dicSeg)
+                //MakeDummy(doc.Parents, dicSeg) //old
+                //MakeDummys(doc.Parents, dicVertex) //new
+
+
                 //edge 리스트 만들기 
-                MakeEdges(doc,  model, dicSeg)
+                MakeEdge(doc,  model, dicSeg) //old
+
+
+                MakeVetexEdges(doc, coreModel, dicFlow , dicVertex) //new
+                MakeEdges     (doc, coreModel, dicFlow , dicVertex) //new
                 //Root Flow AddSingleNode
                 MakeSingleNode(doc,  model, dicSeg)
 

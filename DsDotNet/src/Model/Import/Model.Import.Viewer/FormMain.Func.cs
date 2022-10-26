@@ -67,8 +67,9 @@ namespace Dual.Model.Import
 
                 if (!_ConvertErr)
                 {
-                    var dsCore = ConvertM.ToDs(_model);
-                    _dsText = ToDsTextModuleHelper.ToDsText(dsCore);
+                    // var dsCore = ConvertM.ToDs(_model);
+                    //   _dsText = ToDsTextModuleHelper.ToDsText(dsCore);
+                    _dsText = "";
                     ExportTextModel(Color.Transparent, _dsText);
                     this.Do(() => xtraTabControl_Ex.TabPages.Clear());
                     foreach (var sys in _model.Systems.OrderBy(sys => sys.Name))

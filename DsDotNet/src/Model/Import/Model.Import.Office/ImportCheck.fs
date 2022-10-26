@@ -48,7 +48,7 @@ module ImportCheck =
             if(srcParents.Count() > 1) then failError (srcParents, edge.StartNode)  
             if(tgtParents.Count() > 1) then failError (tgtParents, edge.EndNode)  
 
-        let InterfaceErr(pptNodes:pptNode seq, model:MModel, dicSeg:ConcurrentDictionary<string, MSeg>) = 
+        let InterfaceErr(pptNodes:pptNode seq, model:MModel, dicSeg:Dictionary<string, MSeg>) = 
             pptNodes
             |> Seq.filter(fun node -> node.NodeType = IF) 
             |> Seq.iter(fun node -> 

@@ -24,8 +24,8 @@ module ImportM =
         member internal x.GetImportModel() = 
             try
         
-                let dicVertex = ConcurrentDictionary<string, Vertex>()
-                let dicSeg = ConcurrentDictionary<string, MSeg>()
+                let dicVertex = Dictionary<string, Vertex>()
+                let dicSeg = Dictionary<string, MSeg>()
                 MSys.Create(TextMySys, true, model) |> ignore
                 let mySystem = DsSystem.Create(TextMySys, "localhost", coreModel)  //new 
                 mySystem.Active <- true;
@@ -57,13 +57,13 @@ module ImportM =
                 
                 //segment 리스트 만들기
                 MakeSeg(doc.Nodes, model, dicSeg, doc.Parents)//old
-                MakeSegment(doc.Nodes, coreModel, dicVertex, dicFlow) //new
+          //      MakeSegment(doc.Nodes, coreModel, doc.Parents, dicFlow) //new
 
 
 
                 //parent 리스트 만들기
                 MakeParent(doc.Nodes, model, dicSeg, doc.Parents)
-                MakeParents(doc.Nodes, coreModel, dicVertex, doc.Parents)
+           //     MakeParents(doc.Nodes, coreModel, dicVertex, doc.Parents)
                 
 
                 //Safety 만들기

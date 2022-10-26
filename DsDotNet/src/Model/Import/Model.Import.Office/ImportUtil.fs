@@ -194,38 +194,99 @@ module ImportU =
                     dicSeg.Add(node.Key, seg) |> ignore
                 )
 
+        let MakeParents(pptNodes:pptNode seq, model:Model, dicSeg:Dictionary<string, Vertex>, parents:ConcurrentDictionary<pptNode, seq<pptNode>>) = 
+                let dicParent = parents 
+                                |> Seq.filter(fun parentChildren -> parentChildren.Key.IsDummy|>not)
+                                |> Seq.collect(fun parentChildren -> 
+                                                           parentChildren.Value 
+                                                           |> Seq.map(fun child -> child, parentChildren.Key)) |> dict
+                pptNodes
+                |> Seq.iter(fun node -> 
+                    if(dicParent.ContainsKey(node))
+                    then 
+                        let child  = dicSeg.[node.Key]
+                        let parent = dicSeg.[dicParent.[node].Key]
+                        ()
+                       // child.Parent <- Some(parent)
+                    )
+
+
+        let private createVertex(model:Model, node:pptNode, parentReal:Real Option, parentFlow:Flow Option, dicFlow:Dictionary<int, Flow>, dicSeg:Dictionary<string, Vertex>) = 
+            if node.Alias.IsSome 
+            then
+                 let vertex = dicSeg.[node.Alias.Value.Key] 
+                 Alias.CreateInFlow(node.Name, vertex.NameComponents , dicFlow.[node.PageNum]) :> Vertex
+                 //if parentReal.IsSome
+                 //then 
+                 //    let v = dicSeg.[node.Alias.Value.Key] 
+                 //    Alias.CreateInFlow(node.Name, v.NameComponents , dicFlow.[node.PageNum]) :> Vertex
+                 //else
+                 //    Alias.CreateInReal(node.Name, dicSeg.[node.Alias.Value.Key] , dicFlow.[node.PageNum]) :> Vertex  //ahn Call 규격시 처리
+            else
+
+                let name =   if(node.NodeType.IsCall) then node.CallName else node.NameOrg
+                let vertex = 
+                            if(node.NodeType.IsReal) 
+                            then  Real.Create(name, parentFlow.Value) :> Vertex
+                            else 
+                                    let system =model.FindSystem(node.CallName.Split('.').[0])
+                                    let ifName = node.Name.Split('.').[1];
+                                    let findApi = model.FindApiItem([|system.Name;ifName|]) 
+                                    let api = if findApi.IsNull() then ApiItem.Create(ifName, system) else findApi
+
+
+                                    if(parentReal.IsSome)
+                                    then  Call.CreateInReal(api, parentReal.Value)  :> Vertex  
+                                    else  Call.CreateInFlow(api, parentFlow.Value)  :> Vertex  
+                vertex
+
+
       //segment 리스트 만들기
-        let MakeSegment(pptNodes:pptNode seq, model:Model, dicSeg:ConcurrentDictionary<string, Vertex>, dicFlow:Dictionary<int, Flow>) = 
-            let mySys = model.Systems.Where(fun w->w.Active).First();
+        let MakeSegment(pptNodes:pptNode seq, model:Model
+            , parents:ConcurrentDictionary<pptNode, seq<pptNode>>
+            , dicFlow:Dictionary<int, Flow>
+            , dicSeg:Dictionary<string, Vertex>) = 
+
+            let dicChildParent = 
+                parents 
+                |> Seq.filter(fun parent -> parent.Key.IsDummy|>not)
+                |> Seq.collect(fun parentChildren -> 
+                    parentChildren.Value 
+                    |> Seq.map(fun child -> child, parentChildren.Key)) |> dict
+
+           
+                    
+            //let btn   = node.IsEmgBtn || node.IsStartBtn || node.IsAutoBtn || node.IsResetBtn 
+            //let bound = if(btn) then ExBtn
+            //            else if(node.NodeType.IsCall) then OtherFlow else ThisFlow
+            
+                                        
+            //Real 부터
             pptNodes
-            |> Seq.sortBy(fun node -> node.Alias.IsSome)
+                |> Seq.filter(fun node -> node.Alias.IsNone) 
+                |> Seq.filter(fun node -> node.NodeType.IsReal) 
+                |> Seq.filter(fun node -> dicChildParent.ContainsKey(node)|>not) 
+                |> Seq.iter(fun node   -> dicSeg.Add(node.Key, createVertex(model, node, None, Some(dicFlow.[node.PageNum]), dicFlow, dicSeg))|>ignore)
+            //Call 처리
+            pptNodes
+                |> Seq.filter(fun node -> node.Alias.IsNone) 
+                |> Seq.filter(fun node -> node.NodeType.IsCall) 
+                |> Seq.iter(fun node -> 
+                            let parentReal = if  dicChildParent.ContainsKey(node) 
+                                             then Some(dicSeg.[dicChildParent.[node].Key] :?> Real)
+                                             else None
+                            let parentFlow = if  dicChildParent.ContainsKey(node) 
+                                             then None
+                                             else Some(dicFlow.[node.PageNum])
+                            dicSeg.Add(node.Key, createVertex(model, node, parentReal, parentFlow, dicFlow, dicSeg)))
+          
+            //Alias Node 처리 마감
+            pptNodes
+            |> Seq.filter(fun node -> node.Alias.IsSome)
             |> Seq.iter(fun node -> 
-                
-                let flow  = dicFlow.[node.PageNum]
-                let sys   = if(node.NodeType.IsCall) 
-                            then model.FindSystem(node.CallName.Split('.').[0])
-                            else mySys
-
-                let btn   = node.IsEmgBtn || node.IsStartBtn || node.IsAutoBtn || node.IsResetBtn 
-                let bound = if(btn) then ExBtn
-                            else if(node.NodeType.IsCall) then OtherFlow else ThisFlow
-
-             
-                if(node.Alias.IsSome)
-                then
-                    let segOrg = dicSeg.[node.AliasKey]
-                    let aliasName = node.Alias.Value
-                    let alias = Alias.CreateInFlow(aliasName, segOrg.NameComponents, flow)
-                    //let aliasSeg = MSeg(aliasName, mySys, ThisFlow, segOrg.NodeType, flow, segOrg.IsDummy)
-                    //aliasSeg.Update(node.Key, node.Id.Value, 0,0)
-                    //aliasSeg.AliasOrg <- Some(segOrg)
-                    dicSeg.TryAdd(node.Key, alias) |> ignore
-                else 
-                    let name =  if(node.NodeType.IsCall) then node.CallName else node.NameOrg
-                    let real = Real.Create(name, flow)
-                    //let seg = MSeg(name, sys,  bound, node.NodeType, flow, node.IsDummy)
-                    //seg.Update(node.Key, node.Id.Value, node.CntTX, node.CntRX)
-                    dicSeg.TryAdd(node.Key, real) |> ignore
+                    let segOrg = dicSeg.[node.Alias.Value.Key]
+                    let aliasName = node.Name
+                    Alias.CreateInFlow(aliasName, segOrg.NameComponents, dicFlow.[node.PageNum]) |> ignore
                 )
 
      
@@ -262,7 +323,7 @@ module ImportU =
                 |> Seq.iter  (fun node -> dicSeg.[node.Key].Parent.Value.ChildFlow.AddSingleNode(dicSeg.[node.Key]) |> ignore)   
 
         //pptEdge 변환 및 등록
-        let MakeEdges(doc:pptDoc, model:MModel, dicSeg:ConcurrentDictionary<string, MSeg>) = 
+        let MakeEdge(doc:pptDoc, model:MModel, dicSeg:Dictionary<string, MSeg>) = 
             let pptEdges = doc.Edges
             let parents = doc.Parents
             let mySys = model.ActiveSys
@@ -430,7 +491,17 @@ module ImportU =
                     |> Seq.iter(fun child -> pSeg.ChildFlow.AddSingleNode(dicSeg.[child.Key]) |> ignore  ) )
                 
 
-        let MakeLayouts(doc:pptDoc,  model:MModel, dicSeg:ConcurrentDictionary<string, MSeg>) = 
+        let MakeDummys(parents:ConcurrentDictionary<pptNode, seq<pptNode>>, dicSeg:Dictionary<string, Vertex>) = 
+                parents
+                |> Seq.filter(fun group -> group.Key.IsDummy)
+                |> Seq.map(fun group -> group.Key, group.Value)
+                |> Seq.iter(fun (parent, children) -> 
+                    let pSeg = dicSeg.[parent.Key] :?> Real
+                    children 
+                    |> Seq.iter(fun child -> pSeg.Graph.AddVertex(dicSeg.[child.Key]) |> ignore  ) )
+
+
+        let MakeLayouts(doc:pptDoc,  model:MModel, dicSeg:Dictionary<string, MSeg>) = 
             let pptNodes =    doc.Nodes
             let visibleLast = doc.Pages.OrderByDescending(fun p -> p.PageNum) |> Seq.filter(fun p -> p.IsUsing) |> Seq.head
             let mySys = model.ActiveSys

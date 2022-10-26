@@ -2,6 +2,7 @@ namespace Engine.Parser;
 
 using System.Runtime.Remoting.Contexts;
 
+using static Antlr4.Runtime.Atn.SemanticContext;
 using static Engine.Core.CodeElements;
 
 /// <summary>
@@ -168,40 +169,84 @@ class EtcListener : ListenerBase
         }
 
         //[addresses] = {
-        //    A.F.Am = (%Q123.23, %I12.1);        // FQSegmentName = (Start, Reset) Tag address
-        //    A.F.Ap = (%Q123.24, %I12.2);
-        //    B.F.Bm = (%Q123.25, %I12.3);
-        //    B.F.Bp = (%Q123.26, %I12.4);
+        //  ApiName = (Start, End) Tag address
+        //  A."" + "" = (% Q1234.2343, % I1234.2343)
+        //  A."" - "" = (START, END)
         //}
         var addresses = enumerateChildren<AddressesContext>(ctx).ToArray();
         if (addresses.Length > 1)
             throw new ParserException("Layouts block should exist only once", ctx);
 
         var addressDefs = enumerateChildren<AddressDefContext>(ctx).ToArray();
-        //<<kwak>> help
+
+        // collect Addresses for API
+        Dictionary<string, Addresses> apiAddressMap = new();
         foreach (var addrDef in addressDefs)
         {
-            var segNs = collectNameComponents(addrDef.segmentPath());
-            var call =
+            var apiNs = collectNameComponents(addrDef.segmentPath());
+            var api =
                 _modelSpits
-                .Where(o => o.GetCore() is Call && o.NameComponents.IsStringArrayEqaul(segNs))
+                .Where(o => o.GetCore() is ApiItem && o.NameComponents.IsStringArrayEqaul(apiNs))
                 .FirstOrDefault();
 
-            var callCore = call.GetCore() as Call;
             var sre = addrDef.address();
             var (s, e) = (sre.startItem()?.GetText(), sre.endItem()?.GetText());
-            callCore.Addresses = new Addresses(s, e);
+            apiAddressMap.Add(apiNs.Combine(), new Addresses(s, e));
         }
-        //<<kwak>> help
 
-        foreach (var alias in _modelSpits.Where(o => o.GetCore() is Alias))
+        foreach (var o in _modelSpits)
         {
-            var al = alias.GetCore() as Alias;
-            var targetSys = _model.FindSystem(al.AliasKey[0]);
-            if (targetSys != al.Parent.System)
-                al.SetTarget(_model.FindCall(al.AliasKey));
-            else
-                al.SetTarget(_model.FindGraphVertex(al.AliasKey) as Real);
+            switch (o.GetCore())
+            {
+                case Alias al:
+                    var targetSys = _model.FindSystem(al.AliasKey[0]);
+                    if (targetSys != al.Parent.System)
+                    {
+                        var apiItem = _model.FindApiItem(al.AliasKey);
+                        var calls =
+                            al.Parent.System.Spit()
+                            .CollectCallsDeeply()
+                            //.Select(sp => sp.GetCore())
+                            //.OfType<Call>()
+                            .Where(call => call.Name == apiItem.QualifiedName)
+                            .ToArray();
+                        if (apiAddressMap.ContainsKey(apiItem.QualifiedName))
+                        {
+                            var address = apiAddressMap[apiItem.QualifiedName];
+                            foreach (var c in calls)
+                            {
+                                Assert(c.Addresses == null || c.Addresses == address);
+                                c.Addresses = address;
+                            }
+                        }
+                        else
+                        {
+                            //LogWarn($"Address not specified for call [{apiItem.QualifiedName}]");
+                            throw new ParserException($"Address not specified for call [{apiItem.QualifiedName}]", ctx);
+                        }
+
+                        if (calls.Any())
+                            al.SetTarget(calls.First());
+                        else
+                        {
+                            var dummyCall = Call.CreateNowhere(apiItem, al.Parent);
+                            al.SetTarget(dummyCall);
+                        }
+                    }
+                    else
+                        al.SetTarget(_model.FindGraphVertex(al.AliasKey) as Real);
+                    break;
+                case Call call:
+                    {
+                        if (apiAddressMap.ContainsKey(call.Name))
+                        {
+                            var address = apiAddressMap[call.Name];
+                            Assert(call.Addresses == null || call.Addresses == address);
+                            call.Addresses = address;
+                        }
+                    }
+                    break;
+            }
         }
     }
 }

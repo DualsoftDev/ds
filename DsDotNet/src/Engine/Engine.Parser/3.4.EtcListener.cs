@@ -88,7 +88,7 @@ class EtcListener : ListenerBase
                     seg = _model.FindGraphVertex<Real>(AppendPathElement(key[0]));
                     break;
                 case 3:
-                    Assert(ctx.Parent is PropertyBlockContext);
+                    Assert(ctx.Parent is ModelPropertyBlockContext);
                     seg = _model.FindGraphVertex<Real>(key);
                     break;
                 default:

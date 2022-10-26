@@ -65,7 +65,6 @@ module CoreModule =
         Vertex (name:string, parent:ParentWrapper) =
         inherit FqdnObject(name, parent.Core)
         interface INamedVertex
-        //member _.System = parent.System
         member _.Parent = parent 
 
     /// Segment (DS Basic Unit)
@@ -117,7 +116,6 @@ module CoreModule =
     and Call private (apiItem:ApiItem, parent:ParentWrapper) =
         inherit Vertex(apiItem.QualifiedName, parent)
         member _.ApiItem = apiItem
-        member _.System = parent.System
         member val Addresses:Addresses = null with get, set
 
         static member CreateInFlow(apiItem:ApiItem, flow:Flow) =
@@ -129,6 +127,9 @@ module CoreModule =
             let call = Call(apiItem, Real real)
             real.Graph.AddVertex(call) |> verifyM $"Duplicated call name [{apiItem.QualifiedName}]"
             call
+
+        /// Graph 에 포함되지 않는 core.  Alias 에 숨은 core
+        static member CreateNowhere(apiItem:ApiItem, parent:ParentWrapper) = Call(apiItem, parent)
 
       
     and ApiItem private (name:string, system:DsSystem) =
@@ -146,9 +147,6 @@ module CoreModule =
             let cp = ApiItem(name, system)
             system.ApiItems.Add(cp) |> verifyM $"Duplicated interface prototype name [{name}]"
             cp
-
-        //member val Xywh:Xywh = Xywh(0,0,Some(0),Some(0)) with get,set
-        //override x.ToText() = name
 
     /// API 의 reset 정보:  "+" <||> "-";
     and ApiResetInfo private (system:DsSystem, operand1:string, operator:string, operand2:string) =
@@ -188,13 +186,16 @@ module CoreModule =
 [<Extension>]
 type CoreExt =
     [<Extension>] static member GetSystem(call:Call) = call.Parent.System
-    [<Extension>] static member AddButton(sys:DsSystem, btnType:BtnType, btnName: string, flow:Flow) = 
-                    let dicButton = match btnType with
-                                    |StartBTN       -> sys.StartButtons
-                                    |ResetBTN       -> sys.ResetButtons
-                                    |EmergencyBTN   -> sys.EmergencyButtons
-                                    |AutoBTN        -> sys.AutoButtons
+    [<Extension>]
+    static member AddButton(sys:DsSystem, btnType:BtnType, btnName: string, flow:Flow) = 
+        let dicButton =
+            match btnType with
+            | StartBTN       -> sys.StartButtons
+            | ResetBTN       -> sys.ResetButtons
+            | EmergencyBTN   -> sys.EmergencyButtons
+            | AutoBTN        -> sys.AutoButtons
 
-                    if dicButton.ContainsKey btnName
-                    then dicButton.[btnName].Add(flow)
-                    else dicButton.Add(btnName, ResizeArray[|flow|] )
+        if dicButton.ContainsKey btnName then
+            dicButton.[btnName].Add(flow)
+        else
+            dicButton.Add(btnName, ResizeArray[|flow|] )

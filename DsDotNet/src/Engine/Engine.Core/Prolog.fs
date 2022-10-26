@@ -22,5 +22,5 @@ type Xywh(x:int, y:int, w:Nullable<int>, h:Nullable<int>) =
 
 [<AllowNullLiteral>]
 type Addresses(inAddress:string, outAddress:string) =
-    member x.IN = inAddress
+    member x.In = inAddress
     member x.Out = outAddress

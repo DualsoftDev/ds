@@ -59,7 +59,7 @@ module private GraphCalculationUtils =
             $"{system}.{src}", info.Operator, $"{system}.{tgt}"
 
         let getResetInfo (node:Vertex) = 
-            let vertexSystem = (getVertexTarget node).System
+            let vertexSystem = (getVertexTarget node).GetSystem()
             vertexSystem.ApiResetInfos 
             |> Seq.map(makeName (vertexSystem.QualifiedName.Replace("\"", "")))
 

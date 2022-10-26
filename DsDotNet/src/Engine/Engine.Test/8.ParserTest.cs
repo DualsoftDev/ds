@@ -40,6 +40,10 @@ namespace Engine
     [ safety ] = {
         L.F.Main = {C.F.Vp; C.F.Vm}
     }
+    [addresses] = {
+        C.P = ( %Q1234.2343, %I1234.2343)
+        C.M = ( START, END)
+    }
 }
 ";
 
@@ -110,6 +114,12 @@ namespace Engine
         M = { F.Vm ~ F.Sm }
         // 정보로서의 상호 리셋
         P <||> M;
+    }
+}
+[prop] = {
+    [addresses] = {
+        A.P = ( %Q1234.2343, %I1234.2343)
+        A.M = ( START, END)
     }
 }
 
@@ -452,7 +462,13 @@ namespace Engine
             A.""-"" = { Am1; Am2; Am3; }    // system name optional
             //Vp = {AVp1;}  // invalid: 자신 시스템에 정의된 것만 alias
         }
+    }
+}
 
+[prop] = {
+    [addresses] = {
+        A.""+"" = (%Q1234.2343, %I1234.2343)
+        A.""-"" = (START, END)
     }
 }
 

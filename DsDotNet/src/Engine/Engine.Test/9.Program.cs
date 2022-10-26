@@ -57,9 +57,5 @@ class Program
         InvalidDuplicationTest.Test(InvalidDuplicationTest.DupFlowNameModel);
         InvalidDuplicationTest.Test(InvalidDuplicationTest.DupParentingModel1);
         InvalidDuplicationTest.Test(InvalidDuplicationTest.DupParentingModel2);
-        InvalidDuplicationTest.Test(InvalidDuplicationTest.DupParentingModel3);
-        InvalidDuplicationTest.Test(InvalidDuplicationTest.DupCallPrototypeModel);
-        InvalidDuplicationTest.Test(InvalidDuplicationTest.DupParentingWithCallPrototypeModel);
-        InvalidDuplicationTest.Test(InvalidDuplicationTest.DupCallTxModel);
     }
 }

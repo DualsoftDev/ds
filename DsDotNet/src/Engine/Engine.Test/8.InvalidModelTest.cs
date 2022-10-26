@@ -22,55 +22,19 @@ namespace Engine
 }
 ";
         public static string DupParentingModel2 = @"
-[sys] A = {
+[sys] My = {
     [flow] F = {
-        Root = {X > Y;}
+        Root = {A.Plus > A.Minus;}
         Root;
     }
 }
-";
-        public static string DupParentingModel3 = @"
 [sys] A = {
     [flow] F = {
-        Root = {X > Y;}
-        Root = {Ex.F.Tx ~ Ex.F.Rx}
+        Ap > Am;
     }
-}
-[sys] Ex = {}
-";
-        public static string DupCallPrototypeModel = @"
-[sys] A = {
-    [flow] F = {
-        Root = {X > Y;}
-        X = {Ex.F.Tx ~ Ex.F.Rx}
-        X = {Ex.F.Tx ~ Ex.F.Rx}
-    }
-}
-";
-
-        public static string DupParentingWithCallPrototypeModel = @"
-[sys] A = {
-    [flow] F = {
-        Root = {X > Y;}
-        Root = {Ex.F.Tx ~ Ex.F.Rx}
-        X = {Ex.F.Tx ~ Ex.F.Rx}
-        Y = {Ex.F.Tx ~ Ex.F.Rx}
-    }
-}
-[sys] Ex = {}
-";
-
-        public static string DupCallTxModel = @"
-[sys] A = {
-    [flow] F = {
-        Root = {X > Y;}
-        X = {Ex.F.Tx, Ex.F.Tx ~ Ex.F.Rx}
-        Y = {Ex.F.Tx ~ Ex.F.Rx}
-    }
-}
-[sys] Ex = {
-    [flow] F = {
-        Tx;
+    [interfaces] = {
+        Plus = { F.Ap ~ F.Am }
+        Minus = { F.Am ~ F.Ap }
     }
 }
 ";

@@ -8,19 +8,19 @@ module SpitModuleHelper =
     type SpitOnlyAlias = { AliasKey:NameComponents; Mnemonic:NameComponents }
 
     type SpitCoreType =
-        | SpitModel    of Model
-        | SpitDsSystem of DsSystem
-        | SpitFlow     of Flow
-        | SpitReal     of Real
-        | SpitCall     of Call
-        | SpitAlias    of Alias
+        | SpitModel     of Model
+        | SpitDsSystem  of DsSystem
+        | SpitFlow      of Flow
+        | SpitReal      of Real
+        | SpitCall      of Call
+        | SpitAlias     of Alias
         | SpitOnlyAlias of SpitOnlyAlias
         | SpitApiItem   of ApiItem
         | SpitVariable  of Variable
         | SpitCommand   of Command
         | SpitObserve   of Observe
 
-    [<DebuggerDisplay("Obj={SpitObj}, Names={NameComponents}")>]
+    [<DebuggerDisplay("Obj={SpitObj}, Names={NameComponents.Combine()}")>]
     type SpitResult =
         { SpitObj:SpitCoreType; NameComponents:NameComponents }
         static member Create(core, nameComponents) = {SpitObj = core; NameComponents = nameComponents}

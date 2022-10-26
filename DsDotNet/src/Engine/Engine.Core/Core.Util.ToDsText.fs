@@ -201,6 +201,18 @@ module internal ToDsTextModule =
                 yield "}"
         ] |> combineLines
 
+    let collectCallsDeeply(spitResults:SpitResult seq) =
+        [
+            for core in spitResults.Select(fun spit -> spit.GetCore()) do
+            match core with
+            | :? Call as call -> call
+            | :? Alias as alias ->
+                match alias.Target with
+                | CallTarget call -> call
+                | _ -> ()
+            | _ -> ()
+        ]
+
     let modelToDs (model:Model) =
         let tab = getTab 1
         let tab2 = getTab 2
@@ -228,16 +240,19 @@ module internal ToDsTextModule =
                         yield $"{tab}{rb}"
                 ] |> combineLines
 
-            let callItems = spits.Select(fun spit -> spit.GetCore()).OfType<Call>().ToArray()
-            let withAddresses = callItems.Where(fun callItem -> callItem.Addresses <> null)
+            let calls = collectCallsDeeply spits
+            let callsWithAddresse =
+                calls |> List.filter(fun c -> c.Addresses <> null)
+                |> List.distinctBy(fun c -> c.ApiItem.QualifiedName)
+
             let addresses =
                 [
-                    if withAddresses.Any() then
+                    if callsWithAddresse.Any() then
                         yield $"{tab}[addresses] = {lb}"
-                        for seg in withAddresses do
-                            let ads = seg.Addresses
+                        for call in callsWithAddresse do
+                            let ads = call.Addresses
                             
-                            yield $"{tab2}{seg.QualifiedName} = ( {ads.Out}, {ads.IN})"
+                            yield $"{tab2}{call.ApiItem.QualifiedName} = ( {ads.In}, {ads.Out})"
                         yield $"{tab}{rb}"
 
                 ] |> combineLines
@@ -275,4 +290,5 @@ module internal ToDsTextModule =
 type ToDsTextModuleHelper =
     [<Extension>] static member ToDsText(model:Model) = modelToDs(model)
     [<Extension>] static member ToDsText(system:DsSystem) = systemToDs(system)
+    [<Extension>] static member CollectCallsDeeply(spitResults:SpitResult seq) = collectCallsDeeply spitResults
 

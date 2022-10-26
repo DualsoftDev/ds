@@ -111,6 +111,8 @@ module private ModelComparisonHelper =
         [addresses] = {
             A."+" = ( %Q1234.2343, %I1234.2343)
             A."-" = ( START, END)
+            B."-" = ( BSTART, BEND)
+            B."+" = ( %Q4321.2343, %I4321.2343)
         }
         [layouts] = {
             A."+" = (1309, 405, 205, 83)
@@ -359,6 +361,13 @@ module private ModelComparisonHelper =
         "+" <||> "-";
     }
 }
+
+[prop] = {
+    [addresses] = {
+        A."+" = ( %Q1234.2343, %I1234.2343)
+        A."-" = ( START, END)
+    }
+}
 """
         let answerQualifiedName2 = """
 """
@@ -378,46 +387,73 @@ module ModelTests1 =
         do Fixtures.SetUpTest()
 
         [<Test>]
-        member __.``Model parser test`` () =
-            logInfo "============== Model parser test"
-
+        member __.``EveryScenarioText test`` () =
             logInfo "=== EveryScenarioText"
             compare Program.EveryScenarioText answerEveryScenarioText
 
+        [<Test>]
+        member __.``CodeElementsText test`` () =
             logInfo "=== CodeElementsText"
             compare Program.CodeElementsText answerCodeElementsText
 
+        [<Test>]
+        member __.``AdoptoedValidText test`` () =
             logInfo "=== AdoptoedValidText"
             compare Program.AdoptoedValidText answerAdoptoedValidText
 
+        [<Test>]
+        member __.``DuplicatedEdgesText test`` () =
             logInfo "=== DuplicatedEdgesText"
             compare Program.DuplicatedEdgesText answerDuplicatedEdgesText
 
+        [<Test>]
+        member __.``SplittedMRIEdgesText test`` () =
             logInfo "=== SplittedMRIEdgesText"
             compare Program.SplittedMRIEdgesText answerSplittedMRIEdgesText
 
+        [<Test>]
+        member __.``AdoptoedAmbiguousText test`` () =
             logInfo "=== AdoptoedAmbiguousText"
             (fun () -> compare Program.AdoptoedAmbiguousText "")
                 |> ShouldFailWithSubstringT "Ambiguous entry [F.Seg1] and [My.F.Seg1]"
 
+        [<Test>]
+        member __.``Model component [SafetyValid] test`` () =
+            compare ParserTest.SafetyValid answerSafetyValid
 
         [<Test>]
-        member __.``Model component test done`` () =
-            compare ParserTest.SafetyValid answerSafetyValid
+        member __.``Model component [StrongCausal] test`` () =
             compare ParserTest.StrongCausal answerStrongCausal
+
+        [<Test>]
+        member __.``Model component [Buttons] test`` () =
             compare ParserTest.Buttons answerButtons
+
+        [<Test>]
+        member __.``Model component [Dup] test`` () =
             compare ParserTest.Dup answerDup
                 
         [<Test>]
-        member __.``Model component test`` () =
-
-            //compare ParserTest.Ppt);
+        member __.``Model component [Aliases] test`` () =
             compare ParserTest.Aliases answerAliases
+
+        [<Test>]
+        member __.``Model component [QualifiedName] test`` () =
+            compare ParserTest.QualifiedName answerQualifiedName
+
+        [<Test>]
+        member __.``Model component test`` () =
+            //compare ParserTest.Ppt);
             //compare ParserTest.ExternalSegmentCall ""
             //compare ParserTest.ExternalSegmentCallConfusing ""
             //compare ParserTest.MyFlowReference ""
             //compare ParserTest.Error ""
-            compare ParserTest.QualifiedName answerQualifiedName        // todo : C1 island 없어야 ...
+            ()
             
-            
+        [<Test>]
+        member __.``Model duplication test`` () =
+            (fun () -> compare InvalidDuplicationTest.DupSystemNameModel "") |> ShouldFailWithSubstringT "An item with the same key has already been added"
+            (fun () -> compare InvalidDuplicationTest.DupFlowNameModel "")   |> ShouldFailWithSubstringT "Duplicated"
+            (fun () -> compare InvalidDuplicationTest.DupParentingModel1 "") |> ShouldFailWithSubstringT "Duplicated"
+            (fun () -> compare InvalidDuplicationTest.DupParentingModel2 "") |> ShouldFailWithSubstringT "Duplicated"
             

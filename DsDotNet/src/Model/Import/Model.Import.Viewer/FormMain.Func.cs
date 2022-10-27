@@ -59,21 +59,20 @@ namespace Dual.Model.Import
             try
             {
                 this.Do(() => button_comfile.Enabled = false);
-                var lstModel = new List<Engine.Core.CoreModule.Model>() { ImportM.FromPPTX(PathPPT) };
+                var result = ImportM.FromPPTX(PathPPT);
+                var lstModel = new List<Engine.Core.CoreModule.Model>() { result.Item1 };
                 if (lstModel.Where(w => w == null).Any())
                     return;
 
-                _Model = lstModel.First();
-
+                _Model = result.Item1;
+                _OldModel = result.Item2;
                 if (!_ConvertErr)
                 {
-                    // var dsCore = ConvertM.ToDs(_model);
-                    //   _dsText = ToDsTextModuleHelper.ToDsText(dsCore);
                     _dsText = _Model.ToDsText();
                     ExportTextModel(Color.Transparent, _dsText);
                     this.Do(() => xtraTabControl_Ex.TabPages.Clear());
-                    //foreach (var sys in _model.Systems.OrderBy(sys => sys.Name))
-                    //    CreateNewTabViewer(sys);
+                    foreach (var sys in _OldModel.Systems.OrderBy(sys => sys.Name))
+                        CreateNewTabViewer(sys);
                     WriteDebugMsg(DateTime.Now, MSGLevel.Info, $"{PathPPT} 불러오기 성공!!");
                     this.Do(() =>
                     {
@@ -109,7 +108,7 @@ namespace Dual.Model.Import
                 if (UtilFile.BusyCheck()) return;
                 Busy = true;
                 MSGInfo($"{PathXLS} 불러오는 중!!");
-                ImportIOTable.ApplyExcel(path, _model.ActiveSys);
+                ImportIOTable.ApplyExcel(path, _OldModel.ActiveSys);
                 //_dsText = ExportM.ToText(_model);
                 ExportTextModel(Color.FromArgb(0, 150, 0), _dsText);
                 this.Do(() =>
@@ -146,7 +145,7 @@ namespace Dual.Model.Import
             WriteDebugMsg(DateTime.Now, MSGLevel.Info, $"{PathXLS} 생성시작!!");
 
             Directory.CreateDirectory(Path.GetDirectoryName(PathXLS));
-            ExportIOTable.ToFiie(_model, PathXLS);
+            ExportIOTable.ToFiie(_OldModel, PathXLS);
 
             WriteDebugMsg(DateTime.Now, MSGLevel.Info, $"{PathXLS} 생성완료!!");
             this.Do(() =>

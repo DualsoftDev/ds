@@ -42,11 +42,11 @@ module ImportU =
                     then MSys.Create(sysName, false, model) |> ignore
                     )
 
-            //doc.Nodes 
-            //|> Seq.filter(fun node -> node.NodeType = COPY) 
-            //|> Seq.iter(fun node -> 
-            //        node.CopySys.ForEach(fun sysName -> MSys.Create(sysName, false, model) |> ignore)
-            //        )
+            doc.Nodes 
+            |> Seq.filter(fun node -> node.NodeType = COPY) 
+            |> Seq.iter(fun node -> 
+                    node.CopySys.ForEach(fun sysName -> MSys.Create(sysName.Key, false, model) |> ignore)
+                    )
 
         let MakeCopySystem(doc:pptDoc, model:CoreModule.Model, dicSys:Dictionary<int, DsSystem>) = 
             doc.Pages

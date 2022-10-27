@@ -16,7 +16,7 @@ namespace Dual.Model.Import
     {
         public static FormMain TheMain;
 
-        private MModel _model;
+        private MModel _OldModel = new MModel("TEST");
         private Engine.Core.CoreModule.Model _Model;
         private string _dsText;
         private bool _ConvertErr = false;
@@ -217,7 +217,7 @@ namespace Dual.Model.Import
         {
             button_TestORG.Enabled = false;
             button_TestStart.Enabled = false;
-            await SimSeg.TestStart(_model);
+            await SimSeg.TestStart(_OldModel);
             button_TestORG.Enabled = true;
             button_TestStart.Enabled = true;
         }

@@ -41,7 +41,7 @@ module private GraphCalculationUtils =
         graph.Vertices
         |> Seq.iter(fun v -> 
             let apiName = 
-                (getVertexTarget v).ApiItem.QualifiedName.Replace("\"", "")
+                (getVertexTarget v).ApiItem.QualifiedName
             if not (callMap.ContainsKey(apiName)) then
                 callMap.Add(apiName, new ResizeArray<Vertex>(0))
             callMap.[apiName].Add(v)
@@ -51,14 +51,14 @@ module private GraphCalculationUtils =
     /// Get reset informations from graph
     let getAllResets (graph:Graph<Vertex, Edge>) =
         let makeName (system:string) (info:ApiResetInfo) = 
-            let src = info.Operand1.Replace("\"", "")
-            let tgt = info.Operand2.Replace("\"", "")
+            let src = info.Operand1
+            let tgt = info.Operand2
             $"{system}.{src}", info.Operator, $"{system}.{tgt}"
 
         let getResetInfo (node:Vertex) = 
             let vertexSystem = (getVertexTarget node).ApiItem.System
             vertexSystem.ApiResetInfos 
-            |> Seq.map(makeName (vertexSystem.QualifiedName.Replace("\"", "")))
+            |> Seq.map(makeName (vertexSystem.QualifiedName))
 
         let generateResetRelationShips 
                 (callMap:Dictionary<string, ResizeArray<Vertex>>)

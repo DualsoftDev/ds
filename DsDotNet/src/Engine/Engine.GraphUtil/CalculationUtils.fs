@@ -25,12 +25,7 @@ module private GraphCalculationUtils =
                 result.Add(now)
         result
 
-    let getApiName (vertex:Vertex) = 
-        match vertex with
-        | :? Call as c -> c.Name.Replace("\"", "")
-        | :? Alias as a -> a.AliasKey |> String.concat "."
-        | _ -> failwith $"type error of {vertex}"
-        //<<shin>> help
+    /// Get vertex target
     let getVertexTarget (vertex:Vertex) = 
         match vertex with
         | :? Call as c -> c
@@ -40,11 +35,13 @@ module private GraphCalculationUtils =
             | _ -> failwith $"type error of {vertex}"
         | _ -> failwith $"type error of {vertex}"
 
+    /// Get call maps
     let getCallMap (graph:Graph<Vertex, Edge>) =
         let callMap = new Dictionary<string, ResizeArray<Vertex>>()
         graph.Vertices
         |> Seq.iter(fun v -> 
-            let apiName = getApiName v
+            let apiName = 
+                (getVertexTarget v).ApiItem.QualifiedName.Replace("\"", "")
             if not (callMap.ContainsKey(apiName)) then
                 callMap.Add(apiName, new ResizeArray<Vertex>(0))
             callMap.[apiName].Add(v)
@@ -59,7 +56,7 @@ module private GraphCalculationUtils =
             $"{system}.{src}", info.Operator, $"{system}.{tgt}"
 
         let getResetInfo (node:Vertex) = 
-            let vertexSystem = (getVertexTarget node).GetSystem()
+            let vertexSystem = (getVertexTarget node).ApiItem.System
             vertexSystem.ApiResetInfos 
             |> Seq.map(makeName (vertexSystem.QualifiedName.Replace("\"", "")))
 
@@ -243,7 +240,7 @@ module private GraphCalculationUtils =
         // Remove duplicates
         removeDuplicatesInList candidates
         
-    /// get origin map
+    /// Get origin map
     let getOriginMaps 
             (graphNode:Vertex seq) (offByOneWayBackwardResets:Vertex seq) 
             (offByMutualResetChains:Vertex seq) 
@@ -281,6 +278,7 @@ module private GraphCalculationUtils =
                 allNodes.Add(node, 3)
         allNodes
 
+    // Get aliases in front of graph
     let getAliasHeads 
             (graph:Graph<Vertex, Edge>)
             (callMap:Dictionary<string, ResizeArray<Vertex>>) =

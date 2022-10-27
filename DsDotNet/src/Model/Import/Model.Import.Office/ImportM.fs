@@ -18,51 +18,57 @@ module ImportM =
 
     type internal ImportPowerPoint(path:string) =
         let doc   = pptDoc(path)
-        let model = MModel(doc.FullPath)
+        //let mmodel = MModel(doc.FullPath)
         let coreModel = CoreModule.Model()
 
         member internal x.GetImportModel() = 
             try
         
                 let dicSeg = Dictionary<string, MSeg>()
-                MSys.Create(TextMySys, true, model) |> ignore
+                let dicSys = Dictionary<int, DsSystem>()  //0 페이지 기본 나의 시스템 (각페이지별 해당시스템으로 구성)
+               // MSys.Create(TextMySys, true, mmodel) |> ignore  //old
+
                 let mySystem = DsSystem.Create(TextMySys, "localhost", coreModel)  //new 
                 mySystem.Active <- true;
+                dicSys.Add(0, mySystem)
 
                 //page 타이틀 이름 중복체크 (없으면 P0, P1, ... 자동생성)
                 ImportCheck.SamePageErr(doc.Pages) |> ignore
 
                 //ExSys  만들기
-                MakeExSys(doc, model) |> ignore//old 삭제예정
-                MakeExSystem(doc, coreModel) |> ignore //new 
-
+               // MakeExSys(doc, mmodel ) |> ignore//old 삭제예정
+                MakeCopySystem(doc, coreModel, dicSys) //new 
+                MakeInterfaces(doc, coreModel, dicSys) //new
+                MakeCopySystemAddApi(doc, coreModel, dicSys)
 
                 //Flow 리스트 만들기
-                MakeFlos(doc.Pages, model) |> ignore //old 삭제예정
+             //   MakeFlos(doc.Pages, mmodel) |> ignore //old 삭제예정
                 let dicFlow = Dictionary<int, Flow>() // page , flow
                 MakeFlows(doc.Pages, coreModel, dicFlow) |> ignore //new 
 
                 // system, flow 이름 중복체크 
-                ImportCheck.SameSysFlow(model.Flows) |> ignore//old 삭제예정
+              //  ImportCheck.SameSysFlow(mmodel.Flows) |> ignore//old 삭제예정
                 ImportCheck.SameSysFlowName(coreModel.Systems, dicFlow) |> ignore //new
                  
 
-                //alias Setting, Safety & EMG & Start & Auto 리스트 만들기
-                MakeAlias    (doc.Nodes, model, doc.Parents) //new
+                //alias Setting
+                MakeAlias    (doc,  dicFlow) //new
 
-                MakeBtn      (doc.Nodes, model)//old 삭제예정
+                //EMG & Start & Auto 리스트 만들기
+             //   MakeBtn      (doc.Nodes, mmodel)//old 삭제예정
                 MakeButtons  (doc.Nodes, coreModel, dicFlow) //new
-
-                
+                //let btn   = node.IsEmgBtn || node.IsStartBtn || node.IsAutoBtn || node.IsResetBtn 
+                //let bound = if(btn) then ExBtn
+                //            else if(node.NodeType.IsCall) then OtherFlow else ThisFlow
+            
                 //segment 리스트 만들기
-                MakeSeg(doc.Nodes, model, dicSeg, doc.Parents)//old
+            //    MakeSeg(doc.Nodes, mmodel, dicSeg, doc.Parents)//old
                 let dicVertex = Dictionary<string, Vertex>()
                 MakeSegment(doc.Nodes, coreModel, doc.Parents, dicFlow, dicVertex) //new
 
 
-
                 //parent 리스트 만들기
-                MakeParent(doc.Nodes, model, dicSeg, doc.Parents)
+            //    MakeParent(doc.Nodes, mmodel, dicSeg, doc.Parents)
            //     MakeParents(doc.Nodes, coreModel, dicVertex, doc.Parents)
                 
 
@@ -75,40 +81,40 @@ module ImportM =
 
 
                 //edge 리스트 만들기 
-                MakeEdge(doc,  model, dicSeg) //old
+            //    MakeEdge(doc,  mmodel, dicSeg) //old
 
 
-                MakeVetexEdges(doc, coreModel, dicFlow , dicVertex) //new
-                MakeEdges     (doc, coreModel, dicFlow , dicVertex) //new
+                //MakeVetexEdges(doc, coreModel, dicFlow , dicVertex) //new
+                MakeEdges     (doc, coreModel, dicFlow ,dicSys,  dicVertex) //new
                 //Root Flow AddSingleNode
-                MakeSingleNode(doc,  model, dicSeg)
+             //   MakeSingleNode(doc,  mmodel, dicSeg)
 
 
                 //tx rx 유효 체크 필요 todo
-                ImportCheck.InterfaceErr(doc.Nodes, model, dicSeg) |> ignore
+             //   ImportCheck.InterfaceErr(doc.Nodes, mmodel, dicSeg) |> ignore
                 //Interface 리스트 만들기
-                MakeInterface(doc.Nodes, model, dicSeg)
+            //    MakeIf(doc.Nodes, mmodel, dicSeg) ///old
                 
-                ImportCheck.CopySystemErr(doc.Nodes, model) |> ignore
+              //  ImportCheck.CopySystemErr(doc.Nodes, mmodel) |> ignore
                 //exSysCopy  만들기
-                MakeCopySystem(doc,  model)
+             //   MakeCopySys(doc,  mmodel)
              
                 //유효 이름 체크
-                ImportCheck.ValidPath(doc.Nodes, model) |> ignore
+            //    ImportCheck.ValidPath(doc.Nodes, mmodel) |> ignore
                 //중복엣지 체크
                 ImportCheck.SameEdgeErr(doc.Edges ) |> ignore
 
                 //Call 위치정보 업데이트 (마지막 페이지만 정보 반영)
-                MakeLayouts(doc, model, dicSeg)
+              //  MakeLayouts(doc, mmodel, dicSeg)
             
                 MSGInfo($"전체 장표   count [{doc.Pages.Count()}]")
                 MSGInfo($"전체 도형   count [{doc.Nodes.Count()}]")
                 MSGInfo($"전체 연결   count [{doc.Edges.Count()}]")
                 MSGInfo($"전체 부모   count [{doc.Parents.Keys.Count}]")
-                model
+                coreModel
 
             with ex ->  failwithf  $"{ex.Message}"
-                        model
+                        coreModel
                     
 
     let FromPPTX(path:string) =

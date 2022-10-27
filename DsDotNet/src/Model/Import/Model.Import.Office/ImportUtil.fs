@@ -42,26 +42,33 @@ module ImportU =
                     then MSys.Create(sysName, false, model) |> ignore
                     )
 
-            doc.Nodes 
-            |> Seq.filter(fun node -> node.NodeType = COPY) 
-            |> Seq.iter(fun node -> 
-                    node.CopySys.ForEach(fun sysName -> MSys.Create(sysName, false, model) |> ignore)
-                    )
+            //doc.Nodes 
+            //|> Seq.filter(fun node -> node.NodeType = COPY) 
+            //|> Seq.iter(fun node -> 
+            //        node.CopySys.ForEach(fun sysName -> MSys.Create(sysName, false, model) |> ignore)
+            //        )
 
-        let MakeExSystem(doc:pptDoc, model:CoreModule.Model) = 
+        let MakeCopySystem(doc:pptDoc, model:CoreModule.Model, dicSys:Dictionary<int, DsSystem>) = 
             doc.Pages
                 |> Seq.filter(fun page -> page.IsUsing)
                 |> Seq.iter  (fun page -> 
                     let sysName, flowName = GetSysNFlow(page.Title, page.PageNum)
                     if sysName = TextMySys |>not
-                    then DsSystem.Create(sysName, "", model) |> ignore
+                    then dicSys.Add(page.PageNum, DsSystem.Create(sysName, "", model))
+                    else dicSys.Add(page.PageNum, model.FindSystem(TextMySys))
                     )
 
             doc.Nodes 
             |> Seq.filter(fun node -> node.NodeType = COPY) 
             |> Seq.iter(fun node -> 
-                    node.CopySys.ForEach(fun sysName -> DsSystem.Create(sysName, "", model) |> ignore)
+                    node.CopySys.ForEach(fun copy -> 
+                        let copySys = DsSystem.Create(copy.Key, "", model) 
+                        dicSys.Add(-dicSys.Count, copySys)  //복사 시스템음 순서대로 음수 페이지로 저장
+                        
+                        )
                     )
+
+        
 
         
         //MFlow 리스트 만들기
@@ -89,7 +96,11 @@ module ImportU =
 
 
         //alias Setting
-        let MakeAlias(pptNodes:pptNode seq, model:MModel, parents:ConcurrentDictionary<pptNode, seq<pptNode>>) = 
+        let MakeAlias(doc:pptDoc,  dicFlow:Dictionary<int, Flow>) = 
+
+            let pptNodes = doc.Nodes
+            let parents = doc.Parents
+
             let settingAlias(nodes:pptNode seq) = 
                 let names  = nodes|> Seq.map(fun f->f.Name)
                 (nodes, GetAliasName(names))
@@ -101,9 +112,9 @@ module ImportU =
                                         node.Name  <- newName
                                         )
                 
-            let dicFlowNodes = model.Flows 
-                                |> Seq.sortBy(fun flow -> flow.Page)
-                                |> Seq.map(fun flow -> flow.Page, pptNodes |> Seq.filter(fun node -> node.PageNum = flow.Page)
+            let dicFlowNodes = dicFlow
+                                |> Seq.sortBy(fun flow -> flow.Key)
+                                |> Seq.map(fun flow -> flow.Key, pptNodes |> Seq.filter(fun node -> node.PageNum = flow.Key)
                                 ) |> dict
             
 
@@ -131,9 +142,10 @@ module ImportU =
             callInFlowSet |> Seq.iter settingAlias
             callInRealSet |> Seq.iter settingAlias
            
+        
 
         //Interface 만들기
-        let MakeInterface(pptNodes:pptNode seq, model:MModel, dicSeg:Dictionary<string, MSeg>) = 
+        let MakeIf(pptNodes:pptNode seq, model:MModel, dicSeg:Dictionary<string, MSeg>) = 
             pptNodes
             |> Seq.filter(fun node -> node.NodeType = IF) 
             |> Seq.iter(fun node -> 
@@ -143,6 +155,31 @@ module ImportU =
 
                     flow.System.AddInterface(node.IfName, txs, rxs) |> ignore
             )
+
+
+        //Interface 만들기
+        let MakeInterfaces(doc :pptDoc, model:Model, dicSys:Dictionary<int, DsSystem>) = 
+            doc.Nodes
+            |> Seq.filter(fun node -> node.NodeType = IF) 
+            |> Seq.iter(fun node ->  
+                    let system = dicSys.[node.PageNum]
+                    let apiName = node.Name;
+                    ApiItem.Create(apiName, system) |> ignore
+            )
+            
+        let MakeCopySystemAddApi(doc:pptDoc, model:Model, dicSys:Dictionary<int, DsSystem>) = 
+            doc.Nodes 
+                |> Seq.filter(fun node -> node.NodeType = COPY) 
+                |> Seq.iter(fun node -> 
+                        node.CopySys.ForEach(fun copy -> 
+                            let orgiSys = dicSys.Values.Where(fun w->w.Name = copy.Value).First()
+                            let copySys = dicSys.Values.Where(fun w->w.Name = copy.Key).First()
+
+                            orgiSys.ApiItems
+                            |>Seq.iter(fun api->copySys.ApiItems.Add(ApiItem.Create(api.Name, copySys)) |>ignore)
+                        )
+                )
+
         //parent 리스트 만들기
         let MakeParent(pptNodes:pptNode seq, model:MModel, dicSeg:Dictionary<string, MSeg>, parents:ConcurrentDictionary<pptNode, seq<pptNode>>) = 
             let dicParent = parents 
@@ -241,7 +278,7 @@ module ImportU =
                 vertex
 
 
-      //segment 리스트 만들기
+        //segment 리스트 만들기
         let MakeSegment(pptNodes:pptNode seq, model:Model
             , parents:ConcurrentDictionary<pptNode, seq<pptNode>>
             , dicFlow:Dictionary<int, Flow>
@@ -254,13 +291,6 @@ module ImportU =
                     parentChildren.Value 
                     |> Seq.map(fun child -> child, parentChildren.Key)) |> dict
 
-           
-                    
-            //let btn   = node.IsEmgBtn || node.IsStartBtn || node.IsAutoBtn || node.IsResetBtn 
-            //let bound = if(btn) then ExBtn
-            //            else if(node.NodeType.IsCall) then OtherFlow else ThisFlow
-            
-                                        
             //Real 부터
             pptNodes
                 |> Seq.filter(fun node -> node.Alias.IsNone) 
@@ -285,18 +315,23 @@ module ImportU =
             |> Seq.filter(fun node -> node.Alias.IsSome)
             |> Seq.iter(fun node -> 
                     let segOrg = dicSeg.[node.Alias.Value.Key]
-                    let aliasName = node.Name
-                    Alias.CreateInFlow(aliasName, segOrg.NameComponents, dicFlow.[node.PageNum]) |> ignore
+                    if dicChildParent.ContainsKey(node) 
+                    then 
+                        let real = dicSeg.[dicChildParent.[node].Key] :?> Real
+                        dicSeg.Add(node.Key, Alias.CreateInReal(node.Name, segOrg:?>Call, real) )
+                    else 
+                        dicSeg.Add(node.Key, Alias.CreateInFlow(node.Name, segOrg.NameComponents, dicFlow.[node.PageNum]) )
+
                 )
 
      
       
-        let MakeCopySystem(doc:pptDoc, model:MModel) = 
+        let MakeCopySys(doc:pptDoc, model:MModel) = 
             doc.Nodes 
                 |> Seq.filter(fun node -> node.NodeType = COPY) 
                 |> Seq.iter(fun node -> 
-                        node.CopySys.ForEach(fun sysName ->
-                            let exSys = model.DicSystems.[sysName]
+                        node.CopySys.ForEach(fun copy ->
+                            let exSys = model.DicSystems.[copy.Key]
                             let libSys   = model.DicSystems.[node.Name]
                             libSys.Flows.ForEach(fun f ->  
                                 let flow = MFlow.Create(f.Name, exSys, f.Page) 
@@ -438,15 +473,13 @@ module ImportU =
         //pptEdge 변환 및 등록
         let MakeEdges(doc:pptDoc, model:Model
             , dicFlow:Dictionary<int, Flow>
+            , dicSys:Dictionary<int, DsSystem>
             , dicSeg:Dictionary<string, Vertex>) = 
 
             let pptEdges = doc.Edges
             let parents = doc.Parents
 
             let convertEdge(edge:pptEdge, flow:Flow, src:Vertex, tgt:Vertex) = 
-
-                let sSeg = dicSeg.[edge.StartNode.Key]
-                let eSeg = dicSeg.[edge.EndNode.Key]
                 let graph = 
                       match getParent(edge, parents, dicSeg) with
                       |Some(real) -> (real:?>Real).Graph
@@ -456,29 +489,46 @@ module ImportU =
                 then  
                     Edge.Create(graph, src, tgt, ResetPush ) |> ignore
                     Edge.Create(graph, tgt, src, ResetPush) |> ignore  //vertex 미리 추가 ?
-                else 
-                    Edge.Create(graph, sSeg, eSeg, edge.Causal) |> ignore
-           
+                elif (edge.Causal = StartReset)
+                then
+                    Edge.Create(graph, src, tgt, StartEdge) |> ignore
+                    Edge.Create(graph, tgt, src, ResetEdge) |> ignore
+                else
+                    Edge.Create(graph, src, tgt, edge.Causal) |> ignore
+
             let dicDummys = getDummys(parents, dicSeg)
 
             pptEdges
                 |> Seq.iter(fun edge -> 
                     let flow = dicFlow.[edge.PageNum]
-                    let sSeg = dicSeg.[edge.StartNode.Key]
-                    let eSeg = dicSeg.[edge.EndNode.Key]
-                    if(edge.StartNode.IsDummy || edge.EndNode.IsDummy)
-                    then 
+                    
+                    if(edge.StartNode.NodeType = IF && edge.StartNode.NodeType = edge.EndNode.NodeType|>not)
+                    then Office.ErrorConnect(edge.ConnectionShape,37, edge.StartNode.Name, edge.EndNode.Name, edge.PageNum)
+
+
+
+                    if(edge.StartNode.NodeType = IF || edge.EndNode.NodeType = IF)
+                    then
+                        let sys = dicSys.[edge.PageNum]
+                        sys.ApiResetInfos.Add(ApiResetInfo.Create(sys, edge.StartNode.Name, edge.EndNode.Name, edge.Causal.ToText()))|>ignore
                         
+                    else 
+
                         let srcs = if(edge.StartNode.IsDummy) then dicDummys.[edge.StartNode] else [dicSeg.[edge.StartNode.Key]]
                         let tgts = if(edge.EndNode.IsDummy)   then dicDummys.[edge.EndNode]   else [dicSeg.[edge.EndNode.Key]]
 
-                        srcs
-                        |> Seq.iter(fun src -> tgts
-                                               |> Seq.iter(fun tgt -> convertEdge(edge, flow, src, tgt) |> ignore))
+                        if(edge.StartNode.IsDummy || edge.EndNode.IsDummy)
+                        then 
+                       
+                            srcs
+                            |> Seq.iter(fun src -> tgts
+                                                   |> Seq.iter(fun tgt -> convertEdge(edge, flow, src, tgt) |> ignore))
                                        
-                    else 
-                        convertEdge(edge, flow, sSeg, eSeg) |> ignore
-                    )
+                        else 
+                            let sSeg = srcs.First()
+                            let eSeg = tgts.First()
+                            convertEdge(edge, flow, sSeg, eSeg) |> ignore
+                        )
 
         //Dummy child 처리
         let MakeDummy(parents:ConcurrentDictionary<pptNode, seq<pptNode>>, dicSeg:Dictionary<string, MSeg>) = 

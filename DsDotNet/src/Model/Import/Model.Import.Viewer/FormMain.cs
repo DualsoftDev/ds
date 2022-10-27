@@ -17,6 +17,7 @@ namespace Dual.Model.Import
         public static FormMain TheMain;
 
         private MModel _model;
+        private Engine.Core.CoreModule.Model _Model;
         private string _dsText;
         private bool _ConvertErr = false;
         private MModel _Demo;

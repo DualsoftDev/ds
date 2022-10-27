@@ -173,7 +173,7 @@ module PPTX =
         let mutable txCnt = 1
         let mutable rxCnt = 1
         let mutable name = ""
-        let mutable copySystems = HashSet<string>()
+        let mutable copySystems = ConcurrentDictionary<string, string>() //copyName, orgiName
         let mutable safeties    = HashSet<string>()
         let mutable ifName    = ""
         let mutable ifTXs    = HashSet<string>()
@@ -195,13 +195,17 @@ module PPTX =
 
         let updateSafety(barckets:string)  = safeties <- barckets.Split(';')  |> HashSet 
                                             //             |> Seq.map(fun name -> $"{pageTitle}_{name}") |> HashSet 
-        let updateCopySys(barckets:string) = 
+        let updateCopySys(barckets:string, orgiSysName:string) = 
             if  (trimStartEnd barckets).All(fun c -> Char.IsDigit(c))
             then 
-                 copySystems <- [for i in [1..Convert.ToInt32(barckets)] do yield sprintf "%s%d" name i]
-                                |> Seq.map(fun sys -> $"{pageTitle}_{sys}") |> HashSet
-            else copySystems <- barckets.Split(';') |> trimStartEndSeq 
-                                |> Seq.map(fun sys -> $"{pageTitle}_{sys}") |> HashSet 
+                [for i in [1..Convert.ToInt32(barckets)] do yield sprintf "%s%d" name i]
+                |> Seq.map(fun sys -> $"{pageTitle}_{sys}" , orgiSysName)
+                |> Seq.iter(fun (copy, orgi) -> copySystems.TryAdd(copy, orgiSysName) |> ignore)
+
+            else 
+                barckets.Split(';') |> trimStartEndSeq 
+                |> Seq.map(fun sys -> $"{pageTitle}_{sys}" , orgiSysName)
+                |> Seq.iter(fun (copy, orgi) -> copySystems.TryAdd(copy, orgiSysName) |> ignore)
             
         let updateIF(text:string)      = 
             ifName <- GetBracketsReplaceName(text) |> trimStartEnd
@@ -243,7 +247,10 @@ module PPTX =
                      GetSquareBrackets(shape.InnerText, false) |> fun text -> if text = ""|>not then updateTxRx text
                      GetSquareBrackets(shape.InnerText, true ) |> fun text -> if text = ""|>not then updateSafety text
             |IF ->   updateIF shape.InnerText
-            |COPY -> GetSquareBrackets(shape.InnerText, false) |> fun text -> if text = ""|>not then updateCopySys  text 
+            |COPY -> GetSquareBrackets(shape.InnerText, false) 
+                        |> fun text -> 
+                            if text = ""|>not 
+                            then updateCopySys  (text ,(GetBracketsReplaceName(shape.InnerText) |> trimStartEnd))
             |_ -> ()
 
             bEmg    <- shape.CheckNoSmoking() 

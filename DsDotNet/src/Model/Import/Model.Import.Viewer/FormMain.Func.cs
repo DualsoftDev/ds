@@ -59,21 +59,21 @@ namespace Dual.Model.Import
             try
             {
                 this.Do(() => button_comfile.Enabled = false);
-                var lstModel = new List<MModel>() { ImportM.FromPPTX(PathPPT) };
+                var lstModel = new List<Engine.Core.CoreModule.Model>() { ImportM.FromPPTX(PathPPT) };
                 if (lstModel.Where(w => w == null).Any())
                     return;
 
-                _model = lstModel.First();
+                _Model = lstModel.First();
 
                 if (!_ConvertErr)
                 {
                     // var dsCore = ConvertM.ToDs(_model);
                     //   _dsText = ToDsTextModuleHelper.ToDsText(dsCore);
-                    _dsText = "";
+                    _dsText = _Model.ToDsText();
                     ExportTextModel(Color.Transparent, _dsText);
                     this.Do(() => xtraTabControl_Ex.TabPages.Clear());
-                    foreach (var sys in _model.Systems.OrderBy(sys => sys.Name))
-                        CreateNewTabViewer(sys);
+                    //foreach (var sys in _model.Systems.OrderBy(sys => sys.Name))
+                    //    CreateNewTabViewer(sys);
                     WriteDebugMsg(DateTime.Now, MSGLevel.Info, $"{PathPPT} 불러오기 성공!!");
                     this.Do(() =>
                     {

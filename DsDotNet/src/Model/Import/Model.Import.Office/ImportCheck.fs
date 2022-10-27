@@ -66,8 +66,8 @@ module ImportCheck =
                     if(model.DicSystems.ContainsKey(node.Name)|> not)
                     then Office.ErrorName(node.Shape, 33, node.PageNum)
 
-                    node.CopySys.ForEach(fun sysName -> 
-                        if dicName.TryAdd(sysName, sysName)|> not
+                    node.CopySys.ForEach(fun dicSys -> 
+                        if dicName.TryAdd(dicSys.Key, dicSys.Value)|> not
                         then Office.ErrorName(node.Shape, 34, node.PageNum)
                         )
                     )

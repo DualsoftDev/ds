@@ -39,6 +39,10 @@ module CoreModule =
         member val StartButtons     = ButtonDic()
         member val ResetButtons     = ButtonDic()
 
+        /// API name -> Address map.  A.+ = (%Q1234.2343, %I1234.2343)
+        member val ApiAddressMap    = Dictionary<string[], Addresses>(nameComponentsComparer())
+
+
         ///시스템 핸들링 대상여부   true : mySystem / false : exSystem
         member val Active = false with get, set 
 

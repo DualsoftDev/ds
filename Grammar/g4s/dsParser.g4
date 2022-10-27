@@ -51,8 +51,7 @@ addresses: '[' 'addresses' ']' (identifier12)? '=' addressesBlock;
 addressesBlock
     : LBRACE (addressDef)* RBRACE
     ;
-addressDef: segmentPath '=' address;
-    segmentPath: identifier2;
+addressDef: apiPath '=' address;        // A.+ = (%Q1234.2343, %I1234.2343)
     address: LPARENTHESIS (startItem)? COMMA (endItem)? RPARENTHESIS (SEIMCOLON)?;
     startItem: addressItem;
     endItem: addressItem;

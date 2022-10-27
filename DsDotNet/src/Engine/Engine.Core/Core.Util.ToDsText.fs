@@ -129,19 +129,6 @@ module internal ToDsTextModule =
         ] |> combineLines
 
         
-    let collectCallsDeeply(spitResults:SpitResult seq) =
-        [
-            for core in spitResults.Select(fun spit -> spit.GetCore()) do
-                match core with
-                | :? Call as call -> call
-                | :? Alias as alias ->
-                    match alias.Target with
-                    | CallTarget call -> call
-                    | _ -> ()
-                | _ ->
-                    ()
-        ]
-        
     let systemToDs (system:DsSystem) =
         [
             let ip = if system.Host <> null then $" ip = {system.Host}" else ""
@@ -186,28 +173,18 @@ module internal ToDsTextModule =
 
             // prop
             //      addresses
-            let spits = system.Spit()
-            let calls = collectCallsDeeply spits
-            let callsWithAddresse =
-                calls |> List.filter(fun c -> c.Addresses <> null)
-                |> List.distinctBy(fun c -> c.ApiItem.QualifiedName)
-
             let addresses =
                 [
-                    if callsWithAddresse.Any() then
-                        yield $"{tab}[addresses] = {lb}"
-                        for call in callsWithAddresse do
-                            let ads = call.Addresses
-                            
-                            yield $"{tab2}{call.ApiItem.QualifiedName} = ( {ads.In}, {ads.Out})"
-                        yield $"{tab}{rb}"
-
-                ] |> combineLines            
-
+                    for KeyValue(apiPath, address) in system.ApiAddressMap do
+                        yield $"{tab2}{apiPath.Combine()} = ( {address.In}, {address.Out})"
+                ] |> combineLines
             if addresses.Any() then
                 yield $"[prop] = {lb}"
-                if addresses.Any() then yield addresses
+                yield $"{tab}[addresses] = {lb}"
+                yield addresses
+                yield $"{tab}{rb}" 
                 yield rb
+                
             
             yield rb
         ] |> combineLines
@@ -266,23 +243,6 @@ module internal ToDsTextModule =
                         yield $"{tab}{rb}"
                 ] |> combineLines
 
-            //let calls = collectCallsDeeply spits
-            //let callsWithAddresse =
-            //    calls |> List.filter(fun c -> c.Addresses <> null)
-            //    |> List.distinctBy(fun c -> c.ApiItem.QualifiedName)
-
-            //let addresses =
-            //    [
-            //        if callsWithAddresse.Any() then
-            //            yield $"{tab}[addresses] = {lb}"
-            //            for call in callsWithAddresse do
-            //                let ads = call.Addresses
-                            
-            //                yield $"{tab2}{call.ApiItem.QualifiedName} = ( {ads.In}, {ads.Out})"
-            //            yield $"{tab}{rb}"
-
-            //    ] |> combineLines
-
             let withLayouts =
                 model.Systems
                     .SelectMany(fun sys -> sys.ApiItems.Where(fun ai -> ai.Xywh <> null))
@@ -310,6 +270,19 @@ module internal ToDsTextModule =
                 yield rb
         ] |> combineLines
 
+    let collectCallsDeeply(spitResults:SpitResult seq) =
+        [
+            for core in spitResults.Select(fun spit -> spit.GetCore()) do
+                match core with
+                | :? Call as call -> call
+                | :? Alias as alias ->
+                    match alias.Target with
+                    | CallTarget call -> call
+                    | _ -> ()
+                | _ ->
+                    ()
+        ]
+        
 
 [<Extension>]
 type ToDsTextModuleHelper =

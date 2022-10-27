@@ -1,8 +1,4 @@
 namespace Engine.Parser;
-
-using System.Runtime.Remoting.Contexts;
-
-using static Antlr4.Runtime.Atn.SemanticContext;
 using static Engine.Core.CodeElements;
 
 /// <summary>
@@ -168,30 +164,26 @@ class EtcListener : ListenerBase
             apiItem.Xywh = new Xywh(int.Parse(x), int.Parse(y), w == null ? null : int.Parse(w), h == null ? null : int.Parse(h));
         }
 
+        // [sys] / [prop] /
         //[addresses] = {
         //  ApiName = (Start, End) Tag address
         //  A."" + "" = (% Q1234.2343, % I1234.2343)
         //  A."" - "" = (START, END)
         //}
-        var addresses = enumerateChildren<AddressesContext>(ctx).ToArray();
-        if (addresses.Length > 1)
-            throw new ParserException("Layouts block should exist only once", ctx);
+        var api2Address = (
+            from sysCtx in enumerateChildren<SystemContext>(ctx)
+            from addrDefCtx in enumerateChildren<AddressDefContext>(sysCtx)
+            let apiPath = collectNameComponents(addrDefCtx.apiPath())
+            let sre = addrDefCtx.address()
+            let s = sre.startItem()?.GetText()
+            let e = sre.endItem()?.GetText()
+            select (sysCtx, apiPath, new Addresses(s, e))
+        ).ToArray();
 
-        var addressDefs = enumerateChildren<AddressDefContext>(ctx).ToArray();
-
-        // collect Addresses for API
-        Dictionary<string, Addresses> apiAddressMap = new();
-        foreach (var addrDef in addressDefs)
+        foreach (var (sysCtx, apiPath, address) in api2Address)
         {
-            var apiNs = collectNameComponents(addrDef.segmentPath());
-            var api =
-                _modelSpits
-                .Where(o => o.GetCore() is ApiItem && o.NameComponents.IsStringArrayEqaul(apiNs))
-                .FirstOrDefault();
-
-            var sre = addrDef.address();
-            var (s, e) = (sre.startItem()?.GetText(), sre.endItem()?.GetText());
-            apiAddressMap.Add(apiNs.Combine(), new Addresses(s, e));
+            var sys = _model.FindSystem(sysCtx.systemName().GetText());
+            sys.ApiAddressMap.Add(apiPath, address);
         }
 
         foreach (var o in _modelSpits)
@@ -200,19 +192,18 @@ class EtcListener : ListenerBase
             {
                 case Alias al:
                     var targetSys = _model.FindSystem(al.AliasKey[0]);
-                    if (targetSys != al.Parent.System)
+                    var sys = al.Parent.System;
+                    if (targetSys != sys)
                     {
                         var apiItem = _model.FindApiItem(al.AliasKey);
                         var calls =
                             al.Parent.System.Spit()
                             .CollectCallsDeeply()
-                            //.Select(sp => sp.GetCore())
-                            //.OfType<Call>()
                             .Where(call => call.Name == apiItem.QualifiedName)
                             .ToArray();
-                        if (apiAddressMap.ContainsKey(apiItem.QualifiedName))
+                        if (sys.ApiAddressMap.ContainsKey(apiItem.NameComponents))
                         {
-                            var address = apiAddressMap[apiItem.QualifiedName];
+                            var address = sys.ApiAddressMap[apiItem.NameComponents];
                             foreach (var c in calls)
                             {
                                 Assert(c.Addresses == null || c.Addresses == address);
@@ -238,9 +229,10 @@ class EtcListener : ListenerBase
                     break;
                 case Call call:
                     {
-                        if (apiAddressMap.ContainsKey(call.Name))
+                        var map = call.GetSystem().ApiAddressMap;
+                        if (map.ContainsKey(call.NameComponents))
                         {
-                            var address = apiAddressMap[call.Name];
+                            var address = map[call.NameComponents];
                             Assert(call.Addresses == null || call.Addresses == address);
                             call.Addresses = address;
                         }

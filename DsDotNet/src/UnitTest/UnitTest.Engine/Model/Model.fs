@@ -65,8 +65,8 @@ module private ModelComparisonHelper =
             [addresses] = {
                 A."+" = ( %Q1234.2343, %I1234.2343)
                 A."-" = ( START, END)
-                B."-" = ( BSTART, BEND)
                 B."+" = ( %Q4321.2343, %I4321.2343)
+                B."-" = ( BSTART, BEND)
             }
         }
 
@@ -220,6 +220,12 @@ module private ModelComparisonHelper =
             C.M = { Cm; Cm1; Cm2; }
         }
     }
+    [prop] = {
+        [addresses] = {
+            C.P = ( %Q1234.2343, %I1234.2343)
+            C.M = ( START, END)
+        }
+    }    
 }
 [sys] C = {
     [flow] F = {

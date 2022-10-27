@@ -94,27 +94,35 @@ module CoreModule =
 
     and Alias private (mnemonic:string, parent:ParentWrapper, aliasKey:string[], isOtherFlowCall:bool) =
         inherit Vertex(mnemonic, parent)
+        
         member _.IsOtherFlowCall = isOtherFlowCall
-
-        static member CreateInFlow(name, aliasKey, flow:Flow, [<Optional; DefaultParameterValue(false)>] isOtherFlowCall) =
-            let alias = Alias(name, Flow flow, aliasKey, isOtherFlowCall)
-            flow.Graph.AddVertex(alias) |> verifyM $"Duplicated segment name [{name}]"
-            alias
-        static member CreateInReal(mnemonic, apiItem:ApiItem, real:Real) =
-            let child = Alias(mnemonic, Real real, apiItem.NameComponents, false)
-            real.Graph.AddVertex(child) |> verifyM $"Duplicated child name [{mnemonic}]"
-            child
-    
         member _.AliasKey = aliasKey
         member val Target = NullTarget with get, set
-        member x.SetTarget(call) = x.Target <- CallTarget call
-        member x.SetTarget(real) = x.Target <- RealTarget real
+        member x.SetTarget(call) = assert(x.Target = NullTarget); x.Target <- CallTarget call
+        member x.SetTarget(real) = assert(x.Target = NullTarget); x.Target <- RealTarget real
+        
         override x.GetRelativeName(referencePath:NameComponents) =
             if isOtherFlowCall then
                 aliasKey[1..].Combine()
             else
                 base.GetRelativeName(referencePath)
         
+        static member CreateInFlow(name, aliasKey, flow:Flow, [<Optional; DefaultParameterValue(false)>] isOtherFlowCall) =
+            let alias = Alias(name, Flow flow, aliasKey, isOtherFlowCall)
+            flow.Graph.AddVertex(alias) |> verifyM $"Duplicated segment name [{name}]"
+            alias
+        static member CreateInReal(mnemonic, apiItem:ApiItem, parent:Real) =
+            let child = Alias(mnemonic, Real parent, apiItem.NameComponents, false)
+            parent.Graph.AddVertex(child) |> verifyM $"Duplicated child name [{mnemonic}]"
+            child
+        static member CreateInReal(mnemonic, call:Call, parent:Real) =
+            let api:ApiItem = call.ApiItem
+            let child = Alias(mnemonic, Real parent, api.NameComponents, false)
+            child.SetTarget(call)
+            parent.Graph.AddVertex(child) |> verifyM $"Duplicated child name [{mnemonic}]"
+            child
+            
+    
 
     /// 외부 시스템 호출 객체
     and Call private (apiItem:ApiItem, parent:ParentWrapper) =

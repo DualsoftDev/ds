@@ -64,6 +64,14 @@ C4 > C5;
         //EmptyButton = {};
         //NonExistingFlowButton = { F1; };
     }
+    [prop] = {
+        [addresses] = {
+            A.""+"" = (%Q1234.2343, %I1234.2343)
+            A.""-"" = (START, END)
+            B.""+"" = (%Q4321.2343, %I4321.2343)
+            B.""-"" = (BSTART, BEND)
+        }
+    }
 }
 [sys ip=1.2.3.4] A = {
     [flow] F = {
@@ -87,12 +95,6 @@ C4 > C5;
     // Global safety
     [safety] = {
         My.F.Main = {B.F.Sp; B.F.Sm; C.F.Sp}
-    }
-    [addresses] = {
-        A.""+"" = (%Q1234.2343, %I1234.2343)
-        A.""-"" = (START, END)
-        B.""+"" = (%Q4321.2343, %I4321.2343)
-        B.""-"" = (BSTART, BEND)
     }
     [layouts] = {
         A.""+"" = (1309,405,205,83)

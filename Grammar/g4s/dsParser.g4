@@ -20,12 +20,12 @@ parser grammar dsParser;
 options { tokenVocab=dsLexer; } // use tokens from dsLexer.g4
 
 
-model: (system|properties|variables|commands|observes|comment)* EOF;        // importStatement|cpus
+model: (system|modelProperties|variables|commands|observes|comment)* EOF;        // importStatement|cpus
 comment: BLOCK_COMMENT | LINE_COMMENT;
 
 system: '[' 'sys' (('ip'|'host') '=' host)? ']' systemName '=' (sysBlock|sysCopySpec);    // [sys] Seg = {..}
     sysBlock
-        : LBRACE (flow | interfaces | buttons)* RBRACE       // identifier1Listing|parenting|causal|call
+        : LBRACE (flow | interfaces | buttons | systemProperties )* RBRACE       // identifier1Listing|parenting|causal|call
         ;
     host: ipv4 | domainName;
     domainName: identifier1234;
@@ -51,8 +51,7 @@ addresses: '[' 'addresses' ']' (identifier12)? '=' addressesBlock;
 addressesBlock
     : LBRACE (addressDef)* RBRACE
     ;
-addressDef: segmentPath '=' address;
-    segmentPath: identifier2;
+addressDef: apiPath '=' address;        // A.+ = (%Q1234.2343, %I1234.2343)
     address: LPARENTHESIS (startItem)? COMMA (endItem)? RPARENTHESIS (SEIMCOLON)?;
     startItem: addressItem;
     endItem: addressItem;
@@ -79,13 +78,15 @@ addressDef: segmentPath '=' address;
     }
 }
  */
-properties: '[' 'prop' ']' EQ LBRACE (propertyBlock)* RBRACE;
-propertyBlock: (addresses|safety|layouts);
+modelProperties: '[' 'prop' ']' EQ LBRACE (modelPropertyBlock)* RBRACE;
+modelPropertyBlock: (safety|layouts);
     safety: '[' 'safety' ']' EQ LBRACE (safetyDef)* RBRACE;
     safetyDef: safetyKey EQ LBRACE safetyValues RBRACE;
     safetyKey: identifier123;
     safetyValues: identifier123 (SEIMCOLON identifier123)*;
 
+systemProperties: '[' 'prop' ']' EQ LBRACE (systemPropertyBlock)* RBRACE;
+systemPropertyBlock: (addresses);
 
 flow
     : '[' 'flow' ']' identifier1 '=' LBRACE (

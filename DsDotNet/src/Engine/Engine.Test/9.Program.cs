@@ -2,8 +2,6 @@ using Engine.Common.FS;
 using System.Reflection;
 using System.Threading;
 
-using static System.Net.Mime.MediaTypeNames;
-
 namespace Engine.Sample;
 
 class Program
@@ -57,5 +55,6 @@ class Program
         InvalidDuplicationTest.Test(InvalidDuplicationTest.DupFlowNameModel);
         InvalidDuplicationTest.Test(InvalidDuplicationTest.DupParentingModel1);
         InvalidDuplicationTest.Test(InvalidDuplicationTest.DupParentingModel2);
+        Console.ReadKey();
     }
 }

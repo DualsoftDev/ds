@@ -17,6 +17,12 @@ namespace Engine
             Main = {C.F.Sp; C.F.Sm}
         }
     }
+    [prop] = {
+        [addresses] = {
+            C.P = ( %Q1234.2343, %I1234.2343)
+            C.M = ( START, END)
+        }
+    }
 }
 
 [sys] C = {
@@ -39,10 +45,6 @@ namespace Engine
 [prop] = {
     [ safety ] = {
         L.F.Main = {C.F.Vp; C.F.Vm}
-    }
-    [addresses] = {
-        C.P = ( %Q1234.2343, %I1234.2343)
-        C.M = ( START, END)
     }
 }
 ";
@@ -98,6 +100,12 @@ namespace Engine
             A.M = { Cm; Cm1; Cm2; }
         }
     }
+    [prop] = {
+        [addresses] = {
+            A.P = ( %Q1234.2343, %I1234.2343)
+            A.M = ( START, END)
+        }
+    }
 }
 
 [sys] A = {
@@ -116,13 +124,6 @@ namespace Engine
         P <||> M;
     }
 }
-[prop] = {
-    [addresses] = {
-        A.P = ( %Q1234.2343, %I1234.2343)
-        A.M = ( START, END)
-    }
-}
-
 ";
 
         public static string Buttons = @"
@@ -463,15 +464,13 @@ namespace Engine
             //Vp = {AVp1;}  // invalid: 자신 시스템에 정의된 것만 alias
         }
     }
-}
-
-[prop] = {
-    [addresses] = {
-        A.""+"" = (%Q1234.2343, %I1234.2343)
-        A.""-"" = (START, END)
+    [prop] = {
+        [addresses] = {
+            A.""+"" = (%Q1234.2343, %I1234.2343)
+            A.""-"" = (START, END)
+        }
     }
 }
-
 " + SampleRunner.CreateCylinder("A");
 
 

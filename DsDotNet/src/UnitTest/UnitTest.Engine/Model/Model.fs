@@ -61,6 +61,15 @@ module private ModelComparisonHelper =
         [emg] = {
             EMGBTN = { F; }
         }
+        [prop] = {
+            [addresses] = {
+                A."+" = ( %Q1234.2343, %I1234.2343)
+                A."-" = ( START, END)
+                B."+" = ( %Q4321.2343, %I4321.2343)
+                B."-" = ( BSTART, BEND)
+            }
+        }
+
     }
     [sys ip = 1.2.3.4] A = {
         [flow] F = {
@@ -107,12 +116,6 @@ module private ModelComparisonHelper =
     [prop] = {
         [safety] = {
             My.F.Main = { A.F.Sp; A.F.Sm; B.F.Sp; B.F.Sm; C.F.Sp; }
-        }
-        [addresses] = {
-            A."+" = ( %Q1234.2343, %I1234.2343)
-            A."-" = ( START, END)
-            B."-" = ( BSTART, BEND)
-            B."+" = ( %Q4321.2343, %I4321.2343)
         }
         [layouts] = {
             A."+" = (1309, 405, 205, 83)
@@ -217,6 +220,12 @@ module private ModelComparisonHelper =
             C.M = { Cm; Cm1; Cm2; }
         }
     }
+    [prop] = {
+        [addresses] = {
+            C.P = ( %Q1234.2343, %I1234.2343)
+            C.M = ( START, END)
+        }
+    }    
 }
 [sys] C = {
     [flow] F = {
@@ -248,6 +257,12 @@ module private ModelComparisonHelper =
         [aliases] = {
             A.P = { Cp; Cp1; Ap2; }
             A.M = { Cm; Cm1; Cm2; }
+        }
+    }
+    [prop] = {
+        [addresses] = {
+            A.P = ( %Q1234.2343, %I1234.2343)
+            A.M = ( START, END)
         }
     }
 }
@@ -346,6 +361,12 @@ module private ModelComparisonHelper =
             A."-" = { Am1; Am2; Am3; }
         }
     }
+    [prop] = {
+        [addresses] = {
+            A."+" = ( %Q1234.2343, %I1234.2343)
+            A."-" = ( START, END)
+        }
+    }
 }
 [sys] A = {
     [flow] F = {
@@ -359,13 +380,6 @@ module private ModelComparisonHelper =
         "+" = { A.F.Vp ~ A.F.Sp }
         "-" = { A.F.Vm ~ A.F.Sm }
         "+" <||> "-";
-    }
-}
-
-[prop] = {
-    [addresses] = {
-        A."+" = ( %Q1234.2343, %I1234.2343)
-        A."-" = ( START, END)
     }
 }
 """

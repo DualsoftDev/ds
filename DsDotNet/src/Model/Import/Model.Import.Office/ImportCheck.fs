@@ -58,7 +58,7 @@ module ImportCheck =
             )
 
 
-        let CheckMakeCopySystemAddApi(nodes:pptNode seq, dicSys:Dictionary<int, DsSystem>) =
+        let CheckMakeCopyApi(nodes:pptNode seq, dicSys:Dictionary<int, DsSystem>) =
             let dicName = ConcurrentDictionary<string, string>()
             let sysNames = dicSys.Values.Select(fun s->s.Name)
             nodes

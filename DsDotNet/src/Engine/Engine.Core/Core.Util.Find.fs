@@ -36,6 +36,10 @@ module internal ModelFindModule =
 
     let findSystem(model:Model, systemName:string) =
         model.Systems.First(fun sys -> sys.Name = systemName)
+    
+    let findFlow(system:DsSystem , flowName:string) =
+        system.Flows.First(fun flow -> flow.Name = flowName)
+
 
 [<Extension>]
 type ModelFindHelper =
@@ -44,6 +48,7 @@ type ModelFindHelper =
     [<Extension>] static member FindApiItem(model:Model, apiPath:NameComponents) = findApiItem(model, apiPath)
     [<Extension>] static member FindSystem(model:Model, systemName:string) = findSystem(model, systemName)
     [<Extension>] static member FindCall(model:Model, callPath:NameComponents) = findCall(model, callPath)
+    [<Extension>] static member FindFlow(system:DsSystem, flowName:string) = findFlow(system, flowName)
 
 
 

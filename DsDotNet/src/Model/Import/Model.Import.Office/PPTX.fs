@@ -13,6 +13,7 @@ open Engine.Common.FS
 open Model.Import.Office
 open System.Collections.Generic
 open Engine.Core
+open System.Runtime.CompilerServices
 
 
 
@@ -30,6 +31,9 @@ module PPTX =
             elif(name = "")        then TextMySys, sprintf "P%d" pageNum
             else                        TextMySys, TrimStartEndSpace(name)
             
+    
+        //alias Setting
+    
 
 
     ///전체 사용된 화살표 반환 (앞뒤연결 필수)
@@ -372,6 +376,45 @@ module PPTX =
         let nodes =  ConcurrentDictionary<string, pptNode>()
         let parents = ConcurrentDictionary<pptNode, seq<pptNode>>()
         let edges =  ConcurrentHash<pptEdge>()
+        let updateAliasPPT () = 
+            let pptNodes = nodes.Values
+            let dicFlowNodes = pages.Values
+                                |> Seq.filter(fun page -> page.IsUsing)
+                                |> Seq.map  (fun page -> 
+                                    page.PageNum, pptNodes |> Seq.filter(fun node -> node.PageNum = page.PageNum)
+                                    ) |> dict
+
+            let settingAlias(nodes:pptNode seq) = 
+                let names  = nodes|> Seq.map(fun f->f.Name)
+                (nodes, GetAliasName(names))
+                ||> Seq.map2(fun node  nameSet -> node,  nameSet)
+                |> Seq.iter(fun (node, (name, newName)) -> 
+                                if(name  = newName |> not)
+                                then    let orgNode = nodes |> Seq.filter(fun f->f.Name = name) |> Seq.head
+                                        node.Alias <- Some(orgNode) 
+                                        node.Name  <- newName
+                                        )
+            let children = parents |> Seq.collect(fun parentSet -> parentSet.Value)
+            let callInFlowSet = dicFlowNodes
+                                |> Seq.map(fun flowNodes -> 
+                                            flowNodes.Value 
+                                            |> Seq.filter(fun node -> node.NodeType.IsCall && children.Contains(node)|>not)
+                                            )
+            let realSet = dicFlowNodes
+                                |> Seq.map(fun flowNodes -> 
+                                            flowNodes.Value |> Seq.filter(fun node -> node.NodeType.IsReal))
+            let callInRealSet = realSet 
+                                    |> Seq.collect(fun reals -> reals)
+                                    |> Seq.filter(fun real -> parents.ContainsKey(real))
+                                    |> Seq.map(fun real -> 
+                                                dicFlowNodes.[real.PageNum] 
+                                                |> Seq.filter(fun node -> node.NodeType.IsCall)
+                                                |> Seq.filter(fun node -> parents.[real].Contains(node) ))
+            
+            realSet |> Seq.iter settingAlias
+            callInFlowSet |> Seq.iter settingAlias
+            callInRealSet |> Seq.iter settingAlias
+
         do
             let sildesAll = Office.SildesAll(doc) 
             let shapes = Office.PageShapes(doc) 
@@ -380,7 +423,7 @@ module PPTX =
             let allGroups =  groups |> Seq.collect(fun (slide, groupSet) -> groupSet) 
             let sildeSize = Office.SildeSize(doc)
             let sildeMasters = Office.SildesMasterAll(doc)
-
+            
             try
                 
                 sildeMasters
@@ -408,8 +451,6 @@ module PPTX =
                             let node = pptNode(shape, page,  isDash,  sildeSize, flowName)
                             if(node.Name ="" && node.NodeType = DUMMY|>not) then shape.ErrorName(13, page)
                             nodes.TryAdd(node.Key, node)  |>ignore )
-                             
-             
                 
                 let dicFakeSub = ConcurrentHash<Presentation.GroupShape>()
                 allGroups |> Seq.iter (fun group -> SubGroup(group, dicFakeSub))
@@ -430,7 +471,6 @@ module PPTX =
                         if(pptGroup.DummyParent.IsSome)
                         then 
                             parents.TryAdd(pptGroup.DummyParent.Value, pptGroup.Children)|>ignore
-                          
                 
                 groups
                 |> Seq.iter (fun (slide, groupSet) -> 
@@ -465,6 +505,7 @@ module PPTX =
                         ))
                          
              
+                updateAliasPPT()
                 doc.Close()
               
             with ex -> doc.Close()
@@ -481,7 +522,6 @@ module PPTX =
 
         member val Name =  Path.GetFileNameWithoutExtension(path)
         member val FullPath =  path
-
-                                           
+                
 
             

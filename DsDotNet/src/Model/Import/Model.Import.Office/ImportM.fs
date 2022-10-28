@@ -19,48 +19,43 @@ module ImportM =
     type internal ImportPowerPoint(path:string) =
         let doc   = pptDoc(path)
         let mmodel = MModel(doc.FullPath)
-        let coreModel = CoreModule.Model()
+        let model = CoreModule.Model()
 
         member internal x.GetImportModel() = 
             try
         //new 
-                let dicSys = Dictionary<int, DsSystem>()  //0 페이지 기본 나의 시스템 (각페이지별 해당시스템으로 구성)
-                let mySystem = DsSystem.Create(TextMySys, "localhost", coreModel)  
-                mySystem.Active <- true;
-                dicSys.Add(0, mySystem)
+              
+                let mySystem = DsSystem.Create(TextMySys, "localhost", model)  
+                mySystem.Active <- true         
+                ImportU.dicSys.Add(0, mySystem)
 
                 //page 타이틀 이름 중복체크 (없으면 P0, P1, ... 자동생성)
                 ImportCheck.CheckMakeSystem(doc) 
-                MakeSystem(doc, coreModel, dicSys) //new 
-                MakeInterfaces(doc, coreModel, dicSys) //new
+                doc.MakeSystem(model) //new 
+                doc.MakeCopySystem(model) //new 
+                doc.MakeInterfaces() //new
 
-
-                ImportCheck.CheckMakeCopySystemAddApi(doc.Nodes, dicSys) 
-                MakeCopySystemAddApi(doc, coreModel, dicSys) //new
+                ImportCheck.CheckMakeCopyApi(doc.Nodes, ImportU.dicSys) 
+                doc.MakeCopyApi(model) //new
 
                 //Flow 리스트 만들기
-                let dicFlow = Dictionary<int, Flow>() // page , flow
-                MakeFlows(doc.Pages, coreModel, dicFlow) |> ignore //new 
+                doc.MakeFlows(model) |> ignore //new 
 
                 // system, flow 이름 중복체크 
-                ImportCheck.SameSysFlowName(coreModel.Systems, dicFlow) |> ignore //new
-                //alias Setting
-                MakeAlias    (doc,  dicFlow) //new
+                ImportCheck.SameSysFlowName(model.Systems, ImportU.dicFlow) |> ignore //new
                 //EMG & Start & Auto 리스트 만들기
-                MakeButtons  (doc.Nodes, coreModel, dicFlow) //new
-                //let btn   = node.IsEmgBtn || node.IsStartBtn || node.IsAutoBtn || node.IsResetBtn 
-                //let bound = if(btn) then ExBtn
-                //            else if(node.NodeType.IsCall) then OtherFlow else ThisFlow
-            
+                doc.MakeButtons  (model) //new
+
+
                 //segment 리스트 만들기
-                let dicVertex = Dictionary<string, Vertex>()
-                MakeSegment(doc.Nodes, coreModel, doc.Parents, dicFlow, dicVertex) //new
+                doc.MakeSegment(model) //new
                 //Safety 만들기
-                MakeSafeties(doc.Nodes, coreModel, dicFlow, dicVertex)  //new
-                //MakeVetexEdges(doc, coreModel, dicFlow , dicVertex) //new
-                MakeEdges     (doc, coreModel, dicFlow ,dicSys,  dicVertex) //new
-                MakeApiTxRx(doc, coreModel, dicFlow) //new
-         
+                doc.MakeSafeties(model)  //new
+
+                //Edge  만들기
+                doc.MakeEdges (model) //new
+                //ApiTxRx  만들기
+                doc.MakeApiTxRx(model) //new
 
                   
         //old
@@ -100,10 +95,10 @@ module ImportM =
                 MSGInfo($"전체 도형   count [{doc.Nodes.Count()}]")
                 MSGInfo($"전체 연결   count [{doc.Edges.Count()}]")
                 MSGInfo($"전체 부모   count [{doc.Parents.Keys.Count}]")
-                coreModel, mmodel
+                model, mmodel
 
             with ex ->  failwithf  $"{ex.Message}"
-                        coreModel, mmodel
+                        model, mmodel
                     
 
     let FromPPTX(path:string) =

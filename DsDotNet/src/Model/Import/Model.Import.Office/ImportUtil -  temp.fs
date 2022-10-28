@@ -58,18 +58,6 @@ module ImportUTemp =
                     MFlow.Create(flowName, sys, pageNum) |> ignore
                     )
 
-        //MFlow 리스트 만들기
-        let MakeFlows(pptPages:pptPage seq, model:Model, dicFlow:Dictionary<int, Flow>) = 
-             pptPages
-                |> Seq.filter(fun page -> page.IsUsing)
-                |> Seq.iter  (fun page -> 
-                    let pageNum  = page.PageNum
-                    let sysName, flowName = GetSysNFlow(page.Title, page.PageNum)
-                    let sys    = model.FindSystem(sysName)      //.[sysName]
-                    dicFlow.Add(  pageNum,  Flow.Create(flowName, sys) ) |> ignore
-                    )
-
-
 
 
         //Interface 만들기

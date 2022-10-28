@@ -32,7 +32,7 @@ public static class ModelParser
 
         var model = helper.Model;
         model.CreateMRIEdgesTransitiveClosure();
-
+        model.Validate();
 
         return helper;
     }

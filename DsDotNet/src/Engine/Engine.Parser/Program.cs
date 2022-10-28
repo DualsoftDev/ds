@@ -139,6 +139,33 @@ C4 > C5;
 }
 ";
 
+    public static string DuplicatedCallsText = @"
+[sys] My = {
+    [flow] F = {
+        A.""+"" > A.""-"";
+        A.""-"" > B.""+"";
+    }
+}
+[sys] A = {
+    [flow] F = {
+        Vp > Pp > Sp;
+        Vm > Pm > Sm;
+
+        Vp |> Pm |> Sp;
+        Vm |> Pp |> Sm;
+        Vp <||> Vm;
+    }
+    [interfaces] = {
+        ""+"" = { F.Vp ~ F.Sp }
+        ""-"" = { F.Vm ~ F.Sm }
+        ""+"" <||> ""-"";
+    }
+}
+[sys] B = @copy_system(A);
+
+";
+
+
     public static string AdoptoedValidText = @"
 [sys] My = {
     [flow] F = {

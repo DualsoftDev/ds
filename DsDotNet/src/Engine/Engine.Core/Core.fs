@@ -94,6 +94,19 @@ module CoreModule =
 
     and Alias private (mnemonic:string, parent:ParentWrapper, aliasKey:string[], isOtherFlowCall:bool) =
         inherit Vertex(mnemonic, parent)
+
+        static let tryFindAlias (graph:Graph<Vertex, Edge>) (mnemonic:string) =
+            let existing = graph.TryFindVertex(mnemonic)
+            match existing with
+            | Some (:? Alias as a) -> Some a
+            | Some v -> failwith "Alias name is already used by other vertex"
+            | None -> None
+
+        static let create (mnemonic: string) (graph:Graph<Vertex, Edge>) (creator: unit -> Alias) =
+            let existing = tryFindAlias graph mnemonic
+            match existing with
+            | Some a -> a
+            | _ -> creator()
         
         member _.IsOtherFlowCall = isOtherFlowCall
         member _.AliasKey = aliasKey
@@ -108,37 +121,49 @@ module CoreModule =
                 base.GetRelativeName(referencePath)
         
         static member CreateInFlow(name, aliasKey, flow:Flow, [<Optional; DefaultParameterValue(false)>] isOtherFlowCall) =
-            let alias = Alias(name, Flow flow, aliasKey, isOtherFlowCall)
-            flow.Graph.AddVertex(alias) |> verifyM $"Duplicated segment name [{name}]"
-            alias
+            let creator() =
+                let alias = Alias(name, Flow flow, aliasKey, isOtherFlowCall)
+                flow.Graph.AddVertex(alias) |> verifyM $"Duplicated segment name [{name}]"
+                alias
+            create name flow.Graph creator
+
         static member CreateInReal(mnemonic, apiItem:ApiItem, parent:Real) =
-            let child = Alias(mnemonic, Real parent, apiItem.NameComponents, false)
-            parent.Graph.AddVertex(child) |> verifyM $"Duplicated child name [{mnemonic}]"
-            child
+            let creator() =
+                let alias = Alias(mnemonic, Real parent, apiItem.NameComponents, false)
+                parent.Graph.AddVertex(alias) |> verifyM $"Duplicated child name [{mnemonic}]"
+                alias
+            create mnemonic parent.Graph creator
+
         static member CreateInReal(mnemonic, call:Call, parent:Real) =
-            let api:ApiItem = call.ApiItem
-            let child = Alias(mnemonic, Real parent, api.NameComponents, false)
-            child.SetTarget(call)
-            parent.Graph.AddVertex(child) |> verifyM $"Duplicated child name [{mnemonic}]"
-            child
+            let creator() =
+                let api:ApiItem = call.ApiItem
+                let alias = Alias(mnemonic, Real parent, api.NameComponents, false)
+                alias.SetTarget(call)
+                parent.Graph.AddVertex(alias) |> verifyM $"Duplicated child name [{mnemonic}]"
+                alias
+            create mnemonic parent.Graph creator                
             
     
 
     /// 외부 시스템 호출 객체
     and Call private (apiItem:ApiItem, parent:ParentWrapper) =
         inherit Vertex(apiItem.QualifiedName, parent)
+        static let create (graph:Graph<Vertex, Edge>) (apiItem:ApiItem) (parent:ParentWrapper) =
+            let existing = graph.TryFindVertex(apiItem.QualifiedName)
+            match existing with
+            | Some (:? Call as v) -> v
+            | Some v ->
+                failwith $"Duplicated call name [{apiItem.QualifiedName}]"
+            | _ ->
+                let call = Call(apiItem, parent)
+                graph.AddVertex(call) |> verifyM $"Duplicated call name [{apiItem.QualifiedName}]"
+                call
+
         member _.ApiItem = apiItem
         member val Addresses:Addresses = null with get, set
 
-        static member CreateInFlow(apiItem:ApiItem, flow:Flow) =
-            let call = Call(apiItem, Flow flow)
-            flow.Graph.AddVertex(call) |> verifyM $"Duplicated call name [{apiItem.QualifiedName}]"
-            call
-
-        static member CreateInReal(apiItem:ApiItem, real:Real) =
-            let call = Call(apiItem, Real real)
-            real.Graph.AddVertex(call) |> verifyM $"Duplicated call name [{apiItem.QualifiedName}]"
-            call
+        static member CreateInFlow(apiItem:ApiItem, flow: Flow) = create flow.Graph apiItem (Flow flow)
+        static member CreateInReal(apiItem:ApiItem, real:Real) = create real.Graph apiItem (Real real)
 
         /// Graph 에 포함되지 않는 core.  Alias 에 숨은 core
         static member CreateNowhere(apiItem:ApiItem, parent:ParentWrapper) = Call(apiItem, parent)
@@ -189,6 +214,7 @@ module CoreModule =
 
     and Edge private (source:Vertex, target:Vertex, edgeType:EdgeType) =
         inherit EdgeBase<Vertex>(source, target, edgeType)
+        
         static member Create(graph:Graph<_,_>, source, target, edgeType:EdgeType) =
             let edge = Edge(source, target, edgeType)
             graph.AddEdge(edge) |> verifyM $"Duplicated edge [{source.Name}{edgeType.ToText()}{target.Name}]"

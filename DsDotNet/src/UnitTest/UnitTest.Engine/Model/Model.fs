@@ -206,6 +206,42 @@ module private ModelComparisonHelper =
         }
     }
     """
+        let answerDuplicatedCallsText = """
+[sys] My = {
+    [flow] F = {
+        A."+" > A."-" > B."+";
+    }
+}
+[sys] A = {
+    [flow] F = {
+        Vp > Pp > Sp;
+        Vm > Pm > Sm;
+        Vp |> Pm |> Sp;
+        Vm |> Pp |> Sm;
+        Vp <||> Vm;
+    }
+    [interfaces] = {
+        "+" = { A.F.Vp ~ A.F.Sp }
+        "-" = { A.F.Vm ~ A.F.Sm }
+        "+" <||> "-";
+    }
+}
+[sys] B = {
+    [flow] F = {
+        Vp > Pp > Sp;
+        Vm > Pm > Sm;
+        Vp |> Pm |> Sp;
+        Vm |> Pp |> Sm;
+        Vp <||> Vm;
+    }
+    [interfaces] = {
+        "+" = { B.F.Vp ~ B.F.Sp }
+        "-" = { B.F.Vm ~ B.F.Sm }
+        "+" <||> "-";
+    }
+}    """
+
+
 
     [<AutoOpen>]           
     module ModelComponentAnswers =
@@ -419,6 +455,11 @@ module ModelTests1 =
         member __.``DuplicatedEdgesText test`` () =
             logInfo "=== DuplicatedEdgesText"
             compare Program.DuplicatedEdgesText answerDuplicatedEdgesText
+            
+        [<Test>]
+        member __.``DuplicatedCallsText test`` () =
+            logInfo "=== DuplicatedCallsText"
+            compare Program.DuplicatedCallsText answerDuplicatedCallsText
 
         [<Test>]
         member __.``SplittedMRIEdgesText test`` () =
@@ -465,9 +506,11 @@ module ModelTests1 =
             ()
             
         [<Test>]
-        member __.``Model duplication test`` () =
-            (fun () -> compare InvalidDuplicationTest.DupSystemNameModel "") |> ShouldFailWithSubstringT "An item with the same key has already been added"
-            (fun () -> compare InvalidDuplicationTest.DupFlowNameModel "")   |> ShouldFailWithSubstringT "Duplicated"
-            (fun () -> compare InvalidDuplicationTest.DupParentingModel1 "") |> ShouldFailWithSubstringT "Duplicated"
-            (fun () -> compare InvalidDuplicationTest.DupParentingModel2 "") |> ShouldFailWithSubstringT "Duplicated"
+        member __.``Model ERROR duplication test`` () =
+            //(fun () -> compare InvalidDuplicationTest.DupSystemNameModel "") |> ShouldFailWithSubstringT "An item with the same key has already been added"
+            //(fun () -> compare InvalidDuplicationTest.DupFlowNameModel "")   |> ShouldFailWithSubstringT "Duplicated"
+            //(fun () -> compare InvalidDuplicationTest.DupParentingModel1 "") |> ShouldFailWithSubstringT "Duplicated"
+            //(fun () -> compare InvalidDuplicationTest.DupParentingModel2 "") |> ShouldFailWithSubstringT "Duplicated"
+            (fun () -> compare InvalidDuplicationTest.CyclicEdgeModel ""  )  |> ShouldFailWithSubstringT "Cyclic"
             
+            // todo : Loop detection

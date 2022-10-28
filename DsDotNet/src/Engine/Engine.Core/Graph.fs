@@ -89,9 +89,10 @@ module GraphModule =
         member x.RemoveEdge(edge:'E)     = x.RemoveEdges([edge])
         member x.AddVertex(vertex:'V)    = x.AddVertices([vertex])
         member x.RemoveVertex(vertex:'V) = x.RemoveVertices([vertex])
-        member x.FindVertex(name:string) = vs.FirstOrDefault(fun v -> v.Name = name)
-        member x.FindEdges(source:string, target:string) = es.Where(fun e -> e.Source.Name = source && e.Target.Name = target)
-        member x.FindEdges(source:'V, target:'V) = es.Where(fun e -> e.Source = source && e.Target = target)
+        member _.TryFindVertex(name:string) = vs |> Seq.tryFind(fun v -> v.Name = name)
+        member x.FindVertex = x.TryFindVertex >> Option.get
+        member _.FindEdges(source:string, target:string) = es.Where(fun e -> e.Source.Name = source && e.Target.Name = target)
+        member _.FindEdges(source:'V, target:'V) = es.Where(fun e -> e.Source = source && e.Target = target)
 
         member private x.ConnectedVertices = x.Edges |> Seq.collect(fun e -> [e.Source; e.Target]) |> Seq.distinct
         member x.Islands = x.Vertices.Except(x.ConnectedVertices)
@@ -112,6 +113,8 @@ module GraphModule =
                     .Where(fun tgt -> not <| x.GetOutgoingEdges(tgt).Any())
                     .Distinct()
             x.Islands @@ lasts
+
+
 
 [<AutoOpen>]
 module internal GraphHelperModule =
@@ -166,10 +169,78 @@ module internal GraphHelperModule =
 
 
 
+
+    
+    (* https://blog.naver.com/ndb796/221236952158 *)
+    /// function that retruns strongly connected components from given edge lists of graph    
+    let findStronglyConnectedComponents(graph:Graph<'V, 'E>) (edges:'E seq) =
+        let g = graph
+        let sccs =
+            let sccs:ResizeArray<'V[]> = ResizeArray()
+            let visited = new HashSet<'V>()
+            let stack = new Stack<'V>()
+            let edges = edges.ToHashSet();
+
+            let rec visit(v:'V) =
+                if visited.Contains(v) then
+                    let mutable cond = stack.Contains(v)
+                    if cond then
+                        [|
+                            while cond do
+                                let s = stack.Pop()
+                                s
+                                cond <- s <> v
+                        |] |> sccs.Add
+                else
+                    visited.Add(v) |> ignore
+                    stack.Push(v) |> ignore
+
+                    let oges = g.GetOutgoingEdges(v).Where(fun e -> edges.Contains(e))
+                    let ogvs = oges.Select(fun e -> e.Target).ToArray()
+                    if ogvs.IsEmpty() then
+                        stack.Pop() |> ignore
+                    else
+                        for ogv in ogvs do
+                            visit(ogv)
+                        if stack.Any() then
+                            stack.Pop() |> ignore
+
+            let vs =
+                edges.Collect(fun e -> [ e.Source; e.Target ])
+                |> Seq.distinct
+
+            for v in vs do
+                visit(v)
+
+            sccs
+
+        sccs
+    
+
+    let validateGraph (graph:Graph<'V, 'E>) =
+        let edges =
+            graph.Edges
+                .Where(fun e -> not <| e.EdgeType.HasFlag(EdgeType.Reset))
+                .ToArray()
+
+        let sccs = findStronglyConnectedComponents graph edges
+        if sccs.Any() then
+            let msg =
+                [ for vs in sccs do
+                    vs.Select(fun v -> v.Name).JoinWith(", ").EncloseWith2("[", "]")
+                ].JoinWith("\r\n")
+            failwithlogf $"ERROR: Cyclic graph on {msg}"
+
+        true
+
+
+
 [<Extension>]
 type GraphHelper =
     [<Extension>] static member Dump(graph:Graph<_, _>) = dumpGraph(graph)
     [<Extension>] static member GetVertices(edge:IEdge<'V>) = [edge.Source; edge.Target]
+    [<Extension>] static member Validate(graph:Graph<'V, 'E>) = validateGraph graph
+    
     [<Extension>]
     static member ToText(edgeType:EdgeType) =
         let t = edgeType

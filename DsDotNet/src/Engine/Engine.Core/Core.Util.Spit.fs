@@ -64,8 +64,7 @@ module SpitModuleHelper =
             yield SpitResult.Create(SpitDsSystem system, system.NameComponents)
             for flow in system.Flows do
                 yield! spit(flow)
-                for itf in system.ApiItems do
-                    yield SpitResult.Create(SpitApiItem itf, itf.NameComponents)
+                for api in system.ApiItems -> SpitResult.Create(SpitApiItem api, api.NameComponents)
         |]
     and spitModel (model:Model) : SpitResults =
         [|
@@ -73,12 +72,9 @@ module SpitModuleHelper =
             for sys in model.Systems do
                 yield! spit(sys)
 
-            for x in model.Variables do
-                yield SpitResult.Create(SpitVariable x, [| x.Name |] )
-            for x in model.Commands do
-                yield SpitResult.Create(SpitCommand x, [| x.Name |] )
-            for x in model.Observes do
-                yield SpitResult.Create(SpitObserve x, [| x.Name |] )
+            for x in model.Variables -> SpitResult.Create(SpitVariable x, [| x.Name |] )
+            for x in model.Commands ->  SpitResult.Create(SpitCommand x,  [| x.Name |] )
+            for x in model.Observes ->  SpitResult.Create(SpitObserve x,  [| x.Name |] )
         |]
     and spit(obj:obj) : SpitResults =
         match obj with

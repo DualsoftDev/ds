@@ -65,10 +65,15 @@ module internal ToDsTextModule =
             for KeyValue(_, es) in ess do
                 let es = es.ToArray()
                 if es.Length = 2 then
-                    assert(es[0].EdgeType.HasFlag(EdgeType.AugmentedTransitiveClosure) = es[1].EdgeType.HasFlag(EdgeType.AugmentedTransitiveClosure))
+                    assert(es[0].EdgeType.HasFlag(EdgeType.AugmentedTransitiveClosure)
+                         = es[1].EdgeType.HasFlag(EdgeType.AugmentedTransitiveClosure))
                     assert(es[0].Source = es[1].Target && es[0].Target = es[1].Source)
-                    let commentOnAugmented = if es[0].EdgeType.HasFlag(EdgeType.AugmentedTransitiveClosure) then "//" else ""
-                    yield $"{tab}{commentOnAugmented}{es[0].Source.GetRelativeName(basis)} <||> {es[0].Target.NameComponents.GetRelativeName(basis)};"
+                    let commentOnAugmented =
+                        if es[0].EdgeType.HasFlag(EdgeType.AugmentedTransitiveClosure)
+                        then "//"
+                        else ""
+                    yield $"{tab}{commentOnAugmented}{es[0].Source.GetRelativeName(basis)}"
+                        + $" <||> {es[0].Target.NameComponents.GetRelativeName(basis)};"
                 else
                     assert(es.Length = 1)
                     yield $"{tab}{es[0].ToText()};"

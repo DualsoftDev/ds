@@ -97,9 +97,9 @@ type SpitModule =
     [<Extension>] static member Spit (segment:Real)    = spitSegment segment
     [<Extension>] static member Spit (call:Call)       = spitCall call
     //[<Extension>] static member Spit (alias:Alias)     = spitAlias alias
-    
+
     [<Extension>]
-    static member GetCore (spit:SpitResult):obj = 
+    static member GetCore (spit:SpitResult):obj =
         match spit.SpitObj with
         | SpitModel     c -> c
         | SpitDsSystem  c -> c
@@ -112,6 +112,6 @@ type SpitModule =
         | SpitVariable  c -> c
         | SpitCommand   c -> c
         | SpitObserve   c -> c
-        
+
 
 

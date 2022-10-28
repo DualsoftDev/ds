@@ -129,11 +129,11 @@ module internal ToDsTextModule =
                     let tab = getTab (indent+2)
                     yield $"{tab}{k.Combine()} = {lb} {mnemonics} {rb}"
                 yield $"{tab}{rb}"
-                        
+
             yield $"{tab}{rb}"
         ] |> combineLines
 
-        
+
     let systemToDs (system:DsSystem) =
         [
             let ip = if system.Host <> null then $" ip = {system.Host}" else ""
@@ -159,7 +159,7 @@ module internal ToDsTextModule =
 
                 for ri in system.ApiResetInfos do
                     yield $"{tab2}{ri.Operand1} {ri.Operator} {ri.Operand2};"
-                    
+
                 yield $"{tab}{rb}"
 
             let buttonsToDs(category:string, btns:ButtonDic) =
@@ -187,10 +187,10 @@ module internal ToDsTextModule =
                 yield $"[prop] = {lb}"
                 yield $"{tab}[addresses] = {lb}"
                 yield addresses
-                yield $"{tab}{rb}" 
+                yield $"{tab}{rb}"
                 yield rb
-                
-            
+
+
             yield rb
         ] |> combineLines
 
@@ -199,7 +199,7 @@ module internal ToDsTextModule =
         let funApp (funApp:FunctionApplication) =
             let pgs (argGroups:ParameterGroup seq) =
                 argGroups.Select(fun ag -> ag.JoinWith ", ")
-                    .JoinWith " ~ "                
+                    .JoinWith " ~ "
             $"{funApp.FunctionName} = {pgs funApp.ParameterGroups}"
         let vars = model.Variables
         let cmds = model.Commands
@@ -264,7 +264,7 @@ module internal ToDsTextModule =
                                 else
                                     $"({xywh.X}, {xywh.Y})"
                             yield $"{tab2}{apiItem.QualifiedName} = {posi}"
-                            
+
                         yield $"{tab}{rb}"
                 ] |> combineLines
 
@@ -287,7 +287,7 @@ module internal ToDsTextModule =
                 | _ ->
                     ()
         ]
-        
+
 
 [<Extension>]
 type ToDsTextModuleHelper =

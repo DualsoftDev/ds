@@ -7,10 +7,10 @@ open Engine.Common.FS
 
 [<AutoOpen>]
 module DsType =
-    ///Seg 상태 (Default 'Homing') 
+    ///Seg 상태 (Default 'Homing')
     type Status4 =
-        | Ready 
-        | Going 
+        | Ready
+        | Going
         | Finish
         | Homing
 
@@ -38,7 +38,7 @@ module DsType =
               {TextBit}, {TextBool}, {TextByte}
             , {TextWord}, {TextDword}, {TextLword}
             , {TextString}, {TextSingle}, {TextFloat}, {TextDouble}]"
-     
+
     ///인터페이스 Tag 기본 형식
     type TagCase =
         | Address
@@ -49,12 +49,12 @@ module DsType =
     with
         member x.ToText() =
             match x with
-            | Address      -> TextAddressDev  
-            | Variable     -> TextVariable 
-            | Command      -> TextCommand  
-            | Observe      -> TextObserve  
-            | Button       -> TextButton   
-          
+            | Address      -> TextAddressDev
+            | Variable     -> TextVariable
+            | Command      -> TextCommand
+            | Observe      -> TextObserve
+            | Button       -> TextButton
+
 
     let TagToType(txt:string) =
         match txt with
@@ -75,7 +75,7 @@ module DsType =
         | ResetBTN            //리셋 버튼
         | AutoBTN             //자동 버튼
         | EmergencyBTN        //비상 버튼
-       
+
 
     let BtnToType(txt:string) =
         match txt with

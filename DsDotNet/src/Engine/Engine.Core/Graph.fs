@@ -27,7 +27,7 @@ module GraphModule =
     type IEdge<'V> =
         abstract Source :'V    //방향을 고려안한 위치상 왼쪽   Vertex
         abstract Target :'V    //방향을 고려안한 위치상 오른쪽 Vertex
-        abstract EdgeType  :EdgeType 
+        abstract EdgeType  :EdgeType
 
     ///// vertex on a flow
     //type IFlowVertex =
@@ -54,12 +54,12 @@ module GraphModule =
         member _.Source = source
         member _.Target = target
         member _.EdgeType = edgeType
-     
+
     //type ICoin =
     //    inherit IChildVertex
 
     type Graph<'V, 'E
-            when 'V :> INamed and 'V : equality        
+            when 'V :> INamed and 'V : equality
             and 'E :> IEdge<'V> and 'E: equality> (
             vertices:'V seq, edges:'E seq) =
         let edgeComparer = {
@@ -141,7 +141,7 @@ module internal GraphHelperModule =
     ///
     /// - 단방향 simplex edge 는 값에 하나만 저장됨
     let groupDuplexEdges<'V, 'E
-            when 'V :> INamed and 'V : equality        
+            when 'V :> INamed and 'V : equality
             and 'E :> IEdge<'V> and 'E: equality>
             (edges:'E seq) =
 
@@ -170,9 +170,9 @@ module internal GraphHelperModule =
 
 
 
-    
+
     (* https://blog.naver.com/ndb796/221236952158 *)
-    /// function that retruns strongly connected components from given edge lists of graph    
+    /// function that retruns strongly connected components from given edge lists of graph
     let findStronglyConnectedComponents(graph:Graph<'V, 'E>) (edges:'E seq) =
         let g = graph
         let sccs =
@@ -215,7 +215,7 @@ module internal GraphHelperModule =
             sccs
 
         sccs
-    
+
 
     let validateGraph (graph:Graph<'V, 'E>) =
         let edges =
@@ -240,7 +240,7 @@ type GraphHelper =
     [<Extension>] static member Dump(graph:Graph<_, _>) = dumpGraph(graph)
     [<Extension>] static member GetVertices(edge:IEdge<'V>) = [edge.Source; edge.Target]
     [<Extension>] static member Validate(graph:Graph<'V, 'E>) = validateGraph graph
-    
+
     [<Extension>]
     static member ToText(edgeType:EdgeType) =
         let t = edgeType

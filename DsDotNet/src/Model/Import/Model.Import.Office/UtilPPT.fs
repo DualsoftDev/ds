@@ -29,6 +29,19 @@ module UtilPPT =
     
     [<Extension>] 
     type Office =
+
+        [<Extension>] 
+        static member ErrorName(shape:#Shape, errId:int,  page:int) = 
+               Office.ErrorPPT(ErrorCase.Name, errId, Office.ShapeName(shape), page, shape.InnerText)
+        
+        [<Extension>] 
+        static member ErrorShape(shape:#Shape, errId:int,  page:int) = 
+               Office.ErrorPPT(ErrorCase.Shape, errId, Office.ShapeName(shape), page, shape.InnerText)
+
+        [<Extension>] 
+        static member ErrorConnect(conn:#ConnectionShape, errId:int, src:string, tgt:string,  page:int) = 
+               Office.ErrorPPT(ErrorCase.Conn, errId, $"{Office.EdgeName(conn)}[{src}~{tgt}]", page, conn.InnerText)
+
         ///power point 문서를 Openxml로 열기 (*.pptx 형식만 지원)
         [<Extension>] 
         static member Open(path:string) = PresentationDocument.Open(path, false);
@@ -175,6 +188,12 @@ module UtilPPT =
                 let shapeProperties = conn.Descendants<NonVisualConnectionShapeProperties>().FirstOrDefault();
                 let prop = shapeProperties.Descendants<NonVisualDrawingProperties>().FirstOrDefault();
                 prop.Name.Value
+        
+        [<Extension>]
+        static member IsTitle(shape:#Shape) = 
+                    if (shape.Descendants<ApplicationNonVisualDrawingProperties>().Any() |> not) then false
+                    elif (shape.Descendants<ApplicationNonVisualDrawingProperties>().First().Descendants<PlaceholderShape>().Any() |> not ) then false
+                    else true
 
         [<Extension>]
         static member PageTitle(slidePart:#SlidePart) = 
@@ -221,16 +240,24 @@ module UtilPPT =
         ///전체 사용된 도형 반환 (Text box 제외)
         [<Extension>] 
         static member Shapes(page:int, commonSlideData:CommonSlideData) = 
-                        commonSlideData.ShapeTree.Descendants<Shape>()
-                        |> Seq.filter(fun  shape -> shape.CheckRectangle() || shape.CheckEllipse() 
-                                                   || shape.CheckDonutShape()|| shape.CheckResetShape()
-                                                   || shape.CheckNoSmoking() || shape.CheckBlockArc()
-                                                   || shape.CheckFoldedCorner() || shape.CheckHomePlate()
-                                                   )
-                        |> Seq.map(fun  shape -> 
-                                
-                                let geometry = shape.Descendants<Drawing.PresetGeometry>().FirstOrDefault().Preset.Value
-                                shape, page, geometry, shape.IsDashShape())
+                        let shapes = commonSlideData.ShapeTree.Descendants<Shape>()
+                        let ableShapes = 
+                            shapes
+                            |> Seq.filter(fun  shape -> shape.CheckRectangle() || shape.CheckEllipse() 
+                                                       || shape.CheckDonutShape()|| shape.CheckResetShape()
+                                                       || shape.CheckNoSmoking() || shape.CheckBlockArc()
+                                                       || shape.CheckFoldedCorner() || shape.CheckHomePlate()
+                                                       )
+                            |> Seq.map(fun  shape -> 
+                                    let geometry = shape.Descendants<Drawing.PresetGeometry>().FirstOrDefault().Preset.Value
+                                    shape, page, geometry, shape.IsDashShape())
+
+                        shapes 
+                        |> Seq.except (ableShapes |> Seq.map (fun (shape, page, geometry, isDash) -> shape))
+                        |> Seq.filter(fun f -> f.IsTitle()|>not)
+                        |> Seq.iter(fun f -> f.ErrorShape(38, page))
+
+                        ableShapes
                             
 
         ///전체 사용된 도형 반환 (Text box 제외)
@@ -248,15 +275,4 @@ module UtilPPT =
                         let Cy = doc.PresentationPart.Presentation.SlideSize.Cy
                         Cx |> int, Cy |> int
         
-        [<Extension>] 
-        static member ErrorName(shape:#Shape, errId:int,  page:int) = 
-               Office.ErrorPPT(ErrorCase.Name, errId, Office.ShapeName(shape), page, shape.InnerText)
-        
-        [<Extension>] 
-        static member ErrorShape(shape:#Shape, errId:int,  page:int) = 
-               Office.ErrorPPT(ErrorCase.Shape, errId, Office.ShapeName(shape), page, shape.InnerText)
-
-        [<Extension>] 
-        static member ErrorConnect(conn:#ConnectionShape, errId:int, src:string, tgt:string,  page:int) = 
-               Office.ErrorPPT(ErrorCase.Conn, errId, $"{Office.EdgeName(conn)}[{src}~{tgt}]", page, conn.InnerText)
-        
+    

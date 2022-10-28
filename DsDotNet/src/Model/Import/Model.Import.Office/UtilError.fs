@@ -60,7 +60,8 @@ module UtilError =
         msgs.TryAdd(35,"외부 시스템 인터페이스 이름만 존재 합니다. '인터페이스이름[tx1 ~ rx1,rx2]' 와 같은형식으로 입력 해야합니다.") |>ignore
         msgs.TryAdd(36,"행위이름이 EXCEL 이름 열에 없습니다.") |>ignore
         msgs.TryAdd(37,"인터페이스는 인터페이스끼리 인과가능.") |>ignore
-        msgs.TryAdd(38,"") |>ignore
+        msgs.TryAdd(38,"도형에 윤곽선이 없습니다.") |>ignore
+        msgs.TryAdd(39,"") |>ignore
        
         msgs
         

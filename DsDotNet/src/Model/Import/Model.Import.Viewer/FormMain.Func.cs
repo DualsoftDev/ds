@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using static Engine.Common.FS.MessageEvent;
+using static Engine.Core.CoreModule;
 using static Engine.Core.DsTextProperty;
 using static Model.Import.Office.Object;
 
@@ -71,8 +72,10 @@ namespace Dual.Model.Import
                     _dsText = _Model.ToDsText();
                     ExportTextModel(Color.Transparent, _dsText);
                     this.Do(() => xtraTabControl_Ex.TabPages.Clear());
-                    foreach (var sys in _OldModel.Systems.OrderBy(sys => sys.Name))
-                        CreateNewTabViewer(sys);
+                    //test ahn
+                    //foreach (var sys in _Model.Systems.OrderBy(sys => sys.Name))
+                    //    CreateNewTabViewer(sys);
+
                     WriteDebugMsg(DateTime.Now, MSGLevel.Info, $"{PathPPT} 불러오기 성공!!");
                     this.Do(() =>
                     {
@@ -187,17 +190,17 @@ namespace Dual.Model.Import
 
             this.Size = new Size(1600, 1000);
 
-            _Demo.Systems.OrderBy(sys => sys.Name).ToList()
+            _Model.Systems.OrderBy(sys => sys.Name).ToList()
                   .ForEach(sys =>
                       CreateNewTabViewer(sys, true)
                   );
         }
 
-        internal void CreateNewTabViewer(MSys sys, bool isDemo = false)
+        internal void CreateNewTabViewer(DsSystem sys, bool isDemo = false)
         {
-            List<MFlow> flows = sys.Flows.Cast<MFlow>().OrderBy(o => o.Page).ToList();
+            //List<MFlow> flows = sys.Flows.Cast<MFlow>().OrderBy(o => o.Page).ToList();
 
-            flows.ToList().ForEach(f =>
+            sys.Flows.ToList().ForEach(f =>
             {
                 if (_DicMyUI.ContainsKey(f) || _DicExUI.ContainsKey(f))
                 {
@@ -213,7 +216,8 @@ namespace Dual.Model.Import
                     TabPage tab = new TabPage();
                     tab.Controls.Add(viewer);
                     tab.Tag = viewer;
-                    tab.Text = $"{f.System.Name}.{f.Name}({f.Page})";
+                    //tab.Text = $"{f.System.Name}.{f.Name}({f.Page})";
+                    tab.Text = $"{f.System.Name}.{f.Name}";
                     this.Do(() =>
                     {
                         if (f.System.Active)
@@ -234,9 +238,9 @@ namespace Dual.Model.Import
         }
         internal void RefreshGraph()
         {
-            foreach (KeyValuePair<MFlow, TabPage> view in _DicMyUI)
+            foreach (KeyValuePair<Flow, TabPage> view in _DicMyUI)
             {
-                foreach (var seg in view.Key.UsedMSegs)
+                foreach (var seg in view.Key.Graph.Vertices)
                 {
                     ((UCView)view.Value.Tag).Update(seg);
                 }

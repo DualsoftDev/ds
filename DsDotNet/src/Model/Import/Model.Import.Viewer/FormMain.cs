@@ -8,6 +8,7 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static Engine.Common.FS.MessageEvent;
+using static Engine.Core.CoreModule;
 using static Model.Import.Office.Object;
 
 namespace Dual.Model.Import
@@ -21,8 +22,8 @@ namespace Dual.Model.Import
         private string _dsText;
         private bool _ConvertErr = false;
         private MModel _Demo;
-        public Dictionary<MFlow, TabPage> _DicMyUI;
-        public Dictionary<MFlow, TabPage> _DicExUI;
+        public Dictionary<Flow, TabPage> _DicMyUI;
+        public Dictionary<Flow, TabPage> _DicExUI;
         public string PathPPT;
         public string PathXLS;
         public bool Busy = false;
@@ -50,8 +51,8 @@ namespace Dual.Model.Import
             EventExternal.MSGSubscribe();
             EventExternal.SegSubscribe();
 
-            _DicMyUI = new Dictionary<MFlow, TabPage>();
-            _DicExUI = new Dictionary<MFlow, TabPage>();
+            _DicMyUI = new Dictionary<Flow, TabPage>();
+            _DicExUI = new Dictionary<Flow, TabPage>();
 
             _Demo = ImportCheck.GetDemoModel("test");
 

@@ -1,5 +1,7 @@
 using Engine.Common;
+using Engine.Core;
 using Microsoft.Msagl.Drawing;
+using Microsoft.Msagl.GraphmapsWithMesh;
 using Microsoft.Msagl.GraphViewerGdi;
 using Microsoft.Msagl.Layout.Layered;
 using Model.Import.Office;
@@ -7,13 +9,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
+using static Engine.Core.CoreModule;
 using static Engine.Core.DsType;
 using static Engine.Core.EdgeModule;
 using static Engine.Core.GraphModule;
 using static Model.Import.Office.Object;
 using Color = Microsoft.Msagl.Drawing.Color;
 using Edge = Microsoft.Msagl.Drawing.Edge;
-
+using Vertex = Engine.Core.CoreModule.Vertex;
+using DsEdge = Engine.Core.CoreModule.Edge;
 namespace Dual.Model.Import
 {
     public partial class UCView : UserControl
@@ -40,7 +44,7 @@ namespace Dual.Model.Import
 
 
 
-        public void SetGraph(MFlow flow)
+        public void SetGraph(Flow flow)
         {
             //sub 그래프 불가
             //viewer.Graph.LayoutAlgorithmSettings = new Microsoft.Msagl.Layout.MDS.MdsLayoutSettings();
@@ -71,9 +75,11 @@ namespace Dual.Model.Import
             SetBackColor(System.Drawing.Color.FromArgb(33, 33, 33));
 
 
-            flow.Singles.Cast<MSeg>().ToList().ForEach(seg => DrawSeg(viewer.Graph.RootSubgraph, seg));
+            flow.Graph.Vertices
+                .ForEach(seg => DrawSeg(viewer.Graph.RootSubgraph, new DsViewNode(seg)));
+            var dsEdges = flow.Graph.Edges.Select(s => new DsViewEdge(s));
 
-            drawMEdgeGraph(flow.MEdges.ToList(), viewer.Graph.RootSubgraph);
+            drawMEdgeGraph(dsEdges, viewer.Graph.RootSubgraph);
 
             viewer.SetCalculatedLayout(viewer.CalculateLayout(viewer.Graph));
         }
@@ -90,18 +96,18 @@ namespace Dual.Model.Import
 
 
 
-        private void drawMEdgeGraph(List<MEdge> edges, Subgraph subgraph)
+        private void drawMEdgeGraph(IEnumerable<DsViewEdge> edges, Subgraph subgraph)
         {
             edges.ForEach(f =>
             {
-                if (!f.IsSkipUI)
-                    DrawMEdge(subgraph, f);
+                //  if (!f.IsSkipUI)
+                DrawMEdge(subgraph, f);
             });
         }
 
-        private void DrawMEdge(Subgraph subgraph, MEdge edge)
+        private void DrawMEdge(Subgraph subgraph, DsViewEdge edge)
         {
-            MEdge mEdge = edge;
+            DsViewEdge mEdge = edge;
 
             bool bDrawSubSrc = mEdge.Source.IsChildExist;
             bool bDrawSubTgt = mEdge.Target.IsChildExist;
@@ -119,24 +125,24 @@ namespace Dual.Model.Import
             DrawSub(subgraph, mEdgeTgt, subGTgt, gEdge.TargetNode, bDrawSubTgt);
 
         }
-        private void DrawSeg(Subgraph subgraph, MSeg seg)
+        private void DrawSeg(Subgraph subgraph, DsViewNode seg)
         {
 
-            bool bDrawSub = (seg.IsChildExist || seg.Singles.Any());
+            //bool bDrawSub = (seg.IsChildExist || seg.Singles.Any());
 
-            var subG = new Subgraph(seg.UIKey);
+            //var subG = new Subgraph(seg.UIKey);
 
-            if (bDrawSub) subgraph.AddSubgraph(subG);
-            var gEdge = viewer.Graph.AddEdge(subG.Id, "", subG.Id);
-            UpdateLabelText(gEdge.SourceNode);
-            UpdateNodeView(gEdge.SourceNode, seg);
-            gEdge.IsVisible = false;
+            //if (bDrawSub) subgraph.AddSubgraph(subG);
+            //var gEdge = viewer.Graph.AddEdge(subG.Id, "", subG.Id);
+            //UpdateLabelText(gEdge.SourceNode);
+            //UpdateNodeView(gEdge.SourceNode, seg);
+            //gEdge.IsVisible = false;
 
-            DrawSub(subgraph, seg, subG, gEdge.SourceNode, bDrawSub);
+            //DrawSub(subgraph, seg, subG, gEdge.SourceNode, bDrawSub);
 
         }
 
-        private void DrawSub(Subgraph subgraph, MSeg seg, Subgraph subG, Node gNode, bool bDrawSub)
+        private void DrawSub(Subgraph subgraph, DsViewNode seg, Subgraph subG, Node gNode, bool bDrawSub)
         {
             if (_dicDrawing.ContainsKey(gNode.Id)) return;
             else _dicDrawing.Add(gNode.Id, gNode);
@@ -153,7 +159,7 @@ namespace Dual.Model.Import
         }
 
 
-        private void DrawEdgeStyle(Edge gEdge, MEdge edge, bool model = false)
+        private void DrawEdgeStyle(Edge gEdge, DsViewEdge edge, bool model = false)
         {
             //gEdge.Attr.Color = Color.Black;
             //gEdge.Label.FontColor = Color.White;
@@ -209,8 +215,8 @@ namespace Dual.Model.Import
             if (model)
             {
 
-                var src = edge.Source as MSeg;
-                var tgt = edge.Target as MSeg;
+                var src = edge.Source;
+                var tgt = edge.Target;
 
                 UpdateNodeView(gEdge.SourceNode, src);
                 UpdateNodeView(gEdge.TargetNode, tgt);
@@ -218,7 +224,7 @@ namespace Dual.Model.Import
             }
         }
 
-        private void UpdateNodeView(Node nNode, MSeg segment)
+        private void UpdateNodeView(Node nNode, DsViewNode segment)
         {
             {
                 //nNode.Attr.Color = Color.DarkGoldenrod;
@@ -249,30 +255,30 @@ namespace Dual.Model.Import
         public void RefreshGraph() { viewer.Do(() => viewer.Refresh()); }
 
 
-        public void Update(MSeg seg)
+        public void Update(CoreModule.Vertex seg)
         {
 
-            Node node = viewer.Graph.FindNode(seg.UIKey);
-            if (node == null)
-            {
-                if (viewer.Graph.SubgraphMap.ContainsKey(seg.UIKey))
-                    node = viewer.Graph.SubgraphMap[seg.UIKey];
-                else
-                    return;
-            }
-            //node.Attr.Color = Color.White;
-            //node.Label.FontColor = Color.White;
-            if (seg != null)
-            {
-                if (seg.NodeType == NodeType.MY)
-                    UpdateLineColor(seg.Status4, node);
-                else
-                    UpdateFillColor(seg.Status4, node);
-            }
-            else
-            {
+            //Node node = viewer.Graph.FindNode(seg.UIKey);
+            //if (node == null)
+            //{
+            //    if (viewer.Graph.SubgraphMap.ContainsKey(seg.UIKey))
+            //        node = viewer.Graph.SubgraphMap[seg.UIKey];
+            //    else
+            //        return;
+            //}
+            ////node.Attr.Color = Color.White;
+            ////node.Label.FontColor = Color.White;
+            //if (seg != null)
+            //{
+            //    if (seg.NodeType == NodeType.MY)
+            //        UpdateLineColor(seg.Status4, node);
+            //    else
+            //        UpdateFillColor(seg.Status4, node);
+            //}
+            //else
+            //{
 
-            }
+            //}
 
             RefreshGraph();
         }

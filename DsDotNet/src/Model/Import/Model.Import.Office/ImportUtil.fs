@@ -163,7 +163,7 @@ module ImportU =
             |> Seq.filter(fun node -> node.NodeType = IF) 
             |> Seq.iter(fun node ->  
                     let system = dicSys.[node.PageNum]
-                    let apiName = node.Name;
+                    let apiName = node.IfName;
                     ApiItem.Create(apiName, system) |> ignore
             )
             
@@ -179,6 +179,21 @@ module ImportU =
                             |>Seq.iter(fun api->copySys.ApiItems.Add(ApiItem.Create(api.Name, copySys)) |>ignore)
                         )
                 )
+
+
+        let MakeApiTxRx(doc:pptDoc, model:Model, dicFlow:Dictionary<int, Flow>) = 
+            doc.Nodes 
+                |> Seq.filter(fun node -> node.NodeType = IF) 
+                |> Seq.iter(fun node -> 
+                        let sys = dicFlow.[node.PageNum].System
+                        let api = sys.ApiItems.Where(fun w->w.Name = node.IfName).First() 
+                        ()
+                    /////    let txrxReal(name:string) = txrxRealsys.Host------------------------------------------->
+                    //    let txs = node.IfTxs |> Seq.map(fun f-> txrxReal name) |> Seq.cast<Real>
+                    //    let rxs = node.IfRxs |> Seq.map(fun f-> txrxReal name) |> Seq.cast<Real>
+                    //    api.AddTXs(txs)|>ignore
+                    //    api.AddTXs(rxs)|>ignore
+                        )
 
         //parent 리스트 만들기
         let MakeParent(pptNodes:pptNode seq, model:MModel, dicSeg:Dictionary<string, MSeg>, parents:ConcurrentDictionary<pptNode, seq<pptNode>>) = 

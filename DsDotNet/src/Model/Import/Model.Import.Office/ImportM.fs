@@ -91,8 +91,9 @@ module ImportM =
                 MakeSafeties(doc.Nodes, coreModel, dicFlow, dicVertex)  //new
                 //MakeVetexEdges(doc, coreModel, dicFlow , dicVertex) //new
                 MakeEdges     (doc, coreModel, dicFlow ,dicSys,  dicVertex) //new
+                MakeApiTxRx(doc, coreModel, dicFlow) //new
          
-       
+                
              
                 MSGInfo($"전체 장표   count [{doc.Pages.Count()}]")
                 MSGInfo($"전체 도형   count [{doc.Nodes.Count()}]")

@@ -2,13 +2,8 @@
 namespace Model.Import.Office
 
 open System.Linq
-open System.Collections.Concurrent
-open DocumentFormat.OpenXml.Packaging
-open DocumentFormat.OpenXml.Drawing
-open DocumentFormat.OpenXml
 open PPTX
 open System.Collections.Generic
-open Microsoft.FSharp.Collections
 open Engine.Common.FS
 open Model.Import.Office
 open Engine.Core
@@ -24,7 +19,11 @@ module ImportM =
         member internal x.GetImportModel() = 
             try
         //new 
-              
+                ImportU.dicSys.Clear()
+                ImportU.dicCopy.Clear()
+                ImportU.dicFlow.Clear()
+                ImportU.dicVertex.Clear()
+
                 let mySystem = DsSystem.Create(TextMySys, "localhost", model)  
                 mySystem.Active <- true         
                 ImportU.dicSys.Add(0, mySystem)
@@ -46,19 +45,17 @@ module ImportM =
                 //EMG & Start & Auto 리스트 만들기
                 doc.MakeButtons  (model) //new
 
-
                 //segment 리스트 만들기
                 doc.MakeSegment(model) //new
-                //Safety 만들기
-                doc.MakeSafeties(model)  //new
-
                 //Edge  만들기
                 doc.MakeEdges (model) //new
+                 //Safety 만들기
+                doc.MakeSafeties(model)  //new
                 //ApiTxRx  만들기
                 doc.MakeApiTxRx(model) //new
 
                   
-        //old
+        //old   //Model.Import.Viewer 때문에 임시 살려둠
                 let dicSeg = Dictionary<string, MSeg>()
                 MSys.Create(TextMySys, true, mmodel) |> ignore  
                 MakeExSys(doc, mmodel ) |> ignore//old 삭제예정

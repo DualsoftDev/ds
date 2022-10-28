@@ -222,46 +222,7 @@ module ImportU =
                                     )
                             )
 
-        //Safety 만들기
-        [<Extension>] static member MakeSafeties (doc:pptDoc, model:Model) = 
-                        doc.Nodes
-                        |> Seq.filter(fun node -> node.IsDummy|>not)
-                        |> Seq.iter(fun node -> 
-                                let flow = dicFlow.[node.PageNum]
-                                let dicQualifiedNameSegs  = dicVertex.Values.Select(fun seg -> seg.QualifiedName, seg) |> dict
-                                let safeName(safe) = sprintf "%s.%s.%s_%s" flow.System.Name flow.Name flow.Name safe
-                        
-                                node.Safeties   //세이프티 입력 미등록 이름오류 체크
-                                |> Seq.map(fun safe ->  safeName(safe))
-                                |> Seq.iter(fun safeFullName -> if(dicQualifiedNameSegs.ContainsKey safeFullName|>not) 
-                                                                then Office.ErrorName(node.Shape, 28, node.PageNum))
-
-                                node.Safeties   
-                                |> Seq.map(fun safe ->  safeName(safe))
-                                |> Seq.map(fun safeFullName ->  dicQualifiedNameSegs.[safeFullName])
-                                |> Seq.iter(fun safeConditionSeg ->
-                                        let realTarget = dicVertex.[node.Key] :?> Real  //Target  call 은 안되나 ?  ahn
-                                        realTarget.SafetyConditions.Add(safeConditionSeg :?> Real)|>ignore)  //safeCondition  call 은 안되나 ?
-                                )
-
-                        //copy system  동일 처리
-                        dicCopy.ForEach(fun sysTwin ->
-                            let copySys = sysTwin.Key
-                            let origSys = sysTwin.Value
-                            
-                            origSys.Flows
-                                .ForEach(fun flow->
-                                    let copyFlow = copySys.FindFlow(flow.Name)
-                                    let findReal(realName:string) = model.FindGraphVertex([|copySys.Name;copyFlow.Name;realName|]) :?> Real
-                                    flow.Graph.Vertices.Where(fun w->w :? Real).Cast<Real>()
-                                        .ForEach(fun real->
-                                                let copyReal = findReal(real.Name)
-                                                real.SafetyConditions.ForEach(fun safety ->
-                                                    copyReal.SafetyConditions.Add(findReal(safety.Name)) |>ignore
-                                                    )
-                                            )
-                                    )
-                            )
+        
 
 
                             //pptEdge 변환 및 등록
@@ -330,11 +291,52 @@ module ImportU =
                                             Edge.Create(
                                                 copyFlow.Graph
                                                 , findReal(e.Source.Name)
-                                                , findReal(e.Source.Name)
+                                                , findReal(e.Target.Name)
                                                 , e.EdgeType) |> ignore
                                             )
                                         )
                                 )
+
+             //Safety 만들기
+        [<Extension>] static member MakeSafeties (doc:pptDoc, model:Model) = 
+                        doc.Nodes
+                        |> Seq.filter(fun node -> node.IsDummy|>not)
+                        |> Seq.iter(fun node -> 
+                                let flow = dicFlow.[node.PageNum]
+                                let dicQualifiedNameSegs  = dicVertex.Values.Select(fun seg -> seg.QualifiedName, seg) |> dict
+                                let safeName(safe) = sprintf "%s.%s.%s_%s" flow.System.Name flow.Name flow.Name safe
+                        
+                                node.Safeties   //세이프티 입력 미등록 이름오류 체크
+                                |> Seq.map(fun safe ->  safeName(safe))
+                                |> Seq.iter(fun safeFullName -> if(dicQualifiedNameSegs.ContainsKey safeFullName|>not) 
+                                                                then Office.ErrorName(node.Shape, 28, node.PageNum))
+
+                                node.Safeties   
+                                |> Seq.map(fun safe ->  safeName(safe))
+                                |> Seq.map(fun safeFullName ->  dicQualifiedNameSegs.[safeFullName])
+                                |> Seq.iter(fun safeConditionSeg ->
+                                        let realTarget = dicVertex.[node.Key] :?> Real  //Target  call 은 안되나 ?  ahn
+                                        realTarget.SafetyConditions.Add(safeConditionSeg :?> Real)|>ignore)  //safeCondition  call 은 안되나 ?
+                                )
+
+                        //copy system  동일 처리
+                        dicCopy.ForEach(fun sysTwin ->
+                            let copySys = sysTwin.Key
+                            let origSys = sysTwin.Value
+                            
+                            origSys.Flows
+                                .ForEach(fun flow->
+                                    let copyFlow = copySys.FindFlow(flow.Name)
+                                    let findReal(realName:string) = model.FindGraphVertex([|copySys.Name;copyFlow.Name;realName|]) :?> Real
+                                    flow.Graph.Vertices.Where(fun w->w :? Real).Cast<Real>()
+                                        .ForEach(fun real->
+                                                let copyReal = findReal(real.Name)
+                                                real.SafetyConditions.ForEach(fun safety ->
+                                                    copyReal.SafetyConditions.Add(findReal(safety.Name)) |>ignore
+                                                    )
+                                            )
+                                    )
+                            )
 
              [<Extension>] static member  MakeApiTxRx (doc:pptDoc, model:Model) = 
                             //1. 원본처리

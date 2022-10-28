@@ -13,6 +13,7 @@ open Engine.Common.FS
 open Model.Import.Office
 open System.Collections.Generic
 open Engine.Core
+open System.Runtime.CompilerServices
 
 
 
@@ -20,15 +21,19 @@ open Engine.Core
 module PPTX =
 
     let TextMySys = "MY"
+    let TextExFlow = "exflow"
     let Objkey(iPage, Id) = $"{iPage}page{Id}"
     let SysName(iPage) = sprintf "page%3d" iPage 
     let TrimStartEndSpace(name:string) = name.TrimStart(' ').TrimEnd(' ')
     let CopyName(name:string, cnt) = sprintf "Copy%d_%s" cnt (name.Replace(".", "_")) 
     let GetSysNFlow(name:string, pageNum:int) = 
-            if(name.StartsWith("$")) then (TrimStartEndSpace(name.TrimStart('$'))), "exflow"
+            if(name.StartsWith("$")) then (TrimStartEndSpace(name.TrimStart('$'))), TextExFlow
             elif(name = "")        then TextMySys, sprintf "P%d" pageNum
             else                        TextMySys, TrimStartEndSpace(name)
             
+    
+        //alias Setting
+    
 
 
     ///전체 사용된 화살표 반환 (앞뒤연결 필수)
@@ -173,7 +178,7 @@ module PPTX =
         let mutable txCnt = 1
         let mutable rxCnt = 1
         let mutable name = ""
-        let mutable copySystems = HashSet<string>()
+        let mutable copySystems = ConcurrentDictionary<string, string>() //copyName, orgiName
         let mutable safeties    = HashSet<string>()
         let mutable ifName    = ""
         let mutable ifTXs    = HashSet<string>()
@@ -195,13 +200,17 @@ module PPTX =
 
         let updateSafety(barckets:string)  = safeties <- barckets.Split(';')  |> HashSet 
                                             //             |> Seq.map(fun name -> $"{pageTitle}_{name}") |> HashSet 
-        let updateCopySys(barckets:string) = 
+        let updateCopySys(barckets:string, orgiSysName:string) = 
             if  (trimStartEnd barckets).All(fun c -> Char.IsDigit(c))
             then 
-                 copySystems <- [for i in [1..Convert.ToInt32(barckets)] do yield sprintf "%s%d" name i]
-                                |> Seq.map(fun sys -> $"{pageTitle}_{sys}") |> HashSet
-            else copySystems <- barckets.Split(';') |> trimStartEndSeq 
-                                |> Seq.map(fun sys -> $"{pageTitle}_{sys}") |> HashSet 
+                [for i in [1..Convert.ToInt32(barckets)] do yield sprintf "%s%d" name i]
+                |> Seq.map(fun sys -> $"{pageTitle}_{sys}" , orgiSysName)
+                |> Seq.iter(fun (copy, orgi) -> copySystems.TryAdd(copy, orgiSysName) |> ignore)
+
+            else 
+                barckets.Split(';') |> trimStartEndSeq 
+                |> Seq.map(fun sys -> $"{pageTitle}_{sys}" , orgiSysName)
+                |> Seq.iter(fun (copy, orgi) -> copySystems.TryAdd(copy, orgiSysName) |> ignore)
             
         let updateIF(text:string)      = 
             ifName <- GetBracketsReplaceName(text) |> trimStartEnd
@@ -221,7 +230,7 @@ module PPTX =
                 elif(shape.CheckDonutShape() 
                     || shape.CheckBlockArc() 
                     || shape.CheckNoSmoking() 
-                    || shape.CheckResetShape()) then  BUTTON
+                    || shape.CheckBevelShape()) then  BUTTON
                 elif(shape.CheckEllipse())
                 then 
                     if(dashOutline) 
@@ -243,13 +252,16 @@ module PPTX =
                      GetSquareBrackets(shape.InnerText, false) |> fun text -> if text = ""|>not then updateTxRx text
                      GetSquareBrackets(shape.InnerText, true ) |> fun text -> if text = ""|>not then updateSafety text
             |IF ->   updateIF shape.InnerText
-            |COPY -> GetSquareBrackets(shape.InnerText, false) |> fun text -> if text = ""|>not then updateCopySys  text 
+            |COPY -> GetSquareBrackets(shape.InnerText, false) 
+                        |> fun text -> 
+                            if text = ""|>not 
+                            then updateCopySys  (text ,(GetBracketsReplaceName(shape.InnerText) |> trimStartEnd))
             |_ -> ()
 
             bEmg    <- shape.CheckNoSmoking() 
-            bAuto   <- shape.CheckBlockArc() 
-            bStart  <- shape.CheckDonutShape() 
-            bReset  <- shape.CheckResetShape() 
+            bStart  <- false//not use shape.CheckBlockArc() 
+            bAuto   <- shape.CheckDonutShape() 
+            bReset  <- shape.CheckBevelShape() 
             
         member x.PageNum = iPage
         member x.Shape = shape
@@ -364,6 +376,45 @@ module PPTX =
         let nodes =  ConcurrentDictionary<string, pptNode>()
         let parents = ConcurrentDictionary<pptNode, seq<pptNode>>()
         let edges =  ConcurrentHash<pptEdge>()
+        let updateAliasPPT () = 
+            let pptNodes = nodes.Values
+            let dicFlowNodes = pages.Values
+                                |> Seq.filter(fun page -> page.IsUsing)
+                                |> Seq.map  (fun page -> 
+                                    page.PageNum, pptNodes |> Seq.filter(fun node -> node.PageNum = page.PageNum)
+                                    ) |> dict
+
+            let settingAlias(nodes:pptNode seq) = 
+                let names  = nodes|> Seq.map(fun f->f.Name)
+                (nodes, GetAliasName(names))
+                ||> Seq.map2(fun node  nameSet -> node,  nameSet)
+                |> Seq.iter(fun (node, (name, newName)) -> 
+                                if(name  = newName |> not)
+                                then    let orgNode = nodes |> Seq.filter(fun f->f.Name = name) |> Seq.head
+                                        node.Alias <- Some(orgNode) 
+                                        node.Name  <- newName
+                                        )
+            let children = parents |> Seq.collect(fun parentSet -> parentSet.Value)
+            let callInFlowSet = dicFlowNodes
+                                |> Seq.map(fun flowNodes -> 
+                                            flowNodes.Value 
+                                            |> Seq.filter(fun node -> node.NodeType.IsCall && children.Contains(node)|>not)
+                                            )
+            let realSet = dicFlowNodes
+                                |> Seq.map(fun flowNodes -> 
+                                            flowNodes.Value |> Seq.filter(fun node -> node.NodeType.IsReal))
+            let callInRealSet = realSet 
+                                    |> Seq.collect(fun reals -> reals)
+                                    |> Seq.filter(fun real -> parents.ContainsKey(real))
+                                    |> Seq.map(fun real -> 
+                                                dicFlowNodes.[real.PageNum] 
+                                                |> Seq.filter(fun node -> node.NodeType.IsCall)
+                                                |> Seq.filter(fun node -> parents.[real].Contains(node) ))
+            
+            realSet |> Seq.iter settingAlias
+            callInFlowSet |> Seq.iter settingAlias
+            callInRealSet |> Seq.iter settingAlias
+
         do
             let sildesAll = Office.SildesAll(doc) 
             let shapes = Office.PageShapes(doc) 
@@ -372,7 +423,7 @@ module PPTX =
             let allGroups =  groups |> Seq.collect(fun (slide, groupSet) -> groupSet) 
             let sildeSize = Office.SildeSize(doc)
             let sildeMasters = Office.SildesMasterAll(doc)
-
+            
             try
                 
                 sildeMasters
@@ -400,8 +451,6 @@ module PPTX =
                             let node = pptNode(shape, page,  isDash,  sildeSize, flowName)
                             if(node.Name ="" && node.NodeType = DUMMY|>not) then shape.ErrorName(13, page)
                             nodes.TryAdd(node.Key, node)  |>ignore )
-                             
-             
                 
                 let dicFakeSub = ConcurrentHash<Presentation.GroupShape>()
                 allGroups |> Seq.iter (fun group -> SubGroup(group, dicFakeSub))
@@ -422,7 +471,6 @@ module PPTX =
                         if(pptGroup.DummyParent.IsSome)
                         then 
                             parents.TryAdd(pptGroup.DummyParent.Value, pptGroup.Children)|>ignore
-                          
                 
                 groups
                 |> Seq.iter (fun (slide, groupSet) -> 
@@ -457,6 +505,7 @@ module PPTX =
                         ))
                          
              
+                updateAliasPPT()
                 doc.Close()
               
             with ex -> doc.Close()
@@ -473,7 +522,6 @@ module PPTX =
 
         member val Name =  Path.GetFileNameWithoutExtension(path)
         member val FullPath =  path
-
-                                           
+                
 
             

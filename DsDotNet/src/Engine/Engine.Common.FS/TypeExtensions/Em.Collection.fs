@@ -11,7 +11,7 @@ module EnumuerableExt =
     type IEnumerable<'T> with
         member x.isEmpty() = Seq.isEmpty x
         member x.length() = Seq.length x
-        member x.any() = Seq.isEmpty x |> not 
+        member x.any() = Seq.isEmpty x |> not
         member x.any f = Seq.tryFind f x |> Option.isSome
         member x.realize() = Array.ofSeq x |> ignore
 
@@ -40,6 +40,7 @@ type SeqExt =
     [<Extension>] static member IsNullOrEmpty(xs:'a seq) = xs = null || Seq.isEmpty xs
     [<Extension>] static member NonNullAny(xs:'a seq)    = xs <> null && xs.Any()
     [<Extension>] static member Reduce(xs:'a seq, f)     = Seq.reduce f xs
+    [<Extension>] static member Pairwise(xs:'a seq)      = Seq.pairwise xs
+    [<Extension>] static member TapWhole(xs:'a seq, f)   = f xs; xs
+    [<Extension>] static member TapInner(xs:'a seq, f)   = Seq.iter f xs; xs
     [<Extension>] static member Tap(xs:'a seq, f)        = Seq.iter f xs; xs
-    [<Extension>] static member TapWhole(xs:'a seq, f)        = f xs; xs
-    

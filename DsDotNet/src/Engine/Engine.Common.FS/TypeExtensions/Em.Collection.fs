@@ -27,7 +27,7 @@ type SeqExt =
     //[<Extension>] static member Contains(xs:'T seq, x:'T) = xs |> Seq.contains x  //System.Collections.Generic 혼동
     [<Extension>] static member ContainsAnyOf(xs:'T seq, x:'T seq) = xs |> Seq.containsAnyOf x
     [<Extension>] static member ContainsAllOf(xs:'T seq, x:'T seq) = xs |> Seq.containsAllOf x
-    [<Extension>] static member AllSame(xs:'T seq, x:'T) = (xs |> Seq.filter (fun s -> s = x)).length() = xs.length()
+    [<Extension>] static member AllEqual(xs:'T seq, x:'T) = xs |> Seq.forall((=) x)
     //[<Extension>] static member Any(xs:'a seq) = not <| Seq.isEmpty xs   //System.Collections.Generic 혼동
     [<Extension>] static member GetLength(xs:'a seq) = Seq.length xs
     [<Extension>] static member IsEmpty(xs:'a seq) = Seq.isEmpty xs
@@ -39,4 +39,7 @@ type SeqExt =
     [<Extension>] static member ForEach(xs:'a seq, f)    = Seq.iter f xs
     [<Extension>] static member IsNullOrEmpty(xs:'a seq) = xs = null || Seq.isEmpty xs
     [<Extension>] static member NonNullAny(xs:'a seq)    = xs <> null && xs.Any()
+    [<Extension>] static member Reduce(xs:'a seq, f)     = Seq.reduce f xs
+    [<Extension>] static member Tap(xs:'a seq, f)        = Seq.iter f xs; xs
+    [<Extension>] static member TapWhole(xs:'a seq, f)        = f xs; xs
     

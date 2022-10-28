@@ -180,19 +180,18 @@ module ImportU =
                         )
                 )
 
-
         let MakeApiTxRx(doc:pptDoc, model:Model, dicFlow:Dictionary<int, Flow>) = 
             doc.Nodes 
                 |> Seq.filter(fun node -> node.NodeType = IF) 
                 |> Seq.iter(fun node -> 
                         let sys = dicFlow.[node.PageNum].System
                         let api = sys.ApiItems.Where(fun w->w.Name = node.IfName).First() 
-                        ()
-                    /////    let txrxReal(name:string) = txrxRealsys.Host------------------------------------------->
-                    //    let txs = node.IfTxs |> Seq.map(fun f-> txrxReal name) |> Seq.cast<Real>
-                    //    let rxs = node.IfRxs |> Seq.map(fun f-> txrxReal name) |> Seq.cast<Real>
-                    //    api.AddTXs(txs)|>ignore
-                    //    api.AddTXs(rxs)|>ignore
+
+                        let findReal(trxName:string) = model.FindGraphVertex([|sys.Name;TextExFlow;trxName|]) :?> Real
+                        let txs = node.IfTxs |> Seq.map(fun f-> findReal(f)) 
+                        let rxs = node.IfRxs |> Seq.map(fun f-> findReal(f))
+                        api.AddTXs(txs)|>ignore
+                        api.AddTXs(rxs)|>ignore
                         )
 
         //parent 리스트 만들기
@@ -263,34 +262,31 @@ module ImportU =
                     )
 
 
-        let private createVertex(model:Model, node:pptNode, parentReal:Real Option, parentFlow:Flow Option, dicFlow:Dictionary<int, Flow>, dicSeg:Dictionary<string, Vertex>) = 
-            if node.Alias.IsSome 
-            then
-                 let vertex = dicSeg.[node.Alias.Value.Key] 
-                 Alias.CreateInFlow(node.Name, vertex.NameComponents , dicFlow.[node.PageNum]) :> Vertex
-                 //if parentReal.IsSome
-                 //then 
-                 //    let v = dicSeg.[node.Alias.Value.Key] 
-                 //    Alias.CreateInFlow(node.Name, v.NameComponents , dicFlow.[node.PageNum]) :> Vertex
-                 //else
-                 //    Alias.CreateInReal(node.Name, dicSeg.[node.Alias.Value.Key] , dicFlow.[node.PageNum]) :> Vertex  //ahn Call 규격시 처리
-            else
-
-                let name =   if(node.NodeType.IsCall) then node.CallName else node.NameOrg
-                let vertex = 
-                            if(node.NodeType.IsReal) 
-                            then  Real.Create(name, parentFlow.Value) :> Vertex
-                            else 
-                                    let system =model.FindSystem(node.CallName.Split('.').[0])
-                                    let ifName = node.Name.Split('.').[1];
-                                    let findApi = model.FindApiItem([|system.Name;ifName|]) 
-                                    let api = if findApi.IsNull() then ApiItem.Create(ifName, system) else findApi
-
-
+        let private createVertex(model:Model, node:pptNode, parentReal:Real Option, parentFlow:Flow Option, dicSeg:Dictionary<string, Vertex>) = 
+            let name =   if(node.NodeType.IsCall) then node.CallName else node.NameOrg
+            let vertex = 
+                        if(node.NodeType.IsReal) 
+                        then let real = Real.Create(name, parentFlow.Value) 
+                             parentFlow.Value.Graph.AddVertex(real) |> ignore
+                             dicSeg.Add(node.Key, real)
+                        else 
+                                let system =model.FindSystem(node.CallName.Split('.').[0])
+                                let ifName = node.Name.Split('.').[1];
+                                let findApi = model.FindApiItem([|system.Name;ifName|]) 
+                                let api = if findApi.IsNull() then ApiItem.Create(ifName, system) else findApi
+                                let call = 
                                     if(parentReal.IsSome)
-                                    then  Call.CreateInReal(api, parentReal.Value)  :> Vertex  
-                                    else  Call.CreateInFlow(api, parentFlow.Value)  :> Vertex  
-                vertex
+                                    then  
+                                        let call = Call.CreateInReal(api, parentReal.Value)  
+                                        parentReal.Value.Graph.AddVertex(call) |> ignore
+                                        call
+                                    else 
+                                        let call = Call.CreateInFlow(api, parentFlow.Value)  
+                                        parentFlow.Value.Graph.AddVertex(call) |> ignore
+                                        call 
+
+                                dicSeg.Add(node.Key, call)
+            vertex
 
 
         //segment 리스트 만들기
@@ -311,7 +307,7 @@ module ImportU =
                 |> Seq.filter(fun node -> node.Alias.IsNone) 
                 |> Seq.filter(fun node -> node.NodeType.IsReal) 
                 |> Seq.filter(fun node -> dicChildParent.ContainsKey(node)|>not) 
-                |> Seq.iter(fun node   -> dicSeg.Add(node.Key, createVertex(model, node, None, Some(dicFlow.[node.PageNum]), dicFlow, dicSeg))|>ignore)
+                |> Seq.iter(fun node   -> createVertex(model, node, None, Some(dicFlow.[node.PageNum]), dicSeg))
             //Call 처리
             pptNodes
                 |> Seq.filter(fun node -> node.Alias.IsNone) 
@@ -323,7 +319,7 @@ module ImportU =
                             let parentFlow = if  dicChildParent.ContainsKey(node) 
                                              then None
                                              else Some(dicFlow.[node.PageNum])
-                            dicSeg.Add(node.Key, createVertex(model, node, parentReal, parentFlow, dicFlow, dicSeg)))
+                            createVertex(model, node, parentReal, parentFlow, dicSeg))
           
             //Alias Node 처리 마감
             pptNodes
@@ -460,13 +456,12 @@ module ImportU =
                                             |None ->       None
 
                     let flowParentOption = if realParentOption.IsSome then None else Some(flow)
-                    let sSeg = if dicSeg.ContainsKey(edge.StartNode.Key)
-                                then dicSeg.[edge.StartNode.Key]  
-                                else createVertex(model, edge.StartNode,  realParentOption, flowParentOption, dicFlow, dicSeg)
+                    
+                    if dicSeg.ContainsKey(edge.StartNode.Key) |> not
+                        then createVertex(model, edge.StartNode,  realParentOption, flowParentOption,  dicSeg)
                                     
-                    let eSeg = if dicSeg.ContainsKey(edge.EndNode.Key)
-                                then dicSeg.[edge.EndNode.Key]  
-                                else createVertex(model, edge.EndNode,  realParentOption, flowParentOption, dicFlow, dicSeg)
+                    if dicSeg.ContainsKey(edge.EndNode.Key)
+                        then createVertex(model, edge.EndNode,  realParentOption, flowParentOption,  dicSeg)
 
                     let graph = if(realParentOption.IsSome) then realParentOption.Value.Graph else flow.Graph
                     if(edge.StartNode.IsDummy || edge.EndNode.IsDummy)
@@ -480,9 +475,9 @@ module ImportU =
                                                tgts
                                                |> Seq.iter(fun tgt -> graph.AddVertex(tgt) |> ignore))
                                        
-                    else
-                        graph.AddVertex(sSeg) |>ignore
-                        graph.AddVertex(eSeg) |>ignore
+                    //else
+                    //    graph.AddVertex(sSeg) |>ignore
+                    //    graph.AddVertex(eSeg) |>ignore
                     )
 
         //pptEdge 변환 및 등록

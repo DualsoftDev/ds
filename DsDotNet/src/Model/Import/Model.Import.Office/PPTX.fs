@@ -20,12 +20,13 @@ open Engine.Core
 module PPTX =
 
     let TextMySys = "MY"
+    let TextExFlow = "exflow"
     let Objkey(iPage, Id) = $"{iPage}page{Id}"
     let SysName(iPage) = sprintf "page%3d" iPage 
     let TrimStartEndSpace(name:string) = name.TrimStart(' ').TrimEnd(' ')
     let CopyName(name:string, cnt) = sprintf "Copy%d_%s" cnt (name.Replace(".", "_")) 
     let GetSysNFlow(name:string, pageNum:int) = 
-            if(name.StartsWith("$")) then (TrimStartEndSpace(name.TrimStart('$'))), "exflow"
+            if(name.StartsWith("$")) then (TrimStartEndSpace(name.TrimStart('$'))), TextExFlow
             elif(name = "")        then TextMySys, sprintf "P%d" pageNum
             else                        TextMySys, TrimStartEndSpace(name)
             

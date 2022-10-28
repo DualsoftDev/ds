@@ -89,9 +89,10 @@ module GraphModule =
         member x.RemoveEdge(edge:'E)     = x.RemoveEdges([edge])
         member x.AddVertex(vertex:'V)    = x.AddVertices([vertex])
         member x.RemoveVertex(vertex:'V) = x.RemoveVertices([vertex])
-        member x.FindVertex(name:string) = vs.FirstOrDefault(fun v -> v.Name = name)
-        member x.FindEdges(source:string, target:string) = es.Where(fun e -> e.Source.Name = source && e.Target.Name = target)
-        member x.FindEdges(source:'V, target:'V) = es.Where(fun e -> e.Source = source && e.Target = target)
+        member _.TryFindVertex(name:string) = vs |> Seq.tryFind(fun v -> v.Name = name)
+        member x.FindVertex = x.TryFindVertex >> Option.get
+        member _.FindEdges(source:string, target:string) = es.Where(fun e -> e.Source.Name = source && e.Target.Name = target)
+        member _.FindEdges(source:'V, target:'V) = es.Where(fun e -> e.Source = source && e.Target = target)
 
         member private x.ConnectedVertices = x.Edges |> Seq.collect(fun e -> [e.Source; e.Target]) |> Seq.distinct
         member x.Islands = x.Vertices.Except(x.ConnectedVertices)
@@ -169,8 +170,9 @@ module internal GraphHelperModule =
 
 
 
-       
-    /// function that retruns strongly connected components from given edge lists of graph
+    
+    (* https://blog.naver.com/ndb796/221236952158 *)
+    /// function that retruns strongly connected components from given edge lists of graph    
     let findStronglyConnectedComponents(graph:Graph<'V, 'E>) (edges:'E seq) =
         let g = graph
         let sccs =
@@ -198,8 +200,8 @@ module internal GraphHelperModule =
                     if ogvs.IsEmpty() then
                         stack.Pop() |> ignore
                     else
-                        for w in ogvs do
-                            visit(w)
+                        for ogv in ogvs do
+                            visit(ogv)
                         if stack.Any() then
                             stack.Pop() |> ignore
 

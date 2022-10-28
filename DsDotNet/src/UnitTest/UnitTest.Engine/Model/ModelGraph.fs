@@ -42,6 +42,9 @@ module ModelGrapTests =
             let g = Graph<V, E>(vs, es)
             validateGraph g === true
             
+            // 0 > 0 : Self-replexive cycle
+            let g = Graph<V, E>(vs, [E(vs[0], vs[0])] )
+            (fun () -> validateGraph g |> ignore )  |> ShouldFailWithSubstringT "Cyclic"
 
             // 0>1>2>3; 2>0
             let es = E(vs[2], vs[0])::es0

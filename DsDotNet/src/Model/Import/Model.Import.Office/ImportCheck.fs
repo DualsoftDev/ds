@@ -48,6 +48,7 @@ module ImportCheck =
             if(srcParents.Count() > 1) then failError (srcParents, edge.StartNode)  
             if(tgtParents.Count() > 1) then failError (tgtParents, edge.EndNode)  
 
+
         let InterfaceErr(pptNodes:pptNode seq, model:MModel, dicSeg:Dictionary<string, MSeg>) = 
             pptNodes
             |> Seq.filter(fun node -> node.NodeType = IF) 
@@ -57,19 +58,17 @@ module ImportCheck =
             )
 
 
-
-        let CopySystemErr(nodes:pptNode seq, model:MModel) =
+        let CheckMakeCopySystemAddApi(nodes:pptNode seq, dicSys:Dictionary<int, DsSystem>) =
             let dicName = ConcurrentDictionary<string, string>()
+            let sysNames = dicSys.Values.Select(fun s->s.Name)
             nodes
                 |> Seq.filter(fun node -> node.NodeType = COPY) 
                 |> Seq.iter(fun node -> 
-                    if(model.DicSystems.ContainsKey(node.Name)|> not)
-                    then Office.ErrorName(node.Shape, 33, node.PageNum)
+                    
+                    if(sysNames.Contains(node.Name)|> not)
+                    then Office.ErrorPPT(Name, 32,  node.Shape.InnerText, node.PageNum, $"확인 시스템 이름 : {node.Name}") 
 
-                    node.CopySys.ForEach(fun dicSys -> 
-                        if dicName.TryAdd(dicSys.Key, dicSys.Value)|> not
-                        then Office.ErrorName(node.Shape, 34, node.PageNum)
-                        )
+
                     )
 
        
@@ -82,13 +81,23 @@ module ImportCheck =
             )
 
         //page 타이틀 중복체크 
-        let SamePageErr(pptPages:pptPage seq) = 
+        let CheckMakeSystem(doc:pptDoc) = 
             let dicPage = ConcurrentDictionary<string, int>()
-            pptPages.Filter(fun page  ->  page.IsUsing && page.Title = ""|> not)
+            doc.Pages.Filter(fun page  ->  page.IsUsing && page.Title = ""|> not)
                     .ForEach(fun page-> 
-                if(dicPage.TryAdd(page.Title, page.PageNum)|>not)
-                then Office.ErrorPPT(Page, 21, $"{page.Title},  Same Page({dicPage.[page.Title]})",  page.PageNum)
-            )
+                                if(dicPage.TryAdd(page.Title, page.PageNum)|>not)
+                                then Office.ErrorPPT(Page, 21, $"{page.Title},  Same Page({dicPage.[page.Title]})",  page.PageNum)
+                                )
+
+            let dicSys = ConcurrentDictionary<string, string>()
+            doc.Nodes
+            |> Seq.filter(fun node -> node.NodeType = COPY) 
+            |> Seq.iter(fun node -> 
+                    node.CopySys.ForEach(fun copy -> 
+                        if dicSys.TryAdd(copy.Key, copy.Value)|>not
+                        then Office.ErrorName(node.Shape, 34, node.PageNum)
+                        )
+                    )
         
         //page 타이틀 중복체크 
         let SameSysFlow(flows:MFlow seq) = 

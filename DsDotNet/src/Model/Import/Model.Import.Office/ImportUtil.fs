@@ -18,7 +18,7 @@ module ImportU =
             [<Extension>]  static member GetAcive(model:#Model) =  model.Systems.Filter(fun s->s.Active).First()
 
 
-        let MakeCopySystem(doc:pptDoc, model:CoreModule.Model, dicSys:Dictionary<int, DsSystem>) = 
+        let MakeSystem(doc:pptDoc, model:CoreModule.Model, dicSys:Dictionary<int, DsSystem>) = 
             doc.Pages
                 |> Seq.filter(fun page -> page.IsUsing)
                 |> Seq.iter  (fun page -> 
@@ -34,11 +34,8 @@ module ImportU =
                     node.CopySys.ForEach(fun copy -> 
                         let copySys = DsSystem.Create(copy.Key, "", model) 
                         dicSys.Add(-dicSys.Count, copySys)  //복사 시스템음 순서대로 음수 페이지로 저장
-                        
                         )
                     )
-
-        
 
         //MFlow 리스트 만들기
         let MakeFlows(pptPages:pptPage seq, model:Model, dicFlow:Dictionary<int, Flow>) = 
@@ -119,65 +116,65 @@ module ImportU =
                             let copySys = dicSys.Values.Where(fun w->w.Name = copy.Key).First()
 
                             orgiSys.ApiItems
-                            |>Seq.iter(fun api->copySys.ApiItems.Add(ApiItem.Create(api.Name, copySys)) |>ignore)
+                            |>Seq.iter(fun api-> ApiItem.Create(api.Name, copySys) |>ignore)
                         )
                 )
 
         let MakeApiTxRx(doc:pptDoc, model:Model, dicFlow:Dictionary<int, Flow>) = 
+            //1. 원본처리
             doc.Nodes 
                 |> Seq.filter(fun node -> node.NodeType = IF) 
                 |> Seq.iter(fun node -> 
-                        let sys = dicFlow.[node.PageNum].System
+                        let flow = dicFlow.[node.PageNum]
+                        let sys =  dicFlow.[node.PageNum].System
                         let api = sys.ApiItems.Where(fun w->w.Name = node.IfName).First() 
 
-                        let findReal(trxName:string) = model.FindGraphVertex([|sys.Name;TextExFlow;trxName|]) :?> Real
+                        let findReal(trxName:string) = model.FindGraphVertex([|sys.Name;flow.Name;trxName|]) :?> Real
                         let txs = node.IfTxs |> Seq.map(fun f-> findReal(f)) 
                         let rxs = node.IfRxs |> Seq.map(fun f-> findReal(f))
                         api.AddTXs(txs)|>ignore
                         api.AddRXs(rxs)|>ignore
                         )
 
-       
-        let MakeParents(pptNodes:pptNode seq, model:Model, dicSeg:Dictionary<string, Vertex>, parents:ConcurrentDictionary<pptNode, seq<pptNode>>) = 
-                let dicParent = parents 
-                                |> Seq.filter(fun parentChildren -> parentChildren.Key.IsDummy|>not)
-                                |> Seq.collect(fun parentChildren -> 
-                                                           parentChildren.Value 
-                                                           |> Seq.map(fun child -> child, parentChildren.Key)) |> dict
-                pptNodes
-                |> Seq.iter(fun node -> 
-                    if(dicParent.ContainsKey(node))
-                    then 
-                        let child  = dicSeg.[node.Key]
-                        let parent = dicSeg.[dicParent.[node].Key]
-                        ()
-                       // child.Parent <- Some(parent)
-                    )
+            //1. CopySystem 처리
+            doc.Nodes 
+            |> Seq.filter(fun node -> node.NodeType = COPY) 
+            |> Seq.iter(fun node -> 
+                    node.CopySys.ForEach(fun copy -> 
+                        let orgiSys = model.FindSystem(copy.Value)
+                        let copySys = model.FindSystem(copy.Key)
+                        let findApi name = orgiSys.ApiItems.Where(fun w->w.Name = name).First()
+                        copySys.ApiItems
+                            |>Seq.iter(fun api-> 
+                                ()
+                                ////복사원본이 아닌 외부자신의 리얼을 찾아서 넣어야함
+                                //let findReal(trxName:string) = model.FindGraphVertex([|copySys.Name;TextExFlow;trxName|]) :?> Real
+                                //let txs = (findApi (api.Name)).TXs |> Seq.map(fun f-> findReal(f.Name)) 
+                                //let rxs = (findApi (api.Name)).RXs |> Seq.map(fun f-> findReal(f.Name)) 
 
+                                //api.AddTXs(txs)  |> ignore
+                                //api.AddRXs(rxs)  |> ignore 
+                                
+                                )
+                                )
+                    )
 
         let private createVertex(model:Model, node:pptNode, parentReal:Real Option, parentFlow:Flow Option, dicSeg:Dictionary<string, Vertex>) = 
             let name =   if(node.NodeType.IsCall) then node.CallName else node.NameOrg
             if(node.NodeType.IsReal) 
             then 
                 let real = Real.Create(name, parentFlow.Value) 
-                parentFlow.Value.Graph.AddVertex(real) |> ignore
                 dicSeg.Add(node.Key, real)
             else 
                 let system =model.FindSystem(node.CallName.Split('.').[0])
                 let ifName = node.Name.Split('.').[1];
                 let findApi = model.FindApiItem([|system.Name;ifName|]) 
-                let api = if findApi.IsNull() then ApiItem.Create(ifName, system) else findApi
+                //Api 은 CopySystem 에서 미리 만들어야함 
+                // let api = if findApi.IsNull() then ApiItem.Create(ifName, system) else findApi
                 let call = 
                     if(parentReal.IsSome)
-                    then  
-                        let call = Call.CreateInReal(api, parentReal.Value)  
-                        parentReal.Value.Graph.AddVertex(call) |> ignore
-                        call
-                    else 
-   
-                        let call = Call.CreateInFlow(api, parentFlow.Value)  
-                        parentFlow.Value.Graph.AddVertex(call) |> ignore
-                        call 
+                    then  Call.CreateInReal(findApi, parentReal.Value)  
+                    else  Call.CreateInFlow(findApi, parentFlow.Value)  
 
                 dicSeg.Add(node.Key, call)
 
@@ -202,7 +199,6 @@ module ImportU =
                 |> Seq.filter(fun node -> dicChildParent.ContainsKey(node)|>not) 
                 |> Seq.iter(fun node   -> createVertex(model, node, None, Some(dicFlow.[node.PageNum]), dicSeg))
 
-
             //Call 처리
             pptNodes
                 |> Seq.filter(fun node -> node.Alias.IsNone) 
@@ -225,13 +221,11 @@ module ImportU =
                     then 
                         let real = dicSeg.[dicChildParent.[node].Key] :?> Real
                         let alias = Alias.CreateInReal(node.Name, segOrg:?>Call, real)
-                        dicSeg.Add(node.Key,  alias)
-                        real.Graph.Vertices.Add(alias) |> ignore
+                        dicSeg.Add(node.Key, alias)
                     else 
                         let flow = dicFlow.[node.PageNum]
                         let alias = Alias.CreateInFlow(node.Name, segOrg.NameComponents, flow)
                         dicSeg.Add(node.Key, alias )
-                        flow.Graph.Vertices.Add(alias) |> ignore
                 )
 
         let private getParent(edge:pptEdge, parents:ConcurrentDictionary<pptNode, seq<pptNode>>, dicSeg:Dictionary<string, Vertex>) = 

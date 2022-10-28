@@ -61,7 +61,8 @@ module UtilError =
         msgs.TryAdd(36,"행위이름이 EXCEL 이름 열에 없습니다.") |>ignore
         msgs.TryAdd(37,"인터페이스는 인터페이스끼리 인과가능.") |>ignore
         msgs.TryAdd(38,"도형에 윤곽선이 없습니다.") |>ignore
-        msgs.TryAdd(39,"") |>ignore
+        msgs.TryAdd(39,"모델링에 사용불가 도형입니다.") |>ignore
+        msgs.TryAdd(40,"") |>ignore
        
         msgs
         
@@ -69,9 +70,9 @@ module UtilError =
     type Office =
             
         [<Extension>]
-        static member ErrorPPT(case:ErrorCase, id:int,  objName:string, page:int, ?userName:string) = 
-            let itemName =  if(userName.IsSome && (userName.Value = ""|>not))
-                            then $"[Page{page}:{objName}({userName.Value})" 
+        static member ErrorPPT(case:ErrorCase, id:int,  objName:string, page:int, ?userMsg:string) = 
+            let itemName =  if(userMsg.IsSome && (userMsg.Value = ""|>not))
+                            then $"[Page{page}:{objName}({userMsg.Value})" 
                             else $"[Page{page}:{objName}" 
             failwithf  $"[{case.ToText()}] {DicErr.[id]} \t\t\t{itemName}]"
 

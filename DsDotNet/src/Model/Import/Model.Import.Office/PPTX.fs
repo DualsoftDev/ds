@@ -226,7 +226,7 @@ module PPTX =
                 elif(shape.CheckDonutShape() 
                     || shape.CheckBlockArc() 
                     || shape.CheckNoSmoking() 
-                    || shape.CheckResetShape()) then  BUTTON
+                    || shape.CheckBevelShape()) then  BUTTON
                 elif(shape.CheckEllipse())
                 then 
                     if(dashOutline) 
@@ -255,9 +255,9 @@ module PPTX =
             |_ -> ()
 
             bEmg    <- shape.CheckNoSmoking() 
-            bAuto   <- shape.CheckBlockArc() 
-            bStart  <- shape.CheckDonutShape() 
-            bReset  <- shape.CheckResetShape() 
+            bStart  <- false//not use shape.CheckBlockArc() 
+            bAuto   <- shape.CheckDonutShape() 
+            bReset  <- shape.CheckBevelShape() 
             
         member x.PageNum = iPage
         member x.Shape = shape

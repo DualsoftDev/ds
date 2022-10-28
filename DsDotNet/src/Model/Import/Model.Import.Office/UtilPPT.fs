@@ -52,18 +52,25 @@ module UtilPPT =
                          shape.Descendants<NonVisualShapeProperties>().First()
                               .Descendants<NonVisualDrawingProperties>().First().Id
 
+
         [<Extension>] 
-        static member CheckShapes(shape:#Shape) = 
+        static member IsOutlineExist(shape:#Shape) = 
+            let outline = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.Outline>().FirstOrDefault();
+            if(outline = null && shape.Descendants<ShapeStyle>().Any()|>not) then false
+            else 
+                 if(outline = null|>not && outline.Descendants<Drawing.NoFill>().Any()) then false
+                 else true
+                
+        [<Extension>] 
+        static member CheckShape(shape:#Shape) = 
             //도형이 아니면 필터  NonVisualShapeDrawingProperties
             let outline = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.Outline>().FirstOrDefault();
             if(outline = null && shape.Descendants<ShapeStyle>().Any()|>not) then false
             else 
-                if(outline = null|>not && outline.Descendants<Drawing.NoFill>().Any()) then false
-                else
-                    if(shape.Descendants<ShapeProperties>().Any() |> not) then false
-                    else if(shape.Descendants<ShapeProperties>().FirstOrDefault().Descendants<Drawing.Transform2D>().Any() |> not) then false
-                    else if(shape.Descendants<ShapeProperties>().FirstOrDefault().Descendants<Drawing.PresetGeometry>().Any() |> not) then false
-                    else true
+                if(shape.Descendants<ShapeProperties>().Any() |> not) then false
+                else if(shape.Descendants<ShapeProperties>().FirstOrDefault().Descendants<Drawing.Transform2D>().Any() |> not) then false
+                else if(shape.Descendants<ShapeProperties>().FirstOrDefault().Descendants<Drawing.PresetGeometry>().Any() |> not) then false
+                else true
 
         [<Extension>] 
         static member ShapeName(shape:#Shape) = 
@@ -90,8 +97,8 @@ module UtilPPT =
     
 
         [<Extension>] 
-        static member CheckResetShape(shape:#Shape) = 
-            if(Office.CheckShapes(shape) |> not) then false
+        static member CheckBevelShape(shape:#Shape) = 
+            if(Office.CheckShape(shape) |> not) then false
             else
                 let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
                 (  geometry.Preset.Value = Drawing.ShapeTypeValues.Bevel
@@ -99,7 +106,8 @@ module UtilPPT =
                 
         [<Extension>] 
         static member CheckDonutShape(shape:#Shape) = 
-            if(Office.CheckShapes(shape) |> not) then false
+            
+            if(Office.CheckShape(shape) |> not) then false
             else
                 let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
                 (  geometry.Preset.Value = Drawing.ShapeTypeValues.Donut
@@ -113,7 +121,7 @@ module UtilPPT =
 
         [<Extension>] 
         static member CheckEllipse(shape:#Shape) = 
-            if(Office.CheckShapes(shape) |> not) then false
+            if(Office.CheckShape(shape) |> not) then false
             else
                 let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
                 let round =  geometry.CheckRound()
@@ -126,7 +134,7 @@ module UtilPPT =
 
         [<Extension>] 
         static member CheckRectangle(shape:#Shape) = 
-                if(Office.CheckShapes(shape) |> not) then false
+                if(Office.CheckShape(shape) |> not) then false
                 else
                     let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
                     let round =  geometry.CheckRound()
@@ -138,7 +146,7 @@ module UtilPPT =
         
         [<Extension>] 
         static member CheckFoldedCorner(shape:#Shape) = 
-                if(Office.CheckShapes(shape) |> not) then false
+                if(Office.CheckShape(shape) |> not) then false
                 else
                     let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
                     let round =  geometry.CheckRound()
@@ -146,7 +154,7 @@ module UtilPPT =
         
         [<Extension>] 
         static member CheckHomePlate(shape:#Shape) = 
-                if(Office.CheckShapes(shape) |> not) then false
+                if(Office.CheckShape(shape) |> not) then false
                 else
                     let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
                     let round =  geometry.CheckRound()
@@ -154,17 +162,19 @@ module UtilPPT =
 
         [<Extension>] 
         static member CheckNoSmoking(shape:#Shape) = 
-                if(Office.CheckShapes(shape) |> not) then false
+                if(Office.CheckShape(shape) |> not) then false
                 else
                     let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
                     geometry.Preset.Value = Drawing.ShapeTypeValues.NoSmoking
 
+        ///Start Btn 별도 정의 필요 없음  DS에서 전체/Flow 별로 자동생성
         [<Extension>] 
         static member CheckBlockArc(shape:#Shape) = 
-                if(Office.CheckShapes(shape) |> not) then false
+                if(Office.CheckShape(shape) |> not) then false
                 else
-                    let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
-                    geometry.Preset.Value = Drawing.ShapeTypeValues.BlockArc   
+                    false
+                    //let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
+                    //geometry.Preset.Value = Drawing.ShapeTypeValues.BlockArc   
 
         [<Extension>] 
         static member IsDashShape(shape:#Shape) = 
@@ -239,15 +249,24 @@ module UtilPPT =
        
         ///전체 사용된 도형 반환 (Text box 제외)
         [<Extension>] 
+        static member IsAbleShape(shape:Shape) = 
+                    if (shape.CheckRectangle()      //real
+                    || shape.CheckEllipse()         //call
+                    || shape.CheckDonutShape()      //auto/manual
+                    || shape.CheckBevelShape()      //clear
+                    || shape.CheckNoSmoking()       //emg
+                    || shape.CheckFoldedCorner()    //copy
+                    || shape.CheckHomePlate())      //interface
+                    then true
+                    else false
+
+        [<Extension>] 
         static member Shapes(page:int, commonSlideData:CommonSlideData) = 
                         let shapes = commonSlideData.ShapeTree.Descendants<Shape>()
                         let ableShapes = 
                             shapes
-                            |> Seq.filter(fun  shape -> shape.CheckRectangle() || shape.CheckEllipse() 
-                                                       || shape.CheckDonutShape()|| shape.CheckResetShape()
-                                                       || shape.CheckNoSmoking() || shape.CheckBlockArc()
-                                                       || shape.CheckFoldedCorner() || shape.CheckHomePlate()
-                                                       )
+                            |> Seq.filter(fun  shape -> shape.IsAbleShape())
+                            |> Seq.filter(fun  shape -> shape.IsOutlineExist())
                             |> Seq.map(fun  shape -> 
                                     let geometry = shape.Descendants<Drawing.PresetGeometry>().FirstOrDefault().Preset.Value
                                     shape, page, geometry, shape.IsDashShape())
@@ -255,7 +274,11 @@ module UtilPPT =
                         shapes 
                         |> Seq.except (ableShapes |> Seq.map (fun (shape, page, geometry, isDash) -> shape))
                         |> Seq.filter(fun f -> f.IsTitle()|>not)
-                        |> Seq.iter(fun f -> f.ErrorShape(38, page))
+                        |> Seq.iter(fun f -> 
+                                    if(f.IsAbleShape() && f.IsOutlineExist()|>not)
+                                    then f.ErrorShape(38, page)
+                                    else f.ErrorShape(39, page)
+                                    )
 
                         ableShapes
                             

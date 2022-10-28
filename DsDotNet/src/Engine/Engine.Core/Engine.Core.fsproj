@@ -21,6 +21,7 @@
 		<Compile Include="Core.Util.Edge.fs" />
 		<Compile Include="Core.Util.Find.fs" />
 		<Compile Include="Core.Util.ToDsText.fs" />
+		<Compile Include="AssemblyInfo.fs" />
 		<Content Include="ValidSyntax.txt" />
 		<Content Include="ProgramCodeSyntax.txt" />
 		<!--<Compile Include="Program.fs" />-->

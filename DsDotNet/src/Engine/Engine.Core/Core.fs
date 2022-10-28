@@ -131,9 +131,13 @@ module CoreModule =
         member val Addresses:Addresses = null with get, set
 
         static member CreateInFlow(apiItem:ApiItem, flow:Flow) =
-            let call = Call(apiItem, Flow flow)
-            flow.Graph.AddVertex(call) |> verifyM $"Duplicated call name [{apiItem.QualifiedName}]"
-            call
+            let existing = flow.Graph.FindVertex(apiItem.QualifiedName)
+            if isItNull existing then
+                let call = Call(apiItem, Flow flow)
+                flow.Graph.AddVertex(call) |> verifyM $"Duplicated call name [{apiItem.QualifiedName}]"
+                call
+            else
+                existing :?> Call
 
         static member CreateInReal(apiItem:ApiItem, real:Real) =
             let call = Call(apiItem, Real real)

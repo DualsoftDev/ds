@@ -39,6 +39,31 @@ namespace Engine
 }
 ";
 
+        public static string CyclicEdgeModel = @"
+[sys] My = {
+    [flow] F = {
+        Main = {
+            A.""+"" > A.""-"";
+            A.""-"" > A.""+"";
+        }
+    }
+}
+[sys] A = {
+    [flow] F = {
+        Vp > Pp > Sp;
+        Vm > Pm > Sm;
+
+        Vp |> Pm |> Sp;
+        Vm |> Pp |> Sm;
+        Vp <||> Vm;
+    }
+    [interfaces] = {
+        ""+"" = { F.Vp ~ F.Sp }
+        ""-"" = { F.Vm ~ F.Sm }
+        ""+"" <||> ""-"";
+    }
+}
+";
         public static string DupButtonCategory = @"
 [sys] My = {
     [emg] = {

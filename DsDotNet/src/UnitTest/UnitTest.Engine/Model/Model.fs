@@ -19,7 +19,7 @@ module private ModelComparisonHelper =
                 failwithf "[%s] <> [%s]" x y
         xs.Length === ys.Length
 
-    [<AutoOpen>]           
+    [<AutoOpen>]
     module ModelAnswers =
         let answerEveryScenarioText = """
     [sys ip = 192.168.0.1] My = {
@@ -243,7 +243,7 @@ module private ModelComparisonHelper =
 
 
 
-    [<AutoOpen>]           
+    [<AutoOpen>]
     module ModelComponentAnswers =
         let answerSafetyValid = """
 [sys] L = {
@@ -261,7 +261,7 @@ module private ModelComparisonHelper =
             C.P = ( %Q1234.2343, %I1234.2343)
             C.M = ( START, END)
         }
-    }    
+    }
 }
 [sys] C = {
     [flow] F = {
@@ -419,10 +419,6 @@ module private ModelComparisonHelper =
     }
 }
 """
-        let answerQualifiedName2 = """
-"""
-        let answerQualifiedName3 = """
-"""
 
     let compare originalText answer =
         let helper = ModelParser.ParseFromString2(originalText, ParserOptions.Create4Simulation())
@@ -433,7 +429,7 @@ module private ModelComparisonHelper =
 
 [<AutoOpen>]
 module ModelTests1 =
-    type DemoTests1() = 
+    type DemoTests1() =
         do Fixtures.SetUpTest()
 
         [<Test>]
@@ -455,7 +451,7 @@ module ModelTests1 =
         member __.``DuplicatedEdgesText test`` () =
             logInfo "=== DuplicatedEdgesText"
             compare Program.DuplicatedEdgesText answerDuplicatedEdgesText
-            
+
         [<Test>]
         member __.``DuplicatedCallsText test`` () =
             logInfo "=== DuplicatedCallsText"
@@ -487,7 +483,7 @@ module ModelTests1 =
         [<Test>]
         member __.``Model component [Dup] test`` () =
             compare ParserTest.Dup answerDup
-                
+
         [<Test>]
         member __.``Model component [Aliases] test`` () =
             compare ParserTest.Aliases answerAliases
@@ -504,7 +500,7 @@ module ModelTests1 =
             //compare ParserTest.MyFlowReference ""
             //compare ParserTest.Error ""
             ()
-            
+
         [<Test>]
         member __.``Model ERROR duplication test`` () =
             //(fun () -> compare InvalidDuplicationTest.DupSystemNameModel "") |> ShouldFailWithSubstringT "An item with the same key has already been added"
@@ -512,5 +508,5 @@ module ModelTests1 =
             //(fun () -> compare InvalidDuplicationTest.DupParentingModel1 "") |> ShouldFailWithSubstringT "Duplicated"
             //(fun () -> compare InvalidDuplicationTest.DupParentingModel2 "") |> ShouldFailWithSubstringT "Duplicated"
             (fun () -> compare InvalidDuplicationTest.CyclicEdgeModel ""  )  |> ShouldFailWithSubstringT "Cyclic"
-            
+
             // todo : Loop detection

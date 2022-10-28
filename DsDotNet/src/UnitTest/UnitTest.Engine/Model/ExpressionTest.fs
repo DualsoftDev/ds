@@ -7,44 +7,66 @@ open NUnit.Framework
 
 [<AutoOpen>]
 module ExpressionTestModule =
-    type ExpressionTest() = 
+    type ExpressionTest() =
         do Fixtures.SetUpTest()
 
         [<Test>]
         member __.``ExpressionValueUnit test`` () =
-        
-            (Value 1).Evaluate() |> unbox === 1
+
+            (value 1).Evaluate()  === 1
             Fun( add, "+", [1; 2]).Evaluate() |> unbox === 3
 
-            Value 1 |> resolve === 1
-            Value "hello" |> resolve === "hello"
-            Value Math.PI |> resolve === Math.PI
-            Value true |> resolve === true
-            Value false |> resolve === false
-            Value 3.14f |> resolve === 3.14f
-            Value 3.14 |> resolve === 3.14
-            
-            
+            (value 1).Evaluate() === 1
+            (value "hello").Evaluate() === "hello"
+            (value Math.PI).Evaluate() === Math.PI
+            (value true).Evaluate() === true
+            (value false).Evaluate() === false
+            (value 3.14f).Evaluate() === 3.14f
+            (value 3.14).Evaluate() === 3.14
+
+        [<Test>]
+        member __.``ExpressionTagUnit test`` () =
+            let t1 = PLCTag("1", 1)
+            (tag t1).Evaluate() === 1
+            t1.Value <- 2
+            (tag t1).Evaluate() === 2
+            (PLCTag("Two", "Two") |> tag).Evaluate() === "Two"
+
+            Fun( concat, "concat", [
+                    (PLCTag("Hello", "Hello, ") |> tag).Evaluate()
+                    (PLCTag("World", "world!" ) |> tag).Evaluate()
+                ]).Evaluate() === "Hello, world!"
+
+            let tt1 = t1 |> tag
+            t1.Value <- 1
+            let tt2 = PLCTag("t2", 2) |> tag
+            let addTwoExpr = Fun( add, "+", [ tt1; tt2 ])
+            addTwoExpr.Evaluate() === 3
+            t1.Value <- 10
+            addTwoExpr.Evaluate() === 12
+
+
+
         [<Test>]
         member __.``ExpressionFuncUnit test`` () =
-            Fun( add, "+", [1; 2]) |> resolve === 3
-            Fun( sub, "-", [5; 3]) |> resolve === 2
-            Fun( mul, "*", [2; 3]) |> resolve === 6
-            Fun( div, "/", [3; 2]) |> resolve === 1.5
-            Fun( add, "+", [1; 2; 3]) |> resolve === 6
-            Fun( add, "+", [1..10] |> List.map box) |> resolve === 55
-            Fun( mul, "*", [1..5] |> List.map box) |> resolve === 120
-            Fun( sub, "-", [10; 1; 2]) |> resolve === 7
-            Fun( addd, "+", [1.1; 2.2]) |> resolve |> sprintf "%.1f"=== "3.3"
-            Fun( muld, "+", [1.1; 2.0]) |> resolve |> sprintf "%.1f"=== "2.2"
-            Fun( concat, "concat", ["Hello, "; "world!"]) |> resolve === "Hello, world!"
-            Fun( mul, "*", [2; 3]) |> resolve === 6
-            Fun( equal, "=", ["Hello"; "world"]) |> resolve === false
-            Fun( equal, "=", ["Hello"; "Hello"]) |> resolve === true
-            Fun( notEqual, "=", ["Hello"; "world"]) |> resolve === true
-            Fun( notEqual, "=", ["Hello"; "Hello"]) |> resolve === false
-            Fun( notEqual, "=", [1; 2]) |> resolve === true
-            Fun( notEqual, "=", [2; 2]) |> resolve === false
+            Fun( add, "+", [1; 2]).Evaluate() === 3
+            Fun( sub, "-", [5; 3]).Evaluate() === 2
+            Fun( mul, "*", [2; 3]).Evaluate() === 6
+            Fun( div, "/", [3; 2]).Evaluate() === 1.5
+            Fun( add, "+", [1; 2; 3]).Evaluate() === 6
+            Fun( add, "+", [1..10] |> List.map box).Evaluate() === 55
+            Fun( mul, "*", [1..5] |> List.map box).Evaluate() === 120
+            Fun( sub, "-", [10; 1; 2]).Evaluate() === 7
+            Math.Abs(Fun( addd, "+", [1.1; 2.2]).Evaluate() - 3.3) <= 0.00001 |> ShouldBeTrue
+            Math.Abs(Fun( muld, "+", [1.1; 2.0]).Evaluate() - 2.2) <= 0.00001 |> ShouldBeTrue
+            Fun( concat, "concat", ["Hello, "; "world!"]).Evaluate() === "Hello, world!"
+            Fun( mul, "*", [2; 3]).Evaluate() === 6
+            Fun( equal, "=", ["Hello"; "world"]).Evaluate() === false
+            Fun( equal, "=", ["Hello"; "Hello"]).Evaluate() === true
+            Fun( notEqual, "=", ["Hello"; "world"]).Evaluate() === true
+            Fun( notEqual, "=", ["Hello"; "Hello"]).Evaluate() === false
+            Fun( notEqual, "=", [1; 2]).Evaluate() === true
+            Fun( notEqual, "=", [2; 2]).Evaluate() === false
 
             Fun( equal, "=", [2; 2]) |> resolve === true
             Fun( equal, "=", [2; 2.0]) |> resolve === true
@@ -55,7 +77,7 @@ module ExpressionTestModule =
 
             Fun( gte, ">=", [2; 3; 5; 5; 1]) |> resolve === false
             Fun( gte, ">=", [5; 4; 3; 2; 1]) |> resolve === true
-            
+
             Fun( neg, "!", [true]) |> resolve === false
             Fun( neg, "!", [false]) |> resolve === true
             Fun( logicalAnd, "&", [true; false]) |> resolve === false
@@ -92,4 +114,14 @@ module ExpressionTestModule =
                     Fun( shiftRight, ">>", [8; 3])  // 1
                     4])
                 5]) |> resolve === 100   // 4 * (1+4) * 5
-           
+
+
+
+        [<Test>]
+        member __.``Statement test`` () =
+            let expr = Fun (mul, "*", [2; 3; 4])
+            let target = PLCTag("target", 1)
+
+            let stmt = Assign (expr, target)
+            stmt.Do()
+            target.Value === 24

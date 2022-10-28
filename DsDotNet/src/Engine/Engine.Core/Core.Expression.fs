@@ -2,6 +2,7 @@
 module rec Engine.Core.ExpressionModule
 
 open Engine.Common.FS
+open Engine.Core.Interface
 open System
 open System.Linq
 open System.Runtime.CompilerServices
@@ -26,8 +27,14 @@ module private SubModule =
         | :? uint as n -> Some (int n)
         | _ -> None
 
+    let (|PLCTag|_|) (x:Terminal<'T>) =
+        match x with
+        | Tag t -> Some t
+        | _ -> None
+
     let toDouble = (|Double|_|)   >> Option.get
     let toint    = (|Integer|_|)  >> Option.get
+    let toTag x  = (|PLCTag|_|) x |> Option.get
 
     let isEqual (x:obj) (y:obj) =
         match x, y with
@@ -47,22 +54,42 @@ module private SubModule =
             .Pairwise()
 
 
+
+/// sample PLC tag class
+type PLCTag<'T>(name, value:'T) =
+    member _.Name = name
+    member val Value = value with get, set
+    interface INamed with
+        member x.Name = x.Name
+
+type Terminal<'T> =
+    | Tag of PLCTag<'T>
+    | Value of 'T
+    member x.Evaluate() =
+        match x with
+        | Tag t -> t.Value
+        | Value v -> v
+
+
 type Arguments = obj list
 
 type Expression<'T> =
-    | Value of 'T
+    | Terminal of Terminal<'T>
     | Fun of f:(Arguments -> 'T) * name:string * args:Arguments
 
     member x.Evaluate() =
         match x with
-        | Value b -> b
+        | Terminal b -> b.Evaluate()
         | Fun (f, n, args) -> f (args |> List.map evalArg)
-        |> box
+        //|> box
+
+let value (x:'T) = Terminal (Value x)
+let tag (t: PLCTag<'T>) = Terminal (Tag t)
 
 let eval (expr:Expression<'T>) =
     match expr with
     | Fun (f, n, args) -> f (args |> List.map evalArg)
-    | Value v -> v
+    | Terminal v -> v.Evaluate()
 
 let private evalArg (x:obj) =
     let t = x.GetType()
@@ -81,54 +108,66 @@ let private evalArg (x:obj) =
 
 let resolve (expr:Expression<'T>) = expr |> eval |> unbox
 
-let add (args:Arguments) =
-    args.ExpectGteN(2)
-        .Select(evalArg).Cast<int>()
-        .Reduce(( + ))
-let sub (args:Arguments) =
-    args.ExpectGteN(2)
-        .Select(evalArg).Cast<int>()
-        .Reduce(( - ))
-let mul (args:Arguments) =
-    args.ExpectGteN(2)
-        .Select(evalArg).Cast<int>()
-        .Reduce(( * ))
-let div (args:Arguments) =
-    args.ExpectGteN(2)
-        .Select(evalArg >> toDouble)
-        .Reduce(( / ))
+[<AutoOpen>]
+module FunctionModule =
+    let add (args:Arguments) =
+        args.ExpectGteN(2)
+            .Select(evalArg).Cast<int>()
+            .Reduce(( + ))
+    let sub (args:Arguments) =
+        args.ExpectGteN(2)
+            .Select(evalArg).Cast<int>()
+            .Reduce(( - ))
+    let mul (args:Arguments) =
+        args.ExpectGteN(2)
+            .Select(evalArg).Cast<int>()
+            .Reduce(( * ))
+    let div (args:Arguments) =
+        args.ExpectGteN(2)
+            .Select(evalArg >> toDouble)
+            .Reduce(( / ))
 
-let equal (args:Arguments) =
-    args.ExpectGteN(2)
-        .Select(evalArg)
-        .Pairwise()
-        .All(fun (x, y) -> isEqual x y)
-let notEqual (args:Arguments) =
-    let xs = args.Expect2().Select(evalArg).ToArray()
-    xs[0] <> xs[1]
+    let equal (args:Arguments) =
+        args.ExpectGteN(2)
+            .Select(evalArg)
+            .Pairwise()
+            .All(fun (x, y) -> isEqual x y)
+    let notEqual (args:Arguments) =
+        let xs = args.Expect2().Select(evalArg).ToArray()
+        xs[0] <> xs[1]
 
-let gt  (args:Arguments) = toDoublePairwise(args).All(fun (x, y) -> x > y)
-let lt  (args:Arguments) = toDoublePairwise(args).All(fun (x, y) -> x < y)
-let gte (args:Arguments) = toDoublePairwise(args).All(fun (x, y) -> x >= y)
-let lte (args:Arguments) = toDoublePairwise(args).All(fun (x, y) -> x <= y)
+    let gt  (args:Arguments) = toDoublePairwise(args).All(fun (x, y) -> x > y)
+    let lt  (args:Arguments) = toDoublePairwise(args).All(fun (x, y) -> x < y)
+    let gte (args:Arguments) = toDoublePairwise(args).All(fun (x, y) -> x >= y)
+    let lte (args:Arguments) = toDoublePairwise(args).All(fun (x, y) -> x <= y)
 
-let muld (args:Arguments) =
-    args.ExpectGteN(2)
-        .Select(evalArg >> toDouble)
-        .Reduce(( * ))
-let addd       (args:Arguments) = args.Select(evalArg >> toDouble)   .ExpectGteN(2).Reduce(( + ))
-let concat     (args:Arguments) = args.Select(evalArg).Cast<string>().ExpectGteN(2).Reduce(( + ))
-let logicalAnd (args:Arguments) = args.Select(evalArg).Cast<bool>()  .ExpectGteN(2).Reduce(( && ))
-let logicalOr  (args:Arguments) = args.Select(evalArg).Cast<bool>()  .ExpectGteN(2).Reduce(( || ))
-let shiftLeft  (args:Arguments) = args.Select(evalArg >> toint)      .ExpectGteN(2).Reduce((<<<))
-let shiftRight (args:Arguments) = args.Select(evalArg >> toint)      .ExpectGteN(2).Reduce((>>>))
+    let muld (args:Arguments) =
+        args.ExpectGteN(2)
+            .Select(evalArg >> toDouble)
+            .Reduce(( * ))
+    let addd       (args:Arguments) = args.Select(evalArg >> toDouble)   .ExpectGteN(2).Reduce(( + ))
+    let concat     (args:Arguments) = args.Select(evalArg).Cast<string>().ExpectGteN(2).Reduce(( + ))
+    let logicalAnd (args:Arguments) = args.Select(evalArg).Cast<bool>()  .ExpectGteN(2).Reduce(( && ))
+    let logicalOr  (args:Arguments) = args.Select(evalArg).Cast<bool>()  .ExpectGteN(2).Reduce(( || ))
+    let shiftLeft  (args:Arguments) = args.Select(evalArg >> toint)      .ExpectGteN(2).Reduce((<<<))
+    let shiftRight (args:Arguments) = args.Select(evalArg >> toint)      .ExpectGteN(2).Reduce((>>>))
 
-let neg (args:Arguments) =
-    args.Select(evalArg).Cast<bool>()
-        .Expect1()
-        |> not
-let sin (args:Arguments) =
-    args.Select(evalArg >> toDouble)
-        .Expect1()
-        |> Math.Sin
+    let neg (args:Arguments) =
+        args.Select(evalArg).Cast<bool>()
+            .Expect1()
+            |> not
+    let sin (args:Arguments) =
+        args.Select(evalArg >> toDouble)
+            .Expect1()
+            |> Math.Sin
 
+[<AutoOpen>]
+module StatementModule =
+    type Statement<'T> =
+    | Assign of expr:Expression<'T> * target:PLCTag<'T>
+        member x.Do() =
+            match x with
+            | Assign (expr, target) -> assign(expr, target)
+
+    let assign (expr:Expression<'T>, target:PLCTag<'T>) =
+        target.Value <- expr.Evaluate()

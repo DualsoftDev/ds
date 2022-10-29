@@ -29,7 +29,7 @@ class DsParser
 
 
     /// <summary>
-    /// 주어진 text 내에서 [sys] B = @copy_system(A); 와 같이 copy_system 으로 정의된 영역을 
+    /// 주어진 text 내에서 [sys] B = @copy_system(A); 와 같이 copy_system 으로 정의된 영역을
     /// 치환한 text 를 반환한다.  system A 정의 영역을 찾아서 system B 로 치환한 text 반환
     /// 이때, copy 구문은 삭제한다.
     /// </summary>
@@ -45,7 +45,6 @@ class DsParser
             var chars =
                 text
                     .Where((ch, n) => ranges.ForAll(r => !n.InClosedRange(r.StartIndex, r.StopIndex)))
-                    .Select((ch, _) => ch)
                     .ToArray()
                     ;
             return new string(chars);
@@ -206,7 +205,7 @@ class DsParser
             {
                 var ch = name[i];
                 sub.Add(ch);
-                
+
                 switch(ch)
                 {
                     case '\\':

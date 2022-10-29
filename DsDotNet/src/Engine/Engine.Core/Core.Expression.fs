@@ -1,11 +1,11 @@
 [<AutoOpen>]
 module rec Engine.Core.ExpressionModule
 
-open Engine.Common.FS
-open Engine.Core.Interface
 open System
 open System.Linq
 open System.Runtime.CompilerServices
+open Engine.Common.FS
+open Engine.Core.Interface
 
 [<AutoOpen>]
 module private SubModule =
@@ -110,56 +110,56 @@ let resolve (expr:Expression<'T>) = expr |> eval |> unbox
 
 [<AutoOpen>]
 module FunctionModule =
-    let add (args:Arguments) =
-        args.ExpectGteN(2)
-            .Select(evalArg).Cast<int>()
-            .Reduce(( + ))
-    let sub (args:Arguments) =
-        args.ExpectGteN(2)
-            .Select(evalArg).Cast<int>()
-            .Reduce(( - ))
-    let mul (args:Arguments) =
-        args.ExpectGteN(2)
-            .Select(evalArg).Cast<int>()
-            .Reduce(( * ))
-    let div (args:Arguments) =
-        args.ExpectGteN(2)
-            .Select(evalArg >> toDouble)
-            .Reduce(( / ))
+    let add        (args:Arguments) = Fun (_add,        "+", args)
+    let sub        (args:Arguments) = Fun (_sub,        "-", args)
+    let mul        (args:Arguments) = Fun (_mul,        "*", args)
+    let div        (args:Arguments) = Fun (_div,        "/", args)
 
-    let equal (args:Arguments) =
-        args.ExpectGteN(2)
-            .Select(evalArg)
-            .Pairwise()
-            .All(fun (x, y) -> isEqual x y)
-    let notEqual (args:Arguments) =
-        let xs = args.Expect2().Select(evalArg).ToArray()
-        xs[0] <> xs[1]
+    let equal      (args:Arguments) = Fun (_equal,      "=", args)
+    let notEqual   (args:Arguments) = Fun (_notEqual,   "!=", args)
+    let gt         (args:Arguments) = Fun (_gt,         ">", args)
+    let lt         (args:Arguments) = Fun (_lt,         "<", args)
+    let gte        (args:Arguments) = Fun (_gte,        ">=", args)
+    let lte        (args:Arguments) = Fun (_lte,        "<=", args)
 
-    let gt  (args:Arguments) = toDoublePairwise(args).All(fun (x, y) -> x > y)
-    let lt  (args:Arguments) = toDoublePairwise(args).All(fun (x, y) -> x < y)
-    let gte (args:Arguments) = toDoublePairwise(args).All(fun (x, y) -> x >= y)
-    let lte (args:Arguments) = toDoublePairwise(args).All(fun (x, y) -> x <= y)
+    let muld       (args:Arguments) = Fun (_muld,       "*", args)
+    let addd       (args:Arguments) = Fun (_addd,       "+", args)
+    let concat     (args:Arguments) = Fun (_concat,     "+", args)
+    let logicalAnd (args:Arguments) = Fun (_logicalAnd, "&", args)
+    let logicalOr  (args:Arguments) = Fun (_logicalOr,  "|", args)
+    let shiftLeft  (args:Arguments) = Fun (_shiftLeft,  "<<", args)
+    let shiftRight (args:Arguments) = Fun (_shiftRight, ">>", args)
+    let neg        (args:Arguments) = Fun (_neg,        "!", args)
+    let sin        (args:Arguments) = Fun (_sin,        "sin", args)
 
-    let muld (args:Arguments) =
-        args.ExpectGteN(2)
-            .Select(evalArg >> toDouble)
-            .Reduce(( * ))
-    let addd       (args:Arguments) = args.Select(evalArg >> toDouble)   .ExpectGteN(2).Reduce(( + ))
-    let concat     (args:Arguments) = args.Select(evalArg).Cast<string>().ExpectGteN(2).Reduce(( + ))
-    let logicalAnd (args:Arguments) = args.Select(evalArg).Cast<bool>()  .ExpectGteN(2).Reduce(( && ))
-    let logicalOr  (args:Arguments) = args.Select(evalArg).Cast<bool>()  .ExpectGteN(2).Reduce(( || ))
-    let shiftLeft  (args:Arguments) = args.Select(evalArg >> toint)      .ExpectGteN(2).Reduce((<<<))
-    let shiftRight (args:Arguments) = args.Select(evalArg >> toint)      .ExpectGteN(2).Reduce((>>>))
+    [<AutoOpen>]
+    module internal FunctionImpl =
+        let _add (args:Arguments) = args.ExpectGteN(2).Select(evalArg).Cast<int>().Reduce(( + ))
+        let _sub (args:Arguments) = args.ExpectGteN(2).Select(evalArg).Cast<int>().Reduce(( - ))
+        let _mul (args:Arguments) = args.ExpectGteN(2).Select(evalArg).Cast<int>().Reduce(( * ))
 
-    let neg (args:Arguments) =
-        args.Select(evalArg).Cast<bool>()
-            .Expect1()
-            |> not
-    let sin (args:Arguments) =
-        args.Select(evalArg >> toDouble)
-            .Expect1()
-            |> Math.Sin
+        let _div (args:Arguments) = args.ExpectGteN(2) .Select(evalArg >> toDouble) .Reduce(( / ))
+
+        let _equal (args:Arguments) = args.ExpectGteN(2) .Select(evalArg) .Pairwise() .All(fun (x, y) -> isEqual x y)
+        let _notEqual (args:Arguments) =
+            let xs = args.Expect2().Select(evalArg).ToArray()
+            xs[0] <> xs[1]
+
+        let _gt  (args:Arguments) = toDoublePairwise(args).All(fun (x, y) -> x > y)
+        let _lt  (args:Arguments) = toDoublePairwise(args).All(fun (x, y) -> x < y)
+        let _gte (args:Arguments) = toDoublePairwise(args).All(fun (x, y) -> x >= y)
+        let _lte (args:Arguments) = toDoublePairwise(args).All(fun (x, y) -> x <= y)
+
+        let _muld       (args:Arguments) = args.ExpectGteN(2).Select(evalArg >> toDouble)   .Reduce(( * ))
+        let _addd       (args:Arguments) = args.ExpectGteN(2).Select(evalArg >> toDouble)   .Reduce(( + ))
+        let _concat     (args:Arguments) = args.ExpectGteN(2).Select(evalArg).Cast<string>().Reduce(( + ))
+        let _logicalAnd (args:Arguments) = args.ExpectGteN(2).Select(evalArg).Cast<bool>()  .Reduce(( && ))
+        let _logicalOr  (args:Arguments) = args.ExpectGteN(2).Select(evalArg).Cast<bool>()  .Reduce(( || ))
+        let _shiftLeft  (args:Arguments) = args.ExpectGteN(2).Select(evalArg >> toint)      .Reduce((<<<))
+        let _shiftRight (args:Arguments) = args.ExpectGteN(2).Select(evalArg >> toint)      .Reduce((>>>))
+
+        let _neg (args:Arguments) = args.Select(evalArg).Cast<bool>().Expect1() |> not
+        let _sin (args:Arguments) = args.Select(evalArg >> toDouble) .Expect1() |> Math.Sin
 
 [<AutoOpen>]
 module StatementModule =
@@ -167,7 +167,5 @@ module StatementModule =
     | Assign of expr:Expression<'T> * target:PLCTag<'T>
         member x.Do() =
             match x with
-            | Assign (expr, target) -> assign(expr, target)
+            | Assign (expr, target) -> target.Value <- expr.Evaluate()
 
-    let assign (expr:Expression<'T>, target:PLCTag<'T>) =
-        target.Value <- expr.Evaluate()

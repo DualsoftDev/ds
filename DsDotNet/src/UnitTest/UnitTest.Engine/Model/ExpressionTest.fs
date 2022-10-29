@@ -4,7 +4,6 @@ open System
 open Engine.Core
 open NUnit.Framework
 
-
 [<AutoOpen>]
 module ExpressionTestModule =
     type ExpressionTest() =
@@ -14,7 +13,7 @@ module ExpressionTestModule =
         member __.``ExpressionValueUnit test`` () =
 
             (value 1).Evaluate()  === 1
-            Fun( add, "+", [1; 2]).Evaluate() |> unbox === 3
+            Fun( _add, "+", [1; 2]).Evaluate() |> unbox === 3
 
             (value 1).Evaluate() === 1
             (value "hello").Evaluate() === "hello"
@@ -32,7 +31,7 @@ module ExpressionTestModule =
             (tag t1).Evaluate() === 2
             (PLCTag("Two", "Two") |> tag).Evaluate() === "Two"
 
-            Fun( concat, "concat", [
+            concat([
                     (PLCTag("Hello", "Hello, ") |> tag).Evaluate()
                     (PLCTag("World", "world!" ) |> tag).Evaluate()
                 ]).Evaluate() === "Hello, world!"
@@ -40,7 +39,7 @@ module ExpressionTestModule =
             let tt1 = t1 |> tag
             t1.Value <- 1
             let tt2 = PLCTag("t2", 2) |> tag
-            let addTwoExpr = Fun( add, "+", [ tt1; tt2 ])
+            let addTwoExpr = Fun( _add, "+", [ tt1; tt2 ])
             addTwoExpr.Evaluate() === 3
             t1.Value <- 10
             addTwoExpr.Evaluate() === 12
@@ -49,79 +48,92 @@ module ExpressionTestModule =
 
         [<Test>]
         member __.``ExpressionFuncUnit test`` () =
-            Fun( add, "+", [1; 2]).Evaluate() === 3
-            Fun( sub, "-", [5; 3]).Evaluate() === 2
-            Fun( mul, "*", [2; 3]).Evaluate() === 6
-            Fun( div, "/", [3; 2]).Evaluate() === 1.5
-            Fun( add, "+", [1; 2; 3]).Evaluate() === 6
-            Fun( add, "+", [1..10] |> List.map box).Evaluate() === 55
-            Fun( mul, "*", [1..5] |> List.map box).Evaluate() === 120
-            Fun( sub, "-", [10; 1; 2]).Evaluate() === 7
-            Math.Abs(Fun( addd, "+", [1.1; 2.2]).Evaluate() - 3.3) <= 0.00001 |> ShouldBeTrue
-            Math.Abs(Fun( muld, "+", [1.1; 2.0]).Evaluate() - 2.2) <= 0.00001 |> ShouldBeTrue
-            Fun( concat, "concat", ["Hello, "; "world!"]).Evaluate() === "Hello, world!"
-            Fun( mul, "*", [2; 3]).Evaluate() === 6
-            Fun( equal, "=", ["Hello"; "world"]).Evaluate() === false
-            Fun( equal, "=", ["Hello"; "Hello"]).Evaluate() === true
-            Fun( notEqual, "=", ["Hello"; "world"]).Evaluate() === true
-            Fun( notEqual, "=", ["Hello"; "Hello"]).Evaluate() === false
-            Fun( notEqual, "=", [1; 2]).Evaluate() === true
-            Fun( notEqual, "=", [2; 2]).Evaluate() === false
+            add([1; 2]).Evaluate() === 3
+            sub([5; 3]).Evaluate() === 2
+            mul([2; 3]).Evaluate() === 6
+            div([3; 2]).Evaluate() === 1.5
+            add([1; 2; 3]).Evaluate() === 6
+            add([1..10] |> List.map box).Evaluate() === 55
+            mul([1..5] |> List.map box).Evaluate() === 120
+            sub([10; 1; 2]).Evaluate() === 7
+            Math.Abs(addd([1.1; 2.2]).Evaluate() - 3.3) <= 0.00001 |> ShouldBeTrue
+            Math.Abs(muld([1.1; 2.0]).Evaluate() - 2.2) <= 0.00001 |> ShouldBeTrue
+            concat(["Hello, "; "world!"]).Evaluate() === "Hello, world!"
+            mul([2; 3]).Evaluate() === 6
+            equal(["Hello"; "world"]).Evaluate() === false
+            equal(["Hello"; "Hello"]).Evaluate() === true
+            notEqual(["Hello"; "world"]).Evaluate() === true
+            notEqual(["Hello"; "Hello"]).Evaluate() === false
+            notEqual([1; 2]).Evaluate() === true
+            notEqual([2; 2]).Evaluate() === false
+            equal([2; 2]) |> resolve === true
+            equal([2; 2.0]) |> resolve === true
+            equal([2; 2.0f]) |> resolve === true
+            equal([6; mul [2; 3]]) |> resolve === true
 
-            Fun( equal, "=", [2; 2]) |> resolve === true
-            Fun( equal, "=", [2; 2.0]) |> resolve === true
-            Fun( equal, "=", [2; 2.0f]) |> resolve === true
-            Fun( equal, "=", [  6
-                                Fun( mul, "*", [2; 3]) |> resolve
-                             ]) |> resolve === true
+            gte [2; 3; 5; 5; 1] |> resolve === false
+            gte [5; 4; 3; 2; 1] |> resolve === true
+            neg [true] |> resolve === false
+            neg [false] |> resolve === true
+            logicalAnd [true; false] |> resolve === false
+            logicalAnd [true; true] |> resolve === true
+            logicalAnd [true; true; true; false] |> resolve === false
+            logicalOr [true; false] |> resolve === true
+            logicalOr [false; false] |> resolve === false
+            logicalOr [true; true; true; false] |> resolve === true
+            shiftLeft [1; 1] |> resolve === 2
+            shiftLeft [1; 1; 1; 1] |> resolve === 8
+            shiftLeft [1; 3] |> resolve === 8
+            shiftRight [8; 3] |> resolve === 1
 
-            Fun( gte, ">=", [2; 3; 5; 5; 1]) |> resolve === false
-            Fun( gte, ">=", [5; 4; 3; 2; 1]) |> resolve === true
-
-            Fun( neg, "!", [true]) |> resolve === false
-            Fun( neg, "!", [false]) |> resolve === true
-            Fun( logicalAnd, "&", [true; false]) |> resolve === false
-            Fun( logicalAnd, "&", [true; true]) |> resolve === true
-            Fun( logicalAnd, "&", [true; true; true; false]) |> resolve === false
-            Fun( logicalOr, "|", [true; false]) |> resolve === true
-            Fun( logicalOr, "|", [false; false]) |> resolve === false
-            Fun( logicalOr, "|", [true; true; true; false]) |> resolve === true
-            Fun( shiftLeft, "<<", [1; 1]) |> resolve === 2
-            Fun( shiftLeft, "<<", [1; 1; 1; 1]) |> resolve === 8
-            Fun( shiftLeft, "<<", [1; 3]) |> resolve === 8
-            Fun( shiftRight, ">>", [8; 3]) |> resolve === 1
-
-            (fun () -> Fun( neg, "!", []) |> resolve)
+            (fun () -> neg [] |> resolve)
                 |> ShouldFailWithSubstringT "Wrong number of arguments"
-            (fun () -> Fun( neg, "!", [true; false]) |> resolve)
+            (fun () -> neg [true; false] |> resolve)
                 |> ShouldFailWithSubstringT "Wrong number of arguments"
-            (fun () -> Fun( add, "+", [1]) |> resolve)
+            (fun () -> add [1] |> resolve)
                 |> ShouldFailWithSubstringT "Wrong number of arguments"
 
         [<Test>]
         member __.``ExpressionComposition test`` () =
-            Fun (mul, "*", [
-                2
-                Fun (add, "+", [1; 2])
-                Fun (add, "+", [4; 5])
-            ]) |> resolve === 54
+            (* 2 * (1+2) * (4+5) = 54 *)
+            mul [   2
+                    add [1; 2]
+                    add [4; 5]
+            ] |> resolve === 54
 
-            Fun (mul, "*", [2; 3; 4]) |> resolve === 24
+            mul [2; 3; 4] |> resolve === 24
 
-            Fun (mul, "*", [
-                Fun( shiftLeft, "<<", [1; 2])   // 4
-                Fun (add, "+", [
-                    Fun( shiftRight, ">>", [8; 3])  // 1
-                    4])
-                5]) |> resolve === 100   // 4 * (1+4) * 5
+            (*
+             (1<<2) * ((8>>3) + 4) * 5
+             = 4 * (1+4) * 5
+             = 100
+            *)
+            mul [   shiftLeft [1; 2]   // 4
+                    add [   shiftRight [8; 3]  // 1
+                            4]
+                    5] |> resolve === 100   // 4 * (1+4) * 5
 
 
 
         [<Test>]
         member __.``Statement test`` () =
-            let expr = Fun (mul, "*", [2; 3; 4])
+            let expr = mul [2; 3; 4]
             let target = PLCTag("target", 1)
 
             let stmt = Assign (expr, target)
             stmt.Do()
             target.Value === 24
+
+            Assign(value 9, target).Do()
+            target.Value === 9
+
+            let source = PLCTag("source", 33)
+            Assign(tag source, target).Do()
+            target.Value === 33
+
+            source.Value <- 44
+            target.Value === 33
+            Assign(tag source, target).Do()
+            target.Value === 44
+
+

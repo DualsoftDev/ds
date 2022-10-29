@@ -6,6 +6,7 @@ open NUnit.Framework
 
 [<AutoOpen>]
 module ExpressionTestModule =
+    let toString x = x.ToString()
     type ExpressionTest() =
         do Fixtures.SetUpTest()
 
@@ -136,4 +137,33 @@ module ExpressionTestModule =
             Assign(tag source, target).Do()
             target.Value === 44
 
+        [<Test>]
+        member __.``Serialization test`` () =
+            mul [2; 3; 4] |> toString === "*(2, 3, 4)"
 
+            mul [   2
+                    add [1; 2]
+                    add [4; 5]
+            ] |> toString === "*(2, +(1, 2), +(4, 5))"
+
+
+            let sTag = PLCTag("address", "value")
+            sTag.ToString() === "(address=value)"
+            let exprTag = tag sTag
+            exprTag.ToString() === "(address=value)"
+
+            (value 1).ToString()  === "1"
+            (value "hello").ToString() === "hello"
+            (value Math.PI).ToString() === Math.PI.ToString()
+            (value true).ToString() === "True"
+            (value false).ToString() === "False"
+            (value 3.14f).ToString() === "3.14"
+            (value 3.14).ToString() === "3.14"
+
+
+            let expr = mul [2; 3; 4]
+            let target = PLCTag("target", 1)
+            target.ToString() === "(target=1)"
+
+            let stmt = Assign (expr, target)
+            stmt.ToString() === "assign(*(2, 3, 4), (target=1))"

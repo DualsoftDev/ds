@@ -48,19 +48,13 @@ module private SubModule =
         [<Extension>] static member Expect1(xs:'a seq) = expect1 xs
         [<Extension>] static member Expect2(xs:'a seq) = expect2 xs
 
-    let toDoublePairwise (args:Arguments) =
-        args.ExpectGteN(2)
-            .Select(evalArg >> toDouble)
-            .Pairwise()
-
-
-
 /// sample PLC tag class
 type PLCTag<'T>(name, value:'T) =
     member _.Name = name
     member val Value = value with get, set
     interface INamed with
         member x.Name = x.Name
+    override x.ToString() = $"({x.Name}={x.Value})"
 
 type Terminal<'T> =
     | Tag of PLCTag<'T>
@@ -69,6 +63,10 @@ type Terminal<'T> =
         match x with
         | Tag t -> t.Value
         | Value v -> v
+    override x.ToString() =
+        match x with
+        | Tag t -> $"({t.Name}={t.Value})"
+        | Value v -> $"{v}"
 
 
 type Arguments = obj list
@@ -81,7 +79,12 @@ type Expression<'T> =
         match x with
         | Terminal b -> b.Evaluate()
         | Fun (f, n, args) -> f (args |> List.map evalArg)
-        //|> box
+    override x.ToString() =
+        match x with
+        | Terminal b -> b.ToString()
+        | Fun (f, n, args) ->
+            let strArgs = args.Select(fun x -> x.ToString()).JoinWith(", ")
+            $"{n}({strArgs})"
 
 let value (x:'T) = Terminal (Value x)
 let tag (t: PLCTag<'T>) = Terminal (Tag t)
@@ -145,6 +148,7 @@ module FunctionModule =
             let xs = args.Expect2().Select(evalArg).ToArray()
             xs[0] <> xs[1]
 
+        let private toDoublePairwise (args:Arguments) = args.ExpectGteN(2).Select(evalArg >> toDouble).Pairwise()
         let _gt  (args:Arguments) = toDoublePairwise(args).All(fun (x, y) -> x > y)
         let _lt  (args:Arguments) = toDoublePairwise(args).All(fun (x, y) -> x < y)
         let _gte (args:Arguments) = toDoublePairwise(args).All(fun (x, y) -> x >= y)
@@ -164,8 +168,11 @@ module FunctionModule =
 [<AutoOpen>]
 module StatementModule =
     type Statement<'T> =
-    | Assign of expr:Expression<'T> * target:PLCTag<'T>
+        | Assign of expr:Expression<'T> * target:PLCTag<'T>
         member x.Do() =
             match x with
             | Assign (expr, target) -> target.Value <- expr.Evaluate()
+        override x.ToString() =
+            match x with
+            | Assign (expr, target) -> $"assign({expr.ToString()}, {target.ToString()})"
 

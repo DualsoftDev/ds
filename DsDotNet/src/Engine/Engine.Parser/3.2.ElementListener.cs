@@ -1,8 +1,3 @@
-using System.Xml.Linq;
-
-using static Engine.Core.GraphModule;
-using static Engine.Core.TextUtil;
-
 namespace Engine.Parser;
 
 
@@ -104,7 +99,9 @@ class ElementListener : ListenerBase
         {
             if (apiCall != null)
                 throw new ParserException($"Ambiguous entry [{apiCall.QualifiedName}] and [{pathAdapted.Combine()}]", ctx);
-            Alias.CreateInFlow(ns.Combine(), pathAdapted, _flow, true);
+
+            var aliasTarget = new AliasTargetReal(pathAdapted);
+            ParserHelper.AliasCreators.Add(new AliasCreator(ns.Combine(), ParentWrapper.NewFlow(_flow), aliasTarget));
             return;
         }
 
@@ -126,9 +123,12 @@ class ElementListener : ListenerBase
                 switch (aliasKey.Length)
                 {
                     case 3:     // my flow real 에 대한 alias
-                        Assert(aliasKey[0] == _system.Name && aliasKey[1] == _flow.Name);
-                        Alias.CreateInFlow(ns.Combine(), aliasKey, _flow);
-                        return;
+                        {
+                            Assert(aliasKey[0] == _system.Name && aliasKey[1] == _flow.Name);
+                            var aliasTarget = new AliasTargetReal(aliasKey);
+                            ParserHelper.AliasCreators.Add(new AliasCreator(ns.Combine(), ParentWrapper.NewFlow(_flow), aliasTarget));
+                            return;
+                        }
                     case 2:
                         var apiItem =
                             _modelSpitObjects
@@ -137,10 +137,18 @@ class ElementListener : ListenerBase
                                 .FirstOrDefault();
                         Assert(apiItem != null);
 
+                        var name = ns.Combine();
                         if (_parenting == null)
-                            Alias.CreateInFlow(ns.Combine(), aliasKey, _flow);
+                        {
+                            /* flow 바로 아래에 사용되는 직접 call.  A.+ */
+                            var aliasTarget = new AliasTargetDirectCall(aliasKey);
+                            ParserHelper.AliasCreators.Add(new AliasCreator(name, ParentWrapper.NewFlow(_flow), aliasTarget));
+                        }
                         else
-                            Alias.CreateInReal(ns.Combine(), apiItem, _parenting);
+                        {
+                            var aliasTarget = new AliasTargetApi(apiItem);
+                            ParserHelper.AliasCreators.Add(new AliasCreator(name, ParentWrapper.NewReal(_parenting), aliasTarget));
+                        }
                         return;
                     case 1:
                         Assert(false);

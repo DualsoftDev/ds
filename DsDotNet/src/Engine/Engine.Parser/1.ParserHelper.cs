@@ -1,16 +1,53 @@
 namespace Engine.Parser;
 
-using System.Runtime.InteropServices;
 
-using static Engine.Core.TextUtil;
+public class AliasTarget {}
 
-//using TagDic = System.Collections.Generic.Dictionary<string, Engine.Core.Tag>;
-//class AliasKey : Named
-//{
-//    public AliasKey(string name) : base(name)
-//    {
-//    }
-//}
+public class AliasTargetWithFqdn: AliasTarget {
+    public AliasTargetWithFqdn(string[] targetFqdn)
+    {
+        TargetFqdn = targetFqdn;
+    }
+
+    public string[] TargetFqdn { get; set; }
+}
+public class AliasTargetReal : AliasTargetWithFqdn
+{
+    public AliasTargetReal(string[] targetFqdn) : base(targetFqdn) {}
+}
+
+public class AliasTargetDirectCall : AliasTargetWithFqdn
+{
+    public AliasTargetDirectCall(string[] targetFqdn) : base(targetFqdn) { }
+}
+
+
+
+public class AliasTargetApi : AliasTarget
+{
+    public AliasTargetApi(ApiItem apiItem)
+    {
+        ApiItem = apiItem;
+    }
+
+    public ApiItem ApiItem { get; set; }
+}
+
+
+public class AliasCreator
+{
+    public AliasCreator(string name, ParentWrapper parent, AliasTarget target)
+    {
+        Name = name;
+        Parent = parent;
+        Target = target;
+    }
+
+    public string Name { get; set; }
+    public ParentWrapper Parent { get; set; }
+    public AliasTarget Target { get; set; }
+}
+
 
 public class ParserHelper
 {
@@ -24,6 +61,9 @@ public class ParserHelper
     internal Dictionary<string[], GraphVertexType> _elements = new (NameUtil.CreateNameComponentsComparer());
     internal SpitResult[] _modelSpits;
     internal object[] _modelSpitObjects;
+
+    // 3.2.ElementListener 에서 Alias create 사용
+    public List<AliasCreator> AliasCreators = new();
 
     public ParserOptions ParserOptions { get; set; }
     public ParserHelper(ParserOptions options)

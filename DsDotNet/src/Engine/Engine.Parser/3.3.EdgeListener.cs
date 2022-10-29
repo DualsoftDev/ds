@@ -1,3 +1,5 @@
+using static Engine.Core.CoreModule;
+
 namespace Engine.Parser;
 
 
@@ -11,6 +13,40 @@ class EdgeListener : ListenerBase
     {
         UpdateModelSpits();
     }
+
+    override public void EnterModel(ModelContext ctx)
+    {
+        foreach (var ac in ParserHelper.AliasCreators)
+        {
+            var (name, parent, target) = (ac.Name, ac.Parent, ac.Target);
+            var graph = parent.Graph;
+            var existing = graph.FindVertex(name);
+            if (existing == null)
+            {
+                Call dummyCall = null;
+                switch (target)
+                {
+                    case AliasTargetReal real:
+                        var realTarget = _modelSpits.First(spit => spit.GetCore() is Real r && r.NameComponents.IsStringArrayEqaul(real.TargetFqdn)).GetCore() as Real;
+                        Alias.Create(name, AliasTargetType.NewRealTarget(realTarget), parent);
+                        break;
+                    case AliasTargetDirectCall directCall:
+                        var apiTarget = _modelSpits.First(spit => spit.GetCore() is ApiItem a && a.NameComponents.IsStringArrayEqaul(directCall.TargetFqdn)).GetCore() as ApiItem;
+                        dummyCall = Call.CreateNowhere(apiTarget, parent);
+                        Alias.Create(name, AliasTargetType.NewCallTarget(dummyCall), parent);
+                        break;
+                    case AliasTargetApi api:
+                        dummyCall = Call.CreateNowhere(api.ApiItem, parent);
+                        Alias.Create(name, AliasTargetType.NewCallTarget(dummyCall), parent);
+                        break;
+                }
+            }
+            Console.WriteLine();
+        }
+
+        UpdateModelSpits();
+    }
+
 
     override public void EnterCausalPhrase(CausalPhraseContext ctx)
     {
@@ -40,14 +76,14 @@ class EdgeListener : ListenerBase
         }
 
         /*
-            children[0] > children[2] > children[4]     where (child[1] = '>', child[3] = '>') 
+            children[0] > children[2] > children[4]     where (child[1] = '>', child[3] = '>')
             ===> children[0] > children[2],
                  children[2] > children[4]
 
             e.g "A, B > C, D > E"
             ===> children[0] = {A; B},
                  children[2] = {C; D},
-                 children[4] = {E}, 
+                 children[4] = {E},
 
             todo: "A, B" 와 "A ? B" 에 대한 구분 없음.
          */

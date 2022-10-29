@@ -57,7 +57,7 @@ class EtcListener : ListenerBase
         var safetyDefs = enumerateChildren<SafetyDefContext>(ctx);
         /*
          * safety block 을 parsing 해서 key / value 의 dictionary 로 저장
-         * 
+         *
         [safety] = {
             Main = {P.F.Sp; P.F.Sm}
             Main2 = {P.F.Sp; P.F.Sm}
@@ -164,12 +164,13 @@ class EtcListener : ListenerBase
             apiItem.Xywh = new Xywh(int.Parse(x), int.Parse(y), w == null ? null : int.Parse(w), h == null ? null : int.Parse(h));
         }
 
-        // [sys] / [prop] /
-        //[addresses] = {
-        //  ApiName = (Start, End) Tag address
-        //  A."" + "" = (% Q1234.2343, % I1234.2343)
-        //  A."" - "" = (START, END)
-        //}
+        /*
+            [sys] / [prop] / [addresses] = {
+                ApiName = (Start, End) Tag address
+                A."" + "" = (% Q1234.2343, % I1234.2343)
+                A."" - "" = (START, END)
+            }
+        */
         var api2Address = (
             from sysCtx in enumerateChildren<SystemContext>(ctx)
             from addrDefCtx in enumerateChildren<AddressDefContext>(sysCtx)
@@ -188,56 +189,15 @@ class EtcListener : ListenerBase
 
         foreach (var o in _modelSpits)
         {
-            switch (o.GetCore())
+            if (o.GetCore() is Call call)
             {
-                case Alias al:
-                    var targetSys = _model.FindSystem(al.AliasKey[0]);
-                    var sys = al.Parent.System;
-                    if (targetSys != sys)
-                    {
-                        var apiItem = _model.FindApiItem(al.AliasKey);
-                        var calls =
-                            al.Parent.System.Spit()
-                            .CollectCallsDeeply()
-                            .Where(call => call.Name == apiItem.QualifiedName)
-                            .ToArray();
-                        if (sys.ApiAddressMap.ContainsKey(apiItem.NameComponents))
-                        {
-                            var address = sys.ApiAddressMap[apiItem.NameComponents];
-                            foreach (var c in calls)
-                            {
-                                Assert(c.Addresses == null || c.Addresses == address);
-                                c.Addresses = address;
-                            }
-                        }
-                        else
-                        {
-                            //LogWarn($"Address not specified for call [{apiItem.QualifiedName}]");
-                            throw new ParserException($"Address not specified for call [{apiItem.QualifiedName}]", ctx);
-                        }
-
-                        if (calls.Any())
-                            al.SetTarget(calls.First());
-                        else
-                        {
-                            var dummyCall = Call.CreateNowhere(apiItem, al.Parent);
-                            al.SetTarget(dummyCall);
-                        }
-                    }
-                    else
-                        al.SetTarget(_model.FindGraphVertex(al.AliasKey) as Real);
-                    break;
-                case Call call:
-                    {
-                        var map = call.GetSystem().ApiAddressMap;
-                        if (map.ContainsKey(call.NameComponents))
-                        {
-                            var address = map[call.NameComponents];
-                            Assert(call.Addresses == null || call.Addresses == address);
-                            call.Addresses = address;
-                        }
-                    }
-                    break;
+                var map = call.GetSystem().ApiAddressMap;
+                if (map.ContainsKey(call.NameComponents))
+                {
+                    var address = map[call.NameComponents];
+                    Assert(call.Addresses == null || call.Addresses == address);
+                    call.Addresses = address;
+                }
             }
         }
     }

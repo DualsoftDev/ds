@@ -90,7 +90,7 @@ module GraphModule =
         member x.AddVertex(vertex:'V)    = x.AddVertices([vertex])
         member x.RemoveVertex(vertex:'V) = x.RemoveVertices([vertex])
         member _.TryFindVertex(name:string) = vs |> Seq.tryFind(fun v -> v.Name = name)
-        member x.FindVertex = x.TryFindVertex >> Option.get
+        member _.FindVertex(name:string) = vs.FirstOrDefault(fun v -> v.Name = name)
         member _.FindEdges(source:string, target:string) = es.Where(fun e -> e.Source.Name = source && e.Target.Name = target)
         member _.FindEdges(source:'V, target:'V) = es.Where(fun e -> e.Source = source && e.Target = target)
 

@@ -3,7 +3,6 @@ namespace Engine.Core
 
 open System.Collections.Generic
 open System.Runtime.CompilerServices
-open System.Runtime.InteropServices
 open System.Diagnostics
 open Engine.Common.FS
 
@@ -88,11 +87,10 @@ module CoreModule =
             segment
 
     and AliasTargetType =
-        | NullTarget
         | RealTarget of Real
         | CallTarget of Call
 
-    and Alias private (mnemonic:string, parent:ParentWrapper, aliasKey:string[], isOtherFlowCall:bool) =
+    and Alias private (mnemonic:string, target:AliasTargetType, parent:ParentWrapper) =
         inherit Vertex(mnemonic, parent)
 
         static let tryFindAlias (graph:Graph<Vertex, Edge>) (mnemonic:string) =
@@ -102,46 +100,24 @@ module CoreModule =
             | Some v -> failwith "Alias name is already used by other vertex"
             | None -> None
 
-        static let create (mnemonic: string) (graph:Graph<Vertex, Edge>) (creator: unit -> Alias) =
+        member x.Target = target
+
+        override x.GetRelativeName(referencePath:NameComponents) =
+            match target with
+            | RealTarget r -> x.Name
+            | CallTarget c -> base.GetRelativeName(referencePath)
+
+        static member Create(mnemonic, target:AliasTargetType, parent:ParentWrapper) =
+            let graph = parent.Graph
+            let creator() =
+                let alias = Alias(mnemonic, target, parent)
+                graph.AddVertex(alias) |> verifyM $"Duplicated child name [{mnemonic}]"
+                alias
+
             let existing = tryFindAlias graph mnemonic
             match existing with
             | Some a -> a
             | _ -> creator()
-
-        member _.IsOtherFlowCall = isOtherFlowCall
-        member _.AliasKey = aliasKey
-        member val Target = NullTarget with get, set
-        member x.SetTarget(call) = assert(x.Target = NullTarget); x.Target <- CallTarget call
-        member x.SetTarget(real) = assert(x.Target = NullTarget); x.Target <- RealTarget real
-
-        override x.GetRelativeName(referencePath:NameComponents) =
-            if isOtherFlowCall then
-                aliasKey[1..].Combine()
-            else
-                base.GetRelativeName(referencePath)
-
-        static member CreateInFlow(name, aliasKey, flow:Flow, [<Optional; DefaultParameterValue(false)>] isOtherFlowCall) =
-            let creator() =
-                let alias = Alias(name, Flow flow, aliasKey, isOtherFlowCall)
-                flow.Graph.AddVertex(alias) |> verifyM $"Duplicated segment name [{name}]"
-                alias
-            create name flow.Graph creator
-
-        static member CreateInReal(mnemonic, apiItem:ApiItem, parent:Real) =
-            let creator() =
-                let alias = Alias(mnemonic, Real parent, apiItem.NameComponents, false)
-                parent.Graph.AddVertex(alias) |> verifyM $"Duplicated child name [{mnemonic}]"
-                alias
-            create mnemonic parent.Graph creator
-
-        static member CreateInReal(mnemonic, call:Call, parent:Real) =
-            let creator() =
-                let api:ApiItem = call.ApiItem
-                let alias = Alias(mnemonic, Real parent, api.NameComponents, false)
-                alias.SetTarget(call)
-                parent.Graph.AddVertex(alias) |> verifyM $"Duplicated child name [{mnemonic}]"
-                alias
-            create mnemonic parent.Graph creator
 
 
 
@@ -209,6 +185,11 @@ module CoreModule =
             match x with
             | Flow f -> f.System
             | Real r -> r.Flow.System
+        member x.Graph:Graph<Vertex, Edge> =
+            match x with
+            | Flow f -> f.Graph
+            | Real r -> r.Graph
+
 
     and ButtonDic = Dictionary<string, ResizeArray<Flow>>
 

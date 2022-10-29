@@ -13,25 +13,25 @@ module EdgeModule =
     let internal edgeTypeTuples =
         [
             EdgeType.Default, TextStartEdge
-            EdgeType.Default ||| EdgeType.Strong, TextStartPush     
-            EdgeType.Reset, TextResetEdge     
-            EdgeType.Reset ||| EdgeType.Strong , TextResetPush     
+            EdgeType.Default ||| EdgeType.Strong, TextStartPush
+            EdgeType.Reset, TextResetEdge
+            EdgeType.Reset ||| EdgeType.Strong , TextResetPush
         ] |> Tuple.toDictionary
 
     /// source 와 target 을 edge operator 에 따라서 확장 생성
     let createEdgesReArranged(source:'V, operator:string, target:'V) =
         [
             match operator with
-            | TextInterlockWeak -> //"<|>" 
+            | TextInterlockWeak -> //"<|>"
                 yield source, EdgeType.Reset, target
                 yield target, EdgeType.Reset, source
 
-            | TextInterlock -> //"<||>" 
+            | TextInterlock -> //"<||>"
                 yield source, EdgeType.Reset ||| EdgeType.Strong , target
                 yield target, EdgeType.Reset ||| EdgeType.Strong , source
-            
-            | TextStartEdge  -> yield source, EdgeType.Default, target  //">" 
-            | TextStartPush  -> yield source, EdgeType.Default ||| EdgeType.Strong, target //">>" 
+
+            | TextStartEdge  -> yield source, EdgeType.Default, target  //">"
+            | TextStartPush  -> yield source, EdgeType.Default ||| EdgeType.Strong, target //">>"
             | TextResetEdge  -> yield source, EdgeType.Reset, target //"|>"
             | TextResetPush  -> yield source, EdgeType.Reset ||| EdgeType.Strong, target //"||>"
 
@@ -63,7 +63,7 @@ module EdgeModule =
             edges.Where(fun e -> e.EdgeType.HasFlag(EdgeType.Strong ||| EdgeType.Reset))
     let ofWeakResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) =
             edges.Where(fun e -> e.EdgeType.HasFlag(EdgeType.Reset) && not <| e.EdgeType.HasFlag(EdgeType.Strong))
-            
+
     let ofNotStrongResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) =
             edges.Except(ofStrongResetEdge edges)
     let ofNotResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) =
@@ -145,11 +145,11 @@ module EdgeModule =
 type EdgeExt =
     [<Extension>] static member ToText(edgeType:EdgeType) = edgeTypeTuples[edgeType]
     [<Extension>] static member IsStart(edgeType:EdgeType) = edgeType.HasFlag(EdgeType.Reset)|> not
-    [<Extension>] static member IsReset(edgeType:EdgeType) = edgeType.HasFlag(EdgeType.Reset) 
+    [<Extension>] static member IsReset(edgeType:EdgeType) = edgeType.HasFlag(EdgeType.Reset)
     [<Extension>] static member GetEdgeType(causal:string) =    // EdgeCausalType
                     edgeTypeTuples.Where(fun kv -> kv.Value = causal).Select(fun kv -> kv.Key).First()
 
-   
+
     [<Extension>] static member CreateEdges(flow:Flow, source:Vertex, target:Vertex, operator:string) =
                     createFlowEdges(flow, source, target, operator)
     [<Extension>] static member CreateEdges(segment:Real, source:Vertex, target:Vertex, operator:string) =
@@ -160,7 +160,7 @@ type EdgeExt =
                         createMRIEdgesTransitiveClosure4System sys
 
     [<Extension>] static member Validate(model:Model) = validateModel model
-    
+
     [<Extension>] static member OfStrongResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofStrongResetEdge edges
     [<Extension>] static member OfWeakResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofWeakResetEdge edges
     [<Extension>] static member OfNotResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofNotResetEdge edges

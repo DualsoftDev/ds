@@ -12,8 +12,8 @@ open Engine.Common.FS
 
 
 [<AutoOpen>]
-module TextUtil = 
-    let internal isValidIdentifier (identifier:string) = 
+module TextUtil =
+    let internal isValidIdentifier (identifier:string) =
         let isHangul(ch:char) = Char.GetUnicodeCategory(ch) = UnicodeCategory.OtherLetter;
         let isValidStart(ch:char) = ch = '_' || Char.IsLetter(ch) || isHangul(ch);
         let isValid(ch:char) = isValidStart(ch) || Char.IsDigit(ch);
@@ -58,7 +58,7 @@ module TextUtil =
         member val Name : string = name with get, set
         abstract ToText : unit -> string
         default x.ToText() = name
-     
+
     let isStringArrayEqaul (ns1:string seq, ns2:string seq) = Enumerable.SequenceEqual(ns1, ns2)
 
     let internal nameComparer<'T when 'T:> INamed>() = {
@@ -77,7 +77,7 @@ module TextUtil =
     }
 
     let internal createQualifiedNamedHashSet<'T when 'T:> IQualifiedNamed>() =
-        new HashSet<'T>(Seq.empty<'T>, qualifiedNameComparer<'T>())        
+        new HashSet<'T>(Seq.empty<'T>, qualifiedNameComparer<'T>())
 
 
     let internal nameComponentsComparer() = {
@@ -118,20 +118,19 @@ type NameUtil =
     /// 적법하지 않으면 double quote 로 감싸주어야 한다.
     [<Extension>] static member IsValidIdentifier (identifier:string) = isValidIdentifier identifier
     [<Extension>] static member IsQuotationRequired (identifier:string) = isValidIdentifier(identifier) |> not
-    [<Extension>] static member QuoteOnDemand (identifier:string) = quoteOnDemand identifier                       
-    [<Extension>] static member DeQuoteOnDemand (identifier:string) = deQuoteOnDemand identifier                       
-    [<Extension>] static member Combine (nameComponents:string seq, [<Optional; DefaultParameterValue(".")>]separator) = combine separator nameComponents 
+    [<Extension>] static member QuoteOnDemand (identifier:string) = quoteOnDemand identifier
+    [<Extension>] static member DeQuoteOnDemand (identifier:string) = deQuoteOnDemand identifier
+    [<Extension>] static member Combine (nameComponents:string seq, [<Optional; DefaultParameterValue(".")>]separator) = combine separator nameComponents
     [<Extension>] static member IsStringArrayEqaul (ns1:string seq, ns2:string seq) = isStringArrayEqaul(ns1, ns2)
     [<Extension>] static member CreateNameComparer() = nameComparer()
     [<Extension>] static member CreateNameComponentsComparer() = nameComponentsComparer()
     [<Extension>] static member GetRelativeName(fqdn:NameComponents, referencePath:NameComponents) = getRelativeName referencePath fqdn
-    
+
 
     [<Extension>]
     static member FindWithName (namedObjects:#INamed seq, name:string) =
         namedObjects.FirstOrDefault(fun obj -> obj.Name = name)
     [<Extension>]
     static member FindWithNameComponents (namedObjects:#IQualifiedNamed seq, nameComponents:NameComponents) =
-        namedObjects.FirstOrDefault(fun obj -> Enumerable.SequenceEqual(obj.NameComponents, nameComponents))
-    
-        
+        namedObjects.FirstOrDefault(fun obj -> obj.NameComponents.IsStringArrayEqaul(nameComponents))
+

@@ -73,8 +73,8 @@ class ElementListener : ListenerBase
         var matches =
             _modelSpits
             .Where(spitResult =>
-                Enumerable.SequenceEqual(spitResult.NameComponents, path)
-                || Enumerable.SequenceEqual(spitResult.NameComponents, pathWithoutParenting))
+                spitResult.NameComponents.IsStringArrayEqaul(path)
+                || spitResult.NameComponents.IsStringArrayEqaul(pathWithoutParenting))
             .Select(spitResult => spitResult.GetCore())
             .ToArray()
             ;
@@ -85,9 +85,7 @@ class ElementListener : ListenerBase
         var extendedMatches =
             _modelSpits
             .Where(spitResult =>
-                (pathAdapted.Any() && Enumerable.SequenceEqual(spitResult.NameComponents, pathAdapted))
-                //|| Enumerable.SequenceEqual(spitResult.NameComponents, ns)
-                )
+                pathAdapted.Any() && spitResult.NameComponents.IsStringArrayEqaul(pathAdapted))
             .Select(spitResult => spitResult.GetCore())
             .ToArray()
             ;
@@ -101,7 +99,7 @@ class ElementListener : ListenerBase
 
         Assert(matches.Length.IsOneOf(0, 1));
 
-        // API call 과 나의 시스템의 다른 flow 에 존재하는 segment 호출이 헷갈리지 않도록 
+        // API call 과 나의 시스템의 다른 flow 에 존재하는 segment 호출이 헷갈리지 않도록
         if (extendedMatches.OfType<Real>().Any(r => r.NameComponents.IsStringArrayEqaul(pathAdapted)))
         {
             if (apiCall != null)
@@ -141,7 +139,7 @@ class ElementListener : ListenerBase
 
                         if (_parenting == null)
                             Alias.CreateInFlow(ns.Combine(), aliasKey, _flow);
-                        else 
+                        else
                             Alias.CreateInReal(ns.Combine(), apiItem, _parenting);
                         return;
                     case 1:

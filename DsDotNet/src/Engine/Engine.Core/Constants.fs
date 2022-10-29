@@ -4,8 +4,8 @@ namespace Engine.Core
 open System
 
 [<AutoOpen>]
-module DsText = 
-    //edge    
+module DsText =
+    //edge
     let [<Literal>] TextStartEdge         = ">"
     let [<Literal>] TextStartPush         = ">>"
     let [<Literal>] TextResetEdge         = "|>"
@@ -18,9 +18,9 @@ module DsText =
     let [<Literal>] TextResetEdgeRev      = "<|"
     let [<Literal>] TextResetPushRev      = "<||"
     let [<Literal>] TextStartResetRev     = "<="
-  
+
 [<AutoOpen>]
-module DsTextDataType =    
+module DsTextDataType =
     //data
     let [<Literal>] TextBit    = "bit"
     let [<Literal>] TextBool   = "bool"
@@ -32,10 +32,10 @@ module DsTextDataType =
     let [<Literal>] TextFloat  = "float"
     let [<Literal>] TextSingle = "single"
     let [<Literal>] TextDouble = "double"
-    
+
 
 [<AutoOpen>]
-module DsTextExport =    
+module DsTextExport =
     //export Excel
     let [<Literal>] TextAddressDev  = "주소"
     let [<Literal>] TextVariable    = "내부"
@@ -49,7 +49,7 @@ module DsTextExport =
 
 
 [<AutoOpen>]
-module DsTextProperty =    
+module DsTextProperty =
     //button
     let [<Literal>] TextEmergencyBTN = "emg_in"
     let [<Literal>] TextAutoBTN      = "auto_in"

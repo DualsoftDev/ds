@@ -17,9 +17,9 @@ module CoreModule =
         member val Observes = ResizeArray<Observe>()
 
         interface IQualifiedNamed with
-            member val Name = null 
+            member val Name = null
             member val NameComponents = Array.empty<string>
-            member x.QualifiedName = null  
+            member x.QualifiedName = null
 
     and DsSystem private (name:string, host:string, model:Model) =
         inherit FqdnObject(name, model)
@@ -28,7 +28,7 @@ module CoreModule =
         member val ApiItems = createNamedHashSet<ApiItem>()
         member val ApiResetInfos = HashSet<ApiResetInfo>() with get, set
         ///시스템 전체시작 버튼누름시 수행되야하는 Real목록
-        member val StartPoints = createQualifiedNamedHashSet<Real>() 
+        member val StartPoints = createQualifiedNamedHashSet<Real>()
 
         member _.Model = model
         member _.Host = host
@@ -44,7 +44,7 @@ module CoreModule =
 
 
         ///시스템 핸들링 대상여부   true : mySystem / false : exSystem
-        member val Active = false with get, set 
+        member val Active = false with get, set
 
         static member Create(name, host, model) =
             let system = DsSystem(name, host, model)
@@ -53,7 +53,7 @@ module CoreModule =
 
     and Flow private (name:string, system:DsSystem) =
         inherit FqdnObject(name, system)
-        member val Graph = Graph<Vertex, Edge>()     
+        member val Graph = Graph<Vertex, Edge>()
         member val AliasMap = Dictionary<NameComponents, HashSet<string>>(nameComponentsComparer())
         member x.System = system
         static member Create(name:string, system:DsSystem) =
@@ -69,7 +69,7 @@ module CoreModule =
         Vertex (name:string, parent:ParentWrapper) =
         inherit FqdnObject(name, parent.Core)
         interface INamedVertex
-        member _.Parent = parent 
+        member _.Parent = parent
 
     /// Segment (DS Basic Unit)
     and [<DebuggerDisplay("{QualifiedName}")>]
@@ -78,7 +78,7 @@ module CoreModule =
         member val Graph = Graph<Vertex, Edge>()
         member val Flow = flow
 
-        member val SafetyConditions = createQualifiedNamedHashSet<Real>() 
+        member val SafetyConditions = createQualifiedNamedHashSet<Real>()
         static member Create(name:string, flow) =
             if (name.Contains(".") (*&& not <| (name.StartsWith("\"") && name.EndsWith("\""))*)) then
                 logWarn $"Suspicious segment name [{name}]. Check it."
@@ -107,19 +107,19 @@ module CoreModule =
             match existing with
             | Some a -> a
             | _ -> creator()
-        
+
         member _.IsOtherFlowCall = isOtherFlowCall
         member _.AliasKey = aliasKey
         member val Target = NullTarget with get, set
         member x.SetTarget(call) = assert(x.Target = NullTarget); x.Target <- CallTarget call
         member x.SetTarget(real) = assert(x.Target = NullTarget); x.Target <- RealTarget real
-        
+
         override x.GetRelativeName(referencePath:NameComponents) =
             if isOtherFlowCall then
                 aliasKey[1..].Combine()
             else
                 base.GetRelativeName(referencePath)
-        
+
         static member CreateInFlow(name, aliasKey, flow:Flow, [<Optional; DefaultParameterValue(false)>] isOtherFlowCall) =
             let creator() =
                 let alias = Alias(name, Flow flow, aliasKey, isOtherFlowCall)
@@ -141,9 +141,9 @@ module CoreModule =
                 alias.SetTarget(call)
                 parent.Graph.AddVertex(alias) |> verifyM $"Duplicated child name [{mnemonic}]"
                 alias
-            create mnemonic parent.Graph creator                
-            
-    
+            create mnemonic parent.Graph creator
+
+
 
     /// 외부 시스템 호출 객체
     and Call private (apiItem:ApiItem, parent:ParentWrapper) =
@@ -168,11 +168,11 @@ module CoreModule =
         /// Graph 에 포함되지 않는 core.  Alias 에 숨은 core
         static member CreateNowhere(apiItem:ApiItem, parent:ParentWrapper) = Call(apiItem, parent)
 
-      
+
     and ApiItem private (name:string, system:DsSystem) =
         inherit FqdnObject(name, system)
         interface INamedVertex
-        
+
         member val TXs = createQualifiedNamedHashSet<Real>()
         member val RXs = createQualifiedNamedHashSet<Real>()
         member x.AddTXs(txs:Real seq) = txs |> Seq.forall(fun tx -> x.TXs.Add(tx))
@@ -198,7 +198,7 @@ module CoreModule =
 
 
     ///Vertex의 부모의 타입을 구분한다.
-    and ParentWrapper = 
+    and ParentWrapper =
         | Flow of Flow //Real/Call/Alias 의 부모
         | Real of Real //Call/Alias      의 부모
         member x.Core =
@@ -214,7 +214,7 @@ module CoreModule =
 
     and Edge private (source:Vertex, target:Vertex, edgeType:EdgeType) =
         inherit EdgeBase<Vertex>(source, target, edgeType)
-        
+
         static member Create(graph:Graph<_,_>, source, target, edgeType:EdgeType) =
             let edge = Edge(source, target, edgeType)
             graph.AddEdge(edge) |> verifyM $"Duplicated edge [{source.Name}{edgeType.ToText()}{target.Name}]"
@@ -225,7 +225,7 @@ module CoreModule =
 type CoreExt =
     [<Extension>] static member GetSystem(call:Call) = call.Parent.System
     [<Extension>]
-    static member AddButton(sys:DsSystem, btnType:BtnType, btnName: string, flow:Flow) = 
+    static member AddButton(sys:DsSystem, btnType:BtnType, btnName: string, flow:Flow) =
         let dicButton =
             match btnType with
             | StartBTN       -> sys.StartButtons

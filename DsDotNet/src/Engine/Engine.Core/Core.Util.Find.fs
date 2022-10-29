@@ -29,7 +29,7 @@ module internal ModelFindModule =
         let x = sys.ApiItems.FindWithName(apiKey)
         x
 
-    
+
     let findCall(model:Model, callPath:NameComponents) =
         let x = findGraphVertex(model, callPath) :?> Call
         x

@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using static Engine.Common.FS.MessageEvent;
 using static Engine.Core.CoreModule;
-using static Model.Import.Office.Object;
 
 namespace Dual.Model.Import
 {
@@ -17,11 +16,9 @@ namespace Dual.Model.Import
     {
         public static FormMain TheMain;
 
-        private MModel _OldModel = new MModel("TEST");
         private Engine.Core.CoreModule.Model _Model;
         private string _dsText;
         private bool _ConvertErr = false;
-        private MModel _Demo;
         public Dictionary<Flow, TabPage> _DicMyUI;
         public Dictionary<Flow, TabPage> _DicExUI;
         public string PathPPT;
@@ -54,7 +51,7 @@ namespace Dual.Model.Import
             _DicMyUI = new Dictionary<Flow, TabPage>();
             _DicExUI = new Dictionary<Flow, TabPage>();
 
-            _Demo = ImportCheck.GetDemoModel("test");
+            //_Demo = ImportCheck.GetDemoModel("test");
 
             // this.Text = UtilFile.GetVersion();
             this.Size = new Size(500, 500);
@@ -214,11 +211,11 @@ namespace Dual.Model.Import
         {
             RefreshText();
         }
-        private async void button_TestStart_Click(object sender, EventArgs e)
+        private  void button_TestStart_Click(object sender, EventArgs e)
         {
             button_TestORG.Enabled = false;
             button_TestStart.Enabled = false;
-            await SimSeg.TestStart(_OldModel);
+            //await SimSeg.TestStart(_OldModel);
             button_TestORG.Enabled = true;
             button_TestStart.Enabled = true;
         }

@@ -13,11 +13,12 @@ using static Engine.Core.CoreModule;
 using static Engine.Core.DsType;
 using static Engine.Core.EdgeModule;
 using static Engine.Core.GraphModule;
-using static Model.Import.Office.Object;
 using Color = Microsoft.Msagl.Drawing.Color;
 using Edge = Microsoft.Msagl.Drawing.Edge;
 using Vertex = Engine.Core.CoreModule.Vertex;
 using DsEdge = Engine.Core.CoreModule.Edge;
+using static Model.Import.Office.InterfaceClass;
+
 namespace Dual.Model.Import
 {
     public partial class UCView : UserControl
@@ -39,7 +40,7 @@ namespace Dual.Model.Import
 
         }
 
-        private Dictionary<Tuple<MSeg, Status4>, int> _dicCycle = new Dictionary<Tuple<MSeg, Status4>, int>();
+        //private Dictionary<Tuple<MSeg, Status4>, int> _dicCycle = new Dictionary<Tuple<MSeg, Status4>, int>();
         private Dictionary<string, Node> _dicDrawing = new Dictionary<string, Node>();
 
 

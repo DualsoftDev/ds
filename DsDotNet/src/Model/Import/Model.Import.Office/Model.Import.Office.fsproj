@@ -18,20 +18,13 @@
   <ItemGroup>
     <Compile Include="InterfaceClass.fs" />
     <Compile Include="EdgeUtil.fs" />
-    <Compile Include="ImportFlow.fs" />
-    <Compile Include="ImportClass.fs" />
-    <Compile Include="Importtruct.fs" />
-    <Compile Include="Event.fs" />
     <Compile Include="Util.fs" />
-    <Compile Include="Object.fs" />
     <Compile Include="UtilError.fs" />
     <Compile Include="UtilPPT.fs" />
     <Compile Include="PPTX.fs" />
     <Compile Include="ImportCheck.fs" />
-    <Compile Include="ImportUtil -  temp.fs" />
     <Compile Include="ImportUtil.fs" />
     <Compile Include="ImportM.fs" />
-    <Compile Include="ConvertM.fs" />
     <Compile Include="ImportIOTable.fs" />
     <Compile Include="ExportIOTable.fs" />
   </ItemGroup>

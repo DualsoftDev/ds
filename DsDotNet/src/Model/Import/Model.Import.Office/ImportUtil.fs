@@ -70,9 +70,9 @@ module ImportU =
                         |> Seq.filter(fun node -> node.NodeType = COPY) 
                         |> Seq.iter(fun node -> 
                                 node.CopySys.ForEach(fun copy ->
-                                    let orgSys  = model.FindSystem(copy.Value) 
-                                    let copySys = DsSystem.Create(copy.Key, "", model) 
-                                    dicCopy.Add(copySys, orgSys) |>ignore
+                                    let origSys  = model.FindSystem(copy.Value) 
+                                    let copySys  = DsSystem.Create( copy.Key, "", model)
+                                    dicCopy.Add(copySys, origSys) |>ignore
                                     )
                                 )
         //Interface 만들기
@@ -84,18 +84,7 @@ module ImportU =
                                 let apiName = node.IfName;
                                 ApiItem.Create(apiName, system) |> ignore
                         )
-        [<Extension>] static member MakeCopyApi (doc:pptDoc, model:Model) = 
-                            doc.Nodes 
-                                |> Seq.filter(fun node -> node.NodeType = COPY) 
-                                |> Seq.iter(fun node -> 
-                                        node.CopySys.ForEach(fun copy -> 
-                                            let orgSys = model.FindSystem(copy.Value) 
-                                            let copySys = model.FindSystem(copy.Key) 
 
-                                            orgSys.ApiItems
-                                            |>Seq.iter(fun api-> ApiItem.Create(api.Name, copySys) |>ignore)
-                                        )
-                                )
         //MFlow 리스트 만들기
         [<Extension>] static member MakeFlows (doc:pptDoc, model:Model) = 
                             doc.Pages
@@ -107,12 +96,13 @@ module ImportU =
                                 dicFlow.Add(pageNum,  Flow.Create(flowName, sys) ) |> ignore
                                 )
 
-                            //copy system flow 동일 처리
+                            //copy system ApiItems 동일 처리
                             dicCopy.ForEach(fun sysTwin->
                                 let copySys = sysTwin.Key
                                 let origSys = sysTwin.Value
-                                origSys.Flows.ForEach(fun flow->Flow.Create(flow.Name, copySys)|>ignore)
+                                origSys.ApiItems.ForEach(fun apiItem -> apiItem.ToCopy(copySys)|>ignore)
                                 )
+
         //EMG & Start & Auto 리스트 만들기
         [<Extension>] static member MakeButtons (doc:pptDoc, model:Model) = 
                         let mySys = model.GetAcive() 
@@ -127,21 +117,7 @@ module ImportU =
                                 if(node.IsEmgBtn)   then mySys.AddButton(BtnType.EmergencyBTN ,node.Name, flow)
                                 )
 
-                         //copy system flow 동일 처리
-                        dicCopy.ForEach(fun sysTwin ->
-                            let copySys = sysTwin.Key
-                            let origSys = sysTwin.Value
-                            
-                            origSys.StartButtons.ForEach(fun btn ->
-                                btn.Value.ForEach(fun tgtFlow -> copySys.AddButton(StartBTN, btn.Key, copySys.FindFlow(tgtFlow.Name))))
-                            origSys.ResetButtons.ForEach(fun btn ->
-                                btn.Value.ForEach(fun tgtFlow -> copySys.AddButton(ResetBTN, btn.Key, copySys.FindFlow(tgtFlow.Name))))
-                            origSys.AutoButtons.ForEach(fun btn ->
-                                btn.Value.ForEach(fun tgtFlow -> copySys.AddButton(AutoBTN, btn.Key, copySys.FindFlow(tgtFlow.Name))))
-                            origSys.EmergencyButtons.ForEach(fun btn ->
-                                btn.Value.ForEach(fun tgtFlow -> copySys.AddButton(EmergencyBTN, btn.Key, copySys.FindFlow(tgtFlow.Name))))
-                            
-                            )
+                     
         //real call alias  만들기
         [<Extension>] static member MakeSegment (doc:pptDoc, model:Model) = 
                         let pptNodes = doc.Nodes
@@ -189,49 +165,13 @@ module ImportU =
                                     dicVertex.Add(node.Key, alias )
                             )
 
-                  
-                        //copy system  동일 처리
-                        dicCopy.ForEach(fun sysTwin ->
+                        //copy system ApiItems 동일 처리
+                        dicCopy.ForEach(fun sysTwin->
                             let copySys = sysTwin.Key
                             let origSys = sysTwin.Value
-                            let findAliasCallInReal(flow:Flow, realName:string,  aliasName:string) = model.FindGraphVertex([|copySys.Name;flow.Name;realName;aliasName|]) :?> Vertex
-                            let findAliasVertexInFlow(flow:Flow, name:string) = model.FindGraphVertex([|copySys.Name;flow.Name;name|]) :?> Vertex
-                            let findCopyApi  (orgApi:ApiItem)   = model.FindSystem(orgApi.System.Name).ApiItems.First(fun f->f.Name = orgApi.Name)
-                            //Real, Call 처리 부터
-                            origSys.Flows.ForEach(fun flow->
-                                    let copyFlow = copySys.FindFlow(flow.Name)
-                                    flow.Graph.Vertices.ForEach(fun vInFlow ->
-                                        match vInFlow  with
-                                        | :? Real as orgiReal   
-                                            -> let copyReal = Real.Create(orgiReal.Name, copyFlow) 
-                                               orgiReal.Graph.Vertices.ForEach(fun vInReal->
-                                                match vInReal  with
-                                                | :? Call as orgiCall -> Call.CreateInReal(findCopyApi(orgiCall.ApiItem), copyReal) |> ignore
-                                                | _ -> () )
-
-                                        | :? Call as orgiCall   -> Call.CreateInFlow(findCopyApi(orgiCall.ApiItem), copyFlow) |> ignore
-                                        | _ -> () )
-                                 )
-                               
-                                //Alias Node 처리 
-                            origSys.Flows.ForEach(fun flow->
-                                    let copyFlow = copySys.FindFlow(flow.Name)
-                                    flow.Graph.Vertices.ForEach(fun vInFlow ->
-                                        match vInFlow  with
-                                        | :? Real as orgiReal   
-                                            -> 
-                                                orgiReal.Graph.Vertices.ForEach(fun vInReal->
-                                                let findReal (realName:string)  = model.FindGraphVertex([|copySys.Name;flow.Name;realName|]) :?> Real
-                                                match vInReal  with
-                                                | :? Alias as orgiAlias -> 
-                                                            let target = findAliasCallInReal(copyFlow, orgiReal.Name, orgiAlias.AliasKey.Combine()) :?> Call
-                                                            Alias.CreateInReal(orgiAlias.Name,  target, findReal(orgiReal.Name)) |> ignore
-                                                | _ -> () )
-
-                                        | :? Alias as orgiAlias -> Alias.CreateInFlow(vInFlow.Name,  findAliasVertexInFlow(copyFlow, orgiAlias.AliasKey.[2]).NameComponents, copyFlow) |> ignore
-                                        | _ -> () )
-                                    )
+                            origSys.Flows.ForEach(fun flow-> flow.ToCopy(copySys)|>ignore)
                             )
+                  
         //pptEdge 변환 및 등록
         [<Extension>] static member MakeEdges (doc:pptDoc, model:Model) = 
                             let pptEdges = doc.Edges
@@ -276,7 +216,6 @@ module ImportU =
 
                                         if(edge.StartNode.IsDummy || edge.EndNode.IsDummy)
                                         then 
-                       
                                             srcs
                                             |> Seq.iter(fun src -> tgts
                                                                     |> Seq.iter(fun tgt -> convertEdge(edge, flow, src, tgt) |> ignore))
@@ -288,40 +227,7 @@ module ImportU =
                                             convertEdge(edge, flow, sSeg, eSeg) |> ignore
                                         )
 
-                            //copy system  동일 처리
-                            dicCopy.ForEach(fun sysTwin ->
-                                let copySys = sysTwin.Key
-                                let origSys = sysTwin.Value
-                              
-                                origSys.Flows
-                                    .ForEach(fun flow->
-                                        let copyFlow = copySys.FindFlow(flow.Name)
-                                        let findReal (realName:string)  = model.FindGraphVertex([|copySys.Name;flow.Name;realName|]) :?> Real
-                                        let findCallInReal (flow:Flow, real:Real, callName:string)  = model.FindGraphVertex([|copySys.Name;flow.Name;real.Name;callName|]) :?> Vertex
-                                 
-                                        flow.Graph.Vertices.ForEach(fun vInFlow ->
-                                            match vInFlow  with
-                                            | :? Real as orgiReal   
-                                                ->  
-                                                    let copyReal = findReal(orgiReal.Name) 
-                                                    orgiReal.Graph.Edges.ForEach(fun e -> 
-                                                            Edge.Create(copyFlow.Graph
-                                                            , findCallInReal(copyFlow, copyReal, e.Source.Name)
-                                                            , findCallInReal(copyFlow, copyReal, e.Target.Name)
-                                                            , e.EdgeType) |> ignore       )
-                                            | _ -> () )
-
-                                        flow.Graph.Edges.ForEach(fun e->
-                                            Edge.Create(
-                                                copyFlow.Graph
-                                                , findReal(e.Source.Name)
-                                                , findReal(e.Target.Name)
-                                                , e.EdgeType) |> ignore
-                                            )
-                                        )
-                                    
-                                
-                                )
+                         
         //Safety 만들기
         [<Extension>] static member MakeSafeties (doc:pptDoc, model:Model) = 
                         doc.Nodes
@@ -344,24 +250,6 @@ module ImportU =
                                         realTarget.SafetyConditions.Add(safeConditionSeg :?> Real)|>ignore)  //safeCondition  call 은 안되나 ?
                                 )
 
-                        //copy system  동일 처리
-                        dicCopy.ForEach(fun sysTwin ->
-                            let copySys = sysTwin.Key
-                            let origSys = sysTwin.Value
-                            
-                            origSys.Flows
-                                .ForEach(fun flow->
-                                    let copyFlow = copySys.FindFlow(flow.Name)
-                                    let findReal(realName:string) = model.FindGraphVertex([|copySys.Name;copyFlow.Name;realName|]) :?> Real
-                                    flow.Graph.Vertices.Where(fun w->w :? Real).Cast<Real>()
-                                        .ForEach(fun real->
-                                                let copyReal = findReal(real.Name)
-                                                real.SafetyConditions.ForEach(fun safety ->
-                                                    copyReal.SafetyConditions.Add(findReal(safety.Name)) |>ignore
-                                                    )
-                                            )
-                                    )
-                            )
         [<Extension>] static member MakeApiTxRx (doc:pptDoc, model:Model) = 
                             //1. 원본처리
                             doc.Nodes 
@@ -378,21 +266,17 @@ module ImportU =
                                         api.AddRXs(rxs)|>ignore
                                         )
 
-                            //copy system  동일 처리
-                            dicCopy.ForEach(fun sysTwin ->
+                            //copy system flow 동일 처리
+                            dicCopy.ForEach(fun sysTwin-> 
                                 let copySys = sysTwin.Key
                                 let origSys = sysTwin.Value
-                            
-                                origSys.ApiItems
-                                    .ForEach(fun apiOrig ->
-                                        let findReal(realName:string) = model.FindGraphVertex([|copySys.Name;TextExFlow;realName|]) :?> Real
-                                        let apiCopy = copySys.ApiItems.First(fun f->f.Name = apiOrig.Name)
-                                        //외부자신의 리얼을 찾아서 넣음
-                                        let txs = apiOrig.TXs |> Seq.map(fun f-> findReal(f.Name)) 
-                                        let rxs = apiOrig.RXs |> Seq.map(fun f-> findReal(f.Name)) 
-
-                                        apiCopy.AddTXs(txs)  |> ignore
-                                        apiCopy.AddRXs(rxs)  |> ignore 
-                                                )
-                                        )
+                                origSys.Flows.ForEach(fun flow-> 
+                                            let copyFlow = copySys.FindFlow(flow.Name)
+                                            flow.ToCopy(copyFlow)|>ignore)
+                                origSys.ApiItems.ForEach(fun apiItem -> 
+                                            let apiCopy = copySys.ApiItems.First(fun f->f.Name = apiItem.Name)
+                                            apiItem.ToCopy(apiCopy)|>ignore)
+                                origSys.ApiResetInfos.ForEach(fun apiResetInfo -> 
+                                            apiResetInfo.ToCopy(copySys)|>ignore)
+                                )
 

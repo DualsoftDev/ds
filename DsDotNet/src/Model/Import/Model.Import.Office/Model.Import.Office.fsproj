@@ -28,7 +28,6 @@
     <Compile Include="UtilPPT.fs" />
     <Compile Include="PPTX.fs" />
     <Compile Include="ImportCheck.fs" />
-    <Compile Include="ImportUtil -  temp.fs" />
     <Compile Include="ImportUtil.fs" />
     <Compile Include="ImportM.fs" />
     <Compile Include="ConvertM.fs" />

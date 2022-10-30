@@ -61,12 +61,8 @@ namespace Dual.Model.Import
             {
                 this.Do(() => button_comfile.Enabled = false);
                 var result = ImportM.FromPPTX(PathPPT);
-                var lstModel = new List<Engine.Core.CoreModule.Model>() { result.Item1 };
-                if (lstModel.Where(w => w == null).Any())
-                    return;
-
-                _Model = result.Item1;
-                _OldModel = result.Item2;
+              
+                _Model = result;
                 if (!_ConvertErr)
                 {
                     _dsText = _Model.ToDsText();

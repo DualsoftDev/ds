@@ -26,7 +26,7 @@ module internal ToCopyModule =
                         )
                 )
 
-    //Safety Copy
+    //TxRx Copy
     let copyTxRx(origApi:ApiItem, copyApi:ApiItem) =
         let copySys = copyApi.System
         let origSys = origApi.System
@@ -49,8 +49,6 @@ module internal ToCopyModule =
         let copySys   = copyFlow.System
         let findReal (realName:string)  = origModel.FindGraphVertex([|copySys.Name;copyFlow.Name;realName|]) :?> Real
         let findInReal(realName:string, name:string) = origModel.FindGraphVertex([|copySys.Name;copyFlow.Name;realName;name|]) :?> Vertex
-        let findCallInFlow(name:string) = origModel.FindGraphVertex([|copySys.Name;copyFlow.Name;name|]) :?> Vertex
-
 
         let copyReal(name, graph:Graph<Vertex, Edge>) = 
             let findVertex = graph.TryFindVertex(name)
@@ -97,11 +95,15 @@ module internal ToCopyModule =
                             .ForEach(fun vInReal->
                                 match vInReal  with
                                 | :? Alias as orgiAlias -> 
-                                            let target = findInReal(orgiReal.Name, orgiAlias.AliasKey.Combine()) :?> Call
-                                            Alias.CreateInReal(orgiAlias.Name,  target, findReal(orgiReal.Name)) |> ignore
+                                    match orgiAlias.Target with 
+                                    | RealTarget rt -> failwithf "Error : Real안에 Real타깃 Alias불가" 
+                                    | CallTarget ct -> Alias.Create(orgiAlias.Name, CallTarget(ct), Real(findReal(orgiReal.Name)))|>ignore
                                 | _ -> () )
 
-                | :? Alias as orgiAlias -> Alias.CreateInFlow(vertexInFlow.Name, findCallInFlow(orgiAlias.AliasKey.[2]).NameComponents, copyFlow) |> ignore
+                | :? Alias as orgiAlias ->
+                        match orgiAlias.Target with 
+                        | RealTarget rt -> Alias.Create(vertexInFlow.Name, RealTarget(rt), Flow(copyFlow))|>ignore
+                        | CallTarget ct -> Alias.Create(vertexInFlow.Name, CallTarget(ct), Flow(copyFlow))|>ignore
                 | _ -> () 
             )  
 

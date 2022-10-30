@@ -157,11 +157,16 @@ module ImportU =
                                 if dicChildParent.ContainsKey(node) 
                                 then 
                                     let real = dicVertex.[dicChildParent.[node].Key] :?> Real
-                                    let alias = Alias.CreateInReal(node.Name, segOrg:?>Call, real)
+                                    let alias = Alias.Create(node.Name, CallTarget(segOrg:?>Call), Real(real))
                                     dicVertex.Add(node.Key, alias)
                                 else 
-                                    let flow = dicFlow.[node.PageNum]
-                                    let alias = Alias.CreateInFlow(node.Name, segOrg.NameComponents, flow)
+                                    let alias = 
+                                        let flow = dicFlow.[node.PageNum]
+                                        match segOrg with
+                                        | :? Real as rt -> Alias.Create(node.Name, RealTarget(rt), Flow(flow))
+                                        | :? Call as ct -> Alias.Create(node.Name, CallTarget(ct), Flow(flow))
+                                        |_ -> failwithf "Error type"
+
                                     dicVertex.Add(node.Key, alias )
                             )
 

@@ -13,7 +13,6 @@ module ImportM =
 
     type internal ImportPowerPoint(path:string) =
         let doc   = pptDoc(path)
-        let mmodel = MModel(doc.FullPath)
         let model = CoreModule.Model()
 
         member internal x.GetImportModel() = 

@@ -12,7 +12,6 @@ using System.Windows.Forms;
 using static Engine.Common.FS.MessageEvent;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsTextProperty;
-using static Model.Import.Office.Object;
 
 namespace Dual.Model.Import
 {
@@ -107,7 +106,7 @@ namespace Dual.Model.Import
                 if (UtilFile.BusyCheck()) return;
                 Busy = true;
                 MSGInfo($"{PathXLS} 불러오는 중!!");
-                ImportIOTable.ApplyExcel(path, _OldModel.ActiveSys);
+                //ImportIOTable.ApplyExcel(path, _OldModel.ActiveSys);
                 //_dsText = ExportM.ToText(_model);
                 ExportTextModel(Color.FromArgb(0, 150, 0), _dsText);
                 this.Do(() =>
@@ -144,7 +143,7 @@ namespace Dual.Model.Import
             WriteDebugMsg(DateTime.Now, MSGLevel.Info, $"{PathXLS} 생성시작!!");
 
             Directory.CreateDirectory(Path.GetDirectoryName(PathXLS));
-            ExportIOTable.ToFiie(_OldModel, PathXLS);
+            //ExportIOTable.ToFiie(_OldModel, PathXLS);
 
             WriteDebugMsg(DateTime.Now, MSGLevel.Info, $"{PathXLS} 생성완료!!");
             this.Do(() =>

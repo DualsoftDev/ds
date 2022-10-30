@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using static Model.Import.Office.Object;
 using DsEdge = Engine.Core.CoreModule.Edge;
 using DsVertex = Engine.Core.CoreModule.Vertex;
 using static Engine.Core.GraphModule;
+using static Model.Import.Office.InterfaceClass;
 
 namespace Dual.Model.Import
 {

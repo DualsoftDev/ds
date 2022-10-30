@@ -1,0 +1,14 @@
+Sys0
+	Flow0
+		Parenting0			// 3.0.SkeletonListener.EnterParenting
+			MyCall;			// 3.2.ParentingFillListener.EnterParenting
+			Flow1.Call;		// 3.2.ParentingFillListener.EnterParenting
+			Flow1.Real;		// 3.2.ParentingFillListener.EnterParenting
+		EmptySegment;		// 3.0.SkeletonListener.EnterIdentifier1Listing
+		MyCall;				// 3.1.CallInstanceListener.EnterIdentifier1Listing
+		Flow1.Call;			// 3.1.CallInstanceListener.EnterIdentifier2Listing
+		Flow1.Real;
+
+		MyCall = {Sys1.Flow0.Seg0 ~ Sys1.Flow0.Seg0}		// 3.0.SkeletonListener.EnterCallDef
+	Flow1
+		

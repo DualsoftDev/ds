@@ -205,21 +205,53 @@ module ImportU =
                                     dicVertex.Add(node.Key, alias )
                             )
 
+                  
                         //copy system  동일 처리
                         dicCopy.ForEach(fun sysTwin ->
                             let copySys = sysTwin.Key
                             let origSys = sysTwin.Value
-                            origSys.Flows
-                                .ForEach(fun flow->
+                            let findReal (flow:Flow, realName:string)  = model.FindGraphVertex([|copySys.Name;flow.Name;realName|]) :?> Vertex
+                            let findCall (flow:Flow, callName:string)  = model.FindGraphVertex([|copySys.Name;flow.Name;callName|]) :?> Vertex
+                            let findAlias(flow:Flow, aliasName:string) = model.FindGraphVertex([|copySys.Name;flow.Name;aliasName|]) :?> Vertex
+                            let findCopyApi  (orgApi:ApiItem)   = model.FindSystem(orgApi.System.Name).ApiItems.First(fun f->f.Name = orgApi.Name)
+
+
+
+                            if origSys.Name.StartsWith("Ex") 
+                            then ()
+
+                            //Real, Call 처리 부터
+                            origSys.Flows.ForEach(fun flow->
                                     let copyFlow = copySys.FindFlow(flow.Name)
-                                    let findReal(realName:string) = model.FindGraphVertex([|copySys.Name;copyFlow.Name;realName|]) :?> Vertex
-                                    flow.Graph.Vertices.ForEach(fun v->
-                                        match v with
-                                        | :? Real as orgiReal -> Real.Create(v.Name, copyFlow) |> ignore
-                                        | _ -> () // real 레벨만 복사 처리 (call처리는 피제어라 무의미)
-                                        )
-                                 
-                                    )
+                                    flow.Graph.Vertices.ForEach(fun vInFlow ->
+                                        match vInFlow  with
+                                        | :? Real as orgiReal   
+                                            -> Real.Create(orgiReal.Name, copyFlow) |> ignore
+                                               orgiReal.Graph.Vertices.ForEach(fun vInReal->
+                                                match vInReal  with
+                                                | :? Call as orgiCall -> Call.CreateInFlow(findCopyApi(orgiCall.ApiItem), copyFlow) |> ignore
+                                                | _ -> () )
+
+                                        | :? Call as orgiCall   -> Call.CreateInFlow(findCopyApi(orgiCall.ApiItem), copyFlow) |> ignore
+                                        | _ -> () )
+                                 )
+
+                            //Alias Node 처리 마감
+                            origSys.Flows.ForEach(fun flow->
+                                    let copyFlow = copySys.FindFlow(flow.Name)
+                                    flow.Graph.Vertices.ForEach(fun vInFlow ->
+                                        match vInFlow  with
+                                        | :? Real as orgiReal   
+                                            -> 
+                                               orgiReal.Graph.Vertices.ForEach(fun vInReal->
+                                                match vInReal  with
+                                                | :? Alias as orgiAlias -> Alias.CreateInFlow(vInReal.Name,  findAlias(copyFlow, vInReal.Name).NameComponents, copyFlow) |> ignore
+                                                | _ -> () )
+
+                                        | :? Alias as orgiAlias -> Alias.CreateInFlow(vInFlow.Name,  findAlias(copyFlow, vInFlow.Name).NameComponents, copyFlow) |> ignore
+                                        | _ -> () )
+                                 )
+
                             )
 
         

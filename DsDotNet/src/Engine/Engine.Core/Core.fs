@@ -200,6 +200,8 @@ module CoreModule =
             let edge = Edge(source, target, edgeType)
             graph.AddEdge(edge) |> verifyM $"Duplicated edge [{source.Name}{edgeType.ToText()}{target.Name}]"
             edge
+        
+        member val EditorInfo = EdgeType.EditorSpare with get, set
         override x.ToString() = $"{x.Source.QualifiedName} {x.EdgeType.ToText()} {x.Target.QualifiedName}"
 
 [<Extension>]

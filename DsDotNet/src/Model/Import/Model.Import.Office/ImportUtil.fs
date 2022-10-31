@@ -190,12 +190,17 @@ module ImportU =
                         
                                 if(edge.Causal = Interlock)
                                 then  
-                                    Edge.Create(graph, src, tgt, ResetPush ) |> ignore
-                                    Edge.Create(graph, tgt, src, ResetPush) |> ignore  //vertex 미리 추가 ?
+                                    let edge1 = Edge.Create(graph, src, tgt, ResetPush)
+                                    let edge2 = Edge.Create(graph, tgt, src, ResetPush) 
+                                    edge1.EditorInfo <- EdgeType.EditorInterlock
+                                    edge2.EditorInfo <- EdgeType.EditorInterlock
+
                                 elif (edge.Causal = StartReset)
                                 then
-                                    Edge.Create(graph, src, tgt, StartEdge) |> ignore
-                                    Edge.Create(graph, tgt, src, ResetEdge) |> ignore
+                                    let edge1 = Edge.Create(graph, src, tgt, StartEdge) 
+                                    let edge2 = Edge.Create(graph, tgt, src, ResetEdge) 
+                                    edge1.EditorInfo <- EdgeType.EditorStartReset
+                                    edge2.EditorInfo <- EdgeType.EditorStartReset
                                 else
                                     Edge.Create(graph, src, tgt, edge.Causal) |> ignore
 

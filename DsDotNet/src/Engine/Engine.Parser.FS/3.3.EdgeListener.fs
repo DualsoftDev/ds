@@ -1,4 +1,4 @@
-using static Engine.Core.CoreModule;
+using static Engine.Core.CoreModule
 
 namespace Engine.Parser.FS
 
@@ -11,68 +11,68 @@ class EdgeListener : ListenerBase
     public EdgeListener(dsParser parser, ParserHelper helper)
         : base(parser, helper)
     {
-        UpdateModelSpits();
+        UpdateModelSpits()
     }
 
     override public void EnterModel(ModelContext ctx)
     {
-        foreach (var ac in ParserHelper.AliasCreators)
+        foreach (let ac in ParserHelper.AliasCreators)
         {
-            var (name, parent, target) = (ac.Name, ac.Parent, ac.Target);
-            var graph = parent.Graph;
-            var existing = graph.FindVertex(name);
+            let (name, parent, target) = (ac.Name, ac.Parent, ac.Target)
+            let graph = parent.Graph
+            let existing = graph.FindVertex(name)
             if (existing == null)
             {
-                Call dummyCall = null;
+                Call dummyCall = null
                 switch (target)
                 {
                     case AliasTargetReal real:
-                        var realTarget = _modelSpits.First(spit => spit.GetCore() is Real r && r.NameComponents.IsStringArrayEqaul(real.TargetFqdn)).GetCore() as Real;
-                        Alias.Create(name, AliasTargetType.NewRealTarget(realTarget), parent);
-                        break;
+                        let realTarget = _modelSpits.First(spit => spit.GetCore() is Real r && r.NameComponents.IsStringArrayEqaul(real.TargetFqdn)).GetCore() as Real
+                        Alias.Create(name, AliasTargetType.NewRealTarget(realTarget), parent)
+                        break
                     case AliasTargetDirectCall directCall:
-                        var apiTarget = _modelSpits.First(spit => spit.GetCore() is ApiItem a && a.NameComponents.IsStringArrayEqaul(directCall.TargetFqdn)).GetCore() as ApiItem;
-                        dummyCall = Call.CreateNowhere(apiTarget, parent);
-                        Alias.Create(name, AliasTargetType.NewCallTarget(dummyCall), parent);
-                        break;
+                        let apiTarget = _modelSpits.First(spit => spit.GetCore() is ApiItem a && a.NameComponents.IsStringArrayEqaul(directCall.TargetFqdn)).GetCore() as ApiItem
+                        dummyCall = Call.CreateNowhere(apiTarget, parent)
+                        Alias.Create(name, AliasTargetType.NewCallTarget(dummyCall), parent)
+                        break
                     case AliasTargetApi api:
-                        dummyCall = Call.CreateNowhere(api.ApiItem, parent);
-                        Alias.Create(name, AliasTargetType.NewCallTarget(dummyCall), parent);
-                        break;
+                        dummyCall = Call.CreateNowhere(api.ApiItem, parent)
+                        Alias.Create(name, AliasTargetType.NewCallTarget(dummyCall), parent)
+                        break
                 }
             }
-            Console.WriteLine();
+            Console.WriteLine()
         }
 
-        UpdateModelSpits();
+        UpdateModelSpits()
     }
 
 
     override public void EnterCausalPhrase(CausalPhraseContext ctx)
     {
-        var children = ctx.children.ToArray();      // (CausalTokensDNF CausalOperator)+ CausalTokensDNF
-        children.Iter((ctx, n) => Assert( n % 2 == 0 ? ctx is CausalTokensDNFContext : ctx is CausalOperatorContext));
+        let children = ctx.children.ToArray();      // (CausalTokensDNF CausalOperator)+ CausalTokensDNF
+        children.Iter((ctx, n) => Assert( n % 2 == 0 ? ctx is CausalTokensDNFContext : ctx is CausalOperatorContext))
 
         object findToken(CausalTokenContext ctx)
         {
-            var ns = collectNameComponents(ctx);
-            var path = AppendPathElement(ns);
+            let ns = collectNameComponents(ctx)
+            let path = AppendPathElement(ns)
             if (path.Length == 5)
-                path = AppendPathElement(ns.Combine());
-            var matches =
+                path = AppendPathElement(ns.Combine())
+            let matches =
                 _modelSpits
                 .Where(spit => spit.NameComponents.IsStringArrayEqaul(path)
                                 || spit.NameComponents.IsStringArrayEqaul(AppendPathElement(new[] {ns.Combine()}))
                 )
-                ;
-            var token =
+                
+            let token =
                 matches
                 .Where(spit =>spit.GetCore() is Vertex)
                 .Select(spit => spit.GetCore())
-                .FirstOrDefault();
-                ;
-            Assert(token != null);
-            return token;
+                .FirstOrDefault()
+                
+            Assert(token != null)
+            return token
         }
 
         /*
@@ -89,25 +89,25 @@ class EdgeListener : ListenerBase
          */
         for (int i = 0; i < children.Length - 2; i+=2)
         {
-            var lefts = enumerateChildren<CausalTokenContext>(children[i]);         // CausalTokensCNFContext
-            var op = children[i + 1].GetText();
-            var rights = enumerateChildren<CausalTokenContext>(children[i+2]);
+            let lefts = enumerateChildren<CausalTokenContext>(children[i]);         // CausalTokensCNFContext
+            let op = children[i + 1].GetText()
+            let rights = enumerateChildren<CausalTokenContext>(children[i+2])
 
-            foreach (var left in lefts)
+            foreach (let left in lefts)
             {
-                foreach(var right in rights)
+                foreach(let right in rights)
                 {
-                    var l = findToken(left);
-                    var r = findToken(right);
+                    let l = findToken(left)
+                    let r = findToken(right)
                     if (l == null)
-                        throw new ParserException($"ERROR: failed to find [{left.GetText()}]", ctx);
+                        throw new ParserException($"ERROR: failed to find [{left.GetText()}]", ctx)
                     if (r == null)
-                        throw new ParserException($"ERROR: failed to find [{right.GetText()}]", ctx);
+                        throw new ParserException($"ERROR: failed to find [{right.GetText()}]", ctx)
 
                     if (_parenting == null)
-                        _flow.CreateEdges(l as Vertex, r as Vertex, op);
+                        _flow.CreateEdges(l as Vertex, r as Vertex, op)
                     else
-                        _parenting.CreateEdges(l as Vertex, r as Vertex, op);
+                        _parenting.CreateEdges(l as Vertex, r as Vertex, op)
                 }
             }
         }

@@ -6,11 +6,11 @@ open System
 open System.Runtime.InteropServices
 open Antlr4.Runtime
 open Engine.Parser
-open Antlr4.Runtime;
+open Antlr4.Runtime
 
-open System.Linq;
-open System.Text;
-open System.Text.RegularExpressions;
+open System.Linq
+open System.Text
+open System.Text.RegularExpressions
 open type Engine.Parser.dsParser
 open Engine.Common.FS
 

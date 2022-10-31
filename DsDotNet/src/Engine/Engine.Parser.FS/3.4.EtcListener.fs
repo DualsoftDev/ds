@@ -1,5 +1,5 @@
 namespace Engine.Parser.FS
-using static Engine.Core.CodeElements;
+using static Engine.Core.CodeElements
 
 /// <summary>
 /// 모든 vertex 가 생성 된 이후, edge 연결 작업 수행
@@ -9,13 +9,13 @@ class EtcListener : ListenerBase
     public EtcListener(dsParser parser, ParserHelper helper)
         : base(parser, helper)
     {
-        UpdateModelSpits();
+        UpdateModelSpits()
     }
 
     override public void EnterButtons(ButtonsContext ctx)
     {
-        var first = findFirstChild<ParserRuleContext>(ctx);     // {Emergency, Auto, Start, Reset}ButtonsContext
-        var targetDic =
+        let first = findFirstChild<ParserRuleContext>(ctx);     // {Emergency, Auto, Start, Reset}ButtonsContext
+        let targetDic =
             first switch
             {
                 EmergencyButtonsContext => _system.EmergencyButtons,
@@ -23,38 +23,38 @@ class EtcListener : ListenerBase
                 StartButtonsContext     => _system.StartButtons,
                 ResetButtonsContext     => _system.ResetButtons,
                 _ => throw new Exception("ERROR"),
-            };
+            }
 
-        var category = first.GetChild(1).GetText();       // [| '[', category, ']', buttonBlock |] 에서 category 만 추려냄 (e.g 'emg')
-        var key = (_system, category);
+        let category = first.GetChild(1).GetText();       // [| '[', category, ']', buttonBlock |] 에서 category 만 추려냄 (e.g 'emg')
+        let key = (_system, category)
         if (ParserHelper.ButtonCategories.Contains(key))
-            throw new Exception($"Duplicated button category {category} near {ctx.GetText()}");
+            throw new Exception($"Duplicated button category {category} near {ctx.GetText()}")
         else
-            ParserHelper.ButtonCategories.Add(key);
+            ParserHelper.ButtonCategories.Add(key)
 
-        var buttonDefs = enumerateChildren<ButtonDefContext>(first).ToArray();
-        foreach (var bd in buttonDefs)
+        let buttonDefs = enumerateChildren<ButtonDefContext>(first).ToArray()
+        foreach (let bd in buttonDefs)
         {
-            var buttonName = findFirstChild<ButtonNameContext>(bd).GetText();
-            var flows =
+            let buttonName = findFirstChild<ButtonNameContext>(bd).GetText()
+            let flows =
                 enumerateChildren<FlowNameContext>(bd)
                 .Select(flowCtx => flowCtx.GetText())
                 .Tap(flowName => Verify($"Flow [{flowName}] not exists!", _system.Flows.Any(f => f.Name == flowName)))
                 .Select(flowName => _system.Flows.First(f => f.Name == flowName))
                 .ToArray()
-                ;
+                
 
             if (!targetDic.ContainsKey(buttonName))
-                targetDic.Add(buttonName, new List<Flow>());
+                targetDic.Add(buttonName, new List<Flow>())
 
-            targetDic[buttonName].AddRange(flows);
+            targetDic[buttonName].AddRange(flows)
         }
     }
 
 
     public override void EnterSafety([NotNull] SafetyContext ctx)
     {
-        var safetyDefs = enumerateChildren<SafetyDefContext>(ctx);
+        let safetyDefs = enumerateChildren<SafetyDefContext>(ctx)
         /*
          * safety block 을 parsing 해서 key / value 의 dictionary 로 저장
          *
@@ -65,37 +65,37 @@ class EtcListener : ListenerBase
         => "Main" = {"P.F.Sp"; "P.F.Sm"}
            "Main2" = {"P.F.Sp"; "P.F.Sm"}
          */
-        var safetyKvs =
+        let safetyKvs =
             from safetyDef in safetyDefs
             let key         = collectNameComponents(findFirstChild(safetyDef, t => t is SafetyKeyContext))   // ["Main"] or ["My", "Flow", "Main"]
             let valueHeader = enumerateChildren<SafetyValuesContext>(safetyDef).First()
             let values      = enumerateChildren<Identifier123Context>(valueHeader).Select(collectNameComponents).ToArray()
             select (key, values)
-            ;
+            
 
 
-        foreach (var (key, values) in safetyKvs)
+        foreach (let (key, values) in safetyKvs)
         {
-            Real seg = null;
+            Real seg = null
             switch (key.Length)
             {
                 case 1:
-                    Assert(ctx.Parent is FlowContext);
-                    seg = _model.FindGraphVertex<Real>(AppendPathElement(key[0]));
-                    break;
+                    Assert(ctx.Parent is FlowContext)
+                    seg = _model.FindGraphVertex<Real>(AppendPathElement(key[0]))
+                    break
                 case 3:
-                    Assert(ctx.Parent is ModelPropertyBlockContext);
-                    seg = _model.FindGraphVertex<Real>(key);
-                    break;
+                    Assert(ctx.Parent is ModelPropertyBlockContext)
+                    seg = _model.FindGraphVertex<Real>(key)
+                    break
                 default:
-                    throw new ParserException($"Invalid safety key[{key.Combine()}]", ctx);
+                    throw new ParserException($"Invalid safety key[{key.Combine()}]", ctx)
             }
 
-            foreach (var cond in values.Select(v => _model.FindGraphVertex(v) as Real))
+            foreach (let cond in values.Select(v => _model.FindGraphVertex(v) as Real))
             {
-                var added = seg.SafetyConditions.Add(cond);
+                let added = seg.SafetyConditions.Add(cond)
                 if (!added)
-                    throw new ParserException($"Safety condition [{cond.QualifiedName}] duplicated on safety key[{key.Combine()}]", ctx);
+                    throw new ParserException($"Safety condition [{cond.QualifiedName}] duplicated on safety key[{key.Combine()}]", ctx)
             }
         }
     }
@@ -103,8 +103,8 @@ class EtcListener : ListenerBase
 
     FunctionApplication CreateFunctionApplication(FunApplicationContext context)
     {
-        var funName = findFirstChild<FunNameContext>(context).GetText();
-        var argGroups =
+        let funName = findFirstChild<FunNameContext>(context).GetText()
+        let argGroups =
             enumerateChildren<ArgumentGroupContext>(context)
             .Select(argGrpCtx =>
                 enumerateChildren<ArgumentContext>(argGrpCtx)
@@ -112,56 +112,56 @@ class EtcListener : ListenerBase
                 .ToArray()
                 )
             .ToArray()
-            ;
-        var funAppl = new FunctionApplication(funName, argGroups);
-        return funAppl;
+            
+        let funAppl = new FunctionApplication(funName, argGroups)
+        return funAppl
     }
 
     override public void EnterVariableDef(VariableDefContext context)
     {
-        var varName = findFirstChild<VarNameContext>(context).GetText();
-        var varType = findFirstChild<VarTypeContext>(context).GetText();
-        var init    = findFirstChild<ArgumentContext>(context).GetText();
-        _model.Variables.Add(new Variable(varName, varType, init));
+        let varName = findFirstChild<VarNameContext>(context).GetText()
+        let varType = findFirstChild<VarTypeContext>(context).GetText()
+        let init    = findFirstChild<ArgumentContext>(context).GetText()
+        _model.Variables.Add(new Variable(varName, varType, init))
     }
     override public void EnterCommandDef(CommandDefContext context)
     {
-        var cmdName    = findFirstChild<CmdNameContext>(context).GetText();
-        var funApplCtx = findFirstChild<FunApplicationContext>(context);
-        var funAppl    = CreateFunctionApplication(funApplCtx);
-        var command    = new Command(cmdName, funAppl);
-        _model.Commands.Add(command);
+        let cmdName    = findFirstChild<CmdNameContext>(context).GetText()
+        let funApplCtx = findFirstChild<FunApplicationContext>(context)
+        let funAppl    = CreateFunctionApplication(funApplCtx)
+        let command    = new Command(cmdName, funAppl)
+        _model.Commands.Add(command)
     }
     override public void EnterObserveDef(ObserveDefContext context)
     {
-        var obsName    = findFirstChild<ObserveNameContext>(context).GetText();
-        var funApplCtx = findFirstChild<FunApplicationContext>(context);
-        var funAppl    = CreateFunctionApplication(funApplCtx);
-        var observes   = new Observe(obsName, funAppl);
-        _model.Observes.Add(observes);
+        let obsName    = findFirstChild<ObserveNameContext>(context).GetText()
+        let funApplCtx = findFirstChild<FunApplicationContext>(context)
+        let funAppl    = CreateFunctionApplication(funApplCtx)
+        let observes   = new Observe(obsName, funAppl)
+        _model.Observes.Add(observes)
     }
 
 
     override public void ExitModel(ModelContext ctx)
     {
-        UpdateModelSpits();
+        UpdateModelSpits()
         //[layouts] = {
         //       L.T.Cp = (30, 50)            // xy
         //       L.T.Cm = (60, 50, 20, 20)    // xywh
         //}
 
-        var layouts = enumerateChildren<LayoutsContext>(ctx).ToArray();
+        let layouts = enumerateChildren<LayoutsContext>(ctx).ToArray()
         if (layouts.Length > 1)
-            throw new ParserException("Layouts block should exist only once", ctx);
+            throw new ParserException("Layouts block should exist only once", ctx)
 
-        var positionDefs = enumerateChildren<PositionDefContext>(ctx).ToArray();
-        foreach (var posiDef in positionDefs)
+        let positionDefs = enumerateChildren<PositionDefContext>(ctx).ToArray()
+        foreach (let posiDef in positionDefs)
         {
-            var apiPath = collectNameComponents(posiDef.apiPath());
-            var apiItem = _model.FindApiItem(apiPath);
-            var xywh = posiDef.xywh();
-            var (x, y, w, h) = (xywh.x().GetText(), xywh.y().GetText(), xywh.w()?.GetText(), xywh.h()?.GetText());
-            apiItem.Xywh = new Xywh(int.Parse(x), int.Parse(y), w == null ? null : int.Parse(w), h == null ? null : int.Parse(h));
+            let apiPath = collectNameComponents(posiDef.apiPath())
+            let apiItem = _model.FindApiItem(apiPath)
+            let xywh = posiDef.xywh()
+            let (x, y, w, h) = (xywh.x().GetText(), xywh.y().GetText(), xywh.w()?.GetText(), xywh.h()?.GetText())
+            apiItem.Xywh = new Xywh(int.Parse(x), int.Parse(y), w == null ? null : int.Parse(w), h == null ? null : int.Parse(h))
         }
 
         /*
@@ -171,7 +171,7 @@ class EtcListener : ListenerBase
                 A."" - "" = (START, END)
             }
         */
-        var api2Address = (
+        let api2Address = (
             from sysCtx in enumerateChildren<SystemContext>(ctx)
             from addrDefCtx in enumerateChildren<AddressDefContext>(sysCtx)
             let apiPath = collectNameComponents(addrDefCtx.apiPath())
@@ -179,24 +179,24 @@ class EtcListener : ListenerBase
             let s = sre.startItem()?.GetText()
             let e = sre.endItem()?.GetText()
             select (sysCtx, apiPath, new Addresses(s, e))
-        ).ToArray();
+        ).ToArray()
 
-        foreach (var (sysCtx, apiPath, address) in api2Address)
+        foreach (let (sysCtx, apiPath, address) in api2Address)
         {
-            var sys = _model.FindSystem(sysCtx.systemName().GetText());
-            sys.ApiAddressMap.Add(apiPath, address);
+            let sys = _model.FindSystem(sysCtx.systemName().GetText())
+            sys.ApiAddressMap.Add(apiPath, address)
         }
 
-        foreach (var o in _modelSpits)
+        foreach (let o in _modelSpits)
         {
             if (o.GetCore() is Call call)
             {
-                var map = call.GetSystem().ApiAddressMap;
+                let map = call.GetSystem().ApiAddressMap
                 if (map.ContainsKey(call.NameComponents))
                 {
-                    var address = map[call.NameComponents];
-                    Assert(call.Addresses == null || call.Addresses == address);
-                    call.Addresses = address;
+                    let address = map[call.NameComponents]
+                    Assert(call.Addresses == null || call.Addresses == address)
+                    call.Addresses = address
                 }
             }
         }

@@ -1,22 +1,22 @@
 public record ParserOptions
 {
-    public string ActiveCpuName { get; set; } = null;
-    public bool IsSimulationMode { get; set; } = true;
-    public bool AllowSkipExternalSegment { get; set; } = true;
+    public string ActiveCpuName { get; set; } = null
+    public bool IsSimulationMode { get; set; } = true
+    public bool AllowSkipExternalSegment { get; set; } = true
     public static ParserOptions Create4Runtime(string activeCpuName) =>
         new ParserOptions
         {
             ActiveCpuName = activeCpuName,
             IsSimulationMode = false,
             AllowSkipExternalSegment = false
-        };
+        }
 
     public static ParserOptions Create4Simulation(string activeCpuName = null) =>
-        new ParserOptions { ActiveCpuName = activeCpuName, };
+        new ParserOptions { ActiveCpuName = activeCpuName, }
     public static ParserOptions Create4SimulationWhileIgnoringExtSegCall() =>
-        new ParserOptions { AllowSkipExternalSegment = false, };
+        new ParserOptions { AllowSkipExternalSegment = false, }
 
-    public bool Verify() => IsSimulationMode || (ActiveCpuName != null && !AllowSkipExternalSegment);
+    public bool Verify() => IsSimulationMode || (ActiveCpuName != null && !AllowSkipExternalSegment)
 }
 
 public enum GraphVertexType

@@ -6,13 +6,13 @@ namespace Engine.Parser.FS
         {
             string getPosition(object ctx)
             {
-                string fromToken(IToken token) => $"{token.Line}:{token.Column}";
+                string fromToken(IToken token) => $"{token.Line}:{token.Column}"
                 string fromErrorNode(IErrorNode errNode) =>
                     errNode switch
                     {
                         ErrorNodeImpl impl => fromToken(impl.Symbol),
                         _ => throw new Exception("ERROR"),
-                    };
+                    }
 
                 return ctx switch
                 {
@@ -24,7 +24,7 @@ namespace Engine.Parser.FS
                         },
                     IErrorNode errNode => fromErrorNode(errNode),
                     _ => throw new Exception("ERROR"),
-                };
+                }
             }
 
             string getAmbient(object ctx) =>
@@ -32,11 +32,11 @@ namespace Engine.Parser.FS
                 {
                     IParseTree pt => pt.GetText(),
                     _ => throw new Exception("ERROR"),
-                };
+                }
 
-            var posi = getPosition(ctx);
-            var ambient = getAmbient(ctx);
-            return $"{posi} near\r\n'{ambient}'";
+            let posi = getPosition(ctx)
+            let ambient = getAmbient(ctx)
+            return $"{posi} near\r\n'{ambient}'"
         }
         public ParserException(string message, RuleContext ctx)
             : base($"{message} on {CreatePositionInfo(ctx)}")

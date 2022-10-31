@@ -67,21 +67,10 @@ namespace Dual.Model.Import
 
             viewer.Graph.LayoutAlgorithmSettings = layoutSetting;
             SetBackColor(System.Drawing.Color.FromArgb(33, 33, 33));
-            var btnGroups = new DsViewNode("Buttons", true, BtnType.AutoBTN);
-            sys.AutoButtons.Where(w => w.Value.Contains(flow)).ForEach(f => btnGroups.Singles.Add(new DsViewNode(f.Key, false, BtnType.AutoBTN)));
-            sys.EmergencyButtons.Where(w => w.Value.Contains(flow)).ForEach(f => btnGroups.Singles.Add(new DsViewNode(f.Key, false, BtnType.EmergencyBTN)));
-            sys.ResetButtons.Where(w => w.Value.Contains(flow)).ForEach(f => btnGroups.Singles.Add(new DsViewNode(f.Key, false, BtnType.ResetBTN)));
-            sys.StartButtons.Where(w => w.Value.Contains(flow)).ForEach(f => btnGroups.Singles.Add(new DsViewNode(f.Key, false, BtnType.StartBTN)));
-            DrawSeg(viewer.Graph.RootSubgraph, btnGroups);
 
-
-
-            //sys.EmergencyButtons.Where(w => w.Value.Contains(flow)).ForEach(f => 
-            //    DrawSub(viewer.Graph.RootSubgraph, new DsViewNode(f.Key), btnSubGraph, gEdge.SourceNode , false));
-            //sys.StartButtons.Where(w => w.Value.Contains(flow)).ForEach(f => 
-            //    DrawSub(viewer.Graph.RootSubgraph, new DsViewNode(f.Key), btnSubGraph, gEdge.SourceNode , false));
-            //sys.ResetButtons.Where(w => w.Value.Contains(flow)).ForEach(f => 
-            //    DrawSub(viewer.Graph.RootSubgraph, new DsViewNode(f.Key), btnSubGraph, gEdge.SourceNode , false));
+            DrawButtons(flow, sys);
+            if(sys.Flows.First() == flow) //처음 시스템 Flow에만 인터페이스 표기
+                DrawApiItems(flow, sys);
 
             flow.Graph.Islands
                 .ForEach(seg => DrawSeg(viewer.Graph.RootSubgraph, new DsViewNode(seg)));
@@ -93,6 +82,23 @@ namespace Dual.Model.Import
             viewer.SetCalculatedLayout(viewer.CalculateLayout(viewer.Graph));
         }
 
+        private void DrawButtons(Flow flow, DsSystem sys)
+        {
+            var btnGroups = new DsViewNode("Buttons", true, BtnType.AutoBTN);
+            sys.AutoButtons.Where(w => w.Value.Contains(flow)).ForEach(f => btnGroups.Singles.Add(new DsViewNode(f.Key, false, BtnType.AutoBTN)));
+            sys.EmergencyButtons.Where(w => w.Value.Contains(flow)).ForEach(f => btnGroups.Singles.Add(new DsViewNode(f.Key, false, BtnType.EmergencyBTN)));
+            sys.ResetButtons.Where(w => w.Value.Contains(flow)).ForEach(f => btnGroups.Singles.Add(new DsViewNode(f.Key, false, BtnType.ResetBTN)));
+            sys.StartButtons.Where(w => w.Value.Contains(flow)).ForEach(f => btnGroups.Singles.Add(new DsViewNode(f.Key, false, BtnType.StartBTN)));
+            if(btnGroups.Singles.Count > 0)
+                DrawSeg(viewer.Graph.RootSubgraph, btnGroups);
+        }
+
+        private void DrawApiItems(Flow flow, DsSystem sys)
+        {
+            var apiGroups = new DsViewNode("Interfaces", true);
+            sys.ApiItems.ForEach(f => apiGroups.Singles.Add(new DsViewNode(f.Name, false)));
+            DrawSeg(viewer.Graph.RootSubgraph, apiGroups);
+        }
 
         private void UpdateLabelText(Node nNode)
         {
@@ -243,7 +249,7 @@ namespace Dual.Model.Import
 
                 if (dsViewNode.NodeType == NodeType.BUTTON)
                 {
-                    if (dsViewNode.IsButtonGroup)
+                    if (dsViewNode.IsGroup)
                     {
                         nNode.Attr.FillColor = Color.DarkGray;
                         nNode.Attr.Shape = Shape.Box;
@@ -270,7 +276,19 @@ namespace Dual.Model.Import
                     || dsViewNode.NodeType == NodeType.RX)
                     nNode.Attr.Shape = Shape.Ellipse;
                 if (dsViewNode.NodeType == NodeType.IF)
-                    nNode.Attr.Shape = Shape.InvHouse;
+                {
+                    if (dsViewNode.IsGroup)
+                    {
+                        nNode.Attr.FillColor = Color.DarkGray;
+                        nNode.Attr.Shape = Shape.Box;
+                    }
+                    else
+                    {
+                        nNode.Attr.Shape = Shape.InvHouse;
+                        nNode.Attr.FillColor = Color.BlueViolet;
+                    }
+                    
+                }
                 if (dsViewNode.NodeType == NodeType.COPY)
                     nNode.Attr.Shape = Shape.Octagon;
             }

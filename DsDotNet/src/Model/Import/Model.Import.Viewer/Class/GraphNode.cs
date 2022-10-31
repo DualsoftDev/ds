@@ -14,7 +14,7 @@ namespace Dual.Model.Import
     public class DsViewNode
     {
         public bool IsChildExist = false;
-        public bool IsButtonGroup= false;
+        public bool IsGroup= false;
         public string UIKey = "";
         public DsVertex DsVertex;
         public Bound Bound;
@@ -27,8 +27,14 @@ namespace Dual.Model.Import
             Bound = Bound.ExBtn;
             NodeType = NodeType.BUTTON;
             UIKey = $"{name};{this.GetHashCode()}";
-            IsButtonGroup = bGroup;
+            IsGroup = bGroup;
             BtnType = btnType;
+        }
+        public DsViewNode(string name, bool bGroup)
+        {
+            NodeType = NodeType.IF;
+            UIKey = $"{name};{this.GetHashCode()}";
+            IsGroup = bGroup;
         }
         public DsViewNode(DsVertex v)
         {

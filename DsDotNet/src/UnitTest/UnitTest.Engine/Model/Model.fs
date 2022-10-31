@@ -31,6 +31,7 @@ module private ModelComparisonHelper =
         }
         [flow] "Flow.Complex" = {
             "#Seg.Complex#" > Seg;
+            Seg |> "#Seg.Complex#";
             "#Seg.Complex#" = {
                 A."+" > A."-";
             }

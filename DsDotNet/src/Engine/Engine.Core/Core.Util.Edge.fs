@@ -30,6 +30,10 @@ module EdgeModule =
                 yield source, EdgeType.Reset ||| EdgeType.Strong , target
                 yield target, EdgeType.Reset ||| EdgeType.Strong , source
 
+            | TextStartReset -> // "=>"
+                yield source, EdgeType.Default, target
+                yield target, EdgeType.Reset, source
+
             | TextStartEdge  -> yield source, EdgeType.Default, target  //">"
             | TextStartPush  -> yield source, EdgeType.Default ||| EdgeType.Strong, target //">>"
             | TextResetEdge  -> yield source, EdgeType.Reset, target //"|>"

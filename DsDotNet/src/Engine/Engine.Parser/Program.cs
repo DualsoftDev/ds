@@ -14,7 +14,7 @@ public class Program
         }
     }
     [flow] ""Flow.Complex"" = {
-        ""#Seg.Complex#"" > Seg;
+        ""#Seg.Complex#"" => Seg;
         ""#Seg.Complex#"" = {
             A.""+"" > A.""-"";
         }

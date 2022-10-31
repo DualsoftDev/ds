@@ -17,4 +17,5 @@ using System.Runtime.InteropServices;
 
 [assembly: Guid("2a959eec-ba9d-4c77-841b-d1dce28137b1")]
 [assembly: InternalsVisibleTo("Engine.Sample")]
+[assembly: InternalsVisibleTo("Engine.Parser.FS")]
 [assembly: DebuggerDisplay("[Text={GetText()}]", Target = typeof(RuleContext))]

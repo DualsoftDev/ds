@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 
 namespace Engine.Parser;
 
-class DsParser
+internal class DsParser
 {
     public static (dsParser, RuleContext, ParserError[]) ParseText(
         string text, Func<dsParser, RuleContext> predExtract,

@@ -1,58 +1,37 @@
 namespace Engine.Parser.FS
-{
-    internal class ParserException : Exception
-    {
-        static string CreatePositionInfo(object ctx)   // RuleContext or IErrorNode
-        {
-            string getPosition(object ctx)
-            {
-                string fromToken(IToken token) => $"{token.Line}:{token.Column}"
-                string fromErrorNode(IErrorNode errNode) =>
-                    errNode switch
-                    {
-                        ErrorNodeImpl impl => fromToken(impl.Symbol),
-                        _ => throw new Exception("ERROR"),
-                    }
+open System
+open Antlr4.Runtime
+open Antlr4.Runtime.Tree
 
-                return ctx switch
-                {
-                    ParserRuleContext prctx =>
-                        prctx.Start switch
-                        {
-                            (CommonToken start) => fromToken(start),
-                            _ => throw new Exception("ERROR"),
-                        },
-                    IErrorNode errNode => fromErrorNode(errNode),
-                    _ => throw new Exception("ERROR"),
-                }
-            }
+type ParserException(message:string) =
+    inherit Exception(message)
 
-            string getAmbient(object ctx) =>
-                ctx switch
-                {
-                    IParseTree pt => pt.GetText(),
-                    _ => throw new Exception("ERROR"),
-                }
+    static let CreatePositionInfo(ctx:obj) =   // RuleContext or IErrorNode
+        let getPosition(ctx:obj) =
+            let fromToken (token:IToken) = $"{token.Line}:{token.Column}"
+            let fromErrorNode(errNode:IErrorNode) =
+                match errNode with
+                | :? ErrorNodeImpl as impl -> fromToken(impl.Symbol)
+                | _ -> failwith "ERROR"
 
-            let posi = getPosition(ctx)
-            let ambient = getAmbient(ctx)
-            return $"{posi} near\r\n'{ambient}'"
-        }
-        public ParserException(string message, RuleContext ctx)
-            : base($"{message} on {CreatePositionInfo(ctx)}")
-        {
-        }
+            match ctx with
+            | :? ParserRuleContext as prctx ->
+                match prctx.Start with
+                | :? CommonToken as start -> fromToken(start)
+                | _ -> failwith "ERROR"
+            | :? IErrorNode as errNode -> fromErrorNode(errNode)
+            | _ -> failwith "ERROR"
 
-        public ParserException(string message, IErrorNode errorNode)
-            : base($"{message} on {CreatePositionInfo(errorNode)}")
-        {
-        }
+        let getAmbient(ctx:obj) =
+            match ctx with
+            | :? IParseTree as pt -> pt.GetText()
+            | _ -> failwith "ERROR"
 
-        public ParserException(string message, int line, int column)
-            : base($"{message} on {line}:{column}")
-        {
-        }
+        let posi = getPosition(ctx)
+        let ambient = getAmbient(ctx)
+        $"{posi} near\r\n'{ambient}'"
 
+    new (message:string, ctx:RuleContext) = ParserException($"{message} on {CreatePositionInfo(ctx)}")
+    new (message:string, errorNode:IErrorNode) = ParserException($"{message} on {CreatePositionInfo(errorNode)}")
+    new (message:string, line:int, column:int) = ParserException($"{message} on {line}:{column}")
 
-    }
-}

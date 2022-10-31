@@ -1,33 +1,27 @@
-type ParserOptions = {
-        ActiveCpuName:string
-        IsSimulationMode:bool           // { get; set; } = true
-        AllowSkipExternalSegment:bool // { get; set; } = true
-} with
-    let defaultOption = {
-        ActiveCpuName = ""
-        IsSimulationMode = true
-        AllowSkipExternalSegment = false
-    }
-    static member Create4Runtime(activeCpuName:string) = {
-        ActiveCpuName = activeCpuName
-        IsSimulationMode = false
-        AllowSkipExternalSegment = false
-    }
-    static member Create4Simulation(activeCpuName:string) = { defaultOption with ActiveCpuName = activeCpuName}
-    static member Verify() = IsSimulationMode || (ActiveCpuName != null && !AllowSkipExternalSegment)
+namespace Engine.Parser.FS
 
-//public enum GraphVertexType
-//{
-//    None           = 0,
-//    System         = 1 << 0,
-//    Flow           = 1 << 1,
-//    Segment        = 1 << 2,  // not child
-//    Parenting      = 1 << 6,
-//    Child          = 1 << 10, // not Segment
-//    Call           = 1 << 11,
-//    AliaseKey      = 1 << 15, // not direct call
-//    AliaseMnemonic = 1 << 16, // not direct call
-//    ApiKey         = 1 << 19,
-//    ApiSER         = 1 << 20, // S ~ E ~ R
-//}
+open System
 
+type ParserOptions(activeCpuName, isSimulationMode, allowSkipExternalSegment) =
+    member _.ActiveCpuName:string = activeCpuName
+    member _.IsSimulationMode:bool = isSimulationMode           // { get; set; } = true
+    member _.AllowSkipExternalSegment:bool = allowSkipExternalSegment // { get; set; } = true
+
+    static member Create4Runtime(activeCpuName:string) = ParserOptions(activeCpuName, false, false)
+    static member Create4Simulation(activeCpuName:string) = ParserOptions(activeCpuName, true, false)
+    member x.Verify() = x.IsSimulationMode || (x.ActiveCpuName != null && not x.AllowSkipExternalSegment)
+
+
+[<Flags>]
+type GraphVertexType =
+    | None           = 0b0000000000000001
+    | System         = 0b0000000000000010
+    | Flow           = 0b0000000000000100
+    | Segment        = 0b0000000000001000   // not child
+    | Parenting      = 0b0000000000010000
+    | Child          = 0b0000000000100000   // not Segment
+    | Call           = 0b0000000001000000
+    | AliaseKey      = 0b0000000010000000   // not direct call
+    | AliaseMnemonic = 0b0000000100000000   // not direct call
+    | ApiKey         = 0b0000001000000000
+    | ApiSER         = 0b0000010000000000   // S ~ E ~ R

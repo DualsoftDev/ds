@@ -1,99 +1,81 @@
 namespace Engine.Parser.FS
 
-
-public class AliasTarget {}
-
-public class AliasTargetWithFqdn: AliasTarget {
-    public AliasTargetWithFqdn(string[] targetFqdn)
-    {
-        TargetFqdn = targetFqdn
-    }
-
-    public string[] TargetFqdn { get; set; }
-}
-public class AliasTargetReal : AliasTargetWithFqdn
-{
-    public AliasTargetReal(string[] targetFqdn) : base(targetFqdn) {}
-}
-
-public class AliasTargetDirectCall : AliasTargetWithFqdn
-{
-    public AliasTargetDirectCall(string[] targetFqdn) : base(targetFqdn) { }
-}
+open Engine.Core
+open System.Collections.Generic
+open Engine.Core.SpitModuleHelper
+open System
+open System.Linq
+open System.Collections.Generic
+open System.Diagnostics
+open type System.Diagnostics.Debug
+//open System.Reactive.Linq
+open log4net
+open Antlr4.Runtime
+open Antlr4.Runtime.Tree
+open Antlr4.Runtime.Misc
+open Engine.Common
+open Engine.Core
 
 
 
-public class AliasTargetApi : AliasTarget
-{
-    public AliasTargetApi(ApiItem apiItem)
-    {
-        ApiItem = apiItem
-    }
+type AliasTarget() = class end
 
-    public ApiItem ApiItem { get; set; }
-}
+type AliasTargetWithFqdn(targetFqdn:string[]) =
+    inherit AliasTarget()
 
+    member val TargetFqdn = targetFqdn with get, set
 
-public class AliasCreator
-{
-    public AliasCreator(string name, ParentWrapper parent, AliasTarget target)
-    {
-        Name = name
-        Parent = parent
-        Target = target
-    }
-
-    public string Name { get; set; }
-    public ParentWrapper Parent { get; set; }
-    public AliasTarget Target { get; set; }
-}
+type AliasTargetReal(targetFqdn:string[]) =
+    inherit AliasTargetWithFqdn(targetFqdn)
+type AliasTargetDirectCall(targetFqdn:string[]) =
+    inherit AliasTargetWithFqdn(targetFqdn)
 
 
-public class ParserHelper
-{
-    // button category 중복 check 용
-    public HashSet<(DsSystem, string)> ButtonCategories = new()
-
-    public Model Model { get; } = new Model()
-    internal DsSystem _system
-    internal Flow _flow
-    internal Real _parenting
-    internal Dictionary<string[], GraphVertexType> _elements = new (NameUtil.CreateNameComponentsComparer())
-    internal SpitResult[] _modelSpits
-    internal object[] _modelSpitObjects
-
-    // 3.2.ElementListener 에서 Alias create 사용
-    public List<AliasCreator> AliasCreators = new()
-
-    public ParserOptions ParserOptions { get; set; }
-    public ParserHelper(ParserOptions options)
-    {
-        ParserOptions = options
-    }
+type AliasTargetApi(apiItem:ApiItem) =
+    inherit AliasTarget()
+    member val ApiItem = apiItem with get, set
 
 
-    internal string[] AppendPathElement(string lastName) =>
-        CurrentPathElements.Append(lastName).ToArray()
-    internal string[] AppendPathElement(string[] lastNames) =>
-        CurrentPathElements.Concat(lastNames).ToArray()
+type AliasCreator(name:string, parent:ParentWrapper, target:AliasTarget) =
+    member val Name = name with get, set
+    member val Parent = parent with get, set
+    member val Target = target with get, set
 
-    internal string[] CurrentPathElements
-    {
-        get
-        {
-            IEnumerable<string> helper()
-            {
-                if (_system != null)
-                    yield return _system.Name
-                if (_flow != null)
-                    yield return _flow.Name
-                if (_parenting != null)
-                    yield return _parenting.Name
-            }
-            return helper().ToArray()
-        }
-    }
-    internal string CurrentPath => CurrentPathElements.Combine()
-}
+type ParserHelper(options:ParserOptions) =
+    member val Model = Model()
+    member val ParserOptions = options with get, set
 
+    /// 3.2.ElementListener 에서 Alias create 사용
+    member val AliasCreators = ResizeArray<AliasCreator>()
+    /// button category 중복 check 용
+    member val ButtonCategories = HashSet<(DsSystem*string)>()
+
+    member val internal _system:DsSystem option = None
+    member val internal _flow:Flow option = None
+    member val internal _parenting:Real option = None
+    member val internal _elements = Dictionary<string[], GraphVertexType>(NameUtil.CreateNameComponentsComparer())
+    member val internal _modelSpits:SpitResult array = [||] with get, set
+    member val internal _modelSpitObjects:obj array = [||] with get, set
+
+    member internal x.AppendPathElement(lastName:string) =
+        x.CurrentPathElements.Append(lastName).ToArray()
+    member internal x.AppendPathElement(lastNames:string[]) =
+        x.CurrentPathElements.Concat(lastNames).ToArray()
+
+    member internal x.CurrentPathElements with get():string[] =
+        let helper() = [
+            match x._system with
+            | Some sys -> yield sys.Name
+            | None -> ()
+            match x._flow with
+            | Some f -> yield f.Name
+            | None -> ()
+            match x._parenting with
+            | Some f -> yield f.Name
+            | None -> ()
+        ]
+
+        helper().ToArray()
+
+    member internal x.CurrentPath with get() = x.CurrentPathElements.Combine()
 

@@ -1,56 +1,39 @@
 // Template generated code from Antlr4BuildTasks.Template v 8.17
 namespace Engine.Parser.FS
 
-using System.IO
+open System.IO
+open System.Runtime.InteropServices
+open Antlr4.Runtime
+open Engine.Parser
+open Engine.Common.FS
 
-public class ParserError
-{
-    public ParserError(int line, int column, string message, string ambient)
-    {
-        Line = line
-        Column = column
-        Message = message
-        Ambient = ambient
-    }
+type ParserError(line:int, column:int, message:string, ambient:string)=
+    member val Line = line
+    member val Column = column
+    member val Message = message
+    member val Ambient = ambient
 
-    public int Line { get; set; }
-    public int Column { get; set; }
-    public string Message { get; set; }
-    public string Ambient { get; set; }
 
-}
+type ErrorListener<'Symbol>([<Optional; DefaultParameterValue(false)>]throwOnError) =
+    inherit ConsoleErrorListener<'Symbol>()
 
-public class ErrorListener<Symbol> : ConsoleErrorListener<Symbol>
-{
-    bool _throwOnerror
-    public List<ParserError> Errors = new()
-    public ErrorListener(bool throwOnError = false)
-    {
-        _throwOnerror = throwOnError
-    }
+    member val Errors = ResizeArray<ParserError>()
 
-    public override void SyntaxError(TextWriter output, IRecognizer recognizer, Symbol offendingSymbol, int line,
-        int col, string msg, RecognitionException e)
-    {
+    override x.SyntaxError(output:TextWriter, recognizer:IRecognizer, offendingSymbol:'Symbol, line:int,
+            col:int, msg:string, e:RecognitionException) =
         let dsFile = recognizer.GrammarFileName
-        switch (recognizer)
-        {
-            case dsParser parser:
-                let ambient = parser.RuleContext.GetText()
-                base.SyntaxError(output, recognizer, offendingSymbol, line, col, msg, e)
-                Global.Logger.Error($"Parser error on [{line}:{col}]@{dsFile}: {msg}")
-                Errors.Add(new ParserError(line, col, msg, ambient))
-                if (_throwOnerror)
-                    throw new ParserException($"{msg} near {ambient}", line, col)
-                break
-            case dsLexer lexer:
-                Global.Logger.Error($"Lexer error on [{line}:{col}]@{dsFile}: {msg}")
-                Errors.Add(new ParserError(line, col, msg, ""))
-                if (_throwOnerror)
-                    throw new ParserException($"Lexical error : {msg}", line, col)
-                break
-            default:
-                throw new Exception("ERROR")
-        }
-    }
-}
+        match recognizer with
+        | :? dsParser as parser ->
+            let ambient = parser.RuleContext.GetText()
+            base.SyntaxError(output, recognizer, offendingSymbol, line, col, msg, e)
+            logError($"Parser error on [{line}:{col}]@{dsFile}: {msg}")
+            x.Errors.Add(new ParserError(line, col, msg, ambient))
+            if throwOnError then
+                ParserException($"{msg} near {ambient}", line, col) |> raise
+        | :? dsLexer as lexer ->
+            logError($"Lexer error on [{line}:{col}]@{dsFile}: {msg}")
+            x.Errors.Add(new ParserError(line, col, msg, ""))
+            if throwOnError then
+                ParserException($"Lexical error : {msg}", line, col) |> raise
+        | _ ->
+            failwith "ERROR"

@@ -45,7 +45,7 @@ class EtcListener : ListenerBase
                 
 
             if (!targetDic.ContainsKey(buttonName))
-                targetDic.Add(buttonName, new List<Flow>())
+                targetDic.Add(buttonName, new ResizeArray<Flow>())
 
             targetDic[buttonName].AddRange(flows)
         }

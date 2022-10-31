@@ -1,21 +1,22 @@
+namespace rec Engine.Parser.FS
 
-
-
-namespace Engine.Parser.FS
 open System
 open System.Runtime.InteropServices
 open Antlr4.Runtime
 open Engine.Parser
-open Antlr4.Runtime
 
 open System.Linq
 open System.Text
-open System.Text.RegularExpressions
 open type Engine.Parser.dsParser
 open Engine.Common.FS
 
-module DsParser =
-    let ParseText (text:string, predExtract:dsParser->RuleContext, [<Optional; DefaultParameterValue(true)>]throwOnError) =
+//open System.Reactive.Linq
+open Engine.Common
+open Antlr4.Runtime.Tree
+
+
+type DsParser() =
+    static member ParseText (text:string, predExtract:dsParser->RuleContext, [<Optional; DefaultParameterValue(true)>]throwOnError) =
         let str = new AntlrInputStream(text)
         let lexer = new dsLexer(str)
         let tokens = new CommonTokenStream(lexer)
@@ -36,7 +37,7 @@ module DsParser =
     /// 치환한 text 를 반환한다.  system A 정의 영역을 찾아서 system B 로 치환한 text 반환
     /// 이때, copy 구문은 삭제한다.
     /// </summary>
-    let private ExpandSystemCopy(text:string):string =
+    static member private ExpandSystemCopy(text:string):string =
         /// 원본 text 에서 copy_system 구문을 제외한 나머지 text 를 반환한다.
         let omitSystemCopy(text:string, sysCopies:SystemContext[]):string =
             for cc in sysCopies do
@@ -46,7 +47,7 @@ module DsParser =
             let ranges = sysCopies.Select(fun ctx -> (ctx.Start.StartIndex, ctx.Stop.StopIndex)).ToArray()
             let chars =
                 text
-                    |> Seq.filteri(fun n ch -> ranges |> Seq.forall(fun r -> n < r.StartIndex || r.StopIndex < n))
+                    |> Seq.filteri(fun n ch -> ranges |> Seq.forall(fun r -> n < fst r || snd r < n))
                     |> Array.ofSeq
 
             string(chars)
@@ -80,17 +81,16 @@ module DsParser =
                 parser.Reset()
                 let sysCtxMap =
                     enumerateChildren<SystemContext>(parser.model())
-                        .ToDictionary(ctx => findFirstChild<SystemNameContext>(ctx).GetText(), ctx => ctx)    //ctx => findFirstChild<SysCopySpecContext>(ctx))
+                        .ToDictionary(fun ctx -> findFirstChild<SystemNameContext>(ctx).GetText(), id)    //ctx => findFirstChild<SysCopySpecContext>(ctx))
 
                 let copySysCtxs = sysCtxMap.Where(fun kv -> findFirstChild<SysCopySpecContext>(kv.Value) <> null).ToArray()
 
                 // 원본 full text 에서 copy_system 구문 삭제한 text 반환
                 let textWithoutSysCopy = omitSystemCopy(text, copySysCtxs.Select(kv => kv.Value).ToArray())
-                yield return textWithoutSysCopy
+                yield textWithoutSysCopy
 
-                foreach (let kv in copySysCtxs)
-                {
-                    yield return "\r\n"
+                for kv in copySysCtxs do
+                    yield "\r\n"
 
                     let newSysName = kv.Key
                     let srcSysName = findFirstChild<SourceSystemNameContext>(kv.Value).GetText()
@@ -99,11 +99,9 @@ module DsParser =
                     let pattern = @"(\[sys([^\]]*\]))([^=]*)="
                     let replaced = Regex.Replace(sysText, pattern, $"$1{newSysName}=")
                     yield return replaced
-                }
             ]
 
-        return string.Join("\r\n", helper())
-    }
+        string.Join("\r\n", helper())
 
 
 
@@ -124,185 +122,180 @@ module DsParser =
 
 
 
-    public static (dsParser, RuleContext, ParserError[]) FromDocument(
-        string text, Func<dsParser, RuleContext> predExtract,
-        bool throwOnError = true)
-    {
-        let expanded = ExpandSystemCopy(text)
-        return ParseText(expanded, predExtract, throwOnError)
-    }
+    static member FromDocument(text:string, predExtract:dsParser->RuleContext, [<Optional; DefaultParameterValue(true)>]throwOnError) =       // (dsParser, RuleContext, ParserError[])
+        let expanded = DsParser.ExpandSystemCopy(text)
+        DsParser.ParseText(expanded, predExtract, throwOnError)
 
-    public static (dsParser, ParserError[]) FromDocument(string text, bool throwOnError = true)
-    {
-        let func = (dsParser parser) => parser.model()
-        let(parser, tree, errors) = FromDocument(text, func, throwOnError)
-        return (parser, errors)
-    }
+    static member FromDocument(text:string, [<Optional; DefaultParameterValue(true:bool)>]throwOnError) =       // (dsParser, ParserError[])
+        let func = fun (parser:dsParser) -> parser.model() :> RuleContext
+        let (parser, tree, errors) = DsParser.FromDocument(text, func, throwOnError)
+        (parser, errors)
 
 
-    public static List<T> enumerateChildren<T>(IParseTree from, bool includeMe = false, Func<IParseTree, bool> predicate = null) where T : IParseTree
-    {
-        Func<IParseTree, bool> pred = predicate ?? new Func<IParseTree, bool>(ctx => ctx is T)
-        let result = new List<T>()
-        enumerateChildrenHelper(result, from, includeMe, pred)
-        return result
+    //static member enumerateChildren<'T when 'T:>IParseTree>(
+    //    from:IParseTree
+    //    , [<Optional; DefaultParameterValue(false)>]includeMe
+    //    , ?predicate:IParseTree->bool) : ResizeArray<'T> =         // ResizeArray<'T>
+
+    static member enumerateChildren<'T>(
+        from:IParseTree
+        , [<Optional; DefaultParameterValue(false)>]includeMe
+        , ?predicate:IParseTree->bool) : ResizeArray<'T> when 'T:>IParseTree =         // ResizeArray<'T>
+
+        let predicate = defaultArg predicate (fun ctx -> typedefof<'T>.IsAssignableFrom(ctx.GetType()))
+        let rec enumerateChildrenHelper(rslt:ResizeArray<'T>, frm:IParseTree, incMe:bool, pred:IParseTree->bool) =
+            if (incMe && pred(frm)) then
+                rslt.Add(frm)
 
 
-        void enumerateChildrenHelper(List<T> rslt, IParseTree frm, bool incMe, Func<IParseTree, bool> pred)
-        {
-            bool ok(IParseTree t)
-            {
-                if (pred != null)
-                    return pred(t)
-                return true
-            }
+            for index in [ 0 .. frm.ChildCount - 1 ] do
+                enumerateChildrenHelper(rslt, frm.GetChild(index), true, pred)
 
-            if (incMe && ok(frm))
-                rslt.Add((T)frm)
-            for (int index = 0 index < frm.ChildCount index++)
-                enumerateChildrenHelper(rslt, frm.GetChild(index), true, ok)
-        }
-    }
-
-    public static IEnumerable<IParseTree> enumerateParents(IParseTree from, bool includeMe=false, Func<IParseTree, bool> predicate = null)
-    {
-        bool ok(IParseTree t)
-        {
-            if (predicate != null)
-                return predicate(t)
-            return true
-        }
-
-        if (includeMe && ok(from))
-            yield return from
-
-        foreach (let p in enumerateParents(from.Parent, true, ok))
-            yield return p
-    }
+        //Func<IParseTree, bool> pred = predicate ?? new Func<IParseTree, bool>(ctx => ctx is T)
+        let result = ResizeArray<'T>()
+        enumerateChildrenHelper(result, from, includeMe, predicate)
+        result
 
 
-    public static IParseTree findFirstChild(IParseTree from, Func<IParseTree, bool> predicate, bool includeMe=false)
-    {
-        foreach (let c in enumerateChildren<IParseTree>(from, includeMe))
-        {
-            if (predicate(c))
-                return c
-        }
+//    public static IEnumerable<IParseTree> enumerateParents(IParseTree from, bool includeMe=false, Func<IParseTree, bool> predicate = null)
+//    {
+//        bool ok(IParseTree t)
+//        {
+//            if (predicate != null)
+//                return predicate(t)
+//            return true
+//        }
 
-        return null
-    }
-    public static T findFirstChild<T>(IParseTree from, bool includeMe = false) where T: IParseTree =>
-        enumerateChildren<T>(from, includeMe).FirstOrDefault()
+//        if (includeMe && ok(from))
+//            yield return from
 
-    public static IParseTree findFirstAncestor(IParseTree from, Func<IParseTree, bool> predicate, bool includeMe=false)
-    {
-        foreach (let c in enumerateParents(from, includeMe))
-        {
-            if (predicate(c))
-                return c
-        }
+//        foreach (let p in enumerateParents(from.Parent, true, ok))
+//            yield return p
+//    }
 
-        return null
-    }
-    public static T findFirstAncestor<T>(IParseTree from, bool includeMe = false) where T : IParseTree
-    {
-        let pred = (IParseTree parseTree) => parseTree is T
-        return (T)findFirstAncestor(from, pred, includeMe)
-    }
+
+//    public static IParseTree findFirstChild(IParseTree from, Func<IParseTree, bool> predicate, bool includeMe=false)
+//    {
+//        foreach (let c in enumerateChildren<IParseTree>(from, includeMe))
+//        {
+//            if (predicate(c))
+//                return c
+//        }
+
+//        return null
+//    }
+//    public static T findFirstChild<'T>(IParseTree from, bool includeMe = false) where T: IParseTree =>
+//        enumerateChildren<'T>(from, includeMe).FirstOrDefault()
+
+//    public static IParseTree findFirstAncestor(IParseTree from, Func<IParseTree, bool> predicate, bool includeMe=false)
+//    {
+//        foreach (let c in enumerateParents(from, includeMe))
+//        {
+//            if (predicate(c))
+//                return c
+//        }
+
+//        return null
+//    }
+//    public static T findFirstAncestor<'T>(IParseTree from, bool includeMe = false) where T : IParseTree
+//    {
+//        let pred = (IParseTree parseTree) => parseTree is T
+//        return (T)findFirstAncestor(from, pred, includeMe)
+//    }
 
 
 
-    public static string[] collectNameComponents(IParseTree from)
-    {
-        IEnumerable<string> splitName(string name)
-        {
-            let sub = new List<char>()
-            let q = false
-            let prev = ' '
-            for(int i = 0 i < name.Length i++)
-            {
-                let ch = name[i]
-                sub.Add(ch)
+//    public static string[] collectNameComponents(IParseTree from)
+//    {
+//        IEnumerable<string> splitName(string name)
+//        {
+//            let sub = new ResizeArray<char>()
+//            let q = false
+//            let prev = ' '
+//            for(int i = 0 i < name.Length i++)
+//            {
+//                let ch = name[i]
+//                sub.Add(ch)
 
-                switch(ch)
-                {
-                    case '\\':
-                        let next = name[++i]
-                        sub.Add(next)
-                        prev = next
-                        continue
+//                switch(ch)
+//                {
+//                    case '\\':
+//                        let next = name[++i]
+//                        sub.Add(next)
+//                        prev = next
+//                        continue
 
-                    case '.' when q:
-                        break
+//                    case '.' when q:
+//                        break
 
-                    case '.':
-                        sub.RemoveTail()
-                        yield return new string(sub.ToArray())
-                        sub.Clear()
-                        break
+//                    case '.':
+//                        sub.RemoveTail()
+//                        yield return new string(sub.ToArray())
+//                        sub.Clear()
+//                        break
 
-                    case '"' when prev != '\\':
-                        sub.RemoveTail()
-                        if (q)
-                        {
-                            yield return new string(sub.ToArray())
-                            sub.Clear()
-                        }
-                        else
-                        {
-                            q = true
-                        }
-                        break
+//                    case '"' when prev != '\\':
+//                        sub.RemoveTail()
+//                        if (q)
+//                        {
+//                            yield return new string(sub.ToArray())
+//                            sub.Clear()
+//                        }
+//                        else
+//                        {
+//                            q = true
+//                        }
+//                        break
 
-                }
-            }
-            if (sub.Any())
-                yield return new string(sub.ToArray())
-        }
-        let idCtx = findFirstChild(from,
-                        tree =>
-                            tree is Identifier1Context
-                            || tree is Identifier2Context
-                            || tree is Identifier3Context
-                            || tree is Identifier4Context,
-                        true)
-        let name = idCtx.GetText()
-        return splitName(name).ToArray()
-        //return
-        //    enumerateChildren<Identifier1Context>(from)
-        //        .Select(idf => idf.GetText().DeQuoteOnDemand())
-        //        .ToArray()
-        //
-    }
+//                }
+//            }
+//            if (sub.Any())
+//                yield return new string(sub.ToArray())
+//        }
+//        let idCtx = findFirstChild(from,
+//                        tree =>
+//                            tree is Identifier1Context
+//                            || tree is Identifier2Context
+//                            || tree is Identifier3Context
+//                            || tree is Identifier4Context,
+//                        true)
+//        let name = idCtx.GetText()
+//        return splitName(name).ToArray()
+//        //return
+//        //    enumerateChildren<Identifier1Context>(from)
+//        //        .Select(idf => idf.GetText().DeQuoteOnDemand())
+//        //        .ToArray()
+//        //
+//    }
 
-    public static ParserResult getParseResult(dsParser parser)
-    {
-        let listener = new AllListener()
-        ParseTreeWalker.Default.Walk(listener, parser.model())
-        return listener.r
-    }
+//    public static ParserResult getParseResult(dsParser parser)
+//    {
+//        let listener = new AllListener()
+//        ParseTreeWalker.Default.Walk(listener, parser.model())
+//        return listener.r
+//    }
 
-    /// <summary>
-    /// parser tree 상의 모든 node (rule context, terminal node, error node) 을 반환한다.
-    /// </summary>
-    /// <param name="parser">text DS Document (Parser input)</param>
-    /// <returns></returns>
-    public static List<IParseTree> getAllParseTrees(dsParser parser)
-    {
-        ParserResult r = getParseResult(parser)
+//    /// <summary>
+//    /// parser tree 상의 모든 node (rule context, terminal node, error node) 을 반환한다.
+//    /// </summary>
+//    /// <param name="parser">text DS Document (Parser input)</param>
+//    /// <returns></returns>
+//    public static ResizeArray<IParseTree> getAllParseTrees(dsParser parser)
+//    {
+//        ParserResult r = getParseResult(parser)
 
-        return r.rules.Cast<IParseTree>()
-            .Concat(r.terminals.Cast<IParseTree>())
-            .Concat(r.errors.Cast<IParseTree>())
-            .ToList()
+//        return r.rules.Cast<IParseTree>()
+//            .Concat(r.terminals.Cast<IParseTree>())
+//            .Concat(r.errors.Cast<IParseTree>())
+//            .ToList()
 
-    }
+//    }
 
 
-    /// <summary>parser tree 상의 모든 rule 을 반환한다.</summary>
-    public static List<ParserRuleContext> getAllParseRules(dsParser parser)
-    {
-        ParserResult r = getParseResult(parser)
-        return r.rules
-    }
-}
+//    /// <summary>parser tree 상의 모든 rule 을 반환한다.</summary>
+//    public static ResizeArray<ParserRuleContext> getAllParseRules(dsParser parser)
+//    {
+//        ParserResult r = getParseResult(parser)
+//        return r.rules
+//    }
+//}

@@ -1,23 +1,27 @@
 namespace Engine.Parser.FS
 
-class ParserResult
-{
-    public List<ParserRuleContext> rules = new()
-    public List<ITerminalNode> terminals = new()
-    public List<IErrorNode> errors = new()
-}
-class AllListener : dsParserBaseListener
-{
-    public ParserResult r = new ParserResult()
+open System
+open Antlr4.Runtime
+open Antlr4.Runtime.Tree
+open System.Collections.Generic
+open Engine.Parser
+
+type ParserResult() =
+    member val rules = ResizeArray<ParserRuleContext>()
+    member val terminals = ResizeArray<ITerminalNode>()
+    member val errors = ResizeArray<IErrorNode>()
+
+
+type AllListener() =
+    inherit dsParserBaseListener()
+
+    member val r = new ParserResult()
 
     // ParseTreeListener<> method
-    public override void VisitTerminal(ITerminalNode node) { this.r.terminals.Add(node); }
-    public override void VisitErrorNode(IErrorNode node)
-    {
-        this.r.errors.Add(node)
-        throw new ParserException("ERROR while parsing", node)
-    }
-    public override void EnterEveryRule(ParserRuleContext ctx) { this.r.rules.Add(ctx); }
-    public override void ExitEveryRule(ParserRuleContext ctx) { return; }
+    override x.VisitTerminal(node:ITerminalNode) = x.r.terminals.Add(node)
+    override x.VisitErrorNode(node:IErrorNode) =
+        x.r.errors.Add(node)
+        ParserException("ERROR while parsing", node) |> raise
 
-}
+    override x.EnterEveryRule(ctx:ParserRuleContext) = x.r.rules.Add(ctx)
+    override x.ExitEveryRule(ctx:ParserRuleContext) = ()

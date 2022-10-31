@@ -11,7 +11,7 @@ module EnumuerableExt =
     type IEnumerable<'T> with
         member x.isEmpty() = Seq.isEmpty x
         member x.length() = Seq.length x
-        member x.any() = Seq.isEmpty x |> not 
+        member x.any() = Seq.isEmpty x |> not
         member x.any f = Seq.tryFind f x |> Option.isSome
         member x.realize() = Array.ofSeq x |> ignore
 
@@ -34,9 +34,9 @@ type SeqExt =
     [<Extension>] static member GroupByToDictionary<'V, 'K when 'K: equality>(xs:'V seq, keySelector:'V->'K) = groupByToDictionary xs keySelector
 
     [<Extension>] static member Collect(xs:'a seq, f)    = Seq.collect f xs
+    [<Extension>] static member Choose(xs:'a seq, f)     = Seq.choose f xs
     [<Extension>] static member Map(xs:'a seq, f)        = Seq.map f xs
     [<Extension>] static member Filter(xs:'a seq, f)     = Seq.filter f xs
     [<Extension>] static member ForEach(xs:'a seq, f)    = Seq.iter f xs
     [<Extension>] static member IsNullOrEmpty(xs:'a seq) = xs = null || Seq.isEmpty xs
     [<Extension>] static member NonNullAny(xs:'a seq)    = xs <> null && xs.Any()
-    

@@ -1,3 +1,4 @@
+
 namespace rec Engine.Parser.FS
 
 open System
@@ -12,7 +13,10 @@ open Engine.Common.FS
 
 //open System.Reactive.Linq
 open Engine.Common
+open Antlr4.Runtime
 open Antlr4.Runtime.Tree
+open System.Text.RegularExpressions
+open System.Collections.Generic
 
 
 type DsParser() =
@@ -76,46 +80,34 @@ type DsParser() =
 
         let helper() =
             [
-                let func = fun (parser:dsParser) -> parser.model()
+                let func = fun (parser:dsParser) -> parser.model() :> RuleContext
                 let (parser, _, _) = DsParser.ParseText(text, func)
                 parser.Reset()
                 let sysCtxMap =
-                    enumerateChildren<SystemContext>(parser.model())
-                        .ToDictionary(fun ctx -> findFirstChild<SystemNameContext>(ctx).GetText(), id)    //ctx => findFirstChild<SysCopySpecContext>(ctx))
+                    DsParser.enumerateChildren<SystemContext>(parser.model())
+                        .Select(fun ctx ->
+                            let sysName = DsParser.findFirstChild<SystemNameContext>(ctx) |> Option.get |> fun x -> x.GetText()
+                            sysName, ctx)
+                        |> dict |> Dictionary
 
-                let copySysCtxs = sysCtxMap.Where(fun kv -> findFirstChild<SysCopySpecContext>(kv.Value) <> null).ToArray()
+                let copySysCtxs = sysCtxMap.Where(fun kv -> DsParser.findFirstChild<SysCopySpecContext>(kv.Value) |> Option.isSome).ToArray()
 
                 // 원본 full text 에서 copy_system 구문 삭제한 text 반환
-                let textWithoutSysCopy = omitSystemCopy(text, copySysCtxs.Select(kv => kv.Value).ToArray())
+                let textWithoutSysCopy = omitSystemCopy(text, copySysCtxs.Select(fun kv -> kv.Value).ToArray())
                 yield textWithoutSysCopy
 
                 for kv in copySysCtxs do
                     yield "\r\n"
 
                     let newSysName = kv.Key
-                    let srcSysName = findFirstChild<SourceSystemNameContext>(kv.Value).GetText()
+                    let srcSysName = DsParser.findFirstChild<SourceSystemNameContext>(kv.Value) |> Option.get |> fun x -> x.GetText()
                     // 원본 시스템의 text 를 사본 system text 로 치환해서 생성
                     let sysText = ToText(sysCtxMap[srcSysName])
                     let pattern = @"(\[sys([^\]]*\]))([^=]*)="
                     let replaced = Regex.Replace(sysText, pattern, $"$1{newSysName}=")
-                    yield return replaced
+                    yield replaced
             ]
-
-        string.Join("\r\n", helper())
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        helper().JoinLines()
 
 
 
@@ -132,21 +124,17 @@ type DsParser() =
         (parser, errors)
 
 
-    //static member enumerateChildren<'T when 'T:>IParseTree>(
-    //    from:IParseTree
-    //    , [<Optional; DefaultParameterValue(false)>]includeMe
-    //    , ?predicate:IParseTree->bool) : ResizeArray<'T> =         // ResizeArray<'T>
-
-    static member enumerateChildren<'T>(
+    static member enumerateChildren<'T when 'T :> IParseTree >(
         from:IParseTree
-        , [<Optional; DefaultParameterValue(false)>]includeMe
-        , ?predicate:IParseTree->bool) : ResizeArray<'T> when 'T:>IParseTree =         // ResizeArray<'T>
+        , ?includeMe:bool
+        , ?predicate:(IParseTree->bool)
+        ) : ResizeArray<'T> =         // ResizeArray<'T>
 
-        let predicate = defaultArg predicate (fun ctx -> typedefof<'T>.IsAssignableFrom(ctx.GetType()))
-        let rec enumerateChildrenHelper(rslt:ResizeArray<'T>, frm:IParseTree, incMe:bool, pred:IParseTree->bool) =
+        let includeMe = defaultArg includeMe false
+        let predicate = defaultArg predicate (isType<'T>)
+        let rec enumerateChildrenHelper(rslt:ResizeArray<'T>, frm:IParseTree, incMe:bool, pred:(IParseTree->bool)) =
             if (incMe && pred(frm)) then
-                rslt.Add(frm)
-
+                rslt.Add(forceCast<'T>(frm))
 
             for index in [ 0 .. frm.ChildCount - 1 ] do
                 enumerateChildrenHelper(rslt, frm.GetChild(index), true, pred)
@@ -157,145 +145,127 @@ type DsParser() =
         result
 
 
-//    public static IEnumerable<IParseTree> enumerateParents(IParseTree from, bool includeMe=false, Func<IParseTree, bool> predicate = null)
-//    {
-//        bool ok(IParseTree t)
-//        {
-//            if (predicate != null)
-//                return predicate(t)
-//            return true
-//        }
+    static member enumerateParents(from:IParseTree      // IEnumerable<IParseTree>
+        , ?includeMe:bool
+        , ?predicate:(IParseTree->bool)) =
 
-//        if (includeMe && ok(from))
-//            yield return from
+        let includeMe = defaultArg includeMe false
+        let predicate = defaultArg predicate (fun _ -> true)
+        let rec helper(from:IParseTree, includeMe:bool) =
+            [
+                if (includeMe && predicate(from)) then
+                    yield from
 
-//        foreach (let p in enumerateParents(from.Parent, true, ok))
-//            yield return p
-//    }
-
-
-//    public static IParseTree findFirstChild(IParseTree from, Func<IParseTree, bool> predicate, bool includeMe=false)
-//    {
-//        foreach (let c in enumerateChildren<IParseTree>(from, includeMe))
-//        {
-//            if (predicate(c))
-//                return c
-//        }
-
-//        return null
-//    }
-//    public static T findFirstChild<'T>(IParseTree from, bool includeMe = false) where T: IParseTree =>
-//        enumerateChildren<'T>(from, includeMe).FirstOrDefault()
-
-//    public static IParseTree findFirstAncestor(IParseTree from, Func<IParseTree, bool> predicate, bool includeMe=false)
-//    {
-//        foreach (let c in enumerateParents(from, includeMe))
-//        {
-//            if (predicate(c))
-//                return c
-//        }
-
-//        return null
-//    }
-//    public static T findFirstAncestor<'T>(IParseTree from, bool includeMe = false) where T : IParseTree
-//    {
-//        let pred = (IParseTree parseTree) => parseTree is T
-//        return (T)findFirstAncestor(from, pred, includeMe)
-//    }
+                yield! helper(from.Parent, true)
+            ]
+        helper(from, includeMe)
 
 
 
-//    public static string[] collectNameComponents(IParseTree from)
-//    {
-//        IEnumerable<string> splitName(string name)
-//        {
-//            let sub = new ResizeArray<char>()
-//            let q = false
-//            let prev = ' '
-//            for(int i = 0 i < name.Length i++)
-//            {
-//                let ch = name[i]
-//                sub.Add(ch)
+    static member findFirstChild(from:IParseTree, predicate:(IParseTree->bool), ?includeMe:bool) =
+        let includeMe = defaultArg includeMe false
+        DsParser.enumerateChildren<IParseTree>(from, includeMe) |> Seq.tryFind(predicate)
 
-//                switch(ch)
-//                {
-//                    case '\\':
-//                        let next = name[++i]
-//                        sub.Add(next)
-//                        prev = next
-//                        continue
+    static member findFirstChild<'T when 'T :> IParseTree>(from:IParseTree, ?includeMe:bool) : 'T option =   // :'T
+        let includeMe = defaultArg includeMe false
+        DsParser.enumerateChildren<'T>(from, includeMe) |> Seq.tryFind(isType<'T>)
 
-//                    case '.' when q:
-//                        break
-
-//                    case '.':
-//                        sub.RemoveTail()
-//                        yield return new string(sub.ToArray())
-//                        sub.Clear()
-//                        break
-
-//                    case '"' when prev != '\\':
-//                        sub.RemoveTail()
-//                        if (q)
-//                        {
-//                            yield return new string(sub.ToArray())
-//                            sub.Clear()
-//                        }
-//                        else
-//                        {
-//                            q = true
-//                        }
-//                        break
-
-//                }
-//            }
-//            if (sub.Any())
-//                yield return new string(sub.ToArray())
-//        }
-//        let idCtx = findFirstChild(from,
-//                        tree =>
-//                            tree is Identifier1Context
-//                            || tree is Identifier2Context
-//                            || tree is Identifier3Context
-//                            || tree is Identifier4Context,
-//                        true)
-//        let name = idCtx.GetText()
-//        return splitName(name).ToArray()
-//        //return
-//        //    enumerateChildren<Identifier1Context>(from)
-//        //        .Select(idf => idf.GetText().DeQuoteOnDemand())
-//        //        .ToArray()
-//        //
-//    }
-
-//    public static ParserResult getParseResult(dsParser parser)
-//    {
-//        let listener = new AllListener()
-//        ParseTreeWalker.Default.Walk(listener, parser.model())
-//        return listener.r
-//    }
-
-//    /// <summary>
-//    /// parser tree 상의 모든 node (rule context, terminal node, error node) 을 반환한다.
-//    /// </summary>
-//    /// <param name="parser">text DS Document (Parser input)</param>
-//    /// <returns></returns>
-//    public static ResizeArray<IParseTree> getAllParseTrees(dsParser parser)
-//    {
-//        ParserResult r = getParseResult(parser)
-
-//        return r.rules.Cast<IParseTree>()
-//            .Concat(r.terminals.Cast<IParseTree>())
-//            .Concat(r.errors.Cast<IParseTree>())
-//            .ToList()
-
-//    }
+    static member findFirstAncestor(from:IParseTree, predicate:(IParseTree->bool), ?includeMe:bool) = //:IParseTree option=
+        let includeMe = defaultArg includeMe false
+        DsParser.enumerateParents(from, includeMe) |> Seq.tryFind(predicate)
 
 
-//    /// <summary>parser tree 상의 모든 rule 을 반환한다.</summary>
-//    public static ResizeArray<ParserRuleContext> getAllParseRules(dsParser parser)
-//    {
-//        ParserResult r = getParseResult(parser)
-//        return r.rules
-//    }
-//}
+    static member findFirstAncestor<'T when 'T :> IParseTree>(from:IParseTree, ?includeMe:bool) =
+        let includeMe = defaultArg includeMe false
+        let pred = isType<'T>
+        DsParser.findFirstAncestor(from, pred, includeMe) |> Option.map forceCast<'T>
+
+
+
+    static member collectNameComponents(from:IParseTree) = // :string[]
+        let rec splitName(name:string) = // : string[]
+            [
+                let sub = new ResizeArray<char>()
+                let mutable q = false
+                let mutable prev = ' '
+                let pop =
+                    let mutable i = 0
+                    fun () ->
+                        if i < name.Length then
+                            let c = name.[i]
+                            i <- i + 1
+                            Some c
+                        else
+                            None
+
+                while not q do
+                    match pop() with
+                    | Some ch ->
+                        sub.Add(ch)
+                        match ch with
+
+                        | '\\' ->
+                            let next = pop() |> Option.get
+                            sub.Add(next)
+                            prev <- next
+
+                        | '.' when q->
+                            ()  //break
+
+                        | '.' ->
+                            sub.RemoveTail() |> ignore
+                            yield string(sub.ToArray())
+                            sub.Clear()
+
+                        | '"' when prev <> '\\' ->
+                            sub.RemoveTail() |> ignore
+                            if q then
+                                yield string(sub.ToArray())
+                                sub.Clear()
+                            else
+                                q <- true
+
+                        | _ ->
+                            ()
+                    | None -> q <- true
+
+                if sub.Any() then
+                    yield string(sub.ToArray())
+            ]
+
+        let idCtx =
+            let pred = fun (tree:IParseTree) ->
+                            tree :? Identifier1Context
+                            || tree :? Identifier2Context
+                            || tree :? Identifier3Context
+                            || tree :? Identifier4Context
+            DsParser.findFirstChild(from, pred, true) |> Option.get
+        let name = idCtx.GetText()
+        splitName(name).ToArray()
+
+
+    static member getParseResult(parser:dsParser) = // : ParserResult
+        let listener = new AllListener()
+        ParseTreeWalker.Default.Walk(listener, parser.model())
+        listener.r
+
+    /// <summary>
+    /// parser tree 상의 모든 node (rule context, terminal node, error node) 을 반환한다.
+    /// </summary>
+    /// <param name="parser">text DS Document (Parser input)</param>
+    /// <returns></returns>
+    static member getAllParseTrees(parser:dsParser) = // ResizeArray<IParseTree>
+        let r:ParserResult = DsParser.getParseResult(parser)
+
+        r.rules.Cast<IParseTree>()
+            .Concat(r.terminals.Cast<IParseTree>())
+            .Concat(r.errors.Cast<IParseTree>())
+            .ToList()
+
+
+
+    /// <summary>parser tree 상의 모든 rule 을 반환한다.</summary>
+    static member getAllParseRules(parser:dsParser) = // ResizeArray<ParserRuleContext>
+        let r:ParserResult = DsParser.getParseResult(parser)
+        r.rules
+

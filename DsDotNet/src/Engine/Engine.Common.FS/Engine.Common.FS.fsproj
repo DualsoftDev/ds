@@ -35,6 +35,7 @@
 		<Compile Include="Module\QualifiedAccess\Async.fs" />
 		<Compile Include="Module\QualifiedAccess\Seq.fs" />
 		<Compile Include="Module\QualifiedAccess\Tuple.fs" />
+		<Compile Include="Module\QualifiedAccess\Option.fs" />
 		<!--<Compile Include="Module\QualifiedAccess\Option.fs" />-->
 		<Compile Include="Module\QualifiedAccess\Array.fs" />
 		<Compile Include="Module\QualifiedAccess\Bytes.fs" />

@@ -19,6 +19,13 @@ let inline name x = ( ^T: (member Name:string) x )
 /// x.Value 을 반환
 let inline value x = (^T : (member Value : 'v) x)
 
+/// x 가 'T type 을 상속받는지 확인
+let isType<'T> (x: obj) = typedefof<'T>.IsAssignableFrom(x.GetType())
+let isSuperType<'T> (x: obj) = x.GetType().IsAssignableFrom(typeof<'T>)
+
+/// 강제 type 변환
+let forceCast<'T> (x: obj) = box x :?> 'T
+
 
 let verify x = if not x then failwith "ERROR"
 

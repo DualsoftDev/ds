@@ -4,6 +4,7 @@ open System.Runtime.CompilerServices
 open System.Linq
 open System.Diagnostics
 
+[<AutoOpen>]
 module SpitModuleHelper =
     type SpitOnlyAlias = { AliasKey:NameComponents; Mnemonic:NameComponents }
 

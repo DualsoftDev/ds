@@ -1,5 +1,4 @@
 // Template generated code from Antlr4BuildTasks.Template v 8.17
-using static Engine.Core.SpitModuleHelper.SpitCoreType
 
 namespace Engine.Parser.FS
 
@@ -26,7 +25,7 @@ C3 > C5 > C6
 C4 > C5
         Main        // GraphVertexType.{ Segment | Parenting }
         > R3        // GraphVertexType.{ Segment }
-        
+
         Main = {        // GraphVertexType.{ Segment | Parenting }
             // diamond
             Ap1 > Am1 > Bm1
@@ -39,13 +38,13 @@ C4 > C5
 
             Bm2
             > A.""+""             // GraphVertexType.{ Child | Call }
-            
+
         }
         R1              // define my local terminal real segment    // GraphVertexType.{ Segment }
             //> C.""+""     // direct interface call wrapper segment    // GraphVertexType.{ Call }
             > Main2     // aliased to my real segment               // GraphVertexType.{ Segment | Aliased }
             > Ap1       // aliased to interface                     // GraphVertexType.{ Segment | Aliased | Call }
-            
+
         R2
 
         [aliases] = {

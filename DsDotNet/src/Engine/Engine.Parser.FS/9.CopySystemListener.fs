@@ -13,6 +13,7 @@ open Engine.Core
 open Engine.Core.CoreModule
 open Engine.Core.Interface
 open Engine.Core.SpitModuleHelper
+open type Engine.Parser.FS.DsParser
 
 //open Antlr4.Runtime
 open type Engine.Parser.dsParser
@@ -39,16 +40,18 @@ type CopySystemListener(parser:dsParser, helper:ParserHelper) =
 
     override x.EnterSystem(ctx:SystemContext) =
         let sysCopyCtx = findFirstChild<SysCopySpecContext>(ctx)
-        if sysCopyCtx <> null then
-            let srcSysName = findFirstChild<SourceSystemNameContext>(sysCopyCtx).GetText()
-            let newSysName = findFirstChild<SystemNameContext>(ctx).GetText()
+        match sysCopyCtx with
+        | Some sysCopyCtx ->
+            let srcSysName = findFirstChild<SourceSystemNameContext>(sysCopyCtx).Value.GetText()
+            let newSysName = findFirstChild<SystemNameContext>(ctx).Value.GetText()
 
             let sysCtxs = enumerateChildren<SystemContext>(_parser.model()).ToArray()
             let srcSysCtx =
                 enumerateChildren<SystemContext>(_parser.model())
-                    .FirstOrDefault(sysctx => findFirstChild<SystemNameContext>(sysctx).GetText() == srcSysName)
-                    
+                    .FirstOrDefault(fun sysctx -> findFirstChild<SystemNameContext>(sysctx).Value.GetText() = srcSysName)
 
-            let srcSys = ParserHelper.Model.Systems.First(sys => sys.Name == srcSysName)
+
+            let srcSys = x.ParserHelper.Model.Systems.First(fun sys -> sys.Name = srcSysName)
             ()
+        | None -> ()
 

@@ -39,6 +39,8 @@ type SeqExt =
     [<Extension>] static member Filter(xs:'a seq, f)     = Seq.filter f xs
     [<Extension>] static member Find(xs:'a seq, f)       = Seq.find f xs
     [<Extension>] static member TryFind(xs:'a seq, f)    = Seq.tryFind f xs
+    [<Extension>] static member TryHead(xs:'a seq)       = Seq.tryHead xs
+    [<Extension>] static member Head(xs:'a seq)          = Seq.head xs
     [<Extension>] static member ForEach(xs:'a seq, f)    = Seq.iter f xs
     [<Extension>] static member IsNullOrEmpty(xs:'a seq) = xs = null || Seq.isEmpty xs
     [<Extension>] static member NonNullAny(xs:'a seq)    = xs <> null && xs.Any()

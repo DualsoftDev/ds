@@ -1,81 +1,84 @@
-using static Engine.Core.CoreModule
-
 namespace Engine.Parser.FS
+
+open Engine.Core.CoreModule
+
+open Engine.Common.FS
+open Engine.Parser
+open System.Linq
+open Engine.Core
+open type Engine.Parser.dsParser
+open Engine.Common.FS
+open Engine.Parser
+open System.Linq
+open Engine.Core
+open type Engine.Parser.dsParser
+open type Engine.Parser.FS.DsParser
+open Antlr4.Runtime.Tree
+open Antlr4.Runtime
+open Engine.Common.FS
+open Engine.Common.FS.Functions
+
 
 
 /// <summary>
 /// 모든 vertex 가 생성 된 이후, edge 연결 작업 수행
 /// </summary>
-class EdgeListener : ListenerBase
-{
-    public EdgeListener(dsParser parser, ParserHelper helper)
-        : base(parser, helper)
-    {
-        UpdateModelSpits()
-    }
+type EdgeListener(parser:dsParser, helper:ParserHelper) =
+    inherit ListenerBase(parser, helper)
 
-    override public void EnterModel(ModelContext ctx)
-    {
-        foreach (let ac in ParserHelper.AliasCreators)
-        {
+    do
+        base.UpdateModelSpits()
+
+
+    override x.EnterModel(ctx:ModelContext) =
+        let modelSpitCores = x._modelSpits.Select(fun spit -> spit.GetCore()).ToArray()
+        for ac in x.ParserHelper.AliasCreators do
             let (name, parent, target) = (ac.Name, ac.Parent, ac.Target)
             let graph = parent.Graph
-            let existing = graph.FindVertex(name)
-            if (existing == null)
-            {
-                Call dummyCall = null
-                switch (target)
-                {
-                    case AliasTargetReal real:
-                        let realTarget = _modelSpits.First(spit => spit.GetCore() is Real r && r.NameComponents.IsStringArrayEqaul(real.TargetFqdn)).GetCore() as Real
-                        Alias.Create(name, AliasTargetType.NewRealTarget(realTarget), parent)
-                        break
-                    case AliasTargetDirectCall directCall:
-                        let apiTarget = _modelSpits.First(spit => spit.GetCore() is ApiItem a && a.NameComponents.IsStringArrayEqaul(directCall.TargetFqdn)).GetCore() as ApiItem
-                        dummyCall = Call.CreateNowhere(apiTarget, parent)
-                        Alias.Create(name, AliasTargetType.NewCallTarget(dummyCall), parent)
-                        break
-                    case AliasTargetApi api:
-                        dummyCall = Call.CreateNowhere(api.ApiItem, parent)
-                        Alias.Create(name, AliasTargetType.NewCallTarget(dummyCall), parent)
-                        break
-                }
-            }
-            Console.WriteLine()
-        }
+            let existing = graph.TryFindVertex(name)
+            if existing.IsNone then
+                let target2 =
+                    match target with
+                    | :? AliasTargetReal as real ->
+                        let realTarget = modelSpitCores.OfType<Real>().First(fun r -> r.NameComponents.IsStringArrayEqaul(real.TargetFqdn))
+                        RealTarget realTarget
+                    | :? AliasTargetDirectCall as directCall ->
+                        let apiTarget = modelSpitCores.OfType<ApiItem>().First(fun a -> a.NameComponents.IsStringArrayEqaul(directCall.TargetFqdn))
+                        let dummyCall = Call.CreateNowhere(apiTarget, parent)
+                        CallTarget dummyCall
+                    | :? AliasTargetApi as api ->
+                        let dummyCall = Call.CreateNowhere(api.ApiItem, parent)
+                        CallTarget dummyCall
+                Alias.Create(name, target2, parent) |> ignore
 
-        UpdateModelSpits()
-    }
+        x.UpdateModelSpits()
 
 
-    override public void EnterCausalPhrase(CausalPhraseContext ctx)
-    {
+    override x.EnterCausalPhrase(ctx:CausalPhraseContext) =
         let children = ctx.children.ToArray();      // (CausalTokensDNF CausalOperator)+ CausalTokensDNF
         children.Iter((ctx, n) => Assert( n % 2 == 0 ? ctx is CausalTokensDNFContext : ctx is CausalOperatorContext))
 
-        object findToken(CausalTokenContext ctx)
-        {
+        let findToken(ctx:CausalTokenContext):obj =
             let ns = collectNameComponents(ctx)
-            let path = AppendPathElement(ns)
-            if (path.Length == 5)
-                path = AppendPathElement(ns.Combine())
+            let mutable path = x.AppendPathElement(ns)
+            if path.Length = 5 then
+                path <- x.AppendPathElement(ns.Combine())
             let matches =
-                _modelSpits
-                .Where(spit => spit.NameComponents.IsStringArrayEqaul(path)
-                                || spit.NameComponents.IsStringArrayEqaul(AppendPathElement(new[] {ns.Combine()}))
-                )
-                
+                x._modelSpits
+                    .Where(fun spit -> spit.NameComponents.IsStringArrayEqaul(path)
+                                    || spit.NameComponents.IsStringArrayEqaul(x.AppendPathElement( [| ns.Combine() |] ))
+                    )
+
             let token =
                 matches
-                .Where(spit =>spit.GetCore() is Vertex)
-                .Select(spit => spit.GetCore())
-                .FirstOrDefault()
-                
-            Assert(token != null)
-            return token
-        }
+                    .Select(fun spit -> spit.GetCore())
+                    .OfType<Vertex>()
+                    .FirstOrDefault()
 
-        /*
+            assert(token != null)
+            token
+
+        (*
             children[0] > children[2] > children[4]     where (child[1] = '>', child[3] = '>')
             ===> children[0] > children[2],
                  children[2] > children[4]
@@ -86,30 +89,24 @@ class EdgeListener : ListenerBase
                  children[4] = {E},
 
             todo: "A, B" 와 "A ? B" 에 대한 구분 없음.
-         */
-        for (int i = 0; i < children.Length - 2; i+=2)
-        {
-            let lefts = enumerateChildren<CausalTokenContext>(children[i]);         // CausalTokensCNFContext
-            let op = children[i + 1].GetText()
-            let rights = enumerateChildren<CausalTokenContext>(children[i+2])
+         *)
+        for triple in (children |> Array.windowed2 3 2) do
+            let lefts = enumerateChildren<CausalTokenContext>(triple[0])
+            let op = triple[1].GetText()
+            let rights = enumerateChildren<CausalTokenContext>(triple[2])
 
-            foreach (let left in lefts)
-            {
-                foreach(let right in rights)
-                {
+            for left in lefts do
+                for right in rights do
                     let l = findToken(left)
                     let r = findToken(right)
-                    if (l == null)
-                        throw new ParserException($"ERROR: failed to find [{left.GetText()}]", ctx)
-                    if (r == null)
-                        throw new ParserException($"ERROR: failed to find [{right.GetText()}]", ctx)
+                    if isNull l then
+                        raise <| ParserException($"ERROR: failed to find [{left.GetText()}]", ctx)
+                    if isNull r then
+                        raise <| ParserException($"ERROR: failed to find [{right.GetText()}]", ctx)
 
-                    if (_parenting == null)
-                        _flow.CreateEdges(l as Vertex, r as Vertex, op)
-                    else
-                        _parenting.CreateEdges(l as Vertex, r as Vertex, op)
-                }
-            }
-        }
-    }
-}
+                    match x._parenting with
+                    | Some parent ->
+                        parent.CreateEdges(l :?> Vertex, r :?> Vertex, op)
+                    | None ->
+                        x._flow.Value.CreateEdges(l :?> Vertex, r :?> Vertex, op)
+                    |> ignore

@@ -1,198 +1,188 @@
 namespace Engine.Parser.FS
 
 
+open Engine.Common.FS
+open Engine.Parser
+open System.Linq
+open Engine.Core
+open type Engine.Parser.dsParser
+open Engine.Common.FS
+open Engine.Parser
+open System.Linq
+open Engine.Core
+open type Engine.Parser.dsParser
+open type Engine.Parser.FS.DsParser
+open Antlr4.Runtime.Tree
+open Antlr4.Runtime
+open Engine.Common.FS
+open Engine.Common.FS.Functions
+
+
 /// <summary>
 /// Alias map 및 Api map 가 생성된 이후의 처리
 /// </summary>
-class ElementListener : ListenerBase
-{
-    public ElementListener(dsParser parser, ParserHelper helper)
-        : base(parser, helper)
-    {
-    }
+type ElementListener(parser:dsParser, helper:ParserHelper) =
+    inherit ListenerBase(parser, helper)
 
 
-    override public void EnterParenting(ParentingContext ctx)
-    {
-        base.EnterParenting(ctx)
-    }
 
-    public override void EnterInterfaceDef(InterfaceDefContext ctx)
-    {
-        let hash = _system.ApiItems
+    override x.EnterInterfaceDef(ctx:InterfaceDefContext) =
+        let hash = x._system.Value.ApiItems
         let interrfaceNameCtx = findFirstChild<InterfaceNameContext>(ctx)
-        let interfaceName = collectNameComponents(interrfaceNameCtx)[0]
-        string[][] collectCallComponents(CallComponentsContext ctx) =>
+        let interfaceName = collectNameComponents(interrfaceNameCtx.Value)[0]
+
+        let collectCallComponents(ctx:CallComponentsContext):string[][] =
             enumerateChildren<Identifier123Context>(ctx)
                 .Select(collectNameComponents)
                 .ToArray()
 
-        bool isWildcard(string[] cc) => cc.Length == 1 && cc[0] == "_"
-        Real[] findSegments(string[][] fqdns) =>
+        let isWildcard(cc:string[]):bool = cc.Length = 1 && cc[0] = "_"
+        let findSegments(fqdns:string[][]):Real[] =
             fqdns
-            .Where(fqdn => fqdn != null)
-            .Select(s => _model.FindGraphVertex<Real>(s))
-            .Tap(x => Assert(x != null))
-            .ToArray()
+                .Where(fun fqdn -> fqdn <> null)
+                .Select(fun s -> x._model.FindGraphVertex<Real>(s))
+                .Tap(fun x -> assert(not (isItNull x)))
+                .ToArray()
 
         let ser =   // { start ~ end ~ reset }
             enumerateChildren<CallComponentsContext>(ctx)
-            .Select(collectCallComponents)
-            .Tap(callComponents => Assert(callComponents.ForAll(cc => cc.Length == 2 || isWildcard(cc))))
-            .Select(callCompnents => callCompnents.Select(cc => isWildcard(cc) ? null : cc.Prepend(_system.Name).ToArray()).ToArray())
-            .ToArray()
+                .Select(collectCallComponents)
+                .Tap(fun callComponents -> assert(callComponents.All(fun cc -> cc.Length = 2 || isWildcard(cc))))
+                .Select(fun callCompnents -> callCompnents.Select(fun cc -> if isWildcard(cc) then null else cc.Prepend(x._system.Value.Name).ToArray()).ToArray())
+                .ToArray()
 
-        let item = hash.First(it => it.Name == interfaceName)
+        let item = hash.First(fun it -> it.Name = interfaceName)
         let n = ser.Length
 
-        Assert(n == 2 || n == 3)
+        assert(n = 2 || n = 3)
         item.AddTXs(findSegments(ser[0]))
         item.AddRXs(findSegments(ser[1]))
 
-        Console.WriteLine()
-    }
-    override public void EnterCausalToken(CausalTokenContext ctx)
-    {
+        ()
+
+
+    override x.EnterCausalToken(ctx:CausalTokenContext) =
         let ns = collectNameComponents(ctx)
-        Assert(ns.Length.IsOneOf(1, 2))
+        assert(ns.Length = 1 || ns.Length = 2)
 
-        let path = AppendPathElement(ns)
+        let path = x.AppendPathElement(ns)
+        let sysName = x._system.Value.Name
+        let flow = x._flow.Value
 
-        let existing = _modelSpits.Where(spit => spit.NameComponents.IsStringArrayEqaul(path)).ToArray()
-        if (existing.Where(spit => spit.GetCore() is Vertex).Any())
-            return
+        let existing = x._modelSpits.Where(fun spit -> spit.NameComponents.IsStringArrayEqaul(path)).ToArray()
+        if existing.Where(fun spit -> spit.GetCore() :? Vertex).IsEmpty() then
 
-        let pathWithoutParenting = new[] { _system.Name, _flow.Name }.Concat(ns).ToArray()
+            let pathWithoutParenting = [|sysName; flow.Name; yield! ns|]
 
-        // narrow match
-        let matches =
-            _modelSpits
-            .Where(spitResult =>
-                spitResult.NameComponents.IsStringArrayEqaul(path)
-                || spitResult.NameComponents.IsStringArrayEqaul(pathWithoutParenting))
-            .Select(spitResult => spitResult.GetCore())
-            .ToArray()
-
-
-        let pathAdapted = ns.Length == 2 ? new[] { _system.Name }.Concat(ns).ToArray() : new string[] { }
-
-        // 나의 시스템의 다른 flow 에 존재하는 segment 호출
-        let extendedMatches =
-            _modelSpits
-            .Where(spitResult =>
-                pathAdapted.Any() && spitResult.NameComponents.IsStringArrayEqaul(pathAdapted))
-            .Select(spitResult => spitResult.GetCore())
-            .ToArray()
+            // narrow match
+            let matches =
+                x._modelSpits
+                    .Where(fun spitResult ->
+                        spitResult.NameComponents.IsStringArrayEqaul(path)
+                        || spitResult.NameComponents.IsStringArrayEqaul(pathWithoutParenting))
+                    .Select(fun spitResult -> spitResult.GetCore())
+                    .ToArray()
 
 
-        // 다른 시스템의 API 호출
-        let apiCall =
-            _modelSpitObjects
-                .OfType<ApiItem>()
-                .Where(api => api.NameComponents.IsStringArrayEqaul(ns))
-                .FirstOrDefault()
+            let pathAdapted = if ns.Length = 2 then [|sysName; yield! ns|] else [||]
 
-        Assert(matches.Length.IsOneOf(0, 1))
-
-        // API call 과 나의 시스템의 다른 flow 에 존재하는 segment 호출이 헷갈리지 않도록
-        if (extendedMatches.OfType<Real>().Any(r => r.NameComponents.IsStringArrayEqaul(pathAdapted)))
-        {
-            if (apiCall != null)
-                throw new ParserException($"Ambiguous entry [{apiCall.QualifiedName}] and [{pathAdapted.Combine()}]", ctx)
-
-            let aliasTarget = new AliasTargetReal(pathAdapted)
-            ParserHelper.AliasCreators.Add(new AliasCreator(ns.Combine(), ParentWrapper.NewFlow(_flow), aliasTarget))
-            return
-        }
-
-        if (matches.OfType<Real>().Any())
-            return
-
-        try
-        {
-            let alias = matches.OfType<SpitOnlyAlias>().FirstOrDefault()
-            if (alias != null)
-            {
-                let aliasKey =
-                    matches
-                        .OfType<SpitOnlyAlias>()
-                        .Where(alias => alias.Mnemonic.IsStringArrayEqaul(pathWithoutParenting))
-                        .Select(alias => alias.AliasKey)
-                        .FirstOrDefault()
-
-                switch (aliasKey.Length)
-                {
-                    case 3:     // my flow real 에 대한 alias
-                        {
-                            Assert(aliasKey[0] == _system.Name && aliasKey[1] == _flow.Name)
-                            let aliasTarget = new AliasTargetReal(aliasKey)
-                            ParserHelper.AliasCreators.Add(new AliasCreator(ns.Combine(), ParentWrapper.NewFlow(_flow), aliasTarget))
-                            return
-                        }
-                    case 2:
-                        let apiItem =
-                            _modelSpitObjects
-                                .OfType<ApiItem>()
-                                .Where(api => api.NameComponents.IsStringArrayEqaul(aliasKey))
-                                .FirstOrDefault()
-                        Assert(apiItem != null)
-
-                        let name = ns.Combine()
-                        if (_parenting == null)
-                        {
-                            /* flow 바로 아래에 사용되는 직접 call.  A.+ */
-                            let aliasTarget = new AliasTargetDirectCall(aliasKey)
-                            ParserHelper.AliasCreators.Add(new AliasCreator(name, ParentWrapper.NewFlow(_flow), aliasTarget))
-                        }
-                        else
-                        {
-                            let aliasTarget = new AliasTargetApi(apiItem)
-                            ParserHelper.AliasCreators.Add(new AliasCreator(name, ParentWrapper.NewReal(_parenting), aliasTarget))
-                        }
-                        return
-                    case 1:
-                        Assert(false)
-                        break
-                }
-            }
+            // 나의 시스템의 다른 flow 에 존재하는 segment 호출
+            let extendedMatches =
+                x._modelSpits
+                    .Where(fun spitResult ->
+                        pathAdapted.Any() && spitResult.NameComponents.IsStringArrayEqaul(pathAdapted))
+                    .Select(fun spitResult -> spitResult.GetCore())
+                    .ToArray()
 
 
-            if (apiCall != null)
-            {
-                if (_parenting == null)
-                    Call.CreateInFlow(apiCall, _flow)
-                else
-                    Call.CreateInReal(apiCall, _parenting)
-                return
-            }
+            // 다른 시스템의 API 호출
+            let apiCall =
+                x._modelSpitObjects
+                    .OfType<ApiItem>()
+                    .Where(fun api -> api.NameComponents.IsStringArrayEqaul(ns))
+                    .TryHead()
 
+            assert(matches.Length = 0 || matches.Length = 1)
 
-            let prop = _elements[path]
-            if (_parenting == null)
-            {
-                if(ns.Length != 1)
-                    throw new ParserException($"ERROR: unknown token [{ns.Combine()}].", ctx)
-                Real.Create(ns[0], _flow)
-                return
-            }
+            // API call 과 나의 시스템의 다른 flow 에 존재하는 segment 호출이 헷갈리지 않도록
+            if (extendedMatches.OfType<Real>().Any(fun r -> r.NameComponents.IsStringArrayEqaul(pathAdapted))) then
+                match apiCall with
+                | Some apiCall ->
+                    raise <| ParserException($"Ambiguous entry [{apiCall.QualifiedName}] and [{pathAdapted.Combine()}]", ctx)
+                | None ->
+                    let aliasTarget = new AliasTargetReal(pathAdapted)
+                    x.ParserHelper.AliasCreators.Add(new AliasCreator(ns.Combine(), Flow flow, aliasTarget))
+
+            elif (matches.OfType<Real>().Any()) then
+                ()
             else
-                throw new ParserException($"ERROR: unknown token [{ns.Combine()}].", ctx)
-        }
-        finally
-        {
-            UpdateModelSpits()
-        }
+                try
+                    let alias = matches.OfType<SpitOnlyAlias>().TryHead()
+                    match alias with
+                    | Some alias ->
+                        let aliasKey =
+                            matches
+                                .OfType<SpitOnlyAlias>()
+                                .Where(fun alias -> alias.Mnemonic.IsStringArrayEqaul(pathWithoutParenting))
+                                .Select(fun alias -> alias.AliasKey)
+                                .FirstOrDefault()
 
-    }
+                        match aliasKey.Length with
+                            | 3 ->     // my flow real 에 대한 alias
+                                    assert(aliasKey[0] = sysName && aliasKey[1] = flow.Name)
+                                    let aliasCreator =
+                                        let aliasTarget = new AliasTargetReal(aliasKey)
+                                        new AliasCreator(ns.Combine(), Flow flow, aliasTarget)
+                                    x.ParserHelper.AliasCreators.Add(aliasCreator) |> ignore
+                            | 2 ->
+                                let apiItem =
+                                    x._modelSpitObjects
+                                        .OfType<ApiItem>()
+                                        .Where(fun api -> api.NameComponents.IsStringArrayEqaul(aliasKey))
+                                        .Head()
 
-    override public void EnterIdentifier12Listing(Identifier12ListingContext ctx)
-    {
+                                let name = ns.Combine()
+                                match x._parenting with
+                                | Some parent ->
+                                    let aliasCreator =
+                                        let aliasTarget = new AliasTargetApi(apiItem)
+                                        new AliasCreator(name, Real parent, aliasTarget)
+                                    x.ParserHelper.AliasCreators.Add(aliasCreator)
+                                | None ->
+                                    (* flow 바로 아래에 사용되는 직접 call.  A.+ *)
+                                    let aliasCreator =
+                                        let aliasTarget = new AliasTargetDirectCall(aliasKey)
+                                        new AliasCreator(name, Flow flow, aliasTarget)
+                                    x.ParserHelper.AliasCreators.Add(aliasCreator)
+                                |> ignore
+                            | _ ->
+                                failwith "ERROR"
+                    | None ->
+                        match apiCall with
+                        | Some apiCall ->
+                            match x._parenting with
+                            | Some parent ->
+                                Call.CreateInReal(apiCall, parent)
+                            | None ->
+                                Call.CreateInFlow(apiCall, flow)
+                            |> ignore
+                        | None ->
+                            match x._parenting with
+                            | Some parent ->
+                                if ns.Length <> 1 then
+                                    raise <| ParserException($"ERROR: unknown token [{ns.Combine()}].", ctx)
+                                Real.Create(ns[0], flow) |> ignore
+                            | None ->
+                                raise <| ParserException($"ERROR: unknown token [{ns.Combine()}].", ctx)
+                finally
+                    x.UpdateModelSpits()
+
+
+    override x.EnterIdentifier12Listing(ctx:Identifier12ListingContext) =
         // side effects
-        let path = AppendPathElement(collectNameComponents(ctx))
-        let prop = _elements[path]
-        if (_parenting != null)
-            throw new ParserException($"ERROR: identifier [{path.Combine()}] not allowed!", ctx)
+        let path = x.AppendPathElement(collectNameComponents(ctx))
+        let prop = x._elements[path]
+        if x._parenting.IsSome then
+            raise <| new ParserException($"ERROR: identifier [{path.Combine()}] not allowed!", ctx)
 
-        Real.Create(path.Last(), _flow)
-    }
-}
+        Real.Create(path.Last(), x._flow.Value) |> ignore

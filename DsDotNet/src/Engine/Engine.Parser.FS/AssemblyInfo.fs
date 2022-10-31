@@ -1,5 +1,10 @@
+module AssemblyInfo
+
 open System.Runtime.CompilerServices
 open System.Runtime.InteropServices
+open System.Diagnostics
+open Antlr4.Runtime
+
 
 // In SDK-style projects such as this one, several assembly attributes that were historically
 // defined in this file are now automatically added during build and populated with
@@ -11,10 +16,12 @@ open System.Runtime.InteropServices
 // components.  If you need to access a type in this assembly from COM, set the ComVisible
 // attribute to true on that type.
 
-[assembly: ComVisible(false)]
+[<assembly: ComVisible(false)>]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM.
 
-[assembly: Guid("2a959eec-ba9d-4c77-841b-d1dce28137b1")]
-[assembly: InternalsVisibleTo("Engine.Sample")]
-[assembly: DebuggerDisplay("[Text={GetText()}]", Target = typeof(RuleContext))]
+[<assembly: Guid("2a959eec-ba9d-4c77-841b-d1dce28137b1")>]
+[<assembly: InternalsVisibleTo("Engine.Sample")>]
+[<assembly: DebuggerDisplay("[Text={GetText()}]", Target = typeof<RuleContext>)>]
+
+do ()

@@ -162,7 +162,9 @@ module UtilPPT =
                 else
                     let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
                     let round =  geometry.CheckRound()
-                    (   geometry.Preset.Value = Drawing.ShapeTypeValues.HomePlate && round )
+                    (  
+                      geometry.Preset.Value = Drawing.ShapeTypeValues.HomePlate && round 
+                    ||geometry.Preset.Value = Drawing.ShapeTypeValues.FlowChartOffpageConnector)
 
         [<Extension>] 
         static member CheckNoSmoking(shape:#Shape) = 

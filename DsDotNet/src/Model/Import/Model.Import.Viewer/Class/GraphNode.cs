@@ -14,16 +14,21 @@ namespace Dual.Model.Import
     public class DsViewNode
     {
         public bool IsChildExist = false;
+        public bool IsButtonGroup= false;
         public string UIKey = "";
         public DsVertex DsVertex;
         public Bound Bound;
         public NodeType NodeType;
+        public BtnType BtnType;
         public List<DsViewEdge> MEdges = new List<DsViewEdge>();
         public List<DsViewNode> Singles = new List<DsViewNode>();
-        public DsViewNode(string name)
+        public DsViewNode(string name, bool bGroup, BtnType btnType)
         {
+            Bound = Bound.ExBtn;
             NodeType = NodeType.BUTTON;
             UIKey = $"{name};{this.GetHashCode()}";
+            IsButtonGroup = bGroup;
+            BtnType = btnType;
         }
         public DsViewNode(DsVertex v)
         {

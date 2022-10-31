@@ -181,13 +181,11 @@ module HmiGenModule =
                 | :? Call as c ->
                     c.ApiItem.System.Name, Some(c.ApiItem)
                 | :? Alias as a ->
-                    // { <shin> 확인 요망
                     let aliasKey =
                         match a.Target with
                         | RealTarget r -> r.NameComponents
-                        | CallTarget c -> c.NameComponents
+                        | CallTarget c -> c.ApiItem.NameComponents
                     aliasKey.[0], Some(model.FindApiItem aliasKey)
-                    // }
                 | _ ->
                     null, None
 
@@ -209,8 +207,8 @@ module HmiGenModule =
 
         let hmiInfos = new Dictionary<string, Info>()
         for sys in model.Systems do
-            // if sys.Name = "My" then // to check
-            if sys.Active then
+            if sys.Name = "My" then // to check
+            // if sys.Active then
                 addSystemFlowReal sys hmiInfos
                 addGroupButtons sys hmiInfos sys.AutoButtons ButtonType.Auto
                 addGroupButtons sys hmiInfos sys.ResetButtons ButtonType.Clear
@@ -249,7 +247,7 @@ module HmiGenModule =
         settings.Converters.Add(Converters.StringEnumConverter())
         JsonConvert.SerializeObject(
             initializer,
-            // Formatting.Indented, // to visual check
+            Formatting.Indented, // to visual check
             settings
         )
 

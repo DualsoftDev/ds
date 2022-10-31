@@ -35,9 +35,13 @@ module ImportCheck =
             flow.Graph.Edges.Add(Edge.Create(flow.Graph, find("RESET"),find("복귀인과"), ResetEdge))       |> ignore
             flow.Graph.Edges.Add(Edge.Create(flow.Graph, find("RESET"),find("복귀유지"), ResetPush))       |> ignore
 
-            //test ahn
-            //flow.Graph.Edges.Add(Edge.Create(flow.Graph, find("ETC"),find("상호행위간섭"), Interlock))       |> ignore
-            //flow.Graph.Edges.Add(Edge.Create(flow.Graph, find("ETC"),find("시작후행리셋"), StartReset))       |> ignore
+            let etcEdge =  Edge.Create(flow.Graph, find("ETC"),find("상호행위간섭"), EdgeType.Default)
+            etcEdge.EditorInfo <- EdgeType.EditorInterlock
+            flow.Graph.Edges.Add(etcEdge) |> ignore
+
+            let etcEdge =  Edge.Create(flow.Graph, find("ETC"),find("시작후행리셋"), EdgeType.Default)
+            etcEdge.EditorInfo <- EdgeType.EditorStartReset
+            flow.Graph.Edges.Add(etcEdge)       |> ignore
 
             model
 
@@ -91,7 +95,7 @@ module ImportCheck =
             pptEdges |> Seq.iter(fun edge ->
                 if(dicSameCheck.TryAdd(edge.Text,edge.Text)|>not)
                     then
-                        Office.ErrorConnect(edge.ConnectionShape, 20, $"{edge.StartNode.Name}", $"{edge.StartNode.Name}", edge.PageNum)
+                        edge.ConnectionShape.ErrorConnect(20, edge.Text, edge.PageNum)
             )
 
         //page 타이틀 중복체크 

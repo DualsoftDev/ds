@@ -68,9 +68,9 @@ namespace Dual.Model.Import
                     _dsText = _Model.ToDsText();
                     ExportTextModel(Color.Transparent, _dsText);
                     this.Do(() => xtraTabControl_Ex.TabPages.Clear());
-                    //test ahn
-                    //foreach (var sys in _Model.Systems.OrderBy(sys => sys.Name))
-                    //    CreateNewTabViewer(sys, dicFlow);
+
+                    foreach (var sys in _Model.Systems.OrderBy(sys => sys.Name))
+                        CreateNewTabViewer(sys, dicFlow);
 
                     WriteDebugMsg(DateTime.Now, MSGLevel.Info, $"{PathPPT} 불러오기 성공!!");
                     this.Do(() =>
@@ -215,12 +215,11 @@ namespace Dual.Model.Import
                                                      && flow.Value.Name == f.Name).Key;
 
                     UCView viewer = new UCView { Dock = DockStyle.Fill };
-                    viewer.SetGraph(f);
+                    viewer.SetGraph(f, sys);
                     TabPage tab = new TabPage();
                     tab.Controls.Add(viewer);
                     tab.Tag = viewer;
-                    tab.Text = $"{f.System.Name}.{f.Name}({pageNum})";
-                    tab.Text = $"{f.System.Name}.{f.Name}";
+                    tab.Text = $"{f.System.Name}.{f.Name}({(pageNum > 0 ? pageNum: 0)})";
                     this.Do(() =>
                     {
                         if (f.System.Active)

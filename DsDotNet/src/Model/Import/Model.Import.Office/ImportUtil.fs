@@ -20,23 +20,26 @@ module ImportU =
     let dicVertex = Dictionary<string, Vertex>()
 
     let private createVertex(model:Model, node:pptNode, parentReal:Real Option, parentFlow:Flow Option, dicSeg:Dictionary<string, Vertex>) = 
-        let name =   if(node.NodeType.IsCall) then node.CallName else node.NameOrg
-        if(node.NodeType.IsReal) 
-        then 
-            let real = Real.Create(name, parentFlow.Value) 
-            dicSeg.Add(node.Key, real)
-        else 
-            let system =model.FindSystem(node.CallName.Split('.').[0])
-            let ifName = node.Name.Split('.').[1];
-            let findApi = model.FindApiItem([|system.Name;ifName|]) 
-            //Api 은 CopySystem 에서 미리 만들어야함 
-            // let api = if findApi.IsNull() then ApiItem.Create(ifName, system) else findApi
-            let call = 
-                if(parentReal.IsSome)
-                then  Call.CreateInReal(findApi, parentReal.Value)  
-                else  Call.CreateInFlow(findApi, parentFlow.Value)  
+        
+        if(parentReal.IsNone && parentFlow.IsNone)  then () //alias 지정후 다시 생성
+        else
+            let name =   if(node.NodeType.IsCall) then node.CallName else node.NameOrg
+            if(node.NodeType.IsReal) 
+            then 
+                let real = Real.Create(name, parentFlow.Value) 
+                dicSeg.Add(node.Key, real)
+            else 
+                let system =model.FindSystem(node.CallName.Split('.').[0])
+                let ifName = node.Name.Split('.').[1];
+                let findApi = model.FindApiItem([|system.Name;ifName|]) 
+                //Api 은 CopySystem 에서 미리 만들어야함 
+                // let api = if findApi.IsNull() then ApiItem.Create(ifName, system) else findApi
+                let call = 
+                    if(parentReal.IsSome)
+                    then  Call.CreateInReal(findApi, parentReal.Value)  
+                    else  Call.CreateInFlow(findApi, parentFlow.Value)  
 
-            dicSeg.Add(node.Key, call)
+                dicSeg.Add(node.Key, call)
     let private getParent(edge:pptEdge, parents:ConcurrentDictionary<pptNode, seq<pptNode>>, dicSeg:Dictionary<string, Vertex>) = 
             ImportCheck.SameParent(parents, edge)
             let newParents = 
@@ -120,6 +123,7 @@ module ImportU =
                      
         //real call alias  만들기
         [<Extension>] static member MakeSegment (doc:pptDoc, model:Model) = 
+        
                         let pptNodes = doc.Nodes
                         let parents = doc.Parents
                         let dicChildParent = 
@@ -129,46 +133,55 @@ module ImportU =
                                 parentChildren.Value 
                                 |> Seq.map(fun child -> child, parentChildren.Key)) |> dict
 
-                        //Real 부터
-                        pptNodes
-                            |> Seq.filter(fun node -> node.Alias.IsNone) 
-                            |> Seq.filter(fun node -> node.NodeType.IsReal) 
-                            |> Seq.filter(fun node -> dicChildParent.ContainsKey(node)|>not) 
-                            |> Seq.iter(fun node   -> createVertex(model, node, None, Some(dicFlow.[node.PageNum]), dicVertex))
-
-                        //Call 처리
-                        pptNodes
+                        let createCall() =
+                            pptNodes
                             |> Seq.filter(fun node -> node.Alias.IsNone) 
                             |> Seq.filter(fun node -> node.NodeType.IsCall) 
                             |> Seq.iter(fun node -> 
-                                        let parentReal = if  dicChildParent.ContainsKey(node) 
-                                                            then Some(dicVertex.[dicChildParent.[node].Key] :?> Real)
+                                        let parentReal = if  (dicChildParent.ContainsKey(node))
+                                                            then 
+                                                                 Some(dicVertex.[dicChildParent.[node].Key] :?> Real)
                                                             else None
                                         let parentFlow = if  dicChildParent.ContainsKey(node) 
                                                             then None
                                                             else Some(dicFlow.[node.PageNum])
                                         createVertex(model, node, parentReal, parentFlow, dicVertex))
-          
-                        //Alias Node 처리 마감
-                        pptNodes
-                        |> Seq.filter(fun node -> node.Alias.IsSome)
-                        |> Seq.iter(fun node -> 
-                                let segOrg = dicVertex.[node.Alias.Value.Key]
-                                if dicChildParent.ContainsKey(node) 
-                                then 
-                                    let real = dicVertex.[dicChildParent.[node].Key] :?> Real
-                                    let alias = Alias.Create(node.Name, CallTarget(segOrg:?>Call), Real(real))
-                                    dicVertex.Add(node.Key, alias)
-                                else 
-                                    let alias = 
-                                        let flow = dicFlow.[node.PageNum]
-                                        match segOrg with
-                                        | :? Real as rt -> Alias.Create(node.Name, RealTarget(rt), Flow(flow))
-                                        | :? Call as ct -> Alias.Create(node.Name, CallTarget(ct), Flow(flow))
-                                        |_ -> failwithf "Error type"
 
-                                    dicVertex.Add(node.Key, alias )
-                            )
+                        let createReal() =
+                            pptNodes
+                                |> Seq.filter(fun node -> node.Alias.IsNone) 
+                                |> Seq.filter(fun node -> node.NodeType.IsReal) 
+                                |> Seq.filter(fun node -> dicChildParent.ContainsKey(node)|>not) 
+                                |> Seq.iter(fun node   -> createVertex(model, node, None, Some(dicFlow.[node.PageNum]), dicVertex))
+
+                        let createAlias() =
+                            pptNodes
+                            |> Seq.filter(fun node -> node.Alias.IsSome)
+                            |> Seq.iter(fun node -> 
+                                    let segOrg = dicVertex.[node.Alias.Value.Key]
+                                    if dicChildParent.ContainsKey(node) 
+                                    then 
+                                        let real = dicVertex.[dicChildParent.[node].Key] :?> Real
+                                        let alias = Alias.Create(node.Name, CallTarget(segOrg:?>Call), Real(real))
+                                        dicVertex.Add(node.Key, alias)
+                                    else 
+                                        let alias = 
+                                            let flow = dicFlow.[node.PageNum]
+                                            match segOrg with
+                                            | :? Real as rt -> Alias.Create(node.Name, RealTarget(rt), Flow(flow))
+                                            | :? Call as ct -> Alias.Create(node.Name, CallTarget(ct), Flow(flow))
+                                            |_ -> failwithf "Error type"
+
+                                        dicVertex.Add(node.Key, alias )
+                                )
+
+                        
+                        //Real 부터
+                        createReal()
+                        //Call 처리
+                        createCall()
+                        //Alias Node 처리 마감
+                        createAlias()
 
                         //copy system ApiItems 동일 처리
                         dicCopy.ForEach(fun sysTwin->
@@ -282,7 +295,8 @@ module ImportU =
                                 let origSys = sysTwin.Value
                                 origSys.Flows.ForEach(fun flow-> 
                                             let copyFlow = copySys.FindFlow(flow.Name)
-                                            flow.ToCopy(copyFlow)|>ignore)
+                                            flow.ToCopy(copyFlow)|>ignore
+                                            dicFlow.Add((-dicFlow.Count),  copyFlow ) |> ignore ) //복사본 page는 음수 임의 표기
                                 origSys.ApiItems.ForEach(fun apiItem -> 
                                             let apiCopy = copySys.ApiItems.First(fun f->f.Name = apiItem.Name)
                                             apiItem.ToCopy(apiCopy)|>ignore)

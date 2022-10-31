@@ -45,7 +45,7 @@ namespace Dual.Model.Import
 
 
 
-        public void SetGraph(Flow flow)
+        public void SetGraph(Flow flow, DsSystem sys)
         {
             //sub 그래프 불가
             //viewer.Graph.LayoutAlgorithmSettings = new Microsoft.Msagl.Layout.MDS.MdsLayoutSettings();
@@ -56,7 +56,6 @@ namespace Dual.Model.Import
             layoutSetting.LayerSeparation = 30;
             layoutSetting.NodeSeparation = 30;
             layoutSetting.ClusterMargin = 20;
-
             //viewer.Graph = new Graph() { LayoutAlgorithmSettings = new Microsoft.Msagl.Layout.Incremental.FastIncrementalLayoutSettings() };
             //var layoutSetting = new Microsoft.Msagl.Layout.Incremental.FastIncrementalLayoutSettings();
             //layoutSetting.NodeSeparation = 50;
@@ -66,12 +65,31 @@ namespace Dual.Model.Import
             //layoutSetting.EdgeRoutingSettings.EdgeRoutingMode = Microsoft.Msagl.Core.Routing.EdgeRoutingMode.SugiyamaSplines;
             //layoutSetting.Decay = 0.8;
 
-
-
             viewer.Graph.LayoutAlgorithmSettings = layoutSetting;
             SetBackColor(System.Drawing.Color.FromArgb(33, 33, 33));
 
-            flow.Graph.Vertices
+            var btnSubGraph = DrawSeg(viewer.Graph.RootSubgraph, new DsViewNode("Buttons"));
+            //Edge gEdge = viewer.Graph.AddEdge(btnSubGraph.Id, "", btnSubGraph.Id);
+
+            sys.AutoButtons.Where(w => w.Value.Contains(flow)).ForEach(f =>
+            {
+                DrawSeg(btnSubGraph, new DsViewNode(f.Key));
+
+                //var child = new Subgraph(f.Key);
+                //btnSubGraph.AddSubgraph(child);
+                //DrawSub(btnSubGraph, new DsViewNode(f.Key), child, child.Nodes.First(), true);
+            });
+
+            
+
+            //sys.EmergencyButtons.Where(w => w.Value.Contains(flow)).ForEach(f => 
+            //    DrawSub(viewer.Graph.RootSubgraph, new DsViewNode(f.Key), btnSubGraph, gEdge.SourceNode , false));
+            //sys.StartButtons.Where(w => w.Value.Contains(flow)).ForEach(f => 
+            //    DrawSub(viewer.Graph.RootSubgraph, new DsViewNode(f.Key), btnSubGraph, gEdge.SourceNode , false));
+            //sys.ResetButtons.Where(w => w.Value.Contains(flow)).ForEach(f => 
+            //    DrawSub(viewer.Graph.RootSubgraph, new DsViewNode(f.Key), btnSubGraph, gEdge.SourceNode , false));
+
+            flow.Graph.Islands
                 .ForEach(seg => DrawSeg(viewer.Graph.RootSubgraph, new DsViewNode(seg)));
 
             var dsEdges = flow.Graph.Edges.Select(s => new DsViewEdge(s));
@@ -122,21 +140,21 @@ namespace Dual.Model.Import
             DrawSub(subgraph, mEdgeTgt, subGTgt, gEdge.TargetNode, bDrawSubTgt);
 
         }
-        private void DrawSeg(Subgraph subgraph, DsViewNode seg)
+        private Subgraph DrawSeg(Subgraph subgraph, DsViewNode seg)
         {
+            bool bDrawSub = (seg.IsChildExist || seg.Singles.Any());
 
-            //bool bDrawSub = (seg.IsChildExist || seg.Singles.Any());
+            var subG = new Subgraph(seg.UIKey);
 
-            //var subG = new Subgraph(seg.UIKey);
+            if (bDrawSub) subgraph.AddSubgraph(subG);
+            var gEdge = viewer.Graph.AddEdge(subG.Id, "", subG.Id);
+            UpdateLabelText(gEdge.SourceNode);
+            UpdateNodeView(gEdge.SourceNode, seg);
+            gEdge.IsVisible = false;
 
-            //if (bDrawSub) subgraph.AddSubgraph(subG);
-            //var gEdge = viewer.Graph.AddEdge(subG.Id, "", subG.Id);
-            //UpdateLabelText(gEdge.SourceNode);
-            //UpdateNodeView(gEdge.SourceNode, seg);
-            //gEdge.IsVisible = false;
+            DrawSub(subgraph, seg, subG, gEdge.SourceNode, bDrawSub);
 
-            //DrawSub(subgraph, seg, subG, gEdge.SourceNode, bDrawSub);
-
+            return subG;
         }
 
         private void DrawSub(Subgraph subgraph, DsViewNode seg, Subgraph subG, Node gNode, bool bDrawSub)
@@ -165,26 +183,26 @@ namespace Dual.Model.Import
             gEdge.Attr.Color = Color.White;
 
             var et = edge.Causal;
-            if (et == EdgeType.Default)
+            if (et == UtilEdge.StartEdge)
             {
                 gEdge.Attr.AddStyle(Style.Solid);
                 gEdge.Attr.Color = Color.DeepSkyBlue;
                 gEdge.Attr.LineWidth = 2;
             }
-            else if (et == (EdgeType.Default | EdgeType.Strong))
+            else if (et == UtilEdge.StartPush)
             {
                 gEdge.Attr.AddStyle(Style.Solid);
                 gEdge.Attr.LineWidth = 4;
                 gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
                 gEdge.Attr.Color = Color.DeepSkyBlue;
             }
-            else if (et == EdgeType.Reset)
+            else if (et == UtilEdge.ResetEdge)
             {
                 gEdge.Attr.AddStyle(Style.Dashed);
                 gEdge.Attr.Color = Color.Green;
                 gEdge.Attr.LineWidth = 2;
             }
-            else if (et == (EdgeType.Reset | EdgeType.Strong))
+            else if (et == UtilEdge.ResetPush)
             {
                 gEdge.Attr.AddStyle(Style.Dashed);
                 gEdge.Attr.LineWidth = 4;
@@ -226,26 +244,23 @@ namespace Dual.Model.Import
             {
                 //nNode.Attr.Color = Color.DarkGoldenrod;
 
-                if (segment.Bound == Bound.ExBtn)
-                    nNode.Attr.Shape = Shape.Plaintext;
-                else
+                if (segment.NodeType == NodeType.BUTTON)
+                    nNode.Attr.Shape = Shape.DrawFromGeometry;
+                if (segment.NodeType == NodeType.MY)
+                    nNode.Attr.Shape = Shape.Box;
+                if (segment.NodeType == NodeType.DUMMY)
                 {
-                    if (segment.NodeType == NodeType.MY)
-                        nNode.Attr.Shape = Shape.Box;
-                    if (segment.NodeType == NodeType.DUMMY)
-                    {
-                        nNode.Attr.Shape = Shape.Box;
-                        nNode.Attr.FillColor = Color.Black;
-                    }
-                    if (segment.NodeType == NodeType.TR
-                        || segment.NodeType == NodeType.TX
-                        || segment.NodeType == NodeType.RX)
-                        nNode.Attr.Shape = Shape.Ellipse;
-                    if (segment.NodeType == NodeType.IF)
-                        nNode.Attr.Shape = Shape.InvHouse;
-                    if (segment.NodeType == NodeType.COPY)
-                        nNode.Attr.Shape = Shape.Octagon;
+                    nNode.Attr.Shape = Shape.Box;
+                    nNode.Attr.FillColor = Color.Black;
                 }
+                if (segment.NodeType == NodeType.TR
+                    || segment.NodeType == NodeType.TX
+                    || segment.NodeType == NodeType.RX)
+                    nNode.Attr.Shape = Shape.Ellipse;
+                if (segment.NodeType == NodeType.IF)
+                    nNode.Attr.Shape = Shape.InvHouse;
+                if (segment.NodeType == NodeType.COPY)
+                    nNode.Attr.Shape = Shape.Octagon;
             }
         }
 

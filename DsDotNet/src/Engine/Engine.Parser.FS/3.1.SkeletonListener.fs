@@ -1,6 +1,17 @@
-using Microsoft.FSharp.Core
+
 
 namespace Engine.Parser.FS
+
+open Engine.Common.FS
+open Engine.Parser
+open System.Linq
+open Engine.Core
+open type Engine.Parser.dsParser
+open type Engine.Parser.FS.DsParser
+open Antlr4.Runtime.Tree
+open Antlr4.Runtime
+open Engine.Common.FS
+open Engine.Common.FS.Functions
 
 
 /// <summary>
@@ -9,154 +20,125 @@ namespace Engine.Parser.FS
 /// Element path map 구성
 ///   - Parenting, Child, alias, Api
 /// </summary>
-class SkeletonListener : ListenerBase
-{
-    public SkeletonListener(dsParser parser, ParserHelper helper)
-        : base(parser, helper)
-    {
-    }
+type SkeletonListener(parser:dsParser, helper:ParserHelper) =
+    inherit ListenerBase(parser, helper)
 
-    override public void EnterSystem(SystemContext ctx)
-    {
-        if (findFirstChild<SysBlockContext>(ctx) != null)
-        {
+
+    override x.EnterSystem(ctx:SystemContext) =
+        match findFirstChild<SysBlockContext>(ctx) with
+        | Some sysBlockCtx_ ->
             let name = ctx.systemName().GetText().DeQuoteOnDemand()
-            let host = findFirstChild<HostContext>(ctx)?.GetText()
-            _system = DsSystem.Create(name, host, _model)
-            Trace.WriteLine($"System: {name}")
-            AddElement(CurrentPathElements, GraphVertexType.System)
+            match findFirstChild<HostContext>(ctx) with
+            | Some hostCtx ->
+                let host = hostCtx.GetText()
+                x._system <- Some <| DsSystem.Create(name, host, x._model)
+                tracefn($"System: {name}")
+                x.AddElement(x.CurrentPathElements, GraphVertexType.System)
+            | None -> failwith "ERROR"
+        | None -> failwith "ERROR"
 
-        }
-    }
-
-    override public void EnterFlow(FlowContext ctx)
-    {
+    override x.EnterFlow(ctx:FlowContext) =
         let flowName = ctx.identifier1().GetText().DeQuoteOnDemand()
-        _flow = Flow.Create(flowName, _system)
-        AddElement(CurrentPathElements, GraphVertexType.Flow)
-    }
+        x._flow <- Some <| Flow.Create(flowName, x._system.Value)
+        x.AddElement(x.CurrentPathElements, GraphVertexType.Flow)
 
-    override public void EnterParenting(ParentingContext ctx)
-    {
-        Trace.WriteLine($"Parenting: {ctx.GetText()}")
+    override x.EnterParenting(ctx:ParentingContext) =
+        tracefn($"Parenting: {ctx.GetText()}")
         let name = ctx.identifier1().GetText().DeQuoteOnDemand()
-        _parenting = Real.Create(name, _flow)
-        AddElement(CurrentPathElements, GraphVertexType.Segment | GraphVertexType.Parenting)
+        x._parenting <- Some <| Real.Create(name, x._flow.Value)
+        x.AddElement(x.CurrentPathElements, GraphVertexType.Segment ||| GraphVertexType.Parenting)
 
-        let xxx = enumerateChildren<CausalTokenContext>(ctx).ToArray()
-        let yyy = xxx.Select(ctctx => collectNameComponents(ctctx).ToArray()).ToArray()
+        //let xxx = enumerateChildren<CausalTokenContext>(ctx).ToArray()
+        //let yyy = xxx.Select(ctctx => collectNameComponents(ctctx).ToArray()).ToArray()
 
         let children =
             enumerateChildren<CausalTokenContext>(ctx)
-                .Select(ctctx => collectNameComponents(ctctx).ToArray())
-                .Tap(childNameComponts => Assert(childNameComponts.Length.IsOneOf(1, 2)))
-                .Select(childNameComponts => AppendPathElement(childNameComponts))
+                .Select(fun ctctx -> collectNameComponents(ctctx).ToArray())
+                .Tap(fun childNameComponts -> assert (childNameComponts.Length = 1 || childNameComponts.Length = 2))
+                .Select(fun childNameComponts -> x.AppendPathElement(childNameComponts))
                 .ToArray()
-                
-        foreach(let ch in children)
-            AddElement(ch, GraphVertexType.Child)
-    }
 
-    override public void EnterIdentifier12Listing(Identifier12ListingContext ctx)
-    {
-        let ns = AppendPathElement(collectNameComponents(ctx))
-        AddElement(ns, GraphVertexType.Segment)
-    }
+        for ch in children do
+            x.AddElement(ch, GraphVertexType.Child)
 
-    override public void EnterCausalToken(CausalTokenContext ctx)
-    {
-        let path = AppendPathElement(collectNameComponents(ctx))
+    override x.EnterIdentifier12Listing(ctx:Identifier12ListingContext) =
+        let ns = x.AppendPathElement(collectNameComponents(ctx))
+        x.AddElement(ns, GraphVertexType.Segment)
+
+    override x.EnterCausalToken(ctx:CausalTokenContext) =
+        let path = x.AppendPathElement(collectNameComponents(ctx))
         let vType = GraphVertexType.Call
 
         // 다음 stage 에서 처리...
         //if (_parenting == null)
         //    vType |= GraphVertexType.Segment
 
-        AddElement(path, vType)
-    }
+        x.AddElement(path, vType)
 
 
-    public override void EnterAliasListing(AliasListingContext ctx)
-    {
-        let map = _flow.AliasMap
+    override x.EnterAliasListing(ctx:AliasListingContext) =
+        let map = x._flow.Value.AliasMap
 
         let aliasDef = findFirstChild<AliasDefContext>(ctx)
         let alias = collectNameComponents(aliasDef)
-        switch(alias.Length)
-        {
-            case 2: // {타시스템}.{interface명} or
-                AddElement(alias, GraphVertexType.AliaseKey)
-                break
-            case 1: // { (my system / flow /) segment 명 }
-                AddElement(AppendPathElement(alias[0]), GraphVertexType.AliaseKey)
-                break
-            default:
-                throw new Exception("ERROR")
-        }
+        match alias.Length with
+            | 2 -> // {타시스템}.{interface명} or
+                x.AddElement(alias, GraphVertexType.AliaseKey)
+            | 1 -> // { (my system / flow /) segment 명 }
+                x.AddElement(x.AppendPathElement(alias[0]), GraphVertexType.AliaseKey)
+            | _ ->
+                failwith "ERROR"
 
         let mnemonics =
             enumerateChildren<AliasMnemonicContext>(ctx)
-                .Select(mctx => collectNameComponents(mctx))
-                .Tap(mne => Assert(mne.Length == 1))
-                .Select(mne => mne[0])
+                .Select(fun mctx -> collectNameComponents(mctx))
+                .Tap(fun mne -> assert(mne.Length = 1))
+                .Select(fun mne -> mne[0])
                 .ToHashSet()
         map.Add(alias, mnemonics)
-        foreach(let mne in mnemonics)
-            AddElement(AppendPathElement(mne), GraphVertexType.AliaseMnemonic)
-    }
+        for mne in mnemonics do
+            x.AddElement(x.AppendPathElement(mne), GraphVertexType.AliaseMnemonic)
 
 
-    public override void EnterInterfaces([NotNull] InterfacesContext ctx)
-    {
-        //_system.Api = new Api(_system)
-    }
 
-
-    public override void EnterInterfaceDef([NotNull] InterfaceDefContext ctx)
-    {
-        let hash = _system.ApiItems
+    override x.EnterInterfaceDef(ctx:InterfaceDefContext) =
+        let hash = x._system.Value.ApiItems
         let interrfaceNameCtx = findFirstChild<InterfaceNameContext>(ctx)
-        let interfaceName = collectNameComponents(interrfaceNameCtx)[0]
-        string[][] collectCallComponents(CallComponentsContext ctx) =>
+        let interfaceName = collectNameComponents(interrfaceNameCtx.Value)[0]
+        let collectCallComponents(ctx:CallComponentsContext):string[][] =
             enumerateChildren<Identifier123Context>(ctx)
                 .Select(collectNameComponents)
                 .ToArray()
-                
+
 
         let ser =   // { start ~ end ~ reset }
             enumerateChildren<CallComponentsContext>(ctx)
-            .Select(collectCallComponents)
-            .Tap(callComponents => Assert(callComponents.ForAll(cc => cc.Length == 2 || cc[0] == "_")))
-            .Select(callCompnents => callCompnents.Select(cc => cc.Prepend(_system.Name).ToArray()).ToArray())
-            .ToArray()
-            
+                .Select(collectCallComponents)
+                .Tap(fun callComponents -> assert(callComponents.All(fun cc -> cc.Length = 2 || cc[0] = "_")))
+                .Select(fun callCompnents -> callCompnents.Select(fun cc -> cc.Prepend(x._system.Value.Name).ToArray()).ToArray())
+                .ToArray()
 
-        AddElement(AppendPathElement(interfaceName), GraphVertexType.ApiKey)
-        foreach(let cc in ser.SelectMany(x => x))
-            AddElement(cc, GraphVertexType.ApiSER)
+
+        x.AddElement(x.AppendPathElement(interfaceName), GraphVertexType.ApiKey)
+        for cc in ser.Collect(id) do
+            x.AddElement(cc, GraphVertexType.ApiSER)
 
 
         // 이번 stage 에서 일단 interface 이름만 이용해서 빈 interface 객체를 생성하고,
         // TXs, RXs, Resets 은 다음 listener stage 에서 채움..
-        let api = ApiItem.Create(interfaceName, _system)
-        hash.Add(api)
-    }
+        let api = ApiItem.Create(interfaceName, x._system.Value)
+        hash.Add(api) |> ignore
 
-    public override void EnterInterfaceResetDef(InterfaceResetDefContext ctx)
-    {
+    override x.EnterInterfaceResetDef(ctx:InterfaceResetDefContext) =
         // I1 <||> I2 <||> I3;  ==> [| I1; <||>; I2; <||>; I3; |]
         let terms =
-            enumerateChildren<RuleContext>(ctx, false, tree => tree is Identifier1Context || tree is CausalOperatorResetContext)
-            .Select(ctx => ctx.GetText())
-            .ToArray()
+            let pred = fun (tree:IParseTree) -> tree :? Identifier1Context || tree :? CausalOperatorResetContext
+            enumerateChildren<RuleContext>(ctx, false, pred)
+                .Select(fun ctx -> ctx.GetText())
+                .ToArray()
 
         // I1 <||> I2 와 I2 <||> I3 에 대해서 해석
-        for (let i = 0; i < terms.Length - 2; i += 2)
-        {
-            let opnd1 = terms[i]
-            let op = terms[i+1]
-            let opnd2 = terms[i+2]
-            let ri_ = ApiResetInfo.Create(_system, opnd1, op, opnd2)
-        }
-    }
-}
+        for triple in (terms |> Array.windowed2 3 2) do
+            let opnd1, op, opnd2 = triple[0], triple[1], triple[2]
+            let ri_ = ApiResetInfo.Create(x._system.Value, opnd1, op, opnd2)
+            ()

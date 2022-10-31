@@ -1,8 +1,10 @@
-using Antlr4.Runtime.Misc
-
-using Engine.Common
-
 namespace Engine.Parser.FS
+
+open Engine.Common.FS
+open Engine.Parser
+open System.Linq
+open Engine.Core
+open type Engine.Parser.dsParser
 
 
 /// <summary>
@@ -11,75 +13,62 @@ namespace Engine.Parser.FS
 /// Segment Listing(root flow toplevel 만),
 /// CallPrototype, Aliasing 구조까지 생성
 /// </summary>
-class ListenerBase : dsParserBaseListener
-{
-    public ParserHelper ParserHelper
-    protected Model _model => ParserHelper.Model
-    protected DsSystem _system { get => ParserHelper._system; set => ParserHelper._system = value; }
-    protected Flow _flow { get => ParserHelper._flow; set => ParserHelper._flow = value; }
-    protected Real _parenting { get => ParserHelper._parenting; set => ParserHelper._parenting = value; }
-    protected Dictionary<string[], GraphVertexType> _elements => ParserHelper._elements
-    protected SpitResult[] _modelSpits { get => ParserHelper._modelSpits; set => ParserHelper._modelSpits = value; }
-    protected object[] _modelSpitObjects { get => ParserHelper._modelSpitObjects; set => ParserHelper._modelSpitObjects = value; }
+type ListenerBase(parser:dsParser, helper:ParserHelper) =
+    inherit dsParserBaseListener()
 
-    protected void AddElement(string[] path, GraphVertexType elementType)
-    {
-        if (_elements.ContainsKey(path))
-            _elements[path] |= elementType
-        else
-            _elements.Add(path, elementType)
-    }
-
-    protected string[] AppendPathElement(string name) => ParserHelper.AppendPathElement(name)
-    protected string[] AppendPathElement(string[] names) => ParserHelper.AppendPathElement(names)
-    protected string[] CurrentPathElements => ParserHelper.CurrentPathElements
-    protected void UpdateModelSpits()
-    {
-        _modelSpits = _model.Spit().ToArray()
-        _modelSpitObjects = _modelSpits.Select(spit => spit.GetCore()).ToArray()
-    }
-
-
-
-    public ListenerBase(dsParser parser, ParserHelper helper)
-    {
-        ParserHelper = helper
+    do
         parser.Reset()
-    }
 
-    public override void EnterModel(ModelContext ctx)
-    {
-        UpdateModelSpits()
-    }
+    member x.ParserHelper = helper
+    member internal _._model = helper.Model
+    member internal _._elements = helper._elements
+    member internal _._system           with get() = helper._system           and set(v) = helper._system           <- v
+    member internal _._flow             with get() = helper._flow             and set(v) = helper._flow             <- v
+    member internal _._parenting        with get() = helper._parenting        and set(v) = helper._parenting        <- v
+    member internal _._modelSpits       with get() = helper._modelSpits       and set(v) = helper._modelSpits       <- v
+    member internal _._modelSpitObjects with get() = helper._modelSpitObjects and set(v) = helper._modelSpitObjects <- v
 
-    override public void EnterSystem(SystemContext ctx)
-    {
+    member internal x.AddElement(path:string[], elementType:GraphVertexType) =
+        if x._elements.ContainsKey(path) then
+            x._elements[path] <- (x._elements[path] ||| elementType)
+        else
+            x._elements.Add(path, elementType)
+
+    member internal _.AppendPathElement(name:string) = helper.AppendPathElement(name)
+    member internal _.AppendPathElement(names:string[]) = helper.AppendPathElement(names)
+    member internal _.CurrentPathElements = helper.CurrentPathElements
+    member internal x.UpdateModelSpits() =
+        x._modelSpits <- x._model.Spit().ToArray()
+        x._modelSpitObjects <- x._modelSpits.Select(fun spit -> spit.GetCore()).ToArray()
+
+
+
+    override x.EnterModel(ctx:ModelContext) = x.UpdateModelSpits()
+
+    override x.EnterSystem(ctx:SystemContext) =
         let name = ctx.systemName().GetText().DeQuoteOnDemand()
-        _system = _model.Systems.First(s => s.Name == name)
-    }
-    override public void ExitSystem(SystemContext ctx) { this._system = null; }
+        x._system <- x._model.Systems.TryFind(fun s -> s.Name = name)
 
-    override public void EnterFlow(FlowContext ctx)
-    {
+    override x.ExitSystem(ctx:SystemContext) = x._system <- None
+
+    override x.EnterFlow(ctx:FlowContext) =
         let flowName = ctx.identifier1().GetText().DeQuoteOnDemand()
-        _flow = _system.Flows.First(f => f.Name == flowName)
-    }
-    override public void ExitFlow(FlowContext ctx) { _flow = null; }
+        match x._system with
+        | Some system ->
+            x._flow <- system.Flows.TryFind(fun f -> f.Name = flowName)
+        | None -> failwith "ERROR"
+
+    override x.ExitFlow(ctx:FlowContext) = x._flow <- None
 
 
 
-    override public void EnterParenting(ParentingContext ctx)
-    {
+    override x.EnterParenting(ctx:ParentingContext) =
         let name = ctx.identifier1().GetText().DeQuoteOnDemand()
-        _parenting = (Real)_flow.Graph.Vertices.FindWithName(name)
-    }
-    override public void ExitParenting(ParentingContext ctx) { _parenting = null; }
+        match x._flow with
+        | Some flow ->
+            let real = flow.Graph.Vertices.FindWithName(name) :?> Real
+            x._parenting <- Some real
+        | None -> failwith "ERROR"
 
-    //protected IVertex FindVertex(string[] fqdn)
-    //{
-    //    if (_parenting == null)
-    //    {
-    //        _flow.Graph.
-    //    }
-    //}
-}
+    override x.ExitParenting(ctx:ParentingContext) = x._parenting <- None
+

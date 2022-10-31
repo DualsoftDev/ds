@@ -50,9 +50,9 @@ type ParserHelper(options:ParserOptions) =
     /// button category 중복 check 용
     member val ButtonCategories = HashSet<(DsSystem*string)>()
 
-    member val internal _system:DsSystem option = None
-    member val internal _flow:Flow option = None
-    member val internal _parenting:Real option = None
+    member val internal _system:DsSystem option = None with get, set
+    member val internal _flow:Flow option = None  with get, set
+    member val internal _parenting:Real option = None  with get, set
     member val internal _elements = Dictionary<string[], GraphVertexType>(NameUtil.CreateNameComponentsComparer())
     member val internal _modelSpits:SpitResult array = [||] with get, set
     member val internal _modelSpitObjects:obj array = [||] with get, set

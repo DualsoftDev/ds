@@ -26,7 +26,7 @@ class ElementListener : ListenerBase
             enumerateChildren<Identifier123Context>(ctx)
                 .Select(collectNameComponents)
                 .ToArray()
-                
+
         bool isWildcard(string[] cc) => cc.Length == 1 && cc[0] == "_"
         Real[] findSegments(string[][] fqdns) =>
             fqdns
@@ -34,14 +34,14 @@ class ElementListener : ListenerBase
             .Select(s => _model.FindGraphVertex<Real>(s))
             .Tap(x => Assert(x != null))
             .ToArray()
-            
+
         let ser =   // { start ~ end ~ reset }
             enumerateChildren<CallComponentsContext>(ctx)
             .Select(collectCallComponents)
             .Tap(callComponents => Assert(callComponents.ForAll(cc => cc.Length == 2 || isWildcard(cc))))
             .Select(callCompnents => callCompnents.Select(cc => isWildcard(cc) ? null : cc.Prepend(_system.Name).ToArray()).ToArray())
             .ToArray()
-            
+
         let item = hash.First(it => it.Name == interfaceName)
         let n = ser.Length
 
@@ -72,7 +72,7 @@ class ElementListener : ListenerBase
                 || spitResult.NameComponents.IsStringArrayEqaul(pathWithoutParenting))
             .Select(spitResult => spitResult.GetCore())
             .ToArray()
-            
+
 
         let pathAdapted = ns.Length == 2 ? new[] { _system.Name }.Concat(ns).ToArray() : new string[] { }
 
@@ -83,7 +83,7 @@ class ElementListener : ListenerBase
                 pathAdapted.Any() && spitResult.NameComponents.IsStringArrayEqaul(pathAdapted))
             .Select(spitResult => spitResult.GetCore())
             .ToArray()
-            
+
 
         // 다른 시스템의 API 호출
         let apiCall =
@@ -119,7 +119,7 @@ class ElementListener : ListenerBase
                         .Where(alias => alias.Mnemonic.IsStringArrayEqaul(pathWithoutParenting))
                         .Select(alias => alias.AliasKey)
                         .FirstOrDefault()
-                        
+
                 switch (aliasKey.Length)
                 {
                     case 3:     // my flow real 에 대한 alias

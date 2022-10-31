@@ -207,8 +207,8 @@ module HmiGenModule =
 
         let hmiInfos = new Dictionary<string, Info>()
         for sys in model.Systems do
-            if sys.Name = "My" then // to check
-            // if sys.Active then
+            // if sys.Name = "My" then // to check
+            if sys.Active then
                 addSystemFlowReal sys hmiInfos
                 addGroupButtons sys hmiInfos sys.AutoButtons ButtonType.Auto
                 addGroupButtons sys hmiInfos sys.ResetButtons ButtonType.Clear
@@ -247,7 +247,7 @@ module HmiGenModule =
         settings.Converters.Add(Converters.StringEnumConverter())
         JsonConvert.SerializeObject(
             initializer,
-            Formatting.Indented, // to visual check
+            // Formatting.Indented, // to visual check
             settings
         )
 

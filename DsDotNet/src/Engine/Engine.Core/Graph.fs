@@ -45,7 +45,7 @@ module GraphModule =
                 failwithlogf "Runtime edge does not allow Reversed flag."
             if et.HasFlag(EdgeType.Reversed) then
                 failwithlogf "Runtime edge does not allow Bidirectional flag."
-
+            
         interface IEdge<'V> with
             member x.Source = x.Source
             member x.Target = x.Target

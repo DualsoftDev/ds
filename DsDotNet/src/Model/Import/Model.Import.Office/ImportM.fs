@@ -57,10 +57,10 @@ module ImportM =
                 MSGInfo($"전체 도형   count [{doc.Nodes.Count()}]")
                 MSGInfo($"전체 연결   count [{doc.Edges.Count()}]")
                 MSGInfo($"전체 부모   count [{doc.Parents.Keys.Count}]")
-                model
+                model, ImportU.dicFlow
 
             with ex ->  failwithf  $"{ex.Message}"
-                        model
+                        model, ImportU.dicFlow
                     
 
     let FromPPTX(path:string) =

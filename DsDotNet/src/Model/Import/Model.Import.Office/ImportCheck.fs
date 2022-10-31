@@ -13,19 +13,33 @@ open Engine.Core
 [<AutoOpen>]
 module ImportCheck =
         
-        //let GetDemoModel(sysName:string) = 
-        //    let model = MModel("testModel");
-        //    let sys   = MSys.Create(sysName, true, model)
-        //    let mFlow = MFlow.Create("P0", sys, Int32.MaxValue)
-        //    mFlow.AddEdge(MEdge(MSeg("START", sys,mFlow, TR), MSeg("시작인과", sys,mFlow, MY), StartEdge))         |> ignore
-        //    mFlow.AddEdge(MEdge(MSeg("RESET", sys,mFlow, TR), MSeg("복귀인과", sys,mFlow, MY), ResetEdge))         |> ignore
-        //    mFlow.AddEdge(MEdge(MSeg("START", sys,mFlow, TR), MSeg("시작유지", sys,mFlow, MY), StartPush))         |> ignore
-        //    mFlow.AddEdge(MEdge(MSeg("RESET", sys,mFlow, TR), MSeg("복귀유지", sys,mFlow, MY), ResetPush))         |> ignore
+        let GetDemoModel(sysName:string) = 
+            let model = Model()
+            let sys   = DsSystem.Create(sysName, "", model)
+            sys.Active <- true
+            let flow = Flow.Create("P0", sys)
+            let vertexs = HashSet<Real>()
+            let find(name:string) = vertexs.First(fun f->f.Name = name)
+            vertexs.Add(Real.Create("START", flow)) |>ignore
+            vertexs.Add(Real.Create("시작인과", flow))|>ignore
+            vertexs.Add(Real.Create("시작유지", flow))|>ignore
+            vertexs.Add(Real.Create("RESET", flow))|>ignore
+            vertexs.Add(Real.Create("복귀인과", flow))|>ignore
+            vertexs.Add(Real.Create("복귀유지", flow))|>ignore
+            vertexs.Add(Real.Create("ETC", flow))|>ignore
+            vertexs.Add(Real.Create("상호행위간섭", flow))|>ignore
+            vertexs.Add(Real.Create("시작후행리셋", flow))|>ignore
+            flow.Graph.AddVertices(vertexs.Cast<Vertex>())|>ignore
+            flow.Graph.Edges.Add(Edge.Create(flow.Graph, find("START"),find("시작인과"), StartEdge))       |> ignore
+            flow.Graph.Edges.Add(Edge.Create(flow.Graph, find("START"),find("시작유지"), StartPush))       |> ignore
+            flow.Graph.Edges.Add(Edge.Create(flow.Graph, find("RESET"),find("복귀인과"), ResetEdge))       |> ignore
+            flow.Graph.Edges.Add(Edge.Create(flow.Graph, find("RESET"),find("복귀유지"), ResetPush))       |> ignore
 
-        //    mFlow.AddEdge(MEdge(MSeg("ETC"  , sys,mFlow, TR), MSeg("상호행위간섭", sys,mFlow, MY), Interlock)) |> ignore
-        //    mFlow.AddEdge(MEdge(MSeg("ETC"  , sys,mFlow, TR), MSeg("시작후행리셋", sys,mFlow, MY), StartReset))    |> ignore
+            //test ahn
+            //flow.Graph.Edges.Add(Edge.Create(flow.Graph, find("ETC"),find("상호행위간섭"), Interlock))       |> ignore
+            //flow.Graph.Edges.Add(Edge.Create(flow.Graph, find("ETC"),find("시작후행리셋"), StartReset))       |> ignore
 
-        //    model
+            model
 
         let SameParent(parents:ConcurrentDictionary<pptNode, seq<pptNode>>, edge:pptEdge) =
             let failError (parents:pptNode seq, node:pptNode)=  

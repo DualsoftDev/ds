@@ -57,10 +57,6 @@ namespace Dual.Model.Import
             layoutSetting.NodeSeparation = 30;
             layoutSetting.ClusterMargin = 20;
 
-
-
-
-
             //viewer.Graph = new Graph() { LayoutAlgorithmSettings = new Microsoft.Msagl.Layout.Incremental.FastIncrementalLayoutSettings() };
             //var layoutSetting = new Microsoft.Msagl.Layout.Incremental.FastIncrementalLayoutSettings();
             //layoutSetting.NodeSeparation = 50;
@@ -71,13 +67,13 @@ namespace Dual.Model.Import
             //layoutSetting.Decay = 0.8;
 
 
+
             viewer.Graph.LayoutAlgorithmSettings = layoutSetting;
-
             SetBackColor(System.Drawing.Color.FromArgb(33, 33, 33));
-
 
             flow.Graph.Vertices
                 .ForEach(seg => DrawSeg(viewer.Graph.RootSubgraph, new DsViewNode(seg)));
+
             var dsEdges = flow.Graph.Edges.Select(s => new DsViewEdge(s));
 
             drawMEdgeGraph(dsEdges, viewer.Graph.RootSubgraph);

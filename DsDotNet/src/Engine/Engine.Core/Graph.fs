@@ -247,35 +247,34 @@ type GraphHelper =
     [<Extension>]
     static member ToText(edgeType:EdgeType) =
         let t = edgeType
-        if t.HasFlag(EdgeType.Reset) then
-            if t.HasFlag(EdgeType.Strong) then
-                if t.HasFlag(EdgeType.Bidirectional) then
-                    "<||>"
-                elif t.HasFlag(EdgeType.Reversed) then
-                    "<||"
+        if t = EdgeType.EditorInterlock then  "<||>"  //EditorInterlock Text 출력우선
+        elif t = EdgeType.EditorStartReset then  "=>" //EditorStartReset Reversed 없음
+        else  
+            if t.HasFlag(EdgeType.Reset) then
+                if t.HasFlag(EdgeType.Strong) then
+                    if t.HasFlag(EdgeType.Bidirectional) then
+                        "<||>"
+                    elif t.HasFlag(EdgeType.Reversed) then
+                        "<||"
+                    else
+                        "||>"
                 else
-                    "||>"
+                    if t.HasFlag(EdgeType.Bidirectional) then
+                        "<|>"
+                    elif t.HasFlag(EdgeType.Reversed) then
+                        "<|"
+                    else
+                        "|>"
             else
                 if t.HasFlag(EdgeType.Bidirectional) then
-                    "<|>"
-                elif t.HasFlag(EdgeType.Reversed) then
-                    "<|"
+                    failwith "Bidirectional 은 Strong, Reset와 같이 사용가능합니다. ERROR"
+                if t.HasFlag(EdgeType.Strong) then
+                    if t.HasFlag(EdgeType.Reversed) then
+                        "<<"
+                    else
+                        ">>"
                 else
-                    "|>"
-        else
-            if t.HasFlag(EdgeType.Bidirectional) then
-                failwith "Bidirectional 은 Strong, Reset와 같이 사용가능합니다. ERROR"
-            if t.HasFlag(EdgeType.Strong) then
-                if t.HasFlag(EdgeType.Reversed) then
-                    "<<"
-                else
-                    ">>"
-            else
-                if t.HasFlag(EdgeType.Reversed) then
-                    "<"
-                else
-                    ">"
-
-
-
-
+                    if t.HasFlag(EdgeType.Reversed) then
+                        "<"
+                    else
+                        ">"

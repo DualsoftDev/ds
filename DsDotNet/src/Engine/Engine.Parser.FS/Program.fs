@@ -24,7 +24,7 @@ open Engine.Common.FS.Functions
 
 module Program =
 
-    let EveryScenarioText = """
+    let EveryScenarioText = """XXX
 [sys ip = 192.168.0.1] My = {
     [flow] MyFlow = {
         Seg1 > Seg2;
@@ -765,7 +765,7 @@ C4 > C5;
 
 
     let Main(args:string[]) =
-        //ParseNormal(SplittedMRIEdgesText)
+        ParseNormal(SplittedMRIEdgesText)
         //ParseNormal(DuplicatedEdgesText)
         //ParseNormal(AdoptoedValidText)
         //ParseNormal(AdoptoedAmbiguousText)

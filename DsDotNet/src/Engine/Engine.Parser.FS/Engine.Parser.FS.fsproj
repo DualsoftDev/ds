@@ -28,6 +28,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Antlr4.Runtime.Standard" Version="4.9.3" />
+		<PackageReference Include="Antlr4BuildTasks" Version="8.17" PrivateAssets="all" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <ProjectReference Include="..\Engine.Common.FS\Engine.Common.FS.fsproj" />
 	  <ProjectReference Include="..\Engine.Parser\Engine.Parser.csproj" />
 	</ItemGroup>

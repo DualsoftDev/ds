@@ -20,7 +20,7 @@ open System.Collections.Generic
 
 
 type DsParser() =
-    static member ParseText (text:string, predExtract:dsParser->RuleContext, [<Optional; DefaultParameterValue(true)>]throwOnError) =
+    static member ParseText (text:string, predExtract:dsParser->#RuleContext, [<Optional; DefaultParameterValue(true)>]throwOnError) =
         let str = new AntlrInputStream(text)
         let lexer = new dsLexer(str)
         let tokens = new CommonTokenStream(lexer)
@@ -114,12 +114,12 @@ type DsParser() =
 
 
 
-    static member FromDocument(text:string, predExtract:dsParser->RuleContext, [<Optional; DefaultParameterValue(true)>]throwOnError) =       // (dsParser, RuleContext, ParserError[])
+    static member FromDocument(text:string, predExtract:dsParser->#RuleContext, [<Optional; DefaultParameterValue(true)>]throwOnError) =       // (dsParser, RuleContext, ParserError[])
         let expanded = DsParser.ExpandSystemCopy(text)
         DsParser.ParseText(expanded, predExtract, throwOnError)
 
     static member FromDocument(text:string, [<Optional; DefaultParameterValue(true)>]throwOnError) =       // (dsParser, ParserError[])
-        let func = fun (parser:dsParser) -> parser.model() :> RuleContext
+        let func = fun (parser:dsParser) -> parser.model()// :> RuleContext
         let (parser, tree, errors) = DsParser.FromDocument(text, func, throwOnError)
         (parser, errors)
 

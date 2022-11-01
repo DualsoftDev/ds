@@ -37,28 +37,29 @@ type EdgeListener(parser:dsParser, helper:ParserHelper) =
             let graph = parent.Graph
             let existing = graph.TryFindVertex(name)
             if existing.IsNone then
-                let target2 =
-                    match target with
-                    | :? AliasTargetReal as real ->
-                        let realTarget = modelSpitCores.OfType<Real>().First(fun r -> r.NameComponents.IsStringArrayEqaul(real.TargetFqdn))
-                        RealTarget realTarget
-                    | :? AliasTargetDirectCall as directCall ->
-                        let apiTarget = modelSpitCores.OfType<ApiItem>().First(fun a -> a.NameComponents.IsStringArrayEqaul(directCall.TargetFqdn))
-                        let dummyCall = Call.CreateNowhere(apiTarget, parent)
-                        CallTarget dummyCall
-                    | :? AliasTargetApi as api ->
-                        let dummyCall = Call.CreateNowhere(api.ApiItem, parent)
-                        CallTarget dummyCall
-                Alias.Create(name, target2, parent) |> ignore
+                let create target = Alias.Create(name, target, parent) |> ignore
+                match target with
+                | :? AliasTargetReal as real ->
+                    let realTarget = modelSpitCores.OfType<Real>().First(fun r -> r.NameComponents.IsStringArrayEqaul(real.TargetFqdn))
+                    create (RealTarget realTarget)
+                | :? AliasTargetDirectCall as directCall ->
+                    let apiTarget = modelSpitCores.OfType<ApiItem>().First(fun a -> a.NameComponents.IsStringArrayEqaul(directCall.TargetFqdn))
+                    let dummyCall = Call.CreateNowhere(apiTarget, parent)
+                    create(CallTarget dummyCall)
+                | :? AliasTargetApi as api ->
+                    let dummyCall = Call.CreateNowhere(api.ApiItem, parent)
+                    create(CallTarget dummyCall)
+                | _ -> ()
 
         x.UpdateModelSpits()
 
 
     override x.EnterCausalPhrase(ctx:CausalPhraseContext) =
         let children = ctx.children.ToArray();      // (CausalTokensDNF CausalOperator)+ CausalTokensDNF
-        children.Iter((ctx, n) => Assert( n % 2 == 0 ? ctx is CausalTokensDNFContext : ctx is CausalOperatorContext))
+        for (n, ctx) in children|> Seq.indexed do
+            assert( if n % 2 = 0 then ctx :? CausalTokensDNFContext else ctx :? CausalOperatorContext)
 
-        let findToken(ctx:CausalTokenContext):obj =
+        let findToken(ctx:CausalTokenContext):Vertex option =
             let ns = collectNameComponents(ctx)
             let mutable path = x.AppendPathElement(ns)
             if path.Length = 5 then
@@ -73,9 +74,9 @@ type EdgeListener(parser:dsParser, helper:ParserHelper) =
                 matches
                     .Select(fun spit -> spit.GetCore())
                     .OfType<Vertex>()
-                    .FirstOrDefault()
+                    .TryHead()
 
-            assert(token != null)
+            assert(token.IsSome)
             token
 
         (*
@@ -99,14 +100,16 @@ type EdgeListener(parser:dsParser, helper:ParserHelper) =
                 for right in rights do
                     let l = findToken(left)
                     let r = findToken(right)
-                    if isNull l then
+                    match l, r with
+                    | Some l, Some r ->
+                        match x._parenting with
+                        | Some parent ->
+                            parent.CreateEdges(l, r, op)
+                        | None ->
+                            x._flow.Value.CreateEdges(l, r, op)
+                        |> ignore
+                    | None, _ ->
                         raise <| ParserException($"ERROR: failed to find [{left.GetText()}]", ctx)
-                    if isNull r then
+                    | _, None ->
                         raise <| ParserException($"ERROR: failed to find [{right.GetText()}]", ctx)
 
-                    match x._parenting with
-                    | Some parent ->
-                        parent.CreateEdges(l :?> Vertex, r :?> Vertex, op)
-                    | None ->
-                        x._flow.Value.CreateEdges(l :?> Vertex, r :?> Vertex, op)
-                    |> ignore

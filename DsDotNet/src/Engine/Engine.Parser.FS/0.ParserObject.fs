@@ -9,7 +9,7 @@ type ParserOptions(activeCpuName, isSimulationMode, allowSkipExternalSegment) =
 
     static member Create4Runtime(activeCpuName:string) = ParserOptions(activeCpuName, false, false)
     static member Create4Simulation(activeCpuName:string) = ParserOptions(activeCpuName, true, false)
-    member x.Verify() = x.IsSimulationMode || (x.ActiveCpuName != null && not x.AllowSkipExternalSegment)
+    member x.Verify() = x.IsSimulationMode || (x.ActiveCpuName <> null && not x.AllowSkipExternalSegment)
 
 
 [<Flags>]

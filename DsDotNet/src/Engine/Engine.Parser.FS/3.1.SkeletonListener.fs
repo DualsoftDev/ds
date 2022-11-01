@@ -79,7 +79,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
     override x.EnterAliasListing(ctx:AliasListingContext) =
         let map = x._flow.Value.AliasMap
 
-        let aliasDef = findFirstChild<AliasDefContext>(ctx)
+        let aliasDef = findFirstChild<AliasDefContext>(ctx).Value
         let alias = collectNameComponents(aliasDef)
         match alias.Length with
             | 2 -> // {타시스템}.{interface명} or

@@ -55,10 +55,8 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
         let n = ser.Length
 
         assert(n = 2 || n = 3)
-        item.AddTXs(findSegments(ser[0]))
-        item.AddRXs(findSegments(ser[1]))
-
-        ()
+        item.AddTXs(findSegments(ser[0])) |> ignore
+        item.AddRXs(findSegments(ser[1])) |> ignore
 
 
     override x.EnterCausalToken(ctx:CausalTokenContext) =

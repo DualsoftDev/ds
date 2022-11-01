@@ -24,7 +24,6 @@ class Program
         var logger = Log4NetHelper.PrepareLog4Net("EngineLogger");
         Log4NetWrapper.SetLogger(logger);
         Global.Logger = logger;
-        Engine.Parser.Global.Logger = logger;
 
         logger.Info("Sample Runner started.");
 
@@ -36,7 +35,7 @@ class Program
         //Tester.DoSampleTestTriangle();
         //Tester.DoSampleTestAddressesAndLayouts();
 
-        Engine.Parser.Program.Main(null);
+        Engine.Parser.FS.Program.Main(null);
 
         SampleRunner.Run(ParserTest.SafetyValid);
         //SampleRunner.Run(ParserTest.StrongCausal);

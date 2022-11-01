@@ -3,7 +3,7 @@ namespace Engine.CodeGen
 open System.Collections.Generic
 open Engine.Core
 open Newtonsoft.Json
-open Engine.Parser
+open Engine.Parser.FS
 
 [<AutoOpen>]
 module HmiGenModule =
@@ -257,7 +257,7 @@ module HmiGenModule =
     let main argv =
         let helper =
             ModelParser.ParseFromString2(Program.EveryScenarioText,
-            ParserOptions.Create4Simulation());
+            ParserOptions.Create4Simulation("ActiveCpuName"));
         let model = helper.Model;
         let json = GenHmiCpuText(model)
         printfn "%A" (json.ToString())

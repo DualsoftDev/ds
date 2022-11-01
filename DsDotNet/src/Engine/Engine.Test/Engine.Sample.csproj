@@ -14,6 +14,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\Engine.Common\Engine.Common.csproj" />
 		<ProjectReference Include="..\Engine.Core\Engine.Core.fsproj" />
+		<ProjectReference Include="..\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
 		<ProjectReference Include="..\Engine.Parser\Engine.Parser.csproj" />
 	</ItemGroup>
 

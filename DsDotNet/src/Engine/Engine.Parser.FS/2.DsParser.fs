@@ -118,7 +118,7 @@ type DsParser() =
         let expanded = DsParser.ExpandSystemCopy(text)
         DsParser.ParseText(expanded, predExtract, throwOnError)
 
-    static member FromDocument(text:string, [<Optional; DefaultParameterValue(true:bool)>]throwOnError) =       // (dsParser, ParserError[])
+    static member FromDocument(text:string, [<Optional; DefaultParameterValue(true)>]throwOnError) =       // (dsParser, ParserError[])
         let func = fun (parser:dsParser) -> parser.model() :> RuleContext
         let (parser, tree, errors) = DsParser.FromDocument(text, func, throwOnError)
         (parser, errors)

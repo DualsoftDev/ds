@@ -12,7 +12,6 @@
 	<ItemGroup>
     <Compile Include="CalculationUtils.fs" />
     <Compile Include="GraphAlgorithms.fs" />
-    <Compile Include="GraphUtils.fs" />
   </ItemGroup>
 
   <ItemGroup>

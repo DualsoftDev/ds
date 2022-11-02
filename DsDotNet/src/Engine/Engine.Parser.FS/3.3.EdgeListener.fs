@@ -92,24 +92,25 @@ type EdgeListener(parser:dsParser, helper:ParserHelper) =
             todo: "A, B" 와 "A ? B" 에 대한 구분 없음.
          *)
         for triple in (children |> Array.windowed2 3 2) do
-            let lefts = enumerateChildren<CausalTokenContext>(triple[0])
-            let op = triple[1].GetText()
-            let rights = enumerateChildren<CausalTokenContext>(triple[2])
+            if triple.Length = 3 then
+                let lefts = enumerateChildren<CausalTokenContext>(triple[0])
+                let op = triple[1].GetText()
+                let rights = enumerateChildren<CausalTokenContext>(triple[2])
 
-            for left in lefts do
-                for right in rights do
-                    let l = findToken(left)
-                    let r = findToken(right)
-                    match l, r with
-                    | Some l, Some r ->
-                        match x._parenting with
-                        | Some parent ->
-                            parent.CreateEdges(l, r, op)
-                        | None ->
-                            x._flow.Value.CreateEdges(l, r, op)
-                        |> ignore
-                    | None, _ ->
-                        raise <| ParserException($"ERROR: failed to find [{left.GetText()}]", ctx)
-                    | _, None ->
-                        raise <| ParserException($"ERROR: failed to find [{right.GetText()}]", ctx)
+                for left in lefts do
+                    for right in rights do
+                        let l = findToken(left)
+                        let r = findToken(right)
+                        match l, r with
+                        | Some l, Some r ->
+                            match x._parenting with
+                            | Some parent ->
+                                parent.CreateEdges(l, r, op)
+                            | None ->
+                                x._flow.Value.CreateEdges(l, r, op)
+                            |> ignore
+                        | None, _ ->
+                            raise <| ParserException($"ERROR: failed to find [{left.GetText()}]", ctx)
+                        | _, None ->
+                            raise <| ParserException($"ERROR: failed to find [{right.GetText()}]", ctx)
 

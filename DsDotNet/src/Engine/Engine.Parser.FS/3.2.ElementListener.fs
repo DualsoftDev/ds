@@ -166,11 +166,11 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
                             |> ignore
                         | None ->
                             match x._parenting with
-                            | Some parent ->
+                            | None ->
                                 if ns.Length <> 1 then
                                     raise <| ParserException($"ERROR: unknown token [{ns.Combine()}].", ctx)
                                 Real.Create(ns[0], flow) |> ignore
-                            | None ->
+                            | Some parent ->
                                 raise <| ParserException($"ERROR: unknown token [{ns.Combine()}].", ctx)
                 finally
                     x.UpdateModelSpits()

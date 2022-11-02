@@ -28,14 +28,15 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
         match findFirstChild<SysBlockContext>(ctx) with
         | Some sysBlockCtx_ ->
             let name = ctx.systemName().GetText().DeQuoteOnDemand()
-            match findFirstChild<HostContext>(ctx) with
-            | Some hostCtx ->
-                let host = hostCtx.GetText()
-                x._system <- Some <| DsSystem.Create(name, host, x._model)
-                tracefn($"System: {name}")
-                x.AddElement(x.CurrentPathElements, GraphVertexType.System)
-            | None -> failwith "ERROR"
-        | None -> failwith "ERROR"
+            let host =
+                match findFirstChild<HostContext>(ctx) with
+                | Some hostCtx -> hostCtx.GetText()
+                | None -> null
+            x._system <- Some <| DsSystem.Create(name, host, x._model)
+            tracefn($"System: {name}")
+            x.AddElement(x.CurrentPathElements, GraphVertexType.System)
+        | None ->
+            failwith "ERROR"
 
     override x.EnterFlow(ctx:FlowContext) =
         let flowName = ctx.identifier1().GetText().DeQuoteOnDemand()
@@ -139,6 +140,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
 
         // I1 <||> I2 와 I2 <||> I3 에 대해서 해석
         for triple in (terms |> Array.windowed2 3 2) do
-            let opnd1, op, opnd2 = triple[0], triple[1], triple[2]
-            let ri_ = ApiResetInfo.Create(x._system.Value, opnd1, op, opnd2)
-            ()
+            if triple.Length = 3 then
+                let opnd1, op, opnd2 = triple[0], triple[1], triple[2]
+                let ri_ = ApiResetInfo.Create(x._system.Value, opnd1, op, opnd2)
+                ()

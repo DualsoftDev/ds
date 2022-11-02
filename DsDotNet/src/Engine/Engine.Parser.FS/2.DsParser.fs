@@ -54,7 +54,7 @@ type DsParser() =
                     |> Seq.filteri(fun n ch -> ranges |> Seq.forall(fun r -> n < fst r || snd r < n))
                     |> Array.ofSeq
 
-            string(chars)
+            String(chars)
 
         // see RuleContext.GetText()
         let rec ToText(ctx:RuleContext):string =
@@ -214,13 +214,13 @@ type DsParser() =
 
                         | '.' ->
                             sub.RemoveTail() |> ignore
-                            yield string(sub.ToArray())
+                            yield String(sub.ToArray())
                             sub.Clear()
 
                         | '"' when prev <> '\\' ->
                             sub.RemoveTail() |> ignore
                             if q then
-                                yield string(sub.ToArray())
+                                yield String(sub.ToArray())
                                 sub.Clear()
                             else
                                 q <- true
@@ -230,7 +230,7 @@ type DsParser() =
                     | None -> q <- true
 
                 if sub.Any() then
-                    yield string(sub.ToArray())
+                    yield String(sub.ToArray())
             ]
 
         let idCtx =

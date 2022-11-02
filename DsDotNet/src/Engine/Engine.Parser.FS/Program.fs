@@ -24,7 +24,7 @@ open Engine.Common.FS.Functions
 
 module Program =
 
-    let EveryScenarioText = """XXX
+    let EveryScenarioText = """
 [sys ip = 192.168.0.1] My = {
     [flow] MyFlow = {
         Seg1 > Seg2;

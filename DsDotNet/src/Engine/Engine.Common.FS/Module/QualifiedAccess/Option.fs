@@ -111,7 +111,3 @@ module OptionModule =
         | _                 -> None
 
 
-
-[<AutoOpen>]
-type OptionExt =
-    [<Extension>] static member GetValue<'T>(x:'T option) = x |> Option.get

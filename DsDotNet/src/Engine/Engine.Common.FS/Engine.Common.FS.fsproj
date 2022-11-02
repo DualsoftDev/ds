@@ -49,6 +49,7 @@
 		<Compile Include="Module\String.fs" />
 		<Compile Include="TypeExtensions\Xml.fs" />
 		<Compile Include="TypeExtensions\Em.Collection.fs" />
+		<Compile Include="TypeExtensions\Em.Option.fs" />
 		<Compile Include="Graph\QuickGraph.fs" />
 		<Compile Include="Library.fs" />
 	</ItemGroup>

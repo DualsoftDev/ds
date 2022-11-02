@@ -245,7 +245,7 @@ type DsParser() =
         let name = idCtx.GetText()
         splitName(name).ToArray()
 
-
+#if EXTENDED_USAGE
     static member getParseResult(parser:dsParser) = // : ParserResult
         let listener = new AllListener()
         ParseTreeWalker.Default.Walk(listener, parser.model())
@@ -271,3 +271,4 @@ type DsParser() =
         let r:ParserResult = DsParser.getParseResult(parser)
         r.rules
 
+#endif

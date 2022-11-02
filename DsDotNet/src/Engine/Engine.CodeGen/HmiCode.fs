@@ -3,28 +3,27 @@ namespace Engine.CodeGen
 open System.Collections.Generic
 open Engine.Core
 open Newtonsoft.Json
-open Engine.Parser.FS
 
 [<AutoOpen>]
 module HmiGenModule =
     type Category =
-    | None      = 0
-    | System    = 1
-    | Flow      = 2
-    | Real      = 3
-    | Device    = 4
-    | Interface = 5
-    | Button    = 6
+        | None      = 0
+        | System    = 1
+        | Flow      = 2
+        | Real      = 3
+        | Device    = 4
+        | Interface = 5
+        | Button    = 6
     and ButtonType =
-    | None      = 0
-    | Start     = 7
-    | Reset     = 8
-    | On        = 9
-    | Off       = 10
-    | Run       = 11
-    | Emergency = 12
-    | Auto      = 13
-    | Clear     = 14
+        | None      = 0
+        | Start     = 7
+        | Reset     = 8
+        | On        = 9
+        | Off       = 10
+        | Run       = 11
+        | Emergency = 12
+        | Auto      = 13
+        | Clear     = 14
 
     type Info = {
         name:string;
@@ -36,13 +35,15 @@ module HmiGenModule =
     }
     and Initialize = {
         mode:string;
-        initializer:Info list
+        initializer:Info list;
     }
 
-    let GenHmiCode(model:CoreModule.Model) =
+    let GenHmiCode(model:Model) =
+        let hmiInfos = new Dictionary<string, Info>()
+
         let genInfo
-                (name:string) (category:Category)
-                (buttonType:ButtonType) (parent:string) =
+                name category
+                buttonType (parent:string) =
             {
                 name = name;
                 category = category;
@@ -52,9 +53,7 @@ module HmiGenModule =
                 targets = new ResizeArray<string>(0);
             }
 
-        let addSystemFlowReal
-                (systemFlowReal:obj)
-                (hmiInfos:Dictionary<string, Info>) =
+        let addSystemFlowReal (systemFlowReal:obj) =
             let category =
                 match systemFlowReal with
                 | :? DsSystem -> Category.System
@@ -77,38 +76,29 @@ module HmiGenModule =
                     null, null
 
             if target <> null &&
-                    hmiInfos.ContainsKey(target) = false then
-                hmiInfos.Add(
-                    target, genInfo target category ButtonType.None parent
-                )
+                    false = hmiInfos.ContainsKey(target) then
+                let xxx = genInfo target category ButtonType.None parent
+                hmiInfos.Add(target, xxx)
 
-        let addButton
-                (btnName:string) (systemName:string)
-                (buttonType:ButtonType) (hmiInfos:Dictionary<string, Info>) =
-            hmiInfos.Add(
-                btnName,
-                genInfo btnName Category.Button buttonType systemName
-            )
+        let addButton btnName systemName buttonType =
+            let info = genInfo btnName Category.Button buttonType systemName
+            hmiInfos.Add(btnName, info)
 
-        let addFlowButton
-                (btnName:string) (systemName:string) (flowNames:string list)
-                (buttonType:ButtonType) (hmiInfos:Dictionary<string, Info>) =
+        let addFlowButton btnName systemName flowNames buttonType =
             if hmiInfos.ContainsKey(btnName) = false then
-                addButton btnName systemName buttonType hmiInfos
-                for flow in flowNames do hmiInfos.[btnName].targets.Add(flow)
+                addButton btnName systemName buttonType
+                for flow in flowNames do hmiInfos[btnName].targets.Add(flow)
 
         let addGroupButtons
-                (system:DsSystem) (hmiInfos:Dictionary<string, Info>)
+                (system:DsSystem)
                 (buttonsInFlow:Dictionary<string, ResizeArray<Flow>>)
-                (buttonType:ButtonType) =
-            for btn in buttonsInFlow do
-                let btnName = btn.Key
-                let flowNames = [ for flow in btn.Value do flow.QualifiedName ]
-                addFlowButton btnName system.Name flowNames buttonType hmiInfos
+                buttonType =
+            for KeyValue(btnName, btnValue) in buttonsInFlow do
+                let flowNames = [ for flow in btnValue do flow.QualifiedName ]
+                addFlowButton btnName system.Name flowNames buttonType
 
         let addUnionButtons
                 (system:DsSystem) (flow:Flow)
-                (hmiInfos:Dictionary<string, Info>)
                 (btnTargetMap:Dictionary<ButtonType, ResizeArray<string>>) =
             let flowName = $"{flow.QualifiedName}"
             let btnNames = [
@@ -119,13 +109,12 @@ module HmiGenModule =
             for name, btnType in btnNames do
                 let btnName = $"{name}__{flowName}"
                 if not (btnTargetMap.ContainsKey(btnType)) ||
-                        not (btnTargetMap.[btnType].Contains(flowName)) then
+                        not (btnTargetMap[btnType].Contains(flowName)) then
                     addFlowButton
-                        btnName system.Name [flowName] btnType hmiInfos
+                        btnName system.Name [flowName] btnType
 
-        let addGlobalButtons
-                (model:Model) (hmiInfos:Dictionary<string, Info>) =
-            let getFlowNames (hmiInfos:Dictionary<string, Info>) =
+        let addGlobalButtons (model:Model) =
+            let flowNames =
                 hmiInfos
                 |> Seq.filter(fun info ->
                     info.Value.category = Category.Flow
@@ -138,26 +127,25 @@ module HmiGenModule =
                 "ATMANU", ButtonType.Auto;
                 "CLEAR", ButtonType.Clear;
             ]
-            let flows = getFlowNames hmiInfos
+            let flows = flowNames
             for button, btnType in buttons do
-                addButton button null btnType hmiInfos
+                addButton button null btnType
                 match btnType with
                 | ButtonType.Run ->
                     for sys in model.Systems do
                         for sp in sys.StartPoints do
-                            hmiInfos.[button].targets.Add(sp.QualifiedName)
+                            hmiInfos[button].targets.Add(sp.QualifiedName)
                 | ButtonType.Emergency
                 | ButtonType.Auto
                 | ButtonType.Clear ->
                     for flow in flows do
-                        hmiInfos.[button].targets.Add(flow)
+                        hmiInfos[button].targets.Add(flow)
                 | _ ->
                     failwith "type error"
 
 
-        let addInterface
-                (api:ApiItem) (hmiInfos:Dictionary<string, Info>) =
-            if hmiInfos.ContainsKey(api.QualifiedName) = false then
+        let addInterface (api:ApiItem) =
+            if false = hmiInfos.ContainsKey(api.QualifiedName) then
                 hmiInfos.Add(
                     api.QualifiedName,
                     genInfo
@@ -168,13 +156,10 @@ module HmiGenModule =
                 )
 
         let addDevice
-                (model:Model) (system:DsSystem) (flow:Flow)
-                (hmiInfos:Dictionary<string, Info>) (call:Vertex) =
-            let addToUsedIn
-                    (hmiInfos:Dictionary<string, Info>)
-                    (device:string) (target:string) =
-                if hmiInfos.[device].used_in.Contains(target) = false then
-                    hmiInfos.[device].used_in.Add(target)
+                (model:Model) (system:DsSystem) (flow:Flow) (call:Vertex) =
+            let addToUsedIn device target =
+                if false = hmiInfos[device].used_in.Contains(target) then
+                    hmiInfos[device].used_in.Add(target)
 
             let (device, api) =
                 match call with
@@ -185,7 +170,7 @@ module HmiGenModule =
                         match a.Target with
                         | RealTarget r -> r.NameComponents
                         | CallTarget c -> c.ApiItem.NameComponents
-                    aliasKey.[0], Some(model.FindApiItem aliasKey)
+                    aliasKey[0], Some(model.FindApiItem aliasKey)
                 | _ ->
                     null, None
 
@@ -195,54 +180,54 @@ module HmiGenModule =
                     genInfo device Category.Device ButtonType.None null
                 )
 
-            addInterface api.Value hmiInfos
-            addToUsedIn hmiInfos device system.Name
-            addToUsedIn hmiInfos device flow.QualifiedName
+            addInterface api.Value
+            addToUsedIn device system.Name
+            addToUsedIn device flow.QualifiedName
 
             match call.Parent with
             | Real realParent ->
-                addToUsedIn hmiInfos device realParent.QualifiedName
+                addToUsedIn device realParent.QualifiedName
             | _ ->
                 ()
 
-        let hmiInfos = new Dictionary<string, Info>()
         for sys in model.Systems do
             // if sys.Name = "My" then // to check
             if sys.Active then
-                addSystemFlowReal sys hmiInfos
-                addGroupButtons sys hmiInfos sys.AutoButtons ButtonType.Auto
-                addGroupButtons sys hmiInfos sys.ResetButtons ButtonType.Clear
-                addGroupButtons sys hmiInfos sys.EmergencyButtons ButtonType.Emergency
+                let groupBtnCombiner = addGroupButtons sys
+                addSystemFlowReal sys
+                groupBtnCombiner sys.AutoButtons ButtonType.Auto
+                groupBtnCombiner sys.ResetButtons ButtonType.Clear
+                groupBtnCombiner sys.EmergencyButtons ButtonType.Emergency
                 let btnTgtMap =
                     new Dictionary<ButtonType, ResizeArray<string>>()
                 for info in hmiInfos do
                     btnTgtMap.Add(info.Value.botton_type, info.Value.targets)
                 for flow in sys.Flows do
-                    addSystemFlowReal flow hmiInfos
-                    addUnionButtons sys flow hmiInfos btnTgtMap
+                    addSystemFlowReal flow
+                    addUnionButtons sys flow btnTgtMap
                     for rootSeg in flow.Graph.Vertices do
                         match rootSeg with
                         | :? Real as real ->
-                            addSystemFlowReal rootSeg hmiInfos
+                            addSystemFlowReal rootSeg
                             for call in real.Graph.Vertices do
-                                addDevice model sys flow hmiInfos call
+                                addDevice model sys flow call
                         | :? Call as call ->
-                            addDevice model sys flow hmiInfos call
+                            addDevice model sys flow call
                         | :? Alias as alias ->
                             match alias.Target with
                             | RealTarget rt ->
-                                addSystemFlowReal rt hmiInfos
+                                addSystemFlowReal rt
                             | CallTarget ct ->
-                                addDevice model sys flow hmiInfos alias
+                                addDevice model sys flow alias
                         | _ ->
                             printfn "unknown type has detected"
 
-        addGlobalButtons model hmiInfos
+        addGlobalButtons model
 
         let initializer = {
-                mode = "init";
-                initializer = [ for info in hmiInfos.Values do yield info ];
-            }
+            mode = "init";
+            initializer = hmiInfos.Values |> List.ofSeq;
+        }
         let settings = JsonSerializerSettings()
         settings.Converters.Add(Converters.StringEnumConverter())
         JsonConvert.SerializeObject(

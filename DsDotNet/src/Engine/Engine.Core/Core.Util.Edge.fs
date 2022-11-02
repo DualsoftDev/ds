@@ -48,15 +48,15 @@ module EdgeModule =
                 failwithlogf $"Unknown causal operator [{operator}]."
         ]
 
-    let createEdges(graph:Graph<Vertex, Edge>, source:Vertex, target:Vertex, operator:string) =
+    let private createEdges(graph:Graph<Vertex, Edge>, source:Vertex, target:Vertex, operator:string) =
          [|
             for src, op, tgt in createEdgesReArranged(source, operator, target) do
                 let edge = Edge.Create(graph, src, tgt, op)
                 match operator with
-                | TextInterlock ->     edge.EditorInfo <- EdgeType.EditorInterlock 
-                | TextStartReset ->    edge.EditorInfo <- EdgeType.EditorStartReset 
+                | TextInterlock ->     edge.EditorInfo <- EdgeType.EditorInterlock
+                | TextStartReset ->    edge.EditorInfo <- EdgeType.EditorStartReset
                 | _ -> ()
-                
+
                 yield edge
          |]
 

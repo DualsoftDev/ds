@@ -18,7 +18,8 @@ open type Engine.Parser.dsParser
 
 
 type DsParser() =
-    static member ParseText (text:string, extractor:dsParser->#RuleContext, [<Optional; DefaultParameterValue(true)>]throwOnError) =
+    static member ParseText (text:string, extractor:dsParser->#RuleContext, ?throwOnError) =
+        let throwOnError = defaultArg throwOnError true
         let str = new AntlrInputStream(text)
         let lexer = new dsLexer(str)
         let tokens = new CommonTokenStream(lexer)

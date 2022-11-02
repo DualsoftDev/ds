@@ -108,8 +108,8 @@ module HmiGenModule =
             ]
             for name, btnType in btnNames do
                 let btnName = $"{name}__{flowName}"
-                if not (btnTargetMap.ContainsKey(btnType)) ||
-                        not (btnTargetMap[btnType].Contains(flowName)) then
+                if false = btnTargetMap.ContainsKey(btnType) ||
+                        false = btnTargetMap[btnType].Contains(flowName) then
                     addFlowButton
                         btnName system.Name [flowName] btnType
 

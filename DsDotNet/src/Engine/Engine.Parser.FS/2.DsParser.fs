@@ -18,7 +18,7 @@ open type Engine.Parser.dsParser
 
 
 type DsParser() =
-    static member ParseText (text:string, predExtract:dsParser->#RuleContext, [<Optional; DefaultParameterValue(true)>]throwOnError) =
+    static member ParseText (text:string, extractor:dsParser->#RuleContext, [<Optional; DefaultParameterValue(true)>]throwOnError) =
         let str = new AntlrInputStream(text)
         let lexer = new dsLexer(str)
         let tokens = new CommonTokenStream(lexer)
@@ -28,7 +28,7 @@ type DsParser() =
         let listener_parser = new ErrorListener<IToken>(throwOnError)
         lexer.AddErrorListener(listener_lexer)
         parser.AddErrorListener(listener_parser)
-        let tree = predExtract parser
+        let tree = extractor parser
         let errors = listener_lexer.Errors.Concat(listener_parser.Errors).ToArray()
 
         parser, tree, errors
@@ -180,8 +180,8 @@ type DsParser() =
 
 
 
-    static member collectNameComponents(from:IParseTree) = // :string[]
-        let rec splitName(name:string) = // : string[]
+    static member collectNameComponents(from:IParseTree):string[] = // :Fqdn
+        let rec splitName(name:string) = // : Fqdn
             [
                 let sub = new ResizeArray<char>()
                 let mutable prev = ' '

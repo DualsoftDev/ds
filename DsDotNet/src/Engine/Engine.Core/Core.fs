@@ -53,7 +53,7 @@ module CoreModule =
     and Flow private (name:string, system:DsSystem) =
         inherit FqdnObject(name, system)
         member val Graph = Graph<Vertex, Edge>()
-        member val AliasMap = Dictionary<NameComponents, HashSet<string>>(nameComponentsComparer())
+        member val AliasMap = Dictionary<Fqdn, HashSet<string>>(nameComponentsComparer())
         member x.System = system
         static member Create(name:string, system:DsSystem) =
             let flow = Flow(name, system)
@@ -102,7 +102,7 @@ module CoreModule =
 
         member x.Target = target
 
-        override x.GetRelativeName(referencePath:NameComponents) =
+        override x.GetRelativeName(referencePath:Fqdn) =
             match target with
             | RealTarget r -> x.Name
             | CallTarget c -> base.GetRelativeName(referencePath)

@@ -5,7 +5,7 @@ open System.Linq
 
 [<AutoOpen>]
 module internal ModelFindModule =
-    let findGraphVertex(model:Model, fqdn:NameComponents) : obj =
+    let findGraphVertex(model:Model, fqdn:Fqdn) : obj =
         let n = fqdn.Length
         match n with
         | 0 -> failwith "ERROR: name not given"
@@ -16,21 +16,21 @@ module internal ModelFindModule =
             let seg = model.Systems.First(fun sys -> sys.Name = fqdn[0]).Flows.First(fun f -> f.Name = fqdn[1]).Graph.FindVertex(fqdn[2]) :?> Real
             seg.Graph.FindVertex(fqdn[3])
         | _ -> failwith "ERROR"
-    let findGraphVertexT<'V when 'V :> IVertex>(model:Model, fqdn:NameComponents) =
+    let findGraphVertexT<'V when 'V :> IVertex>(model:Model, fqdn:Fqdn) =
         let v = findGraphVertex(model, fqdn)
         if typedefof<'V>.IsAssignableFrom(v.GetType()) then
             v :?> 'V
         else
             failwith "ERROR"
 
-    let findApiItem(model:Model, apiPath:NameComponents) =
+    let findApiItem(model:Model, apiPath:Fqdn) =
         let sysName, apiKey = apiPath[0], apiPath[1]
         let sys = model.Systems.First(fun sys -> sys.Name = sysName)
         let x = sys.ApiItems.FindWithName(apiKey)
         x
 
 
-    let findCall(model:Model, callPath:NameComponents) =
+    let findCall(model:Model, callPath:Fqdn) =
         let x = findGraphVertex(model, callPath) :?> Call
         x
 
@@ -43,11 +43,11 @@ module internal ModelFindModule =
 
 [<Extension>]
 type ModelFindHelper =
-    [<Extension>] static member FindGraphVertex(model:Model, fqdn:NameComponents) = findGraphVertex(model, fqdn)
-    [<Extension>] static member FindGraphVertex<'V when 'V :> IVertex>(model:Model, fqdn:NameComponents) = findGraphVertexT<'V>(model, fqdn)
-    [<Extension>] static member FindApiItem(model:Model, apiPath:NameComponents) = findApiItem(model, apiPath)
+    [<Extension>] static member FindGraphVertex(model:Model, fqdn:Fqdn) = findGraphVertex(model, fqdn)
+    [<Extension>] static member FindGraphVertex<'V when 'V :> IVertex>(model:Model, fqdn:Fqdn) = findGraphVertexT<'V>(model, fqdn)
+    [<Extension>] static member FindApiItem(model:Model, apiPath:Fqdn) = findApiItem(model, apiPath)
     [<Extension>] static member FindSystem(model:Model, systemName:string) = findSystem(model, systemName)
-    [<Extension>] static member FindCall(model:Model, callPath:NameComponents) = findCall(model, callPath)
+    [<Extension>] static member FindCall(model:Model, callPath:Fqdn) = findCall(model, callPath)
     [<Extension>] static member FindFlow(system:DsSystem, flowName:string) = findFlow(system, flowName)
 
 

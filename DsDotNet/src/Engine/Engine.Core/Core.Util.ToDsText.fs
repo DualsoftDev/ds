@@ -15,7 +15,7 @@ module internal ToDsTextModule =
 
     /// Edge 를 최대한 한줄로 세운 것을 우선으로 출력하고, 나머지 대충 출력
     let edgesToDs<'V when 'V :> FqdnObject and 'V : equality>
-            (basis:NameComponents) (edges:EdgeBase<'V> seq) (indent:int) =
+            (basis:Fqdn) (edges:EdgeBase<'V> seq) (indent:int) =
         let gr = Graph(Seq.empty, edges)    // 계산용 graph
         let processed = HashSet<EdgeBase<'V>>()
         let inits, vs = gr.Inits, gr.Vertices
@@ -49,7 +49,7 @@ module internal ToDsTextModule =
         ]
 
     let rec graphEntitiesToDs<'V when 'V :> FqdnObject and 'V : equality>
-        (basis:NameComponents) (vertices:'V seq) (edges:EdgeBase<'V> seq) (indent:int) =
+        (basis:Fqdn) (vertices:'V seq) (edges:EdgeBase<'V> seq) (indent:int) =
 
         let tab = getTab indent
         [
@@ -96,7 +96,7 @@ module internal ToDsTextModule =
                 yield $"{tab}{island.GetRelativeName(basis)}; // island"
         ] |> combineLines
 
-    and segmentToDs (basis:NameComponents) (segment:Real) (indent:int) =
+    and segmentToDs (basis:Fqdn) (segment:Real) (indent:int) =
         let tab = getTab indent
         [
             let subGraph = segment.Graph

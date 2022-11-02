@@ -100,7 +100,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
         let hash = x._system.Value.ApiItems
         let interrfaceNameCtx = findFirstChild<InterfaceNameContext>(ctx)
         let interfaceName = collectNameComponents(interrfaceNameCtx.Value)[0]
-        let collectCallComponents(ctx:CallComponentsContext):string[][] =
+        let collectCallComponents(ctx:CallComponentsContext):Fqdn[] =
             enumerateChildren<Identifier123Context>(ctx)
                 .Select(collectNameComponents)
                 .ToArray()

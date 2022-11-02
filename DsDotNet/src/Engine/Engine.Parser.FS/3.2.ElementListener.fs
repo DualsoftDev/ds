@@ -22,13 +22,13 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
         let interrfaceNameCtx = findFirstChild<InterfaceNameContext>(ctx)
         let interfaceName = collectNameComponents(interrfaceNameCtx.Value)[0]
 
-        let collectCallComponents(ctx:CallComponentsContext):string[][] =
+        let collectCallComponents(ctx:CallComponentsContext):Fqdn[] =
             enumerateChildren<Identifier123Context>(ctx)
                 .Select(collectNameComponents)
                 .ToArray()
 
-        let isWildcard(cc:string[]):bool = cc.Length = 1 && cc[0] = "_"
-        let findSegments(fqdns:string[][]):Real[] =
+        let isWildcard(cc:Fqdn):bool = cc.Length = 1 && cc[0] = "_"
+        let findSegments(fqdns:Fqdn[]):Real[] =
             fqdns
                 .Where(fun fqdn -> fqdn <> null)
                 .Select(fun s -> x._model.FindGraphVertex<Real>(s))
@@ -170,7 +170,6 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
     override x.EnterIdentifier12Listing(ctx:Identifier12ListingContext) =
         // side effects
         let path = x.AppendPathElement(collectNameComponents(ctx))
-        let prop = x._elements[path]
         if x._parenting.IsSome then
             raise <| new ParserException($"ERROR: identifier [{path.Combine()}] not allowed!", ctx)
 

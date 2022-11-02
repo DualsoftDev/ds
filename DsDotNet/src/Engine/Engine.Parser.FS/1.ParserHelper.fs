@@ -6,15 +6,15 @@ open System.Linq
 
 type AliasTarget() = class end
 
-type AliasTargetWithFqdn(targetFqdn:NameComponents) =
+type AliasTargetWithFqdn(targetFqdn:Fqdn) =
     inherit AliasTarget()
 
     member val TargetFqdn = targetFqdn with get, set
 
-type AliasTargetReal(targetFqdn:NameComponents) =
+type AliasTargetReal(targetFqdn:Fqdn) =
     inherit AliasTargetWithFqdn(targetFqdn)
 
-type AliasTargetDirectCall(targetFqdn:NameComponents) =
+type AliasTargetDirectCall(targetFqdn:Fqdn) =
     inherit AliasTargetWithFqdn(targetFqdn)
 
 
@@ -40,16 +40,16 @@ type ParserHelper(options:ParserOptions) =
     member val internal _system:DsSystem option = None with get, set
     member val internal _flow:Flow option = None  with get, set
     member val internal _parenting:Real option = None  with get, set
-    member val internal _elements = Dictionary<string[], GraphVertexType>(NameUtil.CreateNameComponentsComparer())
+    member val internal _elements = Dictionary<Fqdn, GraphVertexType>(NameUtil.CreateNameComponentsComparer())
     member val internal _modelSpits:SpitResult array = [||] with get, set
     member val internal _modelSpitObjects:obj array = [||] with get, set
 
     member internal x.AppendPathElement(lastName:string) =
         x.CurrentPathElements.Append(lastName).ToArray()
-    member internal x.AppendPathElement(lastNames:string[]) =
+    member internal x.AppendPathElement(lastNames:Fqdn) =
         x.CurrentPathElements.Concat(lastNames).ToArray()
 
-    member internal x.CurrentPathElements with get():string[] =
+    member internal x.CurrentPathElements with get():Fqdn =
         let helper() = [
             match x._system with
             | Some sys -> yield sys.Name

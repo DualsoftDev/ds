@@ -28,14 +28,14 @@ type ListenerBase(parser:dsParser, helper:ParserHelper) =
     member internal _._modelSpits       with get() = helper._modelSpits       and set(v) = helper._modelSpits       <- v
     member internal _._modelSpitObjects with get() = helper._modelSpitObjects and set(v) = helper._modelSpitObjects <- v
 
-    member internal x.AddElement(path:string[], elementType:GraphVertexType) =
+    member internal x.AddElement(path:Fqdn, elementType:GraphVertexType) =
         if x._elements.ContainsKey(path) then
             x._elements[path] <- (x._elements[path] ||| elementType)
         else
             x._elements.Add(path, elementType)
 
     member internal _.AppendPathElement(name:string) = helper.AppendPathElement(name)
-    member internal _.AppendPathElement(names:string[]) = helper.AppendPathElement(names)
+    member internal _.AppendPathElement(names:Fqdn)  = helper.AppendPathElement(names)
     member internal _.CurrentPathElements = helper.CurrentPathElements
     member internal x.UpdateModelSpits() =
         x._modelSpits <- x._model.Spit().ToArray()

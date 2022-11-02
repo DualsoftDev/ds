@@ -4,7 +4,7 @@
 		<TargetFramework>net48</TargetFramework>
 		<RootNamespace>Engine.CodeGen</RootNamespace>
 		<LangVersion>6.0</LangVersion>
-		<OutputType>Exe</OutputType>
+		<OutputType>Library</OutputType>
 	</PropertyGroup>
 
   <ItemGroup>
@@ -15,6 +15,8 @@
     <Compile Include="CpuUnit.fs" />
     <Compile Include="CpuCode.fs" />
     <Compile Include="HmiCode.fs" />
+    <Compile Include="PilotCode.fs" />
+    <Compile Include="CodeGenHandler.fs" />
   </ItemGroup>
 
   <ItemGroup>

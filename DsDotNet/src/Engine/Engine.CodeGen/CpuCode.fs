@@ -7,8 +7,7 @@ open Newtonsoft.Json
 
 [<AutoOpen>]
 module CpuGenModule =
-  
-    let GenCpuText(model:Model) = 
+    let GenCpuCode(model:Model) = 
         let testText = 
             """
             [

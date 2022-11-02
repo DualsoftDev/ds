@@ -3,7 +3,6 @@ namespace Engine.CodeGen
 open System.Collections.Generic
 open Engine.Core
 open Newtonsoft.Json
-open Engine.Parser
 
 [<AutoOpen>]
 module HmiGenModule =
@@ -39,7 +38,7 @@ module HmiGenModule =
         initializer:Info list
     }
 
-    let GenHmiCpuText(model:CoreModule.Model) =
+    let GenHmiCode(model:CoreModule.Model) =
         let genInfo
                 (name:string) (category:Category)
                 (buttonType:ButtonType) (parent:string) =
@@ -251,12 +250,12 @@ module HmiGenModule =
             settings
         )
 
-    [<EntryPoint>]
-    let main argv =
-        let helper =
-            ModelParser.ParseFromString2(Program.EveryScenarioText,
-            ParserOptions.Create4Simulation());
-        let model = helper.Model;
-        let json = GenHmiCpuText(model)
-        printfn "%A" (json.ToString())
-        0
+    //[<EntryPoint>]
+    //let main argv =
+    //    let helper =
+    //        ModelParser.ParseFromString2(Program.EveryScenarioText,
+    //        ParserOptions.Create4Simulation());
+    //    let model = helper.Model;
+    //    let json = GenHmiCode(model)
+    //    printfn "%A" (json.ToString())
+    //    0

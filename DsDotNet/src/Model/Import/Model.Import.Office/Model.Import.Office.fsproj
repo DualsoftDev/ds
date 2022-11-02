@@ -19,7 +19,7 @@
     <Compile Include="InterfaceClass.fs" />
     <Compile Include="EdgeUtil.fs" />
     <Compile Include="Util.fs" />
-    <Compile Include="UtilError.fs" />
+    <Compile Include="MessgeError.fs" />
     <Compile Include="UtilPPT.fs" />
     <Compile Include="PPTX.fs" />
     <Compile Include="ImportCheck.fs" />

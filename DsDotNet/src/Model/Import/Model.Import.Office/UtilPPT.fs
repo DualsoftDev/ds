@@ -206,10 +206,14 @@ module UtilPPT =
                 prop.Name.Value
         
         [<Extension>]
-        static member IsTitle(shape:#Shape) = 
+        static member IsTitleBox(shape:#Shape) = 
                     if (shape.Descendants<ApplicationNonVisualDrawingProperties>().Any() |> not) then false
                     elif (shape.Descendants<ApplicationNonVisualDrawingProperties>().First().Descendants<PlaceholderShape>().Any() |> not ) then false
                     else true
+
+
+        [<Extension>]
+        static member IsTitleSlide(slidePart:#SlidePart) = slidePart.Slide.LocalName = "sId"|> not  //test ahn
 
         [<Extension>]
         static member PageTitle(slidePart:#SlidePart) = 
@@ -279,7 +283,7 @@ module UtilPPT =
 
                         shapes 
                         |> Seq.except (ableShapes |> Seq.map (fun (shape, page, geometry, isDash) -> shape))
-                        |> Seq.filter(fun f -> f.IsTitle()|>not)
+                        |> Seq.filter(fun f -> f.IsTitleBox()|>not)
                         |> Seq.filter(fun f -> f.ShapeName().StartsWith("TextBox")|>not)
                         |> Seq.iter(fun f -> 
                                     if(f.IsAbleShape() && f.IsOutlineExist()|>not)

@@ -9,7 +9,7 @@ open DocumentFormat.OpenXml
 open System.Collections.Concurrent
 
 [<AutoOpen>]
-module UtilError = 
+module MessgeError = 
 
     type ErrorCase  = Shape | Conn | Page | Group | Name 
         with
@@ -33,7 +33,7 @@ module UtilError =
         msgs.TryAdd(8,"SReset edge는 한쪽이 둥근화살표 입니다.") |>ignore
         msgs.TryAdd(9,"양방향 edge 끝 화살표는 하나 이상 입니다") |>ignore
         msgs.TryAdd(10,"Interlock edge는  점선만 가능합니다") |>ignore
-        msgs.TryAdd(11,"sp") |>ignore
+        msgs.TryAdd(11,"인터페이스 인과는 약 리셋 불가") |>ignore
         msgs.TryAdd(12,"children은 call or exReal만 가능합니다.") |>ignore
         msgs.TryAdd(13,"도형의 이름이 없거나 Dummy 그룹은 점선 원형입니다.") |>ignore
         msgs.TryAdd(14,"edge 연결가능도형 아님") |>ignore

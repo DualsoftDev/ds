@@ -67,14 +67,6 @@ module ImportCheck =
             if(tgtParents.Count() > 1) then failError (tgtParents, edge.EndNode)  
 
 
-        //let InterfaceErr(pptNodes:pptNode seq, model:MModel, dicSeg:Dictionary<string, MSeg>) = 
-        //    pptNodes
-        //    |> Seq.filter(fun node -> node.NodeType = IF) 
-        //    |> Seq.iter(fun node -> 
-        //            if(node.IfName = ""|>not && node.IfTxs.IsEmpty() && node.IfTxs.IsEmpty() )
-        //                then Office.ErrorName(node.Shape, 35, node.PageNum)
-        //    )
-
 
         let CheckMakeCopyApi(nodes:pptNode seq, dicSys:Dictionary<int, DsSystem>) =
             let dicName = ConcurrentDictionary<string, string>()

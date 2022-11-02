@@ -433,6 +433,7 @@ module PPTX =
                     masterPages.TryAdd(masterPages.Count+1, slideMaster) |>ignore )
               
                 sildesAll
+                |> Seq.filter (fun (slidePart, show, page) -> slidePart.IsTitleSlide())
                 |> Seq.iter (fun (slidePart, show, page) -> 
                     pages.TryAdd(slidePart, pptPage(slidePart, page, show)) |>ignore )
               

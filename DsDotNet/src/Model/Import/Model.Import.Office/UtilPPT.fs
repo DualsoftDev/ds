@@ -280,6 +280,7 @@ module UtilPPT =
                         shapes 
                         |> Seq.except (ableShapes |> Seq.map (fun (shape, page, geometry, isDash) -> shape))
                         |> Seq.filter(fun f -> f.IsTitle()|>not)
+                        |> Seq.filter(fun f -> f.ShapeName().StartsWith("TextBox")|>not)
                         |> Seq.iter(fun f -> 
                                     if(f.IsAbleShape() && f.IsOutlineExist()|>not)
                                     then f.ErrorShape(38, page)

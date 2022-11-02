@@ -217,10 +217,10 @@ module PPTX =
             let txrx = GetSquareBrackets(shape.InnerText, false)
             if(txrx.Contains('~'))
             then 
-                let txs = txrx.Split('~')[0]
-                let rxs = txrx.Split('~')[1]
-                ifTXs  <- txs.Split(';') |> trimStartEndSeq |> HashSet 
-                ifRXs  <- rxs.Split(';') |> trimStartEndSeq |> HashSet 
+                let txs = (txrx.Split('~')[0])
+                let rxs = (txrx.Split('~')[1])
+                ifTXs  <- txs.Split(';').Where(fun f->f=""|>not) |> trimStartEndSeq |> Seq.filter(fun f->f="_"|>not) |> HashSet 
+                ifRXs  <- rxs.Split(';').Where(fun f->f=""|>not) |> trimStartEndSeq |> Seq.filter(fun f->f="_"|>not) |> HashSet 
         
         do 
             nodeType <- 
@@ -269,8 +269,8 @@ module PPTX =
         member x.Safeties = safeties
         member x.CopySys  = copySystems
         member x.IfName      = ifName
-        member x.IfTxs       = ifTXs
-        member x.IfRxs       = ifRXs
+        member x.IfTXs       = ifTXs
+        member x.IfRXs       = ifRXs
         member x.IsEmgBtn = bEmg
         member x.IsAutoBtn= bAuto
         member x.IsStartBtn = bStart

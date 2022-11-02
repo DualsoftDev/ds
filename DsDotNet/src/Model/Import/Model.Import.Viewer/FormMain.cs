@@ -146,6 +146,7 @@ namespace Dual.Model.Import
             if ((Keys)e.KeyValue == Keys.F1) { HelpLoad(); }
             if ((Keys)e.KeyValue == Keys.F5) { ReloadPPT(); }
             if ((Keys)e.KeyValue == Keys.F6) { TestDebug(); }
+            if ((Keys)e.KeyValue == Keys.F7) { TestUnitTest(); }
             if ((Keys)e.KeyValue == Keys.F8) { RefreshGraph(); }
         }
         private void button_copy_Click(object sender, EventArgs e)

@@ -282,9 +282,16 @@ module ImportU =
                                         let sys =  dicFlow.[node.PageNum].System
                                         let api = sys.ApiItems.Where(fun w->w.Name = node.IfName).First() 
 
-                                        let findReal(trxName:string) = model.FindGraphVertex([|sys.Name;flow.Name;trxName|]) :?> Real
-                                        let txs = node.IfTxs |> Seq.map(fun f-> findReal(f)) 
-                                        let rxs = node.IfRxs |> Seq.map(fun f-> findReal(f))
+                                        let findReal(trxName:string) =
+                                                
+                                                let flowName, realName =
+                                                    if trxName.Contains(".")
+                                                    then trxName.Split('.').[0], trxName.Split('.').[1]
+                                                    else flow.Name, trxName
+                                                                      
+                                                model.FindGraphVertex([|sys.Name;flowName;realName|]) :?> Real
+                                        let txs = node.IfTXs |> Seq.map(fun f-> findReal(f)) 
+                                        let rxs = node.IfRXs |> Seq.map(fun f-> findReal(f))
                                         api.AddTXs(txs)|>ignore
                                         api.AddRXs(rxs)|>ignore
                                         )

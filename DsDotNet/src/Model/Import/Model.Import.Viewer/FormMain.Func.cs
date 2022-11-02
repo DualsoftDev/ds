@@ -267,7 +267,17 @@ namespace Dual.Model.Import
             }
         }
 
+        internal void TestUnitTest()
+        {
 
+            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\..\..\..\..\"))+ "UnitTest\\UnitTest.Engine\\ImportPPT\\1.Api.pptx";
+            bool debug = File.Exists(path);
+            if (debug)
+            {
+                PathPPT = path;
+                InitModel(path);
+            }
+        }
 
     }
 }

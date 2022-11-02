@@ -1,0 +1,37 @@
+namespace Engine.Parser.FS
+open System
+open Antlr4.Runtime
+open Antlr4.Runtime.Tree
+
+type ParserException(message:string) =
+    inherit Exception(message)
+
+    static let CreatePositionInfo(ctx:obj) =   // RuleContext or IErrorNode
+        let getPosition(ctx:obj) =
+            let fromToken (token:IToken) = $"{token.Line}:{token.Column}"
+            let fromErrorNode(errNode:IErrorNode) =
+                match errNode with
+                | :? ErrorNodeImpl as impl -> fromToken(impl.Symbol)
+                | _ -> failwith "ERROR"
+
+            match ctx with
+            | :? ParserRuleContext as prctx ->
+                match prctx.Start with
+                | :? CommonToken as start -> fromToken(start)
+                | _ -> failwith "ERROR"
+            | :? IErrorNode as errNode -> fromErrorNode(errNode)
+            | _ -> failwith "ERROR"
+
+        let getAmbient(ctx:obj) =
+            match ctx with
+            | :? IParseTree as pt -> pt.GetText()
+            | _ -> failwith "ERROR"
+
+        let posi = getPosition(ctx)
+        let ambient = getAmbient(ctx)
+        $"{posi} near\r\n'{ambient}'"
+
+    new (message:string, ctx:RuleContext) = ParserException($"{message} on {CreatePositionInfo(ctx)}")
+    new (message:string, errorNode:IErrorNode) = ParserException($"{message} on {CreatePositionInfo(errorNode)}")
+    new (message:string, line:int, column:int) = ParserException($"{message} on {line}:{column}")
+

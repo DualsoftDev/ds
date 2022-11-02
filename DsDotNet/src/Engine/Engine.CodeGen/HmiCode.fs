@@ -3,6 +3,7 @@ namespace Engine.CodeGen
 open System.Collections.Generic
 open Engine.Core
 open Newtonsoft.Json
+open Engine.Parser.FS
 
 [<AutoOpen>]
 module HmiGenModule =

@@ -45,7 +45,9 @@ module TextUtil =
         | _ -> s
 
     let internal combine (separator:string) (nameComponents:string seq) = nameComponents |> Seq.map quoteOnDemand |> String.concat separator
-    type NameComponents = string[]
+
+    /// Fully Qualified Domain Name: string[] for "A.B.C"
+    type Fqdn = string[]
 
     // 이름이 필요한 객체
     [<AbstractClass>]
@@ -81,12 +83,12 @@ module TextUtil =
 
 
     let internal nameComponentsComparer() = {
-        new IEqualityComparer<NameComponents> with
-            member _.Equals(x:NameComponents, y:NameComponents) = isStringArrayEqaul(x, y)
-            member _.GetHashCode(x:NameComponents) = x.Average(fun s -> s.GetHashCode()) |> int
+        new IEqualityComparer<Fqdn> with
+            member _.Equals(x:Fqdn, y:Fqdn) = isStringArrayEqaul(x, y)
+            member _.GetHashCode(x:Fqdn) = x.Average(fun s -> s.GetHashCode()) |> int
     }
 
-    let getRelativeName(referencePath:NameComponents) (fqdn:NameComponents) =
+    let getRelativeName(referencePath:Fqdn) (fqdn:Fqdn) =
         let rec countSameStartElements (FList(xs)) (FList(ys)) =
             let rec helper xs ys =
                 match xs, ys with
@@ -106,8 +108,8 @@ module TextUtil =
         member x.Name with get() = (x :> INamed).Name
         member x.NameComponents = (x :> IQualifiedNamed).NameComponents
         member x.QualifiedName = (x :> IQualifiedNamed).QualifiedName
-        abstract member GetRelativeName: NameComponents -> string
-        default x.GetRelativeName(referencePath:NameComponents) =
+        abstract member GetRelativeName: Fqdn -> string
+        default x.GetRelativeName(referencePath:Fqdn) =
             getRelativeName referencePath x.NameComponents
 
 
@@ -124,13 +126,13 @@ type NameUtil =
     [<Extension>] static member IsStringArrayEqaul (ns1:string seq, ns2:string seq) = isStringArrayEqaul(ns1, ns2)
     [<Extension>] static member CreateNameComparer() = nameComparer()
     [<Extension>] static member CreateNameComponentsComparer() = nameComponentsComparer()
-    [<Extension>] static member GetRelativeName(fqdn:NameComponents, referencePath:NameComponents) = getRelativeName referencePath fqdn
+    [<Extension>] static member GetRelativeName(fqdn:Fqdn, referencePath:Fqdn) = getRelativeName referencePath fqdn
 
 
     [<Extension>]
     static member FindWithName (namedObjects:#INamed seq, name:string) =
         namedObjects.FirstOrDefault(fun obj -> obj.Name = name)
     [<Extension>]
-    static member FindWithNameComponents (namedObjects:#IQualifiedNamed seq, nameComponents:NameComponents) =
+    static member FindWithNameComponents (namedObjects:#IQualifiedNamed seq, nameComponents:Fqdn) =
         namedObjects.FirstOrDefault(fun obj -> obj.NameComponents.IsStringArrayEqaul(nameComponents))
 

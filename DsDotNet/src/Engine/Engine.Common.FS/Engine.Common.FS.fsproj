@@ -35,6 +35,7 @@
 		<Compile Include="Module\QualifiedAccess\Async.fs" />
 		<Compile Include="Module\QualifiedAccess\Seq.fs" />
 		<Compile Include="Module\QualifiedAccess\Tuple.fs" />
+		<Compile Include="Module\QualifiedAccess\Option.fs" />
 		<!--<Compile Include="Module\QualifiedAccess\Option.fs" />-->
 		<Compile Include="Module\QualifiedAccess\Array.fs" />
 		<Compile Include="Module\QualifiedAccess\Bytes.fs" />
@@ -48,6 +49,7 @@
 		<Compile Include="Module\String.fs" />
 		<Compile Include="TypeExtensions\Xml.fs" />
 		<Compile Include="TypeExtensions\Em.Collection.fs" />
+		<Compile Include="TypeExtensions\Em.Option.fs" />
 		<Compile Include="Graph\QuickGraph.fs" />
 		<Compile Include="Library.fs" />
 	</ItemGroup>

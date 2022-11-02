@@ -1,4 +1,4 @@
-using Engine.Parser;
+using Engine.Parser.FS;
 
 using static Engine.Core.CoreModule;
 
@@ -8,7 +8,7 @@ internal class SampleRunner
 {
     public static void Run(string text)
     {
-        var helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation());
+        var helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation("ActiveCpuName"));
         var model = helper.Model;
         //Try("1 + 2 + 3");
         //Try("1 2 + 3");

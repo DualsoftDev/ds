@@ -70,8 +70,8 @@ module HmiGenModule =
                     
             if target <> null &&
                     false = hmiInfos.ContainsKey(target) then
-                let xxx = genInfo target category ButtonType.None parent
-                hmiInfos.Add(target, xxx)
+                let info = genInfo target category ButtonType.None parent
+                hmiInfos.Add(target, info)
 
         let addButton btnName systemName buttonType =
             let info = genInfo btnName Category.Button buttonType systemName
@@ -120,7 +120,7 @@ module HmiGenModule =
                 "ATMANU", ButtonType.Auto;
                 "CLEAR", ButtonType.Clear;
             ]
-            let flows = flowNames
+
             for button, btnType in buttons do
                 addButton button null btnType
                 match btnType with
@@ -131,21 +131,18 @@ module HmiGenModule =
                 | ButtonType.Emergency
                 | ButtonType.Auto
                 | ButtonType.Clear ->
-                    for flow in flows do
+                    for flow in flowNames do
                         hmiInfos[button].targets.Add(flow)
                 | _ ->
                     failwith "type error"
 
         let addInterface (api:ApiItem) =
             if false = hmiInfos.ContainsKey(api.QualifiedName) then
-                hmiInfos.Add(
-                    api.QualifiedName,
+                let info = 
                     genInfo
-                        api.QualifiedName
-                        Category.Interface
-                        ButtonType.None
-                        api.System.QualifiedName
-                )
+                        api.QualifiedName Category.Interface
+                        ButtonType.None api.System.QualifiedName
+                hmiInfos.Add(api.QualifiedName, info)
 
         let addDevice
                 (model:Model) (system:DsSystem) (flow:Flow) (call:Vertex) =
@@ -167,10 +164,8 @@ module HmiGenModule =
                     null, None
 
             if hmiInfos.ContainsKey(device) = false then
-                hmiInfos.Add(
-                    device,
-                    genInfo device Category.Device ButtonType.None null
-                )
+                let info = genInfo device Category.Device ButtonType.None null
+                hmiInfos.Add(device, info)
 
             addInterface api.Value
             addToUsedIn device system.Name

@@ -18,9 +18,9 @@ public class DllVersionChecker
         get
         {
             var exlibDLL = new Dictionary<string, string>();
-            exlibDLL.Add("Confluent.Kafka", "1.9.2.0");
+            exlibDLL.Add("Confluent.Kafka", "1.9.3.0");
             exlibDLL.Add("log4net", "2.0.15.0");
-            exlibDLL.Add("Newtonsoft.Json", "13.0.1.25517");
+            exlibDLL.Add("Newtonsoft.Json", "13.0.0.0");
             exlibDLL.Add("QuickGraph.Data", "3.6.61114.0");
             exlibDLL.Add("QuickGraph", "3.6.61114.0");
             exlibDLL.Add("QuickGraph.Graphviz", "3.6.61114.0");

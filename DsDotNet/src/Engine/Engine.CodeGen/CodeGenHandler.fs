@@ -1,13 +1,13 @@
 namespace Engine.CodeGen
-open Engine.Parser
+open Engine.Parser.FS
 
 [<AutoOpen>]
 module CodeGenHandler =
-    type ParseModel(dsCode:string) = 
+    type ParseModel(dsCode:string) =
         let parsedDsCode =
             ModelParser.ParseFromString2(
-                dsCode, 
-                ParserOptions.Create4Simulation()
+                dsCode,
+                ParserOptions.Create4Simulation("SomeActiveCpuName")
             )
         let model = parsedDsCode.Model
         member x.CpuCode   = GenCpuCode(model)

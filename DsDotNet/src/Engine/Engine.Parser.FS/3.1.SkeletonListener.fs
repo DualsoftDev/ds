@@ -1,17 +1,14 @@
-
-
 namespace Engine.Parser.FS
+
+open System.Linq
+open Antlr4.Runtime.Tree
+open Antlr4.Runtime
 
 open Engine.Common.FS
 open Engine.Parser
-open System.Linq
 open Engine.Core
 open type Engine.Parser.dsParser
 open type Engine.Parser.FS.DsParser
-open Antlr4.Runtime.Tree
-open Antlr4.Runtime
-open Engine.Common.FS
-open Engine.Common.FS.Functions
 
 
 /// <summary>
@@ -48,9 +45,6 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
         let name = ctx.identifier1().GetText().DeQuoteOnDemand()
         x._parenting <- Some <| Real.Create(name, x._flow.Value)
         x.AddElement(x.CurrentPathElements, GraphVertexType.Segment ||| GraphVertexType.Parenting)
-
-        //let xxx = enumerateChildren<CausalTokenContext>(ctx).ToArray()
-        //let yyy = xxx.Select(ctctx => collectNameComponents(ctctx).ToArray()).ToArray()
 
         let children =
             enumerateChildren<CausalTokenContext>(ctx)

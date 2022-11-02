@@ -2,32 +2,19 @@ namespace Engine.Parser.FS
 
 open Engine.Core
 open System.Collections.Generic
-open Engine.Core.SpitModuleHelper
-open System
 open System.Linq
-open System.Collections.Generic
-open System.Diagnostics
-open type System.Diagnostics.Debug
-//open System.Reactive.Linq
-open log4net
-open Antlr4.Runtime
-open Antlr4.Runtime.Tree
-open Antlr4.Runtime.Misc
-open Engine.Common
-open Engine.Core
-
-
 
 type AliasTarget() = class end
 
-type AliasTargetWithFqdn(targetFqdn:string[]) =
+type AliasTargetWithFqdn(targetFqdn:NameComponents) =
     inherit AliasTarget()
 
     member val TargetFqdn = targetFqdn with get, set
 
-type AliasTargetReal(targetFqdn:string[]) =
+type AliasTargetReal(targetFqdn:NameComponents) =
     inherit AliasTargetWithFqdn(targetFqdn)
-type AliasTargetDirectCall(targetFqdn:string[]) =
+
+type AliasTargetDirectCall(targetFqdn:NameComponents) =
     inherit AliasTargetWithFqdn(targetFqdn)
 
 

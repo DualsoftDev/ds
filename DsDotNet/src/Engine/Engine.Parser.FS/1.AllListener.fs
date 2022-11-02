@@ -1,9 +1,7 @@
 namespace Engine.Parser.FS
 
-open System
 open Antlr4.Runtime
 open Antlr4.Runtime.Tree
-open System.Collections.Generic
 open Engine.Parser
 
 type ParserResult() =

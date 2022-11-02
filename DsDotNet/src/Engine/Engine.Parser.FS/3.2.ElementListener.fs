@@ -1,21 +1,12 @@
 namespace Engine.Parser.FS
 
+open System.Linq
 
 open Engine.Common.FS
 open Engine.Parser
-open System.Linq
-open Engine.Core
-open type Engine.Parser.dsParser
-open Engine.Common.FS
-open Engine.Parser
-open System.Linq
 open Engine.Core
 open type Engine.Parser.dsParser
 open type Engine.Parser.FS.DsParser
-open Antlr4.Runtime.Tree
-open Antlr4.Runtime
-open Engine.Common.FS
-open Engine.Common.FS.Functions
 
 
 /// <summary>

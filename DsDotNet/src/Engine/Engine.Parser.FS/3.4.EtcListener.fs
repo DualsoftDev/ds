@@ -1,24 +1,16 @@
 namespace Engine.Parser.FS
+
 open System
-open Engine.Core.CodeElements
-open Engine.Core.CoreModule
+open System.Linq
+
+open Antlr4.Runtime.Tree
+open Antlr4.Runtime
 
 open Engine.Common.FS
 open Engine.Parser
-open System.Linq
-open Engine.Core
-open type Engine.Parser.dsParser
-open Engine.Common.FS
-open Engine.Parser
-open System.Linq
 open Engine.Core
 open type Engine.Parser.dsParser
 open type Engine.Parser.FS.DsParser
-open Antlr4.Runtime.Tree
-open Antlr4.Runtime
-open Engine.Common.FS
-open Engine.Common.FS.Functions
-open Antlr4.Runtime.Tree
 
 /// <summary>
 /// 모든 vertex 가 생성 된 이후, edge 연결 작업 수행

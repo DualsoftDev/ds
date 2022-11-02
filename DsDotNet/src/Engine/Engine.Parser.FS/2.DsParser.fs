@@ -2,21 +2,19 @@
 namespace rec Engine.Parser.FS
 
 open System
-open System.Runtime.InteropServices
-open Antlr4.Runtime
-open Engine.Parser
-
 open System.Linq
 open System.Text
-open type Engine.Parser.dsParser
-open Engine.Common.FS
-
-//open System.Reactive.Linq
-open Engine.Common
-open Antlr4.Runtime
-open Antlr4.Runtime.Tree
+open System.Runtime.InteropServices
 open System.Text.RegularExpressions
 open System.Collections.Generic
+
+open Antlr4.Runtime
+open Antlr4.Runtime.Tree
+
+open Engine.Common
+open Engine.Common.FS
+open Engine.Parser
+open type Engine.Parser.dsParser
 
 
 type DsParser() =
@@ -118,8 +116,8 @@ type DsParser() =
         let expanded = DsParser.ExpandSystemCopy(text)
         DsParser.ParseText(expanded, predExtract, throwOnError)
 
-    static member FromDocument(text:string, [<Optional; DefaultParameterValue(true)>]throwOnError) =       // (dsParser, ParserError[])
-        let func = fun (parser:dsParser) -> parser.model()// :> RuleContext
+    static member FromDocument(text:string, [<Optional; DefaultParameterValue(true)>]throwOnError:bool) =       // (dsParser, ParserError[])
+        let func = fun (parser:dsParser) -> parser.model()
         let (parser, tree, errors) = DsParser.FromDocument(text, func, throwOnError)
         (parser, errors)
 

@@ -1,26 +1,11 @@
-// Template generated code from Antlr4BuildTasks.Template v 8.17
-
 namespace Engine.Parser.FS
 
-open Engine.Common.FS
-open Engine.Parser
-
-open Engine.Common.FS
-open Engine.Parser
-open System.Linq
-open Engine.Core
-open type Engine.Parser.dsParser
-open Engine.Common.FS
-open Engine.Parser
-open System.Linq
-open Engine.Core
-open type Engine.Parser.dsParser
-open type Engine.Parser.FS.DsParser
-open Antlr4.Runtime.Tree
 open Antlr4.Runtime
-open Engine.Common.FS
-open Engine.Common.FS.Functions
 
+open Engine.Common.FS
+open Engine.Parser
+open Engine.Core
+open type Engine.Parser.dsParser
 
 module Program =
 

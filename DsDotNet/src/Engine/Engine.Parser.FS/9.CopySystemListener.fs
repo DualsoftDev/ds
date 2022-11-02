@@ -1,25 +1,10 @@
 namespace Engine.Parser.FS
-open Engine.Parser
-open System
-open System.Linq
-open System.Collections.Generic
-open System.Diagnostics
-open System.Reactive.Linq
-open Antlr4.Runtime
-open Antlr4.Runtime.Tree
-open Antlr4.Runtime.Misc
-open Engine.Common
-open Engine.Core
-open Engine.Core.CoreModule
-open Engine.Core.Interface
-open Engine.Core.SpitModuleHelper
-open type Engine.Parser.FS.DsParser
 
-//open Antlr4.Runtime
+open System.Linq
+
+open Engine.Parser
+open type Engine.Parser.FS.DsParser
 open type Engine.Parser.dsParser
-//open Engine.Parser.dsParser
-//open Engine.Parser.DsParser
-//open Engine.Parser.Global
 
 
 type CopySystemListener(parser:dsParser, helper:ParserHelper) =

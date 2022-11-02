@@ -13,23 +13,6 @@ module GraphModule =
         inherit IVertex
         inherit INamed
 
-    [<Flags>]
-    type EdgeType =
-    // runtime edge 
-    | Default                    = 0b00000000    // Start, Weak
-    | Reset                      = 0b00000001    // else start
-    | Strong                     = 0b00000010    // else weak
-    | AugmentedTransitiveClosure = 0b00000100    // 강한 상호 reset 관계 확장 edge
-
-
-    // runtime edge 는 Reversed / Bindrectional 을 포함하지 않는다.
-    | Reversed                   = 0b00001000    // direction reversed : <, <|, <||, etc
-    | Bidirectional              = 0b00010000    // 양방향.  <||>, =>, ...
-
-    | EditorInterlock            = 0b00100000    // 강한 상호 reset 저장 확장 edge
-    | EditorStartReset           = 0b01000000    // 약 시작 약 리셋 저장 확장 edge
-    | EditorSpare                = 0b10000000    // 추후 사용예약l          
-
     type IEdge<'V> =
         abstract Source :'V    //방향을 고려안한 위치상 왼쪽   Vertex
         abstract Target :'V    //방향을 고려안한 위치상 오른쪽 Vertex

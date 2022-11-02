@@ -1,13 +1,12 @@
 using System.Collections.Generic;
+using Engine.Common;
 using DsEdge = Engine.Core.CoreModule.Edge;
 using DsVertex = Engine.Core.CoreModule.Vertex;
-using static Engine.Core.GraphModule;
 using static Model.Import.Office.InterfaceClass;
 using static Engine.Core.CoreModule;
-using Engine.Common;
 using static Engine.Core.CoreModule.AliasTargetType;
-using System.Globalization;
 using static Engine.Core.DsType;
+using static Engine.Core.DsText;
 
 namespace Dual.Model.Import
 {
@@ -86,8 +85,8 @@ namespace Dual.Model.Import
         public DsViewNode Target;
         public DsEdge DsEdge;
         public EdgeType Causal = EdgeType.Default;
-        
-        public DsViewEdge(DsEdge e) { 
+
+        public DsViewEdge(DsEdge e) {
             DsEdge = e;
             Source = new DsViewNode(e.Source);
             Target = new DsViewNode(e.Target);

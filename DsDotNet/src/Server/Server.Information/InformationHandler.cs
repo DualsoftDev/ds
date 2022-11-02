@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Server.Common.Kafka;
+using Engine.CodeGen;
 
 namespace Server.Information;
 
@@ -49,17 +50,17 @@ internal class InformationServer
                     foreach (var prd in topic.Value)
                     {
                         var prodInfo = JObject.Parse(prd.ToString());
-                        var typeStr = prodInfo["type"].ToString();
+                        var typeStr = prodInfo["type"]!.ToString();
                         var pType = (ProducerType)Enum.Parse(typeof(ProducerType), typeStr);
                         if (!producers.ContainsKey(pType))
                             producers.Add(pType, new Dictionary<string, KafkaProduce>());
-                        var partition = int.Parse(prodInfo["partition"].ToString());
-                        var target = int.Parse(prodInfo["target"].ToString());
+                        var partition = int.Parse(prodInfo["partition"]!.ToString());
+                        var target = int.Parse(prodInfo["target"]!.ToString());
                         producers[pType].Add(
                             topic.Key,
                             new KafkaProduce(
                                 topic.Key,
-                                addresses[target].ToString(),
+                                addresses[target]!.ToString(),
                                 partition
                             )
                         );
@@ -95,13 +96,13 @@ internal class InformationServer
                 {
                     if (topic.Value == null)
                         continue;
-                    var partition = int.Parse(topic.Value["partition"].ToString());
-                    var target = int.Parse(topic.Value["target"].ToString());
+                    var partition = int.Parse(topic.Value["partition"]!.ToString());
+                    var target = int.Parse(topic.Value["target"]!.ToString());
                     consumers.Add(
                         topic.Key, 
                         new KafkaConsume(
                             topic.Key, 
-                            addresses[target].ToString(), 
+                            addresses[target]!.ToString(), 
                             partition
                         )
                     );

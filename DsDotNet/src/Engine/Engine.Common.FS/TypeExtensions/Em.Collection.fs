@@ -37,6 +37,7 @@ type SeqExt =
     [<Extension>] static member Map(xs:'a seq, f)        = Seq.map f xs
     [<Extension>] static member Filter(xs:'a seq, f)     = Seq.filter f xs
     [<Extension>] static member ForEach(xs:'a seq, f)    = Seq.iter f xs
+    [<Extension>] static member ForAll(xs:'a seq, f)     = Seq.forall f xs
     [<Extension>] static member IsNullOrEmpty(xs:'a seq) = xs = null || Seq.isEmpty xs
     [<Extension>] static member NonNullAny(xs:'a seq)    = xs <> null && xs.Any()
     [<Extension>] static member Reduce(xs:'a seq, f)     = Seq.reduce f xs
@@ -44,3 +45,4 @@ type SeqExt =
     [<Extension>] static member TapWhole(xs:'a seq, f)   = f xs; xs
     [<Extension>] static member TapInner(xs:'a seq, f)   = Seq.iter f xs; xs
     [<Extension>] static member Tap(xs:'a seq, f)        = Seq.iter f xs; xs
+    [<Extension>] static member Foldr(xs:'a seq, f)      = Seq.fold f xs

@@ -109,9 +109,7 @@ module HmiGenModule =
         let addGlobalButtons (model:Model) =
             let flowNames =
                 hmiInfos
-                |> Seq.filter(fun info ->
-                    info.Value.category = Category.Flow
-                )
+                |> Seq.filter(fun info -> info.Value.category = Category.Flow)
                 |> Seq.map(fun info -> info.Value.name)
 
             let buttons = [
@@ -172,10 +170,8 @@ module HmiGenModule =
             addToUsedIn device flow.QualifiedName
 
             match call.Parent with
-            | Real realParent ->
-                addToUsedIn device realParent.QualifiedName
-            | _ ->
-                ()
+            | Real realParent -> addToUsedIn device realParent.QualifiedName
+            | _ -> ()
 
         for sys in model.Systems do
             // if sys.Name = "My" then // to check

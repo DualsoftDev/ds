@@ -54,27 +54,20 @@ module HmiGenModule =
             }
 
         let addSystemFlowReal (systemFlowReal:obj) =
-            let category =
+            let target, parent, category  =
                 match systemFlowReal with
-                | :? DsSystem -> Category.System
-                | :? Flow -> Category.Flow
-                | :? Real -> Category.Real
-                | _ -> Category.None
-
-            let target, parent =
-                match category with
-                | Category.System ->
+                | :? DsSystem -> 
                     let sys = (systemFlowReal :?> DsSystem)
-                    sys.QualifiedName, null
-                | Category.Flow ->
+                    sys.QualifiedName, null, Category.System
+                | :? Flow -> 
                     let flow = (systemFlowReal :?> Flow)
-                    flow.QualifiedName, flow.System.Name
-                | Category.Real ->
+                    flow.QualifiedName, flow.System.Name, Category.Flow
+                | :? Real -> 
                     let real = (systemFlowReal :?> Real)
-                    real.QualifiedName, real.Flow.QualifiedName
+                    real.QualifiedName, real.Flow.QualifiedName, Category.Real
                 | _ ->
-                    null, null
-
+                    null, null, Category.None
+                    
             if target <> null &&
                     false = hmiInfos.ContainsKey(target) then
                 let xxx = genInfo target category ButtonType.None parent
@@ -142,7 +135,6 @@ module HmiGenModule =
                         hmiInfos[button].targets.Add(flow)
                 | _ ->
                     failwith "type error"
-
 
         let addInterface (api:ApiItem) =
             if false = hmiInfos.ContainsKey(api.QualifiedName) then

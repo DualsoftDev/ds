@@ -1,11 +1,9 @@
 [<AutoOpen>]
-module rec Engine.Core.ExpressionModule
+module rec Engine.Cpu.Expression
 
 open System
 open System.Linq
 open System.Runtime.CompilerServices
-open Engine.Common.FS
-open Engine.Core.Interface
 
 [<AutoOpen>]
 module private SubModule =
@@ -47,13 +45,14 @@ module private SubModule =
         [<Extension>] static member ExpectGteN(xs:'a seq, n) = expectGteN n xs; xs
         [<Extension>] static member Expect1(xs:'a seq) = expect1 xs
         [<Extension>] static member Expect2(xs:'a seq) = expect2 xs
+        [<Extension>] static member Pairwise(xs:'a seq)      = Seq.pairwise xs
+        [<Extension>] static member Reduce(xs:'a seq, f)     = Seq.reduce f xs
+        [<Extension>] static member JoinWith(xs:string seq, separator) = String.Join(separator, xs)
 
 /// sample PLC tag class
 type PLCTag<'T>(name, value:'T) =
     member _.Name = name
     member val Value = value with get, set
-    interface INamed with
-        member x.Name = x.Name
     override x.ToString() = $"({x.Name}={x.Value})"
 
 type Terminal<'T> =
@@ -136,7 +135,7 @@ module FunctionModule =
     let sin        (args:Arguments) = Fun (_sin,        "sin", args)
 
     [<AutoOpen>]
-    module internal FunctionImpl =
+    module FunctionImpl =
         let _add (args:Arguments) = args.ExpectGteN(2).Select(evalArg).Cast<int>().Reduce(( + ))
         let _sub (args:Arguments) = args.ExpectGteN(2).Select(evalArg).Cast<int>().Reduce(( - ))
         let _mul (args:Arguments) = args.ExpectGteN(2).Select(evalArg).Cast<int>().Reduce(( * ))

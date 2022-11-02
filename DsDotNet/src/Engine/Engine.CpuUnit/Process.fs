@@ -1,4 +1,4 @@
-namespace Engine.CpuUnit
+namespace Engine.Cpu
 
 [<AutoOpen>]
 module ProcessModule =

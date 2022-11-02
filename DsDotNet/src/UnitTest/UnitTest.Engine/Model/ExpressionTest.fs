@@ -3,6 +3,7 @@ namespace UnitTest.Engine
 open System
 open Engine.Core
 open NUnit.Framework
+open Engine.Cpu.Expression
 
 [<AutoOpen>]
 module ExpressionTestModule =

@@ -1,6 +1,5 @@
-namespace Engine.CpuUnit
+namespace Engine.Cpu
 
-open Newtonsoft.Json
 open System.Collections.Concurrent
 
 [<AutoOpen>]
@@ -41,28 +40,28 @@ module CpuLoader =
             """
         
     ///CPU에 text 규격으로 code 불러 로딩하기
-    let LoadText(code:string) = 
-        BitMap.Clear()
-        let codeUnits = JsonConvert.DeserializeObject<CodeUnit array>(code)
-        codeUnits |> Seq.iter(fun codeUnit -> UpdateBitMap codeUnit)
-        codeUnits |> Seq.map (fun codeUnit ->
+    let LoadText(code:string) = ()
+        //BitMap.Clear()
+        //let codeUnits = JsonConvert.DeserializeObject<CodeUnit array>(code)
+        //codeUnits |> Seq.iter(fun codeUnit -> UpdateBitMap codeUnit)
+        //codeUnits |> Seq.map (fun codeUnit ->
         
-            match codeUnit.GateName with
-            |"GateAND" -> let gateAND = GateAND(BitMap.[codeUnit.Out])
-                          codeUnit.In1.Split(';') |> Seq.iter(fun bit->  gateAND.Add(BitMap.[bit.TrimStart('!')], bit.StartsWith("!"))|>ignore)
-                          gateAND :> Gate
+        //    match codeUnit.GateName with
+        //    |"GateAND" -> let gateAND = GateAND(BitMap.[codeUnit.Out])
+        //                  codeUnit.In1.Split(';') |> Seq.iter(fun bit->  gateAND.Add(BitMap.[bit.TrimStart('!')], bit.StartsWith("!"))|>ignore)
+        //                  gateAND :> Gate
 
-            |"GateOR"  -> let gateOR = GateOR(BitMap.[codeUnit.Out])
-                          codeUnit.In1.Split(';') |> Seq.iter(fun bit->  gateOR.Add(BitMap.[bit.TrimStart('!')], bit.StartsWith("!"))|>ignore)
-                          gateOR :> Gate
+        //    |"GateOR"  -> let gateOR = GateOR(BitMap.[codeUnit.Out])
+        //                  codeUnit.In1.Split(';') |> Seq.iter(fun bit->  gateOR.Add(BitMap.[bit.TrimStart('!')], bit.StartsWith("!"))|>ignore)
+        //                  gateOR :> Gate
             
-            |"GateSR"  -> let gateSR = GateSR(BitMap.[codeUnit.Out])
-                          codeUnit.In1.Split(';') |> Seq.iter(fun bit->  gateSR.AddSet(BitMap.[bit.TrimStart('!')], bit.StartsWith("!"))|>ignore)
-                          codeUnit.In2.Split(';') |> Seq.iter(fun bit->  gateSR.AddRst(BitMap.[bit.TrimStart('!')], bit.StartsWith("!"))|>ignore)
-                          gateSR :> Gate
+        //    |"GateSR"  -> let gateSR = GateSR(BitMap.[codeUnit.Out])
+        //                  codeUnit.In1.Split(';') |> Seq.iter(fun bit->  gateSR.AddSet(BitMap.[bit.TrimStart('!')], bit.StartsWith("!"))|>ignore)
+        //                  codeUnit.In2.Split(';') |> Seq.iter(fun bit->  gateSR.AddRst(BitMap.[bit.TrimStart('!')], bit.StartsWith("!"))|>ignore)
+        //                  gateSR :> Gate
 
-            |_ -> failwith $"{codeUnit.GateName} is not gateName"
-        ) |> Seq.toList
+        //    |_ -> failwith $"{codeUnit.GateName} is not gateName"
+        //) |> Seq.toList
 
     [<EntryPoint>]        
     let main argv = 

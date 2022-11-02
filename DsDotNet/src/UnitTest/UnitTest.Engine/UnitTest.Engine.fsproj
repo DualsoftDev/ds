@@ -49,6 +49,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\..\Engine\Engine.Common\Engine.Common.csproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
+		<ProjectReference Include="..\..\Engine\Engine.CpuUnit\Engine.Cpu.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Parser\Engine.Parser.csproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Test\Engine.Sample.csproj" />
 	</ItemGroup>

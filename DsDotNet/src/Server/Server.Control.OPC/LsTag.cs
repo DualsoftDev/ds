@@ -3,7 +3,7 @@
 //using Dsu.PLC.LS;
 //using Dsu.PLC.Common;
 
-namespace Control.OPC
+namespace Server.Control.OPC
 {
 
     public class LsTag

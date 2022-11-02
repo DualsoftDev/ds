@@ -5,7 +5,7 @@
 
 using Microsoft.FSharp.Core;
 
-namespace Control.OPC
+namespace Server.Control.OPC
 {
     internal class LsConnectionParameters
     {

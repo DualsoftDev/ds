@@ -4,7 +4,7 @@
 //using Newtonsoft.Json;
 //using Newtonsoft.Json.Linq;
 
-namespace Control.OPC
+namespace Server.Control.OPC
 {
 
     //public class OpcTag : Bit, IBitReadWritable

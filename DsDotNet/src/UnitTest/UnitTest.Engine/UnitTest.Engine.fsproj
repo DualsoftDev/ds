@@ -28,6 +28,7 @@
 		<Compile Include="0.OnlyOnce.fs" />
 		<Compile Include="Model\Model.fs" />
 		<Compile Include="Model\ModelGraph.fs" />
+		<Compile Include="Model\ExpressionTest.fs" />
 		<None Include="Obsolete\0.ModelTest_Common.fsx" />
 		<None Include="Obsolete\1.ModelExtension.fsx" />
 		<None Include="Obsolete\ModelTest1.fsx" />
@@ -48,6 +49,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\..\Engine\Engine.Common\Engine.Common.csproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
+		<ProjectReference Include="..\..\Engine\Engine.CpuUnit\Engine.Cpu.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Parser\Engine.Parser.csproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Test\Engine.Sample.csproj" />
 	</ItemGroup>

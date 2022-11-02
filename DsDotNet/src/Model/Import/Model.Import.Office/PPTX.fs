@@ -278,6 +278,7 @@ module PPTX =
         member x.NodeType = nodeType
         member x.IsDummy  = nodeType = DUMMY
         member x.CallName    = assert(nodeType.IsCall); $"{pageTitle}_{name}"  
+        member x.IsAlias :bool   = x.Alias.IsSome
         
         member val Id =  shape.GetId()
         member val Key =  Objkey(iPage, shape.GetId())
@@ -311,11 +312,11 @@ module PPTX =
         member val Name =  conn.EdgeName()
         member val Key =  Objkey(iPage, iEdge)
         member x.Text = 
-                            //let sName = if startNode.Alias.IsSome then  startNode.Alias.Value else startNode.Name
-                            //let eName = if endNode.Alias.IsSome   then  endNode.Alias.Value   else endNode.Name
+                            let sName = if startNode.Alias.IsSome then  startNode.Alias.Value.Name else startNode.Name
+                            let eName = if endNode.Alias.IsSome   then  endNode.Alias.Value.Name   else endNode.Name
                             if(reverse)
-                            then $"{iPage};{endNode.Key}{causal.ToText()}{startNode.Key}";
-                            else $"{iPage};{startNode.Key}{causal.ToText()}{endNode.Key}";
+                            then $"{iPage};{eName}{causal.ToText()}{sName}";
+                            else $"{iPage};{sName}{causal.ToText()}{eName}";
 
         member val Causal:EdgeType = causal
     
@@ -385,7 +386,8 @@ module PPTX =
                                     ) |> dict
 
             let settingAlias(nodes:pptNode seq) = 
-                let names  = nodes|> Seq.map(fun f->f.Name)
+                let nodes = nodes.OrderByDescending(fun o-> parents.ContainsKey(o))  //부모지정
+                let names  = nodes |> Seq.map(fun f->f.Name)
                 (nodes, GetAliasName(names))
                 ||> Seq.map2(fun node  nameSet -> node,  nameSet)
                 |> Seq.iter(fun (node, (name, newName)) -> 

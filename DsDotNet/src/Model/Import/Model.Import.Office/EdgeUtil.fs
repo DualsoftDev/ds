@@ -11,8 +11,8 @@ module UtilEdge =
     let [<Literal>] StartPush         = EdgeType.Strong                                 // A>>B	        강 시작 연결    
     let [<Literal>] ResetEdge         = EdgeType.Reset                                  // A|>B	        약 리셋 연결
     let [<Literal>] ResetPush         = EdgeType.Reset ||| EdgeType.Strong              // A||>B	    강 리셋 연결     
-    let [<Literal>] StartReset        = EdgeType.Reset ||| EdgeType.Bidirectional       // A<||>B	    인터락 연결        
-    let [<Literal>] Interlock         = EdgeType.Reset ||| EdgeType.Bidirectional ||| EdgeType.Strong          
+    let [<Literal>] StartReset        = EdgeType.EditorStartReset       // A=>B	    약시작리셋
+    let [<Literal>] Interlock         = EdgeType.EditorInterlock      // A<||>B	    인터락 연결             
     let [<Literal>] StartEdgeRev      = EdgeType.Default                          ||| EdgeType.Reversed   
     let [<Literal>] StartPushRev      = EdgeType.Strong                           ||| EdgeType.Reversed   
     let [<Literal>] ResetEdgeRev      = EdgeType.Reset                            ||| EdgeType.Reversed   

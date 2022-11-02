@@ -106,6 +106,11 @@ module internal ToDsTextModule =
                 let vs = subGraph.Vertices
                 yield graphEntitiesToDs segment.NameComponents vs es (indent+1)
                 yield $"{tab}{rb}"
+            elif subGraph.Islands.any() then
+                yield $"{tab}{segment.GetRelativeName(basis)} = {lb}"
+                for island in subGraph.Islands do
+                    yield $"{getTab (indent+1)}{island.GetRelativeName(segment.NameComponents)}; // island" 
+                yield $"{tab}{rb}"
         ] |> combineLines
 
     let flowGraphToDs (flow:Flow) (indent:int) =

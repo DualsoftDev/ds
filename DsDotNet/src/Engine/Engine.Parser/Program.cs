@@ -16,7 +16,7 @@ public class Program
     [flow] ""Flow.Complex"" = {
         ""#Seg.Complex#"" => Seg;
         ""#Seg.Complex#"" = {
-            A.""+"" > A.""-"";
+            A.""+"" < A.""-"";
         }
     }
 
@@ -80,7 +80,7 @@ C4 > C5;
 
         Vp |> Pm |> Sp;
         Vm |> Pp |> Sm;
-        Vp <||> Vm;
+        Vp <||> Vm <||> Sm;
     }
     [interfaces] = {
         ""+"" = { F.Vp ~ F.Sp }

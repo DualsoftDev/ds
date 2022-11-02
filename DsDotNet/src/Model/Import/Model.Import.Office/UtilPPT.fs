@@ -39,8 +39,12 @@ module UtilPPT =
                Office.ErrorPPT(ErrorCase.Shape, errId, Office.ShapeName(shape), page, shape.InnerText)
 
         [<Extension>] 
+        static member ErrorConnect(conn:#ConnectionShape, errId:int, text:string,  page:int) = 
+               Office.ErrorPPT(ErrorCase.Conn, errId, $"{Office.EdgeName(conn)}[{text}]", page, conn.InnerText)
+
+        [<Extension>] 
         static member ErrorConnect(conn:#ConnectionShape, errId:int, src:string, tgt:string,  page:int) = 
-               Office.ErrorPPT(ErrorCase.Conn, errId, $"{Office.EdgeName(conn)}[{src}~{tgt}]", page, conn.InnerText)
+               Office.ErrorConnect(conn, errId, $"{Office.EdgeName(conn)}[{src}~{tgt}]", page)
 
         ///power point 문서를 Openxml로 열기 (*.pptx 형식만 지원)
         [<Extension>] 
@@ -158,7 +162,9 @@ module UtilPPT =
                 else
                     let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
                     let round =  geometry.CheckRound()
-                    (   geometry.Preset.Value = Drawing.ShapeTypeValues.HomePlate && round )
+                    (  
+                      geometry.Preset.Value = Drawing.ShapeTypeValues.HomePlate && round 
+                    ||geometry.Preset.Value = Drawing.ShapeTypeValues.FlowChartOffpageConnector)
 
         [<Extension>] 
         static member CheckNoSmoking(shape:#Shape) = 

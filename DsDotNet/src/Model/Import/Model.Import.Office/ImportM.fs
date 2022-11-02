@@ -17,7 +17,7 @@ module ImportM =
 
         member internal x.GetImportModel() = 
             try
-        //new 
+         
                 ImportU.dicSys.Clear()
                 ImportU.dicCopy.Clear()
                 ImportU.dicFlow.Clear()
@@ -29,27 +29,30 @@ module ImportM =
 
                 //page 타이틀 이름 중복체크 (없으면 P0, P1, ... 자동생성)
                 ImportCheck.CheckMakeSystem(doc) 
-                doc.MakeSystem(model) //new 
-                doc.MakeCopySystem(model) //new 
-                doc.MakeInterfaces() //new
+                doc.MakeSystem(model)  
+                doc.MakeCopySystem(model)  
+                doc.MakeInterfaces() 
 
                 ImportCheck.CheckMakeCopyApi(doc.Nodes, ImportU.dicSys) 
                 //Flow 리스트 만들기
-                doc.MakeFlows(model) |> ignore //new 
+                doc.MakeFlows(model) |> ignore  
 
                 // system, flow 이름 중복체크 
-                ImportCheck.SameSysFlowName(model.Systems, ImportU.dicFlow) |> ignore //new
+                ImportCheck.SameSysFlowName(model.Systems, ImportU.dicFlow) |> ignore 
                 //EMG & Start & Auto 리스트 만들기
-                doc.MakeButtons  (model) //new
+                doc.MakeButtons  (model) 
 
                 //segment 리스트 만들기
-                doc.MakeSegment(model) //new
+                doc.MakeSegment(model) 
+
+                ImportCheck.SameEdgeErr(doc.Edges) |> ignore 
+
                 //Edge  만들기
-                doc.MakeEdges (model) //new
+                doc.MakeEdges (model) 
                  //Safety 만들기
-                doc.MakeSafeties(model)  //new
+                doc.MakeSafeties(model)  
                 //ApiTxRx  만들기
-                doc.MakeApiTxRx(model) //new
+                doc.MakeApiTxRx(model) 
 
                   
              
@@ -57,10 +60,10 @@ module ImportM =
                 MSGInfo($"전체 도형   count [{doc.Nodes.Count()}]")
                 MSGInfo($"전체 연결   count [{doc.Edges.Count()}]")
                 MSGInfo($"전체 부모   count [{doc.Parents.Keys.Count}]")
-                model
+                model, ImportU.dicFlow
 
             with ex ->  failwithf  $"{ex.Message}"
-                        model
+                        model, ImportU.dicFlow
                     
 
     let FromPPTX(path:string) =

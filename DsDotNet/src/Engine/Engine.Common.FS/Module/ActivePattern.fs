@@ -19,12 +19,14 @@ let (|HeadAndTail|_|) (FList(xs)) =
 
 
 /// Sequence 의 Init, Last pair 반환
-let (|InitAndLast|_|) (FList(xs)) =
+let (|InitAndLast|_|) (FList(xs)) =     // (|InitAndLast|_|) [1..10] ==> Some ([1; 2; 3; 4; 5; 6; 7; 8; 9], 10)
     match xs with
     | [] -> None
     | _ ->
         let rev = List.rev xs
         Some(List.rev rev.Tail, rev.Head)
+
+let initAndLast xs = (|InitAndLast|_|) xs
 
 /// RegexPattern parses a regular expression and returns a list of the strings that match each group in
 /// the regular expression.

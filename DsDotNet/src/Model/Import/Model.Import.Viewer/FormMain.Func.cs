@@ -61,15 +61,16 @@ namespace Dual.Model.Import
                 this.Do(() => button_comfile.Enabled = false);
                 var result = ImportM.FromPPTX(PathPPT);
               
-                _Model = result;
+                _Model = result.Item1;
+                var dicFlow = result.Item2;
                 if (!_ConvertErr)
                 {
                     _dsText = _Model.ToDsText();
                     ExportTextModel(Color.Transparent, _dsText);
                     this.Do(() => xtraTabControl_Ex.TabPages.Clear());
-                    //test ahn
-                    //foreach (var sys in _Model.Systems.OrderBy(sys => sys.Name))
-                    //    CreateNewTabViewer(sys);
+
+                    foreach (var sys in _Model.Systems.OrderBy(sys => sys.Name))
+                        CreateNewTabViewer(sys, dicFlow);
 
                     WriteDebugMsg(DateTime.Now, MSGLevel.Info, $"{PathPPT} 불러오기 성공!!");
                     this.Do(() =>
@@ -178,20 +179,22 @@ namespace Dual.Model.Import
                 richTextBox_Debug.ScrollToCaret();
             });
         }
-
+        CoreModule.Model _Demo = new CoreModule.Model();
         internal void HelpLoad()
         {
             splitContainer1.Panel1Collapsed = false;
 
             this.Size = new Size(1600, 1000);
+            if (_Demo.Systems.Count == 0)
+                _Demo = ImportCheck.GetDemoModel("test");
 
-            _Model.Systems.OrderBy(sys => sys.Name).ToList()
+            _Demo.Systems.OrderBy(sys => sys.Name).ToList()
                   .ForEach(sys =>
-                      CreateNewTabViewer(sys, true)
+                      CreateNewTabViewer(sys, null)
                   );
         }
 
-        internal void CreateNewTabViewer(DsSystem sys, bool isDemo = false)
+        internal void CreateNewTabViewer(DsSystem sys, Dictionary<int, Flow> dicFlow)
         {
             //List<MFlow> flows = sys.Flows.Cast<MFlow>().OrderBy(o => o.Page).ToList();
 
@@ -206,13 +209,17 @@ namespace Dual.Model.Import
                 }
                 else
                 {
+                    int pageNum = 0;
+                    if(dicFlow != null)
+                        pageNum = dicFlow.First(flow => flow.Value.System.Name == sys.Name 
+                                                     && flow.Value.Name == f.Name).Key;
+
                     UCView viewer = new UCView { Dock = DockStyle.Fill };
-                    viewer.SetGraph(f);
+                    viewer.SetGraph(f, sys);
                     TabPage tab = new TabPage();
                     tab.Controls.Add(viewer);
                     tab.Tag = viewer;
-                    //tab.Text = $"{f.System.Name}.{f.Name}({f.Page})";
-                    tab.Text = $"{f.System.Name}.{f.Name}";
+                    tab.Text = $"{f.System.Name}.{f.Name}({(pageNum > 0 ? pageNum: 0)})";
                     this.Do(() =>
                     {
                         if (f.System.Active)

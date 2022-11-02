@@ -37,7 +37,7 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Engine.Common.FS", "src\Eng
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Engine.Core", "src\Engine\Engine.Core\Engine.Core.fsproj", "{40D8F531-BF68-4FAB-A5DC-57277C3DE2C8}"
 EndProject
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Engine.CpuUnit", "src\Engine\Engine.CpuUnit\Engine.CpuUnit.fsproj", "{C0E14C8D-0A0B-4E52-A9BA-76110164E033}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Engine.Cpu", "src\Engine\Engine.CpuUnit\Engine.Cpu.fsproj", "{C0E14C8D-0A0B-4E52-A9BA-76110164E033}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Engine.Parser", "src\Engine\Engine.Parser\Engine.Parser.csproj", "{D405C9DC-6818-40A6-9397-CD1574F60044}"
 EndProject

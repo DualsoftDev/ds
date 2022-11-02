@@ -1,4 +1,4 @@
-namespace Engine.CpuUnit
+namespace Engine.Cpu
 
 open System.Diagnostics
 open System.Collections.Generic

@@ -48,18 +48,23 @@ module EdgeModule =
                 failwithlogf $"Unknown causal operator [{operator}]."
         ]
 
-    let createFlowEdges(flow:Flow, source:Vertex, target:Vertex, operator:string) =
-        [|
+    let createEdges(graph:Graph<Vertex, Edge>, source:Vertex, target:Vertex, operator:string) =
+         [|
             for src, op, tgt in createEdgesReArranged(source, operator, target) do
-                yield Edge.Create(flow.Graph, src, tgt, op)
-        |]
+                let edge = Edge.Create(graph, src, tgt, op)
+                match operator with
+                | TextInterlock ->     edge.EditorInfo <- EdgeType.EditorInterlock 
+                | TextStartReset ->    edge.EditorInfo <- EdgeType.EditorStartReset 
+                | _ -> ()
+                
+                yield edge
+         |]
+
+    let createFlowEdges(flow:Flow, source:Vertex, target:Vertex, operator:string) =
+        createEdges(flow.Graph, source, target, operator)
 
     let createChildEdges(segment:Real, source:Vertex, target:Vertex, operator:string) =
-        [|
-            for src, op, tgt in createEdgesReArranged(source, operator, target) do
-                yield Edge.Create(segment.Graph, src, tgt, op)
-        |]
-
+        createEdges(segment.Graph, source, target, operator)
 
     let ofResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) =
             edges.Where(fun e -> e.EdgeType.HasFlag(EdgeType.Reset))

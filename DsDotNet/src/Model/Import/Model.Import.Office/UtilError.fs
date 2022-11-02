@@ -63,7 +63,11 @@ module UtilError =
         msgs.TryAdd(38,"도형에 윤곽선이 없습니다.") |>ignore
         msgs.TryAdd(39,"모델링에 사용불가 도형입니다.") |>ignore
         msgs.TryAdd(40,"") |>ignore
-       
+        
+
+        //todo
+        //msgs.TryAdd(xx,"리얼 행위의 자식은 한곳에만 정의가능합니다.(alias, exFlow 정의불가)") |>ignore
+        //
         msgs
         
     [<Extension>]

@@ -39,7 +39,14 @@ type SeqExt =
     [<Extension>] static member Filter(xs:'a seq, f)     = Seq.filter f xs
     [<Extension>] static member Find(xs:'a seq, f)       = Seq.find f xs
     [<Extension>] static member Reduce(xs:'a seq, f)     = Seq.reduce f xs
-    [<Extension>] static member Foldr(xs:'a seq, f)      = Seq.fold f xs
+
+    (*  List.fold (+) 0 [1; 2; 3] = ((0 + 1) + 2) + 3
+        List.foldBack (+) [1; 2; 3] 0 = 1 + (2 + (3 + 0))   *)
+    /// [x] -> (acc -> x -> acc) -> acc -> acc
+    [<Extension>] static member FoldLeft(xs:'a seq, f, seed)   = Seq.fold f seed xs
+    /// [x] -> (x -> acc -> acc) -> acc -> acc
+    [<Extension>] static member FoldRight(xs:'a seq, f, seed)  = Seq.foldBack f xs seed
+
     [<Extension>] static member TryFind(xs:'a seq, f)    = Seq.tryFind f xs
     [<Extension>] static member TryHead(xs:'a seq)       = Seq.tryHead xs
     [<Extension>] static member Head(xs:'a seq)          = Seq.head xs

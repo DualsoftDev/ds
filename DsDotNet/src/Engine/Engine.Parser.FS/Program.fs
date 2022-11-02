@@ -765,7 +765,7 @@ C4 > C5;
 
 
     let Main(args:string[]) =
-        ParseNormal(SplittedMRIEdgesText)
+        //ParseNormal(SplittedMRIEdgesText)
         //ParseNormal(DuplicatedEdgesText)
         //ParseNormal(AdoptoedValidText)
         //ParseNormal(AdoptoedAmbiguousText)

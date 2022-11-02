@@ -30,7 +30,7 @@ type DsParser() =
         let listener_parser = new ErrorListener<IToken>(throwOnError)
         lexer.AddErrorListener(listener_lexer)
         parser.AddErrorListener(listener_parser)
-        let tree = parser.model()
+        let tree = predExtract parser
         let errors = listener_lexer.Errors.Concat(listener_parser.Errors).ToArray()
 
         parser, tree, errors
@@ -186,7 +186,6 @@ type DsParser() =
         let rec splitName(name:string) = // : string[]
             [
                 let sub = new ResizeArray<char>()
-                let mutable q = false
                 let mutable prev = ' '
                 let pop =
                     let mutable i = 0
@@ -198,8 +197,11 @@ type DsParser() =
                         else
                             None
 
-                while not q do
-                    match pop() with
+                let mutable ch = pop()
+                //let mutable quit = false
+                let mutable q = false
+                while ch.IsSome do
+                    match ch with
                     | Some ch ->
                         sub.Add(ch)
                         match ch with
@@ -227,7 +229,9 @@ type DsParser() =
 
                         | _ ->
                             ()
-                    | None -> q <- true
+                    | None ->
+                        q <- true
+                    ch <- pop()
 
                 if sub.Any() then
                     yield String(sub.ToArray())

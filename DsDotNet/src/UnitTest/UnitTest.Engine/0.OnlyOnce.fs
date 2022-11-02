@@ -18,12 +18,11 @@ module Fixtures =
         XmlConfigurator.Configure(new FileInfo(log4netConfigFile)) |> ignore
         let logger = LogManager.GetLogger(loggerName)
         Engine.Common.Global.Logger <- logger
-        Engine.Parser.Global.Logger <- logger
         gLogger <- logger
         logger
 
-    let SetUpTest() = 
-            
+    let SetUpTest() =
+
             let cwd = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..\"))
             sprintf "테스트 초기화 수행" |> ignore
             let configFile = $@"{cwd}App.config"

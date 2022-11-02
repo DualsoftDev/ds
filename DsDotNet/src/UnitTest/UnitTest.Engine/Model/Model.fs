@@ -6,7 +6,7 @@ open Engine
 open Engine.Core
 open Engine.Common.FS
 open NUnit.Framework
-open Engine.Parser
+open Engine.Parser.FS
 
 [<AutoOpen>]
 module private ModelComparisonHelper =
@@ -422,7 +422,7 @@ module private ModelComparisonHelper =
 """
 
     let compare originalText answer =
-        let helper = ModelParser.ParseFromString2(originalText, ParserOptions.Create4Simulation())
+        let helper = ModelParser.ParseFromString2(originalText, ParserOptions.Create4Simulation("ActiveCpuName"))
         let model = helper.Model
 
         let generated = model.ToDsText();

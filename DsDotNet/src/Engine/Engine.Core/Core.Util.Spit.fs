@@ -4,8 +4,9 @@ open System.Runtime.CompilerServices
 open System.Linq
 open System.Diagnostics
 
+[<AutoOpen>]
 module SpitModuleHelper =
-    type SpitOnlyAlias = { AliasKey:NameComponents; Mnemonic:NameComponents }
+    type SpitOnlyAlias = { AliasKey:Fqdn; Mnemonic:Fqdn }
 
     type SpitCoreType =
         | SpitModel     of Model
@@ -22,7 +23,7 @@ module SpitModuleHelper =
 
     [<DebuggerDisplay("Obj={SpitObj}, Names={NameComponents.Combine()}")>]
     type SpitResult =
-        { SpitObj:SpitCoreType; NameComponents:NameComponents }
+        { SpitObj:SpitCoreType; NameComponents:Fqdn }
         static member Create(core, nameComponents) = {SpitObj = core; NameComponents = nameComponents}
 
     type SpitResults = SpitResult[]

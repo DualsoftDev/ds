@@ -1,9 +1,10 @@
-namespace Engine.Core
+namespace Model.Import.Office
 
 open System.Runtime.CompilerServices
 open System.Linq
 open Engine.Common.FS
 open System.Collections.Generic
+open Engine.Core
 
 [<AutoOpen>]
 module internal ToCopyModule =

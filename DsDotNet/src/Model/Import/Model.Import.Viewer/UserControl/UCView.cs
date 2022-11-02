@@ -18,6 +18,7 @@ using Edge = Microsoft.Msagl.Drawing.Edge;
 using Vertex = Engine.Core.CoreModule.Vertex;
 using DsEdge = Engine.Core.CoreModule.Edge;
 using static Model.Import.Office.InterfaceClass;
+using System.Windows.Forms.VisualStyles;
 
 namespace Dual.Model.Import
 {
@@ -69,15 +70,16 @@ namespace Dual.Model.Import
             SetBackColor(System.Drawing.Color.FromArgb(33, 33, 33));
 
             DrawButtons(flow, sys);
-            if(sys.Flows.First() == flow) //처음 시스템 Flow에만 인터페이스 표기
+            if(sys.Flows.First() == flow && sys.ApiItems.Count>0) //처음 시스템 Flow에만 인터페이스 표기
                 DrawApiItems(flow, sys);
 
             flow.Graph.Islands
                 .ForEach(seg => DrawSeg(viewer.Graph.RootSubgraph, new DsViewNode(seg)));
 
-            var dsEdges = flow.Graph.Edges.Select(s => new DsViewEdge(s));
-
-            drawMEdgeGraph(dsEdges, viewer.Graph.RootSubgraph);
+            flow.Graph.Edges
+                .Select(s => new DsViewEdge(s))
+                .Where(w => w.DsEdge.EditorInfo != EdgeType.EditorSpare)
+                .ForEach(f => DrawMEdge(viewer.Graph.RootSubgraph, f));
 
             viewer.SetCalculatedLayout(viewer.CalculateLayout(viewer.Graph));
         }
@@ -108,18 +110,7 @@ namespace Dual.Model.Import
 
         }
 
-
-
-
-        private void drawMEdgeGraph(IEnumerable<DsViewEdge> edges, Subgraph subgraph)
-        {
-            edges.ForEach(f =>
-            {
-                //  if (!f.IsSkipUI)
-                DrawMEdge(subgraph, f);
-            });
-        }
-
+  
         private void DrawMEdge(Subgraph subgraph, DsViewEdge edge)
         {
             DsViewEdge mEdge = edge;
@@ -165,12 +156,14 @@ namespace Dual.Model.Import
 
             if (bDrawSub)
             {
-                if (seg.MEdges.Any())
-                    drawMEdgeGraph(seg.MEdges.ToList(), subG);
+                seg.MEdges.ForEach(f =>
+                {
+                    DrawMEdge(subG, f);
+                });
 
                 seg.Singles.ToList().ForEach(subSeg => DrawSeg(subG, subSeg));
 
-              
+
             }
             else
                 parentGraph.AddNode(gNode);

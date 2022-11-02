@@ -8,14 +8,7 @@ open Engine.Core
 module InterfaceClass =
 
  
-    // 이름이 필요한 객체
-    [<AbstractClass>]
-    type Name(name) =
-        let mutable name = name
-        interface INamed with
-            member _.Name with get () = name
 
-        member val Name : string = name with get
  
  ///인과의 노드 종류
     type NodeType =

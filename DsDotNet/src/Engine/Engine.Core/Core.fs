@@ -54,6 +54,7 @@ module CoreModule =
         inherit FqdnObject(name, system)
         member val Graph = Graph<Vertex, Edge>()
         member val AliasMap = Dictionary<Fqdn, HashSet<string>>(nameComponentsComparer())
+      
         member x.System = system
         static member Create(name:string, system:DsSystem) =
             let flow = Flow(name, system)
@@ -100,6 +101,11 @@ module CoreModule =
             | Some v -> failwith "Alias name is already used by other vertex"
             | None -> None
 
+        static let addAlias(flow:Flow, target:Fqdn, alias:string) =
+            if   flow.AliasMap.ContainsKey target 
+            then flow.AliasMap.[target].Add(alias) |>ignore
+            else flow.AliasMap.Add(target, HashSet[|alias|]) |>ignore
+
         member x.Target = target
 
         override x.GetRelativeName(referencePath:Fqdn) =
@@ -107,13 +113,19 @@ module CoreModule =
             | RealTarget r -> x.Name
             | CallTarget c -> base.GetRelativeName(referencePath)
 
-        static member Create(mnemonic, target:AliasTargetType, parent:ParentWrapper) =
+        static member Create(mnemonic, target:AliasTargetType, parent:ParentWrapper, skipAddFlowMap:bool) =
             let graph = parent.Graph
             let creator() =
                 let alias = Alias(mnemonic, target, parent)
                 graph.AddVertex(alias) |> verifyM $"Duplicated child name [{mnemonic}]"
+                if skipAddFlowMap|>not
+                then match target with
+                     | RealTarget r -> addAlias(r.Flow, [|r.Name|], mnemonic) 
+                     | CallTarget c -> match c.Parent with
+                                       |Real rParent -> addAlias(rParent.Flow, [|c.Name|], mnemonic)  
+                                       |Flow fParent -> addAlias(fParent, [|c.Name|], mnemonic)  
                 alias
-
+                  
             let existing = tryFindAlias graph mnemonic
             match existing with
             | Some a -> a
@@ -201,7 +213,7 @@ module CoreModule =
             graph.AddEdge(edge) |> verifyM $"Duplicated edge [{source.Name}{edgeType.ToText()}{target.Name}]"
             edge
         
-        member val EditorInfo = EdgeType.EditorSpare with get, set
+        member val EditorInfo = EdgeType.Default with get, set
         override x.ToString() = $"{x.Source.QualifiedName} {x.EdgeType.ToText()} {x.Target.QualifiedName}"
 
 [<Extension>]

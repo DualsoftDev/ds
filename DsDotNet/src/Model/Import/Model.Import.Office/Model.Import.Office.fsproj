@@ -20,8 +20,8 @@
     <Compile Include="EdgeUtil.fs" />
     <Compile Include="Util.fs" />
     <Compile Include="MessgeError.fs" />
-    <Compile Include="UtilPPT.fs" />
-    <Compile Include="PPTX.fs" />
+    <Compile Include="PPTUtil.fs" />
+    <Compile Include="PPTObject.fs" />
     <Compile Include="ImportCheck.fs" />
     <Compile Include="ImportUtilCopy.fs" />
     <Compile Include="ImportUtil.fs" />

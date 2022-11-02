@@ -2,7 +2,7 @@
 namespace Model.Import.Office
 
 open System.Linq
-open PPTX
+open PPTObjectModule
 open System
 open System.Collections.Concurrent
 open Engine.Common.FS
@@ -76,7 +76,7 @@ module ImportCheck =
                 |> Seq.iter(fun node -> 
                     
                     if(sysNames.Contains(node.Name)|> not)
-                    then Office.ErrorPPT(Name, 32,  node.Shape.InnerText, node.PageNum, $"확인 시스템 이름 : {node.Name}") 
+                    then Office.ErrorPPT(Name, ErrID._32,  node.Shape.InnerText, node.PageNum, $"확인 시스템 이름 : {node.Name}") 
 
 
                     )
@@ -87,7 +87,7 @@ module ImportCheck =
             pptEdges |> Seq.iter(fun edge ->
                 if(dicSameCheck.TryAdd(edge.Text,edge.Text)|>not)
                     then
-                        edge.ConnectionShape.ErrorConnect(20, edge.Text, edge.PageNum)
+                        edge.ConnectionShape.ErrorConnect(ErrID._20, edge.Text, edge.PageNum)
             )
 
         //page 타이틀 중복체크 
@@ -96,7 +96,7 @@ module ImportCheck =
             doc.Pages.Filter(fun page  ->  page.IsUsing && page.Title = ""|> not)
                     .ForEach(fun page-> 
                                 if(dicPage.TryAdd(page.Title, page.PageNum)|>not)
-                                then Office.ErrorPPT(Page, 21, $"{page.Title},  Same Page({dicPage.[page.Title]})",  page.PageNum)
+                                then Office.ErrorPPT(Page, ErrID._21, $"{page.Title},  Same Page({dicPage.[page.Title]})",  page.PageNum)
                                 )
 
             let dicSys = ConcurrentDictionary<string, string>()
@@ -105,7 +105,7 @@ module ImportCheck =
             |> Seq.iter(fun node -> 
                     node.CopySys.ForEach(fun copy -> 
                         if dicSys.TryAdd(copy.Key, copy.Value)|>not
-                        then Office.ErrorName(node.Shape, 34, node.PageNum)
+                        then Office.ErrorName(node.Shape, ErrID._34, node.PageNum)
                         )
                     )
         
@@ -118,7 +118,7 @@ module ImportCheck =
                     if sysNames.Contains(flow.Name) 
                     then 
                         let page = dicFlow.Where(fun w-> w.Value = flow).First().Key                    
-                        Office.ErrorPPT(ErrorCase.Name, 31, $"시스템이름 : {flow.System.Name}",page, $"중복페이지 : {page}")  )
+                        Office.ErrorPPT(ErrorCase.Name, ErrID._31, $"시스템이름 : {flow.System.Name}",page, $"중복페이지 : {page}")  )
                     )
 
 

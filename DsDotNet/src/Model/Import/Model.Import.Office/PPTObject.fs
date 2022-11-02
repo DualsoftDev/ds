@@ -8,7 +8,7 @@ open DocumentFormat.OpenXml.Drawing
 open DocumentFormat.OpenXml
 open System.IO
 open System
-open UtilPPT
+open PPTUtil
 open Engine.Common.FS
 open Model.Import.Office
 open System.Collections.Generic
@@ -18,24 +18,29 @@ open System.Runtime.CompilerServices
 
 
 [<AutoOpen>]
-module PPTX =
+module PPTObjectModule =
 
-    let TextMySys = "MY"
-    let TextExFlow = "exflow"
     let Objkey(iPage, Id) = $"{iPage}page{Id}"
-    let SysName(iPage) = sprintf "page%3d" iPage 
-    let TrimStartEndSpace(name:string) = name.TrimStart(' ').TrimEnd(' ')
+    let TrimSpace(name:string) = name.TrimStart(' ').TrimEnd(' ')
     let CopyName(name:string, cnt) = sprintf "Copy%d_%s" cnt (name.Replace(".", "_")) 
-    let GetSysNFlow(name:string, pageNum:int) = 
-            if(name.StartsWith("$")) then (TrimStartEndSpace(name.TrimStart('$'))), TextExFlow
-            elif(name = "")        then TextMySys, sprintf "P%d" pageNum
-            else                        TextMySys, TrimStartEndSpace(name)
+
+
+    let GetSysNApi(flowName:string, name:string) = 
+        if(name.StartsWith("$"))
+            then (TrimSpace(name.Split('.').[0]).TrimStart('$')), name.Split('.').[1]
+            else  $"{flowName}_{name.Split('.').[0]}", name.Split('.').[1]
+            
+    let GetSysNFlow(fileName:string, name:string, pageNum:int) = 
+            if(name.StartsWith("$"))
+                then 
+                    if name.Contains(".")
+                    then (TrimSpace(name.Split('.').[0]).TrimStart('$')), name.Split('.').[1]
+                    else (TrimSpace(name.TrimStart('$'))), "_"
+
+            elif(name = "")        then fileName, sprintf "Page%d" pageNum
+            else                        fileName, TrimSpace(name)
             
     
-        //alias Setting
-    
-
-
     ///전체 사용된 화살표 반환 (앞뒤연결 필수)
     let Connections(doc:PresentationDocument) = 
                     Office.SildesSkipHide(doc) 
@@ -108,17 +113,17 @@ module PPTX =
 
 
                     //연결오류 찾아서 예외처리
-                    if (connStart = null && connEnd = null) then  conn.ErrorConnect(4, startName, endName, iPage)
-                    if (connStart = null) then  conn.ErrorConnect(5, startName, endName, iPage)
-                    if (connEnd = null) then  conn.ErrorConnect(6, startName, endName, iPage)
-                    if (not existHead && not existTail) then  conn.ErrorConnect(7, startName, endName, iPage)
+                    if (connStart = null && connEnd = null) then  conn.ErrorConnect(ErrID._4, startName, endName, iPage)
+                    if (connStart = null) then  conn.ErrorConnect(ErrID._5, startName, endName, iPage)
+                    if (connEnd = null) then  conn.ErrorConnect(ErrID._6, startName, endName, iPage)
+                    if (not existHead && not existTail) then  conn.ErrorConnect(ErrID._7, startName, endName, iPage)
                     if (existHead && existTail) 
                     then
                         if(not dashLine)
                         then 
-                            if(headArrow && tailArrow) then  conn.ErrorConnect(8, startName, endName, iPage)           
-                            if((headArrow || tailArrow)|>not)   then  conn.ErrorConnect(9, startName, endName, iPage)  
-                            if(not headArrow && not tailArrow)  then  conn.ErrorConnect(10, startName, endName, iPage) 
+                            if(headArrow && tailArrow) then  conn.ErrorConnect(ErrID._8, startName, endName, iPage)           
+                            if((headArrow || tailArrow)|>not)   then  conn.ErrorConnect(ErrID._9, startName, endName, iPage)  
+                            if(not headArrow && not tailArrow)  then  conn.ErrorConnect(ErrID._10, startName, endName, iPage) 
 
 
                     //인과 타입과 <START, END> 역전여부
@@ -132,7 +137,7 @@ module PPTX =
                             | false,true, false ->  StartPush, isChangeHead
                             | true, true, true  ->  ResetEdge, isChangeHead
                             | false,true, true  ->  ResetPush, isChangeHead
-                            | _ -> conn.ErrorConnect(3, startName, endName, iPage)
+                            | _ -> conn.ErrorConnect(ErrID._3, startName, endName, iPage)
 
 
     let rec ValidGroup(subG:Presentation.GroupShape, shapeIds:ConcurrentHash<uint32>) =    
@@ -196,7 +201,7 @@ module PPTX =
                     txCnt <- tailBarckets.Split(';').[0] |> Convert.ToInt32
                     rxCnt <- tailBarckets.Split(';').[1] |> Convert.ToInt32
                 else 
-                    shape.ErrorName(22, iPage)
+                    shape.ErrorName(ErrID._22, iPage)
 
         let updateSafety(barckets:string)  = safeties <- barckets.Split(';')  |> HashSet 
                                             //             |> Seq.map(fun name -> $"{pageTitle}_{name}") |> HashSet 
@@ -237,14 +242,14 @@ module PPTX =
                     then DUMMY
                     else 
                         if((txCnt = 0 && rxCnt = 0) || txCnt < 0 || rxCnt < 0)
-                        then shape.ErrorName(2, iPage)
+                        then shape.ErrorName(ErrID._2, iPage)
                         else 
                             if (txCnt > 0 && rxCnt > 0) then TR
                             elif (txCnt = 0) then RX
                             elif (rxCnt = 0) then TX
-                            else shape.ErrorName(2, iPage)
+                            else shape.ErrorName(ErrID._2, iPage)
 
-                else  shape.ErrorName(1, iPage)
+                else  shape.ErrorName(ErrID._1, iPage)
 
             name <-  GetBracketsReplaceName(shape.InnerText)
             match nodeType with
@@ -277,7 +282,7 @@ module PPTX =
         member x.IsResetBtn = bReset
         member x.NodeType = nodeType
         member x.IsDummy  = nodeType = DUMMY
-        member x.CallName    = assert(nodeType.IsCall); $"{pageTitle}_{name}"  
+        member x.PageTitle    = pageTitle
         member x.IsAlias :bool   = x.Alias.IsSome
         
         member val Id =  shape.GetId()
@@ -298,6 +303,8 @@ module PPTX =
         let startNode = nodes.[startKey]
         let endNode   = nodes.[endKey]
         do
+            if conn.IsOutlineConnectionExist()|>not
+            then conn.ErrorConnect(ErrID._40, nodes.[startKey].Name, nodes.[endKey].Name, iPage)
             GetCausal(conn, iPage, nodes.[startKey].Name, nodes.[endKey].Name) 
             |> fun(c, r) -> causal <- c;reverse <- r
      
@@ -332,15 +339,15 @@ module PPTX =
                 |> Seq.map (fun id -> nodes.[ Objkey(iPage, id) ])
                 |> Seq.filter (fun node -> node.NodeType = MY)
             if(parents.Count() > 1) 
-            then  Office.ErrorPPT(Group, 23, $"부모수:{parents.Count()}", iPage)
+            then  Office.ErrorPPT(Group, ErrID._23, $"부모수:{parents.Count()}", iPage)
             let dummys = 
                 ids 
                 |> Seq.map (fun id -> nodes.[ Objkey(iPage, id) ])
                 |> Seq.filter (fun node -> node.NodeType = DUMMY)
             if(parents.Count() = 0 && dummys.Count() > 1) 
-            then  Office.ErrorPPT(Group, 24, $"부모수:{dummys.Count()}", iPage)
+            then  Office.ErrorPPT(Group, ErrID._24, $"부모수:{dummys.Count()}", iPage)
             if(parents.Count() = 0 && dummys.Count() = 0 ) 
-            then  Office.ErrorPPT(Group, 25, $"도형 타입확인", iPage)
+            then  Office.ErrorPPT(Group, ErrID._25, $"도형 타입확인", iPage)
 
             parent <-
                 if(parents.Any()|>not) then None
@@ -358,7 +365,7 @@ module PPTX =
                 |> Seq.filter (fun node ->(node.NodeType = DUMMY|>not ||  parent.IsSome))
 
             if(children.Any() |> not) 
-            then  Office.ErrorPPT(Group, 12, $"자식수:0", iPage)
+            then  Office.ErrorPPT(Group, ErrID._12, $"자식수:0", iPage)
          
 
             children |> Seq.iter(fun child -> childSet.TryAdd(child)|>ignore)
@@ -370,8 +377,9 @@ module PPTX =
         member x.DummyParent:pptNode option = dummy
         member x.Children =  childSet.Values 
         
-    type pptDoc(path:string) =
+    type pptDoc(path:string)  =
         let doc = Office.Open(path)
+        let name =  Path.GetFileNameWithoutExtension(path)
         let pages =  ConcurrentDictionary<SlidePart, pptPage>()
         let masterPages =  ConcurrentDictionary<int, DocumentFormat.OpenXml.Presentation.SlideMaster>()
         let nodes =  ConcurrentDictionary<string, pptNode>()
@@ -433,7 +441,6 @@ module PPTX =
                     masterPages.TryAdd(masterPages.Count+1, slideMaster) |>ignore )
               
                 sildesAll
-                |> Seq.filter (fun (slidePart, show, page) -> slidePart.IsTitleSlide())
                 |> Seq.iter (fun (slidePart, show, page) -> 
                     pages.TryAdd(slidePart, pptPage(slidePart, page, show)) |>ignore )
               
@@ -449,10 +456,10 @@ module PPTX =
                 |> Seq.iter (fun (shape, page, geometry, isDash) ->
 
                             let pagePPT = pages.Values.Filter(fun w->w.PageNum = page).First()
-                            let sysName, flowName = GetSysNFlow(pagePPT.Title, pagePPT.PageNum)
+                            let sysName, flowName = GetSysNFlow(name, pagePPT.Title, pagePPT.PageNum)
 
                             let node = pptNode(shape, page,  isDash,  sildeSize, flowName)
-                            if(node.Name ="" && node.NodeType = DUMMY|>not) then shape.ErrorName(13, page)
+                            if(node.Name ="" && node.NodeType = DUMMY|>not) then shape.ErrorName(ErrID._13, page)
                             nodes.TryAdd(node.Key, node)  |>ignore )
                 
                 let dicFakeSub = ConcurrentHash<Presentation.GroupShape>()
@@ -461,14 +468,14 @@ module PPTX =
                 let dicParentCheck = ConcurrentDictionary<string, int>()
                 let makeRealGroup ( pptGroup:pptGroup ) =
                     if(pptGroup.Parent.IsNone)
-                    then Office.ErrorPPT(Group, 18, "", pptGroup.PageNum)
+                    then Office.ErrorPPT(Group, ErrID._18, "", pptGroup.PageNum)
                     else 
                         let parent = pptGroup.Parent.Value;
                         if(dicParentCheck.TryAdd(pptGroup.RealKey, pptGroup.PageNum))
                         then 
                             parents.TryAdd(parent, pptGroup.Children)|>ignore
                         else 
-                            Office.ErrorPPT(Group, 17, $"{dicParentCheck.[pptGroup.RealKey]}-{parent.Name}", pptGroup.PageNum) 
+                            Office.ErrorPPT(Group, ErrID._17, $"{dicParentCheck.[pptGroup.RealKey]}-{parent.Name}", pptGroup.PageNum) 
                 
                 let makeDummyGroup ( pptGroup:pptGroup ) =
                         if(pptGroup.DummyParent.IsSome)
@@ -499,11 +506,11 @@ module PPTX =
                                 if(nodes.ContainsKey(Objkey(iPage, endId)))
                                 then nodes.[Objkey(iPage, endId)].Name else ""
 
-                            if(startId = 0u && endId = 0u) then  conn.ErrorConnect(4, "","", iPage)
-                            if(nodes.ContainsKey(Objkey(iPage, startId))|>not) then  conn.ErrorConnect(14, "",$"{nodeName}", iPage) 
-                            if(nodes.ContainsKey(Objkey(iPage, endId))|>not)   then  conn.ErrorConnect(14, $"{nodeName}", "", iPage) 
-                            if(startId = 0u) then  conn.ErrorConnect(15, "", $"{nodeName}", iPage) 
-                            if(endId = 0u) then    conn.ErrorConnect(16, $"{nodeName}", "", iPage) 
+                            if(startId = 0u && endId = 0u) then  conn.ErrorConnect(ErrID._4, "","", iPage)
+                            if(nodes.ContainsKey(Objkey(iPage, startId))|>not) then  conn.ErrorConnect(ErrID._14, "",$"{nodeName}", iPage) 
+                            if(nodes.ContainsKey(Objkey(iPage, endId))|>not)   then  conn.ErrorConnect(ErrID._14, $"{nodeName}", "", iPage) 
+                            if(startId = 0u) then  conn.ErrorConnect(ErrID._15, "", $"{nodeName}", iPage) 
+                            if(endId = 0u) then    conn.ErrorConnect(ErrID._16, $"{nodeName}", "", iPage) 
                             edges.TryAdd(pptEdge(conn, Id, iPage ,startId, endId,  nodes)) |>ignore 
                         ))
                          
@@ -523,7 +530,7 @@ module PPTX =
         member val Edges = edges.Values.OrderBy(fun p -> p.PageNum)
         member val Parents = parents
 
-        member val Name =  Path.GetFileNameWithoutExtension(path)
+        member val Name =  name
         member val FullPath =  path
                 
 

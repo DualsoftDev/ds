@@ -28,7 +28,7 @@ type EdgeListener(parser:dsParser, helper:ParserHelper) =
             let graph = parent.Graph
             let existing = graph.TryFindVertex(name)
             if existing.IsNone then
-                let create target = Alias.Create(name, target, parent) |> ignore
+                let create target = Alias.Create(name, target, parent, true) |> ignore
                 match target with
                 | :? AliasTargetReal as real ->
                     let realTarget = modelSpitCores.OfType<Real>().First(fun r -> r.NameComponents.IsStringArrayEqaul(real.TargetFqdn))

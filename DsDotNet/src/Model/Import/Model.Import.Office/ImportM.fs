@@ -2,7 +2,7 @@
 namespace Model.Import.Office
 
 open System.Linq
-open PPTX
+open PPTObjectModule
 open System.Collections.Generic
 open Engine.Common.FS
 open Model.Import.Office
@@ -23,7 +23,7 @@ module ImportM =
                 ImportU.dicFlow.Clear()
                 ImportU.dicVertex.Clear()
 
-                let mySystem = DsSystem.Create(TextMySys, "localhost", model)  
+                let mySystem = DsSystem.Create(doc.Name, "localhost", model)  
                 mySystem.Active <- true         
                 ImportU.dicSys.Add(0, mySystem)
 
@@ -49,7 +49,7 @@ module ImportM =
 
                 //Edge  만들기
                 doc.MakeEdges (model) 
-                 //Safety 만들기
+                //Safety 만들기
                 doc.MakeSafeties(model)  
                 //ApiTxRx  만들기
                 doc.MakeApiTxRx(model) 

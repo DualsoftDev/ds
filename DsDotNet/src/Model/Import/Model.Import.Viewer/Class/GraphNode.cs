@@ -38,8 +38,7 @@ namespace Dual.Model.Import
         }
         public DsViewNode(DsVertex v)
         {
-
-            UIKey = $"{v.Name};{this.GetHashCode()}";
+            UIKey = $"{v.Name};{v.QualifiedName}";
             DsVertex = v;
             var real = v as Real;
             if (real != null)
@@ -94,7 +93,7 @@ namespace Dual.Model.Import
 
             if (e.EditorInfo.HasFlag(EdgeType.EditorInterlock))
                 Causal = EdgeType.EditorInterlock;
-            if (e.EditorInfo.HasFlag(EdgeType.EditorStartReset))
+            else if (e.EditorInfo.HasFlag(EdgeType.EditorStartReset))
                 Causal = EdgeType.EditorStartReset;
             else
                 Causal = e.EdgeType;

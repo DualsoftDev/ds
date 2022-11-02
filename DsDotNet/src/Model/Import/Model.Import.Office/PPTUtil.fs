@@ -8,7 +8,7 @@ open System.Linq
 open DocumentFormat.OpenXml
 
 [<AutoOpen>]
-module UtilPPT = 
+module PPTUtil = 
     //open DocumentFormat.OpenXml.Presentation
     //open Presentation 사용금지 직접 네임스페이스 추가 혹은 type 정의 (Drawing 와 혼선)
     //ex) type GroupShape = DocumentFormat.OpenXml.Presentation.GroupShape
@@ -31,20 +31,20 @@ module UtilPPT =
     type Office =
 
         [<Extension>] 
-        static member ErrorName(shape:#Shape, errId:int,  page:int) = 
-               Office.ErrorPPT(ErrorCase.Name, errId, Office.ShapeName(shape), page, shape.InnerText)
+        static member ErrorName(shape:#Shape, errMsg:string,  page:int) = 
+               Office.ErrorPPT(ErrorCase.Name, errMsg, Office.ShapeName(shape), page, shape.InnerText)
         
         [<Extension>] 
-        static member ErrorShape(shape:#Shape, errId:int,  page:int) = 
-               Office.ErrorPPT(ErrorCase.Shape, errId, Office.ShapeName(shape), page, shape.InnerText)
+        static member ErrorShape(shape:#Shape, errMsg:string,  page:int) = 
+               Office.ErrorPPT(ErrorCase.Shape, errMsg, Office.ShapeName(shape), page, shape.InnerText)
 
         [<Extension>] 
-        static member ErrorConnect(conn:#ConnectionShape, errId:int, text:string,  page:int) = 
-               Office.ErrorPPT(ErrorCase.Conn, errId, $"{Office.EdgeName(conn)}[{text}]", page, conn.InnerText)
+        static member ErrorConnect(conn:#ConnectionShape, errMsg:string, text:string,  page:int) = 
+               Office.ErrorPPT(ErrorCase.Conn, errMsg, $"{Office.EdgeName(conn)}[{text}]", page, conn.InnerText)
 
         [<Extension>] 
-        static member ErrorConnect(conn:#ConnectionShape, errId:int, src:string, tgt:string,  page:int) = 
-               Office.ErrorConnect(conn, errId, $"{Office.EdgeName(conn)}[{src}~{tgt}]", page)
+        static member ErrorConnect(conn:#ConnectionShape, errMsg:string, src:string, tgt:string,  page:int) = 
+               Office.ErrorConnect(conn, errMsg, $"{Office.EdgeName(conn)}[{src}~{tgt}]", page)
 
         ///power point 문서를 Openxml로 열기 (*.pptx 형식만 지원)
         [<Extension>] 
@@ -59,6 +59,14 @@ module UtilPPT =
 
         [<Extension>] 
         static member IsOutlineExist(shape:#Shape) = 
+            let outline = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.Outline>().FirstOrDefault();
+            if(outline = null && shape.Descendants<ShapeStyle>().Any()|>not) then false
+            else 
+                 if(outline = null|>not && outline.Descendants<Drawing.NoFill>().Any()) then false
+                 else true
+        
+        [<Extension>] 
+        static member IsOutlineConnectionExist(shape:#ConnectionShape) = 
             let outline = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.Outline>().FirstOrDefault();
             if(outline = null && shape.Descendants<ShapeStyle>().Any()|>not) then false
             else 
@@ -213,9 +221,6 @@ module UtilPPT =
 
 
         [<Extension>]
-        static member IsTitleSlide(slidePart:#SlidePart) = slidePart.Slide.LocalName = "sId"|> not  //test ahn
-
-        [<Extension>]
         static member PageTitle(slidePart:#SlidePart) = 
                 let tilteTexts = 
                     slidePart.Slide.CommonSlideData.ShapeTree.Descendants<Shape>()
@@ -276,7 +281,6 @@ module UtilPPT =
                         let ableShapes = 
                             shapes
                             |> Seq.filter(fun  shape -> shape.IsAbleShape())
-                            |> Seq.filter(fun  shape -> shape.IsOutlineExist())
                             |> Seq.map(fun  shape -> 
                                     let geometry = shape.Descendants<Drawing.PresetGeometry>().FirstOrDefault().Preset.Value
                                     shape, page, geometry, shape.IsDashShape())
@@ -286,9 +290,8 @@ module UtilPPT =
                         |> Seq.filter(fun f -> f.IsTitleBox()|>not)
                         |> Seq.filter(fun f -> f.ShapeName().StartsWith("TextBox")|>not)
                         |> Seq.iter(fun f -> 
-                                    if(f.IsAbleShape() && f.IsOutlineExist()|>not)
-                                    then f.ErrorShape(38, page)
-                                    else f.ErrorShape(39, page)
+                                    if(f.IsAbleShape()|>not)
+                                    then f.ErrorShape(ErrID._39, page)
                                     )
 
                         ableShapes

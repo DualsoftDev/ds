@@ -3,7 +3,7 @@ namespace Model.Import.Office
 
 open System.Linq
 open System.Collections.Concurrent
-open PPTX
+open PPTObjectModule
 open System.Collections.Generic
 open Microsoft.FSharp.Collections
 open Engine.Common.FS
@@ -23,17 +23,14 @@ module ImportU =
         
         if(parentReal.IsNone && parentFlow.IsNone)  then () //alias 지정후 다시 생성
         else
-            let name =   if(node.NodeType.IsCall) then node.CallName else node.NameOrg
             if(node.NodeType.IsReal) 
             then 
-                let real = Real.Create(name, parentFlow.Value) 
+                let real = Real.Create(node.Name, parentFlow.Value) 
                 dicSeg.Add(node.Key, real)
             else 
-                let system =model.FindSystem(node.CallName.Split('.').[0])
-                let ifName = node.Name.Split('.').[1];
-                let findApi = model.FindApiItem([|system.Name;ifName|]) 
+                let sysName, ApiName = GetSysNApi(node.PageTitle, node.Name)
+                let findApi = model.FindApiItem([|sysName;ApiName|]) 
                 //Api 은 CopySystem 에서 미리 만들어야함 
-                // let api = if findApi.IsNull() then ApiItem.Create(ifName, system) else findApi
                 let call = 
                     if(parentReal.IsSome)
                     then  Call.CreateInReal(findApi, parentReal.Value)  
@@ -63,10 +60,11 @@ module ImportU =
                         doc.Pages
                             |> Seq.filter(fun page -> page.IsUsing)
                             |> Seq.iter  (fun page -> 
-                                let sysName, flowName = GetSysNFlow(page.Title, page.PageNum)
-                                if sysName = TextMySys |>not
-                                then dicSys.Add(page.PageNum, DsSystem.Create(sysName, "", model))
-                                else dicSys.Add(page.PageNum, model.FindSystem(TextMySys))
+                                let sysName, flowName = GetSysNFlow(doc.Name, page.Title, page.PageNum)
+                                if sysName = doc.Name|>not
+                                then if model.TryFindSystem(sysName).IsNull()
+                                     then dicSys.Add(page.PageNum, DsSystem.Create(sysName, "", model))
+                                else dicSys.Add(page.PageNum, model.FindSystem(sysName))
                                 )
         [<Extension>] static member MakeCopySystem (doc:pptDoc, model:Model) = 
                         doc.Nodes 
@@ -94,7 +92,7 @@ module ImportU =
                             |> Seq.filter(fun page -> page.IsUsing)
                             |> Seq.iter  (fun page -> 
                                 let pageNum  = page.PageNum
-                                let sysName, flowName = GetSysNFlow(page.Title, page.PageNum)
+                                let sysName, flowName = GetSysNFlow(doc.Name, page.Title, page.PageNum)
                                 let sys    = model.FindSystem(sysName)     
                                 dicFlow.Add(pageNum,  Flow.Create(flowName, sys) ) |> ignore
                                 )
@@ -162,14 +160,14 @@ module ImportU =
                                     if dicChildParent.ContainsKey(node) 
                                     then 
                                         let real = dicVertex.[dicChildParent.[node].Key] :?> Real
-                                        let alias = Alias.Create(node.Name, CallTarget(segOrg:?>Call), Real(real))
+                                        let alias = Alias.Create(node.Name, CallTarget(segOrg:?>Call), Real(real), false)
                                         dicVertex.Add(node.Key, alias)
                                     else 
                                         let alias = 
                                             let flow = dicFlow.[node.PageNum]
                                             match segOrg with
-                                            | :? Real as rt -> Alias.Create(node.Name, RealTarget(rt), Flow(flow))
-                                            | :? Call as ct -> Alias.Create(node.Name, CallTarget(ct), Flow(flow))
+                                            | :? Real as rt -> Alias.Create(node.Name, RealTarget(rt), Flow(flow), false)
+                                            | :? Call as ct -> Alias.Create(node.Name, CallTarget(ct), Flow(flow), false)
                                             |_ -> failwithf "Error type"
 
                                         dicVertex.Add(node.Key, alias )
@@ -206,14 +204,14 @@ module ImportU =
                                     let edge1 = Edge.Create(graph, src, tgt, ResetPush)
                                     let edge2 = Edge.Create(graph, tgt, src, ResetPush) 
                                     edge1.EditorInfo <- EdgeType.EditorInterlock
-                                    edge2.EditorInfo <- EdgeType.EditorInterlock
+                                    edge2.EditorInfo <- EdgeType.EditorSpare
 
                                 elif (edge.Causal = StartReset)
                                 then
                                     let edge1 = Edge.Create(graph, src, tgt, StartEdge) 
                                     let edge2 = Edge.Create(graph, tgt, src, ResetEdge) 
                                     edge1.EditorInfo <- EdgeType.EditorStartReset
-                                    edge2.EditorInfo <- EdgeType.EditorStartReset
+                                    edge2.EditorInfo <- EdgeType.EditorSpare
                                 else
                                     Edge.Create(graph, src, tgt, edge.Causal) |> ignore
 
@@ -225,13 +223,13 @@ module ImportU =
                                 
                     
                                     if(edge.StartNode.NodeType = IF && edge.StartNode.NodeType = edge.EndNode.NodeType|>not)
-                                    then Office.ErrorConnect(edge.ConnectionShape,37, edge.StartNode.Name, edge.EndNode.Name, edge.PageNum)
+                                    then Office.ErrorConnect(edge.ConnectionShape,ErrID._37, edge.StartNode.Name, edge.EndNode.Name, edge.PageNum)
 
                                     if(edge.StartNode.NodeType = IF || edge.EndNode.NodeType = IF)
                                     then
                                         //인터페이스 인과는 약 리셋 불가 
                                         if (edge.Causal = EdgeType.EditorInterlock |>not && edge.Causal.HasFlag(EdgeType.Strong)|>not)
-                                        then Office.ErrorConnect(edge.ConnectionShape, 11, edge.StartNode.Name, edge.EndNode.Name, edge.PageNum)
+                                        then Office.ErrorConnect(edge.ConnectionShape, ErrID._11, edge.StartNode.Name, edge.EndNode.Name, edge.PageNum)
                                         
                                         let sys = dicSys.[edge.PageNum]
                                         sys.ApiResetInfos.Add(ApiResetInfo.Create(sys, edge.StartNode.Name, edge.Causal.ToText() ,edge.EndNode.Name ))|>ignore
@@ -267,7 +265,7 @@ module ImportU =
                                 node.Safeties   //세이프티 입력 미등록 이름오류 체크
                                 |> Seq.map(fun safe ->  safeName(safe))
                                 |> Seq.iter(fun safeFullName -> if(dicQualifiedNameSegs.ContainsKey safeFullName|>not) 
-                                                                then Office.ErrorName(node.Shape, 28, node.PageNum))
+                                                                then Office.ErrorName(node.Shape, ErrID._28, node.PageNum))
 
                                 node.Safeties   
                                 |> Seq.map(fun safe ->  safeName(safe))

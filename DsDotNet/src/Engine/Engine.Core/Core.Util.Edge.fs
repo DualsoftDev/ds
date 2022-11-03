@@ -10,14 +10,6 @@ open Engine.Common.FS
 module EdgeModule =
 
 
-    let internal edgeTypeTuples =
-        [
-            EdgeType.Default, TextStartEdge
-            EdgeType.Default ||| EdgeType.Strong, TextStartPush
-            EdgeType.Reset, TextResetEdge
-            EdgeType.Reset ||| EdgeType.Strong , TextResetPush
-        ] |> Tuple.toDictionary
-
     /// source 와 target 을 edge operator 에 따라서 확장 생성
     let createEdgesReArranged(source:'V, operator:string, target:'V) =
         [
@@ -52,10 +44,11 @@ module EdgeModule =
          [|
             for src, op, tgt in createEdgesReArranged(source, operator, target) do
                 let edge = Edge.Create(graph, src, tgt, op)
-                match operator with
-                | TextInterlock ->     edge.EditorInfo <- EdgeType.EditorInterlock
-                | TextStartReset ->    edge.EditorInfo <- EdgeType.EditorStartReset
-                | _ -> ()
+                // todo: <kwak>
+                //match operator with
+                //| TextInterlock ->     edge.EditorInfo <- EdgeType.EditorInterlock
+                //| TextStartReset ->    edge.EditorInfo <- EdgeType.EditorStartReset
+                //| _ -> ()
 
                 yield edge
          |]
@@ -152,13 +145,6 @@ module EdgeModule =
 
 [<Extension>]
 type EdgeExt =
-    [<Extension>] static member ToText(edgeType:EdgeType) = edgeTypeTuples[edgeType]
-    [<Extension>] static member IsStart(edgeType:EdgeType) = edgeType.HasFlag(EdgeType.Reset)|> not
-    [<Extension>] static member IsReset(edgeType:EdgeType) = edgeType.HasFlag(EdgeType.Reset)
-    [<Extension>] static member GetEdgeType(causal:string) =    // EdgeCausalType
-                    edgeTypeTuples.Where(fun kv -> kv.Value = causal).Select(fun kv -> kv.Key).First()
-
-
     [<Extension>] static member CreateEdges(flow:Flow, source:Vertex, target:Vertex, operator:string) =
                     createFlowEdges(flow, source, target, operator)
     [<Extension>] static member CreateEdges(segment:Real, source:Vertex, target:Vertex, operator:string) =

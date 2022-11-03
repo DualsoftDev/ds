@@ -109,7 +109,7 @@ module internal ToDsTextModule =
             elif subGraph.Islands.any() then
                 yield $"{tab}{segment.GetRelativeName(basis)} = {lb}"
                 for island in subGraph.Islands do
-                    yield $"{getTab (indent+1)}{island.GetRelativeName(segment.NameComponents)}; // island" 
+                    yield $"{getTab (indent+1)}{island.GetRelativeName(segment.NameComponents)}; // island"
                 yield $"{tab}{rb}"
         ] |> combineLines
 

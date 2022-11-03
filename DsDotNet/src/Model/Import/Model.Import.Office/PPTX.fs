@@ -292,7 +292,7 @@ module PPTX =
     and 
         pptEdge(conn:Presentation.ConnectionShape,  iEdge:UInt32Value, iPage:int ,startId:uint32, endId:uint32, nodes:ConcurrentDictionary<string, pptNode>) =
         let mutable reverse = false
-        let mutable causal:EdgeType = EdgeType.Default
+        let mutable causal:ModelingEdgeType = ModelingEdgeType.Default
         let startKey = Objkey(iPage, startId)
         let endKey   = Objkey(iPage, endId) 
         let startNode = nodes.[startKey]
@@ -318,7 +318,7 @@ module PPTX =
                             then $"{iPage};{eName}{causal.ToText()}{sName}";
                             else $"{iPage};{sName}{causal.ToText()}{eName}";
 
-        member val Causal:EdgeType = causal
+        member val Causal:ModelingEdgeType = causal
     
     and 
         pptGroup(iPage:int, ids:uint32 seq, nodes:ConcurrentDictionary<string, pptNode>) =

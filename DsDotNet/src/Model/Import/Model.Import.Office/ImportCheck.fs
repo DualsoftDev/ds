@@ -12,41 +12,41 @@ open Engine.Core
 
 [<AutoOpen>]
 module ImportCheck =
-        
-        let GetDemoModel(sysName:string) = 
+
+        let GetDemoModel(sysName:string) =
             let model = Model()
             let sys   = DsSystem.Create(sysName, "", model)
             sys.Active <- true
             let flow = Flow.Create("P0", sys)
             let vertexs = HashSet<Real>()
             let find(name:string) = vertexs.First(fun f->f.Name = name)
-            vertexs.Add(Real.Create("START", flow)) |>ignore
-            vertexs.Add(Real.Create("시작인과", flow))|>ignore
-            vertexs.Add(Real.Create("시작유지", flow))|>ignore
-            vertexs.Add(Real.Create("RESET", flow))|>ignore
-            vertexs.Add(Real.Create("복귀인과", flow))|>ignore
-            vertexs.Add(Real.Create("복귀유지", flow))|>ignore
-            vertexs.Add(Real.Create("ETC", flow))|>ignore
-            vertexs.Add(Real.Create("상호행위간섭", flow))|>ignore
-            vertexs.Add(Real.Create("시작후행리셋", flow))|>ignore
-            flow.Graph.AddVertices(vertexs.Cast<Vertex>())|>ignore
-            flow.Graph.Edges.Add(Edge.Create(flow.Graph, find("START"),find("시작인과"), StartEdge))       |> ignore
-            flow.Graph.Edges.Add(Edge.Create(flow.Graph, find("START"),find("시작유지"), StartPush))       |> ignore
-            flow.Graph.Edges.Add(Edge.Create(flow.Graph, find("RESET"),find("복귀인과"), ResetEdge))       |> ignore
-            flow.Graph.Edges.Add(Edge.Create(flow.Graph, find("RESET"),find("복귀유지"), ResetPush))       |> ignore
+            for v in [
+                        "START"; "시작인과"; "시작유지"; "RESET"; "복귀인과";
+                        "복귀유지"; "ETC"; "상호행위간섭"; "시작후행리셋";
+                ] do
+                    vertexs.Add(Real.Create(v, flow)) |>ignore
 
-            let etcEdge =  Edge.Create(flow.Graph, find("ETC"),find("상호행위간섭"), EdgeType.Default)
-            etcEdge.EditorInfo <- EdgeType.EditorInterlock
-            flow.Graph.Edges.Add(etcEdge) |> ignore
+            let toR (edge:ModelingEdgeType) = edge.ToRuntimeEdge()
+            let fg = flow.Graph
+            fg.AddVertices(vertexs.Cast<Vertex>())|>ignore
 
-            let etcEdge =  Edge.Create(flow.Graph, find("ETC"),find("시작후행리셋"), EdgeType.Default)
-            etcEdge.EditorInfo <- EdgeType.EditorStartReset
-            flow.Graph.Edges.Add(etcEdge)       |> ignore
+            fg.Edges.Add(Edge.Create(fg, find("START"), find("시작인과"), toR StartEdge)) |> ignore
+            fg.Edges.Add(Edge.Create(fg, find("START"), find("시작유지"), toR StartPush)) |> ignore
+            fg.Edges.Add(Edge.Create(fg, find("RESET"), find("복귀인과"), toR ResetEdge)) |> ignore
+            fg.Edges.Add(Edge.Create(fg, find("RESET"), find("복귀유지"), toR ResetPush)) |> ignore
+
+            let etcEdge =  Edge.Create(fg, find("ETC"), find("상호행위간섭"), toR ModelingEdgeType.Default)
+            etcEdge.EditorInfo <- ModelingEdgeType.EditorInterlock
+            fg.Edges.Add(etcEdge) |> ignore
+
+            let etcEdge =  Edge.Create(fg, find("ETC"), find("시작후행리셋"), toR ModelingEdgeType.Default)
+            etcEdge.EditorInfo <- ModelingEdgeType.EditorStartReset
+            fg.Edges.Add(etcEdge)       |> ignore
 
             model
 
         let SameParent(parents:ConcurrentDictionary<pptNode, seq<pptNode>>, edge:pptEdge) =
-            let failError (parents:pptNode seq, node:pptNode)=  
+            let failError (parents:pptNode seq, node:pptNode)=
                 let error=
                     seq {
                            yield "그룹오류 : 자식은 한부모에만 존재 가능합니다."
@@ -55,22 +55,22 @@ module ImportCheck =
                                 }  |> String.concat "\r\n"
                 failwithf  $"{error}"
 
-            let srcParents = parents 
-                            |> Seq.filter(fun group ->group.Value.Contains(edge.StartNode)) 
-                            |> Seq.filter(fun group ->group.Key.IsDummy |>not) 
+            let srcParents = parents
+                            |> Seq.filter(fun group ->group.Value.Contains(edge.StartNode))
+                            |> Seq.filter(fun group ->group.Key.IsDummy |>not)
                             |> Seq.map (fun group -> group.Key)
             let tgtParents = parents
-                            |> Seq.filter(fun group ->group.Value.Contains(edge.EndNode)) 
-                            |> Seq.filter(fun group ->group.Key.IsDummy |>not) 
+                            |> Seq.filter(fun group ->group.Value.Contains(edge.EndNode))
+                            |> Seq.filter(fun group ->group.Key.IsDummy |>not)
                             |> Seq.map (fun group -> group.Key)
-            if(srcParents.Count() > 1) then failError (srcParents, edge.StartNode)  
-            if(tgtParents.Count() > 1) then failError (tgtParents, edge.EndNode)  
+            if(srcParents.Count() > 1) then failError (srcParents, edge.StartNode)
+            if(tgtParents.Count() > 1) then failError (tgtParents, edge.EndNode)
 
 
-        //let InterfaceErr(pptNodes:pptNode seq, model:MModel, dicSeg:Dictionary<string, MSeg>) = 
+        //let InterfaceErr(pptNodes:pptNode seq, model:MModel, dicSeg:Dictionary<string, MSeg>) =
         //    pptNodes
-        //    |> Seq.filter(fun node -> node.NodeType = IF) 
-        //    |> Seq.iter(fun node -> 
+        //    |> Seq.filter(fun node -> node.NodeType = IF)
+        //    |> Seq.iter(fun node ->
         //            if(node.IfName = ""|>not && node.IfTxs.IsEmpty() && node.IfTxs.IsEmpty() )
         //                then Office.ErrorName(node.Shape, 35, node.PageNum)
         //    )
@@ -80,17 +80,17 @@ module ImportCheck =
             let dicName = ConcurrentDictionary<string, string>()
             let sysNames = dicSys.Values.Select(fun s->s.Name)
             nodes
-                |> Seq.filter(fun node -> node.NodeType = COPY) 
-                |> Seq.iter(fun node -> 
-                    
+                |> Seq.filter(fun node -> node.NodeType = COPY)
+                |> Seq.iter(fun node ->
+
                     if(sysNames.Contains(node.Name)|> not)
-                    then Office.ErrorPPT(Name, 32,  node.Shape.InnerText, node.PageNum, $"확인 시스템 이름 : {node.Name}") 
+                    then Office.ErrorPPT(Name, 32,  node.Shape.InnerText, node.PageNum, $"확인 시스템 이름 : {node.Name}")
 
 
                     )
 
-       
-        let SameEdgeErr(pptEdges:pptEdge seq) = 
+
+        let SameEdgeErr(pptEdges:pptEdge seq) =
             let dicSameCheck = ConcurrentDictionary<string, string>()
             pptEdges |> Seq.iter(fun edge ->
                 if(dicSameCheck.TryAdd(edge.Text,edge.Text)|>not)
@@ -98,34 +98,34 @@ module ImportCheck =
                         edge.ConnectionShape.ErrorConnect(20, edge.Text, edge.PageNum)
             )
 
-        //page 타이틀 중복체크 
-        let CheckMakeSystem(doc:pptDoc) = 
+        //page 타이틀 중복체크
+        let CheckMakeSystem(doc:pptDoc) =
             let dicPage = ConcurrentDictionary<string, int>()
             doc.Pages.Filter(fun page  ->  page.IsUsing && page.Title = ""|> not)
-                    .ForEach(fun page-> 
+                    .ForEach(fun page->
                                 if(dicPage.TryAdd(page.Title, page.PageNum)|>not)
                                 then Office.ErrorPPT(Page, 21, $"{page.Title},  Same Page({dicPage.[page.Title]})",  page.PageNum)
                                 )
 
             let dicSys = ConcurrentDictionary<string, string>()
             doc.Nodes
-            |> Seq.filter(fun node -> node.NodeType = COPY) 
-            |> Seq.iter(fun node -> 
-                    node.CopySys.ForEach(fun copy -> 
+            |> Seq.filter(fun node -> node.NodeType = COPY)
+            |> Seq.iter(fun node ->
+                    node.CopySys.ForEach(fun copy ->
                         if dicSys.TryAdd(copy.Key, copy.Value)|>not
                         then Office.ErrorName(node.Shape, 34, node.PageNum)
                         )
                     )
-        
 
-        //page 타이틀 중복체크 
-        let SameSysFlowName(systems:DsSystem seq, dicFlow: Dictionary<int, Flow>) = 
+
+        //page 타이틀 중복체크
+        let SameSysFlowName(systems:DsSystem seq, dicFlow: Dictionary<int, Flow>) =
             let sysNames = systems.Select(fun s->s.Name)
             systems.ForEach(fun sys->
-                sys.Flows.ForEach(fun flow -> 
-                    if sysNames.Contains(flow.Name) 
-                    then 
-                        let page = dicFlow.Where(fun w-> w.Value = flow).First().Key                    
+                sys.Flows.ForEach(fun flow ->
+                    if sysNames.Contains(flow.Name)
+                    then
+                        let page = dicFlow.Where(fun w-> w.Value = flow).First().Key
                         Office.ErrorPPT(ErrorCase.Name, 31, $"시스템이름 : {flow.System.Name}",page, $"중복페이지 : {page}")  )
                     )
 
@@ -134,54 +134,54 @@ module ImportCheck =
         //    let checkNodeName(nodes:pptNode seq) =
         //        nodes.Filter(fun node -> node.NodeType.IsCall || node.NodeType.IsReal)
         //             .ForEach(fun node -> if node.Name.Contains(";") then node.Shape.ErrorName(29, node.PageNum))
-                
+
         //    let checkSameNodeType(nodes:pptNode seq, model:MModel) =
         //        let dicSame = ConcurrentDictionary<string, pptNode>()
-        //        nodes.ForEach(fun node -> 
+        //        nodes.ForEach(fun node ->
         //            let flow = model.GetFlow(node.PageNum)
-                
+
         //            let nodekey = sprintf "%s;%s" flow.Name node.Name
         //            if(dicSame.ContainsKey(nodekey)|>not)
         //            then dicSame.TryAdd(nodekey, node)|> ignore
 
         //            let oldNode = dicSame.[nodekey]
-        //            if((node.NodeType = oldNode.NodeType)|>not) 
-        //            then 
+        //            if((node.NodeType = oldNode.NodeType)|>not)
+        //            then
         //                MSGError($"도형오류 :타입이 다른 같은이름이 존재합니다 \t[Page{node.PageNum}: {nodekey}({node.NodeType}) != ({oldNode.NodeType}) ({node.Shape.ShapeName()})]")
 
         //       )
 
         //    let myFlowNames  = model.Flows.Filter(fun flow -> flow.System.Name = TextMySys).Map(fun s->s.Name)
-        //    let exSysNamesDic  = model.Systems.Filter(fun sys->sys.Name = TextMySys|>not).Map(fun sys -> sys.Name, sys) |> dict                     
-          
-        //    nodes.ForEach(fun node -> 
+        //    let exSysNamesDic  = model.Systems.Filter(fun sys->sys.Name = TextMySys|>not).Map(fun sys -> sys.Name, sys) |> dict
+
+        //    nodes.ForEach(fun node ->
         //        if(node.Name.Contains('.'))
         //        then
         //            if(node.Name.Split('.').Length > 2)
         //            then Office.ErrorName(node.Shape, 26, node.PageNum)
 
         //            if node.NodeType.IsReal
-        //            then 
+        //            then
         //                if(myFlowNames.Contains(node.Name.Split('.').[0])|> not)
         //                then Office.ErrorName(node.Shape, 27, node.PageNum)
         //            elif node.NodeType.IsCall
-        //            then 
+        //            then
 
-        //                let callSys, callIf = node.CallName.Split('.').[0], node.CallName.Split('.').[1] 
+        //                let callSys, callIf = node.CallName.Split('.').[0], node.CallName.Split('.').[1]
 
         //                if(exSysNamesDic.ContainsKey(callSys)|> not)
-        //                then 
-        //                     let exSysNamesText = exSysNamesDic.Keys |> Seq.sort |> String.concat ";\n"                    
+        //                then
+        //                     let exSysNamesText = exSysNamesDic.Keys |> Seq.sort |> String.concat ";\n"
         //                     let errText = $"\n{callSys} 시스템은 \n[{exSysNamesText}]에 없습니다."
         //                     Office.ErrorPPT(ErrorCase.Name, 32, Office.ShapeName(node.Shape), node.PageNum, errText)
-        //                else 
+        //                else
         //                     let libSys = exSysNamesDic.[callSys]
         //                     if (libSys.IFNames.Contains(callIf)|> not)
-        //                     then 
-        //                         let libSysIFText = libSys.IFNames |> String.concat "; "                    
+        //                     then
+        //                         let libSysIFText = libSys.IFNames |> String.concat "; "
         //                         let errText = $"{callIf} 행위는  {libSys.Name} = [{libSysIFText}]에 없습니다."
         //                         Office.ErrorPPT(ErrorCase.Name, 33, Office.ShapeName(node.Shape), node.PageNum, errText)
         //    )
-        //    checkNodeName(nodes) 
-        //    checkSameNodeType(nodes, model) 
-            
+        //    checkNodeName(nodes)
+        //    checkSameNodeType(nodes, model)
+

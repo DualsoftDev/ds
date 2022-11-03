@@ -110,7 +110,7 @@ namespace Dual.Model.Import
 
         }
 
-  
+
         private void DrawMEdge(Subgraph subgraph, DsViewEdge edge)
         {
             DsViewEdge mEdge = edge;
@@ -280,7 +280,7 @@ namespace Dual.Model.Import
                         nNode.Attr.Shape = Shape.InvHouse;
                         nNode.Attr.FillColor = Color.BlueViolet;
                     }
-                    
+
                 }
                 if (dsViewNode.NodeType == NodeType.COPY)
                     nNode.Attr.Shape = Shape.Octagon;

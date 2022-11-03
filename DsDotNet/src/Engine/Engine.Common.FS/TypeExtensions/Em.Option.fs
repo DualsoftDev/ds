@@ -11,5 +11,6 @@ type OptionExt =
     [<Extension>] static member Contains(x, y) = x |> Option.contains y
     [<Extension>] static member DefaultValue(x, y) = x |> Option.defaultValue y
     [<Extension>] static member GetValue<'T>(x:'T option) = x |> Option.get
+    [<Extension>] static member Tap<'T>(x:'T option, f) = x |> Option.iter f; x
 
 

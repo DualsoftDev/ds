@@ -53,6 +53,7 @@ module CoreModule =
     and Flow private (name:string, system:DsSystem) =
         inherit FqdnObject(name, system)
         member val Graph = Graph<Vertex, Edge>()
+        member val ModelingEdges = HashSet<Vertex*string*Vertex>()
         member val AliasMap = Dictionary<Fqdn, HashSet<string>>(nameComponentsComparer())
       
         member x.System = system
@@ -76,6 +77,7 @@ module CoreModule =
         Real private (name:string, flow:Flow) =
         inherit Vertex(name, Flow flow)
         member val Graph = Graph<Vertex, Edge>()
+        member val ModelingEdges = HashSet<Vertex*string*Vertex>()
         member val Flow = flow
 
         member val SafetyConditions = createQualifiedNamedHashSet<Real>()
@@ -212,8 +214,8 @@ module CoreModule =
             let edge = Edge(source, target, edgeType)
             graph.AddEdge(edge) |> verifyM $"Duplicated edge [{source.Name}{edgeType.ToText()}{target.Name}]"
             edge
-        
-        member val EditorInfo = EdgeType.Default with get, set
+
+        member val EditorInfo = ModelingEdgeType.EditorSpare with get, set
         override x.ToString() = $"{x.Source.QualifiedName} {x.EdgeType.ToText()} {x.Target.QualifiedName}"
 
 [<Extension>]

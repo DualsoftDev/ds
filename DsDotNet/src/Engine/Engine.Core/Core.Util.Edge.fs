@@ -8,62 +8,21 @@ open Engine.Common.FS
 
 [<AutoOpen>]
 module EdgeModule =
-
-
-    let internal edgeTypeTuples =
-        [
-            EdgeType.Default, TextStartEdge
-            EdgeType.Default ||| EdgeType.Strong, TextStartPush
-            EdgeType.Reset, TextResetEdge
-            EdgeType.Reset ||| EdgeType.Strong , TextResetPush
-        ] |> Tuple.toDictionary
-
-    /// source 와 target 을 edge operator 에 따라서 확장 생성
-    let createEdgesReArranged(source:'V, operator:string, target:'V) =
-        [
-            match operator with
-            | TextInterlockWeak -> //"<|>"
-                yield source, EdgeType.Reset, target
-                yield target, EdgeType.Reset, source
-
-            | TextInterlock -> //"<||>"
-                yield source, EdgeType.Reset ||| EdgeType.Strong , target
-                yield target, EdgeType.Reset ||| EdgeType.Strong , source
-
-            | TextStartReset -> // "=>"
-                yield source, EdgeType.Default, target
-                yield target, EdgeType.Reset, source
-
-            | TextStartEdge  -> yield source, EdgeType.Default, target  //">"
-            | TextStartPush  -> yield source, EdgeType.Default ||| EdgeType.Strong, target //">>"
-            | TextResetEdge  -> yield source, EdgeType.Reset, target //"|>"
-            | TextResetPush  -> yield source, EdgeType.Reset ||| EdgeType.Strong, target //"||>"
-
-            | TextStartEdgeRev  -> yield target, EdgeType.Default, source   //"<"
-            | TextStartPushRev  -> yield target, EdgeType.Default ||| EdgeType.Strong, source   //"<<"
-            | TextResetEdgeRev  -> yield target, EdgeType.Reset, source //"<|"
-            | TextResetPushRev  -> yield target, EdgeType.Reset ||| EdgeType.Strong, source //"<||"
-
-            | _ ->
-                failwithlogf $"Unknown causal operator [{operator}]."
-        ]
-
-    let createEdges(graph:Graph<Vertex, Edge>, source:Vertex, target:Vertex, operator:string) =
+    let private createEdges(graph:Graph<Vertex, Edge>, source:Vertex, target:Vertex, operator:string) =
          [|
-            for src, op, tgt in createEdgesReArranged(source, operator, target) do
+            for src, op, tgt in expandModelingEdge source operator target do
                 let edge = Edge.Create(graph, src, tgt, op)
-                match operator with
-                | TextInterlock ->     edge.EditorInfo <- EdgeType.EditorInterlock 
-                | TextStartReset ->    edge.EditorInfo <- EdgeType.EditorStartReset 
-                | _ -> ()
-                
                 yield edge
          |]
 
     let createFlowEdges(flow:Flow, source:Vertex, target:Vertex, operator:string) =
+        let s_op_t = source, operator, target
+        flow.ModelingEdges.Add(s_op_t) |> verifyM $"Duplicated edge {source.Name}{operator}{target.Name}"
         createEdges(flow.Graph, source, target, operator)
 
     let createChildEdges(segment:Real, source:Vertex, target:Vertex, operator:string) =
+        let s_op_t = source, operator, target
+        segment.ModelingEdges.Add(s_op_t) |> verifyM $"Duplicated edge {source.Name}{operator}{target.Name}"
         createEdges(segment.Graph, source, target, operator)
 
     let ofResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) =
@@ -152,13 +111,6 @@ module EdgeModule =
 
 [<Extension>]
 type EdgeExt =
-    [<Extension>] static member ToText(edgeType:EdgeType) = edgeTypeTuples[edgeType]
-    [<Extension>] static member IsStart(edgeType:EdgeType) = edgeType.HasFlag(EdgeType.Reset)|> not
-    [<Extension>] static member IsReset(edgeType:EdgeType) = edgeType.HasFlag(EdgeType.Reset)
-    [<Extension>] static member GetEdgeType(causal:string) =    // EdgeCausalType
-                    edgeTypeTuples.Where(fun kv -> kv.Value = causal).Select(fun kv -> kv.Key).First()
-
-
     [<Extension>] static member CreateEdges(flow:Flow, source:Vertex, target:Vertex, operator:string) =
                     createFlowEdges(flow, source, target, operator)
     [<Extension>] static member CreateEdges(segment:Real, source:Vertex, target:Vertex, operator:string) =

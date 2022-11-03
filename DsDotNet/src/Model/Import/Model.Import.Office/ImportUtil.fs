@@ -30,13 +30,18 @@ module ImportU =
             else
                 let sysName, ApiName = GetSysNApi(node.PageTitle, node.Name)
                 let findApi = model.FindApiItem([|sysName;ApiName|])
-                //Api 은 CopySystem 에서 미리 만들어야함
+
+                if findApi.IsNull()
+                then Office.ErrorPPT(Name, ErrID._42, $"원인이름{ApiName}: 전체이름[{node.Shape.InnerText}] 해당도형[{node.Shape.ShapeName()}]", node.PageNum)
+
                 let call =
                     if(parentReal.IsSome)
                     then  Call.CreateInReal(findApi, parentReal.Value)
                     else  Call.CreateInFlow(findApi, parentFlow.Value)
 
                 dicSeg.Add(node.Key, call)
+
+
     let private getParent(edge:pptEdge, parents:ConcurrentDictionary<pptNode, seq<pptNode>>, dicSeg:Dictionary<string, Vertex>) =
             ImportCheck.SameParent(parents, edge)
             let newParents =
@@ -64,6 +69,7 @@ module ImportU =
                                 if sysName = doc.Name|>not
                                 then if model.TryFindSystem(sysName).IsNull()
                                      then dicSys.Add(page.PageNum, DsSystem.Create(sysName, "", model))
+                                     else dicSys.Add(page.PageNum, model.FindSystem(sysName))
                                 else dicSys.Add(page.PageNum, model.FindSystem(sysName))
                                 )
         [<Extension>] static member MakeCopySystem (doc:pptDoc, model:Model) =
@@ -71,8 +77,12 @@ module ImportU =
                         |> Seq.filter(fun node -> node.NodeType = COPY)
                         |> Seq.iter(fun node ->
                                 node.CopySys.ForEach(fun copy ->
-                                    let origSys  = model.FindSystem(copy.Value)
-                                    let copySys  = DsSystem.Create( copy.Key, "", model)
+                                    let origSys  = model.TryFindSystem(copy.Value)
+
+                                    if origSys.IsNull()
+                                    then Office.ErrorPPT(Name, ErrID._43, $"원인이름{copy.Value}: 전체이름[{node.Shape.InnerText}] 해당도형[{node.Shape.ShapeName()}]", node.PageNum)
+
+                                    let copySys  = DsSystem.Create(copy.Key, "", model)
                                     dicCopy.Add(copySys, origSys) |>ignore
                                     )
                                 )
@@ -181,7 +191,7 @@ module ImportU =
                         //Alias Node 처리 마감
                         createAlias()
 
-                        //copy system ApiItems 동일 처리
+                        //copy system Flows 동일 처리
                         dicCopy.ForEach(fun sysTwin->
                             let copySys = sysTwin.Key
                             let origSys = sysTwin.Value
@@ -263,7 +273,7 @@ module ImportU =
                         |> Seq.iter(fun node ->
                                 let flow = dicFlow.[node.PageNum]
                                 let dicQualifiedNameSegs  = dicVertex.Values.Select(fun seg -> seg.QualifiedName, seg) |> dict
-                                let safeName(safe) = sprintf "%s.%s.%s_%s" flow.System.Name flow.Name flow.Name safe
+                                let safeName(safe) = sprintf "%s.%s.%s" flow.System.Name flow.Name safe
 
                                 node.Safeties   //세이프티 입력 미등록 이름오류 체크
                                 |> Seq.map(fun safe ->  safeName(safe))
@@ -293,8 +303,11 @@ module ImportU =
                                                     if trxName.Contains(".")
                                                     then trxName.Split('.').[0], trxName.Split('.').[1]
                                                     else flow.Name, trxName
+                                                let vertex = model.FindGraphVertex([|sys.Name;flowName;realName|]) 
+                                                if vertex.IsNull()
+                                                then Office.ErrorPPT(Name, ErrID._41, $"원인이름{realName}: 전체이름[{node.Shape.InnerText}] 해당도형[{node.Shape.ShapeName()}]", node.PageNum)
 
-                                                model.FindGraphVertex([|sys.Name;flowName;realName|]) :?> Real
+                                                vertex :?> Real
                                         let txs = node.IfTXs |> Seq.map(fun f-> findReal(f))
                                         let rxs = node.IfRXs |> Seq.map(fun f-> findReal(f))
                                         api.AddTXs(txs)|>ignore

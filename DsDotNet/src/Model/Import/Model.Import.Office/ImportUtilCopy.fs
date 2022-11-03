@@ -14,14 +14,13 @@ module internal ToCopyModule =
     let private copySafety(origFlow:Flow, copyFlow:Flow) =
         let copySys = copyFlow.System
         let origSys = origFlow.System
-        let findReal (realName:string) = origSys.Model.FindGraphVertex([|copySys.Name;copyFlow.Name;realName|]) :?> Real
+        let findReal (realName:string) = copySys.Model.FindGraphVertex([|copySys.Name;copyFlow.Name;realName|]) :?> Real
         origSys.Flows
             .ForEach(fun flow->
-                let copyFlow = copySys.FindFlow(flow.Name)
                 flow.Graph.Vertices.Where(fun w->w :? Real).Cast<Real>()
                     .ForEach(fun real->
-                            let copyReal = findReal(real.Name)
                             real.SafetyConditions.ForEach(fun safety ->
+                                let copyReal = findReal(real.Name)
                                 copyReal.SafetyConditions.Add(findReal(safety.Name)) |>ignore
                                 )
                         )

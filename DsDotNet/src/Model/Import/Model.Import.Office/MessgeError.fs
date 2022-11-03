@@ -54,6 +54,9 @@ module ErrID =
     let _38 = "도형에 윤곽선이 없습니다."
     let _39 = "모델링에 사용불가 도형입니다."
     let _40 = "연결선은 반드시 색상이 있어야 합니다."
+    let _41 = "Api TXs~Rxs 이름의 Real행위가 없습니다."
+    let _42 = "호출 Interface에 해당하는 대상 시스템에 Interface 이름이 없습니다."
+    let _43 = "Copy 대상 시스템이 없습니다."
 
     
 

@@ -253,9 +253,10 @@ module PPTObjectModule =
 
             name <-  GetBracketsReplaceName(shape.InnerText)
             match nodeType with
-            |TX|RX|TR ->
-                     GetSquareBrackets(shape.InnerText, false) |> fun text -> if text = ""|>not then updateTxRx text
-                     GetSquareBrackets(shape.InnerText, true ) |> fun text -> if text = ""|>not then updateSafety text
+            |TX|RX|TR|MY ->
+                     if(nodeType =MY|>not) 
+                     then GetSquareBrackets(shape.InnerText, false) |> fun text -> if text = ""|>not then updateTxRx text
+                     GetSquareBrackets(shape.InnerText, true )      |> fun text -> if text = ""|>not then updateSafety text
             |IF ->   updateIF shape.InnerText
             |COPY -> GetSquareBrackets(shape.InnerText, false)
                         |> fun text ->

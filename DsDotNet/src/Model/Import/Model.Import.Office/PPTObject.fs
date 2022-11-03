@@ -297,7 +297,7 @@ module PPTObjectModule =
     and
         pptEdge(conn:Presentation.ConnectionShape,  iEdge:UInt32Value, iPage:int ,startId:uint32, endId:uint32, nodes:ConcurrentDictionary<string, pptNode>) =
         let mutable reverse = false
-        let mutable causal:ModelingEdgeType = ModelingEdgeType.Default
+        let mutable causal:ModelEdgeType = ModelEdgeType.StartEdge
         let startKey = Objkey(iPage, startId)
         let endKey   = Objkey(iPage, endId)
         let startNode = nodes.[startKey]
@@ -325,7 +325,7 @@ module PPTObjectModule =
                             then $"{iPage};{eName}{causal.ToText()}{sName}";
                             else $"{iPage};{sName}{causal.ToText()}{eName}";
 
-        member val Causal:ModelingEdgeType = causal
+        member val Causal:ModelEdgeType = causal
 
     and
         pptGroup(iPage:int, ids:uint32 seq, nodes:ConcurrentDictionary<string, pptNode>) =

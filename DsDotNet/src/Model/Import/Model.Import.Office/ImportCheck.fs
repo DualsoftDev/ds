@@ -26,22 +26,15 @@ module ImportCheck =
                 ] do
                     vertexs.Add(Real.Create(v, flow)) |>ignore
 
-            let toR (edge:ModelingEdgeType) = edge.ToRuntimeEdge()
             let fg = flow.Graph
             fg.AddVertices(vertexs.Cast<Vertex>())|>ignore
-
-            fg.Edges.Add(Edge.Create(fg, find("START"), find("시작인과"), toR StartEdge)) |> ignore
-            fg.Edges.Add(Edge.Create(fg, find("START"), find("시작유지"), toR StartPush)) |> ignore
-            fg.Edges.Add(Edge.Create(fg, find("RESET"), find("복귀인과"), toR ResetEdge)) |> ignore
-            fg.Edges.Add(Edge.Create(fg, find("RESET"), find("복귀유지"), toR ResetPush)) |> ignore
-
-            let etcEdge =  Edge.Create(fg, find("ETC"), find("상호행위간섭"), toR ModelingEdgeType.Default)
-            etcEdge.EditorInfo <- ModelingEdgeType.EditorInterlock
-            fg.Edges.Add(etcEdge) |> ignore
-
-            let etcEdge =  Edge.Create(fg, find("ETC"), find("시작후행리셋"), toR ModelingEdgeType.Default)
-            etcEdge.EditorInfo <- ModelingEdgeType.EditorStartReset
-            fg.Edges.Add(etcEdge)       |> ignore
+            
+            flow.AddModelEdge("START", TextStartEdge, "시작인과")
+            flow.AddModelEdge("START", TextStartPush, "시작유지")
+            flow.AddModelEdge("RESET", TextResetEdge, "복귀인과")
+            flow.AddModelEdge("RESET", TextResetPush, "복귀유지")
+            flow.AddModelEdge("ETC", TextStartEdge, "상호행위간섭")
+            flow.AddModelEdge("ETC", TextStartReset, "시작후행리셋")
 
             model
 

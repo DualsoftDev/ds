@@ -11,6 +11,7 @@ open Engine.Parser
 open Engine.Core
 open type Engine.Parser.dsParser
 open type Engine.Parser.FS.DsParser
+open System.Collections.Generic
 
 /// <summary>
 /// 모든 vertex 가 생성 된 이후, edge 연결 작업 수행
@@ -52,9 +53,11 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
 
 
             if not (targetDic.ContainsKey(buttonName)) then
-                targetDic.Add(buttonName, new ResizeArray<Flow>())
+                targetDic.Add(buttonName, new HashSet<Flow>())
 
-            targetDic[buttonName].AddRange(flows)
+            flows.ForEach(fun flow ->
+                targetDic[buttonName].Add(flow) |> verifyM $"Flow [{flow.Name}] already added!"
+                    )
 
 
     override x.EnterSafety(ctx:SafetyContext) =

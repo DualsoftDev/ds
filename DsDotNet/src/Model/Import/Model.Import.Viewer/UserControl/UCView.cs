@@ -19,6 +19,7 @@ using Vertex = Engine.Core.CoreModule.Vertex;
 using DsEdge = Engine.Core.CoreModule.Edge;
 using static Model.Import.Office.InterfaceClass;
 using System.Windows.Forms.VisualStyles;
+using static Engine.Core.DsText;
 
 namespace Dual.Model.Import
 {
@@ -76,9 +77,8 @@ namespace Dual.Model.Import
             flow.Graph.Islands
                 .ForEach(seg => DrawSeg(viewer.Graph.RootSubgraph, new DsViewNode(seg)));
 
-            flow.Graph.Edges
-                .Select(s => new DsViewEdge(s))
-               // .Where(w => w.DsEdge.EditorInfo != EdgeType.EditorSpare)  //ahn
+            flow.ModelingEdges
+                .Select(s => new DsViewEdge(s.Item1, s.Item2, s.Item3 ))
                 .ForEach(f => DrawMEdge(viewer.Graph.RootSubgraph, f));
 
             viewer.SetCalculatedLayout(viewer.CalculateLayout(viewer.Graph));
@@ -179,26 +179,26 @@ namespace Dual.Model.Import
             gEdge.Attr.Color = Color.White;
 
             var et = edge.Causal;
-            if (et == UtilEdge.StartEdge)
+            if (et == ModelEdgeType.StartEdge)
             {
                 gEdge.Attr.AddStyle(Style.Solid);
                 gEdge.Attr.Color = Color.DeepSkyBlue;
                 gEdge.Attr.LineWidth = 2;
             }
-            else if (et == UtilEdge.StartPush)
+            else if (et == ModelEdgeType.StartPush)
             {
                 gEdge.Attr.AddStyle(Style.Solid);
                 gEdge.Attr.LineWidth = 4;
                 gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
                 gEdge.Attr.Color = Color.DeepSkyBlue;
             }
-            else if (et == UtilEdge.ResetEdge)
+            else if (et == ModelEdgeType.ResetEdge)
             {
                 gEdge.Attr.AddStyle(Style.Dashed);
                 gEdge.Attr.Color = Color.Green;
                 gEdge.Attr.LineWidth = 2;
             }
-            else if (et == UtilEdge.ResetPush)
+            else if (et == ModelEdgeType.ResetPush)
             {
                 gEdge.Attr.AddStyle(Style.Dashed);
                 gEdge.Attr.LineWidth = 4;
@@ -206,14 +206,14 @@ namespace Dual.Model.Import
                 gEdge.Attr.Color = Color.Green;
             }
 
-            else if (edge.Causal == UtilEdge.Interlock)
+            else if (edge.Causal == ModelEdgeType.Interlock)
             {
                 gEdge.Attr.AddStyle(Style.Dashed);
                 gEdge.Attr.ArrowheadAtSource = ArrowStyle.Normal;
                 gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
                 gEdge.Attr.Color = Color.PaleGoldenrod;
             }
-            else if (edge.Causal == UtilEdge.StartReset)
+            else if (edge.Causal == ModelEdgeType.StartReset)
             {
                 gEdge.Attr.AddStyle(Style.Solid);
                 gEdge.Attr.ArrowheadAtSource = ArrowStyle.Tee;

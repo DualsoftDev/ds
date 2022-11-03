@@ -176,11 +176,11 @@ module CoreModule =
             cp
 
     /// API 의 reset 정보:  "+" <||> "-";
-    and ApiResetInfo private (system:DsSystem, operand1:string, operator:string, operand2:string) =
+    and ApiResetInfo private (system:DsSystem, operand1:string, operator:ModelEdgeType, operand2:string) =
         member val Operand1 = operand1  // "+"
         member val Operand2 = operand2  // "-"
         member val Operator = operator  // "<||>"
-        member x.Text = sprintf "%s %s %s" operand1 operator operand2  //"+" <||> "-"
+        member x.Text = sprintf "%s %s %s" operand1 (operator.ToText()) operand2  //"+" <||> "-"
         static member Create(system, operand1, operator, operand2) =
             let ri = ApiResetInfo(system, operand1, operator, operand2)
             system.ApiResetInfos.Add(ri) |> verifyM $"Duplicated interface ResetInfo [{ri.Text}]"
@@ -205,7 +205,7 @@ module CoreModule =
             | Real r -> r.Graph
 
 
-    and ButtonDic = Dictionary<string, ResizeArray<Flow>>
+    and ButtonDic = Dictionary<string, HashSet<Flow>>
 
     and Edge private (source:Vertex, target:Vertex, edgeType:EdgeType) =
         inherit EdgeBase<Vertex>(source, target, edgeType)
@@ -215,12 +215,17 @@ module CoreModule =
             graph.AddEdge(edge) |> verifyM $"Duplicated edge [{source.Name}{edgeType.ToText()}{target.Name}]"
             edge
 
-        member val EditorInfo = ModelingEdgeType.EditorSpare with get, set
         override x.ToString() = $"{x.Source.QualifiedName} {x.EdgeType.ToText()} {x.Target.QualifiedName}"
 
 [<Extension>]
 type CoreExt =
     [<Extension>] static member GetSystem(call:Call) = call.Parent.System
+    [<Extension>] static member AddModelEdge(flow:Flow, source:string, edgetext:string, target:string) = 
+                        let src = flow.Graph.Vertices.Find(fun f->f.Name = source) 
+                        let tgt = flow.Graph.Vertices.Find(fun f->f.Name = target) 
+                        flow.ModelingEdges.Add(src, edgetext, tgt) |> verifyM $"Duplicated edge [{src.Name}{edgetext}{tgt.Name}]"
+    [<Extension>] static member AddModelEdge(flow:Flow, source:Vertex, modelEdgeType:ModelEdgeType, target:Vertex) = 
+                        flow.ModelingEdges.Add(source, modelEdgeType.ToText(), target) |> verifyM $"Duplicated edge [{source.Name}{modelEdgeType.ToText()}{target.Name}]"
     [<Extension>]
     static member AddButton(sys:DsSystem, btnType:BtnType, btnName: string, flow:Flow) =
         let dicButton =
@@ -231,6 +236,6 @@ type CoreExt =
             | AutoBTN        -> sys.AutoButtons
 
         if dicButton.ContainsKey btnName then
-            dicButton.[btnName].Add(flow)
+            dicButton.[btnName].Add(flow) |> verifyM $"Duplicated flow [{flow.Name}]"
         else
-            dicButton.Add(btnName, ResizeArray[|flow|] )
+            dicButton.Add(btnName, HashSet[|flow|] )

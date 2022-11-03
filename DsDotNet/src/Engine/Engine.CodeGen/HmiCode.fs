@@ -82,7 +82,7 @@ module HmiGenModule =
 
         let addGroupButtons
                 (system:DsSystem)
-                (buttonsInFlow:Dictionary<string, ResizeArray<Flow>>)
+                (buttonsInFlow:Dictionary<string, HashSet<Flow>>)
                 buttonType =
             for KeyValue(btnName, btnValue) in buttonsInFlow do
                 let flowNames = [ for flow in btnValue do flow.QualifiedName ]

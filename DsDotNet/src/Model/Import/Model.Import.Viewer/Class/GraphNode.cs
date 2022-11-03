@@ -8,6 +8,7 @@ using static Engine.Core.CoreModule.AliasTargetType;
 using static Engine.Core.DsType;
 using static Engine.Core.DsText;
 using static Engine.Core.ModelingEdgeExt;
+using System.Linq;
 
 namespace Dual.Model.Import
 {
@@ -43,7 +44,10 @@ namespace Dual.Model.Import
             var real = v as Real;
             if (real != null)
             {
-                real.Graph.Edges.ForEach(e => MEdges.Add(new DsViewEdge(e)));
+                real.Flow.ModelingEdges
+                    .Where(w => w.Item1.Parent.Core == real && w.Item3.Parent.Core == real)
+                    .ForEach(e => MEdges.Add(new DsViewEdge(e.Item1, e.Item2, e.Item3)));
+
                 real.Graph.Islands.ForEach(f => Singles.Add(new DsViewNode(f)));
                 if (real.Graph.Vertices.Count > 0)
                     IsChildExist = true;
@@ -84,19 +88,12 @@ namespace Dual.Model.Import
         public DsViewNode Source;
         public DsViewNode Target;
         public DsEdge DsEdge;
-        public ModelingEdgeType Causal = ModelingEdgeType.Default;
-
-        public DsViewEdge(DsEdge e) {
-            DsEdge = e;
-            Source = new DsViewNode(e.Source);
-            Target = new DsViewNode(e.Target);
-
-            if (e.EditorInfo.HasFlag(ModelingEdgeType.EditorInterlock))
-                Causal = ModelingEdgeType.EditorInterlock;
-            if (e.EditorInfo.HasFlag(ModelingEdgeType.EditorStartReset))
-                Causal = ModelingEdgeType.EditorStartReset;
-            else
-                Causal = e.EdgeType.ToModelingEdge();
+        public ModelEdgeType Causal = ModelEdgeType.StartEdge;
+        public DsViewEdge(DsVertex source, string edgeText, DsVertex target)
+        {
+            Source = new DsViewNode(source);
+            Target = new DsViewNode(target);
+            Causal = edgeText.ToModelEdge();
         }
     }
 }

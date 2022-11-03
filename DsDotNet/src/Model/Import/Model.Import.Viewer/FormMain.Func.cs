@@ -270,7 +270,15 @@ namespace Dual.Model.Import
         internal void TestUnitTest()
         {
 
-            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\..\..\..\..\"))+ "UnitTest\\UnitTest.Engine\\ImportPPT\\6.Alias.pptx";
+
+            //1.System.pptx
+            //2.Flow.pptx
+            //3.Real.pptx
+            //4.Api.pptx
+            //5.Call.pptx
+            //6.Alias.pptx
+
+            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\..\..\..\..\"))+ "UnitTest\\UnitTest.Engine\\ImportPPT\\3.Real.pptx";
             bool debug = File.Exists(path);
             if (debug)
             {

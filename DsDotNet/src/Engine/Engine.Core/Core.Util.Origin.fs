@@ -62,7 +62,7 @@ module OriginModule =
         let makeName (system:string) (info:ApiResetInfo) = 
             let src = info.Operand1
             let tgt = info.Operand2
-            $"{system}.{src}", info.Operator, $"{system}.{tgt}"
+            $"{system}.{src}", info.Operator.ToText(), $"{system}.{tgt}"
 
         let getResetInfo (node:Vertex) = 
             let vertexSystem = (getVertexTarget node).ApiItem.System

@@ -17,7 +17,6 @@
 
   <ItemGroup>
     <Compile Include="InterfaceClass.fs" />
-    <Compile Include="EdgeUtil.fs" />
     <Compile Include="Util.fs" />
     <Compile Include="MessgeError.fs" />
     <Compile Include="PPTUtil.fs" />

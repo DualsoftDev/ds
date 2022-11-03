@@ -199,21 +199,21 @@ module ImportU =
                                         |Some(real) -> (real:?>Real).Graph
                                         |None ->       flow.Graph
 
-                                let toR (edge:ModelingEdgeType) = edge.ToRuntimeEdge()
-
                                 match edge.Causal with
                                 | Interlock ->
-                                    let edge1 = Edge.Create(graph, src, tgt, toR ResetPush)
-                                    let edge2 = Edge.Create(graph, tgt, src, toR ResetPush)
-                                    edge1.EditorInfo <- ModelingEdgeType.EditorInterlock
-                                    edge2.EditorInfo <- ModelingEdgeType.EditorInterlock
+                                    flow.AddModelEdge(src, Interlock, tgt)
+                                    //let edge1 = Edge.Create(graph, src, tgt, toR ResetPush)
+                                    //let edge2 = Edge.Create(graph, tgt, src, toR ResetPush)
+                                    //edge1.EditorInfo <- ModelEdgeType.EditorInterlock
+                                    //edge2.EditorInfo <- ModelEdgeType.EditorInterlock
                                 | StartReset ->
-                                    let edge1 = Edge.Create(graph, src, tgt, toR StartEdge)
-                                    let edge2 = Edge.Create(graph, tgt, src, toR ResetEdge)
-                                    edge1.EditorInfo <- ModelingEdgeType.EditorStartReset
-                                    edge2.EditorInfo <- ModelingEdgeType.EditorStartReset
+                                    flow.AddModelEdge(src, StartReset, tgt)
+                                    //let edge1 = Edge.Create(graph, src, tgt, toR StartEdge)
+                                    //let edge2 = Edge.Create(graph, tgt, src, toR ResetEdge)
+                                    //edge1.EditorInfo <- ModelEdgeType.EditorStartReset
+                                    //edge2.EditorInfo <- ModelEdgeType.EditorStartReset
                                 | _ ->
-                                    Edge.Create(graph, src, tgt, toR edge.Causal) |> ignore
+                                    flow.AddModelEdge(src, edge.Causal, tgt)
 
 
 
@@ -230,11 +230,13 @@ module ImportU =
                                     if(edge.StartNode.NodeType = IF || edge.EndNode.NodeType = IF)
                                     then
                                         //인터페이스 인과는 약 리셋 불가 //ahn
-                                        //if (edge.Causal = EdgeType.EditorInterlock |>not && edge.Causal.HasFlag(EdgeType.Strong)|>not)
-                                        //then Office.ErrorConnect(edge.ConnectionShape, ErrID._11, edge.StartNode.Name, edge.EndNode.Name, edge.PageNum)
+                                        if (edge.Causal = InterlockWeak 
+                                            ||edge.Causal = ModelEdgeType.ResetEdge 
+                                            ||edge.Causal = ModelEdgeType.ResetEdgeRev  )
+                                        then Office.ErrorConnect(edge.ConnectionShape, ErrID._11, edge.StartNode.Name, edge.EndNode.Name, edge.PageNum)
 
                                         let sys = dicSys.[edge.PageNum]
-                                        sys.ApiResetInfos.Add(ApiResetInfo.Create(sys, edge.StartNode.Name, edge.Causal.ToText() ,edge.EndNode.Name ))|>ignore
+                                        sys.ApiResetInfos.Add(ApiResetInfo.Create(sys, edge.StartNode.Name, edge.Causal ,edge.EndNode.Name ))|>ignore
 
                                     else
 

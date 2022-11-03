@@ -136,5 +136,5 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
         for triple in (terms |> Array.windowed2 3 2) do
             if triple.Length = 3 then
                 let opnd1, op, opnd2 = triple[0], triple[1], triple[2]
-                let ri_ = ApiResetInfo.Create(x._system.Value, opnd1, op, opnd2)
+                let ri_ = ApiResetInfo.Create(x._system.Value, opnd1, op.ToModelEdge(), opnd2)
                 ()

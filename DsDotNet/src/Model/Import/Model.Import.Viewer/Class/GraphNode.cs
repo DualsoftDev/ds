@@ -45,8 +45,8 @@ namespace Dual.Model.Import
             if (real != null)
             {
                 real.Flow.ModelingEdges
-                    .Where(w => w.Item1.Parent.Core == real && w.Item3.Parent.Core == real)
-                    .ForEach(e => MEdges.Add(new DsViewEdge(e.Item1, e.Item2, e.Item3)));
+                    .Where(w => w.Source.Parent.Core == real && w.Target.Parent.Core == real)
+                    .ForEach(e => MEdges.Add(new DsViewEdge(e)));
 
                 real.Graph.Islands.ForEach(f => Singles.Add(new DsViewNode(f)));
                 if (real.Graph.Vertices.Count > 0)
@@ -89,11 +89,12 @@ namespace Dual.Model.Import
         public DsViewNode Target;
         public DsEdge DsEdge;
         public ModelEdgeType Causal = ModelEdgeType.StartEdge;
-        public DsViewEdge(DsVertex source, string edgeText, DsVertex target)
+        public DsViewEdge(ModelingEdgeInfo<DsVertex> modelEdgeInfo)
         {
-            Source = new DsViewNode(source);
-            Target = new DsViewNode(target);
-            Causal = edgeText.ToModelEdge();
+            var mei = modelEdgeInfo;
+            Source = new DsViewNode(mei.Source);
+            Target = new DsViewNode(mei.Target);
+            Causal = mei.EdgeSymbol.ToModelEdge();
         }
     }
 }

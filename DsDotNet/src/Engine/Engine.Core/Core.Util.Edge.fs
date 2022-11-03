@@ -8,22 +8,22 @@ open Engine.Common.FS
 
 [<AutoOpen>]
 module EdgeModule =
-    let private createEdges(graph:Graph<Vertex, Edge>, source:Vertex, target:Vertex, operator:string) =
+    let private createEdges (graph:Graph<Vertex, Edge>) (modeingEdgeInfo:ModelingEdgeInfo<'v>) =
          [|
-            for src, op, tgt in expandModelingEdge source operator target do
+            for src, op, tgt in expandModelingEdge modeingEdgeInfo do
                 let edge = Edge.Create(graph, src, tgt, op)
                 yield edge
          |]
 
-    let createFlowEdges(flow:Flow, source:Vertex, target:Vertex, operator:string) =
-        let s_op_t = source, operator, target
-        flow.ModelingEdges.Add(s_op_t) |> verifyM $"Duplicated edge {source.Name}{operator}{target.Name}"
-        createEdges(flow.Graph, source, target, operator)
+    let createFlowEdges(flow:Flow, modeingEdgeInfo:ModelingEdgeInfo<Vertex>) =
+        let mei = modeingEdgeInfo
+        flow.ModelingEdges.Add(mei) |> verifyM $"Duplicated edge {mei.Source.Name}{mei.EdgeSymbol}{mei.Target.Name}"
+        createEdges flow.Graph mei
 
-    let createChildEdges(segment:Real, source:Vertex, target:Vertex, operator:string) =
-        let s_op_t = source, operator, target
-        segment.ModelingEdges.Add(s_op_t) |> verifyM $"Duplicated edge {source.Name}{operator}{target.Name}"
-        createEdges(segment.Graph, source, target, operator)
+    let createChildEdges(segment:Real, modeingEdgeInfo:ModelingEdgeInfo<Vertex>) =
+        let mei = modeingEdgeInfo
+        segment.ModelingEdges.Add(mei) |> verifyM $"Duplicated edge {mei.Source.Name}{mei.EdgeSymbol}{mei.Target.Name}"
+        createEdges segment.Graph modeingEdgeInfo
 
     let ofResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) =
             edges.Where(fun e -> e.EdgeType.HasFlag(EdgeType.Reset))
@@ -111,10 +111,10 @@ module EdgeModule =
 
 [<Extension>]
 type EdgeExt =
-    [<Extension>] static member CreateEdges(flow:Flow, source:Vertex, target:Vertex, operator:string) =
-                    createFlowEdges(flow, source, target, operator)
-    [<Extension>] static member CreateEdges(segment:Real, source:Vertex, target:Vertex, operator:string) =
-                    createChildEdges(segment, source, target, operator)
+    [<Extension>] static member CreateEdges(flow:Flow, modelingEdgeInfo:ModelingEdgeInfo<Vertex>) =
+                    createFlowEdges(flow, modelingEdgeInfo)
+    [<Extension>] static member CreateEdges(segment:Real, modelingEdgeInfo:ModelingEdgeInfo<Vertex>) =
+                    createChildEdges(segment, modelingEdgeInfo)
 
     [<Extension>] static member CreateMRIEdgesTransitiveClosure(model:Model) =
                     for sys in model.Systems do

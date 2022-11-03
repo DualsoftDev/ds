@@ -78,7 +78,7 @@ namespace Dual.Model.Import
                 .ForEach(seg => DrawSeg(viewer.Graph.RootSubgraph, new DsViewNode(seg)));
 
             flow.ModelingEdges
-                .Select(s => new DsViewEdge(s.Item1, s.Item2, s.Item3 ))
+                .Select(s => new DsViewEdge(s))
                 .ForEach(f => DrawMEdge(viewer.Graph.RootSubgraph, f));
 
             viewer.SetCalculatedLayout(viewer.CalculateLayout(viewer.Graph));

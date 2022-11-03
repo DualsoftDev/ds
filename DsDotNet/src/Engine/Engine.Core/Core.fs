@@ -54,7 +54,7 @@ module CoreModule =
     and Flow private (name:string, system:DsSystem) =
         inherit FqdnObject(name, system)
         member val Graph = Graph<Vertex, Edge>()
-        member val ModelingEdges = HashSet<Vertex*string*Vertex>()
+        member val ModelingEdges = HashSet<ModelingEdgeInfo<Vertex>>()
         member val AliasMap = Dictionary<Fqdn, HashSet<string>>(nameComponentsComparer())
 
         member x.System = system
@@ -78,7 +78,7 @@ module CoreModule =
         Real private (name:string, flow:Flow) =
         inherit Vertex(name, Flow flow)
         member val Graph = Graph<Vertex, Edge>()
-        member val ModelingEdges = HashSet<Vertex*string*Vertex>()
+        member val ModelingEdges = HashSet<ModelingEdgeInfo<Vertex>>()
         member val Flow = flow
 
         member val SafetyConditions = createQualifiedNamedHashSet<Real>()
@@ -221,12 +221,14 @@ module CoreModule =
 [<Extension>]
 type CoreExt =
     [<Extension>] static member GetSystem(call:Call) = call.Parent.System
-    [<Extension>] static member AddModelEdge(flow:Flow, source:string, edgetext:string, target:string) = 
-                        let src = flow.Graph.Vertices.Find(fun f->f.Name = source) 
-                        let tgt = flow.Graph.Vertices.Find(fun f->f.Name = target) 
-                        flow.ModelingEdges.Add(src, edgetext, tgt) |> verifyM $"Duplicated edge [{src.Name}{edgetext}{tgt.Name}]"
-    [<Extension>] static member AddModelEdge(flow:Flow, source:Vertex, modelEdgeType:ModelEdgeType, target:Vertex) = 
-                        flow.ModelingEdges.Add(source, modelEdgeType.ToText(), target) |> verifyM $"Duplicated edge [{source.Name}{modelEdgeType.ToText()}{target.Name}]"
+    [<Extension>] static member AddModelEdge(flow:Flow, source:string, edgetext:string, target:string) =
+                        let src = flow.Graph.Vertices.Find(fun f->f.Name = source)
+                        let tgt = flow.Graph.Vertices.Find(fun f->f.Name = target)
+                        let modelingEdgeInfo = ModelingEdgeInfo(src, edgetext, tgt)
+                        flow.ModelingEdges.Add(modelingEdgeInfo) |> verifyM $"Duplicated edge [{src.Name}{edgetext}{tgt.Name}]"
+    [<Extension>] static member AddModelEdge(flow:Flow, source:Vertex, modelEdgeType:ModelEdgeType, target:Vertex) =
+                        let modelingEdgeInfo = ModelingEdgeInfo(source, modelEdgeType.ToText(), target)
+                        flow.ModelingEdges.Add(modelingEdgeInfo) |> verifyM $"Duplicated edge [{source.Name}{modelEdgeType.ToText()}{target.Name}]"
     [<Extension>]
     static member AddButton(sys:DsSystem, btnType:BtnType, btnName: string, flow:Flow) =
         let dicButton =

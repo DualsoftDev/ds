@@ -97,6 +97,8 @@ module internal ToDsTextModule =
         ] |> combineLines
 
     and segmentToDs (basis:Fqdn) (segment:Real) (indent:int) =
+        if segment.ModelingEdges.Any() then
+            noop()
         let tab = getTab indent
         [
             let subGraph = segment.Graph
@@ -114,6 +116,8 @@ module internal ToDsTextModule =
         ] |> combineLines
 
     let flowGraphToDs (flow:Flow) (indent:int) =
+        if flow.ModelingEdges.Any() then
+            noop()
         let graph = flow.Graph
         let basis = flow.NameComponents
         let es = graph.Edges.OfType<EdgeBase<Vertex>>().ToArray()

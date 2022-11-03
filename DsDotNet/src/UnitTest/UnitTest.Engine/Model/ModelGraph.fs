@@ -11,7 +11,7 @@ module ModelGrapTests =
     type V(name:string) =
         inherit Named(name)
     type E(source, target) =
-        inherit EdgeBase<V>(source, target, EdgeType.Default)
+        inherit EdgeBase<V>(source, target, EdgeType.Start)
 
     type CycleDetectTest() =
         do Fixtures.SetUpTest()

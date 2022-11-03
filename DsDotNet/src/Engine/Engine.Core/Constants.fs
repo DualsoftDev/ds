@@ -2,7 +2,6 @@
 namespace Engine.Core
 
 open System
-open System.Linq
 open Engine.Common.FS
 open System.Runtime.CompilerServices
 
@@ -21,8 +20,7 @@ module DsText =
     let [<Literal>] TextResetEdgeRev      = "<|"
     let [<Literal>] TextResetPushRev      = "<||"
     let [<Literal>] TextStartResetRev     = "<="
-    
-    [<Flags>]
+
     type ModelEdgeType =
         | StartEdge          (*  ">"    *)
         | StartPush          (*  ">>"   *)
@@ -31,90 +29,95 @@ module DsText =
         | StartReset         (*  "=>"   *)
         | InterlockWeak      (*  "<|>"  *)
         | Interlock          (*  "<||>" *)
+
         | StartEdgeRev       (*  "<"    *)
         | StartPushRev       (*  "<<"   *)
         | ResetEdgeRev       (*  "<|"   *)
         | ResetPushRev       (*  "<||"  *)
         | StartResetRev      (*  "<="   *)
-        
+
     /// Runtime Edge Types
     [<Flags>]
     type EdgeType =
-        | Default                    = 0b00000000    // Start, Weak
-        | Reset                      = 0b00000001    // else start
-        | Strong                     = 0b00000010    // else weak
-        | AugmentedTransitiveClosure = 0b00000100    // 강한 상호 reset 관계 확장 edge
-
+        | None                       = 0b00000000    // Invalid state
+        | Start                      = 0b00000001    // Start, Weak
+        | Reset                      = 0b00000010    // else start
+        | Strong                     = 0b00000100    // else weak
+        | AugmentedTransitiveClosure = 0b00001000    // 강한 상호 reset 관계 확장 edge
 
     type internal MET = ModelEdgeType
     type internal RET = EdgeType
 
+    type ModelingEdgeInfo<'v>(source:'v, edgeSymbol:string, target:'v) =
+        member val Source = source
+        member val Target = target
+        member val EdgeSymbol = edgeSymbol
+
     /// source 와 target 을 edge operator 에 따라서 확장 생성
-    let expandModelingEdge (source:'v) (edgeSymbol:string) (target:'v) : ('v * EdgeType * 'v) list =
-        let s, t = source, target
+    let expandModelingEdge (modeingEdgeInfo:ModelingEdgeInfo<'v>) : ('v * EdgeType * 'v) list =
+        let mi = modeingEdgeInfo
+        let s, edgeSymbol, t = mi.Source, mi.EdgeSymbol, mi.Target
         match edgeSymbol with
-        | (* ">"    *) TextStartEdge     -> [s, RET.Default, t]
-        | (* ">>"   *) TextStartPush     -> [s, RET.Default ||| RET.Strong, t]
+        | (* ">"    *) TextStartEdge     -> [s, RET.Start, t]
+        | (* ">>"   *) TextStartPush     -> [s, RET.Start ||| RET.Strong, t]
         | (* "|>"   *) TextResetEdge     -> [s, RET.Reset, t]
         | (* "||>"  *) TextResetPush     -> [s, RET.Reset ||| RET.Strong, t]
 
-        | (* "=>"   *) TextStartReset    -> [(s, RET.Default, t); (t, RET.Reset, s)]
+        | (* "=>"   *) TextStartReset    -> [(s, RET.Start, t); (t, RET.Reset, s)]
         | (* "<|>"  *) TextInterlockWeak -> [(s, RET.Reset, t); (t, RET.Reset, s)]
         | (* "<||>" *) TextInterlock     -> [(s, RET.Reset ||| RET.Strong, t); (t, RET.Reset ||| RET.Strong, s)]
-        | (* "<"    *) TextStartEdgeRev  -> [t, RET.Default, s]
-        | (* "<<"   *) TextStartPushRev  -> [t, RET.Default ||| RET.Strong, s]
+        | (* "<"    *) TextStartEdgeRev  -> [t, RET.Start, s]
+        | (* "<<"   *) TextStartPushRev  -> [t, RET.Start ||| RET.Strong, s]
         | (* "<|"   *) TextResetEdgeRev  -> [t, RET.Reset, s]
         | (* "<||"  *) TextResetPushRev  -> [t, RET.Reset ||| RET.Strong, s]
-        | (* "<="   *) TextStartResetRev -> [(t, RET.Default, s); (s, RET.Reset, t); ]
+        | (* "<="   *) TextStartResetRev -> [(t, RET.Start, s); (s, RET.Reset, t); ]
 
         | _
-            -> failwithf "Unknown edge symbol: %s" edgeSymbol
-
+            -> failwithf "Unknown causal edge type: %s" edgeSymbol
 
 
 [<Extension>]
 type ModelingEdgeExt =
-    
     [<Extension>]
     static member ToText(edgeType:EdgeType) =
-        //checkEnumSanity()
         let t = edgeType
+        let isStrong = t.HasFlag(RET.Strong)
         if t.HasFlag(RET.Reset) then
-            if t.HasFlag(RET.Strong) then "||>" else "|>"
+            if isStrong then "||>" else "|>"
         else
-            if t.HasFlag(RET.Strong) then ">>" else ">"
+            if isStrong then ">>" else ">"
 
     [<Extension>]
     static member ToText(edgeType:ModelEdgeType) =
         match edgeType with
-        | StartEdge       ->    TextStartEdge     
-        | StartPush       ->    TextStartPush     
-        | ResetEdge       ->    TextResetEdge     
-        | ResetPush       ->    TextResetPush     
-        | StartReset      ->    TextStartReset    
-        | InterlockWeak   ->    TextInterlockWeak 
-        | Interlock       ->    TextInterlock     
-        | StartEdgeRev    ->    TextStartEdgeRev  
-        | StartPushRev    ->    TextStartPushRev  
-        | ResetEdgeRev    ->    TextResetEdgeRev  
-        | ResetPushRev    ->    TextResetPushRev  
-        | StartResetRev   ->    TextStartResetRev 
+        | StartEdge       ->    TextStartEdge
+        | StartPush       ->    TextStartPush
+        | ResetEdge       ->    TextResetEdge
+        | ResetPush       ->    TextResetPush
+        | StartReset      ->    TextStartReset
+        | InterlockWeak   ->    TextInterlockWeak
+        | Interlock       ->    TextInterlock
+        | StartEdgeRev    ->    TextStartEdgeRev
+        | StartPushRev    ->    TextStartPushRev
+        | ResetEdgeRev    ->    TextResetEdgeRev
+        | ResetPushRev    ->    TextResetPushRev
+        | StartResetRev   ->    TextStartResetRev
 
     [<Extension>]
     static member ToModelEdge(edgeText:string) =
         match edgeText with
-        | TextStartEdge       ->    StartEdge     
-        | TextStartPush       ->    StartPush     
-        | TextResetEdge       ->    ResetEdge     
-        | TextResetPush       ->    ResetPush     
-        | TextStartReset      ->    StartReset    
-        | TextInterlockWeak   ->    InterlockWeak 
-        | TextInterlock       ->    Interlock     
-        | TextStartEdgeRev    ->    StartEdgeRev  
-        | TextStartPushRev    ->    StartPushRev  
-        | TextResetEdgeRev    ->    ResetEdgeRev  
-        | TextResetPushRev    ->    ResetPushRev  
-        | TextStartResetRev   ->    StartResetRev 
+        | TextStartEdge       ->    StartEdge
+        | TextStartPush       ->    StartPush
+        | TextResetEdge       ->    ResetEdge
+        | TextResetPush       ->    ResetPush
+        | TextStartReset      ->    StartReset
+        | TextInterlockWeak   ->    InterlockWeak
+        | TextInterlock       ->    Interlock
+        | TextStartEdgeRev    ->    StartEdgeRev
+        | TextStartPushRev    ->    StartPushRev
+        | TextResetEdgeRev    ->    ResetEdgeRev
+        | TextResetPushRev    ->    ResetPushRev
+        | TextStartResetRev   ->    StartResetRev
         |_ -> failwithf $"'{edgeText}' is not modelEdgeType"
 
 

@@ -230,8 +230,8 @@ module ImportU =
                                     if(edge.StartNode.NodeType = IF || edge.EndNode.NodeType = IF)
                                     then
                                         //인터페이스 인과는 약 리셋 불가 //ahn
-                                        if (edge.Causal = InterlockWeak 
-                                            ||edge.Causal = ModelEdgeType.ResetEdge 
+                                        if (edge.Causal = InterlockWeak
+                                            ||edge.Causal = ModelEdgeType.ResetEdge
                                             ||edge.Causal = ModelEdgeType.ResetEdgeRev  )
                                         then Office.ErrorConnect(edge.ConnectionShape, ErrID._11, edge.StartNode.Name, edge.EndNode.Name, edge.PageNum)
 

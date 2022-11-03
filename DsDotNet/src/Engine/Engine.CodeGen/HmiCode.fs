@@ -41,9 +41,7 @@ module HmiGenModule =
     let GenHmiCode(model:Model) =
         let hmiInfos = new Dictionary<string, Info>()
 
-        let genInfo
-                name category
-                buttonType (parent:string) =
+        let genInfo name category buttonType parent =
             {
                 name = name;
                 category = category;
@@ -126,9 +124,7 @@ module HmiGenModule =
                     for sys in model.Systems do
                         for sp in sys.StartPoints do
                             hmiInfos[button].targets.Add(sp.QualifiedName)
-                | ButtonType.Emergency
-                | ButtonType.Auto
-                | ButtonType.Clear ->
+                | ButtonType.Emergency | ButtonType.Auto | ButtonType.Clear ->
                     for flow in flowNames do
                         hmiInfos[button].targets.Add(flow)
                 | _ ->
@@ -174,8 +170,7 @@ module HmiGenModule =
             | _ -> ()
 
         for sys in model.Systems do
-            // if sys.Name = "My" then // to check
-            if sys.Active then
+            if sys.Active then // if sys.Name = "My" then // to check
                 let groupBtnCombiner = addGroupButtons sys
                 addSystemFlowReal sys
                 groupBtnCombiner sys.AutoButtons ButtonType.Auto
@@ -204,20 +199,15 @@ module HmiGenModule =
                                 addDevice model sys flow alias
                         | _ ->
                             printfn "unknown type has detected"
-
         addGlobalButtons model
 
         let initializer = {
-            mode = "init";
+            mode = "init"; 
             initializer = hmiInfos.Values |> List.ofSeq;
         }
         let settings = JsonSerializerSettings()
         settings.Converters.Add(Converters.StringEnumConverter())
-        JsonConvert.SerializeObject(
-            initializer,
-            // Formatting.Indented, // to visual check
-            settings
-        )
+        JsonConvert.SerializeObject(initializer, Formatting.Indented, settings)
 
     //[<EntryPoint>]
     //let main argv =

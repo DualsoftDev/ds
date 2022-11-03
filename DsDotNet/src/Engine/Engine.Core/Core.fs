@@ -55,7 +55,7 @@ module CoreModule =
         member val Graph = Graph<Vertex, Edge>()
         member val ModelingEdges = HashSet<Vertex*string*Vertex>()
         member val AliasMap = Dictionary<Fqdn, HashSet<string>>(nameComponentsComparer())
-      
+
         member x.System = system
         static member Create(name:string, system:DsSystem) =
             let flow = Flow(name, system)
@@ -104,7 +104,7 @@ module CoreModule =
             | None -> None
 
         static let addAlias(flow:Flow, target:Fqdn, alias:string) =
-            if   flow.AliasMap.ContainsKey target 
+            if   flow.AliasMap.ContainsKey target
             then flow.AliasMap.[target].Add(alias) |>ignore
             else flow.AliasMap.Add(target, HashSet[|alias|]) |>ignore
 
@@ -122,12 +122,12 @@ module CoreModule =
                 graph.AddVertex(alias) |> verifyM $"Duplicated child name [{mnemonic}]"
                 if skipAddFlowMap|>not
                 then match target with
-                     | RealTarget r -> addAlias(r.Flow, [|r.Name|], mnemonic) 
+                     | RealTarget r -> addAlias(r.Flow, [|r.Name|], mnemonic)
                      | CallTarget c -> match c.Parent with
-                                       |Real rParent -> addAlias(rParent.Flow, [|c.Name|], mnemonic)  
-                                       |Flow fParent -> addAlias(fParent, [|c.Name|], mnemonic)  
+                                       |Real rParent -> addAlias(rParent.Flow, [|c.Name|], mnemonic)
+                                       |Flow fParent -> addAlias(fParent, [|c.Name|], mnemonic)
                 alias
-                  
+
             let existing = tryFindAlias graph mnemonic
             match existing with
             | Some a -> a

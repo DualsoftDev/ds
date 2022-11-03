@@ -21,5 +21,6 @@ module PPTTestModule =
             let result  = ImportM.FromPPTX($"{__SOURCE_DIRECTORY__}\\4.Api.pptx");
             let result  = ImportM.FromPPTX($"{__SOURCE_DIRECTORY__}\\5.Call.pptx");
             let result  = ImportM.FromPPTX($"{__SOURCE_DIRECTORY__}\\6.Alias.pptx");
+            let result  = ImportM.FromPPTX($"{__SOURCE_DIRECTORY__}\\7.CopySystem.pptx");
             1  === 1
            

@@ -278,7 +278,7 @@ namespace Dual.Model.Import
             //5.Call.pptx
             //6.Alias.pptx
 
-            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\..\..\..\..\"))+ "UnitTest\\UnitTest.Engine\\ImportPPT\\3.Real.pptx";
+            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\..\..\..\..\"))+ "UnitTest\\UnitTest.Engine\\ImportPPT\\7.CopySystem.pptx";
             bool debug = File.Exists(path);
             if (debug)
             {

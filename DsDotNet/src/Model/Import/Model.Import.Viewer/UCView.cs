@@ -74,10 +74,19 @@ namespace Dual.Model.Import
             if(sys.Flows.First() == flow && sys.ApiItems.Count>0) //처음 시스템 Flow에만 인터페이스 표기
                 DrawApiItems(flow, sys);
 
-            flow.Graph.Islands
+            var edgeVetexs = new List<Vertex>();
+            flow.ModelingEdges.ForEach(s =>
+            {
+                edgeVetexs.Add(s.Item1);
+                edgeVetexs.Add(s.Item3);
+            });
+
+            flow.Graph.Vertices
+                .Where(seg => !edgeVetexs.Contains(seg))
                 .ForEach(seg => DrawSeg(viewer.Graph.RootSubgraph, new DsViewNode(seg)));
 
             flow.ModelingEdges
+                .Where(s => s.Item1.Parent.IsFlow && s.Item3.Parent.IsFlow)
                 .Select(s => new DsViewEdge(s.Item1, s.Item2, s.Item3 ))
                 .ForEach(f => DrawMEdge(viewer.Graph.RootSubgraph, f));
 

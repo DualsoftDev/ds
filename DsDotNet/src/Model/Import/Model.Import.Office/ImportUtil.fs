@@ -229,9 +229,9 @@ module ImportU =
 
                                     if(edge.StartNode.NodeType = IF || edge.EndNode.NodeType = IF)
                                     then
-                                        //인터페이스 인과는 약 리셋 불가
-                                        if (edge.Causal = EdgeType.EditorInterlock |>not && edge.Causal.HasFlag(EdgeType.Strong)|>not)
-                                        then Office.ErrorConnect(edge.ConnectionShape, ErrID._11, edge.StartNode.Name, edge.EndNode.Name, edge.PageNum)
+                                        //인터페이스 인과는 약 리셋 불가 //ahn
+                                        //if (edge.Causal = EdgeType.EditorInterlock |>not && edge.Causal.HasFlag(EdgeType.Strong)|>not)
+                                        //then Office.ErrorConnect(edge.ConnectionShape, ErrID._11, edge.StartNode.Name, edge.EndNode.Name, edge.PageNum)
 
                                         let sys = dicSys.[edge.PageNum]
                                         sys.ApiResetInfos.Add(ApiResetInfo.Create(sys, edge.StartNode.Name, edge.Causal.ToText() ,edge.EndNode.Name ))|>ignore

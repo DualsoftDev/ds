@@ -78,7 +78,7 @@ namespace Dual.Model.Import
 
             flow.Graph.Edges
                 .Select(s => new DsViewEdge(s))
-                .Where(w => w.DsEdge.EditorInfo != EdgeType.EditorSpare)
+               // .Where(w => w.DsEdge.EditorInfo != EdgeType.EditorSpare)  //ahn
                 .ForEach(f => DrawMEdge(viewer.Graph.RootSubgraph, f));
 
             viewer.SetCalculatedLayout(viewer.CalculateLayout(viewer.Graph));

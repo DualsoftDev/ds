@@ -96,19 +96,30 @@ module internal ToDsTextModule =
                 yield $"{tab}{island.GetRelativeName(basis)}; // island"
         ] |> combineLines
 
+    and modelingEdgeInfoToDs (basis:Fqdn) (mei:ModelingEdgeInfo<Vertex>) =
+        let s = mei.Source.GetRelativeName(basis)
+        let t = mei.Target.GetRelativeName(basis)
+        $"{s} {mei.EdgeSymbol} {t}"
+
     and segmentToDs (basis:Fqdn) (segment:Real) (indent:int) =
-        if segment.ModelingEdges.Any() then
-            noop()
         let tab = getTab indent
         [
-            let subGraph = segment.Graph
-            if subGraph.Edges.any() then
+            if segment.ModelingEdges.any() then
                 yield $"{tab}{segment.GetRelativeName(basis)} = {lb}"
-                let es = subGraph.Edges.Cast<EdgeBase<Vertex>>().ToArray()
-                let vs = subGraph.Vertices
-                yield graphEntitiesToDs segment.NameComponents vs es (indent+1)
+                let basis = segment.NameComponents
+                for me in segment.ModelingEdges do
+                    yield $"{tab}{modelingEdgeInfoToDs basis me};"
                 yield $"{tab}{rb}"
-            elif subGraph.Islands.any() then
+
+            let subGraph = segment.Graph
+            //if subGraph.Edges.any() then
+            //    yield $"{tab}{segment.GetRelativeName(basis)} = {lb}"
+            //    let es = subGraph.Edges.Cast<EdgeBase<Vertex>>().ToArray()
+            //    let vs = subGraph.Vertices
+            //    yield graphEntitiesToDs segment.NameComponents vs es (indent+1)
+            //    yield $"{tab}{rb}"
+            //elif subGraph.Islands.any() then
+            if subGraph.Islands.any() then
                 yield $"{tab}{segment.GetRelativeName(basis)} = {lb}"
                 for island in subGraph.Islands do
                     yield $"{getTab (indent+1)}{island.GetRelativeName(segment.NameComponents)}; // island"

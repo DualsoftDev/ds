@@ -297,7 +297,7 @@ module PPTObjectModule =
     and
         pptEdge(conn:Presentation.ConnectionShape,  iEdge:UInt32Value, iPage:int ,startId:uint32, endId:uint32, nodes:ConcurrentDictionary<string, pptNode>) =
         let mutable reverse = false
-        let mutable causal:ModelingEdgeType = ModelingEdgeType.Default
+        let mutable causal:ModelingEdgeType = ModelingEdgeType.Start
         let startKey = Objkey(iPage, startId)
         let endKey   = Objkey(iPage, endId)
         let startNode = nodes.[startKey]

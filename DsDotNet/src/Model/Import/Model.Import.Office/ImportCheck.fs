@@ -35,11 +35,11 @@ module ImportCheck =
             fg.Edges.Add(Edge.Create(fg, find("RESET"), find("복귀인과"), toR ResetEdge)) |> ignore
             fg.Edges.Add(Edge.Create(fg, find("RESET"), find("복귀유지"), toR ResetPush)) |> ignore
 
-            let etcEdge =  Edge.Create(fg, find("ETC"), find("상호행위간섭"), toR ModelingEdgeType.Default)
+            let etcEdge =  Edge.Create(fg, find("ETC"), find("상호행위간섭"), toR ModelingEdgeType.Start)
             etcEdge.EditorInfo <- ModelingEdgeType.EditorInterlock
             fg.Edges.Add(etcEdge) |> ignore
 
-            let etcEdge =  Edge.Create(fg, find("ETC"), find("시작후행리셋"), toR ModelingEdgeType.Default)
+            let etcEdge =  Edge.Create(fg, find("ETC"), find("시작후행리셋"), toR ModelingEdgeType.Start)
             etcEdge.EditorInfo <- ModelingEdgeType.EditorStartReset
             fg.Edges.Add(etcEdge)       |> ignore
 

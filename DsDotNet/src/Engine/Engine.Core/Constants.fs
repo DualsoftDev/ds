@@ -25,23 +25,19 @@ module DsText =
     /// Runtime Edge Types
     [<Flags>]
     type EdgeType =
-        | Default                    = 0b00000000    // Start, Weak
-        | Reset                      = 0b00000001    // else start
-        | Strong                     = 0b00000010    // else weak
-        | AugmentedTransitiveClosure = 0b00000100    // 강한 상호 reset 관계 확장 edge
+        | None                       = 0b00000000    // Invalid state
+        | Start                      = 0b00000001    // Start, Weak
+        | Reset                      = 0b00000010    // else start
+        | Strong                     = 0b00000100    // else weak
+        | AugmentedTransitiveClosure = 0b00001000    // 강한 상호 reset 관계 확장 edge
 
 
     [<Flags>]
     type ModelingEdgeType =
-        // runtime edge
-        | Default                    = 0b00000000    // Start, Weak
-        | Reset                      = 0b00000001    // else start
-        | Strong                     = 0b00000010    // else weak
-        //| AugmentedTransitiveClosure = 0b00000100    // 강한 상호 reset 관계 확장 edge
-
-        // runtime edge 는 Reversed / Bindrectional 을 포함하지 않는다.
-        //| Reversed                   = 0b00001000    // direction reversed : <, <|, <||, etc
-        | Bidirectional              = 0b00010000    // 양방향.  <||>, =>, ...
+        | None                       = 0b00000000    // Invalid state
+        | Start                      = 0b00000001    // Start, Weak
+        | Reset                      = 0b00000010    // else start
+        | Strong                     = 0b00000100    // else weak
 
         | EditorInterlock            = 0b00100000    // 강한 상호 reset 저장 확장 edge
         | EditorStartReset           = 0b01000000    // 약 시작 약 리셋 저장 확장 edge
@@ -55,7 +51,8 @@ module DsText =
         if isFirst then
             isFirst <- false
             let c x = LanguagePrimitives.EnumToValue x
-            assert(c RET.Default = c MET.Default)
+            assert(c RET.None    = c MET.None)
+            assert(c RET.Start   = c MET.Start)
             assert(c RET.Reset   = c MET.Reset)
             assert(c RET.Strong  = c MET.Strong)
 
@@ -63,50 +60,22 @@ module DsText =
     let expandModelingEdge (source:'v) (edgeSymbol:string) (target:'v) : ('v * EdgeType * 'v) list =
         let s, t = source, target
         match edgeSymbol with
-        | (* ">"    *) TextStartEdge     -> [s, RET.Default, t]
-        | (* ">>"   *) TextStartPush     -> [s, RET.Default ||| RET.Strong, t]
+        | (* ">"    *) TextStartEdge     -> [s, RET.Start, t]
+        | (* ">>"   *) TextStartPush     -> [s, RET.Start ||| RET.Strong, t]
         | (* "|>"   *) TextResetEdge     -> [s, RET.Reset, t]
         | (* "||>"  *) TextResetPush     -> [s, RET.Reset ||| RET.Strong, t]
 
-        | (* "=>"   *) TextStartReset    -> [(s, RET.Default, t); (t, RET.Reset, s)]
+        | (* "=>"   *) TextStartReset    -> [(s, RET.Start, t); (t, RET.Reset, s)]
         | (* "<|>"  *) TextInterlockWeak -> [(s, RET.Reset, t); (t, RET.Reset, s)]
         | (* "<||>" *) TextInterlock     -> [(s, RET.Reset ||| RET.Strong, t); (t, RET.Reset ||| RET.Strong, s)]
-        | (* "<"    *) TextStartEdgeRev  -> [t, RET.Default, s]
-        | (* "<<"   *) TextStartPushRev  -> [t, RET.Default ||| RET.Strong, s]
+        | (* "<"    *) TextStartEdgeRev  -> [t, RET.Start, s]
+        | (* "<<"   *) TextStartPushRev  -> [t, RET.Start ||| RET.Strong, s]
         | (* "<|"   *) TextResetEdgeRev  -> [t, RET.Reset, s]
         | (* "<||"  *) TextResetPushRev  -> [t, RET.Reset ||| RET.Strong, s]
-        | (* "<="   *) TextStartResetRev -> [(t, RET.Default, s); (s, RET.Reset, t); ]
+        | (* "<="   *) TextStartResetRev -> [(t, RET.Start, s); (s, RET.Reset, t); ]
 
         | _
             -> failwithf "Unknown edge symbol: %s" edgeSymbol
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 [<Extension>]
@@ -116,9 +85,9 @@ type ModelingEdgeExt =
     [<Extension>]
     static member ToRuntimeEdge(edgeType:ModelingEdgeType) =
         let et = edgeType
-        if et = MET.Default then RET.Default
+        if et = MET.Start then RET.Start
         elif et = MET.Reset then RET.Reset
-        elif et = (MET.Default ||| MET.Strong) then (RET.Default ||| RET.Strong)
+        elif et = (MET.Start ||| MET.Strong) then (RET.Start ||| RET.Strong)
         elif et = (MET.Reset ||| MET.Strong) then (RET.Reset ||| RET.Strong)
         else
             failwith "invalid edge type"
@@ -126,9 +95,9 @@ type ModelingEdgeExt =
     [<Extension>]
     static member ToModelingEdge(edgeType:EdgeType) =
         let et = edgeType
-        if et = RET.Default then MET.Default
+        if et = RET.Start then MET.Start
         elif et = RET.Reset then MET.Reset
-        elif et = (RET.Default ||| RET.Strong) then (MET.Default ||| MET.Strong)
+        elif et = (RET.Start ||| RET.Strong) then (MET.Start ||| MET.Strong)
         elif et = (RET.Reset ||| RET.Strong) then (MET.Reset ||| MET.Strong)
         else
             failwith "invalid edge type"
@@ -137,10 +106,11 @@ type ModelingEdgeExt =
     static member ToText(edgeType:EdgeType) =
         checkEnumSanity()
         let t = edgeType
+        let isStrong = t.HasFlag(RET.Strong)
         if t.HasFlag(RET.Reset) then
-            if t.HasFlag(RET.Strong) then "||>" else "|>"
+            if isStrong then "||>" else "|>"
         else
-            if t.HasFlag(RET.Strong) then ">>" else ">"
+            if isStrong then ">>" else ">"
 
     [<Extension>]
     static member ToText(edgeType:ModelingEdgeType) =
@@ -148,24 +118,11 @@ type ModelingEdgeExt =
         if t = MET.EditorInterlock then  "<||>"  //EditorInterlock Text 출력우선
         elif t = MET.EditorStartReset then  "=>" //EditorStartReset Reversed 없음
         else
+            let isStrong = t.HasFlag(MET.Strong)
             if t.HasFlag(MET.Reset) then
-                if t.HasFlag(MET.Strong) then
-                    if t.HasFlag(MET.Bidirectional) then
-                        "<||>"
-                    else
-                        "||>"
-                else
-                    if t.HasFlag(MET.Bidirectional) then
-                        "<|>"
-                    else
-                        "|>"
+                if isStrong then "||>" else "|>"
             else
-                if t.HasFlag(MET.Bidirectional) then
-                    failwith "Bidirectional 은 Strong, Reset와 같이 사용가능합니다. ERROR"
-                if t.HasFlag(MET.Strong) then
-                    ">>"
-                else
-                    ">"
+                if isStrong then ">>" else ">"
 
 [<AutoOpen>]
 module DsTextDataType =

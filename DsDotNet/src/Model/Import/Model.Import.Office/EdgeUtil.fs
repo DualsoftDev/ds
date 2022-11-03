@@ -7,7 +7,7 @@ open Engine.Core
 [<AutoOpen>]
 module UtilEdge =
 
-    let [<Literal>] StartEdge  = ModelingEdgeType.Default                                // A>B	        약 시작 연결
+    let [<Literal>] StartEdge  = ModelingEdgeType.Start                                // A>B	        약 시작 연결
     let [<Literal>] StartPush  = ModelingEdgeType.Strong                                 // A>>B	        강 시작 연결
     let [<Literal>] ResetEdge  = ModelingEdgeType.Reset                                  // A|>B	        약 리셋 연결
     let [<Literal>] ResetPush  = ModelingEdgeType.Reset ||| ModelingEdgeType.Strong              // A||>B	    강 리셋 연결

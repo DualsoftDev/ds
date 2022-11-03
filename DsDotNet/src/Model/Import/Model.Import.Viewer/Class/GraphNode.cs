@@ -84,7 +84,7 @@ namespace Dual.Model.Import
         public DsViewNode Source;
         public DsViewNode Target;
         public DsEdge DsEdge;
-        public ModelingEdgeType Causal = ModelingEdgeType.Default;
+        public ModelingEdgeType Causal = ModelingEdgeType.Start;
 
         public DsViewEdge(DsEdge e) {
             DsEdge = e;

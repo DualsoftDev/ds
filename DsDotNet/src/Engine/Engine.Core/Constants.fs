@@ -21,7 +21,8 @@ module DsText =
     let [<Literal>] TextResetPushRev      = "<||"
     let [<Literal>] TextStartResetRev     = "<="
 
-    type ModelEdgeType =
+    /// 사용자 모델링한 edge type (단 reverse 는 반대로 뒤집어서)
+    type ModelingEdgeType =
         | StartEdge          (*  ">"    *)
         | StartPush          (*  ">>"   *)
         | ResetEdge          (*  "|>"   *)
@@ -29,12 +30,6 @@ module DsText =
         | StartReset         (*  "=>"   *)
         | InterlockWeak      (*  "<|>"  *)
         | Interlock          (*  "<||>" *)
-
-        | StartEdgeRev       (*  "<"    *)
-        | StartPushRev       (*  "<<"   *)
-        | ResetEdgeRev       (*  "<|"   *)
-        | ResetPushRev       (*  "<||"  *)
-        | StartResetRev      (*  "<="   *)
 
     /// Runtime Edge Types
     [<Flags>]
@@ -45,7 +40,7 @@ module DsText =
         | Strong                     = 0b00000100    // else weak
         | AugmentedTransitiveClosure = 0b00001000    // 강한 상호 reset 관계 확장 edge
 
-    type internal MET = ModelEdgeType
+    type internal MET = ModelingEdgeType
     type internal RET = EdgeType
 
     type ModelingEdgeInfo<'v>(source:'v, edgeSymbol:string, target:'v) =
@@ -88,7 +83,7 @@ type ModelingEdgeExt =
             if isStrong then ">>" else ">"
 
     [<Extension>]
-    static member ToText(edgeType:ModelEdgeType) =
+    static member ToText(edgeType:ModelingEdgeType) =
         match edgeType with
         | StartEdge       ->    TextStartEdge
         | StartPush       ->    TextStartPush
@@ -97,11 +92,6 @@ type ModelingEdgeExt =
         | StartReset      ->    TextStartReset
         | InterlockWeak   ->    TextInterlockWeak
         | Interlock       ->    TextInterlock
-        | StartEdgeRev    ->    TextStartEdgeRev
-        | StartPushRev    ->    TextStartPushRev
-        | ResetEdgeRev    ->    TextResetEdgeRev
-        | ResetPushRev    ->    TextResetPushRev
-        | StartResetRev   ->    TextStartResetRev
 
     [<Extension>]
     static member ToModelEdge(edgeText:string) =
@@ -113,12 +103,18 @@ type ModelingEdgeExt =
         | TextStartReset      ->    StartReset
         | TextInterlockWeak   ->    InterlockWeak
         | TextInterlock       ->    Interlock
-        | TextStartEdgeRev    ->    StartEdgeRev
-        | TextStartPushRev    ->    StartPushRev
-        | TextResetEdgeRev    ->    ResetEdgeRev
-        | TextResetPushRev    ->    ResetPushRev
-        | TextStartResetRev   ->    StartResetRev
         |_ -> failwithf $"'{edgeText}' is not modelEdgeType"
+
+    /// 뒤집힌 edge 판정.  뒤집혀 있으면 source target 을 반대로 하고 edge 를 다시 뒤집을 것.
+    [<Extension>]
+    static member IsReversedEdge(edgeText:string) =
+        match edgeText with
+        | TextStartEdgeRev
+        | TextStartPushRev
+        | TextResetEdgeRev
+        | TextResetPushRev
+        | TextStartResetRev -> true
+        | _ -> false
 
 
 [<AutoOpen>]

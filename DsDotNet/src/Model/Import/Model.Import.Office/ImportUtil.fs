@@ -231,8 +231,7 @@ module ImportU =
                                     then
                                         //인터페이스 인과는 약 리셋 불가 //ahn
                                         if (edge.Causal = InterlockWeak
-                                            ||edge.Causal = ModelEdgeType.ResetEdge
-                                            ||edge.Causal = ModelEdgeType.ResetEdgeRev  )
+                                            ||edge.Causal = ResetEdge)
                                         then Office.ErrorConnect(edge.ConnectionShape, ErrID._11, edge.StartNode.Name, edge.EndNode.Name, edge.PageNum)
 
                                         let sys = dicSys.[edge.PageNum]

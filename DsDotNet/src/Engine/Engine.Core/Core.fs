@@ -177,7 +177,7 @@ module CoreModule =
             cp
 
     /// API 의 reset 정보:  "+" <||> "-";
-    and ApiResetInfo private (system:DsSystem, operand1:string, operator:ModelEdgeType, operand2:string) =
+    and ApiResetInfo private (system:DsSystem, operand1:string, operator:ModelingEdgeType, operand2:string) =
         member val Operand1 = operand1  // "+"
         member val Operand2 = operand2  // "-"
         member val Operator = operator  // "<||>"
@@ -226,7 +226,7 @@ type CoreExt =
                         let tgt = flow.Graph.Vertices.Find(fun f->f.Name = target)
                         let modelingEdgeInfo = ModelingEdgeInfo(src, edgetext, tgt)
                         flow.ModelingEdges.Add(modelingEdgeInfo) |> verifyM $"Duplicated edge [{src.Name}{edgetext}{tgt.Name}]"
-    [<Extension>] static member AddModelEdge(flow:Flow, source:Vertex, modelEdgeType:ModelEdgeType, target:Vertex) =
+    [<Extension>] static member AddModelEdge(flow:Flow, source:Vertex, modelEdgeType:ModelingEdgeType, target:Vertex) =
                         let modelingEdgeInfo = ModelingEdgeInfo(source, modelEdgeType.ToText(), target)
                         flow.ModelingEdges.Add(modelingEdgeInfo) |> verifyM $"Duplicated edge [{source.Name}{modelEdgeType.ToText()}{target.Name}]"
     [<Extension>]

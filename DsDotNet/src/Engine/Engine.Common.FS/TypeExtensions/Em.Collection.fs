@@ -1,5 +1,6 @@
 namespace Engine.Common.FS
 
+open System
 open System.Linq
 open System.Collections.Generic
 open System.Runtime.CompilerServices
@@ -31,6 +32,7 @@ type SeqExt =
     //[<Extension>] static member Any(xs:'a seq) = not <| Seq.isEmpty xs   //System.Collections.Generic 혼동
     [<Extension>] static member GetLength(xs:'a seq) = Seq.length xs
     [<Extension>] static member IsEmpty(xs:'a seq) = Seq.isEmpty xs
+    [<Extension>] static member IsOneOf(x:'x, [<ParamArray>] (xs:'x array)) = xs |> Seq.contains x
     [<Extension>] static member GroupByToDictionary<'V, 'K when 'K: equality>(xs:'V seq, keySelector:'V->'K) = groupByToDictionary xs keySelector
 
     [<Extension>] static member Collect(xs:'a seq, f)    = Seq.collect f xs

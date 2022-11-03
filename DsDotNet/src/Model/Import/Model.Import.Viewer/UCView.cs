@@ -96,10 +96,10 @@ namespace Dual.Model.Import
         private void DrawButtons(Flow flow, DsSystem sys)
         {
             var btnGroups = new DsViewNode("Buttons", true, BtnType.AutoBTN);
-            sys.AutoButtons.Where(w => w.Value.Contains(flow)).ForEach(f => btnGroups.Singles.Add(new DsViewNode(f.Key, false, BtnType.AutoBTN)));
+            sys.AutoButtons     .Where(w => w.Value.Contains(flow)).ForEach(f => btnGroups.Singles.Add(new DsViewNode(f.Key, false, BtnType.AutoBTN)));
             sys.EmergencyButtons.Where(w => w.Value.Contains(flow)).ForEach(f => btnGroups.Singles.Add(new DsViewNode(f.Key, false, BtnType.EmergencyBTN)));
-            sys.ResetButtons.Where(w => w.Value.Contains(flow)).ForEach(f => btnGroups.Singles.Add(new DsViewNode(f.Key, false, BtnType.ResetBTN)));
-            sys.StartButtons.Where(w => w.Value.Contains(flow)).ForEach(f => btnGroups.Singles.Add(new DsViewNode(f.Key, false, BtnType.StartBTN)));
+            sys.ResetButtons    .Where(w => w.Value.Contains(flow)).ForEach(f => btnGroups.Singles.Add(new DsViewNode(f.Key, false, BtnType.ResetBTN)));
+            sys.StartButtons    .Where(w => w.Value.Contains(flow)).ForEach(f => btnGroups.Singles.Add(new DsViewNode(f.Key, false, BtnType.StartBTN)));
             if(btnGroups.Singles.Count > 0)
                 DrawSeg(viewer.Graph.RootSubgraph, btnGroups);
         }
@@ -188,26 +188,26 @@ namespace Dual.Model.Import
             gEdge.Attr.Color = Color.White;
 
             var et = edge.Causal;
-            if (et == ModelEdgeType.StartEdge)
+            if (et == ModelingEdgeType.StartEdge)
             {
                 gEdge.Attr.AddStyle(Style.Solid);
                 gEdge.Attr.Color = Color.DeepSkyBlue;
                 gEdge.Attr.LineWidth = 2;
             }
-            else if (et == ModelEdgeType.StartPush)
+            else if (et == ModelingEdgeType.StartPush)
             {
                 gEdge.Attr.AddStyle(Style.Solid);
                 gEdge.Attr.LineWidth = 4;
                 gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
                 gEdge.Attr.Color = Color.DeepSkyBlue;
             }
-            else if (et == ModelEdgeType.ResetEdge)
+            else if (et == ModelingEdgeType.ResetEdge)
             {
                 gEdge.Attr.AddStyle(Style.Dashed);
                 gEdge.Attr.Color = Color.Green;
                 gEdge.Attr.LineWidth = 2;
             }
-            else if (et == ModelEdgeType.ResetPush)
+            else if (et == ModelingEdgeType.ResetPush)
             {
                 gEdge.Attr.AddStyle(Style.Dashed);
                 gEdge.Attr.LineWidth = 4;
@@ -215,14 +215,14 @@ namespace Dual.Model.Import
                 gEdge.Attr.Color = Color.Green;
             }
 
-            else if (edge.Causal == ModelEdgeType.Interlock)
+            else if (edge.Causal == ModelingEdgeType.Interlock)
             {
                 gEdge.Attr.AddStyle(Style.Dashed);
                 gEdge.Attr.ArrowheadAtSource = ArrowStyle.Normal;
                 gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
                 gEdge.Attr.Color = Color.PaleGoldenrod;
             }
-            else if (edge.Causal == ModelEdgeType.StartReset)
+            else if (edge.Causal == ModelingEdgeType.StartReset)
             {
                 gEdge.Attr.AddStyle(Style.Solid);
                 gEdge.Attr.ArrowheadAtSource = ArrowStyle.Tee;

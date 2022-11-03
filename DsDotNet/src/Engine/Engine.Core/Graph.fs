@@ -13,42 +13,14 @@ module GraphModule =
         inherit IVertex
         inherit INamed
 
-    [<Flags>]
-    type EdgeType =
-    // runtime edge 
-    | Default                    = 0b00000000    // Start, Weak
-    | Reset                      = 0b00000001    // else start
-    | Strong                     = 0b00000010    // else weak
-    | AugmentedTransitiveClosure = 0b00000100    // 강한 상호 reset 관계 확장 edge
-
-
-    // runtime edge 는 Reversed / Bindrectional 을 포함하지 않는다.
-    | Reversed                   = 0b00001000    // direction reversed : <, <|, <||, etc
-    | Bidirectional              = 0b00010000    // 양방향.  <||>, =>, ...
-
-    | EditorInterlock            = 0b00100000    // 강한 상호 reset 저장 확장 edge
-    | EditorStartReset           = 0b01000000    // 약 시작 약 리셋 저장 확장 edge
-    | EditorSpare                = 0b10000000    // 추후 사용예약l          
-
     type IEdge<'V> =
         abstract Source :'V    //방향을 고려안한 위치상 왼쪽   Vertex
         abstract Target :'V    //방향을 고려안한 위치상 오른쪽 Vertex
         abstract EdgeType  :EdgeType
 
-    
+
     [<AbstractClass>]
     type EdgeBase<'V>(source:'V, target:'V, edgeType:EdgeType) =
-        do
-            let et = edgeType
-            if et.HasFlag(EdgeType.Bidirectional) then
-                failwithlogf "Runtime edge does not allow Reversed flag."
-            if et.HasFlag(EdgeType.Reversed) then
-                failwithlogf "Runtime edge does not allow Bidirectional flag."
-            if et.HasFlag(EdgeType.EditorInterlock) 
-                || et.HasFlag(EdgeType.EditorStartReset)
-                || et.HasFlag(EdgeType.EditorSpare) then
-                failwithlogf "Runtime edge does not allow Editor flag."
-
         interface IEdge<'V> with
             member x.Source = x.Source
             member x.Target = x.Target
@@ -57,9 +29,6 @@ module GraphModule =
         member _.Source = source
         member _.Target = target
         member _.EdgeType = edgeType
-
-    //type ICoin =
-    //    inherit IChildVertex
 
     type Graph<'V, 'E
             when 'V :> INamed and 'V : equality
@@ -244,37 +213,3 @@ type GraphHelper =
     [<Extension>] static member GetVertices(edge:IEdge<'V>) = [edge.Source; edge.Target]
     [<Extension>] static member Validate(graph:Graph<'V, 'E>) = validateGraph graph
 
-    [<Extension>]
-    static member ToText(edgeType:EdgeType) =
-        let t = edgeType
-        if t = EdgeType.EditorInterlock then  "<||>"  //EditorInterlock Text 출력우선
-        elif t = EdgeType.EditorStartReset then  "=>" //EditorStartReset Reversed 없음
-        else  
-            if t.HasFlag(EdgeType.Reset) then
-                if t.HasFlag(EdgeType.Strong) then
-                    if t.HasFlag(EdgeType.Bidirectional) then
-                        "<||>"
-                    elif t.HasFlag(EdgeType.Reversed) then
-                        "<||"
-                    else
-                        "||>"
-                else
-                    if t.HasFlag(EdgeType.Bidirectional) then
-                        "<|>"
-                    elif t.HasFlag(EdgeType.Reversed) then
-                        "<|"
-                    else
-                        "|>"
-            else
-                if t.HasFlag(EdgeType.Bidirectional) then
-                    failwith "Bidirectional 은 Strong, Reset와 같이 사용가능합니다. ERROR"
-                if t.HasFlag(EdgeType.Strong) then
-                    if t.HasFlag(EdgeType.Reversed) then
-                        "<<"
-                    else
-                        ">>"
-                else
-                    if t.HasFlag(EdgeType.Reversed) then
-                        "<"
-                    else
-                        ">"

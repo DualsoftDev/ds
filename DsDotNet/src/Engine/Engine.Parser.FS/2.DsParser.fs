@@ -18,7 +18,8 @@ open type Engine.Parser.dsParser
 
 
 type DsParser() =
-    static member ParseText (text:string, extractor:dsParser->#RuleContext, [<Optional; DefaultParameterValue(true)>]throwOnError) =
+    static member ParseText (text:string, extractor:dsParser->#RuleContext, ?throwOnError) =
+        let throwOnError = defaultArg throwOnError true
         let str = new AntlrInputStream(text)
         let lexer = new dsLexer(str)
         let tokens = new CommonTokenStream(lexer)
@@ -181,59 +182,40 @@ type DsParser() =
 
 
     static member collectNameComponents(from:IParseTree):string[] = // :Fqdn
-        let rec splitName(name:string) = // : Fqdn
-            [
-                let sub = new ResizeArray<char>()
-                let mutable prev = ' '
-                let pop =
-                    let mutable i = 0
-                    fun () ->
-                        if i < name.Length then
-                            let c = name.[i]
-                            i <- i + 1
-                            Some c
-                        else
-                            None
 
-                let mutable ch = pop()
-                //let mutable quit = false
-                let mutable q = false
-                while ch.IsSome do
+        (*
+            name 을 구성하는 char list 를 왼쪽에서부터 folding 하면서
+            - name component (하나의 token)가 구성되면 allResult 에 하나씩 추가한다.
+            - backslash 나 backslash 바로 뒤 문자, quote 안의 문자는 계속 token 에 추가.
+        *)
+        let splitName(name:string) = // : Fqdn
+            let mutable isInQuote = false
+            let mutable prev = ' '
+            let allResults = new ResizeArray<string>()
+
+            let folder (token:char list) (ch:char) =
+                try
                     match ch with
-                    | Some ch ->
-                        sub.Add(ch)
-                        match ch with
+                    | '\\'
+                    | '.' when isInQuote  -> ch::token
+                    | _ when prev = '\\' -> ch::token
+                    | '"' ->
+                        isInQuote <- not isInQuote
+                        token
+                    | '.' ->
+                        allResults.Add(token.Reverse().ToArray() |> String)
+                        []
+                    | _ ->
+                        ch::token
+                finally
+                    prev <- ch
 
-                        | '\\' ->
-                            let next = pop() |> Option.get
-                            sub.Add(next)
-                            prev <- next
 
-                        | '.' when q->
-                            ()  //break
+            let last = name.FoldLeft(folder, []).Reverse().ToArray() |> String
+            assert(last <> "")
+            allResults.Add(last)
+            allResults
 
-                        | '.' ->
-                            sub.RemoveTail() |> ignore
-                            yield String(sub.ToArray())
-                            sub.Clear()
-
-                        | '"' when prev <> '\\' ->
-                            sub.RemoveTail() |> ignore
-                            if q then
-                                yield String(sub.ToArray())
-                                sub.Clear()
-                            else
-                                q <- true
-
-                        | _ ->
-                            ()
-                    | None ->
-                        q <- true
-                    ch <- pop()
-
-                if sub.Any() then
-                    yield String(sub.ToArray())
-            ]
 
         let idCtx =
             let pred = fun (tree:IParseTree) ->

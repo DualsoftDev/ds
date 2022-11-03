@@ -9,7 +9,9 @@ open System.Collections.Generic
 /// Active pattern for Functional F# list
 let (|FList|) xs = List.ofSeq xs
 let (|Array|) xs = Array.ofSeq xs
+let (|ResizeArray|) (xs:'x seq) = xs |> System.Collections.Generic.List<'x>
 let (|Hash|) (xs:'X seq) = xs |> HashSet
+
 
 /// Sequence 의 Head, Tail pair 반환
 let (|HeadAndTail|_|) (FList(xs)) =

@@ -56,9 +56,16 @@ module DsText =
             assert(c RET.Reset   = c MET.Reset)
             assert(c RET.Strong  = c MET.Strong)
 
+
+    type ModelingEdgeInfo<'v>(source:'v, edgeSymbol:string, target:'v) =
+        member val Source = source
+        member val Target = target
+        member val EdgeSymbol = edgeSymbol
+
     /// source 와 target 을 edge operator 에 따라서 확장 생성
-    let expandModelingEdge (source:'v) (edgeSymbol:string) (target:'v) : ('v * EdgeType * 'v) list =
-        let s, t = source, target
+    let expandModelingEdge (modeingEdgeInfo:ModelingEdgeInfo<'v>) : ('v * EdgeType * 'v) list =
+        let mi = modeingEdgeInfo
+        let s, edgeSymbol, t = mi.Source, mi.EdgeSymbol, mi.Target
         match edgeSymbol with
         | (* ">"    *) TextStartEdge     -> [s, RET.Start, t]
         | (* ">>"   *) TextStartPush     -> [s, RET.Start ||| RET.Strong, t]
@@ -75,7 +82,7 @@ module DsText =
         | (* "<="   *) TextStartResetRev -> [(t, RET.Start, s); (s, RET.Reset, t); ]
 
         | _
-            -> failwithf "Unknown edge symbol: %s" edgeSymbol
+            -> failwithf "Unknown causal edge type: %s" edgeSymbol
 
 
 [<Extension>]

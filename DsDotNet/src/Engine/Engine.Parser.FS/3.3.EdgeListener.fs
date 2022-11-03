@@ -96,9 +96,9 @@ type EdgeListener(parser:dsParser, helper:ParserHelper) =
                         | Some l, Some r ->
                             match x._parenting with
                             | Some parent ->
-                                parent.CreateEdges(l, r, op)
+                                parent.CreateEdges(ModelingEdgeInfo(l, op, r))
                             | None ->
-                                x._flow.Value.CreateEdges(l, r, op)
+                                x._flow.Value.CreateEdges(ModelingEdgeInfo(l, op, r))
                             |> ignore
                         | None, _ ->
                             raise <| ParserException($"ERROR: failed to find [{left.GetText()}]", ctx)

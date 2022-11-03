@@ -111,24 +111,27 @@ module DsText =
 
 [<Extension>]
 type ModelingEdgeExt =
-    [<Extension>] static member IsStart(edgeType:MET) = edgeType.HasFlag(MET.Reset)|> not
-    [<Extension>] static member IsReset(edgeType:MET) = edgeType.HasFlag(MET.Reset)
+    [<Extension>] static member IsStart(edgeType:ModelingEdgeType) = edgeType.HasFlag(MET.Reset)|> not
+    [<Extension>] static member IsReset(edgeType:ModelingEdgeType) = edgeType.HasFlag(MET.Reset)
     [<Extension>]
-    static member ToRuntimeEdge(edgeType:MET) =
-        match edgeType with
-        | MET.Default -> RET.Default
-        | MET.Reset   -> RET.Reset
-        | MET.Strong  -> RET.Strong
-        | _ -> failwith "invalid edge type"
+    static member ToRuntimeEdge(edgeType:ModelingEdgeType) =
+        let et = edgeType
+        if et = MET.Default then RET.Default
+        elif et = MET.Reset then RET.Reset
+        elif et = (MET.Default ||| MET.Strong) then (RET.Default ||| RET.Strong)
+        elif et = (MET.Reset ||| MET.Strong) then (RET.Reset ||| RET.Strong)
+        else
+            failwith "invalid edge type"
 
     [<Extension>]
     static member ToModelingEdge(edgeType:EdgeType) =
-        match edgeType with
-        | RET.Default -> MET.Default
-        | RET.Reset   -> MET.Reset
-        | RET.Strong  -> MET.Strong
-        | (RET.AugmentedTransitiveClosure | _) -> failwith "invalid edge type"
-
+        let et = edgeType
+        if et = RET.Default then MET.Default
+        elif et = RET.Reset then MET.Reset
+        elif et = (RET.Default ||| RET.Strong) then (MET.Default ||| MET.Strong)
+        elif et = (RET.Reset ||| RET.Strong) then (MET.Reset ||| MET.Strong)
+        else
+            failwith "invalid edge type"
 
     [<Extension>]
     static member ToText(edgeType:EdgeType) =

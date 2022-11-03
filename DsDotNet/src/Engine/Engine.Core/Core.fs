@@ -53,6 +53,7 @@ module CoreModule =
     and Flow private (name:string, system:DsSystem) =
         inherit FqdnObject(name, system)
         member val Graph = Graph<Vertex, Edge>()
+        member val ModelingEdges = HashSet<Vertex*string*Vertex>()
         member val AliasMap = Dictionary<Fqdn, HashSet<string>>(nameComponentsComparer())
         member x.System = system
         static member Create(name:string, system:DsSystem) =
@@ -75,6 +76,7 @@ module CoreModule =
         Real private (name:string, flow:Flow) =
         inherit Vertex(name, Flow flow)
         member val Graph = Graph<Vertex, Edge>()
+        member val ModelingEdges = HashSet<Vertex*string*Vertex>()
         member val Flow = flow
 
         member val SafetyConditions = createQualifiedNamedHashSet<Real>()

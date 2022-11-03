@@ -40,7 +40,7 @@ module DsText =
         //| AugmentedTransitiveClosure = 0b00000100    // 강한 상호 reset 관계 확장 edge
 
         // runtime edge 는 Reversed / Bindrectional 을 포함하지 않는다.
-        | Reversed                   = 0b00001000    // direction reversed : <, <|, <||, etc
+        //| Reversed                   = 0b00001000    // direction reversed : <, <|, <||, etc
         | Bidirectional              = 0b00010000    // 양방향.  <||>, =>, ...
 
         | EditorInterlock            = 0b00100000    // 강한 상호 reset 저장 확장 edge
@@ -59,20 +59,60 @@ module DsText =
             assert(c RET.Reset   = c MET.Reset)
             assert(c RET.Strong  = c MET.Strong)
 
-    let parseEdgeType (edgeSymbol:string):ModelingEdgeType option =
+    /// source 와 target 을 edge operator 에 따라서 확장 생성
+    let expandModelingEdge (source:'v) (edgeSymbol:string) (target:'v) : ('v * EdgeType * 'v) list =
+        let s, t = source, target
         match edgeSymbol with
-        | TextStartEdge -> Some (MET.Default)
-        | TextStartPush -> Some (MET.Default ||| MET.Strong)
-        | TextResetEdge -> Some (MET.Reset)
-        | TextResetPush -> Some (MET.Reset ||| MET.Strong)
-        | _ -> None
+        | (* ">"    *) TextStartEdge     -> [s, RET.Default, t]
+        | (* ">>"   *) TextStartPush     -> [s, RET.Default ||| RET.Strong, t]
+        | (* "|>"   *) TextResetEdge     -> [s, RET.Reset, t]
+        | (* "||>"  *) TextResetPush     -> [s, RET.Reset ||| RET.Strong, t]
+
+        | (* "=>"   *) TextStartReset    -> [(s, RET.Default, t); (t, RET.Reset, s)]
+        | (* "<|>"  *) TextInterlockWeak -> [(s, RET.Reset, t); (t, RET.Reset, s)]
+        | (* "<||>" *) TextInterlock     -> [(s, RET.Reset ||| RET.Strong, t); (t, RET.Reset ||| RET.Strong, s)]
+        | (* "<"    *) TextStartEdgeRev  -> [t, RET.Default, s]
+        | (* "<<"   *) TextStartPushRev  -> [t, RET.Default ||| RET.Strong, s]
+        | (* "<|"   *) TextResetEdgeRev  -> [t, RET.Reset, s]
+        | (* "<||"  *) TextResetPushRev  -> [t, RET.Reset ||| RET.Strong, s]
+        | (* "<="   *) TextStartResetRev -> [(t, RET.Default, s); (s, RET.Reset, t); ]
+
+        | _
+            -> failwithf "Unknown edge symbol: %s" edgeSymbol
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 [<Extension>]
 type ModelingEdgeExt =
     [<Extension>] static member IsStart(edgeType:MET) = edgeType.HasFlag(MET.Reset)|> not
     [<Extension>] static member IsReset(edgeType:MET) = edgeType.HasFlag(MET.Reset)
-    [<Extension>] static member ParseEdgeType(causal:string) = parseEdgeType causal
     [<Extension>]
     static member ToRuntimeEdge(edgeType:MET) =
         match edgeType with
@@ -109,30 +149,20 @@ type ModelingEdgeExt =
                 if t.HasFlag(MET.Strong) then
                     if t.HasFlag(MET.Bidirectional) then
                         "<||>"
-                    elif t.HasFlag(MET.Reversed) then
-                        "<||"
                     else
                         "||>"
                 else
                     if t.HasFlag(MET.Bidirectional) then
                         "<|>"
-                    elif t.HasFlag(MET.Reversed) then
-                        "<|"
                     else
                         "|>"
             else
                 if t.HasFlag(MET.Bidirectional) then
                     failwith "Bidirectional 은 Strong, Reset와 같이 사용가능합니다. ERROR"
                 if t.HasFlag(MET.Strong) then
-                    if t.HasFlag(MET.Reversed) then
-                        "<<"
-                    else
-                        ">>"
+                    ">>"
                 else
-                    if t.HasFlag(MET.Reversed) then
-                        "<"
-                    else
-                        ">"
+                    ">"
 
 [<AutoOpen>]
 module DsTextDataType =

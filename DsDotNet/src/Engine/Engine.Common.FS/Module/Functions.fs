@@ -50,6 +50,8 @@ module Functions =
     /// Returns function which get predecessor
     let predecessor = fun x -> x - 1
 
+    /// Append x at the end of xs list: [1..3] ++ 4 = [1..4]
+    let (++) xs x = xs @ [x]
 
     /// Y-combinator, or Sage bird
     let rec Y f x = f (Y f) x
@@ -107,7 +109,7 @@ module Functions =
     let forceCast<'a> x = x :> obj :?> 'a
 
     /// 두 object 를 최상위 type 인 obj 로 casting 한 후, 동일한지 비교
-    let eq a b = (a :> obj) = (b :> obj) 
+    let eq a b = (a :> obj) = (b :> obj)
 
 
 

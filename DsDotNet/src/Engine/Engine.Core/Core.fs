@@ -2,6 +2,7 @@
 namespace Engine.Core
 
 open System.Collections.Generic
+open System.Linq
 open System.Runtime.CompilerServices
 open System.Diagnostics
 open Engine.Common.FS
@@ -105,7 +106,7 @@ module CoreModule =
 
         static let addAlias(flow:Flow, target:Fqdn, alias:string) =
             if   flow.AliasMap.ContainsKey target
-            then flow.AliasMap.[target].Add(alias) |>ignore
+            then flow.AliasMap.[target].Add(alias) |> verifyM $"Duplicated alias name in AliasMap [{alias}]"
             else flow.AliasMap.Add(target, HashSet[|alias|]) |>ignore
 
         member x.Target = target
@@ -122,10 +123,10 @@ module CoreModule =
                 graph.AddVertex(alias) |> verifyM $"Duplicated child name [{mnemonic}]"
                 if skipAddFlowMap|>not
                 then match target with
-                     | RealTarget r -> addAlias(r.Flow, [|r.Name|], mnemonic)
+                     | RealTarget r -> addAlias(r.Flow, r.NameComponents.Skip(2).ToArray(), mnemonic)
                      | CallTarget c -> match c.Parent with
-                                       |Real rParent -> addAlias(rParent.Flow, [|c.Name|], mnemonic)
-                                       |Flow fParent -> addAlias(fParent, [|c.Name|], mnemonic)
+                                       |Real rParent -> addAlias(rParent.Flow, c.NameComponents.Skip(3).ToArray(), mnemonic)
+                                       |Flow fParent -> addAlias(fParent, c.NameComponents.Skip(2).ToArray(), mnemonic)
                 alias
 
             let existing = tryFindAlias graph mnemonic
@@ -180,10 +181,10 @@ module CoreModule =
         member val Operand1 = operand1  // "+"
         member val Operand2 = operand2  // "-"
         member val Operator = operator  // "<||>"
-        member x.Text = sprintf "%s %s %s" operand1 (operator.ToText()) operand2  //"+" <||> "-"
+        member x.ToDsText() = sprintf "%s %s %s" operand1 (operator.ToText()) operand2  //"+" <||> "-"
         static member Create(system, operand1, operator, operand2) =
             let ri = ApiResetInfo(system, operand1, operator, operand2)
-            system.ApiResetInfos.Add(ri) |> verifyM $"Duplicated interface ResetInfo [{ri.Text}]"
+            system.ApiResetInfos.Add(ri) |> verifyM $"Duplicated interface ResetInfo [{ri.ToDsText()}]"
             ri
 
 

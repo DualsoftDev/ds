@@ -163,7 +163,7 @@ module internal ToDsTextModule =
                     yield $"{tab2}{item.Name.QuoteOnDemand()} = {lb} {ser} {rb}"
 
                 for ri in system.ApiResetInfos do
-                    yield $"{tab2}{ri.Operand1} {ri.Operator} {ri.Operand2};"
+                    yield $"{tab2}{ri.ToDsText()};"
 
                 yield $"{tab}{rb}"
 

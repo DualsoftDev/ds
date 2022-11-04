@@ -5,6 +5,7 @@
 
 		<IsPackable>false</IsPackable>
 		<GenerateProgramFile>false</GenerateProgramFile>
+		<RunSettingsFilePath>F:\Git\ds\DsDotNet\src\UnitTest\UnitTest.Engine\bin\Debug\net6.0\fine-code-coverage\coverage-tool-output\UnitTest.Engine-fcc-mscodecoverage-generated.runsettings</RunSettingsFilePath>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

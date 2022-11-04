@@ -16,12 +16,11 @@ open Engine.Common.FS
 open Engine.Parser
 open type Engine.Parser.dsParser
 
-
 type DsParser() =
     static member ParseText (text:string, extractor:dsParser->#RuleContext, ?throwOnError) =
         let throwOnError = defaultArg throwOnError true
-        let str = new AntlrInputStream(text)
-        let lexer = new dsLexer(str)
+        let inputStream = new AntlrInputStream(text)
+        let lexer = new dsLexer(inputStream)
         let tokens = new CommonTokenStream(lexer)
         let parser = new dsParser(tokens)
 

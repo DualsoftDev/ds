@@ -8,6 +8,7 @@ open Engine.Core
 open Engine.Common.FS
 open FsUnit.Xunit
 open Engine.Common
+open System.Linq
 
 // FsUnit/XUnit 사용법:
 // https://github.com/fsprojects/FsUnit/tree/master/tests/FsUnit.Xunit.Test
@@ -96,3 +97,6 @@ module Base =
             ()  // OK
         | _ as err ->
             failwith $"Exception messsage match failed on {err}.  expected = {substring}"
+    let SeqEq(a, b) = Enumerable.SequenceEqual(a, b) |> ShouldBeTrue
+    let SetEq(xs:'a seq, ys:'a seq) =
+        (xs.Count() = ys.Count() && xs |> Seq.forall(fun x -> ys.Contains(x)) ) |> ShouldBeTrue

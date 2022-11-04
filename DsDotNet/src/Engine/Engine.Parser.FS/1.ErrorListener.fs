@@ -23,14 +23,15 @@ type ErrorListener<'Symbol>([<Optional; DefaultParameterValue(false)>]throwOnErr
             col:int, msg:string, e:RecognitionException) =
         let dsFile = recognizer.GrammarFileName
         match recognizer with
-        | :? dsParser as parser ->
+        //| :? dsParser as parser ->
+        | :? Parser as parser ->
             let ambient = parser.RuleContext.GetText()
             base.SyntaxError(output, recognizer, offendingSymbol, line, col, msg, e)
             logError($"Parser error on [{line}:{col}]@{dsFile}: {msg}")
             x.Errors.Add(new ParserError(line, col, msg, ambient))
             if throwOnError then
                 ParserException($"{msg} near {ambient}", line, col) |> raise
-        | :? dsLexer as lexer ->
+        | :? Lexer as lexer ->
             logError($"Lexer error on [{line}:{col}]@{dsFile}: {msg}")
             x.Errors.Add(new ParserError(line, col, msg, ""))
             if throwOnError then

@@ -27,6 +27,7 @@
 			<Visitor>true</Visitor>
 			<Package>Engine.Parser</Package>
 		</Antlr4>
+		<Antlr4 Include="..\..\..\..\Grammar\g4s\fqdn.g4" Link="g4s\fqdn.g4" />
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Antlr4.Runtime.Standard" Version="4.9.3" />

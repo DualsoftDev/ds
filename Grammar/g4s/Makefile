@@ -8,6 +8,7 @@ grun:
 	@java -version
 	@$(antlr4) dsLexer.g4
 	@$(antlr4) dsParser.g4
+	@$(antlr4) fqdn.g4
 	@javac *.java
 	@echo 'echo "A || B, #g(X), C > D, E || F;" | grun ds causals -gui'
 
@@ -42,6 +43,9 @@ test:
 
 	@echo strong
 	$(grun) ds model < g4test/strong.ds
+
+	@echo fqdn
+	$(grun) fqdn fqdns < g4test/fqdn.fqdn
 
 	@echo "---------- with errors"
 

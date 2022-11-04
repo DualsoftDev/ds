@@ -25,7 +25,7 @@ type EdgeListener(parser:dsParser, helper:ParserHelper) =
         let modelSpitCores = x._modelSpits.Select(fun spit -> spit.GetCore()).ToArray()
         for ac in x.ParserHelper.AliasCreators do
             let (name, parent, target) = (ac.Name, ac.Parent, ac.Target)
-            let graph = parent.Graph
+            let graph = parent.GetGraph()
             let existing = graph.TryFindVertex(name)
             if existing.IsNone then
                 let create target = Alias.Create(name, target, parent, true) |> ignore

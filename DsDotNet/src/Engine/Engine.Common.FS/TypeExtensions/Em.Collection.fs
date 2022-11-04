@@ -40,6 +40,7 @@ type SeqExt =
     [<Extension>] static member Map(xs:'a seq, f)        = Seq.map f xs
     [<Extension>] static member Filter(xs:'a seq, f)     = Seq.filter f xs
     [<Extension>] static member Find(xs:'a seq, f)       = Seq.find f xs
+    [<Extension>] static member Indexed(xs:'a seq)       = Seq.indexed xs
     [<Extension>] static member Reduce(xs:'a seq, f)     = Seq.reduce f xs
 
     (*  List.fold (+) 0 [1; 2; 3] = ((0 + 1) + 2) + 3

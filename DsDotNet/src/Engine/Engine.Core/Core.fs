@@ -1,5 +1,5 @@
 // Copyright (c) Dual Inc.  All Rights Reserved.
-namespace Engine.Core
+namespace rec Engine.Core
 
 open System.Collections.Generic
 open System.Linq
@@ -53,7 +53,7 @@ module CoreModule =
 
     and Flow private (name:string, system:DsSystem) =
         inherit FqdnObject(name, system)
-        member val Graph = Graph<Vertex, Edge>()
+        member val Graph = DsGraph()
         member val ModelingEdges = HashSet<ModelingEdgeInfo<Vertex>>()
         member val AliasMap = Dictionary<Fqdn, HashSet<string>>(nameComponentsComparer())
 
@@ -69,7 +69,7 @@ module CoreModule =
     /// leaf or stem(parenting)
     and [<AbstractClass>]
         Vertex (name:string, parent:ParentWrapper) =
-        inherit FqdnObject(name, parent.Core)
+        inherit FqdnObject(name, parent.GetCore())
         interface INamedVertex
         member _.Parent = parent
 
@@ -77,7 +77,7 @@ module CoreModule =
     and [<DebuggerDisplay("{QualifiedName}")>]
         Real private (name:string, flow:Flow) =
         inherit Vertex(name, Flow flow)
-        member val Graph = Graph<Vertex, Edge>()
+        member val Graph = DsGraph()
         member val ModelingEdges = HashSet<ModelingEdgeInfo<Vertex>>()
         member val Flow = flow
 
@@ -97,7 +97,7 @@ module CoreModule =
     and Alias private (mnemonic:string, target:AliasTargetType, parent:ParentWrapper) =
         inherit Vertex(mnemonic, parent)
 
-        static let tryFindAlias (graph:Graph<Vertex, Edge>) (mnemonic:string) =
+        static let tryFindAlias (graph:DsGraph) (mnemonic:string) =
             let existing = graph.TryFindVertex(mnemonic)
             match existing with
             | Some (:? Alias as a) -> Some a
@@ -117,7 +117,7 @@ module CoreModule =
             | CallTarget c -> base.GetRelativeName(referencePath)
 
         static member Create(mnemonic, target:AliasTargetType, parent:ParentWrapper, skipAddFlowMap:bool) =
-            let graph = parent.Graph
+            let graph:DsGraph = parent.GetGraph()
             let creator() =
                 let alias = Alias(mnemonic, target, parent)
                 graph.AddVertex(alias) |> verifyM $"Duplicated child name [{mnemonic}]"
@@ -139,7 +139,7 @@ module CoreModule =
     /// 외부 시스템 호출 객체
     and Call private (apiItem:ApiItem, parent:ParentWrapper) =
         inherit Vertex(apiItem.QualifiedName, parent)
-        static let create (graph:Graph<Vertex, Edge>) (apiItem:ApiItem) (parent:ParentWrapper) =
+        static let create (graph:DsGraph) (apiItem:ApiItem) (parent:ParentWrapper) =
             let existing = graph.TryFindVertex(apiItem.QualifiedName)
             match existing with
             | Some (:? Call as v) -> v
@@ -192,19 +192,8 @@ module CoreModule =
     and ParentWrapper =
         | Flow of Flow //Real/Call/Alias 의 부모
         | Real of Real //Call/Alias      의 부모
-        member x.Core =
-            match x with
-            | Flow f -> f :> FqdnObject
-            | Real r -> r
-        member x.System =
-            match x with
-            | Flow f -> f.System
-            | Real r -> r.Flow.System
-        member x.Graph:Graph<Vertex, Edge> =
-            match x with
-            | Flow f -> f.Graph
-            | Real r -> r.Graph
 
+    and DsGraph = Graph<Vertex, Edge>
 
     and ButtonDic = Dictionary<string, HashSet<Flow>>
 
@@ -220,7 +209,7 @@ module CoreModule =
 
 [<Extension>]
 type CoreExt =
-    [<Extension>] static member GetSystem(call:Call) = call.Parent.System
+    [<Extension>] static member GetSystem(call:Call) = call.Parent.GetSystem()
     [<Extension>] static member AddModelEdge(flow:Flow, source:string, edgetext:string, target:string) =
                         let src = flow.Graph.Vertices.Find(fun f->f.Name = source)
                         let tgt = flow.Graph.Vertices.Find(fun f->f.Name = target)
@@ -242,3 +231,24 @@ type CoreExt =
             dicButton.[btnName].Add(flow) |> verifyM $"Duplicated flow [{flow.Name}]"
         else
             dicButton.Add(btnName, HashSet[|flow|] )
+
+    [<Extension>]
+    static member GetCore(wrapper:ParentWrapper) =
+        match wrapper with
+        | Flow f -> f :> FqdnObject
+        | Real r -> r
+    [<Extension>]
+    static member GetSystem(wrapper:ParentWrapper) =
+        match wrapper with
+        | Flow f -> f.System
+        | Real r -> r.Flow.System
+    [<Extension>]
+    static member GetGraph(wrapper:ParentWrapper) =
+        match wrapper with
+        | Flow f -> f.Graph
+        | Real r -> r.Graph
+    [<Extension>]
+    static member GetModelingEdges(wrapper:ParentWrapper) =
+        match wrapper with
+        | Flow f -> f.ModelingEdges
+        | Real r -> r.ModelingEdges

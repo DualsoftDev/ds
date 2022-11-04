@@ -3,9 +3,6 @@ namespace Engine.Core
 open System.Runtime.CompilerServices
 open System.Linq
 open Engine.Common.FS
-open System.Collections.Generic
-open GraphModule
-open SpitModuleHelper
 
 [<AutoOpen>]
 module internal ToDsTextModule =
@@ -13,135 +10,67 @@ module internal ToDsTextModule =
     let lb, rb = "{", "}"
     let combineLines = ofNotNullAny >> joinLines
 
-    /// Edge 를 최대한 한줄로 세운 것을 우선으로 출력하고, 나머지 대충 출력
-    let edgesToDs<'V when 'V :> FqdnObject and 'V : equality>
-            (basis:Fqdn) (edges:EdgeBase<'V> seq) (indent:int) =
-        let gr = Graph(Seq.empty, edges)    // 계산용 graph
-        let processed = HashSet<EdgeBase<'V>>()
-        let inits, vs = gr.Inits, gr.Vertices
 
-        /// v 에서 시작하는 chain edges 찾기
-        let rec chainFrom (results:EdgeBase<'V> list) v : EdgeBase<'V> list list =
-            [
-                let es = gr.GetOutgoingEdges(v).Where(processed.Contains >> not).ToArray()
-                let mutable res = results
-                if es.Any() then
-                    for e in es do
-                        processed.Add(e) |> ignore
-                        yield! chainFrom (e::res) e.Target
-                        res <- []
-                else
-                    yield res |> List.rev
-            ]
+    type private MEI = ModelingEdgeInfo<Vertex>
+    let private modelingEdgeInfosToDs (es:MEI seq) (basis:Fqdn) (tab:string) =
 
-        /// 주어진 edge 로 임시 생성한 graph 의 init 에서부터 chain 을 구해서 출력
-        let tab = getTab indent
+        (* rss : Result edge Set of Set *)
+        let folder (rss:ResizeArray<MEI> list) (e:MEI) : ResizeArray<MEI> list =
+            if rss.IsEmpty then
+                [[e] |> ResizeArray]
+            else
+                match rss.TryFind(fun rs -> rs[0].Source = e.Target) with
+                | Some rs -> rs.Insert(0, e); rss
+                | _ ->
+                    match rss.TryFind(fun rs -> rs.Last().Target = e.Source) with
+                    | Some rs -> rs.Add(e); rss
+                    | _ ->
+                        ([e] |> ResizeArray)::rss
+
+
+        let es  = es |> Seq.sortBy(fun e -> e.EdgeSymbol.Count(fun ch -> ch = '|'))
+        let ess = es |> Seq.fold folder []
+
         [
-            for i in inits do
-            for chain in chainFrom [] i do
-                (*
-                   (A -> B) -> (B -> C)
-                   => "A -> " + "B -> " + "C"
-                   => "A -> B -> C";
-                *)
-                let chained = chain.Select(fun e -> $"{e.Source.GetRelativeName(basis)} {e.EdgeType.ToText()} ").JoinWith("")
-                yield $"{tab}{chained}{chain.Last().Target.GetRelativeName(basis)};"
+            for es in ess do
+                [
+                    yield $"{tab}"
+                    for i, e in es.Indexed() do
+                        let mutable s = e.Source.GetRelativeName(basis)
+                        let t = e.Target.GetRelativeName(basis)
+                        if i <> 0 then s <- ""
+                        yield $"{s} {e.EdgeSymbol} {t}"
+                    yield ";"
+                ] |> String.concat ""
         ]
 
-    let rec graphEntitiesToDs<'V when 'V :> FqdnObject and 'V : equality>
-        (basis:Fqdn) (vertices:'V seq) (edges:EdgeBase<'V> seq) (indent:int) =
-
+    let rec graphToDs (container:ParentWrapper) (indent:int) =
         let tab = getTab indent
+        let graph = container.GetGraph()
+        let core = container.GetCore()
+        let basis = core.NameComponents
         [
-            // start 인과(reset 인과 아닌 것) 먼저 출력
-            let startEdges = edges.OfNotResetEdge().ToArray()
-            yield! edgesToDs basis startEdges indent
+            yield! modelingEdgeInfosToDs (container.GetModelingEdges()) basis tab
 
-            let startEdges = edges.OfWeakResetEdge().ToArray()
-            yield! edgesToDs basis startEdges indent
-
-            let resetEdges = edges.OfStrongResetEdge().ToArray()
-            let ess = groupDuplexEdges resetEdges
-            for KeyValue(_, es) in ess do
-                let es = es.ToArray()
-                if es.Length = 2 then
-                    assert(es[0].EdgeType.HasFlag(EdgeType.AugmentedTransitiveClosure)
-                         = es[1].EdgeType.HasFlag(EdgeType.AugmentedTransitiveClosure))
-                    assert(es[0].Source = es[1].Target && es[0].Target = es[1].Source)
-                    let commentOnAugmented =
-                        if es[0].EdgeType.HasFlag(EdgeType.AugmentedTransitiveClosure)
-                        then "//"
-                        else ""
-                    yield $"{tab}{commentOnAugmented}{es[0].Source.GetRelativeName(basis)}"
-                        + $" <||> {es[0].Target.NameComponents.GetRelativeName(basis)};"
-                else
-                    assert(es.Length = 1)
-                    yield $"{tab}{es[0].ToText()};"
-
-            let segments = vertices.OfType<Real>().ToArray()
-            for v in segments do
-                yield segmentToDs basis v indent
-
-            let islands =
-                vertices
-                    // edge 에 포함되지 않은 vertex
-                    .Except((*segments @@*) edges.Collect(fun e -> e.GetVertices()))
-                    // Real 이면서 내부 요소를 갖지 않는 vertex
-                    .Where(fun v ->
-                        match box v with
-                        | :? Real as seg -> seg.Graph.Vertices.IsEmpty()
-                        | _ -> true
-                    )
-            for island in islands do
-                yield $"{tab}{island.GetRelativeName(basis)}; // island"
-        ] |> combineLines
-
-    and modelingEdgeInfoToDs (basis:Fqdn) (mei:ModelingEdgeInfo<Vertex>) =
-        let s = mei.Source.GetRelativeName(basis)
-        let t = mei.Target.GetRelativeName(basis)
-        $"{s} {mei.EdgeSymbol} {t}"
-
-    and segmentToDs (basis:Fqdn) (segment:Real) (indent:int) =
-        let tab = getTab indent
-        [
-            if segment.ModelingEdges.any() then
-                yield $"{tab}{segment.GetRelativeName(basis)} = {lb}"
-                let basis = segment.NameComponents
-                for me in segment.ModelingEdges do
-                    yield $"{tab}{modelingEdgeInfoToDs basis me};"
+            let stems = graph.Vertices.OfType<Real>().Where(fun r -> r.Graph.Vertices.Any()).ToArray()
+            for stem in stems do
+                yield $"{tab}{stem.Name.QuoteOnDemand()} = {lb}"
+                yield! graphToDs (Real stem) (indent + 1)
                 yield $"{tab}{rb}"
 
-            let subGraph = segment.Graph
-            //if subGraph.Edges.any() then
-            //    yield $"{tab}{segment.GetRelativeName(basis)} = {lb}"
-            //    let es = subGraph.Edges.Cast<EdgeBase<Vertex>>().ToArray()
-            //    let vs = subGraph.Vertices
-            //    yield graphEntitiesToDs segment.NameComponents vs es (indent+1)
-            //    yield $"{tab}{rb}"
-            //elif subGraph.Islands.any() then
-            if subGraph.Islands.any() then
-                yield $"{tab}{segment.GetRelativeName(basis)} = {lb}"
-                for island in subGraph.Islands do
-                    yield $"{getTab (indent+1)}{island.GetRelativeName(segment.NameComponents)}; // island"
-                yield $"{tab}{rb}"
-        ] |> combineLines
-
-    let flowGraphToDs (flow:Flow) (indent:int) =
-        if flow.ModelingEdges.Any() then
-            noop()
-        let graph = flow.Graph
-        let basis = flow.NameComponents
-        let es = graph.Edges.OfType<EdgeBase<Vertex>>().ToArray()
-        graphEntitiesToDs basis graph.Vertices es indent
+            let notMentioned = graph.Islands.Except(stems.Cast<Vertex>())
+            for island in notMentioned do
+                yield $"{getTab (indent+1)}{island.GetRelativeName(core.NameComponents)}; // island"
+        ]
 
     let flowToDs (flow:Flow) (indent:int) =
         let tab = getTab indent
         [
             yield $"{tab}[flow] {flow.Name.QuoteOnDemand()} = {lb}"
-            yield flowGraphToDs flow (indent+1)
+            yield! graphToDs (Flow flow) (indent+1)
 
             let alias = flow.AliasMap
-            if alias.Count > 0 then
+            if alias.Any() then
                 let tab = getTab (indent+1)
                 yield $"{tab}[aliases] = {lb}"
                 for KeyValue(k, v) in alias do
@@ -196,8 +125,8 @@ module internal ToDsTextModule =
             yield buttonsToDs("start", system.StartButtons)
             yield buttonsToDs("reset", system.ResetButtons)
 
-            // prop
-            //      addresses
+            (* prop
+                    addresses *)
             let addresses =
                 [
                     for KeyValue(apiPath, address) in system.ApiAddressMap do
@@ -213,7 +142,6 @@ module internal ToDsTextModule =
 
             yield rb
         ] |> combineLines
-
 
     let codeBlockToDs (model:Model) =
         let funApp (funApp:FunctionApplication) =
@@ -251,9 +179,9 @@ module internal ToDsTextModule =
 
             yield codeBlockToDs model
 
-            // prop
-            //      safety
-            //      layouts
+            (* prop
+                 safety
+                 layouts *)
             let spits = model.Spit()
             let segs = spits.Select(fun spit -> spit.GetCore()).OfType<Real>().ToArray()
 
@@ -295,23 +223,9 @@ module internal ToDsTextModule =
                 yield rb
         ] |> combineLines
 
-    let collectCallsDeeply(spitResults:SpitResult seq) =
-        [
-            for core in spitResults.Select(fun spit -> spit.GetCore()) do
-                match core with
-                | :? Call as call -> call
-                | :? Alias as alias ->
-                    match alias.Target with
-                    | CallTarget call -> call
-                    | _ -> ()
-                | _ ->
-                    ()
-        ]
-
 
 [<Extension>]
 type ToDsTextModuleHelper =
     [<Extension>] static member ToDsText(model:Model) = modelToDs(model)
     [<Extension>] static member ToDsText(system:DsSystem) = systemToDs(system)
-    [<Extension>] static member CollectCallsDeeply(spitResults:SpitResult seq) = collectCallsDeeply spitResults
 

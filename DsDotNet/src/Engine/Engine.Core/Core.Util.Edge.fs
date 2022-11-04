@@ -8,7 +8,7 @@ open Engine.Common.FS
 
 [<AutoOpen>]
 module EdgeModule =
-    let private createEdges (graph:Graph<Vertex, Edge>) (modeingEdgeInfo:ModelingEdgeInfo<'v>) =
+    let private createEdges (graph:DsGraph) (modeingEdgeInfo:ModelingEdgeInfo<'v>) =
          [|
             for src, op, tgt in expandModelingEdge modeingEdgeInfo do
                 let edge = Edge.Create(graph, src, tgt, op)

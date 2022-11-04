@@ -50,7 +50,7 @@ module internal ToCopyModule =
         let findReal (realName:string)  = origModel.FindGraphVertex([|copySys.Name;copyFlow.Name;realName|]) :?> Real
         let findInReal(realName:string, name:string) = origModel.FindGraphVertex([|copySys.Name;copyFlow.Name;realName;name|]) :?> Vertex
 
-        let copyReal(name, graph:Graph<Vertex, Edge>) =
+        let copyReal(name, graph:DsGraph) =
             let findVertex = graph.TryFindVertex(name)
             if findVertex.IsNone
                 then Real.Create(name, copyFlow)

@@ -45,7 +45,7 @@ module OriginModule =
         | _ -> failwith $"type error of {vertex}"
 
     /// Get call maps
-    let getCallMap (graph:Graph<Vertex, Edge>) =
+    let getCallMap (graph:DsGraph) =
         let callMap = new Dictionary<string, ResizeArray<Vertex>>()
         graph.Vertices
         |> Seq.iter(fun v -> 
@@ -58,7 +58,7 @@ module OriginModule =
         callMap
 
     /// Get reset informations from graph
-    let getAllResets (graph:Graph<Vertex, Edge>) =
+    let getAllResets (graph:DsGraph) =
         let makeName (system:string) (info:ApiResetInfo) = 
             let src = info.Operand1
             let tgt = info.Operand2
@@ -93,7 +93,7 @@ module OriginModule =
         |> Seq.collect(generateResetRelationShips callMap)
 
     /// Get ordered graph nodes to calculate the node index
-    let getTraverseOrder (graph:Graph<Vertex, Edge>) =
+    let getTraverseOrder (graph:DsGraph) =
         let q = Queue<Vertex>()
         graph.Inits |> Seq.iter q.Enqueue
         [|
@@ -108,10 +108,10 @@ module OriginModule =
     /// Get ordered routes from start to end
     let visitFromSourceToTarget
             (now:Vertex) (target:Vertex) 
-            (graph:Graph<Vertex, Edge>) =
+            (graph:DsGraph) =
         let rec searchNodes
                 (now:Vertex) (target:Vertex)
-                (graph:Graph<Vertex, Edge>) 
+                (graph:DsGraph) 
                 (path:Vertex list) =
             [
                 let nowPath = path.Append(now) |> List.ofSeq
@@ -289,7 +289,7 @@ module OriginModule =
 
     // Get aliases in front of graph
     let getAliasHeads 
-            (graph:Graph<Vertex, Edge>)
+            (graph:DsGraph)
             (callMap:Dictionary<string, ResizeArray<Vertex>>) =
         [
         for calls in callMap do
@@ -309,7 +309,7 @@ module OriginModule =
         ]
 
      /// Get node index map(key:name, value:idx)
-    let getIndexedMap (graph:Graph<Vertex, Edge>) =
+    let getIndexedMap (graph:DsGraph) =
         let traverseOrder = getTraverseOrder graph
         let mutable i = 1
         [
@@ -321,7 +321,7 @@ module OriginModule =
     
 
     /// Get origin status of child nodes
-    let getOrigins (graph:Graph<Vertex, Edge>) =
+    let getOrigins (graph:DsGraph) =
         let rawResets = graph |> getAllResets
         let mutualResets = rawResets |> getMutualResets
         let oneWayResets = rawResets |> getOneWayResets mutualResets
@@ -376,7 +376,7 @@ module OriginModule =
 
     /// Get pre-calculated targets that 
     /// child segments to be 'ON' in progress(Theta)
-    let getThetaTargets (graph:Graph<Vertex, Edge>) = 
+    let getThetaTargets (graph:DsGraph) = 
         // To do...
         ()
 
@@ -384,10 +384,10 @@ module OriginModule =
 [<Extension>]
 type OriginHelper =
     /// Get origin status of child nodes
-    [<Extension>] static member GetOrigins(graph:Graph<Vertex, Edge>)    = graph |> getOrigins
+    [<Extension>] static member GetOrigins(graph:DsGraph)    = graph |> getOrigins
      /// Get node index map(key:name, value:idx)
-    [<Extension>] static member GetIndexedMap(graph:Graph<Vertex, Edge>) = graph |> getIndexedMap
+    [<Extension>] static member GetIndexedMap(graph:DsGraph) = graph |> getIndexedMap
     /// Get reset informations from graph
-    [<Extension>] static member GetAllResets(graph:Graph<Vertex, Edge>)  = graph |> getAllResets
+    [<Extension>] static member GetAllResets(graph:DsGraph)  = graph |> getAllResets
     /// Get pre-calculated targets thatchild segments to be 'ON' in progress(Theta)
-    [<Extension>] static member GetThetaTargets(graph:Graph<Vertex, Edge>) = graph |> getThetaTargets
+    [<Extension>] static member GetThetaTargets(graph:DsGraph) = graph |> getThetaTargets

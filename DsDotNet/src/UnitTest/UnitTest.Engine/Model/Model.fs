@@ -30,27 +30,25 @@ module private ModelComparisonHelper =
             }
         }
         [flow] "Flow.Complex" = {
-            "#Seg.Complex#" > Seg;
-            Seg |> "#Seg.Complex#";
+            "#Seg.Complex#" => Seg;
             "#Seg.Complex#" = {
                 A."+" > A."-";
             }
         }
         [flow] F = {
-            C1 > C3 > C5 > C6;
-            C1 > C4 > C5;
-            C2 > C3;
-            C2 > C4;
-            Main > R3;
             R1 > Main2 > Ap1;
-            C3 |> C5;
-            C4 |> C5;
+            Main > R3;
+            C2 > C4 > C5;
+            C2 > C3 > C5 > C6;
+            C1 > C4 |> C5;
+            C1 > C3 |> C5;
             Main = {
-                Ap1 > Am1 > Bm1 > Ap2 > Am2 > Bm2 > A."+";
-                Ap2 > Bp2 > Bm2;
-                Ap1 > Bp1 > Bm1;
+                Ap2 > Bp2 > Bm2 > A."+";
+                Ap1 > Bp1 > Bm1 > Ap2 > Am2 > Bm2;
+                Ap1 > Am1 > Bm1;
             }
             R2; // island
+
             [aliases] = {
                 A."+" = { Ap1; Ap2; }
                 A."-" = { Am1; Am2; }
@@ -74,11 +72,10 @@ module private ModelComparisonHelper =
     }
     [sys ip = 1.2.3.4] A = {
         [flow] F = {
-            Vp > Pp > Sp;
-            Vm > Pm > Sm;
+            Vp <||> Vm |> Pp |> Sm;
             Vp |> Pm |> Sp;
-            Vm |> Pp |> Sm;
-            Vp <||> Vm;
+            Vm > Pm > Sm;
+            Vp > Pp > Sp;
         }
         [interfaces] = {
             "+" = { A.F.Vp ~ A.F.Sp }
@@ -88,11 +85,10 @@ module private ModelComparisonHelper =
     }
     [sys ip = 1.2.3.4] B = {
         [flow] F = {
-            Vp > Pp > Sp;
-            Vm > Pm > Sm;
+            Vp <||> Vm |> Pp |> Sm;
             Vp |> Pm |> Sp;
-            Vm |> Pp |> Sm;
-            Vp <||> Vm;
+            Vm > Pm > Sm;
+            Vp > Pp > Sp;
         }
         [interfaces] = {
             "+" = { B.F.Vp ~ B.F.Sp }
@@ -102,11 +98,10 @@ module private ModelComparisonHelper =
     }
     [sys ip = 1.2.3.4] C = {
         [flow] F = {
-            Vp > Pp > Sp;
-            Vm > Pm > Sm;
+            Vp <||> Vm |> Pp |> Sm;
             Vp |> Pm |> Sp;
-            Vm |> Pp |> Sm;
-            Vp <||> Vm;
+            Vm > Pm > Sm;
+            Vp > Pp > Sp;
         }
         [interfaces] = {
             "+" = { C.F.Vp ~ C.F.Sp }
@@ -165,11 +160,10 @@ module private ModelComparisonHelper =
     }
     [sys] A = {
         [flow] F = {
-            Vp > Pp > Sp;
-            Vm > Pm > Sm;
+            Vp <||> Vm |> Pp |> Sm;
             Vp |> Pm |> Sp;
-            Vm |> Pp |> Sm;
-            Vp <||> Vm;
+            Vm > Pm > Sm;
+            Vp > Pp > Sp;
         }
         [interfaces] = {
             "+" = { A.F.Vp ~ A.F.Sp }
@@ -181,13 +175,9 @@ module private ModelComparisonHelper =
         let answerSplittedMRIEdgesText = """
     [sys] A = {
         [flow] F = {
-            a1 > a2 > a3 > a4;
-            a1 <||> a2;
-            a2 <||> a3;
             a3 <||> a4;
-            //a3 <||> a1;
-            //a4 <||> a1;
-            //a4 <||> a2;
+            a1 <||> a2 ||> a3 ||> a2;
+            a1 > a2 > a3 > a4;
         }
         [interfaces] = {
             I1 = { A.F.a1 ~ A.F.a2 }
@@ -202,8 +192,8 @@ module private ModelComparisonHelper =
         let answerDuplicatedEdgesText = """
     [sys] B = {
         [flow] F = {
-            Vp > Pp;
             Vp |> Pp;
+            Vp > Pp;
         }
     }
     """
@@ -215,11 +205,10 @@ module private ModelComparisonHelper =
 }
 [sys] A = {
     [flow] F = {
-        Vp > Pp > Sp;
-        Vm > Pm > Sm;
+        Vp <||> Vm |> Pp |> Sm;
         Vp |> Pm |> Sp;
-        Vm |> Pp |> Sm;
-        Vp <||> Vm;
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
     }
     [interfaces] = {
         "+" = { A.F.Vp ~ A.F.Sp }
@@ -229,11 +218,10 @@ module private ModelComparisonHelper =
 }
 [sys] B = {
     [flow] F = {
-        Vp > Pp > Sp;
-        Vm > Pm > Sm;
+        Vp <||> Vm |> Pp |> Sm;
         Vp |> Pm |> Sp;
-        Vm |> Pp |> Sm;
-        Vp <||> Vm;
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
     }
     [interfaces] = {
         "+" = { B.F.Vp ~ B.F.Sp }
@@ -266,11 +254,10 @@ module private ModelComparisonHelper =
 }
 [sys] C = {
     [flow] F = {
-        Vp > Pp > Sp;
-        Vm > Pm > Sm;
-        Pp |> Sm;
         Pm |> Sp;
-        Vp <||> Vm;
+        Pp |> Sm;
+        Vp <||> Vm > Pm > Sm;
+        Vp > Pp > Sp;
     }
     [interfaces] = {
         P = { C.F.Vp ~ C.F.Sp }
@@ -288,8 +275,9 @@ module private ModelComparisonHelper =
 [sys] L = {
     [flow] F = {
         Main = {
+            Cp <|| Cm;
+            Cp ||> Cm;
             Cp >> Cm;
-            Cp <||> Cm;
         }
         [aliases] = {
             A.P = { Cp; Cp1; Ap2; }
@@ -305,11 +293,10 @@ module private ModelComparisonHelper =
 }
 [sys] A = {
     [flow] F = {
-        Vp > Pp > Sp;
-        Vm > Pm > Sm;
-        Pp |> Sm;
         Pm |> Sp;
-        Vp <||> Vm;
+        Pp |> Sm;
+        Vp <||> Vm > Pm > Sm;
+        Vp > Pp > Sp;
     }
     [interfaces] = {
         P = { A.F.Vp ~ A.F.Sp }
@@ -357,12 +344,10 @@ module private ModelComparisonHelper =
         let answerDup = """
 [sys] L = {
     [flow] FF = {
+        C |> "F2.R2" > C;
         A > C;
-        "F2.R2" > C;
-        C |> "F2.R2";
     }
-}
-"""
+}"""
         let answerQualifiedName = """
 [sys] my.favorite.system!! = {
     [flow] " my flow. " = {
@@ -388,9 +373,9 @@ module private ModelComparisonHelper =
 [sys] my = {
     [flow] F = {
         Main = {
-            Ap1 > Am1 > Am2;
-            Ap1 > Ap2 > Am2;
             Ap1 <||> Am1;
+            Ap1 > Ap2 > Am2;
+            Ap1 > Am1 > Am2;
         }
 
         [aliases] = {
@@ -407,11 +392,10 @@ module private ModelComparisonHelper =
 }
 [sys] A = {
     [flow] F = {
-        Vp > Pp > Sp;
-        Vm > Pm > Sm;
+        Vp <||> Vm |> Pp |> Sm;
         Vp |> Pm |> Sp;
-        Vm |> Pp |> Sm;
-        Vp <||> Vm;
+        Vm > Pm > Sm;
+        Vp > Pp > Sp;
     }
     [interfaces] = {
         "+" = { A.F.Vp ~ A.F.Sp }
@@ -434,7 +418,7 @@ module ModelTests1 =
         do Fixtures.SetUpTest()
 
         [<Test>]
-        member __.``XEveryScenarioText test`` () =
+        member __.``EveryScenarioText test`` () =
             logInfo "=== EveryScenarioText"
             compare Program.EveryScenarioText answerEveryScenarioText
 
@@ -474,7 +458,7 @@ module ModelTests1 =
             compare ParserTest.SafetyValid answerSafetyValid
 
         [<Test>]
-        member __.``XModel component [StrongCausal] test`` () =
+        member __.``Model component [StrongCausal] test`` () =
             compare ParserTest.StrongCausal answerStrongCausal
 
         [<Test>]
@@ -486,7 +470,7 @@ module ModelTests1 =
             compare ParserTest.Dup answerDup
 
         [<Test>]
-        member __.``XModel component [Aliases] test`` () =
+        member __.``Model component [Aliases] test`` () =
             compare ParserTest.Aliases answerAliases
 
         [<Test>]

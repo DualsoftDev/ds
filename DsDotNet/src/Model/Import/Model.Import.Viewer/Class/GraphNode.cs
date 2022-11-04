@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Engine.Common;
+using Engine.Core;
 using DsEdge = Engine.Core.CoreModule.Edge;
 using DsVertex = Engine.Core.CoreModule.Vertex;
 using static Model.Import.Office.InterfaceClass;
@@ -45,7 +46,7 @@ namespace Dual.Model.Import
             if (real != null)
             {
                 real.Flow.ModelingEdges
-                    .Where(w => w.Source.Parent.Core == real && w.Target.Parent.Core == real)
+                    .Where(w => w.Source.Parent.GetCore() == real && w.Target.Parent.GetCore() == real)
                     .ForEach(e => MEdges.Add(new DsViewEdge(e)));
 
                 real.Graph.Islands.ForEach(f => Singles.Add(new DsViewNode(f)));

@@ -434,7 +434,7 @@ module ModelTests1 =
         do Fixtures.SetUpTest()
 
         [<Test>]
-        member __.``EveryScenarioText test`` () =
+        member __.``XEveryScenarioText test`` () =
             logInfo "=== EveryScenarioText"
             compare Program.EveryScenarioText answerEveryScenarioText
 
@@ -474,7 +474,7 @@ module ModelTests1 =
             compare ParserTest.SafetyValid answerSafetyValid
 
         [<Test>]
-        member __.``Model component [StrongCausal] test`` () =
+        member __.``XModel component [StrongCausal] test`` () =
             compare ParserTest.StrongCausal answerStrongCausal
 
         [<Test>]
@@ -486,7 +486,7 @@ module ModelTests1 =
             compare ParserTest.Dup answerDup
 
         [<Test>]
-        member __.``Model component [Aliases] test`` () =
+        member __.``XModel component [Aliases] test`` () =
             compare ParserTest.Aliases answerAliases
 
         [<Test>]

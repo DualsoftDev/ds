@@ -380,7 +380,10 @@ module PPTObjectModule =
         
     type pptDoc(path:string)  =
         let doc = Office.Open(path)
-        let name =  Path.GetFileNameWithoutExtension(path)
+        let name =  let fileName = Path.GetFileNameWithoutExtension(path)
+                    if fileName.IsQuotationRequired()
+                    then Office.ErrorPPT(ErrorCase.Name, ErrID._44, $"SystemNamePath : {path}", 0, $"SystemName : {fileName}")
+                    fileName
         let pages =  ConcurrentDictionary<SlidePart, pptPage>()
         let masterPages =  ConcurrentDictionary<int, DocumentFormat.OpenXml.Presentation.SlideMaster>()
         let nodes =  ConcurrentDictionary<string, pptNode>()

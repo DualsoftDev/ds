@@ -100,3 +100,4 @@ module Base =
     let SeqEq(a, b) = Enumerable.SequenceEqual(a, b) |> ShouldBeTrue
     let SetEq(xs:'a seq, ys:'a seq) =
         (xs.Count() = ys.Count() && xs |> Seq.forall(fun x -> ys.Contains(x)) ) |> ShouldBeTrue
+

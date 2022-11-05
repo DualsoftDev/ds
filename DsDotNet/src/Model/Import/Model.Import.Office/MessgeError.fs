@@ -57,6 +57,7 @@ module ErrID =
     let _41 = "Api TXs~Rxs 이름의 Real행위가 없습니다."
     let _42 = "호출 Interface에 해당하는 대상 시스템에 Interface 이름이 없습니다."
     let _43 = "Copy 대상 시스템이 없습니다."
+    let _44 = "System 이름 시작은 특수문자 및 숫자는 불가능합니다.(이름 내부에 공백 미지원)"
 
     
 

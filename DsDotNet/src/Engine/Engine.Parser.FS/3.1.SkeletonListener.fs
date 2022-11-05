@@ -29,7 +29,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
                 match findFirstChild<HostContext>(ctx) with
                 | Some hostCtx -> hostCtx.GetText()
                 | None -> null
-            x._system <- Some <| DsSystem.Create(name, host, x._model)
+            x._systems.Push <| DsSystem.Create(name, host, x._model)
             tracefn($"System: {name}")
             x.AddElement(x.CurrentPathElements, GraphVertexType.System)
         | None ->

@@ -722,7 +722,21 @@ C4 > C5;
 }
 """
 
+    let RecursiveSystemText = """
+[sys] P = {
+    [sys] P1 = {
+        [flow] F = {
+            Vp > Vm;
+        }
+    }
 
+    [sys] P2 = {
+        [flow] F = {
+            Vp > Vm;
+        }
+    }
+}
+"""
 
 
     let ParseNormal(text:string) =

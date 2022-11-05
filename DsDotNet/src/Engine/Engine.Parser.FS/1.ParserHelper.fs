@@ -37,7 +37,8 @@ type ParserHelper(options:ParserOptions) =
     /// button category 중복 check 용
     member val ButtonCategories = HashSet<(DsSystem*string)>()
 
-    member val internal _system:DsSystem option = None with get, set
+    member internal x._system = x._systems |> Seq.tryHead
+    member val internal _systems = Stack<DsSystem>()
     member val internal _flow:Flow option = None  with get, set
     member val internal _parenting:Real option = None  with get, set
     member val internal _elements = Dictionary<Fqdn, GraphVertexType>(NameUtil.CreateNameComponentsComparer())

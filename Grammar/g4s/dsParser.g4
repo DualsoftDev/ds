@@ -25,7 +25,7 @@ comment: BLOCK_COMMENT | LINE_COMMENT;
 
 system: '[' 'sys' (('ip'|'host') '=' host)? ']' systemName '=' (sysBlock|sysCopySpec);    // [sys] Seg = {..}
     sysBlock
-        : LBRACE (flow | interfaces | buttons | systemProperties )* RBRACE       // identifier1Listing|parenting|causal|call
+        : LBRACE (flow | interfaces | buttons | systemProperties | system)* RBRACE       // identifier1Listing|parenting|causal|call
         ;
     host: ipv4 | domainName;
     domainName: identifier1234;

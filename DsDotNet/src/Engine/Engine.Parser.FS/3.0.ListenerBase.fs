@@ -22,7 +22,8 @@ type ListenerBase(parser:dsParser, helper:ParserHelper) =
     member x.ParserHelper = helper
     member internal _._model = helper.Model
     member internal _._elements = helper._elements
-    member internal _._system           with get() = helper._system           and set(v) = helper._system           <- v
+    member internal _._system = helper._system
+    member internal _._systems = helper._systems
     member internal _._flow             with get() = helper._flow             and set(v) = helper._flow             <- v
     member internal _._parenting        with get() = helper._parenting        and set(v) = helper._parenting        <- v
     member internal _._modelSpits       with get() = helper._modelSpits       and set(v) = helper._modelSpits       <- v
@@ -47,9 +48,9 @@ type ListenerBase(parser:dsParser, helper:ParserHelper) =
 
     override x.EnterSystem(ctx:SystemContext) =
         let name = ctx.systemName().GetText().DeQuoteOnDemand()
-        x._system <- x._model.Systems.TryFind(fun s -> s.Name = name)
+        x._systems.Push <| x._model.Systems.Find(fun s -> s.Name = name)
 
-    override x.ExitSystem(ctx:SystemContext) = x._system <- None
+    override x.ExitSystem(ctx:SystemContext) = x._systems.Pop() |> ignore
 
     override x.EnterFlow(ctx:FlowContext) =
         let flowName = ctx.identifier1().GetText().DeQuoteOnDemand()

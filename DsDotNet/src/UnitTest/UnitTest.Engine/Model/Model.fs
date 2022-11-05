@@ -495,3 +495,12 @@ module ModelTests1 =
             (fun () -> compare InvalidDuplicationTest.CyclicEdgeModel ""  )  |> ShouldFailWithSubstringT "Cyclic"
 
             // todo : Loop detection
+
+
+    type RecursiveSystemTests1() =
+        do Fixtures.SetUpTest()
+
+        [<Test>]
+        member __.``RecursiveSystem test`` () =
+            logInfo "=== RecursiveSystem"
+            compare Program.RecursiveSystemText answerEveryScenarioText

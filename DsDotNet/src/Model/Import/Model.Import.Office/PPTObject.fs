@@ -24,12 +24,10 @@ module PPTObjectModule =
     let TrimSpace(name:string) = name.TrimStart(' ').TrimEnd(' ')
     let CopyName(name:string, cnt) = sprintf "Copy%d_%s" cnt (name.Replace(".", "_")) 
 
-
     let GetSysNApi(flowName:string, name:string) = 
         if(name.StartsWith("$"))
             then (TrimSpace(name.Split('.').[0]).TrimStart('$')), name.Split('.').[1]
             else  $"{flowName}_{name.Split('.').[0]}", name.Split('.').[1]
-            
     let GetSysNFlow(fileName:string, name:string, pageNum:int) = 
             if(name.StartsWith("$"))
                 then 
@@ -39,8 +37,6 @@ module PPTObjectModule =
 
             elif(name = "")        then fileName, sprintf "Page%d" pageNum
             else                        fileName, TrimSpace(name)
-            
-    
     ///전체 사용된 화살표 반환 (앞뒤연결 필수)
     let Connections(doc:PresentationDocument) =
                     Office.SildesSkipHide(doc)
@@ -55,33 +51,11 @@ module PPTObjectModule =
                             let connEndId =  if(endNode = null) then 0u else endNode.Id.Value
 
                             conn, Id, connStartId, connEndId))
-
     ///전체 사용된 도형간 그룹지정 정보
     let Groups(doc:PresentationDocument) =
                     Office.SildesSkipHide(doc)
                     |> Seq.filter (fun slide ->  slide.Slide.CommonSlideData.ShapeTree.Descendants<GroupShape>().Any())
                     |> Seq.map (fun slide ->  slide, slide.Slide.CommonSlideData.ShapeTree.Descendants<GroupShape>() |> Seq.toList )
-
-    let rec SubGroup(subG:GroupShape, dicUsedSub:ConcurrentHash<GroupShape>) =
-                            subG.Descendants<Presentation.GroupShape>()
-                            |> Seq.iter(fun childGroup ->
-                                dicUsedSub.TryAdd(childGroup) |>ignore
-                                SubGroup(childGroup, dicUsedSub) )
-
-    let IsDummyGroup(subG:GroupShape) =
-                    let haveDummy =
-                        subG.Descendants<Presentation.Shape>()
-                        |> Seq.filter(fun shape -> shape.CheckEllipse()||shape.CheckRectangle())
-                        |> Seq.filter(fun shape -> shape.IsDashShape())
-                        |> Seq.filter(fun shape -> shape.InnerText.Length = 0)
-                        |> Seq.length > 0
-                    let haveReal =
-                        subG.Descendants<Presentation.Shape>()
-                        |> Seq.filter(fun shape -> shape.CheckRectangle())
-                        |> Seq.filter(fun shape -> shape.IsDashShape()|>not)
-                        |> Seq.filter(fun shape -> shape.InnerText.Length > 0)
-                        |> Seq.length > 0
-                    haveDummy && haveReal|>not
 
     let GetCausal(conn:ConnectionShape, iPage, startName, endName) =
                     let shapeProperties = conn.Descendants<ShapeProperties>().FirstOrDefault();
@@ -139,16 +113,6 @@ module PPTObjectModule =
                             | false,true, true  ->  ResetPush, isChangeHead
                             | _ -> conn.ErrorConnect(ErrID._3, startName, endName, iPage)
 
-
-    let rec ValidGroup(subG:Presentation.GroupShape, shapeIds:ConcurrentHash<uint32>) =
-        subG.Descendants<Presentation.Shape>()
-        |> Seq.filter(fun shape -> shape.CheckRectangle() || shape.CheckEllipse())
-        |> Seq.iter(fun shape -> shapeIds.TryAdd(shape.GetId().Value)|>ignore )
-        subG.Descendants<Presentation.GroupShape>()
-        |> Seq.iter(fun childGroup ->
-            ValidGroup(childGroup, shapeIds) |> ignore)
-        true
-
     let GetAliasName(names:string seq) =
         let usedNames = HashSet<string>()
         seq {
@@ -171,7 +135,7 @@ module PPTObjectModule =
                 for name in names do
                     yield name, newName(name)
             }
-
+    let IsDummyShape(shape:Shape) = shape.IsDashShape() && (shape.CheckRectangle()||shape.CheckEllipse())
 
     type pptPage(slidePart:SlidePart, iPage:int , bShow:bool) =
         member x.PageNum = iPage
@@ -196,12 +160,8 @@ module PPTObjectModule =
         let trimStartEnd(text:string) =   text.TrimStart(' ').TrimEnd(' ')
         let trimStartEndSeq(texts:string seq) =  texts  |> Seq.map(fun name -> trimStartEnd name)
         let updateTxRx(tailBarckets:string) =
-                if(tailBarckets.Split(';').Count() > 1)
-                then
                     txCnt <- tailBarckets.Split(';').[0] |> Convert.ToInt32
                     rxCnt <- tailBarckets.Split(';').[1] |> Convert.ToInt32
-                else 
-                    shape.ErrorName(ErrID._22, iPage)
 
         let updateSafety(barckets:string)  = safeties <- barckets.Split(';')  |> HashSet
                                             //             |> Seq.map(fun name -> $"{pageTitle}_{name}") |> HashSet
@@ -229,18 +189,22 @@ module PPTObjectModule =
 
         do
             nodeType <-
-                if(shape.CheckRectangle())      then  MY
+                if(IsDummyShape(shape))         then DUMMY
+
+                elif(shape.CheckRectangle())    then  MY
+
                 elif(shape.CheckHomePlate())    then  IF
+
                 elif(shape.CheckFoldedCorner()) then  COPY
+
                 elif(shape.CheckDonutShape()
                     || shape.CheckBlockArc()
                     || shape.CheckNoSmoking()
                     || shape.CheckBevelShape()) then  BUTTON
+
                 elif(shape.CheckEllipse())
                 then
-                    if(dashOutline)
-                    then DUMMY
-                    else
+                    
                         if((txCnt = 0 && rxCnt = 0) || txCnt < 0 || rxCnt < 0)
                         then shape.ErrorName(ErrID._2, iPage)
                         else 
@@ -327,47 +291,32 @@ module PPTObjectModule =
                             else $"{iPage};{sName}{causal.ToText()}{eName}";
 
         member val Causal:ModelingEdgeType = causal
-
     and
-        pptGroup(iPage:int, ids:uint32 seq, nodes:ConcurrentDictionary<string, pptNode>) =
+        pptRealGroup(iPage:int,  nodes: pptNode seq) =
         let mutable parent:pptNode option = None
-        let mutable dummy :pptNode option = None
         let childSet =  ConcurrentHash<pptNode>()
+        let nodeNames(nodes :pptNode seq) = nodes.Select(fun s->s.Name).JoinWith(", ")
 
         do
-            let parents =
-                ids
-                |> Seq.map (fun id -> nodes.[ Objkey(iPage, id) ])
-                |> Seq.filter (fun node -> node.NodeType = MY)
-            if(parents.Count() > 1) 
-            then  Office.ErrorPPT(Group, ErrID._23, $"부모수:{parents.Count()}", iPage)
-            let dummys = 
-                ids 
-                |> Seq.map (fun id -> nodes.[ Objkey(iPage, id) ])
-                |> Seq.filter (fun node -> node.NodeType = DUMMY)
-            if(parents.Count() = 0 && dummys.Count() > 1) 
-            then  Office.ErrorPPT(Group, ErrID._24, $"부모수:{dummys.Count()}", iPage)
-            if(parents.Count() = 0 && dummys.Count() = 0 ) 
-            then  Office.ErrorPPT(Group, ErrID._25, $"도형 타입확인", iPage)
+            let reals  = nodes.Where(fun w -> w.NodeType.IsReal)
+            let calls  = nodes.Where(fun w -> w.NodeType.IsCall)
+
+            if(reals.Count() > 1) 
+            then  Office.ErrorPPT(Group, ErrID._23, $"Reals:{reals|>nodeNames}", iPage)
+
+            if(reals.Count() = 0 ) 
+            then  Office.ErrorPPT(Group, ErrID._25, $"Nodes:{nodes|>nodeNames}", iPage)
 
             parent <-
-                if(parents.Any()|>not) then None
-                else Some(parents |> Seq.head)
+                if(reals.Any()|>not) then None
+                else Some(reals |> Seq.head)
 
-
-            dummy <-
-                if(dummys.Any()|>not) then None
-                else Some(dummys |> Seq.head)
-
-            let children =
-                ids
-                |> Seq.map (fun id -> nodes.[Objkey(iPage, id) ])
-                |> Seq.filter (fun node ->node.NodeType = MY |> not)
-                |> Seq.filter (fun node ->(node.NodeType = DUMMY|>not ||  parent.IsSome))
+            let children = nodes
+                            |> Seq.filter (fun node ->node.NodeType = MY |> not)
+                            |> Seq.filter (fun node ->node.NodeType = DUMMY|>not)
 
             if(children.Any() |> not) 
-            then  Office.ErrorPPT(Group, ErrID._12, $"자식수:0", iPage)
-         
+            then  Office.ErrorPPT(Group, ErrID._22,  $"Nodes:{nodes|>nodeNames}", iPage)
 
             children |> Seq.iter(fun child -> childSet.TryAdd(child)|>ignore)
 
@@ -375,166 +324,45 @@ module PPTObjectModule =
         member x.PageNum = iPage
 
         member x.Parent:pptNode option = parent
+        member x.Children =  childSet.Values 
+    and
+        pptDummyGroup(iPage:int, nodes: pptNode seq) =
+        let mutable dummy :pptNode option = None
+        let childSet =  ConcurrentHash<pptNode>()
+        let nodeNames(nodes :pptNode seq) = nodes.Select(fun s->s.Name).JoinWith(", ")
+
+        do
+            let reals  = nodes.Where(fun w -> w.NodeType.IsReal)
+            let calls  = nodes.Where(fun w -> w.NodeType.IsCall)
+            let dummys = nodes.Where(fun w -> w.NodeType = DUMMY)
+
+            //1 child 는 dummy로 구성 불가
+            if dummys.Count() = 1 &&  reals.Count() = 1 && calls.Count() = 0  
+            then Office.ErrorPPT(Group, ErrID._19, $"{reals.First().Name}", nodes.First().PageNum) 
+            if dummys.Count() = 1 &&  reals.Count() = 0 && calls.Count() = 1  
+            then Office.ErrorPPT(Group, ErrID._19, $"{calls.First().Name}", nodes.First().PageNum) 
+
+
+            if(dummys.Count() > 1) 
+            then  Office.ErrorPPT(Group, ErrID._24, $"부모수:{dummys.Count()}", iPage)
+
+            if(reals.Count() = 0 && dummys.Count() = 0 ) 
+            then  Office.ErrorPPT(Group, ErrID._25, $"도형 타입확인", iPage)
+
+           
+            dummy <-
+                if(dummys.Any()|>not) then None
+                else Some(dummys |> Seq.head)
+
+            let children = nodes  |> Seq.filter (fun node ->node.NodeType = DUMMY|>not)
+            
+            if(children.Any() |> not) 
+            then  Office.ErrorPPT(Group, ErrID._12, $"자식수:0", iPage)
+
+            children |> Seq.iter(fun child -> childSet.TryAdd(child)|>ignore)
+
+        member x.PageNum = iPage
+
         member x.DummyParent:pptNode option = dummy
         member x.Children =  childSet.Values 
         
-    type pptDoc(path:string)  =
-        let doc = Office.Open(path)
-        let name =  let fileName = Path.GetFileNameWithoutExtension(path)
-                    if fileName.IsQuotationRequired()
-                    then Office.ErrorPPT(ErrorCase.Name, ErrID._44, $"SystemNamePath : {path}", 0, $"SystemName : {fileName}")
-                    fileName
-        let pages =  ConcurrentDictionary<SlidePart, pptPage>()
-        let masterPages =  ConcurrentDictionary<int, DocumentFormat.OpenXml.Presentation.SlideMaster>()
-        let nodes =  ConcurrentDictionary<string, pptNode>()
-        let parents = ConcurrentDictionary<pptNode, seq<pptNode>>()
-        let edges =  ConcurrentHash<pptEdge>()
-        let updateAliasPPT () =
-            let pptNodes = nodes.Values
-            let dicFlowNodes = pages.Values
-                                |> Seq.filter(fun page -> page.IsUsing)
-                                |> Seq.map  (fun page ->
-                                    page.PageNum, pptNodes |> Seq.filter(fun node -> node.PageNum = page.PageNum)
-                                    ) |> dict
-
-            let settingAlias(nodes:pptNode seq) =
-                let nodes = nodes.OrderByDescending(fun o-> parents.ContainsKey(o))  //부모지정
-                let names  = nodes |> Seq.map(fun f->f.Name)
-                (nodes, GetAliasName(names))
-                ||> Seq.map2(fun node  nameSet -> node,  nameSet)
-                |> Seq.iter(fun (node, (name, newName)) ->
-                                if(name  = newName |> not)
-                                then    let orgNode = nodes |> Seq.filter(fun f->f.Name = name) |> Seq.head
-                                        node.Alias <- Some(orgNode)
-                                        node.Name  <- newName
-                                        )
-            let children = parents |> Seq.collect(fun parentSet -> parentSet.Value)
-            let callInFlowSet = dicFlowNodes
-                                |> Seq.map(fun flowNodes ->
-                                            flowNodes.Value
-                                            |> Seq.filter(fun node -> node.NodeType.IsCall && children.Contains(node)|>not)
-                                            )
-            let realSet = dicFlowNodes
-                                |> Seq.map(fun flowNodes ->
-                                            flowNodes.Value |> Seq.filter(fun node -> node.NodeType.IsReal))
-            let callInRealSet = realSet
-                                    |> Seq.collect(fun reals -> reals)
-                                    |> Seq.filter(fun real -> parents.ContainsKey(real))
-                                    |> Seq.map(fun real ->
-                                                dicFlowNodes.[real.PageNum]
-                                                |> Seq.filter(fun node -> node.NodeType.IsCall)
-                                                |> Seq.filter(fun node -> parents.[real].Contains(node) ))
-
-            realSet |> Seq.iter settingAlias
-            callInFlowSet |> Seq.iter settingAlias
-            callInRealSet |> Seq.iter settingAlias
-
-        do
-            let sildesAll = Office.SildesAll(doc)
-            let shapes = Office.PageShapes(doc)
-            let connections = Connections(doc)
-            let groups = Groups(doc)
-            let allGroups =  groups |> Seq.collect(fun (slide, groupSet) -> groupSet)
-            let sildeSize = Office.SildeSize(doc)
-            let sildeMasters = Office.SildesMasterAll(doc)
-
-            try
-
-                sildeMasters
-                |> Seq.iter (fun slideMaster ->
-                    masterPages.TryAdd(masterPages.Count+1, slideMaster) |>ignore )
-
-                sildesAll
-                |> Seq.iter (fun (slidePart, show, page) ->
-                    pages.TryAdd(slidePart, pptPage(slidePart, page, show)) |>ignore )
-
-                let dicShape = ConcurrentDictionary<int, HashSet<Tuple<Shape,bool>>>()
-                shapes
-                |> Seq.iter (fun (shape, page, geometry, isDash) ->
-                            if(dicShape.ContainsKey(page)|>not)
-                            then dicShape.TryAdd(page, HashSet<Tuple<Shape,bool>>()) |> ignore
-                            dicShape.[page].Add(shape, isDash) |> ignore
-                )
-
-                shapes
-                |> Seq.iter (fun (shape, page, geometry, isDash) ->
-
-                            let pagePPT = pages.Values.Filter(fun w->w.PageNum = page).First()
-                            let sysName, flowName = GetSysNFlow(name, pagePPT.Title, pagePPT.PageNum)
-
-                            let node = pptNode(shape, page,  isDash,  sildeSize, flowName)
-                            if(node.Name ="" && node.NodeType = DUMMY|>not) then shape.ErrorName(ErrID._13, page)
-                            nodes.TryAdd(node.Key, node)  |>ignore )
-
-                let dicFakeSub = ConcurrentHash<Presentation.GroupShape>()
-                allGroups |> Seq.iter (fun group -> SubGroup(group, dicFakeSub))
-
-                let dicParentCheck = ConcurrentDictionary<string, int>()
-                let makeRealGroup ( pptGroup:pptGroup ) =
-                    if(pptGroup.Parent.IsNone)
-                    then Office.ErrorPPT(Group, ErrID._18, "", pptGroup.PageNum)
-                    else 
-                        let parent = pptGroup.Parent.Value;
-                        if(dicParentCheck.TryAdd(pptGroup.RealKey, pptGroup.PageNum))
-                        then
-                            parents.TryAdd(parent, pptGroup.Children)|>ignore
-                        else 
-                            Office.ErrorPPT(Group, ErrID._17, $"{dicParentCheck.[pptGroup.RealKey]}-{parent.Name}", pptGroup.PageNum) 
-                
-                let makeDummyGroup ( pptGroup:pptGroup ) =
-                        if(pptGroup.DummyParent.IsSome)
-                        then
-                            parents.TryAdd(pptGroup.DummyParent.Value, pptGroup.Children)|>ignore
-
-                groups
-                |> Seq.iter (fun (slide, groupSet) ->
-                    groupSet
-                    |> Seq.iter (fun group ->
-                        let shapeIds = ConcurrentHash<uint32>()
-                        ValidGroup(group, shapeIds) |> ignore
-
-                        if(IsDummyGroup(group))
-                        then makeDummyGroup(pptGroup(pages.[slide].PageNum, shapeIds.Values, nodes))
-                        else
-                            if(dicFakeSub.ContainsKey(group)|>not)
-                            then makeRealGroup (pptGroup(pages.[slide].PageNum, shapeIds.Values, nodes))
-                    )
-                )
-
-                connections
-                |> Seq.iter (fun (slide, conns) ->
-                    conns
-                          |> Seq.iter (fun (conn, Id, startId, endId) ->
-                            let iPage = pages.[slide].PageNum
-                            let nodeName =
-                                if(nodes.ContainsKey(Objkey(iPage, endId)))
-                                then nodes.[Objkey(iPage, endId)].Name else ""
-
-                            if(startId = 0u && endId = 0u) then  conn.ErrorConnect(ErrID._4, "","", iPage)
-                            if(nodes.ContainsKey(Objkey(iPage, startId))|>not) then  conn.ErrorConnect(ErrID._14, "",$"{nodeName}", iPage) 
-                            if(nodes.ContainsKey(Objkey(iPage, endId))|>not)   then  conn.ErrorConnect(ErrID._14, $"{nodeName}", "", iPage) 
-                            if(startId = 0u) then  conn.ErrorConnect(ErrID._15, "", $"{nodeName}", iPage) 
-                            if(endId = 0u) then    conn.ErrorConnect(ErrID._16, $"{nodeName}", "", iPage) 
-                            edges.TryAdd(pptEdge(conn, Id, iPage ,startId, endId,  nodes)) |>ignore 
-                        ))
-
-
-                updateAliasPPT()
-                doc.Close()
-
-            with ex -> doc.Close()
-                       failwithf  $"{ex.Message}"
-
-
-        member x.GetPage(pageNum:int) = pages.Values |> Seq.filter(fun p -> p.PageNum = pageNum) |> Seq.head
-        member val Pages = pages.Values.OrderBy(fun p -> p.PageNum)
-
-        member val Nodes = nodes.Values.OrderBy(fun p -> p.PageNum)
-        member val DicNodes = nodes
-        member val Edges = edges.Values.OrderBy(fun p -> p.PageNum)
-        member val Parents = parents
-
-        member val Name =  name
-        member val FullPath =  path
-
-

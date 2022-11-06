@@ -74,7 +74,7 @@ namespace Dual.Model.Import
             if(sys.Flows.First() == flow && sys.ApiItems.Count>0) //처음 시스템 Flow에만 인터페이스 표기
                 DrawApiItems(flow, sys);
 
-            var edgeVetexs = new List<Vertex>();
+            var edgeVetexs = new HashSet<Vertex>();
             flow.ModelingEdges.ForEach(s =>
             {
                 edgeVetexs.Add(s.Source);

@@ -16,6 +16,9 @@ module PPTUtil =
     type ConnectionShape = Presentation.ConnectionShape
     type Shape = Presentation.Shape
     type NonVisualShapeProperties = Presentation.NonVisualShapeProperties
+    type NonVisualGroupShapeProperties = Presentation.NonVisualGroupShapeProperties
+    type NonVisualGroupShapeDrawingProperties = Presentation.NonVisualGroupShapeDrawingProperties
+    
     type NonVisualConnectionShapeProperties = Presentation.NonVisualConnectionShapeProperties
     type NonVisualShapeDrawingProperties = Presentation.NonVisualShapeDrawingProperties
     type ApplicationNonVisualDrawingProperties = Presentation.ApplicationNonVisualDrawingProperties
@@ -88,6 +91,12 @@ module PPTUtil =
         static member ShapeName(shape:#Shape) = 
                         let shapeProperties = shape.Descendants<NonVisualShapeProperties>().FirstOrDefault();
                         let prop = shapeProperties.Descendants<NonVisualDrawingProperties>().FirstOrDefault();
+                        prop.Name.Value
+
+        [<Extension>] 
+        static member GroupName(gShape:#GroupShape) = 
+                        let shapeProperties = gShape.Descendants<NonVisualGroupShapeProperties>().FirstOrDefault();
+                        let prop = shapeProperties.Descendants<NonVisualDrawingProperties>().First();
                         prop.Name.Value
     
         //shape Position 구하기
@@ -197,7 +206,7 @@ module PPTUtil =
                 let presetDash = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.Outline>().FirstOrDefault().Descendants<Drawing.PresetDash>()
                 presetDash.Any() && presetDash.FirstOrDefault().Val.Value = Drawing.PresetLineDashValues.Solid |>not
 
-
+       
 
         [<Extension>] 
         static member IsDashLine(conn:ConnectionShape) = 

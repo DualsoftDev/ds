@@ -21,6 +21,7 @@
     <Compile Include="MessgeError.fs" />
     <Compile Include="PPTUtil.fs" />
     <Compile Include="PPTObject.fs" />
+    <Compile Include="PPTDoc.fs" />
     <Compile Include="ImportCheck.fs" />
     <Compile Include="ImportUtilCopy.fs" />
     <Compile Include="ImportUtil.fs" />

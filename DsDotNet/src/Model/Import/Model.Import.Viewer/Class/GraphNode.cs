@@ -70,14 +70,14 @@ namespace Dual.Model.Import
                 if (alias.Target.IsCallTarget)
                 {
                     var target = (CallTarget)alias.Target;
-                    UIKey = $"{target.Item.Name};{this.GetHashCode()}";
+                    UIKey = $"{target.Item.Name};{v.QualifiedName}";
                     NodeType = NodeType.TR;
                 }
 
                 if (alias.Target.IsRealTarget)
                 {
                     var target = (RealTarget)alias.Target;
-                    UIKey = $"{target.Item.Name};{this.GetHashCode()}";
+                    UIKey = $"{target.Item.Name};{v.QualifiedName}";
                     NodeType = NodeType.MY;
                 }
             }

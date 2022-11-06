@@ -37,7 +37,7 @@ namespace Dual.Model.Import
                     if (color == Color.Transparent)
                     {
                         if (f.StartsWith($"[{TextSystem}") || (f.Contains($"[{TextFlow}]"))  //[flow] F = {} 한줄제외
-                        || f.Contains($"[{TextAddress}]") || f.Contains($"[{TextLayout}]") || f.Contains("//"))
+                        || f.Contains($"[{TextAddress}]") || f.Contains($"[{TextLayout}]") )
                         {
                             rndColor = Color.FromArgb(r.Next(130, 230), r.Next(130, 230), r.Next(130, 230));
                             this.Do(() => richTextBox_ds.ScrollToCaret());
@@ -279,7 +279,7 @@ namespace Dual.Model.Import
             //6_Alias
             //7_CopySystem
             //8_Safety
-            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\..\..\..\..\"))+ "UnitTest\\UnitTest.Engine\\ImportPPT\\8_Safety.pptx";
+            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\..\..\..\..\"))+ "UnitTest\\UnitTest.Engine\\ImportPPT\\T9_GroupEdge.pptx";
             bool debug = File.Exists(path);
             if (debug)
             {

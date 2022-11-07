@@ -28,7 +28,17 @@ let (|InitAndLast|_|) (FList(xs)) =     // (|InitAndLast|_|) [1..10] ==> Some ([
         let rev = List.rev xs
         Some(List.rev rev.Tail, rev.Head)
 
+
+let (|HeadAndLast|_|) (FList(xs)) =
+    match xs with
+    | [] -> None
+    | x::[] -> None
+    | h::ts -> Some(h, List.last ts)
+
+let headAndTail xs = (|HeadAndTail|_|) xs
 let initAndLast xs = (|InitAndLast|_|) xs
+let headAndLast xs = (|HeadAndLast|_|) xs
+
 
 /// RegexPattern parses a regular expression and returns a list of the strings that match each group in
 /// the regular expression.

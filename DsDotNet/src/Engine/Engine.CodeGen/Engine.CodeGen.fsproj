@@ -8,6 +8,7 @@
 	</PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="CodeGen.Common.fs" />
     <Compile Include="TagType.fs" />
     <Compile Include="Interface.fs" />
     <Compile Include="CpuLoader.fs" />

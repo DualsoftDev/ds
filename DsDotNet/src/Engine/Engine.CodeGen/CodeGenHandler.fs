@@ -9,7 +9,22 @@ module CodeGenHandler =
                 dsCode,
                 ParserOptions.Create4Simulation("SomeActiveCpuName")
             )
-        let model = parsedDsCode.Model
-        member x.CpuCode   = GenCpuCode(model)
-        member x.PilotCode = GenPilotCode(model)
-        member x.HmiCode   = GenHmiCode(model)
+        let model    = parsedDsCode.Model
+        let cpuRes   = GenCpuCode(model)
+        let hmiRes   = GenPilotCode(model)
+        let pilotRes = GenHmiCode(model)
+        let SelectGet target = 
+            match target with
+            | "cpu"   -> cpuRes
+            | "pilot" -> hmiRes
+            | "hmi"   -> pilotRes
+            | _ -> { 
+                    from = null; 
+                    succeed = false; 
+                    body = null; 
+                    error = "target error" 
+                }
+        member x.CpuResult   = cpuRes
+        member x.HmiResult   = hmiRes
+        member x.PilotResult = pilotRes
+        member x.SelectedResult(target) = SelectGet target

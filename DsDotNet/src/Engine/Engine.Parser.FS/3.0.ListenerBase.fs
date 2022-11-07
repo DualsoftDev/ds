@@ -27,7 +27,7 @@ type ListenerBase(parser:dsParser, helper:ParserHelper) =
     member internal _._flow             with get() = helper._flow             and set(v) = helper._flow             <- v
     member internal _._parenting        with get() = helper._parenting        and set(v) = helper._parenting        <- v
     member internal _._modelSpits       with get() = helper._modelSpits       and set(v) = helper._modelSpits       <- v
-    member internal _._modelSpitObjects with get() = helper._modelSpitObjects and set(v) = helper._modelSpitObjects <- v
+    member internal _._modelSpitObjects = helper._modelSpitObjects
 
     member internal x.AddElement(path:Fqdn, elementType:GraphVertexType) =
         if x._elements.ContainsKey(path) then
@@ -40,7 +40,6 @@ type ListenerBase(parser:dsParser, helper:ParserHelper) =
     member internal _.CurrentPathElements = helper.CurrentPathElements
     member internal x.UpdateModelSpits() =
         x._modelSpits <- x._model.Spit().ToArray()
-        x._modelSpitObjects <- x._modelSpits.Select(fun spit -> spit.GetCore()).ToArray()
 
 
 

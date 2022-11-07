@@ -43,7 +43,7 @@ type ParserHelper(options:ParserOptions) =
     member val internal _parenting:Real option = None  with get, set
     member val internal _elements = Dictionary<Fqdn, GraphVertexType>(NameUtil.CreateNameComponentsComparer())
     member val internal _modelSpits:SpitResult array = [||] with get, set
-    member val internal _modelSpitObjects:obj array = [||] with get, set
+    member internal x._modelSpitObjects = x._modelSpits.Select(fun spit -> spit.GetCore()).ToArray()
 
     member internal x.AppendPathElement(lastName:string) =
         x.CurrentPathElements.Append(lastName).ToArray()

@@ -131,30 +131,31 @@ type DsParser() =
 
         let includeMe = defaultArg includeMe false
         let predicate = defaultArg predicate (isType<'T>)
-        let rec enumerateChildrenHelper(rslt:ResizeArray<'T>, frm:IParseTree, incMe:bool, pred:(IParseTree->bool)) =
-            if (incMe && pred(frm)) then
+        let rec enumerateChildrenHelper(rslt:ResizeArray<'T>, frm:IParseTree, incMe:bool) =
+            if (incMe && predicate(frm)) then
                 rslt.Add(forceCast<'T>(frm))
 
             for index in [ 0 .. frm.ChildCount - 1 ] do
-                enumerateChildrenHelper(rslt, frm.GetChild(index), true, pred)
+                enumerateChildrenHelper(rslt, frm.GetChild(index), true)
 
         //Func<IParseTree, bool> pred = predicate ?? new Func<IParseTree, bool>(ctx => ctx is T)
         let result = ResizeArray<'T>()
-        enumerateChildrenHelper(result, from, includeMe, predicate)
+        enumerateChildrenHelper(result, from, includeMe)
         result
 
 
-    static member enumerateParents(from:IParseTree      // IEnumerable<IParseTree>
+    static member enumerateParents<'T when 'T :> IParseTree >(
+        from:IParseTree      // IEnumerable<IParseTree>
         , ?includeMe:bool
         , ?predicate:(IParseTree->bool)) =
 
         let includeMe = defaultArg includeMe false
-        let predicate = defaultArg predicate (fun _ -> true)
+        let predicate = defaultArg predicate (isType<'T>)
         let rec helper(from:IParseTree, includeMe:bool) =
             [
                 if from <> null then
                     if (includeMe && predicate(from)) then
-                        yield from
+                        yield forceCast<'T>(from)
 
                     yield! helper(from.Parent, true)
             ]

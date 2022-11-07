@@ -174,16 +174,16 @@ internal class InformationServer
                 {
                     var res = code.succeed ? code.body : code.error;
                     _ = Task.Run(() => {
-                        var retuner =
-                            JsonConvert.SerializeObject(
-                                new {
-                                    mode = "init",
-                                    from = "info-server",
-                                    initializer = res
-                                }
-                            );
-                        producers[mode][code.from].TransferData(retuner!);
-                    }
+                            var retuner =
+                                JsonConvert.SerializeObject(
+                                    new {
+                                        mode = "init",
+                                        from = "info-server",
+                                        initializer = res
+                                    }
+                                );
+                            producers[mode][code.from].TransferData(retuner!);
+                        }
                     );
                 }
             }
@@ -192,6 +192,20 @@ internal class InformationServer
         }
         catch (Exception e)
         {
+            _ = Task.Run(() => {
+                    var target = "model-input";
+                    var retuner =
+                        JsonConvert.SerializeObject(
+                            new
+                            {
+                                mode = "init",
+                                from = "info-server",
+                                initializer = e.Message
+                            }
+                        );
+                    producers[mode][target].TransferData(retuner!);
+                }
+            );
             return new Response(false, mode, e.Message);
         }
     }
@@ -332,8 +346,11 @@ internal class InformationServer
         var content = JObject.Parse(eventString);
         var mode = content["mode"]!.ToString();
         var container = content["container"]!;
-        var response = TypeSelector(mode, container);
-        DbHandler(response);
+        if (container != null && container["from"]!.ToString() != "info-server")
+        {
+            var response = TypeSelector(mode, container);
+            DbHandler(response);
+        }
     }
 
     public void Executor()

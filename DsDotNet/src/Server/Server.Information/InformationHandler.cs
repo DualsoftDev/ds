@@ -12,7 +12,29 @@ namespace Server.Information;
 
 internal class InformationServer
 {
-    public Dictionary<ProducerType, Dictionary<string, KafkaProduce>> producers;
+    public enum ProduceType
+    {
+        none,
+        distributor,
+        information,
+        broadcaster,
+        heart_bit
+    }
+
+    public class Response
+    {
+        public bool Succeed;
+        public ProduceType Process;
+        public object Body;
+        public Response(bool succeed, ProduceType process, object body)
+        {
+            Succeed = succeed;
+            Process = process;
+            Body = body;
+        }
+    }
+
+    public Dictionary<ProduceType, Dictionary<string, KafkaProduce>> producers;
     public Dictionary<string, KafkaConsume> consumers;
     public InformationServer(string path)
     {
@@ -22,18 +44,11 @@ internal class InformationServer
         consumers = GenConsumers(serverCfg);
     }
 
-    public enum ProducerType
+    private Dictionary<ProduceType, Dictionary<string, KafkaProduce>> 
+        GenProducers(JObject serverCfg)
     {
-        none,
-        distributor,
-        information,
-        broadcaster,
-        heart_bit
-    }
-
-    private Dictionary<ProducerType, Dictionary<string, KafkaProduce>> GenProducers(JObject serverCfg)
-    {
-        var producers = new Dictionary<ProducerType, Dictionary<string, KafkaProduce>>();
+        var producers = 
+            new Dictionary<ProduceType, Dictionary<string, KafkaProduce>>();
         var addresses = serverCfg["addresses"];
         if (addresses == null)
             throw new ArgumentNullException("addresses");
@@ -52,11 +67,20 @@ internal class InformationServer
                     {
                         var prodInfo = JObject.Parse(prd.ToString());
                         var typeStr = prodInfo["type"]!.ToString();
-                        var pType = (ProducerType)Enum.Parse(typeof(ProducerType), typeStr);
+                        var pType = 
+                            (ProduceType)Enum.Parse(
+                                typeof(ProduceType), 
+                                typeStr
+                            );
                         if (!producers.ContainsKey(pType))
-                            producers.Add(pType, new Dictionary<string, KafkaProduce>());
-                        var partition = int.Parse(prodInfo["partition"]!.ToString());
-                        var target = int.Parse(prodInfo["target"]!.ToString());
+                            producers.Add(
+                                pType, 
+                                new Dictionary<string, KafkaProduce>()
+                            );
+                        var partition = 
+                            int.Parse(prodInfo["partition"]!.ToString());
+                        var target = 
+                            int.Parse(prodInfo["target"]!.ToString());
                         producers[pType].Add(
                             topic.Key,
                             new KafkaProduce(
@@ -123,80 +147,220 @@ internal class InformationServer
         return consumers;
     }
 
-    private void ModelHandler(string content)
+    private void DbHandler(Response resp)
+    {
+        //
+        Console.WriteLine(
+            $"succeed : {resp.Succeed}\n" +
+            $"process : {resp.Process}\n" +
+            $"body : {resp.Body}"
+        );
+    }
+
+    private Response ModelUploadHandler(ProduceType mode, JToken container)
     {
         // input : Ds model text
-        // 1. saving content to db as a ds model
+        // 1. store container into DB
         //   + check differences of ds model if is possible
         // 2. parse ds model and generate CPU-HMI-PILOT codes
-        // 3. distribute the codes and store the log to db
-        var pm = new CodeGenHandler.ParseModel(content);
-        if (pm != null)
+        // 3. distribute the codes
+        try
         {
-            var cCode = pm.CpuCode;
-            var hCode = pm.HmiCode;
-            var pCode = pm.PilotCode;
-            Console.WriteLine(pCode);
+            var resultList = new List<CodeGen.Initializer>();
+            var pm = 
+                new CodeGenHandler.ParseModel(container["body"]!.ToString());
+            if (pm != null)
+            {
+                resultList.Add(pm.CpuResult);
+                resultList.Add(pm.PilotResult);
+                resultList.Add(pm.HmiResult);
+                foreach (var code in resultList)
+                {
+                    var res = code.succeed ? code.body : code.error;
+                    var returner =
+                        JsonConvert.SerializeObject(
+                            new {
+                                mode = "init",
+                                from = "info-server",
+                                initializer = res
+                            }
+                        );
+                    _ = Task.Run(() => {
+                            producers[mode][code.from].TransferData(returner!);
+                        }
+                    );
+                }
+            }
+
+            return new Response(true, mode, resultList);
+        }
+        catch (Exception e)
+        {
+            var target = "model-input";
+            var returner =
+                JsonConvert.SerializeObject(
+                    new {
+                        mode = "init",
+                        from = "info-server",
+                        initializer = e.Message
+                    }
+                );
+            _ = Task.Run(() => {
+                    producers[mode][target].TransferData(returner!);
+                }
+            );
+            return new Response(false, mode, e.Message);
         }
     }
 
-    private void InformationHandler(string content)
+    private Response ModelDownloadHandler(ProduceType mode, JToken container)
     {
-        // input : request for getting daily & monthly information
-        // 1. getting day & month data from db
-        // 2. generate information
-        // 3. return to Ds pilot
+        // input : ds model get request
+        // 1. getting ds model from DB
+        // 2. produce to target topic
+        try
+        {
+            return new Response(true, mode, "");
+        }
+        catch (Exception e)
+        {
+            return new Response(false, mode, e.Message);
+        }
     }
 
-    private void StreamHandler(string content)
+    private Response ModelInitializeHandler(ProduceType mode, JToken container)
+    {
+        // input : initialize request
+        // 1. getting ds model from DB
+        // 2. change ds model to target code
+        // 3. produce to target topic
+        try
+        {
+            var model = new { }; 
+            var pm = 
+                new CodeGenHandler.ParseModel(model.ToString());
+            var target = container["from"]!.ToString();
+            var genRes = pm.SelectedResult(target);
+            var res = genRes.succeed ? genRes.body : genRes.error;
+            var returner =
+                JsonConvert.SerializeObject(
+                    new {
+                        mode = "init",
+                        from = "info-server",
+                        initializer = res
+                    }
+                );
+            _ = Task.Run(() => {
+                    producers[mode][target].TransferData(returner);
+                }
+            );
+            return new Response(true, mode, genRes);
+        }
+        catch (Exception e)
+        {
+            var target = container["from"]!.ToString();
+            var returner =
+                JsonConvert.SerializeObject(
+                    new {
+                        mode = "init",
+                        from = "info-server",
+                        initializer = e.Message
+                    }
+                );
+            _ = Task.Run(() => {
+                    producers[mode][target].TransferData(returner);
+                }
+            );
+            return new Response(false, mode, e.Message);
+        }
+    }
+    
+    private Response InformationHandler(ProduceType mode, JToken container)
+    {
+        // input : process for getting daily & monthly information
+        // 1. getting day & month data from db
+        // 2. generate information
+        // 3. produce to Ds pilot
+        try
+        {
+            return new Response(true, mode, "");
+        }
+        catch (Exception e)
+        {
+            return new Response(false, mode, e.Message);
+        }
+    }
+    
+    private Response StreamHandler(ProduceType mode, JToken container)
     {
         // input : stream data from control server
         // 1. collect stream data
         // 2. broadcast to the ds pilot when getting a request
+        try
+        {
+            return new Response(true, mode, "");
+        }
+        catch (Exception e)
+        {
+            return new Response(false, mode, e.Message);
+        }
     }
-
+    
     private void MessageHandler(string eventString)
     {
         // input : every inputs on kafka brokers
         // format :
         //     {
-        //         "mode": string,
-        //         "from": string,
-        //         "container": string, // maybe ds model or something else..
-        //         "timestamp": datetime(YYYY.MM.DD_HH:MM:SS.sss)
+        //         "container": {
+        //             "from": string,
+        //             "body": object,
+        //             "timestamp": datetime(YYYY.MM.DD_HH:MM:SS.sss)
+        //         },
+        //         "mode": string
         //     }
-        ProducerType TypeSelector(string mode) =>
+        Response TypeSelector(string mode, JToken container) =>
             mode switch
             {
                 // upload from model editor ->
                 //     distribute to DsPilot, HMI, constrol server, engine cpu
-                "upload"      => ProducerType.distributor,
-
+                "upload" =>
+                    ModelUploadHandler(ProduceType.distributor, container),
+                    
                 // request from model editor ->
                 //     upload stored ds model into kafk broker for model editor
-                "download"    => ProducerType.distributor,
+                "download" =>
+                    ModelDownloadHandler(ProduceType.distributor, container),
 
                 // request from DsPilot, HMI, constrol server, engine cpu
-                //     distribute to DsPilot, HMI, constrol server, engine cpu
-                "initialize" => ProducerType.distributor,
+                //     return a parsed ds code
+                "initialize" =>
+                    ModelInitializeHandler(ProduceType.distributor, container),
 
                 // request from DsPilot ->
                 //     generate daily & monthly information and return
-                "information" => ProducerType.information,
+                "information" =>
+                    InformationHandler(ProduceType.information, container),
 
                 // request from DsPilot ->
                 //     get stream data from control server and
                 //     streaming realtime data to the DsPilot
-                "streaming"   => ProducerType.broadcaster,
+                "streaming" =>
+                    StreamHandler(ProduceType.broadcaster, container),
 
                 // mode error ->
                 //     notify error and mode list with usage
-                _             => ProducerType.none
+                _ =>
+                    new Response(false, ProduceType.none, "type error")
             };
 
         var content = JObject.Parse(eventString);
-        var targetType = TypeSelector(content["mode"]!.ToString());
-        
+        var mode = content["mode"]!.ToString();
+        var container = content["container"]!;
+        if (container != null && container["from"]!.ToString() != "info-server")
+        {
+            var response = TypeSelector(mode, container);
+            DbHandler(response);
+        }
     }
 
     public void Executor()

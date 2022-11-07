@@ -274,4 +274,5 @@ module PilotGenModule =
 				"timestamp": "1667183446.5441985"
 			}
             """
-        pilotCode
+
+        { from = "ds-pilot"; succeed = true; body = pilotCode; error = ""; }

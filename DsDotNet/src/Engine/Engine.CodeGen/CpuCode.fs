@@ -24,5 +24,5 @@ module CpuGenModule =
                 }
             ]
             """
-       
-        testText
+
+        { from = "cpu"; succeed = true; body = testText; error = ""; }

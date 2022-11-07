@@ -33,10 +33,6 @@ module HmiGenModule =
         used_in:ResizeArray<string>;
         targets:ResizeArray<string>;
     }
-    and Initialize = {
-        mode:string;
-        initializer:Info list;
-    }
 
     let GenHmiCode(model:Model) =
         let hmiInfos = new Dictionary<string, Info>()
@@ -101,8 +97,7 @@ module HmiGenModule =
                 let btnName = $"{name}__{flowName}"
                 if false = btnTargetMap.ContainsKey(btnType) ||
                         false = btnTargetMap[btnType].Contains(flowName) then
-                    addFlowButton
-                        btnName system.Name [flowName] btnType
+                    addFlowButton btnName system.Name [flowName] btnType
 
         let addGlobalButtons (model:Model) =
             let flowNames =
@@ -169,45 +164,59 @@ module HmiGenModule =
             | Real realParent -> addToUsedIn device realParent.QualifiedName
             | _ -> ()
 
-        for sys in model.Systems do
-            if sys.Active then // if sys.Name = "My" then // to check
-                let groupBtnCombiner = addGroupButtons sys
-                addSystemFlowReal sys
-                groupBtnCombiner sys.AutoButtons ButtonType.Auto
-                groupBtnCombiner sys.ResetButtons ButtonType.Clear
-                groupBtnCombiner sys.EmergencyButtons ButtonType.Emergency
-                let btnTgtMap =
-                    new Dictionary<ButtonType, ResizeArray<string>>()
-                for info in hmiInfos do
-                    btnTgtMap.Add(info.Value.botton_type, info.Value.targets)
-                for flow in sys.Flows do
-                    addSystemFlowReal flow
-                    addUnionButtons sys flow btnTgtMap
-                    for rootSeg in flow.Graph.Vertices do
-                        match rootSeg with
-                        | :? Real as real ->
-                            addSystemFlowReal rootSeg
-                            for call in real.Graph.Vertices do
-                                addDevice model sys flow call
-                        | :? Call as call ->
-                            addDevice model sys flow call
-                        | :? Alias as alias ->
-                            match alias.Target with
-                            | RealTarget rt ->
-                                addSystemFlowReal rt
-                            | CallTarget ct ->
-                                addDevice model sys flow alias
-                        | _ ->
-                            printfn "unknown type has detected"
-        addGlobalButtons model
-
-        let initializer = {
-            mode = "init"; 
-            initializer = hmiInfos.Values |> List.ofSeq;
-        }
+        let succeess, message = 
+            try
+                for sys in model.Systems do
+                    if sys.Name = "My" then //to check //if sys.Active then // 
+                        let groupBtnCombiner = addGroupButtons sys
+                        addSystemFlowReal 
+                            sys
+                        groupBtnCombiner 
+                            sys.AutoButtons ButtonType.Auto
+                        groupBtnCombiner 
+                            sys.ResetButtons ButtonType.Clear
+                        groupBtnCombiner 
+                            sys.EmergencyButtons ButtonType.Emergency
+                        let btnTgtMap =
+                            new Dictionary<ButtonType, ResizeArray<string>>()
+                        for info in hmiInfos do
+                            btnTgtMap.Add(
+                                info.Value.botton_type, 
+                                info.Value.targets
+                            )
+                        for flow in sys.Flows do
+                            addSystemFlowReal flow
+                            addUnionButtons sys flow btnTgtMap
+                            for rootSeg in flow.Graph.Vertices do
+                                match rootSeg with
+                                | :? Real as real ->
+                                    addSystemFlowReal rootSeg
+                                    for call in real.Graph.Vertices do
+                                        addDevice model sys flow call
+                                | :? Call as call ->
+                                    addDevice model sys flow call
+                                | :? Alias as alias ->
+                                    match alias.Target with
+                                    | RealTarget rt ->
+                                        addSystemFlowReal rt
+                                    | _ ->
+                                        addDevice model sys flow alias
+                                | _ ->
+                                    printfn "unknown type has detected"
+                if hmiInfos.Count <> 0 then addGlobalButtons model
+                true, null
+            with
+                | ex -> false, ex.Message
+        
         let settings = JsonSerializerSettings()
         settings.Converters.Add(Converters.StringEnumConverter())
-        JsonConvert.SerializeObject(initializer, Formatting.Indented, settings)
+        let body = 
+            JsonConvert.SerializeObject(
+                hmiInfos.Values |> List.ofSeq,
+                settings
+            )
+
+        { from = "hmi"; succeed = succeess; body = body; error = message; }
 
     //[<EntryPoint>]
     //let main argv =

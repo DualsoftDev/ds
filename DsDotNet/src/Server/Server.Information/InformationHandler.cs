@@ -323,40 +323,34 @@ internal class InformationServer
             {
                 // upload from model editor ->
                 //     distribute to DsPilot, HMI, constrol server, engine cpu
-                "upload" => (
-                    ModelUploadHandler(ProduceType.distributor, container)
-                ),
+                "upload" =>
+                    ModelUploadHandler(ProduceType.distributor, container),
                     
                 // request from model editor ->
                 //     upload stored ds model into kafk broker for model editor
-                "download" => (
-                    ModelDownloadHandler(ProduceType.distributor, container)
-                ),
+                "download" =>
+                    ModelDownloadHandler(ProduceType.distributor, container),
 
                 // request from DsPilot, HMI, constrol server, engine cpu
                 //     return a parsed ds code
-                "initialize" => (
-                    ModelInitializeHandler(ProduceType.distributor, container)
-                ),
+                "initialize" =>
+                    ModelInitializeHandler(ProduceType.distributor, container),
 
                 // request from DsPilot ->
                 //     generate daily & monthly information and return
-                "information" => (
-                    InformationHandler(ProduceType.information, container)
-                ),
+                "information" =>
+                    InformationHandler(ProduceType.information, container),
 
                 // request from DsPilot ->
                 //     get stream data from control server and
                 //     streaming realtime data to the DsPilot
-                "streaming" => (
-                    StreamHandler(ProduceType.broadcaster, container)
-                ),
+                "streaming" =>
+                    StreamHandler(ProduceType.broadcaster, container),
 
                 // mode error ->
                 //     notify error and mode list with usage
-                _ => (
+                _ =>
                     new Response(false, ProduceType.none, "type error")
-                )
             };
 
         var content = JObject.Parse(eventString);

@@ -15,9 +15,9 @@ module CodeGenHandler =
         let pilotRes = GenHmiCode(model)
         let SelectGet target = 
             match target with
-            | "cpu"   -> cpuRes
-            | "pilot" -> hmiRes
-            | "hmi"   -> pilotRes
+            | "cpu"      -> cpuRes
+            | "ds-pilot" -> hmiRes
+            | "hmi"      -> pilotRes
             | _ -> { 
                     from = null; 
                     succeed = false; 

@@ -275,4 +275,4 @@ module PilotGenModule =
 			}
             """
 
-        { from = "pilot"; succeed = true; body = pilotCode; error = ""; }
+        { from = "ds-pilot"; succeed = true; body = pilotCode; error = ""; }

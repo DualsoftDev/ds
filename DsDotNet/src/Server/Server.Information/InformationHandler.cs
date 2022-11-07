@@ -150,7 +150,11 @@ internal class InformationServer
     private void DbHandler(Response resp)
     {
         //
-        Console.WriteLine($"succeed : {resp.Succeed}\nprocess : {resp.Process} \nbody : {resp.Body}");
+        Console.WriteLine(
+            $"succeed : {resp.Succeed}\n" +
+            $"process : {resp.Process}\n" +
+            $"body : {resp.Body}"
+        );
     }
 
     private Response ModelUploadHandler(ProduceType mode, JToken container)
@@ -173,16 +177,16 @@ internal class InformationServer
                 foreach (var code in resultList)
                 {
                     var res = code.succeed ? code.body : code.error;
+                    var returner =
+                        JsonConvert.SerializeObject(
+                            new {
+                                mode = "init",
+                                from = "info-server",
+                                initializer = res
+                            }
+                        );
                     _ = Task.Run(() => {
-                            var retuner =
-                                JsonConvert.SerializeObject(
-                                    new {
-                                        mode = "init",
-                                        from = "info-server",
-                                        initializer = res
-                                    }
-                                );
-                            producers[mode][code.from].TransferData(retuner!);
+                            producers[mode][code.from].TransferData(returner!);
                         }
                     );
                 }
@@ -192,18 +196,17 @@ internal class InformationServer
         }
         catch (Exception e)
         {
+            var target = "model-input";
+            var returner =
+                JsonConvert.SerializeObject(
+                    new {
+                        mode = "init",
+                        from = "info-server",
+                        initializer = e.Message
+                    }
+                );
             _ = Task.Run(() => {
-                    var target = "model-input";
-                    var retuner =
-                        JsonConvert.SerializeObject(
-                            new
-                            {
-                                mode = "init",
-                                from = "info-server",
-                                initializer = e.Message
-                            }
-                        );
-                    producers[mode][target].TransferData(retuner!);
+                    producers[mode][target].TransferData(returner!);
                 }
             );
             return new Response(false, mode, e.Message);
@@ -239,22 +242,35 @@ internal class InformationServer
             var target = container["from"]!.ToString();
             var genRes = pm.SelectedResult(target);
             var res = genRes.succeed ? genRes.body : genRes.error;
+            var returner =
+                JsonConvert.SerializeObject(
+                    new {
+                        mode = "init",
+                        from = "info-server",
+                        initializer = res
+                    }
+                );
             _ = Task.Run(() => {
-                    producers[mode][target].TransferData(
-                        JsonConvert.SerializeObject(
-                            new {
-                                mode = "init",
-                                from = "info-server",
-                                initializer = res
-                            }
-                        )
-                    );
+                    producers[mode][target].TransferData(returner);
                 }
             );
             return new Response(true, mode, genRes);
         }
         catch (Exception e)
         {
+            var target = container["from"]!.ToString();
+            var returner =
+                JsonConvert.SerializeObject(
+                    new {
+                        mode = "init",
+                        from = "info-server",
+                        initializer = e.Message
+                    }
+                );
+            _ = Task.Run(() => {
+                    producers[mode][target].TransferData(returner);
+                }
+            );
             return new Response(false, mode, e.Message);
         }
     }

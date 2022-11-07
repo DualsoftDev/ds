@@ -15,6 +15,7 @@ open Engine.Common
 open Engine.Common.FS
 open Engine.Parser
 open type Engine.Parser.dsParser
+open type Engine.Parser.FS.DsParser
 
 type DsParser() =
     static member ParseText (text:string, extractor:dsParser->#RuleContext, ?throwOnError) =
@@ -151,10 +152,11 @@ type DsParser() =
         let predicate = defaultArg predicate (fun _ -> true)
         let rec helper(from:IParseTree, includeMe:bool) =
             [
-                if (includeMe && predicate(from)) then
-                    yield from
+                if from <> null then
+                    if (includeMe && predicate(from)) then
+                        yield from
 
-                yield! helper(from.Parent, true)
+                    yield! helper(from.Parent, true)
             ]
         helper(from, includeMe)
 
@@ -178,7 +180,8 @@ type DsParser() =
         let pred = isType<'T>
         DsParser.findFirstAncestor(from, pred, includeMe) |> Option.map forceCast<'T>
 
-
+    static member findIdentifier1FromContext(context:IParseTree) =
+        findFirstChild<Identifier1Context>(context) |> Option.map(fun ctx -> ctx.GetText())
 
     static member collectNameComponents(from:IParseTree):string[] = // :Fqdn
 
@@ -225,6 +228,14 @@ type DsParser() =
             DsParser.findFirstChild(from, pred, true) |> Option.get
         let name = idCtx.GetText()
         splitName(name).ToArray()
+
+
+    static member collectNameInformation(from:IParseTree) =
+        let ns        = collectNameComponents from
+        let sysNames  = findFirstAncestor<SystemContext>(from, true).Map(collectNameComponents).ToList()
+        let flow      = findFirstAncestor<FlowContext>(from, true).Bind(findIdentifier1FromContext)
+        let parenting = findFirstAncestor<ParentingContext>(from, true).Bind(findIdentifier1FromContext)
+        ns, sysNames, flow, parenting
 
 #if EXTENDED_USAGE
     static member getParseResult(parser:dsParser) = // : ParserResult

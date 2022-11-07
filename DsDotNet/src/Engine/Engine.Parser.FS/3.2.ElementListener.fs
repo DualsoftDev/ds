@@ -52,6 +52,7 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
 
     override x.EnterCausalToken(ctx:CausalTokenContext) =
         let ns = collectNameComponents(ctx)
+        let ns2, sysNames, flowName, realName = collectNameInformation ctx
         assert(ns.Length = 1 || ns.Length = 2)
 
         let path = x.AppendPathElement(ns)

@@ -143,7 +143,7 @@ module PPTObjectModule =
         member x.IsUsing = bShow
         member x.Title = slidePart.PageTitle()
 
-    type pptNode(shape:Presentation.Shape, iPage:int, dashOutline:bool , sildeSize, pageTitle:string)  =
+    type pptNode(shape:Presentation.Shape, iPage:int, pageTitle:string, isDummy:bool)  =
         let mutable txCnt = 1
         let mutable rxCnt = 1
         let mutable name = ""
@@ -152,10 +152,7 @@ module PPTObjectModule =
         let mutable ifName    = ""
         let mutable ifTXs    = HashSet<string>()
         let mutable ifRXs    = HashSet<string>()
-        let mutable bEmg = false
-        let mutable bAuto = false
-        let mutable bStart = false
-        let mutable bReset = false
+        let mutable btnType:BtnType option = None 
         let mutable nodeType:NodeType = NodeType.MY
         let trimStartEnd(text:string) =   text.TrimStart(' ').TrimEnd(' ')
         let trimStartEndSeq(texts:string seq) =  texts  |> Seq.map(fun name -> trimStartEnd name)
@@ -189,12 +186,10 @@ module PPTObjectModule =
 
         do
             nodeType <-
-                if(IsDummyShape(shape))         then DUMMY
+                if isDummy then DUMMY
 
                 elif(shape.CheckRectangle())    then  MY
-
                 elif(shape.CheckHomePlate())    then  IF
-
                 elif(shape.CheckFoldedCorner()) then  COPY
 
                 elif(shape.CheckDonutShape()
@@ -228,23 +223,21 @@ module PPTObjectModule =
                             then updateCopySys  (text ,(GetBracketsReplaceName(shape.InnerText) |> trimStartEnd))
             |_ -> ()
 
-            bEmg    <- shape.CheckNoSmoking()
-            bStart  <- false//not use shape.CheckBlockArc()
-            bAuto   <- shape.CheckDonutShape()
-            bReset  <- shape.CheckBevelShape()
+            let btn =  if shape.CheckNoSmoking() then Some(BtnType.EmergencyBTN)
+                       elif shape.CheckDonutShape() then Some(BtnType.AutoBTN)
+                       elif shape.CheckBevelShape() then Some(BtnType.ResetBTN)
+                       else None
+            btnType    <- btn
+               
 
         member x.PageNum = iPage
         member x.Shape = shape
-        member x.DashOutline = dashOutline
         member x.Safeties = safeties
         member x.CopySys  = copySystems
         member x.IfName      = ifName
         member x.IfTXs       = ifTXs
         member x.IfRXs       = ifRXs
-        member x.IsEmgBtn = bEmg
-        member x.IsAutoBtn= bAuto
-        member x.IsStartBtn = bStart
-        member x.IsResetBtn = bReset
+        member x.BtnType = btnType
         member x.NodeType = nodeType
         member x.IsDummy  = nodeType = DUMMY
         member x.PageTitle    = pageTitle
@@ -257,35 +250,30 @@ module PPTObjectModule =
         member val CntTX =  txCnt
         member val CntRX =  rxCnt
         member val Alias :pptNode  option = None with get, set
-        member val Rectangle :System.Drawing.Rectangle =   shape.GetPosition(sildeSize)
+        member x.GetRectangle (sildeSize:int*int) =  shape.GetPosition(sildeSize)
 
     and
-        pptEdge(conn:Presentation.ConnectionShape,  iEdge:UInt32Value, iPage:int ,startId:uint32, endId:uint32, nodes:ConcurrentDictionary<string, pptNode>) =
+        pptEdge(conn:Presentation.ConnectionShape,  iEdge:UInt32Value, iPage:int ,sNode:pptNode, eNode:pptNode) =
         let mutable reverse = false
         let mutable causal:ModelingEdgeType = ModelingEdgeType.StartEdge
-        let startKey = Objkey(iPage, startId)
-        let endKey   = Objkey(iPage, endId)
-        let startNode = nodes.[startKey]
-        let endNode   = nodes.[endKey]
         do
-            if conn.IsOutlineConnectionExist()|>not
-            then conn.ErrorConnect(ErrID._40, nodes.[startKey].Name, nodes.[endKey].Name, iPage)
-            GetCausal(conn, iPage, nodes.[startKey].Name, nodes.[endKey].Name) 
+            
+            GetCausal(conn, iPage, sNode.Name, eNode.Name) 
             |> fun(c, r) -> causal <- c;reverse <- r
 
         member x.PageNum = iPage
         member x.ConnectionShape = conn
         member x.Id = iEdge
-        member x.StartNode:pptNode = if(reverse) then endNode else startNode
-        member x.EndNode:pptNode =   if(reverse) then startNode else endNode
+        member x.StartNode:pptNode = if(reverse) then eNode else sNode
+        member x.EndNode:pptNode =   if(reverse) then sNode else eNode
         member x.ParentId = 0 //reserve
 
 
         member val Name =  conn.EdgeName()
         member val Key =  Objkey(iPage, iEdge)
         member x.Text =
-                            let sName = if startNode.Alias.IsSome then  startNode.Alias.Value.Name else startNode.Name
-                            let eName = if endNode.Alias.IsSome   then  endNode.Alias.Value.Name   else endNode.Name
+                            let sName = if sNode.Alias.IsSome then  sNode.Alias.Value.Name else sNode.Name
+                            let eName = if eNode.Alias.IsSome then  eNode.Alias.Value.Name else eNode.Name
                             if(reverse)
                             then $"{iPage};{eName}{causal.ToText()}{sName}";
                             else $"{iPage};{sName}{causal.ToText()}{eName}";

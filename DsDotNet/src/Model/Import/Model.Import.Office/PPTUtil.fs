@@ -6,6 +6,7 @@ open DocumentFormat.OpenXml.Packaging
 open System
 open System.Linq
 open DocumentFormat.OpenXml
+open DocumentFormat.OpenXml.Drawing
 
 [<AutoOpen>]
 module PPTUtil = 
@@ -75,7 +76,22 @@ module PPTUtil =
             else 
                  if(outline = null|>not && outline.Descendants<Drawing.NoFill>().Any()) then false
                  else true
-                
+
+        [<Extension>] 
+        static member IsNonDirectional(shape:#ConnectionShape) = 
+            let outline = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.Outline>().FirstOrDefault();
+            if(outline = null) then true
+            else 
+                let head  = if(outline.Descendants<HeadEnd>().FirstOrDefault() = null)
+                            then LineEndValues.None
+                            else outline.Descendants<HeadEnd>().FirstOrDefault().Type.Value
+
+                let tail  = if(outline.Descendants<TailEnd>().FirstOrDefault() = null)
+                            then LineEndValues.None
+                            else outline.Descendants<TailEnd>().FirstOrDefault().Type.Value
+
+                head = LineEndValues.None && tail = LineEndValues.None
+
         [<Extension>] 
         static member CheckShape(shape:#Shape) = 
             //도형이 아니면 필터  NonVisualShapeDrawingProperties

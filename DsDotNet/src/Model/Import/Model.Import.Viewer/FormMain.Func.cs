@@ -12,6 +12,7 @@ using System.Windows.Forms;
 using static Engine.Common.FS.MessageEvent;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsTextProperty;
+using static Model.Import.Office.PPTDummyModule;
 
 namespace Dual.Model.Import
 {
@@ -63,6 +64,7 @@ namespace Dual.Model.Import
               
                 _Model = result.Item1;
                 var dicFlow = result.Item2;
+                IEnumerable<pptDummy> dummys  = result.Item3;
                 if (!_ConvertErr)
                 {
                     _dsText = _Model.ToDsText();
@@ -70,7 +72,7 @@ namespace Dual.Model.Import
                     this.Do(() => xtraTabControl_Ex.TabPages.Clear());
 
                     foreach (var sys in _Model.Systems.OrderBy(sys => sys.Name))
-                        CreateNewTabViewer(sys, dicFlow);
+                        CreateNewTabViewer(sys, dicFlow, dummys);
 
                     WriteDebugMsg(DateTime.Now, MSGLevel.Info, $"{PathPPT} 불러오기 성공!!");
                     this.Do(() =>
@@ -99,6 +101,9 @@ namespace Dual.Model.Import
                 Busy = false;
             }
         }
+
+
+
         internal void ImportExcel(string path)
         {
             try
@@ -190,14 +195,12 @@ namespace Dual.Model.Import
 
             _Demo.Systems.OrderBy(sys => sys.Name).ToList()
                   .ForEach(sys =>
-                      CreateNewTabViewer(sys, null)
+                      CreateNewTabViewer(sys, null, null)
                   );
         }
 
-        internal void CreateNewTabViewer(DsSystem sys, Dictionary<int, Flow> dicFlow)
+        internal void CreateNewTabViewer(DsSystem sys, Dictionary<int, Flow> dicFlow, IEnumerable<pptDummy> dummys)
         {
-            //List<MFlow> flows = sys.Flows.Cast<MFlow>().OrderBy(o => o.Page).ToList();
-
             sys.Flows.ToList().ForEach(f =>
             {
                 if (_DicMyUI.ContainsKey(f) || _DicExUI.ContainsKey(f))
@@ -214,12 +217,16 @@ namespace Dual.Model.Import
                         pageNum = dicFlow.First(flow => flow.Value.System.Name == sys.Name 
                                                      && flow.Value.Name == f.Name).Key;
 
+                    List<pptDummy> lstDummy = new List<pptDummy>();
+                    if (dummys != null)
+                        lstDummy = dummys.Where(w => w.Page == pageNum).ToList();
+
                     UCView viewer = new UCView { Dock = DockStyle.Fill };
-                    viewer.SetGraph(f, sys);
+                    viewer.SetGraph(f, sys, lstDummy);
                     TabPage tab = new TabPage();
                     tab.Controls.Add(viewer);
                     tab.Tag = viewer;
-                    tab.Text = $"{f.System.Name}.{f.Name}({(pageNum > 0 ? pageNum: 0)})";
+                    tab.Text = $"{f.Name}({(pageNum > 0 ? pageNum: 0)})";
                     this.Do(() =>
                     {
                         if (f.System.Active)
@@ -279,7 +286,7 @@ namespace Dual.Model.Import
             //6_Alias
             //7_CopySystem
             //8_Safety
-            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\..\..\..\..\"))+ "UnitTest\\UnitTest.Engine\\ImportPPT\\T9_GroupEdge.pptx";
+            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\..\..\..\..\"))+ "UnitTest\\UnitTest.Engine\\ImportPPT\\T9_Group.pptx";
             bool debug = File.Exists(path);
             if (debug)
             {

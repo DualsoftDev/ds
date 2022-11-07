@@ -122,10 +122,10 @@ module ImportU =
                         |> Seq.iter(fun node ->
                                 let flow = dicFlow.[node.PageNum]
                                 //Start, Reset, Auto, Emg 버튼
-                                if(node.IsStartBtn) then mySys.AddButton(BtnType.StartBTN, node.Name, flow)
-                                if(node.IsResetBtn) then mySys.AddButton(BtnType.ResetBTN,node.Name, flow)
-                                if(node.IsAutoBtn)  then mySys.AddButton(BtnType.AutoBTN,node.Name, flow)
-                                if(node.IsEmgBtn)   then mySys.AddButton(BtnType.EmergencyBTN ,node.Name, flow)
+                                if(node.BtnType.IsSome && node.BtnType.Value = BtnType.StartBTN) then mySys.AddButton(BtnType.StartBTN, node.Name, flow)
+                                if(node.BtnType.IsSome && node.BtnType.Value = BtnType.ResetBTN) then mySys.AddButton(BtnType.ResetBTN,node.Name, flow)
+                                if(node.BtnType.IsSome && node.BtnType.Value = BtnType.AutoBTN)  then mySys.AddButton(BtnType.AutoBTN,node.Name, flow)
+                                if(node.BtnType.IsSome && node.BtnType.Value = BtnType.EmergencyBTN)   then mySys.AddButton(BtnType.EmergencyBTN ,node.Name, flow)
                                 )
 
 
@@ -202,6 +202,7 @@ module ImportU =
         [<Extension>] static member MakeEdges (doc:pptDoc, model:Model) =
                             let pptEdges = doc.Edges
                             let parents = doc.Parents
+                            let dummys = doc.Dummys
 
                             let convertEdge(edge:pptEdge, flow:Flow, src:Vertex, tgt:Vertex) =
                                 let graph =
@@ -248,21 +249,36 @@ module ImportU =
                                         sys.ApiResetInfos.Add(ApiResetInfo.Create(sys, edge.StartNode.Name, edge.Causal ,edge.EndNode.Name ))|>ignore
 
                                     else
+                                        let srcDummy = dummys.TryFindDummy(edge.StartNode)
+                                        let tgtDummy = dummys.TryFindDummy(edge.EndNode)
 
-                                        let srcs = if(edge.StartNode.IsDummy) then dicDummys.[edge.StartNode] else [dicVertex.[edge.StartNode.Key]]
-                                        let tgts = if(edge.EndNode.IsDummy)   then dicDummys.[edge.EndNode]   else [dicVertex.[edge.EndNode.Key]]
+                                        if(srcDummy.IsNonNull()) 
+                                            then 
+                                                let tgt = if tgtDummy.IsNull() then edge.EndNode.Key else tgtDummy.DummyNodeKey
+                                                srcDummy.AddOutEdge(edge.Causal, tgt)
+                                            else 
+                                                if(tgtDummy.IsNonNull()) 
+                                                then 
+                                                    let src = if srcDummy.IsNull() then edge.StartNode.Key else srcDummy.DummyNodeKey
+                                                    tgtDummy.AddInEdge(edge.Causal, src)
 
-                                        if(edge.StartNode.IsDummy || edge.EndNode.IsDummy)
-                                        then
-                                            srcs
-                                            |> Seq.iter(fun src -> tgts
-                                                                    |> Seq.iter(fun tgt -> convertEdge(edge, flow, src, tgt) |> ignore))
 
-                                        else
-                                            let sSeg = srcs.First()
-                                            let eSeg = tgts.First()
+                                        let getVertexs(pptNodes:pptNode seq) = 
+                                            pptNodes.Select(fun s-> dicVertex.[s.Key])
 
-                                            convertEdge(edge, flow, sSeg, eSeg) |> ignore
+                                        let srcs = if(dummys.IsMember(edge.StartNode)) 
+                                                    then dummys.GetMembers(edge.StartNode) |> getVertexs 
+                                                    else [dicVertex.[edge.StartNode.Key]]
+
+                                        let tgts = if(dummys.IsMember(edge.EndNode)) 
+                                                    then dummys.GetMembers(edge.EndNode)   |> getVertexs
+                                                    else [dicVertex.[edge.EndNode.Key]]
+                                        
+                                        srcs
+                                        |> Seq.iter(fun src ->
+                                            tgts
+                                            |> Seq.iter(fun tgt -> convertEdge(edge, flow, src, tgt) |> ignore))
+
                                         )
 
 
@@ -328,4 +344,9 @@ module ImportU =
                                 origSys.ApiResetInfos.ForEach(fun apiResetInfo ->
                                             apiResetInfo.ToCopy(copySys)|>ignore)
                                 )
+
+        [<Extension>] static member MakeViewDummy (doc:pptDoc, model:Model) =
+                            doc.Dummys |> Seq.iter(fun dummy -> dummy.Update(dicVertex))
+                               
+                                    
 

@@ -1,25 +1,22 @@
 using Engine.Common;
 using Engine.Core;
 using Microsoft.Msagl.Drawing;
-using Microsoft.Msagl.GraphmapsWithMesh;
 using Microsoft.Msagl.GraphViewerGdi;
 using Microsoft.Msagl.Layout.Layered;
-using Model.Import.Office;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsType;
-using static Engine.Core.EdgeModule;
-using static Engine.Core.GraphModule;
 using Color = Microsoft.Msagl.Drawing.Color;
 using Edge = Microsoft.Msagl.Drawing.Edge;
 using Vertex = Engine.Core.CoreModule.Vertex;
-using DsEdge = Engine.Core.CoreModule.Edge;
 using static Model.Import.Office.InterfaceClass;
-using System.Windows.Forms.VisualStyles;
 using static Engine.Core.DsText;
+using static Model.Import.Office.PPTDummyModule;
+using DocumentFormat.OpenXml.Spreadsheet;
+using System.Diagnostics;
+using DocumentFormat.OpenXml.Office2016.Presentation.Command;
 
 namespace Dual.Model.Import
 {
@@ -46,8 +43,11 @@ namespace Dual.Model.Import
         private Dictionary<string, Node> _dicDrawing = new Dictionary<string, Node>();
 
 
+        bool IsDummyMember(List<pptDummy> lstDummy, Vertex vertex) {
+            return lstDummy.Where(w => w.Members.Contains(vertex)).Count() > 0;
+        }
 
-        public void SetGraph(Flow flow, DsSystem sys)
+        public void SetGraph(Flow flow, DsSystem sys, List<pptDummy> lstDummy)
         {
             //sub 그래프 불가
             //viewer.Graph.LayoutAlgorithmSettings = new Microsoft.Msagl.Layout.MDS.MdsLayoutSettings();
@@ -74,20 +74,24 @@ namespace Dual.Model.Import
             if(sys.Flows.First() == flow && sys.ApiItems.Count>0) //처음 시스템 Flow에만 인터페이스 표기
                 DrawApiItems(flow, sys);
 
-            var edgeVetexs = new HashSet<Vertex>();
-            flow.ModelingEdges.ForEach(s =>
-            {
-                edgeVetexs.Add(s.Source);
-                edgeVetexs.Add(s.Target);
-            });
+            var edgeVetexs = flow.ModelingEdges.SelectMany(s => new List<Vertex>() { s.Source, s.Target });
+            var dummyNodes = lstDummy
+                .ToDictionary(d => d.DummyNodeKey, d => System.Tuple.Create(d, new DsViewNode(d.DummyNodeKey)));
 
             flow.Graph.Vertices
                 .Where(seg => !edgeVetexs.Contains(seg))
                 .ForEach(seg => DrawSeg(viewer.Graph.RootSubgraph, new DsViewNode(seg)));
 
             flow.ModelingEdges
+                .Where(s => !IsDummyMember(lstDummy, s.Source) && !IsDummyMember(lstDummy, s.Target))
                 .Where(s => s.Source.Parent.IsFlow && s.Target.Parent.IsFlow)
                 .Select(s => new DsViewEdge(s))
+                .ForEach(f => DrawMEdge(viewer.Graph.RootSubgraph, f));
+             
+            lstDummy
+                .Where(w => w.GetParent().GetCore() is Flow)
+                .ToDictionary(s => s, s => s.Edges)
+                .SelectMany(dic => dic.Value.Select(edge => new DsViewEdge(dic.Key, edge, dummyNodes)))
                 .ForEach(f => DrawMEdge(viewer.Graph.RootSubgraph, f));
 
             viewer.SetCalculatedLayout(viewer.CalculateLayout(viewer.Graph));

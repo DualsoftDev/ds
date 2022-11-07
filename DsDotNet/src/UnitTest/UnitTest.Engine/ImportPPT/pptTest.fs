@@ -12,7 +12,7 @@ open Model.Import.Office
 [<AutoOpen>]
 module pptTestModule =
     ///ppt로 부터 만든 모델을 text로 다시 읽어 이중 확인
-    let check (model:Model, pageFlow:Dictionary<int, Flow>) = 
+    let check (model:Model, pageFlow:Dictionary<int, Flow>, dummys:IEnumerable<pptDummy>) = 
         let originalText =  model.ToDsText() 
         originalText =~= originalText
 
@@ -20,12 +20,7 @@ module pptTestModule =
         //let helper = ModelParser.ParseFromString2(originalText, ParserOptions.Create4Runtime("localhost"))
         //originalText =~= helper.Model.ToDsText()
 
-    type PPTTest() =
-        do Fixtures.SetUpTest()
-
-        [<Test>]
-        member __.``EveryScenarioPPT test`` () =
-
+    let checkAll () = 
             check (ImportM.FromPPTX($"{__SOURCE_DIRECTORY__}\\T0_CaseAll.pptx"))
             check (ImportM.FromPPTX($"{__SOURCE_DIRECTORY__}\\T1_System.pptx"))
             check (ImportM.FromPPTX($"{__SOURCE_DIRECTORY__}\\T2_Flow.pptx"))
@@ -36,3 +31,9 @@ module pptTestModule =
             check (ImportM.FromPPTX($"{__SOURCE_DIRECTORY__}\\T7_CopySystem.pptx"))
             check (ImportM.FromPPTX($"{__SOURCE_DIRECTORY__}\\T8_Safety.pptx"))
     
+
+    type PPTTest() =
+        do Fixtures.SetUpTest()
+
+        [<Test>]
+        member __.``EveryScenarioPPT test`` () = checkAll()

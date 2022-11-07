@@ -53,17 +53,18 @@ module ImportM =
                 doc.MakeSafeties(model)
                 //ApiTxRx  만들기
                 doc.MakeApiTxRx(model)
-
+                //Dummy Vertex  만들기
+                doc.MakeViewDummy(model)
 
 
                 MSGInfo($"전체 장표   count [{doc.Pages.Count()}]")
                 MSGInfo($"전체 도형   count [{doc.Nodes.Count()}]")
                 MSGInfo($"전체 연결   count [{doc.Edges.Count()}]")
                 MSGInfo($"전체 부모   count [{doc.Parents.Keys.Count}]")
-                model, ImportU.dicFlow
+                model, ImportU.dicFlow, doc.Dummys
 
             with ex ->  failwithf  $"{ex.Message}"
-                        model, ImportU.dicFlow
+                        model, ImportU.dicFlow, doc.Dummys
 
 
     let FromPPTX(path:string) =

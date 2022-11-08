@@ -183,7 +183,8 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
             |]
 
         for (sysCtx, apiPath, address) in api2Address do
-            let sys = x._model.FindSystem(sysCtx.systemName().GetText())
+            //let sys = x._model.FindSystem(sysCtx.systemName().GetText())
+            let sys = x._theSystem.Value  // todo: fix me
             sys.ApiAddressMap.Add(apiPath, address)
 
         for o in x._modelSpits do

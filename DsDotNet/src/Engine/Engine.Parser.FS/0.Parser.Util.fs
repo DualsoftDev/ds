@@ -31,10 +31,9 @@ module ParserUtil =
               ReplaceText = replace }
 
 
-    let getReplacedText (ctx:ParserRuleContext) (replaces:RangeReplace seq) =
-        let text = getOriginalText ctx
-        //let text = ctx.GetText()
-        let offset = ctx.Start.StartIndex
+    let getReplacedText (ruleContextToTextify:ParserRuleContext) (replaces:RangeReplace seq) =
+        let text = getOriginalText ruleContextToTextify
+        let offset = ruleContextToTextify.Start.StartIndex
         let hash = HashSet<RangeReplace>()
         let rec helper (i:int) =
             [

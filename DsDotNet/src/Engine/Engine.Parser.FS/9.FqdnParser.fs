@@ -1,6 +1,7 @@
 namespace Engine.Parser.FS
 
 open Antlr4.Runtime
+open Engine.Core
 
 open type DsParser
 
@@ -24,5 +25,5 @@ module Fqdn =
         let parser = createParser (text)
         let ctx = parser.fqdn()
         let ncs = enumerateChildren<fqdnParser.NameComponentContext>(ctx)
-        [ for nc in ncs -> nc.GetText() ]
+        [ for nc in ncs -> nc.GetText().DeQuoteOnDemand() ]
 

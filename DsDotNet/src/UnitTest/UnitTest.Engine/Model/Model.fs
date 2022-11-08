@@ -365,16 +365,16 @@ module private ModelComparisonHelper =
             EX."이상한. Api" > EX."Dummy. Api";
         }
     }
-}
-[sys] EX = {
-    [flow] F = {
-        TX; // island
-        "R.X"; // island
-        "NameWith\"Quote"; // island
-    }
-    [interfaces] = {
-        "이상한. Api" = { EX.F.TX ~ EX.F."R.X" }
-        "Dummy. Api" = { _ ~ _ }
+    [sys] EX = {
+        [flow] F = {
+            TX; // island
+            "R.X"; // island
+            "NameWith\"Quote"; // island
+        }
+        [interfaces] = {
+            "이상한. Api" = { F.TX ~ F."R.X" }
+            "Dummy. Api" = { _ ~ _ }
+        }
     }
 }
 """
@@ -392,24 +392,24 @@ module private ModelComparisonHelper =
             A."-" = { Am1; Am2; Am3; }
         }
     }
+    [sys] A = {
+        [flow] F = {
+            Vp <||> Vm |> Pp |> Sm;
+            Vp |> Pm |> Sp;
+            Vm > Pm > Sm;
+            Vp > Pp > Sp;
+        }
+        [interfaces] = {
+            "+" = { F.Vp ~ F.Sp }
+            "-" = { F.Vm ~ F.Sm }
+            "+" <||> "-";
+        }
+    }
     [prop] = {
         [addresses] = {
             A."+" = ( %Q1234.2343, %I1234.2343)
             A."-" = ( START, END)
         }
-    }
-}
-[sys] A = {
-    [flow] F = {
-        Vp <||> Vm |> Pp |> Sm;
-        Vp |> Pm |> Sp;
-        Vm > Pm > Sm;
-        Vp > Pp > Sp;
-    }
-    [interfaces] = {
-        "+" = { A.F.Vp ~ A.F.Sp }
-        "-" = { A.F.Vm ~ A.F.Sm }
-        "+" <||> "-";
     }
 }
 """

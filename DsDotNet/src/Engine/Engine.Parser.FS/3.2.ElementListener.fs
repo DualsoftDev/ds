@@ -67,12 +67,54 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
             | None ->
                 tracefn "Need to generate %A" [s;f;n]
                 Real.Create(n, flow) |> ignore
-                goon <- false
-        | s::[], f, Some p, n::[] ->
-            tracefn $"{s}/{f}/{p}/{n}"
-            match findSpit [s;f;p;n] with
+            goon <- false
+        | s::[], f, Some p, aliasCall::[] ->
+            tracefn $"{s}/{f}/{p}/{aliasCall}"
+            match findSpit [s;f;p;aliasCall] with
             | Some sp -> ()
-            | None -> tracefn "Need to generate %A" [s;f;p;n]
+            | None ->
+                match findSpit [s; f; aliasCall] with
+                | Some sp ->
+                    let mne =
+                        match sp.SpitObj with
+                        | SpitOnlyAlias soa ->
+                            let aliasKey = soa.AliasKey
+                            match aliasKey.Length with
+                                | 3 ->     // my flow real 에 대한 alias
+                                        assert(aliasKey[0] = s && aliasKey[1] = flow.Name)
+                                        let aliasCreator =
+                                            let aliasTarget = new AliasTargetReal(aliasKey)
+                                            new AliasCreator(ns.Combine(), Flow flow, aliasTarget)
+                                        x.ParserHelper.AliasCreators.Add(aliasCreator) |> ignore
+                                | 2 ->
+                                    let apiItem =
+                                        x._modelSpitObjects
+                                            .OfType<ApiItem>()
+                                            .Where(fun api -> api.NameComponents.IsStringArrayEqaul(aliasKey))
+                                            .Head()
+
+                                    let name = ns.Combine()
+                                    match x._parenting with
+                                    | Some parent ->
+                                        let aliasCreator =
+                                            let aliasTarget = new AliasTargetApi(apiItem)
+                                            new AliasCreator(name, Real parent, aliasTarget)
+                                        x.ParserHelper.AliasCreators.Add(aliasCreator)
+                                    | None ->
+                                        (* flow 바로 아래에 사용되는 직접 call.  A.+ *)
+                                        let aliasCreator =
+                                            let aliasTarget = new AliasTargetDirectCall(aliasKey)
+                                            new AliasCreator(name, Flow flow, aliasTarget)
+                                        x.ParserHelper.AliasCreators.Add(aliasCreator)
+                                    |> ignore
+                                | _ ->
+                                    failwith "ERROR"
+                        | _ -> ()
+                    ()
+                | None ->
+                    ()
+
+                tracefn "Need to generate %A" [s;f;p;aliasCall]
 
         | s::[], f, Some p, otherSystem::apiName::[] ->
             assert(p = x._parenting.Value.Name)

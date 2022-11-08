@@ -1,6 +1,12 @@
 open System.Collections.Generic
 
 
+exception MyException of string
+    with static member Create(msg:string) = MyException msg
+
+let ex = MyException.Create("test")    
+raise ex
+
 
 type Range = {
     Start: int

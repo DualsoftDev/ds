@@ -16,6 +16,7 @@ open Engine.Common.FS
 open Engine.Parser
 open type Engine.Parser.dsParser
 open type Engine.Parser.FS.DsParser
+open Engine.Core
 
 type DsParser() =
     static member ParseText (text:string, extractor:dsParser->#RuleContext, ?throwOnError) =
@@ -210,8 +211,9 @@ type DsParser() =
         DsParser.findFirstAncestor(from, pred, includeMe) |> Option.map forceCast<'T>
 
     static member findIdentifier1FromContext(context:IParseTree) =
-        findFirstChild<Identifier1Context>(context) |> Option.map(fun ctx -> ctx.GetText())
+        findFirstChild<Identifier1Context>(context) |> Option.map(fun ctx -> ctx.GetText().DeQuoteOnDemand())
 
+    [<Obsolete("Use FqdnParser instead")>]
     static member collectNameComponents(from:IParseTree):string[] = // :Fqdn
 
         (*

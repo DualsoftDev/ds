@@ -13,40 +13,41 @@ namespace Engine
             C.P = { Cp; Cp1; Ap2; }
             C.M = { Cm; Cm1; Cm2; }
         }
-        [safety] = {
-            Main = {C.F.Sp; C.F.Sm}
+        // ---- flow 내의 safety block 없애는 걸로...
+        //[safety] = {
+        //    Main = {C.F.Sp; C.F.Sm}
+        //}
+    }
+    [sys] C = {
+        [flow] F = {
+            Vp > Pp > Sp;
+            Vm > Pm > Sm;
+
+            Pp |> Sm;
+            Pm |> Sp;
+            Vp <||> Vm;
+        }
+        [interfaces] = {
+            P = { F.Vp ~ F.Sp }
+            M = { F.Vm ~ F.Sm }
+            // 정보로서의 상호 리셋
+            P <||> M;
         }
     }
+
     [prop] = {
         [addresses] = {
             C.P = ( %Q1234.2343, %I1234.2343)
             C.M = ( START, END)
         }
     }
-}
-
-[sys] C = {
-    [flow] F = {
-        Vp > Pp > Sp;
-        Vm > Pm > Sm;
-
-        Pp |> Sm;
-        Pm |> Sp;
-        Vp <||> Vm;
-    }
-    [interfaces] = {
-        P = { F.Vp ~ F.Sp }
-        M = { F.Vm ~ F.Sm }
-        // 정보로서의 상호 리셋
-        P <||> M;
+    [prop] = {
+        [ safety ] = {
+            L.F.Main = {C.F.Vp; C.F.Vm}
+        }
     }
 }
 
-[prop] = {
-    [ safety ] = {
-        L.F.Main = {C.F.Vp; C.F.Vm}
-    }
-}
 ";
 
         public static string SafetyDuplicatedInvalid = @"
@@ -386,18 +387,17 @@ namespace Engine
             // > EX.""이상한. Api""
             ; }
     }
-}
-[sys] EX = {
-    [flow] F = {
-        TX;
-        ""R.X"";
-        ""NameWith\""Quote"";
+    [sys] EX = {
+        [flow] F = {
+            TX;
+            ""R.X"";
+            ""NameWith\""Quote"";
+        }
+        [interfaces] = {
+            ""이상한. Api"" = { F.TX ~ F.""R.X"" }
+            ""Dummy. Api"" = { _ ~ _ }
+        }
     }
-    [interfaces] = {
-        ""이상한. Api"" = { F.TX ~ F.""R.X"" }
-        ""Dummy. Api"" = { _ ~ _ }
-    }
-
 }
 ";
 
@@ -470,8 +470,9 @@ namespace Engine
             A.""-"" = (START, END)
         }
     }
+    " + SampleRunner.CreateCylinder("A") + @"
 }
-" + SampleRunner.CreateCylinder("A");
+";
 
 
         public static string Diamond = @"

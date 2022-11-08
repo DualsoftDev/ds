@@ -3,15 +3,12 @@ namespace rec Engine.Parser.FS
 
 open System
 open System.Linq
-open System.Text
 open System.Runtime.InteropServices
-open System.Text.RegularExpressions
 open System.Collections.Generic
 
 open Antlr4.Runtime
 open Antlr4.Runtime.Tree
 
-open Engine.Common
 open Engine.Common.FS
 open Engine.Parser
 open type Engine.Parser.dsParser
@@ -65,6 +62,7 @@ type DsParser() =
                 let copiedSystemText = srcCtx.GetReplacedText([RangeReplace.Create(nameCtx, name)])
                 RangeReplace.Create(ctx, copiedSystemText)).ToArray()
         let replacedText = model.GetReplacedText(replaces)
+        logDebug $"Replaced Text:\r\n{replacedText}"
         replacedText
         //printfn ""
         //()

@@ -4,9 +4,26 @@ open System.Collections.Generic
 exception MyException of string
     with static member Create(msg:string) = MyException msg
 
-let ex = MyException.Create("test")    
+let ex = MyException.Create("test")
 raise ex
 
+
+
+let bind (mapping: 'T->seq<'U>) source = Seq.collect mapping source
+let apply fs xs = bind (fun f -> Seq.map ((<|) f) xs) fs
+let apply' fs xs = bind (fun f -> Seq.map f xs) fs
+let x2 = (*) 2
+let x3 = (*) 3
+let x n = (*) n
+let (<*>) = apply
+apply [x 2; x 9] [1; 3]
+apply' [x 2; x 9] [1; 3]
+
+bind (fun f -> Seq.map f [ 1; 3 ]) [ x 2; x 9 ]
+
+[x2; x3] <*> [1; 3]
+
+((<|) x2) 9
 
 type Range = {
     Start: int

@@ -194,8 +194,18 @@ module Functions =
     module PrimitiveOperators =
         // https://riptutorial.com/fsharp/example/16297/how-to-compose-values-and-functions-using-common-operators
 
-        let (>>=) t uf  = Option.bind uf t
-        let (>=>) tf uf = fun v -> tf v >>= uf
+        /// bind for option
+        (* t: 'a option -> uf: ('a -> 'b option) -> 'b option *)
+        let (>>=) xo uf  = Option.bind uf xo
+
+        /// kliesli for option
+        (* tf: ('a -> 'b option) -> uf: ('b -> 'c option) -> v: 'a -> 'c option *)
+        let (>=>) tf uf = fun v -> tf v >>= uf      // == fun v -> (tf v) >>= uf
+
+        (* uf: ('a -> 'b option) -> tf: ('c -> 'a option) -> v: 'c -> 'b option
+           v: 'b option <- 'c <- uf: ('b option <- 'a ) <- tf: ('a option <- 'c)
+         *)
+        let (<=<) uf tf = fun v -> tf v >>= uf
 
         /// get default arguments.
         let (|?) = defaultArg

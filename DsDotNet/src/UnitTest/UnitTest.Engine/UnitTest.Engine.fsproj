@@ -45,6 +45,7 @@
 		<None Include="Obsolete\Parser\Parse.OK.fsx" />
 		<None Include="Obsolete\test.ipynb" />
 		<Compile Include="EntryPoint.fs" />
+		<None Include="ScratchPad.fsx" />
 		<None Include="App.config" />
 	</ItemGroup>
 

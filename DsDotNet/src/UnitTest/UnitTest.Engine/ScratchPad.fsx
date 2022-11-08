@@ -1,0 +1,41 @@
+open System.Collections.Generic
+
+
+
+type Range = {
+    Start: int
+    End: int
+    Replace: string
+} with
+    static member Create(start: int, end_: int, replace: string) =
+        { Start = start
+          End = end_
+          Replace = replace }
+
+let ranges = [
+    Range.Create(0, 0, "Start")
+    Range.Create(2, 3, "hello")
+    Range.Create(5, 6, "world")
+    Range.Create(9, 9, "Bye")
+]
+
+
+let replace (xs:char array) (ranges:Range seq) =
+    let hash = HashSet<Range>()
+    let rec helper (i:int) =
+        [
+            if i < xs.Length then
+                let range = ranges |> Seq.tryFind (fun r -> r.Start <= i && i <= r.End)
+                match range with
+                | Some r ->
+                    if not (hash.Contains(r)) then
+                        hash.Add(r) |> ignore
+                        yield! r.Replace
+                | None ->
+                    yield xs[i]
+                yield! helper (i+1)
+        ]
+    helper 0
+
+[|'0'..'9'|]
+replace [|'0'..'9'|] ranges

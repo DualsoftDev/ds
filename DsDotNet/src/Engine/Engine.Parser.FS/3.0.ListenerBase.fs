@@ -5,6 +5,7 @@ open Engine.Common.FS
 open Engine.Core
 open Engine.Parser
 open type Engine.Parser.dsParser
+open type Engine.Parser.FS.DsParser
 
 
 /// <summary>
@@ -46,13 +47,27 @@ type ListenerBase(parser:dsParser, helper:ParserHelper) =
 
     override x.EnterSystem(ctx:SystemContext) =
         let name = ctx.systemName().GetText().DeQuoteOnDemand()
-        match x._currentSystem with
-        | None ->
-            assert(name = helper._theSystem.Value.Name)
-            helper._currentSystem <- helper._theSystem
-        | Some curSys ->
-            helper._currentSystem <- Some <| curSys.Systems.Find(fun s -> s.Name = name)
-        ()
+        let theSystem = helper._theSystem.Value
+
+        let ns = collectSystemNames ctx
+
+        helper._currentSystem <-
+            if theSystem.NameComponents.IsStringArrayEqaul ns then
+                helper._theSystem
+            else
+                theSystem.Systems.TryFind(fun sys -> sys.NameComponents.IsStringArrayEqaul ns)
+
+        //match x._currentSystem with
+        //| None ->
+        //    let ns = collectNameComponents ctx
+        //    if theSystem.NameComponents.IsStringArrayEqaul ns then
+        //        helper._currentSystem <- helper._theSystem
+        //    else
+        //        helper._currentSystem <- theSystem.Systems.TryFind(fun sys -> sys.NameComponents.IsStringArrayEqaul ns)
+        //| Some curSys ->
+        //    helper._currentSystem <- Some <| curSys.Systems.Find(fun s -> s.Name = name)
+
+        assert (helper._currentSystem.IsSome)
 
     override x.ExitSystem(ctx:SystemContext) = helper._currentSystem <- None
 

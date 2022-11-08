@@ -11,6 +11,7 @@
 	<ItemGroup>
 		<Compile Include="0.ParserException.fs" />
 		<Compile Include="0.ParserObject.fs" />
+		<Compile Include="0.Parser.Util.fs" />
 		<Compile Include="1.AllListener.fs" />
 		<Compile Include="1.ErrorListener.fs" />
 		<Compile Include="1.ParserHelper.fs" />

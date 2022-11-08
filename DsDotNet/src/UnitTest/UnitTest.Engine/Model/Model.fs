@@ -218,8 +218,8 @@ module private ModelComparisonHelper =
             Vp > Pp > Sp;
         }
         [interfaces] = {
-            "+" = { A.F.Vp ~ A.F.Sp }
-            "-" = { A.F.Vm ~ A.F.Sm }
+            "+" = { F.Vp ~ F.Sp }
+            "-" = { F.Vm ~ F.Sm }
             "+" <||> "-";
         }
     }
@@ -231,8 +231,8 @@ module private ModelComparisonHelper =
             Vp > Pp > Sp;
         }
         [interfaces] = {
-            "+" = { B.F.Vp ~ B.F.Sp }
-            "-" = { B.F.Vm ~ B.F.Sm }
+            "+" = { F.Vp ~ F.Sp }
+            "-" = { F.Vm ~ F.Sm }
             "+" <||> "-";
         }
     }

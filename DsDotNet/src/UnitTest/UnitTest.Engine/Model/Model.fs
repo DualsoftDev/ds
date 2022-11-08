@@ -210,33 +210,34 @@ module private ModelComparisonHelper =
     [flow] F = {
         A."+" > A."-" > B."+";
     }
+    [sys] A = {
+        [flow] F = {
+            Vp <||> Vm |> Pp |> Sm;
+            Vp |> Pm |> Sp;
+            Vm > Pm > Sm;
+            Vp > Pp > Sp;
+        }
+        [interfaces] = {
+            "+" = { A.F.Vp ~ A.F.Sp }
+            "-" = { A.F.Vm ~ A.F.Sm }
+            "+" <||> "-";
+        }
+    }
+    [sys] B = {
+        [flow] F = {
+            Vp <||> Vm |> Pp |> Sm;
+            Vp |> Pm |> Sp;
+            Vm > Pm > Sm;
+            Vp > Pp > Sp;
+        }
+        [interfaces] = {
+            "+" = { B.F.Vp ~ B.F.Sp }
+            "-" = { B.F.Vm ~ B.F.Sm }
+            "+" <||> "-";
+        }
+    }
 }
-[sys] A = {
-    [flow] F = {
-        Vp <||> Vm |> Pp |> Sm;
-        Vp |> Pm |> Sp;
-        Vm > Pm > Sm;
-        Vp > Pp > Sp;
-    }
-    [interfaces] = {
-        "+" = { A.F.Vp ~ A.F.Sp }
-        "-" = { A.F.Vm ~ A.F.Sm }
-        "+" <||> "-";
-    }
-}
-[sys] B = {
-    [flow] F = {
-        Vp <||> Vm |> Pp |> Sm;
-        Vp |> Pm |> Sp;
-        Vm > Pm > Sm;
-        Vp > Pp > Sp;
-    }
-    [interfaces] = {
-        "+" = { B.F.Vp ~ B.F.Sp }
-        "-" = { B.F.Vm ~ B.F.Sm }
-        "+" <||> "-";
-    }
-}    """
+"""
 
 
 

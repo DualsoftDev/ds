@@ -35,7 +35,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
                 | _, Some system ->
                     DsSystem.Create(name, host, system)
                 | Some theSystem, None ->
-                    theSystem
+                    DsSystem.Create(name, host, theSystem)
                 | None, None ->
                     let system = DsSystem.CreateTopLevel(name, host)
                     helper._theSystem <- Some system

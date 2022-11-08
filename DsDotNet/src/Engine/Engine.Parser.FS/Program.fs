@@ -149,23 +149,23 @@ C4 > C5;
         A."+" > A."-";
         A."-" > B."+";
     }
-}
-[sys] A = {
-    [flow] F = {
-        Vp > Pp > Sp;
-        Vm > Pm > Sm;
+    [sys] A = {
+        [flow] F = {
+            Vp > Pp > Sp;
+            Vm > Pm > Sm;
 
-        Vp |> Pm |> Sp;
-        Vm |> Pp |> Sm;
-        Vp <||> Vm;
+            Vp |> Pm |> Sp;
+            Vm |> Pp |> Sm;
+            Vp <||> Vm;
+        }
+        [interfaces] = {
+            "+" = { F.Vp ~ F.Sp }
+            "-" = { F.Vm ~ F.Sm }
+            "+" <||> "-";
+        }
     }
-    [interfaces] = {
-        "+" = { F.Vp ~ F.Sp }
-        "-" = { F.Vm ~ F.Sm }
-        "+" <||> "-";
-    }
+    [sys] B = @copy_system(A);
 }
-[sys] B = @copy_system(A);
 
 """
 

@@ -52,6 +52,7 @@ type ListenerBase(parser:dsParser, helper:ParserHelper) =
             helper._currentSystem <- helper._theSystem
         | Some curSys ->
             helper._currentSystem <- Some <| curSys.Systems.Find(fun s -> s.Name = name)
+        ()
 
     override x.ExitSystem(ctx:SystemContext) = helper._currentSystem <- None
 

@@ -89,7 +89,8 @@ type DsParser() =
                             sysName, ctx)
                         |> dict |> Dictionary
 
-                let copySysCtxs = sysCtxMap.Where(fun kv -> DsParser.findFirstChild<SysCopySpecContext>(kv.Value) |> Option.isSome).ToArray()
+                let copySysCtxs =
+                    sysCtxMap.Where(fun (KeyValue(sysName, sysCtxt)) -> sysCtxt.children.Any(isType<SysCopySpecContext>)).ToArray()
 
                 // 원본 full text 에서 copy_system 구문 삭제한 text 반환
                 let textWithoutSysCopy = omitSystemCopy(text, copySysCtxs.Select(fun kv -> kv.Value).ToArray())

@@ -153,8 +153,7 @@ module CoreModule =
         member _.ApiItem = apiItem
         member val Addresses:Addresses = null with get, set
 
-        static member CreateInFlow(apiItem:ApiItem, flow: Flow) = create flow.Graph apiItem (Flow flow)
-        static member CreateInReal(apiItem:ApiItem, real:Real) = create real.Graph apiItem (Real real)
+        static member Create(apiItem:ApiItem, parent:ParentWrapper) = create (parent.GetGraph()) apiItem parent
 
         /// Graph 에 포함되지 않는 core.  Alias 에 숨은 core
         static member CreateNowhere(apiItem:ApiItem, parent:ParentWrapper) = Call(apiItem, parent)

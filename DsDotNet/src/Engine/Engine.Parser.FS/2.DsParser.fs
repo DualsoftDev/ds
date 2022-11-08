@@ -232,11 +232,11 @@ type DsParser() =
 
 
     static member collectNameInformation(from:IParseTree) =
-        let ns        = collectNameComponents from
-        let sysNames  = findFirstAncestor<SystemContext>(from, true).Map(collectNameComponents).ToList()
-        let flow      = findFirstAncestor<FlowContext>(from, true).Bind(findIdentifier1FromContext)
+        let ns        = collectNameComponents(from).ToFSharpList()
+        let sysNames  = enumerateParents<SystemContext>(from, true).Select(findIdentifier1FromContext >> Option.get).Reverse().ToFSharpList()
+        let flow      = findFirstAncestor<FlowContext>(from, true).Bind(findIdentifier1FromContext).Value
         let parenting = findFirstAncestor<ParentingContext>(from, true).Bind(findIdentifier1FromContext)
-        ns, sysNames, flow, parenting
+        sysNames, flow, parenting, ns
 
 #if EXTENDED_USAGE
     static member getParseResult(parser:dsParser) = // : ParserResult

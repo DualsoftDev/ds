@@ -34,6 +34,7 @@ type SeqExt =
     [<Extension>] static member IsEmpty(xs:'a seq) = Seq.isEmpty xs
     [<Extension>] static member IsOneOf(x:'x, [<ParamArray>] (xs:'x array)) = xs |> Seq.contains x
     [<Extension>] static member GroupByToDictionary<'V, 'K when 'K: equality>(xs:'V seq, keySelector:'V->'K) = groupByToDictionary xs keySelector
+    [<Extension>] static member ToFSharpList(xs:'a seq)  = List.ofSeq xs
 
     [<Extension>] static member Collect(xs:'a seq, f)    = Seq.collect f xs
     [<Extension>] static member Choose(xs:'a seq, f)     = Seq.choose f xs

@@ -9,6 +9,13 @@ open Engine.Common.FS
 
 [<AutoOpen>]
 module CoreModule =
+    let createFqdnObject (nameComponents:string array) = {
+        new IQualifiedNamed with
+            member _.Name = nameComponents.LastOrDefault()
+            member _.NameComponents = nameComponents
+            member x.QualifiedName = nameComponents.Combine()
+    }
+
     ///Top level structure
     type Model() =
         member val Systems = createNamedHashSet<DsSystem>()
@@ -21,8 +28,14 @@ module CoreModule =
             member val NameComponents = Array.empty<string>
             member x.QualifiedName = null
 
-    and DsSystem private (name:string, host:string, model:Model) =
-        inherit FqdnObject(name, model)
+    and DsSystem private (name:string, host:string, parentQualifiedName:IQualifiedNamed) =
+        inherit FqdnObject(name, parentQualifiedName)
+
+        member val ParentSystem:DsSystem option = None with get, set
+        member val Systems = createNamedHashSet<DsSystem>()
+        member val Variables = ResizeArray<Variable>()
+        member val Commands = ResizeArray<Command>()
+        member val Observes = ResizeArray<Observe>()
 
         member val Flows    = createNamedHashSet<Flow>()
         member val ApiItems = createNamedHashSet<ApiItem>()
@@ -30,7 +43,8 @@ module CoreModule =
         ///시스템 전체시작 버튼누름시 수행되야하는 Real목록
         member val StartPoints = createQualifiedNamedHashSet<Real>()
 
-        member _.Model = model
+        // todo: fix me
+        member _.Model = null//model
         member _.Host = host
 
         ///시스템 버튼 소속 Flow 정보
@@ -46,9 +60,23 @@ module CoreModule =
         ///시스템 핸들링 대상여부   true : mySystem / false : exSystem
         member val Active = false with get, set
 
-        static member Create(name, host, model) =
-            let system = DsSystem(name, host, model)
-            model.Systems.Add(system) |> verifyM $"Duplicated system name [{name}]"
+        //static member Create(name, host, model) =
+        //    let system = DsSystem(name, host, model)
+        //    model.Systems.Add(system) |> verifyM $"Duplicated system name [{name}]"
+        //    system
+        static member Create(name, host, parentSystem:DsSystem) =
+            let system = DsSystem(name, host, parentSystem)
+            system.ParentSystem <- Some parentSystem
+            parentSystem.Systems.Add(system) |> verifyM $"Duplicated system name [{name}]"
+            system
+        static member CreateTopLevel(name, host) =
+            //let emptyName = {
+            //    new IQualifiedNamed with
+            //        member _.Name = null
+            //        member _.NameComponents = Array.empty<string>
+            //        member x.QualifiedName = null
+            //}
+            let system = DsSystem(name, host, createFqdnObject([||]) )
             system
 
     and Flow private (name:string, system:DsSystem) =
@@ -160,7 +188,8 @@ module CoreModule =
 
 
     and ApiItem private (name:string, system:DsSystem) =
-        inherit FqdnObject(name, system)
+        inherit FqdnObject(name, createFqdnObject([|system.Name|]))
+        //inherit FqdnObject(name, system)
         interface INamedVertex
 
         member val TXs = createQualifiedNamedHashSet<Real>()

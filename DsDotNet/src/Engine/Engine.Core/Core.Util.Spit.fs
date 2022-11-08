@@ -66,6 +66,13 @@ module SpitModuleHelper =
             for flow in system.Flows do
                 yield! spit(flow)
                 for api in system.ApiItems -> SpitResult.Create(SpitApiItem api, api.NameComponents)
+
+            for sys in system.Systems do
+                yield! spit(sys)
+
+            for x in system.Variables -> SpitResult.Create(SpitVariable x, [| x.Name |] )
+            for x in system.Commands ->  SpitResult.Create(SpitCommand x,  [| x.Name |] )
+            for x in system.Observes ->  SpitResult.Create(SpitObserve x,  [| x.Name |] )
         |]
     and spitModel (model:Model) : SpitResults =
         [|

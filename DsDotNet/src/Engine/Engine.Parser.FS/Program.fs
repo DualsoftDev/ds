@@ -184,24 +184,25 @@ C4 > C5;
             A."+" > A."-";
         }
     }
+
+    [sys] A = {
+        [flow] F = {
+            Vp > Pp > Sp;
+            Vm > Pm > Sm;
+
+            Vp |> Pm |> Sp;
+            Vm |> Pp |> Sm;
+            Vp <||> Vm;
+        }
+        [interfaces] = {
+            "+" = { F.Vp ~ F.Sp }
+            "-" = { F.Vm ~ F.Sm }
+            // 정보로서의 상호 리셋
+            "+" <||> "-";
+        }
+    }
 }
 
-[sys] A = {
-    [flow] F = {
-        Vp > Pp > Sp;
-        Vm > Pm > Sm;
-
-        Vp |> Pm |> Sp;
-        Vm |> Pp |> Sm;
-        Vp <||> Vm;
-    }
-    [interfaces] = {
-        "+" = { F.Vp ~ F.Sp }
-        "-" = { F.Vm ~ F.Sm }
-        // 정보로서의 상호 리셋
-        "+" <||> "-";
-    }
-}
 """
     let AdoptoedAmbiguousText = """
 [sys] My = {
@@ -743,7 +744,6 @@ C4 > C5;
         let helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation("ActiveCpuName"))
         let model = helper.Model
 
-        let xxx = model.ToDsText()
         //Try("1 + 2 + 3")
         //Try("1 2 + 3")
         //Try("1 + +")

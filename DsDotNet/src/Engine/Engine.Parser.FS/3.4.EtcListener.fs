@@ -25,7 +25,7 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
 
     override x.EnterButtons(ctx:ButtonsContext) =
         let first = findFirstChild<ParserRuleContext>(ctx).Value     // {Emergency, Auto, Start, Reset}ButtonsContext
-        let system = x._system.Value
+        let system = x._theSystem.Value
         let targetDic =
             match first with
             | :? EmergencyButtonsContext -> system.EmergencyButtons
@@ -83,20 +83,20 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
             ]
 
 
-
+        let curSystem = x._currentSystem.Value
         for (key, values) in safetyKvs do
             let seg:Real =
                 match key.Length with
                     | 1 ->
                         assert(ctx.Parent :? FlowContext)
-                        x._model.FindGraphVertex<Real>(x.AppendPathElement(key[0]))
+                        curSystem.FindGraphVertex<Real>(x.AppendPathElement(key[0]))
                     | 3 ->
                         assert(ctx.Parent :? ModelPropertyBlockContext)
-                        x._model.FindGraphVertex<Real>(key)
+                        curSystem.FindGraphVertex<Real>(key)
                     | _ ->
                         raise <| ParserException($"Invalid safety key[{key.Combine()}]", ctx)
 
-            for cond in values.Select(fun v -> x._model.FindGraphVertex(v) :?> Real) do
+            for cond in values.Select(fun v -> curSystem.FindGraphVertex(v) :?> Real) do
                 let added = seg.SafetyConditions.Add(cond)
                 if not added then
                     raise <| ParserException($"Safety condition [{cond.QualifiedName}] duplicated on safety key[{key.Combine()}]", ctx)

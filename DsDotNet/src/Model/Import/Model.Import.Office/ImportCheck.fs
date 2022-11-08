@@ -28,7 +28,7 @@ module ImportCheck =
 
             let fg = flow.Graph
             fg.AddVertices(vertexs.Cast<Vertex>())|>ignore
-            
+
             flow.AddModelEdge("START", TextStartEdge, "시작인과")
             flow.AddModelEdge("START", TextStartPush, "시작유지")
             flow.AddModelEdge("RESET", TextResetEdge, "복귀인과")
@@ -69,7 +69,7 @@ module ImportCheck =
                 |> Seq.iter(fun node ->
 
                     if(sysNames.Contains(node.Name)|> not)
-                    then Office.ErrorPPT(Name, ErrID._32,  node.Shape.InnerText, node.PageNum, $"확인 시스템 이름 : {node.Name}") 
+                    then Office.ErrorPPT(Name, ErrID._32,  node.Shape.InnerText, node.PageNum, $"확인 시스템 이름 : {node.Name}")
 
 
                     )
@@ -107,10 +107,10 @@ module ImportCheck =
         let SameSysFlowName(systems:DsSystem seq, dicFlow: Dictionary<int, Flow>) =
             let sysNames = systems.Select(fun s->s.Name)
             systems.ForEach(fun sys->
-                sys.Flows.ForEach(fun flow -> 
-                    if sysNames.Contains(flow.Name) 
-                    then 
-                        let page = dicFlow.Where(fun w-> w.Value = flow).First().Key                    
+                sys.Flows.ForEach(fun flow ->
+                    if sysNames.Contains(flow.Name)
+                    then
+                        let page = dicFlow.Where(fun w-> w.Value = flow).First().Key
                         Office.ErrorPPT(ErrorCase.Name, ErrID._31, $"시스템이름 : {flow.System.Name}",page, $"중복페이지 : {page}")  )
                     )
 

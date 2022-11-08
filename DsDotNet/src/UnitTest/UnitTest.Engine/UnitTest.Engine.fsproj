@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
@@ -23,13 +23,13 @@
 		<PackageReference Include="NUnit3TestAdapter" Version="3.16.1" />
 		<PackageReference Include="xunit" Version="2.4.2" />
 	</ItemGroup>
-	
+
 	<ItemGroup>
 		<Compile Include="0.OnlyOnce.fs" />
 		<Compile Include="Model\Model.fs" />
 		<Compile Include="Model\ModelGraph.fs" />
 		<Compile Include="Model\ExpressionTest.fs" />
-		<Compile Include="ImportPPT\pptTest.fs" />
+		<!--<Compile Include="ImportPPT\pptTest.fs" />-->
 		<None Include="Obsolete\0.ModelTest_Common.fsx" />
 		<None Include="Obsolete\1.ModelExtension.fsx" />
 		<None Include="Obsolete\ModelTest1.fsx" />
@@ -47,7 +47,7 @@
 		<Compile Include="EntryPoint.fs" />
 		<None Include="App.config" />
 	</ItemGroup>
-	
+
 	<ItemGroup>
 		<ProjectReference Include="..\..\Engine\Engine.CpuUnit\Engine.Cpu.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Test\Engine.Sample.csproj" />

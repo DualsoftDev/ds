@@ -37,14 +37,26 @@ type ParserHelper(options:ParserOptions) =
     /// button category 중복 check 용
     member val ButtonCategories = HashSet<(DsSystem*string)>()
 
-    member internal x._system = x._systems |> Seq.tryHead
-    member val internal _systems = Stack<DsSystem>()
+    //member internal x._system = x._systems |> Seq.tryHead
+    //member val internal _systems = Stack<DsSystem>()
+
+    member x.TheSystem = x._theSystem.Value
+    member val internal _theSystem:DsSystem option = None with get, set
+    member val internal _currentSystem:DsSystem option = None with get, set
+
     member val internal _flow:Flow option = None  with get, set
     member val internal _parenting:Real option = None  with get, set
     member val internal _elements = Dictionary<Fqdn, GraphVertexType>(NameUtil.CreateNameComponentsComparer())
     member val internal _modelSpits:SpitResult array = [||] with get, set
     member internal x._modelSpitObjects = x._modelSpits.Select(fun spit -> spit.GetCore()).ToArray()
-    member internal x.UpdateModelSpits() = x._modelSpits <- x.Model.Spit().ToArray()
+    //member internal x.UpdateModelSpits() = x._modelSpits <- x.Model.Spit().ToArray()
+    member internal x.UpdateModelSpits() =
+        x._modelSpits <-
+            [|
+                match x._theSystem with
+                | Some system -> yield! system.Spit()
+                | _ -> ()
+            |]
 
     member internal x.AppendPathElement(lastName:string) =
         x.CurrentPathElements.Append(lastName).ToArray()
@@ -53,8 +65,8 @@ type ParserHelper(options:ParserOptions) =
 
     member internal x.CurrentPathElements with get():Fqdn =
         let helper() = [
-            match x._system with
-            | Some sys -> yield sys.Name
+            match x._currentSystem with
+            | Some sys -> yield! sys.NameComponents // yield sys.Name
             | None -> ()
             match x._flow with
             | Some f -> yield f.Name

@@ -22,8 +22,8 @@ type ListenerBase(parser:dsParser, helper:ParserHelper) =
     member x.ParserHelper = helper
     member internal _._model = helper.Model
     member internal _._elements = helper._elements
-    member internal _._system = helper._system
-    member internal _._systems = helper._systems
+    member internal _._currentSystem = helper._currentSystem
+    member internal _._theSystem = helper._theSystem
     member internal _._modelSpits = helper._modelSpits
     member internal _._modelSpitObjects = helper._modelSpitObjects
     member internal _._flow       with get() = helper._flow      and set(v) = helper._flow      <- v
@@ -46,16 +46,20 @@ type ListenerBase(parser:dsParser, helper:ParserHelper) =
 
     override x.EnterSystem(ctx:SystemContext) =
         let name = ctx.systemName().GetText().DeQuoteOnDemand()
-        x._systems.Push <| x._model.Systems.Find(fun s -> s.Name = name)
+        match x._currentSystem with
+        | None ->
+            assert(name = helper._theSystem.Value.Name)
+            helper._currentSystem <- helper._theSystem
+        | Some curSys ->
+            helper._currentSystem <- Some <| curSys.Systems.Find(fun s -> s.Name = name)
 
-    override x.ExitSystem(ctx:SystemContext) = x._systems.Pop() |> ignore
+    override x.ExitSystem(ctx:SystemContext) = helper._currentSystem <- None
 
     override x.EnterFlow(ctx:FlowContext) =
         let flowName = ctx.identifier1().GetText().DeQuoteOnDemand()
-        match x._system with
-        | Some system ->
-            x._flow <- system.Flows.TryFind(fun f -> f.Name = flowName)
-        | None -> failwith "ERROR"
+        let flow = x._currentSystem.Value.Flows.TryFind(fun f -> f.Name = flowName)
+        assert(flow.IsSome)
+        x._flow <- flow
 
     override x.ExitFlow(ctx:FlowContext) = x._flow <- None
 

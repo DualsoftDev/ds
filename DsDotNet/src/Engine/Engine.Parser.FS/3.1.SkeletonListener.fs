@@ -29,7 +29,22 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
                 match findFirstChild<HostContext>(ctx) with
                 | Some hostCtx -> hostCtx.GetText()
                 | None -> null
-            x._systems.Push <| DsSystem.Create(name, host, x._model)
+
+            let system =
+                match x._theSystem, x._currentSystem with
+                | _, Some system ->
+                    DsSystem.Create(name, host, system)
+                | Some theSystem, None ->
+                    theSystem
+                | None, None ->
+                    let system = DsSystem.CreateTopLevel(name, host)
+                    helper._theSystem <- Some system
+                    system
+            helper._currentSystem <- Some system
+
+            //let sys = DsSystem.Create(name, host, x._model)
+            //helper._currentSystem <- Some sys
+            //helper._theSystem <- Some sys
             tracefn($"System: {name}")
             x.AddElement(x.CurrentPathElements, GraphVertexType.System)
         | None ->
@@ -37,7 +52,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
 
     override x.EnterFlow(ctx:FlowContext) =
         let flowName = ctx.identifier1().GetText().DeQuoteOnDemand()
-        x._flow <- Some <| Flow.Create(flowName, x._system.Value)
+        x._flow <- Some <| Flow.Create(flowName, x._currentSystem.Value)
         x.AddElement(x.CurrentPathElements, GraphVertexType.Flow)
 
     override x.EnterParenting(ctx:ParentingContext) =
@@ -97,7 +112,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
 
 
     override x.EnterInterfaceDef(ctx:InterfaceDefContext) =
-        let hash = x._system.Value.ApiItems
+        let hash = x._currentSystem.Value.ApiItems
         let interrfaceNameCtx = findFirstChild<InterfaceNameContext>(ctx)
         let interfaceName = collectNameComponents(interrfaceNameCtx.Value)[0]
         let collectCallComponents(ctx:CallComponentsContext):Fqdn[] =
@@ -110,7 +125,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
             enumerateChildren<CallComponentsContext>(ctx)
                 .Select(collectCallComponents)
                 .Tap(fun callComponents -> assert(callComponents.All(fun cc -> cc.Length = 2 || cc[0] = "_")))
-                .Select(fun callCompnents -> callCompnents.Select(fun cc -> cc.Prepend(x._system.Value.Name).ToArray()).ToArray())
+                .Select(fun callCompnents -> callCompnents.Select(fun cc -> cc.Prepend(x._currentSystem.Value.Name).ToArray()).ToArray())
                 .ToArray()
 
 
@@ -121,7 +136,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
 
         // 이번 stage 에서 일단 interface 이름만 이용해서 빈 interface 객체를 생성하고,
         // TXs, RXs, Resets 은 다음 listener stage 에서 채움..
-        let api = ApiItem.Create(interfaceName, x._system.Value)
+        let api = ApiItem.Create(interfaceName, x._currentSystem.Value)
         hash.Add(api) |> ignore
 
     override x.EnterInterfaceResetDef(ctx:InterfaceResetDefContext) =
@@ -136,5 +151,5 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
         for triple in (terms |> Array.windowed2 3 2) do
             if triple.Length = 3 then
                 let opnd1, op, opnd2 = triple[0], triple[1], triple[2]
-                let ri_ = ApiResetInfo.Create(x._system.Value, opnd1, op.ToModelEdge(), opnd2)
+                let ri_ = ApiResetInfo.Create(x._currentSystem.Value, opnd1, op.ToModelEdge(), opnd2)
                 ()

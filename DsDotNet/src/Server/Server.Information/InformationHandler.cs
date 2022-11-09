@@ -36,12 +36,18 @@ internal class InformationServer
 
     public Dictionary<ProduceType, Dictionary<string, KafkaProduce>> producers;
     public Dictionary<string, KafkaConsume> consumers;
+
+    private readonly JsonSerializerSettings jsonSettings = new();
+    
     public InformationServer(string path)
     {
         // parsing server configurations
         var serverCfg = JObject.Parse(File.ReadAllText(path));
         producers = GenProducers(serverCfg);
         consumers = GenConsumers(serverCfg);
+        jsonSettings.Converters.Add(
+            new Newtonsoft.Json.Converters.StringEnumConverter()
+        );
     }
 
     private Dictionary<ProduceType, Dictionary<string, KafkaProduce>> 
@@ -95,9 +101,7 @@ internal class InformationServer
             catch (Exception e)
             {
                 Console.WriteLine(
-                    $"Exception has raised when " +
-                    $"Parse producer config : \n" +
-                    e
+                    $"Exception has raised when parse producer config :\n{e}"
                 );
             }
         }
@@ -138,9 +142,7 @@ internal class InformationServer
             catch (Exception e)
             {
                 Console.WriteLine(
-                    $"Exception has raised when " +
-                    $"Parse consumer config : \n" +
-                    e
+                    $"Exception has raised when parse consumer config :\n{e}"
                 );
             }
         }
@@ -167,8 +169,8 @@ internal class InformationServer
         try
         {
             var resultList = new List<CodeGen.Initializer>();
-            var pm = 
-                new CodeGenHandler.ParseModel(container["body"]!.ToString());
+            var model = container["body"]!.ToString();
+            var pm = new CodeGenHandler.ParseModel(model);
             if (pm != null)
             {
                 resultList.Add(pm.CpuResult);
@@ -183,7 +185,8 @@ internal class InformationServer
                                 mode = "init",
                                 from = "info-server",
                                 initializer = res
-                            }
+                            },
+                            jsonSettings
                         );
                     _ = Task.Run(() => {
                             producers[mode][code.from].TransferData(returner!);
@@ -191,7 +194,6 @@ internal class InformationServer
                     );
                 }
             }
-
             return new Response(true, mode, resultList);
         }
         catch (Exception e)
@@ -203,7 +205,8 @@ internal class InformationServer
                         mode = "init",
                         from = "info-server",
                         initializer = e.Message
-                    }
+                    },
+                    jsonSettings
                 );
             _ = Task.Run(() => {
                     producers[mode][target].TransferData(returner!);
@@ -236,9 +239,8 @@ internal class InformationServer
         // 3. produce to target topic
         try
         {
-            var model = new { }; 
-            var pm = 
-                new CodeGenHandler.ParseModel(model.ToString());
+            var model = new { }; // getting ds model from DB
+            var pm = new CodeGenHandler.ParseModel(model.ToString());
             var target = container["from"]!.ToString();
             var genRes = pm.SelectedResult(target);
             var res = genRes.succeed ? genRes.body : genRes.error;
@@ -248,7 +250,8 @@ internal class InformationServer
                         mode = "init",
                         from = "info-server",
                         initializer = res
-                    }
+                    },
+                    jsonSettings
                 );
             _ = Task.Run(() => {
                     producers[mode][target].TransferData(returner);
@@ -265,7 +268,8 @@ internal class InformationServer
                         mode = "init",
                         from = "info-server",
                         initializer = e.Message
-                    }
+                    },
+                    jsonSettings
                 );
             _ = Task.Run(() => {
                     producers[mode][target].TransferData(returner);
@@ -278,7 +282,7 @@ internal class InformationServer
     private Response InformationHandler(ProduceType mode, JToken container)
     {
         // input : process for getting daily & monthly information
-        // 1. getting day & month data from db
+        // 1. getting day & month data from DB
         // 2. generate information
         // 3. produce to Ds pilot
         try
@@ -356,11 +360,8 @@ internal class InformationServer
         var content = JObject.Parse(eventString);
         var mode = content["mode"]!.ToString();
         var container = content["container"]!;
-        if (container != null && container["from"]!.ToString() != "info-server")
-        {
-            var response = TypeSelector(mode, container);
-            DbHandler(response);
-        }
+        if (container!=null && container["from"]!.ToString()!="info-server")
+            DbHandler(TypeSelector(mode, container));
     }
 
     public void Executor()

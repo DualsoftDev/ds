@@ -61,13 +61,13 @@ module internal ToCopyModule =
         let copyCallInReal(apiItem:ApiItem, real:Real) =
             let findVertex = real.Graph.TryFindVertex(apiItem.Name)
             if findVertex.IsNone
-                then Call.CreateInReal(apiItem, real)
+                then Call.Create(apiItem, Real real)
                 else findVertex.Value :?> Call
 
         let copyCallInFlow(apiItem:ApiItem, flow:Flow) =
             let findVertex = flow.Graph.TryFindVertex(apiItem.Name)
             if findVertex.IsNone
-                then Call.CreateInFlow(apiItem, flow)
+                then Call.Create(apiItem, Flow flow)
                 else findVertex.Value :?> Call
 
 
@@ -102,14 +102,15 @@ module internal ToCopyModule =
                                     | CallTarget ct -> 
                                             let r = findReal(orgiReal.Name)
                                             Alias.Create(orgiAlias.Name, CallTarget(findCallInReal(orgiReal.Name, ct.Name)), Real(findReal(orgiReal.Name)), false)|>ignore
+                                    //| CallTarget ct -> Alias.Create(orgiAlias.Name, CallTarget(ct), Real(findReal(orgiReal.Name)), false)|>ignore
                                 | _ -> () )
 
                 | :? Alias as orgiAlias ->
-                        match orgiAlias.Target with 
+                        match orgiAlias.Target with
                         | RealTarget rt -> Alias.Create(vertexInFlow.Name, RealTarget(rt), Flow(copyFlow), false)|>ignore
                         | CallTarget ct -> Alias.Create(vertexInFlow.Name, CallTarget(ct), Flow(copyFlow), false)|>ignore
-                | _ -> () 
-            )  
+                | _ -> ()
+            )
 
 
         let copyEdge(origFlow:Flow, copyFlow:Flow) =

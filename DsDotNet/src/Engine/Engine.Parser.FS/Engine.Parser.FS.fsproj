@@ -11,10 +11,12 @@
 	<ItemGroup>
 		<Compile Include="0.ParserException.fs" />
 		<Compile Include="0.ParserObject.fs" />
+		<Compile Include="0.Parser.Util.fs" />
 		<Compile Include="1.AllListener.fs" />
 		<Compile Include="1.ErrorListener.fs" />
-		<Compile Include="1.ParserHelper.fs" />
 		<Compile Include="2.DsParser.fs" />
+		<Compile Include="1.ParserHelper.fs" />
+		<Compile Include="9.FqdnParser.fs" />
 		<Compile Include="3.0.ListenerBase.fs" />
 		<Compile Include="3.1.SkeletonListener.fs" />
 		<Compile Include="3.2.ElementListener.fs" />
@@ -22,7 +24,6 @@
 		<Compile Include="3.4.EtcListener.fs" />
 		<Compile Include="5.ModelParser.fs" />
 		<Compile Include="9.CopySystemListener.fs" />
-		<Compile Include="9.FqdnParser.fs" />
 		<Compile Include="AssemblyInfo.fs" />
 		<Compile Include="Program.fs" />
 	</ItemGroup>

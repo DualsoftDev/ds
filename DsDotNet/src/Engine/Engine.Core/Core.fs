@@ -9,8 +9,16 @@ open Engine.Common.FS
 
 [<AutoOpen>]
 module CoreModule =
+    let createFqdnObject (nameComponents:string array) = {
+        new IQualifiedNamed with
+            member _.Name = nameComponents.LastOrDefault()
+            member _.NameComponents = nameComponents
+            member x.QualifiedName = nameComponents.Combine()
+    }
+
     ///Top level structure
     type Model() =
+        member val TheSystem:DsSystem option = None with get, set
         member val Systems = createNamedHashSet<DsSystem>()
         member val Variables = ResizeArray<Variable>()
         member val Commands = ResizeArray<Command>()
@@ -21,8 +29,14 @@ module CoreModule =
             member val NameComponents = Array.empty<string>
             member x.QualifiedName = null
 
-    and DsSystem private (name:string, host:string, model:Model) =
-        inherit FqdnObject(name, model)
+    and DsSystem private (name:string, host:string, parentQualifiedName:IQualifiedNamed) =
+        inherit FqdnObject(name, parentQualifiedName)
+
+        member val ParentSystem:DsSystem option = None with get, set
+        member val Systems = createNamedHashSet<DsSystem>()
+        member val Variables = ResizeArray<Variable>()
+        member val Commands = ResizeArray<Command>()
+        member val Observes = ResizeArray<Observe>()
 
         member val Flows    = createNamedHashSet<Flow>()
         member val ApiItems = createNamedHashSet<ApiItem>()
@@ -30,7 +44,8 @@ module CoreModule =
         ///시스템 전체시작 버튼누름시 수행되야하는 Real목록
         member val StartPoints = createQualifiedNamedHashSet<Real>()
 
-        member _.Model = model
+        // todo: fix me
+        member _.Model = null//model
         member _.Host = host
 
         ///시스템 버튼 소속 Flow 정보
@@ -46,10 +61,13 @@ module CoreModule =
         ///시스템 핸들링 대상여부   true : mySystem / false : exSystem
         member val Active = false with get, set
 
-        static member Create(name, host, model) =
-            let system = DsSystem(name, host, model)
-            model.Systems.Add(system) |> verifyM $"Duplicated system name [{name}]"
+        static member Create(name, host, parentSystem:DsSystem) =
+            let system = DsSystem(name, host, parentSystem)
+            system.ParentSystem <- Some parentSystem
+            parentSystem.Systems.Add(system) |> verifyM $"Duplicated system name [{name}]"
             system
+        static member CreateTopLevel(name, host) =
+            DsSystem(name, host, createFqdnObject([||]) )
 
     and Flow private (name:string, system:DsSystem) =
         inherit FqdnObject(name, system)
@@ -62,8 +80,6 @@ module CoreModule =
             let flow = Flow(name, system)
             system.Flows.Add(flow) |> verifyM $"Duplicated flow name [{name}]"
             flow
-
-
 
 
     /// leaf or stem(parenting)
@@ -121,12 +137,13 @@ module CoreModule =
             let creator() =
                 let alias = Alias(mnemonic, target, parent)
                 graph.AddVertex(alias) |> verifyM $"Duplicated child name [{mnemonic}]"
-                if skipAddFlowMap|>not
-                then match target with
-                     | RealTarget r -> addAlias(r.Flow, r.NameComponents.Skip(2).ToArray(), mnemonic)
-                     | CallTarget c -> match c.Parent with
-                                       |Real rParent -> addAlias(rParent.Flow, c.NameComponents.Skip(3).ToArray(), mnemonic)
-                                       |Flow fParent -> addAlias(fParent, c.NameComponents.Skip(2).ToArray(), mnemonic)
+                if not skipAddFlowMap then
+                    match target with
+                    | RealTarget r -> addAlias(r.Flow, r.NameComponents.Skip(2).ToArray(), mnemonic)
+                    | CallTarget c ->
+                        match c.Parent with
+                        | Real rParent -> addAlias(rParent.Flow, c.NameComponents.Skip(3).ToArray(), mnemonic)
+                        | Flow fParent -> addAlias(fParent, c.NameComponents.Skip(2).ToArray(), mnemonic)
                 alias
 
             let existing = tryFindAlias graph mnemonic
@@ -153,15 +170,15 @@ module CoreModule =
         member _.ApiItem = apiItem
         member val Addresses:Addresses = null with get, set
 
-        static member CreateInFlow(apiItem:ApiItem, flow: Flow) = create flow.Graph apiItem (Flow flow)
-        static member CreateInReal(apiItem:ApiItem, real:Real) = create real.Graph apiItem (Real real)
+        static member Create(apiItem:ApiItem, parent:ParentWrapper) = create (parent.GetGraph()) apiItem parent
 
         /// Graph 에 포함되지 않는 core.  Alias 에 숨은 core
         static member CreateNowhere(apiItem:ApiItem, parent:ParentWrapper) = Call(apiItem, parent)
 
 
     and ApiItem private (name:string, system:DsSystem) =
-        inherit FqdnObject(name, system)
+        (* createFqdnObject : system 이 다른 system 에 포함되더라도, name component 를 더 이상 확장하지 않도록 cut *)
+        inherit FqdnObject(name, createFqdnObject([|system.Name|]))
         interface INamedVertex
 
         member val TXs = createQualifiedNamedHashSet<Real>()
@@ -207,9 +224,36 @@ module CoreModule =
 
         override x.ToString() = $"{x.Source.QualifiedName} {x.EdgeType.ToText()} {x.Target.QualifiedName}"
 
+
+
+[<AutoOpen>]
+module CoreHelperModule =
+    let collectHierarchicalSystemNames(system:DsSystem) =
+        let rec helper (system:DsSystem) =
+            [   yield system.Name
+                match system.ParentSystem with
+                | Some parent -> yield! helper parent
+                | _ -> ()
+            ]
+        helper system |> List.rev
+
 [<Extension>]
 type CoreExt =
     [<Extension>] static member GetSystem(call:Call) = call.Parent.GetSystem()
+    [<Extension>] static member CollectSystemNames(system:DsSystem) = collectHierarchicalSystemNames system
+
+    [<Extension>]
+    static member AddModelEdge(flow:Flow, source:string, edgetext:string, target:string) =
+        let src = flow.Graph.Vertices.Find(fun f->f.Name = source)
+        let tgt = flow.Graph.Vertices.Find(fun f->f.Name = target)
+        let modelingEdgeInfo = ModelingEdgeInfo(src, edgetext, tgt)
+        flow.ModelingEdges.Add(modelingEdgeInfo) |> verifyM $"Duplicated edge [{src.Name}{edgetext}{tgt.Name}]"
+
+    [<Extension>]
+    static member AddModelEdge(flow:Flow, source:Vertex, modelEdgeType:ModelingEdgeType, target:Vertex) =
+        let modelingEdgeInfo = ModelingEdgeInfo(source, modelEdgeType.ToText(), target)
+        flow.ModelingEdges.Add(modelingEdgeInfo) |> verifyM $"Duplicated edge [{source.Name}{modelEdgeType.ToText()}{target.Name}]"
+
     [<Extension>]
     static member AddButton(sys:DsSystem, btnType:BtnType, btnName: string, flow:Flow) =
         if sys <> flow.System then failwithf $"button [{btnName}] in flow ({flow.System.Name} != {sys.Name}) is not same system"
@@ -230,16 +274,19 @@ type CoreExt =
         match wrapper with
         | Flow f -> f :> FqdnObject
         | Real r -> r
+
     [<Extension>]
     static member GetSystem(wrapper:ParentWrapper) =
         match wrapper with
         | Flow f -> f.System
         | Real r -> r.Flow.System
+
     [<Extension>]
     static member GetGraph(wrapper:ParentWrapper) =
         match wrapper with
         | Flow f -> f.Graph
         | Real r -> r.Graph
+
     [<Extension>]
     static member GetModelingEdges(wrapper:ParentWrapper) =
         match wrapper with

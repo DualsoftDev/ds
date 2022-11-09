@@ -47,20 +47,20 @@ namespace Engine
             A.""-"" > A.""+"";
         }
     }
-}
-[sys] A = {
-    [flow] F = {
-        Vp > Pp > Sp;
-        Vm > Pm > Sm;
+    [sys] A = {
+        [flow] F = {
+            Vp > Pp > Sp;
+            Vm > Pm > Sm;
 
-        Vp |> Pm |> Sp;
-        Vm |> Pp |> Sm;
-        Vp <||> Vm;
-    }
-    [interfaces] = {
-        ""+"" = { F.Vp ~ F.Sp }
-        ""-"" = { F.Vm ~ F.Sm }
-        ""+"" <||> ""-"";
+            Vp |> Pm |> Sp;
+            Vm |> Pp |> Sm;
+            Vp <||> Vm;
+        }
+        [interfaces] = {
+            ""+"" = { F.Vp ~ F.Sp }
+            ""-"" = { F.Vm ~ F.Sm }
+            ""+"" <||> ""-"";
+        }
     }
 }
 ";
@@ -91,7 +91,7 @@ namespace Engine
 }
 ";
 
-        
+
         public static void Test(string text)
         {
             if (!text.Contains("[cpus]"))
@@ -102,7 +102,7 @@ namespace Engine
     }
 }
 ";
-     
+
         }
 
 

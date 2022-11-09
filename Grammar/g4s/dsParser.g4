@@ -20,12 +20,12 @@ parser grammar dsParser;
 options { tokenVocab=dsLexer; } // use tokens from dsLexer.g4
 
 
-model: (system|modelProperties|variables|commands|observes|comment)* EOF;        // importStatement|cpus
+model: (system|variables|commands|observes|comment)* EOF;        // importStatement|cpus
 comment: BLOCK_COMMENT | LINE_COMMENT;
 
 system: '[' 'sys' (('ip'|'host') '=' host)? ']' systemName '=' (sysBlock|sysCopySpec);    // [sys] Seg = {..}
     sysBlock
-        : LBRACE (flow | interfaces | buttons | systemProperties )* RBRACE       // identifier1Listing|parenting|causal|call
+        : LBRACE (flow | interfaces | buttons | systemProperties | modelProperties | system)* RBRACE       // identifier1Listing|parenting|causal|call
         ;
     host: ipv4 | domainName;
     domainName: identifier1234;

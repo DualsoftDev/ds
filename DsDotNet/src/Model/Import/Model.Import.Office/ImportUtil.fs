@@ -39,8 +39,8 @@ module ImportU =
 
                 let call =
                     if(parentReal.IsSome)
-                    then  Call.CreateInReal(findApi, parentReal.Value)
-                    else  Call.CreateInFlow(findApi, parentFlow.Value)
+                    then  Call.Create(findApi, Real parentReal.Value)
+                    else  Call.Create(findApi, Flow parentFlow.Value)
 
                 dicSeg.Add(node.Key, call)
 
@@ -310,7 +310,7 @@ module ImportU =
                                                     if trxName.Contains(".")
                                                     then trxName.Split('.').[0], trxName.Split('.').[1]
                                                     else flow.Name, trxName
-                                                let vertex = model.FindGraphVertex([|sys.Name;flowName;realName|]) 
+                                                let vertex = model.FindGraphVertex([|sys.Name;flowName;realName|])
                                                 if vertex.IsNull()
                                                 then Office.ErrorPPT(Name, ErrID._41, $"원인이름{realName}: 전체이름[{node.Shape.InnerText}] 해당도형[{node.Shape.ShapeName()}]", node.PageNum)
 

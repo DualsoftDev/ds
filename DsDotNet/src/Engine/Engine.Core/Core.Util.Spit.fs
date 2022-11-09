@@ -66,6 +66,13 @@ module SpitModuleHelper =
             for flow in system.Flows do
                 yield! spit(flow)
                 for api in system.ApiItems -> SpitResult.Create(SpitApiItem api, api.NameComponents)
+
+            for sys in system.Systems do
+                yield! spit(sys)
+
+            for x in system.Variables -> SpitResult.Create(SpitVariable x, [| x.Name |] )
+            for x in system.Commands ->  SpitResult.Create(SpitCommand x,  [| x.Name |] )
+            for x in system.Observes ->  SpitResult.Create(SpitObserve x,  [| x.Name |] )
         |]
     and spitModel (model:Model) : SpitResults =
         [|
@@ -86,6 +93,15 @@ module SpitModuleHelper =
         | :? Call     as c -> spitCall c
         | :? Alias    as a -> spitAlias a
         | _ -> failwith $"ERROR: Unknown type {obj}"
+
+    //let collectUpwardInformation(obj:obj) =
+    //    match obj with
+    //    | :? DsSystem as s -> spitSystem s
+    //    | :? Flow     as f -> spitFlow f
+    //    | :? Real     as r -> spitSegment r
+    //    | :? Call     as c -> spitCall c
+    //    | :? Alias    as a -> spitAlias a
+
     ()
 
 open SpitModuleHelper

@@ -88,7 +88,7 @@ module TextUtil =
             member _.GetHashCode(x:Fqdn) = x.Average(fun s -> s.GetHashCode()) |> int
     }
 
-    let getRelativeName(referencePath:Fqdn) (fqdn:Fqdn) =
+    let getRelativeNames(referencePath:Fqdn) (fqdn:Fqdn) =
         let rec countSameStartElements (FList(xs)) (FList(ys)) =
             let rec helper xs ys =
                 match xs, ys with
@@ -96,9 +96,11 @@ module TextUtil =
                 | _ -> 0
             helper xs ys
         let numSameStart = countSameStartElements referencePath fqdn
-        let relativeNameComponents = fqdn.Skip(numSameStart).Select(quoteOnDemand).ToArray()
+        let relativeNameComponents = fqdn.Skip(numSameStart).ToFSharpList()
         assert(relativeNameComponents.NonNullAny())
-        combine "." relativeNameComponents
+        relativeNameComponents
+
+    let getRelativeName(referencePath:Fqdn) (fqdn:Fqdn) = getRelativeNames referencePath fqdn |> Seq.map(quoteOnDemand) |> (combine ".")
 
     type FqdnObject(name:string, parent:IQualifiedNamed) =
         inherit Named(name)

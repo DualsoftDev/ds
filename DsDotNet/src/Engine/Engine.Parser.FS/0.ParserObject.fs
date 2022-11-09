@@ -26,15 +26,3 @@ type GraphVertexType =
     | ApiKey         = 0b0000001000000000
     | ApiSER         = 0b0000010000000000   // S ~ E ~ R
 
-open System.Runtime.CompilerServices
-open Antlr4.Runtime
-open Antlr4.Runtime.Misc
-
-[<Extension>]
-type ParserExt =
-    [<Extension>]
-    static member GetOriginalText(ctx:ParserRuleContext) =
-        // https://stackoverflow.com/questions/16343288/how-do-i-get-the-original-text-that-an-antlr4-rule-matched
-        let s = ctx.Start.StartIndex
-        let e = ctx.Stop.StopIndex
-        ctx.Start.InputStream.GetText(Interval(s, e))

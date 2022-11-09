@@ -11,7 +11,11 @@ open Engine.Parser.FS
 [<AutoOpen>]
 module private ModelComparisonHelper =
     let (=~=) (xs:string) (ys:string) =
-        let toArray (xs:string) = xs.SplitByLine() |> Seq.where(fun x -> x.Trim().Any()) |> Array.ofSeq
+        let toArray (xs:string) =
+            xs.SplitByLine()
+                .Select(fun x -> x.Trim())
+                |> Seq.where(fun x -> x.Any() && not <| x.StartsWith("//"))
+                |> Array.ofSeq
         let xs = toArray xs
         let ys = toArray ys
         for (x, y) in Seq.zip xs ys do
@@ -157,18 +161,22 @@ module private ModelComparisonHelper =
                 A."+" > A."-";
             }
         }
-    }
-    [sys] A = {
-        [flow] F = {
-            Vp <||> Vm |> Pp |> Sm;
-            Vp |> Pm |> Sp;
-            Vm > Pm > Sm;
-            Vp > Pp > Sp;
-        }
-        [interfaces] = {
-            "+" = { A.F.Vp ~ A.F.Sp }
-            "-" = { A.F.Vm ~ A.F.Sm }
-            "+" <||> "-";
+        [sys] A = {
+            [flow] F = {
+                //Vp <||> Vm |> Pp |> Sm;
+                //Vp |> Pm |> Sp;
+                //Vm > Pm > Sm;
+                //Vp > Pp > Sp;
+                Vp <||> Vm |> Pp |> Sm;
+                Vp |> Pm |> Sp;
+                Vm > Pm > Sm;
+                Vp > Pp > Sp;
+            }
+            [interfaces] = {
+                "+" = { F.Vp ~ F.Sp }
+                "-" = { F.Vm ~ F.Sm }
+                "+" <||> "-";
+            }
         }
     }
     """
@@ -180,9 +188,9 @@ module private ModelComparisonHelper =
             a1 > a2 > a3 > a4;
         }
         [interfaces] = {
-            I1 = { A.F.a1 ~ A.F.a2 }
-            I2 = { A.F.a2 ~ A.F.a3 }
-            I3 = { A.F.a3 ~ A.F.a1 }
+            I1 = { F.a1 ~ F.a2 }
+            I2 = { F.a2 ~ F.a3 }
+            I3 = { F.a3 ~ F.a1 }
             I1 <||> I2;
             I2 <||> I3;
             I3 ||> I4;
@@ -202,33 +210,34 @@ module private ModelComparisonHelper =
     [flow] F = {
         A."+" > A."-" > B."+";
     }
+    [sys] A = {
+        [flow] F = {
+            Vp <||> Vm |> Pp |> Sm;
+            Vp |> Pm |> Sp;
+            Vm > Pm > Sm;
+            Vp > Pp > Sp;
+        }
+        [interfaces] = {
+            "+" = { F.Vp ~ F.Sp }
+            "-" = { F.Vm ~ F.Sm }
+            "+" <||> "-";
+        }
+    }
+    [sys] B = {
+        [flow] F = {
+            Vp <||> Vm |> Pp |> Sm;
+            Vp |> Pm |> Sp;
+            Vm > Pm > Sm;
+            Vp > Pp > Sp;
+        }
+        [interfaces] = {
+            "+" = { F.Vp ~ F.Sp }
+            "-" = { F.Vm ~ F.Sm }
+            "+" <||> "-";
+        }
+    }
 }
-[sys] A = {
-    [flow] F = {
-        Vp <||> Vm |> Pp |> Sm;
-        Vp |> Pm |> Sp;
-        Vm > Pm > Sm;
-        Vp > Pp > Sp;
-    }
-    [interfaces] = {
-        "+" = { A.F.Vp ~ A.F.Sp }
-        "-" = { A.F.Vm ~ A.F.Sm }
-        "+" <||> "-";
-    }
-}
-[sys] B = {
-    [flow] F = {
-        Vp <||> Vm |> Pp |> Sm;
-        Vp |> Pm |> Sp;
-        Vm > Pm > Sm;
-        Vp > Pp > Sp;
-    }
-    [interfaces] = {
-        "+" = { B.F.Vp ~ B.F.Sp }
-        "-" = { B.F.Vm ~ B.F.Sm }
-        "+" <||> "-";
-    }
-}    """
+"""
 
 
 
@@ -245,29 +254,29 @@ module private ModelComparisonHelper =
             C.M = { Cm; Cm1; Cm2; }
         }
     }
+    [sys] C = {
+        [flow] F = {
+            Pm |> Sp;
+            Pp |> Sm;
+            Vp <||> Vm > Pm > Sm;
+            Vp > Pp > Sp;
+        }
+        [interfaces] = {
+            P = { F.Vp ~ F.Sp }
+            M = { F.Vm ~ F.Sm }
+            P <||> M;
+        }
+    }
     [prop] = {
         [addresses] = {
             C.P = ( %Q1234.2343, %I1234.2343)
             C.M = ( START, END)
         }
     }
-}
-[sys] C = {
-    [flow] F = {
-        Pm |> Sp;
-        Pp |> Sm;
-        Vp <||> Vm > Pm > Sm;
-        Vp > Pp > Sp;
-    }
-    [interfaces] = {
-        P = { C.F.Vp ~ C.F.Sp }
-        M = { C.F.Vm ~ C.F.Sm }
-        P <||> M;
-    }
-}
-[prop] = {
-    [safety] = {
-        L.F.Main = { C.F.Sp; C.F.Sm; C.F.Vp; C.F.Vm; }
+    [prop] = {
+        [safety] = {
+            L.F.Main = { C.F.Vp; C.F.Vm; }
+        }
     }
 }
 """
@@ -284,6 +293,19 @@ module private ModelComparisonHelper =
             A.M = { Cm; Cm1; Cm2; }
         }
     }
+    [sys] A = {
+        [flow] F = {
+            Pm |> Sp;
+            Pp |> Sm;
+            Vp <||> Vm > Pm > Sm;
+            Vp > Pp > Sp;
+        }
+        [interfaces] = {
+            P = { F.Vp ~ F.Sp }
+            M = { F.Vm ~ F.Sm }
+            P <||> M;
+        }
+    }
     [prop] = {
         [addresses] = {
             A.P = ( %Q1234.2343, %I1234.2343)
@@ -291,19 +313,7 @@ module private ModelComparisonHelper =
         }
     }
 }
-[sys] A = {
-    [flow] F = {
-        Pm |> Sp;
-        Pp |> Sm;
-        Vp <||> Vm > Pm > Sm;
-        Vp > Pp > Sp;
-    }
-    [interfaces] = {
-        P = { A.F.Vp ~ A.F.Sp }
-        M = { A.F.Vm ~ A.F.Sm }
-        P <||> M;
-    }
-}
+
 """
         let answerButtons = """
 [sys] My = {
@@ -356,16 +366,16 @@ module private ModelComparisonHelper =
             EX."이상한. Api" > EX."Dummy. Api";
         }
     }
-}
-[sys] EX = {
-    [flow] F = {
-        TX; // island
-        "R.X"; // island
-        "NameWith\"Quote"; // island
-    }
-    [interfaces] = {
-        "이상한. Api" = { EX.F.TX ~ EX.F."R.X" }
-        "Dummy. Api" = { _ ~ _ }
+    [sys] EX = {
+        [flow] F = {
+            TX; // island
+            "R.X"; // island
+            "NameWith\"Quote"; // island
+        }
+        [interfaces] = {
+            "이상한. Api" = { F.TX ~ F."R.X" }
+            "Dummy. Api" = { _ ~ _ }
+        }
     }
 }
 """
@@ -383,6 +393,19 @@ module private ModelComparisonHelper =
             A."-" = { Am1; Am2; Am3; }
         }
     }
+    [sys] A = {
+        [flow] F = {
+            Vp <||> Vm |> Pp |> Sm;
+            Vp |> Pm |> Sp;
+            Vm > Pm > Sm;
+            Vp > Pp > Sp;
+        }
+        [interfaces] = {
+            "+" = { F.Vp ~ F.Sp }
+            "-" = { F.Vm ~ F.Sm }
+            "+" <||> "-";
+        }
+    }
     [prop] = {
         [addresses] = {
             A."+" = ( %Q1234.2343, %I1234.2343)
@@ -390,24 +413,11 @@ module private ModelComparisonHelper =
         }
     }
 }
-[sys] A = {
-    [flow] F = {
-        Vp <||> Vm |> Pp |> Sm;
-        Vp |> Pm |> Sp;
-        Vm > Pm > Sm;
-        Vp > Pp > Sp;
-    }
-    [interfaces] = {
-        "+" = { A.F.Vp ~ A.F.Sp }
-        "-" = { A.F.Vm ~ A.F.Sm }
-        "+" <||> "-";
-    }
-}
 """
 
     let compare originalText answer =
         let helper = ModelParser.ParseFromString2(originalText, ParserOptions.Create4Simulation("ActiveCpuName"))
-        let model = helper.Model
+        let model = helper.TheSystem
 
         let generated = model.ToDsText();
         generated =~= answer
@@ -450,8 +460,12 @@ module ModelTests1 =
         [<Test>]
         member __.``AdoptoedAmbiguousText test`` () =
             logInfo "=== AdoptoedAmbiguousText"
-            (fun () -> compare Program.AdoptoedAmbiguousText "")
-                |> ShouldFailWithSubstringT "Ambiguous entry [F.Seg1] and [My.F.Seg1]"
+            try
+                compare Program.AdoptoedAmbiguousText ""
+            with exn ->
+                (exn.Message.Contains("Duplicated") || exn.Message.Contains("Ambiguous entry [F.Seg1] and [My.F.Seg1]")) === true
+            //(fun () -> compare Program.AdoptoedAmbiguousText "")
+            //    |> ShouldFailWithSubstringT "Ambiguous entry [F.Seg1] and [My.F.Seg1]"
 
         [<Test>]
         member __.``Model component [SafetyValid] test`` () =
@@ -479,6 +493,23 @@ module ModelTests1 =
 
         [<Test>]
         member __.``Model component test`` () =
+            let input = """
+[sys ip = localhost] T6_Alias = {
+    [flow] Page1 = {
+    }
+    [flow] AndFlow = {
+        R2 > R3;
+        R1 > R3;
+    }
+    [flow] OrFlow = {
+        R2 > Copy1_R3;
+        R1 > R3;
+        [aliases] = {
+            R3 = { Copy1_R3; }
+        }
+    }
+}"""
+            compare input ""
             //compare ParserTest.Ppt);
             //compare ParserTest.ExternalSegmentCall ""
             //compare ParserTest.ExternalSegmentCallConfusing ""
@@ -495,3 +526,12 @@ module ModelTests1 =
             (fun () -> compare InvalidDuplicationTest.CyclicEdgeModel ""  )  |> ShouldFailWithSubstringT "Cyclic"
 
             // todo : Loop detection
+
+
+    type RecursiveSystemTests1() =
+        do Fixtures.SetUpTest()
+
+        [<Test>]
+        member __.``RecursiveSystem test`` () =
+            logInfo "=== RecursiveSystem"
+            compare Program.RecursiveSystemText answerEveryScenarioText

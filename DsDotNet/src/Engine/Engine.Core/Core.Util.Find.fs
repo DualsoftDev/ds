@@ -2,22 +2,46 @@ namespace Engine.Core
 
 open System.Runtime.CompilerServices
 open System.Linq
+open Engine.Common.FS
 
 [<AutoOpen>]
 module internal ModelFindModule =
-    let findGraphVertex(model:Model, fqdn:Fqdn) : obj =
-        let n = fqdn.Length
-        match n with
-        | 0 -> failwith "ERROR: name not given"
-        | 1 -> model.Systems.First(fun sys -> sys.Name = fqdn[0])
-        | 2 -> model.Systems.First(fun sys -> sys.Name = fqdn[0]).Flows.First(fun f -> f.Name = fqdn[1])
-        | 3 -> model.Systems.First(fun sys -> sys.Name = fqdn[0]).Flows.First(fun f -> f.Name = fqdn[1]).Graph.FindVertex(fqdn[2])
-        | 4 ->
-            let seg = model.Systems.First(fun sys -> sys.Name = fqdn[0]).Flows.First(fun f -> f.Name = fqdn[1]).Graph.FindVertex(fqdn[2]) :?> Real
-            seg.Graph.FindVertex(fqdn[3])
-        | _ -> failwith "ERROR"
-    let findGraphVertexT<'V when 'V :> IVertex>(model:Model, fqdn:Fqdn) =
-        let v = findGraphVertex(model, fqdn)
+    let findGraphVertex(system:DsSystem, fqdn:Fqdn) : obj =
+        let xxx = system.Spit()
+        let nameEq (name:string) (x:INamed) = x.Name = name
+
+        let rec findSystemInner (system:DsSystem) (xs:string list) : obj =
+            match xs with
+            | [] -> system
+            | f::xs when system.Flows.Any(nameEq f) ->
+                let flow = system.Flows.First(nameEq f)
+                match xs with
+                | [] -> flow
+                | r::xs ->
+                    let real = flow.Graph.FindVertex(r) |> box :?> Real
+                    match xs with
+                    | [] -> real
+                    | remaining -> real.Graph.FindVertex(remaining.Combine())
+
+            | subsys::xs when system.Systems.Any(nameEq subsys) ->
+                let subSystem = system.Systems.Find(nameEq subsys)
+                match xs with
+                | [] -> subSystem
+                | _ -> findSystemInner subSystem xs
+            | _ -> failwith "ERROR"
+
+
+        let fqdn = fqdn.ToFSharpList()
+        match fqdn with
+        | [] -> failwith "ERROR: name not given"
+        | s::xs when s = system.Name -> findSystemInner system xs
+        | _ -> findSystemInner system fqdn
+
+    let getTheSystem(model:Model) = model.TheSystem.Value
+
+
+    let findGraphVertexT<'V when 'V :> IVertex>(system:DsSystem, fqdn:Fqdn) =
+        let v = findGraphVertex(system, fqdn)
         if typedefof<'V>.IsAssignableFrom(v.GetType()) then
             v :?> 'V
         else
@@ -25,13 +49,13 @@ module internal ModelFindModule =
 
     let findApiItem(model:Model, apiPath:Fqdn) =
         let sysName, apiKey = apiPath[0], apiPath[1]
-        let sys = model.Systems.First(fun sys -> sys.Name = sysName)
+        let sys = model.TheSystem.Value.Systems.First(fun sys -> sys.Name = sysName)
         let x = sys.ApiItems.FindWithName(apiKey)
         x
 
 
-    let findCall(model:Model, callPath:Fqdn) =
-        let x = findGraphVertex(model, callPath) :?> Call
+    let findCall(system:DsSystem, callPath:Fqdn) =
+        let x = findGraphVertex(system, callPath) :?> Call
         x
 
     let findFlow(system:DsSystem , flowName:string) =
@@ -40,13 +64,16 @@ module internal ModelFindModule =
 
 [<Extension>]
 type ModelFindHelper =
-    [<Extension>] static member FindGraphVertex(model:Model, fqdn:Fqdn) = findGraphVertex(model, fqdn)
-    [<Extension>] static member FindGraphVertex<'V when 'V :> IVertex>(model:Model, fqdn:Fqdn) = findGraphVertexT<'V>(model, fqdn)
+    [<Extension>] static member FindGraphVertex(model:Model, fqdn:Fqdn) = findGraphVertex(getTheSystem(model), fqdn)
+    [<Extension>] static member FindGraphVertex<'V when 'V :> IVertex>(model:Model, fqdn:Fqdn) = findGraphVertexT<'V>(getTheSystem(model), fqdn)
     [<Extension>] static member FindSystem(model:Model, systemName:string)    = model.Systems.First(fun sys -> sys.Name = systemName)
     [<Extension>] static member TryFindSystem(model:Model, systemName:string) = model.Systems.FirstOrDefault(fun sys -> sys.Name = systemName)
     [<Extension>] static member FindApiItem(model:Model, apiPath:Fqdn) = findApiItem(model, apiPath)
     [<Extension>] static member TryFindApiItem(system:DsSystem, apiKey:string) = system.ApiItems.FindWithName(apiKey)
-    [<Extension>] static member FindCall(model:Model, callPath:Fqdn) = findCall(model, callPath)
+    [<Extension>] static member FindCall(model:Model, callPath:Fqdn) = findCall(getTheSystem(model), callPath)
+
+    [<Extension>] static member FindGraphVertex<'V when 'V :> IVertex>(system:DsSystem, fqdn:Fqdn) = findGraphVertexT<'V>(system, fqdn)
+    [<Extension>] static member FindCall(system:DsSystem, callPath:Fqdn) = findCall(system, callPath)
     [<Extension>] static member FindFlow(system:DsSystem, flowName:string) = findFlow(system, flowName)
 
 

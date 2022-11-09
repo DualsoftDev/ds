@@ -63,6 +63,34 @@ C4 > C5;
             Main = {A.F.Sp; A.F.Sm}
         }
     }
+    [sys ip=1.2.3.4] A = {
+        [flow] F = {
+            Vp > Pp > Sp;
+            Vm > Pm > Sm;
+
+            Vp |> Pm |> Sp;
+            Vm |> Pp |> Sm;
+            Vp <||> Vm;
+        }
+        [interfaces] = {
+            "+" = { F.Vp ~ F.Sp }
+            "-" = { F.Vm ~ F.Sm }
+            // 정보로서의 상호 리셋
+            "+" <||> "-";
+        }
+    }
+    [sys] B = @copy_system(A);
+    [sys] C = @copy_system(A);
+    [prop] = {
+        // Global safety
+        [safety] = {
+            My.F.Main = {B.F.Sp; B.F.Sm; C.F.Sp}
+        }
+        [layouts] = {
+            A."+" = (1309,405,205,83)
+        }
+    }
+
     [emg] = {
         EMGBTN = { F; };
         //EmptyButton = {};
@@ -75,33 +103,6 @@ C4 > C5;
             B."+" = (%Q4321.2343, %I4321.2343)
             B."-" = (BSTART, BEND)
         }
-    }
-}
-[sys ip=1.2.3.4] A = {
-    [flow] F = {
-        Vp > Pp > Sp;
-        Vm > Pm > Sm;
-
-        Vp |> Pm |> Sp;
-        Vm |> Pp |> Sm;
-        Vp <||> Vm;
-    }
-    [interfaces] = {
-        "+" = { F.Vp ~ F.Sp }
-        "-" = { F.Vm ~ F.Sm }
-        // 정보로서의 상호 리셋
-        "+" <||> "-";
-    }
-}
-[sys] B = @copy_system(A);
-[sys] C = @copy_system(A);
-[prop] = {
-    // Global safety
-    [safety] = {
-        My.F.Main = {B.F.Sp; B.F.Sm; C.F.Sp}
-    }
-    [layouts] = {
-        A."+" = (1309,405,205,83)
     }
 }
 """
@@ -149,23 +150,23 @@ C4 > C5;
         A."+" > A."-";
         A."-" > B."+";
     }
-}
-[sys] A = {
-    [flow] F = {
-        Vp > Pp > Sp;
-        Vm > Pm > Sm;
+    [sys] A = {
+        [flow] F = {
+            Vp > Pp > Sp;
+            Vm > Pm > Sm;
 
-        Vp |> Pm |> Sp;
-        Vm |> Pp |> Sm;
-        Vp <||> Vm;
+            Vp |> Pm |> Sp;
+            Vm |> Pp |> Sm;
+            Vp <||> Vm;
+        }
+        [interfaces] = {
+            "+" = { F.Vp ~ F.Sp }
+            "-" = { F.Vm ~ F.Sm }
+            "+" <||> "-";
+        }
     }
-    [interfaces] = {
-        "+" = { F.Vp ~ F.Sp }
-        "-" = { F.Vm ~ F.Sm }
-        "+" <||> "-";
-    }
+    [sys] B = @copy_system(A);
 }
-[sys] B = @copy_system(A);
 
 """
 
@@ -184,24 +185,25 @@ C4 > C5;
             A."+" > A."-";
         }
     }
+
+    [sys] A = {
+        [flow] F = {
+            Vp > Pp > Sp;
+            Vm > Pm > Sm;
+
+            Vp |> Pm |> Sp;
+            Vm |> Pp |> Sm;
+            Vp <||> Vm;
+        }
+        [interfaces] = {
+            "+" = { F.Vp ~ F.Sp }
+            "-" = { F.Vm ~ F.Sm }
+            // 정보로서의 상호 리셋
+            "+" <||> "-";
+        }
+    }
 }
 
-[sys] A = {
-    [flow] F = {
-        Vp > Pp > Sp;
-        Vm > Pm > Sm;
-
-        Vp |> Pm |> Sp;
-        Vm |> Pp |> Sm;
-        Vp <||> Vm;
-    }
-    [interfaces] = {
-        "+" = { F.Vp ~ F.Sp }
-        "-" = { F.Vm ~ F.Sm }
-        // 정보로서의 상호 리셋
-        "+" <||> "-";
-    }
-}
 """
     let AdoptoedAmbiguousText = """
 [sys] My = {
@@ -722,14 +724,27 @@ C4 > C5;
 }
 """
 
+    let RecursiveSystemText = """
+[sys] P = {
+    [sys] P1 = {
+        [flow] F = {
+            Vp > Vm;
+        }
+    }
 
+    [sys] P2 = {
+        [flow] F = {
+            Vp > Vm;
+        }
+    }
+}
+"""
 
 
     let ParseNormal(text:string) =
         let helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation("ActiveCpuName"))
         let model = helper.Model
 
-        let xxx = model.ToDsText()
         //Try("1 + 2 + 3")
         //Try("1 2 + 3")
         //Try("1 + +")

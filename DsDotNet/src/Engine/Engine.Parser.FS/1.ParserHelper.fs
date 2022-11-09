@@ -1,6 +1,7 @@
-namespace Engine.Parser.FS
+namespace rec Engine.Parser.FS
 
 open Engine.Core
+open Engine.Common.FS
 open System.Collections.Generic
 open System.Linq
 
@@ -28,7 +29,25 @@ type AliasCreator(name:string, parent:ParentWrapper, target:AliasTarget) =
     member val Parent = parent with get, set
     member val Target = target with get, set
 
+
+[<AutoOpen>]
+module internal ParserHelperModule =
+    let tryFindSystem(fromSystem:DsSystem) (systemNames:Fqdn) =
+        let rec helper (fromSystem:DsSystem) (systemNames:string list) =
+            match systemNames with
+            | n::[] when fromSystem.Name = n -> Some fromSystem
+            | n::[] -> None
+            | n::ns when fromSystem.Name = n ->
+                let child = fromSystem.Systems.TryFind(fun s -> s.Name = n)
+                match child with
+                | Some child -> helper child ns
+                | None -> None
+            | _ -> None
+        helper fromSystem (systemNames.ToFSharpList())
+
+
 type ParserHelper(options:ParserOptions) =
+    let mutable theSystem:DsSystem option = None
     member val Model = Model()
     member val ParserOptions = options with get, set
 
@@ -37,12 +56,28 @@ type ParserHelper(options:ParserOptions) =
     /// button category 중복 check 용
     member val ButtonCategories = HashSet<(DsSystem*string)>()
 
-    member val internal _system:DsSystem option = None with get, set
+    //member internal x._system = x._systems |> Seq.tryHead
+    //member val internal _systems = Stack<DsSystem>()
+
+    member x.TheSystem = theSystem.Value
+    member internal x._theSystem
+        with get() = theSystem
+        and set(v) = theSystem <- v; x.Model.TheSystem <- v
+    member val internal _currentSystem:DsSystem option = None with get, set
+
     member val internal _flow:Flow option = None  with get, set
     member val internal _parenting:Real option = None  with get, set
     member val internal _elements = Dictionary<Fqdn, GraphVertexType>(NameUtil.CreateNameComponentsComparer())
     member val internal _modelSpits:SpitResult array = [||] with get, set
-    member val internal _modelSpitObjects:obj array = [||] with get, set
+    member internal x._modelSpitObjects = x._modelSpits.Select(fun spit -> spit.GetCore()).ToArray()
+    //member internal x.UpdateModelSpits() = x._modelSpits <- x.Model.Spit().ToArray()
+    member internal x.UpdateModelSpits() =
+        x._modelSpits <-
+            [|
+                match x._theSystem with
+                | Some system -> yield! system.Spit()
+                | _ -> ()
+            |]
 
     member internal x.AppendPathElement(lastName:string) =
         x.CurrentPathElements.Append(lastName).ToArray()
@@ -51,8 +86,8 @@ type ParserHelper(options:ParserOptions) =
 
     member internal x.CurrentPathElements with get():Fqdn =
         let helper() = [
-            match x._system with
-            | Some sys -> yield sys.Name
+            match x._currentSystem with
+            | Some sys -> yield! sys.NameComponents // yield sys.Name
             | None -> ()
             match x._flow with
             | Some f -> yield f.Name
@@ -65,4 +100,4 @@ type ParserHelper(options:ParserOptions) =
         helper().ToArray()
 
     member internal x.CurrentPath with get() = x.CurrentPathElements.Combine()
-
+    member x.TryFindSystem(systemNames:Fqdn) = tryFindSystem (x.TheSystem) systemNames

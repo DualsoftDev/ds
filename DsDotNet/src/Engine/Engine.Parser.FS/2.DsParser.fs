@@ -3,19 +3,22 @@ namespace rec Engine.Parser.FS
 
 open System
 open System.Linq
-open System.Text
 open System.Runtime.InteropServices
-open System.Text.RegularExpressions
 open System.Collections.Generic
 
 open Antlr4.Runtime
 open Antlr4.Runtime.Tree
 
-open Engine.Common
 open Engine.Common.FS
 open Engine.Parser
 open type Engine.Parser.dsParser
+open type Engine.Parser.FS.DsParser
+open Engine.Core
 
+module DsParserHelperModule =
+    ()
+
+type ParseTreePredicate = IParseTree->bool
 type DsParser() =
     static member ParseText (text:string, extractor:dsParser->#RuleContext, ?throwOnError) =
         let throwOnError = defaultArg throwOnError true
@@ -40,72 +43,101 @@ type DsParser() =
     /// 이때, copy 구문은 삭제한다.
     /// </summary>
     static member private ExpandSystemCopy(text:string):string =
-        /// 원본 text 에서 copy_system 구문을 제외한 나머지 text 를 반환한다.
-        let omitSystemCopy(text:string, sysCopies:SystemContext[]):string =
-            for cc in sysCopies do
-                if Global.Logger <> null then
-                    Global.Logger.Debug($"Replacing @copy_system(): {cc.GetText()}")
+        let func = fun (parser:dsParser) -> parser.model() :> RuleContext
+        let (parser, _, _) = DsParser.ParseText(text, func)
+        parser.Reset()
+        let model = parser.model()
+        let sysCtxMap =
+            DsParser.enumerateChildren<SystemContext>(model)
+                .Select(fun ctx ->
+                    let sysName = DsParser.findFirstChild<SystemNameContext>(ctx) |> Option.get |> fun x -> x.GetText()
+                    sysName, ctx)
+                |> dict |> Dictionary
 
-            let ranges = sysCopies.Select(fun ctx -> (ctx.Start.StartIndex, ctx.Stop.StopIndex)).ToArray()
-            let chars =
-                text
-                    |> Seq.filteri(fun n ch -> ranges |> Seq.forall(fun r -> n < fst r || snd r < n))
-                    |> Array.ofSeq
+        let copySysCtxs =
+            sysCtxMap.Where(fun (KeyValue(sysName, sysCtxt)) -> sysCtxt.children.Any(isType<SysCopySpecContext>)).ToArray()
 
-            String(chars)
+        // 원본 full text 에서 copy_system 구문을 치환한??? 삭제한 text 반환
+        let replaces =
+            copySysCtxs.Select(fun (KeyValue(name, ctx)) ->
+                let sourceSystemName = DsParser.findFirstChild<SourceSystemNameContext>(ctx) |> Option.get |> fun x -> x.GetText()
+                let srcCtx = sysCtxMap[sourceSystemName]
+                let nameCtx = findFirstChild<SystemNameContext>(srcCtx).Value
+                let copiedSystemText = srcCtx.GetReplacedText([RangeReplace.Create(nameCtx, name)])
+                RangeReplace.Create(ctx, copiedSystemText)).ToArray()
+        let replacedText = model.GetReplacedText(replaces)
+        logDebug $"Replaced Text:\r\n{replacedText}"
+        replacedText
+        //printfn ""
+        //()
 
-        // see RuleContext.GetText()
-        let rec ToText(ctx:RuleContext):string =
-            if ctx.ChildCount = 0 then
-                ""
-            else
-                let sb = new StringBuilder()
-                let mutable last = " "
-                for i in [0 .. ctx.ChildCount - 1] do
-                    let ch = ctx.GetChild(i)
-                    let text =
-                        match ch with
-                        | :? RuleContext as rc -> ToText(rc)
-                        | _ -> ch.GetText()
 
-                    // [sys ip = 123.2...] 에서 sys token 과 ip token 사이 공백을 삽입한다.
-                    if (Char.IsLetterOrDigit(last.Last()) && Char.IsLetterOrDigit(text[0])) then
-                        sb.Append(" ") |> ignore
-                    last <- text
-                    sb.Append(text)  |> ignore
+        //let omitSystemCopy(text:string, sysCopies:SystemContext[]):string =
+        //    for cc in sysCopies do
+        //        if Global.Logger <> null then
+        //            Global.Logger.Debug($"Replacing @copy_system(): {cc.GetText()}")
 
-                sb.ToString()
+        //    let ranges = sysCopies.Select(fun ctx -> (ctx.Start.StartIndex, ctx.Stop.StopIndex)).ToArray()
+        //    let chars =
+        //        text
+        //            |> Seq.filteri(fun n ch -> ranges |> Seq.forall(fun r -> n < fst r || snd r < n))
+        //            |> Array.ofSeq
 
-        let helper() =
-            [
-                let func = fun (parser:dsParser) -> parser.model() :> RuleContext
-                let (parser, _, _) = DsParser.ParseText(text, func)
-                parser.Reset()
-                let sysCtxMap =
-                    DsParser.enumerateChildren<SystemContext>(parser.model())
-                        .Select(fun ctx ->
-                            let sysName = DsParser.findFirstChild<SystemNameContext>(ctx) |> Option.get |> fun x -> x.GetText()
-                            sysName, ctx)
-                        |> dict |> Dictionary
+        //    String(chars)
 
-                let copySysCtxs = sysCtxMap.Where(fun kv -> DsParser.findFirstChild<SysCopySpecContext>(kv.Value) |> Option.isSome).ToArray()
+        //// see RuleContext.GetText()
+        //let rec ToText(ctx:RuleContext):string =
+        //    if ctx.ChildCount = 0 then
+        //        ""
+        //    else
+        //        let sb = new StringBuilder()
+        //        let mutable last = " "
+        //        for i in [0 .. ctx.ChildCount - 1] do
+        //            let ch = ctx.GetChild(i)
+        //            let text =
+        //                match ch with
+        //                | :? RuleContext as rc -> ToText(rc)
+        //                | _ -> ch.GetText()
 
-                // 원본 full text 에서 copy_system 구문 삭제한 text 반환
-                let textWithoutSysCopy = omitSystemCopy(text, copySysCtxs.Select(fun kv -> kv.Value).ToArray())
-                yield textWithoutSysCopy
+        //            // [sys ip = 123.2...] 에서 sys token 과 ip token 사이 공백을 삽입한다.
+        //            if (Char.IsLetterOrDigit(last.Last()) && Char.IsLetterOrDigit(text[0])) then
+        //                sb.Append(" ") |> ignore
+        //            last <- text
+        //            sb.Append(text)  |> ignore
 
-                for kv in copySysCtxs do
-                    yield "\r\n"
+        //        sb.ToString()
 
-                    let newSysName = kv.Key
-                    let srcSysName = DsParser.findFirstChild<SourceSystemNameContext>(kv.Value) |> Option.get |> fun x -> x.GetText()
-                    // 원본 시스템의 text 를 사본 system text 로 치환해서 생성
-                    let sysText = ToText(sysCtxMap[srcSysName])
-                    let pattern = @"(\[sys([^\]]*\]))([^=]*)="
-                    let replaced = Regex.Replace(sysText, pattern, $"$1{newSysName}=")
-                    yield replaced
-            ]
-        helper().JoinLines()
+        //let helper() =
+        //    [
+        //        let func = fun (parser:dsParser) -> parser.model() :> RuleContext
+        //        let (parser, _, _) = DsParser.ParseText(text, func)
+        //        parser.Reset()
+        //        let sysCtxMap =
+        //            DsParser.enumerateChildren<SystemContext>(parser.model())
+        //                .Select(fun ctx ->
+        //                    let sysName = DsParser.findFirstChild<SystemNameContext>(ctx) |> Option.get |> fun x -> x.GetText()
+        //                    sysName, ctx)
+        //                |> dict |> Dictionary
+
+        //        let copySysCtxs =
+        //            sysCtxMap.Where(fun (KeyValue(sysName, sysCtxt)) -> sysCtxt.children.Any(isType<SysCopySpecContext>)).ToArray()
+
+        //        // 원본 full text 에서 copy_system 구문 삭제한 text 반환
+        //        let textWithoutSysCopy = omitSystemCopy(text, copySysCtxs.Select(fun kv -> kv.Value).ToArray())
+        //        yield textWithoutSysCopy
+
+        //        for kv in copySysCtxs do
+        //            yield "\r\n"
+
+        //            let newSysName = kv.Key
+        //            let srcSysName = DsParser.findFirstChild<SourceSystemNameContext>(kv.Value) |> Option.get |> fun x -> x.GetText()
+        //            // 원본 시스템의 text 를 사본 system text 로 치환해서 생성
+        //            let sysText = ToText(sysCtxMap[srcSysName])
+        //            let pattern = @"(\[sys([^\]]*\]))([^=]*)="
+        //            let replaced = Regex.Replace(sysText, pattern, $"$1{newSysName}=")
+        //            yield replaced
+        //    ]
+        //helper().JoinLines()
 
 
 
@@ -125,50 +157,54 @@ type DsParser() =
     static member enumerateChildren<'T when 'T :> IParseTree >(
         from:IParseTree
         , ?includeMe:bool
-        , ?predicate:(IParseTree->bool)
+        , ?predicate:ParseTreePredicate
         ) : ResizeArray<'T> =         // ResizeArray<'T>
 
         let includeMe = defaultArg includeMe false
         let predicate = defaultArg predicate (isType<'T>)
-        let rec enumerateChildrenHelper(rslt:ResizeArray<'T>, frm:IParseTree, incMe:bool, pred:(IParseTree->bool)) =
-            if (incMe && pred(frm)) then
+        let rec enumerateChildrenHelper(rslt:ResizeArray<'T>, frm:IParseTree, incMe:bool) =
+            if (incMe && predicate(frm) && isType<'T> frm) then
                 rslt.Add(forceCast<'T>(frm))
 
             for index in [ 0 .. frm.ChildCount - 1 ] do
-                enumerateChildrenHelper(rslt, frm.GetChild(index), true, pred)
+                enumerateChildrenHelper(rslt, frm.GetChild(index), true)
 
         //Func<IParseTree, bool> pred = predicate ?? new Func<IParseTree, bool>(ctx => ctx is T)
         let result = ResizeArray<'T>()
-        enumerateChildrenHelper(result, from, includeMe, predicate)
+        enumerateChildrenHelper(result, from, includeMe)
         result
 
 
-    static member enumerateParents(from:IParseTree      // IEnumerable<IParseTree>
+    static member enumerateParents<'T when 'T :> IParseTree >(
+        from:IParseTree      // IEnumerable<IParseTree>
         , ?includeMe:bool
-        , ?predicate:(IParseTree->bool)) =
+        , ?predicate:ParseTreePredicate) =
 
         let includeMe = defaultArg includeMe false
-        let predicate = defaultArg predicate (fun _ -> true)
+        let predicate = defaultArg predicate (isType<'T>)
         let rec helper(from:IParseTree, includeMe:bool) =
             [
-                if (includeMe && predicate(from)) then
-                    yield from
+                if from <> null then
+                    if (includeMe && predicate(from) && isType<'T> from) then
+                        yield forceCast<'T>(from)
 
-                yield! helper(from.Parent, true)
+                    yield! helper(from.Parent, true)
             ]
         helper(from, includeMe)
 
 
 
-    static member findFirstChild(from:IParseTree, predicate:(IParseTree->bool), ?includeMe:bool) =
+    static member findFirstChild(from:IParseTree, predicate:ParseTreePredicate, ?includeMe:bool) =
         let includeMe = defaultArg includeMe false
         DsParser.enumerateChildren<IParseTree>(from, includeMe) |> Seq.tryFind(predicate)
 
-    static member findFirstChild<'T when 'T :> IParseTree>(from:IParseTree, ?includeMe:bool) : 'T option =   // :'T
+    static member findFirstChild<'T when 'T :> IParseTree>(from:IParseTree, ?includeMe:bool, ?predicate:ParseTreePredicate) : 'T option =   // :'T
         let includeMe = defaultArg includeMe false
-        DsParser.enumerateChildren<'T>(from, includeMe) |> Seq.tryFind(isType<'T>)
+        let predicate = defaultArg predicate (fun _ -> true)
+        let predicate x = isType<'T> x && predicate x
+        DsParser.enumerateChildren<'T>(from, includeMe, predicate) |> Seq.tryHead
 
-    static member findFirstAncestor(from:IParseTree, predicate:(IParseTree->bool), ?includeMe:bool) = //:IParseTree option=
+    static member findFirstAncestor(from:IParseTree, predicate:ParseTreePredicate, ?includeMe:bool) = //:IParseTree option=
         let includeMe = defaultArg includeMe false
         DsParser.enumerateParents(from, includeMe) |> Seq.tryFind(predicate)
 
@@ -178,8 +214,14 @@ type DsParser() =
         let pred = isType<'T>
         DsParser.findFirstAncestor(from, pred, includeMe) |> Option.map forceCast<'T>
 
+    static member findIdentifier1FromContext(context:IParseTree) =
+        let predicate (tree:IParseTree) =
+            let result = isType<Identifier1Context> tree
+                            && findFirstAncestor<DomainNameContext> tree |> Option.isNone   // [sys ip = hostname] 을 제거하기 위함
+            result
+        findFirstChild<Identifier1Context>(context, false, predicate) |> Option.map(fun ctx -> ctx.GetText().DeQuoteOnDemand())
 
-
+    [<Obsolete("Use FqdnParser instead")>]
     static member collectNameComponents(from:IParseTree):string[] = // :Fqdn
 
         (*
@@ -225,6 +267,16 @@ type DsParser() =
             DsParser.findFirstChild(from, pred, true) |> Option.get
         let name = idCtx.GetText()
         splitName(name).ToArray()
+
+    static member collectSystemNames(from:IParseTree) =
+        enumerateParents<SystemContext>(from, true).Select(findIdentifier1FromContext >> Option.get).Reverse().ToArray()
+
+    static member collectUpwardContextInformation(from:IParseTree) =
+        let ns        = collectNameComponents(from).ToFSharpList()
+        let sysNames  = collectSystemNames(from).ToFSharpList()
+        let flow      = findFirstAncestor<FlowContext>(from, true).Bind(findIdentifier1FromContext)
+        let parenting = findFirstAncestor<ParentingContext>(from, true).Bind(findIdentifier1FromContext)
+        sysNames, flow, parenting, ns
 
 #if EXTENDED_USAGE
     static member getParseResult(parser:dsParser) = // : ParserResult

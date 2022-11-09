@@ -40,3 +40,13 @@
 - DS 엔진 리뉴얼중
 
 
+## Recursive System
+	- 현재 구현된 model 구조는 system 이 대체함
+	- ParserHelper: _system 을 _systemStack 으로 구현해서 push pop
+	- NameComponents: 현행대로 최대 4단계로 유지?
+		- A/B/C 와 같은 계층적 system 구성이 존재할 때
+			- A 에서는 B API 는 호출할 수 있으나, C API 는 호출하지 못한다.
+			- 즉, A 와 C 시스템은 서로를 알지 못한다.
+			- B 는 A 를 부모로 알고, C 를 자식 으로 인지한다.
+
+

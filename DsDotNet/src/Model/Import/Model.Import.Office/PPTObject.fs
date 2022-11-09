@@ -26,13 +26,13 @@ module PPTObjectModule =
 
     let GetSysNApi(flowName:string, name:string) = 
         if(name.StartsWith("$"))
-            then (TrimSpace(name.Split('.').[0]).TrimStart('$')), name.Split('.').[1]
-            else  $"{flowName}_{name.Split('.').[0]}", name.Split('.').[1]
+            then (TrimSpace(name.Split('.').[0]).TrimStart('$')), TrimSpace(name.Split('.').[1])
+            else  $"{flowName}_{name.Split('.').[0]}", TrimSpace(name.Split('.').[1])
     let GetSysNFlow(fileName:string, name:string, pageNum:int) = 
             if(name.StartsWith("$"))
                 then 
                     if name.Contains(".")
-                    then (TrimSpace(name.Split('.').[0]).TrimStart('$')), name.Split('.').[1]
+                    then (TrimSpace(name.Split('.').[0]).TrimStart('$')), TrimSpace(name.Split('.').[1])
                     else (TrimSpace(name.TrimStart('$'))), "_"
 
             elif(name = "")        then fileName, sprintf "Page%d" pageNum

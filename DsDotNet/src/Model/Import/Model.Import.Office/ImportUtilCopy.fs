@@ -48,6 +48,8 @@ module internal ToCopyModule =
         let origModel = origFlow.System.Model
         let copySys   = copyFlow.System
         let findReal (realName:string)  = origModel.FindGraphVertex([|copySys.Name;copyFlow.Name;realName|]) :?> Real
+        let findCall (callName:string)  = origModel.FindGraphVertex([|copySys.Name;copyFlow.Name;callName|]) :?> Call
+        let findCallInReal(realName:string, name:string) = origModel.FindGraphVertex([|copySys.Name;copyFlow.Name;realName;name|]) :?> Call
         let findInReal(realName:string, name:string) = origModel.FindGraphVertex([|copySys.Name;copyFlow.Name;realName;name|]) :?> Vertex
 
         let copyReal(name, graph:DsGraph) =
@@ -97,7 +99,9 @@ module internal ToCopyModule =
                                 | :? Alias as orgiAlias -> 
                                     match orgiAlias.Target with 
                                     | RealTarget rt -> failwithf "Error : Real안에 Real타깃 Alias불가" 
-                                    | CallTarget ct -> Alias.Create(orgiAlias.Name, CallTarget(ct), Real(findReal(orgiReal.Name)), false)|>ignore
+                                    | CallTarget ct -> 
+                                            let r = findReal(orgiReal.Name)
+                                            Alias.Create(orgiAlias.Name, CallTarget(findCallInReal(orgiReal.Name, ct.Name)), Real(findReal(orgiReal.Name)), false)|>ignore
                                 | _ -> () )
 
                 | :? Alias as orgiAlias ->

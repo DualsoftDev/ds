@@ -154,8 +154,8 @@ module PPTObjectModule =
         let mutable ifRXs    = HashSet<string>()
         let mutable btnType:BtnType option = None 
         let mutable nodeType:NodeType = NodeType.MY
-        let trimStartEnd(text:string) =   text.TrimStart(' ').TrimEnd(' ')
-        let trimStartEndSeq(texts:string seq) =  texts  |> Seq.map(fun name -> trimStartEnd name)
+        let trimSpace(text:string) =   text.TrimStart(' ').TrimEnd(' ')
+        let trimStartEndSeq(texts:string seq) =  texts  |> Seq.map(fun name -> trimSpace name)
         let updateTxRx(tailBarckets:string) =
                     txCnt <- tailBarckets.Split(';').[0] |> Convert.ToInt32
                     rxCnt <- tailBarckets.Split(';').[1] |> Convert.ToInt32
@@ -163,7 +163,7 @@ module PPTObjectModule =
         let updateSafety(barckets:string)  = safeties <- barckets.Split(';')  |> HashSet
                                             //             |> Seq.map(fun name -> $"{pageTitle}_{name}") |> HashSet
         let updateCopySys(barckets:string, orgiSysName:string) =
-            if  (trimStartEnd barckets).All(fun c -> Char.IsDigit(c))
+            if  (trimSpace barckets).All(fun c -> Char.IsDigit(c))
             then
                 [for i in [1..Convert.ToInt32(barckets)] do yield sprintf "%s%d" name i]
                 |> Seq.map(fun sys -> $"{pageTitle}_{sys}" , orgiSysName)
@@ -175,7 +175,7 @@ module PPTObjectModule =
                 |> Seq.iter(fun (copy, orgi) -> copySystems.TryAdd(copy, orgiSysName) |> ignore)
 
         let updateIF(text:string)      =
-            ifName <- GetBracketsReplaceName(text) |> trimStartEnd
+            ifName <- GetBracketsReplaceName(text) |> trimSpace
             let txrx = GetSquareBrackets(shape.InnerText, false)
             if(txrx.Contains('~'))
             then
@@ -185,7 +185,7 @@ module PPTObjectModule =
                 ifRXs  <- rxs.Split(';').Where(fun f->f=""|>not) |> trimStartEndSeq |> Seq.filter(fun f->f="_"|>not) |> HashSet
 
         do
-            name <-  GetBracketsReplaceName(shape.InnerText)
+            name <-  GetBracketsReplaceName(shape.InnerText)  |> trimSpace
             nodeType <-
                 if isDummy then DUMMY
 
@@ -221,7 +221,7 @@ module PPTObjectModule =
             |COPY -> GetSquareBrackets(shape.InnerText, false)
                         |> fun text ->
                             if text = ""|>not
-                            then updateCopySys  (text ,(GetBracketsReplaceName(shape.InnerText) |> trimStartEnd))
+                            then updateCopySys  (text ,(GetBracketsReplaceName(shape.InnerText) |> trimSpace))
             |_ -> ()
 
             let btn =  if shape.CheckNoSmoking() then Some(BtnType.EmergencyBTN)

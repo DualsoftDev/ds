@@ -31,10 +31,10 @@ type EdgeListener(parser:dsParser, helper:ParserHelper) =
                 let create target = Alias.Create(name, target, parent, true) |> ignore
                 match target with
                 | :? AliasTargetReal as real ->
-                    let realTarget = modelSpitCores.OfType<Real>().First(fun r -> r.NameComponents.IsStringArrayEqaul(real.TargetFqdn))
+                    let realTarget = modelSpitCores.OfType<Real>().First(fun r -> r.NameComponents = real.TargetFqdn)
                     create (RealTarget realTarget)
                 | :? AliasTargetDirectCall as directCall ->
-                    let apiTarget = modelSpitCores.OfType<ApiItem>().First(fun a -> a.NameComponents.IsStringArrayEqaul(directCall.TargetFqdn))
+                    let apiTarget = modelSpitCores.OfType<ApiItem>().First(fun a -> a.NameComponents = directCall.TargetFqdn)
                     let dummyCall = Call.CreateNowhere(apiTarget, parent)
                     create(CallTarget dummyCall)
                 | :? AliasTargetApi as api ->
@@ -60,8 +60,8 @@ type EdgeListener(parser:dsParser, helper:ParserHelper) =
                 path <- x.AppendPathElement(ns.Combine())
             let matches =
                 x._modelSpits
-                    .Where(fun spit -> spit.NameComponents.IsStringArrayEqaul(path)
-                                    || spit.NameComponents.IsStringArrayEqaul(x.AppendPathElement( [| ns.Combine() |] ))
+                    .Where(fun spit -> spit.NameComponents = path
+                                    || spit.NameComponents = x.AppendPathElement( [| ns.Combine() |] )
                     )
 
             let token =

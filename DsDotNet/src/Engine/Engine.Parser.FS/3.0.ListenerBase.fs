@@ -55,18 +55,18 @@ type ListenerBase(parser:dsParser, helper:ParserHelper) =
         let ns = collectSystemNames ctx
 
         helper._currentSystem <-
-            if theSystem.NameComponents.IsStringArrayEqaul ns then
+            if theSystem.NameComponents = ns then
                 helper._theSystem
             else
-                theSystem.Systems.TryFind(fun sys -> sys.NameComponents.IsStringArrayEqaul ns)
+                theSystem.Systems.TryFind(fun sys -> sys.NameComponents = ns)
 
         //match x._currentSystem with
         //| None ->
         //    let ns = collectNameComponents ctx
-        //    if theSystem.NameComponents.IsStringArrayEqaul ns then
+        //    if theSystem.NameComponents = ns then
         //        helper._currentSystem <- helper._theSystem
         //    else
-        //        helper._currentSystem <- theSystem.Systems.TryFind(fun sys -> sys.NameComponents.IsStringArrayEqaul ns)
+        //        helper._currentSystem <- theSystem.Systems.TryFind(fun sys -> sys.NameComponents = ns)
         //| Some curSys ->
         //    helper._currentSystem <- Some <| curSys.Systems.Find(fun s -> s.Name = name)
 

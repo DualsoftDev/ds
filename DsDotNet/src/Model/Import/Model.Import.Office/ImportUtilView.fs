@@ -14,8 +14,7 @@ module ImportViewModule =
     let MEI = ModelingEdgeInfo
 
 
-    let ConvertRealEdge(real:Real, dummys:pptDummy seq)  =
-        let newNode = ViewNode()
+    let ConvertRealEdge(real:Real, newNode:ViewNode, dummys:pptDummy seq)  =
         let edgeInfos = real.ModelingEdges
         let lands = real.Graph.Islands
         let dicV = real.Graph.Vertices |> Seq.map(fun v-> v, ViewNode(v)) |> dict
@@ -34,7 +33,6 @@ module ImportViewModule =
         |>Seq.iter(fun edge -> newNode.Edges.Add(MEI(dicV.[edge.Source], edge.EdgeSymbol, dicV.[edge.Target])) |>ignore)
 
         real.GetDummyReal(dummys, dicV, dicDummy) |> Seq.iter(fun e-> newNode.Edges.Add(e) |>ignore)
-        newNode
 
     let ConvertFlowEdge(flow:Flow, dummys:pptDummy seq)  =
         let newNode = ViewNode()
@@ -43,29 +41,32 @@ module ImportViewModule =
         let dicV = flow.Graph.Vertices |> Seq.map(fun v-> v, ViewNode(v)) |> dict
         let dicDummy = Dictionary<string, ViewNode>()
         let dummyMembers = dummys.GetDummyMembers()
+
         let convertReal(vertex:Vertex) = 
             match vertex  with
-                | :? Real as r ->  newNode.Singles.Add(ConvertRealEdge(r, dummys)) |>ignore
-                | :? Call | :? Alias-> newNode.Singles.Add(dicV.[vertex]) |>ignore
+                | :? Real as r -> ConvertRealEdge(r, dicV.[vertex], dummys)
+                | :? Call | :? Alias-> ()
                 | _ -> failwithf "vertex type ERROR" 
+            dicV.[vertex]
 
         lands
         |>Seq.filter(fun vertex -> dummyMembers.Contains(vertex) |> not)
-        |>Seq.iter(fun vertex -> convertReal(vertex))
+        |>Seq.iter(fun vertex -> newNode.Singles.Add(convertReal(vertex))|>ignore)
 
         edgeInfos
         |>Seq.filter(fun edge -> (dummyMembers.Contains(edge.Source) || dummyMembers.Contains(edge.Target))|>not)
         |>Seq.iter(fun edge -> 
-                    //if edge.Source.GetType() =  then  ConvertRealEdge(edge.Source, dummys)
-                    //if edge.Target.GetType() =  then  ConvertRealEdge(edge.Source, dummys)
-                    //ConvertRealEdge(edge.Target, dummys)
-                    //ConvertRealEdge(edge.Target, dummys)
-                    convertReal(edge.Source)
-                    convertReal(edge.Target)
+                    if edge.Source :? Real 
+                    then let r = edge.Source :?> Real
+                         ConvertRealEdge(r, dicV.[r], dummys) |> ignore 
+                    if edge.Target :? Real 
+                    then let r = edge.Target :?> Real
+                         ConvertRealEdge(r, dicV.[r], dummys) |> ignore 
+
                     newNode.Edges.Add(MEI(dicV.[edge.Source], edge.EdgeSymbol, dicV.[edge.Target])) |>ignore)
 
-        let a  = flow.GetDummyFlow(dummys, dicV, dicDummy) 
-        a |> Seq.iter(fun e-> newNode.Edges.Add(e) |>ignore)
+        flow.GetDummyFlow(dummys, dicV, dicDummy) 
+        |> Seq.iter(fun e-> newNode.Edges.Add(e) |>ignore)
 
         newNode
 

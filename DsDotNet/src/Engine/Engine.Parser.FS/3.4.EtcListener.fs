@@ -82,8 +82,9 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
                     (key, values)
             ]
 
+        let sysNames, flowName, parenting_, ns_ = collectUpwardContextInformation ctx
+        let curSystem = x.ParserHelper.TryFindSystem(sysNames.ToArray()).Value
 
-        let curSystem = x._currentSystem.Value
         for (key, values) in safetyKvs do
             let seg:Real =
                 match key.Length with

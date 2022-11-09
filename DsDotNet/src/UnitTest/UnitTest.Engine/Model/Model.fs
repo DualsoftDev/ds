@@ -188,9 +188,9 @@ module private ModelComparisonHelper =
             a1 > a2 > a3 > a4;
         }
         [interfaces] = {
-            I1 = { A.F.a1 ~ A.F.a2 }
-            I2 = { A.F.a2 ~ A.F.a3 }
-            I3 = { A.F.a3 ~ A.F.a1 }
+            I1 = { F.a1 ~ F.a2 }
+            I2 = { F.a2 ~ F.a3 }
+            I3 = { F.a3 ~ F.a1 }
             I1 <||> I2;
             I2 <||> I3;
             I3 ||> I4;
@@ -254,29 +254,29 @@ module private ModelComparisonHelper =
             C.M = { Cm; Cm1; Cm2; }
         }
     }
+    [sys] C = {
+        [flow] F = {
+            Pm |> Sp;
+            Pp |> Sm;
+            Vp <||> Vm > Pm > Sm;
+            Vp > Pp > Sp;
+        }
+        [interfaces] = {
+            P = { F.Vp ~ F.Sp }
+            M = { F.Vm ~ F.Sm }
+            P <||> M;
+        }
+    }
     [prop] = {
         [addresses] = {
             C.P = ( %Q1234.2343, %I1234.2343)
             C.M = ( START, END)
         }
     }
-}
-[sys] C = {
-    [flow] F = {
-        Pm |> Sp;
-        Pp |> Sm;
-        Vp <||> Vm > Pm > Sm;
-        Vp > Pp > Sp;
-    }
-    [interfaces] = {
-        P = { C.F.Vp ~ C.F.Sp }
-        M = { C.F.Vm ~ C.F.Sm }
-        P <||> M;
-    }
-}
-[prop] = {
-    [safety] = {
-        L.F.Main = { C.F.Sp; C.F.Sm; C.F.Vp; C.F.Vm; }
+    [prop] = {
+        [safety] = {
+            L.F.Main = { C.F.Vp; C.F.Vm; }
+        }
     }
 }
 """
@@ -293,6 +293,19 @@ module private ModelComparisonHelper =
             A.M = { Cm; Cm1; Cm2; }
         }
     }
+    [sys] A = {
+        [flow] F = {
+            Pm |> Sp;
+            Pp |> Sm;
+            Vp <||> Vm > Pm > Sm;
+            Vp > Pp > Sp;
+        }
+        [interfaces] = {
+            P = { F.Vp ~ F.Sp }
+            M = { F.Vm ~ F.Sm }
+            P <||> M;
+        }
+    }
     [prop] = {
         [addresses] = {
             A.P = ( %Q1234.2343, %I1234.2343)
@@ -300,19 +313,7 @@ module private ModelComparisonHelper =
         }
     }
 }
-[sys] A = {
-    [flow] F = {
-        Pm |> Sp;
-        Pp |> Sm;
-        Vp <||> Vm > Pm > Sm;
-        Vp > Pp > Sp;
-    }
-    [interfaces] = {
-        P = { A.F.Vp ~ A.F.Sp }
-        M = { A.F.Vm ~ A.F.Sm }
-        P <||> M;
-    }
-}
+
 """
         let answerButtons = """
 [sys] My = {

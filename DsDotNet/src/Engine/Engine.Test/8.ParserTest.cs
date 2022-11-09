@@ -101,28 +101,27 @@ namespace Engine
             A.M = { Cm; Cm1; Cm2; }
         }
     }
+    [sys] A = {
+        [flow] F = {
+            Vp > Pp > Sp;
+            Vm > Pm > Sm;
+
+            Pp |> Sm;
+            Pm |> Sp;
+            Vp <||> Vm;
+        }
+        [interfaces] = {
+            P = { F.Vp ~ F.Sp }
+            M = { F.Vm ~ F.Sm }
+            // 정보로서의 상호 리셋
+            P <||> M;
+        }
+    }
     [prop] = {
         [addresses] = {
             A.P = ( %Q1234.2343, %I1234.2343)
             A.M = ( START, END)
         }
-    }
-}
-
-[sys] A = {
-    [flow] F = {
-        Vp > Pp > Sp;
-        Vm > Pm > Sm;
-
-        Pp |> Sm;
-        Pm |> Sp;
-        Vp <||> Vm;
-    }
-    [interfaces] = {
-        P = { F.Vp ~ F.Sp }
-        M = { F.Vm ~ F.Sm }
-        // 정보로서의 상호 리셋
-        P <||> M;
     }
 }
 ";

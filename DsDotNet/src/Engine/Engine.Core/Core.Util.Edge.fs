@@ -95,7 +95,7 @@ module EdgeModule =
 
     let validateModel(model:Model) =
         let cores =
-            model.Spit()
+            model.TheSystem.Value.Spit()
                 .Select(fun sp -> sp.GetCore())
 
         for f in cores.OfType<Flow>() do

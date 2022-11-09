@@ -18,6 +18,7 @@ module CoreModule =
 
     ///Top level structure
     type Model() =
+        member val TheSystem:DsSystem option = None with get, set
         member val Systems = createNamedHashSet<DsSystem>()
         member val Variables = ResizeArray<Variable>()
         member val Commands = ResizeArray<Command>()
@@ -223,9 +224,23 @@ module CoreModule =
 
         override x.ToString() = $"{x.Source.QualifiedName} {x.EdgeType.ToText()} {x.Target.QualifiedName}"
 
+
+
+[<AutoOpen>]
+module CoreHelperModule =
+    let collectHierarchicalSystemNames(system:DsSystem) =
+        let rec helper (system:DsSystem) =
+            [   yield system.Name
+                match system.ParentSystem with
+                | Some parent -> yield! helper parent
+                | _ -> ()
+            ]
+        helper system |> List.rev
+
 [<Extension>]
 type CoreExt =
     [<Extension>] static member GetSystem(call:Call) = call.Parent.GetSystem()
+    [<Extension>] static member CollectSystemNames(system:DsSystem) = collectHierarchicalSystemNames system
 
     [<Extension>]
     static member AddModelEdge(flow:Flow, source:string, edgetext:string, target:string) =

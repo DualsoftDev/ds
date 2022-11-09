@@ -15,6 +15,9 @@ open type Engine.Parser.dsParser
 open type Engine.Parser.FS.DsParser
 open Engine.Core
 
+module DsParserHelperModule =
+    ()
+
 type DsParser() =
     static member ParseText (text:string, extractor:dsParser->#RuleContext, ?throwOnError) =
         let throwOnError = defaultArg throwOnError true
@@ -261,10 +264,10 @@ type DsParser() =
     static member collectSystemNames(from:IParseTree) =
         enumerateParents<SystemContext>(from, true).Select(findIdentifier1FromContext >> Option.get).Reverse().ToArray()
 
-    static member collectNameInformation(from:IParseTree) =
+    static member collectUpwardContextInformation(from:IParseTree) =
         let ns        = collectNameComponents(from).ToFSharpList()
         let sysNames  = collectSystemNames(from).ToFSharpList()
-        let flow      = findFirstAncestor<FlowContext>(from, true).Bind(findIdentifier1FromContext).Value
+        let flow      = findFirstAncestor<FlowContext>(from, true).Bind(findIdentifier1FromContext)
         let parenting = findFirstAncestor<ParentingContext>(from, true).Bind(findIdentifier1FromContext)
         sysNames, flow, parenting, ns
 

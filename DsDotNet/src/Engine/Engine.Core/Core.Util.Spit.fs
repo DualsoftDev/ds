@@ -93,6 +93,15 @@ module SpitModuleHelper =
         | :? Call     as c -> spitCall c
         | :? Alias    as a -> spitAlias a
         | _ -> failwith $"ERROR: Unknown type {obj}"
+
+    //let collectUpwardInformation(obj:obj) =
+    //    match obj with
+    //    | :? DsSystem as s -> spitSystem s
+    //    | :? Flow     as f -> spitFlow f
+    //    | :? Real     as r -> spitSegment r
+    //    | :? Call     as c -> spitCall c
+    //    | :? Alias    as a -> spitAlias a
+
     ()
 
 open SpitModuleHelper

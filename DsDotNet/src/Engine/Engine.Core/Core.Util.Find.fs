@@ -8,11 +8,9 @@ open Engine.Common.FS
 module internal ModelFindModule =
     let findGraphVertex(system:DsSystem, fqdn:Fqdn) : obj =
         let xxx = system.Spit()
-        let fqdn = fqdn.ToFSharpList()
         let nameEq (name:string) (x:INamed) = x.Name = name
-        match fqdn with
-        | [] -> failwith "ERROR: name not given"
-        | s::xs when s = system.Name ->
+
+        let rec findSystemInner (system:DsSystem) (xs:string list) : obj =
             match xs with
             | [] -> system
             | f::xs when system.Flows.Any(nameEq f) ->
@@ -25,28 +23,21 @@ module internal ModelFindModule =
                     | [] -> real
                     | remaining -> real.Graph.FindVertex(remaining.Combine())
 
-            | subsys::[] when system.Systems.Any(nameEq subsys) -> system.Systems.First(nameEq subsys)
+            | subsys::xs when system.Systems.Any(nameEq subsys) ->
+                let subSystem = system.Systems.Find(nameEq subsys)
+                match xs with
+                | [] -> subSystem
+                | _ -> findSystemInner subSystem xs
             | _ -> failwith "ERROR"
-        | _ -> failwith "ERROR"
 
 
+        let fqdn = fqdn.ToFSharpList()
+        match fqdn with
+        | [] -> failwith "ERROR: name not given"
+        | s::xs when s = system.Name -> findSystemInner system xs
+        | _ -> findSystemInner system fqdn
 
 
-        //let n = fqdn.Length
-        //match n with
-        //| 0 -> failwith "ERROR: name not given"
-        //| _ when n > 1 ->
-        //    assert(system.Name = fqdn[0])
-        //    match n with
-        //    | 1 -> system       //system.Systems.First(fun sys -> sys.Name = fqdn[0])
-        //    | 2 -> system.Systems.First(fun sys -> sys.Name = fqdn[0])
-        //    | 3 -> system.Systems.First(fun sys -> sys.Name = fqdn[0]).Flows.First(fun f -> f.Name = fqdn[1])
-        //    | 4 -> system.Systems.First(fun sys -> sys.Name = fqdn[0]).Flows.First(fun f -> f.Name = fqdn[1]).Graph.FindVertex(fqdn[2])
-        //    | 5 ->
-        //        let seg = system.Systems.First(fun sys -> sys.Name = fqdn[0]).Flows.First(fun f -> f.Name = fqdn[1]).Graph.FindVertex(fqdn[2]) :?> Real
-        //        seg.Graph.FindVertex(fqdn[3])
-        //    | _ -> failwith "ERROR"
-        //| _ -> failwith "ERROR"
 
 
     let findGraphVertexT<'V when 'V :> IVertex>(system:DsSystem, fqdn:Fqdn) =

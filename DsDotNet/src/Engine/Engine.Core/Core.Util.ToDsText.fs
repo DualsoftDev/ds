@@ -189,8 +189,10 @@ module internal ToDsTextModule =
                     [
                         if withSafeties.Any() then
                             yield $"{tab}[safety] = {lb}"
+                            let sysNames = system.CollectSystemNames().ToArray()
                             for seg in withSafeties do
-                                let conds = seg.SafetyConditions.Select(fun seg -> seg.QualifiedName).JoinWith("; ") + ";"
+                                let getSegmentPath (seg:Real) = getRelativeName sysNames seg.NameComponents
+                                let conds = seg.SafetyConditions.Select(getSegmentPath).JoinWith("; ") + ";"
                                 yield $"{tab2}{seg.QualifiedName} = {lb} {conds} {rb}"
                             yield $"{tab}{rb}"
                     ] |> combineLines

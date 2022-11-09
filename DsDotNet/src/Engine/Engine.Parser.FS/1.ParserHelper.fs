@@ -1,6 +1,7 @@
-namespace Engine.Parser.FS
+namespace rec Engine.Parser.FS
 
 open Engine.Core
+open Engine.Common.FS
 open System.Collections.Generic
 open System.Linq
 
@@ -28,7 +29,25 @@ type AliasCreator(name:string, parent:ParentWrapper, target:AliasTarget) =
     member val Parent = parent with get, set
     member val Target = target with get, set
 
+
+[<AutoOpen>]
+module internal ParserHelperModule =
+    let tryFindSystem(fromSystem:DsSystem) (systemNames:Fqdn) =
+        let rec helper (fromSystem:DsSystem) (systemNames:string list) =
+            match systemNames with
+            | n::[] when fromSystem.Name = n -> Some fromSystem
+            | n::[] -> None
+            | n::ns when fromSystem.Name = n ->
+                let child = fromSystem.Systems.TryFind(fun s -> s.Name = n)
+                match child with
+                | Some child -> helper child ns
+                | None -> None
+            | _ -> None
+        helper fromSystem (systemNames.ToFSharpList())
+
+
 type ParserHelper(options:ParserOptions) =
+    let mutable theSystem:DsSystem option = None
     member val Model = Model()
     member val ParserOptions = options with get, set
 
@@ -40,8 +59,10 @@ type ParserHelper(options:ParserOptions) =
     //member internal x._system = x._systems |> Seq.tryHead
     //member val internal _systems = Stack<DsSystem>()
 
-    member x.TheSystem = x._theSystem.Value
-    member val internal _theSystem:DsSystem option = None with get, set
+    member x.TheSystem = theSystem.Value
+    member internal x._theSystem
+        with get() = theSystem
+        and set(v) = theSystem <- v; x.Model.TheSystem <- v
     member val internal _currentSystem:DsSystem option = None with get, set
 
     member val internal _flow:Flow option = None  with get, set
@@ -79,4 +100,4 @@ type ParserHelper(options:ParserOptions) =
         helper().ToArray()
 
     member internal x.CurrentPath with get() = x.CurrentPathElements.Combine()
-
+    member x.TryFindSystem(systemNames:Fqdn) = tryFindSystem (x.TheSystem) systemNames

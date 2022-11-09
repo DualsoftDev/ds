@@ -19,6 +19,7 @@ isntall-package:
 clean:
 	rm -rf latex html
 	rm -rf */bin */obj
+	rm -rf UnitTest/UnitTest.Engine/bin
 
 cloc:
 	cloc Engine*

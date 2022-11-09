@@ -14,8 +14,8 @@
 		<Compile Include="0.Parser.Util.fs" />
 		<Compile Include="1.AllListener.fs" />
 		<Compile Include="1.ErrorListener.fs" />
-		<Compile Include="1.ParserHelper.fs" />
 		<Compile Include="2.DsParser.fs" />
+		<Compile Include="1.ParserHelper.fs" />
 		<Compile Include="9.FqdnParser.fs" />
 		<Compile Include="3.0.ListenerBase.fs" />
 		<Compile Include="3.1.SkeletonListener.fs" />

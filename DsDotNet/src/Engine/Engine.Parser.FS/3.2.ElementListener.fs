@@ -56,11 +56,11 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
         let findSpit (ns:string seq) =
             spits.TryFind(fun sp -> sp.NameComponents.IsStringArrayEqaul (ns.ToArray()))
         //let ns = collectNameComponents(ctx)
-        let sysNames, flowName, parenting, ns = collectNameInformation ctx
+        let sysNames, flowName, parenting, ns = collectUpwardContextInformation ctx
 
         let mutable goon = true
         match sysNames, flowName, parenting, ns with
-        | s::[], f, None, n::[] ->
+        | s::[], Some f, None, n::[] ->
             tracefn $"{s}/{f}/{n}"
             match findSpit [s;f;n] with
             | Some sp -> ()
@@ -68,7 +68,7 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
                 tracefn "Need to generate %A" [s;f;n]
                 Real.Create(n, flow) |> ignore
             goon <- false
-        | s::[], f, Some p, aliasCall::[] ->
+        | s::[], Some f, Some p, aliasCall::[] ->
             tracefn $"{s}/{f}/{p}/{aliasCall}"
             match findSpit [s;f;p;aliasCall] with
             | Some sp -> ()
@@ -116,7 +116,7 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
 
                 tracefn "Need to generate %A" [s;f;p;aliasCall]
 
-        | s::[], f, Some p, otherSystem::apiName::[] ->
+        | s::[], Some f, Some p, otherSystem::apiName::[] ->
             assert(p = x._parenting.Value.Name)
             tracefn $"{s}/{f}/{p}/{otherSystem}.{apiName}"
             match findSpit [s; otherSystem; apiName] with

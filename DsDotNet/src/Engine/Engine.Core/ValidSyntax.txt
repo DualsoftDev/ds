@@ -1,3 +1,14 @@
+- Naming 제약 사항
+    - 동일 children level 에서는 동일 이름 불허
+        - 항목 성격이 달라도 적용됨.
+            - e.g   Sys "A" / {Flow "F", SubSys "F"} : 동일 A 아래에 같은 이름 F 두 번 사용 불허
+    - Parent 항목 이름과 동일한 Child 항목 이름은 불허
+        - e.g Sys "A" / Flow "A"
+        - e.g Flow "A" / Real "A"
+- Flow 내의 safety block 은 없애고, system 의 속성으로만 정의
+- 상위로 따라 올라가면서 쓰이는 모든 이름에서 중복이 없어야 한다.
+    - e.g Sys "A" / Flow "F" / Real "A" => A/F/A : A 이름이 중복됨
+
 
 Sys / F / Seg
 Sys / F / MySegAlias

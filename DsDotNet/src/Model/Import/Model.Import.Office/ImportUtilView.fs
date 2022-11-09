@@ -14,7 +14,7 @@ module ImportViewModule =
     let MEI = ModelingEdgeInfo
 
 
-    let ConvertRealEdge(real:Real, newNode:ViewNode, dummys:pptDummy seq)  =
+    let ConvertReal(real:Real, newNode:ViewNode, dummys:pptDummy seq)  =
         let edgeInfos = real.ModelingEdges
         let lands = real.Graph.Islands
         let dicV = real.Graph.Vertices |> Seq.map(fun v-> v, ViewNode(v)) |> dict
@@ -34,7 +34,7 @@ module ImportViewModule =
 
         real.GetDummyReal(dummys, dicV, dicDummy) |> Seq.iter(fun e-> newNode.Edges.Add(e) |>ignore)
 
-    let ConvertFlowEdge(flow:Flow, dummys:pptDummy seq)  =
+    let ConvertFlow(flow:Flow, dummys:pptDummy seq)  =
         let newNode = ViewNode()
         let edgeInfos = flow.ModelingEdges
         let lands = flow.Graph.Islands
@@ -44,7 +44,7 @@ module ImportViewModule =
 
         let convertReal(vertex:Vertex) = 
             match vertex  with
-                | :? Real as r -> ConvertRealEdge(r, dicV.[vertex], dummys)
+                | :? Real as r -> ConvertReal(r, dicV.[vertex], dummys)
                 | :? Call | :? Alias-> ()
                 | _ -> failwithf "vertex type ERROR" 
             dicV.[vertex]
@@ -58,10 +58,10 @@ module ImportViewModule =
         |>Seq.iter(fun edge -> 
                     if edge.Source :? Real 
                     then let r = edge.Source :?> Real
-                         ConvertRealEdge(r, dicV.[r], dummys) |> ignore 
+                         ConvertReal(r, dicV.[r], dummys) |> ignore 
                     if edge.Target :? Real 
                     then let r = edge.Target :?> Real
-                         ConvertRealEdge(r, dicV.[r], dummys) |> ignore 
+                         ConvertReal(r, dicV.[r], dummys) |> ignore 
 
                     newNode.Edges.Add(MEI(dicV.[edge.Source], edge.EdgeSymbol, dicV.[edge.Target])) |>ignore)
 
@@ -69,6 +69,18 @@ module ImportViewModule =
         |> Seq.iter(fun e-> newNode.Edges.Add(e) |>ignore)
 
         newNode
+
+    let UpdateBtnNodes(system:DsSystem, flow:Flow, node:ViewNode)  =
+
+        let newNode = ViewNode("Buttons")
+
+        system.AutoButtons.Where(fun w->w.Value.Contains(flow))     |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, AutoBTN)) |>ignore)
+        system.ResetButtons.Where(fun w->w.Value.Contains(flow))    |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, ResetBTN)) |>ignore)
+        system.StartButtons.Where(fun w->w.Value.Contains(flow))    |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, StartBTN)) |>ignore)
+        system.EmergencyButtons.Where(fun w->w.Value.Contains(flow))|> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, EmergencyBTN)) |>ignore)
+        
+        if newNode.Singles.Count > 0
+        then node.Singles.Add(newNode) |> ignore
 
 
     let rec ConvertRuntimeEdge(graph:Graph<Vertex, Edge>)  =
@@ -95,14 +107,22 @@ module ImportViewModule =
         [<Extension>] 
         static member MakeGraphView (doc:pptDoc, model:Model) =
                 doc.Dummys |> Seq.iter(fun dummy -> dummy.Update(dicVertex))
-                            
-                model.Systems
-                |>Seq.collect(fun sys -> sys.Flows)
-                |>Seq.map(fun flow -> 
-                    let page = dicFlow.GetPage(flow)
-                    let dummys = doc.Dummys.Where(fun f->f.Page = page)
-                    let flowNode = ConvertFlowEdge(flow, dummys)
-                    flowNode.Page <- page
-                    flowNode.Flow <- Some(flow)
-                    flowNode
-                    )
+
+                let getFlowNodes(flows:Flow seq) = 
+                    flows |>Seq.map(fun flow -> 
+                        let page = dicFlow.GetPage(flow)
+                        let dummys = doc.Dummys.Where(fun f->f.Page = page)
+                        let flowNode = ConvertFlow(flow, dummys)
+                        UpdateBtnNodes(flow.System, flow, flowNode)
+                        flowNode.Page <- page; flowNode.Flow <- Some(flow)
+                        flowNode)
+
+                let viewNodes = 
+                    model.Systems
+                    |>Seq.map(fun sys -> sys, sys.Flows)
+                    |>Seq.collect(fun (sys, flows) -> 
+                            let flowNodes = getFlowNodes(flows)
+
+                            flowNodes
+                            )
+                viewNodes 

@@ -30,8 +30,8 @@ module pptTestModule =
             check (ImportM.FromPPTX($"{__SOURCE_DIRECTORY__}\\T6_Alias.pptx"))
             check (ImportM.FromPPTX($"{__SOURCE_DIRECTORY__}\\T7_CopySystem.pptx"))
             check (ImportM.FromPPTX($"{__SOURCE_DIRECTORY__}\\T8_Safety.pptx"))
+            check (ImportM.FromPPTX($"{__SOURCE_DIRECTORY__}\\T9_Group.pptx"))
     
-
     type PPTTest() =
         do Fixtures.SetUpTest()
 

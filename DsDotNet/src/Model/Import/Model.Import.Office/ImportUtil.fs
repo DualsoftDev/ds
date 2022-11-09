@@ -122,15 +122,20 @@ module ImportU =
         //EMG & Start & Auto 리스트 만들기
         [<Extension>] static member MakeButtons (doc:pptDoc, model:Model) =
                         let mySys = model.GetAcive()
+                        let checkErr(flow:Flow, node:pptNode) = 
+                                if (flow.System <> mySys)
+                                then  Office.ErrorPPT(Name, ErrID._45 , $"원인 버튼 {node.Name}: 시스템{flow.System.Name}", node.PageNum)
+                                
                         doc.Nodes
                         |> Seq.filter(fun node -> node.IsDummy|>not)
                         |> Seq.iter(fun node ->
                                 let flow = dicFlow.[node.PageNum]
+
                                 //Start, Reset, Auto, Emg 버튼
-                                if(node.BtnType.IsSome && node.BtnType.Value = BtnType.StartBTN) then mySys.AddButton(BtnType.StartBTN, node.Name, flow)
-                                if(node.BtnType.IsSome && node.BtnType.Value = BtnType.ResetBTN) then mySys.AddButton(BtnType.ResetBTN,node.Name, flow)
-                                if(node.BtnType.IsSome && node.BtnType.Value = BtnType.AutoBTN)  then mySys.AddButton(BtnType.AutoBTN,node.Name, flow)
-                                if(node.BtnType.IsSome && node.BtnType.Value = BtnType.EmergencyBTN)   then mySys.AddButton(BtnType.EmergencyBTN ,node.Name, flow)
+                                if(node.BtnType.IsSome && node.BtnType.Value = BtnType.StartBTN) then checkErr(flow, node);mySys.AddButton(BtnType.StartBTN, node.Name, flow)
+                                if(node.BtnType.IsSome && node.BtnType.Value = BtnType.ResetBTN) then checkErr(flow, node);mySys.AddButton(BtnType.ResetBTN,node.Name, flow)
+                                if(node.BtnType.IsSome && node.BtnType.Value = BtnType.AutoBTN)  then checkErr(flow, node);mySys.AddButton(BtnType.AutoBTN,node.Name, flow)
+                                if(node.BtnType.IsSome && node.BtnType.Value = BtnType.EmergencyBTN)   then checkErr(flow, node);mySys.AddButton(BtnType.EmergencyBTN ,node.Name, flow)
                                 )
 
 

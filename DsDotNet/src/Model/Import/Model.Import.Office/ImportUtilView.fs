@@ -72,7 +72,7 @@ module ImportViewModule =
 
     let UpdateBtnNodes(system:DsSystem, flow:Flow, node:ViewNode)  =
 
-        let newNode = ViewNode("Buttons")
+        let newNode = ViewNode("Buttons", BUTTON)
 
         system.AutoButtons.Where(fun w->w.Value.Contains(flow))     |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, AutoBTN)) |>ignore)
         system.ResetButtons.Where(fun w->w.Value.Contains(flow))    |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, ResetBTN)) |>ignore)
@@ -81,7 +81,16 @@ module ImportViewModule =
         
         if newNode.Singles.Count > 0
         then node.Singles.Add(newNode) |> ignore
+    
 
+    let UpdateApiItems(system:DsSystem, flow:Flow, node:ViewNode)  =
+
+        let newNode = ViewNode("Interface", IF)
+
+        system.ApiItems |> Seq.iter(fun api -> newNode.Singles.Add(ViewNode(api.Name, IF)) |>ignore)
+        
+        if newNode.Singles.Count > 0
+        then node.Singles.Add(newNode) |> ignore
 
     let rec ConvertRuntimeEdge(graph:Graph<Vertex, Edge>)  =
         let newNode = ViewNode()
@@ -113,7 +122,10 @@ module ImportViewModule =
                         let page = dicFlow.GetPage(flow)
                         let dummys = doc.Dummys.Where(fun f->f.Page = page)
                         let flowNode = ConvertFlow(flow, dummys)
+
                         UpdateBtnNodes(flow.System, flow, flowNode)
+                        UpdateApiItems(flow.System, flow, flowNode)
+
                         flowNode.Page <- page; flowNode.Flow <- Some(flow)
                         flowNode)
 

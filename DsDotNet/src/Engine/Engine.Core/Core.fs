@@ -212,6 +212,7 @@ type CoreExt =
     [<Extension>] static member GetSystem(call:Call) = call.Parent.GetSystem()
     [<Extension>]
     static member AddButton(sys:DsSystem, btnType:BtnType, btnName: string, flow:Flow) =
+        if sys <> flow.System then failwithf $"button [{btnName}] in flow ({flow.System.Name} != {sys.Name}) is not same system"
         let dicButton =
             match btnType with
             | StartBTN       -> sys.StartButtons

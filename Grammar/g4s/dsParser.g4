@@ -28,7 +28,7 @@ system: '[' 'sys' (('ip'|'host') '=' host)? ']' systemName '=' (sysBlock|sysCopy
         : LBRACE (flow | interfaces | buttons | systemProperties | modelProperties | system)* RBRACE       // identifier1Listing|parenting|causal|call
         ;
     host: ipv4 | domainName;
-    domainName: identifier1234;
+    domainName: IDENTIFIER1 | IDENTIFIER2 | IDENTIFIER3 | IDENTIFIER4;  // identifier1234;
     ipv4: IPV4;
     systemName:identifier1;
 

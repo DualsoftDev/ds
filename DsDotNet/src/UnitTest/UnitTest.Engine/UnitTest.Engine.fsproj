@@ -46,6 +46,7 @@
 		<None Include="Obsolete\test.ipynb" />
 		<None Include="ScratchPad.fsx" />
 		<None Include="App.config" />
+		<Compile Include="Main.fs" />
 	</ItemGroup>
 
 	<ItemGroup>

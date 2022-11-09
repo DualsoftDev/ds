@@ -18,6 +18,29 @@ open Engine.Core
 module DsParserHelperModule =
     ()
 
+[<RequireQualifiedAccess>]
+module Fqdn =
+    let parse(text:string) =
+        let createParser(text:string) =
+            let inputStream = new AntlrInputStream(text)
+            let lexer = fqdnLexer (inputStream)
+            let tokenStream = CommonTokenStream(lexer)
+            let parser = fqdnParser (tokenStream)
+
+            let listener_lexer = new ErrorListener<int>(true)
+            let listener_parser = new ErrorListener<IToken>(true)
+            lexer.AddErrorListener(listener_lexer)
+            parser.AddErrorListener(listener_parser)
+            parser
+
+
+        let parser = createParser (text)
+        let ctx = parser.fqdn()
+        let ncs = enumerateChildren<fqdnParser.NameComponentContext>(ctx)
+        [ for nc in ncs -> nc.GetText().DeQuoteOnDemand() ]
+
+
+
 type ParseTreePredicate = IParseTree->bool
 type DsParser() =
     static member ParseText (text:string, extractor:dsParser->#RuleContext, ?throwOnError) =
@@ -215,58 +238,19 @@ type DsParser() =
         DsParser.findFirstAncestor(from, pred, includeMe) |> Option.map forceCast<'T>
 
     static member findIdentifier1FromContext(context:IParseTree) =
-        let predicate (tree:IParseTree) =
-            let result = isType<Identifier1Context> tree
-                            && findFirstAncestor<DomainNameContext> tree |> Option.isNone   // [sys ip = hostname] 을 제거하기 위함
-            result
-        findFirstChild<Identifier1Context>(context, false, predicate) |> Option.map(fun ctx -> ctx.GetText().DeQuoteOnDemand())
+        findFirstChild<Identifier1Context>(context, false) |> Option.map(fun ctx -> ctx.GetText().DeQuoteOnDemand())
 
-    [<Obsolete("Use FqdnParser instead")>]
     static member collectNameComponents(from:IParseTree):string[] = // :Fqdn
-
-        (*
-            name 을 구성하는 char list 를 왼쪽에서부터 folding 하면서
-            - name component (하나의 token)가 구성되면 allResult 에 하나씩 추가한다.
-            - backslash 나 backslash 바로 뒤 문자, quote 안의 문자는 계속 token 에 추가.
-        *)
-        let splitName(name:string) = // : Fqdn
-            let mutable isInQuote = false
-            let mutable prev = ' '
-            let allResults = new ResizeArray<string>()
-
-            let folder (token:char list) (ch:char) =
-                try
-                    match ch with
-                    | '\\'
-                    | '.' when isInQuote  -> ch::token
-                    | _ when prev = '\\' -> ch::token
-                    | '"' ->
-                        isInQuote <- not isInQuote
-                        token
-                    | '.' ->
-                        allResults.Add(token.Reverse().ToArray() |> String)
-                        []
-                    | _ ->
-                        ch::token
-                finally
-                    prev <- ch
-
-
-            let last = name.FoldLeft(folder, []).Reverse().ToArray() |> String
-            assert(last <> "")
-            allResults.Add(last)
-            allResults
-
-
         let idCtx =
-            let pred = fun (tree:IParseTree) ->
-                            tree :? Identifier1Context
-                            || tree :? Identifier2Context
-                            || tree :? Identifier3Context
-                            || tree :? Identifier4Context
+            let pred =
+                fun (tree:IParseTree) ->
+                    tree :? Identifier1Context
+                    || tree :? Identifier2Context
+                    || tree :? Identifier3Context
+                    || tree :? Identifier4Context
             DsParser.findFirstChild(from, pred, true) |> Option.get
         let name = idCtx.GetText()
-        splitName(name).ToArray()
+        Fqdn.parse(name).ToArray()
 
     static member collectSystemNames(from:IParseTree) =
         enumerateParents<SystemContext>(from, true).Select(findIdentifier1FromContext >> Option.get).Reverse().ToArray()

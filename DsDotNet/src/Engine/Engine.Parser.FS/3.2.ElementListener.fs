@@ -55,7 +55,7 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
         let spits = system.Spit()
         let flow = x._flow.Value
         let findSpits (ns:string seq) =
-            spits.Where(fun sp -> sp.NameComponents.IsStringArrayEqaul (ns.ToArray()))
+            spits.Where(fun sp -> sp.NameComponents = (ns.ToArray()))
         let findSpit = findSpits >> Seq.tryHead
         //let ns = collectNameComponents(ctx)
         let sysNames, flowName, parenting, ns = collectUpwardContextInformation ctx
@@ -75,7 +75,7 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
                     let apiItem =
                         x._modelSpitObjects
                             .OfType<ApiItem>()
-                            .Where(fun api -> api.NameComponents.IsStringArrayEqaul(aliasKey))
+                            .Where(fun api -> api.NameComponents = aliasKey)
                             .Head()
 
                     let name = ns.Combine()
@@ -102,7 +102,7 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
                     match sp.SpitObj with
                     | SpitReal _
                     | SpitCall _ -> true
-                    | _ -> false).TryFind(fun sp -> sp.NameComponents.IsStringArrayEqaul key)
+                    | _ -> false).TryFind(fun sp -> sp.NameComponents = key)
             match target with
             | Some sp -> ()
             | None ->
@@ -179,7 +179,7 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
             let path = x.AppendPathElement(ns.ToArray())
             let sysName = x._currentSystem.Value.Name
 
-            let existing = x._modelSpits.Where(fun spit -> spit.NameComponents.IsStringArrayEqaul(path)).ToArray()
+            let existing = x._modelSpits.Where(fun spit -> spit.NameComponents = path).ToArray()
             if existing.Where(fun spit -> spit.GetCore() :? Vertex).IsEmpty() then
 
                 let pathWithoutParenting = [|sysName; flow.Name; yield! ns|]
@@ -188,8 +188,8 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
                 let matches =
                     x._modelSpits
                         .Where(fun spitResult ->
-                            spitResult.NameComponents.IsStringArrayEqaul(path)
-                            || spitResult.NameComponents.IsStringArrayEqaul(pathWithoutParenting))
+                            spitResult.NameComponents = path
+                            || spitResult.NameComponents = pathWithoutParenting)
                         .Select(fun spitResult -> spitResult.GetCore())
                         .ToArray()
 
@@ -201,7 +201,7 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
                     x._modelSpits
                         .Where(fun spitResult ->
                             spitResult.GetCore() :? Real
-                            && pathAdapted.Any() && spitResult.NameComponents.IsStringArrayEqaul(pathAdapted))
+                            && pathAdapted.Any() && spitResult.NameComponents = pathAdapted)
                         .Select(fun spitResult -> spitResult.GetCore())
                         .ToArray()
 
@@ -213,13 +213,13 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
                 let apiCall =
                     x._modelSpitObjects
                         .OfType<ApiItem>()
-                        .Where(fun api -> api.NameComponents.IsStringArrayEqaul(ns))
+                        .Where(fun api -> api.NameComponents = ns.ToArray())
                         .TryHead()
 
                 assert(matches.Length = 0 || matches.Length = 1)
 
                 // API call 과 나의 시스템의 다른 flow 에 존재하는 segment 호출이 헷갈리지 않도록
-                if (extendedMatches.OfType<Real>().Any(fun r -> r.NameComponents.IsStringArrayEqaul(pathAdapted))) then
+                if (extendedMatches.OfType<Real>().Any(fun r -> r.NameComponents = pathAdapted)) then
                     match apiCall with
                     | Some apiCall ->
                         raise <| ParserException($"Ambiguous entry [{apiCall.QualifiedName}] and [{pathAdapted.Combine()}]", ctx)
@@ -237,7 +237,7 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
                             let aliasKey =
                                 matches
                                     .OfType<SpitOnlyAlias>()
-                                    .Where(fun alias -> alias.Mnemonic.IsStringArrayEqaul(pathWithoutParenting))
+                                    .Where(fun alias -> alias.Mnemonic = pathWithoutParenting)
                                     .Select(fun alias -> alias.AliasKey)
                                     .FirstOrDefault()
 
@@ -252,7 +252,7 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
                                     let apiItem =
                                         x._modelSpitObjects
                                             .OfType<ApiItem>()
-                                            .Where(fun api -> api.NameComponents.IsStringArrayEqaul(aliasKey))
+                                            .Where(fun api -> api.NameComponents = aliasKey)
                                             .Head()
 
                                     let name = ns.Combine()

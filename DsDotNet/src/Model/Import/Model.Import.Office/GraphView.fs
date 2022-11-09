@@ -20,7 +20,16 @@ module rec ViewModule =
         new (nodeType) = ViewNode("", nodeType, None, None)
         new (name, nodeType) = ViewNode(name, nodeType, None, None)
         new (name) = ViewNode(name, MY, None, None)
-        new (coreVertex:Vertex) = ViewNode(coreVertex.Name, MY, Some(coreVertex),  None)
+        new (coreVertex:Vertex) = 
+              let name = 
+                  match coreVertex  with
+                    | :? Alias as a -> match a.Target with
+                                       | RealTarget r -> r.Name
+                                       | CallTarget c -> c.Name
+                    | _ -> coreVertex.Name
+                
+              ViewNode(name, MY, Some(coreVertex),  None)
+            
         new (name, btnType:BtnType) = ViewNode(name, BUTTON, None, Some(btnType))
 
         member val Edges = HashSet<ModelingEdgeInfo<ViewNode>>()

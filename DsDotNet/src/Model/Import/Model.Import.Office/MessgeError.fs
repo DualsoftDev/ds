@@ -59,6 +59,8 @@ module ErrID =
     let _43 = "Copy 대상 시스템이 없습니다."
     let _44 = "System 이름 시작은 특수문자 및 숫자는 불가능합니다.(이름 내부에 공백 미지원)"
     let _45 = "button 등록은 자신 System 에만 등록가능합니다."
+    let _46 = "Call 이름은 '.' 으로 구분되어야 합니다.(ex: systemA.Inferface3)"
+    let _47 = "호출 Interface에 해당하는 대상 시스템이 없습니다."
 
     
 

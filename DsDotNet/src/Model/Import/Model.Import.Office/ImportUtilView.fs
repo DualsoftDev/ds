@@ -83,12 +83,19 @@ module ImportViewModule =
         then node.Singles.Add(newNode) |> ignore
     
 
-    let UpdateApiItems(system:DsSystem, flow:Flow, node:ViewNode)  =
+    let UpdateApiItems(system:DsSystem, page:int, pptNodes: pptNode seq, node:ViewNode)  =
 
         let newNode = ViewNode("Interface", IF)
 
-        system.ApiItems |> Seq.iter(fun api -> newNode.Singles.Add(ViewNode(api.Name, IF)) |>ignore)
-        
+        system.ApiItems 
+        |> Seq.iter(fun api ->
+            
+            let findApiNode = pptNodes.Where(fun f->f.Name = api.Name && f.PageNum = page)
+            if findApiNode.Count() > 0
+            then newNode.Singles.Add(ViewNode(api.Name, IF)) |>ignore
+            
+            )
+
         if newNode.Singles.Count > 0
         then node.Singles.Add(newNode) |> ignore
 
@@ -124,7 +131,7 @@ module ImportViewModule =
                         let flowNode = ConvertFlow(flow, dummys)
 
                         UpdateBtnNodes(flow.System, flow, flowNode)
-                        UpdateApiItems(flow.System, flow, flowNode)
+                        UpdateApiItems(flow.System, page, doc.DicNodes.Values.Where(fun f->f.NodeType = IF), flowNode)
 
                         flowNode.Page <- page; flowNode.Flow <- Some(flow)
                         flowNode)

@@ -12,7 +12,6 @@ using System.Windows.Forms;
 using static Engine.Common.FS.MessageEvent;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsTextProperty;
-using static Model.Import.Office.PPTDummyModule;
 using static Model.Import.Office.ViewModule;
 
 namespace Dual.Model.Import
@@ -39,7 +38,7 @@ namespace Dual.Model.Import
                     if (color == Color.Transparent)
                     {
                         if (f.StartsWith($"[{TextSystem}") || (f.Contains($"[{TextFlow}]"))  //[flow] F = {} 한줄제외
-                        || f.Contains($"[{TextAddress}]") || f.Contains($"[{TextLayout}]") )
+                        || f.Contains($"[{TextAddress}]") || f.Contains($"[{TextLayout}]"))
                         {
                             rndColor = Color.FromArgb(r.Next(130, 230), r.Next(130, 230), r.Next(130, 230));
                             this.Do(() => richTextBox_ds.ScrollToCaret());
@@ -62,7 +61,7 @@ namespace Dual.Model.Import
             {
                 this.Do(() => button_comfile.Enabled = false);
                 var result = ImportM.FromPPTX(PathPPT);
-              
+
                 _Model = result.Item1;
                 var viewNodes = result.Item2;
                 if (!_ConvertErr)
@@ -265,8 +264,7 @@ namespace Dual.Model.Import
         }
         internal void TestDebug()
         {
-
-            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\..\..\"))+ "Model.Import.Office\\sample\\DS.pptx";
+            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\..\..\..\..\")) + "UnitTest\\UnitTest.Engine\\ImportPPT\\T0_CaseAll.pptx";
             bool debug = File.Exists(path);
             if (debug)
             {
@@ -278,18 +276,18 @@ namespace Dual.Model.Import
         internal void TestUnitTest()
         {
 
-            //0_CaseAll
-            //1_System
-            //2_Flow
-            //3_Real
-            //4_Api
-            //5_Call
-            //6_Alias
-            //7_CopySystem
-            //8_Safety
+            //T0_CaseAll
+            //T1_System
+            //T2_Flow
+            //T3_Real
+            //T4_Api
+            //T5_Call
+            //T6_Alias
+            //T7_CopySystem
+            //T8_Safety
             //T9_Group
             //T10_Button
-            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\..\..\..\..\"))+ "UnitTest\\UnitTest.Engine\\ImportPPT\\T10_Button.pptx";
+            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\..\..\..\..\")) + "UnitTest\\UnitTest.Engine\\ImportPPT\\T3_Real.pptx";
             bool debug = File.Exists(path);
             if (debug)
             {

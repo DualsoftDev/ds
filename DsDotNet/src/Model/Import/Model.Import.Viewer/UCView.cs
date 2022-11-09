@@ -6,18 +6,14 @@ using Microsoft.Msagl.Layout.Layered;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
-using static Engine.Core.CoreModule;
+using static Engine.Core.DsText;
 using static Engine.Core.DsType;
+using static Model.Import.Office.InterfaceClass;
+using static Model.Import.Office.PPTDummyModule;
+using static Model.Import.Office.ViewModule;
 using Color = Microsoft.Msagl.Drawing.Color;
 using Edge = Microsoft.Msagl.Drawing.Edge;
 using Vertex = Engine.Core.CoreModule.Vertex;
-using static Model.Import.Office.InterfaceClass;
-using static Engine.Core.DsText;
-using static Model.Import.Office.PPTDummyModule;
-using DocumentFormat.OpenXml.Spreadsheet;
-using System.Diagnostics;
-using DocumentFormat.OpenXml.Office2016.Presentation.Command;
-using static Model.Import.Office.ViewModule;
 
 namespace Dual.Model.Import
 {
@@ -43,8 +39,8 @@ namespace Dual.Model.Import
         //private Dictionary<Tuple<MSeg, Status4>, int> _dicCycle = new Dictionary<Tuple<MSeg, Status4>, int>();
         private Dictionary<string, Node> _dicDrawing = new Dictionary<string, Node>();
 
-
-        bool IsDummyMember(List<pptDummy> lstDummy, Vertex vertex) {
+        bool IsDummyMember(List<pptDummy> lstDummy, Vertex vertex)
+        {
             return lstDummy.Where(w => w.Members.Contains(vertex)).Count() > 0;
         }
 
@@ -74,53 +70,8 @@ namespace Dual.Model.Import
             viewNode.Singles.ForEach(f => DrawSeg(viewer.Graph.RootSubgraph, f));
             viewNode.Edges.ForEach(f => DrawMEdge(viewer.Graph.RootSubgraph, f));
 
-
-            //if(sys.Flows.First() == flow && sys.ApiItems.Count>0) //처음 시스템 Flow에만 인터페이스 표기
-            //    DrawApiItems(flow, sys);
-
-            //var edgeVetexs = flow.ModelingEdges.SelectMany(s => new List<Vertex>() { s.Source, s.Target });
-            //var dummyNodes = lstDummy
-            //    .ToDictionary(d => d.DummyNodeKey, d => System.Tuple.Create(d, new DsViewNode(d.DummyNodeKey)));
-
-            //flow.Graph.Vertices
-            //    .Where(seg => !edgeVetexs.Contains(seg))
-            //    .ForEach(seg => DrawSeg(viewer.Graph.RootSubgraph, new DsViewNode(seg)));
-
-            //flow.ModelingEdges
-            //    .Where(s => !IsDummyMember(lstDummy, s.Source) && !IsDummyMember(lstDummy, s.Target))
-            //    .Where(s => s.Source.Parent.IsFlow && s.Target.Parent.IsFlow)
-            //    .Select(s => new DsViewEdge(s))
-            //    .ForEach(f => DrawMEdge(viewer.Graph.RootSubgraph, f));
-
-            //lstDummy
-            //    .Where(w => w.GetParent().GetCore() is Flow)
-            //    .ToDictionary(s => s, s => s.Edges)
-            //    .SelectMany(dic => dic.Value.Select(edge => new DsViewEdge(dic.Key, edge, dummyNodes)))
-            //    .ForEach(f => DrawMEdge(viewer.Graph.RootSubgraph, f));
-
-
-
-
             viewer.SetCalculatedLayout(viewer.CalculateLayout(viewer.Graph));
         }
-
-        //private void DrawButtons(Flow flow, DsSystem sys)
-        //{
-        //    var btnGroups = new DsViewNode("Buttons", true, BtnType.AutoBTN);
-        //    sys.AutoButtons     .Where(w => w.Value.Contains(flow)).ForEach(f => btnGroups.Singles.Add(new DsViewNode(f.Key, false, BtnType.AutoBTN)));
-        //    sys.EmergencyButtons.Where(w => w.Value.Contains(flow)).ForEach(f => btnGroups.Singles.Add(new DsViewNode(f.Key, false, BtnType.EmergencyBTN)));
-        //    sys.ResetButtons    .Where(w => w.Value.Contains(flow)).ForEach(f => btnGroups.Singles.Add(new DsViewNode(f.Key, false, BtnType.ResetBTN)));
-        //    sys.StartButtons    .Where(w => w.Value.Contains(flow)).ForEach(f => btnGroups.Singles.Add(new DsViewNode(f.Key, false, BtnType.StartBTN)));
-        //    if(btnGroups.Singles.Count > 0)
-        //        DrawSeg(viewer.Graph.RootSubgraph, btnGroups);
-        //}
-
-        //private void DrawApiItems(Flow flow, DsSystem sys)
-        //{
-        //    var apiGroups = new DsViewNode("Interfaces", true);
-        //    sys.ApiItems.ForEach(f => apiGroups.Singles.Add(new DsViewNode(f.Name, false)));
-        //    DrawSeg(viewer.Graph.RootSubgraph, apiGroups);
-        //}
 
         private void UpdateLabelText(Node nNode)
         {
@@ -129,7 +80,6 @@ namespace Dual.Model.Import
             nNode.Attr.Color = Color.White;
 
         }
-
 
         private void DrawMEdge(Subgraph subgraph, ModelingEdgeInfo<ViewNode> edge)
         {
@@ -267,10 +217,10 @@ namespace Dual.Model.Import
                     else
                     {
                         nNode.Attr.Shape = Shape.Ellipse;
-                        if(viewNode.BtnType.Value == BtnType.AutoBTN) nNode.Attr.FillColor = Color.DarkGoldenrod;
-                        if(viewNode.BtnType.Value == BtnType.ResetBTN) nNode.Attr.FillColor = Color.DarkOliveGreen;
-                        if(viewNode.BtnType.Value == BtnType.EmergencyBTN) nNode.Attr.FillColor = Color.MediumVioletRed;
-                        if(viewNode.BtnType.Value == BtnType.StartBTN) nNode.Attr.FillColor = Color.BlueViolet;
+                        if (viewNode.BtnType.Value == BtnType.AutoBTN) nNode.Attr.FillColor = Color.DarkGoldenrod;
+                        if (viewNode.BtnType.Value == BtnType.ResetBTN) nNode.Attr.FillColor = Color.DarkOliveGreen;
+                        if (viewNode.BtnType.Value == BtnType.EmergencyBTN) nNode.Attr.FillColor = Color.MediumVioletRed;
+                        if (viewNode.BtnType.Value == BtnType.StartBTN) nNode.Attr.FillColor = Color.BlueViolet;
                     }
 
                 }
@@ -369,8 +319,5 @@ namespace Dual.Model.Import
             gColor.B = color.B;
             viewer.Graph.Attr.BackgroundColor = gColor;
         }
-
-
-
     }
 }

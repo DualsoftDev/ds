@@ -42,9 +42,10 @@ module internal ModelFindModule =
 type ModelFindHelper =
     [<Extension>] static member FindGraphVertex(model:Model, fqdn:Fqdn) = findGraphVertex(model, fqdn)
     [<Extension>] static member FindGraphVertex<'V when 'V :> IVertex>(model:Model, fqdn:Fqdn) = findGraphVertexT<'V>(model, fqdn)
-    [<Extension>] static member FindApiItem(model:Model, apiPath:Fqdn) = findApiItem(model, apiPath)
     [<Extension>] static member FindSystem(model:Model, systemName:string)    = model.Systems.First(fun sys -> sys.Name = systemName)
     [<Extension>] static member TryFindSystem(model:Model, systemName:string) = model.Systems.FirstOrDefault(fun sys -> sys.Name = systemName)
+    [<Extension>] static member FindApiItem(model:Model, apiPath:Fqdn) = findApiItem(model, apiPath)
+    [<Extension>] static member TryFindApiItem(system:DsSystem, apiKey:string) = system.ApiItems.FindWithName(apiKey)
     [<Extension>] static member FindCall(model:Model, callPath:Fqdn) = findCall(model, callPath)
     [<Extension>] static member FindFlow(system:DsSystem, flowName:string) = findFlow(system, flowName)
 

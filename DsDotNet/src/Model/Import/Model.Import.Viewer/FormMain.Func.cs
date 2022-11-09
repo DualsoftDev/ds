@@ -13,6 +13,7 @@ using static Engine.Common.FS.MessageEvent;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsTextProperty;
 using static Model.Import.Office.PPTDummyModule;
+using static Model.Import.Office.ViewModule;
 
 namespace Dual.Model.Import
 {
@@ -63,8 +64,7 @@ namespace Dual.Model.Import
                 var result = ImportM.FromPPTX(PathPPT);
               
                 _Model = result.Item1;
-                var dicFlow = result.Item2;
-                IEnumerable<pptDummy> dummys  = result.Item3;
+                var viewNodes = result.Item2;
                 if (!_ConvertErr)
                 {
                     _dsText = _Model.ToDsText();
@@ -72,7 +72,7 @@ namespace Dual.Model.Import
                     this.Do(() => xtraTabControl_Ex.TabPages.Clear());
 
                     foreach (var sys in _Model.Systems.OrderBy(sys => sys.Name))
-                        CreateNewTabViewer(sys, dicFlow, dummys);
+                        CreateNewTabViewer(viewNodes);
 
                     WriteDebugMsg(DateTime.Now, MSGLevel.Info, $"{PathPPT} 불러오기 성공!!");
                     this.Do(() =>
@@ -193,53 +193,54 @@ namespace Dual.Model.Import
             if (_Demo.Systems.Count == 0)
                 _Demo = ImportCheck.GetDemoModel("test");
 
-            _Demo.Systems.OrderBy(sys => sys.Name).ToList()
-                  .ForEach(sys =>
-                      CreateNewTabViewer(sys, null, null)
-                  );
+            //_Demo.Systems.OrderBy(sys => sys.Name).ToList()
+            //      .ForEach(sys =>
+            //          CreateNewTabViewer(sys, null)
+            //      );
         }
 
-        internal void CreateNewTabViewer(DsSystem sys, Dictionary<int, Flow> dicFlow, IEnumerable<pptDummy> dummys)
+        internal void CreateNewTabViewer(IEnumerable<ViewNode> lstViewNode)
         {
-            sys.Flows.ToList().ForEach(f =>
+            lstViewNode.ForEach(f =>
             {
-                if (_DicMyUI.ContainsKey(f) || _DicExUI.ContainsKey(f))
+                var flow = f.Flow.Value;
+                if (_DicMyUI.ContainsKey(flow) || _DicExUI.ContainsKey(flow))
                 {
-                    if (f.System.Active)
-                        xtraTabControl_My.SelectedTab = _DicMyUI[f];
+                    if (flow.System.Active)
+                        xtraTabControl_My.SelectedTab = _DicMyUI[flow];
                     else
-                        xtraTabControl_Ex.SelectedTab = _DicExUI[f];
+                        xtraTabControl_Ex.SelectedTab = _DicExUI[flow];
                 }
                 else
                 {
-                    int pageNum = 0;
-                    if(dicFlow != null)
-                        pageNum = dicFlow.First(flow => flow.Value.System.Name == sys.Name 
-                                                     && flow.Value.Name == f.Name).Key;
+                    //int pageNum = 0;
+                    //if(dicFlow != null)
+                    //    pageNum = dicFlow.First(flow => flow.Value.System.Name == sys.Name 
+                    //                                 && flow.Value.Name == f.Name).Key;
 
-                    List<pptDummy> lstDummy = new List<pptDummy>();
-                    if (dummys != null)
-                        lstDummy = dummys.Where(w => w.Page == pageNum).ToList();
+                    //List<pptDummy> lstDummy = new List<pptDummy>();
+                    //if (dummys != null)
+                    //    lstDummy = dummys.Where(w => w.Page == pageNum).ToList();
 
                     UCView viewer = new UCView { Dock = DockStyle.Fill };
-                    viewer.SetGraph(f, sys, lstDummy);
+                    viewer.SetGraph(f);
                     TabPage tab = new TabPage();
                     tab.Controls.Add(viewer);
                     tab.Tag = viewer;
-                    tab.Text = $"{f.Name}({(pageNum > 0 ? pageNum: 0)})";
+                    tab.Text = $"{flow.System.Name}.{flow.Name}({f.Page})";
                     this.Do(() =>
                     {
-                        if (f.System.Active)
+                        if (flow.System.Active)
                         {
                             xtraTabControl_My.TabPages.Add(tab);
                             xtraTabControl_My.SelectedTab = tab;
-                            _DicMyUI.Add(f, tab);
+                            _DicMyUI.Add(flow, tab);
                         }
                         else
                         {
                             xtraTabControl_Ex.TabPages.Add(tab);
                             xtraTabControl_Ex.SelectedTab = tab;
-                            _DicExUI.Add(f, tab);
+                            _DicExUI.Add(flow, tab);
                         }
                     });
                 }

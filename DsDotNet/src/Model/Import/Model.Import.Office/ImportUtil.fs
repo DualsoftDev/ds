@@ -53,6 +53,7 @@ module ImportU =
             if(newParents.Any())
                 then Some( newParents |> Seq.head)
                 else None
+
     let private getDummys(parents:ConcurrentDictionary<pptNode, seq<pptNode>>, dicSeg:Dictionary<string, Vertex>) =
                 parents
                 |> Seq.filter(fun group -> group.Key.IsDummy)
@@ -60,7 +61,11 @@ module ImportU =
 
     [<Extension>]
     type ImportUtil =
-        [<Extension>] static member GetAcive(model:Model) =  model.Systems.Filter(fun s->s.Active).First()
+        [<Extension>] static member GetAcive(model:Model) = 
+                        model.Systems.Filter(fun s->s.Active).First()
+        [<Extension>] static member GetPage(dicFlow:Dictionary<int, Flow>, flow:Flow) = 
+                        dicFlow.Where(fun w-> w.Value = flow).First().Key                    
+
         [<Extension>] static member MakeSystem (doc:pptDoc, model:Model) =
                         doc.Pages
                             |> Seq.filter(fun page -> page.IsUsing)
@@ -205,30 +210,10 @@ module ImportU =
                             let dummys = doc.Dummys
 
                             let convertEdge(edge:pptEdge, flow:Flow, src:Vertex, tgt:Vertex) =
-                                let graph =
-                                        match getParent(edge, parents, dicVertex) with
-                                        |Some(real) -> (real:?>Real).Graph
-                                        |None ->       flow.Graph
-
-                                match edge.Causal with
-                                | Interlock ->
-                                    flow.AddModelEdge(src, Interlock, tgt)
-                                    //let edge1 = Edge.Create(graph, src, tgt, toR ResetPush)
-                                    //let edge2 = Edge.Create(graph, tgt, src, toR ResetPush)
-                                    //edge1.EditorInfo <- ModelEdgeType.EditorInterlock
-                                    //edge2.EditorInfo <- ModelEdgeType.EditorInterlock
-                                | StartReset ->
-                                    flow.AddModelEdge(src, StartReset, tgt)
-                                    //let edge1 = Edge.Create(graph, src, tgt, toR StartEdge)
-                                    //let edge2 = Edge.Create(graph, tgt, src, toR ResetEdge)
-                                    //edge1.EditorInfo <- ModelEdgeType.EditorStartReset
-                                    //edge2.EditorInfo <- ModelEdgeType.EditorStartReset
-                                | _ ->
-                                    flow.AddModelEdge(src, edge.Causal, tgt)
-
-
-
-                            let dicDummys = getDummys(parents, dicVertex)
+                                let mei = ModelingEdgeInfo(src, edge.Causal.ToText(), tgt)
+                                match getParent(edge, parents, dicVertex) with
+                                |Some(real) -> (real:?>Real).CreateEdges(mei)
+                                |None ->       flow.CreateEdges(mei)
 
                             pptEdges
                                 |> Seq.iter(fun edge ->
@@ -236,13 +221,12 @@ module ImportU =
 
 
                                     if(edge.StartNode.NodeType = IF && edge.StartNode.NodeType = edge.EndNode.NodeType|>not)
-                                    then Office.ErrorConnect(edge.ConnectionShape,ErrID._37, edge.StartNode.Name, edge.EndNode.Name, edge.PageNum)
+                                    then Office.ErrorConnect(edge.ConnectionShape, ErrID._37, edge.StartNode.Name, edge.EndNode.Name, edge.PageNum)
 
                                     if(edge.StartNode.NodeType = IF || edge.EndNode.NodeType = IF)
                                     then
                                         //인터페이스 인과는 약 리셋 불가 //ahn
-                                        if (edge.Causal = InterlockWeak
-                                            ||edge.Causal = ResetEdge)
+                                        if (edge.Causal = InterlockWeak || edge.Causal = ResetEdge)
                                         then Office.ErrorConnect(edge.ConnectionShape, ErrID._11, edge.StartNode.Name, edge.EndNode.Name, edge.PageNum)
 
                                         let sys = dicSys.[edge.PageNum]
@@ -274,10 +258,9 @@ module ImportU =
                                                     then dummys.GetMembers(edge.EndNode)   |> getVertexs
                                                     else [dicVertex.[edge.EndNode.Key]]
                                         
-                                        srcs
-                                        |> Seq.iter(fun src ->
-                                            tgts
-                                            |> Seq.iter(fun tgt -> convertEdge(edge, flow, src, tgt) |> ignore))
+                                        for src in srcs do
+                                            for tgt in tgts do
+                                            convertEdge(edge, flow, src, tgt) |> ignore
 
                                         )
 
@@ -345,8 +328,4 @@ module ImportU =
                                             apiResetInfo.ToCopy(copySys)|>ignore)
                                 )
 
-        [<Extension>] static member MakeViewDummy (doc:pptDoc, model:Model) =
-                            doc.Dummys |> Seq.iter(fun dummy -> dummy.Update(dicVertex))
-                               
-                                    
-
+                            

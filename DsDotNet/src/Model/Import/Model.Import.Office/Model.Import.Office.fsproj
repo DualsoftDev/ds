@@ -23,9 +23,11 @@
     <Compile Include="PPTObject.fs" />
     <Compile Include="PPTDummy.fs" />
     <Compile Include="PPTDoc.fs" />
+    <Compile Include="GraphView.fs" />
     <Compile Include="ImportCheck.fs" />
     <Compile Include="ImportUtilCopy.fs" />
     <Compile Include="ImportUtil.fs" />
+    <Compile Include="ImportUtilView.fs" />
     <Compile Include="ImportM.fs" />
     <Compile Include="ImportIOTable.fs" />
     <Compile Include="ExportIOTable.fs" />

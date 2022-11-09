@@ -53,18 +53,18 @@ module ImportM =
                 doc.MakeSafeties(model)
                 //ApiTxRx  만들기
                 doc.MakeApiTxRx(model)
-                //Dummy Vertex  만들기
-                doc.MakeViewDummy(model)
+                //Dummy 및 UI Flow, Node, Edge 만들기
+                let viewNodes = doc.MakeGraphView(model)
 
 
                 MSGInfo($"전체 장표   count [{doc.Pages.Count()}]")
                 MSGInfo($"전체 도형   count [{doc.Nodes.Count()}]")
                 MSGInfo($"전체 연결   count [{doc.Edges.Count()}]")
                 MSGInfo($"전체 부모   count [{doc.Parents.Keys.Count}]")
-                model, ImportU.dicFlow, doc.Dummys
+                model, viewNodes
 
             with ex ->  failwithf  $"{ex.Message}"
-                        model, ImportU.dicFlow, doc.Dummys
+                        model, null
 
 
     let FromPPTX(path:string) =

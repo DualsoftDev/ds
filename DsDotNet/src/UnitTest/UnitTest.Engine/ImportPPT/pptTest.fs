@@ -12,7 +12,7 @@ open Model.Import.Office
 [<AutoOpen>]
 module pptTestModule =
     ///ppt로 부터 만든 모델을 text로 다시 읽어 이중 확인
-    let check (model:Model, pageFlow:Dictionary<int, Flow>, dummys:IEnumerable<pptDummy>) = 
+    let check (model:Model, viewNodes:ViewNode seq) = 
         let originalText =  model.ToDsText() 
         originalText =~= originalText
 

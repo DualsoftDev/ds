@@ -28,13 +28,14 @@ module ImportCheck =
 
             let fg = flow.Graph
             fg.AddVertices(vertexs.Cast<Vertex>())|>ignore
+            let v(name:string) = fg.Vertices.Find(fun f->f.Name = name)
             
-            flow.AddModelEdge("START", TextStartEdge, "시작인과")
-            flow.AddModelEdge("START", TextStartPush, "시작유지")
-            flow.AddModelEdge("RESET", TextResetEdge, "복귀인과")
-            flow.AddModelEdge("RESET", TextResetPush, "복귀유지")
-            flow.AddModelEdge("ETC", TextStartEdge, "상호행위간섭")
-            flow.AddModelEdge("ETC", TextStartReset, "시작후행리셋")
+            flow.ModelingEdges.Add(ModelingEdgeInfo(v("START"), TextStartEdge, v("시작인과")))|>ignore
+            flow.ModelingEdges.Add(ModelingEdgeInfo(v("START"), TextStartPush, v("시작유지")))|>ignore
+            flow.ModelingEdges.Add(ModelingEdgeInfo(v("RESET"), TextResetEdge, v("복귀인과")))|>ignore
+            flow.ModelingEdges.Add(ModelingEdgeInfo(v("RESET"), TextResetPush, v("복귀유지")))|>ignore
+            flow.ModelingEdges.Add(ModelingEdgeInfo(v("ETC"), TextStartEdge, v("상호행위간섭")))|>ignore
+            flow.ModelingEdges.Add(ModelingEdgeInfo(v("ETC"), TextStartReset, v("시작후행리셋")))|>ignore
 
             model
 

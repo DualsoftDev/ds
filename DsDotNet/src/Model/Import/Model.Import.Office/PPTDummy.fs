@@ -18,14 +18,14 @@ module PPTDummyModule =
     type pptDummy(shapeName:string, page:int)  =
         
         let pptNodes = HashSet<pptNode>()
-        let vertex = HashSet<Vertex>()
+        let vertices = HashSet<Vertex>()
         let dummyEdges = HashSet<ModelingEdgeInfo<string>>()
         let dummyNode  = $"{page}_{shapeName}" 
         
         member x.Page = page
         member x.DummyNodeKey = dummyNode
         member x.Edges = dummyEdges
-        member x.Members = vertex
+        member x.Members = vertices
 
         member x.AddOutEdge(edgeType:ModelingEdgeType, target:string) =
             x.Edges.Add(ModelingEdgeInfo(dummyNode, edgeType.ToText(), target)) |> ignore 
@@ -34,15 +34,15 @@ module PPTDummyModule =
 
         member val internal DicVertex  = Dictionary<string, Vertex>() with get,set
         member val internal Items  = pptNodes
-        member x.GetVertex(key:string) = 
-                x.DicVertex
-                 .Where(fun f->f.Key = key)
-                 .Select(fun s->s.Value).FirstOrDefault()
+        //member x.GetVertex(key:string) = 
+        //        x.DicVertex
+        //         .Where(fun f->f.Key = key)
+        //         .Select(fun s->s.Value).FirstOrDefault()
 
-        member x.GetParent() = vertex.First().Parent
+     //   member x.GetParent() = vertices.First().Parent
         member x.Update(dic:Dictionary<string, Vertex>) =
                 x.DicVertex <- dic
-                pptNodes.Iter(fun f->  vertex.Add(x.DicVertex.[f.Key])|>ignore)
+                pptNodes.Iter(fun f->  vertices.Add(x.DicVertex.[f.Key])|>ignore)
       
 
 
@@ -79,7 +79,4 @@ type PPTDummyExt =
                         let newDummy = pptDummy(dummyNode.Shape.ShapeName(), dummyNode.PageNum);
                         pptNodes.ForEach(fun f-> newDummy.Items.Add(f)|>ignore)
                         dummys.Add(newDummy) |> ignore
-               
-
-
-
+    

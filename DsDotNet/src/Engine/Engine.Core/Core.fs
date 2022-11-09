@@ -210,14 +210,6 @@ module CoreModule =
 [<Extension>]
 type CoreExt =
     [<Extension>] static member GetSystem(call:Call) = call.Parent.GetSystem()
-    [<Extension>] static member AddModelEdge(flow:Flow, source:string, edgetext:string, target:string) =
-                        let src = flow.Graph.Vertices.Find(fun f->f.Name = source)
-                        let tgt = flow.Graph.Vertices.Find(fun f->f.Name = target)
-                        let modelingEdgeInfo = ModelingEdgeInfo(src, edgetext, tgt)
-                        flow.ModelingEdges.Add(modelingEdgeInfo) |> verifyM $"Duplicated edge [{src.Name}{edgetext}{tgt.Name}]"
-    [<Extension>] static member AddModelEdge(flow:Flow, source:Vertex, modelEdgeType:ModelingEdgeType, target:Vertex) =
-                        let modelingEdgeInfo = ModelingEdgeInfo(source, modelEdgeType.ToText(), target)
-                        flow.ModelingEdges.Add(modelingEdgeInfo) |> verifyM $"Duplicated edge [{source.Name}{modelEdgeType.ToText()}{target.Name}]"
     [<Extension>]
     static member AddButton(sys:DsSystem, btnType:BtnType, btnName: string, flow:Flow) =
         let dicButton =

@@ -112,30 +112,30 @@ namespace Dual.Model.Import
         }
 
   
-        public DsViewEdge(pptDummy pptDummy, ModelingEdgeInfo<string> edge, Dictionary<string, Tuple<pptDummy, DsViewNode>> dummyNodes)
-        {
-            var src = pptDummy.GetVertex(edge.Source);
-            var tgt = pptDummy.GetVertex(edge.Target);
+        //public DsViewEdge(pptDummy pptDummy, ModelingEdgeInfo<string> edge, Dictionary<string, Tuple<pptDummy, DsViewNode>> dummyNodes)
+        //{
+        //    var src = pptDummy.GetVertex(edge.Source);
+        //    var tgt = pptDummy.GetVertex(edge.Target);
 
-            if (src == null)
-            {
-                var dummy = dummyNodes[edge.Source].Item1;
-                Source = dummyNodes[edge.Source].Item2;
-                Source.Singles.AddRange(dummy.Members.Select(f=>new DsViewNode(f)));
-            }
-            else
-                Source = new DsViewNode(src);
-            if (tgt == null)
-            {
-                var dummy = dummyNodes[edge.Target].Item1;
-                Target = dummyNodes[edge.Target].Item2;
-                Target.Singles.AddRange(dummy.Members.Select(f => new DsViewNode(f)));
-            }
-            else
-                Target = new DsViewNode(tgt);
+        //    if (src == null)
+        //    {
+        //        var dummy = dummyNodes[edge.Source].Item1;
+        //        Source = dummyNodes[edge.Source].Item2;
+        //        Source.Singles.AddRange(dummy.Members.Select(f=>new DsViewNode(f)));
+        //    }
+        //    else
+        //        Source = new DsViewNode(src);
+        //    if (tgt == null)
+        //    {
+        //        var dummy = dummyNodes[edge.Target].Item1;
+        //        Target = dummyNodes[edge.Target].Item2;
+        //        Target.Singles.AddRange(dummy.Members.Select(f => new DsViewNode(f)));
+        //    }
+        //    else
+        //        Target = new DsViewNode(tgt);
 
-            Causal = edge.EdgeSymbol.ToModelEdge();
-        }
+        //    Causal = edge.EdgeSymbol.ToModelEdge();
+        //}
 
     
     }

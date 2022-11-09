@@ -17,8 +17,8 @@ module pptTestModule =
         originalText =~= originalText
 
         //Edge 정리 후 Parse 이중체크 대기중 
-        //let helper = ModelParser.ParseFromString2(originalText, ParserOptions.Create4Runtime("localhost"))
-        //originalText =~= helper.Model.ToDsText()
+        let helper = ModelParser.ParseFromString2(originalText, ParserOptions.Create4Runtime("localhost"))
+        originalText =~= helper.Model.ToDsText()
 
     let checkAll () = 
             check (ImportM.FromPPTX($"{__SOURCE_DIRECTORY__}\\T0_CaseAll.pptx"))

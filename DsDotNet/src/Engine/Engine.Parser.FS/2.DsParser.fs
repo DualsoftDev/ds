@@ -91,81 +91,6 @@ type DsParser() =
         let replacedText = model.GetReplacedText(replaces)
         logDebug $"Replaced Text:\r\n{replacedText}"
         replacedText
-        //printfn ""
-        //()
-
-
-        //let omitSystemCopy(text:string, sysCopies:SystemContext[]):string =
-        //    for cc in sysCopies do
-        //        if Global.Logger <> null then
-        //            Global.Logger.Debug($"Replacing @copy_system(): {cc.GetText()}")
-
-        //    let ranges = sysCopies.Select(fun ctx -> (ctx.Start.StartIndex, ctx.Stop.StopIndex)).ToArray()
-        //    let chars =
-        //        text
-        //            |> Seq.filteri(fun n ch -> ranges |> Seq.forall(fun r -> n < fst r || snd r < n))
-        //            |> Array.ofSeq
-
-        //    String(chars)
-
-        //// see RuleContext.GetText()
-        //let rec ToText(ctx:RuleContext):string =
-        //    if ctx.ChildCount = 0 then
-        //        ""
-        //    else
-        //        let sb = new StringBuilder()
-        //        let mutable last = " "
-        //        for i in [0 .. ctx.ChildCount - 1] do
-        //            let ch = ctx.GetChild(i)
-        //            let text =
-        //                match ch with
-        //                | :? RuleContext as rc -> ToText(rc)
-        //                | _ -> ch.GetText()
-
-        //            // [sys ip = 123.2...] 에서 sys token 과 ip token 사이 공백을 삽입한다.
-        //            if (Char.IsLetterOrDigit(last.Last()) && Char.IsLetterOrDigit(text[0])) then
-        //                sb.Append(" ") |> ignore
-        //            last <- text
-        //            sb.Append(text)  |> ignore
-
-        //        sb.ToString()
-
-        //let helper() =
-        //    [
-        //        let func = fun (parser:dsParser) -> parser.model() :> RuleContext
-        //        let (parser, _, _) = DsParser.ParseText(text, func)
-        //        parser.Reset()
-        //        let sysCtxMap =
-        //            DsParser.enumerateChildren<SystemContext>(parser.model())
-        //                .Select(fun ctx ->
-        //                    let sysName = DsParser.findFirstChild<SystemNameContext>(ctx) |> Option.get |> fun x -> x.GetText()
-        //                    sysName, ctx)
-        //                |> dict |> Dictionary
-
-        //        let copySysCtxs =
-        //            sysCtxMap.Where(fun (KeyValue(sysName, sysCtxt)) -> sysCtxt.children.Any(isType<SysCopySpecContext>)).ToArray()
-
-        //        // 원본 full text 에서 copy_system 구문 삭제한 text 반환
-        //        let textWithoutSysCopy = omitSystemCopy(text, copySysCtxs.Select(fun kv -> kv.Value).ToArray())
-        //        yield textWithoutSysCopy
-
-        //        for kv in copySysCtxs do
-        //            yield "\r\n"
-
-        //            let newSysName = kv.Key
-        //            let srcSysName = DsParser.findFirstChild<SourceSystemNameContext>(kv.Value) |> Option.get |> fun x -> x.GetText()
-        //            // 원본 시스템의 text 를 사본 system text 로 치환해서 생성
-        //            let sysText = ToText(sysCtxMap[srcSysName])
-        //            let pattern = @"(\[sys([^\]]*\]))([^=]*)="
-        //            let replaced = Regex.Replace(sysText, pattern, $"$1{newSysName}=")
-        //            yield replaced
-        //    ]
-        //helper().JoinLines()
-
-
-
-
-
 
     static member FromDocument(text:string, predExtract:dsParser->#RuleContext, [<Optional; DefaultParameterValue(true)>]throwOnError) =       // (dsParser, RuleContext, ParserError[])
         let expanded = DsParser.ExpandSystemCopy(text)
@@ -262,30 +187,4 @@ type DsParser() =
         let parenting = findFirstAncestor<ParentingContext>(from, true).Bind(findIdentifier1FromContext)
         sysNames, flow, parenting, ns
 
-#if EXTENDED_USAGE
-    static member getParseResult(parser:dsParser) = // : ParserResult
-        let listener = new AllListener()
-        ParseTreeWalker.Default.Walk(listener, parser.model())
-        listener.r
 
-    /// <summary>
-    /// parser tree 상의 모든 node (rule context, terminal node, error node) 을 반환한다.
-    /// </summary>
-    /// <param name="parser">text DS Document (Parser input)</param>
-    /// <returns></returns>
-    static member getAllParseTrees(parser:dsParser) = // ResizeArray<IParseTree>
-        let r:ParserResult = DsParser.getParseResult(parser)
-
-        r.rules.Cast<IParseTree>()
-            .Concat(r.terminals.Cast<IParseTree>())
-            .Concat(r.errors.Cast<IParseTree>())
-            .ToList()
-
-
-
-    /// <summary>parser tree 상의 모든 rule 을 반환한다.</summary>
-    static member getAllParseRules(parser:dsParser) = // ResizeArray<ParserRuleContext>
-        let r:ParserResult = DsParser.getParseResult(parser)
-        r.rules
-
-#endif

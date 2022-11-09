@@ -18,6 +18,7 @@ open Engine.Core
 module DsParserHelperModule =
     ()
 
+type ParseTreePredicate = IParseTree->bool
 type DsParser() =
     static member ParseText (text:string, extractor:dsParser->#RuleContext, ?throwOnError) =
         let throwOnError = defaultArg throwOnError true
@@ -156,13 +157,13 @@ type DsParser() =
     static member enumerateChildren<'T when 'T :> IParseTree >(
         from:IParseTree
         , ?includeMe:bool
-        , ?predicate:(IParseTree->bool)
+        , ?predicate:ParseTreePredicate
         ) : ResizeArray<'T> =         // ResizeArray<'T>
 
         let includeMe = defaultArg includeMe false
         let predicate = defaultArg predicate (isType<'T>)
         let rec enumerateChildrenHelper(rslt:ResizeArray<'T>, frm:IParseTree, incMe:bool) =
-            if (incMe && predicate(frm)) then
+            if (incMe && predicate(frm) && isType<'T> frm) then
                 rslt.Add(forceCast<'T>(frm))
 
             for index in [ 0 .. frm.ChildCount - 1 ] do
@@ -177,14 +178,14 @@ type DsParser() =
     static member enumerateParents<'T when 'T :> IParseTree >(
         from:IParseTree      // IEnumerable<IParseTree>
         , ?includeMe:bool
-        , ?predicate:(IParseTree->bool)) =
+        , ?predicate:ParseTreePredicate) =
 
         let includeMe = defaultArg includeMe false
         let predicate = defaultArg predicate (isType<'T>)
         let rec helper(from:IParseTree, includeMe:bool) =
             [
                 if from <> null then
-                    if (includeMe && predicate(from)) then
+                    if (includeMe && predicate(from) && isType<'T> from) then
                         yield forceCast<'T>(from)
 
                     yield! helper(from.Parent, true)
@@ -193,15 +194,17 @@ type DsParser() =
 
 
 
-    static member findFirstChild(from:IParseTree, predicate:(IParseTree->bool), ?includeMe:bool) =
+    static member findFirstChild(from:IParseTree, predicate:ParseTreePredicate, ?includeMe:bool) =
         let includeMe = defaultArg includeMe false
         DsParser.enumerateChildren<IParseTree>(from, includeMe) |> Seq.tryFind(predicate)
 
-    static member findFirstChild<'T when 'T :> IParseTree>(from:IParseTree, ?includeMe:bool) : 'T option =   // :'T
+    static member findFirstChild<'T when 'T :> IParseTree>(from:IParseTree, ?includeMe:bool, ?predicate:ParseTreePredicate) : 'T option =   // :'T
         let includeMe = defaultArg includeMe false
-        DsParser.enumerateChildren<'T>(from, includeMe) |> Seq.tryFind(isType<'T>)
+        let predicate = defaultArg predicate (fun _ -> true)
+        let predicate x = isType<'T> x && predicate x
+        DsParser.enumerateChildren<'T>(from, includeMe, predicate) |> Seq.tryHead
 
-    static member findFirstAncestor(from:IParseTree, predicate:(IParseTree->bool), ?includeMe:bool) = //:IParseTree option=
+    static member findFirstAncestor(from:IParseTree, predicate:ParseTreePredicate, ?includeMe:bool) = //:IParseTree option=
         let includeMe = defaultArg includeMe false
         DsParser.enumerateParents(from, includeMe) |> Seq.tryFind(predicate)
 
@@ -212,7 +215,11 @@ type DsParser() =
         DsParser.findFirstAncestor(from, pred, includeMe) |> Option.map forceCast<'T>
 
     static member findIdentifier1FromContext(context:IParseTree) =
-        findFirstChild<Identifier1Context>(context) |> Option.map(fun ctx -> ctx.GetText().DeQuoteOnDemand())
+        let predicate (tree:IParseTree) =
+            let result = isType<Identifier1Context> tree
+                            && findFirstAncestor<DomainNameContext> tree |> Option.isNone   // [sys ip = hostname] 을 제거하기 위함
+            result
+        findFirstChild<Identifier1Context>(context, false, predicate) |> Option.map(fun ctx -> ctx.GetText().DeQuoteOnDemand())
 
     [<Obsolete("Use FqdnParser instead")>]
     static member collectNameComponents(from:IParseTree):string[] = // :Fqdn

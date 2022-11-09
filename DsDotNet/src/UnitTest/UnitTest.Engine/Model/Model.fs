@@ -493,6 +493,23 @@ module ModelTests1 =
 
         [<Test>]
         member __.``Model component test`` () =
+            let input = """
+[sys ip = localhost] T6_Alias = {
+    [flow] Page1 = {
+    }
+    [flow] AndFlow = {
+        R2 > R3;
+        R1 > R3;
+    }
+    [flow] OrFlow = {
+        R2 > Copy1_R3;
+        R1 > R3;
+        [aliases] = {
+            R3 = { Copy1_R3; }
+        }
+    }
+}"""
+            compare input ""
             //compare ParserTest.Ppt);
             //compare ParserTest.ExternalSegmentCall ""
             //compare ParserTest.ExternalSegmentCallConfusing ""

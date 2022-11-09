@@ -51,14 +51,16 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
 
 
     override x.EnterCausalToken(ctx:CausalTokenContext) =
-        let spits = x._currentSystem.Value.Spit()
+        let system = x._currentSystem.Value
+        let spits = system.Spit()
         let flow = x._flow.Value
-        let findSpit (ns:string seq) =
-            spits.TryFind(fun sp -> sp.NameComponents.IsStringArrayEqaul (ns.ToArray()))
+        let findSpits (ns:string seq) =
+            spits.Where(fun sp -> sp.NameComponents.IsStringArrayEqaul (ns.ToArray()))
+        let findSpit = findSpits >> Seq.tryHead
         //let ns = collectNameComponents(ctx)
         let sysNames, flowName, parenting, ns = collectUpwardContextInformation ctx
 
-        if ctx.GetText() = "Main2" then
+        if flow.Name = "OrFlow" && ctx.GetText().IsOneOf("Copy1_R3", "R3")  then
             noop()
 
         let createAlias(soa:SpitOnlyAlias) =
@@ -93,7 +95,32 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
                 | _ ->
                     failwith "ERROR"
 
-
+        let createAliasTargetOnDemand (soa:SpitOnlyAlias) =
+            let key = soa.AliasKey
+            let target =
+                spits.Where(fun sp->
+                    match sp.SpitObj with
+                    | SpitReal _
+                    | SpitCall _ -> true
+                    | _ -> false).TryFind(fun sp -> sp.NameComponents.IsStringArrayEqaul key)
+            match target with
+            | Some sp -> ()
+            | None ->
+                let names = getRelativeNames flow.NameComponents key
+                match names with
+                | n::[] -> Real.Create(n, flow) |> ignore
+                | x::y::[] ->
+                    if system.Flows.Any(fun f -> f.Name = x) then
+                        (* do nothing.  다른 flow 의 real 에 대한 alias 이므로, 다른 flow 생성 시 이미 target 이 만들어져 있어야 한다. *)
+                        ()
+                    else
+                        match findSpits(x::y::[]).Select(fun sp -> sp.GetCore()).OfType<ApiItem>().TryHead()  with
+                        | Some apiItem ->
+                            Call.Create(apiItem, Flow flow) |> ignore
+                        | _ ->
+                            failwith "ERROR"
+                | _ ->
+                    failwith "ERROR"
 
 
 
@@ -106,7 +133,9 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
             match findSpit [s;f;n] with
             | Some sp ->
                 match sp.SpitObj with
-                | SpitOnlyAlias soa -> createAlias soa
+                | SpitOnlyAlias soa ->
+                    createAliasTargetOnDemand soa
+                    createAlias soa
                 | SpitReal real -> noop()   // OK
                 | _ -> failwith "ERROR"
             | None ->

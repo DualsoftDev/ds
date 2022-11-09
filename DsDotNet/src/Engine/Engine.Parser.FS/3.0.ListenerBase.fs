@@ -31,10 +31,13 @@ type ListenerBase(parser:dsParser, helper:ParserHelper) =
     member internal _._parenting  with get() = helper._parenting and set(v) = helper._parenting <- v
 
     member internal x.AddElement(path:Fqdn, elementType:GraphVertexType) =
+        if path[0] <> x._model.TheSystem.Value.Name then
+            noop()
         if x._elements.ContainsKey(path) then
             x._elements[path] <- (x._elements[path] ||| elementType)
         else
             x._elements.Add(path, elementType)
+        logDebug $"Added Element: {path.Combine()}={x._elements[path]}"
 
     member internal _.AppendPathElement(name:string) = helper.AppendPathElement(name)
     member internal _.AppendPathElement(names:Fqdn)  = helper.AppendPathElement(names)

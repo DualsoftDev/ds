@@ -49,7 +49,7 @@ module internal ModelFindModule =
 
     let findApiItem(model:Model, apiPath:Fqdn) =
         let sysName, apiKey = apiPath[0], apiPath[1]
-        let sys = model.Systems.First(fun sys -> sys.Name = sysName)
+        let sys = model.TheSystem.Value.Systems.First(fun sys -> sys.Name = sysName)
         let x = sys.ApiItems.FindWithName(apiKey)
         x
 

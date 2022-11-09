@@ -58,12 +58,57 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
         //let ns = collectNameComponents(ctx)
         let sysNames, flowName, parenting, ns = collectUpwardContextInformation ctx
 
+        if ctx.GetText() = "Main2" then
+            noop()
+
+        let createAlias(soa:SpitOnlyAlias) =
+            let aliasKey = soa.AliasKey
+            match aliasKey.Length with
+                | 3 ->     // my flow real 에 대한 alias
+                    let aliasCreator =
+                        let aliasTarget = new AliasTargetReal(aliasKey)
+                        new AliasCreator(ns.Combine(), Flow flow, aliasTarget)
+                    x.ParserHelper.AliasCreators.Add(aliasCreator) |> ignore
+                | 2 ->
+                    let apiItem =
+                        x._modelSpitObjects
+                            .OfType<ApiItem>()
+                            .Where(fun api -> api.NameComponents.IsStringArrayEqaul(aliasKey))
+                            .Head()
+
+                    let name = ns.Combine()
+                    match x._parenting with
+                    | Some parent ->
+                        let aliasCreator =
+                            let aliasTarget = new AliasTargetApi(apiItem)
+                            new AliasCreator(name, Real parent, aliasTarget)
+                        x.ParserHelper.AliasCreators.Add(aliasCreator)
+                    | None ->
+                        (* flow 바로 아래에 사용되는 직접 call.  A.+ *)
+                        let aliasCreator =
+                            let aliasTarget = new AliasTargetDirectCall(aliasKey)
+                            new AliasCreator(name, Flow flow, aliasTarget)
+                        x.ParserHelper.AliasCreators.Add(aliasCreator)
+                    |> ignore
+                | _ ->
+                    failwith "ERROR"
+
+
+
+
+
+
+
         let mutable goon = true
         match sysNames, flowName, parenting, ns with
         | s::[], Some f, None, n::[] ->
             tracefn $"{s}/{f}/{n}"
             match findSpit [s;f;n] with
-            | Some sp -> ()
+            | Some sp ->
+                match sp.SpitObj with
+                | SpitOnlyAlias soa -> createAlias soa
+                | SpitReal real -> noop()   // OK
+                | _ -> failwith "ERROR"
             | None ->
                 tracefn "Need to generate %A" [s;f;n]
                 Real.Create(n, flow) |> ignore
@@ -71,61 +116,29 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
         | s::[], Some f, Some p, aliasCall::[] ->
             tracefn $"{s}/{f}/{p}/{aliasCall}"
             match findSpit [s;f;p;aliasCall] with
-            | Some sp -> ()
+            | Some sp ->
+                failwith "ERROR"
             | None ->
                 match findSpit [s; f; aliasCall] with
                 | Some sp ->
-                    let mne =
-                        match sp.SpitObj with
-                        | SpitOnlyAlias soa ->
-                            let aliasKey = soa.AliasKey
-                            match aliasKey.Length with
-                                | 3 ->     // my flow real 에 대한 alias
-                                        assert(aliasKey[0] = s && aliasKey[1] = flow.Name)
-                                        let aliasCreator =
-                                            let aliasTarget = new AliasTargetReal(aliasKey)
-                                            new AliasCreator(ns.Combine(), Flow flow, aliasTarget)
-                                        x.ParserHelper.AliasCreators.Add(aliasCreator) |> ignore
-                                | 2 ->
-                                    let apiItem =
-                                        x._modelSpitObjects
-                                            .OfType<ApiItem>()
-                                            .Where(fun api -> api.NameComponents.IsStringArrayEqaul(aliasKey))
-                                            .Head()
-
-                                    let name = ns.Combine()
-                                    match x._parenting with
-                                    | Some parent ->
-                                        let aliasCreator =
-                                            let aliasTarget = new AliasTargetApi(apiItem)
-                                            new AliasCreator(name, Real parent, aliasTarget)
-                                        x.ParserHelper.AliasCreators.Add(aliasCreator)
-                                    | None ->
-                                        (* flow 바로 아래에 사용되는 직접 call.  A.+ *)
-                                        let aliasCreator =
-                                            let aliasTarget = new AliasTargetDirectCall(aliasKey)
-                                            new AliasCreator(name, Flow flow, aliasTarget)
-                                        x.ParserHelper.AliasCreators.Add(aliasCreator)
-                                    |> ignore
-                                | _ ->
-                                    failwith "ERROR"
-                        | _ -> ()
-                    ()
+                    match sp.SpitObj with
+                    | SpitOnlyAlias soa -> createAlias soa
+                    | _ -> failwith "ERROR"
                 | None ->
-                    ()
+                    failwith "ERROR"
 
                 tracefn "Need to generate %A" [s;f;p;aliasCall]
 
         | s::[], Some f, Some p, otherSystem::apiName::[] ->
             assert(p = x._parenting.Value.Name)
             tracefn $"{s}/{f}/{p}/{otherSystem}.{apiName}"
-            match findSpit [s; otherSystem; apiName] with
+            match (findSpit [s; otherSystem; apiName]).OrElse(findSpit [otherSystem; apiName]) with
             | Some sp ->
                 match sp.SpitObj with
-                | SpitApiItem apiItem ->
-                    Call.Create(apiItem, Real x._parenting.Value) |> ignore
-                    goon <- false
+                | SpitApiItem apiItem -> Call.Create(apiItem, Real x._parenting.Value) |> ignore
+                | SpitOnlyAlias soa -> createAlias soa
                 | _ -> failwith "Not an API item"
+                goon <- false
             | None -> tracefn "Need to generate %A" [s; otherSystem; apiName]
         | _ ->
             printfn "I don't know"

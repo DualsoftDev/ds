@@ -1,28 +1,28 @@
 namespace Engine.CodeGen
 
-open System.Diagnostics
-open System.Collections.Generic
 open Engine.Core
-open Newtonsoft.Json
+open Newtonsoft.Json.Linq
 
 [<AutoOpen>]
 module CpuGenModule =
     let GenCpuCode(model:Model) = 
-        let testText = 
+        let cpuCode = 
             """
-            [
-                {
-                "GateName": "GateAND",
-                "Out": "O1",
-                "In1": "A;B;C;D"
-                },
-                {
-                "GateName": "GateSR",
-                "Out": "O1",
-                "In1": "A;!B;C;D",
-                "In2": "E;F"
-                }
-            ]
+            {
+                "gates": [
+                    {
+                        "GateName": "GateAND",
+                        "Out": "O1",
+                        "In": ["A;B;C;D"]
+                    },
+                    {
+                        "GateName": "GateSR",
+                        "Out": "O1",
+                        "In": ["A;!B;C;D", "E;F"]
+                    }
+                ]
+            }
             """
-
-        { from = "cpu"; succeed = true; body = testText; error = ""; }
+            
+        let body = JObject.Parse(cpuCode)
+        { from = "cpu"; succeed = true; body = body["gates"]; error = ""; }

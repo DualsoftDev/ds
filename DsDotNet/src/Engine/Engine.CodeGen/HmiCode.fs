@@ -2,7 +2,6 @@ namespace Engine.CodeGen
 
 open System.Collections.Generic
 open Engine.Core
-open Newtonsoft.Json
 
 [<AutoOpen>]
 module HmiGenModule =
@@ -27,9 +26,9 @@ module HmiGenModule =
 
     type Info = {
         name:string;
+        parent:string;
         category:Category;
         botton_type:ButtonType;
-        parent:string;
         used_in:ResizeArray<string>;
         targets:ResizeArray<string>;
     }
@@ -40,9 +39,9 @@ module HmiGenModule =
         let genInfo name category buttonType parent =
             {
                 name = name;
+                parent = parent;
                 category = category;
                 botton_type = buttonType;
-                parent = parent;
                 used_in = new ResizeArray<string>(0);
                 targets = new ResizeArray<string>(0);
             }
@@ -62,8 +61,7 @@ module HmiGenModule =
                 | _ ->
                     null, null, Category.None
                     
-            if target <> null &&
-                    false = hmiInfos.ContainsKey(target) then
+            if target <> null && false = hmiInfos.ContainsKey(target) then
                 let info = genInfo target category ButtonType.None parent
                 hmiInfos.Add(target, info)
 
@@ -120,8 +118,7 @@ module HmiGenModule =
                         for sp in sys.StartPoints do
                             hmiInfos[button].targets.Add(sp.QualifiedName)
                 | ButtonType.Emergency | ButtonType.Auto | ButtonType.Clear ->
-                    for flow in flowNames do
-                        hmiInfos[button].targets.Add(flow)
+                    for flow in flowNames do hmiInfos[button].targets.Add(flow)
                 | _ ->
                     failwith "type error"
 
@@ -167,7 +164,7 @@ module HmiGenModule =
         let succeess, message = 
             try
                 for sys in model.Systems do
-                    if sys.Name = "My" then //to check //if sys.Active then // 
+                    if sys.Active then// if sys.Name = "My" then //to check //
                         let groupBtnCombiner = addGroupButtons sys
                         addSystemFlowReal 
                             sys
@@ -207,14 +204,7 @@ module HmiGenModule =
                 true, null
             with
                 | ex -> false, ex.Message
-        
-        let settings = JsonSerializerSettings()
-        settings.Converters.Add(Converters.StringEnumConverter())
-        let body = 
-            JsonConvert.SerializeObject(
-                hmiInfos.Values |> List.ofSeq,
-                settings
-            )
+        let body = hmiInfos.Values |> List.ofSeq
 
         { from = "hmi"; succeed = succeess; body = body; error = message; }
 

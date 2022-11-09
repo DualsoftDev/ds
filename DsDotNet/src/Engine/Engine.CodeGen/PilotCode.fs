@@ -1,7 +1,7 @@
 namespace Engine.CodeGen
 
 open Engine.Core
-open Newtonsoft.Json
+open Newtonsoft.Json.Linq
 
 [<AutoOpen>]
 module PilotGenModule =
@@ -9,8 +9,6 @@ module PilotGenModule =
         let pilotCode = 
             """
             {
-				"mode": "initialize",
-				"from": "info_server",
 				"reals": [
 					{
 						"name": "ctrl_sys.main_flow.R1",
@@ -275,4 +273,5 @@ module PilotGenModule =
 			}
             """
 
-        { from = "ds-pilot"; succeed = true; body = pilotCode; error = ""; }
+        let body = JObject.Parse(pilotCode)
+        { from = "ds-pilot"; succeed = true; body = body["reals"]; error = ""; }

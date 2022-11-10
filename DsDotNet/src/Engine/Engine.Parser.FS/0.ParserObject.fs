@@ -14,6 +14,7 @@ type ParserOptions(activeCpuName, isSimulationMode, allowSkipExternalSegment) =
 
 [<Flags>]
 type GraphVertexType =
+    | Unknown        = 0b0000000000000000
     | None           = 0b0000000000000001
     | System         = 0b0000000000000010
     | Flow           = 0b0000000000000100
@@ -25,4 +26,5 @@ type GraphVertexType =
     | AliaseMnemonic = 0b0000000100000000   // not direct call
     | ApiKey         = 0b0000001000000000
     | ApiSER         = 0b0000010000000000   // S ~ E ~ R
+    | CausalToken    = 0b0000100000000000   // S ~ E ~ R
 

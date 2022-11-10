@@ -50,6 +50,15 @@ module ParserUtil =
             ]
         helper 0 |> Array.ofSeq |> System.String
 
+    type ContextInformation = {
+        Systems: string list
+        Flow: string option
+        Parenting: string option
+        Names: string list
+    } with
+        static member Create(systems, flow, parenting, names) =
+            { Systems = systems; Flow = flow; Parenting = parenting; Names = names }
+        member x.GetTuples() = x.Systems, x.Flow, x.Parenting, x.Names
 
 [<Extension>]
 type ParserExt =

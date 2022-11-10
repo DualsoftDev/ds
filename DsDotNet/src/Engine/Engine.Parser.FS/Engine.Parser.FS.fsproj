@@ -22,7 +22,6 @@
 		<Compile Include="3.3.EdgeListener.fs" />
 		<Compile Include="3.4.EtcListener.fs" />
 		<Compile Include="5.ModelParser.fs" />
-		<Compile Include="9.CopySystemListener.fs" />
 		<Compile Include="AssemblyInfo.fs" />
 		<Compile Include="Program.fs" />
 	</ItemGroup>

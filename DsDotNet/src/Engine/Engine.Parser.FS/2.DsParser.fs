@@ -185,6 +185,11 @@ type DsParser() =
         let sysNames  = collectSystemNames(from).ToFSharpList()
         let flow      = findFirstAncestor<FlowContext>(from, true).Bind(findIdentifier1FromContext)
         let parenting = findFirstAncestor<ParentingContext>(from, true).Bind(findIdentifier1FromContext)
-        sysNames, flow, parenting, ns
+        ContextInformation.Create(sysNames, flow, parenting, ns)
 
-
+    //static member getPathAndName(from:IParseTree) =
+    //    let sysNames, flowName, parenting, ns = collectUpwardContextInformation from
+    //    [   yield! sysNames
+    //        if flowName.IsSome then yield flowName.Value
+    //        if parenting.IsSome then yield parenting.Value
+    //    ], ns.Combine()

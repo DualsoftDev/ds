@@ -66,7 +66,7 @@ namespace Dual.Model.Import
                 var viewNodes = result.Item2;
                 if (!_ConvertErr)
                 {
-                    _dsText = _Model.ToDsText();
+                    _dsText = _Model.TheSystem.Value.ToDsText();
                     ExportTextModel(Color.Transparent, _dsText);
                     this.Do(() => xtraTabControl_Ex.TabPages.Clear());
 
@@ -288,7 +288,7 @@ namespace Dual.Model.Import
             //T9_Group
             //T10_Button
             //T11_ImportSystem
-            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\..\..\..\..\")) + "UnitTest\\UnitTest.Engine\\ImportPPT\\T11_ImportSystem.pptx";
+            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\..\..\..\..\")) + "UnitTest\\UnitTest.Engine\\ImportPPT\\T0_CaseAll.pptx";
             bool debug = File.Exists(path);
             if (debug)
             {

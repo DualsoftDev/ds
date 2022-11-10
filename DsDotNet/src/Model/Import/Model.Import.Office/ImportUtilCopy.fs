@@ -14,7 +14,7 @@ module internal ToCopyModule =
     let private copySafety(origFlow:Flow, copyFlow:Flow) =
         let copySys = copyFlow.System
         let origSys = origFlow.System
-        let findReal (realName:string) = copySys.Model.FindGraphVertex([|copySys.Name;copyFlow.Name;realName|]) :?> Real
+        let findReal (realName:string) = copySys.FindGraphVertex<Real>([|copySys.Name;copyFlow.Name;realName|]) 
         origSys.Flows
             .ForEach(fun flow->
                 flow.Graph.Vertices.Where(fun w->w :? Real).Cast<Real>()
@@ -30,7 +30,7 @@ module internal ToCopyModule =
     let copyTxRx(origApi:ApiItem, copyApi:ApiItem) =
         let copySys = copyApi.System
         let origSys = origApi.System
-        let findReal (flowName:string, realName:string) = origSys.Model.FindGraphVertex([|copySys.Name;flowName;realName|]) :?> Real
+        let findReal (flowName:string, realName:string) = copySys.FindGraphVertex<Real>([|copySys.Name;flowName;realName|]) 
         origSys.ApiItems
                 .ForEach(fun apiOrig ->
                     let apiCopy = copySys.ApiItems.First(fun f->f.Name = apiOrig.Name)
@@ -47,10 +47,10 @@ module internal ToCopyModule =
 
         let origModel = origFlow.System.Model
         let copySys   = copyFlow.System
-        let findReal (realName:string)  = origModel.FindGraphVertex([|copySys.Name;copyFlow.Name;realName|]) :?> Real
-        let findCall (callName:string)  = origModel.FindGraphVertex([|copySys.Name;copyFlow.Name;callName|]) :?> Call
-        let findCallInReal(realName:string, name:string) = origModel.FindGraphVertex([|copySys.Name;copyFlow.Name;realName;name|]) :?> Call
-        let findInReal(realName:string, name:string) = origModel.FindGraphVertex([|copySys.Name;copyFlow.Name;realName;name|]) :?> Vertex
+        let findReal (realName:string)  = copySys.FindGraphVertex<Real>([|copySys.Name;copyFlow.Name;realName|]) 
+        let findCall (callName:string)  = copySys.FindGraphVertex<Call>([|copySys.Name;copyFlow.Name;callName|]) 
+        let findCallInReal(realName:string, name:string) = copySys.FindGraphVertex<Call>([|copySys.Name;copyFlow.Name;realName;name|]) 
+        let findInReal(realName:string, name:string) = copySys.FindGraphVertex<Vertex>([|copySys.Name;copyFlow.Name;realName;name|])
 
         let copyReal(name, graph:DsGraph) =
             let findVertex = graph.TryFindVertex(name)
@@ -181,19 +181,28 @@ module internal ToCopyModule =
         copySystem
 
     //Model Copy
-    let copyModel(origModel:Model) =
-        let copyMoodel = Model()
-        origModel.Systems.ForEach(fun origSys ->
-            let copySys = DsSystem.Create($"{origSys.Name}_Copy", origSys.Host, copyMoodel)
-            copySystem(origSys, copySys)|>ignore)
-        copyMoodel
+    //let copyModel(origModel:Model) =
+    //    let copyMoodel = Model()
+    //    origModel.Systems.ForEach(fun origSys ->
+    //        let copySys = DsSystem.Create($"{origSys.Name}_Copy", origSys.Host, copyMoodel)
+    //        copySystem(origSys, copySys)|>ignore)
+    //    copyMoodel
 
 [<Extension>]
 type ToCopyModuleHelper =
-    [<Extension>] static member ToCopy(model:Model) = copyModel(model)
+    [<Extension>] static member TryFindSystem(model:Model, systemName:string)    =
+                    if model.TheSystem.IsSome 
+                    then  if model.TheSystem.Value.Name = systemName 
+                            then model.TheSystem.Value
+                            else model.TheSystem.Value.Systems.FirstOrDefault(fun sys -> sys.Name = systemName)
+                                       
+                    else model.Systems.FirstOrDefault(fun sys -> sys.Name = systemName)
+                    
+    //[<Extension>] static member ToCopy(model:Model) = copyModel(model)
     [<Extension>] static member ToCopy(system:DsSystem, copySys:DsSystem) = copySystem(system, copySys)
     [<Extension>] static member ToCopy(system:DsSystem, copySysName:string) =
-                    let copySys = DsSystem.Create(copySysName, system.Host, system.Model)
+                    //copy 시에 상위레벨 복사 무시
+                    let copySys = DsSystem.Create(copySysName, system.Host, DsSystem.CreateTopLevel("",""))
                     copySystem(system, copySys)
     [<Extension>] static member ToCopy(flow:Flow, copySystem:DsSystem) =
                     let newFlow = Flow.Create(flow.Name, copySystem)

@@ -22,10 +22,11 @@ module ImportM =
                 ImportU.dicCopy.Clear()
                 ImportU.dicFlow.Clear()
                 ImportU.dicVertex.Clear()
+                let topSystem = DsSystem.CreateTopLevel(doc.Name,"localhost")
 
-                let mySystem = DsSystem.Create(doc.Name, "localhost", model)
-                mySystem.Active <- true
-                ImportU.dicSys.Add(0, mySystem)
+                model.TheSystem  <- Some topSystem
+                topSystem.Active <- true
+                ImportU.dicSys.Add(0, topSystem)
 
                 //page 타이틀 이름 중복체크 (없으면 P0, P1, ... 자동생성)
                 ImportCheck.CheckMakeSystem(doc)

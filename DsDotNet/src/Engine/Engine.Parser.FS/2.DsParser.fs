@@ -165,22 +165,24 @@ type DsParser() =
     static member findIdentifier1FromContext(context:IParseTree) =
         findFirstChild<Identifier1Context>(context, false) |> Option.map(fun ctx -> ctx.GetText().DeQuoteOnDemand())
 
+    static member collectNameComponentContext(from:IParseTree) : IParseTree =
+        let pred =
+            fun (tree:IParseTree) ->
+                tree :? Identifier1Context
+                || tree :? Identifier2Context
+                || tree :? Identifier3Context
+                || tree :? Identifier4Context
+        DsParser.findFirstChild(from, pred, true) |> Option.get
+
     static member collectNameComponents(from:IParseTree):string[] = // :Fqdn
-        let idCtx =
-            let pred =
-                fun (tree:IParseTree) ->
-                    tree :? Identifier1Context
-                    || tree :? Identifier2Context
-                    || tree :? Identifier3Context
-                    || tree :? Identifier4Context
-            DsParser.findFirstChild(from, pred, true) |> Option.get
+        let idCtx = collectNameComponentContext from
         let name = idCtx.GetText()
         Fqdn.parse(name).ToArray()
 
     static member collectSystemNames(from:IParseTree) =
         enumerateParents<SystemContext>(from, true).Select(findIdentifier1FromContext >> Option.get).Reverse().ToArray()
 
-    static member collectUpwardContextInformation(from:IParseTree) =
+    static member getContextInformation(from:IParseTree) =
         let ns        = collectNameComponents(from).ToFSharpList()
         let sysNames  = collectSystemNames(from).ToFSharpList()
         let flow      = findFirstAncestor<FlowContext>(from, true).Bind(findIdentifier1FromContext)

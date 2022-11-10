@@ -750,7 +750,7 @@ C4 > C5;
         //Try("1 + +")
         for KeyValue(p, type_) in helper._elements do
             let types = type_.ToString("F")
-            tracefn "%s :{%s}" (p.Combine("/")) $":{types}"
+            tracefn $"{p} :{types}"
 
         tracefn "---- Spit result"
         let spits = model.Spit()

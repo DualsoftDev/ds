@@ -58,7 +58,7 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
             spits.Where(fun sp -> sp.NameComponents = (ns.ToArray()))
         let findSpit = findSpits >> Seq.tryHead
         //let ns = collectNameComponents(ctx)
-        let sysNames, flowName, parenting, ns = (collectUpwardContextInformation ctx).GetTuples()
+        let sysNames, flowName, parenting, ns = (getContextInformation ctx).Tuples
 
         if flow.Name = "OrFlow" && ctx.GetText().IsOneOf("Copy1_R3", "R3")  then
             noop()

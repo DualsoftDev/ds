@@ -58,8 +58,13 @@ module ParserUtil =
     } with
         static member Create(systems, flow, parenting, names) =
             { Systems = systems; Flow = flow; Parenting = parenting; Names = names }
-        member x.GetTuples() = x.Systems, x.Flow, x.Parenting, x.Names
-
+        member x.Tuples = x.Systems, x.Flow, x.Parenting, x.Names
+        member x.NameComponents = [
+            yield! x.Systems
+            if x.Flow.IsSome then yield x.Flow.Value
+            if x.Parenting.IsSome then yield x.Parenting.Value
+            yield! x.Names
+        ]
 [<Extension>]
 type ParserExt =
     [<Extension>] static member GetOriginalText(ctx:ParserRuleContext) = getOriginalText ctx

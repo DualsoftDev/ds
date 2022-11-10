@@ -9,8 +9,10 @@ raise ex
 
 
 
-let bind (mapping: 'T->seq<'U>) source = Seq.collect mapping source
-let apply fs xs = bind (fun f -> Seq.map ((<|) f) xs) fs
+let bind   (mapping: 'x->seq<'y>) xs = (Seq.collect mapping) xs
+let bind'  (mapping: 'x->seq<'y>) xs = Seq.collect mapping xs
+let bind'' (mapping: 'x->seq<'y>)    = Seq.collect mapping
+let apply  fs xs = bind (fun f -> Seq.map ((<|) f) xs) fs
 let apply' fs xs = bind (fun f -> Seq.map f xs) fs
 let x2 = (*) 2
 let x3 = (*) 3

@@ -33,6 +33,9 @@ type ListenerBase(parser:dsParser, helper:ParserHelper) =
 
     member internal x.AddElement(contextInformation:ContextInformation, elementType:GraphVertexType) =
         let ci = contextInformation
+        if ci.FullName = "My.MyFlow.Seg1" then
+            noop()
+
         if x._elements.ContainsKey(ci) then
             x._elements[ci] <- (x._elements[ci] ||| elementType)
         else

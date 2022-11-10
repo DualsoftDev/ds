@@ -59,6 +59,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
         tracefn($"Parenting: {ctx.GetText()}")
         let name = ctx.identifier1().GetText().DeQuoteOnDemand()
         x._parenting <- Some <| Real.Create(name, x._flow.Value)
+        let xxx = getContextInformation ctx
         x.AddElement(getContextInformation ctx, GraphVertexType.Segment ||| GraphVertexType.Parenting)
 
         let children = enumerateChildren<CausalTokenContext>(ctx)
@@ -69,7 +70,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
         x.AddElement(getContextInformation ctx, GraphVertexType.Segment)
 
     override x.EnterCausalToken(ctx:CausalTokenContext) =
-        let vType = GraphVertexType.Call
+        let vType = GraphVertexType.CausalToken
 
         // 다음 stage 에서 처리...
         //if (_parenting == null)
@@ -158,5 +159,5 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
 
     override x.ExitModel(ctx:ModelContext) =
         logDebug "---- All Elements"
-        for KeyValue(path, vType) in x._elements do
-            logDebug $"{path} : {vType}"
+        for KeyValue(ctxInfo, vType) in x._elements do
+            logDebug $"{ctxInfo.FullName} : {vType}"

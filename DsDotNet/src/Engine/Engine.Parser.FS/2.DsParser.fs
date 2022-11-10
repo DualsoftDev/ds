@@ -14,6 +14,7 @@ open Engine.Parser
 open type Engine.Parser.dsParser
 open type Engine.Parser.FS.DsParser
 open Engine.Core
+open Antlr4.Runtime
 
 module DsParserHelperModule =
     ()
@@ -182,12 +183,15 @@ type DsParser() =
     static member collectSystemNames(from:IParseTree) =
         enumerateParents<SystemContext>(from, true).Select(findIdentifier1FromContext >> Option.get).Reverse().ToArray()
 
-    static member getContextInformation(from:IParseTree) =
-        let ns        = collectNameComponents(from).ToFSharpList()
-        let sysNames  = collectSystemNames(from).ToFSharpList()
-        let flow      = findFirstAncestor<FlowContext>(from, true).Bind(findIdentifier1FromContext)
-        let parenting = findFirstAncestor<ParentingContext>(from, true).Bind(findIdentifier1FromContext)
-        ContextInformation.Create(sysNames, flow, parenting, ns)
+    static member getContextInformation(parserRuleContext:ParserRuleContext) =
+        let ctx = parserRuleContext
+        let sysNames  = collectSystemNames(ctx).ToFSharpList()
+        let flow      = findFirstAncestor<FlowContext>(ctx, true).Bind(findIdentifier1FromContext)
+        let parenting = findFirstAncestor<ParentingContext>(ctx, true).Bind(findIdentifier1FromContext)
+        let ns        = collectNameComponents(ctx).ToFSharpList()
+        if ns.Any() && flow.IsNone then
+            noop()
+        ContextInformation.Create(ctx, sysNames, flow, parenting, ns)
 
     //static member getPathAndName(from:IParseTree) =
     //    let sysNames, flowName, parenting, ns = collectUpwardContextInformation from

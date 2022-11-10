@@ -51,6 +51,9 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
 
 
     override x.EnterCausalToken(ctx:CausalTokenContext) =
+        let ci = getContextInformation ctx
+        let vertexType = x._elements[ci]
+
         let system = x._currentSystem.Value
         let spits = system.Spit()
         let flow = x._flow.Value
@@ -58,7 +61,7 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
             spits.Where(fun sp -> sp.NameComponents = (ns.ToArray()))
         let findSpit = findSpits >> Seq.tryHead
         //let ns = collectNameComponents(ctx)
-        let sysNames, flowName, parenting, ns = (getContextInformation ctx).Tuples
+        let sysNames, flowName, parenting, ns = ci.Tuples
 
         if flow.Name = "OrFlow" && ctx.GetText().IsOneOf("Copy1_R3", "R3")  then
             noop()

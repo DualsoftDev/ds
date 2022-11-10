@@ -82,7 +82,7 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
                     (key, values)
             ]
 
-        let sysNames, flowName, parenting_, ns_ = collectUpwardContextInformation ctx
+        let sysNames, flowName, parenting_, ns_ = (collectUpwardContextInformation ctx).GetTuples()
         let curSystem = x.ParserHelper.TryFindSystem(sysNames.ToArray()).Value
 
         for (key, values) in safetyKvs do

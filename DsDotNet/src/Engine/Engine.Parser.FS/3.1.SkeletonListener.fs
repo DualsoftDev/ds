@@ -153,3 +153,8 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
                 let opnd1, op, opnd2 = triple[0], triple[1], triple[2]
                 let ri_ = ApiResetInfo.Create(x._currentSystem.Value, opnd1, op.ToModelEdge(), opnd2)
                 ()
+
+    override x.ExitModel(ctx:ModelContext) =
+        logDebug "---- All Elements"
+        for KeyValue(path, vType) in x._elements do
+            logDebug $"{path} : {vType}"

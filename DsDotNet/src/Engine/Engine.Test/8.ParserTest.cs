@@ -399,6 +399,23 @@ namespace Engine
     }
 }
 ";
+        public static string T6Alias = @"
+[sys ip = localhost] T6_Alias = {
+    [flow] Page1 = {
+    }
+    [flow] AndFlow = {
+        R2 > R3;
+        R1 > R3;
+    }
+    [flow] OrFlow = {
+        R2 > Copy1_R3;
+        R1 > R3;
+        [aliases] = {
+            R3 = { Copy1_R3; }
+        }
+    }
+}
+";
 
         public static string ExternalSegmentCall = @"
 [sys] MY = {

@@ -12,7 +12,7 @@ module Program =
     let EveryScenarioText = """
 [sys ip = 192.168.0.1] My = {
     [flow] MyFlow = {
-        Seg1 > Seg2;
+        Seg1 > Seg2 > A."+";
         Seg1 = {
             A."+" > A."-";
         }
@@ -24,31 +24,31 @@ module Program =
         }
     }
 
-    [flow] F = {        // GraphVertexType.Flow
+    [flow] F = {        // GVT.Flow
         C1, C2 > C3, C4 |> C5;
 C3 > C5 > C6;
 C4 > C5;
-        Main        // GraphVertexType.{ Segment | Parenting }
-        > R3        // GraphVertexType.{ Segment }
+        Main        // GVT.{ Segment | Parenting }
+        > R3        // GVT.{ Segment }
         ;
-        Main = {        // GraphVertexType.{ Segment | Parenting }
+        Main = {        // GVT.{ Segment | Parenting }
             // diamond
             Ap1 > Am1 > Bm1;
             Ap1 > Bp1 > Bm1;
 
             // diamond 2nd
-            Bm1 >               // GraphVertexType.{ Child | Call | Aliased }
+            Bm1 >               // GVT.{ Child | Call | Aliased }
             Ap2 > Am2 > Bm2;
             Ap2 > Bp2 > Bm2;
 
             Bm2
-            > A."+"             // GraphVertexType.{ Child | Call }
+            > A."+"             // GVT.{ Child | Call }
             ;
         }
-        R1              // define my local terminal real segment    // GraphVertexType.{ Segment }
-            //> C."+"     // direct interface call wrapper segment    // GraphVertexType.{ Call }
-            > Main2     // aliased to my real segment               // GraphVertexType.{ Segment | Aliased }
-            > Ap1       // aliased to interface                     // GraphVertexType.{ Segment | Aliased | Call }
+        R1              // define my local terminal real segment    // GVT.{ Segment }
+            //> C."+"     // direct interface call wrapper segment    // GVT.{ Call }
+            > Main2     // aliased to my real segment               // GVT.{ Segment | Aliased }
+            > Ap1       // aliased to interface                     // GVT.{ Segment | Aliased | Call }
             ;
         R2;
 
@@ -219,25 +219,25 @@ C4 > C5;
             F."+" > F."-";
         }
     }
+    [sys] F = {
+        [flow] F = {
+            Vp > Pp > Sp;
+            Vm > Pm > Sm;
+
+            Vp |> Pm |> Sp;
+            Vm |> Pp |> Sm;
+            Vp <||> Vm;
+        }
+        [interfaces] = {
+            "+" = { F.Vp ~ F.Sp }
+            "-" = { F.Vm ~ F.Sm }
+            Seg1 = { F.Vp ~ F.Sp }
+            // 정보로서의 상호 리셋
+            "+" <||> "-";
+        }
+    }
 }
 
-[sys] F = {
-    [flow] F = {
-        Vp > Pp > Sp;
-        Vm > Pm > Sm;
-
-        Vp |> Pm |> Sp;
-        Vm |> Pp |> Sm;
-        Vp <||> Vm;
-    }
-    [interfaces] = {
-        "+" = { F.Vp ~ F.Sp }
-        "-" = { F.Vm ~ F.Sm }
-        Seg1 = { F.Vp ~ F.Sp }
-        // 정보로서의 상호 리셋
-        "+" <||> "-";
-    }
-}
 """
     let SplittedMRIEdgesText = """
 [sys] A = {
@@ -750,7 +750,7 @@ C4 > C5;
         //Try("1 + +")
         for KeyValue(p, type_) in helper._elements do
             let types = type_.ToString("F")
-            tracefn "%s :{%s}" (p.Combine("/")) $":{types}"
+            tracefn $"{p} :{types}"
 
         tracefn "---- Spit result"
         let spits = model.Spit()

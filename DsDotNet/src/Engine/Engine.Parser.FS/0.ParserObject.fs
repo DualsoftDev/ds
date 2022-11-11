@@ -14,17 +14,34 @@ type ParserOptions(activeCpuName, isSimulationMode, allowSkipExternalSegment) =
 
 [<Flags>]
 type GraphVertexType =
-    | Unknown        = 0b0000000000000000
-    | None           = 0b0000000000000001
+    | None           = 0b0000000000000000
     | System         = 0b0000000000000010
     | Flow           = 0b0000000000000100
     | Segment        = 0b0000000000001000   // not child
     | Parenting      = 0b0000000000010000
     | Child          = 0b0000000000100000   // not Segment
-    | Call           = 0b0000000001000000
-    | AliaseKey      = 0b0000000010000000   // not direct call
-    | AliaseMnemonic = 0b0000000100000000   // not direct call
-    | ApiKey         = 0b0000001000000000
-    | ApiSER         = 0b0000010000000000   // S ~ E ~ R
-    | CausalToken    = 0b0000100000000000   // S ~ E ~ R
+    | CallAliasKey   = 0b0000000001000000
+    | CallFlowReal   = 0b0000000010000000
+    | CallApi        = 0b0000000100000000
+    | AliaseKey      = 0b0000001000000000   // not direct call
+    | AliaseMnemonic = 0b0000010000000000   // not direct call
+    | ApiKey         = 0b0000100000000000
+    | ApiSER         = 0b0001000000000000   // S ~ E ~ R
+    | CausalToken    = 0b0010000000000000   // S ~ E ~ R
 
+type GVT = GraphVertexType
+
+(*
+    0b0000000000000000
+    0b0000000000000010
+    0b0000000000000100
+    0b0000000000001000
+    0b0000000000010000
+    0b0000000000100000
+    0b0000000001000000
+    0b0000000010000000
+    0b0000000100000000
+    0b0000001000000000
+    0b0000010000000000
+    0b0000100000000000
+*)

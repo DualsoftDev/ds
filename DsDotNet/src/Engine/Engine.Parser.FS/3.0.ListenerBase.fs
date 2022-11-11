@@ -22,7 +22,6 @@ type ListenerBase(parser:dsParser, helper:ParserHelper) =
 
     member x.ParserHelper = helper
     member internal _._model = helper.Model
-    member internal _._elements = helper._elements
     member internal _._currentSystem = helper._currentSystem
     member internal _._theSystem = helper._theSystem
     member internal _._modelSpits = helper._modelSpits
@@ -30,14 +29,30 @@ type ListenerBase(parser:dsParser, helper:ParserHelper) =
     member internal _._flow       with get() = helper._flow      and set(v) = helper._flow      <- v
     member internal _._parenting  with get() = helper._parenting and set(v) = helper._parenting <- v
 
-    member internal x.AddElement(path:Fqdn, elementType:GraphVertexType) =
-        if path[0] <> x._model.TheSystem.Value.Name then
+
+    member internal x.AddElement(contextInformation:ContextInformation, elementType:GVT) =
+        let ci = contextInformation
+        let es = helper._elements
+        if ci.FullName = "My.MyFlow.Seg1" then
             noop()
-        if x._elements.ContainsKey(path) then
-            x._elements[path] <- (x._elements[path] ||| elementType)
+
+        if es.ContainsKey(ci) then
+            failwith "ERROR: duplicated"
+            es[ci] <- (es[ci] ||| elementType)
         else
-            x._elements.Add(path, elementType)
-        logDebug $"Added Element: {path.Combine()}={x._elements[path]}"
+            es.Add(ci, elementType)
+        //logDebug $"Added Element: {ci}={es[ci]}"
+
+    member internal x.AddCausalTokenElement(contextInformation:ContextInformation, elementType:GVT) =
+        let ci = contextInformation
+        let elementType = elementType ||| GVT.CausalToken
+        let ctes = helper._causalTokenElements
+        if ctes.ContainsKey(ci) then
+            ctes[ci] <- (ctes[ci] ||| elementType)
+        else
+            ctes.Add(ci, elementType)
+        //logDebug $"Added Element: {ci}={ctes[ci]}"
+
 
     member internal _.AppendPathElement(name:string) = helper.AppendPathElement(name)
     member internal _.AppendPathElement(names:Fqdn)  = helper.AppendPathElement(names)

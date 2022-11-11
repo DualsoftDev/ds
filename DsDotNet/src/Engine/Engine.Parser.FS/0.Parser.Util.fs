@@ -1,9 +1,14 @@
 namespace Engine.Parser.FS
 
+open System
 open System.Collections.Generic
+open System.Linq
 open System.Runtime.CompilerServices
 open Antlr4.Runtime
 open Antlr4.Runtime.Misc
+open Engine.Core
+open type Engine.Parser.dsParser
+open System.Diagnostics
 
 [<AutoOpen>]
 module ParserUtil =
@@ -50,15 +55,42 @@ module ParserUtil =
             ]
         helper 0 |> Array.ofSeq |> System.String
 
+    [<DebuggerDisplay("{FullName}({ContextType.Name})")>]
     type ContextInformation = {
         Systems: string list
         Flow: string option
         Parenting: string option
         Names: string list
+        ContextType:System.Type
     } with
-        static member Create(systems, flow, parenting, names) =
-            { Systems = systems; Flow = flow; Parenting = parenting; Names = names }
-        member x.GetTuples() = x.Systems, x.Flow, x.Parenting, x.Names
+        static member Create(parserRuleContext, systems, flow, parenting, names) =
+            {   ContextType = parserRuleContext.GetType();
+                Systems = systems; Flow = flow; Parenting = parenting; Names = names }
+        static member CreateFullNameComparer() = {
+            new IEqualityComparer<ContextInformation> with
+                member _.Equals(x:ContextInformation, y:ContextInformation) = x.FullName = y.FullName
+                member _.GetHashCode(x:ContextInformation) = x.FullName.GetHashCode()
+        }
+
+        member x.Tuples = x.Systems, x.Flow, x.Parenting, x.Names
+        member x.NameComponents = [
+            yield! x.Systems
+            if x.Flow.IsSome then yield x.Flow.Value
+            if x.Parenting.IsSome then yield x.Parenting.Value
+            if x.ContextType = typedefof<SystemContext>
+                || x.ContextType = typedefof<FlowContext>
+                || x.ContextType = typedefof<ParentingContext>
+                then
+                ()
+            else
+                yield! x.Names
+        ]
+        member x.FullName = x.NameComponents.ToArray().Combine()
+
+    let getParentWrapper (ci:ContextInformation) (flow:Flow option) (parenting:Real option) =
+        match ci.Parenting with
+        | Some prnt -> Real parenting.Value
+        | None -> Flow flow.Value
 
 [<Extension>]
 type ParserExt =

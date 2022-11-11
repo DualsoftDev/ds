@@ -121,9 +121,11 @@ module CoreModule =
             | None -> None
 
         static let addAlias(flow:Flow, target:Fqdn, alias:string) =
-            if   flow.AliasMap.ContainsKey target
-            then flow.AliasMap.[target].Add(alias) |> verifyM $"Duplicated alias name in AliasMap [{alias}]"
-            else flow.AliasMap.Add(target, HashSet[|alias|]) |>ignore
+            let map = flow.AliasMap
+            if map.ContainsKey target then
+                map[target].Add(alias) |> verifyM $"Duplicated alias name in AliasMap [{alias}]"
+            else
+                map.Add(target, HashSet[|alias|]) |>ignore
 
         member x.Target = target
 

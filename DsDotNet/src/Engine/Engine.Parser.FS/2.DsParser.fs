@@ -14,6 +14,7 @@ open Engine.Parser
 open type Engine.Parser.dsParser
 open type Engine.Parser.FS.DsParser
 open Engine.Core
+open Antlr4.Runtime
 
 module DsParserHelperModule =
     ()
@@ -89,7 +90,7 @@ type DsParser() =
                 let copiedSystemText = srcCtx.GetReplacedText([RangeReplace.Create(nameCtx, name)])
                 RangeReplace.Create(ctx, copiedSystemText)).ToArray()
         let replacedText = model.GetReplacedText(replaces)
-        logDebug $"Replaced Text:\r\n{replacedText}"
+        //logDebug $"Replaced Text:\r\n{replacedText}"
         replacedText
 
     static member FromDocument(text:string, predExtract:dsParser->#RuleContext, [<Optional; DefaultParameterValue(true)>]throwOnError) =       // (dsParser, RuleContext, ParserError[])
@@ -165,27 +166,32 @@ type DsParser() =
     static member findIdentifier1FromContext(context:IParseTree) =
         findFirstChild<Identifier1Context>(context, false) |> Option.map(fun ctx -> ctx.GetText().DeQuoteOnDemand())
 
+    static member collectNameComponentContext(from:IParseTree) : IParseTree =
+        let pred =
+            fun (tree:IParseTree) ->
+                tree :? Identifier1Context
+                || tree :? Identifier2Context
+                || tree :? Identifier3Context
+                || tree :? Identifier4Context
+        DsParser.findFirstChild(from, pred, true) |> Option.get
+
     static member collectNameComponents(from:IParseTree):string[] = // :Fqdn
-        let idCtx =
-            let pred =
-                fun (tree:IParseTree) ->
-                    tree :? Identifier1Context
-                    || tree :? Identifier2Context
-                    || tree :? Identifier3Context
-                    || tree :? Identifier4Context
-            DsParser.findFirstChild(from, pred, true) |> Option.get
+        let idCtx = collectNameComponentContext from
         let name = idCtx.GetText()
         Fqdn.parse(name).ToArray()
 
     static member collectSystemNames(from:IParseTree) =
         enumerateParents<SystemContext>(from, true).Select(findIdentifier1FromContext >> Option.get).Reverse().ToArray()
 
-    static member collectUpwardContextInformation(from:IParseTree) =
-        let ns        = collectNameComponents(from).ToFSharpList()
-        let sysNames  = collectSystemNames(from).ToFSharpList()
-        let flow      = findFirstAncestor<FlowContext>(from, true).Bind(findIdentifier1FromContext)
-        let parenting = findFirstAncestor<ParentingContext>(from, true).Bind(findIdentifier1FromContext)
-        ContextInformation.Create(sysNames, flow, parenting, ns)
+    static member getContextInformation(parserRuleContext:ParserRuleContext) =
+        let ctx = parserRuleContext
+        let sysNames  = collectSystemNames(ctx).ToFSharpList()
+        let flow      = findFirstAncestor<FlowContext>(ctx, true).Bind(findIdentifier1FromContext)
+        let parenting = findFirstAncestor<ParentingContext>(ctx, true).Bind(findIdentifier1FromContext)
+        let ns        = collectNameComponents(ctx).ToFSharpList()
+        if ns.Any() && flow.IsNone then
+            noop()
+        ContextInformation.Create(ctx, sysNames, flow, parenting, ns)
 
     //static member getPathAndName(from:IParseTree) =
     //    let sysNames, flowName, parenting, ns = collectUpwardContextInformation from

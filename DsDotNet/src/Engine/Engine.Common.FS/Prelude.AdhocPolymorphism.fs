@@ -3,86 +3,128 @@ namespace Engine.Common.FS
 
 [<AutoOpen>]
 module PreludeAdhocPolymorphism =
-
+    (*
     // http://nut-cracker.azurewebsites.net/blog/2011/11/15/typeclasses-for-fsharp/
     // https://kwangyulseo.com/2015/01/21/emulating-haskell-type-classes-in-f/
-    
-    //type Fbind = Fbind with
-    //    static member ($) (Fbind, x:option<_>)     = fun f -> Option.bind   f x
-    //    static member ($) (Fbind, x:list<_>)       = fun f -> List.collect  f x
-    //    static member ($) (Fbind, x:seq<_>)        = fun f -> Seq.collect   f x
-    //    static member ($) (Fbind, x:array<_>)      = fun f -> Array.collect f x
-    //    static member ($) (Fbind, x:Result<_, _>)  = fun f -> Result.bind   f x
-    //let inline bind f x = Fbind $ x <| f
+    // https://stackoverflow.com/questions/7695393/overloading-operator-in-f
+    *)
 
-    
-    //type Fbindi = Fbindi with
-    //    static member ($) (Fbindi, x:list<_>)    = fun f -> List.mapi  f x |> List.collect id
-    //    static member ($) (Fbindi, x:seq<_>)     = fun f -> Seq.mapi   f x |> Seq.collect id
-    //    static member ($) (Fbindi, x:array<_>)   = fun f -> Array.mapi f x |> Array.collect id
-    //let inline bindi f x = Fbindi $ x <| f
+    type FAdhoc_bind = FAdhoc_bind with
+        static member ($) (FAdhoc_bind, x:option<_>)     = fun f -> Option.bind   f x
+        static member ($) (FAdhoc_bind, x:list<_>)       = fun f -> List.collect  f x
+        static member ($) (FAdhoc_bind, x:seq<_>)        = fun f -> Seq.collect   f x
+        static member ($) (FAdhoc_bind, x:array<_>)      = fun f -> Array.collect f x
+        static member ($) (FAdhoc_bind, x:Result<_, _>)  = fun f -> Result.bind   f x
 
-    //type Fchoosei = Fchoosei with
-    //    static member ($) (Fchoosei, x:list<_>)  = fun f -> List.mapi  f x |> List.choose id
-    //    static member ($) (Fchoosei, x:seq<_>)   = fun f -> Seq.mapi   f x |> Seq.choose id
-    //    static member ($) (Fchoosei, x:array<_>) = fun f -> Array.mapi f x |> Array.choose id
-    //let inline choosei f x = Fchoosei $ x <| f
+    type FAdhoc_bindi = FAdhoc_bindi with
+        static member ($) (FAdhoc_bindi, x:list<_>)    = fun f -> List.mapi  f x |> List.collect id
+        static member ($) (FAdhoc_bindi, x:seq<_>)     = fun f -> Seq.mapi   f x |> Seq.collect id
+        static member ($) (FAdhoc_bindi, x:array<_>)   = fun f -> Array.mapi f x |> Array.collect id
 
-    type FchunkBySize = FchunkBySize with
-        static member ($) (FchunkBySize, x:list<_>)     = fun f -> List.chunkBySize  f x
-        static member ($) (FchunkBySize, x:seq<_>)      = fun f -> Seq.chunkBySize   f x
-        static member ($) (FchunkBySize, x:array<_>)    = fun f -> Array.chunkBySize f x
-    /// chunkSize:int -> array:'T [] -> 'T [] []
-    let inline chunkBySize f x = FchunkBySize $ x <| f
+    type FAdhoc_choosei = FAdhoc_choosei with
+        static member ($) (FAdhoc_choosei, x:list<_>)  = fun f -> List.mapi  f x |> List.choose id
+        static member ($) (FAdhoc_choosei, x:seq<_>)   = fun f -> Seq.mapi   f x |> Seq.choose id
+        static member ($) (FAdhoc_choosei, x:array<_>) = fun f -> Array.mapi f x |> Array.choose id
 
-    //type FgroupBy = FgroupBy with
-    //    static member ($) (FgroupBy, x:list<_>)     = fun f -> List.groupBy  f x
-    //    static member ($) (FgroupBy, x:seq<_>)      = fun f -> Seq.groupBy   f x
-    //    static member ($) (FgroupBy, x:array<_>)    = fun f -> Array.groupBy f x
-    ///// projection:('T -> 'Key) -> collection:'T [] -> ('Key * 'T []) [] when 'Key : equality
-    //let inline groupBy f x = FgroupBy $ x <| f
+    type FAdhoc_chunkBySize = FAdhoc_chunkBySize with
+        static member ($) (FAdhoc_chunkBySize, x:list<_>)     = fun f -> List.chunkBySize  f x
+        static member ($) (FAdhoc_chunkBySize, x:seq<_>)      = fun f -> Seq.chunkBySize   f x
+        static member ($) (FAdhoc_chunkBySize, x:array<_>)    = fun f -> Array.chunkBySize f x
+
+    type FAdhoc_groupBy = FAdhoc_groupBy with
+        static member ($) (FAdhoc_groupBy, x:list<_>)     = fun f -> List.groupBy  f x
+        static member ($) (FAdhoc_groupBy, x:seq<_>)      = fun f -> Seq.groupBy   f x
+        static member ($) (FAdhoc_groupBy, x:array<_>)    = fun f -> Array.groupBy f x
+
+    type FAdhoc_indexed = FAdhoc_indexed with
+        static member ($) (FAdhoc_indexed, x:list<_>)  = List.indexed  x
+        static member ($) (FAdhoc_indexed, x:seq<_>)   = Seq.indexed   x
+        static member ($) (FAdhoc_indexed, x:array<_>) = Array.indexed x
+
+    type FAdhoc_iter = FAdhoc_iter with
+        static member ($) (FAdhoc_iter, x:option<_>)    = fun f -> Option.iter f x
+        static member ($) (FAdhoc_iter, x:list<_>)      = fun f -> List.iter   f x
+        static member ($) (FAdhoc_iter, x:seq<_>)       = fun f -> Seq.iter    f x
+        static member ($) (FAdhoc_iter, x:array<_>)     = fun f -> Array.iter  f x
+        static member ($) (FAdhoc_iter, x:Result<_, _>) = fun f -> Result.iter f x
+
+    type FAdhoc_map = FAdhoc_map with
+        static member ($) (FAdhoc_map, x:option<_>) = fun f -> Option.map     f x
+        static member ($) (FAdhoc_map, x:list<_>)   = fun f -> List.map       f x
+        static member ($) (FAdhoc_map, x:seq<_>)    = fun f -> Seq.map        f x
+        static member ($) (FAdhoc_map, x:array<_>)  = fun f -> Array.map      f x
+        static member ($) (FAdhoc_map, x:Result<_, _>)  = fun f -> Result.map f x
+
+    type FAdhoc_mapi = FAdhoc_mapi with
+        static member ($) (FAdhoc_mapi, x:list<_>)   = fun f -> List.mapi  f x
+        static member ($) (FAdhoc_mapi, x:seq<_>)    = fun f -> Seq.mapi   f x
+        static member ($) (FAdhoc_mapi, x:array<_>)  = fun f -> Array.mapi f x
+
+    type FAdhoc_pairwise = FAdhoc_pairwise with
+        static member ($) (FAdhoc_pairwise, x:list<_>)  = List.pairwise  x
+        static member ($) (FAdhoc_pairwise, x:seq<_>)   = Seq.pairwise   x
+        static member ($) (FAdhoc_pairwise, x:array<_>) = Array.pairwise x
+
+    type FAdhoc_picki = FAdhoc_picki with
+        static member ($) (FAdhoc_picki, x:list<_>)  = fun f -> List.mapi  f x |> List.pick id
+        static member ($) (FAdhoc_picki, x:seq<_>)   = fun f -> Seq.mapi   f x |> Seq.pick id
+        static member ($) (FAdhoc_picki, x:array<_>) = fun f -> Array.mapi f x |> Array.pick id
+
+    type FAdhoc_append = FAdhoc_append with
+        static member (?<-) (FAdhoc_append, x:list<'a>,  y:list<'a>)  = List.append x y
+        static member (?<-) (FAdhoc_append, x:array<'a>, y:array<'a>) = Array.append x y
+        static member (?<-) (FAdhoc_append, x:seq<'a>,   y:seq<'a>)   = Seq.append x y
+
+    type FAdhoc_Xpend = FAdhoc_Xpend with
+        static member (?<-) (FAdhoc_Xpend, x:list<'a>,  y:'a) = List.append x [y]
+        static member (?<-) (FAdhoc_Xpend, x:array<'a>, y:'a) = Array.append x [|y|]
+        static member (?<-) (FAdhoc_Xpend, x:seq<'a>,   y:'a) = Seq.append x (seq {y})
+        static member (?<-) (FAdhoc_Xpend, x:'a, y:list<'a> ) = x::y
+        static member (?<-) (FAdhoc_Xpend, x:'a, y:array<'a>) = Array.append [|x|] y
+        static member (?<-) (FAdhoc_Xpend, x:'a, y:seq<'a>  ) = Seq.append (seq{x}) y
 
 
-    type Findexed = Findexed with
-        static member ($) (Findexed, x:list<_>)  = List.indexed  x
-        static member ($) (Findexed, x:seq<_>)   = Seq.indexed   x
-        static member ($) (Findexed, x:array<_>) = Array.indexed x
-    let inline indexed x = Findexed $ x
+    type FAdhoc_orElse = FAdhoc_orElse with
+        static member (?<-) (FAdhoc_orElse, x:option<'a>, y:option<'a>)  = Option.orElse x y
+        static member (?<-) (FAdhoc_orElse, x:list<'a>  , y:list<'a>)    = if List.isEmpty  x then y else x
+        static member (?<-) (FAdhoc_orElse, x:seq<'a>   , y:seq<'a>)     = if Seq.isEmpty   x then y else x
+        static member (?<-) (FAdhoc_orElse, x:array<'a> , y:array<'a>)   = if Array.isEmpty x then x else y
 
-    //type Fiter = Fiter with
-    //    static member ($) (Fiter, x:option<_>)   = fun f -> Option.iter f x
-    //    static member ($) (Fiter, x:list<_>)     = fun f -> List.iter   f x
-    //    static member ($) (Fiter, x:seq<_>)      = fun f -> Seq.iter    f x
-    //    static member ($) (Fiter, x:array<_>)    = fun f -> Array.iter  f x
-    //    //static member ($) (Fiter, x:Result<_, _>)  = fun f -> Result.iter f x
-    //let inline iter f x = Fiter $ x <| f
+    let inline bind        f x = FAdhoc_bind        $ x <| f
+    let inline (>>=)       f x = FAdhoc_bind        $ x <| f
+    let inline bindi       f x = FAdhoc_bindi       $ x <| f
+    let inline choosei     f x = FAdhoc_choosei     $ x <| f
+    let inline chunkBySize f x = FAdhoc_chunkBySize $ x <| f
+    let inline groupBy     f x = FAdhoc_groupBy     $ x <| f
 
-    //type Fmap = Fmap with
-    //    static member ($) (Fmap, x:option<_>) = fun f -> Option.map     f x
-    //    static member ($) (Fmap, x:list<_>)   = fun f -> List.map       f x
-    //    static member ($) (Fmap, x:seq<_>)    = fun f -> Seq.map        f x
-    //    static member ($) (Fmap, x:array<_>)  = fun f -> Array.map      f x
-    //    static member ($) (Fmap, x:Result<_, _>)  = fun f -> Result.map f x
-    //let inline map f x = Fmap $ x <| f
+    let inline indexed       x = FAdhoc_indexed     $ x
+    let inline iter        f x = FAdhoc_iter        $ x <| f
+    let inline map         f x = FAdhoc_map         $ x <| f
+    let inline mapi        f x = FAdhoc_mapi        $ x <| f
+    let inline pairwise      x = FAdhoc_pairwise    $ x
+    let inline picki       f x = FAdhoc_picki       $ x <| f
+    let inline ( <|> )     x y = (?<-) FAdhoc_orElse x y
+    let inline ( @@ )      x y = (?<-) FAdhoc_append x y
+    let inline ( @ )       x y = (?<-) FAdhoc_append x y
+    let inline ( ++ )      x y = (?<-) FAdhoc_Xpend  x y
 
-    //type Fmapi = Fmapi with
-    //    static member ($) (Fmapi, x:list<_>)   = fun f -> List.mapi  f x
-    //    static member ($) (Fmapi, x:seq<_>)    = fun f -> Seq.mapi   f x
-    //    static member ($) (Fmapi, x:array<_>)  = fun f -> Array.mapi f x
-    //let inline mapi f x = Fmapi $ x <| f       
-                                               
-    type Fpairwise = Fpairwise with
-        static member ($) (Fpairwise, x:list<_>)  = List.pairwise  x
-        static member ($) (Fpairwise, x:seq<_>)   = Seq.pairwise   x
-        static member ($) (Fpairwise, x:array<_>) = Array.pairwise x
-    let inline pairwise x = Fpairwise $ x
-                                               
-    //type Fpicki = Fpicki with                  
-    //    static member ($) (Fpicki, x:list<_>)  = fun f -> List.mapi  f x |> List.pick id
-    //    static member ($) (Fpicki, x:seq<_>)   = fun f -> Seq.mapi   f x |> Seq.pick id
-    //    static member ($) (Fpicki, x:array<_>) = fun f -> Array.mapi f x |> Array.pick id
-    //let inline picki f x = Fpicki $ x <| f
+    let private testme() =
+        let a = Some 1 <|> None
+        let b = [1..10] <|> []
+        let c =[] <|> [1..10] <|> []
+
+        let lift (f: 'a -> 'b) (x: 'a) = f x
+
+        let incr x = Some (x + 1)
+        let x = incr >>= Some 2
+        ()
+
+
+
+
 
     /// tuple array 를 개별 seq 의 tuple 로 반환 : [a*b] -> [a] * [b]
     //let inline unzip tpls =
     //    (tpls |> map fst, tpls |> map snd)
+
+

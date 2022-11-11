@@ -17,7 +17,7 @@ internal class SampleRunner
         {
             var (p, type_) = (kv.Key, kv.Value);
             var types = type_.ToString("F");
-            Trace.WriteLine(p.Combine("/") + $":{types}");
+            Trace.WriteLine($"{p} : {types}");
         }
 
         Trace.WriteLine("---- Spit result");

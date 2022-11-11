@@ -67,7 +67,8 @@ type ParserHelper(options:ParserOptions) =
 
     member val internal _flow:Flow option = None  with get, set
     member val internal _parenting:Real option = None  with get, set
-    member val internal _elements = Dictionary<Fqdn, GraphVertexType>(NameUtil.CreateNameComponentsComparer())
+    member val internal _causalTokenElements = Dictionary<ContextInformation, GVT>(ContextInformation.CreateFullNameComparer())
+    member val internal _elements = Dictionary<ContextInformation, GVT>()
     member val internal _modelSpits:SpitResult array = [||] with get, set
     member internal x._modelSpitObjects = x._modelSpits.Select(fun spit -> spit.GetCore()).ToArray()
     //member internal x.UpdateModelSpits() = x._modelSpits <- x.Model.Spit().ToArray()

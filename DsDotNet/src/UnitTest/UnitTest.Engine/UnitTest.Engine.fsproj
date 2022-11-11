@@ -30,6 +30,7 @@
 		<Compile Include="Model\ModelGraph.fs" />
 		<Compile Include="Model\ExpressionTest.fs" />
 		<Compile Include="ImportPPT\pptTest.fs" />
+		<Compile Include="EntryPoint.fs" />
 		<None Include="Obsolete\0.ModelTest_Common.fsx" />
 		<None Include="Obsolete\1.ModelExtension.fsx" />
 		<None Include="Obsolete\ModelTest1.fsx" />
@@ -45,7 +46,6 @@
 		<None Include="Obsolete\Parser\Parse.OK.fsx" />
 		<None Include="Obsolete\test.ipynb" />
 		<None Include="ScratchPad.fsx" />
-		<Compile Include="EntryPoint.fs" />
 		<None Include="App.config" />
 	</ItemGroup>
 

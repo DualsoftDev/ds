@@ -17,20 +17,16 @@ module pptTestModule =
         let helper = ModelParser.ParseFromString2(originalText, ParserOptions.Create4Runtime("localhost"))
         originalText =~= helper.TheSystem.ToDsText()
 
-    let checkAll () =
-            check (ImportM.FromPPTX($"{__SOURCE_DIRECTORY__}\\T0_CaseAll.pptx"))
-            check (ImportM.FromPPTX($"{__SOURCE_DIRECTORY__}\\T1_System.pptx"))
-            check (ImportM.FromPPTX($"{__SOURCE_DIRECTORY__}\\T2_Flow.pptx"))
-            check (ImportM.FromPPTX($"{__SOURCE_DIRECTORY__}\\T3_Real.pptx"))
-            check (ImportM.FromPPTX($"{__SOURCE_DIRECTORY__}\\T4_Api.pptx"))
-            check (ImportM.FromPPTX($"{__SOURCE_DIRECTORY__}\\T5_Call.pptx"))
-            check (ImportM.FromPPTX($"{__SOURCE_DIRECTORY__}\\T6_Alias.pptx"))
-            check (ImportM.FromPPTX($"{__SOURCE_DIRECTORY__}\\T7_CopySystem.pptx"))
-            check (ImportM.FromPPTX($"{__SOURCE_DIRECTORY__}\\T8_Safety.pptx"))
-            check (ImportM.FromPPTX($"{__SOURCE_DIRECTORY__}\\T9_Group.pptx"))
-
     type PPTTest() =
         do Fixtures.SetUpTest()
 
-        [<Test>]
-        member __.``EveryScenarioPPT test`` () = checkAll()
+        [<Test>] member __.``CaseAll CaseAll test``       () = check (ImportM.FromPPTX($"{__SOURCE_DIRECTORY__}\\T0_CaseAll.pptx"))
+        [<Test>] member __.``System System test``         () = check (ImportM.FromPPTX($"{__SOURCE_DIRECTORY__}\\T1_System.pptx"))
+        [<Test>] member __.``Flow Flow test``             () = check (ImportM.FromPPTX($"{__SOURCE_DIRECTORY__}\\T2_Flow.pptx"))
+        [<Test>] member __.``Real Real test``             () = check (ImportM.FromPPTX($"{__SOURCE_DIRECTORY__}\\T3_Real.pptx"))
+        [<Test>] member __.``Api Api test``               () = check (ImportM.FromPPTX($"{__SOURCE_DIRECTORY__}\\T4_Api.pptx"))
+        [<Test>] member __.``Call Call test``             () = check (ImportM.FromPPTX($"{__SOURCE_DIRECTORY__}\\T5_Call.pptx"))
+        [<Test>] member __.``Alias Alias test``           () = check (ImportM.FromPPTX($"{__SOURCE_DIRECTORY__}\\T6_Alias.pptx"))
+        [<Test>] member __.``CopySystem CopySystem test`` () = check (ImportM.FromPPTX($"{__SOURCE_DIRECTORY__}\\T7_CopySystem.pptx"))
+        [<Test>] member __.``Safety test``                () = check (ImportM.FromPPTX($"{__SOURCE_DIRECTORY__}\\T8_Safety.pptx"))
+        [<Test>] member __.``Group test``                 () = check (ImportM.FromPPTX($"{__SOURCE_DIRECTORY__}\\T9_Group.pptx"))

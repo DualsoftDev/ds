@@ -379,6 +379,24 @@ module private ModelComparisonHelper =
     }
 }
 """
+
+        let answerT6Aliases = """
+[sys ip = localhost] T6_Alias = {
+    [flow] Page1 = {
+    }
+    [flow] AndFlow = {
+        R1 > R3;
+        R2 > R3;
+    }
+    [flow] OrFlow = {
+        R1 > R3;
+        R2 > Copy1_R3;
+        [aliases] = {
+            R3 = { Copy1_R3; }
+        }
+    }
+}
+"""
         let answerAliases = """
 [sys] my = {
     [flow] F = {
@@ -490,30 +508,17 @@ module ModelTests1 =
             compare ParserTest.QualifiedName answerQualifiedName
 
         [<Test>]
-        member __.``Model component test`` () =
-            let input = """
-[sys ip = localhost] T6_Alias = {
-    [flow] Page1 = {
-    }
-    [flow] AndFlow = {
-        R2 > R3;
-        R1 > R3;
-    }
-    [flow] OrFlow = {
-        R2 > Copy1_R3;
-        R1 > R3;
-        [aliases] = {
-            R3 = { Copy1_R3; }
-        }
-    }
-}"""
-            compare input ""
-            //compare ParserTest.Ppt);
-            //compare ParserTest.ExternalSegmentCall ""
-            //compare ParserTest.ExternalSegmentCallConfusing ""
-            //compare ParserTest.MyFlowReference ""
-            //compare ParserTest.Error ""
-            ()
+        member __.``Model component [T6 alias] test`` () =
+            compare ParserTest.T6Alias answerT6Aliases
+
+        //[<Test>]
+        //member __.``Model component test`` () =
+        //    compare ParserTest.Ppt);
+        //    compare ParserTest.ExternalSegmentCall ""
+        //    compare ParserTest.ExternalSegmentCallConfusing ""
+        //    compare ParserTest.MyFlowReference ""
+        //    compare ParserTest.Error ""
+        //    ()
 
         [<Test>]
         member __.``Model ERROR duplication test`` () =

@@ -219,25 +219,25 @@ C4 > C5;
             F."+" > F."-";
         }
     }
+    [sys] F = {
+        [flow] F = {
+            Vp > Pp > Sp;
+            Vm > Pm > Sm;
+
+            Vp |> Pm |> Sp;
+            Vm |> Pp |> Sm;
+            Vp <||> Vm;
+        }
+        [interfaces] = {
+            "+" = { F.Vp ~ F.Sp }
+            "-" = { F.Vm ~ F.Sm }
+            Seg1 = { F.Vp ~ F.Sp }
+            // 정보로서의 상호 리셋
+            "+" <||> "-";
+        }
+    }
 }
 
-[sys] F = {
-    [flow] F = {
-        Vp > Pp > Sp;
-        Vm > Pm > Sm;
-
-        Vp |> Pm |> Sp;
-        Vm |> Pp |> Sm;
-        Vp <||> Vm;
-    }
-    [interfaces] = {
-        "+" = { F.Vp ~ F.Sp }
-        "-" = { F.Vm ~ F.Sm }
-        Seg1 = { F.Vp ~ F.Sp }
-        // 정보로서의 상호 리셋
-        "+" <||> "-";
-    }
-}
 """
     let SplittedMRIEdgesText = """
 [sys] A = {

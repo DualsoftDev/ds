@@ -181,13 +181,16 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
                             dic[ctxInfo] <- dic[ctxInfo] ||| GVT.Segment
                         | GVT.Child ->
                             if ctxInfo.Names.Length = 2 then
-                                dic[ctxInfo] <- dic[ctxInfo] ||| GVT.Call
+                                dic[ctxInfo] <- dic[ctxInfo] ||| GVT.CallApi        // todo : GVT.CallFlowReal 구분
+                                //helper._elements.TryFind(fun (KeyValue(ctx, _)) -> ctx.
+                                //failwith "ERROR"
+
                         | _ ->
                             failwith "ERROR"
                     else
                         match types with
                         | GVT.AliaseKey ->
-                            dic[ctxInfo] <- dic[ctxInfo] ||| GVT.Call
+                            dic[ctxInfo] <- dic[ctxInfo] ||| GVT.CallAliasKey ||| GVT.Segment
                         | GVT.AliaseMnemonic ->
                             dic[ctxInfo] <- dic[ctxInfo] ||| GVT.AliaseMnemonic
                         | _ ->

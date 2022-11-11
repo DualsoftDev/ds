@@ -192,7 +192,10 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
             | None, y::z::[] -> createCall ci
             | _ -> failwith "ERROR"
         | HasFlag GVT.AliaseMnemonic -> createAliasFromContextInformation ci
-        | HasFlag GVT.Call
+        | HasFlag GVT.CallAliasKey ->
+            failwith "ERROR"
+        | HasFlag GVT.CallApi
+        | HasFlag GVT.CallFlowReal
         | HasFlag GVT.Child -> createCall ci
         | _ ->
             failwith "ERROR"

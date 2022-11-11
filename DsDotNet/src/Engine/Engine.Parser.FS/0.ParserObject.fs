@@ -27,3 +27,4 @@ type GraphVertexType =
     | ApiSER         = 0b0000010000000000   // S ~ E ~ R
     | CausalToken    = 0b0000100000000000   // S ~ E ~ R
 
+type GVT = GraphVertexType

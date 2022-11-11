@@ -13,13 +13,15 @@ module internal ModelFindModule =
         let rec findSystemInner (system:DsSystem) (xs:string list) : obj =
             match xs with
             | [] -> system
-            | f::xs when system.Flows.Any(nameEq f) ->
+            | f::xs1 when system.Flows.Any(nameEq f) ->
                 let flow = system.Flows.First(nameEq f)
-                match xs with
+                match xs1 with
                 | [] -> flow
-                | r::xs ->
+                | r::xs2 ->
+                    if r = "R.X" then
+                        noop()
                     let real = flow.Graph.FindVertex(r) |> box :?> Real
-                    match xs with
+                    match xs2 with
                     | [] -> real
                     | remaining -> real.Graph.FindVertex(remaining.Combine())
 

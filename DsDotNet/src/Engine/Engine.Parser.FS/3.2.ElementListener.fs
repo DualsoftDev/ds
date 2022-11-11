@@ -104,32 +104,32 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
                 | _ ->
                     failwith "ERROR"
 
-        let createAliasTargetOnDemand (soa:SpitOnlyAlias) =
-            let key = soa.AliasKey
-            let target =
-                spits.Where(fun sp->
-                    match sp.SpitObj with
-                    | SpitReal _
-                    | SpitCall _ -> true
-                    | _ -> false).TryFind(fun sp -> sp.NameComponents = key)
-            match target with
-            | Some sp -> ()
-            | None ->
-                let names = getRelativeNames flow.NameComponents key
-                match names with
-                | n::[] -> Real.Create(n, flow) |> ignore
-                | x::y::[] ->
-                    if system.Flows.Any(fun f -> f.Name = x) then
-                        (* do nothing.  다른 flow 의 real 에 대한 alias 이므로, 다른 flow 생성 시 이미 target 이 만들어져 있어야 한다. *)
-                        ()
-                    else
-                        match findSpits(x::y::[]).Select(fun sp -> sp.GetCore()).OfType<ApiItem>().TryHead()  with
-                        | Some apiItem ->
-                            Call.Create(apiItem, Flow flow) |> ignore
-                        | _ ->
-                            failwith "ERROR"
-                | _ ->
-                    failwith "ERROR"
+        //let createAliasTargetOnDemand (soa:SpitOnlyAlias) =
+        //    let key = soa.AliasKey
+        //    let target =
+        //        spits.Where(fun sp->
+        //            match sp.SpitObj with
+        //            | SpitReal _
+        //            | SpitCall _ -> true
+        //            | _ -> false).TryFind(fun sp -> sp.NameComponents = key)
+        //    match target with
+        //    | Some sp -> ()
+        //    | None ->
+        //        let names = getRelativeNames flow.NameComponents key
+        //        match names with
+        //        | n::[] -> Real.Create(n, flow) |> ignore
+        //        | x::y::[] ->
+        //            if system.Flows.Any(fun f -> f.Name = x) then
+        //                (* do nothing.  다른 flow 의 real 에 대한 alias 이므로, 다른 flow 생성 시 이미 target 이 만들어져 있어야 한다. *)
+        //                ()
+        //            else
+        //                match findSpits(x::y::[]).Select(fun sp -> sp.GetCore()).OfType<ApiItem>().TryHead()  with
+        //                | Some apiItem ->
+        //                    Call.Create(apiItem, Flow flow) |> ignore
+        //                | _ ->
+        //                    failwith "ERROR"
+        //        | _ ->
+        //            failwith "ERROR"
 
         //let createReal (ci:ContextInformation) =
         //    match ns with
@@ -152,9 +152,9 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
 
         let createCall (ci:ContextInformation) =
             match ci.Tuples with
-            | s::[], Some f, _, y::z::[] ->
-                let xxx = (findSpits [s; y; z]).Concat(findSpits [y; z]).ToArray()
-                match (findSpit [s; y; z]).OrElse(findSpit [y; z]) with
+            | s::[], Some f, _, childNames ->     // my / flow / (parenting) / childNames.    where childNames = A.+ or Alias
+                let xxx = (findSpits [s; yield! childNames]).Concat(findSpits childNames).ToArray()
+                match (findSpit [s; yield! childNames]).OrElse(findSpit childNames) with
                 | Some sp ->
                     match sp.SpitObj with
                     | SpitApiItem apiItem ->
@@ -163,7 +163,7 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
                     | SpitOnlyAlias soa -> createAlias soa
                     | SpitReal real -> createRealTargetAlias ci real
                     | _ -> failwith "Not an API item"
-                | None -> tracefn "Need to generate %A" [s; y; z]
+                | None -> tracefn "Need to generate %A" [s; yield! childNames]
             | _ ->
                 failwith "ERROR"
 
@@ -185,15 +185,15 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
 
 
         match vertexType with
-        | HasFlag GraphVertexType.Segment ->
+        | HasFlag GVT.Segment ->
             let existing = findSpit(ci.NameComponents)
             match existing, ns with
             | Some x, _ -> ()
             | None, y::z::[] -> createCall ci
             | _ -> failwith "ERROR"
-        | HasFlag GraphVertexType.AliaseMnemonic -> createAliasFromContextInformation ci
-        | HasFlag GraphVertexType.Call
-        | HasFlag GraphVertexType.Child -> createCall ci
+        | HasFlag GVT.AliaseMnemonic -> createAliasFromContextInformation ci
+        | HasFlag GVT.Call
+        | HasFlag GVT.Child -> createCall ci
         | _ ->
             failwith "ERROR"
         x.UpdateModelSpits()

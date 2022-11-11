@@ -24,31 +24,31 @@ module Program =
         }
     }
 
-    [flow] F = {        // GraphVertexType.Flow
+    [flow] F = {        // GVT.Flow
         C1, C2 > C3, C4 |> C5;
 C3 > C5 > C6;
 C4 > C5;
-        Main        // GraphVertexType.{ Segment | Parenting }
-        > R3        // GraphVertexType.{ Segment }
+        Main        // GVT.{ Segment | Parenting }
+        > R3        // GVT.{ Segment }
         ;
-        Main = {        // GraphVertexType.{ Segment | Parenting }
+        Main = {        // GVT.{ Segment | Parenting }
             // diamond
             Ap1 > Am1 > Bm1;
             Ap1 > Bp1 > Bm1;
 
             // diamond 2nd
-            Bm1 >               // GraphVertexType.{ Child | Call | Aliased }
+            Bm1 >               // GVT.{ Child | Call | Aliased }
             Ap2 > Am2 > Bm2;
             Ap2 > Bp2 > Bm2;
 
             Bm2
-            > A."+"             // GraphVertexType.{ Child | Call }
+            > A."+"             // GVT.{ Child | Call }
             ;
         }
-        R1              // define my local terminal real segment    // GraphVertexType.{ Segment }
-            //> C."+"     // direct interface call wrapper segment    // GraphVertexType.{ Call }
-            > Main2     // aliased to my real segment               // GraphVertexType.{ Segment | Aliased }
-            > Ap1       // aliased to interface                     // GraphVertexType.{ Segment | Aliased | Call }
+        R1              // define my local terminal real segment    // GVT.{ Segment }
+            //> C."+"     // direct interface call wrapper segment    // GVT.{ Call }
+            > Main2     // aliased to my real segment               // GVT.{ Segment | Aliased }
+            > Ap1       // aliased to interface                     // GVT.{ Segment | Aliased | Call }
             ;
         R2;
 

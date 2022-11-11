@@ -30,7 +30,7 @@ type ListenerBase(parser:dsParser, helper:ParserHelper) =
     member internal _._parenting  with get() = helper._parenting and set(v) = helper._parenting <- v
 
 
-    member internal x.AddElement(contextInformation:ContextInformation, elementType:GraphVertexType) =
+    member internal x.AddElement(contextInformation:ContextInformation, elementType:GVT) =
         let ci = contextInformation
         let es = helper._elements
         if ci.FullName = "My.MyFlow.Seg1" then
@@ -43,9 +43,9 @@ type ListenerBase(parser:dsParser, helper:ParserHelper) =
             es.Add(ci, elementType)
         //logDebug $"Added Element: {ci}={es[ci]}"
 
-    member internal x.AddCausalTokenElement(contextInformation:ContextInformation, elementType:GraphVertexType) =
+    member internal x.AddCausalTokenElement(contextInformation:ContextInformation, elementType:GVT) =
         let ci = contextInformation
-        let elementType = elementType ||| GraphVertexType.CausalToken
+        let elementType = elementType ||| GVT.CausalToken
         let ctes = helper._causalTokenElements
         if ctes.ContainsKey(ci) then
             ctes[ci] <- (ctes[ci] ||| elementType)

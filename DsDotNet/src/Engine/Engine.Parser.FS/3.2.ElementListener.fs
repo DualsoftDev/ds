@@ -58,12 +58,19 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
         let system = x._currentSystem.Value
         let spits = system.Spit()
         let findSpits (ns:string seq) =
-            spits.Where(fun sp -> sp.NameComponents = (ns.ToArray()))
-        let findSpit = findSpits >> Seq.tryHead
+            let xxx = ns.Combine()
+            let yyys = spits.Select(fun sp -> sp.NameComponents.Combine()).ToArray()
+            spits.Where(fun sp -> sp.NameComponents = (ns.ToArray()) || sp.NameComponents.Combine() = ns.Combine()).ToArray()
+        let findSpit ns = findSpits ns |> Array.tryHead
         //let ns = collectNameComponents(ctx)
-        let sysNames, flowName, parenting, ns = ci.Tuples
 
 
+        let createRealTargetAlias (ci:ContextInformation) (target:Real) =
+            let aliasCreator =
+                let aliasTarget = new AliasTargetReal(target.NameComponents)
+                let parent = getParentWrapper ci x._flow x._parenting
+                new AliasCreator(ci.Names.Combine(), parent, aliasTarget)
+            x.ParserHelper.AliasCreators.Add(aliasCreator)
 
         let createAlias(soa:SpitOnlyAlias) =
             let aliasKey = soa.AliasKey
@@ -124,30 +131,48 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
                 | _ ->
                     failwith "ERROR"
 
-        let createReal (ci:ContextInformation) =
-            if findSpit(ci.NameComponents).IsNone then
-                Real.Create(ns.Combine(), flow) |> ignore
+        //let createReal (ci:ContextInformation) =
+        //    match ns with
+        //    | n::[] ->
+        //        if findSpit(ci.NameComponents).IsNone then
+        //            Real.Create(ns.Combine(), flow) |> ignore
+        //    | y::z::[] ->
+        //        let realTarget = findSpit([yield! ci.Systems; y; z])
+        //        match realTarget with
+        //        | Some real ->
+        //            let parentWrapper = getParentWrapper ci
+        //            let target = RealTarget (real.GetCore() :?> Real)
+        //            let parent = getParentWrapper ci x._flow x._parenting
+        //            Alias.Create(ns.Combine(), target, parent, true) |> ignore   // "ERROR"  // other flow real call
+        //        | _ ->
+        //            failwith "ERROR"
+        //    | _ ->
+        //        failwith "ERROR"
+
 
         let createCall (ci:ContextInformation) =
             match ci.Tuples with
-            | s::[], Some f, _, otherSystem::apiName::[] ->
-                match (findSpit [s; otherSystem; apiName]).OrElse(findSpit [otherSystem; apiName]) with
+            | s::[], Some f, _, y::z::[] ->
+                let xxx = (findSpits [s; y; z]).Concat(findSpits [y; z]).ToArray()
+                match (findSpit [s; y; z]).OrElse(findSpit [y; z]) with
                 | Some sp ->
                     match sp.SpitObj with
                     | SpitApiItem apiItem ->
-                        let parentWrapper =
-                            match ci.Parenting with
-                            | Some parenting -> Real x._parenting.Value
-                            | None -> Flow x._flow.Value
-                        Call.Create(apiItem, parentWrapper) |> ignore
+                        let parent = getParentWrapper ci x._flow x._parenting
+                        Call.Create(apiItem, parent) |> ignore
                     | SpitOnlyAlias soa -> createAlias soa
+                    | SpitReal real -> createRealTargetAlias ci real
                     | _ -> failwith "Not an API item"
-                | None -> tracefn "Need to generate %A" [s; otherSystem; apiName]
+                | None -> tracefn "Need to generate %A" [s; y; z]
             | _ ->
                 failwith "ERROR"
 
         let createAliasFromContextInformation (ci:ContextInformation) =
             //let aliasKey = [yield! ci.Systems; ci.Flow.Value; yield! ci.Names]
+            let xxx = findSpits ci.Names
+            let yyy = xxx.Select(fun sp -> sp.GetCore()).OfType<SpitOnlyAlias>().ToArray()
+            let zzz = yyy.Where(fun sp -> sp.FlowFqdn = [| yield! ci.Systems; ci.Flow.Value |] ).ToArray()
+
             let alias =
                 (findSpits ci.Names)
                     .Select(fun sp -> sp.GetCore())
@@ -160,10 +185,15 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
 
 
         match vertexType with
-        | HasFlag GraphVertexType.Segment -> createReal ci
+        | HasFlag GraphVertexType.Segment ->
+            let existing = findSpit(ci.NameComponents)
+            match existing, ns with
+            | Some x, _ -> ()
+            | None, y::z::[] -> createCall ci
+            | _ -> failwith "ERROR"
+        | HasFlag GraphVertexType.AliaseMnemonic -> createAliasFromContextInformation ci
         | HasFlag GraphVertexType.Call
         | HasFlag GraphVertexType.Child -> createCall ci
-        | HasFlag GraphVertexType.AliaseMnemonic -> createAliasFromContextInformation ci
         | _ ->
             failwith "ERROR"
         x.UpdateModelSpits()
@@ -335,10 +365,10 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
         //                x.UpdateModelSpits()
 
 
-    override x.EnterIdentifier12Listing(ctx:Identifier12ListingContext) =
-        // side effects
-        let path = x.AppendPathElement(collectNameComponents(ctx))
-        if x._parenting.IsSome then
-            raise <| new ParserException($"ERROR: identifier [{path.Combine()}] not allowed!", ctx)
+    //override x.EnterIdentifier12Listing(ctx:Identifier12ListingContext) =
+    //    // side effects
+    //    let path = x.AppendPathElement(collectNameComponents(ctx))
+    //    if x._parenting.IsSome then
+    //        raise <| new ParserException($"ERROR: identifier [{path.Combine()}] not allowed!", ctx)
 
-        Real.Create(path.Last(), x._flow.Value) |> ignore
+    //    Real.Create(path.Last(), x._flow.Value) |> ignore

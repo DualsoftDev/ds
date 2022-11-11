@@ -42,11 +42,11 @@ module PreludeAdhocPolymorphism =
         static member ($) (FAdhoc_indexed, x:array<_>) = Array.indexed x
 
     type FAdhoc_iter = FAdhoc_iter with
-        static member ($) (FAdhoc_iter, x:option<_>)   = fun f -> Option.iter f x
-        static member ($) (FAdhoc_iter, x:list<_>)     = fun f -> List.iter   f x
-        static member ($) (FAdhoc_iter, x:seq<_>)      = fun f -> Seq.iter    f x
-        static member ($) (FAdhoc_iter, x:array<_>)    = fun f -> Array.iter  f x
-        static member ($) (FAdhoc_iter, x:Result<_, _>)  = fun f -> Result.iter f x
+        static member ($) (FAdhoc_iter, x:option<_>)    = fun f -> Option.iter f x
+        static member ($) (FAdhoc_iter, x:list<_>)      = fun f -> List.iter   f x
+        static member ($) (FAdhoc_iter, x:seq<_>)       = fun f -> Seq.iter    f x
+        static member ($) (FAdhoc_iter, x:array<_>)     = fun f -> Array.iter  f x
+        static member ($) (FAdhoc_iter, x:Result<_, _>) = fun f -> Result.iter f x
 
     type FAdhoc_map = FAdhoc_map with
         static member ($) (FAdhoc_map, x:option<_>) = fun f -> Option.map     f x
@@ -70,14 +70,28 @@ module PreludeAdhocPolymorphism =
         static member ($) (FAdhoc_picki, x:seq<_>)   = fun f -> Seq.mapi   f x |> Seq.pick id
         static member ($) (FAdhoc_picki, x:array<_>) = fun f -> Array.mapi f x |> Array.pick id
 
+    type FAdhoc_append = FAdhoc_append with
+        static member (?<-) (FAdhoc_append, x:list<'a>,  y:list<'a>)  = List.append x y
+        static member (?<-) (FAdhoc_append, x:array<'a>, y:array<'a>) = Array.append x y
+        static member (?<-) (FAdhoc_append, x:seq<'a>,   y:seq<'a>)   = Seq.append x y
 
-    type FAdhoc_OrElse = FAdhoc_OrElse with
-        static member (?<-) (FAdhoc_OrElse, x:option<'a>, y:option<'a>)  = Option.orElse x y
-        static member (?<-) (FAdhoc_OrElse, x:list<'a>  , y:list<'a>)    = if List.isEmpty  x then y else x
-        static member (?<-) (FAdhoc_OrElse, x:seq<'a>   , y:seq<'a>)     = if Seq.isEmpty   x then y else x
-        static member (?<-) (FAdhoc_OrElse, x:array<'a> , y:array<'a>)   = if Array.isEmpty x then x else y
+    type FAdhoc_Xpend = FAdhoc_Xpend with
+        static member (?<-) (FAdhoc_Xpend, x:list<'a>,  y:'a) = List.append x [y]
+        static member (?<-) (FAdhoc_Xpend, x:array<'a>, y:'a) = Array.append x [|y|]
+        static member (?<-) (FAdhoc_Xpend, x:seq<'a>,   y:'a) = Seq.append x (seq {y})
+        static member (?<-) (FAdhoc_Xpend, x:'a, y:list<'a> ) = x::y
+        static member (?<-) (FAdhoc_Xpend, x:'a, y:array<'a>) = Array.append [|x|] y
+        static member (?<-) (FAdhoc_Xpend, x:'a, y:seq<'a>  ) = Seq.append (seq{x}) y
+
+
+    type FAdhoc_orElse = FAdhoc_orElse with
+        static member (?<-) (FAdhoc_orElse, x:option<'a>, y:option<'a>)  = Option.orElse x y
+        static member (?<-) (FAdhoc_orElse, x:list<'a>  , y:list<'a>)    = if List.isEmpty  x then y else x
+        static member (?<-) (FAdhoc_orElse, x:seq<'a>   , y:seq<'a>)     = if Seq.isEmpty   x then y else x
+        static member (?<-) (FAdhoc_orElse, x:array<'a> , y:array<'a>)   = if Array.isEmpty x then x else y
 
     let inline bind        f x = FAdhoc_bind        $ x <| f
+    let inline (>>=)       f x = FAdhoc_bind        $ x <| f
     let inline bindi       f x = FAdhoc_bindi       $ x <| f
     let inline choosei     f x = FAdhoc_choosei     $ x <| f
     let inline chunkBySize f x = FAdhoc_chunkBySize $ x <| f
@@ -89,12 +103,20 @@ module PreludeAdhocPolymorphism =
     let inline mapi        f x = FAdhoc_mapi        $ x <| f
     let inline pairwise      x = FAdhoc_pairwise    $ x
     let inline picki       f x = FAdhoc_picki       $ x <| f
-    let inline ( <|> )     x y = (?<-) FAdhoc_OrElse x y
+    let inline ( <|> )     x y = (?<-) FAdhoc_orElse x y
+    let inline ( @@ )      x y = (?<-) FAdhoc_append x y
+    let inline ( @ )       x y = (?<-) FAdhoc_append x y
+    let inline ( ++ )      x y = (?<-) FAdhoc_Xpend  x y
 
     let private testme() =
         let a = Some 1 <|> None
         let b = [1..10] <|> []
         let c =[] <|> [1..10] <|> []
+
+        let lift (f: 'a -> 'b) (x: 'a) = f x
+
+        let incr x = Some (x + 1)
+        let x = incr >>= Some 2
         ()
 
 

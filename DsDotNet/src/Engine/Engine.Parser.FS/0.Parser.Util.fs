@@ -86,6 +86,12 @@ module ParserUtil =
                 yield! x.Names
         ]
         member x.FullName = x.NameComponents.ToArray().Combine()
+
+    let getParentWrapper (ci:ContextInformation) (flow:Flow option) (parenting:Real option) =
+        match ci.Parenting with
+        | Some prnt -> Real parenting.Value
+        | None -> Flow flow.Value
+
 [<Extension>]
 type ParserExt =
     [<Extension>] static member GetOriginalText(ctx:ParserRuleContext) = getOriginalText ctx

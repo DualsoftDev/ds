@@ -70,6 +70,9 @@ type EdgeListener(parser:dsParser, helper:ParserHelper) =
                     .OfType<Vertex>()
                     .TryHead()
 
+            if token.IsNone then
+                ()
+
             assert(token.IsSome)
             token
 

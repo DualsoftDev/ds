@@ -119,6 +119,10 @@ let (|InClosedRange|_|) a b x =
         None
 
 
+let (|HasFlag|_|) (flag:Enum) (enum:Enum) =
+    if enum.HasFlag(flag) then Some HasFlag else None
+
+
 /// Default argument 를 위한 active pattern
 // https://stackoverflow.com/questions/30255271/how-to-set-default-argument-value-in-f
 let inline (|Default|) defaultValue input =

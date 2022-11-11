@@ -64,3 +64,4 @@ let replace (xs:char array) (ranges:Range seq) =
 
 [|'0'..'9'|]
 replace [|'0'..'9'|] ranges
+

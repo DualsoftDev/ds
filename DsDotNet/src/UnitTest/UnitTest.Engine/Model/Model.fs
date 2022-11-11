@@ -28,7 +28,7 @@ module private ModelComparisonHelper =
         let answerEveryScenarioText = """
     [sys ip = 192.168.0.1] My = {
         [flow] MyFlow = {
-            Seg1 > Seg2;
+            Seg1 > Seg2 > A."+";
             Seg1 = {
                 A."+" > A."-";
             }
@@ -61,6 +61,45 @@ module private ModelComparisonHelper =
                 Main = { Main2; }
             }
         }
+        [sys ip = 1.2.3.4] A = {
+            [flow] F = {
+                Vp <||> Vm |> Pp |> Sm;
+                Vp |> Pm |> Sp;
+                Vm > Pm > Sm;
+                Vp > Pp > Sp;
+            }
+            [interfaces] = {
+                "+" = { F.Vp ~ F.Sp }
+                "-" = { F.Vm ~ F.Sm }
+                "+" <||> "-";
+            }
+        }
+        [sys ip = 1.2.3.4] B = {
+            [flow] F = {
+                Vp <||> Vm |> Pp |> Sm;
+                Vp |> Pm |> Sp;
+                Vm > Pm > Sm;
+                Vp > Pp > Sp;
+            }
+            [interfaces] = {
+                "+" = { F.Vp ~ F.Sp }
+                "-" = { F.Vm ~ F.Sm }
+                "+" <||> "-";
+            }
+        }
+        [sys ip = 1.2.3.4] C = {
+            [flow] F = {
+                Vp <||> Vm |> Pp |> Sm;
+                Vp |> Pm |> Sp;
+                Vm > Pm > Sm;
+                Vp > Pp > Sp;
+            }
+            [interfaces] = {
+                "+" = { F.Vp ~ F.Sp }
+                "-" = { F.Vm ~ F.Sm }
+                "+" <||> "-";
+            }
+        }
         [emg] = {
             EMGBTN = { F; }
         }
@@ -72,55 +111,16 @@ module private ModelComparisonHelper =
                 B."-" = ( BSTART, BEND)
             }
         }
+        [prop] = {
+            [safety] = {
+                My.F.Main = { A.F.Sp; A.F.Sm; B.F.Sp; B.F.Sm; C.F.Sp; }
+            }
+            [layouts] = {
+                A."+" = (1309, 405, 205, 83)
+            }
+        }
+    }
 
-    }
-    [sys ip = 1.2.3.4] A = {
-        [flow] F = {
-            Vp <||> Vm |> Pp |> Sm;
-            Vp |> Pm |> Sp;
-            Vm > Pm > Sm;
-            Vp > Pp > Sp;
-        }
-        [interfaces] = {
-            "+" = { A.F.Vp ~ A.F.Sp }
-            "-" = { A.F.Vm ~ A.F.Sm }
-            "+" <||> "-";
-        }
-    }
-    [sys ip = 1.2.3.4] B = {
-        [flow] F = {
-            Vp <||> Vm |> Pp |> Sm;
-            Vp |> Pm |> Sp;
-            Vm > Pm > Sm;
-            Vp > Pp > Sp;
-        }
-        [interfaces] = {
-            "+" = { B.F.Vp ~ B.F.Sp }
-            "-" = { B.F.Vm ~ B.F.Sm }
-            "+" <||> "-";
-        }
-    }
-    [sys ip = 1.2.3.4] C = {
-        [flow] F = {
-            Vp <||> Vm |> Pp |> Sm;
-            Vp |> Pm |> Sp;
-            Vm > Pm > Sm;
-            Vp > Pp > Sp;
-        }
-        [interfaces] = {
-            "+" = { C.F.Vp ~ C.F.Sp }
-            "-" = { C.F.Vm ~ C.F.Sm }
-            "+" <||> "-";
-        }
-    }
-    [prop] = {
-        [safety] = {
-            My.F.Main = { A.F.Sp; A.F.Sm; B.F.Sp; B.F.Sm; C.F.Sp; }
-        }
-        [layouts] = {
-            A."+" = (1309, 405, 205, 83)
-        }
-    }
     """
         let answerCodeElementsText = """
     [sys] My = {
@@ -463,9 +463,7 @@ module ModelTests1 =
             try
                 compare Program.AdoptoedAmbiguousText ""
             with exn ->
-                (exn.Message.Contains("Duplicated") || exn.Message.Contains("Ambiguous entry [F.Seg1] and [My.F.Seg1]")) === true
-            //(fun () -> compare Program.AdoptoedAmbiguousText "")
-            //    |> ShouldFailWithSubstringT "Ambiguous entry [F.Seg1] and [My.F.Seg1]"
+                ["duplicated"; "Duplicated"; "Ambiguous entry"].Any(fun msg -> exn.Message.Contains msg) === true
 
         [<Test>]
         member __.``Model component [SafetyValid] test`` () =

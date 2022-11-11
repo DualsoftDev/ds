@@ -6,7 +6,7 @@ open System.Diagnostics
 
 [<AutoOpen>]
 module SpitModuleHelper =
-    type SpitOnlyAlias = { AliasKey:Fqdn; Mnemonic:Fqdn }
+    type SpitOnlyAlias = { AliasKey:Fqdn; Mnemonic:Fqdn; FlowFqdn:Fqdn }
 
     type SpitCoreType =
         | SpitModel     of Model
@@ -21,10 +21,11 @@ module SpitModuleHelper =
         | SpitCommand   of Command
         | SpitObserve   of Observe
 
-    [<DebuggerDisplay("Obj={SpitObj}, Names={NameComponents.Combine()}")>]
+    [<DebuggerDisplay("{ToString()}")>]
     type SpitResult =
         { SpitObj:SpitCoreType; NameComponents:Fqdn }
         static member Create(core, nameComponents) = {SpitObj = core; NameComponents = nameComponents}
+        override x.ToString() = $"Obj={x.SpitObj}, Names={x.NameComponents.Combine()}"
 
     type SpitResults = SpitResult[]
 
@@ -49,15 +50,9 @@ module SpitModuleHelper =
             // Main = { Main2; }
             for KeyValue(aliasKey, mnemonics) in flow.AliasMap do
             for m in mnemonics do
-                let aliasKey2 =
-                    match aliasKey.Length with
-                    | 2 -> aliasKey            // A."+"
-                    | 1 -> fns.Append(aliasKey[0]).ToArray()   // My.Flow + Main
-                    | _ -> failwith "ERROR"
-
-                let mnemonicFqdn = [| yield! fns; m |]
-                let alias = { AliasKey = aliasKey2; Mnemonic = mnemonicFqdn}
-                yield SpitResult.Create(SpitOnlyAlias alias, aliasKey2)       // key -> alias : [ My.Flow.Ap1, A."+";  My.Flow.Main2, My.Flow.Main; ...]
+                let mnemonicFqdn = [| m |]
+                let alias = { AliasKey = aliasKey; Mnemonic = mnemonicFqdn; FlowFqdn = flow.NameComponents }
+                yield SpitResult.Create(SpitOnlyAlias alias, aliasKey)        // key -> alias : [ My.Flow.Ap1, A."+";  My.Flow.Main2, My.Flow.Main; ...]
                 yield SpitResult.Create(SpitOnlyAlias alias, mnemonicFqdn)    // mne -> alias
         |]
     and spitSystem (system:DsSystem) : SpitResults =
@@ -105,6 +100,7 @@ module SpitModuleHelper =
     ()
 
 open SpitModuleHelper
+open Engine.Common.FS
 
 [<Extension>]
 type SpitModule =
@@ -113,6 +109,7 @@ type SpitModule =
     [<Extension>] static member Spit (flow:Flow)       = spitFlow flow
     [<Extension>] static member Spit (segment:Real)    = spitSegment segment
     [<Extension>] static member Spit (call:Call)       = spitCall call
+    [<Extension>] static member Dump (spits:SpitResult[]) = spits.Select(toString).JoinWith("\r\n")
     //[<Extension>] static member Spit (alias:Alias)     = spitAlias alias
 
     [<Extension>]

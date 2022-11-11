@@ -52,26 +52,25 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
 
     override x.EnterCausalToken(ctx:CausalTokenContext) =
         let ci = getContextInformation ctx
+        let sysNames, flowName, parenting, ns = ci.Tuples
+        let flow = x._flow.Value
         let vertexType = helper._causalTokenElements[ci]
-
         let system = x._currentSystem.Value
         let spits = system.Spit()
-        let flow = x._flow.Value
         let findSpits (ns:string seq) =
             spits.Where(fun sp -> sp.NameComponents = (ns.ToArray()))
         let findSpit = findSpits >> Seq.tryHead
         //let ns = collectNameComponents(ctx)
         let sysNames, flowName, parenting, ns = ci.Tuples
 
-        if flow.Name = "OrFlow" && ctx.GetText().IsOneOf("Copy1_R3", "R3")  then
-            noop()
+
 
         let createAlias(soa:SpitOnlyAlias) =
             let aliasKey = soa.AliasKey
             match aliasKey.Length with
-                | 3 ->     // my flow real 에 대한 alias
+                | 1 ->     // my flow real 에 대한 alias
                     let aliasCreator =
-                        let aliasTarget = new AliasTargetReal(aliasKey)
+                        let aliasTarget = new AliasTargetReal([|yield! soa.FlowFqdn; yield! aliasKey|])
                         new AliasCreator(ns.Combine(), Flow flow, aliasTarget)
                     x.ParserHelper.AliasCreators.Add(aliasCreator) |> ignore
                 | 2 ->
@@ -125,174 +124,215 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
                 | _ ->
                     failwith "ERROR"
 
+        let createReal (ci:ContextInformation) =
+            if findSpit(ci.NameComponents).IsNone then
+                Real.Create(ns.Combine(), flow) |> ignore
 
-
-
-
-        let mutable goon = true
-        match sysNames, flowName, parenting, ns with
-        | s::[], Some f, None, n::[] ->
-            tracefn $"{s}/{f}/{n}"
-            match findSpit [s;f;n] with
-            | Some sp ->
-                match sp.SpitObj with
-                | SpitOnlyAlias soa ->
-                    createAliasTargetOnDemand soa
-                    createAlias soa
-                | SpitReal real -> noop()   // OK
-                | _ -> failwith "ERROR"
-            | None ->
-                tracefn "Need to generate %A" [s;f;n]
-                Real.Create(n, flow) |> ignore
-            goon <- false
-        | s::[], Some f, Some p, aliasCall::[] ->
-            tracefn $"{s}/{f}/{p}/{aliasCall}"
-            match findSpit [s;f;p;aliasCall] with
-            | Some sp ->
-                failwith "ERROR"
-            | None ->
-                match findSpit [s; f; aliasCall] with
+        let createCall (ci:ContextInformation) =
+            match ci.Tuples with
+            | s::[], Some f, _, otherSystem::apiName::[] ->
+                match (findSpit [s; otherSystem; apiName]).OrElse(findSpit [otherSystem; apiName]) with
                 | Some sp ->
                     match sp.SpitObj with
+                    | SpitApiItem apiItem ->
+                        let parentWrapper =
+                            match ci.Parenting with
+                            | Some parenting -> Real x._parenting.Value
+                            | None -> Flow x._flow.Value
+                        Call.Create(apiItem, parentWrapper) |> ignore
                     | SpitOnlyAlias soa -> createAlias soa
-                    | _ -> failwith "ERROR"
-                | None ->
-                    failwith "ERROR"
+                    | _ -> failwith "Not an API item"
+                | None -> tracefn "Need to generate %A" [s; otherSystem; apiName]
+            | _ ->
+                failwith "ERROR"
 
-                tracefn "Need to generate %A" [s;f;p;aliasCall]
+        let createAliasFromContextInformation (ci:ContextInformation) =
+            //let aliasKey = [yield! ci.Systems; ci.Flow.Value; yield! ci.Names]
+            let alias =
+                (findSpits ci.Names)
+                    .Select(fun sp -> sp.GetCore())
+                    .OfType<SpitOnlyAlias>()
+                    .Where(fun sp -> sp.FlowFqdn = [| yield! ci.Systems; ci.Flow.Value |] )
+                    .ExactlyOne()
 
-        | s::[], Some f, Some p, otherSystem::apiName::[] ->
-            assert(p = x._parenting.Value.Name)
-            tracefn $"{s}/{f}/{p}/{otherSystem}.{apiName}"
-            match (findSpit [s; otherSystem; apiName]).OrElse(findSpit [otherSystem; apiName]) with
-            | Some sp ->
-                match sp.SpitObj with
-                | SpitApiItem apiItem -> Call.Create(apiItem, Real x._parenting.Value) |> ignore
-                | SpitOnlyAlias soa -> createAlias soa
-                | _ -> failwith "Not an API item"
-                goon <- false
-            | None -> tracefn "Need to generate %A" [s; otherSystem; apiName]
+            createAlias alias
+
+
+
+        match vertexType with
+        | HasFlag GraphVertexType.Segment -> createReal ci
+        | HasFlag GraphVertexType.Call
+        | HasFlag GraphVertexType.Child -> createCall ci
+        | HasFlag GraphVertexType.AliaseMnemonic -> createAliasFromContextInformation ci
         | _ ->
-            printfn "I don't know"
-
-        if goon then
-
-            assert(ns.Length = 1 || ns.Length = 2)
-
-            let path = x.AppendPathElement(ns.ToArray())
-            let sysName = x._currentSystem.Value.Name
-
-            let existing = x._modelSpits.Where(fun spit -> spit.NameComponents = path).ToArray()
-            if existing.Where(fun spit -> spit.GetCore() :? Vertex).IsEmpty() then
-
-                let pathWithoutParenting = [|sysName; flow.Name; yield! ns|]
-
-                // narrow match
-                let matches =
-                    x._modelSpits
-                        .Where(fun spitResult ->
-                            spitResult.NameComponents = path
-                            || spitResult.NameComponents = pathWithoutParenting)
-                        .Select(fun spitResult -> spitResult.GetCore())
-                        .ToArray()
+            failwith "ERROR"
+        x.UpdateModelSpits()
 
 
-                let pathAdapted = if ns.Length = 2 then [|sysName; yield! ns|] else [||]
+        //let mutable goon = true
+        //match sysNames, flowName, parenting, ns with
+        //| s::[], Some f, None, n::[] ->
+        //    tracefn $"{s}/{f}/{n}"
+        //    match findSpit [s;f;n] with
+        //    | Some sp ->
+        //        match sp.SpitObj with
+        //        | SpitOnlyAlias soa ->
+        //            createAliasTargetOnDemand soa
+        //            createAlias soa
+        //        | SpitReal real -> noop()   // OK
+        //        | _ -> failwith "ERROR"
+        //    | None ->
+        //        tracefn "Need to generate %A" [s;f;n]
+        //        Real.Create(n, flow) |> ignore
+        //    goon <- false
+        //| s::[], Some f, Some p, aliasCall::[] ->
+        //    tracefn $"{s}/{f}/{p}/{aliasCall}"
+        //    match findSpit [s;f;p;aliasCall] with
+        //    | Some sp ->
+        //        failwith "ERROR"
+        //    | None ->
+        //        match findSpit [s; f; aliasCall] with
+        //        | Some sp ->
+        //            match sp.SpitObj with
+        //            | SpitOnlyAlias soa -> createAlias soa
+        //            | _ -> failwith "ERROR"
+        //        | None ->
+        //            failwith "ERROR"
 
-                // 나의 시스템의 다른 flow 에 존재하는 segment 호출
-                let extendedMatches =
-                    x._modelSpits
-                        .Where(fun spitResult ->
-                            spitResult.GetCore() :? Real
-                            && pathAdapted.Any() && spitResult.NameComponents = pathAdapted)
-                        .Select(fun spitResult -> spitResult.GetCore())
-                        .ToArray()
+        //        tracefn "Need to generate %A" [s;f;p;aliasCall]
+
+        //| s::[], Some f, Some p, otherSystem::apiName::[] ->
+        //    assert(p = x._parenting.Value.Name)
+        //    tracefn $"{s}/{f}/{p}/{otherSystem}.{apiName}"
+        //    match (findSpit [s; otherSystem; apiName]).OrElse(findSpit [otherSystem; apiName]) with
+        //    | Some sp ->
+        //        match sp.SpitObj with
+        //        | SpitApiItem apiItem -> Call.Create(apiItem, Real x._parenting.Value) |> ignore
+        //        | SpitOnlyAlias soa -> createAlias soa
+        //        | _ -> failwith "Not an API item"
+        //        goon <- false
+        //    | None -> tracefn "Need to generate %A" [s; otherSystem; apiName]
+        //| _ ->
+        //    printfn "I don't know"
+
+        //if goon then
+
+        //    assert(ns.Length = 1 || ns.Length = 2)
+
+        //    let path = x.AppendPathElement(ns.ToArray())
+        //    let sysName = x._currentSystem.Value.Name
+
+        //    let existing = x._modelSpits.Where(fun spit -> spit.NameComponents = path).ToArray()
+        //    if existing.Where(fun spit -> spit.GetCore() :? Vertex).IsEmpty() then
+
+        //        let pathWithoutParenting = [|sysName; flow.Name; yield! ns|]
+
+        //        // narrow match
+        //        let matches =
+        //            x._modelSpits
+        //                .Where(fun spitResult ->
+        //                    spitResult.NameComponents = path
+        //                    || spitResult.NameComponents = pathWithoutParenting)
+        //                .Select(fun spitResult -> spitResult.GetCore())
+        //                .ToArray()
 
 
-                let xxx =
-                    x._modelSpitObjects.OfType<ApiItem>().ToArray()
+        //        let pathAdapted = if ns.Length = 2 then [|sysName; yield! ns|] else [||]
 
-                // 다른 시스템의 API 호출
-                let apiCall =
-                    x._modelSpitObjects
-                        .OfType<ApiItem>()
-                        .Where(fun api -> api.NameComponents = ns.ToArray())
-                        .TryHead()
+        //        // 나의 시스템의 다른 flow 에 존재하는 segment 호출
+        //        let extendedMatches =
+        //            x._modelSpits
+        //                .Where(fun spitResult ->
+        //                    spitResult.GetCore() :? Real
+        //                    && pathAdapted.Any() && spitResult.NameComponents = pathAdapted)
+        //                .Select(fun spitResult -> spitResult.GetCore())
+        //                .ToArray()
 
-                assert(matches.Length = 0 || matches.Length = 1)
 
-                // API call 과 나의 시스템의 다른 flow 에 존재하는 segment 호출이 헷갈리지 않도록
-                if (extendedMatches.OfType<Real>().Any(fun r -> r.NameComponents = pathAdapted)) then
-                    match apiCall with
-                    | Some apiCall ->
-                        raise <| ParserException($"Ambiguous entry [{apiCall.QualifiedName}] and [{pathAdapted.Combine()}]", ctx)
-                    | None ->
-                        let aliasTarget = new AliasTargetReal(pathAdapted)
-                        x.ParserHelper.AliasCreators.Add(new AliasCreator(ns.Combine(), Flow flow, aliasTarget))
+        //        let xxx =
+        //            x._modelSpitObjects.OfType<ApiItem>().ToArray()
 
-                elif (matches.OfType<Real>().Any()) then
-                    ()
-                else
-                    try
-                        let alias = matches.OfType<SpitOnlyAlias>().TryHead()
-                        match alias with
-                        | Some alias ->
-                            let aliasKey =
-                                matches
-                                    .OfType<SpitOnlyAlias>()
-                                    .Where(fun alias -> alias.Mnemonic = pathWithoutParenting)
-                                    .Select(fun alias -> alias.AliasKey)
-                                    .FirstOrDefault()
+        //        // 다른 시스템의 API 호출
+        //        let apiCall =
+        //            x._modelSpitObjects
+        //                .OfType<ApiItem>()
+        //                .Where(fun api -> api.NameComponents = ns.ToArray())
+        //                .TryHead()
 
-                            match aliasKey.Length with
-                                | 3 ->     // my flow real 에 대한 alias
-                                        assert(aliasKey[0] = sysName && aliasKey[1] = flow.Name)
-                                        let aliasCreator =
-                                            let aliasTarget = new AliasTargetReal(aliasKey)
-                                            new AliasCreator(ns.Combine(), Flow flow, aliasTarget)
-                                        x.ParserHelper.AliasCreators.Add(aliasCreator) |> ignore
-                                | 2 ->
-                                    let apiItem =
-                                        x._modelSpitObjects
-                                            .OfType<ApiItem>()
-                                            .Where(fun api -> api.NameComponents = aliasKey)
-                                            .Head()
+        //        assert(matches.Length = 0 || matches.Length = 1)
 
-                                    let name = ns.Combine()
-                                    match x._parenting with
-                                    | Some parent ->
-                                        let aliasCreator =
-                                            let aliasTarget = new AliasTargetApi(apiItem)
-                                            new AliasCreator(name, Real parent, aliasTarget)
-                                        x.ParserHelper.AliasCreators.Add(aliasCreator)
-                                    | None ->
-                                        (* flow 바로 아래에 사용되는 직접 call.  A.+ *)
-                                        let aliasCreator =
-                                            let aliasTarget = new AliasTargetDirectCall(aliasKey)
-                                            new AliasCreator(name, Flow flow, aliasTarget)
-                                        x.ParserHelper.AliasCreators.Add(aliasCreator)
-                                    |> ignore
-                                | _ ->
-                                    failwith "ERROR"
-                        | None ->
-                            match apiCall with
-                            | Some apiCall ->
-                                match x._parenting with
-                                | Some parent ->
-                                    Call.Create(apiCall, Real parent)
-                                | None ->
-                                    Call.Create(apiCall, Flow flow)
-                                |> ignore
-                            | None ->
-                                match x._parenting with
-                                | None ->
-                                    if ns.Length <> 1 then
-                                        raise <| ParserException($"ERROR: unknown token [{ns.Combine()}].", ctx)
-                                    Real.Create(ns[0], flow) |> ignore
-                                | Some parent ->
-                                    raise <| ParserException($"ERROR: unknown token [{ns.Combine()}].", ctx)
-                    finally
-                        x.UpdateModelSpits()
+        //        // API call 과 나의 시스템의 다른 flow 에 존재하는 segment 호출이 헷갈리지 않도록
+        //        if (extendedMatches.OfType<Real>().Any(fun r -> r.NameComponents = pathAdapted)) then
+        //            match apiCall with
+        //            | Some apiCall ->
+        //                raise <| ParserException($"Ambiguous entry [{apiCall.QualifiedName}] and [{pathAdapted.Combine()}]", ctx)
+        //            | None ->
+        //                let aliasTarget = new AliasTargetReal(pathAdapted)
+        //                x.ParserHelper.AliasCreators.Add(new AliasCreator(ns.Combine(), Flow flow, aliasTarget))
+
+        //        elif (matches.OfType<Real>().Any()) then
+        //            ()
+        //        else
+        //            try
+        //                let alias = matches.OfType<SpitOnlyAlias>().TryHead()
+        //                match alias with
+        //                | Some alias ->
+        //                    let aliasKey =
+        //                        matches
+        //                            .OfType<SpitOnlyAlias>()
+        //                            .Where(fun alias -> alias.Mnemonic = pathWithoutParenting)
+        //                            .Select(fun alias -> alias.AliasKey)
+        //                            .FirstOrDefault()
+
+        //                    match aliasKey.Length with
+        //                        | 3 ->     // my flow real 에 대한 alias
+        //                                assert(aliasKey[0] = sysName && aliasKey[1] = flow.Name)
+        //                                let aliasCreator =
+        //                                    let aliasTarget = new AliasTargetReal(aliasKey)
+        //                                    new AliasCreator(ns.Combine(), Flow flow, aliasTarget)
+        //                                x.ParserHelper.AliasCreators.Add(aliasCreator) |> ignore
+        //                        | 2 ->
+        //                            let apiItem =
+        //                                x._modelSpitObjects
+        //                                    .OfType<ApiItem>()
+        //                                    .Where(fun api -> api.NameComponents = aliasKey)
+        //                                    .Head()
+
+        //                            let name = ns.Combine()
+        //                            match x._parenting with
+        //                            | Some parent ->
+        //                                let aliasCreator =
+        //                                    let aliasTarget = new AliasTargetApi(apiItem)
+        //                                    new AliasCreator(name, Real parent, aliasTarget)
+        //                                x.ParserHelper.AliasCreators.Add(aliasCreator)
+        //                            | None ->
+        //                                (* flow 바로 아래에 사용되는 직접 call.  A.+ *)
+        //                                let aliasCreator =
+        //                                    let aliasTarget = new AliasTargetDirectCall(aliasKey)
+        //                                    new AliasCreator(name, Flow flow, aliasTarget)
+        //                                x.ParserHelper.AliasCreators.Add(aliasCreator)
+        //                            |> ignore
+        //                        | _ ->
+        //                            failwith "ERROR"
+        //                | None ->
+        //                    match apiCall with
+        //                    | Some apiCall ->
+        //                        match x._parenting with
+        //                        | Some parent ->
+        //                            Call.Create(apiCall, Real parent)
+        //                        | None ->
+        //                            Call.Create(apiCall, Flow flow)
+        //                        |> ignore
+        //                    | None ->
+        //                        match x._parenting with
+        //                        | None ->
+        //                            if ns.Length <> 1 then
+        //                                raise <| ParserException($"ERROR: unknown token [{ns.Combine()}].", ctx)
+        //                            Real.Create(ns[0], flow) |> ignore
+        //                        | Some parent ->
+        //                            raise <| ParserException($"ERROR: unknown token [{ns.Combine()}].", ctx)
+        //            finally
+        //                x.UpdateModelSpits()
 
 
     override x.EnterIdentifier12Listing(ctx:Identifier12ListingContext) =

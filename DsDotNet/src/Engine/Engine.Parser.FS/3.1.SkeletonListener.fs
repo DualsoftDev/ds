@@ -89,7 +89,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
         let mnemonics = enumerateChildren<AliasMnemonicContext>(ctx).Select(getContextInformation)
         for mne in mnemonics do
             x.AddElement(mne, GraphVertexType.AliaseMnemonic)
-        let aliasesHash = mnemonics.Select(fun ci -> ci.NameComponents.Combine()).ToHashSet()
+        let aliasesHash = mnemonics.Select(fun ctx -> ctx.Names.Combine()).ToHashSet()
         let aliasKey = ci.Names.ToArray()
         map.Add(aliasKey, aliasesHash)
 
@@ -158,6 +158,8 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
                 ()
 
     override x.ExitModel(ctx:ModelContext) =
+        logInfo "---- Spit results"
+        logDebug "%s" <| x._theSystem.Value.Spit().Dump()
         logInfo "---- Uncategorized elements"
         let dic = helper._causalTokenElements
         let dups = dic |> seq
@@ -171,11 +173,14 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
             let types = nameMatches.Select(valueOfKeyValue).Fold((|||), GraphVertexType.None)
             if vt.IsOneOf(GraphVertexType.None, GraphVertexType.Child) then
                 if nameMatches.isEmpty() then
-                    if vt = GraphVertexType.None then
+                    match vt with
+                    | GraphVertexType.None ->
                         let newVType = dic[ctxInfo] ||| GraphVertexType.Segment
                         dic[ctxInfo] <- newVType
                         logDebug $"{ctxInfo.FullName} : {newVType}  // from {vType}"
-                    else
+                    | GraphVertexType.Child ->
+                        ()
+                    | _ ->
                         failwith "ERROR"
                 else
                     match types with

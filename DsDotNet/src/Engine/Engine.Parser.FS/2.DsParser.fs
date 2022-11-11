@@ -90,7 +90,7 @@ type DsParser() =
                 let copiedSystemText = srcCtx.GetReplacedText([RangeReplace.Create(nameCtx, name)])
                 RangeReplace.Create(ctx, copiedSystemText)).ToArray()
         let replacedText = model.GetReplacedText(replaces)
-        logDebug $"Replaced Text:\r\n{replacedText}"
+        //logDebug $"Replaced Text:\r\n{replacedText}"
         replacedText
 
     static member FromDocument(text:string, predExtract:dsParser->#RuleContext, [<Optional; DefaultParameterValue(true)>]throwOnError) =       // (dsParser, RuleContext, ParserError[])

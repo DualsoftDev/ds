@@ -12,7 +12,7 @@ module Program =
     let EveryScenarioText = """
 [sys ip = 192.168.0.1] My = {
     [flow] MyFlow = {
-        Seg1 > Seg2;
+        Seg1 > Seg2 > A."+";
         Seg1 = {
             A."+" > A."-";
         }

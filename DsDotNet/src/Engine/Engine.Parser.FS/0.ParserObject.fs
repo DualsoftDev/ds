@@ -14,8 +14,7 @@ type ParserOptions(activeCpuName, isSimulationMode, allowSkipExternalSegment) =
 
 [<Flags>]
 type GraphVertexType =
-    | Unknown        = 0b0000000000000000
-    | None           = 0b0000000000000001
+    | None           = 0b0000000000000000
     | System         = 0b0000000000000010
     | Flow           = 0b0000000000000100
     | Segment        = 0b0000000000001000   // not child

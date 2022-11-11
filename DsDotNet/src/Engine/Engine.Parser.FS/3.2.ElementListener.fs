@@ -52,7 +52,7 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
 
     override x.EnterCausalToken(ctx:CausalTokenContext) =
         let ci = getContextInformation ctx
-        let vertexType = x._elements[ci]
+        let vertexType = helper._causalTokenElements[ci]
 
         let system = x._currentSystem.Value
         let spits = system.Spit()

@@ -66,6 +66,12 @@ module ParserUtil =
         static member Create(parserRuleContext, systems, flow, parenting, names) =
             {   ContextType = parserRuleContext.GetType();
                 Systems = systems; Flow = flow; Parenting = parenting; Names = names }
+        static member CreateFullNameComparer() = {
+            new IEqualityComparer<ContextInformation> with
+                member _.Equals(x:ContextInformation, y:ContextInformation) = x.FullName = y.FullName
+                member _.GetHashCode(x:ContextInformation) = x.FullName.GetHashCode()
+        }
+
         member x.Tuples = x.Systems, x.Flow, x.Parenting, x.Names
         member x.NameComponents = [
             yield! x.Systems

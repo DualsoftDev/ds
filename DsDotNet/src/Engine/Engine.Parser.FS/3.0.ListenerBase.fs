@@ -22,7 +22,6 @@ type ListenerBase(parser:dsParser, helper:ParserHelper) =
 
     member x.ParserHelper = helper
     member internal _._model = helper.Model
-    member internal _._elements = helper._elements
     member internal _._currentSystem = helper._currentSystem
     member internal _._theSystem = helper._theSystem
     member internal _._modelSpits = helper._modelSpits
@@ -33,14 +32,27 @@ type ListenerBase(parser:dsParser, helper:ParserHelper) =
 
     member internal x.AddElement(contextInformation:ContextInformation, elementType:GraphVertexType) =
         let ci = contextInformation
+        let es = helper._elements
         if ci.FullName = "My.MyFlow.Seg1" then
             noop()
 
-        if x._elements.ContainsKey(ci) then
-            x._elements[ci] <- (x._elements[ci] ||| elementType)
+        if es.ContainsKey(ci) then
+            failwith "ERROR: duplicated"
+            es[ci] <- (es[ci] ||| elementType)
         else
-            x._elements.Add(ci, elementType)
-        logDebug $"Added Element: {ci}={x._elements[ci]}"
+            es.Add(ci, elementType)
+        //logDebug $"Added Element: {ci}={es[ci]}"
+
+    member internal x.AddCausalTokenElement(contextInformation:ContextInformation, elementType:GraphVertexType) =
+        let ci = contextInformation
+        let elementType = elementType ||| GraphVertexType.CausalToken
+        let ctes = helper._causalTokenElements
+        if ctes.ContainsKey(ci) then
+            ctes[ci] <- (ctes[ci] ||| elementType)
+        else
+            ctes.Add(ci, elementType)
+        //logDebug $"Added Element: {ci}={ctes[ci]}"
+
 
     member internal _.AppendPathElement(name:string) = helper.AppendPathElement(name)
     member internal _.AppendPathElement(names:Fqdn)  = helper.AppendPathElement(names)

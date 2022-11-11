@@ -12,6 +12,11 @@ let (|Array|) xs = Array.ofSeq xs
 let (|ResizeArray|) (xs:'x seq) = xs |> System.Collections.Generic.List<'x>
 let (|Hash|) (xs:'X seq) = xs |> HashSet
 
+let (|KeyOfKeyValue|) (kv:KeyValuePair<'k, 'v>) = kv.Key
+let (|ValueOfKeyValue|) (kv:KeyValuePair<'k, 'v>) = kv.Value
+
+let keyOfKeyValue kv = (|KeyOfKeyValue|) kv
+let valueOfKeyValue kv = (|ValueOfKeyValue|) kv
 
 /// Sequence 의 Head, Tail pair 반환
 let (|HeadAndTail|_|) (FList(xs)) =

@@ -60,14 +60,14 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
         let name = ctx.identifier1().GetText().DeQuoteOnDemand()
         x._parenting <- Some <| Real.Create(name, x._flow.Value)
         let xxx = getContextInformation ctx
-        x.AddElement(getContextInformation ctx, GraphVertexType.Segment ||| GraphVertexType.Parenting)
+        x.AddCausalTokenElement(getContextInformation ctx, GraphVertexType.Segment ||| GraphVertexType.Parenting)
 
         let children = enumerateChildren<CausalTokenContext>(ctx)
         for ch in children do
-            x.AddElement(getContextInformation ch, GraphVertexType.Child)
+            x.AddCausalTokenElement(getContextInformation ch, GraphVertexType.Child)
 
     override x.EnterIdentifier12Listing(ctx:Identifier12ListingContext) =
-        x.AddElement(getContextInformation ctx, GraphVertexType.Segment)
+        x.AddCausalTokenElement(getContextInformation ctx, GraphVertexType.Segment)
 
     override x.EnterCausalToken(ctx:CausalTokenContext) =
         let vType = GraphVertexType.CausalToken
@@ -76,7 +76,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
         //if (_parenting == null)
         //    vType |= GraphVertexType.Segment
 
-        x.AddElement(getContextInformation ctx, vType)
+        x.AddCausalTokenElement(getContextInformation ctx, vType)
 
 
     override x.EnterAliasListing(ctx:AliasListingContext) =
@@ -158,6 +158,39 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
                 ()
 
     override x.ExitModel(ctx:ModelContext) =
-        logDebug "---- All Elements"
-        for KeyValue(ctxInfo, vType) in x._elements do
+        logInfo "---- Uncategorized elements"
+        let dic = helper._causalTokenElements
+        let dups = dic |> seq
+        for KeyValue(ctxInfo, vType) in dups do
+            let nameMatches =
+                helper._elements.Where(fun (KeyValue(ctx, _)) ->
+                    ctx.Names = ctxInfo.Names //&& ctx.Systems = ctxInfo.Systems && ctx.Flow = ctxInfo.Flow
+                    ).ToArray()
+            assert(vType.HasFlag(GraphVertexType.CausalToken))
+            let vt =  (vType &&& ~~~GraphVertexType.CausalToken)
+            let types = nameMatches.Select(valueOfKeyValue).Fold((|||), GraphVertexType.None)
+            if vt.IsOneOf(GraphVertexType.None, GraphVertexType.Child) then
+                if nameMatches.isEmpty() then
+                    if vt = GraphVertexType.None then
+                        let newVType = dic[ctxInfo] ||| GraphVertexType.Segment
+                        dic[ctxInfo] <- newVType
+                        logDebug $"{ctxInfo.FullName} : {newVType}  // from {vType}"
+                    else
+                        failwith "ERROR"
+                else
+                    match types with
+                    | GraphVertexType.AliaseKey ->
+                        dic[ctxInfo] <- dic[ctxInfo] ||| GraphVertexType.Call
+                    | GraphVertexType.AliaseMnemonic ->
+                        dic[ctxInfo] <- dic[ctxInfo] ||| GraphVertexType.AliaseMnemonic
+                    | _ ->
+                        failwith "ERROR"
+                    logWarn $"{ctxInfo.FullName} : {dic[ctxInfo]} // from {vType}"
+
+        logInfo "---- All Causal token elements"
+        for KeyValue(ctxInfo, vType) in helper._causalTokenElements do
+            logDebug $"{ctxInfo.FullName} : {vType}"
+
+        logInfo "---- Non Causal token elements"
+        for KeyValue(ctxInfo, vType) in helper._elements do
             logDebug $"{ctxInfo.FullName} : {vType}"

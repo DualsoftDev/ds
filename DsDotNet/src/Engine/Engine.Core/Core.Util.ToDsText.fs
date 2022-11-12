@@ -116,7 +116,7 @@ module internal ToDsTextModule =
         let tab = getTab indent
         let isTopLevel = system.ParentSystem.IsNone
         [
-            let ip = if system.Host <> null then $" ip = {system.Host}" else ""
+            let ip = if system.Host.IsNullOrEmpty() then "" else $" ip = {system.Host}"
             yield $"{tab}[sys{ip}] {system.Name} = {lb}"
 
             for f in system.Flows do

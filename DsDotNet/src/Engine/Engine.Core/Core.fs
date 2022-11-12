@@ -83,6 +83,7 @@ module CoreModule =
 
 
     /// leaf or stem(parenting)
+    /// Graph 상의 vertex 를 점유하는 named object : Real, Alias, Call
     and [<AbstractClass>]
         Vertex (name:string, parent:ParentWrapper) =
         inherit FqdnObject(name, parent.GetCore())

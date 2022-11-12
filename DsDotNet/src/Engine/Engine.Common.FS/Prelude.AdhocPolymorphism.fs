@@ -103,20 +103,38 @@ module PreludeAdhocPolymorphism =
     let inline mapi        f x = FAdhoc_mapi        $ x <| f
     let inline pairwise      x = FAdhoc_pairwise    $ x
     let inline picki       f x = FAdhoc_picki       $ x <| f
+
+    (* Operators *)
+
+    /// map
+    let inline ( => )      x f = FAdhoc_map         $ x <| f
+    /// bind
+    let inline ( ==> )     x f = FAdhoc_bind        $ x <| f
+    /// choice on option type
     let inline ( <|> )     x y = (?<-) FAdhoc_orElse x y
-    let inline ( @@ )      x y = (?<-) FAdhoc_append x y
+    /// append two lists / arrays / sequences
     let inline ( @ )       x y = (?<-) FAdhoc_append x y
-    let inline ( ++ )      x y = (?<-) FAdhoc_Xpend  x y
+    /// append element to a list / array / sequence
+    let inline ( +++ )      x y = (?<-) FAdhoc_Xpend  x y
+
+
 
     let private testme() =
-        let a = Some 1 <|> None
-        let b = [1..10] <|> []
-        let c =[] <|> [1..10] <|> []
+        let verify c = if not c then failwith "ERROR"
+        verify ( (Some 1 <|> None) = Some 1 )
+        verify ( ([1..10] <|> []) = [1..10] )
+        verify ( ([] <|> [1..10] <|> []) = [1..10] )
 
         let lift (f: 'a -> 'b) (x: 'a) = f x
 
-        let incr x = Some (x + 1)
-        let x = incr >>= Some 2
+        let incrOption x = Some (x + 1)
+        verify ( (incrOption >>= Some 2) = Some 3)
+        verify ( (Some 2 ==> incrOption) = Some 3)
+
+        let incr x = x + 1
+        verify( ([1..5] => incr) = [2..6])
+        verify( (map incr [1..5]) = [2..6])
+
         ()
 
 

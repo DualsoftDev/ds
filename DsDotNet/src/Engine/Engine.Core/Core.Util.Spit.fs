@@ -21,7 +21,7 @@ module SpitModuleHelper =
         | SpitCommand   of Command
         | SpitObserve   of Observe
 
-    [<DebuggerDisplay("{ToString()}")>]
+    [<DebuggerDisplay("{NameComponents} = {SpitObj.GetType().Name}")>]
     type SpitResult =
         { SpitObj:SpitCoreType; NameComponents:Fqdn }
         static member Create(core, nameComponents) = {SpitObj = core; NameComponents = nameComponents}

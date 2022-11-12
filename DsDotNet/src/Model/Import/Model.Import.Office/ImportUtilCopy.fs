@@ -14,7 +14,7 @@ module internal ToCopyModule =
     let private copySafety(origFlow:Flow, copyFlow:Flow) =
         let copySys = copyFlow.System
         let origSys = origFlow.System
-        let findReal (realName:string) = copySys.FindGraphVertex<Real>([|copySys.Name;copyFlow.Name;realName|]) 
+        let findReal (realName:string) = copySys.FindGraphVertex<Real>([|copySys.Name;copyFlow.Name;realName|])
         origSys.Flows
             .ForEach(fun flow->
                 flow.Graph.Vertices.Where(fun w->w :? Real).Cast<Real>()
@@ -30,7 +30,7 @@ module internal ToCopyModule =
     let copyTxRx(origApi:ApiItem, copyApi:ApiItem) =
         let copySys = copyApi.System
         let origSys = origApi.System
-        let findReal (flowName:string, realName:string) = copySys.FindGraphVertex<Real>([|copySys.Name;flowName;realName|]) 
+        let findReal (flowName:string, realName:string) = copySys.FindGraphVertex<Real>([|copySys.Name;flowName;realName|])
         origSys.ApiItems
                 .ForEach(fun apiOrig ->
                     let apiCopy = copySys.ApiItems.First(fun f->f.Name = apiOrig.Name)
@@ -47,15 +47,15 @@ module internal ToCopyModule =
 
         let origModel = origFlow.System.Model
         let copySys   = copyFlow.System
-        let findReal (realName:string)  = copySys.FindGraphVertex<Real>([|copySys.Name;copyFlow.Name;realName|]) 
-        let findCall (callName:string)  = copySys.FindGraphVertex<Call>([|copySys.Name;copyFlow.Name;callName|]) 
-        let findCallInReal(realName:string, name:string) = copySys.FindGraphVertex<Call>([|copySys.Name;copyFlow.Name;realName;name|]) 
+        let findReal (realName:string)  = copySys.FindGraphVertex<Real>([|copySys.Name;copyFlow.Name;realName|])
+        let findCall (callName:string)  = copySys.FindGraphVertex<Call>([|copySys.Name;copyFlow.Name;callName|])
+        let findCallInReal(realName:string, name:string) = copySys.FindGraphVertex<Call>([|copySys.Name;copyFlow.Name;realName;name|])
         let findInReal(realName:string, name:string) = copySys.FindGraphVertex<Vertex>([|copySys.Name;copyFlow.Name;realName;name|])
 
-        let copyReal(name, graph:DsGraph) =
-            let findVertex = graph.TryFindVertex(name)
+        let copyReal(names:Fqdn, graph:DsGraph) =
+            let findVertex = graph.TryFindVertex(names.Combine())
             if findVertex.IsNone
-                then Real.Create(name, copyFlow)
+                then Real.Create(names, copyFlow)
                 else findVertex.Value :?> Real
 
         let copyCallInReal(apiItem:ApiItem, real:Real) =
@@ -76,7 +76,7 @@ module internal ToCopyModule =
             origFlow.Graph.Vertices.ForEach(fun vertexInFlow ->
                 match vertexInFlow with
                 | :? Real as orgiReal
-                   ->  let copyReal = copyReal(orgiReal.Name,  copyFlow.Graph)
+                   ->  let copyReal = copyReal(orgiReal.PureNames,  copyFlow.Graph)
                        orgiReal.Graph.Vertices
                             .ForEach(fun vInReal->
                                 match vInReal with
@@ -96,10 +96,10 @@ module internal ToCopyModule =
                         orgiReal.Graph.Vertices
                             .ForEach(fun vInReal->
                                 match vInReal  with
-                                | :? Alias as orgiAlias -> 
-                                    match orgiAlias.Target with 
-                                    | RealTarget rt -> failwithf "Error : Real안에 Real타깃 Alias불가" 
-                                    | CallTarget ct -> 
+                                | :? Alias as orgiAlias ->
+                                    match orgiAlias.Target with
+                                    | RealTarget rt -> failwithf "Error : Real안에 Real타깃 Alias불가"
+                                    | CallTarget ct ->
                                             let r = findReal(orgiReal.Name)
                                             Alias.Create(orgiAlias.Name, CallTarget(findCallInReal(orgiReal.Name, ct.Name)), Real(findReal(orgiReal.Name)), false)|>ignore
                                     //| CallTarget ct -> Alias.Create(orgiAlias.Name, CallTarget(ct), Real(findReal(orgiReal.Name)), false)|>ignore
@@ -191,13 +191,13 @@ module internal ToCopyModule =
 [<Extension>]
 type ToCopyModuleHelper =
     [<Extension>] static member TryFindSystem(model:Model, systemName:string)    =
-                    if model.TheSystem.IsSome 
-                    then  if model.TheSystem.Value.Name = systemName 
+                    if model.TheSystem.IsSome
+                    then  if model.TheSystem.Value.Name = systemName
                             then model.TheSystem.Value
                             else model.TheSystem.Value.Systems.FirstOrDefault(fun sys -> sys.Name = systemName)
-                                       
+
                     else model.Systems.FirstOrDefault(fun sys -> sys.Name = systemName)
-                    
+
     //[<Extension>] static member ToCopy(model:Model) = copyModel(model)
     [<Extension>] static member ToCopy(system:DsSystem, copySys:DsSystem) = copySystem(system, copySys)
     [<Extension>] static member ToCopy(system:DsSystem, copySysName:string) =

@@ -25,7 +25,7 @@ module ImportU =
         else
             if(node.NodeType.IsReal)
             then
-                let real = Real.Create(node.Name, parentFlow.Value)
+                let real = Real.Create([|node.Name|], parentFlow.Value)
                 dicSeg.Add(node.Key, real)
             else
                 let sysName, ApiName = GetSysNApi(node.PageTitle, node.Name)
@@ -64,10 +64,10 @@ module ImportU =
 
     [<Extension>]
     type ImportUtil =
-        [<Extension>] static member GetAcive(model:Model) = 
+        [<Extension>] static member GetAcive(model:Model) =
                         model.Systems.Filter(fun s->s.Active).First()
-        [<Extension>] static member GetPage(dicFlow:Dictionary<int, Flow>, flow:Flow) = 
-                        dicFlow.Where(fun w-> w.Value = flow).First().Key                    
+        [<Extension>] static member GetPage(dicFlow:Dictionary<int, Flow>, flow:Flow) =
+                        dicFlow.Where(fun w-> w.Value = flow).First().Key
 
         [<Extension>] static member MakeSystem (doc:pptDoc, model:Model) =
                         doc.Pages
@@ -125,10 +125,10 @@ module ImportU =
         //EMG & Start & Auto 리스트 만들기
         [<Extension>] static member MakeButtons (doc:pptDoc, model:Model) =
                         let mySys = model.TheSystem.Value
-                        let checkErr(flow:Flow, node:pptNode) = 
+                        let checkErr(flow:Flow, node:pptNode) =
                                 if (flow.System <> mySys)
                                 then  Office.ErrorPPT(Name, ErrID._45 , $"원인 버튼 {node.Name}: 시스템{flow.System.Name}", node.PageNum)
-                                
+
                         doc.Nodes
                         |> Seq.filter(fun node -> node.IsDummy|>not)
                         |> Seq.iter(fun node ->
@@ -244,28 +244,28 @@ module ImportU =
                                         let srcDummy = dummys.TryFindDummy(edge.StartNode)
                                         let tgtDummy = dummys.TryFindDummy(edge.EndNode)
 
-                                        if(srcDummy.IsNonNull()) 
-                                            then 
+                                        if(srcDummy.IsNonNull())
+                                            then
                                                 let tgt = if tgtDummy.IsNull() then edge.EndNode.Key else tgtDummy.DummyNodeKey
                                                 srcDummy.AddOutEdge(edge.Causal, tgt)
-                                            else 
-                                                if(tgtDummy.IsNonNull()) 
-                                                then 
+                                            else
+                                                if(tgtDummy.IsNonNull())
+                                                then
                                                     let src = if srcDummy.IsNull() then edge.StartNode.Key else srcDummy.DummyNodeKey
                                                     tgtDummy.AddInEdge(edge.Causal, src)
 
 
-                                        let getVertexs(pptNodes:pptNode seq) = 
+                                        let getVertexs(pptNodes:pptNode seq) =
                                             pptNodes.Select(fun s-> dicVertex.[s.Key])
 
-                                        let srcs = if(dummys.IsMember(edge.StartNode)) 
-                                                    then dummys.GetMembers(edge.StartNode) |> getVertexs 
+                                        let srcs = if(dummys.IsMember(edge.StartNode))
+                                                    then dummys.GetMembers(edge.StartNode) |> getVertexs
                                                     else [dicVertex.[edge.StartNode.Key]]
 
-                                        let tgts = if(dummys.IsMember(edge.EndNode)) 
+                                        let tgts = if(dummys.IsMember(edge.EndNode))
                                                     then dummys.GetMembers(edge.EndNode)   |> getVertexs
                                                     else [dicVertex.[edge.EndNode.Key]]
-                                        
+
                                         for src in srcs do
                                             for tgt in tgts do
                                             convertEdge(edge, flow, src, tgt) |> ignore
@@ -284,7 +284,7 @@ module ImportU =
 
                                 node.Safeties   //세이프티 입력 미등록 이름오류 체크
                                 |> Seq.map(fun safe ->  safeName(safe))
-                                |> Seq.iter(fun safeFullName -> 
+                                |> Seq.iter(fun safeFullName ->
                                                                 if(dicQualifiedNameSegs.ContainsKey safeFullName|>not)
                                                                 then Office.ErrorName(node.Shape, ErrID._28, node.PageNum))
 
@@ -337,4 +337,3 @@ module ImportU =
                                             apiResetInfo.ToCopy(copySys)|>ignore)
                                 )
 
-                            

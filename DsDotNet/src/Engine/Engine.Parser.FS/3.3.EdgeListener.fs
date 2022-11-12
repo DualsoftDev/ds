@@ -46,6 +46,9 @@ type EdgeListener(parser:dsParser, helper:ParserHelper) =
 
 
     override x.EnterCausalPhrase(ctx:CausalPhraseContext) =
+        let ci = getContextInformation ctx
+        let sysNames, flowName, parenting, ns = ci.Tuples
+
         let children = ctx.children.ToArray();      // (CausalTokensDNF CausalOperator)+ CausalTokensDNF
         for (n, ctx) in children|> Seq.indexed do
             assert( if n % 2 = 0 then ctx :? CausalTokensDNFContext else ctx :? CausalOperatorContext)

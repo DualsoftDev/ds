@@ -6,8 +6,6 @@ open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module ArrayPrelude =
-    /// append two array
-    let (@@@) = Array.append
     /// Array.empty
     let aempty = Array.empty
 
@@ -20,7 +18,7 @@ module Array =
     /// Array type extensions
     // https://stackoverflow.com/questions/11836167/how-to-define-a-type-extension-for-t-in-f
     type 'a ``[]`` with
-        member x.GetOrDefault n = 
+        member x.GetOrDefault n =
             if x.Length > n then x.[n]
             else Unchecked.defaultof<'a>
 
@@ -33,30 +31,30 @@ module Array =
                 x |> Array.minBy f |> Some
 
 
-    let tryMinBy f (arr: array<'t>) = 
+    let tryMinBy f (arr: array<'t>) =
         if Array.isEmpty arr then
             None
         else
             arr |> Array.minBy f |> Some
-    let tryMaxBy f (arr: array<'t>) = 
+    let tryMaxBy f (arr: array<'t>) =
         if Array.isEmpty arr then
             None
         else
             arr |> Array.maxBy f |> Some
 
-    let tryReduce f (arr: array<'t>) = 
+    let tryReduce f (arr: array<'t>) =
         if Array.isEmpty arr then
             None
         else
             arr |> Array.reduce f |> Some
-    let any (arr: array<'t>) = not (Array.isEmpty arr) 
+    let any (arr: array<'t>) = not (Array.isEmpty arr)
     /// Array 중에서 type 에 맞는 것만 골라냄
     let ofType<'a> source : 'a array =
         Seq.ofType<'a> source |> Array.ofSeq
 
     /// Array 중에서 type 이 아닌 것만 골라냄
     /// obj 의 sequence 로 반환되므로 필요시 다시 casting 해서 써야 한다.
-    let ofNotType<'a when 'a: equality> source = 
+    let ofNotType<'a when 'a: equality> source =
         Seq.ofNotType<'a> source |> Array.ofSeq
 
     /// Seq 중에서 type 에 맞는 것만 골라냄.  ofType<'a> 과 동일
@@ -86,7 +84,7 @@ module Array =
     let insertAt (arr: array<'t>) (pos:int) (value:'t) =
         let sub1 = Array.sub arr 0 pos
         let sub2 = Array.sub arr pos (arr.Length - pos)
-        sub1 @@@ [|value|] @@@ sub2
+        sub1 @ [|value|] @ sub2
 
 
     let mapTuple (mapper1:'a->'c) (mapper2:'b->'d) (xs:('a*'b) array) =
@@ -97,7 +95,7 @@ module Array =
     /// [ (1, "a"); (2, "b") ] |> map1st ((+) 1) ==> [(2, "a"); (3, "b")]
     let map1st mapper = mapTuple mapper id
 
-    /// tuple 의 array 에 대해서 tuple 의 snd 만 mapping 
+    /// tuple 의 array 에 대해서 tuple 의 snd 만 mapping
     ///
     // [ ("a", 1); ("b", 2) ] |> map2nd ((+) 1) ==> [("a", 2); ("b", 3)]
     let map2nd mapper = mapTuple id mapper

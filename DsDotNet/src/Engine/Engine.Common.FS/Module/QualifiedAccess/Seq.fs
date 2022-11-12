@@ -8,8 +8,6 @@ open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module SeqPrelude =
-    /// append two sequence
-    let (@@) = Seq.append
     /// Seq.empty
     let sempty = Seq.empty
 

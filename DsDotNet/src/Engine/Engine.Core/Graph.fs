@@ -39,7 +39,7 @@ module GraphModule =
                 member _.Equals(x:'E, y:'E) = x.Source = y.Source && x.Target = y.Target && x.EdgeType = y.EdgeType
                 member _.GetHashCode(x) = x.Source.GetHashCode()/2 + x.Target.GetHashCode()/2
         }
-        let vertices = vertices @@ edges.Collect(fun e -> [e.Source; e.Target]).Distinct()
+        let vertices = vertices @ edges.Collect(fun e -> [e.Source; e.Target]).Distinct()
         let vs = new HashSet<'V>(vertices, nameComparer<'V>())
         let es = new HashSet<'E>(edges, edgeComparer)
         new () = Graph<'V, 'E>(Seq.empty<'V>, Seq.empty<'E>)
@@ -80,13 +80,13 @@ module GraphModule =
                 x.Edges.Select(fun e -> e.Source)
                     .Where(fun src -> not <| x.GetIncomingEdges(src).Any())
                     .Distinct()
-            x.Islands @@ inits
+            x.Islands @ inits
         member x.Lasts =
             let lasts =
                 x.Edges.Select(fun e -> e.Target)
                     .Where(fun tgt -> not <| x.GetOutgoingEdges(tgt).Any())
                     .Distinct()
-            x.Islands @@ lasts
+            x.Islands @ lasts
 
 
 

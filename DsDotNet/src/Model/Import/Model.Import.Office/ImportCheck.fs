@@ -24,12 +24,12 @@ module ImportCheck =
                         "START"; "시작인과"; "시작유지"; "RESET"; "복귀인과";
                         "복귀유지"; "ETC"; "상호행위간섭"; "시작후행리셋";
                 ] do
-                    vertexs.Add(Real.Create(v, flow)) |>ignore
+                    vertexs.Add(Real.Create([|v|], flow)) |>ignore
 
             let fg = flow.Graph
             fg.AddVertices(vertexs.Cast<Vertex>())|>ignore
             let v(name:string) = fg.Vertices.Find(fun f->f.Name = name)
-            
+
             flow.ModelingEdges.Add(ModelingEdgeInfo(v("START"), TextStartEdge, v("시작인과")))|>ignore
             flow.ModelingEdges.Add(ModelingEdgeInfo(v("START"), TextStartPush, v("시작유지")))|>ignore
             flow.ModelingEdges.Add(ModelingEdgeInfo(v("RESET"), TextResetEdge, v("복귀인과")))|>ignore

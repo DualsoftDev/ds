@@ -85,25 +85,27 @@ module CoreModule =
     /// leaf or stem(parenting)
     /// Graph 상의 vertex 를 점유하는 named object : Real, Alias, Call
     and [<AbstractClass>]
-        Vertex (name:string, parent:ParentWrapper) =
-        inherit FqdnObject(name, parent.GetCore())
+        Vertex (names:Fqdn, parent:ParentWrapper) =
+        inherit FqdnObject(names.Combine(), parent.GetCore())
         interface INamedVertex
         member _.Parent = parent
+        member _.PureNames = names
 
     /// Segment (DS Basic Unit)
     and [<DebuggerDisplay("{QualifiedName}")>]
-        Real private (name:string, flow:Flow) =
-        inherit Vertex(name, Flow flow)
+        Real private (names:Fqdn, flow:Flow) =
+        inherit Vertex(names, Flow flow)
         member val Graph = DsGraph()
         member val ModelingEdges = HashSet<ModelingEdgeInfo<Vertex>>()
         member val Flow = flow
 
         member val SafetyConditions = createQualifiedNamedHashSet<Real>()
-        static member Create(name:string, flow) =
-            if (name.Contains(".") (*&& not <| (name.StartsWith("\"") && name.EndsWith("\""))*)) then
+        static member Create(names:Fqdn, flow) =
+            let name = names.Combine()
+            if (names.Any(fun n -> n.Contains ".") (*&& not <| (name.StartsWith("\"") && name.EndsWith("\""))*)) then
                 logWarn $"Suspicious segment name [{name}]. Check it."
 
-            let segment = Real(name, flow)
+            let segment = Real(names, flow)
             flow.Graph.AddVertex(segment) |> verifyM $"Duplicated segment name [{name}]"
             segment
 
@@ -112,7 +114,7 @@ module CoreModule =
         | CallTarget of Call
 
     and Alias private (mnemonic:string, target:AliasTargetType, parent:ParentWrapper) =
-        inherit Vertex(mnemonic, parent)
+        inherit Vertex([|mnemonic|], parent)
 
         static let tryFindAlias (graph:DsGraph) (mnemonic:string) =
             let existing = graph.TryFindVertex(mnemonic)
@@ -158,7 +160,7 @@ module CoreModule =
 
     /// 외부 시스템 호출 객체
     and Call private (apiItem:ApiItem, parent:ParentWrapper) =
-        inherit Vertex(apiItem.QualifiedName, parent)
+        inherit Vertex(apiItem.NameComponents, parent)
         static let create (graph:DsGraph) (apiItem:ApiItem) (parent:ParentWrapper) =
             let existing = graph.TryFindVertex(apiItem.QualifiedName)
             match existing with

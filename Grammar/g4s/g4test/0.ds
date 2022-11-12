@@ -1,40 +1,15 @@
-[sys] L = {
-    [flow] F = {
-        Main = { Cp > Cm; }
+[sys ip = localhost] T6_Alias = {
+    [flow] Page1 = {
+    }
+    [flow] AndFlow = {
+        R2 > R3;
+        R1 > R3;
+    }
+    [flow] OrFlow = {
+        R2 > Copy1_R3;
+        R1 > R3;
         [aliases] = {
-            C.P = { Cp; Cp1; Ap2; }
-            C.M = { Cm; Cm1; Cm2; }
-        }
-        [safety] = {
-            Main = {C.F.Sp; C.F.Sm}
-        }
-    }
-    [sys] C = {
-        [flow] F = {
-            Vp > Pp > Sp;
-            Vm > Pm > Sm;
-
-            Pp |> Sm;
-            Pm |> Sp;
-            Vp <||> Vm;
-        }
-        [interfaces] = {
-            P = { F.Vp ~ F.Sp }
-            M = { F.Vm ~ F.Sm }
-            // 정보로서의 상호 리셋
-            P <||> M;
-        }
-    }
-
-    [prop] = {
-        [addresses] = {
-            C.P = ( %Q1234.2343, %I1234.2343)
-            C.M = ( START, END)
-        }
-    }
-    [prop] = {
-        [ safety ] = {
-            L.F.Main = {C.F.Vp; C.F.Vm}
+            R3 = { Copy1_R3; }
         }
     }
 }

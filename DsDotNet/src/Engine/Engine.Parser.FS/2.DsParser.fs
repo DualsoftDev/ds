@@ -107,16 +107,19 @@ type DsParser() =
         from:IParseTree
         , ?includeMe:bool
         , ?predicate:ParseTreePredicate
+        , ?exclude:ParseTreePredicate
         ) : ResizeArray<'T> =         // ResizeArray<'T>
 
         let includeMe = defaultArg includeMe false
         let predicate = defaultArg predicate (isType<'T>)
+        let exclude = defaultArg exclude (fun x -> false)
         let rec enumerateChildrenHelper(rslt:ResizeArray<'T>, frm:IParseTree, incMe:bool) =
-            if (incMe && predicate(frm) && isType<'T> frm) then
-                rslt.Add(forceCast<'T>(frm))
+            if not (exclude(frm)) then
+                if (incMe && predicate(frm) && isType<'T> frm) then
+                    rslt.Add(forceCast<'T>(frm))
 
-            for index in [ 0 .. frm.ChildCount - 1 ] do
-                enumerateChildrenHelper(rslt, frm.GetChild(index), true)
+                for index in [ 0 .. frm.ChildCount - 1 ] do
+                    enumerateChildrenHelper(rslt, frm.GetChild(index), true)
 
         //Func<IParseTree, bool> pred = predicate ?? new Func<IParseTree, bool>(ctx => ctx is T)
         let result = ResizeArray<'T>()
@@ -147,11 +150,12 @@ type DsParser() =
         let includeMe = defaultArg includeMe false
         DsParser.enumerateChildren<IParseTree>(from, includeMe) |> Seq.tryFind(predicate)
 
-    static member findFirstChild<'T when 'T :> IParseTree>(from:IParseTree, ?includeMe:bool, ?predicate:ParseTreePredicate) : 'T option =   // :'T
+    static member findFirstChild<'T when 'T :> IParseTree>(from:IParseTree, ?includeMe:bool, ?predicate:ParseTreePredicate, ?exclude:ParseTreePredicate) : 'T option =   // :'T
         let includeMe = defaultArg includeMe false
         let predicate = defaultArg predicate (fun _ -> true)
         let predicate x = isType<'T> x && predicate x
-        DsParser.enumerateChildren<'T>(from, includeMe, predicate) |> Seq.tryHead
+        let exclude = defaultArg exclude (fun _ -> false)
+        DsParser.enumerateChildren<'T>(from, includeMe, predicate, exclude) |> Seq.tryHead
 
     static member findFirstAncestor(from:IParseTree, predicate:ParseTreePredicate, ?includeMe:bool) = //:IParseTree option=
         let includeMe = defaultArg includeMe false
@@ -163,8 +167,10 @@ type DsParser() =
         let pred = isType<'T>
         DsParser.findFirstAncestor(from, pred, includeMe) |> Option.map forceCast<'T>
 
-    static member findIdentifier1FromContext(context:IParseTree) =
-        findFirstChild<Identifier1Context>(context, false) |> Option.map(fun ctx -> ctx.GetText().DeQuoteOnDemand())
+    static member findIdentifier1FromContext(context:IParseTree, ?exclude:ParseTreePredicate) =
+        let exclude = defaultArg exclude (fun _ -> false)
+        let xxx = findFirstChild<Identifier1Context>(context, false, exclude=exclude).ToArray()
+        findFirstChild<Identifier1Context>(context, false, exclude=exclude) |> Option.map(fun ctx -> ctx.GetText().DeQuoteOnDemand())
 
     static member collectNameComponentContext(from:IParseTree) : IParseTree =
         let pred =
@@ -181,15 +187,19 @@ type DsParser() =
         Fqdn.parse(name).ToArray()
 
     static member collectSystemNames(from:IParseTree) =
-        enumerateParents<SystemContext>(from, true).Select(findIdentifier1FromContext >> Option.get).Reverse().ToArray()
+        let exclude (tree:IParseTree) = tree :? DomainNameContext
+        let xxx = enumerateParents<SystemContext>(from, true).ToArray()
+        let yyy = xxx.Select(fun ctx -> findIdentifier1FromContext(ctx, exclude=exclude)).ToArray()
+        enumerateParents<SystemContext>(from, true)
+            .Select(fun ctx -> findIdentifier1FromContext(ctx, exclude=exclude) |> Option.get).Reverse().ToArray()
 
-    static member getContextInformation(parserRuleContext:ParserRuleContext) =
+    static member getContextInformation(parserRuleContext:ParserRuleContext) =      // collectUpwardContextInformation
         let ctx = parserRuleContext
         let sysNames  = collectSystemNames(ctx).ToFSharpList()
         let flow      = findFirstAncestor<FlowContext>(ctx, true).Bind(findIdentifier1FromContext)
         let parenting = findFirstAncestor<ParentingContext>(ctx, true).Bind(findIdentifier1FromContext)
         let ns        = collectNameComponents(ctx).ToFSharpList()
-        if ns.Any() && flow.IsNone then
+        if sysNames = ["localhost"] then
             noop()
         ContextInformation.Create(ctx, sysNames, flow, parenting, ns)
 

@@ -9,6 +9,7 @@ open Antlr4.Runtime.Misc
 open Engine.Core
 open type Engine.Parser.dsParser
 open System.Diagnostics
+open Engine.Common.FS
 
 [<AutoOpen>]
 module ParserUtil =
@@ -63,7 +64,9 @@ module ParserUtil =
         Names: string list
         ContextType:System.Type
     } with
-        static member Create(parserRuleContext, systems, flow, parenting, names) =
+        static member Create(parserRuleContext, systems:string list, flow, parenting, names) =
+            if systems.Any(fun s -> s.Contains "localhost") then
+                noop()
             {   ContextType = parserRuleContext.GetType();
                 Systems = systems; Flow = flow; Parenting = parenting; Names = names }
         static member CreateFullNameComparer() = {

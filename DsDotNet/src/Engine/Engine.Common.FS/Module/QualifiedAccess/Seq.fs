@@ -37,7 +37,7 @@ module Seq =
     /// [ (1, "a"); (2, "b") ] |> map1st ((+) 1) ==> [(2, "a"); (3, "b")]
     let map1st mapper = mapTuple mapper id
 
-    /// tuple 의 seq 에 대해서 tuple 의 snd 만 mapping 
+    /// tuple 의 seq 에 대해서 tuple 의 snd 만 mapping
     ///
     // [ ("a", 1); ("b", 2) ] |> map2nd ((+) 1) ==> [("a", 2); ("b", 3)]
     let map2nd mapper = mapTuple id mapper
@@ -48,7 +48,7 @@ module Seq =
     let mapProject2nd mapper (xs:(_*'a) seq) = xs |> Seq.map (snd >> mapper)
 
 
-    /// seq 의 seq 에 대해서 내부의 seq 를 mapping 
+    /// seq 의 seq 에 대해서 내부의 seq 를 mapping
     ///
     /// seq { seq {1..3}; seq {5..9}} |> Seq.mapInner ((+) 1) ==> [[2; 3; 4]; [6; 7; 8; 9; 10]]
     let mapInner (mapper:'x->'b) (xss:'x seq seq) =
@@ -175,20 +175,20 @@ module Seq =
     /// triplewise [1..4] // -> seq [(1, 2, 3); (2, 3, 4)]
     let triplewise (xs: seq<_>) =
         seq {
-            use e = xs.GetEnumerator() 
+            use e = xs.GetEnumerator()
             if e.MoveNext() then
                 let i = ref e.Current
                 if e.MoveNext() then
                     let j = ref e.Current
                     while e.MoveNext() do
-                        let k = e.Current 
+                        let k = e.Current
                         yield (!i, !j, k)
                         i := !j
                         j := k }
 
     let quadwise (xs: seq<_>) =
         seq {
-            use e = xs.GetEnumerator() 
+            use e = xs.GetEnumerator()
             if e.MoveNext() then
                 let i = ref e.Current
                 if e.MoveNext() then
@@ -196,7 +196,7 @@ module Seq =
                     if e.MoveNext() then
                         let k = ref e.Current
                         while e.MoveNext() do
-                            let l = e.Current 
+                            let l = e.Current
                             yield (!i, !j, !k, l)
                             i := !j
                             j := !k
@@ -210,22 +210,22 @@ module Seq =
     /// A new group is started when the specified predicate holds about the element
     /// of the sequence (and at the beginning of the iteration).
     ///
-    /// For example: 
+    /// For example:
     ///  *  Seq.groupWhen isOdd [3;3;2;4;1;2] = seq [[3]; [3; 2; 4]; [1; 2]]
     ///  *  [1..10] |> groupWhen (fun n -> n%3 = 0) // ==> seq [[1; 2]; [3; 4; 5]; [6; 7; 8]; [9; 10]]
     let groupWhen f (xs:seq<_>) =
         seq {
             use en = xs.GetEnumerator()
             let running = ref true
-    
+
             // Generate a group starting with the current element. Stops generating
             // when it founds element such that 'f en.Current' is 'true'
             let rec group() =  [
                 yield en.Current
                 if en.MoveNext() then
-                    if not (f en.Current) then yield! group() 
+                    if not (f en.Current) then yield! group()
                 else running := false ]
-    
+
             if en.MoveNext() then
                 // While there are still elements, start a new group
                 while running.Value do
@@ -262,25 +262,25 @@ module Seq =
                     yield item
         }
 
-    let isAscending  xs = xs |> Seq.pairwise |> Seq.forall (fun (a, b) -> a <= b) 
-    let isDescending xs = xs |> Seq.pairwise |> Seq.forall (fun (a, b) -> a >= b) 
+    let isAscending  xs = xs |> Seq.pairwise |> Seq.forall (fun (a, b) -> a <= b)
+    let isDescending xs = xs |> Seq.pairwise |> Seq.forall (fun (a, b) -> a >= b)
 
     /// Debug 모드에서만 lazy evaluation 을 eager evaluation 으로 수행
     /// 최대한 lazy evaluation 을 유지하면서 한번만 evaluation 을 원할 경우, Seq.cache 를 이용
-    let eagerOnDebug (xs: seq<_>) = 
+    let eagerOnDebug (xs: seq<_>) =
 #if DEBUG
         xs |> Array.ofSeq |> seq
 #else
         xs
 #endif
     /// Seq.min 의 option type safe version : empty sequence 인 경우 None 반환
-    let tryMinBy f (xs: seq<_>) = 
+    let tryMinBy f (xs: seq<_>) =
         if Seq.isEmpty xs then
             None
         else
             xs |> Seq.minBy f |> Some
     /// Seq.reduce 의 option type safe version : empty sequence 인 경우 None 반환
-    let tryReduce f (xs: seq<_>) = 
+    let tryReduce f (xs: seq<_>) =
         if Seq.isEmpty xs then
             None
         else
@@ -353,7 +353,7 @@ module Seq =
     let symetricDifference xs1 xs2 = Enumerable.Union(Enumerable.Except(xs1, xs2), Enumerable.Except(xs2, xs1)) |> seq
 
     let setEqual xs1 xs2 = symetricDifference xs1 xs2 |> Seq.isEmpty
-        
+
 
 
     /// xs 중에서 predicate 을 만족하는 요소의 index 를 반환
@@ -362,15 +362,15 @@ module Seq =
         |> Seq.indexed
         |> Seq.choose (fun (i, x) -> if predicate x then Some i else None)
 
-    /// haystack 에 needles 이 모두 포함되어 있는지 
+    /// haystack 에 needles 이 모두 포함되어 있는지
     let containsAllOf (haystack:'a seq) (needles:'a seq) =
         let hash = needles |> HashSet
         hash.IsProperSubsetOf(haystack)
-    let containsAllOfPipe haystack = swapf containsAllOf haystack
+    let containsAllOfPipe haystack = flipf containsAllOf haystack
     let containsAnyOf (haystack:'a seq) (needles:'a seq) =
         let hash = needles |> HashSet
         haystack |> Seq.exists (fun h -> hash.Contains(h))
-    let containsAnyOfPipe haystack = swapf containsAnyOf haystack
+    let containsAnyOfPipe haystack = flipf containsAnyOf haystack
 
 
 [<AutoOpen>]
@@ -379,7 +379,7 @@ module SeqModule =
     let incrementalKeywordGenerator = Seq.incrementalKeywordGenerator
 
 
-module private testMe = 
+module private testMe =
     let ofType<'a>(xs:_ seq) = xs.OfType<'a>()
     let ofNotType<'a>(xs:'b seq) =
         let ofs = xs.OfType<'a>().Cast<'b>()

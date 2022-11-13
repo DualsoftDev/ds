@@ -456,7 +456,7 @@ module ModelTests1 =
             compare Program.CodeElementsText answerCodeElementsText
 
         [<Test>]
-        member __.``AdoptoedValidText test`` () =
+        member __.``XAdoptoedValidText test`` () =
             logInfo "=== AdoptoedValidText"
             compare Program.AdoptoedValidText answerAdoptoedValidText
 

@@ -115,7 +115,7 @@ module PreludeAdhocPolymorphism =
     /// append two lists / arrays / sequences
     let inline ( @ )       x y = (?<-) FAdhoc_append x y
     /// append element to a list / array / sequence
-    let inline ( +++ )      x y = (?<-) FAdhoc_Xpend  x y
+    let inline ( ++ )      x y = (?<-) FAdhoc_Xpend  x y
 
 
 

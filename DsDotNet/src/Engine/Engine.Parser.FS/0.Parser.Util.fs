@@ -1,15 +1,16 @@
 namespace Engine.Parser.FS
 
-open System
 open System.Collections.Generic
 open System.Linq
+open System.Diagnostics
 open System.Runtime.CompilerServices
+
 open Antlr4.Runtime
 open Antlr4.Runtime.Misc
+
 open Engine.Core
-open type Engine.Parser.dsParser
-open System.Diagnostics
 open Engine.Common.FS
+open type Engine.Parser.dsParser
 
 [<AutoOpen>]
 module ParserUtil =
@@ -41,20 +42,22 @@ module ParserUtil =
         let text = getOriginalText ruleContextToTextify
         let offset = ruleContextToTextify.Start.StartIndex
         let hash = HashSet<RangeReplace>()
-        let rec helper (i:int) =
-            [
-                if i < text.Length then
-                    let range = replaces |> Seq.tryFind (fun r -> r.Start - offset - 1 <= i && i <= r.End - offset)       // -1 for bug???
-                    match range with
-                    | Some r ->
-                        if not (hash.Contains(r)) then
-                            hash.Add(r) |> ignore
-                            yield! r.ReplaceText
-                    | None ->
-                        yield text[i]
-                    yield! helper (i+1)
-            ]
-        helper 0 |> Array.ofSeq |> System.String
+
+        let mutable i = 0
+        let folder (z:string) (x:char) =
+            let range = replaces |> Seq.tryFind (fun r -> r.Start - offset - 1 <= i && i <= r.End - offset)       // -1 for bug???
+            i <- i + 1
+            match range with
+            | Some r ->
+                if hash.Contains(r) then
+                    z
+                else
+                    hash.Add(r) |> ignore
+                    z + r.ReplaceText
+            | None ->
+                z + (x |> string)
+        let replaced = text.ToList().FoldLeft(folder, "")
+        replaced
 
     [<DebuggerDisplay("{FullName}({ContextType.Name})")>]
     type ContextInformation = {

@@ -87,9 +87,14 @@ module CoreModule =
     and [<AbstractClass>]
         Vertex (names:Fqdn, parent:ParentWrapper) =
         inherit FqdnObject(names.Combine(), parent.GetCore())
+        do
+            if names.Length = 1 && names.Contains(".") then
+                noop()
         interface INamedVertex
         member _.Parent = parent
         member _.PureNames = names
+        member x.FlatNameComponents = parent.GetCore().NameComponents @ x.PureNames
+        override x.GetRelativeName(referencePath:Fqdn) = x.PureNames.Combine()   // todo
 
     /// Segment (DS Basic Unit)
     and [<DebuggerDisplay("{QualifiedName}")>]

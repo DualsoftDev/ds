@@ -50,20 +50,24 @@ module Functions =
     /// Returns function which get predecessor
     let predecessor = fun x -> x - 1
 
-    /// Append x at the end of xs list: [1..3] ++ 4 = [1..4]
-    let (++) xs x = xs @ [x]
+    //// Append x at the end of xs list: [1..3] ++ 4 = [1..4]
+    //let (++) xs x = xs @ [x]
 
     /// Y-combinator, or Sage bird
     let rec Y f x = f (Y f) x
 
-    /// argument 의 순서를 바꾸어서 f 호출
-    let swapf f = fun x y -> f y x
 
     // https://stackoverflow.com/questions/42800373/f-pipe-forward-first-argument
-    /// Argument 의 순서 치환
-    /// [1; 2; 3] |> (flip List.append) [4; 5; 6]   ==> [1; 2; 3; 4; 5; 6]
-    /// [1; 2; 3] |> List.append [4; 5; 6]   ==> [4; 5; 6; 1; 2; 3]
-    let flip f x y = f y x
+    /// argument 의 순서를 바꾸어서 f 호출
+    (*
+        [1; 2; 3] |> (flip List.append) [4; 5; 6]   ==> [1; 2; 3; 4; 5; 6]
+        [1; 2; 3] |> List.append [4; 5; 6]   ==> [4; 5; 6; 1; 2; 3]
+        let swapf f = fun x y -> f y x
+        let modulo2 = (flipf (%)) 2
+        let isEven = modulo2 >> ((=) 0)
+        let isOdd = modulo2 >> ((<>) 0)
+    *)
+    let flipf f x y = f y x
 
 
     let tee f x =
@@ -235,5 +239,5 @@ module Functions =
             assert(triples = [24..3..48])
 
         let b = [1..10] |> List.map (float >> ((/) 2.0))        // ==> 2 / [1..10] ==> [2.0; 1.0; 0.6666666667; 0.5; 0.4; 0.3333333333; 0.2857142857; 0.25; 0.2222222222; 0.2]
-        let c = [1..10] |> List.map (float >> (swapf (/) 2.0))  // ==> [1..10] / 2 ==> [0.5; 1.0; 1.5; 2.0; 2.5; 3.0; 3.5; 4.0; 4.5; 5.0]
+        let c = [1..10] |> List.map (float >> (flipf (/) 2.0))  // ==> [1..10] / 2 ==> [0.5; 1.0; 1.5; 2.0; 2.5; 3.0; 3.5; 4.0; 4.5; 5.0]
 

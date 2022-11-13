@@ -60,8 +60,6 @@ module internal ToDsTextModule =
                 yield $"{tab}{rb}"
 
             let notMentioned = graph.Islands.Except(stems.Cast<Vertex>()).ToArray()
-            if notMentioned.Any() then
-                noop()
             for island in notMentioned do
                 yield $"{getTab (indent+1)}{island.GetRelativeName(core.NameComponents)}; // island"
         ]

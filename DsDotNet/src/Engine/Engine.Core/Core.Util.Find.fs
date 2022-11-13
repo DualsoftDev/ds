@@ -7,7 +7,6 @@ open Engine.Common.FS
 [<AutoOpen>]
 module internal ModelFindModule =
     let findGraphVertex(system:DsSystem, fqdn:Fqdn) : obj =
-        let xxx = system.Spit()
         let nameEq (name:string) (x:INamed) = x.Name = name
 
         let rec findSystemInner (system:DsSystem) (xs:string list) : obj =
@@ -18,8 +17,6 @@ module internal ModelFindModule =
                 match xs1 with
                 | [] -> flow
                 | r::xs2 ->
-                    if r = "R.X" then
-                        noop()
                     let real = flow.Graph.FindVertex(r) |> box :?> Real
                     match xs2 with
                     | [] -> real

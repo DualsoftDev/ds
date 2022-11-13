@@ -199,8 +199,6 @@ type DsParser() =
         let flow      = findFirstAncestor<FlowContext>(ctx, true).Bind(findIdentifier1FromContext)
         let parenting = findFirstAncestor<ParentingContext>(ctx, true).Bind(findIdentifier1FromContext)
         let ns        = collectNameComponents(ctx).ToFSharpList()
-        if sysNames = ["localhost"] then
-            noop()
         ContextInformation.Create(ctx, sysNames, flow, parenting, ns)
 
     //static member getPathAndName(from:IParseTree) =

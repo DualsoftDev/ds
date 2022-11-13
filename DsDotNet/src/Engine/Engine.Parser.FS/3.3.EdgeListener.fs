@@ -54,9 +54,6 @@ type EdgeListener(parser:dsParser, helper:ParserHelper) =
             assert( if n % 2 = 0 then ctx :? CausalTokensDNFContext else ctx :? CausalOperatorContext)
 
         let findToken(ctx:CausalTokenContext):Vertex option =
-            if ctx.GetText() = "F.Seg1" then
-                noop()
-
             let ns = collectNameComponents(ctx)
             let mutable path = x.AppendPathElement(ns)
             if path.Length = 5 then

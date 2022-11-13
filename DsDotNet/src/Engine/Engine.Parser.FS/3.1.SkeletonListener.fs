@@ -169,8 +169,6 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
                         ctx.Names = ctxInfo.Names && ctx.Flow = ctxInfo.Flow    // && ctx.Systems = ctxInfo.Systems
                         ).ToArray()
                 assert(vType.HasFlag(GVT.CausalToken))
-                if ctxInfo.Names.Contains "R3" then
-                    noop()
 
                 let vt =  (vType &&& ~~~GVT.CausalToken)
                 let types = nameMatches.Select(valueOfKeyValue).Fold((|||), GVT.None)

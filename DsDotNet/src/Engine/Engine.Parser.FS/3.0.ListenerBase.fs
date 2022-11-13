@@ -33,8 +33,6 @@ type ListenerBase(parser:dsParser, helper:ParserHelper) =
     member internal x.AddElement(contextInformation:ContextInformation, elementType:GVT) =
         let ci = contextInformation
         let es = helper._elements
-        if ci.FullName = "My.MyFlow.Seg1" then
-            noop()
 
         if es.ContainsKey(ci) then
             failwith "ERROR: duplicated"

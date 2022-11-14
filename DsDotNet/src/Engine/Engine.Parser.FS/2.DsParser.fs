@@ -1,10 +1,6 @@
-
 namespace rec Engine.Parser.FS
 
-open System
 open System.Linq
-open System.Runtime.InteropServices
-open System.Collections.Generic
 
 open Antlr4.Runtime
 open Antlr4.Runtime.Tree
@@ -14,11 +10,6 @@ open Engine.Parser
 open type Engine.Parser.dsParser
 open type Engine.Parser.FS.DsParser
 open Engine.Core
-open Antlr4.Runtime
-open Antlr4.Runtime
-
-module DsParserHelperModule =
-    ()
 
 [<RequireQualifiedAccess>]
 module Fqdn =
@@ -45,6 +36,7 @@ module Fqdn =
 
 type ParseTreePredicate = IParseTree->bool
 type RuleExtractor = dsParser -> RuleContext
+
 type DsParser() =
     static member val LoadedSystemName:string option = None with get, set
     static member ParseText (text:string, extractor:RuleExtractor, ?throwOnError) =
@@ -201,10 +193,3 @@ type DsParser() =
         let parenting = findFirstAncestor<ParentingContext>(ctx, true).Bind(findIdentifier1FromContext)
         let ns        = collectNameComponents(ctx).ToFSharpList()
         ContextInformation.Create(ctx, system, flow, parenting, ns)
-
-    //static member getPathAndName(from:IParseTree) =
-    //    let sysNames, flowName, parenting, ns = collectUpwardContextInformation from
-    //    [   yield! sysNames
-    //        if flowName.IsSome then yield flowName.Value
-    //        if parenting.IsSome then yield parenting.Value
-    //    ], ns.Combine()

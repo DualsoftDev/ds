@@ -4,7 +4,6 @@ namespace Engine.Parser.FS
 open System.IO
 open System.Runtime.InteropServices
 open Antlr4.Runtime
-open Engine.Parser
 open Engine.Common.FS
 
 type ParserError(line:int, column:int, message:string, ambient:string)=
@@ -23,7 +22,6 @@ type ErrorListener<'Symbol>([<Optional; DefaultParameterValue(false)>]throwOnErr
             col:int, msg:string, e:RecognitionException) =
         let dsFile = recognizer.GrammarFileName
         match recognizer with
-        //| :? dsParser as parser ->
         | :? Parser as parser ->
             let ambient = parser.RuleContext.GetText()
             base.SyntaxError(output, recognizer, offendingSymbol, line, col, msg, e)

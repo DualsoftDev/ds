@@ -1,7 +1,6 @@
 namespace Engine.Parser.FS
 
 open Engine.Core
-open Engine.Common.FS
 open System.Collections.Generic
 open System.Linq
 

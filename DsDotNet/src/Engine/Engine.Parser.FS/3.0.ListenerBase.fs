@@ -1,6 +1,5 @@
 namespace Engine.Parser.FS
 
-open System.Linq
 open Engine.Common.FS
 open Engine.Core
 open Engine.Parser
@@ -60,29 +59,6 @@ type ListenerBase(parser:dsParser, helper:ParserHelper) =
     override x.EnterSystem(ctx:SystemContext) =
         if helper.ParserOptions.LoadedSystemName.IsSome then
             DsParser.LoadedSystemName <- helper.ParserOptions.LoadedSystemName
-        //let name = ctx.systemName().GetText().DeQuoteOnDemand()
-        //let theSystem = helper.TheSystem
-
-        //let ns = collectSystemNames ctx
-
-        //helper.TheSystem <-
-        //    if theSystem.NameComponents = ns then
-        //        helper.theSystem
-        //    else
-        //        theSystem.Systems.TryFind(fun sys -> sys.NameComponents = ns)
-
-        ////match x._currentSystem with
-        ////| None ->
-        ////    let ns = collectNameComponents ctx
-        ////    if theSystem.NameComponents = ns then
-        ////        helper._currentSystem <- helper._theSystem
-        ////    else
-        ////        helper._currentSystem <- theSystem.Systems.TryFind(fun sys -> sys.NameComponents = ns)
-        ////| Some curSys ->
-        ////    helper._currentSystem <- Some <| curSys.Systems.Find(fun s -> s.Name = name)
-
-        //assert (helper._currentSystem.IsSome)
-
         x.UpdateModelSpits()
 
     override x.ExitSystem(ctx:SystemContext) = DsParser.LoadedSystemName <- None

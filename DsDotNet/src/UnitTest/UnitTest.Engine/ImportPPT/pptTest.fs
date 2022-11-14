@@ -12,10 +12,10 @@ open Model.Import.Office
 [<AutoOpen>]
 module pptTestModule =
     ///ppt로 부터 만든 모델을 text로 다시 읽어 이중 확인
-    let check (model:Model, viewNodes:ViewNode seq) =
-        let modelText =  model.TheSystem.Value.ToDsText()
+    let check (system:DsSystem, viewNodes:ViewNode seq) =
+        let modelText =  system.ToDsText()
         let helper = ModelParser.ParseFromString2(modelText, ParserOptions.Create4Runtime("localhost"))
-        let reGenerated = helper.TheSystem.ToDsText()
+        let reGenerated = helper.TheSystem.Value.ToDsText()
         modelText =~= reGenerated
 
     type PPTTest() =

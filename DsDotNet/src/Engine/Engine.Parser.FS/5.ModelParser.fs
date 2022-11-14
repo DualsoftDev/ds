@@ -1,6 +1,6 @@
 namespace Engine.Parser.FS
 
-open Antlr4.Runtime
+open System.IO
 open Antlr4.Runtime.Tree
 
 open Engine.Common.FS
@@ -10,41 +10,70 @@ open type Engine.Parser.dsParser
 open type Engine.Parser.FS.DsParser
 
 module ModelParser =
+    let mutable initialized = false
     let Walk(parser:dsParser, helper:ParserHelper) =
         let sListener = new SkeletonListener(parser, helper)
-        ParseTreeWalker.Default.Walk(sListener, parser.model())
+        ParseTreeWalker.Default.Walk(sListener, parser.system())
         tracefn("--- End of skeleton listener")
 
         let eleListener = new ElementListener(parser, helper)
-        ParseTreeWalker.Default.Walk(eleListener, parser.model())
+        ParseTreeWalker.Default.Walk(eleListener, parser.system())
         tracefn("--- End of element listener")
 
 
         let edgeListener = new EdgeListener(parser, helper)
-        ParseTreeWalker.Default.Walk(edgeListener, parser.model())
+        ParseTreeWalker.Default.Walk(edgeListener, parser.system())
         tracefn("--- End of edge listener")
 
         let etcListener = new EtcListener(parser, helper)
-        ParseTreeWalker.Default.Walk(etcListener, parser.model())
+        ParseTreeWalker.Default.Walk(etcListener, parser.system())
         tracefn("--- End of etc listener")
 
     let ParseFromString2(text:string, options:ParserOptions):ParserHelper =
+        assert(initialized)
         let (parser, errors) = DsParser.FromDocument(text)
         let helper = new ParserHelper(options)
 
         Walk(parser, helper)
 
-        let model = helper.Model
-        model.CreateMRIEdgesTransitiveClosure()
-        model.Validate() |> ignore
+        let system = helper.TheSystem.Value
+        system.CreateMRIEdgesTransitiveClosure()
+        system.Validate() |> ignore
 
         helper
 
 
-    let ParseFromString(text:string, options:ParserOptions):Model = ParseFromString2(text, options).Model
+    let ParseFromString(text:string, options:ParserOptions):DsSystem = ParseFromString2(text, options).TheSystem.Value
 
+    //let ParsePartial(text:string, helper:ParserHelper, predExtract:RuleExtractor option) =
+    //    //let predExtract = defaultArg predExtract (fun (parser:dsParser) -> parser.system() :> RuleContext)
+    //    let (parser, ast, parserErrors) = FromDocument(text, predExtract)
+    //    Walk(parser, helper)
 
-    let ParsePartial(text:string, helper:ParserHelper, predExtract:(dsParser->RuleContext) option) =
-        let predExtract = defaultArg predExtract (fun (parser:dsParser) -> parser.model())
-        let (parser, ast, parserErrors) = FromDocument(text, predExtract)
-        Walk(parser, helper)
+    let Initialize() =
+        tracefn "Initializing"
+        initialized <- true
+        let loadSystemFromDsFile dsFilePath =
+            let text = File.ReadAllText(dsFilePath)
+            let dir = Path.GetDirectoryName(dsFilePath)
+            let option = ParserOptions.Create4Runtime(dir, "ActiveCpuName")
+            option.IsSubSystemParsing <- true
+            let system = ParseFromString(text, option)
+            system
+        let loadDevice (constainerSystem:DsSystem) (loadedName:string) dsFilePath =
+            let device =
+                let system = loadSystemFromDsFile dsFilePath
+                system.Name <- loadedName
+                Device(system, constainerSystem)
+            device.FilePath <- dsFilePath
+            device
+
+        let loadExternalSystem (constainerSystem:DsSystem) (loadedName:string) dsFilePath =
+            let externalSystem =
+                let system = loadSystemFromDsFile dsFilePath
+                ExternalSystem(loadedName, system, constainerSystem)
+            externalSystem.FilePath <- dsFilePath
+            externalSystem
+
+        fwdLoadDevice <- loadDevice
+        fwdLoadExternalSystem <- loadExternalSystem

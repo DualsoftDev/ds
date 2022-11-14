@@ -21,7 +21,7 @@ type EdgeListener(parser:dsParser, helper:ParserHelper) =
         base.UpdateModelSpits()
 
 
-    override x.EnterModel(ctx:ModelContext) =
+    override x.EnterSystem(ctx:SystemContext) =
         let modelSpitCores = x._modelSpits.Select(fun spit -> spit.GetCore()).ToArray()
         for ac in x.ParserHelper.AliasCreators do
             let (name, parent, target) = (ac.Name, ac.Parent, ac.Target)
@@ -48,6 +48,8 @@ type EdgeListener(parser:dsParser, helper:ParserHelper) =
     override x.EnterCausalPhrase(ctx:CausalPhraseContext) =
         let ci = getContextInformation ctx
         let sysNames, flowName, parenting, ns = ci.Tuples
+        let xxxSystem = x._theSystem.Value
+        let xxxFlow = xxxSystem.Flows.First(fun f -> f.Name = flowName.Value)
 
         let children = ctx.children.ToArray();      // (CausalTokensDNF CausalOperator)+ CausalTokensDNF
         for (n, ctx) in children|> Seq.indexed do

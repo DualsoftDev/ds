@@ -433,17 +433,22 @@ module private ModelComparisonHelper =
 }
 """
 
-    let compare originalText answer =
-        let helper = ModelParser.ParseFromString2(originalText, ParserOptions.Create4Simulation("ActiveCpuName"))
-        let model = helper.TheSystem
+    let compare referenceDir originalText answer =
+        let helper = ModelParser.ParseFromString2(originalText, ParserOptions.Create4Simulation(referenceDir, "ActiveCpuName"))
+        let system = helper.TheSystem.Value
 
-        let generated = model.ToDsText();
+        let generated = system.ToDsText();
         generated =~= answer
+
 
 [<AutoOpen>]
 module ModelTests1 =
     type DemoTests1() =
-        do Fixtures.SetUpTest()
+        do
+            Fixtures.SetUpTest()
+            ModelParser.Initialize()
+
+        let compare = compare @$"{__SOURCE_DIRECTORY__}\..\Libraries"
 
         [<Test>]
         member __.``EveryScenarioText test`` () =

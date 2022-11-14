@@ -112,7 +112,6 @@ module internal ToDsTextModule =
 
     let rec systemToDs (system:DsSystem) (indent:int) =
         let tab = getTab indent
-        let isTopLevel = system.ParentSystem.IsNone
         [
             let ip = if system.Host.IsNullOrEmpty() then "" else $" ip = {system.Host}"
             yield $"{tab}[sys{ip}] {system.Name} = {lb}"
@@ -144,89 +143,80 @@ module internal ToDsTextModule =
 
 
 
-            if isTopLevel then
-                let theSystem = system
-                for s in theSystem.Systems.OrderBy(fun s -> not s.Active) do//mySystem 부터 출력
-                    yield systemToDs s (indent + 1)
+            let buttonsToDs(category:string, btns:ButtonDic) =
+                [
+                    if btns.Count > 0 then
+                        yield $"{tab}[{category}] = {lb}"
+                        for KeyValue(k, v) in btns do
+                            let flows = (v.Select(fun f -> f.NameComponents.Skip(1).Combine()) |> String.concat ";") + ";"
+                            yield $"{tab2}{k} = {lb} {flows} {rb}"
+                        yield $"{tab}{rb}"
+                ] |> combineLines
+            yield buttonsToDs("auto" , system.AutoButtons)
+            yield buttonsToDs("emg"  , system.EmergencyButtons)
+            yield buttonsToDs("start", system.StartButtons)
+            yield buttonsToDs("reset", system.ResetButtons)
 
-                let buttonsToDs(category:string, btns:ButtonDic) =
-                    [
-                        if btns.Count > 0 then
-                            yield $"{tab}[{category}] = {lb}"
-                            for KeyValue(k, v) in btns do
-                                let flows = (v.Select(fun f -> f.NameComponents.Skip(1).Combine()) |> String.concat ";") + ";"
-                                yield $"{tab2}{k} = {lb} {flows} {rb}"
-                            yield $"{tab}{rb}"
-                    ] |> combineLines
-                yield buttonsToDs("auto" , theSystem.AutoButtons)
-                yield buttonsToDs("emg"  , theSystem.EmergencyButtons)
-                yield buttonsToDs("start", theSystem.StartButtons)
-                yield buttonsToDs("reset", theSystem.ResetButtons)
-
-                (* prop
-                        addresses *)
-                let addresses =
-                    [
-                        for KeyValue(apiPath, address) in theSystem.ApiAddressMap do
-                            yield $"{tab2}{apiPath.Combine()} = ( {address.In}, {address.Out})"
-                    ] |> combineLines
-                if addresses.Any() then
-                    yield $"[prop] = {lb}"
-                    yield $"{tab}[addresses] = {lb}"
-                    yield addresses
-                    yield $"{tab}{rb}"
-                    yield rb
+            (* prop
+                    addresses *)
+            let addresses =
+                [
+                    for KeyValue(apiPath, address) in system.ApiAddressMap do
+                        yield $"{tab2}{apiPath.Combine()} = ( {address.In}, {address.Out})"
+                ] |> combineLines
+            if addresses.Any() then
+                yield $"[prop] = {lb}"
+                yield $"{tab}[addresses] = {lb}"
+                yield addresses
+                yield $"{tab}{rb}"
+                yield rb
 
 
-                (* prop
-                     safety
-                     layouts *)
-                let spits = theSystem.Spit()
-                let segs = spits.Select(fun spit -> spit.GetCore()).OfType<Real>().ToArray()
+            (* prop
+                    safety
+                    layouts *)
+            let spits = system.Spit()
+            let segs = spits.Select(fun spit -> spit.GetCore()).OfType<Real>().ToArray()
 
-                let withSafeties = segs.Where(fun seg -> seg.SafetyConditions.Any())
-                let safeties =
-                    [
-                        if withSafeties.Any() then
-                            yield $"{tab}[safety] = {lb}"
-                            let sysNames = system.CollectSystemNames().ToArray()
-                            for seg in withSafeties do
-                                let getSegmentPath (seg:Real) = getRelativeName sysNames seg.NameComponents
-                                let conds = seg.SafetyConditions.Select(getSegmentPath).JoinWith("; ") + ";"
-                                yield $"{tab2}{seg.QualifiedName} = {lb} {conds} {rb}"
-                            yield $"{tab}{rb}"
-                    ] |> combineLines
+            let withSafeties = segs.Where(fun seg -> seg.SafetyConditions.Any())
+            let safeties =
+                [
+                    if withSafeties.Any() then
+                        yield $"{tab}[safety] = {lb}"
+                        for seg in withSafeties do
+                            let getSegmentPath (seg:Real) = getRelativeName [|system.Name|] seg.NameComponents
+                            let conds = seg.SafetyConditions.Select(getSegmentPath).JoinWith("; ") + ";"
+                            yield $"{tab2}{seg.QualifiedName} = {lb} {conds} {rb}"
+                        yield $"{tab}{rb}"
+                ] |> combineLines
 
-                let withLayouts =
-                    theSystem.Systems
-                        .SelectMany(fun sys -> sys.ApiItems.Where(fun ai -> ai.Xywh <> null))
-                        ;
-                let layouts =
-                    [
-                        if withLayouts.Any() then
-                            yield $"{tab}[layouts] = {lb}"
-                            for apiItem in withLayouts do
-                                let xywh = apiItem.Xywh
-                                let posi =
-                                    if xywh.W.HasValue then
-                                        $"({xywh.X}, {xywh.Y}, {xywh.W.Value}, {xywh.H.Value})"
-                                    else
-                                        $"({xywh.X}, {xywh.Y})"
-                                yield $"{tab2}{apiItem.QualifiedName} = {posi}"
+            let withLayouts = system.ApiItems.Where(fun ai -> ai.Xywh <> null)
+            let layouts =
+                [
+                    if withLayouts.Any() then
+                        yield $"{tab}[layouts] = {lb}"
+                        for apiItem in withLayouts do
+                            let xywh = apiItem.Xywh
+                            let posi =
+                                if xywh.W.HasValue then
+                                    $"({xywh.X}, {xywh.Y}, {xywh.W.Value}, {xywh.H.Value})"
+                                else
+                                    $"({xywh.X}, {xywh.Y})"
+                            yield $"{tab2}{apiItem.QualifiedName} = {posi}"
 
-                            yield $"{tab}{rb}"
-                    ] |> combineLines
+                        yield $"{tab}{rb}"
+                ] |> combineLines
 
-                if safeties.Any() || layouts.Any() then
-                    yield $"[prop] = {lb}"
-                    if safeties.Any()  then yield safeties
-                    if layouts.Any()   then yield layouts
-                    yield rb
+            if safeties.Any() || layouts.Any() then
+                yield $"[prop] = {lb}"
+                if safeties.Any()  then yield safeties
+                if layouts.Any()   then yield layouts
+                yield rb
 
 
 
 
-                yield codeBlockToDs theSystem
+            yield codeBlockToDs system
 
 
 

@@ -2,13 +2,15 @@ namespace Engine.Parser.FS
 
 open System
 
-type ParserOptions(activeCpuName, isSimulationMode, allowSkipExternalSegment) =
+type ParserOptions(referencePath, activeCpuName, isSimulationMode, allowSkipExternalSegment) =
     member _.ActiveCpuName:string = activeCpuName
     member _.IsSimulationMode:bool = isSimulationMode           // { get; set; } = true
     member _.AllowSkipExternalSegment:bool = allowSkipExternalSegment // { get; set; } = true
+    member val ReferencePath:string = referencePath with get, set
+    member val IsSubSystemParsing = false with get, set
 
-    static member Create4Runtime(activeCpuName:string) = ParserOptions(activeCpuName, false, false)
-    static member Create4Simulation(activeCpuName:string) = ParserOptions(activeCpuName, true, false)
+    static member Create4Runtime(referencePath, activeCpuName) = ParserOptions(referencePath, activeCpuName, false, false)
+    static member Create4Simulation(referencePath, activeCpuName) = ParserOptions(referencePath, activeCpuName, true, false)
     member x.Verify() = x.IsSimulationMode || (x.ActiveCpuName <> null && not x.AllowSkipExternalSegment)
 
 

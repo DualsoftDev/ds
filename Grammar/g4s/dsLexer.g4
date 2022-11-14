@@ -1,9 +1,12 @@
 lexer grammar dsLexer;
 
 
-SYS: 'sys';
+SYS: ('sys'|'system');
+EXTERNAL_SYSTEM: 'external';
 IP: 'ip';
 HOST: 'host';
+FILE: 'file';
+DEVICE: 'device';
 COPY_SYSTEM: 'copy_system';
 LAYOUTS: 'layouts';
 ADDRESSES: 'addresses';

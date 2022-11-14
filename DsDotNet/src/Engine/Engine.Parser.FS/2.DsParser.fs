@@ -15,6 +15,7 @@ open type Engine.Parser.dsParser
 open type Engine.Parser.FS.DsParser
 open Engine.Core
 open Antlr4.Runtime
+open Antlr4.Runtime
 
 module DsParserHelperModule =
     ()
@@ -43,8 +44,9 @@ module Fqdn =
 
 
 type ParseTreePredicate = IParseTree->bool
+type RuleExtractor = dsParser -> RuleContext
 type DsParser() =
-    static member ParseText (text:string, extractor:dsParser->#RuleContext, ?throwOnError) =
+    static member ParseText (text:string, extractor:RuleExtractor, ?throwOnError) =
         let throwOnError = defaultArg throwOnError true
         let inputStream = new AntlrInputStream(text)
         let lexer = new dsLexer(inputStream)
@@ -61,45 +63,47 @@ type DsParser() =
         parser, tree, errors
 
 
-    /// <summary>
-    /// 주어진 text 내에서 [sys] B = @copy_system(A) 와 같이 copy_system 으로 정의된 영역을
-    /// 치환한 text 를 반환한다.  system A 정의 영역을 찾아서 system B 로 치환한 text 반환
-    /// 이때, copy 구문은 삭제한다.
-    /// </summary>
-    static member private ExpandSystemCopy(text:string):string =
-        let func = fun (parser:dsParser) -> parser.model() :> RuleContext
-        let (parser, _, _) = DsParser.ParseText(text, func)
-        parser.Reset()
-        let model = parser.model()
-        let sysCtxMap =
-            DsParser.enumerateChildren<SystemContext>(model)
-                .Select(fun ctx ->
-                    let sysName = DsParser.findFirstChild<SystemNameContext>(ctx) |> Option.get |> fun x -> x.GetText()
-                    sysName, ctx)
-                |> dict |> Dictionary
+    ///// <summary>
+    ///// 주어진 text 내에서 [sys] B = @copy_system(A) 와 같이 copy_system 으로 정의된 영역을
+    ///// 치환한 text 를 반환한다.  system A 정의 영역을 찾아서 system B 로 치환한 text 반환
+    ///// 이때, copy 구문은 삭제한다.
+    ///// </summary>
+    //static member private ExpandSystemCopy(text:string):string =
+    //    let func = fun (parser:dsParser) -> parser.system() :> RuleContext
+    //    let (parser, _, _) = DsParser.ParseText(text, func)
+    //    parser.Reset()
+    //    let model = parser.system()
+    //    let sysCtxMap =
+    //        DsParser.enumerateChildren<SystemContext>(model)
+    //            .Select(fun ctx ->
+    //                let sysName = DsParser.findFirstChild<SystemNameContext>(ctx) |> Option.get |> fun x -> x.GetText()
+    //                sysName, ctx)
+    //            |> dict |> Dictionary
 
-        let copySysCtxs =
-            sysCtxMap.Where(fun (KeyValue(sysName, sysCtxt)) -> sysCtxt.children.Any(isType<SysCopySpecContext>)).ToArray()
+    //    let copySysCtxs =
+    //        sysCtxMap.Where(fun (KeyValue(sysName, sysCtxt)) -> sysCtxt.children.Any(isType<LoadDeviceContext>)).ToArray()
 
-        // 원본 full text 에서 copy_system 구문을 치환한??? 삭제한 text 반환
-        let replaces =
-            copySysCtxs.Select(fun (KeyValue(name, ctx)) ->
-                let sourceSystemName = DsParser.findFirstChild<SourceSystemNameContext>(ctx) |> Option.get |> fun x -> x.GetText()
-                let srcCtx = sysCtxMap[sourceSystemName]
-                let nameCtx = findFirstChild<SystemNameContext>(srcCtx).Value
-                let copiedSystemText = srcCtx.GetReplacedText([RangeReplace.Create(nameCtx, name)])
-                RangeReplace.Create(ctx, copiedSystemText)).ToArray()
-        let replacedText = model.GetReplacedText(replaces)
-        //logDebug $"Replaced Text:\r\n{replacedText}"
-        replacedText
+    //    // 원본 full text 에서 copy_system 구문을 치환한??? 삭제한 text 반환
+    //    let replaces =
+    //        copySysCtxs.Select(fun (KeyValue(name, ctx)) ->
+    //            let sourceSystemName = DsParser.findFirstChild<SourceSystemNameContext>(ctx) |> Option.get |> fun x -> x.GetText()
+    //            let srcCtx = sysCtxMap[sourceSystemName]
+    //            let nameCtx = findFirstChild<SystemNameContext>(srcCtx).Value
+    //            let copiedSystemText = srcCtx.GetReplacedText([RangeReplace.Create(nameCtx, name)])
+    //            RangeReplace.Create(ctx, copiedSystemText)).ToArray()
+    //    let replacedText = model.GetReplacedText(replaces)
+    //    //logDebug $"Replaced Text:\r\n{replacedText}"
+    //    replacedText
 
-    static member FromDocument(text:string, predExtract:dsParser->#RuleContext, [<Optional; DefaultParameterValue(true)>]throwOnError) =       // (dsParser, RuleContext, ParserError[])
-        let expanded = DsParser.ExpandSystemCopy(text)
-        DsParser.ParseText(expanded, predExtract, throwOnError)
+    //static member FromDocument(text:string, predExtract:RuleExtractor, ?throwOnError) =       // (dsParser, RuleContext, ParserError[])
+    //    //let expanded = DsParser.ExpandSystemCopy(text)
+    //    DsParser.ParseText(text, predExtract, throwOnError)
 
-    static member FromDocument(text:string, [<Optional; DefaultParameterValue(true)>]throwOnError:bool) =       // (dsParser, ParserError[])
-        let func = fun (parser:dsParser) -> parser.model()
-        let (parser, tree, errors) = DsParser.FromDocument(text, func, throwOnError)
+    static member FromDocument(text:string, ?predExtract:RuleExtractor, ?throwOnError) =       // (dsParser, ParserError[])
+        let throwOnError = defaultArg throwOnError true
+        let func = defaultArg predExtract (fun (parser:dsParser) -> parser.system() :> RuleContext)
+        //let (parser, tree, errors) = DsParser.FromDocument(text, func, throwOnError)
+        let (parser, tree, errors) = ParseText(text, func, throwOnError)
         (parser, errors)
 
 
@@ -186,16 +190,12 @@ type DsParser() =
         let name = idCtx.GetText()
         Fqdn.parse(name).ToArray()
 
-    static member collectSystemNames(from:IParseTree) =
-        let exclude (tree:IParseTree) = tree :? DomainNameContext
-        let xxx = enumerateParents<SystemContext>(from, true).ToArray()
-        let yyy = xxx.Select(fun ctx -> findIdentifier1FromContext(ctx, exclude=exclude)).ToArray()
-        enumerateParents<SystemContext>(from, true)
-            .Select(fun ctx -> findIdentifier1FromContext(ctx, exclude=exclude) |> Option.get).Reverse().ToArray()
+    static member getSystemNames(from:IParseTree) =
+        findFirstAncestor<SystemContext>(from, true) => collectNameComponents |> Option.get
 
     static member getContextInformation(parserRuleContext:ParserRuleContext) =      // collectUpwardContextInformation
         let ctx = parserRuleContext
-        let sysNames  = collectSystemNames(ctx).ToFSharpList()
+        let sysNames  = getSystemNames(ctx).ToFSharpList()
         let flow      = findFirstAncestor<FlowContext>(ctx, true).Bind(findIdentifier1FromContext)
         let parenting = findFirstAncestor<ParentingContext>(ctx, true).Bind(findIdentifier1FromContext)
         let ns        = collectNameComponents(ctx).ToFSharpList()

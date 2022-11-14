@@ -11,29 +11,28 @@ open Engine.Common.FS
 module CoreModule =
     let createFqdnObject (nameComponents:string array) = {
         new IQualifiedNamed with
-            member _.Name = nameComponents.LastOrDefault()
+            member _.Name with get() = nameComponents.LastOrDefault() and set(v) = failwith "ERROR"
             member _.NameComponents = nameComponents
             member x.QualifiedName = nameComponents.Combine()
     }
 
-    ///Top level structure
-    type Model() =
-        member val TheSystem:DsSystem option = None with get, set
-        member val Systems = createNamedHashSet<DsSystem>()
-        member val Variables = ResizeArray<Variable>()
-        member val Commands = ResizeArray<Command>()
-        member val Observes = ResizeArray<Observe>()
+    /////Top level structure
+    //type Model() =
+    //    member val TheSystem:DsSystem option = None with get, set
+    //    member val Systems = createNamedHashSet<DsSystem>()
+    //    member val Variables = ResizeArray<Variable>()
+    //    member val Commands = ResizeArray<Command>()
+    //    member val Observes = ResizeArray<Observe>()
 
-        interface IQualifiedNamed with
-            member val Name = null
-            member val NameComponents = Array.empty<string>
-            member x.QualifiedName = null
+    //    interface IQualifiedNamed with
+    //        member val Name = null
+    //        member val NameComponents = Array.empty<string>
+    //        member x.QualifiedName = null
 
-    and DsSystem private (name:string, host:string, parentQualifiedName:IQualifiedNamed) =
-        inherit FqdnObject(name, parentQualifiedName)
+    type DsSystem private (name:string, host:string) =
+        inherit FqdnObject(name, createFqdnObject([||]))
 
-        member val ParentSystem:DsSystem option = None with get, set
-        member val Systems = createNamedHashSet<DsSystem>()
+        member val Devices = createNamedHashSet<Device>()
         member val Variables = ResizeArray<Variable>()
         member val Commands = ResizeArray<Command>()
         member val Observes = ResizeArray<Observe>()
@@ -61,13 +60,21 @@ module CoreModule =
         ///시스템 핸들링 대상여부   true : mySystem / false : exSystem
         member val Active = false with get, set
 
-        static member Create(name, host, parentSystem:DsSystem) =
-            let system = DsSystem(name, host, parentSystem)
-            system.ParentSystem <- Some parentSystem
-            parentSystem.Systems.Add(system) |> verifyM $"Duplicated system name [{name}]"
+        static member Create(name, host) =
+            let system = DsSystem(name, host)
             system
-        static member CreateTopLevel(name, host) =
-            DsSystem(name, host, createFqdnObject([||]) )
+
+    [<AbstractClass>]
+    type LoadedSystem(name:string, referenceSystem:DsSystem, containerSystem:DsSystem) =
+        inherit FqdnObject(name, containerSystem)
+        member val ContainerSystem = containerSystem
+        member val FilePath:string = null with get, set
+
+    type Device(referenceSystem:DsSystem, containerSystem:DsSystem) =
+        inherit LoadedSystem(referenceSystem.Name, referenceSystem, containerSystem)
+
+    type ExternalSystem(name:string, referenceSystem:DsSystem, containerSystem:DsSystem) =
+        inherit LoadedSystem(name, referenceSystem, containerSystem)
 
     and Flow private (name:string, system:DsSystem) =
         inherit FqdnObject(name, system)
@@ -235,22 +242,9 @@ module CoreModule =
         override x.ToString() = $"{x.Source.QualifiedName} {x.EdgeType.ToText()} {x.Target.QualifiedName}"
 
 
-
-[<AutoOpen>]
-module CoreHelperModule =
-    let collectHierarchicalSystemNames(system:DsSystem) =
-        let rec helper (system:DsSystem) =
-            [   yield system.Name
-                match system.ParentSystem with
-                | Some parent -> yield! helper parent
-                | _ -> ()
-            ]
-        helper system |> List.rev
-
 [<Extension>]
 type CoreExt =
     [<Extension>] static member GetSystem(call:Call) = call.Parent.GetSystem()
-    [<Extension>] static member CollectSystemNames(system:DsSystem) = collectHierarchicalSystemNames system
 
     [<Extension>]
     static member AddModelEdge(flow:Flow, source:string, edgetext:string, target:string) =

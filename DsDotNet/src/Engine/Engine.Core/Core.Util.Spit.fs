@@ -9,8 +9,9 @@ module SpitModuleHelper =
     type SpitOnlyAlias = { AliasKey:Fqdn; Mnemonic:Fqdn; FlowFqdn:Fqdn }
 
     type SpitCoreType =
-        | SpitModel     of Model
         | SpitDsSystem  of DsSystem
+        | SpitExternalSystem of ExternalSystem
+        | SpitDevice of Device
         | SpitFlow      of Flow
         | SpitReal      of Real
         | SpitCall      of Call
@@ -31,6 +32,11 @@ module SpitModuleHelper =
 
     let rec spitCall (call:Call) : SpitResults =
         [| yield SpitResult.Create(SpitCall call, call.NameComponents) |]
+    and spitDevice (device:Device) : SpitResults =
+        [| yield SpitResult.Create(SpitDevice device, device.NameComponents) |]
+    and spitExternalSystem (externalSystem:ExternalSystem) : SpitResults =
+        [| yield SpitResult.Create(SpitExternalSystem externalSystem, externalSystem.NameComponents) |]
+
     and spitSegment (segment:Real) : SpitResults =
         [|
             yield SpitResult.Create(SpitReal segment, segment.NameComponents)
@@ -62,31 +68,22 @@ module SpitModuleHelper =
                 yield! spit(flow)
                 for api in system.ApiItems -> SpitResult.Create(SpitApiItem api, api.NameComponents)
 
-            for sys in system.Systems do
-                yield! spit(sys)
+            for dev in system.Devices do
+                yield! spit(dev)
 
             for x in system.Variables -> SpitResult.Create(SpitVariable x, [| x.Name |] )
             for x in system.Commands ->  SpitResult.Create(SpitCommand x,  [| x.Name |] )
             for x in system.Observes ->  SpitResult.Create(SpitObserve x,  [| x.Name |] )
         |]
-    and spitModel (model:Model) : SpitResults =
-        [|
-            yield SpitResult.Create(SpitModel model, [||])
-            for sys in model.Systems do
-                yield! spit(sys)
-
-            for x in model.Variables -> SpitResult.Create(SpitVariable x, [| x.Name |] )
-            for x in model.Commands ->  SpitResult.Create(SpitCommand x,  [| x.Name |] )
-            for x in model.Observes ->  SpitResult.Create(SpitObserve x,  [| x.Name |] )
-        |]
     and spit(obj:obj) : SpitResults =
         match obj with
-        | :? Model    as m -> spitModel m
         | :? DsSystem as s -> spitSystem s
         | :? Flow     as f -> spitFlow f
         | :? Real     as r -> spitSegment r
         | :? Call     as c -> spitCall c
         | :? Alias    as a -> spitAlias a
+        | :? Device   as d -> spitDevice d
+        | :? ExternalSystem as e -> spitExternalSystem e
         | _ -> failwith $"ERROR: Unknown type {obj}"
 
     //let collectUpwardInformation(obj:obj) =
@@ -104,7 +101,6 @@ open Engine.Common.FS
 
 [<Extension>]
 type SpitModule =
-    [<Extension>] static member Spit (model:Model)     = spitModel model
     [<Extension>] static member Spit (system:DsSystem) = spitSystem system
     [<Extension>] static member Spit (flow:Flow)       = spitFlow flow
     [<Extension>] static member Spit (segment:Real)    = spitSegment segment
@@ -115,8 +111,9 @@ type SpitModule =
     [<Extension>]
     static member GetCore (spit:SpitResult):obj =
         match spit.SpitObj with
-        | SpitModel     c -> c
         | SpitDsSystem  c -> c
+        | SpitDevice  c -> c
+        | SpitExternalSystem c -> c
         | SpitFlow      c -> c
         | SpitReal      c -> c
         | SpitCall      c -> c

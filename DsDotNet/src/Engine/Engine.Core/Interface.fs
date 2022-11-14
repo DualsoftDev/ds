@@ -11,7 +11,7 @@ module Interface =
     type IBit  = interface end
     /// 이름
     type INamed  =
-         abstract Name:string with get  //,set
+         abstract Name:string with get, set
 
     type IRenameable =
         inherit INamed

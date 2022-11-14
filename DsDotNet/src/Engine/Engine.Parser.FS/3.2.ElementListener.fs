@@ -18,7 +18,8 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
 
 
     override x.EnterInterfaceDef(ctx:InterfaceDefContext) =
-        let hash = x._currentSystem.Value.ApiItems
+        let system = helper.TheSystem.Value
+        let hash = system.ApiItems
         let interrfaceNameCtx = findFirstChild<InterfaceNameContext>(ctx)
         let interfaceName = collectNameComponents(interrfaceNameCtx.Value)[0]
 
@@ -31,7 +32,7 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
         let findSegments(fqdns:Fqdn[]):Real[] =
             fqdns
                 .Where(fun fqdn -> fqdn <> null)
-                .Select(fun s -> x._currentSystem.Value.FindGraphVertex<Real>(s))
+                .Select(fun s -> system.FindGraphVertex<Real>(s))
                 .Tap(fun x -> assert(not (isItNull x)))
                 .ToArray()
 
@@ -39,7 +40,7 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
             enumerateChildren<CallComponentsContext>(ctx)
                 .Select(collectCallComponents)
                 .Tap(fun callComponents -> assert(callComponents.All(fun cc -> cc.Length = 2 || isWildcard(cc))))
-                .Select(fun callCompnents -> callCompnents.Select(fun cc -> if isWildcard(cc) then null else cc.Prepend(x._currentSystem.Value.Name).ToArray()).ToArray())
+                .Select(fun callCompnents -> callCompnents.Select(fun cc -> if isWildcard(cc) then null else cc.Prepend(system.Name).ToArray()).ToArray())
                 .ToArray()
 
         let item = hash.First(fun it -> it.Name = interfaceName)
@@ -55,7 +56,7 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
         let sysNames, flowName, parenting, ns = ci.Tuples
         let flow = x._flow.Value
         let vertexType = helper._causalTokenElements[ci]
-        let system = x._currentSystem.Value
+        let system = helper.TheSystem.Value
         let spits = system.Spit()
         let findSpits (ns:string seq) =
             spits.Where(fun sp -> sp.NameComponents = (ns.ToArray()) || sp.NameComponents.Combine() = ns.Combine()).ToArray()
@@ -147,4 +148,3 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
         | _ ->
             failwith "ERROR"
         x.UpdateModelSpits()
-        

@@ -1,6 +1,9 @@
 namespace Engine.Parser.FS
 
 open System.Linq
+open System.IO
+open System.Collections.Generic
+
 open Antlr4.Runtime.Tree
 open Antlr4.Runtime
 
@@ -9,7 +12,6 @@ open Engine.Parser
 open Engine.Core
 open type Engine.Parser.dsParser
 open type Engine.Parser.FS.DsParser
-open System.Collections.Generic
 
 
 /// <summary>
@@ -30,22 +32,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
                 match findFirstChild<HostContext>(ctx) with
                 | Some hostCtx -> hostCtx.GetText()
                 | None -> null
-
-            let system =
-                match x._theSystem, x._currentSystem with
-                | _, Some system ->
-                    DsSystem.Create(name, host, system)
-                | Some theSystem, None ->
-                    DsSystem.Create(name, host, theSystem)
-                | None, None ->
-                    let system = DsSystem.CreateTopLevel(name, host)
-                    helper._theSystem <- Some system
-                    system
-            helper._currentSystem <- Some system
-
-            //let sys = DsSystem.Create(name, host, x._model)
-            //helper._currentSystem <- Some sys
-            //helper._theSystem <- Some sys
+            helper.TheSystem <- Some <| DsSystem.Create(name, host)
             tracefn($"System: {name}")
             x.AddElement(getContextInformation ctx, GVT.System)
         | None ->
@@ -53,7 +40,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
 
     override x.EnterFlow(ctx:FlowContext) =
         let flowName = ctx.identifier1().GetText().DeQuoteOnDemand()
-        x._flow <- Some <| Flow.Create(flowName, x._currentSystem.Value)
+        x._flow <- Some <| Flow.Create(flowName, helper.TheSystem.Value)
         x.AddElement(getContextInformation ctx, GVT.Flow)
 
     override x.EnterParenting(ctx:ParentingContext) =
@@ -94,53 +81,19 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
         let aliasKey = ci.Names.ToArray()
         map.Add(aliasKey, aliasesHash)
 
-        //let alias = collectNameComponents(aliasDef)
-        //match alias.Length with
-        //    | 2 -> // {타시스템}.{interface명} or
-        //        x.AddElement(getContextInformation aliasDef, GVT.AliaseKey)
-        //    | 1 -> // { (my system / flow /) segment 명 }
-        //        x.AddElement(x.AppendPathElement(alias[0]), GVT.AliaseKey)
-        //    | _ ->
-        //        failwith "ERROR"
-
-        //let mnemonics =
-        //    enumerateChildren<AliasMnemonicContext>(ctx)
-        //        .Select(fun mctx -> collectNameComponents(mctx))
-        //        .Tap(fun mne -> assert(mne.Length = 1))
-        //        .Select(fun mne -> mne[0])
-        //        .ToHashSet()
-        //map.Add(ci.Names.ToArray(), mnemonics)
-        //for mne in mnemonics do
-        //    x.AddElement(x.AppendPathElement(mne), GVT.AliaseMnemonic)
-
-
 
     override x.EnterInterfaceDef(ctx:InterfaceDefContext) =
-        let hash = x._currentSystem.Value.ApiItems
+        let hash = helper.TheSystem.Value.ApiItems
         let interrfaceNameCtx = findFirstChild<InterfaceNameContext>(ctx).Value
         let interfaceName = collectNameComponents(interrfaceNameCtx)[0]
-        //let collectCallComponents(ctx:CallComponentsContext):Fqdn[] =
-        //    enumerateChildren<Identifier123Context>(ctx)
-        //        .Select(collectNameComponents)
-        //        .ToArray()
-
-
         let ser =   // { start ~ end ~ reset }
             enumerateChildren<CallComponentsContext>(ctx)
-                //.Select(collectCallComponents)
-                //.Tap(fun callComponents -> assert(callComponents.All(fun cc -> cc.Length = 2 || cc[0] = "_")))
-                //.Select(fun callCompnents -> callCompnents.Select(fun cc -> cc.Prepend(x._currentSystem.Value.Name).ToArray()).ToArray())
-                //.ToArray()
-
 
         x.AddElement(getContextInformation interrfaceNameCtx, GVT.ApiKey)
-        //for cc in ser do
-        //    x.AddElement(getContextInformation cc, GVT.ApiSER)
-
 
         // 이번 stage 에서 일단 interface 이름만 이용해서 빈 interface 객체를 생성하고,
         // TXs, RXs, Resets 은 다음 listener stage 에서 채움..
-        let api = ApiItem.Create(interfaceName, x._currentSystem.Value)
+        let api = ApiItem.Create(interfaceName, helper.TheSystem.Value)
         hash.Add(api) |> ignore
 
     override x.EnterInterfaceResetDef(ctx:InterfaceResetDefContext) =
@@ -155,10 +108,27 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
         for triple in (terms |> Array.windowed2 3 2) do
             if triple.Length = 3 then
                 let opnd1, op, opnd2 = triple[0], triple[1], triple[2]
-                let ri_ = ApiResetInfo.Create(x._currentSystem.Value, opnd1, op.ToModelEdge(), opnd2)
+                let ri_ = ApiResetInfo.Create(helper.TheSystem.Value, opnd1, op.ToModelEdge(), opnd2)
                 ()
 
-    override x.ExitModel(ctx:ModelContext) =
+    member private x.GetFilePath(fileSpecCtx:FileSpecContext) =
+        let path =
+            let filePath = fileSpecCtx.GetText().DeQuoteOnDemand()
+            let dir = helper.ParserOptions.ReferencePath
+            [filePath; $"{dir}\\{filePath}"].First(fun f -> File.Exists(f))
+        path
+
+
+    override x.EnterLoadDevice(ctx:LoadDeviceContext) =
+        let loadedName = collectNameComponents(ctx).Combine()
+        let filePath = x.GetFilePath(findFirstChild<FileSpecContext>(ctx).Value)
+        let device = fwdLoadDevice x._theSystem.Value loadedName filePath
+        x._theSystem.Value.Devices.Add(device) |> ignore
+
+    override x.EnterLoadExternalSystem(ctx:LoadExternalSystemContext) =
+        failwith "Not implemented"
+
+    override x.ExitSystem(ctx:SystemContext) =
         let adjustVertexType() =
             logInfo "---- Adjusting elements"
             let dic = helper._causalTokenElements
@@ -169,6 +139,9 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
                         ctx.Names = ctxInfo.Names && ctx.Flow = ctxInfo.Flow    // && ctx.Systems = ctxInfo.Systems
                         ).ToArray()
                 assert(vType.HasFlag(GVT.CausalToken))
+
+                if not x.ParserHelper.ParserOptions.IsSubSystemParsing then
+                    noop()
 
                 let vt =  (vType &&& ~~~GVT.CausalToken)
                 let types = nameMatches.Select(valueOfKeyValue).Fold((|||), GVT.None)
@@ -196,7 +169,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
                     logWarn $"{ctxInfo.FullName} : {dic[ctxInfo]} // from {vType}"
 
         let createNonParentedReals() =
-            let sys = x._theSystem.Value
+            let sys = helper.TheSystem.Value
             for KeyValue(ctxInfo, vType) in helper._causalTokenElements do
                 match vType with
                 | HasFlag GVT.Segment ->
@@ -224,7 +197,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
         createNonParentedReals()
 
         logInfo "---- Spit results"
-        logDebug "%s" <| x._theSystem.Value.Spit().Dump()
+        logDebug "%s" <| helper.TheSystem.Value.Spit().Dump()
 
         dumpCausalTokens "---- All Causal token elements"
 

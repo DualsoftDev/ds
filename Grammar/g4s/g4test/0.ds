@@ -1,5 +1,6 @@
 [sys ip = localhost] T6_Alias = {
     [flow] Page1 = {
+        // comment
     }
     [flow] AndFlow = {
         R2 > R3;
@@ -12,4 +13,9 @@
             R3 = { Copy1_R3; }
         }
     }
+    [external file="c:\\my.ds" ip="192.168.0.1"] B;
+    [device file="c:/my.a.b.c.d.e.ds"] B;
+    // [device file=c:/my.a.b.c.d.e.ds] C;      //<-- illegal
 }
+// comment
+/* comment */

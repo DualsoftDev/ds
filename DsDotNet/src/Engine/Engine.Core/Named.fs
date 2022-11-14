@@ -53,13 +53,12 @@ module TextUtil =
     [<AbstractClass>]
     [<DebuggerDisplay("{Name}")>]
     type Named(name) =
-        let mutable name = name
         interface INamed with
-            member x.Name with get () = x.Name
+            member x.Name with get () = x.Name and set(v) = x.Name <- v
 
         member val Name : string = name with get, set
         abstract ToText : unit -> string
-        default x.ToText() = name
+        default x.ToText() = x.Name
 
     let internal nameComparer<'T when 'T:> INamed>() = {
         new IEqualityComparer<'T> with
@@ -103,9 +102,9 @@ module TextUtil =
     type FqdnObject(name:string, parent:IQualifiedNamed) =
         inherit Named(name)
         interface IQualifiedNamed with
-            member val NameComponents = [| yield! parent.NameComponents; name |]
+            member x.NameComponents = [| yield! parent.NameComponents; x.Name |]
             member x.QualifiedName = combine "." x.NameComponents
-        member x.Name with get() = (x :> INamed).Name
+        member x.Name with get() = (x :> INamed).Name and set(v) = (x :> INamed).Name <- v
         member x.NameComponents = (x :> IQualifiedNamed).NameComponents
         member x.QualifiedName = (x :> IQualifiedNamed).QualifiedName
         abstract member GetRelativeName: Fqdn -> string

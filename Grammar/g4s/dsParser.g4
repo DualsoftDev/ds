@@ -20,21 +20,30 @@ parser grammar dsParser;
 options { tokenVocab=dsLexer; } // use tokens from dsLexer.g4
 
 
-model: (system|variables|commands|observes|comment)* EOF;        // importStatement|cpus
+// model: (system|)* EOF;        // importStatement|cpus
 comment: BLOCK_COMMENT | LINE_COMMENT;
 
-system: '[' 'sys' (('ip'|'host') '=' host)? ']' systemName '=' (sysBlock|sysCopySpec);    // [sys] Seg = {..}
+system: '[' SYS ipSpec? ']' systemName '=' (sysBlock);    // [sys] Seg = {..}
     sysBlock
-        : LBRACE (flow | interfaces | buttons | systemProperties | modelProperties | system)* RBRACE       // identifier1Listing|parenting|causal|call
+        : LBRACE (flow | loadDevice | loadExternalSystem | interfaces | buttons | systemProperties | modelProperties | variables|commands|observes)* RBRACE       // identifier1Listing|parenting|causal|call
         ;
-    host: ipv4 | domainName;
-    domainName: IDENTIFIER1 | IDENTIFIER2 | IDENTIFIER3 | IDENTIFIER4;  // identifier1234;
-    ipv4: IPV4;
     systemName:identifier1;
 
-//[sys] B = @copy_system(A);
-sysCopySpec: '@' 'copy_system' LPARENTHESIS sourceSystemName RPARENTHESIS SEIMCOLON;
-    sourceSystemName:identifier1;
+ipSpec: ('ip'|'host') '=' host;
+    host: ipv4 | etcName;
+    etcName: IDENTIFIER1 | IDENTIFIER2 | IDENTIFIER3 | IDENTIFIER4;  // identifier1234;
+    ipv4: IPV4;
+fileSpec: 'file' '=' filePath;
+    etcName1: IDENTIFIER1;
+    filePath: etcName1;
+
+//[device file="c:\my.ds"] B;
+loadDevice: '[' 'device' fileSpec ']' deviceName SEIMCOLON;
+    deviceName:identifier1;
+//[external file="c:\my.ds"] B;
+loadExternalSystem: '[' EXTERNAL_SYSTEM fileSpec ipSpec ']' externalSystemName SEIMCOLON;
+    externalSystemName:identifier1;
+
 layouts: '[' 'layouts' ']' (identifier1)? '=' layoutsBlock;
     layoutsBlock
         : LBRACE (positionDef)* RBRACE

@@ -188,29 +188,29 @@ module internal ToCopyModule =
     //        copySystem(origSys, copySys)|>ignore)
     //    copyMoodel
 
-[<Extension>]
-type ToCopyModuleHelper =
-    [<Extension>] static member TryFindSystem(model:Model, systemName:string)    =
-                    if model.TheSystem.IsSome
-                    then  if model.TheSystem.Value.Name = systemName
-                            then model.TheSystem.Value
-                            else model.TheSystem.Value.Systems.FirstOrDefault(fun sys -> sys.Name = systemName)
+//[<Extension>]
+//type ToCopyModuleHelper =
+//    [<Extension>] static member TryFindSystem(model:Model, systemName:string)    =
+//                    if model.TheSystem.IsSome
+//                    then  if model.TheSystem.Value.Name = systemName
+//                            then model.TheSystem.Value
+//                            else model.TheSystem.Value.Systems.FirstOrDefault(fun sys -> sys.Name = systemName)
 
-                    else model.Systems.FirstOrDefault(fun sys -> sys.Name = systemName)
+//                    else model.Systems.FirstOrDefault(fun sys -> sys.Name = systemName)
 
-    //[<Extension>] static member ToCopy(model:Model) = copyModel(model)
-    [<Extension>] static member ToCopy(system:DsSystem, copySys:DsSystem) = copySystem(system, copySys)
-    [<Extension>] static member ToCopy(system:DsSystem, copySysName:string) =
-                    //copy 시에 상위레벨 복사 무시
-                    let copySys = DsSystem.Create(copySysName, system.Host, DsSystem.CreateTopLevel("",""))
-                    copySystem(system, copySys)
-    [<Extension>] static member ToCopy(flow:Flow, copySystem:DsSystem) =
-                    let newFlow = Flow.Create(flow.Name, copySystem)
-                    copyFlow(flow, newFlow)
-    [<Extension>] static member ToCopy(flow:Flow, copyflow:Flow)   = copyFlow(flow, copyflow)
-    [<Extension>] static member ToCopy(apiItem:ApiItem, copySystem:DsSystem) = copyApi(apiItem, copySystem)
-    [<Extension>] static member ToCopy(apiItem:ApiItem, copyApiItem:ApiItem) = copyTxRx(apiItem, copyApiItem)
-    [<Extension>] static member ToCopy(apiResetInfo:ApiResetInfo, copySystem:DsSystem) = copyApiInfo(apiResetInfo, copySystem)
+//    //[<Extension>] static member ToCopy(model:Model) = copyModel(model)
+//    [<Extension>] static member ToCopy(system:DsSystem, copySys:DsSystem) = copySystem(system, copySys)
+//    [<Extension>] static member ToCopy(system:DsSystem, copySysName:string) =
+//                    //copy 시에 상위레벨 복사 무시
+//                    let copySys = DsSystem.Create(copySysName, system.Host, DsSystem.CreateTopLevel("",""))
+//                    copySystem(system, copySys)
+//    [<Extension>] static member ToCopy(flow:Flow, copySystem:DsSystem) =
+//                    let newFlow = Flow.Create(flow.Name, copySystem)
+//                    copyFlow(flow, newFlow)
+//    [<Extension>] static member ToCopy(flow:Flow, copyflow:Flow)   = copyFlow(flow, copyflow)
+//    [<Extension>] static member ToCopy(apiItem:ApiItem, copySystem:DsSystem) = copyApi(apiItem, copySystem)
+//    [<Extension>] static member ToCopy(apiItem:ApiItem, copyApiItem:ApiItem) = copyTxRx(apiItem, copyApiItem)
+//    [<Extension>] static member ToCopy(apiResetInfo:ApiResetInfo, copySystem:DsSystem) = copyApiInfo(apiResetInfo, copySystem)
 
 
 

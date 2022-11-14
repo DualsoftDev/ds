@@ -13,7 +13,7 @@ module ImportM =
 
     type internal ImportPowerPoint(path:string) =
         let doc   = pptDoc(path)
-        let model = CoreModule.Model()
+        let mutable theSystem:DsSystem option = None
 
         member internal x.GetImportModel() =
             try
@@ -22,7 +22,7 @@ module ImportM =
                 ImportU.dicCopy.Clear()
                 ImportU.dicFlow.Clear()
                 ImportU.dicVertex.Clear()
-                let topSystem = DsSystem.CreateTopLevel(doc.Name,"localhost")
+                theSystem <- DsSystem.Create(doc.Name,"localhost")
 
                 model.TheSystem  <- Some topSystem
                 topSystem.Active <- true

@@ -14,8 +14,7 @@ open Engine.Core
 module ImportCheck =
 
         let GetDemoModel(sysName:string) =
-            let model = Model()
-            let sys   = DsSystem.Create(sysName, "", DsSystem.CreateTopLevel("top", ""))
+            let sys   = DsSystem.Create(sysName, "top")
             sys.Active <- true
             let flow = Flow.Create("P0", sys)
             let vertexs = HashSet<Real>()
@@ -37,7 +36,7 @@ module ImportCheck =
             flow.ModelingEdges.Add(ModelingEdgeInfo(v("ETC"), TextStartEdge, v("상호행위간섭")))|>ignore
             flow.ModelingEdges.Add(ModelingEdgeInfo(v("ETC"), TextStartReset, v("시작후행리셋")))|>ignore
 
-            model
+            sys
 
         let SameParent(parents:ConcurrentDictionary<pptNode, seq<pptNode>>, edge:pptEdge) =
             let failError (parents:pptNode seq, node:pptNode)=

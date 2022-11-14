@@ -21,9 +21,7 @@ type ListenerBase(parser:dsParser, helper:ParserHelper) =
         parser.Reset()
 
     member x.ParserHelper = helper
-    member internal _._model = helper.Model
-    member internal _._currentSystem = helper._currentSystem
-    member internal _._theSystem = helper._theSystem
+    member internal _._theSystem = helper.TheSystem
     member internal _._modelSpits = helper._modelSpits
     member internal _._modelSpitObjects = helper._modelSpitObjects
     member internal _._flow       with get() = helper._flow      and set(v) = helper._flow      <- v
@@ -59,37 +57,37 @@ type ListenerBase(parser:dsParser, helper:ParserHelper) =
 
 
 
-    override x.EnterModel(ctx:ModelContext) = x.UpdateModelSpits()
-
     override x.EnterSystem(ctx:SystemContext) =
-        let name = ctx.systemName().GetText().DeQuoteOnDemand()
-        let theSystem = helper._theSystem.Value
+        //let name = ctx.systemName().GetText().DeQuoteOnDemand()
+        //let theSystem = helper.TheSystem
 
-        let ns = collectSystemNames ctx
+        //let ns = collectSystemNames ctx
 
-        helper._currentSystem <-
-            if theSystem.NameComponents = ns then
-                helper._theSystem
-            else
-                theSystem.Systems.TryFind(fun sys -> sys.NameComponents = ns)
-
-        //match x._currentSystem with
-        //| None ->
-        //    let ns = collectNameComponents ctx
+        //helper.TheSystem <-
         //    if theSystem.NameComponents = ns then
-        //        helper._currentSystem <- helper._theSystem
+        //        helper.theSystem
         //    else
-        //        helper._currentSystem <- theSystem.Systems.TryFind(fun sys -> sys.NameComponents = ns)
-        //| Some curSys ->
-        //    helper._currentSystem <- Some <| curSys.Systems.Find(fun s -> s.Name = name)
+        //        theSystem.Systems.TryFind(fun sys -> sys.NameComponents = ns)
 
-        assert (helper._currentSystem.IsSome)
+        ////match x._currentSystem with
+        ////| None ->
+        ////    let ns = collectNameComponents ctx
+        ////    if theSystem.NameComponents = ns then
+        ////        helper._currentSystem <- helper._theSystem
+        ////    else
+        ////        helper._currentSystem <- theSystem.Systems.TryFind(fun sys -> sys.NameComponents = ns)
+        ////| Some curSys ->
+        ////    helper._currentSystem <- Some <| curSys.Systems.Find(fun s -> s.Name = name)
 
-    override x.ExitSystem(ctx:SystemContext) = helper._currentSystem <- None
+        //assert (helper._currentSystem.IsSome)
+
+        x.UpdateModelSpits()
+
+    //override x.ExitSystem(ctx:SystemContext) = helper._currentSystem <- None
 
     override x.EnterFlow(ctx:FlowContext) =
         let flowName = ctx.identifier1().GetText().DeQuoteOnDemand()
-        let flow = x._currentSystem.Value.Flows.TryFind(fun f -> f.Name = flowName)
+        let flow = helper.TheSystem.Value.Flows.TryFind(fun f -> f.Name = flowName)
         assert(flow.IsSome)
         x._flow <- flow
 

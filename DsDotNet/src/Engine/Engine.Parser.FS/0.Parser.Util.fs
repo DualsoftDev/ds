@@ -38,26 +38,31 @@ module ParserUtil =
               ReplaceText = replace }
 
 
-    let getReplacedText (ruleContextToTextify:ParserRuleContext) (replaces:RangeReplace seq) =
-        let text = getOriginalText ruleContextToTextify
-        let offset = ruleContextToTextify.Start.StartIndex
-        let hash = HashSet<RangeReplace>()
+    //let getReplacedText (ruleContextToTextify:ParserRuleContext) (replaces:RangeReplace seq) =
+    //    let text = getOriginalText ruleContextToTextify
+    //    let offset = ruleContextToTextify.Start.StartIndex
+    //    let hash = HashSet<RangeReplace>()
 
-        let mutable i = 0
-        let folder (z:string) (x:char) =
-            let range = replaces |> Seq.tryFind (fun r -> r.Start - offset - 1 <= i && i <= r.End - offset)       // -1 for bug???
-            i <- i + 1
-            match range with
-            | Some r ->
-                if hash.Contains(r) then
-                    z
-                else
-                    hash.Add(r) |> ignore
-                    z + r.ReplaceText
-            | None ->
-                z + (x |> string)
-        let replaced = text.ToList().FoldLeft(folder, "")
-        replaced
+    //    let mutable i = 0
+    //    let folder (z:string) (x:char) =
+    //        let range = replaces |> Seq.tryFind (fun r -> r.Start - offset - 1 <= i && i <= r.End - offset)       // -1 for bug???
+    //        i <- i + 1
+    //        match range with
+    //        | Some r ->
+    //            if hash.Contains(r) then
+    //                z
+    //            else
+    //                hash.Add(r) |> ignore
+    //                z + r.ReplaceText
+    //        | None ->
+    //            z + (x |> string)
+    //    let replaced = text.ToList().FoldLeft(folder, "")
+    //    replaced
+
+    let dummyDeviceLoader (theSystem:DsSystem) (loadedName:string) (dsFilePath:string) : Device = failwith "Should be reimplemented."
+    let dummyExternalSystemLoader (theSystem:DsSystem) (loadedName:string) (dsFilePath:string) : ExternalSystem = failwith "Should be reimplemented."
+    let mutable fwdLoadDevice = dummyDeviceLoader
+    let mutable fwdLoadExternalSystem = dummyExternalSystemLoader
 
     [<DebuggerDisplay("{FullName}({ContextType.Name})")>]
     type ContextInformation = {
@@ -101,4 +106,4 @@ module ParserUtil =
 [<Extension>]
 type ParserExt =
     [<Extension>] static member GetOriginalText(ctx:ParserRuleContext) = getOriginalText ctx
-    [<Extension>] static member GetReplacedText(ctx:ParserRuleContext, replaces:RangeReplace seq) = getReplacedText ctx replaces
+    //[<Extension>] static member GetReplacedText(ctx:ParserRuleContext, replaces:RangeReplace seq) = getReplacedText ctx replaces

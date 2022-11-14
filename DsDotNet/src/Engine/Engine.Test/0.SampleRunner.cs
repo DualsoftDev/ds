@@ -8,8 +8,8 @@ internal class SampleRunner
 {
     public static void Run(string text)
     {
-        var helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation("ActiveCpuName"));
-        var model = helper.Model;
+        var helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation(".", "ActiveCpuName"));
+        var system = helper.TheSystem.Value;
         //Try("1 + 2 + 3");
         //Try("1 2 + 3");
         //Try("1 + +");
@@ -21,7 +21,7 @@ internal class SampleRunner
         }
 
         Trace.WriteLine("---- Spit result");
-        var spits = model.Spit();
+        var spits = system.Spit();
         foreach (var spit in spits)
         {
             var tName = spit.GetCore().GetType().Name;

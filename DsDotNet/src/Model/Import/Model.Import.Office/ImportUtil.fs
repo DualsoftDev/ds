@@ -19,7 +19,7 @@ module ImportU =
     let dicFlow = Dictionary<int, Flow>() // page , flow
     let dicVertex = Dictionary<string, Vertex>()
 
-    let private createVertex(model:Model, node:pptNode, parentReal:Real Option, parentFlow:Flow Option, dicSeg:Dictionary<string, Vertex>) =
+    let private createVertex(system:DsSystem, node:pptNode, parentReal:Real Option, parentFlow:Flow Option, dicSeg:Dictionary<string, Vertex>) =
 
         if(parentReal.IsNone && parentFlow.IsNone)  then () //alias 지정후 다시 생성
         else
@@ -28,21 +28,24 @@ module ImportU =
                 let real = Real.Create([|node.Name|], parentFlow.Value)
                 dicSeg.Add(node.Key, real)
             else
-                let sysName, ApiName = GetSysNApi(node.PageTitle, node.Name)
-                let system = model.TryFindSystem(sysName)
-                let findApi = if(system.IsNull())
-                                then Office.ErrorPPT(Name, ErrID._47, $"원인이름{sysName}: 전체이름[{node.Shape.InnerText}] 해당도형[{node.Shape.ShapeName()}]", node.PageNum)
-                                else system.TryFindApiItem(ApiName)
+                failwith "Need to fix"
+                // <ahn>
 
-                if findApi.IsNull()
-                then Office.ErrorPPT(Name, ErrID._42, $"원인이름{ApiName}: 전체이름[{node.Shape.InnerText}] 해당도형[{node.Shape.ShapeName()}]", node.PageNum)
+                //let sysName, ApiName = GetSysNApi(node.PageTitle, node.Name)
+                //let system = model.TryFindSystem(sysName)
+                //let findApi = if(system.IsNull())
+                //                then Office.ErrorPPT(Name, ErrID._47, $"원인이름{sysName}: 전체이름[{node.Shape.InnerText}] 해당도형[{node.Shape.ShapeName()}]", node.PageNum)
+                //                else system.TryFindApiItem(ApiName)
 
-                let call =
-                    if(parentReal.IsSome)
-                    then  Call.Create(findApi, Real parentReal.Value)
-                    else  Call.Create(findApi, Flow parentFlow.Value)
+                //if findApi.IsNull()
+                //then Office.ErrorPPT(Name, ErrID._42, $"원인이름{ApiName}: 전체이름[{node.Shape.InnerText}] 해당도형[{node.Shape.ShapeName()}]", node.PageNum)
 
-                dicSeg.Add(node.Key, call)
+                //let call =
+                //    if(parentReal.IsSome)
+                //    then  Call.Create(findApi, Real parentReal.Value)
+                //    else  Call.Create(findApi, Flow parentFlow.Value)
+
+                //dicSeg.Add(node.Key, call)
 
 
     let private getParent(edge:pptEdge, parents:ConcurrentDictionary<pptNode, seq<pptNode>>, dicSeg:Dictionary<string, Vertex>) =

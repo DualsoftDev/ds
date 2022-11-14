@@ -150,22 +150,25 @@ C4 > C5;
         A."+" > A."-";
         A."-" > B."+";
     }
-    [sys] A = {
-        [flow] F = {
-            Vp > Pp > Sp;
-            Vm > Pm > Sm;
+    [device file="cylinder.ds"] A;
+    [device file="cylinder.ds"] B;
 
-            Vp |> Pm |> Sp;
-            Vm |> Pp |> Sm;
-            Vp <||> Vm;
-        }
-        [interfaces] = {
-            "+" = { F.Vp ~ F.Sp }
-            "-" = { F.Vm ~ F.Sm }
-            "+" <||> "-";
-        }
-    }
-    [sys] B = @copy_system(A);
+    //[sys] A = {
+    //    [flow] F = {
+    //        Vp > Pp > Sp;
+    //        Vm > Pm > Sm;
+
+    //        Vp |> Pm |> Sp;
+    //        Vm |> Pp |> Sm;
+    //        Vp <||> Vm;
+    //    }
+    //    [interfaces] = {
+    //        "+" = { F.Vp ~ F.Sp }
+    //        "-" = { F.Vm ~ F.Sm }
+    //        "+" <||> "-";
+    //    }
+    //}
+    //[sys] B = @copy_system(A);
 }
 
 """
@@ -742,8 +745,8 @@ C4 > C5;
 
 
     let ParseNormal(text:string) =
-        let helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation("ActiveCpuName"))
-        let model = helper.Model
+        let helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation(".", "ActiveCpuName"))
+        let system = helper.TheSystem.Value
 
         //Try("1 + 2 + 3")
         //Try("1 2 + 3")
@@ -753,7 +756,7 @@ C4 > C5;
             tracefn $"{p} :{types}"
 
         tracefn "---- Spit result"
-        let spits = model.Spit()
+        let spits = system.Spit()
         for spit in spits do
             match spit.SpitObj with
             | SpitFlow f -> f.Graph.Dump() |> ignore

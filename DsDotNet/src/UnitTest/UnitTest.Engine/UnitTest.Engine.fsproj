@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
@@ -29,7 +29,7 @@
 		<Compile Include="Model\Model.fs" />
 		<Compile Include="Model\ModelGraph.fs" />
 		<Compile Include="Model\ExpressionTest.fs" />
-		<Compile Include="ImportPPT\pptTest.fs" />
+		<!--<Compile Include="ImportPPT\pptTest.fs" />-->
 		<Compile Include="EntryPoint.fs" />
 		<None Include="Obsolete\0.ModelTest_Common.fsx" />
 		<None Include="Obsolete\1.ModelExtension.fsx" />
@@ -53,7 +53,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\..\Engine\Engine.CpuUnit\Engine.Cpu.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Test\Engine.Sample.csproj" />
-		<ProjectReference Include="..\..\Model\Import\Model.Import.Office\Model.Import.Office.fsproj" />
+		<!--<ProjectReference Include="..\..\Model\Import\Model.Import.Office\Model.Import.Office.fsproj" />-->
 	</ItemGroup>
 	<ItemGroup>
 	  <Reference Include="log4net">

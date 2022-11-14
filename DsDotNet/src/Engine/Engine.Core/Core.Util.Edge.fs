@@ -93,10 +93,8 @@ module EdgeModule =
         for f in system.Flows do
             createMRIEdgesTransitiveClosure f
 
-    let validateModel(model:Model) =
-        let cores =
-            model.TheSystem.Value.Spit()
-                .Select(fun sp -> sp.GetCore())
+    let validateSystem(system:DsSystem) =
+        let cores = system.Spit().Select(fun sp -> sp.GetCore())
 
         for f in cores.OfType<Flow>() do
             try
@@ -116,11 +114,9 @@ type EdgeExt =
     [<Extension>] static member CreateEdges(segment:Real, modelingEdgeInfo:ModelingEdgeInfo<Vertex>) =
                     createChildEdges(segment, modelingEdgeInfo)
 
-    [<Extension>] static member CreateMRIEdgesTransitiveClosure(model:Model) =
-                    for sys in model.Systems do
-                        createMRIEdgesTransitiveClosure4System sys
-
-    [<Extension>] static member Validate(model:Model) = validateModel model
+    [<Extension>] static member CreateMRIEdgesTransitiveClosure(system:DsSystem) =
+                        createMRIEdgesTransitiveClosure4System system
+    [<Extension>] static member Validate(system:DsSystem) = validateSystem system
 
     [<Extension>] static member OfStrongResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofStrongResetEdge edges
     [<Extension>] static member OfWeakResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofWeakResetEdge edges

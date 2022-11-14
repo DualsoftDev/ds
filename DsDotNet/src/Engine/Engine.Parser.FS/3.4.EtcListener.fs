@@ -83,7 +83,7 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
             ]
 
         let sysNames, flowName, parenting_, ns_ = (getContextInformation ctx).Tuples
-        let curSystem = x.ParserHelper.TryFindSystem(sysNames.ToArray()).Value
+        let curSystem = x.ParserHelper.TheSystem.Value
 
         for (key, values) in safetyKvs do
             let seg:Real =
@@ -119,24 +119,24 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
         let varName = findFirstChild<VarNameContext>(context).Value.GetText()
         let varType = findFirstChild<VarTypeContext>(context).Value.GetText()
         let init    = findFirstChild<ArgumentContext>(context).Value.GetText()
-        x._model.Variables.Add(new Variable(varName, varType, init))
+        helper.TheSystem.Value.Variables.Add(new Variable(varName, varType, init))
 
     override x.EnterCommandDef(context:CommandDefContext) =
         let cmdName    = findFirstChild<CmdNameContext>(context).Value.GetText()
         let funApplCtx = findFirstChild<FunApplicationContext>(context).Value
         let funAppl    = x.CreateFunctionApplication(funApplCtx)
         let command    = new Command(cmdName, funAppl)
-        x._model.Commands.Add(command)
+        helper.TheSystem.Value.Commands.Add(command)
 
     override x.EnterObserveDef(context:ObserveDefContext) =
         let obsName    = findFirstChild<ObserveNameContext>(context).Value.GetText()
         let funApplCtx = findFirstChild<FunApplicationContext>(context).Value
         let funAppl    = x.CreateFunctionApplication(funApplCtx)
         let observes   = new Observe(obsName, funAppl)
-        x._model.Observes.Add(observes)
+        helper.TheSystem.Value.Observes.Add(observes)
 
 
-    override x.ExitModel(ctx:ModelContext) =
+    override x.ExitSystem(ctx:SystemContext) =
         x.UpdateModelSpits()
         (* [layouts] = {
                L.T.Cp = (30, 50)            // xy
@@ -150,7 +150,7 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
         let positionDefs = enumerateChildren<PositionDefContext>(ctx).ToArray()
         for posiDef in positionDefs do
             let apiPath = collectNameComponents(posiDef.apiPath())
-            let apiItem = x._model.FindApiItem(apiPath)
+            let apiItem = helper.TheSystem.Value.FindApiItem(apiPath)
             let xywh = posiDef.xywh()
 
             match xywh.x().GetText(), xywh.y().GetText(), xywh.w().GetText(), xywh.h().GetText() with

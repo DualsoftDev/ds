@@ -119,8 +119,8 @@ module internal ToDsTextModule =
 
             for d in system.Devices do
                 match d with
-                | :? ExternalSystem as es -> yield $"{tab}[external file={es.FilePath}] {es.Name};"
-                | :? Device as d -> yield $"{tab}[device file={d.FilePath}] {d.Name};"
+                | :? ExternalSystem as es -> yield $"{tab}[external file={es.AbsoluteFilePath}] {es.Name};"
+                | :? Device as d -> yield $"{tab}[device file={d.AbsoluteFilePath}] {d.Name};"
                 | _ -> failwith "ERROR"
 
 

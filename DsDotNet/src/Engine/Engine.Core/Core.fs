@@ -13,8 +13,7 @@ module CoreModule =
         new IQualifiedNamed with
             member _.Name with get() = nameComponents.LastOrDefault() and set(v) = failwith "ERROR"
             member _.NameComponents = nameComponents
-            member x.QualifiedName = nameComponents.Combine()
-    }
+            member x.QualifiedName = nameComponents.Combine() }
 
     type DsSystem private (name:string, host:string) =
         inherit FqdnObject(name, createFqdnObject([||]))
@@ -52,9 +51,12 @@ module CoreModule =
     [<AbstractClass>]
     type LoadedSystem(name:string, referenceSystem:DsSystem, containerSystem:DsSystem) =
         inherit FqdnObject(name, containerSystem)
+        /// Loading 된 system 을 포함하는 container system
         member val ContainerSystem = containerSystem
+        /// Loading 된 system 참조 용
         member val ReferenceSystem = referenceSystem
-        member val FilePath:string = null with get, set
+
+        member val AbsoluteFilePath:string = null with get, set
 
     type Device(referenceSystem:DsSystem, containerSystem:DsSystem) =
         inherit LoadedSystem(referenceSystem.Name, referenceSystem, containerSystem)
@@ -84,8 +86,7 @@ module CoreModule =
         interface INamedVertex
         member _.Parent = parent
         member _.PureNames = names
-        member x.FlatNameComponents = parent.GetCore().NameComponents @ x.PureNames
-        override x.GetRelativeName(referencePath:Fqdn) = x.PureNames.Combine()   // todo
+        override x.GetRelativeName(referencePath:Fqdn) = x.PureNames.Combine()
 
     /// Segment (DS Basic Unit)
     and [<DebuggerDisplay("{QualifiedName}")>]

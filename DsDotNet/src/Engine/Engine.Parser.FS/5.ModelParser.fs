@@ -66,14 +66,14 @@ module ModelParser =
                 let system = loadSystemFromDsFile (dsFilePath, loadedName)
                 system.Name <- loadedName
                 Device(system, constainerSystem)
-            device.FilePath <- dsFilePath
+            device.AbsoluteFilePath <- dsFilePath
             device
 
         let loadExternalSystem (constainerSystem:DsSystem) (dsFilePath, loadedName) =
             let externalSystem =
                 let system = loadSystemFromDsFile (dsFilePath, loadedName)
                 ExternalSystem(loadedName, system, constainerSystem)
-            externalSystem.FilePath <- dsFilePath
+            externalSystem.AbsoluteFilePath <- dsFilePath
             externalSystem
 
         fwdLoadDevice <- loadDevice

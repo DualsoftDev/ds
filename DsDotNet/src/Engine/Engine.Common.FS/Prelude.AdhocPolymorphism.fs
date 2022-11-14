@@ -91,7 +91,7 @@ module PreludeAdhocPolymorphism =
         static member (?<-) (FAdhoc_orElse, x:array<'a> , y:array<'a>)   = if Array.isEmpty x then x else y
 
     let inline bind        f x = FAdhoc_bind        $ x <| f
-    let inline (>>=)       f x = FAdhoc_bind        $ x <| f
+    let inline (>>=)       x f = FAdhoc_bind        $ x <| f
     let inline bindi       f x = FAdhoc_bindi       $ x <| f
     let inline choosei     f x = FAdhoc_choosei     $ x <| f
     let inline chunkBySize f x = FAdhoc_chunkBySize $ x <| f
@@ -107,9 +107,7 @@ module PreludeAdhocPolymorphism =
     (* Operators *)
 
     /// map
-    let inline ( => )      x f = FAdhoc_map         $ x <| f
-    /// bind
-    let inline ( ==> )     x f = FAdhoc_bind        $ x <| f
+    let inline ( ==> )     x f = FAdhoc_map         $ x <| f
     /// choice on option type
     let inline ( <|> )     x y = (?<-) FAdhoc_orElse x y
     /// append two lists / arrays / sequences
@@ -117,23 +115,47 @@ module PreludeAdhocPolymorphism =
     /// append element to a list / array / sequence
     let inline ( ++ )      x y = (?<-) FAdhoc_Xpend  x y
 
+    /// get default arguments.
+    let (|?) = defaultArg
 
+    // https://riptutorial.com/fsharp/example/16297/how-to-compose-values-and-functions-using-common-operators
+
+    /// kliesli for option
+    (* tf: ('a -> 'b option) -> uf: ('b -> 'c option) -> v: 'a -> 'c option *)
+    let inline (>=>) tf uf = fun v -> tf v >>= uf      // == fun v -> (tf v) >>= uf
+
+    (* uf: ('a -> 'b option) -> tf: ('c -> 'a option) -> v: 'c -> 'b option
+        v: 'b option <- 'c <- uf: ('b option <- 'a ) <- tf: ('a option <- 'c)
+        *)
+    let inline (<=<) uf tf = fun v -> tf v >>= uf
 
     let private testme() =
         let verify c = if not c then failwith "ERROR"
-        verify ( (Some 1 <|> None) = Some 1 )
+        let some1, some2, some3 = Some 1, Some 2, Some 3
+        verify ( some1 <|> None = some1 )
         verify ( ([1..10] <|> []) = [1..10] )
         verify ( ([] <|> [1..10] <|> []) = [1..10] )
 
         let lift (f: 'a -> 'b) (x: 'a) = f x
 
         let incrOption x = Some (x + 1)
-        verify ( (incrOption >>= Some 2) = Some 3)
-        verify ( (Some 2 ==> incrOption) = Some 3)
+        verify ( some2 >>= incrOption = some3)
+        verify ( bind incrOption some2 = some3)
+
+        let dincr = incrOption >=> incrOption
+        verify (dincr 1 = some3)
+
+        let incrList x = [ x + 1 ]
+        let lincr = incrList >=> incrList
+        verify (lincr 3 = [5])
 
         let incr x = x + 1
-        verify( ([1..5] => incr) = [2..6])
+        verify( ([1..5] ==> incr) = [2..6])
+        verify( map incr some2 = some3)
+
         verify( (map incr [1..5]) = [2..6])
+        verify( map incr some2 = some3)
+
 
         ()
 

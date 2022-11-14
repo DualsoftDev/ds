@@ -119,6 +119,11 @@ module internal ToDsTextModule =
             for f in system.Flows do
                 yield flowToDs f indent
 
+            for d in system.Devices do
+                match d with
+                | :? ExternalSystem as es -> yield $"{tab}[external file={es.FilePath}] {es.Name};"
+                | :? Device as d -> yield $"{tab}[device file={d.FilePath}] {d.Name};"
+
 
             let tab = getTab indent
             let tab2 = getTab (indent+1)

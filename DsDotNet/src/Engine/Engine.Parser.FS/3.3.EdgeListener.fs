@@ -22,6 +22,7 @@ type EdgeListener(parser:dsParser, helper:ParserHelper) =
 
 
     override x.EnterSystem(ctx:SystemContext) =
+        base.EnterSystem(ctx)
         let modelSpitCores = x._modelSpits.Select(fun spit -> spit.GetCore()).ToArray()
         for ac in x.ParserHelper.AliasCreators do
             let (name, parent, target) = (ac.Name, ac.Parent, ac.Target)

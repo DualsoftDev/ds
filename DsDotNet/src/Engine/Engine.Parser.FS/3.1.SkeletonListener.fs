@@ -25,13 +25,16 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
 
 
     override x.EnterSystem(ctx:SystemContext) =
+        base.EnterSystem(ctx)
+
         match findFirstChild<SysBlockContext>(ctx) with
         | Some sysBlockCtx_ ->
-            let name = ctx.systemName().GetText().DeQuoteOnDemand()
+            let name = defaultArg helper.ParserOptions.LoadedSystemName (ctx.systemName().GetText().DeQuoteOnDemand())
             let host =
                 match findFirstChild<HostContext>(ctx) with
                 | Some hostCtx -> hostCtx.GetText()
                 | None -> null
+            //let name = helper.ParserOptions.LoadedSystemName
             helper.TheSystem <- Some <| DsSystem.Create(name, host)
             tracefn($"System: {name}")
             x.AddElement(getContextInformation ctx, GVT.System)
@@ -122,51 +125,59 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
     override x.EnterLoadDevice(ctx:LoadDeviceContext) =
         let loadedName = collectNameComponents(ctx).Combine()
         let filePath = x.GetFilePath(findFirstChild<FileSpecContext>(ctx).Value)
-        let device = fwdLoadDevice x._theSystem.Value loadedName filePath
+        let device = fwdLoadDevice x._theSystem.Value (filePath, loadedName)
         x._theSystem.Value.Devices.Add(device) |> ignore
 
     override x.EnterLoadExternalSystem(ctx:LoadExternalSystemContext) =
         failwith "Not implemented"
 
     override x.ExitSystem(ctx:SystemContext) =
+        base.ExitSystem(ctx)
+        let system = x._theSystem.Value
         let adjustVertexType() =
             logInfo "---- Adjusting elements"
             let dic = helper._causalTokenElements
             let dups = dic |> seq
             for KeyValue(ctxInfo, vType) in dups do
-                let nameMatches =
-                    helper._elements.Where(fun (KeyValue(ctx, _)) ->
-                        ctx.Names = ctxInfo.Names && ctx.Flow = ctxInfo.Flow    // && ctx.Systems = ctxInfo.Systems
-                        ).ToArray()
-                assert(vType.HasFlag(GVT.CausalToken))
+                match ctxInfo.Tuples with
+                | sys_, Some flow, parenting_, device::api::[] when tryFindImportApiItem(system, [|device; api|]).IsSome ->
+                    dic[ctxInfo] <- dic[ctxInfo] ||| GVT.CallApi
+                | _ ->
+                    let nameMatches =
+                        helper._elements.Where(fun (KeyValue(ctx, _)) ->
+                            ctx.Names = ctxInfo.Names && ctx.Flow = ctxInfo.Flow    // && ctx.Systems = ctxInfo.Systems
+                            ).ToArray()
+                    assert(vType.HasFlag(GVT.CausalToken))
 
-                if not x.ParserHelper.ParserOptions.IsSubSystemParsing then
-                    noop()
+                    if not x.ParserHelper.ParserOptions.IsSubSystemParsing then
+                        noop()
 
-                let vt =  (vType &&& ~~~GVT.CausalToken)
-                let types = nameMatches.Select(valueOfKeyValue).Fold((|||), GVT.None)
-                if vt.IsOneOf(GVT.None, GVT.Child) then
-                    if nameMatches.isEmpty() then
-                        match vt with
-                        | GVT.None ->
-                            dic[ctxInfo] <- dic[ctxInfo] ||| GVT.Segment
-                        | GVT.Child ->
-                            if ctxInfo.Names.Length = 2 then
-                                dic[ctxInfo] <- dic[ctxInfo] ||| GVT.CallApi        // todo : GVT.CallFlowReal 구분
-                                //helper._elements.TryFind(fun (KeyValue(ctx, _)) -> ctx.
-                                //failwith "ERROR"
+                    let vt =  (vType &&& ~~~GVT.CausalToken)
+                    let types = nameMatches.Select(valueOfKeyValue).Fold((|||), GVT.None)
+                    if vt.IsOneOf(GVT.None, GVT.Child) then
+                        if nameMatches.isEmpty() then
+                            match vt with
+                            | GVT.None ->
+                                dic[ctxInfo] <- dic[ctxInfo] ||| GVT.Segment
+                            | GVT.Child ->
+                                failwith "ERROR"
 
-                        | _ ->
-                            failwith "ERROR"
-                    else
-                        match types with
-                        | GVT.AliaseKey ->
-                            dic[ctxInfo] <- dic[ctxInfo] ||| GVT.CallAliasKey ||| GVT.Segment
-                        | GVT.AliaseMnemonic ->
-                            dic[ctxInfo] <- dic[ctxInfo] ||| GVT.AliaseMnemonic
-                        | _ ->
-                            failwith "ERROR"
-                    logWarn $"{ctxInfo.FullName} : {dic[ctxInfo]} // from {vType}"
+                                //if ctxInfo.Names.Length = 2 then
+                                //    dic[ctxInfo] <- dic[ctxInfo] ||| GVT.CallApi        // todo : GVT.CallFlowReal 구분
+                                //    //helper._elements.TryFind(fun (KeyValue(ctx, _)) -> ctx.
+                                //    //failwith "ERROR"
+
+                            | _ ->
+                                failwith "ERROR"
+                        else
+                            match types with
+                            | GVT.AliaseKey ->
+                                dic[ctxInfo] <- dic[ctxInfo] ||| GVT.CallAliasKey ||| GVT.Segment
+                            | GVT.AliaseMnemonic ->
+                                dic[ctxInfo] <- dic[ctxInfo] ||| GVT.AliaseMnemonic
+                            | _ ->
+                                failwith "ERROR"
+                        logWarn $"{ctxInfo.FullName} : {dic[ctxInfo]} // from {vType}"
 
         let createNonParentedReals() =
             let sys = helper.TheSystem.Value
@@ -177,7 +188,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
                         let parent = findGraphVertex(sys, ctxInfo.NameComponents.ToArray())
                         assert(parent <> null)
                     elif ctxInfo.Names.Length = 1 then
-                        let flow = findGraphVertex (sys, [| yield! ctxInfo.Systems; yield ctxInfo.Flow.Value |]) // ctxInfo.Flow.Value.N
+                        let flow = findGraphVertex (sys, [| yield ctxInfo.System.Value; yield ctxInfo.Flow.Value |]) // ctxInfo.Flow.Value.N
                         Real.Create(ctxInfo.Names.ToArray(), flow:?>Flow) |> ignore
                     else
                         ()  // e.g My/F/F2.Seg1 : 해당 real 생성은 다른 flow 의 역할임.

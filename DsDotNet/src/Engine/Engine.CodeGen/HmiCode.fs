@@ -145,7 +145,7 @@ module HmiGenModule =
                         match a.Target with
                         | RealTarget r -> r.NameComponents
                         | CallTarget c -> c.ApiItem.NameComponents
-                    aliasKey[0], Some(model.FindApiItem aliasKey)
+                    aliasKey[0], Some(model.FindExportApiItem aliasKey)
                 | _ ->
                     null, None
 

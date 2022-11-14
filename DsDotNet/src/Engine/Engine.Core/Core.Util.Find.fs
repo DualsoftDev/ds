@@ -9,7 +9,7 @@ module internal ModelFindModule =
     let findGraphVertex(system:DsSystem, fqdn:Fqdn) : obj =
         let nameEq (name:string) (x:INamed) = x.Name = name
 
-        let findInDevice (device:Device) (fqdn:Fqdn) =
+        let findInLoadedSystem (device:LoadedSystem) (fqdn:Fqdn) =
             failwith "Not yet implemented"
             null
 
@@ -30,7 +30,7 @@ module internal ModelFindModule =
                 let device = system.Devices.Find(nameEq dev)
                 match xs with
                 | [] -> device
-                | _ -> findInDevice device (xs.ToArray())
+                | _ -> findInLoadedSystem device (xs.ToArray())
             | _ -> failwith "ERROR"
 
 
@@ -48,10 +48,19 @@ module internal ModelFindModule =
         else
             failwith "ERROR"
 
-    let findApiItem(system:DsSystem, apiPath:Fqdn) =
+    let findExportApiItem(system:DsSystem, apiPath:Fqdn) =
         let sysName, apiKey = apiPath[0], apiPath[1]
         system.ApiItems.FindWithName(apiKey)
 
+    let tryFindLoadedSystem(system:DsSystem, loadedSystemName:string) = system.Devices.TryFind(fun d -> d.Name = loadedSystemName)
+    let tryFindImportApiItem(system:DsSystem, apiPath:Fqdn) =
+        let lSysName, lApiKey = apiPath[0], apiPath[1]
+        let loadedSystem = tryFindLoadedSystem(system, lSysName)
+        match loadedSystem with
+        | Some lsystem ->
+            lsystem.ReferenceSystem.ApiItems
+                .TryFind(fun api -> api.Name = lApiKey)
+        | None -> None
 
     let findCall(system:DsSystem, callPath:Fqdn) =
         let x = findGraphVertex(system, callPath) :?> Call
@@ -66,8 +75,8 @@ type ModelFindHelper =
     [<Extension>] static member FindGraphVertex(system:DsSystem, fqdn:Fqdn) = findGraphVertex(system, fqdn)
     [<Extension>] static member FindGraphVertex<'V when 'V :> IVertex>(system:DsSystem, fqdn:Fqdn) = findGraphVertexT<'V>(system, fqdn)
 
-    [<Extension>] static member FindApiItem(system:DsSystem, apiPath:Fqdn) = findApiItem(system, apiPath)
-    [<Extension>] static member TryFindApiItem(system:DsSystem, apiKey:string) = system.ApiItems.FindWithName(apiKey)
+    [<Extension>] static member FindExportApiItem(system:DsSystem, apiPath:Fqdn) = findExportApiItem(system, apiPath)
+    [<Extension>] static member TryFindExportApiItem(system:DsSystem, apiKey:string) = system.ApiItems.FindWithName(apiKey)
     [<Extension>] static member FindCall(system:DsSystem, callPath:Fqdn) = findCall(system, callPath)
 
     [<Extension>] static member FindFlow(system:DsSystem, flowName:string) = findFlow(system, flowName)

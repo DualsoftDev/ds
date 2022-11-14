@@ -46,6 +46,7 @@ module Fqdn =
 type ParseTreePredicate = IParseTree->bool
 type RuleExtractor = dsParser -> RuleContext
 type DsParser() =
+    static member val LoadedSystemName:string option = None with get, set
     static member ParseText (text:string, extractor:RuleExtractor, ?throwOnError) =
         let throwOnError = defaultArg throwOnError true
         let inputStream = new AntlrInputStream(text)
@@ -190,16 +191,16 @@ type DsParser() =
         let name = idCtx.GetText()
         Fqdn.parse(name).ToArray()
 
-    static member getSystemNames(from:IParseTree) =
-        findFirstAncestor<SystemContext>(from, true) => collectNameComponents |> Option.get
+    static member getSystemName(from:IParseTree) =
+        findFirstAncestor<SystemContext>(from, true).Map(fun ctx -> collectNameComponents(ctx).Combine())
 
     static member getContextInformation(parserRuleContext:ParserRuleContext) =      // collectUpwardContextInformation
         let ctx = parserRuleContext
-        let sysNames  = getSystemNames(ctx).ToFSharpList()
+        let system  = LoadedSystemName.OrElse(getSystemName ctx)
         let flow      = findFirstAncestor<FlowContext>(ctx, true).Bind(findIdentifier1FromContext)
         let parenting = findFirstAncestor<ParentingContext>(ctx, true).Bind(findIdentifier1FromContext)
         let ns        = collectNameComponents(ctx).ToFSharpList()
-        ContextInformation.Create(ctx, sysNames, flow, parenting, ns)
+        ContextInformation.Create(ctx, system, flow, parenting, ns)
 
     //static member getPathAndName(from:IParseTree) =
     //    let sysNames, flowName, parenting, ns = collectUpwardContextInformation from

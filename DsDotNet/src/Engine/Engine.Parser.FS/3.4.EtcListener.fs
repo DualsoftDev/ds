@@ -137,6 +137,7 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
 
 
     override x.ExitSystem(ctx:SystemContext) =
+        base.ExitSystem(ctx)
         x.UpdateModelSpits()
         (* [layouts] = {
                L.T.Cp = (30, 50)            // xy
@@ -150,7 +151,7 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
         let positionDefs = enumerateChildren<PositionDefContext>(ctx).ToArray()
         for posiDef in positionDefs do
             let apiPath = collectNameComponents(posiDef.apiPath())
-            let apiItem = helper.TheSystem.Value.FindApiItem(apiPath)
+            let apiItem = helper.TheSystem.Value.FindExportApiItem(apiPath)
             let xywh = posiDef.xywh()
 
             match xywh.x().GetText(), xywh.y().GetText(), xywh.w().GetText(), xywh.h().GetText() with

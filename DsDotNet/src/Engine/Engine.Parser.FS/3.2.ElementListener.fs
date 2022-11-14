@@ -106,17 +106,19 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
 
         let createCall (ci:ContextInformation) =
             match ci.Tuples with
-            | s::[], Some f, _, childNames ->     // my / flow / (parenting) / childNames.    where childNames = A.+ or Alias
-                match (findSpit [s; yield! childNames]).OrElse(findSpit childNames) with
-                | Some sp ->
-                    match sp.SpitObj with
-                    | SpitApiItem apiItem ->
-                        let parent = getParentWrapper ci x._flow x._parenting
-                        Call.Create(apiItem, parent) |> ignore
-                    | SpitOnlyAlias soa -> createAlias soa
-                    | SpitReal real -> createRealTargetAlias ci real
-                    | _ -> failwith "Not an API item"
-                | None -> tracefn "Need to generate %A" [s; yield! childNames]
+            | Some s, Some f, _, device::api::[] ->     // my / flow / (parenting) / device.api
+                match tryFindImportApiItem(system, [|device; api|]) with
+                | Some apiItem ->
+                    let parent = getParentWrapper ci x._flow x._parenting
+                    Call.Create(apiItem, parent) |> ignore
+                | None ->
+                    match (findSpit [s; device; api]).OrElse(findSpit [device; api]) with
+                    | Some sp ->
+                        match sp.SpitObj with
+                        | SpitOnlyAlias soa -> createAlias soa
+                        | SpitReal real -> createRealTargetAlias ci real
+                        | _ -> failwith "Not an API item"
+                    | None -> tracefn "Need to generate %A" [s; device; api]
             | _ ->
                 failwith "ERROR"
 
@@ -125,7 +127,7 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
                 (findSpits ci.Names)
                     .Select(fun sp -> sp.GetCore())
                     .OfType<SpitOnlyAlias>()
-                    .Where(fun sp -> sp.FlowFqdn = [| yield! ci.Systems; ci.Flow.Value |] )
+                    .Where(fun sp -> sp.FlowFqdn = [| ci.System.Value; ci.Flow.Value |] )
                     .ExactlyOne()
 
             createAlias alias

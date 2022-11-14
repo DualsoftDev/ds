@@ -59,33 +59,31 @@ module ParserUtil =
     //    let replaced = text.ToList().FoldLeft(folder, "")
     //    replaced
 
-    let dummyDeviceLoader (theSystem:DsSystem) (loadedName:string) (dsFilePath:string) : Device = failwith "Should be reimplemented."
-    let dummyExternalSystemLoader (theSystem:DsSystem) (loadedName:string) (dsFilePath:string) : ExternalSystem = failwith "Should be reimplemented."
+    let dummyDeviceLoader (theSystem:DsSystem) (loadedName:string, dsFilePath:string) : Device = failwith "Should be reimplemented."
+    let dummyExternalSystemLoader (theSystem:DsSystem) (loadedName:string, dsFilePath:string) : ExternalSystem = failwith "Should be reimplemented."
     let mutable fwdLoadDevice = dummyDeviceLoader
     let mutable fwdLoadExternalSystem = dummyExternalSystemLoader
 
     [<DebuggerDisplay("{FullName}({ContextType.Name})")>]
     type ContextInformation = {
-        Systems: string list
+        System: string option
         Flow: string option
         Parenting: string option
         Names: string list
         ContextType:System.Type
     } with
-        static member Create(parserRuleContext, systems:string list, flow, parenting, names) =
-            if systems.Any(fun s -> s.Contains "localhost") then
-                noop()
+        static member Create(parserRuleContext, system:string option, flow, parenting, names) =
             {   ContextType = parserRuleContext.GetType();
-                Systems = systems; Flow = flow; Parenting = parenting; Names = names }
-        static member CreateFullNameComparer() = {
-            new IEqualityComparer<ContextInformation> with
-                member _.Equals(x:ContextInformation, y:ContextInformation) = x.FullName = y.FullName
-                member _.GetHashCode(x:ContextInformation) = x.FullName.GetHashCode()
-        }
+                System = system; Flow = flow; Parenting = parenting; Names = names }
 
-        member x.Tuples = x.Systems, x.Flow, x.Parenting, x.Names
+        static member CreateFullNameComparer() =
+            {   new IEqualityComparer<ContextInformation> with
+                    member _.Equals(x:ContextInformation, y:ContextInformation) = x.FullName = y.FullName
+                    member _.GetHashCode(x:ContextInformation) = x.FullName.GetHashCode() }
+
+        member x.Tuples = x.System, x.Flow, x.Parenting, x.Names
         member x.NameComponents = [
-            yield! x.Systems
+            if x.System.IsSome then yield x.System.Value
             if x.Flow.IsSome then yield x.Flow.Value
             if x.Parenting.IsSome then yield x.Parenting.Value
             if x.ContextType = typedefof<SystemContext>

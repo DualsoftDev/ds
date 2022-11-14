@@ -8,6 +8,7 @@ type ParserOptions(referencePath, activeCpuName, isSimulationMode, allowSkipExte
     member _.AllowSkipExternalSegment:bool = allowSkipExternalSegment // { get; set; } = true
     member val ReferencePath:string = referencePath with get, set
     member val IsSubSystemParsing = false with get, set
+    member val LoadedSystemName:string option = None with get, set
 
     static member Create4Runtime(referencePath, activeCpuName) = ParserOptions(referencePath, activeCpuName, false, false)
     static member Create4Simulation(referencePath, activeCpuName) = ParserOptions(referencePath, activeCpuName, true, false)

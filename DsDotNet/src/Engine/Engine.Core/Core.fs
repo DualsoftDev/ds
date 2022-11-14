@@ -32,7 +32,7 @@ module CoreModule =
     type DsSystem private (name:string, host:string) =
         inherit FqdnObject(name, createFqdnObject([||]))
 
-        member val Devices = createNamedHashSet<Device>()
+        member val Devices = createNamedHashSet<LoadedSystem>()
         member val Variables = ResizeArray<Variable>()
         member val Commands = ResizeArray<Command>()
         member val Observes = ResizeArray<Observe>()
@@ -68,6 +68,7 @@ module CoreModule =
     type LoadedSystem(name:string, referenceSystem:DsSystem, containerSystem:DsSystem) =
         inherit FqdnObject(name, containerSystem)
         member val ContainerSystem = containerSystem
+        member val ReferenceSystem = referenceSystem
         member val FilePath:string = null with get, set
 
     type Device(referenceSystem:DsSystem, containerSystem:DsSystem) =

@@ -35,7 +35,7 @@ module ImportU =
                 //let system = model.TryFindSystem(sysName)
                 //let findApi = if(system.IsNull())
                 //                then Office.ErrorPPT(Name, ErrID._47, $"원인이름{sysName}: 전체이름[{node.Shape.InnerText}] 해당도형[{node.Shape.ShapeName()}]", node.PageNum)
-                //                else system.TryFindApiItem(ApiName)
+                //                else system.TryFindExportApiItem(ApiName)
 
                 //if findApi.IsNull()
                 //then Office.ErrorPPT(Name, ErrID._42, $"원인이름{ApiName}: 전체이름[{node.Shape.InnerText}] 해당도형[{node.Shape.ShapeName()}]", node.PageNum)

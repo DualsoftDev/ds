@@ -58,6 +58,8 @@ type ListenerBase(parser:dsParser, helper:ParserHelper) =
 
 
     override x.EnterSystem(ctx:SystemContext) =
+        if helper.ParserOptions.LoadedSystemName.IsSome then
+            DsParser.LoadedSystemName <- helper.ParserOptions.LoadedSystemName
         //let name = ctx.systemName().GetText().DeQuoteOnDemand()
         //let theSystem = helper.TheSystem
 
@@ -83,7 +85,7 @@ type ListenerBase(parser:dsParser, helper:ParserHelper) =
 
         x.UpdateModelSpits()
 
-    //override x.ExitSystem(ctx:SystemContext) = helper._currentSystem <- None
+    override x.ExitSystem(ctx:SystemContext) = DsParser.LoadedSystemName <- None
 
     override x.EnterFlow(ctx:FlowContext) =
         let flowName = ctx.identifier1().GetText().DeQuoteOnDemand()

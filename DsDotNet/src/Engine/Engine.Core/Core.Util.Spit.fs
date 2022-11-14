@@ -52,8 +52,10 @@ module SpitModuleHelper =
             for flowVertex in flow.Graph.Vertices do
                 yield! spit(flowVertex)
 
-            // A."+" = { Ap1; Ap2; }    : alias=A."+", mnemonics = [Ap1; Ap2;]
-            // Main = { Main2; }
+            (*
+                 A."+" = { Ap1; Ap2; }    : alias=A."+", mnemonics = [Ap1; Ap2;]
+                 Main = { Main2; }
+             *)
             for KeyValue(aliasKey, mnemonics) in flow.AliasMap do
             for m in mnemonics do
                 let mnemonicFqdn = [| m |]
@@ -86,15 +88,6 @@ module SpitModuleHelper =
         | :? ExternalSystem as e -> spitExternalSystem e
         | _ -> failwith $"ERROR: Unknown type {obj}"
 
-    //let collectUpwardInformation(obj:obj) =
-    //    match obj with
-    //    | :? DsSystem as s -> spitSystem s
-    //    | :? Flow     as f -> spitFlow f
-    //    | :? Real     as r -> spitSegment r
-    //    | :? Call     as c -> spitCall c
-    //    | :? Alias    as a -> spitAlias a
-
-    ()
 
 open SpitModuleHelper
 open Engine.Common.FS
@@ -106,7 +99,6 @@ type SpitModule =
     [<Extension>] static member Spit (segment:Real)    = spitSegment segment
     [<Extension>] static member Spit (call:Call)       = spitCall call
     [<Extension>] static member Dump (spits:SpitResult[]) = spits.Select(toString).JoinWith("\r\n")
-    //[<Extension>] static member Spit (alias:Alias)     = spitAlias alias
 
     [<Extension>]
     static member GetCore (spit:SpitResult):obj =

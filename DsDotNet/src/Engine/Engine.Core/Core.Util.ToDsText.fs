@@ -1,7 +1,5 @@
 namespace Engine.Core
 
-open System.Runtime.CompilerServices
-open System.Runtime.InteropServices
 open System.Linq
 open Engine.Common.FS
 
@@ -123,6 +121,7 @@ module internal ToDsTextModule =
                 match d with
                 | :? ExternalSystem as es -> yield $"{tab}[external file={es.FilePath}] {es.Name};"
                 | :? Device as d -> yield $"{tab}[device file={d.FilePath}] {d.Name};"
+                | _ -> failwith "ERROR"
 
 
             let tab = getTab indent
@@ -229,63 +228,6 @@ module internal ToDsTextModule =
             yield rb
         ] |> combineLines
 
-
-    //let modelToDs (model:Model) =
-    //    let tab = getTab 1
-    //    let tab2 = getTab 2
-    //    [
-    //        for s in model.Systems.OrderBy(fun s -> not s.Active) do//mySystem 부터 출력
-    //            yield systemToDs s
-
-    //        yield codeBlockToDs model
-
-    //        (* prop
-    //             safety
-    //             layouts *)
-    //        let spits = model.Spit()
-    //        let segs = spits.Select(fun spit -> spit.GetCore()).OfType<Real>().ToArray()
-
-    //        let withSafeties = segs.Where(fun seg -> seg.SafetyConditions.Any())
-    //        let safeties =
-    //            [
-    //                if withSafeties.Any() then
-    //                    yield $"{tab}[safety] = {lb}"
-    //                    for seg in withSafeties do
-    //                        let conds = seg.SafetyConditions.Select(fun seg -> seg.QualifiedName).JoinWith("; ") + ";"
-    //                        yield $"{tab2}{seg.QualifiedName} = {lb} {conds} {rb}"
-    //                    yield $"{tab}{rb}"
-    //            ] |> combineLines
-
-    //        let withLayouts =
-    //            model.Systems
-    //                .SelectMany(fun sys -> sys.ApiItems.Where(fun ai -> ai.Xywh <> null))
-    //                ;
-    //        let layouts =
-    //            [
-    //                if withLayouts.Any() then
-    //                    yield $"{tab}[layouts] = {lb}"
-    //                    for apiItem in withLayouts do
-    //                        let xywh = apiItem.Xywh
-    //                        let posi =
-    //                            if xywh.W.HasValue then
-    //                                $"({xywh.X}, {xywh.Y}, {xywh.W.Value}, {xywh.H.Value})"
-    //                            else
-    //                                $"({xywh.X}, {xywh.Y})"
-    //                        yield $"{tab2}{apiItem.QualifiedName} = {posi}"
-
-    //                    yield $"{tab}{rb}"
-    //            ] |> combineLines
-
-    //        if safeties.Any() || layouts.Any() then
-    //            yield $"[prop] = {lb}"
-    //            if safeties.Any()  then yield safeties
-    //            if layouts.Any()   then yield layouts
-    //            yield rb
-    //    ] |> combineLines
-
-
-[<Extension>]
-type ToDsTextModuleHelper =
-    //[<Extension>] static member ToDsText(model:Model) = modelToDs(model)
-    [<Extension>] static member ToDsText(system:DsSystem, [<Optional; DefaultParameterValue(1)>]indent) = systemToDs system indent
+    type DsSystem with
+        member x.ToDsText() = systemToDs x 1
 

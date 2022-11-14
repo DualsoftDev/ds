@@ -16,19 +16,6 @@ module CoreModule =
             member x.QualifiedName = nameComponents.Combine()
     }
 
-    /////Top level structure
-    //type Model() =
-    //    member val TheSystem:DsSystem option = None with get, set
-    //    member val Systems = createNamedHashSet<DsSystem>()
-    //    member val Variables = ResizeArray<Variable>()
-    //    member val Commands = ResizeArray<Command>()
-    //    member val Observes = ResizeArray<Observe>()
-
-    //    interface IQualifiedNamed with
-    //        member val Name = null
-    //        member val NameComponents = Array.empty<string>
-    //        member x.QualifiedName = null
-
     type DsSystem private (name:string, host:string) =
         inherit FqdnObject(name, createFqdnObject([||]))
 
@@ -43,8 +30,6 @@ module CoreModule =
         ///시스템 전체시작 버튼누름시 수행되야하는 Real목록
         member val StartPoints = createQualifiedNamedHashSet<Real>()
 
-        // todo: fix me
-        member _.Model = null//model
         member _.Host = host
 
         ///시스템 버튼 소속 Flow 정보
@@ -95,9 +80,7 @@ module CoreModule =
     and [<AbstractClass>]
         Vertex (names:Fqdn, parent:ParentWrapper) =
         inherit FqdnObject(names.Combine(), parent.GetCore())
-        do
-            if names.Length = 1 && names.Contains(".") then
-                noop()
+
         interface INamedVertex
         member _.Parent = parent
         member _.PureNames = names

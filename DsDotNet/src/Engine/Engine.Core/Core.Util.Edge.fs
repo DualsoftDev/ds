@@ -25,17 +25,17 @@ module EdgeModule =
         segment.ModelingEdges.Add(mei) |> verifyM $"Duplicated edge {mei.Source.Name}{mei.EdgeSymbol}{mei.Target.Name}"
         createEdges segment.Graph modeingEdgeInfo
 
-    let ofResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) =
-            edges.Where(fun e -> e.EdgeType.HasFlag(EdgeType.Reset))
+    //let ofResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) =
+    //        edges.Where(fun e -> e.EdgeType.HasFlag(EdgeType.Reset))
     let ofStrongResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) =
             edges.Where(fun e -> e.EdgeType.HasFlag(EdgeType.Strong ||| EdgeType.Reset))
-    let ofWeakResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) =
-            edges.Where(fun e -> e.EdgeType.HasFlag(EdgeType.Reset) && not <| e.EdgeType.HasFlag(EdgeType.Strong))
+    //let ofWeakResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) =
+    //        edges.Where(fun e -> e.EdgeType.HasFlag(EdgeType.Reset) && not <| e.EdgeType.HasFlag(EdgeType.Strong))
 
-    let ofNotStrongResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) =
-            edges.Except(ofStrongResetEdge edges)
-    let ofNotResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) =
-            edges.Except(ofResetEdge edges)
+    //let ofNotStrongResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) =
+    //        edges.Except(ofStrongResetEdge edges)
+    //let ofNotResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) =
+    //        edges.Except(ofResetEdge edges)
 
     let toText<'V, 'E when 'V :> INamed and 'E :> EdgeBase<'V>> (e:'E) = $"{e.Source.Name.QuoteOnDemand()} {e.EdgeType.ToText()} {e.Target.Name.QuoteOnDemand()}"
 
@@ -118,10 +118,10 @@ type EdgeExt =
                         createMRIEdgesTransitiveClosure4System system
     [<Extension>] static member Validate(system:DsSystem) = validateSystem system
 
-    [<Extension>] static member OfStrongResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofStrongResetEdge edges
-    [<Extension>] static member OfWeakResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofWeakResetEdge edges
-    [<Extension>] static member OfNotResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofNotResetEdge edges
-    [<Extension>] static member OfNotStrongResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofNotStrongResetEdge edges
+    //[<Extension>] static member OfStrongResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofStrongResetEdge edges
+    //[<Extension>] static member OfWeakResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofWeakResetEdge edges
+    //[<Extension>] static member OfNotResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofNotResetEdge edges
+    //[<Extension>] static member OfNotStrongResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofNotStrongResetEdge edges
     [<Extension>] static member ToText<'V, 'E when 'V :> INamed and 'E :> EdgeBase<'V>> (edge:'E) = toText edge
     [<Extension>] static member GetVertices(edges:IEdge<'V> seq) = edges.Collect(fun e -> e.GetVertices())
 

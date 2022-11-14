@@ -1,6 +1,5 @@
 namespace Engine.Core
 
-open System.Runtime.CompilerServices
 open System.Linq
 open Engine.Common.FS
 
@@ -70,18 +69,13 @@ module internal ModelFindModule =
         system.Flows.First(fun flow -> flow.Name = flowName)
 
 
-[<Extension>]
-type ModelFindHelper =
-    [<Extension>] static member FindGraphVertex(system:DsSystem, fqdn:Fqdn) = findGraphVertex(system, fqdn)
-    [<Extension>] static member FindGraphVertex<'V when 'V :> IVertex>(system:DsSystem, fqdn:Fqdn) = findGraphVertexT<'V>(system, fqdn)
+    type DsSystem with
+        member x.FindGraphVertex(fqdn:Fqdn) = findGraphVertex(x, fqdn)
+        member x.FindGraphVertex<'V when 'V :> IVertex>(fqdn:Fqdn) = findGraphVertexT<'V>(x, fqdn)
 
-    [<Extension>] static member FindExportApiItem(system:DsSystem, apiPath:Fqdn) = findExportApiItem(system, apiPath)
-    [<Extension>] static member TryFindExportApiItem(system:DsSystem, apiKey:string) = system.ApiItems.FindWithName(apiKey)
-    [<Extension>] static member FindCall(system:DsSystem, callPath:Fqdn) = findCall(system, callPath)
+        member x.FindExportApiItem(apiPath:Fqdn) = findExportApiItem(x, apiPath)
+        member x.TryFindExportApiItem(apiKey:string) = x.ApiItems.FindWithName(apiKey)
+        member x.FindCall(callPath:Fqdn) = findCall(x, callPath)
 
-    [<Extension>] static member FindFlow(system:DsSystem, flowName:string) = findFlow(system, flowName)
-
-
-
-
+        member x.FindFlow(flowName:string) = findFlow(x, flowName)
 

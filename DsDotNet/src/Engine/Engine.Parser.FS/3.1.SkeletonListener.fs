@@ -115,17 +115,19 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
                 ()
 
     member private x.GetFilePath(fileSpecCtx:FileSpecContext) =
-        let path =
-            let filePath = fileSpecCtx.GetText().DeQuoteOnDemand()
+        let simpleFilePath = fileSpecCtx.GetText().DeQuoteOnDemand()
+        let absoluteFilePath =
             let dir = helper.ParserOptions.ReferencePath
-            [filePath; $"{dir}\\{filePath}"].First(fun f -> File.Exists(f))
-        path
+            [simpleFilePath; $"{dir}\\{simpleFilePath}"].First(fun f -> File.Exists(f))
+        absoluteFilePath, simpleFilePath
 
 
     override x.EnterLoadDevice(ctx:LoadDeviceContext) =
-        let loadedName = collectNameComponents(ctx).Combine()
-        let filePath = x.GetFilePath(findFirstChild<FileSpecContext>(ctx).Value)
-        let device = fwdLoadDevice x._theSystem.Value (filePath, loadedName)
+        let fileSpecCtx = findFirstChild<FileSpecContext>(ctx).Value
+        let absoluteFilePath, simpleFilePath = x.GetFilePath(fileSpecCtx)
+        let device =
+            let loadedName = collectNameComponents(ctx).Combine()
+            fwdLoadDevice x._theSystem.Value (absoluteFilePath, simpleFilePath) loadedName
         x._theSystem.Value.Devices.Add(device) |> ignore
 
     override x.EnterLoadExternalSystem(ctx:LoadExternalSystemContext) =

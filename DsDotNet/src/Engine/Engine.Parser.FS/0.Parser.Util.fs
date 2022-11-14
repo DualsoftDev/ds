@@ -9,8 +9,12 @@ open type Engine.Parser.dsParser
 
 [<AutoOpen>]
 module ParserUtil =
-    let dummyDeviceLoader (theSystem:DsSystem) (loadedName:string, dsFilePath:string) : Device = failwith "Should be reimplemented."
-    let dummyExternalSystemLoader (theSystem:DsSystem) (loadedName:string, dsFilePath:string) : ExternalSystem = failwith "Should be reimplemented."
+    let dummyDeviceLoader (theSystem:DsSystem) (absoluteFilePath:string, simpleFilePath:string) (loadedName:string) : Device =
+        failwith "Should be reimplemented."
+
+    let dummyExternalSystemLoader (theSystem:DsSystem) (absoluteFilePath:string, simpleFilePath:string) (loadedName:string) : ExternalSystem =
+        failwith "Should be reimplemented."
+
     let mutable fwdLoadDevice = dummyDeviceLoader
     let mutable fwdLoadExternalSystem = dummyExternalSystemLoader
 

@@ -7,12 +7,19 @@ open Engine.Core
 open Engine.Common.FS
 open NUnit.Framework
 open Engine.Parser.FS
+open System.Text.RegularExpressions
 
 [<AutoOpen>]
 module private ModelComparisonHelper =
     let (=~=) (xs:string) (ys:string) =
+        let removeComment input =
+            let blockComments = @"/\*(.*?)\*/"
+            let lineComments = @"//(.*?)$"
+            Regex.Replace(input, $"{blockComments}|{lineComments}", "", RegexOptions.Singleline)
+
         let toArray (xs:string) =
             xs.SplitByLine()
+                .Select(removeComment)
                 .Select(fun x -> x.Trim())
                 |> Seq.where(fun x -> x.Any() && not <| x.StartsWith("//"))
                 |> Array.ofSeq
@@ -210,32 +217,8 @@ module private ModelComparisonHelper =
     [flow] F = {
         A."+" > A."-" > B."+";
     }
-    [sys] A = {
-        [flow] F = {
-            Vp <||> Vm |> Pp |> Sm;
-            Vp |> Pm |> Sp;
-            Vm > Pm > Sm;
-            Vp > Pp > Sp;
-        }
-        [interfaces] = {
-            "+" = { F.Vp ~ F.Sp }
-            "-" = { F.Vm ~ F.Sm }
-            "+" <||> "-";
-        }
-    }
-    [sys] B = {
-        [flow] F = {
-            Vp <||> Vm |> Pp |> Sm;
-            Vp |> Pm |> Sp;
-            Vm > Pm > Sm;
-            Vp > Pp > Sp;
-        }
-        [interfaces] = {
-            "+" = { F.Vp ~ F.Sp }
-            "-" = { F.Vm ~ F.Sm }
-            "+" <||> "-";
-        }
-    }
+    [device file=cylinder.ds] A;
+    [device file=cylinder.ds] B; // F:\Git\ds\DsDotNet\src\UnitTest\UnitTest.Engine\Model\..\Libraries\cylinder.ds
 }
 """
 

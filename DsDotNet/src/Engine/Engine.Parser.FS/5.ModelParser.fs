@@ -61,19 +61,20 @@ module ModelParser =
             option.LoadedSystemName <- Some loadedName
             let system = ParseFromString(text, option)
             system
-        let loadDevice (constainerSystem:DsSystem) (dsFilePath, loadedName) =
+        let loadDevice (constainerSystem:DsSystem) (absoluteFilePath, simpleFilePath) loadedName =
             let device =
-                let system = loadSystemFromDsFile (dsFilePath, loadedName)
+                let system = loadSystemFromDsFile (absoluteFilePath, loadedName)
                 system.Name <- loadedName
                 Device(system, constainerSystem)
-            device.AbsoluteFilePath <- dsFilePath
+            device.AbsoluteFilePath <- absoluteFilePath
+            device.UserSpecifiedFilePath <- simpleFilePath
             device
 
-        let loadExternalSystem (constainerSystem:DsSystem) (dsFilePath, loadedName) =
+        let loadExternalSystem (constainerSystem:DsSystem) (absoluteFilePath, simpleFilePath) loadedName =
             let externalSystem =
-                let system = loadSystemFromDsFile (dsFilePath, loadedName)
+                let system = loadSystemFromDsFile (absoluteFilePath, loadedName)
                 ExternalSystem(loadedName, system, constainerSystem)
-            externalSystem.AbsoluteFilePath <- dsFilePath
+            externalSystem.AbsoluteFilePath <- absoluteFilePath
             externalSystem
 
         fwdLoadDevice <- loadDevice

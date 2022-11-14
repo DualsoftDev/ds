@@ -56,6 +56,7 @@ module CoreModule =
         /// Loading 된 system 참조 용
         member val ReferenceSystem = referenceSystem
 
+        member val UserSpecifiedFilePath:string = null with get, set
         member val AbsoluteFilePath:string = null with get, set
 
     type Device(referenceSystem:DsSystem, containerSystem:DsSystem) =

@@ -91,19 +91,18 @@ module CoreModule =
 
     /// Segment (DS Basic Unit)
     and [<DebuggerDisplay("{QualifiedName}")>]
-        Real private (names:Fqdn, flow:Flow) =
-        inherit Vertex(names, Flow flow)
+        Real private (name:string, flow:Flow) =
+        inherit Vertex([|name|], Flow flow)
         member val Graph = DsGraph()
         member val ModelingEdges = HashSet<ModelingEdgeInfo<Vertex>>()
         member val Flow = flow
 
         member val SafetyConditions = createQualifiedNamedHashSet<Real>()
-        static member Create(names:Fqdn, flow) =
-            let name = names.Combine()
-            if (names.Any(fun n -> n.Contains ".") (*&& not <| (name.StartsWith("\"") && name.EndsWith("\""))*)) then
+        static member Create(name:string, flow) =
+            if (name.Contains ".") (*&& not <| (name.StartsWith("\"") && name.EndsWith("\""))*) then
                 logWarn $"Suspicious segment name [{name}]. Check it."
 
-            let segment = Real(names, flow)
+            let segment = Real(name, flow)
             flow.Graph.AddVertex(segment) |> verifyM $"Duplicated segment name [{name}]"
             segment
 

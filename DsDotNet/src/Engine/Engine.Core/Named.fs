@@ -34,17 +34,22 @@ module TextUtil =
         match s with
         | ValidIdentifier x when x.IsSome -> s
 
-        | ( RegexMatches "\"(.*)\""   // "#specidal#"
+        | ( RegexMatches "^\"(.*)\"$"   // "#specidal#"
           | RegexMatches pattern ) -> s // xxx."yyy"
 
         | _ -> quote s
 
     let internal deQuoteOnDemand(s:string) =
         match s with
-        | RegexPattern "\"(.*)\"" [inner] -> inner
+        | RegexPattern "^\"([^\"]*)\"$" [inner] -> inner
         | _ -> s
 
-    let internal combine (separator:string) (nameComponents:string seq) = nameComponents |> Seq.map quoteOnDemand |> String.concat separator
+    let internal combine (separator:string) (nameComponents:string seq) =
+        let nameComponents = nameComponents |> List.ofSeq
+        match nameComponents with
+        | [] -> failwith "ERROR"
+        | n::[] -> n
+        | ns -> ns |> Seq.map quoteOnDemand |> String.concat separator
 
     /// Fully Qualified Domain Name: string[] for "A.B.C"
     type Fqdn = string[]

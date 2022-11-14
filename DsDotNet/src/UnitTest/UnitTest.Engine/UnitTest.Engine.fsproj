@@ -29,6 +29,7 @@
 		<Compile Include="Model\Model.fs" />
 		<Compile Include="Model\ModelGraph.fs" />
 		<Compile Include="Model\ExpressionTest.fs" />
+		<Compile Include="Model\FqdnParseTest.fs" />
 		<!--<Compile Include="ImportPPT\pptTest.fs" />-->
 		<Compile Include="EntryPoint.fs" />
 		<None Include="Obsolete\0.ModelTest_Common.fsx" />

@@ -63,24 +63,9 @@ C4 > C5;
             Main = {A.F.Sp; A.F.Sm}
         }
     }
-    [sys ip=1.2.3.4] A = {
-        [flow] F = {
-            Vp > Pp > Sp;
-            Vm > Pm > Sm;
-
-            Vp |> Pm |> Sp;
-            Vm |> Pp |> Sm;
-            Vp <||> Vm;
-        }
-        [interfaces] = {
-            "+" = { F.Vp ~ F.Sp }
-            "-" = { F.Vm ~ F.Sm }
-            // 정보로서의 상호 리셋
-            "+" <||> "-";
-        }
-    }
-    [sys] B = @copy_system(A);
-    [sys] C = @copy_system(A);
+    [device file="cylinder.ds"] A;
+    [device file="cylinder.ds"] B;
+    [device file="cylinder.ds"] C;
     [prop] = {
         // Global safety
         [safety] = {

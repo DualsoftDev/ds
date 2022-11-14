@@ -26,11 +26,17 @@ module Fqdn =
             parser.AddErrorListener(listener_parser)
             parser
 
-
-        let parser = createParser (text)
-        let ctx = parser.fqdn()
-        let ncs = enumerateChildren<fqdnParser.NameComponentContext>(ctx)
-        [ for nc in ncs -> nc.GetText().DeQuoteOnDemand() ]
+        try
+            let parser = createParser (text)
+            let ctx = parser.fqdn()
+            let ncs = enumerateChildren<fqdnParser.NameComponentContext>(ctx)
+            [ for nc in ncs -> nc.GetText().DeQuoteOnDemand() ]
+        with
+            | :? ParserException ->
+                logWarn $"Failed to parse FQDN: {text}"
+                [ text ]
+            | exn ->
+                failwith $"ERROR: {exn}"
 
 
 
@@ -178,9 +184,14 @@ type DsParser() =
                 || tree :? Identifier4Context
         DsParser.findFirstChild(from, pred, true) |> Option.get
 
-    static member collectNameComponents(from:IParseTree):string[] = // :Fqdn
+    static member getName(from:IParseTree):string =
         let idCtx = collectNameComponentContext from
-        let name = idCtx.GetText()
+        if idCtx.GetText().Contains("+") then
+            noop()
+        let name = idCtx.GetText().DeQuoteOnDemand()
+        name
+    static member collectNameComponents(from:IParseTree):string[] = // :Fqdn
+        let name = getName from
         Fqdn.parse(name).ToArray()
 
     static member getSystemName(from:IParseTree) =

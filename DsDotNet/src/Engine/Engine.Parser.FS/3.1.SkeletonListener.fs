@@ -48,8 +48,8 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
 
     override x.EnterParenting(ctx:ParentingContext) =
         tracefn($"Parenting: {ctx.GetText()}")
-        let names = collectNameComponents(ctx.identifier1())
-        x._parenting <- Some <| Real.Create(names, x._flow.Value)
+        let name = getName(ctx.identifier1())
+        x._parenting <- Some <| Real.Create(name, x._flow.Value)
         let xxx = getContextInformation ctx
         x.AddCausalTokenElement(getContextInformation ctx, GVT.Segment ||| GVT.Parenting)
 
@@ -115,7 +115,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
                 ()
 
     member private x.GetFilePath(fileSpecCtx:FileSpecContext) =
-        let simpleFilePath = fileSpecCtx.GetText().DeQuoteOnDemand()
+        let simpleFilePath = findFirstChild<FilePathContext>(fileSpecCtx).Value.GetText().DeQuoteOnDemand()
         let absoluteFilePath =
             let dir = helper.ParserOptions.ReferencePath
             [simpleFilePath; $"{dir}\\{simpleFilePath}"].First(fun f -> File.Exists(f))
@@ -191,7 +191,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
                         assert(parent <> null)
                     elif ctxInfo.Names.Length = 1 then
                         let flow = findGraphVertex (sys, [| yield ctxInfo.System.Value; yield ctxInfo.Flow.Value |]) // ctxInfo.Flow.Value.N
-                        Real.Create(ctxInfo.Names.ToArray(), flow:?>Flow) |> ignore
+                        Real.Create(ctxInfo.Names[0], flow:?>Flow) |> ignore
                     else
                         ()  // e.g My/F/F2.Seg1 : 해당 real 생성은 다른 flow 의 역할임.
                 | _ ->

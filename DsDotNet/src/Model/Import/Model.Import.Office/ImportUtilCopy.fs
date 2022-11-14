@@ -52,10 +52,10 @@ module internal ToCopyModule =
         let findCallInReal(realName:string, name:string) = copySys.FindGraphVertex<Call>([|copySys.Name;copyFlow.Name;realName;name|])
         let findInReal(realName:string, name:string) = copySys.FindGraphVertex<Vertex>([|copySys.Name;copyFlow.Name;realName;name|])
 
-        let copyReal(names:Fqdn, graph:DsGraph) =
-            let findVertex = graph.TryFindVertex(names.Combine())
+        let copyReal(name:string, graph:DsGraph) =
+            let findVertex = graph.TryFindVertex(name)
             if findVertex.IsNone
-                then Real.Create(names, copyFlow)
+                then Real.Create(name, copyFlow)
                 else findVertex.Value :?> Real
 
         let copyCallInReal(apiItem:ApiItem, real:Real) =

@@ -81,9 +81,8 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
                     x.ParserHelper.AliasCreators.Add(aliasCreator) |> ignore
                 | 2 ->
                     let apiItem =
-                        x._modelSpitObjects
-                            .OfType<ApiItem>()
-                            .Where(fun api -> api.NameComponents = aliasKey)
+                        let apiItems = x._modelSpitObjects.OfType<ApiItem>().ToArray()
+                        apiItems.Where(fun api -> api.NameComponents = aliasKey)
                             .Head()
 
                     let name = ns.Combine()
@@ -138,10 +137,11 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
         | HasFlag GVT.Segment ->
             let existing = findSpit(ci.NameComponents)
             match existing, ns with
-            | Some x, _ -> ()
-            | None, y::z::[] -> createCall ci
+            | Some _,   _ -> ()
+            | None,     _::_::[] -> createCall ci
             | _ -> failwith "ERROR"
-        | HasFlag GVT.AliaseMnemonic -> createAliasFromContextInformation ci
+        | HasFlag GVT.AliaseMnemonic ->
+            createAliasFromContextInformation ci
         | HasFlag GVT.CallAliasKey ->
             failwith "ERROR"
         | HasFlag GVT.CallApi

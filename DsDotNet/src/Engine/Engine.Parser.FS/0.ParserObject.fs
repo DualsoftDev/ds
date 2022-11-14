@@ -38,7 +38,8 @@ type GraphVertexType =
     | ApiSER         = 0b0001000000000000   // S ~ E ~ R
     | CausalToken    = 0b0010000000000000   // S ~ E ~ R
 
-type GVT = GraphVertexType
+/// Abbreviation for GraphVertexType
+type internal GVT = GraphVertexType
 
 (*
     0b0000000000000000

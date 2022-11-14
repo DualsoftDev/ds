@@ -33,15 +33,15 @@ module GraphModule =
     type Graph<'V, 'E
             when 'V :> INamed and 'V : equality
             and 'E :> IEdge<'V> and 'E: equality> (
-            vertices:'V seq, edges:'E seq) =
+            vertices_:'V seq, edges_:'E seq) =
         let edgeComparer = {
             new IEqualityComparer<'E> with
                 member _.Equals(x:'E, y:'E) = x.Source = y.Source && x.Target = y.Target && x.EdgeType = y.EdgeType
                 member _.GetHashCode(x) = x.Source.GetHashCode()/2 + x.Target.GetHashCode()/2
         }
-        let vertices = vertices @ edges.Collect(fun e -> [e.Source; e.Target]).Distinct()
+        let vertices = vertices_ @ edges_.Collect(fun e -> [e.Source; e.Target]).Distinct()
         let vs = new HashSet<'V>(vertices, nameComparer<'V>())
-        let es = new HashSet<'E>(edges, edgeComparer)
+        let es = new HashSet<'E>(edges_, edgeComparer)
         new () = Graph<'V, 'E>(Seq.empty<'V>, Seq.empty<'E>)
         member _.Vertices = vs
         member _.Edges = es
@@ -55,7 +55,10 @@ module GraphModule =
                 es.Add(e))  // |> verifyMessage $"Duplicated edge [{e.Source.Name} -> {e.Target.Name}]"
 
         member _.RemoveEdges(edges:'E seq)       = edges    |> Seq.forall es.Remove
-        member _.AddVertices(vertices:'V seq)    = vertices |> Seq.forall vs.Add
+        member _.AddVertices(vertices:'V seq)    =
+            if (vertices.Any(fun v -> v.Name.Contains("#Seg.Complex#"))) then
+                noop()
+            vertices |> Seq.forall vs.Add
         member _.RemoveVertices(vertices:'V seq) = vertices |> Seq.forall vs.Remove
         member x.AddEdge(edge:'E)        = x.AddEdges([edge])
         member x.RemoveEdge(edge:'E)     = x.RemoveEdges([edge])

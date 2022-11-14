@@ -23,7 +23,7 @@ module ImportCheck =
                         "START"; "시작인과"; "시작유지"; "RESET"; "복귀인과";
                         "복귀유지"; "ETC"; "상호행위간섭"; "시작후행리셋";
                 ] do
-                    vertexs.Add(Real.Create([|v|], flow)) |>ignore
+                    vertexs.Add(Real.Create(v, flow)) |>ignore
 
             let fg = flow.Graph
             fg.AddVertices(vertexs.Cast<Vertex>())|>ignore

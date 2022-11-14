@@ -25,7 +25,7 @@ module ImportU =
         else
             if(node.NodeType.IsReal)
             then
-                let real = Real.Create([|node.Name|], parentFlow.Value)
+                let real = Real.Create(node.Name, parentFlow.Value)
                 dicSeg.Add(node.Key, real)
             else
                 failwith "Need to fix"

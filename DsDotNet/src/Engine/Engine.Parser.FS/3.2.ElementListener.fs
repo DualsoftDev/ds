@@ -20,7 +20,7 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
     override x.EnterInterfaceDef(ctx:InterfaceDefContext) =
         let system = helper.TheSystem.Value
         let hash = system.ApiItems4Export
-        let interrfaceNameCtx = findFirstChild<InterfaceNameContext>(ctx)
+        let interrfaceNameCtx = tryFindFirstChild<InterfaceNameContext>(ctx)
         let interfaceName = collectNameComponents(interrfaceNameCtx.Value)[0]
 
         let collectCallComponents(ctx:CallComponentsContext):Fqdn[] =

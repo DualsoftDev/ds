@@ -125,7 +125,7 @@ partial class ElementsListener : dsParserBaseListener
          */
         var safetyKvs =
             from safetyDef in safetyDefs
-            let key = collectNameComponents(findFirstChild(safetyDef, t => t is SafetyKeyContext))   // ["Main"] or ["My", "Flow", "Main"]
+            let key = collectNameComponents(tryFindFirstChild(safetyDef, t => t is SafetyKeyContext))   // ["Main"] or ["My", "Flow", "Main"]
             let valueHeader = enumerateChildren<SafetyValuesContext>(safetyDef).First()
             let values = enumerateChildren<Identifier123Context>(valueHeader).Select(collectNameComponents).ToArray()
             select (key, values)

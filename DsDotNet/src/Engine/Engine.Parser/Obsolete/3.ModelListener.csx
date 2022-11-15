@@ -109,9 +109,9 @@ class ModelListener : dsParserBaseListener
                     //var (flowName, lastName) = (ns[0], ns[1]);
                     //var flow = _system.Flows.FirstOrDefault(rf => rf.Name == flowName);
                     //var targets = flow.FindAll(ns[1]).ToArray();    // call def 과 call instance 둘다 존재할 수 있다.
-                    //var target = 
+                    //var target =
                     //    targets.Length > 1
-                    //    ? flow.Find<CallPrototype>(ns[1])   
+                    //    ? flow.Find<CallPrototype>(ns[1])
                     //    : targets.FirstOrDefault();
                     switch (target)
                     {
@@ -153,7 +153,7 @@ class ModelListener : dsParserBaseListener
 
     override public void EnterButtons (ButtonsContext ctx)
     {
-        var first = findFirstChild<ParserRuleContext>(ctx);     // {Emergency, Auto, Start, Reset}ButtonsContext
+        var first = tryFindFirstChild<ParserRuleContext>(ctx);     // {Emergency, Auto, Start, Reset}ButtonsContext
         var targetDic =
             first switch
             {
@@ -174,7 +174,7 @@ class ModelListener : dsParserBaseListener
         var buttonDefs = enumerateChildren<ButtonDefContext>(first).ToArray();
         foreach (var bd in buttonDefs)
         {
-            var buttonName = findFirstChild<ButtonNameContext>(bd).GetText();
+            var buttonName = tryFindFirstChild<ButtonNameContext>(bd).GetText();
             var flows = (
                     from flowNameCtx in enumerateChildren<FlowNameContext>(bd)
                     let flowName = flowNameCtx.GetText()

@@ -27,11 +27,11 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
     override x.EnterSystem(ctx:SystemContext) =
         base.EnterSystem(ctx)
 
-        match findFirstChild<SysBlockContext>(ctx) with
+        match tryFindFirstChild<SysBlockContext>(ctx) with
         | Some sysBlockCtx_ ->
             let name = defaultArg helper.ParserOptions.LoadedSystemName (ctx.systemName().GetText().DeQuoteOnDemand())
             let host =
-                match findFirstChild<HostContext>(ctx) with
+                match tryFindFirstChild<HostContext>(ctx) with
                 | Some hostCtx -> hostCtx.GetText()
                 | None -> null
             //let name = helper.ParserOptions.LoadedSystemName
@@ -73,7 +73,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
     override x.EnterAliasListing(ctx:AliasListingContext) =
         let map = x._flow.Value.AliasMap
 
-        let aliasDef = findFirstChild<AliasDefContext>(ctx).Value
+        let aliasDef = tryFindFirstChild<AliasDefContext>(ctx).Value
         let ci = getContextInformation aliasDef
         x.AddElement(ci, GVT.AliaseKey)
 
@@ -87,7 +87,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
 
     override x.EnterInterfaceDef(ctx:InterfaceDefContext) =
         let hash = helper.TheSystem.Value.ApiItems4Export
-        let interrfaceNameCtx = findFirstChild<InterfaceNameContext>(ctx).Value
+        let interrfaceNameCtx = tryFindFirstChild<InterfaceNameContext>(ctx).Value
         let interfaceName = collectNameComponents(interrfaceNameCtx)[0]
         let ser =   // { start ~ end ~ reset }
             enumerateChildren<CallComponentsContext>(ctx)
@@ -115,7 +115,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
                 ()
 
     member private x.GetFilePath(fileSpecCtx:FileSpecContext) =
-        let simpleFilePath = findFirstChild<FilePathContext>(fileSpecCtx).Value.GetText().DeQuoteOnDemand()
+        let simpleFilePath = tryFindFirstChild<FilePathContext>(fileSpecCtx).Value.GetText().DeQuoteOnDemand()
         let absoluteFilePath =
             let dir = helper.ParserOptions.ReferencePath
             [simpleFilePath; $"{dir}\\{simpleFilePath}"].First(fun f -> File.Exists(f))
@@ -123,7 +123,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
 
 
     override x.EnterLoadDevice(ctx:LoadDeviceContext) =
-        let fileSpecCtx = findFirstChild<FileSpecContext>(ctx).Value
+        let fileSpecCtx = tryFindFirstChild<FileSpecContext>(ctx).Value
         let absoluteFilePath, simpleFilePath = x.GetFilePath(fileSpecCtx)
         let device =
             let loadedName = collectNameComponents(ctx).Combine()
@@ -131,11 +131,11 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
         x._theSystem.Value.Devices.Add(device) |> ignore
 
     override x.EnterLoadExternalSystem(ctx:LoadExternalSystemContext) =
-        let fileSpecCtx = findFirstChild<FileSpecContext>(ctx).Value
+        let fileSpecCtx = tryFindFirstChild<FileSpecContext>(ctx).Value
         let absoluteFilePath, simpleFilePath = x.GetFilePath(fileSpecCtx)
         let external =
-            let ipSpecCtx = findFirstChild<IpSpecContext>(ctx).Value
-            let ip = findFirstChild<EtcNameContext>(ipSpecCtx).Value.GetText()
+            let ipSpecCtx = tryFindFirstChild<IpSpecContext>(ctx).Value
+            let ip = tryFindFirstChild<EtcNameContext>(ipSpecCtx).Value.GetText()
             let loadedName = collectNameComponents(ctx).Combine()
             fwdLoadExternalSystem x._theSystem.Value (absoluteFilePath, simpleFilePath) loadedName
         x._theSystem.Value.Devices.Add(external) |> ignore

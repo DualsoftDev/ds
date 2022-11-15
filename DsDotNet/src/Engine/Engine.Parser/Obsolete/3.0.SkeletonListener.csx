@@ -112,7 +112,7 @@ class SkeletonListener : dsParserBaseListener
             return;
 
         // 같은 이름의 parenting 이 존재하면, 내부가 존재하는 root segemnt 이므로, skip
-        var flowContext = findFirstAncestor<FlowContext>(ctx);
+        var flowContext = tryFindFirstAncestor<FlowContext>(ctx);
         var hasParentingDefinition =
             enumerateChildren<ParentingContext>(flowContext)
                 .Select(parentingCtx => parentingCtx.identifier1().GetText().DeQuoteOnDemand())

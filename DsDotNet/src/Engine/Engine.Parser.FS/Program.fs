@@ -61,16 +61,16 @@ C4 > C5;
         }
         // Flow 내의 safety 는 지원하지 않음
         //[safety] = {
-        //    Main = {A.F.Sp; A.F.Sm}
+        //    Main = { F.Main.Ap1; F.R2; }
         //}
     }
     [device file="cylinder.ds"] A;
     [device file="cylinder.ds"] B;
-    [device file="cylinder.ds"] C;
+    [external file="station.ds" ip="192.168.0.2"] C;
     [prop] = {
         // Global safety
         [safety] = {
-            My.F.Main = {B.F.Sp; B.F.Sm; C.F.Sp}
+            F.Main = { F.Main.Ap1; F.R2 }
         }
         [layouts] = {
             A."+" = (1309,405,205,83)

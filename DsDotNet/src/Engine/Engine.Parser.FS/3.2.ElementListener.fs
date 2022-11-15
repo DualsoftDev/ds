@@ -105,7 +105,7 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
         let createCall (ci:ContextInformation) =
             match ci.Tuples with
             | Some s, Some f, _, device::api::[] ->     // my / flow / (parenting) / device.api
-                match tryFindImportApiItem(system, [|device; api|]) with
+                match tryFindImportApiItem system [device; api] with
                 | Some apiItem ->
                     let parent = getParentWrapper ci x._flow x._parenting
                     Call.Create(apiItem, parent) |> ignore

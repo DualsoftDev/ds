@@ -131,7 +131,14 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
         x._theSystem.Value.Devices.Add(device) |> ignore
 
     override x.EnterLoadExternalSystem(ctx:LoadExternalSystemContext) =
-        failwith "Not implemented"
+        let fileSpecCtx = findFirstChild<FileSpecContext>(ctx).Value
+        let absoluteFilePath, simpleFilePath = x.GetFilePath(fileSpecCtx)
+        let external =
+            let ipSpecCtx = findFirstChild<IpSpecContext>(ctx).Value
+            let ip = findFirstChild<EtcNameContext>(ipSpecCtx).Value.GetText()
+            let loadedName = collectNameComponents(ctx).Combine()
+            fwdLoadExternalSystem x._theSystem.Value (absoluteFilePath, simpleFilePath) loadedName
+        x._theSystem.Value.Devices.Add(external) |> ignore
 
     override x.ExitSystem(ctx:SystemContext) =
         base.ExitSystem(ctx)
@@ -142,7 +149,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
             let dups = dic |> seq
             for KeyValue(ctxInfo, vType) in dups do
                 match ctxInfo.Tuples with
-                | sys_, Some flow, parenting_, device::api::[] when tryFindImportApiItem(system, [|device; api|]).IsSome ->
+                | sys_, Some flow, parenting_, device::api::[] when (tryFindImportApiItem system [device; api]).IsSome ->
                     dic[ctxInfo] <- dic[ctxInfo] ||| GVT.CallApi
                 | _ ->
                     let nameMatches =
@@ -187,10 +194,10 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
                 match vType with
                 | HasFlag GVT.Segment ->
                     if vType.HasFlag(GVT.Parenting) then
-                        let parent = findGraphVertex(sys, ctxInfo.NameComponents.ToArray())
+                        let parent = findGraphVertex sys ctxInfo.NameComponents
                         assert(parent <> null)
                     elif ctxInfo.Names.Length = 1 then
-                        let flow = findGraphVertex (sys, [| yield ctxInfo.System.Value; yield ctxInfo.Flow.Value |]) // ctxInfo.Flow.Value.N
+                        let flow = findGraphVertex sys [yield ctxInfo.System.Value; yield ctxInfo.Flow.Value] // ctxInfo.Flow.Value.N
                         Real.Create(ctxInfo.Names[0], flow:?>Flow) |> ignore
                     else
                         ()  // e.g My/F/F2.Seg1 : 해당 real 생성은 다른 flow 의 역할임.

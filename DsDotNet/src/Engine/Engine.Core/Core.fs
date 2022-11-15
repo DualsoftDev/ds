@@ -66,7 +66,7 @@ module CoreModule =
             let system = DsSystem(name, host)
             system
 
-    and Flow private (name:string, system:DsSystem) =
+    type Flow private (name:string, system:DsSystem) =
         inherit FqdnObject(name, system)
         member val Graph = DsGraph()
         member val ModelingEdges = HashSet<ModelingEdgeInfo<Vertex>>()
@@ -81,7 +81,7 @@ module CoreModule =
 
     /// leaf or stem(parenting)
     /// Graph 상의 vertex 를 점유하는 named object : Real, Alias, Call
-    and [<AbstractClass>]
+    type [<AbstractClass>]
         Vertex (names:Fqdn, parent:ParentWrapper) =
         inherit FqdnObject(names.Combine(), parent.GetCore())
 
@@ -98,7 +98,7 @@ module CoreModule =
         member val ModelingEdges = HashSet<ModelingEdgeInfo<Vertex>>()
         member val Flow = flow
 
-        member val SafetyConditions = createQualifiedNamedHashSet<Real>()
+        member val SafetyConditions = HashSet<SafetyCondition>()
         static member Create(name:string, flow) =
             if (name.Contains ".") (*&& not <| (name.StartsWith("\"") && name.EndsWith("\""))*) then
                 logWarn $"Suspicious segment name [{name}]. Check it."
@@ -106,6 +106,11 @@ module CoreModule =
             let segment = Real(name, flow)
             flow.Graph.AddVertex(segment) |> verifyM $"Duplicated segment name [{name}]"
             segment
+
+    and SafetyCondition =
+        | SafetyConditionReal of Real
+        | SafetyConditionCall of Call
+
 
     and AliasTargetType =
         | RealTarget of Real
@@ -179,7 +184,7 @@ module CoreModule =
         static member CreateNowhere(apiItem:ApiItem, parent:ParentWrapper) = Call(apiItem, parent)
 
 
-    and ApiItem private (name:string, system:DsSystem) =
+    type ApiItem private (name:string, system:DsSystem) =
         (* createFqdnObject : system 이 다른 system 에 포함되더라도, name component 를 더 이상 확장하지 않도록 cut *)
         inherit FqdnObject(name, createFqdnObject([|system.Name|]))
         interface INamedVertex
@@ -209,7 +214,7 @@ module CoreModule =
 
 
     ///Vertex의 부모의 타입을 구분한다.
-    and ParentWrapper =
+    type ParentWrapper =
         | Flow of Flow //Real/Call/Alias 의 부모
         | Real of Real //Call/Alias      의 부모
 
@@ -226,6 +231,38 @@ module CoreModule =
             edge
 
         override x.ToString() = $"{x.Source.QualifiedName} {x.EdgeType.ToText()} {x.Target.QualifiedName}"
+
+
+    (*
+     * Extension methods
+     *)
+
+    type SafetyCondition with
+        member x.ToText() =
+            match x with
+            | SafetyConditionReal real -> [real.Flow.Name; real.Name].Combine()
+            | SafetyConditionCall call -> call.NameComponents.Combine()
+
+    type ParentWrapper with
+        member x.GetCore() =
+            match x with
+            | Flow f -> f :> FqdnObject
+            | Real r -> r
+
+        member x.GetSystem() =
+            match x with
+            | Flow f -> f.System
+            | Real r -> r.Flow.System
+
+        member x.GetGraph() =
+            match x with
+            | Flow f -> f.Graph
+            | Real r -> r.Graph
+
+        member x.GetModelingEdges() =
+            match x with
+            | Flow f -> f.ModelingEdges
+            | Real r -> r.ModelingEdges
 
 
 [<Extension>]
@@ -259,26 +296,3 @@ type CoreExt =
         else
             dicButton.Add(btnName, HashSet[|flow|] )
 
-    [<Extension>]
-    static member GetCore(wrapper:ParentWrapper) =
-        match wrapper with
-        | Flow f -> f :> FqdnObject
-        | Real r -> r
-
-    [<Extension>]
-    static member GetSystem(wrapper:ParentWrapper) =
-        match wrapper with
-        | Flow f -> f.System
-        | Real r -> r.Flow.System
-
-    [<Extension>]
-    static member GetGraph(wrapper:ParentWrapper) =
-        match wrapper with
-        | Flow f -> f.Graph
-        | Real r -> r.Graph
-
-    [<Extension>]
-    static member GetModelingEdges(wrapper:ParentWrapper) =
-        match wrapper with
-        | Flow f -> f.ModelingEdges
-        | Real r -> r.ModelingEdges

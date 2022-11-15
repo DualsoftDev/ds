@@ -66,11 +66,9 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
          * safety block 을 parsing 해서 key / value 의 dictionary 로 저장
          *
         [safety] = {
-            Main = {P.F.Sp; P.F.Sm}
-            Main2 = {P.F.Sp; P.F.Sm}
+            F.Main = {A."+"; B."+"}
         }
-        => "Main" = {"P.F.Sp"; "P.F.Sm"}
-           "Main2" = {"P.F.Sp"; "P.F.Sm"}
+        => "Main" = {A."+"; B."+"}
          *)
         let safetyKvs =
             [   for safetyDef in safetyDefs do
@@ -85,22 +83,65 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
         let sysNames, flowName, parenting_, ns_ = (getContextInformation ctx).Tuples
         let curSystem = x.ParserHelper.TheSystem.Value
 
-        for (key, values) in safetyKvs do
-            let seg:Real =
-                match key.Length with
-                    | 1 ->
-                        assert(ctx.Parent :? FlowContext)
-                        curSystem.FindGraphVertex<Real>(x.AppendPathElement(key[0]))
-                    | 3 ->
-                        assert(ctx.Parent :? ModelPropertyBlockContext)
-                        curSystem.FindGraphVertex<Real>(key)
-                    | _ ->
-                        raise <| ParserException($"Invalid safety key[{key.Combine()}]", ctx)
+        let test =
+            let f (n:int) = n.ToString()
+            let a = Some 1
+            a |> Option.map(f)
 
-            for cond in values.Select(fun v -> curSystem.FindGraphVertex(v) |> box :?> Real) do
-                let added = seg.SafetyConditions.Add(cond)
-                if not added then
-                    raise <| ParserException($"Safety condition [{cond.QualifiedName}] duplicated on safety key[{key.Combine()}]", ctx)
+        for (FList(key), values) in safetyKvs do
+            match key with
+            | flow::real::[] ->
+                let realSeg = curSystem.TryFindFlow(flow).Bind(fun f -> f.Graph.TryFindVertex(real)).Map(fun v -> v :?> Real)
+                match realSeg with
+                | Some realSeg ->
+                    for value in values do
+                        let vertex = curSystem.FindGraphVertex(value)
+                        let xxx = vertex
+                        ()
+                        let condition() =
+                            let vertex = curSystem.FindGraphVertex(value)
+
+                            //if api.IsSome then
+                            //    SafetyConditionApiItem (api.Value)
+                            //else
+                            ()
+                        ()
+
+                        //let added = realSeg.SafetyConditions.Add(cond)
+                        //if not added then
+                        //    raise <| ParserException($"Safety condition [{cond.QualifiedName}] duplicated on safety key[{key.Combine()}]", ctx)
+                        //let x = api
+                        //()
+                        ////let safetySeg = curSystem.FindExportApiItem  TryFindFlow(flow).Map(fun f -> f.Graph.TryFindVertex(value))
+                        ////match safetySeg with
+                        ////| Some safetySeg ->
+                        ////    safetySeg.Safety <- Some realSeg
+                        ////| None -> failwith $"Safety segment [{value}] not exists!"
+                | _ ->
+                    failwith "ERROR"
+
+                ()
+            | _ ->
+                failwith "ERROR"
+
+
+            //assert(key.Length = 2)
+            //let (flow::real::[]) = key
+            //let seg:Real =
+            //    match key.Length with
+            //        | 1 ->
+            //            assert(ctx.Parent :? FlowContext)
+            //            curSystem.FindGraphVertex<Real>(x.AppendPathElement(key[0]))
+            //        | 3 ->
+            //            assert(ctx.Parent :? ModelPropertyBlockContext)
+            //            curSystem.FindGraphVertex<Real>(key)
+            //        | _ ->
+            //            raise <| ParserException($"Invalid safety key[{key.Combine()}]", ctx)
+
+            //for cond in values.Select(fun v -> curSystem.FindGraphVertex(v) |> box :?> Real) do
+            //    let added = seg.SafetyConditions.Add(cond)
+            //    if not added then
+            //        raise <| ParserException($"Safety condition [{cond.QualifiedName}] duplicated on safety key[{key.Combine()}]", ctx)
 
 
     member private x.CreateFunctionApplication(context:FunApplicationContext):FunctionApplication =

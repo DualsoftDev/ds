@@ -26,6 +26,14 @@ type OptionExt =
     [<Extension>] static member ToOption(v)     = Option.ofNullable v
     [<Extension>] static member ToOption(obj)   = Option.ofObj obj
 
+    (* Fail to define Cast for option. *)
+    //[<Extension>] static member Cast<'T>(xo):'T option = Option.map (forceCast<'T>) xo
+    //[<Extension>] static member Cast<'T>(xo):'T option =
+    //    match xo with
+    //    | None -> None
+    //    | Some o when isType<'T> o -> Some (forceCast<'T> o)
+    //    | _ -> failwith "Casting ERROR"
+
 [<Extension>] // type OptionExt =
 type ResultExt =
     [<Extension>] static member Bind(xr, f) = Result.bind f xr

@@ -1,0 +1,16 @@
+[sys] Station = {
+    [flow] F = {
+        Vp > Pp > Sp;
+        Vm > Pm > Sm;
+
+        Vp |> Pm |> Sp;
+        Vm |> Pp |> Sm;
+        Vp <||> Vm;
+    }
+    [interfaces] = {
+        "+" = { F.Vp ~ F.Sp }
+        "-" = { F.Vm ~ F.Sm }
+        "+" <||> "-";
+    }
+    [device file="cylinder.ds"] StationCylinder;
+}

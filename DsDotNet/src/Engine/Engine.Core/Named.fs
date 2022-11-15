@@ -53,6 +53,7 @@ module TextUtil =
 
     /// Fully Qualified Domain Name: string[] for "A.B.C"
     type Fqdn = string[]
+    let (|Fqdn|) xs = Array.ofSeq xs
 
     // 이름이 필요한 객체
     [<AbstractClass>]

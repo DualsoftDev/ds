@@ -5,10 +5,13 @@ open Engine.Common.FS
 
 [<AutoOpen>]
 module internal ModelFindModule =
-    let findGraphVertex(system:DsSystem, fqdn:Fqdn) : obj =
-        let nameEq (name:string) (x:INamed) = x.Name = name
+    let nameComponentsEq (Fqdn(ys)) (xs:IQualifiedNamed) = xs.NameComponents = ys
+    let nameEq (name:string) (x:INamed) = x.Name = name
 
-        let findInLoadedSystem (device:LoadedSystem) (fqdn:Fqdn) =
+    let findGraphVertex(system:DsSystem) (Fqdn(fqdn)) : obj =
+        //let inline nameComponentsEq xs ys = (^T: (member NameComponents: Fqdn) xs) = (^T: (member NameComponents: Fqdn) ys)
+
+        let findInLoadedSystem (device:LoadedSystem) (Fqdn(fqdn)) =
             failwith "Not yet implemented"
             null
 
@@ -40,42 +43,49 @@ module internal ModelFindModule =
         | _ -> findSystemInner system fqdn
 
 
-    let findGraphVertexT<'V when 'V :> IVertex>(system:DsSystem, fqdn:Fqdn) =
-        let v = findGraphVertex(system, fqdn)
+    let findGraphVertexT<'V when 'V :> IVertex>(system:DsSystem) (Fqdn(fqdn)) =
+        let v = findGraphVertex system fqdn
         if typedefof<'V>.IsAssignableFrom(v.GetType()) then
             v :?> 'V
         else
             failwith "ERROR"
 
-    let findExportApiItem(system:DsSystem, apiPath:Fqdn) =
+    let findExportApiItem(system:DsSystem) (Fqdn(apiPath)) =
         let sysName, apiKey = apiPath[0], apiPath[1]
         system.ApiItems4Export.FindWithName(apiKey)
 
-    let tryFindLoadedSystem(system:DsSystem, loadedSystemName:string) = system.Devices.TryFind(fun d -> d.Name = loadedSystemName)
-    let tryFindImportApiItem(system:DsSystem, apiPath:Fqdn) =
+    let tryFindLoadedSystem(system:DsSystem) (loadedSystemName:string) =
+        system.Devices.TryFind(fun d -> d.Name = loadedSystemName)
+
+    let tryFindImportApiItem(system:DsSystem) (Fqdn(apiPath)) =
         let lSysName, lApiKey = apiPath[0], apiPath[1]
-        let loadedSystem = tryFindLoadedSystem(system, lSysName)
+        let loadedSystem = tryFindLoadedSystem system lSysName
         match loadedSystem with
         | Some lsystem ->
             lsystem.ReferenceSystem.ApiItems4Export
                 .TryFind(fun api -> api.Name = lApiKey)
         | None -> None
 
-    let findCall(system:DsSystem, callPath:Fqdn) =
-        let x = findGraphVertex(system, callPath) :?> Call
+    let findCallingApiItem(system:DsSystem) (Fqdn(apiPath)) =
+        let sysName, apiKey = apiPath[0], apiPath[1]
+        system.ApiItems.TryFind(nameComponentsEq apiKey)
+
+    let findCall(system:DsSystem) (Fqdn(callPath)) =
+        let x = findGraphVertex system callPath :?> Call
         x
 
-    let findFlow(system:DsSystem , flowName:string) =
-        system.Flows.First(fun flow -> flow.Name = flowName)
+    let tryFindFlow(system:DsSystem) (flowName:string) =
+        system.Flows.TryFind(fun flow -> flow.Name = flowName)
 
 
     type DsSystem with
-        member x.FindGraphVertex(fqdn:Fqdn) = findGraphVertex(x, fqdn)
-        member x.FindGraphVertex<'V when 'V :> IVertex>(fqdn:Fqdn) = findGraphVertexT<'V>(x, fqdn)
+        member x.FindGraphVertex(Fqdn(fqdn)) = findGraphVertex x fqdn
+        member x.FindGraphVertex<'V when 'V :> IVertex>(Fqdn(fqdn)) = findGraphVertexT<'V> x fqdn
 
-        member x.FindExportApiItem(apiPath:Fqdn) = findExportApiItem(x, apiPath)
-        member x.TryFindExportApiItem(apiKey:string) = x.ApiItems4Export.FindWithName(apiKey)
-        member x.FindCall(callPath:Fqdn) = findCall(x, callPath)
+        member x.FindExportApiItem(Fqdn(apiPath)) = findExportApiItem x apiPath
+        //member x.TryFindExportApiItem(apiKey:string) = x.ApiItems4Export.FindWithName(apiKey)
+        member x.FindCall(Fqdn(callPath)) = findCall x callPath
 
-        member x.FindFlow(flowName:string) = findFlow(x, flowName)
+        member x.FindFlow(flowName:string) = tryFindFlow x flowName |> Option.get
+        member x.TryFindFlow(flowName:string) = tryFindFlow x flowName
 

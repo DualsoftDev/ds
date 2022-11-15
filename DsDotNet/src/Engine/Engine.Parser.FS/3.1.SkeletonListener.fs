@@ -86,7 +86,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
 
 
     override x.EnterInterfaceDef(ctx:InterfaceDefContext) =
-        let hash = helper.TheSystem.Value.ApiItems
+        let hash = helper.TheSystem.Value.ApiItems4Export
         let interrfaceNameCtx = findFirstChild<InterfaceNameContext>(ctx).Value
         let interfaceName = collectNameComponents(interrfaceNameCtx)[0]
         let ser =   // { start ~ end ~ reset }

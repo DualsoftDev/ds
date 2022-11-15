@@ -23,6 +23,8 @@ type EdgeListener(parser:dsParser, helper:ParserHelper) =
 
     override x.EnterSystem(ctx:SystemContext) =
         base.EnterSystem(ctx)
+
+        let system = helper.TheSystem.Value
         let modelSpitCores = x._modelSpits.Select(fun spit -> spit.GetCore()).ToArray()
         for ac in x.ParserHelper.AliasCreators do
             let (name, parent, target) = (ac.Name, ac.Parent, ac.Target)
@@ -35,7 +37,7 @@ type EdgeListener(parser:dsParser, helper:ParserHelper) =
                     let realTarget = modelSpitCores.OfType<Real>().First(fun r -> r.NameComponents = real.TargetFqdn)
                     create (RealTarget realTarget)
                 | :? AliasTargetDirectCall as directCall ->
-                    let apiTarget = modelSpitCores.OfType<ApiItem>().First(fun a -> a.NameComponents = directCall.TargetFqdn)
+                    let apiTarget = system.ApiItems.First(fun a -> a.NameComponents = directCall.TargetFqdn)
                     let dummyCall = Call.CreateNowhere(apiTarget, parent)
                     create(CallTarget dummyCall)
                 | :? AliasTargetApi as api ->

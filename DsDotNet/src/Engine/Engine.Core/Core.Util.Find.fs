@@ -49,7 +49,7 @@ module internal ModelFindModule =
 
     let findExportApiItem(system:DsSystem, apiPath:Fqdn) =
         let sysName, apiKey = apiPath[0], apiPath[1]
-        system.ApiItems.FindWithName(apiKey)
+        system.ApiItems4Export.FindWithName(apiKey)
 
     let tryFindLoadedSystem(system:DsSystem, loadedSystemName:string) = system.Devices.TryFind(fun d -> d.Name = loadedSystemName)
     let tryFindImportApiItem(system:DsSystem, apiPath:Fqdn) =
@@ -57,7 +57,7 @@ module internal ModelFindModule =
         let loadedSystem = tryFindLoadedSystem(system, lSysName)
         match loadedSystem with
         | Some lsystem ->
-            lsystem.ReferenceSystem.ApiItems
+            lsystem.ReferenceSystem.ApiItems4Export
                 .TryFind(fun api -> api.Name = lApiKey)
         | None -> None
 
@@ -74,7 +74,7 @@ module internal ModelFindModule =
         member x.FindGraphVertex<'V when 'V :> IVertex>(fqdn:Fqdn) = findGraphVertexT<'V>(x, fqdn)
 
         member x.FindExportApiItem(apiPath:Fqdn) = findExportApiItem(x, apiPath)
-        member x.TryFindExportApiItem(apiKey:string) = x.ApiItems.FindWithName(apiKey)
+        member x.TryFindExportApiItem(apiKey:string) = x.ApiItems4Export.FindWithName(apiKey)
         member x.FindCall(callPath:Fqdn) = findCall(x, callPath)
 
         member x.FindFlow(flowName:string) = findFlow(x, flowName)

@@ -59,9 +59,10 @@ C4 > C5;
             B."-" = { Bm1; Bm2; }
             Main = { Main2; }
         }
-        [safety] = {
-            Main = {A.F.Sp; A.F.Sm}
-        }
+        // Flow 내의 safety 는 지원하지 않음
+        //[safety] = {
+        //    Main = {A.F.Sp; A.F.Sm}
+        //}
     }
     [device file="cylinder.ds"] A;
     [device file="cylinder.ds"] B;

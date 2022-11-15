@@ -127,9 +127,9 @@ module internal ToDsTextModule =
             let tab = getTab indent
             let tab2 = getTab (indent+1)
 
-            if system.ApiItems.Any() then
+            if system.ApiItems4Export.Any() then
                 yield $"{tab}[interfaces] = {lb}"
-                for item in system.ApiItems do
+                for item in system.ApiItems4Export do
                     let ser =
                         let getFlowAndRealName (r:Real) = [r.Flow.Name; r.Name].Combine()
                         let qNames (xs:Real seq) = xs.Select(getFlowAndRealName) |> String.concat(", ")
@@ -194,7 +194,7 @@ module internal ToDsTextModule =
                         yield $"{tab}{rb}"
                 ] |> combineLines
 
-            let withLayouts = system.ApiItems.Where(fun ai -> ai.Xywh <> null)
+            let withLayouts = system.ApiItems4Export.Where(fun ai -> ai.Xywh <> null)
             let layouts =
                 [
                     if withLayouts.Any() then

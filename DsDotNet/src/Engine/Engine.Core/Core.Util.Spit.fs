@@ -68,7 +68,7 @@ module SpitModuleHelper =
             yield SpitResult.Create(SpitDsSystem system, system.NameComponents)
             for flow in system.Flows do
                 yield! spit(flow)
-                for api in system.ApiItems -> SpitResult.Create(SpitApiItem api, api.NameComponents)
+                for api in system.ApiItems4Export -> SpitResult.Create(SpitApiItem api, api.NameComponents)
 
             for dev in system.Devices do
                 yield! spit(dev)

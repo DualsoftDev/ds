@@ -19,7 +19,7 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
 
     override x.EnterInterfaceDef(ctx:InterfaceDefContext) =
         let system = helper.TheSystem.Value
-        let hash = system.ApiItems
+        let hash = system.ApiItems4Export
         let interrfaceNameCtx = findFirstChild<InterfaceNameContext>(ctx)
         let interfaceName = collectNameComponents(interrfaceNameCtx.Value)[0]
 
@@ -81,8 +81,7 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
                     x.ParserHelper.AliasCreators.Add(aliasCreator) |> ignore
                 | 2 ->
                     let apiItem =
-                        let apiItems = x._modelSpitObjects.OfType<ApiItem>().ToArray()
-                        apiItems.Where(fun api -> api.NameComponents = aliasKey)
+                        system.ApiItems.Where(fun api -> api.NameComponents = aliasKey)
                             .Head()
 
                     let name = ns.Combine()

@@ -15,6 +15,23 @@ module CoreModule =
             member _.NameComponents = nameComponents
             member x.QualifiedName = nameComponents.Combine() }
 
+    [<AbstractClass>]
+    type LoadedSystem(name:string, referenceSystem:DsSystem, containerSystem:DsSystem) =
+        inherit FqdnObject(name, containerSystem)
+        /// Loading 된 system 을 포함하는 container system
+        member val ContainerSystem = containerSystem
+        /// Loading 된 system 참조 용
+        member val ReferenceSystem = referenceSystem
+
+        member val UserSpecifiedFilePath:string = null with get, set
+        member val AbsoluteFilePath:string = null with get, set
+
+    and Device(referenceSystem:DsSystem, containerSystem:DsSystem) =
+        inherit LoadedSystem(referenceSystem.Name, referenceSystem, containerSystem)
+
+    and ExternalSystem(name:string, referenceSystem:DsSystem, containerSystem:DsSystem) =
+        inherit LoadedSystem(name, referenceSystem, containerSystem)
+
     type DsSystem private (name:string, host:string) =
         inherit FqdnObject(name, createFqdnObject([||]))
 
@@ -24,7 +41,8 @@ module CoreModule =
         member val Observes = ResizeArray<Observe>()
 
         member val Flows    = createNamedHashSet<Flow>()
-        member val ApiItems = createNamedHashSet<ApiItem>()
+        member val ApiItems4Export = createNamedHashSet<ApiItem>()
+        member x.ApiItems = x.Devices.Collect(fun d -> d.ReferenceSystem.ApiItems4Export)
         member val ApiResetInfos = HashSet<ApiResetInfo>() with get, set
         ///시스템 전체시작 버튼누름시 수행되야하는 Real목록
         member val StartPoints = createQualifiedNamedHashSet<Real>()
@@ -47,23 +65,6 @@ module CoreModule =
         static member Create(name, host) =
             let system = DsSystem(name, host)
             system
-
-    [<AbstractClass>]
-    type LoadedSystem(name:string, referenceSystem:DsSystem, containerSystem:DsSystem) =
-        inherit FqdnObject(name, containerSystem)
-        /// Loading 된 system 을 포함하는 container system
-        member val ContainerSystem = containerSystem
-        /// Loading 된 system 참조 용
-        member val ReferenceSystem = referenceSystem
-
-        member val UserSpecifiedFilePath:string = null with get, set
-        member val AbsoluteFilePath:string = null with get, set
-
-    type Device(referenceSystem:DsSystem, containerSystem:DsSystem) =
-        inherit LoadedSystem(referenceSystem.Name, referenceSystem, containerSystem)
-
-    type ExternalSystem(name:string, referenceSystem:DsSystem, containerSystem:DsSystem) =
-        inherit LoadedSystem(name, referenceSystem, containerSystem)
 
     and Flow private (name:string, system:DsSystem) =
         inherit FqdnObject(name, system)
@@ -192,7 +193,7 @@ module CoreModule =
 
         static member Create(name, system) =
             let cp = ApiItem(name, system)
-            system.ApiItems.Add(cp) |> verifyM $"Duplicated interface prototype name [{name}]"
+            system.ApiItems4Export.Add(cp) |> verifyM $"Duplicated interface prototype name [{name}]"
             cp
 
     /// API 의 reset 정보:  "+" <||> "-";

@@ -68,14 +68,15 @@ module internal ToDsTextModule =
             yield $"{tab}[flow] {flow.Name.QuoteOnDemand()} = {lb}"
             yield! graphToDs (Flow flow) (indent+1)
 
-            let alias = flow.AliasMap
+            let alias = flow.AliasDefs
             if alias.Any() then
                 let tab = getTab (indent+1)
                 yield $"{tab}[aliases] = {lb}"
-                for KeyValue(k, v) in alias do
-                    let mnemonics = (v |> String.concat "; ") + ";"
-                    let tab = getTab (indent+2)
-                    yield $"{tab}{k.Combine()} = {lb} {mnemonics} {rb}"
+                failwith "ERROR"
+                //for KeyValue(k, v) in alias do
+                //    let mnemonics = (v |> String.concat "; ") + ";"
+                //    let tab = getTab (indent+2)
+                //    yield $"{tab}{k.Combine()} = {lb} {mnemonics} {rb}"
                 yield $"{tab}{rb}"
 
             yield $"{tab}{rb}"
@@ -189,8 +190,9 @@ module internal ToDsTextModule =
                         yield $"{tab}[safety] = {lb}"
                         for seg in withSafeties do
                             let getSegmentPath (seg:Real) = getRelativeName [|system.Name|] seg.NameComponents
-                            let conds = seg.SafetyConditions.Select(toText).JoinWith("; ") + ";"
-                            yield $"{tab2}{seg.QualifiedName} = {lb} {conds} {rb}"
+                            failwith "ERROR"
+                            //let conds = seg.SafetyConditions.Select(toText).JoinWith("; ") + ";"
+                            //yield $"{tab2}{seg.QualifiedName} = {lb} {conds} {rb}"
                         yield $"{tab}{rb}"
                 ] |> combineLines
 

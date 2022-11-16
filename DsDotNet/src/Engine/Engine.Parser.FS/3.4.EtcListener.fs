@@ -233,9 +233,10 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
         for o in x._modelSpits do
             match o.GetCore() with
             | :? Call as call ->
-                let map = call.GetSystem().ApiAddressMap
-                if map.ContainsKey(call.NameComponents) then
-                    let address = map[call.NameComponents]
-                    assert(isNull call.Addresses || call.Addresses = address)
-                    call.Addresses <- address
+                failwith "ERROR"
+                //let map = call.GetSystem().ApiAddressMap
+                //if map.ContainsKey(call.NameComponents) then
+                //    let address = map[call.NameComponents]
+                //    assert(isNull call.Addresses || call.Addresses = address)
+                //    call.Addresses <- address
             | _ -> ()

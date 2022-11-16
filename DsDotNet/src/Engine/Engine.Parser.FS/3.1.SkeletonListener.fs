@@ -71,18 +71,19 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
 
 
     override x.EnterAliasListing(ctx:AliasListingContext) =
-        let map = x._flow.Value.AliasMap
+        failwith "NOT yet"
+        //let map = x._flow.Value.AliasDefs
 
-        let aliasDef = tryFindFirstChild<AliasDefContext>(ctx).Value
-        let ci = getContextInformation aliasDef
-        x.AddElement(ci, GVT.AliaseKey)
+        //let aliasDef = tryFindFirstChild<AliasDefContext>(ctx).Value
+        //let ci = getContextInformation aliasDef
+        //x.AddElement(ci, GVT.AliaseKey)
 
-        let mnemonics = enumerateChildren<AliasMnemonicContext>(ctx).Select(getContextInformation)
-        for mne in mnemonics do
-            x.AddElement(mne, GVT.AliaseMnemonic)
-        let aliasesHash = mnemonics.Select(fun ctx -> ctx.Names.Combine()).ToHashSet()
-        let aliasKey = ci.Names.ToArray()
-        map.Add(aliasKey, aliasesHash)
+        //let mnemonics = enumerateChildren<AliasMnemonicContext>(ctx).Select(getContextInformation)
+        //for mne in mnemonics do
+        //    x.AddElement(mne, GVT.AliaseMnemonic)
+        //let aliasesHash = mnemonics.Select(fun ctx -> ctx.Names.Combine()).ToHashSet()
+        //let aliasKey = ci.Names.ToArray()
+        //map.Add(aliasKey, aliasesHash)
 
 
     override x.EnterInterfaceDef(ctx:InterfaceDefContext) =
@@ -96,7 +97,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
 
         // 이번 stage 에서 일단 interface 이름만 이용해서 빈 interface 객체를 생성하고,
         // TXs, RXs, Resets 은 다음 listener stage 에서 채움..
-        let api = ApiItem.Create(interfaceName, helper.TheSystem.Value)
+        let api = ApiItem4Export.Create(interfaceName, helper.TheSystem.Value)
         hash.Add(api) |> ignore
 
     override x.EnterInterfaceResetDef(ctx:InterfaceResetDefContext) =

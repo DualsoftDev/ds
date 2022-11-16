@@ -103,22 +103,23 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
 
 
         let createCall (ci:ContextInformation) =
-            match ci.Tuples with
-            | Some s, Some f, _, device::api::[] ->     // my / flow / (parenting) / device.api
-                match tryFindImportApiItem system [device; api] with
-                | Some apiItem ->
-                    let parent = getParentWrapper ci x._flow x._parenting
-                    Call.Create(apiItem, parent) |> ignore
-                | None ->
-                    match (findSpit [s; device; api]).OrElse(findSpit [device; api]) with
-                    | Some sp ->
-                        match sp.SpitObj with
-                        | SpitOnlyAlias soa -> createAlias soa
-                        | SpitReal real -> createRealTargetAlias ci real
-                        | _ -> failwith "Not an API item"
-                    | None -> tracefn "Need to generate %A" [s; device; api]
-            | _ ->
-                failwith "ERROR"
+            failwith "ERROR"
+            //match ci.Tuples with
+            //| Some s, Some f, _, device::api::[] ->     // my / flow / (parenting) / device.api
+            //    match tryFindImportApiItem system [device; api] with
+            //    | Some apiItem ->
+            //        let parent = getParentWrapper ci x._flow x._parenting
+            //        Call.Create(apiItem, parent) |> ignore
+            //    | None ->
+            //        match (findSpit [s; device; api]).OrElse(findSpit [device; api]) with
+            //        | Some sp ->
+            //            match sp.SpitObj with
+            //            | SpitOnlyAlias soa -> createAlias soa
+            //            | SpitReal real -> createRealTargetAlias ci real
+            //            | _ -> failwith "Not an API item"
+            //        | None -> tracefn "Need to generate %A" [s; device; api]
+            //| _ ->
+            //    failwith "ERROR"
 
         let createAliasFromContextInformation (ci:ContextInformation) =
             let alias =

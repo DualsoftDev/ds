@@ -4,10 +4,11 @@ open Engine.Core
 open System.Collections.Generic
 open System.Linq
 
-type AliasTarget() = class end
+[<AbstractClass>]
+type AliasTargetBase() = class end
 
 type AliasTargetWithFqdn(targetFqdn:Fqdn) =
-    inherit AliasTarget()
+    inherit AliasTargetBase()
 
     member val TargetFqdn = targetFqdn with get, set
 
@@ -18,12 +19,12 @@ type AliasTargetDirectCall(targetFqdn:Fqdn) =
     inherit AliasTargetWithFqdn(targetFqdn)
 
 
-type AliasTargetApi(apiItem:ApiItem) =
-    inherit AliasTarget()
-    member val ApiItem = apiItem with get, set
+type AliasTargetApi(apiItem:ApiItem4Export) =
+    inherit AliasTargetBase()
+    member val ApiItem4Export = apiItem with get, set
 
 
-type AliasCreator(name:string, parent:ParentWrapper, target:AliasTarget) =
+type AliasCreator(name:string, parent:ParentWrapper, target:AliasTargetBase) =
     member val Name = name with get, set
     member val Parent = parent with get, set
     member val Target = target with get, set

@@ -5,7 +5,7 @@ open System.Linq
 open Engine.Common.FS
 open System.Collections.Generic
 open GraphModule
-
+#if false
 [<AutoOpen>]
 module OriginModule =
     //해당 Child Origin 기준
@@ -50,7 +50,7 @@ module OriginModule =
         graph.Vertices
         |> Seq.iter(fun v ->
             let apiName =
-                (getVertexTarget v).ApiItem.QualifiedName
+                (getVertexTarget v).ApiItem4Export.QualifiedName
             if not (callMap.ContainsKey(apiName)) then
                 callMap.Add(apiName, new ResizeArray<Vertex>(0))
             callMap.[apiName].Add(v)
@@ -65,7 +65,7 @@ module OriginModule =
             $"{system}.{src}", info.Operator.ToText(), $"{system}.{tgt}"
 
         let getResetInfo (node:Vertex) =
-            let vertexSystem = (getVertexTarget node).ApiItem.System
+            let vertexSystem = (getVertexTarget node).ApiItem4Export.System
             vertexSystem.ApiResetInfos
             |> Seq.map(makeName (vertexSystem.QualifiedName))
 
@@ -390,3 +390,5 @@ type OriginHelper =
     [<Extension>] static member GetAllResets(graph:DsGraph)  = graph |> getAllResets
     /// Get pre-calculated targets thatchild segments to be 'ON' in progress(Theta)
     [<Extension>] static member GetThetaTargets(graph:DsGraph) = graph |> getThetaTargets
+
+#endif

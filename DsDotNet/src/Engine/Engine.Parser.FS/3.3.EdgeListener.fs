@@ -31,19 +31,20 @@ type EdgeListener(parser:dsParser, helper:ParserHelper) =
             let graph = parent.GetGraph()
             let existing = graph.TryFindVertex(name)
             if existing.IsNone then
-                let create target = Alias.Create(name, target, parent, true) |> ignore
-                match target with
-                | :? AliasTargetReal as real ->
-                    let realTarget = modelSpitCores.OfType<Real>().First(fun r -> r.NameComponents = real.TargetFqdn)
-                    create (RealTarget realTarget)
-                | :? AliasTargetDirectCall as directCall ->
-                    let apiTarget = system.ApiItems.First(fun a -> a.NameComponents = directCall.TargetFqdn)
-                    let dummyCall = Call.CreateNowhere(apiTarget, parent)
-                    create(CallTarget dummyCall)
-                | :? AliasTargetApi as api ->
-                    let dummyCall = Call.CreateNowhere(api.ApiItem, parent)
-                    create(CallTarget dummyCall)
-                | _ -> ()
+                failwith "ERROR"
+                //let create target = Alias.Create(name, target, parent, true) |> ignore
+                //match target with
+                //| :? AliasTargetReal as real ->
+                //    let realTarget = modelSpitCores.OfType<Real>().First(fun r -> r.NameComponents = real.TargetFqdn)
+                //    create (RealTarget realTarget)
+                //| :? AliasTargetDirectCall as directCall ->
+                //    let apiTarget = system.ApiItems.First(fun a -> a.NameComponents = directCall.TargetFqdn)
+                //    let dummyCall = Call.CreateNowhere(apiTarget, parent)
+                //    create(CallTarget dummyCall)
+                //| :? AliasTargetApi as api ->
+                //    let dummyCall = Call.CreateNowhere(api.ApiItem4Export, parent)
+                //    create(CallTarget dummyCall)
+                //| _ -> ()
 
         x.UpdateModelSpits()
 

@@ -122,7 +122,7 @@ module HmiGenModule =
                 | _ ->
                     failwith "type error"
 
-        let addInterface (api:ApiItem) =
+        let addInterface (api:ApiItem4Export) =
             if false = hmiInfos.ContainsKey(api.QualifiedName) then
                 let info = 
                     genInfo
@@ -139,12 +139,12 @@ module HmiGenModule =
             let (device, api) =
                 match call with
                 | :? Call as c ->
-                    c.ApiItem.System.Name, Some(c.ApiItem)
+                    c.ApiItem4Export.System.Name, Some(c.ApiItem4Export)
                 | :? Alias as a ->
                     let aliasKey =
                         match a.Target with
                         | RealTarget r -> r.NameComponents
-                        | CallTarget c -> c.ApiItem.NameComponents
+                        | CallTarget c -> c.ApiItem4Export.NameComponents
                     aliasKey[0], Some(model.FindExportApiItem aliasKey)
                 | _ ->
                     null, None

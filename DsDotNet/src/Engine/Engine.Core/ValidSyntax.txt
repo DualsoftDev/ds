@@ -10,6 +10,17 @@
     - e.g Sys "A" / Flow "F" / Real "A" => A/F/A : A 이름이 중복됨
 
 
+- [calls] {
+        C1 = { OtherSys.Api(Tx, Rx); A."+"(%I1, %Q3) }
+  }
+  [aliases] {
+    C1 = {A1; A2; A3}
+  }
+
+
+
+
+
 Sys / F / Seg
 Sys / F / MySegAlias
 Sys / F / SegApiCall (=OtherSys.ApiName)    ICall

@@ -19,7 +19,7 @@ open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module PPTDocModule =
-    
+
     let getSystemName(name:string) =
         let fileName = Path.GetFileNameWithoutExtension(name)
         if fileName.IsQuotationRequired()
@@ -30,7 +30,7 @@ module PPTDocModule =
           nodes:ConcurrentDictionary<string, pptNode>
         , pages:ConcurrentDictionary<SlidePart, pptPage>
         , parents:ConcurrentDictionary<pptNode, seq<pptNode>>) =
-        
+
             let pptNodes = nodes.Values
             let dicFlowNodes = pages.Values
                                 |> Seq.filter(fun page -> page.IsUsing)
@@ -73,7 +73,7 @@ module PPTDocModule =
 
 
     let getGroupParentsChildren(page:int, subG:Presentation.GroupShape, nodes:ConcurrentDictionary<string, pptNode>) =
-        
+
         //group 에 사용된 real, call ID를 재귀적으로 모든 하위그룹까지 가져옴
         let rec getGroupMembers(subG:Presentation.GroupShape, shapeIds:ConcurrentHash<uint32>) =
                 subG.Descendants<Presentation.Shape>()
@@ -87,24 +87,24 @@ module PPTDocModule =
         getGroupMembers(subG, shapeIds)
         let groupNodes = shapeIds.Values |> Seq.map (fun id -> nodes.[ Objkey(page, id) ])
         groupNodes
-            
+
     let getValidGroup(groupShapes:GroupShape seq) =
             let rec getGroups(subG:Presentation.GroupShape, names:HashSet<string>) =
                 subG.Descendants<Presentation.GroupShape>()
-                |> Seq.iter(fun childGroup -> 
+                |> Seq.iter(fun childGroup ->
                                 names.Add(childGroup.GroupName()) |>ignore
                                 getGroups(childGroup, names) |> ignore)
                 names
 
-            let groupSubs = 
-                groupShapes 
+            let groupSubs =
+                groupShapes
                 |> Seq.map(fun group->  getGroups(group, HashSet<string>()))
                 |> Seq.collect(fun groups-> groups)
 
             groupShapes
             |> Seq.filter(fun f-> groupSubs.Contains(f.GroupName())|>not)
-            
-            
+
+
     //하부의 재귀적 중복 그룹 항목을 dicUsedSub 저장한다
     let rec SubGroup(page, subG:GroupShape, dicUsedSub:ConcurrentHash<GroupShape>) =
             subG.Descendants<Presentation.GroupShape>()
@@ -157,24 +157,24 @@ module PPTDocModule =
                             nodes.TryAdd(node.Key, node)  |>ignore )
 
                 let dicParentCheck = ConcurrentDictionary<string, int>()
-                allGroups 
-                |> Seq.iter (fun (page, groups) -> 
-                    groups|> getValidGroup 
+                allGroups
+                |> Seq.iter (fun (page, groups) ->
+                    groups|> getValidGroup
                             |> Seq.iter (fun group ->
                                 let groupAllNodes = getGroupParentsChildren(page, group, nodes)
                                 let pptGroup = pptRealGroup(page, groupAllNodes)
                                 if(pptGroup.Parent.IsNone)
                                 then Office.ErrorPPT(Group, ErrID._18, "", pptGroup.PageNum)
-                                else 
+                                else
                                     let parent = pptGroup.Parent.Value;
                                     if(dicParentCheck.TryAdd(pptGroup.RealKey, pptGroup.PageNum))
                                     then  parents.TryAdd(parent, pptGroup.Children)|>ignore
-                                    else  Office.ErrorPPT(Group, ErrID._17, $"{dicParentCheck.[pptGroup.RealKey]}-{parent.Name}", pptGroup.PageNum) 
-                                       
+                                    else  Office.ErrorPPT(Group, ErrID._17, $"{dicParentCheck.[pptGroup.RealKey]}-{parent.Name}", pptGroup.PageNum)
+
                     )
                 )
-               
-                   
+
+
                 connections
                 |> Seq.iter (fun (slide, conns) ->
                     conns
@@ -187,14 +187,14 @@ module PPTDocModule =
                             let eName = if(nodes.ContainsKey(eNode.Key)) then eNode.Name else ""
 
                             if(startId = 0u && endId = 0u) then  conn.ErrorConnect(ErrID._4, "","", iPage)
-                            if(nodes.ContainsKey(sNode.Key)|>not) then  conn.ErrorConnect(ErrID._14, $"{sName}", "", iPage) 
-                            if(nodes.ContainsKey(eNode.Key)|>not) then  conn.ErrorConnect(ErrID._14, $"{eName}", "", iPage) 
-                            if(startId = 0u) then  conn.ErrorConnect(ErrID._15, "", $"{eName}", iPage) 
-                            if(endId = 0u)   then  conn.ErrorConnect(ErrID._16, $"{sName}", "", iPage) 
+                            if(nodes.ContainsKey(sNode.Key)|>not) then  conn.ErrorConnect(ErrID._14, $"{sName}", "", iPage)
+                            if(nodes.ContainsKey(eNode.Key)|>not) then  conn.ErrorConnect(ErrID._14, $"{eName}", "", iPage)
+                            if(startId = 0u) then  conn.ErrorConnect(ErrID._15, "", $"{eName}", iPage)
+                            if(endId = 0u)   then  conn.ErrorConnect(ErrID._16, $"{sName}", "", iPage)
 
                             if conn.IsNonDirectional()
                             then dummys.AddDummys([|sNode; eNode|])
-                            else edges.Add(pptEdge(conn, Id, iPage ,sNode, eNode)) |>ignore 
+                            else edges.Add(pptEdge(conn, Id, iPage ,sNode, eNode)) |>ignore
                         ))
 
 

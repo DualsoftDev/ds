@@ -24,6 +24,8 @@
 		<None Include="FSharpFSIs\Microsoft.FSharp.Core\Operators.fsi" />
 		<None Include="FSharpFSIs\Microsoft.FSharp.Core\OptionModule.fsi" />
 		<None Include="FSharpFSIs\Option.fsi" />
+		<Compile Include="ComputationExpressions\MaybeBuilder.fs" />
+		<Compile Include="ComputationExpressions\ChooseSeqBuilder.fs" />
 		<Compile Include="Prelude.AdhocPolymorphism.fs" />
 		<Compile Include="ForwardDecl.fs" />
 		<Compile Include="Module\App.Config.fs" />

@@ -69,6 +69,9 @@ module Functions =
     *)
     let flipf f x y = f y x
 
+    let falsify x = false
+    let truthyfy x = true
+
 
     let tee f x =
         f x |> ignore

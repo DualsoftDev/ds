@@ -151,55 +151,66 @@ type DsParser() =
 
     static member tryFindFirstChild(from:IParseTree, predicate:ParseTreePredicate, ?includeMe:bool) =
         let includeMe = defaultArg includeMe false
-        DsParser.enumerateChildren<IParseTree>(from, includeMe) |> Seq.tryFind(predicate)
+        enumerateChildren<IParseTree>(from, includeMe) |> Seq.tryFind(predicate)
 
     static member tryFindFirstChild<'T when 'T :> IParseTree>(from:IParseTree, ?includeMe:bool, ?predicate:ParseTreePredicate, ?exclude:ParseTreePredicate) : 'T option =   // :'T
         let includeMe = defaultArg includeMe false
-        let predicate = defaultArg predicate (fun _ -> true)
+        let predicate = defaultArg predicate truthyfy
         let predicate x = isType<'T> x && predicate x
-        let exclude = defaultArg exclude (fun _ -> false)
-        DsParser.enumerateChildren<'T>(from, includeMe, predicate, exclude) |> Seq.tryHead
+        let exclude = defaultArg exclude falsify
+        enumerateChildren<'T>(from, includeMe, predicate, exclude) |> Seq.tryHead
 
     static member tryFindFirstAncestor(from:IParseTree, predicate:ParseTreePredicate, ?includeMe:bool) = //:IParseTree option=
         let includeMe = defaultArg includeMe false
-        DsParser.enumerateParents(from, includeMe) |> Seq.tryFind(predicate)
+        enumerateParents(from, includeMe) |> Seq.tryFind(predicate)
 
 
     static member tryFindFirstAncestor<'T when 'T :> IParseTree>(from:IParseTree, ?includeMe:bool) =
         let includeMe = defaultArg includeMe false
         let pred = isType<'T>
-        DsParser.tryFindFirstAncestor(from, pred, includeMe) |> Option.map forceCast<'T>
+        tryFindFirstAncestor(from, pred, includeMe) |> Option.map forceCast<'T>
 
     static member tryFindIdentifier1FromContext(context:IParseTree, ?exclude:ParseTreePredicate) =
-        let exclude = defaultArg exclude (fun _ -> false)
-        let xxx = tryFindFirstChild<Identifier1Context>(context, false, exclude=exclude).ToArray()
-        tryFindFirstChild<Identifier1Context>(context, false, exclude=exclude) |> Option.map(fun ctx -> ctx.GetText().DeQuoteOnDemand())
+        let exclude = defaultArg exclude falsify
+        option {
+            let! ctx = tryFindFirstChild<Identifier1Context>(context, false, exclude=exclude)
+            return ctx.GetText().DeQuoteOnDemand()
+        }
 
-    static member collectNameComponentContext(from:IParseTree) : IParseTree =
+    static member tryFindNameComponentContext(from:IParseTree) : IParseTree option =
         let pred =
             fun (tree:IParseTree) ->
                 tree :? Identifier1Context
                 || tree :? Identifier2Context
                 || tree :? Identifier3Context
                 || tree :? Identifier4Context
-        DsParser.tryFindFirstChild(from, pred, true) |> Option.get
+        DsParser.tryFindFirstChild(from, pred, true)
 
-    static member getName(from:IParseTree):string =
-        let idCtx = collectNameComponentContext from
-        if idCtx.GetText().Contains("+") then
-            noop()
-        let name = idCtx.GetText().DeQuoteOnDemand()
-        name
-    static member collectNameComponents(from:IParseTree):string[] = // :Fqdn
-        let name = getName from
-        Fqdn.parse(name).ToArray()
+    static member tryGetName(from:IParseTree):string option =
+        option {
+            let! idCtx = tryFindNameComponentContext from
+            let name = idCtx.GetText().DeQuoteOnDemand()
+            return name
+        }
 
-    static member getSystemName(from:IParseTree) =
-        tryFindFirstAncestor<SystemContext>(from, true).Map(fun ctx -> collectNameComponents(ctx).Combine())
+    static member tryCollectNameComponents(from:IParseTree):string[] option = // :Fqdn
+        option {
+            let! name = tryGetName from
+            return Fqdn.parse(name).ToArray()
+        }
+
+    static member collectNameComponents(from:IParseTree):string[] = tryCollectNameComponents from |> Option.get
+
+    static member tryGetSystemName(from:IParseTree) =
+        option {
+            let! ctx = tryFindFirstAncestor<SystemContext>(from, true)
+            let! names = tryCollectNameComponents(ctx)
+            return names.Combine()
+        }
 
     static member getContextInformation(parserRuleContext:ParserRuleContext) =      // collectUpwardContextInformation
         let ctx = parserRuleContext
-        let system  = LoadedSystemName.OrElse(getSystemName ctx)
+        let system  = LoadedSystemName.OrElse(tryGetSystemName ctx)
         let flow      = tryFindFirstAncestor<FlowContext>(ctx, true).Bind(tryFindIdentifier1FromContext)
         let parenting = tryFindFirstAncestor<ParentingContext>(ctx, true).Bind(tryFindIdentifier1FromContext)
         let ns        = collectNameComponents(ctx).ToFSharpList()

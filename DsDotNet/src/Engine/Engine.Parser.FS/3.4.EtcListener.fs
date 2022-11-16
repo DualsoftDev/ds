@@ -215,12 +215,12 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
                 for sysCtx in enumerateChildren<SystemContext>(ctx) do
                 for addrDefCtx in enumerateChildren<AddressDefContext>(sysCtx) do
                     let apiPath = collectNameComponents(addrDefCtx.apiPath())
-                    let sre = addrDefCtx.address()
+                    let sre = addrDefCtx.addressTxRxs()
                     let s =
-                        let s = sre.startItem()
+                        let s = sre.txs()
                         if isNull s then null else s.GetText()
                     let e =
-                        let e = sre.endItem()
+                        let e = sre.rxs()
                         if isNull e then null else e.GetText()
                     (sysCtx, apiPath, new Addresses(s, e))
             |]

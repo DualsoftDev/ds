@@ -36,12 +36,13 @@ module CoreModule =
     type DsSystem private (name:string, host:string) =
         inherit FqdnObject(name, createFqdnObject([||]))
 
+        member val Flows    = createNamedHashSet<Flow>()
+        member val Calls    = ResizeArray<Call>()
+
         member val Devices = createNamedHashSet<LoadedSystem>()
         member val Variables = ResizeArray<Variable>()
         member val Commands = ResizeArray<Command>()
         member val Observes = ResizeArray<Observe>()
-
-        member val Flows    = createNamedHashSet<Flow>()
 
         member val ApiItems4Export = createNamedHashSet<ApiItem4Export>()
         member x.ApiItems = x.Devices.Collect(fun d -> d.ReferenceSystem.ApiItems4Export)
@@ -70,7 +71,7 @@ module CoreModule =
         inherit FqdnObject(name, system)
         member val Graph = DsGraph()
         member val ModelingEdges = HashSet<ModelingEdgeInfo<Vertex>>()
-        member _.AliasDefs = ResizeArray<AliasDef>()
+        member val AliasDefs = ResizeArray<AliasDef>()
 
         member x.System = system
         static member Create(name:string, system:DsSystem) =
@@ -79,7 +80,7 @@ module CoreModule =
             flow
 
     and AliasTargetWrapper =
-        | RealTarget of Real
+        | RealTarget of Real    // MyFlow or OtherFlow 의 Real 일 수 있다.
         | CallTarget of Call
     and AliasDef = { AliasTarget:AliasTargetWrapper; Mnemonincs:string [] }
 
@@ -108,63 +109,73 @@ module CoreModule =
 
     /// Indirect to Call/Alias
     [<AbstractClass>]
-    type Indirect (name, parent:ParentWrapper) =
-        inherit Vertex([|name|], parent)
+    type Indirect (names:string seq, parent:ParentWrapper) =
+        inherit Vertex(names |> Array.ofSeq, parent)
+        new (name, parent) = Indirect([name], parent)
 
-    and IndirectCall private (name, parent) =
+    and VertexCall private (name:string, target:Call, parent) =
         inherit Indirect(name, parent)
 
-    and IndirectAlias private (name, parent) =
+    and VertexAlias private (name:string, target:AliasTargetWrapper, parent) = // target : Real or Call or OtherFlowReal
         inherit Indirect(name, parent)
+
+    and VertexOtherFlowRealCall private (names:Fqdn, target:Real, parent) =
+        inherit Indirect(names, parent)
 
     and SafetyCondition =
         | SafetyConditionReal of Real
         | SafetyConditionCall of Call
 
 
-    and Alias private (mnemonic:string, target:AliasTargetWrapper, parent:ParentWrapper) =
-        inherit Vertex([|mnemonic|], parent)
+    //and Alias private (mnemonic:string, target:AliasTargetWrapper, parent:ParentWrapper) =
+    //    inherit Vertex([|mnemonic|], parent)
 
-        //static let tryFindAlias (graph:DsGraph) (mnemonic:string) =
-        //    let existing = graph.TryFindVertex(mnemonic)
-        //    match existing with
-        //    | Some (:? Alias as a) -> Some a
-        //    | Some v -> failwith "Alias name is already used by other vertex"
-        //    | None -> None
+    //    static let tryFindAlias (graph:DsGraph) (mnemonic:string) =
+    //        let existing = graph.TryFindVertex(mnemonic)
+    //        match existing with
+    //        | Some (:? Alias as a) -> Some a
+    //        | Some v -> failwith "Alias name is already used by other vertex"
+    //        | None -> None
 
-        //static let addAlias(flow:Flow, target:Fqdn, alias:string) =
-        //    let map = flow.AliasDefs
-        //    if map.ContainsKey target then
-        //        map[target].Add(alias) |> verifyM $"Duplicated alias name in AliasMap [{alias}]"
-        //    else
-        //        map.Add(target, HashSet[|alias|]) |>ignore
+    //    static let addAlias(flow:Flow, target:Fqdn, alias:string) =
+    //        let map = flow.AliasDefs
+    //        if map.ContainsKey target then
+    //            map[target].Add(alias) |> verifyM $"Duplicated alias name in AliasMap [{alias}]"
+    //        else
+    //            map.Add(target, HashSet[|alias|]) |>ignore
 
-        member x.Target = target
+    //    member x.Target = target
 
-        override x.GetRelativeName(referencePath:Fqdn) =
-            match target with
-            | RealTarget r -> x.Name
-            | CallTarget c -> base.GetRelativeName(referencePath)
+    //    override x.GetRelativeName(referencePath:Fqdn) =
+    //        match target with
+    //        | RealTarget r -> x.Name
+    //        | CallTarget c -> base.GetRelativeName(referencePath)
 
-        //static member Create(mnemonic, target:AliasTargetWrapper, parent:ParentWrapper, skipAddFlowMap:bool) =
-        //    let graph:DsGraph = parent.GetGraph()
-        //    let creator() =
-        //        let alias = Alias(mnemonic, target, parent)
-        //        graph.AddVertex(alias) |> verifyM $"Duplicated child name [{mnemonic}]"
-        //        if not skipAddFlowMap then
-        //            match target with
-        //            | RealTarget r -> addAlias(r.Flow, r.NameComponents.Skip(2).ToArray(), mnemonic)
-        //            | CallTarget c ->
-        //                match c.Parent with
-        //                | Real rParent -> addAlias(rParent.Flow, c.NameComponents.Skip(3).ToArray(), mnemonic)
-        //                | Flow fParent -> addAlias(fParent, c.NameComponents.Skip(2).ToArray(), mnemonic)
-        //        alias
+    //    static member Create(mnemonic, target:AliasTargetWrapper, parent:ParentWrapper, skipAddFlowMap:bool) =
+    //        let graph:DsGraph = parent.GetGraph()
+    //        let creator() =
+    //            let alias = Alias(mnemonic, target, parent)
+    //            graph.AddVertex(alias) |> verifyM $"Duplicated child name [{mnemonic}]"
+    //            if not skipAddFlowMap then
+    //                match target with
+    //                | RealTarget r -> addAlias(r.Flow, r.NameComponents.Skip(2).ToArray(), mnemonic)
+    //                | CallTarget c ->
+    //                    match c.Parent with
+    //                    | Real rParent -> addAlias(rParent.Flow, c.NameComponents.Skip(3).ToArray(), mnemonic)
+    //                    | Flow fParent -> addAlias(fParent, c.NameComponents.Skip(2).ToArray(), mnemonic)
+    //            alias
 
-        //    let existing = tryFindAlias graph mnemonic
-        //    match existing with
-        //    | Some a -> a
-        //    | _ -> creator()
+    //        let existing = tryFindAlias graph mnemonic
+    //        match existing with
+    //        | Some a -> a
+    //        | _ -> creator()
 
+
+
+    /// Call 정의:
+    type Call (name:string, apiItems:ApiItem seq) =
+        inherit Named(name)
+        member val ApiItems = apiItems.ToFSharpList()
 
 
 
@@ -173,14 +184,7 @@ module CoreModule =
         member val TXs = txs.ToFSharpList()
         member val RXs = rxs.ToFSharpList()
 
-    /// Call 정의:
-    and Call (name:string, apiItems:ApiItem seq) =
-        inherit Named(name)
-        member val ApiItems = apiItems.ToFSharpList()
-
-
-
-    type ApiItem4Export private (name:string, system:DsSystem) =
+    and ApiItem4Export private (name:string, system:DsSystem) =
         (* createFqdnObject : system 이 다른 system 에 포함되더라도, name component 를 더 이상 확장하지 않도록 cut *)
         inherit FqdnObject(name, createFqdnObject([|system.Name|]))
         interface INamedVertex
@@ -244,6 +248,15 @@ module CoreModule =
             let cp = ApiItem4Export(name, system)
             system.ApiItems4Export.Add(cp) |> verifyM $"Duplicated interface prototype name [{name}]"
             cp
+
+    type VertexCall with
+        static member Create(name:string, target:Call, parent:ParentWrapper) =
+            VertexCall(name, target, parent)
+
+    type VertexOtherFlowRealCall with
+        static member Create( otherFlowName:string, otherFlowRealName:string, otherFlowReal:Real, parent:ParentWrapper) =
+            VertexOtherFlowRealCall( [|otherFlowName; otherFlowRealName|], otherFlowReal, parent)
+
 
     //type SafetyCondition with
     //    member x.ToText() =

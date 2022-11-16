@@ -59,7 +59,7 @@ type EdgeListener(parser:dsParser, helper:ParserHelper) =
         for (n, ctx) in children|> Seq.indexed do
             assert( if n % 2 = 0 then ctx :? CausalTokensDNFContext else ctx :? CausalOperatorContext)
 
-        let findToken(ctx:CausalTokenContext):Vertex option =
+        let tryFindToken(ctx:CausalTokenContext):Vertex option =
             let ns = collectNameComponents(ctx)
             let mutable path = x.AppendPathElement(ns)
             if path.Length = 5 then
@@ -102,8 +102,8 @@ type EdgeListener(parser:dsParser, helper:ParserHelper) =
 
                 for left in lefts do
                     for right in rights do
-                        let l = findToken(left)
-                        let r = findToken(right)
+                        let l = tryFindToken(left)
+                        let r = tryFindToken(right)
                         match l, r with
                         | Some l, Some r ->
                             match x._parenting with

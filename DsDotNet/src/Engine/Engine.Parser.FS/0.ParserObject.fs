@@ -29,9 +29,10 @@ type GraphVertexType =
     | Segment        = 0b0000000000001000   // not child
     | Parenting      = 0b0000000000010000
     | Child          = 0b0000000000100000   // not Segment
-    | CallAliasKey   = 0b0000000001000000
+    | CallAliased    = 0b0000000001000000
     | CallFlowReal   = 0b0000000010000000
-    | CallApi        = 0b0000000100000000
+    | Call           = 0b0000000100000000   // System 에 정의된 Call 을 직접 사용
+
     | AliaseKey      = 0b0000001000000000   // not direct call
     | AliaseMnemonic = 0b0000010000000000   // not direct call
     | ApiKey         = 0b0000100000000000

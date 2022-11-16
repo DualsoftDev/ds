@@ -50,32 +50,42 @@ module internal ModelFindModule =
         else
             failwith "ERROR"
 
-    let findExportApiItem(system:DsSystem) (Fqdn(apiPath)) =
-        let sysName, apiKey = apiPath[0], apiPath[1]
-        system.ApiItems4Export.FindWithName(apiKey)
-
     let tryFindLoadedSystem(system:DsSystem) (loadedSystemName:string) =
         system.Devices.TryFind(fun d -> d.Name = loadedSystemName)
 
-    let tryFindImportApiItem(system:DsSystem) (Fqdn(apiPath)) =
-        let lSysName, lApiKey = apiPath[0], apiPath[1]
-        let loadedSystem = tryFindLoadedSystem system lSysName
-        match loadedSystem with
-        | Some lsystem ->
-            lsystem.ReferenceSystem.ApiItems4Export
-                .TryFind(fun api -> api.Name = lApiKey)
-        | None -> None
-
-    let findCallingApiItem(system:DsSystem) (Fqdn(apiPath)) =
+    let rec findExportApiItem(system:DsSystem) (Fqdn(apiPath)) =
         let sysName, apiKey = apiPath[0], apiPath[1]
-        system.ApiItems.TryFind(nameComponentsEq apiKey)
+        system.ApiItems4Export.FindWithName(apiKey)
 
-    let findCall(system:DsSystem) (Fqdn(callPath)) =
+    //and tryFindImportApiItem(system:DsSystem) (Fqdn(apiPath)) =
+    //    let lSysName, lApiKey = apiPath[0], apiPath[1]
+    //    let loadedSystem = tryFindLoadedSystem system lSysName
+    //    match loadedSystem with
+    //    | Some lsystem ->
+    //        lsystem.ReferenceSystem.ApiItems4Export
+    //            .TryFind(fun api -> api.Name = lApiKey)
+    //    | None -> None
+
+    and tryFindCallingApiItem (system:DsSystem) targetSystemName targetApiName =
+        system.ApiItems.TryFind(nameComponentsEq [targetSystemName; targetApiName])
+
+    let findVertexCall(system:DsSystem) (Fqdn(callPath)) =
         let x = findGraphVertex system callPath :?> Call
         x
 
     let tryFindFlow(system:DsSystem) (flowName:string) =
         system.Flows.TryFind(fun flow -> flow.Name = flowName)
+
+
+    let tryFindReal system flowName realName =
+        option {
+            let! flow = tryFindFlow system flowName
+            return! flow.Graph.TryFindVertex(realName).Map(fun x -> x:?>Real)
+        }
+
+    let tryFindCall (system:DsSystem) callName = system.Calls.TryFind(nameEq callName)
+    let tryFindAliasTarget (flow:Flow) aliasMnemonic =
+        flow.AliasDefs.Where(fun ad -> ad.Mnemonincs.Contains(aliasMnemonic)).Select(fun ad -> ad.AliasTarget).TryExactlyOne()
 
 
     type DsSystem with
@@ -84,7 +94,7 @@ module internal ModelFindModule =
 
         member x.FindExportApiItem(Fqdn(apiPath)) = findExportApiItem x apiPath
         //member x.TryFindExportApiItem(apiKey:string) = x.ApiItems4Export.FindWithName(apiKey)
-        member x.FindCall(Fqdn(callPath)) = findCall x callPath
+        member x.FindVertexCall(Fqdn(callPath)) = findVertexCall x callPath
 
         member x.FindFlow(flowName:string) = tryFindFlow x flowName |> Option.get
         member x.TryFindFlow(flowName:string) = tryFindFlow x flowName

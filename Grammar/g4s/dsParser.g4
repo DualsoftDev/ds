@@ -60,10 +60,10 @@ addresses: '[' 'addresses' ']' (identifier12)? '=' addressesBlock;
     addressesBlock
         : LBRACE (addressDef)* RBRACE
         ;
-    addressDef: apiPath '=' address;        // A.+ = (%Q1234.2343, %I1234.2343)
-        address: LPARENTHESIS (startItem)? COMMA (endItem)? RPARENTHESIS (SEIMCOLON)?;
-        startItem: addressItem;
-        endItem: addressItem;
+    addressDef: apiPath '=' addressTxRxs;        // A.+ = (%Q1234.2343; %I1234.2343)
+        addressTxRxs: LPARENTHESIS txs SEIMCOLON rxs (SEIMCOLON)? RPARENTHESIS (SEIMCOLON)?;
+        txs: addressItem (COMMA addressItem)*;
+        rxs: addressItem (COMMA addressItem)*;
         addressItem: tagAddress | funAddress;
         tagAddress: TAG_ADDRESS;
         funAddress: IDENTIFIER1;
@@ -115,18 +115,20 @@ interfaceBlock
     interfaceResetDef: identifier1 (causalOperatorReset identifier1)+ (';')?;
 
 
+// [aliases] = { X; Y; Z } = P          // {MyFlowReal} or {Call}
+// [aliases] = { X; Y; Z } = P.Q        // {OtherFlow}.{real}
 aliasBlock: '[' 'aliases' ']' '=' LBRACE (aliasListing)* RBRACE;
     aliasListing:
         LBRACE (aliasMnemonic)? ( ';' aliasMnemonic)* (';')+ RBRACE '=' aliasDef ';'
         ;
-    aliasDef: identifier12;     // {타시스템}.{interface} or {Flow}.{real}
+    aliasDef: identifier12;     // {OtherFlow}.{real} or {MyFlowReal} or {Call}
     aliasMnemonic: identifier1;
 
 callBlock: '[' 'calls' ']' '=' LBRACE (callListing)* RBRACE;
     callListing:
         callName '=' LBRACE (callApiDef)? ( ';' callApiDef)* (';')+ RBRACE;
     callName: etcName1;
-    callApiDef: apiPath address;
+    callApiDef: apiPath addressTxRxs;
 
 
 

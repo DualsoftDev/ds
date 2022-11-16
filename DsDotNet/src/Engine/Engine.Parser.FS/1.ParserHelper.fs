@@ -3,6 +3,8 @@ namespace Engine.Parser.FS
 open Engine.Core
 open System.Collections.Generic
 open System.Linq
+open Antlr4.Runtime
+open type Engine.Parser.dsParser
 
 [<AbstractClass>]
 type AliasTargetBase() = class end
@@ -44,6 +46,8 @@ type ParserHelper(options:ParserOptions) =
     member val internal _parenting:Real option = None  with get, set
     member val internal _causalTokenElements = Dictionary<ContextInformation, GVT>(ContextInformation.CreateFullNameComparer())
     member val internal _elements = Dictionary<ContextInformation, GVT>()
+    member val internal _aliasListingContexts = ResizeArray<AliasListingContext>()
+    member val internal _callListingContexts = ResizeArray<CallListingContext>()
     member val internal _modelSpits:SpitResult array = [||] with get, set
     member internal x._modelSpitObjects = x._modelSpits.Select(fun spit -> spit.GetCore()).ToArray()
     member internal x.UpdateModelSpits() =

@@ -15,6 +15,32 @@ open type Engine.Parser.FS.DsParser
 type ElementListener(parser:dsParser, helper:ParserHelper) =
     inherit ListenerBase(parser, helper)
 
+    //override x.EnterAliasListing(ctx:AliasListingContext) =
+    //    let flow = x._flow.Value
+    //    let map = flow.AliasDefs
+    //    let mnemonics = enumerateChildren<AliasMnemonicContext>(ctx).Select(getText).ToArray()
+    //    let aliasTargetCtx = tryFindFirstChild<AliasDefContext>(ctx).Value    // {타시스템}.{interface} or {Flow}.{real}
+    //    let aliasTargetName = tryGetName(aliasTargetCtx).Value
+    //    let realTargetCandidate = flow.Graph.TryFindVertex<Real>(aliasTargetName)
+    //    let callTargetCandidate = tryFindCall x._theSystem.Value aliasTargetName
+    //    let target =
+    //        match realTargetCandidate, callTargetCandidate with
+    //        | Some real, None -> RealTarget real
+    //        | None, Some call -> CallTarget call
+    //        | Some _, Some _ -> failwith "Name duplicated."
+    //        | _ -> failwith "Failed to find"
+
+    //    { AliasTarget=target; Mnemonincs=mnemonics} |> map.Add
+
+    //    let ci = getContextInformation aliasTargetCtx
+    //    x.AddElement(ci, GVT.AliaseKey)
+
+    //    //for mne in mnemonics do
+    //    //    x.AddElement(mne, GVT.AliaseMnemonic)
+    //    //let aliasesHash = mnemonics.Select(fun ctx -> ctx.Names.Combine()).ToHashSet()
+    //    //let aliasKey = ci.Names.ToArray()
+    //    //map.Add(aliasKey, aliasesHash)
+
 
 
     override x.EnterInterfaceDef(ctx:InterfaceDefContext) =
@@ -67,7 +93,7 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
         let createRealTargetAlias (ci:ContextInformation) (target:Real) =
             let aliasCreator =
                 let aliasTarget = new AliasTargetReal(target.NameComponents)
-                let parent = getParentWrapper ci x._flow x._parenting
+                let parent = choiceParentWrapper ci x._flow x._parenting
                 new AliasCreator(ci.Names.Combine(), parent, aliasTarget)
             x.ParserHelper.AliasCreators.Add(aliasCreator)
 
@@ -102,13 +128,36 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
                     failwith "ERROR"
 
 
-        let createCall (ci:ContextInformation) =
-            failwith "ERROR"
+        let createCall (vertexType:GVT) (ci:ContextInformation) : Indirect =
+            assert(ci.System.Value = system.Name)
+            assert(ci.Flow.Value = flow.Name)
+
+            match vertexType with
+            | HasFlag GVT.CallFlowReal ->
+                match ci.Tuples with
+                | Some s, Some f, None, ofName::ofrName::[] ->   // "ofr" Other Flow Real
+                    let ofr = tryFindReal system ofName ofrName |> Option.get
+                    VertexOtherFlowRealCall.Create(ofName, ofrName, ofr, Flow flow)
+                | _ -> failwith "ERROR"
+            | HasFlag GVT.CallAliased ->
+                failwith "Not Yet"
+            | HasFlag GVT.Call ->
+                match ci.Tuples with
+                | Some s, Some f, parenting_, callName::[] ->
+                    option {
+                        let! call = tryFindCall system callName
+                        let! parent = tryFindParentWrapper system ci
+                        return VertexCall.Create(callName, call, parent) :> Indirect
+                    } |> Option.get
+                | _ ->
+                    failwith "ERROR"
+            | _ ->
+                failwith "ERROR"
             //match ci.Tuples with
             //| Some s, Some f, _, device::api::[] ->     // my / flow / (parenting) / device.api
             //    match tryFindImportApiItem system [device; api] with
             //    | Some apiItem ->
-            //        let parent = getParentWrapper ci x._flow x._parenting
+            //        let parent = choiceParentWrapper ci x._flow x._parenting
             //        Call.Create(apiItem, parent) |> ignore
             //    | None ->
             //        match (findSpit [s; device; api]).OrElse(findSpit [device; api]) with
@@ -138,15 +187,15 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
             let existing = findSpit(ci.NameComponents)
             match existing, ns with
             | Some _,   _ -> ()
-            | None,     _::_::[] -> createCall ci
+            | None,     _::_::[] -> createCall vertexType ci |> ignore
             | _ -> failwith "ERROR"
         | HasFlag GVT.AliaseMnemonic ->
             createAliasFromContextInformation ci
-        | HasFlag GVT.CallAliasKey ->
+        | HasFlag GVT.CallAliased ->
             failwith "ERROR"
-        | HasFlag GVT.CallApi
+        | HasFlag GVT.Call
         | HasFlag GVT.CallFlowReal
-        | HasFlag GVT.Child -> createCall ci
+        | HasFlag GVT.Child -> createCall vertexType ci |> ignore
         | _ ->
             failwith "ERROR"
         x.UpdateModelSpits()

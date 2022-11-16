@@ -402,6 +402,8 @@ namespace Engine
         public static string T6Alias = @"
 [sys ip = localhost] T6_Alias = {
     [flow] Page1 = {
+        AndFlow.R2 > OrFlow.R1;
+        C1 > C2;
     }
     [flow] AndFlow = {
         R2 > R3;
@@ -411,15 +413,16 @@ namespace Engine
         R2 > Copy1_R3;
         R1 > R3;
         [aliases] = {
-            R3 = { Copy1_R3; }
+            { Copy1_R3; AliasToR3; } = R3;
+            { AndFlowR3; OtherFlowR3; } = AndFlow.R3;
         }
     }
     [calls] = {
-        C1 = { OtherSys.Api(%Q1234.2343, %I1234.2343); A.""+""(%Q999.2343, _); }
-        C2 = { Cyl1.Adv(%Q1, %I1); Cyl.Ret(_, %I1); }
+        C1 = { B.""+""(%Q1, %Q2; %I1); A.""+""(%Q999.2343; _); }
+        C2 = { A.""-""(%Q3, %Q4; %I1); B.""-""(_; %I1); }
     }
-    [external file=""c:\\my.ds"" ip=""192.168.0.1""] B;
-    [device file=""c:/my.a.b.c.d.e.ds""] B;
+    [external file=""cylinder.ds"" ip=""192.168.0.1""] A;
+    [device file=""cylinder.ds""] B;
     // [device file=c:/my.a.b.c.d.e.ds] C;      //<-- illegal: file path without quote!!
 }
 ";

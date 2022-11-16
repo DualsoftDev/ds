@@ -6,6 +6,7 @@ open System.Diagnostics
 open Engine.Core
 open Engine.Common.FS
 open type Engine.Parser.dsParser
+open Antlr4.Runtime.Tree
 
 [<AutoOpen>]
 module ParserUtil =
@@ -17,6 +18,8 @@ module ParserUtil =
 
     let mutable fwdLoadDevice = dummyDeviceLoader
     let mutable fwdLoadExternalSystem = dummyExternalSystemLoader
+
+    let getText (x:IParseTree) = x.GetText()
 
     [<DebuggerDisplay("{FullName}({ContextType.Name})")>]
     type ContextInformation = {
@@ -50,8 +53,19 @@ module ParserUtil =
         ]
         member x.FullName = x.NameComponents.ToArray().Combine()
 
-    let getParentWrapper (ci:ContextInformation) (flow:Flow option) (parenting:Real option) =
+    let choiceParentWrapper (ci:ContextInformation) (flow:Flow option) (parenting:Real option) =
         match ci.Parenting with
         | Some prnt -> Real parenting.Value
         | None -> Flow flow.Value
-
+    let tryFindParentWrapper (system:DsSystem) (ci:ContextInformation) =
+        option {
+            let! flowName = ci.Flow
+            match ci.Tuples with
+            | Some sys, Some flow, Some parenting, _ ->
+                let! real = tryFindReal system flow parenting
+                return Real real
+            | Some sys, Some flow, None, _ ->
+                let! f = tryFindFlow system flowName
+                return Flow f
+            | _ -> failwith "ERROR"
+        }

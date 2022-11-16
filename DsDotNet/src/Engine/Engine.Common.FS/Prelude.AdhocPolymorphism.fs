@@ -1,5 +1,6 @@
 namespace Engine.Common.FS
-//open FSharpPlus
+
+#nowarn "1173"  // warning FS1173: 중위 연산자 멤버 '?<-'에 3개의 초기 인수가 있습니다. 2개 인수의 튜플이 필요합니다(예: 정적 멤버 (+) (x,y) = ...).
 
 [<AutoOpen>]
 module PreludeAdhocPolymorphism =
@@ -132,6 +133,7 @@ module PreludeAdhocPolymorphism =
     let private testme() =
         let verify c = if not c then failwith "ERROR"
         let some1, some2, some3 = Some 1, Some 2, Some 3
+        verify ( [1..3] @ [4..5] = [1..5])
         verify ( some1 <|> None = some1 )
         verify ( ([1..10] <|> []) = [1..10] )
         verify ( ([] <|> [1..10] <|> []) = [1..10] )

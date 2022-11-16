@@ -3,6 +3,7 @@ namespace Engine.Core
 open System.Runtime.CompilerServices
 open System.Linq
 open System.Diagnostics
+open Engine.Common.FS
 
 [<AutoOpen>]
 module SpitModuleHelper =
@@ -15,7 +16,7 @@ module SpitModuleHelper =
         | SpitFlow      of Flow
         | SpitReal      of Real
         | SpitCall      of Call
-        | SpitAlias     of Alias
+        | SpitAlias     of VertexAlias
         | SpitOnlyAlias of SpitOnlyAlias
         | SpitApiItem   of ApiItem4Export
         | SpitVariable  of Variable
@@ -43,27 +44,27 @@ module SpitModuleHelper =
             for ch in segment.Graph.Vertices do
                 yield! spit(ch)
         |]
-    and spitAlias (alias:Alias) : SpitResults =
+    and spitAlias (alias:VertexAlias) : SpitResults =
         [| yield SpitResult.Create(SpitAlias alias, alias.NameComponents) |]
     and spitFlow (flow:Flow) : SpitResults =
-        failwith "ERROR"
-        //[|
-        //    let fns = flow.NameComponents
-        //    yield SpitResult.Create(SpitFlow flow, fns)
-        //    for flowVertex in flow.Graph.Vertices do
-        //        yield! spit(flowVertex)
+        [|
+            let fns = flow.NameComponents
+            yield SpitResult.Create(SpitFlow flow, fns)
+            for flowVertex in flow.Graph.Vertices do
+                yield! spit(flowVertex)
 
-        //    (*
-        //         A."+" = { Ap1; Ap2; }    : alias=A."+", mnemonics = [Ap1; Ap2;]
-        //         Main = { Main2; }
-        //     *)
-        //    for { AliasTarget = targetWrapper; Mnemonincs = mnes } in flow.AliasDefs do
-        //    for m in mnes do
-        //        let mnemonicFqdn = [| m |]
-        //        let alias = { AliasKey = aliasKey; Mnemonic = mnemonicFqdn; FlowFqdn = flow.NameComponents }
-        //        yield SpitResult.Create(SpitOnlyAlias alias, aliasKey)        // key -> alias : [ My.Flow.Ap1, A."+";  My.Flow.Main2, My.Flow.Main; ...]
-        //        yield SpitResult.Create(SpitOnlyAlias alias, mnemonicFqdn)    // mne -> alias
-        //|]
+            (*
+                 A."+" = { Ap1; Ap2; }    : alias=A."+", mnemonics = [Ap1; Ap2;]
+                 Main = { Main2; }
+             *)
+            for { AliasTarget = targetWrapper; Mnemonincs = mnes } in flow.AliasDefs do
+                noop()
+                //for m in mnes do
+                //    let mnemonicFqdn = [| m |]
+                //    let alias = { AliasKey = aliasKey; Mnemonic = mnemonicFqdn; FlowFqdn = flow.NameComponents }
+                //    yield SpitResult.Create(SpitOnlyAlias alias, aliasKey)        // key -> alias : [ My.Flow.Ap1, A."+";  My.Flow.Main2, My.Flow.Main; ...]
+                //    yield SpitResult.Create(SpitOnlyAlias alias, mnemonicFqdn)    // mne -> alias
+        |]
     and spitSystem (system:DsSystem) : SpitResults =
         [|
             yield SpitResult.Create(SpitDsSystem system, system.NameComponents)
@@ -84,7 +85,7 @@ module SpitModuleHelper =
         | :? Flow     as f -> spitFlow f
         | :? Real     as r -> spitSegment r
         //| :? Call     as c -> spitCall c
-        | :? Alias    as a -> spitAlias a
+        | :? VertexAlias    as a -> spitAlias a
         | :? Device   as d -> spitDevice d
         | :? ExternalSystem as e -> spitExternalSystem e
         | _ -> failwith $"ERROR: Unknown type {obj}"

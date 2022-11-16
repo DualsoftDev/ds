@@ -41,7 +41,7 @@ module ParserUtil =
             if x.Flow.IsSome then yield x.Flow.Value
             if x.Parenting.IsSome then yield x.Parenting.Value
             if x.ContextType = typedefof<SystemContext>
-                || x.ContextType = typedefof<FlowContext>
+                || x.ContextType = typedefof<FlowBlockContext>
                 || x.ContextType = typedefof<ParentingContext>
                 then
                 ()

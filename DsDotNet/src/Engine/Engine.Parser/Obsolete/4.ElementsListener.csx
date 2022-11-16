@@ -78,7 +78,7 @@ partial class ElementsListener : dsParserBaseListener
     }
     override public void ExitSystem(SystemContext ctx) { this._system = null; }
 
-    override public void EnterFlow(FlowContext ctx)
+    override public void EnterFlow(FlowBlockContext ctx)
     {
         var flowName = ctx.identifier1().GetText().DeQuoteOnDemand();
         _rootFlow = _system.Flows.First(f => f.Name == flowName);
@@ -86,7 +86,7 @@ partial class ElementsListener : dsParserBaseListener
         var flowOf = ctx.flowProp().identifier1();
         this.flowOfName = flowOf == null ? flowName : flowOf.GetText();
     }
-    override public void ExitFlow(FlowContext ctx)
+    override public void ExitFlow(FlowBlockContext ctx)
     {
         _rootFlow = null;
         flowOfName = null;
@@ -140,7 +140,7 @@ partial class ElementsListener : dsParserBaseListener
                     return _model.FindFirst<Segment>(segPath);
 
                 // in flow safety
-                case FlowContext:
+                case FlowBlockContext:
                     return (Segment)_rootFlow.InstanceMap[segPath[0]];
 
                 default:

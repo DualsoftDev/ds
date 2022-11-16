@@ -24,12 +24,12 @@ class ModelListener : dsParserBaseListener
     }
     override public void ExitSystem(SystemContext ctx) { this._system = null; }
 
-    override public void EnterFlow(FlowContext ctx)
+    override public void EnterFlow(FlowBlockContext ctx)
     {
         var flowName = ctx.identifier1().GetText().DeQuoteOnDemand();
         _rootFlow = _system.Flows.First(f => f.Name == flowName);
     }
-    override public void ExitFlow(FlowContext ctx) { _rootFlow = null; }
+    override public void ExitFlow(FlowBlockContext ctx) { _rootFlow = null; }
 
 
 

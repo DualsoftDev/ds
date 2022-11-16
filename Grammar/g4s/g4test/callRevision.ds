@@ -19,7 +19,7 @@
     }
     [external file="c:\\my.ds" ip="192.168.0.1"] B;
     [device file="c:/my.a.b.c.d.e.ds"] B;
-    // [device file=c:/my.a.b.c.d.e.ds] C;      //<-- illegal
+    // [device file=c:/my.a.b.c.d.e.ds] C;      //<-- illegal: file path without quote!!
 }
 // comment
 /* comment */

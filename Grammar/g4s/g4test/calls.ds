@@ -1,0 +1,4 @@
+    [calls] = {
+        C1 = { OtherSys.Api(Tx, Rx); A."+"(%I1, %Q3); }
+        C2 = { Cyl1.Adv(Tx, Rx); Cyl.Ret(%I1, %Q3); }
+    }

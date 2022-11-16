@@ -41,7 +41,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
         | None ->
             failwith "ERROR"
 
-    override x.EnterFlow(ctx:FlowContext) =
+    override x.EnterFlowBlock(ctx:FlowBlockContext) =
         let flowName = ctx.identifier1().GetText().DeQuoteOnDemand()
         x._flow <- Some <| Flow.Create(flowName, helper.TheSystem.Value)
         x.AddElement(getContextInformation ctx, GVT.Flow)

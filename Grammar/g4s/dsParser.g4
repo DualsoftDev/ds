@@ -25,7 +25,7 @@ comment: BLOCK_COMMENT | LINE_COMMENT;
 
 system: '[' SYS ipSpec? ']' systemName '=' (sysBlock);    // [sys] Seg = {..}
     sysBlock
-        : LBRACE (flow | loadDevice | loadExternalSystem | interfaces | buttons | systemProperties | modelProperties | variables|commands|observes)* RBRACE       // identifier1Listing|parenting|causal|call
+        : LBRACE (flowBlock | callBlock | loadDevice | loadExternalSystem | interfaces | buttons | systemProperties | modelProperties | variables|commands|observes)* RBRACE       // identifier1Listing|parenting|causal|call
         ;
     systemName:identifier1;
 
@@ -97,10 +97,10 @@ modelPropertyBlock: (safety|layouts);
 systemProperties: '[' 'prop' ']' EQ LBRACE (systemPropertyBlock)* RBRACE;
 systemPropertyBlock: (addresses);
 
-flow
+flowBlock
     : '[' 'flow' ']' identifier1 '=' LBRACE (
         causal | parenting | identifier12Listing
-        | alias
+        | aliasBlock
         | safety)* RBRACE     // |flowTask|callDef
     ;
 
@@ -117,12 +117,19 @@ interfaces
     interfaceResetDef: identifier1 (causalOperatorReset identifier1)+ (';')?;
 
 
-alias: '[' 'aliases' ']' (identifier1)? '=' LBRACE (aliasListing)* RBRACE;
+aliasBlock: '[' 'aliases' ']' '=' LBRACE (aliasListing)* RBRACE;
     aliasListing:
-        aliasDef '=' LBRACE (aliasMnemonic)? ( ';' aliasMnemonic)* (';')+ RBRACE
+        LBRACE (aliasMnemonic)? ( ';' aliasMnemonic)* (';')+ RBRACE '=' aliasDef ';'
         ;
-    aliasDef: identifier12;     // {타시스템}.{interface명} or { (my system / flow /) segment 명}
+    aliasDef: identifier12;     // {타시스템}.{interface} or {Flow}.{real}
     aliasMnemonic: identifier1;
+
+callBlock: '[' 'calls' ']' '=' LBRACE (callListing)* RBRACE;
+    callListing:
+        callName '=' LBRACE (callApiDef)? ( ';' callApiDef)* (';')+ RBRACE;
+    callName: etcName1;
+    callApiDef: apiPath address;
+
 
 
 identifier1Listing: identifier1 SEIMCOLON;     // A;

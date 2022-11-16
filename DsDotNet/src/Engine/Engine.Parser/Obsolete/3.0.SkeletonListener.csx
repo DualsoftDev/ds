@@ -34,12 +34,12 @@ class SkeletonListener : dsParserBaseListener
     override public void ExitSystem(SystemContext ctx) { _system = null; }
 
 
-    override public void EnterFlow(FlowContext ctx)
+    override public void EnterFlow(FlowBlockContext ctx)
     {
         var flowName = ctx.identifier1().GetText().DeQuoteOnDemand();
         _rootFlow = Flow.Create(flowName, _system);
     }
-    override public void ExitFlow(FlowContext ctx) { _rootFlow = null; }
+    override public void ExitFlow(FlowBlockContext ctx) { _rootFlow = null; }
 
 
 
@@ -112,7 +112,7 @@ class SkeletonListener : dsParserBaseListener
             return;
 
         // 같은 이름의 parenting 이 존재하면, 내부가 존재하는 root segemnt 이므로, skip
-        var flowContext = tryFindFirstAncestor<FlowContext>(ctx);
+        var flowContext = tryFindFirstAncestor<FlowBlockContext>(ctx);
         var hasParentingDefinition =
             enumerateChildren<ParentingContext>(flowContext)
                 .Select(parentingCtx => parentingCtx.identifier1().GetText().DeQuoteOnDemand())

@@ -414,6 +414,13 @@ namespace Engine
             R3 = { Copy1_R3; }
         }
     }
+    [calls] = {
+        C1 = { OtherSys.Api(%Q1234.2343, %I1234.2343); A.""+""(%Q999.2343, _); }
+        C2 = { Cyl1.Adv(%Q1, %I1); Cyl.Ret(_, %I1); }
+    }
+    [external file=""c:\\my.ds"" ip=""192.168.0.1""] B;
+    [device file=""c:/my.a.b.c.d.e.ds""] B;
+    // [device file=c:/my.a.b.c.d.e.ds] C;      //<-- illegal: file path without quote!!
 }
 ";
 

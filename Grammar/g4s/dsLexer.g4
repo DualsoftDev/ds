@@ -15,6 +15,7 @@ SAFETY: 'safety';
 FLOW: 'flow';
 INTERFACES: 'interfaces';
 ALIASES: 'aliases';
+CALLS: 'calls';
 EMG_IN: 'emg_in';
 EMG: 'emg';
 AUTO_IN: 'auto_in';

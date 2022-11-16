@@ -130,7 +130,7 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
             //let seg:Real =
             //    match key.Length with
             //        | 1 ->
-            //            assert(ctx.Parent :? FlowContext)
+            //            assert(ctx.Parent :? FlowBlockContext)
             //            curSystem.FindGraphVertex<Real>(x.AppendPathElement(key[0]))
             //        | 3 ->
             //            assert(ctx.Parent :? ModelPropertyBlockContext)

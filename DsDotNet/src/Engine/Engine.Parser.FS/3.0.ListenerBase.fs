@@ -63,13 +63,13 @@ type ListenerBase(parser:dsParser, helper:ParserHelper) =
 
     override x.ExitSystem(ctx:SystemContext) = DsParser.LoadedSystemName <- None
 
-    override x.EnterFlow(ctx:FlowContext) =
+    override x.EnterFlowBlock(ctx:FlowBlockContext) =
         let flowName = ctx.identifier1().GetText().DeQuoteOnDemand()
         let flow = helper.TheSystem.Value.Flows.TryFind(fun f -> f.Name = flowName)
         assert(flow.IsSome)
         x._flow <- flow
 
-    override x.ExitFlow(ctx:FlowContext) = x._flow <- None
+    override x.ExitFlowBlock(ctx:FlowBlockContext) = x._flow <- None
 
 
 

@@ -46,7 +46,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
         x._flow <- Some <| Flow.Create(flowName, helper.TheSystem.Value)
         x.AddElement(getContextInformation ctx, GVT.Flow)
 
-    override x.EnterParenting(ctx:ParentingContext) =
+    override x.EnterParentingBlock(ctx:ParentingBlockContext) =
         tracefn($"Parenting: {ctx.GetText()}")
         let name = tryGetName(ctx.identifier1()).Value
         x._parenting <- Some <| Real.Create(name, x._flow.Value)

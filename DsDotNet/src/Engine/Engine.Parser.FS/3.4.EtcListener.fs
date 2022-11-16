@@ -60,7 +60,7 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
                     )
 
 
-    override x.EnterSafety(ctx:SafetyContext) =
+    override x.EnterSafetyBlock(ctx:SafetyBlockContext) =
         let safetyDefs = enumerateChildren<SafetyDefContext>(ctx)
         (*
          * safety block 을 parsing 해서 key / value 의 dictionary 로 저장

@@ -57,16 +57,16 @@ positionDef: apiPath '=' xywh;
     h: INTEGER;
 
 addresses: '[' 'addresses' ']' (identifier12)? '=' addressesBlock;
-addressesBlock
-    : LBRACE (addressDef)* RBRACE
-    ;
-addressDef: apiPath '=' address;        // A.+ = (%Q1234.2343, %I1234.2343)
-    address: LPARENTHESIS (startItem)? COMMA (endItem)? RPARENTHESIS (SEIMCOLON)?;
-    startItem: addressItem;
-    endItem: addressItem;
-    addressItem: tagAddress | funAddress;
-    tagAddress: TAG_ADDRESS;
-    funAddress: IDENTIFIER1;
+    addressesBlock
+        : LBRACE (addressDef)* RBRACE
+        ;
+    addressDef: apiPath '=' address;        // A.+ = (%Q1234.2343, %I1234.2343)
+        address: LPARENTHESIS (startItem)? COMMA (endItem)? RPARENTHESIS (SEIMCOLON)?;
+        startItem: addressItem;
+        endItem: addressItem;
+        addressItem: tagAddress | funAddress;
+        tagAddress: TAG_ADDRESS;
+        funAddress: IDENTIFIER1;
 
 
 
@@ -87,18 +87,19 @@ addressDef: apiPath '=' address;        // A.+ = (%Q1234.2343, %I1234.2343)
     }
 }
  */
-propsBlock: '[' 'prop' ']' EQ LBRACE (safety|layoutBlock|addresses)* RBRACE;
-    safety: '[' 'safety' ']' EQ LBRACE (safetyDef)* RBRACE;
-    safetyDef: safetyKey EQ LBRACE safetyValues RBRACE;
-    safetyKey: identifier123;
-    safetyValues: identifier123 (SEIMCOLON identifier123)*;
+propsBlock: '[' 'prop' ']' EQ LBRACE (safetyBlock|layoutBlock|addresses)* RBRACE;
+    safetyBlock: '[' 'safety' ']' EQ LBRACE (safetyDef)* RBRACE;
+        safetyDef: safetyKey EQ LBRACE safetyValues RBRACE;
+            safetyKey: identifier123;
+            safetyValues: identifier123 (SEIMCOLON identifier123)*;
 
 
 flowBlock
     : '[' 'flow' ']' identifier1 '=' LBRACE (
-        causal | parenting | identifier12Listing
+        causal | parentingBlock | identifier12Listing
         | aliasBlock
-        | safety)* RBRACE     // |flowTask|callDef
+        // | safetyBlock
+        )* RBRACE     // |flowTask|callDef
     ;
 
 interfaceBlock
@@ -132,7 +133,7 @@ callBlock: '[' 'calls' ']' '=' LBRACE (callListing)* RBRACE;
 identifier1Listing: identifier1 SEIMCOLON;     // A;
 identifier2Listing: identifier2 SEIMCOLON;     // A;
 identifier12Listing: (identifier1Listing | identifier2Listing);
-parenting: identifier1 EQ LBRACE (causal|identifier12Listing)* RBRACE;
+parentingBlock: identifier1 EQ LBRACE (causal|identifier12Listing)* RBRACE;
 
 
 buttonsBlocks:emergencyButtonBlock|autoButtonBlock|startButtonBlock|resetButtonBlock;
@@ -148,9 +149,7 @@ flowName : identifier1;
 
 
 // B.F1 > Set1F <| T.A21;
-causal
-    : causalPhrase SEIMCOLON
-    ;
+causal: causalPhrase SEIMCOLON;
 
 
 // // debugging purpose {

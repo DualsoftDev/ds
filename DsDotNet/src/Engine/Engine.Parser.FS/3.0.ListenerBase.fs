@@ -73,7 +73,7 @@ type ListenerBase(parser:dsParser, helper:ParserHelper) =
 
 
 
-    override x.EnterParenting(ctx:ParentingContext) =
+    override x.EnterParentingBlock(ctx:ParentingBlockContext) =
         let name = ctx.identifier1().GetText().DeQuoteOnDemand()
         match x._flow with
         | Some flow ->
@@ -81,5 +81,5 @@ type ListenerBase(parser:dsParser, helper:ParserHelper) =
             x._parenting <- Some real
         | None -> failwith "ERROR"
 
-    override x.ExitParenting(ctx:ParentingContext) = x._parenting <- None
+    override x.ExitParentingBlock(ctx:ParentingBlockContext) = x._parenting <- None
 

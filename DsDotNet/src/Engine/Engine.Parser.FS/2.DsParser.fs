@@ -212,6 +212,6 @@ type DsParser() =
         let ctx = parserRuleContext
         let system  = LoadedSystemName.OrElse(tryGetSystemName ctx)
         let flow      = tryFindFirstAncestor<FlowBlockContext>(ctx, true).Bind(tryFindIdentifier1FromContext)
-        let parenting = tryFindFirstAncestor<ParentingContext>(ctx, true).Bind(tryFindIdentifier1FromContext)
+        let parenting = tryFindFirstAncestor<ParentingBlockContext>(ctx, true).Bind(tryFindIdentifier1FromContext)
         let ns        = collectNameComponents(ctx).ToFSharpList()
         ContextInformation.Create(ctx, system, flow, parenting, ns)

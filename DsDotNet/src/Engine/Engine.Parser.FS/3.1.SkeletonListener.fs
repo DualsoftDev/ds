@@ -123,7 +123,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
         absoluteFilePath, simpleFilePath
 
 
-    override x.EnterLoadDevice(ctx:LoadDeviceContext) =
+    override x.EnterLoadDeviceBlock(ctx:LoadDeviceBlockContext) =
         let fileSpecCtx = tryFindFirstChild<FileSpecContext>(ctx).Value
         let absoluteFilePath, simpleFilePath = x.GetFilePath(fileSpecCtx)
         let device =
@@ -131,7 +131,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
             fwdLoadDevice x._theSystem.Value (absoluteFilePath, simpleFilePath) loadedName
         x._theSystem.Value.Devices.Add(device) |> ignore
 
-    override x.EnterLoadExternalSystem(ctx:LoadExternalSystemContext) =
+    override x.EnterLoadExternalSystemBlock(ctx:LoadExternalSystemBlockContext) =
         let fileSpecCtx = tryFindFirstChild<FileSpecContext>(ctx).Value
         let absoluteFilePath, simpleFilePath = x.GetFilePath(fileSpecCtx)
         let external =

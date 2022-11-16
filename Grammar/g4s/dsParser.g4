@@ -25,8 +25,11 @@ comment: BLOCK_COMMENT | LINE_COMMENT;
 
 system: '[' SYS ipSpec? ']' systemName '=' (sysBlock);    // [sys] Seg = {..}
     sysBlock
-        : LBRACE (flowBlock | callBlock | loadDevice | loadExternalSystem | interfaces | buttons | systemProperties | modelProperties | variables|commands|observes)* RBRACE       // identifier1Listing|parenting|causal|call
-        ;
+        : LBRACE (  flowBlock | callBlock | loadDeviceBlock | loadExternalSystemBlock
+                    | interfaceBlock | buttonsBlocks | propsBlock
+                    | variableBlock | commandBlock | observeBlock )*
+          RBRACE       // identifier1Listing|parenting|causal|call
+          ;
     systemName:identifier1;
 
 ipSpec: ('ip'|'host') '=' host;
@@ -38,16 +41,13 @@ fileSpec: 'file' '=' filePath;
     filePath: etcName1;
 
 //[device file="c:\my.ds"] B;
-loadDevice: '[' 'device' fileSpec ']' deviceName SEIMCOLON;
+loadDeviceBlock: '[' 'device' fileSpec ']' deviceName SEIMCOLON;
     deviceName:identifier1;
 //[external file="c:\my.ds"] B;
-loadExternalSystem: '[' EXTERNAL_SYSTEM fileSpec ipSpec ']' externalSystemName SEIMCOLON;
+loadExternalSystemBlock: '[' EXTERNAL_SYSTEM fileSpec ipSpec ']' externalSystemName SEIMCOLON;
     externalSystemName:identifier1;
 
-layouts: '[' 'layouts' ']' (identifier1)? '=' layoutsBlock;
-    layoutsBlock
-        : LBRACE (positionDef)* RBRACE
-        ;
+layoutBlock: '[' 'layouts' ']' '=' LBRACE (positionDef)* RBRACE;
 positionDef: apiPath '=' xywh;
     apiPath: identifier2;
     xywh: LPARENTHESIS x COMMA y (COMMA w COMMA h)? RPARENTHESIS (SEIMCOLON)?;
@@ -87,15 +87,12 @@ addressDef: apiPath '=' address;        // A.+ = (%Q1234.2343, %I1234.2343)
     }
 }
  */
-modelProperties: '[' 'prop' ']' EQ LBRACE (modelPropertyBlock)* RBRACE;
-modelPropertyBlock: (safety|layouts);
+propsBlock: '[' 'prop' ']' EQ LBRACE (safety|layoutBlock|addresses)* RBRACE;
     safety: '[' 'safety' ']' EQ LBRACE (safetyDef)* RBRACE;
     safetyDef: safetyKey EQ LBRACE safetyValues RBRACE;
     safetyKey: identifier123;
     safetyValues: identifier123 (SEIMCOLON identifier123)*;
 
-systemProperties: '[' 'prop' ']' EQ LBRACE (systemPropertyBlock)* RBRACE;
-systemPropertyBlock: (addresses);
 
 flowBlock
     : '[' 'flow' ']' identifier1 '=' LBRACE (
@@ -104,7 +101,7 @@ flowBlock
         | safety)* RBRACE     // |flowTask|callDef
     ;
 
-interfaces
+interfaceBlock
     : '[' 'interfaces' ']' (identifier1)? '=' LBRACE (interfaceListing)* RBRACE;
     interfaceListing: (interfaceDef (';')?) | interfaceResetDef;
 
@@ -138,11 +135,11 @@ identifier12Listing: (identifier1Listing | identifier2Listing);
 parenting: identifier1 EQ LBRACE (causal|identifier12Listing)* RBRACE;
 
 
-buttons:emergencyButtons|autoButtons|startButtons|resetButtons;
-emergencyButtons :'[' ('emg_in'|'emg') ']'     EQ buttonBlock;
-autoButtons      :'[' ('auto_in'|'auto') ']'   EQ buttonBlock;
-startButtons     :'[' ('start_in'|'start') ']' EQ buttonBlock;
-resetButtons     :'[' ('reset_in'|'reset') ']' EQ buttonBlock;
+buttonsBlocks:emergencyButtonBlock|autoButtonBlock|startButtonBlock|resetButtonBlock;
+emergencyButtonBlock :'[' ('emg_in'|'emg') ']'     EQ buttonBlock;
+autoButtonBlock      :'[' ('auto_in'|'auto') ']'   EQ buttonBlock;
+startButtonBlock     :'[' ('start_in'|'start') ']' EQ buttonBlock;
+resetButtonBlock     :'[' ('reset_in'|'reset') ']' EQ buttonBlock;
 buttonBlock: LBRACE (() | ((SEIMCOLON)* buttonDef)* (SEIMCOLON)*) RBRACE;
 buttonDef: buttonName EQ LBRACE (() | flowName (SEIMCOLON flowName)* (SEIMCOLON)?) RBRACE;
 buttonName: identifier1;
@@ -228,7 +225,7 @@ identifier123DNF: identifier123CNF (OR2 identifier123CNF)*;
 identifier1234: (identifier1 | identifier2 | identifier3 | identifier4);
 
 
-variables: '[' 'variables' ']' '=' '{' variableDef* '}';
+variableBlock: '[' 'variables' ']' '=' '{' variableDef* '}';
     variableDef: varName '=' '(' varType ',' argumentGroups ')';     // R100   = (Word, 0)
     varName: IDENTIFIER1;
     argumentGroups: argumentGroup ('~' argumentGroup)*;
@@ -242,11 +239,11 @@ variables: '[' 'variables' ']' '=' '{' variableDef* '}';
 
 funApplication: funName '=' argumentGroups;
 
-commands: '[' 'commands' ']' '=' '{' commandDef* '}';
+commandBlock: '[' 'commands' ']' '=' '{' commandDef* '}';
     commandDef: cmdName '=' '(' '@' funApplication ')';     // CMD1 = (@Delay= 0)
     cmdName: IDENTIFIER1;
     funName:IDENTIFIER1;
-observes: '[' 'observes' ']' '=' '{' observeDef* '}';
+observeBlock: '[' 'observes' ']' '=' '{' observeDef* '}';
     observeDef: observeName '=' '(' '@' funApplication ')';     // CMD1 = (@Delay= 0)
     observeName:IDENTIFIER1;
     //funName:IDENTIFIER1;

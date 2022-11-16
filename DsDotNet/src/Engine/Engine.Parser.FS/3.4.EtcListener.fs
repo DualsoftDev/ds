@@ -23,15 +23,15 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
         base.UpdateModelSpits()
 
 
-    override x.EnterButtons(ctx:ButtonsContext) =
+    override x.EnterButtonsBlocks(ctx:ButtonsBlocksContext) =
         let first = tryFindFirstChild<ParserRuleContext>(ctx).Value     // {Emergency, Auto, Start, Reset}ButtonsContext
         let system = x._theSystem.Value
         let targetDic =
             match first with
-            | :? EmergencyButtonsContext -> system.EmergencyButtons
-            | :? AutoButtonsContext      -> system.AutoButtons
-            | :? StartButtonsContext     -> system.StartButtons
-            | :? ResetButtonsContext     -> system.ResetButtons
+            | :? EmergencyButtonBlockContext -> system.EmergencyButtons
+            | :? AutoButtonBlockContext      -> system.AutoButtons
+            | :? StartButtonBlockContext     -> system.StartButtons
+            | :? ResetButtonBlockContext     -> system.ResetButtons
             | _ -> failwith "ERROR"
 
         let category = first.GetChild(1).GetText();       // [| '[', category, ']', buttonBlock |] 에서 category 만 추려냄 (e.g 'emg')
@@ -185,7 +185,7 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
                L.T.Cm = (60, 50, 20, 20)    // xywh
         } *)
 
-        let layouts = enumerateChildren<LayoutsContext>(ctx).ToArray()
+        let layouts = enumerateChildren<LayoutBlockContext>(ctx).ToArray()
         if layouts.Length > 1 then
             raise <| ParserException("Layouts block should exist only once", ctx)
 

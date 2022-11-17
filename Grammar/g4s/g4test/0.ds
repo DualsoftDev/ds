@@ -1,25 +1,50 @@
-[sys ip = localhost] T6_Alias = {
-    [flow] Page1 = {
-        // comment
-    }
-    [flow] AndFlow = {
-        R2 > R3;
-        R1 > R3;
-    }
-    [flow] OrFlow = {
-        R2 > Copy1_R3;
-        R1 > R3;
+[sys ip = 192.168.0.1] My = {
+
+    [flow] F = {        // GVT.Flow
+        C1, C2 > C3, C4 |> C5;
         [aliases] = {
-            { Copy1_R3; } = R3;
+            Ap = { Ap1; Ap2; }
+            Am = { Am1; Am2; }
+            Bp = { Bp1; Bp2; }
+            Bm = { Bm1; Bm2; }
+            Main = { Main2; }
+        }
+        // Flow 내의 safety 는 지원하지 않음
+        //[safety] = {
+        //    Main = { F.Main.Ap1; F.R2; }
+        //}
+    }
+
+    [calls] = {
+        Ap = {A."+"(%Q1, %I1);}
+        Am = {A."-"(%Q2, %I2);}
+        Bp = {B."+"(%Q3, %I3);}
+        Bm = {B."-"(%Q4, %I4);}
+    }
+
+    [device file="cylinder.ds"] A;
+    [device file="cylinder.ds"] B;
+    [external file="station.ds" ip="192.168.0.2"] C;
+    [prop] = {
+        // Global safety
+        [safety] = {
+            F.Main = { F.Main.Ap1; F.R2 }
+        }
+        [layouts] = {
+            Ap = (1309,405,205,83)
         }
     }
-    [calls] = {
-        C1 = { OtherSys.Api(%Q1234.2343, %I1234.2343); A."+"(%Q999.2343, _); }
-        C2 = { Cyl1.Adv(%Q1, %I1); Cyl.Ret(_, %I1); }
+
+    [emg] = {
+        EMGBTN = { F; };
+        //EmptyButton = {};
+        //NonExistingFlowButton = { F1; };
     }
-    [external file="c:\\my.ds" ip="192.168.0.1"] B;
-    [device file="c:/my.a.b.c.d.e.ds"] B;
-    // [device file=c:/my.a.b.c.d.e.ds] C;      //<-- illegal
 }
-// comment
-/* comment */
+/*
+    [emg] = {
+        EMGBTN = { F; };
+        //EmptyButton = {};
+        //NonExistingFlowButton = { F1; };
+    }
+*/

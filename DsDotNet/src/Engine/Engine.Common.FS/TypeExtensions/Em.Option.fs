@@ -14,10 +14,10 @@ type OptionExt =
     [<Extension>] static member Filter(xo, f)   = Option.filter f xo
     [<Extension>] static member Flatten(xooo)   = Option.flatten xooo
     [<Extension>] static member DefaultValue(xo, defaultValue) = Option.defaultValue defaultValue xo
-    [<Extension>] static member DefaultWith(xo, f)     = Option.defaultWith f xo
-    [<Extension>] static member Iter(xo, f)            = Option.iter f xo
-    [<Extension>] static member Map(xo, f)             = Option.map f xo
-    [<Extension>] static member OrElse(xo, coverValue) = Option.orElse coverValue xo
+    [<Extension>] static member DefaultWith(xo, f) = Option.defaultWith f xo
+    [<Extension>] static member Iter(xo, f)        = Option.iter f xo
+    [<Extension>] static member Map(xo, f)         = Option.map f xo
+    [<Extension>] static member OrElse(xo, coverValue) = Option.orElse coverValue xo    // <|>
     [<Extension>] static member OrElseWith(xo, f) = Option.orElseWith f xo
     [<Extension>] static member ToArray(xo)       = Option.toArray xo
     [<Extension>] static member ToList(xo)        = Option.toList xo
@@ -26,13 +26,15 @@ type OptionExt =
     [<Extension>] static member ToOption(v)     = Option.ofNullable v
     [<Extension>] static member ToOption(obj)   = Option.ofObj obj
 
-    (* Fail to define Cast for option. *)
+    (* Fail to define simple cast for option. *)
     //[<Extension>] static member Cast<'T>(xo):'T option = Option.map (forceCast<'T>) xo
-    //[<Extension>] static member Cast<'T>(xo):'T option =
-    //    match xo with
-    //    | None -> None
-    //    | Some o when isType<'T> o -> Some (forceCast<'T> o)
-    //    | _ -> failwith "Casting ERROR"
+    (* For just working version, need both type parameters of source and target option . *)
+    [<Extension>]
+    static member Cast<'FROM, 'TO>(xo:Option<'FROM>):'TO option =
+        match xo with
+        | None -> None
+        | Some o when isType<'TO> o -> Some (forceCast<'TO> o)
+        | _ -> failwith "Casting ERROR"
 
 [<Extension>] // type OptionExt =
 type ResultExt =

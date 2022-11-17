@@ -55,10 +55,7 @@ module GraphModule =
                 es.Add(e))  // |> verifyMessage $"Duplicated edge [{e.Source.Name} -> {e.Target.Name}]"
 
         member _.RemoveEdges(edges:'E seq)       = edges    |> Seq.forall es.Remove
-        member _.AddVertices(vertices:'V seq)    =
-            if (vertices.Any(fun v -> v.Name.Contains("R1"))) then
-                noop()
-            vertices |> Seq.forall vs.Add
+        member _.AddVertices(vertices:'V seq)    = vertices |> Seq.forall vs.Add
         member _.RemoveVertices(vertices:'V seq) = vertices |> Seq.forall vs.Remove
         member x.AddEdge(edge:'E)        = x.AddEdges([edge])
         member x.RemoveEdge(edge:'E)     = x.RemoveEdges([edge])

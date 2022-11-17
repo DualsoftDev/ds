@@ -42,4 +42,8 @@ module ContextInformationModule =
             {   new IEqualityComparer<ContextInformation> with
                     member _.Equals(x:ContextInformation, y:ContextInformation) = x.FullName = y.FullName
                     member _.GetHashCode(x:ContextInformation) = x.FullName.GetHashCode() }
+        member x.GetRawName() =
+            match x.Names.Length with
+            | 1 -> x.Names[0]
+            | _ -> x.Names.Combine()
 

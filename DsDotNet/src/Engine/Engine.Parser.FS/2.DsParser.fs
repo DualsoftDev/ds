@@ -242,14 +242,13 @@ module DsParserHelperModule =
         option {
             let! flowName = ci.Flow
             let! flow = tryFindFlow system flowName
+            assert(flowName = flow.Name)
+
             let! parentWrapper = tryFindParentWrapper system ci
             let graph = parentWrapper.GetGraph()
-            let xxx = ci.Tuples
             match ci.Names with
             | ofn::ofrn::[] ->      // of(r)n: other flow (real) name
                 return! graph.TryFindVertex(ci.Names.Combine())
-                //let! realCall = tryFindReal system ofn ofrn
-                //return real :> Vertex
             | callOrAlias::[] ->
                 return! graph.TryFindVertex(callOrAlias)
             | _ ->

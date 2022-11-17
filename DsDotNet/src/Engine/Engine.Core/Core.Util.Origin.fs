@@ -5,7 +5,7 @@ open System.Linq
 open Engine.Common.FS
 open System.Collections.Generic
 open GraphModule
-#if false
+#if false   // <shin>
 [<AutoOpen>]
 module OriginModule =
     //해당 Child Origin 기준
@@ -391,4 +391,4 @@ type OriginHelper =
     /// Get pre-calculated targets thatchild segments to be 'ON' in progress(Theta)
     [<Extension>] static member GetThetaTargets(graph:DsGraph) = graph |> getThetaTargets
 
-#endif
+#endif      // <shin>

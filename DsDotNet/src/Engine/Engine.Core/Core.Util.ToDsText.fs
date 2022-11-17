@@ -49,7 +49,6 @@ module internal ToDsTextModule =
         let core = container.GetCore()
         let basis = core.NameComponents
         [
-            let xxx = modelingEdgeInfosToDs (container.GetModelingEdges()) basis tab
             yield! modelingEdgeInfosToDs (container.GetModelingEdges()) basis tab
 
             let stems = graph.Vertices.OfType<Real>().Where(fun r -> r.Graph.Vertices.Any()).ToArray()

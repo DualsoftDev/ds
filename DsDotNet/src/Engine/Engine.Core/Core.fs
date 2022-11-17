@@ -78,9 +78,6 @@ module CoreModule =
             system.Flows.Add(flow) |> verifyM $"Duplicated flow name [{name}]"
             flow
 
-    and AliasTargetWrapper =
-        | RealTarget of Real    // MyFlow or OtherFlow 의 Real 일 수 있다.
-        | CallTarget of Call
     and AliasDef = { AliasTarget:AliasTargetWrapper; Mnemonincs:string [] }
 
 
@@ -211,6 +208,10 @@ module CoreModule =
         | Flow of Flow //Real/Call/Alias 의 부모
         | Real of Real //Call/Alias      의 부모
 
+    and AliasTargetWrapper =
+        | RealTarget of Real    // MyFlow or OtherFlow 의 Real 일 수 있다.
+        | CallTarget of Call
+
     (* Abbreviations *)
 
     type DsGraph = Graph<Vertex, Edge>
@@ -250,16 +251,15 @@ module CoreModule =
             cp
 
     type VertexCall with
-        static member CreateOrFind(name:string, target:Call, parent:ParentWrapper) =
-            let gr = parent.GetGraph()
-            let existing = gr.TryFindVertex(name)
-            match existing with
-            | Some (:? VertexCall as v) -> v
-            | Some _ -> failwith $"Duplicated name [{name}]"
-            | None ->
-                let v = VertexCall(name, target, parent)
-                gr.AddVertex(v) |> ignore
-                v
+        static member Create(name:string, target:Call, parent:ParentWrapper) =
+            let v = VertexCall(name, target, parent)
+            parent.GetGraph().AddVertex(v) |> verifyM $"Duplicated call name [{name}]"
+            v
+    type VertexAlias with
+        static member Create(name:string, target:AliasTargetWrapper, parent:ParentWrapper) =
+            let v = VertexAlias(name, target, parent)
+            parent.GetGraph().AddVertex(v) |> verifyM $"Duplicated alias name [{name}]"
+            v
 
     type VertexOtherFlowRealCall with
         static member Create( otherFlowName:string, otherFlowRealName:string, otherFlowReal:Real, parent:ParentWrapper) =

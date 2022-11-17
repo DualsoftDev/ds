@@ -88,10 +88,6 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
             spits.Where(fun sp -> sp.NameComponents = (ns.ToArray()) || sp.NameComponents.Combine() = ns.Combine()).ToArray()
         let findSpit ns = findSpits ns |> Array.tryHead
 
-        if ns.Contains "C1" then
-            noop()
-
-
         let createRealTargetAlias (ci:ContextInformation) (target:Real) =
             let aliasCreator =
                 let aliasTarget = new AliasTargetReal(target.NameComponents)
@@ -134,43 +130,67 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
             assert(ci.System.Value = system.Name)
             assert(ci.Flow.Value = flow.Name)
 
-            match vertexType with
-            | HasFlag GVT.CallFlowReal ->
-                match ci.Tuples with
-                | Some s, Some f, None, ofName::ofrName::[] ->   // "ofr" Other Flow Real
-                    let ofr = tryFindReal system ofName ofrName |> Option.get
-                    VertexOtherFlowRealCall.Create(ofName, ofrName, ofr, Flow flow)
-                | _ -> failwith "ERROR"
-            | HasFlag GVT.CallAliased ->
-                failwith "Not Yet"
-            | HasFlag GVT.Call ->
-                match ci.Tuples with
-                | Some s, Some f, parenting_, callName::[] ->
+            let parentWrapper = tryFindParentWrapper system ci
+            let existing =
+                option {
+                    let! parent = parentWrapper
+                    return! parent.GetGraph().TryFindVertex(ci.GetRawName())
+                }
+            let existingOk =
+                match vertexType, existing with
+                | HasFlag GVT.CallFlowReal, Some (:? VertexOtherFlowRealCall as v) -> Some (v :> Indirect)
+                | HasFlag GVT.CallAliased,  Some (:? VertexAlias as v) ->  Some (v :> Indirect)
+                | HasFlag GVT.Call,         Some (:? VertexCall as v) ->  Some (v :> Indirect)
+                | _ -> None
+            match existingOk with
+            | Some v -> v
+            | None when existing.IsSome -> failwith "ERROR"     // 이름 동일하고 다른 type 의 vertex 가 존재하는 경우
+            | None ->
+                let newVertex =
                     option {
-                        let! call = tryFindCall system callName
-                        let! parent = tryFindParentWrapper system ci
-                        return VertexCall.CreateOrFind(callName, call, parent) :> Indirect
-                    } |> Option.get
-                | _ ->
-                    failwith "ERROR"
-            | _ ->
-                failwith "ERROR"
-            //match ci.Tuples with
-            //| Some s, Some f, _, device::api::[] ->     // my / flow / (parenting) / device.api
-            //    match tryFindImportApiItem system [device; api] with
-            //    | Some apiItem ->
-            //        let parent = choiceParentWrapper ci x._flow x._parenting
-            //        Call.Create(apiItem, parent) |> ignore
-            //    | None ->
-            //        match (findSpit [s; device; api]).OrElse(findSpit [device; api]) with
-            //        | Some sp ->
-            //            match sp.SpitObj with
-            //            | SpitOnlyAlias soa -> createAlias soa
-            //            | SpitReal real -> createRealTargetAlias ci real
-            //            | _ -> failwith "Not an API item"
-            //        | None -> tracefn "Need to generate %A" [s; device; api]
-            //| _ ->
-            //    failwith "ERROR"
+                        let! parent = parentWrapper
+                        match vertexType with
+                        | HasFlag GVT.CallFlowReal ->
+                            match ci.Tuples with
+                            | Some s, Some f, None, ofName::ofrName::[] ->   // "ofr" Other Flow Real
+                                let! ofr = tryFindReal system ofName ofrName
+                                return VertexOtherFlowRealCall.Create(ofName, ofrName, ofr, Flow flow) :> Indirect
+                            | _ ->
+                                failwith "ERROR"
+
+                        | HasFlag GVT.CallAliased ->
+                            let name = ci.GetRawName()
+                            let! target = tryFindAliasTarget flow name
+                            return VertexAlias.Create(name, target, parent) :> Indirect
+
+                        | HasFlag GVT.Call ->
+                            match ci.Tuples with
+                            | Some s, Some f, parenting_, callName::[] ->
+                                let! call = tryFindCall system callName
+                                return VertexCall.Create(callName, call, parent) :> Indirect
+                            | _ ->
+                                failwith "ERROR"
+                        | _ ->
+                            failwith "ERROR"
+                    }
+                newVertex.Value
+
+                //match ci.Tuples with
+                //| Some s, Some f, _, device::api::[] ->     // my / flow / (parenting) / device.api
+                //    match tryFindImportApiItem system [device; api] with
+                //    | Some apiItem ->
+                //        let parent = choiceParentWrapper ci x._flow x._parenting
+                //        Call.Create(apiItem, parent) |> ignore
+                //    | None ->
+                //        match (findSpit [s; device; api]).OrElse(findSpit [device; api]) with
+                //        | Some sp ->
+                //            match sp.SpitObj with
+                //            | SpitOnlyAlias soa -> createAlias soa
+                //            | SpitReal real -> createRealTargetAlias ci real
+                //            | _ -> failwith "Not an API item"
+                //        | None -> tracefn "Need to generate %A" [s; device; api]
+                //| _ ->
+                //    failwith "ERROR"
 
         let createAliasFromContextInformation (ci:ContextInformation) =
             let alias =
@@ -193,11 +213,11 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
             | _ -> failwith "ERROR"
         | HasFlag GVT.AliaseMnemonic ->
             createAliasFromContextInformation ci
-        | HasFlag GVT.CallAliased ->
-            failwith "ERROR"
-        | HasFlag GVT.Call
-        | HasFlag GVT.CallFlowReal
-        | HasFlag GVT.Child -> createCall vertexType ci |> ignore
+        | ( HasFlag GVT.CallAliased
+          | HasFlag GVT.Call
+          | HasFlag GVT.CallFlowReal
+          | HasFlag GVT.Child ) ->
+            createCall vertexType ci |> ignore
         | _ ->
             failwith "ERROR"
         x.UpdateModelSpits()

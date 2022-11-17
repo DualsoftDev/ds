@@ -96,15 +96,6 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
                 | Some realSeg ->
                     for value in values do
                         let vertex = curSystem.FindGraphVertex(value)
-                        let xxx = vertex
-                        ()
-                        let condition() =
-                            let vertex = curSystem.FindGraphVertex(value)
-
-                            //if api.IsSome then
-                            //    SafetyConditionApiItem (api.Value)
-                            //else
-                            ()
                         ()
 
                         //let added = realSeg.SafetyConditions.Add(cond)
@@ -210,20 +201,20 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
         //        A."" - "" = (START, END)
         //    }
         //*)
-        let api2Address =
-            [|
-                for sysCtx in enumerateChildren<SystemContext>(ctx) do
-                for addrDefCtx in enumerateChildren<AddressDefContext>(sysCtx) do
-                    let apiPath = collectNameComponents(addrDefCtx.apiPath())
-                    let sre = addrDefCtx.addressTxRx()
-                    let s =
-                        let s = sre.tx()
-                        if isNull s then null else s.GetText()
-                    let e =
-                        let e = sre.rx()
-                        if isNull e then null else e.GetText()
-                    (sysCtx, apiPath, new Addresses(s, e))
-            |]
+        //let api2Address =
+        //    [|
+        //        for sysCtx in enumerateChildren<SystemContext>(ctx) do
+        //        for addrDefCtx in enumerateChildren<AddressDefContext>(sysCtx) do
+        //            let apiPath = collectNameComponents(addrDefCtx.apiPath())
+        //            let sre = addrDefCtx.addressTxRx()
+        //            let s =
+        //                let s = sre.tx()
+        //                if isNull s then null else s.GetText()
+        //            let e =
+        //                let e = sre.rx()
+        //                if isNull e then null else e.GetText()
+        //            (sysCtx, apiPath, new Addresses(s, e))
+        //    |]
 
         for o in x._modelSpits do
             match o.GetCore() with

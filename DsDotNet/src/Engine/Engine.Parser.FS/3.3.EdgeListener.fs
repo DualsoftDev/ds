@@ -53,14 +53,10 @@ type EdgeListener(parser:dsParser, helper:ParserHelper) =
         let ci = getContextInformation ctx
         let sysNames, flowName, parenting, ns = ci.Tuples
         let system = x._theSystem.Value
-        let xxxFlow = system.Flows.First(fun f -> f.Name = flowName.Value)
 
         let children = ctx.children.ToArray();      // (CausalTokensDNF CausalOperator)+ CausalTokensDNF
         for (n, ctx) in children|> Seq.indexed do
             assert( if n % 2 = 0 then ctx :? CausalTokensDNFContext else ctx :? CausalOperatorContext)
-
-        if flowName.Value = "Page1" then
-            noop()
 
 
 

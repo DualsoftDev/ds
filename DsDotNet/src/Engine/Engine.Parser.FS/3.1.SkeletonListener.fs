@@ -51,7 +51,6 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
         tracefn($"Parenting: {ctx.GetText()}")
         let name = tryGetName(ctx.identifier1()).Value
         x._parenting <- Some <| Real.Create(name, x._flow.Value)
-        let xxx = getContextInformation ctx
         x.AddCausalTokenElement(getContextInformation ctx, GVT.Segment ||| GVT.Parenting)
 
         let children = enumerateChildren<CausalTokenContext>(ctx)

@@ -23,7 +23,7 @@ options { tokenVocab=dsLexer; } // use tokens from dsLexer.g4
 // model: (system|)* EOF;        // importStatement|cpus
 comment: BLOCK_COMMENT | LINE_COMMENT;
 
-system: '[' SYS ipSpec? ']' systemName '=' (sysBlock);    // [sys] Seg = {..}
+system: '[' SYS ipSpec? ']' systemName '=' (sysBlock) EOF;    // [sys] Seg = {..}
     sysBlock
         : LBRACE (  flowBlock | callBlock | loadDeviceBlock | loadExternalSystemBlock
                     | interfaceBlock | buttonsBlocks | propsBlock
@@ -49,18 +49,18 @@ loadExternalSystemBlock: '[' EXTERNAL_SYSTEM fileSpec ipSpec ']' externalSystemN
 
 layoutBlock: '[' 'layouts' ']' '=' LBRACE (positionDef)* RBRACE;
 positionDef: apiPath '=' xywh;
-    apiPath: identifier2;
+    apiPath: identifier1;
     xywh: LPARENTHESIS x COMMA y (COMMA w COMMA h)? RPARENTHESIS (SEIMCOLON)?;
     x: INTEGER;
     y: INTEGER;
     w: INTEGER;
     h: INTEGER;
 
-addresses: '[' 'addresses' ']' (identifier12)? '=' addressesBlock;
-    addressesBlock
-        : LBRACE (addressDef)* RBRACE
-        ;
-    addressDef: apiPath '=' addressTxRx;        // A.+ = (%Q1234.2343; %I1234.2343)
+// addresses: '[' 'addresses' ']' (identifier12)? '=' addressesBlock;
+//     addressesBlock
+//         : LBRACE (addressDef)* RBRACE
+//         ;
+//     addressDef: apiPath '=' addressTxRx;        // A.+ = (%Q1234.2343; %I1234.2343)
         addressTxRx: LPARENTHESIS tx COMMA rx RPARENTHESIS (SEIMCOLON)?;
         tx: addressItem;
         rx: addressItem;
@@ -87,7 +87,7 @@ addresses: '[' 'addresses' ']' (identifier12)? '=' addressesBlock;
     }
 }
  */
-propsBlock: '[' 'prop' ']' EQ LBRACE (safetyBlock|layoutBlock|addresses)* RBRACE;
+propsBlock: '[' 'prop' ']' EQ LBRACE (safetyBlock|layoutBlock)* RBRACE;
     safetyBlock: '[' 'safety' ']' EQ LBRACE (safetyDef)* RBRACE;
         safetyDef: safetyKey EQ LBRACE safetyValues RBRACE;
             safetyKey: identifier123;
@@ -128,7 +128,8 @@ callBlock: '[' 'calls' ']' '=' LBRACE (callListing)* RBRACE;
     callListing:
         callName '=' LBRACE (callApiDef)? ( ';' callApiDef)* (';')+ RBRACE;
     callName: etcName1;
-    callApiDef: apiPath addressTxRx;
+    callApiDef: callKey addressTxRx;
+    callKey: identifier12;
 
 
 

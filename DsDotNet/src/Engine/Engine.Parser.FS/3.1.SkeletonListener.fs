@@ -48,6 +48,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
         x.AddElement(getContextInformation ctx, GVT.Flow)
 
     override x.EnterParentingBlock(ctx:ParentingBlockContext) =
+        helper._parentingBlockContexts.Add(ctx)
         tracefn($"Parenting: {ctx.GetText()}")
         let name = tryGetName(ctx.identifier1()).Value
         x._parenting <- Some <| Real.Create(name, x._flow.Value)
@@ -61,6 +62,8 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
         x.AddCausalTokenElement(getContextInformation ctx, GVT.Segment)
 
     override x.EnterCausalToken(ctx:CausalTokenContext) =
+        helper._causalTokenContext.Add(ctx)
+
         let vType = GVT.CausalToken
 
         // 다음 stage 에서 처리...
@@ -108,6 +111,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
 
 
     override x.EnterLoadDeviceBlock(ctx:LoadDeviceBlockContext) =
+        helper._deviceBlockContexts.Add(ctx)
         let fileSpecCtx = tryFindFirstChild<FileSpecContext>(ctx).Value
         let absoluteFilePath, simpleFilePath = x.GetFilePath(fileSpecCtx)
         let device =
@@ -116,6 +120,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
         x._theSystem.Value.Devices.Add(device) |> ignore
 
     override x.EnterLoadExternalSystemBlock(ctx:LoadExternalSystemBlockContext) =
+        helper._externalSystemBlockContexts.Add(ctx)
         let fileSpecCtx = tryFindFirstChild<FileSpecContext>(ctx).Value
         let absoluteFilePath, simpleFilePath = x.GetFilePath(fileSpecCtx)
         let external =

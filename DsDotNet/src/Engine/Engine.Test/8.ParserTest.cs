@@ -413,13 +413,13 @@ namespace Engine
         R2 > Copy1_R3;
         R1 > R3;
         [aliases] = {
-            { Copy1_R3; AliasToR3; } = R3;
-            { AndFlowR3; OtherFlowR3; } = AndFlow.R3;
+            R3 = { Copy1_R3; AliasToR3; }
+            AndFlow.R3 = { AndFlowR3; OtherFlowR3; }
         }
     }
     [calls] = {
-        C1 = { B.""+""(%Q1, %Q2; %I1); A.""+""(%Q999.2343; _); }
-        C2 = { A.""-""(%Q3, %Q4; %I1); B.""-""(_; %I1); }
+        C1 = { B.""+""(%Q1, %I1); A.""+""(%Q999.2343, _); }
+        C2 = { A.""-""(%Q3, _); B.""-""(_, %I1); }
     }
     [external file=""cylinder.ds"" ip=""192.168.0.1""] A;
     [device file=""cylinder.ds""] B;

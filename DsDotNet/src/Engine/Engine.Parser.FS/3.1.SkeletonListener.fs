@@ -145,8 +145,8 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
         let createCallDef(ctx:CallListingContext) =
             let callName =  tryFindFirstChild<CallNameContext>(ctx).Map(getText).Value
             let apiDefCtxs = enumerateChildren<CallApiDefContext>(ctx).ToArray()
-            let collectAddress (addressCtx:IParseTree) =
-                enumerateChildren<AddressItemContext>(addressCtx).Select(getText).ToArray()
+            let getAddress (addressCtx:IParseTree) =
+                tryFindFirstChild<AddressItemContext>(addressCtx).Map(getText).Value
             let apiItems =
                 [   for apiDefCtx in apiDefCtxs do
                     let apiPath = collectNameComponents apiDefCtx |> List.ofSeq // e.g ["A"; "+"]
@@ -155,15 +155,14 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
                         let apiItem =
                             option {
                                 let! apiPoint = tryFindCallingApiItem system device api
-                                let! addressCtx = tryFindFirstChild<AddressTxRxsContext>(ctx)
-                                let! txAddressCtx = tryFindFirstChild<TxsContext>(addressCtx)
-                                let! rxAddressCtx = tryFindFirstChild<RxsContext>(addressCtx)
-                                let txs = collectAddress(txAddressCtx)
-                                let rxs = collectAddress(rxAddressCtx)
+                                let! addressCtx = tryFindFirstChild<AddressTxRxContext>(ctx)
+                                let! txAddressCtx = tryFindFirstChild<TxContext>(addressCtx)
+                                let! rxAddressCtx = tryFindFirstChild<RxContext>(addressCtx)
+                                let tx = getAddress(txAddressCtx)
+                                let rx = getAddress(rxAddressCtx)
 
-                                tracefn $"TXs={txs} RXs={rxs}"
-                                //return
-                                return ApiItem(apiPoint, txs, rxs)
+                                tracefn $"TX={tx} RX={rx}"
+                                return ApiItem(apiPoint, tx, rx)
                             }
                         match apiItem with
                         | Some apiItem -> yield apiItem

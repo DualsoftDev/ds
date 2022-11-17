@@ -179,10 +179,11 @@ module CoreModule =
 
 
 
-    type ApiItem (api:ApiItem4Export, txs:string seq, rxs:string seq) =
+    type TagAddress = string
+    type ApiItem (api:ApiItem4Export, tx:TagAddress, rx:TagAddress) =
         member _.ApiItem = api
-        member val TXs = txs.ToFSharpList()
-        member val RXs = rxs.ToFSharpList()
+        member val TX = tx
+        member val RX = rx
 
     and ApiItem4Export private (name:string, system:DsSystem) =
         (* createFqdnObject : system 이 다른 system 에 포함되더라도, name component 를 더 이상 확장하지 않도록 cut *)

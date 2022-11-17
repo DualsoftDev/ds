@@ -56,7 +56,7 @@ module GraphModule =
 
         member _.RemoveEdges(edges:'E seq)       = edges    |> Seq.forall es.Remove
         member _.AddVertices(vertices:'V seq)    =
-            if (vertices.Any(fun v -> v.Name.Contains("#Seg.Complex#"))) then
+            if (vertices.Any(fun v -> v.Name.Contains("R1"))) then
                 noop()
             vertices |> Seq.forall vs.Add
         member _.RemoveVertices(vertices:'V seq) = vertices |> Seq.forall vs.Remove

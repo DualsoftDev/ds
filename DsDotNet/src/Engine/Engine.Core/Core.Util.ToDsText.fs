@@ -78,10 +78,14 @@ module internal ToDsTextModule =
                     let tab = getTab (indent+2)
                     let aliasKey =
                         match a.AliasTarget with
-                        | RealTarget real -> [real.Flow.Name; real.Name].Combine()
+                        | RealTarget real ->
+                            if real.Flow.Name = flow.Name then
+                                real.Name
+                            else
+                                [real.Flow.Name; real.Name].Combine()
                         | CallTarget call -> call.Name
 
-                    yield $"{tab}{lb} {mnemonics} {rb} = {aliasKey};"
+                    yield $"{tab}{aliasKey} = {lb} {mnemonics} {rb}"
                 yield $"{tab}{rb}"
 
             yield $"{tab}{rb}"
@@ -118,14 +122,9 @@ module internal ToDsTextModule =
         let tab = getTab indent
         [
             let ip = if system.Host.IsNullOrEmpty() then "" else $" ip = {system.Host}"
-            yield $"{tab}[sys{ip}] {system.Name} = {lb}"
+            yield $"[sys{ip}] {system.Name} = {lb}"
 
             for f in system.Flows do
-                if f.Name = "Page1" then
-                    let xxx = flowToDs f indent
-                    ()
-                    let yyy = xxx
-                    ()
                 yield flowToDs f indent
 
             for d in system.Devices do
@@ -134,9 +133,16 @@ module internal ToDsTextModule =
                 | :? Device as d -> yield $"{tab}[device file={d.UserSpecifiedFilePath}] {d.Name}; // {d.AbsoluteFilePath}"
                 | _ -> failwith "ERROR"
 
-
-            let tab = getTab indent
             let tab2 = getTab (indent+1)
+
+            if system.Calls.Any() then
+                let print (ai:ApiItem) = $"{ai.ApiItem.QualifiedName}({ai.TX}, {ai.RX})"
+                yield $"{tab}[calls] = {lb}"
+                for c in system.Calls do
+                    let ais = c.ApiItems.Select(print).JoinWith("; ") + ";"
+                    yield $"{tab2}{c.Name} = {lb}{ais}{rb}"
+                yield $"{tab}{rb}"
+
 
             if system.ApiItems4Export.Any() then
                 yield $"{tab}[interfaces] = {lb}"

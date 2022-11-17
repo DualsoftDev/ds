@@ -60,10 +60,10 @@ addresses: '[' 'addresses' ']' (identifier12)? '=' addressesBlock;
     addressesBlock
         : LBRACE (addressDef)* RBRACE
         ;
-    addressDef: apiPath '=' addressTxRxs;        // A.+ = (%Q1234.2343; %I1234.2343)
-        addressTxRxs: LPARENTHESIS txs SEIMCOLON rxs (SEIMCOLON)? RPARENTHESIS (SEIMCOLON)?;
-        txs: addressItem (COMMA addressItem)*;
-        rxs: addressItem (COMMA addressItem)*;
+    addressDef: apiPath '=' addressTxRx;        // A.+ = (%Q1234.2343; %I1234.2343)
+        addressTxRx: LPARENTHESIS tx COMMA rx RPARENTHESIS (SEIMCOLON)?;
+        tx: addressItem;
+        rx: addressItem;
         addressItem: tagAddress | funAddress;
         tagAddress: TAG_ADDRESS;
         funAddress: IDENTIFIER1;
@@ -119,7 +119,7 @@ interfaceBlock
 // [aliases] = { X; Y; Z } = P.Q        // {OtherFlow}.{real}
 aliasBlock: '[' 'aliases' ']' '=' LBRACE (aliasListing)* RBRACE;
     aliasListing:
-        LBRACE (aliasMnemonic)? ( ';' aliasMnemonic)* (';')+ RBRACE '=' aliasDef ';'
+        aliasDef '=' LBRACE (aliasMnemonic)? ( ';' aliasMnemonic)* (';')+ RBRACE (';')?
         ;
     aliasDef: identifier12;     // {OtherFlow}.{real} or {MyFlowReal} or {Call}
     aliasMnemonic: identifier1;
@@ -128,7 +128,7 @@ callBlock: '[' 'calls' ']' '=' LBRACE (callListing)* RBRACE;
     callListing:
         callName '=' LBRACE (callApiDef)? ( ';' callApiDef)* (';')+ RBRACE;
     callName: etcName1;
-    callApiDef: apiPath addressTxRxs;
+    callApiDef: apiPath addressTxRx;
 
 
 

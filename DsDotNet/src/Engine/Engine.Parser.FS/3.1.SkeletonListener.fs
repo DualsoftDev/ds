@@ -282,9 +282,9 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
         dumpCausalTokens "---- Original Causal token elements"
 
         createCallDefs()
+        createAliasDefs()
         adjustVertexType()
         createNonParentedReals()
-        createAliasDefs()
 
         logInfo "---- Spit results"
         logDebug "%s" <| helper.TheSystem.Value.Spit().Dump()

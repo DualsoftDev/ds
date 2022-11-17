@@ -58,12 +58,11 @@ module CoreModule =
         member val StartButtons     = ButtonDic()
         member val ResetButtons     = ButtonDic()
 
-        /// API name -> Address map.  A.+ = (%Q1234.2343, %I1234.2343)
-        member val ApiAddressMap    = Dictionary<string[], Addresses>(nameComponentsComparer())
+        ///// API name -> Address map.  A.+ = (%Q1234.2343, %I1234.2343)
+        //member val ApiAddressMap    = Dictionary<string[], Addresses>(nameComponentsComparer())
 
-
-        ///시스템 핸들링 대상여부   true : mySystem / false : exSystem
-        member val Active = false with get, set
+        /////시스템 핸들링 대상여부   true : mySystem / false : exSystem
+        //member val Active = false with get, set
 
         static member Create(name, host) = DsSystem(name, host)
 
@@ -251,10 +250,16 @@ module CoreModule =
             cp
 
     type VertexCall with
-        static member Create(name:string, target:Call, parent:ParentWrapper) =
-            let v = VertexCall(name, target, parent)
-            parent.GetGraph().AddVertex(v) |> verifyM $"Duplicated entity with call name [{name}]"
-            v
+        static member CreateOrFind(name:string, target:Call, parent:ParentWrapper) =
+            let gr = parent.GetGraph()
+            let existing = gr.TryFindVertex(name)
+            match existing with
+            | Some (:? VertexCall as v) -> v
+            | Some _ -> failwith $"Duplicated name [{name}]"
+            | None ->
+                let v = VertexCall(name, target, parent)
+                gr.AddVertex(v) |> ignore
+                v
 
     type VertexOtherFlowRealCall with
         static member Create( otherFlowName:string, otherFlowRealName:string, otherFlowReal:Real, parent:ParentWrapper) =

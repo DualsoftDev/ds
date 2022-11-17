@@ -146,13 +146,6 @@ public class Tester
 	LS_Demo.IO.Am = (1381,299,144,144)
 	LS_Demo.IO.Bm = (1474,758,144,144)
 }
-[addresses] = {
-	EX_Am_Ap.F.Am = (%Q123.23, , %I12.1);
-	EX_Am_Ap.F.Ap = (%Q123.24, , %I12.2);
-	EX_Bm_Bp.F.Bm = (%Q123.25, , %I12.3);
-	EX_Bm_Bp.F.Bp = (%Q123.26, , %I12.4);
-}
-
 [cpus] AllCpus = {
 	[cpu] Cpu = {
 		LS_Demo.page01;
@@ -187,13 +180,6 @@ public class Tester
             T.Ap > T.Am;
         }
     }
-}
-[addresses] = {
-	//L.F.Main = (%0, %0,);
-	A.F.Vp = (%QX0.1.3, ,);
-	A.F.Vm = (%QX0.1.2, ,);
-	A.F.Sp = (, , %IX0.0.5);
-	A.F.Sm = (, , %IX0.0.4);
 }
 [cpus] AllCpus = {
     [cpu] Cpu = {
@@ -251,7 +237,7 @@ public class Tester
 }
 " + CreateCylinder("A") + "\r\n" + CreateCylinder("B");
 
-      
+
     }
 
     public static string GetTextDiamondNormal()
@@ -343,7 +329,7 @@ public class Tester
     public static void DoSampleTestDiamond()
     {
 
-       
+
     }
 
 

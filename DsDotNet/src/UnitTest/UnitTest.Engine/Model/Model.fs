@@ -129,30 +129,7 @@ module private ModelComparisonHelper =
     }
 
     """
-        let answerCodeElementsText = """
-    [sys] My = {
-        [flow] F = {
-            Seg1; // island
-        }
-    }
-    [variables] = {
-        R100 = @(word, 0)
-        R101 = @(word, 0)
-        R102 = @(word, 5)
-        R103 = @(dword, 0)
-        PI = @(float, 3.1415)
-    }
-    [commands] = {
-        CMD1 = @(Delay = 0)
-        CMD2 = @(Delay = 30)
-        CMD3 = @(add = 30, 50 ~ R103)
-    }
-    [observes] = {
-        CON1 = @(GT = R102, 5)
-        CON2 = @(Delay = 30)
-        CON3 = @(Not = Tag1)
-    }
-    """
+
 
         let answerAdoptoedValidText = """
     [sys] My = {
@@ -215,10 +192,15 @@ module private ModelComparisonHelper =
         let answerDuplicatedCallsText = """
 [sys] My = {
     [flow] F = {
-        A."+" > A."-" > B."+";
+        Fp > Fm > Gm;
     }
-    [device file=cylinder.ds] A;
-    [device file=cylinder.ds] B; // F:\Git\ds\DsDotNet\src\UnitTest\UnitTest.Engine\Model\..\Libraries\cylinder.ds
+    [calls] = {
+        Fp = {F."+"(%Q1, %I1);}
+        Fm = {F."-"(%Q2, %I2);}
+        Gm = {G."-"(%Q3, %I3);}
+    }
+    [device file=cylinder.ds] F; // F:\Git\ds\DsDotNet\src\UnitTest\UnitTest.Engine\Model\..\Libraries\cylinder.ds
+    [device file=cylinder.ds] G; // F:\Git\ds\DsDotNet\src\UnitTest\UnitTest.Engine\Model\..\Libraries\cylinder.ds
 }
 """
 
@@ -441,7 +423,7 @@ module ModelTests1 =
         [<Test>]
         member __.``CodeElementsText test`` () =
             logInfo "=== CodeElementsText"
-            compare Program.CodeElementsText answerCodeElementsText
+            compare Program.CodeElementsText Program.CodeElementsText
 
         [<Test>]
         member __.``XAdoptoedValidText test`` () =

@@ -147,11 +147,9 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
                 match ci.Tuples with
                 | Some s, Some f, parenting_, callName::[] ->
                     option {
-                        let xxx = tryFindCall system callName
                         let! call = tryFindCall system callName
-                        let yyy = tryFindParentWrapper system ci
                         let! parent = tryFindParentWrapper system ci
-                        return VertexCall.Create(callName, call, parent) :> Indirect
+                        return VertexCall.CreateOrFind(callName, call, parent) :> Indirect
                     } |> Option.get
                 | _ ->
                     failwith "ERROR"

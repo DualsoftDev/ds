@@ -12,15 +12,15 @@ module Program =
     let EveryScenarioText = """
 [sys ip = 192.168.0.1] My = {
     [flow] MyFlow = {
-        Seg1 > Seg2 > A."+";
+        Seg1 > Seg2 > Ap;
         Seg1 = {
-            A."+" > A."-";
+            Ap > Am;
         }
     }
     [flow] "Flow.Complex" = {
         "#Seg.Complex#" => Seg;
         "#Seg.Complex#" = {
-            A."+" > A."-";
+            Ap > Am;
         }
     }
 
@@ -42,7 +42,7 @@ C4 > C5;
             Ap2 > Bp2 > Bm2;
 
             Bm2
-            > A."+"             // GVT.{ Child | Call }
+            > Ap             // GVT.{ Child | Call }
             ;
         }
         R1              // define my local terminal real segment    // GVT.{ Segment }
@@ -53,10 +53,10 @@ C4 > C5;
         R2;
 
         [aliases] = {
-            A."+" = { Ap1; Ap2; }
-            A."-" = { Am1; Am2; }
-            B."+" = { Bp1; Bp2; }
-            B."-" = { Bm1; Bm2; }
+            Ap = { Ap1; Ap2; }
+            Am = { Am1; Am2; }
+            Bp = { Bp1; Bp2; }
+            Bm = { Bm1; Bm2; }
             Main = { Main2; }
         }
         // Flow 내의 safety 는 지원하지 않음
@@ -64,6 +64,14 @@ C4 > C5;
         //    Main = { F.Main.Ap1; F.R2; }
         //}
     }
+
+    [calls] = {
+        Ap = {A."+"(%Q1, %I1);}
+        Am = {A."-"(%Q2, %I2);}
+        Bp = {B."+"(%Q3, %I3);}
+        Bm = {B."-"(%Q4, %I4);}
+    }
+
     [device file="cylinder.ds"] A;
     [device file="cylinder.ds"] B;
     [external file="station.ds" ip="192.168.0.2"] C;
@@ -82,14 +90,6 @@ C4 > C5;
         //EmptyButton = {};
         //NonExistingFlowButton = { F1; };
     }
-    [prop] = {
-        [addresses] = {
-            A."+" = (%Q1234.2343, %I1234.2343)
-            A."-" = (START, END)
-            B."+" = (%Q4321.2343, %I4321.2343)
-            B."-" = (BSTART, BEND)
-        }
-    }
 }
 """
 
@@ -98,26 +98,26 @@ C4 > C5;
     [flow] F = {
         Seg1;
     }
-}
 
-[variables] = { //이름 = (타입,초기값)
-    R100   = (word, 0)
-    R101   = (word, 0)
-    R102   = (word, 5)
-    R103   = (dword, 0)
-    PI     = (float, 3.1415)
-}
+    [variables] = { //이름 = (타입,초기값)
+        R100 = (word, 0)
+        R101 = (word, 0)
+        R102 = (word, 5)
+        R103 = (dword, 0)
+        PI = (float, 3.1415)
+    }
 
-[commands] = {
-    CMD1   = (@Delay= 0)
-    CMD2   = (@Delay= 30)
-    CMD3   = (@add= 30, 50 ~ R103)  //30+R101 = R103
-}
+    [commands] = {
+        CMD1 = (@Delay = 0)
+        CMD2 = (@Delay = 30)
+        CMD3 = (@add = 30, 50 ~ R103)  //30+R101 = R103
+    }
 
-[observes] = {
-    CON1   = (@GT = R102, 5)
-    CON2   = (@Delay = 30)
-    CON3   = (@Not = Tag1)
+    [observes] = {
+        CON1 = (@GT = R102, 5)
+        CON2 = (@Delay = 30)
+        CON3 = (@Not = Tag1)
+    }
 }
 
 """
@@ -133,11 +133,16 @@ C4 > C5;
     let DuplicatedCallsText = """
 [sys] My = {
     [flow] F = {
-        A."+" > A."-";
-        A."-" > B."+";
+        Fp > Fm;
+        Fm > Gm;
     }
-    [device file="cylinder.ds"] A;
-    [device file="cylinder.ds"] B;
+    [calls] = {
+        Fp = {F."+"(%Q1, %I1); }
+        Fm = {F."-"(%Q2, %I2); }
+        Gm = {G."-"(%Q3, %I3); }
+    }
+    [device file="cylinder.ds"] F;
+    [device file="cylinder.ds"] G;
 }
 
 """
@@ -167,14 +172,18 @@ C4 > C5;
     [flow] F = {
         Seg1 > Seg2;
         Seg1 = {
-            F."+" > F."-";
+            Fp > Fm;
         }
     }
     [flow] F2 = {
         F.Seg1 > Seg;
         Seg = {
-            F."+" > F."-";
+            Fp > Fm;
         }
+    }
+    [calls] = {
+        Fp = {F."+"(%Q1, %I1); }
+        Fm = {F."-"(%Q2, %I2); }
     }
     [device file="cylinder.ds"] F;
 }

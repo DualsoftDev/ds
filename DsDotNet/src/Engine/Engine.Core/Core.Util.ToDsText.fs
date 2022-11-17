@@ -100,22 +100,24 @@ module internal ToDsTextModule =
         let vars = theSystem.Variables
         let cmds = theSystem.Commands
         let obss = theSystem.Observes
+        let tab = getTab 1
+        let tab2 = getTab 2
         [
             if vars.Any() then
-                yield "[variables] = {"
+                yield $"{tab}[variables] = {lb}"
                 for var in vars do
-                    yield $"    {var.Name} = @({var.Type}, {var.InitValue})"
-                yield "}"
+                    yield $"{tab2}{var.Name} = ({var.Type}, {var.InitValue})"
+                yield $"{tab}{rb}"
             if cmds.Any() then
-                yield "[commands] = {"
+                yield $"{tab}[commands] = {lb}"
                 for cmd in cmds do
-                    yield $"    {cmd.Name} = @({funApp cmd.FunctionApplication})"
-                yield "}"
+                    yield $"{tab2}{cmd.Name} = (@{funApp cmd.FunctionApplication})"
+                yield $"{tab}{rb}"
             if obss.Any() then
-                yield "[observes] = {"
+                yield $"{tab}[observes] = {lb}"
                 for obs in obss do
-                    yield $"    {obs.Name} = @({funApp obs.FunctionApplication})"
-                yield "}"
+                    yield $"{tab2}{obs.Name} = (@{funApp obs.FunctionApplication})"
+                yield $"{tab}{rb}"
         ] |> combineLines
 
     let rec systemToDs (system:DsSystem) (indent:int) =
@@ -127,12 +129,6 @@ module internal ToDsTextModule =
             for f in system.Flows do
                 yield flowToDs f indent
 
-            for d in system.Devices do
-                match d with
-                | :? ExternalSystem as es -> yield $"{tab}[external file={es.UserSpecifiedFilePath}] {es.Name}; // {es.AbsoluteFilePath}"
-                | :? Device as d -> yield $"{tab}[device file={d.UserSpecifiedFilePath}] {d.Name}; // {d.AbsoluteFilePath}"
-                | _ -> failwith "ERROR"
-
             let tab2 = getTab (indent+1)
 
             if system.Calls.Any() then
@@ -142,6 +138,12 @@ module internal ToDsTextModule =
                     let ais = c.ApiItems.Select(print).JoinWith("; ") + ";"
                     yield $"{tab2}{c.Name} = {lb}{ais}{rb}"
                 yield $"{tab}{rb}"
+
+            for d in system.Devices do
+                match d with
+                | :? ExternalSystem as es -> yield $"{tab}[external file={es.UserSpecifiedFilePath}] {es.Name}; // {es.AbsoluteFilePath}"
+                | :? Device as d -> yield $"{tab}[device file={d.UserSpecifiedFilePath}] {d.Name}; // {d.AbsoluteFilePath}"
+                | _ -> failwith "ERROR"
 
 
             if system.ApiItems4Export.Any() then
@@ -177,21 +179,6 @@ module internal ToDsTextModule =
             yield buttonsToDs("emg"  , system.EmergencyButtons)
             yield buttonsToDs("start", system.StartButtons)
             yield buttonsToDs("reset", system.ResetButtons)
-
-            (* prop
-                    addresses *)
-            let addresses =
-                [
-                    for KeyValue(apiPath, address) in system.ApiAddressMap do
-                        yield $"{tab2}{apiPath.Combine()} = ( {address.In}, {address.Out})"
-                ] |> combineLines
-            if addresses.Any() then
-                yield $"[prop] = {lb}"
-                yield $"{tab}[addresses] = {lb}"
-                yield addresses
-                yield $"{tab}{rb}"
-                yield rb
-
 
             (* prop
                     safety

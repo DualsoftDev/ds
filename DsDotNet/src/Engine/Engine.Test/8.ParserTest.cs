@@ -36,12 +36,6 @@ namespace Engine
     }
 
     [prop] = {
-        [addresses] = {
-            C.P = ( %Q1234.2343, %I1234.2343)
-            C.M = ( START, END)
-        }
-    }
-    [prop] = {
         [ safety ] = {
             L.F.Main = {C.F.Vp; C.F.Vm}
         }
@@ -115,12 +109,6 @@ namespace Engine
             M = { F.Vm ~ F.Sm }
             // 정보로서의 상호 리셋
             P <||> M;
-        }
-    }
-    [prop] = {
-        [addresses] = {
-            A.P = ( %Q1234.2343, %I1234.2343)
-            A.M = ( START, END)
         }
     }
 }
@@ -351,29 +339,6 @@ namespace Engine
     [flow] Work_Front_1pos_Sen = { TX > RX; }
     [flow] Work_Work = { TR; }
 }
-
-
-[addresses] = {
-    EX.Rear_Rear_Cyl_Push_ADV.TX  = (, , )
-    EX.Rear_Rear_Cyl_Push_ADV.RX  = (, ,)
-    EX.Rear_Rear_Cyl_Push_RET.TX  = (, , )
-    EX.Rear_Rear_Cyl_Push_RET.RX  = (, ,)
-    EX.Rear_Rear_Con_W.TX         = (, , )
-    EX.Rear_Rear_Pos_Sen.RX       = (, ,)
-    EX.Work_Work.TR               = (,,)
-    EX.Work_Front_Usb_Cyl_RET.TX  = (, , )
-    EX.Work_Front_Usb_Cyl_RET.RX  = (, ,)
-    EX.Work_Front_Con_W.TX        = (, , )
-    EX.Work_Front_1Stopper_Adv.TX = (, , )
-    EX.Work_Front_1Stopper_Adv.RX = (, ,)
-    EX.Work_Front_Pos_Sen.RX      = (, ,)
-    EX.Work_Front_1Stopper_RET.TX = (, , )
-    EX.Work_Front_1Stopper_RET.RX = (, ,)
-    EX.Work_Front_Usb_Cyl_ADV.TX  = (, , )
-    EX.Work_Front_Usb_Cyl_ADV.RX  = (, ,)
-    EX.Work_Front_1pos_Sen.RX     = (, ,)
-}
-
 ";
 
         public static string QualifiedName = @"
@@ -490,12 +455,6 @@ namespace Engine
             //Vp = {AVp1;}  // invalid: 자신 시스템에 정의된 것만 alias
         }
     }
-    [prop] = {
-        [addresses] = {
-            A.""+"" = (%Q1234.2343, %I1234.2343)
-            A.""-"" = (START, END)
-        }
-    }
     " + SampleRunner.CreateCylinder("A") + @"
 }
 ";
@@ -545,12 +504,6 @@ namespace Engine
     [flow] F1_C1 = { TX > RX; }
 }
 
-[addresses] = {
-    EX.F1_ER1.EXT = (,,)
-    EX.F1_ER2.EXT = (,,)
-    EX.F1_C1.TX   = (, , )
-    EX.F1_C1.RX   = (, ,)
-}
 [layouts] = {
     MY.F1.C1 = (1309,405,205,83)
     MY.F1.ER2 = (571,803,173,58)

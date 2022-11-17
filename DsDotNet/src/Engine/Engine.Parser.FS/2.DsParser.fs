@@ -215,3 +215,41 @@ type DsParser() =
         let parenting = tryFindFirstAncestor<ParentingBlockContext>(ctx, true).Bind(tryFindIdentifier1FromContext)
         let ns        = collectNameComponents(ctx).ToFSharpList()
         ContextInformation.Create(ctx, system, flow, parenting, ns)
+
+
+[<AutoOpen>]
+module DsParserHelperModule =
+
+    let choiceParentWrapper (ci:ContextInformation) (flow:Flow option) (parenting:Real option) =
+        match ci.Parenting with
+        | Some prnt -> Real parenting.Value
+        | None -> Flow flow.Value
+    let tryFindParentWrapper (system:DsSystem) (ci:ContextInformation) =
+        option {
+            let! flowName = ci.Flow
+            match ci.Tuples with
+            | Some sys, Some flow, Some parenting, _ ->
+                let! real = tryFindReal system flow parenting
+                return Real real
+            | Some sys, Some flow, None, _ ->
+                let! f = tryFindFlow system flowName
+                return Flow f
+            | _ -> failwith "ERROR"
+        }
+
+    let tryFindToken (system:DsSystem) (ctx:CausalTokenContext):Vertex option =
+        let ci = getContextInformation ctx
+        option {
+            let! flowName = ci.Flow
+            let! flow = tryFindFlow system flowName
+            match ci.Names with
+            | ofn::ofrn::[] ->      // of(r)n: other flow (real) name
+                let! real = tryFindReal system ofn ofrn
+                return real :> Vertex
+            | callOrAlias::[] ->
+                let! parentWrapper = tryFindParentWrapper system ci
+                return! parentWrapper.GetGraph().TryFindVertex(callOrAlias)
+            | _ ->
+                failwith "ERROR"
+        }
+

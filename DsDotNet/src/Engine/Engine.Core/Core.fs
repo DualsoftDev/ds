@@ -251,11 +251,15 @@ module CoreModule =
 
     type VertexCall with
         static member Create(name:string, target:Call, parent:ParentWrapper) =
-            VertexCall(name, target, parent)
+            let v = VertexCall(name, target, parent)
+            parent.GetGraph().AddVertex(v) |> verifyM $"Duplicated entity with call name [{name}]"
+            v
 
     type VertexOtherFlowRealCall with
         static member Create( otherFlowName:string, otherFlowRealName:string, otherFlowReal:Real, parent:ParentWrapper) =
-            VertexOtherFlowRealCall( [|otherFlowName; otherFlowRealName|], otherFlowReal, parent)
+            let v = VertexOtherFlowRealCall( [|otherFlowName; otherFlowRealName|], otherFlowReal, parent)
+            parent.GetGraph().AddVertex(v) |> verifyM $"Duplicated other flow real call [{otherFlowName}.{otherFlowRealName}]"
+            v
 
 
     //type SafetyCondition with
@@ -275,7 +279,7 @@ module CoreModule =
             | Flow f -> f.System
             | Real r -> r.Flow.System
 
-        member x.GetGraph() =
+        member x.GetGraph():DsGraph =
             match x with
             | Flow f -> f.Graph
             | Real r -> r.Graph

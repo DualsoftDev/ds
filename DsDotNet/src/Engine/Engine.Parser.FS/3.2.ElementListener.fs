@@ -87,7 +87,9 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
         let findSpits (ns:string seq) =
             spits.Where(fun sp -> sp.NameComponents = (ns.ToArray()) || sp.NameComponents.Combine() = ns.Combine()).ToArray()
         let findSpit ns = findSpits ns |> Array.tryHead
-        //let ns = collectNameComponents(ctx)
+
+        if ns.Contains "C1" then
+            noop()
 
 
         let createRealTargetAlias (ci:ContextInformation) (target:Real) =
@@ -145,7 +147,9 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
                 match ci.Tuples with
                 | Some s, Some f, parenting_, callName::[] ->
                     option {
+                        let xxx = tryFindCall system callName
                         let! call = tryFindCall system callName
+                        let yyy = tryFindParentWrapper system ci
                         let! parent = tryFindParentWrapper system ci
                         return VertexCall.Create(callName, call, parent) :> Indirect
                     } |> Option.get

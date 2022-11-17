@@ -52,35 +52,12 @@ type EdgeListener(parser:dsParser, helper:ParserHelper) =
     override x.EnterCausalPhrase(ctx:CausalPhraseContext) =
         let ci = getContextInformation ctx
         let sysNames, flowName, parenting, ns = ci.Tuples
-        let xxxSystem = x._theSystem.Value
-        let xxxFlow = xxxSystem.Flows.First(fun f -> f.Name = flowName.Value)
+        let system = x._theSystem.Value
+        let xxxFlow = system.Flows.First(fun f -> f.Name = flowName.Value)
 
         let children = ctx.children.ToArray();      // (CausalTokensDNF CausalOperator)+ CausalTokensDNF
         for (n, ctx) in children|> Seq.indexed do
             assert( if n % 2 = 0 then ctx :? CausalTokensDNFContext else ctx :? CausalOperatorContext)
-
-        let tryFindToken(ctx:CausalTokenContext):Vertex option =
-            let ns = collectNameComponents(ctx)
-            let mutable path = x.AppendPathElement(ns)
-            if path.Length = 5 then
-                path <- x.AppendPathElement(ns.Combine())
-            let matches =
-                x._modelSpits
-                    .Where(fun spit -> spit.NameComponents = path
-                                    || spit.NameComponents = x.AppendPathElement( [| ns.Combine() |] )
-                    )
-
-            let token =
-                matches
-                    .Select(fun spit -> spit.GetCore())
-                    .OfType<Vertex>()
-                    .TryHead()
-
-            if token.IsNone then
-                ()
-
-            assert(token.IsSome)
-            token
 
         (*
             children[0] > children[2] > children[4]     where (child[1] = '>', child[3] = '>')
@@ -102,8 +79,8 @@ type EdgeListener(parser:dsParser, helper:ParserHelper) =
 
                 for left in lefts do
                     for right in rights do
-                        let l = tryFindToken(left)
-                        let r = tryFindToken(right)
+                        let l = tryFindToken system left
+                        let r = tryFindToken system right
                         match l, r with
                         | Some l, Some r ->
                             match x._parenting with

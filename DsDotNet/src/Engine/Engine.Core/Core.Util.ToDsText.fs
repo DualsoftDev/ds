@@ -49,6 +49,7 @@ module internal ToDsTextModule =
         let core = container.GetCore()
         let basis = core.NameComponents
         [
+            let xxx = modelingEdgeInfosToDs (container.GetModelingEdges()) basis tab
             yield! modelingEdgeInfosToDs (container.GetModelingEdges()) basis tab
 
             let stems = graph.Vertices.OfType<Real>().Where(fun r -> r.Graph.Vertices.Any()).ToArray()
@@ -68,15 +69,19 @@ module internal ToDsTextModule =
             yield $"{tab}[flow] {flow.Name.QuoteOnDemand()} = {lb}"
             yield! graphToDs (Flow flow) (indent+1)
 
-            let alias = flow.AliasDefs
-            if alias.Any() then
+            let aliasDefs = flow.AliasDefs
+            if aliasDefs.Any() then
                 let tab = getTab (indent+1)
                 yield $"{tab}[aliases] = {lb}"
-                failwith "ERROR"
-                //for KeyValue(k, v) in alias do
-                //    let mnemonics = (v |> String.concat "; ") + ";"
-                //    let tab = getTab (indent+2)
-                //    yield $"{tab}{k.Combine()} = {lb} {mnemonics} {rb}"
+                for a in aliasDefs do
+                    let mnemonics = (a.Mnemonincs |> String.concat "; ") + ";"
+                    let tab = getTab (indent+2)
+                    let aliasKey =
+                        match a.AliasTarget with
+                        | RealTarget real -> [real.Flow.Name; real.Name].Combine()
+                        | CallTarget call -> call.Name
+
+                    yield $"{tab}{lb} {mnemonics} {rb} = {aliasKey};"
                 yield $"{tab}{rb}"
 
             yield $"{tab}{rb}"
@@ -116,6 +121,11 @@ module internal ToDsTextModule =
             yield $"{tab}[sys{ip}] {system.Name} = {lb}"
 
             for f in system.Flows do
+                if f.Name = "Page1" then
+                    let xxx = flowToDs f indent
+                    ()
+                    let yyy = xxx
+                    ()
                 yield flowToDs f indent
 
             for d in system.Devices do

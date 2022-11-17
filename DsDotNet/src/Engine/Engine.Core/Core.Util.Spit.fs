@@ -14,14 +14,17 @@ module SpitModuleHelper =
         | SpitExternalSystem of ExternalSystem
         | SpitDevice of Device
         | SpitFlow      of Flow
-        | SpitReal      of Real
         | SpitCall      of Call
-        | SpitAlias     of VertexAlias
         | SpitOnlyAlias of SpitOnlyAlias
         | SpitApiItem   of ApiItem4Export
         | SpitVariable  of Variable
         | SpitCommand   of Command
         | SpitObserve   of Observe
+
+        | SpitVertexReal  of Real
+        | SpitVertexCall  of VertexCall
+        | SpitVertexAlias of VertexAlias
+        | SpitVertexOtherFlowRealCall of VertexOtherFlowRealCall
 
     [<DebuggerDisplay("{NameComponents} = {SpitObj.GetType().Name}")>]
     type SpitResult =
@@ -40,12 +43,19 @@ module SpitModuleHelper =
 
     and spitSegment (segment:Real) : SpitResults =
         [|
-            yield SpitResult.Create(SpitReal segment, segment.NameComponents)
+            yield SpitResult.Create(SpitVertexReal segment, segment.NameComponents)
             for ch in segment.Graph.Vertices do
                 yield! spit(ch)
         |]
-    and spitAlias (alias:VertexAlias) : SpitResults =
-        [| yield SpitResult.Create(SpitAlias alias, alias.NameComponents) |]
+    and spitIndirect (indirect:Indirect) : SpitResults =
+        let spitCore =
+            match indirect with
+            | :? VertexCall as v -> SpitVertexCall v
+            | :? VertexAlias as v -> SpitVertexAlias v
+            | :? VertexOtherFlowRealCall as v -> SpitVertexOtherFlowRealCall v
+            | _ -> failwith "ERROR"
+
+        [| yield SpitResult.Create(spitCore, indirect.NameComponents) |]
     and spitFlow (flow:Flow) : SpitResults =
         [|
             let fns = flow.NameComponents
@@ -85,7 +95,7 @@ module SpitModuleHelper =
         | :? Flow     as f -> spitFlow f
         | :? Real     as r -> spitSegment r
         //| :? Call     as c -> spitCall c
-        | :? VertexAlias    as a -> spitAlias a
+        | :? Indirect as v -> spitIndirect v
         | :? Device   as d -> spitDevice d
         | :? ExternalSystem as e -> spitExternalSystem e
         | _ -> failwith $"ERROR: Unknown type {obj}"
@@ -109,14 +119,16 @@ type SpitModule =
         | SpitDevice  c -> c
         | SpitExternalSystem c -> c
         | SpitFlow      c -> c
-        | SpitReal      c -> c
         | SpitCall      c -> c
-        | SpitAlias     c -> c
         | SpitOnlyAlias c -> c
         | SpitApiItem   c -> c
         | SpitVariable  c -> c
         | SpitCommand   c -> c
         | SpitObserve   c -> c
+        | SpitVertexReal      c -> c
+        | SpitVertexAlias     c -> c
+        | SpitVertexCall c -> c
+        | SpitVertexOtherFlowRealCall c -> c
 
 
 

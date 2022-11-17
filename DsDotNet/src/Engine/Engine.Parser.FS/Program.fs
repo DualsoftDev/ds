@@ -698,7 +698,7 @@ C4 > C5;
         for spit in spits do
             match spit.SpitObj with
             | SpitFlow f -> f.Graph.Dump() |> ignore
-            | SpitReal r -> r.Graph.Dump() |> ignore
+            | SpitVertexReal r -> r.Graph.Dump() |> ignore
             | _ -> ()
 
 

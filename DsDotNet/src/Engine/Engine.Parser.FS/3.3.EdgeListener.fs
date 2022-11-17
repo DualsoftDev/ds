@@ -59,6 +59,11 @@ type EdgeListener(parser:dsParser, helper:ParserHelper) =
         for (n, ctx) in children|> Seq.indexed do
             assert( if n % 2 = 0 then ctx :? CausalTokensDNFContext else ctx :? CausalOperatorContext)
 
+        if flowName.Value = "Page1" then
+            noop()
+
+
+
         (*
             children[0] > children[2] > children[4]     where (child[1] = '>', child[3] = '>')
             ===> children[0] > children[2],

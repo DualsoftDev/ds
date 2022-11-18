@@ -64,13 +64,14 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
 
 
     override x.EnterInterfaceDef(ctx:InterfaceDefContext) =
-        let hash = helper.TheSystem.Value.ApiItems4Export
+        helper._interfaceDefContexts.Add(ctx)
         let interrfaceNameCtx = tryFindFirstChild<InterfaceNameContext>(ctx).Value
         let interfaceName = collectNameComponents(interrfaceNameCtx)[0]
 
         // 이번 stage 에서 일단 interface 이름만 이용해서 빈 interface 객체를 생성하고,
-        // TXs, RXs, Resets 은 다음 listener stage 에서 채움..
+        // TXs, RXs, Resets 은 추후에 채움..
         let api = ApiItem4Export.Create(interfaceName, helper.TheSystem.Value)
+        let hash = helper.TheSystem.Value.ApiItems4Export
         hash.Add(api) |> ignore
 
     override x.EnterInterfaceResetDef(ctx:InterfaceResetDefContext) =
@@ -136,16 +137,25 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
             let parentWrapper = tryFindParentWrapper system ci
             parentWrapper, ci
 
-        let createNonParentedTokens() =
+        let tokenCreator (cycle:int) =
             let candidateCtxs:ParserRuleContext list = [
                 yield! helper._identifier12ListingContexts.Cast<ParserRuleContext>()
                 yield! helper._causalTokenContext.Cast<ParserRuleContext>()
             ]
+
+            let isCallName (parentWrapper:ParentWrapper) name = tryFindCall system name |> Option.isSome
+            let isAliasMnemonic (parentWrapper:ParentWrapper) name =
+                let flow = parentWrapper.GetFlow()
+                tryFindAliasDefWithMnemonic flow name |> Option.isSome
+            let isCallOrAlias pw name =
+                if name = "Ap1" then
+                    noop()
+                let xxx = isCallName pw name
+                let yyy = isAliasMnemonic pw name
+                isCallName pw name || isAliasMnemonic pw name
+
             let tryCreateCallOrAlias (parentWrapper:ParentWrapper) name =
-                let flow =
-                    match parentWrapper with
-                    | Flow f -> f
-                    | Real r -> r.Flow
+                let flow = parentWrapper.GetFlow()
                 let tryCall = tryFindCall system name
                 let tryAliasDef = tryFindAliasDefWithMnemonic flow name
                 option {
@@ -161,7 +171,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
                 }
             let candidates = candidateCtxs.Select(getContainerChildPair)
 
-            let loop (cycle:int) =
+            let loop () =
                 for (optParent, ctxInfo) in candidates do
                     let parent = optParent.Value
                     let existing = parent.GetGraph().TryFindVertex(ctxInfo.GetRawName())
@@ -169,12 +179,15 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
                     | Some v -> tracefn $"{v.Name} already exists.  Skip creating it."
                     | None ->
                         match cycle, ctxInfo.Names with
-                        | 0, q::[] ->
+                        | 0, q::[] when not <| isCallOrAlias parent q ->
+                            let flow = parent.GetCore() :?> Flow
+                            Real.Create(q, flow) |> ignore
+
+                        | 1, q::[] when (isCallOrAlias parent q) ->
                             match tryCreateCallOrAlias parent q with
                             | Some _ -> ()
                             | None ->
-                                let flow = parent.GetCore() :?> Flow
-                                Real.Create(q, flow) |> ignore
+                                failwith "ERROR"
                         | 1, ofn::ofrn::[] ->
                             let otherFlowReal = tryFindReal system ofn ofrn |> Option.get
                             VertexOtherFlowRealCall.Create(ofn, ofrn, otherFlowReal, parent) |> ignore
@@ -185,8 +198,11 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
                         | _ ->
                             failwith "ERROR"
                         noop()
-            loop 0
-            loop 1
+            loop
+
+        let createNonParentedRealVertex = tokenCreator 0
+        let createCallOrAliasVertex = tokenCreator 1
+
 
         //let dumpTokens (tokens:Dictionary<ContextInformation, GVT>) (msg:string) =
         //    logInfo "%s" msg
@@ -198,7 +214,10 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
 
         createCallDefs helper
         createAliasDefs helper
-        createNonParentedTokens()
+        createNonParentedRealVertex()
+        fillAliasDefsTarget helper
+        createCallOrAliasVertex()
+        fillInterfaceDefs helper
 
         logInfo "---- Spit results"
         logDebug "%s" <| helper.TheSystem.Value.Spit().Dump()

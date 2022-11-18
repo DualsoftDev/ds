@@ -63,17 +63,6 @@ module SpitModuleHelper =
             for flowVertex in flow.Graph.Vertices do
                 yield! spit(flowVertex)
 
-            (*
-                 A."+" = { Ap1; Ap2; }    : alias=A."+", mnemonics = [Ap1; Ap2;]
-                 Main = { Main2; }
-             *)
-            for { AliasTarget = targetWrapper; Mnemonincs = mnes } in flow.AliasDefs do
-                noop()
-                //for m in mnes do
-                //    let mnemonicFqdn = [| m |]
-                //    let alias = { AliasKey = aliasKey; Mnemonic = mnemonicFqdn; FlowFqdn = flow.NameComponents }
-                //    yield SpitResult.Create(SpitOnlyAlias alias, aliasKey)        // key -> alias : [ My.Flow.Ap1, A."+";  My.Flow.Main2, My.Flow.Main; ...]
-                //    yield SpitResult.Create(SpitOnlyAlias alias, mnemonicFqdn)    // mne -> alias
         |]
     and spitSystem (system:DsSystem) : SpitResults =
         [|

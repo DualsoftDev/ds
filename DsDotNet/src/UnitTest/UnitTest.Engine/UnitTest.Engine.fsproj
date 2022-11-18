@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
@@ -32,6 +32,9 @@
 		<Compile Include="Model\FqdnParseTest.fs" />
 		<!--<Compile Include="ImportPPT\pptTest.fs" />-->
 		<Compile Include="EntryPoint.fs" />
+		<None Include="Libraries\cylinder.ds" />
+		<None Include="Libraries\station.ds" />
+		<None Include="Libraries\strange.ds" />
 		<None Include="Obsolete\0.ModelTest_Common.fsx" />
 		<None Include="Obsolete\1.ModelExtension.fsx" />
 		<None Include="Obsolete\ModelTest1.fsx" />

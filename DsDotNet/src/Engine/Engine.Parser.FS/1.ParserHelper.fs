@@ -54,6 +54,11 @@ type ParserHelper(options:ParserOptions) =
     member val internal _causalTokenContext          = ResizeArray<CausalTokenContext>()
     member val internal _identifier12ListingContexts = ResizeArray<Identifier12ListingContext>()
 
+
+    member val internal _interfaceDefContexts = ResizeArray<InterfaceDefContext>()
+
+
+
     member val internal _deviceBlockContexts         = ResizeArray<LoadDeviceBlockContext>()
     member val internal _externalSystemBlockContexts = ResizeArray<LoadExternalSystemBlockContext>()
 

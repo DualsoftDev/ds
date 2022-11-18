@@ -85,9 +85,12 @@ module internal ModelFindModule =
 
     let tryFindCall (system:DsSystem) callName = system.Calls.TryFind(nameEq callName)
     let tryFindAliasTarget (flow:Flow) aliasMnemonic =
-        flow.AliasDefs.Where(fun ad -> ad.Mnemonincs.Contains(aliasMnemonic)).Select(fun ad -> ad.AliasTarget).TryExactlyOne()
+        flow.AliasDefs.Values
+            .Where(fun ad -> ad.Mnemonincs.Contains(aliasMnemonic))
+            .TryExactlyOne()
+            .Bind(fun ad -> ad.AliasTarget)
     let tryFindAliasDefWithMnemonic (flow:Flow) aliasMnemonic =
-        flow.AliasDefs.TryFind(fun ad -> ad.Mnemonincs.Contains(aliasMnemonic))
+        flow.AliasDefs.Values.TryFind(fun ad -> ad.Mnemonincs.Contains(aliasMnemonic))
 
 
     type DsSystem with

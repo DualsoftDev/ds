@@ -68,7 +68,7 @@ module internal ToDsTextModule =
             yield $"{tab}[flow] {flow.Name.QuoteOnDemand()} = {lb}"
             yield! graphToDs (Flow flow) (indent+1)
 
-            let aliasDefs = flow.AliasDefs
+            let aliasDefs = flow.AliasDefs.Values
             if aliasDefs.Any() then
                 let tab = getTab (indent+1)
                 yield $"{tab}[aliases] = {lb}"
@@ -77,12 +77,13 @@ module internal ToDsTextModule =
                     let tab = getTab (indent+2)
                     let aliasKey =
                         match a.AliasTarget with
-                        | RealTarget real ->
+                        | Some(RealTarget real) ->
                             if real.Flow.Name = flow.Name then
                                 real.Name
                             else
                                 [real.Flow.Name; real.Name].Combine()
-                        | CallTarget call -> call.Name
+                        | Some(CallTarget call) -> call.Name
+                        | None -> failwith "ERROR"
 
                     yield $"{tab}{aliasKey} = {lb} {mnemonics} {rb}"
                 yield $"{tab}{rb}"

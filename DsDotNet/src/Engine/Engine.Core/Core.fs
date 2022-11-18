@@ -70,7 +70,7 @@ module CoreModule =
         inherit FqdnObject(name, system)
         member val Graph = DsGraph()
         member val ModelingEdges = HashSet<ModelingEdgeInfo<Vertex>>()
-        member val AliasDefs = ResizeArray<AliasDef>()
+        member val AliasDefs = Dictionary<Fqdn, AliasDef>(nameComponentsComparer())
 
         member x.System = system
         static member Create(name:string, system:DsSystem) =
@@ -78,7 +78,10 @@ module CoreModule =
             system.Flows.Add(flow) |> verifyM $"Duplicated flow name [{name}]"
             flow
 
-    and AliasDef = { AliasTarget:AliasTargetWrapper; Mnemonincs:string [] }
+    and AliasDef(aliasKey:Fqdn, target:AliasTargetWrapper option, mnemonics:string []) =
+        member _.AliasKey = aliasKey
+        member val AliasTarget = target with get, set
+        member _.Mnemonincs = mnemonics
 
 
 
@@ -281,6 +284,10 @@ module CoreModule =
             match x with
             | Flow f -> f :> FqdnObject
             | Real r -> r
+        member x.GetFlow() =
+            match x with
+            | Flow f -> f
+            | Real r -> r.Flow
 
         member x.GetSystem() =
             match x with

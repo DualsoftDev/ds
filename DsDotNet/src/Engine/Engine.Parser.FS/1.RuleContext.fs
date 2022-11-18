@@ -46,29 +46,53 @@ module ParserRuleContextModule =
 
         let createAliasDef (system:DsSystem) (ctx:AliasListingContext) =
             let ci = getContextInformation ctx
-            let flow = tryFindFlow system ci.Flow.Value |> Option.get
-            let map = flow.AliasDefs
-            let mnemonics = enumerateChildren<AliasMnemonicContext>(ctx).Select(getText).ToArray()
-            let aliasTargetCtx = tryFindFirstChild<AliasDefContext>(ctx).Value    // {타시스템}.{interface} or {Flow}.{real}
-            let aliasTargetNames = collectNameComponents(aliasTargetCtx).ToFSharpList()
-            let target =
-                match aliasTargetNames with
-                | t::[] ->
-                    let realTargetCandidate = flow.Graph.TryFindVertex<Real>(t)
-                    let callTargetCandidate = tryFindCall system t
-                    match realTargetCandidate, callTargetCandidate with
-                    | Some real, None -> RealTarget real
-                    | None, Some call -> CallTarget call
-                    | Some _, Some _ -> failwith "Name duplicated."
-                    | _ -> failwith "Failed to find"
-                | otherFlow::real::[] ->
-                    match tryFindReal system otherFlow real with
-                    | Some otherFlowReal -> RealTarget otherFlowReal
-                    | _ -> failwith "Failed to find"
-                | _ ->
-                    failwith "ERROR"
+            option {
+                let! flow = tryFindFlow system ci.Flow.Value
+                let! aliasKeys = tryFindFirstChild<AliasDefContext>(ctx).Map(collectNameComponents)
+                let mnemonics = enumerateChildren<AliasMnemonicContext>(ctx).Select(getText).ToArray()
+                let ad = AliasDef(aliasKeys, None, mnemonics)
+                flow.AliasDefs.Add(aliasKeys, ad)
+                return ad
+            }
 
-            { AliasTarget=target; Mnemonincs=mnemonics} |> map.Add
+        let fillTargetOfAliasDef (system:DsSystem) (ctx:AliasListingContext) =
+            let ci = getContextInformation ctx
+            option {
+                let! flow = tryFindFlow system ci.Flow.Value
+                let mnemonics = enumerateChildren<AliasMnemonicContext>(ctx).Select(getText).ToArray()
+                let! aliasKeys = tryFindFirstChild<AliasDefContext>(ctx).Map(collectNameComponents)
+                let target =
+                    match aliasKeys.ToFSharpList() with
+                    | t::[] ->
+                        let realTargetCandidate = flow.Graph.TryFindVertex<Real>(t)
+                        let callTargetCandidate = tryFindCall system t
+                        match realTargetCandidate, callTargetCandidate with
+                        | Some real, None -> Some (RealTarget real)
+                        | None, Some call -> Some (CallTarget call)
+                        | Some _, Some _ -> failwith "Name duplicated."
+                        | _ -> failwith "Failed to find"
+                    | otherFlow::real::[] ->
+                        match tryFindReal system otherFlow real with
+                        | Some otherFlowReal -> Some (RealTarget otherFlowReal)
+                        | _ -> failwith "Failed to find"
+                    | _ ->
+                        failwith "ERROR"
 
-        let createCallDefs (helper:ParserHelper) = helper._callListingContexts.Iter(createCallDef helper.TheSystem.Value)
-        let createAliasDefs (helper:ParserHelper) = helper._aliasListingContexts.Iter(createAliasDef helper.TheSystem.Value)
+                flow.AliasDefs[aliasKeys].AliasTarget <- target
+            }
+
+
+        let createCallDefs (helper:ParserHelper) =
+            helper._callListingContexts.Iter(createCallDef helper.TheSystem.Value)
+        let createAliasDefs (helper:ParserHelper) =
+            helper._aliasListingContexts.Iter(fun ctx ->
+                createAliasDef helper.TheSystem.Value ctx |> ignore)
+        let fillAliasDefsTarget (helper:ParserHelper) =
+            helper._aliasListingContexts.Iter(fun ctx ->
+                fillTargetOfAliasDef helper.TheSystem.Value ctx |> ignore)
+        let fillInterfaceDefs (helper:ParserHelper) =
+            ()
+            //helper._interfaceDefContexts.Iter(fun ctx ->
+            //    let system = helper.TheSystem.Value
+            //    system.ApiItems4Export
+            //    fillTargetOfAliasDef helper.TheSystem.Value ctx |> ignore)

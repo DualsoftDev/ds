@@ -43,25 +43,15 @@ namespace Engine
 [sys] My = {
     [flow] F = {
         Main = {
-            A.""+"" > A.""-"";
-            A.""-"" > A.""+"";
+            Ap > Am;
+            Am > Ap;
         }
     }
-    [sys] A = {
-        [flow] F = {
-            Vp > Pp > Sp;
-            Vm > Pm > Sm;
-
-            Vp |> Pm |> Sp;
-            Vm |> Pp |> Sm;
-            Vp <||> Vm;
-        }
-        [interfaces] = {
-            ""+"" = { F.Vp ~ F.Sp }
-            ""-"" = { F.Vm ~ F.Sm }
-            ""+"" <||> ""-"";
-        }
+    [calls] = {
+        Ap = { A.""+""(%Q1, %I1); }
+        Am = { A.""-""(%Q2, %I2); }
     }
+    [device file=""cylinder.ds""] A;
 }
 ";
         public static string DupButtonCategory = @"

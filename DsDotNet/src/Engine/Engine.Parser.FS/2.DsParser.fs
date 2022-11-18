@@ -195,8 +195,12 @@ type DsParser() =
 
     static member tryCollectNameComponents(from:IParseTree):string[] option = // :Fqdn
         option {
-            let! name = tryGetName from
-            return Fqdn.parse(name).ToArray()
+            let! idCtx = tryFindNameComponentContext from
+            if idCtx :? Identifier1Context then
+                return [| idCtx.GetText().DeQuoteOnDemand() |]
+            else
+                let! name = tryGetName from
+                return Fqdn.parse(name).ToArray()
         }
 
     static member collectNameComponents(from:IParseTree):string[] = tryCollectNameComponents from |> Option.get

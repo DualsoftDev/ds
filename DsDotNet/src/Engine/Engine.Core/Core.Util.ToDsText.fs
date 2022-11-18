@@ -59,7 +59,7 @@ module internal ToDsTextModule =
 
             let notMentioned = graph.Islands.Except(stems.Cast<Vertex>()).ToArray()
             for island in notMentioned do
-                yield $"{getTab (indent+1)}{island.GetRelativeName(core.NameComponents)}; // island"
+                yield $"{getTab (indent+1)}{island.Name.QuoteOnDemand()}; // island"
         ]
 
     let flowToDs (flow:Flow) (indent:int) =

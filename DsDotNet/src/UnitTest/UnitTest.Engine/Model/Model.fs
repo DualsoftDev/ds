@@ -370,6 +370,24 @@ module ModelTests1 =
         let compare = compare @$"{__SOURCE_DIRECTORY__}\..\Libraries"
 
         [<Test>]
+        member __.``0 Any test`` () =
+            logInfo "=== 0 Any test"
+            let input = """
+[sys] EX = {
+    [flow] F = {
+        TX;
+        "R.X";
+        "NameWith\"Quote";
+    }
+    //[interfaces] = {
+    //    "이상한. Api" = { F.TX ~ F."R.X" }
+    //    "Dummy. Api" = { _ ~ _ }
+    //}
+}
+"""
+            compare input input
+
+        [<Test>]
         member __.``EveryScenarioText test`` () =
             logInfo "=== EveryScenarioText"
             compare Program.EveryScenarioText answerEveryScenarioText

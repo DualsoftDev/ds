@@ -348,15 +348,17 @@ namespace Engine
 
         public static string QualifiedName = @"
 [sys] ""my.favorite.system!!"" = {
+	[flow] EX = {
+		""이상한. Real"" > ""Dummy. Real"";
+	}
     [flow] "" my flow. "" = {
         R1 > R2;
         C1 = {
-            EX.""이상한. Api"" >
-            EX.""Dummy. Api""
-            // > EX.""이상한. Api""
+            EX.""이상한. Real"" >
+            EX.""Dummy. Real""
+            // > EX.""이상한. Real""
             ; }
     }
-    [device file=""strange.ds""] A;
 }
 ";
         public static string T6Alias = @"

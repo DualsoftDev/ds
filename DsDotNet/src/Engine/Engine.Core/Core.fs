@@ -121,11 +121,6 @@ module CoreModule =
     and VertexOtherFlowRealCall private (names:Fqdn, target:Real, parent) =
         inherit Indirect(names, parent)
 
-    and SafetyCondition =
-        | SafetyConditionReal of Real
-        | SafetyConditionCall of Call
-
-
     //and Alias private (mnemonic:string, target:AliasTargetWrapper, parent:ParentWrapper) =
     //    inherit Vertex([|mnemonic|], parent)
 
@@ -214,6 +209,11 @@ module CoreModule =
     and AliasTargetWrapper =
         | RealTarget of Real    // MyFlow or OtherFlow 의 Real 일 수 있다.
         | CallTarget of Call
+
+    and SafetyCondition =
+        | SafetyConditionReal of Real
+        | SafetyConditionCall of Call
+
 
     (* Abbreviations *)
 

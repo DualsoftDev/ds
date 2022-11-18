@@ -153,14 +153,18 @@ C4 > C5;
     [flow] F = {
         Seg1 > Seg2;
         Seg1 = {
-            A."+" > A."-";
+            Ap > Am;
         }
     }
     [flow] F2 = {
         F.Seg1 > Seg;
         Seg = {
-            A."+" > A."-";
+            Ap > Am;
         }
+    }
+    [calls] = {
+        Ap = { A."+"(%Q1, %I1); }
+        Am = { A."-"(%Q2, %I2); }
     }
 
     [device file="cylinder.ds"] A;

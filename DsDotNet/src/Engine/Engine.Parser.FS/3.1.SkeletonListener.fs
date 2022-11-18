@@ -65,13 +65,15 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
 
     override x.EnterInterfaceDef(ctx:InterfaceDefContext) =
         helper._interfaceDefContexts.Add(ctx)
+
+        let system = helper.TheSystem.Value
         let interrfaceNameCtx = tryFindFirstChild<InterfaceNameContext>(ctx).Value
         let interfaceName = collectNameComponents(interrfaceNameCtx)[0]
 
         // 이번 stage 에서 일단 interface 이름만 이용해서 빈 interface 객체를 생성하고,
         // TXs, RXs, Resets 은 추후에 채움..
-        let api = ApiItem4Export.Create(interfaceName, helper.TheSystem.Value)
-        let hash = helper.TheSystem.Value.ApiItems4Export
+        let api = ApiItem4Export.Create(interfaceName, system)
+        let hash = system.ApiItems4Export
         hash.Add(api) |> ignore
 
     override x.EnterInterfaceResetDef(ctx:InterfaceResetDefContext) =

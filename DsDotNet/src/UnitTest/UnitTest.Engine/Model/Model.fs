@@ -101,39 +101,7 @@ module private ModelComparisonHelper =
     """
 
 
-        let answerAdoptoedValidText = """
-    [sys] My = {
-        [flow] F = {
-            Seg1 > Seg2;
-            Seg1 = {
-                A."+" > A."-";
-            }
-        }
-        [flow] F2 = {
-            F.Seg1 > Seg;
-            Seg = {
-                A."+" > A."-";
-            }
-        }
-        [sys] A = {
-            [flow] F = {
-                //Vp <||> Vm |> Pp |> Sm;
-                //Vp |> Pm |> Sp;
-                //Vm > Pm > Sm;
-                //Vp > Pp > Sp;
-                Vp <||> Vm |> Pp |> Sm;
-                Vp |> Pm |> Sp;
-                Vm > Pm > Sm;
-                Vp > Pp > Sp;
-            }
-            [interfaces] = {
-                "+" = { F.Vp ~ F.Sp }
-                "-" = { F.Vm ~ F.Sm }
-                "+" <||> "-";
-            }
-        }
-    }
-    """
+
         let answerSplittedMRIEdgesText = """
     [sys] A = {
         [flow] F = {
@@ -338,10 +306,14 @@ module private ModelComparisonHelper =
 
 [<AutoOpen>]
 module ModelTests1 =
-    type DemoTests1() =
+    [<AbstractClass>]
+    type TestBase() =
         do
             Fixtures.SetUpTest()
             ModelParser.Initialize()
+
+    type DemoTests1() =
+        inherit TestBase()
 
         let compare = compare @$"{__SOURCE_DIRECTORY__}\..\Libraries"
 
@@ -374,9 +346,9 @@ module ModelTests1 =
             compare Program.CodeElementsText Program.CodeElementsText
 
         [<Test>]
-        member __.``XAdoptoedValidText test`` () =
+        member __.``AdoptoedValidText test`` () =
             logInfo "=== AdoptoedValidText"
-            compare Program.AdoptoedValidText answerAdoptoedValidText
+            compare Program.AdoptoedValidText Program.AdoptoedValidText
 
         [<Test>]
         member __.``DuplicatedEdgesText test`` () =
@@ -446,10 +418,12 @@ module ModelTests1 =
             // todo : Loop detection
 
 
-    type RecursiveSystemTests1() =
-        do Fixtures.SetUpTest()
+    type InvalidModelTests1() =
+        inherit TestBase()
+
+        let compare = compare @$"{__SOURCE_DIRECTORY__}\..\Libraries"
 
         [<Test>]
         member __.``RecursiveSystem test`` () =
             logInfo "=== RecursiveSystem"
-            compare Program.RecursiveSystemText answerEveryScenarioText
+            (fun () -> compare Program.RecursiveSystemText "" ) |> ShouldFail

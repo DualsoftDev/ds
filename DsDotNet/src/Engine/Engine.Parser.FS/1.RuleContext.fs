@@ -81,6 +81,36 @@ module ParserRuleContextModule =
                 flow.AliasDefs[aliasKeys].AliasTarget <- target
             }
 
+        let fillInterfaceDef (system:DsSystem) (ctx:InterfaceDefContext) =
+            let findSegments(fqdns:Fqdn[]):Real[] =
+                fqdns
+                    .Where(fun fqdn -> fqdn <> null)
+                    .Select(fun s -> system.FindGraphVertex<Real>(s))
+                    .Tap(fun x -> assert(not (isItNull x)))
+                    .ToArray()
+            let isWildcard(cc:Fqdn):bool = cc.Length = 1 && cc[0] = "_"
+            let collectCallComponents(ctx:CallComponentsContext):Fqdn[] =
+                enumerateChildren<Identifier123Context>(ctx)
+                    .Select(collectNameComponents)
+                    .ToArray()
+            option {
+                let! interrfaceNameCtx = tryFindFirstChild<InterfaceNameContext>(ctx)
+                let interfaceName = collectNameComponents(interrfaceNameCtx)[0]
+                let! api = system.ApiItems4Export.TryFind(nameEq interfaceName)
+                let ser =   // { start ~ end ~ reset }
+                    enumerateChildren<CallComponentsContext>(ctx)
+                        .Map(collectCallComponents)
+                        .Tap(fun callComponents -> assert(callComponents.All(fun cc -> cc.Length = 2 || isWildcard(cc))))
+                        .Select(fun callCompnents -> callCompnents.Select(fun cc -> if isWildcard(cc) then null else cc.Prepend(system.Name).ToArray()).ToArray())
+                        .ToArray()
+
+                let n = ser.Length
+
+                assert(n = 2 || n = 3)
+                api.AddTXs(findSegments(ser[0])) |> ignore
+                api.AddRXs(findSegments(ser[1])) |> ignore
+            } |> ignore
+
 
         let createCallDefs (helper:ParserHelper) =
             helper._callListingContexts.Iter(createCallDef helper.TheSystem.Value)
@@ -90,9 +120,8 @@ module ParserRuleContextModule =
         let fillAliasDefsTarget (helper:ParserHelper) =
             helper._aliasListingContexts.Iter(fun ctx ->
                 fillTargetOfAliasDef helper.TheSystem.Value ctx |> ignore)
+
         let fillInterfaceDefs (helper:ParserHelper) =
-            ()
-            //helper._interfaceDefContexts.Iter(fun ctx ->
-            //    let system = helper.TheSystem.Value
-            //    system.ApiItems4Export
-            //    fillTargetOfAliasDef helper.TheSystem.Value ctx |> ignore)
+            helper._interfaceDefContexts.Iter(fun ctx ->
+                fillInterfaceDef helper.TheSystem.Value ctx |> ignore)
+

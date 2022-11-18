@@ -8,23 +8,28 @@ namespace Engine
         public static string SafetyValid = @"
 [sys] L = {
     [flow] F = {
-        Main = { Cp > Cm; }
+        Main = { Ap > Am; }
         [aliases] = {
-            C.P = { Cp; Cp1; Ap2; }
-            C.M = { Cm; Cm1; Cm2; }
+            Ap = { Ap1; Ap2; Ap3; }
+            Am = { Am1; Am2; Am3; }
         }
         // ---- flow 내의 safety block 없애는 걸로...
         //[safety] = {
         //    Main = {C.F.Sp; C.F.Sm}
         //}
     }
-    [device file=""cylinder.ds""] C;
+    [calls] = {
+        Ap = { A.""+""(%Q1, %I1); }
+        Am = { A.""-""(%Q2, %I2); }
+    }
 
     [prop] = {
         [ safety ] = {
-            L.F.Main = {C.F.Vp; C.F.Vm}
+            L.F.Main = {Ap1; Ap2}
         }
     }
+
+    [device file=""cylinder.ds""] A;
 }
 
 ";

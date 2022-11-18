@@ -38,49 +38,37 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
             //let name = helper.ParserOptions.LoadedSystemName
             helper.TheSystem <- Some <| DsSystem.Create(name, host)
             tracefn($"System: {name}")
-            x.AddElement(getContextInformation ctx, GVT.System)
         | None ->
             failwith "ERROR"
 
     override x.EnterFlowBlock(ctx:FlowBlockContext) =
         let flowName = ctx.identifier1().GetText().DeQuoteOnDemand()
         x._flow <- Some <| Flow.Create(flowName, helper.TheSystem.Value)
-        x.AddElement(getContextInformation ctx, GVT.Flow)
 
     override x.EnterParentingBlock(ctx:ParentingBlockContext) =
         helper._parentingBlockContexts.Add(ctx)
         tracefn($"Parenting: {ctx.GetText()}")
         let name = tryGetName(ctx.identifier1()).Value
         x._parenting <- Some <| Real.Create(name, x._flow.Value)
-        x.AddCausalTokenElement(getContextInformation ctx, GVT.Segment ||| GVT.Parenting)
 
-        let children = enumerateChildren<CausalTokenContext>(ctx)
-        for ch in children do
-            x.AddCausalTokenElement(getContextInformation ch, GVT.Child)
+
+
+    override x.EnterCausalPhrase(ctx:CausalPhraseContext) =
+        helper._causalPhraseContexts.Add(ctx)
 
     override x.EnterIdentifier12Listing(ctx:Identifier12ListingContext) =
-        x.AddCausalTokenElement(getContextInformation ctx, GVT.Segment)
+        helper._identifier12ListingContexts.Add(ctx)
 
     override x.EnterCausalToken(ctx:CausalTokenContext) =
         helper._causalTokenContext.Add(ctx)
 
-        let vType = GVT.CausalToken
 
-        // 다음 stage 에서 처리...
-        //if (_parenting == null)
-        //    vType |= GVT.Segment
-
-        x.AddCausalTokenElement(getContextInformation ctx, vType)
 
 
     override x.EnterInterfaceDef(ctx:InterfaceDefContext) =
         let hash = helper.TheSystem.Value.ApiItems4Export
         let interrfaceNameCtx = tryFindFirstChild<InterfaceNameContext>(ctx).Value
         let interfaceName = collectNameComponents(interrfaceNameCtx)[0]
-        let ser =   // { start ~ end ~ reset }
-            enumerateChildren<CallComponentsContext>(ctx)
-
-        x.AddElement(getContextInformation interrfaceNameCtx, GVT.ApiKey)
 
         // 이번 stage 에서 일단 interface 이름만 이용해서 빈 interface 객체를 생성하고,
         // TXs, RXs, Resets 은 다음 listener stage 에서 채움..
@@ -132,169 +120,82 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
 
     override x.EnterAliasListing(ctx:AliasListingContext) =
         helper._aliasListingContexts.Add(ctx)
-        let mnemonicCtxInfos = enumerateChildren<AliasMnemonicContext>(ctx).Select(getContextInformation).ToArray()
-        for mneCi in mnemonicCtxInfos do
-            x.AddElement(mneCi, GVT.AliaseMnemonic)
-
 
     override x.EnterCallListing(ctx:CallListingContext) =
         helper._callListingContexts.Add(ctx)
-        //let callNameCtx = tryFindFirstChild<CallNameContext>(ctx).Value
-        //x.AddElement(getContextInformation callNameCtx, GVT.Call)
 
     override x.ExitSystem(ctx:SystemContext) =
         base.ExitSystem(ctx)
         let system = x._theSystem.Value
 
-        let createCallDef(ctx:CallListingContext) =
-            let callName =  tryFindFirstChild<CallNameContext>(ctx).Map(getText).Value
-            let apiDefCtxs = enumerateChildren<CallApiDefContext>(ctx).ToArray()
-            let getAddress (addressCtx:IParseTree) =
-                tryFindFirstChild<AddressItemContext>(addressCtx).Map(getText).Value
-            let apiItems =
-                [   for apiDefCtx in apiDefCtxs do
-                    let apiPath = collectNameComponents apiDefCtx |> List.ofSeq // e.g ["A"; "+"]
-                    match apiPath with
-                    | device::api::[] ->
-                        let apiItem =
-                            option {
-                                let! apiPoint = tryFindCallingApiItem system device api
-                                let! addressCtx = tryFindFirstChild<AddressTxRxContext>(ctx)
-                                let! txAddressCtx = tryFindFirstChild<TxContext>(addressCtx)
-                                let! rxAddressCtx = tryFindFirstChild<RxContext>(addressCtx)
-                                let tx = getAddress(txAddressCtx)
-                                let rx = getAddress(rxAddressCtx)
 
-                                tracefn $"TX={tx} RX={rx}"
-                                return ApiItem(apiPoint, tx, rx)
-                            }
-                        match apiItem with
-                        | Some apiItem -> yield apiItem
-                        | _ -> failwith "ERROR"
 
-                    | _ -> failwith "ERROR"
-                ]
-            assert(apiItems.Any())
-            Call(callName, apiItems) |> system.Calls.Add
 
-        let createCallDefs() = helper._callListingContexts.Iter(createCallDef)
 
-        let createAliasDef (ctx:AliasListingContext) =
+        let getContainerChildPair(ctx:ParserRuleContext) : ParentWrapper option * ContextInformation =
             let ci = getContextInformation ctx
-            let flow = tryFindFlow system ci.Flow.Value |> Option.get
-            let map = flow.AliasDefs
-            let mnemonics = enumerateChildren<AliasMnemonicContext>(ctx).Select(getText).ToArray()
-            let aliasTargetCtx = tryFindFirstChild<AliasDefContext>(ctx).Value    // {타시스템}.{interface} or {Flow}.{real}
-            let aliasTargetNames = collectNameComponents(aliasTargetCtx).ToFSharpList()
-            let target =
-                match aliasTargetNames with
-                | t::[] ->
-                    let realTargetCandidate = flow.Graph.TryFindVertex<Real>(t)
-                    let callTargetCandidate = tryFindCall system t
-                    match realTargetCandidate, callTargetCandidate with
-                    | Some real, None -> RealTarget real
-                    | None, Some call -> CallTarget call
-                    | Some _, Some _ -> failwith "Name duplicated."
-                    | _ -> failwith "Failed to find"
-                | otherFlow::real::[] ->
-                    match tryFindReal system otherFlow real with
-                    | Some otherFlowReal -> RealTarget otherFlowReal
-                    | _ -> failwith "Failed to find"
-                | _ ->
-                    failwith "ERROR"
+            let system = x._theSystem.Value
+            let parentWrapper = tryFindParentWrapper system ci
+            parentWrapper, ci
 
-            { AliasTarget=target; Mnemonincs=mnemonics} |> map.Add
-
-            let ci = getContextInformation aliasTargetCtx
-            x.AddElement(ci, GVT.AliaseKey)
-        let createAliasDefs() = helper._aliasListingContexts.Iter(createAliasDef)
-
-        let adjustVertexType() =
-            logInfo "---- Adjusting elements"
-            let dic = helper._causalTokenElements
-            let dups = dic |> seq
-            for KeyValue(ctxInfo, vType) in dups do
-                let flagAddtion =
-                    match ctxInfo.Tuples with
-                    | sys_, Some flow, parenting_, otherFlow::real::[] -> GVT.CallFlowReal
-                    | sys_, Some flow, parenting_, id::[] ->
-                        let call = tryFindCall system id
-                        let fl = tryFindFlow system flow |> Option.get
-                        let alias = tryFindAliasTarget fl id
-                        match call, alias with
-                        | Some call, None -> GVT.Call
-                        | None, Some aliasTarget -> GVT.CallAliased
-                        | None, None when parenting_.IsNone -> GVT.Segment
-                        | _ -> failwith "ERROR"
+        let createNonParentedTokens() =
+            let candidateCtxs:ParserRuleContext list = [
+                yield! helper._identifier12ListingContexts.Cast<ParserRuleContext>()
+                yield! helper._causalTokenContext.Cast<ParserRuleContext>()
+            ]
+            let tryCreateCallOrAlias (parentWrapper:ParentWrapper) name =
+                let flow =
+                    match parentWrapper with
+                    | Flow f -> f
+                    | Real r -> r.Flow
+                let tryCall = tryFindCall system name
+                let tryAliasDef = tryFindAliasDefWithMnemonic flow name
+                option {
+                    match tryCall, tryAliasDef with
+                    | Some call, None ->
+                        return VertexCall.Create(name, call, parentWrapper) :> Indirect
+                    | None, Some aliasDef ->
+                        let aliasTarget = tryFindAliasTarget flow name |> Option.get
+                        return VertexAlias.Create(name, aliasTarget, parentWrapper) :> Indirect
+                    | None, None -> return! None
                     | _ ->
-                        let nameMatches =
-                            helper._elements.Where(fun (KeyValue(ctx, _)) ->
-                                ctx.Names = ctxInfo.Names && ctx.Flow = ctxInfo.Flow    // && ctx.Systems = ctxInfo.Systems
-                                ).ToArray()
-                        assert(vType.HasFlag(GVT.CausalToken))
+                        failwith "ERROR: duplicated"
+                }
+            let candidates = candidateCtxs.Select(getContainerChildPair)
+            for (optParent, ctxInfo) in candidates do
+                let parent = optParent.Value
+                let existing = parent.GetGraph().TryFindVertex(ctxInfo.GetRawName())
+                match existing with
+                | Some v -> tracefn $"{v.Name} already exists.  Skip creating it."
+                | None ->
+                    match ctxInfo.Names with
+                    | q::[] ->
+                        match tryCreateCallOrAlias parent q with
+                        | Some _ -> ()
+                        | None ->
+                            let flow = parent.GetCore() :?> Flow
+                            Real.Create(q, flow) |> ignore
+                    | otherFlow::real::[] ->
+                        tracefn $"{otherFlow}.{real} should already have been created."
+                    | _ ->
+                        failwith "ERROR"
+                    noop()
 
-                        let vt =  (vType &&& ~~~GVT.CausalToken)
-                        let types = nameMatches.Select(valueOfKeyValue).Fold((|||), GVT.None)
-                        if vt.IsOneOf(GVT.None, GVT.Child) then
-                            if nameMatches.isEmpty() then
-                                match vt with
-                                | GVT.None -> GVT.Segment
-                                | GVT.Child -> failwith "ERROR"
 
-                                    //if ctxInfo.Names.Length = 2 then
-                                    //    dic[ctxInfo] <- dic[ctxInfo] ||| GVT.CallApi        // todo : GVT.CallFlowReal 구분
-                                    //    //helper._elements.TryFind(fun (KeyValue(ctx, _)) -> ctx.
-                                    //    //failwith "ERROR"
+        //let dumpTokens (tokens:Dictionary<ContextInformation, GVT>) (msg:string) =
+        //    logInfo "%s" msg
+        //    for KeyValue(ctxInfo, vType) in tokens do
+        //        logDebug $"{ctxInfo.FullName} : {vType}"
+        //let dumpCausalTokens = dumpTokens helper._causalTokenElements
 
-                                | _ ->
-                                    failwith "ERROR"
-                            else
-                                match types with
-                                //| GVT.AliaseKey ->
-                                //    GVT.CallAliasKey ||| GVT.Segment
-                                | GVT.AliaseMnemonic ->
-                                    GVT.AliaseMnemonic
-                                | _ ->
-                                    failwith "ERROR"
-                            //logWarn $"{ctxInfo.FullName} : {dic[ctxInfo]} // from {vType}"
-                        else GVT.None
-                dic[ctxInfo] <- dic[ctxInfo] ||| flagAddtion
+        //dumpCausalTokens "---- Original Causal token elements"
 
-        let createNonParentedReals() =
-            let sys = helper.TheSystem.Value
-            for KeyValue(ctxInfo, vType) in helper._causalTokenElements do
-                match vType with
-                | HasFlag GVT.Segment ->
-                    if vType.HasFlag(GVT.Parenting) then
-                        let parent = findGraphVertex sys ctxInfo.NameComponents
-                        assert(parent <> null)
-                    elif ctxInfo.Names.Length = 1 then
-                        let flow = findGraphVertex sys [yield ctxInfo.System.Value; yield ctxInfo.Flow.Value] // ctxInfo.Flow.Value.N
-                        Real.Create(ctxInfo.Names[0], flow:?>Flow) |> ignore
-                    else
-                        ()  // e.g My/F/F2.Seg1 : 해당 real 생성은 다른 flow 의 역할임.
-                | _ ->
-                    ()
-                logDebug $"{ctxInfo.FullName} : {vType}"
-
-        let dumpTokens (tokens:Dictionary<ContextInformation, GVT>) (msg:string) =
-            logInfo "%s" msg
-            for KeyValue(ctxInfo, vType) in tokens do
-                logDebug $"{ctxInfo.FullName} : {vType}"
-        let dumpCausalTokens = dumpTokens helper._causalTokenElements
-
-        dumpCausalTokens "---- Original Causal token elements"
-
-        createCallDefs()
-        createAliasDefs()
-        adjustVertexType()
-        createNonParentedReals()
+        createCallDefs helper
+        createAliasDefs helper
+        createNonParentedTokens()
 
         logInfo "---- Spit results"
         logDebug "%s" <| helper.TheSystem.Value.Spit().Dump()
 
-        dumpCausalTokens "---- All Causal token elements"
+        //dumpCausalTokens "---- All Causal token elements"
 
-        logInfo "---- Non Causal token elements"
-        for KeyValue(ctxInfo, vType) in helper._elements do
-            logDebug $"{ctxInfo.FullName} : {vType}"

@@ -172,6 +172,7 @@ module CoreModule =
     type Call (name:string, apiItems:ApiItem seq) =
         inherit Named(name)
         member val ApiItems = apiItems.ToFSharpList()
+        member val Xywh:Xywh = null with get, set
 
 
 
@@ -189,7 +190,6 @@ module CoreModule =
         member val TXs = createQualifiedNamedHashSet<Real>()
         member val RXs = createQualifiedNamedHashSet<Real>()
         member _.System = system
-        member val Xywh:Xywh = null with get, set
 
     /// API 의 reset 정보:  "+" <||> "-";
     and ApiResetInfo private (system:DsSystem, operand1:string, operator:ModelingEdgeType, operand2:string) =
@@ -235,6 +235,8 @@ module CoreModule =
 
     type Real with
         static member Create(name: string, flow) =
+            if name = "Ap" then
+                noop()
             if (name.Contains ".") (*&& not <| (name.StartsWith("\"") && name.EndsWith("\""))*) then
                 logWarn $"Suspicious segment name [{name}]. Check it."
 

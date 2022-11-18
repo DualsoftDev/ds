@@ -35,15 +35,15 @@ module private ModelComparisonHelper =
         let answerEveryScenarioText = """
     [sys ip = 192.168.0.1] My = {
         [flow] MyFlow = {
-            Seg1 > Seg2 > A."+";
+            Seg1 > Seg2 > Ap;
             Seg1 = {
-                A."+" > A."-";
+                Ap > Am;
             }
         }
         [flow] "Flow.Complex" = {
             "#Seg.Complex#" => Seg;
             "#Seg.Complex#" = {
-                A."+" > A."-";
+                Ap > Am;
             }
         }
         [flow] F = {
@@ -54,78 +54,48 @@ module private ModelComparisonHelper =
             C1 > C4 |> C5;
             C1 > C3 |> C5;
             Main = {
-                Ap2 > Bp2 > Bm2 > A."+";
+                Ap2 > Bp2 > Bm2 > Ap;
                 Ap1 > Bp1 > Bm1 > Ap2 > Am2 > Bm2;
                 Ap1 > Am1 > Bm1;
             }
             R2; // island
 
             [aliases] = {
-                A."+" = { Ap1; Ap2; }
-                A."-" = { Am1; Am2; }
-                B."+" = { Bp1; Bp2; }
-                B."-" = { Bm1; Bm2; }
+                Ap = { Ap1; Ap2; }
+                Am = { Am1; Am2; }
+                Bp = { Bp1; Bp2; }
+                Bm = { Bm1; Bm2; }
                 Main = { Main2; }
             }
         }
-        [sys ip = 1.2.3.4] A = {
-            [flow] F = {
-                Vp <||> Vm |> Pp |> Sm;
-                Vp |> Pm |> Sp;
-                Vm > Pm > Sm;
-                Vp > Pp > Sp;
-            }
-            [interfaces] = {
-                "+" = { F.Vp ~ F.Sp }
-                "-" = { F.Vm ~ F.Sm }
-                "+" <||> "-";
-            }
+        [calls] = {
+            Ap = { A."+"(%Q1, %I1); }
+            Am = { A."-"(%Q2, %I2); }
+            Bp = { B."+"(%Q3, %I3); }
+            Bm = { B."-"(%Q4, %I4); }
         }
-        [sys ip = 1.2.3.4] B = {
-            [flow] F = {
-                Vp <||> Vm |> Pp |> Sm;
-                Vp |> Pm |> Sp;
-                Vm > Pm > Sm;
-                Vp > Pp > Sp;
-            }
-            [interfaces] = {
-                "+" = { F.Vp ~ F.Sp }
-                "-" = { F.Vm ~ F.Sm }
-                "+" <||> "-";
-            }
-        }
-        [sys ip = 1.2.3.4] C = {
-            [flow] F = {
-                Vp <||> Vm |> Pp |> Sm;
-                Vp |> Pm |> Sp;
-                Vm > Pm > Sm;
-                Vp > Pp > Sp;
-            }
-            [interfaces] = {
-                "+" = { F.Vp ~ F.Sp }
-                "-" = { F.Vm ~ F.Sm }
-                "+" <||> "-";
-            }
-        }
+        [device file=cylinder.ds] A;
+        [device file=cylinder.ds] B;
+        [external file=station.ds] C;
         [emg] = {
             EMGBTN = { F; }
         }
         [prop] = {
-            [addresses] = {
-                A."+" = ( %Q1234.2343, %I1234.2343)
-                A."-" = ( START, END)
-                B."+" = ( %Q4321.2343, %I4321.2343)
-                B."-" = ( BSTART, BEND)
-            }
-        }
-        [prop] = {
-            [safety] = {
-                My.F.Main = { A.F.Sp; A.F.Sm; B.F.Sp; B.F.Sm; C.F.Sp; }
-            }
             [layouts] = {
-                A."+" = (1309, 405, 205, 83)
+                Ap = (1309, 405, 205, 83)
             }
+            //[addresses] = {
+            //    A."+" = ( %Q1234.2343, %I1234.2343)
+            //    A."-" = ( START, END)
+            //    B."+" = ( %Q4321.2343, %I4321.2343)
+            //    B."-" = ( BSTART, BEND)
+            //}
         }
+        //[prop] = {
+        //    [safety] = {
+        //        My.F.Main = { A.F.Sp; A.F.Sm; B.F.Sp; B.F.Sm; C.F.Sp; }
+        //    }
+        //}
     }
 
     """

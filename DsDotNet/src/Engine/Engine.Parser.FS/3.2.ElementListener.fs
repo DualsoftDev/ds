@@ -8,6 +8,7 @@ open Engine.Core
 open type Engine.Parser.dsParser
 open type Engine.Parser.FS.DsParser
 
+#if false
 
 /// <summary>
 /// Alias map 및 Api map 가 생성된 이후의 처리
@@ -81,7 +82,6 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
         let ci = getContextInformation ctx
         let sysNames, flowName, parenting, ns = ci.Tuples
         let flow = x._flow.Value
-        let vertexType = helper._causalTokenElements[ci]
         let system = helper.TheSystem.Value
         let spits = system.Spit()
         let findSpits (ns:string seq) =
@@ -204,6 +204,7 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
 
 
 
+        let vertexType = helper._causalTokenElements[ci]
         match vertexType with
         | HasFlag GVT.Segment ->
             let existing = findSpit(ci.NameComponents)
@@ -221,3 +222,4 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
         | _ ->
             failwith "ERROR"
         x.UpdateModelSpits()
+#endif

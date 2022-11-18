@@ -48,8 +48,7 @@ loadExternalSystemBlock: '[' EXTERNAL_SYSTEM fileSpec ipSpec ']' externalSystemN
     externalSystemName:identifier1;
 
 layoutBlock: '[' 'layouts' ']' '=' LBRACE (positionDef)* RBRACE;
-positionDef: apiPath '=' xywh;
-    apiPath: identifier1;
+positionDef: callName '=' xywh;
     xywh: LPARENTHESIS x COMMA y (COMMA w COMMA h)? RPARENTHESIS (SEIMCOLON)?;
     x: INTEGER;
     y: INTEGER;

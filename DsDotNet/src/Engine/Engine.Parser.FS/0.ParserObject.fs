@@ -21,38 +21,3 @@ type ParserOptions(referencePath, activeCpuName, isSimulationMode, allowSkipExte
     member x.Verify() = x.IsSimulationMode || (x.ActiveCpuName <> null && not x.AllowSkipExternalSegment)
 
 
-[<Flags>]
-type GraphVertexType =
-    | None           = 0b0000000000000000
-    | System         = 0b0000000000000010
-    | Flow           = 0b0000000000000100
-    | Segment        = 0b0000000000001000   // not child
-    | Parenting      = 0b0000000000010000
-    | Child          = 0b0000000000100000   // not Segment
-    | CallAliased    = 0b0000000001000000
-    | CallFlowReal   = 0b0000000010000000
-    | Call           = 0b0000000100000000   // System 에 정의된 Call 을 직접 사용
-
-    | AliaseKey      = 0b0000001000000000   // not direct call
-    | AliaseMnemonic = 0b0000010000000000   // not direct call
-    | ApiKey         = 0b0000100000000000
-    | ApiSER         = 0b0001000000000000   // S ~ E ~ R
-    | CausalToken    = 0b0010000000000000   // S ~ E ~ R
-
-/// Abbreviation for GraphVertexType
-type internal GVT = GraphVertexType
-
-(*
-    0b0000000000000000
-    0b0000000000000010
-    0b0000000000000100
-    0b0000000000001000
-    0b0000000000010000
-    0b0000000000100000
-    0b0000000001000000
-    0b0000000010000000
-    0b0000000100000000
-    0b0000001000000000
-    0b0000010000000000
-    0b0000100000000000
-*)

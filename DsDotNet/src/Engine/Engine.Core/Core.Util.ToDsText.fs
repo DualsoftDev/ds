@@ -11,7 +11,7 @@ module internal ToDsTextModule =
 
 
     type private MEI = ModelingEdgeInfo<Vertex>
-    let private modelingEdgeInfosToDs (es:MEI seq) (basis:Fqdn) (tab:string) =
+    let private modelingEdgeInfosToDs (es:MEI seq) (tab:string) =
 
         (* rss : Result edge Set of Set *)
         let folder (rss:ResizeArray<MEI> list) (e:MEI) : ResizeArray<MEI> list =
@@ -35,8 +35,8 @@ module internal ToDsTextModule =
                 [
                     yield $"{tab}"
                     for i, e in es.Indexed() do
-                        let mutable s = e.Source.GetRelativeName(basis)
-                        let t = e.Target.GetRelativeName(basis)
+                        let mutable s = e.Source.Name.QuoteOnDemand()
+                        let t = e.Target.Name.QuoteOnDemand()
                         if i <> 0 then s <- ""
                         yield $"{s} {e.EdgeSymbol} {t}"
                     yield ";"
@@ -47,9 +47,8 @@ module internal ToDsTextModule =
         let tab = getTab indent
         let graph = container.GetGraph()
         let core = container.GetCore()
-        let basis = core.NameComponents
         [
-            yield! modelingEdgeInfosToDs (container.GetModelingEdges()) basis tab
+            yield! modelingEdgeInfosToDs (container.GetModelingEdges()) tab
 
             let stems = graph.Vertices.OfType<Real>().Where(fun r -> r.Graph.Vertices.Any()).ToArray()
             for stem in stems do
@@ -135,7 +134,7 @@ module internal ToDsTextModule =
                 yield $"{tab}[calls] = {lb}"
                 for c in system.Calls do
                     let ais = c.ApiItems.Select(print).JoinWith("; ") + ";"
-                    yield $"{tab2}{c.Name} = {lb}{ais}{rb}"
+                    yield $"{tab2}{c.Name} = {lb} {ais} {rb}"
                 yield $"{tab}{rb}"
 
             for d in system.Devices do
@@ -198,19 +197,19 @@ module internal ToDsTextModule =
                         yield $"{tab}{rb}"
                 ] |> combineLines
 
-            let withLayouts = system.ApiItems4Export.Where(fun ai -> ai.Xywh <> null)
+            let withLayouts = system.Calls.Where(fun call -> call.Xywh <> null)
             let layouts =
                 [
                     if withLayouts.Any() then
                         yield $"{tab}[layouts] = {lb}"
-                        for apiItem in withLayouts do
-                            let xywh = apiItem.Xywh
+                        for call in withLayouts do
+                            let xywh = call.Xywh
                             let posi =
                                 if xywh.W.HasValue then
                                     $"({xywh.X}, {xywh.Y}, {xywh.W.Value}, {xywh.H.Value})"
                                 else
                                     $"({xywh.X}, {xywh.Y})"
-                            yield $"{tab2}{apiItem.QualifiedName} = {posi}"
+                            yield $"{tab2}{call.Name} = {posi}"
 
                         yield $"{tab}{rb}"
                 ] |> combineLines

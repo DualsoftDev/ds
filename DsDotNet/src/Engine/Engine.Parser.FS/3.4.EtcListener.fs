@@ -182,15 +182,15 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
 
         let positionDefs = enumerateChildren<PositionDefContext>(ctx).ToArray()
         for posiDef in positionDefs do
-            let apiPath = collectNameComponents(posiDef.apiPath())
-            let apiItem = helper.TheSystem.Value.FindExportApiItem(apiPath)
+            let callName = posiDef.callName().GetText()
             let xywh = posiDef.xywh()
+            let call = tryFindCall helper.TheSystem.Value callName |> Option.get
 
             match xywh.x().GetText(), xywh.y().GetText(), xywh.w().GetText(), xywh.h().GetText() with
             | Int32Pattern x, Int32Pattern y, Int32Pattern w, Int32Pattern h ->
-                apiItem.Xywh <- new Xywh(x, y, w, h)
+                call.Xywh <- new Xywh(x, y, w, h)
             | Int32Pattern x, Int32Pattern y, null, null ->
-                apiItem.Xywh <- new Xywh(x, y, Nullable(), Nullable())
+                call.Xywh <- new Xywh(x, y, Nullable(), Nullable())
             | _ ->
                 failwith "ERROR"
 

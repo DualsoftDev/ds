@@ -27,31 +27,6 @@ type ListenerBase(parser:dsParser, helper:ParserHelper) =
     member internal _._parenting  with get() = helper._parenting and set(v) = helper._parenting <- v
 
 
-    member internal x.AddElement(contextInformation:ContextInformation, elementType:GVT) =
-        let ci = contextInformation
-        let es = helper._elements
-
-        if es.ContainsKey(ci) then
-            failwith "ERROR: duplicated"
-            es[ci] <- (es[ci] ||| elementType)
-        else
-            es.Add(ci, elementType)
-        //logDebug $"Added Element: {ci}={es[ci]}"
-
-    member internal x.AddCausalTokenElement(contextInformation:ContextInformation, elementType:GVT) =
-        let ci = contextInformation
-        let elementType = elementType ||| GVT.CausalToken
-        let ctes = helper._causalTokenElements
-        if ctes.ContainsKey(ci) then
-            ctes[ci] <- (ctes[ci] ||| elementType)
-        else
-            ctes.Add(ci, elementType)
-        //logDebug $"Added Element: {ci}={ctes[ci]}"
-
-
-    member internal _.AppendPathElement(name:string) = helper.AppendPathElement(name)
-    member internal _.AppendPathElement(names:Fqdn)  = helper.AppendPathElement(names)
-    member internal _.CurrentPathElements = helper.CurrentPathElements
     member internal x.UpdateModelSpits() = helper.UpdateModelSpits()
 
 

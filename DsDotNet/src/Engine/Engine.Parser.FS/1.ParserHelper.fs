@@ -45,15 +45,18 @@ type ParserHelper(options:ParserOptions) =
     member val internal _flow:Flow option = None  with get, set
     member val internal _parenting:Real option = None  with get, set
 
-    member val internal _causalTokenElements = Dictionary<ContextInformation, GVT>(ContextInformation.CreateFullNameComparer())
-    member val internal _elements = Dictionary<ContextInformation, GVT>()
 
-    member val internal _aliasListingContexts   = ResizeArray<AliasListingContext>()
-    member val internal _callListingContexts    = ResizeArray<CallListingContext>()
-    member val internal _parentingBlockContexts = ResizeArray<ParentingBlockContext>()
-    member val internal _causalTokenContext     = ResizeArray<CausalTokenContext>()
+    member val internal _aliasListingContexts        = ResizeArray<AliasListingContext>()
+    member val internal _callListingContexts         = ResizeArray<CallListingContext>()
+    member val internal _parentingBlockContexts      = ResizeArray<ParentingBlockContext>()
+
+    member val internal _causalPhraseContexts        = ResizeArray<CausalPhraseContext>()
+    member val internal _causalTokenContext          = ResizeArray<CausalTokenContext>()
+    member val internal _identifier12ListingContexts = ResizeArray<Identifier12ListingContext>()
+
     member val internal _deviceBlockContexts         = ResizeArray<LoadDeviceBlockContext>()
     member val internal _externalSystemBlockContexts = ResizeArray<LoadExternalSystemBlockContext>()
+
 
     member val internal _modelSpits:SpitResult array = [||] with get, set
     member internal x._modelSpitObjects = x._modelSpits.Select(fun spit -> spit.GetCore()).ToArray()
@@ -64,26 +67,4 @@ type ParserHelper(options:ParserOptions) =
                 | Some system -> yield! system.Spit()
                 | _ -> ()
             |]
-
-    member internal x.AppendPathElement(lastName:string) =
-        x.CurrentPathElements.Append(lastName).ToArray()
-    member internal x.AppendPathElement(lastNames:Fqdn) =
-        x.CurrentPathElements.Concat(lastNames).ToArray()
-
-    member internal x.CurrentPathElements with get():Fqdn =
-        let helper() = [
-            match x.TheSystem with
-            | Some sys -> yield! sys.NameComponents // yield sys.Name
-            | None -> ()
-            match x._flow with
-            | Some f -> yield f.Name
-            | None -> ()
-            match x._parenting with
-            | Some f -> yield f.Name
-            | None -> ()
-        ]
-
-        helper().ToArray()
-
-    member internal x.CurrentPath with get() = x.CurrentPathElements.Combine()
 

@@ -10,15 +10,6 @@ internal class SampleRunner
     {
         var helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation(".", "ActiveCpuName"));
         var system = helper.TheSystem.Value;
-        //Try("1 + 2 + 3");
-        //Try("1 2 + 3");
-        //Try("1 + +");
-        foreach (var kv in helper._elements)
-        {
-            var (p, type_) = (kv.Key, kv.Value);
-            var types = type_.ToString("F");
-            Trace.WriteLine($"{p} : {types}");
-        }
 
         Trace.WriteLine("---- Spit result");
         var spits = system.Spit();

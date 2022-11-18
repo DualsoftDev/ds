@@ -66,10 +66,10 @@ C4 > C5;
     }
 
     [calls] = {
-        Ap = {A."+"(%Q1, %I1);}
-        Am = {A."-"(%Q2, %I2);}
-        Bp = {B."+"(%Q3, %I3);}
-        Bm = {B."-"(%Q4, %I4);}
+        Ap = { A."+"(%Q1, %I1); }
+        Am = { A."-"(%Q2, %I2); }
+        Bp = { B."+"(%Q3, %I3); }
+        Bm = { B."-"(%Q4, %I4); }
     }
 
     [device file="cylinder.ds"] A;
@@ -694,13 +694,6 @@ C4 > C5;
     let ParseNormal(text:string) =
         let helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation(".", "ActiveCpuName"))
         let system = helper.TheSystem.Value
-
-        //Try("1 + 2 + 3")
-        //Try("1 2 + 3")
-        //Try("1 + +")
-        for KeyValue(p, type_) in helper._elements do
-            let types = type_.ToString("F")
-            tracefn $"{p} :{types}"
 
         tracefn "---- Spit result"
         let spits = system.Spit()

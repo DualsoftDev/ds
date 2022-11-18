@@ -16,9 +16,9 @@ module ModelParser =
         ParseTreeWalker.Default.Walk(sListener, parser.system())
         tracefn("--- End of skeleton listener")
 
-        let eleListener = new ElementListener(parser, helper)
-        ParseTreeWalker.Default.Walk(eleListener, parser.system())
-        tracefn("--- End of element listener")
+        //let eleListener = new ElementListener(parser, helper)
+        //ParseTreeWalker.Default.Walk(eleListener, parser.system())
+        //tracefn("--- End of element listener")
 
 
         let edgeListener = new EdgeListener(parser, helper)

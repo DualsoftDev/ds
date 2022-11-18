@@ -28,7 +28,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
 
         match tryFindFirstChild<SysBlockContext>(ctx) with
         | Some sysBlockCtx_ ->
-            let name = defaultArg helper.ParserOptions.LoadedSystemName (ctx.systemName().GetText().DeQuoteOnDemand())
+            let name = helper.ParserOptions.LoadedSystemName |? (ctx.systemName().GetText().DeQuoteOnDemand())
             let host =
                 match tryFindFirstChild<HostContext>(ctx) with
                 | Some hostCtx -> hostCtx.GetText()

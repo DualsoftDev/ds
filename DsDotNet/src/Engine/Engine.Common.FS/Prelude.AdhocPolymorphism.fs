@@ -1,5 +1,7 @@
 namespace Engine.Common.FS
 
+open System
+
 #nowarn "1173"  // warning FS1173: 중위 연산자 멤버 '?<-'에 3개의 초기 인수가 있습니다. 2개 인수의 튜플이 필요합니다(예: 정적 멤버 (+) (x,y) = ...).
 
 [<AutoOpen>]
@@ -76,6 +78,7 @@ module PreludeAdhocPolymorphism =
         static member (?<-) (FAdhoc_append, x:array<'a>, y:array<'a>) = Array.append x y
         static member (?<-) (FAdhoc_append, x:seq<'a>,   y:seq<'a>)   = Seq.append x y
 
+    /// x + [xs] or [xs] + x
     type FAdhoc_Xpend = FAdhoc_Xpend with
         static member (?<-) (FAdhoc_Xpend, x:list<'a>,  y:'a) = List.append x [y]
         static member (?<-) (FAdhoc_Xpend, x:array<'a>, y:'a) = Array.append x [|y|]
@@ -87,9 +90,8 @@ module PreludeAdhocPolymorphism =
 
     type FAdhoc_orElse = FAdhoc_orElse with
         static member (?<-) (FAdhoc_orElse, x:option<'a>, y:option<'a>)  = Option.orElse x y
-        static member (?<-) (FAdhoc_orElse, x:list<'a>  , y:list<'a>)    = if List.isEmpty  x then y else x
-        static member (?<-) (FAdhoc_orElse, x:seq<'a>   , y:seq<'a>)     = if Seq.isEmpty   x then y else x
-        static member (?<-) (FAdhoc_orElse, x:array<'a> , y:array<'a>)   = if Array.isEmpty x then x else y
+        static member (?<-) (FAdhoc_orElse, x:Nullable<'a>, y:Nullable<'a>)  = if x.HasValue then x else y
+        static member (?<-) (FAdhoc_orElse, x:'a when ^a : not struct, y:'a when ^a : not struct) = if isNull x then y else x
 
     let inline bind        f x = FAdhoc_bind        $ x <| f
     let inline (>>=)       x f = FAdhoc_bind        $ x <| f
@@ -116,7 +118,7 @@ module PreludeAdhocPolymorphism =
     /// append element to a list / array / sequence
     let inline ( ++ )      x y = (?<-) FAdhoc_Xpend  x y
 
-    /// get default arguments.
+    /// get default arguments (= defaultArg).
     let (|?) = defaultArg
 
     // https://riptutorial.com/fsharp/example/16297/how-to-compose-values-and-functions-using-common-operators
@@ -135,8 +137,6 @@ module PreludeAdhocPolymorphism =
         let some1, some2, some3 = Some 1, Some 2, Some 3
         verify ( [1..3] @ [4..5] = [1..5])
         verify ( some1 <|> None = some1 )
-        verify ( ([1..10] <|> []) = [1..10] )
-        verify ( ([] <|> [1..10] <|> []) = [1..10] )
 
         let lift (f: 'a -> 'b) (x: 'a) = f x
 
@@ -159,6 +159,17 @@ module PreludeAdhocPolymorphism =
         verify( map incr some2 = some3)
 
 
+        let s1:string = null
+        let s2 = "Hello"
+        verify( s1 <|> s2 = s2)
+
+        let s3 = "World"
+        verify( s2 <|> s3 = s2 )
+
+        verify( "nice" <|> null = "nice")
+        verify( null <|> "nice" = "nice")
+        verify( Nullable<int>() <|> Nullable<int>(333) = Nullable<int>(333))
+        verify( Nullable<int>() <|> Nullable<int>() = Nullable<int>())
         ()
 
 

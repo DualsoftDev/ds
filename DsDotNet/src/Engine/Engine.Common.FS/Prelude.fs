@@ -42,19 +42,7 @@ let inline isItNull (x:'T when 'T : not struct) = obj.ReferenceEquals (x, null)
 /// [<AllowNullLiteral>] 을 사용할 수 없는 F# class 에 대한 null instance 강제 생성.  use sparingly
 let getNull<'T when 'T : not struct>():'T = Operators.Unchecked.defaultof<'T>
 
-let inline nonNullSelector (nonNullValue:^T when ^T : not struct) (x:^T when ^T : not struct) =
-    if isItNull x then nonNullValue else x
-
-open System.Linq
-let isInUnitTest() =
-    AppDomain.CurrentDomain.GetAssemblies()
-        .Select(fun a -> a.FullName)
-        .Any(fun n -> n.StartsWith("Microsoft.VisualStudio.TestPlatform."))
-        ;
-
-
 [<Extension>]
 type PreludeExt =
     [<Extension>] static member IsNull(x) = isItNull x
     [<Extension>] static member IsNonNull(x) = not <| isItNull x
-    [<Extension>] static member NonNullSelector(nonNullValue, x) = nonNullSelector nonNullValue x

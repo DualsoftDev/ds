@@ -46,7 +46,7 @@ type RuleExtractor = dsParser -> RuleContext
 type DsParser() =
     static member val LoadedSystemName:string option = None with get, set
     static member ParseText (text:string, extractor:RuleExtractor, ?throwOnError) =
-        let throwOnError = defaultArg throwOnError true
+        let throwOnError = throwOnError |? true
         let inputStream = new AntlrInputStream(text)
         let lexer = new dsLexer(inputStream)
         let tokens = new CommonTokenStream(lexer)
@@ -63,8 +63,8 @@ type DsParser() =
 
 
     static member FromDocument(text:string, ?predExtract:RuleExtractor, ?throwOnError) =       // (dsParser, ParserError[])
-        let throwOnError = defaultArg throwOnError true
-        let func = defaultArg predExtract (fun (parser:dsParser) -> parser.system() :> RuleContext)
+        let throwOnError = throwOnError |? true
+        let func = predExtract |? (fun (parser:dsParser) -> parser.system() :> RuleContext)
         //let (parser, tree, errors) = DsParser.FromDocument(text, func, throwOnError)
         let (parser, tree, errors) = ParseText(text, func, throwOnError)
         (parser, errors)
@@ -77,9 +77,9 @@ type DsParser() =
         , ?exclude:ParseTreePredicate
         ) : ResizeArray<'T> =         // ResizeArray<'T>
 
-        let includeMe = defaultArg includeMe false
-        let predicate = defaultArg predicate (isType<'T>)
-        let exclude = defaultArg exclude (fun x -> false)
+        let includeMe = includeMe |? false
+        let predicate = predicate |? (isType<'T>)
+        let exclude   = exclude |? (fun x -> false)
         let rec enumerateChildrenHelper(rslt:ResizeArray<'T>, frm:IParseTree, incMe:bool) =
             if not (exclude(frm)) then
                 if (incMe && predicate(frm) && isType<'T> frm) then
@@ -99,8 +99,8 @@ type DsParser() =
         , ?includeMe:bool
         , ?predicate:ParseTreePredicate) =
 
-        let includeMe = defaultArg includeMe false
-        let predicate = defaultArg predicate (isType<'T>)
+        let includeMe = includeMe |? false
+        let predicate = predicate |? (isType<'T>)
         let rec helper(from:IParseTree, includeMe:bool) =
             [
                 if from <> null then
@@ -114,28 +114,28 @@ type DsParser() =
 
 
     static member tryFindFirstChild(from:IParseTree, predicate:ParseTreePredicate, ?includeMe:bool) =
-        let includeMe = defaultArg includeMe false
+        let includeMe = includeMe |? false
         enumerateChildren<IParseTree>(from, includeMe) |> Seq.tryFind(predicate)
 
     static member tryFindFirstChild<'T when 'T :> IParseTree>(from:IParseTree, ?includeMe:bool, ?predicate:ParseTreePredicate, ?exclude:ParseTreePredicate) : 'T option =   // :'T
-        let includeMe = defaultArg includeMe false
-        let predicate = defaultArg predicate truthyfy
+        let includeMe = includeMe |? false
+        let predicate = predicate |? truthyfy
         let predicate x = isType<'T> x && predicate x
-        let exclude = defaultArg exclude falsify
+        let exclude = exclude |? falsify
         enumerateChildren<'T>(from, includeMe, predicate, exclude) |> Seq.tryHead
 
     static member tryFindFirstAncestor(from:IParseTree, predicate:ParseTreePredicate, ?includeMe:bool) = //:IParseTree option=
-        let includeMe = defaultArg includeMe false
+        let includeMe = includeMe |? false
         enumerateParents(from, includeMe) |> Seq.tryFind(predicate)
 
 
     static member tryFindFirstAncestor<'T when 'T :> IParseTree>(from:IParseTree, ?includeMe:bool) =
-        let includeMe = defaultArg includeMe false
+        let includeMe = includeMe |? false
         let pred = isType<'T>
         tryFindFirstAncestor(from, pred, includeMe) |> Option.map forceCast<'T>
 
     static member tryFindIdentifier1FromContext(context:IParseTree, ?exclude:ParseTreePredicate) =
-        let exclude = defaultArg exclude falsify
+        let exclude = exclude |? falsify
         option {
             let! ctx = tryFindFirstChild<Identifier1Context>(context, false, exclude=exclude)
             return ctx.GetText().DeQuoteOnDemand()

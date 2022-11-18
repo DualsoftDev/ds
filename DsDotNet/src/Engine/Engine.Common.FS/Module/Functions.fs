@@ -3,9 +3,7 @@ namespace Engine.Common.FS
 
 open System
 open System.IO
-open System.Threading
-open System.Net
-open System.Diagnostics
+open System.Linq
 open System.Collections.Generic
 
 [<AutoOpen>]
@@ -192,12 +190,16 @@ module Functions =
     let verifyValue value =
         if not value then
             failwith "Failed to verify"
-    let verify f = f() |> verifyValue
+    let verifyWith f = f() |> verifyValue
 
     /// Type name 을 반환
     let typeName x = x.GetType().Name
 
-
+    let isInUnitTest() =
+        AppDomain.CurrentDomain.GetAssemblies()
+            .Select(fun a -> a.FullName)
+            .Any(fun n -> n.StartsWith("Microsoft.VisualStudio.TestPlatform."))
+            ;
 
     module private TestMe =
         let test() =

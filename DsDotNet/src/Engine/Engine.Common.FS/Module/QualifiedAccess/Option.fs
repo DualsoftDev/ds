@@ -4,6 +4,15 @@ open System.Runtime.CompilerServices
 
 [<RequireQualifiedAccess>]
 module Option =
+    // reminders...
+    let private ofObj2        = Option.ofObj
+    let private ofNullable2   = Option.ofNullable
+    let private toObj2        = Option.toObj
+    let private toNullable2   = Option.toNullable
+    let private defaultValue2 = Option.defaultValue
+    let private defaultWith2  = Option.defaultWith
+
+    #if INTERACTIVE
     let ofTuple<'v> (b, v:'v) =
         if b then Some v
         else None
@@ -12,49 +21,6 @@ module Option =
         | Some(v) -> true, v
         | None -> false, null
 
-    //let ofResult = function
-    //    | Ok v -> Some v
-    //    | Error _ -> None
-
-    //let toResult defaultErrorValue = function
-    //    | Some v -> Ok v
-    //    | None -> Error defaultErrorValue
-
-    // reminders...
-    let ofObj2        = Option.ofObj
-    let ofNullable2   = Option.ofNullable
-    let toObj2        = Option.toObj
-    let toNullable2   = Option.toNullable
-    let defaultValue2 = Option.defaultValue
-    let defaultWith2  = Option.defaultWith
-
-    /// F# option to nullable reference
-    let toReference = function
-        | Some v -> v
-        | None -> null
-
-    let toList = function
-        | Some v -> [v]
-        | None -> []
-
-    /// 주어진 option 값을 꺼낸다.  None 일 경우를 대비해 default value 를 인자로 준다.
-    let flatten defaultValue = function
-        | Some(value) -> value
-        | None -> defaultValue
-
-
-    //let rec flattenRecursively defaultValue = function
-    //    | Some(value) ->
-    //        if value.GetType() = typedefof<Option<_>> then
-    //            flattenRecursively defaultValue (value :?> Option<_>)
-    //        else
-    //            value
-    //        //match value with
-    //        //| :? Option<_> as ov -> //value.GetType() = typedefof<Option<_>> -> flattenRecursively defaultValue value
-    //        //    flattenRecursively defaultValue ov
-    //    | None -> defaultValue
-
-    #if INTERACTIVE
     let a = (true, "a") |> Option.ofTuple
     let b = (false, null)  |> Option.ofTuple<string>
     let n = Int32.TryParse("32") |> Option.ofTuple
@@ -94,15 +60,9 @@ module Option =
 //[<AutoOpen>]
 module OptionModule =
     /// F# option to C# reference : reference type 이 아닌 경우, compile error 발생
-    let o2r optVal = Option.toReference optVal
+    let o2r optVal = Option.toObj optVal
 
     // https://riptutorial.com/fsharp/example/16297/how-to-compose-values-and-functions-using-common-operators
-
-    /// If 't' has Some value then return t otherwise return u
-    let (<|>) t u =
-        match t with
-        | Some _  -> t
-        | None    -> u
 
     /// If 't' and 'u' has Some values then return Some (tv*uv) otherwise return None
     let (<*>) t u =

@@ -8,7 +8,23 @@ open Engine.Core
 open type Engine.Parser.dsParser
 
 module Program =
+    let CylinderText = """
+[sys] Cylinder = {
+    [flow] F = {
+        Vp > Pp > Sp;
+        Vm > Pm > Sm;
 
+        Vp |> Pm |> Sp;
+        Vm |> Pp |> Sm;
+        Vp <||> Vm;
+    }
+    [interfaces] = {
+        "+" = { F.Vp ~ F.Sp }
+        "-" = { F.Vm ~ F.Sm }
+        "+" <||> "-";
+    }
+}
+"""
     let EveryScenarioText = """
 [sys ip = 192.168.0.1] My = {
     [flow] MyFlow = {

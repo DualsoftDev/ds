@@ -21,7 +21,7 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
 
     override x.EnterButtonsBlocks(ctx:ButtonsBlocksContext) =
         let first = tryFindFirstChild<ParserRuleContext>(ctx).Value     // {Emergency, Auto, Start, Reset}ButtonsContext
-        let system = x._theSystem.Value
+        let system = helper.TheSystem
         let targetDic =
             match first with
             | :? EmergencyButtonBlockContext -> system.EmergencyButtons
@@ -77,7 +77,7 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
             ]
 
         let sysNames, flowName, parenting_, ns_ = (getContextInformation ctx).Tuples
-        let curSystem = x.ParserHelper.TheSystem.Value
+        let curSystem = x.ParserHelper.TheSystem
 
         let test =
             let f (n:int) = n.ToString()
@@ -147,21 +147,21 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
         let varName = tryFindFirstChild<VarNameContext>(context).Value.GetText()
         let varType = tryFindFirstChild<VarTypeContext>(context).Value.GetText()
         let init    = tryFindFirstChild<ArgumentContext>(context).Value.GetText()
-        helper.TheSystem.Value.Variables.Add(new Variable(varName, varType, init))
+        helper.TheSystem.Variables.Add(new Variable(varName, varType, init))
 
     override x.EnterCommandDef(context:CommandDefContext) =
         let cmdName    = tryFindFirstChild<CmdNameContext>(context).Value.GetText()
         let funApplCtx = tryFindFirstChild<FunApplicationContext>(context).Value
         let funAppl    = x.CreateFunctionApplication(funApplCtx)
         let command    = new Command(cmdName, funAppl)
-        helper.TheSystem.Value.Commands.Add(command)
+        helper.TheSystem.Commands.Add(command)
 
     override x.EnterObserveDef(context:ObserveDefContext) =
         let obsName    = tryFindFirstChild<ObserveNameContext>(context).Value.GetText()
         let funApplCtx = tryFindFirstChild<FunApplicationContext>(context).Value
         let funAppl    = x.CreateFunctionApplication(funApplCtx)
         let observes   = new Observe(obsName, funAppl)
-        helper.TheSystem.Value.Observes.Add(observes)
+        helper.TheSystem.Observes.Add(observes)
 
 
     override x.ExitSystem(ctx:SystemContext) =
@@ -179,7 +179,7 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
         for posiDef in positionDefs do
             let callName = posiDef.callName().GetText()
             let xywh = posiDef.xywh()
-            let call = tryFindCall helper.TheSystem.Value callName |> Option.get
+            let call = tryFindCall helper.TheSystem callName |> Option.get
 
             match xywh.x().GetText(), xywh.y().GetText(), xywh.w().GetText(), xywh.h().GetText() with
             | Int32Pattern x, Int32Pattern y, Int32Pattern w, Int32Pattern h ->

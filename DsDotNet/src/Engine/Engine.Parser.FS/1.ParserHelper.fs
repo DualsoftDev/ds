@@ -3,6 +3,7 @@ namespace Engine.Parser.FS
 open Engine.Core
 open System.Collections.Generic
 open type Engine.Parser.dsParser
+open Engine.Common.FS
 
 type ParserHelper(options:ParserOptions) =
     member val ParserOptions = options with get, set
@@ -10,10 +11,10 @@ type ParserHelper(options:ParserOptions) =
     /// button category 중복 check 용
     member val ButtonCategories = HashSet<(DsSystem*string)>()
 
-    member val TheSystem:DsSystem option = None with get, set
+    member val TheSystem:DsSystem = getNull<DsSystem>() with get, set
 
-    member val internal _flow:Flow option = None  with get, set
-    member val internal _parenting:Real option = None  with get, set
+    member val internal _flow = getNull<Flow>() with get, set
+    member val internal _parenting = getNull<Real>()  with get, set
 
 
     member val internal _aliasListingContexts        = ResizeArray<AliasListingContext>()

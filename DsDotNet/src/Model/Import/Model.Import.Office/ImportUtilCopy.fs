@@ -192,9 +192,9 @@ module internal ToCopyModule =
 //type ToCopyModuleHelper =
 //    [<Extension>] static member TryFindSystem(model:Model, systemName:string)    =
 //                    if model.TheSystem.IsSome
-//                    then  if model.TheSystem.Value.Name = systemName
-//                            then model.TheSystem.Value
-//                            else model.TheSystem.Value.Systems.FirstOrDefault(fun sys -> sys.Name = systemName)
+//                    then  if model.TheSystem.Name = systemName
+//                            then model.TheSystem
+//                            else model.TheSystem.Systems.FirstOrDefault(fun sys -> sys.Name = systemName)
 
 //                    else model.Systems.FirstOrDefault(fun sys -> sys.Name = systemName)
 

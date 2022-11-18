@@ -66,7 +66,7 @@ namespace Dual.Model.Import
                 var viewNodes = result.Item2;
                 if (!_ConvertErr)
                 {
-                    _dsText = _Model.TheSystem.Value.ToDsText();
+                    _dsText = _Model.TheSystem.ToDsText();
                     ExportTextModel(Color.Transparent, _dsText);
                     this.Do(() => xtraTabControl_Ex.TabPages.Clear());
 

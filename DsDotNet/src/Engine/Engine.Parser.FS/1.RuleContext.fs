@@ -113,15 +113,15 @@ module ParserRuleContextModule =
 
 
         let createCallDefs (helper:ParserHelper) =
-            helper._callListingContexts.Iter(createCallDef helper.TheSystem.Value)
+            helper._callListingContexts.Iter(createCallDef helper.TheSystem)
         let createAliasDefs (helper:ParserHelper) =
             helper._aliasListingContexts.Iter(fun ctx ->
-                createAliasDef helper.TheSystem.Value ctx |> ignore)
+                createAliasDef helper.TheSystem ctx |> ignore)
         let fillAliasDefsTarget (helper:ParserHelper) =
             helper._aliasListingContexts.Iter(fun ctx ->
-                fillTargetOfAliasDef helper.TheSystem.Value ctx |> ignore)
+                fillTargetOfAliasDef helper.TheSystem ctx |> ignore)
 
         let fillInterfaceDefs (helper:ParserHelper) =
             helper._interfaceDefContexts.Iter(fun ctx ->
-                fillInterfaceDef helper.TheSystem.Value ctx |> ignore)
+                fillInterfaceDef helper.TheSystem ctx |> ignore)
 

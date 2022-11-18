@@ -20,12 +20,6 @@ type ListenerBase(parser:dsParser, helper:ParserHelper) =
         parser.Reset()
 
     member x.ParserHelper = helper
-    member internal _._theSystem = helper.TheSystem
-    member internal _._flow       with get() = helper._flow      and set(v) = helper._flow      <- v
-    member internal _._parenting  with get() = helper._parenting and set(v) = helper._parenting <- v
-
-
-
 
     override x.EnterSystem(ctx:SystemContext) =
         if helper.ParserOptions.LoadedSystemName.IsSome then
@@ -35,21 +29,22 @@ type ListenerBase(parser:dsParser, helper:ParserHelper) =
 
     override x.EnterFlowBlock(ctx:FlowBlockContext) =
         let flowName = ctx.identifier1().GetText().DeQuoteOnDemand()
-        let flow = helper.TheSystem.Value.Flows.TryFind(fun f -> f.Name = flowName)
-        assert(flow.IsSome)
-        x._flow <- flow
+        let flow = helper.TheSystem.Flows.TryFind(fun f -> f.Name = flowName).Value
+        helper._flow <- flow
 
-    override x.ExitFlowBlock(ctx:FlowBlockContext) = x._flow <- None
+    override x.ExitFlowBlock(ctx:FlowBlockContext) =
+        helper._flow <- getNull<Flow>()
 
 
 
     override x.EnterParentingBlock(ctx:ParentingBlockContext) =
         let name = ctx.identifier1().GetText().DeQuoteOnDemand()
-        match x._flow with
-        | Some flow ->
-            let real = flow.Graph.Vertices.FindWithName(name) :?> Real
-            x._parenting <- Some real
-        | None -> failwith "ERROR"
+        if isItNull helper._flow then
+            failwith "ERROR"
+        else
+            let real = helper._flow.Graph.Vertices.FindWithName(name) :?> Real
+            helper._parenting <- real
 
-    override x.ExitParentingBlock(ctx:ParentingBlockContext) = x._parenting <- None
+    override x.ExitParentingBlock(ctx:ParentingBlockContext) =
+        helper._parenting <- getNull<Real>()
 

@@ -23,7 +23,7 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
     //    let aliasTargetCtx = tryFindFirstChild<AliasDefContext>(ctx).Value    // {타시스템}.{interface} or {Flow}.{real}
     //    let aliasTargetName = tryGetName(aliasTargetCtx).Value
     //    let realTargetCandidate = flow.Graph.TryFindVertex<Real>(aliasTargetName)
-    //    let callTargetCandidate = tryFindCall x._theSystem.Value aliasTargetName
+    //    let callTargetCandidate = tryFindCall helper.TheSystem aliasTargetName
     //    let target =
     //        match realTargetCandidate, callTargetCandidate with
     //        | Some real, None -> RealTarget real
@@ -45,7 +45,7 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
 
 
     override x.EnterInterfaceDef(ctx:InterfaceDefContext) =
-        let system = helper.TheSystem.Value
+        let system = helper.TheSystem
         let hash = system.ApiItems4Export
         let interrfaceNameCtx = tryFindFirstChild<InterfaceNameContext>(ctx)
         let interfaceName = collectNameComponents(interrfaceNameCtx.Value)[0]
@@ -82,7 +82,7 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
         let ci = getContextInformation ctx
         let sysNames, flowName, parenting, ns = ci.Tuples
         let flow = x._flow.Value
-        let system = helper.TheSystem.Value
+        let system = helper.TheSystem
         let spits = system.Spit()
         let findSpits (ns:string seq) =
             spits.Where(fun sp -> sp.NameComponents = (ns.ToArray()) || sp.NameComponents.Combine() = ns.Combine()).ToArray()

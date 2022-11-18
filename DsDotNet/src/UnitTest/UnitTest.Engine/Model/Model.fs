@@ -34,7 +34,7 @@ module private ModelComparisonHelper =
 
     let compare referenceDir originalText answer =
         let helper = ModelParser.ParseFromString2(originalText, ParserOptions.Create4Simulation(referenceDir, "ActiveCpuName"))
-        let system = helper.TheSystem.Value
+        let system = helper.TheSystem
 
         validateSystem system
 

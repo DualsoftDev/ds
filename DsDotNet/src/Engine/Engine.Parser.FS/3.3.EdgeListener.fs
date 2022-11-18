@@ -20,7 +20,7 @@ type EdgeListener(parser:dsParser, helper:ParserHelper) =
     override x.EnterCausalPhrase(ctx:CausalPhraseContext) =
         let ci = getContextInformation ctx
         let sysNames, flowName, parenting, ns = ci.Tuples
-        let system = x._theSystem.Value
+        let system = helper.TheSystem
 
         let children = ctx.children.ToArray();      // (CausalTokensDNF CausalOperator)+ CausalTokensDNF
         for (n, ctx) in children|> Seq.indexed do
@@ -52,11 +52,10 @@ type EdgeListener(parser:dsParser, helper:ParserHelper) =
                         let r = tryFindToken system right
                         match l, r with
                         | Some l, Some r ->
-                            match x._parenting with
-                            | Some parent ->
-                                parent.CreateEdges(ModelingEdgeInfo(l, op, r))
-                            | None ->
-                                x._flow.Value.CreateEdges(ModelingEdgeInfo(l, op, r))
+                            if isItNull helper._parenting then
+                                helper._flow.CreateEdges(ModelingEdgeInfo(l, op, r))
+                            else
+                                helper._parenting.CreateEdges(ModelingEdgeInfo(l, op, r))
                             |> ignore
                         | None, _ ->
                             raise <| ParserException($"ERROR: failed to find [{left.GetText()}]", ctx)

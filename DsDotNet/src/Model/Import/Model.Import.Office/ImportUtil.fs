@@ -79,9 +79,9 @@ module ImportU =
                                 let sysName, flowName = GetSysNFlow(doc.Name, page.Title, page.PageNum)
                                 if sysName = doc.Name|>not
                                 then if model.TryFindSystem(sysName).IsNull()
-                                     then dicSys.Add(page.PageNum, DsSystem.Create(sysName, "", model.TheSystem.Value))
+                                     then dicSys.Add(page.PageNum, DsSystem.Create(sysName, "", model.TheSystem))
                                      else dicSys.Add(page.PageNum, model.TryFindSystem(sysName))
-                                else dicSys.Add(page.PageNum, model.TheSystem.Value)
+                                else dicSys.Add(page.PageNum, model.TheSystem)
                                 )
         [<Extension>] static member MakeCopySystem (doc:pptDoc, model:Model) =
                         doc.Nodes
@@ -93,7 +93,7 @@ module ImportU =
                                     if origSys.IsNull()
                                     then Office.ErrorPPT(Name, ErrID._43, $"원인이름{copy.Value}: 전체이름[{node.Shape.InnerText}] 해당도형[{node.Shape.ShapeName()}]", node.PageNum)
 
-                                    let copySys  = DsSystem.Create(copy.Key, "", model.TheSystem.Value)
+                                    let copySys  = DsSystem.Create(copy.Key, "", model.TheSystem)
                                     dicCopy.Add(copySys, origSys) |>ignore
                                     )
                                 )
@@ -127,7 +127,7 @@ module ImportU =
 
         //EMG & Start & Auto 리스트 만들기
         [<Extension>] static member MakeButtons (doc:pptDoc, model:Model) =
-                        let mySys = model.TheSystem.Value
+                        let mySys = model.TheSystem
                         let checkErr(flow:Flow, node:pptNode) =
                                 if (flow.System <> mySys)
                                 then  Office.ErrorPPT(Name, ErrID._45 , $"원인 버튼 {node.Name}: 시스템{flow.System.Name}", node.PageNum)
@@ -283,7 +283,7 @@ module ImportU =
                         |> Seq.iter(fun node ->
                                 let flow = dicFlow.[node.PageNum]
                                 let dicQualifiedNameSegs  = dicVertex.Values.Select(fun seg -> seg.QualifiedName, seg) |> dict
-                                let safeName(safe) = sprintf "%s.%s.%s.%s" model.TheSystem.Value.Name flow.System.Name flow.Name safe
+                                let safeName(safe) = sprintf "%s.%s.%s.%s" model.TheSystem.Name flow.System.Name flow.Name safe
 
                                 node.Safeties   //세이프티 입력 미등록 이름오류 체크
                                 |> Seq.map(fun safe ->  safeName(safe))

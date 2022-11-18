@@ -34,20 +34,20 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
                 | Some hostCtx -> hostCtx.GetText()
                 | None -> null
             //let name = helper.ParserOptions.LoadedSystemName
-            helper.TheSystem <- Some <| DsSystem.Create(name, host)
+            helper.TheSystem <- DsSystem.Create(name, host)
             tracefn($"System: {name}")
         | None ->
             failwith "ERROR"
 
     override x.EnterFlowBlock(ctx:FlowBlockContext) =
         let flowName = ctx.identifier1().GetText().DeQuoteOnDemand()
-        x._flow <- Some <| Flow.Create(flowName, helper.TheSystem.Value)
+        helper._flow <- Flow.Create(flowName, helper.TheSystem)
 
     override x.EnterParentingBlock(ctx:ParentingBlockContext) =
         helper._parentingBlockContexts.Add(ctx)
         tracefn($"Parenting: {ctx.GetText()}")
         let name = tryGetName(ctx.identifier1()).Value
-        x._parenting <- Some <| Real.Create(name, x._flow.Value)
+        helper._parenting <- Real.Create(name, helper._flow)
 
 
 
@@ -66,7 +66,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
     override x.EnterInterfaceDef(ctx:InterfaceDefContext) =
         helper._interfaceDefContexts.Add(ctx)
 
-        let system = helper.TheSystem.Value
+        let system = helper.TheSystem
         let interrfaceNameCtx = tryFindFirstChild<InterfaceNameContext>(ctx).Value
         let interfaceName = collectNameComponents(interrfaceNameCtx)[0]
 
@@ -88,7 +88,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
         for triple in (terms |> Array.windowed2 3 2) do
             if triple.Length = 3 then
                 let opnd1, op, opnd2 = triple[0], triple[1], triple[2]
-                let ri_ = ApiResetInfo.Create(helper.TheSystem.Value, opnd1, op.ToModelEdge(), opnd2)
+                let ri_ = ApiResetInfo.Create(helper.TheSystem, opnd1, op.ToModelEdge(), opnd2)
                 ()
 
     member private x.GetFilePath(fileSpecCtx:FileSpecContext) =
@@ -105,8 +105,8 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
         let absoluteFilePath, simpleFilePath = x.GetFilePath(fileSpecCtx)
         let device =
             let loadedName = collectNameComponents(ctx).Combine()
-            fwdLoadDevice x._theSystem.Value (absoluteFilePath, simpleFilePath) loadedName
-        x._theSystem.Value.Devices.Add(device) |> ignore
+            fwdLoadDevice helper.TheSystem (absoluteFilePath, simpleFilePath) loadedName
+        helper.TheSystem.Devices.Add(device) |> ignore
 
     override x.EnterLoadExternalSystemBlock(ctx:LoadExternalSystemBlockContext) =
         helper._externalSystemBlockContexts.Add(ctx)
@@ -116,8 +116,8 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
             let ipSpecCtx = tryFindFirstChild<IpSpecContext>(ctx).Value
             let ip = tryFindFirstChild<EtcNameContext>(ipSpecCtx).Value.GetText()
             let loadedName = collectNameComponents(ctx).Combine()
-            fwdLoadExternalSystem x._theSystem.Value (absoluteFilePath, simpleFilePath) loadedName
-        x._theSystem.Value.Devices.Add(external) |> ignore
+            fwdLoadExternalSystem helper.TheSystem (absoluteFilePath, simpleFilePath) loadedName
+        helper.TheSystem.Devices.Add(external) |> ignore
 
     override x.EnterAliasListing(ctx:AliasListingContext) =
         helper._aliasListingContexts.Add(ctx)
@@ -127,15 +127,11 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
 
     override x.ExitSystem(ctx:SystemContext) =
         base.ExitSystem(ctx)
-        let system = x._theSystem.Value
-
-
-
-
+        let system = helper.TheSystem
 
         let getContainerChildPair(ctx:ParserRuleContext) : ParentWrapper option * ContextInformation =
             let ci = getContextInformation ctx
-            let system = x._theSystem.Value
+            let system = helper.TheSystem
             let parentWrapper = tryFindParentWrapper system ci
             parentWrapper, ci
 

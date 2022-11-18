@@ -36,7 +36,7 @@ module ModelParser =
 
         Walk(parser, helper)
 
-        let system = helper.TheSystem.Value
+        let system = helper.TheSystem
         system.CreateMRIEdgesTransitiveClosure()
 
         system.Validate() |> ignore
@@ -44,7 +44,7 @@ module ModelParser =
         helper
 
 
-    let ParseFromString(text:string, options:ParserOptions):DsSystem = ParseFromString2(text, options).TheSystem.Value
+    let ParseFromString(text:string, options:ParserOptions):DsSystem = ParseFromString2(text, options).TheSystem
 
     let Initialize() =
         tracefn "Initializing"

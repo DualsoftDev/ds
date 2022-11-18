@@ -9,7 +9,7 @@ internal class SampleRunner
     public static void Run(string text)
     {
         var helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation(".", "ActiveCpuName"));
-        var system = helper.TheSystem.Value;
+        var system = helper.TheSystem;
     }
 
     public static string CreateCylinder(string name) => $"[sys] {name} =\r\n" + @"{

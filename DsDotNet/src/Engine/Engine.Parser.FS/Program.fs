@@ -713,7 +713,7 @@ C4 > C5;
 
     let ParseNormal(text:string) =
         let helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation(".", "ActiveCpuName"))
-        let system = helper.TheSystem.Value
+        let system = helper.TheSystem
         tracefn "Done"
 
 

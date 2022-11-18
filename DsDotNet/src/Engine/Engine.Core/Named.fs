@@ -1,5 +1,5 @@
 // Copyright (c) Dual Inc.  All Rights Reserved.
-namespace Engine.Core
+namespace rec Engine.Core
 
 open System.Runtime.CompilerServices
 open System
@@ -28,7 +28,7 @@ module TextUtil =
             isValidStart(first) && chars.Skip(1).All(isValid)
     let (|ValidIdentifier|) x = if isValidIdentifier x then Some x else None
     let private dq = "\""
-    let private quote(s:string) = $"{dq}{s}{dq}"
+    let internal quote(s:string) = $"{dq}{s}{dq}"
     let internal quoteOnDemand(s:string) =
         let pattern = @$".*\.\{dq}.*\{dq}(\.*)?"
         match s with
@@ -90,6 +90,15 @@ module TextUtil =
             member _.Equals(x:Fqdn, y:Fqdn) = x = y
             member _.GetHashCode(x:Fqdn) = x.Average(fun s -> s.GetHashCode()) |> int
     }
+
+    // 단일 이름인 경우, Combine() 을 수행하면 특수 기호 포함된 경우, quotation 부호가 강제로 붙어서 향후의 처리에 문제가 되어서 따로 처리
+    let getRawName (fqdn:string seq) (quoteOnSingle:bool) =
+        let fqdn' = fqdn |> List.ofSeq
+        match fqdn' with
+        | n::[] when quoteOnSingle -> quoteOnDemand n
+        | n::[] -> n
+        | p::q::[] -> combine "." fqdn'
+        | _ -> failwith "ERROR"
 
     let getRelativeNames(referencePath:Fqdn) (fqdn:Fqdn) =
         let rec countSameStartElements (FList(xs)) (FList(ys)) =

@@ -44,8 +44,8 @@ module ContextInformationModule =
                     member _.GetHashCode(x:ContextInformation) = x.FullName.GetHashCode() }
 
         // 단일 이름인 경우, Combine() 을 수행하면 특수 기호 포함된 경우, quotation 부호가 강제로 붙어서 향후의 처리에 문제가 되어서 따로 처리
-        member x.GetRawName() =
-            match x.Names.Length with
-            | 1 -> x.Names[0]
-            | _ -> x.Names.Combine()
+        member x.GetRawName() = getRawName x.Names false
+            //match x.Names.Length with
+            //| 1 -> x.Names[0]
+            //| _ -> x.Names.Combine()
 

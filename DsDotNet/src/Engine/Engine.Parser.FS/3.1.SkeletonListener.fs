@@ -2,7 +2,6 @@ namespace Engine.Parser.FS
 
 open System.Linq
 open System.IO
-open System.Collections.Generic
 
 open Antlr4.Runtime.Tree
 open Antlr4.Runtime
@@ -11,8 +10,7 @@ open Engine.Common.FS
 open Engine.Parser
 open Engine.Core
 open type Engine.Parser.dsParser
-open type Engine.Parser.FS.DsParser
-open Engine.Common.FS.ChooseSeqBuilder
+open type DsParser
 
 
 /// <summary>
@@ -175,8 +173,11 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
                         | None ->
                             let flow = parent.GetCore() :?> Flow
                             Real.Create(q, flow) |> ignore
-                    | otherFlow::real::[] ->
-                        tracefn $"{otherFlow}.{real} should already have been created."
+                    | ofn::ofrn::[] ->
+                        let otherFlowReal = tryFindReal system ofn ofrn |> Option.get
+                        VertexOtherFlowRealCall.Create(ofn, ofrn, otherFlowReal, parent) |> ignore
+
+                        tracefn $"{ofn}.{ofrn} should already have been created."
                     | _ ->
                         failwith "ERROR"
                     noop()

@@ -29,14 +29,15 @@ module internal ToDsTextModule =
 
         let es  = es |> Seq.sortBy(fun e -> e.EdgeSymbol.Count(fun ch -> ch = '|'))
         let ess = es |> Seq.fold folder []
+        let getName (v:Vertex) = getRawName v.PureNames true
 
         [
             for es in ess do
                 [
                     yield $"{tab}"
                     for i, e in es.Indexed() do
-                        let mutable s = e.Source.Name.QuoteOnDemand()
-                        let t = e.Target.Name.QuoteOnDemand()
+                        let mutable s = getName e.Source
+                        let t = getName e.Target
                         if i <> 0 then s <- ""
                         yield $"{s} {e.EdgeSymbol} {t}"
                     yield ";"
@@ -139,8 +140,8 @@ module internal ToDsTextModule =
 
             for d in system.Devices do
                 match d with
-                | :? ExternalSystem as es -> yield $"{tab}[external file={es.UserSpecifiedFilePath}] {es.Name}; // {es.AbsoluteFilePath}"
-                | :? Device as d -> yield $"{tab}[device file={d.UserSpecifiedFilePath}] {d.Name}; // {d.AbsoluteFilePath}"
+                | :? ExternalSystem as es -> yield $"{tab}[external file={quote es.UserSpecifiedFilePath}] {es.Name}; // {es.AbsoluteFilePath}"
+                | :? Device as d -> yield $"{tab}[device file={quote d.UserSpecifiedFilePath}] {d.Name}; // {d.AbsoluteFilePath}"
                 | _ -> failwith "ERROR"
 
 

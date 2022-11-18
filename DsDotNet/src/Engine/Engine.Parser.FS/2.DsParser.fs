@@ -240,9 +240,9 @@ module DsParserHelperModule =
     let tryFindToken (system:DsSystem) (ctx:CausalTokenContext):Vertex option =
         let ci = getContextInformation ctx
         option {
-            let! flowName = ci.Flow
-            let! flow = tryFindFlow system flowName
-            assert(flowName = flow.Name)
+            //let! flowName = ci.Flow
+            //let! flow = tryFindFlow system flowName
+            //assert(flowName = flow.Name)
 
             let! parentWrapper = tryFindParentWrapper system ci
             let graph = parentWrapper.GetGraph()

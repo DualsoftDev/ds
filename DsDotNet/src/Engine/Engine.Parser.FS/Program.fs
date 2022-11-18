@@ -137,9 +137,9 @@ C4 > C5;
         Fm > Gm;
     }
     [calls] = {
-        Fp = {F."+"(%Q1, %I1); }
-        Fm = {F."-"(%Q2, %I2); }
-        Gm = {G."-"(%Q3, %I3); }
+        Fp = { F."+"(%Q1, %I1); }
+        Fm = { F."-"(%Q2, %I2); }
+        Gm = { G."-"(%Q3, %I3); }
     }
     [device file="cylinder.ds"] F;
     [device file="cylinder.ds"] G;
@@ -167,7 +167,7 @@ C4 > C5;
 }
 
 """
-    let AdoptoedAmbiguousText = """
+    let SimpleLoadedDeviceText = """
 [sys] My = {
     [flow] F = {
         Seg1 > Seg2;
@@ -182,8 +182,8 @@ C4 > C5;
         }
     }
     [calls] = {
-        Fp = {F."+"(%Q1, %I1); }
-        Fm = {F."-"(%Q2, %I2); }
+        Fp = { F."+"(%Q1, %I1); }
+        Fm = { F."-"(%Q2, %I2); }
     }
     [device file="cylinder.ds"] F;
 }

@@ -74,9 +74,9 @@ module private ModelComparisonHelper =
             Bp = { B."+"(%Q3, %I3); }
             Bm = { B."-"(%Q4, %I4); }
         }
-        [device file=cylinder.ds] A;
-        [device file=cylinder.ds] B;
-        [external file=station.ds] C;
+        [device file="cylinder.ds"] A;
+        [device file="cylinder.ds"] B;
+        [external file="station.ds"] C;
         [emg] = {
             EMGBTN = { F; }
         }
@@ -165,12 +165,12 @@ module private ModelComparisonHelper =
         Fp > Fm > Gm;
     }
     [calls] = {
-        Fp = {F."+"(%Q1, %I1);}
-        Fm = {F."-"(%Q2, %I2);}
-        Gm = {G."-"(%Q3, %I3);}
+        Fp = { F."+"(%Q1, %I1); }
+        Fm = { F."-"(%Q2, %I2); }
+        Gm = { G."-"(%Q3, %I3); }
     }
-    [device file=cylinder.ds] F; // F:\Git\ds\DsDotNet\src\UnitTest\UnitTest.Engine\Model\..\Libraries\cylinder.ds
-    [device file=cylinder.ds] G; // F:\Git\ds\DsDotNet\src\UnitTest\UnitTest.Engine\Model\..\Libraries\cylinder.ds
+    [device file="cylinder.ds"] F;
+    [device file="cylinder.ds"] G;
 }
 """
 
@@ -289,29 +289,28 @@ module private ModelComparisonHelper =
         let answerDup = """
 [sys] L = {
     [flow] FF = {
-        C |> "F2.R2" > C;
+        C |> Ap > C;
         A > C;
     }
-}"""
+    [calls] = {
+        Ap = { A."+"(%Q1, %I1); }
+        Am = { A."-"(%Q2, %I2); }
+    }
+    [device file="cylinder.ds"] A;
+}
+"""
+
         let answerQualifiedName = """
-[sys] my.favorite.system!! = {
-    [flow] " my flow. " = {
+[sys] ""my.favorite.system!!"" = {
+    [flow] "" my flow. "" = {
         R1 > R2;
         C1 = {
-            EX."이상한. Api" > EX."Dummy. Api";
-        }
+            EX.""이상한. Api"" >
+            EX.""Dummy. Api""
+            // > EX.""이상한. Api""
+            ; }
     }
-    [sys] EX = {
-        [flow] F = {
-            TX; // island
-            "R.X"; // island
-            "NameWith\"Quote"; // island
-        }
-        [interfaces] = {
-            "이상한. Api" = { F.TX ~ F."R.X" }
-            "Dummy. Api" = { _ ~ _ }
-        }
-    }
+    [device file=""strange.ds""] A;
 }
 """
 
@@ -340,31 +339,16 @@ module private ModelComparisonHelper =
             Ap1 > Ap2 > Am2;
             Ap1 > Am1 > Am2;
         }
-
         [aliases] = {
-            A."+" = { Ap1; Ap2; Ap3; }
-            A."-" = { Am1; Am2; Am3; }
+            Ap = { Ap1; Ap2; Ap3; }
+            Am = { Am1; Am2; Am3; }
         }
     }
-    [sys] A = {
-        [flow] F = {
-            Vp <||> Vm |> Pp |> Sm;
-            Vp |> Pm |> Sp;
-            Vm > Pm > Sm;
-            Vp > Pp > Sp;
-        }
-        [interfaces] = {
-            "+" = { F.Vp ~ F.Sp }
-            "-" = { F.Vm ~ F.Sm }
-            "+" <||> "-";
-        }
+    [calls] = {
+        Ap = { A."+"(%Q1, %I1); }
+        Am = { A."-"(%Q2, %I2); }
     }
-    [prop] = {
-        [addresses] = {
-            A."+" = ( %Q1234.2343, %I1234.2343)
-            A."-" = ( START, END)
-        }
-    }
+    [device file="cylinder.ds"] A;
 }
 """
 
@@ -416,12 +400,9 @@ module ModelTests1 =
             compare Program.SplittedMRIEdgesText answerSplittedMRIEdgesText
 
         [<Test>]
-        member __.``AdoptoedAmbiguousText test`` () =
-            logInfo "=== AdoptoedAmbiguousText"
-            try
-                compare Program.AdoptoedAmbiguousText ""
-            with exn ->
-                ["duplicated"; "Duplicated"; "Ambiguous entry"].Any(fun msg -> exn.Message.Contains msg) === true
+        member __.``SimpleLoadedDeviceText test`` () =
+            logInfo "=== SimpleLoadedDeviceText"
+            compare Program.SimpleLoadedDeviceText Program.SimpleLoadedDeviceText
 
         [<Test>]
         member __.``Model component [SafetyValid] test`` () =
@@ -444,7 +425,7 @@ module ModelTests1 =
             compare ParserTest.Aliases answerAliases
 
         [<Test>]
-        member __.``Model component [QualifiedName] test`` () =
+        member __.``X Model component [QualifiedName] test`` () =
             compare ParserTest.QualifiedName answerQualifiedName
 
         [<Test>]

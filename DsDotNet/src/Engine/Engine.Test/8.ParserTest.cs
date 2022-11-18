@@ -260,9 +260,14 @@ namespace Engine
         public static string Dup = @"
 [sys] L = {
     [flow] FF = {
-        A, ""F2.R2"" > C;
-        C |> ""F2.R2"";
+        A, Ap > C;
+        C |> Ap;
     }
+    [calls] = {
+        Ap = { A.""+""(%Q1, %I1); }
+        Am = { A.""-""(%Q2, %I2); }
+    }
+    [device file=""cylinder.ds""] A;
 }
 ";
 
@@ -351,17 +356,7 @@ namespace Engine
             // > EX.""이상한. Api""
             ; }
     }
-    [sys] EX = {
-        [flow] F = {
-            TX;
-            ""R.X"";
-            ""NameWith\""Quote"";
-        }
-        [interfaces] = {
-            ""이상한. Api"" = { F.TX ~ F.""R.X"" }
-            ""Dummy. Api"" = { _ ~ _ }
-        }
-    }
+    [device file=""strange.ds""] A;
 }
 ";
         public static string T6Alias = @"
@@ -450,12 +445,16 @@ namespace Engine
             Ap1 > Am1, Ap2 > Am2;
         }
         [aliases] = {
-            A.""+"" = { Ap1; Ap2; Ap3; }
-            A.""-"" = { Am1; Am2; Am3; }    // system name optional
+            Ap = { Ap1; Ap2; Ap3; }
+            Am = { Am1; Am2; Am3; }    // system name optional
             //Vp = {AVp1;}  // invalid: 자신 시스템에 정의된 것만 alias
         }
     }
-    " + SampleRunner.CreateCylinder("A") + @"
+    [calls] = {
+        Ap = {A.""+""(%Q1, %I1);}
+        Am = {A.""-""(%Q2, %I2);}
+    }
+    [device file=""cylinder.ds""] A;
 }
 ";
 

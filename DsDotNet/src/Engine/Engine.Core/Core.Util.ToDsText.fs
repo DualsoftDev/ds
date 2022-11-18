@@ -183,12 +183,14 @@ module internal ToDsTextModule =
             (* prop
                     safety
                     layouts *)
-            let segs = [
+            let safetyHolders = [
                 for f in system.Flows do
-                    yield! f.Graph.Vertices.OfType<Real>()
+                    yield! f.Graph.Vertices.OfType<ISafetyConditoinHolder>()
+                    for real in f.Graph.Vertices.OfType<Real>() do
+                        yield! real.Graph.Vertices.OfType<ISafetyConditoinHolder>()
             ]
 
-            let withSafeties = segs.Where(fun seg -> seg.SafetyConditions.Any())
+            let withSafeties = safetyHolders.Where(fun h -> h.SafetyConditions.Any())
             let safeties =
                 [
                     if withSafeties.Any() then

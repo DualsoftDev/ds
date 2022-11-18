@@ -36,24 +36,18 @@ ipSpec: ('ip'|'host') '=' host;
     host: ipv4 | etcName;
     etcName: IDENTIFIER1 | IDENTIFIER2 | IDENTIFIER3 | IDENTIFIER4;  // identifier1234;
     ipv4: IPV4;
-fileSpec: 'file' '=' filePath;
-    etcName1: IDENTIFIER1;
-    filePath: etcName1;
-
 //[device file="c:\my.ds"] B;
 loadDeviceBlock: '[' 'device' fileSpec ']' deviceName SEIMCOLON;
     deviceName:identifier1;
+    fileSpec: 'file' '=' filePath;
+        etcName1: IDENTIFIER1;
+        filePath: etcName1;
+
 //[external file="c:\my.ds"] B;
 loadExternalSystemBlock: '[' EXTERNAL_SYSTEM fileSpec ipSpec ']' externalSystemName SEIMCOLON;
     externalSystemName:identifier1;
 
-layoutBlock: '[' 'layouts' ']' '=' LBRACE (positionDef)* RBRACE;
-positionDef: callName '=' xywh;
-    xywh: LPARENTHESIS x COMMA y (COMMA w COMMA h)? RPARENTHESIS (SEIMCOLON)?;
-    x: INTEGER;
-    y: INTEGER;
-    w: INTEGER;
-    h: INTEGER;
+
 
 // addresses: '[' 'addresses' ']' (identifier12)? '=' addressesBlock;
 //     addressesBlock
@@ -73,25 +67,26 @@ positionDef: callName '=' xywh;
 // global safety property
 [prop] {
     [safety] = {
-        L.F.Main = {A.F.Vm; B.F.Vm}
-    }
-}
-// local safety property
-[sys] L = {
-    [flow] F = {
-        Main = { T.Cp > T.Cm; }
-        [safety] = {
-            Main = {A.F.Vm; B.F.Vm}
-        }
+        F1.Main = {F2.Real; Call1;}
+        Call2 = {F1.Main;}
     }
 }
  */
 propsBlock: '[' 'prop' ']' EQ LBRACE (safetyBlock|layoutBlock)* RBRACE;
     safetyBlock: '[' 'safety' ']' EQ LBRACE (safetyDef)* RBRACE;
         safetyDef: safetyKey EQ LBRACE safetyValues RBRACE;
-            safetyKey: identifier123;
-            safetyValues: identifier123 (SEIMCOLON identifier123)*;
+            // x2: Flow.{Real, Call, Alias}
+            // x3: Flow.Real.{Call, Alias}
+            safetyKey: identifier12;
+            safetyValues: identifier12 (SEIMCOLON identifier12)*;
 
+    layoutBlock: '[' 'layouts' ']' '=' LBRACE (positionDef)* RBRACE;
+        positionDef: callName '=' xywh;
+            xywh: LPARENTHESIS x COMMA y (COMMA w COMMA h)? RPARENTHESIS (SEIMCOLON)?;
+            x: INTEGER;
+            y: INTEGER;
+            w: INTEGER;
+            h: INTEGER;
 
 flowBlock
     : '[' 'flow' ']' identifier1 '=' LBRACE (
@@ -100,6 +95,31 @@ flowBlock
         // | safetyBlock
         )* RBRACE     // |flowTask|callDef
     ;
+    parentingBlock: identifier1 EQ LBRACE (causal|identifier12Listing)* RBRACE;
+
+    identifier12Listing: (identifier1Listing | identifier2Listing);
+        identifier1Listing: identifier1 SEIMCOLON;     // A;
+        identifier2Listing: identifier2 SEIMCOLON;     // A;
+
+
+
+    // [aliases] = { X; Y; Z } = P          // {MyFlowReal} or {Call}
+    // [aliases] = { X; Y; Z } = P.Q        // {OtherFlow}.{real}
+    aliasBlock: '[' 'aliases' ']' '=' LBRACE (aliasListing)* RBRACE;
+        aliasListing:
+            aliasDef '=' LBRACE (aliasMnemonic)? ( ';' aliasMnemonic)* (';')+ RBRACE (';')?
+            ;
+        aliasDef: identifier12;     // {OtherFlow}.{real} or {MyFlowReal} or {Call}
+        aliasMnemonic: identifier1;
+
+callBlock: '[' 'calls' ']' '=' LBRACE (callListing)* RBRACE;
+    callListing:
+        callName '=' LBRACE (callApiDef)? ( ';' callApiDef)* (';')+ RBRACE;
+    callName: etcName1;
+    callApiDef: callKey addressTxRx;
+    callKey: identifier12;
+
+
 
 interfaceBlock
     : '[' 'interfaces' ']' (identifier1)? '=' LBRACE (interfaceListing)* RBRACE;
@@ -114,116 +134,81 @@ interfaceBlock
     interfaceResetDef: identifier1 (causalOperatorReset identifier1)+ (';')?;
 
 
-// [aliases] = { X; Y; Z } = P          // {MyFlowReal} or {Call}
-// [aliases] = { X; Y; Z } = P.Q        // {OtherFlow}.{real}
-aliasBlock: '[' 'aliases' ']' '=' LBRACE (aliasListing)* RBRACE;
-    aliasListing:
-        aliasDef '=' LBRACE (aliasMnemonic)? ( ';' aliasMnemonic)* (';')+ RBRACE (';')?
-        ;
-    aliasDef: identifier12;     // {OtherFlow}.{real} or {MyFlowReal} or {Call}
-    aliasMnemonic: identifier1;
-
-callBlock: '[' 'calls' ']' '=' LBRACE (callListing)* RBRACE;
-    callListing:
-        callName '=' LBRACE (callApiDef)? ( ';' callApiDef)* (';')+ RBRACE;
-    callName: etcName1;
-    callApiDef: callKey addressTxRx;
-    callKey: identifier12;
-
-
-
-identifier1Listing: identifier1 SEIMCOLON;     // A;
-identifier2Listing: identifier2 SEIMCOLON;     // A;
-identifier12Listing: (identifier1Listing | identifier2Listing);
-parentingBlock: identifier1 EQ LBRACE (causal|identifier12Listing)* RBRACE;
-
 
 buttonsBlocks:emergencyButtonBlock|autoButtonBlock|startButtonBlock|resetButtonBlock;
-emergencyButtonBlock :'[' ('emg_in'|'emg') ']'     EQ buttonBlock;
-autoButtonBlock      :'[' ('auto_in'|'auto') ']'   EQ buttonBlock;
-startButtonBlock     :'[' ('start_in'|'start') ']' EQ buttonBlock;
-resetButtonBlock     :'[' ('reset_in'|'reset') ']' EQ buttonBlock;
-buttonBlock: LBRACE (() | ((SEIMCOLON)* buttonDef)* (SEIMCOLON)*) RBRACE;
-buttonDef: buttonName EQ LBRACE (() | flowName (SEIMCOLON flowName)* (SEIMCOLON)?) RBRACE;
-buttonName: identifier1;
-flowName : identifier1;
+    emergencyButtonBlock :'[' ('emg_in'|'emg') ']'     EQ buttonBlock;
+    autoButtonBlock      :'[' ('auto_in'|'auto') ']'   EQ buttonBlock;
+    startButtonBlock     :'[' ('start_in'|'start') ']' EQ buttonBlock;
+    resetButtonBlock     :'[' ('reset_in'|'reset') ']' EQ buttonBlock;
+    buttonBlock: LBRACE (() | ((SEIMCOLON)* buttonDef)* (SEIMCOLON)*) RBRACE;
+    buttonDef: buttonName EQ LBRACE (() | flowName (SEIMCOLON flowName)* (SEIMCOLON)?) RBRACE;
+    buttonName: identifier1;
+    flowName : identifier1;
 
 
 
 // B.F1 > Set1F <| T.A21;
 causal: causalPhrase SEIMCOLON;
+    causalPhrase
+        : causalTokensDNF (causalOperator causalTokensDNF)+
+        ;
+
+    causalTokensDNF
+        : causalTokensCNF ('?' causalTokensCNF)*
+        ;
+    causalTokensCNF
+        : causalToken (',' causalToken)*
+        ;
+
+    causalToken
+        : identifier12
+    //     | proc
+    //     | func
+    //     | expression
+    //  | segmentValue  // '(A)' or '(A.B)'
+        ;
+    //segmentValue: LPARENTHESIS identifier123 RPARENTHESIS;
 
 
-// // debugging purpose {
-// causals: causal* (causalPhrase)?;
+    causalOperator
+        : '>'   // CAUSAL_FWD
+        | '>>'  // CAUSAL_FWD_STRONG
+        | '>|>'    | '|>>'
+        | '<<'   // CAUSAL_BWD_STRONG
+        | '<'   // CAUSAL_BWD
+        | '<<|' | '<|<'
+        // | '=>'          // CAUSAL_FWD_AND_RESET_BWD
+        | '|><'         // CAUSAL_BWD_AND_RESET_FWD
+        | '><|' | '=>'
 
-// expressions: (expression SEIMCOLON)+ ;
-// // } debugging purpose
-
-
-causalPhrase
-    : causalTokensDNF (causalOperator causalTokensDNF)+
-    ;
-
-
-causalTokensDNF
-    : causalTokensCNF ('?' causalTokensCNF)*
-    ;
-causalTokensCNF
-    : causalToken (',' causalToken)*
-    ;
-
-causalToken
-    : identifier12
-//     | proc
-//     | func
-//     | expression
-//  | segmentValue  // '(A)' or '(A.B)'
-    ;
-//segmentValue: LPARENTHESIS identifier123 RPARENTHESIS;
-
-
-causalOperator
-    : '>'   // CAUSAL_FWD
-    | '>>'  // CAUSAL_FWD_STRONG
-    | '>|>'    | '|>>'
-    | '<<'   // CAUSAL_BWD_STRONG
-    | '<'   // CAUSAL_BWD
-    | '<<|' | '<|<'
-    // | '=>'          // CAUSAL_FWD_AND_RESET_BWD
-    | '|><'         // CAUSAL_BWD_AND_RESET_FWD
-    | '><|' | '=>'
-
-    | causalOperatorReset
-    ;
-causalOperatorReset
-    : '||>'  // CAUSAL_RESET_FWD_STRONG
-    | '|>'  // CAUSAL_RESET_FWD
-    | '<||'  // CAUSAL_RESET_BWD_STRONG
-    | '<|'  // CAUSAL_RESET_BWD
-    | '<<||>>'        // CAUSAL_RESET_FB_STRONG
-    | '<||>'        // CAUSAL_RESET_FB
-    ;
-
-identifier1: IDENTIFIER1;
-identifier2: IDENTIFIER2;
-identifier3: IDENTIFIER3;
-identifier4: IDENTIFIER4;
-
-
-// // - Segment 규격
-// // - 0 DOT: TagName
-// // - 1 DOT: TaskName.SegmentName  : mysystem 을 가정하고 있음.  필요한가?
-// // - 2 DOT: System.TaskName.SegmentName
-identifier12: (identifier1 | identifier2);
-identifier123: (identifier1 | identifier2 | identifier3);
-
-flowPath: identifier2;
-
-identifier123CNF: identifier123 (COMMA identifier123)*;
-identifier123DNF: identifier123CNF (OR2 identifier123CNF)*;
+        | causalOperatorReset
+        ;
+    causalOperatorReset
+        : '||>'  // CAUSAL_RESET_FWD_STRONG
+        | '|>'  // CAUSAL_RESET_FWD
+        | '<||'  // CAUSAL_RESET_BWD_STRONG
+        | '<|'  // CAUSAL_RESET_BWD
+        | '<<||>>'        // CAUSAL_RESET_FB_STRONG
+        | '<||>'        // CAUSAL_RESET_FB
+        ;
 
 identifier1234: (identifier1 | identifier2 | identifier3 | identifier4);
+    identifier1: IDENTIFIER1;
+    identifier2: IDENTIFIER2;
+    identifier3: IDENTIFIER3;
+    identifier4: IDENTIFIER4;
+
+    // // - Segment 규격
+    // // - 0 DOT: TagName
+    // // - 1 DOT: TaskName.SegmentName  : mysystem 을 가정하고 있음.  필요한가?
+    // // - 2 DOT: System.TaskName.SegmentName
+    identifier12: (identifier1 | identifier2);
+    identifier123: (identifier1 | identifier2 | identifier3);
+
+    identifier123CNF: identifier123 (COMMA identifier123)*;
+    identifier123DNF: identifier123CNF (OR2 identifier123CNF)*;
+
+    flowPath: identifier2;
 
 
 variableBlock: '[' 'variables' ']' '=' '{' variableDef* '}';

@@ -62,42 +62,6 @@ type DsParser() =
         parser, tree, errors
 
 
-    ///// <summary>
-    ///// 주어진 text 내에서 [sys] B = @copy_system(A) 와 같이 copy_system 으로 정의된 영역을
-    ///// 치환한 text 를 반환한다.  system A 정의 영역을 찾아서 system B 로 치환한 text 반환
-    ///// 이때, copy 구문은 삭제한다.
-    ///// </summary>
-    //static member private ExpandSystemCopy(text:string):string =
-    //    let func = fun (parser:dsParser) -> parser.system() :> RuleContext
-    //    let (parser, _, _) = DsParser.ParseText(text, func)
-    //    parser.Reset()
-    //    let model = parser.system()
-    //    let sysCtxMap =
-    //        DsParser.enumerateChildren<SystemContext>(model)
-    //            .Select(fun ctx ->
-    //                let sysName = DsParser.tryFindFirstChild<SystemNameContext>(ctx) |> Option.get |> fun x -> x.GetText()
-    //                sysName, ctx)
-    //            |> dict |> Dictionary
-
-    //    let copySysCtxs =
-    //        sysCtxMap.Where(fun (KeyValue(sysName, sysCtxt)) -> sysCtxt.children.Any(isType<LoadDeviceContext>)).ToArray()
-
-    //    // 원본 full text 에서 copy_system 구문을 치환한??? 삭제한 text 반환
-    //    let replaces =
-    //        copySysCtxs.Select(fun (KeyValue(name, ctx)) ->
-    //            let sourceSystemName = DsParser.tryFindFirstChild<SourceSystemNameContext>(ctx) |> Option.get |> fun x -> x.GetText()
-    //            let srcCtx = sysCtxMap[sourceSystemName]
-    //            let nameCtx = tryFindFirstChild<SystemNameContext>(srcCtx).Value
-    //            let copiedSystemText = srcCtx.GetReplacedText([RangeReplace.Create(nameCtx, name)])
-    //            RangeReplace.Create(ctx, copiedSystemText)).ToArray()
-    //    let replacedText = model.GetReplacedText(replaces)
-    //    //logDebug $"Replaced Text:\r\n{replacedText}"
-    //    replacedText
-
-    //static member FromDocument(text:string, predExtract:RuleExtractor, ?throwOnError) =       // (dsParser, RuleContext, ParserError[])
-    //    //let expanded = DsParser.ExpandSystemCopy(text)
-    //    DsParser.ParseText(text, predExtract, throwOnError)
-
     static member FromDocument(text:string, ?predExtract:RuleExtractor, ?throwOnError) =       // (dsParser, ParserError[])
         let throwOnError = defaultArg throwOnError true
         let func = defaultArg predExtract (fun (parser:dsParser) -> parser.system() :> RuleContext)
@@ -244,10 +208,6 @@ module DsParserHelperModule =
     let tryFindToken (system:DsSystem) (ctx:CausalTokenContext):Vertex option =
         let ci = getContextInformation ctx
         option {
-            //let! flowName = ci.Flow
-            //let! flow = tryFindFlow system flowName
-            //assert(flowName = flow.Name)
-
             let! parentWrapper = tryFindParentWrapper system ci
             let graph = parentWrapper.GetGraph()
             match ci.Names with

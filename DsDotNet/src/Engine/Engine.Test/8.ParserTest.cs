@@ -25,7 +25,7 @@ namespace Engine
 
     [prop] = {
         [ safety ] = {
-            L.F.Main = {Ap1; Ap2}
+            F.Main = {F.Ap1; Ap2}
         }
     }
 

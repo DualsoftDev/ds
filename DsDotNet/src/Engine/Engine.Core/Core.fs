@@ -16,21 +16,22 @@ module CoreModule =
             member x.QualifiedName = nameComponents.Combine() }
 
     [<AbstractClass>]
-    type LoadedSystem(name:string, referenceSystem:DsSystem, containerSystem:DsSystem) =
+    type LoadedSystem(name:string, referenceSystem:DsSystem, containerSystem:DsSystem, absoluteAndSimpleFilePath:string*string) =
         inherit FqdnObject(name, containerSystem)
+        let absoluteFilePath, simpleFilePath = absoluteAndSimpleFilePath
         /// Loading 된 system 을 포함하는 container system
         member val ContainerSystem = containerSystem
         /// Loading 된 system 참조 용
         member val ReferenceSystem = referenceSystem
 
-        member val UserSpecifiedFilePath:string = null with get, set
-        member val AbsoluteFilePath:string = null with get, set
+        member val UserSpecifiedFilePath:string = simpleFilePath with get, set
+        member val AbsoluteFilePath:string = absoluteFilePath with get, set
 
-    and Device(referenceSystem:DsSystem, containerSystem:DsSystem) =
-        inherit LoadedSystem(referenceSystem.Name, referenceSystem, containerSystem)
+    and Device(referenceSystem:DsSystem, containerSystem:DsSystem, absoluteAndSimpleFilePath:string*string) =
+        inherit LoadedSystem(referenceSystem.Name, referenceSystem, containerSystem, absoluteAndSimpleFilePath)
 
-    and ExternalSystem(name:string, referenceSystem:DsSystem, containerSystem:DsSystem) =
-        inherit LoadedSystem(name, referenceSystem, containerSystem)
+    and ExternalSystem(name:string, referenceSystem:DsSystem, containerSystem:DsSystem, absoluteAndSimpleFilePath:string*string) =
+        inherit LoadedSystem(name, referenceSystem, containerSystem, absoluteAndSimpleFilePath)
 
     type DsSystem private (name:string, host:string) =
         inherit FqdnObject(name, createFqdnObject([||]))
@@ -95,6 +96,11 @@ module CoreModule =
         member _.PureNames = names
         override x.GetRelativeName(referencePath:Fqdn) = x.PureNames.Combine()
 
+    // todo: subclass 정의 : Real + ???
+    // Call vs {VertexCall, VertexOtherFlowRealCall}
+    type ISafetyConditoinHolder =
+        abstract member SafetyConditions: HashSet<SafetyCondition>
+
     /// Segment (DS Basic Unit)
     [<DebuggerDisplay("{QualifiedName}")>]
     type Real private (name:string, flow:Flow) =
@@ -103,7 +109,8 @@ module CoreModule =
         member val Graph = DsGraph()
         member val ModelingEdges = HashSet<ModelingEdgeInfo<Vertex>>()
         member val Flow = flow
-        member val SafetyConditions = HashSet<SafetyCondition>()
+        interface ISafetyConditoinHolder with
+            member val SafetyConditions = HashSet<SafetyCondition>()
 
     /// Indirect to Call/Alias
     [<AbstractClass>]
@@ -190,8 +197,6 @@ module CoreModule =
 
     type Real with
         static member Create(name: string, flow) =
-            if name = "Ap" then
-                noop()
             if (name.Contains ".") (*&& not <| (name.StartsWith("\"") && name.EndsWith("\""))*) then
                 logWarn $"Suspicious segment name [{name}]. Check it."
 

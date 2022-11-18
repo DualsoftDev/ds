@@ -53,26 +53,18 @@ module ModelParser =
             let text = File.ReadAllText(dsFilePath)
             let dir = Path.GetDirectoryName(dsFilePath)
             let option = ParserOptions.Create4Runtime(dir, "ActiveCpuName")
-            option.IsSubSystemParsing <- true
             option.LoadedSystemName <- Some loadedName
             let system = ParseFromString(text, option)
             system
+
         let loadDevice (constainerSystem:DsSystem) (absoluteFilePath, simpleFilePath) loadedName =
-            let device =
-                let system = loadSystemFromDsFile (absoluteFilePath, loadedName)
-                system.Name <- loadedName
-                Device(system, constainerSystem)
-            device.AbsoluteFilePath <- absoluteFilePath
-            device.UserSpecifiedFilePath <- simpleFilePath
-            device
+            let system = loadSystemFromDsFile (absoluteFilePath, loadedName)
+            system.Name <- loadedName
+            Device(system, constainerSystem, (absoluteFilePath, simpleFilePath))
 
         let loadExternalSystem (constainerSystem:DsSystem) (absoluteFilePath, simpleFilePath) loadedName =
-            let externalSystem =
-                let system = loadSystemFromDsFile (absoluteFilePath, loadedName)
-                ExternalSystem(loadedName, system, constainerSystem)
-            externalSystem.AbsoluteFilePath <- absoluteFilePath
-            externalSystem.UserSpecifiedFilePath <- simpleFilePath
-            externalSystem
+            let system = loadSystemFromDsFile (absoluteFilePath, loadedName)
+            ExternalSystem(loadedName, system, constainerSystem, (absoluteFilePath, simpleFilePath))
 
         fwdLoadDevice <- loadDevice
         fwdLoadExternalSystem <- loadExternalSystem

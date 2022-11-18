@@ -77,7 +77,7 @@ C4 > C5;
         }
         // Flow 내의 safety 는 지원하지 않음
         //[safety] = {
-        //    Main = { F.Main.Ap1; F.R2; }
+        //    F.Main = { Ap; }
         //}
     }
 
@@ -94,7 +94,7 @@ C4 > C5;
     [prop] = {
         // Global safety
         [safety] = {
-            F.Main = { F.Main.Ap1; F.R2 }
+            F.Main = { Ap1; F.R2 }
         }
         [layouts] = {
             Ap = (1309,405,205,83)

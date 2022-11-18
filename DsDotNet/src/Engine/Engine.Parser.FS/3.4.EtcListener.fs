@@ -72,7 +72,7 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
                         let safety = tryFindFirstChild(safetyDef, fun (t:IParseTree) -> t :? SafetyKeyContext).Value
                         collectNameComponents(safety)   // ["Main"] or ["My", "Flow", "Main"]
                     let valueHeader = enumerateChildren<SafetyValuesContext>(safetyDef).First()
-                    let values      = enumerateChildren<Identifier123Context>(valueHeader).Select(collectNameComponents).ToArray()
+                    let values      = enumerateChildren<Identifier12Context>(valueHeader).Select(collectNameComponents).ToArray()
                     (key, values)
             ]
 
@@ -91,7 +91,7 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
                 match realSeg with
                 | Some realSeg ->
                     for value in values do
-                        let vertex = curSystem.FindGraphVertex(value)
+                        //let vertex = curSystem.FindGraphVertex(value)
                         ()
 
                         //let added = realSeg.SafetyConditions.Add(cond)

@@ -69,6 +69,12 @@ module ModelAnswers =
         [layouts] = {
             Ap = (1309, 405, 205, 83)
         }
+        // todo: not yet
+        //[safety] = {
+        //    F.Main = { Ap1; F.R2 }
+        //}
+
+        // will not be supported
         //[addresses] = {
         //    A."+" = ( %Q1234.2343, %I1234.2343)
         //    A."-" = ( START, END)
@@ -76,11 +82,6 @@ module ModelAnswers =
         //    B."-" = ( BSTART, BEND)
         //}
     }
-    //[prop] = {
-    //    [safety] = {
-    //        My.F.Main = { A.F.Sp; A.F.Sm; B.F.Sp; B.F.Sm; C.F.Sp; }
-    //    }
-    //}
 }
 
 """

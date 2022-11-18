@@ -18,22 +18,7 @@ namespace Engine
         //    Main = {C.F.Sp; C.F.Sm}
         //}
     }
-    [sys] C = {
-        [flow] F = {
-            Vp > Pp > Sp;
-            Vm > Pm > Sm;
-
-            Pp |> Sm;
-            Pm |> Sp;
-            Vp <||> Vm;
-        }
-        [interfaces] = {
-            P = { F.Vp ~ F.Sp }
-            M = { F.Vm ~ F.Sm }
-            // 정보로서의 상호 리셋
-            P <||> M;
-        }
-    }
+    [device file=""cylinder.ds""] C;
 
     [prop] = {
         [ safety ] = {
@@ -56,24 +41,9 @@ namespace Engine
             Main = {C.F.Sp; C.F.Sm}
         }
     }
+    [device file=""cylinder.ds""] C;
 }
 
-[sys] C = {
-    [flow] F = {
-        Vp > Pp > Sp;
-        Vm > Pm > Sm;
-
-        Pp |> Sm;
-        Pm |> Sp;
-        Vp <||> Vm;
-    }
-    [interfaces] = {
-        P = { F.Vp ~ F.Sp }
-        M = { F.Vm ~ F.Sm }
-        // 정보로서의 상호 리셋
-        P <||> M;
-    }
-}
 
 [prop] = {
     [ safety ] = {
@@ -86,31 +56,16 @@ namespace Engine
 [sys] L = {
     [flow] F = {
         Main = {
-            Cp >> Cm;
-            Cp ||> Cm;
-            Cp <|| Cm;
-        }
-        [aliases] = {
-            A.P = { Cp; Cp1; Ap2; }
-            A.M = { Cm; Cm1; Cm2; }
+            Ap >> Am;
+            Ap ||> Am;
+            Ap <|| Am;
         }
     }
-    [sys] A = {
-        [flow] F = {
-            Vp > Pp > Sp;
-            Vm > Pm > Sm;
-
-            Pp |> Sm;
-            Pm |> Sp;
-            Vp <||> Vm;
-        }
-        [interfaces] = {
-            P = { F.Vp ~ F.Sp }
-            M = { F.Vm ~ F.Sm }
-            // 정보로서의 상호 리셋
-            P <||> M;
-        }
+    [calls] = {
+        Ap = { A.""+""(%Q1, %I1); }
+        Am = { A.""-""(%Q2, %I2); }
     }
+    [device file=""cylinder.ds""] A;
 }
 ";
 
@@ -348,17 +303,16 @@ namespace Engine
 
         public static string QualifiedName = @"
 [sys] ""my.favorite.system!!"" = {
-	[flow] EX = {
-		""이상한. Real"" > ""Dummy. Real"";
-	}
     [flow] "" my flow. "" = {
         R1 > R2;
         C1 = {
-            EX.""이상한. Real"" >
-            EX.""Dummy. Real""
+            EX.""이상한. Real"" > EX.""Dummy. Real"";
             // > EX.""이상한. Real""
-            ; }
+            }
     }
+	[flow] EX = {
+		""이상한. Real"" > ""Dummy. Real"";
+	}
 }
 ";
         public static string T6Alias = @"

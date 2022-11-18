@@ -123,7 +123,7 @@ module internal ToDsTextModule =
         let tab = getTab indent
         [
             let ip = if system.Host.IsNullOrEmpty() then "" else $" ip = {system.Host}"
-            yield $"[sys{ip}] {system.Name} = {lb}"
+            yield $"[sys{ip}] {system.Name.QuoteOnDemand()} = {lb}"
 
             for f in system.Flows do
                 yield flowToDs f indent
@@ -135,7 +135,7 @@ module internal ToDsTextModule =
                 yield $"{tab}[calls] = {lb}"
                 for c in system.Calls do
                     let ais = c.ApiItems.Select(print).JoinWith("; ") + ";"
-                    yield $"{tab2}{c.Name} = {lb} {ais} {rb}"
+                    yield $"{tab2}{c.Name.QuoteOnDemand()} = {lb} {ais} {rb}"
                 yield $"{tab}{rb}"
 
             for d in system.Devices do

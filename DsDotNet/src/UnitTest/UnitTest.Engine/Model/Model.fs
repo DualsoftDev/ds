@@ -219,36 +219,17 @@ module private ModelComparisonHelper =
 [sys] L = {
     [flow] F = {
         Main = {
-            Cp <|| Cm;
-            Cp ||> Cm;
-            Cp >> Cm;
-        }
-        [aliases] = {
-            A.P = { Cp; Cp1; Ap2; }
-            A.M = { Cm; Cm1; Cm2; }
+            Ap <|| Am;
+            Ap ||> Am;
+            Ap >> Am;
         }
     }
-    [sys] A = {
-        [flow] F = {
-            Pm |> Sp;
-            Pp |> Sm;
-            Vp <||> Vm > Pm > Sm;
-            Vp > Pp > Sp;
-        }
-        [interfaces] = {
-            P = { F.Vp ~ F.Sp }
-            M = { F.Vm ~ F.Sm }
-            P <||> M;
-        }
+    [calls] = {
+        Ap = { A."+"(%Q1, %I1); }
+        Am = { A."-"(%Q2, %I2); }
     }
-    [prop] = {
-        [addresses] = {
-            A.P = ( %Q1234.2343, %I1234.2343)
-            A.M = ( START, END)
-        }
-    }
+    [device file="cylinder.ds"] A;
 }
-
 """
         let answerButtons = """
 [sys] My = {
@@ -297,20 +278,6 @@ module private ModelComparisonHelper =
         Am = { A."-"(%Q2, %I2); }
     }
     [device file="cylinder.ds"] A;
-}
-"""
-
-        let answerQualifiedName = """
-[sys] ""my.favorite.system!!"" = {
-    [flow] "" my flow. "" = {
-        R1 > R2;
-        C1 = {
-            EX.""이상한. Api"" >
-            EX.""Dummy. Api""
-            // > EX.""이상한. Api""
-            ; }
-    }
-    [device file=""strange.ds""] A;
 }
 """
 
@@ -443,8 +410,8 @@ module ModelTests1 =
             compare ParserTest.Aliases answerAliases
 
         [<Test>]
-        member __.``X Model component [QualifiedName] test`` () =
-            compare ParserTest.QualifiedName answerQualifiedName
+        member __.``Model component [QualifiedName] test`` () =
+            compare ParserTest.QualifiedName ParserTest.QualifiedName
 
         [<Test>]
         member __.``Model component [T6 alias] test`` () =

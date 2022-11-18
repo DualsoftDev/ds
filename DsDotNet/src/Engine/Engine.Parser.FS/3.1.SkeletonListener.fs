@@ -160,28 +160,33 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
                         failwith "ERROR: duplicated"
                 }
             let candidates = candidateCtxs.Select(getContainerChildPair)
-            for (optParent, ctxInfo) in candidates do
-                let parent = optParent.Value
-                let existing = parent.GetGraph().TryFindVertex(ctxInfo.GetRawName())
-                match existing with
-                | Some v -> tracefn $"{v.Name} already exists.  Skip creating it."
-                | None ->
-                    match ctxInfo.Names with
-                    | q::[] ->
-                        match tryCreateCallOrAlias parent q with
-                        | Some _ -> ()
-                        | None ->
-                            let flow = parent.GetCore() :?> Flow
-                            Real.Create(q, flow) |> ignore
-                    | ofn::ofrn::[] ->
-                        let otherFlowReal = tryFindReal system ofn ofrn |> Option.get
-                        VertexOtherFlowRealCall.Create(ofn, ofrn, otherFlowReal, parent) |> ignore
 
-                        tracefn $"{ofn}.{ofrn} should already have been created."
-                    | _ ->
-                        failwith "ERROR"
-                    noop()
+            let loop (cycle:int) =
+                for (optParent, ctxInfo) in candidates do
+                    let parent = optParent.Value
+                    let existing = parent.GetGraph().TryFindVertex(ctxInfo.GetRawName())
+                    match existing with
+                    | Some v -> tracefn $"{v.Name} already exists.  Skip creating it."
+                    | None ->
+                        match cycle, ctxInfo.Names with
+                        | 0, q::[] ->
+                            match tryCreateCallOrAlias parent q with
+                            | Some _ -> ()
+                            | None ->
+                                let flow = parent.GetCore() :?> Flow
+                                Real.Create(q, flow) |> ignore
+                        | 1, ofn::ofrn::[] ->
+                            let otherFlowReal = tryFindReal system ofn ofrn |> Option.get
+                            VertexOtherFlowRealCall.Create(ofn, ofrn, otherFlowReal, parent) |> ignore
 
+                            tracefn $"{ofn}.{ofrn} should already have been created."
+                        | _, q::[] -> ()
+                        | _, ofn::ofrn::[] -> ()
+                        | _ ->
+                            failwith "ERROR"
+                        noop()
+            loop 0
+            loop 1
 
         //let dumpTokens (tokens:Dictionary<ContextInformation, GVT>) (msg:string) =
         //    logInfo "%s" msg

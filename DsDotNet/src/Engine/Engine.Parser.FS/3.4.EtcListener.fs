@@ -19,10 +19,6 @@ open System.Collections.Generic
 type EtcListener(parser:dsParser, helper:ParserHelper) =
     inherit ListenerBase(parser, helper)
 
-    do
-        base.UpdateModelSpits()
-
-
     override x.EnterButtonsBlocks(ctx:ButtonsBlocksContext) =
         let first = tryFindFirstChild<ParserRuleContext>(ctx).Value     // {Emergency, Auto, Start, Reset}ButtonsContext
         let system = x._theSystem.Value
@@ -170,7 +166,6 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
 
     override x.ExitSystem(ctx:SystemContext) =
         base.ExitSystem(ctx)
-        x.UpdateModelSpits()
         (* [layouts] = {
                L.T.Cp = (30, 50)            // xy
                L.T.Cm = (60, 50, 20, 20)    // xywh
@@ -193,36 +188,3 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
                 call.Xywh <- new Xywh(x, y, Nullable(), Nullable())
             | _ ->
                 failwith "ERROR"
-
-        //(*
-        //    [sys] / [prop] / [addresses] = {
-        //        ApiName = (Start, End) Tag address
-        //        A."" + "" = (% Q1234.2343, % I1234.2343)
-        //        A."" - "" = (START, END)
-        //    }
-        //*)
-        //let api2Address =
-        //    [|
-        //        for sysCtx in enumerateChildren<SystemContext>(ctx) do
-        //        for addrDefCtx in enumerateChildren<AddressDefContext>(sysCtx) do
-        //            let apiPath = collectNameComponents(addrDefCtx.apiPath())
-        //            let sre = addrDefCtx.addressTxRx()
-        //            let s =
-        //                let s = sre.tx()
-        //                if isNull s then null else s.GetText()
-        //            let e =
-        //                let e = sre.rx()
-        //                if isNull e then null else e.GetText()
-        //            (sysCtx, apiPath, new Addresses(s, e))
-        //    |]
-
-        for o in x._modelSpits do
-            match o.GetCore() with
-            | :? Call as call ->
-                failwith "ERROR"
-                //let map = call.GetSystem().ApiAddressMap
-                //if map.ContainsKey(call.NameComponents) then
-                //    let address = map[call.NameComponents]
-                //    assert(isNull call.Addresses || call.Addresses = address)
-                //    call.Addresses <- address
-            | _ -> ()

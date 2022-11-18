@@ -698,16 +698,6 @@ C4 > C5;
     let ParseNormal(text:string) =
         let helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation(".", "ActiveCpuName"))
         let system = helper.TheSystem.Value
-
-        tracefn "---- Spit result"
-        let spits = system.Spit()
-        for spit in spits do
-            match spit.SpitObj with
-            | SpitFlow f -> f.Graph.Dump() |> ignore
-            | SpitVertexReal r -> r.Graph.Dump() |> ignore
-            | _ -> ()
-
-
         tracefn "Done"
 
 

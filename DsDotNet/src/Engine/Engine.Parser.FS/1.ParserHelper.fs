@@ -2,8 +2,6 @@ namespace Engine.Parser.FS
 
 open Engine.Core
 open System.Collections.Generic
-open System.Linq
-open Antlr4.Runtime
 open type Engine.Parser.dsParser
 
 type ParserHelper(options:ParserOptions) =
@@ -33,15 +31,4 @@ type ParserHelper(options:ParserOptions) =
 
     member val internal _deviceBlockContexts         = ResizeArray<LoadDeviceBlockContext>()
     member val internal _externalSystemBlockContexts = ResizeArray<LoadExternalSystemBlockContext>()
-
-
-    member val internal _modelSpits:SpitResult array = [||] with get, set
-    member internal x._modelSpitObjects = x._modelSpits.Select(fun spit -> spit.GetCore()).ToArray()
-    member internal x.UpdateModelSpits() =
-        x._modelSpits <-
-            [|
-                match x.TheSystem with
-                | Some system -> yield! system.Spit()
-                | _ -> ()
-            |]
 

@@ -94,18 +94,13 @@ module EdgeModule =
             createMRIEdgesTransitiveClosure f
 
     let validateSystem(system:DsSystem) =
-        let cores = system.Spit().Select(fun sp -> sp.GetCore())
-
-        for f in cores.OfType<Flow>() do
-            try
-                f.Graph.Validate() |> ignore
+        for f in system.Flows do
+            f.Graph.Validate() |> ignore
+            f.Graph.Vertices.OfType<Real>().Iter(fun r -> r.Graph.Validate() |> ignore)
+    let guardedValidateSystem(system:DsSystem) =
+            try validateSystem system
             with exn ->
                 logWarn "%A" exn
-
-        cores.OfType<Real>()
-            .Select(fun r -> r.Graph.Validate())
-            .All(id)
-
 
 [<Extension>]
 type EdgeExt =

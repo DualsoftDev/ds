@@ -21,20 +21,15 @@ type ListenerBase(parser:dsParser, helper:ParserHelper) =
 
     member x.ParserHelper = helper
     member internal _._theSystem = helper.TheSystem
-    member internal _._modelSpits = helper._modelSpits
-    member internal _._modelSpitObjects = helper._modelSpitObjects
     member internal _._flow       with get() = helper._flow      and set(v) = helper._flow      <- v
     member internal _._parenting  with get() = helper._parenting and set(v) = helper._parenting <- v
 
-
-    member internal x.UpdateModelSpits() = helper.UpdateModelSpits()
 
 
 
     override x.EnterSystem(ctx:SystemContext) =
         if helper.ParserOptions.LoadedSystemName.IsSome then
             DsParser.LoadedSystemName <- helper.ParserOptions.LoadedSystemName
-        x.UpdateModelSpits()
 
     override x.ExitSystem(ctx:SystemContext) = DsParser.LoadedSystemName <- None
 

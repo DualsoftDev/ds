@@ -38,17 +38,13 @@ module ModelParser =
 
         let system = helper.TheSystem.Value
         system.CreateMRIEdgesTransitiveClosure()
+
         system.Validate() |> ignore
 
         helper
 
 
     let ParseFromString(text:string, options:ParserOptions):DsSystem = ParseFromString2(text, options).TheSystem.Value
-
-    //let ParsePartial(text:string, helper:ParserHelper, predExtract:RuleExtractor option) =
-    //    //let predExtract = defaultArg predExtract (fun (parser:dsParser) -> parser.system() :> RuleContext)
-    //    let (parser, ast, parserErrors) = FromDocument(text, predExtract)
-    //    Walk(parser, helper)
 
     let Initialize() =
         tracefn "Initializing"

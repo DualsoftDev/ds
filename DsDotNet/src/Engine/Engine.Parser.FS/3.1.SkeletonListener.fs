@@ -221,8 +221,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
         createCallOrAliasVertex()
         fillInterfaceDefs helper
 
-        logInfo "---- Spit results"
-        logDebug "%s" <| helper.TheSystem.Value.Spit().Dump()
+        guardedValidateSystem system
 
         //dumpCausalTokens "---- All Causal token elements"
 

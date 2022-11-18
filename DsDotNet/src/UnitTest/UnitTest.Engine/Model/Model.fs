@@ -300,6 +300,8 @@ module private ModelComparisonHelper =
         let helper = ModelParser.ParseFromString2(originalText, ParserOptions.Create4Simulation(referenceDir, "ActiveCpuName"))
         let system = helper.TheSystem.Value
 
+        validateSystem system
+
         let generated = system.ToDsText();
         generated =~= answer
 

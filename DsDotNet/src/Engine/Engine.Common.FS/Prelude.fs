@@ -45,6 +45,13 @@ let getNull<'T when 'T : not struct>():'T = Operators.Unchecked.defaultof<'T>
 let inline nonNullSelector (nonNullValue:^T when ^T : not struct) (x:^T when ^T : not struct) =
     if isItNull x then nonNullValue else x
 
+open System.Linq
+let isInUnitTest() =
+    AppDomain.CurrentDomain.GetAssemblies()
+        .Select(fun a -> a.FullName)
+        .Any(fun n -> n.StartsWith("Microsoft.VisualStudio.TestPlatform."))
+        ;
+
 
 [<Extension>]
 type PreludeExt =

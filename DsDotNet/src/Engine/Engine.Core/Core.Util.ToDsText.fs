@@ -183,8 +183,10 @@ module internal ToDsTextModule =
             (* prop
                     safety
                     layouts *)
-            let spits = system.Spit()
-            let segs = spits.Select(fun spit -> spit.GetCore()).OfType<Real>().ToArray()
+            let segs = [
+                for f in system.Flows do
+                    yield! f.Graph.Vertices.OfType<Real>()
+            ]
 
             let withSafeties = segs.Where(fun seg -> seg.SafetyConditions.Any())
             let safeties =

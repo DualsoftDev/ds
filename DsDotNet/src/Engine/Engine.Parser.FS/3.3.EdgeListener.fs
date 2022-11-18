@@ -17,9 +17,6 @@ open type Engine.Parser.FS.DsParser
 type EdgeListener(parser:dsParser, helper:ParserHelper) =
     inherit ListenerBase(parser, helper)
 
-    do
-        base.UpdateModelSpits()
-
     override x.EnterCausalPhrase(ctx:CausalPhraseContext) =
         let ci = getContextInformation ctx
         let sysNames, flowName, parenting, ns = ci.Tuples

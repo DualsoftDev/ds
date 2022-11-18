@@ -6,37 +6,9 @@ open System.Linq
 open Antlr4.Runtime
 open type Engine.Parser.dsParser
 
-[<AbstractClass>]
-type AliasTargetBase() = class end
-
-type AliasTargetWithFqdn(targetFqdn:Fqdn) =
-    inherit AliasTargetBase()
-
-    member val TargetFqdn = targetFqdn with get, set
-
-type AliasTargetReal(targetFqdn:Fqdn) =
-    inherit AliasTargetWithFqdn(targetFqdn)
-
-type AliasTargetDirectCall(targetFqdn:Fqdn) =
-    inherit AliasTargetWithFqdn(targetFqdn)
-
-
-type AliasTargetApi(apiItem:ApiItem4Export) =
-    inherit AliasTargetBase()
-    member val ApiItem4Export = apiItem with get, set
-
-
-type AliasCreator(name:string, parent:ParentWrapper, target:AliasTargetBase) =
-    member val Name = name with get, set
-    member val Parent = parent with get, set
-    member val Target = target with get, set
-
-
 type ParserHelper(options:ParserOptions) =
     member val ParserOptions = options with get, set
 
-    /// 3.2.ElementListener 에서 Alias create 사용
-    member val AliasCreators = ResizeArray<AliasCreator>()
     /// button category 중복 check 용
     member val ButtonCategories = HashSet<(DsSystem*string)>()
 

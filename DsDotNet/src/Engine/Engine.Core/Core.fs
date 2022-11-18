@@ -6,7 +6,6 @@ open System.Linq
 open System.Runtime.CompilerServices
 open System.Diagnostics
 open Engine.Common.FS
-open System.ComponentModel
 
 [<AutoOpen>]
 module CoreModule =
@@ -121,58 +120,11 @@ module CoreModule =
     and VertexOtherFlowRealCall private (names:Fqdn, target:Real, parent) =
         inherit Indirect(names, parent)
 
-    //and Alias private (mnemonic:string, target:AliasTargetWrapper, parent:ParentWrapper) =
-    //    inherit Vertex([|mnemonic|], parent)
-
-    //    static let tryFindAlias (graph:DsGraph) (mnemonic:string) =
-    //        let existing = graph.TryFindVertex(mnemonic)
-    //        match existing with
-    //        | Some (:? Alias as a) -> Some a
-    //        | Some v -> failwith "Alias name is already used by other vertex"
-    //        | None -> None
-
-    //    static let addAlias(flow:Flow, target:Fqdn, alias:string) =
-    //        let map = flow.AliasDefs
-    //        if map.ContainsKey target then
-    //            map[target].Add(alias) |> verifyM $"Duplicated alias name in AliasMap [{alias}]"
-    //        else
-    //            map.Add(target, HashSet[|alias|]) |>ignore
-
-    //    member x.Target = target
-
-    //    override x.GetRelativeName(referencePath:Fqdn) =
-    //        match target with
-    //        | RealTarget r -> x.Name
-    //        | CallTarget c -> base.GetRelativeName(referencePath)
-
-    //    static member Create(mnemonic, target:AliasTargetWrapper, parent:ParentWrapper, skipAddFlowMap:bool) =
-    //        let graph:DsGraph = parent.GetGraph()
-    //        let creator() =
-    //            let alias = Alias(mnemonic, target, parent)
-    //            graph.AddVertex(alias) |> verifyM $"Duplicated child name [{mnemonic}]"
-    //            if not skipAddFlowMap then
-    //                match target with
-    //                | RealTarget r -> addAlias(r.Flow, r.NameComponents.Skip(2).ToArray(), mnemonic)
-    //                | CallTarget c ->
-    //                    match c.Parent with
-    //                    | Real rParent -> addAlias(rParent.Flow, c.NameComponents.Skip(3).ToArray(), mnemonic)
-    //                    | Flow fParent -> addAlias(fParent, c.NameComponents.Skip(2).ToArray(), mnemonic)
-    //            alias
-
-    //        let existing = tryFindAlias graph mnemonic
-    //        match existing with
-    //        | Some a -> a
-    //        | _ -> creator()
-
-
-
     /// Call 정의:
     type Call (name:string, apiItems:ApiItem seq) =
         inherit Named(name)
         member val ApiItems = apiItems.ToFSharpList()
         member val Xywh:Xywh = null with get, set
-
-
 
     type TagAddress = string
     type ApiItem (api:ApiItem4Export, tx:TagAddress, rx:TagAddress) =
@@ -307,8 +259,6 @@ module CoreModule =
 
 [<Extension>]
 type CoreExt =
-    //[<Extension>] static member GetSystem(call:Call) = call.Parent.GetSystem()
-
     [<Extension>]
     static member AddModelEdge(flow:Flow, source:string, edgetext:string, target:string) =
         let src = flow.Graph.Vertices.Find(fun f->f.Name = source)

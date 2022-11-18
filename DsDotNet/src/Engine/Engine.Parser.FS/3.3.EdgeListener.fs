@@ -20,35 +20,6 @@ type EdgeListener(parser:dsParser, helper:ParserHelper) =
     do
         base.UpdateModelSpits()
 
-
-    override x.EnterSystem(ctx:SystemContext) =
-        base.EnterSystem(ctx)
-
-        let system = helper.TheSystem.Value
-        let modelSpitCores = x._modelSpits.Select(fun spit -> spit.GetCore()).ToArray()
-        for ac in x.ParserHelper.AliasCreators do
-            let (name, parent, target) = (ac.Name, ac.Parent, ac.Target)
-            let graph = parent.GetGraph()
-            let existing = graph.TryFindVertex(name)
-            if existing.IsNone then
-                failwith "ERROR"
-                //let create target = Alias.Create(name, target, parent, true) |> ignore
-                //match target with
-                //| :? AliasTargetReal as real ->
-                //    let realTarget = modelSpitCores.OfType<Real>().First(fun r -> r.NameComponents = real.TargetFqdn)
-                //    create (RealTarget realTarget)
-                //| :? AliasTargetDirectCall as directCall ->
-                //    let apiTarget = system.ApiItems.First(fun a -> a.NameComponents = directCall.TargetFqdn)
-                //    let dummyCall = Call.CreateNowhere(apiTarget, parent)
-                //    create(CallTarget dummyCall)
-                //| :? AliasTargetApi as api ->
-                //    let dummyCall = Call.CreateNowhere(api.ApiItem4Export, parent)
-                //    create(CallTarget dummyCall)
-                //| _ -> ()
-
-        x.UpdateModelSpits()
-
-
     override x.EnterCausalPhrase(ctx:CausalPhraseContext) =
         let ci = getContextInformation ctx
         let sysNames, flowName, parenting, ns = ci.Tuples

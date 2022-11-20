@@ -33,14 +33,22 @@ module internal ToDsTextModule =
 
         [
             for es in ess do
-                [
+                let comments = ResizeArray<string>()
+                yield [
                     yield $"{tab}"
                     for i, e in es.Indexed() do
-                        let mutable s = getName e.Source
-                        let t = getName e.Target
-                        if i <> 0 then s <- ""
-                        yield $"{s} {e.EdgeSymbol} {t}"
+                        let s, t = e.Source, e.Target
+                        let mutable sn = getName s
+                        let tn = getName t
+                        if i <> 0 then sn <- ""
+                        let arrow = e.EdgeSymbol
+                        yield $"{sn} {arrow} {tn}"
+                        let comment =
+                            let sn2 = if sn <> "" then $"{sn}({s.GetType().Name})" else " "
+                            $"{sn2}{arrow} {tn}({t.GetType().Name})"
+                        comments.Add($"{comment}")
                     yield ";"
+                    yield ("\t\t// " + comments.JoinWith("") + ";")
                 ] |> String.concat ""
         ]
 

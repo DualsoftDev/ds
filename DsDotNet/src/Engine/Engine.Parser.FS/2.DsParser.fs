@@ -6,10 +6,19 @@ open Antlr4.Runtime
 open Antlr4.Runtime.Tree
 
 open Engine.Common.FS
+open Engine.Common.FS
 open Engine.Parser
 open type Engine.Parser.dsParser
 open type Engine.Parser.FS.DsParser
 open Engine.Core
+
+open System.Collections.Generic
+open System.Diagnostics
+
+open Engine.Core
+open type Engine.Parser.dsParser
+open Antlr4.Runtime.Tree
+open Antlr4.Runtime
 
 [<RequireQualifiedAccess>]
 module Fqdn =
@@ -176,46 +185,4 @@ type DsParser() =
             return names.Combine()
         }
 
-    static member getContextInformation(parserRuleContext:ParserRuleContext) =      // collectUpwardContextInformation
-        let ctx = parserRuleContext
-        let system  = LoadedSystemName.OrElse(tryGetSystemName ctx)
-        let flow      = tryFindFirstAncestor<FlowBlockContext>(ctx, true).Bind(tryFindIdentifier1FromContext)
-        let parenting = tryFindFirstAncestor<ParentingBlockContext>(ctx, true).Bind(tryFindIdentifier1FromContext)
-        let ns        = collectNameComponents(ctx).ToFSharpList()
-        ContextInformation.Create(ctx, system, flow, parenting, ns)
-
-
-[<AutoOpen>]
-module DsParserHelperModule =
-
-    let choiceParentWrapper (ci:ContextInformation) (flow:Flow option) (parenting:Real option) =
-        match ci.Parenting with
-        | Some prnt -> Real parenting.Value
-        | None -> Flow flow.Value
-    let tryFindParentWrapper (system:DsSystem) (ci:ContextInformation) =
-        option {
-            let! flowName = ci.Flow
-            match ci.Tuples with
-            | Some sys, Some flow, Some parenting, _ ->
-                let! real = tryFindReal system flow parenting
-                return Real real
-            | Some sys, Some flow, None, _ ->
-                let! f = tryFindFlow system flowName
-                return Flow f
-            | _ -> failwith "ERROR"
-        }
-
-    let tryFindToken (system:DsSystem) (ctx:CausalTokenContext):Vertex option =
-        let ci = getContextInformation ctx
-        option {
-            let! parentWrapper = tryFindParentWrapper system ci
-            let graph = parentWrapper.GetGraph()
-            match ci.Names with
-            | ofn::ofrn::[] ->      // of(r)n: other flow (real) name
-                return! graph.TryFindVertex(ci.Names.Combine())
-            | callOrAlias::[] ->
-                return! graph.TryFindVertex(callOrAlias)
-            | _ ->
-                failwith "ERROR"
-        }
 

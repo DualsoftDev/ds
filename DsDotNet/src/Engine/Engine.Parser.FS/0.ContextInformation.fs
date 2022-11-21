@@ -1,4 +1,4 @@
-namespace Engine.Parser.FS
+namespace rec Engine.Parser.FS
 
 open System.Collections.Generic
 open System.Diagnostics
@@ -18,7 +18,18 @@ module ContextInformationModule =
         Parenting: string option
         Names    : string list
         ContextType:System.Type
-    } with
+    }
+
+    type ObjectContextInformation = {
+        System   : DsSystem
+        Flow     : Flow option
+        Parenting: Real option
+        NamedContextInformation: NamedContextInformation
+    }
+
+    type NamedContextInformation with
+        // 단일 이름인 경우, Combine() 을 수행하면 특수 기호 포함된 경우, quotation 부호가 강제로 붙어서 향후의 처리에 문제가 되어서 따로 처리
+        member x.GetRawName() = getRawName x.Names false
         member x.Tuples = x.System, x.Flow, x.Parenting, x.Names
         member x.NameComponents = [
             if x.System.IsSome then yield x.System.Value
@@ -34,46 +45,32 @@ module ContextInformationModule =
         ]
         member x.FullName = x.NameComponents.ToArray().Combine()
 
-    type NamedContextInformation with
-        static member Create(parserRuleContext:ParserRuleContext, system:string option, flow, parenting, names) =
-            {   ContextType = parserRuleContext.GetType();
-                System = system; Flow = flow; Parenting = parenting; Names = names }
+    type ObjectContextInformation with
+        member x.Tuples = x.Flow, x.Parenting, x.NamedContextInformation.Names
 
-        static member CreateFullNameComparer() =
-            {   new IEqualityComparer<NamedContextInformation> with
-                    member _.Equals(x:NamedContextInformation, y:NamedContextInformation) = x.FullName = y.FullName
-                    member _.GetHashCode(x:NamedContextInformation) = x.FullName.GetHashCode() }
 
-        // 단일 이름인 경우, Combine() 을 수행하면 특수 기호 포함된 경우, quotation 부호가 강제로 붙어서 향후의 처리에 문제가 되어서 따로 처리
-        member x.GetRawName() = getRawName x.Names false
-            //match x.Names.Length with
-            //| 1 -> x.Names[0]
-            //| _ -> x.Names.Combine()
     let getContextInformation(parserRuleContext:ParserRuleContext) =      // collectUpwardContextInformation
         let ctx = parserRuleContext
         let system  = LoadedSystemName.OrElse(tryGetSystemName ctx)
         let flow      = tryFindFirstAncestor<FlowBlockContext>(ctx, true).Bind(tryFindIdentifier1FromContext)
         let parenting = tryFindFirstAncestor<ParentingBlockContext>(ctx, true).Bind(tryFindIdentifier1FromContext)
         let ns        = collectNameComponents(ctx).ToFSharpList()
-        NamedContextInformation.Create(ctx, system, flow, parenting, ns)
+        {   ContextType = ctx.GetType();
+            System = system; Flow = flow; Parenting = parenting; Names = ns }
 
-    type ObjectContextInformation = {
-        System   : DsSystem
-        Flow     : Flow option
-        Parenting: Real option
-        NamedContextInformation: NamedContextInformation
-    } with
-        static member Create(system:DsSystem, parserRuleContext) =
-            let ci = getContextInformation parserRuleContext
-            assert(system.Name = ci.System.Value)
-            let flow = ci.Flow.Bind(fun fn -> system.TryFindFlow(fn))
-            let parenting =
-                option {
-                    let! flow = flow
-                    let! parentingName = ci.Parenting
-                    return! flow.Graph.TryFindVertex<Real>(parentingName)
-                }
-            {   System = system; Flow = flow; Parenting = parenting; NamedContextInformation = ci }
+    let getObjectContextInformation(system:DsSystem) (parserRuleContext:ParserRuleContext) =
+        let ci = getContextInformation parserRuleContext
+        assert(system.Name = ci.System.Value)
+        let flow = ci.Flow.Bind(fun fn -> system.TryFindFlow(fn))
+        let parenting =
+            option {
+                let! flow = flow
+                let! parentingName = ci.Parenting
+                return! flow.Graph.TryFindVertex<Real>(parentingName)
+            }
+        { System = system; Flow = flow; Parenting = parenting; NamedContextInformation = ci }
+
+
 
 [<AutoOpen>]
 module DsParserHelperModule =

@@ -16,10 +16,12 @@ module ModelParser =
         let sysctx = parser.system()
         ParseTreeWalker.Default.Walk(listener, sysctx)
         tracefn("--- End of skeleton listener")
+        parser.Reset()
 
         listener.CreateVertices(sysctx)
 
-        listener.ProcessCausalPhrases()
+        for ctx in sysctx.Descendants<CausalPhraseContext>() do
+            listener.ProcessCausalPhrase(ctx)
 
         for ctx in sysctx.Descendants<ButtonsBlocksContext>() do
             listener.ProcessButtonsBlocks(ctx)

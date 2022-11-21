@@ -43,7 +43,6 @@ type SkeletonListener(parser:dsParser, options:ParserOptions) =
         Flow.Create(flowName, x.TheSystem) |> ignore
 
     override x.EnterParentingBlock(ctx:ParentingBlockContext) =
-        x._parentingBlockContexts.Add(ctx)
         tracefn($"Parenting: {ctx.GetText()}")
         let name = ctx.identifier1().TryGetName().Value
         let oci = x.GetObjectContextInformation(x.TheSystem, ctx)
@@ -51,22 +50,7 @@ type SkeletonListener(parser:dsParser, options:ParserOptions) =
         Real.Create(name, flow) |> ignore
 
 
-
-    override x.EnterCausalPhrase(ctx:CausalPhraseContext) =
-        x._causalPhraseContexts.Add(ctx)
-
-    override x.EnterIdentifier12Listing(ctx:Identifier12ListingContext) =
-        x._identifier12ListingContexts.Add(ctx)
-
-    override x.EnterCausalToken(ctx:CausalTokenContext) =
-        x._causalTokenContext.Add(ctx)
-
-
-
-
     override x.EnterInterfaceDef(ctx:InterfaceDefContext) =
-        x._interfaceDefContexts.Add(ctx)
-
         let system = x.TheSystem
         let interrfaceNameCtx = ctx.TryFindFirstChild<InterfaceNameContext>().Value
         let interfaceName = interrfaceNameCtx.CollectNameComponents()[0]
@@ -74,8 +58,7 @@ type SkeletonListener(parser:dsParser, options:ParserOptions) =
         // 이번 stage 에서 일단 interface 이름만 이용해서 빈 interface 객체를 생성하고,
         // TXs, RXs, Resets 은 추후에 채움..
         let api = ApiItem4Export.Create(interfaceName, system)
-        let hash = system.ApiItems4Export
-        hash.Add(api) |> ignore
+        system.ApiItems4Export.Add(api) |> ignore
 
     override x.EnterInterfaceResetDef(ctx:InterfaceResetDefContext) =
         // I1 <||> I2 <||> I3;  ==> [| I1; <||>; I2; <||>; I3; |]
@@ -101,7 +84,6 @@ type SkeletonListener(parser:dsParser, options:ParserOptions) =
 
 
     override x.EnterLoadDeviceBlock(ctx:LoadDeviceBlockContext) =
-        x._deviceBlockContexts.Add(ctx)
         let fileSpecCtx = ctx.TryFindFirstChild<FileSpecContext>().Value
         let absoluteFilePath, simpleFilePath = x.GetFilePath(fileSpecCtx)
         let device =
@@ -110,7 +92,6 @@ type SkeletonListener(parser:dsParser, options:ParserOptions) =
         x.TheSystem.Devices.Add(device) |> ignore
 
     override x.EnterLoadExternalSystemBlock(ctx:LoadExternalSystemBlockContext) =
-        x._externalSystemBlockContexts.Add(ctx)
         let fileSpecCtx = ctx.TryFindFirstChild<FileSpecContext>().Value
         let absoluteFilePath, simpleFilePath = x.GetFilePath(fileSpecCtx)
         let external =
@@ -119,12 +100,6 @@ type SkeletonListener(parser:dsParser, options:ParserOptions) =
             let loadedName = ctx.CollectNameComponents().Combine()
             fwdLoadExternalSystem x.TheSystem (absoluteFilePath, simpleFilePath) loadedName
         x.TheSystem.Devices.Add(external) |> ignore
-
-    override x.EnterAliasListing(ctx:AliasListingContext) =
-        x._aliasListingContexts.Add(ctx)
-
-    override x.EnterCallListing(ctx:CallListingContext) =
-        x._callListingContexts.Add(ctx)
 
 
     member x.CreateVertices(ctx:SystemContext) = createVertices x ctx
@@ -236,14 +211,6 @@ module ParserRuleContextModule =
         } |> ignore
 
 
-    let private createCallDefs (x:SkeletonListener) =
-        x._callListingContexts.Iter(createCallDef x.TheSystem)
-
-    let private fillInterfaceDefs (x:SkeletonListener) =
-        x._interfaceDefContexts.Iter(fun ctx ->
-            fillInterfaceDef x.TheSystem ctx |> ignore)
-
-
 
     let private createAliasDef (x:SkeletonListener) (ctx:AliasListingContext) =
         let system = x.TheSystem
@@ -283,16 +250,9 @@ module ParserRuleContextModule =
 
             flow.AliasDefs[aliasKeys].AliasTarget <- target
         }
-    let private createAliasDefs (x:SkeletonListener) =
-        x._aliasListingContexts.Iter(fun ctx ->
-            createAliasDef x ctx |> ignore)
-    let private fillAliasDefsTarget (x:SkeletonListener) =
-        x._aliasListingContexts.Iter(fun ctx ->
-            fillTargetOfAliasDef x ctx |> ignore)
-
-
     let createVertices (x:SkeletonListener) (ctx:SystemContext) =
         let system = x.TheSystem
+        let sysctx = x.AntlrParser.system()
 
         let getContainerChildPair(ctx:ParserRuleContext) : ParentWrapper option * NamedContextInformation =
             let ci = x.GetContextInformation(ctx)
@@ -302,8 +262,8 @@ module ParserRuleContextModule =
 
         let tokenCreator (cycle:int) =
             let candidateCtxs:ParserRuleContext list = [
-                yield! x._identifier12ListingContexts.Cast<ParserRuleContext>()
-                yield! x._causalTokenContext.Cast<ParserRuleContext>()
+                yield! sysctx.Descendants<Identifier12ListingContext>().Cast<ParserRuleContext>()
+                yield! sysctx.Descendants<CausalTokenContext>().Cast<ParserRuleContext>()
             ]
 
             let isCallName (parentWrapper:ParentWrapper) name = tryFindCall system name |> Option.isSome
@@ -378,13 +338,23 @@ module ParserRuleContextModule =
 
 
 
+        for ctx in sysctx.Descendants<CallListingContext>() do
+            createCallDef x.TheSystem ctx
 
-        createCallDefs x
-        createAliasDefs x
+
+        for ctx in sysctx.Descendants<AliasListingContext>() do
+            createAliasDef x ctx |> ignore
+
         createNonParentedRealVertex()
-        fillAliasDefsTarget x
+
+        for ctx in sysctx.Descendants<AliasListingContext>() do
+            fillTargetOfAliasDef x ctx |> ignore
+
         createCallOrAliasVertex()
-        fillInterfaceDefs x
+
+
+        for ctx in sysctx.Descendants<InterfaceDefContext>() do
+            fillInterfaceDef x.TheSystem ctx |> ignore
 
         guardedValidateSystem system
 

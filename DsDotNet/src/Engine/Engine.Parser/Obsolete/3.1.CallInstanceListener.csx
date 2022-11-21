@@ -49,7 +49,7 @@ namespace Engine.Parser
         /// <param name="ctx"></param>
         override public void EnterIdentifier1Listing(Identifier1ListingContext ctx)
         {
-            // parenting 이 존재할 때는 이미 3.0.SkeletonListener.EnterParenting 에서 이미 수행했으므로 skip
+            // parenting 이 존재할 때는 이미 3.0.DsParserListener.EnterParenting 에서 이미 수행했으므로 skip
             if (_parenting != null)
                 return;
 
@@ -57,7 +57,7 @@ namespace Engine.Parser
             var cp = _rootFlow.FindFirst<CallPrototype>(ParserHelper.GetCurrentPathComponents(callName));
             if (cp == null)
             {
-                // Real listing : 3.0.SkeletonListener 에서 이미 만들어져 있어야 한다.
+                // Real listing : 3.0.DsParserListener 에서 이미 만들어져 있어야 한다.
                 Assert(_rootFlow.InstanceMap.ContainsKey(callName));
             }
             else

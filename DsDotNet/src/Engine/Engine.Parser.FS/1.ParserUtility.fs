@@ -149,13 +149,6 @@ type ParseTreePredicate = IParseTree->bool
 type RuleExtractor = dsParser -> RuleContext
 
 type DsParser() =
-
-    (*
-         TODO: fix me!!
-         - Dangerous shared static member: Multithreading ¾ÈµÊ
-     *)
-    static member val LoadedSystemName:string option = None with get, set
-
     static member ParseText (text:string, extractor:RuleExtractor, ?throwOnError) =
         let throwOnError = throwOnError |? true
         let inputStream = new AntlrInputStream(text)

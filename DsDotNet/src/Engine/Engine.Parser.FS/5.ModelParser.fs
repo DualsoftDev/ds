@@ -11,33 +11,48 @@ open type Engine.Parser.FS.DsParser
 
 module ModelParser =
     let mutable initialized = false
-    let Walk(parser:dsParser, helper:ParserHelper) =
-        let sListener = new SkeletonListener(parser, helper)
-        ParseTreeWalker.Default.Walk(sListener, parser.system())
+    let Walk(parser:dsParser, options:ParserOptions) =
+        let listener = new DsParserListener(parser, options)
+        let sysctx = parser.system()
+        ParseTreeWalker.Default.Walk(listener, sysctx)
         tracefn("--- End of skeleton listener")
+        parser.Reset()
 
+        listener.CreateVertices(sysctx)
 
-        let edgeListener = new EdgeListener(parser, helper)
-        ParseTreeWalker.Default.Walk(edgeListener, parser.system())
-        tracefn("--- End of edge listener")
+        for ctx in sysctx.Descendants<CausalPhraseContext>() do
+            listener.ProcessCausalPhrase(ctx)
 
-        let etcListener = new EtcListener(parser, helper)
-        ParseTreeWalker.Default.Walk(etcListener, parser.system())
-        tracefn("--- End of etc listener")
+        for ctx in sysctx.Descendants<ButtonsBlocksContext>() do
+            listener.ProcessButtonsBlocks(ctx)
 
-    let ParseFromString2(text:string, options:ParserOptions):ParserHelper =
+        for ctx in sysctx.Descendants<SafetyBlockContext>() do
+            listener.ProcessSafetyBlock(ctx)
+
+        for ctx in sysctx.Descendants<VariableDefContext>() do
+            listener.ProcessVariableDef(ctx)
+
+        for ctx in sysctx.Descendants<CommandDefContext>() do
+            listener.ProcessCommandDef(ctx)
+
+        for ctx in sysctx.Descendants<ObserveDefContext>() do
+            listener.ProcessObserveDef(ctx)
+
+        listener.ProcessLayouts(sysctx)
+
+        listener
+
+    let ParseFromString2(text:string, options:ParserOptions):DsParserListener =
         assert(initialized)
         let (parser, errors) = DsParser.FromDocument(text)
-        let helper = new ParserHelper(options)
+        let listener = Walk(parser, options)
 
-        Walk(parser, helper)
-
-        let system = helper.TheSystem
+        let system = listener.TheSystem
         system.CreateMRIEdgesTransitiveClosure()
 
         system.Validate() |> ignore
 
-        helper
+        listener
 
 
     let ParseFromString(text:string, options:ParserOptions):DsSystem = ParseFromString2(text, options).TheSystem

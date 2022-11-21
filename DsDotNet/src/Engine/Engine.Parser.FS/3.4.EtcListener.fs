@@ -73,7 +73,7 @@ module EtcListenerModule =
                         (key, values)
                 ]
 
-            let sysNames, flowName, parenting_, ns_ = (x.getContextInformation ctx).Tuples
+            let sysNames, flowName, parenting_, ns_ = (x.GetContextInformation ctx).Tuples
             let curSystem = x.TheSystem
 
             let test =

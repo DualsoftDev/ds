@@ -17,6 +17,8 @@ module ModelParser =
         ParseTreeWalker.Default.Walk(listener, sysctx)
         tracefn("--- End of skeleton listener")
 
+        listener.CreateVertices(sysctx)
+
         listener.ProcessCausalPhrases()
 
         for ctx in sysctx.Descendants<ButtonsBlocksContext>() do

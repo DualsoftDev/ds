@@ -16,8 +16,8 @@ module SkeletonListenerModule =
             for ctx in x._causalPhraseContexts do
 
                 let system = x.TheSystem
-                let ci = x.getContextInformation ctx
-                let oci = x.getObjectContextInformation system ctx
+                let ci = x.GetContextInformation ctx
+                let oci = x.GetObjectContextInformation(system, ctx)
                 let sysNames, flowName, parenting, ns = ci.Tuples
 
                 let children = ctx.children.ToArray();      // (CausalTokensDNF CausalOperator)+ CausalTokensDNF

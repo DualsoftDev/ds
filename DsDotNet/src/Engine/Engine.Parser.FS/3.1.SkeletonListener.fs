@@ -46,7 +46,7 @@ type SkeletonListener(parser:dsParser, options:ParserOptions) =
         x._parentingBlockContexts.Add(ctx)
         tracefn($"Parenting: {ctx.GetText()}")
         let name = ctx.identifier1().TryGetName().Value
-        let oci = x.getObjectContextInformation x.TheSystem (ctx)
+        let oci = x.GetObjectContextInformation(x.TheSystem, ctx)
         let flow = oci.Flow.Value
         Real.Create(name, flow) |> ignore
 
@@ -126,12 +126,176 @@ type SkeletonListener(parser:dsParser, options:ParserOptions) =
     override x.EnterCallListing(ctx:CallListingContext) =
         x._callListingContexts.Add(ctx)
 
-    override x.ExitSystem(ctx:SystemContext) =
-        base.ExitSystem(ctx)
+
+    member x.CreateVertices(ctx:SystemContext) = createVertices x ctx
+
+    member x.GetContextInformation(parserRuleContext:ParserRuleContext) =      // collectUpwardContextInformation
+        let ctx = parserRuleContext
+        let system =
+            if x.RuleDictionary.ContainsKey(parserRuleContext) then
+                Some x.RuleDictionary[parserRuleContext]
+            else
+                parserRuleContext.TryGetSystemName()
+
+        let flow      = ctx.TryFindFirstAscendant<FlowBlockContext>(true).Bind(fun b -> b.TryFindIdentifier1FromContext())
+        let parenting = ctx.TryFindFirstAscendant<ParentingBlockContext>(true).Bind(fun b -> b.TryFindIdentifier1FromContext())
+        let ns        = ctx.CollectNameComponents().ToFSharpList()
+        {   ContextType = ctx.GetType();
+            System = system; Flow = flow; Parenting = parenting; Names = ns }
+
+    member x.GetObjectContextInformation(system:DsSystem, parserRuleContext:ParserRuleContext) =
+        let ci = x.GetContextInformation(parserRuleContext)
+        assert(system.Name = ci.System.Value)
+        let flow = ci.Flow.Bind(fun fn -> system.TryFindFlow(fn))
+        let parenting =
+            option {
+                let! flow = flow
+                let! parentingName = ci.Parenting
+                return! flow.Graph.TryFindVertex<Real>(parentingName)
+            }
+        { System = system; Flow = flow; Parenting = parenting; NamedContextInformation = ci }
+
+    member x.TryFindVertex(ctx:CausalTokenContext):Vertex option =
+        let ci = x.GetContextInformation ctx
+        option {
+            let! parentWrapper = x.TheSystem.TryFindParentWrapper(ci)
+            let graph = parentWrapper.GetGraph()
+            match ci.Names with
+            | ofn_::ofrn_::[] ->      // of(r)n: other flow (real) name
+                return! graph.TryFindVertex(ci.Names.Combine())
+            | callOrAlias::[] ->
+                return! graph.TryFindVertex(callOrAlias)
+            | _ ->
+                failwith "ERROR"
+        }
+
+
+[<AutoOpen>]
+module ParserRuleContextModule =
+    let private createCallDef (system:DsSystem) (ctx:CallListingContext) =
+        let callName =  ctx.TryFindFirstChild<CallNameContext>().Map(getText).Value
+        let apiDefCtxs = ctx.Descendants<CallApiDefContext>().ToArray()
+        let getAddress (addressCtx:IParseTree) =
+            addressCtx.TryFindFirstChild<AddressItemContext>().Map(getText).Value
+        let apiItems =
+            [   for apiDefCtx in apiDefCtxs do
+                let apiPath = apiDefCtx.CollectNameComponents() |> List.ofSeq // e.g ["A"; "+"]
+                match apiPath with
+                | device::api::[] ->
+                    let apiItem =
+                        option {
+                            let! apiPoint = tryFindCallingApiItem system device api
+                            let! addressCtx = ctx.TryFindFirstChild<AddressTxRxContext>()
+                            let! txAddressCtx = addressCtx.TryFindFirstChild<TxContext>()
+                            let! rxAddressCtx = addressCtx.TryFindFirstChild<RxContext>()
+                            let tx = getAddress(txAddressCtx)
+                            let rx = getAddress(rxAddressCtx)
+
+                            tracefn $"TX={tx} RX={rx}"
+                            return ApiItem(apiPoint, tx, rx)
+                        }
+                    match apiItem with
+                    | Some apiItem -> yield apiItem
+                    | _ -> failwith "ERROR"
+
+                | _ -> failwith "ERROR"
+            ]
+        assert(apiItems.Any())
+        Call(callName, apiItems) |> system.Calls.Add
+
+
+
+    let private fillInterfaceDef (system:DsSystem) (ctx:InterfaceDefContext) =
+        let findSegments(fqdns:Fqdn[]):Real[] =
+            fqdns
+                .Where(fun fqdn -> fqdn <> null)
+                .Select(fun s -> system.FindGraphVertex<Real>(s))
+                .Tap(fun x -> assert(not (isItNull x)))
+                .ToArray()
+        let isWildcard(cc:Fqdn):bool = cc.Length = 1 && cc[0] = "_"
+        let collectCallComponents(ctx:CallComponentsContext):Fqdn[] =
+            ctx.Descendants<Identifier123Context>()
+                .Select(collectNameComponents)
+                .ToArray()
+        option {
+            let! interrfaceNameCtx = ctx.TryFindFirstChild<InterfaceNameContext>()
+            let interfaceName = interrfaceNameCtx.CollectNameComponents()[0]
+            let! api = system.ApiItems4Export.TryFind(nameEq interfaceName)
+            let ser =   // { start ~ end ~ reset }
+                ctx.Descendants<CallComponentsContext>()
+                    .Map(collectCallComponents)
+                    .Tap(fun callComponents -> assert(callComponents.All(fun cc -> cc.Length = 2 || isWildcard(cc))))
+                    .Select(fun callCompnents -> callCompnents.Select(fun cc -> if isWildcard(cc) then null else cc.Prepend(system.Name).ToArray()).ToArray())
+                    .ToArray()
+
+            let n = ser.Length
+
+            assert(n = 2 || n = 3)
+            api.AddTXs(findSegments(ser[0])) |> ignore
+            api.AddRXs(findSegments(ser[1])) |> ignore
+        } |> ignore
+
+
+    let private createCallDefs (x:SkeletonListener) =
+        x._callListingContexts.Iter(createCallDef x.TheSystem)
+
+    let private fillInterfaceDefs (x:SkeletonListener) =
+        x._interfaceDefContexts.Iter(fun ctx ->
+            fillInterfaceDef x.TheSystem ctx |> ignore)
+
+
+
+    let private createAliasDef (x:SkeletonListener) (ctx:AliasListingContext) =
+        let system = x.TheSystem
+        let ci = x.GetContextInformation ctx
+        option {
+            let! flow = tryFindFlow system ci.Flow.Value
+            let! aliasKeys = ctx.TryFindFirstChild<AliasDefContext>().Map(collectNameComponents)
+            let mnemonics = ctx.Descendants<AliasMnemonicContext>().Select(getText).ToArray()
+            let ad = AliasDef(aliasKeys, None, mnemonics)
+            flow.AliasDefs.Add(aliasKeys, ad)
+            return ad
+        }
+
+    let private fillTargetOfAliasDef (x:SkeletonListener) (ctx:AliasListingContext) =
+        let system = x.TheSystem
+        let ci = x.GetContextInformation ctx
+        option {
+            let! flow = tryFindFlow system ci.Flow.Value
+            let mnemonics = ctx.Descendants<AliasMnemonicContext>().Select(getText).ToArray()
+            let! aliasKeys = ctx.TryFindFirstChild<AliasDefContext>().Map(collectNameComponents)
+            let target =
+                match aliasKeys.ToFSharpList() with
+                | t::[] ->
+                    let realTargetCandidate = flow.Graph.TryFindVertex<Real>(t)
+                    let callTargetCandidate = tryFindCall system t
+                    match realTargetCandidate, callTargetCandidate with
+                    | Some real, None -> Some (RealTarget real)
+                    | None, Some call -> Some (CallTarget call)
+                    | Some _, Some _ -> failwith "Name duplicated."
+                    | _ -> failwith "Failed to find"
+                | otherFlow::real::[] ->
+                    match tryFindReal system otherFlow real with
+                    | Some otherFlowReal -> Some (RealTarget otherFlowReal)
+                    | _ -> failwith "Failed to find"
+                | _ ->
+                    failwith "ERROR"
+
+            flow.AliasDefs[aliasKeys].AliasTarget <- target
+        }
+    let private createAliasDefs (x:SkeletonListener) =
+        x._aliasListingContexts.Iter(fun ctx ->
+            createAliasDef x ctx |> ignore)
+    let private fillAliasDefsTarget (x:SkeletonListener) =
+        x._aliasListingContexts.Iter(fun ctx ->
+            fillTargetOfAliasDef x ctx |> ignore)
+
+
+    let createVertices (x:SkeletonListener) (ctx:SystemContext) =
         let system = x.TheSystem
 
         let getContainerChildPair(ctx:ParserRuleContext) : ParentWrapper option * NamedContextInformation =
-            let ci = x.getContextInformation(ctx)
+            let ci = x.GetContextInformation(ctx)
             let system = x.TheSystem
             let parentWrapper = system.TryFindParentWrapper(ci)
             parentWrapper, ci
@@ -216,172 +380,12 @@ type SkeletonListener(parser:dsParser, options:ParserOptions) =
 
 
         createCallDefs x
-        x.createAliasDefs x
+        createAliasDefs x
         createNonParentedRealVertex()
-        x.fillAliasDefsTarget x
+        fillAliasDefsTarget x
         createCallOrAliasVertex()
         fillInterfaceDefs x
 
         guardedValidateSystem system
 
         //dumpCausalTokens "---- All Causal token elements"
-
-    member x.getContextInformation(parserRuleContext:ParserRuleContext) =      // collectUpwardContextInformation
-        let ctx = parserRuleContext
-        let system =
-            if x.RuleDictionary.ContainsKey(parserRuleContext) then
-                Some x.RuleDictionary[parserRuleContext]
-            else
-                parserRuleContext.TryGetSystemName()
-
-        let flow      = ctx.TryFindFirstAscendant<FlowBlockContext>(true).Bind(fun b -> b.TryFindIdentifier1FromContext())
-        let parenting = ctx.TryFindFirstAscendant<ParentingBlockContext>(true).Bind(fun b -> b.TryFindIdentifier1FromContext())
-        let ns        = ctx.CollectNameComponents().ToFSharpList()
-        {   ContextType = ctx.GetType();
-            System = system; Flow = flow; Parenting = parenting; Names = ns }
-
-    member x.getObjectContextInformation(system:DsSystem) (parserRuleContext:ParserRuleContext) =
-        let ci = x.getContextInformation(parserRuleContext)
-        assert(system.Name = ci.System.Value)
-        let flow = ci.Flow.Bind(fun fn -> system.TryFindFlow(fn))
-        let parenting =
-            option {
-                let! flow = flow
-                let! parentingName = ci.Parenting
-                return! flow.Graph.TryFindVertex<Real>(parentingName)
-            }
-        { System = system; Flow = flow; Parenting = parenting; NamedContextInformation = ci }
-
-
-    member x.createAliasDef (system:DsSystem) (ctx:AliasListingContext) =
-        let ci = x.getContextInformation ctx
-        option {
-            let! flow = tryFindFlow system ci.Flow.Value
-            let! aliasKeys = ctx.TryFindFirstChild<AliasDefContext>().Map(collectNameComponents)
-            let mnemonics = ctx.Descendants<AliasMnemonicContext>().Select(getText).ToArray()
-            let ad = AliasDef(aliasKeys, None, mnemonics)
-            flow.AliasDefs.Add(aliasKeys, ad)
-            return ad
-        }
-
-    member x.fillTargetOfAliasDef (system:DsSystem) (ctx:AliasListingContext) =
-        let ci = x.getContextInformation ctx
-        option {
-            let! flow = tryFindFlow system ci.Flow.Value
-            let mnemonics = ctx.Descendants<AliasMnemonicContext>().Select(getText).ToArray()
-            let! aliasKeys = ctx.TryFindFirstChild<AliasDefContext>().Map(collectNameComponents)
-            let target =
-                match aliasKeys.ToFSharpList() with
-                | t::[] ->
-                    let realTargetCandidate = flow.Graph.TryFindVertex<Real>(t)
-                    let callTargetCandidate = tryFindCall system t
-                    match realTargetCandidate, callTargetCandidate with
-                    | Some real, None -> Some (RealTarget real)
-                    | None, Some call -> Some (CallTarget call)
-                    | Some _, Some _ -> failwith "Name duplicated."
-                    | _ -> failwith "Failed to find"
-                | otherFlow::real::[] ->
-                    match tryFindReal system otherFlow real with
-                    | Some otherFlowReal -> Some (RealTarget otherFlowReal)
-                    | _ -> failwith "Failed to find"
-                | _ ->
-                    failwith "ERROR"
-
-            flow.AliasDefs[aliasKeys].AliasTarget <- target
-        }
-    member x.createAliasDefs (helper:SkeletonListener) =
-        helper._aliasListingContexts.Iter(fun ctx ->
-            x.createAliasDef helper.TheSystem ctx |> ignore)
-    member x.fillAliasDefsTarget (helper:SkeletonListener) =
-        helper._aliasListingContexts.Iter(fun ctx ->
-            x.fillTargetOfAliasDef helper.TheSystem ctx |> ignore)
-
-    member x.TryFindVertex(ctx:CausalTokenContext):Vertex option =
-        let ci = x.getContextInformation ctx
-        option {
-            let! parentWrapper = x.TheSystem.TryFindParentWrapper(ci)
-            let graph = parentWrapper.GetGraph()
-            match ci.Names with
-            | ofn_::ofrn_::[] ->      // of(r)n: other flow (real) name
-                return! graph.TryFindVertex(ci.Names.Combine())
-            | callOrAlias::[] ->
-                return! graph.TryFindVertex(callOrAlias)
-            | _ ->
-                failwith "ERROR"
-        }
-
-
-[<AutoOpen>]
-module ParserRuleContextModule =
-
-
-        let createCallDef (system:DsSystem) (ctx:CallListingContext) =
-            let callName =  ctx.TryFindFirstChild<CallNameContext>().Map(getText).Value
-            let apiDefCtxs = ctx.Descendants<CallApiDefContext>().ToArray()
-            let getAddress (addressCtx:IParseTree) =
-                addressCtx.TryFindFirstChild<AddressItemContext>().Map(getText).Value
-            let apiItems =
-                [   for apiDefCtx in apiDefCtxs do
-                    let apiPath = apiDefCtx.CollectNameComponents() |> List.ofSeq // e.g ["A"; "+"]
-                    match apiPath with
-                    | device::api::[] ->
-                        let apiItem =
-                            option {
-                                let! apiPoint = tryFindCallingApiItem system device api
-                                let! addressCtx = ctx.TryFindFirstChild<AddressTxRxContext>()
-                                let! txAddressCtx = addressCtx.TryFindFirstChild<TxContext>()
-                                let! rxAddressCtx = addressCtx.TryFindFirstChild<RxContext>()
-                                let tx = getAddress(txAddressCtx)
-                                let rx = getAddress(rxAddressCtx)
-
-                                tracefn $"TX={tx} RX={rx}"
-                                return ApiItem(apiPoint, tx, rx)
-                            }
-                        match apiItem with
-                        | Some apiItem -> yield apiItem
-                        | _ -> failwith "ERROR"
-
-                    | _ -> failwith "ERROR"
-                ]
-            assert(apiItems.Any())
-            Call(callName, apiItems) |> system.Calls.Add
-
-
-
-        let fillInterfaceDef (system:DsSystem) (ctx:InterfaceDefContext) =
-            let findSegments(fqdns:Fqdn[]):Real[] =
-                fqdns
-                    .Where(fun fqdn -> fqdn <> null)
-                    .Select(fun s -> system.FindGraphVertex<Real>(s))
-                    .Tap(fun x -> assert(not (isItNull x)))
-                    .ToArray()
-            let isWildcard(cc:Fqdn):bool = cc.Length = 1 && cc[0] = "_"
-            let collectCallComponents(ctx:CallComponentsContext):Fqdn[] =
-                ctx.Descendants<Identifier123Context>()
-                    .Select(collectNameComponents)
-                    .ToArray()
-            option {
-                let! interrfaceNameCtx = ctx.TryFindFirstChild<InterfaceNameContext>()
-                let interfaceName = interrfaceNameCtx.CollectNameComponents()[0]
-                let! api = system.ApiItems4Export.TryFind(nameEq interfaceName)
-                let ser =   // { start ~ end ~ reset }
-                    ctx.Descendants<CallComponentsContext>()
-                        .Map(collectCallComponents)
-                        .Tap(fun callComponents -> assert(callComponents.All(fun cc -> cc.Length = 2 || isWildcard(cc))))
-                        .Select(fun callCompnents -> callCompnents.Select(fun cc -> if isWildcard(cc) then null else cc.Prepend(system.Name).ToArray()).ToArray())
-                        .ToArray()
-
-                let n = ser.Length
-
-                assert(n = 2 || n = 3)
-                api.AddTXs(findSegments(ser[0])) |> ignore
-                api.AddRXs(findSegments(ser[1])) |> ignore
-            } |> ignore
-
-
-        let createCallDefs (helper:SkeletonListener) =
-            helper._callListingContexts.Iter(createCallDef helper.TheSystem)
-
-        let fillInterfaceDefs (helper:SkeletonListener) =
-            helper._interfaceDefContexts.Iter(fun ctx ->
-                fillInterfaceDef helper.TheSystem ctx |> ignore)

@@ -20,7 +20,7 @@ open System.Collections.Generic
 /// Element path map 구성
 ///   - Parenting, Child, alias, Api
 /// </summary>
-type SkeletonListener(parser:dsParser, options:ParserOptions) =
+type DsParserListener(parser:dsParser, options:ParserOptions) =
     inherit dsParserBaseListener()
     do
         parser.Reset()
@@ -283,7 +283,7 @@ module ParserRuleContextModule =
 
 
 
-    let private createAliasDef (x:SkeletonListener) (ctx:AliasListingContext) =
+    let private createAliasDef (x:DsParserListener) (ctx:AliasListingContext) =
         let system = x.TheSystem
         let ci = x.GetContextInformation ctx
         option {
@@ -295,7 +295,7 @@ module ParserRuleContextModule =
             return ad
         }
 
-    let private fillTargetOfAliasDef (x:SkeletonListener) (ctx:AliasListingContext) =
+    let private fillTargetOfAliasDef (x:DsParserListener) (ctx:AliasListingContext) =
         let system = x.TheSystem
         let ci = x.GetContextInformation ctx
         option {
@@ -321,7 +321,7 @@ module ParserRuleContextModule =
 
             flow.AliasDefs[aliasKeys].AliasTarget <- target
         }
-    let createVertices (x:SkeletonListener) (ctx:SystemContext) =
+    let createVertices (x:DsParserListener) (ctx:SystemContext) =
         let system = x.TheSystem
         let sysctx = x.AntlrParser.system()
 

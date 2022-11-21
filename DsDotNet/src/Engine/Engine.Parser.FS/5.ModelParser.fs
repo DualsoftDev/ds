@@ -12,7 +12,7 @@ open type Engine.Parser.FS.DsParser
 module ModelParser =
     let mutable initialized = false
     let Walk(parser:dsParser, options:ParserOptions) =
-        let listener = new SkeletonListener(parser, options)
+        let listener = new DsParserListener(parser, options)
         let sysctx = parser.system()
         ParseTreeWalker.Default.Walk(listener, sysctx)
         tracefn("--- End of skeleton listener")
@@ -42,7 +42,7 @@ module ModelParser =
 
         listener
 
-    let ParseFromString2(text:string, options:ParserOptions):SkeletonListener =
+    let ParseFromString2(text:string, options:ParserOptions):DsParserListener =
         assert(initialized)
         let (parser, errors) = DsParser.FromDocument(text)
         let listener = Walk(parser, options)

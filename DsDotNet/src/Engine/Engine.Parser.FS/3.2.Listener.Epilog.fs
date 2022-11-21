@@ -15,7 +15,7 @@ open System.Collections.Generic
 module EtcListenerModule =
 
     (* 모든 vertex 가 생성 된 이후, edge 연결 작업 수행 *)
-    type SkeletonListener with
+    type DsParserListener with
         member x.ProcessButtonsBlocks(ctx:ButtonsBlocksContext) =
             let first = ctx.TryFindFirstChild<ParserRuleContext>().Value     // {Emergency, Auto, Start, Reset}ButtonsContext
             let system = x.TheSystem

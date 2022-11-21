@@ -11,6 +11,7 @@ open Engine.Parser
 open Engine.Core
 open type Engine.Parser.dsParser
 open type DsParser
+open System.Collections.Generic
 
 
 /// <summary>
@@ -20,11 +21,33 @@ open type DsParser
 ///   - Parenting, Child, alias, Api
 /// </summary>
 type SkeletonListener(parser:dsParser, options:ParserOptions) =
-    inherit ListenerBase(parser, options)
+    inherit dsParserBaseListener()
+    do
+        parser.Reset()
+
+    member val OptLoadedSystemName:string option = None with get, set
+    member val ParserOptions = options with get, set
+    member val AntlrParser = parser
+
+    /// button category 중복 check 용
+    member val ButtonCategories = HashSet<(DsSystem*string)>()
+
+    member val TheSystem:DsSystem = getNull<DsSystem>() with get, set
+
+    member val internal RuleDictionary = Dictionary<ParserRuleContext, string>()
+
+    override x.EnterEveryRule(ctx:ParserRuleContext) =
+        match x.OptLoadedSystemName with
+        | Some systemName -> x.RuleDictionary.Add(ctx, systemName)
+        | None -> ()
 
 
     override x.EnterSystem(ctx:SystemContext) =
-        base.EnterSystem(ctx)
+        match options.LoadedSystemName with
+        | Some systemName ->
+                x.OptLoadedSystemName <- Some systemName
+                x.RuleDictionary.Add(ctx, systemName)
+        | _ -> ()
 
         match ctx.TryFindFirstChild<SysBlockContext>() with
         | Some sysBlockCtx_ ->
@@ -37,6 +60,8 @@ type SkeletonListener(parser:dsParser, options:ParserOptions) =
             tracefn($"System: {name}")
         | None ->
             failwith "ERROR"
+
+    override x.ExitSystem(ctx:SystemContext) = x.OptLoadedSystemName <- None
 
     override x.EnterFlowBlock(ctx:FlowBlockContext) =
         let flowName = ctx.identifier1().GetText().DeQuoteOnDemand()
@@ -144,6 +169,52 @@ type SkeletonListener(parser:dsParser, options:ParserOptions) =
                 failwith "ERROR"
         }
 
+
+    member x.ProcessCausalPhrase(ctx:CausalPhraseContext) =
+        let system = x.TheSystem
+        let ci = x.GetContextInformation ctx
+        let oci = x.GetObjectContextInformation(system, ctx)
+        let sysNames, flowName, parenting, ns = ci.Tuples
+
+        let children = ctx.children.ToArray();      // (CausalTokensDNF CausalOperator)+ CausalTokensDNF
+        for (n, ctx) in children|> Seq.indexed do
+            assert( if n % 2 = 0 then ctx :? CausalTokensDNFContext else ctx :? CausalOperatorContext)
+
+
+
+        (*
+            children[0] > children[2] > children[4]     where (child[1] = '>', child[3] = '>')
+            ===> children[0] > children[2],
+                    children[2] > children[4]
+
+            e.g "A, B > C, D > E"
+            ===> children[0] = {A; B},
+                    children[2] = {C; D},
+                    children[4] = {E},
+
+            todo: "A, B" 와 "A ? B" 에 대한 구분 없음.
+            *)
+        for triple in (children |> Array.windowed2 3 2) do
+            if triple.Length = 3 then
+                let lefts = triple[0].Descendants<CausalTokenContext>()
+                let op = triple[1].GetText()
+                let rights = triple[2].Descendants<CausalTokenContext>()
+
+                for left in lefts do
+                    for right in rights do
+                        let l = x.TryFindVertex(left)
+                        let r = x.TryFindVertex(right)
+                        match l, r with
+                        | Some l, Some r ->
+                            match oci.Parenting, oci.Flow with
+                            | Some parenting, _ -> parenting.CreateEdges(ModelingEdgeInfo(l, op, r))
+                            | None, Some flow -> flow.CreateEdges(ModelingEdgeInfo(l, op, r))
+                            | _ -> failwith "ERROR"
+                            |> ignore
+                        | None, _ ->
+                            raise <| ParserException($"ERROR: failed to find [{left.GetText()}]", ctx)
+                        | _, None ->
+                            raise <| ParserException($"ERROR: failed to find [{right.GetText()}]", ctx)
 
 [<AutoOpen>]
 module ParserRuleContextModule =

@@ -26,11 +26,11 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
     override x.EnterSystem(ctx:SystemContext) =
         base.EnterSystem(ctx)
 
-        match tryFindFirstChild<SysBlockContext>(ctx) with
+        match ctx.tryFindFirstChild<SysBlockContext>() with
         | Some sysBlockCtx_ ->
             let name = helper.ParserOptions.LoadedSystemName |? (ctx.systemName().GetText().DeQuoteOnDemand())
             let host =
-                match tryFindFirstChild<HostContext>(ctx) with
+                match ctx.tryFindFirstChild<HostContext>() with
                 | Some hostCtx -> hostCtx.GetText()
                 | None -> null
             //let name = helper.ParserOptions.LoadedSystemName
@@ -46,7 +46,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
     override x.EnterParentingBlock(ctx:ParentingBlockContext) =
         helper._parentingBlockContexts.Add(ctx)
         tracefn($"Parenting: {ctx.GetText()}")
-        let name = tryGetName(ctx.identifier1()).Value
+        let name = ctx.identifier1().tryGetName().Value
         helper._parenting <- Real.Create(name, helper._flow)
 
 
@@ -67,8 +67,8 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
         helper._interfaceDefContexts.Add(ctx)
 
         let system = helper.TheSystem
-        let interrfaceNameCtx = tryFindFirstChild<InterfaceNameContext>(ctx).Value
-        let interfaceName = collectNameComponents(interrfaceNameCtx)[0]
+        let interrfaceNameCtx = ctx.tryFindFirstChild<InterfaceNameContext>().Value
+        let interfaceName = interrfaceNameCtx.collectNameComponents()[0]
 
         // 이번 stage 에서 일단 interface 이름만 이용해서 빈 interface 객체를 생성하고,
         // TXs, RXs, Resets 은 추후에 채움..
@@ -92,7 +92,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
                 ()
 
     member private x.GetFilePath(fileSpecCtx:FileSpecContext) =
-        let simpleFilePath = tryFindFirstChild<FilePathContext>(fileSpecCtx).Value.GetText().DeQuoteOnDemand()
+        let simpleFilePath = fileSpecCtx.tryFindFirstChild<FilePathContext>().Value.GetText().DeQuoteOnDemand()
         let absoluteFilePath =
             let dir = helper.ParserOptions.ReferencePath
             [simpleFilePath; $"{dir}\\{simpleFilePath}"].First(fun f -> File.Exists(f))
@@ -101,21 +101,21 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
 
     override x.EnterLoadDeviceBlock(ctx:LoadDeviceBlockContext) =
         helper._deviceBlockContexts.Add(ctx)
-        let fileSpecCtx = tryFindFirstChild<FileSpecContext>(ctx).Value
+        let fileSpecCtx = ctx.tryFindFirstChild<FileSpecContext>().Value
         let absoluteFilePath, simpleFilePath = x.GetFilePath(fileSpecCtx)
         let device =
-            let loadedName = collectNameComponents(ctx).Combine()
+            let loadedName = ctx.collectNameComponents().Combine()
             fwdLoadDevice helper.TheSystem (absoluteFilePath, simpleFilePath) loadedName
         helper.TheSystem.Devices.Add(device) |> ignore
 
     override x.EnterLoadExternalSystemBlock(ctx:LoadExternalSystemBlockContext) =
         helper._externalSystemBlockContexts.Add(ctx)
-        let fileSpecCtx = tryFindFirstChild<FileSpecContext>(ctx).Value
+        let fileSpecCtx = ctx.tryFindFirstChild<FileSpecContext>().Value
         let absoluteFilePath, simpleFilePath = x.GetFilePath(fileSpecCtx)
         let external =
-            let ipSpecCtx = tryFindFirstChild<IpSpecContext>(ctx).Value
-            let ip = tryFindFirstChild<EtcNameContext>(ipSpecCtx).Value.GetText()
-            let loadedName = collectNameComponents(ctx).Combine()
+            let ipSpecCtx = ctx.tryFindFirstChild<IpSpecContext>().Value
+            let ip = ipSpecCtx.tryFindFirstChild<EtcNameContext>().Value.GetText()
+            let loadedName = ctx.collectNameComponents().Combine()
             fwdLoadExternalSystem helper.TheSystem (absoluteFilePath, simpleFilePath) loadedName
         helper.TheSystem.Devices.Add(external) |> ignore
 

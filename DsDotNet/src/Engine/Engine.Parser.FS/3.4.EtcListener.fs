@@ -20,7 +20,7 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
     inherit ListenerBase(parser, helper)
 
     override x.EnterButtonsBlocks(ctx:ButtonsBlocksContext) =
-        let first = tryFindFirstChild<ParserRuleContext>(ctx).Value     // {Emergency, Auto, Start, Reset}ButtonsContext
+        let first = ctx.tryFindFirstChild<ParserRuleContext>().Value     // {Emergency, Auto, Start, Reset}ButtonsContext
         let system = helper.TheSystem
         let targetDic =
             match first with
@@ -39,7 +39,7 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
 
         let buttonDefs = first.enumerateChildren<ButtonDefContext>().ToArray()
         for bd in buttonDefs do
-            let buttonName = tryFindFirstChild<ButtonNameContext>(bd).Value.GetText()
+            let buttonName = bd.tryFindFirstChild<ButtonNameContext>().Value.GetText()
             let flows =
                 bd.enumerateChildren<FlowNameContext>()
                     .Select(fun flowCtx -> flowCtx.GetText())
@@ -69,10 +69,10 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
         let safetyKvs =
             [   for safetyDef in safetyDefs do
                     let key =
-                        let safety = tryFindFirstChild(safetyDef, fun (t:IParseTree) -> t :? SafetyKeyContext).Value
-                        collectNameComponents(safety)   // ["Main"] or ["My", "Flow", "Main"]
+                        let safety = safetyDef.tryFindFirstChild(fun (t:IParseTree) -> t :? SafetyKeyContext).Value
+                        safety.collectNameComponents()   // ["Main"] or ["My", "Flow", "Main"]
                     let valueHeader = safetyDef.enumerateChildren<SafetyValuesContext>().First()
-                    let values      = valueHeader.enumerateChildren<Identifier12Context>().Select(collectNameComponents).ToArray()
+                    let values      = valueHeader.enumerateChildren<Identifier12Context>().Select(fun x -> x.collectNameComponents()).ToArray()
                     (key, values)
             ]
 
@@ -132,7 +132,7 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
 
 
     member private x.CreateFunctionApplication(context:FunApplicationContext):FunctionApplication =
-        let funName = tryFindFirstChild<FunNameContext>(context).Value.GetText()
+        let funName = context.tryFindFirstChild<FunNameContext>().Value.GetText()
         let argGroups =
             context.enumerateChildren<ArgumentGroupContext>()
                 .Select(fun argGrpCtx ->
@@ -144,21 +144,21 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
         FunctionApplication(funName, argGroups)
 
     override x.EnterVariableDef(context:VariableDefContext) =
-        let varName = tryFindFirstChild<VarNameContext>(context).Value.GetText()
-        let varType = tryFindFirstChild<VarTypeContext>(context).Value.GetText()
-        let init    = tryFindFirstChild<ArgumentContext>(context).Value.GetText()
+        let varName = context.tryFindFirstChild<VarNameContext>().Value.GetText()
+        let varType = context.tryFindFirstChild<VarTypeContext>().Value.GetText()
+        let init    = context.tryFindFirstChild<ArgumentContext>().Value.GetText()
         helper.TheSystem.Variables.Add(new Variable(varName, varType, init))
 
     override x.EnterCommandDef(context:CommandDefContext) =
-        let cmdName    = tryFindFirstChild<CmdNameContext>(context).Value.GetText()
-        let funApplCtx = tryFindFirstChild<FunApplicationContext>(context).Value
+        let cmdName    = context.tryFindFirstChild<CmdNameContext>().Value.GetText()
+        let funApplCtx = context.tryFindFirstChild<FunApplicationContext>().Value
         let funAppl    = x.CreateFunctionApplication(funApplCtx)
         let command    = new Command(cmdName, funAppl)
         helper.TheSystem.Commands.Add(command)
 
     override x.EnterObserveDef(context:ObserveDefContext) =
-        let obsName    = tryFindFirstChild<ObserveNameContext>(context).Value.GetText()
-        let funApplCtx = tryFindFirstChild<FunApplicationContext>(context).Value
+        let obsName    = context.tryFindFirstChild<ObserveNameContext>().Value.GetText()
+        let funApplCtx = context.tryFindFirstChild<FunApplicationContext>().Value
         let funAppl    = x.CreateFunctionApplication(funApplCtx)
         let observes   = new Observe(obsName, funAppl)
         helper.TheSystem.Observes.Add(observes)

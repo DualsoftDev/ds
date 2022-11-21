@@ -16,9 +16,9 @@ module FqdnParseTestModule =
 
         [<Test>]
         member __.``Fqdn parse test`` () =
-            Fqdn.parse("hello") === ["hello"]
-            Fqdn.parse ("A.B.C") === [ "A"; "B"; "C" ]
-            Fqdn.parse("#seg.testMe!!!") === ["#seg.testMe!!!"]
+            parseFqdn("hello") === ["hello"]
+            parseFqdn("A.B.C") === [ "A"; "B"; "C" ]
+            parseFqdn("#seg.testMe!!!") === ["#seg.testMe!!!"]
 
         [<Test>]
         member __.``Combine test`` () =

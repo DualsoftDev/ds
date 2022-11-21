@@ -13,21 +13,21 @@ open Engine.Common.FS
 module ParserRuleContextModule =
 
         let createCallDef (system:DsSystem) (ctx:CallListingContext) =
-            let callName =  tryFindFirstChild<CallNameContext>(ctx).Map(getText).Value
+            let callName =  ctx.tryFindFirstChild<CallNameContext>().Map(getText).Value
             let apiDefCtxs = ctx.enumerateChildren<CallApiDefContext>().ToArray()
             let getAddress (addressCtx:IParseTree) =
-                tryFindFirstChild<AddressItemContext>(addressCtx).Map(getText).Value
+                addressCtx.tryFindFirstChild<AddressItemContext>().Map(getText).Value
             let apiItems =
                 [   for apiDefCtx in apiDefCtxs do
-                    let apiPath = collectNameComponents apiDefCtx |> List.ofSeq // e.g ["A"; "+"]
+                    let apiPath = apiDefCtx.collectNameComponents() |> List.ofSeq // e.g ["A"; "+"]
                     match apiPath with
                     | device::api::[] ->
                         let apiItem =
                             option {
                                 let! apiPoint = tryFindCallingApiItem system device api
-                                let! addressCtx = tryFindFirstChild<AddressTxRxContext>(ctx)
-                                let! txAddressCtx = tryFindFirstChild<TxContext>(addressCtx)
-                                let! rxAddressCtx = tryFindFirstChild<RxContext>(addressCtx)
+                                let! addressCtx = ctx.tryFindFirstChild<AddressTxRxContext>()
+                                let! txAddressCtx = addressCtx.tryFindFirstChild<TxContext>()
+                                let! rxAddressCtx = addressCtx.tryFindFirstChild<RxContext>()
                                 let tx = getAddress(txAddressCtx)
                                 let rx = getAddress(rxAddressCtx)
 
@@ -48,7 +48,7 @@ module ParserRuleContextModule =
             let ci = getContextInformation ctx
             option {
                 let! flow = tryFindFlow system ci.Flow.Value
-                let! aliasKeys = tryFindFirstChild<AliasDefContext>(ctx).Map(collectNameComponents)
+                let! aliasKeys = ctx.tryFindFirstChild<AliasDefContext>().Map(fun x -> x.collectNameComponents())
                 let mnemonics = ctx.enumerateChildren<AliasMnemonicContext>().Select(getText).ToArray()
                 let ad = AliasDef(aliasKeys, None, mnemonics)
                 flow.AliasDefs.Add(aliasKeys, ad)
@@ -60,7 +60,7 @@ module ParserRuleContextModule =
             option {
                 let! flow = tryFindFlow system ci.Flow.Value
                 let mnemonics = ctx.enumerateChildren<AliasMnemonicContext>().Select(getText).ToArray()
-                let! aliasKeys = tryFindFirstChild<AliasDefContext>(ctx).Map(collectNameComponents)
+                let! aliasKeys = ctx.tryFindFirstChild<AliasDefContext>().Map(fun x -> x.collectNameComponents())
                 let target =
                     match aliasKeys.ToFSharpList() with
                     | t::[] ->
@@ -91,11 +91,11 @@ module ParserRuleContextModule =
             let isWildcard(cc:Fqdn):bool = cc.Length = 1 && cc[0] = "_"
             let collectCallComponents(ctx:CallComponentsContext):Fqdn[] =
                 ctx.enumerateChildren<Identifier123Context>()
-                    .Select(collectNameComponents)
+                    .Select(fun x -> x.collectNameComponents())
                     .ToArray()
             option {
-                let! interrfaceNameCtx = tryFindFirstChild<InterfaceNameContext>(ctx)
-                let interfaceName = collectNameComponents(interrfaceNameCtx)[0]
+                let! interrfaceNameCtx = ctx.tryFindFirstChild<InterfaceNameContext>()
+                let interfaceName = interrfaceNameCtx.collectNameComponents()[0]
                 let! api = system.ApiItems4Export.TryFind(nameEq interfaceName)
                 let ser =   // { start ~ end ~ reset }
                     ctx.enumerateChildren<CallComponentsContext>()

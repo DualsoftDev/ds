@@ -85,12 +85,13 @@ module ParserUtilityModule =
             let includeMe = includeMe |? false
             x.Descendants<IParseTree>(includeMe) |> Seq.tryFind(predicate)
 
-        member x.TryFindFirstChild<'T when 'T :> IParseTree>(?includeMe:bool, ?predicate:ParseTreePredicate, ?exclude:ParseTreePredicate) : 'T option =   // :'T
-            let includeMe = includeMe |? false
-            let predicate = predicate |? truthyfy
-            let predicate x = isType<'T> x && predicate x
-            let exclude = exclude |? falsify
-            x.Descendants<'T>(includeMe, predicate, exclude) |> Seq.tryHead
+        member x.TryFindFirstChild<'T when 'T :> IParseTree>
+            (?includeMe:bool, ?predicate:ParseTreePredicate, ?exclude:ParseTreePredicate) : 'T option =   // :'T
+                let includeMe = includeMe |? false
+                let predicate = predicate |? truthyfy
+                let predicate x = isType<'T> x && predicate x
+                let exclude = exclude |? falsify
+                x.Descendants<'T>(includeMe, predicate, exclude) |> Seq.tryHead
 
         member x.TryFindFirstAscendant(predicate:ParseTreePredicate, ?includeMe:bool) = //:IParseTree option=
             let includeMe = includeMe |? false

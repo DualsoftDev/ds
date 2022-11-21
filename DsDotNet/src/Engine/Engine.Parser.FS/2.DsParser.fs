@@ -32,7 +32,7 @@ module ParserUtilityModule =
         try
             let parser = createParser (text)
             let ctx = parser.fqdn()
-            let ncs = ctx.enumerateChildren<fqdnParser.NameComponentContext>()
+            let ncs = ctx.Descendants<fqdnParser.NameComponentContext>()
             [ for nc in ncs -> nc.GetText().DeQuoteOnDemand() ]
         with
             | :? ParserException ->
@@ -42,7 +42,7 @@ module ParserUtilityModule =
                 failwith $"ERROR: {exn}"
 
     type IParseTree with
-        member x.enumerateChildren<'T when 'T :> IParseTree >(
+        member x.Descendants<'T when 'T :> IParseTree >(
             ?includeMe:bool
             , ?predicate:ParseTreePredicate
             , ?exclude:ParseTreePredicate
@@ -51,20 +51,20 @@ module ParserUtilityModule =
             let includeMe = includeMe |? false
             let predicate = predicate |? (isType<'T>)
             let exclude   = exclude |? (fun x -> false)
-            let rec enumerateChildrenHelper(rslt:ResizeArray<'T>, frm:IParseTree, incMe:bool) =
+            let rec helper(rslt:ResizeArray<'T>, frm:IParseTree, incMe:bool) =
                 if not (exclude(frm)) then
                     if (incMe && predicate(frm) && isType<'T> frm) then
                         rslt.Add(forceCast<'T>(frm))
 
                     for index in [ 0 .. frm.ChildCount - 1 ] do
-                        enumerateChildrenHelper(rslt, frm.GetChild(index), true)
+                        helper(rslt, frm.GetChild(index), true)
 
             //Func<IParseTree, bool> pred = predicate ?? new Func<IParseTree, bool>(ctx => ctx is T)
             let result = ResizeArray<'T>()
-            enumerateChildrenHelper(result, x, includeMe)
+            helper(result, x, includeMe)
             result
 
-        member x.enumerateParents<'T when 'T :> IParseTree >(
+        member x.Ascendants<'T when 'T :> IParseTree >(
             ?includeMe:bool
             , ?predicate:ParseTreePredicate) =
 
@@ -80,66 +80,66 @@ module ParserUtilityModule =
                 ]
             helper(x, includeMe)
 
-        member x.tryFindFirstChild(predicate:ParseTreePredicate, ?includeMe:bool) =
+        member x.TryFindFirstChild(predicate:ParseTreePredicate, ?includeMe:bool) =
             let includeMe = includeMe |? false
-            x.enumerateChildren<IParseTree>(includeMe) |> Seq.tryFind(predicate)
+            x.Descendants<IParseTree>(includeMe) |> Seq.tryFind(predicate)
 
-        member x.tryFindFirstChild<'T when 'T :> IParseTree>(?includeMe:bool, ?predicate:ParseTreePredicate, ?exclude:ParseTreePredicate) : 'T option =   // :'T
+        member x.TryFindFirstChild<'T when 'T :> IParseTree>(?includeMe:bool, ?predicate:ParseTreePredicate, ?exclude:ParseTreePredicate) : 'T option =   // :'T
             let includeMe = includeMe |? false
             let predicate = predicate |? truthyfy
             let predicate x = isType<'T> x && predicate x
             let exclude = exclude |? falsify
-            x.enumerateChildren<'T>(includeMe, predicate, exclude) |> Seq.tryHead
+            x.Descendants<'T>(includeMe, predicate, exclude) |> Seq.tryHead
 
-        member x.tryFindFirstAncestor(predicate:ParseTreePredicate, ?includeMe:bool) = //:IParseTree option=
+        member x.TryFindFirstAscendant(predicate:ParseTreePredicate, ?includeMe:bool) = //:IParseTree option=
             let includeMe = includeMe |? false
-            x.enumerateParents(includeMe) |> Seq.tryFind(predicate)
+            x.Ascendants(includeMe) |> Seq.tryFind(predicate)
 
 
-        member x.tryFindFirstAncestor<'T when 'T :> IParseTree>(?includeMe:bool) =
+        member x.TryFindFirstAscendant<'T when 'T :> IParseTree>(?includeMe:bool) =
             let includeMe = includeMe |? false
             let pred = isType<'T>
-            x.tryFindFirstAncestor(pred, includeMe) |> Option.map forceCast<'T>
+            x.TryFindFirstAscendant(pred, includeMe) |> Option.map forceCast<'T>
 
-        member x.tryFindIdentifier1FromContext(?exclude:ParseTreePredicate) =
+        member x.TryFindIdentifier1FromContext(?exclude:ParseTreePredicate) =
             let exclude = exclude |? falsify
             option {
-                let! ctx = x.tryFindFirstChild<Identifier1Context>(false, exclude=exclude)
+                let! ctx = x.TryFindFirstChild<Identifier1Context>(false, exclude=exclude)
                 return ctx.GetText().DeQuoteOnDemand()
             }
 
-        member x.tryFindNameComponentContext() : IParseTree option =
+        member x.TryFindNameComponentContext() : IParseTree option =
             let pred =
                 fun (tree:IParseTree) ->
                     tree :? Identifier1Context
                     || tree :? Identifier2Context
                     || tree :? Identifier3Context
                     || tree :? Identifier4Context
-            x.tryFindFirstChild(pred, true)
+            x.TryFindFirstChild(pred, true)
 
-        member x.tryGetName():string option =
+        member x.TryGetName():string option =
             option {
-                let! idCtx = x.tryFindNameComponentContext()
+                let! idCtx = x.TryFindNameComponentContext()
                 let name = idCtx.GetText().DeQuoteOnDemand()
                 return name
             }
 
-        member x.tryCollectNameComponents():string[] option = // :Fqdn
+        member x.TryCollectNameComponents():string[] option = // :Fqdn
             option {
-                let! idCtx = x.tryFindNameComponentContext()
+                let! idCtx = x.TryFindNameComponentContext()
                 if idCtx :? Identifier1Context then
                     return [| idCtx.GetText().DeQuoteOnDemand() |]
                 else
-                    let! name = x.tryGetName()
+                    let! name = x.TryGetName()
                     return parseFqdn(name).ToArray()
             }
 
-        member x.collectNameComponents():string[] = x.tryCollectNameComponents() |> Option.get
+        member x.collectNameComponents():string[] = x.TryCollectNameComponents() |> Option.get
 
-        member x.tryGetSystemName() =
+        member x.TryGetSystemName() =
             option {
-                let! ctx = x.tryFindFirstAncestor<SystemContext>(true)
-                let! names = ctx.tryCollectNameComponents()
+                let! ctx = x.TryFindFirstAscendant<SystemContext>(true)
+                let! names = ctx.TryCollectNameComponents()
                 return names.Combine()
             }
 

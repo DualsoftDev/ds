@@ -153,7 +153,7 @@ class ModelListener : dsParserBaseListener
 
     override public void EnterButtons (ButtonsContext ctx)
     {
-        var first = tryFindFirstChild<ParserRuleContext>(ctx);     // {Emergency, Auto, Start, Reset}ButtonsContext
+        var first = TryFindFirstChild<ParserRuleContext>(ctx);     // {Emergency, Auto, Start, Reset}ButtonsContext
         var targetDic =
             first switch
             {
@@ -171,12 +171,12 @@ class ModelListener : dsParserBaseListener
         else
             ParserHelper.ButtonCategories.Add(key);
 
-        var buttonDefs = enumerateChildren<ButtonDefContext>(first).ToArray();
+        var buttonDefs = Descendants<ButtonDefContext>(first).ToArray();
         foreach (var bd in buttonDefs)
         {
-            var buttonName = tryFindFirstChild<ButtonNameContext>(bd).GetText();
+            var buttonName = TryFindFirstChild<ButtonNameContext>(bd).GetText();
             var flows = (
-                    from flowNameCtx in enumerateChildren<FlowNameContext>(bd)
+                    from flowNameCtx in Descendants<FlowNameContext>(bd)
                     let flowName = flowNameCtx.GetText()
                     let flow = _system.Flows.First(rf => rf.Name == flowName)
                     select flow

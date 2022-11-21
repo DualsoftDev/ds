@@ -19,9 +19,9 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
     //override x.EnterAliasListing(ctx:AliasListingContext) =
     //    let flow = x._flow.Value
     //    let map = flow.AliasDefs
-    //    let mnemonics = enumerateChildren<AliasMnemonicContext>(ctx).Select(getText).ToArray()
-    //    let aliasTargetCtx = tryFindFirstChild<AliasDefContext>(ctx).Value    // {타시스템}.{interface} or {Flow}.{real}
-    //    let aliasTargetName = tryGetName(aliasTargetCtx).Value
+    //    let mnemonics = Descendants<AliasMnemonicContext>(ctx).Select(getText).ToArray()
+    //    let aliasTargetCtx = TryFindFirstChild<AliasDefContext>(ctx).Value    // {타시스템}.{interface} or {Flow}.{real}
+    //    let aliasTargetName = TryGetName(aliasTargetCtx).Value
     //    let realTargetCandidate = flow.Graph.TryFindVertex<Real>(aliasTargetName)
     //    let callTargetCandidate = tryFindCall helper.TheSystem aliasTargetName
     //    let target =
@@ -47,11 +47,11 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
     override x.EnterInterfaceDef(ctx:InterfaceDefContext) =
         let system = helper.TheSystem
         let hash = system.ApiItems4Export
-        let interrfaceNameCtx = tryFindFirstChild<InterfaceNameContext>(ctx)
+        let interrfaceNameCtx = TryFindFirstChild<InterfaceNameContext>(ctx)
         let interfaceName = collectNameComponents(interrfaceNameCtx.Value)[0]
 
         let collectCallComponents(ctx:CallComponentsContext):Fqdn[] =
-            enumerateChildren<Identifier123Context>(ctx)
+            Descendants<Identifier123Context>(ctx)
                 .Select(collectNameComponents)
                 .ToArray()
 
@@ -64,7 +64,7 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
                 .ToArray()
 
         let ser =   // { start ~ end ~ reset }
-            enumerateChildren<CallComponentsContext>(ctx)
+            Descendants<CallComponentsContext>(ctx)
                 .Select(collectCallComponents)
                 .Tap(fun callComponents -> assert(callComponents.All(fun cc -> cc.Length = 2 || isWildcard(cc))))
                 .Select(fun callCompnents -> callCompnents.Select(fun cc -> if isWildcard(cc) then null else cc.Prepend(system.Name).ToArray()).ToArray())

@@ -112,16 +112,16 @@ class SkeletonListener : dsParserBaseListener
             return;
 
         // 같은 이름의 parenting 이 존재하면, 내부가 존재하는 root segemnt 이므로, skip
-        var flowContext = tryFindFirstAncestor<FlowBlockContext>(ctx);
+        var flowContext = TryFindFirstAscendant<FlowBlockContext>(ctx);
         var hasParentingDefinition =
-            enumerateChildren<ParentingContext>(flowContext)
+            Descendants<ParentingContext>(flowContext)
                 .Select(parentingCtx => parentingCtx.identifier1().GetText().DeQuoteOnDemand())
                 .Contains(last);
         if (hasParentingDefinition)
             return;
 
         var hasCallPrototypeDefinition =
-            enumerateChildren<CallDefContext>(flowContext)
+            Descendants<CallDefContext>(flowContext)
                 .Select(callCtx => callCtx.identifier1().GetText().DeQuoteOnDemand())
                 .Contains(last);
         if (hasCallPrototypeDefinition)
@@ -143,7 +143,7 @@ class SkeletonListener : dsParserBaseListener
     {
         var defs = collectNameComponents(ctx.aliasDef()); // e.g "P.F.Vp" -> [| "P"; "F"; "Vp" |]
         var aliasMnemonics =    // e.g { Vp1; Vp2; Vp3; }
-            enumerateChildren<AliasMnemonicContext>(ctx)
+            Descendants<AliasMnemonicContext>(ctx)
             .Select(mne => collectNameComponents(mne))
             .Do(ns => Assert(ns.Count() == 1))      // Vp1 등은 '.' 허용 안함
             .Select(ns => ns[0])

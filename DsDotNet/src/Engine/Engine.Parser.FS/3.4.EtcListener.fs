@@ -20,7 +20,7 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
     inherit ListenerBase(parser, helper)
 
     override x.EnterButtonsBlocks(ctx:ButtonsBlocksContext) =
-        let first = ctx.tryFindFirstChild<ParserRuleContext>().Value     // {Emergency, Auto, Start, Reset}ButtonsContext
+        let first = ctx.TryFindFirstChild<ParserRuleContext>().Value     // {Emergency, Auto, Start, Reset}ButtonsContext
         let system = helper.TheSystem
         let targetDic =
             match first with
@@ -37,11 +37,11 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
         else
             x.ParserHelper.ButtonCategories.Add(key) |> ignore
 
-        let buttonDefs = first.enumerateChildren<ButtonDefContext>().ToArray()
+        let buttonDefs = first.Descendants<ButtonDefContext>().ToArray()
         for bd in buttonDefs do
-            let buttonName = bd.tryFindFirstChild<ButtonNameContext>().Value.GetText()
+            let buttonName = bd.TryFindFirstChild<ButtonNameContext>().Value.GetText()
             let flows =
-                bd.enumerateChildren<FlowNameContext>()
+                bd.Descendants<FlowNameContext>()
                     .Select(fun flowCtx -> flowCtx.GetText())
                     .Tap(fun flowName -> verifyM $"Flow [{flowName}] not exists!" (system.Flows.Any(fun f -> f.Name = flowName)))
                     .Select(fun flowName -> system.Flows.First(fun f -> f.Name = flowName))
@@ -57,7 +57,7 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
 
 
     override x.EnterSafetyBlock(ctx:SafetyBlockContext) =
-        let safetyDefs = ctx.enumerateChildren<SafetyDefContext>()
+        let safetyDefs = ctx.Descendants<SafetyDefContext>()
         (*
          * safety block 을 parsing 해서 key / value 의 dictionary 로 저장
          *
@@ -69,10 +69,10 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
         let safetyKvs =
             [   for safetyDef in safetyDefs do
                     let key =
-                        let safety = safetyDef.tryFindFirstChild(fun (t:IParseTree) -> t :? SafetyKeyContext).Value
+                        let safety = safetyDef.TryFindFirstChild(fun (t:IParseTree) -> t :? SafetyKeyContext).Value
                         safety.collectNameComponents()   // ["Main"] or ["My", "Flow", "Main"]
-                    let valueHeader = safetyDef.enumerateChildren<SafetyValuesContext>().First()
-                    let values      = valueHeader.enumerateChildren<Identifier12Context>().Select(fun x -> x.collectNameComponents()).ToArray()
+                    let valueHeader = safetyDef.Descendants<SafetyValuesContext>().First()
+                    let values      = valueHeader.Descendants<Identifier12Context>().Select(fun x -> x.collectNameComponents()).ToArray()
                     (key, values)
             ]
 
@@ -132,11 +132,11 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
 
 
     member private x.CreateFunctionApplication(context:FunApplicationContext):FunctionApplication =
-        let funName = context.tryFindFirstChild<FunNameContext>().Value.GetText()
+        let funName = context.TryFindFirstChild<FunNameContext>().Value.GetText()
         let argGroups =
-            context.enumerateChildren<ArgumentGroupContext>()
+            context.Descendants<ArgumentGroupContext>()
                 .Select(fun argGrpCtx ->
-                    argGrpCtx.enumerateChildren<ArgumentContext>()
+                    argGrpCtx.Descendants<ArgumentContext>()
                         .Select(fun arg -> arg.GetText())
                         .ToArray())
                 .ToArray()
@@ -144,21 +144,21 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
         FunctionApplication(funName, argGroups)
 
     override x.EnterVariableDef(context:VariableDefContext) =
-        let varName = context.tryFindFirstChild<VarNameContext>().Value.GetText()
-        let varType = context.tryFindFirstChild<VarTypeContext>().Value.GetText()
-        let init    = context.tryFindFirstChild<ArgumentContext>().Value.GetText()
+        let varName = context.TryFindFirstChild<VarNameContext>().Value.GetText()
+        let varType = context.TryFindFirstChild<VarTypeContext>().Value.GetText()
+        let init    = context.TryFindFirstChild<ArgumentContext>().Value.GetText()
         helper.TheSystem.Variables.Add(new Variable(varName, varType, init))
 
     override x.EnterCommandDef(context:CommandDefContext) =
-        let cmdName    = context.tryFindFirstChild<CmdNameContext>().Value.GetText()
-        let funApplCtx = context.tryFindFirstChild<FunApplicationContext>().Value
+        let cmdName    = context.TryFindFirstChild<CmdNameContext>().Value.GetText()
+        let funApplCtx = context.TryFindFirstChild<FunApplicationContext>().Value
         let funAppl    = x.CreateFunctionApplication(funApplCtx)
         let command    = new Command(cmdName, funAppl)
         helper.TheSystem.Commands.Add(command)
 
     override x.EnterObserveDef(context:ObserveDefContext) =
-        let obsName    = context.tryFindFirstChild<ObserveNameContext>().Value.GetText()
-        let funApplCtx = context.tryFindFirstChild<FunApplicationContext>().Value
+        let obsName    = context.TryFindFirstChild<ObserveNameContext>().Value.GetText()
+        let funApplCtx = context.TryFindFirstChild<FunApplicationContext>().Value
         let funAppl    = x.CreateFunctionApplication(funApplCtx)
         let observes   = new Observe(obsName, funAppl)
         helper.TheSystem.Observes.Add(observes)
@@ -171,11 +171,11 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
                L.T.Cm = (60, 50, 20, 20)    // xywh
         } *)
 
-        let layouts = ctx.enumerateChildren<LayoutBlockContext>().ToArray()
+        let layouts = ctx.Descendants<LayoutBlockContext>().ToArray()
         if layouts.Length > 1 then
             raise <| ParserException("Layouts block should exist only once", ctx)
 
-        let positionDefs = ctx.enumerateChildren<PositionDefContext>().ToArray()
+        let positionDefs = ctx.Descendants<PositionDefContext>().ToArray()
         for posiDef in positionDefs do
             let callName = posiDef.callName().GetText()
             let xywh = posiDef.xywh()

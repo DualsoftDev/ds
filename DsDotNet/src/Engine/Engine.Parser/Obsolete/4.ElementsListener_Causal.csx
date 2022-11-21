@@ -10,13 +10,13 @@ partial class ElementsListener
         if (this._existings.ContainsKey(ctx))
             return this._existings[ctx];
 
-        var cnfs = enumerateChildren<CausalTokensCNFContext>(ctx);
+        var cnfs = Descendants<CausalTokensCNFContext>(ctx);
 
         Nodes dnfNodes = new Nodes();
         foreach (var cnf in cnfs)
         {
             List<Node> cnfNodes = new List<Node>();
-            var causalContexts = enumerateChildren<CausalTokenContext>(cnf);
+            var causalContexts = Descendants<CausalTokenContext>(cnf);
 
             foreach (var cc in causalContexts)
             {

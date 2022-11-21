@@ -39,7 +39,7 @@ namespace Engine.Parser
         {
             var name = ctx.identifier1().GetText().DeQuoteOnDemand();
             _parenting = (Segment)_rootFlow.InstanceMap[name];
-            var myFlowCallCtxs = enumerateChildren<Identifier1ListingContext>(ctx).Select(ctx => collectNameComponents(ctx)[0]).ToArray();
+            var myFlowCallCtxs = Descendants<Identifier1ListingContext>(ctx).Select(ctx => collectNameComponents(ctx)[0]).ToArray();
             foreach(var call in myFlowCallCtxs)
             {
                 var cp = _rootFlow.CallPrototypes.FirstOrDefault(cp => cp.Name == call);
@@ -47,7 +47,7 @@ namespace Engine.Parser
                 _parenting.InstanceMap.Add(call, instance);
             }
 
-            var mySystemOtherFlowCallCtxs = enumerateChildren<Identifier2ListingContext>(ctx).Select(ctx => collectNameComponents(ctx).ToArray()).ToArray();   // collectNameComponents
+            var mySystemOtherFlowCallCtxs = Descendants<Identifier2ListingContext>(ctx).Select(ctx => collectNameComponents(ctx).ToArray()).ToArray();   // collectNameComponents
             foreach(var otherFlowCall in mySystemOtherFlowCallCtxs)
             {
                 Assert(otherFlowCall.Length == 2);

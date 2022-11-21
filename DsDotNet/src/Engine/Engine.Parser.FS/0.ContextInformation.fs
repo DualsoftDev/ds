@@ -51,9 +51,9 @@ module ContextInformationModule =
 
     let getContextInformation(parserRuleContext:ParserRuleContext) =      // collectUpwardContextInformation
         let ctx = parserRuleContext
-        let system  = LoadedSystemName.OrElse(ctx.tryGetSystemName())
-        let flow      = ctx.tryFindFirstAncestor<FlowBlockContext>(true).Bind(fun b -> b.tryFindIdentifier1FromContext())
-        let parenting = ctx.tryFindFirstAncestor<ParentingBlockContext>(true).Bind(fun b -> b.tryFindIdentifier1FromContext())
+        let system  = LoadedSystemName.OrElse(ctx.TryGetSystemName())
+        let flow      = ctx.TryFindFirstAscendant<FlowBlockContext>(true).Bind(fun b -> b.TryFindIdentifier1FromContext())
+        let parenting = ctx.TryFindFirstAscendant<ParentingBlockContext>(true).Bind(fun b -> b.TryFindIdentifier1FromContext())
         let ns        = ctx.collectNameComponents().ToFSharpList()
         {   ContextType = ctx.GetType();
             System = system; Flow = flow; Parenting = parenting; Names = ns }

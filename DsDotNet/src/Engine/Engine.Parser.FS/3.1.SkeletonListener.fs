@@ -26,11 +26,11 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
     override x.EnterSystem(ctx:SystemContext) =
         base.EnterSystem(ctx)
 
-        match ctx.tryFindFirstChild<SysBlockContext>() with
+        match ctx.TryFindFirstChild<SysBlockContext>() with
         | Some sysBlockCtx_ ->
             let name = helper.ParserOptions.LoadedSystemName |? (ctx.systemName().GetText().DeQuoteOnDemand())
             let host =
-                match ctx.tryFindFirstChild<HostContext>() with
+                match ctx.TryFindFirstChild<HostContext>() with
                 | Some hostCtx -> hostCtx.GetText()
                 | None -> null
             //let name = helper.ParserOptions.LoadedSystemName
@@ -46,7 +46,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
     override x.EnterParentingBlock(ctx:ParentingBlockContext) =
         helper._parentingBlockContexts.Add(ctx)
         tracefn($"Parenting: {ctx.GetText()}")
-        let name = ctx.identifier1().tryGetName().Value
+        let name = ctx.identifier1().TryGetName().Value
         helper._parenting <- Real.Create(name, helper._flow)
 
 
@@ -67,7 +67,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
         helper._interfaceDefContexts.Add(ctx)
 
         let system = helper.TheSystem
-        let interrfaceNameCtx = ctx.tryFindFirstChild<InterfaceNameContext>().Value
+        let interrfaceNameCtx = ctx.TryFindFirstChild<InterfaceNameContext>().Value
         let interfaceName = interrfaceNameCtx.collectNameComponents()[0]
 
         // 이번 stage 에서 일단 interface 이름만 이용해서 빈 interface 객체를 생성하고,
@@ -80,7 +80,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
         // I1 <||> I2 <||> I3;  ==> [| I1; <||>; I2; <||>; I3; |]
         let terms =
             let pred = fun (tree:IParseTree) -> tree :? Identifier1Context || tree :? CausalOperatorResetContext
-            ctx.enumerateChildren<RuleContext>(false, pred)
+            ctx.Descendants<RuleContext>(false, pred)
                 .Select(fun ctx -> ctx.GetText())
                 .ToArray()
 
@@ -92,7 +92,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
                 ()
 
     member private x.GetFilePath(fileSpecCtx:FileSpecContext) =
-        let simpleFilePath = fileSpecCtx.tryFindFirstChild<FilePathContext>().Value.GetText().DeQuoteOnDemand()
+        let simpleFilePath = fileSpecCtx.TryFindFirstChild<FilePathContext>().Value.GetText().DeQuoteOnDemand()
         let absoluteFilePath =
             let dir = helper.ParserOptions.ReferencePath
             [simpleFilePath; $"{dir}\\{simpleFilePath}"].First(fun f -> File.Exists(f))
@@ -101,7 +101,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
 
     override x.EnterLoadDeviceBlock(ctx:LoadDeviceBlockContext) =
         helper._deviceBlockContexts.Add(ctx)
-        let fileSpecCtx = ctx.tryFindFirstChild<FileSpecContext>().Value
+        let fileSpecCtx = ctx.TryFindFirstChild<FileSpecContext>().Value
         let absoluteFilePath, simpleFilePath = x.GetFilePath(fileSpecCtx)
         let device =
             let loadedName = ctx.collectNameComponents().Combine()
@@ -110,11 +110,11 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
 
     override x.EnterLoadExternalSystemBlock(ctx:LoadExternalSystemBlockContext) =
         helper._externalSystemBlockContexts.Add(ctx)
-        let fileSpecCtx = ctx.tryFindFirstChild<FileSpecContext>().Value
+        let fileSpecCtx = ctx.TryFindFirstChild<FileSpecContext>().Value
         let absoluteFilePath, simpleFilePath = x.GetFilePath(fileSpecCtx)
         let external =
-            let ipSpecCtx = ctx.tryFindFirstChild<IpSpecContext>().Value
-            let ip = ipSpecCtx.tryFindFirstChild<EtcNameContext>().Value.GetText()
+            let ipSpecCtx = ctx.TryFindFirstChild<IpSpecContext>().Value
+            let ip = ipSpecCtx.TryFindFirstChild<EtcNameContext>().Value.GetText()
             let loadedName = ctx.collectNameComponents().Combine()
             fwdLoadExternalSystem helper.TheSystem (absoluteFilePath, simpleFilePath) loadedName
         helper.TheSystem.Devices.Add(external) |> ignore

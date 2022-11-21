@@ -112,7 +112,7 @@ partial class ElementsListener : dsParserBaseListener
 
     public override void EnterSafetyBlock([NotNull] SafetyBlockContext ctx)
     {
-        var safetyDefs = enumerateChildren<SafetyDefContext>(ctx);
+        var safetyDefs = Descendants<SafetyDefContext>(ctx);
         /*
          * safety block 을 parsing 해서 key / value 의 dictionary 로 저장
          * 
@@ -125,9 +125,9 @@ partial class ElementsListener : dsParserBaseListener
          */
         var safetyKvs =
             from safetyDef in safetyDefs
-            let key = collectNameComponents(tryFindFirstChild(safetyDef, t => t is SafetyKeyContext))   // ["Main"] or ["My", "Flow", "Main"]
-            let valueHeader = enumerateChildren<SafetyValuesContext>(safetyDef).First()
-            let values = enumerateChildren<Identifier123Context>(valueHeader).Select(collectNameComponents).ToArray()
+            let key = collectNameComponents(TryFindFirstChild(safetyDef, t => t is SafetyKeyContext))   // ["Main"] or ["My", "Flow", "Main"]
+            let valueHeader = Descendants<SafetyValuesContext>(safetyDef).First()
+            let values = Descendants<Identifier123Context>(valueHeader).Select(collectNameComponents).ToArray()
             select (key, values)
             ;
 
@@ -170,7 +170,7 @@ partial class ElementsListener : dsParserBaseListener
             if (txrxCtx == null || txrxCtx.GetText() == "_")
                 return Array.Empty<Segment>();
 
-            var nss = enumerateChildren<Identifier123Context>(txrxCtx).Select(collectNameComponents).ToArray();
+            var nss = Descendants<Identifier123Context>(txrxCtx).Select(collectNameComponents).ToArray();
             return nss.Select(ns => _model.FindFirst<Segment>(ns)).ToArray();
         }
 
@@ -237,11 +237,11 @@ partial class ElementsListener : dsParserBaseListener
         //       L.T.Cm = (60, 50, 20, 20)    // xywh
         //}
 
-        var layouts = enumerateChildren<LayoutsContext>(ctx).ToArray();
+        var layouts = Descendants<LayoutsContext>(ctx).ToArray();
         if (layouts.Length > 1)
             throw new ParserException("Layouts block should exist only once", ctx);
 
-        var positionDefs = enumerateChildren<PositionDefContext>(ctx).ToArray();
+        var positionDefs = Descendants<PositionDefContext>(ctx).ToArray();
         foreach (var posiDef in positionDefs)
         {
             var callPath = collectNameComponents(posiDef.callPath());
@@ -257,11 +257,11 @@ partial class ElementsListener : dsParserBaseListener
         //    B.F.Bm = (%Q123.25, , %I12.3);
         //    B.F.Bp = (%Q123.26, , %I12.4);
         //}
-        var addresses = enumerateChildren<AddressesContext>(ctx).ToArray();
+        var addresses = Descendants<AddressesContext>(ctx).ToArray();
         if (addresses.Length > 1)
             throw new ParserException("Layouts block should exist only once", ctx);
 
-        var addressDefs = enumerateChildren<AddressDefContext>(ctx).ToArray();
+        var addressDefs = Descendants<AddressDefContext>(ctx).ToArray();
         foreach (var addrDef in addressDefs)
         {
             var segNs = collectNameComponents(addrDef.segmentPath());

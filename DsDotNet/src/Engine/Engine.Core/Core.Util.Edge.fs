@@ -25,17 +25,9 @@ module EdgeModule =
         segment.ModelingEdges.Add(mei) |> verifyM $"Duplicated edge {mei.Source.Name}{mei.EdgeSymbol}{mei.Target.Name}"
         createEdges segment.Graph modeingEdgeInfo
 
-    //let ofResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) =
-    //        edges.Where(fun e -> e.EdgeType.HasFlag(EdgeType.Reset))
+    /// edges 에서 strong reset edge type 만 추려 냄
     let ofStrongResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) =
             edges.Where(fun e -> e.EdgeType.HasFlag(EdgeType.Strong ||| EdgeType.Reset))
-    //let ofWeakResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) =
-    //        edges.Where(fun e -> e.EdgeType.HasFlag(EdgeType.Reset) && not <| e.EdgeType.HasFlag(EdgeType.Strong))
-
-    //let ofNotStrongResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) =
-    //        edges.Except(ofStrongResetEdge edges)
-    //let ofNotResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) =
-    //        edges.Except(ofResetEdge edges)
 
     let toText<'V, 'E when 'V :> INamed and 'E :> EdgeBase<'V>> (e:'E) = $"{e.Source.Name.QuoteOnDemand()} {e.EdgeType.ToText()} {e.Target.Name.QuoteOnDemand()}"
 

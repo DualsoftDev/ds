@@ -111,20 +111,14 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
     override x.EnterLoadDeviceBlock(ctx:LoadDeviceBlockContext) =
         let fileSpecCtx = ctx.TryFindFirstChild<FileSpecContext>().Value
         let absoluteFilePath, simpleFilePath = x.GetFilePath(fileSpecCtx)
-        let device =
-            let loadedName = ctx.CollectNameComponents().Combine()
-            fwdLoadDevice x.TheSystem (absoluteFilePath, simpleFilePath) loadedName
-        x.TheSystem.Devices.Add(device) |> ignore
+        let loadedName = ctx.CollectNameComponents().Combine()
+        x.TheSystem.LoadDeviceAs(loadedName, absoluteFilePath, simpleFilePath) |> ignore
 
     override x.EnterLoadExternalSystemBlock(ctx:LoadExternalSystemBlockContext) =
         let fileSpecCtx = ctx.TryFindFirstChild<FileSpecContext>().Value
         let absoluteFilePath, simpleFilePath = x.GetFilePath(fileSpecCtx)
-        let external =
-            let ipSpecCtx = ctx.TryFindFirstChild<IpSpecContext>().Value
-            let ip = ipSpecCtx.TryFindFirstChild<EtcNameContext>().Value.GetText()
-            let loadedName = ctx.CollectNameComponents().Combine()
-            fwdLoadExternalSystem x.TheSystem (absoluteFilePath, simpleFilePath) loadedName
-        x.TheSystem.Devices.Add(external) |> ignore
+        let loadedName = ctx.CollectNameComponents().Combine()
+        x.TheSystem.LoadExternalSystemAs(loadedName, absoluteFilePath, simpleFilePath) |> ignore
 
 
     member x.CreateVertices(ctx:SystemContext) = createVertices x ctx
@@ -430,3 +424,17 @@ module ParserRuleContextModule =
         guardedValidateSystem system
 
         //dumpCausalTokens "---- All Causal token elements"
+
+
+[<AutoOpen>]
+module ParserLoadApiModule =
+    (* 외부에서 구조적으로 system 을 build 할 때에 사용되는 API *)
+    type DsSystem with
+        member x.LoadDeviceAs (loadedName:string, absoluteFilePath:string, simpleFilePath:string) =
+            let device = fwdLoadDevice x (absoluteFilePath, simpleFilePath) loadedName
+            x.Devices.Add(device) |> ignore
+            device
+        member x.LoadExternalSystemAs (loadedName:string, absoluteFilePath:string, simpleFilePath:string) =
+            let external = fwdLoadExternalSystem x (absoluteFilePath, simpleFilePath) loadedName
+            x.Devices.Add(external) |> ignore
+            external

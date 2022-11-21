@@ -28,6 +28,7 @@
 		<Compile Include="0.OnlyOnce.fs" />
 		<Compile Include="Model\Answers.fs" />
 		<Compile Include="Model\Model.fs" />
+		<Compile Include="Model\Model.Buildup.Test.fs" />
 		<Compile Include="Model\ModelGraph.fs" />
 		<Compile Include="Model\ExpressionTest.fs" />
 		<Compile Include="Model\FqdnParseTest.fs" />

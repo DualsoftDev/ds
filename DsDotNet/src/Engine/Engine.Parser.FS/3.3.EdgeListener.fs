@@ -1,13 +1,10 @@
 namespace Engine.Parser.FS
 
-open System.Linq
 
-open Engine.Core.CoreModule
 open Engine.Common.FS
 open Engine.Parser
 open Engine.Core
 open type Engine.Parser.dsParser
-open type Engine.Parser.FS.DsParser
 
 
 
@@ -48,8 +45,8 @@ type EdgeListener(parser:dsParser, helper:ParserHelper) =
 
                 for left in lefts do
                     for right in rights do
-                        let l = tryFindToken system left
-                        let r = tryFindToken system right
+                        let l = system.TryFindVertex(left)
+                        let r = system.TryFindVertex(right)
                         match l, r with
                         | Some l, Some r ->
                             if isItNull helper._parenting then

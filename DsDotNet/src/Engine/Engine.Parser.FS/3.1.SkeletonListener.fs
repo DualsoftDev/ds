@@ -132,7 +132,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
         let getContainerChildPair(ctx:ParserRuleContext) : ParentWrapper option * NamedContextInformation =
             let ci = getContextInformation ctx
             let system = helper.TheSystem
-            let parentWrapper = tryFindParentWrapper system ci
+            let parentWrapper = system.TryFindParentWrapper(ci)
             parentWrapper, ci
 
         let tokenCreator (cycle:int) =

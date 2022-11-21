@@ -74,35 +74,31 @@ module ContextInformationModule =
 
 [<AutoOpen>]
 module DsParserHelperModule =
+    type DsSystem with
+        member x.TryFindParentWrapper(ci:NamedContextInformation) =
+            option {
+                let! flowName = ci.Flow
+                match ci.Tuples with
+                | Some sys, Some flow, Some parenting, _ ->
+                    let! real = tryFindReal x flow parenting
+                    return Real real
+                | Some sys, Some flow, None, _ ->
+                    let! f = tryFindFlow x flowName
+                    return Flow f
+                | _ -> failwith "ERROR"
+            }
 
-    let choiceParentWrapper (ci:NamedContextInformation) (flow:Flow option) (parenting:Real option) =
-        match ci.Parenting with
-        | Some prnt -> Real parenting.Value
-        | None -> Flow flow.Value
-    let tryFindParentWrapper (system:DsSystem) (ci:NamedContextInformation) =
-        option {
-            let! flowName = ci.Flow
-            match ci.Tuples with
-            | Some sys, Some flow, Some parenting, _ ->
-                let! real = tryFindReal system flow parenting
-                return Real real
-            | Some sys, Some flow, None, _ ->
-                let! f = tryFindFlow system flowName
-                return Flow f
-            | _ -> failwith "ERROR"
-        }
-
-    let tryFindToken (system:DsSystem) (ctx:CausalTokenContext):Vertex option =
-        let ci = getContextInformation ctx
-        option {
-            let! parentWrapper = tryFindParentWrapper system ci
-            let graph = parentWrapper.GetGraph()
-            match ci.Names with
-            | ofn::ofrn::[] ->      // of(r)n: other flow (real) name
-                return! graph.TryFindVertex(ci.Names.Combine())
-            | callOrAlias::[] ->
-                return! graph.TryFindVertex(callOrAlias)
-            | _ ->
-                failwith "ERROR"
-        }
+        member x.TryFindVertex(ctx:CausalTokenContext):Vertex option =
+            let ci = getContextInformation ctx
+            option {
+                let! parentWrapper = x.TryFindParentWrapper(ci)
+                let graph = parentWrapper.GetGraph()
+                match ci.Names with
+                | ofn_::ofrn_::[] ->      // of(r)n: other flow (real) name
+                    return! graph.TryFindVertex(ci.Names.Combine())
+                | callOrAlias::[] ->
+                    return! graph.TryFindVertex(callOrAlias)
+                | _ ->
+                    failwith "ERROR"
+            }
 

@@ -50,17 +50,11 @@ type ListenerBase(parser:dsParser, options:ParserOptions) =
     member val internal _externalSystemBlockContexts = ResizeArray<LoadExternalSystemBlockContext>()
 
     member val internal RuleDictionary = Dictionary<ParserRuleContext, string>()
+
     override x.EnterEveryRule(ctx:ParserRuleContext) =
-        match ctx with
-        | :? SystemContext ->
-            let systemName = ctx.TryGetName().Value
-            x.RuleDictionary.Add(ctx, systemName)
-        | _ -> x.RuleDictionary.Add(ctx, systemName)
-        let systemName =
-            match x.YYLoadedSystemName with
-            | Some systemName -> systemName
-            | None -> if isItNull(x.TheSystem) then failwith "ERROR" else x.TheSystem.Name
-        x.RuleDictionary.Add(ctx, systemName)
+        match x.YYLoadedSystemName with
+        | Some systemName -> x.RuleDictionary.Add(ctx, systemName)
+        | None -> ()
 
 
     override x.EnterSystem(ctx:SystemContext) =

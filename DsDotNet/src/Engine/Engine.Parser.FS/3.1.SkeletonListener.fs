@@ -226,12 +226,17 @@ type SkeletonListener(parser:dsParser, options:ParserOptions) =
 
     member x.getContextInformation(parserRuleContext:ParserRuleContext) =      // collectUpwardContextInformation
         let ctx = parserRuleContext
-        let system  = x.RuleDictionary[parserRuleContext]
+        let system =
+            if x.RuleDictionary.ContainsKey(parserRuleContext) then
+                Some x.RuleDictionary[parserRuleContext]
+            else
+                parserRuleContext.TryGetSystemName()
+
         let flow      = ctx.TryFindFirstAscendant<FlowBlockContext>(true).Bind(fun b -> b.TryFindIdentifier1FromContext())
         let parenting = ctx.TryFindFirstAscendant<ParentingBlockContext>(true).Bind(fun b -> b.TryFindIdentifier1FromContext())
         let ns        = ctx.CollectNameComponents().ToFSharpList()
         {   ContextType = ctx.GetType();
-            System = Some system; Flow = flow; Parenting = parenting; Names = ns }
+            System = system; Flow = flow; Parenting = parenting; Names = ns }
 
     member x.getObjectContextInformation(system:DsSystem) (parserRuleContext:ParserRuleContext) =
         let ci = x.getContextInformation(parserRuleContext)

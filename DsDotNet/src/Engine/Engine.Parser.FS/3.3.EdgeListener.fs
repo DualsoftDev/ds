@@ -9,13 +9,7 @@ open System.ComponentModel
 
 [<AutoOpen>]
 module SkeletonListenerModule =
-
-    /// <summary>
-    /// 모든 vertex 가 생성 된 이후, edge 연결 작업 수행
-    /// </summary>
-    //type EdgeListener(parser:dsParser, helper:ParserHelper) =
-    //    inherit ListenerBase(parser, helper)
-
+    (* 모든 vertex 가 생성 된 이후, edge 연결 작업 수행 *)
     type SkeletonListener with
 
         member x.ProcessCausalPhrases() =

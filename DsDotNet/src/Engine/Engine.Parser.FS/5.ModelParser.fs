@@ -13,18 +13,28 @@ module ModelParser =
     let mutable initialized = false
     let Walk(parser:dsParser, options:ParserOptions) =
         let listener = new SkeletonListener(parser, options)
-        ParseTreeWalker.Default.Walk(listener, parser.system())
+        let sysctx = parser.system()
+        ParseTreeWalker.Default.Walk(listener, sysctx)
         tracefn("--- End of skeleton listener")
 
         listener.ProcessCausalPhrases()
 
-        //let edgeListener = new EdgeListener(parser, helper)
-        //ParseTreeWalker.Default.Walk(edgeListener, parser.system())
-        //tracefn("--- End of edge listener")
+        for ctx in sysctx.Descendants<ButtonsBlocksContext>() do
+            listener.ProcessButtonsBlocks(ctx)
 
-        //let etcListener = new EtcListener(parser, helper)
-        //ParseTreeWalker.Default.Walk(etcListener, parser.system())
-        //tracefn("--- End of etc listener")
+        for ctx in sysctx.Descendants<SafetyBlockContext>() do
+            listener.ProcessSafetyBlock(ctx)
+
+        for ctx in sysctx.Descendants<VariableDefContext>() do
+            listener.ProcessVariableDef(ctx)
+
+        for ctx in sysctx.Descendants<CommandDefContext>() do
+            listener.ProcessCommandDef(ctx)
+
+        for ctx in sysctx.Descendants<ObserveDefContext>() do
+            listener.ProcessObserveDef(ctx)
+
+        listener.ProcessLayouts(sysctx)
 
         listener
 

@@ -4,7 +4,6 @@ open Engine.Common.FS
 open Engine.Core
 open Engine.Parser
 open type Engine.Parser.dsParser
-open type Engine.Parser.FS.DsParser
 open System.Collections.Generic
 open Antlr4.Runtime
 
@@ -21,17 +20,13 @@ type ListenerBase(parser:dsParser, options:ParserOptions) =
     do
         parser.Reset()
 
-    member val YYLoadedSystemName:string option = None with get, set
+    member val OptLoadedSystemName:string option = None with get, set
     member val ParserOptions = options with get, set
 
     /// button category 중복 check 용
     member val ButtonCategories = HashSet<(DsSystem*string)>()
 
     member val TheSystem:DsSystem = getNull<DsSystem>() with get, set
-
-    member val internal _flow = getNull<Flow>() with get, set
-    member val internal _parenting = getNull<Real>()  with get, set
-
 
     member val internal _aliasListingContexts        = ResizeArray<AliasListingContext>()
     member val internal _callListingContexts         = ResizeArray<CallListingContext>()
@@ -52,7 +47,7 @@ type ListenerBase(parser:dsParser, options:ParserOptions) =
     member val internal RuleDictionary = Dictionary<ParserRuleContext, string>()
 
     override x.EnterEveryRule(ctx:ParserRuleContext) =
-        match x.YYLoadedSystemName with
+        match x.OptLoadedSystemName with
         | Some systemName -> x.RuleDictionary.Add(ctx, systemName)
         | None -> ()
 
@@ -60,30 +55,8 @@ type ListenerBase(parser:dsParser, options:ParserOptions) =
     override x.EnterSystem(ctx:SystemContext) =
         match options.LoadedSystemName with
         | Some systemName ->
-                x.YYLoadedSystemName <- Some systemName
+                x.OptLoadedSystemName <- Some systemName
                 x.RuleDictionary.Add(ctx, systemName)
         | _ -> ()
 
-    override x.ExitSystem(ctx:SystemContext) = x.YYLoadedSystemName <- None
-
-    override x.EnterFlowBlock(ctx:FlowBlockContext) =
-        let flowName = ctx.identifier1().GetText().DeQuoteOnDemand()
-        let flow = x.TheSystem.Flows.TryFind(fun f -> f.Name = flowName).Value
-        x._flow <- flow
-
-    override x.ExitFlowBlock(ctx:FlowBlockContext) =
-        x._flow <- getNull<Flow>()
-
-
-
-    override x.EnterParentingBlock(ctx:ParentingBlockContext) =
-        let name = ctx.identifier1().GetText().DeQuoteOnDemand()
-        if isItNull x._flow then
-            failwith "ERROR"
-        else
-            let real = x._flow.Graph.Vertices.FindWithName(name) :?> Real
-            x._parenting <- real
-
-    override x.ExitParentingBlock(ctx:ParentingBlockContext) =
-        x._parenting <- getNull<Real>()
-
+    override x.ExitSystem(ctx:SystemContext) = x.OptLoadedSystemName <- None

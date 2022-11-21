@@ -40,13 +40,15 @@ type SkeletonListener(parser:dsParser, options:ParserOptions) =
 
     override x.EnterFlowBlock(ctx:FlowBlockContext) =
         let flowName = ctx.identifier1().GetText().DeQuoteOnDemand()
-        x._flow <- Flow.Create(flowName, x.TheSystem)
+        Flow.Create(flowName, x.TheSystem) |> ignore
 
     override x.EnterParentingBlock(ctx:ParentingBlockContext) =
         x._parentingBlockContexts.Add(ctx)
         tracefn($"Parenting: {ctx.GetText()}")
         let name = ctx.identifier1().TryGetName().Value
-        x._parenting <- Real.Create(name, x._flow)
+        let oci = x.getObjectContextInformation x.TheSystem (ctx)
+        let flow = oci.Flow.Value
+        Real.Create(name, flow) |> ignore
 
 
 

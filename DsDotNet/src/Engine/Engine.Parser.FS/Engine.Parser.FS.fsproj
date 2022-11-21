@@ -16,7 +16,6 @@
 		<Compile Include="1.ErrorListener.fs" />
 		<Compile Include="1.ParserUtility.fs" />
 		<Compile Include="1.ContextInformation.fs" />
-		<Compile Include="1.ParserHelper.fs" />
 		<Compile Include="3.0.ListenerBase.fs" />
 		<Compile Include="3.1.SkeletonListener.fs" />
 		<Compile Include="3.3.EdgeListener.fs" />

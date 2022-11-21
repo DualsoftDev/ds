@@ -14,7 +14,7 @@ module ParserRuleContextModule =
 
         let createCallDef (system:DsSystem) (ctx:CallListingContext) =
             let callName =  tryFindFirstChild<CallNameContext>(ctx).Map(getText).Value
-            let apiDefCtxs = enumerateChildren<CallApiDefContext>(ctx).ToArray()
+            let apiDefCtxs = ctx.enumerateChildren<CallApiDefContext>().ToArray()
             let getAddress (addressCtx:IParseTree) =
                 tryFindFirstChild<AddressItemContext>(addressCtx).Map(getText).Value
             let apiItems =
@@ -49,7 +49,7 @@ module ParserRuleContextModule =
             option {
                 let! flow = tryFindFlow system ci.Flow.Value
                 let! aliasKeys = tryFindFirstChild<AliasDefContext>(ctx).Map(collectNameComponents)
-                let mnemonics = enumerateChildren<AliasMnemonicContext>(ctx).Select(getText).ToArray()
+                let mnemonics = ctx.enumerateChildren<AliasMnemonicContext>().Select(getText).ToArray()
                 let ad = AliasDef(aliasKeys, None, mnemonics)
                 flow.AliasDefs.Add(aliasKeys, ad)
                 return ad
@@ -59,7 +59,7 @@ module ParserRuleContextModule =
             let ci = getContextInformation ctx
             option {
                 let! flow = tryFindFlow system ci.Flow.Value
-                let mnemonics = enumerateChildren<AliasMnemonicContext>(ctx).Select(getText).ToArray()
+                let mnemonics = ctx.enumerateChildren<AliasMnemonicContext>().Select(getText).ToArray()
                 let! aliasKeys = tryFindFirstChild<AliasDefContext>(ctx).Map(collectNameComponents)
                 let target =
                     match aliasKeys.ToFSharpList() with
@@ -90,7 +90,7 @@ module ParserRuleContextModule =
                     .ToArray()
             let isWildcard(cc:Fqdn):bool = cc.Length = 1 && cc[0] = "_"
             let collectCallComponents(ctx:CallComponentsContext):Fqdn[] =
-                enumerateChildren<Identifier123Context>(ctx)
+                ctx.enumerateChildren<Identifier123Context>()
                     .Select(collectNameComponents)
                     .ToArray()
             option {
@@ -98,7 +98,7 @@ module ParserRuleContextModule =
                 let interfaceName = collectNameComponents(interrfaceNameCtx)[0]
                 let! api = system.ApiItems4Export.TryFind(nameEq interfaceName)
                 let ser =   // { start ~ end ~ reset }
-                    enumerateChildren<CallComponentsContext>(ctx)
+                    ctx.enumerateChildren<CallComponentsContext>()
                         .Map(collectCallComponents)
                         .Tap(fun callComponents -> assert(callComponents.All(fun cc -> cc.Length = 2 || isWildcard(cc))))
                         .Select(fun callCompnents -> callCompnents.Select(fun cc -> if isWildcard(cc) then null else cc.Prepend(system.Name).ToArray()).ToArray())

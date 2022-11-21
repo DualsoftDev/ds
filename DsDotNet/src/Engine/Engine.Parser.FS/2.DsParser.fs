@@ -20,6 +20,32 @@ open type Engine.Parser.dsParser
 open Antlr4.Runtime.Tree
 open Antlr4.Runtime
 
+
+[<AutoOpen>]
+module ParserHelperMouduel =
+    type IParseTree with
+        member x.enumerateChildren<'T when 'T :> IParseTree >(
+            ?includeMe:bool
+            , ?predicate:ParseTreePredicate
+            , ?exclude:ParseTreePredicate
+            ) : ResizeArray<'T> =         // ResizeArray<'T>
+
+            let includeMe = includeMe |? false
+            let predicate = predicate |? (isType<'T>)
+            let exclude   = exclude |? (fun x -> false)
+            let rec enumerateChildrenHelper(rslt:ResizeArray<'T>, frm:IParseTree, incMe:bool) =
+                if not (exclude(frm)) then
+                    if (incMe && predicate(frm) && isType<'T> frm) then
+                        rslt.Add(forceCast<'T>(frm))
+
+                    for index in [ 0 .. frm.ChildCount - 1 ] do
+                        enumerateChildrenHelper(rslt, frm.GetChild(index), true)
+
+            //Func<IParseTree, bool> pred = predicate ?? new Func<IParseTree, bool>(ctx => ctx is T)
+            let result = ResizeArray<'T>()
+            enumerateChildrenHelper(result, x, includeMe)
+            result
+
 [<RequireQualifiedAccess>]
 module Fqdn =
     let parse(text:string) =
@@ -38,7 +64,7 @@ module Fqdn =
         try
             let parser = createParser (text)
             let ctx = parser.fqdn()
-            let ncs = enumerateChildren<fqdnParser.NameComponentContext>(ctx)
+            let ncs = ctx.enumerateChildren<fqdnParser.NameComponentContext>()
             [ for nc in ncs -> nc.GetText().DeQuoteOnDemand() ]
         with
             | :? ParserException ->
@@ -79,28 +105,6 @@ type DsParser() =
         (parser, errors)
 
 
-    static member enumerateChildren<'T when 'T :> IParseTree >(
-        from:IParseTree
-        , ?includeMe:bool
-        , ?predicate:ParseTreePredicate
-        , ?exclude:ParseTreePredicate
-        ) : ResizeArray<'T> =         // ResizeArray<'T>
-
-        let includeMe = includeMe |? false
-        let predicate = predicate |? (isType<'T>)
-        let exclude   = exclude |? (fun x -> false)
-        let rec enumerateChildrenHelper(rslt:ResizeArray<'T>, frm:IParseTree, incMe:bool) =
-            if not (exclude(frm)) then
-                if (incMe && predicate(frm) && isType<'T> frm) then
-                    rslt.Add(forceCast<'T>(frm))
-
-                for index in [ 0 .. frm.ChildCount - 1 ] do
-                    enumerateChildrenHelper(rslt, frm.GetChild(index), true)
-
-        //Func<IParseTree, bool> pred = predicate ?? new Func<IParseTree, bool>(ctx => ctx is T)
-        let result = ResizeArray<'T>()
-        enumerateChildrenHelper(result, from, includeMe)
-        result
 
 
     static member enumerateParents<'T when 'T :> IParseTree >(
@@ -124,14 +128,14 @@ type DsParser() =
 
     static member tryFindFirstChild(from:IParseTree, predicate:ParseTreePredicate, ?includeMe:bool) =
         let includeMe = includeMe |? false
-        enumerateChildren<IParseTree>(from, includeMe) |> Seq.tryFind(predicate)
+        from.enumerateChildren<IParseTree>(includeMe) |> Seq.tryFind(predicate)
 
     static member tryFindFirstChild<'T when 'T :> IParseTree>(from:IParseTree, ?includeMe:bool, ?predicate:ParseTreePredicate, ?exclude:ParseTreePredicate) : 'T option =   // :'T
         let includeMe = includeMe |? false
         let predicate = predicate |? truthyfy
         let predicate x = isType<'T> x && predicate x
         let exclude = exclude |? falsify
-        enumerateChildren<'T>(from, includeMe, predicate, exclude) |> Seq.tryHead
+        from.enumerateChildren<'T>(includeMe, predicate, exclude) |> Seq.tryHead
 
     static member tryFindFirstAncestor(from:IParseTree, predicate:ParseTreePredicate, ?includeMe:bool) = //:IParseTree option=
         let includeMe = includeMe |? false

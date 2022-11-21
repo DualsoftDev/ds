@@ -42,9 +42,9 @@ type EdgeListener(parser:dsParser, helper:ParserHelper) =
          *)
         for triple in (children |> Array.windowed2 3 2) do
             if triple.Length = 3 then
-                let lefts = enumerateChildren<CausalTokenContext>(triple[0])
+                let lefts = triple[0].enumerateChildren<CausalTokenContext>()
                 let op = triple[1].GetText()
-                let rights = enumerateChildren<CausalTokenContext>(triple[2])
+                let rights = triple[2].enumerateChildren<CausalTokenContext>()
 
                 for left in lefts do
                     for right in rights do

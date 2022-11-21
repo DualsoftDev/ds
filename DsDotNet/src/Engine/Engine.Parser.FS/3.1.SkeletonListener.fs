@@ -80,7 +80,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
         // I1 <||> I2 <||> I3;  ==> [| I1; <||>; I2; <||>; I3; |]
         let terms =
             let pred = fun (tree:IParseTree) -> tree :? Identifier1Context || tree :? CausalOperatorResetContext
-            enumerateChildren<RuleContext>(ctx, false, pred)
+            ctx.enumerateChildren<RuleContext>(false, pred)
                 .Select(fun ctx -> ctx.GetText())
                 .ToArray()
 

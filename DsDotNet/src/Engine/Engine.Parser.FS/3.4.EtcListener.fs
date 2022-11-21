@@ -37,11 +37,11 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
         else
             x.ParserHelper.ButtonCategories.Add(key) |> ignore
 
-        let buttonDefs = enumerateChildren<ButtonDefContext>(first).ToArray()
+        let buttonDefs = first.enumerateChildren<ButtonDefContext>().ToArray()
         for bd in buttonDefs do
             let buttonName = tryFindFirstChild<ButtonNameContext>(bd).Value.GetText()
             let flows =
-                enumerateChildren<FlowNameContext>(bd)
+                bd.enumerateChildren<FlowNameContext>()
                     .Select(fun flowCtx -> flowCtx.GetText())
                     .Tap(fun flowName -> verifyM $"Flow [{flowName}] not exists!" (system.Flows.Any(fun f -> f.Name = flowName)))
                     .Select(fun flowName -> system.Flows.First(fun f -> f.Name = flowName))
@@ -57,7 +57,7 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
 
 
     override x.EnterSafetyBlock(ctx:SafetyBlockContext) =
-        let safetyDefs = enumerateChildren<SafetyDefContext>(ctx)
+        let safetyDefs = ctx.enumerateChildren<SafetyDefContext>()
         (*
          * safety block 을 parsing 해서 key / value 의 dictionary 로 저장
          *
@@ -71,8 +71,8 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
                     let key =
                         let safety = tryFindFirstChild(safetyDef, fun (t:IParseTree) -> t :? SafetyKeyContext).Value
                         collectNameComponents(safety)   // ["Main"] or ["My", "Flow", "Main"]
-                    let valueHeader = enumerateChildren<SafetyValuesContext>(safetyDef).First()
-                    let values      = enumerateChildren<Identifier12Context>(valueHeader).Select(collectNameComponents).ToArray()
+                    let valueHeader = safetyDef.enumerateChildren<SafetyValuesContext>().First()
+                    let values      = valueHeader.enumerateChildren<Identifier12Context>().Select(collectNameComponents).ToArray()
                     (key, values)
             ]
 
@@ -134,9 +134,9 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
     member private x.CreateFunctionApplication(context:FunApplicationContext):FunctionApplication =
         let funName = tryFindFirstChild<FunNameContext>(context).Value.GetText()
         let argGroups =
-            enumerateChildren<ArgumentGroupContext>(context)
+            context.enumerateChildren<ArgumentGroupContext>()
                 .Select(fun argGrpCtx ->
-                    enumerateChildren<ArgumentContext>(argGrpCtx)
+                    argGrpCtx.enumerateChildren<ArgumentContext>()
                         .Select(fun arg -> arg.GetText())
                         .ToArray())
                 .ToArray()
@@ -171,11 +171,11 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
                L.T.Cm = (60, 50, 20, 20)    // xywh
         } *)
 
-        let layouts = enumerateChildren<LayoutBlockContext>(ctx).ToArray()
+        let layouts = ctx.enumerateChildren<LayoutBlockContext>().ToArray()
         if layouts.Length > 1 then
             raise <| ParserException("Layouts block should exist only once", ctx)
 
-        let positionDefs = enumerateChildren<PositionDefContext>(ctx).ToArray()
+        let positionDefs = ctx.enumerateChildren<PositionDefContext>().ToArray()
         for posiDef in positionDefs do
             let callName = posiDef.callName().GetText()
             let xywh = posiDef.xywh()

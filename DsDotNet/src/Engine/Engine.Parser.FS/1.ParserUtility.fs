@@ -149,7 +149,7 @@ type ParseTreePredicate = IParseTree->bool
 type RuleExtractor = dsParser -> RuleContext
 
 type DsParser() =
-    static member val LoadedSystemName:string option = None with get, set
+    static member val XLoadedSystemName:string option = None with get, set
     static member ParseText (text:string, extractor:RuleExtractor, ?throwOnError) =
         let throwOnError = throwOnError |? true
         let inputStream = new AntlrInputStream(text)

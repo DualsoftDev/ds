@@ -12,6 +12,7 @@ open Engine.Core
 open type Engine.Parser.dsParser
 open System.Collections.Generic
 
+#if false
 /// <summary>
 /// 모든 vertex 가 생성 된 이후, edge 연결 작업 수행
 /// </summary>
@@ -187,3 +188,4 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
                 call.Xywh <- new Xywh(x, y, Nullable(), Nullable())
             | _ ->
                 failwith "ERROR"
+#endif

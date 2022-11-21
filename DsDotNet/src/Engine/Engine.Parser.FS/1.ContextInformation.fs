@@ -49,28 +49,6 @@ module ContextInformationModule =
         member x.Tuples = x.Flow, x.Parenting, x.NamedContextInformation.Names
 
 
-    let getContextInformation(parserRuleContext:ParserRuleContext) =      // collectUpwardContextInformation
-        let ctx = parserRuleContext
-        let system  = LoadedSystemName.OrElse(ctx.TryGetSystemName())
-        let flow      = ctx.TryFindFirstAscendant<FlowBlockContext>(true).Bind(fun b -> b.TryFindIdentifier1FromContext())
-        let parenting = ctx.TryFindFirstAscendant<ParentingBlockContext>(true).Bind(fun b -> b.TryFindIdentifier1FromContext())
-        let ns        = ctx.CollectNameComponents().ToFSharpList()
-        {   ContextType = ctx.GetType();
-            System = system; Flow = flow; Parenting = parenting; Names = ns }
-
-    let getObjectContextInformation(system:DsSystem) (parserRuleContext:ParserRuleContext) =
-        let ci = getContextInformation parserRuleContext
-        assert(system.Name = ci.System.Value)
-        let flow = ci.Flow.Bind(fun fn -> system.TryFindFlow(fn))
-        let parenting =
-            option {
-                let! flow = flow
-                let! parentingName = ci.Parenting
-                return! flow.Graph.TryFindVertex<Real>(parentingName)
-            }
-        { System = system; Flow = flow; Parenting = parenting; NamedContextInformation = ci }
-
-
 
 [<AutoOpen>]
 module DsParserHelperModule =
@@ -86,19 +64,5 @@ module DsParserHelperModule =
                     let! f = tryFindFlow x flowName
                     return Flow f
                 | _ -> failwith "ERROR"
-            }
-
-        member x.TryFindVertex(ctx:CausalTokenContext):Vertex option =
-            let ci = getContextInformation ctx
-            option {
-                let! parentWrapper = x.TryFindParentWrapper(ci)
-                let graph = parentWrapper.GetGraph()
-                match ci.Names with
-                | ofn_::ofrn_::[] ->      // of(r)n: other flow (real) name
-                    return! graph.TryFindVertex(ci.Names.Combine())
-                | callOrAlias::[] ->
-                    return! graph.TryFindVertex(callOrAlias)
-                | _ ->
-                    failwith "ERROR"
             }
 

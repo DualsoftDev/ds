@@ -36,30 +36,6 @@ namespace Engine
 }
 
 ";
-
-        public static string SafetyDuplicatedInvalid = @"
-[sys] L = {
-    [flow] F = {
-        Main = { Cp > Cm; }
-        [aliases] = {
-            C.P = { Cp; Cp1; Ap2; }
-            C.M = { Cm; Cm1; Cm2; }
-        }
-        [safety] = {
-            Main = {C.F.Sp; C.F.Sm}
-        }
-    }
-    [device file=""cylinder.ds""] C;
-}
-
-
-[prop] = {
-    [ safety ] = {
-        L.F.Main = {C.F.Sp; C.F.Sm}
-    }
-}
-";
-
         public static string StrongCausal = @"
 [sys] L = {
     [flow] F = {

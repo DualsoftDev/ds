@@ -147,12 +147,6 @@ module internal ToDsTextModule =
                     yield $"{tab2}{c.Name.QuoteOnDemand()} = {lb} {ais} {rb}"
                 yield $"{tab}{rb}"
 
-            for d in system.Devices do
-                match d with
-                | :? ExternalSystem as es -> yield $"{tab}[external file={quote es.UserSpecifiedFilePath}] {es.Name}; // {es.AbsoluteFilePath}"
-                | :? Device as d -> yield $"{tab}[device file={quote d.UserSpecifiedFilePath}] {d.Name}; // {d.AbsoluteFilePath}"
-                | _ -> failwith "ERROR"
-
 
             if system.ApiItems4Export.Any() then
                 yield $"{tab}[interfaces] = {lb}"
@@ -211,18 +205,18 @@ module internal ToDsTextModule =
 
                 [
                     if withSafeties.Any() then
-                        yield $"{tab}[safety] = {lb}"
+                        yield $"{tab2}[safety] = {lb}"
                         for safetyHolder in withSafeties do
                             let conds = safetyHolder.SafetyConditions.Select(safetyConditionName).JoinWith("; ") + ";"
                             yield $"{tab2}{safetyConditionHolderName safetyHolder} = {lb} {conds} {rb}"
-                        yield $"{tab}{rb}"
+                        yield $"{tab2}{rb}"
                 ] |> combineLines
 
             let withLayouts = system.Calls.Where(fun call -> call.Xywh <> null)
             let layouts =
                 [
                     if withLayouts.Any() then
-                        yield $"{tab}[layouts] = {lb}"
+                        yield $"{tab2}[layouts] = {lb}"
                         for call in withLayouts do
                             let xywh = call.Xywh
                             let posi =
@@ -232,16 +226,21 @@ module internal ToDsTextModule =
                                     $"({xywh.X}, {xywh.Y})"
                             yield $"{tab2}{call.Name} = {posi}"
 
-                        yield $"{tab}{rb}"
+                        yield $"{tab2}{rb}"
                 ] |> combineLines
 
             if safeties.Any() || layouts.Any() then
-                yield $"[prop] = {lb}"
+                yield $"{tab}[prop] = {lb}"
                 if safeties.Any()  then yield safeties
                 if layouts.Any()   then yield layouts
-                yield rb
+                yield $"{tab}{rb}"
 
 
+            for d in system.Devices do
+                match d with
+                | :? ExternalSystem as es -> yield $"{tab}[external file={quote es.UserSpecifiedFilePath}] {es.Name}; // {es.AbsoluteFilePath}"
+                | :? Device as d -> yield $"{tab}[device file={quote d.UserSpecifiedFilePath}] {d.Name}; // {d.AbsoluteFilePath}"
+                | _ -> failwith "ERROR"
 
 
             yield codeBlockToDs system

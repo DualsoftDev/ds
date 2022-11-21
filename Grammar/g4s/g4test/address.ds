@@ -1,13 +1,24 @@
-[prop] = {
-    // Global safety
-    [safety] = {
-        My.F.Main = {B.F.Sp; B.F.Sm; C.F.Sp}
+[sys] L = {
+    [flow] F = {
+        Main = {
+            Ap > Am;
+        }
+        [aliases] = {
+            Ap = { Ap1; Ap2; Ap3; }
+            Am = { Am1; Am2; Am3; }
+        }
     }
-    [addresses] = {
-        A."+" = (%Q1234.2343, %I1234.2343)
-        A."-" = (START, END)
+    [calls] = {
+        Ap = { A.""+""(%Q1, %I1); }
+        Am = { A.""-""(%Q2, %I2); }
     }
-    [layouts] = {
-        A."+" = (1309,405,205,83)
+
+    [prop] = {
+        [safety] = {
+            F.Main = { Ap; Am; }
+            Ap = { F.Main; }
+        }
     }
+
+    [device file=""cylinder.ds""] A;
 }

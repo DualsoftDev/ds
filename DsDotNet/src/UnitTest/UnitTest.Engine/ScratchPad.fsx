@@ -65,3 +65,15 @@ let replace (xs:char array) (ranges:Range seq) =
 [|'0'..'9'|]
 replace [|'0'..'9'|] ranges
 
+open System.Collections.Generic
+let dic =
+    [
+        1, "One"
+        2, "Two"
+        5, "Five"
+    ] |> dict |> Dictionary
+
+let n = 5
+match n with
+| DicContains dic v -> v
+| _ -> "Not Found"

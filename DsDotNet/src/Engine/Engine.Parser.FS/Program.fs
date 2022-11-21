@@ -88,9 +88,11 @@ C4 > C5;
         Bm = { B."-"(%Q4, %I4); }
     }
 
-    [device file="cylinder.ds"] A;
-    [device file="cylinder.ds"] B;
-    [external file="station.ds" ip="192.168.0.2"] C;
+    [emg] = {
+        EMGBTN = { F; };
+        //EmptyButton = {};
+        //NonExistingFlowButton = { F1; };
+    }
     [prop] = {
         // safety : Real|Call = { (Real|Call)* }
         [safety] = {
@@ -102,11 +104,9 @@ C4 > C5;
         }
     }
 
-    [emg] = {
-        EMGBTN = { F; };
-        //EmptyButton = {};
-        //NonExistingFlowButton = { F1; };
-    }
+    [device file="cylinder.ds"] A;
+    [device file="cylinder.ds"] B;
+    [external file="station.ds" ip="192.168.0.2"] C;
 }
 """
 
@@ -163,7 +163,44 @@ C4 > C5;
 }
 
 """
+    let CausalsText = """
+[sys] L = {
+    [flow] F = {
+        Main = {
+            Ap > Am;
 
+            Ap1, Bp1 > Bm1;
+
+            /* Grouped */
+            //{ Ap1; Bp1; } > Bm1
+            //{ Ap1; Bp1; } > { Am1; Bm1; }
+        }
+        [aliases] = {
+            Ap = { Ap1; Ap2; Ap3; }
+            Am = { Am1; Am2; Am3; }
+            Bp = { Bp1; Bp2; Bp3; }
+            Bm = { Bm1; Bm2; Bm3; }
+        }
+    }
+    [calls] = {
+        Ap = { A."+"(%Q1, %I1); }
+        Am = { A."-"(%Q2, %I2); }
+        Bp = { B."+"(%Q3, %I3); }
+        Bm = { B."-"(%Q4, %I4); }
+    }
+
+    [prop] = {
+        [safety] = {
+            F.Main = { Ap; Am; }
+            Ap = { F.Main; }
+        }
+    }
+
+    [device file="cylinder.ds"] A;
+    [device file="cylinder.ds"] B;
+}
+
+"""
 
     let AdoptoedValidText = """
 [sys] My = {

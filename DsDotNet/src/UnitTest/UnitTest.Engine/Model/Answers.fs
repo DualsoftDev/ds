@@ -17,6 +17,37 @@ module ModelAnswers =
     }
 }
 """
+    let answerCausalsText = """
+[sys] L = {
+    [flow] F = {
+        Main = {
+            Bp1 > Bm1;
+            Ap1 > Bm1;
+            Ap > Am;
+        }
+        [aliases] = {
+            Ap = { Ap1; Ap2; Ap3; }
+            Am = { Am1; Am2; Am3; }
+            Bp = { Bp1; Bp2; Bp3; }
+            Bm = { Bm1; Bm2; Bm3; }
+        }
+    }
+    [calls] = {
+        Ap = { A."+"(%Q1, %I1); }
+        Am = { A."-"(%Q2, %I2); }
+        Bp = { B."+"(%Q3, %I3); }
+        Bm = { B."-"(%Q4, %I4); }
+    }
+    [prop] = {
+        [safety] = {
+        F.Main = { Ap; Am; }
+        Ap = { F.Main; }
+        }
+    }
+    [device file="cylinder.ds"] A;
+    [device file="cylinder.ds"] B;
+}
+"""
     let answerEveryScenarioText = """
 [sys ip = 192.168.0.1] My = {
     [flow] MyFlow = {
@@ -59,9 +90,6 @@ module ModelAnswers =
         Bp = { B."+"(%Q3, %I3); }
         Bm = { B."-"(%Q4, %I4); }
     }
-    [device file="cylinder.ds"] A;
-    [device file="cylinder.ds"] B;
-    [external file="station.ds"] C;
     [emg] = {
         EMGBTN = { F; }
     }
@@ -81,6 +109,9 @@ module ModelAnswers =
         //    B."-" = ( BSTART, BEND)
         //}
     }
+    [device file="cylinder.ds"] A;
+    [device file="cylinder.ds"] B;
+    [external file="station.ds"] C;
 }
 
 """
@@ -131,35 +162,6 @@ module ModelAnswers =
 
 [<AutoOpen>]
 module ModelComponentAnswers =
-    let answerSafetyValid = """
-[sys] L = {
-    [flow] F = {
-        Main = {
-            Ap > Am;
-        }
-        [aliases] = {
-            Ap = { Ap1; Ap2; Ap3; }
-            Am = { Am1; Am2; Am3; }
-        }
-        // ---- flow 내의 safety block 없애는 걸로...
-        //[safety] = {
-        //    Main = {C.F.Sp; C.F.Sm}
-        //}
-    }
-    [calls] = {
-        Ap = { A."+"(%Q1, %I1); }
-        Am = { A."-"(%Q2, %I2); }
-    }
-
-    [device file="cylinder.ds"] A;
-    [prop] = {
-        [safety] = {
-            F.Main = { Ap; Am; }
-            Ap = { F.Main; }
-        }
-    }
-}
-"""
     let answerStrongCausal = """
 [sys] L = {
 [flow] F = {

@@ -2,30 +2,19 @@
     [flow] F = {
         Seg1 > Seg2;
         Seg1 = {
-            A."+" > A."-";
+            Ap > Am;
         }
     }
     [flow] F2 = {
         F.Seg1 > Seg;
         Seg = {
-            A."+" > A."-";
+            Ap > Am;
         }
     }
-}
-
-[sys] A = {
-    [flow] F = {
-        Vp > Pp > Sp;
-        Vm > Pm > Sm;
-
-        Vp |> Pm |> Sp;
-        Vm |> Pp |> Sm;
-        Vp <||> Vm;
+    [calls] = {
+        Ap = { A."+"(%Q1, %I1); }
+        Am = { A."-"(%Q2, %I2); }
     }
-    [interfaces] = {
-        "+" = { F.Vp ~ F.Sp }
-        "-" = { F.Vm ~ F.Sm }
-        // 정보로서의 상호 리셋
-        "+" <||> "-";
-    }
+
+    [device file="cylinder.ds"] A;
 }

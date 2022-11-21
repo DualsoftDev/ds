@@ -54,9 +54,9 @@ module ModelTests1 =
         inherit TestBase()
 
         let compare = compare @$"{__SOURCE_DIRECTORY__}\..\Libraries"
-
+        let compareExact x = compare x x
         [<Test>]
-        member __.``0 Any test`` () =
+        member __.``0 Any temporary test`` () =
             logInfo "=== 0 Any test"
             let input = """
 [sys] EX = {
@@ -86,12 +86,17 @@ module ModelTests1 =
         [<Test>]
         member __.``CodeElementsText test`` () =
             logInfo "=== CodeElementsText"
-            compare Program.CodeElementsText Program.CodeElementsText
+            compareExact Program.CodeElementsText
+
+        [<Test>]
+        member __.``CausalsText test`` () =
+            logInfo "=== CausalsText"
+            compare Program.CausalsText answerCausalsText
 
         [<Test>]
         member __.``AdoptoedValidText test`` () =
             logInfo "=== AdoptoedValidText"
-            compare Program.AdoptoedValidText Program.AdoptoedValidText
+            compareExact Program.AdoptoedValidText
 
         [<Test>]
         member __.``DuplicatedEdgesText test`` () =
@@ -111,11 +116,11 @@ module ModelTests1 =
         [<Test>]
         member __.``SimpleLoadedDeviceText test`` () =
             logInfo "=== SimpleLoadedDeviceText"
-            compare Program.SimpleLoadedDeviceText Program.SimpleLoadedDeviceText
+            compareExact Program.SimpleLoadedDeviceText
 
         [<Test>]
         member __.``Model component [SafetyValid] test`` () =
-            compare ParserTest.SafetyValid answerSafetyValid
+            compareExact ParserTest.SafetyValid
 
         [<Test>]
         member __.``Model component [StrongCausal] test`` () =
@@ -135,7 +140,7 @@ module ModelTests1 =
 
         [<Test>]
         member __.``Model component [QualifiedName] test`` () =
-            compare ParserTest.QualifiedName ParserTest.QualifiedName
+            compareExact ParserTest.QualifiedName
 
         [<Test>]
         member __.``Model component [T6 alias] test`` () =

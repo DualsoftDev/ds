@@ -66,6 +66,16 @@ let (|EndsWith|_|) (needle:string) (haystack : string) = if haystack.EndsWith(ne
 let (|Equals|_|) x y = if x = y then Some() else None
 let (|Contains|_|) (needle:string) (haystack : string) = if haystack.Contains(needle) then Some() else None
 
+
+let (|Try|_|) (f: 'a -> 'b option) a = f a
+let (|ContainedInDictionary|_|) (dic:IDictionary<'k,'v>) key =
+    let success, value = dic.TryGetValue key
+    if success then Some value else None
+let (|ContainedInSet|_|) xs x = if Set.contains x xs then Some() else None
+let (|ContainedInHashSet|_|) (xs:HashSet<'a>) (x:'a) = if xs.Contains x then Some() else None
+let (|ContainedInList|_|) xs x = if List.contains x xs then Some() else None
+let (|ContainedInArray|_|) xs x = if Array.contains x xs then Some() else None
+
 let (|DatePattern|_|) (input : string) =
     match DateTime.TryParse(input) with
     | true, v -> Some(v)
@@ -144,9 +154,13 @@ let private do_test() =
             | _ -> printfn "None:%s" str
         )
 
+
+
+    let listxs = [9..11]
     match 10 with
       | Between 0 5 -> printfn "Passed1"
       | Between 6 8 -> printfn "Passed2"
+      | ContainedInList listxs  -> printfn "passed by list comparison"
       | Between 9 11 -> printfn "Passed3"
       | Between 3 15 -> printfn "Will not be called"
       | _ -> printfn "Outside range"

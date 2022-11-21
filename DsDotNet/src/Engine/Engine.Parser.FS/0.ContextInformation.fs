@@ -54,7 +54,7 @@ module ContextInformationModule =
         let system  = LoadedSystemName.OrElse(ctx.TryGetSystemName())
         let flow      = ctx.TryFindFirstAscendant<FlowBlockContext>(true).Bind(fun b -> b.TryFindIdentifier1FromContext())
         let parenting = ctx.TryFindFirstAscendant<ParentingBlockContext>(true).Bind(fun b -> b.TryFindIdentifier1FromContext())
-        let ns        = ctx.collectNameComponents().ToFSharpList()
+        let ns        = ctx.CollectNameComponents().ToFSharpList()
         {   ContextType = ctx.GetType();
             System = system; Flow = flow; Parenting = parenting; Names = ns }
 

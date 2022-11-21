@@ -125,9 +125,9 @@ partial class ElementsListener : dsParserBaseListener
          */
         var safetyKvs =
             from safetyDef in safetyDefs
-            let key = collectNameComponents(TryFindFirstChild(safetyDef, t => t is SafetyKeyContext))   // ["Main"] or ["My", "Flow", "Main"]
+            let key = CollectNameComponents(TryFindFirstChild(safetyDef, t => t is SafetyKeyContext))   // ["Main"] or ["My", "Flow", "Main"]
             let valueHeader = Descendants<SafetyValuesContext>(safetyDef).First()
-            let values = Descendants<Identifier123Context>(valueHeader).Select(collectNameComponents).ToArray()
+            let values = Descendants<Identifier123Context>(valueHeader).Select(CollectNameComponents).ToArray()
             select (key, values)
             ;
 
@@ -170,7 +170,7 @@ partial class ElementsListener : dsParserBaseListener
             if (txrxCtx == null || txrxCtx.GetText() == "_")
                 return Array.Empty<Segment>();
 
-            var nss = Descendants<Identifier123Context>(txrxCtx).Select(collectNameComponents).ToArray();
+            var nss = Descendants<Identifier123Context>(txrxCtx).Select(CollectNameComponents).ToArray();
             return nss.Select(ns => _model.FindFirst<Segment>(ns)).ToArray();
         }
 
@@ -244,7 +244,7 @@ partial class ElementsListener : dsParserBaseListener
         var positionDefs = Descendants<PositionDefContext>(ctx).ToArray();
         foreach (var posiDef in positionDefs)
         {
-            var callPath = collectNameComponents(posiDef.callPath());
+            var callPath = CollectNameComponents(posiDef.callPath());
             var cp = _model.FindFirst<CallPrototype>(callPath);
             var xywh = posiDef.xywh();
             var (x, y, w, h) = (xywh.x().GetText(), xywh.y().GetText(), xywh.w()?.GetText(), xywh.h()?.GetText());
@@ -264,7 +264,7 @@ partial class ElementsListener : dsParserBaseListener
         var addressDefs = Descendants<AddressDefContext>(ctx).ToArray();
         foreach (var addrDef in addressDefs)
         {
-            var segNs = collectNameComponents(addrDef.segmentPath());
+            var segNs = CollectNameComponents(addrDef.segmentPath());
             var seg = _model.FindFirst<Segment>(segNs);
             var sre = addrDef.address();
             var (s, r, e) = (sre.startTag()?.GetText(), sre.resetTag()?.GetText(), sre.endTag()?.GetText());

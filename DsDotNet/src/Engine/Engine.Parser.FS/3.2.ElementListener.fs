@@ -48,11 +48,11 @@ type ElementListener(parser:dsParser, helper:ParserHelper) =
         let system = helper.TheSystem
         let hash = system.ApiItems4Export
         let interrfaceNameCtx = TryFindFirstChild<InterfaceNameContext>(ctx)
-        let interfaceName = collectNameComponents(interrfaceNameCtx.Value)[0]
+        let interfaceName = CollectNameComponents(interrfaceNameCtx.Value)[0]
 
         let collectCallComponents(ctx:CallComponentsContext):Fqdn[] =
             Descendants<Identifier123Context>(ctx)
-                .Select(collectNameComponents)
+                .Select(CollectNameComponents)
                 .ToArray()
 
         let isWildcard(cc:Fqdn):bool = cc.Length = 1 && cc[0] = "_"

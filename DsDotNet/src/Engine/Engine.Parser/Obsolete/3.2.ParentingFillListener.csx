@@ -39,7 +39,7 @@ namespace Engine.Parser
         {
             var name = ctx.identifier1().GetText().DeQuoteOnDemand();
             _parenting = (Segment)_rootFlow.InstanceMap[name];
-            var myFlowCallCtxs = Descendants<Identifier1ListingContext>(ctx).Select(ctx => collectNameComponents(ctx)[0]).ToArray();
+            var myFlowCallCtxs = Descendants<Identifier1ListingContext>(ctx).Select(ctx => CollectNameComponents(ctx)[0]).ToArray();
             foreach(var call in myFlowCallCtxs)
             {
                 var cp = _rootFlow.CallPrototypes.FirstOrDefault(cp => cp.Name == call);
@@ -47,7 +47,7 @@ namespace Engine.Parser
                 _parenting.InstanceMap.Add(call, instance);
             }
 
-            var mySystemOtherFlowCallCtxs = Descendants<Identifier2ListingContext>(ctx).Select(ctx => collectNameComponents(ctx).ToArray()).ToArray();   // collectNameComponents
+            var mySystemOtherFlowCallCtxs = Descendants<Identifier2ListingContext>(ctx).Select(ctx => CollectNameComponents(ctx).ToArray()).ToArray();   // CollectNameComponents
             foreach(var otherFlowCall in mySystemOtherFlowCallCtxs)
             {
                 Assert(otherFlowCall.Length == 2);
@@ -79,7 +79,7 @@ namespace Engine.Parser
             if (_parenting != null)
                 return;
 
-            var id2 = collectNameComponents(ctx);
+            var id2 = CollectNameComponents(ctx);
             var fqdn = id2.Prepend(_system.Name).ToArray();
             var objs = _model.FindAll(fqdn).ToArray();
             var obj = objs.FirstOrDefault();

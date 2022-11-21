@@ -68,7 +68,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
 
         let system = helper.TheSystem
         let interrfaceNameCtx = ctx.TryFindFirstChild<InterfaceNameContext>().Value
-        let interfaceName = interrfaceNameCtx.collectNameComponents()[0]
+        let interfaceName = interrfaceNameCtx.CollectNameComponents()[0]
 
         // 이번 stage 에서 일단 interface 이름만 이용해서 빈 interface 객체를 생성하고,
         // TXs, RXs, Resets 은 추후에 채움..
@@ -104,7 +104,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
         let fileSpecCtx = ctx.TryFindFirstChild<FileSpecContext>().Value
         let absoluteFilePath, simpleFilePath = x.GetFilePath(fileSpecCtx)
         let device =
-            let loadedName = ctx.collectNameComponents().Combine()
+            let loadedName = ctx.CollectNameComponents().Combine()
             fwdLoadDevice helper.TheSystem (absoluteFilePath, simpleFilePath) loadedName
         helper.TheSystem.Devices.Add(device) |> ignore
 
@@ -115,7 +115,7 @@ type SkeletonListener(parser:dsParser, helper:ParserHelper) =
         let external =
             let ipSpecCtx = ctx.TryFindFirstChild<IpSpecContext>().Value
             let ip = ipSpecCtx.TryFindFirstChild<EtcNameContext>().Value.GetText()
-            let loadedName = ctx.collectNameComponents().Combine()
+            let loadedName = ctx.CollectNameComponents().Combine()
             fwdLoadExternalSystem helper.TheSystem (absoluteFilePath, simpleFilePath) loadedName
         helper.TheSystem.Devices.Add(external) |> ignore
 

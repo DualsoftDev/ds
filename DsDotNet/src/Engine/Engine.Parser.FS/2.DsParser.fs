@@ -8,7 +8,6 @@ open Antlr4.Runtime.Tree
 open Engine.Common.FS
 open Engine.Parser
 open type Engine.Parser.dsParser
-open type Engine.Parser.FS.DsParser
 open Engine.Core
 
 
@@ -40,6 +39,8 @@ module ParserUtilityModule =
                 [ text ]
             | exn ->
                 failwith $"ERROR: {exn}"
+
+    let collectNameComponents (parseTree:IParseTree) = parseTree.CollectNameComponents()
 
     type IParseTree with
         member x.Descendants<'T when 'T :> IParseTree >(
@@ -134,7 +135,7 @@ module ParserUtilityModule =
                     return parseFqdn(name).ToArray()
             }
 
-        member x.collectNameComponents():string[] = x.TryCollectNameComponents() |> Option.get
+        member x.CollectNameComponents():string[] = x.TryCollectNameComponents() |> Option.get
 
         member x.TryGetSystemName() =
             option {
@@ -142,7 +143,6 @@ module ParserUtilityModule =
                 let! names = ctx.TryCollectNameComponents()
                 return names.Combine()
             }
-
 
 type ParseTreePredicate = IParseTree->bool
 type RuleExtractor = dsParser -> RuleContext
@@ -170,7 +170,7 @@ type DsParser() =
         let throwOnError = throwOnError |? true
         let func = predExtract |? (fun (parser:dsParser) -> parser.system() :> RuleContext)
         //let (parser, tree, errors) = DsParser.FromDocument(text, func, throwOnError)
-        let (parser, tree, errors) = ParseText(text, func, throwOnError)
+        let (parser, tree, errors) = DsParser.ParseText(text, func, throwOnError)
         (parser, errors)
 
 

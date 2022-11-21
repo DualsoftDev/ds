@@ -19,7 +19,7 @@ module ParserRuleContextModule =
                 addressCtx.TryFindFirstChild<AddressItemContext>().Map(getText).Value
             let apiItems =
                 [   for apiDefCtx in apiDefCtxs do
-                    let apiPath = apiDefCtx.collectNameComponents() |> List.ofSeq // e.g ["A"; "+"]
+                    let apiPath = apiDefCtx.CollectNameComponents() |> List.ofSeq // e.g ["A"; "+"]
                     match apiPath with
                     | device::api::[] ->
                         let apiItem =
@@ -48,7 +48,7 @@ module ParserRuleContextModule =
             let ci = getContextInformation ctx
             option {
                 let! flow = tryFindFlow system ci.Flow.Value
-                let! aliasKeys = ctx.TryFindFirstChild<AliasDefContext>().Map(fun x -> x.collectNameComponents())
+                let! aliasKeys = ctx.TryFindFirstChild<AliasDefContext>().Map(collectNameComponents)
                 let mnemonics = ctx.Descendants<AliasMnemonicContext>().Select(getText).ToArray()
                 let ad = AliasDef(aliasKeys, None, mnemonics)
                 flow.AliasDefs.Add(aliasKeys, ad)
@@ -60,7 +60,7 @@ module ParserRuleContextModule =
             option {
                 let! flow = tryFindFlow system ci.Flow.Value
                 let mnemonics = ctx.Descendants<AliasMnemonicContext>().Select(getText).ToArray()
-                let! aliasKeys = ctx.TryFindFirstChild<AliasDefContext>().Map(fun x -> x.collectNameComponents())
+                let! aliasKeys = ctx.TryFindFirstChild<AliasDefContext>().Map(collectNameComponents)
                 let target =
                     match aliasKeys.ToFSharpList() with
                     | t::[] ->
@@ -91,11 +91,11 @@ module ParserRuleContextModule =
             let isWildcard(cc:Fqdn):bool = cc.Length = 1 && cc[0] = "_"
             let collectCallComponents(ctx:CallComponentsContext):Fqdn[] =
                 ctx.Descendants<Identifier123Context>()
-                    .Select(fun x -> x.collectNameComponents())
+                    .Select(collectNameComponents)
                     .ToArray()
             option {
                 let! interrfaceNameCtx = ctx.TryFindFirstChild<InterfaceNameContext>()
-                let interfaceName = interrfaceNameCtx.collectNameComponents()[0]
+                let interfaceName = interrfaceNameCtx.CollectNameComponents()[0]
                 let! api = system.ApiItems4Export.TryFind(nameEq interfaceName)
                 let ser =   // { start ~ end ~ reset }
                     ctx.Descendants<CallComponentsContext>()

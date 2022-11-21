@@ -10,7 +10,6 @@ open Engine.Common.FS
 open Engine.Parser
 open Engine.Core
 open type Engine.Parser.dsParser
-open type Engine.Parser.FS.DsParser
 open System.Collections.Generic
 
 /// <summary>
@@ -70,9 +69,9 @@ type EtcListener(parser:dsParser, helper:ParserHelper) =
             [   for safetyDef in safetyDefs do
                     let key =
                         let safety = safetyDef.TryFindFirstChild(fun (t:IParseTree) -> t :? SafetyKeyContext).Value
-                        safety.collectNameComponents()   // ["Main"] or ["My", "Flow", "Main"]
+                        safety.CollectNameComponents()   // ["Main"] or ["My", "Flow", "Main"]
                     let valueHeader = safetyDef.Descendants<SafetyValuesContext>().First()
-                    let values      = valueHeader.Descendants<Identifier12Context>().Select(fun x -> x.collectNameComponents()).ToArray()
+                    let values      = valueHeader.Descendants<Identifier12Context>().Select(collectNameComponents).ToArray()
                     (key, values)
             ]
 

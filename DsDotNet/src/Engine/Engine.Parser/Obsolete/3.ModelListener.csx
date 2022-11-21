@@ -49,7 +49,7 @@ class ModelListener : dsParserBaseListener
     {
         var container = (Flow)_parenting ?? _rootFlow;
         var instanceMap = container.InstanceMap;
-        var ns = collectNameComponents(ctx);
+        var ns = CollectNameComponents(ctx);
         var fqdn = ns.Combine();
         if (instanceMap.ContainsKey(fqdn))
             return;

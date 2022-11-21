@@ -20,7 +20,7 @@ partial class ElementsListener
 
             foreach (var cc in causalContexts)
             {
-                var ns = collectNameComponents(cc);
+                var ns = CollectNameComponents(cc);
                 var text = cc.GetText();
                 if (text.StartsWith("#"))
                 {

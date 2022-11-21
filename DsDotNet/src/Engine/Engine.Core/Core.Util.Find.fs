@@ -51,7 +51,7 @@ module internal ModelFindModule =
             failwith "ERROR"
 
     let tryFindLoadedSystem(system:DsSystem) (loadedSystemName:string) =
-        system.Devices.TryFind(fun d -> d.Name = loadedSystemName)
+        system.Devices.TryFind(nameEq loadedSystemName)
 
     let rec findExportApiItem(system:DsSystem) (Fqdn(apiPath)) =
         let sysName, apiKey = apiPath[0], apiPath[1]
@@ -74,7 +74,7 @@ module internal ModelFindModule =
         x
 
     let tryFindFlow(system:DsSystem) (flowName:string) =
-        system.Flows.TryFind(fun flow -> flow.Name = flowName)
+        system.Flows.TryFind(nameEq flowName)
 
 
     let tryFindReal system flowName realName =

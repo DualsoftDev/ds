@@ -53,7 +53,7 @@ namespace Engine.Parser
             if (_parenting != null)
                 return;
 
-            var callName = collectNameComponents(ctx)[0];
+            var callName = CollectNameComponents(ctx)[0];
             var cp = _rootFlow.FindFirst<CallPrototype>(ParserHelper.GetCurrentPathComponents(callName));
             if (cp == null)
             {
@@ -73,7 +73,7 @@ namespace Engine.Parser
             if (_parenting != null)
                 return;
 
-            var ns = collectNameComponents(ctx);
+            var ns = CollectNameComponents(ctx);
             var name2 = ns.Combine();
             var target = _system.FindFirst(ns);
             switch(target)

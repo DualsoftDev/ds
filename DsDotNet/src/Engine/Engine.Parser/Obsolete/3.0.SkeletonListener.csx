@@ -97,7 +97,7 @@ class SkeletonListener : dsParserBaseListener
         if (_parenting != null)
             return;
 
-        var ns = collectNameComponents(ctx);
+        var ns = CollectNameComponents(ctx);
         if (ns.Length > 1)
             return;
 
@@ -141,10 +141,10 @@ class SkeletonListener : dsParserBaseListener
      */
     override public void EnterAliasListing(AliasListingContext ctx)
     {
-        var defs = collectNameComponents(ctx.aliasDef()); // e.g "P.F.Vp" -> [| "P"; "F"; "Vp" |]
+        var defs = CollectNameComponents(ctx.aliasDef()); // e.g "P.F.Vp" -> [| "P"; "F"; "Vp" |]
         var aliasMnemonics =    // e.g { Vp1; Vp2; Vp3; }
             Descendants<AliasMnemonicContext>(ctx)
-            .Select(mne => collectNameComponents(mne))
+            .Select(mne => CollectNameComponents(mne))
             .Do(ns => Assert(ns.Count() == 1))      // Vp1 등은 '.' 허용 안함
             .Select(ns => ns[0])
             .ToArray()

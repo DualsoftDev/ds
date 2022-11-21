@@ -103,4 +103,5 @@ module internal ModelFindModule =
 
         member x.FindFlow(flowName:string) = tryFindFlow x flowName |> Option.get
         member x.TryFindFlow(flowName:string) = tryFindFlow x flowName
+        member x.TryFindCall(callName:string) = tryFindCall x callName
 

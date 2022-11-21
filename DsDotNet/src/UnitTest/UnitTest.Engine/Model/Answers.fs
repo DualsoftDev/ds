@@ -66,14 +66,13 @@ module ModelAnswers =
         EMGBTN = { F; }
     }
     [prop] = {
+        [safety] = {
+            Am = { F.Main; }
+            F.Main = { Ap; }
+        }
         [layouts] = {
             Ap = (1309, 405, 205, 83)
         }
-        // todo: not yet
-        //[safety] = {
-        //    F.Main = { Ap1; F.R2 }
-        //}
-
         // will not be supported
         //[addresses] = {
         //    A."+" = ( %Q1234.2343, %I1234.2343)
@@ -134,39 +133,31 @@ module ModelAnswers =
 module ModelComponentAnswers =
     let answerSafetyValid = """
 [sys] L = {
-[flow] F = {
-    Main = {
-        Cp > Cm;
-    }
-    [aliases] = {
-        C.P = { Cp; Cp1; Ap2; }
-        C.M = { Cm; Cm1; Cm2; }
-    }
-}
-[sys] C = {
     [flow] F = {
-        Pm |> Sp;
-        Pp |> Sm;
-        Vp <||> Vm > Pm > Sm;
-        Vp > Pp > Sp;
+        Main = {
+            Ap > Am;
+        }
+        [aliases] = {
+            Ap = { Ap1; Ap2; Ap3; }
+            Am = { Am1; Am2; Am3; }
+        }
+        // ---- flow 내의 safety block 없애는 걸로...
+        //[safety] = {
+        //    Main = {C.F.Sp; C.F.Sm}
+        //}
     }
-    [interfaces] = {
-        P = { F.Vp ~ F.Sp }
-        M = { F.Vm ~ F.Sm }
-        P <||> M;
+    [calls] = {
+        Ap = { A."+"(%Q1, %I1); }
+        Am = { A."-"(%Q2, %I2); }
     }
-}
-[prop] = {
-    [addresses] = {
-        C.P = ( %Q1234.2343, %I1234.2343)
-        C.M = ( START, END)
+
+    [device file="cylinder.ds"] A;
+    [prop] = {
+        [safety] = {
+            F.Main = { Ap; Am; }
+            Ap = { F.Main; }
+        }
     }
-}
-[prop] = {
-    [safety] = {
-        L.F.Main = { C.F.Vp; C.F.Vm; }
-    }
-}
 }
 """
     let answerStrongCausal = """

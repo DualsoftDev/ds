@@ -76,38 +76,28 @@ module EtcListenerModule =
             let sysNames, flowName, parenting_, ns_ = (x.GetContextInformation ctx).Tuples
             let curSystem = x.TheSystem
 
-            let test =
-                let f (n:int) = n.ToString()
-                let a = Some 1
-                a |> Option.map(f)
-
-            for (FList(key), values) in safetyKvs do
-                match key with
-                | flow::real::[] ->
-                    let realSeg = curSystem.TryFindFlow(flow).Bind(fun f -> f.Graph.TryFindVertex(real)).Map(fun v -> v :?> Real)
-                    match realSeg with
-                    | Some realSeg ->
-                        for value in values do
-                            //let vertex = curSystem.FindGraphVertex(value)
-                            ()
-
-                            //let added = realSeg.SafetyConditions.Add(cond)
-                            //if not added then
-                            //    raise <| ParserException($"Safety condition [{cond.QualifiedName}] duplicated on safety key[{key.Combine()}]", ctx)
-                            //let x = api
-                            //()
-                            ////let safetySeg = curSystem.FindExportApiItem  TryFindFlow(flow).Map(fun f -> f.Graph.TryFindVertex(value))
-                            ////match safetySeg with
-                            ////| Some safetySeg ->
-                            ////    safetySeg.Safety <- Some realSeg
-                            ////| None -> failwith $"Safety segment [{value}] not exists!"
+            let tryFindRealOrCall (ns:Fqdn) =
+                option {
+                    match ns.ToFSharpList() with
+                    | flow::real::[] ->
+                        let! flow = curSystem.TryFindFlow(flow)
+                        let! vertex = flow.Graph.TryFindVertex(real)
+                        return SafetyConditionReal (vertex :?> Real)
+                    | call::[] ->
+                        let! c = curSystem.TryFindCall(call)
+                        return SafetyConditionCall c
                     | _ ->
                         failwith "ERROR"
+                }
 
-                    ()
-                | _ ->
-                    failwith "ERROR"
-
+            for (key, values) in safetyKvs do
+                option {
+                    let! safetyKey = tryFindRealOrCall key
+                    let safetyConditions = [ for value in values -> tryFindRealOrCall value ] |> Seq.choose id
+                    let holder = safetyKey.Core :?> ISafetyConditoinHolder
+                    tracefn "%A = {%A}" holder safetyConditions
+                    safetyConditions.Iter(fun sc -> holder.SafetyConditions.Add(sc) |> verifyM $"Duplicated safety condition[{ (sc.Core :?> INamed).Name}]")
+                } |> ignore
 
                 //assert(key.Length = 2)
                 //let (flow::real::[]) = key

@@ -191,23 +191,30 @@ module internal ToDsTextModule =
             (* prop
                     safety
                     layouts *)
-            let safetyHolders = [
-                for f in system.Flows do
-                    yield! f.Graph.Vertices.OfType<ISafetyConditoinHolder>()
-                    for real in f.Graph.Vertices.OfType<Real>() do
-                        yield! real.Graph.Vertices.OfType<ISafetyConditoinHolder>()
-            ]
+            let safetyHolders =
+                [   for f in system.Flows do
+                        yield! f.Graph.Vertices.OfType<ISafetyConditoinHolder>()
+                        yield! system.Calls.Cast<ISafetyConditoinHolder>()
+                ] |> List.distinct
 
             let withSafeties = safetyHolders.Where(fun h -> h.SafetyConditions.Any())
             let safeties =
+                let safetyConditionName (sc:SafetyCondition) =
+                    match sc with
+                    | SafetyConditionReal real -> [real.Flow.Name; real.Name].Combine()
+                    | SafetyConditionCall call -> call.Name
+                let safetyConditionHolderName(sch:ISafetyConditoinHolder) =
+                    match sch with
+                    | :? Real as real -> [real.Flow.Name; real.Name].Combine()
+                    | :? Call as call -> call.Name
+                    | _ -> failwith "ERROR"
+
                 [
                     if withSafeties.Any() then
                         yield $"{tab}[safety] = {lb}"
-                        for seg in withSafeties do
-                            let getSegmentPath (seg:Real) = getRelativeName [|system.Name|] seg.NameComponents
-                            failwith "ERROR"
-                            //let conds = seg.SafetyConditions.Select(toText).JoinWith("; ") + ";"
-                            //yield $"{tab2}{seg.QualifiedName} = {lb} {conds} {rb}"
+                        for safetyHolder in withSafeties do
+                            let conds = safetyHolder.SafetyConditions.Select(safetyConditionName).JoinWith("; ") + ";"
+                            yield $"{tab2}{safetyConditionHolderName safetyHolder} = {lb} {conds} {rb}"
                         yield $"{tab}{rb}"
                 ] |> combineLines
 

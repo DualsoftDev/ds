@@ -8,7 +8,9 @@ namespace Engine
         public static string SafetyValid = @"
 [sys] L = {
     [flow] F = {
-        Main = { Ap > Am; }
+        Main = {
+            Ap > Am;
+        }
         [aliases] = {
             Ap = { Ap1; Ap2; Ap3; }
             Am = { Am1; Am2; Am3; }
@@ -24,8 +26,9 @@ namespace Engine
     }
 
     [prop] = {
-        [ safety ] = {
-            F.Main = {F.Ap1; Ap2}
+        [safety] = {
+            F.Main = { Ap; Am; }
+            Ap = { F.Main; }
         }
     }
 

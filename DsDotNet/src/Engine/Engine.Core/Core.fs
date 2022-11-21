@@ -132,6 +132,8 @@ module CoreModule =
         inherit Named(name)
         member val ApiItems = apiItems.ToFSharpList()
         member val Xywh:Xywh = null with get, set
+        interface ISafetyConditoinHolder with
+            member val SafetyConditions = HashSet<SafetyCondition>()
 
     type TagAddress = string
     type ApiItem (api:ApiItem4Export, tx:TagAddress, rx:TagAddress) =
@@ -230,11 +232,15 @@ module CoreModule =
             v
 
 
-    //type SafetyCondition with
-    //    member x.ToText() =
-    //        match x with
-    //        | SafetyConditionReal real -> [real.Flow.Name; real.Name].Combine()
-    //        | SafetyConditionCall call -> call.NameComponents.Combine()
+    type SafetyCondition with
+        member x.Core:obj =
+            match x with
+            | SafetyConditionReal real -> real
+            | SafetyConditionCall call -> call
+        //member x.ToText():string =
+        //    match x with
+        //    | SafetyConditionReal real -> real.PureNames.Combine()
+        //    | SafetyConditionCall call -> call.Name
 
     type ParentWrapper with
         member x.GetCore() =

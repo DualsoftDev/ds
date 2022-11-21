@@ -75,10 +75,9 @@ loadExternalSystemBlock: '[' EXTERNAL_SYSTEM fileSpec ipSpec ']' externalSystemN
 propsBlock: '[' 'prop' ']' EQ LBRACE (safetyBlock|layoutBlock)* RBRACE;
     safetyBlock: '[' 'safety' ']' EQ LBRACE (safetyDef)* RBRACE;
         safetyDef: safetyKey EQ LBRACE safetyValues RBRACE;
-            // x2: Flow.{Real, Call, Alias}
-            // x3: Flow.Real.{Call, Alias}
+            // Real|Call = { ((Real|Call);)* }
             safetyKey: identifier12;
-            safetyValues: identifier12 (SEIMCOLON identifier12)*;
+            safetyValues: identifier12 (SEIMCOLON identifier12)* (SEIMCOLON)?;
 
     layoutBlock: '[' 'layouts' ']' '=' LBRACE (positionDef)* RBRACE;
         positionDef: callName '=' xywh;

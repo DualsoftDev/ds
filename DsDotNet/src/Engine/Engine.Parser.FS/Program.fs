@@ -92,9 +92,10 @@ C4 > C5;
     [device file="cylinder.ds"] B;
     [external file="station.ds" ip="192.168.0.2"] C;
     [prop] = {
-        // Global safety
+        // safety : Real|Call = { (Real|Call)* }
         [safety] = {
-            F.Main = { Ap1; F.R2 }
+            F.Main = { Ap; }
+            Am = { F.Main; }
         }
         [layouts] = {
             Ap = (1309,405,205,83)

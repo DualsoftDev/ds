@@ -40,7 +40,7 @@ module ModelBuildupTests1 =
 
             let vCallP = VertexCall.Create("Ap", callAp, Real real)
             let vCallM = VertexCall.Create("Am", callAm, Real real)
-            real.CreateEdge(ModelingEdgeInfo(vCallP, ">", vCallM)) |> ignore
+            real.CreateEdge(ModelingEdgeInfo<Vertex>(vCallP, ">", vCallM)) |> ignore
 
             let generated = system.ToDsText()
             let answer = """
@@ -68,7 +68,7 @@ module ModelBuildupTests1 =
             let vCallM = VertexCall.Create("Am", callAm, Real real)
             ( fun () ->
                 // real 의 child 간 edge 를 flow 에서 생성하려 함.. should fail
-                flow.CreateEdge(ModelingEdgeInfo(vCallP, ">", vCallM)) |> ignore
+                flow.CreateEdge(ModelingEdgeInfo<Vertex>(vCallP, ">", vCallM)) |> ignore
             ) |> ShouldFailWithSubstringT "not child of"
 
         [<Test>]
@@ -78,7 +78,7 @@ module ModelBuildupTests1 =
             let vCallP = VertexAlias.Create("Main2", AliasTargetReal real, Flow flow)
             let real2 = Real.Create("R2", flow)
 
-            flow.CreateEdge(ModelingEdgeInfo(vCallP, ">", real2)) |> ignore
+            flow.CreateEdge(ModelingEdgeInfo<Vertex>(vCallP, ">", real2)) |> ignore
             let generated = system.ToDsText()
             let answer = """
 [sys ip = localhost] My = {

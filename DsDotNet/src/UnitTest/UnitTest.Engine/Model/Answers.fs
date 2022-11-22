@@ -21,8 +21,7 @@ module ModelAnswers =
 [sys] L = {
     [flow] F = {
         Main = {
-            Bp1 > Bm1;
-            Ap1 > Bm1;
+            Ap1, Bp1 > Bm1;
             Ap > Am;
         }
         [aliases] = {

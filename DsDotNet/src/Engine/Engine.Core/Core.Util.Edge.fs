@@ -15,18 +15,22 @@ module EdgeModule =
                 yield edge
          |]
 
+    let private validateParentOfEdgeVertices (mei:ModelingEdgeInfo<Vertex>) (parent:FqdnObject) =
+        let invalid = (mei.Sources @ mei.Targets).Select(fun v -> v.Parent.GetCore()).TryFind(fun c -> c <> parent)
+        match invalid with
+        | Some v -> failwith $"Vertex {v.Name} is not child of flow {parent.Name}"
+        | None -> ()
+
     let createFlowEdge(flow:Flow) (modeingEdgeInfo:ModelingEdgeInfo<Vertex>) =
         let mei = modeingEdgeInfo
-        mei.Source.Parent.GetCore() = flow |> verifyM $"Source vertex {mei.Source.Name} is not child of flow {flow.Name}"
-        mei.Target.Parent.GetCore() = flow |> verifyM $"Target vertex {mei.Target.Name} is not child of flow {flow.Name}"
-        flow.ModelingEdges.Add(mei) |> verifyM $"Duplicated edge {mei.Source.Name}{mei.EdgeSymbol}{mei.Target.Name}"
+        validateParentOfEdgeVertices mei flow
+        flow.ModelingEdges.Add(mei) |> verifyM $"Duplicated edge {mei.Sources[0].Name}{mei.EdgeSymbol}{mei.Targets[0].Name}"
         createEdge flow.Graph mei
 
     let createChildEdge(segment:Real) (modeingEdgeInfo:ModelingEdgeInfo<Vertex>) =
         let mei = modeingEdgeInfo
-        mei.Source.Parent.GetCore() = segment |> verifyM $"Source vertex {mei.Source.Name} is not child of real {segment.Name}"
-        mei.Target.Parent.GetCore() = segment |> verifyM $"Target vertex {mei.Target.Name} is not child of real {segment.Name}"
-        segment.ModelingEdges.Add(mei) |> verifyM $"Duplicated edge {mei.Source.Name}{mei.EdgeSymbol}{mei.Target.Name}"
+        validateParentOfEdgeVertices mei segment
+        segment.ModelingEdges.Add(mei) |> verifyM $"Duplicated edge {mei.Sources[0].Name}{mei.EdgeSymbol}{mei.Targets[0].Name}"
         createEdge segment.Graph modeingEdgeInfo
 
     /// edges 에서 strong reset edge type 만 추려 냄

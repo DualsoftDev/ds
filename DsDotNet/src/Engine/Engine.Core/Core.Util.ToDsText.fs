@@ -18,10 +18,10 @@ module internal ToDsTextModule =
             if rss.IsEmpty then
                 [[e] |> ResizeArray]
             else
-                match rss.TryFind(fun rs -> rs[0].Source = e.Target) with
+                match rss.TryFind(fun rs -> rs[0].Sources = e.Targets) with
                 | Some rs -> rs.Insert(0, e); rss
                 | _ ->
-                    match rss.TryFind(fun rs -> rs.Last().Target = e.Source) with
+                    match rss.TryFind(fun rs -> rs.Last().Targets = e.Sources) with
                     | Some rs -> rs.Add(e); rss
                     | _ ->
                         ([e] |> ResizeArray)::rss
@@ -30,6 +30,7 @@ module internal ToDsTextModule =
         let es  = es |> Seq.sortBy(fun e -> e.EdgeSymbol.Count(fun ch -> ch = '|'))
         let ess = es |> Seq.fold folder []
         let getName (v:Vertex) = getRawName v.PureNames true
+        let getNames (vs:Vertex seq) = vs.Select(getName).JoinWith(", ")
 
         [
             for es in ess do
@@ -37,15 +38,17 @@ module internal ToDsTextModule =
                 yield [
                     yield $"{tab}"
                     for i, e in es.Indexed() do
-                        let s, t = e.Source, e.Target
-                        let mutable sn = getName s
-                        let tn = getName t
+                        let ss, ts = e.Sources, e.Targets
+                        let mutable sn = getNames ss
+                        let tn = getNames ts
                         if i <> 0 then sn <- ""
                         let arrow = e.EdgeSymbol
                         yield $"{sn} {arrow} {tn}"
                         let comment =
-                            let sn2 = if sn <> "" then $"{sn}({s.GetType().Name})" else " "
-                            $"{sn2}{arrow} {tn}({t.GetType().Name})"
+                            let getVsAndTypes (vs:Vertex seq) =
+                                [ for v in vs -> $"{getName v}({v.GetType().Name})" ].JoinWith(", ")
+                            let sn2 = if sn <> "" then $"{getVsAndTypes ss}" else " "
+                            $"{sn2}{arrow} {getVsAndTypes ts}"
                         comments.Add($"{comment}")
                     yield ";"
                     yield ("\t\t// " + comments.JoinWith("") + ";")

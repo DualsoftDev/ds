@@ -194,21 +194,18 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                 let op = triple[1].GetText()
                 let rights = triple[2].Descendants<CausalTokenContext>()
 
-                for left in lefts do
-                    for right in rights do
-                        let l = x.TryFindVertex(left)
-                        let r = x.TryFindVertex(right)
-                        match l, r with
-                        | Some l, Some r ->
-                            match oci.Parenting, oci.Flow with
-                            | Some parenting, _ -> parenting.CreateEdge(ModelingEdgeInfo(l, op, r))
-                            | None, Some flow -> flow.CreateEdge(ModelingEdgeInfo(l, op, r))
-                            | _ -> failwith "ERROR"
-                            |> ignore
-                        | None, _ ->
-                            raise <| ParserException($"ERROR: failed to find [{left.GetText()}]", ctx)
-                        | _, None ->
-                            raise <| ParserException($"ERROR: failed to find [{right.GetText()}]", ctx)
+                let findVertex tokenCtx =
+                    match x.TryFindVertex tokenCtx with
+                    | Some v -> v
+                    | None -> raise <| ParserException($"ERROR: failed to find [{tokenCtx.GetText()}]", ctx)
+                let lvs = lefts.Select(findVertex)
+                let rvs = rights.Select(findVertex)
+                let mei = ModelingEdgeInfo<Vertex>(lvs, op, rvs)
+                match oci.Parenting, oci.Flow with
+                | Some parenting, _ -> parenting.CreateEdge(mei)
+                | None, Some flow -> flow.CreateEdge(mei)
+                | _ -> failwith "ERROR"
+                |> ignore
 
 [<AutoOpen>]
 module ParserRuleContextModule =

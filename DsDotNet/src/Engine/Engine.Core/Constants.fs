@@ -43,32 +43,38 @@ module DsText =
     type internal MET = ModelingEdgeType
     type internal RET = EdgeType
 
-    type ModelingEdgeInfo<'v>(source:'v, edgeSymbol:string, target:'v) =
-        member val Source = source
-        member val Target = target
+    type ModelingEdgeInfo<'v>(sources:'v seq, edgeSymbol:string, targets:'v seq) =
+        new(source, edgeSymbol, target) = ModelingEdgeInfo([source], edgeSymbol, [target])
+        member val Sources = sources.ToFSharpList()
+        member val Targets = targets.ToFSharpList()
         member val EdgeSymbol = edgeSymbol
 
     /// source 와 target 을 edge operator 에 따라서 확장 생성
     let expandModelingEdge (modeingEdgeInfo:ModelingEdgeInfo<'v>) : ('v * EdgeType * 'v) list =
         let mi = modeingEdgeInfo
-        let s, edgeSymbol, t = mi.Source, mi.EdgeSymbol, mi.Target
-        match edgeSymbol with
-        | (* ">"    *) TextStartEdge     -> [s, RET.Start, t]
-        | (* ">>"   *) TextStartPush     -> [s, RET.Start ||| RET.Strong, t]
-        | (* "|>"   *) TextResetEdge     -> [s, RET.Reset, t]
-        | (* "||>"  *) TextResetPush     -> [s, RET.Reset ||| RET.Strong, t]
+        let ss, edgeSymbol, ts = mi.Sources, mi.EdgeSymbol, mi.Targets
+        [
+            for s in ss do
+            for t in ts do
+                yield!
+                    match edgeSymbol with
+                    | (* ">"    *) TextStartEdge     -> [s, RET.Start, t]
+                    | (* ">>"   *) TextStartPush     -> [s, RET.Start ||| RET.Strong, t]
+                    | (* "|>"   *) TextResetEdge     -> [s, RET.Reset, t]
+                    | (* "||>"  *) TextResetPush     -> [s, RET.Reset ||| RET.Strong, t]
 
-        | (* "=>"   *) TextStartReset    -> [(s, RET.Start, t); (t, RET.Reset, s)]
-        | (* "<|>"  *) TextInterlockWeak -> [(s, RET.Reset, t); (t, RET.Reset, s)]
-        | (* "<||>" *) TextInterlock     -> [(s, RET.Reset ||| RET.Strong, t); (t, RET.Reset ||| RET.Strong, s)]
-        | (* "<"    *) TextStartEdgeRev  -> [t, RET.Start, s]
-        | (* "<<"   *) TextStartPushRev  -> [t, RET.Start ||| RET.Strong, s]
-        | (* "<|"   *) TextResetEdgeRev  -> [t, RET.Reset, s]
-        | (* "<||"  *) TextResetPushRev  -> [t, RET.Reset ||| RET.Strong, s]
-        | (* "<="   *) TextStartResetRev -> [(t, RET.Start, s); (s, RET.Reset, t); ]
+                    | (* "=>"   *) TextStartReset    -> [(s, RET.Start, t); (t, RET.Reset, s)]
+                    | (* "<|>"  *) TextInterlockWeak -> [(s, RET.Reset, t); (t, RET.Reset, s)]
+                    | (* "<||>" *) TextInterlock     -> [(s, RET.Reset ||| RET.Strong, t); (t, RET.Reset ||| RET.Strong, s)]
+                    | (* "<"    *) TextStartEdgeRev  -> [t, RET.Start, s]
+                    | (* "<<"   *) TextStartPushRev  -> [t, RET.Start ||| RET.Strong, s]
+                    | (* "<|"   *) TextResetEdgeRev  -> [t, RET.Reset, s]
+                    | (* "<||"  *) TextResetPushRev  -> [t, RET.Reset ||| RET.Strong, s]
+                    | (* "<="   *) TextStartResetRev -> [(t, RET.Start, s); (s, RET.Reset, t); ]
 
-        | _
-            -> failwithf "Unknown causal edge type: %s" edgeSymbol
+                    | _
+                        -> failwithf "Unknown causal edge type: %s" edgeSymbol
+        ]
 
 
 [<Extension>]

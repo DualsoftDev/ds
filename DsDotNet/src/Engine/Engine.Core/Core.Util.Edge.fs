@@ -8,22 +8,26 @@ open Engine.Common.FS
 
 [<AutoOpen>]
 module EdgeModule =
-    let private createEdges (graph:DsGraph) (modeingEdgeInfo:ModelingEdgeInfo<'v>) =
+    let private createEdge (graph:DsGraph) (modeingEdgeInfo:ModelingEdgeInfo<'v>) =
          [|
             for src, op, tgt in expandModelingEdge modeingEdgeInfo do
                 let edge = Edge.Create(graph, src, tgt, op)
                 yield edge
          |]
 
-    let createFlowEdges(flow:Flow, modeingEdgeInfo:ModelingEdgeInfo<Vertex>) =
+    let createFlowEdge(flow:Flow) (modeingEdgeInfo:ModelingEdgeInfo<Vertex>) =
         let mei = modeingEdgeInfo
+        mei.Source.Parent.GetCore() = flow |> verifyM $"Source vertex {mei.Source.Name} is not child of flow {flow.Name}"
+        mei.Target.Parent.GetCore() = flow |> verifyM $"Target vertex {mei.Target.Name} is not child of flow {flow.Name}"
         flow.ModelingEdges.Add(mei) |> verifyM $"Duplicated edge {mei.Source.Name}{mei.EdgeSymbol}{mei.Target.Name}"
-        createEdges flow.Graph mei
+        createEdge flow.Graph mei
 
-    let createChildEdges(segment:Real, modeingEdgeInfo:ModelingEdgeInfo<Vertex>) =
+    let createChildEdge(segment:Real) (modeingEdgeInfo:ModelingEdgeInfo<Vertex>) =
         let mei = modeingEdgeInfo
+        mei.Source.Parent.GetCore() = segment |> verifyM $"Source vertex {mei.Source.Name} is not child of real {segment.Name}"
+        mei.Target.Parent.GetCore() = segment |> verifyM $"Target vertex {mei.Target.Name} is not child of real {segment.Name}"
         segment.ModelingEdges.Add(mei) |> verifyM $"Duplicated edge {mei.Source.Name}{mei.EdgeSymbol}{mei.Target.Name}"
-        createEdges segment.Graph modeingEdgeInfo
+        createEdge segment.Graph modeingEdgeInfo
 
     /// edges 에서 strong reset edge type 만 추려 냄
     let ofStrongResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) =
@@ -96,10 +100,10 @@ module EdgeModule =
 
 [<Extension>]
 type EdgeExt =
-    [<Extension>] static member CreateEdges(flow:Flow, modelingEdgeInfo:ModelingEdgeInfo<Vertex>) =
-                    createFlowEdges(flow, modelingEdgeInfo)
-    [<Extension>] static member CreateEdges(segment:Real, modelingEdgeInfo:ModelingEdgeInfo<Vertex>) =
-                    createChildEdges(segment, modelingEdgeInfo)
+    [<Extension>] static member CreateEdge(flow:Flow, modelingEdgeInfo:ModelingEdgeInfo<Vertex>) =
+                    createFlowEdge flow modelingEdgeInfo
+    [<Extension>] static member CreateEdge(segment:Real, modelingEdgeInfo:ModelingEdgeInfo<Vertex>) =
+                    createChildEdge segment modelingEdgeInfo
 
     [<Extension>] static member CreateMRIEdgesTransitiveClosure(system:DsSystem) =
                         createMRIEdgesTransitiveClosure4System system

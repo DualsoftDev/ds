@@ -19,11 +19,11 @@ module CoreModule =
     type LoadedSystem(name:string, referenceSystem:DsSystem, containerSystem:DsSystem, absoluteAndSimpleFilePath:string*string) =
         inherit FqdnObject(name, containerSystem)
         let absoluteFilePath, simpleFilePath = absoluteAndSimpleFilePath
-        /// Loading 된 system 을 포함하는 container system
+        /// Loading 된 system 입장에 자신을 포함하는 container system
         member val ContainerSystem = containerSystem
-        /// Loading 된 system 참조 용
+        /// 다른 device 을 Loading 하려는 system 입장에서 loading 된 system 참조 용
         member val ReferenceSystem = referenceSystem
-
+        /// Loading 을 위해서 사용자가 지정한 file path.  serialize 시, 절대 path 를 사용하지 않기 위한 용도로만 사용된다.
         member val UserSpecifiedFilePath:string = simpleFilePath with get, set
         member val AbsoluteFilePath:string = absoluteFilePath with get, set
 
@@ -57,12 +57,6 @@ module CoreModule =
         member val AutoButtons      = ButtonDic()
         member val StartButtons     = ButtonDic()
         member val ResetButtons     = ButtonDic()
-
-        ///// API name -> Address map.  A.+ = (%Q1234.2343, %I1234.2343)
-        //member val ApiAddressMap    = Dictionary<string[], Addresses>(nameComponentsComparer())
-
-        /////시스템 핸들링 대상여부   true : mySystem / false : exSystem
-        //member val Active = false with get, set
 
         static member Create(name, host) = DsSystem(name, host)
 
@@ -136,11 +130,14 @@ module CoreModule =
             member val SafetyConditions = HashSet<SafetyCondition>()
 
     type TagAddress = string
+
+    /// Main system 에서 loading 된 다른 system 의 API 를 바라보는 관점
     type ApiItem (api:ApiItem4Export, tx:TagAddress, rx:TagAddress) =
         member _.ApiItem = api
         member val TX = tx
         member val RX = rx
 
+    /// 자신을 export 하는 관점에서 본 api's
     and ApiItem4Export private (name:string, system:DsSystem) =
         (* createFqdnObject : system 이 다른 system 에 포함되더라도, name component 를 더 이상 확장하지 않도록 cut *)
         inherit FqdnObject(name, createFqdnObject([|system.Name|]))

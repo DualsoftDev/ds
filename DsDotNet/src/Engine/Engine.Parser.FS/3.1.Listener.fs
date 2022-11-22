@@ -201,8 +201,8 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                         match l, r with
                         | Some l, Some r ->
                             match oci.Parenting, oci.Flow with
-                            | Some parenting, _ -> parenting.CreateEdges(ModelingEdgeInfo(l, op, r))
-                            | None, Some flow -> flow.CreateEdges(ModelingEdgeInfo(l, op, r))
+                            | Some parenting, _ -> parenting.CreateEdge(ModelingEdgeInfo(l, op, r))
+                            | None, Some flow -> flow.CreateEdge(ModelingEdgeInfo(l, op, r))
                             | _ -> failwith "ERROR"
                             |> ignore
                         | None, _ ->

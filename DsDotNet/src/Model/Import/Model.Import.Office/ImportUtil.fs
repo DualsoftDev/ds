@@ -223,8 +223,8 @@ module ImportU =
                             let convertEdge(edge:pptEdge, flow:Flow, src:Vertex, tgt:Vertex) =
                                 let mei = ModelingEdgeInfo(src, edge.Causal.ToText(), tgt)
                                 match getParent(edge, parents, dicVertex) with
-                                |Some(real) -> (real:?>Real).CreateEdges(mei)
-                                |None ->       flow.CreateEdges(mei)
+                                |Some(real) -> (real:?>Real).CreateEdge(mei)
+                                |None ->       flow.CreateEdge(mei)
 
                             pptEdges
                                 |> Seq.iter(fun edge ->

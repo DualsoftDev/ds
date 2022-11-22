@@ -2,12 +2,10 @@ namespace UnitTest.Engine
 
 
 open System.Linq
-open Engine
 open Engine.Core
 open Engine.Common.FS
 open NUnit.Framework
 open Engine.Parser.FS
-open System.Text.RegularExpressions
 
 [<AutoOpen>]
 module ModelBuildupTests1 =
@@ -17,8 +15,8 @@ module ModelBuildupTests1 =
         let libdir = @$"{__SOURCE_DIRECTORY__}\..\Libraries"
         let compare = compare libdir
         let compareExact x = compare x x
-        [<Test>]
-        member __.``Model creation test`` () =
+
+        let createSimpleSystem() =
             let system = DsSystem.Create("My", "localhost")
             let flow = Flow.Create("F", system)
             let real = Real.Create("Main", flow)
@@ -34,27 +32,70 @@ module ModelBuildupTests1 =
                 let apiItem = ApiItem(apiM, "%Q2", "%I2")
                 Call("Am", [apiItem])
             system.Calls.AddRange([callAp; callAm])
+            system, flow, real, callAp, callAm
+
+        [<Test>]
+        member __.``Model creation test`` () =
+            let system, flow, real, callAp, callAm = createSimpleSystem()
 
             let vCallP = VertexCall.Create("Ap", callAp, Real real)
             let vCallM = VertexCall.Create("Am", callAm, Real real)
-            flow.CreateEdges(ModelingEdgeInfo(vCallP, ">", vCallM)) |> ignore
+            real.CreateEdge(ModelingEdgeInfo(vCallP, ">", vCallM)) |> ignore
+
+            let generated = system.ToDsText()
+            let answer = """
+[sys ip = localhost] My = {
+    [flow] F = {
+        Main = {
+            Ap > Am;
+        }
+    }
+    [calls] = {
+        Ap = { A."+"(%Q1, %I1); }
+        Am = { A."-"(%Q2, %I2); }
+    }
+    [device file="cylinder.ds"] A;
+}"""
+            logDebug $"{generated}"
+            compare generated answer
             ()
 
-            //let vertexs = HashSet<Real>()
-            //let find(name:string) = vertexs.First(fun f->f.Name = name)
-            //for v in [
-            //            "START"; "시작인과"; "시작유지"; "RESET"; "복귀인과";
-            //            "복귀유지"; "ETC"; "상호행위간섭"; "시작후행리셋";
-            //    ] do
-            //        vertexs.Add(Real.Create(v, flow)) |>ignore
+        [<Test>]
+        member __.``Invalid Model creation test`` () =
+            let system, flow, real, callAp, callAm = createSimpleSystem()
 
-            //let fg = flow.Graph
-            //fg.AddVertices(vertexs.Cast<Vertex>())|>ignore
-            //let v(name:string) = fg.Vertices.Find(fun f->f.Name = name)
+            let vCallP = VertexCall.Create("Ap", callAp, Real real)
+            let vCallM = VertexCall.Create("Am", callAm, Real real)
+            ( fun () ->
+                // real 의 child 간 edge 를 flow 에서 생성하려 함.. should fail
+                flow.CreateEdge(ModelingEdgeInfo(vCallP, ">", vCallM)) |> ignore
+            ) |> ShouldFailWithSubstringT "not child of"
 
-            //flow.ModelingEdges.Add(ModelingEdgeInfo(v("START"), TextStartEdge, v("시작인과")))|>ignore
-            //flow.ModelingEdges.Add(ModelingEdgeInfo(v("START"), TextStartPush, v("시작유지")))|>ignore
-            //flow.ModelingEdges.Add(ModelingEdgeInfo(v("RESET"), TextResetEdge, v("복귀인과")))|>ignore
-            //flow.ModelingEdges.Add(ModelingEdgeInfo(v("RESET"), TextResetPush, v("복귀유지")))|>ignore
-            //flow.ModelingEdges.Add(ModelingEdgeInfo(v("ETC"), TextStartEdge, v("상호행위간섭")))|>ignore
-            //flow.ModelingEdges.Add(ModelingEdgeInfo(v("ETC"), TextStartReset, v("시작후행리셋")))|>ignore
+        [<Test>]
+        member __.``XModel with alias test`` () =
+            let system, flow, real, callAp, callAm = createSimpleSystem()
+
+            let vCallP = VertexAlias.Create("Main2", RealTarget real, Flow flow)
+            let real2 = Real.Create("R2", flow)
+
+            flow.CreateEdge(ModelingEdgeInfo(vCallP, ">", real2)) |> ignore
+            let generated = system.ToDsText()
+            let answer = """
+[sys ip = localhost] My = {
+    [flow] F = {
+        Main2 > R2;		// Main2(VertexAlias)> R2(Real);
+        Main; // island
+        // todo : alias 가 생성 안됨.
+        [aliases] = {
+            Main = { Main2; }
+        }
+    }
+    [calls] = {
+        Ap = { A."+"(%Q1, %I1); }
+        Am = { A."-"(%Q2, %I2); }
+    }
+    [device file="cylinder.ds"] A;
+}
+"""
+            logDebug $"{generated}"
+            compare generated answer

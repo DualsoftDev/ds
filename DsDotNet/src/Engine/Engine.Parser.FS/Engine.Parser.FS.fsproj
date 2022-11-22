@@ -19,6 +19,7 @@
 		<Compile Include="3.1.Listener.fs" />
 		<Compile Include="3.2.Listener.Epilog.fs" />
 		<Compile Include="5.ModelParser.fs" />
+		<Compile Include="SystemBuilder.fs" />
 		<Compile Include="AssemblyInfo.fs" />
 		<Compile Include="Program.fs" />
 	</ItemGroup>

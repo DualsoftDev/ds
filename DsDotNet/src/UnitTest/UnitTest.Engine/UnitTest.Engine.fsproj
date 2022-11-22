@@ -1,7 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
+		<!--<TargetFramework>net48</TargetFramework>-->
 
 		<IsPackable>false</IsPackable>
 		<GenerateProgramFile>false</GenerateProgramFile>
@@ -32,6 +33,7 @@
 		<Compile Include="Model\ModelGraph.fs" />
 		<Compile Include="Model\ExpressionTest.fs" />
 		<Compile Include="Model\FqdnParseTest.fs" />
+		<Compile Include="Model\SystemBuilderTest.fs" />
 		<!--<Compile Include="ImportPPT\pptTest.fs" />-->
 		<Compile Include="EntryPoint.fs" />
 		<None Include="Libraries\cylinder.ds" />
@@ -58,6 +60,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\Engine\Engine.CpuUnit\Engine.Cpu.fsproj" />
+		<ProjectReference Include="..\..\Engine\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Test\Engine.Sample.csproj" />
 		<!--<ProjectReference Include="..\..\Model\Import\Model.Import.Office\Model.Import.Office.fsproj" />-->
 	</ItemGroup>

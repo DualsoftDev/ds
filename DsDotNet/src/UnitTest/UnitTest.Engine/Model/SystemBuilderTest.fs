@@ -20,7 +20,7 @@ module SystemBuilderTest =
         let compare = compare libdir
         let compareExact x = compare x x
         [<Test>]
-        member __.``Builder test`` () =
+        member __.``XBuilder test`` () =
             let opt =
                 option {
                     if true then
@@ -38,8 +38,10 @@ module SystemBuilderTest =
             //        name "MySystem"
             //    }
 
+
             let system =
-                system {
+                let sysCore = DsSystem.Create("MySystem", "localhost")
+                withSystem sysCore {
                     name "MySystem"
                     path [libdir]
                     device "A" "cylinder.ds"
@@ -47,11 +49,37 @@ module SystemBuilderTest =
                     call "Ap" [ { Api=("A", "+"); Tx="%Q1"; Rx="%I1" } ]
                     call "Am" [ { Api=("A", "-"); Tx="%Q2"; Rx="%I2" } ]
 
-                    flow "F1"
-                    real "F1" "R1"
+                    //let flowCore = Flow.Create("F1", sysCore)
+                    //let flow = withFlow flowCore {
+                    //    real "R1"
+                    //    real "R2"
+                    //}
+                    //create_flow flow
+
+
+                    //withFlow (Flow.Create("F3", sysCore)) {
+                    //    real "R1"
+                    //    real "R2"
+                    //}
+
+                    flow "F2"
+                    //{
+                    //    real "R1"
+                    //    real "R2"
+                    //}
+
+
+                    //create_flow "F2"
+
+                    //create_flow_from_obj (
+                    //    //flow (getNull<DsSystem>()) {
+                    //    flow "F1" sysCore {
+                    //        name "F1"
+                    //    })
                 }
 
             let generated = system.ToDsText()
+            logDebug $"{generated}"
             let answer = """
 [sys] MySystem = {
     [flow] F1 = {
@@ -66,3 +94,20 @@ module SystemBuilderTest =
 }
 """
             ()
+
+
+        //[<Test>]
+        //member __.``XMeta Builder test`` () =
+        //    let sys =
+        //        system {
+        //            name "My"
+        //            let f2 = flow { name "F2" }
+        //            let xxx = f2.Aliases
+        //            add_flow f2
+        //            let n = "F"
+        //            add_flow (
+        //                flow {
+        //                    name "F1"
+        //                })
+        //        }
+        //    ()

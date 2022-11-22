@@ -7,27 +7,22 @@ open System.Runtime.CompilerServices
 open System.Diagnostics
 open Engine.Common.FS
 open Engine.Core
+open System.IO
 
 [<AutoOpen>]
 module SystemBuilderModule =
     type CallSpec = { Api:string*string; Tx:string; Rx:string }
 
-    type SystemBuilder internal () =
-        let mutable theSystem = getNull<DsSystem>()
-        let thePath = ResizeArray<string>()
-        member __.Zero() = theSystem
-        member __.Yield(_) =
-            theSystem <- DsSystem.Create(null, null)
-            theSystem
+    type SystemBuilder internal (system:DsSystem) =
+        let paths = ResizeArray<string>()
+        member __.Zero() = system
+        member __.Yield(_) = system
 
         member __.ReturnFrom(m) = m
         member __.Run(f) = f()
         member __.Bind(m, f) = f m
         member __.Delay(f: unit -> _) = f
-        member inline __.Combine (a, b) = a//Awaitable.combine a b
-        //member inline __.Combine a, b) = Awaitable.combine (AsyncWorkflow a) b
-        //member inline __.Combine (a, b) = Awaitable.combine (DotNetTask a) b
-        //member inline __.While (g, a) = Awaitable.doWhile g a
+        member x.Combine(m1, m2) = x.Bind(m1, fun () -> m2)
         member inline __.For (s, f) = s
 
         //member this.TryWith(delayedExpr, handler) =
@@ -42,6 +37,10 @@ module SystemBuilderModule =
         //member __.GetFlow(sys, flowName) = theSystem.FindFlow(flowName)
 
 
+        [<CustomOperation("this")>]
+        member x.GetThis(sys) =
+            assert(x = sys)
+            sys
 
         //member inline __.For (sys, f) = sys//f sys
         [<CustomOperation("name")>]
@@ -53,49 +52,180 @@ module SystemBuilderModule =
         member __.CreateFlow(sys, name) =
           let flow = Flow.Create(name, sys)
           sys
+        [<CustomOperation("create_flow")>]
+        member __.CreateFlow(sys, flow:Flow) =
+          //let flow = Flow.Create(name, sys)
+          sys
         //[<CustomOperation("create_flow")>]
         //member __.CreateFlow(sys, flow:Flow) =
         //  //flow.System <- theSystem
         //  sys
 
 
-        [<CustomOperation("real")>]
-        member __.CreateReal(sys, flowName, realName) =
-            let flow = theSystem.FindFlow(flowName)
-            let real = Real.Create(realName, flow)
-            sys
-
         [<CustomOperation("path")>]
         member __.SetPath(sys, path) =
-            thePath.AddRange(path)
+            paths.AddRange(path)
             sys
 
         [<CustomOperation("device")>]
-        member __.LoadDevice(sys, loadedName, filePath) =
-            let device = theSystem.LoadDeviceAs(loadedName, filePath, filePath)
+        member __.LoadDevice(sys, loadedName, simpleFilePath) =
+            let absoluteFilePath =
+                [
+                    yield simpleFilePath;
+                    yield! paths.Select(fun p -> p + "\\" + simpleFilePath)
+                ] |> List.find (fun f -> File.Exists(f))
+
+            let device = system.LoadDeviceAs(loadedName, absoluteFilePath, simpleFilePath)
             sys
         [<CustomOperation("call")>]
         member __.CreateCall(sys, callName, callSpecs:CallSpec list) =
             let apiItems = [
                 for cs in callSpecs do
                     let dev, apiName = cs.Api
-                    let apiExported = theSystem.ApiItems.Find(nameComponentsEq [dev; apiName])
+                    let apiExported = system.ApiItems.Find(nameComponentsEq [dev; apiName])
                     ApiItem(apiExported, cs.Tx, cs.Rx)
             ]
             let call = Call(callName, apiItems)
-            theSystem.Calls.Add call
+            system.Calls.Add call
             sys
 
-    type FlowBuilder internal (system:DsSystem) =
-        let mutable theFlow = getNull<Flow>()
-        member __.Zero() = theFlow
-        member __.Yield(_) =
-            theFlow <- Flow.Create(null, system)
-            theFlow
 
-    let system = SystemBuilder()
-    //let flow = FlowBuilder(theSystem)
+    type FlowBuilder internal (flow:Flow) =
+        let system = flow.System
+        member __.Zero() = flow
+        member __.Yield(_) = flow
+        //member __.Yield(_) = system
+
+        member __.ReturnFrom(m) = m
+        member __.Run(f) = f()
+        member __.Bind(m, f) = f m
+        member __.Delay(f: unit -> _) = f
+        member x.Combine(m1, m2) = x.Bind(m1, fun () -> m2)
+        member inline __.For (s, f) = s
+
+        [<CustomOperation("real")>]
+        member __.CreateReal(sys, realName) =
+            let real = Real.Create(realName, flow)
+            flow
+
+    let withSystem system = SystemBuilder(system)
+    let withFlow flow = FlowBuilder(flow)
 
 
 
+[<AutoOpen>]
+module MetaBuilder =
 
+    type LoadDeviceSpec = {
+        LoadedName:string
+        Path:string
+    }
+
+    type ApiItem = {
+        Device:string
+        ApiName:string
+        Tx:string
+        Rx:string
+    }
+    type CallMeta = {
+        CallKey:string
+        ApiItems:ApiItem list
+    }
+
+    type VSpec =
+        | Group of Fqdn list
+        | Fqdn
+
+    type Edge = {
+        Source: VSpec
+        Symbol: string
+        Target: VSpec
+    }
+
+    type AliasMeta = {
+        AliasKey: Fqdn
+        Mnemonics: string list
+    }
+    type FlowMeta = {
+        Name:string
+        Aliases:AliasMeta list
+        Reals: string list
+        Calls: Fqdn list
+        Edges: Edge list
+    }
+
+    type SystemMeta = {
+        Name:string;
+        Paths:string list;
+        Devices:LoadDeviceSpec list;
+        Calls:CallMeta list;
+        Flows:FlowMeta list;
+    }
+
+
+    type FlowMetaBuilder internal () =
+        let flow:FlowMeta =
+            { Name = ""
+              Aliases = []
+              Reals = []
+              Calls = []
+              Edges = [] }
+        member __.Zero() = flow
+        member __.Yield(_) = flow
+
+        member __.ReturnFrom(m) = m
+        member __.Run(f) = f()
+        member __.Bind(m, f) = f m
+        member __.Delay(f: unit -> _) = f
+        member x.Combine(m1, m2) = x.Bind(m1, fun () -> m2)
+        member inline __.For (s, f) = s
+        [<CustomOperation("name")>]
+        member __.SetName(sys:FlowMeta, name) =
+            { sys with Name = name }
+
+    type SystemMetaBuilder internal () =
+        let system =
+            { Name = ""
+              Paths = []
+              Devices = []
+              Calls = []
+              Flows = [] }
+        member __.Zero() = system
+        member __.Yield(_) = system
+
+        member __.ReturnFrom(m) = m
+        member __.Run(f) = f()
+        member __.Bind(m, f) = f m
+        member __.Delay(f: unit -> _) = f
+        member x.Combine(m1, m2) = x.Bind(m1, fun () -> m2)
+        member inline __.For (s, f) = s
+
+        [<CustomOperation("this")>]
+        member x.GetThis(sys):SystemMeta = sys
+
+        [<CustomOperation("name")>]
+        member __.SetName(sys:SystemMeta, name) =
+            { sys with Name = name }
+
+        [<CustomOperation("path")>]
+        member __.SetPath(sys, path) =
+            { sys with Paths = sys.Paths @ [path] }
+
+        [<CustomOperation("device")>]
+        member __.LoadDevice(sys, loadedName, simpleFilePath) =
+            { sys with Devices = sys.Devices @ [{LoadedName = loadedName; Path = simpleFilePath}] }
+
+        [<CustomOperation("add_flow")>]
+        member __.AddFlow(sys, flow:FlowMeta) =
+            { sys with Flows = sys.Flows ++ flow }
+
+        //[<CustomOperation("flow")>]
+        //member __.CreateFlow(sys, loadedName, simpleFilePath) =
+        //    { sys with Devices = sys.Devices @ [{LoadedName = loadedName; Path = simpleFilePath}] }
+
+        //[<CustomOperation("call")>]
+        //member __.CreateCall(sys, callName, callSpecs:CallSpec list) =
+        //    { sys with Calls = sys.Calls @ [{CallKey = callName; ApiItems = callSpecs |> List.map (fun cs -> {Device = cs.Api.Device; ApiName = cs.Api.ApiName; Tx = cs.Tx; Rx = cs.Rx})}] }
+
+    let system = SystemMetaBuilder()
+    let flow = FlowMetaBuilder()

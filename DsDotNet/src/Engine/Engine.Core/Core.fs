@@ -90,8 +90,7 @@ module CoreModule =
         member _.PureNames = names
         override x.GetRelativeName(referencePath:Fqdn) = x.PureNames.Combine()
 
-    // todo: subclass 정의 : Real + ???
-    // Call vs {VertexCall, VertexOtherFlowRealCall}
+    // Subclasses = {Call | Real}
     type ISafetyConditoinHolder =
         abstract member SafetyConditions: HashSet<SafetyCondition>
 

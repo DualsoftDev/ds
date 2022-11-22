@@ -186,7 +186,6 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                     children[2] = {C; D},
                     children[4] = {E},
 
-            todo: "A, B" 와 "A ? B" 에 대한 구분 없음.
             *)
         for triple in (children |> Array.windowed2 3 2) do
             if triple.Length = 3 then

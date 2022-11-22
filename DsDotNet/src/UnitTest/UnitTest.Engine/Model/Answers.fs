@@ -64,17 +64,15 @@ module ModelAnswers =
     [flow] F = {
         R1 > Main2 > Ap1;
         Main > R3;
-        C2 > C4 > C5;
-        C2 > C3 > C5 > C6;
-        C1 > C4 |> C5;
-        C1 > C3 |> C5;
+        C4 > C5;
+        C3 > C5 > C6;
+        C1, C2 > C3, C4 |> C5;
         Main = {
             Ap2 > Bp2 > Bm2 > Ap;
             Ap1 > Bp1 > Bm1 > Ap2 > Am2 > Bm2;
             Ap1 > Am1 > Bm1;
         }
         R2; // island
-
         [aliases] = {
             Ap = { Ap1; Ap2; }
             Am = { Am1; Am2; }
@@ -213,19 +211,6 @@ module ModelComponentAnswers =
 }
 }
 """
-    let answerDup = """
-[sys] L = {
-[flow] FF = {
-    C |> Ap > C;
-    A > C;
-}
-[calls] = {
-    Ap = { A."+"(%Q1, %I1); }
-    Am = { A."-"(%Q2, %I2); }
-}
-[device file="cylinder.ds"] A;
-}
-"""
 
     let answerT6Aliases = """
 [sys ip = localhost] T6_Alias = {
@@ -251,25 +236,5 @@ module ModelComponentAnswers =
 }
 [external file="cylinder.ds"] A;
 [device file="cylinder.ds"] B;
-}
-"""
-    let answerAliases = """
-[sys] my = {
-[flow] F = {
-    Main = {
-        Ap1 <||> Am1;
-        Ap1 > Ap2 > Am2;
-        Ap1 > Am1 > Am2;
-    }
-    [aliases] = {
-        Ap = { Ap1; Ap2; Ap3; }
-        Am = { Am1; Am2; Am3; }
-    }
-}
-[calls] = {
-    Ap = { A."+"(%Q1, %I1); }
-    Am = { A."-"(%Q2, %I2); }
-}
-[device file="cylinder.ds"] A;
 }
 """

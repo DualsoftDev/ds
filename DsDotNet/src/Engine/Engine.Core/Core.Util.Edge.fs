@@ -41,7 +41,6 @@ module EdgeModule =
 
     /// 상호 reset 정보(Mutual Reset Info) 확장
     let internal createMRIEdgesTransitiveClosure4Graph(graph:Graph<'V, 'E>, edgeCreator:'V*'V*EdgeType -> IEdge<'V>) =
-        // todo: system 의 flow 에 대해서 MRI 를 갖는 real 들의 MRI edge 생성
         // https://www.tutorialspoint.com/Transitive-closure-of-a-Graph
         (*
             Begin

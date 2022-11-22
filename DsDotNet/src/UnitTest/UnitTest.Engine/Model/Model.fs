@@ -132,11 +132,11 @@ module ModelTests1 =
 
         [<Test>]
         member __.``Model component [Dup] test`` () =
-            compare ParserTest.Dup answerDup
+            compareExact ParserTest.Dup
 
         [<Test>]
         member __.``Model component [Aliases] test`` () =
-            compare ParserTest.Aliases answerAliases
+            compareExact ParserTest.Aliases
 
         [<Test>]
         member __.``Model component [QualifiedName] test`` () =
@@ -162,8 +162,6 @@ module ModelTests1 =
             //(fun () -> compare InvalidDuplicationTest.DupParentingModel1 "") |> ShouldFailWithSubstringT "Duplicated"
             //(fun () -> compare InvalidDuplicationTest.DupParentingModel2 "") |> ShouldFailWithSubstringT "Duplicated"
             (fun () -> compare InvalidDuplicationTest.CyclicEdgeModel ""  )  |> ShouldFailWithSubstringT "Cyclic"
-
-            // todo : Loop detection
 
 
     type InvalidModelTests1() =

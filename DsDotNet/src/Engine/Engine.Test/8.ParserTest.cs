@@ -199,8 +199,7 @@ namespace Engine
         public static string Dup = @"
 [sys] L = {
     [flow] FF = {
-        A, Ap > C;
-        C |> Ap;
+        A, Ap > C |> Ap;
     }
     [calls] = {
         Ap = { A.""+""(%Q1, %I1); }
@@ -391,8 +390,8 @@ namespace Engine
         }
     }
     [calls] = {
-        Ap = {A.""+""(%Q1, %I1);}
-        Am = {A.""-""(%Q2, %I2);}
+        Ap = { A.""+""(%Q1, %I1); }
+        Am = { A.""-""(%Q2, %I2); }
     }
     [device file=""cylinder.ds""] A;
 }

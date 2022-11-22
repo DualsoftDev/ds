@@ -92,30 +92,29 @@ module EdgeModule =
         for f in system.Flows do
             createMRIEdgesTransitiveClosure f
 
-    let validateSystem(system:DsSystem) =
+    let validateGraphOfSystem(system:DsSystem) =
         for f in system.Flows do
             f.Graph.Validate() |> ignore
             f.Graph.Vertices.OfType<Real>().Iter(fun r -> r.Graph.Validate() |> ignore)
+
     let guardedValidateSystem(system:DsSystem) =
-            try validateSystem system
+            try validateGraphOfSystem system
             with exn ->
                 logWarn "%A" exn
 
+    type DsSystem with
+        member x.CreateMRIEdgesTransitiveClosure() = createMRIEdgesTransitiveClosure4System x
+        member x.ValidateGraph() = validateGraphOfSystem x
+
+    type Flow with
+        member x.CreateEdge(modelingEdgeInfo:ModelingEdgeInfo<Vertex>) =
+            createFlowEdge x modelingEdgeInfo
+    type Real with
+        member x.CreateEdge(modelingEdgeInfo:ModelingEdgeInfo<Vertex>) =
+            createChildEdge x modelingEdgeInfo
+
 [<Extension>]
 type EdgeExt =
-    [<Extension>] static member CreateEdge(flow:Flow, modelingEdgeInfo:ModelingEdgeInfo<Vertex>) =
-                    createFlowEdge flow modelingEdgeInfo
-    [<Extension>] static member CreateEdge(segment:Real, modelingEdgeInfo:ModelingEdgeInfo<Vertex>) =
-                    createChildEdge segment modelingEdgeInfo
-
-    [<Extension>] static member CreateMRIEdgesTransitiveClosure(system:DsSystem) =
-                        createMRIEdgesTransitiveClosure4System system
-    [<Extension>] static member Validate(system:DsSystem) = validateSystem system
-
-    //[<Extension>] static member OfStrongResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofStrongResetEdge edges
-    //[<Extension>] static member OfWeakResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofWeakResetEdge edges
-    //[<Extension>] static member OfNotResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofNotResetEdge edges
-    //[<Extension>] static member OfNotStrongResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofNotStrongResetEdge edges
     [<Extension>] static member ToText<'V, 'E when 'V :> INamed and 'E :> EdgeBase<'V>> (edge:'E) = toText edge
     [<Extension>] static member GetVertices(edges:IEdge<'V> seq) = edges.Collect(fun e -> e.GetVertices())
 

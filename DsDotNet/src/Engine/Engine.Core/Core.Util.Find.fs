@@ -8,61 +8,66 @@ module internal ModelFindModule =
     let nameComponentsEq (Fqdn(ys)) (xs:IQualifiedNamed) = xs.NameComponents = ys
     let nameEq (name:string) (x:INamed) = x.Name = name
 
-    let findGraphVertex(system:DsSystem) (Fqdn(fqdn)) : obj =
+    let tryFindGraphVertex(system:DsSystem) (Fqdn(fqdn)) : obj option =
         //let inline nameComponentsEq xs ys = (^T: (member NameComponents: Fqdn) xs) = (^T: (member NameComponents: Fqdn) ys)
 
-        let findInLoadedSystem (device:LoadedSystem) (Fqdn(fqdn)) =
+        let tryFindInLoadedSystem (device:LoadedSystem) (Fqdn(fqdn)) =
             failwith "Not yet implemented"
-            null
+            None
 
-        let rec findSystemInner (system:DsSystem) (xs:string list) : obj =
+        let rec tryFindSystemInner (system:DsSystem) (xs:string list) : obj option =
             match xs with
-            | [] -> system
+            | [] -> Some system
             | f::xs1 when system.Flows.Any(nameEq f) ->
                 let flow = system.Flows.First(nameEq f)
                 match xs1 with
-                | [] -> flow
+                | [] -> Some flow
                 | r::xs2 ->
                     let real = flow.Graph.FindVertex(r) |> box :?> Real
                     match xs2 with
-                    | [] -> real
-                    | remaining -> real.Graph.FindVertex(remaining.Combine())
+                    | [] -> Some real
+                    | remaining ->
+                        option {
+                            let! v = real.Graph.TryFindVertex(remaining.Combine())
+                            return box v
+                        }
 
             | dev::xs when system.Devices.Any(nameEq dev) ->
                 let device = system.Devices.Find(nameEq dev)
                 match xs with
-                | [] -> device
-                | _ -> findInLoadedSystem device (xs.ToArray())
+                | [] -> Some device
+                | _ -> tryFindInLoadedSystem device (xs.ToArray())
             | _ -> failwith "ERROR"
 
 
         let fqdn = fqdn.ToFSharpList()
         match fqdn with
         | [] -> failwith "ERROR: name not given"
-        | s::xs when s = system.Name -> findSystemInner system xs
-        | _ -> findSystemInner system fqdn
+        | s::xs when s = system.Name -> tryFindSystemInner system xs
+        | _ -> tryFindSystemInner system fqdn
 
 
-    let findGraphVertexT<'V when 'V :> IVertex>(system:DsSystem) (Fqdn(fqdn)) =
-        let v = findGraphVertex system fqdn
-        if typedefof<'V>.IsAssignableFrom(v.GetType()) then
-            v :?> 'V
-        else
-            failwith "ERROR"
+    let tryFindGraphVertexT<'V when 'V :> IVertex>(system:DsSystem) (Fqdn(fqdn)) =
+        option {
+            let! v = tryFindGraphVertex system fqdn
+            if typedefof<'V>.IsAssignableFrom(v.GetType()) then
+                return v :?> 'V
+            else
+                failwith "ERROR"
+        }
 
     let tryFindLoadedSystem(system:DsSystem) (loadedSystemName:string) =
         system.Devices.TryFind(nameEq loadedSystemName)
 
-    let rec findExportApiItem(system:DsSystem) (Fqdn(apiPath)) =
+    let rec tryFindExportApiItem(system:DsSystem) (Fqdn(apiPath)) =
         let sysName, apiKey = apiPath[0], apiPath[1]
-        system.ApiItems4Export.FindWithName(apiKey)
+        system.ApiItems4Export.TryFindWithName(apiKey)
 
     and tryFindCallingApiItem (system:DsSystem) targetSystemName targetApiName =
         system.ApiItems.TryFind(nameComponentsEq [targetSystemName; targetApiName])
 
-    let findVertexCall(system:DsSystem) (Fqdn(callPath)) =
-        let x = findGraphVertex system callPath :?> Call
-        x
+    let tryFindVertexCall(system:DsSystem) (Fqdn(callPath)) =
+        tryFindGraphVertex system callPath |> Option.map(forceCast<Call>)
 
     let tryFindFlow(system:DsSystem) (flowName:string) =
         system.Flows.TryFind(nameEq flowName)
@@ -88,13 +93,12 @@ module internal ModelFindModule =
 
 
     type DsSystem with
-        member x.FindGraphVertex(Fqdn(fqdn)) = findGraphVertex x fqdn
-        member x.FindGraphVertex<'V when 'V :> IVertex>(Fqdn(fqdn)) = findGraphVertexT<'V> x fqdn
+        member x.TryFindGraphVertex(Fqdn(fqdn)) = tryFindGraphVertex x fqdn
+        member x.TryFindGraphVertex<'V when 'V :> IVertex>(Fqdn(fqdn)) = tryFindGraphVertexT<'V> x fqdn
 
-        member x.FindExportApiItem(Fqdn(apiPath)) = findExportApiItem x apiPath
-        member x.FindVertexCall(Fqdn(callPath)) = findVertexCall x callPath
+        member x.TryFindExportApiItem(Fqdn(apiPath)) = tryFindExportApiItem x apiPath
+        member x.TryFindVertexCall(Fqdn(callPath)) = tryFindVertexCall x callPath
 
-        member x.FindFlow(flowName:string) = tryFindFlow x flowName |> Option.get
         member x.TryFindFlow(flowName:string) = tryFindFlow x flowName
         member x.TryFindCall(callName:string) = tryFindCall x callName
 

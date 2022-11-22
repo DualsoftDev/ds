@@ -34,6 +34,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
 
     member val TheSystem:DsSystem = getNull<DsSystem>() with get, set
 
+    /// parser rule context 가 어느 시스템에 속한 것인지를 판정하기 위함.  Loaded system 의 context 와 Main system 의 context 구분 용도.
     member val internal RuleDictionary = Dictionary<ParserRuleContext, string>()
 
     override x.EnterEveryRule(ctx:ParserRuleContext) =
@@ -243,8 +244,9 @@ module ParserRuleContextModule =
         let findSegments(fqdns:Fqdn[]):Real[] =
             fqdns
                 .Where(fun fqdn -> fqdn <> null)
-                .Select(fun s -> system.FindGraphVertex<Real>(s))
-                .Tap(fun x -> assert(not (isItNull x)))
+                .Select(fun s -> system.TryFindGraphVertex<Real>(s))
+                .Tap(fun x -> assert(x.IsSome))
+                .Choose(id)
                 .ToArray()
         let isWildcard(cc:Fqdn):bool = cc.Length = 1 && cc[0] = "_"
         let collectCallComponents(ctx:CallComponentsContext):Fqdn[] =

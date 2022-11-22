@@ -143,9 +143,9 @@ type NameUtil =
 
 
     [<Extension>]
-    static member FindWithName (namedObjects:#INamed seq, name:string) =
-        namedObjects.FirstOrDefault(fun obj -> obj.Name = name)
+    static member TryFindWithName (namedObjects:#INamed seq, name:string) =
+        namedObjects.TryFind(fun obj -> obj.Name = name)
     [<Extension>]
-    static member FindWithNameComponents (namedObjects:#IQualifiedNamed seq, nameComponents:Fqdn) =
-        namedObjects.FirstOrDefault(fun obj -> obj.NameComponents = nameComponents)
+    static member TryFindWithNameComponents (namedObjects:#IQualifiedNamed seq, nameComponents:Fqdn) =
+        namedObjects.TryFind(fun obj -> obj.NameComponents = nameComponents)
 

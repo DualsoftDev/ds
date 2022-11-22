@@ -228,10 +228,9 @@ module CoreModule =
                         (if r.Flow <> flow then [|r.Flow.Name|] else [||]) @ [| r.Name |]
                     | AliasTargetCall c -> [| c.Name |]
                 let ads = flow.AliasDefs
-                if ads.ContainsKey(aliasKey) then
-                    ads[aliasKey].Mnemonincs.AddIfNotContains(name) |> ignore
-                else
-                    ads.Add(aliasKey, AliasDef(aliasKey, Some target, [|name|]))
+                match ads.TryFind(aliasKey) with
+                | Some ad -> ad.Mnemonincs.AddIfNotContains(name) |> ignore
+                | None -> ads.Add(aliasKey, AliasDef(aliasKey, Some target, [|name|]))
 
             createAliasDefOnDemand()
             let v = VertexAlias(name, target, parent)
@@ -305,8 +304,7 @@ type CoreExt =
             | EmergencyBTN   -> sys.EmergencyButtons
             | AutoBTN        -> sys.AutoButtons
 
-        if dicButton.ContainsKey btnName then
-            dicButton.[btnName].Add(flow) |> verifyM $"Duplicated flow [{flow.Name}]"
-        else
-            dicButton.Add(btnName, HashSet[|flow|] )
+        match dicButton.TryFind btnName with
+        | Some btn -> btn.Add(flow) |> verifyM $"Duplicated flow [{flow.Name}]"
+        | None -> dicButton.Add(btnName, HashSet[|flow|] )
 

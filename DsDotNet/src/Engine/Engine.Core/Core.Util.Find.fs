@@ -57,15 +57,6 @@ module internal ModelFindModule =
         let sysName, apiKey = apiPath[0], apiPath[1]
         system.ApiItems4Export.FindWithName(apiKey)
 
-    //and tryFindImportApiItem(system:DsSystem) (Fqdn(apiPath)) =
-    //    let lSysName, lApiKey = apiPath[0], apiPath[1]
-    //    let loadedSystem = tryFindLoadedSystem system lSysName
-    //    match loadedSystem with
-    //    | Some lsystem ->
-    //        lsystem.ReferenceSystem.ApiItems4Export
-    //            .TryFind(fun api -> api.Name = lApiKey)
-    //    | None -> None
-
     and tryFindCallingApiItem (system:DsSystem) targetSystemName targetApiName =
         system.ApiItems.TryFind(nameComponentsEq [targetSystemName; targetApiName])
 
@@ -83,12 +74,15 @@ module internal ModelFindModule =
             return! flow.Graph.TryFindVertex(realName).Map(fun x -> x:?>Real)
         }
 
-    let tryFindCall (system:DsSystem) callName = system.Calls.TryFind(nameEq callName)
+    let tryFindCall (system:DsSystem) callName =
+        system.Calls.TryFind(nameEq callName)
+
     let tryFindAliasTarget (flow:Flow) aliasMnemonic =
         flow.AliasDefs.Values
             .Where(fun ad -> ad.Mnemonincs.Contains(aliasMnemonic))
             .TryExactlyOne()
             .Bind(fun ad -> ad.AliasTarget)
+
     let tryFindAliasDefWithMnemonic (flow:Flow) aliasMnemonic =
         flow.AliasDefs.Values.TryFind(fun ad -> ad.Mnemonincs.Contains(aliasMnemonic))
 
@@ -98,7 +92,6 @@ module internal ModelFindModule =
         member x.FindGraphVertex<'V when 'V :> IVertex>(Fqdn(fqdn)) = findGraphVertexT<'V> x fqdn
 
         member x.FindExportApiItem(Fqdn(apiPath)) = findExportApiItem x apiPath
-        //member x.TryFindExportApiItem(apiKey:string) = x.ApiItems4Export.FindWithName(apiKey)
         member x.FindVertexCall(Fqdn(callPath)) = findVertexCall x callPath
 
         member x.FindFlow(flowName:string) = tryFindFlow x flowName |> Option.get

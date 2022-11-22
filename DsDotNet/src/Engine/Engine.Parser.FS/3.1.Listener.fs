@@ -126,10 +126,9 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
     member x.GetContextInformation(parserRuleContext:ParserRuleContext) =      // collectUpwardContextInformation
         let ctx = parserRuleContext
         let system =
-            if x.RuleDictionary.ContainsKey(parserRuleContext) then
-                Some x.RuleDictionary[parserRuleContext]
-            else
-                parserRuleContext.TryGetSystemName()
+            match x.RuleDictionary.TryFind(parserRuleContext) with
+            | Some ruleName -> Some ruleName
+            | None -> parserRuleContext.TryGetSystemName()
 
         let flow      = ctx.TryFindFirstAscendant<FlowBlockContext>(true).Bind(fun b -> b.TryFindIdentifier1FromContext())
         let parenting = ctx.TryFindFirstAscendant<ParentingBlockContext>(true).Bind(fun b -> b.TryFindIdentifier1FromContext())
@@ -168,7 +167,6 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
         let system = x.TheSystem
         let ci = x.GetContextInformation ctx
         let oci = x.GetObjectContextInformation(system, ctx)
-        let sysNames, flowName, parenting, ns = ci.Tuples
 
         let children = ctx.children.ToArray();      // (CausalTokensDNF CausalOperator)+ CausalTokensDNF
         for (n, ctx) in children|> Seq.indexed do
@@ -386,17 +384,6 @@ module ParserRuleContextModule =
 
         let createNonParentedRealVertex = tokenCreator 0
         let createCallOrAliasVertex = tokenCreator 1
-
-
-        //let dumpTokens (tokens:Dictionary<ContextInformation, GVT>) (msg:string) =
-        //    logInfo "%s" msg
-        //    for KeyValue(ctxInfo, vType) in tokens do
-        //        logDebug $"{ctxInfo.FullName} : {vType}"
-        //let dumpCausalTokens = dumpTokens helper._causalTokenElements
-
-        //dumpCausalTokens "---- Original Causal token elements"
-
-
 
 
         for ctx in sysctx.Descendants<CallListingContext>() do

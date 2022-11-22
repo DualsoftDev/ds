@@ -99,25 +99,6 @@ module EtcListenerModule =
                     safetyConditions.Iter(fun sc -> holder.SafetyConditions.Add(sc) |> verifyM $"Duplicated safety condition[{ (sc.Core :?> INamed).Name}]")
                 } |> ignore
 
-                //assert(key.Length = 2)
-                //let (flow::real::[]) = key
-                //let seg:Real =
-                //    match key.Length with
-                //        | 1 ->
-                //            assert(ctx.Parent :? FlowBlockContext)
-                //            curSystem.FindGraphVertex<Real>(x.AppendPathElement(key[0]))
-                //        | 3 ->
-                //            assert(ctx.Parent :? ModelPropertyBlockContext)
-                //            curSystem.FindGraphVertex<Real>(key)
-                //        | _ ->
-                //            raise <| ParserException($"Invalid safety key[{key.Combine()}]", ctx)
-
-                //for cond in values.Select(fun v -> curSystem.FindGraphVertex(v) |> box :?> Real) do
-                //    let added = seg.SafetyConditions.Add(cond)
-                //    if not added then
-                //        raise <| ParserException($"Safety condition [{cond.QualifiedName}] duplicated on safety key[{key.Combine()}]", ctx)
-
-
         member private x.CreateFunctionApplication(context:FunApplicationContext):FunctionApplication =
             let funName = context.TryFindFirstChild<FunNameContext>().Value.GetText()
             let argGroups =

@@ -103,9 +103,19 @@ type SeqExt =
 [<AutoOpen>]
 module DotNetCollectionExt =
     type System.Collections.Generic.List<'t> with
-        member x.AddIfNotContains(item:'t) =
-            if not (x.Contains item) then
-                x.Add item
-                true
+        member xs.AddIfNotContains(x:'t) =
+            if not (xs.Contains x) then
+                xs.Add x
+
+    type Dictionary<'k, 'v> with
+        member xs.TryFind(key:'k) =
+            if xs.ContainsKey key then
+                Some xs.[key]
             else
-                false
+                None
+        member xs.AddOrReplace(key:'k, value:'v) =
+            if xs.ContainsKey key then
+                xs.[key] <- value
+            else
+                xs.Add(key, value)
+

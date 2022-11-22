@@ -89,7 +89,8 @@ module PreludeAdhocPolymorphism =
 
 
     type FAdhoc_orElse = FAdhoc_orElse with
-        static member (?<-) (FAdhoc_orElse, x:option<'a>, y:option<'a>)  = Option.orElse x y
+        /// 주의: FAdhoc_orElse (Option.orElse) 사용 시 short circuit 기능이 없다.
+        static member (?<-) (FAdhoc_orElse, x:option<'a>, y:option<'a>)  = x |> Option.orElse y
         static member (?<-) (FAdhoc_orElse, x:Nullable<'a>, y:Nullable<'a>)  = if x.HasValue then x else y
         static member (?<-) (FAdhoc_orElse, x:'a when ^a : not struct, y:'a when ^a : not struct) = if isNull x then y else x
 

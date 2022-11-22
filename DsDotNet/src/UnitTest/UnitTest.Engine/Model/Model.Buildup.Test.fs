@@ -72,7 +72,7 @@ module ModelBuildupTests1 =
             ) |> ShouldFailWithSubstringT "not child of"
 
         [<Test>]
-        member __.``XModel with alias test`` () =
+        member __.``Model with alias test`` () =
             let system, flow, real, callAp, callAm = createSimpleSystem()
 
             let vCallP = VertexAlias.Create("Main2", AliasTargetReal real, Flow flow)
@@ -85,7 +85,6 @@ module ModelBuildupTests1 =
     [flow] F = {
         Main2 > R2;		// Main2(VertexAlias)> R2(Real);
         Main; // island
-        // todo : alias 가 생성 안됨.
         [aliases] = {
             Main = { Main2; }
         }

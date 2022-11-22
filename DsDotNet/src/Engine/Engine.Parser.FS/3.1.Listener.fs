@@ -374,7 +374,7 @@ module ParserRuleContextModule =
                                 failwith "ERROR"
                         | 1, ofn::ofrn::[] ->
                             let otherFlowReal = tryFindReal system ofn ofrn |> Option.get
-                            VertexOtherFlowRealCall.Create(ofn, ofrn, otherFlowReal, parent) |> ignore
+                            VertexOtherFlowRealCall.Create(otherFlowReal, parent) |> ignore
 
                             tracefn $"{ofn}.{ofrn} should already have been created."
                         | _, q::[] -> ()

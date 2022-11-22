@@ -209,6 +209,11 @@ module CoreModule =
             let cp = ApiItem4Export(name, system)
             system.ApiItems4Export.Add(cp) |> verifyM $"Duplicated interface prototype name [{name}]"
             cp
+        static member Create(name, system, txs, rxs) =
+            let ai4e = ApiItem4Export.Create(name, system)
+            ai4e.AddTXs txs |> ignore
+            ai4e.AddRXs rxs |> ignore
+            ai4e
 
     type VertexCall with
         static member Create(name:string, target:Call, parent:ParentWrapper) =
@@ -238,9 +243,10 @@ module CoreModule =
             v
 
     type VertexOtherFlowRealCall with
-        static member Create( otherFlowName:string, otherFlowRealName:string, otherFlowReal:Real, parent:ParentWrapper) =
-            let v = VertexOtherFlowRealCall( [|otherFlowName; otherFlowRealName|], otherFlowReal, parent)
-            parent.GetGraph().AddVertex(v) |> verifyM $"Duplicated other flow real call [{otherFlowName}.{otherFlowRealName}]"
+        static member Create(otherFlowReal:Real, parent:ParentWrapper) =
+            let ofn, ofrn = otherFlowReal.Flow.Name, otherFlowReal.Name
+            let v = VertexOtherFlowRealCall( [| ofn; ofrn |], otherFlowReal, parent)
+            parent.GetGraph().AddVertex(v) |> verifyM $"Duplicated other flow real call [{ofn}.{ofrn}]"
             v
 
 
@@ -279,32 +285,16 @@ module CoreModule =
             | Flow f -> f.ModelingEdges
             | Real r -> r.ModelingEdges
 
+    type DsSystem with
+        member x.AddButton(btnType:BtnType, btnName: string, flow:Flow) =
+            if x <> flow.System then failwithf $"button [{btnName}] in flow ({flow.System.Name} != {x.Name}) is not same system"
+            let dicButton =
+                match btnType with
+                | StartBTN       -> x.StartButtons
+                | ResetBTN       -> x.ResetButtons
+                | EmergencyBTN   -> x.EmergencyButtons
+                | AutoBTN        -> x.AutoButtons
 
-[<Extension>]
-type CoreExt =
-    //[<Extension>]
-    //static member AddModelEdge(flow:Flow, source:string, edgetext:string, target:string) =
-    //    let src = flow.Graph.Vertices.Find(fun f->f.Name = source)
-    //    let tgt = flow.Graph.Vertices.Find(fun f->f.Name = target)
-    //    let modelingEdgeInfo = ModelingEdgeInfo(src, edgetext, tgt)
-    //    flow.ModelingEdges.Add(modelingEdgeInfo) |> verifyM $"Duplicated edge [{src.Name}{edgetext}{tgt.Name}]"
-
-    //[<Extension>]
-    //static member AddModelEdge(flow:Flow, source:Vertex, modelEdgeType:ModelingEdgeType, target:Vertex) =
-    //    let modelingEdgeInfo = ModelingEdgeInfo(source, modelEdgeType.ToText(), target)
-    //    flow.ModelingEdges.Add(modelingEdgeInfo) |> verifyM $"Duplicated edge [{source.Name}{modelEdgeType.ToText()}{target.Name}]"
-
-    [<Extension>]
-    static member AddButton(sys:DsSystem, btnType:BtnType, btnName: string, flow:Flow) =
-        if sys <> flow.System then failwithf $"button [{btnName}] in flow ({flow.System.Name} != {sys.Name}) is not same system"
-        let dicButton =
-            match btnType with
-            | StartBTN       -> sys.StartButtons
-            | ResetBTN       -> sys.ResetButtons
-            | EmergencyBTN   -> sys.EmergencyButtons
-            | AutoBTN        -> sys.AutoButtons
-
-        match dicButton.TryFind btnName with
-        | Some btn -> btn.Add(flow) |> verifyM $"Duplicated flow [{flow.Name}]"
-        | None -> dicButton.Add(btnName, HashSet[|flow|] )
-
+            match dicButton.TryFind btnName with
+            | Some btn -> btn.Add(flow) |> verifyM $"Duplicated flow [{flow.Name}]"
+            | None -> dicButton.Add(btnName, HashSet[|flow|] )

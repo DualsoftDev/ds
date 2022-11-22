@@ -128,7 +128,7 @@ interfaceBlock
     interfaceDef: interfaceName EQ LBRACE serPhrase RBRACE;
     interfaceName: identifier1;
     serPhrase: callComponents TILDE callComponents (TILDE callComponents)?;
-        callComponents: identifier123DNF*;
+        callComponents: identifier123CNF*;
     //callDefs: (callDef SEIMCOLON)+ ;
     interfaceResetDef: identifier1 (causalOperatorReset identifier1)+ (';')?;
 
@@ -148,26 +148,9 @@ buttonsBlocks:emergencyButtonBlock|autoButtonBlock|startButtonBlock|resetButtonB
 
 // B.F1 > Set1F <| T.A21;
 causal: causalPhrase SEIMCOLON;
-    causalPhrase
-        : causalTokensDNF (causalOperator causalTokensDNF)+
-        ;
-
-    causalTokensDNF
-        : causalTokensCNF ('?' causalTokensCNF)*
-        ;
-    causalTokensCNF
-        : causalToken (',' causalToken)*
-        ;
-
-    causalToken
-        : identifier12
-    //     | proc
-    //     | func
-    //     | expression
-    //  | segmentValue  // '(A)' or '(A.B)'
-        ;
-    //segmentValue: LPARENTHESIS identifier123 RPARENTHESIS;
-
+    causalPhrase: causalTokensCNF (causalOperator causalTokensCNF)+;
+    causalTokensCNF:  causalToken (',' causalToken)* ;
+    causalToken: identifier12;
 
     causalOperator
         : '>'   // CAUSAL_FWD
@@ -197,15 +180,10 @@ identifier1234: (identifier1 | identifier2 | identifier3 | identifier4);
     identifier3: IDENTIFIER3;
     identifier4: IDENTIFIER4;
 
-    // // - Segment 규격
-    // // - 0 DOT: TagName
-    // // - 1 DOT: TaskName.SegmentName  : mysystem 을 가정하고 있음.  필요한가?
-    // // - 2 DOT: System.TaskName.SegmentName
     identifier12: (identifier1 | identifier2);
     identifier123: (identifier1 | identifier2 | identifier3);
 
     identifier123CNF: identifier123 (COMMA identifier123)*;
-    identifier123DNF: identifier123CNF (OR2 identifier123CNF)*;
 
     flowPath: identifier2;
 

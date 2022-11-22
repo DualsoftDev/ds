@@ -171,7 +171,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
 
         let children = ctx.children.ToArray();      // (CausalTokensDNF CausalOperator)+ CausalTokensDNF
         for (n, ctx) in children|> Seq.indexed do
-            assert( if n % 2 = 0 then ctx :? CausalTokensDNFContext else ctx :? CausalOperatorContext)
+            assert( if n % 2 = 0 then ctx :? CausalTokensCNFContext else ctx :? CausalOperatorContext)
 
 
 

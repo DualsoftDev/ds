@@ -85,12 +85,12 @@ module internal ToDsTextModule =
                     let tab = getTab (indent+2)
                     let aliasKey =
                         match a.AliasTarget with
-                        | Some(RealTarget real) ->
+                        | Some(AliasTargetReal real) ->
                             if real.Flow.Name = flow.Name then
                                 real.Name
                             else
                                 [real.Flow.Name; real.Name].Combine()
-                        | Some(CallTarget call) -> call.Name
+                        | Some(AliasTargetCall call) -> call.Name
                         | None -> failwith "ERROR"
 
                     yield $"{tab}{aliasKey} = {lb} {mnemonics} {rb}"

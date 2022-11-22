@@ -75,7 +75,7 @@ module ModelBuildupTests1 =
         member __.``XModel with alias test`` () =
             let system, flow, real, callAp, callAm = createSimpleSystem()
 
-            let vCallP = VertexAlias.Create("Main2", RealTarget real, Flow flow)
+            let vCallP = VertexAlias.Create("Main2", AliasTargetReal real, Flow flow)
             let real2 = Real.Create("R2", flow)
 
             flow.CreateEdge(ModelingEdgeInfo(vCallP, ">", real2)) |> ignore

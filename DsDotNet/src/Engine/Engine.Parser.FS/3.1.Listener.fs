@@ -302,13 +302,13 @@ module ParserRuleContextModule =
                     let realTargetCandidate = flow.Graph.TryFindVertex<Real>(t)
                     let callTargetCandidate = tryFindCall system t
                     match realTargetCandidate, callTargetCandidate with
-                    | Some real, None -> Some (RealTarget real)
-                    | None, Some call -> Some (CallTarget call)
+                    | Some real, None -> Some (AliasTargetReal real)
+                    | None, Some call -> Some (AliasTargetCall call)
                     | Some _, Some _ -> failwith "Name duplicated."
                     | _ -> failwith "Failed to find"
                 | otherFlow::real::[] ->
                     match tryFindReal system otherFlow real with
-                    | Some otherFlowReal -> Some (RealTarget otherFlowReal)
+                    | Some otherFlowReal -> Some (AliasTargetReal otherFlowReal)
                     | _ -> failwith "Failed to find"
                 | _ ->
                     failwith "ERROR"

@@ -24,8 +24,8 @@ module rec ViewModule =
               let name = 
                   match coreVertex  with
                     | :? Alias as a -> match a.Target with
-                                       | RealTarget r -> r.Name
-                                       | CallTarget c -> c.Name
+                                       | AliasTargetReal r -> r.Name
+                                       | AliasTargetCall c -> c.Name
                     | _ -> coreVertex.Name
                 
               ViewNode(name, MY, Some(coreVertex),  None)

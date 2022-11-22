@@ -98,8 +98,8 @@ module internal ToCopyModule =
                                 match vInReal  with
                                 | :? Alias as orgiAlias ->
                                     match orgiAlias.Target with
-                                    | RealTarget rt -> failwithf "Error : Real안에 Real타깃 Alias불가"
-                                    | CallTarget ct ->
+                                    | AliasTargetReal rt -> failwithf "Error : Real안에 Real타깃 Alias불가"
+                                    | AliasTargetCall ct ->
                                             let r = findReal(orgiReal.Name)
                                             Alias.Create(orgiAlias.Name, CallTarget(findCallInReal(orgiReal.Name, ct.Name)), Real(findReal(orgiReal.Name)), false)|>ignore
                                     //| CallTarget ct -> Alias.Create(orgiAlias.Name, CallTarget(ct), Real(findReal(orgiReal.Name)), false)|>ignore
@@ -107,8 +107,8 @@ module internal ToCopyModule =
 
                 | :? Alias as orgiAlias ->
                         match orgiAlias.Target with
-                        | RealTarget rt -> Alias.Create(vertexInFlow.Name, RealTarget(rt), Flow(copyFlow), false)|>ignore
-                        | CallTarget ct -> Alias.Create(vertexInFlow.Name, CallTarget(ct), Flow(copyFlow), false)|>ignore
+                        | AliasTargetReal rt -> Alias.Create(vertexInFlow.Name, RealTarget(rt), Flow(copyFlow), false)|>ignore
+                        | AliasTargetCall ct -> Alias.Create(vertexInFlow.Name, CallTarget(ct), Flow(copyFlow), false)|>ignore
                 | _ -> ()
             )
 

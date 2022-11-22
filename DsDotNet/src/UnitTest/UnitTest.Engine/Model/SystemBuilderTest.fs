@@ -20,7 +20,7 @@ module SystemBuilderTest =
         let compare = compare libdir
         let compareExact x = compare x x
         [<Test>]
-        member __.``XBuilder test`` () =
+        member __.``Builder test`` () =
             let opt =
                 option {
                     if true then

@@ -100,3 +100,12 @@ type SeqExt =
     [<Extension>] static member Zip3(xs:'x seq, ys:'y seq, zs:'z seq) = Seq.zip3 xs ys zs
 
 
+[<AutoOpen>]
+module DotNetCollectionExt =
+    type System.Collections.Generic.List<'t> with
+        member x.AddIfNotContains(item:'t) =
+            if not (x.Contains item) then
+                x.Add item
+                true
+            else
+                false

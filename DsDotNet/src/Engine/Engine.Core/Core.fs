@@ -75,7 +75,7 @@ module CoreModule =
     and AliasDef(aliasKey:Fqdn, target:AliasTargetWrapper option, mnemonics:string []) =
         member _.AliasKey = aliasKey
         member val AliasTarget = target with get, set
-        member _.Mnemonincs = mnemonics
+        member val Mnemonincs = mnemonics |> ResizeArray
 
 
 
@@ -217,6 +217,23 @@ module CoreModule =
             v
     type VertexAlias with
         static member Create(name:string, target:AliasTargetWrapper, parent:ParentWrapper) =
+            let createAliasDefOnDemand() =
+                (* <*.ds> 파일에서 생성하는 경우는 alias 정의가 먼저 선행되지만,
+                 * 메모리에서 생성해 나가는 경우는 alias 정의가 없으므로 거꾸로 채워나가야 한다.
+                 *)
+                let flow:Flow = parent.GetFlow()
+                let aliasKey =
+                    match target with
+                    | AliasTargetReal r ->
+                        (if r.Flow <> flow then [|r.Flow.Name|] else [||]) @ [| r.Name |]
+                    | AliasTargetCall c -> [| c.Name |]
+                let ads = flow.AliasDefs
+                if ads.ContainsKey(aliasKey) then
+                    ads[aliasKey].Mnemonincs.AddIfNotContains(name) |> ignore
+                else
+                    ads.Add(aliasKey, AliasDef(aliasKey, Some target, [|name|]))
+
+            createAliasDefOnDemand()
             let v = VertexAlias(name, target, parent)
             parent.GetGraph().AddVertex(v) |> verifyM $"Duplicated alias name [{name}]"
             v

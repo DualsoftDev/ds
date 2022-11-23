@@ -58,18 +58,18 @@ module DsText =
             for t in ts do
                 yield!
                     match edgeSymbol with
-                    | (* ">"    *) TextStartEdge     -> [s, RET.Start, t]
-                    | (* ">>"   *) TextStartPush     -> [s, RET.Start ||| RET.Strong, t]
-                    | (* "|>"   *) TextResetEdge     -> [s, RET.Reset, t]
-                    | (* "||>"  *) TextResetPush     -> [s, RET.Reset ||| RET.Strong, t]
+                    | (* ">"    *) TextStartEdge     -> [(s, RET.Start, t)]
+                    | (* ">>"   *) TextStartPush     -> [(s, RET.Start ||| RET.Strong, t)]
+                    | (* "|>"   *) TextResetEdge     -> [(s, RET.Reset, t)]
+                    | (* "||>"  *) TextResetPush     -> [(s, RET.Reset ||| RET.Strong, t)]
 
                     | (* "=>"   *) TextStartReset    -> [(s, RET.Start, t); (t, RET.Reset, s)]
                     | (* "<|>"  *) TextInterlockWeak -> [(s, RET.Reset, t); (t, RET.Reset, s)]
                     | (* "<||>" *) TextInterlock     -> [(s, RET.Reset ||| RET.Strong, t); (t, RET.Reset ||| RET.Strong, s)]
-                    | (* "<"    *) TextStartEdgeRev  -> [t, RET.Start, s]
-                    | (* "<<"   *) TextStartPushRev  -> [t, RET.Start ||| RET.Strong, s]
-                    | (* "<|"   *) TextResetEdgeRev  -> [t, RET.Reset, s]
-                    | (* "<||"  *) TextResetPushRev  -> [t, RET.Reset ||| RET.Strong, s]
+                    | (* "<"    *) TextStartEdgeRev  -> [(t, RET.Start, s)]
+                    | (* "<<"   *) TextStartPushRev  -> [(t, RET.Start ||| RET.Strong, s)]
+                    | (* "<|"   *) TextResetEdgeRev  -> [(t, RET.Reset, s)]
+                    | (* "<||"  *) TextResetPushRev  -> [(t, RET.Reset ||| RET.Strong, s)]
                     | (* "<="   *) TextStartResetRev -> [(t, RET.Start, s); (s, RET.Reset, t); ]
 
                     | _

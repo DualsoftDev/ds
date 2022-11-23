@@ -93,7 +93,6 @@ type SeqExt =
     [<Extension>] static member TryItem(xs:'a seq, index)      = Seq.tryItem index xs
     [<Extension>] static member TryLast(xs:'a seq)             = Seq.tryLast xs
     [<Extension>] static member TryPick(xs:'a seq, chooser)    = Seq.tryPick chooser xs
-    [<Extension>] static member Unfold(xs:'a seq, generator, z)   = Seq.unfold generator z
     [<Extension>] static member UpdateAt(xs:'a seq, index, value) = Seq.updateAt index value xs
     [<Extension>] static member Windowed(xs:'a seq, windowSize)   = Seq.windowed windowSize xs
     [<Extension>] static member Zip(xs:'x seq, ys:'y seq)         = Seq.zip xs ys

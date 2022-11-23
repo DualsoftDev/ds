@@ -34,6 +34,7 @@
 		<Compile Include="Model\ExpressionTest.fs" />
 		<Compile Include="Model\FqdnParseTest.fs" />
 		<Compile Include="Model\SystemBuilderTest.fs" />
+		<Compile Include="Model\LoadConfigTest.fs" />
 		<!--<Compile Include="ImportPPT\pptTest.fs" />-->
 		<Compile Include="EntryPoint.fs" />
 		<None Include="Libraries\cylinder.ds" />

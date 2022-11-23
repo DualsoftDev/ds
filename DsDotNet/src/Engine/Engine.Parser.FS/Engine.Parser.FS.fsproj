@@ -20,6 +20,7 @@
 		<Compile Include="3.2.Listener.Epilog.fs" />
 		<Compile Include="5.ModelParser.fs" />
 		<Compile Include="SystemBuilder.fs" />
+		<Compile Include="ModelLoader.fs" />
 		<Compile Include="AssemblyInfo.fs" />
 		<Compile Include="Program.fs" />
 	</ItemGroup>
@@ -41,6 +42,9 @@
 	<ItemGroup>
 		<Reference Include="log4net">
 			<HintPath>..\..\..\exLib\log4net.dll</HintPath>
+		</Reference>
+		<Reference Include="Newtonsoft.Json">
+			<HintPath>..\..\..\exLib\Newtonsoft.Json.dll</HintPath>
 		</Reference>
 	</ItemGroup>
 

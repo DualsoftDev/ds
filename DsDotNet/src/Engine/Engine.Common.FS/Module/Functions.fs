@@ -67,6 +67,11 @@ module Functions =
     *)
     let flipf f x y = f y x
 
+    /// Returns a function that returns the given constant value. `(fun _ -> a)`
+    let inline cnst a = (fun _ -> a)
+    /// Returns a function that returns the given constant value. `(fun _ _ -> a)`
+    let inline cnst2 a = (fun _ _ -> a)
+
     let falsify x = false
     let truthyfy x = true
 
@@ -106,6 +111,11 @@ module Functions =
     let tryCast<'a> input =
         try Some(cast<'a> input)
         with _ -> None
+
+    /// Calls f and returns the result in Ok if it did not throw; otherwise catches the exception and returns it in an Error.
+    let inline tryResult f =
+        try Ok (f ())
+        with e -> Error e
 
     /// type 검사
     let isType<'a> x = x :> obj :? 'a

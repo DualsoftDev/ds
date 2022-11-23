@@ -29,19 +29,20 @@ module BuilderImpl =
         member __.Bind(m: 'T option, f) = Option.bind f m
         member __.Bind(m: 'T Nullable, f) = m |> Option.ofNullable |> Option.bind f
         member __.Bind(m: 'T when 'T:null, f) = m |> Option.ofObj |> Option.bind f
-
+        member __.Combine (x, f) = Option.orElseWith f x
         member __.Delay(f: unit -> _) = f
         member __.Run(f) = f()
 
         member this.TryWith(delayedExpr, handler) =
             try this.Run(delayedExpr)
             with exn -> handler exn
+
         member this.TryFinally(delayedExpr, compensation) =
             try this.Run(delayedExpr)
             finally compensation()
+
         member this.Using(resource:#IDisposable, body) =
             this.TryFinally(this.Delay(fun ()->body resource), fun () -> match box resource with null -> () | _ -> resource.Dispose())
-
 
 
 

@@ -18,6 +18,7 @@ module PreludeAdhocPolymorphism =
         static member ($) (FAdhoc_bind, x:seq<_>)        = fun f -> Seq.collect   f x
         static member ($) (FAdhoc_bind, x:array<_>)      = fun f -> Array.collect f x
         static member ($) (FAdhoc_bind, x:Result<_, _>)  = fun f -> Result.bind   f x
+        static member ($) (FAdhoc_bind, x:Async<_>)      = fun f -> Async.bind    f x
 
     type FAdhoc_bindi = FAdhoc_bindi with
         static member ($) (FAdhoc_bindi, x:list<_>)    = fun f -> List.mapi  f x |> List.collect id
@@ -50,6 +51,7 @@ module PreludeAdhocPolymorphism =
         static member ($) (FAdhoc_iter, x:seq<_>)       = fun f -> Seq.iter    f x
         static member ($) (FAdhoc_iter, x:array<_>)     = fun f -> Array.iter  f x
         static member ($) (FAdhoc_iter, x:Result<_, _>) = fun f -> Result.iter f x
+        static member ($) (FAdhoc_iter, x:Async<_>)     = fun f -> Async.iter  f x
 
     type FAdhoc_map = FAdhoc_map with
         static member ($) (FAdhoc_map, x:option<_>) = fun f -> Option.map     f x
@@ -57,6 +59,7 @@ module PreludeAdhocPolymorphism =
         static member ($) (FAdhoc_map, x:seq<_>)    = fun f -> Seq.map        f x
         static member ($) (FAdhoc_map, x:array<_>)  = fun f -> Array.map      f x
         static member ($) (FAdhoc_map, x:Result<_, _>)  = fun f -> Result.map f x
+        static member ($) (FAdhoc_map, x:Async<_>)  = fun f -> Async.map f x
 
     type FAdhoc_mapi = FAdhoc_mapi with
         static member ($) (FAdhoc_mapi, x:list<_>)   = fun f -> List.mapi  f x

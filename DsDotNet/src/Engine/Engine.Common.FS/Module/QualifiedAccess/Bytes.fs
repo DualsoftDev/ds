@@ -1,4 +1,4 @@
-﻿namespace Engine.Common.FS
+namespace Engine.Common.FS
 
 open System
 open Microsoft.FSharp.Reflection
@@ -12,6 +12,7 @@ module private BytesExtModule =
         match toggle with
         | Some true -> bs |> Array.rev
         | _ -> bs
+    let (|?) = defaultArg
 
 
 
@@ -45,7 +46,7 @@ module Bytes =
     let toUInt32 (b0, b1, b2, b3) = BitConverter.ToUInt32([|b0; b1; b2; b3|], 0)
 
 
-    let getString() = (None:string option) 
+    let getString() = (None:string option)
     let test = getString() |? "This will be used if the result of getString() is None.";;
 
     //let x = Some 1

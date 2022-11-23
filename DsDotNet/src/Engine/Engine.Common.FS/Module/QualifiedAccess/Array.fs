@@ -78,13 +78,15 @@ module Array =
     let filteri (f:int -> 't -> bool) (xs: array<'t>) =
         xs |> Seq.filteri f |> Array.ofSeq
 
-    let append<'a> (xs:'a array) (x:'a) = xs.Append(x).ToArray()
-
     /// 원본 array arr 의 pos 위치에 값 value 를 삽입하여 생성한 사본 array 반환
     let insertAt (arr: array<'t>) (pos:int) (value:'t) =
         let sub1 = Array.sub arr 0 pos
         let sub2 = Array.sub arr pos (arr.Length - pos)
-        sub1 @ [|value|] @ sub2
+        [|
+            yield! sub1
+            yield value
+            yield! sub2
+        |]
 
 
     let mapTuple (mapper1:'a->'c) (mapper2:'b->'d) (xs:('a*'b) array) =

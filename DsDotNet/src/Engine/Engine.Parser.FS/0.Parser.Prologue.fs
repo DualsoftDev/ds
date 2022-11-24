@@ -5,10 +5,17 @@ open Engine.Core
 
 [<AutoOpen>]
 module ParserUtil =
-    let dummyDeviceLoader (system:DsSystem) (absoluteFilePath:string, simpleFilePath:string) (loadedName:string) : Device =
+    type DeviceLoadParameters = {
+        ContainerSystem : DsSystem
+        AbsoluteFilePath: string
+        SimpleFilePath  : string
+        LoadedName      : string
+    }
+
+    let dummyDeviceLoader (param:DeviceLoadParameters) : Device =
         failwith "Should be reimplemented."
 
-    let dummyExternalSystemLoader (system:DsSystem) (absoluteFilePath:string, simpleFilePath:string) (loadedName:string) : ExternalSystem =
+    let dummyExternalSystemLoader (param:DeviceLoadParameters) : ExternalSystem =
         failwith "Should be reimplemented."
 
     let mutable fwdLoadDevice = dummyDeviceLoader

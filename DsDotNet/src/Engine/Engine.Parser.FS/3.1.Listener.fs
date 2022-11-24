@@ -311,6 +311,8 @@ module ParserRuleContextModule =
 
             flow.AliasDefs[aliasKeys].AliasTarget <- target
         }
+
+
     let createVertices (x:DsParserListener) (ctx:SystemContext) =
         let system = x.TheSystem
         let sysctx = x.AntlrParser.system()
@@ -416,10 +418,14 @@ module ParserLoadApiModule =
     (* 외부에서 구조적으로 system 을 build 할 때에 사용되는 API *)
     type DsSystem with
         member x.LoadDeviceAs (loadedName:string, absoluteFilePath:string, simpleFilePath:string) =
-            let device = fwdLoadDevice x (absoluteFilePath, simpleFilePath) loadedName
+            let device = fwdLoadDevice <| {
+                ContainerSystem = x; AbsoluteFilePath = absoluteFilePath
+                SimpleFilePath = simpleFilePath; LoadedName = loadedName }
             x.Devices.Add(device) |> ignore
             device
         member x.LoadExternalSystemAs (loadedName:string, absoluteFilePath:string, simpleFilePath:string) =
-            let external = fwdLoadExternalSystem x (absoluteFilePath, simpleFilePath) loadedName
+            let external = fwdLoadExternalSystem <| {
+                ContainerSystem = x; AbsoluteFilePath = absoluteFilePath
+                SimpleFilePath = simpleFilePath; LoadedName = loadedName }
             x.Devices.Add(external) |> ignore
             external

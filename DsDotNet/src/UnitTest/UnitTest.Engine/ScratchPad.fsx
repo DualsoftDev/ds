@@ -238,3 +238,15 @@ let testCopyRecursive src dst =
 
 let files = [Dir, "/foo"; Dir, "/foo/dir1"; Dir, "/foo/dir2"; File, "foo/file1"; File, "foo/file2"; File, "foo/dir1/hello"]
 files |> copyFiles "/foo" "/foo2" |> State.run testIO |> fst
+
+
+
+let (|FList|) xs = List.ofSeq xs
+
+let n (FList(xs:int list)) =
+    xs |> List.map (fun x -> x + 1)
+let c (FList(xs:char list)) =
+    xs |> List.map (sprintf "%c")
+
+['a' .. 'z'] |> c
+[|1..10|] |> n

@@ -39,15 +39,15 @@ module internal ToDsTextModule =
                     yield $"{tab}"
                     for i, e in es.Indexed() do
                         let ss, ts = e.Sources, e.Targets
-                        let mutable sn = getNames ss
+                        let mutable ssn = getNames ss
                         let tn = getNames ts
-                        if i <> 0 then sn <- ""
+                        if i <> 0 then ssn <- ""
                         let arrow = e.EdgeSymbol
-                        yield $"{sn} {arrow} {tn}"
+                        yield $"{ssn} {arrow} {tn}"
                         let comment =
                             let getVsAndTypes (vs:Vertex seq) =
                                 [ for v in vs -> $"{getName v}({v.GetType().Name})" ].JoinWith(", ")
-                            let sn2 = if sn <> "" then $"{getVsAndTypes ss}" else " "
+                            let sn2 = if ssn <> "" then $"{getVsAndTypes ss}" else " "
                             $"{sn2}{arrow} {getVsAndTypes ts}"
                         comments.Add($"{comment}")
                     yield ";"

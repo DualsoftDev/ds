@@ -187,6 +187,10 @@ module ActivePattern =
                 | _ -> printfn "None:%s" str
             )
 
+        let incrInts (FList(xs:int list)) =
+            xs |> List.map (fun n -> n + 1)
+        [|1..10|]   |> incrInts = [1..10] |> verify
+        seq {1..10} |> incrInts = [1..10] |> verify
 
 
         let listxs = [9..11]

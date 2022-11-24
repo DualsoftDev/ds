@@ -1,7 +1,7 @@
 namespace Engine.Common.FS
 
 open System
-// https://github.dev/ekonbenefits/FSharp.Interop.NullOptAble
+// https://github.com/ekonbenefits/FSharp.Interop.NullOptAble/blob/master/src/FSharp.Interop.NullOptAble/TopLevelBuilders.fs
 module ChooseSeqBuilderImpl =
 
     type GuardBuilder() =

@@ -7,10 +7,6 @@ open Engine.Parser.FS
 
 [<AutoOpen>]
 module ModelLoaderModule =
-    // #r @"..\..\..\exLib\Newtonsoft.Json.dll"
-    let jsonSettings = JsonSerializerSettings()
-
-
     type FilePath = string
     type ModelConfig = {
         DsFilePaths: FilePath list
@@ -23,6 +19,8 @@ module ModelLoaderModule =
 
 [<RequireQualifiedAccess>]
 module ModelLoader =
+    let private jsonSettings = JsonSerializerSettings()
+
     let loadConfig (path: FilePath) =
         let json = File.ReadAllText(path)
         JsonConvert.DeserializeObject<ModelConfig>(json, jsonSettings)

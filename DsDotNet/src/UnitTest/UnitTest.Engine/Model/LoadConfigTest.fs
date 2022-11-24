@@ -1,15 +1,15 @@
 namespace UnitTest.Engine
 
-
+open System.Linq
 open Engine.Core
-open Engine.Common.FS
 open NUnit.Framework
 
 
 [<AutoOpen>]
 module LoadConfigTestModule =
     type LoadConfigTest() =
-        inherit TestBase()
+        do
+            Fixtures.SetUpTest()
 
         let configFile = @"test-model-config.json"
 
@@ -28,4 +28,5 @@ module LoadConfigTestModule =
             let config = loadConfigTest()
             let model = ModelLoader.loadFromConfig configFile
             model.Systems.Length === 2
+            model.Systems.Select(fun s -> s.Name) |> SeqEq ["Cylinder"; "Station"]
 

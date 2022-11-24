@@ -44,14 +44,9 @@ module private ModelComparisonHelper =
 
 [<AutoOpen>]
 module ModelTests1 =
-    [<AbstractClass>]
-    type TestBase() =
+    type DemoTests1() =
         do
             Fixtures.SetUpTest()
-            ModelParser.Initialize()
-
-    type DemoTests1() =
-        inherit TestBase()
 
         let compare = compare @$"{__SOURCE_DIRECTORY__}\..\Libraries"
         let compareExact x = compare x x
@@ -165,7 +160,8 @@ module ModelTests1 =
 
 
     type InvalidModelTests1() =
-        inherit TestBase()
+        do
+            Fixtures.SetUpTest()
 
         let compare = compare @$"{__SOURCE_DIRECTORY__}\..\Libraries"
 

@@ -14,7 +14,8 @@ open System.Text.RegularExpressions
 [<AutoOpen>]
 module SystemBuilderTest =
     type SystemBuilderTest() =
-        inherit TestBase()
+        do
+            Fixtures.SetUpTest()
 
         let libdir = @$"{__SOURCE_DIRECTORY__}\..\Libraries"
         let compare = compare libdir

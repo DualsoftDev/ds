@@ -10,7 +10,6 @@ open type Engine.Parser.dsParser
 open type Engine.Parser.FS.DsParser
 
 module ModelParser =
-    let mutable initialized = false
     let Walk(parser:dsParser, options:ParserOptions) =
         let listener = new DsParserListener(parser, options)
         let sysctx = parser.system()
@@ -43,7 +42,6 @@ module ModelParser =
         listener
 
     let ParseFromString2(text:string, options:ParserOptions):DsParserListener =
-        assert(initialized)
         let (parser, errors) = DsParser.FromDocument(text)
         let listener = Walk(parser, options)
 
@@ -59,7 +57,6 @@ module ModelParser =
 
     let Initialize() =
         tracefn "Initializing"
-        initialized <- true
         let loadSystemFromDsFile (dsFilePath, loadedName) =
             let text = File.ReadAllText(dsFilePath)
             let dir = Path.GetDirectoryName(dsFilePath)

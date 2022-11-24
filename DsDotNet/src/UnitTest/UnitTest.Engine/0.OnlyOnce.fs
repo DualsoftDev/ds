@@ -97,7 +97,7 @@ module Base =
             ()  // OK
         | _ as err ->
             failwith $"Exception messsage match failed on {err}.  expected = {substring}"
-    let SeqEq(a, b) = Enumerable.SequenceEqual(a, b) |> ShouldBeTrue
-    let SetEq(xs:'a seq, ys:'a seq) =
+    let SeqEq a b = Enumerable.SequenceEqual(a, b) |> ShouldBeTrue
+    let SetEq (xs:'a seq) (ys:'a seq) =
         (xs.Count() = ys.Count() && xs |> Seq.forall(fun x -> ys.Contains(x)) ) |> ShouldBeTrue
 

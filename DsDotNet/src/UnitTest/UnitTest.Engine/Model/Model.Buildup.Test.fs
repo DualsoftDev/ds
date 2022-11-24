@@ -11,7 +11,9 @@ open Engine.Parser.FS
 module ModelBuildupTests1 =
 
     type Buildup() =
-        inherit TestBase()
+        do
+            Fixtures.SetUpTest()
+
         let libdir = @$"{__SOURCE_DIRECTORY__}\..\Libraries"
         let compare = compare libdir
         let compareExact x = compare x x

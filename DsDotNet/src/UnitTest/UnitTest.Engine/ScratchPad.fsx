@@ -138,12 +138,15 @@ type StateBuilder() =
 
 let state = new StateBuilder()
 
+
+
 let multiplesOfThreeUptoTwenty =
     // Reads like imperative code, but it's actually chaining a series of transformations
     // on an invisible state value behind the scenes. No mutable state here.
     state {
         for i in 0..20 do
             let! s = State.get
+            printfn "%d=%A" i s
             if i % 3 = 0 then do! State.put (s + i)
         return! State.get
     } |> State.run 0 |> fst

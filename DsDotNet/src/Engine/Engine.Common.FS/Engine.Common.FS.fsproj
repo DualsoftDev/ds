@@ -28,6 +28,7 @@
 		<Compile Include="ComputationExpressions\ChooseSeqBuilder.fs" />
 		<Compile Include="ComputationExpressions\ResultBuilder.fs" />
 		<Compile Include="ComputationExpressions\AsyncOptionBuilder.fs" />
+		<Compile Include="ComputationExpressions\StateBuilder.fs" />
 		<Compile Include="ForwardDecl.fs" />
 		<Compile Include="Module\App.Config.fs" />
 		<Compile Include="Module\Log4NetWrapper.fs" />

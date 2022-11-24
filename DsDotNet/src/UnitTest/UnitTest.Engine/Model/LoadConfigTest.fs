@@ -18,14 +18,14 @@ module LoadConfigTestModule =
                 {   DsFilePaths = [
                         @"F:\Git\ds\DsDotNet\src\UnitTest\UnitTest.Engine\Libraries\cylinder.ds"
                         @"F:\Git\ds\DsDotNet\src\UnitTest\UnitTest.Engine\Libraries\station.ds" ] }
-            saveConfig configFile cfg
-            let cfg2 = loadConfig configFile
+            ModelLoader.saveConfig configFile cfg
+            let cfg2 = ModelLoader.loadConfig configFile
             cfg === cfg2
             cfg
 
         [<Test>]
         member __.``LoadModelFromConfigTest`` () =
             let config = loadConfigTest()
-            let model = loadModelFromConfig configFile
+            let model = ModelLoader.loadFromConfig configFile
             model.Systems.Length === 2
 

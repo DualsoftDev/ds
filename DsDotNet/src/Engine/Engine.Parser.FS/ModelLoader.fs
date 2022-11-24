@@ -15,7 +15,14 @@ module ModelLoaderModule =
     type ModelConfig = {
         DsFilePaths: FilePath list
     }
+    type Model = {
+        Config: ModelConfig
+        Systems: DsSystem list
+    }
 
+
+[<RequireQualifiedAccess>]
+module ModelLoader =
     let loadConfig (path: FilePath) =
         let json = File.ReadAllText(path)
         JsonConvert.DeserializeObject<ModelConfig>(json, jsonSettings)
@@ -24,19 +31,15 @@ module ModelLoaderModule =
         let json = JsonConvert.SerializeObject(modelConfig, jsonSettings)
         File.WriteAllText(path, json)
 
-    type Model = {
-        Config: ModelConfig
-        Systems: DsSystem list
-    }
 
-    let loadSystemFromDsFile (dsFilePath) =
+    let private loadSystemFromDsFile (dsFilePath) =
         let text = File.ReadAllText(dsFilePath)
         let dir = Path.GetDirectoryName(dsFilePath)
         let option = ParserOptions.Create4Runtime(dir, "ActiveCpuName")
         let system = ModelParser.ParseFromString(text, option)
         system
 
-    let loadModelFromConfig(config: FilePath) =
+    let loadFromConfig(config: FilePath) =
         let cfg = loadConfig config
         let systems =
             [   for dsFile in cfg.DsFilePaths do
@@ -51,8 +54,8 @@ module private TestLoadConfig =
                     @"F:\Git\ds\DsDotNet\src\UnitTest\UnitTest.Engine\Libraries\station.ds" ] }
 
         let fp = @"F:\tmp\a.tmp"
-        saveConfig fp cfg
+        ModelLoader.saveConfig fp cfg
 
-        let cfg2 = loadConfig fp
+        let cfg2 = ModelLoader.loadConfig fp
 
         verify (cfg = cfg2)

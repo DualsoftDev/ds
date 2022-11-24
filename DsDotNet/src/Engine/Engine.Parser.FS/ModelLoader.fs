@@ -43,17 +43,8 @@ module ModelLoaderModule =
                     loadSystemFromDsFile dsFile ]
         { Config = cfg; Systems = systems }
 
-module TestLoadConfig =
+module private TestLoadConfig =
     let testme() =
-        // get newton soft json dll version
-
-        let get_newtonsoft_json_version() =
-            let assembly = typeof<Newtonsoft.Json.JsonConvert>.Assembly
-            let version = assembly.GetName().Version
-            version.ToString()
-
-        let ver = get_newtonsoft_json_version()
-
         let cfg =
             {   DsFilePaths = [
                     @"F:\Git\ds\DsDotNet\src\UnitTest\UnitTest.Engine\Libraries\cylinder.ds"

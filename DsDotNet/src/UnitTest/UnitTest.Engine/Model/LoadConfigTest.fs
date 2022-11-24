@@ -9,21 +9,23 @@ open NUnit.Framework
 [<AutoOpen>]
 module LoadConfigTestModule =
     type LoadConfigTest() =
-        do Fixtures.SetUpTest()
+        inherit TestBase()
 
-        [<Test>]
-        member __.``LoadConfigTest test`` () =
-            TestLoadConfig.testme()
+        let configFile = @"test-model-config.json"
 
+        let loadConfigTest() =
             let cfg =
                 {   DsFilePaths = [
                         @"F:\Git\ds\DsDotNet\src\UnitTest\UnitTest.Engine\Libraries\cylinder.ds"
                         @"F:\Git\ds\DsDotNet\src\UnitTest\UnitTest.Engine\Libraries\station.ds" ] }
-            let fp = @"test-model-config.json"
-            saveConfig fp cfg
-            let cfg2 = loadConfig fp
+            saveConfig configFile cfg
+            let cfg2 = loadConfig configFile
             cfg === cfg2
+            cfg
 
-
-
+        [<Test>]
+        member __.``LoadModelFromConfigTest`` () =
+            let config = loadConfigTest()
+            let model = loadModelFromConfig configFile
+            model.Systems.Length === 2
 

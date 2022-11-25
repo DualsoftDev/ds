@@ -15,23 +15,35 @@ module CoreModule =
             member _.NameComponents = nameComponents
             member x.QualifiedName = nameComponents.Combine() }
 
-    [<AbstractClass>]
-    type LoadedSystem(name:string, referenceSystem:DsSystem, containerSystem:DsSystem, absoluteAndSimpleFilePath:string*string) =
-        inherit FqdnObject(name, containerSystem)
-        let absoluteFilePath, simpleFilePath = absoluteAndSimpleFilePath
+    type DeviceLoadParameters = {
         /// Loading 된 system 입장에 자신을 포함하는 container system
-        member val ContainerSystem = containerSystem
+        ContainerSystem        : DsSystem
+        AbsoluteFilePath       : string
+        /// Loading 을 위해서 사용자가 지정한 file path.  serialize 시, 절대 path 를 사용하지 않기 위한 용도로 사용된다.
+        UserSpecifiedFilePath  : string
+        /// *.ds 에 정의된 이름과 loading 할 때의 이름은 다를 수 있다.
+        LoadedName             : string
+    }
+
+    [<AbstractClass>]
+    type LoadedSystem(loadedSystem:DsSystem, param:DeviceLoadParameters) =
+        inherit FqdnObject(param.LoadedName, param.ContainerSystem)
         /// 다른 device 을 Loading 하려는 system 입장에서 loading 된 system 참조 용
-        member val ReferenceSystem = referenceSystem
-        /// Loading 을 위해서 사용자가 지정한 file path.  serialize 시, 절대 path 를 사용하지 않기 위한 용도로만 사용된다.
-        member val UserSpecifiedFilePath:string = simpleFilePath with get, set
-        member val AbsoluteFilePath:string = absoluteFilePath with get, set
+        member _.ReferenceSystem = loadedSystem
 
-    and Device(referenceSystem:DsSystem, containerSystem:DsSystem, absoluteAndSimpleFilePath:string*string) =
-        inherit LoadedSystem(referenceSystem.Name, referenceSystem, containerSystem, absoluteAndSimpleFilePath)
+        /// Loading 된 system 입장에 자신을 포함하는 container system
+        member _.ContainerSystem = param.ContainerSystem
+        /// Loading 을 위해서 사용자가 지정한 file path.  serialize 시, 절대 path 를 사용하지 않기 위한 용도로 사용된다.
+        member _.UserSpecifiedFilePath:string = param.UserSpecifiedFilePath
+        member _.AbsoluteFilePath:string = param.AbsoluteFilePath
 
-    and ExternalSystem(name:string, referenceSystem:DsSystem, containerSystem:DsSystem, absoluteAndSimpleFilePath:string*string) =
-        inherit LoadedSystem(name, referenceSystem, containerSystem, absoluteAndSimpleFilePath)
+    /// *.ds file 을 읽어 들여서 새로운 instance 를 만들어 넣기 위한 구조
+    and Device(loadedDevice:DsSystem, param:DeviceLoadParameters) =
+        inherit LoadedSystem(loadedDevice, param)
+
+    /// shared instance.  *.ds file 의 절대 경로 기준으로 하나의 instance 만 생성하고 이를 참조하는 개념
+    and ExternalSystem(referenceSystem:DsSystem, param:DeviceLoadParameters) =
+        inherit LoadedSystem(referenceSystem, param)
 
     type DsSystem private (name:string, host:string) =
         inherit FqdnObject(name, createFqdnObject([||]))

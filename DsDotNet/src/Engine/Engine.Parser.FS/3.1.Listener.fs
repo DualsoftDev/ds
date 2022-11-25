@@ -313,6 +313,7 @@ module ParserRuleContextModule =
         }
 
 
+    /// system context 아래에 기술된 모든 vertex 들을 생성한다.
     let createVertices (x:DsParserListener) (ctx:SystemContext) =
         let system = x.TheSystem
         let sysctx = x.AntlrParser.system()
@@ -410,22 +411,27 @@ module ParserRuleContextModule =
 
         guardedValidateSystem system
 
-        //dumpCausalTokens "---- All Causal token elements"
-
 
 [<AutoOpen>]
 module ParserLoadApiModule =
     (* 외부에서 구조적으로 system 을 build 할 때에 사용되는 API *)
     type DsSystem with
-        member x.LoadDeviceAs (loadedName:string, absoluteFilePath:string, simpleFilePath:string) =
-            let device = fwdLoadDevice <| {
-                ContainerSystem = x; AbsoluteFilePath = absoluteFilePath
-                SimpleFilePath = simpleFilePath; LoadedName = loadedName }
+        member x.LoadDeviceAs (loadedName:string, absoluteFilePath:string, userSpecifiedFilePath:string) =
+            let device =
+                fwdLoadDevice <| {
+                    ContainerSystem = x
+                    AbsoluteFilePath = absoluteFilePath
+                    UserSpecifiedFilePath = userSpecifiedFilePath
+                    LoadedName = loadedName }
             x.Devices.Add(device) |> ignore
             device
-        member x.LoadExternalSystemAs (loadedName:string, absoluteFilePath:string, simpleFilePath:string) =
-            let external = fwdLoadExternalSystem <| {
-                ContainerSystem = x; AbsoluteFilePath = absoluteFilePath
-                SimpleFilePath = simpleFilePath; LoadedName = loadedName }
+
+        member x.LoadExternalSystemAs (loadedName:string, absoluteFilePath:string, userSpecifiedFilePath:string) =
+            let external =
+                fwdLoadExternalSystem <| {
+                    ContainerSystem = x
+                    AbsoluteFilePath = absoluteFilePath
+                    UserSpecifiedFilePath = userSpecifiedFilePath
+                    LoadedName = loadedName }
             x.Devices.Add(external) |> ignore
             external

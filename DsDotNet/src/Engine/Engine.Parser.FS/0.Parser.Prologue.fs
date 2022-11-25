@@ -5,13 +5,6 @@ open Engine.Core
 
 [<AutoOpen>]
 module ParserUtil =
-    type DeviceLoadParameters = {
-        ContainerSystem : DsSystem
-        AbsoluteFilePath: string
-        SimpleFilePath  : string
-        LoadedName      : string
-    }
-
     let dummyDeviceLoader (param:DeviceLoadParameters) : Device =
         failwith "Should be reimplemented."
 

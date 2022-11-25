@@ -169,7 +169,6 @@ type DsParser() =
     static member FromDocument(text:string, ?predExtract:RuleExtractor, ?throwOnError) =       // (dsParser, ParserError[])
         let throwOnError = throwOnError |? true
         let func = predExtract |? (fun (parser:dsParser) -> parser.system() :> RuleContext)
-        //let (parser, tree, errors) = DsParser.FromDocument(text, func, throwOnError)
         let (parser, tree, errors) = DsParser.ParseText(text, func, throwOnError)
         (parser, errors)
 

@@ -7,7 +7,6 @@ open Engine.Common.FS
 open Engine.Parser
 open Engine.Core
 open type Engine.Parser.dsParser
-open type Engine.Parser.FS.DsParser
 
 module ModelParser =
     let Walk(parser:dsParser, options:ParserOptions) =

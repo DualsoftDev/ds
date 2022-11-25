@@ -1,12 +1,8 @@
 namespace UnitTest.Engine
 
-open System
 open Engine.Core
 open NUnit.Framework
-open Engine.Cpu.Expression
 open Engine.Parser.FS
-open type Engine.Parser.dsParser
-open type Engine.Parser.FS.DsParser
 
 [<AutoOpen>]
 module FqdnParseTestModule =

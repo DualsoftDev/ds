@@ -138,8 +138,8 @@ module ModelBuildupTests1 =
         member __.``Model with export api test`` () =
             let system, flow, real, callAp, callAm = createSimpleSystem()
             let real2 = Real.Create("Main2", flow)
-            let adv = ApiItem4Export.Create("Adv", system, [real], [real])
-            let ret = ApiItem4Export.Create("Ret", system, [real2], [real2])
+            let adv = ApiInterface.Create("Adv", system, [real], [real])
+            let ret = ApiInterface.Create("Ret", system, [real2], [real2])
             [ adv; ret; ].Iter(system.ApiItems4Export.Add >> ignore)
 
             ApiResetInfo.Create(system, "Adv", ModelingEdgeType.Interlock, "Ret") |> ignore

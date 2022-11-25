@@ -23,7 +23,8 @@ options { tokenVocab=dsLexer; } // use tokens from dsLexer.g4
 // model: (system|)* EOF;        // importStatement|cpus
 comment: BLOCK_COMMENT | LINE_COMMENT;
 
-system: '[' SYS ipSpec? ']' systemName '=' (sysBlock) EOF;    // [sys] Seg = {..}
+system: '[' sysHeader ']' systemName '=' (sysBlock) EOF;    // [sys] Seg = {..}
+    sysHeader: SYS ipSpec?;
     sysBlock
         : LBRACE (  flowBlock | callBlock | loadDeviceBlock | loadExternalSystemBlock
                     | interfaceBlock | buttonsBlocks | propsBlock

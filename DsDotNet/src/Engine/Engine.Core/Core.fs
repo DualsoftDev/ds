@@ -56,7 +56,7 @@ module CoreModule =
         member val Commands = ResizeArray<Command>()
         member val Observes = ResizeArray<Observe>()
 
-        member val ApiItems4Export = createNamedHashSet<ApiItem4Export>()
+        member val ApiItems4Export = createNamedHashSet<ApiInterface>()
         member x.ApiItems = x.Devices.Collect(fun d -> d.ReferenceSystem.ApiItems4Export)
         member val ApiResetInfos = HashSet<ApiResetInfo>() with get, set
         ///시스템 전체시작 버튼누름시 수행되야하는 Real목록
@@ -142,14 +142,14 @@ module CoreModule =
 
     type TagAddress = string
 
-    /// Main system 에서 loading 된 다른 system 의 API 를 바라보는 관점
-    type ApiItem (api:ApiItem4Export, tx:TagAddress, rx:TagAddress) =
+    /// Main system 에서 loading 된 다른 system 의 API 를 바라보는 관점.  [calls] = { Ap = { A."+"(%Q1, %I1); } }
+    type ApiItem (api:ApiInterface, tx:TagAddress, rx:TagAddress) =
         member _.ApiItem = api
         member val TX = tx
         member val RX = rx
 
-    /// 자신을 export 하는 관점에서 본 api's
-    and ApiItem4Export private (name:string, system:DsSystem) =
+    /// 자신을 export 하는 관점에서 본 api's.  Interface 정의.   [interfaces] = { "+" = { F.Vp ~ F.Sp } }
+    and ApiInterface private (name:string, system:DsSystem) =
         (* createFqdnObject : system 이 다른 system 에 포함되더라도, name component 를 더 이상 확장하지 않도록 cut *)
         inherit FqdnObject(name, createFqdnObject([|system.Name|]))
         interface INamedVertex
@@ -214,15 +214,15 @@ module CoreModule =
             flow.Graph.AddVertex(segment) |> verifyM $"Duplicated segment name [{name}]"
             segment
 
-    type ApiItem4Export with
+    type ApiInterface with
         member x.AddTXs(txs:Real seq) = txs |> Seq.forall(fun tx -> x.TXs.Add(tx))
         member x.AddRXs(rxs:Real seq) = rxs |> Seq.forall(fun rx -> x.RXs.Add(rx))
         static member Create(name, system) =
-            let cp = ApiItem4Export(name, system)
+            let cp = ApiInterface(name, system)
             system.ApiItems4Export.Add(cp) |> verifyM $"Duplicated interface prototype name [{name}]"
             cp
         static member Create(name, system, txs, rxs) =
-            let ai4e = ApiItem4Export.Create(name, system)
+            let ai4e = ApiInterface.Create(name, system)
             ai4e.AddTXs txs |> ignore
             ai4e.AddRXs rxs |> ignore
             ai4e

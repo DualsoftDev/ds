@@ -50,7 +50,7 @@ module OriginModule =
         graph.Vertices
         |> Seq.iter(fun v ->
             let apiName =
-                (getVertexTarget v).ApiItem4Export.QualifiedName
+                (getVertexTarget v).ApiInterface.QualifiedName
             if not (callMap.ContainsKey(apiName)) then
                 callMap.Add(apiName, new ResizeArray<Vertex>(0))
             callMap.[apiName].Add(v)
@@ -65,7 +65,7 @@ module OriginModule =
             $"{system}.{src}", info.Operator.ToText(), $"{system}.{tgt}"
 
         let getResetInfo (node:Vertex) =
-            let vertexSystem = (getVertexTarget node).ApiItem4Export.System
+            let vertexSystem = (getVertexTarget node).ApiInterface.System
             vertexSystem.ApiResetInfos
             |> Seq.map(makeName (vertexSystem.QualifiedName))
 

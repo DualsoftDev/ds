@@ -33,7 +33,7 @@ module LoadConfigTestModule =
             model.Systems.Select(fun s -> s.Name) |> SeqEq ["Cylinder"; "Station"]
 
         [<Test>]
-        member __.``LoadSharedDevicesTest`` () =
+        member __.``LoadSharedDevices Singleton Test`` () =
 
             DsSystem.ClearExternalSystemCaches()
 
@@ -44,9 +44,7 @@ module LoadConfigTestModule =
 }
 """
 
-            let helper = ModelParser.ParseFromString2(mySysText, ParserOptions.Create4Simulation(libdir, "ActiveCpuName"))
-            let system = helper.TheSystem
-
+            let system = parseText libdir mySysText
             validateGraphOfSystem system
 
             let caches = DsSystem.ExternalSystemCaches
@@ -60,4 +58,5 @@ module LoadConfigTestModule =
             exs[0].Name === "Station"
 
             let generated = system.ToDsText();
+            compare libdir mySysText generated
             ()

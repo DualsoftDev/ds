@@ -54,8 +54,14 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
         | Some sysBlockCtx_ ->
             let name = options.LoadedSystemName |? (ctx.systemName().GetText().DeQuoteOnDemand())
             let host =
-                match ctx.TryFindFirstChild<HostContext>() with
-                | Some hostCtx -> hostCtx.GetText()
+                let hostSpec =
+                    option {
+                        let! sysHeader = ctx.TryFindFirstChild<SysHeaderContext>()
+                        let! hostCtx = sysHeader.TryFindFirstChild<HostContext>()
+                        return hostCtx.GetText()
+                    }
+                match hostSpec with
+                | Some name -> name
                 | None -> null
             x.TheSystem <- DsSystem.Create(name, host)
             tracefn($"System: {name}")
@@ -83,7 +89,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
 
         // 이번 stage 에서 일단 interface 이름만 이용해서 빈 interface 객체를 생성하고,
         // TXs, RXs, Resets 은 추후에 채움..
-        let api = ApiItem4Export.Create(interfaceName, system)
+        let api = ApiInterface.Create(interfaceName, system)
         system.ApiItems4Export.Add(api) |> ignore
 
     override x.EnterInterfaceResetDef(ctx:InterfaceResetDefContext) =
@@ -220,6 +226,8 @@ module ParserRuleContextModule =
                     let apiItem =
                         option {
                             let! apiPoint = tryFindCallingApiItem system device api
+                            if device <> apiPoint.System.Name then
+                                failwith "ERROR"
                             let! addressCtx = ctx.TryFindFirstChild<AddressTxRxContext>()
                             let! txAddressCtx = addressCtx.TryFindFirstChild<TxContext>()
                             let! rxAddressCtx = addressCtx.TryFindFirstChild<RxContext>()

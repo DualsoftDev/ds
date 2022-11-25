@@ -31,11 +31,12 @@ module private ModelComparisonHelper =
         xs.Length === ys.Length
 
 
+    let parseText referenceDir text =
+        let helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation(referenceDir, "ActiveCpuName"))
+        helper.TheSystem
 
     let compare referenceDir originalText answer =
-        let helper = ModelParser.ParseFromString2(originalText, ParserOptions.Create4Simulation(referenceDir, "ActiveCpuName"))
-        let system = helper.TheSystem
-
+        let system = parseText referenceDir originalText
         validateGraphOfSystem system
 
         let generated = system.ToDsText();

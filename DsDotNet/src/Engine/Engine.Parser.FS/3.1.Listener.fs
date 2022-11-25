@@ -90,7 +90,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
         // 이번 stage 에서 일단 interface 이름만 이용해서 빈 interface 객체를 생성하고,
         // TXs, RXs, Resets 은 추후에 채움..
         let api = ApiInterface.Create(interfaceName, system)
-        system.ApiItems4Export.Add(api) |> ignore
+        system.ApiInterface.Add(api) |> ignore
 
     override x.EnterInterfaceResetDef(ctx:InterfaceResetDefContext) =
         // I1 <||> I2 <||> I3;  ==> [| I1; <||>; I2; <||>; I3; |]
@@ -226,8 +226,6 @@ module ParserRuleContextModule =
                     let apiItem =
                         option {
                             let! apiPoint = tryFindCallingApiItem system device api
-                            if device <> apiPoint.System.Name then
-                                failwith "ERROR"
                             let! addressCtx = ctx.TryFindFirstChild<AddressTxRxContext>()
                             let! txAddressCtx = addressCtx.TryFindFirstChild<TxContext>()
                             let! rxAddressCtx = addressCtx.TryFindFirstChild<RxContext>()
@@ -235,7 +233,7 @@ module ParserRuleContextModule =
                             let rx = getAddress(rxAddressCtx)
 
                             tracefn $"TX={tx} RX={rx}"
-                            return ApiItem(apiPoint, tx, rx)
+                            return ApiCallDef(apiPoint, tx, rx)
                         }
                     match apiItem with
                     | Some apiItem -> yield apiItem
@@ -264,7 +262,7 @@ module ParserRuleContextModule =
         option {
             let! interrfaceNameCtx = ctx.TryFindFirstChild<InterfaceNameContext>()
             let interfaceName = interrfaceNameCtx.CollectNameComponents()[0]
-            let! api = system.ApiItems4Export.TryFind(nameEq interfaceName)
+            let! api = system.ApiInterface.TryFind(nameEq interfaceName)
             let ser =   // { start ~ end ~ reset }
                 ctx.Descendants<CallComponentsContext>()
                     .Map(collectCallComponents)
@@ -433,7 +431,7 @@ module ParserLoadApiModule =
                     AbsoluteFilePath = absoluteFilePath
                     UserSpecifiedFilePath = userSpecifiedFilePath
                     LoadedName = loadedName }
-            x.Devices.Add(device) |> ignore
+            x.AddDevice(device) |> ignore
             device
 
         member x.LoadExternalSystemAs (loadedName:string, absoluteFilePath:string, userSpecifiedFilePath:string) =
@@ -451,7 +449,7 @@ module ParserLoadApiModule =
                     let exSystem = fwdLoadExternalSystem param
                     externalSystemCaches.Add(absoluteFilePath, exSystem.ReferenceSystem) |> ignore
                     exSystem
-            x.Devices.Add(external) |> ignore
+            x.AddDevice(external) |> ignore
             external
 
         static member ClearExternalSystemCaches() = externalSystemCaches.Clear()

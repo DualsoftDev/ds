@@ -47,17 +47,22 @@ module CoreModule =
 
     type DsSystem private (name:string, host:string) =
         inherit FqdnObject(name, createFqdnObject([||]))
+        let devices = createNamedHashSet<LoadedSystem>()
+        let apiItems = ResizeArray<ApiUsage>()
+        let addApiItemsForDevice (device: LoadedSystem) = device.CreateApiUsages() |> apiItems.AddRange
 
         member val Flows    = createNamedHashSet<Flow>()
         member val Calls    = ResizeArray<Call>()
 
-        member val Devices = createNamedHashSet<LoadedSystem>()
+        member _.AddDevice(dev) = devices.Add(dev) |> ignore; addApiItemsForDevice dev
+        member val Devices = devices |> seq
         member val Variables = ResizeArray<Variable>()
         member val Commands = ResizeArray<Command>()
         member val Observes = ResizeArray<Observe>()
 
-        member val ApiItems4Export = createNamedHashSet<ApiInterface>()
-        member x.ApiItems = x.Devices.Collect(fun d -> d.ReferenceSystem.ApiItems4Export)
+        member val ApiInterface = createNamedHashSet<ApiInterface>()
+        //member x.ApiItems = x.Devices.Collect(fun d -> d.ReferenceSystem.ApiInterface)
+        member x.ApiItems = apiItems |> seq
         member val ApiResetInfos = HashSet<ApiResetInfo>() with get, set
         ///시스템 전체시작 버튼누름시 수행되야하는 Real목록
         member val StartPoints = createQualifiedNamedHashSet<Real>()
@@ -133,7 +138,7 @@ module CoreModule =
         inherit Indirect(names, parent)
 
     /// Call 정의:
-    type Call (name:string, apiItems:ApiItem seq) =
+    type Call (name:string, apiItems:ApiCallDef seq) =
         inherit Named(name)
         member val ApiItems = apiItems.ToFSharpList()
         member val Xywh:Xywh = null with get, set
@@ -143,8 +148,8 @@ module CoreModule =
     type TagAddress = string
 
     /// Main system 에서 loading 된 다른 system 의 API 를 바라보는 관점.  [calls] = { Ap = { A."+"(%Q1, %I1); } }
-    type ApiItem (api:ApiInterface, tx:TagAddress, rx:TagAddress) =
-        member _.ApiItem = api
+    type ApiCallDef (api:ApiUsage, tx:TagAddress, rx:TagAddress) =
+        member _.ApiInterface = api
         member val TX = tx
         member val RX = rx
 
@@ -157,6 +162,10 @@ module CoreModule =
         member val TXs = createQualifiedNamedHashSet<Real>()
         member val RXs = createQualifiedNamedHashSet<Real>()
         member _.System = system
+
+    and ApiUsage(loadedSystemName:string, api: ApiInterface) =
+        inherit FqdnObject(api.Name, createFqdnObject([|loadedSystemName|]))
+        member _.ApiInterface = api
 
     /// API 의 reset 정보:  "+" <||> "-";
     and ApiResetInfo private (system:DsSystem, operand1:string, operator:ModelingEdgeType, operand2:string) =
@@ -219,7 +228,7 @@ module CoreModule =
         member x.AddRXs(rxs:Real seq) = rxs |> Seq.forall(fun rx -> x.RXs.Add(rx))
         static member Create(name, system) =
             let cp = ApiInterface(name, system)
-            system.ApiItems4Export.Add(cp) |> verifyM $"Duplicated interface prototype name [{name}]"
+            system.ApiInterface.Add(cp) |> verifyM $"Duplicated interface prototype name [{name}]"
             cp
         static member Create(name, system, txs, rxs) =
             let ai4e = ApiInterface.Create(name, system)
@@ -310,3 +319,7 @@ module CoreModule =
             match dicButton.TryFind btnName with
             | Some btn -> btn.Add(flow) |> verifyM $"Duplicated flow [{flow.Name}]"
             | None -> dicButton.Add(btnName, HashSet[|flow|] )
+
+    type LoadedSystem with
+        member x.CreateApiUsages() =
+            [ for ai in x.ReferenceSystem.ApiInterface -> ApiUsage(x.Name, ai) ]

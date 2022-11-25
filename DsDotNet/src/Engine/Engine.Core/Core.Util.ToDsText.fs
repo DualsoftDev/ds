@@ -143,7 +143,7 @@ module internal ToDsTextModule =
             let tab2 = getTab (indent+1)
 
             if system.Calls.Any() then
-                let print (ai:ApiItem) = $"{ai.ApiItem.QualifiedName}({ai.TX}, {ai.RX})"
+                let print (ai:ApiCallDef) = $"{ai.ApiInterface.QualifiedName}({ai.TX}, {ai.RX})"
                 yield $"{tab}[calls] = {lb}"
                 for c in system.Calls do
                     let ais = c.ApiItems.Select(print).JoinWith("; ") + ";"
@@ -151,9 +151,9 @@ module internal ToDsTextModule =
                 yield $"{tab}{rb}"
 
 
-            if system.ApiItems4Export.Any() then
+            if system.ApiInterface.Any() then
                 yield $"{tab}[interfaces] = {lb}"
-                for item in system.ApiItems4Export do
+                for item in system.ApiInterface do
                     let ser =
                         let getFlowAndRealName (r:Real) = [r.Flow.Name; r.Name].Combine()
                         let qNames (xs:Real seq) = xs.Select(getFlowAndRealName) |> String.concat(", ")

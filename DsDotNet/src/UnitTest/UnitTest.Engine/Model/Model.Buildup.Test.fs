@@ -24,14 +24,14 @@ module ModelBuildupTests1 =
             let real = Real.Create("Main", flow)
             let a = system.LoadDeviceAs("A", @$"{libdir}\cylinder.ds", "cylinder.ds")
 
-            let apis = a.ReferenceSystem.ApiItems4Export
+            let apis = system.ApiItems
             let apiP = apis.First(fun ai -> ai.Name = "+")
             let apiM = apis.First(fun ai -> ai.Name = "-")
             let callAp =
-                let apiItem = ApiItem(apiP, "%Q1", "%I1")
+                let apiItem = ApiCallDef(apiP, "%Q1", "%I1")
                 Call("Ap", [apiItem])
             let callAm =
-                let apiItem = ApiItem(apiM, "%Q2", "%I2")
+                let apiItem = ApiCallDef(apiM, "%Q2", "%I2")
                 Call("Am", [apiItem])
             system.Calls.AddRange([callAp; callAm])
             system, flow, real, callAp, callAm
@@ -140,7 +140,7 @@ module ModelBuildupTests1 =
             let real2 = Real.Create("Main2", flow)
             let adv = ApiInterface.Create("Adv", system, [real], [real])
             let ret = ApiInterface.Create("Ret", system, [real2], [real2])
-            [ adv; ret; ].Iter(system.ApiItems4Export.Add >> ignore)
+            [ adv; ret; ].Iter(system.ApiInterface.Add >> ignore)
 
             ApiResetInfo.Create(system, "Adv", ModelingEdgeType.Interlock, "Ret") |> ignore
 

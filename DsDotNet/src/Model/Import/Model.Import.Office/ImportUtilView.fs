@@ -87,7 +87,7 @@ module ImportViewModule =
 
         let newNode = ViewNode("Interface", IF)
 
-        system.ApiItems 
+        system.ApiUsages 
         |> Seq.iter(fun api ->
             
             let findApiNode = pptNodes.Where(fun f->f.Name = api.Name && f.PageNum = page)

@@ -122,7 +122,7 @@ module ImportU =
                             dicCopy.ForEach(fun sysTwin->
                                 let copySys = sysTwin.Key
                                 let origSys = sysTwin.Value
-                                origSys.ApiItems.ForEach(fun apiItem -> apiItem.ToCopy(copySys)|>ignore)
+                                origSys.ApiUsages.ForEach(fun apiItem -> apiItem.ToCopy(copySys)|>ignore)
                                 )
 
         //EMG & Start & Auto 리스트 만들기
@@ -306,7 +306,7 @@ module ImportU =
                                 |> Seq.iter(fun node ->
                                         let flow = dicFlow.[node.PageNum]
                                         let sys =  dicFlow.[node.PageNum].System
-                                        let api = sys.ApiItems.Where(fun w->w.Name = node.IfName).First()
+                                        let api = sys.ApiUsages.Where(fun w->w.Name = node.IfName).First()
 
                                         let findReal(trxName:string) =
 
@@ -333,8 +333,8 @@ module ImportU =
                                             let copyFlow = copySys.FindFlow(flow.Name)
                                             flow.ToCopy(copyFlow)|>ignore
                                             dicFlow.Add((-dicFlow.Count),  copyFlow ) |> ignore ) //복사본 page는 음수 임의 표기
-                                origSys.ApiItems.ForEach(fun apiItem ->
-                                            let apiCopy = copySys.ApiItems.First(fun f->f.Name = apiItem.Name)
+                                origSys.ApiUsages.ForEach(fun apiItem ->
+                                            let apiCopy = copySys.ApiUsages.First(fun f->f.Name = apiItem.Name)
                                             apiItem.ToCopy(apiCopy)|>ignore)
                                 origSys.ApiResetInfos.ForEach(fun apiResetInfo ->
                                             apiResetInfo.ToCopy(copySys)|>ignore)

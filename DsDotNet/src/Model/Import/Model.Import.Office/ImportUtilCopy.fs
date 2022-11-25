@@ -31,9 +31,9 @@ module internal ToCopyModule =
         let copySys = copyApi.System
         let origSys = origApi.System
         let findReal (flowName:string, realName:string) = copySys.FindGraphVertex<Real>([|copySys.Name;flowName;realName|])
-        origSys.ApiItems
+        origSys.ApiUsages
                 .ForEach(fun apiOrig ->
-                    let apiCopy = copySys.ApiItems.First(fun f->f.Name = apiOrig.Name)
+                    let apiCopy = copySys.ApiUsages.First(fun f->f.Name = apiOrig.Name)
                     //자신의 리얼을 찾아서 넣음
                     let txs = apiOrig.TXs |> Seq.map(fun f-> findReal(f.Flow.Name, f.Name))
                     let rxs = apiOrig.RXs |> Seq.map(fun f-> findReal(f.Flow.Name, f.Name))
@@ -176,7 +176,7 @@ module internal ToCopyModule =
         origSys.Flows.ForEach(fun origFlow      ->
                         let newFlow = Flow.Create(origFlow.Name, copySystem)
                         copyFlow(origFlow, newFlow)|>ignore)
-        origSys.ApiItems.ForEach(fun origApi    -> copyApi(origApi, copySystem)|>ignore)
+        origSys.ApiUsages.ForEach(fun origApi    -> copyApi(origApi, copySystem)|>ignore)
         origSys.ApiResetInfos.ForEach(fun orig  -> copyApiInfo(orig, copySystem)|>ignore)
         copySystem
 

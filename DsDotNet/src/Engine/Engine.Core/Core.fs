@@ -48,8 +48,8 @@ module CoreModule =
     type DsSystem private (name:string, host:string) =
         inherit FqdnObject(name, createFqdnObject([||]))
         let devices = createNamedHashSet<LoadedSystem>()
-        let apiItems = ResizeArray<ApiUsage>()
-        let addApiItemsForDevice (device: LoadedSystem) = device.CreateApiUsages() |> apiItems.AddRange
+        let apiUsages = ResizeArray<ApiUsage>()
+        let addApiItemsForDevice (device: LoadedSystem) = device.CreateApiUsages() |> apiUsages.AddRange
 
         member val Flows    = createNamedHashSet<Flow>()
         member val Calls    = ResizeArray<Call>()
@@ -60,9 +60,8 @@ module CoreModule =
         member val Commands = ResizeArray<Command>()
         member val Observes = ResizeArray<Observe>()
 
-        member val ApiInterface = createNamedHashSet<ApiInterface>()
-        //member x.ApiItems = x.Devices.Collect(fun d -> d.ReferenceSystem.ApiInterface)
-        member x.ApiItems = apiItems |> seq
+        member val ApiInterfaces = createNamedHashSet<ApiInterface>()
+        member x.ApiUsages = apiUsages |> seq
         member val ApiResetInfos = HashSet<ApiResetInfo>() with get, set
         ///시스템 전체시작 버튼누름시 수행되야하는 Real목록
         member val StartPoints = createQualifiedNamedHashSet<Real>()
@@ -228,7 +227,7 @@ module CoreModule =
         member x.AddRXs(rxs:Real seq) = rxs |> Seq.forall(fun rx -> x.RXs.Add(rx))
         static member Create(name, system) =
             let cp = ApiInterface(name, system)
-            system.ApiInterface.Add(cp) |> verifyM $"Duplicated interface prototype name [{name}]"
+            system.ApiInterfaces.Add(cp) |> verifyM $"Duplicated interface prototype name [{name}]"
             cp
         static member Create(name, system, txs, rxs) =
             let ai4e = ApiInterface.Create(name, system)
@@ -322,4 +321,4 @@ module CoreModule =
 
     type LoadedSystem with
         member x.CreateApiUsages() =
-            [ for ai in x.ReferenceSystem.ApiInterface -> ApiUsage(x.Name, ai) ]
+            [ for ai in x.ReferenceSystem.ApiInterfaces -> ApiUsage(x.Name, ai) ]

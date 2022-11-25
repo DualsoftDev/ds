@@ -151,9 +151,9 @@ module internal ToDsTextModule =
                 yield $"{tab}{rb}"
 
 
-            if system.ApiInterface.Any() then
+            if system.ApiInterfaces.Any() then
                 yield $"{tab}[interfaces] = {lb}"
-                for item in system.ApiInterface do
+                for item in system.ApiInterfaces do
                     let ser =
                         let getFlowAndRealName (r:Real) = [r.Flow.Name; r.Name].Combine()
                         let qNames (xs:Real seq) = xs.Select(getFlowAndRealName) |> String.concat(", ")

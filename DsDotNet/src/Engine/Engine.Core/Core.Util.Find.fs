@@ -61,10 +61,10 @@ module internal ModelFindModule =
 
     let rec tryFindExportApiItem(system:DsSystem) (Fqdn(apiPath)) =
         let sysName, apiKey = apiPath[0], apiPath[1]
-        system.ApiInterface.TryFindWithName(apiKey)
+        system.ApiInterfaces.TryFindWithName(apiKey)
 
     and tryFindCallingApiItem (system:DsSystem) targetSystemName targetApiName =
-        system.ApiItems.TryFind(nameComponentsEq [targetSystemName; targetApiName])
+        system.ApiUsages.TryFind(nameComponentsEq [targetSystemName; targetApiName])
 
     let tryFindVertexCall(system:DsSystem) (Fqdn(callPath)) =
         tryFindGraphVertex system callPath |> Option.map(forceCast<Call>)

@@ -90,7 +90,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
         // 이번 stage 에서 일단 interface 이름만 이용해서 빈 interface 객체를 생성하고,
         // TXs, RXs, Resets 은 추후에 채움..
         let api = ApiInterface.Create(interfaceName, system)
-        system.ApiInterface.Add(api) |> ignore
+        system.ApiInterfaces.Add(api) |> ignore
 
     override x.EnterInterfaceResetDef(ctx:InterfaceResetDefContext) =
         // I1 <||> I2 <||> I3;  ==> [| I1; <||>; I2; <||>; I3; |]
@@ -262,7 +262,7 @@ module ParserRuleContextModule =
         option {
             let! interrfaceNameCtx = ctx.TryFindFirstChild<InterfaceNameContext>()
             let interfaceName = interrfaceNameCtx.CollectNameComponents()[0]
-            let! api = system.ApiInterface.TryFind(nameEq interfaceName)
+            let! api = system.ApiInterfaces.TryFind(nameEq interfaceName)
             let ser =   // { start ~ end ~ reset }
                 ctx.Descendants<CallComponentsContext>()
                     .Map(collectCallComponents)

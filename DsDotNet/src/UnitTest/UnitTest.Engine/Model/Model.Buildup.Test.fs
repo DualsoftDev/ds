@@ -24,7 +24,7 @@ module ModelBuildupTests1 =
             let real = Real.Create("Main", flow)
             let a = system.LoadDeviceAs("A", @$"{libdir}\cylinder.ds", "cylinder.ds")
 
-            let apis = system.ApiItems
+            let apis = system.ApiUsages
             let apiP = apis.First(fun ai -> ai.Name = "+")
             let apiM = apis.First(fun ai -> ai.Name = "-")
             let callAp =
@@ -140,7 +140,7 @@ module ModelBuildupTests1 =
             let real2 = Real.Create("Main2", flow)
             let adv = ApiInterface.Create("Adv", system, [real], [real])
             let ret = ApiInterface.Create("Ret", system, [real2], [real2])
-            [ adv; ret; ].Iter(system.ApiInterface.Add >> ignore)
+            [ adv; ret; ].Iter(system.ApiInterfaces.Add >> ignore)
 
             ApiResetInfo.Create(system, "Adv", ModelingEdgeType.Interlock, "Ret") |> ignore
 

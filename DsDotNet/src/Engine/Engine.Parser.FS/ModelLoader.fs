@@ -21,11 +21,11 @@ module ModelLoaderModule =
 module ModelLoader =
     let private jsonSettings = JsonSerializerSettings()
 
-    let loadConfig (path: FilePath) =
+    let LoadConfig (path: FilePath) =
         let json = File.ReadAllText(path)
         JsonConvert.DeserializeObject<ModelConfig>(json, jsonSettings)
 
-    let saveConfig (path: FilePath) (modelConfig:ModelConfig) =
+    let SaveConfig (path: FilePath) (modelConfig:ModelConfig) =
         let json = JsonConvert.SerializeObject(modelConfig, jsonSettings)
         File.WriteAllText(path, json)
 
@@ -37,8 +37,8 @@ module ModelLoader =
         let system = ModelParser.ParseFromString(text, option)
         system
 
-    let loadFromConfig(config: FilePath) =
-        let cfg = loadConfig config
+    let LoadFromConfig(config: FilePath) =
+        let cfg = LoadConfig config
         let systems =
             [   for dsFile in cfg.DsFilePaths do
                     loadSystemFromDsFile dsFile ]
@@ -52,8 +52,8 @@ module private TestLoadConfig =
                     @"F:\Git\ds\DsDotNet\src\UnitTest\UnitTest.Engine\Libraries\station.ds" ] }
 
         let fp = @"F:\tmp\a.tmp"
-        ModelLoader.saveConfig fp cfg
+        ModelLoader.SaveConfig fp cfg
 
-        let cfg2 = ModelLoader.loadConfig fp
+        let cfg2 = ModelLoader.LoadConfig fp
 
         verify (cfg = cfg2)

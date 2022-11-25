@@ -414,6 +414,8 @@ module ParserRuleContextModule =
 
 [<AutoOpen>]
 module ParserLoadApiModule =
+    let externalSystemCaches = Dictionary<string, DsSystem>()
+
     (* 외부에서 구조적으로 system 을 build 할 때에 사용되는 API *)
     type DsSystem with
         member x.LoadDeviceAs (loadedName:string, absoluteFilePath:string, userSpecifiedFilePath:string) =
@@ -428,10 +430,21 @@ module ParserLoadApiModule =
 
         member x.LoadExternalSystemAs (loadedName:string, absoluteFilePath:string, userSpecifiedFilePath:string) =
             let external =
-                fwdLoadExternalSystem <| {
+                let param = {
                     ContainerSystem = x
                     AbsoluteFilePath = absoluteFilePath
                     UserSpecifiedFilePath = userSpecifiedFilePath
-                    LoadedName = loadedName }
+                    LoadedName = loadedName
+                }
+                match externalSystemCaches.TryFind(absoluteFilePath) with
+                | Some existing ->
+                    ExternalSystem(existing, param)
+                | None ->
+                    let exSystem = fwdLoadExternalSystem param
+                    externalSystemCaches.Add(absoluteFilePath, exSystem.ReferenceSystem) |> ignore
+                    exSystem
             x.Devices.Add(external) |> ignore
             external
+
+        static member ClearExternalSystemCaches() = externalSystemCaches.Clear()
+        static member ExternalSystemCaches = externalSystemCaches |> seq

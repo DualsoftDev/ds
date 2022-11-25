@@ -1,22 +1,4 @@
-[sys] EX = {
-    [flow] F = {
-        TX;
-        "R.X";
-        "NameWith\"Quote";
-    }
-    [interfaces] = {
-        "이상한. Api" = { F.TX ~ F."R.X" }
-        "Dummy. Api" = { _ ~ _ }
-    }
-
-    [prop] = {
-        // safety : Real|Call = { (Real|Call)* }
-        [safety] = {
-            F.Main = { Ap; }
-            Am = { F.Main2; }
-        }
-        [layouts] = {
-            Ap = (1309,405,205,83)
-        }
-    }
+[sys] L = {
+    [external file="station.ds" ip="localhost"] A;
+    [external file="station.ds" ip="localhost"] B;
 }

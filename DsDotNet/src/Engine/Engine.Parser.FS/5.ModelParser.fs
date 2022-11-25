@@ -61,7 +61,7 @@ module ModelParser =
             let text = File.ReadAllText(dsFilePath)
             let dir = Path.GetDirectoryName(dsFilePath)
             let option = ParserOptions.Create4Runtime(dir, "ActiveCpuName")
-            option.LoadedSystemName <- Some loadedName
+            option.LoadedSystemName <- Option.ofObj loadedName
             let system = ParseFromString(text, option)
             system
 
@@ -71,7 +71,7 @@ module ModelParser =
             Device(device, param)
 
         let loadExternalSystem (param:DeviceLoadParameters) =
-            let system = loadSystemFromDsFile param
+            let system = loadSystemFromDsFile { param with LoadedName = null }
             ExternalSystem(system, param)
 
         fwdLoadDevice <- loadDevice

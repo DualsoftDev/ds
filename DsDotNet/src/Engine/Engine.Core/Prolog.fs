@@ -6,10 +6,10 @@ open System
 [<AutoOpen>]
 module PrologModule =
     /// verify with message
-    let internal verifyM (message:string) condition =
+    let verifyM (message:string) condition =
         if not condition then
             failwith message
-    let internal verifyMessage (message:string) condition =
+    let verifyMessage (message:string) condition =
         verifyM message condition
         condition
 

@@ -10,27 +10,27 @@ open Engine.Cpu
 type StatementCall =
     
 
-    [<Extension>] static member StartRung(call:DsTag, srcs:DsTag seq, real:DsTag) =
+    [<Extension>] static member GetCallStartStatement(call:DsTag, srcs:DsTag seq, real:DsTag) =
                     let sets  = srcs.Select(fun f->f.Relay).ToTags().Append(real.Going)
                     let rsts  = [call.Relay].ToTags()
-                    Assign(FuncExt.DoNoRelay(sets, rsts), call.Start)
+                    Assign(FuncExt.GetNoRelayExpr(sets, rsts), call.Start)
 
 
-    [<Extension>] static member RelayRung(call:DsTag, srcs:DsTag seq, srcOuts:ActionTag<_> seq, real:DsTag) =
+    [<Extension>] static member GetCallRelayStatement(call:DsTag, srcs:DsTag seq, srcOuts:ActionTag<_> seq, parentReal:DsTag) =
                     let sets  = srcs.Select(fun s->s.Relay).ToTags() |> Seq.append (srcOuts.ToTags())
-                    let rsts  = [real.Homing].ToTags()
+                    let rsts  = [parentReal.Homing].ToTags()
                     let relay = call.Relay
 
-                    Assign(FuncExt.DoRelay(sets, rsts, relay) , call.Relay)
+                    Assign(FuncExt.GetRelayExpr(sets, rsts, relay) , call.Relay)
 
 
-    [<Extension>] static member OutputRung(call:DsTag, callOut:ActionTag<_>)  =
+    [<Extension>] static member GetOutputStatement(call:DsTag, callOut:ActionTag<_>)  =
                     Assign(FuncExt.DoAnd([call.Start]) , callOut)
     
-    [<Extension>] static member LinkTx(call:DsTag)  =
+    [<Extension>] static member GetLinkTxStatement(call:DsTag)  =
                     Assign(FuncExt.DoAnd([call.Start]) , call.Start)
     
-    [<Extension>] static member LinkRx(call:DsTag)  =
+    [<Extension>] static member GetLinkRxStatement(call:DsTag)  =
                     Assign(FuncExt.DoAnd([call.Start]) , call.End)
     
      

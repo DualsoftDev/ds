@@ -16,30 +16,30 @@ type ConvertUtil =
                         flow.Graph.Vertices 
                             |> Seq.collect(fun v ->
                                 match v with
-                                | :? Real as r -> r.Graph.Vertices |> Seq.append [r]
+                                | :? Real as r -> r.Graph.Vertices.ToArray() |>Seq.append [r]
                                 | _ -> [|v|])
                            ) 
 
-    [<Extension>] static member IncomingReset(target:Vertex, graph:DsGraph, dicM:ConcurrentDictionary<Vertex, DsTag>) =
+    [<Extension>] static member GetIncomingReset(target:Vertex, graph:DsGraph, dicM:ConcurrentDictionary<Vertex, DsTag>) =
                      graph.GetIncomingEdges(target)
                         .Where(fun e-> e.EdgeType.HasFlag(EdgeType.Reset))
                         .Where(fun e-> e.EdgeType.HasFlag(EdgeType.Strong)|>not)
                         .Select(fun e->dicM[e.Source])
     
-    [<Extension>] static member IncomingStart(target:Vertex, graph:DsGraph, dicM:ConcurrentDictionary<Vertex, DsTag>) =
+    [<Extension>] static member GetIncomingStart(target:Vertex, graph:DsGraph, dicM:ConcurrentDictionary<Vertex, DsTag>) =
                      graph.GetIncomingEdges(target)
                         .Where(fun e-> e.EdgeType.HasFlag(EdgeType.Reset)|>not)
                         .Where(fun e-> e.EdgeType.HasFlag(EdgeType.Strong)|>not)
                         .Select(fun e->dicM[e.Source])
     
-    [<Extension>] static member IncomingStartStrong(target:Vertex, graph:DsGraph, dicM:ConcurrentDictionary<Vertex, DsTag>) =
+    [<Extension>] static member GetIncomingStartStrong(target:Vertex, graph:DsGraph, dicM:ConcurrentDictionary<Vertex, DsTag>) =
                      graph.GetIncomingEdges(target)
                         .Where(fun e-> e.EdgeType.HasFlag(EdgeType.Reset)|>not)
                         .Where(fun e-> e.EdgeType.HasFlag(EdgeType.Strong))
                         .Select(fun e->dicM[e.Source])
 
       
-    [<Extension>] static member IncomingResetStrong(target:Vertex, graph:DsGraph, dicM:ConcurrentDictionary<Vertex, DsTag>) =
+    [<Extension>] static member GetIncomingResetStrong(target:Vertex, graph:DsGraph, dicM:ConcurrentDictionary<Vertex, DsTag>) =
                      graph.GetIncomingEdges(target)
                         .Where(fun e-> e.EdgeType.HasFlag(EdgeType.Reset))
                         .Where(fun e-> e.EdgeType.HasFlag(EdgeType.Strong))

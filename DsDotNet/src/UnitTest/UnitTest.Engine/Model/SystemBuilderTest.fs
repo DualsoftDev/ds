@@ -41,7 +41,7 @@ module SystemBuilderTest =
 
 
             let system =
-                let sysCore = DsSystem.Create("MySystem", "localhost")
+                let sysCore = DsSystem("MySystem", "localhost")
                 withSystem sysCore {
                     name "MySystem"
                     path [libdir]

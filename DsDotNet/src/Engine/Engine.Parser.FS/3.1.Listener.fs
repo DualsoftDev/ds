@@ -64,7 +64,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                 match hostSpec with
                 | Some name -> name
                 | None -> null
-            x.TheSystem <- DsSystem.Create(name, host)
+            x.TheSystem <- DsSystem(name, host)
             tracefn($"System: {name}")
         | None ->
             failwith "ERROR"

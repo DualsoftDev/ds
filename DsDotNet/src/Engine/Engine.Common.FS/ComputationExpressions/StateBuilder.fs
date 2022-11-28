@@ -6,14 +6,19 @@ open System.IO
 // https://tomasp.net/blog/2014/update-monads/
 
 
-
+// https://dev.to/shimmer/the-state-monad-in-f-3ik0
 // https://gist.github.com/jwosty/5338fce8a6691bbd9f6f
 [<AutoOpen>]
 module StateBuilderModule =
     type State<'s, 'a> = State of ('s -> ('a * 's))
 
     module State =
-        let inline run state x = let (State(f)) = x in f state
+        let inline run state (State(f)) = f state
+        let ret result = State(fun state -> (result, state))
+        let bind binder stateful =
+            State(fun state ->
+                let result, state' = stateful |> run state
+                binder result |> run state')
         let get = State(fun s -> s, s)
         let put newState = State(fun _ -> (), newState)
         let map f s = State(fun (state: 's) ->

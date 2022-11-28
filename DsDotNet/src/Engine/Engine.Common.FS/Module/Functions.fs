@@ -48,8 +48,16 @@ module Functions =
     /// Returns function which get predecessor
     let predecessor = fun x -> x - 1
 
-    //// Append x at the end of xs list: [1..3] ++ 4 = [1..4]
-    //let (++) xs x = xs @ [x]
+    /// Returns a function that returns the given constant value. `(fun _ -> a)`
+    let inline konst a = (fun _ -> a)
+    /// Returns a function that returns the given constant value. `(fun _ _ -> a)`
+    let inline konst2 a = (fun _ _ -> a)
+
+    /// function that returns repeatedly the same value
+    let repate n = Seq.initInfinite (konst n)
+
+    //// Append x at the end of xs list: [1..3] +++ 4 = [1..4]
+    //let (+++) xs x = xs @ [x]
 
     /// Y-combinator, or Sage bird
     let rec Y f x = f (Y f) x
@@ -67,13 +75,8 @@ module Functions =
     *)
     let flipf f x y = f y x
 
-    /// Returns a function that returns the given constant value. `(fun _ -> a)`
-    let inline cnst a = (fun _ -> a)
-    /// Returns a function that returns the given constant value. `(fun _ _ -> a)`
-    let inline cnst2 a = (fun _ _ -> a)
-
-    let falsify x = false
-    let truthyfy x = true
+    let falsify _ = false
+    let truthyfy _ = true
 
 
     let tee f x =

@@ -3,7 +3,6 @@ namespace rec Engine.Core
 
 open System.Collections.Generic
 open System.Linq
-open System.Runtime.CompilerServices
 open System.Diagnostics
 open Engine.Common.FS
 
@@ -275,10 +274,6 @@ module CoreModule =
             match x with
             | SafetyConditionReal real -> real
             | SafetyConditionCall call -> call
-        //member x.ToText():string =
-        //    match x with
-        //    | SafetyConditionReal real -> real.PureNames.Combine()
-        //    | SafetyConditionCall call -> call.Name
 
     type ParentWrapper with
         member x.GetCore() =

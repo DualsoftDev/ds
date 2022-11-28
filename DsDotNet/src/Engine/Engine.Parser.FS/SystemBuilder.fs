@@ -217,7 +217,7 @@ module MetaBuilder =
 
         [<CustomOperation("add_flow")>]
         member __.AddFlow(sys, flow:FlowMeta) =
-            { sys with Flows = sys.Flows ++ flow }
+            { sys with Flows = sys.Flows +++ flow }
 
         //[<CustomOperation("flow")>]
         //member __.CreateFlow(sys, loadedName, simpleFilePath) =

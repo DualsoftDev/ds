@@ -8,13 +8,30 @@
 	</PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Cpu.Expression.fs" />
     <Compile Include="Interface.fs" />
-    <Compile Include="Bit.fs" />
-    <Compile Include="Evaluate.fs" />
-    <Compile Include="Gate.fs" />
-    <Compile Include="Process.fs" />
+    <Compile Include="Memory.fs" />
+    <Compile Include="Data.fs" />
+    <Compile Include="Tag.fs" />
+    <Compile Include="FunctionName.fs" />
+    <Compile Include="Expression.fs" />
+    <Compile Include="Expression.Extenstion.fs" />
+    <Compile Include="Expression.Statement.fs" />
+    <Compile Include="Convert.Util.fs" />
+    <Compile Include="Convert.Root.fs" />
+    <Compile Include="Convert.Real.fs" />
+    <Compile Include="Convert.Call.fs" />
+    <Compile Include="Convert.fs" />
+    <Compile Include="CpuSerializeJson.fs" />
     <Compile Include="Loader.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Engine.Common.FS\Engine.Common.FS.fsproj" />
+    <ProjectReference Include="..\Engine.Core\Engine.Core.fsproj" />
   </ItemGroup>
 
   <ItemGroup>

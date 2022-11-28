@@ -126,9 +126,11 @@ module CoreModule =
 
     and VertexCall private (name:string, target:Call, parent) =
         inherit Indirect(name, parent)
+        member val CallTarget = target
 
     and VertexAlias private (name:string, target:AliasTargetWrapper, parent) = // target : Real or Call or OtherFlowReal
         inherit Indirect(name, parent)
+        member val ApiTarget = target
 
     and VertexOtherFlowRealCall private (names:Fqdn, target:Real, parent) =
         inherit Indirect(names, parent)
@@ -182,11 +184,11 @@ module CoreModule =
 
     and AliasTargetWrapper =
         | AliasTargetReal of Real    // MyFlow or OtherFlow 의 Real 일 수 있다.
-        | AliasTargetCall of Call
+        | AliasTargetCall of VertexCall
 
     and SafetyCondition =
         | SafetyConditionReal of Real
-        | SafetyConditionCall of Call
+        | SafetyConditionCall of VertexCall
 
 
     (* Abbreviations *)

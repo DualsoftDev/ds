@@ -14,6 +14,12 @@ module CpuLoader =
     ///CPU에 text 규격으로 code 불러 로딩하기
     let LoadStatements(system:DsSystem) = 
         let statements =  ConvertSystem(system)
+        statements.Iter(fun f -> 
+                f.ToText()  |> Console.WriteLine
+                f.Do() |>ignore
+                f.ToText()  |> Console.WriteLine
+                ) 
+
         statements 
 
     [<EntryPoint>]        

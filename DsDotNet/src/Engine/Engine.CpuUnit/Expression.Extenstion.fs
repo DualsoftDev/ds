@@ -61,20 +61,20 @@ type FuncExt =
     [<Extension>] static member DoOr  (xs:Tag<'T> seq)  = xs.Select(fun f-> (f|>box)) |> oR
     //[sets and]--|----- ! [rsts or] ----- (relay)
     //|relay|-----|
-    [<Extension>] static member DoRelay(sets:Tag<'T> seq, rsts:Tag<'T> seq, relay:Tag<'T>) =
+    [<Extension>] static member GetRelayExpr(sets:Tag<'T> seq, rsts:Tag<'T> seq, relay:Tag<'T>) =
                     let relaySet = anD[sets.DoAnd();relay]
                     let relayRst = noT[rsts.DoOr()]
                     anD[relaySet;relayRst]
 
     //[sets and]--|----- ! [rsts or] ----- (coil)
-    [<Extension>] static member DoNoRelay(sets:Tag<'T> seq, rsts:Tag<'T> seq) =
+    [<Extension>] static member GetNoRelayExpr(sets:Tag<'T> seq, rsts:Tag<'T> seq) =
                     let relaySet = anD[sets.DoAnd()]
                     let relayRst = noT[rsts.DoOr()]
                     anD[relaySet;relayRst]
 
     //[sets and]--|-----  [rsts and] ----- (relay)
     //|relay|-----|
-    [<Extension>] static member DoRelayReverseReset(sets:Tag<'T> seq, rsts:Tag<'T> seq, relay:Tag<'T>) =
+    [<Extension>] static member GetRelayExprReverseReset(sets:Tag<'T> seq, rsts:Tag<'T> seq, relay:Tag<'T>) =
                     let relaySet = anD[sets.DoAnd();relay]
                     let relayRst = rsts.DoAnd()
                     anD[relaySet;relayRst]

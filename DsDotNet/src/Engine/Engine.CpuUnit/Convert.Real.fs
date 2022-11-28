@@ -10,15 +10,15 @@ open Engine.Cpu
 type StatementReal =
     
     
-    [<Extension>] static member TaskEnd(real:DsTag, calls:DsTag seq) =
+    [<Extension>] static member GetTaskEndStatement(realTag:DsTag, calls:DsTag seq) =
                     let sets  = calls.Select(fun f->f.Relay).ToTags()
-                    Assign(FuncExt.DoAnd(sets), real.End)
+                    Assign(FuncExt.DoAnd(sets), realTag.End)
 
-    [<Extension>] static member InitStart(real:DsTag)  =
-                    let sets  = [real.Going;real.Origin].ToTags()
-                    let rsts  = [real.Homing].ToTags()
-                    let relay = real.Relay
+    [<Extension>] static member GetInitStartStatement(realTag:DsTag)  =
+                    let sets  = [realTag.Going;realTag.Origin].ToTags()
+                    let rsts  = [realTag.Homing].ToTags()
+                    let relay = realTag.Relay
 
-                    Assign(FuncExt.DoRelay(sets, rsts, relay), real.Relay)
+                    Assign(FuncExt.GetRelayExpr(sets, rsts, relay), realTag.Relay)
     
      

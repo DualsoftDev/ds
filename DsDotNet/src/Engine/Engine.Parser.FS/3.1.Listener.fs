@@ -25,15 +25,16 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
     do
         parser.Reset()
 
-    member val OptLoadedSystemName:string option = None with get, set
-    member val ParserOptions = options with get, set
     member val AntlrParser = parser
+    member val ParserOptions = options with get, set
 
     /// button category 중복 check 용
     member val ButtonCategories = HashSet<(DsSystem*string)>()
 
     member val TheSystem:DsSystem = getNull<DsSystem>() with get, set
 
+    /// 하나의 main.ds 를 loading 할 때, 외부 system 을 copy/reference 로 loading 시, 해당 system 의 구분을 위해서 사용
+    member val OptLoadedSystemName:string option = None with get, set
     /// parser rule context 가 어느 시스템에 속한 것인지를 판정하기 위함.  Loaded system 의 context 와 Main system 의 context 구분 용도.
     member val internal RuleDictionary = Dictionary<ParserRuleContext, string>()
 
@@ -63,7 +64,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                 match hostSpec with
                 | Some name -> name
                 | None -> null
-            x.TheSystem <- DsSystem.Create(name, host)
+            x.TheSystem <- DsSystem(name, host)
             tracefn($"System: {name}")
         | None ->
             failwith "ERROR"
@@ -128,8 +129,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
         x.TheSystem.LoadExternalSystemAs(loadedName, absoluteFilePath, simpleFilePath) |> ignore
 
 
-    member x.CreateVertices(ctx:SystemContext) = createVertices x ctx
-
+    /// parser rule context 에 대한 이름 기준의 정보를 얻는다.  system 이름, flow 이름, parenting 이름 등
     member x.GetContextInformation(parserRuleContext:ParserRuleContext) =      // collectUpwardContextInformation
         let ctx = parserRuleContext
         let system =
@@ -143,6 +143,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
         {   ContextType = ctx.GetType();
             System = system; Flow = flow; Parenting = parenting; Names = ns }
 
+    /// parser rule context 에 대한 객체 기준의 정보를 얻는다.  DsSystem 객체, flow 객체, parenting 객체 등
     member x.GetObjectContextInformation(system:DsSystem, parserRuleContext:ParserRuleContext) =
         let ci = x.GetContextInformation(parserRuleContext)
         assert(system.Name = ci.System.Value)
@@ -155,6 +156,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
             }
         { System = system; Flow = flow; Parenting = parenting; NamedContextInformation = ci }
 
+    /// 인과 token 으로 사용된 context 에 해당하는 vertex 를 찾는다.
     member x.TryFindVertex(ctx:CausalTokenContext):Vertex option =
         let ci = x.GetContextInformation ctx
         option {
@@ -211,116 +213,8 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                 | _ -> failwith "ERROR"
                 |> ignore
 
-[<AutoOpen>]
-module ParserRuleContextModule =
-    let private createCallDef (system:DsSystem) (ctx:CallListingContext) =
-        let callName =  ctx.TryFindFirstChild<CallNameContext>().Map(getText).Value
-        let apiDefCtxs = ctx.Descendants<CallApiDefContext>().ToArray()
-        let getAddress (addressCtx:IParseTree) =
-            addressCtx.TryFindFirstChild<AddressItemContext>().Map(getText).Value
-        let apiItems =
-            [   for apiDefCtx in apiDefCtxs do
-                let apiPath = apiDefCtx.CollectNameComponents() |> List.ofSeq // e.g ["A"; "+"]
-                match apiPath with
-                | device::api::[] ->
-                    let apiItem =
-                        option {
-                            let! apiPoint = tryFindCallingApiItem system device api
-                            let! addressCtx = ctx.TryFindFirstChild<AddressTxRxContext>()
-                            let! txAddressCtx = addressCtx.TryFindFirstChild<TxContext>()
-                            let! rxAddressCtx = addressCtx.TryFindFirstChild<RxContext>()
-                            let tx = getAddress(txAddressCtx)
-                            let rx = getAddress(rxAddressCtx)
-
-                            tracefn $"TX={tx} RX={rx}"
-                            return ApiCallDef(apiPoint, tx, rx)
-                        }
-                    match apiItem with
-                    | Some apiItem -> yield apiItem
-                    | _ -> failwith "ERROR"
-
-                | _ -> failwith "ERROR"
-            ]
-        assert(apiItems.Any())
-        Call(callName, apiItems) |> system.Calls.Add
-
-
-
-    let private fillInterfaceDef (system:DsSystem) (ctx:InterfaceDefContext) =
-        let findSegments(fqdns:Fqdn[]):Real[] =
-            fqdns
-                .Where(fun fqdn -> fqdn <> null)
-                .Select(fun s -> system.TryFindGraphVertex<Real>(s))
-                .Tap(fun x -> assert(x.IsSome))
-                .Choose(id)
-                .ToArray()
-        let isWildcard(cc:Fqdn):bool = cc.Length = 1 && cc[0] = "_"
-        let collectCallComponents(ctx:CallComponentsContext):Fqdn[] =
-            ctx.Descendants<Identifier123Context>()
-                .Select(collectNameComponents)
-                .ToArray()
-        option {
-            let! interrfaceNameCtx = ctx.TryFindFirstChild<InterfaceNameContext>()
-            let interfaceName = interrfaceNameCtx.CollectNameComponents()[0]
-            let! api = system.ApiInterfaces.TryFind(nameEq interfaceName)
-            let ser =   // { start ~ end ~ reset }
-                ctx.Descendants<CallComponentsContext>()
-                    .Map(collectCallComponents)
-                    .Tap(fun callComponents -> assert(callComponents.All(fun cc -> cc.Length = 2 || isWildcard(cc))))
-                    .Select(fun callCompnents -> callCompnents.Select(fun cc -> if isWildcard(cc) then null else cc.Prepend(system.Name).ToArray()).ToArray())
-                    .ToArray()
-
-            let n = ser.Length
-
-            assert(n = 2 || n = 3)
-            api.AddTXs(findSegments(ser[0])) |> ignore
-            api.AddRXs(findSegments(ser[1])) |> ignore
-        } |> ignore
-
-
-
-    let private createAliasDef (x:DsParserListener) (ctx:AliasListingContext) =
-        let system = x.TheSystem
-        let ci = x.GetContextInformation ctx
-        option {
-            let! flow = tryFindFlow system ci.Flow.Value
-            let! aliasKeys = ctx.TryFindFirstChild<AliasDefContext>().Map(collectNameComponents)
-            let mnemonics = ctx.Descendants<AliasMnemonicContext>().Select(getText).ToArray()
-            let ad = AliasDef(aliasKeys, None, mnemonics)
-            flow.AliasDefs.Add(aliasKeys, ad)
-            return ad
-        }
-
-    let private fillTargetOfAliasDef (x:DsParserListener) (ctx:AliasListingContext) =
-        let system = x.TheSystem
-        let ci = x.GetContextInformation ctx
-        option {
-            let! flow = tryFindFlow system ci.Flow.Value
-            let mnemonics = ctx.Descendants<AliasMnemonicContext>().Select(getText).ToArray()
-            let! aliasKeys = ctx.TryFindFirstChild<AliasDefContext>().Map(collectNameComponents)
-            let target =
-                match aliasKeys.ToFSharpList() with
-                | t::[] ->
-                    let realTargetCandidate = flow.Graph.TryFindVertex<Real>(t)
-                    let callTargetCandidate = tryFindCall system t
-                    match realTargetCandidate, callTargetCandidate with
-                    | Some real, None -> Some (AliasTargetReal real)
-                    | None, Some call -> Some (AliasTargetCall call)
-                    | Some _, Some _ -> failwith "Name duplicated."
-                    | _ -> failwith "Failed to find"
-                | otherFlow::real::[] ->
-                    match tryFindReal system otherFlow real with
-                    | Some otherFlowReal -> Some (AliasTargetReal otherFlowReal)
-                    | _ -> failwith "Failed to find"
-                | _ ->
-                    failwith "ERROR"
-
-            flow.AliasDefs[aliasKeys].AliasTarget <- target
-        }
-
-
     /// system context 아래에 기술된 모든 vertex 들을 생성한다.
-    let createVertices (x:DsParserListener) (ctx:SystemContext) =
+    member x.CreateVertices (ctx:SystemContext) =
         let system = x.TheSystem
         let sysctx = x.AntlrParser.system()
 
@@ -396,6 +290,107 @@ module ParserRuleContextModule =
         let createNonParentedRealVertex = tokenCreator 0
         let createCallOrAliasVertex = tokenCreator 1
 
+        let fillInterfaceDef (system:DsSystem) (ctx:InterfaceDefContext) =
+            let findSegments(fqdns:Fqdn[]):Real[] =
+                fqdns
+                    .Where(fun fqdn -> fqdn <> null)
+                    .Select(fun s -> system.TryFindGraphVertex<Real>(s))
+                    .Tap(fun x -> assert(x.IsSome))
+                    .Choose(id)
+                    .ToArray()
+            let isWildcard(cc:Fqdn):bool = cc.Length = 1 && cc[0] = "_"
+            let collectCallComponents(ctx:CallComponentsContext):Fqdn[] =
+                ctx.Descendants<Identifier123Context>()
+                    .Select(collectNameComponents)
+                    .ToArray()
+            option {
+                let! interrfaceNameCtx = ctx.TryFindFirstChild<InterfaceNameContext>()
+                let interfaceName = interrfaceNameCtx.CollectNameComponents()[0]
+                let! api = system.ApiInterfaces.TryFind(nameEq interfaceName)
+                let ser =   // { start ~ end ~ reset }
+                    ctx.Descendants<CallComponentsContext>()
+                        .Map(collectCallComponents)
+                        .Tap(fun callComponents -> assert(callComponents.All(fun cc -> cc.Length = 2 || isWildcard(cc))))
+                        .Select(fun callCompnents -> callCompnents.Select(fun cc -> if isWildcard(cc) then null else cc.Prepend(system.Name).ToArray()).ToArray())
+                        .ToArray()
+
+                let n = ser.Length
+
+                assert(n = 2 || n = 3)
+                api.AddTXs(findSegments(ser[0])) |> ignore
+                api.AddRXs(findSegments(ser[1])) |> ignore
+            } |> ignore
+
+        let createCallDef (system:DsSystem) (ctx:CallListingContext) =
+            let callName =  ctx.TryFindFirstChild<CallNameContext>().Map(getText).Value
+            let apiDefCtxs = ctx.Descendants<CallApiDefContext>().ToArray()
+            let getAddress (addressCtx:IParseTree) =
+                addressCtx.TryFindFirstChild<AddressItemContext>().Map(getText).Value
+            let apiItems =
+                [   for apiDefCtx in apiDefCtxs do
+                    let apiPath = apiDefCtx.CollectNameComponents() |> List.ofSeq // e.g ["A"; "+"]
+                    match apiPath with
+                    | device::api::[] ->
+                        let apiItem =
+                            option {
+                                let! apiPoint = tryFindCallingApiItem system device api
+                                let! addressCtx = ctx.TryFindFirstChild<AddressTxRxContext>()
+                                let! txAddressCtx = addressCtx.TryFindFirstChild<TxContext>()
+                                let! rxAddressCtx = addressCtx.TryFindFirstChild<RxContext>()
+                                let tx = getAddress(txAddressCtx)
+                                let rx = getAddress(rxAddressCtx)
+
+                                tracefn $"TX={tx} RX={rx}"
+                                return ApiCallDef(apiPoint, tx, rx)
+                            }
+                        match apiItem with
+                        | Some apiItem -> yield apiItem
+                        | _ -> failwith "ERROR"
+
+                    | _ -> failwith "ERROR"
+                ]
+            assert(apiItems.Any())
+            Call(callName, apiItems) |> system.Calls.Add
+
+        let fillTargetOfAliasDef (x:DsParserListener) (ctx:AliasListingContext) =
+            let system = x.TheSystem
+            let ci = x.GetContextInformation ctx
+            option {
+                let! flow = tryFindFlow system ci.Flow.Value
+                let mnemonics = ctx.Descendants<AliasMnemonicContext>().Select(getText).ToArray()
+                let! aliasKeys = ctx.TryFindFirstChild<AliasDefContext>().Map(collectNameComponents)
+                let target =
+                    match aliasKeys.ToFSharpList() with
+                    | t::[] ->
+                        let realTargetCandidate = flow.Graph.TryFindVertex<Real>(t)
+                        let callTargetCandidate = tryFindCall system t
+                        match realTargetCandidate, callTargetCandidate with
+                        | Some real, None -> Some (AliasTargetReal real)
+                        | None, Some call -> Some (AliasTargetCall call)
+                        | Some _, Some _ -> failwith "Name duplicated."
+                        | _ -> failwith "Failed to find"
+                    | otherFlow::real::[] ->
+                        match tryFindReal system otherFlow real with
+                        | Some otherFlowReal -> Some (AliasTargetReal otherFlowReal)
+                        | _ -> failwith "Failed to find"
+                    | _ ->
+                        failwith "ERROR"
+
+                flow.AliasDefs[aliasKeys].AliasTarget <- target
+            }
+
+        let createAliasDef (x:DsParserListener) (ctx:AliasListingContext) =
+            let system = x.TheSystem
+            let ci = x.GetContextInformation ctx
+            option {
+                let! flow = tryFindFlow system ci.Flow.Value
+                let! aliasKeys = ctx.TryFindFirstChild<AliasDefContext>().Map(collectNameComponents)
+                let mnemonics = ctx.Descendants<AliasMnemonicContext>().Select(getText).ToArray()
+                let ad = AliasDef(aliasKeys, None, mnemonics)
+                flow.AliasDefs.Add(aliasKeys, ad)
+                return ad
+            }
+
 
         for ctx in sysctx.Descendants<CallListingContext>() do
             createCallDef x.TheSystem ctx
@@ -420,7 +415,7 @@ module ParserRuleContextModule =
 
 [<AutoOpen>]
 module ParserLoadApiModule =
-    let externalSystemCaches = Dictionary<string, DsSystem>()
+    let sharableExternalSystemCaches = Dictionary<string, DsSystem>()
 
     (* 외부에서 구조적으로 system 을 build 할 때에 사용되는 API *)
     type DsSystem with
@@ -442,15 +437,15 @@ module ParserLoadApiModule =
                     UserSpecifiedFilePath = userSpecifiedFilePath
                     LoadedName = loadedName
                 }
-                match externalSystemCaches.TryFind(absoluteFilePath) with
+                match sharableExternalSystemCaches.TryFind(absoluteFilePath) with
                 | Some existing ->
-                    ExternalSystem(existing, param)
+                    ExternalSystem(existing, param) // 기존 loading 된 system share
                 | None ->
                     let exSystem = fwdLoadExternalSystem param
-                    externalSystemCaches.Add(absoluteFilePath, exSystem.ReferenceSystem) |> ignore
+                    sharableExternalSystemCaches.Add(absoluteFilePath, exSystem.ReferenceSystem) |> ignore
                     exSystem
             x.AddDevice(external) |> ignore
             external
 
-        static member ClearExternalSystemCaches() = externalSystemCaches.Clear()
-        static member ExternalSystemCaches = externalSystemCaches |> seq
+        static member ClearExternalSystemCaches() = sharableExternalSystemCaches.Clear()
+        static member ExternalSystemCaches = sharableExternalSystemCaches |> seq

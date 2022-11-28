@@ -3,107 +3,135 @@ namespace UnitTest.Engine
 open System
 open Engine.Core
 open NUnit.Framework
-open Engine.Cpu.Expression
+open Engine.Cpu.TagModule
+open Engine.Cpu
 
 [<AutoOpen>]
 module ExpressionTestModule =
-    let toString x = x.ToString()
+    
     type ExpressionTest() =
         do Fixtures.SetUpTest()
 
         [<Test>]
-        member __.``ExpressionValueUnit test`` () =
+        member __.``1 ExpressionValueUnit test`` () =
 
-            (value 1).Evaluate()  === 1
-            Fun( _add, "+", [1; 2]).Evaluate() |> unbox === 3
+            //지원 value type : bool, int, single, double, string
+            1       |> evaluate === 1
+            1       |> evaluate === 1
+            "hello" |> evaluate === "hello"
+            Math.PI |> evaluate === Math.PI
+            true    |> evaluate === true
+            false   |> evaluate === false
+            3.14f   |> evaluate === 3.14f
+            3.14    |> evaluate === 3.14
 
-            (value 1).Evaluate() === 1
-            (value "hello").Evaluate() === "hello"
-            (value Math.PI).Evaluate() === Math.PI
-            (value true).Evaluate() === true
-            (value false).Evaluate() === false
-            (value 3.14f).Evaluate() === 3.14f
-            (value 3.14).Evaluate() === 3.14
+            //미지원 value type : uint, int64, ... 지원 기준외 등등
+            (fun () -> 1u   |> evaluate  === 1) |> ShouldFail
+            (fun () -> 1L   |> evaluate  === 1) |> ShouldFail
+            (fun () -> 1.0m |> evaluate  === 1) |> ShouldFail
 
-        [<Test>]
-        member __.``ExpressionTagUnit test`` () =
-            let t1 = PLCTag("1", 1)
-            (tag t1).Evaluate() === 1
-            t1.Value <- 2
-            (tag t1).Evaluate() === 2
-            (PLCTag("Two", "Two") |> tag).Evaluate() === "Two"
-
-            concat([
-                    (PLCTag("Hello", "Hello, ") |> tag).Evaluate()
-                    (PLCTag("World", "world!" ) |> tag).Evaluate()
-                ]).Evaluate() === "Hello, world!"
-
-            let tt1 = t1 |> tag
-            t1.Value <- 1
-            let tt2 = PLCTag("t2", 2) |> tag
-            let addTwoExpr = Fun( _add, "+", [ tt1; tt2 ])
-            addTwoExpr.Evaluate() === 3
-            t1.Value <- 10
-            addTwoExpr.Evaluate() === 12
-
-
+            //함수 없는 Value 배열 평가는 불가능
+            (fun () -> [1;2]   |> evaluate  === 1) |> ShouldFail
 
         [<Test>]
-        member __.``ExpressionFuncUnit test`` () =
-            add([1; 2]).Evaluate() === 3
-            sub([5; 3]).Evaluate() === 2
-            mul([2; 3]).Evaluate() === 6
-            div([3; 2]).Evaluate() === 1.5
-            add([1; 2; 3]).Evaluate() === 6
-            add([1..10] |> List.map box).Evaluate() === 55
-            mul([1..5] |> List.map box).Evaluate() === 120
-            sub([10; 1; 2]).Evaluate() === 7
-            Math.Abs(addd([1.1; 2.2]).Evaluate() - 3.3) <= 0.00001 |> ShouldBeTrue
-            Math.Abs(muld([1.1; 2.0]).Evaluate() - 2.2) <= 0.00001 |> ShouldBeTrue
-            concat(["Hello, "; "world!"]).Evaluate() === "Hello, world!"
-            mul([2; 3]).Evaluate() === 6
-            equal(["Hello"; "world"]).Evaluate() === false
-            equal(["Hello"; "Hello"]).Evaluate() === true
-            notEqual(["Hello"; "world"]).Evaluate() === true
-            notEqual(["Hello"; "Hello"]).Evaluate() === false
-            notEqual([1; 2]).Evaluate() === true
-            notEqual([2; 2]).Evaluate() === false
-            equal([2; 2]) |> resolve === true
-            equal([2; 2.0]) |> resolve === true
-            equal([2; 2.0f]) |> resolve === true
-            equal([6; mul [2; 3]]) |> resolve === true
+        member __.``2 ExpressionTagUnit test`` () =
+            let t1 = PcTag.Create("1", 1)
+            t1 |> evaluate === 1
+            t1.Data <-  2|>ToData  // t1.SetValue(2) 같음
+            
+            t1 |> evaluate === 2
+            t1.SetValue(3)
+            t1 |> evaluate === 3
+            
+            let t2 = PcTag.Create("2", 2)
+            add[t2;t2] |> evaluate === 4
+            //함수 없는 Tag 배열 평가는 불가능
+            (fun () -> [t2;t2]   |> evaluate  === 1) |> ShouldFail
 
-            gte [2; 3; 5; 5; 1] |> resolve === false
-            gte [5; 4; 3; 2; 1] |> resolve === true
-            neg [true] |> resolve === false
-            neg [false] |> resolve === true
-            logicalAnd [true; false] |> resolve === false
-            logicalAnd [true; true] |> resolve === true
-            logicalAnd [true; true; true; false] |> resolve === false
-            logicalOr [true; false] |> resolve === true
-            logicalOr [false; false] |> resolve === false
-            logicalOr [true; true; true; false] |> resolve === true
-            shiftLeft [1; 1] |> resolve === 2
-            shiftLeft [1; 1; 1; 1] |> resolve === 8
-            shiftLeft [1; 3] |> resolve === 8
-            shiftRight [8; 3] |> resolve === 1
+            PcTag.Create("Two", "Two") |> evaluate === "Two"
+            
+            addString([
+                    PcTag.Create("Hello", "Hello, ") 
+                    PcTag.Create("World", "world!" ) 
+                ]) |> evaluate === "Hello, world!"
 
-            (fun () -> neg [] |> resolve)
-                |> ShouldFailWithSubstringT "Wrong number of arguments"
-            (fun () -> neg [true; false] |> resolve)
-                |> ShouldFailWithSubstringT "Wrong number of arguments"
-            (fun () -> add [1] |> resolve)
-                |> ShouldFailWithSubstringT "Wrong number of arguments"
+            let tt1 = t1 |> createTagExpr
+            t1.SetValue(1)
+            let tt2 = PcTag.Create("t2", 2) 
+
+            let addTwoExpr = Function("+", [ tt1; tt2 ])
+            addTwoExpr |> evaluate  === 3
+            t1.SetValue(10)
+            addTwoExpr |> evaluate  === 12
+
+
 
         [<Test>]
-        member __.``ExpressionComposition test`` () =
-            (* 2 * (1+2) * (4+5) = 54 *)
-            mul [   2
-                    add [1; 2]
-                    add [4; 5]
-            ] |> resolve === 54
+        member __.``3 ExpressionFuncUnit test`` () =
 
-            mul [2; 3; 4] |> resolve === 24
+            abs[13]                          |> evaluate === 13
+            abs[-13]                         |> evaluate === 13
+            absDouble[-13.0]                 |> evaluate === 13.0
+            xorBit[13; 11]                   |> evaluate === 6
+            andBit[2; 3]                     |> evaluate === 2
+            andBit[1; 2; 3; 4]               |> evaluate === 0
+            orBit[1; 2; 3; 4]                |> evaluate === 7
+            notBit[65535]                    |> evaluate === -65536
+            add[1; 2]                        |> evaluate === 3
+            sub[5; 3]                        |> evaluate === 2
+            mul[2; 3]                        |> evaluate === 6
+            divDouble[3.0; 2.0]              |> evaluate === 1.5
+            add[1; 2; 3]                     |> evaluate === 6
+            add([1..10]|>List.map(fun f->f)) |> evaluate === 55
+            mul([1..5]|> List.map(fun f->f)) |> evaluate === 120
+            sub[10; 1; 2]       |> evaluate === 7
+            Math.Abs((addDouble[1.1; 2.2] |> evaluate) - 3.3) <= 0.00001 |> ShouldBeTrue
+            Math.Abs((mulDouble[1.1; 2.0] |> evaluate) - 2.2) <= 0.00001 |> ShouldBeTrue
+            addString["Hello, "; "world!"]|> evaluate === "Hello, world!"
+            mul[2; 3] |> evaluate === 6
+            equalString["Hello"; "world"]       |> evaluate === false
+            equalString["Hello"; "Hello"]       |> evaluate === true
+            notEqualString["Hello"; "world"]    |> evaluate === true
+            notEqualString["Hello"; "Hello"]    |> evaluate === false
+            notEqual[1; 2]                      |> evaluate === true
+            notEqual[2; 2]                      |> evaluate === false
+            equal[2; 2]                         |> evaluate === true
+            equal[2; 2.0]                       |> evaluate=== true
+            equal[2; 2.0f]                      |> evaluate === true
+
+          
+            gte [2; 3] |> evaluate === false
+            gte [5; 4] |> evaluate === true
+            noT [true] |> evaluate  === false
+            noT [false] |> evaluate  === true
+            anD [true; false] |> evaluate === false
+            anD [true; true] |> evaluate === true
+            anD [true; true; true; false] |> evaluate === false
+            oR  [true; false] |> evaluate === true
+            oR  [false; false] |> evaluate === false
+            oR  [true; true; true; false] |> evaluate === true
+            shiftLeft [1; 1] |> evaluate === 2
+            shiftLeft [2; -1] |> evaluate === 0
+            shiftLeft [1; 3] |> evaluate === 8
+            shiftRight [8; 3] |> evaluate === 1
+
+            let ex = mul [2; 3] 
+            equal [6; ex]                    |> evaluate === true
+            equal [6; mul [2; 3]]            |> evaluate === true
+            Function("+", [1; 2])     |> evaluate === 3
+
+        [<Test>]
+        member __.``4 ExpressionComposition test`` () =
+            mul [   
+                    0
+                   // [2;2]
+                    PcTag.Create("t2", 2) 
+                    add [1; 2] 
+                    add [4; 5] 
+            ] |> evaluate === 0
+
+
+            mul [2; 3; 4] |> evaluate === 24
 
             (*
              (1<<2) * ((8>>3) + 4) * 5
@@ -111,60 +139,105 @@ module ExpressionTestModule =
              = 100
             *)
             mul [   shiftLeft [1; 2]   // 4
-                    add [   shiftRight [8; 3]  // 1
-                            4]
-                    5] |> resolve === 100   // 4 * (1+4) * 5
+                    add [   
+                        shiftRight [8; 3]   // 1
+                        4
+                        ] 
+                    5] |> evaluate === 100   // 4 * (1+4) * 5
 
 
 
         [<Test>]
-        member __.``Statement test`` () =
-            let expr = mul [2; 3; 4]
-            let target = PLCTag("target", 1)
+        member __.``5 Statement test`` () =
+            let expr = mul [2; 3; 4] 
+            let target = PcTag.Create("target", 1)
 
             let stmt = Assign (expr, target)
             stmt.Do()
-            target.Value === 24
+            target |> evaluate === 24
 
-            Assign(value 9, target).Do()
-            target.Value === 9
+            (Assign (createDataExpr 9, target)).Do()
+            target |> evaluate === 9
 
-            let source = PLCTag("source", 33)
-            Assign(tag source, target).Do()
-            target.Value === 33
-
-            source.Value <- 44
-            target.Value === 33
-            Assign(tag source, target).Do()
-            target.Value === 44
-
+            let source = PcTag.Create("source", 33)
+            Assign(createTagExpr source, target).Do()
+            target |> evaluate === 33
+            source.SetValue(44)
+            target |> evaluate  === 33
+            Assign(createTagExpr source, target).Do()
+            target |> evaluate === 44
+          
         [<Test>]
-        member __.``Serialization test`` () =
-            mul [2; 3; 4] |> toString === "*(2, 3, 4)"
+        member __.``6 Serialization test`` () = 
+            
+            createDataExpr 1         |> ToText === "1"
+            createDataExpr "hello"   |> ToText === "hello"
+            createDataExpr Math.PI   |> ToText === Math.PI.ToString()
+            createDataExpr true      |> ToText === "True"
+            createDataExpr false     |> ToText === "False"
+            createDataExpr 3.14f     |> ToText === "3.14"
+            createDataExpr 3.14      |> ToText === "3.14"
+            
 
             mul [   2
-                    add [1; 2]
-                    add [4; 5]
-            ] |> toString === "*(2, +(1, 2), +(4, 5))"
+                    add [1; 2] 
+                    add [4; 5] 
+            ] |> ToText === "*[2; +[1; 2]; +[4; 5]]"
+            mul [2; add[3; 4]]|> ToText  === "*[2; +[3; 4]]"
+
+            mul [2; 3; 4]|> ToText  === "*[2; 3; 4]"
+            mul [2; 3; 4]|> ToText  === "*[2; 3; 4]"
+
+            let t1 = PcTag.Create("t1", 1) 
+            let t2 = PcTag.Create("t2", 2) 
+            let tt1 = t1 |> createTagExpr
+            let tt2 = t2 |> createTagExpr
+
+            let addTwoExpr = Function("+", [ tt1; tt2 ])
+            addTwoExpr.ToText() === "+[(t1=1); (t2=2)]"
 
 
-            let sTag = PLCTag("address", "value")
-            sTag.ToString() === "(address=value)"
-            let exprTag = tag sTag
-            exprTag.ToString() === "(address=value)"
-
-            (value 1).ToString()  === "1"
-            (value "hello").ToString() === "hello"
-            (value Math.PI).ToString() === Math.PI.ToString()
-            (value true).ToString() === "True"
-            (value false).ToString() === "False"
-            (value 3.14f).ToString() === "3.14"
-            (value 3.14).ToString() === "3.14"
+            let sTag = PcTag.Create("address", "value")
+            sTag.ToText() === "(address=value)"
+            let exprTag = createTagExpr sTag
+            exprTag.ToText() === "(address=value)"
 
 
             let expr = mul [2; 3; 4]
-            let target = PLCTag("target", 1)
-            target.ToString() === "(target=1)"
+            let target = PcTag.Create("target", 1)
+            target.ToText() === "(target=1)"
 
             let stmt = Assign (expr, target)
-            stmt.ToString() === "assign(*(2, 3, 4), (target=1))"
+            stmt.ToText() === "assign(*[2; 3; 4], (target=1))"
+
+        [<Test>]
+        member __.``7 Deserialize test`` () =
+
+            let t2 = PcTag.Create("t2", 2) 
+            let t1 = PcTag.Create("t1", 1) 
+            let addTwoExpr = Function("+", [ t1;t2 ])
+            addTwoExpr.ToJsonText().ToExpression().ToJsonText() === addTwoExpr.ToJsonText()
+
+            let expr = mul [   2
+                               add [t1; t2] 
+                               add [4; 5] 
+                            ]
+            expr.ToJsonText().ToExpression().ToJsonText() === expr.ToJsonText()
+
+            let expr = oR [false ;true ;false ]
+            expr.ToJsonText().ToExpression().ToJsonText() === expr.ToJsonText()
+
+            let expr = add [10 ;12 ]
+            expr.ToJsonText().ToExpression().ToJsonText() === expr.ToJsonText()
+            let target = PcTag.Create("target", 1)
+            
+
+            let expr = mul [    2
+                                expr
+                                add [t1; t2] 
+                                add [1; 5] 
+                    ] 
+            let a = expr |> evaluate
+
+            let stmt = Assign (expr, target)
+            stmt.ToJsonText().ToStatement().ToJsonText() === stmt.ToJsonText()

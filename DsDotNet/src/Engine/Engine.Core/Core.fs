@@ -3,7 +3,6 @@ namespace rec Engine.Core
 
 open System.Collections.Generic
 open System.Linq
-open System.Runtime.CompilerServices
 open System.Diagnostics
 open Engine.Common.FS
 
@@ -45,7 +44,7 @@ module CoreModule =
     and ExternalSystem(referenceSystem:DsSystem, param:DeviceLoadParameters) =
         inherit LoadedSystem(referenceSystem, param)
 
-    type DsSystem private (name:string, host:string) =
+    type DsSystem (name:string, host:string) =
         inherit FqdnObject(name, createFqdnObject([||]))
         let devices = createNamedHashSet<LoadedSystem>()
         let apiUsages = ResizeArray<ApiUsage>()
@@ -73,8 +72,6 @@ module CoreModule =
         member val AutoButtons      = ButtonDic()
         member val StartButtons     = ButtonDic()
         member val ResetButtons     = ButtonDic()
-
-        static member Create(name, host) = DsSystem(name, host)
 
     type Flow private (name:string, system:DsSystem) =
         inherit FqdnObject(name, system)
@@ -277,10 +274,6 @@ module CoreModule =
             match x with
             | SafetyConditionReal real -> real
             | SafetyConditionCall call -> call
-        //member x.ToText():string =
-        //    match x with
-        //    | SafetyConditionReal real -> real.PureNames.Combine()
-        //    | SafetyConditionCall call -> call.Name
 
     type ParentWrapper with
         member x.GetCore() =

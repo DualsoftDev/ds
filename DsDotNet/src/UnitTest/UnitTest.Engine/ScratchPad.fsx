@@ -250,3 +250,53 @@ let c (FList(xs:char list)) =
 
 ['a' .. 'z'] |> c
 [|1..10|] |> n
+
+
+
+// Active pattern that can be used to assign
+// values to symbols in a pattern
+let (|Let|) value input = (value, input)
+
+// This is useful when writing complex pattern matching
+let flag, num = (true, 2)
+match flag, num with
+| true, (Let "one" (str, 1) | Let "two" (str, 2) | Let "three" (str, 3)) ->
+    // Called when number is between 1 and 3 and assigns textual
+    // representation of the number to 'str' (so that we can handle all
+    // cases with just a single match clause)
+    printfn "%s" str
+| _ ->
+    printfn "Something else"
+
+
+let flag, num = (true, "One")
+match flag, num with
+| true, (Let "one" (str, "One") | Let "two" (str, "Two") | Let "three" (str, "Three")) ->
+    // Called when number is between 1 and 3 and assigns textual
+    // representation of the number to 'str' (so that we can handle all
+    // cases with just a single match clause)
+    printfn "%s" str
+| _ ->
+    printfn "Something else"
+
+// Haskell
+// let rightTriangles = [ (a,b,c) | c <- [1..10], b <- [1..c], a <- [1..b], a^2 + b^2 == c^2]
+
+let rightTriangles = [
+    let sq x = x * x
+    for c in [1..10] do
+    for b in [1..c] do
+    for a in [1..b] do
+        if sq a + sq b = sq c then
+            yield a, b, c
+]
+
+(   let a = 100
+    let b = 200
+    let c = 300
+    in a*b*c,
+    let foo="Hey "
+    let bar = "there!"
+    in foo + bar)
+
+    

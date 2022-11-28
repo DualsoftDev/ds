@@ -184,11 +184,11 @@ module CoreModule =
 
     and AliasTargetWrapper =
         | AliasTargetReal of Real    // MyFlow or OtherFlow 의 Real 일 수 있다.
-        | AliasTargetCall of VertexCall
+        | AliasTargetCall of Call
 
     and SafetyCondition =
         | SafetyConditionReal of Real
-        | SafetyConditionCall of VertexCall
+        | SafetyConditionCall of Call
 
 
     (* Abbreviations *)

@@ -19,7 +19,7 @@ module ModelBuildupTests1 =
         let compareExact x = compare x x
 
         let createSimpleSystem() =
-            let system = DsSystem.Create("My", "localhost")
+            let system = DsSystem("My", "localhost")
             let flow = Flow.Create("F", system)
             let real = Real.Create("Main", flow)
             let a = system.LoadDeviceAs("A", @$"{libdir}\cylinder.ds", "cylinder.ds")

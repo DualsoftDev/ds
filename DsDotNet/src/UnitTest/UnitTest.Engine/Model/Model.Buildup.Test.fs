@@ -109,7 +109,7 @@ module ModelBuildupTests1 =
 
             let flow2 = Flow.Create("F2", system)
 
-            let real2 = VertexOtherFlowRealCall.Create(real, Flow flow2)
+            let real2 = RealOtherFlow.Create(real, Flow flow2)
             let real3 = Real.Create("R3", flow2)
 
             flow2.CreateEdge(ModelingEdgeInfo<Vertex>(real2, ">", real3)) |> ignore
@@ -120,7 +120,7 @@ module ModelBuildupTests1 =
             Main; // island
     }
     [flow] F2 = {
-        F.Main > R3;		// F.Main(VertexOtherFlowRealCall)> R3(Real);
+        F.Main > R3;		// F.Main(RealOtherFlow)> R3(Real);
     }
     [calls] = {
         Ap = { A."+"(%Q1, %I1); }

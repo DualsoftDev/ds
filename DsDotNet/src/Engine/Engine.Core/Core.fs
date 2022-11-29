@@ -125,6 +125,10 @@ module CoreModule =
         interface ISafetyConditoinHolder with
             member val SafetyConditions = HashSet<SafetyCondition>()
 
+    and RealOtherFlow private (names:Fqdn, target:Real, parent) =
+        inherit Indirect(names, parent)
+        member val Real = target
+
     and Call private (target:ApiCall, parent) =
         inherit Indirect(target.Name, parent)
         member val CallTarget = target
@@ -134,9 +138,6 @@ module CoreModule =
     and Alias private (name:string, target:AliasTargetWrapper, parent) = // target : Real or Call or OtherFlowReal
         inherit Indirect(name, parent)
         member val ApiTarget = target
-
-    and VertexOtherFlowRealCall private (names:Fqdn, target:Real, parent) =
-        inherit Indirect(names, parent)
 
     /// ApiCallDefs 정의:
     type ApiCall (name:string, apiItems:ApiCallDef seq) =
@@ -224,7 +225,14 @@ module CoreModule =
             let segment = Real(name, flow)
             flow.Graph.AddVertex(segment) |> verifyM $"Duplicated segment name [{name}]"
             segment
-            
+
+    type RealOtherFlow with
+        static member Create(otherFlowReal:Real, parent:ParentWrapper) =
+            let ofn, ofrn = otherFlowReal.Flow.Name, otherFlowReal.Name
+            let v = RealOtherFlow( [| ofn; ofrn |], otherFlowReal, parent)
+            parent.GetGraph().AddVertex(v) |> verifyM $"Duplicated other flow real call [{ofn}.{ofrn}]"
+            v
+
     type Call with
         static member Create(target:ApiCall, parent:ParentWrapper) =
             let v = Call(target, parent)
@@ -265,13 +273,6 @@ module CoreModule =
             ai4e.AddTXs txs |> ignore
             ai4e.AddRXs rxs |> ignore
             ai4e
-
-    type VertexOtherFlowRealCall with
-        static member Create(otherFlowReal:Real, parent:ParentWrapper) =
-            let ofn, ofrn = otherFlowReal.Flow.Name, otherFlowReal.Name
-            let v = VertexOtherFlowRealCall( [| ofn; ofrn |], otherFlowReal, parent)
-            parent.GetGraph().AddVertex(v) |> verifyM $"Duplicated other flow real call [{ofn}.{ofrn}]"
-            v
 
     type SafetyCondition with
         member x.Core:obj =

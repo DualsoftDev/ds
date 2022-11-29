@@ -277,7 +277,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                                 failwith "ERROR"
                         | 1, ofn::ofrn::[] ->
                             let otherFlowReal = tryFindReal system ofn ofrn |> Option.get
-                            VertexOtherFlowRealCall.Create(otherFlowReal, parent) |> ignore
+                            RealOtherFlow.Create(otherFlowReal, parent) |> ignore
 
                             tracefn $"{ofn}.{ofrn} should already have been created."
                         | _, q::[] -> ()

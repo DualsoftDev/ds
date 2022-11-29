@@ -13,10 +13,10 @@ let verifyFunction (expr:Expression<'T>)  =
     match expr with
     | ConstValue v -> failwith "not function"
     | Variable   t -> failwith "not function"
-    | Function (name, args) -> expr
-                               //if args.Any() |>not 
-                               //then failwith $"Empty Arguments of function : {name}"
-                               //else expr
+    | Function (name, args) -> 
+                               if args.Any() |>not 
+                               then failwith $"Empty Arguments of function : {name}"
+                               else expr
  
 let add             (xs:Args) =  Function(_add           , xs) |> verifyFunction
 let addDouble       (xs:Args) =  Function(_addDouble     , xs) |> verifyFunction

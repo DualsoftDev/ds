@@ -29,10 +29,10 @@ module ModelBuildupTests1 =
             let apiM = apis.First(fun ai -> ai.Name = "-")
             let callAp =
                 let apiItem = ApiCallDef(apiP, "%Q1", "%I1", dev.Name)
-                ApiGroup("Ap", [apiItem])
+                ApiCall("Ap", [apiItem])
             let callAm =
                 let apiItem = ApiCallDef(apiM, "%Q2", "%I2", dev.Name)
-                ApiGroup("Am", [apiItem])
+                ApiCall("Am", [apiItem])
             system.ApiGroups.AddRange([callAp; callAm])
             system, flow, real, callAp, callAm
 
@@ -40,8 +40,8 @@ module ModelBuildupTests1 =
         member __.``Model creation test`` () =
             let system, flow, real, callAp, callAm = createSimpleSystem()
 
-            let vCallP = Call.Create("Ap", callAp, Real real)
-            let vCallM = Call.Create("Am", callAm, Real real)
+            let vCallP = Call.Create( callAp, Real real)
+            let vCallM = Call.Create( callAm, Real real)
             real.CreateEdge(ModelingEdgeInfo<Vertex>(vCallP, ">", vCallM)) |> ignore
 
             let generated = system.ToDsText()
@@ -67,8 +67,8 @@ module ModelBuildupTests1 =
         member __.``Invalid Model creation test`` () =
             let system, flow, real, callAp, callAm = createSimpleSystem()
 
-            let vCallP = Call.Create("Ap", callAp, Real real)
-            let vCallM = Call.Create("Am", callAm, Real real)
+            let vCallP = Call.Create( callAp, Real real)
+            let vCallM = Call.Create( callAm, Real real)
             ( fun () ->
                 // real 의 child 간 edge 를 flow 에서 생성하려 함.. should fail
                 flow.CreateEdge(ModelingEdgeInfo<Vertex>(vCallP, ">", vCallM)) |> ignore

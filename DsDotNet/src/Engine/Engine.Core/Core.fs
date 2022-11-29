@@ -49,10 +49,10 @@ module CoreModule =
         inherit FqdnObject(name, createFqdnObject([||]))
         let devices = createNamedHashSet<LoadedSystem>()
         let apiUsages = ResizeArray<ApiInterface>()
-        let addApiItemsForDevice (device: LoadedSystem) = device.CreateApiUsages() |> apiUsages.AddRange
+        let addApiItemsForDevice (device: LoadedSystem) = device.ReferenceSystem.ApiInterfaces |> apiUsages.AddRange
 
         member val Flows    = createNamedHashSet<Flow>()
-        member val ApiGroups    = ResizeArray<ApiGroup>()
+        member val ApiGroups    = ResizeArray<ApiCall>()
 
         member _.AddDevice(dev) = devices.Add(dev) |> ignore; addApiItemsForDevice dev
         member val Devices = devices |> seq
@@ -107,6 +107,12 @@ module CoreModule =
     // Subclasses = {Call | Real}
     type ISafetyConditoinHolder =
         abstract member SafetyConditions: HashSet<SafetyCondition>
+    
+    /// Indirect to Call/Alias
+    [<AbstractClass>]
+    type Indirect (names:string seq, parent:ParentWrapper) =
+        inherit Vertex(names |> Array.ofSeq, parent)
+        new (name, parent) = Indirect([name], parent)
 
     /// Segment (DS Basic Unit)
     [<DebuggerDisplay("{QualifiedName}")>]
@@ -119,16 +125,11 @@ module CoreModule =
         interface ISafetyConditoinHolder with
             member val SafetyConditions = HashSet<SafetyCondition>()
 
-    /// Indirect to Call/Alias
-    [<AbstractClass>]
-    type Indirect (names:string seq, parent:ParentWrapper) =
-        inherit Vertex(names |> Array.ofSeq, parent)
-        new (name, parent) = Indirect([name], parent)
-
-    and Call private (name:string, target:ApiGroup, parent) =
-        inherit Indirect(name, parent)
+    and Call private (target:ApiCall, parent) =
+        inherit Indirect(target.Name, parent)
         member val CallTarget = target
-
+        interface ISafetyConditoinHolder with
+            member val SafetyConditions = HashSet<SafetyCondition>()
 
     and Alias private (name:string, target:AliasTargetWrapper, parent) = // target : Real or Call or OtherFlowReal
         inherit Indirect(name, parent)
@@ -137,16 +138,15 @@ module CoreModule =
     and VertexOtherFlowRealCall private (names:Fqdn, target:Real, parent) =
         inherit Indirect(names, parent)
 
-    /// ApiGroup 정의:
-    type ApiGroup (name:string, apiItems:ApiCallDef seq) =
+    /// ApiCallDefs 정의:
+    type ApiCall (name:string, apiItems:ApiCallDef seq) =
         inherit Named(name)
         member val ApiItems = apiItems.ToFSharpList()
         member val Xywh:Xywh = null with get, set
-        interface ISafetyConditoinHolder with
+        interface ISafetyConditoinHolder with  //?? 여기 정의 확인 필요 Subclasses = {Call | Real}
             member val SafetyConditions = HashSet<SafetyCondition>()
 
     type TagAddress = string
-
     /// Main system 에서 loading 된 다른 system 의 API 를 바라보는 관점.  [calls] = { Ap = { A."+"(%Q1, %I1); } }
     type ApiCallDef (api:ApiInterface, outTag:TagAddress, inTag:TagAddress, deviceName:string) =
         member _.ApiInterface = api
@@ -188,11 +188,11 @@ module CoreModule =
 
     and AliasTargetWrapper =
         | AliasTargetReal of Real    // MyFlow or OtherFlow 의 Real 일 수 있다.
-        | AliasTargetCall of ApiGroup
+        | AliasTargetCall of ApiCall
 
     and SafetyCondition =
         | SafetyConditionReal of Real
-        | SafetyConditionCall of ApiGroup
+        | SafetyConditionCall of ApiCall
 
 
     (* Abbreviations *)
@@ -226,9 +226,9 @@ module CoreModule =
             segment
             
     type Call with
-        static member Create(name:string, target:ApiGroup, parent:ParentWrapper) =
-            let v = Call(name, target, parent)
-            parent.GetGraph().AddVertex(v) |> verifyM $"Duplicated call name [{name}]"
+        static member Create(target:ApiCall, parent:ParentWrapper) =
+            let v = Call(target, parent)
+            parent.GetGraph().AddVertex(v) |> verifyM $"Duplicated call name [{target.Name}]"
             v
 
     type Alias with
@@ -318,7 +318,6 @@ module CoreModule =
             | Some btn -> btn.Add(flow) |> verifyM $"Duplicated flow [{flow.Name}]"
             | None -> dicButton.Add(btnName, HashSet[|flow|] )
 
-    type LoadedSystem with
-        member x.CreateApiUsages() = x.ReferenceSystem.ApiInterfaces 
-           
+  //  type LoadedSystem with
+       // member x.CreateApiUsages() = 
         //    [ for ai in x.ReferenceSystem.ApiInterfaces -> ApiUsage(x.Name, ai) ]

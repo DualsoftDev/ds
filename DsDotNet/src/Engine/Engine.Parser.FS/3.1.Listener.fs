@@ -248,7 +248,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                 option {
                     match tryCall, tryAliasDef with
                     | Some call, None ->
-                        return Call.Create(name, call, parentWrapper) :> Indirect
+                        return Call.Create(call, parentWrapper) :> Indirect
                     | None, Some aliasDef ->
                         let aliasTarget = tryFindAliasTarget flow name |> Option.get
                         return Alias.Create(name, aliasTarget, parentWrapper) :> Indirect
@@ -350,7 +350,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                     | _ -> failwith "ERROR"
                 ]
             assert(apiItems.Any())
-            ApiGroup(callName, apiItems) |> system.ApiGroups.Add
+            ApiCall(callName, apiItems) |> system.ApiGroups.Add
 
         let fillTargetOfAliasDef (x:DsParserListener) (ctx:AliasListingContext) =
             let system = x.TheSystem

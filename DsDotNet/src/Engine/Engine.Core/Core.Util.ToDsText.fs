@@ -203,7 +203,7 @@ module internal ToDsTextModule =
                 let safetyConditionHolderName(sch:ISafetyConditoinHolder) =
                     match sch with
                     | :? Real as real -> [real.Flow.Name; real.Name].Combine()
-                    | :? ApiGroup as call -> call.Name
+                    | :? ApiCall as call -> call.Name
                     | _ -> failwith "ERROR"
 
                 [

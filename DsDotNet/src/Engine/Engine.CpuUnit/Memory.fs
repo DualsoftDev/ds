@@ -20,8 +20,9 @@ module MemoryModule =
     | Pause     = 32   
     | ErrorTx   = 64   //error bit1
     | ErrorRx   = 128  //error bit2
-    | LowNibble = 15    //xxxx0000
-    | HiNibble  = 255   //0000xxxx
+    
+    let LowNibble = 15    //xxxx0000
+    let HiNibble  = 240   //0000xxxx
 
     let  [<Literal>] EndIndex        = 0
     let  [<Literal>] ResetIndex      = 1
@@ -39,48 +40,61 @@ module MemoryModule =
     | ErrorRx 
 
     [<DebuggerDisplay("{Status}")>]
-    type Memory(m: Byte) =
-        let mutable value: Byte = m
+    type Memory(m:byte) =
+        let mutable value = m
         interface IData
-        new() = Memory(0uy)
-        member private x.getValue(flag:MemoryFlag) = 
+        member internal x.getValue(flag:MemoryFlag) = 
                         (value &&& (byte)flag) = (byte)flag
-        member private x.setValue(flag:MemoryFlag, v:bool) = 
+        member internal x.setValue(flag:MemoryFlag, v:bool) = 
                         if v 
                         then value <- value ||| (byte)flag
                         else value <- value &&& ~~~((byte)flag)
 
         member x.Value      with get() = value and set(v:Byte) = value <- v
-        member x.Relay      = x.getValue(MemoryFlag.Relay)
-        member x.RelayOn()  = x.setValue(MemoryFlag.Relay, true) 
-        member x.RelayOff() = x.setValue(MemoryFlag.Relay, false)
-
-        member x.Start      = x.getValue(MemoryFlag.S)
-        member x.StartOn()  = x.setValue(MemoryFlag.S, true) 
-        member x.StartOff() = x.setValue(MemoryFlag.S, false)
-
-        member x.Reset      = x.getValue(MemoryFlag.R)
-        member x.ResetOn()  = x.setValue(MemoryFlag.R, true) 
-        member x.ResetOff() = x.setValue(MemoryFlag.R, false)
-
-        member x.End      = x.getValue(MemoryFlag.E)
-        member x.EndOn()  = x.setValue(MemoryFlag.E, true) 
-        member x.EndOff() = x.setValue(MemoryFlag.E, false)
+        member x.Change(flag:MemoryFlag, v:bool)  = x.setValue(flag, v) 
 
         //status4 DS RGFH 상태
         member x.Status = 
-            let lowNibble = value &&& (MemoryFlag.LowNibble |> byte)
+            let lowNibble = value &&& (LowNibble |> byte)
             //Start = 1 Reset = 2 End = 4
             match lowNibble with  
-            |0uy|2uy|6uy -> Monitor.R
-            |4uy         -> Monitor.G
-            |1uy|5uy     -> Monitor.F
-            |3uy|7uy     -> Monitor.H
+            |0uy|2uy|6uy|8uy|10uy|14uy -> Monitor.R
+            |4uy|12uy                  -> Monitor.G
+            |1uy|5uy|9uy|13uy          -> Monitor.F
+            |3uy|7uy|11uy|15uy         -> Monitor.H
             |_ ->  failwith "error"
-                               
-        //Origin, Stop, ErrorTx, ErrorRx  상태
-        member x.Origin  = x.getValue(MemoryFlag.Origin)
-        member x.Pause   = x.getValue(MemoryFlag.Pause)
-        member x.ErrorTx = x.getValue(MemoryFlag.ErrorTx)
-        member x.ErrorRx = x.getValue(MemoryFlag.ErrorRx)
-      
+          
+        member x.GetControlValue(index:int)   = 
+            match index with 
+            | EndIndex   -> x.getValue(MemoryFlag.E) 
+            | ResetIndex -> x.getValue(MemoryFlag.R)  
+            | StartIndex -> x.getValue(MemoryFlag.S)  
+            | RelayIndex -> x.getValue(MemoryFlag.Relay)  
+            |_ -> failwith "error"
+       
+        member x.SetControlValue(index:int, v:bool)   = 
+            match index with 
+            | EndIndex ->   x.Change(MemoryFlag.E, v)
+            | ResetIndex -> x.Change(MemoryFlag.R, v)
+            | StartIndex -> x.Change(MemoryFlag.S, v)
+            | RelayIndex -> x.Change(MemoryFlag.Relay, v)
+            |_ -> failwith "error"
+
+        member x.GetMonitorValue(monitor:Monitor)   = 
+            match monitor  with 
+            |Monitor.R|Monitor.G|Monitor.F| Monitor.H  
+                              -> x.Status = monitor 
+            |Monitor.Origin   -> x.getValue(MemoryFlag.Origin) 
+            |Monitor.Pause    -> x.getValue(MemoryFlag.Pause) 
+            |Monitor.ErrorTx  -> x.getValue(MemoryFlag.ErrorTx) 
+            |Monitor.ErrorRx  -> x.getValue(MemoryFlag.ErrorRx) 
+
+        //Origin, Stop, ErrorTx, ErrorRx  변경
+        member x.ChangeMonitor(monitor:Monitor, v:bool)   = 
+            match monitor  with 
+            |Monitor.R|Monitor.G|Monitor.F| Monitor.H  
+                              -> failwith "error Status4 read only"
+            |Monitor.Origin   -> x.setValue(MemoryFlag.Origin,v) 
+            |Monitor.Pause    -> x.setValue(MemoryFlag.Pause,v) 
+            |Monitor.ErrorTx  -> x.setValue(MemoryFlag.ErrorTx,v) 
+            |Monitor.ErrorRx  -> x.setValue(MemoryFlag.ErrorRx,v) 

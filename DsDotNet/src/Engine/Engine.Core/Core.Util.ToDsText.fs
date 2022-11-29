@@ -143,7 +143,7 @@ module internal ToDsTextModule =
             let tab2 = getTab (indent+1)
 
             if system.Calls.Any() then
-                let print (ai:ApiCallDef) = $"{ai.ApiInterface.QualifiedName}({ai.TX}, {ai.RX})"
+                let print (ai:ApiCallDef) = $"{ai.ApiInterface.QualifiedName}({ai.OutTag}, {ai.InTag})"
                 yield $"{tab}[calls] = {lb}"
                 for c in system.Calls do
                     let ais = c.ApiItems.Select(print).JoinWith("; ") + ";"

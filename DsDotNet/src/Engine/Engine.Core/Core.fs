@@ -147,10 +147,10 @@ module CoreModule =
     type TagAddress = string
 
     /// Main system 에서 loading 된 다른 system 의 API 를 바라보는 관점.  [calls] = { Ap = { A."+"(%Q1, %I1); } }
-    type ApiCallDef (api:ApiUsage, tx:TagAddress, rx:TagAddress) =
+    type ApiCallDef (api:ApiUsage, outTag:TagAddress, inTag:TagAddress) =
         member _.ApiInterface = api
-        member val TX = tx
-        member val RX = rx
+        member val InTag = inTag
+        member val OutTag = outTag
 
     /// 자신을 export 하는 관점에서 본 api's.  Interface 정의.   [interfaces] = { "+" = { F.Vp ~ F.Sp } }
     and ApiInterface private (name:string, system:DsSystem) =

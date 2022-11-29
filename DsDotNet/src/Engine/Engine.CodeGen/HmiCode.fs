@@ -6,23 +6,24 @@ open Engine.Core
 [<AutoOpen>]
 module HmiGenModule =
     type Category =
-        | None      = 0
-        | System    = 1
-        | Flow      = 2
-        | Real      = 3
-        | Device    = 4
-        | Interface = 5
-        | Button    = 6
+        | None        = 0
+        | System      = 1
+        | Flow        = 2
+        | Real        = 3
+        | Device      = 4
+        | DeviceGroup = 5
+        | Interface   = 6
+        | Button      = 7
     and ButtonType =
-        | None      = 0
-        | Start     = 7
-        | Reset     = 8
-        | On        = 9
-        | Off       = 10
-        | Run       = 11
-        | Emergency = 12
-        | Auto      = 13
-        | Clear     = 14
+        | None        = 0
+        | Start       = 8
+        | Reset       = 9
+        | On          = 10
+        | Off         = 11
+        | Run         = 12
+        | Emergency   = 13
+        | Auto        = 14
+        | Clear       = 15
 
     type Info = {
         name:string;
@@ -33,7 +34,7 @@ module HmiGenModule =
         targets:ResizeArray<string>;
     }
 
-    let GenHmiCode(model:Model) =
+    let GenHmiCode (model:Model) =
         let hmiInfos = new Dictionary<string, Info>()
 
         let genInfo name category buttonType parent =
@@ -97,7 +98,7 @@ module HmiGenModule =
                         false = btnTargetMap[btnType].Contains(flowName) then
                     addFlowButton btnName system.Name [flowName] btnType
 
-        let addGlobalButtons (model:Model) =
+        let addGlobalButtons =
             let flowNames =
                 hmiInfos
                 |> Seq.filter(fun info -> info.Value.category = Category.Flow)
@@ -130,77 +131,86 @@ module HmiGenModule =
                         ButtonType.None api.System.QualifiedName
                 hmiInfos.Add(api.QualifiedName, info)
 
-        let addDevice
-                (model:Model) (system:DsSystem) (flow:Flow) (call:Vertex) =
-            let addToUsedIn device target =
-                if false = hmiInfos[device].used_in.Contains(target) then
-                    hmiInfos[device].used_in.Add(target)
+        let addDevice (system:DsSystem) (flow:Flow) (dvcGroup:ApiCallDef seq) =
+            for dvc in dvcGroup do
+                let api = dvc.ApiInterface
+                let device = dvc.ApiInterface.QualifiedName
+                if false = hmiInfos.ContainsKey(device) then
+                    let info = 
+                        genInfo device Category.Device ButtonType.None null
+                    hmiInfos.Add(device, info)
 
-            let (device, api) =
+                addInterface api.ApiInterface
+
+        let addDeviceGroup (system:DsSystem) (flow:Flow) (call:Vertex) = 
+            let addToUsedIn deviceGroup target =
+                if false = hmiInfos[deviceGroup].used_in.Contains(target) then
+                    hmiInfos[deviceGroup].used_in.Add(target)
+
+            let dvcGrp =
                 match call with
-                | :? Call as c ->
-                    c.ApiInterface.System.Name, Some(c.ApiInterface)
-                | :? Alias as a ->
+                | :? VertexCall as c ->
+                    addDevice system flow c.CallTarget.ApiItems
+                    c.CallTarget.Name
+                | :? VertexAlias as a ->
                     let aliasKey =
-                        match a.Target with
-                        | RealTarget r -> r.NameComponents
-                        | CallTarget c -> c.ApiInterface.NameComponents
-                    aliasKey[0], Some(model.FindExportApiItem aliasKey)
+                        match a.ApiTarget with
+                        | AliasTargetReal r -> 
+                            r.NameComponents
+                        | AliasTargetCall c -> 
+                            addDevice system flow c.ApiItems
+                            [|c.Name|]
+                    aliasKey[0]
                 | _ ->
-                    null, None
+                    null
 
-            if hmiInfos.ContainsKey(device) = false then
-                let info = genInfo device Category.Device ButtonType.None null
-                hmiInfos.Add(device, info)
+            if hmiInfos.ContainsKey(dvcGrp) = false then
+                let info = 
+                    genInfo dvcGrp Category.DeviceGroup ButtonType.None null
+                hmiInfos.Add(dvcGrp, info)
 
-            addInterface api.Value
-            addToUsedIn device system.Name
-            addToUsedIn device flow.QualifiedName
+            addToUsedIn dvcGrp system.Name
+            addToUsedIn dvcGrp flow.QualifiedName
 
             match call.Parent with
-            | Real realParent -> addToUsedIn device realParent.QualifiedName
+            | Real realParent -> addToUsedIn dvcGrp realParent.QualifiedName
             | _ -> ()
 
         let succeess, message = 
             try
                 for sys in model.Systems do
-                    if sys.Active then// if sys.Name = "My" then //to check //
-                        let groupBtnCombiner = addGroupButtons sys
-                        addSystemFlowReal 
-                            sys
-                        groupBtnCombiner 
-                            sys.AutoButtons ButtonType.Auto
-                        groupBtnCombiner 
-                            sys.ResetButtons ButtonType.Clear
-                        groupBtnCombiner 
-                            sys.EmergencyButtons ButtonType.Emergency
-                        let btnTgtMap =
-                            new Dictionary<ButtonType, ResizeArray<string>>()
-                        for info in hmiInfos do
-                            btnTgtMap.Add(
-                                info.Value.botton_type, 
-                                info.Value.targets
-                            )
-                        for flow in sys.Flows do
-                            addSystemFlowReal flow
-                            addUnionButtons sys flow btnTgtMap
-                            for rootSeg in flow.Graph.Vertices do
-                                match rootSeg with
-                                | :? Real as real ->
-                                    addSystemFlowReal rootSeg
-                                    for call in real.Graph.Vertices do
-                                        addDevice model sys flow call
-                                | :? Call as call ->
-                                    addDevice model sys flow call
-                                | :? Alias as alias ->
-                                    match alias.Target with
-                                    | RealTarget rt ->
-                                        addSystemFlowReal rt
-                                    | _ ->
-                                        addDevice model sys flow alias
+                    let groupBtnCombiner = addGroupButtons sys
+                    addSystemFlowReal sys
+                    groupBtnCombiner sys.AutoButtons ButtonType.Auto
+                    groupBtnCombiner sys.ResetButtons ButtonType.Clear
+                    groupBtnCombiner sys.EmergencyButtons ButtonType.Emergency
+                    let btnTgtMap =
+                        new Dictionary<ButtonType, ResizeArray<string>>()
+                    for info in hmiInfos do
+                        btnTgtMap.Add(
+                            info.Value.botton_type, 
+                            info.Value.targets
+                        )
+                    for flow in sys.Flows do
+                        addSystemFlowReal flow
+                        addUnionButtons sys flow btnTgtMap
+                        for rootSeg in flow.Graph.Vertices do
+                            match rootSeg with
+                            | :? Real as real ->
+                                addSystemFlowReal rootSeg
+                                for call in real.Graph.Vertices do
+                                    addDeviceGroup sys flow call
+                            | :? VertexCall as call ->
+                                addDeviceGroup sys flow call
+                            | :? VertexAlias as alias ->
+                                match alias.ApiTarget with
+                                | AliasTargetReal rt ->
+                                    addSystemFlowReal rt
                                 | _ ->
-                                    printfn "unknown type has detected"
-                if hmiInfos.Count <> 0 then addGlobalButtons model
+                                    addDeviceGroup sys flow alias
+                            | _ ->
+                                printfn "unknown type has detected"
+                if hmiInfos.Count <> 0 then addGlobalButtons
                 true, null
             with
                 | ex -> false, ex.Message

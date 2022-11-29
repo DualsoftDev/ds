@@ -10,7 +10,7 @@ open Engine.Cpu
 type StatementRoot =
     
     
-    [<Extension>] static member GetRealStartStatement(pReal:DsMemory, srcs:DsMemory seq) =
+    [<Extension>] static member TryCreateRungForRealStart(pReal:DsMemory, srcs:DsMemory seq) =
                     if srcs.Any()
                     then 
                         let sets  = srcs.Select(fun f->f.End).ToTags()
@@ -18,7 +18,7 @@ type StatementRoot =
                         pReal.Start <== anD[FuncExt.GetRelayExpr(sets, rsts, pReal.Start);pReal.Pause] |> Some //pReal.Pause _Auto 로 변경 필요
                     else None
                         
-    [<Extension>] static member GetRealResetStatement(real:DsMemory, goingSrcs:DsMemory seq) =
+    [<Extension>] static member TryGetRealResetStatement(real:DsMemory, goingSrcs:DsMemory seq) =
                     if goingSrcs.Any()
                     then 
                         //going relay srcs
@@ -27,13 +27,13 @@ type StatementRoot =
                         real.Reset <== anD[FuncExt.GetRelayExprReverseReset(sets, rsts, real.Reset);real.Pause] |> Some//pReal.Pause _Auto 로 변경 필요 
                     else None
     
-    [<Extension>] static member GetResetGoingStatement(realSrc:DsMemory, realTgt:DsMemory , going:DsMemory ) =
+    [<Extension>] static member CreateRungForResetGoing(realSrc:DsMemory, realTgt:DsMemory , going:DsMemory ) =
                     let sets  = [realSrc.Going].ToTags()
                     let rsts  = [realTgt.Homing].ToTags()
                     going.Relay <== FuncExt.GetRelayExpr(sets, rsts, going.Relay) //pReal.Pause _Auto 로 변경 필요
 
 
-    [<Extension>] static member GetResetSelfStatement(pReal:DsMemory ) =
+    [<Extension>] static member CreateRungForResetSelf(pReal:DsMemory ) =
                     let rsts  = [pReal.End].ToTags()
                     pReal.Reset <== FuncExt.GetAnd(rsts)
 

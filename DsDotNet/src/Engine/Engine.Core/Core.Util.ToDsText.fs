@@ -142,10 +142,10 @@ module internal ToDsTextModule =
 
             let tab2 = getTab (indent+1)
 
-            if system.Calls.Any() then
-                let print (ai:ApiCallDef) = $"{ai.ApiInterface.QualifiedName}({ai.OutTag}, {ai.InTag})"
+            if system.ApiGroups.Any() then
+                let print (ai:ApiCallDef) = $"{ai.ApiName}({ai.OutTag}, {ai.InTag})"
                 yield $"{tab}[calls] = {lb}"
-                for c in system.Calls do
+                for c in system.ApiGroups do
                     let ais = c.ApiItems.Select(print).JoinWith("; ") + ";"
                     yield $"{tab2}{c.Name.QuoteOnDemand()} = {lb} {ais} {rb}"
                 yield $"{tab}{rb}"
@@ -191,7 +191,7 @@ module internal ToDsTextModule =
             let safetyHolders =
                 [   for f in system.Flows do
                         yield! f.Graph.Vertices.OfType<ISafetyConditoinHolder>()
-                        yield! system.Calls.Cast<ISafetyConditoinHolder>()
+                        yield! system.ApiGroups.Cast<ISafetyConditoinHolder>()
                 ] |> List.distinct
 
             let withSafeties = safetyHolders.Where(fun h -> h.SafetyConditions.Any())
@@ -203,7 +203,7 @@ module internal ToDsTextModule =
                 let safetyConditionHolderName(sch:ISafetyConditoinHolder) =
                     match sch with
                     | :? Real as real -> [real.Flow.Name; real.Name].Combine()
-                    | :? Call as call -> call.Name
+                    | :? ApiGroup as call -> call.Name
                     | _ -> failwith "ERROR"
 
                 [
@@ -215,7 +215,7 @@ module internal ToDsTextModule =
                         yield $"{tab2}{rb}"
                 ] |> combineLines
 
-            let withLayouts = system.Calls.Where(fun call -> call.Xywh <> null)
+            let withLayouts = system.ApiGroups.Where(fun call -> call.Xywh <> null)
             let layouts =
                 [
                     if withLayouts.Any() then

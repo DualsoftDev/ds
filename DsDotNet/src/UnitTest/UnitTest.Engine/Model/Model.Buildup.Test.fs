@@ -22,26 +22,26 @@ module ModelBuildupTests1 =
             let system = DsSystem("My", "localhost")
             let flow = Flow.Create("F", system)
             let real = Real.Create("Main", flow)
-            let a = system.LoadDeviceAs("A", @$"{libdir}\cylinder.ds", "cylinder.ds")
+            let dev = system.LoadDeviceAs("A", @$"{libdir}\cylinder.ds", "cylinder.ds")
 
             let apis = system.ApiUsages
             let apiP = apis.First(fun ai -> ai.Name = "+")
             let apiM = apis.First(fun ai -> ai.Name = "-")
             let callAp =
-                let apiItem = ApiCallDef(apiP, "%Q1", "%I1")
-                Call("Ap", [apiItem])
+                let apiItem = ApiCallDef(apiP, "%Q1", "%I1", dev.Name)
+                ApiGroup("Ap", [apiItem])
             let callAm =
-                let apiItem = ApiCallDef(apiM, "%Q2", "%I2")
-                Call("Am", [apiItem])
-            system.Calls.AddRange([callAp; callAm])
+                let apiItem = ApiCallDef(apiM, "%Q2", "%I2", dev.Name)
+                ApiGroup("Am", [apiItem])
+            system.ApiGroups.AddRange([callAp; callAm])
             system, flow, real, callAp, callAm
 
         [<Test>]
         member __.``Model creation test`` () =
             let system, flow, real, callAp, callAm = createSimpleSystem()
 
-            let vCallP = VertexCall.Create("Ap", callAp, Real real)
-            let vCallM = VertexCall.Create("Am", callAm, Real real)
+            let vCallP = Call.Create("Ap", callAp, Real real)
+            let vCallM = Call.Create("Am", callAm, Real real)
             real.CreateEdge(ModelingEdgeInfo<Vertex>(vCallP, ">", vCallM)) |> ignore
 
             let generated = system.ToDsText()
@@ -67,8 +67,8 @@ module ModelBuildupTests1 =
         member __.``Invalid Model creation test`` () =
             let system, flow, real, callAp, callAm = createSimpleSystem()
 
-            let vCallP = VertexCall.Create("Ap", callAp, Real real)
-            let vCallM = VertexCall.Create("Am", callAm, Real real)
+            let vCallP = Call.Create("Ap", callAp, Real real)
+            let vCallM = Call.Create("Am", callAm, Real real)
             ( fun () ->
                 // real 의 child 간 edge 를 flow 에서 생성하려 함.. should fail
                 flow.CreateEdge(ModelingEdgeInfo<Vertex>(vCallP, ">", vCallM)) |> ignore
@@ -78,7 +78,7 @@ module ModelBuildupTests1 =
         member __.``Model with alias test`` () =
             let system, flow, real, callAp, callAm = createSimpleSystem()
 
-            let vCallP = VertexAlias.Create("Main2", AliasTargetReal real, Flow flow)
+            let vCallP = Alias.Create("Main2", AliasTargetReal real, Flow flow)
             let real2 = Real.Create("R2", flow)
 
             flow.CreateEdge(ModelingEdgeInfo<Vertex>(vCallP, ">", real2)) |> ignore
@@ -86,7 +86,7 @@ module ModelBuildupTests1 =
             let answer = """
 [sys ip = localhost] My = {
     [flow] F = {
-        Main2 > R2;		// Main2(VertexAlias)> R2(Real);
+        Main2 > R2;		// Main2(Alias)> R2(Real);
         Main; // island
         [aliases] = {
             Main = { Main2; }

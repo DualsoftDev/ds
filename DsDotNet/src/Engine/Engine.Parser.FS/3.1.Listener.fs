@@ -248,10 +248,10 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                 option {
                     match tryCall, tryAliasDef with
                     | Some call, None ->
-                        return VertexCall.Create(name, call, parentWrapper) :> Indirect
+                        return Call.Create(name, call, parentWrapper) :> Indirect
                     | None, Some aliasDef ->
                         let aliasTarget = tryFindAliasTarget flow name |> Option.get
-                        return VertexAlias.Create(name, aliasTarget, parentWrapper) :> Indirect
+                        return Alias.Create(name, aliasTarget, parentWrapper) :> Indirect
                     | None, None -> return! None
                     | _ ->
                         failwith "ERROR: duplicated"
@@ -341,7 +341,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                                 let rx = getAddress(rxAddressCtx)
 
                                 tracefn $"TX={tx} RX={rx}"
-                                return ApiCallDef(apiPoint, tx, rx)
+                                return ApiCallDef(apiPoint, tx, rx, device)
                             }
                         match apiItem with
                         | Some apiItem -> yield apiItem
@@ -350,7 +350,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                     | _ -> failwith "ERROR"
                 ]
             assert(apiItems.Any())
-            Call(callName, apiItems) |> system.Calls.Add
+            ApiGroup(callName, apiItems) |> system.ApiGroups.Add
 
         let fillTargetOfAliasDef (x:DsParserListener) (ctx:AliasListingContext) =
             let system = x.TheSystem

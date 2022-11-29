@@ -64,7 +64,9 @@ module internal ModelFindModule =
         system.ApiInterfaces.TryFindWithName(apiKey)
 
     and tryFindCallingApiItem (system:DsSystem) targetSystemName targetApiName =
-        system.ApiUsages.TryFind(nameComponentsEq [targetSystemName; targetApiName])
+        let findedLoadedSystem = tryFindLoadedSystem system targetSystemName 
+        let targetSystem = findedLoadedSystem.Value.ReferenceSystem
+        system.ApiUsages.TryFind(nameComponentsEq [targetSystem.Name; targetApiName])
 
     let tryFindVertexCall(system:DsSystem) (Fqdn(callPath)) =
         tryFindGraphVertex system callPath |> Option.map(forceCast<Call>)
@@ -80,7 +82,7 @@ module internal ModelFindModule =
         }
 
     let tryFindCall (system:DsSystem) callName =
-        system.Calls.TryFind(nameEq callName)
+        system.ApiGroups.TryFind(nameEq callName)
 
     let tryFindAliasTarget (flow:Flow) aliasMnemonic =
         flow.AliasDefs.Values

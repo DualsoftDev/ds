@@ -48,11 +48,11 @@ module CoreModule =
     type DsSystem (name:string, host:string) =
         inherit FqdnObject(name, createFqdnObject([||]))
         let devices = createNamedHashSet<LoadedSystem>()
-        let apiUsages = ResizeArray<ApiUsage>()
+        let apiUsages = ResizeArray<ApiInterface>()
         let addApiItemsForDevice (device: LoadedSystem) = device.CreateApiUsages() |> apiUsages.AddRange
 
         member val Flows    = createNamedHashSet<Flow>()
-        member val Calls    = ResizeArray<Call>()
+        member val ApiGroups    = ResizeArray<ApiGroup>()
 
         member _.AddDevice(dev) = devices.Add(dev) |> ignore; addApiItemsForDevice dev
         member val Devices = devices |> seq
@@ -125,19 +125,20 @@ module CoreModule =
         inherit Vertex(names |> Array.ofSeq, parent)
         new (name, parent) = Indirect([name], parent)
 
-    and VertexCall private (name:string, target:Call, parent) =
+    and Call private (name:string, target:ApiGroup, parent) =
         inherit Indirect(name, parent)
         member val CallTarget = target
 
-    and VertexAlias private (name:string, target:AliasTargetWrapper, parent) = // target : Real or Call or OtherFlowReal
+
+    and Alias private (name:string, target:AliasTargetWrapper, parent) = // target : Real or Call or OtherFlowReal
         inherit Indirect(name, parent)
         member val ApiTarget = target
 
     and VertexOtherFlowRealCall private (names:Fqdn, target:Real, parent) =
         inherit Indirect(names, parent)
 
-    /// Call 정의:
-    type Call (name:string, apiItems:ApiCallDef seq) =
+    /// ApiGroup 정의:
+    type ApiGroup (name:string, apiItems:ApiCallDef seq) =
         inherit Named(name)
         member val ApiItems = apiItems.ToFSharpList()
         member val Xywh:Xywh = null with get, set
@@ -147,10 +148,11 @@ module CoreModule =
     type TagAddress = string
 
     /// Main system 에서 loading 된 다른 system 의 API 를 바라보는 관점.  [calls] = { Ap = { A."+"(%Q1, %I1); } }
-    type ApiCallDef (api:ApiUsage, outTag:TagAddress, inTag:TagAddress) =
+    type ApiCallDef (api:ApiInterface, outTag:TagAddress, inTag:TagAddress, deviceName:string) =
         member _.ApiInterface = api
-        member val InTag = inTag
-        member val OutTag = outTag
+        member val InTag   = inTag
+        member val OutTag  = outTag
+        member val ApiName = getRawName [deviceName;api.Name] true
 
     /// 자신을 export 하는 관점에서 본 api's.  Interface 정의.   [interfaces] = { "+" = { F.Vp ~ F.Sp } }
     and ApiInterface private (name:string, system:DsSystem) =
@@ -158,13 +160,14 @@ module CoreModule =
         inherit FqdnObject(name, createFqdnObject([|system.Name|]))
         interface INamedVertex
 
+        member val Name = name
         member val TXs = createQualifiedNamedHashSet<Real>()
         member val RXs = createQualifiedNamedHashSet<Real>()
         member _.System = system
 
-    and ApiUsage(loadedSystemName:string, api: ApiInterface) =
-        inherit FqdnObject(api.Name, createFqdnObject([|loadedSystemName|]))
-        member _.ApiInterface = api
+    //and ApiUsage(loadedSystemName:string, api: ApiInterface) =
+    //    inherit FqdnObject(api.Name, createFqdnObject([|loadedSystemName|]))
+    //    member _.ApiInterface = api
 
     /// API 의 reset 정보:  "+" <||> "-";
     and ApiResetInfo private (system:DsSystem, operand1:string, operator:ModelingEdgeType, operand2:string) =
@@ -185,11 +188,11 @@ module CoreModule =
 
     and AliasTargetWrapper =
         | AliasTargetReal of Real    // MyFlow or OtherFlow 의 Real 일 수 있다.
-        | AliasTargetCall of Call
+        | AliasTargetCall of ApiGroup
 
     and SafetyCondition =
         | SafetyConditionReal of Real
-        | SafetyConditionCall of Call
+        | SafetyConditionCall of ApiGroup
 
 
     (* Abbreviations *)
@@ -221,26 +224,14 @@ module CoreModule =
             let segment = Real(name, flow)
             flow.Graph.AddVertex(segment) |> verifyM $"Duplicated segment name [{name}]"
             segment
-
-    type ApiInterface with
-        member x.AddTXs(txs:Real seq) = txs |> Seq.forall(fun tx -> x.TXs.Add(tx))
-        member x.AddRXs(rxs:Real seq) = rxs |> Seq.forall(fun rx -> x.RXs.Add(rx))
-        static member Create(name, system) =
-            let cp = ApiInterface(name, system)
-            system.ApiInterfaces.Add(cp) |> verifyM $"Duplicated interface prototype name [{name}]"
-            cp
-        static member Create(name, system, txs, rxs) =
-            let ai4e = ApiInterface.Create(name, system)
-            ai4e.AddTXs txs |> ignore
-            ai4e.AddRXs rxs |> ignore
-            ai4e
-
-    type VertexCall with
-        static member Create(name:string, target:Call, parent:ParentWrapper) =
-            let v = VertexCall(name, target, parent)
+            
+    type Call with
+        static member Create(name:string, target:ApiGroup, parent:ParentWrapper) =
+            let v = Call(name, target, parent)
             parent.GetGraph().AddVertex(v) |> verifyM $"Duplicated call name [{name}]"
             v
-    type VertexAlias with
+
+    type Alias with
         static member Create(name:string, target:AliasTargetWrapper, parent:ParentWrapper) =
             let createAliasDefOnDemand() =
                 (* <*.ds> 파일에서 생성하는 경우는 alias 정의가 먼저 선행되지만,
@@ -258,9 +249,22 @@ module CoreModule =
                 | None -> ads.Add(aliasKey, AliasDef(aliasKey, Some target, [|name|]))
 
             createAliasDefOnDemand()
-            let v = VertexAlias(name, target, parent)
+            let v = Alias(name, target, parent)
             parent.GetGraph().AddVertex(v) |> verifyM $"Duplicated alias name [{name}]"
             v
+
+    type ApiInterface with
+        member x.AddTXs(txs:Real seq) = txs |> Seq.forall(fun tx -> x.TXs.Add(tx))
+        member x.AddRXs(rxs:Real seq) = rxs |> Seq.forall(fun rx -> x.RXs.Add(rx))
+        static member Create(name, system) =
+            let cp = ApiInterface(name, system)
+            system.ApiInterfaces.Add(cp) |> verifyM $"Duplicated interface prototype name [{name}]"
+            cp
+        static member Create(name, system, txs, rxs) =
+            let ai4e = ApiInterface.Create(name, system)
+            ai4e.AddTXs txs |> ignore
+            ai4e.AddRXs rxs |> ignore
+            ai4e
 
     type VertexOtherFlowRealCall with
         static member Create(otherFlowReal:Real, parent:ParentWrapper) =
@@ -268,7 +272,6 @@ module CoreModule =
             let v = VertexOtherFlowRealCall( [| ofn; ofrn |], otherFlowReal, parent)
             parent.GetGraph().AddVertex(v) |> verifyM $"Duplicated other flow real call [{ofn}.{ofrn}]"
             v
-
 
     type SafetyCondition with
         member x.Core:obj =
@@ -316,5 +319,6 @@ module CoreModule =
             | None -> dicButton.Add(btnName, HashSet[|flow|] )
 
     type LoadedSystem with
-        member x.CreateApiUsages() =
-            [ for ai in x.ReferenceSystem.ApiInterfaces -> ApiUsage(x.Name, ai) ]
+        member x.CreateApiUsages() = x.ReferenceSystem.ApiInterfaces 
+           
+        //    [ for ai in x.ReferenceSystem.ApiInterfaces -> ApiUsage(x.Name, ai) ]

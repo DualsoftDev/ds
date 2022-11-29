@@ -140,7 +140,7 @@ module HmiGenModule =
                         genInfo device Category.Device ButtonType.None null
                     hmiInfos.Add(device, info)
 
-                addInterface api.ApiInterface
+                addInterface api//.ApiInterface
 
         let addDeviceGroup (system:DsSystem) (flow:Flow) (call:Vertex) = 
             let addToUsedIn deviceGroup target =
@@ -149,10 +149,10 @@ module HmiGenModule =
 
             let dvcGrp =
                 match call with
-                | :? VertexCall as c ->
+                | :? Call as c ->
                     addDevice system flow c.CallTarget.ApiItems
                     c.CallTarget.Name
-                | :? VertexAlias as a ->
+                | :? Alias as a ->
                     let aliasKey =
                         match a.ApiTarget with
                         | AliasTargetReal r -> 
@@ -200,9 +200,9 @@ module HmiGenModule =
                                 addSystemFlowReal rootSeg
                                 for call in real.Graph.Vertices do
                                     addDeviceGroup sys flow call
-                            | :? VertexCall as call ->
+                            | :? Call as call ->
                                 addDeviceGroup sys flow call
-                            | :? VertexAlias as alias ->
+                            | :? Alias as alias ->
                                 match alias.ApiTarget with
                                 | AliasTargetReal rt ->
                                     addSystemFlowReal rt

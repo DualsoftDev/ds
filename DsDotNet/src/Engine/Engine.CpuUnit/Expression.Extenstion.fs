@@ -14,10 +14,10 @@ let verifyFunction (expr:Expression<'T>)  =
     | ConstValue v -> failwith "not function"
     | Variable   t -> failwith "not function"
     | Function (name, args) -> expr
-                               //if args.Any() |>not 
+                               //if args.Any() |>not
                                //then failwith $"Empty Arguments of function : {name}"
                                //else expr
- 
+
 let add             (xs:Args) =  Function(_add           , xs) |> verifyFunction
 let addDouble       (xs:Args) =  Function(_addDouble     , xs) |> verifyFunction
 let addString       (xs:Args) =  Function(_addString     , xs) |> verifyFunction
@@ -60,41 +60,42 @@ let tan             (xs:Args) =  Function(_tan           , xs) |> verifyFunction
 
 [<AutoOpen>]
 [<DebuggerDisplay("{ToText()}")>]
-type Statement<'T> = 
-    | Assign      of expression:Expression<'T>   * target:Tag<'T>
+type Statement<'T> =
+    | Assign      of expression:Expression<'T> * target:Tag<'T>
 
     //임시테스트
     member x.TestForce() =
         match x with
         | Assign     (expr, target) ->  target.SetValue(true)
-                    
-                
+
+
     member x.Do() =
         match x with
-        | Assign     (expr, target) -> 
+        | Assign     (expr, target) ->
                      ///  Target Y = Function (X)
-                     target.SetValue(evaluate(expr)) 
-                
+                     target.SetValue(evaluate(expr))
+
     member x.ToText() =
          match x with
          | Assign     (expr, target) -> $"assign({expr.ToText()}, {target.ToText()})"
 
 
+let private tagsToArguments (xs:Tag<'T> seq) = xs.Select box
 
 [<AutoOpen>]
 [<Extension>]
 type FuncExt =
 
 
-    
+
     [<Extension>] static member Evaluate (x:Expression<'T>) = evaluate x
     [<Extension>] static member CreateFunc (xs:IEnumerable, funcName:string) = Function(funcName, [xs])
     [<Extension>] static member ToTags (xs:DsBit<'T> seq)    = xs.Cast<Tag<_>>()
     [<Extension>] static member ToTags (xs:DsDotBit<'T> seq) = xs.Cast<Tag<_>>()
     [<Extension>] static member ToTags (xs:PlcTag<'T> seq)   = xs.Cast<Tag<_>>()
     [<Extension>] static member ToExpr (x:Tag<bool>)   = x |> createTagExpr
-    [<Extension>] static member GetAnd (xs:Tag<'T> seq)  = xs.Select(fun f-> (f|>box)) |> anD
-    [<Extension>] static member GetOr  (xs:Tag<'T> seq)  = xs.Select(fun f-> (f|>box)) |> oR
+    [<Extension>] static member GetAnd (xs:Tag<'T> seq)  = xs |> tagsToArguments |> anD
+    [<Extension>] static member GetOr  (xs:Tag<'T> seq)  = xs |> tagsToArguments |> oR
     //[sets and]--|----- ! [rsts or] ----- (relay)
     //|relay|-----|
     [<Extension>] static member GetRelayExpr(sets:Tag<'T> seq, rsts:Tag<'T> seq, relay:Tag<bool>) =
@@ -108,7 +109,7 @@ type FuncExt =
     //|relay|-----|
     [<Extension>] static member GetRelayExprReverseReset(sets:Tag<'T> seq, rsts:Tag<'T> seq, relay:Tag<bool>) =
                     (sets.GetAnd() <||> relay.ToExpr()) <&&> (rsts.GetOr())
-           
+
 
 [<AutoOpen>]
 module ExpressionOperatorModule =

@@ -22,7 +22,7 @@ module ModelAnswers =
     [flow] F = {
         Main = {
             Ap1, Bp1 > Bm1;
-            Ap > Am;
+            Ap > Am > Bp > Bm;
         }
         [aliases] = {
             Ap = { Ap1; Ap2; Ap3; }

@@ -23,14 +23,23 @@ module internal ModelFindModule =
                 match xs1 with
                 | [] -> Some flow
                 | r::xs2 ->
-                    let real = flow.Graph.FindVertex(r) |> box :?> Real
-                    match xs2 with
-                    | [] -> Some real
-                    | remaining ->
-                        option {
-                            let! v = real.Graph.TryFindVertex(remaining.Combine())
-                            return box v
-                        }
+                    match flow.Graph.FindVertex(r) with
+                    | :? Real as real ->  match xs2 with
+                                          | [] -> Some real
+                                          | remaining ->
+                                                option {
+                                                    let! v = real.Graph.TryFindVertex(remaining.Combine())
+                                                    return box v
+                                                }
+                    | :? Call as call ->  match xs2 with
+                                          | [] -> Some call
+                                          | remaining ->
+                                                option {
+                                                    let! v = call.Parent.GetGraph().TryFindVertex(remaining.Combine())
+                                                    return box v
+                                                }
+                    |_ -> None
+                   
 
             | dev::xs when system.Devices.Any(nameEq dev) ->
                 let device = system.Devices.Find(nameEq dev)
@@ -83,6 +92,9 @@ module internal ModelFindModule =
 
     let tryFindCall (system:DsSystem) callName =
         system.ApiGroups.TryFind(nameEq callName)
+
+    let tryFindApiNameDef (system:DsSystem) callName =
+        system.DefinedApiNames.Where(fun f-> f = callName)
 
     let tryFindAliasTarget (flow:Flow) aliasMnemonic =
         flow.AliasDefs.Values

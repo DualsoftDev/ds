@@ -150,8 +150,8 @@ module HmiGenModule =
             let dvcGrp =
                 match call with
                 | :? Call as c ->
-                    addDevice system flow c.CallTarget.ApiItems
-                    c.CallTarget.Name
+                    addDevice system flow c.ApiItems
+                    c.Name
                 | :? Alias as a ->
                     let aliasKey =
                         match a.ApiTarget with

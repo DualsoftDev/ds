@@ -230,7 +230,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                 yield! sysctx.Descendants<CausalTokenContext>().Cast<ParserRuleContext>()
             ]
 
-            let isCallName (parentWrapper:ParentWrapper) name = tryFindCall system name |> Option.isSome
+            let isCallName (parentWrapper:ParentWrapper) name = tryFindApiNameDef system name |> Seq.any
             let isAliasMnemonic (parentWrapper:ParentWrapper) name =
                 let flow = parentWrapper.GetFlow()
                 tryFindAliasDefWithMnemonic flow name |> Option.isSome
@@ -241,21 +241,18 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                 let yyy = isAliasMnemonic pw name
                 isCallName pw name || isAliasMnemonic pw name
 
-            let tryCreateCallOrAlias (parentWrapper:ParentWrapper) name =
+          
+            let tryCreateAlias (parentWrapper:ParentWrapper) name =
                 let flow = parentWrapper.GetFlow()
-                let tryCall = tryFindCall system name
                 let tryAliasDef = tryFindAliasDefWithMnemonic flow name
                 option {
-                    match tryCall, tryAliasDef with
-                    | Some call, None ->
-                        return Call.Create(call, parentWrapper) :> Indirect
-                    | None, Some aliasDef ->
+                    match tryAliasDef with
+                    | Some aliasDef ->
                         let aliasTarget = tryFindAliasTarget flow name |> Option.get
                         return Alias.Create(name, aliasTarget, parentWrapper) :> Indirect
-                    | None, None -> return! None
-                    | _ ->
-                        failwith "ERROR: duplicated"
+                    | None -> failwith "Error"
                 }
+
             let candidates = candidateCtxs.Select(getContainerChildPair)
 
             let loop () =
@@ -267,14 +264,16 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                     | None ->
                         match cycle, ctxInfo.Names with
                         | 0, q::[] when not <| isCallOrAlias parent q ->
-                            let flow = parent.GetCore() :?> Flow
-                            Real.Create(q, flow) |> ignore
+                            match parent.GetCore() with
+                            | :? Flow as f -> Real.Create(q, f) |> ignore
+                            | :? Real as r -> ()
+                            | _ ->   failwith "ERROR"
+                        | 1, q::[] when (isCallOrAlias parent q) -> 
+                            if isCallName parent q
+                            then Call.Create(q, parent, parent.GetSystem(), []) |> ignore
+                            elif isAliasMnemonic parent q then tryCreateAlias parent q |> ignore
+                            else failwith "ERROR"
 
-                        | 1, q::[] when (isCallOrAlias parent q) ->
-                            match tryCreateCallOrAlias parent q with
-                            | Some _ -> ()
-                            | None ->
-                                failwith "ERROR"
                         | 1, ofn::ofrn::[] ->
                             let otherFlowReal = tryFindReal system ofn ofrn |> Option.get
                             RealOtherFlow.Create(otherFlowReal, parent) |> ignore
@@ -289,6 +288,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
 
         let createNonParentedRealVertex = tokenCreator 0
         let createCallOrAliasVertex = tokenCreator 1
+        //let createAliasVertex = tokenCreator 2
 
         let fillInterfaceDef (system:DsSystem) (ctx:InterfaceDefContext) =
             let findSegments(fqdns:Fqdn[]):Real[] =
@@ -321,7 +321,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                 api.AddRXs(findSegments(ser[1])) |> ignore
             } |> ignore
 
-        let createCallDef (system:DsSystem) (ctx:CallListingContext) =
+        let fillCallApiItems (system:DsSystem) (ctx:CallListingContext) =
             let callName =  ctx.TryFindFirstChild<CallNameContext>().Map(getText).Value
             let apiDefCtxs = ctx.Descendants<CallApiDefContext>().ToArray()
             let getAddress (addressCtx:IParseTree) =
@@ -350,7 +350,16 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                     | _ -> failwith "ERROR"
                 ]
             assert(apiItems.Any())
-            ApiCall(callName, apiItems) |> system.ApiGroups.Add
+            let tryCall = tryFindCall system callName
+            match tryCall with
+            | Some(c) -> apiItems.ForEach(fun f->  c.ApiItems.Add(f) |> verifyM $"Duplicated ApiItem add call [{f.ApiName}]")
+            | None -> ()
+
+        let createCallAddApis (system:DsSystem) (ctx:CallListingContext) =
+            let callName =  ctx.TryFindFirstChild<CallNameContext>().Map(getText).Value
+            system.DefinedApiNames.Add(callName) |> verifyM $"Duplicated ApiItem define [{callName}]"
+          
+
 
         let fillTargetOfAliasDef (x:DsParserListener) (ctx:AliasListingContext) =
             let system = x.TheSystem
@@ -392,14 +401,15 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
             }
 
 
+ 
         for ctx in sysctx.Descendants<CallListingContext>() do
-            createCallDef x.TheSystem ctx
+            createCallAddApis x.TheSystem ctx |> ignore
 
+        createNonParentedRealVertex()
 
         for ctx in sysctx.Descendants<AliasListingContext>() do
             createAliasDef x ctx |> ignore
 
-        createNonParentedRealVertex()
 
         for ctx in sysctx.Descendants<AliasListingContext>() do
             fillTargetOfAliasDef x ctx |> ignore
@@ -409,6 +419,9 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
 
         for ctx in sysctx.Descendants<InterfaceDefContext>() do
             fillInterfaceDef x.TheSystem ctx |> ignore
+
+        for ctx in sysctx.Descendants<CallListingContext>() do
+            fillCallApiItems x.TheSystem ctx |> ignore
 
         guardedValidateSystem system
 

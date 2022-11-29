@@ -203,7 +203,7 @@ namespace Engine
     }
     [calls] = {
         Ap = { A.""+""(%Q1, %I1); }
-        Am = { A.""-""(%Q2, %I2); }
+        //Am = { A.""-""(%Q2, %I2); }  //사용 안되면 정의 불가
     }
     [device file=""cylinder.ds""] A;
 }
@@ -382,6 +382,7 @@ namespace Engine
             // 정보로서의 Call 상호 리셋
             Ap1 <||> Am1;
             Ap1 > Am1, Ap2 > Am2;
+            Ap > Am;  //원본 사용 필수
         }
         [aliases] = {
             Ap = { Ap1; Ap2; Ap3; }

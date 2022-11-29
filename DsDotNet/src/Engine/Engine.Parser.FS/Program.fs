@@ -167,9 +167,9 @@ C4 > C5;
 [sys] L = {
     [flow] F = {
         Main = {
-            Ap > Am;
 
             Ap1, Bp1 > Bm1;
+            Ap > Am > Bp > Bm;
 
             /* Grouped */
             //{ Ap1; Bp1; } > Bm1

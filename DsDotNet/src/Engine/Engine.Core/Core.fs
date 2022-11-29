@@ -52,8 +52,9 @@ module CoreModule =
         let addApiItemsForDevice (device: LoadedSystem) = device.ReferenceSystem.ApiInterfaces |> apiUsages.AddRange
 
         member val Flows    = createNamedHashSet<Flow>()
-        member val ApiGroups    = ResizeArray<ApiCall>()
-
+        member val ApiGroups        = ResizeArray<Call>()
+        member val DefinedApiNames  = HashSet<string>()
+        
         member _.AddDevice(dev) = devices.Add(dev) |> ignore; addApiItemsForDevice dev
         member val Devices = devices |> seq
         member val Variables = ResizeArray<Variable>()
@@ -129,9 +130,10 @@ module CoreModule =
         inherit Indirect(names, parent)
         member val Real = target
 
-    and Call private (target:ApiCall, parent) =
-        inherit Indirect(target.Name, parent)
-        member val CallTarget = target
+    and Call private (name:string, parent) =
+        inherit Indirect(name, parent)
+        member val ApiItems = HashSet<ApiCallDef>()
+        member val Xywh:Xywh = null with get, set
         interface ISafetyConditoinHolder with
             member val SafetyConditions = HashSet<SafetyCondition>()
 
@@ -140,12 +142,12 @@ module CoreModule =
         member val ApiTarget = target
 
     /// ApiCallDefs 정의:
-    type ApiCall (name:string, apiItems:ApiCallDef seq) =
-        inherit Named(name)
-        member val ApiItems = apiItems.ToFSharpList()
-        member val Xywh:Xywh = null with get, set
-        interface ISafetyConditoinHolder with  //?? 여기 정의 확인 필요 Subclasses = {Call | Real}
-            member val SafetyConditions = HashSet<SafetyCondition>()
+    //type ApiCall (name:string, apiItems:ApiCallDef seq) =
+    //    inherit Named(name)
+    //    member val ApiItems = apiItems.ToFSharpList()
+    //    member val Xywh:Xywh = null with get, set
+    //    interface ISafetyConditoinHolder with  //?? 여기 정의 확인 필요 Subclasses = {Call | Real}
+    //        member val SafetyConditions = HashSet<SafetyCondition>()
 
     type TagAddress = string
     /// Main system 에서 loading 된 다른 system 의 API 를 바라보는 관점.  [calls] = { Ap = { A."+"(%Q1, %I1); } }
@@ -189,11 +191,11 @@ module CoreModule =
 
     and AliasTargetWrapper =
         | AliasTargetReal of Real    // MyFlow or OtherFlow 의 Real 일 수 있다.
-        | AliasTargetCall of ApiCall
+        | AliasTargetCall of Call
 
     and SafetyCondition =
         | SafetyConditionReal of Real
-        | SafetyConditionCall of ApiCall
+        | SafetyConditionCall of Call
 
 
     (* Abbreviations *)
@@ -234,9 +236,11 @@ module CoreModule =
             v
 
     type Call with
-        static member Create(target:ApiCall, parent:ParentWrapper) =
-            let v = Call(target, parent)
-            parent.GetGraph().AddVertex(v) |> verifyM $"Duplicated call name [{target.Name}]"
+        static member Create(name:string, parent:ParentWrapper, system:DsSystem, apiItems:ApiCallDef seq) =
+            let v = Call(name, parent)
+            apiItems.ForEach(fun a-> v.ApiItems.Add(a) |> verifyM $"Duplicated ApiItem name [{name}]")
+            parent.GetGraph().AddVertex(v) |> verifyM $"Duplicated call name [{name}]"
+            if system.ApiGroups.Where(fun f-> f.Name = v.Name).IsEmpty() then system.ApiGroups.Add(v)
             v
 
     type Alias with

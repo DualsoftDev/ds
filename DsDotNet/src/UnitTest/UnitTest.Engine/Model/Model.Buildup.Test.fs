@@ -27,21 +27,19 @@ module ModelBuildupTests1 =
             let apis = system.ApiUsages
             let apiP = apis.First(fun ai -> ai.Name = "+")
             let apiM = apis.First(fun ai -> ai.Name = "-")
-            let callAp =
-                let apiItem = ApiCallDef(apiP, "%Q1", "%I1", dev.Name)
-                ApiCall("Ap", [apiItem])
-            let callAm =
-                let apiItem = ApiCallDef(apiM, "%Q2", "%I2", dev.Name)
-                ApiCall("Am", [apiItem])
-            system.ApiGroups.AddRange([callAp; callAm])
-            system, flow, real, callAp, callAm
+            let apiItemP = ApiCallDef(apiP, "%Q1", "%I1", dev.Name)
+            let apiItemM = ApiCallDef(apiM, "%Q2", "%I2", dev.Name)
+
+        
+            system, flow, real, apiItemP, apiItemM
 
         [<Test>]
         member __.``Model creation test`` () =
-            let system, flow, real, callAp, callAm = createSimpleSystem()
+            let system, flow, real, apiItemP, apiItemM = createSimpleSystem()
 
-            let vCallP = Call.Create( callAp, Real real)
-            let vCallM = Call.Create( callAm, Real real)
+            let vCallP = Call.Create("Ap", Real real, system, [apiItemP])
+            let vCallM = Call.Create("Am", Real real, system, [apiItemM])
+
             real.CreateEdge(ModelingEdgeInfo<Vertex>(vCallP, ">", vCallM)) |> ignore
 
             let generated = system.ToDsText()
@@ -65,10 +63,9 @@ module ModelBuildupTests1 =
 
         [<Test>]
         member __.``Invalid Model creation test`` () =
-            let system, flow, real, callAp, callAm = createSimpleSystem()
-
-            let vCallP = Call.Create( callAp, Real real)
-            let vCallM = Call.Create( callAm, Real real)
+            let system, flow, real, apiItemP, apiItemM = createSimpleSystem()
+            let vCallP = Call.Create("Ap", Real real, system, [apiItemP])
+            let vCallM = Call.Create("Am", Real real, system, [apiItemM])
             ( fun () ->
                 // real 의 child 간 edge 를 flow 에서 생성하려 함.. should fail
                 flow.CreateEdge(ModelingEdgeInfo<Vertex>(vCallP, ">", vCallM)) |> ignore
@@ -76,7 +73,7 @@ module ModelBuildupTests1 =
 
         [<Test>]
         member __.``Model with alias test`` () =
-            let system, flow, real, callAp, callAm = createSimpleSystem()
+            let system, flow, real, apiItemP, apiItemM = createSimpleSystem()
 
             let vCallP = Alias.Create("Main2", AliasTargetReal real, Flow flow)
             let real2 = Real.Create("R2", flow)
@@ -92,10 +89,6 @@ module ModelBuildupTests1 =
             Main = { Main2; }
         }
     }
-    [calls] = {
-        Ap = { A."+"(%Q1, %I1); }
-        Am = { A."-"(%Q2, %I2); }
-    }
     [device file="cylinder.ds"] A;
 }
 """
@@ -105,7 +98,7 @@ module ModelBuildupTests1 =
 
         [<Test>]
         member __.``Model with other flow real call test`` () =
-            let system, flow, real, callAp, callAm = createSimpleSystem()
+            let system, flow, real, apiItemP, apiItemM = createSimpleSystem()
 
             let flow2 = Flow.Create("F2", system)
 
@@ -122,10 +115,6 @@ module ModelBuildupTests1 =
     [flow] F2 = {
         F.Main > R3;		// F.Main(RealOtherFlow)> R3(Real);
     }
-    [calls] = {
-        Ap = { A."+"(%Q1, %I1); }
-        Am = { A."-"(%Q2, %I2); }
-    }
     [device file="cylinder.ds"] A;
 }
 """
@@ -136,7 +125,7 @@ module ModelBuildupTests1 =
 
         [<Test>]
         member __.``Model with export api test`` () =
-            let system, flow, real, callAp, callAm = createSimpleSystem()
+            let system, flow, real, apiItemP, apiItemM = createSimpleSystem()
             let real2 = Real.Create("Main2", flow)
             let adv = ApiInterface.Create("Adv", system, [real], [real])
             let ret = ApiInterface.Create("Ret", system, [real2], [real2])
@@ -150,10 +139,6 @@ module ModelBuildupTests1 =
     [flow] F = {
             Main; // island
             Main2; // island
-    }
-    [calls] = {
-        Ap = { A."+"(%Q1, %I1); }
-        Am = { A."-"(%Q2, %I2); }
     }
     [interfaces] = {
         Adv = { F.Main ~ F.Main }
@@ -170,7 +155,7 @@ module ModelBuildupTests1 =
 
         [<Test>]
         member __.``Model with buttons test`` () =
-            let system, flow, real, callAp, callAm = createSimpleSystem()
+            let system, flow, real, apiItemP, apiItemM = createSimpleSystem()
 
             system.AddButton(BtnType.EmergencyBTN, "STOP", flow)
             system.AddButton(BtnType.StartBTN, "START", flow)
@@ -186,10 +171,6 @@ module ModelBuildupTests1 =
             Main; // island
     }
     [flow] F2 = {
-    }
-    [calls] = {
-        Ap = { A."+"(%Q1, %I1); }
-        Am = { A."-"(%Q2, %I2); }
     }
     [emg] = {
         STOP = { F; }
@@ -211,7 +192,7 @@ module ModelBuildupTests1 =
 
         [<Test>]
         member __.``Model with code element test`` () =
-            let system, flow, real, callAp, callAm = createSimpleSystem()
+            let system, flow, real, apiItemP, apiItemM = createSimpleSystem()
 
             let v = CodeElements.Variable
             let c = CodeElements.Command
@@ -255,10 +236,6 @@ module ModelBuildupTests1 =
 [sys ip = localhost] My = {
     [flow] F = {
             Main; // island
-    }
-    [calls] = {
-        Ap = { A."+"(%Q1, %I1); }
-        Am = { A."-"(%Q2, %I2); }
     }
     [device file="cylinder.ds"] A;
     [variables] = {

@@ -9,39 +9,32 @@ open System.Collections.Concurrent
  
 [<AutoOpen>]
 [<Extension>]
-type ConvertUtil =
+type ConvertUtilExt =
     
     [<Extension>] static member GetVertices(sys:DsSystem) =
                     sys.Flows.SelectMany(fun flow->
                         flow.Graph.Vertices 
                             |> Seq.collect(fun v ->
                                 match v with
-                                | :? Real as r -> r.Graph.Vertices.ToArray() |>Seq.append [r]
+                                | :? Real as r -> r.Graph.Vertices.ToArray() @ [r]
                                 | _ -> [|v|])
                            ) 
 
-    [<Extension>] static member GetIncomingReset(target:Vertex, graph:DsGraph, dicM:ConcurrentDictionary<Vertex, DsTag>) =
-                     graph.GetIncomingEdges(target)
-                        .Where(fun e-> e.EdgeType.HasFlag(EdgeType.Reset))
-                        .Where(fun e-> e.EdgeType.HasFlag(EdgeType.Strong)|>not)
-                        .Select(fun e->dicM[e.Source])
-    
-    [<Extension>] static member GetIncomingStart(target:Vertex, graph:DsGraph, dicM:ConcurrentDictionary<Vertex, DsTag>) =
-                     graph.GetIncomingEdges(target)
-                        .Where(fun e-> e.EdgeType.HasFlag(EdgeType.Reset)|>not)
-                        .Where(fun e-> e.EdgeType.HasFlag(EdgeType.Strong)|>not)
-                        .Select(fun e->dicM[e.Source])
-    
-    [<Extension>] static member GetIncomingStartStrong(target:Vertex, graph:DsGraph, dicM:ConcurrentDictionary<Vertex, DsTag>) =
-                     graph.GetIncomingEdges(target)
-                        .Where(fun e-> e.EdgeType.HasFlag(EdgeType.Reset)|>not)
-                        .Where(fun e-> e.EdgeType.HasFlag(EdgeType.Strong))
-                        .Select(fun e->dicM[e.Source])
+    [<Extension>] static member AppendSome(xs:Statement<'T> seq, xOpt:Statement<'T> option) =
+                                if xOpt.IsSome 
+                                then xs |> Seq.append [xOpt.Value]
+                                else xs
 
-      
-    [<Extension>] static member GetIncomingResetStrong(target:Vertex, graph:DsGraph, dicM:ConcurrentDictionary<Vertex, DsTag>) =
-                     graph.GetIncomingEdges(target)
-                        .Where(fun e-> e.EdgeType.HasFlag(EdgeType.Reset))
-                        .Where(fun e-> e.EdgeType.HasFlag(EdgeType.Strong))
-                        .Select(fun e->dicM[e.Source])
-    
+    [<Extension>] static member FindEdgeSources(target:Vertex, graph:DsGraph, edgeType:ModelingEdgeType) = 
+                    let edges = graph.GetIncomingEdges(target)
+                    let findEdges = 
+                        match edgeType with 
+                        | StartEdge        -> edges.OfNotResetEdge().Where(fun e->e.EdgeType.HasFlag(EdgeType.Strong)|> not)
+                        | StartPush        -> edges.OfNotResetEdge().Where(fun e->e.EdgeType.HasFlag(EdgeType.Strong))
+                        | ResetEdge        -> edges.OfWeakResetEdge()
+                        | ResetPush        -> edges.OfStrongResetEdge()
+                        | StartReset       
+                        | InterlockWeak    
+                        | Interlock        -> failwith $"Do not use {edgeType} Error"
+        
+                    findEdges.Select(fun e->e.Source)

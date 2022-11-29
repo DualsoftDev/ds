@@ -15,35 +15,26 @@ module DataModule =
 
       //지원 value type : bool, int, byte, single, double, string
       //미지원 value type : uint, int64, ... 지원 기준외 등등
-    let ToData (x:obj) = 
-        match x with
-        | :? bool   as ds -> Data(ds) :> IData
-        | :? int    as ds -> Data(ds) :> IData
-        | :? byte   as ds -> Data(ds) :> IData
-        | :? double as ds -> Data(ds) :> IData
-        | :? single as ds -> Data(ds) :> IData
-        | :? string as ds -> Data(ds) :> IData
-        | _ ->
-                failwith $"error {x.GetType().Name} : vaildType [ bool, byte, int, single, double, string ]" 
-
-    let ToValue (x:obj) =
-        match x with
-        | :? Data<bool>     as ds -> ds.Data |> unbox
-        | :? Data<int>      as ds -> ds.Data |> unbox
-        | :? Data<byte>     as ds -> ds.Data |> unbox
-        | :? Data<double>   as ds -> ds.Data |> unbox
-        | :? Data<single>   as ds -> ds.Data |> unbox
-        | :? Data<string>   as ds -> ds.Data |> unbox
-        | _ ->
-                failwith "error" 
+    let CheckVaildValue (x:obj) = 
+        let checkedValue = 
+            match x with
+            | :? bool   -> x
+            | :? int    -> x
+            | :? byte   -> x
+            | :? double -> x
+            | :? single -> x
+            | :? string -> x
+            | _ ->
+                    failwith $"error {x.GetType().Name} : vaildType [ bool, byte, int, single, double, string ]" 
+        checkedValue
 
     //json type Deserialize
     let getData(dataType:string, value:string)  = 
         match dataType with
-        |"Boolean"-> Convert.ToBoolean(value) |> ToData
-        |"Int32"  -> Convert.ToInt32(value)   |> ToData
-        |"Byte  " -> Convert.ToByte(value)    |> ToData
-        |"Double" -> Convert.ToDouble(value)  |> ToData
-        |"Single" -> Convert.ToSingle(value)  |> ToData
-        |"String" -> Convert.ToDouble(value)  |> ToData
+        |"Boolean"-> Convert.ToBoolean(value)  |> box
+        |"Int32"  -> Convert.ToInt32(value)    |> box
+        |"Byte  " -> Convert.ToByte(value)     |> box
+        |"Double" -> Convert.ToDouble(value)   |> box
+        |"Single" -> Convert.ToSingle(value)   |> box
+        |"String" -> Convert.ToDouble(value)   |> box
         |_ -> failwith "error"

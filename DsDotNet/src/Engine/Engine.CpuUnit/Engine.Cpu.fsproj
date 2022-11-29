@@ -15,7 +15,6 @@
     <Compile Include="FunctionName.fs" />
     <Compile Include="Expression.fs" />
     <Compile Include="Expression.Extenstion.fs" />
-    <Compile Include="Expression.Statement.fs" />
     <Compile Include="Convert.Util.fs" />
     <Compile Include="Convert.Root.fs" />
     <Compile Include="Convert.Real.fs" />

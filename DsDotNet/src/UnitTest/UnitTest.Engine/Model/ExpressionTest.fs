@@ -8,7 +8,7 @@ open Engine.Cpu
 
 [<AutoOpen>]
 module ExpressionTestModule =
-    
+
     type ExpressionTest() =
         do Fixtures.SetUpTest()
 
@@ -38,26 +38,26 @@ module ExpressionTestModule =
             let t1 = PcTag.Create("1", 1)
             t1 |> evaluate === 1
             t1.Data <-  2|>ToData  // t1.SetValue(2) 같음
-            
+
             t1 |> evaluate === 2
             t1.SetValue(3)
             t1 |> evaluate === 3
-            
+
             let t2 = PcTag.Create("2", 2)
             add[t2;t2] |> evaluate === 4
             //함수 없는 Tag 배열 평가는 불가능
             (fun () -> [t2;t2]   |> evaluate  === 1) |> ShouldFail
 
             PcTag.Create("Two", "Two") |> evaluate === "Two"
-            
+
             addString([
-                    PcTag.Create("Hello", "Hello, ") 
-                    PcTag.Create("World", "world!" ) 
+                    PcTag.Create("Hello", "Hello, ")
+                    PcTag.Create("World", "world!" )
                 ]) |> evaluate === "Hello, world!"
 
             let tt1 = t1 |> createTagExpr
             t1.SetValue(1)
-            let tt2 = PcTag.Create("t2", 2) 
+            let tt2 = PcTag.Create("t2", 2)
 
             let addTwoExpr = Function("+", [ tt1; tt2 ])
             addTwoExpr |> evaluate  === 3
@@ -99,7 +99,7 @@ module ExpressionTestModule =
             equal[2; 2.0]                       |> evaluate=== true
             equal[2; 2.0f]                      |> evaluate === true
 
-          
+
             gte [2; 3] |> evaluate === false
             gte [5; 4] |> evaluate === true
             noT [true] |> evaluate  === false
@@ -115,19 +115,19 @@ module ExpressionTestModule =
             shiftLeft [1; 3] |> evaluate === 8
             shiftRight [8; 3] |> evaluate === 1
 
-            let ex = mul [2; 3] 
+            let ex = mul [2; 3]
             equal [6; ex]                    |> evaluate === true
             equal [6; mul [2; 3]]            |> evaluate === true
             Function("+", [1; 2])     |> evaluate === 3
 
         [<Test>]
         member __.``4 ExpressionComposition test`` () =
-            mul [   
+            mul [
                     0
                    // [2;2]
-                    PcTag.Create("t2", 2) 
-                    add [1; 2] 
-                    add [4; 5] 
+                    PcTag.Create("t2", 2)
+                    add [1; 2]
+                    add [4; 5]
             ] |> evaluate === 0
 
 
@@ -139,17 +139,17 @@ module ExpressionTestModule =
              = 100
             *)
             mul [   shiftLeft [1; 2]   // 4
-                    add [   
+                    add [
                         shiftRight [8; 3]   // 1
                         4
-                        ] 
+                        ]
                     5] |> evaluate === 100   // 4 * (1+4) * 5
 
 
 
         [<Test>]
         member __.``5 Statement test`` () =
-            let expr = mul [2; 3; 4] 
+            let expr = mul [2; 3; 4]
             let target = PcTag.Create("target", 1)
 
             let stmt = Assign (expr, target)
@@ -166,10 +166,10 @@ module ExpressionTestModule =
             target |> evaluate  === 33
             Assign(createTagExpr source, target).Do()
             target |> evaluate === 44
-          
+
         [<Test>]
-        member __.``6 Serialization test`` () = 
-            
+        member __.``6 Serialization test`` () =
+
             createDataExpr 1         |> ToText === "1"
             createDataExpr "hello"   |> ToText === "hello"
             createDataExpr Math.PI   |> ToText === Math.PI.ToString()
@@ -177,19 +177,19 @@ module ExpressionTestModule =
             createDataExpr false     |> ToText === "False"
             createDataExpr 3.14f     |> ToText === "3.14"
             createDataExpr 3.14      |> ToText === "3.14"
-            
+
 
             mul [   2
-                    add [1; 2] 
-                    add [4; 5] 
+                    add [1; 2]
+                    add [4; 5]
             ] |> ToText === "*[2; +[1; 2]; +[4; 5]]"
             mul [2; add[3; 4]]|> ToText  === "*[2; +[3; 4]]"
 
             mul [2; 3; 4]|> ToText  === "*[2; 3; 4]"
             mul [2; 3; 4]|> ToText  === "*[2; 3; 4]"
 
-            let t1 = PcTag.Create("t1", 1) 
-            let t2 = PcTag.Create("t2", 2) 
+            let t1 = PcTag.Create("t1", 1)
+            let t2 = PcTag.Create("t2", 2)
             let tt1 = t1 |> createTagExpr
             let tt2 = t2 |> createTagExpr
 
@@ -213,14 +213,14 @@ module ExpressionTestModule =
         [<Test>]
         member __.``7 Deserialize test`` () =
 
-            let t2 = PcTag.Create("t2", 2) 
-            let t1 = PcTag.Create("t1", 1) 
+            let t2 = PcTag.Create("t2", 2)
+            let t1 = PcTag.Create("t1", 1)
             let addTwoExpr = Function("+", [ t1;t2 ])
             addTwoExpr.ToJsonText().ToExpression().ToJsonText() === addTwoExpr.ToJsonText()
 
             let expr = mul [   2
-                               add [t1; t2] 
-                               add [4; 5] 
+                               add [t1; t2]
+                               add [4; 5]
                             ]
             expr.ToJsonText().ToExpression().ToJsonText() === expr.ToJsonText()
 
@@ -230,14 +230,45 @@ module ExpressionTestModule =
             let expr = add [10 ;12 ]
             expr.ToJsonText().ToExpression().ToJsonText() === expr.ToJsonText()
             let target = PcTag.Create("target", 1)
-            
+
 
             let expr = mul [    2
                                 expr
-                                add [t1; t2] 
-                                add [1; 5] 
-                    ] 
+                                add [t1; t2]
+                                add [1; 5]
+                    ]
             let a = expr |> evaluate
 
             let stmt = Assign (expr, target)
             stmt.ToJsonText().ToStatement().ToJsonText() === stmt.ToJsonText()
+
+
+        [<Test>]
+        member __.``8 ExpressionOperator test`` () =
+            let t = Bool [true]
+            let f = Bool [false]
+            !! t |> evaluate === false
+            !! f |> evaluate === true
+            t <&&> t |> evaluate === true
+            t <&&> f |> evaluate === false
+            f <&&> t |> evaluate === false
+            f <&&> f |> evaluate === false
+
+            t <||> t |> evaluate === true
+            t <||> f |> evaluate === true
+            f <||> t |> evaluate === true
+            f <||> f |> evaluate === false
+
+
+            (t <||> f) <&&> t |> evaluate === true
+
+            let target = PcTag.Create("bool", false)
+            target |> evaluate === false
+
+            let assignStatement = target <== t
+            assignStatement.Do()
+            target |> evaluate === true
+
+            (target <== f).Do()
+            target |> evaluate === false
+

@@ -8,6 +8,7 @@ open Engine.Common.FS
 
 [<AutoOpen>]
 module CoreModule =
+    /// Creates FQDN(Fully Qualified Domain Name) object
     let createFqdnObject (nameComponents:string array) = {
         new IQualifiedNamed with
             member _.Name with get() = nameComponents.LastOrDefault() and set(v) = failwith "ERROR"

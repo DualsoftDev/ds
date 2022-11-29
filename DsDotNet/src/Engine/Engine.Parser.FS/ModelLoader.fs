@@ -38,6 +38,7 @@ module ModelLoader =
         system
 
     let LoadFromConfig(config: FilePath) =
+        DsSystem.ClearExternalSystemCaches()
         let cfg = LoadConfig config
         let systems =
             [   for dsFile in cfg.DsFilePaths do

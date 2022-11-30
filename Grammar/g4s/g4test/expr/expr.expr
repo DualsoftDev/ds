@@ -1,0 +1,14 @@
+/* grun expression expression < g4test/expression/exp.exp */
+
+hello := true && false = 5;
+hello := (true && false = 5);
+
+hello((1 + 2) * 3, sin(1), array[3][2][g(2)], myvar);
+
+a = b;
+
+-a;
+2 + 3;
+$tag + 2;
+//$ tag + 2;      // illegal: $ space
+

@@ -342,6 +342,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                 api.AddRXs(findSegments(ser[1])) |> ignore
             } |> ignore
 
+
         let createJobDef (system:DsSystem) (ctx:CallListingContext) =
             let jobName =  ctx.TryFindFirstChild<JobNameContext>().Map(getText).Value
             let apiDefCtxs = ctx.Descendants<CallApiDefContext>().ToArray()
@@ -383,28 +384,15 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                 let target =
                         let ns = aliasKeys.ToFSharpList()
                         match ns with
-                        | flowOrReal::realOrCall::[] ->
-                            let realTargetCandidate = flow.Graph.TryFindVertex<Real>(realOrCall)
-                            let callTargetCandidate = tryFindCall system  ns 
-                            match realTargetCandidate, callTargetCandidate with
-                            | Some real, None -> AliasTargetReal real
-                            | None, Some call -> AliasTargetCall call
-                            | Some _, Some _ -> failwith "Name duplicated."
-                            | _ ->  
-                                
-                                match tryFindReal system flowOrReal realOrCall with
-                                    | Some otherFlowReal -> AliasTargetReal otherFlowReal
-                                    | _ -> failwith "Failed to find"
-                           
-
-                        | realOrCall::[] ->
-                            let vertex = flow.System.TryFindReal flow.System flow.Name realOrCall 
-                            if vertex.IsSome
-                            then AliasTargetReal (vertex.Value)
-                            else
-                                 let c = flow.System.TryFindCall ([flow.Name;realOrCall].ToArray()) |> Option.get
-                                 AliasTargetCall (c)
-                            
+                        | rc::[] -> //Flow.R or Flow.C
+                            match flow.System.TryFindReal flow.System flow.Name rc  with
+                            | Some r -> r |> AliasTargetReal
+                            | None -> flow.System.TryFindCall ([flow.Name;rc].ToArray()) |> Option.get |>AliasTargetCall
+                      
+                        | flowOrReal::rc::[] -> //FlowEx.R or Real.C
+                            match tryFindFlow system flowOrReal with
+                            | Some f -> f.Graph.TryFindVertex<Real>(rc)  |> Option.get |> AliasTargetReal
+                            | None ->  tryFindCall system  ns |> Option.get |> AliasTargetCall
                         | _ ->
                             failwith "ERROR"
 

@@ -13,8 +13,8 @@ namespace Engine
             Ap1 > Am1;
         }
         [aliases] = {
-            F.Ap = { Ap1; Ap2; Ap3; }
-            F.Am = { Am1; Am2; Am3; }
+            Ap = { Ap1; Ap2; Ap3; }
+            Am = { Am1; Am2; Am3; }
         }
         // ---- flow 내의 safety block 없애는 걸로...
         //[safety] = {
@@ -386,8 +386,8 @@ namespace Engine
             Ap > Am; 
         }
         [aliases] = {
-            Ap = { Ap1; Ap2; Ap3; }
-            Am = { Am1; Am2; Am3; }    // system name optional
+            Main.Ap = { Ap1; Ap2; Ap3; }
+            Main.Am = { Am1; Am2; Am3; }    // system name optional
             //Vp = {AVp1;}  // invalid: 자신 시스템에 정의된 것만 alias
         }
     }

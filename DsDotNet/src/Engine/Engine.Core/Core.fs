@@ -250,7 +250,7 @@ module CoreModule =
                     match target with
                     | AliasTargetReal r ->
                         (if r.Flow <> flow then [|r.Flow.Name|] else [||]) @ [| r.Name |]
-                    | AliasTargetCall c -> c.ParentNPureNames
+                    | AliasTargetCall c -> c.PureNames
                 let ads = flow.AliasDefs
                 match ads.TryFind(aliasKey) with
                 | Some ad -> ad.Mnemonincs.AddIfNotContains(name) |> ignore

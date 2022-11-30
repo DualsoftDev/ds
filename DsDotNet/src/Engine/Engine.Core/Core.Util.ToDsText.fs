@@ -94,8 +94,8 @@ module internal ToDsTextModule =
                                
                         | Some(AliasTargetCall call) -> 
                             match call.Parent.GetCore() with
-                            | :? Flow as f -> [f.Name; call.Name].Combine()
-                            | :? Real as r -> [r.Flow.Name; r.Name; call.Name].Combine()
+                            | :? Flow as f -> call.Name
+                            | :? Real as r -> call.ParentNPureNames.Combine()
                             | _ -> failwith "ERROR"
                         | None -> failwith "ERROR"
 

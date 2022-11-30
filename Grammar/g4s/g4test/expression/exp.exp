@@ -1,0 +1,2 @@
+/* grun expression expression < g4test/expression/exp.exp */
+(1 + 2) * 3

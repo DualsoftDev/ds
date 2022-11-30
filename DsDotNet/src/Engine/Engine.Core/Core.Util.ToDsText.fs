@@ -144,7 +144,7 @@ module internal ToDsTextModule =
 
             if system.Jobs.Any() then
                 let print (ai:JobDef) = $"{ai.ApiName}({ai.OutTag}, {ai.InTag})"
-                yield $"{tab}[calls] = {lb}"
+                yield $"{tab}[jobs] = {lb}"
                 for c in system.Jobs do
                     let ais = c.ApiItems.Select(print).JoinWith("; ") + ";"
                     yield $"{tab2}{c.Name.QuoteOnDemand()} = {lb} {ais} {rb}"

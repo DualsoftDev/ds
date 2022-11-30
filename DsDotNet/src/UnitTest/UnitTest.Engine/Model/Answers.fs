@@ -31,7 +31,7 @@ module ModelAnswers =
             Bm = { Bm1; Bm2; Bm3; }
         }
     }
-    [calls] = {
+    [jobs] = {
         Ap = { A."+"(%Q1, %I1); }
         Am = { A."-"(%Q2, %I2); }
         Bp = { B."+"(%Q3, %I3); }
@@ -81,7 +81,7 @@ module ModelAnswers =
             Main = { Main2; }
         }
     }
-    [calls] = {
+    [jobs] = {
         Ap = { A."+"(%Q1, %I1); }
         Am = { A."-"(%Q2, %I2); }
         Bp = { B."+"(%Q3, %I3); }
@@ -145,7 +145,7 @@ module ModelAnswers =
 [flow] F = {
     Fp > Fm > Gm;
 }
-[calls] = {
+[jobs] = {
     Fp = { F."+"(%Q1, %I1); }
     Fm = { F."-"(%Q2, %I2); }
     Gm = { G."-"(%Q3, %I3); }
@@ -168,7 +168,7 @@ module ModelComponentAnswers =
         Ap >> Am;
     }
 }
-[calls] = {
+[jobs] = {
     Ap = { A."+"(%Q1, %I1); }
     Am = { A."-"(%Q2, %I2); }
 }
@@ -230,7 +230,7 @@ module ModelComponentAnswers =
         AndFlow.R3 = { AndFlowR3; OtherFlowR3; }
     }
 }
-[calls] = {
+[jobs] = {
     C1 = { B."+"(%Q1, %I1); A."+"(%Q1, %I1); }
     C2 = { A."-"(%Q3, _); B."-"(%Q3, _); }
 }

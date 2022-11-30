@@ -112,7 +112,7 @@ flowBlock
         aliasDef: identifier12;     // {OtherFlow}.{real} or {MyFlowReal} or {Call}
         aliasMnemonic: identifier1;
 
-callBlock: '[' 'calls' ']' '=' LBRACE (callListing)* RBRACE;
+callBlock: '[' 'jobs' ']' '=' LBRACE (callListing)* RBRACE;
     callListing:
         callName '=' LBRACE (callApiDef)? ( ';' callApiDef)* (';')+ RBRACE;
     callName: etcName1;

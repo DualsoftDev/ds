@@ -20,7 +20,7 @@
             - Parenting 에서는 올 수 없으며, Flow 직접 child 에서만 가능
             - Call 이나 Alias 정의가 없으면 MyReal 로 간주
 
-- [calls] {
+- [jobs] {
         C1 = { Cyl1.Adv(%Q1, %Q2; %I1); Cyl2.Adv(%Q3; %I2, %I3) }
   }
   [aliases] {

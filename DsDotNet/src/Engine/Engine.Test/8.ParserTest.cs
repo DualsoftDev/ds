@@ -22,7 +22,7 @@ namespace Engine
         //    Main = {C.F.Sp; C.F.Sm}
         //}
     }
-    [calls] = {
+    [jobs] = {
         Ap = { A.""+""(%Q1, %I1); }
         Am = { A.""-""(%Q2, %I2); }
     }
@@ -47,7 +47,7 @@ namespace Engine
             Ap <|| Am;
         }
     }
-    [calls] = {
+    [jobs] = {
         Ap = { A.""+""(%Q1, %I1); }
         Am = { A.""-""(%Q2, %I2); }
     }
@@ -203,7 +203,7 @@ namespace Engine
     [flow] FF = {
         A, Ap > C |> Ap;
     }
-    [calls] = {
+    [jobs] = {
         Ap = { A.""+""(%Q1, %I1); }
         //Am = { A.""-""(%Q2, %I2); }  //사용 안되면 정의 불가
     }
@@ -318,7 +318,7 @@ namespace Engine
             AndFlow.R3 = { AndFlowR3; OtherFlowR3; }
         }
     }
-    [calls] = {
+    [jobs] = {
         C1 = { B.""+""(%Q1, %I1); A.""+""(%Q999.2343, _); }
         C2 = { A.""-""(%Q3, _); B.""-""(_, %I1); }
     }
@@ -392,7 +392,7 @@ namespace Engine
             //Vp = {AVp1;}  // invalid: 자신 시스템에 정의된 것만 alias
         }
     }
-    [calls] = {
+    [jobs] = {
         Ap = { A.""+""(%Q1, %I1); }
         Am = { A.""-""(%Q2, %I2); }
     }

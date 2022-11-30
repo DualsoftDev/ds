@@ -86,7 +86,7 @@ module SystemBuilderTest =
     [flow] F1 = {
             R1; // island
     }
-    [calls] = {
+    [jobs] = {
         Ap = { A."+"(%Q1, %I1); }
         Am = { A."-"(%Q2, %I2); }
     }

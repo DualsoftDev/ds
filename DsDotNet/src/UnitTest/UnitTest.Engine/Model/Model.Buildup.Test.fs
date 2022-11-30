@@ -52,7 +52,7 @@ module ModelBuildupTests1 =
             Ap > Am;
         }
     }
-    [calls] = {
+    [jobs] = {
         Ap = { A."+"(%Q1, %I1); }
         Am = { A."-"(%Q2, %I2); }
     }
@@ -92,7 +92,7 @@ module ModelBuildupTests1 =
             Main = { Main2; }
         }
     }
-    [calls] = {
+    [jobs] = {
         Ap = { A."+"(%Q1, %I1); }
         Am = { A."-"(%Q2, %I2); }
     }
@@ -122,7 +122,7 @@ module ModelBuildupTests1 =
     [flow] F2 = {
         F.Main > R3;		// F.Main(RealOtherFlow)> R3(Real);
     }
-    [calls] = {
+    [jobs] = {
         Ap = { A."+"(%Q1, %I1); }
         Am = { A."-"(%Q2, %I2); }
     }
@@ -151,7 +151,7 @@ module ModelBuildupTests1 =
             Main; // island
             Main2; // island
     }
-    [calls] = {
+    [jobs] = {
         Ap = { A."+"(%Q1, %I1); }
         Am = { A."-"(%Q2, %I2); }
     }
@@ -187,7 +187,7 @@ module ModelBuildupTests1 =
     }
     [flow] F2 = {
     }
-    [calls] = {
+    [jobs] = {
         Ap = { A."+"(%Q1, %I1); }
         Am = { A."-"(%Q2, %I2); }
     }
@@ -256,7 +256,7 @@ module ModelBuildupTests1 =
     [flow] F = {
             Main; // island
     }
-    [calls] = {
+    [jobs] = {
         Ap = { A."+"(%Q1, %I1); }
         Am = { A."-"(%Q2, %I2); }
     }

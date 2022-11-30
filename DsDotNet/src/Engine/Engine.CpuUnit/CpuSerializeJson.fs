@@ -6,7 +6,7 @@ open System.Text.Json
 open System
 
 
-let toTag(x:TerminalJson) = 
+let toTag(x:TerminalJson) =
     let typeName = x.TagType
     let dataType = x.Type
     let tagName  = x.Name
@@ -17,45 +17,55 @@ let toTag(x:TerminalJson) =
                 |"PlcTag"   -> PlcTag.Create(tagName, getData(dataType, tagValue)|> CheckVaildValue)  :> ITag
                 |_ -> failwith "error"
 
-    tag :?> Tag<'T> 
+    tag :?> Tag<'T>
 
-let toConstExpr(x:ExpressionJson) = Expression.ConstValue(getData(x.Type, x.Terminal.Value))
+//let toConstExpr(x:ExpressionJson) =
+//    let t, v = x.Type, x.Terminal.Value
+//    let conv x = Terminal (Value (box x))
+//    match x.Type with
+//    |"Boolean"-> Convert.ToBoolean(v)  |> conv
+//    |"Int32"  -> Convert.ToInt32(v)    |> conv
+//    |"Byte  " -> Convert.ToByte(v)     |> conv
+//    |"Double" -> Convert.ToDouble(v)   |> conv
+//    |"Single" -> Convert.ToSingle(v)   |> conv
+//    |"String" -> Convert.ToDouble(v)   |> conv
+//    |_ -> failwith "error"
 
-///ExpressionJson -> Expression
-let toExpr(x:ExpressionJson) = 
-    let rec getExpr(x:ExpressionJson) = 
-                    match x.Case with
-                    |"ConstValue" -> toConstExpr(x)
-                    |"Variable" ->   toTag(x.Terminal) |> createTagExpr
-                    |"Function" ->   Function(x.Type, x.Items |> Seq.map(fun f-> getExpr f) )
-                    | _ -> failwith "error"
-    getExpr(x)
+/////ExpressionJson -> Expression
+//let toExpr(x:ExpressionJson) =
+//    let rec getExpr(x:ExpressionJson) =
+//                    match x.Case with
+//                    |"ConstValue" -> toConstExpr(x)
+//                    |"Variable" ->   Terminal (toTag(x.Terminal))
+//                    |"Function" ->   Function(x.Type, x.Items |> Seq.map(fun f-> getExpr f) )
+//                    | _ -> failwith "error"
+//    getExpr(x)
 
-[<AutoOpen>]
-[<Extension>]
-type SerializeModule =
-    ///Expression -> ToJsonText
-    [<Extension>] static member ToJsonText (expr:Expression<'T>) = 
-                    let expressionJson = expr.ToJson() 
-                    let json = JsonSerializer.Serialize<ExpressionJson>(expressionJson, jsonOptions)
-                    json.ToString()
+//[<AutoOpen>]
+//[<Extension>]
+//type SerializeModule =
+//    ///Expression -> ToJsonText
+//    [<Extension>] static member ToJsonText (expr:Expression<'T>) =
+//                    let expressionJson = expr.ToJson()
+//                    let json = JsonSerializer.Serialize<ExpressionJson>(expressionJson, jsonOptions)
+//                    json.ToString()
 
-    ///Statement -> ToJsonText
-    [<Extension>] static member ToJsonText (x:Statement<'T>) = 
-                    let statementJson = match x with
-                                        | Assign     (expr, target) ->  { 
-                                            Expresstion = expr.ToJson() 
-                                            Target      = target  |> toTerminalTagJson }
+//    ///Statement -> ToJsonText
+//    [<Extension>] static member ToJsonText (x:Statement<'T>) =
+//                    let statementJson = match x with
+//                                        | Assign     (expr, target) ->  {
+//                                            Expresstion = expr.ToJson()
+//                                            Target      = target  |> toTerminalTagJson }
 
-                    let json = JsonSerializer.Serialize<StatementJson>(statementJson, jsonOptions)
-                    json.ToString()
+//                    let json = JsonSerializer.Serialize<StatementJson>(statementJson, jsonOptions)
+//                    json.ToString()
 
-    ///JsonText -> Expression
-    [<Extension>] static member ToExpression (json:string) =
-                    let exprJson = JsonSerializer.Deserialize<ExpressionJson> json
-                    toExpr(exprJson)
+//    ///JsonText -> Expression
+//    [<Extension>] static member ToExpression (json:string) =
+//                    let exprJson = JsonSerializer.Deserialize<ExpressionJson> json
+//                    toExpr(exprJson)
 
-     ///JsonText -> Statement
-    [<Extension>] static member ToStatement (json:string) =
-                    let sJson = JsonSerializer.Deserialize<StatementJson> json
-                    Assign(sJson.Expresstion|>toExpr , sJson.Target |> toTag)
+//     ///JsonText -> Statement
+//    [<Extension>] static member ToStatement (json:string) =
+//                    let sJson = JsonSerializer.Deserialize<StatementJson> json
+//                    Assign(sJson.Expresstion|>toExpr , sJson.Target |> toTag)

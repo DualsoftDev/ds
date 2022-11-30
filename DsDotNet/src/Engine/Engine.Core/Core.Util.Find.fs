@@ -79,7 +79,7 @@ module internal ModelFindModule =
     let tryFindJob (system:DsSystem) jobName =
         system.Jobs.TryFind(nameEq jobName)
     
-    //JOB에 등록 안되있으면 Real로 처리 한다.
+    //jobs 에 등록 안되있으면 Real로 처리 한다.
     let tryFindCall (system:DsSystem) (Fqdn(callPath))=
         if tryFindJob system (callPath.Last()) |> Option.isSome
         then match tryFindGraphVertex system callPath with

@@ -11,7 +11,6 @@ namespace Engine
         Ap > Am;
         Main = {
             Ap1 > Am1;
-            Ap > Am;
         }
         [aliases] = {
             F.Ap = { Ap1; Ap2; Ap3; }
@@ -384,7 +383,7 @@ namespace Engine
             // 정보로서의 Call 상호 리셋
             Ap1 <||> Am1;
             Ap1 > Am1, Ap2 > Am2;
-            Ap > Am;  //원본 사용 필수
+            Ap > Am; 
         }
         [aliases] = {
             Ap = { Ap1; Ap2; Ap3; }

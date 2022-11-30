@@ -89,11 +89,14 @@ module internal ToDsTextModule =
                     let aliasKey =
                         match a.AliasTarget with
                         | Some(AliasTargetReal real) ->
-                            if real.Flow.Name = flow.Name then
-                                real.Name
-                            else
-                                [real.Flow.Name; real.Name].Combine()
-                        | Some(AliasTargetCall call) -> call.Name
+                            if real.Flow.Name = flow.Name then real.Name
+                            else real.PureNames.Combine()
+                               
+                        | Some(AliasTargetCall call) -> 
+                            match call.Parent.GetCore() with
+                            | :? Flow as f -> [f.Name; call.Name].Combine()
+                            | :? Real as r -> [r.Flow.Name; r.Name; call.Name].Combine()
+                            | _ -> failwith "ERROR"
                         | None -> failwith "ERROR"
 
                     yield $"{tab}{aliasKey} = {lb} {mnemonics} {rb}"
@@ -197,12 +200,12 @@ module internal ToDsTextModule =
             let safeties =
                 let safetyConditionName (sc:SafetyCondition) =
                     match sc with
-                    | SafetyConditionReal real -> [real.Flow.Name; real.Name].Combine()
-                    | SafetyConditionCall call -> call.Name
+                    | SafetyConditionReal real -> real.ParentNPureNames.Combine()
+                    | SafetyConditionCall call -> call.ParentNPureNames.Combine()
                 let safetyConditionHolderName(sch:ISafetyConditoinHolder) =
                     match sch with
-                    | :? Real as real -> [real.Flow.Name; real.Name].Combine()
-                    | :? Call as call -> call.NameComponents.Combine()
+                    | :? Real as real -> real.ParentNPureNames.Combine()
+                    | :? Call as call -> call.ParentNPureNames.Combine()
                     | _ -> failwith "ERROR"
 
                 [

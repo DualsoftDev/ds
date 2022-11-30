@@ -26,7 +26,7 @@ comment: BLOCK_COMMENT | LINE_COMMENT;
 system: '[' sysHeader ']' systemName '=' (sysBlock) EOF;    // [sys] Seg = {..}
     sysHeader: SYS ipSpec?;
     sysBlock
-        : LBRACE (  flowBlock | callBlock | loadDeviceBlock | loadExternalSystemBlock
+        : LBRACE (  flowBlock | jobBlock | loadDeviceBlock | loadExternalSystemBlock
                     | interfaceBlock | buttonsBlocks | propsBlock
                     | variableBlock | commandBlock | observeBlock )*
           RBRACE       // identifier1Listing|parenting|causal|call
@@ -82,6 +82,7 @@ propsBlock: '[' 'prop' ']' EQ LBRACE (safetyBlock|layoutBlock)* RBRACE;
 
     layoutBlock: '[' 'layouts' ']' '=' LBRACE (positionDef)* RBRACE;
         positionDef: callName '=' xywh;
+            callName: identifier23;
             xywh: LPARENTHESIS x COMMA y (COMMA w COMMA h)? RPARENTHESIS (SEIMCOLON)?;
             x: INTEGER;
             y: INTEGER;
@@ -112,10 +113,10 @@ flowBlock
         aliasDef: identifier12;     // {OtherFlow}.{real} or {MyFlowReal} or {Call}
         aliasMnemonic: identifier1;
 
-callBlock: '[' 'jobs' ']' '=' LBRACE (callListing)* RBRACE;
+jobBlock: '[' 'jobs' ']' '=' LBRACE (callListing)* RBRACE;
     callListing:
-        callName '=' LBRACE (callApiDef)? ( ';' callApiDef)* (';')+ RBRACE;
-    callName: etcName1;
+        jobName '=' LBRACE (callApiDef)? ( ';' callApiDef)* (';')+ RBRACE;
+    jobName: etcName1;
     callApiDef: callKey addressTxRx;
     callKey: identifier12;
 

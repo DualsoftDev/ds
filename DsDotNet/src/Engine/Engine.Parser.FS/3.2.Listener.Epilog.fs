@@ -69,7 +69,7 @@ module EtcListenerModule =
                             let safety = safetyDef.TryFindFirstChild(fun (t:IParseTree) -> t :? SafetyKeyContext).Value
                             safety.CollectNameComponents()   // ["Main"] or ["My", "Flow", "Main"]
                         let valueHeader = safetyDef.Descendants<SafetyValuesContext>().First()
-                        let values      = valueHeader.Descendants<Identifier12Context>().Select(collectNameComponents).ToArray()
+                        let values      = valueHeader.Descendants<Identifier23Context>().Select(collectNameComponents).ToArray()
                         (key, values)
                 ]
 
@@ -154,7 +154,8 @@ module EtcListenerModule =
             let positionDefs = ctx.Descendants<PositionDefContext>().ToArray()
             for posiDef in positionDefs do
                 //<kwak> //callName() 파서 수정필요
-                let callNamePath = posiDef.callName().GetText().Split('.')  //임시처리
+                let callNamePath = posiDef.Descendants<CallNameContext>().Select(getText).ToArray()
+              //  let callNamePath = posiDef.callName().GetText().Split('.')  //임시처리
                 let xywh = posiDef.xywh()
                 let call = tryFindCall x.TheSystem callNamePath |> Option.get
 

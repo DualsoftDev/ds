@@ -233,12 +233,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
             let isCallName (pw:ParentWrapper, Fqdn(vetexPath)) = 
                     let flow = pw.GetFlow()
                     tryFindCall flow.System vetexPath |> Option.isSome
-                //if vetexPath.length() > 1 
-                //then 
-                //    let flow = pw.GetFlow()
-                //    tryFindCall flow.System vetexPath |> Option.isSome
-                //else false
-                
+               
             let isAliasMnemonic (pw:ParentWrapper, Fqdn(vetexPath)) =
                 let flow = pw.GetFlow()
                 match vetexPath.ToFSharpList() with
@@ -348,7 +343,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
             } |> ignore
 
         let createJobDef (system:DsSystem) (ctx:CallListingContext) =
-            let callName =  ctx.TryFindFirstChild<CallNameContext>().Map(getText).Value
+            let jobName =  ctx.TryFindFirstChild<JobNameContext>().Map(getText).Value
             let apiDefCtxs = ctx.Descendants<CallApiDefContext>().ToArray()
             let getAddress (addressCtx:IParseTree) =
                 addressCtx.TryFindFirstChild<AddressItemContext>().Map(getText).Value
@@ -376,7 +371,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                     | _ -> failwith "ERROR"
                 ]
             assert(apiItems.Any())
-            Job(callName, apiItems) |> system.Jobs.Add
+            Job(jobName, apiItems) |> system.Jobs.Add
 
         let fillTargetOfAliasDef (x:DsParserListener) (ctx:AliasListingContext) =
             let system = x.TheSystem

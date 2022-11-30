@@ -69,7 +69,7 @@ module EtcListenerModule =
                             let safety = safetyDef.TryFindFirstChild(fun (t:IParseTree) -> t :? SafetyKeyContext).Value
                             safety.CollectNameComponents()   // ["Main"] or ["My", "Flow", "Main"]
                         let valueHeader = safetyDef.Descendants<SafetyValuesContext>().First()
-                        let values      = valueHeader.Descendants<Identifier12Context>().Select(collectNameComponents).ToArray()
+                        let values      = valueHeader.Descendants<Identifier23Context>().Select(collectNameComponents).ToArray()
                         (key, values)
                 ]
 
@@ -79,13 +79,23 @@ module EtcListenerModule =
             let tryFindRealOrCall (ns:Fqdn) =
                 option {
                     match ns.ToFSharpList() with
-                    | flow::real::[] ->
-                        let! flow = curSystem.TryFindFlow(flow)
-                        let! vertex = flow.Graph.TryFindVertex(real)
-                        return SafetyConditionReal (vertex :?> Real)
-                    | call::[] ->
-                        let! c = curSystem.TryFindCall(call)
-                        return SafetyConditionCall c
+                    | flowOrReal::realOrCall::[] ->
+                        match curSystem.TryFindFlow(flowOrReal) with
+                        |Some (flow) ->
+                            let! vertex = flow.Graph.TryFindVertex(realOrCall)
+                            if vertex :? Real 
+                            then 
+                                return SafetyConditionReal (vertex :?> Real)
+                            else 
+                                return SafetyConditionCall (vertex :?> Call)
+                        |None ->        
+                            let c = curSystem.TryFindCall(ns) |> Option.get
+                            return SafetyConditionCall (c)
+
+                    | f::r::c::[] ->
+                         let! c = curSystem.TryFindCall(ns)
+                         return SafetyConditionCall c
+                
                     | _ ->
                         failwith "ERROR"
                 }
@@ -144,9 +154,9 @@ module EtcListenerModule =
 
             let positionDefs = ctx.Descendants<PositionDefContext>().ToArray()
             for posiDef in positionDefs do
-                let callName = posiDef.callName().GetText()
+                let callNamePath = posiDef.callName().TryCollectNameComponents()|> Option.get
                 let xywh = posiDef.xywh()
-                let call = tryFindCall x.TheSystem callName |> Option.get
+                let call = tryFindCall x.TheSystem callNamePath |> Option.get
 
                 match xywh.x().GetText(), xywh.y().GetText(), xywh.w().GetText(), xywh.h().GetText() with
                 | Int32Pattern x, Int32Pattern y, Int32Pattern w, Int32Pattern h ->

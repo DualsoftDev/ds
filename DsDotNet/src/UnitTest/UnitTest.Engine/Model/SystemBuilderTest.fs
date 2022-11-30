@@ -47,8 +47,8 @@ module SystemBuilderTest =
                     path [libdir]
                     device "A" "cylinder.ds"
                     device "B" "cylinder.ds"
-                    call "Ap" [ { Api=("A", "+"); Tx="%Q1"; Rx="%I1" } ]
-                    call "Am" [ { Api=("A", "-"); Tx="%Q2"; Rx="%I2" } ]
+                    //call "Ap" [ { Api=("A", "+"); Tx="%Q1"; Rx="%I1" } ]
+                    //call "Am" [ { Api=("A", "-"); Tx="%Q2"; Rx="%I2" } ]
 
                     //let flowCore = Flow.Create("F1", sysCore)
                     //let flow = withFlow flowCore {
@@ -86,7 +86,7 @@ module SystemBuilderTest =
     [flow] F1 = {
             R1; // island
     }
-    [calls] = {
+    [jobs] = {
         Ap = { A."+"(%Q1, %I1); }
         Am = { A."-"(%Q2, %I2); }
     }

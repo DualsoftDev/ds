@@ -303,7 +303,7 @@ namespace Engine.Sample;
 //                switch (child.Coin)
 //                {
 //                    case SubCall call when isResetEdge:
-//                        Global.Logger.Debug($"Skipping generating tags for reset edge on Calls");
+//                        Global.Logger.Debug($"Skipping generating tags for reset edge on Jobs");
 //                        break;
 //                    case SubCall call:
 //                        if (!hasReset) // reset 이 없으면...  (set edge 가 있거나, 없거나..)
@@ -336,7 +336,7 @@ namespace Engine.Sample;
 //                switch (root)
 //                {
 //                    case RootCall rootCall when isResetEdge:
-//                        Global.Logger.Debug($"Skipping generating tags for reset edge on Calls");
+//                        Global.Logger.Debug($"Skipping generating tags for reset edge on Jobs");
 //                        break;
 //                    case RootCall rootCall:
 //                        foreach (var txSeg in rootCall.Prototype.TXs.OfType<Segment>())

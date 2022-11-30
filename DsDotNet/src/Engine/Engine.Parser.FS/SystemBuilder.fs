@@ -77,17 +77,17 @@ module SystemBuilderModule =
 
             let device = system.LoadDeviceAs(loadedName, absoluteFilePath, simpleFilePath)
             sys
-        [<CustomOperation("call")>]
-        member __.CreateCall(sys, callName, callSpecs:CallSpec list) =
-            let apiItems = [
-                for cs in callSpecs do
-                    let dev, apiName = cs.Api
-                    let apiExported = system.ApiUsages.Find(nameComponentsEq [dev; apiName])
-                    JobDef(apiExported, cs.Tx, cs.Rx, dev)
-            ]
-            let apiGroup = Job(callName, apiItems)
-            system.Jobs.Add apiGroup
-            sys
+        //[<CustomOperation("call")>]
+        //member __.CreateCall(sys, callName, callSpecs:CallSpec list) =
+        //    let apiItems = [
+        //        for cs in callSpecs do
+        //            let dev, apiName = cs.Api
+        //            let apiExported = system.ApiUsages.Find(nameComponentsEq [dev; apiName])
+        //            ApiCallDef(apiExported, cs.Tx, cs.Rx, dev)
+        //    ]
+        //    let apiGroup = Call.Create(callName, apiItems)
+        //    system.ApiGroups.Add apiGroup
+        //    sys
 
 
     type FlowBuilder internal (flow:Flow) =

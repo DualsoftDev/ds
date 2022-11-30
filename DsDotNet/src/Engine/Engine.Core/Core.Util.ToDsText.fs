@@ -88,12 +88,8 @@ module internal ToDsTextModule =
                     let tab = getTab (indent+2)
                     let aliasKey =
                         match a.AliasTarget with
-                        | Some(AliasTargetReal real) ->
-                            if real.Flow.Name = flow.Name then
-                                real.Name
-                            else
-                                [real.Flow.Name; real.Name].Combine()
-                        | Some(AliasTargetCall call) -> call.Name
+                        | Some(AliasTargetReal real) -> real.GetAliasTargetToDs(flow).Combine()
+                        | Some(AliasTargetCall call) -> call.GetAliasTargetToDs().Combine()
                         | None -> failwith "ERROR"
 
                     yield $"{tab}{aliasKey} = {lb} {mnemonics} {rb}"
@@ -144,7 +140,7 @@ module internal ToDsTextModule =
 
             if system.Jobs.Any() then
                 let print (ai:JobDef) = $"{ai.ApiName}({ai.OutTag}, {ai.InTag})"
-                yield $"{tab}[calls] = {lb}"
+                yield $"{tab}[jobs] = {lb}"
                 for c in system.Jobs do
                     let ais = c.ApiItems.Select(print).JoinWith("; ") + ";"
                     yield $"{tab2}{c.Name.QuoteOnDemand()} = {lb} {ais} {rb}"
@@ -191,19 +187,18 @@ module internal ToDsTextModule =
             let safetyHolders =
                 [   for f in system.Flows do
                         yield! f.Graph.Vertices.OfType<ISafetyConditoinHolder>()
-                        yield! system.Jobs.Cast<ISafetyConditoinHolder>()
                 ] |> List.distinct
 
             let withSafeties = safetyHolders.Where(fun h -> h.SafetyConditions.Any())
             let safeties =
                 let safetyConditionName (sc:SafetyCondition) =
                     match sc with
-                    | SafetyConditionReal real -> [real.Flow.Name; real.Name].Combine()
-                    | SafetyConditionCall call -> call.Name
+                    | SafetyConditionReal real -> real.ParentNPureNames.Combine()
+                    | SafetyConditionCall call -> call.ParentNPureNames.Combine()
                 let safetyConditionHolderName(sch:ISafetyConditoinHolder) =
                     match sch with
-                    | :? Real as real -> [real.Flow.Name; real.Name].Combine()
-                    | :? Job as call -> call.Name
+                    | :? Real as real -> real.ParentNPureNames.Combine()
+                    | :? Call as call -> call.ParentNPureNames.Combine()
                     | _ -> failwith "ERROR"
 
                 [
@@ -215,7 +210,12 @@ module internal ToDsTextModule =
                         yield $"{tab2}{rb}"
                 ] |> combineLines
 
-            let withLayouts = system.Jobs.Where(fun call -> call.Xywh <> null)
+            let calls =
+                [   for f in system.Flows do
+                        yield! f.Graph.Vertices.OfType<Call>()
+                ] |> List.distinct
+
+            let withLayouts = calls.Where(fun call -> call.Xywh <> null)
             let layouts =
                 [
                     if withLayouts.Any() then

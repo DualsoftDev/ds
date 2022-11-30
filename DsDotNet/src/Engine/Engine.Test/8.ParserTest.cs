@@ -8,8 +8,9 @@ namespace Engine
         public static string SafetyValid = @"
 [sys] L = {
     [flow] F = {
+        Ap > Am;
         Main = {
-            Ap > Am;
+            Ap1 > Am1;
         }
         [aliases] = {
             Ap = { Ap1; Ap2; Ap3; }
@@ -20,15 +21,15 @@ namespace Engine
         //    Main = {C.F.Sp; C.F.Sm}
         //}
     }
-    [calls] = {
+    [jobs] = {
         Ap = { A.""+""(%Q1, %I1); }
         Am = { A.""-""(%Q2, %I2); }
     }
 
     [prop] = {
         [safety] = {
-            F.Main = { Ap; Am; }
-            Ap = { F.Main; }
+            F.Main = { F.Ap; F.Am; }
+            F.Ap = { F.Main; }
         }
     }
 
@@ -45,7 +46,7 @@ namespace Engine
             Ap <|| Am;
         }
     }
-    [calls] = {
+    [jobs] = {
         Ap = { A.""+""(%Q1, %I1); }
         Am = { A.""-""(%Q2, %I2); }
     }
@@ -201,9 +202,9 @@ namespace Engine
     [flow] FF = {
         A, Ap > C |> Ap;
     }
-    [calls] = {
+    [jobs] = {
         Ap = { A.""+""(%Q1, %I1); }
-        Am = { A.""-""(%Q2, %I2); }
+        //Am = { A.""-""(%Q2, %I2); }  //사용 안되면 정의 불가
     }
     [device file=""cylinder.ds""] A;
 }
@@ -316,7 +317,7 @@ namespace Engine
             AndFlow.R3 = { AndFlowR3; OtherFlowR3; }
         }
     }
-    [calls] = {
+    [jobs] = {
         C1 = { B.""+""(%Q1, %I1); A.""+""(%Q999.2343, _); }
         C2 = { A.""-""(%Q3, _); B.""-""(_, %I1); }
     }
@@ -381,15 +382,15 @@ namespace Engine
             // AVp1 |> Am1;
             // 정보로서의 Call 상호 리셋
             Ap1 <||> Am1;
-            Ap1 > Am1, Ap2 > Am2;
+            Ap > Am; 
         }
         [aliases] = {
-            Ap = { Ap1; Ap2; Ap3; }
-            Am = { Am1; Am2; Am3; }    // system name optional
+            Main.Ap = { Ap1; Ap2; Ap3; }
+            Main.Am = { Am1; Am2; Am3; }    // system name optional
             //Vp = {AVp1;}  // invalid: 자신 시스템에 정의된 것만 alias
         }
     }
-    [calls] = {
+    [jobs] = {
         Ap = { A.""+""(%Q1, %I1); }
         Am = { A.""-""(%Q2, %I2); }
     }

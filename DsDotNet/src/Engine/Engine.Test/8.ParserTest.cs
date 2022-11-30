@@ -8,12 +8,14 @@ namespace Engine
         public static string SafetyValid = @"
 [sys] L = {
     [flow] F = {
+        Ap > Am;
         Main = {
+            Ap1 > Am1;
             Ap > Am;
         }
         [aliases] = {
-            Ap = { Ap1; Ap2; Ap3; }
-            Am = { Am1; Am2; Am3; }
+            F.Ap = { Ap1; Ap2; Ap3; }
+            F.Am = { Am1; Am2; Am3; }
         }
         // ---- flow 내의 safety block 없애는 걸로...
         //[safety] = {
@@ -27,8 +29,8 @@ namespace Engine
 
     [prop] = {
         [safety] = {
-            F.Main = { Ap; Am; }
-            Ap = { F.Main; }
+            F.Main = { F.Ap; F.Am; }
+            F.Ap = { F.Main; }
         }
     }
 

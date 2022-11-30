@@ -20,9 +20,9 @@ module ModelAnswers =
     let answerCausalsText = """
 [sys] L = {
     [flow] F = {
+        Ap > Am;
         Main = {
             Ap1, Bp1 > Bm1;
-            Ap > Am > Bp > Bm;
         }
         [aliases] = {
             Ap = { Ap1; Ap2; Ap3; }
@@ -39,8 +39,8 @@ module ModelAnswers =
     }
     [prop] = {
         [safety] = {
-        F.Main = { Ap; Am; }
-        Ap = { F.Main; }
+            F.Main = { F.Ap; F.Am; }
+            F.Ap = { F.Main; }
         }
     }
     [device file="cylinder.ds"] A;

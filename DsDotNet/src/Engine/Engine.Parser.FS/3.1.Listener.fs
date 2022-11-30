@@ -90,8 +90,8 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
 
         // 이번 stage 에서 일단 interface 이름만 이용해서 빈 interface 객체를 생성하고,
         // TXs, RXs, Resets 은 추후에 채움..
-        let api = ApiInterface.Create(interfaceName, system)
-        system.ApiInterfaces.Add(api) |> ignore
+        let api = ApiItem.Create(interfaceName, system)
+        system.ApiItems.Add(api) |> ignore
 
     override x.EnterInterfaceResetDef(ctx:InterfaceResetDefContext) =
         // I1 <||> I2 <||> I3;  ==> [| I1; <||>; I2; <||>; I3; |]
@@ -230,28 +230,49 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                 yield! sysctx.Descendants<CausalTokenContext>().Cast<ParserRuleContext>()
             ]
 
-            let isCallName (parentWrapper:ParentWrapper) name = tryFindApiNameDef system name |> Seq.any
-            let isAliasMnemonic (parentWrapper:ParentWrapper) name =
-                let flow = parentWrapper.GetFlow()
-                tryFindAliasDefWithMnemonic flow name |> Option.isSome
-            let isCallOrAlias pw name =
-                if name = "Ap1" then
-                    noop()
-                let xxx = isCallName pw name
-                let yyy = isAliasMnemonic pw name
-                isCallName pw name || isAliasMnemonic pw name
+            let isCallName (pw:ParentWrapper, Fqdn(vetexPath)) = 
+                    let flow = pw.GetFlow()
+                    tryFindCall flow.System vetexPath |> Option.isSome
+                //if vetexPath.length() > 1 
+                //then 
+                //    let flow = pw.GetFlow()
+                //    tryFindCall flow.System vetexPath |> Option.isSome
+                //else false
+                
+            let isAliasMnemonic (pw:ParentWrapper, Fqdn(vetexPath)) =
+                let flow = pw.GetFlow()
+                match vetexPath.ToFSharpList() with
+                    | t::[] -> tryFindAliasDefWithMnemonic flow t |> Option.isSome
+                    | _ -> failwith "Error"
 
-          
-            let tryCreateAlias (parentWrapper:ParentWrapper) name =
+            let isCallOrAlias (pw, Fqdn(vetexPath)) =
+                isCallName (pw, vetexPath) || isAliasMnemonic (pw, vetexPath)
+
+            let isJobName (pw, name) =
+                tryFindJob pw name |> Option.isSome
+
+            let isJobOrAlias (pw:ParentWrapper, Fqdn(vetexPath)) =
+                isJobName (pw.GetFlow().System, vetexPath.Last()) || isAliasMnemonic (pw, vetexPath)
+                
+            let tryCreateCallOrAlias (parentWrapper:ParentWrapper) name =
                 let flow = parentWrapper.GetFlow()
+                let tryJob = tryFindJob system name
                 let tryAliasDef = tryFindAliasDefWithMnemonic flow name
                 option {
-                    match tryAliasDef with
-                    | Some aliasDef ->
-                        let aliasTarget = tryFindAliasTarget flow name |> Option.get
-                        return Alias.Create(name, aliasTarget, parentWrapper) :> Indirect
-                    | None -> failwith "Error"
+                    match tryJob, tryAliasDef with
+                    | Some job, None ->
+                        return Call.Create(job, parentWrapper) :> Indirect
+                    | None, Some aliasDef ->
+                        return Alias.Create(name, aliasDef.AliasTarget.Value, parentWrapper) :> Indirect
+                    | None, None -> return! None
+                    | _ ->
+                        failwith "ERROR: duplicated"
                 }
+
+            let createCall (parentWrapper:ParentWrapper) name =
+                let flow = parentWrapper.GetFlow()
+                let job = tryFindJob system name |> Option.get
+                Call.Create(job, parentWrapper) |> ignore
 
             let candidates = candidateCtxs.Select(getContainerChildPair)
 
@@ -263,22 +284,27 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                     | Some v -> tracefn $"{v.Name} already exists.  Skip creating it."
                     | None ->
                         match cycle, ctxInfo.Names with
-                        | 0, q::[] when not <| isCallOrAlias parent q ->
-                            match parent.GetCore() with
-                            | :? Flow as f -> Real.Create(q, f) |> ignore
-                            | :? Real as r -> ()
-                            | _ ->   failwith "ERROR"
-                        | 1, q::[] when (isCallOrAlias parent q) -> 
-                            if isCallName parent q
-                            then Call.Create(q, parent, parent.GetSystem(), []) |> ignore
-                            elif isAliasMnemonic parent q then tryCreateAlias parent q |> ignore
-                            else failwith "ERROR"
-
-                        | 1, ofn::ofrn::[] ->
-                            let otherFlowReal = tryFindReal system ofn ofrn |> Option.get
+                        | 0, r::[] when not <| (isJobOrAlias (parent, ctxInfo.Names)) ->
+                            let flow = parent.GetCore() :?> Flow
+                            if not <| isCallName (parent, ctxInfo.Names)
+                            then
+                                Real.Create(r, flow) |> ignore    
+                           
+                        | 1, c::[] when not <| (isAliasMnemonic (parent, ctxInfo.Names)) ->
+                            let flow = parent.GetFlow()
+                            let job = tryFindJob system c |> Option.get
+                            Call.Create(job, parent) |> ignore
+                        
+                        | 1, realorFlow::cr::[]  ->
+                            let otherFlowReal = tryFindReal system realorFlow cr |> Option.get
                             RealOtherFlow.Create(otherFlowReal, parent) |> ignore
+                            tracefn $"{realorFlow}.{cr} should already have been created."
+                           
+                        | 2, q::[] when isAliasMnemonic (parent, ctxInfo.Names) ->
+                            let flow = parent.GetFlow()
+                            let aliasDef = tryFindAliasDefWithMnemonic flow q |> Option.get
+                            Alias.Create(q, aliasDef.AliasTarget.Value, parent) |> ignore
 
-                            tracefn $"{ofn}.{ofrn} should already have been created."
                         | _, q::[] -> ()
                         | _, ofn::ofrn::[] -> ()
                         | _ ->
@@ -286,9 +312,9 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                         noop()
             loop
 
-        let createNonParentedRealVertex = tokenCreator 0
-        let createCallOrAliasVertex = tokenCreator 1
-        //let createAliasVertex = tokenCreator 2
+        let createRealVertex          = tokenCreator 0
+        let createCallOrExRealVertex  = tokenCreator 1
+        let createAliasVertex         = tokenCreator 2
 
         let fillInterfaceDef (system:DsSystem) (ctx:InterfaceDefContext) =
             let findSegments(fqdns:Fqdn[]):Real[] =
@@ -306,7 +332,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
             option {
                 let! interrfaceNameCtx = ctx.TryFindFirstChild<InterfaceNameContext>()
                 let interfaceName = interrfaceNameCtx.CollectNameComponents()[0]
-                let! api = system.ApiInterfaces.TryFind(nameEq interfaceName)
+                let! api = system.ApiItems.TryFind(nameEq interfaceName)
                 let ser =   // { start ~ end ~ reset }
                     ctx.Descendants<CallComponentsContext>()
                         .Map(collectCallComponents)
@@ -321,7 +347,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                 api.AddRXs(findSegments(ser[1])) |> ignore
             } |> ignore
 
-        let fillCallApiItems (system:DsSystem) (ctx:CallListingContext) =
+        let createJobDef (system:DsSystem) (ctx:CallListingContext) =
             let callName =  ctx.TryFindFirstChild<CallNameContext>().Map(getText).Value
             let apiDefCtxs = ctx.Descendants<CallApiDefContext>().ToArray()
             let getAddress (addressCtx:IParseTree) =
@@ -341,7 +367,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                                 let rx = getAddress(rxAddressCtx)
 
                                 tracefn $"TX={tx} RX={rx}"
-                                return ApiCallDef(apiPoint, tx, rx, device)
+                                return JobDef(apiPoint, tx, rx, device)
                             }
                         match apiItem with
                         | Some apiItem -> yield apiItem
@@ -350,16 +376,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                     | _ -> failwith "ERROR"
                 ]
             assert(apiItems.Any())
-            let tryCall = tryFindCall system callName
-            match tryCall with
-            | Some(c) -> apiItems.ForEach(fun f->  c.ApiItems.Add(f) |> verifyM $"Duplicated ApiItem add call [{f.ApiName}]")
-            | None -> ()
-
-        let createCallAddApis (system:DsSystem) (ctx:CallListingContext) =
-            let callName =  ctx.TryFindFirstChild<CallNameContext>().Map(getText).Value
-            system.DefinedApiNames.Add(callName) |> verifyM $"Duplicated ApiItem define [{callName}]"
-          
-
+            Job(callName, apiItems) |> system.Jobs.Add
 
         let fillTargetOfAliasDef (x:DsParserListener) (ctx:AliasListingContext) =
             let system = x.TheSystem
@@ -369,23 +386,35 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                 let mnemonics = ctx.Descendants<AliasMnemonicContext>().Select(getText).ToArray()
                 let! aliasKeys = ctx.TryFindFirstChild<AliasDefContext>().Map(collectNameComponents)
                 let target =
-                    match aliasKeys.ToFSharpList() with
-                    | t::[] ->
-                        let realTargetCandidate = flow.Graph.TryFindVertex<Real>(t)
-                        let callTargetCandidate = tryFindCall system t
-                        match realTargetCandidate, callTargetCandidate with
-                        | Some real, None -> Some (AliasTargetReal real)
-                        | None, Some call -> Some (AliasTargetCall call)
-                        | Some _, Some _ -> failwith "Name duplicated."
-                        | _ -> failwith "Failed to find"
-                    | otherFlow::real::[] ->
-                        match tryFindReal system otherFlow real with
-                        | Some otherFlowReal -> Some (AliasTargetReal otherFlowReal)
-                        | _ -> failwith "Failed to find"
-                    | _ ->
-                        failwith "ERROR"
+                        let ns = aliasKeys.ToFSharpList()
+                        match ns with
+                        | flowOrReal::realOrCall::[] ->
+                            let realTargetCandidate = flow.Graph.TryFindVertex<Real>(realOrCall)
+                            let callTargetCandidate = tryFindCall system  ns 
+                            match realTargetCandidate, callTargetCandidate with
+                            | Some real, None -> AliasTargetReal real
+                            | None, Some call -> AliasTargetCall call
+                            | Some _, Some _ -> failwith "Name duplicated."
+                            | _ ->  
+                                
+                                match tryFindReal system flowOrReal realOrCall with
+                                    | Some otherFlowReal -> AliasTargetReal otherFlowReal
+                                    | _ -> failwith "Failed to find"
+                           
 
-                flow.AliasDefs[aliasKeys].AliasTarget <- target
+                        | realOrCall::[] ->
+                            let vertex = flow.System.TryFindReal flow.System flow.Name realOrCall 
+                            if vertex.IsSome
+                            then AliasTargetReal (vertex.Value)
+                            else
+                                 let c = flow.System.TryFindCall ([flow.Name;realOrCall].ToArray()) |> Option.get
+                                 AliasTargetCall (c)
+                            
+                        | _ ->
+                            failwith "ERROR"
+
+
+                flow.AliasDefs[aliasKeys].AliasTarget <- Some target
             }
 
         let createAliasDef (x:DsParserListener) (ctx:AliasListingContext) =
@@ -401,27 +430,25 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
             }
 
 
- 
         for ctx in sysctx.Descendants<CallListingContext>() do
-            createCallAddApis x.TheSystem ctx |> ignore
-
-        createNonParentedRealVertex()
+            createJobDef x.TheSystem ctx
 
         for ctx in sysctx.Descendants<AliasListingContext>() do
             createAliasDef x ctx |> ignore
 
+        //실제모델링 만들고
+        createRealVertex()
+        createCallOrExRealVertex()
 
+        //AliasDef 생성후
         for ctx in sysctx.Descendants<AliasListingContext>() do
             fillTargetOfAliasDef x ctx |> ignore
 
-        createCallOrAliasVertex()
-
+        //Alias 만들기
+        createAliasVertex()
 
         for ctx in sysctx.Descendants<InterfaceDefContext>() do
             fillInterfaceDef x.TheSystem ctx |> ignore
-
-        for ctx in sysctx.Descendants<CallListingContext>() do
-            fillCallApiItems x.TheSystem ctx |> ignore
 
         guardedValidateSystem system
 

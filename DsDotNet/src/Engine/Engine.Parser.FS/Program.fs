@@ -166,6 +166,7 @@ C4 > C5;
     let CausalsText = """
 [sys] L = {
     [flow] F = {
+        Ap > Am;
         Main = {
 
             Ap1, Bp1 > Bm1;
@@ -191,8 +192,8 @@ C4 > C5;
 
     [prop] = {
         [safety] = {
-            F.Main = { Ap; Am; }
-            Ap = { F.Main; }
+            F.Main = { F.Ap; F.Am; }
+            F.Ap = { F.Main; }
         }
     }
 

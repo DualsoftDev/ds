@@ -66,19 +66,19 @@ loadExternalSystemBlock: '[' EXTERNAL_SYSTEM fileSpec ipSpec ']' externalSystemN
 
 /*
 // global safety property
-[prop] {
-    [safety] = {
-        F1.Main = {F2.Real; Call1;}
-        Call2 = {F1.Main;}
+    [prop] = {
+        [safety] = {
+            F.Main = { F.Ap; F.Am; }
+            F.Ap = { F.Main; }
+        }
     }
-}
  */
 propsBlock: '[' 'prop' ']' EQ LBRACE (safetyBlock|layoutBlock)* RBRACE;
     safetyBlock: '[' 'safety' ']' EQ LBRACE (safetyDef)* RBRACE;
         safetyDef: safetyKey EQ LBRACE safetyValues RBRACE;
             // Real|Call = { ((Real|Call);)* }
-            safetyKey: identifier12;
-            safetyValues: identifier12 (SEIMCOLON identifier12)* (SEIMCOLON)?;
+            safetyKey: identifier23;
+            safetyValues: identifier23 (SEIMCOLON identifier23)* (SEIMCOLON)?;
 
     layoutBlock: '[' 'layouts' ']' '=' LBRACE (positionDef)* RBRACE;
         positionDef: callName '=' xywh;
@@ -182,6 +182,7 @@ identifier1234: (identifier1 | identifier2 | identifier3 | identifier4);
     identifier4: IDENTIFIER4;
 
     identifier12: (identifier1 | identifier2);
+    identifier23: (identifier2 | identifier3);
     identifier123: (identifier1 | identifier2 | identifier3);
 
     identifier123CNF: identifier123 (COMMA identifier123)*;

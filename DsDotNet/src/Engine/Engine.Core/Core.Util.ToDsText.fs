@@ -65,7 +65,7 @@ module internal ToDsTextModule =
             let stems = graph.Vertices.OfType<Real>().Where(fun r -> r.Graph.Vertices.Any()).ToArray()
             for stem in stems do
                 yield $"{tab}{stem.Name.QuoteOnDemand()} = {lb}"
-                yield! graphToDs (Real stem) (indent + 1)
+                yield! graphToDs (ParentReal stem) (indent + 1)
                 yield $"{tab}{rb}"
 
             let notMentioned = graph.Islands.Except(stems.Cast<Vertex>()).ToArray()
@@ -77,7 +77,7 @@ module internal ToDsTextModule =
         let tab = getTab indent
         [
             yield $"{tab}[flow] {flow.Name.QuoteOnDemand()} = {lb}"
-            yield! graphToDs (Flow flow) (indent+1)
+            yield! graphToDs (ParentFlow flow) (indent+1)
 
             let aliasDefs = flow.AliasDefs.Values
             if aliasDefs.Any() then
@@ -142,18 +142,18 @@ module internal ToDsTextModule =
 
             let tab2 = getTab (indent+1)
 
-            if system.ApiGroups.Any() then
-                let print (ai:ApiCallDef) = $"{ai.ApiName}({ai.OutTag}, {ai.InTag})"
+            if system.Jobs.Any() then
+                let print (ai:JobDef) = $"{ai.ApiName}({ai.OutTag}, {ai.InTag})"
                 yield $"{tab}[calls] = {lb}"
-                for c in system.ApiGroups do
+                for c in system.Jobs do
                     let ais = c.ApiItems.Select(print).JoinWith("; ") + ";"
                     yield $"{tab2}{c.Name.QuoteOnDemand()} = {lb} {ais} {rb}"
                 yield $"{tab}{rb}"
 
 
-            if system.ApiInterfaces.Any() then
+            if system.ApiItems.Any() then
                 yield $"{tab}[interfaces] = {lb}"
-                for item in system.ApiInterfaces do
+                for item in system.ApiItems do
                     let ser =
                         let getFlowAndRealName (r:Real) = [r.Flow.Name; r.Name].Combine()
                         let qNames (xs:Real seq) = xs.Select(getFlowAndRealName) |> String.concat(", ")
@@ -191,7 +191,6 @@ module internal ToDsTextModule =
             let safetyHolders =
                 [   for f in system.Flows do
                         yield! f.Graph.Vertices.OfType<ISafetyConditoinHolder>()
-                        yield! system.ApiGroups.Cast<ISafetyConditoinHolder>()
                 ] |> List.distinct
 
             let withSafeties = safetyHolders.Where(fun h -> h.SafetyConditions.Any())
@@ -203,7 +202,7 @@ module internal ToDsTextModule =
                 let safetyConditionHolderName(sch:ISafetyConditoinHolder) =
                     match sch with
                     | :? Real as real -> [real.Flow.Name; real.Name].Combine()
-                    | :? Call as call -> call.Name
+                    | :? Call as call -> call.NameComponents.Combine()
                     | _ -> failwith "ERROR"
 
                 [
@@ -215,7 +214,12 @@ module internal ToDsTextModule =
                         yield $"{tab2}{rb}"
                 ] |> combineLines
 
-            let withLayouts = system.ApiGroups.Where(fun call -> call.Xywh <> null)
+            let calls =
+                [   for f in system.Flows do
+                        yield! f.Graph.Vertices.OfType<Call>()
+                ] |> List.distinct
+
+            let withLayouts = calls.Where(fun call -> call.Xywh <> null)
             let layouts =
                 [
                     if withLayouts.Any() then

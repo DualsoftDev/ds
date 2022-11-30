@@ -23,23 +23,17 @@ module internal ModelFindModule =
                 match xs1 with
                 | [] -> Some flow
                 | r::xs2 ->
-                    match flow.Graph.FindVertex(r) with
-                    | :? Real as real ->  match xs2 with
-                                          | [] -> Some real
-                                          | remaining ->
-                                                option {
-                                                    let! v = real.Graph.TryFindVertex(remaining.Combine())
-                                                    return box v
-                                                }
-                    | :? Call as call ->  match xs2 with
-                                          | [] -> Some call
-                                          | remaining ->
-                                                option {
-                                                    let! v = call.Parent.GetGraph().TryFindVertex(remaining.Combine())
-                                                    return box v
-                                                }
-                    |_ -> None
-                   
+                    match flow.Graph.FindVertex(r) |> box with
+                    | :? Call as call-> Some call
+                    | :? Real as real-> 
+                        match xs2 with
+                        | [] -> Some real
+                        | remaining ->
+                            option {
+                                let! v = real.Graph.TryFindVertex(remaining.Combine())
+                                return box v
+                            }
+                    | _ -> None
 
             | dev::xs when system.Devices.Any(nameEq dev) ->
                 let device = system.Devices.Find(nameEq dev)
@@ -70,32 +64,35 @@ module internal ModelFindModule =
 
     let rec tryFindExportApiItem(system:DsSystem) (Fqdn(apiPath)) =
         let sysName, apiKey = apiPath[0], apiPath[1]
-        system.ApiInterfaces.TryFindWithName(apiKey)
+        system.ApiItems.TryFindWithName(apiKey)
 
     and tryFindCallingApiItem (system:DsSystem) targetSystemName targetApiName =
         let findedLoadedSystem = tryFindLoadedSystem system targetSystemName 
         let targetSystem = findedLoadedSystem.Value.ReferenceSystem
         system.ApiUsages.TryFind(nameComponentsEq [targetSystem.Name; targetApiName])
 
-    let tryFindVertexCall(system:DsSystem) (Fqdn(callPath)) =
-        tryFindGraphVertex system callPath |> Option.map(forceCast<Call>)
-
+    
     let tryFindFlow(system:DsSystem) (flowName:string) =
         system.Flows.TryFind(nameEq flowName)
 
+    
+    let tryFindJob (system:DsSystem) jobName =
+        system.Jobs.TryFind(nameEq jobName)
+    
+    //JOB에 등록 안되있으면 Real로 처리 한다.
+    let tryFindCall (system:DsSystem) (Fqdn(callPath))=
+        if tryFindJob system (callPath.Last()) |> Option.isSome
+        then match tryFindGraphVertex system callPath with
+             |Some(v) -> Some(v :?> Call)
+             |None -> None
+        else None
 
-    let tryFindReal system flowName realName =
-        option {
-            let! flow = tryFindFlow system flowName
-            return! flow.Graph.TryFindVertex(realName).Map(fun x -> x:?>Real)
-        }
-
-    let tryFindCall (system:DsSystem) callName =
-        system.ApiGroups.TryFind(nameEq callName)
-
-    let tryFindApiNameDef (system:DsSystem) callName =
-        system.DefinedApiNames.Where(fun f-> f = callName)
-
+    let tryFindReal system flowName name =
+        let flow = tryFindFlow system flowName |> Option.get
+        match flow.Graph.TryFindVertex(name) with
+        |Some(v) -> if v:? Real then Some(v :?> Real) else None
+        |None -> None
+     
     let tryFindAliasTarget (flow:Flow) aliasMnemonic =
         flow.AliasDefs.Values
             .Where(fun ad -> ad.Mnemonincs.Contains(aliasMnemonic))
@@ -111,8 +108,7 @@ module internal ModelFindModule =
         member x.TryFindGraphVertex<'V when 'V :> IVertex>(Fqdn(fqdn)) = tryFindGraphVertexT<'V> x fqdn
 
         member x.TryFindExportApiItem(Fqdn(apiPath)) = tryFindExportApiItem x apiPath
-        member x.TryFindVertexCall(Fqdn(callPath)) = tryFindVertexCall x callPath
-
+        member x.TryFindCall(callPath:Fqdn) = tryFindCall x callPath
         member x.TryFindFlow(flowName:string) = tryFindFlow x flowName
-        member x.TryFindCall(callName:string) = tryFindCall x callName
-
+        member x.TryFindJob (jobName:string) =  tryFindJob  x jobName
+        member x.TryFindReal( system) flowName realName =  tryFindReal  system flowName realName 

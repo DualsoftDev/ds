@@ -48,20 +48,19 @@ module CoreModule =
     type DsSystem (name:string, host:string) =
         inherit FqdnObject(name, createFqdnObject([||]))
         let devices = createNamedHashSet<LoadedSystem>()
-        let apiUsages = ResizeArray<ApiInterface>()
-        let addApiItemsForDevice (device: LoadedSystem) = device.ReferenceSystem.ApiInterfaces |> apiUsages.AddRange
+        let apiUsages = ResizeArray<ApiItem>()
+        let addApiItemsForDevice (device: LoadedSystem) = device.ReferenceSystem.ApiItems |> apiUsages.AddRange
 
-        member val Flows    = createNamedHashSet<Flow>()
-        member val ApiGroups        = ResizeArray<Call>()
-        member val DefinedApiNames  = HashSet<string>()
-        
+        member val Flows   = createNamedHashSet<Flow>()
+        member val Jobs    = ResizeArray<Job>()
+
         member _.AddDevice(dev) = devices.Add(dev) |> ignore; addApiItemsForDevice dev
         member val Devices = devices |> seq
         member val Variables = ResizeArray<Variable>()
         member val Commands = ResizeArray<Command>()
         member val Observes = ResizeArray<Observe>()
 
-        member val ApiInterfaces = createNamedHashSet<ApiInterface>()
+        member val ApiItems = createNamedHashSet<ApiItem>()
         member x.ApiUsages = apiUsages |> seq
         member val ApiResetInfos = HashSet<ApiResetInfo>() with get, set
         ///시스템 전체시작 버튼누름시 수행되야하는 Real목록
@@ -118,7 +117,7 @@ module CoreModule =
     /// Segment (DS Basic Unit)
     [<DebuggerDisplay("{QualifiedName}")>]
     type Real private (name:string, flow:Flow) =
-        inherit Vertex([|name|], Flow flow)
+        inherit Vertex([|name|], ParentFlow flow)
 
         member val Graph = DsGraph()
         member val ModelingEdges = HashSet<ModelingEdgeInfo<Vertex>>()
@@ -130,9 +129,9 @@ module CoreModule =
         inherit Indirect(names, parent)
         member val Real = target
 
-    and Call private (name:string, parent) =
-        inherit Indirect(name, parent)
-        member val ApiItems = HashSet<ApiCallDef>()
+    and Call private (target:Job, parent) =
+        inherit Indirect(target.Name, parent)
+        member val CallTarget = target
         member val Xywh:Xywh = null with get, set
         interface ISafetyConditoinHolder with
             member val SafetyConditions = HashSet<SafetyCondition>()
@@ -141,24 +140,22 @@ module CoreModule =
         inherit Indirect(name, parent)
         member val ApiTarget = target
 
-    /// ApiCallDefs 정의:
-    //type ApiCall (name:string, apiItems:ApiCallDef seq) =
-    //    inherit Named(name)
-    //    member val ApiItems = apiItems.ToFSharpList()
-    //    member val Xywh:Xywh = null with get, set
-    //    interface ISafetyConditoinHolder with  //?? 여기 정의 확인 필요 Subclasses = {Call | Real}
-    //        member val SafetyConditions = HashSet<SafetyCondition>()
+    /// JobDefs 정의: Call 이 호출하는 Job 항목
+    type Job (name:string, apiItems:JobDef seq) =
+        inherit Named(name)
+        member val ApiItems = apiItems.ToFSharpList()
+    
 
     type TagAddress = string
     /// Main system 에서 loading 된 다른 system 의 API 를 바라보는 관점.  [calls] = { Ap = { A."+"(%Q1, %I1); } }
-    type ApiCallDef (api:ApiInterface, outTag:TagAddress, inTag:TagAddress, deviceName:string) =
-        member _.ApiInterface = api
+    type JobDef (api:ApiItem, outTag:TagAddress, inTag:TagAddress, deviceName:string) =
+        member _.ApiItem = api
         member val InTag   = inTag
         member val OutTag  = outTag
         member val ApiName = getRawName [deviceName;api.Name] true
 
     /// 자신을 export 하는 관점에서 본 api's.  Interface 정의.   [interfaces] = { "+" = { F.Vp ~ F.Sp } }
-    and ApiInterface private (name:string, system:DsSystem) =
+    and ApiItem private (name:string, system:DsSystem) =
         (* createFqdnObject : system 이 다른 system 에 포함되더라도, name component 를 더 이상 확장하지 않도록 cut *)
         inherit FqdnObject(name, createFqdnObject([|system.Name|]))
         interface INamedVertex
@@ -168,9 +165,9 @@ module CoreModule =
         member val RXs = createQualifiedNamedHashSet<Real>()
         member _.System = system
 
-    //and ApiUsage(loadedSystemName:string, api: ApiInterface) =
+    //and ApiUsage(loadedSystemName:string, api: ApiItem) =
     //    inherit FqdnObject(api.Name, createFqdnObject([|loadedSystemName|]))
-    //    member _.ApiInterface = api
+    //    member _.ApiItem = api
 
     /// API 의 reset 정보:  "+" <||> "-";
     and ApiResetInfo private (system:DsSystem, operand1:string, operator:ModelingEdgeType, operand2:string) =
@@ -186,8 +183,8 @@ module CoreModule =
 
     ///Vertex의 부모의 타입을 구분한다.
     type ParentWrapper =
-        | Flow of Flow //Real/Call/Alias 의 부모
-        | Real of Real //Call/Alias      의 부모
+        | ParentFlow of Flow //Real/Call/Alias 의 부모
+        | ParentReal of Real //Call/Alias      의 부모
 
     and AliasTargetWrapper =
         | AliasTargetReal of Real    // MyFlow or OtherFlow 의 Real 일 수 있다.
@@ -236,11 +233,9 @@ module CoreModule =
             v
 
     type Call with
-        static member Create(name:string, parent:ParentWrapper, system:DsSystem, apiItems:ApiCallDef seq) =
-            let v = Call(name, parent)
-            apiItems.ForEach(fun a-> v.ApiItems.Add(a) |> verifyM $"Duplicated ApiItem name [{name}]")
-            parent.GetGraph().AddVertex(v) |> verifyM $"Duplicated call name [{name}]"
-            if system.ApiGroups.Where(fun f-> f.Name = v.Name).IsEmpty() then system.ApiGroups.Add(v)
+        static member Create(target:Job, parent:ParentWrapper) =
+            let v = Call(target, parent)
+            parent.GetGraph().AddVertex(v) |> verifyM $"Duplicated call name [{target.Name}]"
             v
 
     type Alias with
@@ -265,15 +260,15 @@ module CoreModule =
             parent.GetGraph().AddVertex(v) |> verifyM $"Duplicated alias name [{name}]"
             v
 
-    type ApiInterface with
+    type ApiItem with
         member x.AddTXs(txs:Real seq) = txs |> Seq.forall(fun tx -> x.TXs.Add(tx))
         member x.AddRXs(rxs:Real seq) = rxs |> Seq.forall(fun rx -> x.RXs.Add(rx))
         static member Create(name, system) =
-            let cp = ApiInterface(name, system)
-            system.ApiInterfaces.Add(cp) |> verifyM $"Duplicated interface prototype name [{name}]"
+            let cp = ApiItem(name, system)
+            system.ApiItems.Add(cp) |> verifyM $"Duplicated interface prototype name [{name}]"
             cp
         static member Create(name, system, txs, rxs) =
-            let ai4e = ApiInterface.Create(name, system)
+            let ai4e = ApiItem.Create(name, system)
             ai4e.AddTXs txs |> ignore
             ai4e.AddRXs rxs |> ignore
             ai4e
@@ -287,27 +282,27 @@ module CoreModule =
     type ParentWrapper with
         member x.GetCore() =
             match x with
-            | Flow f -> f :> FqdnObject
-            | Real r -> r
+            | ParentFlow f -> f :> FqdnObject
+            | ParentReal r -> r
         member x.GetFlow() =
             match x with
-            | Flow f -> f
-            | Real r -> r.Flow
+            | ParentFlow f -> f
+            | ParentReal r -> r.Flow
 
         member x.GetSystem() =
             match x with
-            | Flow f -> f.System
-            | Real r -> r.Flow.System
+            | ParentFlow f -> f.System
+            | ParentReal r -> r.Flow.System
 
         member x.GetGraph():DsGraph =
             match x with
-            | Flow f -> f.Graph
-            | Real r -> r.Graph
+            | ParentFlow f -> f.Graph
+            | ParentReal r -> r.Graph
 
         member x.GetModelingEdges() =
             match x with
-            | Flow f -> f.ModelingEdges
-            | Real r -> r.ModelingEdges
+            | ParentFlow f -> f.ModelingEdges
+            | ParentReal r -> r.ModelingEdges
 
     type DsSystem with
         member x.AddButton(btnType:BtnType, btnName: string, flow:Flow) =
@@ -322,7 +317,3 @@ module CoreModule =
             match dicButton.TryFind btnName with
             | Some btn -> btn.Add(flow) |> verifyM $"Duplicated flow [{flow.Name}]"
             | None -> dicButton.Add(btnName, HashSet[|flow|] )
-
-  //  type LoadedSystem with
-       // member x.CreateApiUsages() = 
-        //    [ for ai in x.ReferenceSystem.ApiInterfaces -> ApiUsage(x.Name, ai) ]

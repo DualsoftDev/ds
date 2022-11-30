@@ -23,7 +23,7 @@ module ModelAnswers =
         Ap > Am;
         Main = {
 
-            Ap1 > Bp1;
+         //   Ap1 > Bp1; // to text DS 시에 순서 아래줄이랑  바뀜
             Ap > Am > Bp;
 
             /* Grouped */
@@ -57,36 +57,37 @@ module ModelAnswers =
 
 """
     let answerEveryScenarioText = """
-[sys ip = 192.168.0.1] My = {
+    [sys ip = 192.168.0.1] My = {
     [flow] MyFlow = {
-        Seg1 > Seg2 > Ap;
+        Seg1 > Seg2 > Ap;		// Seg1(Real)> Seg2(Real) > Ap(Call);
         Seg1 = {
-            Ap > Am;
+            Ap > Am;		// Ap(Call)> Am(Call);
         }
     }
     [flow] "Flow.Complex" = {
-        "#Seg.Complex#" => Seg;
+        "#Seg.Complex#" => Seg;		// "#Seg.Complex#"(Real)=> Seg(Real);
         "#Seg.Complex#" = {
-            Ap > Am;
+            Ap > Am;		// Ap(Call)> Am(Call);
         }
     }
     [flow] F = {
-        R1 > Main2 > Ap1;
-        Main > R3;
-        C4 > C5;
-        C3 > C5 > C6;
-        C1, C2 > C3, C4 |> C5;
+        R1 > Main2 > Ap1;		// R1(Real)> Main2(Alias) > Ap1(Alias);
+        Main > R3;		// Main(Real)> R3(Real);
+        C4 > C5;		// C4(Real)> C5(Real);
+        C3 > C5 > C6;		// C3(Real)> C5(Real) > C6(Real);
+        C1, C2 > C3, C4 |> C5;		// C1(Real), C2(Real)> C3(Real), C4(Real) |> C5(Real);
         Main = {
-            Ap2 > Bp2 > Bm2 > Ap;
-            Ap1 > Bp1 > Bm1 > Ap2 > Am2 > Bm2;
-            Ap1 > Am1 > Bm1;
+            Bm2 > Ap > Am > Bp > Bm;		// Bm2(Alias)> Ap(Call) > Am(Call) > Bp(Call) > Bm(Call);
+            Ap2 > Bp2 > Bm2;		// Ap2(Alias)> Bp2(Alias) > Bm2(Alias);
+            Ap1 > Bp1 > Bm1 > Ap2 > Am2 > Bm2;		// Ap1(Alias)> Bp1(Alias) > Bm1(Alias) > Ap2(Alias) > Am2(Alias) > Bm2(Alias);
+            Ap1 > Am1 > Bm1;		// Ap1(Alias)> Am1(Alias) > Bm1(Alias);
         }
-        R2; // island
+            R2; // island
         [aliases] = {
-            Ap = { Ap1; Ap2; }
-            Am = { Am1; Am2; }
-            Bp = { Bp1; Bp2; }
-            Bm = { Bm1; Bm2; }
+            Main.Ap = { Ap1; Ap2; }
+            Main.Am = { Am1; Am2; }
+            Main.Bp = { Bp1; Bp2; }
+            Main.Bm = { Bm1; Bm2; }
             Main = { Main2; }
         }
     }
@@ -101,25 +102,13 @@ module ModelAnswers =
     }
     [prop] = {
         [safety] = {
-            Am = { F.Main; }
-            F.Main = { Ap; }
+        F.Main = { Main.Ap; }
         }
-        [layouts] = {
-            Ap = (1309, 405, 205, 83)
-        }
-        // will not be supported
-        //[addresses] = {
-        //    A."+" = ( %Q1234.2343, %I1234.2343)
-        //    A."-" = ( START, END)
-        //    B."+" = ( %Q4321.2343, %I4321.2343)
-        //    B."-" = ( BSTART, BEND)
-        //}
     }
-    [device file="cylinder.ds"] A;
-    [device file="cylinder.ds"] B;
-    [external file="station.ds"] C;
+    [device file="cylinder.ds"] A; // D:\Git\ds-Master\DsDotNet\src\UnitTest\UnitTest.Engine\Model\..\Libraries\cylinder.ds
+    [device file="cylinder.ds"] B; // D:\Git\ds-Master\DsDotNet\src\UnitTest\UnitTest.Engine\Model\..\Libraries\cylinder.ds
+    [external file="station.ds"] C; // D:\Git\ds-Master\DsDotNet\src\UnitTest\UnitTest.Engine\Model\..\Libraries\station.ds
 }
-
 """
 
 

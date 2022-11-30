@@ -248,9 +248,8 @@ module CoreModule =
                 let flow:Flow = parent.GetFlow()
                 let aliasKey =
                     match target with
-                    | AliasTargetReal r ->
-                        (if r.Flow <> flow then [|r.Flow.Name|] else [||]) @ [| r.Name |]
-                    | AliasTargetCall c -> c.PureNames
+                    | AliasTargetReal r -> r.GetAliasTargetToDs(flow)
+                    | AliasTargetCall c -> c.GetAliasTargetToDs()
                 let ads = flow.AliasDefs
                 match ads.TryFind(aliasKey) with
                 | Some ad -> ad.Mnemonincs.AddIfNotContains(name) |> ignore
@@ -305,7 +304,19 @@ module CoreModule =
             | ParentFlow f -> f.ModelingEdges
             | ParentReal r -> r.ModelingEdges
 
-   
+    type Call with
+        member x.GetAliasTargetToDs() =
+            match x.Parent.GetCore() with
+                | :? Flow as f -> [x.Name].ToArray()
+                | :? Real as r -> x.ParentNPureNames
+                | _->failwith "Error"
+
+    type Real with
+        member x.GetAliasTargetToDs(aliasFlow:Flow) =
+                if x.Flow <> aliasFlow
+                then [|x.Flow.Name; x.Name|]  //other flow
+                else [| x.Name |]             //my    flow
+
     type DsSystem with
         member x.AddButton(btnType:BtnType, btnName: string, flow:Flow) =
             if x <> flow.System then failwithf $"button [{btnName}] in flow ({flow.System.Name} != {x.Name}) is not same system"

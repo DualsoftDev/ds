@@ -27,7 +27,7 @@ module internal ToCopyModule =
                 )
 
     //TxRx Copy
-    let copyTxRx(origApi:ApiInterface, copyApi:ApiInterface) =
+    let copyTxRx(origApi:ApiItem, copyApi:ApiItem) =
         let copySys = copyApi.System
         let origSys = origApi.System
         let findReal (flowName:string, realName:string) = copySys.FindGraphVertex<Real>([|copySys.Name;flowName;realName|])
@@ -58,13 +58,13 @@ module internal ToCopyModule =
                 then Real.Create(name, copyFlow)
                 else findVertex.Value :?> Real
 
-        let copyCallInReal(apiItem:ApiInterface, real:Real) =
+        let copyCallInReal(apiItem:ApiItem, real:Real) =
             let findVertex = real.Graph.TryFindVertex(apiItem.Name)
             if findVertex.IsNone
                 then Call.Create(apiItem, Real real)
                 else findVertex.Value :?> Call
 
-        let copyCallInFlow(apiItem:ApiInterface, flow:Flow) =
+        let copyCallInFlow(apiItem:ApiItem, flow:Flow) =
             let findVertex = flow.Graph.TryFindVertex(apiItem.Name)
             if findVertex.IsNone
                 then Call.Create(apiItem, Flow flow)
@@ -80,11 +80,11 @@ module internal ToCopyModule =
                        orgiReal.Graph.Vertices
                             .ForEach(fun vInReal->
                                 match vInReal with
-                                | :? Call as orgiCall -> copyCallInReal (orgiCall.ApiInterface, copyReal) |> ignore
+                                | :? Call as orgiCall -> copyCallInReal (orgiCall.ApiItem, copyReal) |> ignore
                                 | _ -> () )
 
                 | :? Call as orgiCall
-                    -> copyCallInFlow (orgiCall.ApiInterface, copyFlow) |> ignore
+                    -> copyCallInFlow (orgiCall.ApiItem, copyFlow) |> ignore
                 | _ -> ()
             )
 
@@ -154,9 +154,9 @@ module internal ToCopyModule =
             origSys.EmergencyButtons.ForEach(fun btn ->
                 btn.Value.ForEach(fun tgtFlow -> copySys.AddButton(EmergencyBTN, btn.Key, copySys.FindFlow(tgtFlow.Name))))
 
-    //ApiInterface Copy
-    let copyApi(origApiItem:ApiInterface, copySys:DsSystem) =
-        let copyApiItem =ApiInterface.Create(origApiItem.Name, copySys)
+    //ApiItem Copy
+    let copyApi(origApiItem:ApiItem, copySys:DsSystem) =
+        let copyApiItem =ApiItem.Create(origApiItem.Name, copySys)
         copyApiItem
 
     //ApiInfo Copy
@@ -208,8 +208,8 @@ module internal ToCopyModule =
 //                    let newFlow = Flow.Create(flow.Name, copySystem)
 //                    copyFlow(flow, newFlow)
 //    [<Extension>] static member ToCopy(flow:Flow, copyflow:Flow)   = copyFlow(flow, copyflow)
-//    [<Extension>] static member ToCopy(apiItem:ApiInterface, copySystem:DsSystem) = copyApi(apiItem, copySystem)
-//    [<Extension>] static member ToCopy(apiItem:ApiInterface, copyApiItem:ApiInterface) = copyTxRx(apiItem, copyApiItem)
+//    [<Extension>] static member ToCopy(apiItem:ApiItem, copySystem:DsSystem) = copyApi(apiItem, copySystem)
+//    [<Extension>] static member ToCopy(apiItem:ApiItem, copyApiItem:ApiItem) = copyTxRx(apiItem, copyApiItem)
 //    [<Extension>] static member ToCopy(apiResetInfo:ApiResetInfo, copySystem:DsSystem) = copyApiInfo(apiResetInfo, copySystem)
 
 

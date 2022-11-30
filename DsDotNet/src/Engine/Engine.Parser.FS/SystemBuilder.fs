@@ -83,10 +83,10 @@ module SystemBuilderModule =
                 for cs in callSpecs do
                     let dev, apiName = cs.Api
                     let apiExported = system.ApiUsages.Find(nameComponentsEq [dev; apiName])
-                    ApiCallDef(apiExported, cs.Tx, cs.Rx, dev)
+                    JobDef(apiExported, cs.Tx, cs.Rx, dev)
             ]
-            let apiGroup = ApiCall(callName, apiItems)
-            system.ApiGroups.Add apiGroup
+            let apiGroup = Job(callName, apiItems)
+            system.Jobs.Add apiGroup
             sys
 
 

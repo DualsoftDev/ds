@@ -33,10 +33,10 @@
 
 Sys / F / Seg
 Sys / F / MySegAlias
-Sys / F / SegApiCall (=OtherSys.ApiName)    ICall
+Sys / F / SegJob (=OtherSys.ApiName)    ICall
 Sys / F / SegExCall (=MyF.Seg2)
 
-Sys / F / Seg / InRealApiCall (=Sys2.Plus)   ICall
+Sys / F / Seg / InRealJob (=Sys2.Plus)   ICall
 Sys / F / Seg / ChildAlias (=X)
 
 

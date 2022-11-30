@@ -28,20 +28,20 @@ module ModelBuildupTests1 =
             let apiP = apis.First(fun ai -> ai.Name = "+")
             let apiM = apis.First(fun ai -> ai.Name = "-")
             let callAp =
-                let apiItem = ApiCallDef(apiP, "%Q1", "%I1", dev.Name)
-                ApiCall("Ap", [apiItem])
+                let apiItem = JobDef(apiP, "%Q1", "%I1", dev.Name)
+                Job("Ap", [apiItem])
             let callAm =
-                let apiItem = ApiCallDef(apiM, "%Q2", "%I2", dev.Name)
-                ApiCall("Am", [apiItem])
-            system.ApiGroups.AddRange([callAp; callAm])
+                let apiItem = JobDef(apiM, "%Q2", "%I2", dev.Name)
+                Job("Am", [apiItem])
+            system.Jobs.AddRange([callAp; callAm])
             system, flow, real, callAp, callAm
 
         [<Test>]
         member __.``Model creation test`` () =
             let system, flow, real, callAp, callAm = createSimpleSystem()
 
-            let vCallP = Call.Create( callAp, Real real)
-            let vCallM = Call.Create( callAm, Real real)
+            let vCallP = Call.Create( callAp, ParentReal real)
+            let vCallM = Call.Create( callAm, ParentReal real)
             real.CreateEdge(ModelingEdgeInfo<Vertex>(vCallP, ">", vCallM)) |> ignore
 
             let generated = system.ToDsText()
@@ -67,8 +67,8 @@ module ModelBuildupTests1 =
         member __.``Invalid Model creation test`` () =
             let system, flow, real, callAp, callAm = createSimpleSystem()
 
-            let vCallP = Call.Create( callAp, Real real)
-            let vCallM = Call.Create( callAm, Real real)
+            let vCallP = Call.Create( callAp, ParentReal real)
+            let vCallM = Call.Create( callAm, ParentReal real)
             ( fun () ->
                 // real 의 child 간 edge 를 flow 에서 생성하려 함.. should fail
                 flow.CreateEdge(ModelingEdgeInfo<Vertex>(vCallP, ">", vCallM)) |> ignore
@@ -78,7 +78,7 @@ module ModelBuildupTests1 =
         member __.``Model with alias test`` () =
             let system, flow, real, callAp, callAm = createSimpleSystem()
 
-            let vCallP = Alias.Create("Main2", AliasTargetReal real, Flow flow)
+            let vCallP = Alias.Create("Main2", AliasTargetReal real, ParentFlow flow)
             let real2 = Real.Create("R2", flow)
 
             flow.CreateEdge(ModelingEdgeInfo<Vertex>(vCallP, ">", real2)) |> ignore
@@ -109,7 +109,7 @@ module ModelBuildupTests1 =
 
             let flow2 = Flow.Create("F2", system)
 
-            let real2 = RealOtherFlow.Create(real, Flow flow2)
+            let real2 = RealOtherFlow.Create(real, ParentFlow flow2)
             let real3 = Real.Create("R3", flow2)
 
             flow2.CreateEdge(ModelingEdgeInfo<Vertex>(real2, ">", real3)) |> ignore
@@ -138,9 +138,9 @@ module ModelBuildupTests1 =
         member __.``Model with export api test`` () =
             let system, flow, real, callAp, callAm = createSimpleSystem()
             let real2 = Real.Create("Main2", flow)
-            let adv = ApiInterface.Create("Adv", system, [real], [real])
-            let ret = ApiInterface.Create("Ret", system, [real2], [real2])
-            [ adv; ret; ].Iter(system.ApiInterfaces.Add >> ignore)
+            let adv = ApiItem.Create("Adv", system, [real], [real])
+            let ret = ApiItem.Create("Ret", system, [real2], [real2])
+            [ adv; ret; ].Iter(system.ApiItems.Add >> ignore)
 
             ApiResetInfo.Create(system, "Adv", ModelingEdgeType.Interlock, "Ret") |> ignore
 

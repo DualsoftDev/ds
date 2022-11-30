@@ -104,7 +104,7 @@ module ImportU =
                         |> Seq.iter(fun node ->
                                 let system = dicSys.[node.PageNum]
                                 let apiName = node.IfName;
-                                ApiInterface.Create(apiName, system) |> ignore
+                                ApiItem.Create(apiName, system) |> ignore
                         )
 
         //MFlow 리스트 만들기

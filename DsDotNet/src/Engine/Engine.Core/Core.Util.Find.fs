@@ -61,7 +61,7 @@ module internal ModelFindModule =
 
     let rec tryFindExportApiItem(system:DsSystem) (Fqdn(apiPath)) =
         let sysName, apiKey = apiPath[0], apiPath[1]
-        system.ApiInterfaces.TryFindWithName(apiKey)
+        system.ApiItems.TryFindWithName(apiKey)
 
     and tryFindCallingApiItem (system:DsSystem) targetSystemName targetApiName =
         let findedLoadedSystem = tryFindLoadedSystem system targetSystemName 
@@ -81,8 +81,11 @@ module internal ModelFindModule =
             return! flow.Graph.TryFindVertex(realName).Map(fun x -> x:?>Real)
         }
 
+    let tryFindJob (system:DsSystem) callName =
+        system.Jobs.TryFind(nameEq callName)
+    
     let tryFindCall (system:DsSystem) callName =
-        system.ApiGroups.TryFind(nameEq callName)
+        system.Jobs.TryFind(nameEq callName)
 
     let tryFindAliasTarget (flow:Flow) aliasMnemonic =
         flow.AliasDefs.Values
@@ -103,4 +106,5 @@ module internal ModelFindModule =
 
         member x.TryFindFlow(flowName:string) = tryFindFlow x flowName
         member x.TryFindCall(callName:string) = tryFindCall x callName
+        member x.TryFindJob (jobName:string) =  tryFindJob  x jobName
 

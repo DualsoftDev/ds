@@ -92,9 +92,10 @@ module EtcListenerModule =
                             let c = curSystem.TryFindCall(ns) |> Option.get
                             return SafetyConditionCall (c)
 
-                    | call::[] ->
-                        let! c = curSystem.TryFindCall(ns)
-                        return SafetyConditionCall c
+                    | f::r::c::[] ->
+                         let! c = curSystem.TryFindCall(ns)
+                         return SafetyConditionCall c
+                
                     | _ ->
                         failwith "ERROR"
                 }
@@ -153,9 +154,7 @@ module EtcListenerModule =
 
             let positionDefs = ctx.Descendants<PositionDefContext>().ToArray()
             for posiDef in positionDefs do
-                //<kwak> //callName() 파서 수정필요
-                let callNamePath = posiDef.Descendants<CallNameContext>().Select(getText).ToArray()
-              //  let callNamePath = posiDef.callName().GetText().Split('.')  //임시처리
+                let callNamePath = posiDef.callName().TryCollectNameComponents()|> Option.get
                 let xywh = posiDef.xywh()
                 let call = tryFindCall x.TheSystem callNamePath |> Option.get
 

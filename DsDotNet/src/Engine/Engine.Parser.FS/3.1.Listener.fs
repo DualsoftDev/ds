@@ -392,7 +392,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                         | flowOrReal::rc::[] -> //FlowEx.R or Real.C
                             match tryFindFlow system flowOrReal with
                             | Some f -> f.Graph.TryFindVertex<Real>(rc)  |> Option.get |> AliasTargetReal
-                            | None ->  tryFindCall system  ns |> Option.get |> AliasTargetCall
+                            | None ->  tryFindCall system ([flow.Name]@ns) |> Option.get |> AliasTargetCall
                         | _ ->
                             failwith "ERROR"
 

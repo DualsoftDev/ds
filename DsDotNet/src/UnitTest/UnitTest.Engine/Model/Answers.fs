@@ -22,13 +22,19 @@ module ModelAnswers =
     [flow] F = {
         Ap > Am;
         Main = {
-            Ap1, Bp1 > Bm1;
+
+            Ap1 > Bp1;
+            Ap > Am > Bp;
+
+            /* Grouped */
+            //{ Ap1; Bp1; } > Bm1
+            //{ Ap1; Bp1; } > { Am1; Bm1; }
         }
         [aliases] = {
             Ap = { Ap1; Ap2; Ap3; }
             Am = { Am1; Am2; Am3; }
-            Bp = { Bp1; Bp2; Bp3; }
-            Bm = { Bm1; Bm2; Bm3; }
+            Main.Bp = { Bp1; Bp2; Bp3; }
+            //Bm = { Bm1; Bm2; Bm3; } Vextex에 없으면 정의불가
         }
     }
     [jobs] = {
@@ -37,15 +43,18 @@ module ModelAnswers =
         Bp = { B."+"(%Q3, %I3); }
         Bm = { B."-"(%Q4, %I4); }
     }
+
     [prop] = {
         [safety] = {
             F.Main = { F.Ap; F.Am; }
             F.Ap = { F.Main; }
         }
     }
+
     [device file="cylinder.ds"] A;
     [device file="cylinder.ds"] B;
 }
+
 """
     let answerEveryScenarioText = """
 [sys ip = 192.168.0.1] My = {

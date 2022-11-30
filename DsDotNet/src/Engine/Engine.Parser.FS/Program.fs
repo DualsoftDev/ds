@@ -57,6 +57,7 @@ C4 > C5;
             Ap2 > Am2 > Bm2;
             Ap2 > Bp2 > Bm2;
 
+            Ap>Am>Bp>Bm;
             Bm2
             > Ap             // GVT.{ Child | Call }
             ;
@@ -69,10 +70,10 @@ C4 > C5;
         R2;
 
         [aliases] = {
-            Ap = { Ap1; Ap2; }
-            Am = { Am1; Am2; }
-            Bp = { Bp1; Bp2; }
-            Bm = { Bm1; Bm2; }
+            Main.Ap = { Ap1; Ap2; }
+            Main.Am = { Am1; Am2; }
+            Main.Bp = { Bp1; Bp2; }
+            Main.Bm = { Bm1; Bm2; }
             Main = { Main2; }
         }
         // Flow 내의 safety 는 지원하지 않음
@@ -96,11 +97,11 @@ C4 > C5;
     [prop] = {
         // safety : Real|Call = { (Real|Call)* }
         [safety] = {
-            F.Main = { Ap; }
-            Am = { F.Main; }
+            F.Main = { F.Main.Ap; }
+            F.Main.Am = { F.Main; }
         }
         [layouts] = {
-            Ap = (1309,405,205,83)
+            F.Main.Ap = (1309,405,205,83)
         }
     }
 
@@ -169,8 +170,8 @@ C4 > C5;
         Ap > Am;
         Main = {
 
-            Ap1, Bp1 > Bm1;
-            Ap > Am > Bp > Bm;
+            Ap1 > Bp1;
+            Ap > Am > Bp;
 
             /* Grouped */
             //{ Ap1; Bp1; } > Bm1
@@ -179,8 +180,8 @@ C4 > C5;
         [aliases] = {
             Ap = { Ap1; Ap2; Ap3; }
             Am = { Am1; Am2; Am3; }
-            Bp = { Bp1; Bp2; Bp3; }
-            Bm = { Bm1; Bm2; Bm3; }
+            Main.Bp = { Bp1; Bp2; Bp3; }
+            //Bm = { Bm1; Bm2; Bm3; } Vextex에 없으면 정의불가
         }
     }
     [jobs] = {
@@ -200,7 +201,6 @@ C4 > C5;
     [device file="cylinder.ds"] A;
     [device file="cylinder.ds"] B;
 }
-
 """
 
     let AdoptoedValidText = """

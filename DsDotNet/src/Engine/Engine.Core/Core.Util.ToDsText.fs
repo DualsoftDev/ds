@@ -89,8 +89,8 @@ module internal ToDsTextModule =
                     let aliasKey =
                         match a.AliasTarget with
                         | Some(AliasTargetReal real) ->
-                            if real.Flow.Name = flow.Name then real.Name
-                            else real.PureNames.Combine()
+                            if real.Flow.Name = flow.Name then real.Name  //myFlow Real
+                            else real.ParentNPureNames.Combine()          //exFlow Real
                                
                         | Some(AliasTargetCall call) -> 
                             match call.Parent.GetCore() with

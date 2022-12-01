@@ -188,11 +188,13 @@ module CoreModule =
         | ParentReal of Real //Call/Alias      의 부모
 
     and AliasTargetWrapper =
-        | AliasTargetReal of Real    // MyFlow or OtherFlow 의 Real 일 수 있다.
+        | AliasTargetReal of Real
+        | AliasTargetRealOtherFlow of RealOtherFlow
         | AliasTargetCall of Call
 
     and SafetyCondition =
         | SafetyConditionReal of Real
+        | SafetyConditionRealOtherFlow of RealOtherFlow
         | SafetyConditionCall of Call
 
 

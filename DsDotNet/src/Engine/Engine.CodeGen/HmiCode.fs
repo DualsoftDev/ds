@@ -123,7 +123,7 @@ module HmiGenModule =
                 | _ ->
                     failwith "type error"
 
-        let addInterface (api:ApiInterface) =
+        let addInterface (api:ApiItem) =
             if false = hmiInfos.ContainsKey(api.QualifiedName) then
                 let info = 
                     genInfo
@@ -131,36 +131,36 @@ module HmiGenModule =
                         ButtonType.None api.System.QualifiedName
                 hmiInfos.Add(api.QualifiedName, info)
 
-        let addDevice (system:DsSystem) (flow:Flow) (dvcGroup:ApiCallDef seq) =
+        let addDevice (system:DsSystem) (flow:Flow) (dvcGroup:JobDef seq) =
             for dvc in dvcGroup do
-                let api = dvc.ApiInterface
-                let device = dvc.ApiInterface.QualifiedName
+                let api = dvc.ApiItem
+                let device = dvc.ApiItem.System.Name
                 if false = hmiInfos.ContainsKey(device) then
                     let info = 
                         genInfo device Category.Device ButtonType.None null
                     hmiInfos.Add(device, info)
 
-                addInterface api//.ApiInterface
+                addInterface api
 
-        let addDeviceGroup (system:DsSystem) (flow:Flow) (call:Vertex) = 
+        let addDeviceGroup (system:DsSystem) (flow:Flow) (vertex:Vertex) = 
             let addToUsedIn deviceGroup target =
                 if false = hmiInfos[deviceGroup].used_in.Contains(target) then
                     hmiInfos[deviceGroup].used_in.Add(target)
 
             let dvcGrp =
-                match call with
+                match vertex with
                 | :? Call as c ->
-                    addDevice system flow c.ApiItems
+                    addDevice system flow c.CallTarget.ApiItems
                     c.Name
                 | :? Alias as a ->
-                    let aliasKey =
-                        match a.ApiTarget with
-                        | AliasTargetReal r -> 
-                            r.NameComponents
-                        | AliasTargetCall c -> 
-                            addDevice system flow c.ApiItems
-                            [|c.Name|]
-                    aliasKey[0]
+                    match a.ApiTarget with
+                    | AliasTargetReal r -> 
+                        r.NameComponents[0]
+                    | AliasTargetCall c -> 
+                        addDevice system flow c.CallTarget.ApiItems
+                        c.Name
+                    | _ ->
+                        null
                 | _ ->
                     null
 
@@ -172,9 +172,11 @@ module HmiGenModule =
             addToUsedIn dvcGrp system.Name
             addToUsedIn dvcGrp flow.QualifiedName
 
-            match call.Parent with
-            | Real realParent -> addToUsedIn dvcGrp realParent.QualifiedName
-            | _ -> ()
+            match vertex.Parent with
+            | ParentReal realParent -> 
+                addToUsedIn dvcGrp realParent.QualifiedName
+            | _ -> 
+                ()
 
         let succeess, message = 
             try
@@ -198,16 +200,18 @@ module HmiGenModule =
                             match rootSeg with
                             | :? Real as real ->
                                 addSystemFlowReal rootSeg
-                                for call in real.Graph.Vertices do
-                                    addDeviceGroup sys flow call
+                                for vert in real.Graph.Vertices do
+                                    addDeviceGroup sys flow vert
                             | :? Call as call ->
                                 addDeviceGroup sys flow call
                             | :? Alias as alias ->
                                 match alias.ApiTarget with
                                 | AliasTargetReal rt ->
                                     addSystemFlowReal rt
+                                | AliasTargetCall ct ->
+                                    addDeviceGroup sys flow ct
                                 | _ ->
-                                    addDeviceGroup sys flow alias
+                                    ()
                             | _ ->
                                 printfn "unknown type has detected"
                 if hmiInfos.Count <> 0 then addGlobalButtons

@@ -212,27 +212,27 @@ module ModelComponentAnswers =
 
     let answerT6Aliases = """
 [sys ip = localhost] T6_Alias = {
-[flow] Page1 = {
-    C1 > C2;
-    AndFlow.R2 > OrFlow.R1;
-}
-[flow] AndFlow = {
-    R1 > R3;
-    R2 > R3;
-}
-[flow] OrFlow = {
-    R1 > R3;
-    R2 > Copy1_R3;
-    [aliases] = {
-        R3 = { Copy1_R3; AliasToR3; }
-        AndFlow.R3 = { AndFlowR3; OtherFlowR3; }
+    [flow] Page1 = {
+        C1 > C2;		
+        AndFlow.R2 > OrFlow.R2;		
     }
-}
-[jobs] = {
-    C1 = { B."+"(%Q1, %I1); A."+"(%Q1, %I1); }
-    C2 = { A."-"(%Q3, _); B."-"(%Q3, _); }
-}
-[external file="cylinder.ds"] A;
-[device file="cylinder.ds"] B;
+    [flow] AndFlow = {
+        R1 > R3;		
+        R2 > R3;		
+    }
+    [flow] OrFlow = {
+        OtherFlowR3 > R3;	
+        R2 > Copy1_R3;		
+        [aliases] = {
+            R3 = { Copy1_R3; AliasToR3; }
+            AndFlow.R3 = { AndFlowR3; OtherFlowR3; }
+        }
+    }
+    [jobs] = {
+        C1 = { B."+"(%Q1, %I1); A."+"(%Q1, %I1); }
+        C2 = { A."-"(%Q3, _); B."-"(%Q3, _); }
+    }
+    [external file="cylinder.ds"] A;
+    [device file="cylinder.ds"] B;  
 }
 """

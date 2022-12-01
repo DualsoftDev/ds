@@ -131,7 +131,7 @@ module HmiGenModule =
                         ButtonType.None api.System.QualifiedName
                 hmiInfos.Add(api.QualifiedName, info)
 
-        let addDevice (system:DsSystem) (flow:Flow) (dvcGroup:JobDef seq) =
+        let addDevice (dvcGroup:JobDef seq) =
             for dvc in dvcGroup do
                 let api = dvc.ApiItem
                 let device = dvc.ApiItem.System.Name

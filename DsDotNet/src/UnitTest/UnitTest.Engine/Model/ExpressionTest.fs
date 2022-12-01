@@ -6,6 +6,7 @@ open NUnit.Framework
 open Engine.Cpu.TagModule
 open Engine.Cpu
 open Newtonsoft.Json
+open Engine.Parser.FS.ExpressionParser
 
 [<AutoOpen>]
 module ExpressionTestModule =
@@ -280,3 +281,18 @@ module ExpressionTestModule =
             (target <== f).Do()
             targetExpr |> evaluate === false
 
+        [<Test>]
+        member __.``8 ExpressionParse test`` () =
+            let evalExpr = parseExpression >> evaluateBoxedExpression >> box
+
+            //"Int(3.4) + 1 + 2 + (abs(%tag3))"
+            "1 + 2" |> evalExpr === 3
+
+            "1.0 + 2.0" |> evalExpr === 3.0
+
+            (fun () -> "1.0 + 2" |> evalExpr |> ignore )
+            |> ShouldFailWithSubstringT "Type mismatch"
+
+            "Int(1.0) + 2" |> evalExpr === 3
+
+            """  "hello, " + "world" """ |> evalExpr === "hello, world"

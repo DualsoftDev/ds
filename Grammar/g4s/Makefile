@@ -9,6 +9,7 @@ grun:
 	@$(antlr4) dsLexer.g4
 	@$(antlr4) dsParser.g4
 	@$(antlr4) fqdn.g4
+	@$(antlr4) expr.g4
 	@javac *.java
 	@echo 'echo "A || B, #g(X), C > D, E || F;" | grun ds causals -gui'
 

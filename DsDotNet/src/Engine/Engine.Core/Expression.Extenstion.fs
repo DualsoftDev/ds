@@ -1,12 +1,11 @@
 [<AutoOpen>]
-module rec Engine.Cpu.FunctionModule
+module rec Engine.Core.FunctionModule
 
 open System
 open System.Linq
 open System.Runtime.CompilerServices
 open System.Diagnostics
 open System.Collections
-open Engine.Cpu
 
 //let add             (xs:Args) =  Function(_add           , xs)
 //let addDouble       (xs:Args) =  Function(_addDouble     , xs)
@@ -53,10 +52,10 @@ open Engine.Cpu
 type Statement<'T> =
     | Assign      of expression:Expression<'T> * target:Tag<'T>
 
-    //임시테스트
-    member x.TestForce() =
-        match x with
-        | Assign     (expr, target) ->  target.SetValue(true)
+    ////임시테스트
+    //member x.TestForce() =
+    //    match x with
+    //    | Assign     (expr, target) ->  target.SetValue(true)
 
 
     member x.Do() =
@@ -80,9 +79,10 @@ type FuncExt =
 
     [<Extension>] static member Evaluate (x:Expression<'T>) = evaluate x
     //[<Extension>] static member CreateFunc (xs:IEnumerable, funcName:string) = Function(funcName, [xs])
-    [<Extension>] static member ToTags (xs:DsBit<'T> seq)    = xs.Cast<Tag<_>>()
-    [<Extension>] static member ToTags (xs:DsDotBit<'T> seq) = xs.Cast<Tag<_>>()
-    [<Extension>] static member ToTags (xs:PlcTag<'T> seq)   = xs.Cast<Tag<_>>()
+    [<Extension>] static member ToTags (xs:#Tag<'T> seq)    = xs.Cast<Tag<_>>()
+    //[<Extension>] static member ToTags (xs:DsBit<'T> seq)    = xs.Cast<Tag<_>>()
+    //[<Extension>] static member ToTags (xs:DsDotBit<'T> seq) = xs.Cast<Tag<_>>()
+    //[<Extension>] static member ToTags (xs:PlcTag<'T> seq)   = xs.Cast<Tag<_>>()
     [<Extension>] static member ToExpr (x:Tag<bool>)   = Terminal (Tag x)
     [<Extension>] static member GetAnd (xs:Tag<'T> seq)  = xs |> tagsToArguments |> anD
     [<Extension>] static member GetOr  (xs:Tag<'T> seq)  = xs |> tagsToArguments |> oR

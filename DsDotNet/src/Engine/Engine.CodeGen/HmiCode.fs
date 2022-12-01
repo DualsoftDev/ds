@@ -150,14 +150,14 @@ module HmiGenModule =
             let dvcGrp =
                 match vertex with
                 | :? Call as c ->
-                    addDevice system flow c.CallTarget.ApiItems
+                    addDevice c.CallTarget.ApiItems
                     c.Name
                 | :? Alias as a ->
                     match a.ApiTarget with
                     | AliasTargetReal r -> 
                         r.NameComponents[0]
                     | AliasTargetCall c -> 
-                        addDevice system flow c.CallTarget.ApiItems
+                        addDevice c.CallTarget.ApiItems
                         c.Name
                     | _ ->
                         null

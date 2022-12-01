@@ -15,7 +15,7 @@ namespace Dual.Model.Import
     {
         public static FormMain TheMain;
 
-        private Engine.Core.CoreModule.Model _Model;
+        private DsSystem _mySystem;
         private string _dsText;
         private bool _ConvertErr = false;
         public Dictionary<Flow, TabPage> _DicMyUI;
@@ -134,7 +134,7 @@ namespace Dual.Model.Import
             }
             catch
             {
-                WriteDebugMsg(DateTime.Now, MSGLevel.Error, $"{PathPPT} 불러오기 실패!!");
+                WriteDebugMsg(DateTime.Now, MSGLevel.MsgError, $"{PathPPT} 불러오기 실패!!");
                 Busy = false;
             }
 
@@ -152,7 +152,7 @@ namespace Dual.Model.Import
         {
             var text = richTextBox_ds.Text;
             RichTextBoxExtensions.SetClipboard(text);
-            WriteDebugMsg(DateTime.Now, MSGLevel.Info, $"클립보드복사 성공!! Ctrl+V로 붙여넣기 가능합니다.");
+            WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"클립보드복사 성공!! Ctrl+V로 붙여넣기 가능합니다.");
 
         }
 

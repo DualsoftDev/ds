@@ -25,7 +25,7 @@
     <Compile Include="PPTDoc.fs" />
     <Compile Include="GraphView.fs" />
     <Compile Include="ImportCheck.fs" />
-    <Compile Include="ImportUtilCopy.fs" />
+    <Compile Include="ImportUtilCopy.fsx" />
     <Compile Include="ImportUtil.fs" />
     <Compile Include="ImportUtilView.fs" />
     <Compile Include="ImportM.fs" />
@@ -44,6 +44,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\Engine\Engine.Common.FS\Engine.Common.FS.fsproj" />
     <ProjectReference Include="..\..\..\Engine\Engine.Core\Engine.Core.fsproj" />
+    <ProjectReference Include="..\..\..\Engine\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
   </ItemGroup>
 
 

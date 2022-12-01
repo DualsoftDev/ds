@@ -13,7 +13,9 @@ module ImportM =
 
     type internal ImportPowerPoint(path:string) =
         let doc   = pptDoc(path)
-        let mutable theSystem:DsSystem option = None
+      //  let configFile = @"test-model-config.json"
+      //  let model = ModelLoader.LoadFromConfig configFile
+        let mySys = DsSystem(doc.Name,"localhost")
 
         member internal x.GetImportModel() =
             try
@@ -22,50 +24,47 @@ module ImportM =
                 ImportU.dicCopy.Clear()
                 ImportU.dicFlow.Clear()
                 ImportU.dicVertex.Clear()
-                theSystem <- DsSystem.Create(doc.Name,"localhost")
 
-                model.TheSystem  <- Some topSystem
-                topSystem.Active <- true
-                ImportU.dicSys.Add(0, topSystem)
+                ImportU.dicSys.Add(0, mySys)
 
                 //page 타이틀 이름 중복체크 (없으면 P0, P1, ... 자동생성)
                 ImportCheck.CheckMakeSystem(doc)
-                doc.MakeSystem(model)
-                doc.MakeCopySystem(model)
+                doc.MakeSystem(mySys)
+                doc.MakeCopySystem(mySys)
                 doc.MakeInterfaces()
 
                 ImportCheck.CheckMakeCopyApi(doc.Nodes, ImportU.dicSys)
                 //Flow 리스트 만들기
-                doc.MakeFlows(model) |> ignore
+                doc.MakeFlows(mySys) |> ignore
 
                 // system, flow 이름 중복체크
-                ImportCheck.SameSysFlowName(model.Systems, ImportU.dicFlow) |> ignore
+                ImportCheck.SameSysFlowName(mySys.ReferenceSystems, ImportU.dicFlow) |> ignore
                 //EMG & Start & Auto 리스트 만들기
-                doc.MakeButtons  (model)
+                doc.MakeButtons  (mySys)
 
                 //segment 리스트 만들기
-                doc.MakeSegment(model)
+                doc.MakeSegment(mySys)
 
                 ImportCheck.SameEdgeErr(doc.Edges) |> ignore
 
                 //Edge  만들기
-                doc.MakeEdges (model)
+                doc.MakeEdges ()
                 //Safety 만들기
-                doc.MakeSafeties(model)
+                doc.MakeSafeties(mySys)
                 //ApiTxRx  만들기
-                doc.MakeApiTxRx(model)
+                doc.MakeApiTxRx()
                 //Dummy 및 UI Flow, Node, Edge 만들기
-                let viewNodes = doc.MakeGraphView(model)
+                let viewNodes = doc.MakeGraphView(mySys)
 
 
                 MSGInfo($"전체 장표   count [{doc.Pages.Count()}]")
                 MSGInfo($"전체 도형   count [{doc.Nodes.Count()}]")
                 MSGInfo($"전체 연결   count [{doc.Edges.Count()}]")
                 MSGInfo($"전체 부모   count [{doc.Parents.Keys.Count}]")
-                model, viewNodes
+                mySys, viewNodes
 
             with ex ->  failwithf  $"{ex.Message}"
-                        model, null
+                        mySys, null
 
 
     let FromPPTX(path:string) =

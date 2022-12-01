@@ -11,7 +11,7 @@ open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module ImportViewModule =
-    let MEI = ModelingEdgeInfo
+    //let MEI = ModelingEdgeInfo
 
 
     let ConvertReal(real:Real, newNode:ViewNode, dummys:pptDummy seq)  =
@@ -29,8 +29,8 @@ module ImportViewModule =
                 | _ -> failwithf "vertex type ERROR" )
 
         edgeInfos
-        |>Seq.filter(fun edge -> (dummyMembers.Contains(edge.Source) || dummyMembers.Contains(edge.Target))|>not)
-        |>Seq.iter(fun edge -> newNode.Edges.Add(MEI(dicV.[edge.Source], edge.EdgeSymbol, dicV.[edge.Target])) |>ignore)
+        |>Seq.filter(fun edge -> (dummyMembers.Contains(edge.Sources[0]) || dummyMembers.Contains(edge.Targets[0]))|>not)
+        |>Seq.iter(fun edge -> newNode.Edges.Add(ModelingEdgeInfo(dicV.[edge.Sources[0]], edge.EdgeSymbol, dicV.[edge.Targets[0]])) |>ignore)
 
         real.GetDummyReal(dummys, dicV, dicDummy) |> Seq.iter(fun e-> newNode.Edges.Add(e) |>ignore)
 
@@ -54,16 +54,16 @@ module ImportViewModule =
         |>Seq.iter(fun vertex -> newNode.Singles.Add(convertReal(vertex))|>ignore)
 
         edgeInfos
-        |>Seq.filter(fun edge -> (dummyMembers.Contains(edge.Source) || dummyMembers.Contains(edge.Target))|>not)
+        |>Seq.filter(fun edge -> (dummyMembers.Contains(edge.Sources[0]) || dummyMembers.Contains(edge.Targets[0]))|>not)
         |>Seq.iter(fun edge -> 
-                    if edge.Source :? Real 
-                    then let r = edge.Source :?> Real
+                    if edge.Sources[0] :? Real 
+                    then let r = edge.Sources[0] :?> Real
                          ConvertReal(r, dicV.[r], dummys) |> ignore 
-                    if edge.Target :? Real 
-                    then let r = edge.Target :?> Real
+                    if edge.Targets[0] :? Real 
+                    then let r = edge.Targets[0] :?> Real
                          ConvertReal(r, dicV.[r], dummys) |> ignore 
 
-                    newNode.Edges.Add(MEI(dicV.[edge.Source], edge.EdgeSymbol, dicV.[edge.Target])) |>ignore)
+                    newNode.Edges.Add(ModelingEdgeInfo<ViewNode>(dicV.[edge.Sources[0]], edge.EdgeSymbol, dicV.[edge.Targets[0]])) |>ignore)
 
         flow.GetDummyFlow(dummys, dicV, dicDummy) 
         |> Seq.iter(fun e-> newNode.Edges.Add(e) |>ignore)
@@ -121,7 +121,7 @@ module ImportViewModule =
     [<Extension>]
     type ImportViewUtil =
         [<Extension>] 
-        static member MakeGraphView (doc:pptDoc, model:Model) =
+        static member MakeGraphView (doc:pptDoc, mySys:DsSystem) =
                 doc.Dummys |> Seq.iter(fun dummy -> dummy.Update(dicVertex))
 
                 let getFlowNodes(flows:Flow seq) = 
@@ -137,7 +137,7 @@ module ImportViewModule =
                         flowNode)
 
                 let viewNodes = 
-                    model.Systems
+                    mySys.ReferenceSystems
                     |>Seq.map(fun sys -> sys, sys.Flows)
                     |>Seq.collect(fun (sys, flows) -> 
                             let flowNodes = getFlowNodes(flows)

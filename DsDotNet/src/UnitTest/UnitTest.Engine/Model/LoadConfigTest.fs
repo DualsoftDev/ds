@@ -50,11 +50,11 @@ module LoadConfigTestModule =
             let caches = DsSystem.ExternalSystemCaches
             caches.Count() === 1
 
-            let exs = system.Devices.Select(fun d -> d.ReferenceSystem).ToArray()
+            let exs = system.LoadedSystems.Select(fun d -> d.ReferenceSystem).ToArray()
             exs.Length === 2
             exs[0] === exs[1]
             exs.Distinct().Count() === 1
-            system.Devices.Select(fun d -> d.Name) |> Seq.sort |> SeqEq ["A"; "B"]
+            system.LoadedSystems.Select(fun d -> d.Name) |> Seq.sort |> SeqEq ["A"; "B"]
             exs[0].Name === "Station"
 
             let generated = system.ToDsText();

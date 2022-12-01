@@ -19,7 +19,7 @@ module ImportU =
     let dicFlow = Dictionary<int, Flow>() // page , flow
     let dicVertex = Dictionary<string, Vertex>()
 
-    let private createVertex(system:DsSystem, node:pptNode, parentReal:Real Option, parentFlow:Flow Option, dicSeg:Dictionary<string, Vertex>) =
+    let private createVertex(sys:DsSystem, node:pptNode, parentReal:Real Option, parentFlow:Flow Option, dicSeg:Dictionary<string, Vertex>) =
 
         if(parentReal.IsNone && parentFlow.IsNone)  then () //alias 지정후 다시 생성
         else
@@ -28,24 +28,21 @@ module ImportU =
                 let real = Real.Create(node.Name, parentFlow.Value)
                 dicSeg.Add(node.Key, real)
             else
-                failwith "Need to fix"
-                // <ahn>
+                let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
+                let system = sys.TryFindReferenceSystem(sysName)
+                let findApi = if(system.IsSome)
+                                then Office.ErrorPPT(Name, ErrID._47, $"원인이름{sysName}: 전체이름[{node.Shape.InnerText}] 해당도형[{node.Shape.ShapeName()}]", node.PageNum)
+                                else 
+                                     match system.Value.TryFindExportApiItem([|system.Value.Name;apiName|]) with
+                                     |Some v -> v
+                                     |None ->   Office.ErrorPPT(Name, ErrID._42, $"원인이름{apiName}: 전체이름[{node.Shape.InnerText}] 해당도형[{node.Shape.ShapeName()}]", node.PageNum)
 
-                //let sysName, ApiName = GetSysNApi(node.PageTitle, node.Name)
-                //let system = model.TryFindSystem(sysName)
-                //let findApi = if(system.IsNull())
-                //                then Office.ErrorPPT(Name, ErrID._47, $"원인이름{sysName}: 전체이름[{node.Shape.InnerText}] 해당도형[{node.Shape.ShapeName()}]", node.PageNum)
-                //                else system.TryFindExportApiItem(ApiName)
+                let call =
+                    if(parentReal.IsSome)
+                    then  Call.Create(findApi, ParentReal (parentReal.Value) , sysName)
+                    else  Call.Create(findApi, ParentFlow (parentFlow.Value) , sysName)
 
-                //if findApi.IsNull()
-                //then Office.ErrorPPT(Name, ErrID._42, $"원인이름{ApiName}: 전체이름[{node.Shape.InnerText}] 해당도형[{node.Shape.ShapeName()}]", node.PageNum)
-
-                //let call =
-                //    if(parentReal.IsSome)
-                //    then  Call.Create(findApi, Real parentReal.Value)
-                //    else  Call.Create(findApi, Flow parentFlow.Value)
-
-                //dicSeg.Add(node.Key, call)
+                dicSeg.Add(node.Key, call)
 
 
     let private getParent(edge:pptEdge, parents:ConcurrentDictionary<pptNode, seq<pptNode>>, dicSeg:Dictionary<string, Vertex>) =
@@ -67,36 +64,36 @@ module ImportU =
 
     [<Extension>]
     type ImportUtil =
-        [<Extension>] static member GetAcive(model:Model) =
-                        model.Systems.Filter(fun s->s.Active).First()
+    
         [<Extension>] static member GetPage(dicFlow:Dictionary<int, Flow>, flow:Flow) =
                         dicFlow.Where(fun w-> w.Value = flow).First().Key
 
-        [<Extension>] static member MakeSystem (doc:pptDoc, model:Model) =
+        [<Extension>] static member MakeSystem (doc:pptDoc, sys:DsSystem) =
                         doc.Pages
                             |> Seq.filter(fun page -> page.IsUsing)
                             |> Seq.iter  (fun page ->
                                 let sysName, flowName = GetSysNFlow(doc.Name, page.Title, page.PageNum)
                                 if sysName = doc.Name|>not
-                                then if model.TryFindSystem(sysName).IsNull()
-                                     then dicSys.Add(page.PageNum, DsSystem.Create(sysName, "", model.TheSystem))
-                                     else dicSys.Add(page.PageNum, model.TryFindSystem(sysName))
-                                else dicSys.Add(page.PageNum, model.TheSystem)
+                                then if sys.TryFindLoadedSystem(sysName) |> Option.isSome
+                                     then dicSys.Add(page.PageNum, DsSystem(sysName, ""))
+                                     else dicSys.Add(page.PageNum, sys.TryFindLoadedSystem(sysName).Value.ReferenceSystem)
+                                else dicSys.Add(page.PageNum, sys)
                                 )
-        [<Extension>] static member MakeCopySystem (doc:pptDoc, model:Model) =
+
+        [<Extension>] static member MakeCopySystem (doc:pptDoc, sys:DsSystem) =
                         doc.Nodes
                         |> Seq.filter(fun node -> node.NodeType = COPY)
                         |> Seq.iter(fun node ->
                                 node.CopySys.ForEach(fun copy ->
-                                    let origSys  = model.TryFindSystem(copy.Value)
-
-                                    if origSys.IsNull()
-                                    then Office.ErrorPPT(Name, ErrID._43, $"원인이름{copy.Value}: 전체이름[{node.Shape.InnerText}] 해당도형[{node.Shape.ShapeName()}]", node.PageNum)
-
-                                    let copySys  = DsSystem.Create(copy.Key, "", model.TheSystem)
-                                    dicCopy.Add(copySys, origSys) |>ignore
+                                    match sys.TryFindReferenceSystem(copy.Value) with
+                                    |Some origSys -> 
+                                            let copySys  = DsSystem(copy.Key, "")
+                                            dicCopy.Add(copySys, origSys) |>ignore
+                                    | None ->
+                                        Office.ErrorPPT(Name, ErrID._43, $"원인이름{copy.Value}: 전체이름[{node.Shape.InnerText}] 해당도형[{node.Shape.ShapeName()}]", node.PageNum)
                                     )
                                 )
+
         //Interface 만들기
         [<Extension>] static member MakeInterfaces (doc :pptDoc) =
                         doc.Nodes
@@ -108,26 +105,25 @@ module ImportU =
                         )
 
         //MFlow 리스트 만들기
-        [<Extension>] static member MakeFlows (doc:pptDoc, model:Model) =
+        [<Extension>] static member MakeFlows (doc:pptDoc, sys:DsSystem) =
                             doc.Pages
                             |> Seq.filter(fun page -> page.IsUsing)
                             |> Seq.iter  (fun page ->
                                 let pageNum  = page.PageNum
                                 let sysName, flowName = GetSysNFlow(doc.Name, page.Title, page.PageNum)
-                                let sys    = model.TryFindSystem(sysName)
+                                let sys    = sys.ReferenceSystems.First(fun f->f.Name = sysName)
                                 dicFlow.Add(pageNum,  Flow.Create(flowName, sys) ) |> ignore
                                 )
 
                             //copy system ApiItems 동일 처리
-                            dicCopy.ForEach(fun sysTwin->
-                                let copySys = sysTwin.Key
-                                let origSys = sysTwin.Value
-                                origSys.ApiUsages.ForEach(fun apiItem -> apiItem.ToCopy(copySys)|>ignore)
-                                )
+                            //dicCopy.ForEach(fun sysTwin->
+                            //    let copySys = sysTwin.Key
+                            //    let origSys = sysTwin.Value
+                            //    origSys.ApiUsages.ForEach(fun apiItem -> apiItem.ToCopy(copySys)|>ignore)
+                            //    )
 
         //EMG & Start & Auto 리스트 만들기
-        [<Extension>] static member MakeButtons (doc:pptDoc, model:Model) =
-                        let mySys = model.TheSystem
+        [<Extension>] static member MakeButtons (doc:pptDoc, mySys:DsSystem) =
                         let checkErr(flow:Flow, node:pptNode) =
                                 if (flow.System <> mySys)
                                 then  Office.ErrorPPT(Name, ErrID._45 , $"원인 버튼 {node.Name}: 시스템{flow.System.Name}", node.PageNum)
@@ -146,197 +142,209 @@ module ImportU =
 
 
         //real call alias  만들기
-        [<Extension>] static member MakeSegment (doc:pptDoc, model:Model) =
+        [<Extension>] 
+        static member MakeSegment (doc:pptDoc, mySys:DsSystem) =
 
-                        let pptNodes = doc.Nodes
-                        let parents = doc.Parents
-                        let dicChildParent =
-                            parents
-                            |> Seq.filter(fun parent -> parent.Key.IsDummy|>not)
-                            |> Seq.collect(fun parentChildren ->
-                                parentChildren.Value
-                                |> Seq.map(fun child -> child, parentChildren.Key)) |> dict
+                let pptNodes = doc.Nodes
+                let parents = doc.Parents
+                let dicChildParent =
+                    parents
+                    |> Seq.filter(fun parent -> parent.Key.IsDummy|>not)
+                    |> Seq.collect(fun parentChildren ->
+                        parentChildren.Value
+                        |> Seq.map(fun child -> child, parentChildren.Key)) |> dict
 
-                        let createCall() =
-                            pptNodes
-                            |> Seq.filter(fun node -> node.Alias.IsNone)
-                            |> Seq.filter(fun node -> node.NodeType.IsCall)
-                            |> Seq.iter(fun node ->
-                                        let parentReal = if  (dicChildParent.ContainsKey(node))
-                                                            then
-                                                                 Some(dicVertex.[dicChildParent.[node].Key] :?> Real)
-                                                            else None
-                                        let parentFlow = if  dicChildParent.ContainsKey(node)
-                                                            then None
-                                                            else Some(dicFlow.[node.PageNum])
-                                        createVertex(model, node, parentReal, parentFlow, dicVertex))
+                let createCall() =
+                    pptNodes
+                    |> Seq.filter(fun node -> node.Alias.IsNone)
+                    |> Seq.filter(fun node -> node.NodeType.IsCall)
+                    |> Seq.iter(fun node ->
+                                let parentReal = if  (dicChildParent.ContainsKey(node))
+                                                    then
+                                                            Some(dicVertex.[dicChildParent.[node].Key] :?> Real)
+                                                    else None
+                                let parentFlow = if  dicChildParent.ContainsKey(node)
+                                                    then None
+                                                    else Some(dicFlow.[node.PageNum])
+                                createVertex(mySys, node, parentReal, parentFlow, dicVertex))
 
-                        let createReal() =
-                            pptNodes
-                                |> Seq.filter(fun node -> node.Alias.IsNone)
-                                |> Seq.filter(fun node -> node.NodeType.IsReal)
-                                |> Seq.filter(fun node -> dicChildParent.ContainsKey(node)|>not)
-                                |> Seq.iter(fun node   -> createVertex(model, node, None, Some(dicFlow.[node.PageNum]), dicVertex))
+                let createReal() =
+                    pptNodes
+                        |> Seq.filter(fun node -> node.Alias.IsNone)
+                        |> Seq.filter(fun node -> node.NodeType.IsReal)
+                        |> Seq.filter(fun node -> dicChildParent.ContainsKey(node)|>not)
+                        |> Seq.iter(fun node   -> createVertex(mySys, node, None, Some(dicFlow.[node.PageNum]), dicVertex))
 
-                        let createAlias() =
-                            pptNodes
-                            |> Seq.filter(fun node -> node.Alias.IsSome)
-                            |> Seq.iter(fun node ->
-                                    let segOrg = dicVertex.[node.Alias.Value.Key]
-                                    if dicChildParent.ContainsKey(node)
-                                    then
-                                        let real = dicVertex.[dicChildParent.[node].Key] :?> Real
-                                        let alias = Alias.Create(node.Name, CallTarget(segOrg:?>Call), Real(real), false)
-                                        dicVertex.Add(node.Key, alias)
-                                    else
-                                        let alias =
-                                            let flow = dicFlow.[node.PageNum]
-                                            match segOrg with
-                                            | :? Real as rt -> Alias.Create(node.Name, RealTarget(rt), Flow(flow), false)
-                                            | :? Call as ct -> Alias.Create(node.Name, CallTarget(ct), Flow(flow), false)
-                                            |_ -> failwithf "Error type"
+                let createAlias() =
+                    pptNodes
+                    |> Seq.filter(fun node -> node.Alias.IsSome)
+                    |> Seq.iter(fun node ->
+                            let segOrg = dicVertex.[node.Alias.Value.Key]
+                            if dicChildParent.ContainsKey(node)
+                            then
+                                let real = dicVertex.[dicChildParent.[node].Key] :?> Real
+                                Alias.Create(node.Name, AliasTargetCall(segOrg:?>Call), ParentReal(real)) |> ignore
+                            else
+                                let alias =
+                                    let flow = dicFlow.[node.PageNum]
+                                    match segOrg with
+                                    | :? Real as rt -> Alias.Create(node.Name, AliasTargetReal(rt), ParentFlow(flow))
+                                    | :? Call as ct -> Alias.Create(node.Name, AliasTargetCall(ct), ParentFlow(flow))
+                                    |_ -> failwithf "Error type"
 
-                                        dicVertex.Add(node.Key, alias )
-                                )
+                                dicVertex.Add(node.Key, alias )
+                        )
 
 
-                        //Real 부터
-                        createReal()
-                        //Call 처리
-                        createCall()
-                        //Alias Node 처리 마감
-                        createAlias()
+                //Real 부터
+                createReal()
+                //Call 처리
+                createCall()
+                //Alias Node 처리 마감
+                createAlias()
 
-                        //copy system Flows 동일 처리
-                        dicCopy.ForEach(fun sysTwin->
-                            let copySys = sysTwin.Key
-                            let origSys = sysTwin.Value
-                            origSys.Flows.ForEach(fun flow-> flow.ToCopy(copySys)|>ignore)
-                            )
+                ////copy system Flows 동일 처리
+                //dicCopy.ForEach(fun sysTwin->
+                //    let copySys = sysTwin.Key
+                //    let origSys = sysTwin.Value
+                //    origSys.Flows.ForEach(fun flow-> flow.ToCopy(copySys)|>ignore)
+                //    )
 
         //pptEdge 변환 및 등록
-        [<Extension>] static member MakeEdges (doc:pptDoc, model:Model) =
-                            let pptEdges = doc.Edges
-                            let parents = doc.Parents
-                            let dummys = doc.Dummys
+        [<Extension>] 
+        static member MakeEdges (doc:pptDoc) =
+                let pptEdges = doc.Edges
+                let parents = doc.Parents
+                let dummys = doc.Dummys
 
-                            let convertEdge(edge:pptEdge, flow:Flow, src:Vertex, tgt:Vertex) =
-                                let mei = ModelingEdgeInfo(src, edge.Causal.ToText(), tgt)
-                                match getParent(edge, parents, dicVertex) with
-                                |Some(real) -> (real:?>Real).CreateEdge(mei)
-                                |None ->       flow.CreateEdge(mei)
+                let convertEdge(edge:pptEdge, flow:Flow, src:Vertex, tgt:Vertex) =
+                    let mei = ModelingEdgeInfo(src, edge.Causal.ToText(), tgt)
+                    match getParent(edge, parents, dicVertex) with
+                    |Some(real) -> (real:?>Real).CreateEdge(mei)
+                    |None ->       flow.CreateEdge(mei)
 
-                            pptEdges
-                                |> Seq.iter(fun edge ->
-                                    let flow = dicFlow.[edge.PageNum]
+                pptEdges
+                    |> Seq.iter(fun edge ->
+                        let flow = dicFlow.[edge.PageNum]
 
 
-                                    if(edge.StartNode.NodeType = IF && edge.StartNode.NodeType = edge.EndNode.NodeType|>not)
-                                    then Office.ErrorConnect(edge.ConnectionShape, ErrID._37, edge.StartNode.Name, edge.EndNode.Name, edge.PageNum)
+                        if(edge.StartNode.NodeType = IF && edge.StartNode.NodeType = edge.EndNode.NodeType|>not)
+                        then Office.ErrorConnect(edge.ConnectionShape, ErrID._37, edge.StartNode.Name, edge.EndNode.Name, edge.PageNum)
 
-                                    if(edge.StartNode.NodeType = IF || edge.EndNode.NodeType = IF)
+                        if(edge.StartNode.NodeType = IF || edge.EndNode.NodeType = IF)
+                        then
+                            //인터페이스 인과는 약 리셋 불가 //ahn
+                            if (edge.Causal = InterlockWeak || edge.Causal = ResetEdge)
+                            then Office.ErrorConnect(edge.ConnectionShape, ErrID._11, edge.StartNode.Name, edge.EndNode.Name, edge.PageNum)
+
+                            let sys = dicSys.[edge.PageNum]
+                            sys.ApiResetInfos.Add(ApiResetInfo.Create(sys, edge.StartNode.Name, edge.Causal ,edge.EndNode.Name ))|>ignore
+
+                        else
+                            let srcDummy = dummys.TryFindDummy(edge.StartNode)
+                            let tgtDummy = dummys.TryFindDummy(edge.EndNode)
+
+                            if(srcDummy.IsNonNull())
+                                then
+                                    let tgt = if tgtDummy.IsNull() then edge.EndNode.Key else tgtDummy.DummyNodeKey
+                                    srcDummy.AddOutEdge(edge.Causal, tgt)
+                                else
+                                    if(tgtDummy.IsNonNull())
                                     then
-                                        //인터페이스 인과는 약 리셋 불가 //ahn
-                                        if (edge.Causal = InterlockWeak || edge.Causal = ResetEdge)
-                                        then Office.ErrorConnect(edge.ConnectionShape, ErrID._11, edge.StartNode.Name, edge.EndNode.Name, edge.PageNum)
-
-                                        let sys = dicSys.[edge.PageNum]
-                                        sys.ApiResetInfos.Add(ApiResetInfo.Create(sys, edge.StartNode.Name, edge.Causal ,edge.EndNode.Name ))|>ignore
-
-                                    else
-                                        let srcDummy = dummys.TryFindDummy(edge.StartNode)
-                                        let tgtDummy = dummys.TryFindDummy(edge.EndNode)
-
-                                        if(srcDummy.IsNonNull())
-                                            then
-                                                let tgt = if tgtDummy.IsNull() then edge.EndNode.Key else tgtDummy.DummyNodeKey
-                                                srcDummy.AddOutEdge(edge.Causal, tgt)
-                                            else
-                                                if(tgtDummy.IsNonNull())
-                                                then
-                                                    let src = if srcDummy.IsNull() then edge.StartNode.Key else srcDummy.DummyNodeKey
-                                                    tgtDummy.AddInEdge(edge.Causal, src)
+                                        let src = if srcDummy.IsNull() then edge.StartNode.Key else srcDummy.DummyNodeKey
+                                        tgtDummy.AddInEdge(edge.Causal, src)
 
 
-                                        let getVertexs(pptNodes:pptNode seq) =
-                                            pptNodes.Select(fun s-> dicVertex.[s.Key])
+                            let getVertexs(pptNodes:pptNode seq) =
+                                pptNodes.Select(fun s-> dicVertex.[s.Key])
 
-                                        let srcs = if(dummys.IsMember(edge.StartNode))
-                                                    then dummys.GetMembers(edge.StartNode) |> getVertexs
-                                                    else [dicVertex.[edge.StartNode.Key]]
+                            let srcs = if(dummys.IsMember(edge.StartNode))
+                                        then dummys.GetMembers(edge.StartNode) |> getVertexs
+                                        else [dicVertex.[edge.StartNode.Key]]
 
-                                        let tgts = if(dummys.IsMember(edge.EndNode))
-                                                    then dummys.GetMembers(edge.EndNode)   |> getVertexs
-                                                    else [dicVertex.[edge.EndNode.Key]]
+                            let tgts = if(dummys.IsMember(edge.EndNode))
+                                        then dummys.GetMembers(edge.EndNode)   |> getVertexs
+                                        else [dicVertex.[edge.EndNode.Key]]
 
-                                        for src in srcs do
-                                            for tgt in tgts do
-                                            convertEdge(edge, flow, src, tgt) |> ignore
+                            for src in srcs do
+                                for tgt in tgts do
+                                convertEdge(edge, flow, src, tgt) |> ignore
 
-                                        )
+                            )
 
 
         //Safety 만들기
-        [<Extension>] static member MakeSafeties (doc:pptDoc, model:Model) =
-                        doc.Nodes
-                        |> Seq.filter(fun node -> node.IsDummy|>not)
-                        |> Seq.iter(fun node ->
-                                let flow = dicFlow.[node.PageNum]
-                                let dicQualifiedNameSegs  = dicVertex.Values.Select(fun seg -> seg.QualifiedName, seg) |> dict
-                                let safeName(safe) = sprintf "%s.%s.%s.%s" model.TheSystem.Name flow.System.Name flow.Name safe
+        [<Extension>] 
+        static member MakeSafeties (doc:pptDoc, mySys:DsSystem) =
+                    doc.Nodes
+                    |> Seq.filter(fun node -> node.IsDummy|>not)
+                    |> Seq.iter(fun node ->
+                            let flow = dicFlow.[node.PageNum]
+                            let dicQualifiedNameSegs  = dicVertex.Values.Select(fun seg -> seg.QualifiedName, seg) |> dict
+                            let safeName(safe) = sprintf "%s.%s.%s.%s" mySys.Name flow.System.Name flow.Name safe
 
-                                node.Safeties   //세이프티 입력 미등록 이름오류 체크
-                                |> Seq.map(fun safe ->  safeName(safe))
-                                |> Seq.iter(fun safeFullName ->
-                                                                if(dicQualifiedNameSegs.ContainsKey safeFullName|>not)
-                                                                then Office.ErrorName(node.Shape, ErrID._28, node.PageNum))
+                            node.Safeties   //세이프티 입력 미등록 이름오류 체크
+                            |> Seq.map(fun safe ->  safeName(safe))
+                            |> Seq.iter(fun safeFullName ->
+                                                            if(dicQualifiedNameSegs.ContainsKey safeFullName|>not)
+                                                            then Office.ErrorName(node.Shape, ErrID._28, node.PageNum))
 
-                                node.Safeties
-                                |> Seq.map(fun safe ->  safeName(safe))
-                                |> Seq.map(fun safeFullName ->  dicQualifiedNameSegs.[safeFullName])
-                                |> Seq.iter(fun safeConditionSeg ->
-                                        let realTarget = dicVertex.[node.Key] :?> Real  //Target  call 은 안되나 ?  ahn
-                                        realTarget.SafetyConditions.Add(safeConditionSeg :?> Real)|>ignore)  //safeCondition  call 은 안되나 ?
+                            node.Safeties
+                            |> Seq.map(fun safe ->  safeName(safe))
+                            |> Seq.map(fun safeFullName ->  dicQualifiedNameSegs.[safeFullName])
+                            |> Seq.iter(fun safeCondV ->
+                                    match  dicVertex.[node.Key] |> box with
+                                    | :? ISafetyConditoinHolder as holder ->  
+                                            match safeCondV with
+                                            | :? Real as r -> holder.SafetyConditions.Add( SafetyConditionReal (r)) |>ignore
+                                            | :? RealEx as ex -> holder.SafetyConditions.Add(SafetyConditionRealEx (ex))  |>ignore
+                                            | :? Call as c -> holder.SafetyConditions.Add(SafetyConditionCall (c)) |>ignore
+                                            | _ -> failwith "Error"
+                                    | _ -> failwith "Error"
                                 )
+                            )
 
-        [<Extension>] static member MakeApiTxRx (doc:pptDoc, model:Model) =
+        [<Extension>] 
+        static member MakeApiTxRx (doc:pptDoc) =
                             //1. 원본처리
-                            doc.Nodes
-                                |> Seq.filter(fun node -> node.NodeType = IF)
-                                |> Seq.iter(fun node ->
-                                        let flow = dicFlow.[node.PageNum]
-                                        let sys =  dicFlow.[node.PageNum].System
-                                        let api = sys.ApiUsages.Where(fun w->w.Name = node.IfName).First()
+                doc.Nodes
+                    |> Seq.filter(fun node -> node.NodeType = IF)
+                    |> Seq.iter(fun node ->
+                            let flow = dicFlow.[node.PageNum]
+                            let sys =  dicFlow.[node.PageNum].System
+                            let api = sys.ApiUsages.Where(fun w->w.Name = node.IfName).First()
 
-                                        let findReal(trxName:string) =
+                            let findReal(trxName:string) =
+                                let flowName, realName =
+                                    if trxName.Contains(".")
+                                    then trxName.Split('.').[0], trxName.Split('.').[1]
+                                    else flow.Name, trxName
+                                                     
+                                let vertex = sys.TryFindGraphVertex([|sys.Name;flowName;realName|])
+                                if vertex.IsNone
+                                then Office.ErrorPPT(Name, ErrID._41, $"원인이름{realName}: 전체이름[{node.Shape.InnerText}] 해당도형[{node.Shape.ShapeName()}]", node.PageNum)
+                                match vertex.Value with
+                                | :? Real as r -> r
+                                | _ -> failwith "Error "
 
-                                                let flowName, realName =
-                                                    if trxName.Contains(".")
-                                                    then trxName.Split('.').[0], trxName.Split('.').[1]
-                                                    else flow.Name, trxName
-                                                let vertex = model.FindGraphVertex([|sys.Name;flowName;realName|])
-                                                if vertex.IsNull()
-                                                then Office.ErrorPPT(Name, ErrID._41, $"원인이름{realName}: 전체이름[{node.Shape.InnerText}] 해당도형[{node.Shape.ShapeName()}]", node.PageNum)
+                            let txs = node.IfTXs |> Seq.map(fun f-> findReal(f))
+                            let rxs = node.IfRXs |> Seq.map(fun f-> findReal(f))
+                            api.AddTXs(txs)|>ignore
+                            api.AddRXs(rxs)|>ignore
+                            )
 
-                                                vertex :?> Real
-                                        let txs = node.IfTXs |> Seq.map(fun f-> findReal(f))
-                                        let rxs = node.IfRXs |> Seq.map(fun f-> findReal(f))
-                                        api.AddTXs(txs)|>ignore
-                                        api.AddRXs(rxs)|>ignore
-                                        )
-
-                            //copy system flow 동일 처리
-                            dicCopy.ForEach(fun sysTwin->
-                                let copySys = sysTwin.Key
-                                let origSys = sysTwin.Value
-                                origSys.Flows.ForEach(fun flow->
-                                            let copyFlow = copySys.FindFlow(flow.Name)
-                                            flow.ToCopy(copyFlow)|>ignore
-                                            dicFlow.Add((-dicFlow.Count),  copyFlow ) |> ignore ) //복사본 page는 음수 임의 표기
-                                origSys.ApiUsages.ForEach(fun apiItem ->
-                                            let apiCopy = copySys.ApiUsages.First(fun f->f.Name = apiItem.Name)
-                                            apiItem.ToCopy(apiCopy)|>ignore)
-                                origSys.ApiResetInfos.ForEach(fun apiResetInfo ->
-                                            apiResetInfo.ToCopy(copySys)|>ignore)
-                                )
+                            ////copy system flow 동일 처리
+                            //dicCopy.ForEach(fun sysTwin->
+                            //    let copySys = sysTwin.Key
+                            //    let origSys = sysTwin.Value
+                            //    origSys.Flows.ForEach(fun flow->
+                            //                let copyFlow = copySys.FindFlow(flow.Name)
+                            //                flow.ToCopy(copyFlow)|>ignore
+                            //                dicFlow.Add((-dicFlow.Count),  copyFlow ) |> ignore ) //복사본 page는 음수 임의 표기
+                            //    origSys.ApiUsages.ForEach(fun apiItem ->
+                            //                let apiCopy = copySys.ApiUsages.First(fun f->f.Name = apiItem.Name)
+                            //                apiItem.ToCopy(apiCopy)|>ignore)
+                            //    origSys.ApiResetInfos.ForEach(fun apiResetInfo ->
+                            //                apiResetInfo.ToCopy(copySys)|>ignore)
+                            //    )
 

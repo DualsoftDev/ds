@@ -23,10 +23,10 @@ module PPTDummyModule =
         let mutable dicVertex  = Dictionary<string, Vertex>()
         let dummyNode  = $"{page}_{shapeName}" 
         let getVertexEdge(edge:ModelingEdgeInfo<string>)  = 
-                let src = if dicVertex.ContainsKey(edge.Source) then dicVertex.[edge.Source].Name else edge.Source
-                let tgt = if dicVertex.ContainsKey(edge.Target) then dicVertex.[edge.Target].Name else edge.Target
-                ModelingEdgeInfo(src , edge.EdgeSymbol, tgt)
-        
+                let src = if dicVertex.ContainsKey(edge.Sources[0]) then dicVertex.[edge.Sources[0]].Name else edge.Sources[0]
+                let tgt = if dicVertex.ContainsKey(edge.Targets[0]) then dicVertex.[edge.Targets[0]].Name else edge.Targets[0]
+                ModelingEdgeInfo<string>(src , edge.EdgeSymbol, tgt)
+                
         member x.Page = page
         member x.DummyNodeKey = dummyNode
         member x.Edges = dummyEdges //|> Seq.map(fun f-> getVertexEdge f)
@@ -35,9 +35,9 @@ module PPTDummyModule =
         member x.GetVertex(name:string) = 
             dicVertex.Where(fun f->f.Key = name).Select(fun s->s.Value).FirstOrDefault()
         member x.AddOutEdge(edgeType:ModelingEdgeType, target:string) =
-            dummyEdges.Add(ModelingEdgeInfo(dummyNode, edgeType.ToText(), target)) |> ignore 
+            dummyEdges.Add(ModelingEdgeInfo<string>(dummyNode, edgeType.ToText(), target)) |> ignore 
         member x.AddInEdge(edgeType:ModelingEdgeType, source:string) =
-            dummyEdges.Add(ModelingEdgeInfo(source, edgeType.ToText(), dummyNode)) |> ignore 
+            dummyEdges.Add(ModelingEdgeInfo<string>(source, edgeType.ToText(), dummyNode)) |> ignore 
        
        
         member x.GetParent() = vertices.First().Parent

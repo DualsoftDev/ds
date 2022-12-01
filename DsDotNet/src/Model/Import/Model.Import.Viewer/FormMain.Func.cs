@@ -62,18 +62,18 @@ namespace Dual.Model.Import
                 this.Do(() => button_comfile.Enabled = false);
                 var result = ImportM.FromPPTX(PathPPT);
 
-                _Model = result.Item1;
+                _mySystem = result.Item1;
                 var viewNodes = result.Item2;
                 if (!_ConvertErr)
                 {
-                    _dsText = _Model.TheSystem.ToDsText();
+                    _dsText = _mySystem.ToDsText();
                     ExportTextModel(Color.Transparent, _dsText);
                     this.Do(() => xtraTabControl_Ex.TabPages.Clear());
 
-                    foreach (var sys in _Model.Systems.OrderBy(sys => sys.Name))
+                    foreach (var sys in _mySystem.ReferenceSystems.OrderBy(sys => sys.Name))
                         CreateNewTabViewer(viewNodes);
 
-                    WriteDebugMsg(DateTime.Now, MSGLevel.Info, $"{PathPPT} 불러오기 성공!!");
+                    WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{PathPPT} 불러오기 성공!!");
                     this.Do(() =>
                     {
                         button_CreateExcel.Visible = true;
@@ -86,14 +86,14 @@ namespace Dual.Model.Import
                     ProcessEvent.DoWork(0);
                 }
                 else
-                    WriteDebugMsg(DateTime.Now, MSGLevel.Error, $"{PathPPT} 불러오기 실패!!");
+                    WriteDebugMsg(DateTime.Now, MSGLevel.MsgError, $"{PathPPT} 불러오기 실패!!");
 
                 this.Do(() => button_comfile.Enabled = true);
 
             }
             catch (Exception ex)
             {
-                WriteDebugMsg(DateTime.Now, MSGLevel.Error, ex.Message);
+                WriteDebugMsg(DateTime.Now, MSGLevel.MsgError, ex.Message);
             }
             finally
             {
@@ -127,7 +127,7 @@ namespace Dual.Model.Import
 
             catch (Exception ex)
             {
-                WriteDebugMsg(DateTime.Now, MSGLevel.Error, ex.Message);
+                WriteDebugMsg(DateTime.Now, MSGLevel.MsgError, ex.Message);
             }
             finally
             {
@@ -145,12 +145,12 @@ namespace Dual.Model.Import
             button_copy.Visible = false;
             button_CreateExcel.Enabled = false;
             PathXLS = UtilFile.GetNewPath(PathPPT);
-            WriteDebugMsg(DateTime.Now, MSGLevel.Info, $"{PathXLS} 생성시작!!");
+            WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{PathXLS} 생성시작!!");
 
             Directory.CreateDirectory(Path.GetDirectoryName(PathXLS));
             //ExportIOTable.ToFiie(_OldModel, PathXLS);
 
-            WriteDebugMsg(DateTime.Now, MSGLevel.Info, $"{PathXLS} 생성완료!!");
+            WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{PathXLS} 생성완료!!");
             this.Do(() =>
             {
                 button_CreateExcel.Enabled = true;
@@ -168,7 +168,7 @@ namespace Dual.Model.Import
             this.Do(() =>
             {
                 var color = Color.Black;
-                if (level.IsError)
+                if (level.IsMsgError)
                 {
                     _ConvertErr = true;
                     richTextBox_Debug.AppendTextColor($"\r\n{msg}", Color.Red);
@@ -176,21 +176,21 @@ namespace Dual.Model.Import
                 }
                 else
                 {
-                    if (level.IsWarn) color = Color.Purple;
+                    if (level.IsMsgWarn) color = Color.Purple;
                     richTextBox_Debug.AppendTextColor($"\r\n{time} : {msg}", color);
                 }
 
                 richTextBox_Debug.ScrollToCaret();
             });
         }
-        CoreModule.Model _Demo = new CoreModule.Model();
+       // CoreModule.Model _Demo = new CoreModule.Model();
         internal void HelpLoad()
         {
             splitContainer1.Panel1Collapsed = false;
 
             this.Size = new Size(1600, 1000);
-            if (_Demo.Systems.Count == 0)
-                _Demo = ImportCheck.GetDemoModel("test");
+            //if (_Demo.Systems.Count == 0)
+            //    _Demo = ImportCheck.GetDemoModel("test");
 
             //_Demo.Systems.OrderBy(sys => sys.Name).ToList()
             //      .ForEach(sys =>
@@ -205,7 +205,7 @@ namespace Dual.Model.Import
                 var flow = f.Flow.Value;
                 if (_DicMyUI.ContainsKey(flow) || _DicExUI.ContainsKey(flow))
                 {
-                    if (flow.System.Active)
+                    if (flow.System == _mySystem)
                         xtraTabControl_My.SelectedTab = _DicMyUI[flow];
                     else
                         xtraTabControl_Ex.SelectedTab = _DicExUI[flow];
@@ -229,7 +229,7 @@ namespace Dual.Model.Import
                     tab.Text = $"{flow.System.Name}.{flow.Name}({f.Page})";
                     this.Do(() =>
                     {
-                        if (flow.System.Active)
+                        if (flow.System == _mySystem)
                         {
                             xtraTabControl_My.TabPages.Add(tab);
                             xtraTabControl_My.SelectedTab = tab;

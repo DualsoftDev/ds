@@ -167,67 +167,67 @@ module ExpressionTestModule =
             Assign(tag source, target).Do()
             targetExpr |> evaluate === 44
 
-        [<Test>]
-        member __.``X 6 Serialization test`` () =
-            let toText (exp:Expression<'T>) = exp.ToText()
-            value 1         |> toText === "1"
-            value "hello"   |> toText === "hello"
-            value Math.PI   |> toText === Math.PI.ToString()
-            value true      |> toText === "True"
-            value false     |> toText === "False"
-            value 3.14f     |> toText === "3.14"
-            value 3.14      |> toText === "3.14"
+        //[<Test>]
+        //member __.``X 6 Serialization test`` () =
+        //    let toText (exp:Expression<'T>) = exp.ToText()
+        //    value 1         |> toText === "1"
+        //    value "hello"   |> toText === "hello"
+        //    value Math.PI   |> toText === Math.PI.ToString()
+        //    value true      |> toText === "True"
+        //    value false     |> toText === "False"
+        //    value 3.14f     |> toText === "3.14"
+        //    value 3.14      |> toText === "3.14"
 
 
-            mul [   2
-                    add [1; 2]
-                    add [4; 5]
-            ] |> toText === "*[2; +[1; 2]; +[4; 5]]"
-            mul [2; add[3; 4]]|> toText  === "*[2; +[3; 4]]"
+        //    mul [   2
+        //            add [1; 2]
+        //            add [4; 5]
+        //    ] |> toText === "*[2; +[1; 2]; +[4; 5]]"
+        //    mul [2; add[3; 4]]|> toText  === "*[2; +[3; 4]]"
 
-            mul [2; 3; 4]|> toText  === "*[2; 3; 4]"
-            mul [2; 3; 4]|> toText  === "*[2; 3; 4]"
+        //    mul [2; 3; 4]|> toText  === "*[2; 3; 4]"
+        //    mul [2; 3; 4]|> toText  === "*[2; 3; 4]"
 
-            let t1 = PlcTag.Create("t1", 1)
-            let t2 = PlcTag.Create("t2", 2)
-            let tt1 = t1 |> tag
-            let tt2 = t2 |> tag
+        //    let t1 = PlcTag.Create("t1", 1)
+        //    let t2 = PlcTag.Create("t2", 2)
+        //    let tt1 = t1 |> tag
+        //    let tt2 = t2 |> tag
 
-            let addTwoExpr = add [ tt1; tt2 ]
-            addTwoExpr.ToText() === "+[(t1=1); (t2=2)]"
-
-
-            let sTag = PlcTag.Create("address", "value")
-            sTag.ToText() === "(address=value)"
-            let exprTag = tag sTag
-            exprTag.ToText() === "(address=value)"
+        //    let addTwoExpr = add [ tt1; tt2 ]
+        //    addTwoExpr.ToText() === "+[(t1=1); (t2=2)]"
 
 
-            let expr = mul [2; 3; 4]
-            let target = PlcTag.Create("target", 1)
-            target.ToText() === "(target=1)"
+        //    let sTag = PlcTag.Create("address", "value")
+        //    sTag.ToText() === "(address=value)"
+        //    let exprTag = tag sTag
+        //    exprTag.ToText() === "(address=value)"
 
-            let stmt = Assign (expr, target)
-            stmt.ToText() === "assign(*[2; 3; 4], (target=1))"
 
-        [<Test>]
-        member __.``X 7 Deserialize test`` () =
-            ()
-            let t2 = PlcTag.Create("t2", 2)
-            let t1 = PlcTag.Create("t1", 1)
-            let addTwoExpr = add [ t1;t2 ]
-            //addTwoExpr.ToJsonText().ToExpression().ToJsonText() === addTwoExpr.ToJsonText()
+        //    let expr = mul [2; 3; 4]
+        //    let target = PlcTag.Create("target", 1)
+        //    target.ToText() === "(target=1)"
 
-            let expr = mul [   2
-                               add [tag t1; tag t2]
-                               add [4; 5]
-                            ]
-            let jsonSettings = JsonSerializerSettings(Formatting=Formatting.Indented)
+        //    let stmt = Assign (expr, target)
+        //    stmt.ToText() === "assign(*[2; 3; 4], (target=1))"
 
-            let json = JsonConvert.SerializeObject(expr, jsonSettings)
-            let obj = JsonConvert.DeserializeObject<Expression<int>>(json, jsonSettings)
+        //[<Test>]
+        //member __.``X 7 Deserialize test`` () =
+        //    ()
+        //    let t2 = PlcTag.Create("t2", 2)
+        //    let t1 = PlcTag.Create("t1", 1)
+        //    let addTwoExpr = add [ t1;t2 ]
+        //    //addTwoExpr.ToJsonText().ToExpression().ToJsonText() === addTwoExpr.ToJsonText()
 
-            ()
+        //    let expr = mul [   2
+        //                       add [tag t1; tag t2]
+        //                       add [4; 5]
+        //                    ]
+        //    let jsonSettings = JsonSerializerSettings(Formatting=Formatting.Indented)
+
+        //    let json = JsonConvert.SerializeObject(expr, jsonSettings)
+        //    let obj = JsonConvert.DeserializeObject<Expression<int>>(json, jsonSettings)
+
+        //    ()
 
         //    expr.ToJsonText().ToExpression().ToJsonText() === expr.ToJsonText()
 

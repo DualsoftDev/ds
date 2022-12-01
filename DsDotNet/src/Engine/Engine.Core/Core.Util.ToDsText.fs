@@ -2,6 +2,7 @@ namespace Engine.Core
 
 open System.Linq
 open Engine.Common.FS
+open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module internal ToDsTextModule =
@@ -90,7 +91,7 @@ module internal ToDsTextModule =
                         match a.AliasTarget with
                         | Some(AliasTargetReal real) -> real.GetAliasTargetToDs(flow).Combine()
                         | Some(AliasTargetCall call) -> call.GetAliasTargetToDs().Combine()
-                        | Some(AliasTargetRealOtherFlow o) -> o.Real.GetAliasTargetToDs(flow).Combine()
+                        | Some(AliasTargetRealEx o) -> o.Real.GetAliasTargetToDs(flow).Combine()
                         | None -> failwith "ERROR"
 
                     yield $"{tab}{aliasKey} = {lb} {mnemonics} {rb}"
@@ -196,11 +197,12 @@ module internal ToDsTextModule =
                     match sc with
                     | SafetyConditionReal real -> real.ParentNPureNames.Combine()
                     | SafetyConditionCall call -> call.ParentNPureNames.Combine()
-                    | SafetyConditionRealOtherFlow o -> o.ParentNPureNames.Combine()
+                    | SafetyConditionRealEx  o -> o.ParentNPureNames.Combine()
                 let safetyConditionHolderName(sch:ISafetyConditoinHolder) =
                     match sch with
                     | :? Real as real -> real.ParentNPureNames.Combine()
                     | :? Call as call -> call.ParentNPureNames.Combine()
+                    | :? RealOtherFlow as realEx -> realEx.ParentNPureNames.Combine()
                     | _ -> failwith "ERROR"
 
                 [
@@ -240,12 +242,8 @@ module internal ToDsTextModule =
                 if layouts.Any()   then yield layouts
                 yield $"{tab}{rb}"
 
-
-            for d in system.Devices do
-                match d with
-                | :? ExternalSystem as es -> yield $"{tab}[external file={quote es.UserSpecifiedFilePath}] {es.Name}; // {es.AbsoluteFilePath}"
-                | :? Device as d -> yield $"{tab}[device file={quote d.UserSpecifiedFilePath}] {d.Name}; // {d.AbsoluteFilePath}"
-                | _ -> failwith "ERROR"
+            for d in system.Devices do          yield $"{tab}[device file={quote d.UserSpecifiedFilePath}] {d.Name}; // {d.AbsoluteFilePath}"
+            for es in system.ExternalSystems do  yield $"{tab}[external file={quote es.UserSpecifiedFilePath}] {es.Name}; // {es.AbsoluteFilePath}"
 
 
             yield codeBlockToDs system
@@ -259,3 +257,7 @@ module internal ToDsTextModule =
     type DsSystem with
         member x.ToDsText() = systemToDs x 1
 
+           
+[<Extension>]
+type SystemExt =  
+    [<Extension>] static member ToDsText (system:DsSystem) = systemToDs system 1

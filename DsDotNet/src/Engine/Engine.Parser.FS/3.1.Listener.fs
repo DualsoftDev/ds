@@ -445,7 +445,7 @@ module ParserLoadApiModule =
                     AbsoluteFilePath = absoluteFilePath
                     UserSpecifiedFilePath = userSpecifiedFilePath
                     LoadedName = loadedName }
-            x.AddDevice(device) |> ignore
+            x.AddLoadedSystem(device) |> ignore
             device
 
         member x.LoadExternalSystemAs (loadedName:string, absoluteFilePath:string, userSpecifiedFilePath:string) =
@@ -463,7 +463,7 @@ module ParserLoadApiModule =
                     let exSystem = fwdLoadExternalSystem param
                     sharableExternalSystemCaches.Add(absoluteFilePath, exSystem.ReferenceSystem) |> ignore
                     exSystem
-            x.AddDevice(external) |> ignore
+            x.AddLoadedSystem(external) |> ignore
             external
 
         static member ClearExternalSystemCaches() = sharableExternalSystemCaches.Clear()

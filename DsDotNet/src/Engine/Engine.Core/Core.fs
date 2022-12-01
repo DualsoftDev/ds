@@ -42,20 +42,25 @@ module CoreModule =
         inherit LoadedSystem(loadedDevice, param)
 
     /// shared instance.  *.ds file 의 절대 경로 기준으로 하나의 instance 만 생성하고 이를 참조하는 개념
-    and ExternalSystem(referenceSystem:DsSystem, param:DeviceLoadParameters) =
-        inherit LoadedSystem(referenceSystem, param)
+    and ExternalSystem(loadedSystem:DsSystem, param:DeviceLoadParameters) =
+        inherit LoadedSystem(loadedSystem, param)
 
     type DsSystem (name:string, host:string) =
         inherit FqdnObject(name, createFqdnObject([||]))
-        let devices = createNamedHashSet<LoadedSystem>()
+        let loadedSystems = createNamedHashSet<LoadedSystem>()
         let apiUsages = ResizeArray<ApiItem>()
         let addApiItemsForDevice (device: LoadedSystem) = device.ReferenceSystem.ApiItems |> apiUsages.AddRange
 
         member val Flows   = createNamedHashSet<Flow>()
+        //시스템에서 호출가능한 작업리스트 (Call => Job => ApiItems => Addresses)
         member val Jobs    = ResizeArray<Job>()
 
-        member _.AddDevice(dev) = devices.Add(dev) |> ignore; addApiItemsForDevice dev
-        member val Devices = devices |> seq
+        member _.AddLoadedSystem(dev) = loadedSystems.Add(dev) |> ignore; addApiItemsForDevice dev
+        member val ReferenceSystems = loadedSystems.Select(fun s->s.ReferenceSystem) 
+        member val LoadedSystems = loadedSystems |> seq
+        member val Devices       = loadedSystems.OfType<Device>() 
+        member val ExternalSystems = loadedSystems.OfType<ExternalSystem>() 
+
         member val Variables = ResizeArray<Variable>()
         member val Commands = ResizeArray<Command>()
         member val Observes = ResizeArray<Observe>()
@@ -105,7 +110,7 @@ module CoreModule =
         member _.ParentNPureNames = ([parent.GetCore().Name] @ names).ToArray()
         override x.GetRelativeName(referencePath:Fqdn) = x.PureNames.Combine()
 
-    // Subclasses = {Call | Real}
+    // Subclasses = {Call | Real | RealOtherFlow}
     type ISafetyConditoinHolder =
         abstract member SafetyConditions: HashSet<SafetyCondition>
     
@@ -123,12 +128,14 @@ module CoreModule =
         member val Graph = DsGraph()
         member val ModelingEdges = HashSet<ModelingEdgeInfo<Vertex>>()
         member val Flow = flow
-        interface ISafetyConditoinHolder with
+        interface ISafetyConditoinHolder with 
             member val SafetyConditions = HashSet<SafetyCondition>()
 
     and RealOtherFlow private (names:Fqdn, target:Real, parent) =
         inherit Indirect(names, parent)
         member val Real = target
+        interface ISafetyConditoinHolder with
+            member val SafetyConditions = HashSet<SafetyCondition>()
 
     and Call private (target:Job, parent) =
         inherit Indirect(target.Name, parent)
@@ -139,7 +146,7 @@ module CoreModule =
 
     and Alias private (name:string, target:AliasTargetWrapper, parent) = // target : Real or Call or OtherFlowReal
         inherit Indirect(name, parent)
-        member val ApiTarget = target
+        member val TargetVertex = target
 
     /// JobDefs 정의: Call 이 호출하는 Job 항목
     type Job (name:string, apiItems:JobDef seq) =
@@ -179,22 +186,6 @@ module CoreModule =
             ri
 
 
-    ///Vertex의 부모의 타입을 구분한다.
-    type ParentWrapper =
-        | ParentFlow of Flow //Real/Call/Alias 의 부모
-        | ParentReal of Real //Call/Alias      의 부모
-
-    and AliasTargetWrapper =
-        | AliasTargetReal of Real    
-        | AliasTargetCall of Call
-        | AliasTargetRealOtherFlow of RealOtherFlow    // MyFlow or RealOtherFlow 의 Real 일 수 있다.
-
-    and SafetyCondition =
-        | SafetyConditionReal of Real
-        | SafetyConditionCall of Call
-        | SafetyConditionRealOtherFlow of RealOtherFlow    // MyFlow or RealOtherFlow 의 Real 일 수 있다.
-
-
     (* Abbreviations *)
 
     type DsGraph = Graph<Vertex, Edge>
@@ -225,6 +216,7 @@ module CoreModule =
             flow.Graph.AddVertex(segment) |> verifyM $"Duplicated segment name [{name}]"
             segment
 
+    type RealEx = RealOtherFlow
     type RealOtherFlow with
         static member Create(otherFlowReal:Real, parent:ParentWrapper) =
             let ofn, ofrn = otherFlowReal.Flow.Name, otherFlowReal.Name
@@ -238,6 +230,10 @@ module CoreModule =
             parent.GetGraph().AddVertex(v) |> verifyM $"Duplicated call name [{target.Name}]"
             v
 
+        static member Create(api:ApiItem, parent:ParentWrapper, deveiceName) =
+            let job = Job(api.Name, [|JobDef(api, "","", deveiceName)|])
+            Call.Create(job, parent)
+
     type Alias with
         static member Create(name:string, target:AliasTargetWrapper, parent:ParentWrapper) =
             let createAliasDefOnDemand() =
@@ -249,7 +245,7 @@ module CoreModule =
                     match target with
                     | AliasTargetReal r -> r.GetAliasTargetToDs(flow)
                     | AliasTargetCall c -> c.GetAliasTargetToDs()
-                    | AliasTargetRealOtherFlow o -> o.Real.GetAliasTargetToDs(flow)
+                    | AliasTargetRealEx o -> o.Real.GetAliasTargetToDs(flow)
                 let ads = flow.AliasDefs
                 match ads.TryFind(aliasKey) with
                 | Some ad -> ad.Mnemonincs.AddIfNotContains(name) |> ignore
@@ -278,7 +274,22 @@ module CoreModule =
             match x with
             | SafetyConditionReal real -> real
             | SafetyConditionCall call -> call
-            | SafetyConditionRealOtherFlow realOtherFlow -> realOtherFlow
+            | SafetyConditionRealEx  realOtherFlow -> realOtherFlow
+  
+    and AliasTargetWrapper =
+        | AliasTargetReal of Real    
+        | AliasTargetCall of Call
+        | AliasTargetRealEx of RealOtherFlow    // MyFlow or RealOtherFlow 의 Real 일 수 있다.
+
+    and SafetyCondition =
+        | SafetyConditionReal of Real
+        | SafetyConditionCall of Call
+        | SafetyConditionRealEx of RealOtherFlow    // MyFlow or RealOtherFlow 의 Real 일 수 있다.
+
+          ///Vertex의 부모의 타입을 구분한다.
+    type ParentWrapper =
+        | ParentFlow of Flow //Real/Call/Alias 의 부모
+        | ParentReal of Real //Call/Alias      의 부모
 
     type ParentWrapper with
         member x.GetCore() =
@@ -289,17 +300,14 @@ module CoreModule =
             match x with
             | ParentFlow f -> f
             | ParentReal r -> r.Flow
-
         member x.GetSystem() =
             match x with
             | ParentFlow f -> f.System
             | ParentReal r -> r.Flow.System
-
         member x.GetGraph():DsGraph =
             match x with
             | ParentFlow f -> f.Graph
             | ParentReal r -> r.Graph
-
         member x.GetModelingEdges() =
             match x with
             | ParentFlow f -> f.ModelingEdges
@@ -311,12 +319,17 @@ module CoreModule =
                 | :? Flow as f -> [x.Name].ToArray()
                 | :? Real as r -> x.ParentNPureNames
                 | _->failwith "Error"
+        member x.SafetyConditions = (x :> ISafetyConditoinHolder).SafetyConditions
 
     type Real with
         member x.GetAliasTargetToDs(aliasFlow:Flow) =
                 if x.Flow <> aliasFlow
                 then [|x.Flow.Name; x.Name|]  //other flow
                 else [| x.Name |]             //my    flow
+        member x.SafetyConditions = (x :> ISafetyConditoinHolder).SafetyConditions
+
+    type RealOtherFlow with
+        member x.SafetyConditions = (x :> ISafetyConditoinHolder).SafetyConditions
 
     type DsSystem with
         member x.AddButton(btnType:BtnType, btnName: string, flow:Flow) =

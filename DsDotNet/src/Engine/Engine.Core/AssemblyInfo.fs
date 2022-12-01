@@ -5,5 +5,6 @@ open System.Runtime.InteropServices
 
 [<assembly: InternalsVisibleTo("UnitTest.Engine")>]
 [<assembly: InternalsVisibleTo("Engine.Parser.FS")>]
+[<assembly: InternalsVisibleTo("Model.Import.Viewer")>]
 
 do ()

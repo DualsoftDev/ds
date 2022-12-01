@@ -157,7 +157,7 @@ module MetaBuilder =
     type SystemMeta = {
         Name:string;
         Paths:string list;
-        Devices:LoadDeviceSpec list;
+        LoadedSystems:LoadDeviceSpec list;
         Calls:CallMeta list;
         Flows:FlowMeta list;
     }
@@ -187,7 +187,7 @@ module MetaBuilder =
         let system =
             { Name = ""
               Paths = []
-              Devices = []
+              LoadedSystems = []
               Calls = []
               Flows = [] }
         member __.Zero() = system
@@ -211,9 +211,9 @@ module MetaBuilder =
         member __.SetPath(sys, path) =
             { sys with Paths = sys.Paths @ [path] }
 
-        [<CustomOperation("device")>]
+        [<CustomOperation("LoadedSystems")>]
         member __.LoadDevice(sys, loadedName, simpleFilePath) =
-            { sys with Devices = sys.Devices @ [{LoadedName = loadedName; Path = simpleFilePath}] }
+            { sys with LoadedSystems = sys.LoadedSystems @ [{LoadedName = loadedName; Path = simpleFilePath}] }
 
         [<CustomOperation("add_flow")>]
         member __.AddFlow(sys, flow:FlowMeta) =

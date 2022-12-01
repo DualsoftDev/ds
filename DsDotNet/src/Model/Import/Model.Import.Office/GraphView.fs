@@ -23,9 +23,10 @@ module rec ViewModule =
         new (coreVertex:Vertex) = 
               let name = 
                   match coreVertex  with
-                    | :? Alias as a -> match a.Target with
+                    | :? Alias as a -> match a.TargetVertex with
                                        | AliasTargetReal r -> r.Name
                                        | AliasTargetCall c -> c.Name
+                                       | AliasTargetRealEx o -> o.Name
                     | _ -> coreVertex.Name
                 
               ViewNode(name, MY, Some(coreVertex),  None)
@@ -59,9 +60,9 @@ module rec ViewModule =
             let vertex = if findV.IsNonNull() then dicV.[findV] else createDummy()
             vertex
         
-        let src = getVertex (edge.Source);
-        let tgt = getVertex (edge.Target);
-        ModelingEdgeInfo(src, edge.EdgeSymbol, tgt)
+        let src = getVertex (edge.Sources[0]);
+        let tgt = getVertex (edge.Targets[0]);
+        ModelingEdgeInfo<ViewNode>(src, edge.EdgeSymbol, tgt)
 
 [<Extension>]
 type ViewModuleExt = 

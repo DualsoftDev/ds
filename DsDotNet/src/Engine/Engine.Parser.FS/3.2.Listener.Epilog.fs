@@ -86,7 +86,7 @@ module EtcListenerModule =
                             match vertex with
                             | :? Real as r -> return SafetyConditionReal (r)
                             | :? Call as c -> return SafetyConditionCall (c)
-                            | :? RealOtherFlow as o -> return SafetyConditionRealOtherFlow (o)
+                            | :? RealOtherFlow as o -> return SafetyConditionRealEx (o)
                             | _-> failwith "Error"
 
                         |None ->        

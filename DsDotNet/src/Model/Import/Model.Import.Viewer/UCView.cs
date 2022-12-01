@@ -84,11 +84,11 @@ namespace Dual.Model.Import
         private void DrawMEdge(Subgraph subgraph, ModelingEdgeInfo<ViewNode> edge)
         {
 
-            bool bDrawSubSrc = edge.Source.IsChildExist;
-            bool bDrawSubTgt = edge.Target.IsChildExist;
+            bool bDrawSubSrc = edge.Sources[0].IsChildExist;
+            bool bDrawSubTgt = edge.Targets[0].IsChildExist;
 
-            var mEdgeSrc = edge.Source;
-            var mEdgeTgt = edge.Target;
+            var mEdgeSrc = edge.Sources[0];
+            var mEdgeTgt = edge.Targets[0];
             var subGSrc = new Subgraph(mEdgeSrc.UIKey);
             var subGTgt = new Subgraph(mEdgeTgt.UIKey);
 
@@ -193,8 +193,8 @@ namespace Dual.Model.Import
             if (model)
             {
 
-                var src = edge.Source;
-                var tgt = edge.Target;
+                var src = edge.Sources[0];
+                var tgt = edge.Targets[0];
 
                 UpdateNodeView(gEdge.SourceNode, src);
                 UpdateNodeView(gEdge.TargetNode, tgt);

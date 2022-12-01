@@ -132,17 +132,16 @@ module HmiGenModule =
                 info.used_in.Add(usedIn)
                 hmiInfos.Add(api.QualifiedName, info)
 
-        let addDevice (dvcGroup:JobDef seq) (usedIn:string) =
-            for dvc in dvcGroup do
+        let addDevice (apiGroup:JobDef seq) (usedIn:string) =
+            for dvc in apiGroup do
                 let api = dvc.ApiItem
                 let device = dvc.ApiItem.System.Name
                 if false = hmiInfos.ContainsKey(device) then
                     let info = 
                         genInfo device Category.Device ButtonType.None null
-                    info.used_in.Add(usedIn)
                     hmiInfos.Add(device, info)
 
-                addInterface api device
+                addInterface api usedIn
 
         let addApiGroup (system:DsSystem) (flow:Flow) (vertex:Vertex) = 
             let addToUsedIn deviceGroup target =

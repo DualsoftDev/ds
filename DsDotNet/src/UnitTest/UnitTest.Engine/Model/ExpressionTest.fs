@@ -282,8 +282,28 @@ module ExpressionTestModule =
             targetExpr |> evaluate === false
 
         [<Test>]
-        member __.``8 ExpressionParse test`` () =
-            let evalExpr = parseExpression >> evaluateBoxedExpression >> box
+        member __.``9 Expression Tag type test`` () =
+            let rawTags = [
+                PlcTag.Create("sbyte", 1y) |> box
+                PlcTag.Create("byte", 1uy)
+                PlcTag.Create("int16", 1s)
+                PlcTag.Create("uint16", 1us)
+                PlcTag.Create("int32", 1)
+                PlcTag.Create("uint32", 1u)
+                PlcTag.Create("int64", 1L)
+                PlcTag.Create("uint64", 1UL)
+                PlcTag.Create("single", 1.0f)
+                PlcTag.Create("double", 1.0)
+                PlcTag.Create("char", '1')
+                PlcTag.Create("string", "1")
+            ]
+            let tags = rawTags |> List.map (unbox >> tag >> box)
+            ()
+
+        [<Test>]
+        member __.``10 ExpressionParse test`` () =
+            let evalExpr = parseExpression >> evaluateBoxedExpression
+
 
             //"Int(3.4) + 1 + 2 + (abs(%tag3))"
             "1 + 2" |> evalExpr === 3
@@ -291,6 +311,9 @@ module ExpressionTestModule =
             "1.0 + 2.0" |> evalExpr === 3.0
 
             (fun () -> "1.0 + 2" |> evalExpr |> ignore )
+            |> ShouldFailWithSubstringT "Type mismatch"
+
+            (fun () -> "\"hello\" + 2" |> evalExpr |> ignore )
             |> ShouldFailWithSubstringT "Type mismatch"
 
             "Int(1.0) + 2" |> evalExpr === 3

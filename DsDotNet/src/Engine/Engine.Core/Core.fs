@@ -102,6 +102,7 @@ module CoreModule =
         interface INamedVertex
         member _.Parent = parent
         member _.PureNames = names
+        member _.ParentNPureNames = ([parent.GetCore().Name] @ names).ToArray()
         override x.GetRelativeName(referencePath:Fqdn) = x.PureNames.Combine()
 
     // Subclasses = {Call | Real}
@@ -132,6 +133,7 @@ module CoreModule =
     and Call private (target:Job, parent) =
         inherit Indirect(target.Name, parent)
         member val CallTarget = target
+        member val Xywh:Xywh = null with get, set
         interface ISafetyConditoinHolder with
             member val SafetyConditions = HashSet<SafetyCondition>()
 
@@ -143,12 +145,10 @@ module CoreModule =
     type Job (name:string, apiItems:JobDef seq) =
         inherit Named(name)
         member val ApiItems = apiItems.ToFSharpList()
-        member val Xywh:Xywh = null with get, set
-        interface ISafetyConditoinHolder with
-            member val SafetyConditions = HashSet<SafetyCondition>()
+    
 
     type TagAddress = string
-    /// Main system 에서 loading 된 다른 system 의 API 를 바라보는 관점.  [calls] = { Ap = { A."+"(%Q1, %I1); } }
+    /// Main system 에서 loading 된 다른 system 의 API 를 바라보는 관점.  [jobs] = { Ap = { A."+"(%Q1, %I1); } }
     type JobDef (api:ApiItem, outTag:TagAddress, inTag:TagAddress, deviceName:string) =
         member _.ApiItem = api
         member val InTag   = inTag
@@ -188,12 +188,14 @@ module CoreModule =
         | ParentReal of Real //Call/Alias      의 부모
 
     and AliasTargetWrapper =
-        | AliasTargetReal of Real    // MyFlow or OtherFlow 의 Real 일 수 있다.
-        | AliasTargetCall of Job
+        | AliasTargetReal of Real
+        | AliasTargetRealOtherFlow of RealOtherFlow
+        | AliasTargetCall of Call
 
     and SafetyCondition =
         | SafetyConditionReal of Real
-        | SafetyConditionCall of Job
+        | SafetyConditionRealOtherFlow of RealOtherFlow
+        | SafetyConditionCall of Call
 
 
     (* Abbreviations *)
@@ -248,9 +250,8 @@ module CoreModule =
                 let flow:Flow = parent.GetFlow()
                 let aliasKey =
                     match target with
-                    | AliasTargetReal r ->
-                        (if r.Flow <> flow then [|r.Flow.Name|] else [||]) @ [| r.Name |]
-                    | AliasTargetCall c -> [| c.Name |]
+                    | AliasTargetReal r -> r.GetAliasTargetToDs(flow)
+                    | AliasTargetCall c -> c.GetAliasTargetToDs()
                 let ads = flow.AliasDefs
                 match ads.TryFind(aliasKey) with
                 | Some ad -> ad.Mnemonincs.AddIfNotContains(name) |> ignore
@@ -304,6 +305,19 @@ module CoreModule =
             match x with
             | ParentFlow f -> f.ModelingEdges
             | ParentReal r -> r.ModelingEdges
+
+    type Call with
+        member x.GetAliasTargetToDs() =
+            match x.Parent.GetCore() with
+                | :? Flow as f -> [x.Name].ToArray()
+                | :? Real as r -> x.ParentNPureNames
+                | _->failwith "Error"
+
+    type Real with
+        member x.GetAliasTargetToDs(aliasFlow:Flow) =
+                if x.Flow <> aliasFlow
+                then [|x.Flow.Name; x.Name|]  //other flow
+                else [| x.Name |]             //my    flow
 
     type DsSystem with
         member x.AddButton(btnType:BtnType, btnName: string, flow:Flow) =

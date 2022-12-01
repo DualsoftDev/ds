@@ -52,7 +52,7 @@ module ModelBuildupTests1 =
             Ap > Am;
         }
     }
-    [calls] = {
+    [jobs] = {
         Ap = { A."+"(%Q1, %I1); }
         Am = { A."-"(%Q2, %I2); }
     }
@@ -79,20 +79,20 @@ module ModelBuildupTests1 =
             let system, flow, real, callAp, callAm = createSimpleSystem()
 
             let vCallP = Alias.Create("Main2", AliasTargetReal real, ParentFlow flow)
-            let real2 = Real.Create("R2", flow)
+            let call2 = Call.Create(callAp, ParentFlow flow)
 
-            flow.CreateEdge(ModelingEdgeInfo<Vertex>(vCallP, ">", real2)) |> ignore
+            flow.CreateEdge(ModelingEdgeInfo<Vertex>(vCallP, ">", call2)) |> ignore
             let generated = system.ToDsText()
             let answer = """
 [sys ip = localhost] My = {
     [flow] F = {
-        Main2 > R2;		// Main2(Alias)> R2(Real);
+        Main2 > Ap;		// Main2(Alias)> Ap(Call);
         Main; // island
         [aliases] = {
             Main = { Main2; }
         }
     }
-    [calls] = {
+    [jobs] = {
         Ap = { A."+"(%Q1, %I1); }
         Am = { A."-"(%Q2, %I2); }
     }
@@ -122,7 +122,7 @@ module ModelBuildupTests1 =
     [flow] F2 = {
         F.Main > R3;		// F.Main(RealOtherFlow)> R3(Real);
     }
-    [calls] = {
+    [jobs] = {
         Ap = { A."+"(%Q1, %I1); }
         Am = { A."-"(%Q2, %I2); }
     }
@@ -151,7 +151,7 @@ module ModelBuildupTests1 =
             Main; // island
             Main2; // island
     }
-    [calls] = {
+    [jobs] = {
         Ap = { A."+"(%Q1, %I1); }
         Am = { A."-"(%Q2, %I2); }
     }
@@ -187,7 +187,7 @@ module ModelBuildupTests1 =
     }
     [flow] F2 = {
     }
-    [calls] = {
+    [jobs] = {
         Ap = { A."+"(%Q1, %I1); }
         Am = { A."-"(%Q2, %I2); }
     }
@@ -256,7 +256,7 @@ module ModelBuildupTests1 =
     [flow] F = {
             Main; // island
     }
-    [calls] = {
+    [jobs] = {
         Ap = { A."+"(%Q1, %I1); }
         Am = { A."-"(%Q2, %I2); }
     }

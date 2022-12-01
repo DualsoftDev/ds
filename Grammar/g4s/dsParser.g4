@@ -26,7 +26,7 @@ comment: BLOCK_COMMENT | LINE_COMMENT;
 system: '[' sysHeader ']' systemName '=' (sysBlock) EOF;    // [sys] Seg = {..}
     sysHeader: SYS ipSpec?;
     sysBlock
-        : LBRACE (  flowBlock | callBlock | loadDeviceBlock | loadExternalSystemBlock
+        : LBRACE (  flowBlock | jobBlock | loadDeviceBlock | loadExternalSystemBlock
                     | interfaceBlock | buttonsBlocks | propsBlock
                     | variableBlock | commandBlock | observeBlock )*
           RBRACE       // identifier1Listing|parenting|causal|call
@@ -66,22 +66,23 @@ loadExternalSystemBlock: '[' EXTERNAL_SYSTEM fileSpec ipSpec ']' externalSystemN
 
 /*
 // global safety property
-[prop] {
-    [safety] = {
-        F1.Main = {F2.Real; Call1;}
-        Call2 = {F1.Main;}
+    [prop] = {
+        [safety] = {
+            F.Main = { F.Ap; F.Am; }
+            F.Ap = { F.Main; }
+        }
     }
-}
  */
 propsBlock: '[' 'prop' ']' EQ LBRACE (safetyBlock|layoutBlock)* RBRACE;
     safetyBlock: '[' 'safety' ']' EQ LBRACE (safetyDef)* RBRACE;
         safetyDef: safetyKey EQ LBRACE safetyValues RBRACE;
             // Real|Call = { ((Real|Call);)* }
-            safetyKey: identifier12;
-            safetyValues: identifier12 (SEIMCOLON identifier12)* (SEIMCOLON)?;
+            safetyKey: identifier23;
+            safetyValues: identifier23 (SEIMCOLON identifier23)* (SEIMCOLON)?;
 
     layoutBlock: '[' 'layouts' ']' '=' LBRACE (positionDef)* RBRACE;
         positionDef: callName '=' xywh;
+            callName: identifier23;
             xywh: LPARENTHESIS x COMMA y (COMMA w COMMA h)? RPARENTHESIS (SEIMCOLON)?;
             x: INTEGER;
             y: INTEGER;
@@ -112,10 +113,10 @@ flowBlock
         aliasDef: identifier12;     // {OtherFlow}.{real} or {MyFlowReal} or {Call}
         aliasMnemonic: identifier1;
 
-callBlock: '[' 'calls' ']' '=' LBRACE (callListing)* RBRACE;
+jobBlock: '[' 'jobs' ']' '=' LBRACE (callListing)* RBRACE;
     callListing:
-        callName '=' LBRACE (callApiDef)? ( ';' callApiDef)* (';')+ RBRACE;
-    callName: etcName1;
+        jobName '=' LBRACE (callApiDef)? ( ';' callApiDef)* (';')+ RBRACE;
+    jobName: etcName1;
     callApiDef: callKey addressTxRx;
     callKey: identifier12;
 
@@ -182,6 +183,7 @@ identifier1234: (identifier1 | identifier2 | identifier3 | identifier4);
     identifier4: IDENTIFIER4;
 
     identifier12: (identifier1 | identifier2);
+    identifier23: (identifier2 | identifier3);
     identifier123: (identifier1 | identifier2 | identifier3);
 
     identifier123CNF: identifier123 (COMMA identifier123)*;

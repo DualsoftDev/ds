@@ -10,8 +10,8 @@ module HmiGenModule =
         | System     = 1
         | Flow       = 2
         | Real       = 3
-        | Device     = 4
-        | ApiGroup   = 5
+        | Job        = 4
+        | Device     = 5
         | Interface  = 6
         | Button     = 7
     and ButtonType =
@@ -103,14 +103,12 @@ module HmiGenModule =
                 hmiInfos
                 |> Seq.filter(fun info -> info.Value.category = Category.Flow)
                 |> Seq.map(fun info -> info.Value.name)
-
             let buttons = [
                 "RUN", ButtonType.Run;
                 "EMSTOP", ButtonType.Emergency;
                 "ATMANU", ButtonType.Auto;
                 "CLEAR", ButtonType.Clear;
             ]
-
             for button, btnType in buttons do
                 addButton button null btnType
                 match btnType with
@@ -132,103 +130,81 @@ module HmiGenModule =
                 info.used_in.Add(usedIn)
                 hmiInfos.Add(api.QualifiedName, info)
 
-        let addDevice (apiGroup:JobDef seq) (usedIn:string) =
-            for dvc in apiGroup do
+        let addApiGroup (system:DsSystem) (job:Job) = 
+            let jobName = $"{system.Name}.{job.Name}"
+            if hmiInfos.ContainsKey(jobName) = false then
+                let info = 
+                    genInfo 
+                        jobName Category.Job ButtonType.None system.Name
+                hmiInfos.Add(jobName, info)
+            for dvc in job.ApiItems do
                 let api = dvc.ApiItem
                 let device = dvc.ApiItem.System.Name
                 if false = hmiInfos.ContainsKey(device) then
                     let info = 
-                        genInfo device Category.Device ButtonType.None null
+                        genInfo 
+                            device Category.Device ButtonType.None system.Name
                     hmiInfos.Add(device, info)
+                addInterface api jobName
 
-                addInterface api usedIn
-
-        let addApiGroup (system:DsSystem) (flow:Flow) (vertex:Vertex) = 
-            let addToUsedIn deviceGroup target =
-                if false = hmiInfos[deviceGroup].used_in.Contains(target) then
-                    hmiInfos[deviceGroup].used_in.Add(target)
-
-            let dvcGrp =
+        let addUses (system:DsSystem) (flow:Flow) (vertex:Vertex) = 
+            let addToUsedIn nowVertex target =
+                if false = hmiInfos[nowVertex].used_in.Contains(target) then
+                    hmiInfos[nowVertex].used_in.Add(target)
+            let getJobName name = $"{system.Name}.{name}"
+            let vertName =
                 match vertex with
-                | :? Call as c ->
-                    addDevice c.CallTarget.ApiItems c.CallTarget.Name
-                    c.Name
+                | :? Real as r -> r.QualifiedName
+                | :? Call as c -> getJobName c.CallTarget.Name
                 | :? Alias as a ->
-                    match a.ApiTarget with
-                    | AliasTargetReal r -> 
-                        r.NameComponents[0]
-                    | AliasTargetCall c -> 
-                        addDevice c.CallTarget.ApiItems c.CallTarget.Name
-                        c.Name
-                    | _ ->
-                        null
-                | _ ->
-                    null
-
-            if hmiInfos.ContainsKey(dvcGrp) = false then
-                let info = 
-                    genInfo dvcGrp Category.ApiGroup ButtonType.None null
-                hmiInfos.Add(dvcGrp, info)
-
-            addToUsedIn dvcGrp system.Name
-            addToUsedIn dvcGrp flow.QualifiedName
-
+                    match a.TargetVertex with
+                    | AliasTargetReal r -> r.QualifiedName
+                    | AliasTargetRealEx rex -> rex.QualifiedName
+                    | AliasTargetCall c -> getJobName c.CallTarget.Name
+                | _ -> null
+            addToUsedIn vertName system.Name
+            addToUsedIn vertName flow.QualifiedName
             match vertex.Parent with
-            | ParentReal realParent -> 
-                addToUsedIn dvcGrp realParent.QualifiedName
-            | _ -> 
-                ()
+            | ParentReal pr -> addToUsedIn vertName pr.QualifiedName
+            | _ -> ()
+
+        let addBasicComponents () =
+            for sys in model.Systems do
+                let groupBtnCombiner = addGroupButtons sys
+                addSystemFlowReal sys
+                groupBtnCombiner sys.AutoButtons ButtonType.Auto
+                groupBtnCombiner sys.ResetButtons ButtonType.Clear
+                groupBtnCombiner sys.EmergencyButtons ButtonType.Emergency
+                let btnTgtMap =
+                    new Dictionary<ButtonType, ResizeArray<string>>()
+                for flow in sys.Flows do
+                    addSystemFlowReal flow
+                    addUnionButtons sys flow btnTgtMap
+                    for rootSeg in flow.Graph.Vertices do
+                        match rootSeg with
+                        | :? Real -> addSystemFlowReal rootSeg
+                        | _ -> ()
+
+        let addJobComponentAndUses () =
+            for sys in model.Systems do
+                for job in sys.Jobs do
+                    addApiGroup sys job
+                for flow in sys.Flows do
+                    for rootSeg in flow.Graph.Vertices do
+                        match rootSeg with
+                        | :? Real as r ->
+                            addUses sys flow r
+                            for vertex in r.Graph.Vertices do
+                                addUses sys flow vertex
+                        | _ -> addUses sys flow rootSeg
 
         let succeess, message = 
             try
-                for sys in model.Systems do
-                    let groupBtnCombiner = addGroupButtons sys
-                    addSystemFlowReal sys
-                    groupBtnCombiner sys.AutoButtons ButtonType.Auto
-                    groupBtnCombiner sys.ResetButtons ButtonType.Clear
-                    groupBtnCombiner sys.EmergencyButtons ButtonType.Emergency
-                    let btnTgtMap =
-                        new Dictionary<ButtonType, ResizeArray<string>>()
-                    //for info in hmiInfos do
-                    //    btnTgtMap.Add(
-                    //        info.Value.botton_type, 
-                    //        info.Value.targets
-                    //    )
-                    for flow in sys.Flows do
-                        addSystemFlowReal flow
-                        addUnionButtons sys flow btnTgtMap
-                        for rootSeg in flow.Graph.Vertices do
-                            match rootSeg with
-                            | :? Real as real ->
-                                addSystemFlowReal rootSeg
-                                for vert in real.Graph.Vertices do
-                                    addApiGroup sys flow vert
-                            | :? Call as call ->
-                                addApiGroup sys flow call
-                            | :? Alias as alias ->
-                                match alias.ApiTarget with
-                                | AliasTargetReal rt ->
-                                    addSystemFlowReal rt
-                                | AliasTargetCall ct ->
-                                    addApiGroup sys flow ct
-                                | _ ->
-                                    ()
-                            | _ ->
-                                printfn "unknown type has detected"
+                addBasicComponents()
+                addJobComponentAndUses()
                 if hmiInfos.Count <> 0 then addGlobalButtons
                 true, null
             with
                 | ex -> false, ex.Message
         let body = hmiInfos.Values |> List.ofSeq
-
         { from = "hmi"; succeed = succeess; body = body; error = message; }
-
-    //[<EntryPoint>]
-    //let main argv =
-    //    let helper =
-    //        ModelParser.ParseFromString2(Program.EveryScenarioText,
-    //        ParserOptions.Create4Simulation());
-    //    let model = helper.Model;
-    //    let json = GenHmiCode(model)
-    //    printfn "%A" (json.ToString())
-    //    0

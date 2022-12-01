@@ -210,6 +210,10 @@ module ExpressionModule =
     let createCustomFunctionExpression (funName:string) (args:Args) =
         match funName with
         | "Int" -> Int args |> box
+        | "Bool" -> Bool args |> box
+        | "sin" -> sin args |> box
+        //| "cos" -> cos args |> box
+        //| "tan" -> tan args |> box
         | _ -> failwith "NOT yet"
 
 

@@ -1,14 +1,24 @@
 /* grun expression expression < g4test/expression/exp.exp */
+myvar := Int(3.4) + 1 + 2 + (abs(tag3));
 
-hello := true && false = 5;
-hello := (true && false = 5);
+/* variable declaration */
+//....
 
+
+"hello, " + "world";
+
+/* assign statements : target := expression */
+%mytag := tag1 && tag2;
+%tag3 := 3
+myvar := Int(3.4) + 1 + 2 + (abs(tag3));
+
+/* expression */
 hello((1 + 2) * 3, sin(1), array[3][2][g(2)], myvar);
 
 a = b;
 
 -a;
 2 + 3;
-$tag + 2;
-//$ tag + 2;      // illegal: $ space
+%tag + 2;
+//% tag + 2;      // illegal: % space
 

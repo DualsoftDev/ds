@@ -28,6 +28,7 @@ module ExpressionModule =
             match x with
             | :? int as n -> Some n
             | :? uint as n -> Some (int n)
+            | :? double as n -> Some (int n)
             | _ -> None
         let (|Bool|_|) (x:obj) =
             match x with
@@ -42,7 +43,7 @@ module ExpressionModule =
 
         let toBool   = (|Bool|_|)     >> Option.get
         let toDouble = (|Double|_|)   >> Option.get
-        let toint    = (|Integer|_|)  >> Option.get
+        let toInt    = (|Integer|_|)  >> Option.get
         let toTag x  = (|PLCTag|_|) x |> Option.get
         let toString (x:obj) = Convert.ToString x
 
@@ -61,27 +62,38 @@ module ExpressionModule =
 
     [<AbstractClass>]
     [<DebuggerDisplay("{Name}")>]
-    type Tag<'T>(name, initValue:'T) =
+    type TypedValueStorage<'T>(name, initValue:'T) =
         member x.ToText() = $"({name}={(x.Value.ToString())})"
         member _.Name: string = name
         member val Value = initValue with get, set
+
+
+    [<AbstractClass>]
+    type Tag<'T>(name, initValue:'T) =
+        inherit TypedValueStorage<'T>(name, initValue)
 
         //memory bit masking 처리를 위해 일반 PlcTag와 DsMemory 구별 구현
         // <ahn> : obj -> 'T
         abstract SetValue:obj -> unit
         abstract GetValue:unit -> obj
 
+    // todo: 임시 이름... 추후 Variable로
+    type StorageVariable<'T>(name, initValue:'T) =
+        inherit TypedValueStorage<'T>(name, initValue)
 
     type Terminal<'T> =
         | Tag of Tag<'T>
+        | Variable of StorageVariable<'T>
         | Value of 'T
         member x.Evaluate() =
             match x with
             | Tag t -> t.Value
+            | Variable v -> v.Value
             | Value v -> v
         override x.ToString() =
             match x with
             | Tag t -> $"({t.Name}={t.Value})"
+            | Variable t -> $"({t.Name}={t.Value})"
             | Value v -> $"{v}"
 
 
@@ -89,9 +101,19 @@ module ExpressionModule =
     type Arguments = obj list
     type Args      = Arguments
 
+    type IExpression =
+        abstract Type : System.Type
+        abstract BoxedEvaluatedValue : obj
+    //    abstract ToText   : unit -> string
+    //    abstract ToJson   : unit -> ExpressionJson
+
+
     type Expression<'T> =
         | Terminal of Terminal<'T>
         | Function of f:(Arguments -> 'T) * name:string * args:Arguments
+        interface IExpression with
+            member x.Type = x.Type
+            member x.BoxedEvaluatedValue = x.Evaluate() |> box
 
         member x.Evaluate() =
             match x with
@@ -103,17 +125,63 @@ module ExpressionModule =
             | Function (f, n, args) ->
                 let strArgs = args.Select(fun x -> x.ToString()).JoinWith(", ")
                 $"{n}({strArgs})"
+        member x.Type = typedefof<'T>
 
 
+    let getTypeOfBoxedExpression (exp:obj) = (exp :?> IExpression).Type
     let value (x:'T) = Terminal (Value x)
     let tag (t: Tag<'T>) = Terminal (Tag t)
+    //let binaryExpression (opnd1:Expression<'T>) (op:string) (opnd2:Expression<'T>) =
+    let createBinaryExpression (opnd1:obj) (op:string) (opnd2:obj) =
+        let t1 = getTypeOfBoxedExpression opnd1
+        let t2 = getTypeOfBoxedExpression opnd2
+        if t1 <> t2 then
+            failwith "ERROR: Type mismatch"
 
-    let evaluate (expr:Expression<'T>) =
-        match expr with
-        | Function (f, n, args) ->  // f (args |> List.map evalArg)
-            let args = args |> List.map evalArg
-            f args
-        | Terminal v -> v.Evaluate()
+        let args = [box opnd1; opnd2]
+
+        if t1 = typeof<int> then
+            match op with
+            | "+" -> add args
+            | "-" -> sub args
+            | "*" -> mul args
+            | "/" -> div args
+            | _ -> failwith "NOT Yet"
+            |> box
+        elif t1 = typeof<double> then
+            match op with
+            | "+" -> addd args
+            | "-" -> subd args
+            | "*" -> muld args
+            | "/" -> divd args
+            | _ -> failwith "NOT Yet"
+            |> box
+        elif t1 = typeof<string> then
+            match op with
+            | "+" -> concat args
+            | _ -> failwith "ERROR"
+            |> box
+        else
+            failwith "ERROR"
+
+    let createCustomFunctionExpression (funName:string) (args:Args) =
+        match funName with
+        | "Int" -> Int args |> box
+        | _ -> failwith "NOT yet"
+
+
+
+    let evaluate (expr:Expression<'T>) = expr.Evaluate()
+        //match expr with
+        //| Function (f, n, args) ->  // f (args |> List.map evalArg)
+        //    let args = args |> List.map evalArg
+        //    f args
+        //| Terminal v -> v.Evaluate()
+
+    let evaluateBoxedExpression (boxedExpr:obj) =
+        let expr = boxedExpr :?> IExpression
+        expr.BoxedEvaluatedValue
+
 
     let private evalArg (x:obj) =
         let t = x.GetType()
@@ -158,6 +226,7 @@ module ExpressionModule =
 
         let muld       (args:Arguments) = Function (_muld,       "*", args)
         let addd       (args:Arguments) = Function (_addd,       "+", args)
+        let subd       (args:Arguments) = Function (_subd,       "-D", args)
         let divd       (args:Arguments) = Function (_divd,       "/D", args)
         let modulod    (args:Arguments) = Function (_modulo,     "%D", args)
         let concat     (args:Arguments) = Function (_concat,     "+", args)
@@ -172,6 +241,7 @@ module ExpressionModule =
         let shiftRight (args:Arguments) = Function (_shiftRight, ">>", args)
         let sin        (args:Arguments) = Function (_sin,        "sin", args)
         let Bool       (args:Arguments) = Function (_convertBool, "Bool", args)
+        let Int        (args:Arguments) = Function (_convertInt, "Int", args)
 
         let anD = logicalAnd
         let absDouble = absd
@@ -206,6 +276,7 @@ module ExpressionModule =
 
             let _muld       (args:Arguments) = args.ExpectGteN(2).Select(evalArg >> toDouble)   .Reduce(( * ))
             let _addd       (args:Arguments) = args.ExpectGteN(2).Select(evalArg >> toDouble)   .Reduce(( + ))
+            let _subd       (args:Arguments) = args.ExpectGteN(2).Select(evalArg >> toDouble)   .Reduce(( - ))
             let _concat     (args:Arguments) = args.ExpectGteN(2).Select(evalArg).Cast<string>().Reduce(( + ))
             let _logicalAnd (args:Arguments) = args.ExpectGteN(2).Select(evalArg).Cast<bool>()  .Reduce(( && ))
             let _logicalOr  (args:Arguments) = args.ExpectGteN(2).Select(evalArg).Cast<bool>()  .Reduce(( || ))
@@ -214,11 +285,12 @@ module ExpressionModule =
             let _orBit      (args:Arguments) = args.Select(evalArg).Cast<int>()                 .Reduce (|||)
             let _andBit     (args:Arguments) = args.Select(evalArg).Cast<int>()                 .Reduce (&&&)
             let _notBit     (args:Arguments) = args.Select(evalArg).Cast<int>().Expect1()       |> (~~~)
-            let _shiftLeft  (args:Arguments) = args.ExpectGteN(2).Select(evalArg >> toint)      .Reduce((<<<))
-            let _shiftRight (args:Arguments) = args.ExpectGteN(2).Select(evalArg >> toint)      .Reduce((>>>))
+            let _shiftLeft  (args:Arguments) = args.ExpectGteN(2).Select(evalArg >> toInt)      .Reduce((<<<))
+            let _shiftRight (args:Arguments) = args.ExpectGteN(2).Select(evalArg >> toInt)      .Reduce((>>>))
 
             let _sin (args:Arguments) = args.Select(evalArg >> toDouble) .Expect1() |> Math.Sin
             let _convertBool (args:Arguments) = args.Select(evalArg >> toBool) .Expect1()
+            let _convertInt (args:Arguments) = args.Select(evalArg >> toInt) .Expect1()
     [<AutoOpen>]
     module StatementModule =
         type Statement<'T> =

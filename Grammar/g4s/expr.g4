@@ -18,11 +18,13 @@ identifier : IDENTIFIER;
 
 // terminal: literal | tag | identifier;
 
-literal: variable | tag | scientific | integer;
+terminal: variable | tag | literal;
+    literal: scientific | integer | string;
+    string: STRING;
     scientific: SCIENTIFIC_NUMBER;
     integer: INTEGER;
 tag: TAG;
-    TAG: '$' IDENTIFIER;
+    TAG: '%' IDENTIFIER;
 
 toplevels: toplevel (';' toplevel)* (';')?;
     toplevel: expr|statement;
@@ -34,23 +36,21 @@ assign: expr ':=' expr;
 // https://github.com/antlr/antlr4/blob/master/doc/parser-rules.md#alternative-labels
 expr:   functionName '(' arguments? ')'         # FunctionCallExpr  // func call like f(), f(x), f(1,2)
     |   variable ('[' expr ']')+                # ArrayReferenceExpr // array index like a[i], a[i][j]
-    |   ('-'|'!') expr                          # UnaryExpr           // unary minus, boolean not
+    |   unaryOperator expr                      # UnaryExpr           // unary minus, boolean not
     |   expr (
             | '+'|'-'|'*'|'/'|'%'
             | '&&' | '||' 
             |'=' | '!='
             //|':='
             ) expr                              # BinaryExpr // ':=': assignment equality comparison (lowest priority op)
-    |   literal                                 # LiteralExpr
+    |   terminal                                # TerminalExpr
     |   '(' expr ')'                            # ParenthesysExpr
     ;
 
     functionCall: functionName '(' arguments? ')';    // func call like f(), f(x), f(1,2)
     arguments: exprList;
     exprList : expr (',' expr)* ;   // arg list
-    // arrayReference: variable ('[' expr ']')+;           // array index like a[i], a[i][j]
-    // unary: ('-'|'!') expr;                           // unary minus, boolean not
-    // binary: expr ('+'|'-'|'*'|'/'|'%'|'=') expr;      // '=': equality comparison (lowest priority op)
+    unaryOperator: '-'|'!';
 
 INTEGER: SIGN? UNSIGNED_INTEGER;
 IDENTIFIER: VALID_ID_START VALID_ID_CHAR*;
@@ -63,6 +63,8 @@ fragment UNSIGNED_INTEGER: ('0' .. '9')+;
 
 fragment E : 'E' | 'e' ;
 fragment SIGN : ('+' | '-') ;
+STRING: QuotedStringLiteral;
+    fragment QuotedStringLiteral : '"' (~('"' | '\\' | '\r' | '\n') | '\\' ('"' | '\\'))* '"';
 
 LPAREN : '(' ;
 RPAREN : ')' ;

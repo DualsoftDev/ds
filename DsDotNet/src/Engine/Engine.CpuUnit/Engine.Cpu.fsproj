@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
 		<TargetFramework>net48</TargetFramework>
@@ -15,8 +15,6 @@
     <Compile Include="Tag.fs" />
     <Compile Include="DsMemory.fs" />
     <Compile Include="FunctionName.fs" />
-    <Compile Include="Expression.fs" />
-    <Compile Include="Expression.Extenstion.fs" />
     <Compile Include="Convert.Util.fs" />
     <Compile Include="Convert.Root.fs" />
     <Compile Include="Convert.Real.fs" />

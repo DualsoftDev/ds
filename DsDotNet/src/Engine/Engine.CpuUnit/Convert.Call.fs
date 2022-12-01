@@ -4,6 +4,7 @@ module Engine.Cpu.ConvertCall
 open System.Linq
 open System.Runtime.CompilerServices
 open Engine.Cpu
+open Engine.Core
 
 [<AutoOpen>]
 [<Extension>]

@@ -6,11 +6,11 @@ open System.Text.RegularExpressions
 open Engine.Core
 
 [<AutoOpen>]
-module DsMemoryModule = 
+module DsMemoryModule =
 
-    /// DsMemory DsBit/DsDotBit 를 관리하는 컨테이어 
+    /// DsMemory DsBit/DsDotBit 를 관리하는 컨테이어
     type DsMemory (name:string)  =
-        
+
         let mutable memory:Memory = Memory(0uy)
 
         let readyTag   = DsBit($"{name}(R)",  false , memory, Monitor.R)
@@ -26,23 +26,22 @@ module DsMemoryModule =
         let resetTag   = DsDotBit($"{name}[{ResetIndex}]" , false, memory)
         let endTag     = DsDotBit($"{name}[{EndIndex}]"   , false, memory)
         let relayTag   = DsDotBit($"{name}[{RelayIndex}]" , false, memory)
-        
+
         member x.Byte  = memory.Value
         member x.Name  = name
 
-        member x.Start = startTag 
+        member x.Start = startTag
         member x.Reset = resetTag
         member x.End   = endTag
         member x.Relay = relayTag
-        
+
         member x.Ready  = readyTag
         member x.Going  = goingTag
         member x.Finish = finishTag
         member x.Homing = homingTag
 
-        member x.Origin  =  originTag 
-        member x.Pause   =  pauseTag  
+        member x.Origin  =  originTag
+        member x.Pause   =  pauseTag
         member x.ErrorTx =  errorTxTag
         member x.ErrorRx =  errorRxTag
 
-     

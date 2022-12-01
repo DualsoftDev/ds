@@ -44,6 +44,13 @@ module LoadConfigTestModule =
 }
 """
 
+//file="station.ds"
+//[sys] Station = {
+    //[flow] F = {
+    //    Vp > Pp > Sp;
+    //    Vm > Pm > Sm;
+    //} ....
+
             let system = parseText libdir mySysText
             validateGraphOfSystem system
 
@@ -56,6 +63,11 @@ module LoadConfigTestModule =
             exs.Distinct().Count() === 1
             system.LoadedSystems.Select(fun d -> d.Name) |> Seq.sort |> SeqEq ["A"; "B"]
             exs[0].Name === "Station"
+
+
+            let findFromLoaded = tryFindLoadedSystem system  "A" |> Option.get
+            let findReferenceSystem = tryFindReferenceSystem system  "Station" |> Option.get
+            findFromLoaded.Name =!= findReferenceSystem.Name 
 
             let generated = system.ToDsText();
             compare libdir mySysText generated

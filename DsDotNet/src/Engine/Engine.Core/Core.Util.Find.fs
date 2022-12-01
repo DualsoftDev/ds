@@ -62,9 +62,10 @@ module internal ModelFindModule =
         
     let tryFindFlow(system:DsSystem) (name:string)   = system.Flows.TryFind(nameEq name)
     let tryFindJob (system:DsSystem) name            = system.Jobs.TryFind(nameEq name)
+
     let tryFindLoadedSystem (system:DsSystem) name   = system.LoadedSystems.TryFind(nameEq name)
-    let tryFindExternalSystem (system:DsSystem) name = system.ExternalSystems.TryFind(nameEq name)
-    let tryFindDevice (system:DsSystem) name         = system.Devices.TryFind(nameEq name)
+    let tryFindReferenceSystem (system:DsSystem) name   =
+                     system.LoadedSystems.Select(fun s->s.ReferenceSystem).TryFind(nameEq name)
     
    
     let rec tryFindExportApiItem(system:DsSystem) (Fqdn(apiPath)) =
@@ -110,22 +111,16 @@ module internal ModelFindModule =
         member x.TryFindFlow(flowName:string) = tryFindFlow x flowName
         member x.TryFindJob (jobName:string) =  tryFindJob  x jobName
         member x.TryFindReal(system) flowName realName =  tryFindReal  system flowName realName 
-        member x.TryFindLoadedSystem   (system:DsSystem)  name = tryFindLoadedSystem system name  
-        member x.TryFindExternalSystem (system:DsSystem)  name = tryFindExternalSystem system name
-        member x.TryFindDevice (system:DsSystem)          name = tryFindDevice system name        
+        member x.TryFindLoadedSystem     (system:DsSystem)  name = tryFindLoadedSystem system name  
+        member x.TryFindReferenceSystem  (system:DsSystem)  name = tryFindReferenceSystem system name  
       
 [<Extension>]
 type FindExtension =  
-    //TryFindLoadedSystem 전체 사용된 시스템을 이름으로 찾기
+    // 전체 사용된 시스템을 이름으로 찾기
     [<Extension>] static member TryFindLoadedSystem (system:DsSystem, name) = tryFindLoadedSystem system name  
-    //TryFindExternalSystem 전체 사용된 시스템 중 외부 시스템 찾기
-    [<Extension>] static member TryFindExternalSystem (system:DsSystem, name) = tryFindExternalSystem system name  
-    //TryFindDevice 전체 사용된 시스템 중 디바이스 시스템 찾기
-    [<Extension>] static member TryFindDevice (system:DsSystem, name) = tryFindDevice system name  
-    //TryFindReferenceSystem 전체 사용된 시스템에서의 찾는 이름 대상 DsSystem  
-    [<Extension>] static member TryFindReferenceSystem (system:DsSystem, name) = 
-                                tryFindLoadedSystem system name |> map(fun f->f.ReferenceSystem) 
-    
+    // 전체 사용된 시스템에서의 찾는 이름 대상 DsSystem  
+    [<Extension>] static member TryFindReferenceSystem (system:DsSystem, name) = tryFindReferenceSystem system name  
+
     [<Extension>] static member TryFindExportApiItem(x:DsSystem, Fqdn(apiPath)) = tryFindExportApiItem x apiPath
     [<Extension>] static member TryFindGraphVertex  (x:DsSystem, Fqdn(fqdn)) = tryFindGraphVertex x fqdn
     [<Extension>] static member TryFindGraphVertex<'V when 'V :> IVertex>(x:DsSystem, Fqdn(fqdn)) = tryFindGraphVertexT<'V> x fqdn

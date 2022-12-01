@@ -36,6 +36,8 @@ module CoreModule =
         /// Loading 을 위해서 사용자가 지정한 file path.  serialize 시, 절대 path 를 사용하지 않기 위한 용도로 사용된다.
         member _.UserSpecifiedFilePath:string = param.UserSpecifiedFilePath
         member _.AbsoluteFilePath:string = param.AbsoluteFilePath
+        member _.LoadedName:string = param.LoadedName
+        member _.OriginName:string = loadedSystem.Name
 
     /// *.ds file 을 읽어 들여서 새로운 instance 를 만들어 넣기 위한 구조
     and Device(loadedDevice:DsSystem, param:DeviceLoadParameters) =

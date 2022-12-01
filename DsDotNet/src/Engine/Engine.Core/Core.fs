@@ -166,9 +166,6 @@ module CoreModule =
         member val RXs = createQualifiedNamedHashSet<Real>()
         member _.System = system
 
-    //and ApiUsage(loadedSystemName:string, api: ApiItem) =
-    //    inherit FqdnObject(api.Name, createFqdnObject([|loadedSystemName|]))
-    //    member _.ApiItem = api
 
     /// API 의 reset 정보:  "+" <||> "-";
     and ApiResetInfo private (system:DsSystem, operand1:string, operator:ModelingEdgeType, operand2:string) =
@@ -188,12 +185,14 @@ module CoreModule =
         | ParentReal of Real //Call/Alias      의 부모
 
     and AliasTargetWrapper =
-        | AliasTargetReal of Real    // MyFlow or OtherFlow 의 Real 일 수 있다.
+        | AliasTargetReal of Real    
         | AliasTargetCall of Call
+        | AliasTargetRealOtherFlow of RealOtherFlow    // MyFlow or RealOtherFlow 의 Real 일 수 있다.
 
     and SafetyCondition =
         | SafetyConditionReal of Real
         | SafetyConditionCall of Call
+        | SafetyConditionRealOtherFlow of RealOtherFlow    // MyFlow or RealOtherFlow 의 Real 일 수 있다.
 
 
     (* Abbreviations *)
@@ -250,6 +249,7 @@ module CoreModule =
                     match target with
                     | AliasTargetReal r -> r.GetAliasTargetToDs(flow)
                     | AliasTargetCall c -> c.GetAliasTargetToDs()
+                    | AliasTargetRealOtherFlow o -> o.Real.GetAliasTargetToDs(flow)
                 let ads = flow.AliasDefs
                 match ads.TryFind(aliasKey) with
                 | Some ad -> ad.Mnemonincs.AddIfNotContains(name) |> ignore
@@ -278,6 +278,7 @@ module CoreModule =
             match x with
             | SafetyConditionReal real -> real
             | SafetyConditionCall call -> call
+            | SafetyConditionRealOtherFlow realOtherFlow -> realOtherFlow
 
     type ParentWrapper with
         member x.GetCore() =

@@ -90,6 +90,7 @@ module internal ToDsTextModule =
                         match a.AliasTarget with
                         | Some(AliasTargetReal real) -> real.GetAliasTargetToDs(flow).Combine()
                         | Some(AliasTargetCall call) -> call.GetAliasTargetToDs().Combine()
+                        | Some(AliasTargetRealOtherFlow o) -> o.Real.GetAliasTargetToDs(flow).Combine()
                         | None -> failwith "ERROR"
 
                     yield $"{tab}{aliasKey} = {lb} {mnemonics} {rb}"
@@ -195,6 +196,7 @@ module internal ToDsTextModule =
                     match sc with
                     | SafetyConditionReal real -> real.ParentNPureNames.Combine()
                     | SafetyConditionCall call -> call.ParentNPureNames.Combine()
+                    | SafetyConditionRealOtherFlow o -> o.ParentNPureNames.Combine()
                 let safetyConditionHolderName(sch:ISafetyConditoinHolder) =
                     match sch with
                     | :? Real as real -> real.ParentNPureNames.Combine()

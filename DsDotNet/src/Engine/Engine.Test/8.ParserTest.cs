@@ -302,7 +302,7 @@ namespace Engine
         public static string T6Alias = @"
 [sys ip = localhost] T6_Alias = {
     [flow] Page1 = {
-        AndFlow.R2 > OrFlow.R1;
+        AndFlow.R2 > OrFlow.R2;
         C1 > C2;
     }
     [flow] AndFlow = {
@@ -311,7 +311,7 @@ namespace Engine
     }
     [flow] OrFlow = {
         R2 > Copy1_R3;
-        R1 > R3;
+        OtherFlowR3 > R3;
         [aliases] = {
             R3 = { Copy1_R3; AliasToR3; }
             AndFlow.R3 = { AndFlowR3; OtherFlowR3; }

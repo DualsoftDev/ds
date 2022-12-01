@@ -234,20 +234,16 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                     let flow = pw.GetFlow()
                     tryFindCall flow.System vetexPath |> Option.isSome
                
-            let isAliasMnemonic (pw:ParentWrapper, Fqdn(vetexPath)) =
+            let isAliasMnemonic (pw:ParentWrapper, mnemonic:string) =
                 let flow = pw.GetFlow()
-                match vetexPath.ToFSharpList() with
-                    | t::[] -> tryFindAliasDefWithMnemonic flow t |> Option.isSome
-                    | _ -> failwith "Error"
+                tryFindAliasDefWithMnemonic flow mnemonic |> Option.isSome
 
-            let isCallOrAlias (pw, Fqdn(vetexPath)) =
-                isCallName (pw, vetexPath) || isAliasMnemonic (pw, vetexPath)
-
+           
             let isJobName (pw, name) =
                 tryFindJob pw name |> Option.isSome
 
             let isJobOrAlias (pw:ParentWrapper, Fqdn(vetexPath)) =
-                isJobName (pw.GetFlow().System, vetexPath.Last()) || isAliasMnemonic (pw, vetexPath)
+                isJobName (pw.GetFlow().System, vetexPath.Last()) || isAliasMnemonic (pw, vetexPath.JoinWith("."))
                 
             let tryCreateCallOrAlias (parentWrapper:ParentWrapper) name =
                 let flow = parentWrapper.GetFlow()
@@ -285,17 +281,17 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                             then
                                 Real.Create(r, flow) |> ignore    
                            
-                        | 1, c::[] when not <| (isAliasMnemonic (parent, ctxInfo.Names)) ->
+                        | 1, c::[] when not <| (isAliasMnemonic (parent, ctxInfo.Names.Combine())) ->
                             let flow = parent.GetFlow()
                             let job = tryFindJob system c |> Option.get
                             Call.Create(job, parent) |> ignore
                         
-                        | 1, realorFlow::cr::[]  ->
+                        | 1, realorFlow::cr::[] when not <| isAliasMnemonic (parent, ctxInfo.Names.Combine()) ->
                             let otherFlowReal = tryFindReal system realorFlow cr |> Option.get
                             RealOtherFlow.Create(otherFlowReal, parent) |> ignore
                             tracefn $"{realorFlow}.{cr} should already have been created."
                            
-                        | 2, q::[] when isAliasMnemonic (parent, ctxInfo.Names) ->
+                        | 2, q::[] when isAliasMnemonic (parent, ctxInfo.Names.Combine()) ->
                             let flow = parent.GetFlow()
                             let aliasDef = tryFindAliasDefWithMnemonic flow q |> Option.get
                             Alias.Create(q, aliasDef.AliasTarget.Value, parent) |> ignore

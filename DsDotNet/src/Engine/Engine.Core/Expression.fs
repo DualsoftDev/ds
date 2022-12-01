@@ -73,7 +73,7 @@ module ExpressionModule =
         abstract BoxedEvaluatedValue : obj
         /// Tag<'T> 나 Variable<'T> 객체 boxed 로 반환
         abstract GetBoxedRawObject: unit -> obj
-    //    abstract ToText   : unit -> string
+        abstract ToText   : unit -> string
     //    abstract ToJson   : unit -> ExpressionJson
 
 
@@ -111,26 +111,26 @@ module ExpressionModule =
     type Terminal<'T> =
         | Tag of Tag<'T>
         | Variable of StorageVariable<'T>
-        | Value of 'T
+        | Literal of 'T
 
 
         member x.GetBoxedRawObject() =
             match x with
             | Tag t -> t |> box
             | Variable v -> v
-            | Value v -> v |> box
+            | Literal v -> v |> box
 
         member x.Evaluate() =
             match x with
             | Tag t -> t.Value
             | Variable v -> v.Value
-            | Value v -> v
+            | Literal v -> v
 
         override x.ToString() =
             match x with
             | Tag t -> $"({t.Name}={t.Value})"
             | Variable t -> $"({t.Name}={t.Value})"
-            | Value v -> $"{v}"
+            | Literal v -> $"{v}"
 
 
 
@@ -144,6 +144,7 @@ module ExpressionModule =
             member x.Type = x.Type
             member x.BoxedEvaluatedValue = x.Evaluate() |> box
             member x.GetBoxedRawObject() = x.GetBoxedRawObject()
+            member x.ToText() = x.ToText()
 
         member x.Type = typedefof<'T>
         member x.GetBoxedRawObject() =
@@ -159,14 +160,12 @@ module ExpressionModule =
         member x.ToText() =
             match x with
             | Terminal b -> b.ToString()
-            | Function (f, n, args) ->
-                let strArgs = args.Select(fun x -> x.ToString()).JoinWith(", ")
-                $"{n}({strArgs})"
+            | Function (f, n, args) -> fwdSerializeFunctionExpression n args
 
 
 
     let getTypeOfBoxedExpression (exp:obj) = (exp :?> IExpression).Type
-    let value (x:'T) = Terminal (Value x)
+    let value (x:'T) = Terminal (Literal x)
     let tag (t: Tag<'T>) = Terminal (Tag t)
 
     /// storage:obj --> 실제는 Tag<'T> or StorageVariable<'T> type 객체 boxed
@@ -216,15 +215,6 @@ module ExpressionModule =
         //| "tan" -> tan args |> box
         | _ -> failwith "NOT yet"
 
-
-
-    let evaluate (expr:Expression<'T>) = expr.Evaluate()
-        //match expr with
-        //| Function (f, n, args) ->  // f (args |> List.map evalArg)
-        //    let args = args |> List.map evalArg
-        //    f args
-        //| Terminal v -> v.Evaluate()
-
     let evaluateBoxedExpression (boxedExpr:obj) =
         let expr = boxedExpr :?> IExpression
         expr.BoxedEvaluatedValue
@@ -248,7 +238,7 @@ module ExpressionModule =
         | _ ->
             failwith "error"
 
-    let resolve (expr:Expression<'T>) = expr |> evaluate |> unbox
+    let resolve (expr:Expression<'T>) = expr.Evaluate() |> unbox
 
 
 

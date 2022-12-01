@@ -59,3 +59,8 @@ module Interface =
 
     //type ISystem    =
     //    abstract Flows:IFlow seq
+
+
+    let private dummySerializeFunctionExpression (functionName:string) (args:obj list): string =
+        failwith "Should be reimplemented."
+    let mutable internal fwdSerializeFunctionExpression = dummySerializeFunctionExpression

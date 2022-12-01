@@ -62,7 +62,7 @@ type Statement<'T> =
         match x with
         | Assign     (expr, target) ->
                      ///  Target Y = Function (X)
-                     target.SetValue(evaluate(expr))
+                     target.SetValue(expr.Evaluate())
 
     member x.ToText() =
          match x with
@@ -77,12 +77,7 @@ type FuncExt =
 
 
 
-    [<Extension>] static member Evaluate (x:Expression<'T>) = evaluate x
-    //[<Extension>] static member CreateFunc (xs:IEnumerable, funcName:string) = Function(funcName, [xs])
     [<Extension>] static member ToTags (xs:#Tag<'T> seq)    = xs.Cast<Tag<_>>()
-    //[<Extension>] static member ToTags (xs:DsBit<'T> seq)    = xs.Cast<Tag<_>>()
-    //[<Extension>] static member ToTags (xs:DsDotBit<'T> seq) = xs.Cast<Tag<_>>()
-    //[<Extension>] static member ToTags (xs:PlcTag<'T> seq)   = xs.Cast<Tag<_>>()
     [<Extension>] static member ToExpr (x:Tag<bool>)   = Terminal (Tag x)
     [<Extension>] static member GetAnd (xs:Tag<'T> seq)  = xs |> tagsToArguments |> anD
     [<Extension>] static member GetOr  (xs:Tag<'T> seq)  = xs |> tagsToArguments |> oR

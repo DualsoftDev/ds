@@ -17,9 +17,11 @@ module ExpressionTestModule =
         do Fixtures.SetUpTest()
 
         let value = ExpressionModule.value
+        let evaluate (exp:Expression<'T>) = exp.Evaluate()
 
         [<Test>]
         member __.``1 ExpressionValueUnit test`` () =
+
 
             //지원 value type : bool, int, single, double, string
             value 1       |> evaluate === 1
@@ -184,9 +186,9 @@ module ExpressionTestModule =
             value 3.14      |> toText === "3.14"
 
 
-            mul [   2
-                    add [1; 2]
-                    add [4; 5]
+            mul [   value 2
+                    add [value 1; value 2]
+                    add [value 4; value 5]
             ] |> toText === "*[2; +[1; 2]; +[4; 5]]"
             mul [2; add[3; 4]]|> toText  === "*[2; +[3; 4]]"
 

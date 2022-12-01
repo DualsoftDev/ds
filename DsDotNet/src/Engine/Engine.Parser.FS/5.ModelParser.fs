@@ -76,3 +76,4 @@ module ModelParser =
 
         fwdLoadDevice <- loadDevice
         fwdLoadExternalSystem <- loadExternalSystem
+        fwdParseFqdn <- FqdnParser.parseFqdn

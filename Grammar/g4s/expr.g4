@@ -1,4 +1,4 @@
-// grun expr exprs < g4test/expr/exp.exp
+// grun expr toplevels < g4test/expr/expr.expr
 // https://github.com/antlr/grammars-v4/blob/master/arithmetic/arithmetic.g4
 grammar expr;
 
@@ -24,7 +24,8 @@ literal: variable | tag | scientific | integer;
 tag: TAG;
     TAG: '$' IDENTIFIER;
 
-exprs: ( (expr|statement) ';')*;     // for debugging purpose
+toplevels: toplevel (';' toplevel)* (';')?;
+    toplevel: expr|statement;
 
 statement: assign;
 assign: expr ':=' expr;
@@ -40,7 +41,6 @@ expr:   functionName '(' arguments? ')'         # FunctionCallExpr  // func call
             |'=' | '!='
             //|':='
             ) expr                              # BinaryExpr // ':=': assignment equality comparison (lowest priority op)
-    //|   expr ':=' expr                          # AssignmentStatement
     |   literal                                 # LiteralExpr
     |   '(' expr ')'                            # ParenthesysExpr
     ;

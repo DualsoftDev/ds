@@ -9,6 +9,7 @@ module FqdnParseTestModule =
     let toString x = x.ToString()
     type FqdnParseTest() =
         do Fixtures.SetUpTest()
+        let parseFqdn = fwdParseFqdn
 
         [<Test>]
         member __.``Fqdn parse test`` () =

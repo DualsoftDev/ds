@@ -15,6 +15,8 @@
 		<Compile Include="1.AllListener.fs" />
 		<Compile Include="1.ErrorListener.fs" />
 		<Compile Include="1.ParserUtility.fs" />
+		<Compile Include="FqdnParser.fs" />
+		<Compile Include="ExpressionParser.fs" />
 		<Compile Include="1.ContextInformation.fs" />
 		<Compile Include="3.1.Listener.fs" />
 		<Compile Include="3.2.Listener.Epilog.fs" />

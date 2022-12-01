@@ -60,12 +60,37 @@ module ExpressionModule =
             [<Extension>] static member Expect2(xs:'a seq) = expect2 xs
 
 
+    /// Expression<'T> 로 생성할 수 있는 interface
+    type IExpressionCreatable    =
+        abstract CreateBoxedExpression: unit -> obj        // Terminal<'T>
+        //abstract Name   : string
+        //abstract Value  : obj with get,set
+        //abstract ToText   : unit -> string
+
+    /// Expression<'T> 을 boxed 에서 접근하기 위한 최소의 interface
+    type IExpression =
+        abstract Type : System.Type
+        abstract BoxedEvaluatedValue : obj
+        /// Tag<'T> 나 Variable<'T> 객체 boxed 로 반환
+        abstract GetBoxedRawObject: unit -> obj
+    //    abstract ToText   : unit -> string
+    //    abstract ToJson   : unit -> ExpressionJson
+
+
     [<AbstractClass>]
     [<DebuggerDisplay("{Name}")>]
     type TypedValueStorage<'T>(name, initValue:'T) =
         member x.ToText() = $"({name}={(x.Value.ToString())})"
         member _.Name: string = name
         member val Value = initValue with get, set
+
+        interface IExpressionCreatable with
+            member x.CreateBoxedExpression() = x.CreateBoxedExpression()
+        abstract CreateBoxedExpression: unit -> obj
+
+        interface INamed with
+            member x.Name with get() = x.Name and set(v) = failwith "ERROR: not supported"
+
 
 
     [<AbstractClass>]
@@ -76,20 +101,31 @@ module ExpressionModule =
         // <ahn> : obj -> 'T
         abstract SetValue:obj -> unit
         abstract GetValue:unit -> obj
+        override x.CreateBoxedExpression() = Terminal(Terminal.Tag x)
 
     // todo: 임시 이름... 추후 Variable로
     type StorageVariable<'T>(name, initValue:'T) =
         inherit TypedValueStorage<'T>(name, initValue)
+        override x.CreateBoxedExpression() = Terminal(Terminal.Variable x)
 
     type Terminal<'T> =
         | Tag of Tag<'T>
         | Variable of StorageVariable<'T>
         | Value of 'T
+
+
+        member x.GetBoxedRawObject() =
+            match x with
+            | Tag t -> t |> box
+            | Variable v -> v
+            | Value v -> v |> box
+
         member x.Evaluate() =
             match x with
             | Tag t -> t.Value
             | Variable v -> v.Value
             | Value v -> v
+
         override x.ToString() =
             match x with
             | Tag t -> $"({t.Name}={t.Value})"
@@ -101,36 +137,43 @@ module ExpressionModule =
     type Arguments = obj list
     type Args      = Arguments
 
-    type IExpression =
-        abstract Type : System.Type
-        abstract BoxedEvaluatedValue : obj
-    //    abstract ToText   : unit -> string
-    //    abstract ToJson   : unit -> ExpressionJson
-
-
     type Expression<'T> =
         | Terminal of Terminal<'T>
         | Function of f:(Arguments -> 'T) * name:string * args:Arguments
         interface IExpression with
             member x.Type = x.Type
             member x.BoxedEvaluatedValue = x.Evaluate() |> box
+            member x.GetBoxedRawObject() = x.GetBoxedRawObject()
+
+        member x.Type = typedefof<'T>
+        member x.GetBoxedRawObject() =
+            match x with
+            | Terminal b -> b.GetBoxedRawObject()
+            | Function _ -> null
 
         member x.Evaluate() =
             match x with
             | Terminal b -> b.Evaluate()
             | Function (f, n, args) -> f (args |> List.map evalArg)
+
         member x.ToText() =
             match x with
             | Terminal b -> b.ToString()
             | Function (f, n, args) ->
                 let strArgs = args.Select(fun x -> x.ToString()).JoinWith(", ")
                 $"{n}({strArgs})"
-        member x.Type = typedefof<'T>
+
 
 
     let getTypeOfBoxedExpression (exp:obj) = (exp :?> IExpression).Type
     let value (x:'T) = Terminal (Value x)
     let tag (t: Tag<'T>) = Terminal (Tag t)
+
+    /// storage:obj --> 실제는 Tag<'T> or StorageVariable<'T> type 객체 boxed
+    let createExpressionFromBoxedStorage (storage:obj) =
+        let t = storage :?> IExpressionCreatable
+        t.CreateBoxedExpression()
+
     //let binaryExpression (opnd1:Expression<'T>) (op:string) (opnd2:Expression<'T>) =
     let createBinaryExpression (opnd1:obj) (op:string) (opnd2:obj) =
         let t1 = getTypeOfBoxedExpression opnd1

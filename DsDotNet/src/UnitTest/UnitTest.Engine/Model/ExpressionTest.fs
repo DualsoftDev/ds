@@ -1,18 +1,22 @@
 namespace UnitTest.Engine
 
 open System
+open System.Linq
 open Engine.Core
 open NUnit.Framework
 open Engine.Cpu.TagModule
 open Engine.Cpu
 open Newtonsoft.Json
 open Engine.Parser.FS.ExpressionParser
+open Engine.Common.FS
 
 [<AutoOpen>]
 module ExpressionTestModule =
 
     type ExpressionTest() =
         do Fixtures.SetUpTest()
+
+        let value = ExpressionModule.value
 
         [<Test>]
         member __.``1 ExpressionValueUnit test`` () =
@@ -297,7 +301,44 @@ module ExpressionTestModule =
                 PlcTag.Create("char", '1')
                 PlcTag.Create("string", "1")
             ]
-            let tags = rawTags |> List.map (unbox >> tag >> box)
+            let tags = rawTags |> List.map (createExpressionFromBoxedStorage)
+            let tagDic =
+                [   for t in tags do
+                        let exp = t :?> IExpression
+                        let inner = exp.GetBoxedRawObject()
+                        let name = (inner :?> INamed).Name
+                        (name, t)
+                ] |> Tuple.toDictionary
+            let sbyte = tagDic["sbyte"] :?> IExpression //:?> Terminal
+            sbyte.Type === typedefof<sbyte>
+            sbyte.BoxedEvaluatedValue === 1y
+
+            let rawVariables = [
+                StorageVariable("sbyte", 1y) |> box
+                StorageVariable("byte", 1uy)
+                StorageVariable("int16", 1s)
+                StorageVariable("uint16", 1us)
+                StorageVariable("int32", 1)
+                StorageVariable("uint32", 1u)
+                StorageVariable("int64", 1L)
+                StorageVariable("uint64", 1UL)
+                StorageVariable("single", 1.0f)
+                StorageVariable("double", 1.0)
+                StorageVariable("char", '1')
+                StorageVariable("string", "1")
+            ]
+            let variables = rawVariables |> List.map (createExpressionFromBoxedStorage)
+            let varDic =
+                [   for t in variables do
+                        let exp = t :?> IExpression
+                        let inner = exp.GetBoxedRawObject()
+                        let name = (inner :?> INamed).Name
+                        (name, t)
+                ] |> Tuple.toDictionary
+            let sbyte = varDic["sbyte"] :?> IExpression //:?> Terminal
+            sbyte.Type === typedefof<sbyte>
+            sbyte.BoxedEvaluatedValue === 1y
+
             ()
 
         [<Test>]

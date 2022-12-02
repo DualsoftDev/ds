@@ -60,41 +60,4 @@ module ExpressionExtensionModule =
             | Assign (expr, target) -> $"assign({expr.ToText(false)}, {target.ToText()})"
 
 
-    let private tagsToArguments (xs:Tag<'T> seq) = xs.Select (Tag >> box) |> List.ofSeq
-
-    [<AutoOpen>]
-    [<Extension>]
-    type FuncExt =
-
-
-
-        [<Extension>] static member ToTags (xs:#Tag<'T> seq)    = xs.Cast<Tag<_>>()
-        [<Extension>] static member ToExpr (x:Tag<bool>)   = Terminal (Tag x)
-        [<Extension>] static member GetAnd (xs:Tag<'T> seq)  = xs |> tagsToArguments |> anD
-        [<Extension>] static member GetOr  (xs:Tag<'T> seq)  = xs |> tagsToArguments |> oR
-        //[sets and]--|----- ! [rsts or] ----- (relay)
-        //|relay|-----|
-        [<Extension>] static member GetRelayExpr(sets:Tag<bool> seq, rsts:Tag<bool> seq, relay:Tag<bool>) =
-                        (sets.GetAnd() <||> relay.ToExpr()) <&&> (!! rsts.GetOr())
-
-        //[sets and]--|----- ! [rsts or] ----- (coil)
-        [<Extension>] static member GetNoRelayExpr(sets:Tag<'T> seq, rsts:Tag<'T> seq) =
-                        sets.GetAnd() <&&> (!! rsts.GetOr())
-
-        //[sets and]--|-----  [rsts and] ----- (relay)
-        //|relay|-----|
-        [<Extension>] static member GetRelayExprReverseReset(sets:Tag<'T> seq, rsts:Tag<'T> seq, relay:Tag<bool>) =
-                        (sets.GetAnd() <||> relay.ToExpr()) <&&> (rsts.GetOr())
-
-
-    [<AutoOpen>]
-    module ExpressionOperatorModule =
-        /// boolean AND operator
-        let (<&&>) (left: Expression<bool>) (right: Expression<bool>) = anD [ left; right ]
-        /// boolean OR operator
-        let (<||>) (left: Expression<bool>) (right: Expression<bool>) = oR [ left; right ]
-        /// boolean NOT operator
-        let (!!)   (exp: Expression<bool>) = noT [exp]
-        /// Assign statement
-        let (<==)  (storage: IStorage<'T>) (exp: Expression<'T>) = Assign(exp, storage)
 

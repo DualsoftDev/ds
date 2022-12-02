@@ -16,6 +16,7 @@ module ExpressionTestModule =
 
         let v = ExpressionModule.value
         let evaluate (exp:Expression<'T>) = exp.Evaluate()
+        let dq = "\""
 
         [<Test>]
         member __.``1 ExpressionValueUnit test`` () =
@@ -40,14 +41,27 @@ module ExpressionTestModule =
 
 
         [<Test>]
-        member __.``2 ExpressionTagUnit test`` () =
+        member __.``2 Tag test`` () =
             let t1 = PlcTag.Create("1", 1)
             tag t1 |> evaluate === 1
-            t1.SetValue(2)
+            t1.Value <- 2
+
+            // Invalid assignment: won't compile.  OK!
+            // t1.Value <- 2.0
 
             tag t1 |> evaluate === 2
-            t1.SetValue(3)
+            t1.Value <- 3
             tag t1 |> evaluate === 3
+
+            (t1 <== add [3; 4]).Do()
+            t1.Value === 7
+
+            let exp = $"{dq}hello{dq} + {dq}world{dq}" |> parseExpression :?> Expression<string>
+            // Invalid assignment: won't compile.  OK!
+            // (t1 <== exp)
+            let tString = PlcTag.Create("1", "1")
+            (tString <== exp).Do()
+            tString.Value === "helloworld"
 
             let t2 = PlcTag.Create("2", 2)
             add [tag t2; tag t2] |> evaluate === 4
@@ -62,18 +76,18 @@ module ExpressionTestModule =
                 ]) |> evaluate === "Hello, world!"
 
             let tt1 = tag t1
-            t1.SetValue( 1 )
+            t1.Value <- 1
             let tt2 = PlcTag.Create("t2", 2)
 
             let addTwoExpr = add [ tt1; tag tt2 ]
             addTwoExpr |> evaluate  === 3
-            t1.SetValue( 10 )
+            t1.Value <- 10
             addTwoExpr |> evaluate  === 12
 
 
 
         [<Test>]
-        member __.``3 ExpressionFuncUnit test`` () =
+        member __.``3 Func test`` () =
 
             abs [13]                          |> evaluate === 13
             abs [-13]                         |> evaluate === 13
@@ -127,7 +141,7 @@ module ExpressionTestModule =
             add [1; 2]     |> evaluate === 3
 
         [<Test>]
-        member __.``4 ExpressionComposition test`` () =
+        member __.``4 Composition test`` () =
             mul [
                     tag <| PlcTag.Create("t2", 2)
                     add [1; 2]
@@ -167,7 +181,7 @@ module ExpressionTestModule =
             let source = PlcTag.Create("source", 33)
             Assign(tag source, target).Do()
             targetExpr |> evaluate === 33
-            source.SetValue 44
+            source.Value <- 44
             targetExpr |> evaluate  === 33
             Assign(tag source, target).Do()
             targetExpr |> evaluate === 44
@@ -242,7 +256,6 @@ module ExpressionTestModule =
                 let expr = parseExpression text
                 serializeBoxedExpression expr false
             let exprs =
-                let dq = "\""
                 [
                     "1y + 2y"
                     "1uy + 2uy"
@@ -263,7 +276,7 @@ module ExpressionTestModule =
 
 
         [<Test>]
-        member __.``8 ExpressionOperator test`` () =
+        member __.``8 Operator test`` () =
             let t = Bool [true]
             let f = Bool [false]
             !! t |> evaluate === false
@@ -295,7 +308,7 @@ module ExpressionTestModule =
 
 
         [<Test>]
-        member __.``9 Expression Tag type test`` () =
+        member __.``9 Tag type test`` () =
             let rawTags = [
                 PlcTag.Create("sbyte", 1y) |> box
                 PlcTag.Create("byte", 1uy)
@@ -351,7 +364,7 @@ module ExpressionTestModule =
             ()
 
         [<Test>]
-        member __.``10 ExpressionParse test`` () =
+        member __.``10 Parse test`` () =
             let evalExpr = parseExpression >> evaluateBoxedExpression
 
 
@@ -359,6 +372,8 @@ module ExpressionTestModule =
             "1 + 2" |> evalExpr === 3
 
             "1.0 + 2.0" |> evalExpr === 3.0
+
+            //"+(2, 3, 4)" |> evalExpr === 9        // todo:
 
             (fun () -> "1.0 + 2" |> evalExpr |> ignore )
             |> ShouldFailWithSubstringT "Type mismatch"

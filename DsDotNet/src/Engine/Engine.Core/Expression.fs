@@ -40,8 +40,6 @@ module ExpressionModule =
         inherit TypedValueStorage<'T>(name, initValue)
 
         interface ITag
-        abstract SetValue:obj -> unit
-        abstract GetValue:unit -> obj
         override x.CreateBoxedExpression() = Terminal(Terminal.Tag x)
         override x.ToText() = "%" + name
 
@@ -129,7 +127,7 @@ module ExpressionModule =
             | Assign of expr:Expression<'T> * target:Tag<'T>
             member x.Do() =
                 match x with
-                | Assign (expr, target) -> expr.Evaluate() |> target.SetValue
+                | Assign (expr, target) -> target.Value <- expr.Evaluate()
             member x.ToText() =
                  match x with
                  | Assign     (expr, target) -> $"{target.ToText()} := {expr.ToText(false)}"

@@ -7,21 +7,21 @@ open System
 open Engine.Core
 
 
-let toTag(x:TerminalJson) =
-    let typeName = x.TagType
-    let dataType = x.Type
-    let tagName  = x.Name
-    let tagValue = x.Value
-    let tag = // : #Tag<'T> =
-        match typeName with
-        | "DsBit"    -> DsBit(tagName, false, Memory( getData(dataType, tagValue) |> Convert.ToByte), Monitor.ErrorRx) |> box //todo :Memory를 DsMemory로 ref 처리필요
-        | "DsDotBit" -> DsDotBit(tagName , false, Memory( getData(dataType, tagValue) |> Convert.ToByte)) |> box //todo :Memory를 DsMemory로 ref 처리필요
-        | "PlcTag"   -> PlcTag.Create(tagName, getData(dataType, tagValue)|> CheckVaildValue :?> 'T) |> box
-        | _ -> failwith "error"
+//let toTag(x:TerminalJson) =
+//    let typeName = x.TagType
+//    let dataType = x.Type
+//    let tagName  = x.Name
+//    let tagValue = x.Value
+//    let tag = // : #Tag<'T> =
+//        match typeName with
+//        | "DsBit"    -> DsBit(tagName, false, Memory( getData(dataType, tagValue) |> Convert.ToByte), Monitor.ErrorRx) |> box //todo :Memory를 DsMemory로 ref 처리필요
+//        | "DsDotBit" -> DsDotBit(tagName , false, Memory( getData(dataType, tagValue) |> Convert.ToByte)) |> box //todo :Memory를 DsMemory로 ref 처리필요
+//        | "PlcTag"   -> PlcTag.Create(tagName, getData(dataType, tagValue)|> CheckVaildValue :?> 'T) |> box
+//        | _ -> failwith "error"
 
-    match tag with
-    | :? Tag<'T> as t -> t
-    | _ -> failwith "ERROR"
+//    match tag with
+//    | :? Tag<'T> as t -> t
+//    | _ -> failwith "ERROR"
 
 //let toConstExpr(x:ExpressionJson) =
 //    let t, v = x.Type, x.Terminal.Value

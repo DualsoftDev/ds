@@ -38,7 +38,7 @@ module ExpressionModule =
     type Tag<'T>(name, initValue:'T) =
         inherit TypedValueStorage<'T>(name, initValue)
 
-        interface ITagExpression
+        interface ITag
         //memory bit masking 처리를 위해 일반 PlcTag와 DsMemory 구별 구현
         // <ahn> : obj -> 'T
         abstract SetValue:obj -> unit
@@ -49,7 +49,7 @@ module ExpressionModule =
     type StorageVariable<'T>(name, initValue:'T) =
         inherit TypedValueStorage<'T>(name, initValue)
 
-        interface IVarExpression
+        interface IVariable
         override x.CreateBoxedExpression() = Terminal(Terminal.Variable x)
 
     type Terminal<'T> =

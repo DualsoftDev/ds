@@ -34,7 +34,7 @@ module ExpressionPrologModule =
 
         let (|PLCTag|_|) (x:obj) =
             match x with
-            | :? ITagExpression as t -> Some t
+            | :? ITag as t -> Some t
             | _ -> None
 
         let toBool   x = (|Bool|_|)    x |> Option.get
@@ -65,9 +65,9 @@ module ExpressionPrologModule =
         | ExpTypeTag
         | ExpTypeLiteral
 
-    type IExpressionTerminalObject = interface end
-    type ITagExpression = inherit IExpressionTerminalObject
-    type IVarExpression = inherit IExpressionTerminalObject
+    type IExpressionTerminalObject = inherit INamed
+    type ITag = inherit IExpressionTerminalObject
+    type IVariable = inherit IExpressionTerminalObject
 
     /// Expression<'T> 을 boxed 에서 접근하기 위한 최소의 interface
     type IExpression =

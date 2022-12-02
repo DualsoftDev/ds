@@ -7,7 +7,7 @@ open System.Diagnostics
 
 [<AutoOpen>]
 module ExpressionPrologModule =
-    module SubModule =
+    module ExpressionPrologSubModule =
         let expectN (n:int) (xs:'a seq) = if xs.Count() <> n then failwith $"Wrong number of arguments: expect {n}"
         let expect1 xs = expectN 1 xs; xs.First()
         let expect2 xs = expectN 2 xs; Array.ofSeq xs

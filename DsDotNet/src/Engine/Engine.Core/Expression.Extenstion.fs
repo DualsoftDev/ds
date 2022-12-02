@@ -51,12 +51,6 @@ module ExpressionExtensionModule =
     type Statement<'T> =
         | Assign of expression:Expression<'T> * target:Tag<'T>
 
-        ////임시테스트
-        //member x.TestForce() =
-        //    match x with
-        //    | Assign     (expr, target) ->  target.SetValue(true)
-
-
         member x.Do() =
             match x with
             | Assign (expr, target) ->

@@ -31,13 +31,13 @@ module ExpressionTestModule =
             v 3.14f   |> evaluate === 3.14f
             v 3.14    |> evaluate === 3.14
 
-            /////미지원 value type : uint, int64, ... 지원 기준외 등등
-            (fun () -> v 1u   |> evaluate  === 1) |> ShouldFail
-            (fun () -> v 1L   |> evaluate  === 1) |> ShouldFail
-            (fun () -> v 1.0m |> evaluate  === 1) |> ShouldFail
+            v 1u   |> evaluate  === 1u
+            v 1L   |> evaluate  === 1L
+            v 1.0m |> evaluate  === 1.0m
 
-            ////함수 없는 Value 배열 평가는 불가능
-            (fun () -> v [1;2]   |> evaluate  === 1) |> ShouldFail
+            // primitive type (bool, int16, intXX, double, .., string)  을 제외한 나머지에 대한 value 는 생성 불가.
+            (fun () -> v [1;2] |> ignore) |> ShouldFailWithSubstringT "Value Type Error"
+
 
         [<Test>]
         member __.``2 ExpressionTagUnit test`` () =
@@ -220,26 +220,20 @@ module ExpressionTestModule =
             let tt1 = t1 |> tag
             let tt2 = t2 |> tag
             let addTwoExpr = add [ tt1; tt2 ]
-            addTwoExpr.ToText(false) === "+[(t1=1); (t2=2)]"
+            addTwoExpr.ToText(false) === "%t1+%t2"
 
             let sTag = PlcTag.Create("address", "value")
             sTag.ToText() === "(address=value)"
             let exprTag = tag sTag
-            exprTag.ToText(false) === "(address=value)"
+            exprTag.ToText(false) === "%address"
 
 
-        //    let sTag = PlcTag.Create("address", "value")
-        //    sTag.ToText() === "(address=value)"
-        //    let exprTag = tag sTag
-        //    exprTag.ToText() === "(address=value)"
+            let expr = mul [2; 3; 4]
+            let target = PlcTag.Create("target", 1)
+            target.ToText() === "(target=1)"
 
-
-        //    let expr = mul [2; 3; 4]
-        //    let target = PlcTag.Create("target", 1)
-        //    target.ToText() === "(target=1)"
-
-        //    let stmt = Assign (expr, target)
-        //    stmt.ToText() === "assign(*[2; 3; 4], (target=1))"
+            let stmt = Assign (expr, target)
+            stmt.ToText() === "assign(*[2; 3; 4], (target=1))"
 
         //[<Test>]
         //member __.``X 7 Deserialize test`` () =

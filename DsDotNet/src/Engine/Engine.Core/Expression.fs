@@ -15,7 +15,7 @@ open System.Diagnostics
 
 [<AutoOpen>]
 module ExpressionModule =
-    open SubModule
+    open ExpressionPrologSubModule
 
 
     [<AbstractClass>]
@@ -39,8 +39,6 @@ module ExpressionModule =
         inherit TypedValueStorage<'T>(name, initValue)
 
         interface ITag
-        //memory bit masking 처리를 위해 일반 PlcTag와 DsMemory 구별 구현
-        // <ahn> : obj -> 'T
         abstract SetValue:obj -> unit
         abstract GetValue:unit -> obj
         override x.CreateBoxedExpression() = Terminal(Terminal.Tag x)
@@ -66,6 +64,7 @@ module ExpressionModule =
         args:Arguments
     }
 
+
     type Expression<'T> =
         | Terminal of Terminal<'T>
         | Function of FunctionSpec<'T>  //f:(Arguments -> 'T) * name:string * args:Arguments
@@ -84,7 +83,12 @@ module ExpressionModule =
 
     let getTypeOfBoxedExpression (exp:obj) = (exp :?> IExpression).DataType
 
-    let value (x:'T) = Terminal (Literal x)
+    let value (x:'T) =
+        let t = x.GetType()
+        if t.IsValueType || t = typedefof<string> then
+            Terminal (Literal x)
+        else
+            failwith "ERROR: Value Type Error.  only allowed for primitive type"
     let tag (t: Tag<'T>) = Terminal (Tag t)
 
     let expr (x:obj) =
@@ -159,15 +163,6 @@ module ExpressionModule =
         expr.BoxedEvaluatedValue
 
 
-    let private evalArg (x:obj) =
-        let t = x.GetType()
-        match x with
-        (* primitive types *)
-        | (:? bool | :? string | :? int | :? double | :? single) -> x
-        | :? IExpression as exp -> exp.BoxedEvaluatedValue
-        | _ ->
-            failwith "error"
-
     let resolve (expr:Expression<'T>) = expr.Evaluate() |> unbox
 
 
@@ -179,7 +174,7 @@ module ExpressionModule =
             let args = args |> map expr
             Function { f=f; name=name; args=args}
 
-        let add            args = cf _add            "+"    args
+        let add            args = cf _add            "+"      args
         let abs            args = cf _abs            "abs"    args
         let absd           args = cf _absd           "absD"   args
         let sub            args = cf _sub            "-"      args
@@ -222,45 +217,48 @@ module ExpressionModule =
 
         [<AutoOpen>]
         module internal FunctionImpl =
-            let _add  (args:Arguments) = args.ExpectGteN(2).Select(evalArg).Cast<int>().Reduce(( + ))
-            let _abs  (args:Arguments) = args.Select(evalArg).Cast<int>().Head() |> Math.Abs
-            let _absd (args:Arguments) = args.Select(evalArg >> toDouble).Head() |> Math.Abs
-            let _sub  (args:Arguments) = args.ExpectGteN(2).Select(evalArg).Cast<int>().Reduce(( - ))
-            let _mul  (args:Arguments) = args.ExpectGteN(2).Select(evalArg).Cast<int>().Reduce(( * ))
+            let private evalArg (x:obj) = (x :?> IExpression).BoxedEvaluatedValue
+            let private evalToDouble x = x |> evalArg |> toDouble
 
-            let _div  (args:Arguments) = args.ExpectGteN(2) .Select(evalArg).Cast<int>().Reduce(( / ))
-            let _divd (args:Arguments) = args.ExpectGteN(2) .Select(evalArg >> toDouble).Reduce(( / ))
-            let _modulo (args:Arguments) = args.ExpectGteN(2) .Select(evalArg).Cast<int>().Reduce(( % ))
-            let _modulod (args:Arguments) = args.ExpectGteN(2) .Select(evalArg >> toDouble).Reduce(( % ))
+            let _add     (args:Args) = args.ExpectGteN(2).Select(evalArg).Cast<int>().Reduce(( + ))
+            let _abs     (args:Args) = args.Select(evalArg).Cast<int>().Head() |> Math.Abs
+            let _absd    (args:Args) = args.Select(evalToDouble).Head() |> Math.Abs
+            let _sub     (args:Args) = args.ExpectGteN(2).Select(evalArg).Cast<int>().Reduce(( - ))
+            let _mul     (args:Args) = args.ExpectGteN(2).Select(evalArg).Cast<int>().Reduce(( * ))
 
-            let _equal (args:Arguments) = args.ExpectGteN(2) .Select(evalArg) .Pairwise() .All(fun (x, y) -> isEqual x y)
-            let _notEqual (args:Arguments) = not <| _equal args
-            let _equalString (args:Arguments) = args.ExpectGteN(2) .Select(evalArg).Cast<string>().Distinct().Count() = 1
-            let _notEqualString (args:Arguments) = not <| _equalString args
+            let _div     (args:Args) = args.ExpectGteN(2) .Select(evalArg).Cast<int>().Reduce(( / ))
+            let _divd    (args:Args) = args.ExpectGteN(2) .Select(evalToDouble).Reduce(( / ))
+            let _modulo  (args:Args) = args.ExpectGteN(2) .Select(evalArg).Cast<int>().Reduce(( % ))
+            let _modulod (args:Args) = args.ExpectGteN(2) .Select(evalToDouble).Reduce(( % ))
 
-            let private toDoublePairwise (args:Arguments) = args.ExpectGteN(2).Select(evalArg >> toDouble).Pairwise()
-            let _gt  (args:Arguments) = toDoublePairwise(args).All(fun (x, y) -> x > y)
-            let _lt  (args:Arguments) = toDoublePairwise(args).All(fun (x, y) -> x < y)
-            let _gte (args:Arguments) = toDoublePairwise(args).All(fun (x, y) -> x >= y)
-            let _lte (args:Arguments) = toDoublePairwise(args).All(fun (x, y) -> x <= y)
+            let _equal   (args:Args) = args.ExpectGteN(2) .Select(evalArg) .Pairwise() .All(fun (x, y) -> isEqual x y)
+            let _notEqual (args:Args) = not <| _equal args
+            let _equalString (args:Args) = args.ExpectGteN(2) .Select(evalArg).Cast<string>().Distinct().Count() = 1
+            let _notEqualString (args:Args) = not <| _equalString args
 
-            let _muld       (args:Arguments) = args.ExpectGteN(2).Select(evalArg >> toDouble)   .Reduce(( * ))
-            let _addd       (args:Arguments) = args.ExpectGteN(2).Select(evalArg >> toDouble)   .Reduce(( + ))
-            let _subd       (args:Arguments) = args.ExpectGteN(2).Select(evalArg >> toDouble)   .Reduce(( - ))
-            let _concat     (args:Arguments) = args.ExpectGteN(2).Select(evalArg).Cast<string>().Reduce(( + ))
-            let _logicalAnd (args:Arguments) = args.ExpectGteN(2).Select(evalArg).Cast<bool>()  .Reduce(( && ))
-            let _logicalOr  (args:Arguments) = args.ExpectGteN(2).Select(evalArg).Cast<bool>()  .Reduce(( || ))
-            let _logicalNot (args:Arguments) = args.Select(evalArg).Cast<bool>().Expect1() |> not
-            let _xorBit     (args:Arguments) = args.Select(evalArg).Cast<int>()                 .Reduce (^^^)
-            let _orBit      (args:Arguments) = args.Select(evalArg).Cast<int>()                 .Reduce (|||)
-            let _andBit     (args:Arguments) = args.Select(evalArg).Cast<int>()                 .Reduce (&&&)
-            let _notBit     (args:Arguments) = args.Select(evalArg).Cast<int>().Expect1()       |> (~~~)
-            let _shiftLeft  (args:Arguments) = args.ExpectGteN(2).Select(evalArg >> toInt)      .Reduce((<<<))
-            let _shiftRight (args:Arguments) = args.ExpectGteN(2).Select(evalArg >> toInt)      .Reduce((>>>))
+            let private toDoublePairwise (args:Args) = args.ExpectGteN(2).Select(evalToDouble).Pairwise()
+            let _gt  (args:Args) = toDoublePairwise(args).All(fun (x, y) -> x > y)
+            let _lt  (args:Args) = toDoublePairwise(args).All(fun (x, y) -> x < y)
+            let _gte (args:Args) = toDoublePairwise(args).All(fun (x, y) -> x >= y)
+            let _lte (args:Args) = toDoublePairwise(args).All(fun (x, y) -> x <= y)
 
-            let _sin (args:Arguments) = args.Select(evalArg >> toDouble) .Expect1() |> Math.Sin
-            let _convertBool (args:Arguments) = args.Select(evalArg >> toBool) .Expect1()
-            let _convertInt (args:Arguments) = args.Select(evalArg >> toInt) .Expect1()
+            let _muld       (args:Args) = args.ExpectGteN(2).Select(evalToDouble)   .Reduce(( * ))
+            let _addd       (args:Args) = args.ExpectGteN(2).Select(evalToDouble)   .Reduce(( + ))
+            let _subd       (args:Args) = args.ExpectGteN(2).Select(evalToDouble)   .Reduce(( - ))
+            let _concat     (args:Args) = args.ExpectGteN(2).Select(evalArg).Cast<string>().Reduce(( + ))
+            let _logicalAnd (args:Args) = args.ExpectGteN(2).Select(evalArg).Cast<bool>()  .Reduce(( && ))
+            let _logicalOr  (args:Args) = args.ExpectGteN(2).Select(evalArg).Cast<bool>()  .Reduce(( || ))
+            let _logicalNot (args:Args) = args.Select(evalArg).Cast<bool>().Expect1() |> not
+            let _xorBit     (args:Args) = args.Select(evalArg).Cast<int>()                 .Reduce (^^^)
+            let _orBit      (args:Args) = args.Select(evalArg).Cast<int>()                 .Reduce (|||)
+            let _andBit     (args:Args) = args.Select(evalArg).Cast<int>()                 .Reduce (&&&)
+            let _notBit     (args:Args) = args.Select(evalArg).Cast<int>().Expect1()       |> (~~~)
+            let _shiftLeft  (args:Args) = args.ExpectGteN(2).Select(evalArg >> toInt)      .Reduce((<<<))
+            let _shiftRight (args:Args) = args.ExpectGteN(2).Select(evalArg >> toInt)      .Reduce((>>>))
+
+            let _sin (args:Args) = args.Select(evalToDouble) .Expect1() |> Math.Sin
+            let _convertBool (args:Args) = args.Select(evalArg >> toBool) .Expect1()
+            let _convertInt (args:Args) = args.Select(evalArg >> toInt) .Expect1()
     [<AutoOpen>]
     module StatementModule =
         type Statement<'T> =
@@ -293,8 +291,8 @@ module ExpressionModule =
 
         member x.ToText() =
             match x with
-            | Tag t -> $"({t.Name}={t.Value})"
-            | Variable t -> $"({t.Name}={t.Value})"
+            | Tag t -> "%" + t.Name
+            | Variable t -> "$" + t.Name
             | Literal v -> $"{v}"
 
     type Expression<'T> with
@@ -306,7 +304,7 @@ module ExpressionModule =
         member x.Evaluate() =
             match x with
             | Terminal b -> b.Evaluate()
-            | Function fs -> fs.f (fs.args |> List.map evalArg)
+            | Function fs -> fs.f fs.args
 
         member x.ToText(withParenthesys:bool) =
             match x with

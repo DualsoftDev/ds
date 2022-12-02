@@ -28,18 +28,18 @@ terminal: variable | tag | literal;
     // integer: INTEGER;
 
     literal:
-          literalSingle
-        | literalDouble         // 'double' 이름 그대로 사용 불가 : symbol double conflicts with generated code in target language or runtime
-        | literalSbyte
-        | literalByte
-        | literalInt16
-        | literalUint16
-        | literalInt32
-        | literalUint32
-        | literalInt64
-        | literalUint64
-        | literalChar
-        | literalString
+        /* - */   literalSingle
+        /* . */ | literalDouble         // 'double' 이름 그대로 사용 불가 : symbol double conflicts with generated code in target language or runtime
+        /* y */ | literalSbyte
+        /* uy */ | literalByte
+        /* s */ | literalInt16
+        /* us */ | literalUint16
+        /* - */ | literalInt32
+        /* u */ | literalUint32
+        /* L */ | literalInt64
+        /* UL */ | literalUint64
+        /*  */ | literalChar
+        /*  */ | literalString
     ;
     literalSingle :SINGLE;
     literalDouble :DOUBLE;

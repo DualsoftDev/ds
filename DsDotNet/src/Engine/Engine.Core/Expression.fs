@@ -133,12 +133,52 @@ module ExpressionModule =
 
         let args = [box opnd1; opnd2]
 
-        if t1 = typeof<int> then
+        if t1 = typeof<byte> then
+            match op with
+            | "+" -> adduy args
+            | "-" -> subuy args
+            | "*" -> muluy args
+            | "/" -> divuy args
+            | _ -> failwith "NOT Yet"
+            |> box
+        elif t1 = typeof<sbyte> then
+            match op with
+            | "+" -> addy args
+            | "-" -> suby args
+            | "*" -> muly args
+            | "/" -> divy args
+            | _ -> failwith "NOT Yet"
+            |> box
+        elif t1 = typeof<int16> then
+            match op with
+            | "+" -> adds args
+            | "-" -> subs args
+            | "*" -> muls args
+            | "/" -> divs args
+            | _ -> failwith "NOT Yet"
+            |> box
+        elif t1 = typeof<uint16> then
+            match op with
+            | "+" -> addus args
+            | "-" -> subus args
+            | "*" -> mulus args
+            | "/" -> divus args
+            | _ -> failwith "NOT Yet"
+            |> box
+        elif t1 = typeof<int32> then
             match op with
             | "+" -> add args
             | "-" -> sub args
             | "*" -> mul args
             | "/" -> div args
+            | _ -> failwith "NOT Yet"
+            |> box
+        elif t1 = typeof<uint32> then
+            match op with
+            | "+" -> addu args
+            | "-" -> subu args
+            | "*" -> mulu args
+            | "/" -> divu args
             | _ -> failwith "NOT Yet"
             |> box
         elif t1 = typeof<double> then
@@ -147,6 +187,14 @@ module ExpressionModule =
             | "-" -> subd args
             | "*" -> muld args
             | "/" -> divd args
+            | _ -> failwith "NOT Yet"
+            |> box
+        elif t1 = typeof<single> then
+            match op with
+            | "+" -> addf args
+            | "-" -> subf args
+            | "*" -> mulf args
+            | "/" -> divf args
             | _ -> failwith "NOT Yet"
             |> box
         elif t1 = typeof<string> then
@@ -182,13 +230,76 @@ module ExpressionModule =
             let args = args |> map expr
             Function { f=f; name=name; args=args}
 
+        (*
+            /* .f */    Single
+            /* . */  | Double
+            /* y */  | Sbyte
+            /* uy */ | Byte
+            /* s */  | Int16
+            /* us */ | Uint16
+            /* - */  | Int32
+            /* u */  | Uint32
+            /* L */  | Int64
+            /* UL */ | Uint64
+        *)
+
+        let muly           args = cf _muly           "*"      args
+        let addy           args = cf _addy           "+"      args
+        let suby           args = cf _suby           "-"      args
+        let divy           args = cf _divy           "/"      args
+        let absy           args = cf _absy           "abs"    args
+        let moduloy        args = cf _moduloy         "%"     args
+
+        let muluy           args = cf _muluy         "*"      args
+        let adduy           args = cf _adduy         "+"      args
+        let subuy           args = cf _subuy         "-"      args
+        let divuy           args = cf _divuy         "/"      args
+        let absuy           args = cf _absuy         "abs"    args
+        let modulouy        args = cf _modulouy      "%"     args
+
+        let muls           args = cf _muls           "*"      args
+        let adds           args = cf _adds           "+"      args
+        let subs           args = cf _subs           "-"      args
+        let divs           args = cf _divs           "/"      args
+        let abss           args = cf _abss           "abs"    args
+        let modulos        args = cf _modulos         "%"     args
+
+        let mulus           args = cf _mulus           "*"      args
+        let addus           args = cf _addus           "+"      args
+        let subus           args = cf _subus           "-"      args
+        let divus           args = cf _divus           "/"      args
+        let absus           args = cf _absus           "abs"    args
+        let modulous        args = cf _modulous         "%"     args
+
         let add            args = cf _add            "+"      args
-        let abs            args = cf _abs            "abs"    args
-        let absd           args = cf _absd           "absD"   args
         let sub            args = cf _sub            "-"      args
         let mul            args = cf _mul            "*"      args
         let div            args = cf _div            "/"      args
+        let abs            args = cf _abs            "abs"    args
         let modulo         args = cf _modulo         "%"      args
+
+        let muld           args = cf _muld           "*"      args
+        let addd           args = cf _addd           "+"      args
+        let subd           args = cf _subd           "-"      args
+        let divd           args = cf _divd           "/"      args
+        let absd           args = cf _absd           "abs"    args
+        let modulod        args = cf _modulod         "%"     args
+
+        let mulf           args = cf _mulf           "*"      args
+        let addf           args = cf _addf           "+"      args
+        let subf           args = cf _subf           "-"      args
+        let divf           args = cf _divf           "/"      args
+        let absf           args = cf _absf           "abs"    args
+        let modulof        args = cf _modulof         "%"     args
+
+        let mulu           args = cf _mulu           "*"      args
+        let addu           args = cf _addu           "+"      args
+        let subu           args = cf _subu           "-"      args
+        let divu           args = cf _divu           "/"      args
+        let absu           args = cf _absu           "abs"    args
+        let modulou        args = cf _modulou         "%"     args
+
+
         let equal          args = cf _equal          "="      args
         let notEqual       args = cf _notEqual       "!="     args
         let gt             args = cf _gt             ">"      args
@@ -197,11 +308,6 @@ module ExpressionModule =
         let lte            args = cf _lte            "<="     args
         let equalString    args = cf _equalString    "=T"     args
         let notEqualString args = cf _notEqualString "!=T"    args
-        let muld           args = cf _muld           "*"      args
-        let addd           args = cf _addd           "+"      args
-        let subd           args = cf _subd           "-D"     args
-        let divd           args = cf _divd           "/D"     args
-        let modulod        args = cf _modulo         "%D"     args
         let concat         args = cf _concat         "+"      args
         let logicalAnd     args = cf _logicalAnd     "&"      args
         let logicalOr      args = cf _logicalOr      "|"      args
@@ -227,17 +333,69 @@ module ExpressionModule =
         module internal FunctionImpl =
             let private evalArg (x:obj) = (x :?> IExpression).BoxedEvaluatedValue
             let private evalToDouble x = x |> evalArg |> toDouble
+            let private evalToFloat  x = x |> evalArg |> toFloat
+            let private evalToByte   x = x |> evalArg |> toByte
+            let private evalToSByte  x = x |> evalArg |> toSByte
+            let private evalToUInt32 x = x |> evalArg |> toUInt32
+            let private evalToInt16  x = x |> evalArg |> toInt16
+            let private evalToUInt16 x = x |> evalArg |> toUInt16
+
+            let _addy    (args:Args) = args.ExpectGteN(2).Select(evalToSByte).Reduce(( + ))
+            let _suby    (args:Args) = args.ExpectGteN(2).Select(evalToSByte).Reduce(( - ))
+            let _muly    (args:Args) = args.ExpectGteN(2).Select(evalToSByte).Reduce(( * ))
+            let _divy    (args:Args) = args.ExpectGteN(2) .Select(evalToSByte).Reduce(( / ))
+            let _absy    (args:Args) = args.Select(evalToSByte).Head() |> Math.Abs
+            let _moduloy (args:Args) = args.ExpectGteN(2) .Select(evalToSByte).Reduce(( % ))
+
+            let _adduy    (args:Args) = args.ExpectGteN(2).Select(evalToByte).Reduce(( + ))
+            let _subuy    (args:Args) = args.ExpectGteN(2).Select(evalToByte).Reduce(( - ))
+            let _muluy    (args:Args) = args.ExpectGteN(2).Select(evalToByte).Reduce(( * ))
+            let _divuy    (args:Args) = args.ExpectGteN(2) .Select(evalToByte).Reduce(( / ))
+            let _absuy    (args:Args) = args.Select(evalToByte).Head() |> Math.Abs
+            let _modulouy (args:Args) = args.ExpectGteN(2) .Select(evalToByte).Reduce(( % ))
+
+            let _adds    (args:Args) = args.ExpectGteN(2).Select(evalToInt16).Reduce(( + ))
+            let _subs    (args:Args) = args.ExpectGteN(2).Select(evalToInt16).Reduce(( - ))
+            let _muls    (args:Args) = args.ExpectGteN(2).Select(evalToInt16).Reduce(( * ))
+            let _divs    (args:Args) = args.ExpectGteN(2) .Select(evalToInt16).Reduce(( / ))
+            let _abss    (args:Args) = args.Select(evalToInt16).Head() |> Math.Abs
+            let _modulos (args:Args) = args.ExpectGteN(2) .Select(evalToInt16).Reduce(( % ))
+
+            let _addus    (args:Args) = args.ExpectGteN(2).Select(evalToUInt16).Reduce(( + ))
+            let _subus    (args:Args) = args.ExpectGteN(2).Select(evalToUInt16).Reduce(( - ))
+            let _mulus    (args:Args) = args.ExpectGteN(2).Select(evalToUInt16).Reduce(( * ))
+            let _divus    (args:Args) = args.ExpectGteN(2) .Select(evalToUInt16).Reduce(( / ))
+            let _absus    (args:Args) = args.Select(evalToUInt16).Head() |> Math.Abs
+            let _modulous (args:Args) = args.ExpectGteN(2) .Select(evalToUInt16).Reduce(( % ))
 
             let _add     (args:Args) = args.ExpectGteN(2).Select(evalArg).Cast<int>().Reduce(( + ))
-            let _abs     (args:Args) = args.Select(evalArg).Cast<int>().Head() |> Math.Abs
-            let _absd    (args:Args) = args.Select(evalToDouble).Head() |> Math.Abs
             let _sub     (args:Args) = args.ExpectGteN(2).Select(evalArg).Cast<int>().Reduce(( - ))
             let _mul     (args:Args) = args.ExpectGteN(2).Select(evalArg).Cast<int>().Reduce(( * ))
-
             let _div     (args:Args) = args.ExpectGteN(2) .Select(evalArg).Cast<int>().Reduce(( / ))
-            let _divd    (args:Args) = args.ExpectGteN(2) .Select(evalToDouble).Reduce(( / ))
+            let _abs     (args:Args) = args.Select(evalArg).Cast<int>().Head() |> Math.Abs
             let _modulo  (args:Args) = args.ExpectGteN(2) .Select(evalArg).Cast<int>().Reduce(( % ))
+
+            let _addd    (args:Args) = args.ExpectGteN(2).Select(evalToDouble).Reduce(( + ))
+            let _subd    (args:Args) = args.ExpectGteN(2).Select(evalToDouble).Reduce(( - ))
+            let _muld    (args:Args) = args.ExpectGteN(2).Select(evalToDouble).Reduce(( * ))
+            let _divd    (args:Args) = args.ExpectGteN(2) .Select(evalToDouble).Reduce(( / ))
+            let _absd    (args:Args) = args.Select(evalToDouble).Head() |> Math.Abs
             let _modulod (args:Args) = args.ExpectGteN(2) .Select(evalToDouble).Reduce(( % ))
+
+            let _addf    (args:Args) = args.ExpectGteN(2).Select(evalToFloat).Reduce(( + ))
+            let _subf    (args:Args) = args.ExpectGteN(2).Select(evalToFloat).Reduce(( - ))
+            let _mulf    (args:Args) = args.ExpectGteN(2).Select(evalToFloat).Reduce(( * ))
+            let _divf    (args:Args) = args.ExpectGteN(2) .Select(evalToFloat).Reduce(( / ))
+            let _absf    (args:Args) = args.Select(evalToFloat).Head() |> Math.Abs
+            let _modulof (args:Args) = args.ExpectGteN(2) .Select(evalToFloat).Reduce(( % ))
+
+            let _addu    (args:Args) = args.ExpectGteN(2).Select(evalToUInt32).Reduce(( + ))
+            let _subu    (args:Args) = args.ExpectGteN(2).Select(evalToUInt32).Reduce(( - ))
+            let _mulu    (args:Args) = args.ExpectGteN(2).Select(evalToUInt32).Reduce(( * ))
+            let _divu    (args:Args) = args.ExpectGteN(2) .Select(evalToUInt32).Reduce(( / ))
+            let _absu    (args:Args) = args.Select(evalToUInt32).Head() |> Math.Abs
+            let _modulou (args:Args) = args.ExpectGteN(2) .Select(evalToUInt32).Reduce(( % ))
+
 
             let _equal   (args:Args) = args.ExpectGteN(2) .Select(evalArg) .Pairwise() .All(fun (x, y) -> isEqual x y)
             let _notEqual (args:Args) = not <| _equal args
@@ -250,9 +408,6 @@ module ExpressionModule =
             let _gte (args:Args) = toDoublePairwise(args).All(fun (x, y) -> x >= y)
             let _lte (args:Args) = toDoublePairwise(args).All(fun (x, y) -> x <= y)
 
-            let _muld       (args:Args) = args.ExpectGteN(2).Select(evalToDouble)   .Reduce(( * ))
-            let _addd       (args:Args) = args.ExpectGteN(2).Select(evalToDouble)   .Reduce(( + ))
-            let _subd       (args:Args) = args.ExpectGteN(2).Select(evalToDouble)   .Reduce(( - ))
             let _concat     (args:Args) = args.ExpectGteN(2).Select(evalArg).Cast<string>().Reduce(( + ))
             let _logicalAnd (args:Args) = args.ExpectGteN(2).Select(evalArg).Cast<bool>()  .Reduce(( && ))
             let _logicalOr  (args:Args) = args.ExpectGteN(2).Select(evalArg).Cast<bool>()  .Reduce(( || ))

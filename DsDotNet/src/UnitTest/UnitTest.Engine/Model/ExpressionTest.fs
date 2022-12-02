@@ -173,7 +173,7 @@ module ExpressionTestModule =
             targetExpr |> evaluate === 44
 
         [<Test>]
-        member __.``X 6 Serialization test`` () =
+        member __.``6 Serialization test`` () =
             let toText (exp:Expression<'T>) = exp.ToText(false)
             mul [ 2; 3 ] |> toText === "2 * 3"
 
@@ -236,19 +236,24 @@ module ExpressionTestModule =
             stmt.ToText() === "%target := *(2, 3, 4)"
 
         [<Test>]
-        member __.``X 7 Deserialize test`` () =
+        member __.``7 Deserialize test`` () =
             /// Parse And Serialize
             let pns (text:string) =
                 let expr = parseExpression text
                 serializeBoxedExpression expr false
             let exprs =
+                let dq = "\""
                 [
-                    "1 + 2"
-                    "(1 + 2) * (3 + 4)"
-                    "1.0 + 2.0"
-                    "1u + 2u"
                     "1y + 2y"
                     "1uy + 2uy"
+                    "1s + 2s"
+                    "1us + 2us"
+                    "1 + 2"
+                    "1u + 2u"
+                    "(1 + 2) * (3 + 4)"
+                    "1.0 + 2.0"
+                    "1.0f + 2.0f"
+                    $"{dq}hello{dq} + {dq}world{dq}"
                     //"Int(1.0) + 2"
                 ]
 

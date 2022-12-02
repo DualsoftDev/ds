@@ -20,11 +20,55 @@ module ExpressionPrologModule =
             | :? int as a -> Some (double a)
             | :? single as a -> Some (double a)
             | _ -> None
+        let (|Float|_|) (x:obj) =
+            match x with
+            | :? double as a -> Some (float a)
+            | :? int as a -> Some (float a)
+            | :? single as a -> Some (float a)
+            | _ -> None
+
         let (|Integer|_|) (x:obj) =
             match x with
             | :? int as n -> Some n
             | :? uint as n -> Some (int n)
             | :? double as n -> Some (int n)
+            | _ -> None
+        let (|Byte|_|) (x:obj) =
+            match x with
+            | :? byte as n -> Some n
+            | :? int as n -> Some (byte n)
+            | :? uint as n -> Some (byte n)
+            | :? double as n -> Some (byte n)
+            | _ -> None
+        let (|SByte|_|) (x:obj) =
+            match x with
+            | :? sbyte as n -> Some n
+            | :? int as n -> Some (sbyte n)
+            | :? uint as n -> Some (sbyte n)
+            | :? double as n -> Some (sbyte n)
+            | _ -> None
+
+        let (|Int16|_|) (x:obj) =
+            match x with
+            | :? int16 as n -> Some n
+            | :? int as n -> Some (int16 n)
+            | :? uint as n -> Some (int16 n)
+            | :? double as n -> Some (int16 n)
+            | _ -> None
+
+        let (|UInt16|_|) (x:obj) =
+            match x with
+            | :? uint16 as n -> Some n
+            | :? int as n -> Some (uint16 n)
+            | :? uint as n -> Some (uint16 n)
+            | :? double as n -> Some (uint16 n)
+            | _ -> None
+        let (|UInt32|_|) (x:obj) =
+            match x with
+            | :? uint32 as n -> Some n
+            | :? uint16 as n -> Some (uint32 n)
+            | :? int as n -> Some (uint32 n)
+            | :? double as n -> Some (uint32 n)
             | _ -> None
         let (|Bool|_|) (x:obj) =
             match x with
@@ -39,7 +83,13 @@ module ExpressionPrologModule =
 
         let toBool   x = (|Bool|_|)    x |> Option.get
         let toDouble x = (|Double|_|)  x |> Option.get
+        let toFloat  x = (|Float|_|)   x |> Option.get
+        let toByte   x = (|Byte|_|)    x |> Option.get
+        let toSByte  x = (|SByte|_|)   x |> Option.get
         let toInt    x = (|Integer|_|) x |> Option.get
+        let toInt16  x = (|Int16|_|)   x |> Option.get
+        let toUInt16 x = (|UInt16|_|)  x |> Option.get
+        let toUInt32 x = (|UInt32|_|)  x |> Option.get
         let toTag    x = (|PLCTag|_|)  x |> Option.get
         let toString (x:obj) = Convert.ToString x
 

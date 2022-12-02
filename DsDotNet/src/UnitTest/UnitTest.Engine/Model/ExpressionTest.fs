@@ -77,35 +77,35 @@ module ExpressionTestModule =
         [<Test>]
         member __.``3 ExpressionFuncUnit test`` () =
 
-            abs[13]                          |> evaluate === 13
-            abs[-13]                         |> evaluate === 13
-            absDouble[-13.0]                 |> evaluate === 13.0
-            xorBit[13; 11]                   |> evaluate === 6
-            andBit[2; 3]                     |> evaluate === 2
-            andBit[1; 2; 3; 4]               |> evaluate === 0
-            orBit[1; 2; 3; 4]                |> evaluate === 7
-            notBit[65535]                    |> evaluate === -65536
-            add[1; 2]                        |> evaluate === 3
-            sub[5; 3]                        |> evaluate === 2
-            mul[2; 3]                        |> evaluate === 6
-            divDouble[3.0; 2.0]              |> evaluate === 1.5
-            add[1; 2; 3]                     |> evaluate === 6
-            add([1..10]|>List.map(fun f->f)) |> evaluate === 55
-            mul([1..5]|> List.map(fun f->f)) |> evaluate === 120
-            sub[10; 1; 2]       |> evaluate === 7
+            abs [13]                          |> evaluate === 13
+            abs [-13]                         |> evaluate === 13
+            absDouble [-13.0]                 |> evaluate === 13.0
+            xorBit [13; 11]                   |> evaluate === 6
+            andBit [2; 3]                     |> evaluate === 2
+            andBit [1; 2; 3; 4]               |> evaluate === 0
+            orBit [1; 2; 3; 4]                |> evaluate === 7
+            notBit [65535]                    |> evaluate === -65536
+            add [1; 2]                        |> evaluate === 3
+            sub [5; 3]                        |> evaluate === 2
+            mul [2; 3]                        |> evaluate === 6
+            divDouble [3.0; 2.0]              |> evaluate === 1.5
+            add [1; 2; 3]                     |> evaluate === 6
+            add ([1..10] |> List.cast<obj>)   |> evaluate === 55
+            mul( [1..5]  |> List.cast<obj>)   |> evaluate === 120
+            sub [10; 1; 2]       |> evaluate === 7
             //Math.Abs((addDouble[1.1; 2.2] |> evaluate) - 3.3) <= 0.00001 |> ShouldBeTrue
             //Math.Abs((mulDouble[1.1; 2.0] |> evaluate) - 2.2) <= 0.00001 |> ShouldBeTrue
-            addString["Hello, "; "world!"]|> evaluate === "Hello, world!"
-            mul[2; 3] |> evaluate === 6
-            equalString["Hello"; "world"]       |> evaluate === false
-            equalString["Hello"; "Hello"]       |> evaluate === true
-            notEqualString["Hello"; "world"]    |> evaluate === true
-            notEqualString["Hello"; "Hello"]    |> evaluate === false
-            notEqual[1; 2]                      |> evaluate === true
-            notEqual[2; 2]                      |> evaluate === false
-            equal[2; 2]                         |> evaluate === true
-            equal[2; 2.0]                       |> evaluate=== true
-            equal[2; 2.0f]                      |> evaluate === true
+            addString ["Hello, "; "world!"]|> evaluate === "Hello, world!"
+            mul [2; 3] |> evaluate === 6
+            equalString ["Hello"; "world"]       |> evaluate === false
+            equalString ["Hello"; "Hello"]       |> evaluate === true
+            notEqualString ["Hello"; "world"]    |> evaluate === true
+            notEqualString ["Hello"; "Hello"]    |> evaluate === false
+            notEqual [1; 2]                      |> evaluate === true
+            notEqual [2; 2]                      |> evaluate === false
+            equal [2; 2]                         |> evaluate === true
+            equal [2; 2.0]                       |> evaluate=== true
+            equal [2; 2.0f]                      |> evaluate === true
 
 
             gte [2; 3] |> evaluate === false

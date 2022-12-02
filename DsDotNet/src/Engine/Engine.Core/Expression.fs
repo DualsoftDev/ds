@@ -5,82 +5,17 @@ open System.Runtime.CompilerServices
 open Engine.Common.FS
 open System.Diagnostics
 
+(*  expression: generic type <'T> 나 <_> 으로는 <obj> match 으로 간주됨
+    Expression<'T> 객체에 대한 matching
+    * :? Expression<int> as x -> 형태로 type 을 지정하면 matching 이 가능하다.
+    * :? Expression<_> as x ->   형태로 type 을 지정하지 않으면, Expression<obj> 로 matching 시도해서 matching 이 불가능하다.
+    * :? Expression<'T> as x ->  형태로 type 을 지정하지 않으면, Expression<obj> 로 matching 시도해서 matching 이 불가능하다.
+    * matching 해서 수행해야 할 필요한 기능들은 non generic interface 인 IExpression 에 담아 두고, 이를 matching 한다.
+*)
+
 [<AutoOpen>]
 module ExpressionModule =
-
-
-
-    [<AutoOpen>]
-    module private SubModule =
-        let expectN (n:int) (xs:'a seq) = if xs.Count() <> n then failwith $"Wrong number of arguments: expect {n}"
-        let expect1 xs = expectN 1 xs; xs.First()
-        let expect2 xs = expectN 2 xs; Array.ofSeq xs
-        let expectGteN (n:int) (xs:'a seq) =
-            if xs.Count() < n then failwith $"Wrong number of arguments: expect at least {n} arguments"
-
-        let (|Double|_|) (x:obj) =
-            match x with
-            | :? double as a -> Some a
-            | :? int as a -> Some (double a)
-            | :? single as a -> Some (double a)
-            | _ -> None
-        let (|Integer|_|) (x:obj) =
-            match x with
-            | :? int as n -> Some n
-            | :? uint as n -> Some (int n)
-            | :? double as n -> Some (int n)
-            | _ -> None
-        let (|Bool|_|) (x:obj) =
-            match x with
-            | :? bool as n -> Some n
-            | Integer n when n <> 0 -> Some true
-            | _ -> None
-
-        let (|PLCTag|_|) (x:Terminal<'T>) =
-            match x with
-            | Tag t -> Some t
-            | _ -> None
-
-        let toBool   = (|Bool|_|)     >> Option.get
-        let toDouble = (|Double|_|)   >> Option.get
-        let toInt    = (|Integer|_|)  >> Option.get
-        let toTag x  = (|PLCTag|_|) x |> Option.get
-        let toString (x:obj) = Convert.ToString x
-
-        let isEqual (x:obj) (y:obj) =
-            match x, y with
-            | Double x, Double y -> x = y
-            | (:? string as a), (:? string as b) -> a = b
-            | _ -> false
-
-        [<Extension>] // type SeqExt =
-        type SeqExt =
-            [<Extension>] static member ExpectGteN(xs:'a seq, n) = expectGteN n xs; xs
-            [<Extension>] static member Expect1(xs:'a seq) = expect1 xs
-            [<Extension>] static member Expect2(xs:'a seq) = expect2 xs
-
-
-    /// Expression<'T> 로 생성할 수 있는 interface
-    type IExpressionCreatable    =
-        abstract CreateBoxedExpression: unit -> obj        // Terminal<'T>
-        //abstract Name   : string
-        //abstract Value  : obj with get,set
-        //abstract ToText   : unit -> string
-
-    type ExpressionType =
-        | ExpTypeFunction
-        | ExpTypeVariable
-        | ExpTypeTag
-        | ExpTypeLiteral
-    /// Expression<'T> 을 boxed 에서 접근하기 위한 최소의 interface
-    type IExpression =
-        abstract DataType : System.Type
-        abstract ExpressionType : ExpressionType
-        abstract BoxedEvaluatedValue : obj
-        /// Tag<'T> 나 Variable<'T> 객체 boxed 로 반환
-        abstract GetBoxedRawObject: unit -> obj
-        abstract ToText : withParenthesys:bool -> string
-    //    abstract ToJson   : unit -> ExpressionJson
+    open SubModule
 
 
     [<AbstractClass>]
@@ -103,6 +38,7 @@ module ExpressionModule =
     type Tag<'T>(name, initValue:'T) =
         inherit TypedValueStorage<'T>(name, initValue)
 
+        interface ITagExpression
         //memory bit masking 처리를 위해 일반 PlcTag와 DsMemory 구별 구현
         // <ahn> : obj -> 'T
         abstract SetValue:obj -> unit
@@ -112,38 +48,14 @@ module ExpressionModule =
     // todo: 임시 이름... 추후 Variable로
     type StorageVariable<'T>(name, initValue:'T) =
         inherit TypedValueStorage<'T>(name, initValue)
+
+        interface IVarExpression
         override x.CreateBoxedExpression() = Terminal(Terminal.Variable x)
 
     type Terminal<'T> =
         | Tag of Tag<'T>
         | Variable of StorageVariable<'T>
         | Literal of 'T
-
-        member x.ExpressionType =
-            match x with
-            | Tag _ -> ExpTypeTag
-            | Variable _ -> ExpTypeVariable
-            | Literal _ -> ExpTypeLiteral
-
-        member x.GetBoxedRawObject() =
-            match x with
-            | Tag t -> t |> box
-            | Variable v -> v
-            | Literal v -> v |> box
-
-        member x.Evaluate() =
-            match x with
-            | Tag t -> t.Value
-            | Variable v -> v.Value
-            | Literal v -> v
-
-        override x.ToString() =
-            match x with
-            | Tag t -> $"({t.Name}={t.Value})"
-            | Variable t -> $"({t.Name}={t.Value})"
-            | Literal v -> $"{v}"
-
-
 
     type Arguments = obj list
     type Args      = Arguments
@@ -169,24 +81,6 @@ module ExpressionModule =
             match x with
             | Terminal b -> b.ExpressionType
             | Function _ -> ExpTypeFunction
-        member x.GetBoxedRawObject() =
-            match x with
-            | Terminal b -> b.GetBoxedRawObject()
-            | Function fs -> fs |> box
-
-        member x.Evaluate() =
-            match x with
-            | Terminal b -> b.Evaluate()
-            | Function fs -> fs.f (fs.args |> List.map evalArg)
-
-        member x.ToText(withParenthesys:bool) =
-            match x with
-            | Terminal b -> b.ToString()
-            | Function fs ->
-                let text = fwdSerializeFunctionNameAndBoxedArguments fs.name fs.args withParenthesys
-                text
-
-
 
     let getTypeOfBoxedExpression (exp:obj) = (exp :?> IExpression).DataType
     let value (x:'T) = Terminal (Literal x)
@@ -248,17 +142,8 @@ module ExpressionModule =
         let t = x.GetType()
         match x with
         (* primitive types *)
-        | (:? bool | :? string | :? int | :? double | :? single) ->
-            x
-        (*  expression: 'T general type 으로는 match 가 안되니, 중복해서 쓸 수 밖에 없음. *)
-        | :? Expression<bool>   as exp -> exp.Evaluate()
-        | :? Expression<int>    as exp -> exp.Evaluate()
-        | :? Expression<double> as exp -> exp.Evaluate()
-        | :? Expression<single> as exp -> exp.Evaluate()
-        | :? Expression<string> as exp -> exp.Evaluate()
-        | :? Expression<_> as exp ->
-            tracefn "Generic expression"
-            exp.Evaluate()
+        | (:? bool | :? string | :? int | :? double | :? single) -> x
+        | :? IExpression as exp -> exp.BoxedEvaluatedValue
         | _ ->
             failwith "error"
 
@@ -362,4 +247,48 @@ module ExpressionModule =
             member x.ToText() =
                  match x with
                  | Assign     (expr, target) -> $"assign({expr.ToText(false)}, {target.ToText()})"
+
+    type Terminal<'T> with
+        member x.ExpressionType =
+            match x with
+            | Tag _ -> ExpTypeTag
+            | Variable _ -> ExpTypeVariable
+            | Literal _ -> ExpTypeLiteral
+
+        member x.GetBoxedRawObject() =
+            match x with
+            | Tag t -> t |> box
+            | Variable v -> v
+            | Literal v -> v |> box
+
+        member x.Evaluate() =
+            match x with
+            | Tag t -> t.Value
+            | Variable v -> v.Value
+            | Literal v -> v
+
+        member x.ToText() =
+            match x with
+            | Tag t -> $"({t.Name}={t.Value})"
+            | Variable t -> $"({t.Name}={t.Value})"
+            | Literal v -> $"{v}"
+
+    type Expression<'T> with
+        member x.GetBoxedRawObject() =
+            match x with
+            | Terminal b -> b.GetBoxedRawObject()
+            | Function fs -> fs |> box
+
+        member x.Evaluate() =
+            match x with
+            | Terminal b -> b.Evaluate()
+            | Function fs -> fs.f (fs.args |> List.map evalArg)
+
+        member x.ToText(withParenthesys:bool) =
+            match x with
+            | Terminal b -> b.ToText()
+            | Function fs ->
+                let text = fwdSerializeFunctionNameAndBoxedArguments fs.name fs.args withParenthesys
+                text
+
 

@@ -1,9 +1,10 @@
-[<AutoOpen>]
-module rec Engine.Cpu.Interface
+namespace rec Engine.Cpu
 
 open System.Collections.Concurrent
 open System.Text.Json
-
+open Engine.Core
+[<AutoOpen>]
+module Interface =
 
     //22.11.29 일 기준 지원 Data type = { bool, int, byte, single, double, string }
     type IData      = interface end
@@ -12,7 +13,6 @@ open System.Text.Json
         abstract Name   : string
         abstract Value  : obj with get,set
         abstract ToText   : unit -> string
-
 
     //json union 타입이 지원 안되서 레코드 규격 추가
     //f#.Json nuget이 있지만 System.Text.Json 사용

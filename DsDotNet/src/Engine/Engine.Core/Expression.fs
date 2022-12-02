@@ -15,7 +15,6 @@ open System.Diagnostics
 
 [<AutoOpen>]
 module ExpressionModule =
-    open ExpressionPrologSubModule
 
 
     [<AbstractClass>]
@@ -124,105 +123,6 @@ module ExpressionModule =
         let t = storage :?> IExpressionCreatable
         t.CreateBoxedExpression()
 
-    //let binaryExpression (opnd1:Expression<'T>) (op:string) (opnd2:Expression<'T>) =
-    let createBinaryExpression (opnd1:obj) (op:string) (opnd2:obj) =
-        let t1 = getTypeOfBoxedExpression opnd1
-        let t2 = getTypeOfBoxedExpression opnd2
-        if t1 <> t2 then
-            failwith "ERROR: Type mismatch"
-
-        let args = [box opnd1; opnd2]
-
-        if t1 = typeof<byte> then
-            match op with
-            | "+" -> adduy args
-            | "-" -> subuy args
-            | "*" -> muluy args
-            | "/" -> divuy args
-            | _ -> failwith "NOT Yet"
-            |> box
-        elif t1 = typeof<sbyte> then
-            match op with
-            | "+" -> addy args
-            | "-" -> suby args
-            | "*" -> muly args
-            | "/" -> divy args
-            | _ -> failwith "NOT Yet"
-            |> box
-        elif t1 = typeof<int16> then
-            match op with
-            | "+" -> adds args
-            | "-" -> subs args
-            | "*" -> muls args
-            | "/" -> divs args
-            | _ -> failwith "NOT Yet"
-            |> box
-        elif t1 = typeof<uint16> then
-            match op with
-            | "+" -> addus args
-            | "-" -> subus args
-            | "*" -> mulus args
-            | "/" -> divus args
-            | _ -> failwith "NOT Yet"
-            |> box
-        elif t1 = typeof<int32> then
-            match op with
-            | "+" -> add args
-            | "-" -> sub args
-            | "*" -> mul args
-            | "/" -> div args
-            | _ -> failwith "NOT Yet"
-            |> box
-        elif t1 = typeof<uint32> then
-            match op with
-            | "+" -> addu args
-            | "-" -> subu args
-            | "*" -> mulu args
-            | "/" -> divu args
-            | _ -> failwith "NOT Yet"
-            |> box
-        elif t1 = typeof<double> then
-            match op with
-            | "+" -> addd args
-            | "-" -> subd args
-            | "*" -> muld args
-            | "/" -> divd args
-            | _ -> failwith "NOT Yet"
-            |> box
-        elif t1 = typeof<single> then
-            match op with
-            | "+" -> addf args
-            | "-" -> subf args
-            | "*" -> mulf args
-            | "/" -> divf args
-            | _ -> failwith "NOT Yet"
-            |> box
-        elif t1 = typeof<string> then
-            match op with
-            | "+" -> concat args
-            | _ -> failwith "ERROR"
-            |> box
-        else
-            failwith "ERROR"
-
-    let createCustomFunctionExpression (funName:string) (args:Args) =
-        match funName with
-        | "Int" -> Int args |> box
-        | "Bool" -> Bool args |> box
-        | "sin" -> sin args |> box
-        //| "cos" -> cos args |> box
-        //| "tan" -> tan args |> box
-        | _ -> failwith "NOT yet"
-
-    let evaluateBoxedExpression (boxedExpr:obj) =
-        let expr = boxedExpr :?> IExpression
-        expr.BoxedEvaluatedValue
-
-
-    let resolve (expr:Expression<'T>) = expr.Evaluate() |> unbox
-
-
-
     [<AutoOpen>]
     module FunctionModule =
         /// Create function
@@ -243,61 +143,61 @@ module ExpressionModule =
             /* UL */ | Uint64
         *)
 
-        let muly           args = cf _muly           "*"      args
-        let addy           args = cf _addy           "+"      args
-        let suby           args = cf _suby           "-"      args
-        let divy           args = cf _divy           "/"      args
-        let absy           args = cf _absy           "abs"    args
-        let moduloy        args = cf _moduloy         "%"     args
+        let muly     args = cf _muly     "*"     args
+        let addy     args = cf _addy     "+"     args
+        let suby     args = cf _suby     "-"     args
+        let divy     args = cf _divy     "/"     args
+        let absy     args = cf _absy     "abs"   args
+        let moduloy  args = cf _moduloy  "%"     args
 
-        let muluy           args = cf _muluy         "*"      args
-        let adduy           args = cf _adduy         "+"      args
-        let subuy           args = cf _subuy         "-"      args
-        let divuy           args = cf _divuy         "/"      args
-        let absuy           args = cf _absuy         "abs"    args
-        let modulouy        args = cf _modulouy      "%"     args
+        let muluy    args = cf _muluy    "*"     args
+        let adduy    args = cf _adduy    "+"     args
+        let subuy    args = cf _subuy    "-"     args
+        let divuy    args = cf _divuy    "/"     args
+        let absuy    args = cf _absuy    "abs"   args
+        let modulouy args = cf _modulouy "%"     args
 
-        let muls           args = cf _muls           "*"      args
-        let adds           args = cf _adds           "+"      args
-        let subs           args = cf _subs           "-"      args
-        let divs           args = cf _divs           "/"      args
-        let abss           args = cf _abss           "abs"    args
-        let modulos        args = cf _modulos         "%"     args
+        let muls     args = cf _muls     "*"     args
+        let adds     args = cf _adds     "+"     args
+        let subs     args = cf _subs     "-"     args
+        let divs     args = cf _divs     "/"     args
+        let abss     args = cf _abss     "abs"   args
+        let modulos  args = cf _modulos  "%"     args
 
-        let mulus           args = cf _mulus           "*"      args
-        let addus           args = cf _addus           "+"      args
-        let subus           args = cf _subus           "-"      args
-        let divus           args = cf _divus           "/"      args
-        let absus           args = cf _absus           "abs"    args
-        let modulous        args = cf _modulous         "%"     args
+        let mulus    args = cf _mulus    "*"     args
+        let addus    args = cf _addus    "+"     args
+        let subus    args = cf _subus    "-"     args
+        let divus    args = cf _divus    "/"     args
+        let absus    args = cf _absus    "abs"   args
+        let modulous args = cf _modulous "%"     args
 
-        let add            args = cf _add            "+"      args
-        let sub            args = cf _sub            "-"      args
-        let mul            args = cf _mul            "*"      args
-        let div            args = cf _div            "/"      args
-        let abs            args = cf _abs            "abs"    args
-        let modulo         args = cf _modulo         "%"      args
+        let add      args = cf _add      "+"     args
+        let sub      args = cf _sub      "-"     args
+        let mul      args = cf _mul      "*"     args
+        let div      args = cf _div      "/"     args
+        let abs      args = cf _abs      "abs"   args
+        let modulo   args = cf _modulo   "%"     args
 
-        let muld           args = cf _muld           "*"      args
-        let addd           args = cf _addd           "+"      args
-        let subd           args = cf _subd           "-"      args
-        let divd           args = cf _divd           "/"      args
-        let absd           args = cf _absd           "abs"    args
-        let modulod        args = cf _modulod         "%"     args
+        let muld     args = cf _muld     "*"     args
+        let addd     args = cf _addd     "+"     args
+        let subd     args = cf _subd     "-"     args
+        let divd     args = cf _divd     "/"     args
+        let absd     args = cf _absd     "abs"   args
+        let modulod  args = cf _modulod  "%"     args
 
-        let mulf           args = cf _mulf           "*"      args
-        let addf           args = cf _addf           "+"      args
-        let subf           args = cf _subf           "-"      args
-        let divf           args = cf _divf           "/"      args
-        let absf           args = cf _absf           "abs"    args
-        let modulof        args = cf _modulof         "%"     args
+        let mulf     args = cf _mulf     "*"     args
+        let addf     args = cf _addf     "+"     args
+        let subf     args = cf _subf     "-"     args
+        let divf     args = cf _divf     "/"     args
+        let absf     args = cf _absf     "abs"   args
+        let modulof  args = cf _modulof  "%"     args
 
-        let mulu           args = cf _mulu           "*"      args
-        let addu           args = cf _addu           "+"      args
-        let subu           args = cf _subu           "-"      args
-        let divu           args = cf _divu           "/"      args
-        let absu           args = cf _absu           "abs"    args
-        let modulou        args = cf _modulou         "%"     args
+        let mulu     args = cf _mulu     "*"     args
+        let addu     args = cf _addu     "+"     args
+        let subu     args = cf _subu     "-"     args
+        let divu     args = cf _divu     "/"     args
+        let absu     args = cf _absu     "abs"   args
+        let modulou  args = cf _modulou  "%"     args
 
 
         let equal          args = cf _equal          "="      args
@@ -329,8 +229,11 @@ module ExpressionModule =
         let divDouble = divd
         let addString = concat
 
+
         [<AutoOpen>]
         module internal FunctionImpl =
+            open ExpressionPrologSubModule
+
             let private evalArg (x:obj) = (x :?> IExpression).BoxedEvaluatedValue
             let private evalToDouble x = x |> evalArg |> toDouble
             let private evalToFloat  x = x |> evalArg |> toFloat

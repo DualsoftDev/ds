@@ -25,6 +25,7 @@
 		<Compile Include="Expression.fs" />
 		<Compile Include="Expression.Extenstion.fs" />
 		<Compile Include="Expression.Serialize.fs" />
+		<Compile Include="Expression.Function.fs" />
 		<Compile Include="EntryPoint.fs" />
 		<Compile Include="AssemblyInfo.fs" />
 		<Content Include="ValidSyntax.txt" />

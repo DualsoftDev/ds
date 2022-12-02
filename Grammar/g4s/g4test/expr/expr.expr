@@ -1,4 +1,5 @@
-/* grun expression expression < g4test/expression/exp.exp */
+/* grun expr expr < g4test/expr/expr.expr */
+
 myvar := Int(3.4) + 1 + 2 + (abs(tag3));
 
 /* variable declaration */

@@ -68,9 +68,18 @@ module ExpressionParser =
                     | :? LiteralContext as exp ->
                         assert(exp.ChildCount = 1)
                         match exp.children[0] with
-                        | :? ScientificContext as exp -> box <| expr (System.Double.Parse(text))
-                        | :? IntegerContext    as exp -> box <| expr (System.Int32.Parse(text))
-                        | :? StringContext     as exp -> box <| expr (deQuoteOnDemand text)
+                        | :? LiteralDoubleContext as exp -> text |> System.Double.Parse |> expr |> box
+                        | :? LiteralStringContext as exp -> text |> deQuoteOnDemand     |> expr |> box
+                        | :? LiteralSbyteContext  as exp -> text |> System.SByte.Parse  |> expr |> box
+                        | :? LiteralByteContext   as exp -> text |> System.Byte.Parse   |> expr |> box
+                        | :? LiteralInt16Context  as exp -> text |> System.Int16.Parse  |> expr |> box
+                        | :? LiteralUint16Context as exp -> text |> System.UInt16.Parse |> expr |> box
+                        | :? LiteralInt32Context  as exp -> text |> System.Int32.Parse  |> expr |> box
+                        | :? LiteralUint32Context as exp -> text.Replace("u", "") |> System.UInt32.Parse |> expr |> box
+                        | :? LiteralInt64Context  as exp -> text |> System.Int64.Parse  |> expr |> box
+                        | :? LiteralUint64Context as exp -> text |> System.UInt64.Parse |> expr |> box
+                        | :? LiteralCharContext   as exp -> text |> System.Char.Parse   |> expr |> box
+
                         | _ -> failwith "ERROR"
                     | :? TagContext as texp ->
                         box <| tag (tagDic[text])
@@ -86,7 +95,8 @@ module ExpressionParser =
 
                 | :? ParenthesysExprContext as exp ->
                     tracefn $"Parenthesys: {text}"
-                    failwith "Not yet"
+                    let exp = exp.TryFindFirstChild<ExprContext>().Value
+                    helper exp
 
                 | _ ->
                     failwith "Not yet"

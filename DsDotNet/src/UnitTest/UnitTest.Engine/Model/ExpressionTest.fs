@@ -178,11 +178,11 @@ module ExpressionTestModule =
             mul [ 2; 3 ] |> toText === "2 * 3"
 
             v 1         |> toText === "1"
-            v "hello"   |> toText === "hello"
-            v Math.PI   |> toText === Math.PI.ToString()
-            v true      |> toText === "True"
-            v false     |> toText === "False"
-            v 3.14f     |> toText === "3.14"
+            v "hello"   |> toText === "\"hello\""
+            v Math.PI   |> toText === sprintf "%A" Math.PI
+            v true      |> toText === "true"
+            v false     |> toText === "false"
+            v 3.14f     |> toText === sprintf "%A" 3.14f
             v 3.14      |> toText === "3.14"
 
             mul [ v 2; v 3 ] |> toText === "2 * 3"
@@ -235,44 +235,26 @@ module ExpressionTestModule =
             let stmt = Assign (expr, target)
             stmt.ToText() === "%target := *(2, 3, 4)"
 
-        //[<Test>]
-        //member __.``X 7 Deserialize test`` () =
-        //    ()
-        //    let t2 = PlcTag.Create("t2", 2)
-        //    let t1 = PlcTag.Create("t1", 1)
-        //    let addTwoExpr = add [ t1;t2 ]
-        //    //addTwoExpr.ToJsonText().ToExpression().ToJsonText() === addTwoExpr.ToJsonText()
+        [<Test>]
+        member __.``X 7 Deserialize test`` () =
+            /// Parse And Serialize
+            let pns (text:string) =
+                let expr = parseExpression text
+                serializeBoxedExpression expr false
+            let exprs =
+                [
+                    "1 + 2"
+                    "(1 + 2) * (3 + 4)"
+                    "1.0 + 2.0"
+                    "1u + 2u"
+                    "1y + 2y"
+                    "1uy + 2uy"
+                    //"Int(1.0) + 2"
+                ]
 
-        //    let expr = mul [   2
-        //                       add [tag t1; tag t2]
-        //                       add [4; 5]
-        //                    ]
-        //    let jsonSettings = JsonSerializerSettings(Formatting=Formatting.Indented)
+            for exp in exprs do
+                pns exp === exp
 
-        //    let json = JsonConvert.SerializeObject(expr, jsonSettings)
-        //    let obj = JsonConvert.DeserializeObject<Expression<int>>(json, jsonSettings)
-
-        //    ()
-
-        //    expr.ToJsonText().ToExpression().ToJsonText() === expr.ToJsonText()
-
-        //    let expr = oR [false ;true ;false ]
-        //    expr.ToJsonText().ToExpression().ToJsonText() === expr.ToJsonText()
-
-        //    let expr = add [10 ;12 ]
-        //    expr.ToJsonText().ToExpression().ToJsonText() === expr.ToJsonText()
-        //    let target = PlcTag.Create("target", 1)
-
-
-        //    let expr = mul [    2
-        //                        expr
-        //                        add [t1; t2]
-        //                        add [1; 5]
-        //            ]
-        //    let a = expr |> evaluate
-
-        //    let stmt = Assign (expr, target)
-        //    stmt.ToJsonText().ToStatement().ToJsonText() === stmt.ToJsonText()
 
 
         [<Test>]
@@ -304,6 +286,8 @@ module ExpressionTestModule =
 
             (target <== f).Do()
             targetExpr |> evaluate === false
+
+
 
         [<Test>]
         member __.``9 Expression Tag type test`` () =

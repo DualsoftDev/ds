@@ -1,6 +1,14 @@
+/* grun expr literals < g4test/expr/literal.expr */
+
 "hello-string";
 
-hello_identifier;
+1u;
+-3.14;
+1UL;
+
+%myTag;
+
+$myVar;
 
 3.14;
 111111;

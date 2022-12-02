@@ -301,7 +301,7 @@ module ExpressionModule =
             match x with
             | Tag t -> "%" + t.Name
             | Variable t -> "$" + t.Name
-            | Literal v -> $"{v}"
+            | Literal v -> sprintf "%A" v
 
     type Expression<'T> with
         member x.GetBoxedRawObject() =

@@ -8,7 +8,10 @@ LINE_COMMENT  : '//' .*? ('\n'|EOF) -> channel(HIDDEN) ;
 
 comment: BLOCK_COMMENT | LINE_COMMENT;
 identifier : IDENTIFIER;
-    variable: identifier;
+    tag: TAG;
+        TAG: '%' IDENTIFIER;
+    variable: VARIABLE;
+        VARIABLE: '$' IDENTIFIER;
     //tagName: identifier;
     functionName: identifier;
 
@@ -19,12 +22,39 @@ identifier : IDENTIFIER;
 // terminal: literal | tag | identifier;
 
 terminal: variable | tag | literal;
-    literal: scientific | integer | string;
-    string: STRING;
-    scientific: SCIENTIFIC_NUMBER;
-    integer: INTEGER;
-tag: TAG;
-    TAG: '%' IDENTIFIER;
+    // literal: numDouble | integer | string;
+    // string: STRING;
+    // numDouble: DOUBLE;
+    // integer: INTEGER;
+
+    literal:
+          literalSingle
+        | literalDouble         // 'double' 이름 그대로 사용 불가 : symbol double conflicts with generated code in target language or runtime
+        | literalSbyte
+        | literalByte
+        | literalInt16
+        | literalUint16
+        | literalInt32
+        | literalUint32
+        | literalInt64
+        | literalUint64
+        | literalChar
+        | literalString
+    ;
+    literalSingle :SINGLE;
+    literalDouble :DOUBLE;
+    literalSbyte  :SBYTE;
+    literalByte   :BYTE;
+    literalInt16  :INT16;
+    literalUint16 :UINT16;
+    literalInt32  :INT32;
+    literalUint32 :UINT32;
+    literalInt64  :INT64;
+    literalUint64 :UINT64;
+    literalChar   :CHAR;
+    literalString :STRING;
+
+literals: literal (';' toplevel)* (';')?;
 
 toplevels: toplevel (';' toplevel)* (';')?;
     toplevel: expr|statement;
@@ -47,19 +77,36 @@ expr:   functionName '(' arguments? ')'         # FunctionCallExpr  // func call
     |   '(' expr ')'                            # ParenthesysExpr
     ;
 
-    functionCall: functionName '(' arguments? ')';    // func call like f(), f(x), f(1,2)
+    //functionCall: functionName '(' arguments? ')';    // func call like f(), f(x), f(1,2)
     arguments: exprList;
     exprList : expr (',' expr)* ;   // arg list
     unaryOperator: '-'|'!';
 
-INTEGER: SIGN? UNSIGNED_INTEGER;
+//INTEGER: SIGN? DIGITS;
 IDENTIFIER: VALID_ID_START VALID_ID_CHAR*;
 fragment VALID_ID_START: ('a' .. 'z') | ('A' .. 'Z') | '_';
 fragment VALID_ID_CHAR: VALID_ID_START | ('0' .. '9');
+fragment DIGIT: ('0' .. '9');
+fragment DIGITS: DIGIT+;
 
-SCIENTIFIC_NUMBER: NUMBER (E SIGN? UNSIGNED_INTEGER)?;
-fragment NUMBER: ('0' .. '9') + ('.' ('0' .. '9') +)?;
-fragment UNSIGNED_INTEGER: ('0' .. '9')+;
+fragment SCIENTIFIC_NUMBER: SIGN? NUMBER (E SIGN? DIGITS)?;
+fragment NUMBER: DIGITS ('.' DIGITS);
+
+    SINGLE: SCIENTIFIC_NUMBER 'f';
+    DOUBLE: SCIENTIFIC_NUMBER;
+    SBYTE: SIGN? DIGITS 'y';
+    BYTE: DIGITS 'uy';
+    INT16:SIGN? DIGITS 's';
+    UINT16:DIGITS 'us';
+    INT32: SIGN? DIGITS;
+    UINT32:DIGITS 'u';
+    INT64:SIGN? DIGITS 'L';
+    UINT64:DIGITS 'UL';
+
+//fragment UNSIGNED_INTEGER: ('0' .. '9')+;
+
+CHAR: QuotedCharLiteral;
+    fragment QuotedCharLiteral : '\'' (~('\'' | '\\' | '\r' | '\n') | '\\' ('\'' | '\\'))+ '\'';
 
 fragment E : 'E' | 'e' ;
 fragment SIGN : ('+' | '-') ;
@@ -79,3 +126,4 @@ LT : '<' ;
 EQ : '=' ;
 POINT : '.' ;
 POW : '^' ;
+

@@ -13,6 +13,9 @@ module Interface =
     type INamed  =
          abstract Name:string with get, set
 
+    type IText  =
+         abstract ToText:unit -> string
+
     type IRenameable =
         inherit INamed
         abstract Name:string with set

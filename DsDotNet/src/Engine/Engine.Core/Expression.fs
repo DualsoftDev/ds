@@ -21,16 +21,22 @@ module ExpressionModule =
     [<AbstractClass>]
     [<DebuggerDisplay("{Name}")>]
     type TypedValueStorage<'T>(name, initValue:'T) =
-        member x.ToText() = $"({name}={(x.Value.ToString())})"
         member _.Name: string = name
         member val Value = initValue with get, set
 
+        interface IStorage with
+            member x.Value with get() = x.Value and set(v) = x.Value <- v :?> 'T
+            member x.ToText() = x.ToText()
+        interface IStorage<'T> with
+            member x.Value with get() = x.Value and set(v) = x.Value <- v
         interface IExpressionCreatable with
             member x.CreateBoxedExpression() = x.CreateBoxedExpression()
-        abstract CreateBoxedExpression: unit -> obj
-
         interface INamed with
             member x.Name with get() = x.Name and set(v) = failwith "ERROR: not supported"
+
+        abstract CreateBoxedExpression: unit -> obj
+        abstract ToText: unit -> string
+
 
 
 
@@ -42,6 +48,7 @@ module ExpressionModule =
         abstract SetValue:obj -> unit
         abstract GetValue:unit -> obj
         override x.CreateBoxedExpression() = Terminal(Terminal.Tag x)
+        override x.ToText() = "%" + name
 
     // todo: 임시 이름... 추후 Variable로
     type StorageVariable<'T>(name, initValue:'T) =
@@ -49,6 +56,7 @@ module ExpressionModule =
 
         interface IVariable
         override x.CreateBoxedExpression() = Terminal(Terminal.Variable x)
+        override x.ToText() = "$" + name
 
     type Terminal<'T> =
         | Tag of Tag<'T>
@@ -268,7 +276,7 @@ module ExpressionModule =
                 | Assign (expr, target) -> expr.Evaluate() |> target.SetValue
             member x.ToText() =
                  match x with
-                 | Assign     (expr, target) -> $"assign({expr.ToText(false)}, {target.ToText()})"
+                 | Assign     (expr, target) -> $"{target.ToText()} := {expr.ToText(false)}"
 
     type Terminal<'T> with
         member x.ExpressionType =

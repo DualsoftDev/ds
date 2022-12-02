@@ -36,7 +36,7 @@ module rec ExpressionSerializeModule =
             let precedence = operatorPrecedenceMap[name]
             let l:string = serializeBoxedExpression args[0] true
             let r:string = serializeBoxedExpression args[1] true
-            let text = $"{l}{name}{r}"
+            let text = $"{l} {name} {r}"
             if withParenthesys then $"({text})" else text
         else
             let args =
@@ -44,6 +44,6 @@ module rec ExpressionSerializeModule =
                     let ax = a :?> IExpression
                     let withParenthesys = args.Length >= 2
                     ax.ToText(withParenthesys)
-                ] |> String.concat ","
+                ] |> String.concat ", "
             $"{name}({args})"
 

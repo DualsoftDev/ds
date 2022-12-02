@@ -65,9 +65,17 @@ module ExpressionPrologModule =
         | ExpTypeTag
         | ExpTypeLiteral
 
-    type IExpressionTerminalObject = inherit INamed
-    type ITag = inherit IExpressionTerminalObject
-    type IVariable = inherit IExpressionTerminalObject
+    /// Expression 의 Terminal 이 될 수 있는 subclass: Tag<'T>, StorageVariable<'T>
+    type IStorage =
+        inherit INamed
+        inherit IText
+        abstract Value: obj with get, set
+    type IStorage<'T> =
+        inherit IStorage
+        abstract Value: 'T with get, set
+
+    type ITag = inherit IStorage
+    type IVariable = inherit IStorage
 
     /// Expression<'T> 을 boxed 에서 접근하기 위한 최소의 interface
     type IExpression =

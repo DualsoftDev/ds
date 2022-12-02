@@ -175,7 +175,7 @@ module ExpressionTestModule =
         [<Test>]
         member __.``X 6 Serialization test`` () =
             let toText (exp:Expression<'T>) = exp.ToText(false)
-            mul [ 2; 3 ] |> toText === "2*3"
+            mul [ 2; 3 ] |> toText === "2 * 3"
 
             v 1         |> toText === "1"
             v "hello"   |> toText === "hello"
@@ -185,26 +185,26 @@ module ExpressionTestModule =
             v 3.14f     |> toText === "3.14"
             v 3.14      |> toText === "3.14"
 
-            mul [ v 2; v 3 ] |> toText === "2*3"
-            mul [ add [v 1; v 2]; v 3 ] |> toText === "(1+2)*3"
-            mul [ v 3; add [v 1; v 2] ] |> toText === "3*(1+2)"
-            add [ mul [v 1; v 2]; v 3; ] |> toText === "(1*2)+3"  //"1*2+3"
+            mul [ v 2; v 3 ] |> toText === "2 * 3"
+            mul [ add [v 1; v 2]; v 3 ] |> toText === "(1 + 2) * 3"
+            mul [ v 3; add [v 1; v 2] ] |> toText === "3 * (1 + 2)"
+            add [ mul [v 1; v 2]; v 3; ] |> toText === "(1 * 2) + 3"  //"1*2+3"
 
-            add [v 1; v 2; v 3 ] |> toText === "+(1,2,3)"
-            mul [ add [v 1; v 2; v 3]; v 3 ] |> toText === "+(1,2,3)*3"
+            add [v 1; v 2; v 3 ] |> toText === "+(1, 2, 3)"
+            mul [ add [v 1; v 2; v 3]; v 3 ] |> toText === "+(1, 2, 3) * 3"
 
             mul [   v 2
                     add [v 1; v 2]
                     add [v 4; v 5]
-            ] |> toText === "*(2,(1+2),(4+5))"
-            mul [v 2; add[v 3; v 4]]|> toText  === "2*(3+4)"
+            ] |> toText === "*(2, (1 + 2), (4 + 5))"
+            mul [v 2; add[v 3; v 4]]|> toText  === "2 * (3 + 4)"
 
-            add [v 2; mul [ v 5; v 6 ]; v 4]|> toText  === "+(2,(5*6),4)"
+            add [v 2; mul [ v 5; v 6 ]; v 4]|> toText  === "+(2, (5 * 6), 4)"
             add [
                 add [v 2; mul [ v 5; v 6 ]];
                 v 4
-            ]|> toText  === "(2+(5*6))+4"  //"2+(5*6)+4)"
-            mul [v 2; v 3; v 4]|> toText  === "*(2,3,4)"
+            ]|> toText  === "(2 + (5 * 6)) + 4"  //"2+(5*6)+4)"
+            mul [v 2; v 3; v 4]|> toText  === "*(2, 3, 4)"
 
         //    mul [   2
         //            add [1; 2]
@@ -220,20 +220,20 @@ module ExpressionTestModule =
             let tt1 = t1 |> tag
             let tt2 = t2 |> tag
             let addTwoExpr = add [ tt1; tt2 ]
-            addTwoExpr.ToText(false) === "%t1+%t2"
+            addTwoExpr.ToText(false) === "%t1 + %t2"
 
             let sTag = PlcTag.Create("address", "value")
-            sTag.ToText() === "(address=value)"
+            sTag.ToText() === "%address"
             let exprTag = tag sTag
             exprTag.ToText(false) === "%address"
 
 
             let expr = mul [2; 3; 4]
             let target = PlcTag.Create("target", 1)
-            target.ToText() === "(target=1)"
+            target.ToText() === "%target"
 
             let stmt = Assign (expr, target)
-            stmt.ToText() === "assign(*[2; 3; 4], (target=1))"
+            stmt.ToText() === "%target := *(2, 3, 4)"
 
         //[<Test>]
         //member __.``X 7 Deserialize test`` () =

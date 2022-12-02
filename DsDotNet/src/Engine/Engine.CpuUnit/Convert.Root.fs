@@ -16,7 +16,7 @@ type StatementRoot =
                     then
                         let sets  = srcs.Select(fun f->f.End).ToTags()
                         let rsts  = [pReal.End].ToTags()
-                        pReal.Start <== anD[FuncExt.GetRelayExpr(sets, rsts, pReal.Start);pReal.Pause] |> Some //pReal.Pause _Auto 로 변경 필요
+                        pReal.Start <== anD [FuncExt.GetRelayExpr(sets, rsts, pReal.Start);pReal.Pause] |> Some //pReal.Pause _Auto 로 변경 필요
                     else None
 
     [<Extension>] static member TryGetRealResetStatement(real:DsMemory, goingSrcs:DsMemory seq) =

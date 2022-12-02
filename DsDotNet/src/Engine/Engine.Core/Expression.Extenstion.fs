@@ -49,17 +49,15 @@ module ExpressionExtensionModule =
     [<AutoOpen>]
     [<DebuggerDisplay("{ToText()}")>]
     type Statement<'T> =
-        | Assign of expression:Expression<'T> * target:Tag<'T>
+        | Assign of expression:Expression<'T> * target:IStorage<'T>
 
         member x.Do() =
             match x with
-            | Assign (expr, target) ->
-                         ///  Target Y = Function (X)
-                         target.SetValue(expr.Evaluate())
+            | Assign (expr, target) -> target.Value <- expr.Evaluate()
 
         member x.ToText() =
-             match x with
-             | Assign (expr, target) -> $"assign({expr.ToText(false)}, {target.ToText()})"
+            match x with
+            | Assign (expr, target) -> $"assign({expr.ToText(false)}, {target.ToText()})"
 
 
     let private tagsToArguments (xs:Tag<'T> seq) = xs.Select (Tag >> box) |> List.ofSeq
@@ -98,5 +96,5 @@ module ExpressionExtensionModule =
         /// boolean NOT operator
         let (!!)   (exp: Expression<bool>) = noT [exp]
         /// Assign statement
-        let (<==)  (storage: Tag<'T>) (exp: Expression<'T>) = Assign(exp, storage)
+        let (<==)  (storage: IStorage<'T>) (exp: Expression<'T>) = Assign(exp, storage)
 

@@ -67,13 +67,19 @@ module ExpressionModule =
         //abstract Value  : obj with get,set
         //abstract ToText   : unit -> string
 
+    type ExpressionType =
+        | ExpTypeFunction
+        | ExpTypeVariable
+        | ExpTypeTag
+        | ExpTypeLiteral
     /// Expression<'T> 을 boxed 에서 접근하기 위한 최소의 interface
     type IExpression =
-        abstract Type : System.Type
+        abstract DataType : System.Type
+        abstract ExpressionType : ExpressionType
         abstract BoxedEvaluatedValue : obj
         /// Tag<'T> 나 Variable<'T> 객체 boxed 로 반환
         abstract GetBoxedRawObject: unit -> obj
-        abstract ToText   : unit -> string
+        abstract ToText : withParenthesys:bool -> string
     //    abstract ToJson   : unit -> ExpressionJson
 
 
@@ -113,6 +119,11 @@ module ExpressionModule =
         | Variable of StorageVariable<'T>
         | Literal of 'T
 
+        member x.ExpressionType =
+            match x with
+            | Tag _ -> ExpTypeTag
+            | Variable _ -> ExpTypeVariable
+            | Literal _ -> ExpTypeLiteral
 
         member x.GetBoxedRawObject() =
             match x with
@@ -137,34 +148,47 @@ module ExpressionModule =
     type Arguments = obj list
     type Args      = Arguments
 
+    type FunctionSpec<'T> = {
+        f: Arguments -> 'T
+        name: string
+        args:Arguments
+    }
+
     type Expression<'T> =
         | Terminal of Terminal<'T>
-        | Function of f:(Arguments -> 'T) * name:string * args:Arguments
+        | Function of FunctionSpec<'T>  //f:(Arguments -> 'T) * name:string * args:Arguments
         interface IExpression with
-            member x.Type = x.Type
+            member x.DataType = x.DataType
+            member x.ExpressionType = x.ExpressionType
             member x.BoxedEvaluatedValue = x.Evaluate() |> box
             member x.GetBoxedRawObject() = x.GetBoxedRawObject()
-            member x.ToText() = x.ToText()
+            member x.ToText(withParenthesys) = x.ToText(withParenthesys)
 
-        member x.Type = typedefof<'T>
+        member x.DataType = typedefof<'T>
+        member x.ExpressionType =
+            match x with
+            | Terminal b -> b.ExpressionType
+            | Function _ -> ExpTypeFunction
         member x.GetBoxedRawObject() =
             match x with
             | Terminal b -> b.GetBoxedRawObject()
-            | Function _ -> null
+            | Function fs -> fs |> box
 
         member x.Evaluate() =
             match x with
             | Terminal b -> b.Evaluate()
-            | Function (f, n, args) -> f (args |> List.map evalArg)
+            | Function fs -> fs.f (fs.args |> List.map evalArg)
 
-        member x.ToText() =
+        member x.ToText(withParenthesys:bool) =
             match x with
             | Terminal b -> b.ToString()
-            | Function (f, n, args) -> fwdSerializeFunctionExpression n args
+            | Function fs ->
+                let text = fwdSerializeFunctionNameAndBoxedArguments fs.name fs.args withParenthesys
+                text
 
 
 
-    let getTypeOfBoxedExpression (exp:obj) = (exp :?> IExpression).Type
+    let getTypeOfBoxedExpression (exp:obj) = (exp :?> IExpression).DataType
     let value (x:'T) = Terminal (Literal x)
     let tag (t: Tag<'T>) = Terminal (Tag t)
 
@@ -244,41 +268,41 @@ module ExpressionModule =
 
     [<AutoOpen>]
     module FunctionModule =
-        let add        (args:Arguments) = Function (_add,        "+", args)
-        let abs        (args:Arguments) = Function (_abs,        "abs", args)
-        let absd       (args:Arguments) = Function (_absd,       "absD", args)
-        let sub        (args:Arguments) = Function (_sub,        "-", args)
-        let mul        (args:Arguments) = Function (_mul,        "*", args)
-        let div        (args:Arguments) = Function (_div,        "/", args)
-        let modulo     (args:Arguments) = Function (_modulo,     "%", args)
+        let add            (args:Args) = Function { f=_add;            name="+";      args=args}
+        let abs            (args:Args) = Function { f=_abs;            name="abs";    args=args}
+        let absd           (args:Args) = Function { f=_absd;           name="absD";   args=args}
+        let sub            (args:Args) = Function { f=_sub;            name="-";      args=args}
+        let mul            (args:Args) = Function { f=_mul;            name="*";      args=args}
+        let div            (args:Args) = Function { f=_div;            name="/";      args=args}
+        let modulo         (args:Args) = Function { f=_modulo;         name="%";      args=args}
 
-        let equal      (args:Arguments) = Function (_equal,      "=", args)
-        let notEqual   (args:Arguments) = Function (_notEqual,   "!=", args)
-        let gt         (args:Arguments) = Function (_gt,         ">", args)
-        let lt         (args:Arguments) = Function (_lt,         "<", args)
-        let gte        (args:Arguments) = Function (_gte,        ">=", args)
-        let lte        (args:Arguments) = Function (_lte,        "<=", args)
-        let equalString    (args:Arguments) = Function (_equalString,      "=T", args)
-        let notEqualString (args:Arguments) = Function (_notEqualString,   "!=T", args)
+        let equal          (args:Args) = Function { f=_equal;          name="=";      args=args}
+        let notEqual       (args:Args) = Function { f=_notEqual;       name="!=";     args=args}
+        let gt             (args:Args) = Function { f=_gt;             name=">";      args=args}
+        let lt             (args:Args) = Function { f=_lt;             name="<";      args=args}
+        let gte            (args:Args) = Function { f=_gte;            name=">=";     args=args}
+        let lte            (args:Args) = Function { f=_lte;            name="<=";     args=args}
+        let equalString    (args:Args) = Function { f=_equalString;    name="=T";     args=args}
+        let notEqualString (args:Args) = Function { f=_notEqualString; name="!=T";    args=args}
 
-        let muld       (args:Arguments) = Function (_muld,       "*", args)
-        let addd       (args:Arguments) = Function (_addd,       "+", args)
-        let subd       (args:Arguments) = Function (_subd,       "-D", args)
-        let divd       (args:Arguments) = Function (_divd,       "/D", args)
-        let modulod    (args:Arguments) = Function (_modulo,     "%D", args)
-        let concat     (args:Arguments) = Function (_concat,     "+", args)
-        let logicalAnd (args:Arguments) = Function (_logicalAnd, "&", args)
-        let logicalOr  (args:Arguments) = Function (_logicalOr,  "|", args)
-        let logicalNot (args:Arguments) = Function (_logicalNot, "!", args)
-        let orBit      (args:Arguments) = Function (_orBit,      "orBit", args)
-        let andBit     (args:Arguments) = Function (_andBit,     "andBit", args)
-        let notBit     (args:Arguments) = Function (_notBit,     "notBit", args)
-        let xorBit     (args:Arguments) = Function (_xorBit,     "xorBit", args)
-        let shiftLeft  (args:Arguments) = Function (_shiftLeft,  "<<", args)
-        let shiftRight (args:Arguments) = Function (_shiftRight, ">>", args)
-        let sin        (args:Arguments) = Function (_sin,        "sin", args)
-        let Bool       (args:Arguments) = Function (_convertBool, "Bool", args)
-        let Int        (args:Arguments) = Function (_convertInt, "Int", args)
+        let muld           (args:Args) = Function { f=_muld;           name="*";      args=args}
+        let addd           (args:Args) = Function { f=_addd;           name="+";      args=args}
+        let subd           (args:Args) = Function { f=_subd;           name="-D";     args=args}
+        let divd           (args:Args) = Function { f=_divd;           name="/D";     args=args}
+        let modulod        (args:Args) = Function { f=_modulo;         name="%D";     args=args}
+        let concat         (args:Args) = Function { f=_concat;         name="+";      args=args}
+        let logicalAnd     (args:Args) = Function { f=_logicalAnd;     name="&";      args=args}
+        let logicalOr      (args:Args) = Function { f=_logicalOr;      name="|";      args=args}
+        let logicalNot     (args:Args) = Function { f=_logicalNot;     name="!";      args=args}
+        let orBit          (args:Args) = Function { f=_orBit;          name="orBit";  args=args}
+        let andBit         (args:Args) = Function { f=_andBit;         name="andBit"; args=args}
+        let notBit         (args:Args) = Function { f=_notBit;         name="notBit"; args=args}
+        let xorBit         (args:Args) = Function { f=_xorBit;         name="xorBit"; args=args}
+        let shiftLeft      (args:Args) = Function { f=_shiftLeft;      name="<<";     args=args}
+        let shiftRight     (args:Args) = Function { f=_shiftRight;     name=">>";     args=args}
+        let sin            (args:Args) = Function { f=_sin;            name="sin";    args=args}
+        let Bool           (args:Args) = Function { f=_convertBool;    name="Bool";   args=args}
+        let Int            (args:Args) = Function { f=_convertInt;     name= "Int";   args=args}
 
         let anD = logicalAnd
         let absDouble = absd
@@ -337,5 +361,5 @@ module ExpressionModule =
                 | Assign (expr, target) -> expr.Evaluate() |> target.SetValue
             member x.ToText() =
                  match x with
-                 | Assign     (expr, target) -> $"assign({expr.ToText()}, {target.ToText()})"
+                 | Assign     (expr, target) -> $"assign({expr.ToText(false)}, {target.ToText()})"
 

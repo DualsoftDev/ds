@@ -1,13 +1,9 @@
 namespace Engine.Core
-open System
-open System.Linq
-open System.Runtime.CompilerServices
 open System.Collections.Generic
 open Engine.Common.FS
-open System.Diagnostics
 
 [<AutoOpen>]
-module ExpressionSerializeModule =
+module rec ExpressionSerializeModule =
     let operatorPrecedenceMap =
         let dic = Dictionary<string, int>()
         let defs =
@@ -29,8 +25,27 @@ module ExpressionSerializeModule =
             ] |> HashSet<string>
         fun (name:string) -> hash.Contains (name)
 
-    let serializeFunctionExpression (name:string) (args:Args) =
-        let args = args |> List.map (fun arg -> (arg :?> IExpression).ToText())
-        let args = args |> String.concat ","
-        $"{name}({args})"
+    let serializeBoxedExpression (exp:obj) (withParenthesys:bool) =
+        let exp = exp :?> IExpression
+        exp.ToText(withParenthesys)
+
+
+    let serializeFunctionNameAndBoxedArguments (name:string) (args:Args) (withParenthesys:bool) =
+        let isBinary = isBinaryFunctionOrOperator name
+        let precedence = operatorPrecedenceMap[name]
+        if isBinary && args.Length = 2 then
+            let l:string = serializeBoxedExpression args[0] true
+            let r:string = serializeBoxedExpression args[1] true
+            let text = $"{l}{name}{r}"
+            if withParenthesys then $"({text})" else text
+        else
+            let args =
+                [   for a in args do
+                    let ax = a :?> IExpression
+                    let withParenthesys = args.Length >= 2
+                    ax.ToText(withParenthesys)
+                ] |> String.concat ","
+            //let args = args |> map (fun arg -> (arg :?> IExpression).ToText())
+            //let args = args |> String.concat ","
+            $"{name}({args})"
 

@@ -176,7 +176,8 @@ module ExpressionTestModule =
 
         [<Test>]
         member __.``X 6 Serialization test`` () =
-            let toText (exp:Expression<'T>) = exp.ToText()
+            let toText (exp:Expression<'T>) = exp.ToText(false)
+
             value 1         |> toText === "1"
             value "hello"   |> toText === "hello"
             value Math.PI   |> toText === Math.PI.ToString()
@@ -185,15 +186,26 @@ module ExpressionTestModule =
             value 3.14f     |> toText === "3.14"
             value 3.14      |> toText === "3.14"
 
+            mul [ value 2; value 3 ] |> toText === "2*3"
+            mul [ add [value 1; value 2]; value 3 ] |> toText === "(1+2)*3"
+            mul [ value 3; add [value 1; value 2] ] |> toText === "3*(1+2)"
+            add [ mul [value 1; value 2]; value 3; ] |> toText === "(1*2)+3"  //"1*2+3"
+
+            add [value 1; value 2; value 3 ] |> toText === "+(1,2,3)"
+            mul [ add [value 1; value 2; value 3]; value 3 ] |> toText === "+(1,2,3)*3"
 
             mul [   value 2
                     add [value 1; value 2]
                     add [value 4; value 5]
-            ] |> toText === "*[2; +[1; 2]; +[4; 5]]"
-            mul [2; add[3; 4]]|> toText  === "*[2; +[3; 4]]"
+            ] |> toText === "*(2,(1+2),(4+5))"
+            mul [value 2; add[value 3; value 4]]|> toText  === "2*(3+4)"
 
-            mul [2; 3; 4]|> toText  === "*[2; 3; 4]"
-            mul [2; 3; 4]|> toText  === "*[2; 3; 4]"
+            add [value 2; mul [ value 5; value 6 ]; value 4]|> toText  === "+(2,(5*6),4)"
+            add [
+                add [value 2; mul [ value 5; value 6 ]];
+                value 4
+            ]|> toText  === "(2+(5*6))+4"  //"2+(5*6)+4)"
+            mul [value 2; value 3; value 4]|> toText  === "*(2,3,4)"
 
             let t1 = PlcTag.Create("t1", 1)
             let t2 = PlcTag.Create("t2", 2)
@@ -201,13 +213,13 @@ module ExpressionTestModule =
             let tt2 = t2 |> tag
 
             let addTwoExpr = add [ tt1; tt2 ]
-            addTwoExpr.ToText() === "+[(t1=1); (t2=2)]"
+            addTwoExpr.ToText(false) === "+[(t1=1); (t2=2)]"
 
 
             let sTag = PlcTag.Create("address", "value")
             sTag.ToText() === "(address=value)"
             let exprTag = tag sTag
-            exprTag.ToText() === "(address=value)"
+            exprTag.ToText(false) === "(address=value)"
 
 
             let expr = mul [2; 3; 4]
@@ -312,7 +324,7 @@ module ExpressionTestModule =
                         (name, t)
                 ] |> Tuple.toDictionary
             let sbyte = tagDic["sbyte"] :?> IExpression //:?> Terminal
-            sbyte.Type === typedefof<sbyte>
+            sbyte.DataType === typedefof<sbyte>
             sbyte.BoxedEvaluatedValue === 1y
 
             let rawVariables = [
@@ -338,7 +350,7 @@ module ExpressionTestModule =
                         (name, t)
                 ] |> Tuple.toDictionary
             let sbyte = varDic["sbyte"] :?> IExpression //:?> Terminal
-            sbyte.Type === typedefof<sbyte>
+            sbyte.DataType === typedefof<sbyte>
             sbyte.BoxedEvaluatedValue === 1y
 
             ()

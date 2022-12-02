@@ -61,6 +61,6 @@ module Interface =
     //    abstract Flows:IFlow seq
 
 
-    let private dummySerializeFunctionExpression (functionName:string) (args:obj list): string =
+    let private dummySerializeFunctionNameAndBoxedArguments (functionName:string) (args:obj list) (withParenthesys:bool): string =
         failwith "Should be reimplemented."
-    let mutable internal fwdSerializeFunctionExpression = dummySerializeFunctionExpression
+    let mutable internal fwdSerializeFunctionNameAndBoxedArguments = dummySerializeFunctionNameAndBoxedArguments

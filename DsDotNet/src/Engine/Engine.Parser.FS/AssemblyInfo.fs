@@ -21,6 +21,7 @@ open Antlr4.Runtime
 // The following GUID is for the ID of the typelib if this project is exposed to COM.
 
 [<assembly: Guid("2a959eec-ba9d-4c77-841b-d1dce28137b1")>]
+[<assembly: InternalsVisibleTo("UnitTest.Engine")>]
 [<assembly: InternalsVisibleTo("Engine.Sample")>]
 [<assembly: DebuggerDisplay("[Text={GetText()}]", Target = typeof<RuleContext>)>]
 

@@ -43,7 +43,7 @@ module CpuLoader =
                             3
                             add [1; 5]
                 ]
-        let a = expr |> evaluate
+        let a = expr.Evaluate()
 
         //let a = expr.ToJsonText()
         //let stmt = Assign (expr, target)

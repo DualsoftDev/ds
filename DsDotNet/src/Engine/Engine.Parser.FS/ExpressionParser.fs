@@ -21,10 +21,13 @@ module ExpressionParser =
         parser.AddErrorListener(listener_parser)
         parser
 
-    let createExpression (tagDic:Dictionary<string, Tag<_>>) (varDic) (ctx:ExprContext) : obj = // 실제로는 Expression<'T> =
+    let createExpression
+        (tagDic:Dictionary<string, Tag<_>>)
+        (varDic:Dictionary<string, StorageVariable<_>>)
+        (ctx:ExprContext) : obj = // 실제로는 Expression<'T> =
+
         let rec helper(ctx:ExprContext) : obj =
             let text = ctx.GetText()
-            let dummy = box (value 1)
             let expr =
                 match ctx with
                 | :? FunctionCallExprContext as exp ->
@@ -40,16 +43,22 @@ module ExpressionParser =
                                 ()
                         ]
                     createCustomFunctionExpression funName args
+
                 | :? BinaryExprContext as exp ->
                     tracefn $"Binary: {text}"
-                    let (left::op::right::[]) = exp.children.ToFSharpList()
-                    let expL = helper(left :?> ExprContext)
-                    let expR = helper(right :?> ExprContext)
-                    let op = op.GetText()
-                    box <| createBinaryExpression expL op expR
+                    match exp.children.ToFSharpList() with
+                    | left::op::right::[] ->
+                        let expL = helper(left :?> ExprContext)
+                        let expR = helper(right :?> ExprContext)
+                        let op = op.GetText()
+                        box <| createBinaryExpression expL op expR
+                    | _ ->
+                        failwith "ERROR"
+
                 | :? UnaryExprContext as exp ->
                     tracefn $"Unary: {text}"
-                    dummy
+                    failwith "Not yet"
+
                 | :? TerminalExprContext as terminalExp ->
                     tracefn $"Terminal: {text}"
                     assert(terminalExp.ChildCount = 1)
@@ -61,21 +70,25 @@ module ExpressionParser =
                         | :? ScientificContext as exp -> box <| value (System.Double.Parse(text))
                         | :? IntegerContext    as exp -> box <| value (System.Int32.Parse(text))
                         | :? StringContext     as exp -> box <| value (deQuoteOnDemand text)
+                        | _ -> failwith "ERROR"
                     | :? TagContext as texp ->
                         box <| tag (tagDic[text])
                     | :? VariableContext as vexp ->
                         //var (varDic[text])
-                        dummy
+                        failwith "Not yet"
                     | _ ->
                         failwith "ERROR"
+
                 | :? ArrayReferenceExprContext as exp ->
                     tracefn $"ArrayReference: {text}"
-                    dummy
+                    failwith "Not yet"
+
                 | :? ParenthesysExprContext as exp ->
                     tracefn $"Parenthesys: {text}"
-                    dummy
+                    failwith "Not yet"
+
                 | _ ->
-                    dummy
+                    failwith "Not yet"
 
             expr
 

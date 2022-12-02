@@ -5,59 +5,17 @@ open System.Runtime.CompilerServices
 open Engine.Common.FS
 open System.Diagnostics
 
+(*  expression: generic type <'T> 나 <_> 으로는 <obj> match 으로 간주됨
+    Expression<'T> 객체에 대한 matching
+    * :? Expression<int> as x -> 형태로 type 을 지정하면 matching 이 가능하다.
+    * :? Expression<_> as x ->   형태로 type 을 지정하지 않으면, Expression<obj> 로 matching 시도해서 matching 이 불가능하다.
+    * :? Expression<'T> as x ->  형태로 type 을 지정하지 않으면, Expression<obj> 로 matching 시도해서 matching 이 불가능하다.
+    * matching 해서 수행해야 할 필요한 기능들은 non generic interface 인 IExpression 에 담아 두고, 이를 matching 한다.
+*)
+
 [<AutoOpen>]
 module ExpressionModule =
-
-
-
-    [<AutoOpen>]
-    module private SubModule =
-        let expectN (n:int) (xs:'a seq) = if xs.Count() <> n then failwith $"Wrong number of arguments: expect {n}"
-        let expect1 xs = expectN 1 xs; xs.First()
-        let expect2 xs = expectN 2 xs; Array.ofSeq xs
-        let expectGteN (n:int) (xs:'a seq) =
-            if xs.Count() < n then failwith $"Wrong number of arguments: expect at least {n} arguments"
-
-        let (|Double|_|) (x:obj) =
-            match x with
-            | :? double as a -> Some a
-            | :? int as a -> Some (double a)
-            | :? single as a -> Some (double a)
-            | _ -> None
-        let (|Integer|_|) (x:obj) =
-            match x with
-            | :? int as n -> Some n
-            | :? uint as n -> Some (int n)
-            | :? double as n -> Some (int n)
-            | _ -> None
-        let (|Bool|_|) (x:obj) =
-            match x with
-            | :? bool as n -> Some n
-            | Integer n when n <> 0 -> Some true
-            | _ -> None
-
-        let (|PLCTag|_|) (x:Terminal<'T>) =
-            match x with
-            | Tag t -> Some t
-            | _ -> None
-
-        let toBool   = (|Bool|_|)     >> Option.get
-        let toDouble = (|Double|_|)   >> Option.get
-        let toInt    = (|Integer|_|)  >> Option.get
-        let toTag x  = (|PLCTag|_|) x |> Option.get
-        let toString (x:obj) = Convert.ToString x
-
-        let isEqual (x:obj) (y:obj) =
-            match x, y with
-            | Double x, Double y -> x = y
-            | (:? string as a), (:? string as b) -> a = b
-            | _ -> false
-
-        [<Extension>] // type SeqExt =
-        type SeqExt =
-            [<Extension>] static member ExpectGteN(xs:'a seq, n) = expectGteN n xs; xs
-            [<Extension>] static member Expect1(xs:'a seq) = expect1 xs
-            [<Extension>] static member Expect2(xs:'a seq) = expect2 xs
+    open SubModule
 
 
     [<AbstractClass>]
@@ -67,70 +25,72 @@ module ExpressionModule =
         member _.Name: string = name
         member val Value = initValue with get, set
 
+        interface IExpressionCreatable with
+            member x.CreateBoxedExpression() = x.CreateBoxedExpression()
+        abstract CreateBoxedExpression: unit -> obj
+
+        interface INamed with
+            member x.Name with get() = x.Name and set(v) = failwith "ERROR: not supported"
+
+
 
     [<AbstractClass>]
     type Tag<'T>(name, initValue:'T) =
         inherit TypedValueStorage<'T>(name, initValue)
 
+        interface ITag
         //memory bit masking 처리를 위해 일반 PlcTag와 DsMemory 구별 구현
         // <ahn> : obj -> 'T
         abstract SetValue:obj -> unit
         abstract GetValue:unit -> obj
+        override x.CreateBoxedExpression() = Terminal(Terminal.Tag x)
 
     // todo: 임시 이름... 추후 Variable로
     type StorageVariable<'T>(name, initValue:'T) =
         inherit TypedValueStorage<'T>(name, initValue)
 
+        interface IVariable
+        override x.CreateBoxedExpression() = Terminal(Terminal.Variable x)
+
     type Terminal<'T> =
         | Tag of Tag<'T>
         | Variable of StorageVariable<'T>
-        | Value of 'T
-        member x.Evaluate() =
-            match x with
-            | Tag t -> t.Value
-            | Variable v -> v.Value
-            | Value v -> v
-        override x.ToString() =
-            match x with
-            | Tag t -> $"({t.Name}={t.Value})"
-            | Variable t -> $"({t.Name}={t.Value})"
-            | Value v -> $"{v}"
-
-
+        | Literal of 'T
 
     type Arguments = obj list
     type Args      = Arguments
 
-    type IExpression =
-        abstract Type : System.Type
-        abstract BoxedEvaluatedValue : obj
-    //    abstract ToText   : unit -> string
-    //    abstract ToJson   : unit -> ExpressionJson
-
+    type FunctionSpec<'T> = {
+        f: Arguments -> 'T
+        name: string
+        args:Arguments
+    }
 
     type Expression<'T> =
         | Terminal of Terminal<'T>
-        | Function of f:(Arguments -> 'T) * name:string * args:Arguments
+        | Function of FunctionSpec<'T>  //f:(Arguments -> 'T) * name:string * args:Arguments
         interface IExpression with
-            member x.Type = x.Type
+            member x.DataType = x.DataType
+            member x.ExpressionType = x.ExpressionType
             member x.BoxedEvaluatedValue = x.Evaluate() |> box
+            member x.GetBoxedRawObject() = x.GetBoxedRawObject()
+            member x.ToText(withParenthesys) = x.ToText(withParenthesys)
 
-        member x.Evaluate() =
+        member x.DataType = typedefof<'T>
+        member x.ExpressionType =
             match x with
-            | Terminal b -> b.Evaluate()
-            | Function (f, n, args) -> f (args |> List.map evalArg)
-        member x.ToText() =
-            match x with
-            | Terminal b -> b.ToString()
-            | Function (f, n, args) ->
-                let strArgs = args.Select(fun x -> x.ToString()).JoinWith(", ")
-                $"{n}({strArgs})"
-        member x.Type = typedefof<'T>
+            | Terminal b -> b.ExpressionType
+            | Function _ -> ExpTypeFunction
 
-
-    let getTypeOfBoxedExpression (exp:obj) = (exp :?> IExpression).Type
-    let value (x:'T) = Terminal (Value x)
+    let getTypeOfBoxedExpression (exp:obj) = (exp :?> IExpression).DataType
+    let value (x:'T) = Terminal (Literal x)
     let tag (t: Tag<'T>) = Terminal (Tag t)
+
+    /// storage:obj --> 실제는 Tag<'T> or StorageVariable<'T> type 객체 boxed
+    let createExpressionFromBoxedStorage (storage:obj) =
+        let t = storage :?> IExpressionCreatable
+        t.CreateBoxedExpression()
+
     //let binaryExpression (opnd1:Expression<'T>) (op:string) (opnd2:Expression<'T>) =
     let createBinaryExpression (opnd1:obj) (op:string) (opnd2:obj) =
         let t1 = getTypeOfBoxedExpression opnd1
@@ -167,16 +127,11 @@ module ExpressionModule =
     let createCustomFunctionExpression (funName:string) (args:Args) =
         match funName with
         | "Int" -> Int args |> box
+        | "Bool" -> Bool args |> box
+        | "sin" -> sin args |> box
+        //| "cos" -> cos args |> box
+        //| "tan" -> tan args |> box
         | _ -> failwith "NOT yet"
-
-
-
-    let evaluate (expr:Expression<'T>) = expr.Evaluate()
-        //match expr with
-        //| Function (f, n, args) ->  // f (args |> List.map evalArg)
-        //    let args = args |> List.map evalArg
-        //    f args
-        //| Terminal v -> v.Evaluate()
 
     let evaluateBoxedExpression (boxedExpr:obj) =
         let expr = boxedExpr :?> IExpression
@@ -187,61 +142,52 @@ module ExpressionModule =
         let t = x.GetType()
         match x with
         (* primitive types *)
-        | (:? bool | :? string | :? int | :? double | :? single) ->
-            x
-        (*  expression: 'T general type 으로는 match 가 안되니, 중복해서 쓸 수 밖에 없음. *)
-        | :? Expression<bool>   as exp -> exp.Evaluate()
-        | :? Expression<int>    as exp -> exp.Evaluate()
-        | :? Expression<double> as exp -> exp.Evaluate()
-        | :? Expression<single> as exp -> exp.Evaluate()
-        | :? Expression<string> as exp -> exp.Evaluate()
-        | :? Expression<_> as exp ->
-            tracefn "Generic expression"
-            exp.Evaluate()
+        | (:? bool | :? string | :? int | :? double | :? single) -> x
+        | :? IExpression as exp -> exp.BoxedEvaluatedValue
         | _ ->
             failwith "error"
 
-    let resolve (expr:Expression<'T>) = expr |> evaluate |> unbox
+    let resolve (expr:Expression<'T>) = expr.Evaluate() |> unbox
 
 
 
     [<AutoOpen>]
     module FunctionModule =
-        let add        (args:Arguments) = Function (_add,        "+", args)
-        let abs        (args:Arguments) = Function (_abs,        "abs", args)
-        let absd       (args:Arguments) = Function (_absd,       "absD", args)
-        let sub        (args:Arguments) = Function (_sub,        "-", args)
-        let mul        (args:Arguments) = Function (_mul,        "*", args)
-        let div        (args:Arguments) = Function (_div,        "/", args)
-        let modulo     (args:Arguments) = Function (_modulo,     "%", args)
+        let add            (args:Args) = Function { f=_add;            name="+";      args=args}
+        let abs            (args:Args) = Function { f=_abs;            name="abs";    args=args}
+        let absd           (args:Args) = Function { f=_absd;           name="absD";   args=args}
+        let sub            (args:Args) = Function { f=_sub;            name="-";      args=args}
+        let mul            (args:Args) = Function { f=_mul;            name="*";      args=args}
+        let div            (args:Args) = Function { f=_div;            name="/";      args=args}
+        let modulo         (args:Args) = Function { f=_modulo;         name="%";      args=args}
 
-        let equal      (args:Arguments) = Function (_equal,      "=", args)
-        let notEqual   (args:Arguments) = Function (_notEqual,   "!=", args)
-        let gt         (args:Arguments) = Function (_gt,         ">", args)
-        let lt         (args:Arguments) = Function (_lt,         "<", args)
-        let gte        (args:Arguments) = Function (_gte,        ">=", args)
-        let lte        (args:Arguments) = Function (_lte,        "<=", args)
-        let equalString    (args:Arguments) = Function (_equalString,      "=T", args)
-        let notEqualString (args:Arguments) = Function (_notEqualString,   "!=T", args)
+        let equal          (args:Args) = Function { f=_equal;          name="=";      args=args}
+        let notEqual       (args:Args) = Function { f=_notEqual;       name="!=";     args=args}
+        let gt             (args:Args) = Function { f=_gt;             name=">";      args=args}
+        let lt             (args:Args) = Function { f=_lt;             name="<";      args=args}
+        let gte            (args:Args) = Function { f=_gte;            name=">=";     args=args}
+        let lte            (args:Args) = Function { f=_lte;            name="<=";     args=args}
+        let equalString    (args:Args) = Function { f=_equalString;    name="=T";     args=args}
+        let notEqualString (args:Args) = Function { f=_notEqualString; name="!=T";    args=args}
 
-        let muld       (args:Arguments) = Function (_muld,       "*", args)
-        let addd       (args:Arguments) = Function (_addd,       "+", args)
-        let subd       (args:Arguments) = Function (_subd,       "-D", args)
-        let divd       (args:Arguments) = Function (_divd,       "/D", args)
-        let modulod    (args:Arguments) = Function (_modulo,     "%D", args)
-        let concat     (args:Arguments) = Function (_concat,     "+", args)
-        let logicalAnd (args:Arguments) = Function (_logicalAnd, "&", args)
-        let logicalOr  (args:Arguments) = Function (_logicalOr,  "|", args)
-        let logicalNot (args:Arguments) = Function (_logicalNot, "!", args)
-        let orBit      (args:Arguments) = Function (_orBit,      "orBit", args)
-        let andBit     (args:Arguments) = Function (_andBit,     "andBit", args)
-        let notBit     (args:Arguments) = Function (_notBit,     "notBit", args)
-        let xorBit     (args:Arguments) = Function (_xorBit,     "xorBit", args)
-        let shiftLeft  (args:Arguments) = Function (_shiftLeft,  "<<", args)
-        let shiftRight (args:Arguments) = Function (_shiftRight, ">>", args)
-        let sin        (args:Arguments) = Function (_sin,        "sin", args)
-        let Bool       (args:Arguments) = Function (_convertBool, "Bool", args)
-        let Int        (args:Arguments) = Function (_convertInt, "Int", args)
+        let muld           (args:Args) = Function { f=_muld;           name="*";      args=args}
+        let addd           (args:Args) = Function { f=_addd;           name="+";      args=args}
+        let subd           (args:Args) = Function { f=_subd;           name="-D";     args=args}
+        let divd           (args:Args) = Function { f=_divd;           name="/D";     args=args}
+        let modulod        (args:Args) = Function { f=_modulo;         name="%D";     args=args}
+        let concat         (args:Args) = Function { f=_concat;         name="+";      args=args}
+        let logicalAnd     (args:Args) = Function { f=_logicalAnd;     name="&";      args=args}
+        let logicalOr      (args:Args) = Function { f=_logicalOr;      name="|";      args=args}
+        let logicalNot     (args:Args) = Function { f=_logicalNot;     name="!";      args=args}
+        let orBit          (args:Args) = Function { f=_orBit;          name="orBit";  args=args}
+        let andBit         (args:Args) = Function { f=_andBit;         name="andBit"; args=args}
+        let notBit         (args:Args) = Function { f=_notBit;         name="notBit"; args=args}
+        let xorBit         (args:Args) = Function { f=_xorBit;         name="xorBit"; args=args}
+        let shiftLeft      (args:Args) = Function { f=_shiftLeft;      name="<<";     args=args}
+        let shiftRight     (args:Args) = Function { f=_shiftRight;     name=">>";     args=args}
+        let sin            (args:Args) = Function { f=_sin;            name="sin";    args=args}
+        let Bool           (args:Args) = Function { f=_convertBool;    name="Bool";   args=args}
+        let Int            (args:Args) = Function { f=_convertInt;     name= "Int";   args=args}
 
         let anD = logicalAnd
         let absDouble = absd
@@ -300,5 +246,49 @@ module ExpressionModule =
                 | Assign (expr, target) -> expr.Evaluate() |> target.SetValue
             member x.ToText() =
                  match x with
-                 | Assign     (expr, target) -> $"assign({expr.ToText()}, {target.ToText()})"
+                 | Assign     (expr, target) -> $"assign({expr.ToText(false)}, {target.ToText()})"
+
+    type Terminal<'T> with
+        member x.ExpressionType =
+            match x with
+            | Tag _ -> ExpTypeTag
+            | Variable _ -> ExpTypeVariable
+            | Literal _ -> ExpTypeLiteral
+
+        member x.GetBoxedRawObject() =
+            match x with
+            | Tag t -> t |> box
+            | Variable v -> v
+            | Literal v -> v |> box
+
+        member x.Evaluate() =
+            match x with
+            | Tag t -> t.Value
+            | Variable v -> v.Value
+            | Literal v -> v
+
+        member x.ToText() =
+            match x with
+            | Tag t -> $"({t.Name}={t.Value})"
+            | Variable t -> $"({t.Name}={t.Value})"
+            | Literal v -> $"{v}"
+
+    type Expression<'T> with
+        member x.GetBoxedRawObject() =
+            match x with
+            | Terminal b -> b.GetBoxedRawObject()
+            | Function fs -> fs |> box
+
+        member x.Evaluate() =
+            match x with
+            | Terminal b -> b.Evaluate()
+            | Function fs -> fs.f (fs.args |> List.map evalArg)
+
+        member x.ToText(withParenthesys:bool) =
+            match x with
+            | Terminal b -> b.ToText()
+            | Function fs ->
+                let text = fwdSerializeFunctionNameAndBoxedArguments fs.name fs.args withParenthesys
+                text
+
 

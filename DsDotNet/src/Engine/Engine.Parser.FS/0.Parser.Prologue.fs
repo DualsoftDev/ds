@@ -5,18 +5,18 @@ open Engine.Core
 
 [<AutoOpen>]
 module ParserUtil =
-    let dummyDeviceLoader (param:DeviceLoadParameters) : Device =
+    let private dummyDeviceLoader (param:DeviceLoadParameters) : Device =
         failwith "Should be reimplemented."
 
-    let dummyExternalSystemLoader (param:DeviceLoadParameters) : ExternalSystem =
+    let private dummyExternalSystemLoader (param:DeviceLoadParameters) : ExternalSystem =
         failwith "Should be reimplemented."
 
-    let dummyParserFqdn (text:string) : string list =
+    let private dummyParserFqdn (text:string) : string list =
         failwith "Should be reimplemented."
 
-    let mutable fwdLoadDevice = dummyDeviceLoader
-    let mutable fwdLoadExternalSystem = dummyExternalSystemLoader
-    let mutable fwdParseFqdn = dummyParserFqdn
+    let mutable internal fwdLoadDevice = dummyDeviceLoader
+    let mutable internal fwdLoadExternalSystem = dummyExternalSystemLoader
+    let mutable internal fwdParseFqdn = dummyParserFqdn
     //let mutable fwdParseExpression = dummyParserFqdn
 
     let getText (x:IParseTree) = x.GetText()

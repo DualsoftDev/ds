@@ -1,12 +1,14 @@
 namespace UnitTest.Engine
 
 open System
+open System.Linq
 open Engine.Core
 open NUnit.Framework
 open Engine.Cpu.TagModule
 open Engine.Cpu
 open Newtonsoft.Json
 open Engine.Parser.FS.ExpressionParser
+open Engine.Common.FS
 
 [<AutoOpen>]
 module ExpressionTestModule =
@@ -14,8 +16,12 @@ module ExpressionTestModule =
     type ExpressionTest() =
         do Fixtures.SetUpTest()
 
+        let value = ExpressionModule.value
+        let evaluate (exp:Expression<'T>) = exp.Evaluate()
+
         [<Test>]
         member __.``1 ExpressionValueUnit test`` () =
+
 
             //지원 value type : bool, int, single, double, string
             value 1       |> evaluate === 1
@@ -71,35 +77,35 @@ module ExpressionTestModule =
         [<Test>]
         member __.``3 ExpressionFuncUnit test`` () =
 
-            abs[13]                          |> evaluate === 13
-            abs[-13]                         |> evaluate === 13
-            absDouble[-13.0]                 |> evaluate === 13.0
-            xorBit[13; 11]                   |> evaluate === 6
-            andBit[2; 3]                     |> evaluate === 2
-            andBit[1; 2; 3; 4]               |> evaluate === 0
-            orBit[1; 2; 3; 4]                |> evaluate === 7
-            notBit[65535]                    |> evaluate === -65536
-            add[1; 2]                        |> evaluate === 3
-            sub[5; 3]                        |> evaluate === 2
-            mul[2; 3]                        |> evaluate === 6
-            divDouble[3.0; 2.0]              |> evaluate === 1.5
-            add[1; 2; 3]                     |> evaluate === 6
-            add([1..10]|>List.map(fun f->f)) |> evaluate === 55
-            mul([1..5]|> List.map(fun f->f)) |> evaluate === 120
-            sub[10; 1; 2]       |> evaluate === 7
+            abs [13]                          |> evaluate === 13
+            abs [-13]                         |> evaluate === 13
+            absDouble [-13.0]                 |> evaluate === 13.0
+            xorBit [13; 11]                   |> evaluate === 6
+            andBit [2; 3]                     |> evaluate === 2
+            andBit [1; 2; 3; 4]               |> evaluate === 0
+            orBit [1; 2; 3; 4]                |> evaluate === 7
+            notBit [65535]                    |> evaluate === -65536
+            add [1; 2]                        |> evaluate === 3
+            sub [5; 3]                        |> evaluate === 2
+            mul [2; 3]                        |> evaluate === 6
+            divDouble [3.0; 2.0]              |> evaluate === 1.5
+            add [1; 2; 3]                     |> evaluate === 6
+            add ([1..10] |> List.cast<obj>)   |> evaluate === 55
+            mul( [1..5]  |> List.cast<obj>)   |> evaluate === 120
+            sub [10; 1; 2]       |> evaluate === 7
             //Math.Abs((addDouble[1.1; 2.2] |> evaluate) - 3.3) <= 0.00001 |> ShouldBeTrue
             //Math.Abs((mulDouble[1.1; 2.0] |> evaluate) - 2.2) <= 0.00001 |> ShouldBeTrue
-            addString["Hello, "; "world!"]|> evaluate === "Hello, world!"
-            mul[2; 3] |> evaluate === 6
-            equalString["Hello"; "world"]       |> evaluate === false
-            equalString["Hello"; "Hello"]       |> evaluate === true
-            notEqualString["Hello"; "world"]    |> evaluate === true
-            notEqualString["Hello"; "Hello"]    |> evaluate === false
-            notEqual[1; 2]                      |> evaluate === true
-            notEqual[2; 2]                      |> evaluate === false
-            equal[2; 2]                         |> evaluate === true
-            equal[2; 2.0]                       |> evaluate=== true
-            equal[2; 2.0f]                      |> evaluate === true
+            addString ["Hello, "; "world!"]|> evaluate === "Hello, world!"
+            mul [2; 3] |> evaluate === 6
+            equalString ["Hello"; "world"]       |> evaluate === false
+            equalString ["Hello"; "Hello"]       |> evaluate === true
+            notEqualString ["Hello"; "world"]    |> evaluate === true
+            notEqualString ["Hello"; "Hello"]    |> evaluate === false
+            notEqual [1; 2]                      |> evaluate === true
+            notEqual [2; 2]                      |> evaluate === false
+            equal [2; 2]                         |> evaluate === true
+            equal [2; 2.0]                       |> evaluate=== true
+            equal [2; 2.0f]                      |> evaluate === true
 
 
             gte [2; 3] |> evaluate === false
@@ -168,17 +174,38 @@ module ExpressionTestModule =
             Assign(tag source, target).Do()
             targetExpr |> evaluate === 44
 
-        //[<Test>]
-        //member __.``X 6 Serialization test`` () =
-        //    let toText (exp:Expression<'T>) = exp.ToText()
-        //    value 1         |> toText === "1"
-        //    value "hello"   |> toText === "hello"
-        //    value Math.PI   |> toText === Math.PI.ToString()
-        //    value true      |> toText === "True"
-        //    value false     |> toText === "False"
-        //    value 3.14f     |> toText === "3.14"
-        //    value 3.14      |> toText === "3.14"
+        [<Test>]
+        member __.``X 6 Serialization test`` () =
+            let toText (exp:Expression<'T>) = exp.ToText(false)
 
+            value 1         |> toText === "1"
+            value "hello"   |> toText === "hello"
+            value Math.PI   |> toText === Math.PI.ToString()
+            value true      |> toText === "True"
+            value false     |> toText === "False"
+            value 3.14f     |> toText === "3.14"
+            value 3.14      |> toText === "3.14"
+
+            mul [ value 2; value 3 ] |> toText === "2*3"
+            mul [ add [value 1; value 2]; value 3 ] |> toText === "(1+2)*3"
+            mul [ value 3; add [value 1; value 2] ] |> toText === "3*(1+2)"
+            add [ mul [value 1; value 2]; value 3; ] |> toText === "(1*2)+3"  //"1*2+3"
+
+            add [value 1; value 2; value 3 ] |> toText === "+(1,2,3)"
+            mul [ add [value 1; value 2; value 3]; value 3 ] |> toText === "+(1,2,3)*3"
+
+            mul [   value 2
+                    add [value 1; value 2]
+                    add [value 4; value 5]
+            ] |> toText === "*(2,(1+2),(4+5))"
+            mul [value 2; add[value 3; value 4]]|> toText  === "2*(3+4)"
+
+            add [value 2; mul [ value 5; value 6 ]; value 4]|> toText  === "+(2,(5*6),4)"
+            add [
+                add [value 2; mul [ value 5; value 6 ]];
+                value 4
+            ]|> toText  === "(2+(5*6))+4"  //"2+(5*6)+4)"
+            mul [value 2; value 3; value 4]|> toText  === "*(2,3,4)"
 
         //    mul [   2
         //            add [1; 2]
@@ -189,13 +216,17 @@ module ExpressionTestModule =
         //    mul [2; 3; 4]|> toText  === "*[2; 3; 4]"
         //    mul [2; 3; 4]|> toText  === "*[2; 3; 4]"
 
-        //    let t1 = PlcTag.Create("t1", 1)
-        //    let t2 = PlcTag.Create("t2", 2)
-        //    let tt1 = t1 |> tag
-        //    let tt2 = t2 |> tag
+            let t1 = PlcTag.Create("t1", 1)
+            let t2 = PlcTag.Create("t2", 2)
+            let tt1 = t1 |> tag
+            let tt2 = t2 |> tag
+            let addTwoExpr = add [ tt1; tt2 ]
+            addTwoExpr.ToText(false) === "+[(t1=1); (t2=2)]"
 
-        //    let addTwoExpr = add [ tt1; tt2 ]
-        //    addTwoExpr.ToText() === "+[(t1=1); (t2=2)]"
+            let sTag = PlcTag.Create("address", "value")
+            sTag.ToText() === "(address=value)"
+            let exprTag = tag sTag
+            exprTag.ToText(false) === "(address=value)"
 
 
         //    let sTag = PlcTag.Create("address", "value")
@@ -282,8 +313,65 @@ module ExpressionTestModule =
             targetExpr |> evaluate === false
 
         [<Test>]
-        member __.``8 ExpressionParse test`` () =
-            let evalExpr = parseExpression >> evaluateBoxedExpression >> box
+        member __.``9 Expression Tag type test`` () =
+            let rawTags = [
+                PlcTag.Create("sbyte", 1y) |> box
+                PlcTag.Create("byte", 1uy)
+                PlcTag.Create("int16", 1s)
+                PlcTag.Create("uint16", 1us)
+                PlcTag.Create("int32", 1)
+                PlcTag.Create("uint32", 1u)
+                PlcTag.Create("int64", 1L)
+                PlcTag.Create("uint64", 1UL)
+                PlcTag.Create("single", 1.0f)
+                PlcTag.Create("double", 1.0)
+                PlcTag.Create("char", '1')
+                PlcTag.Create("string", "1")
+            ]
+            let tags = rawTags |> List.map (createExpressionFromBoxedStorage)
+            let tagDic =
+                [   for t in tags do
+                        let exp = t :?> IExpression
+                        let inner = exp.GetBoxedRawObject()
+                        let name = (inner :?> INamed).Name
+                        (name, t)
+                ] |> Tuple.toDictionary
+            let sbyte = tagDic["sbyte"] :?> IExpression //:?> Terminal
+            sbyte.DataType === typedefof<sbyte>
+            sbyte.BoxedEvaluatedValue === 1y
+
+            let rawVariables = [
+                StorageVariable("sbyte", 1y) |> box
+                StorageVariable("byte", 1uy)
+                StorageVariable("int16", 1s)
+                StorageVariable("uint16", 1us)
+                StorageVariable("int32", 1)
+                StorageVariable("uint32", 1u)
+                StorageVariable("int64", 1L)
+                StorageVariable("uint64", 1UL)
+                StorageVariable("single", 1.0f)
+                StorageVariable("double", 1.0)
+                StorageVariable("char", '1')
+                StorageVariable("string", "1")
+            ]
+            let variables = rawVariables |> List.map (createExpressionFromBoxedStorage)
+            let varDic =
+                [   for t in variables do
+                        let exp = t :?> IExpression
+                        let inner = exp.GetBoxedRawObject()
+                        let name = (inner :?> INamed).Name
+                        (name, t)
+                ] |> Tuple.toDictionary
+            let sbyte = varDic["sbyte"] :?> IExpression //:?> Terminal
+            sbyte.DataType === typedefof<sbyte>
+            sbyte.BoxedEvaluatedValue === 1y
+
+            ()
+
+        [<Test>]
+        member __.``10 ExpressionParse test`` () =
+            let evalExpr = parseExpression >> evaluateBoxedExpression
+
 
             //"Int(3.4) + 1 + 2 + (abs(%tag3))"
             "1 + 2" |> evalExpr === 3
@@ -291,6 +379,9 @@ module ExpressionTestModule =
             "1.0 + 2.0" |> evalExpr === 3.0
 
             (fun () -> "1.0 + 2" |> evalExpr |> ignore )
+            |> ShouldFailWithSubstringT "Type mismatch"
+
+            (fun () -> "\"hello\" + 2" |> evalExpr |> ignore )
             |> ShouldFailWithSubstringT "Type mismatch"
 
             "Int(1.0) + 2" |> evalExpr === 3

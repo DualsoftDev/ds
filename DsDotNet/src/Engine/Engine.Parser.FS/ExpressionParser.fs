@@ -8,6 +8,7 @@ open Engine.Common.FS
 open Engine.Core
 open type exprParser
 
+[<AutoOpen>]
 module ExpressionParser =
     let private createParser(text:string) =
         let inputStream = new AntlrInputStream(text)
@@ -67,9 +68,9 @@ module ExpressionParser =
                     | :? LiteralContext as exp ->
                         assert(exp.ChildCount = 1)
                         match exp.children[0] with
-                        | :? ScientificContext as exp -> box <| value (System.Double.Parse(text))
-                        | :? IntegerContext    as exp -> box <| value (System.Int32.Parse(text))
-                        | :? StringContext     as exp -> box <| value (deQuoteOnDemand text)
+                        | :? ScientificContext as exp -> box <| expr (System.Double.Parse(text))
+                        | :? IntegerContext    as exp -> box <| expr (System.Int32.Parse(text))
+                        | :? StringContext     as exp -> box <| expr (deQuoteOnDemand text)
                         | _ -> failwith "ERROR"
                     | :? TagContext as texp ->
                         box <| tag (tagDic[text])

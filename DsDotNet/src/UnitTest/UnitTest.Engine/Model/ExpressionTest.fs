@@ -1,13 +1,11 @@
 namespace UnitTest.Engine
 
 open System
-open System.Linq
-open Engine.Core
 open NUnit.Framework
-open Engine.Cpu.TagModule
+
+open Engine.Core
 open Engine.Cpu
-open Newtonsoft.Json
-open Engine.Parser.FS.ExpressionParser
+open Engine.Parser.FS
 open Engine.Common.FS
 
 [<AutoOpen>]
@@ -16,7 +14,7 @@ module ExpressionTestModule =
     type ExpressionTest() =
         do Fixtures.SetUpTest()
 
-        let value = ExpressionModule.value
+        let v = ExpressionModule.value
         let evaluate (exp:Expression<'T>) = exp.Evaluate()
 
         [<Test>]
@@ -24,22 +22,22 @@ module ExpressionTestModule =
 
 
             //지원 value type : bool, int, single, double, string
-            value 1       |> evaluate === 1
-            value 1       |> evaluate === 1
-            value "hello" |> evaluate === "hello"
-            value Math.PI |> evaluate === Math.PI
-            value true    |> evaluate === true
-            value false   |> evaluate === false
-            value 3.14f   |> evaluate === 3.14f
-            value 3.14    |> evaluate === 3.14
+            v 1       |> evaluate === 1
+            v 1       |> evaluate === 1
+            v "hello" |> evaluate === "hello"
+            v Math.PI |> evaluate === Math.PI
+            v true    |> evaluate === true
+            v false   |> evaluate === false
+            v 3.14f   |> evaluate === 3.14f
+            v 3.14    |> evaluate === 3.14
 
             /////미지원 value type : uint, int64, ... 지원 기준외 등등
-            (fun () -> value 1u   |> evaluate  === 1) |> ShouldFail
-            (fun () -> value 1L   |> evaluate  === 1) |> ShouldFail
-            (fun () -> value 1.0m |> evaluate  === 1) |> ShouldFail
+            (fun () -> v 1u   |> evaluate  === 1) |> ShouldFail
+            (fun () -> v 1L   |> evaluate  === 1) |> ShouldFail
+            (fun () -> v 1.0m |> evaluate  === 1) |> ShouldFail
 
             ////함수 없는 Value 배열 평가는 불가능
-            (fun () -> value [1;2]   |> evaluate  === 1) |> ShouldFail
+            (fun () -> v [1;2]   |> evaluate  === 1) |> ShouldFail
 
         [<Test>]
         member __.``2 ExpressionTagUnit test`` () =
@@ -54,7 +52,7 @@ module ExpressionTestModule =
             let t2 = PlcTag.Create("2", 2)
             add [tag t2; tag t2] |> evaluate === 4
             //함수 없는 Tag 배열 평가는 불가능
-            (fun () -> value [t2;t2]   |> evaluate  === 1) |> ShouldFail
+            (fun () -> v [t2;t2]   |> evaluate  === 1) |> ShouldFail
 
             tag (PlcTag.Create("Two", "Two")) |> evaluate === "Two"
 
@@ -163,7 +161,7 @@ module ExpressionTestModule =
             stmt.Do()
             targetExpr |> evaluate === 24
 
-            (Assign (value 9, target)).Do()
+            (Assign (v 9, target)).Do()
             targetExpr |> evaluate === 9
 
             let source = PlcTag.Create("source", 33)
@@ -177,35 +175,36 @@ module ExpressionTestModule =
         [<Test>]
         member __.``X 6 Serialization test`` () =
             let toText (exp:Expression<'T>) = exp.ToText(false)
+            mul [ 2; 3 ] |> toText === "2*3"
 
-            value 1         |> toText === "1"
-            value "hello"   |> toText === "hello"
-            value Math.PI   |> toText === Math.PI.ToString()
-            value true      |> toText === "True"
-            value false     |> toText === "False"
-            value 3.14f     |> toText === "3.14"
-            value 3.14      |> toText === "3.14"
+            v 1         |> toText === "1"
+            v "hello"   |> toText === "hello"
+            v Math.PI   |> toText === Math.PI.ToString()
+            v true      |> toText === "True"
+            v false     |> toText === "False"
+            v 3.14f     |> toText === "3.14"
+            v 3.14      |> toText === "3.14"
 
-            mul [ value 2; value 3 ] |> toText === "2*3"
-            mul [ add [value 1; value 2]; value 3 ] |> toText === "(1+2)*3"
-            mul [ value 3; add [value 1; value 2] ] |> toText === "3*(1+2)"
-            add [ mul [value 1; value 2]; value 3; ] |> toText === "(1*2)+3"  //"1*2+3"
+            mul [ v 2; v 3 ] |> toText === "2*3"
+            mul [ add [v 1; v 2]; v 3 ] |> toText === "(1+2)*3"
+            mul [ v 3; add [v 1; v 2] ] |> toText === "3*(1+2)"
+            add [ mul [v 1; v 2]; v 3; ] |> toText === "(1*2)+3"  //"1*2+3"
 
-            add [value 1; value 2; value 3 ] |> toText === "+(1,2,3)"
-            mul [ add [value 1; value 2; value 3]; value 3 ] |> toText === "+(1,2,3)*3"
+            add [v 1; v 2; v 3 ] |> toText === "+(1,2,3)"
+            mul [ add [v 1; v 2; v 3]; v 3 ] |> toText === "+(1,2,3)*3"
 
-            mul [   value 2
-                    add [value 1; value 2]
-                    add [value 4; value 5]
+            mul [   v 2
+                    add [v 1; v 2]
+                    add [v 4; v 5]
             ] |> toText === "*(2,(1+2),(4+5))"
-            mul [value 2; add[value 3; value 4]]|> toText  === "2*(3+4)"
+            mul [v 2; add[v 3; v 4]]|> toText  === "2*(3+4)"
 
-            add [value 2; mul [ value 5; value 6 ]; value 4]|> toText  === "+(2,(5*6),4)"
+            add [v 2; mul [ v 5; v 6 ]; v 4]|> toText  === "+(2,(5*6),4)"
             add [
-                add [value 2; mul [ value 5; value 6 ]];
-                value 4
+                add [v 2; mul [ v 5; v 6 ]];
+                v 4
             ]|> toText  === "(2+(5*6))+4"  //"2+(5*6)+4)"
-            mul [value 2; value 3; value 4]|> toText  === "*(2,3,4)"
+            mul [v 2; v 3; v 4]|> toText  === "*(2,3,4)"
 
         //    mul [   2
         //            add [1; 2]

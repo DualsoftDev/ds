@@ -32,8 +32,8 @@ module rec ExpressionSerializeModule =
 
     let serializeFunctionNameAndBoxedArguments (name:string) (args:Args) (withParenthesys:bool) =
         let isBinary = isBinaryFunctionOrOperator name
-        let precedence = operatorPrecedenceMap[name]
         if isBinary && args.Length = 2 then
+            let precedence = operatorPrecedenceMap[name]
             let l:string = serializeBoxedExpression args[0] true
             let r:string = serializeBoxedExpression args[1] true
             let text = $"{l}{name}{r}"
@@ -45,7 +45,5 @@ module rec ExpressionSerializeModule =
                     let withParenthesys = args.Length >= 2
                     ax.ToText(withParenthesys)
                 ] |> String.concat ","
-            //let args = args |> map (fun arg -> (arg :?> IExpression).ToText())
-            //let args = args |> String.concat ","
             $"{name}({args})"
 

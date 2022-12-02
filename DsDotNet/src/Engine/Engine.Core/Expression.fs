@@ -83,8 +83,29 @@ module ExpressionModule =
             | Function _ -> ExpTypeFunction
 
     let getTypeOfBoxedExpression (exp:obj) = (exp :?> IExpression).DataType
+
     let value (x:'T) = Terminal (Literal x)
     let tag (t: Tag<'T>) = Terminal (Tag t)
+
+    let expr (x:obj) =
+        match x with
+        | :? IExpression as e -> x
+        | :? IExpressionCreatable as c -> c.CreateBoxedExpression()
+        | :? sbyte  as o -> Terminal (Literal o)
+        | :? byte   as o -> Terminal (Literal o)
+        | :? int16  as o -> Terminal (Literal o)
+        | :? uint16 as o -> Terminal (Literal o)
+        | :? int32  as o -> Terminal (Literal o)
+        | :? uint32 as o -> Terminal (Literal o)
+        | :? int64  as o -> Terminal (Literal o)
+        | :? uint64 as o -> Terminal (Literal o)
+        | :? single as o -> Terminal (Literal o)
+        | :? bool   as o -> Terminal (Literal o)
+        | :? double as o -> Terminal (Literal o)
+        | :? char   as o -> Terminal (Literal o)
+        | :? string as o -> Terminal (Literal o)
+        | _ -> failwith "ERROR"
+
 
     /// storage:obj --> 실제는 Tag<'T> or StorageVariable<'T> type 객체 boxed
     let createExpressionFromBoxedStorage (storage:obj) =
@@ -153,41 +174,44 @@ module ExpressionModule =
 
     [<AutoOpen>]
     module FunctionModule =
-        let add            (args:Args) = Function { f=_add;            name="+";      args=args}
-        let abs            (args:Args) = Function { f=_abs;            name="abs";    args=args}
-        let absd           (args:Args) = Function { f=_absd;           name="absD";   args=args}
-        let sub            (args:Args) = Function { f=_sub;            name="-";      args=args}
-        let mul            (args:Args) = Function { f=_mul;            name="*";      args=args}
-        let div            (args:Args) = Function { f=_div;            name="/";      args=args}
-        let modulo         (args:Args) = Function { f=_modulo;         name="%";      args=args}
+        /// Create function
+        let private cf (f:Args->'T) (name:string) (args:Args) =
+            let args = args |> map expr
+            Function { f=f; name=name; args=args}
 
-        let equal          (args:Args) = Function { f=_equal;          name="=";      args=args}
-        let notEqual       (args:Args) = Function { f=_notEqual;       name="!=";     args=args}
-        let gt             (args:Args) = Function { f=_gt;             name=">";      args=args}
-        let lt             (args:Args) = Function { f=_lt;             name="<";      args=args}
-        let gte            (args:Args) = Function { f=_gte;            name=">=";     args=args}
-        let lte            (args:Args) = Function { f=_lte;            name="<=";     args=args}
-        let equalString    (args:Args) = Function { f=_equalString;    name="=T";     args=args}
-        let notEqualString (args:Args) = Function { f=_notEqualString; name="!=T";    args=args}
-
-        let muld           (args:Args) = Function { f=_muld;           name="*";      args=args}
-        let addd           (args:Args) = Function { f=_addd;           name="+";      args=args}
-        let subd           (args:Args) = Function { f=_subd;           name="-D";     args=args}
-        let divd           (args:Args) = Function { f=_divd;           name="/D";     args=args}
-        let modulod        (args:Args) = Function { f=_modulo;         name="%D";     args=args}
-        let concat         (args:Args) = Function { f=_concat;         name="+";      args=args}
-        let logicalAnd     (args:Args) = Function { f=_logicalAnd;     name="&";      args=args}
-        let logicalOr      (args:Args) = Function { f=_logicalOr;      name="|";      args=args}
-        let logicalNot     (args:Args) = Function { f=_logicalNot;     name="!";      args=args}
-        let orBit          (args:Args) = Function { f=_orBit;          name="orBit";  args=args}
-        let andBit         (args:Args) = Function { f=_andBit;         name="andBit"; args=args}
-        let notBit         (args:Args) = Function { f=_notBit;         name="notBit"; args=args}
-        let xorBit         (args:Args) = Function { f=_xorBit;         name="xorBit"; args=args}
-        let shiftLeft      (args:Args) = Function { f=_shiftLeft;      name="<<";     args=args}
-        let shiftRight     (args:Args) = Function { f=_shiftRight;     name=">>";     args=args}
-        let sin            (args:Args) = Function { f=_sin;            name="sin";    args=args}
-        let Bool           (args:Args) = Function { f=_convertBool;    name="Bool";   args=args}
-        let Int            (args:Args) = Function { f=_convertInt;     name= "Int";   args=args}
+        let add            args = cf _add            "+"    args
+        let abs            args = cf _abs            "abs"    args
+        let absd           args = cf _absd           "absD"   args
+        let sub            args = cf _sub            "-"      args
+        let mul            args = cf _mul            "*"      args
+        let div            args = cf _div            "/"      args
+        let modulo         args = cf _modulo         "%"      args
+        let equal          args = cf _equal          "="      args
+        let notEqual       args = cf _notEqual       "!="     args
+        let gt             args = cf _gt             ">"      args
+        let lt             args = cf _lt             "<"      args
+        let gte            args = cf _gte            ">="     args
+        let lte            args = cf _lte            "<="     args
+        let equalString    args = cf _equalString    "=T"     args
+        let notEqualString args = cf _notEqualString "!=T"    args
+        let muld           args = cf _muld           "*"      args
+        let addd           args = cf _addd           "+"      args
+        let subd           args = cf _subd           "-D"     args
+        let divd           args = cf _divd           "/D"     args
+        let modulod        args = cf _modulo         "%D"     args
+        let concat         args = cf _concat         "+"      args
+        let logicalAnd     args = cf _logicalAnd     "&"      args
+        let logicalOr      args = cf _logicalOr      "|"      args
+        let logicalNot     args = cf _logicalNot     "!"      args
+        let orBit          args = cf _orBit          "orBit"  args
+        let andBit         args = cf _andBit         "andBit" args
+        let notBit         args = cf _notBit         "notBit" args
+        let xorBit         args = cf _xorBit         "xorBit" args
+        let shiftLeft      args = cf _shiftLeft      "<<"     args
+        let shiftRight     args = cf _shiftRight     ">>"     args
+        let sin            args = cf _sin            "sin"    args
+        let Bool           args = cf _convertBool    "Bool"   args
+        let Int            args = cf _convertInt     "Int"    args
 
         let anD = logicalAnd
         let absDouble = absd

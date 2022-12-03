@@ -31,7 +31,7 @@ module CpuLoader =
         s.ErrorRx .ToText()   |> Console.WriteLine
 
 
-        let expr = add [10 ;12 ]
+        let expr = add [literal 10; literal 12 ]
         let t1 = PlcTag.Create("t1", 1)
         let t2 = PlcTag.Create("t2", 1)
         let target = PlcTag.Create("target", 1)
@@ -39,9 +39,9 @@ module CpuLoader =
         let expr = mul [  //  2
                           //  expr
                           //  add [t1; t2]
-                            2
-                            3
-                            add [1; 5]
+                            literal 2
+                            literal 3
+                            add [literal 1; literal 5]
                 ]
         let a = expr.Evaluate()
 

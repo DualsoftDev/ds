@@ -25,9 +25,9 @@ module ExpressionParser =
     let createExpression
         (tagDic:Dictionary<string, Tag<_>>)
         (varDic:Dictionary<string, StorageVariable<_>>)
-        (ctx:ExprContext) : obj = // 실제로는 Expression<'T> =
+        (ctx:ExprContext) : IExpression =
 
-        let rec helper(ctx:ExprContext) : obj =
+        let rec helper(ctx:ExprContext) : IExpression =
             let text = ctx.GetText()
             let expr =
                 match ctx with
@@ -52,7 +52,7 @@ module ExpressionParser =
                         let expL = helper(left :?> ExprContext)
                         let expR = helper(right :?> ExprContext)
                         let op = op.GetText()
-                        box <| createBinaryExpression expL op expR
+                        createBinaryExpression expL op expR
                     | _ ->
                         failwith "ERROR"
 
@@ -68,22 +68,22 @@ module ExpressionParser =
                     | :? LiteralContext as exp ->
                         assert(exp.ChildCount = 1)
                         match exp.children[0] with
-                        | :? LiteralStringContext as exp -> text |> deQuoteOnDemand|> literal |> box
-                        | :? LiteralDoubleContext as exp -> text                   |> System.Double.Parse |> literal |> box
-                        | :? LiteralSingleContext as exp -> text.Replace("f", "")  |> System.Single.Parse |> literal |> box
-                        | :? LiteralSbyteContext  as exp -> text.Replace("y", "")  |> System.SByte.Parse  |> literal |> box
-                        | :? LiteralByteContext   as exp -> text.Replace("uy", "") |> System.Byte.Parse   |> literal |> box
-                        | :? LiteralInt16Context  as exp -> text.Replace("s", "")  |> System.Int16.Parse  |> literal |> box
-                        | :? LiteralUint16Context as exp -> text.Replace("us", "") |> System.UInt16.Parse |> literal |> box
-                        | :? LiteralInt32Context  as exp -> text                   |> System.Int32.Parse  |> literal |> box
-                        | :? LiteralUint32Context as exp -> text.Replace("u", "")  |> System.UInt32.Parse |> literal |> box
-                        | :? LiteralInt64Context  as exp -> text.Replace("L", "")  |> System.Int64.Parse  |> literal |> box
-                        | :? LiteralUint64Context as exp -> text.Replace("UL", "") |> System.UInt64.Parse |> literal |> box
-                        | :? LiteralCharContext   as exp -> text                   |> System.Char.Parse   |> literal |> box
+                        | :? LiteralStringContext as exp -> text |> deQuoteOnDemand|> literal |> iexpr
+                        | :? LiteralDoubleContext as exp -> text                   |> System.Double.Parse |> literal |> iexpr
+                        | :? LiteralSingleContext as exp -> text.Replace("f", "")  |> System.Single.Parse |> literal |> iexpr
+                        | :? LiteralSbyteContext  as exp -> text.Replace("y", "")  |> System.SByte.Parse  |> literal |> iexpr
+                        | :? LiteralByteContext   as exp -> text.Replace("uy", "") |> System.Byte.Parse   |> literal |> iexpr
+                        | :? LiteralInt16Context  as exp -> text.Replace("s", "")  |> System.Int16.Parse  |> literal |> iexpr
+                        | :? LiteralUint16Context as exp -> text.Replace("us", "") |> System.UInt16.Parse |> literal |> iexpr
+                        | :? LiteralInt32Context  as exp -> text                   |> System.Int32.Parse  |> literal |> iexpr
+                        | :? LiteralUint32Context as exp -> text.Replace("u", "")  |> System.UInt32.Parse |> literal |> iexpr
+                        | :? LiteralInt64Context  as exp -> text.Replace("L", "")  |> System.Int64.Parse  |> literal |> iexpr
+                        | :? LiteralUint64Context as exp -> text.Replace("UL", "") |> System.UInt64.Parse |> literal |> iexpr
+                        | :? LiteralCharContext   as exp -> text                   |> System.Char.Parse   |> literal |> iexpr
 
                         | _ -> failwith "ERROR"
                     | :? TagContext as texp ->
-                        box <| tag (tagDic[text])
+                        iexpr <| tag (tagDic[text])
                     | :? VariableContext as vexp ->
                         //var (varDic[text])
                         failwith "Not yet"

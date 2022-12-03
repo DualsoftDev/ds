@@ -17,9 +17,6 @@ module ExpressionModule =
         | Variable of StorageVariable<'T>
         | Literal of 'T
 
-    type Arguments = obj list
-    type Args      = Arguments
-
     type FunctionSpec<'T> = {
         f: Arguments -> 'T
         name: string
@@ -42,8 +39,6 @@ module ExpressionModule =
             match x with
             | Terminal b -> b.ExpressionType
             | Function _ -> ExpTypeFunction
-
-    let getTypeOfBoxedExpression (exp:obj) = (exp :?> IExpression).DataType
 
     /// literal 'T 로부터 Expression<'T> 생성
     let literal (x:'T) =

@@ -7,13 +7,16 @@ open Engine.Common.FS
 [<AutoOpen>]
 module ExpressionFunctionModule =
 
-    let createBinaryExpression (opnd1:obj) (op:string) (opnd2:obj) =
-        let t1 = getTypeOfBoxedExpression opnd1
-        let t2 = getTypeOfBoxedExpression opnd2
+    /// Expression<'T> 를 IExpression 으로 casting
+    let internal iexpr any = (box any) :?> IExpression
+
+    let createBinaryExpression (opnd1:IExpression) (op:string) (opnd2:IExpression) : IExpression =
+        let t1 = opnd1.DataType
+        let t2 = opnd2.DataType
         if t1 <> t2 then
             failwith "ERROR: Type mismatch"
 
-        let args = [box opnd1; opnd2]
+        let args = [opnd1; opnd2]
 
         if t1 = typeof<byte> then
             match op with
@@ -22,7 +25,7 @@ module ExpressionFunctionModule =
             | "*" -> muluy args
             | "/" -> divuy args
             | _ -> failwith "NOT Yet"
-            |> box
+            |> iexpr
         elif t1 = typeof<sbyte> then
             match op with
             | "+" -> addy args
@@ -30,7 +33,7 @@ module ExpressionFunctionModule =
             | "*" -> muly args
             | "/" -> divy args
             | _ -> failwith "NOT Yet"
-            |> box
+            |> iexpr
         elif t1 = typeof<int16> then
             match op with
             | "+" -> adds args
@@ -38,7 +41,7 @@ module ExpressionFunctionModule =
             | "*" -> muls args
             | "/" -> divs args
             | _ -> failwith "NOT Yet"
-            |> box
+            |> iexpr
         elif t1 = typeof<uint16> then
             match op with
             | "+" -> addus args
@@ -46,7 +49,7 @@ module ExpressionFunctionModule =
             | "*" -> mulus args
             | "/" -> divus args
             | _ -> failwith "NOT Yet"
-            |> box
+            |> iexpr
         elif t1 = typeof<int32> then
             match op with
             | "+" -> add args
@@ -54,7 +57,7 @@ module ExpressionFunctionModule =
             | "*" -> mul args
             | "/" -> div args
             | _ -> failwith "NOT Yet"
-            |> box
+            |> iexpr
         elif t1 = typeof<uint32> then
             match op with
             | "+" -> addu args
@@ -62,7 +65,7 @@ module ExpressionFunctionModule =
             | "*" -> mulu args
             | "/" -> divu args
             | _ -> failwith "NOT Yet"
-            |> box
+            |> iexpr
         elif t1 = typeof<double> then
             match op with
             | "+" -> addd args
@@ -70,7 +73,7 @@ module ExpressionFunctionModule =
             | "*" -> muld args
             | "/" -> divd args
             | _ -> failwith "NOT Yet"
-            |> box
+            |> iexpr
         elif t1 = typeof<single> then
             match op with
             | "+" -> addf args
@@ -78,57 +81,27 @@ module ExpressionFunctionModule =
             | "*" -> mulf args
             | "/" -> divf args
             | _ -> failwith "NOT Yet"
-            |> box
+            |> iexpr
         elif t1 = typeof<string> then
             match op with
             | "+" -> concat args
             | _ -> failwith "ERROR"
-            |> box
+            |> iexpr
         else
             failwith "ERROR"
 
-    let createCustomFunctionExpression (funName:string) (args:Args) =
+    let createCustomFunctionExpression (funName:string) (args:Args) : IExpression =
         match funName with
-        | "Int" -> Int args |> box
-        | "Bool" -> Bool args |> box
-        | "sin" -> sin args |> box
-        //| "cos" -> cos args |> box
-        //| "tan" -> tan args |> box
+        | "Int" -> Int args |> iexpr
+        | "Bool" -> Bool args |> iexpr
+        | "sin" -> sin args |> iexpr
+        //| "cos" -> cos args |> iexpr
+        //| "tan" -> tan args |> iexpr
         | _ -> failwith "NOT yet"
-
-    let evaluateBoxedExpression (boxedExpr:obj) =
-        let expr = boxedExpr :?> IExpression
-        expr.BoxedEvaluatedValue
-
-
-    let resolve (expr:Expression<'T>) = expr.Evaluate() |> unbox
 
 
     [<AutoOpen>]
     module FunctionModule =
-        ///// boxed object 로부터 Expression<'T> 생성하고 이를 obj type 으로 반환
-        //let expr (x:obj) =
-        //    match x with
-        //    | :? IExpression as e -> x
-
-        //    (* Parser 에서 읽은 raw literal 의 변환 case *)
-        //    | :? sbyte  as o -> Terminal (Literal o)
-        //    | :? byte   as o -> Terminal (Literal o)
-        //    | :? int16  as o -> Terminal (Literal o)
-        //    | :? uint16 as o -> Terminal (Literal o)
-        //    | :? int32  as o -> Terminal (Literal o)
-        //    | :? uint32 as o -> Terminal (Literal o)
-        //    | :? int64  as o -> Terminal (Literal o)
-        //    | :? uint64 as o -> Terminal (Literal o)
-        //    | :? single as o -> Terminal (Literal o)
-        //    | :? bool   as o -> Terminal (Literal o)
-        //    | :? double as o -> Terminal (Literal o)
-        //    | :? char   as o -> Terminal (Literal o)
-        //    | :? string as o -> Terminal (Literal o)
-
-        //    | _ -> failwith "ERROR"
-
-
         /// Create function
         let private cf (f:Args->'T) (name:string) (args:Args) =
             Function { f=f; name=name; args=args}
@@ -146,7 +119,7 @@ module ExpressionFunctionModule =
             /* UL */ | Uint64
         *)
 
-        let muly     args = cf _muly     "*"     args
+        let muly     (args:Args) = cf _muly     "*"     args
         let addy     args = cf _addy     "+"     args
         let suby     args = cf _suby     "-"     args
         let divy     args = cf _divy     "/"     args
@@ -237,7 +210,7 @@ module ExpressionFunctionModule =
     module internal FunctionImpl =
         open ExpressionPrologSubModule
 
-        let private evalArg (x:obj) = (x :?> IExpression).BoxedEvaluatedValue
+        let private evalArg (x:IExpression) = x.BoxedEvaluatedValue
         let private evalToDouble x = x |> evalArg |> toDouble
         let private evalToFloat  x = x |> evalArg |> toFloat
         let private evalToByte   x = x |> evalArg |> toByte
@@ -330,14 +303,14 @@ module ExpressionFunctionModule =
         let _convertInt (args:Args) = args.Select(evalArg >> toInt) .Expect1()
 
 
-    let private tagsToArguments (xs:Tag<'T> seq) = xs.Select (Tag >> box) |> List.ofSeq
+    let private tagsToArguments (xs:Tag<'T> seq) = xs.Select(fun x -> Tag x) |> List.ofSeq
     [<Extension>]
     type FuncExt =
 
         [<Extension>] static member ToTags (xs:#Tag<'T> seq)    = xs.Cast<Tag<_>>()
         [<Extension>] static member ToExpr (x:Tag<bool>)   = Terminal (Tag x)
-        [<Extension>] static member GetAnd (xs:Tag<'T> seq)  = xs |> tagsToArguments |> anD
-        [<Extension>] static member GetOr  (xs:Tag<'T> seq)  = xs |> tagsToArguments |> oR
+        [<Extension>] static member GetAnd (xs:Tag<'T> seq)  = xs |> tagsToArguments |> List.cast<IExpression> |> anD
+        [<Extension>] static member GetOr  (xs:Tag<'T> seq)  = xs |> tagsToArguments |> List.cast<IExpression>|> oR
         //[sets and]--|----- ! [rsts or] ----- (relay)
         //|relay|-----|
         [<Extension>] static member GetRelayExpr(sets:Tag<bool> seq, rsts:Tag<bool> seq, relay:Tag<bool>) =

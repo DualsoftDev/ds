@@ -1,4 +1,4 @@
-namespace rec Engine.Core
+namespace Engine.Core
 open System
 open System.Linq
 open System.Runtime.CompilerServices
@@ -6,7 +6,7 @@ open Engine.Common.FS
 open System.Diagnostics
 
 [<AutoOpen>]
-module ExpressionPrologModule =
+module rec ExpressionPrologModule =
     module ExpressionPrologSubModule =
         let expectN (n:int) (xs:'a seq) = if xs.Count() <> n then failwith $"Wrong number of arguments: expect {n}"
         let expect1 xs = expectN 1 xs; xs.First()
@@ -169,3 +169,13 @@ module ExpressionPrologModule =
 
         interface IVariable
         override x.ToText() = "$" + name
+
+    type Arguments = IExpression list
+    type Args      = Arguments
+
+
+[<AutoOpen>]
+module ExpressionPrologModule2 =
+    let private dummySerializeFunctionNameAndBoxedArguments (functionName:string) (args:Args) (withParenthesys:bool): string =
+        failwith "Should be reimplemented."
+    let mutable internal fwdSerializeFunctionNameAndBoxedArguments = dummySerializeFunctionNameAndBoxedArguments

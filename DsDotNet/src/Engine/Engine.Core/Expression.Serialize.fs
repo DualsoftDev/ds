@@ -41,9 +41,8 @@ module rec ExpressionSerializeModule =
         else
             let args =
                 [   for a in args do
-                    let ax = a :?> IExpression
                     let withParenthesys = args.Length >= 2
-                    ax.ToText(withParenthesys)
+                    a.ToText(withParenthesys)
                 ] |> String.concat ", "
             $"{name}({args})"
 

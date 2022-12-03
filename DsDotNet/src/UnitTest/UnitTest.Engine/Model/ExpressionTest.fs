@@ -89,56 +89,56 @@ module ExpressionTestModule =
         [<Test>]
         member __.``3 Func test`` () =
 
-            abs [v 13]                          |> evaluate === 13
-            abs [v -13]                         |> evaluate === 13
-            absDouble [v -13.0]                 |> evaluate === 13.0
-            xorBit [v 13; v 11]                   |> evaluate === 6
-            andBit [v 2; v 3]                     |> evaluate === 2
-            andBit [v 1; v 2; v 3; v 4]               |> evaluate === 0
-            orBit [v 1; v 2; v 3; v 4]                |> evaluate === 7
-            notBit [v 65535]                    |> evaluate === -65536
-            add [v 1; v 2]                        |> evaluate === 3
-            sub [v 5; v 3]                        |> evaluate === 2
-            mul [v 2; v 3]                        |> evaluate === 6
-            divDouble [v 3.0; v 2.0]              |> evaluate === 1.5
-            add [v 1; v 2; v 3]                     |> evaluate === 6
-            add ([1..10] |> List.map(v >> box))   |> evaluate === 55
-            mul( [1..5]  |> List.map(v >> box))   |> evaluate === 120
-            sub [v 10; v 1; v 2]       |> evaluate === 7
+            abs [v 13]                  |> evaluate === 13
+            abs [v -13]                 |> evaluate === 13
+            absDouble [v -13.0]         |> evaluate === 13.0
+            xorBit [v 13; v 11]         |> evaluate === 6
+            andBit [v 2; v 3]           |> evaluate === 2
+            andBit [v 1; v 2; v 3; v 4] |> evaluate === 0
+            orBit [v 1; v 2; v 3; v 4]  |> evaluate === 7
+            notBit [v 65535]            |> evaluate === -65536
+            add [v 1; v 2]              |> evaluate === 3
+            sub [v 5; v 3]              |> evaluate === 2
+            mul [v 2; v 3]              |> evaluate === 6
+            divDouble [v 3.0; v 2.0]    |> evaluate === 1.5
+            add [v 1; v 2; v 3]         |> evaluate === 6
+            add ([1..10]                |> List.map(v >> iexpr))   |> evaluate === 55
+            mul( [1..5]                 |> List.map(v >> iexpr))   |> evaluate === 120
+            sub [v 10; v 1; v 2]        |> evaluate === 7
             //Math.Abs((addDouble[1.1; 2.2] |> evaluate) - 3.3) <= 0.00001 |> ShouldBeTrue
             //Math.Abs((mulDouble[1.1; 2.0] |> evaluate) - 2.2) <= 0.00001 |> ShouldBeTrue
             addString [v "Hello, "; v "world!"]|> evaluate === "Hello, world!"
             mul [v 2; v 3] |> evaluate === 6
-            equalString [v "Hello"; v "world"]       |> evaluate === false
-            equalString [v "Hello"; v "Hello"]       |> evaluate === true
-            notEqualString [v "Hello"; v "world"]    |> evaluate === true
-            notEqualString [v "Hello"; v "Hello"]    |> evaluate === false
-            notEqual [v 1; v 2]                      |> evaluate === true
-            notEqual [v 2; v 2]                      |> evaluate === false
-            equal [v 2; v 2]                         |> evaluate === true
-            equal [v 2; v 2.0]                       |> evaluate=== true
-            equal [v 2; v 2.0f]                      |> evaluate === true
+            equalString [v "Hello"; v "world"]    |> evaluate === false
+            equalString [v "Hello"; v "Hello"]    |> evaluate === true
+            notEqualString [v "Hello"; v "world"] |> evaluate === true
+            notEqualString [v "Hello"; v "Hello"] |> evaluate === false
+            notEqual [v 1; v 2]                   |> evaluate === true
+            notEqual [v 2; v 2]                   |> evaluate === false
+            equal [v 2; v 2]                      |> evaluate === true
+            equal [v 2; v 2.0]                    |> evaluate=== true
+            equal [v 2; v 2.0f]                   |> evaluate === true
 
 
-            gte [v 2; v 3] |> evaluate === false
-            gte [v 5; v 4] |> evaluate === true
-            noT [v true] |> evaluate  === false
-            noT [v false] |> evaluate  === true
-            anD [v true; v false] |> evaluate === false
-            anD [v true; v true] |> evaluate === true
+            gte [v 2; v 3]                        |> evaluate === false
+            gte [v 5; v 4]                        |> evaluate === true
+            noT [v true]                          |> evaluate  === false
+            noT [v false]                         |> evaluate  === true
+            anD [v true; v false]                 |> evaluate === false
+            anD [v true; v true]                  |> evaluate === true
             anD [v true; v true; v true; v false] |> evaluate === false
-            oR  [v true; v false] |> evaluate === true
-            oR  [v false;v false] |> evaluate === false
+            oR  [v true; v false]                 |> evaluate === true
+            oR  [v false;v false]                 |> evaluate === false
             oR  [v true; v true; v true; v false] |> evaluate === true
-            shiftLeft [v 1; v 1] |> evaluate === 2
-            shiftLeft [v 2; v -1] |> evaluate === 0
-            shiftLeft [v 1; v 3] |> evaluate === 8
-            shiftRight [v 8; v 3] |> evaluate === 1
+            shiftLeft [v 1; v 1]                  |> evaluate === 2
+            shiftLeft [v 2; v -1]                 |> evaluate === 0
+            shiftLeft [v 1; v 3]                  |> evaluate === 8
+            shiftRight [v 8; v 3]                 |> evaluate === 1
 
             let ex = mul [v 2; v 3]
-            equal [v 6; ex]                    |> evaluate === true
-            equal [v 6; mul [v 2; v 3]]            |> evaluate === true
-            add [v 1; v 2]     |> evaluate === 3
+            equal [v 6; ex]                       |> evaluate === true
+            equal [v 6; mul [v 2; v 3]]           |> evaluate === true
+            add [v 1; v 2]                        |> evaluate === 3
 
         [<Test>]
         member __.``4 Composition test`` () =
@@ -309,52 +309,50 @@ module ExpressionTestModule =
         [<Test>]
         member __.``9 Tag type test`` () =
             let tags = [
-                PlcTag.Create("sbyte", 1y)     |> tag |> box
-                PlcTag.Create("byte", 1uy)     |> tag |> box
-                PlcTag.Create("int16", 1s)     |> tag |> box
-                PlcTag.Create("uint16", 1us)   |> tag |> box
-                PlcTag.Create("int32", 1)      |> tag |> box
-                PlcTag.Create("uint32", 1u)    |> tag |> box
-                PlcTag.Create("int64", 1L)     |> tag |> box
-                PlcTag.Create("uint64", 1UL)   |> tag |> box
-                PlcTag.Create("single", 1.0f)  |> tag |> box
-                PlcTag.Create("double", 1.0)   |> tag |> box
-                PlcTag.Create("char", '1')     |> tag |> box
-                PlcTag.Create("string", "1")   |> tag |> box
+                PlcTag.Create("sbyte", 1y)     |> tag |> iexpr
+                PlcTag.Create("byte", 1uy)     |> tag |> iexpr
+                PlcTag.Create("int16", 1s)     |> tag |> iexpr
+                PlcTag.Create("uint16", 1us)   |> tag |> iexpr
+                PlcTag.Create("int32", 1)      |> tag |> iexpr
+                PlcTag.Create("uint32", 1u)    |> tag |> iexpr
+                PlcTag.Create("int64", 1L)     |> tag |> iexpr
+                PlcTag.Create("uint64", 1UL)   |> tag |> iexpr
+                PlcTag.Create("single", 1.0f)  |> tag |> iexpr
+                PlcTag.Create("double", 1.0)   |> tag |> iexpr
+                PlcTag.Create("char", '1')     |> tag |> iexpr
+                PlcTag.Create("string", "1")   |> tag |> iexpr
             ]
             let tagDic =
                 [   for t in tags do
-                        let exp = t :?> IExpression
-                        let inner = exp.GetBoxedRawObject()
+                        let inner = t.GetBoxedRawObject()
                         let name = (inner :?> INamed).Name
                         (name, t)
                 ] |> Tuple.toDictionary
-            let sbyte = tagDic["sbyte"] :?> IExpression //:?> Terminal
+            let sbyte = tagDic["sbyte"]
             sbyte.DataType === typedefof<sbyte>
             sbyte.BoxedEvaluatedValue === 1y
 
             let variables = [
-                StorageVariable("sbyte", 1y)    |> var |> box
-                StorageVariable("byte", 1uy)    |> var |> box
-                StorageVariable("int16", 1s)    |> var |> box
-                StorageVariable("uint16", 1us)  |> var |> box
-                StorageVariable("int32", 1)     |> var |> box
-                StorageVariable("uint32", 1u)   |> var |> box
-                StorageVariable("int64", 1L)    |> var |> box
-                StorageVariable("uint64", 1UL)  |> var |> box
-                StorageVariable("single", 1.0f) |> var |> box
-                StorageVariable("double", 1.0)  |> var |> box
-                StorageVariable("char", '1')    |> var |> box
-                StorageVariable("string", "1")  |> var |> box
+                StorageVariable("sbyte", 1y)    |> var |> iexpr
+                StorageVariable("byte", 1uy)    |> var |> iexpr
+                StorageVariable("int16", 1s)    |> var |> iexpr
+                StorageVariable("uint16", 1us)  |> var |> iexpr
+                StorageVariable("int32", 1)     |> var |> iexpr
+                StorageVariable("uint32", 1u)   |> var |> iexpr
+                StorageVariable("int64", 1L)    |> var |> iexpr
+                StorageVariable("uint64", 1UL)  |> var |> iexpr
+                StorageVariable("single", 1.0f) |> var |> iexpr
+                StorageVariable("double", 1.0)  |> var |> iexpr
+                StorageVariable("char", '1')    |> var |> iexpr
+                StorageVariable("string", "1")  |> var |> iexpr
             ]
             let varDic =
-                [   for t in variables do
-                        let exp = t :?> IExpression
-                        let inner = exp.GetBoxedRawObject()
+                [   for v in variables do
+                        let inner = v.GetBoxedRawObject()
                         let name = (inner :?> INamed).Name
-                        (name, t)
+                        (name, v)
                 ] |> Tuple.toDictionary
-            let sbyte = varDic["sbyte"] :?> IExpression //:?> Terminal
+            let sbyte = varDic["sbyte"]
             sbyte.DataType === typedefof<sbyte>
             sbyte.BoxedEvaluatedValue === 1y
 
@@ -362,7 +360,7 @@ module ExpressionTestModule =
 
         [<Test>]
         member __.``10 Parse test`` () =
-            let evalExpr = parseExpression >> evaluateBoxedExpression
+            let evalExpr (text:string) = (parseExpression text).BoxedEvaluatedValue
 
 
             //"Int(3.4) + 1 + 2 + (abs(%tag3))"
@@ -381,3 +379,21 @@ module ExpressionTestModule =
             "Int(1.0) + 2" |> evalExpr === 3
 
             """  "hello, " + "world" """ |> evalExpr === "hello, world"
+
+        [<Test>]
+        member __.``11 Uncompilable test`` () =
+            let t1 = PlcTag.Create("1", 1)
+            tag t1 |> evaluate === 1
+            t1.Value <- 2
+
+            // Invalid assignment: won't compile.  OK!
+            // t1.Value <- 2.0
+
+            let exp = $"{dq}hello{dq} + {dq}world{dq}" |> parseExpression :?> Expression<string>
+            // Invalid assignment: won't compile.  OK!
+            // (t1 <== exp)
+
+            let exp2 = mul [ v 1; v 2; v 3 ]
+            // Function-call should take arguments as an IExpression list.
+            // let exp2 = mul [ 1; 2; 3 ]
+            ()

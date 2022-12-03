@@ -85,7 +85,7 @@ module ExpressionModule =
     let getTypeOfBoxedExpression (exp:obj) = (exp :?> IExpression).DataType
 
     /// literal 'T 로부터 Expression<'T> 생성
-    let value (x:'T) =
+    let literal (x:'T) =
         let t = x.GetType()
         if t.IsValueType || t = typedefof<string> then
             Terminal (Literal x)
@@ -94,27 +94,6 @@ module ExpressionModule =
 
     /// Tag<'T> 로부터 Expression<'T> 생성
     let tag (t: Tag<'T>) = Terminal (Tag t)
-
-    /// boxed object 로부터 Expression<'T> 생성하고 이를 obj type 으로 반환
-    let expr (x:obj) =
-        match x with
-        | :? IExpression as e -> x
-        | :? IExpressionCreatable as c -> c.CreateBoxedExpression()
-        | :? sbyte  as o -> Terminal (Literal o)
-        | :? byte   as o -> Terminal (Literal o)
-        | :? int16  as o -> Terminal (Literal o)
-        | :? uint16 as o -> Terminal (Literal o)
-        | :? int32  as o -> Terminal (Literal o)
-        | :? uint32 as o -> Terminal (Literal o)
-        | :? int64  as o -> Terminal (Literal o)
-        | :? uint64 as o -> Terminal (Literal o)
-        | :? single as o -> Terminal (Literal o)
-        | :? bool   as o -> Terminal (Literal o)
-        | :? double as o -> Terminal (Literal o)
-        | :? char   as o -> Terminal (Literal o)
-        | :? string as o -> Terminal (Literal o)
-        | _ -> failwith "ERROR"
-
 
     /// storage:obj --> 실제는 Tag<'T> or StorageVariable<'T> type 객체 boxed
     let createExpressionFromBoxedStorage (storage:obj) =

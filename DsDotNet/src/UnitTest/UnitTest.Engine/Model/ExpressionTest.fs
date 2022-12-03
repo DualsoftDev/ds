@@ -14,7 +14,7 @@ module ExpressionTestModule =
     type ExpressionTest() =
         do Fixtures.SetUpTest()
 
-        let v = ExpressionModule.value
+        let v = ExpressionModule.literal
         let evaluate (exp:Expression<'T>) = exp.Evaluate()
         let dq = "\""
 
@@ -53,7 +53,7 @@ module ExpressionTestModule =
             t1.Value <- 3
             tag t1 |> evaluate === 3
 
-            (t1 <== add [3; 4]).Do()
+            (t1 <== add [v 3; v 4]).Do()
             t1.Value === 7
 
             let exp = $"{dq}hello{dq} + {dq}world{dq}" |> parseExpression :?> Expression<string>
@@ -71,8 +71,8 @@ module ExpressionTestModule =
             tag (PlcTag.Create("Two", "Two")) |> evaluate === "Two"
 
             concat([
-                    (tag <| PlcTag.Create("Hello", "Hello, ")).Evaluate()
-                    (tag <| PlcTag.Create("World", "world!" )).Evaluate()
+                    tag <| PlcTag.Create("Hello", "Hello, ")
+                    tag <| PlcTag.Create("World", "world!" )
                 ]) |> evaluate === "Hello, world!"
 
             let tt1 = tag t1
@@ -89,85 +89,85 @@ module ExpressionTestModule =
         [<Test>]
         member __.``3 Func test`` () =
 
-            abs [13]                          |> evaluate === 13
-            abs [-13]                         |> evaluate === 13
-            absDouble [-13.0]                 |> evaluate === 13.0
-            xorBit [13; 11]                   |> evaluate === 6
-            andBit [2; 3]                     |> evaluate === 2
-            andBit [1; 2; 3; 4]               |> evaluate === 0
-            orBit [1; 2; 3; 4]                |> evaluate === 7
-            notBit [65535]                    |> evaluate === -65536
-            add [1; 2]                        |> evaluate === 3
-            sub [5; 3]                        |> evaluate === 2
-            mul [2; 3]                        |> evaluate === 6
-            divDouble [3.0; 2.0]              |> evaluate === 1.5
-            add [1; 2; 3]                     |> evaluate === 6
-            add ([1..10] |> List.cast<obj>)   |> evaluate === 55
-            mul( [1..5]  |> List.cast<obj>)   |> evaluate === 120
-            sub [10; 1; 2]       |> evaluate === 7
+            abs [v 13]                          |> evaluate === 13
+            abs [v -13]                         |> evaluate === 13
+            absDouble [v -13.0]                 |> evaluate === 13.0
+            xorBit [v 13; v 11]                   |> evaluate === 6
+            andBit [v 2; v 3]                     |> evaluate === 2
+            andBit [v 1; v 2; v 3; v 4]               |> evaluate === 0
+            orBit [v 1; v 2; v 3; v 4]                |> evaluate === 7
+            notBit [v 65535]                    |> evaluate === -65536
+            add [v 1; v 2]                        |> evaluate === 3
+            sub [v 5; v 3]                        |> evaluate === 2
+            mul [v 2; v 3]                        |> evaluate === 6
+            divDouble [v 3.0; v 2.0]              |> evaluate === 1.5
+            add [v 1; v 2; v 3]                     |> evaluate === 6
+            add ([1..10] |> List.map(v >> box))   |> evaluate === 55
+            mul( [1..5]  |> List.map(v >> box))   |> evaluate === 120
+            sub [v 10; v 1; v 2]       |> evaluate === 7
             //Math.Abs((addDouble[1.1; 2.2] |> evaluate) - 3.3) <= 0.00001 |> ShouldBeTrue
             //Math.Abs((mulDouble[1.1; 2.0] |> evaluate) - 2.2) <= 0.00001 |> ShouldBeTrue
-            addString ["Hello, "; "world!"]|> evaluate === "Hello, world!"
-            mul [2; 3] |> evaluate === 6
-            equalString ["Hello"; "world"]       |> evaluate === false
-            equalString ["Hello"; "Hello"]       |> evaluate === true
-            notEqualString ["Hello"; "world"]    |> evaluate === true
-            notEqualString ["Hello"; "Hello"]    |> evaluate === false
-            notEqual [1; 2]                      |> evaluate === true
-            notEqual [2; 2]                      |> evaluate === false
-            equal [2; 2]                         |> evaluate === true
-            equal [2; 2.0]                       |> evaluate=== true
-            equal [2; 2.0f]                      |> evaluate === true
+            addString [v "Hello, "; v "world!"]|> evaluate === "Hello, world!"
+            mul [v 2; v 3] |> evaluate === 6
+            equalString [v "Hello"; v "world"]       |> evaluate === false
+            equalString [v "Hello"; v "Hello"]       |> evaluate === true
+            notEqualString [v "Hello"; v "world"]    |> evaluate === true
+            notEqualString [v "Hello"; v "Hello"]    |> evaluate === false
+            notEqual [v 1; v 2]                      |> evaluate === true
+            notEqual [v 2; v 2]                      |> evaluate === false
+            equal [v 2; v 2]                         |> evaluate === true
+            equal [v 2; v 2.0]                       |> evaluate=== true
+            equal [v 2; v 2.0f]                      |> evaluate === true
 
 
-            gte [2; 3] |> evaluate === false
-            gte [5; 4] |> evaluate === true
-            noT [true] |> evaluate  === false
-            noT [false] |> evaluate  === true
-            anD [true; false] |> evaluate === false
-            anD [true; true] |> evaluate === true
-            anD [true; true; true; false] |> evaluate === false
-            oR  [true; false] |> evaluate === true
-            oR  [false; false] |> evaluate === false
-            oR  [true; true; true; false] |> evaluate === true
-            shiftLeft [1; 1] |> evaluate === 2
-            shiftLeft [2; -1] |> evaluate === 0
-            shiftLeft [1; 3] |> evaluate === 8
-            shiftRight [8; 3] |> evaluate === 1
+            gte [v 2; v 3] |> evaluate === false
+            gte [v 5; v 4] |> evaluate === true
+            noT [v true] |> evaluate  === false
+            noT [v false] |> evaluate  === true
+            anD [v true; v false] |> evaluate === false
+            anD [v true; v true] |> evaluate === true
+            anD [v true; v true; v true; v false] |> evaluate === false
+            oR  [v true; v false] |> evaluate === true
+            oR  [v false;v false] |> evaluate === false
+            oR  [v true; v true; v true; v false] |> evaluate === true
+            shiftLeft [v 1; v 1] |> evaluate === 2
+            shiftLeft [v 2; v -1] |> evaluate === 0
+            shiftLeft [v 1; v 3] |> evaluate === 8
+            shiftRight [v 8; v 3] |> evaluate === 1
 
-            let ex = mul [2; 3]
-            equal [6; ex]                    |> evaluate === true
-            equal [6; mul [2; 3]]            |> evaluate === true
-            add [1; 2]     |> evaluate === 3
+            let ex = mul [v 2; v 3]
+            equal [v 6; ex]                    |> evaluate === true
+            equal [v 6; mul [v 2; v 3]]            |> evaluate === true
+            add [v 1; v 2]     |> evaluate === 3
 
         [<Test>]
         member __.``4 Composition test`` () =
             mul [
                     tag <| PlcTag.Create("t2", 2)
-                    add [1; 2]
-                    add [4; 5]
+                    add [v 1; v 2]
+                    add [v 4; v 5]
             ] |> evaluate === 54
 
 
-            mul [2; 3; 4] |> evaluate === 24
+            mul [v 2; v 3; v 4] |> evaluate === 24
 
             (*
              (1<<2) * ((8>>3) + 4) * 5
              = 4 * (1+4) * 5
              = 100
             *)
-            mul [   shiftLeft [1; 2]   // 4
+            mul [   shiftLeft [v 1; v 2]   // 4
                     add [
-                        shiftRight [8; 3]   // 1
-                        4
+                        shiftRight [v 8; v 3]   // 1
+                        v 4
                         ]
-                    5] |> evaluate === 100   // 4 * (1+4) * 5
+                    v 5] |> evaluate === 100   // 4 * (1+4) * 5
 
 
 
         [<Test>]
         member __.``5 Statement test`` () =
-            let expr = mul [2; 3; 4]
+            let expr = mul [v 2; v 3; v 4]
             let target = PlcTag.Create("target", 1)
             let targetExpr = tag target
 
@@ -189,8 +189,7 @@ module ExpressionTestModule =
         [<Test>]
         member __.``6 Serialization test`` () =
             let toText (exp:Expression<'T>) = exp.ToText(false)
-            mul [ 2; 3 ] |> toText === "2 * 3"
-
+            
             v 1         |> toText === "1"
             v "hello"   |> toText === "\"hello\""
             v Math.PI   |> toText === sprintf "%A" Math.PI
@@ -242,7 +241,7 @@ module ExpressionTestModule =
             exprTag.ToText(false) === "%address"
 
 
-            let expr = mul [2; 3; 4]
+            let expr = mul [v 2; v 3; v 4]
             let target = PlcTag.Create("target", 1)
             target.ToText() === "%target"
 
@@ -277,8 +276,8 @@ module ExpressionTestModule =
 
         [<Test>]
         member __.``8 Operator test`` () =
-            let t = Bool [true]
-            let f = Bool [false]
+            let t = Bool [v true]
+            let f = Bool [v false]
             !! t |> evaluate === false
             !! f |> evaluate === true
             t <&&> t |> evaluate === true

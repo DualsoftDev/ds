@@ -68,18 +68,18 @@ module ExpressionParser =
                     | :? LiteralContext as exp ->
                         assert(exp.ChildCount = 1)
                         match exp.children[0] with
-                        | :? LiteralDoubleContext as exp -> text |> System.Double.Parse |> expr |> box
-                        | :? LiteralSingleContext as exp -> text.Replace("f", "") |> System.Single.Parse |> expr |> box
-                        | :? LiteralStringContext as exp -> text |> deQuoteOnDemand     |> expr |> box
-                        | :? LiteralSbyteContext  as exp -> text.Replace("y", "") |> System.SByte.Parse  |> expr |> box
-                        | :? LiteralByteContext   as exp -> text.Replace("uy", "") |> System.Byte.Parse   |> expr |> box
-                        | :? LiteralInt16Context  as exp -> text.Replace("s", "") |> System.Int16.Parse  |> expr |> box
-                        | :? LiteralUint16Context as exp -> text.Replace("us", "") |> System.UInt16.Parse |> expr |> box
-                        | :? LiteralInt32Context  as exp -> text |> System.Int32.Parse  |> expr |> box
-                        | :? LiteralUint32Context as exp -> text.Replace("u", "") |> System.UInt32.Parse |> expr |> box
-                        | :? LiteralInt64Context  as exp -> text.Replace("L", "") |> System.Int64.Parse  |> expr |> box
-                        | :? LiteralUint64Context as exp -> text.Replace("UL", "") |> System.UInt64.Parse |> expr |> box
-                        | :? LiteralCharContext   as exp -> text |> System.Char.Parse   |> expr |> box
+                        | :? LiteralStringContext as exp -> text |> deQuoteOnDemand|> literal |> box
+                        | :? LiteralDoubleContext as exp -> text                   |> System.Double.Parse |> literal |> box
+                        | :? LiteralSingleContext as exp -> text.Replace("f", "")  |> System.Single.Parse |> literal |> box
+                        | :? LiteralSbyteContext  as exp -> text.Replace("y", "")  |> System.SByte.Parse  |> literal |> box
+                        | :? LiteralByteContext   as exp -> text.Replace("uy", "") |> System.Byte.Parse   |> literal |> box
+                        | :? LiteralInt16Context  as exp -> text.Replace("s", "")  |> System.Int16.Parse  |> literal |> box
+                        | :? LiteralUint16Context as exp -> text.Replace("us", "") |> System.UInt16.Parse |> literal |> box
+                        | :? LiteralInt32Context  as exp -> text                   |> System.Int32.Parse  |> literal |> box
+                        | :? LiteralUint32Context as exp -> text.Replace("u", "")  |> System.UInt32.Parse |> literal |> box
+                        | :? LiteralInt64Context  as exp -> text.Replace("L", "")  |> System.Int64.Parse  |> literal |> box
+                        | :? LiteralUint64Context as exp -> text.Replace("UL", "") |> System.UInt64.Parse |> literal |> box
+                        | :? LiteralCharContext   as exp -> text                   |> System.Char.Parse   |> literal |> box
 
                         | _ -> failwith "ERROR"
                     | :? TagContext as texp ->

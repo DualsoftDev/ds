@@ -55,13 +55,15 @@ module ExpressionModule =
     [<AutoOpen>]
     module StatementModule =
         type Statement<'T> =
-            | Assign of expr:Expression<'T> * target:Tag<'T>
+            | Assign of expression:IExpression * target:IStorage<'T>
+
             member x.Do() =
                 match x with
-                | Assign (expr, target) -> target.Value <- expr.Evaluate()
+                | Assign (expr, target) -> target.Value <- (expr.BoxedEvaluatedValue :?> 'T)
+
             member x.ToText() =
-                 match x with
-                 | Assign     (expr, target) -> $"{target.ToText()} := {expr.ToText(false)}"
+                match x with
+                | Assign (expr, target) -> $"{target.ToText()} := {expr.ToText(false)}"
 
     type Terminal<'T> with
         member x.ExpressionType =

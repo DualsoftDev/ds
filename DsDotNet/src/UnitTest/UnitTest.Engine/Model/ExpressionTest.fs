@@ -15,7 +15,7 @@ module ExpressionTestModule =
         do Fixtures.SetUpTest()
 
         let v = ExpressionModule.literal
-        let evaluate (exp:Expression<'T>) = exp.Evaluate()
+        let evaluate (exp:IExpression) = exp.BoxedEvaluatedValue
         let dq = "\""
 
         [<Test>]
@@ -91,7 +91,7 @@ module ExpressionTestModule =
 
             abs [v 13]                  |> evaluate === 13
             abs [v -13]                 |> evaluate === 13
-            absDouble [v -13.0]         |> evaluate === 13.0
+            abs [v -13.0]               |> evaluate === 13.0
             xorBit [v 13; v 11]         |> evaluate === 6
             andBit [v 2; v 3]           |> evaluate === 2
             andBit [v 1; v 2; v 3; v 4] |> evaluate === 0
@@ -100,13 +100,15 @@ module ExpressionTestModule =
             add [v 1; v 2]              |> evaluate === 3
             sub [v 5; v 3]              |> evaluate === 2
             mul [v 2; v 3]              |> evaluate === 6
-            divDouble [v 3.0; v 2.0]    |> evaluate === 1.5
+            div [v 3.0; v 2.0]          |> evaluate === 1.5
             add [v 1; v 2; v 3]         |> evaluate === 6
             add ([1..10]                |> List.map(v >> iexpr))   |> evaluate === 55
             mul( [1..5]                 |> List.map(v >> iexpr))   |> evaluate === 120
             sub [v 10; v 1; v 2]        |> evaluate === 7
-            //Math.Abs((addDouble[1.1; 2.2] |> evaluate) - 3.3) <= 0.00001 |> ShouldBeTrue
-            //Math.Abs((mulDouble[1.1; 2.0] |> evaluate) - 2.2) <= 0.00001 |> ShouldBeTrue
+            let xxx = sub [add [v 1.1; v 2.2]; v 3.3]
+
+            abs [ sub [add [v 1.1; v 2.2]; v 3.3] ] |> evaluate :?> double <= 0.00001 |> ShouldBeTrue
+            abs [ sub [mul [v 1.1; v 2.0]; v 2.2] ] |> evaluate :?> double <= 0.00001 |> ShouldBeTrue
             addString [v "Hello, "; v "world!"]|> evaluate === "Hello, world!"
             mul [v 2; v 3] |> evaluate === 6
             equalString [v "Hello"; v "world"]    |> evaluate === false
@@ -188,7 +190,7 @@ module ExpressionTestModule =
 
         [<Test>]
         member __.``6 Serialization test`` () =
-            let toText (exp:Expression<'T>) = exp.ToText(false)
+            let toText (exp:IExpression) = exp.ToText(false)
 
             v 1         |> toText === "1"
             v "hello"   |> toText === "\"hello\""
@@ -361,6 +363,8 @@ module ExpressionTestModule =
         [<Test>]
         member __.``10 Parse test`` () =
             let evalExpr (text:string) = (parseExpression text).BoxedEvaluatedValue
+            """  "hello, " + "world" """ |> evalExpr === "hello, world"
+
             "1 + 2" |> evalExpr === 3
             "+(1, 2, 3)" |> evalExpr === 6
             "+(1, *(2, 3))" |> evalExpr === 7
@@ -369,9 +373,10 @@ module ExpressionTestModule =
 
             //"Int(3.4) + 1 + 2 + (abs(%tag3))"
 
+
             "1.0 + 2.0" |> evalExpr === 3.0
 
-            //"+(2, 3, 4)" |> evalExpr === 9        // todo:
+            "+(2, 3, 4)" |> evalExpr === 9
 
             (fun () -> "1.0 + 2" |> evalExpr |> ignore )
             |> ShouldFailWithSubstringT "Type mismatch"

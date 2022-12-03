@@ -65,7 +65,7 @@ expr:   functionName '(' arguments? ')'         # FunctionCallExpr  // func call
     unaryOperator: '-'|'!';
     binaryOperator:
             '+'|'-'|'*'|'/'|'%'
-            | '&&' | '||' 
+            | '&&' | '||'
             |'=' | '!=';
 
 //INTEGER: SIGN? DIGITS;

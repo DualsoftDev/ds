@@ -16,64 +16,167 @@ module rec ExpressionPrologModule =
 
         let (|Double|_|) (x:obj) =
             match x with
-            | :? double as a -> Some a
-            | :? int as a -> Some (double a)
-            | :? single as a -> Some (double a)
-            | _ -> None
+            | :? single as n -> Some (double n)
+            | :? double as n -> Some (double n)
+            | :? sbyte  as n -> Some (double n)
+            | :? byte   as n -> Some (double n)
+            | :? int16  as n -> Some (double n)
+            | :? uint16 as n -> Some (double n)
+            | :? int32  as n -> Some (double n)
+            | :? uint32 as n -> Some (double n)
+            | :? int64  as n -> Some (double n)
+            | :? uint64 as n -> Some (double n)
+            | _ ->
+                logWarn $"Cannot convert {x} to double"
+                None
+
         let (|Float|_|) (x:obj) =
             match x with
-            | :? double as a -> Some (float a)
-            | :? int as a -> Some (float a)
-            | :? single as a -> Some (float a)
-            | _ -> None
+            | :? single as n -> Some (float n)
+            | :? double as n -> Some (float n)
+            | :? sbyte  as n -> Some (float n)
+            | :? byte   as n -> Some (float n)
+            | :? int16  as n -> Some (float n)
+            | :? uint16 as n -> Some (float n)
+            | :? int32  as n -> Some (float n)
+            | :? uint32 as n -> Some (float n)
+            | :? int64  as n -> Some (float n)
+            | :? uint64 as n -> Some (float n)
+            | _ ->
+                logWarn $"Cannot convert {x} to float"
+                None
 
         let (|Byte|_|) (x:obj) =
             match x with
-            | :? byte as n -> Some n
-            | :? int as n -> Some (byte n)
-            | :? uint as n -> Some (byte n)
+            | :? single as n -> Some (byte n)
             | :? double as n -> Some (byte n)
-            | _ -> None
+            | :? sbyte  as n -> Some (byte n)
+            | :? byte   as n -> Some (byte n)
+            | :? int16  as n -> Some (byte n)
+            | :? uint16 as n -> Some (byte n)
+            | :? int32  as n -> Some (byte n)
+            | :? uint32 as n -> Some (byte n)
+            | :? int64  as n -> Some (byte n)
+            | :? uint64 as n -> Some (byte n)
+            | _ ->
+                logWarn $"Cannot convert {x} to byte"
+                None
         let (|SByte|_|) (x:obj) =
             match x with
-            | :? sbyte as n -> Some n
-            | :? int as n -> Some (sbyte n)
-            | :? uint as n -> Some (sbyte n)
+            | :? single as n -> Some (sbyte n)
             | :? double as n -> Some (sbyte n)
-            | _ -> None
-
+            | :? sbyte  as n -> Some (sbyte n)
+            | :? byte   as n -> Some (sbyte n)
+            | :? int16  as n -> Some (sbyte n)
+            | :? uint16 as n -> Some (sbyte n)
+            | :? int32  as n -> Some (sbyte n)
+            | :? uint32 as n -> Some (sbyte n)
+            | :? int64  as n -> Some (sbyte n)
+            | :? uint64 as n -> Some (sbyte n)
+            | _ ->
+                logWarn $"Cannot convert {x} to sbyte"
+                None
         let (|Int16|_|) (x:obj) =
             match x with
-            | :? int16 as n -> Some n
-            | :? int as n -> Some (int16 n)
-            | :? uint as n -> Some (int16 n)
+            | :? single as n -> Some (int16 n)
             | :? double as n -> Some (int16 n)
-            | _ -> None
+            | :? sbyte  as n -> Some (int16 n)
+            | :? byte   as n -> Some (int16 n)
+            | :? int16  as n -> Some (int16 n)
+            | :? uint16 as n -> Some (int16 n)
+            | :? int32  as n -> Some (int16 n)
+            | :? uint32 as n -> Some (int16 n)
+            | :? int64  as n -> Some (int16 n)
+            | :? uint64 as n -> Some (int16 n)
+            | _ ->
+                logWarn $"Cannot convert {x} to int16"
+                None
 
         let (|UInt16|_|) (x:obj) =
             match x with
-            | :? uint16 as n -> Some n
-            | :? int as n -> Some (uint16 n)
-            | :? uint as n -> Some (uint16 n)
+            | :? single as n -> Some (uint16 n)
             | :? double as n -> Some (uint16 n)
-            | _ -> None
+            | :? sbyte  as n -> Some (uint16 n)
+            | :? byte   as n -> Some (uint16 n)
+            | :? int16  as n -> Some (uint16 n)
+            | :? uint16 as n -> Some (uint16 n)
+            | :? int32  as n -> Some (uint16 n)
+            | :? uint32 as n -> Some (uint16 n)
+            | :? int64  as n -> Some (uint16 n)
+            | :? uint64 as n -> Some (uint16 n)
+            | _ ->
+                logWarn $"Cannot convert {x} to uint16"
+                None
+
         let (|Int32|_|) (x:obj) =
             match x with
-            | :? int32 as n -> Some n
-            | :? uint as n -> Some (int n)
-            | :? double as n -> Some (int n)
-            | _ -> None
+            | :? single as n -> Some (int32 n)
+            | :? double as n -> Some (int32 n)
+            | :? sbyte  as n -> Some (int32 n)
+            | :? byte   as n -> Some (int32 n)
+            | :? int16  as n -> Some (int32 n)
+            | :? uint16 as n -> Some (int32 n)
+            | :? int32  as n -> Some (int32 n)
+            | :? uint32 as n -> Some (int32 n)
+            | :? int64  as n -> Some (int32 n)
+            | :? uint64 as n -> Some (int32 n)
+            | _ ->
+                logWarn $"Cannot convert {x} to int32"
+                None
+
         let (|UInt32|_|) (x:obj) =
             match x with
-            | :? uint32 as n -> Some n
-            | :? uint16 as n -> Some (uint32 n)
-            | :? int as n -> Some (uint32 n)
+            | :? single as n -> Some (uint32 n)
             | :? double as n -> Some (uint32 n)
-            | _ -> None
+            | :? sbyte  as n -> Some (uint32 n)
+            | :? byte   as n -> Some (uint32 n)
+            | :? int16  as n -> Some (uint32 n)
+            | :? uint16 as n -> Some (uint32 n)
+            | :? int32  as n -> Some (uint32 n)
+            | :? uint32 as n -> Some (uint32 n)
+            | :? int64  as n -> Some (uint32 n)
+            | :? uint64 as n -> Some (uint32 n)
+            | _ ->
+                logWarn $"Cannot convert {x} to uint32"
+                None
+
+        let (|Int64|_|) (x:obj) =
+            match x with
+            | :? single as n -> Some (int64 n)
+            | :? double as n -> Some (int64 n)
+            | :? sbyte  as n -> Some (int64 n)
+            | :? byte   as n -> Some (int64 n)
+            | :? int16  as n -> Some (int64 n)
+            | :? uint16 as n -> Some (int64 n)
+            | :? int32  as n -> Some (int64 n)
+            | :? uint32 as n -> Some (int64 n)
+            | :? int64  as n -> Some (int64 n)
+            | :? uint64 as n -> Some (int64 n)
+            | _ ->
+                logWarn $"Cannot convert {x} to int64"
+                None
+
+        let (|UInt64|_|) (x:obj) =
+            match x with
+            | :? single as n -> Some (uint64 n)
+            | :? double as n -> Some (uint64 n)
+            | :? sbyte  as n -> Some (uint64 n)
+            | :? byte   as n -> Some (uint64 n)
+            | :? int16  as n -> Some (uint64 n)
+            | :? uint16 as n -> Some (uint64 n)
+            | :? int32  as n -> Some (uint64 n)
+            | :? uint32 as n -> Some (uint64 n)
+            | :? int64  as n -> Some (uint64 n)
+            | :? uint64 as n -> Some (uint64 n)
+            | _ ->
+                logWarn $"Cannot convert {x} to uint64"
+                None
+
+
         let (|Bool|_|) (x:obj) =
             match x with
             | :? bool as n -> Some n
-            | Int32 n when n <> 0 -> Some true
+            | Int32 n when n <> 0 -> Some true      // todo: 다른 numeric type
             | _ -> None
 
         let (|PLCTag|_|) (x:obj) =
@@ -104,10 +207,6 @@ module rec ExpressionPrologModule =
             [<Extension>] static member ExpectGteN(xs:'a seq, n) = expectGteN n xs; xs
             [<Extension>] static member Expect1(xs:'a seq) = expect1 xs
             [<Extension>] static member Expect2(xs:'a seq) = expect2 xs
-
-    ///// Expression<'T> 로 생성할 수 있는 interface
-    //type IExpressionCreatable    =
-    //    abstract CreateBoxedExpression: unit -> obj        // Terminal<'T>
 
     type ExpressionType =
         | ExpTypeFunction
@@ -172,6 +271,7 @@ module rec ExpressionPrologModule =
 
     type Arguments = IExpression list
     type Args      = Arguments
+    type Arg       = IExpression
 
     let isAllExpressionSameType(args:Args) =
         args |> Seq.distinctBy(fun a -> a.DataType) |> Seq.length = 1

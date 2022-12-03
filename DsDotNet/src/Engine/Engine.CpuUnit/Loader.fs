@@ -43,7 +43,7 @@ module CpuLoader =
                             literal 3
                             add [literal 1; literal 5]
                 ]
-        let a = expr.Evaluate()
+        let a = expr.BoxedEvaluatedValue
 
         //let a = expr.ToJsonText()
         //let stmt = Assign (expr, target)

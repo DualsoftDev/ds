@@ -12,47 +12,35 @@ identifier : IDENTIFIER;
         TAG: '%' IDENTIFIER;
     variable: VARIABLE;
         VARIABLE: '$' IDENTIFIER;
-    //tagName: identifier;
-    functionName: identifier;
-
-// expression: (terminal | function | expr);
-
-// function: functionName '[' expression (';' expression)* ']';
-
-// terminal: literal | tag | identifier;
+    functionName: identifier | binaryOperator;
 
 terminal: variable | tag | literal;
-    // literal: numDouble | integer | string;
-    // string: STRING;
-    // numDouble: DOUBLE;
-    // integer: INTEGER;
-
     literal:
-        /* - */   literalSingle
-        /* . */ | literalDouble         // 'double' 이름 그대로 사용 불가 : symbol double conflicts with generated code in target language or runtime
-        /* y */ | literalSbyte
+        /* -  */   literalSingle
+        /* .  */ | literalDouble         // 'double' 이름 그대로 사용 불가 : symbol double conflicts with generated code in target language or runtime
+        /* y  */ | literalSbyte
         /* uy */ | literalByte
-        /* s */ | literalInt16
+        /* s  */ | literalInt16
         /* us */ | literalUint16
-        /* - */ | literalInt32
-        /* u */ | literalUint32
-        /* L */ | literalInt64
+        /* -  */ | literalInt32
+        /* u  */ | literalUint32
+        /* L  */ | literalInt64
         /* UL */ | literalUint64
-        /*  */ | literalChar
-        /*  */ | literalString
+        /*    */ | literalChar
+        /*    */ | literalString
     ;
-    literalSingle :SINGLE;
-    literalDouble :DOUBLE;
-    literalSbyte  :SBYTE;
-    literalByte   :BYTE;
-    literalInt16  :INT16;
-    literalUint16 :UINT16;
-    literalInt32  :INT32;
-    literalUint32 :UINT32;
-    literalInt64  :INT64;
-    literalUint64 :UINT64;
-    literalChar   :CHAR;
-    literalString :STRING;
+        literalSingle :SINGLE;
+        literalDouble :DOUBLE;
+        literalSbyte  :SBYTE;
+        literalByte   :BYTE;
+        literalInt16  :INT16;
+        literalUint16 :UINT16;
+        literalInt32  :INT32;
+        literalUint32 :UINT32;
+        literalInt64  :INT64;
+        literalUint64 :UINT64;
+        literalChar   :CHAR;
+        literalString :STRING;
 
 literals: literal (';' toplevel)* (';')?;
 
@@ -67,20 +55,18 @@ assign: expr ':=' expr;
 expr:   functionName '(' arguments? ')'         # FunctionCallExpr  // func call like f(), f(x), f(1,2)
     |   variable ('[' expr ']')+                # ArrayReferenceExpr // array index like a[i], a[i][j]
     |   unaryOperator expr                      # UnaryExpr           // unary minus, boolean not
-    |   expr (
-            | '+'|'-'|'*'|'/'|'%'
-            | '&&' | '||' 
-            |'=' | '!='
-            //|':='
-            ) expr                              # BinaryExpr // ':=': assignment equality comparison (lowest priority op)
+    |   expr binaryOperator expr                # BinaryExpr // ':=': assignment equality comparison (lowest priority op)
     |   terminal                                # TerminalExpr
     |   '(' expr ')'                            # ParenthesysExpr
     ;
 
-    //functionCall: functionName '(' arguments? ')';    // func call like f(), f(x), f(1,2)
     arguments: exprList;
     exprList : expr (',' expr)* ;   // arg list
     unaryOperator: '-'|'!';
+    binaryOperator:
+            '+'|'-'|'*'|'/'|'%'
+            | '&&' | '||' 
+            |'=' | '!=';
 
 //INTEGER: SIGN? DIGITS;
 IDENTIFIER: VALID_ID_START VALID_ID_CHAR*;

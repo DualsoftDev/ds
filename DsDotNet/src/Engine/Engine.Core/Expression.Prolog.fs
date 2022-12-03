@@ -173,6 +173,9 @@ module rec ExpressionPrologModule =
     type Arguments = IExpression list
     type Args      = Arguments
 
+    let isAllExpressionSameType(args:Args) =
+        args |> Seq.distinctBy(fun a -> a.DataType) |> Seq.length = 1
+    let verifyAllExpressionSameType = isAllExpressionSameType >> verifyMessage "Type mismatch"
 
 [<AutoOpen>]
 module ExpressionPrologModule2 =

@@ -11,14 +11,15 @@ module ExpressionFunctionModule =
     let internal iexpr any = (box any) :?> IExpression
 
     let createBinaryExpression (opnd1:IExpression) (op:string) (opnd2:IExpression) : IExpression =
+        verifyAllExpressionSameType [opnd1; opnd2] |> ignore
         let t1 = opnd1.DataType
         let t2 = opnd2.DataType
         if t1 <> t2 then
             failwith "ERROR: Type mismatch"
 
         let args = [opnd1; opnd2]
-
-        if t1 = typeof<byte> then
+        match t1.Name with
+        | "Byte" ->
             match op with
             | "+" -> adduy args
             | "-" -> subuy args
@@ -26,7 +27,7 @@ module ExpressionFunctionModule =
             | "/" -> divuy args
             | _ -> failwith "NOT Yet"
             |> iexpr
-        elif t1 = typeof<sbyte> then
+        | "SByte" ->
             match op with
             | "+" -> addy args
             | "-" -> suby args
@@ -34,7 +35,7 @@ module ExpressionFunctionModule =
             | "/" -> divy args
             | _ -> failwith "NOT Yet"
             |> iexpr
-        elif t1 = typeof<int16> then
+        | "Int16" ->
             match op with
             | "+" -> adds args
             | "-" -> subs args
@@ -42,7 +43,7 @@ module ExpressionFunctionModule =
             | "/" -> divs args
             | _ -> failwith "NOT Yet"
             |> iexpr
-        elif t1 = typeof<uint16> then
+        | "UInt16" ->
             match op with
             | "+" -> addus args
             | "-" -> subus args
@@ -50,7 +51,7 @@ module ExpressionFunctionModule =
             | "/" -> divus args
             | _ -> failwith "NOT Yet"
             |> iexpr
-        elif t1 = typeof<int32> then
+        | "Int32" ->
             match op with
             | "+" -> add args
             | "-" -> sub args
@@ -58,7 +59,7 @@ module ExpressionFunctionModule =
             | "/" -> div args
             | _ -> failwith "NOT Yet"
             |> iexpr
-        elif t1 = typeof<uint32> then
+        | "UInt32" ->
             match op with
             | "+" -> addu args
             | "-" -> subu args
@@ -66,7 +67,7 @@ module ExpressionFunctionModule =
             | "/" -> divu args
             | _ -> failwith "NOT Yet"
             |> iexpr
-        elif t1 = typeof<double> then
+        | "Double" ->
             match op with
             | "+" -> addd args
             | "-" -> subd args
@@ -74,7 +75,7 @@ module ExpressionFunctionModule =
             | "/" -> divd args
             | _ -> failwith "NOT Yet"
             |> iexpr
-        elif t1 = typeof<single> then
+        | "Single" ->
             match op with
             | "+" -> addf args
             | "-" -> subf args
@@ -82,19 +83,26 @@ module ExpressionFunctionModule =
             | "/" -> divf args
             | _ -> failwith "NOT Yet"
             |> iexpr
-        elif t1 = typeof<string> then
+        | "String" ->
             match op with
             | "+" -> concat args
             | _ -> failwith "ERROR"
             |> iexpr
-        else
+        | _ ->
             failwith "ERROR"
 
     let createCustomFunctionExpression (funName:string) (args:Args) : IExpression =
-        match funName with
-        | "Int" -> Int args |> iexpr
-        | "Bool" -> Bool args |> iexpr
-        | "sin" -> sin args |> iexpr
+        verifyAllExpressionSameType args |> ignore
+        let t = args[0].DataType.Name
+        match funName, t with
+        | "Int", _ -> Int args |> iexpr     // casting 이므로 argument type 을 strict check 하지 않음
+        | "Bool", _ -> Bool args |> iexpr
+
+        | "sin", _ -> sin args |> iexpr
+        | ("+", "Int32") | ("add", "Int32") -> add args |> iexpr
+        | ("-", "Int32") | ("sub", "Int32") -> sub args |> iexpr
+        | ("*", "Int32") | ("mul", "Int32") -> mul args |> iexpr
+        | ("/", "Int32") | ("div", "Int32") -> div args |> iexpr
         //| "cos" -> cos args |> iexpr
         //| "tan" -> tan args |> iexpr
         | _ -> failwith "NOT yet"

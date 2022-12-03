@@ -38,8 +38,8 @@ module ExpressionParser =
                         [
                             match exp.TryFindFirstChild<ExprListContext>() with
                             | Some exprListCtx ->
-                                for exprCtx in exprListCtx.children do
-                                    helper (exprCtx :?> ExprContext)
+                                for exprCtx in exprListCtx.children.OfType<ExprContext>() do
+                                    helper exprCtx
                             | None ->
                                 ()
                         ]

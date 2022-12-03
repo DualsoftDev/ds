@@ -361,16 +361,21 @@ module ExpressionTestModule =
         [<Test>]
         member __.``10 Parse test`` () =
             let evalExpr (text:string) = (parseExpression text).BoxedEvaluatedValue
+            "1 + 2" |> evalExpr === 3
+            "+(1, 2, 3)" |> evalExpr === 6
+            "+(1, *(2, 3))" |> evalExpr === 7
+            "+(/(2, 1), 3)" |> evalExpr === 5
 
 
             //"Int(3.4) + 1 + 2 + (abs(%tag3))"
-            "1 + 2" |> evalExpr === 3
 
             "1.0 + 2.0" |> evalExpr === 3.0
 
             //"+(2, 3, 4)" |> evalExpr === 9        // todo:
 
             (fun () -> "1.0 + 2" |> evalExpr |> ignore )
+            |> ShouldFailWithSubstringT "Type mismatch"
+            (fun () -> "+(1.0, 2)" |> evalExpr |> ignore )
             |> ShouldFailWithSubstringT "Type mismatch"
 
             (fun () -> "\"hello\" + 2" |> evalExpr |> ignore )
@@ -397,3 +402,5 @@ module ExpressionTestModule =
             // Function-call should take arguments as an IExpression list.
             // let exp2 = mul [ 1; 2; 3 ]
             ()
+
+

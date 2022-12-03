@@ -27,12 +27,6 @@ module ExpressionPrologModule =
             | :? single as a -> Some (float a)
             | _ -> None
 
-        let (|Integer|_|) (x:obj) =
-            match x with
-            | :? int as n -> Some n
-            | :? uint as n -> Some (int n)
-            | :? double as n -> Some (int n)
-            | _ -> None
         let (|Byte|_|) (x:obj) =
             match x with
             | :? byte as n -> Some n
@@ -63,6 +57,12 @@ module ExpressionPrologModule =
             | :? uint as n -> Some (uint16 n)
             | :? double as n -> Some (uint16 n)
             | _ -> None
+        let (|Int32|_|) (x:obj) =
+            match x with
+            | :? int32 as n -> Some n
+            | :? uint as n -> Some (int n)
+            | :? double as n -> Some (int n)
+            | _ -> None
         let (|UInt32|_|) (x:obj) =
             match x with
             | :? uint32 as n -> Some n
@@ -73,7 +73,7 @@ module ExpressionPrologModule =
         let (|Bool|_|) (x:obj) =
             match x with
             | :? bool as n -> Some n
-            | Integer n when n <> 0 -> Some true
+            | Int32 n when n <> 0 -> Some true
             | _ -> None
 
         let (|PLCTag|_|) (x:obj) =
@@ -86,7 +86,7 @@ module ExpressionPrologModule =
         let toFloat  x = (|Float|_|)   x |> Option.get
         let toByte   x = (|Byte|_|)    x |> Option.get
         let toSByte  x = (|SByte|_|)   x |> Option.get
-        let toInt    x = (|Integer|_|) x |> Option.get
+        let toInt    x = (|Int32|_|)   x |> Option.get
         let toInt16  x = (|Int16|_|)   x |> Option.get
         let toUInt16 x = (|UInt16|_|)  x |> Option.get
         let toUInt32 x = (|UInt32|_|)  x |> Option.get
@@ -105,9 +105,9 @@ module ExpressionPrologModule =
             [<Extension>] static member Expect1(xs:'a seq) = expect1 xs
             [<Extension>] static member Expect2(xs:'a seq) = expect2 xs
 
-    /// Expression<'T> 로 생성할 수 있는 interface
-    type IExpressionCreatable    =
-        abstract CreateBoxedExpression: unit -> obj        // Terminal<'T>
+    ///// Expression<'T> 로 생성할 수 있는 interface
+    //type IExpressionCreatable    =
+    //    abstract CreateBoxedExpression: unit -> obj        // Terminal<'T>
 
     type ExpressionType =
         | ExpTypeFunction
@@ -137,3 +137,35 @@ module ExpressionPrologModule =
         abstract ToText : withParenthesys:bool -> string
 
 
+    [<AbstractClass>]
+    [<DebuggerDisplay("{Name}")>]
+    type TypedValueStorage<'T>(name, initValue:'T) =
+        member _.Name: string = name
+        member val Value = initValue with get, set
+
+        interface IStorage with
+            member x.Value with get() = x.Value and set(v) = x.Value <- v :?> 'T
+            member x.ToText() = x.ToText()
+        interface IStorage<'T> with
+            member x.Value with get() = x.Value and set(v) = x.Value <- v
+        interface INamed with
+            member x.Name with get() = x.Name and set(v) = failwith "ERROR: not supported"
+
+        abstract ToText: unit -> string
+
+
+
+
+    [<AbstractClass>]
+    type Tag<'T>(name, initValue:'T) =
+        inherit TypedValueStorage<'T>(name, initValue)
+
+        interface ITag
+        override x.ToText() = "%" + name
+
+    // todo: 임시 이름... 추후 Variable로
+    type StorageVariable<'T>(name, initValue:'T) =
+        inherit TypedValueStorage<'T>(name, initValue)
+
+        interface IVariable
+        override x.ToText() = "$" + name

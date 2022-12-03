@@ -189,7 +189,7 @@ module ExpressionTestModule =
         [<Test>]
         member __.``6 Serialization test`` () =
             let toText (exp:Expression<'T>) = exp.ToText(false)
-            
+
             v 1         |> toText === "1"
             v "hello"   |> toText === "\"hello\""
             v Math.PI   |> toText === sprintf "%A" Math.PI
@@ -308,21 +308,20 @@ module ExpressionTestModule =
 
         [<Test>]
         member __.``9 Tag type test`` () =
-            let rawTags = [
-                PlcTag.Create("sbyte", 1y) |> box
-                PlcTag.Create("byte", 1uy)
-                PlcTag.Create("int16", 1s)
-                PlcTag.Create("uint16", 1us)
-                PlcTag.Create("int32", 1)
-                PlcTag.Create("uint32", 1u)
-                PlcTag.Create("int64", 1L)
-                PlcTag.Create("uint64", 1UL)
-                PlcTag.Create("single", 1.0f)
-                PlcTag.Create("double", 1.0)
-                PlcTag.Create("char", '1')
-                PlcTag.Create("string", "1")
+            let tags = [
+                PlcTag.Create("sbyte", 1y)     |> tag |> box
+                PlcTag.Create("byte", 1uy)     |> tag |> box
+                PlcTag.Create("int16", 1s)     |> tag |> box
+                PlcTag.Create("uint16", 1us)   |> tag |> box
+                PlcTag.Create("int32", 1)      |> tag |> box
+                PlcTag.Create("uint32", 1u)    |> tag |> box
+                PlcTag.Create("int64", 1L)     |> tag |> box
+                PlcTag.Create("uint64", 1UL)   |> tag |> box
+                PlcTag.Create("single", 1.0f)  |> tag |> box
+                PlcTag.Create("double", 1.0)   |> tag |> box
+                PlcTag.Create("char", '1')     |> tag |> box
+                PlcTag.Create("string", "1")   |> tag |> box
             ]
-            let tags = rawTags |> List.map (createExpressionFromBoxedStorage)
             let tagDic =
                 [   for t in tags do
                         let exp = t :?> IExpression
@@ -334,21 +333,20 @@ module ExpressionTestModule =
             sbyte.DataType === typedefof<sbyte>
             sbyte.BoxedEvaluatedValue === 1y
 
-            let rawVariables = [
-                StorageVariable("sbyte", 1y) |> box
-                StorageVariable("byte", 1uy)
-                StorageVariable("int16", 1s)
-                StorageVariable("uint16", 1us)
-                StorageVariable("int32", 1)
-                StorageVariable("uint32", 1u)
-                StorageVariable("int64", 1L)
-                StorageVariable("uint64", 1UL)
-                StorageVariable("single", 1.0f)
-                StorageVariable("double", 1.0)
-                StorageVariable("char", '1')
-                StorageVariable("string", "1")
+            let variables = [
+                StorageVariable("sbyte", 1y)    |> var |> box
+                StorageVariable("byte", 1uy)    |> var |> box
+                StorageVariable("int16", 1s)    |> var |> box
+                StorageVariable("uint16", 1us)  |> var |> box
+                StorageVariable("int32", 1)     |> var |> box
+                StorageVariable("uint32", 1u)   |> var |> box
+                StorageVariable("int64", 1L)    |> var |> box
+                StorageVariable("uint64", 1UL)  |> var |> box
+                StorageVariable("single", 1.0f) |> var |> box
+                StorageVariable("double", 1.0)  |> var |> box
+                StorageVariable("char", '1')    |> var |> box
+                StorageVariable("string", "1")  |> var |> box
             ]
-            let variables = rawVariables |> List.map (createExpressionFromBoxedStorage)
             let varDic =
                 [   for t in variables do
                         let exp = t :?> IExpression

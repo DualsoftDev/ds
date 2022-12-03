@@ -106,33 +106,31 @@ module ExpressionFunctionModule =
 
     [<AutoOpen>]
     module FunctionModule =
-        /// boxed object 로부터 Expression<'T> 생성하고 이를 obj type 으로 반환
-        let expr (x:obj) =
-            match x with
-            | :? IExpression as e -> x
-            //| :? IExpressionCreatable as c -> c.CreateBoxedExpression()
+        ///// boxed object 로부터 Expression<'T> 생성하고 이를 obj type 으로 반환
+        //let expr (x:obj) =
+        //    match x with
+        //    | :? IExpression as e -> x
 
-            //(* Parser 에서 읽은 raw literal 의 변환 case *)
-            //| :? sbyte  as o -> Terminal (Literal o)
-            //| :? byte   as o -> Terminal (Literal o)
-            //| :? int16  as o -> Terminal (Literal o)
-            //| :? uint16 as o -> Terminal (Literal o)
-            //| :? int32  as o -> Terminal (Literal o)
-            //| :? uint32 as o -> Terminal (Literal o)
-            //| :? int64  as o -> Terminal (Literal o)
-            //| :? uint64 as o -> Terminal (Literal o)
-            //| :? single as o -> Terminal (Literal o)
-            //| :? bool   as o -> Terminal (Literal o)
-            //| :? double as o -> Terminal (Literal o)
-            //| :? char   as o -> Terminal (Literal o)
-            //| :? string as o -> Terminal (Literal o)
+        //    (* Parser 에서 읽은 raw literal 의 변환 case *)
+        //    | :? sbyte  as o -> Terminal (Literal o)
+        //    | :? byte   as o -> Terminal (Literal o)
+        //    | :? int16  as o -> Terminal (Literal o)
+        //    | :? uint16 as o -> Terminal (Literal o)
+        //    | :? int32  as o -> Terminal (Literal o)
+        //    | :? uint32 as o -> Terminal (Literal o)
+        //    | :? int64  as o -> Terminal (Literal o)
+        //    | :? uint64 as o -> Terminal (Literal o)
+        //    | :? single as o -> Terminal (Literal o)
+        //    | :? bool   as o -> Terminal (Literal o)
+        //    | :? double as o -> Terminal (Literal o)
+        //    | :? char   as o -> Terminal (Literal o)
+        //    | :? string as o -> Terminal (Literal o)
 
-            | _ -> failwith "ERROR"
+        //    | _ -> failwith "ERROR"
 
 
         /// Create function
         let private cf (f:Args->'T) (name:string) (args:Args) =
-            let args = args |> map expr
             Function { f=f; name=name; args=args}
 
         (*

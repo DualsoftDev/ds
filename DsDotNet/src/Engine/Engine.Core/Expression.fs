@@ -12,45 +12,6 @@ open System.Diagnostics
 [<AutoOpen>]
 module ExpressionModule =
 
-
-    [<AbstractClass>]
-    [<DebuggerDisplay("{Name}")>]
-    type TypedValueStorage<'T>(name, initValue:'T) =
-        member _.Name: string = name
-        member val Value = initValue with get, set
-
-        interface IStorage with
-            member x.Value with get() = x.Value and set(v) = x.Value <- v :?> 'T
-            member x.ToText() = x.ToText()
-        interface IStorage<'T> with
-            member x.Value with get() = x.Value and set(v) = x.Value <- v
-        interface IExpressionCreatable with
-            member x.CreateBoxedExpression() = x.CreateBoxedExpression()
-        interface INamed with
-            member x.Name with get() = x.Name and set(v) = failwith "ERROR: not supported"
-
-        abstract CreateBoxedExpression: unit -> obj
-        abstract ToText: unit -> string
-
-
-
-
-    [<AbstractClass>]
-    type Tag<'T>(name, initValue:'T) =
-        inherit TypedValueStorage<'T>(name, initValue)
-
-        interface ITag
-        override x.CreateBoxedExpression() = Terminal(Terminal.Tag x)
-        override x.ToText() = "%" + name
-
-    // todo: 임시 이름... 추후 Variable로
-    type StorageVariable<'T>(name, initValue:'T) =
-        inherit TypedValueStorage<'T>(name, initValue)
-
-        interface IVariable
-        override x.CreateBoxedExpression() = Terminal(Terminal.Variable x)
-        override x.ToText() = "$" + name
-
     type Terminal<'T> =
         | Tag of Tag<'T>
         | Variable of StorageVariable<'T>
@@ -94,11 +55,7 @@ module ExpressionModule =
 
     /// Tag<'T> 로부터 Expression<'T> 생성
     let tag (t: Tag<'T>) = Terminal (Tag t)
-
-    /// storage:obj --> 실제는 Tag<'T> or StorageVariable<'T> type 객체 boxed
-    let createExpressionFromBoxedStorage (storage:obj) =
-        let t = storage :?> IExpressionCreatable
-        t.CreateBoxedExpression()
+    let var (t: StorageVariable<'T>) = Terminal (Variable t)
 
     [<AutoOpen>]
     module StatementModule =

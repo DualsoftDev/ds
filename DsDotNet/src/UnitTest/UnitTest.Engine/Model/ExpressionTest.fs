@@ -253,7 +253,7 @@ module ExpressionTestModule =
             /// Parse And Serialize
             let pns (text:string) =
                 let expr = parseExpression text
-                serializeBoxedExpression expr false
+                expr.ToText(false)
             let exprs =
                 [
                     "1y + 2y"

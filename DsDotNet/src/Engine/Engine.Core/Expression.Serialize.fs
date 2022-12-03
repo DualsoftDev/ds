@@ -25,17 +25,13 @@ module rec ExpressionSerializeModule =
             ] |> HashSet<string>
         fun (name:string) -> hash.Contains (name)
 
-    let serializeBoxedExpression (exp:obj) (withParenthesys:bool) =
-        let exp = exp :?> IExpression
-        exp.ToText(withParenthesys)
-
 
     let serializeFunctionNameAndBoxedArguments (name:string) (args:Args) (withParenthesys:bool) =
         let isBinary = isBinaryFunctionOrOperator name
         if isBinary && args.Length = 2 then
             let precedence = operatorPrecedenceMap[name]
-            let l:string = serializeBoxedExpression args[0] true
-            let r:string = serializeBoxedExpression args[1] true
+            let l = args[0].ToText(true)
+            let r = args[1].ToText(true)
             let text = $"{l} {name} {r}"
             if withParenthesys then $"({text})" else text
         else

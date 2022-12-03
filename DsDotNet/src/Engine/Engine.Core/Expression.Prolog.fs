@@ -275,7 +275,7 @@ module rec ExpressionPrologModule =
 
     let isAllExpressionSameType(args:Args) =
         args |> Seq.distinctBy(fun a -> a.DataType) |> Seq.length = 1
-    let verifyAllExpressionSameType = isAllExpressionSameType >> verifyMessage "Type mismatch"
+    let verifyAllExpressionSameType = isAllExpressionSameType >> verifyM "Type mismatch"
 
 [<AutoOpen>]
 module ExpressionPrologModule2 =

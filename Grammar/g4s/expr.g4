@@ -66,7 +66,9 @@ expr:   functionName '(' arguments? ')'         # FunctionCallExpr  // func call
     binaryOperator:
             '+'|'-'|'*'|'/'|'%'
             | '&&' | '||'
-            |'=' | '!=';
+            |'=' | '!='
+            |'>' | '>=' | '<' | '<='
+            ;
 
 //INTEGER: SIGN? DIGITS;
 IDENTIFIER: VALID_ID_START VALID_ID_CHAR*;

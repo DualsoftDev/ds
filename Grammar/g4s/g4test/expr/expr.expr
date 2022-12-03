@@ -1,5 +1,9 @@
 /* grun expr expr < g4test/expr/expr.expr */
-+(1, 2, 3)
+sin(0);
+
+(1 + 1) * 2 = 4;
+
++(1, 2, 3);
 
 myvar := Int(3.4) + 1 + 2 + (abs(tag3));
 

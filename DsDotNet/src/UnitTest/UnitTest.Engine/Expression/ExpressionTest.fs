@@ -10,19 +10,25 @@ open Engine.Common.FS
 
 [<AutoOpen>]
 module ExpressionTestModule =
+    let evalExpr (text:string) = (parseExpression text).BoxedEvaluatedValue
+    let v = ExpressionModule.literal
+    let evaluate (exp:IExpression) = exp.BoxedEvaluatedValue
+    let dq = "\""
 
     type ExpressionTest() =
         do Fixtures.SetUpTest()
-
-        let v = ExpressionModule.literal
-        let evaluate (exp:IExpression) = exp.BoxedEvaluatedValue
-        let dq = "\""
 
         [<Test>]
         member __.``1 ExpressionValueUnit test`` () =
 
 
-            //지원 value type : bool, int, single, double, string
+            (* 지원 value type :
+                - bool, string,
+                - dotnet numeric type
+                    - (s)byte, (u)int16, (u)int32, (u)int64
+                    - float, double
+            *)
+
             v 1       |> evaluate === 1
             v 1       |> evaluate === 1
             v "hello" |> evaluate === "hello"
@@ -362,7 +368,6 @@ module ExpressionTestModule =
 
         [<Test>]
         member __.``10 Parse test`` () =
-            let evalExpr (text:string) = (parseExpression text).BoxedEvaluatedValue
             """  "hello, " + "world" """ |> evalExpr === "hello, world"
 
             "1 + 2" |> evalExpr === 3

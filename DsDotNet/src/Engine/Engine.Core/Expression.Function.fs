@@ -12,7 +12,7 @@ module ExpressionFunctionModule =
     let internal iexpr any = (box any) :?> IExpression
 
     let createBinaryExpression (opnd1:IExpression) (op:string) (opnd2:IExpression) : IExpression =
-        verifyAllExpressionSameType [opnd1; opnd2] |> ignore
+        verifyAllExpressionSameType [opnd1; opnd2]
         let t1 = opnd1.DataType
         let t2 = opnd2.DataType
         if t1 <> t2 then
@@ -26,12 +26,22 @@ module ExpressionFunctionModule =
         | "-" -> sub args
         | "*" -> mul args
         | "/" -> div args
-        | _ -> failwith "NOT Yet"
+
+        | ">"  -> gt  args
+        | ">=" -> gte args
+        | "<"  -> lt  args
+        | "<=" -> lte args
+        | "=" when t = "String" -> equalString args
+        | "="  -> equal args
+
+        | _ -> failwith $"NOT Yet {op}"
         |> iexpr
 
 
     let createCustomFunctionExpression (funName:string) (args:Args) : IExpression =
-        verifyAllExpressionSameType args |> ignore
+        verifyAllExpressionSameType args
+        let t = args[0].DataType.Name
+
         match funName with
         | ("+" | "add") -> add args
         | ("-" | "sub") -> sub args
@@ -39,14 +49,17 @@ module ExpressionFunctionModule =
         | ("/" | "div") -> div args
 
         | (">" | "gt") -> gt args
+        | ("=" | "equal") when t = "String" -> equalString args
+        | ("=" | "equal") -> equal args
 
         | "Int"  -> Int  args |> iexpr
         | "Bool" -> Bool args |> iexpr
+        | "Double" -> Double args |> iexpr
 
         | "sin"  -> sin  args |> iexpr
         | "cos" -> cos args |> iexpr
         | "tan" -> tan args |> iexpr
-        | _ -> failwith "NOT yet"
+        | _ -> failwith $"NOT yet: {funName}"
 
     [<AutoOpen>]
     module FunctionModule =
@@ -150,22 +163,6 @@ module ExpressionFunctionModule =
             | "UInt64" -> cf _moduloUL "%" args |> iexpr
             | _        -> failwith "ERROR"
 
-        //let gt (args:Args) =
-        //    match args[0].DataType.Name with
-        //    | "Single"
-        //    | "Double"
-        //    | "SByte"
-        //    | "Byte"
-        //    | "Int16"
-        //    | "UInt16"
-        //    | "Int32"
-        //    | "UInt32"
-        //    | "Int64"
-        //    | "UInt64"  ->
-        //        let doubleArgs = args.Select(fun a -> a.BoxedEvaluatedValue |> toDouble
-        //        cf _gt ">" doubleArgs
-
-
         let equal          args = cf _equal          "="      args
         let notEqual       args = cf _notEqual       "!="     args
         let gt             args = cf _gt             ">"      args
@@ -189,6 +186,7 @@ module ExpressionFunctionModule =
         let tan            args = cf _tan            "tan"    args
         let Bool           args = cf _convertBool    "Bool"   args
         let Int            args = cf _convertInt     "Int"    args
+        let Double         args = cf _convertDouble  "Double"    args
 
         let anD = logicalAnd
         //let absDouble = absd
@@ -315,6 +313,7 @@ module ExpressionFunctionModule =
         let _tan (args:Args) = args.Select(evalToDouble) .Expect1() |> Math.Tan
         let _convertBool (args:Args) = args.Select(evalArg >> toBool) .Expect1()
         let _convertInt (args:Args) = args.Select(evalArg >> toInt) .Expect1()
+        let _convertDouble (args:Args) = args.Select(evalArg >> toDouble) .Expect1()
 
 
     let private tagsToArguments (xs:Tag<'T> seq) = xs.Select(fun x -> Tag x) |> List.ofSeq

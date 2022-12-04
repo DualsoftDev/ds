@@ -99,11 +99,11 @@ module TestModule =
             abs [v 13]                  |> evaluate === 13
             abs [v -13]                 |> evaluate === 13
             abs [v -13.0]               |> evaluate === 13.0
-            xorBit [v 13; v 11]         |> evaluate === 6
-            andBit [v 2; v 3]           |> evaluate === 2
-            andBit [v 1; v 2; v 3; v 4] |> evaluate === 0
-            orBit [v 1; v 2; v 3; v 4]  |> evaluate === 7
-            notBit [v 65535]            |> evaluate === -65536
+            bitwiseXor [v 13; v 11]         |> evaluate === 6
+            bitwiseAnd [v 2; v 3]           |> evaluate === 2
+            bitwiseAnd [v 1; v 2; v 3; v 4] |> evaluate === 0
+            bitwiseOr [v 1; v 2; v 3; v 4]  |> evaluate === 7
+            bitwiseNot [v 65535]            |> evaluate === -65536
             add [v 1; v 2]              |> evaluate === 3
             sub [v 5; v 3]              |> evaluate === 2
             mul [v 2; v 3]              |> evaluate === 6

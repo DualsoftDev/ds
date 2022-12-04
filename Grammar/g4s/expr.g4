@@ -65,9 +65,10 @@ expr:   functionName '(' arguments? ')'         # FunctionCallExpr  // func call
     unaryOperator: '-'|'!';
     binaryOperator:
             '+'|'-'|'*'|'/'|'%'
-            | '&&' | '||'
+            | '&&' | '||'     // logical and or
             |'=' | '!='
             |'>' | '>=' | '<' | '<='
+            | '&' | '|' | '&&&' | '|||'   // bitwise and or (C++/F# style)
             ;
 
 //INTEGER: SIGN? DIGITS;

@@ -49,8 +49,21 @@ module ExpressionFunctionModule =
         | ("/" | "div") -> div args
 
         | (">" | "gt") -> gt args
+        | (">=" | "gte") -> gte args
+        | ("<" | "lt") -> lt args
+        | ("<=" | "lte") -> lte args
         | ("=" | "equal") when t = "String" -> equalString args
         | ("=" | "equal") -> equal args
+        | ("!=" | "notEqual") when t = "String" -> notEqualString args
+        | ("!=" | "notEqual") -> notEqual args
+
+        | ("&&" | "and") -> logicalAnd args
+        | ("||" | "or") -> logicalOr args
+        | ("!" | "not") -> logicalNot args
+
+        | ("&" | "&&&") -> bitwiseAnd args
+        | ("|" | "|||") -> bitwiseOr args
+        | ("~" | "~~~") -> bitwiseNot args
 
         | "bool" -> cast_bool    args |> iexpr
         | ("sbyte" | "int8")     -> cast_sbyte   args |> iexpr
@@ -88,106 +101,107 @@ module ExpressionFunctionModule =
              L   | Int64        | int64
              UL  | UInt64       | uint64
         *)
-        let add (args:Args) =
+        let add (args:Args) : IExpression =
             match args[0].DataType.Name with
-            | "Single" -> cf _add   "+" args |> iexpr
-            | "Double" -> cf _addd  "+" args |> iexpr
-            | "SByte"  -> cf _addy  "+" args |> iexpr
-            | "Byte"   -> cf _adduy "+" args |> iexpr
-            | "Int16"  -> cf _adds  "+" args |> iexpr
-            | "UInt16" -> cf _addus "+" args |> iexpr
-            | "Int32"  -> cf _add   "+" args |> iexpr
-            | "UInt32" -> cf _addu  "+" args |> iexpr
-            | "Int64"  -> cf _addL  "+" args |> iexpr
-            | "UInt64" -> cf _addUL "+" args |> iexpr
+            | "Single" -> cf _add   "+" args
+            | "Double" -> cf _addd  "+" args
+            | "SByte"  -> cf _addy  "+" args
+            | "Byte"   -> cf _adduy "+" args
+            | "Int16"  -> cf _adds  "+" args
+            | "UInt16" -> cf _addus "+" args
+            | "Int32"  -> cf _add   "+" args
+            | "UInt32" -> cf _addu  "+" args
+            | "Int64"  -> cf _addL  "+" args
+            | "UInt64" -> cf _addUL "+" args
             | _        -> failwith "ERROR"
 
-        let sub (args:Args) =
+        let sub (args:Args) : IExpression =
             match args[0].DataType.Name with
-            | "Single" -> cf _sub   "-" args |> iexpr
-            | "Double" -> cf _subd  "-" args |> iexpr
-            | "SByte"  -> cf _suby  "-" args |> iexpr
-            | "Byte"   -> cf _subuy "-" args |> iexpr
-            | "Int16"  -> cf _subs  "-" args |> iexpr
-            | "UInt16" -> cf _subus "-" args |> iexpr
-            | "Int32"  -> cf _sub   "-" args |> iexpr
-            | "UInt32" -> cf _subu  "-" args |> iexpr
-            | "Int64"  -> cf _subL  "-" args |> iexpr
-            | "UInt64" -> cf _subUL "-" args |> iexpr
+            | "Single" -> cf _sub   "-" args
+            | "Double" -> cf _subd  "-" args
+            | "SByte"  -> cf _suby  "-" args
+            | "Byte"   -> cf _subuy "-" args
+            | "Int16"  -> cf _subs  "-" args
+            | "UInt16" -> cf _subus "-" args
+            | "Int32"  -> cf _sub   "-" args
+            | "UInt32" -> cf _subu  "-" args
+            | "Int64"  -> cf _subL  "-" args
+            | "UInt64" -> cf _subUL "-" args
             | _        -> failwith "ERROR"
 
-        let mul (args:Args) =
+        let mul (args:Args) : IExpression =
             match args[0].DataType.Name with
-            | "Single" -> cf _mul   "*" args |> iexpr
-            | "Double" -> cf _muld  "*" args |> iexpr
-            | "SByte"  -> cf _muly  "*" args |> iexpr
-            | "Byte"   -> cf _muluy "*" args |> iexpr
-            | "Int16"  -> cf _muls  "*" args |> iexpr
-            | "UInt16" -> cf _mulus "*" args |> iexpr
-            | "Int32"  -> cf _mul   "*" args |> iexpr
-            | "UInt32" -> cf _mulu  "*" args |> iexpr
-            | "Int64"  -> cf _mulL  "*" args |> iexpr
-            | "UInt64" -> cf _mulUL "*" args |> iexpr
+            | "Single" -> cf _mul   "*" args
+            | "Double" -> cf _muld  "*" args
+            | "SByte"  -> cf _muly  "*" args
+            | "Byte"   -> cf _muluy "*" args
+            | "Int16"  -> cf _muls  "*" args
+            | "UInt16" -> cf _mulus "*" args
+            | "Int32"  -> cf _mul   "*" args
+            | "UInt32" -> cf _mulu  "*" args
+            | "Int64"  -> cf _mulL  "*" args
+            | "UInt64" -> cf _mulUL "*" args
             | _        -> failwith "ERROR"
 
-        let div (args:Args) =
+        let div (args:Args) : IExpression =
             match args[0].DataType.Name with
-            | "Single" -> cf _div   "/" args |> iexpr
-            | "Double" -> cf _divd  "/" args |> iexpr
-            | "SByte"  -> cf _divy  "/" args |> iexpr
-            | "Byte"   -> cf _divuy "/" args |> iexpr
-            | "Int16"  -> cf _divs  "/" args |> iexpr
-            | "UInt16" -> cf _divus "/" args |> iexpr
-            | "Int32"  -> cf _div   "/" args |> iexpr
-            | "UInt32" -> cf _divu  "/" args |> iexpr
-            | "Int64"  -> cf _divL  "/" args |> iexpr
-            | "UInt64" -> cf _divUL "/" args |> iexpr
+            | "Single" -> cf _div   "/" args
+            | "Double" -> cf _divd  "/" args
+            | "SByte"  -> cf _divy  "/" args
+            | "Byte"   -> cf _divuy "/" args
+            | "Int16"  -> cf _divs  "/" args
+            | "UInt16" -> cf _divus "/" args
+            | "Int32"  -> cf _div   "/" args
+            | "UInt32" -> cf _divu  "/" args
+            | "Int64"  -> cf _divL  "/" args
+            | "UInt64" -> cf _divUL "/" args
             | _        -> failwith "ERROR"
 
-        let abs (args:Args) =
+        let abs (args:Args) : IExpression =
             match args[0].DataType.Name with
-            | "Single" -> cf _abs   "abs" args |> iexpr
-            | "Double" -> cf _absd  "abs" args |> iexpr
-            | "SByte"  -> cf _absy  "abs" args |> iexpr
-            | "Byte"   -> cf _absuy "abs" args |> iexpr
-            | "Int16"  -> cf _abss  "abs" args |> iexpr
-            | "UInt16" -> cf _absus "abs" args |> iexpr
-            | "Int32"  -> cf _abs   "abs" args |> iexpr
-            | "UInt32" -> cf _absu  "abs" args |> iexpr
-            | "Int64"  -> cf _absL  "abs" args |> iexpr
-            | "UInt64" -> cf _absUL "abs" args |> iexpr
+            | "Single" -> cf _abs   "abs" args
+            | "Double" -> cf _absd  "abs" args
+            | "SByte"  -> cf _absy  "abs" args
+            | "Byte"   -> cf _absuy "abs" args
+            | "Int16"  -> cf _abss  "abs" args
+            | "UInt16" -> cf _absus "abs" args
+            | "Int32"  -> cf _abs   "abs" args
+            | "UInt32" -> cf _absu  "abs" args
+            | "Int64"  -> cf _absL  "abs" args
+            | "UInt64" -> cf _absUL "abs" args
             | _        -> failwith "ERROR"
 
-        let modulo (args:Args) =
+        let modulo (args:Args) : IExpression =
             match args[0].DataType.Name with
-            | "Single" -> cf _modulo   "%" args |> iexpr
-            | "Double" -> cf _modulod  "%" args |> iexpr
-            | "SByte"  -> cf _moduloy  "%" args |> iexpr
-            | "Byte"   -> cf _modulouy "%" args |> iexpr
-            | "Int16"  -> cf _modulos  "%" args |> iexpr
-            | "UInt16" -> cf _modulous "%" args |> iexpr
-            | "Int32"  -> cf _modulo   "%" args |> iexpr
-            | "UInt32" -> cf _modulou  "%" args |> iexpr
-            | "Int64"  -> cf _moduloL  "%" args |> iexpr
-            | "UInt64" -> cf _moduloUL "%" args |> iexpr
+            | "Single" -> cf _modulo   "%" args
+            | "Double" -> cf _modulod  "%" args
+            | "SByte"  -> cf _moduloy  "%" args
+            | "Byte"   -> cf _modulouy "%" args
+            | "Int16"  -> cf _modulos  "%" args
+            | "UInt16" -> cf _modulous "%" args
+            | "Int32"  -> cf _modulo   "%" args
+            | "UInt32" -> cf _modulou  "%" args
+            | "Int64"  -> cf _moduloL  "%" args
+            | "UInt64" -> cf _moduloUL "%" args
             | _        -> failwith "ERROR"
 
-        let equal          args = cf _equal          "="      args
-        let notEqual       args = cf _notEqual       "!="     args
-        let gt             args = cf _gt             ">"      args
-        let lt             args = cf _lt             "<"      args
-        let gte            args = cf _gte            ">="     args
-        let lte            args = cf _lte            "<="     args
-        let equalString    args = cf _equalString    "=T"     args
-        let notEqualString args = cf _notEqualString "!=T"    args
         let concat         args = cf _concat         "+"      args
-        let logicalAnd     args = cf _logicalAnd     "&"      args
-        let logicalOr      args = cf _logicalOr      "|"      args
-        let logicalNot     args = cf _logicalNot     "!"      args
-        let orBit          args = cf _orBit          "orBit"  args
-        let andBit         args = cf _andBit         "andBit" args
-        let notBit         args = cf _notBit         "notBit" args
-        let xorBit         args = cf _xorBit         "xorBit" args
+
+        let equal          args: Expression<bool> = cf _equal          "="  args
+        let notEqual       args: Expression<bool> = cf _notEqual       "!=" args
+        let gt             args: Expression<bool> = cf _gt             ">"  args
+        let lt             args: Expression<bool> = cf _lt             "<"  args
+        let gte            args: Expression<bool> = cf _gte            ">=" args
+        let lte            args: Expression<bool> = cf _lte            "<=" args
+        let equalString    args: Expression<bool> = cf _equalString    "="  args
+        let notEqualString args: Expression<bool> = cf _notEqualString "!=" args
+        let logicalAnd     args: Expression<bool> = cf _logicalAnd     "&&" args
+        let logicalOr      args: Expression<bool> = cf _logicalOr      "||" args
+        let logicalNot     args: Expression<bool> = cf _logicalNot     "!"  args
+        let bitwiseOr      args = cf _orBit          "orBit"  args
+        let bitwiseAnd     args = cf _andBit         "andBit" args
+        let bitwiseNot     args = cf _notBit         "notBit" args
+        let bitwiseXor     args = cf _xorBit         "xorBit" args
         let shiftLeft      args = cf _shiftLeft      "<<"     args
         let shiftRight     args = cf _shiftRight     ">>"     args
         let sin            args = cf _sin            "sin"    args
@@ -223,8 +237,8 @@ module ExpressionFunctionModule =
         let private castTo<'T> (x:obj) = x :?> 'T
         let private evalToDouble x = x |> evalArg |> castTo<double>
         let private evalToFloat  x = x |> evalArg |> castTo<single>
-        let private evalToByte   x = x |> evalArg |> castTo<byte>
-        let private evalToSByte  x = x |> evalArg |> castTo<sbyte>
+        let private evalToInt8   x = x |> evalArg |> castTo<int8>
+        let private evalToUInt8  x = x |> evalArg |> castTo<uint8>
         let private evalToInt16  x = x |> evalArg |> castTo<int16>
         let private evalToUInt16 x = x |> evalArg |> castTo<uint16>
         let private evalToInt32  x = x |> evalArg |> castTo<int32>
@@ -232,17 +246,17 @@ module ExpressionFunctionModule =
         let private evalToInt64  x = x |> evalArg |> castTo<int64>
         let private evalToUInt64 x = x |> evalArg |> castTo<uint64>
 
-        let _addy    (args:Args) = args.ExpectGteN(2).Select(evalToSByte).Reduce(( + ))
-        let _suby    (args:Args) = args.ExpectGteN(2).Select(evalToSByte).Reduce(( - ))
-        let _muly    (args:Args) = args.ExpectGteN(2).Select(evalToSByte).Reduce(( * ))
-        let _divy    (args:Args) = args.ExpectGteN(2) .Select(evalToSByte).Reduce(( / ))
-        let _moduloy (args:Args) = args.ExpectGteN(2) .Select(evalToSByte).Reduce(( % ))
+        let _addy    (args:Args) = args.ExpectGteN(2).Select(evalToInt8).Reduce(( + ))
+        let _suby    (args:Args) = args.ExpectGteN(2).Select(evalToInt8).Reduce(( - ))
+        let _muly    (args:Args) = args.ExpectGteN(2).Select(evalToInt8).Reduce(( * ))
+        let _divy    (args:Args) = args.ExpectGteN(2) .Select(evalToInt8).Reduce(( / ))
+        let _moduloy (args:Args) = args.ExpectGteN(2) .Select(evalToInt8).Reduce(( % ))
 
-        let _adduy    (args:Args) = args.ExpectGteN(2).Select(evalToByte).Reduce(( + ))
-        let _subuy    (args:Args) = args.ExpectGteN(2).Select(evalToByte).Reduce(( - ))
-        let _muluy    (args:Args) = args.ExpectGteN(2).Select(evalToByte).Reduce(( * ))
-        let _divuy    (args:Args) = args.ExpectGteN(2) .Select(evalToByte).Reduce(( / ))
-        let _modulouy (args:Args) = args.ExpectGteN(2) .Select(evalToByte).Reduce(( % ))
+        let _adduy    (args:Args) = args.ExpectGteN(2).Select(evalToUInt8).Reduce(( + ))
+        let _subuy    (args:Args) = args.ExpectGteN(2).Select(evalToUInt8).Reduce(( - ))
+        let _muluy    (args:Args) = args.ExpectGteN(2).Select(evalToUInt8).Reduce(( * ))
+        let _divuy    (args:Args) = args.ExpectGteN(2) .Select(evalToUInt8).Reduce(( / ))
+        let _modulouy (args:Args) = args.ExpectGteN(2) .Select(evalToUInt8).Reduce(( % ))
 
         let _adds    (args:Args) = args.ExpectGteN(2).Select(evalToInt16).Reduce(( + ))
         let _subs    (args:Args) = args.ExpectGteN(2).Select(evalToInt16).Reduce(( - ))
@@ -292,8 +306,8 @@ module ExpressionFunctionModule =
         let _divUL    (args:Args) = args.ExpectGteN(2) .Select(evalToUInt64).Reduce(( / ))
         let _moduloUL (args:Args) = args.ExpectGteN(2) .Select(evalToUInt64).Reduce(( % ))
 
-        let _absy  (args:Args) = evalToSByte  (args.ExactlyOne()) |> Math.Abs
-        let _absuy (args:Args) = evalToByte   (args.ExactlyOne()) |> Math.Abs
+        let _absy  (args:Args) = evalToInt8  (args.ExactlyOne()) |> Math.Abs
+        let _absuy (args:Args) = evalToUInt8  (args.ExactlyOne()) |> Math.Abs
         let _abss  (args:Args) = evalToInt16  (args.ExactlyOne()) |> Math.Abs
         let _absus (args:Args) = evalToUInt16 (args.ExactlyOne()) |> Math.Abs
         let _abs   (args:Args) = evalToInt32  (args.ExactlyOne()) |> Math.Abs

@@ -235,87 +235,89 @@ module ExpressionFunctionModule =
 
         let private evalArg (x:IExpression) = x.BoxedEvaluatedValue
         let private castTo<'T> (x:obj) = x :?> 'T
-        let private evalToDouble x = x |> evalArg |> castTo<double>
-        let private evalToSingle  x = x |> evalArg |> castTo<single>
-        let private evalToInt8   x = x |> evalArg |> castTo<int8>
-        let private evalToUInt8  x = x |> evalArg |> castTo<uint8>
-        let private evalToInt16  x = x |> evalArg |> castTo<int16>
-        let private evalToUInt16 x = x |> evalArg |> castTo<uint16>
-        let private evalToInt32  x = x |> evalArg |> castTo<int32>
-        let private evalToUInt32 x = x |> evalArg |> castTo<uint32>
-        let private evalToInt64  x = x |> evalArg |> castTo<int64>
-        let private evalToUInt64 x = x |> evalArg |> castTo<uint64>
+        let private evalTo<'T> (x:IExpression) = x |> evalArg |> castTo<'T>
 
-        let _addy    (args:Args) = args.ExpectGteN(2).Select(evalToInt8).Reduce(( + ))
-        let _suby    (args:Args) = args.ExpectGteN(2).Select(evalToInt8).Reduce(( - ))
-        let _muly    (args:Args) = args.ExpectGteN(2).Select(evalToInt8).Reduce(( * ))
-        let _divy    (args:Args) = args.ExpectGteN(2) .Select(evalToInt8).Reduce(( / ))
-        let _moduloy (args:Args) = args.ExpectGteN(2) .Select(evalToInt8).Reduce(( % ))
+        //let private evalToDouble x = x |> evalArg |> castTo<double>
+        //let private evalToSingle  x = x |> evalArg |> castTo<single>
+        //let private evalToInt8   x = x |> evalArg |> castTo<int8>
+        //let private evalToUInt8  x = x |> evalArg |> castTo<uint8>
+        //let private evalToInt16  x = x |> evalArg |> castTo<int16>
+        //let private evalToUInt16 x = x |> evalArg |> castTo<uint16>
+        //let private evalToInt32  x = x |> evalArg |> castTo<int32>
+        //let private evalToUInt32 x = x |> evalArg |> castTo<uint32>
+        //let private evalToInt64  x = x |> evalArg |> castTo<int64>
+        //let private evalToUInt64 x = x |> evalArg |> castTo<uint64>
 
-        let _adduy    (args:Args) = args.ExpectGteN(2).Select(evalToUInt8).Reduce(( + ))
-        let _subuy    (args:Args) = args.ExpectGteN(2).Select(evalToUInt8).Reduce(( - ))
-        let _muluy    (args:Args) = args.ExpectGteN(2).Select(evalToUInt8).Reduce(( * ))
-        let _divuy    (args:Args) = args.ExpectGteN(2) .Select(evalToUInt8).Reduce(( / ))
-        let _modulouy (args:Args) = args.ExpectGteN(2) .Select(evalToUInt8).Reduce(( % ))
+        let _addy    (args:Args) = args.ExpectGteN(2).Select(evalTo<int8>).Reduce(( + ))
+        let _suby    (args:Args) = args.ExpectGteN(2).Select(evalTo<int8>).Reduce(( - ))
+        let _muly    (args:Args) = args.ExpectGteN(2).Select(evalTo<int8>).Reduce(( * ))
+        let _divy    (args:Args) = args.ExpectGteN(2) .Select(evalTo<int8>).Reduce(( / ))
+        let _moduloy (args:Args) = args.ExpectGteN(2) .Select(evalTo<int8>).Reduce(( % ))
 
-        let _adds    (args:Args) = args.ExpectGteN(2).Select(evalToInt16).Reduce(( + ))
-        let _subs    (args:Args) = args.ExpectGteN(2).Select(evalToInt16).Reduce(( - ))
-        let _muls    (args:Args) = args.ExpectGteN(2).Select(evalToInt16).Reduce(( * ))
-        let _divs    (args:Args) = args.ExpectGteN(2) .Select(evalToInt16).Reduce(( / ))
-        let _modulos (args:Args) = args.ExpectGteN(2) .Select(evalToInt16).Reduce(( % ))
+        let _adduy    (args:Args) = args.ExpectGteN(2).Select(evalTo<uint8>).Reduce(( + ))
+        let _subuy    (args:Args) = args.ExpectGteN(2).Select(evalTo<uint8>).Reduce(( - ))
+        let _muluy    (args:Args) = args.ExpectGteN(2).Select(evalTo<uint8>).Reduce(( * ))
+        let _divuy    (args:Args) = args.ExpectGteN(2) .Select(evalTo<uint8>).Reduce(( / ))
+        let _modulouy (args:Args) = args.ExpectGteN(2) .Select(evalTo<uint8>).Reduce(( % ))
 
-        let _addus    (args:Args) = args.ExpectGteN(2).Select(evalToUInt16).Reduce(( + ))
-        let _subus    (args:Args) = args.ExpectGteN(2).Select(evalToUInt16).Reduce(( - ))
-        let _mulus    (args:Args) = args.ExpectGteN(2).Select(evalToUInt16).Reduce(( * ))
-        let _divus    (args:Args) = args.ExpectGteN(2) .Select(evalToUInt16).Reduce(( / ))
-        let _modulous (args:Args) = args.ExpectGteN(2) .Select(evalToUInt16).Reduce(( % ))
+        let _adds    (args:Args) = args.ExpectGteN(2).Select(evalTo<int16>).Reduce(( + ))
+        let _subs    (args:Args) = args.ExpectGteN(2).Select(evalTo<int16>).Reduce(( - ))
+        let _muls    (args:Args) = args.ExpectGteN(2).Select(evalTo<int16>).Reduce(( * ))
+        let _divs    (args:Args) = args.ExpectGteN(2) .Select(evalTo<int16>).Reduce(( / ))
+        let _modulos (args:Args) = args.ExpectGteN(2) .Select(evalTo<int16>).Reduce(( % ))
 
-        let _add     (args:Args) = args.ExpectGteN(2).Select(evalToInt32).Reduce(( + ))
-        let _sub     (args:Args) = args.ExpectGteN(2).Select(evalToInt32).Reduce(( - ))
-        let _mul     (args:Args) = args.ExpectGteN(2).Select(evalToInt32).Reduce(( * ))
-        let _div     (args:Args) = args.ExpectGteN(2) .Select(evalToInt32).Reduce(( / ))
-        let _modulo  (args:Args) = args.ExpectGteN(2) .Select(evalToInt32).Reduce(( % ))
+        let _addus    (args:Args) = args.ExpectGteN(2).Select(evalTo<uint16>).Reduce(( + ))
+        let _subus    (args:Args) = args.ExpectGteN(2).Select(evalTo<uint16>).Reduce(( - ))
+        let _mulus    (args:Args) = args.ExpectGteN(2).Select(evalTo<uint16>).Reduce(( * ))
+        let _divus    (args:Args) = args.ExpectGteN(2) .Select(evalTo<uint16>).Reduce(( / ))
+        let _modulous (args:Args) = args.ExpectGteN(2) .Select(evalTo<uint16>).Reduce(( % ))
 
-        let _addd    (args:Args) = args.ExpectGteN(2).Select(evalToDouble).Reduce(( + ))
-        let _subd    (args:Args) = args.ExpectGteN(2).Select(evalToDouble).Reduce(( - ))
-        let _muld    (args:Args) = args.ExpectGteN(2).Select(evalToDouble).Reduce(( * ))
-        let _divd    (args:Args) = args.ExpectGteN(2) .Select(evalToDouble).Reduce(( / ))
-        let _modulod (args:Args) = args.ExpectGteN(2) .Select(evalToDouble).Reduce(( % ))
+        let _add     (args:Args) = args.ExpectGteN(2).Select(evalTo<int32>).Reduce(( + ))
+        let _sub     (args:Args) = args.ExpectGteN(2).Select(evalTo<int32>).Reduce(( - ))
+        let _mul     (args:Args) = args.ExpectGteN(2).Select(evalTo<int32>).Reduce(( * ))
+        let _div     (args:Args) = args.ExpectGteN(2) .Select(evalTo<int32>).Reduce(( / ))
+        let _modulo  (args:Args) = args.ExpectGteN(2) .Select(evalTo<int32>).Reduce(( % ))
 
-        let _addf    (args:Args) = args.ExpectGteN(2).Select(evalToSingle).Reduce(( + ))
-        let _subf    (args:Args) = args.ExpectGteN(2).Select(evalToSingle).Reduce(( - ))
-        let _mulf    (args:Args) = args.ExpectGteN(2).Select(evalToSingle).Reduce(( * ))
-        let _divf    (args:Args) = args.ExpectGteN(2) .Select(evalToSingle).Reduce(( / ))
-        let _modulof (args:Args) = args.ExpectGteN(2) .Select(evalToSingle).Reduce(( % ))
+        let _addd    (args:Args) = args.ExpectGteN(2).Select(evalTo<double>).Reduce(( + ))
+        let _subd    (args:Args) = args.ExpectGteN(2).Select(evalTo<double>).Reduce(( - ))
+        let _muld    (args:Args) = args.ExpectGteN(2).Select(evalTo<double>).Reduce(( * ))
+        let _divd    (args:Args) = args.ExpectGteN(2) .Select(evalTo<double>).Reduce(( / ))
+        let _modulod (args:Args) = args.ExpectGteN(2) .Select(evalTo<double>).Reduce(( % ))
 
-        let _addu    (args:Args) = args.ExpectGteN(2).Select(evalToUInt32).Reduce(( + ))
-        let _subu    (args:Args) = args.ExpectGteN(2).Select(evalToUInt32).Reduce(( - ))
-        let _mulu    (args:Args) = args.ExpectGteN(2).Select(evalToUInt32).Reduce(( * ))
-        let _divu    (args:Args) = args.ExpectGteN(2) .Select(evalToUInt32).Reduce(( / ))
-        let _modulou (args:Args) = args.ExpectGteN(2) .Select(evalToUInt32).Reduce(( % ))
+        let _addf    (args:Args) = args.ExpectGteN(2).Select(evalTo<single>).Reduce(( + ))
+        let _subf    (args:Args) = args.ExpectGteN(2).Select(evalTo<single>).Reduce(( - ))
+        let _mulf    (args:Args) = args.ExpectGteN(2).Select(evalTo<single>).Reduce(( * ))
+        let _divf    (args:Args) = args.ExpectGteN(2) .Select(evalTo<single>).Reduce(( / ))
+        let _modulof (args:Args) = args.ExpectGteN(2) .Select(evalTo<single>).Reduce(( % ))
 
-        let _addL    (args:Args) = args.ExpectGteN(2).Select(evalToInt64).Reduce(( + ))
-        let _subL    (args:Args) = args.ExpectGteN(2).Select(evalToInt64).Reduce(( - ))
-        let _mulL    (args:Args) = args.ExpectGteN(2).Select(evalToInt64).Reduce(( * ))
-        let _divL    (args:Args) = args.ExpectGteN(2) .Select(evalToInt64).Reduce(( / ))
-        let _moduloL (args:Args) = args.ExpectGteN(2) .Select(evalToInt64).Reduce(( % ))
+        let _addu    (args:Args) = args.ExpectGteN(2).Select(evalTo<uint32>).Reduce(( + ))
+        let _subu    (args:Args) = args.ExpectGteN(2).Select(evalTo<uint32>).Reduce(( - ))
+        let _mulu    (args:Args) = args.ExpectGteN(2).Select(evalTo<uint32>).Reduce(( * ))
+        let _divu    (args:Args) = args.ExpectGteN(2) .Select(evalTo<uint32>).Reduce(( / ))
+        let _modulou (args:Args) = args.ExpectGteN(2) .Select(evalTo<uint32>).Reduce(( % ))
 
-        let _addUL    (args:Args) = args.ExpectGteN(2).Select(evalToUInt64).Reduce(( + ))
-        let _subUL    (args:Args) = args.ExpectGteN(2).Select(evalToUInt64).Reduce(( - ))
-        let _mulUL    (args:Args) = args.ExpectGteN(2).Select(evalToUInt64).Reduce(( * ))
-        let _divUL    (args:Args) = args.ExpectGteN(2) .Select(evalToUInt64).Reduce(( / ))
-        let _moduloUL (args:Args) = args.ExpectGteN(2) .Select(evalToUInt64).Reduce(( % ))
+        let _addL    (args:Args) = args.ExpectGteN(2).Select(evalTo<int64>).Reduce(( + ))
+        let _subL    (args:Args) = args.ExpectGteN(2).Select(evalTo<int64>).Reduce(( - ))
+        let _mulL    (args:Args) = args.ExpectGteN(2).Select(evalTo<int64>).Reduce(( * ))
+        let _divL    (args:Args) = args.ExpectGteN(2) .Select(evalTo<int64>).Reduce(( / ))
+        let _moduloL (args:Args) = args.ExpectGteN(2) .Select(evalTo<int64>).Reduce(( % ))
 
-        let _absy  (args:Args) = evalToInt8  (args.ExactlyOne()) |> Math.Abs
-        let _absuy (args:Args) = evalToUInt8  (args.ExactlyOne()) |> Math.Abs
-        let _abss  (args:Args) = evalToInt16  (args.ExactlyOne()) |> Math.Abs
-        let _absus (args:Args) = evalToUInt16 (args.ExactlyOne()) |> Math.Abs
-        let _abs   (args:Args) = evalToInt32  (args.ExactlyOne()) |> Math.Abs
-        let _absd  (args:Args) = evalToDouble (args.ExactlyOne()) |> Math.Abs
-        let _absf  (args:Args) = evalToSingle  (args.ExactlyOne()) |> Math.Abs
-        let _absu  (args:Args) = evalToUInt32 (args.ExactlyOne()) |> Math.Abs
-        let _absL  (args:Args) = evalToInt64  (args.ExactlyOne()) |> Math.Abs
-        let _absUL (args:Args) = evalToUInt64 (args.ExactlyOne()) |> Math.Abs
+        let _addUL    (args:Args) = args.ExpectGteN(2).Select(evalTo<uint64>).Reduce(( + ))
+        let _subUL    (args:Args) = args.ExpectGteN(2).Select(evalTo<uint64>).Reduce(( - ))
+        let _mulUL    (args:Args) = args.ExpectGteN(2).Select(evalTo<uint64>).Reduce(( * ))
+        let _divUL    (args:Args) = args.ExpectGteN(2) .Select(evalTo<uint64>).Reduce(( / ))
+        let _moduloUL (args:Args) = args.ExpectGteN(2) .Select(evalTo<uint64>).Reduce(( % ))
+
+        let _absy  (args:Args) = evalTo<int8> (args.ExactlyOne()) |> Math.Abs
+        let _absuy (args:Args) = evalTo<uint8> (args.ExactlyOne()) |> Math.Abs
+        let _abss  (args:Args) = evalTo<int16 > (args.ExactlyOne()) |> Math.Abs
+        let _absus (args:Args) = evalTo<uint16> (args.ExactlyOne()) |> Math.Abs
+        let _abs   (args:Args) = evalTo<int32 > (args.ExactlyOne()) |> Math.Abs
+        let _absd  (args:Args) = evalTo<double> (args.ExactlyOne()) |> Math.Abs
+        let _absf  (args:Args) = evalTo<single > (args.ExactlyOne()) |> Math.Abs
+        let _absu  (args:Args) = evalTo<uint32> (args.ExactlyOne()) |> Math.Abs
+        let _absL  (args:Args) = evalTo<int64 > (args.ExactlyOne()) |> Math.Abs
+        let _absUL (args:Args) = evalTo<uint64> (args.ExactlyOne()) |> Math.Abs
 
 
 
@@ -341,9 +343,9 @@ module ExpressionFunctionModule =
         let _shiftLeft  (args:Args) = args.ExpectGteN(2).Select(evalArg >> toInt32)      .Reduce((<<<))
         let _shiftRight (args:Args) = args.ExpectGteN(2).Select(evalArg >> toInt32)      .Reduce((>>>))
 
-        let _sin (args:Args) = args.Select(evalToDouble) .Expect1() |> Math.Sin
-        let _cos (args:Args) = args.Select(evalToDouble) .Expect1() |> Math.Cos
-        let _tan (args:Args) = args.Select(evalToDouble) .Expect1() |> Math.Tan
+        let _sin (args:Args) = args.Select(evalTo<double>) .Expect1() |> Math.Sin
+        let _cos (args:Args) = args.Select(evalTo<double>) .Expect1() |> Math.Cos
+        let _tan (args:Args) = args.Select(evalTo<double>) .Expect1() |> Math.Tan
 
         let _convertUInt8  (args:Args) = args.Select(evalArg >> toUInt8)  .Expect1()
         let _convertInt8   (args:Args) = args.Select(evalArg >> toInt8)   .Expect1()

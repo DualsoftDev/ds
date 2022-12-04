@@ -186,9 +186,9 @@ module rec ExpressionPrologModule =
 
         let toBool   x = (|Bool|_|)    x |> Option.get
         let toDouble x = (|Double|_|)  x |> Option.get
-        let toFloat  x = (|Float|_|)   x |> Option.get
-        let toByte   x = (|Byte|_|)    x |> Option.get
-        let toSByte  x = (|SByte|_|)   x |> Option.get
+        let toSingle  x = (|Float|_|)   x |> Option.get
+        let toUInt8   x = (|Byte|_|)    x |> Option.get
+        let toInt8  x = (|SByte|_|)   x |> Option.get
         let toInt16  x = (|Int16|_|)   x |> Option.get
         let toUInt16 x = (|UInt16|_|)  x |> Option.get
         let toInt32  x = (|Int32|_|)   x |> Option.get

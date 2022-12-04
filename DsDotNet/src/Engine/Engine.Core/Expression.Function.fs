@@ -66,8 +66,8 @@ module ExpressionFunctionModule =
         | ("~" | "~~~") -> bitwiseNot args
 
         | "bool" -> cast_bool    args |> iexpr
-        | ("sbyte" | "int8")     -> cast_sbyte   args |> iexpr
-        | ("byte"  | "uint8")    -> cast_byte    args |> iexpr
+        | ("sbyte" | "int8")     -> cast_int8   args |> iexpr
+        | ("byte"  | "uint8")    -> cast_uint8    args |> iexpr
         | ("short" | "int16")    -> cast_int16   args |> iexpr
         | ("ushort"| "uint16")   -> cast_int16   args |> iexpr
         | ("int"   | "int32")    -> cast_int32   args |> iexpr
@@ -209,17 +209,17 @@ module ExpressionFunctionModule =
         let tan            args = cf _tan            "tan"    args
 
 
-        let cast_bool           args = cf _convertBool    "bool"   args
-        let cast_byte           args = cf _convertByte    "byte"   args
-        let cast_sbyte          args = cf _convertSByte   "sbyte"  args
-        let cast_int16          args = cf _convertInt16   "int16"  args
-        let cast_uint16         args = cf _convertUInt16  "uint16" args
-        let cast_int32          args = cf _convertInt32   "int32"  args
-        let cast_uint32         args = cf _convertUInt32  "Uint32" args
-        let cast_int64          args = cf _convertInt64   "int64"  args
-        let cast_uint64         args = cf _convertUInt64  "Uint64" args
-        let cast_float          args = cf _convertFloat   "float"  args
-        let cast_double         args = cf _convertDouble  "double" args
+        let cast_bool      args = cf _convertBool     "bool"   args
+        let cast_uint8     args = cf _convertUInt8    "byte"   args
+        let cast_int8      args = cf _convertInt8     "sbyte"  args
+        let cast_int16     args = cf _convertInt16    "int16"  args
+        let cast_uint16    args = cf _convertUInt16   "uint16" args
+        let cast_int32     args = cf _convertInt32    "int32"  args
+        let cast_uint32    args = cf _convertUInt32   "Uint32" args
+        let cast_int64     args = cf _convertInt64    "int64"  args
+        let cast_uint64    args = cf _convertUInt64   "Uint64" args
+        let cast_float     args = cf _convertSingle    "float"  args
+        let cast_double    args = cf _convertDouble   "double" args
 
         let anD = logicalAnd
         //let absDouble = absd
@@ -236,7 +236,7 @@ module ExpressionFunctionModule =
         let private evalArg (x:IExpression) = x.BoxedEvaluatedValue
         let private castTo<'T> (x:obj) = x :?> 'T
         let private evalToDouble x = x |> evalArg |> castTo<double>
-        let private evalToFloat  x = x |> evalArg |> castTo<single>
+        let private evalToSingle  x = x |> evalArg |> castTo<single>
         let private evalToInt8   x = x |> evalArg |> castTo<int8>
         let private evalToUInt8  x = x |> evalArg |> castTo<uint8>
         let private evalToInt16  x = x |> evalArg |> castTo<int16>
@@ -282,11 +282,11 @@ module ExpressionFunctionModule =
         let _divd    (args:Args) = args.ExpectGteN(2) .Select(evalToDouble).Reduce(( / ))
         let _modulod (args:Args) = args.ExpectGteN(2) .Select(evalToDouble).Reduce(( % ))
 
-        let _addf    (args:Args) = args.ExpectGteN(2).Select(evalToFloat).Reduce(( + ))
-        let _subf    (args:Args) = args.ExpectGteN(2).Select(evalToFloat).Reduce(( - ))
-        let _mulf    (args:Args) = args.ExpectGteN(2).Select(evalToFloat).Reduce(( * ))
-        let _divf    (args:Args) = args.ExpectGteN(2) .Select(evalToFloat).Reduce(( / ))
-        let _modulof (args:Args) = args.ExpectGteN(2) .Select(evalToFloat).Reduce(( % ))
+        let _addf    (args:Args) = args.ExpectGteN(2).Select(evalToSingle).Reduce(( + ))
+        let _subf    (args:Args) = args.ExpectGteN(2).Select(evalToSingle).Reduce(( - ))
+        let _mulf    (args:Args) = args.ExpectGteN(2).Select(evalToSingle).Reduce(( * ))
+        let _divf    (args:Args) = args.ExpectGteN(2) .Select(evalToSingle).Reduce(( / ))
+        let _modulof (args:Args) = args.ExpectGteN(2) .Select(evalToSingle).Reduce(( % ))
 
         let _addu    (args:Args) = args.ExpectGteN(2).Select(evalToUInt32).Reduce(( + ))
         let _subu    (args:Args) = args.ExpectGteN(2).Select(evalToUInt32).Reduce(( - ))
@@ -312,7 +312,7 @@ module ExpressionFunctionModule =
         let _absus (args:Args) = evalToUInt16 (args.ExactlyOne()) |> Math.Abs
         let _abs   (args:Args) = evalToInt32  (args.ExactlyOne()) |> Math.Abs
         let _absd  (args:Args) = evalToDouble (args.ExactlyOne()) |> Math.Abs
-        let _absf  (args:Args) = evalToFloat  (args.ExactlyOne()) |> Math.Abs
+        let _absf  (args:Args) = evalToSingle  (args.ExactlyOne()) |> Math.Abs
         let _absu  (args:Args) = evalToUInt32 (args.ExactlyOne()) |> Math.Abs
         let _absL  (args:Args) = evalToInt64  (args.ExactlyOne()) |> Math.Abs
         let _absUL (args:Args) = evalToUInt64 (args.ExactlyOne()) |> Math.Abs
@@ -344,21 +344,22 @@ module ExpressionFunctionModule =
         let _sin (args:Args) = args.Select(evalToDouble) .Expect1() |> Math.Sin
         let _cos (args:Args) = args.Select(evalToDouble) .Expect1() |> Math.Cos
         let _tan (args:Args) = args.Select(evalToDouble) .Expect1() |> Math.Tan
-        let _convertBool (args:Args) = args.Select(evalArg >> toBool) .Expect1()
 
-        let _convertByte   (args:Args) = args.Select(evalArg >> toByte) .Expect1()
-        let _convertSByte  (args:Args) = args.Select(evalArg >> toSByte) .Expect1()
-        let _convertInt16  (args:Args) = args.Select(evalArg >> toInt16) .Expect1()
+        let _convertUInt8  (args:Args) = args.Select(evalArg >> toUInt8)  .Expect1()
+        let _convertInt8   (args:Args) = args.Select(evalArg >> toInt8)   .Expect1()
+        let _convertInt16  (args:Args) = args.Select(evalArg >> toInt16)  .Expect1()
         let _convertUInt16 (args:Args) = args.Select(evalArg >> toUInt16) .Expect1()
-        let _convertInt32  (args:Args) = args.Select(evalArg >> toInt32) .Expect1()
+        let _convertInt32  (args:Args) = args.Select(evalArg >> toInt32)  .Expect1()
         let _convertUInt32 (args:Args) = args.Select(evalArg >> toUInt32) .Expect1()
-        let _convertInt64  (args:Args) = args.Select(evalArg >> toInt64) .Expect1()
+        let _convertInt64  (args:Args) = args.Select(evalArg >> toInt64)  .Expect1()
         let _convertUInt64 (args:Args) = args.Select(evalArg >> toUInt64) .Expect1()
 
-
-
+        let _convertBool (args:Args) = args.Select(evalArg >> toBool) .Expect1()
         let _convertDouble (args:Args) = args.Select(evalArg >> toDouble) .Expect1()
-        let _convertFloat  (args:Args) = args.Select(evalArg >> toFloat) .Expect1()
+        let _convertSingle  (args:Args) = args.Select(evalArg >> toSingle) .Expect1()
+
+
+
 
 
     let private tagsToArguments (xs:Tag<'T> seq) = xs.Select(fun x -> Tag x) |> List.ofSeq

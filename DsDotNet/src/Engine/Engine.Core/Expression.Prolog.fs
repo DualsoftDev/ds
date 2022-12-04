@@ -189,10 +189,13 @@ module rec ExpressionPrologModule =
         let toFloat  x = (|Float|_|)   x |> Option.get
         let toByte   x = (|Byte|_|)    x |> Option.get
         let toSByte  x = (|SByte|_|)   x |> Option.get
-        let toInt    x = (|Int32|_|)   x |> Option.get
         let toInt16  x = (|Int16|_|)   x |> Option.get
         let toUInt16 x = (|UInt16|_|)  x |> Option.get
+        let toInt32  x = (|Int32|_|)   x |> Option.get
         let toUInt32 x = (|UInt32|_|)  x |> Option.get
+        let toInt64  x = (|Int64|_|)   x |> Option.get
+        let toUInt64 x = (|UInt64|_|)  x |> Option.get
+
         let toTag    x = (|PLCTag|_|)  x |> Option.get
         let toString (x:obj) = Convert.ToString x
 

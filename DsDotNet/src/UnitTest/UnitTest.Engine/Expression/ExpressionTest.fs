@@ -1,4 +1,4 @@
-namespace UnitTest.Engine
+namespace UnitTest.Engine.Expression
 
 open System
 open NUnit.Framework
@@ -7,9 +7,10 @@ open Engine.Core
 open Engine.Cpu
 open Engine.Parser.FS
 open Engine.Common.FS
+open UnitTest.Engine
 
 [<AutoOpen>]
-module ExpressionTestModule =
+module TestModule =
     let evalExpr (text:string) = (parseExpression text).BoxedEvaluatedValue
     let v = ExpressionModule.literal
     let evaluate (exp:IExpression) = exp.BoxedEvaluatedValue
@@ -284,8 +285,8 @@ module ExpressionTestModule =
 
         [<Test>]
         member __.``8 Operator test`` () =
-            let t = Bool [v true]
-            let f = Bool [v false]
+            let t = cast_bool [v true]
+            let f = cast_bool [v false]
             !! t |> evaluate === false
             !! f |> evaluate === true
             t <&&> t |> evaluate === true
@@ -391,7 +392,7 @@ module ExpressionTestModule =
             (fun () -> "\"hello\" + 2" |> evalExpr |> ignore )
             |> ShouldFailWithSubstringT "Type mismatch"
 
-            "Int(1.0) + 2" |> evalExpr === 3
+            "int(1.0) + 2" |> evalExpr === 3
 
             """  "hello, " + "world" """ |> evalExpr === "hello, world"
 

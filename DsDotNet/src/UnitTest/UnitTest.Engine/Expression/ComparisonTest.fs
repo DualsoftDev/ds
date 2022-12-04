@@ -1,11 +1,12 @@
-namespace UnitTest.Engine
+namespace UnitTest.Engine.Expression
 
 open NUnit.Framework
 
 open Engine.Parser.FS
+open UnitTest.Engine
 
 [<AutoOpen>]
-module ExpressionComparisonTestModule =
+module ComparisonTestModule =
 
     type ExpressionTest() =
         do Fixtures.SetUpTest()

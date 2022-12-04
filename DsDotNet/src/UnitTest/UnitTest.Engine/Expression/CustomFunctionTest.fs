@@ -1,11 +1,11 @@
-namespace UnitTest.Engine
+namespace UnitTest.Engine.Expression
 
 open NUnit.Framework
 
-open Engine.Parser.FS
+open UnitTest.Engine
 
 [<AutoOpen>]
-module ExpressionCustomFunctionTestModule =
+module CustomFunctionTestModule =
 
     type ExpressionTest() =
         do Fixtures.SetUpTest()
@@ -14,11 +14,16 @@ module ExpressionCustomFunctionTestModule =
         member __.``1 Trigonometry test`` () =
             let trues =
                 [
-                    "sin(0.0) = 0.0"            // "sin(0) = 0.0f" Not yet!!
-                    "sin(Double(0)) = 0.0"
-                    "Int(sin(0.0)) = 0"
+                    "sin(0.0) = 0.0"            // todo: "sin(0) = 0.0f" Not yet!!
+                    "sin(double(0)) = 0.0"
+                    "int(sin(0.0)) = 0"
+
+                    "sin(3.14 / 2.0) >= 0.9999"
+                    "sin(3.14 / 2.0) <= 1.0"
                 ]
             for t in trues do
                 t |> evalExpr === true
+
+
 
 

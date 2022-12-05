@@ -118,14 +118,7 @@ module ExpressionParser =
             createExpression null ctx
         with exn ->
             failwith $"Failed to parse Expression: {text}\r\n{exn}" // Just warning.  하나의 이름에 '.' 을 포함하는 경우.  e.g "#seg.testMe!!!"
-    //let parseStatement(text:string) =
-    //    try
-    //        let parser = createParser (text)
-    //        let ctx = parser.statement()
-    //        let ncs = ctx.Descendants<exprParser.NameComponentContext>()
-    //        [ for nc in ncs -> nc.GetText().DeQuoteOnDemand() ]
-    //    with exn ->
-    //        failwith $"Failed to parse Expression: {text}\r\n{exn}" // Just warning.  하나의 이름에 '.' 을 포함하는 경우.  e.g "#seg.testMe!!!"
+
 
     type System.Type with
         member x.CreateVariable(name:string) : IStorage =
@@ -156,7 +149,7 @@ module ExpressionParser =
             | ("uint64"  | "ulong")  -> typedefof<uint64>
             | _  -> failwith "ERROR"
 
-    let parseStatementContext (storages:Storages) (ctx:StatementContext) : Statement =
+    let createStatement (storages:Storages) (ctx:StatementContext) : Statement =
         assert(ctx.ChildCount = 1)
         let storageName = ctx.Descendants<StorageNameContext>().First().GetText()
         let getFirstChildExpressionContext (ctx:ParserRuleContext) : ExprContext = ctx.children.OfType<ExprContext>().First()
@@ -204,7 +197,7 @@ module ExpressionParser =
                     assert(t.ChildCount = 1)
 
                     match t.children[0] with
-                    | :? StatementContext as stmt -> parseStatementContext storages stmt
+                    | :? StatementContext as stmt -> createStatement storages stmt
                     | _ ->
                         failwith $"ERROR: {text}: expect statements"
             ]

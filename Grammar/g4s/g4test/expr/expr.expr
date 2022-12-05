@@ -4,7 +4,7 @@ int16 myShort = 0uy;
 int32 myInt = 0;
 int64 myLong = 0L;
 float32 myFloat = 0.0f;
-float32 myFloat = 0.0f;
+float64 myDouble = 0.0;
 
 
 double d0 = sin(0);

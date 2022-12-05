@@ -57,8 +57,8 @@ statement: assign | varDecl;
         | 'uint32'| 'uint'
         | 'int64' | 'long'
         | 'uint64'| 'ulong'
-        | 'double' | 'float64' | 'float'
-        | 'single' | 'float32'
+        | 'double' | 'float64'
+        | 'single' | 'float32' | 'float'
         | 'char'
         | 'string'
     ;

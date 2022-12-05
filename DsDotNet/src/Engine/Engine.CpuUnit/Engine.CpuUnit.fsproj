@@ -2,7 +2,7 @@
 	<PropertyGroup>
 		<!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
 		<TargetFramework>net48</TargetFramework>
-		<RootNamespace>Engine.Cpu</RootNamespace>
+		<RootNamespace>Engine.CpuUnit</RootNamespace>
 		<LangVersion>6.0</LangVersion>
 		<OutputType>Exe</OutputType>
 	</PropertyGroup>

@@ -1,4 +1,4 @@
-namespace rec Engine.Cpu
+namespace rec Engine.CpuUnit
 
 open System.Collections.Concurrent
 open System.Text.Json

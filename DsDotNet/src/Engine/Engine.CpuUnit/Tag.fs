@@ -1,4 +1,4 @@
-namespace Engine.Cpu
+namespace Engine.CpuUnit
 
 open System.Diagnostics
 open System

@@ -270,9 +270,9 @@ module rec ExpressionPrologModule =
         interface IVariable
         override x.ToText() = "$" + name
 
+    type Arg       = IExpression
     type Arguments = IExpression list
     type Args      = Arguments
-    type Arg       = IExpression
 
     let isAllExpressionSameType(args:Args) =
         args |> Seq.distinctBy(fun a -> a.DataType) |> Seq.length = 1

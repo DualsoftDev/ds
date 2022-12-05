@@ -1,5 +1,5 @@
 [<AutoOpen>]
-module Engine.Cpu.ConvertUtil
+module Engine.CpuUnit.ConvertUtil
 
 open System.Linq
 open System.Runtime.CompilerServices

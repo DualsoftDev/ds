@@ -1,10 +1,10 @@
 [<AutoOpen>]
-module Engine.Cpu.ConvertReal
+module Engine.CpuUnit.ConvertReal
 
 open System.Linq
 open System.Runtime.CompilerServices
 open Engine.Core
-open Engine.Cpu
+open Engine.CpuUnit
 
 [<AutoOpen>]
 [<Extension>]

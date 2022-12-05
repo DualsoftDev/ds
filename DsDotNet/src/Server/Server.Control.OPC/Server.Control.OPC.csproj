@@ -13,7 +13,7 @@
     <ProjectReference Include="..\..\Engine\Engine.Common.FS\Engine.Common.FS.fsproj" />
     <ProjectReference Include="..\..\Engine\Engine.Common\Engine.Common.csproj" />
     <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
-    <ProjectReference Include="..\..\Engine\Engine.CpuUnit\Engine.Cpu.fsproj" />
+    <ProjectReference Include="..\..\Engine\Engine.CpuUnit\Engine.CpuUnit.fsproj" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Confluent.Kafka">

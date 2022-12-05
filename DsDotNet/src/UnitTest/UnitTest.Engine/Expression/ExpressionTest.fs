@@ -4,7 +4,7 @@ open System
 open NUnit.Framework
 
 open Engine.Core
-open Engine.Cpu
+open Engine.CpuUnit
 open Engine.Parser.FS
 open Engine.Common.FS
 open UnitTest.Engine

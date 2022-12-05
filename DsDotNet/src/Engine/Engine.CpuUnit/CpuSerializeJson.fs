@@ -1,5 +1,5 @@
 [<AutoOpen>]
-module Engine.Cpu.CpuSerializeJson
+module Engine.CpuUnit.CpuSerializeJson
 
 open System.Runtime.CompilerServices
 open System.Text.Json

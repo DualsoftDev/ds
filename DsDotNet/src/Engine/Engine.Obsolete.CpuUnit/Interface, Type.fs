@@ -1,4 +1,4 @@
-namespace rec Engine.CpuUnit
+namespace rec Engine.Obsolete.CpuUnit
 
 open System.Collections.Concurrent
 open System.Text.Json

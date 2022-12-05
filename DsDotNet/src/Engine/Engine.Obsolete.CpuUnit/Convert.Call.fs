@@ -1,9 +1,9 @@
 [<AutoOpen>]
-module Engine.CpuUnit.ConvertCall
+module Engine.Obsolete.CpuUnit.ConvertCall
 
 open System.Linq
 open System.Runtime.CompilerServices
-open Engine.CpuUnit
+open Engine.Obsolete.CpuUnit
 open Engine.Core
 
 [<AutoOpen>]

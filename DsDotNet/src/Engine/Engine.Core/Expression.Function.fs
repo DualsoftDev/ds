@@ -10,13 +10,23 @@ module ExpressionFunctionModule =
 
     /// Expression<'T> 를 IExpression 으로 casting
     let internal iexpr any = (box any) :?> IExpression
+    let private evalArg (x:IExpression) = x.BoxedEvaluatedValue
+    let private castTo<'T> (x:obj) = x :?> 'T
+    let private evalTo<'T> (x:IExpression) = x |> evalArg |> castTo<'T>
 
     let createBinaryExpression (opnd1:IExpression) (op:string) (opnd2:IExpression) : IExpression =
-        verifyAllExpressionSameType [opnd1; opnd2]
         let t1 = opnd1.DataType
         let t2 = opnd2.DataType
-        if t1 <> t2 then
-            failwith "ERROR: Type mismatch"
+
+        match op with
+        | (   "+" | "+" | "-" | "*" | "/"
+            | ">" | ">=" | "<" | "<=" | "=" | "=" ) ->
+            verifyAllExpressionSameType [opnd1; opnd2]
+            if t1 <> t2 then
+                failwith "ERROR: Type mismatch"
+        | _ ->
+            ()
+
         let t = t1.Name
         let args = [opnd1; opnd2]
 
@@ -33,6 +43,9 @@ module ExpressionFunctionModule =
         | "<=" -> lte args
         | "=" when t = "String" -> equalString args
         | "="  -> equal args
+
+        | ("<<<" | "<<") -> shiftLeft args
+        | (">>>" | ">>") -> shiftRight args
 
         | _ -> failwith $"NOT Yet {op}"
         |> iexpr
@@ -56,6 +69,9 @@ module ExpressionFunctionModule =
         | ("=" | "equal") -> equal args
         | ("!=" | "notEqual") when t = "String" -> notEqualString args
         | ("!=" | "notEqual") -> notEqual args
+
+        | ("<<" | "<<<" | "shiftLeft") -> shiftLeft args
+        | (">>" | ">>>" | "shiftRight") -> shiftLeft args
 
         | ("&&" | "and") -> logicalAnd args
         | ("||" | "or") -> logicalOr args
@@ -185,6 +201,32 @@ module ExpressionFunctionModule =
             | "UInt64" -> cf _moduloUL "%" args
             | _        -> failwith "ERROR"
 
+
+        let shiftLeft (args:Args) : IExpression =
+            match args[0].DataType.Name with
+            | "SByte"  -> cf _shiftLeftInt8    "<<<" args
+            | "Byte"   -> cf _shiftLeftUInt8   "<<<" args
+            | "Int16"  -> cf _shiftLeftInt16   "<<<" args
+            | "UInt16" -> cf _shiftLeftUInt16  "<<<" args
+            | "Int32"  -> cf _shiftLeftInt32   "<<<" args
+            | "UInt32" -> cf _shiftLeftUInt32  "<<<" args
+            | "Int64"  -> cf _shiftLeftInt64   "<<<" args
+            | "UInt64" -> cf _shiftLeftUInt64  "<<<" args
+            | _        -> failwith "ERROR"
+
+        let shiftRight (args:Args) : IExpression =
+            match args[0].DataType.Name with
+            | "SByte"  -> cf _shiftRightInt8    ">>>" args
+            | "Byte"   -> cf _shiftRightUInt8   ">>>" args
+            | "Int16"  -> cf _shiftRightInt16   ">>>" args
+            | "UInt16" -> cf _shiftRightUInt16  ">>>" args
+            | "Int32"  -> cf _shiftRightInt32   ">>>" args
+            | "UInt32" -> cf _shiftRightUInt32  ">>>" args
+            | "Int64"  -> cf _shiftRightInt64   ">>>" args
+            | "UInt64" -> cf _shiftRightUInt64  ">>>" args
+            | _        -> failwith "ERROR"
+
+
         let concat         args = cf _concat         "+"      args
 
         let equal          args: Expression<bool> = cf _equal          "="  args
@@ -202,8 +244,6 @@ module ExpressionFunctionModule =
         let bitwiseAnd     args = cf _andBit         "andBit" args
         let bitwiseNot     args = cf _notBit         "notBit" args
         let bitwiseXor     args = cf _xorBit         "xorBit" args
-        let shiftLeft      args = cf _shiftLeft      "<<"     args
-        let shiftRight     args = cf _shiftRight     ">>"     args
         let sin            args = cf _sin            "sin"    args
         let cos            args = cf _cos            "cos"    args
         let tan            args = cf _tan            "tan"    args
@@ -232,21 +272,17 @@ module ExpressionFunctionModule =
     [<AutoOpen>]
     module internal FunctionImpl =
         open ExpressionPrologSubModule
+        [<Extension>] // type SeqExt =
+        type SeqExt =
+            [<Extension>] static member ExpectGteN(xs:'a seq, n) = expectGteN n xs; xs
+            [<Extension>] static member Expect1(xs:'a seq) = expect1 xs
+            [<Extension>] static member Expect2(xs:'a seq) = expect2 xs
+            [<Extension>]
+            static member ExpectTyped2<'U, 'V>(Array(xs:IExpression [])) =
+                let arg0 = xs[0] |> evalTo<'U>
+                let arg1 = xs[1] |> evalTo<'V>
+                arg0, arg1
 
-        let private evalArg (x:IExpression) = x.BoxedEvaluatedValue
-        let private castTo<'T> (x:obj) = x :?> 'T
-        let private evalTo<'T> (x:IExpression) = x |> evalArg |> castTo<'T>
-
-        //let private evalToDouble x = x |> evalArg |> castTo<double>
-        //let private evalToSingle  x = x |> evalArg |> castTo<single>
-        //let private evalToInt8   x = x |> evalArg |> castTo<int8>
-        //let private evalToUInt8  x = x |> evalArg |> castTo<uint8>
-        //let private evalToInt16  x = x |> evalArg |> castTo<int16>
-        //let private evalToUInt16 x = x |> evalArg |> castTo<uint16>
-        //let private evalToInt32  x = x |> evalArg |> castTo<int32>
-        //let private evalToUInt32 x = x |> evalArg |> castTo<uint32>
-        //let private evalToInt64  x = x |> evalArg |> castTo<int64>
-        //let private evalToUInt64 x = x |> evalArg |> castTo<uint64>
 
         let _addy    (args:Args) = args.ExpectGteN(2).Select(evalTo<int8>).Reduce(( + ))
         let _suby    (args:Args) = args.ExpectGteN(2).Select(evalTo<int8>).Reduce(( - ))
@@ -340,8 +376,25 @@ module ExpressionFunctionModule =
         let _orBit      (args:Args) = args.Select(evalArg).Cast<int>()                 .Reduce (|||)
         let _andBit     (args:Args) = args.Select(evalArg).Cast<int>()                 .Reduce (&&&)
         let _notBit     (args:Args) = args.Select(evalArg).Cast<int>().Expect1()       |> (~~~)
-        let _shiftLeft  (args:Args) = args.ExpectGteN(2).Select(evalArg >> toInt32)      .Reduce((<<<))
-        let _shiftRight (args:Args) = args.ExpectGteN(2).Select(evalArg >> toInt32)      .Reduce((>>>))
+
+        let _shiftLeftInt8    (args:Args) = let n, shift = args.ExpectTyped2<int8,   int>() in n <<< shift
+        let _shiftLeftUInt8   (args:Args) = let n, shift = args.ExpectTyped2<uint8,  int>() in n <<< shift
+        let _shiftLeftInt16   (args:Args) = let n, shift = args.ExpectTyped2<int16,  int>() in n <<< shift
+        let _shiftLeftUInt16  (args:Args) = let n, shift = args.ExpectTyped2<uint16, int>() in n <<< shift
+        let _shiftLeftInt32   (args:Args) = let n, shift = args.ExpectTyped2<int32,  int>() in n <<< shift
+        let _shiftLeftUInt32  (args:Args) = let n, shift = args.ExpectTyped2<uint32, int>() in n <<< shift
+        let _shiftLeftInt64   (args:Args) = let n, shift = args.ExpectTyped2<int64,  int>() in n <<< shift
+        let _shiftLeftUInt64  (args:Args) = let n, shift = args.ExpectTyped2<uint64, int>() in n <<< shift
+
+        let _shiftRightInt8   (args:Args) = let n, shift = args.ExpectTyped2<int8,   int>() in n >>> shift
+        let _shiftRightUInt8  (args:Args) = let n, shift = args.ExpectTyped2<uint8,  int>() in n >>> shift
+        let _shiftRightInt16  (args:Args) = let n, shift = args.ExpectTyped2<int16,  int>() in n >>> shift
+        let _shiftRightUInt16 (args:Args) = let n, shift = args.ExpectTyped2<uint16, int>() in n >>> shift
+        let _shiftRightInt32  (args:Args) = let n, shift = args.ExpectTyped2<int32,  int>() in n >>> shift
+        let _shiftRightUInt32 (args:Args) = let n, shift = args.ExpectTyped2<uint32, int>() in n >>> shift
+        let _shiftRightInt64  (args:Args) = let n, shift = args.ExpectTyped2<int64,  int>() in n >>> shift
+        let _shiftRightUInt64 (args:Args) = let n, shift = args.ExpectTyped2<uint64, int>() in n >>> shift
+
 
         let _sin (args:Args) = args.Select(evalTo<double>) .Expect1() |> Math.Sin
         let _cos (args:Args) = args.Select(evalTo<double>) .Expect1() |> Math.Cos

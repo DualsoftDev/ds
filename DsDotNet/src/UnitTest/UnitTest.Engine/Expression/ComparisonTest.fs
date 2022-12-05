@@ -6,9 +6,9 @@ open Engine.Parser.FS
 open UnitTest.Engine
 
 [<AutoOpen>]
-module ComparisonTestModule =
+module ComparisionTestModule =
 
-    type ExpressionTest() =
+    type ComparisonTest() =
         do Fixtures.SetUpTest()
 
         [<Test>]
@@ -92,6 +92,51 @@ module ComparisonTestModule =
 
                     "(1 + 1) * 2 = 4"
                     "equal(1, (2 / 2), (3 / 3), 1)"
+                ]
+            for t in trues do
+                t |> evalExpr === true
+
+    type ShiftTest() =
+        do Fixtures.SetUpTest()
+
+        [<Test>]
+        member __.``1 ">>>" test`` () =
+            let trues =
+                [
+                    "8 >>> 1 = 4"
+                    "8s >>> 1 = 4s"
+                    "8us >>> 1 = 4us"
+                    "8L >>> 1 = 4L"
+                    "8UL >>> 1 = 4UL"
+
+                    "1 <<< 2 = 4"
+                    "1s <<< 2 = 4s"
+                    "1us <<< 2 = 4us"
+                    "1L <<< 2 = 4L"
+                    "1UL <<< 2 = 4UL"
+
+
+                    "8 >> 1 = 4"
+                    "8s >> 1 = 4s"
+                    "8us >> 1 = 4us"
+                    "8L >> 1 = 4L"
+                    "8UL >> 1 = 4UL"
+
+                    "1 << 2 = 4"
+                    "1s << 2 = 4s"
+                    "1us << 2 = 4us"
+                    "1L << 2 = 4L"
+                    "1UL << 2 = 4UL"
+
+
+                ]
+            for t in trues do
+                t |> evalExpr === true
+        [<Test>]
+        member __.``X 1 Math test`` () =
+            let trues =
+                [
+                    "sin(0) = 0.0"
                 ]
             for t in trues do
                 t |> evalExpr === true

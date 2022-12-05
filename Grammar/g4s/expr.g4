@@ -69,6 +69,7 @@ expr:   functionName '(' arguments? ')'         # FunctionCallExpr  // func call
             |'=' | '!='
             |'>' | '>=' | '<' | '<='
             | '&' | '|' | '&&&' | '|||'   // bitwise and or (C++/F# style)
+            | '<<' | '<<<' | '>>' | '>>>'   // bitwise shift
             ;
 
 //INTEGER: SIGN? DIGITS;

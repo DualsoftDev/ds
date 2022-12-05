@@ -205,12 +205,6 @@ module rec ExpressionPrologModule =
             | (:? string as a), (:? string as b) -> a = b
             | _ -> false
 
-        [<Extension>] // type SeqExt =
-        type SeqExt =
-            [<Extension>] static member ExpectGteN(xs:'a seq, n) = expectGteN n xs; xs
-            [<Extension>] static member Expect1(xs:'a seq) = expect1 xs
-            [<Extension>] static member Expect2(xs:'a seq) = expect2 xs
-
     type ExpressionType =
         | ExpTypeFunction
         | ExpTypeVariable

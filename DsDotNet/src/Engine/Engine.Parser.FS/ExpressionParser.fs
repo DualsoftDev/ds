@@ -8,7 +8,6 @@ open Engine.Common.FS
 open Engine.Core
 open type exprParser
 open Antlr4.Runtime.Tree
-open Engine.Core.ExpressionPrologModule
 
 [<AutoOpen>]
 module ExpressionParser =
@@ -153,33 +152,37 @@ module ExpressionParser =
         assert(ctx.ChildCount = 1)
         let storageName = ctx.Descendants<StorageNameContext>().First().GetText()
         let getFirstChildExpressionContext (ctx:ParserRuleContext) : ExprContext = ctx.children.OfType<ExprContext>().First()
-        let createStorageOnDemand (name:string) (creator: string -> IStorage) : IStorage =
-            if storages.ContainsKey name then
-                storages[name]
-            else
-                let storage = creator name
-                storages.Add(name, storage) |> ignore
-                storage
 
-        match ctx.children[0] with
-        | :? VarDeclContext as varDeclCtx ->
-            let exp = createExpression storages (getFirstChildExpressionContext varDeclCtx)
-            let typ = ctx.Descendants<TypeContext>().First().GetText() |> System.Type.FromString
-            if exp.DataType <> typ then
-                failwith $"ERROR: Type mismatch in variable declaration {ctx.GetText()}"
+        let statement =
+            match ctx.children[0] with
+            | :? VarDeclContext as varDeclCtx ->
+                let exp = createExpression storages (getFirstChildExpressionContext varDeclCtx)
+                let typ = ctx.Descendants<TypeContext>().First().GetText() |> System.Type.FromString
+                if exp.DataType <> typ then
+                    failwith $"ERROR: Type mismatch in variable declaration {ctx.GetText()}"
+                if storages.ContainsKey storageName then
+                    failwith $"ERROR: Duplicated variable declaration {storageName}"
 
-            let storage = createStorageOnDemand storageName (fun n -> exp.DataType.CreateVariable(n))
-            VarDecl (exp, storage)
+                let storage = exp.DataType.CreateVariable(storageName)
+                storages.Add(storageName, storage)
+                VarDecl (exp, storage)
 
-        | :? AssignContext as assignCtx ->
-            let exp = createExpression storages (getFirstChildExpressionContext assignCtx)
-            let storage = storages[storageName]
-            Assign (exp, storage)
-        | _ -> failwith "ERROR: Not yet statement"
+            | :? AssignContext as assignCtx ->
+                let exp = createExpression storages (getFirstChildExpressionContext assignCtx)
+                if not <| storages.ContainsKey storageName then
+                    failwith $"ERROR: Failed to assign into non existing storage {storageName}"
 
-    let parseCode(text:string) =
+                let storage = storages[storageName]
+                Assign (exp, storage)
+            | _ ->
+                failwith "ERROR: Not yet statement"
+
+        statement.Do()
+        statement
+
+
+    let parseCode (storages:Storages) (text:string) : Statement list =
         try
-            let storages = Dictionary<string, IStorage>()
             let parser = createParser (text)
             let topLevels =
                 [

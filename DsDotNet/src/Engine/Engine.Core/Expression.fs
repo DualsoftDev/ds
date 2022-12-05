@@ -64,12 +64,15 @@ module ExpressionModule =
             | Assign (expr, target) ->
                 assert(target.DataType = expr.DataType)
                 target.Value <- expr.BoxedEvaluatedValue
-            | VarDecl (_, _) -> failwith "Invalid operation"
+
+            | VarDecl (expr, target) ->
+                assert(target.DataType = expr.DataType)
+                target.Value <- expr.BoxedEvaluatedValue
 
         member x.ToText() =
             match x with
             | Assign (expr, target) -> $"{target.ToText()} := {expr.ToText(false)}"
-            | VarDecl (expr, var) -> $"{typedefof<'T>.Name} {var.Name} = {expr.ToText(false)}"
+            | VarDecl (expr, var) -> $"{var.DataType.Name} {var.Name} = {expr.ToText(false)}"
 
     type Terminal<'T> with
         member x.ExpressionType =

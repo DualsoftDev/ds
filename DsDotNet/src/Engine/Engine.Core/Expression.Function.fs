@@ -119,7 +119,7 @@ module ExpressionFunctionModule =
         *)
         let add (args:Args) : IExpression =
             match args[0].DataType.Name with
-            | "Single" -> cf _add   "+" args
+            | "Single" -> cf _addf  "+" args
             | "Double" -> cf _addd  "+" args
             | "SByte"  -> cf _addy  "+" args
             | "Byte"   -> cf _adduy "+" args
@@ -133,7 +133,7 @@ module ExpressionFunctionModule =
 
         let sub (args:Args) : IExpression =
             match args[0].DataType.Name with
-            | "Single" -> cf _sub   "-" args
+            | "Single" -> cf _subf  "-" args
             | "Double" -> cf _subd  "-" args
             | "SByte"  -> cf _suby  "-" args
             | "Byte"   -> cf _subuy "-" args
@@ -147,7 +147,7 @@ module ExpressionFunctionModule =
 
         let mul (args:Args) : IExpression =
             match args[0].DataType.Name with
-            | "Single" -> cf _mul   "*" args
+            | "Single" -> cf _mulf  "*" args
             | "Double" -> cf _muld  "*" args
             | "SByte"  -> cf _muly  "*" args
             | "Byte"   -> cf _muluy "*" args
@@ -161,7 +161,7 @@ module ExpressionFunctionModule =
 
         let div (args:Args) : IExpression =
             match args[0].DataType.Name with
-            | "Single" -> cf _div   "/" args
+            | "Single" -> cf _divf  "/" args
             | "Double" -> cf _divd  "/" args
             | "SByte"  -> cf _divy  "/" args
             | "Byte"   -> cf _divuy "/" args
@@ -175,7 +175,7 @@ module ExpressionFunctionModule =
 
         let abs (args:Args) : IExpression =
             match args[0].DataType.Name with
-            | "Single" -> cf _abs   "abs" args
+            | "Single" -> cf _absf  "abs" args
             | "Double" -> cf _absd  "abs" args
             | "SByte"  -> cf _absy  "abs" args
             | "Byte"   -> cf _absuy "abs" args
@@ -189,7 +189,7 @@ module ExpressionFunctionModule =
 
         let modulo (args:Args) : IExpression =
             match args[0].DataType.Name with
-            | "Single" -> cf _modulo   "%" args
+            | "Single" -> cf _modulof  "%" args
             | "Double" -> cf _modulod  "%" args
             | "SByte"  -> cf _moduloy  "%" args
             | "Byte"   -> cf _modulouy "%" args

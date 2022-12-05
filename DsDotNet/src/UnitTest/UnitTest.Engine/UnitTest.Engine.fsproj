@@ -35,6 +35,7 @@
 		<Compile Include="Expression\ExpressionTest.fs" />
 		<Compile Include="Expression\ComparisonTest.fs" />
 		<Compile Include="Expression\CustomFunctionTest.fs" />
+		<Compile Include="Expression\CodeTest.fs" />
 		<Compile Include="Model\FqdnParseTest.fs" />
 		<Compile Include="Model\SystemBuilderTest.fs" />
 		<Compile Include="Model\LoadConfigTest.fs" />

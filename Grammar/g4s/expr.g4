@@ -10,11 +10,10 @@ comment: BLOCK_COMMENT | LINE_COMMENT;
 identifier : IDENTIFIER;
     tag: TAG;
         TAG: '%' IDENTIFIER;
-    variable: VARIABLE;
-        VARIABLE: '$' IDENTIFIER;
+    storage: '$' storageName;
     functionName: identifier | binaryOperator;
 
-terminal: variable | tag | literal;
+terminal: storage | tag | literal;
     literal:
         /* -  */   literalSingle
         /* .  */ | literalDouble         // 'double' 이름 그대로 사용 불가 : symbol double conflicts with generated code in target language or runtime
@@ -45,13 +44,30 @@ terminal: variable | tag | literal;
 toplevels: toplevel (';' toplevel)* (';')?;
     toplevel: expr|statement;
 
-statement: assign;
-assign: expr ':=' expr;
+statement: assign | varDecl;
+    assign: '$' storageName ':=' expr;
+    varDecl:   type storageName ('=' expr)? ;//';';
+        storageName: IDENTIFIER;
+    type:
+        'int8' | 'sbyte'
+        | 'uint8' | 'byte'
+        | 'int16' | 'short' | 'word'
+        | 'uint16'| 'ushort'
+        | 'int32' | 'int'   | 'dword'
+        | 'uint32'| 'uint'
+        | 'int64' | 'long'
+        | 'uint64'| 'ulong'
+        | 'double' | 'float64' | 'float'
+        | 'single' | 'float32'
+        | 'char'
+        | 'string'
+    ;
+
 
 // https://stackoverflow.com/questions/41017948/antlr4-the-following-sets-of-rules-are-mutually-left-recursive
 // https://github.com/antlr/antlr4/blob/master/doc/parser-rules.md#alternative-labels
 expr:   functionName '(' arguments? ')'         # FunctionCallExpr  // func call like f(), f(x), f(1,2)
-    |   variable ('[' expr ']')+                # ArrayReferenceExpr // array index like a[i], a[i][j]
+    |   storage ('[' expr ']')+                # ArrayReferenceExpr // array index like $a[i], $a[i][j]
     |   unaryOperator expr                      # UnaryExpr           // unary minus, boolean not
     |   expr binaryOperator expr                # BinaryExpr // ':=': assignment equality comparison (lowest priority op)
     |   terminal                                # TerminalExpr

@@ -216,6 +216,8 @@ module rec ExpressionPrologModule =
         inherit INamed
         inherit IText
         abstract Value: obj with get, set
+        abstract DataType : System.Type
+
     type IStorage<'T> =
         inherit IStorage
         abstract Value: 'T with get, set
@@ -240,8 +242,10 @@ module rec ExpressionPrologModule =
         member val Value = initValue with get, set
 
         interface IStorage with
+            member x.DataType = typedefof<'T>
             member x.Value with get() = x.Value and set(v) = x.Value <- v :?> 'T
             member x.ToText() = x.ToText()
+
         interface IStorage<'T> with
             member x.Value with get() = x.Value and set(v) = x.Value <- v
         interface INamed with

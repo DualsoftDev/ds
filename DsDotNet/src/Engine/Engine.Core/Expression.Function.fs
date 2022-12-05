@@ -81,18 +81,18 @@ module ExpressionFunctionModule =
         | ("|" | "|||") -> bitwiseOr args
         | ("~" | "~~~") -> bitwiseNot args
 
-        | "bool" -> cast_bool    args |> iexpr
-        | ("sbyte" | "int8")     -> cast_int8   args |> iexpr
-        | ("byte"  | "uint8")    -> cast_uint8    args |> iexpr
-        | ("short" | "int16")    -> cast_int16   args |> iexpr
-        | ("ushort"| "uint16")   -> cast_int16   args |> iexpr
-        | ("int"   | "int32")    -> cast_int32   args |> iexpr
-        | ("uint"  | "uint32")   -> cast_uint32  args |> iexpr
-        | ("int"   | "int64")    -> cast_int64   args |> iexpr
-        | ("uint"  | "uint64")   -> cast_uint64  args |> iexpr
+        | "toBool" -> cast_bool    args |> iexpr
+        | ("toSByte" | "toInt8")     -> cast_int8   args |> iexpr
+        | ("toByte"  | "toUInt8")    -> cast_uint8    args |> iexpr
+        | ("toShort" | "toInt16")    -> cast_int16   args |> iexpr
+        | ("toUShort"| "toUInt16")   -> cast_int16   args |> iexpr
+        | ("toInt"   | "toInt32")    -> cast_int32   args |> iexpr
+        | ("toUInt"  | "toUInt32")   -> cast_uint32  args |> iexpr
+        | ("toLong"  | "toInt64")    -> cast_int64   args |> iexpr
+        | ("toULong" | "toUInt64")   -> cast_uint64  args |> iexpr
 
-        | ("single") -> cast_float   args |> iexpr
-        | ("double" | "float") -> cast_double  args |> iexpr
+        | ("toSingle") -> cast_float   args |> iexpr
+        | ("toDouble" | "toFloat") -> cast_double  args |> iexpr
 
         | "sin" -> sin args |> iexpr
         | "cos" -> cos args |> iexpr
@@ -412,10 +412,6 @@ module ExpressionFunctionModule =
         let _convertBool (args:Args) = args.Select(evalArg >> toBool) .Expect1()
         let _convertDouble (args:Args) = args.Select(evalArg >> toDouble) .Expect1()
         let _convertSingle  (args:Args) = args.Select(evalArg >> toSingle) .Expect1()
-
-
-
-
 
     let private tagsToArguments (xs:Tag<'T> seq) = xs.Select(fun x -> Tag x) |> List.ofSeq
     [<Extension>]

@@ -1,11 +1,22 @@
-/* grun expr expr < g4test/expr/expr.expr */
-sin(0);
+/* grun expr toplevels -gui < g4test/expr/expr.expr */
+int8 myByte = 0y;
+int16 myShort = 0uy;
+int32 myInt = 0;
+int64 myLong = 0L;
+float32 myFloat = 0.0f;
+float32 myFloat = 0.0f;
+
+
+double d0 = sin(0);
 
 (1 + 1) * 2 = 4;
 
-+(1, 2, 3);
+Int(3.4);
 
-myvar := Int(3.4) + 1 + 2 + (abs(tag3));
++(1, 2, 3);
+abs($tag3);
+
+$myvar := Int(3.4) + 1 + 2 + (abs($tag3));
 
 /* variable declaration */
 //....
@@ -14,9 +25,9 @@ myvar := Int(3.4) + 1 + 2 + (abs(tag3));
 "hello, " + "world";
 
 /* assign statements : target := expression */
-%mytag := tag1 && tag2;
-%tag3 := 3
-myvar := Int(3.4) + 1 + 2 + (abs(tag3));
+$mytag := $tag1 && $tag2;
+$tag3 := 3
+$myvar := Int(3.4) + 1 + 2 + (abs($tag3));
 
 /* expression */
 hello((1 + 2) * 3, sin(1), array[3][2][g(2)], myvar);

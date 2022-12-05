@@ -392,7 +392,7 @@ module TestModule =
             (fun () -> "\"hello\" + 2" |> evalExpr |> ignore )
             |> ShouldFailWithSubstringT "Type mismatch"
 
-            "int(1.0) + 2" |> evalExpr === 3
+            "toInt(1.0) + 2" |> evalExpr === 3
 
             """  "hello, " + "world" """ |> evalExpr === "hello, world"
 

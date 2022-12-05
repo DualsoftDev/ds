@@ -1,5 +1,6 @@
 namespace rec Engine.Core
 open System.Diagnostics
+open Engine.Common.FS.Prelude
 
 (*  expression: generic type <'T> 나 <_> 으로는 <obj> match 으로 간주됨
     Expression<'T> 객체에 대한 matching
@@ -52,18 +53,23 @@ module ExpressionModule =
     let tag (t: Tag<'T>) = Terminal (Tag t)
     let var (t: StorageVariable<'T>) = Terminal (Variable t)
 
-    [<AutoOpen>]
-    module StatementModule =
-        type Statement<'T> =
-            | Assign of expression:IExpression * target:IStorage<'T>
+    type Statement =
+        | Assign of expression:IExpression * target:IStorage
+        | VarDecl of expression:IExpression * variable:IStorage
 
-            member x.Do() =
-                match x with
-                | Assign (expr, target) -> target.Value <- (expr.BoxedEvaluatedValue :?> 'T)
 
-            member x.ToText() =
-                match x with
-                | Assign (expr, target) -> $"{target.ToText()} := {expr.ToText(false)}"
+    type Statement with
+        member x.Do() =
+            match x with
+            | Assign (expr, target) ->
+                assert(target.DataType = expr.DataType)
+                target.Value <- expr.BoxedEvaluatedValue
+            | VarDecl (_, _) -> failwith "Invalid operation"
+
+        member x.ToText() =
+            match x with
+            | Assign (expr, target) -> $"{target.ToText()} := {expr.ToText(false)}"
+            | VarDecl (expr, var) -> $"{typedefof<'T>.Name} {var.Name} = {expr.ToText(false)}"
 
     type Terminal<'T> with
         member x.ExpressionType =

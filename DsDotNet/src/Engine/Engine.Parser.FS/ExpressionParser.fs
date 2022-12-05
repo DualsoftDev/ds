@@ -7,9 +7,13 @@ open Antlr4.Runtime
 open Engine.Common.FS
 open Engine.Core
 open type exprParser
+open Antlr4.Runtime.Tree
+open Engine.Core.ExpressionPrologModule
 
 [<AutoOpen>]
 module ExpressionParser =
+    type Storages = Dictionary<string, IStorage>
+
     let private createParser(text:string) =
         let inputStream = new AntlrInputStream(text)
         let lexer = exprLexer (inputStream)
@@ -23,8 +27,7 @@ module ExpressionParser =
         parser
 
     let createExpression
-        (tagDic:Dictionary<string, Tag<_>>)
-        (varDic:Dictionary<string, StorageVariable<_>>)
+        (storages:Storages)
         (ctx:ExprContext) : IExpression =
 
         let rec helper(ctx:ExprContext) : IExpression =
@@ -83,8 +86,9 @@ module ExpressionParser =
 
                         | _ -> failwith "ERROR"
                     | :? TagContext as texp ->
-                        iexpr <| tag (tagDic[text])
-                    | :? VariableContext as vexp ->
+                        failwith "Not yet"
+                        //iexpr <| tag (storages[text])
+                    | :? StorageContext as vexp ->
                         //var (varDic[text])
                         failwith "Not yet"
                     | _ ->
@@ -111,7 +115,7 @@ module ExpressionParser =
             let parser = createParser (text)
             let ctx = parser.expr()
 
-            createExpression null null ctx
+            createExpression null ctx
         with exn ->
             failwith $"Failed to parse Expression: {text}\r\n{exn}" // Just warning.  하나의 이름에 '.' 을 포함하는 경우.  e.g "#seg.testMe!!!"
     //let parseStatement(text:string) =
@@ -122,3 +126,87 @@ module ExpressionParser =
     //        [ for nc in ncs -> nc.GetText().DeQuoteOnDemand() ]
     //    with exn ->
     //        failwith $"Failed to parse Expression: {text}\r\n{exn}" // Just warning.  하나의 이름에 '.' 을 포함하는 경우.  e.g "#seg.testMe!!!"
+
+    type System.Type with
+        member x.CreateVariable(name:string) : IStorage =
+            match x.Name with
+            | "Single" -> StorageVariable<single>(name, 0.0f)
+            | "Double" -> StorageVariable<double>(name, 0.0)
+            | "SByte"  -> StorageVariable<int8>(name, 0y)
+            | "Byte"   -> StorageVariable<uint8>(name, 0uy)
+            | "Int16"  -> StorageVariable<int16>(name, 0s)
+            | "UInt16" -> StorageVariable<uint16>(name, 0us)
+            | "Int32"  -> StorageVariable<int32>(name, 0)
+            | "UInt32" -> StorageVariable<uint32>(name, 0u)
+            | "Int64"  -> StorageVariable<int64>(name, 0L)
+            | "UInt64" -> StorageVariable<uint64>(name, 0UL)
+            | _  -> failwith "ERROR"
+
+        static member FromString(typeName:string) : System.Type =
+            match typeName.ToLower() with
+            | ("float32" | "single") -> typedefof<single>
+            | ("float64" | "double") -> typedefof<double>
+            | ("int8"    | "sbyte")  -> typedefof<int8>
+            | ("uint8"   | "byte")   -> typedefof<uint8>
+            | ("int16"   | "short")  -> typedefof<int16>
+            | ("uint16"  | "ushort") -> typedefof<uint16>
+            | ("int32"   | "int" )   -> typedefof<int32>
+            | ("uint32"  | "uint")   -> typedefof<uint32>
+            | ("int64"   | "long")   -> typedefof<int64>
+            | ("uint64"  | "ulong")  -> typedefof<uint64>
+            | _  -> failwith "ERROR"
+
+    let parseStatementContext (storages:Storages) (ctx:StatementContext) : Statement =
+        assert(ctx.ChildCount = 1)
+        let storageName = ctx.Descendants<StorageNameContext>().First().GetText()
+        let getFirstChildExpressionContext (ctx:ParserRuleContext) : ExprContext = ctx.children.OfType<ExprContext>().First()
+        let createStorageOnDemand (name:string) (creator: string -> IStorage) : IStorage =
+            if storages.ContainsKey name then
+                storages[name]
+            else
+                let storage = creator name
+                storages.Add(name, storage) |> ignore
+                storage
+
+        match ctx.children[0] with
+        | :? VarDeclContext as varDeclCtx ->
+            let exp = createExpression storages (getFirstChildExpressionContext varDeclCtx)
+            let typ = ctx.Descendants<TypeContext>().First().GetText() |> System.Type.FromString
+            if exp.DataType <> typ then
+                failwith $"ERROR: Type mismatch in variable declaration {ctx.GetText()}"
+
+            let storage = createStorageOnDemand storageName (fun n -> exp.DataType.CreateVariable(n))
+            VarDecl (exp, storage)
+
+        | :? AssignContext as assignCtx ->
+            let exp = createExpression storages (getFirstChildExpressionContext assignCtx)
+            let storage = storages[storageName]
+            Assign (exp, storage)
+        | _ -> failwith "ERROR: Not yet statement"
+
+    let parseCode(text:string) =
+        try
+            let storages = Dictionary<string, IStorage>()
+            let parser = createParser (text)
+            let topLevels =
+                [
+                    for t in parser.toplevels().children do
+                        match t with
+                        | :? ToplevelContext as ctx -> ctx
+                        | :? ITerminalNode as semicolon when semicolon.GetText() = ";" -> ()
+                        | _ -> failwith "ERROR"
+                ]
+
+            [
+                for t in topLevels do
+                    let text = t.GetText()
+                    tracefn $"Toplevel: {text}"
+                    assert(t.ChildCount = 1)
+
+                    match t.children[0] with
+                    | :? StatementContext as stmt -> parseStatementContext storages stmt
+                    | _ ->
+                        failwith $"ERROR: {text}: expect statements"
+            ]
+        with exn ->
+            failwith $"Failed to parse code: {text}\r\n{exn}"

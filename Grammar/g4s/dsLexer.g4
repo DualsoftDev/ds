@@ -37,6 +37,10 @@ WS: [ \t\r\n]+ -> skip;
 BLOCK_COMMENT : '/*' (BLOCK_COMMENT|.)*? '*/' -> channel(HIDDEN) ;
 LINE_COMMENT  : '//' .*? ('\n'|EOF) -> channel(HIDDEN) ;
 
+fragment CODE_BLOCK_START: '<@{';
+fragment CODE_BLOCK_END: '}@>';
+CODE_BLOCK: CODE_BLOCK_START (BLOCK_COMMENT|LINE_COMMENT|CODE_BLOCK|.)*? CODE_BLOCK_END;
+
 fragment Identifier: ValidIdStart ValidIdChar*;
    // lexical rule for hangul characters
     fragment HangulChar: [\uAC00-\uD7A3]+;

@@ -28,6 +28,7 @@ system: '[' sysHeader ']' systemName '=' (sysBlock) EOF;    // [sys] Seg = {..}
     sysBlock
         : LBRACE (  flowBlock | jobBlock | loadDeviceBlock | loadExternalSystemBlock
                     | interfaceBlock | buttonsBlocks | propsBlock
+                    | codeBlock
                     | variableBlock | commandBlock | observeBlock )*
           RBRACE       // identifier1Listing|parenting|causal|call
           ;
@@ -190,6 +191,7 @@ identifier1234: (identifier1 | identifier2 | identifier3 | identifier4);
 
     flowPath: identifier2;
 
+codeBlock: CODE_BLOCK;
 
 variableBlock: '[' 'variables' ']' '=' '{' variableDef* '}';
     variableDef: varName '=' '(' varType ',' argumentGroups ')';     // R100   = (Word, 0)

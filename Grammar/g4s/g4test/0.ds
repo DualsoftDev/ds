@@ -1,4 +1,8 @@
 [sys] L = {
     [external file="station.ds" ip="localhost"] A;
     [external file="station.ds" ip="localhost"] B;
+    <@{
+    This is arbitary code block;
+    // }@> commented out---This is arbitary code block;
+    }@>
 }

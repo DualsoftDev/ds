@@ -42,8 +42,6 @@ terminal: variable | tag | literal;
         literalChar   :CHAR;
         literalString :STRING;
 
-literals: literal (';' toplevel)* (';')?;
-
 toplevels: toplevel (';' toplevel)* (';')?;
     toplevel: expr|statement;
 
@@ -80,7 +78,7 @@ fragment DIGIT: ('0' .. '9');
 fragment DIGITS: DIGIT+;
 
 fragment SCIENTIFIC_NUMBER: SIGN? NUMBER (E SIGN? DIGITS)?;
-fragment NUMBER: DIGITS ('.' DIGITS);
+fragment NUMBER: ((DIGITS)? ('.' DIGITS)) | ( (DIGITS) '.' (DIGITS)?);
 
     SINGLE: SCIENTIFIC_NUMBER 'f';
     DOUBLE: SCIENTIFIC_NUMBER;

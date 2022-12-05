@@ -396,9 +396,9 @@ module ExpressionFunctionModule =
         let _shiftRightUInt64 (args:Args) = let n, shift = args.ExpectTyped2<uint64, int>() in n >>> shift
 
 
-        let _sin (args:Args) = args.Select(evalTo<double>) .Expect1() |> Math.Sin
-        let _cos (args:Args) = args.Select(evalTo<double>) .Expect1() |> Math.Cos
-        let _tan (args:Args) = args.Select(evalTo<double>) .Expect1() |> Math.Tan
+        let _sin (args:Args) = args.Select(evalArg >> toDouble).Expect1() |> Math.Sin
+        let _cos (args:Args) = args.Select(evalArg >> toDouble).Expect1() |> Math.Cos
+        let _tan (args:Args) = args.Select(evalArg >> toDouble).Expect1() |> Math.Tan
 
         let _convertUInt8  (args:Args) = args.Select(evalArg >> toUInt8)  .Expect1()
         let _convertInt8   (args:Args) = args.Select(evalArg >> toInt8)   .Expect1()

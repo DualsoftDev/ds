@@ -1,10 +1,17 @@
-/* grun expr literals < g4test/expr/literal.expr */
-
-"hello-string";
+/* grun expr toplevels -gui < g4test/expr/literal.expr */
+.0f;
+0.f;
+.0;
 
 1u;
 -3.14;
 1UL;
+
+
+"hello-string";
+
+
+
 
 %myTag;
 

@@ -133,10 +133,18 @@ module ComparisionTestModule =
             for t in trues do
                 t |> evalExpr === true
         [<Test>]
-        member __.``X 1 Math test`` () =
+        member __.``1 Math test`` () =
             let trues =
                 [
                     "sin(0) = 0.0"
+                    "sin(.0) = 0.0"
+                    "sin(0.) = 0.0"
+                    "sin(0.f) = 0.0"
+                    "sin(.0f) = 0.0"
+
+                    "sin( 3.14 / 2.0 ) <= 1.0"
+                    "sin( 3.14 / 2.0 ) >= 0.999"
                 ]
+
             for t in trues do
                 t |> evalExpr === true

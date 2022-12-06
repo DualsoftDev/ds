@@ -64,18 +64,20 @@ module PPTUtil =
         [<Extension>] 
         static member IsOutlineExist(shape:#Shape) = 
             let outline = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.Outline>().FirstOrDefault();
-            if(outline = null && shape.Descendants<ShapeStyle>().Any()|>not) then false
+            if(outline = null)
+            then 
+                 shape.Descendants<ShapeStyle>().Any()
             else 
-                 if(outline = null|>not && outline.Descendants<Drawing.NoFill>().Any()) then false
-                 else true
+                 outline.Descendants<Drawing.NoFill>().Any()|>not
         
         [<Extension>] 
         static member IsOutlineConnectionExist(shape:#ConnectionShape) = 
             let outline = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.Outline>().FirstOrDefault();
-            if(outline = null && shape.Descendants<ShapeStyle>().Any()|>not) then false
+            if(outline = null)
+            then 
+                 shape.Descendants<ShapeStyle>().Any()
             else 
-                 if(outline = null|>not && outline.Descendants<Drawing.NoFill>().Any()) then false
-                 else true
+                 outline.Descendants<Drawing.NoFill>().Any()|>not
 
         [<Extension>] 
         static member IsNonDirectional(shape:#ConnectionShape) = 

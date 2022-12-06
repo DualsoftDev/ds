@@ -60,18 +60,18 @@ module ImportCheck =
 
 
 
-        let CheckMakeCopyApi(nodes:pptNode seq, dicSys:Dictionary<int, DsSystem>) =
-            let dicName = ConcurrentDictionary<string, string>()
-            let sysNames = dicSys.Values.Select(fun s->s.Name)
-            nodes
-                |> Seq.filter(fun node -> node.NodeType = COPY)
-                |> Seq.iter(fun node ->
+        //let CheckMakeCopyApi(nodes:pptNode seq, dicSys:Dictionary<int, DsSystem>) =
+        //    let dicName = ConcurrentDictionary<string, string>()
+        //    let sysNames = dicSys.Values.Select(fun s->s.Name)
+        //    nodes
+        //        |> Seq.filter(fun node -> node.NodeType = COPY)
+        //        |> Seq.iter(fun node ->
 
-                    if(sysNames.Contains(node.Name)|> not)
-                    then Office.ErrorPPT(Name, ErrID._32,  node.Shape.InnerText, node.PageNum, $"확인 시스템 이름 : {node.Name}")
+        //            if(sysNames.Contains(node.Name)|> not)
+        //            then Office.ErrorPPT(Name, ErrID._32,  node.Shape.InnerText, node.PageNum, $"확인 시스템 이름 : {node.Name}")
 
 
-                    )
+        //            )
 
 
         let SameEdgeErr(pptEdges:pptEdge seq) =

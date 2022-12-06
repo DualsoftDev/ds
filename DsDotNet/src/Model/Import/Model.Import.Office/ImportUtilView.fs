@@ -87,7 +87,7 @@ module ImportViewModule =
 
         let newNode = ViewNode("Interface", IF)
 
-        system.ApiUsages 
+        system.ApiItems 
         |> Seq.iter(fun api ->
             
             let findApiNode = pptNodes.Where(fun f->f.Name = api.Name && f.PageNum = page)
@@ -122,6 +122,9 @@ module ImportViewModule =
     type ImportViewUtil =
         [<Extension>] 
         static member MakeGraphView (doc:pptDoc, mySys:DsSystem) =
+                let dicVertex = doc.DicVertex
+                let dicFlow = doc.DicFlow
+
                 doc.Dummys |> Seq.iter(fun dummy -> dummy.Update(dicVertex))
 
                 let getFlowNodes(flows:Flow seq) = 
@@ -137,7 +140,8 @@ module ImportViewModule =
                         flowNode)
 
                 let viewNodes = 
-                    mySys.ReferenceSystems
+                   // mySys.ReferenceSystems @ [mySys]
+                    [mySys]
                     |>Seq.map(fun sys -> sys, sys.Flows)
                     |>Seq.collect(fun (sys, flows) -> 
                             let flowNodes = getFlowNodes(flows)

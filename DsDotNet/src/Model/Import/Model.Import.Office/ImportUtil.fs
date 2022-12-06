@@ -14,10 +14,10 @@ open System.Runtime.CompilerServices
 [<AutoOpen>]
 module ImportU =
 
-    let dicSys  = Dictionary<int, DsSystem>()  //0 페이지 기본 나의 시스템 (각페이지별 해당시스템으로 구성)
-    let dicCopy = Dictionary<DsSystem, DsSystem>()  //Dic<copySys, orgiSys> 원본 구조 생성시 계속 같이 만듬
-    let dicFlow = Dictionary<int, Flow>() // page , flow
-    let dicVertex = Dictionary<string, Vertex>()
+    //let dicSys  = Dictionary<int, DsSystem>()  //0 페이지 기본 나의 시스템 (각페이지별 해당시스템으로 구성)
+    //let dicCopy = Dictionary<DsSystem, DsSystem>()  //Dic<copySys, orgiSys> 원본 구조 생성시 계속 같이 만듬
+    //let dicFlow = Dictionary<int, Flow>() // page , flow
+    //let dicVertex = Dictionary<string, Vertex>()
 
     let private createVertex(sys:DsSystem, node:pptNode, parentReal:Real Option, parentFlow:Flow Option, dicSeg:Dictionary<string, Vertex>) =
 
@@ -30,7 +30,7 @@ module ImportU =
             else
                 let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
                 let system = sys.TryFindReferenceSystem(sysName)
-                let findApi = if(system.IsSome)
+                let findApi = if(system.IsNone)
                                 then Office.ErrorPPT(Name, ErrID._47, $"원인이름{sysName}: 전체이름[{node.Shape.InnerText}] 해당도형[{node.Shape.ShapeName()}]", node.PageNum)
                                 else 
                                      match system.Value.TryFindExportApiItem([|system.Value.Name;apiName|]) with
@@ -68,62 +68,53 @@ module ImportU =
         [<Extension>] static member GetPage(dicFlow:Dictionary<int, Flow>, flow:Flow) =
                         dicFlow.Where(fun w-> w.Value = flow).First().Key
 
-        [<Extension>] static member MakeSystem (doc:pptDoc, sys:DsSystem) =
-                        doc.Pages
-                            |> Seq.filter(fun page -> page.IsUsing)
-                            |> Seq.iter  (fun page ->
-                                let sysName, flowName = GetSysNFlow(doc.Name, page.Title, page.PageNum)
-                                if sysName = doc.Name|>not
-                                then if sys.TryFindLoadedSystem(sysName) |> Option.isSome
-                                     then dicSys.Add(page.PageNum, DsSystem(sysName, ""))
-                                     else dicSys.Add(page.PageNum, sys.TryFindLoadedSystem(sysName).Value.ReferenceSystem)
-                                else dicSys.Add(page.PageNum, sys)
-                                )
+        //[<Extension>] static member MakeSystem (doc:pptDoc, sys:DsSystem) =
+        //                doc.Pages
+        //                    |> Seq.filter(fun page -> page.IsUsing)
+        //                    |> Seq.iter  (fun page ->
+        //                        let sysName, flowName = GetSysNFlow(doc.Name, page.Title, page.PageNum)
+        //                        if sysName = doc.Name|>not
+        //                        then if sys.TryFindLoadedSystem(sysName) |> Option.isSome
+        //                             then dicSys.Add(page.PageNum, DsSystem(sysName, ""))
+        //                             else dicSys.Add(page.PageNum, sys.TryFindLoadedSystem(sysName).Value.ReferenceSystem)
+        //                        else dicSys.Add(page.PageNum, sys)
+        //                        )
 
-        [<Extension>] static member MakeCopySystem (doc:pptDoc, sys:DsSystem) =
-                        doc.Nodes
-                        |> Seq.filter(fun node -> node.NodeType = COPY)
-                        |> Seq.iter(fun node ->
-                                node.CopySys.ForEach(fun copy ->
-                                    match sys.TryFindReferenceSystem(copy.Value) with
-                                    |Some origSys -> 
-                                            let copySys  = DsSystem(copy.Key, "")
-                                            dicCopy.Add(copySys, origSys) |>ignore
-                                    | None ->
-                                        Office.ErrorPPT(Name, ErrID._43, $"원인이름{copy.Value}: 전체이름[{node.Shape.InnerText}] 해당도형[{node.Shape.ShapeName()}]", node.PageNum)
-                                    )
-                                )
+        //[<Extension>] static member AddRefSystems (mySys:DsSystem, refInfos:DsSystem* DeviceLoadParameters seq) =
+        //                let loadedSystems  = 
+        //                    refInfos.Select(fun ref ->
+        //                        let paras ={
+        //                                    ContainerSystem = mySys
+        //                                    AbsoluteFilePath = ""
+        //                                    UserSpecifiedFilePath = ""
+        //                                    LoadedName = "" }
+        //                        Device(ref, paras)
+        //                        )
+        //                loadedSystems |> Seq.map(fun loadSys -> mySys.AddLoadedSystem(loadSys))
 
         //Interface 만들기
-        [<Extension>] static member MakeInterfaces (doc :pptDoc) =
+        [<Extension>] static member MakeInterfaces (doc :pptDoc, sys:DsSystem) =
                         doc.Nodes
                         |> Seq.filter(fun node -> node.NodeType = IF)
                         |> Seq.iter(fun node ->
-                                let system = dicSys.[node.PageNum]
                                 let apiName = node.IfName;
-                                ApiItem.Create(apiName, system) |> ignore
+                                ApiItem.Create(apiName, sys) |> ignore
                         )
 
         //MFlow 리스트 만들기
         [<Extension>] static member MakeFlows (doc:pptDoc, sys:DsSystem) =
+                            let dicFlow = doc.DicFlow
                             doc.Pages
                             |> Seq.filter(fun page -> page.IsUsing)
                             |> Seq.iter  (fun page ->
                                 let pageNum  = page.PageNum
                                 let sysName, flowName = GetSysNFlow(doc.Name, page.Title, page.PageNum)
-                                let sys    = sys.ReferenceSystems.First(fun f->f.Name = sysName)
                                 dicFlow.Add(pageNum,  Flow.Create(flowName, sys) ) |> ignore
                                 )
 
-                            //copy system ApiItems 동일 처리
-                            //dicCopy.ForEach(fun sysTwin->
-                            //    let copySys = sysTwin.Key
-                            //    let origSys = sysTwin.Value
-                            //    origSys.ApiUsages.ForEach(fun apiItem -> apiItem.ToCopy(copySys)|>ignore)
-                            //    )
-
         //EMG & Start & Auto 리스트 만들기
         [<Extension>] static member MakeButtons (doc:pptDoc, mySys:DsSystem) =
+                        let dicFlow = doc.DicFlow
                         let checkErr(flow:Flow, node:pptNode) =
                                 if (flow.System <> mySys)
                                 then  Office.ErrorPPT(Name, ErrID._45 , $"원인 버튼 {node.Name}: 시스템{flow.System.Name}", node.PageNum)
@@ -144,6 +135,8 @@ module ImportU =
         //real call alias  만들기
         [<Extension>] 
         static member MakeSegment (doc:pptDoc, mySys:DsSystem) =
+                let dicFlow = doc.DicFlow
+                let dicVertex = doc.DicVertex
 
                 let pptNodes = doc.Nodes
                 let parents = doc.Parents
@@ -212,7 +205,9 @@ module ImportU =
 
         //pptEdge 변환 및 등록
         [<Extension>] 
-        static member MakeEdges (doc:pptDoc) =
+        static member MakeEdges (doc:pptDoc, mySys:DsSystem) =
+                let dicVertex = doc.DicVertex
+                let dicFlow = doc.DicFlow
                 let pptEdges = doc.Edges
                 let parents = doc.Parents
                 let dummys = doc.Dummys
@@ -237,8 +232,7 @@ module ImportU =
                             if (edge.Causal = InterlockWeak || edge.Causal = ResetEdge)
                             then Office.ErrorConnect(edge.ConnectionShape, ErrID._11, edge.StartNode.Name, edge.EndNode.Name, edge.PageNum)
 
-                            let sys = dicSys.[edge.PageNum]
-                            sys.ApiResetInfos.Add(ApiResetInfo.Create(sys, edge.StartNode.Name, edge.Causal ,edge.EndNode.Name ))|>ignore
+                            mySys.ApiResetInfos.Add(ApiResetInfo.Create(mySys, edge.StartNode.Name, edge.Causal ,edge.EndNode.Name ))|>ignore
 
                         else
                             let srcDummy = dummys.TryFindDummy(edge.StartNode)
@@ -276,6 +270,8 @@ module ImportU =
         //Safety 만들기
         [<Extension>] 
         static member MakeSafeties (doc:pptDoc, mySys:DsSystem) =
+                    let dicVertex = doc.DicVertex
+                    let dicFlow = doc.DicFlow
                     doc.Nodes
                     |> Seq.filter(fun node -> node.IsDummy|>not)
                     |> Seq.iter(fun node ->
@@ -306,13 +302,14 @@ module ImportU =
 
         [<Extension>] 
         static member MakeApiTxRx (doc:pptDoc) =
+                let dicFlow = doc.DicFlow
                             //1. 원본처리
                 doc.Nodes
                     |> Seq.filter(fun node -> node.NodeType = IF)
                     |> Seq.iter(fun node ->
                             let flow = dicFlow.[node.PageNum]
                             let sys =  dicFlow.[node.PageNum].System
-                            let api = sys.ApiUsages.Where(fun w->w.Name = node.IfName).First()
+                            let api = sys.ApiItems.Where(fun w->w.Name = node.IfName).First()
 
                             let findReal(trxName:string) =
                                 let flowName, realName =

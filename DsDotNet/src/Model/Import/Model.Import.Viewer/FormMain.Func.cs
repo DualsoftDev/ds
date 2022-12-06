@@ -70,8 +70,7 @@ namespace Dual.Model.Import
                     ExportTextModel(Color.Transparent, _dsText);
                     this.Do(() => xtraTabControl_Ex.TabPages.Clear());
 
-                    foreach (var sys in _mySystem.ReferenceSystems.OrderBy(sys => sys.Name))
-                        CreateNewTabViewer(viewNodes);
+                    CreateNewTabViewer(viewNodes);
 
                     WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{PathPPT} 불러오기 성공!!");
                     this.Do(() =>
@@ -288,7 +287,7 @@ namespace Dual.Model.Import
             //T9_Group
             //T10_Button
             //T11_ImportSystem
-            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\..\..\..\..\")) + "UnitTest\\UnitTest.Engine\\ImportPPT\\T0_CaseAll.pptx";
+            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\..\..\..\..\")) + "UnitTest\\UnitTest.Engine\\ImportPPT\\T5_Call.pptx";
             bool debug = File.Exists(path);
             if (debug)
             {

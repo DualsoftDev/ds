@@ -215,6 +215,18 @@ module PPTDocModule =
         member val Dummys  = dummys
 
         member val Name =  name
-        member val FullPath =  path
+        member val DirectoryName =  FileInfo(path).DirectoryName
 
+        member val DicFlow = Dictionary<int, Flow>() // page , flow
+        member val DicVertex = Dictionary<string, Vertex>() 
+    
+[<Extension>]
+type PPTDocExt =
+        [<Extension>] static member GetCopyPathNName(doc:pptDoc) =
+                         doc.Nodes 
+                         |> Seq.filter(fun node -> node.NodeType = COPY)
+                         |> Seq.collect(fun node ->
+                            node.CopySys.Select(fun copy -> copy.Value , copy.Key)
+                        )
 
+                       

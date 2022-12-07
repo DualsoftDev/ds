@@ -224,16 +224,14 @@ namespace Dual.Model.Import
                     }
 
                 }
-                if (viewNode.NodeType == NodeType.MY)
+                if (viewNode.NodeType == NodeType.REAL)
                     nNode.Attr.Shape = Shape.Box;
                 if (viewNode.NodeType == NodeType.DUMMY)
                 {
                     nNode.Attr.Shape = Shape.Box;
                     nNode.Attr.FillColor = Color.Black;
                 }
-                if (viewNode.NodeType == NodeType.TR
-                    || viewNode.NodeType == NodeType.TX
-                    || viewNode.NodeType == NodeType.RX)
+                if (viewNode.NodeType == NodeType.CALL)
                     nNode.Attr.Shape = Shape.Ellipse;
                 if (viewNode.NodeType == NodeType.IF)
                 {

@@ -16,24 +16,26 @@ module ImportM =
       //  let configFile = @"test-model-config.json"
       //  let model = ModelLoader.LoadFromConfig configFile
 
+        let getParams(directoryName:string, filePath:string, loadedName:string, containerSystem:DsSystem) = 
+            {  
+                ContainerSystem = containerSystem
+                AbsoluteFilePath = Path.GetFullPath(Path.Combine(directoryName, filePath)) + ".pptx"
+                UserSpecifiedFilePath = filePath + ".ds"
+                LoadedName = loadedName 
+            }
+
         let rec loadSystem(path:string, name:string, active:bool) = 
-            let dicFlow = Dictionary<int, Flow>() // page , flow
-            let dicVertex = Dictionary<string, Vertex>()
     
             let doc = pptDoc(path)
-            let name, ip = if active //active는 시스템이름으로 ppt 파일 이름을 사용
-                            then doc.Name,"localhost" 
+            let name, ip =  if active //active는 시스템이름으로 ppt 파일 이름을 사용
+                            then doc.Name, "localhost" 
                             else name, ""
             let mySys = DsSystem(name, ip)
 
             doc.GetCopyPathNName()
             |> Seq.iter(fun (path, loadedName) -> 
 
-                    let paras = {   ContainerSystem = mySys
-                                    AbsoluteFilePath = Path.GetFullPath(Path.Combine(doc.DirectoryName, path)) + ".pptx"
-                                    UserSpecifiedFilePath = path + ".ds"
-                                    LoadedName = loadedName }
-
+                    let paras = getParams(doc.DirectoryName, path, loadedName, mySys)
                     let sys, (doc: pptDoc) = loadSystem(paras.AbsoluteFilePath, loadedName, false)
 
                     if loadedName =  doc.Name //파일이름 그대로 부르면 ExSys, 다른이름이면 Device
@@ -42,24 +44,14 @@ module ImportM =
                     )
 
 
-            //page 타이틀 이름 중복체크 (없으면 P0, P1, ... 자동생성)
-            //ImportCheck.CheckMakeSystem(doc)
+            doc.MakeJobs(mySys)
             doc.MakeInterfaces(mySys)
-
-            //ImportCheck.CheckMakeCopyApi(doc.Nodes)
-            //Flow 리스트 만들기
             doc.MakeFlows(mySys) |> ignore
 
-            // system, flow 이름 중복체크
-            //ImportCheck.SameSysFlowName(mySys.ReferenceSystems, ImportU.dicFlow) |> ignore
             //EMG & Start & Auto 리스트 만들기
-            doc.MakeButtons  (mySys)
-
+            doc.MakeButtons(mySys)
             //segment 리스트 만들기
             doc.MakeSegment(mySys)
-
-            ImportCheck.SameEdgeErr(doc.Edges) |> ignore
-
             //Edge  만들기
             doc.MakeEdges (mySys)
             //Safety 만들기

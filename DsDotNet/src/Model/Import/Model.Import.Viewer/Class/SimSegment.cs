@@ -5,8 +5,8 @@ namespace Dual.Model.Import
 {
     public static class SimSeg
     {
-        static readonly List<NodeType> mys = new List<NodeType>() { NodeType.MY };
-        static readonly List<NodeType> notMys = new List<NodeType>() { NodeType.TR, NodeType.TX, NodeType.RX };
+        static readonly List<NodeType> mys = new List<NodeType>() { NodeType.REAL };
+        static readonly List<NodeType> notMys = new List<NodeType>() { NodeType.CALL };
         //static bool org = false;
         static List<NodeType> AllSeg
         {

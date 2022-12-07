@@ -189,19 +189,27 @@ module internal ToDsTextModule =
             let safetyHolders =
                 [   for f in system.Flows do
                         yield! f.Graph.Vertices.OfType<ISafetyConditoinHolder>()
+
+                        for r in f.Graph.Vertices.OfType<Real>() do
+                        yield! r.Graph.Vertices.OfType<ISafetyConditoinHolder>()
                 ] |> List.distinct
 
             let withSafeties = safetyHolders.Where(fun h -> h.SafetyConditions.Any())
             let safeties =
+                let getCallName (call:Call) =
+                    match call.Parent with
+                    |ParentReal r-> $"{r.Flow.Name}.{call.ParentNPureNames.Combine()}"       
+                    |ParentFlow f-> call.ParentNPureNames.Combine()
+
                 let safetyConditionName (sc:SafetyCondition) =
                     match sc with
                     | SafetyConditionReal real -> real.ParentNPureNames.Combine()
-                    | SafetyConditionCall call -> call.ParentNPureNames.Combine()
+                    | SafetyConditionCall call -> getCallName call
                     | SafetyConditionRealEx  o -> o.ParentNPureNames.Combine()
                 let safetyConditionHolderName(sch:ISafetyConditoinHolder) =
                     match sch with
                     | :? Real as real -> real.ParentNPureNames.Combine()
-                    | :? Call as call -> call.ParentNPureNames.Combine()
+                    | :? Call as call -> getCallName call
                     | :? RealOtherFlow as realEx -> realEx.ParentNPureNames.Combine()
                     | _ -> failwith "ERROR"
 

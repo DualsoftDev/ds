@@ -232,9 +232,6 @@ module CoreModule =
             parent.GetGraph().AddVertex(v) |> verifyM $"Duplicated call name [{target.Name}]"
             v
 
-        static member Create(api:ApiItem, parent:ParentWrapper, deveiceName) =
-            let job = Job(api.Name, [|JobDef(api, "","", deveiceName)|])
-            Call.Create(job, parent)
 
     type Alias with
         static member Create(name:string, target:AliasTargetWrapper, parent:ParentWrapper) =

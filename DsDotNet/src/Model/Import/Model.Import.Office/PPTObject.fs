@@ -25,9 +25,7 @@ module PPTObjectModule =
     let CopyName(name:string, cnt) = sprintf "Copy%d_%s" cnt (name.Replace(".", "_")) 
 
     let GetSysNApi(flowName:string, name:string) = 
-        if(name.StartsWith("$"))
-            then (TrimSpace(name.Split('.').[0]).TrimStart('$')), TrimSpace(name.Split('.').[1])
-            else  $"{flowName}_{name.Split('.').[0]}", TrimSpace(name.Split('.').[1])
+        $"{flowName}_{TrimSpace (name.Split('$').[0])}", TrimSpace(name.Split('$').[1])
     let GetSysNFlow(fileName:string, name:string, pageNum:int) = 
             if(name.StartsWith("$"))
                 then 
@@ -144,35 +142,45 @@ module PPTObjectModule =
         member x.Title = slidePart.PageTitle()
 
     type pptNode(shape:Presentation.Shape, iPage:int, pageTitle:string, isDummy:bool)  =
-        let mutable txCnt = 1
-        let mutable rxCnt = 1
+        let copySystems = Dictionary<string, string>() //copyName, orgiName
+        let safeties    = HashSet<string>()
+        let jobInfos = Dictionary<string, HashSet<string>>()  // jobBase, api SystemNames
+        
         let mutable name = ""
-        let mutable copySystems = ConcurrentDictionary<string, string>() //copyName, orgiName
-        let mutable safeties    = HashSet<string>()
         let mutable ifName    = ""
         let mutable ifTXs    = HashSet<string>()
         let mutable ifRXs    = HashSet<string>()
+        let mutable nodeType:NodeType = NodeType.REAL
         let mutable btnType:BtnType option = None 
-        let mutable nodeType:NodeType = NodeType.MY
+
         let trimSpace(text:string) =   text.TrimStart(' ').TrimEnd(' ')
         let trimStartEndSeq(texts:string seq) =  texts  |> Seq.map(fun name -> trimSpace name)
-        let updateTxRx(tailBarckets:string) =
-                    txCnt <- tailBarckets.Split(';').[0] |> Convert.ToInt32
-                    rxCnt <- tailBarckets.Split(';').[1] |> Convert.ToInt32
-
-        let updateSafety(barckets:string)  = safeties <- barckets.Split(';')  |> HashSet
-                                            //             |> Seq.map(fun name -> $"{pageTitle}_{name}") |> HashSet
-        let updateCopySys(barckets:string, orgiSysName:string) =
-            if  (trimSpace barckets).All(fun c -> Char.IsDigit(c))
+        let updateSafety(barckets:string)  = barckets.Split(';') |> Seq.iter(fun f-> safeties.Add (f) |> ignore )
+        let updateCopySys(barckets:string, orgiSysName:string, groupJob:int) =
+            
+            if  (groupJob > 0)
             then
-                [for i in [1..Convert.ToInt32(barckets)] do yield sprintf "%s%d" name i]
-                |> Seq.map(fun sys -> $"{pageTitle}_{sys}" , orgiSysName)
-                |> Seq.iter(fun (copy, orgi) -> copySystems.TryAdd(copy, orgiSysName) |> ignore)
+                let jobBaseName = $"{pageTitle}_{barckets}" //jobBaseName + apiName = JobName
+                jobInfos.Add(jobBaseName , HashSet<string>())
+                let copys = 
+                    [for i in [1..groupJob] do 
+                        yield sprintf "%s%d" jobBaseName i]
+                
+                copys
+                |> Seq.iter(fun copy ->
+                    copySystems.Add(copy, orgiSysName) 
+                    jobInfos[jobBaseName].Add(copy)|>ignore)
 
             else
-                barckets.Split(';') |> trimStartEndSeq
-                |> Seq.map(fun sys -> $"{pageTitle}_{sys}" , orgiSysName)
-                |> Seq.iter(fun (copy, orgi) -> copySystems.TryAdd(copy, orgiSysName) |> ignore)
+                let copys = 
+                    barckets.Split(';') 
+                    |> trimStartEndSeq
+                    |> Seq.map(fun sys -> $"{pageTitle}_{sys}")
+
+                copys
+                |> Seq.iter(fun copy -> 
+                    copySystems.Add(copy, orgiSysName)
+                    jobInfos.Add(copy, [copy]|>HashSet))
 
         let updateIF(text:string)      =
             ifName <- GetBracketsReplaceName(text) |> trimSpace
@@ -189,7 +197,7 @@ module PPTObjectModule =
             nodeType <-
                 if isDummy then DUMMY
 
-                elif(shape.CheckRectangle())    then  MY
+                elif(shape.CheckRectangle())    then  REAL
                 elif(shape.CheckHomePlate())    then  IF
                 elif(shape.CheckFoldedCorner()) then  COPY
 
@@ -199,29 +207,30 @@ module PPTObjectModule =
                     || shape.CheckBevelShape()) then  BUTTON
 
                 elif(shape.CheckEllipse())
-                then
-                    if(name.Split('.').Count() <> 2)
-                    then shape.ErrorName(ErrID._46, iPage)
-                    if((txCnt = 0 && rxCnt = 0) || txCnt < 0 || rxCnt < 0)
-                    then shape.ErrorName(ErrID._2, iPage)
-                    else 
-                        if (txCnt > 0 && rxCnt > 0) then TR
-                        elif (txCnt = 0) then RX
-                        elif (rxCnt = 0) then TX
-                        else shape.ErrorName(ErrID._2, iPage)
+                then CALL
+                    //if(name.Split('.').Count() <> 2)
+                    //then shape.ErrorName(ErrID._46, iPage)
+                    //if((txCnt = 0 && rxCnt = 0) || txCnt < 0 || rxCnt < 0)
+                    //then shape.ErrorName(ErrID._2, iPage)
+                    //else 
+                    //    if (txCnt > 0 && rxCnt > 0) then TR
+                    //    elif (txCnt = 0) then RX
+                    //    elif (rxCnt = 0) then TX
+                    //    else shape.ErrorName(ErrID._2, iPage)
 
                 else  shape.ErrorName(ErrID._1, iPage)
 
             match nodeType with
-            |TX|RX|TR|MY ->
-                     if(nodeType =MY|>not) 
-                     then GetSquareBrackets(shape.InnerText, false) |> fun text -> if text = ""|>not then updateTxRx text
+            |CALL|REAL ->
+                     //if(nodeType =MY|>not) 
+                     //then GetSquareBrackets(shape.InnerText, false) |> fun text -> if text = ""|>not then updateTxRx text
                      GetSquareBrackets(shape.InnerText, true )      |> fun text -> if text = ""|>not then updateSafety text
             |IF ->   updateIF shape.InnerText
-            |COPY -> GetSquareBrackets(shape.InnerText, false)
-                        |> fun text ->
-                            if text = ""|>not
-                            then updateCopySys  (text ,(GetBracketsReplaceName(shape.InnerText) |> trimSpace))
+            |COPY -> 
+                     let name, number = GetTailNumber(shape.InnerText)
+                     GetSquareBrackets(name, false)
+                        |> fun text -> 
+                            updateCopySys  (text ,(GetBracketsReplaceName(name) |> trimSpace), number)
             |_ -> ()
 
             let btn =  if shape.CheckNoSmoking() then Some(BtnType.EmergencyBTN)
@@ -233,8 +242,9 @@ module PPTObjectModule =
 
         member x.PageNum = iPage
         member x.Shape = shape
-        member x.Safeties = safeties
         member x.CopySys  = copySystems
+        member x.JobInfos  = jobInfos
+        member x.Safeties = safeties
         member x.IfName      = ifName
         member x.IfTXs       = ifTXs
         member x.IfRXs       = ifRXs
@@ -248,8 +258,6 @@ module PPTObjectModule =
         member val Key =  Objkey(iPage, shape.GetId())
         member val Name =   name with get, set
         member val NameOrg =   shape.InnerText
-        member val CntTX =  txCnt
-        member val CntRX =  rxCnt
         member val Alias :pptNode  option = None with get, set
         member x.GetRectangle (sildeSize:int*int) =  shape.GetPosition(sildeSize)
 
@@ -301,7 +309,7 @@ module PPTObjectModule =
                 else Some(reals |> Seq.head)
 
             let children = nodes
-                            |> Seq.filter (fun node ->node.NodeType = MY |> not)
+                            |> Seq.filter (fun node ->node.NodeType = REAL |> not)
                             |> Seq.filter (fun node ->node.NodeType = DUMMY|>not)
 
             if(children.Any() |> not) 

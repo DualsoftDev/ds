@@ -228,5 +228,4 @@ type PPTDocExt =
                          |> Seq.collect(fun node ->
                             node.CopySys.Select(fun copy -> copy.Value , copy.Key)
                         )
-
-                       
+     

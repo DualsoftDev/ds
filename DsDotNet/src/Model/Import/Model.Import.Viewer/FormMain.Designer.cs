@@ -191,8 +191,9 @@ namespace Dual.Model.Import
             // splitContainer5.Panel2
             // 
             this.splitContainer5.Panel2.Controls.Add(this.xtraTabControl_Ex);
+            this.splitContainer5.Panel2Collapsed = true;
             this.splitContainer5.Size = new System.Drawing.Size(540, 443);
-            this.splitContainer5.SplitterDistance = 221;
+            this.splitContainer5.SplitterDistance = 251;
             this.splitContainer5.TabIndex = 3;
             // 
             // richTextBox_ds
@@ -202,7 +203,7 @@ namespace Dual.Model.Import
             this.richTextBox_ds.Location = new System.Drawing.Point(0, 0);
             this.richTextBox_ds.Name = "richTextBox_ds";
             this.richTextBox_ds.ReadOnly = true;
-            this.richTextBox_ds.Size = new System.Drawing.Size(540, 221);
+            this.richTextBox_ds.Size = new System.Drawing.Size(540, 443);
             this.richTextBox_ds.TabIndex = 2;
             this.richTextBox_ds.Text = "";
             // 
@@ -215,7 +216,7 @@ namespace Dual.Model.Import
             this.xtraTabControl_Ex.Location = new System.Drawing.Point(0, 0);
             this.xtraTabControl_Ex.Name = "xtraTabControl_Ex";
             this.xtraTabControl_Ex.SelectedIndex = 0;
-            this.xtraTabControl_Ex.Size = new System.Drawing.Size(540, 218);
+            this.xtraTabControl_Ex.Size = new System.Drawing.Size(540, 188);
             this.xtraTabControl_Ex.TabIndex = 6;
             // 
             // button_copy

@@ -12,19 +12,17 @@ module InterfaceClass =
  
  ///인과의 노드 종류
     type NodeType =
-        | MY            //실제 나의 시스템 1 bit
-        | TR            //지시관찰 TX RX
-        | TX            //지시만
-        | RX            //관찰만
+        | REAL            //실제 나의 시스템 1 bit
+        | CALL            //지시관찰 TX RX
+        //| TX            //지시만
+        //| RX            //관찰만
         | IF            //인터페이스
         | COPY          //시스템복사
         | DUMMY         //그룹더미
         | BUTTON        //버튼 emg,start, ...
         with
-            member x.IsReal = x = MY
-            member x.IsCall = match x with
-                                |TR |TX |RX -> true
-                                |_ -> false
+            member x.IsReal = x = REAL
+            member x.IsCall = x = CALL
 
             member x.IsRealorCall =  x.IsReal || x.IsCall
     // 행위 Bound 정의

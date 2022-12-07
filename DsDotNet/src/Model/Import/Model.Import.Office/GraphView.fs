@@ -16,10 +16,10 @@ module rec ViewModule =
         let btnType:BtnType option = btnType
         let coreVertex:Vertex option = None
 
-        new () = ViewNode("", MY, None, None)
+        new () = ViewNode("", REAL, None, None)
         new (nodeType) = ViewNode("", nodeType, None, None)
         new (name, nodeType) = ViewNode(name, nodeType, None, None)
-        new (name) = ViewNode(name, MY, None, None)
+        new (name) = ViewNode(name, REAL, None, None)
         new (coreVertex:Vertex) = 
               let name = 
                   match coreVertex  with
@@ -29,7 +29,7 @@ module rec ViewModule =
                                        | AliasTargetRealEx o -> o.Name
                     | _ -> coreVertex.Name
                 
-              ViewNode(name, MY, Some(coreVertex),  None)
+              ViewNode(name, REAL, Some(coreVertex),  None)
             
         new (name, btnType:BtnType) = ViewNode(name, BUTTON, None, Some(btnType))
 

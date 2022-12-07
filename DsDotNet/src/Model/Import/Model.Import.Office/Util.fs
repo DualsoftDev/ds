@@ -2,6 +2,7 @@
 namespace Model.Import.Office
 
 open System.Collections.Concurrent
+open System
 
 [<AutoOpen>]
 module Util =
@@ -12,6 +13,7 @@ module Util =
         inherit ConcurrentDictionary<'T, 'T>()
         member x.TryAdd(item:'T) = x.TryAdd(item, item)
 
+    let trimSpace(text:string) =   text.TrimStart(' ').TrimEnd(' ')
 
     let GetSquareBrackets(name:string, bHead:bool) =
         let pattern   = "(?<=\[).*?(?=\])"  //대괄호 안에 내용은 무조건 가져온다
@@ -23,6 +25,16 @@ module Util =
         else
             if(name.EndsWith("]")   && name.Contains("["))
             then matches.[matches.Count-1].Value else ""
+
+    let GetTailNumber(name:string) =
+        let pattern   = "\d+$"  //글자 마지막 숫자를 찾음
+        let matches   = System.Text.RegularExpressions.Regex.Matches(name, pattern)
+        if matches.Count > 0
+        then 
+             let name = System.Text.RegularExpressions.Regex.Replace(name, pattern, "")
+             let number = matches.[matches.Count-1].Value |> trimSpace |> Convert.ToInt32 
+             name, number
+        else name, 0
 
     //특수 대괄호 제거후 순수 이름 추출
     //[yy]xx[xxx]Name[1,3] => xx[xxx]Name

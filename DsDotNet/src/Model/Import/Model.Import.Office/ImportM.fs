@@ -15,7 +15,6 @@ module ImportM =
     type internal ImportPowerPoint() =
       //  let configFile = @"test-model-config.json"
       //  let model = ModelLoader.LoadFromConfig configFile
-
         let getParams(directoryName:string, filePath:string, loadedName:string, containerSystem:DsSystem) = 
             {  
                 ContainerSystem = containerSystem

@@ -157,7 +157,6 @@ module PPTObjectModule =
         let trimStartEndSeq(texts:string seq) =  texts  |> Seq.map(fun name -> trimSpace name)
         let updateSafety(barckets:string)  = barckets.Split(';') |> Seq.iter(fun f-> safeties.Add (f) |> ignore )
         let updateCopySys(barckets:string, orgiSysName:string, groupJob:int) =
-            
             if  (groupJob > 0)
             then
                 let jobBaseName = $"{pageTitle}_{barckets}" //jobBaseName + apiName = JobName
@@ -196,35 +195,21 @@ module PPTObjectModule =
             name <-  GetBracketsReplaceName(shape.InnerText)  |> trimSpace
             nodeType <-
                 if isDummy then DUMMY
-
-                elif(shape.CheckRectangle())    then  REAL
-                elif(shape.CheckHomePlate())    then  IF
-                elif(shape.CheckFoldedCorner()) then  COPY
-
+                elif(shape.CheckRectangle())    then REAL
+                elif(shape.CheckHomePlate())    then IF
+                elif(shape.CheckFoldedCorner()) then COPY
+                elif(shape.CheckEllipse())      then CALL
                 elif(shape.CheckDonutShape()
                     || shape.CheckBlockArc()
                     || shape.CheckNoSmoking()
                     || shape.CheckBevelShape()) then  BUTTON
 
-                elif(shape.CheckEllipse())
-                then CALL
-                    //if(name.Split('.').Count() <> 2)
-                    //then shape.ErrorName(ErrID._46, iPage)
-                    //if((txCnt = 0 && rxCnt = 0) || txCnt < 0 || rxCnt < 0)
-                    //then shape.ErrorName(ErrID._2, iPage)
-                    //else 
-                    //    if (txCnt > 0 && rxCnt > 0) then TR
-                    //    elif (txCnt = 0) then RX
-                    //    elif (rxCnt = 0) then TX
-                    //    else shape.ErrorName(ErrID._2, iPage)
-
                 else  shape.ErrorName(ErrID._1, iPage)
 
             match nodeType with
             |CALL|REAL ->
-                     //if(nodeType =MY|>not) 
-                     //then GetSquareBrackets(shape.InnerText, false) |> fun text -> if text = ""|>not then updateTxRx text
-                     GetSquareBrackets(shape.InnerText, true )      |> fun text -> if text = ""|>not then updateSafety text
+                     GetSquareBrackets(shape.InnerText, true )  
+                     |> fun text -> if text = ""|>not then updateSafety text
             |IF ->   updateIF shape.InnerText
             |COPY -> 
                      let name, number = GetTailNumber(shape.InnerText)

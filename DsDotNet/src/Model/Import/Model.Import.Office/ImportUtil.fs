@@ -14,11 +14,6 @@ open System.Runtime.CompilerServices
 [<AutoOpen>]
 module ImportU =
 
-    //let dicSys  = Dictionary<int, DsSystem>()  //0 페이지 기본 나의 시스템 (각페이지별 해당시스템으로 구성)
-    //let dicCopy = Dictionary<DsSystem, DsSystem>()  //Dic<copySys, orgiSys> 원본 구조 생성시 계속 같이 만듬
-    //let dicFlow = Dictionary<int, Flow>() // page , flow
-    //let dicVertex = Dictionary<string, Vertex>()
-
     let private createCallVertex(mySys:DsSystem, node:pptNode, parentReal:Real Option, parentFlow:Flow Option, dicSeg:Dictionary<string, Vertex>) =
         let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
       
@@ -56,13 +51,6 @@ module ImportU =
     
         [<Extension>] static member GetPage(dicFlow:Dictionary<int, Flow>, flow:Flow) =
                         dicFlow.Where(fun w-> w.Value = flow).First().Key
-                        
-        //static member Create(api:ApiItem, parent:ParentWrapper, deveiceName) =
-        //    let job = Job(api.Name, [|JobDef(api, "","", deveiceName)|])
-        //    let sys = parent.GetSystem()
-            
-        //    Call.Create(job, parent)
-
 
         //Job 만들기
         [<Extension>]
@@ -332,19 +320,3 @@ module ImportU =
                             api.AddTXs(txs)|>ignore
                             api.AddRXs(rxs)|>ignore
                             )
-
-                            ////copy system flow 동일 처리
-                            //dicCopy.ForEach(fun sysTwin->
-                            //    let copySys = sysTwin.Key
-                            //    let origSys = sysTwin.Value
-                            //    origSys.Flows.ForEach(fun flow->
-                            //                let copyFlow = copySys.FindFlow(flow.Name)
-                            //                flow.ToCopy(copyFlow)|>ignore
-                            //                dicFlow.Add((-dicFlow.Count),  copyFlow ) |> ignore ) //복사본 page는 음수 임의 표기
-                            //    origSys.ApiUsages.ForEach(fun apiItem ->
-                            //                let apiCopy = copySys.ApiUsages.First(fun f->f.Name = apiItem.Name)
-                            //                apiItem.ToCopy(apiCopy)|>ignore)
-                            //    origSys.ApiResetInfos.ForEach(fun apiResetInfo ->
-                            //                apiResetInfo.ToCopy(copySys)|>ignore)
-                            //    )
-

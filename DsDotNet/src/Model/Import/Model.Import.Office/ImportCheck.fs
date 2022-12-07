@@ -69,8 +69,6 @@ module ImportCheck =
 
         //            if(sysNames.Contains(node.Name)|> not)
         //            then Office.ErrorPPT(Name, ErrID._32,  node.Shape.InnerText, node.PageNum, $"확인 시스템 이름 : {node.Name}")
-
-
         //            )
 
 

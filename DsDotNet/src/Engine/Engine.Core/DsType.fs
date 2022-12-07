@@ -45,7 +45,6 @@ module DsType =
         | Variable
         | Command
         | Observe
-        | Button
     with
         member x.ToText() =
             match x with
@@ -53,7 +52,6 @@ module DsType =
             | Variable     -> TextVariable
             | Command      -> TextCommand
             | Observe      -> TextObserve
-            | Button       -> TextButton
 
 
     let TagToType(txt:string) =
@@ -62,11 +60,10 @@ module DsType =
         | TextVariable     -> Variable
         | TextCommand      -> Command
         | TextObserve      -> Observe
-        | TextButton       -> Button
         |_-> failwithf $"'{txt}' TagCase Error check type [
                 , {TextAddressDev}, {TextVariable}
                 , {TextCommand}, {TextObserve}
-                , {TextButton}]"
+                ]"
 
 
     ///BtnType 인과의 노드 종류

@@ -25,7 +25,6 @@
     <Compile Include="PPTDoc.fs" />
     <Compile Include="GraphView.fs" />
     <Compile Include="ImportCheck.fs" />
-    <Compile Include="ImportUtilCopy.fsx" />
     <Compile Include="ImportUtil.fs" />
     <Compile Include="ImportUtilView.fs" />
     <Compile Include="ImportM.fs" />

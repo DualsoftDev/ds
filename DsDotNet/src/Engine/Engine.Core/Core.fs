@@ -151,17 +151,17 @@ module CoreModule =
         member val TargetVertex = target
 
     /// JobDefs 정의: Call 이 호출하는 Job 항목
-    type Job (name:string, apiItems:JobDef seq) =
+    type Job (name:string, jobDefs:JobDef seq) =
         inherit Named(name)
-        member val ApiItems = apiItems.ToFSharpList()
+        member val JobDefs = jobDefs.ToFSharpList()
     
 
     type TagAddress = string
     /// Main system 에서 loading 된 다른 system 의 API 를 바라보는 관점.  [jobs] = { Ap = { A."+"(%Q1, %I1); } }
     type JobDef (api:ApiItem, outTag:TagAddress, inTag:TagAddress, deviceName:string) =
         member _.ApiItem = api
-        member val InTag   = inTag
-        member val OutTag  = outTag
+        member val InTag   = inTag  with get,set
+        member val OutTag  = outTag with get,set
         member val ApiName = getRawName [deviceName;api.Name] true
 
     /// 자신을 export 하는 관점에서 본 api's.  Interface 정의.   [interfaces] = { "+" = { F.Vp ~ F.Sp } }

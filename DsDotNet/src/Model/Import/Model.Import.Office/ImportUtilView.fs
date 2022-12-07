@@ -11,9 +11,6 @@ open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module ImportViewModule =
-    //let MEI = ModelingEdgeInfo
-
-
     let ConvertReal(real:Real, newNode:ViewNode, dummys:pptDummy seq)  =
         let edgeInfos = real.ModelingEdges
         let lands = real.Graph.Islands

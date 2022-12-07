@@ -13,7 +13,7 @@ module DsMemoryModule =
 
         let mutable memory:Memory = Memory(0uy)
 
-        let readyTag   = DsBit($"{name}(R)",  false , memory, Monitor.R)
+        let readyTag   = DsBit($"{name}(R)",  false , memory, Monitor.R)    // 0
         let goingTag   = DsBit($"{name}(G)",  false , memory, Monitor.G)
         let finishTag  = DsBit($"{name}(F)",  false , memory, Monitor.F)
         let homingTag  = DsBit($"{name}(H)",  false , memory, Monitor.H)
@@ -22,10 +22,10 @@ module DsMemoryModule =
         let errorTxTag = DsBit($"{name}(E1)", false , memory, Monitor.ErrorTx)
         let errorRxTag = DsBit($"{name}(E2)", false , memory, Monitor.ErrorRx)
 
-        let startTag   = DsDotBit($"{name}[{StartIndex}]" , false, memory)
-        let resetTag   = DsDotBit($"{name}[{ResetIndex}]" , false, memory)
-        let endTag     = DsDotBit($"{name}[{EndIndex}]"   , false, memory)
-        let relayTag   = DsDotBit($"{name}[{RelayIndex}]" , false, memory)
+        let startTag   = DsDotBit($"{name}[{StartIndex}]" , false, memory)  // 2
+        let resetTag   = DsDotBit($"{name}[{ResetIndex}]" , false, memory)  // 1
+        let endTag     = DsDotBit($"{name}[{EndIndex}]"   , false, memory)  // 0
+        let relayTag   = DsDotBit($"{name}[{RelayIndex}]" , false, memory)  // 3
 
         member x.Byte  = memory.Value
         member x.Name  = name

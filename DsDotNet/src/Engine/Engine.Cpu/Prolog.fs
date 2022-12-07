@@ -16,6 +16,15 @@ module Prolog =
         let tagCR = TagBit($"{name}_R", false)  // Command Reset
         let tagCE = TagBit($"{name}_E", false)  // Command End
 
+        let tagS4R = TagBit($"{name}_SR", false) // Status Ready
+        let tagS4G = TagBit($"{name}_SG", false) // Status Going
+        let tagS4F = TagBit($"{name}_SF", false) // Status Finished
+        let tagS4H = TagBit($"{name}_SH", false) // Status Homing
+
+        let tagOrigin = TagBit($"{name}_O", false)
+        let tagPause  = TagBit($"{name}_P", false)
+        let tagTX     = TagBit($"{name}_TX", false)
+        let tagRX     = TagBit($"{name}_RX", false)
 
         let exprCS = tag <| tagCS
         let exprCR = tag <| tagCR
@@ -28,22 +37,13 @@ module Prolog =
         let condSF =                         (!!) exprCR <&&>      exprCE    // X 0 1
         let condSH =                              exprCR <&&>      exprCE    // X 1 1
 
-        let tagSR = TagBit($"{name}_SR", false) // Status Ready
-        let tagSG = TagBit($"{name}_SG", false) // Status Going
-        let tagSF = TagBit($"{name}_SF", false) // Status Finished
-        let tagSH = TagBit($"{name}_SH", false) // Status Homing
+        let assignS4R = tagS4R <== condSR
+        let assignS4G = tagS4G <== condSG
+        let assignS4F = tagS4F <== condSF
+        let assignS4H = tagS4H <== condSH
 
-        let assignSR = tagSR <== condSR
-        let assignSG = tagSG <== condSG
-        let assignSF = tagSF <== condSF
-        let assignSH = tagSH <== condSH
+        let assignStatements = [assignS4R; assignS4G; assignS4F; assignS4H]
 
-        let assignStatements = [assignSR; assignSG; assignSF; assignSH]
-
-        let tagOrigin = TagBit($"{name}_O", false)
-        let tagPause  = TagBit($"{name}_P", false)
-        let tagTX     = TagBit($"{name}_TX", false)
-        let tagRX     = TagBit($"{name}_RX", false)
         let exprOrigin = tag <| tagOrigin
         let exprPause  = tag <| tagPause
         let exprTX     = tag <| tagTX
@@ -56,14 +56,14 @@ module Prolog =
         do singleScan()
 
 
-        member _.TagSR  = tagSR
-        member _.TagSG  = tagSG
-        member _.TagSF  = tagSF
-        member _.TagSH  = tagSH
+        member _.TagS4R = tagS4R
+        member _.TagS4G = tagS4G
+        member _.TagS4F = tagS4F
+        member _.TagS4H = tagS4H
 
-        member _.TagCS  = tagCS
-        member _.TagCR  = tagCR
-        member _.TagCE  = tagCE
+        member _.TagCS = tagCS
+        member _.TagCR = tagCR
+        member _.TagCE = tagCE
 
         member _.TagOrigin = tagOrigin
         member _.TagPause  = tagPause
@@ -76,14 +76,14 @@ module Prolog =
         member _.ExprRX     = exprRX
 
 
-        member _.ExprCS  = exprCS
-        member _.ExprCR  = exprCR
-        member _.ExprCE  = exprCE
+        member _.ExprCS = exprCS
+        member _.ExprCR = exprCR
+        member _.ExprCE = exprCE
 
 
         member _.SingleScan() = singleScan()
         member _.Status4 =
-            match tagSR.Value, tagSG.Value, tagSF.Value, tagSH.Value with
+            match tagS4R.Value, tagS4G.Value, tagS4F.Value, tagS4H.Value with
             | true, false, false, false -> Status4.Ready
             | false, true, false, false -> Status4.Going
             | false, false, true, false -> Status4.Finish

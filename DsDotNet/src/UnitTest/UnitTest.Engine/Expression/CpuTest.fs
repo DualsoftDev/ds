@@ -20,10 +20,10 @@ module CpuTestModule =
             let ss = SegmentStatus("Seg1")
 
             (* Initial state: Ready *)
-            ss.TagSR.Value === true
-            ss.TagSG.Value === false
-            ss.TagSF.Value === false
-            ss.TagSH.Value === false
+            ss.TagS4R.Value === true
+            ss.TagS4G.Value === false
+            ss.TagS4F.Value === false
+            ss.TagS4H.Value === false
             ss.Status4 === Status4.Ready
 
 
@@ -32,10 +32,10 @@ module CpuTestModule =
             // Re-evaluate rungs
             ss.SingleScan()
 
-            ss.TagSR.Value === false
-            ss.TagSG.Value === true
-            ss.TagSF.Value === false
-            ss.TagSH.Value === false
+            ss.TagS4R.Value === false
+            ss.TagS4G.Value === true
+            ss.TagS4F.Value === false
+            ss.TagS4H.Value === false
 
             ss.TagCS.Value === true
             ss.Status4 === Status4.Going
@@ -44,10 +44,10 @@ module CpuTestModule =
             ss.TagCE.Value <- true
             ss.SingleScan()
 
-            ss.TagSR.Value === false
-            ss.TagSG.Value === false
-            ss.TagSF.Value === true
-            ss.TagSH.Value === false
+            ss.TagS4R.Value === false
+            ss.TagS4G.Value === false
+            ss.TagS4F.Value === true
+            ss.TagS4H.Value === false
 
             ss.TagCS.Value === true
             ss.TagCE.Value === true
@@ -58,10 +58,10 @@ module CpuTestModule =
             ss.TagCR.Value <- true
             ss.SingleScan()
 
-            ss.TagSR.Value === false
-            ss.TagSG.Value === false
-            ss.TagSF.Value === false
-            ss.TagSH.Value === true
+            ss.TagS4R.Value === false
+            ss.TagS4G.Value === false
+            ss.TagS4F.Value === false
+            ss.TagS4H.Value === true
 
             ss.TagCE.Value === true
             ss.TagCR.Value === true

@@ -102,7 +102,8 @@ module ModelAnswers =
     }
     [prop] = {
         [safety] = {
-        F.Main = { Main.Ap; }
+            F.Main = { F.Main.Ap; }
+            F.Main.Am = { F.Main; }
         }
     }
     [device file="cylinder.ds"] A; // D:\Git\ds-Master\DsDotNet\src\UnitTest\UnitTest.Engine\Model\..\Libraries\cylinder.ds

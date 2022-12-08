@@ -30,7 +30,7 @@ module Prolog =
         let exprCR = tag <| tagCR
         let exprCE = tag <| tagCE
 
-        // ---------------------------------------------------   // S R E
+        // ---------------------------------------------------               // S R E
         let condSR =      ( (!!) exprCS                  <&&> (!!) exprCE )  // 0 X 0
                      <||> (      exprCS <&&>      exprCR <&&> (!!) exprCE )  // 1 1 0
         let condSG =             exprCS <&&> (!!) exprCR <&&> (!!) exprCE    // 1 0 0

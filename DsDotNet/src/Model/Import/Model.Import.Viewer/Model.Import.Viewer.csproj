@@ -5,7 +5,7 @@
     <RootNamespace>Model.Import.Viewer</RootNamespace>
     <OutputType>WinExe</OutputType>
 
-    
+
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="FSharp.Core" Version="6.0.6" />

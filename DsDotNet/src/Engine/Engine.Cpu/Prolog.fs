@@ -14,7 +14,7 @@ module Prolog =
     type SegmentStatus(name) =
         let tagCS = TagBit($"{name}_S", false)  // Command Start
         let tagCR = TagBit($"{name}_R", false)  // Command Reset
-        let tagCE = TagBit($"{name}_E", false)  // Command End
+        let tagCE = TagBit($"{name}_E", false)  // Sensor End
 
         let tagS4R = TagBit($"{name}_SR", false) // Status Ready
         let tagS4G = TagBit($"{name}_SG", false) // Status Going

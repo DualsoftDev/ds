@@ -1,0 +1,20 @@
+[sys ip = localhost] Factroy = {
+    [flow] Page1 = {
+    }
+    [flow] Master = {
+        R1 > R2;		// R1(Real)> R2(Real);
+        R1 = {
+            Master_Line_Func1 > Master_Line_Func2;		// Master_Line_Func1(Call)> Master_Line_Func2(Call);
+        }
+    }
+    [jobs] = {
+        Master_Line_Func1 = { Master_Line.Func1(_, _); }
+        Master_Line_Func2 = { Master_Line.Func2(_, _); }
+    }
+    [interfaces] = {
+        Func1 = { Master.R1 ~ _ }
+        Func2 = { _ ~ Master.R2 }
+        Func2 <||> Func1;
+    }
+    [device file="Sub/Line.ds"] Master_Line; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Engine\ImportPPT\Sub\Sub\Line.pptx
+}

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
@@ -36,7 +36,7 @@
 		<Compile Include="Model\FqdnParseTest.fs" />
 		<Compile Include="Model\SystemBuilderTest.fs" />
 		<Compile Include="Model\LoadConfigTest.fs" />
-		<!--<Compile Include="ImportPPT\pptTest.fs" />-->
+		<Compile Include="ImportPPT\pptTest.fs" />
 		<None Include="Libraries\cylinder.ds" />
 		<None Include="Libraries\station.ds" />
 		<None Include="Libraries\strange.ds" />
@@ -63,6 +63,7 @@
 		<ProjectReference Include="..\..\Engine\Engine.CpuUnit\Engine.Cpu.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Test\Engine.Sample.csproj" />
+		<ProjectReference Include="..\..\Model\Import\Model.Import.Office\Model.Import.Office.fsproj" />
 		<!--<ProjectReference Include="..\..\Model\Import\Model.Import.Office\Model.Import.Office.fsproj" />-->
 	</ItemGroup>
 	<ItemGroup>

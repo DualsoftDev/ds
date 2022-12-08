@@ -316,10 +316,7 @@ module PPTUtil =
                         |> Seq.except (ableShapes |> Seq.map (fun (shape, page, geometry, isDash) -> shape))
                         |> Seq.filter(fun f -> f.IsTitleBox()|>not)
                         |> Seq.filter(fun f -> f.ShapeName().StartsWith("TextBox")|>not)
-                        |> Seq.iter(fun f -> 
-                                    if(f.IsAbleShape()|>not)
-                                    then f.ErrorShape(ErrID._39, page)
-                                    )
+                        |> Seq.iter(fun f -> f.ErrorShape(ErrID._39, page))
 
                         ableShapes
                             

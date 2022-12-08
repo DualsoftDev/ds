@@ -286,7 +286,7 @@ namespace Dual.Model.Import
             //T8_Safety
             //T9_Group
             //T10_Button
-            //T11_ImportSystem
+            //T11_SubLoading
             string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\..\..\..\..\")) + "UnitTest\\UnitTest.Engine\\ImportPPT\\T11_ImportSystem.pptx";
             bool debug = File.Exists(path);
             if (debug)

@@ -55,7 +55,7 @@
 		<Compile Include="TypeExtensions\Xml.fs" />
 		<Compile Include="TypeExtensions\Em.Collection.fs" />
 		<Compile Include="TypeExtensions\Em.Option.fs" />
-		<Compile Include="Graph\QuickGraph.fs" />
+		<Compile Include="Graph\QuickGraph.fsx" />
 		<Compile Include="Library.fs" />
 	</ItemGroup>
 
@@ -70,18 +70,6 @@
 	<ItemGroup>
 	  <Reference Include="log4net">
 	    <HintPath>..\..\..\exLib\log4net.dll</HintPath>
-	  </Reference>
-	  <Reference Include="QuickGraph">
-	    <HintPath>..\..\..\exLib\QuickGraph.dll</HintPath>
-	  </Reference>
-	  <Reference Include="QuickGraph.Data">
-	    <HintPath>..\..\..\exLib\QuickGraph.Data.dll</HintPath>
-	  </Reference>
-	  <Reference Include="QuickGraph.Graphviz">
-	    <HintPath>..\..\..\exLib\QuickGraph.Graphviz.dll</HintPath>
-	  </Reference>
-	  <Reference Include="QuickGraph.Serialization">
-	    <HintPath>..\..\..\exLib\QuickGraph.Serialization.dll</HintPath>
 	  </Reference>
 	  <Reference Include="System.Configuration" />
 	</ItemGroup>

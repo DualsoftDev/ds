@@ -1,0 +1,12 @@
+[sys ip = localhost] Device = {
+    [flow] Page1 = {
+    }
+    [flow] Master = {
+        R1 > R2;		// R1(Real)> R2(Real);
+    }
+    [interfaces] = {
+        Func2 = { _ ~ Master.R2 }
+        Func1 = { Master.R1 ~ _ }
+        Func2 <||> Func1;
+    }
+}

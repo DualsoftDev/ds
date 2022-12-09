@@ -33,7 +33,7 @@ module ExpressionParser =
             let text = ctx.GetText()
             let expr =
                 match ctx with
-                | :? FunctionCallExprContext as exp ->
+                | :? FunctionCallExprContext as exp ->  // functionName '(' arguments? ')'
                     tracefn $"FunctionCall: {text}"
                     let funName = exp.TryFindFirstChild<FunctionNameContext>().Value.GetText()
                     let args =
@@ -47,9 +47,25 @@ module ExpressionParser =
                         ]
                     createCustomFunctionExpression funName args
 
-                | :? BinaryExprContext as exp ->
+                | :? CastingExprContext as exp ->   // '(' type ')' expr
+                    tracefn $"Casting: {text}"
+                    let castName = exp.TryFindFirstChild<TypeContext>().Value.GetText()
+                    let exprCtx = exp.TryFindFirstChild<ExprContext>().Value
+                    let expr = helper exprCtx
+                    createCustomFunctionExpression castName [expr]
+
+                |(  :? BinaryExprMultiplicativeContext
+                  | :? BinaryExprAdditiveContext
+                  | :? BinaryExprBitwiseShiftContext
+                  | :? BinaryExprRelationalContext
+                  | :? BinaryExprEqualityContext
+                  | :? BinaryExprBitwiseAndContext
+                  | :? BinaryExprBitwiseXorContext
+                  | :? BinaryExprBitwiseOrContext
+                  | :? BinaryExprLogicalAndContext
+                  | :? BinaryExprLogicalOrContext) ->
                     tracefn $"Binary: {text}"
-                    match exp.children.ToFSharpList() with
+                    match ctx.children.ToFSharpList() with
                     | left::op::right::[] ->
                         let expL = helper(left :?> ExprContext)
                         let expR = helper(right :?> ExprContext)
@@ -58,9 +74,16 @@ module ExpressionParser =
                     | _ ->
                         failwith "ERROR"
 
+
                 | :? UnaryExprContext as exp ->
                     tracefn $"Unary: {text}"
-                    failwith "Not yet"
+                    match exp.children.ToFSharpList() with
+                    | op::opnd::[] ->
+                        let exp = helper(opnd :?> ExprContext)
+                        let op = op.GetText()
+                        createUnaryExpression op exp
+                    | _ ->
+                        failwith "ERROR"
 
                 | :? TerminalExprContext as terminalExp ->
                     tracefn $"Terminal: {text}"
@@ -70,9 +93,6 @@ module ExpressionParser =
                     | :? LiteralContext as exp ->
                         assert(exp.ChildCount = 1)
                         match exp.children[0] with
-                        | :? LiteralStringContext as exp -> text |> deQuoteOnDemand|> literal |> iexpr
-                        | :? LiteralDoubleContext as exp -> text                   |> System.Double.Parse |> literal |> iexpr
-                        | :? LiteralSingleContext as exp -> text.Replace("f", "")  |> System.Single.Parse |> literal |> iexpr
                         | :? LiteralSbyteContext  as exp -> text.Replace("y", "")  |> System.SByte.Parse  |> literal |> iexpr
                         | :? LiteralByteContext   as exp -> text.Replace("uy", "") |> System.Byte.Parse   |> literal |> iexpr
                         | :? LiteralInt16Context  as exp -> text.Replace("s", "")  |> System.Int16.Parse  |> literal |> iexpr
@@ -81,7 +101,11 @@ module ExpressionParser =
                         | :? LiteralUint32Context as exp -> text.Replace("u", "")  |> System.UInt32.Parse |> literal |> iexpr
                         | :? LiteralInt64Context  as exp -> text.Replace("L", "")  |> System.Int64.Parse  |> literal |> iexpr
                         | :? LiteralUint64Context as exp -> text.Replace("UL", "") |> System.UInt64.Parse |> literal |> iexpr
+                        | :? LiteralSingleContext as exp -> text.Replace("f", "")  |> System.Single.Parse |> literal |> iexpr
+                        | :? LiteralDoubleContext as exp -> text                   |> System.Double.Parse |> literal |> iexpr
+                        | :? LiteralStringContext as exp -> text |> deQuoteOnDemand|> literal |> iexpr
                         | :? LiteralCharContext   as exp -> text                   |> System.Char.Parse   |> literal |> iexpr
+                        | :? LiteralBoolContext   as exp -> text                   |> System.Boolean.Parse|> literal |> iexpr
 
                         | _ -> failwith "ERROR"
                     | :? TagContext as texp ->

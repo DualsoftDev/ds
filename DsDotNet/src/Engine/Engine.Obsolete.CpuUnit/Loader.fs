@@ -31,17 +31,17 @@ module CpuLoader =
         s.ErrorRx .ToText()   |> Console.WriteLine
 
 
-        let expr = add [literal 10; literal 12 ]
+        let expr = fAdd [literal 10; literal 12 ]
         let t1 = PlcTag.Create("t1", 1)
         let t2 = PlcTag.Create("t2", 1)
         let target = PlcTag.Create("target", 1)
 
-        let expr = mul [  //  2
+        let expr = fMul [  //  2
                           //  expr
                           //  add [t1; t2]
                             literal 2
                             literal 3
-                            add [literal 1; literal 5]
+                            fAdd [literal 1; literal 5]
                 ]
         let a = expr.BoxedEvaluatedValue
 

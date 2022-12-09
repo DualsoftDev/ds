@@ -16,7 +16,7 @@ type StatementRoot =
                     then
                         let sets  = srcs.Select(fun f->f.End).ToTags()
                         let rsts  = [pReal.End].ToTags()
-                        pReal.Start <== anD [FuncExt.GetRelayExpr(sets, rsts, pReal.Start); tag pReal.Pause] |> Some //pReal.Pause _Auto 로 변경 필요
+                        pReal.Start <== fLogicalAnd [FuncExt.GetRelayExpr(sets, rsts, pReal.Start); tag pReal.Pause] |> Some //pReal.Pause _Auto 로 변경 필요
                     else None
 
     [<Extension>] static member TryGetRealResetStatement(real:DsMemory, goingSrcs:DsMemory seq) =
@@ -25,7 +25,7 @@ type StatementRoot =
                         //going relay srcs
                         let sets  = goingSrcs.Select(fun f->f.Relay).ToTags()
                         let rsts  = [real.End].ToTags()
-                        real.Reset <== anD[FuncExt.GetRelayExprReverseReset(sets, rsts, real.Reset); tag real.Pause] |> Some//pReal.Pause _Auto 로 변경 필요
+                        real.Reset <== fLogicalAnd [FuncExt.GetRelayExprReverseReset(sets, rsts, real.Reset); tag real.Pause] |> Some//pReal.Pause _Auto 로 변경 필요
                     else None
 
     [<Extension>] static member CreateRungForResetGoing(realSrc:DsMemory, realTgt:DsMemory , going:DsMemory ) =

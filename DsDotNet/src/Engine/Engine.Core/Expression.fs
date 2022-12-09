@@ -38,7 +38,7 @@ module ExpressionModule =
 
         member x.DataType = typedefof<'T>
 
-    /// literal 'T 로부터 Expression<'T> 생성
+    /// literal 'T 로부터 terminal Expression<'T> 생성
     let literal (x:'T) =
         let t = x.GetType()
         if t.IsValueType || t = typedefof<string> then

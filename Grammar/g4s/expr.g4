@@ -103,8 +103,8 @@ expr:   functionName '(' arguments? ')'         # FunctionCallExpr  // func call
     binaryOperatorBitwiseXor: '^' | '^^^';   // bitwise xor
     binaryOperatorBitwiseOr: '|' | '|||';   // bitwise or
 
-    binaryOperatorLogicalAnd: '&&';
-    binaryOperatorLogicalOr: '||';     // logical and or
+    binaryOperatorLogicalAnd: '&&';     // logical and
+    binaryOperatorLogicalOr: '||';     // logical or
 
 
     binaryOperator:

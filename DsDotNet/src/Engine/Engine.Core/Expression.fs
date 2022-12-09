@@ -19,15 +19,15 @@ module ExpressionModule =
         | Literal of 'T
 
     type FunctionSpec<'T> = {
-        f: Arguments -> 'T
-        name: string
-        args:Arguments
+        FunctionBody: Arguments -> 'T
+        Name        : string
+        Arguments   : Arguments
     }
 
 
     type Expression<'T> =
         | Terminal of Terminal<'T>
-        | Function of FunctionSpec<'T>  //f:(Arguments -> 'T) * name:string * args:Arguments
+        | Function of FunctionSpec<'T>  //FunctionBody:(Arguments -> 'T) * Name * Arguments
         interface IExpression with
             member x.DataType = x.DataType
             member x.BoxedEvaluatedValue = x.Evaluate() |> box
@@ -99,13 +99,13 @@ module ExpressionModule =
         member x.Evaluate(): 'T =
             match x with
             | Terminal b -> b.Evaluate()
-            | Function fs -> fs.f fs.args
+            | Function fs -> fs.FunctionBody fs.Arguments
 
         member x.ToText(withParenthesys:bool) =
             match x with
             | Terminal b -> b.ToText()
             | Function fs ->
-                let text = fwdSerializeFunctionNameAndBoxedArguments fs.name fs.args withParenthesys
+                let text = fwdSerializeFunctionNameAndBoxedArguments fs.Name fs.Arguments withParenthesys
                 text
 
 

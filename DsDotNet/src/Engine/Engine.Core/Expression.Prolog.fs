@@ -1,7 +1,6 @@
 namespace Engine.Core
 open System
 open System.Linq
-open System.Runtime.CompilerServices
 open Engine.Common.FS
 open System.Diagnostics
 
@@ -61,6 +60,7 @@ module rec ExpressionPrologModule =
             | _ ->
                 logWarn $"Cannot convert {x} to byte"
                 None
+
         let (|SByte|_|) (x:obj) =
             match x with
             | :? single as n -> Some (sbyte n)
@@ -76,6 +76,7 @@ module rec ExpressionPrologModule =
             | _ ->
                 logWarn $"Cannot convert {x} to sbyte"
                 None
+
         let (|Int16|_|) (x:obj) =
             match x with
             | :? single as n -> Some (int16 n)
@@ -180,25 +181,17 @@ module rec ExpressionPrologModule =
             | Int32 _            -> Some true
             | _ -> None  // bool casting 실패
 
-        let (|PLCTag|_|) (x:obj) =
-            match x with
-            | :? ITag as t -> Some t
-            | _ -> None
-
         let toBool   x = (|Bool|_|)    x |> Option.get
         let toDouble x = (|Double|_|)  x |> Option.get
-        let toSingle  x = (|Float|_|)   x |> Option.get
-        let toUInt8   x = (|Byte|_|)    x |> Option.get
-        let toInt8  x = (|SByte|_|)   x |> Option.get
+        let toSingle x = (|Float|_|)   x |> Option.get
+        let toUInt8  x = (|Byte|_|)    x |> Option.get
+        let toInt8   x = (|SByte|_|)   x |> Option.get
         let toInt16  x = (|Int16|_|)   x |> Option.get
         let toUInt16 x = (|UInt16|_|)  x |> Option.get
         let toInt32  x = (|Int32|_|)   x |> Option.get
         let toUInt32 x = (|UInt32|_|)  x |> Option.get
         let toInt64  x = (|Int64|_|)   x |> Option.get
         let toUInt64 x = (|UInt64|_|)  x |> Option.get
-
-        let toTag    x = (|PLCTag|_|)  x |> Option.get
-        let toString (x:obj) = Convert.ToString x
 
         let isEqual (x:obj) (y:obj) =
             match x, y with
@@ -228,6 +221,7 @@ module rec ExpressionPrologModule =
         abstract BoxedEvaluatedValue : obj
         /// Tag<'T> 나 Variable<'T> 객체 boxed 로 반환
         abstract GetBoxedRawObject: unit -> obj
+        /// withParenthesys: terminal 일 경우는 무시되고, Function 일 경우에만 적용됨
         abstract ToText : withParenthesys:bool -> string
 
 
@@ -270,6 +264,7 @@ module rec ExpressionPrologModule =
     type Arguments = IExpression list
     type Args      = Arguments
 
+    /// 모든 args 의 data type 이 동일한지 여부 반환
     let isAllExpressionSameType(args:Args) =
         args |> Seq.distinctBy(fun a -> a.DataType) |> Seq.length = 1
     let verifyAllExpressionSameType = isAllExpressionSameType >> verifyM "Type mismatch"

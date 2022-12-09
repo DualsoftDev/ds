@@ -103,7 +103,7 @@ module ExpressionFunctionModule =
     module FunctionModule =
         /// Create function
         let private cf (f:Args->'T) (name:string) (args:Args) =
-            Function { f=f; name=name; args=args}
+            Function { FunctionBody=f; Name=name; Arguments=args}
 
         (*
              .f  | Single       | single

@@ -76,13 +76,17 @@ expr:   functionName '(' arguments? ')'         # FunctionCallExpr  // func call
 
     arguments: exprList;
     exprList : expr (',' expr)* ;   // arg list
-    unaryOperator: '-'|'!';
+    unaryOperator:
+            // '-'|
+             '!'
+            | '~' | '~~~'                   // bitwise negation (C++/F# style)
+            ;
     binaryOperator:
             '+'|'-'|'*'|'/'|'%'
             | '&&' | '||'     // logical and or
             |'=' | '!='
             |'>' | '>=' | '<' | '<='
-            | '&' | '|' | '&&&' | '|||'   // bitwise and or (C++/F# style)
+            | '&' | '|' | '&&&' | '|||'     // bitwise and or (C++/F# style)
             | '<<' | '<<<' | '>>' | '>>>'   // bitwise shift
             ;
 

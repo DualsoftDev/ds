@@ -60,7 +60,7 @@ module TestModule =
             t1.Value <- 3
             tag t1 |> evaluate === 3
 
-            (t1 <== add [v 3; v 4]).Do()
+            (t1 <== fAdd [v 3; v 4]).Do()
             t1.Value === 7
 
             let exp = $"{dq}hello{dq} + {dq}world{dq}" |> parseExpression :?> Expression<string>
@@ -71,13 +71,13 @@ module TestModule =
             tString.Value === "helloworld"
 
             let t2 = PlcTag.Create("2", 2)
-            add [tag t2; tag t2] |> evaluate === 4
+            fAdd [tag t2; tag t2] |> evaluate === 4
             //함수 없는 Tag 배열 평가는 불가능
             (fun () -> v [t2;t2]   |> evaluate  === 1) |> ShouldFail
 
             tag (PlcTag.Create("Two", "Two")) |> evaluate === "Two"
 
-            concat([
+            fConcat([
                     tag <| PlcTag.Create("Hello", "Hello, ")
                     tag <| PlcTag.Create("World", "world!" )
                 ]) |> evaluate === "Hello, world!"
@@ -86,7 +86,7 @@ module TestModule =
             t1.Value <- 1
             let tt2 = PlcTag.Create("t2", 2)
 
-            let addTwoExpr = add [ tt1; tag tt2 ]
+            let addTwoExpr = fAdd [ tt1; tag tt2 ]
             addTwoExpr |> evaluate  === 3
             t1.Value <- 10
             addTwoExpr |> evaluate  === 12
@@ -96,41 +96,41 @@ module TestModule =
         [<Test>]
         member __.``3 Func test`` () =
 
-            abs [v 13]                  |> evaluate === 13
-            abs [v -13]                 |> evaluate === 13
-            abs [v -13.0]               |> evaluate === 13.0
-            bitwiseXor [v 13; v 11]         |> evaluate === 6
-            bitwiseAnd [v 2; v 3]           |> evaluate === 2
-            bitwiseAnd [v 1; v 2; v 3; v 4] |> evaluate === 0
-            bitwiseOr [v 1; v 2; v 3; v 4]  |> evaluate === 7
-            bitwiseNot [v 65535]            |> evaluate === -65536
-            add [v 1; v 2]              |> evaluate === 3
-            sub [v 5; v 3]              |> evaluate === 2
-            mul [v 2; v 3]              |> evaluate === 6
-            div [v 3.0; v 2.0]          |> evaluate === 1.5
-            add [v 1; v 2; v 3]         |> evaluate === 6
-            add ([1..10]                |> List.map(v >> iexpr))   |> evaluate === 55
-            mul( [1..5]                 |> List.map(v >> iexpr))   |> evaluate === 120
-            sub [v 10; v 1; v 2]        |> evaluate === 7
-            let xxx = sub [add [v 1.1; v 2.2]; v 3.3]
+            fAbs [v 13]                  |> evaluate === 13
+            fAbs [v -13]                 |> evaluate === 13
+            fAbs [v -13.0]               |> evaluate === 13.0
+            fBitwiseXor [v 13; v 11]         |> evaluate === 6
+            fBitwiseAnd [v 2; v 3]           |> evaluate === 2
+            fBitwiseAnd [v 1; v 2; v 3; v 4] |> evaluate === 0
+            fBitwiseOr [v 1; v 2; v 3; v 4]  |> evaluate === 7
+            fBitwiseNot [v 65535]            |> evaluate === -65536
+            fAdd [v 1; v 2]              |> evaluate === 3
+            fSub [v 5; v 3]              |> evaluate === 2
+            fMul [v 2; v 3]              |> evaluate === 6
+            fDiv [v 3.0; v 2.0]          |> evaluate === 1.5
+            fAdd [v 1; v 2; v 3]         |> evaluate === 6
+            fAdd ([1..10]                |> List.map(v >> iexpr))   |> evaluate === 55
+            fMul( [1..5]                 |> List.map(v >> iexpr))   |> evaluate === 120
+            fSub [v 10; v 1; v 2]        |> evaluate === 7
+            let xxx = fSub [fAdd [v 1.1; v 2.2]; v 3.3]
 
-            abs [ sub [add [v 1.1; v 2.2]; v 3.3] ] |> evaluate :?> double <= 0.00001 |> ShouldBeTrue
-            abs [ sub [mul [v 1.1; v 2.0]; v 2.2] ] |> evaluate :?> double <= 0.00001 |> ShouldBeTrue
+            fAbs [ fSub [fAdd [v 1.1; v 2.2]; v 3.3] ] |> evaluate :?> double <= 0.00001 |> ShouldBeTrue
+            fAbs [ fSub [fMul [v 1.1; v 2.0]; v 2.2] ] |> evaluate :?> double <= 0.00001 |> ShouldBeTrue
             addString [v "Hello, "; v "world!"]|> evaluate === "Hello, world!"
-            mul [v 2; v 3] |> evaluate === 6
-            equalString [v "Hello"; v "world"]    |> evaluate === false
-            equalString [v "Hello"; v "Hello"]    |> evaluate === true
-            notEqualString [v "Hello"; v "world"] |> evaluate === true
-            notEqualString [v "Hello"; v "Hello"] |> evaluate === false
-            notEqual [v 1; v 2]                   |> evaluate === true
-            notEqual [v 2; v 2]                   |> evaluate === false
-            equal [v 2; v 2]                      |> evaluate === true
-            equal [v 2; v 2.0]                    |> evaluate=== true
-            equal [v 2; v 2.0f]                   |> evaluate === true
+            fMul [v 2; v 3] |> evaluate === 6
+            fEqualString [v "Hello"; v "world"]    |> evaluate === false
+            fEqualString [v "Hello"; v "Hello"]    |> evaluate === true
+            fNotEqualString [v "Hello"; v "world"] |> evaluate === true
+            fNotEqualString [v "Hello"; v "Hello"] |> evaluate === false
+            fNotEqual [v 1; v 2]                   |> evaluate === true
+            fNotEqual [v 2; v 2]                   |> evaluate === false
+            fEqual [v 2; v 2]                      |> evaluate === true
+            fEqual [v 2; v 2.0]                    |> evaluate=== true
+            fEqual [v 2; v 2.0f]                   |> evaluate === true
 
 
-            gte [v 2; v 3]                        |> evaluate === false
-            gte [v 5; v 4]                        |> evaluate === true
+            fGte [v 2; v 3]                        |> evaluate === false
+            fGte [v 5; v 4]                        |> evaluate === true
             noT [v true]                          |> evaluate  === false
             noT [v false]                         |> evaluate  === true
             anD [v true; v false]                 |> evaluate === false
@@ -139,35 +139,35 @@ module TestModule =
             oR  [v true; v false]                 |> evaluate === true
             oR  [v false;v false]                 |> evaluate === false
             oR  [v true; v true; v true; v false] |> evaluate === true
-            shiftLeft [v 1; v 1]                  |> evaluate === 2
-            shiftLeft [v 2; v -1]                 |> evaluate === 0
-            shiftLeft [v 1; v 3]                  |> evaluate === 8
-            shiftRight [v 8; v 3]                 |> evaluate === 1
+            fShiftLeft [v 1; v 1]                  |> evaluate === 2
+            fShiftLeft [v 2; v -1]                 |> evaluate === 0
+            fShiftLeft [v 1; v 3]                  |> evaluate === 8
+            fShiftRight [v 8; v 3]                 |> evaluate === 1
 
-            let ex = mul [v 2; v 3]
-            equal [v 6; ex]                       |> evaluate === true
-            equal [v 6; mul [v 2; v 3]]           |> evaluate === true
-            add [v 1; v 2]                        |> evaluate === 3
+            let ex = fMul [v 2; v 3]
+            fEqual [v 6; ex]                       |> evaluate === true
+            fEqual [v 6; fMul [v 2; v 3]]           |> evaluate === true
+            fAdd [v 1; v 2]                        |> evaluate === 3
 
         [<Test>]
         member __.``4 Composition test`` () =
-            mul [
+            fMul [
                     tag <| PlcTag.Create("t2", 2)
-                    add [v 1; v 2]
-                    add [v 4; v 5]
+                    fAdd [v 1; v 2]
+                    fAdd [v 4; v 5]
             ] |> evaluate === 54
 
 
-            mul [v 2; v 3; v 4] |> evaluate === 24
+            fMul [v 2; v 3; v 4] |> evaluate === 24
 
             (*
              (1<<2) * ((8>>3) + 4) * 5
              = 4 * (1+4) * 5
              = 100
             *)
-            mul [   shiftLeft [v 1; v 2]   // 4
-                    add [
-                        shiftRight [v 8; v 3]   // 1
+            fMul [  fShiftLeft [v 1; v 2]   // 4
+                    fAdd [
+                        fShiftRight [v 8; v 3]   // 1
                         v 4
                         ]
                     v 5] |> evaluate === 100   // 4 * (1+4) * 5
@@ -176,7 +176,7 @@ module TestModule =
 
         [<Test>]
         member __.``5 Statement test`` () =
-            let expr = mul [v 2; v 3; v 4]
+            let expr = fMul [v 2; v 3; v 4]
             let target = PlcTag.Create("target", 1)
             let targetExpr = tag target
 
@@ -207,41 +207,41 @@ module TestModule =
             v 3.14f     |> toText === sprintf "%A" 3.14f
             v 3.14      |> toText === "3.14"
 
-            mul [ v 2; v 3 ] |> toText === "2 * 3"
-            mul [ add [v 1; v 2]; v 3 ] |> toText === "(1 + 2) * 3"
-            mul [ v 3; add [v 1; v 2] ] |> toText === "3 * (1 + 2)"
-            add [ mul [v 1; v 2]; v 3; ] |> toText === "(1 * 2) + 3"  //"1*2+3"
+            fMul [ v 2; v 3 ] |> toText === "2 * 3"
+            fMul [ fAdd [v 1; v 2]; v 3 ] |> toText === "(1 + 2) * 3"
+            fMul [ v 3; fAdd [v 1; v 2] ] |> toText === "3 * (1 + 2)"
+            fAdd [ fMul [v 1; v 2]; v 3; ] |> toText === "(1 * 2) + 3"  //"1*2+3"
 
-            add [v 1; v 2; v 3 ] |> toText === "+(1, 2, 3)"
-            mul [ add [v 1; v 2; v 3]; v 3 ] |> toText === "+(1, 2, 3) * 3"
+            fAdd [v 1; v 2; v 3 ] |> toText === "+(1, 2, 3)"
+            fMul [ fAdd [v 1; v 2; v 3]; v 3 ] |> toText === "+(1, 2, 3) * 3"
 
-            mul [   v 2
-                    add [v 1; v 2]
-                    add [v 4; v 5]
+            fMul [  v 2
+                    fAdd [v 1; v 2]
+                    fAdd [v 4; v 5]
             ] |> toText === "*(2, (1 + 2), (4 + 5))"
-            mul [v 2; add[v 3; v 4]]|> toText  === "2 * (3 + 4)"
+            fMul [v 2; fAdd[v 3; v 4]]|> toText  === "2 * (3 + 4)"
 
-            add [v 2; mul [ v 5; v 6 ]; v 4]|> toText  === "+(2, (5 * 6), 4)"
-            add [
-                add [v 2; mul [ v 5; v 6 ]];
+            fAdd [v 2; fMul [ v 5; v 6 ]; v 4]|> toText  === "+(2, (5 * 6), 4)"
+            fAdd [
+                fAdd [v 2; fMul [ v 5; v 6 ]];
                 v 4
             ]|> toText  === "(2 + (5 * 6)) + 4"  //"2+(5*6)+4)"
-            mul [v 2; v 3; v 4]|> toText  === "*(2, 3, 4)"
+            fMul [v 2; v 3; v 4]|> toText  === "*(2, 3, 4)"
 
-        //    mul [   2
-        //            add [1; 2]
-        //            add [4; 5]
+        //    fMul [   2
+        //            fAdd [1; 2]
+        //            fAdd [4; 5]
         //    ] |> toText === "*[2; +[1; 2]; +[4; 5]]"
-        //    mul [2; add[3; 4]]|> toText  === "*[2; +[3; 4]]"
+        //    fMul [2; fAdd[3; 4]]|> toText  === "*[2; +[3; 4]]"
 
-        //    mul [2; 3; 4]|> toText  === "*[2; 3; 4]"
-        //    mul [2; 3; 4]|> toText  === "*[2; 3; 4]"
+        //    fMul [2; 3; 4]|> toText  === "*[2; 3; 4]"
+        //    fMul [2; 3; 4]|> toText  === "*[2; 3; 4]"
 
             let t1 = PlcTag.Create("t1", 1)
             let t2 = PlcTag.Create("t2", 2)
             let tt1 = t1 |> tag
             let tt2 = t2 |> tag
-            let addTwoExpr = add [ tt1; tt2 ]
+            let addTwoExpr = fAdd [ tt1; tt2 ]
             addTwoExpr.ToText(false) === "%t1 + %t2"
 
             let sTag = PlcTag.Create("address", "value")
@@ -250,7 +250,7 @@ module TestModule =
             exprTag.ToText(false) === "%address"
 
 
-            let expr = mul [v 2; v 3; v 4]
+            let expr = fMul [v 2; v 3; v 4]
             let target = PlcTag.Create("target", 1)
             target.ToText() === "%target"
 
@@ -285,8 +285,8 @@ module TestModule =
 
         [<Test>]
         member __.``8 Operator test`` () =
-            let t = cast_bool [v true]
-            let f = cast_bool [v false]
+            let t = fCastBool [v true]
+            let f = fCastBool [v false]
             !! t |> evaluate === false
             !! f |> evaluate === true
             t <&&> t |> evaluate === true
@@ -409,7 +409,7 @@ module TestModule =
             // Invalid assignment: won't compile.  OK!
             // (t1 <== exp)
 
-            let exp2 = mul [ v 1; v 2; v 3 ]
+            let exp2 = fMul [ v 1; v 2; v 3 ]
             // Function-call should take arguments as an IExpression list.
             // let exp2 = mul [ 1; 2; 3 ]
             ()

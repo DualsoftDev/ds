@@ -1,4 +1,9 @@
 /* grun expr toplevels -gui < g4test/expr/expr.expr */
+-3;
+1 >>> 2;
+
+~~~ 0u;
+
 int8 myByte = 0y;
 int16 myShort = 0uy;
 int32 myInt = 0;

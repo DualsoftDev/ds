@@ -4,6 +4,8 @@ open NUnit.Framework
 
 open Engine.Parser.FS
 open UnitTest.Engine
+open Engine.Core.ExpressionPrologModule.ExpressionPrologSubModule
+open Engine.Core.ExpressionFunctionModule.FunctionModule
 
 [<AutoOpen>]
 module ComparisionTestModule =
@@ -88,6 +90,12 @@ module ComparisionTestModule =
                     "1uy = 1uy"
                     "1L = 1L"
                     "1UL = 1UL"
+
+                    "1 >= 1"
+                    "1s >= 1s"
+                    "1 <= 1"
+                    "1s <= 1s"
+
                     $"{dq}hello{dq} = {dq}hello{dq}"
 
                     "(1 + 1) * 2 = 4"
@@ -95,6 +103,26 @@ module ComparisionTestModule =
                 ]
             for t in trues do
                 t |> evalExpr === true
+
+        [<Test>]
+        member __.``1 "=" with different type test`` () =
+            (* 구현을 위한 내부 함수 isEqual, gte 등은 type 과 상관없이 대소 비교 가능해야 하지만,
+               실제 사용자가 사용할 때에는 type 이 같아야 한다. *)
+            isEqual 1 1s === true
+            isEqual 1u 1s === true
+            isEqual 1 1.0 === true
+
+            let fails =
+                [
+                    "1s = 1"
+                    "1s = 1u"
+                    "1us = 1.0"
+                    "1s >= 1"
+                ]
+            for f in fails do
+                (fun () -> f |> evalExpr |> ignore) |> ShouldFailWithSubstringT "Type mismatch"
+
+
 
     type ShiftTest() =
         do Fixtures.SetUpTest()
@@ -144,6 +172,22 @@ module ComparisionTestModule =
 
                     "sin( 3.14 / 2.0 ) <= 1.0"
                     "sin( 3.14 / 2.0 ) >= 0.999"
+                ]
+
+            for t in trues do
+                t |> evalExpr === true
+
+
+        [<Test>]
+        member __.``X 1 Bitwise operation test`` () =
+            let trues =
+                [
+                    "8 &&& 255 = 8"
+                    "24 &&& 16 = 16"
+                    "24 &&& 8 = 8"
+
+                    "1 ||| 2 ||| 4 = 7"
+                    "~~~ 0u = 255u"
                 ]
 
             for t in trues do

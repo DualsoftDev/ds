@@ -31,72 +31,80 @@ module ExpressionFunctionModule =
         let args = [opnd1; opnd2]
 
         match op with
-        | "+" when t = "String" -> concat args
-        | "+" -> add args
-        | "-" -> sub args
-        | "*" -> mul args
-        | "/" -> div args
+        | "+" when t = "String" -> fConcat args
+        | "+" -> fAdd args
+        | "-" -> fSub args
+        | "*" -> fMul args
+        | "/" -> fDiv args
 
-        | ">"  -> gt  args
-        | ">=" -> gte args
-        | "<"  -> lt  args
-        | "<=" -> lte args
-        | "=" when t = "String" -> equalString args
-        | "="  -> equal args
+        | ">"  -> fGt  args
+        | ">=" -> fGte args
+        | "<"  -> fLt  args
+        | "<=" -> fLte args
+        | "=" when t = "String" -> fEqualString args
+        | "="  -> fEqual args
 
-        | ("<<<" | "<<") -> shiftLeft args
-        | (">>>" | ">>") -> shiftRight args
+        | ("<<<" | "<<") -> fShiftLeft  args
+        | (">>>" | ">>") -> fShiftRight args
+
+        | ("&&&" | "&") ->  fBitwiseAnd args
+        | ("|||" | "|") ->  fBitwiseOr  args
+        | ("~~~" | "~") ->  fBitwiseNot args
 
         | _ -> failwith $"NOT Yet {op}"
         |> iexpr
 
+    let createUnaryExpression (op:string) (opnd:IExpression) : IExpression =
+        match op with
+        | ("~" | "~~~" ) -> fBitwiseNot [opnd]
 
     let createCustomFunctionExpression (funName:string) (args:Args) : IExpression =
         verifyAllExpressionSameType args
         let t = args[0].DataType.Name
 
         match funName with
-        | ("+" | "add") -> add args
-        | ("-" | "sub") -> sub args
-        | ("*" | "mul") -> mul args
-        | ("/" | "div") -> div args
+        | ("+" | "add") -> fAdd args
+        | ("-" | "sub") -> fSub args
+        | ("*" | "mul") -> fMul args
+        | ("/" | "div") -> fDiv args
 
-        | (">" | "gt") -> gt args
-        | (">=" | "gte") -> gte args
-        | ("<" | "lt") -> lt args
-        | ("<=" | "lte") -> lte args
-        | ("=" | "equal") when t = "String" -> equalString args
-        | ("=" | "equal") -> equal args
-        | ("!=" | "notEqual") when t = "String" -> notEqualString args
-        | ("!=" | "notEqual") -> notEqual args
+        | (">"  | "gt")  -> fGt args
+        | (">=" | "gte") -> fGte args
+        | ("<"  | "lt")  -> fLt args
+        | ("<=" | "lte") -> fLte args
 
-        | ("<<" | "<<<" | "shiftLeft") -> shiftLeft args
-        | (">>" | ">>>" | "shiftRight") -> shiftLeft args
+        | ("="  | "equal") when t = "String" -> fEqualString args
+        | ("="  | "equal") -> fEqual args
+        | ("!=" | "notEqual") when t = "String" -> fNotEqualString args
+        | ("!=" | "notEqual") -> fNotEqual args
 
-        | ("&&" | "and") -> logicalAnd args
-        | ("||" | "or") -> logicalOr args
-        | ("!" | "not") -> logicalNot args
+        | ("<<" | "<<<" | "shiftLeft") -> fShiftLeft args
+        | (">>" | ">>>" | "shiftRight") -> fShiftLeft args
 
-        | ("&" | "&&&") -> bitwiseAnd args
-        | ("|" | "|||") -> bitwiseOr args
-        | ("~" | "~~~") -> bitwiseNot args
+        | ("&&" | "and") -> fLogicalAnd args
+        | ("||" | "or")  -> fLogicalOr args
+        | ("!"  | "not") -> fLogicalNot args
 
-        | "toBool" -> cast_bool    args |> iexpr
-        | ("toSByte" | "toInt8")     -> cast_int8   args |> iexpr
-        | ("toByte"  | "toUInt8")    -> cast_uint8    args |> iexpr
-        | ("toShort" | "toInt16")    -> cast_int16   args |> iexpr
-        | ("toUShort"| "toUInt16")   -> cast_int16   args |> iexpr
-        | ("toInt"   | "toInt32")    -> cast_int32   args |> iexpr
-        | ("toUInt"  | "toUInt32")   -> cast_uint32  args |> iexpr
-        | ("toLong"  | "toInt64")    -> cast_int64   args |> iexpr
-        | ("toULong" | "toUInt64")   -> cast_uint64  args |> iexpr
+        | ("&" | "&&&") -> fBitwiseAnd args
+        | ("|" | "|||") -> fBitwiseOr args
+        | ("~" | "~~~") -> fBitwiseNot args
 
-        | ("toSingle") -> cast_float   args |> iexpr
-        | ("toDouble" | "toFloat") -> cast_double  args |> iexpr
+        | "toBool" -> fCastBool    args |> iexpr
+        | ("toSByte" | "toInt8")     -> fCastInt8     args |> iexpr
+        | ("toByte"  | "toUInt8")    -> fCastUInt8    args |> iexpr
+        | ("toShort" | "toInt16")    -> fCastInt16    args |> iexpr
+        | ("toUShort"| "toUInt16")   -> fCastInt16    args |> iexpr
+        | ("toInt"   | "toInt32")    -> fCastInt32    args |> iexpr
+        | ("toUInt"  | "toUInt32")   -> fCastUInt32   args |> iexpr
+        | ("toLong"  | "toInt64")    -> fCastInt64    args |> iexpr
+        | ("toULong" | "toUInt64")   -> fCastUInt64   args |> iexpr
 
-        | "sin" -> sin args |> iexpr
-        | "cos" -> cos args |> iexpr
-        | "tan" -> tan args |> iexpr
+        | ("toSingle"| "toFloat" | "toFloat32") -> fCastFloat32 args |> iexpr
+        | ("toDouble"| "toFloat64" ) -> fCastFloat64  args |> iexpr
+
+        | "sin" -> fSin args |> iexpr
+        | "cos" -> fCos args |> iexpr
+        | "tan" -> fTan args |> iexpr
         | _ -> failwith $"NOT yet: {funName}"
 
     [<AutoOpen>]
@@ -117,7 +125,7 @@ module ExpressionFunctionModule =
              L   | Int64        | int64
              UL  | UInt64       | uint64
         *)
-        let add (args:Args) : IExpression =
+        let fAdd (args:Args) : IExpression =
             match args[0].DataType.Name with
             | "Single" -> cf _addf  "+" args
             | "Double" -> cf _addd  "+" args
@@ -131,7 +139,7 @@ module ExpressionFunctionModule =
             | "UInt64" -> cf _addUL "+" args
             | _        -> failwith "ERROR"
 
-        let sub (args:Args) : IExpression =
+        let fSub (args:Args) : IExpression =
             match args[0].DataType.Name with
             | "Single" -> cf _subf  "-" args
             | "Double" -> cf _subd  "-" args
@@ -145,7 +153,7 @@ module ExpressionFunctionModule =
             | "UInt64" -> cf _subUL "-" args
             | _        -> failwith "ERROR"
 
-        let mul (args:Args) : IExpression =
+        let fMul (args:Args) : IExpression =
             match args[0].DataType.Name with
             | "Single" -> cf _mulf  "*" args
             | "Double" -> cf _muld  "*" args
@@ -159,7 +167,7 @@ module ExpressionFunctionModule =
             | "UInt64" -> cf _mulUL "*" args
             | _        -> failwith "ERROR"
 
-        let div (args:Args) : IExpression =
+        let fDiv (args:Args) : IExpression =
             match args[0].DataType.Name with
             | "Single" -> cf _divf  "/" args
             | "Double" -> cf _divd  "/" args
@@ -173,7 +181,7 @@ module ExpressionFunctionModule =
             | "UInt64" -> cf _divUL "/" args
             | _        -> failwith "ERROR"
 
-        let abs (args:Args) : IExpression =
+        let fAbs (args:Args) : IExpression =
             match args[0].DataType.Name with
             | "Single" -> cf _absf  "abs" args
             | "Double" -> cf _absd  "abs" args
@@ -187,7 +195,7 @@ module ExpressionFunctionModule =
             | "UInt64" -> cf _absUL "abs" args
             | _        -> failwith "ERROR"
 
-        let modulo (args:Args) : IExpression =
+        let fMod (args:Args) : IExpression =
             match args[0].DataType.Name with
             | "Single" -> cf _modulof  "%" args
             | "Double" -> cf _modulod  "%" args
@@ -202,7 +210,7 @@ module ExpressionFunctionModule =
             | _        -> failwith "ERROR"
 
 
-        let shiftLeft (args:Args) : IExpression =
+        let fShiftLeft (args:Args) : IExpression =
             match args[0].DataType.Name with
             | "SByte"  -> cf _shiftLeftInt8    "<<<" args
             | "Byte"   -> cf _shiftLeftUInt8   "<<<" args
@@ -214,7 +222,7 @@ module ExpressionFunctionModule =
             | "UInt64" -> cf _shiftLeftUInt64  "<<<" args
             | _        -> failwith "ERROR"
 
-        let shiftRight (args:Args) : IExpression =
+        let fShiftRight (args:Args) : IExpression =
             match args[0].DataType.Name with
             | "SByte"  -> cf _shiftRightInt8    ">>>" args
             | "Byte"   -> cf _shiftRightUInt8   ">>>" args
@@ -227,46 +235,46 @@ module ExpressionFunctionModule =
             | _        -> failwith "ERROR"
 
 
-        let concat         args = cf _concat         "+"      args
+        let fConcat         args = cf _concat         "+"      args
 
-        let equal          args: Expression<bool> = cf _equal          "="  args
-        let notEqual       args: Expression<bool> = cf _notEqual       "!=" args
-        let gt             args: Expression<bool> = cf _gt             ">"  args
-        let lt             args: Expression<bool> = cf _lt             "<"  args
-        let gte            args: Expression<bool> = cf _gte            ">=" args
-        let lte            args: Expression<bool> = cf _lte            "<=" args
-        let equalString    args: Expression<bool> = cf _equalString    "="  args
-        let notEqualString args: Expression<bool> = cf _notEqualString "!=" args
-        let logicalAnd     args: Expression<bool> = cf _logicalAnd     "&&" args
-        let logicalOr      args: Expression<bool> = cf _logicalOr      "||" args
-        let logicalNot     args: Expression<bool> = cf _logicalNot     "!"  args
-        let bitwiseOr      args = cf _orBit          "orBit"  args
-        let bitwiseAnd     args = cf _andBit         "andBit" args
-        let bitwiseNot     args = cf _notBit         "notBit" args
-        let bitwiseXor     args = cf _xorBit         "xorBit" args
-        let sin            args = cf _sin            "sin"    args
-        let cos            args = cf _cos            "cos"    args
-        let tan            args = cf _tan            "tan"    args
+        let fEqual          args: Expression<bool> = cf _equal          "="  args
+        let fNotEqual       args: Expression<bool> = cf _notEqual       "!=" args
+        let fGt             args: Expression<bool> = cf _gt             ">"  args
+        let fLt             args: Expression<bool> = cf _lt             "<"  args
+        let fGte            args: Expression<bool> = cf _gte            ">=" args
+        let fLte            args: Expression<bool> = cf _lte            "<=" args
+        let fEqualString    args: Expression<bool> = cf _equalString    "="  args
+        let fNotEqualString args: Expression<bool> = cf _notEqualString "!=" args
+        let fLogicalAnd     args: Expression<bool> = cf _logicalAnd     "&&" args
+        let fLogicalOr      args: Expression<bool> = cf _logicalOr      "||" args
+        let fLogicalNot     args: Expression<bool> = cf _logicalNot     "!"  args
+        let fBitwiseOr      args = cf _orBit          "orBit"  args
+        let fBitwiseAnd     args = cf _andBit         "andBit" args
+        let fBitwiseNot     args = cf _notBit         "notBit" args
+        let fBitwiseXor     args = cf _xorBit         "xorBit" args
+        let fSin            args = cf _sin            "sin"    args
+        let fCos            args = cf _cos            "cos"    args
+        let fTan            args = cf _tan            "tan"    args
 
 
-        let cast_bool      args = cf _convertBool     "bool"   args
-        let cast_uint8     args = cf _convertUInt8    "byte"   args
-        let cast_int8      args = cf _convertInt8     "sbyte"  args
-        let cast_int16     args = cf _convertInt16    "int16"  args
-        let cast_uint16    args = cf _convertUInt16   "uint16" args
-        let cast_int32     args = cf _convertInt32    "int32"  args
-        let cast_uint32    args = cf _convertUInt32   "Uint32" args
-        let cast_int64     args = cf _convertInt64    "int64"  args
-        let cast_uint64    args = cf _convertUInt64   "Uint64" args
-        let cast_float     args = cf _convertSingle    "float"  args
-        let cast_double    args = cf _convertDouble   "double" args
+        let fCastBool       args = cf _castToBool     "bool"   args
+        let fCastUInt8      args = cf _castToUInt8    "byte"   args
+        let fCastInt8       args = cf _castToInt8     "sbyte"  args
+        let fCastInt16      args = cf _castToInt16    "int16"  args
+        let fCastUInt16     args = cf _castToUInt16   "uint16" args
+        let fCastInt32      args = cf _castToInt32    "int32"  args
+        let fCastUInt32     args = cf _castToUInt32   "Uint32" args
+        let fCastInt64      args = cf _castToInt64    "int64"  args
+        let fCastUInt64     args = cf _castToUInt64   "Uint64" args
+        let fCastFloat32    args = cf _castToFloat32   "float"  args
+        let fCastFloat64    args = cf _castToFloat64   "double" args
 
-        let anD = logicalAnd
+        let anD = fLogicalAnd
         //let absDouble = absd
-        let oR = logicalOr
-        let noT = logicalNot
+        let oR = fLogicalOr
+        let noT = fLogicalNot
         //let divDouble = divd
-        let addString = concat
+        let addString = fConcat
 
 
     [<AutoOpen>]
@@ -362,7 +370,7 @@ module ExpressionFunctionModule =
         let _equalString (args:Args) = args.ExpectGteN(2) .Select(evalArg).Cast<string>().Distinct().Count() = 1
         let _notEqualString (args:Args) = not <| _equalString args
 
-        let private convertToDoublePair (args:Args) = args.ExpectGteN(2).Select(fun x -> x.BoxedEvaluatedValue |> toDouble).Pairwise()
+        let private convertToDoublePair (args:Args) = args.ExpectGteN(2).Select(fun x -> x.BoxedEvaluatedValue |> toFloat64).Pairwise()
         let _gt  (args:Args) = convertToDoublePair(args).All(fun (x, y) -> x > y)
         let _lt  (args:Args) = convertToDoublePair(args).All(fun (x, y) -> x < y)
         let _gte (args:Args) = convertToDoublePair(args).All(fun (x, y) -> x >= y)
@@ -396,22 +404,22 @@ module ExpressionFunctionModule =
         let _shiftRightUInt64 (args:Args) = let n, shift = args.ExpectTyped2<uint64, int>() in n >>> shift
 
 
-        let _sin (args:Args) = args.Select(evalArg >> toDouble).Expect1() |> Math.Sin
-        let _cos (args:Args) = args.Select(evalArg >> toDouble).Expect1() |> Math.Cos
-        let _tan (args:Args) = args.Select(evalArg >> toDouble).Expect1() |> Math.Tan
+        let _sin (args:Args) = args.Select(evalArg >> toFloat64).Expect1() |> Math.Sin
+        let _cos (args:Args) = args.Select(evalArg >> toFloat64).Expect1() |> Math.Cos
+        let _tan (args:Args) = args.Select(evalArg >> toFloat64).Expect1() |> Math.Tan
 
-        let _convertUInt8  (args:Args) = args.Select(evalArg >> toUInt8)  .Expect1()
-        let _convertInt8   (args:Args) = args.Select(evalArg >> toInt8)   .Expect1()
-        let _convertInt16  (args:Args) = args.Select(evalArg >> toInt16)  .Expect1()
-        let _convertUInt16 (args:Args) = args.Select(evalArg >> toUInt16) .Expect1()
-        let _convertInt32  (args:Args) = args.Select(evalArg >> toInt32)  .Expect1()
-        let _convertUInt32 (args:Args) = args.Select(evalArg >> toUInt32) .Expect1()
-        let _convertInt64  (args:Args) = args.Select(evalArg >> toInt64)  .Expect1()
-        let _convertUInt64 (args:Args) = args.Select(evalArg >> toUInt64) .Expect1()
+        let _castToUInt8  (args:Args)  = args.Select(evalArg >> toUInt8)  .Expect1()
+        let _castToInt8   (args:Args)  = args.Select(evalArg >> toInt8)   .Expect1()
+        let _castToInt16  (args:Args)  = args.Select(evalArg >> toInt16)  .Expect1()
+        let _castToUInt16 (args:Args)  = args.Select(evalArg >> toUInt16) .Expect1()
+        let _castToInt32  (args:Args)  = args.Select(evalArg >> toInt32)  .Expect1()
+        let _castToUInt32 (args:Args)  = args.Select(evalArg >> toUInt32) .Expect1()
+        let _castToInt64  (args:Args)  = args.Select(evalArg >> toInt64)  .Expect1()
+        let _castToUInt64 (args:Args)  = args.Select(evalArg >> toUInt64) .Expect1()
 
-        let _convertBool (args:Args) = args.Select(evalArg >> toBool) .Expect1()
-        let _convertDouble (args:Args) = args.Select(evalArg >> toDouble) .Expect1()
-        let _convertSingle  (args:Args) = args.Select(evalArg >> toSingle) .Expect1()
+        let _castToBool (args:Args)    = args.Select(evalArg >> toBool) .Expect1()
+        let _castToFloat32 (args:Args) = args.Select(evalArg >> toFloat32) .Expect1()
+        let _castToFloat64 (args:Args) = args.Select(evalArg >> toFloat64) .Expect1()
 
     let private tagsToArguments (xs:Tag<'T> seq) = xs.Select(fun x -> Tag x) |> List.ofSeq
     [<Extension>]

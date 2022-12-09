@@ -60,7 +60,13 @@ module ExpressionParser =
 
                 | :? UnaryExprContext as exp ->
                     tracefn $"Unary: {text}"
-                    failwith "Not yet"
+                    match exp.children.ToFSharpList() with
+                    | op::opnd::[] ->
+                        let exp = helper(opnd :?> ExprContext)
+                        let op = op.GetText()
+                        createUnaryExpression op exp
+                    | _ ->
+                        failwith "ERROR"
 
                 | :? TerminalExprContext as terminalExp ->
                     tracefn $"Terminal: {text}"

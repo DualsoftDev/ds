@@ -13,7 +13,7 @@ module rec ExpressionPrologModule =
         let expectGteN (n:int) (xs:'a seq) =
             if xs.Count() < n then failwith $"Wrong number of arguments: expect at least {n} arguments"
 
-        let (|Double|_|) (x:obj) =
+        let (|Float64|_|) (x:obj) =
             match x with
             | :? single as n -> Some (double n)
             | :? double as n -> Some (double n)
@@ -29,18 +29,18 @@ module rec ExpressionPrologModule =
                 logWarn $"Cannot convert {x} to double"
                 None
 
-        let (|Float|_|) (x:obj) =
+        let (|Float32|_|) (x:obj) =
             match x with
-            | :? single as n -> Some (float n)
-            | :? double as n -> Some (float n)
-            | :? sbyte  as n -> Some (float n)
-            | :? byte   as n -> Some (float n)
-            | :? int16  as n -> Some (float n)
-            | :? uint16 as n -> Some (float n)
-            | :? int32  as n -> Some (float n)
-            | :? uint32 as n -> Some (float n)
-            | :? int64  as n -> Some (float n)
-            | :? uint64 as n -> Some (float n)
+            | :? single as n -> Some (float32 n)
+            | :? double as n -> Some (float32 n)
+            | :? sbyte  as n -> Some (float32 n)
+            | :? byte   as n -> Some (float32 n)
+            | :? int16  as n -> Some (float32 n)
+            | :? uint16 as n -> Some (float32 n)
+            | :? int32  as n -> Some (float32 n)
+            | :? uint32 as n -> Some (float32 n)
+            | :? int64  as n -> Some (float32 n)
+            | :? uint64 as n -> Some (float32 n)
             | _ ->
                 logWarn $"Cannot convert {x} to float"
                 None
@@ -181,23 +181,25 @@ module rec ExpressionPrologModule =
             | Int32 _            -> Some true
             | _ -> None  // bool casting 실패
 
-        let toBool   x = (|Bool|_|)    x |> Option.get
-        let toDouble x = (|Double|_|)  x |> Option.get
-        let toSingle x = (|Float|_|)   x |> Option.get
-        let toUInt8  x = (|Byte|_|)    x |> Option.get
-        let toInt8   x = (|SByte|_|)   x |> Option.get
-        let toInt16  x = (|Int16|_|)   x |> Option.get
-        let toUInt16 x = (|UInt16|_|)  x |> Option.get
-        let toInt32  x = (|Int32|_|)   x |> Option.get
-        let toUInt32 x = (|UInt32|_|)  x |> Option.get
-        let toInt64  x = (|Int64|_|)   x |> Option.get
-        let toUInt64 x = (|UInt64|_|)  x |> Option.get
+        let toBool    x = (|Bool|_|)    x |> Option.get
+        let toFloat64 x = (|Float64|_|) x |> Option.get
+        let toFloat32 x = (|Float32|_|) x |> Option.get
+        let toUInt8   x = (|Byte|_|)    x |> Option.get
+        let toInt8    x = (|SByte|_|)   x |> Option.get
+        let toInt16   x = (|Int16|_|)   x |> Option.get
+        let toUInt16  x = (|UInt16|_|)  x |> Option.get
+        let toInt32   x = (|Int32|_|)   x |> Option.get
+        let toUInt32  x = (|UInt32|_|)  x |> Option.get
+        let toInt64   x = (|Int64|_|)   x |> Option.get
+        let toUInt64  x = (|UInt64|_|)  x |> Option.get
 
         let isEqual (x:obj) (y:obj) =
             match x, y with
-            | Double x, Double y -> x = y
+            | Float64 x, Float64 y -> x = y     // double 로 환산가능한 숫자만 비교하면 모든 type 의 숫자 비교는 OK
             | (:? string as a), (:? string as b) -> a = b
-            | _ -> false
+            | _ ->
+                failwith "ERROR"
+                false
 
 
     /// Expression 의 Terminal 이 될 수 있는 subclass: Tag<'T>, StorageVariable<'T>

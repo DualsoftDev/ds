@@ -33,7 +33,7 @@ module ExpressionParser =
             let text = ctx.GetText()
             let expr =
                 match ctx with
-                | :? FunctionCallExprContext as exp ->
+                | :? FunctionCallExprContext as exp ->  // functionName '(' arguments? ')'
                     tracefn $"FunctionCall: {text}"
                     let funName = exp.TryFindFirstChild<FunctionNameContext>().Value.GetText()
                     let args =
@@ -47,6 +47,12 @@ module ExpressionParser =
                         ]
                     createCustomFunctionExpression funName args
 
+                | :? CastingExprContext as exp ->   // '(' type ')' expr
+                    tracefn $"Casting: {text}"
+                    let castName = exp.TryFindFirstChild<TypeContext>().Value.GetText()
+                    let exprCtx = exp.TryFindFirstChild<ExprContext>().Value
+                    let expr = helper exprCtx
+                    createCustomFunctionExpression castName [expr]
 
                 |(  :? BinaryExprMultiplicativeContext
                   | :? BinaryExprAdditiveContext

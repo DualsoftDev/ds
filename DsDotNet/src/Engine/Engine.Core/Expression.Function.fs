@@ -20,10 +20,13 @@ module ExpressionFunctionModule =
 
         match op with
         | (   "+" | "+" | "-" | "*" | "/"
-            | ">" | ">=" | "<" | "<=" | "=" | "=" ) ->
+            | ">" | ">=" | "<" | "<=" | "=" | "="
+            | "&&" | "||"
+            | "&" | "|" | "&&&" | "|||" ) ->
             verifyAllExpressionSameType [opnd1; opnd2]
-            if t1 <> t2 then
-                failwith "ERROR: Type mismatch"
+            match op with
+            | "&&" | "||" -> if t1 <> typedefof<bool> then failwith $"{op} expects bool.  Type mismatch"
+            | _ -> ()
         | _ ->
             ()
 
@@ -99,18 +102,18 @@ module ExpressionFunctionModule =
         | ("^" | "^^^") -> fBitwiseXor  args
         | ("~" | "~~~") -> fBitwiseNot  args
 
-        | ((*"bool"   |*) "toBool") -> fCastBool    args |> iexpr
-        | ((*"sbyte"  |*) "toSByte" | "toInt8")     -> fCastInt8   args |> iexpr
-        | ((*"byte"   |*) "toByte"  | "toUInt8")    -> fCastUInt8  args |> iexpr
-        | ((*"short"  |*) "toShort" | "toInt16")    -> fCastInt16  args |> iexpr
-        | ((*"ushort" |*) "toUShort"| "toUInt16")   -> fCastUInt16 args |> iexpr
-        | ((*"int"    |*) "toInt"   | "toInt32")    -> fCastInt32  args |> iexpr
-        | ((*"uint"   |*) "toUInt"  | "toUInt32")   -> fCastUInt32 args |> iexpr
-        | ((*"long"   |*) "toLong"  | "toInt64")    -> fCastInt64  args |> iexpr
-        | ((*"ulong"  |*) "toULong" | "toUInt64")   -> fCastUInt64 args |> iexpr
+        | ("bool"   | "toBool") -> fCastBool    args |> iexpr
+        | ("sbyte"  | "toSByte" | "toInt8")     -> fCastInt8   args |> iexpr
+        | ("byte"   | "toByte"  | "toUInt8")    -> fCastUInt8  args |> iexpr
+        | ("short"  | "toShort" | "toInt16")    -> fCastInt16  args |> iexpr
+        | ("ushort" | "toUShort"| "toUInt16")   -> fCastUInt16 args |> iexpr
+        | ("int"    | "toInt"   | "toInt32")    -> fCastInt32  args |> iexpr
+        | ("uint"   | "toUInt"  | "toUInt32")   -> fCastUInt32 args |> iexpr
+        | ("long"   | "toLong"  | "toInt64")    -> fCastInt64  args |> iexpr
+        | ("ulong"  | "toULong" | "toUInt64")   -> fCastUInt64 args |> iexpr
 
-        | ((*"single" | "float" | "float32" |*) "toSingle"| "toFloat" | "toFloat32") -> fCastFloat32 args |> iexpr
-        | ((*"double" | "float64" |*) "toDouble"| "toFloat64" ) -> fCastFloat64  args |> iexpr
+        | ("single" | "float" | "float32" | "toSingle"| "toFloat" | "toFloat32") -> fCastFloat32 args |> iexpr
+        | ("double" | "float64" | "toDouble"| "toFloat64" ) -> fCastFloat64  args |> iexpr
 
         | "sin" -> fSin args |> iexpr
         | "cos" -> fCos args |> iexpr

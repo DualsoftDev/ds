@@ -256,6 +256,12 @@ module ComparisionTestModule =
 
             let fails =
                 [
+                    "0 & true"
+                    "0 && true"
+                    "0 &&& true"
+                    "0 | true"
+                    "0 || true"
+                    "0 ||| true"
                     "1 = true"
                     "0 = false"
                 ]
@@ -267,8 +273,11 @@ module ComparisionTestModule =
         [<Test>]
         member __.``1 TypeCast test`` () =
             //let xxx = "toInt16(false) = 0s" |> evalExpr
+
+
             let trues =
                 [
+                    "(bool)0 = false"
                     "toBool(0) = false"
                     "toBool(0.0) = false"
                     "toBool(0.0000000000001) = true"
@@ -298,7 +307,19 @@ module ComparisionTestModule =
 
                     "toInt(false) = 0"
                     "toInt(true) = 1"
+
+
+                    "(bool)0 && true = false"
+                    "(bool)(2 + 3) = true"
                 ]
 
             for t in trues do
                 t |> evalExpr === true
+
+            let fails =
+                [
+                    "(bool)(0 && true)"
+                ]
+            for f in fails do
+                (fun () -> f |> parseExpression |> ignore) |> ShouldFailWithSubstringT "Type mismatch"
+

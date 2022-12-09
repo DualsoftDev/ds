@@ -63,12 +63,14 @@ statement: assign | varDecl;
         | 'single' | 'float32' | 'float'
         | 'char'
         | 'string'
+        | 'bool' | 'boolean'
     ;
 
 
 // https://stackoverflow.com/questions/41017948/antlr4-the-following-sets-of-rules-are-mutually-left-recursive
 // https://github.com/antlr/antlr4/blob/master/doc/parser-rules.md#alternative-labels
 expr: functionName '(' arguments? ')'                 # FunctionCallExpr    // func call like f(), f(x), f(1,2)
+    | '(' type ')' expr                               # CastingExpr
     | storage ('[' expr ']')+                         # ArrayReferenceExpr  // array index like $a[i], $a[i][j]
     | unaryOperator expr                              # UnaryExpr           // unary minus, boolean not
     // priority 순서대로 나열되어야 함.  https://learn.microsoft.com/en-us/cpp/c-language/precedence-and-order-of-evaluation?view=msvc-170

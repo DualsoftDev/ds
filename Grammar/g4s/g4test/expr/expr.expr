@@ -1,4 +1,9 @@
 /* grun expr toplevels -gui < g4test/expr/expr.expr */
+(bool)(0 && true) = false;
+
+(bool)0 && true = false;
+(int)32u;
+
 toUInt16(false) = 0us;
 toInt(false) = 0;
 

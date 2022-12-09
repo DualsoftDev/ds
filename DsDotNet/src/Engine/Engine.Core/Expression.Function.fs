@@ -99,18 +99,18 @@ module ExpressionFunctionModule =
         | ("^" | "^^^") -> fBitwiseXor  args
         | ("~" | "~~~") -> fBitwiseNot  args
 
-        | "toBool" -> fCastBool    args |> iexpr
-        | ("toSByte" | "toInt8")     -> fCastInt8   args |> iexpr
-        | ("toByte"  | "toUInt8")    -> fCastUInt8  args |> iexpr
-        | ("toShort" | "toInt16")    -> fCastInt16  args |> iexpr
-        | ("toUShort"| "toUInt16")   -> fCastInt16  args |> iexpr
-        | ("toInt"   | "toInt32")    -> fCastInt32  args |> iexpr
-        | ("toUInt"  | "toUInt32")   -> fCastUInt32 args |> iexpr
-        | ("toLong"  | "toInt64")    -> fCastInt64  args |> iexpr
-        | ("toULong" | "toUInt64")   -> fCastUInt64 args |> iexpr
+        | ((*"bool"   |*) "toBool") -> fCastBool    args |> iexpr
+        | ((*"sbyte"  |*) "toSByte" | "toInt8")     -> fCastInt8   args |> iexpr
+        | ((*"byte"   |*) "toByte"  | "toUInt8")    -> fCastUInt8  args |> iexpr
+        | ((*"short"  |*) "toShort" | "toInt16")    -> fCastInt16  args |> iexpr
+        | ((*"ushort" |*) "toUShort"| "toUInt16")   -> fCastUInt16 args |> iexpr
+        | ((*"int"    |*) "toInt"   | "toInt32")    -> fCastInt32  args |> iexpr
+        | ((*"uint"   |*) "toUInt"  | "toUInt32")   -> fCastUInt32 args |> iexpr
+        | ((*"long"   |*) "toLong"  | "toInt64")    -> fCastInt64  args |> iexpr
+        | ((*"ulong"  |*) "toULong" | "toUInt64")   -> fCastUInt64 args |> iexpr
 
-        | ("toSingle"| "toFloat" | "toFloat32") -> fCastFloat32 args |> iexpr
-        | ("toDouble"| "toFloat64" ) -> fCastFloat64  args |> iexpr
+        | ((*"single" | "float" | "float32" |*) "toSingle"| "toFloat" | "toFloat32") -> fCastFloat32 args |> iexpr
+        | ((*"double" | "float64" |*) "toDouble"| "toFloat64" ) -> fCastFloat64  args |> iexpr
 
         | "sin" -> fSin args |> iexpr
         | "cos" -> fCos args |> iexpr
@@ -311,17 +311,17 @@ module ExpressionFunctionModule =
         let fTan            args = cf _tan            "tan"    args
 
 
-        let fCastBool       args = cf _castToBool     "bool"   args
-        let fCastUInt8      args = cf _castToUInt8    "byte"   args
-        let fCastInt8       args = cf _castToInt8     "sbyte"  args
-        let fCastInt16      args = cf _castToInt16    "int16"  args
-        let fCastUInt16     args = cf _castToUInt16   "uint16" args
-        let fCastInt32      args = cf _castToInt32    "int32"  args
-        let fCastUInt32     args = cf _castToUInt32   "Uint32" args
-        let fCastInt64      args = cf _castToInt64    "int64"  args
-        let fCastUInt64     args = cf _castToUInt64   "Uint64" args
-        let fCastFloat32    args = cf _castToFloat32  "float"  args
-        let fCastFloat64    args = cf _castToFloat64  "double" args
+        let fCastBool       args = cf _castToBool     "toBool"   args
+        let fCastUInt8      args = cf _castToUInt8    "toByte"   args
+        let fCastInt8       args = cf _castToInt8     "toSByte"  args
+        let fCastInt16      args = cf _castToInt16    "toInt16"  args
+        let fCastUInt16     args = cf _castToUInt16   "toUInt16" args
+        let fCastInt32      args = cf _castToInt32    "toInt32"  args
+        let fCastUInt32     args = cf _castToUInt32   "toUInt32" args
+        let fCastInt64      args = cf _castToInt64    "toInt64"  args
+        let fCastUInt64     args = cf _castToUInt64   "toUInt64" args
+        let fCastFloat32    args = cf _castToFloat32  "toFloat32"  args
+        let fCastFloat64    args = cf _castToFloat64  "toFloat64" args
 
     [<AutoOpen>]
     module internal FunctionImpl =

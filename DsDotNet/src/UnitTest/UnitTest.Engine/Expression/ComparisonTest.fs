@@ -120,7 +120,7 @@ module ComparisionTestModule =
                     "1s >= 1"
                 ]
             for f in fails do
-                (fun () -> f |> evalExpr |> ignore) |> ShouldFailWithSubstringT "Type mismatch"
+                (fun () -> f |> parseExpression |> ignore) |> ShouldFailWithSubstringT "Type mismatch"
 
 
 
@@ -239,7 +239,65 @@ module ComparisionTestModule =
 
                     "3 > 2 = 10 > 9"
 
+                    (* cast to boolean test *)
+                    "toBool(0) = false"
+                    "toBool(0.0) = false"
+                    "toBool(0.0000000000001) = true"
+                    "toBool(3) = true"
+                    "toBool(3.0) = true"
 
+                    "toInt(false) = 0"
+                    "toInt(true) = 1"
+                ]
+
+            for t in trues do
+                t |> evalExpr === true
+
+
+            let fails =
+                [
+                    "1 = true"
+                    "0 = false"
+                ]
+            for f in fails do
+                (fun () -> f |> parseExpression |> ignore) |> ShouldFailWithSubstringT "Type mismatch"
+
+
+
+        [<Test>]
+        member __.``1 TypeCast test`` () =
+            //let xxx = "toInt16(false) = 0s" |> evalExpr
+            let trues =
+                [
+                    "toBool(0) = false"
+                    "toBool(0.0) = false"
+                    "toBool(0.0000000000001) = true"
+                    "toBool(3) = true"
+                    "toBool(3.0) = true"
+
+                    "toInt8(false) = 0y"
+                    "toInt8(true) = 1y"
+                    "toUInt8(false) = 0uy"
+                    "toUInt8(true) = 1uy"
+
+                    "toInt16(false) = 0s"
+                    "toInt16(true) = 1s"
+                    "toUInt16(false) = 0us"
+                    "toUInt16(true) = 1us"
+
+                    "toInt32(false) = 0"
+                    "toInt32(true) = 1"
+                    "toUInt32(false) = 0u"
+                    "toUInt32(true) = 1u"
+
+                    "toInt64(false) = 0L"
+                    "toInt64(true) = 1L"
+                    "toUInt64(false) = 0UL"
+                    "toUInt64(true) = 1UL"
+
+
+                    "toInt(false) = 0"
+                    "toInt(true) = 1"
                 ]
 
             for t in trues do

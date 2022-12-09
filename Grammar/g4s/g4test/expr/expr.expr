@@ -1,4 +1,8 @@
 /* grun expr toplevels -gui < g4test/expr/expr.expr */
+toUInt16(false) = 0us;
+toInt(false) = 0;
+
+toBool(3.0) = true;
 
 !true = false;
 

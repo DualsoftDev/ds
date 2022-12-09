@@ -25,6 +25,7 @@ module rec ExpressionPrologModule =
             | :? uint32 as n -> Some (double n)
             | :? int64  as n -> Some (double n)
             | :? uint64 as n -> Some (double n)
+            | :? bool as b -> Some (if b then 1.0 else 0.0)     // toInt(false) 등에서의 casting 허용 위해 필요
             | _ ->
                 logWarn $"Cannot convert {x} to double"
                 None
@@ -41,6 +42,7 @@ module rec ExpressionPrologModule =
             | :? uint32 as n -> Some (float32 n)
             | :? int64  as n -> Some (float32 n)
             | :? uint64 as n -> Some (float32 n)
+            | :? bool as b -> Some (if b then 1.f else 0.f)
             | _ ->
                 logWarn $"Cannot convert {x} to float"
                 None
@@ -57,6 +59,7 @@ module rec ExpressionPrologModule =
             | :? uint32 as n -> Some (byte n)
             | :? int64  as n -> Some (byte n)
             | :? uint64 as n -> Some (byte n)
+            | :? bool as b -> Some (if b then 1uy else 0uy)
             | _ ->
                 logWarn $"Cannot convert {x} to byte"
                 None
@@ -73,6 +76,7 @@ module rec ExpressionPrologModule =
             | :? uint32 as n -> Some (sbyte n)
             | :? int64  as n -> Some (sbyte n)
             | :? uint64 as n -> Some (sbyte n)
+            | :? bool as b -> Some (if b then 1y else 0y)
             | _ ->
                 logWarn $"Cannot convert {x} to sbyte"
                 None
@@ -89,6 +93,7 @@ module rec ExpressionPrologModule =
             | :? uint32 as n -> Some (int16 n)
             | :? int64  as n -> Some (int16 n)
             | :? uint64 as n -> Some (int16 n)
+            | :? bool as b -> Some (if b then 1s else 0s)
             | _ ->
                 logWarn $"Cannot convert {x} to int16"
                 None
@@ -105,6 +110,7 @@ module rec ExpressionPrologModule =
             | :? uint32 as n -> Some (uint16 n)
             | :? int64  as n -> Some (uint16 n)
             | :? uint64 as n -> Some (uint16 n)
+            | :? bool as b -> Some (if b then 1us else 0us)
             | _ ->
                 logWarn $"Cannot convert {x} to uint16"
                 None
@@ -121,6 +127,7 @@ module rec ExpressionPrologModule =
             | :? uint32 as n -> Some (int32 n)
             | :? int64  as n -> Some (int32 n)
             | :? uint64 as n -> Some (int32 n)
+            | :? bool as b -> Some (if b then 1 else 0)     // toInt(false) 등에서의 casting 허용 위해 필요
             | _ ->
                 logWarn $"Cannot convert {x} to int32"
                 None
@@ -137,6 +144,7 @@ module rec ExpressionPrologModule =
             | :? uint32 as n -> Some (uint32 n)
             | :? int64  as n -> Some (uint32 n)
             | :? uint64 as n -> Some (uint32 n)
+            | :? bool as b -> Some (if b then 1u else 0u)
             | _ ->
                 logWarn $"Cannot convert {x} to uint32"
                 None
@@ -153,6 +161,7 @@ module rec ExpressionPrologModule =
             | :? uint32 as n -> Some (int64 n)
             | :? int64  as n -> Some (int64 n)
             | :? uint64 as n -> Some (int64 n)
+            | :? bool as b -> Some (if b then 1L else 0L)
             | _ ->
                 logWarn $"Cannot convert {x} to int64"
                 None
@@ -169,6 +178,7 @@ module rec ExpressionPrologModule =
             | :? uint32 as n -> Some (uint64 n)
             | :? int64  as n -> Some (uint64 n)
             | :? uint64 as n -> Some (uint64 n)
+            | :? bool as b -> Some (if b then 1UL else 0UL)
             | _ ->
                 logWarn $"Cannot convert {x} to uint64"
                 None
@@ -177,8 +187,9 @@ module rec ExpressionPrologModule =
         let (|Bool|_|) (x:obj) =
             match x with
             | :? bool as b -> Some b
-            | Int32 n when n = 0 -> Some false      (* int32 로 변환 가능한 모든 numeric type 포함 *)
-            | Int32 _            -> Some true
+            | :? single as n -> Some (n <> 0.f)
+            | :? double as n -> Some (n <> 0.0)
+            | Int32 n -> Some (n <> 0)      (* int32 로 변환 가능한 모든 numeric type 포함 *)
             | _ -> None  // bool casting 실패
 
         let toBool    x = (|Bool|_|)    x |> Option.get

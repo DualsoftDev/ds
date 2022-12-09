@@ -264,6 +264,9 @@ module TestModule =
             stmt.ToText() === "%target := *(2, 3, 4)"
 
 
+            "toBool(0)" |> pns === "toBool(0)"
+
+
         [<Test>]
         member __.``6 Operator Precedence test`` () =
             "2 + 3 + 4"         |> evalExpr === 9

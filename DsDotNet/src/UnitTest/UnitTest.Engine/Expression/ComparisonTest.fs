@@ -179,7 +179,7 @@ module ComparisionTestModule =
 
 
         [<Test>]
-        member __.``X 1 Bitwise operation test`` () =
+        member __.``1 Bitwise operation test`` () =
             let trues =
                 [
                     "8 &&& 255 = 8"

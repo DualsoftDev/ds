@@ -69,7 +69,20 @@ statement: assign | varDecl;
 expr:   functionName '(' arguments? ')'         # FunctionCallExpr  // func call like f(), f(x), f(1,2)
     |   storage ('[' expr ']')+                # ArrayReferenceExpr // array index like $a[i], $a[i][j]
     |   unaryOperator expr                      # UnaryExpr           // unary minus, boolean not
-    |   expr binaryOperator expr                # BinaryExpr // ':=': assignment equality comparison (lowest priority op)
+    // priority 순서대로 나열되어야 함.  https://learn.microsoft.com/en-us/cpp/c-language/precedence-and-order-of-evaluation?view=msvc-170
+    // equality 의 경우, 위 문서가 잘못된 듯 함..
+    | expr binaryOperatorMultiplicative expr        #BinaryExprMultiplicative
+    | expr binaryOperatorAdditive expr      #BinaryExprAdditive
+    | expr binaryOperatorBitwiseShift expr      #BinaryExprBitwiseShift
+    | expr binaryOperatorRelational expr        #BinaryExprRelational
+    | expr binaryOperatorBitwiseAnd expr        #BinaryExprBitwiseAnd
+    | expr binaryOperatorBitwiseXor expr        #BinaryExprBitwiseXor
+    | expr binaryOperatorBitwiseOr expr     #BinaryExprBitwiseOr
+    | expr binaryOperatorEquality expr      #BinaryExprEquality
+
+    | expr binaryOperatorLogicalAnd expr #BinaryExprLogicalAnd
+    | expr binaryOperatorLogicalOr expr #BinaryExprLogicalOr
+
     |   terminal                                # TerminalExpr
     |   '(' expr ')'                            # ParenthesysExpr
     ;
@@ -81,14 +94,34 @@ expr:   functionName '(' arguments? ')'         # FunctionCallExpr  // func call
              '!'
             | '~' | '~~~'                   // bitwise negation (C++/F# style)
             ;
+    binaryOperatorMultiplicative: '*'|'/'|'%';
+    binaryOperatorAdditive:'+'|'-';
+    binaryOperatorBitwiseShift: '<<' | '<<<' | '>>' | '>>>';   // bitwise shift
+    binaryOperatorRelational:'>' | '>=' | '<' | '<=';
+    binaryOperatorEquality:'=' | '!=';
+    binaryOperatorBitwiseAnd: '&' | '&&&';   // bitwise and   (C++/F# style)
+    binaryOperatorBitwiseXor: '^' | '^^^';   // bitwise xor
+    binaryOperatorBitwiseOr: '|' | '|||';   // bitwise or
+
+    binaryOperatorLogicalAnd: '&&';
+    binaryOperatorLogicalOr: '||';     // logical and or
+
+
     binaryOperator:
-            '+'|'-'|'*'|'/'|'%'
-            | '&&' | '||'     // logical and or
-            |'=' | '!='
-            |'>' | '>=' | '<' | '<='
-            | '&' | '|' | '^' | '&&&' | '|||' | '^^^'     // bitwise and/or/xor (C++/F# style)
-            | '<<' | '<<<' | '>>' | '>>>'   // bitwise shift
-            ;
+          binaryOperatorMultiplicative
+        | binaryOperatorAdditive
+        | binaryOperatorBitwiseShift
+        | binaryOperatorRelational
+        | binaryOperatorEquality
+        | binaryOperatorBitwiseAnd
+        | binaryOperatorBitwiseXor
+        | binaryOperatorBitwiseOr
+        | binaryOperatorLogicalAnd
+        | binaryOperatorLogicalOr
+        ;
+
+
+
 
 //INTEGER: SIGN? DIGITS;
 IDENTIFIER: VALID_ID_START VALID_ID_CHAR*;

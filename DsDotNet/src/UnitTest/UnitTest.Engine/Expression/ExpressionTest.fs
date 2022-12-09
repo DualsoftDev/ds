@@ -15,9 +15,15 @@ module TestModule =
     let v = ExpressionModule.literal
     let evaluate (exp:IExpression) = exp.BoxedEvaluatedValue
     let dq = "\""
+    /// Parse And Serialize
+    let pns (text:string) =
+        let expr = parseExpression text
+        expr.ToText(false)
+    let toText (exp:IExpression) = exp.ToText(false)
 
     type ExpressionTest() =
         do Fixtures.SetUpTest()
+
 
         [<Test>]
         member __.``1 ExpressionValueUnit test`` () =
@@ -192,8 +198,6 @@ module TestModule =
 
         [<Test>]
         member __.``6 Serialization test`` () =
-            let toText (exp:IExpression) = exp.ToText(false)
-
             v 1         |> toText === "1"
             v "hello"   |> toText === "\"hello\""
             v Math.PI   |> toText === sprintf "%A" Math.PI
@@ -205,7 +209,7 @@ module TestModule =
             fMul [ v 2; v 3 ] |> toText === "2 * 3"
             fMul [ fAdd [v 1; v 2]; v 3 ] |> toText === "(1 + 2) * 3"
             fMul [ v 3; fAdd [v 1; v 2] ] |> toText === "3 * (1 + 2)"
-            fAdd [ fMul [v 1; v 2]; v 3; ] |> toText === "(1 * 2) + 3"  //"1*2+3"
+            fAdd [ fMul [v 1; v 2]; v 3; ] |> toText === "1 * 2 + 3"
 
             fAdd [v 1; v 2; v 3 ] |> toText === "+(1, 2, 3)"
             fMul [ fAdd [v 1; v 2; v 3]; v 3 ] |> toText === "+(1, 2, 3) * 3"
@@ -220,17 +224,24 @@ module TestModule =
             fAdd [
                 fAdd [v 2; fMul [ v 5; v 6 ]];
                 v 4
-            ]|> toText  === "(2 + (5 * 6)) + 4"  //"2+(5*6)+4)"
+            ]|> toText  === "2 + 5 * 6 + 4"
+            fMul [v 2; v 3; v 4] |> toText  === "*(2, 3, 4)"
+
+            fAdd [ v 2
+                   fMul [v 3; v 4] ] |> toText  === "2 + 3 * 4"
+            fMul [ v 2
+                   fAdd [v 3; v 4] ] |> toText  === "2 * (3 + 4)"
+            fAdd [ v 2
+                   fAdd [v 3; v 4] ] |> toText  === "2 + 3 + 4"
+
+            fMul [  v 2
+                    fAdd [v 1; v 2]
+                    fAdd [v 4; v 5]
+            ] |> toText === "*(2, (1 + 2), (4 + 5))"
+            fMul [v 2; fAdd[v 3; v 4]]|> toText  === "2 * (3 + 4)"
+
             fMul [v 2; v 3; v 4]|> toText  === "*(2, 3, 4)"
-
-        //    fMul [   2
-        //            fAdd [1; 2]
-        //            fAdd [4; 5]
-        //    ] |> toText === "*[2; +[1; 2]; +[4; 5]]"
-        //    fMul [2; fAdd[3; 4]]|> toText  === "*[2; +[3; 4]]"
-
-        //    fMul [2; 3; 4]|> toText  === "*[2; 3; 4]"
-        //    fMul [2; 3; 4]|> toText  === "*[2; 3; 4]"
+            fMul [v 2; v 3; v 4]|> toText  === "*(2, 3, 4)"
 
             let t1 = PlcTag.Create("t1", 1)
             let t2 = PlcTag.Create("t2", 2)
@@ -252,12 +263,47 @@ module TestModule =
             let stmt = Assign (expr, target)
             stmt.ToText() === "%target := *(2, 3, 4)"
 
+
+        [<Test>]
+        member __.``6 Operator Precedence test`` () =
+            "2 + 3 + 4"         |> evalExpr === 9
+            "2 + (3 + 4)"       |> evalExpr === 9
+            "(2 + 3) + 4"       |> evalExpr === 9
+            "2 * 3 + 4"         |> evalExpr === 10
+            "(2 * 3) + 4"       |> evalExpr === 10
+            "2 + 3 * 4"         |> evalExpr === 14
+            "2 + (3 * 4)"       |> evalExpr === 14
+            "2 * 3 + 4 * 5"     |> evalExpr === 26
+            "(2 * 3) + (4 * 5)" |> evalExpr === 26
+
+
+            "2 * (3 + 4)"       |> evalExpr === 14
+            "(2 + 3) * (4 + 5)" |> evalExpr === 45
+            "(2 + 3) * (4 * 5)" |> evalExpr === 100
+            ()
+
+        [<Test>]
+        member __.``6 Text Serialization test`` () =
+            "2 + 3 + 4"         |> pns === "2 + 3 + 4"
+            "2 + (3 + 4)"       |> pns === "2 + 3 + 4"
+            "(2 + 3) + 4"       |> pns === "2 + 3 + 4"
+            "2 * 3 + 4"         |> pns === "2 * 3 + 4"
+            "(2 * 3) + 4"       |> pns === "2 * 3 + 4"
+            "2 + 3 * 4"         |> pns === "2 + 3 * 4"
+            "2 + (3 * 4)"       |> pns === "2 + 3 * 4"
+            "2 * 3 + 4 * 5"     |> pns === "2 * 3 + 4 * 5"
+            "(2 * 3) + (4 * 5)" |> pns === "2 * 3 + 4 * 5"
+
+
+            "2 * (3 + 4)"       |> pns === "2 * (3 + 4)"
+            "(2 + 3) * (4 + 5)" |> pns === "(2 + 3) * (4 + 5)"
+            "(2 + 3) * (4 * 5)" |> pns === "(2 + 3) * 4 * 5"
+            ()
+
+
+
         [<Test>]
         member __.``7 Deserialize test`` () =
-            /// Parse And Serialize
-            let pns (text:string) =
-                let expr = parseExpression text
-                expr.ToText(false)
             let exprs =
                 [
                     "1y + 2y"

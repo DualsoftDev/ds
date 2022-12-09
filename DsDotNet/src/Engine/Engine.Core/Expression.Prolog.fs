@@ -225,6 +225,8 @@ module rec ExpressionPrologModule =
         abstract GetBoxedRawObject: unit -> obj
         /// withParenthesys: terminal 일 경우는 무시되고, Function 일 경우에만 적용됨
         abstract ToText : withParenthesys:bool -> string
+        // Function expression 인 경우 function name 반환.  terminal 이면 none
+        abstract FunctionName: string option
 
 
     [<AbstractClass>]

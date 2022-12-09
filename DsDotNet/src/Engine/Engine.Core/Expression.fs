@@ -33,6 +33,8 @@ module ExpressionModule =
             member x.BoxedEvaluatedValue = x.Evaluate() |> box
             member x.GetBoxedRawObject() = x.GetBoxedRawObject()
             member x.ToText(withParenthesys) = x.ToText(withParenthesys)
+            member x.FunctionName = x.FunctionName
+
 
         member x.DataType = typedefof<'T>
 
@@ -100,6 +102,11 @@ module ExpressionModule =
             match x with
             | Terminal b -> b.Evaluate()
             | Function fs -> fs.FunctionBody fs.Arguments
+
+        member x.FunctionName =
+            match x with
+            | Terminal _ -> None
+            | Function fs -> Some fs.Name
 
         member x.ToText(withParenthesys:bool) =
             match x with

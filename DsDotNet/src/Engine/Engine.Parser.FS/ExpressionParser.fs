@@ -47,9 +47,19 @@ module ExpressionParser =
                         ]
                     createCustomFunctionExpression funName args
 
-                | :? BinaryExprContext as exp ->
+
+                |(  :? BinaryExprMultiplicativeContext
+                  | :? BinaryExprAdditiveContext
+                  | :? BinaryExprBitwiseShiftContext
+                  | :? BinaryExprRelationalContext
+                  | :? BinaryExprEqualityContext
+                  | :? BinaryExprBitwiseAndContext
+                  | :? BinaryExprBitwiseXorContext
+                  | :? BinaryExprBitwiseOrContext
+                  | :? BinaryExprLogicalAndContext
+                  | :? BinaryExprLogicalOrContext) ->
                     tracefn $"Binary: {text}"
-                    match exp.children.ToFSharpList() with
+                    match ctx.children.ToFSharpList() with
                     | left::op::right::[] ->
                         let expL = helper(left :?> ExprContext)
                         let expR = helper(right :?> ExprContext)
@@ -57,6 +67,7 @@ module ExpressionParser =
                         createBinaryExpression expL op expR
                     | _ ->
                         failwith "ERROR"
+
 
                 | :? UnaryExprContext as exp ->
                     tracefn $"Unary: {text}"

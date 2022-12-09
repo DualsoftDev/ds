@@ -29,9 +29,18 @@ module rec ExpressionSerializeModule =
     let serializeFunctionNameAndBoxedArguments (name:string) (args:Args) (withParenthesys:bool) =
         let isBinary = isBinaryFunctionOrOperator name
         if isBinary && args.Length = 2 then
-            let precedence = operatorPrecedenceMap[name]
-            let l = args[0].ToText(true)
-            let r = args[1].ToText(true)
+            let needParenthesys (seaName:string) (island:Arg) =
+                option {
+                    let! islandName = island.FunctionName
+                    let islandPrecedence = operatorPrecedenceMap.[islandName]
+                    let seaPrecedence = operatorPrecedenceMap.[seaName]
+                    return islandPrecedence > seaPrecedence
+                } |> Option.defaultValue false
+
+            let lWithParnethesys = needParenthesys name args[0]
+            let rWithParnethesys = needParenthesys name args[1]
+            let l = args[0].ToText(lWithParnethesys)
+            let r = args[1].ToText(rWithParnethesys)
             let text = $"{l} {name} {r}"
             if withParenthesys then $"({text})" else text
         else

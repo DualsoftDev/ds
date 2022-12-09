@@ -123,10 +123,9 @@ module ImportViewModule =
                 let dicFlow = doc.DicFlow
 
                 doc.Dummys |> Seq.iter(fun dummy -> dummy.Update(dicVertex))
-
                 let getFlowNodes(flows:Flow seq) = 
                     flows |>Seq.map(fun flow -> 
-                        let page = dicFlow.GetPage(flow)
+                        let page =  dicFlow.Where(fun w-> w.Value = flow).First().Key
                         let dummys = doc.Dummys.Where(fun f->f.Page = page)
                         let flowNode = ConvertFlow(flow, dummys)
 

@@ -49,11 +49,9 @@ module ImportCheck =
 
             let srcParents = parents
                             |> Seq.filter(fun group ->group.Value.Contains(edge.StartNode))
-                            |> Seq.filter(fun group ->group.Key.IsDummy |>not)
                             |> Seq.map (fun group -> group.Key)
             let tgtParents = parents
                             |> Seq.filter(fun group ->group.Value.Contains(edge.EndNode))
-                            |> Seq.filter(fun group ->group.Key.IsDummy |>not)
                             |> Seq.map (fun group -> group.Key)
             if(srcParents.Count() > 1) then failError (srcParents, edge.StartNode)
             if(tgtParents.Count() > 1) then failError (tgtParents, edge.EndNode)
@@ -77,7 +75,7 @@ module ImportCheck =
             pptEdges |> Seq.iter(fun edge ->
                 if(dicSameCheck.TryAdd(edge.Text,edge.Text)|>not)
                     then
-                        edge.ConnectionShape.ErrorConnect(ErrID._20, edge.Text, edge.PageNum)
+                        edge.ConnectionShape.ErrorConnect(ErrID._22, edge.Text, edge.PageNum)
             )
 
         //page 타이틀 중복체크

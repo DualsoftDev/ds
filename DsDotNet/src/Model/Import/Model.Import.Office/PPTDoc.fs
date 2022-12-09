@@ -152,8 +152,8 @@ module PPTDocModule =
                             let pagePPT = pages.Values.Filter(fun w->w.PageNum = page).First()
                             let sysName, flowName = GetSysNFlow(name, pagePPT.Title, pagePPT.PageNum)
 
-                            let node = pptNode(shape, page, flowName, false)
-                            if(node.Name ="" && node.NodeType = DUMMY|>not) then shape.ErrorName(ErrID._13, page)
+                            let node = pptNode(shape, page, flowName)
+                            if(node.Name ="") then shape.ErrorName(ErrID._13, page)
                             nodes.TryAdd(node.Key, node)  |>ignore )
 
                 let dicParentCheck = ConcurrentDictionary<string, int>()
@@ -163,13 +163,11 @@ module PPTDocModule =
                             |> Seq.iter (fun group ->
                                 let groupAllNodes = getGroupParentsChildren(page, group, nodes)
                                 let pptGroup = pptRealGroup(page, groupAllNodes)
-                                if(pptGroup.Parent.IsNone)
-                                then Office.ErrorPPT(Group, ErrID._18, "", pptGroup.PageNum)
-                                else
-                                    let parent = pptGroup.Parent.Value;
-                                    if(dicParentCheck.TryAdd(pptGroup.RealKey, pptGroup.PageNum))
-                                    then  parents.TryAdd(parent, pptGroup.Children)|>ignore
-                                    else  Office.ErrorPPT(Group, ErrID._17, $"{dicParentCheck.[pptGroup.RealKey]}-{parent.Name}", pptGroup.PageNum)
+                                
+                                let parent = pptGroup.Parent.Value;
+                                if(dicParentCheck.TryAdd(pptGroup.RealKey, pptGroup.PageNum))
+                                then  parents.TryAdd(parent, pptGroup.Children)|>ignore
+                                else  Office.ErrorPPT(Group, ErrID._17, $"{dicParentCheck.[pptGroup.RealKey]}-{parent.Name}", pptGroup.PageNum)
 
                     )
                 )
@@ -226,6 +224,11 @@ type PPTDocExt =
                          doc.Nodes 
                          |> Seq.filter(fun node -> node.NodeType = COPY)
                          |> Seq.collect(fun node ->
-                            node.CopySys.Select(fun copy -> copy.Value , copy.Key)
+                            node.CopySys.Select(fun copy -> 
+                                let path = Path.GetFullPath(Path.Combine(doc.DirectoryName, copy.Value))+".pptx"
+                                if File.Exists(path) |> not
+                                then node.Shape.ErrorPath(ErrID._29, node.PageNum, path)
+                                
+                                copy.Value , copy.Key)
                         )
      

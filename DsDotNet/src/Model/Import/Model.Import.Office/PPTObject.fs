@@ -88,7 +88,6 @@ module PPTObjectModule =
                     if (connStart = null && connEnd = null) then  conn.ErrorConnect(ErrID._4, startName, endName, iPage)
                     if (connStart = null) then  conn.ErrorConnect(ErrID._5, startName, endName, iPage)
                     if (connEnd = null) then  conn.ErrorConnect(ErrID._6, startName, endName, iPage)
-                    if (not existHead && not existTail) then  conn.ErrorConnect(ErrID._7, startName, endName, iPage)
                     if (existHead && existTail) 
                     then
                         if(not dashLine)
@@ -141,7 +140,7 @@ module PPTObjectModule =
         member x.IsUsing = bShow
         member x.Title = slidePart.PageTitle()
 
-    type pptNode(shape:Presentation.Shape, iPage:int, pageTitle:string, isDummy:bool)  =
+    type pptNode(shape:Presentation.Shape, iPage:int, pageTitle:string)  =
         let copySystems = Dictionary<string, string>() //copyName, orgiName
         let safeties    = HashSet<string>()
         let jobInfos = Dictionary<string, HashSet<string>>()  // jobBase, api SystemNames
@@ -193,9 +192,12 @@ module PPTObjectModule =
 
         do
             name <-  GetBracketsReplaceName(shape.InnerText)  |> trimSpace
+            if name.Contains(";") 
+            then shape.ErrorName(ErrID._18, iPage)
+
             nodeType <-
-                if isDummy then DUMMY
-                elif(shape.CheckRectangle())    then REAL
+                if(shape.CheckRectangle())      
+                then if name.Contains(".") then REALEx else REAL
                 elif(shape.CheckHomePlate())    then IF
                 elif(shape.CheckFoldedCorner()) then COPY
                 elif(shape.CheckEllipse())      then CALL
@@ -205,6 +207,14 @@ module PPTObjectModule =
                     || shape.CheckBevelShape()) then  BUTTON
 
                 else  shape.ErrorName(ErrID._1, iPage)
+
+            if nodeType.IsReal 
+            then //real이면 이름에 '.' 1개 까지 가능
+                if name.Split('.').length() > 2 
+                then  shape.ErrorName(ErrID._19, iPage)
+            else //real이 아니면 이름에 '.' 불가
+                if name.Contains(".") 
+                then  shape.ErrorName(ErrID._19, iPage)
 
             match nodeType with
             |CALL|REAL ->
@@ -235,7 +245,6 @@ module PPTObjectModule =
         member x.IfRXs       = ifRXs
         member x.BtnType = btnType
         member x.NodeType = nodeType
-        member x.IsDummy  = nodeType = DUMMY
         member x.PageTitle    = pageTitle
         member x.IsAlias :bool   = x.Alias.IsSome
 
@@ -287,7 +296,7 @@ module PPTObjectModule =
             then  Office.ErrorPPT(Group, ErrID._23, $"Reals:{reals|>nodeNames}", iPage)
 
             if(reals.Count() = 0 ) 
-            then  Office.ErrorPPT(Group, ErrID._25, $"Nodes:{nodes|>nodeNames}", iPage)
+            then  Office.ErrorPPT(Group, ErrID._24, $"Nodes:{nodes|>nodeNames}", iPage)
 
             parent <-
                 if(reals.Any()|>not) then None
@@ -295,10 +304,6 @@ module PPTObjectModule =
 
             let children = nodes
                             |> Seq.filter (fun node ->node.NodeType = REAL |> not)
-                            |> Seq.filter (fun node ->node.NodeType = DUMMY|>not)
-
-            if(children.Any() |> not) 
-            then  Office.ErrorPPT(Group, ErrID._22,  $"Nodes:{nodes|>nodeNames}", iPage)
 
             children |> Seq.iter(fun child -> childSet.TryAdd(child)|>ignore)
 
@@ -307,44 +312,4 @@ module PPTObjectModule =
 
         member x.Parent:pptNode option = parent
         member x.Children =  childSet.Values 
-    and
-        pptDummyGroup(iPage:int, nodes: pptNode seq) =
-        let mutable dummy :pptNode option = None
-        let childSet =  ConcurrentHash<pptNode>()
-        let nodeNames(nodes :pptNode seq) = nodes.Select(fun s->s.Name).JoinWith(", ")
-
-        do
-            let reals  = nodes.Where(fun w -> w.NodeType.IsReal)
-            let calls  = nodes.Where(fun w -> w.NodeType.IsCall)
-            let dummys = nodes.Where(fun w -> w.NodeType = DUMMY)
-
-            //1 child 는 dummy로 구성 불가
-            if dummys.Count() = 1 &&  reals.Count() = 1 && calls.Count() = 0  
-            then Office.ErrorPPT(Group, ErrID._19, $"{reals.First().Name}", nodes.First().PageNum) 
-            if dummys.Count() = 1 &&  reals.Count() = 0 && calls.Count() = 1  
-            then Office.ErrorPPT(Group, ErrID._19, $"{calls.First().Name}", nodes.First().PageNum) 
-
-
-            if(dummys.Count() > 1) 
-            then  Office.ErrorPPT(Group, ErrID._24, $"부모수:{dummys.Count()}", iPage)
-
-            if(reals.Count() = 0 && dummys.Count() = 0 ) 
-            then  Office.ErrorPPT(Group, ErrID._25, $"도형 타입확인", iPage)
-
-           
-            dummy <-
-                if(dummys.Any()|>not) then None
-                else Some(dummys |> Seq.head)
-
-            let children = nodes  |> Seq.filter (fun node ->node.NodeType = DUMMY|>not)
-            
-            if(children.Any() |> not) 
-            then  Office.ErrorPPT(Group, ErrID._12, $"자식수:0", iPage)
-
-            children |> Seq.iter(fun child -> childSet.TryAdd(child)|>ignore)
-
-        member x.PageNum = iPage
-
-        member x.DummyParent:pptNode option = dummy
-        member x.Children =  childSet.Values 
-        
+    

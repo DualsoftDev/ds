@@ -287,7 +287,7 @@ namespace Dual.Model.Import
             //T9_Group
             //T10_Button
             //T11_SubLoading
-            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\..\..\..\..\")) + "UnitTest\\UnitTest.Engine\\ImportPPT\\T11_ImportSystem.pptx";
+            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\..\..\..\..\")) + "UnitTest\\UnitTest.Engine\\ImportPPT\\debug.pptx";
             bool debug = File.Exists(path);
             if (debug)
             {

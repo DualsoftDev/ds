@@ -39,6 +39,10 @@ module PPTUtil =
                Office.ErrorPPT(ErrorCase.Name, errMsg, Office.ShapeName(shape), page, shape.InnerText)
         
         [<Extension>] 
+        static member ErrorPath(shape:#Shape, errMsg:string,  page:int, path:string) = 
+               Office.ErrorPPT(ErrorCase.Page, errMsg, Office.ShapeName(shape), page, path)
+        
+        [<Extension>] 
         static member ErrorShape(shape:#Shape, errMsg:string,  page:int) = 
                Office.ErrorPPT(ErrorCase.Shape, errMsg, Office.ShapeName(shape), page, shape.InnerText)
 

@@ -14,35 +14,39 @@ module WarnID =
     let _2 = 1, "Warnning message2"
 
 module ErrID =
-    let _1 = "Call에 점선은 지정된 모양이 아닙니다."
-    let _2 = "이름 마지막에 [#;#] 형식은 하나 이상 양의 정수이어야 합니다."
-    let _3 = "기능이 없는 연결입니다."
-    let _4 = "edge not connected"
-    let _5 = "start not connected"
-    let _6 = "end not connected"
-    let _7 = "there is no edge direction "
-    let _8 = "SReset edge는 한쪽이 둥근화살표 입니다."
+    let _1 = "사용불가 도형입니다."
+    let _2 = "Spare"
+    let _3 = "사용불가 연결 방식 입니다."
+    let _4 = "선이 도형에 연결이 안되었습니다."
+    let _5 = "선이 시작쪽 도형에 연결이 안되었습니다."
+    let _6 = "선이 종료쪽 도형에 연결이 안되었습니다."
+    let _7 = "Spare"
+    let _8 = "StartReset edge는 한쪽이 둥근화살표 입니다."
     let _9 = "양방향 edge 끝 화살표는 하나 이상 입니다"
     let _10 = "Interlock edge는  점선만 가능합니다"
-    let _11 = "인터페이스 인과는 약 리셋 불가"
-    let _12 = "Dummy 그룹을 구성하지 못하였습니다."
-    let _13 = "도형의 이름이 없거나 Dummy 그룹은 점선 원형입니다."
+    let _11 = "인터페이스 인과는 약 리셋이 불가능 합니다."
+    let _12 = "Spare"
+    let _13 = "도형의 이름이 없습니다."
     let _14 = "edge 연결가능도형 아님"
     let _15 = "edge not connected 시작 화살표 연결필요"
     let _16 = "edge not connected 끝   화살표 연결필요"
     let _17 = "Real의 내부자식은 한번만 정의 되어야 합니다."
-    let _18 = "Dummy 그룹은 사각형 내부에서만 사용가능합니다."
-    let _19 = "Dummy 그룹은 자식을 1개만 가질 수 없습니다."
-    let _20 = "중복된 화살표 연결이 존재합니다."
+    let _18 = "이름에 ';' 사용은 안됩니다."
+    let _19 = "Flow.Real 표기외에 이름에 '.' 사용은 안됩니다."
+    let _20 = "Flow 이름 (페이지 제목)에 '.' 사용은 안됩니다."
     let _21 = "동일한 이름의 페이지 타이틀이 존재합니다."
-    let _22 = "1 개는 dummy 지정이 불가능합니다."
+    let _22 = "중복된 화살표 연결이 존재합니다."
     let _23 = "1 개의 Real만 그룹지정이 되어야 합니다."
-    let _24 = "1 개의 dummy 그룹지정이 되어야 합니다."
-    let _25 = "그룹내 real 타입 하나는 존재 해야합니다."
-    let _26 = "이름에 MFlow경로 설정 '.' 기호는 1개 이여야 합니다. ex) MFlow.real"
-    let _27 = "해당이름의 MFlow가 없거나 이름에 ';' 사용은 안됩니다. (이름에 ';' 제거 혹은 다른 페이지 타이틀 이름 확인필요)"
+    let _24 = "그룹내 Real 타입 하나는 존재 해야합니다."
+
+
+    let _25 = "중복된 인터페이스 이름이 있습니다."
+
+    let _26 = "해당이름의 Flow가 없습니다."
+    let _27 = "해당이름의 Real이 없습니다."
+
     let _28 = "Safety 이름이 시스템 내부에 존재하지 않습니다."
-    let _29 = "이름에 '.' or ';' 사용은 안됩니다."
+    let _29 = "Loading 파일경로에 파일이 없습니다."
     let _30 = "버튼 타입은 출력값은 입력 불가입니다. [0, N] 수량을 사용하세요"
     let _31 = "시스템 이름과 Flow이름이 같으면 안됩니다."
     let _32 = "외부 시스템이 정의되지 않았습니다."
@@ -58,7 +62,7 @@ module ErrID =
     let _42 = "호출 Interface에 해당하는 대상 시스템에 Interface 이름이 없습니다."
     let _43 = "Copy 대상 시스템이 없습니다."
     let _44 = "System 이름 시작은 특수문자 및 숫자는 불가능합니다.(이름 내부에 공백 미지원)"
-    let _45 = "button 등록은 자신 System 에만 등록가능합니다."
+    let _45 = ""
     let _46 = "Call 이름은 '.' 으로 구분되어야 합니다.(ex: systemA.Inferface3)"
     let _47 = "호출 Interface에 해당하는 대상 시스템이 없습니다."
 
@@ -71,7 +75,7 @@ module ErrID =
 [<AutoOpen>]
 module MessgeError = 
 
-    type ErrorCase  = Shape | Conn | Page | Group | Name 
+    type ErrorCase  = Shape | Conn | Page | Group | Name | Path 
         with
         member x.ToText() =
             match x with
@@ -80,6 +84,7 @@ module MessgeError =
             |Page  -> "장표오류"
             |Group -> "그룹오류"
             |Name  -> "이름오류"
+            |Path  -> "경로오류"
 
 
 
@@ -91,6 +96,6 @@ module MessgeError =
             let itemName =  if(userMsg.IsSome && (userMsg.Value = ""|>not))
                             then $"[Page{page}:{objName}({userMsg.Value})" 
                             else $"[Page{page}:{objName}" 
-            failwithf  $"[{case.ToText()}] {msg} \t\t\t{itemName}]"
+            failwithf  $"[{case.ToText()}] {msg} \t\t{itemName}]"
 
         

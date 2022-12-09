@@ -205,11 +205,6 @@ module rec ExpressionPrologModule =
             | (:? string as a), (:? string as b) -> a = b
             | _ -> false
 
-    type ExpressionType =
-        | ExpTypeFunction
-        | ExpTypeVariable
-        | ExpTypeTag
-        | ExpTypeLiteral
 
     /// Expression 의 Terminal 이 될 수 있는 subclass: Tag<'T>, StorageVariable<'T>
     type IStorage =
@@ -228,7 +223,7 @@ module rec ExpressionPrologModule =
     /// Expression<'T> 을 boxed 에서 접근하기 위한 최소의 interface
     type IExpression =
         abstract DataType : System.Type
-        abstract ExpressionType : ExpressionType
+        //abstract ExpressionType : ExpressionType
         abstract BoxedEvaluatedValue : obj
         /// Tag<'T> 나 Variable<'T> 객체 boxed 로 반환
         abstract GetBoxedRawObject: unit -> obj

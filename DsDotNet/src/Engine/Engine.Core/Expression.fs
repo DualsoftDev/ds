@@ -30,16 +30,11 @@ module ExpressionModule =
         | Function of FunctionSpec<'T>  //f:(Arguments -> 'T) * name:string * args:Arguments
         interface IExpression with
             member x.DataType = x.DataType
-            member x.ExpressionType = x.ExpressionType
             member x.BoxedEvaluatedValue = x.Evaluate() |> box
             member x.GetBoxedRawObject() = x.GetBoxedRawObject()
             member x.ToText(withParenthesys) = x.ToText(withParenthesys)
 
         member x.DataType = typedefof<'T>
-        member x.ExpressionType =
-            match x with
-            | Terminal b -> b.ExpressionType
-            | Function _ -> ExpTypeFunction
 
     /// literal 'T 로부터 Expression<'T> 생성
     let literal (x:'T) =
@@ -75,12 +70,6 @@ module ExpressionModule =
             | VarDecl (expr, var) -> $"{var.DataType.Name} {var.Name} = {expr.ToText(false)}"
 
     type Terminal<'T> with
-        member x.ExpressionType =
-            match x with
-            | Tag _ -> ExpTypeTag
-            | Variable _ -> ExpTypeVariable
-            | Literal _ -> ExpTypeLiteral
-
         member x.GetBoxedRawObject() =
             match x with
             | Tag t -> t |> box

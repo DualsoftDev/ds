@@ -43,6 +43,7 @@ module ExpressionFunctionModule =
         | "<=" -> fLte args
         | "=" when t = "String" -> fEqualString args
         | "="  -> fEqual args
+        | ("!=" | "<>")  -> fNotEqual args
 
         | ("<<<" | "<<") -> fShiftLeft  args
         | (">>>" | ">>") -> fShiftRight args
@@ -52,12 +53,17 @@ module ExpressionFunctionModule =
         | ("^^^" | "^") ->  fBitwiseXor args
         | ("~~~" | "~") ->  failwith "Not binary operation" //fBitwiseNot args
 
+        | "&&"  -> fLogicalAnd  args
+        | "||"  -> fLogicalOr  args
+
+
         | _ -> failwith $"NOT Yet {op}"
         |> iexpr
 
     let createUnaryExpression (op:string) (opnd:IExpression) : IExpression =
         match op with
         | ("~" | "~~~" ) -> fBitwiseNot [opnd]
+        | "!"  -> fLogicalNot [opnd]
         | _ ->
             failwith $"NOT Yet {op}"
 
@@ -455,9 +461,9 @@ module ExpressionFunctionModule =
         let _gte (args:Args) = convertToDoublePair(args).All(fun (x, y) -> x >= y)
         let _lte (args:Args) = convertToDoublePair(args).All(fun (x, y) -> x <= y)
 
-        let _concat     (args:Args) = args.ExpectGteN(2).Select(evalArg).Cast<string>().Reduce(( + ))
-        let _logicalAnd (args:Args) = args.ExpectGteN(2).Select(evalArg).Cast<bool>()  .Reduce(( && ))
-        let _logicalOr  (args:Args) = args.ExpectGteN(2).Select(evalArg).Cast<bool>()  .Reduce(( || ))
+        let _concat     (args:Args) = args.ExpectGteN(2).Select(evalArg).Cast<string>().Reduce( + )
+        let _logicalAnd (args:Args) = args.ExpectGteN(2).Select(evalArg).Cast<bool>()  .Reduce( && )
+        let _logicalOr  (args:Args) = args.ExpectGteN(2).Select(evalArg).Cast<bool>()  .Reduce( || )
         let _logicalNot (args:Args) = args.Select(evalArg).Cast<bool>().Expect1() |> not
 
         let _shiftLeftInt8    (args:Args) = let n, shift = args.ExpectTyped2<int8,   int>() in n <<< shift

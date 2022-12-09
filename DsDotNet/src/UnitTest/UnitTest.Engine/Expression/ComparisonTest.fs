@@ -202,3 +202,45 @@ module ComparisionTestModule =
 
             for t in trues do
                 t |> evalExpr === true
+
+
+        [<Test>]
+        member __.``1 Logical And/Or/Not test`` () =
+            let trues =
+                [
+                    "true != false"
+                    "true <> false"
+
+                    "true = true"
+                    "false = false"
+                    "! true = false"
+                    "! false = true"
+                    "!true = false"
+                    "!false = true"
+                    "!true = !true"
+
+
+                    "true && true = true"
+                    "true && false  = false"
+                    "false && true = false"
+                    "false && false = false"
+
+
+                    "true || true = true"
+                    "true || false  = true"
+                    "false || true = true"
+                    "false || false = false"
+
+                    "(true || false) && true = true"
+                    "(false || false) && true = false"
+
+                    "2 > 3 = false"
+                    "3 > 2 = true"
+
+                    "3 > 2 = 10 > 9"
+
+
+                ]
+
+            for t in trues do
+                t |> evalExpr === true

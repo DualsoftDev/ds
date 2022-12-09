@@ -195,8 +195,9 @@ module rec ExpressionPrologModule =
 
         let isEqual (x:obj) (y:obj) =
             match x, y with
-            | Float64 x, Float64 y -> x = y     // double 로 환산가능한 숫자만 비교하면 모든 type 의 숫자 비교는 OK
+            | (:? bool as x), (:? bool as y) -> x = y
             | (:? string as a), (:? string as b) -> a = b
+            | Float64 x, Float64 y -> x = y     // double 로 환산가능한 숫자만 비교하면 모든 type 의 숫자 비교는 OK
             | _ ->
                 failwith "ERROR"
                 false

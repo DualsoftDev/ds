@@ -1,4 +1,12 @@
 /* grun expr toplevels -gui < g4test/expr/expr.expr */
+
+!true = false;
+
+false && true = false;
+true;
+false;
+true && false;
+
 2 + 3 * 4;
 8uy &&& 255uy = 8uy;
 -3;

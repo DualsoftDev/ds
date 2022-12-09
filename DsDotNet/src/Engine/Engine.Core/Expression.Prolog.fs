@@ -175,9 +175,10 @@ module rec ExpressionPrologModule =
 
         let (|Bool|_|) (x:obj) =
             match x with
-            | :? bool as n -> Some n
-            | Int32 n when n <> 0 -> Some true      // todo: 다른 numeric type
-            | _ -> None
+            | :? bool as b -> Some b
+            | Int32 n when n = 0 -> Some false      (* int32 로 변환 가능한 모든 numeric type 포함 *)
+            | Int32 _            -> Some true
+            | _ -> None  // bool casting 실패
 
         let (|PLCTag|_|) (x:obj) =
             match x with

@@ -46,6 +46,8 @@ module ExpressionModule =
 
     /// Tag<'T> 로부터 Expression<'T> 생성
     let tag (t: Tag<'T>) = Terminal (Tag t)
+
+    /// Variable<'T> 로부터 Expression<'T> 생성
     let var (t: StorageVariable<'T>) = Terminal (Variable t)
 
     type Statement =
@@ -70,13 +72,13 @@ module ExpressionModule =
             | VarDecl (expr, var) -> $"{var.DataType.Name} {var.Name} = {expr.ToText(false)}"
 
     type Terminal<'T> with
-        member x.GetBoxedRawObject() =
+        member x.GetBoxedRawObject(): obj =
             match x with
             | Tag t -> t |> box
             | Variable v -> v
             | Literal v -> v |> box
 
-        member x.Evaluate() =
+        member x.Evaluate(): 'T =
             match x with
             | Tag t -> t.Value
             | Variable v -> v.Value
@@ -89,12 +91,12 @@ module ExpressionModule =
             | Literal v -> sprintf "%A" v
 
     type Expression<'T> with
-        member x.GetBoxedRawObject() =
+        member x.GetBoxedRawObject() =  // return type:obj    return type 명시할 경우, 다음 compile error 발생:  error FS1198: 제네릭 멤버 'ToText'이(가) 이 프로그램 지점 전의 비균일 인스턴스화에 사용되었습니다. 이 멤버가 처음에 오도록 멤버들을 다시 정렬해 보세요. 또는, 인수 형식, 반환 형식 및 추가 제네릭 매개 변수와 제약 조건을 포함한 멤버의 전체 형식을 명시적으로 지정하세요.
             match x with
             | Terminal b -> b.GetBoxedRawObject()
             | Function fs -> fs |> box
 
-        member x.Evaluate() =
+        member x.Evaluate(): 'T =
             match x with
             | Terminal b -> b.Evaluate()
             | Function fs -> fs.f fs.args

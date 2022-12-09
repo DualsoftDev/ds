@@ -99,11 +99,6 @@ module TestModule =
             fAbs [v 13]                  |> evaluate === 13
             fAbs [v -13]                 |> evaluate === 13
             fAbs [v -13.0]               |> evaluate === 13.0
-            fBitwiseXor [v 13; v 11]         |> evaluate === 6
-            fBitwiseAnd [v 2; v 3]           |> evaluate === 2
-            fBitwiseAnd [v 1; v 2; v 3; v 4] |> evaluate === 0
-            fBitwiseOr [v 1; v 2; v 3; v 4]  |> evaluate === 7
-            fBitwiseNot [v 65535]            |> evaluate === -65536
             fAdd [v 1; v 2]              |> evaluate === 3
             fSub [v 5; v 3]              |> evaluate === 2
             fMul [v 2; v 3]              |> evaluate === 6
@@ -116,7 +111,7 @@ module TestModule =
 
             fAbs [ fSub [fAdd [v 1.1; v 2.2]; v 3.3] ] |> evaluate :?> double <= 0.00001 |> ShouldBeTrue
             fAbs [ fSub [fMul [v 1.1; v 2.0]; v 2.2] ] |> evaluate :?> double <= 0.00001 |> ShouldBeTrue
-            addString [v "Hello, "; v "world!"]|> evaluate === "Hello, world!"
+            fConcat [v "Hello, "; v "world!"]|> evaluate === "Hello, world!"
             fMul [v 2; v 3] |> evaluate === 6
             fEqualString [v "Hello"; v "world"]    |> evaluate === false
             fEqualString [v "Hello"; v "Hello"]    |> evaluate === true
@@ -131,14 +126,14 @@ module TestModule =
 
             fGte [v 2; v 3]                        |> evaluate === false
             fGte [v 5; v 4]                        |> evaluate === true
-            noT [v true]                          |> evaluate  === false
-            noT [v false]                         |> evaluate  === true
-            anD [v true; v false]                 |> evaluate === false
-            anD [v true; v true]                  |> evaluate === true
-            anD [v true; v true; v true; v false] |> evaluate === false
-            oR  [v true; v false]                 |> evaluate === true
-            oR  [v false;v false]                 |> evaluate === false
-            oR  [v true; v true; v true; v false] |> evaluate === true
+            fLogicalNot [v true]                          |> evaluate  === false
+            fLogicalNot [v false]                         |> evaluate  === true
+            fLogicalAnd [v true; v false]                 |> evaluate === false
+            fLogicalAnd [v true; v true]                  |> evaluate === true
+            fLogicalAnd [v true; v true; v true; v false] |> evaluate === false
+            fLogicalOr  [v true; v false]                 |> evaluate === true
+            fLogicalOr  [v false;v false]                 |> evaluate === false
+            fLogicalOr  [v true; v true; v true; v false] |> evaluate === true
             fShiftLeft [v 1; v 1]                  |> evaluate === 2
             fShiftLeft [v 2; v -1]                 |> evaluate === 0
             fShiftLeft [v 1; v 3]                  |> evaluate === 8

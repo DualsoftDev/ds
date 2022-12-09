@@ -86,7 +86,7 @@ expr:   functionName '(' arguments? ')'         # FunctionCallExpr  // func call
             | '&&' | '||'     // logical and or
             |'=' | '!='
             |'>' | '>=' | '<' | '<='
-            | '&' | '|' | '&&&' | '|||'     // bitwise and or (C++/F# style)
+            | '&' | '|' | '^' | '&&&' | '|||' | '^^^'     // bitwise and/or/xor (C++/F# style)
             | '<<' | '<<<' | '>>' | '>>>'   // bitwise shift
             ;
 

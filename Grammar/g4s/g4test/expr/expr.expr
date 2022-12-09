@@ -1,4 +1,5 @@
 /* grun expr toplevels -gui < g4test/expr/expr.expr */
+8uy &&& 255uy = 8uy;
 -3;
 1 >>> 2;
 

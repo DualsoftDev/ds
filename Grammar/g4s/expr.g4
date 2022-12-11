@@ -27,6 +27,7 @@ terminal: storage | tag | literal;
         /* UL */ | literalUint64
         /*    */ | literalChar
         /*    */ | literalString
+        /*    */ | literalBool
     ;
         literalSingle :SINGLE;
         literalDouble :DOUBLE;
@@ -40,6 +41,7 @@ terminal: storage | tag | literal;
         literalUint64 :UINT64;
         literalChar   :CHAR;
         literalString :STRING;
+        literalBool   :'true' | 'false';
 
 toplevels: toplevel (';' toplevel)* (';')?;
     toplevel: expr|statement;
@@ -61,30 +63,69 @@ statement: assign | varDecl;
         | 'single' | 'float32' | 'float'
         | 'char'
         | 'string'
+        | 'bool' | 'boolean'
     ;
 
 
 // https://stackoverflow.com/questions/41017948/antlr4-the-following-sets-of-rules-are-mutually-left-recursive
 // https://github.com/antlr/antlr4/blob/master/doc/parser-rules.md#alternative-labels
-expr:   functionName '(' arguments? ')'         # FunctionCallExpr  // func call like f(), f(x), f(1,2)
-    |   storage ('[' expr ']')+                # ArrayReferenceExpr // array index like $a[i], $a[i][j]
-    |   unaryOperator expr                      # UnaryExpr           // unary minus, boolean not
-    |   expr binaryOperator expr                # BinaryExpr // ':=': assignment equality comparison (lowest priority op)
-    |   terminal                                # TerminalExpr
-    |   '(' expr ')'                            # ParenthesysExpr
+expr: functionName '(' arguments? ')'                 # FunctionCallExpr    // func call like f(), f(x), f(1,2)
+    | '(' type ')' expr                               # CastingExpr
+    | storage ('[' expr ']')+                         # ArrayReferenceExpr  // array index like $a[i], $a[i][j]
+    | unaryOperator expr                              # UnaryExpr           // unary minus, boolean not
+    // priority 순서대로 나열되어야 함.  https://learn.microsoft.com/en-us/cpp/c-language/precedence-and-order-of-evaluation?view=msvc-170
+    // equality 의 경우, 위 문서가 잘못된 듯 함..
+    | expr binaryOperatorMultiplicative expr          #BinaryExprMultiplicative
+    |   expr binaryOperatorAdditive expr              #BinaryExprAdditive
+    |   expr binaryOperatorBitwiseShift expr          #BinaryExprBitwiseShift
+    |   expr binaryOperatorRelational expr            #BinaryExprRelational
+    |   expr binaryOperatorBitwiseAnd expr            #BinaryExprBitwiseAnd
+    |   expr binaryOperatorBitwiseXor expr            #BinaryExprBitwiseXor
+    |   expr binaryOperatorBitwiseOr expr             #BinaryExprBitwiseOr
+
+    |   expr binaryOperatorLogicalAnd expr            #BinaryExprLogicalAnd
+    |   expr binaryOperatorLogicalOr expr             #BinaryExprLogicalOr
+    |   expr binaryOperatorEquality expr              #BinaryExprEquality
+
+    | terminal                                        #TerminalExpr
+    | '(' expr ')'                                    #ParenthesysExpr
     ;
 
     arguments: exprList;
     exprList : expr (',' expr)* ;   // arg list
-    unaryOperator: '-'|'!';
-    binaryOperator:
-            '+'|'-'|'*'|'/'|'%'
-            | '&&' | '||'     // logical and or
-            |'=' | '!='
-            |'>' | '>=' | '<' | '<='
-            | '&' | '|' | '&&&' | '|||'   // bitwise and or (C++/F# style)
-            | '<<' | '<<<' | '>>' | '>>>'   // bitwise shift
+    unaryOperator:
+            // '-'|
+             '!'
+            | '~' | '~~~'                   // bitwise negation (C++/F# style)
             ;
+    binaryOperatorMultiplicative: '*'|'/'|'%';
+    binaryOperatorAdditive:'+'|'-';
+    binaryOperatorBitwiseShift: '<<' | '<<<' | '>>' | '>>>';   // bitwise shift
+    binaryOperatorRelational:'>' | '>=' | '<' | '<=';
+    binaryOperatorEquality:'=' | '!=' | '<>';
+    binaryOperatorBitwiseAnd: '&' | '&&&';   // bitwise and   (C++/F# style)
+    binaryOperatorBitwiseXor: '^' | '^^^';   // bitwise xor
+    binaryOperatorBitwiseOr: '|' | '|||';   // bitwise or
+
+    binaryOperatorLogicalAnd: '&&';     // logical and
+    binaryOperatorLogicalOr: '||';     // logical or
+
+
+    binaryOperator:
+          binaryOperatorMultiplicative
+        | binaryOperatorAdditive
+        | binaryOperatorBitwiseShift
+        | binaryOperatorRelational
+        | binaryOperatorEquality
+        | binaryOperatorBitwiseAnd
+        | binaryOperatorBitwiseXor
+        | binaryOperatorBitwiseOr
+        | binaryOperatorLogicalAnd
+        | binaryOperatorLogicalOr
+        ;
+
+
+
 
 //INTEGER: SIGN? DIGITS;
 IDENTIFIER: VALID_ID_START VALID_ID_CHAR*;

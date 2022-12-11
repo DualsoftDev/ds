@@ -49,7 +49,7 @@ double myDouble = 0.0;
             storages.Count === numAddedVariables
 
             for KeyValue(k, v) in storages do
-                ExpressionPrologSubModule.toDouble v.Value === 0.0
+                ExpressionPrologSubModule.toFloat64 v.Value === 0.0
 
             (fun () -> "int8 myInt8 = 0y;" |> parseCode storages |> ignore) |> ShouldFailWithSubstringT "Duplicated"
             storages.Count === numAddedVariables
@@ -86,7 +86,7 @@ uint64 myUInt64 = 32UL;
             storages.Count === numAddedVariables
 
             for KeyValue(k, v) in storages do
-                ExpressionPrologSubModule.toDouble v.Value === 32.0
+                ExpressionPrologSubModule.toFloat64 v.Value === 32.0
 
 
         [<Test>]
@@ -104,7 +104,7 @@ double myDouble = 3.14;
             storages.Count === numAddedVariables
 
             for KeyValue(k, v) in storages do
-                Math.Abs(ExpressionPrologSubModule.toDouble v.Value - 3.14) <= 0.0001 |> ShouldBeTrue
+                Math.Abs(ExpressionPrologSubModule.toFloat64 v.Value - 3.14) <= 0.0001 |> ShouldBeTrue
 
 
         [<Test>]
@@ -122,5 +122,5 @@ double myDouble = 3.14 + 3.14;
             storages.Count === numAddedVariables
 
             for KeyValue(k, v) in storages do
-                Math.Abs(ExpressionPrologSubModule.toDouble v.Value - 3.14 * 2.0) <= 0.0001 |> ShouldBeTrue
+                Math.Abs(ExpressionPrologSubModule.toFloat64 v.Value - 3.14 * 2.0) <= 0.0001 |> ShouldBeTrue
 

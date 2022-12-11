@@ -35,15 +35,15 @@ module PPTUtil =
     type Office =
 
         [<Extension>] 
-        static member ErrorName(shape:#Shape, errMsg:string,  page:int) = 
+        static member ErrorName(shape:Shape, errMsg:string,  page:int) = 
                Office.ErrorPPT(ErrorCase.Name, errMsg, Office.ShapeName(shape), page, shape.InnerText)
         
         [<Extension>] 
-        static member ErrorPath(shape:#Shape, errMsg:string,  page:int, path:string) = 
+        static member ErrorPath(shape:Shape, errMsg:string,  page:int, path:string) = 
                Office.ErrorPPT(ErrorCase.Page, errMsg, Office.ShapeName(shape), page, path)
         
         [<Extension>] 
-        static member ErrorShape(shape:#Shape, errMsg:string,  page:int) = 
+        static member ErrorShape(shape:Shape, errMsg:string,  page:int) = 
                Office.ErrorPPT(ErrorCase.Shape, errMsg, Office.ShapeName(shape), page, shape.InnerText)
 
         [<Extension>] 
@@ -60,13 +60,13 @@ module PPTUtil =
 
         //shape ID 구하기
         [<Extension>] 
-        static member GetId(shape:#Shape) = 
+        static member GetId(shape:Shape) = 
                          shape.Descendants<NonVisualShapeProperties>().First()
                               .Descendants<NonVisualDrawingProperties>().First().Id
 
 
         [<Extension>] 
-        static member IsOutlineExist(shape:#Shape) = 
+        static member IsOutlineExist(shape:Shape) = 
             let outline = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.Outline>().FirstOrDefault();
             if(outline = null)
             then 
@@ -99,7 +99,7 @@ module PPTUtil =
                 head = LineEndValues.None && tail = LineEndValues.None
 
         [<Extension>] 
-        static member CheckShape(shape:#Shape) = 
+        static member CheckShape(shape:Shape) = 
             //도형이 아니면 필터  NonVisualShapeDrawingProperties
             let outline = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.Outline>().FirstOrDefault();
             if(outline = null && shape.Descendants<ShapeStyle>().Any()|>not) then false
@@ -110,7 +110,7 @@ module PPTUtil =
                 else true
 
         [<Extension>] 
-        static member ShapeName(shape:#Shape) = 
+        static member ShapeName(shape:Shape) = 
                         let shapeProperties = shape.Descendants<NonVisualShapeProperties>().FirstOrDefault();
                         let prop = shapeProperties.Descendants<NonVisualDrawingProperties>().FirstOrDefault();
                         prop.Name.Value
@@ -123,7 +123,7 @@ module PPTUtil =
     
         //shape Position 구하기
         [<Extension>] 
-        static member GetPosition(shape:#Shape, sildeSize:int*int) = 
+        static member GetPosition(shape:Shape, sildeSize:int*int) = 
                 let transform2D = shape.Descendants<ShapeProperties>().FirstOrDefault().Descendants<Drawing.Transform2D>().FirstOrDefault()
                 let xy = transform2D.Descendants<Drawing.Offset>().FirstOrDefault()  //좌상단 x,y
                 let wh = transform2D.Descendants<Drawing.Extents>().FirstOrDefault()
@@ -140,15 +140,15 @@ module PPTUtil =
     
 
         [<Extension>] 
-        static member CheckBevelShape(shape:#Shape) = 
+        static member CheckBevelShape(shape:Shape) = 
             if(Office.CheckShape(shape) |> not) then false
             else
                 let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
                 (  geometry.Preset.Value = Drawing.ShapeTypeValues.Bevel
                 )    
-                
+  
         [<Extension>] 
-        static member CheckDonutShape(shape:#Shape) = 
+        static member CheckDonutShape(shape:Shape) = 
             
             if(Office.CheckShape(shape) |> not) then false
             else
@@ -163,7 +163,7 @@ module PPTUtil =
                       
 
         [<Extension>] 
-        static member CheckEllipse(shape:#Shape) = 
+        static member CheckEllipse(shape:Shape) = 
             if(Office.CheckShape(shape) |> not) then false
             else
                 let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
@@ -176,7 +176,7 @@ module PPTUtil =
      
 
         [<Extension>] 
-        static member CheckRectangle(shape:#Shape) = 
+        static member CheckRectangle(shape:Shape) = 
                 if(Office.CheckShape(shape) |> not) then false
                 else
                     let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
@@ -188,7 +188,7 @@ module PPTUtil =
                     ||  geometry.Preset.Value = Drawing.ShapeTypeValues.FlowChartProcess)    
         
         [<Extension>] 
-        static member CheckFoldedCorner(shape:#Shape) = 
+        static member CheckFoldedCorner(shape:Shape) = 
                 if(Office.CheckShape(shape) |> not) then false
                 else
                     let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
@@ -196,7 +196,7 @@ module PPTUtil =
                     (   geometry.Preset.Value = Drawing.ShapeTypeValues.FoldedCorner && round )
         
         [<Extension>] 
-        static member CheckHomePlate(shape:#Shape) = 
+        static member CheckHomePlate(shape:Shape) = 
                 if(Office.CheckShape(shape) |> not) then false
                 else
                     let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
@@ -206,7 +206,7 @@ module PPTUtil =
                     ||geometry.Preset.Value = Drawing.ShapeTypeValues.FlowChartOffpageConnector)
 
         [<Extension>] 
-        static member CheckNoSmoking(shape:#Shape) = 
+        static member CheckNoSmoking(shape:Shape) = 
                 if(Office.CheckShape(shape) |> not) then false
                 else
                     let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
@@ -214,15 +214,25 @@ module PPTUtil =
 
         ///Start Btn 별도 정의 필요 없음  DS에서 전체/Flow 별로 자동생성
         [<Extension>] 
-        static member CheckBlockArc(shape:#Shape) = 
+        static member CheckBlockArc(shape:Shape) = 
                 if(Office.CheckShape(shape) |> not) then false
                 else
                     false
                     //let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
                     //geometry.Preset.Value = Drawing.ShapeTypeValues.BlockArc   
-
+        
+        
         [<Extension>] 
-        static member IsDashShape(shape:#Shape) = 
+        static member CheckButtonShape(shape:Shape) = 
+                    if (shape.CheckDonutShape()      
+                        || shape.CheckBlockArc()      
+                        || shape.CheckNoSmoking()     
+                        || shape.CheckBevelShape())    
+                    then true
+                    else false
+                
+        [<Extension>] 
+        static member IsDashShape(shape:Shape) = 
             if(shape.Descendants<ShapeProperties>().First().Descendants<Drawing.Outline>().Any()|>not) then false
             else 
                 let presetDash = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.Outline>().FirstOrDefault().Descendants<Drawing.PresetDash>()
@@ -245,7 +255,7 @@ module PPTUtil =
                 prop.Name.Value
         
         [<Extension>]
-        static member IsTitleBox(shape:#Shape) = 
+        static member IsTitleBox(shape:Shape) = 
                     if (shape.Descendants<ApplicationNonVisualDrawingProperties>().Any() |> not) then false
                     elif (shape.Descendants<ApplicationNonVisualDrawingProperties>().First().Descendants<PlaceholderShape>().Any() |> not ) then false
                     else true

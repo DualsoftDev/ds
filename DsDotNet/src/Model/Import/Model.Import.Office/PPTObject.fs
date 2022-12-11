@@ -132,6 +132,19 @@ module PPTObjectModule =
                 for name in names do
                     yield name, newName(name)
             }
+
+    let nameCheck(shape:Shape, nodeType:NodeType, iPage:int) =
+        let name = GetBracketsReplaceName(shape.InnerText) |> trimSpace
+        if name.Contains(";") 
+            then shape.ErrorName(ErrID._18, iPage)
+        if nodeType = COPY && GetSquareBrackets(shape.InnerText, false).length() = 0
+        then  shape.ErrorName(ErrID._7, iPage)
+        if nodeType = CALL && name.Contains("$")|>not 
+        then  shape.ErrorName(ErrID._12, iPage)
+        //REAL other flow 아니면 이름에 '.' 불가
+        if nodeType <> REALEx && name.Contains(".") 
+        then  shape.ErrorName(ErrID._19, iPage)
+
     let IsDummyShape(shape:Shape) = shape.IsDashShape() && (shape.CheckRectangle()||shape.CheckEllipse())
 
     type pptPage(slidePart:SlidePart, iPage:int , bShow:bool) =
@@ -183,38 +196,30 @@ module PPTObjectModule =
         let updateIF(text:string)      =
             ifName <- GetBracketsReplaceName(text) |> trimSpace
             let txrx = GetSquareBrackets(shape.InnerText, false)
-            if(txrx.Contains('~'))
-            then
-                let txs = (txrx.Split('~')[0])
-                let rxs = (txrx.Split('~')[1])
-                ifTXs  <- txs.Split(';').Where(fun f->f=""|>not) |> trimStartEndSeq |> Seq.filter(fun f->f="_"|>not) |> HashSet
-                ifRXs  <- rxs.Split(';').Where(fun f->f=""|>not) |> trimStartEndSeq |> Seq.filter(fun f->f="_"|>not) |> HashSet
-
+            if(txrx.length() > 0)
+            then 
+                if(txrx.Contains('~'))
+                then
+                    let txs = (txrx.Split('~')[0])
+                    let rxs = (txrx.Split('~')[1])
+                    ifTXs  <- txs.Split(';').Where(fun f->f=""|>not) |> trimStartEndSeq |> Seq.filter(fun f->f="_"|>not) |> HashSet
+                    ifRXs  <- rxs.Split(';').Where(fun f->f=""|>not) |> trimStartEndSeq |> Seq.filter(fun f->f="_"|>not) |> HashSet
+                else
+                    shape.ErrorName(ErrID._43, iPage)
+                
         do
             name <-  GetBracketsReplaceName(shape.InnerText)  |> trimSpace
-            if name.Contains(";") 
-            then shape.ErrorName(ErrID._18, iPage)
-
+            
             nodeType <-
                 if(shape.CheckRectangle())      
                 then if name.Contains(".") then REALEx else REAL
                 elif(shape.CheckHomePlate())    then IF
                 elif(shape.CheckFoldedCorner()) then COPY
                 elif(shape.CheckEllipse())      then CALL
-                elif(shape.CheckDonutShape()
-                    || shape.CheckBlockArc()
-                    || shape.CheckNoSmoking()
-                    || shape.CheckBevelShape()) then  BUTTON
-
+                elif(shape.CheckButtonShape())  then  BUTTON
                 else  shape.ErrorName(ErrID._1, iPage)
 
-            if nodeType.IsReal 
-            then //real이면 이름에 '.' 1개 까지 가능
-                if name.Split('.').length() > 2 
-                then  shape.ErrorName(ErrID._19, iPage)
-            else //real이 아니면 이름에 '.' 불가
-                if name.Contains(".") 
-                then  shape.ErrorName(ErrID._19, iPage)
+            nameCheck (shape, nodeType, iPage)
 
             match nodeType with
             |CALL|REAL ->

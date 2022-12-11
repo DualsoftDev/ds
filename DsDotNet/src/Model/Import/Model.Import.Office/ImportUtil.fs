@@ -16,7 +16,12 @@ module ImportU =
 
     let private createCallVertex(mySys:DsSystem, node:pptNode, parentReal:Real Option, parentFlow:Flow Option, dicSeg:Dictionary<string, Vertex>) =
         let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
-      
+
+        match mySys.TryFindLoadedSystem(sysName) with
+        |Some sys -> if sys.ReferenceSystem.ApiItems.TryFind(fun f->f.Name = apiName).IsNone
+                     then node.Shape.ErrorName(ErrID._33, node.PageNum)
+        |None -> node.Shape.ErrorName(ErrID._32, node.PageNum)
+
         let job = mySys.Jobs.First(fun job -> job.Name = sysName+"_"+apiName)
         let call =
             if(parentReal.IsSome)
@@ -332,6 +337,8 @@ module ImportU =
                                     then trxName.Split('.').[0], trxName.Split('.').[1]
                                     else flow.Name, trxName
                                                      
+                                if dicFlow.Values.Where(fun w->w.Name = flowName).IsEmpty()
+                                then Office.ErrorPPT(Name, ErrID._42, $"원인이름{flowName}: 전체이름[{node.Shape.InnerText}] 해당도형[{node.Shape.ShapeName()}]", node.PageNum)
                                 let vertex = sys.TryFindGraphVertex([|sys.Name;flowName;realName|])
                                 if vertex.IsNone
                                 then Office.ErrorPPT(Name, ErrID._41, $"원인이름{realName}: 전체이름[{node.Shape.InnerText}] 해당도형[{node.Shape.ShapeName()}]", node.PageNum)

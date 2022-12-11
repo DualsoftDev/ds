@@ -34,7 +34,7 @@ module internal ModelFindModule =
                                 let! v = real.Graph.TryFindVertex(remaining.Combine())
                                 return box v
                             }
-                    | _ -> failwith "ERROR"
+                    | _ -> None
 
             | dev::xs when system.LoadedSystems.Any(nameEq dev) ->
                 let device = system.LoadedSystems.Find(nameEq dev)

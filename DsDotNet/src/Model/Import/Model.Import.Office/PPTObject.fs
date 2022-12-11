@@ -137,8 +137,11 @@ module PPTObjectModule =
         let name = GetBracketsReplaceName(shape.InnerText) |> trimSpace
         if name.Contains(";") 
             then shape.ErrorName(ErrID._18, iPage)
-        if nodeType = COPY && GetSquareBrackets(shape.InnerText, false).length() = 0
-        then  shape.ErrorName(ErrID._7, iPage)
+        if nodeType = COPY
+        then 
+            let name, number = GetTailNumber(shape.InnerText)
+            if GetSquareBrackets(name, false).length() = 0
+            then  shape.ErrorName(ErrID._7, iPage)
         if nodeType = CALL && name.Contains("$")|>not 
         then  shape.ErrorName(ErrID._12, iPage)
         //REAL other flow 아니면 이름에 '.' 불가

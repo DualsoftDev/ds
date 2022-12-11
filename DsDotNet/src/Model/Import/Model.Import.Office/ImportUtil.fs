@@ -17,17 +17,14 @@ module ImportU =
     let private createCallVertex(mySys:DsSystem, node:pptNode, parentReal:Real Option, parentFlow:Flow Option, dicSeg:Dictionary<string, Vertex>) =
         let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
 
-        match mySys.TryFindLoadedSystem(sysName) with
-        |Some sys -> if sys.ReferenceSystem.ApiItems.TryFind(fun f->f.Name = apiName).IsNone
-                     then node.Shape.ErrorName(ErrID._33, node.PageNum)
-        |None -> node.Shape.ErrorName(ErrID._32, node.PageNum)
-
-        let job = mySys.Jobs.First(fun job -> job.Name = sysName+"_"+apiName)
         let call =
-            if(parentReal.IsSome)
-            then  Call.Create(job, ParentReal (parentReal.Value))
-            else  Call.Create(job, ParentFlow (parentFlow.Value))
-
+            match mySys.Jobs.TryFind(fun job -> job.Name = sysName+"_"+apiName) with
+            |Some job ->
+                if(parentReal.IsSome)
+                then  Call.Create(job, ParentReal (parentReal.Value))
+                else  Call.Create(job, ParentFlow (parentFlow.Value))
+            |None -> node.Shape.ErrorName(ErrID._32, node.PageNum)
+        
         dicSeg.Add(node.Key, call)
         
     let private getParent(edge:pptEdge, parents:ConcurrentDictionary<pptNode, seq<pptNode>>, dicSeg:Dictionary<string, Vertex>) =

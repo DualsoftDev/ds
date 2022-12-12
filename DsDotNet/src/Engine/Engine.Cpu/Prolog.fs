@@ -1,8 +1,5 @@
 namespace rec Engine.Cpu
 
-open System.Collections.Generic
-open System.Linq
-open System.Diagnostics
 open Engine.Core
 
 
@@ -30,17 +27,17 @@ module Prolog =
         let exprCR = tag <| tagCR
         let exprCE = tag <| tagCE
 
-        // ---------------------------------------------------               // S R E
-        let condSR =      ( (!!) exprCS                  <&&> (!!) exprCE )  // 0 X 0
-                     <||> (      exprCS <&&>      exprCR <&&> (!!) exprCE )  // 1 1 0
-        let condSG =             exprCS <&&> (!!) exprCR <&&> (!!) exprCE    // 1 0 0
-        let condSF =                         (!!) exprCR <&&>      exprCE    // X 0 1
-        let condSH =                              exprCR <&&>      exprCE    // X 1 1
+        // ---------------------------------------------------                // S R E
+        let condS4R =      ( (!!) exprCS                  <&&> (!!) exprCE )  // 0 X 0
+                      <||> (      exprCS <&&>      exprCR <&&> (!!) exprCE )  // 1 1 0
+        let condS4G =             exprCS <&&> (!!) exprCR <&&> (!!) exprCE    // 1 0 0
+        let condS4F =                         (!!) exprCR <&&>      exprCE    // X 0 1
+        let condS4H =                              exprCR <&&>      exprCE    // X 1 1
 
-        let assignS4R = tagS4R <== condSR
-        let assignS4G = tagS4G <== condSG
-        let assignS4F = tagS4F <== condSF
-        let assignS4H = tagS4H <== condSH
+        let assignS4R = tagS4R <== condS4R
+        let assignS4G = tagS4G <== condS4G
+        let assignS4F = tagS4F <== condS4F
+        let assignS4H = tagS4H <== condS4H
 
         let assignStatements = [assignS4R; assignS4G; assignS4F; assignS4H]
 

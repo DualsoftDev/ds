@@ -230,21 +230,21 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                 yield! sysctx.Descendants<CausalTokenContext>().Cast<ParserRuleContext>()
             ]
 
-            let isCallName (pw:ParentWrapper, Fqdn(vetexPath)) = 
+            let isCallName (pw:ParentWrapper, Fqdn(vetexPath)) =
                     let flow = pw.GetFlow()
                     tryFindCall flow.System vetexPath |> Option.isSome
-               
+
             let isAliasMnemonic (pw:ParentWrapper, mnemonic:string) =
                 let flow = pw.GetFlow()
                 tryFindAliasDefWithMnemonic flow mnemonic |> Option.isSome
 
-           
+
             let isJobName (pw, name) =
                 tryFindJob pw name |> Option.isSome
 
             let isJobOrAlias (pw:ParentWrapper, Fqdn(vetexPath)) =
                 isJobName (pw.GetFlow().System, vetexPath.Last()) || isAliasMnemonic (pw, vetexPath.JoinWith("."))
-                
+
             let tryCreateCallOrAlias (parentWrapper:ParentWrapper) name =
                 let flow = parentWrapper.GetFlow()
                 let tryJob = tryFindJob system name
@@ -279,18 +279,18 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                             let flow = parent.GetCore() :?> Flow
                             if not <| isCallName (parent, ctxInfo.Names)
                             then
-                                Real.Create(r, flow) |> ignore    
-                           
+                                Real.Create(r, flow) |> ignore
+
                         | 1, c::[] when not <| (isAliasMnemonic (parent, ctxInfo.Names.Combine())) ->
                             let flow = parent.GetFlow()
                             let job = tryFindJob system c |> Option.get
                             Call.Create(job, parent) |> ignore
-                        
+
                         | 1, realorFlow::cr::[] when not <| isAliasMnemonic (parent, ctxInfo.Names.Combine()) ->
                             let otherFlowReal = tryFindReal system realorFlow cr |> Option.get
                             RealOtherFlow.Create(otherFlowReal, parent) |> ignore
                             tracefn $"{realorFlow}.{cr} should already have been created."
-                           
+
                         | 2, q::[] when isAliasMnemonic (parent, ctxInfo.Names.Combine()) ->
                             let flow = parent.GetFlow()
                             let aliasDef = tryFindAliasDefWithMnemonic flow q |> Option.get
@@ -384,7 +384,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                             match flow.System.TryFindReal flow.System flow.Name rc  with
                             | Some r -> r |> AliasTargetReal
                             | None -> flow.System.TryFindCall ([flow.Name;rc].ToArray()) |> Option.get |>AliasTargetCall
-                      
+
                         | flowOrReal::rc::[] -> //FlowEx.R or Real.C
                             match tryFindFlow system flowOrReal with
                             | Some f -> f.Graph.TryFindVertex<Real>(rc)  |> Option.get |> AliasTargetReal

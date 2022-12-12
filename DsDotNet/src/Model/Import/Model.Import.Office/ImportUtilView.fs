@@ -18,18 +18,26 @@ module ImportViewModule =
         let dicDummy = Dictionary<string, ViewNode>()
         let dummyMembers = dummys.GetDummyMembers()
 
-        lands
-        |>Seq.filter(fun vertex -> dummyMembers.Contains(vertex) |> not)
-        |>Seq.iter(fun vertex -> 
-                match vertex  with
-                | :? Call | :? Alias-> newNode.Singles.Add(dicV.[vertex]) |>ignore
-                | _ -> failwithf "vertex type ERROR" )
+        if newNode.Singles.length() = 0
+        then 
+            lands
+            |>Seq.filter(fun vertex -> dummyMembers.Contains(vertex) |> not)
+            |>Seq.iter(fun vertex -> 
+                    match vertex  with
+                    | :? Call | :? Alias-> newNode.Singles.Add(dicV.[vertex]) |>ignore
+                    | _ -> failwithf "vertex type ERROR" )
 
-        edgeInfos
-        |>Seq.filter(fun edge -> (dummyMembers.Contains(edge.Sources[0]) || dummyMembers.Contains(edge.Targets[0]))|>not)
-        |>Seq.iter(fun edge -> newNode.Edges.Add(ModelingEdgeInfo(dicV.[edge.Sources[0]], edge.EdgeSymbol, dicV.[edge.Targets[0]])) |>ignore)
+        if newNode.Edges.length() = 0
+        then 
+            edgeInfos
+            |>Seq.filter(fun edge -> (dummyMembers.Contains(edge.Sources[0]) || dummyMembers.Contains(edge.Targets[0]))|>not)
+            |>Seq.iter(fun edge -> newNode.Edges.Add(ModelingEdgeInfo(dicV.[edge.Sources[0]], edge.EdgeSymbol, dicV.[edge.Targets[0]])) |>ignore)
 
-        real.GetDummyReal(dummys, dicV, dicDummy) |> Seq.iter(fun e-> newNode.Edges.Add(e) |>ignore)
+        real.GetDummyReal(dummys, dicV, dicDummy) 
+        |> Seq.iter(fun e-> 
+            if newNode.DummyAdded |> not
+            then newNode.Edges.Add(e) |>ignore
+            )
 
     let ConvertFlow(flow:Flow, dummys:pptDummy seq)  =
         let newNode = ViewNode()
@@ -59,7 +67,7 @@ module ImportViewModule =
                     if edge.Targets[0] :? Real 
                     then let r = edge.Targets[0] :?> Real
                          ConvertReal(r, dicV.[r], dummys) |> ignore 
-
+                    
                     newNode.Edges.Add(ModelingEdgeInfo<ViewNode>(dicV.[edge.Sources[0]], edge.EdgeSymbol, dicV.[edge.Targets[0]])) |>ignore)
 
         flow.GetDummyFlow(dummys, dicV, dicDummy) 

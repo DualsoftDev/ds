@@ -39,9 +39,13 @@ module rec ViewModule =
         member val Flow:Flow option = None with get, set
         member val Page = 0 with get, set
 
-        member x.CoreVertex =  coreVertex
+        member x.DummyAdded = x.Edges |> Seq.collect(fun e-> e.Sources @ e.Targets)
+                                      |> Seq.filter(fun v -> v.NodeType = DUMMY)
+                                      |> Seq.isEmpty |> not
+        member x.CoreVertex = coreVertex
         member x.BtnType =  btnType
         member x.IsChildExist =  x.Edges.Count>0 || x.Singles.Count>0
+        member x.Name =  name
         member x.UIKey =  $"{name};{x.GetHashCode()}"
     
 

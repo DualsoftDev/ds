@@ -303,9 +303,6 @@ module PPTObjectModule =
             if(reals.Count() > 1) 
             then  Office.ErrorPPT(Group, ErrID._23, $"Reals:{reals|>nodeNames}", iPage)
 
-            if(reals.Count() = 0 ) 
-            then  Office.ErrorPPT(Group, ErrID._24, $"Nodes:{nodes|>nodeNames}", iPage)
-
             parent <-
                 if(reals.Any()|>not) then None
                 else Some(reals |> Seq.head)

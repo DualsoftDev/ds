@@ -15,6 +15,8 @@ module ImportM =
     type internal ImportPowerPoint() =
       //  let configFile = @"test-model-config.json"
       //  let model = ModelLoader.LoadFromConfig configFile
+        let pathStack = Stack<string>()
+
         let getParams(directoryName:string, filePath:string, loadedName:string, containerSystem:DsSystem) = 
             {  
                 ContainerSystem = containerSystem
@@ -24,7 +26,8 @@ module ImportM =
             }
 
         let rec loadSystem(path:string, name:string, active:bool) = 
-    
+            pathStack.Push(path)
+
             let doc = pptDoc(path)
             let name, ip =  if active //active는 시스템이름으로 ppt 파일 이름을 사용
                             then doc.Name, "localhost" 
@@ -58,6 +61,8 @@ module ImportM =
             //ApiTxRx  만들기
             doc.MakeApiTxRx()
             
+            pathStack.Pop() |> ignore
+
             mySys, doc
 
         member internal x.GetImportModel(path:string) =
@@ -75,7 +80,7 @@ module ImportM =
                 MSGInfo($"전체 부모   count [{doc.Parents.Keys.Count}]")
                 mySys, viewNodes
 
-            with ex ->  failwithf  $"{ex.Message}"
+            with ex ->  failwithf  $"{pathStack.Last()}\r\n{ex.Message}"
 
 
     let FromPPTX(path:string) =

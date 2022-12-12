@@ -160,15 +160,16 @@ module PPTDocModule =
                 allGroups
                 |> Seq.iter (fun (page, groups) ->
                     groups|> getValidGroup
-                            |> Seq.iter (fun group ->
-                                let groupAllNodes = getGroupParentsChildren(page, group, nodes)
-                                let pptGroup = pptRealGroup(page, groupAllNodes)
+                    |> Seq.iter (fun group ->
+                        let groupAllNodes = getGroupParentsChildren(page, group, nodes)
+                        if groupAllNodes.any()
+                        then
+                            let pptGroup = pptRealGroup(page, groupAllNodes)
                                 
-                                let parent = pptGroup.Parent.Value;
-                                if(dicParentCheck.TryAdd(pptGroup.RealKey, pptGroup.PageNum))
-                                then  parents.TryAdd(parent, pptGroup.Children)|>ignore
-                                else  Office.ErrorPPT(Group, ErrID._17, $"{dicParentCheck.[pptGroup.RealKey]}-{parent.Name}", pptGroup.PageNum)
-
+                            let parent = pptGroup.Parent.Value;
+                            if(dicParentCheck.TryAdd(pptGroup.RealKey, pptGroup.PageNum))
+                            then parents.TryAdd(parent, pptGroup.Children)|>ignore
+                            else Office.ErrorPPT(Group, ErrID._17, $"{dicParentCheck.[pptGroup.RealKey]}-{parent.Name}", pptGroup.PageNum)
                     )
                 )
 
@@ -179,17 +180,19 @@ module PPTDocModule =
                           |> Seq.iter (fun (conn, Id, startId, endId) ->
                             let iPage = pages.[slide].PageNum
 
+                            
+                            if(startId = 0u && endId = 0u) then  conn.ErrorConnect(ErrID._4, "","", iPage)
+                            if(startId = 0u) then  conn.ErrorConnect(ErrID._15, "", $"{nodes.[Objkey(iPage, endId)].Name}", iPage)
+                            if(endId = 0u)   then  conn.ErrorConnect(ErrID._16, $"{nodes.[Objkey(iPage, startId)].Name}", "", iPage)
+
                             let sNode = nodes.[Objkey(iPage, startId)]
                             let eNode = nodes.[Objkey(iPage, endId)]
                             let sName = if(nodes.ContainsKey(sNode.Key)) then sNode.Name else ""
                             let eName = if(nodes.ContainsKey(eNode.Key)) then eNode.Name else ""
 
-                            if(startId = 0u && endId = 0u) then  conn.ErrorConnect(ErrID._4, "","", iPage)
                             if(nodes.ContainsKey(sNode.Key)|>not) then  conn.ErrorConnect(ErrID._14, $"{sName}", "", iPage)
                             if(nodes.ContainsKey(eNode.Key)|>not) then  conn.ErrorConnect(ErrID._14, $"{eName}", "", iPage)
-                            if(startId = 0u) then  conn.ErrorConnect(ErrID._15, "", $"{eName}", iPage)
-                            if(endId = 0u)   then  conn.ErrorConnect(ErrID._16, $"{sName}", "", iPage)
-
+                           
                             if conn.IsNonDirectional()
                             then dummys.AddDummys([|sNode; eNode|])
                             else edges.Add(pptEdge(conn, Id, iPage ,sNode, eNode)) |>ignore

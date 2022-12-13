@@ -36,11 +36,11 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
     /// 하나의 main.ds 를 loading 할 때, 외부 system 을 copy/reference 로 loading 시, 해당 system 의 구분을 위해서 사용
     member val OptLoadedSystemName:string option = None with get, set
     /// parser rule context 가 어느 시스템에 속한 것인지를 판정하기 위함.  Loaded system 의 context 와 Main system 의 context 구분 용도.
-    member val internal RuleDictionary = Dictionary<ParserRuleContext, string>()
+    member val internal Rule2SystemNameDictionary = Dictionary<ParserRuleContext, string>()
 
     override x.EnterEveryRule(ctx:ParserRuleContext) =
         match x.OptLoadedSystemName with
-        | Some systemName -> x.RuleDictionary.Add(ctx, systemName)
+        | Some systemName -> x.Rule2SystemNameDictionary.Add(ctx, systemName)
         | None -> ()
 
 
@@ -48,7 +48,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
         match options.LoadedSystemName with
         | Some systemName ->
                 x.OptLoadedSystemName <- Some systemName
-                x.RuleDictionary.Add(ctx, systemName)
+                x.Rule2SystemNameDictionary.Add(ctx, systemName)
         | _ -> ()
 
         match ctx.TryFindFirstChild<SysBlockContext>() with
@@ -133,8 +133,8 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
     member x.GetContextInformation(parserRuleContext:ParserRuleContext) =      // collectUpwardContextInformation
         let ctx = parserRuleContext
         let system =
-            match x.RuleDictionary.TryFind(parserRuleContext) with
-            | Some ruleName -> Some ruleName
+            match x.Rule2SystemNameDictionary.TryFind(parserRuleContext) with
+            | Some systemName -> Some systemName
             | None -> parserRuleContext.TryGetSystemName()
 
         let flow      = ctx.TryFindFirstAscendant<FlowBlockContext>(true).Bind(fun b -> b.TryFindIdentifier1FromContext())

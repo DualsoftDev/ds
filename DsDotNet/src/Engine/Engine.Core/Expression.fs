@@ -52,9 +52,16 @@ module ExpressionModule =
     /// Variable<'T> 로부터 Expression<'T> 생성
     let var (t: StorageVariable<'T>) = Terminal (Variable t)
 
+    // type Timer =
+    //     /// On delay timer
+    //     | TON
+    //     /// Off delay timer
+    //     | TOF
+    //     | TMR
     type Statement =
         | Assign of expression:IExpression * target:IStorage
         | VarDecl of expression:IExpression * variable:IStorage
+        // | Timer of timer:Timer
 
 
     type Statement with

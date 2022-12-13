@@ -22,6 +22,7 @@
 		<Compile Include="Core.Util.Origin.fs" />
 		<Compile Include="Core.Util.ToDsText.fs" />
 		<Compile Include="Expression.Prolog.fs" />
+		<Compile Include="Timer.fs" />
 		<Compile Include="Expression.fs" />
 		<Compile Include="Expression.Serialize.fs" />
 		<Compile Include="Expression.Function.fs" />

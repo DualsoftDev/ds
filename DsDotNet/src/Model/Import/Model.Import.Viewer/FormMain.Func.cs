@@ -1,3 +1,4 @@
+using Engine.CodeGenCPU;
 using Engine.Common;
 using Engine.Common.FS;
 using Engine.Core;
@@ -63,6 +64,13 @@ namespace Dual.Model.Import
                 var result = ImportM.FromPPTX(PathPPT);
                 _mySystem = result.Item1;
                 var viewNodes = result.Item2;
+
+                //var rungs = CpuLoader.LoadStatements(_mySystem);
+                //rungs.ForEach(rung =>
+                //{
+                //    WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, rung.ToText());
+                //});
+
                 if (!_ConvertErr)
                 {
                     _dsText = _mySystem.ToDsText();

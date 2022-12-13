@@ -61,7 +61,6 @@ namespace Dual.Model.Import
             {
                 this.Do(() => button_comfile.Enabled = false);
                 var result = ImportM.FromPPTX(PathPPT);
-
                 _mySystem = result.Item1;
                 var viewNodes = result.Item2;
                 if (!_ConvertErr)

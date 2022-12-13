@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Server.Common.Kafka;
-using Engine.CodeGen;
+using Engine.CodeGenHMI;
 
 namespace Server.Information;
 

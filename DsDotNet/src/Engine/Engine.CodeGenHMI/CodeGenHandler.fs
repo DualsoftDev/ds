@@ -1,4 +1,4 @@
-namespace Engine.CodeGen
+namespace Engine.CodeGenHMI
 open Engine.Core
 open Newtonsoft.Json;
 

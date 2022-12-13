@@ -1,4 +1,4 @@
-namespace Engine.Obsolete.CpuUnit
+namespace Engine.CodeGenCPU
 
 open System.Collections.Concurrent
 open System.Diagnostics
@@ -42,7 +42,6 @@ module MemoryModule =
     [<DebuggerDisplay("{Status}")>]
     type Memory(m:byte) =
         let mutable value = m
-        interface IData
         member internal x.getValue(flag:MemoryFlag) = 
                         (value &&& (byte)flag) = (byte)flag
         member internal x.setValue(flag:MemoryFlag, v:bool) = 

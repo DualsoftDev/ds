@@ -1,4 +1,4 @@
-namespace Engine.CodeGen
+namespace Engine.CodeGenHMI
 
 open System.Collections.Generic
 open Engine.Core
@@ -137,7 +137,7 @@ module HmiGenModule =
                     genInfo 
                         jobName Category.Job ButtonType.None system.Name
                 hmiInfos.Add(jobName, info)
-            for dvc in job.ApiItems do
+            for dvc in job.JobDefs do
                 let api = dvc.ApiItem
                 let device = dvc.ApiItem.System.Name
                 if false = hmiInfos.ContainsKey(device) then

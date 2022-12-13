@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
@@ -64,8 +64,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\..\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Cpu\Engine.Cpu.fsproj" />
-		<ProjectReference Include="..\..\Engine\Engine.Obsolete.CpuUnit\Engine.Obsolete.CpuUnit.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Test\Engine.Sample.csproj" />
 		<ProjectReference Include="..\..\Model\Import\Model.Import.Office\Model.Import.Office.fsproj" />

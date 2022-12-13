@@ -1,5 +1,5 @@
 [<AutoOpen>]
-module Engine.Obsolete.CpuUnit.ConvertUtil
+module Engine.CodeGenCPU.ConvertUtil
 
 open System.Linq
 open System.Runtime.CompilerServices
@@ -20,10 +20,6 @@ type ConvertUtilExt =
                                 | _ -> [|v|])
                            )
 
-    //[<Extension>] static member AppendSome(xs:Statement<'T> seq, xOpt:Statement<'T> option) =
-    //                            if xOpt.IsSome
-    //                            then xs |> Seq.append [xOpt.Value]
-    //                            else xs
 
     [<Extension>] static member FindEdgeSources(target:Vertex, graph:DsGraph, edgeType:ModelingEdgeType) =
                     let edges = graph.GetIncomingEdges(target)

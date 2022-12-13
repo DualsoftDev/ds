@@ -1,4 +1,4 @@
-namespace Engine.Obsolete.CpuUnit
+namespace Engine.CodeGenCPU
 
 open System.Collections.Concurrent
 open System.Linq
@@ -75,33 +75,33 @@ module CpuConvertModule =
     let ConvertSystem(sys:DsSystem) =
         dicM.Clear()
 
-        //let aliasSet = ConcurrentDictionary<Alias, Vertex>() //Alias, target
-        //let vertices = sys.GetVertices()
+        let aliasSet = ConcurrentDictionary<Alias, Vertex>() //Alias, target
+        let vertices = sys.GetVertices()
 
-        ////모든 인과 대상 Node 메모리화
-        //vertices.ForEach(fun v ->
-        //    match v with
-        //        | :? Real as r -> dicM.TryAdd(v, DsMemory($"{r.QualifiedName}")) |> verifyM $"Duplicated system name [{v.QualifiedName}]"
-        //        | :? Call as c -> dicM.TryAdd(c, DsMemory($"{c.QualifiedName}")) |> verifyM $"Duplicated system name [{v.QualifiedName}]"
-        //        | :? Alias as a ->
-        //                    match a.Target with
-        //                    | RealTarget r -> aliasSet.TryAdd(a, r) |> verifyM $"Duplicated system name [{v.QualifiedName}]"
-        //                    | CallTarget c -> aliasSet.TryAdd(a, c) |> verifyM $"Duplicated system name [{v.QualifiedName}]"
-        //        | _-> ()
-        //)
+        //모든 인과 대상 Node 메모리화
+        vertices.ForEach(fun v ->
+            match v with
+                | :? Real as r -> dicM.TryAdd(v, DsMemory($"{r.QualifiedName}")) |> verifyM $"Duplicated system name [{v.QualifiedName}]"
+                | :? Call as c -> dicM.TryAdd(c, DsMemory($"{c.QualifiedName}")) |> verifyM $"Duplicated system name [{v.QualifiedName}]"
+                | :? Alias as a ->
+                            match a.TargetVertex with
+                            | AliasTargetReal r -> aliasSet.TryAdd(a, r)        |> verifyM $"Duplicated system name [{v.QualifiedName}]"
+                            | AliasTargetRealEx rEx -> aliasSet.TryAdd(a, rEx)  |> verifyM $"Duplicated system name [{v.QualifiedName}]"
+                            | AliasTargetCall c -> aliasSet.TryAdd(a, c)        |> verifyM $"Duplicated system name [{v.QualifiedName}]"
+                | _-> ()
+        )
 
+        //Alias 원본 메모리 매칭
+        aliasSet.ForEach(fun alias->
+            let vertex = vertices.First(fun f->f  =alias.Value)
+            dicM.TryAdd(alias.Key, dicM.[vertex]) |> ignore
+        )
 
-        ////Alias 원본 메모리 매칭
-        //aliasSet.ForEach(fun alias->
-        //    let vertex = vertices.First(fun f->f  =alias.Value)
-        //    dicM.TryAdd(alias.Key, dicM.[vertex]) |> ignore
-        //)
-
-        //sys.Flows.SelectMany(fun flow->
-        //flow.Graph.Vertices
-        //    .Where(fun w->w :? Real).Cast<Real>()
-        //    .SelectMany(fun r->
-        //        createReal(dicM[r], r.Graph)
-        //        @@ createRoot(r, flow.Graph)
-        //    )
-        //)
+        sys.Flows.SelectMany(fun flow->
+        flow.Graph.Vertices
+            .Where(fun w->w :? Real).Cast<Real>()
+            .SelectMany(fun r->
+                createRungsForReal(dicM[r], r.Graph)
+                @ createRungsForRoot(r, flow.Graph)
+            )
+        )

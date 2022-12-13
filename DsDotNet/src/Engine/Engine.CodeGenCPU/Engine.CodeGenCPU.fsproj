@@ -2,14 +2,12 @@
 	<PropertyGroup>
 		<!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
 		<TargetFramework>net48</TargetFramework>
-		<RootNamespace>Engine.Obsolete.CpuUnit</RootNamespace>
+		<RootNamespace>Engine.CodeGenCPU</RootNamespace>
 		<LangVersion>6.0</LangVersion>
-		<OutputType>Exe</OutputType>
+		<OutputType>Library</OutputType>
 	</PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Interface, Type.fs" />
-    <Compile Include="Data.fs" />
     <Compile Include="CpuUtil.fs" />
     <Compile Include="Memory.fs" />
     <Compile Include="Tag.fs" />
@@ -19,7 +17,6 @@
     <Compile Include="Convert.Real.fs" />
     <Compile Include="Convert.Call.fs" />
     <Compile Include="Convert.fs" />
-    <Compile Include="CpuSerializeJson.fs" />
     <Compile Include="Loader.fs" />
   </ItemGroup>
 

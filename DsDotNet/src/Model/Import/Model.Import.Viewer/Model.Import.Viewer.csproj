@@ -15,6 +15,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Engine\Engine.Common\Engine.Common.csproj" />
+    <ProjectReference Include="..\..\..\Engine\Engine.Obsolete.CpuUnit\Engine.CodeGenCPU.fsproj" />
     <ProjectReference Include="..\Model.Import.Office\Model.Import.Office.fsproj" />
   </ItemGroup>
 

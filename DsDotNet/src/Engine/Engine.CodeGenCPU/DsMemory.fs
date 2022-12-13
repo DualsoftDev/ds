@@ -1,4 +1,4 @@
-namespace Engine.Obsolete.CpuUnit
+namespace Engine.CodeGenCPU
 
 open System.Diagnostics
 open System

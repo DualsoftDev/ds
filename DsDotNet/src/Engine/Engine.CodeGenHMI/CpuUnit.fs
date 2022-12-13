@@ -1,4 +1,4 @@
-namespace Engine.CodeGen
+namespace Engine.CodeGenHMI
 
 open System.Diagnostics
 open System.Collections.Generic

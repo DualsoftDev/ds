@@ -1,4 +1,4 @@
-namespace Engine.Obsolete.CpuUnit
+namespace Engine.CodeGenCPU
 
 open System.Diagnostics
 open System
@@ -23,7 +23,7 @@ module  TagModule =
             member x.GetValue()  = x.GetValue()
             member x.SetValue(v) = x.SetValue(v)
 
-        abstract  GetValue:unit -> obj
+        abstract GetValue:unit -> obj
         abstract SetValue:obj -> unit
 
         override x.GetValue()  = x.Value
@@ -38,7 +38,7 @@ module  TagModule =
             member x.GetValue()  = x.GetValue()
             member x.SetValue(v) = x.SetValue(v)
 
-        abstract  GetValue:unit -> obj
+        abstract GetValue:unit -> obj
         abstract SetValue:obj -> unit
 
         override x.GetValue()  = memory.GetMonitorValue(monitor)
@@ -59,7 +59,7 @@ module  TagModule =
             member x.GetValue()  = x.GetValue()
             member x.SetValue(v) = x.SetValue(v)
 
-        abstract  GetValue:unit -> obj
+        abstract GetValue:unit -> obj
         abstract SetValue:obj -> unit
 
         override x.GetValue()  = memory.GetControlValue(index)

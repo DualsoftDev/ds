@@ -1,5 +1,5 @@
 // Copyright (c) Dual Inc.  All Rights Reserved.
-namespace Engine.CodeGen
+namespace Engine.CodeGenHMI
 
 open System
 open System.Reactive.Subjects

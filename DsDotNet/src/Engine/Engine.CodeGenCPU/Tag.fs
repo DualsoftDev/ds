@@ -31,8 +31,8 @@ module  TagModule =
 
 
     /// Monitor tag (PlanTag) class
-    type DsBit<'T> (name, initValue:'T, memory:Memory, monitor:Monitor) =
-        inherit Tag<'T>(name, initValue)
+    type DsBit (name, initValue:bool, memory:Memory, monitor:Monitor) =
+        inherit Tag<bool>(name, initValue)
 
         interface IPLCTag with
             member x.GetValue()  = x.GetValue()
@@ -47,12 +47,12 @@ module  TagModule =
             |Monitor.R|Monitor.G|Monitor.F| Monitor.H
                 -> failwith "error Status4 read only"
             |_  -> memory.ChangeMonitor(monitor, Convert.ToBoolean(v))
-                   x.Value  <- v :?> 'T    //memory와 동기화
+                   x.Value  <- v :?> bool    //memory와 동기화
 
 
     //name[Index] 규격 ex : R203[3]
-    type DsDotBit<'T> (name, initValue:'T, memory:Memory) =
-        inherit Tag<'T>(name, initValue)
+    type DsDotBit (name, initValue:bool, memory:Memory) =
+        inherit Tag<bool>(name, initValue)
         let mutable index:int=  getIndex(name)//대괄호 안에 내용의 index 가져오기
 
         interface IPLCTag with
@@ -64,5 +64,5 @@ module  TagModule =
 
         override x.GetValue()  = memory.GetControlValue(index)
         override x.SetValue(v) = memory.SetControlValue(index, Convert.ToBoolean(v))
-                                 x.Value  <- v :?> 'T  //memory와 동기화
+                                 x.Value  <- v :?> bool  //memory와 동기화
 

@@ -1,20 +1,15 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
 		<TargetFramework>net48</TargetFramework>
 		<RootNamespace>Engine.CodeGen</RootNamespace>
 		<LangVersion>6.0</LangVersion>
 		<!--<OutputType>Library</OutputType>-->
+		<!--<OutputType>Exe</OutputType>-->
 	</PropertyGroup>
 
   <ItemGroup>
     <Compile Include="CodeGen.Common.fs" />
-    <Compile Include="TagType.fs" />
-    <Compile Include="Interface.fs" />
-    <Compile Include="CpuLoader.fs" />
-    <Compile Include="CpuEvent.fs" />
-    <Compile Include="CpuUnit.fs" />
-    <Compile Include="CpuCode.fs" />
     <Compile Include="HmiCode.fs" />
     <Compile Include="PilotCode.fs" />
     <Compile Include="CodeGenHandler.fs" />

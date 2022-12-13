@@ -274,4 +274,4 @@ module PilotGenModule =
             """
 
         let body = JObject.Parse(pilotCode)
-        { from = "ds-pilot"; succeed = true; body = body["reals"]; error = ""; }
+        { from = "ds-pilot"; success = true; body = body["reals"]; error = ""; }

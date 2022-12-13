@@ -104,10 +104,10 @@ module HmiGenModule =
                 |> Seq.filter(fun info -> info.Value.category = Category.Flow)
                 |> Seq.map(fun info -> info.Value.name)
             let buttons = [
-                "RUN", ButtonType.Run;
+                "RUN",    ButtonType.Run;
                 "EMSTOP", ButtonType.Emergency;
                 "ATMANU", ButtonType.Auto;
-                "CLEAR", ButtonType.Clear;
+                "CLEAR",  ButtonType.Clear;
             ]
             for button, btnType in buttons do
                 addButton button null btnType
@@ -198,7 +198,7 @@ module HmiGenModule =
                                 addUses sys flow vertex
                         | _ -> addUses sys flow rootSeg
 
-        let succeess, message = 
+        let success, message = 
             try
                 addBasicComponents()
                 addJobComponentAndUses()
@@ -207,4 +207,4 @@ module HmiGenModule =
             with
                 | ex -> false, ex.Message
         let body = hmiInfos.Values |> List.ofSeq
-        { from = "hmi"; succeed = succeess; body = body; error = message; }
+        { from = "hmi"; success = success; body = body; error = message; }

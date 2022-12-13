@@ -65,11 +65,11 @@ namespace Dual.Model.Import
                 _mySystem = result.Item1;
                 var viewNodes = result.Item2;
 
-                //var rungs = CpuLoader.LoadStatements(_mySystem);
-                //rungs.ForEach(rung =>
-                //{
-                //    WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, rung.ToText());
-                //});
+                var rungs = CpuLoader.LoadStatements(_mySystem);
+                rungs.ForEach(rung =>
+                {
+                    WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, rung.ToText());
+                });
 
                 if (!_ConvertErr)
                 {

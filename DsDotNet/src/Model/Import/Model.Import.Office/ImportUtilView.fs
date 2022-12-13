@@ -143,13 +143,6 @@ module ImportViewModule =
                         flowNode.Page <- page; flowNode.Flow <- Some(flow)
                         flowNode)
 
-                let viewNodes = 
-                   // mySys.ReferenceSystems @ [mySys]
-                    [mySys]
-                    |>Seq.map(fun sys -> sys, sys.Flows)
-                    |>Seq.collect(fun (sys, flows) -> 
-                            let flowNodes = getFlowNodes(flows)
-
-                            flowNodes
-                            )
+                let viewNodes =  getFlowNodes(mySys.Flows)
+                    
                 viewNodes 

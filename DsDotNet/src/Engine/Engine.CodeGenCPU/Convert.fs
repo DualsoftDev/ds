@@ -20,57 +20,72 @@ module CpuConvertModule =
         //R1.Real 초기시작 Statement 만들기
         let r1 = realTag.CreateRungForInitStart()
         //R2.Real 작업완료 Statement 만들기
-        let r2 = realTag.CreateRungForRealEnd(cv.Select(fun f->dicM[f]))
+        let r2 = realTag.CreateRungForRealEnd(cv.Select(fun v->dicM[v]))
 
         //C1 Call 시작조건 Statement 만들기
-        let c1 = cv.Select(fun c ->
-                 let srcs = getSrcMemorys(c, graph, StartEdge)
-                 dicM[c].CreateRungForCallStart(srcs, realTag))
+        let c1s = cv.Select(fun coin ->
+                 let srcs = getSrcMemorys(coin, graph, StartEdge)
+                 dicM[coin].CreateRungForCallStart(srcs, realTag))
         //C2 Call 작업완료 Statement 만들기
-        let c2 = cv.Select(fun c ->
-                 let srcs = getSrcMemorys(c, graph, StartEdge)
-                 dicM[c].CreateRungForCallRelay(srcs, [PlcTag.Create(c.Name, false)], realTag))
+        let c2s = cv.Select(fun coin ->
+                  let srcs = getSrcMemorys(coin, graph, StartEdge)
+                  dicM[coin].CreateRungForCallRelay(srcs, coin.GetCoinTags(dicM[coin], true), realTag)
+                  )
+
         //C3 Call 시작출력 Statement 만들기
-        let c3 = cv.Select(fun c ->
-                 dicM[c].CreateRungForOutput(PlcTag.Create(c.Name, false)))
+        let c3s = cv.SelectMany(fun coin ->
+                  dicM[coin].CreateRungForOutputs(coin.GetCoinTags(dicM[coin], false))
+                  )
 
         //C4 Call Start to Api TX.Start Statement 만들기
-        let c4 = cv.Select(fun c ->
-                 dicM[c].CreateRungForLinkTx())  //구현필요
+        let c4s = cv.Select(fun coin ->
+                 dicM[coin].CreateRungForLinkTx())  //구현필요
         //C5 Call End from  Api RX.End  Statement 만들기
-        let c5 = cv.Select(fun c ->
-                 dicM[c].CreateRungForLinkRx())  //구현필요
+        let c5s = cv.Select(fun coin ->
+                 dicM[coin].CreateRungForLinkRx())  //구현필요
 
-
-        [r1; r2] @ c1 @ c2 @ c3 @ c4 @ c5
-
+        //description, statement List 출력
+        ["Real-r1",r1; "Real-r2",r2] 
+        @ c1s.Select(fun s-> "Real-c1", s)
+        @ c2s.Select(fun s-> "Real-c2", s)
+        @ c3s.Select(fun s-> "Real-c3", s)
+        @ c4s.Select(fun s-> "Real-c4", s)
+        @ c5s.Select(fun s-> "Real-c5", s)
 
 
     /// real 의 가상 부모 만들어서 가상 부모를 통한 제어 statement 생성
     let createRungsForRoot(real:Real, graph:DsGraph) =
-        let parentTag = DsMemory($"{real.Name}(p)")
+        if getSrcMemorys(real, graph, StartEdge) @ getSrcMemorys(real, graph, ResetEdge) |> Seq.any
+        then 
+            let parentTag = DsMemory($"{real.QualifiedName}(p)")
 
-        //F1. child Real Start Statement 만들기
-        let parentGraph = DsGraph()
-        parentGraph.AddVertex(real) |> ignore
-        let f1 = createRungsForReal(parentTag, parentGraph)
+            //F1. child Real Start Statement 만들기
+            let parentGraph = DsGraph()
+            parentGraph.AddVertex(real) |> ignore
+            let f1s = createRungsForReal(parentTag, parentGraph)
 
-        //F2. Real 자신의 Reset going relay  Statement 만들기
-        let srcs = getSrcMemorys(real, graph, ResetEdge)
-        let goingRelays = srcs.Select(fun c -> c, DsMemory($"{c.Name}(gr)")) |> dict
-        let f2 = srcs.Select(fun c ->
-                 c.CreateRungForResetGoing(dicM[real], goingRelays[c]))
+            //F2. Real 자신의 Reset going relay  Statement 만들기
+            let srcs = getSrcMemorys(real, graph, ResetEdge)
+            let goingRelays = srcs.Select(fun c -> c, DsMemory($"{c.Name}(gr)")) |> dict
+            let f2s = srcs.Select(fun c ->
+                     c.CreateRungForResetGoing(dicM[real], goingRelays[c]))
 
-        //F3. Real 자신의    Reset Statement 만들기
-        let f3 = dicM[real].TryGetRealResetStatement(goingRelays.Values)
-        //F4. Real 부모의 시작조건 Statement 만들기
-        let srcs = getSrcMemorys(real, graph, StartEdge)
-        let f4 = parentTag.TryCreateRungForRealStart(srcs)
-        //F5. Real 부모의 셀프리셋 Statement 만들기
-        let f5 = parentTag.CreateRungForResetSelf()
+            //F3. Real 자신의    Reset Statement 만들기
+            let f3 = dicM[real].TryGetRealResetStatement(goingRelays.Values)
+            //F4. Real 부모의 시작조건 Statement 만들기
+            let srcs = getSrcMemorys(real, graph, StartEdge)
+            let f4 = parentTag.TryCreateRungForRealStart(srcs)
+            //F5. Real 부모의 셀프리셋 Statement 만들기
+            let f5 = parentTag.CreateRungForResetSelf()
 
-        let statements = f1 @ f2 @ [f5] @ (f3 |> Option.toList) @ (f4 |> Option.toList)
-        statements
+            //description, statement List 출력
+            f1s.Select(fun (s, f1)-> $"Root:{s}", f1)
+            @ f2s.Select(fun s-> "Flow-f2", s)
+            @ (f3 |> Option.toList).Select(fun s-> "Flow-f3", s)
+            @ (f4 |> Option.toList).Select(fun s-> "Flow-f4", s)
+            @ ["Flow-f5", f5]
+        
+        else Seq.empty
 
     let ConvertSystem(sys:DsSystem) =
         dicM.Clear()
@@ -102,6 +117,7 @@ module CpuConvertModule =
             .Where(fun w->w :? Real).Cast<Real>()
             .SelectMany(fun r->
                 createRungsForReal(dicM[r], r.Graph)
-                @ createRungsForRoot(r, flow.Graph)
+                @ 
+                createRungsForRoot(r, flow.Graph)
             )
         )

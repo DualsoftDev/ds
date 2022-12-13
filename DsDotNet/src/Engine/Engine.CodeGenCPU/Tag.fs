@@ -51,10 +51,8 @@ module  TagModule =
 
 
     //name[Index] 규격 ex : R203[3]
-    type DsDotBit (name, initValue:bool, memory:Memory) =
+    type DsDotBit (name, initValue:bool, memory:Memory, index:int) =
         inherit Tag<bool>(name, initValue)
-        let mutable index:int=  getIndex(name)//대괄호 안에 내용의 index 가져오기
-
         interface IPLCTag with
             member x.GetValue()  = x.GetValue()
             member x.SetValue(v) = x.SetValue(v)

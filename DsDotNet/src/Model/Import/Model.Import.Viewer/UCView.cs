@@ -252,33 +252,39 @@ namespace Dual.Model.Import
             }
         }
 
-        public void RefreshGraph() { viewer.Do(() => viewer.Refresh()); }
-
-
-        public void Update(CoreModule.Vertex seg)
+        public void RefreshGraph()
         {
+            viewer.Do(() =>
+            {
+                viewer.Refresh();
+            });
 
-            //Node node = viewer.Graph.FindNode(seg.UIKey);
-            //if (node == null)
-            //{
-            //    if (viewer.Graph.SubgraphMap.ContainsKey(seg.UIKey))
-            //        node = viewer.Graph.SubgraphMap[seg.UIKey];
-            //    else
-            //        return;
-            //}
-            ////node.Attr.Color = Color.White;
-            ////node.Label.FontColor = Color.White;
-            //if (seg != null)
-            //{
-            //    if (seg.NodeType == NodeType.MY)
-            //        UpdateLineColor(seg.Status4, node);
-            //    else
-            //        UpdateFillColor(seg.Status4, node);
-            //}
-            //else
-            //{
+        }
 
-            //}
+
+        public void Update(ViewNode viewNode)
+        {
+            Node node = viewer.Graph.FindNode(viewNode.UIKey);
+            if (node == null)
+            {
+                if (viewer.Graph.SubgraphMap.ContainsKey(viewNode.UIKey))
+                    node = viewer.Graph.SubgraphMap[viewNode.UIKey];
+                else
+                    return;
+            }
+            //node.Attr.Color = Color.White;
+            //node.Label.FontColor = Color.White;
+            if (viewNode != null)
+            {
+                if (viewNode.NodeType == NodeType.REAL)
+                    UpdateLineColor(viewNode.Status4, node);
+                else
+                    UpdateFillColor(viewNode.Status4, node);
+            }
+            else
+            {
+
+            }
 
             RefreshGraph();
         }

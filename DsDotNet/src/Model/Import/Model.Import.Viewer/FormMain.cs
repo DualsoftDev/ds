@@ -4,10 +4,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static Engine.Common.FS.MessageEvent;
 using static Engine.Core.CoreModule;
+using static Model.Import.Office.ViewModule;
 
 namespace Dual.Model.Import
 {
@@ -16,6 +18,7 @@ namespace Dual.Model.Import
         public static FormMain TheMain;
 
         private DsSystem _mySystem;
+        private IEnumerable<ViewNode> _myViewNodes;
         private string _dsText;
         private bool _ConvertErr = false;
         public Dictionary<Flow, TabPage> _DicMyUI;
@@ -211,11 +214,11 @@ namespace Dual.Model.Import
         {
             RefreshText();
         }
-        private void button_TestStart_Click(object sender, EventArgs e)
+        private async void button_TestStart_Click(object sender, EventArgs e)
         {
             button_TestORG.Enabled = false;
             button_TestStart.Enabled = false;
-            //await SimSeg.TestStart(_OldModel);
+            await SimSeg.TestStart(_mySystem, _DicMyUI);
             button_TestORG.Enabled = true;
             button_TestStart.Enabled = true;
         }

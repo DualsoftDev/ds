@@ -113,6 +113,14 @@ module EdgeModule =
             with exn ->
                 logWarn "%A" exn
 
+    let getVerticesOfSystem(system:DsSystem) =
+        let realVertices = system.Flows.SelectMany(fun f -> 
+                                    f.Graph.Vertices.OfType<Real>()
+                                        .SelectMany(fun r -> r.Graph.Vertices.Cast<Vertex>()))
+
+        let flowVertices = system.Flows.SelectMany(fun f -> f.Graph.Vertices.Cast<Vertex>())
+        realVertices @ flowVertices
+
     type DsSystem with
         member x.CreateMRIEdgesTransitiveClosure() = createMRIEdgesTransitiveClosure4System x
         member x.ValidateGraph() = validateGraphOfSystem x
@@ -128,6 +136,7 @@ module EdgeModule =
 type EdgeExt =
     [<Extension>] static member ToText<'V, 'E when 'V :> INamed and 'E :> EdgeBase<'V>> (edge:'E) = toText edge
     [<Extension>] static member GetVertices(edges:IEdge<'V> seq) = edges.Collect(fun e -> e.GetVertices())
+    [<Extension>] static member GetVertices(x:DsSystem) =  getVerticesOfSystem x
     
     [<Extension>] static member OfStrongResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofStrongResetEdge edges
     [<Extension>] static member OfWeakResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofWeakResetEdge edges

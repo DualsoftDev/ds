@@ -34,3 +34,24 @@ type ConvertUtilExt =
                         | Interlock        -> failwith $"Do not use {edgeType} Error"
 
                     findEdges.Select(fun e->e.Source)
+
+
+    [<Extension>]  static member GetCoinTags(coin:Vertex, memory:DsMemory, isInTag:bool) =
+                            match coin with
+                            | :? Call as c -> c.CallTarget.JobDefs
+                                                .Select(fun j-> 
+                                                            if isInTag
+                                                            then PlcTag.Create(j.ApiName+"_I", false)
+                                                            else PlcTag.Create(j.ApiName+"_O", false)
+                                                )
+                                                .Cast<Tag<bool>>()
+                            | :? Real | :? RealEx ->   //가상부모에 의해 Coin이 Real으로 올 수 있음
+                                                if isInTag
+                                                then [memory.End].Cast<Tag<bool>>()   
+                                                else [memory.Start].Cast<Tag<bool>>() 
+                            | :? Alias as a -> 
+                                        match a.TargetVertex with
+                                        | AliasTargetReal ar    -> ar.GetCoinTags(memory, isInTag)
+                                        | AliasTargetCall ac    -> ac.GetCoinTags(memory, isInTag)
+                                        | AliasTargetRealEx ao  -> ao.GetCoinTags(memory, isInTag)
+                            | _ -> failwith "Error"

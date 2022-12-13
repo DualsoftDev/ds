@@ -22,10 +22,10 @@ module DsMemoryModule =
         let errorTxTag = DsBit($"{name}(E1)", false , memory, Monitor.ErrorTx)
         let errorRxTag = DsBit($"{name}(E2)", false , memory, Monitor.ErrorRx)
 
-        let startTag   = DsDotBit($"{name}[{StartIndex}]" , false, memory)  // 2
-        let resetTag   = DsDotBit($"{name}[{ResetIndex}]" , false, memory)  // 1
-        let endTag     = DsDotBit($"{name}[{EndIndex}]"   , false, memory)  // 0
-        let relayTag   = DsDotBit($"{name}[{RelayIndex}]" , false, memory)  // 3
+        let endTag     = DsDotBit($"{name}(ET)" ,false , memory, EndIndex)  // 0
+        let resetTag   = DsDotBit($"{name}(RT)" ,false , memory, ResetIndex)  // 1
+        let startTag   = DsDotBit($"{name}(ST)" ,false , memory, StartIndex)  // 2
+        let relayTag   = DsDotBit($"{name}(RE)" ,false , memory, RelayIndex)  // 3
 
         member x.Byte  = memory.Value
         member x.Name  = name

@@ -18,7 +18,7 @@ type StatementRoot =
                         let rsts  = [pReal.End].ToTags()
                         pReal.Start <== fLogicalAnd [FuncExt.GetRelayExpr(sets, rsts, pReal.Start); tag pReal.Pause] |> Some //pReal.Pause _Auto 로 변경 필요
                     else None
-
+    ///F3. Real 자신의    Reset Statement 만들기
     [<Extension>] static member TryGetRealResetStatement(real:DsMemory, goingSrcs:DsMemory seq) =
                     if goingSrcs.Any()
                     then
@@ -27,13 +27,13 @@ type StatementRoot =
                         let rsts  = [real.End].ToTags()
                         real.Reset <== fLogicalAnd [FuncExt.GetRelayExprReverseReset(sets, rsts, real.Reset); tag real.Pause] |> Some//pReal.Pause _Auto 로 변경 필요
                     else None
-
+    ///F2. Real 자신의 Reset going relay  Statement 만들기
     [<Extension>] static member CreateRungForResetGoing(realSrc:DsMemory, realTgt:DsMemory , going:DsMemory ) =
                     let sets  = [realSrc.Going].ToTags()
                     let rsts  = [realTgt.Homing].ToTags()
                     going.Relay <== FuncExt.GetRelayExpr(sets, rsts, going.Relay) //pReal.Pause _Auto 로 변경 필요
 
-
+    ///F5. Real 부모의 셀프리셋 Statement 만들기
     [<Extension>] static member CreateRungForResetSelf(pReal:DsMemory ) =
                     let rsts  = [pReal.End].ToTags()
                     pReal.Reset <== FuncExt.GetAnd(rsts)

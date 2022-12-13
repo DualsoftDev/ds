@@ -85,7 +85,7 @@ namespace Dual.Model.Import
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
-            this.splitContainer1.Size = new System.Drawing.Size(1373, 667);
+            this.splitContainer1.Size = new System.Drawing.Size(1373, 346);
             this.splitContainer1.SplitterDistance = 829;
             this.splitContainer1.TabIndex = 18;
             // 
@@ -97,14 +97,14 @@ namespace Dual.Model.Import
             this.xtraTabControl_My.Location = new System.Drawing.Point(3, 0);
             this.xtraTabControl_My.Name = "xtraTabControl_My";
             this.xtraTabControl_My.SelectedIndex = 0;
-            this.xtraTabControl_My.Size = new System.Drawing.Size(826, 667);
+            this.xtraTabControl_My.Size = new System.Drawing.Size(826, 346);
             this.xtraTabControl_My.TabIndex = 8;
             // 
             // splitter2
             // 
             this.splitter2.Location = new System.Drawing.Point(0, 0);
             this.splitter2.Name = "splitter2";
-            this.splitter2.Size = new System.Drawing.Size(3, 667);
+            this.splitter2.Size = new System.Drawing.Size(3, 346);
             this.splitter2.TabIndex = 7;
             this.splitter2.TabStop = false;
             // 
@@ -128,7 +128,7 @@ namespace Dual.Model.Import
             // 
             this.splitContainer2.Panel2.Controls.Add(this.splitContainer5);
             this.splitContainer2.Panel2.Controls.Add(this.button_copy);
-            this.splitContainer2.Size = new System.Drawing.Size(540, 667);
+            this.splitContainer2.Size = new System.Drawing.Size(540, 346);
             this.splitContainer2.SplitterDistance = 220;
             this.splitContainer2.TabIndex = 4;
             // 
@@ -192,7 +192,7 @@ namespace Dual.Model.Import
             // 
             this.splitContainer5.Panel2.Controls.Add(this.xtraTabControl_Ex);
             this.splitContainer5.Panel2Collapsed = true;
-            this.splitContainer5.Size = new System.Drawing.Size(540, 443);
+            this.splitContainer5.Size = new System.Drawing.Size(540, 122);
             this.splitContainer5.SplitterDistance = 251;
             this.splitContainer5.TabIndex = 3;
             // 
@@ -203,7 +203,7 @@ namespace Dual.Model.Import
             this.richTextBox_ds.Location = new System.Drawing.Point(0, 0);
             this.richTextBox_ds.Name = "richTextBox_ds";
             this.richTextBox_ds.ReadOnly = true;
-            this.richTextBox_ds.Size = new System.Drawing.Size(540, 443);
+            this.richTextBox_ds.Size = new System.Drawing.Size(540, 122);
             this.richTextBox_ds.TabIndex = 2;
             this.richTextBox_ds.Text = "";
             // 
@@ -216,7 +216,7 @@ namespace Dual.Model.Import
             this.xtraTabControl_Ex.Location = new System.Drawing.Point(0, 0);
             this.xtraTabControl_Ex.Name = "xtraTabControl_Ex";
             this.xtraTabControl_Ex.SelectedIndex = 0;
-            this.xtraTabControl_Ex.Size = new System.Drawing.Size(540, 188);
+            this.xtraTabControl_Ex.Size = new System.Drawing.Size(150, 46);
             this.xtraTabControl_Ex.TabIndex = 6;
             // 
             // button_copy
@@ -274,7 +274,7 @@ namespace Dual.Model.Import
             this.splitContainer4.Panel2.Controls.Add(this.button_ClearLog);
             this.splitContainer4.Panel2.Controls.Add(this.richTextBox_Debug);
             this.splitContainer4.Size = new System.Drawing.Size(1373, 746);
-            this.splitContainer4.SplitterDistance = 667;
+            this.splitContainer4.SplitterDistance = 346;
             this.splitContainer4.TabIndex = 20;
             // 
             // button_HideLine
@@ -318,7 +318,7 @@ namespace Dual.Model.Import
             this.richTextBox_Debug.Location = new System.Drawing.Point(0, 0);
             this.richTextBox_Debug.Name = "richTextBox_Debug";
             this.richTextBox_Debug.ReadOnly = true;
-            this.richTextBox_Debug.Size = new System.Drawing.Size(1373, 75);
+            this.richTextBox_Debug.Size = new System.Drawing.Size(1373, 396);
             this.richTextBox_Debug.TabIndex = 0;
             this.richTextBox_Debug.Text = "";
             // 

@@ -338,17 +338,9 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                 api.AddRXs(findSegments(ser[1])) |> ignore
             } |> ignore
 
-
         let createJobDef (system:DsSystem) (ctx:CallListingContext) =
-            let trimQuote (input:string) = 
-                let now = input.ToCharArray() // split the input string into char array
-                let fst = 0 // first index of char array
-                let lst = input.Length - 1 // last index of char array
-                if now[fst] = '"' && now[lst] = '"' then // if first and last is quotation
-                    new string(Array.sub now (fst + 1) (lst - 1)) // remove first and last char
-                else
-                    input
-            let jobName =  trimQuote(ctx.TryFindFirstChild<JobNameContext>().Map(getText).Value)
+            let getRawJobName = ctx.TryFindFirstChild<EtcName1Context>().Value
+            let jobName =  getRawJobName.GetText().DeQuoteOnDemand()
             let apiDefCtxs = ctx.Descendants<CallApiDefContext>().ToArray()
             let getAddress (addressCtx:IParseTree) =
                 addressCtx.TryFindFirstChild<AddressItemContext>().Map(getText).Value

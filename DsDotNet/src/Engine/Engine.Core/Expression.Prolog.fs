@@ -214,19 +214,6 @@ module rec ExpressionPrologModule =
                 false
 
 
-    /// Expression 의 Terminal 이 될 수 있는 subclass: Tag<'T>, StorageVariable<'T>
-    type IStorage =
-        inherit INamed
-        inherit IText
-        abstract Value: obj with get, set
-        abstract DataType : System.Type
-
-    type IStorage<'T> =
-        inherit IStorage
-        abstract Value: 'T with get, set
-
-    type ITag = inherit IStorage
-    type IVariable = inherit IStorage
 
     /// Expression<'T> 을 boxed 에서 접근하기 위한 최소의 interface
     type IExpression =
@@ -245,25 +232,28 @@ module rec ExpressionPrologModule =
     [<DebuggerDisplay("{Name}")>]
     type TypedValueStorage<'T>(name, initValue:'T) =
         let mutable value = initValue
-        let setValue(v) =
+        let setValue(x, v) =
             if (value |> box) <> (v |> box) //value 변경시만 저장 및 이벤트
-            then value <- v; ChangeValueEvent(name, v)
+            then value <- v; ChangeValueEvent(x)
                  
-        member _.Name: string = name
-        member _.Value with get() = value and set(v) = setValue v 
-
-        interface IStorage<'T> with
-            member x.Value with get() = x.Value and set(v) = setValue v
+        member x.Name: string = name
+        member x.Value with get() = value and set(v) = setValue (x, v)
+        
+        //ahn 삭제 해도 정상 동작 : 삭제 가능확인 필요
+        //interface IStorage<'T> with
+        //    member x.Value with get() = x.Value and set(v) = setValue (x, v)
 
         interface IStorage with
             member x.DataType = typedefof<'T>
-            member x.Value with get() = x.Value and set(v) = setValue (v|> unbox) 
+            member x.Value with get() = x.Value and set(v) = setValue (x, v|> unbox) 
             member x.ToText() = x.ToText()
+            member x.NotifyValueChanged() = x.NotifyValueChanged()
        
         interface INamed with
             member x.Name with get() = x.Name and set(v) = failwith "ERROR: not supported"
 
         abstract ToText: unit -> string
+        abstract NotifyValueChanged: unit -> unit
 
 
     [<AbstractClass>]
@@ -273,13 +263,13 @@ module rec ExpressionPrologModule =
         interface ITag
         override x.ToText() = "%" + name
 
-    // todo: 임시 이름... 추후 Variable로
-    type StorageVariable<'T>(name, initValue:'T) =
+    type Variable<'T>(name, initValue:'T) =
         inherit TypedValueStorage<'T>(name, initValue)
 
         interface IVariable
         override x.ToText() = "$" + name
-
+        override x.NotifyValueChanged() = ChangeValueEvent x
+       
     type Arg       = IExpression
     type Arguments = IExpression list
     type Args      = Arguments

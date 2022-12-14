@@ -63,7 +63,7 @@ module CoreModule =
         member val Devices       = loadedSystems.OfType<Device>() 
         member val ExternalSystems = loadedSystems.OfType<ExternalSystem>() 
 
-        member val Variables = ResizeArray<Variable>()
+        member val Variables = ResizeArray<VariableData>()
         member val Commands = ResizeArray<Command>()
         member val Observes = ResizeArray<Observe>()
 

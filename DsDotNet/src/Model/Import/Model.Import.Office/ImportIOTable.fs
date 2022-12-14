@@ -77,8 +77,8 @@ module ImportIOTable =
                         dicJob.[name].InTag  <- inTag
                         dicJob.[name].OutTag <-outTag
 
-                    |TagCase.Variable ->    //ahn 초기값 입력
-                        let item = CodeElements.Variable($"{row.[(int)IOColumn.Name]}", $"{row.[(int)IOColumn.Size]}",  "")
+                    |TagCase.VariableData ->    //ahn 초기값 입력
+                        let item = CodeElements.VariableData($"{row.[(int)IOColumn.Name]}", $"{row.[(int)IOColumn.Size]}",  "")
                         sys.Variables.Add(item) |>ignore
                     |TagCase.Command  ->        //ahn 수식 입력
                         let item = CodeElements.Command($"{row.[(int)IOColumn.Command]}", FunctionApplication("", [||]))

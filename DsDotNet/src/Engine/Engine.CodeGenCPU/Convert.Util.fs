@@ -45,10 +45,6 @@ type ConvertUtilExt =
                                                             else PlcTag(j.ApiName+"_O", false)
                                                 )
                                                 .Cast<Tag<bool>>()
-                            | :? Real | :? RealEx ->   //가상부모에 의해 Coin이 Real으로 올 수 있음
-                                                if isInTag
-                                                then [memory.End].Cast<Tag<bool>>()   
-                                                else [memory.Start].Cast<Tag<bool>>() 
                             | :? Alias as a -> 
                                         match a.TargetVertex with
                                         | AliasTargetReal ar    -> ar.GetCoinTags(memory, isInTag)
@@ -67,7 +63,6 @@ type ConvertUtilExt =
                                                             else j.ApiItem.RXs.Select(fun s-> dicM[s].End)
                                                 )
                                                 .Cast<Tag<bool>>()
-                            | :? Real | :? RealEx -> Seq.empty //TxRx 처리 안함 (나의 Real 호출일 경우)
                             | :? Alias as a -> 
                                         match a.TargetVertex with
                                         | AliasTargetReal ar    -> ar.GetCoinTags(memory, isTx)

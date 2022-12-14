@@ -146,16 +146,16 @@ module ExpressionParser =
     type System.Type with
         member x.CreateVariable(name:string) : IStorage =
             match x.Name with
-            | "Single" -> StorageVariable<single>(name, 0.0f)
-            | "Double" -> StorageVariable<double>(name, 0.0)
-            | "SByte"  -> StorageVariable<int8>(name, 0y)
-            | "Byte"   -> StorageVariable<uint8>(name, 0uy)
-            | "Int16"  -> StorageVariable<int16>(name, 0s)
-            | "UInt16" -> StorageVariable<uint16>(name, 0us)
-            | "Int32"  -> StorageVariable<int32>(name, 0)
-            | "UInt32" -> StorageVariable<uint32>(name, 0u)
-            | "Int64"  -> StorageVariable<int64>(name, 0L)
-            | "UInt64" -> StorageVariable<uint64>(name, 0UL)
+            | "Single" -> Variable<single>(name, 0.0f)
+            | "Double" -> Variable<double>(name, 0.0)
+            | "SByte"  -> Variable<int8>(name, 0y)
+            | "Byte"   -> Variable<uint8>(name, 0uy)
+            | "Int16"  -> Variable<int16>(name, 0s)
+            | "UInt16" -> Variable<uint16>(name, 0us)
+            | "Int32"  -> Variable<int32>(name, 0)
+            | "UInt32" -> Variable<uint32>(name, 0u)
+            | "Int64"  -> Variable<int64>(name, 0L)
+            | "UInt64" -> Variable<uint64>(name, 0UL)
             | _  -> failwith "ERROR"
 
         static member FromString(typeName:string) : System.Type =

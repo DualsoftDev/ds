@@ -10,11 +10,14 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Windows.Forms;
 using static Engine.Common.FS.MessageEvent;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsTextProperty;
+using static Engine.Core.ExpressionModule;
 using static Engine.Core.ExpressionPrologModule;
+using static Engine.Cpu.RunTime;
 using static Model.Import.Office.ViewModule;
 using Color = System.Drawing.Color;
 
@@ -27,7 +30,11 @@ namespace Dual.Model.Import
         {
             try
             {
-                this.Do(() => button_comfile.Enabled = false);
+                _cts.Cancel();
+                _cts = new CancellationTokenSource();
+                button_TestStart.Enabled = true;
+                button_Stop.Enabled = false;
+
                 var result = ImportM.FromPPTX(PathPPT);
                 _mySystem = result.Item1;
                 _myViewNodes = result.Item2;
@@ -36,7 +43,9 @@ namespace Dual.Model.Import
                 var rungs = resultData.Item1;
                 var dicM = resultData.Item2;
 
-                SimSeg.DicView.Clear();
+                _myCPU = new DsCPU("", rungs.Select(s=>s.Item2));
+                comboBox_Segment.Items.Clear();
+                _DicVertex = new Dictionary<Vertex, ViewNode>();
                 _mySystem.GetVertices()
                            .ForEach(v =>
                            {
@@ -44,13 +53,17 @@ namespace Dual.Model.Import
                                                            .Where(w => w.CoreVertex != null);
 
                                var viewNode = viewNodes.First(w => w.CoreVertex.Value == v);
-                               SimSeg.DicView.Add(v.QualifiedName, viewNode);
-                               comboBox_Segment.Items
-                               .Add(new SegmentHMI { Display = v.QualifiedName, Vertex = v, ViewNode = viewNode, Memory = dicM[v] });
+                               _DicVertex.Add(v, viewNode);
+
+                               if (v is Real)
+                               {
+                                   comboBox_Segment.Items
+                                   .Add(new SegmentHMI { Display = v.QualifiedName, Vertex = v, ViewNode = viewNode, Memory = dicM[v] });
+                               }
                            });
+
                 comboBox_Segment.DisplayMember= "Display";
                 comboBox_Segment.SelectedIndex = 0;
-
                
                 var text = rungs.Select(rung =>
                                 {
@@ -84,7 +97,6 @@ namespace Dual.Model.Import
                 else
                     WriteDebugMsg(DateTime.Now, MSGLevel.MsgError, $"{PathPPT} 불러오기 실패!!");
 
-                this.Do(() => button_comfile.Enabled = true);
 
             }
             catch (Exception ex)
@@ -292,7 +304,7 @@ namespace Dual.Model.Import
         }
         internal void TestDebug()
         {
-            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\..\..\..\..\")) + "UnitTest\\UnitTest.Engine\\ImportPPT\\S.pptx";
+            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\")) + "src\\UnitTest\\UnitTest.Engine\\ImportPPT\\FactoryIO\\Sys.pptx";
             bool debug = File.Exists(path);
             if (debug)
             {
@@ -315,7 +327,7 @@ namespace Dual.Model.Import
             //T9_Group
             //T10_Button
             //T11_SubLoading
-            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\..\..\..\..\")) + "UnitTest\\UnitTest.Engine\\ImportPPT\\S.pptx";
+            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\")) + "src\\UnitTest\\UnitTest.Engine\\ImportPPT\\S.pptx";
             bool debug = File.Exists(path);
             if (debug)
             {

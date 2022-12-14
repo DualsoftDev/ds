@@ -1,5 +1,13 @@
+using Engine.Common;
 using Engine.Common.FS;
+using Engine.Core;
+using Microsoft.Msagl.Core.DataStructures;
 using System;
+using System.Data.SqlTypes;
+using System.Reactive.Linq;
+using System.Text.RegularExpressions;
+using static Engine.Common.FS.MessageEvent;
+using static Engine.Core.CoreModule;
 
 namespace Dual.Model.Import
 {
@@ -14,6 +22,32 @@ namespace Dual.Model.Import
             });
         }
 
+        public static void CPUSubscribe()
+        {
+            CpuEvent.TypedValueSubject.Subscribe(rx =>
+            {
+                FormMain.TheMain.WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{rx.Name}:{rx.Value}");
+            });
+
+            CpuEvent.Status4Subject.Subscribe(rx =>
+            {
+                var v = rx.vertex as Vertex;
+                FormMain.TheMain.Do(() =>
+                {
+                    var ucView = FormMain.TheMain.SelectedView;
+                    var viewNode = FormMain.TheMain._DicVertex[v];
+                    viewNode.Status4 = rx.status;
+
+                    ucView.UpdateStatus(viewNode);
+                });
+
+                FormMain.TheMain.WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{v.Name}:{rx.status}");
+            });
+        }
+
+      
+
+
         public static void MSGSubscribe()
         {
             MessageEvent.MSGSubject.Subscribe(rx =>
@@ -22,22 +56,6 @@ namespace Dual.Model.Import
                 });
         }
 
-        public static void SegSubscribe()
-        {
-            //CoreEvent.SegSubject.Subscribe(rx =>
-            //{
-            //    var seg = rx.Seg as MSeg;
-            //    var sys = seg.BaseSys;
-
-            //    sys.RootMFlow().ToList().ForEach(f =>
-            //    {
-            //        var flow = f as MFlow;
-            //        if (flow.UsedSegs.Contains(seg))
-            //            if (FormMain.TheMain.DicUI.ContainsKey(flow))
-            //                ((UCView)FormMain.TheMain.DicUI[flow].Tag).Update(seg);
-            //    });
-            //});
-        }
     }
 
 }

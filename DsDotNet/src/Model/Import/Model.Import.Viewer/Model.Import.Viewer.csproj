@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>net48</TargetFrameworks>
     <RootNamespace>Model.Import.Viewer</RootNamespace>
+    <OutputPath>$(SolutionDir)\bin</OutputPath>
     <OutputType>WinExe</OutputType>
 
 
@@ -16,6 +17,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
     <ProjectReference Include="..\..\..\Engine\Engine.Common\Engine.Common.csproj" />
+    <ProjectReference Include="..\..\..\Engine\Engine.Cpu\Engine.Cpu.fsproj" />
     <ProjectReference Include="..\Model.Import.Office\Model.Import.Office.fsproj" />
   </ItemGroup>
 

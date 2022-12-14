@@ -262,7 +262,7 @@ namespace Dual.Model.Import
         }
 
 
-        public void Update(ViewNode viewNode)
+        public void UpdateStatus(ViewNode viewNode)
         {
             Node node = viewer.Graph.FindNode(viewNode.UIKey);
             if (node == null)

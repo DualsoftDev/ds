@@ -126,7 +126,7 @@ module EtcListenerModule =
             let varName = context.TryFindFirstChild<VarNameContext>().Value.GetText()
             let varType = context.TryFindFirstChild<VarTypeContext>().Value.GetText()
             let init    = context.TryFindFirstChild<ArgumentContext>().Value.GetText()
-            x.TheSystem.Variables.Add(new Variable(varName, varType, init))
+            x.TheSystem.Variables.Add(new VariableData(varName, varType, init))
 
         member x.ProcessCommandDef(context:CommandDefContext) =
             let cmdName    = context.TryFindFirstChild<CmdNameContext>().Value.GetText()

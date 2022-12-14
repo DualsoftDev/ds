@@ -47,12 +47,11 @@ namespace Dual.Model.Import
             this.button_Reset = new System.Windows.Forms.Button();
             this.button_start = new System.Windows.Forms.Button();
             this.comboBox_Segment = new System.Windows.Forms.ComboBox();
-            this.button_HideLine = new System.Windows.Forms.Button();
-            this.button_comfile = new System.Windows.Forms.Button();
             this.button_ClearLog = new System.Windows.Forms.Button();
             this.richTextBox_Debug = new System.Windows.Forms.RichTextBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.splitter1 = new System.Windows.Forms.Splitter();
+            this.button_Stop = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -270,11 +269,10 @@ namespace Dual.Model.Import
             // 
             // splitContainer4.Panel2
             // 
+            this.splitContainer4.Panel2.Controls.Add(this.button_Stop);
             this.splitContainer4.Panel2.Controls.Add(this.button_Reset);
             this.splitContainer4.Panel2.Controls.Add(this.button_start);
             this.splitContainer4.Panel2.Controls.Add(this.comboBox_Segment);
-            this.splitContainer4.Panel2.Controls.Add(this.button_HideLine);
-            this.splitContainer4.Panel2.Controls.Add(this.button_comfile);
             this.splitContainer4.Panel2.Controls.Add(this.button_TestStart);
             this.splitContainer4.Panel2.Controls.Add(this.button_TestORG);
             this.splitContainer4.Panel2.Controls.Add(this.button_ClearLog);
@@ -315,29 +313,6 @@ namespace Dual.Model.Import
             this.comboBox_Segment.Size = new System.Drawing.Size(173, 20);
             this.comboBox_Segment.TabIndex = 6;
             // 
-            // button_HideLine
-            // 
-            this.button_HideLine.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_HideLine.Location = new System.Drawing.Point(1259, 117);
-            this.button_HideLine.Name = "button_HideLine";
-            this.button_HideLine.Size = new System.Drawing.Size(85, 23);
-            this.button_HideLine.TabIndex = 5;
-            this.button_HideLine.Text = "라인숨기기";
-            this.button_HideLine.UseVisualStyleBackColor = true;
-            this.button_HideLine.Click += new System.EventHandler(this.button_HideLine_Click);
-            // 
-            // button_comfile
-            // 
-            this.button_comfile.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_comfile.Enabled = false;
-            this.button_comfile.Location = new System.Drawing.Point(1259, 93);
-            this.button_comfile.Name = "button_comfile";
-            this.button_comfile.Size = new System.Drawing.Size(85, 23);
-            this.button_comfile.TabIndex = 2;
-            this.button_comfile.Text = "DS언어 체크";
-            this.button_comfile.UseVisualStyleBackColor = true;
-            this.button_comfile.Click += new System.EventHandler(this.button_comfile_Click);
-            // 
             // button_ClearLog
             // 
             this.button_ClearLog.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -377,6 +352,17 @@ namespace Dual.Model.Import
             this.splitter1.Size = new System.Drawing.Size(1373, 3);
             this.splitter1.TabIndex = 22;
             this.splitter1.TabStop = false;
+            // 
+            // button_Stop
+            // 
+            this.button_Stop.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_Stop.Location = new System.Drawing.Point(1259, 84);
+            this.button_Stop.Name = "button_Stop";
+            this.button_Stop.Size = new System.Drawing.Size(85, 23);
+            this.button_Stop.TabIndex = 9;
+            this.button_Stop.Text = "TEST 멈춤";
+            this.button_Stop.UseVisualStyleBackColor = true;
+            this.button_Stop.Click += new System.EventHandler(this.button_Stop_Click);
             // 
             // FormMain
             // 
@@ -434,14 +420,13 @@ namespace Dual.Model.Import
         private System.Windows.Forms.Button button_CreateExcel;
         private System.Windows.Forms.Button button_TestStart;
         private System.Windows.Forms.Button button_TestORG;
-        private System.Windows.Forms.Button button_comfile;
-        private System.Windows.Forms.Button button_HideLine;
         private System.Windows.Forms.TabControl xtraTabControl_My;
         private System.Windows.Forms.Splitter splitter2;
         private System.Windows.Forms.SplitContainer splitContainer5;
         private System.Windows.Forms.Button button_Reset;
         private System.Windows.Forms.Button button_start;
         private System.Windows.Forms.ComboBox comboBox_Segment;
+        private System.Windows.Forms.Button button_Stop;
     }
 }
 

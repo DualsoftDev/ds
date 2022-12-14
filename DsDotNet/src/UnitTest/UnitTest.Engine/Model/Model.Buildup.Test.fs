@@ -213,7 +213,7 @@ module ModelBuildupTests1 =
         member __.``Model with code element test`` () =
             let system, flow, real, callAp, callAm = createSimpleSystem()
 
-            let v = CodeElements.Variable
+            let v = CodeElements.VariableData
             let c = CodeElements.Command
             let o = CodeElements.Observe
             [

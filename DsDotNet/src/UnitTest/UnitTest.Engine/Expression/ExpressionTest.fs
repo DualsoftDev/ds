@@ -386,18 +386,18 @@ module TestModule =
             sbyte.BoxedEvaluatedValue === 1y
 
             let variables = [
-                StorageVariable("sbyte", 1y)    |> var |> iexpr
-                StorageVariable("byte", 1uy)    |> var |> iexpr
-                StorageVariable("int16", 1s)    |> var |> iexpr
-                StorageVariable("uint16", 1us)  |> var |> iexpr
-                StorageVariable("int32", 1)     |> var |> iexpr
-                StorageVariable("uint32", 1u)   |> var |> iexpr
-                StorageVariable("int64", 1L)    |> var |> iexpr
-                StorageVariable("uint64", 1UL)  |> var |> iexpr
-                StorageVariable("single", 1.0f) |> var |> iexpr
-                StorageVariable("double", 1.0)  |> var |> iexpr
-                StorageVariable("char", '1')    |> var |> iexpr
-                StorageVariable("string", "1")  |> var |> iexpr
+                Variable("sbyte", 1y)    |> var |> iexpr
+                Variable("byte", 1uy)    |> var |> iexpr
+                Variable("int16", 1s)    |> var |> iexpr
+                Variable("uint16", 1us)  |> var |> iexpr
+                Variable("int32", 1)     |> var |> iexpr
+                Variable("uint32", 1u)   |> var |> iexpr
+                Variable("int64", 1L)    |> var |> iexpr
+                Variable("uint64", 1UL)  |> var |> iexpr
+                Variable("single", 1.0f) |> var |> iexpr
+                Variable("double", 1.0)  |> var |> iexpr
+                Variable("char", '1')    |> var |> iexpr
+                Variable("string", "1")  |> var |> iexpr
             ]
             let varDic =
                 [   for v in variables do

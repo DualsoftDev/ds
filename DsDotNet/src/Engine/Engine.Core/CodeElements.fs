@@ -8,7 +8,7 @@ module CodeElements =
       }
      *)
     /// Variable Declaration: name = (type, init)
-    type Variable(name:string, varType:string, initValue:string) =
+    type VariableData(name:string, varType:string, initValue:string) =
         member _.Name = name
         member _.Type = varType
         member _.InitValue = initValue

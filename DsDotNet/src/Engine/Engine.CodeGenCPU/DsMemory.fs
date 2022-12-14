@@ -9,25 +9,24 @@ open Engine.Core
 module DsMemoryModule =
 
     /// DsMemory DsBit/DsDotBit 를 관리하는 컨테이어
-    type DsMemory (name:string)  =
+    type DsMemory (v:Vertex)  =
 
         let mutable memory:Memory = Memory(0uy)
+        let name = v.QualifiedName
 
-        let readyTag   = DsBit($"{name}(R)",  false , memory, TagFlag.R)    // 0
-        let goingTag   = DsBit($"{name}(G)",  false , memory, TagFlag.G)
-        let finishTag  = DsBit($"{name}(F)",  false , memory, TagFlag.F)
-        let homingTag  = DsBit($"{name}(H)",  false , memory, TagFlag.H)
-        let originTag  = DsBit($"{name}(0G)", false , memory, TagFlag.Origin)
-        let pauseTag   = DsBit($"{name}(PS)", false , memory, TagFlag.Pause)
-        let errorTxTag = DsBit($"{name}(E1)", false , memory, TagFlag.ErrorTx)
-        let errorRxTag = DsBit($"{name}(E2)", false , memory, TagFlag.ErrorRx)
-
-        let endTag     = DsBit($"{name}(ET)" ,false , memory, EndIndex)     // 0
-        let resetTag   = DsBit($"{name}(RT)" ,false , memory, ResetIndex)   // 1
-        let startTag   = DsBit($"{name}(ST)" ,false , memory, StartIndex)   // 2
-        let relayTag   = DsBit($"{name}(RE)" ,false , memory, RelayIndex)   // 3
-        
-        
+        let readyTag   = DsBit($"{name}(R)",  false ,v ,memory, TagFlag.R)    
+        let goingTag   = DsBit($"{name}(G)",  false ,v ,memory, TagFlag.G)
+        let finishTag  = DsBit($"{name}(F)",  false ,v ,memory, TagFlag.F)
+        let homingTag  = DsBit($"{name}(H)",  false ,v ,memory, TagFlag.H)
+        let originTag  = DsBit($"{name}(0G)", false ,v ,memory, TagFlag.Origin)
+        let pauseTag   = DsBit($"{name}(PS)", false ,v ,memory, TagFlag.Pause)
+        let errorTxTag = DsBit($"{name}(E1)", false ,v ,memory, TagFlag.ErrorTx)
+        let errorRxTag = DsBit($"{name}(E2)", false ,v ,memory, TagFlag.ErrorRx)
+                                                       
+        let endTag     = DsBit($"{name}(ET)" ,false ,v ,memory, EndIndex)     // 0
+        let resetTag   = DsBit($"{name}(RT)" ,false ,v ,memory, ResetIndex)   // 1
+        let startTag   = DsBit($"{name}(ST)" ,false ,v ,memory, StartIndex)   // 2
+        let relayTag   = DsBit($"{name}(RE)" ,false ,v ,memory, RelayIndex)   // 3
 
         member x.Byte  = memory.Value
         member x.Name  = name

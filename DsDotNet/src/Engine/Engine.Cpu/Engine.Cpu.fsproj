@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<OutputType>Exe</OutputType>
+		<OutputType>Library</OutputType>
 		<TargetFramework>net48</TargetFramework>
 		<RootNamespace>Engine.Cpu</RootNamespace>
 		<LangVersion>6.0</LangVersion>
@@ -9,13 +9,14 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Compile Include="Prolog.fs" />
-		<Compile Include="Program.fs" />
+		<Compile Include="Prolog.fsx" />
+		<Compile Include="RunTime.fs" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Update="FSharp.Core" Version="6.0.6" />
 		<ProjectReference Include="..\Engine.Core\Engine.Core.fsproj" />
+		<ProjectReference Include="..\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
 	</ItemGroup>
 
 </Project>

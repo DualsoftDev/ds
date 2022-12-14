@@ -1,9 +1,8 @@
-namespace Engine.CodeGenCPU
+namespace Engine.Core
 
 open System.Collections.Concurrent
 open System.Diagnostics
 open System
-open Engine.Core
 open System.Collections
 
 [<AutoOpen>]
@@ -59,7 +58,6 @@ module MemoryModule =
     [<DebuggerDisplay("{Status}")>]
     type Memory(m:byte) =
         let mutable value = m
-        interface IMemory
         member internal x.getValue(flag:MemoryFlag) = 
                         (value &&& (byte)flag) = (byte)flag
         member internal x.setValue(flag:MemoryFlag, v:bool) = 
@@ -85,10 +83,10 @@ module MemoryModule =
             let lowNibble = value &&& (LowNibble |> byte)
             //Start = 4 Reset = 2 End = 0
             match lowNibble with  
-            |0uy|2uy|6uy|8uy|10uy|14uy -> TagFlag.R
-            |4uy|12uy                  -> TagFlag.G
-            |1uy|5uy|9uy|13uy          -> TagFlag.F
-            |3uy|7uy|11uy|15uy         -> TagFlag.H
+            |0uy|2uy|6uy|8uy|10uy|14uy -> Status4.Ready
+            |4uy|12uy                  -> Status4.Going
+            |1uy|5uy|9uy|13uy          -> Status4.Finish
+            |3uy|7uy|11uy|15uy         -> Status4.Homing
             |_ ->  failwith "error"
           
         member x.GetControlValue(index:int)   = 
@@ -109,8 +107,10 @@ module MemoryModule =
 
         member x.GetMonitorValue(tagFlag:TagFlag)   = 
             match tagFlag  with 
-            |TagFlag.R|TagFlag.G|TagFlag.F| TagFlag.H 
-                              -> x.Status = tagFlag 
+            |TagFlag.R -> x.Status = Ready 
+            |TagFlag.G -> x.Status = Going 
+            |TagFlag.F -> x.Status = Finish 
+            |TagFlag.H -> x.Status = Homing 
             |TagFlag.Origin   -> x.getValue(MemoryFlag.Origin) 
             |TagFlag.Pause    -> x.getValue(MemoryFlag.Pause) 
             |TagFlag.ErrorTx  -> x.getValue(MemoryFlag.ErrorTx) 

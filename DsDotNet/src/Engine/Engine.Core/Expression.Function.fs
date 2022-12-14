@@ -544,5 +544,5 @@ module ExpressionFunctionModule =
         /// boolean NOT operator
         let (!!)   (exp: Expression<bool>) = fLogicalNot [exp]
         /// Assign statement
-        let (<==)  (storage: IStorage<'T>) (exp: IExpression) = Assign(exp, storage)
+        let (<==)  (storage: IStorage) (exp: IExpression) = Assign(exp, storage)
 

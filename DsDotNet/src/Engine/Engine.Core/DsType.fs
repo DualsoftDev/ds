@@ -42,14 +42,14 @@ module DsType =
     ///인터페이스 Tag 기본 형식
     type TagCase =
         | Address
-        | Variable
+        | VariableData
         | Command
         | Observe
     with
         member x.ToText() =
             match x with
             | Address      -> TextAddressDev
-            | Variable     -> TextVariable
+            | VariableData -> TextVariable
             | Command      -> TextCommand
             | Observe      -> TextObserve
 
@@ -57,7 +57,7 @@ module DsType =
     let TagToType(txt:string) =
         match txt with
         | TextAddressDev   -> Address
-        | TextVariable     -> Variable
+        | TextVariable     -> VariableData
         | TextCommand      -> Command
         | TextObserve      -> Observe
         |_-> failwithf $"'{txt}' TagCase Error check type [

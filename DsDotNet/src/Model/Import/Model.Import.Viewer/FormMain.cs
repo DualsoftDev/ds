@@ -5,10 +5,12 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static Engine.Common.FS.MessageEvent;
 using static Engine.Core.CoreModule;
+using static Engine.Cpu.RunTime;
 using static Model.Import.Office.ViewModule;
 
 namespace Dual.Model.Import
@@ -18,11 +20,15 @@ namespace Dual.Model.Import
         public static FormMain TheMain;
 
         private DsSystem _mySystem;
+        private DsCPU _myCPU;
+        private CancellationTokenSource _cts = new CancellationTokenSource();
+
         private IEnumerable<ViewNode> _myViewNodes;
         private string _dsText;
         private bool _ConvertErr = false;
         public Dictionary<Flow, TabPage> _DicMyUI;
         public Dictionary<Flow, TabPage> _DicExUI;
+        public Dictionary<Vertex, ViewNode> _DicVertex;
         public string PathPPT;
         public string PathXLS;
         public bool Busy = false;
@@ -43,12 +49,14 @@ namespace Dual.Model.Import
             richTextBox_Debug.AppendText($"{DateTime.Now} : *.pptx 를 드랍하면 시작됩니다");
 
         }
+        public UCView SelectedView =>  xtraTabControl_My.SelectedTab.Tag as UCView;
+
 
         private void Form1_Load(object sender, EventArgs e)
         {
             EventExternal.ProcessSubscribe();
             EventExternal.MSGSubscribe();
-            EventExternal.SegSubscribe();
+            EventExternal.CPUSubscribe();
 
             _DicMyUI = new Dictionary<Flow, TabPage>();
             _DicExUI = new Dictionary<Flow, TabPage>();
@@ -210,11 +218,16 @@ namespace Dual.Model.Import
         }
         private async void button_TestStart_Click(object sender, EventArgs e)
         {
-            button_TestORG.Enabled = false;
             button_TestStart.Enabled = false;
-            await SimSeg.TestStart(_mySystem, _DicMyUI);
-            button_TestORG.Enabled = true;
+            button_Stop.Enabled = true;
+            await SimSeg.TestStart(_myCPU, _cts);
+        }
+        private void button_Stop_Click(object sender, EventArgs e)
+        {
             button_TestStart.Enabled = true;
+            button_Stop.Enabled = false;
+            _cts.Cancel();
+            _cts = new CancellationTokenSource();
         }
 
         private async void button_TestORG_Click(object sender, EventArgs e)
@@ -232,10 +245,9 @@ namespace Dual.Model.Import
             var segHMI = comboBox_Segment.SelectedItem as SegmentHMI;
             if (segHMI == null) return;
 
-            var ucView = xtraTabControl_My.SelectedTab.Tag as UCView;
+            var ucView = SelectedView;
             segHMI.Memory.Reset.SetValue(false);
             segHMI.Memory.Start.SetValue(true);
-            ucView.Update(segHMI.ViewNode);
         }
 
         private void button_reset_Click(object sender, EventArgs e)
@@ -243,10 +255,11 @@ namespace Dual.Model.Import
             var segHMI = comboBox_Segment.SelectedItem as SegmentHMI;
             if (segHMI == null) return;
 
-            var ucView = xtraTabControl_My.SelectedTab.Tag as UCView;
+            var ucView = SelectedView;
             segHMI.Memory.Start.SetValue(false);
             segHMI.Memory.Reset.SetValue(true);
-            ucView.Update(segHMI.ViewNode);
         }
+
+      
     }
 }

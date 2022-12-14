@@ -15,7 +15,7 @@ module ExpressionModule =
 
     type Terminal<'T> =
         | Tag of Tag<'T>
-        | Variable of StorageVariable<'T>
+        | Variable of Variable<'T>
         | Literal of 'T
 
     type FunctionSpec<'T> = {
@@ -50,7 +50,7 @@ module ExpressionModule =
     let tag (t: Tag<'T>) = Terminal (Tag t)
 
     /// Variable<'T> 로부터 Expression<'T> 생성
-    let var (t: StorageVariable<'T>) = Terminal (Variable t)
+    let var (t: Variable<'T>) = Terminal (Variable t)
 
     type Statement =
         | Assign of expression:IExpression * target:IStorage

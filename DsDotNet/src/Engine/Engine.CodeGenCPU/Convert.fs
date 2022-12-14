@@ -52,45 +52,34 @@ module CpuConvertModule =
 
         //description, statement List 출력
         ["Real-r1",r1; "Real-r2",r2] 
-        @ c1s.Select(fun s-> "Real-c1", s)
-        @ c2s.Select(fun s-> "Real-c2", s)
-        @ c3s.Select(fun s-> "Real-c3", s)
-        @ c4s.Select(fun s-> "Real-c4", s)
-        @ c5s.Select(fun s-> "Real-c5", s)
-        @ c6s.Select(fun s-> "Real-c6", s)
+        @ c1s.Select(fun s-> "Call-c1", s)
+        @ c2s.Select(fun s-> "Call-c2", s)
+        @ c3s.Select(fun s-> "Call-c3", s)
+        @ c4s.Select(fun s-> "Call-c4", s)
+        @ c5s.Select(fun s-> "Call-c5", s)
+        @ c6s.Select(fun s-> "Call-c6", s)
 
 
     /// real 의 가상 부모 만들어서 가상 부모를 통한 제어 statement 생성
     let createRungsForRoot(real:Real, graph:DsGraph) =
-        if getSrcMemorys(real, graph, StartEdge) @ getSrcMemorys(real, graph, ResetEdge) |> Seq.any
+        if (getSrcMemorys(real, graph, StartEdge) @ getSrcMemorys(real, graph, ResetEdge)) |> Seq.any
         then 
-            let parentTag = DsMemory($"{real.QualifiedName}(p)")
-
-            //F1. child Real Start Statement 만들기
-            let parentGraph = DsGraph()
-            parentGraph.AddVertex(real) |> ignore
-            let f1s = createRungsForReal(parentTag, parentGraph)
-
-            //F2. Real 자신의 Reset going relay  Statement 만들기
+            //F1. Real 자신의 Reset going relay  Statement 만들기
             let srcs = getSrcMemorys(real, graph, ResetEdge)
-            let goingRelays = srcs.Select(fun c -> c, DsMemory($"{c.Name}(gr)")) |> dict
-            let f2s = srcs.Select(fun c ->
-                     c.CreateResetGoing(dicM[real], goingRelays[c]))
+            let goingRelays = srcs.Select(fun c -> c, DsTag($"{c.Name}(gr)", false)) |> dict
+            let f1s = srcs.Select(fun c ->
+                      c.CreateResetGoing(dicM[real], goingRelays[c]))
 
-            //F3. Real 자신의    Reset Statement 만들기
-            let f3 = dicM[real].TryGetRealResetStatement(goingRelays.Values)
-            //F4. Real 부모의 시작조건 Statement 만들기
+            //F2. Real 자신의    Reset Statement 만들기
+            let f2 = dicM[real].TryGetRealResetStatement(goingRelays.Values)
+            //F3. Real 자신의    Start Statement 만들기
             let srcs = getSrcMemorys(real, graph, StartEdge)
-            let f4 = parentTag.TryCreateRealStart(srcs)
-            //F5. Real 부모의 셀프리셋 Statement 만들기
-            let f5 = parentTag.CreateResetSelf()
+            let f3 = dicM[real].TryCreateRealStart(srcs)
 
             //description, statement List 출력
-            f1s.Select(fun (s, f1)-> $"Root:{s}", f1)
-            @ f2s.Select(fun s-> "Flow-f2", s)
+            f1s.Select(fun s -> "Flow-f1", s)
+            @ (f2 |> Option.toList).Select(fun s-> "Flow-f2", s)
             @ (f3 |> Option.toList).Select(fun s-> "Flow-f3", s)
-            @ (f4 |> Option.toList).Select(fun s-> "Flow-f4", s)
-            @ ["Flow-f5", f5]
         
         else Seq.empty
 
@@ -103,13 +92,13 @@ module CpuConvertModule =
         //모든 인과 대상 Node 메모리화
         vertices.ForEach(fun v ->
             match v with
-                | :? Real as r -> dicM.TryAdd(v, DsMemory($"{r.QualifiedName}")) |> verifyM $"Duplicated system name [{v.QualifiedName}]"
-                | :? Call as c -> dicM.TryAdd(c, DsMemory($"{c.QualifiedName}")) |> verifyM $"Duplicated system name [{v.QualifiedName}]"
+                | :? Real as r -> dicM.TryAdd(r, DsMemory(v)) |> verifyM $"Duplicated name [{v.QualifiedName}]"
+                | :? Call as c -> dicM.TryAdd(c, DsMemory(v)) |> verifyM $"Duplicated name [{v.QualifiedName}]"
                 | :? Alias as a ->
-                            match a.TargetVertex with
-                            | AliasTargetReal r -> aliasSet.TryAdd(a, r)        |> verifyM $"Duplicated system name [{v.QualifiedName}]"
-                            | AliasTargetRealEx rEx -> aliasSet.TryAdd(a, rEx)  |> verifyM $"Duplicated system name [{v.QualifiedName}]"
-                            | AliasTargetCall c -> aliasSet.TryAdd(a, c)        |> verifyM $"Duplicated system name [{v.QualifiedName}]"
+                    match a.TargetVertex with
+                    | AliasTargetReal r -> aliasSet.TryAdd(a, r)        |> verifyM $"Duplicated name [{v.QualifiedName}]"
+                    | AliasTargetRealEx rEx -> aliasSet.TryAdd(a, rEx)  |> verifyM $"Duplicated name [{v.QualifiedName}]"
+                    | AliasTargetCall c -> aliasSet.TryAdd(a, c)        |> verifyM $"Duplicated name [{v.QualifiedName}]"
                 | _-> ()
         )
 

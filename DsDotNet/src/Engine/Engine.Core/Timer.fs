@@ -2,6 +2,7 @@ namespace Engine.Core
 open System
 open System.Reactive.Linq
 open System.Reactive.Subjects
+open Engine.Common.FS
 
 
 (*
@@ -38,40 +39,61 @@ module rec TimerModule =
             clockSubscription.Dispose()
             clockSubscription <- null
 
+        let clearStructure() =
+            ts.EN.Value <- false
+            ts.TT.Value <- false
+            ts.DN.Value <- false
+            ts.ACC.Value <- 0us
+
+        let clear() =
+            if clockSubscription <> null then
+                unsubscribe()
+            clearStructure()
+
+        let resume() =
+            if clockSubscription <> null then
+                failwith "ERROR"
+
+            let accumulate() =
+                if ts.TT.Value && not ts.DN.Value then
+                    ts.ACC.Value <- ts.ACC.Value + 1us
+                    tracefn "Accumutated to %A" ts.ACC.Value
+                    if ts.ACC.Value >= ts.PRE.Value then
+                        //clear()
+                        tracefn "Timer accumulator value reached"
+                        ts.TT.Value <- false
+                        ts.DN.Value <- true
+                        ts.EN.Value <- true
+
+            tracefn "Timer subscribing to tick event"
+            clockSubscription <-
+                the20msTimer.Subscribe(fun _ ->
+                    let xxx = ts
+                    match tt, ts.TT.Value with
+                    | TON, true when not ts.DN.Value -> accumulate()        // When enabled, timing can be paused by setting the .DN bit to true and resumed by clearing the .DN
+                    | _, true -> accumulate()
+                    | _, _ -> ()
+                )
+
         do
             StorageValueChangedSubject
                 .Where(fun storage -> storage = timerStruct.EN)
                 .Subscribe(fun storage ->
-                    match tt, (storage.Value :?> bool) with
-                    | TON, true -> this.Start()
+                    let enabled = storage.Value :?> bool
+                    match tt, enabled with
+                    | TON, true ->
+                        tracefn "%A enabled with DN=%b" tt ts.DN.Value
+                        if ts.ACC.Value < 0us || ts.PRE.Value < 0us then failwith "ERROR"
+                        ts.TT.Value <- not ts.DN.Value
+                        if ts.TT.Value then
+                            resume()
+
+                    | TON, false -> clear()
                     | TOF, true -> ts.DN.Value <- true
                 ) |> ignore
 
-        member x.Start() =
-            x.Reset()
-            x.Resume()
-
         member x.Pause() = unsubscribe()
 
-        member x.Resume() =
-            if clockSubscription <> null then
-                failwith "ERROR"
-
-            clockSubscription <-
-                the20msTimer.Subscribe(fun _ ->
-                    ts.ACC.Value <- ts.ACC.Value + 1us
-                    if ts.ACC.Value >= ts.PRE.Value then
-                        x.Reset()
-                        ts.TT.Value <- false
-                        ts.DN.Value <- true
-                )
-
-        member x.Reset() =
-            ts.ACC.Value <- 0us
-            ts.TT.Value <- false
-            ts.DN.Value <- false
-            if clockSubscription <> null then
-                unsubscribe()
 
         member val internal Fire:Fire option = None with get, set
 

@@ -1,16 +1,17 @@
 // https://literature.rockwellautomation.com/idc/groups/literature/documents/rm/1756-rm003_-en-p.pdf  pp121
-
-.EN BOOL The enable bit contains rung-condition-in when the instruction
-was last executed.
-.TT BOOL The timing bit when set indicates the timing operation is in
-process.
-.DN BOOL The done bit when set indicates the timing operation is
-complete (or paused).
-.PRE DINT The preset value specifies the value (1 millisecond units) which
-the accumulated value must reach before the instruction
-indicates it is done.
-.ACC DINT The accumulated value specifies the number of milliseconds
-that have elapsed since the TON instruction was enabled.
+// 국문 https://literature.rockwellautomation.com/idc/groups/literature/documents/rm/1756-rm003_-ko-p.pdf
+.EN BOOL
+    The enable bit contains rung-condition-in when the instruction was last executed.
+.TT BOOL
+    The timing bit when set indicates the timing operation is in process.
+.DN BOOL
+    The done bit when set indicates the timing operation is complete (or paused).
+.PRE DINT
+    The preset value specifies the value (1 millisecond units)
+    which the accumulated value must reach before the instruction indicates it is done.
+.ACC DINT
+    The accumulated value specifies the number of milliseconds
+    that have elapsed since the TON/TOF instruction was enabled.
 
 
 

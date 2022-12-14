@@ -257,24 +257,26 @@ module rec ExpressionPrologModule =
     [<AbstractClass>]
     [<DebuggerDisplay("{Name}")>]
     type TypedValueStorage<'T when 'T:equality>(name, initValue:'T) =
+        let mutable value = initValue
         member _.Name: string = name
-        member val Value = initValue with get, set
+        member x.Value
+            with get() = value
+            and set(v) =
+                if value <> v then
+                    value <- v
+                    StorageValueChangedSubject.OnNext(x :> IStorage)
 
         interface IStorage with
             member x.DataType = typedefof<'T>
-            member x.Value with get() = x.Value and set(v) = x.SetValue(v :?> 'T)
+            member x.Value with get() = x.Value and set(v) = x.Value <- (v :?> 'T)
             member x.ToText() = x.ToText()
 
         interface IStorage<'T> with
-            member x.Value with get() = x.Value and set(v) = x.SetValue(v)
+            member x.Value with get() = x.Value and set(v) = x.Value <- v
         interface INamed with
             member x.Name with get() = x.Name and set(v) = failwith "ERROR: not supported"
 
         abstract ToText: unit -> string
-        member private x.SetValue(v:'T) =
-            if x.Value <> v then
-                x.Value <- v
-                StorageValueChangedSubject.OnNext(x :> IStorage)
 
 
 

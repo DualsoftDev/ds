@@ -39,16 +39,40 @@ module rec TimerModule =
             clockSubscription.Dispose()
             clockSubscription <- null
 
-        let clearStructure() =
+        let tonPreScan() =
             ts.EN.Value <- false
             ts.TT.Value <- false
             ts.DN.Value <- false
             ts.ACC.Value <- 0us
+        let tonRungConditionInFalse() = tonPreScan()
+        let tonPostScan() = tonPreScan()
+
+        let tofPreScan() =
+            ts.EN.Value <- false
+            ts.TT.Value <- false
+            ts.DN.Value <- true
+            ts.ACC.Value <- ts.PRE.Value
+        //let tofRungConditionInTrue() =
+        //    ts.EN.Value <- true
+        //    ts.TT.Value <- true     // https://edisciplinas.usp.br/pluginfile.php/184942/mod_resource/content/1/Logix5000%20-%20Manual%20de%20Referencias.pdf 와 https://edisciplinas.usp.br/pluginfile.php/184942/mod_resource/content/1/Logix5000%20-%20Manual%20de%20Referencias.pdf 설명이 다름
+        //    ts.DN.Value <- true
+        //    ts.ACC.Value <- 0us
+        //let tofPostScan() = tofPreScan()
+
+        let rtoPreScan() = failwith "ERROR"
+        let rtoConditionTrue() = failwith "ERROR"
+        let rtoPostScan() = failwith "ERROR"
+
+        let preScan() =
+            match tt with
+            | TON -> tonPreScan()
+            | TOF -> tofPreScan()
+            | RTO -> rtoPreScan()
 
         let clear() =
             if clockSubscription <> null then
                 unsubscribe()
-            clearStructure()
+            preScan()
 
         let resume() =
             if clockSubscription <> null then
@@ -62,34 +86,53 @@ module rec TimerModule =
                         //clear()
                         tracefn "Timer accumulator value reached"
                         ts.TT.Value <- false
-                        ts.DN.Value <- true
-                        ts.EN.Value <- true
+                        match tt with
+                        | TON ->
+                            ts.DN.Value <- true
+                            ts.EN.Value <- true
+                        | TOF ->
+                            ts.DN.Value <- false
+                            ts.EN.Value <- false
 
             tracefn "Timer subscribing to tick event"
             clockSubscription <-
                 the20msTimer.Subscribe(fun _ ->
                     let xxx = ts
                     match tt, ts.TT.Value with
-                    | TON, true when not ts.DN.Value -> accumulate()        // When enabled, timing can be paused by setting the .DN bit to true and resumed by clearing the .DN
+                    | (TON|TOF), true when not ts.DN.Value -> accumulate()        // When enabled, timing can be paused by setting the .DN bit to true and resumed by clearing the .DN
                     | _, true -> accumulate()
                     | _, _ -> ()
                 )
 
         do
+            preScan()
             StorageValueChangedSubject
                 .Where(fun storage -> storage = timerStruct.EN)
                 .Subscribe(fun storage ->
+                    if ts.ACC.Value < 0us || ts.PRE.Value < 0us then failwith "ERROR"
                     let enabled = storage.Value :?> bool
                     match tt, enabled with
                     | TON, true ->
-                        tracefn "%A enabled with DN=%b" tt ts.DN.Value
-                        if ts.ACC.Value < 0us || ts.PRE.Value < 0us then failwith "ERROR"
+                        tracefn "TON enabled with DN=%b" ts.DN.Value
                         ts.TT.Value <- not ts.DN.Value
                         if ts.TT.Value then
                             resume()
+                    | TON, false -> preScan()
 
-                    | TON, false -> clear()
-                    | TOF, true -> ts.DN.Value <- true
+                    | TOF, false ->
+                        tracefn "TOF enabled with DN=%b" ts.DN.Value
+                        ts.EN.Value <- false
+                        ts.TT.Value <- true
+                        ts.ACC.Value <- 0us // When the TOF instruction is disabled, the ACC value is cleared       https://edisciplinas.usp.br/pluginfile.php/184942/mod_resource/content/1/Logix5000%20-%20Manual%20de%20Referencias.pdf  pp121
+                        if not ts.EN.Value then
+                            resume()
+
+                    | TOF, true ->
+                        ts.EN.Value <- true
+                        ts.TT.Value <- true     // spec 상충함 : // https://edisciplinas.usp.br/pluginfile.php/184942/mod_resource/content/1/Logix5000%20-%20Manual%20de%20Referencias.pdf 와 https://edisciplinas.usp.br/pluginfile.php/184942/mod_resource/content/1/Logix5000%20-%20Manual%20de%20Referencias.pdf 설명이 다름
+                        ts.DN.Value <- true
+                        ts.ACC.Value <- 0us
+                        //preScan()
                 ) |> ignore
 
         member x.Pause() = unsubscribe()

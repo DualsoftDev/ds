@@ -13,7 +13,9 @@
     The accumulated value specifies the number of milliseconds
     that have elapsed since the TON/TOF instruction was enabled.
 
-
+TON
+TOF
+RTO : Retentive Timer ON (유지 타이머)
 
 사용설명서_XGK_XGB_명령어집_국문_V2.3.pdf, pp4-29  (http://www.famart.co.kr/resource/ls/%EC%82%AC%EC%9A%A9%EC%84%A4%EB%AA%85%EC%84%9C_XGK_XGB_%EB%AA%85%EB%A0%B9%EC%96%B4%EC%A7%91_%EA%B5%AD%EB%AC%B8_V2.3.pdf)
 

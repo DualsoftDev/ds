@@ -459,3 +459,23 @@ module TestModule =
             ()
 
 
+    type ExpressionObjectTest() =
+        do Fixtures.SetUpTest()
+
+
+        [<Test>]
+        member __.``1 ExpressionReference test`` () =
+            let t1 = PlcTag.Create("1", 1)
+
+            (*
+            let e1 = tag t1
+            let e2 = tag t1
+            let isEqual = e1 = e2   // won't compile: error FS0001: 'Expression<int>' 형식은 'equality' 제약 조건을 지원하지 않는 하나 이상의 구조적 요소 형식을 포함하는 레코드, 공용 구조체 또는 구조체이므로 'equality' 제약 조건을 지원하지 않습니다. 이 형식의 경우 같음 조건을 사용하지 말거나 형식에 'StructuralEquality' 특성을 추가하여 같음 조건을 지원하지 않는 필드 형식을 확인하세요.
+            *)
+
+            let e1 = tag t1 :> IExpression
+            let e2 = tag t1 :> IExpression
+            let isEqual = e1 = e2
+            isEqual === false       // IExpression 참조로 접근할 때, equality check 가 불가능한 상태
+            ()
+

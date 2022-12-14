@@ -749,6 +749,73 @@ C4 > C5;
 }
 """
 
+    let Ppt20221213Text = """
+[sys ip = localhost] FactoryIO = {
+    [flow] API = {
+    }
+    [flow] Line = {
+        Clear |> Clear |> Copy1_Assy반출 |> Green공급및고정;		// Clear(Real)|> Clear(Real) |> Copy1_Assy반출(Alias) |> Green공급및고정(Real);
+        "Line_Robot_X+" > 로봇조립Sub;		// "Line_Robot_X+"(Call)> 로봇조립Sub(Real);
+        "Line_Robot_X-" > 로봇조립Main;		// "Line_Robot_X-"(Call)> 로봇조립Main(Real);
+        Blue공급및고정 => 로봇조립Sub => Assy반출;		// Blue공급및고정(Real)=> 로봇조립Sub(Real) => Assy반출(Real);
+        GoSub => Blue공급및고정 => Assy반출;		// GoSub(Real)=> Blue공급및고정(Real) => Assy반출(Real);
+        GoMain => Green공급및고정 => 로봇조립Main => 로봇조립Sub;		// GoMain(Real)=> Green공급및고정(Real) => 로봇조립Main(Real) => 로봇조립Sub(Real);
+        Assy반출 = {
+            "Line_Assy_Upper+" > Line_Sub_PartOff;		// "Line_Assy_Upper+"(Call)> Line_Sub_PartOff(Call);
+            "Line_Assy_Upper+" > "Line_Assy_UpConv+" > "Line_Assy_Upper-" > "Line_Assy_DownConv+";		// "Line_Assy_Upper+"(Call)> "Line_Assy_UpConv+"(Call) > "Line_Assy_Upper-"(Call) > "Line_Assy_DownConv+"(Call);
+        }
+        Green공급및고정 = {
+            "Line_Main_Conv+" > "Line_Main_Clamp+" > "Line_Main_Clamp-";		// "Line_Main_Conv+"(Call)> "Line_Main_Clamp+"(Call) > "Line_Main_Clamp-"(Call);
+        }
+        Blue공급및고정 = {
+            "Line_Sub_Conv+" > "Line_Sub_Clamp+" > "Line_Sub_Clamp-";		// "Line_Sub_Conv+"(Call)> "Line_Sub_Clamp+"(Call) > "Line_Sub_Clamp-"(Call);
+        }
+        로봇조립Sub = {
+            "Line_Robot_Grab-" > "Line_Robot_Z-";		// "Line_Robot_Grab-"(Call)> "Line_Robot_Z-"(Call);
+            "Line_Robot_Z+" > "Line_Robot_Grab-" > "Line_Robot_X-";		// "Line_Robot_Z+"(Call)> "Line_Robot_Grab-"(Call) > "Line_Robot_X-"(Call);
+        }
+        로봇조립Main = {
+            "Line_Robot_Grab+" > Line_Main_PartOff;		// "Line_Robot_Grab+"(Call)> Line_Main_PartOff(Call);
+            "Line_Robot_Grab+" > "Line_Robot_X+";		// "Line_Robot_Grab+"(Call)> "Line_Robot_X+"(Call);
+            "Line_Robot_Z+" > "Line_Robot_Grab+" > "Line_Robot_Z-";		// "Line_Robot_Z+"(Call)> "Line_Robot_Grab+"(Call) > "Line_Robot_Z-"(Call);
+        }
+        [aliases] = {
+            Assy반출 = { Copy1_Assy반출; }
+        }
+    }
+    [jobs] = {
+        "Line_Sub_Conv+" = { Line_Sub."Conv+"(_, _); }
+        Line_Sub_PartOff = { Line_Sub.PartOff(_, _); }
+        "Line_Sub_Clamp+" = { Line_Sub."Clamp+"(_, _); }
+        "Line_Sub_Clamp-" = { Line_Sub."Clamp-"(_, _); }
+        "Line_Robot_Grab+" = { Line_Robot."Grab+"(_, _); }
+        "Line_Robot_Grab-" = { Line_Robot."Grab-"(_, _); }
+        "Line_Robot_X-" = { Line_Robot."X-"(_, _); }
+        "Line_Robot_Z+" = { Line_Robot."Z+"(_, _); }
+        "Line_Robot_Z-" = { Line_Robot."Z-"(_, _); }
+        "Line_Robot_X+" = { Line_Robot."X+"(_, _); }
+        "Line_Assy_UpConv+" = { Line_Assy."UpConv+"(_, _); }
+        "Line_Assy_DownConv+" = { Line_Assy."DownConv+"(_, _); }
+        "Line_Assy_Upper+" = { Line_Assy."Upper+"(_, _); }
+        "Line_Assy_Upper-" = { Line_Assy."Upper-"(_, _); }
+        Line_Assy_JobClear = { Line_Assy.JobClear(_, _); }
+        "Line_Main_Conv+" = { Line_Main."Conv+"(_, _); }
+        Line_Main_PartOff = { Line_Main.PartOff(_, _); }
+        "Line_Main_Clamp+" = { Line_Main."Clamp+"(_, _); }
+        "Line_Main_Clamp-" = { Line_Main."Clamp-"(_, _); }
+    }
+    [interfaces] = {
+        "JobClearClear~_" = { _ ~ _ }
+        "StartMainGoMain~_" = { _ ~ _ }
+        "StartSubGoSub~_" = { _ ~ _ }
+    }
+    [device file="Lib/Sub.ds"] Line_Sub; // C:\Users\kwak\Downloads\FactoryIO\Lib\Sub.pptx
+    [device file="Lib/Robot.ds"] Line_Robot; // C:\Users\kwak\Downloads\FactoryIO\Lib\Robot.pptx
+    [device file="Lib/Assy.ds"] Line_Assy; // C:\Users\kwak\Downloads\FactoryIO\Lib\Assy.pptx
+    [device file="Lib/Main.ds"] Line_Main; // C:\Users\kwak\Downloads\FactoryIO\Lib\Main.pptx
+}
+"""
+
 
     let ParseNormal(text:string) =
         let helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation(".", "ActiveCpuName"))

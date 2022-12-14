@@ -1,0 +1,37 @@
+// https://literature.rockwellautomation.com/idc/groups/literature/documents/rm/1756-rm003_-en-p.pdf  pp121
+
+.EN BOOL The enable bit contains rung-condition-in when the instruction
+was last executed.
+.TT BOOL The timing bit when set indicates the timing operation is in
+process.
+.DN BOOL The done bit when set indicates the timing operation is
+complete (or paused).
+.PRE DINT The preset value specifies the value (1 millisecond units) which
+the accumulated value must reach before the instruction
+indicates it is done.
+.ACC DINT The accumulated value specifies the number of milliseconds
+that have elapsed since the TON instruction was enabled.
+
+
+
+사용설명서_XGK_XGB_명령어집_국문_V2.3.pdf, pp4-29  (http://www.famart.co.kr/resource/ls/%EC%82%AC%EC%9A%A9%EC%84%A4%EB%AA%85%EC%84%9C_XGK_XGB_%EB%AA%85%EB%A0%B9%EC%96%B4%EC%A7%91_%EA%B5%AD%EB%AC%B8_V2.3.pdf)
+
+    TON (On 타이머) 입력조건이 On 되면, 타이머 접점 출력 Off
+    타이머 현재값이 설정값에 도달했을 때 타이머 접점 출력 On
+
+    TOFF (Off 타이머) 입력조건이 On 되면, 현재값은 설정값이 되고 타이머 접점 출력 On
+    현재값이 감소되어 0 이 되면 타이머 접점 출력 Off
+
+    TMR (적산 타이머) 입력조건이 Off 되어도 현재값 유지
+    누적된 타이머 값이 설정값에 도달하면 타이머 접접 출력 On
+
+    TMON (모노스테이블) 타이머
+    입력조건이 On 되면, 현재값은 설정값이 되고 타이머 접점 출력 On
+    입력조건이 Off 되어도 계속 현재값 감소. 0 이 되면 접점 출력 Off
+
+    TRTG (리트리거블 타이머)
+    모노스테이블 타이머와 같은 기능을 하되, 현재값이 감소하고 있을 때
+    다시 입력조건이 On 되면 현재값은 다시 설정값이 되어 동작함.
+
+해석
+    입력조건이 On 되면 --> 입력조건이 rising On 되면

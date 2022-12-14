@@ -3,6 +3,7 @@ open System
 open System.Linq
 open Engine.Common.FS
 open System.Diagnostics
+open System.Reactive.Subjects
 
 [<AutoOpen>]
 module rec ExpressionPrologModule =
@@ -221,11 +222,16 @@ module rec ExpressionPrologModule =
         abstract Value: obj with get, set
         abstract DataType : System.Type
 
+    type IValue<'T> =
+        abstract Value: 'T with get, set
     type IStorage<'T> =
         inherit IStorage
-        abstract Value: 'T with get, set
+        inherit IValue<'T>
 
     type ITag = inherit IStorage
+    type ITag<'T> =
+        inherit ITag
+        inherit IStorage<'T>
     type IVariable = inherit IStorage
 
     /// Expression<'T> 을 boxed 에서 접근하기 위한 최소의 interface
@@ -240,37 +246,48 @@ module rec ExpressionPrologModule =
         // Function expression 인 경우 function name 반환.  terminal 이면 none
         abstract FunctionName: string option
 
+    type IExpression<'T> =
+        inherit IExpression
+        abstract EvaluatedValue : 'T
+
+
+
+    let StorageValueChangedSubject = new Subject<IStorage>()
 
     [<AbstractClass>]
     [<DebuggerDisplay("{Name}")>]
-    type TypedValueStorage<'T>(name, initValue:'T) =
+    type TypedValueStorage<'T when 'T:equality>(name, initValue:'T) =
         member _.Name: string = name
         member val Value = initValue with get, set
 
         interface IStorage with
             member x.DataType = typedefof<'T>
-            member x.Value with get() = x.Value and set(v) = x.Value <- v :?> 'T
+            member x.Value with get() = x.Value and set(v) = x.SetValue(v :?> 'T)
             member x.ToText() = x.ToText()
 
         interface IStorage<'T> with
-            member x.Value with get() = x.Value and set(v) = x.Value <- v
+            member x.Value with get() = x.Value and set(v) = x.SetValue(v)
         interface INamed with
             member x.Name with get() = x.Name and set(v) = failwith "ERROR: not supported"
 
         abstract ToText: unit -> string
+        member private x.SetValue(v:'T) =
+            if x.Value <> v then
+                x.Value <- v
+                StorageValueChangedSubject.OnNext(x :> IStorage)
 
 
 
 
     [<AbstractClass>]
-    type Tag<'T>(name, initValue:'T) =
+    type Tag<'T when 'T:equality>(name, initValue:'T) =
         inherit TypedValueStorage<'T>(name, initValue)
 
-        interface ITag
+        interface ITag<'T>
         override x.ToText() = "%" + name
 
     // todo: 임시 이름... 추후 Variable로
-    type StorageVariable<'T>(name, initValue:'T) =
+    type StorageVariable<'T when 'T:equality>(name, initValue:'T) =
         inherit TypedValueStorage<'T>(name, initValue)
 
         interface IVariable

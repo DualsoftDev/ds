@@ -13,7 +13,7 @@ open Engine.Common.FS.Prelude
 [<AutoOpen>]
 module ExpressionModule =
 
-    type Terminal<'T> =
+    type Terminal<'T when 'T:equality> =
         | Tag of Tag<'T>
         | Variable of StorageVariable<'T>
         | Literal of 'T
@@ -25,11 +25,12 @@ module ExpressionModule =
     }
 
 
-    type Expression<'T> =
+    type Expression<'T when 'T:equality> =
         | Terminal of Terminal<'T>
         | Function of FunctionSpec<'T>  //FunctionBody:(Arguments -> 'T) * Name * Arguments
-        interface IExpression with
+        interface IExpression<'T> with
             member x.DataType = x.DataType
+            member x.EvaluatedValue = x.Evaluate()
             member x.BoxedEvaluatedValue = x.Evaluate() |> box
             member x.GetBoxedRawObject() = x.GetBoxedRawObject()
             member x.ToText(withParenthesys) = x.ToText(withParenthesys)
@@ -52,16 +53,21 @@ module ExpressionModule =
     /// Variable<'T> 로부터 Expression<'T> 생성
     let var (t: StorageVariable<'T>) = Terminal (Variable t)
 
-    // type Timer =
-    //     /// On delay timer
-    //     | TON
-    //     /// Off delay timer
-    //     | TOF
-    //     | TMR
+    type Timer internal(typ:TimerType, name, condition:IExpression, preset20msCounter:uint16) =
+        let timerStruct = TimerStruct(name, preset20msCounter)
+        let firer = Firere(typ, timerStruct)
+        member _.Struct = timerStruct
+        member _.Condition = condition
+        member val ConditionCheckStatement:Statement option = None with get, set
+        //member val CachedConditionValue = false with get, set
+        //member val Firere = Firere(typ, timerStruct)
+        //member val internal OptOnConditionChanged: (bool -> unit) option = None with get, set
+        //member internal x.OnConditionChanged newCondition = x.OptOnConditionChanged.Value(newCondition)
+
     type Statement =
         | Assign of expression:IExpression * target:IStorage
         | VarDecl of expression:IExpression * variable:IStorage
-        // | Timer of timer:Timer
+        | Timer of condition:IExpression<bool> * timer:Timer
 
 
     type Statement with
@@ -75,12 +81,15 @@ module ExpressionModule =
                 assert(target.DataType = expr.DataType)
                 target.Value <- expr.BoxedEvaluatedValue
 
+            | Timer (condition, timer) ->
+                timer.ConditionCheckStatement.Value.Do()
+
         member x.ToText() =
             match x with
             | Assign (expr, target) -> $"{target.ToText()} := {expr.ToText(false)}"
             | VarDecl (expr, var) -> $"{var.DataType.Name} {var.Name} = {expr.ToText(false)}"
 
-    type Terminal<'T> with
+    type Terminal<'T when 'T:equality> with
         member x.GetBoxedRawObject(): obj =
             match x with
             | Tag t -> t |> box
@@ -99,7 +108,7 @@ module ExpressionModule =
             | Variable t -> "$" + t.Name
             | Literal v -> sprintf "%A" v
 
-    type Expression<'T> with
+    type Expression<'T when 'T:equality> with
         member x.GetBoxedRawObject() =  // return type:obj    return type 명시할 경우, 다음 compile error 발생:  error FS1198: 제네릭 멤버 'ToText'이(가) 이 프로그램 지점 전의 비균일 인스턴스화에 사용되었습니다. 이 멤버가 처음에 오도록 멤버들을 다시 정렬해 보세요. 또는, 인수 형식, 반환 형식 및 추가 제네릭 매개 변수와 제약 조건을 포함한 멤버의 전체 형식을 명시적으로 지정하세요.
             match x with
             | Terminal b -> b.GetBoxedRawObject()

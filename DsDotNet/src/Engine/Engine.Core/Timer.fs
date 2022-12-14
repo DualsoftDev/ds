@@ -1,11 +1,17 @@
 namespace Engine.Core
 open System
 open System.Reactive.Linq
+open System.Reactive.Subjects
 
+
+(*
+ - Timer 설정을 위한 조건: expression 으로 받음.
+ - Timer statement 는 expression 을 매 scan 마다 평가.  값이 변경되면(rising or falling) 해당 timer 에 반영
+ - Timer 가 설정되고 나면, observable timer 에 의해서 counter 값이 하나씩 감소하고, 0 이 되면 target trigger
+*)
 
 [<AutoOpen>]
-
-module TimerModule =
+module rec TimerModule =
     #r "nuget: System.Reactive"
 
     printfn "Current Time: %A" DateTime.Now
@@ -20,14 +26,26 @@ module TimerModule =
     //source.Add(fun x -> printfn "%A %A" x.Value x.Timestamp)
     let subscription = the1secTimer.Subscribe(printfn "%A")
 
+    type TimerType = TON | TOF | RTO
 
     type Fire = unit -> unit
-    type Firere(target20msCounter:uint16, fire:Fire) =
-        let mutable counter = target20msCounter
-        let mutable subscription:IDisposable = null
+    type Firere(timerType:TimerType, timerStruct:TimerStruct) as this =
+        let ts = timerStruct
+        let tt = timerType
+
+        let mutable clockSubscription:IDisposable = null
         let unsubscribe() =
-            subscription.Dispose()
-            subscription <- null
+            clockSubscription.Dispose()
+            clockSubscription <- null
+
+        do
+            StorageValueChangedSubject
+                .Where(fun storage -> storage = timerStruct.EN)
+                .Subscribe(fun storage ->
+                    match tt, (storage.Value :?> bool) with
+                    | TON, true -> this.Start()
+                    | TOF, true -> ts.DN.Value <- true
+                ) |> ignore
 
         member x.Start() =
             x.Reset()
@@ -36,40 +54,44 @@ module TimerModule =
         member x.Pause() = unsubscribe()
 
         member x.Resume() =
-            if subscription <> null then
+            if clockSubscription <> null then
                 failwith "ERROR"
 
-            subscription <-
+            clockSubscription <-
                 the20msTimer.Subscribe(fun _ ->
-                    counter <- counter - 1us
-                    if counter = 0us then
+                    ts.ACC.Value <- ts.ACC.Value + 1us
+                    if ts.ACC.Value >= ts.PRE.Value then
                         x.Reset()
-                        fire()
+                        ts.TT.Value <- false
+                        ts.DN.Value <- true
                 )
 
         member x.Reset() =
-            counter <- target20msCounter
-            if subscription <> null then
+            ts.ACC.Value <- 0us
+            ts.TT.Value <- false
+            ts.DN.Value <- false
+            if clockSubscription <> null then
                 unsubscribe()
 
-        /// 현재 진행 중 시간 / 남은 시간 / ....
-        member _.Counter = counter
-        member _.Target = target20msCounter
-        //interface INamed with
+        member val internal Fire:Fire option = None with get, set
 
-    type TimerType = TON | TOFF | TMR | TMON
-    type TimerVariable(time:uint16, goal:uint16) =
-        let mutable timer = time
 
-    type Timer private(name, set:IExpression, target20msCounter:uint16, fire:Fire) =
-        inherit Firere(target20msCounter, fire)
+
+    // 임시.  추후 수정 필요.  simualte Tag<bool>
+    type BoolTag(name) =
+        inherit Tag<bool>(name, false)
+    type IntTag(name, init) =
+        inherit Tag<uint16>(name, init)
+
+    type TimerStruct internal(name, preset20msCounter:uint16) =
         member _.Name:string = name
-        /// Set 조건
-        member _.Set = set
+        /// Set 조건 : 멤버에서 삭제 가능?
 
-        static member CreateTON(name, set, target20msCounter) =
-            //let mutable fired = Tag<bool>($"Timer_{name}", false)
-            let mutable fired = false   // simualte Tag<bool>
-            let fire() = fired <- true
-            new Timer(name, set, target20msCounter, fire)
+        member val EN:BoolTag = BoolTag($"{name}.EN")  // Enable
+        member val TT:BoolTag = BoolTag($"{name}.TT")  // Timing
+        member val DN:BoolTag = BoolTag($"{name}.DN")  // Done
+        member val PRE:IntTag = IntTag( $"{name}.PRE", preset20msCounter)
+        member val ACC:IntTag = IntTag( $"{name}.ACC", 0us)
+
+
 

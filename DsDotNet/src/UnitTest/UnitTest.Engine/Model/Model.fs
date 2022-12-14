@@ -143,8 +143,9 @@ module ModelTests1 =
             compare ParserTest.T6Alias answerT6Aliases
 
         [<Test>]
-        member __.``Ppt20221213Text test`` () =
-            compare Program.Ppt20221213Text answerT6Aliases
+        member __.``X Ppt20221213Text test`` () =
+            // 현재 test 실패
+            compareExact Program.Ppt20221213Text
 
         //[<Test>]
         //member __.``Model component test`` () =

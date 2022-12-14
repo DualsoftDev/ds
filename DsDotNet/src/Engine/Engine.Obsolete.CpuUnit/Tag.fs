@@ -14,7 +14,7 @@ module  TagModule =
         abstract GetValue:unit -> obj
 
     /// PLC tag (PlcTag) class
-    type PlcTag<'T> private (name, initValue:'T)  =
+    type PlcTag<'T when 'T:equality> private (name, initValue:'T)  =
         inherit Tag<'T>(name, initValue)
         member val Address = "" with get, set
         static member Create(name:string, value:'T) = PlcTag(name, value)
@@ -31,7 +31,7 @@ module  TagModule =
 
 
     /// Monitor tag (PlanTag) class
-    type DsBit<'T> (name, initValue:'T, memory:Memory, monitor:Monitor) =
+    type DsBit<'T when 'T:equality> (name, initValue:'T, memory:Memory, monitor:Monitor) =
         inherit Tag<'T>(name, initValue)
 
         interface IPLCTag with
@@ -51,7 +51,7 @@ module  TagModule =
 
 
     //name[Index] 규격 ex : R203[3]
-    type DsDotBit<'T> (name, initValue:'T, memory:Memory) =
+    type DsDotBit<'T when 'T:equality> (name, initValue:'T, memory:Memory) =
         inherit Tag<'T>(name, initValue)
         let mutable index:int=  getIndex(name)//대괄호 안에 내용의 index 가져오기
 

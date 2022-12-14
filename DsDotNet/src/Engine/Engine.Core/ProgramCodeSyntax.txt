@@ -23,7 +23,7 @@ void Main() {
     int delay = Wait(1000); // local 변수에 사용자 함수 수행 값 대입
     %Q100.0 = true;         // PLC tag 에 값 할당
 }
-
+    
 
 // 기타
 //      조건식, 루프, array, 구조체, ...

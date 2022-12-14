@@ -244,22 +244,26 @@ module rec ExpressionPrologModule =
     [<AbstractClass>]
     [<DebuggerDisplay("{Name}")>]
     type TypedValueStorage<'T>(name, initValue:'T) =
+        let mutable value = initValue
+        let setValue(v) =
+            if (value |> box) <> (v |> box) //value 변경시만 저장 및 이벤트
+            then value <- v; ChangeValueEvent(name, v)
+                 
         member _.Name: string = name
-        member val Value = initValue with get, set
+        member _.Value with get() = value and set(v) = setValue v 
+
+        interface IStorage<'T> with
+            member x.Value with get() = x.Value and set(v) = setValue v
 
         interface IStorage with
             member x.DataType = typedefof<'T>
-            member x.Value with get() = x.Value and set(v) = x.Value <- v :?> 'T
+            member x.Value with get() = x.Value and set(v) = setValue (v|> unbox) 
             member x.ToText() = x.ToText()
-
-        interface IStorage<'T> with
-            member x.Value with get() = x.Value and set(v) = x.Value <- v
+       
         interface INamed with
             member x.Name with get() = x.Name and set(v) = failwith "ERROR: not supported"
 
         abstract ToText: unit -> string
-
-
 
 
     [<AbstractClass>]

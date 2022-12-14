@@ -4,10 +4,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static Engine.Common.FS.MessageEvent;
 using static Engine.Core.CoreModule;
+using static Model.Import.Office.ViewModule;
 
 namespace Dual.Model.Import
 {
@@ -16,6 +18,7 @@ namespace Dual.Model.Import
         public static FormMain TheMain;
 
         private DsSystem _mySystem;
+        private IEnumerable<ViewNode> _myViewNodes;
         private string _dsText;
         private bool _ConvertErr = false;
         public Dictionary<Flow, TabPage> _DicMyUI;
@@ -153,7 +156,6 @@ namespace Dual.Model.Import
             var text = richTextBox_ds.Text;
             RichTextBoxExtensions.SetClipboard(text);
             WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"클립보드복사 성공!! Ctrl+V로 붙여넣기 가능합니다.");
-
         }
 
         private void button_CreateExcel_Click(object sender, EventArgs e)
@@ -165,16 +167,11 @@ namespace Dual.Model.Import
             Process.Start(Path.GetDirectoryName(PathXLS));
         }
 
-
-
         private void button_ClearLog_Click(object sender, EventArgs e)
         {
             richTextBox_Debug.Clear();
             richTextBox_Debug.AppendText($"{DateTime.Now} : Log Clear");
         }
-
-
-
 
         private void button_comfile_Click(object sender, EventArgs e)
         {
@@ -211,11 +208,11 @@ namespace Dual.Model.Import
         {
             RefreshText();
         }
-        private void button_TestStart_Click(object sender, EventArgs e)
+        private async void button_TestStart_Click(object sender, EventArgs e)
         {
             button_TestORG.Enabled = false;
             button_TestStart.Enabled = false;
-            //await SimSeg.TestStart(_OldModel);
+            await SimSeg.TestStart(_mySystem, _DicMyUI);
             button_TestORG.Enabled = true;
             button_TestStart.Enabled = true;
         }
@@ -230,5 +227,26 @@ namespace Dual.Model.Import
             });
         }
 
+        private void button_start_Click(object sender, EventArgs e)
+        {
+            var segHMI = comboBox_Segment.SelectedItem as SegmentHMI;
+            if (segHMI == null) return;
+
+            var ucView = xtraTabControl_My.SelectedTab.Tag as UCView;
+            segHMI.Memory.Reset.SetValue(false);
+            segHMI.Memory.Start.SetValue(true);
+            ucView.Update(segHMI.ViewNode);
+        }
+
+        private void button_reset_Click(object sender, EventArgs e)
+        {
+            var segHMI = comboBox_Segment.SelectedItem as SegmentHMI;
+            if (segHMI == null) return;
+
+            var ucView = xtraTabControl_My.SelectedTab.Tag as UCView;
+            segHMI.Memory.Start.SetValue(false);
+            segHMI.Memory.Reset.SetValue(true);
+            ucView.Update(segHMI.ViewNode);
+        }
     }
 }

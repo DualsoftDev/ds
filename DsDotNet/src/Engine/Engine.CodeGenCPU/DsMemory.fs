@@ -13,19 +13,21 @@ module DsMemoryModule =
 
         let mutable memory:Memory = Memory(0uy)
 
-        let readyTag   = DsBit($"{name}(R)",  false , memory, Monitor.R)    // 0
-        let goingTag   = DsBit($"{name}(G)",  false , memory, Monitor.G)
-        let finishTag  = DsBit($"{name}(F)",  false , memory, Monitor.F)
-        let homingTag  = DsBit($"{name}(H)",  false , memory, Monitor.H)
-        let originTag  = DsBit($"{name}(0G)", false , memory, Monitor.Origin)
-        let pauseTag   = DsBit($"{name}(PS)", false , memory, Monitor.Pause)
-        let errorTxTag = DsBit($"{name}(E1)", false , memory, Monitor.ErrorTx)
-        let errorRxTag = DsBit($"{name}(E2)", false , memory, Monitor.ErrorRx)
+        let readyTag   = DsBit($"{name}(R)",  false , memory, TagFlag.R)    // 0
+        let goingTag   = DsBit($"{name}(G)",  false , memory, TagFlag.G)
+        let finishTag  = DsBit($"{name}(F)",  false , memory, TagFlag.F)
+        let homingTag  = DsBit($"{name}(H)",  false , memory, TagFlag.H)
+        let originTag  = DsBit($"{name}(0G)", false , memory, TagFlag.Origin)
+        let pauseTag   = DsBit($"{name}(PS)", false , memory, TagFlag.Pause)
+        let errorTxTag = DsBit($"{name}(E1)", false , memory, TagFlag.ErrorTx)
+        let errorRxTag = DsBit($"{name}(E2)", false , memory, TagFlag.ErrorRx)
 
-        let startTag   = DsDotBit($"{name}[{StartIndex}]" , false, memory)  // 2
-        let resetTag   = DsDotBit($"{name}[{ResetIndex}]" , false, memory)  // 1
-        let endTag     = DsDotBit($"{name}[{EndIndex}]"   , false, memory)  // 0
-        let relayTag   = DsDotBit($"{name}[{RelayIndex}]" , false, memory)  // 3
+        let endTag     = DsBit($"{name}(ET)" ,false , memory, EndIndex)     // 0
+        let resetTag   = DsBit($"{name}(RT)" ,false , memory, ResetIndex)   // 1
+        let startTag   = DsBit($"{name}(ST)" ,false , memory, StartIndex)   // 2
+        let relayTag   = DsBit($"{name}(RE)" ,false , memory, RelayIndex)   // 3
+        
+        
 
         member x.Byte  = memory.Value
         member x.Name  = name

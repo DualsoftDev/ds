@@ -1,3 +1,4 @@
+using DocumentFormat.OpenXml.Spreadsheet;
 using Engine.CodeGenCPU;
 using Engine.Common;
 using Engine.Common.FS;
@@ -13,12 +14,89 @@ using System.Windows.Forms;
 using static Engine.Common.FS.MessageEvent;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsTextProperty;
+using static Engine.Core.ExpressionPrologModule;
 using static Model.Import.Office.ViewModule;
+using Color = System.Drawing.Color;
 
 namespace Dual.Model.Import
 {
+    
     public partial class FormMain : Form
     {
+        internal void ImportPPT()
+        {
+            try
+            {
+                this.Do(() => button_comfile.Enabled = false);
+                var result = ImportM.FromPPTX(PathPPT);
+                _mySystem = result.Item1;
+                _myViewNodes = result.Item2;
+
+                var resultData = CpuLoader.LoadStatements(_mySystem);
+                var rungs = resultData.Item1;
+                var dicM = resultData.Item2;
+
+                SimSeg.DicView.Clear();
+                _mySystem.GetVertices()
+                           .ForEach(v =>
+                           {
+                               var viewNodes = _myViewNodes.SelectMany(s => s.UsedViewNodes)
+                                                           .Where(w => w.CoreVertex != null);
+
+                               var viewNode = viewNodes.First(w => w.CoreVertex.Value == v);
+                               SimSeg.DicView.Add(v.QualifiedName, viewNode);
+                               comboBox_Segment.Items
+                               .Add(new SegmentHMI { Display = v.QualifiedName, Vertex = v, ViewNode = viewNode, Memory = dicM[v] });
+                           });
+                comboBox_Segment.DisplayMember= "Display";
+                comboBox_Segment.SelectedIndex = 0;
+
+               
+                var text = rungs.Select(rung =>
+                                {
+                                    var description = rung.Item1;
+                                    var statement = rung.Item2;
+                                    return $"***{description}***\t{rung.Item2.ToText().Replace("%"," ")}"; 
+                                });
+
+                WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"\r\n{text.JoinWith("\n")}");
+
+                if (!_ConvertErr)
+                {
+                    _dsText = _mySystem.ToDsText();
+                    ExportTextModel(Color.Transparent, _dsText);
+                    this.Do(() => xtraTabControl_Ex.TabPages.Clear());
+
+                    CreateNewTabViewer(_myViewNodes);
+
+                    WriteDebugMsg(DateTime.Now, MSGLevel.MsgWarn, $"{PathPPT} 불러오기 성공!!");
+                    this.Do(() =>
+                    {
+                        button_CreateExcel.Visible = true;
+                        pictureBox_xls.Visible = true;
+                        button_TestORG.Visible = true;
+                        button_TestStart.Visible = true;
+                        button_copy.Visible = false;
+                    });
+
+                    ProcessEvent.DoWork(0);
+                }
+                else
+                    WriteDebugMsg(DateTime.Now, MSGLevel.MsgError, $"{PathPPT} 불러오기 실패!!");
+
+                this.Do(() => button_comfile.Enabled = true);
+
+            }
+            catch (Exception ex)
+            {
+                WriteDebugMsg(DateTime.Now, MSGLevel.MsgError, ex.Message);
+            }
+            finally
+            {
+                Busy = false;
+            }
+        }
+
         internal void ExportTextModel(Color color, string dsText, bool bShowLine = false)
         {
 
@@ -56,58 +134,6 @@ namespace Dual.Model.Import
             this.Do(() => richTextBox_ds.ScrollToCaret());
             ProcessEvent.DoWork(0);
         }
-        internal void ImportPPT()
-        {
-            try
-            {
-                this.Do(() => button_comfile.Enabled = false);
-                var result = ImportM.FromPPTX(PathPPT);
-                _mySystem = result.Item1;
-                var viewNodes = result.Item2;
-
-                //var rungs = CpuLoader.LoadStatements(_mySystem);
-                //rungs.ForEach(rung =>
-                //{
-                //    WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, rung.ToText());
-                //});
-
-                if (!_ConvertErr)
-                {
-                    _dsText = _mySystem.ToDsText();
-                    ExportTextModel(Color.Transparent, _dsText);
-                    this.Do(() => xtraTabControl_Ex.TabPages.Clear());
-
-                    CreateNewTabViewer(viewNodes);
-
-                    WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{PathPPT} 불러오기 성공!!");
-                    this.Do(() =>
-                    {
-                        button_CreateExcel.Visible = true;
-                        pictureBox_xls.Visible = true;
-                        button_TestORG.Visible = true;
-                        button_TestStart.Visible = true;
-                        button_copy.Visible = false;
-                    });
-
-                    ProcessEvent.DoWork(0);
-                }
-                else
-                    WriteDebugMsg(DateTime.Now, MSGLevel.MsgError, $"{PathPPT} 불러오기 실패!!");
-
-                this.Do(() => button_comfile.Enabled = true);
-
-            }
-            catch (Exception ex)
-            {
-                WriteDebugMsg(DateTime.Now, MSGLevel.MsgError, ex.Message);
-            }
-            finally
-            {
-                Busy = false;
-            }
-        }
-
-
 
         internal void ImportExcel(string path)
         {
@@ -255,14 +281,10 @@ namespace Dual.Model.Import
         {
             foreach (KeyValuePair<Flow, TabPage> view in _DicMyUI)
             {
-                foreach (var seg in view.Key.Graph.Vertices)
-                {
-                    ((UCView)view.Value.Tag).Update(seg);
-                }
-
                 ((UCView)view.Value.Tag).RefreshGraph();
             }
         }
+
         internal void ReloadPPT()
         {
             if (File.Exists(PathPPT))
@@ -270,7 +292,7 @@ namespace Dual.Model.Import
         }
         internal void TestDebug()
         {
-            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\..\..\..\..\")) + "UnitTest\\UnitTest.Engine\\ImportPPT\\T0_CaseAll.pptx";
+            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\..\..\..\..\")) + "UnitTest\\UnitTest.Engine\\ImportPPT\\S.pptx";
             bool debug = File.Exists(path);
             if (debug)
             {
@@ -282,7 +304,6 @@ namespace Dual.Model.Import
         internal void TestUnitTest()
         {
 
-            //T0_CaseAll
             //T1_System
             //T2_Flow
             //T3_Real
@@ -294,7 +315,7 @@ namespace Dual.Model.Import
             //T9_Group
             //T10_Button
             //T11_SubLoading
-            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\..\..\..\..\")) + "UnitTest\\UnitTest.Engine\\ImportPPT\\debug.pptx";
+            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\..\..\..\..\")) + "UnitTest\\UnitTest.Engine\\ImportPPT\\S.pptx";
             bool debug = File.Exists(path);
             if (debug)
             {

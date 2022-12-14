@@ -1,5 +1,15 @@
+using DocumentFormat.OpenXml.Wordprocessing;
+using Engine.Common;
+using Engine.Core;
+using Microsoft.Msagl.Core.DataStructures;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using static Engine.Core.CoreModule;
 using static Model.Import.Office.InterfaceClass;
+using static Model.Import.Office.ViewModule;
 
 namespace Dual.Model.Import
 {
@@ -7,6 +17,7 @@ namespace Dual.Model.Import
     {
         static readonly List<NodeType> mys = new List<NodeType>() { NodeType.REAL };
         static readonly List<NodeType> notMys = new List<NodeType>() { NodeType.CALL };
+        static public Dictionary<string, ViewNode> DicView = new Dictionary<string, ViewNode>();
         //static bool org = false;
         static List<NodeType> AllSeg
         {
@@ -16,6 +27,32 @@ namespace Dual.Model.Import
                 obj.AddRange(mys); obj.AddRange(notMys);
                 return obj;
             }
+        }
+
+        internal static async Task TestStart(CoreModule.DsSystem sys, Dictionary<CoreModule.Flow, TabPage> _DicMyUI)
+        {
+            sys.Flows.ForEach(f =>
+            {
+                var ucView = _DicMyUI[f].Tag as UCView;
+                f.Graph.Vertices.ForEach(v =>
+                {
+                    Update(v, ucView);
+                    if (v is Real)
+                        ((Real)v).Graph.Vertices.ForEach(c => Update(c, ucView));
+
+                });
+            });
+                           
+
+            await Task.Delay(0);
+        }
+
+        private static void Update(Vertex v, UCView ucView)
+        {
+            var viewNode = DicView[v.QualifiedName];
+            viewNode.Status4 = DsType.Status4.Going;
+
+            ucView.Update(viewNode);
         }
 
         //private static async Task Test(IEnumerable<MSeg> rootSegs, Status4 status, List<NodeType> showList)

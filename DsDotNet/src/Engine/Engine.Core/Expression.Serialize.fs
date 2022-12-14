@@ -11,7 +11,9 @@ module rec ExpressionSerializeModule =
             [
                 let mutable i = 1
                 let incr() = i <- i + 1
-                (["*"; "/"; "%"], i)              ; incr()  // 우선 순위 최상위 연산자
+                // 우선 순위 최상위 연산자가 맨 처음에 오도록 리스팅
+                (["!"; ], i)                      ; incr()
+                (["*"; "/"; "%"], i)              ; incr()
                 (["+"; "-"], i)                   ; incr()
 
                 (["<<" ; "<<<" ; ">>" ; ">>>"], i); incr()

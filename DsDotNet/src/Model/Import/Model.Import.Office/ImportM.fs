@@ -74,10 +74,10 @@ module ImportM =
                 let viewNodes = doc.MakeGraphView(mySys)
 
 
-                MSGInfo($"전체 장표   count [{doc.Pages.Count()}]")
-                MSGInfo($"전체 도형   count [{doc.Nodes.Count()}]")
-                MSGInfo($"전체 연결   count [{doc.Edges.Count()}]")
-                MSGInfo($"전체 부모   count [{doc.Parents.Keys.Count}]")
+                //MSGInfo($"전체 장표   count [{doc.Pages.Count()}]")
+                //MSGInfo($"전체 도형   count [{doc.Nodes.Count()}]")
+                //MSGInfo($"전체 연결   count [{doc.Edges.Count()}]")
+                //MSGInfo($"전체 부모   count [{doc.Parents.Keys.Count}]")
                 mySys, viewNodes
 
             with ex ->  failwithf  $"{pathStack.Last()}\r\n{ex.Message}"

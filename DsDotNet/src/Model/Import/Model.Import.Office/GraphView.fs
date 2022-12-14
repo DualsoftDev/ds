@@ -12,9 +12,7 @@ open System.Linq
 module rec ViewModule = 
 
    
-    type ViewNode(name:string, nodeType:NodeType, coreVertex:Vertex option, btnType:BtnType option) = 
-        let btnType:BtnType option = btnType
-        let coreVertex:Vertex option = None
+    type ViewNode(name:string, nodeType:NodeType, coreVertex:Vertex option, btnType:BtnType option)  = 
 
         new () = ViewNode("", REAL, None, None)
         new (nodeType) = ViewNode("", nodeType, None, None)
@@ -35,6 +33,7 @@ module rec ViewModule =
 
         member val Edges = HashSet<ModelingEdgeInfo<ViewNode>>()
         member val Singles = HashSet<ViewNode>()
+        member val Status4 = Status4.Homing with get, set
         member val NodeType = nodeType with get, set
         member val Flow:Flow option = None with get, set
         member val Page = 0 with get, set
@@ -42,11 +41,20 @@ module rec ViewModule =
         member x.DummyAdded = x.Edges |> Seq.collect(fun e-> e.Sources @ e.Targets)
                                       |> Seq.filter(fun v -> v.NodeType = DUMMY)
                                       |> Seq.isEmpty |> not
+
         member x.CoreVertex = coreVertex
         member x.BtnType =  btnType
         member x.IsChildExist =  x.Edges.Count>0 || x.Singles.Count>0
         member x.Name =  name
-        member x.UIKey =  $"{name};{x.GetHashCode()}"
+        member x.UIKey = if coreVertex.IsSome
+                         then $"{name};{coreVertex.Value.QualifiedName.GetHashCode()}"
+                         else $"{name};{x.GetHashCode()}"
+
+        member x.UsedViewNodes = 
+                            let thisChildren  = x.Edges |> Seq.collect(fun e-> e.Sources @ e.Targets)
+                                                        |> Seq.append x.Singles
+
+                            thisChildren @ thisChildren.SelectMany(fun x->x.UsedViewNodes)
     
 
     let getViewEdge(edge:ModelingEdgeInfo<string> ,dummy:pptDummy , dummys:pptDummy seq,  dicV:IDictionary<Vertex, ViewNode>, dicDummy:IDictionary<string, ViewNode>) =  

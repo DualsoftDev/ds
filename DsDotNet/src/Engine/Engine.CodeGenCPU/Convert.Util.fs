@@ -34,3 +34,43 @@ type ConvertUtilExt =
                         | Interlock        -> failwith $"Do not use {edgeType} Error"
 
                     findEdges.Select(fun e->e.Source)
+
+                    
+    [<Extension>]  static member GetCoinTags(coin:Vertex, memory:DsMemory, isInTag:bool) =
+                            match coin with
+                            | :? Call as c -> c.CallTarget.JobDefs
+                                                .Select(fun j-> 
+                                                            if isInTag
+                                                            then PlcTag(j.ApiName+"_I", false)
+                                                            else PlcTag(j.ApiName+"_O", false)
+                                                )
+                                                .Cast<Tag<bool>>()
+                            | :? Real | :? RealEx ->   //가상부모에 의해 Coin이 Real으로 올 수 있음
+                                                if isInTag
+                                                then [memory.End].Cast<Tag<bool>>()   
+                                                else [memory.Start].Cast<Tag<bool>>() 
+                            | :? Alias as a -> 
+                                        match a.TargetVertex with
+                                        | AliasTargetReal ar    -> ar.GetCoinTags(memory, isInTag)
+                                        | AliasTargetCall ac    -> ac.GetCoinTags(memory, isInTag)
+                                        | AliasTargetRealEx ao  -> ao.GetCoinTags(memory, isInTag)
+                            | _ -> failwith "Error"
+
+
+    [<Extension>]  static member GetTxRxTags(coin:Vertex, isTx:bool, dicM:ConcurrentDictionary<Vertex, DsMemory>) =
+                            let memory = dicM[coin]
+                            match coin with
+                            | :? Call as c -> c.CallTarget.JobDefs
+                                                .SelectMany(fun j-> 
+                                                            if isTx
+                                                            then j.ApiItem.TXs.Select(fun s-> dicM[s].Start)
+                                                            else j.ApiItem.RXs.Select(fun s-> dicM[s].End)
+                                                )
+                                                .Cast<Tag<bool>>()
+                            | :? Real | :? RealEx -> Seq.empty //TxRx 처리 안함 (나의 Real 호출일 경우)
+                            | :? Alias as a -> 
+                                        match a.TargetVertex with
+                                        | AliasTargetReal ar    -> ar.GetCoinTags(memory, isTx)
+                                        | AliasTargetCall ac    -> ac.GetCoinTags(memory, isTx)
+                                        | AliasTargetRealEx ao  -> ao.GetCoinTags(memory, isTx)
+                            | _ -> failwith "Error"

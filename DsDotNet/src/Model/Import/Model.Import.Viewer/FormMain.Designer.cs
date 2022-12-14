@@ -44,6 +44,9 @@ namespace Dual.Model.Import
             this.button_TestStart = new System.Windows.Forms.Button();
             this.button_TestORG = new System.Windows.Forms.Button();
             this.splitContainer4 = new System.Windows.Forms.SplitContainer();
+            this.button_Reset = new System.Windows.Forms.Button();
+            this.button_start = new System.Windows.Forms.Button();
+            this.comboBox_Segment = new System.Windows.Forms.ComboBox();
             this.button_HideLine = new System.Windows.Forms.Button();
             this.button_comfile = new System.Windows.Forms.Button();
             this.button_ClearLog = new System.Windows.Forms.Button();
@@ -193,7 +196,7 @@ namespace Dual.Model.Import
             this.splitContainer5.Panel2.Controls.Add(this.xtraTabControl_Ex);
             this.splitContainer5.Panel2Collapsed = true;
             this.splitContainer5.Size = new System.Drawing.Size(540, 122);
-            this.splitContainer5.SplitterDistance = 251;
+            this.splitContainer5.SplitterDistance = 97;
             this.splitContainer5.TabIndex = 3;
             // 
             // richTextBox_ds
@@ -267,6 +270,9 @@ namespace Dual.Model.Import
             // 
             // splitContainer4.Panel2
             // 
+            this.splitContainer4.Panel2.Controls.Add(this.button_Reset);
+            this.splitContainer4.Panel2.Controls.Add(this.button_start);
+            this.splitContainer4.Panel2.Controls.Add(this.comboBox_Segment);
             this.splitContainer4.Panel2.Controls.Add(this.button_HideLine);
             this.splitContainer4.Panel2.Controls.Add(this.button_comfile);
             this.splitContainer4.Panel2.Controls.Add(this.button_TestStart);
@@ -276,6 +282,38 @@ namespace Dual.Model.Import
             this.splitContainer4.Size = new System.Drawing.Size(1373, 746);
             this.splitContainer4.SplitterDistance = 346;
             this.splitContainer4.TabIndex = 20;
+            // 
+            // button_Reset
+            // 
+            this.button_Reset.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_Reset.Location = new System.Drawing.Point(1259, 172);
+            this.button_Reset.Name = "button_Reset";
+            this.button_Reset.Size = new System.Drawing.Size(85, 23);
+            this.button_Reset.TabIndex = 8;
+            this.button_Reset.Text = "Reset";
+            this.button_Reset.UseVisualStyleBackColor = true;
+            this.button_Reset.Click += new System.EventHandler(this.button_reset_Click);
+            // 
+            // button_start
+            // 
+            this.button_start.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_start.Location = new System.Drawing.Point(1171, 172);
+            this.button_start.Name = "button_start";
+            this.button_start.Size = new System.Drawing.Size(85, 23);
+            this.button_start.TabIndex = 7;
+            this.button_start.Text = "Start";
+            this.button_start.UseVisualStyleBackColor = true;
+            this.button_start.Click += new System.EventHandler(this.button_start_Click);
+            // 
+            // comboBox_Segment
+            // 
+            this.comboBox_Segment.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.comboBox_Segment.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox_Segment.FormattingEnabled = true;
+            this.comboBox_Segment.Location = new System.Drawing.Point(1171, 146);
+            this.comboBox_Segment.Name = "comboBox_Segment";
+            this.comboBox_Segment.Size = new System.Drawing.Size(173, 20);
+            this.comboBox_Segment.TabIndex = 6;
             // 
             // button_HideLine
             // 
@@ -401,6 +439,9 @@ namespace Dual.Model.Import
         private System.Windows.Forms.TabControl xtraTabControl_My;
         private System.Windows.Forms.Splitter splitter2;
         private System.Windows.Forms.SplitContainer splitContainer5;
+        private System.Windows.Forms.Button button_Reset;
+        private System.Windows.Forms.Button button_start;
+        private System.Windows.Forms.ComboBox comboBox_Segment;
     }
 }
 

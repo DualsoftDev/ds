@@ -55,7 +55,7 @@ module TestModule =
 
         [<Test>]
         member __.``2 Tag test`` () =
-            let t1 = PlcTag.Create("1", 1)
+            let t1 = PlcTag("1", 1)
             tag t1 |> evaluate === 1
             t1.Value <- 2
 
@@ -72,25 +72,25 @@ module TestModule =
             let exp = $"{dq}hello{dq} + {dq}world{dq}" |> parseExpression :?> Expression<string>
             // Invalid assignment: won't compile.  OK!
             // (t1 <== exp)
-            let tString = PlcTag.Create("1", "1")
+            let tString = PlcTag("1", "1")
             (tString <== exp).Do()
             tString.Value === "helloworld"
 
-            let t2 = PlcTag.Create("2", 2)
+            let t2 = PlcTag("2", 2)
             fAdd [tag t2; tag t2] |> evaluate === 4
             //함수 없는 Tag 배열 평가는 불가능
             (fun () -> v [t2;t2]   |> evaluate  === 1) |> ShouldFail
 
-            tag (PlcTag.Create("Two", "Two")) |> evaluate === "Two"
+            tag (PlcTag("Two", "Two")) |> evaluate === "Two"
 
             fConcat([
-                    tag <| PlcTag.Create("Hello", "Hello, ")
-                    tag <| PlcTag.Create("World", "world!" )
+                    tag <| PlcTag("Hello", "Hello, ")
+                    tag <| PlcTag("World", "world!" )
                 ]) |> evaluate === "Hello, world!"
 
             let tt1 = tag t1
             t1.Value <- 1
-            let tt2 = PlcTag.Create("t2", 2)
+            let tt2 = PlcTag("t2", 2)
 
             let addTwoExpr = fAdd [ tt1; tag tt2 ]
             addTwoExpr |> evaluate  === 3
@@ -153,7 +153,7 @@ module TestModule =
         [<Test>]
         member __.``4 Composition test`` () =
             fMul [
-                    tag <| PlcTag.Create("t2", 2)
+                    tag <| PlcTag("t2", 2)
                     fAdd [v 1; v 2]
                     fAdd [v 4; v 5]
             ] |> evaluate === 54
@@ -178,7 +178,7 @@ module TestModule =
         [<Test>]
         member __.``5 Statement test`` () =
             let expr = fMul [v 2; v 3; v 4]
-            let target = PlcTag.Create("target", 1)
+            let target = PlcTag("target", 1)
             let targetExpr = tag target
 
             let stmt = Assign (expr, target)
@@ -188,7 +188,7 @@ module TestModule =
             (Assign (v 9, target)).Do()
             targetExpr |> evaluate === 9
 
-            let source = PlcTag.Create("source", 33)
+            let source = PlcTag("source", 33)
             Assign(tag source, target).Do()
             targetExpr |> evaluate === 33
             source.Value <- 44
@@ -243,21 +243,21 @@ module TestModule =
             fMul [v 2; v 3; v 4]|> toText  === "*(2, 3, 4)"
             fMul [v 2; v 3; v 4]|> toText  === "*(2, 3, 4)"
 
-            let t1 = PlcTag.Create("t1", 1)
-            let t2 = PlcTag.Create("t2", 2)
+            let t1 = PlcTag("t1", 1)
+            let t2 = PlcTag("t2", 2)
             let tt1 = t1 |> tag
             let tt2 = t2 |> tag
             let addTwoExpr = fAdd [ tt1; tt2 ]
             addTwoExpr.ToText(false) === "%t1 + %t2"
 
-            let sTag = PlcTag.Create("address", "value")
+            let sTag = PlcTag("address", "value")
             sTag.ToText() === "%address"
             let exprTag = tag sTag
             exprTag.ToText(false) === "%address"
 
 
             let expr = fMul [v 2; v 3; v 4]
-            let target = PlcTag.Create("target", 1)
+            let target = PlcTag("target", 1)
             target.ToText() === "%target"
 
             let stmt = Assign (expr, target)
@@ -346,7 +346,7 @@ module TestModule =
 
             (t <||> f) <&&> t |> evaluate === true
 
-            let target = PlcTag.Create("bool", false)
+            let target = PlcTag("bool", false)
             let targetExpr = tag target
             targetExpr |> evaluate === false
 
@@ -362,18 +362,18 @@ module TestModule =
         [<Test>]
         member __.``9 Tag type test`` () =
             let tags = [
-                PlcTag.Create("sbyte", 1y)     |> tag |> iexpr
-                PlcTag.Create("byte", 1uy)     |> tag |> iexpr
-                PlcTag.Create("int16", 1s)     |> tag |> iexpr
-                PlcTag.Create("uint16", 1us)   |> tag |> iexpr
-                PlcTag.Create("int32", 1)      |> tag |> iexpr
-                PlcTag.Create("uint32", 1u)    |> tag |> iexpr
-                PlcTag.Create("int64", 1L)     |> tag |> iexpr
-                PlcTag.Create("uint64", 1UL)   |> tag |> iexpr
-                PlcTag.Create("single", 1.0f)  |> tag |> iexpr
-                PlcTag.Create("double", 1.0)   |> tag |> iexpr
-                PlcTag.Create("char", '1')     |> tag |> iexpr
-                PlcTag.Create("string", "1")   |> tag |> iexpr
+                PlcTag("sbyte", 1y)     |> tag |> iexpr
+                PlcTag("byte", 1uy)     |> tag |> iexpr
+                PlcTag("int16", 1s)     |> tag |> iexpr
+                PlcTag("uint16", 1us)   |> tag |> iexpr
+                PlcTag("int32", 1)      |> tag |> iexpr
+                PlcTag("uint32", 1u)    |> tag |> iexpr
+                PlcTag("int64", 1L)     |> tag |> iexpr
+                PlcTag("uint64", 1UL)   |> tag |> iexpr
+                PlcTag("single", 1.0f)  |> tag |> iexpr
+                PlcTag("double", 1.0)   |> tag |> iexpr
+                PlcTag("char", '1')     |> tag |> iexpr
+                PlcTag("string", "1")   |> tag |> iexpr
             ]
             let tagDic =
                 [   for t in tags do
@@ -442,7 +442,7 @@ module TestModule =
 
         [<Test>]
         member __.``11 Uncompilable test`` () =
-            let t1 = PlcTag.Create("1", 1)
+            let t1 = PlcTag("1", 1)
             tag t1 |> evaluate === 1
             t1.Value <- 2
 

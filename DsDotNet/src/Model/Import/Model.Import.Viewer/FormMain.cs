@@ -156,7 +156,6 @@ namespace Dual.Model.Import
             var text = richTextBox_ds.Text;
             RichTextBoxExtensions.SetClipboard(text);
             WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"클립보드복사 성공!! Ctrl+V로 붙여넣기 가능합니다.");
-
         }
 
         private void button_CreateExcel_Click(object sender, EventArgs e)
@@ -168,16 +167,11 @@ namespace Dual.Model.Import
             Process.Start(Path.GetDirectoryName(PathXLS));
         }
 
-
-
         private void button_ClearLog_Click(object sender, EventArgs e)
         {
             richTextBox_Debug.Clear();
             richTextBox_Debug.AppendText($"{DateTime.Now} : Log Clear");
         }
-
-
-
 
         private void button_comfile_Click(object sender, EventArgs e)
         {
@@ -233,5 +227,26 @@ namespace Dual.Model.Import
             });
         }
 
+        private void button_start_Click(object sender, EventArgs e)
+        {
+            var segHMI = comboBox_Segment.SelectedItem as SegmentHMI;
+            if (segHMI == null) return;
+
+            var ucView = xtraTabControl_My.SelectedTab.Tag as UCView;
+            segHMI.Memory.Reset.SetValue(false);
+            segHMI.Memory.Start.SetValue(true);
+            ucView.Update(segHMI.ViewNode);
+        }
+
+        private void button_reset_Click(object sender, EventArgs e)
+        {
+            var segHMI = comboBox_Segment.SelectedItem as SegmentHMI;
+            if (segHMI == null) return;
+
+            var ucView = xtraTabControl_My.SelectedTab.Tag as UCView;
+            segHMI.Memory.Start.SetValue(false);
+            segHMI.Memory.Reset.SetValue(true);
+            ucView.Update(segHMI.ViewNode);
+        }
     }
 }

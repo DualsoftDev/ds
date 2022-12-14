@@ -8,21 +8,6 @@ open System.Collections
 
 [<AutoOpen>]
 module MemoryModule =
-    
-
-      //----------------------
-      //  Status   SP  RP  EP
-      //----------------------
-      //    R      x   -   x
-      //           o   o   x
-      //    G      o   x   x
-      //    F      -   x   o
-      //    H      -   o   o
-      //----------------------
-      //- 'o' : ON, 'x' : Off, '-' 는 don't care
-      //- 내부에서 Reset First 로만 해석
-
-      //- 실행/Resume 은 Child call status 보고 G 이거나 R 인 것부터 수행
 
     //bitFlag
     [<Flags>] 
@@ -44,19 +29,37 @@ module MemoryModule =
     let  [<Literal>] StartIndex      = 2
     let  [<Literal>] RelayIndex      = 3
 
-    type Monitor =
-    | R
-    | G
-    | F
-    | H
-    | Origin 
-    | Pause 
-    | ErrorTx 
-    | ErrorRx 
+    type TagFlag =
+    | R        
+    | G        
+    | F        
+    | H        
+    | Origin   
+    | Pause    
+    | ErrorTx  
+    | ErrorRx  
+    | End      
+    | Reset    
+    | Start    
+    | Relay    
+        member x.IsControl = 
+            match x with
+            | End| Reset| Start| Relay -> true
+            | _ -> false
+        member x.IsTagFlag = x.IsControl |> not
+
+    let getControlFlag(index:int) = 
+            match index with
+            |EndIndex   -> TagFlag.End
+            |ResetIndex -> TagFlag.Reset
+            |StartIndex -> TagFlag.Start
+            |RelayIndex -> TagFlag.Relay
+            |_ -> failwith "Error"
 
     [<DebuggerDisplay("{Status}")>]
     type Memory(m:byte) =
         let mutable value = m
+        interface IMemory
         member internal x.getValue(flag:MemoryFlag) = 
                         (value &&& (byte)flag) = (byte)flag
         member internal x.setValue(flag:MemoryFlag, v:bool) = 
@@ -66,16 +69,26 @@ module MemoryModule =
 
         member x.Value      with get() = value and set(v:Byte) = value <- v
         member x.Change(flag:MemoryFlag, v:bool)  = x.setValue(flag, v) 
-
+        
+        //-------------------------
+        //  Status   ST  RT  ET  RE
+        //-------------------------
+        //    R      x   -   x   -
+        //           o   o   x   -
+        //    G      o   x   x   -
+        //    F      -   x   o   -
+        //    H      -   o   o   -
+        //-------------------------
+        //- 'o' : ON, 'x' : Off, '-' 는 don't care
         //status4 DS RGFH 상태
         member x.Status = 
             let lowNibble = value &&& (LowNibble |> byte)
-            //Start = 1 Reset = 2 End = 4
+            //Start = 4 Reset = 2 End = 0
             match lowNibble with  
-            |0uy|2uy|6uy|8uy|10uy|14uy -> Monitor.R
-            |4uy|12uy                  -> Monitor.G
-            |1uy|5uy|9uy|13uy          -> Monitor.F
-            |3uy|7uy|11uy|15uy         -> Monitor.H
+            |0uy|2uy|6uy|8uy|10uy|14uy -> TagFlag.R
+            |4uy|12uy                  -> TagFlag.G
+            |1uy|5uy|9uy|13uy          -> TagFlag.F
+            |3uy|7uy|11uy|15uy         -> TagFlag.H
             |_ ->  failwith "error"
           
         member x.GetControlValue(index:int)   = 
@@ -94,21 +107,23 @@ module MemoryModule =
             | RelayIndex -> x.Change(MemoryFlag.Relay, v)
             |_ -> failwith "error"
 
-        member x.GetMonitorValue(monitor:Monitor)   = 
-            match monitor  with 
-            |Monitor.R|Monitor.G|Monitor.F| Monitor.H  
-                              -> x.Status = monitor 
-            |Monitor.Origin   -> x.getValue(MemoryFlag.Origin) 
-            |Monitor.Pause    -> x.getValue(MemoryFlag.Pause) 
-            |Monitor.ErrorTx  -> x.getValue(MemoryFlag.ErrorTx) 
-            |Monitor.ErrorRx  -> x.getValue(MemoryFlag.ErrorRx) 
+        member x.GetMonitorValue(tagFlag:TagFlag)   = 
+            match tagFlag  with 
+            |TagFlag.R|TagFlag.G|TagFlag.F| TagFlag.H 
+                              -> x.Status = tagFlag 
+            |TagFlag.Origin   -> x.getValue(MemoryFlag.Origin) 
+            |TagFlag.Pause    -> x.getValue(MemoryFlag.Pause) 
+            |TagFlag.ErrorTx  -> x.getValue(MemoryFlag.ErrorTx) 
+            |TagFlag.ErrorRx  -> x.getValue(MemoryFlag.ErrorRx) 
+            |_  -> failwith $"Error {tagFlag} is not TagFlag type"
 
         //Origin, Stop, ErrorTx, ErrorRx  변경
-        member x.ChangeMonitor(monitor:Monitor, v:bool)   = 
-            match monitor  with 
-            |Monitor.R|Monitor.G|Monitor.F| Monitor.H  
-                              -> failwith "error Status4 read only"
-            |Monitor.Origin   -> x.setValue(MemoryFlag.Origin,v) 
-            |Monitor.Pause    -> x.setValue(MemoryFlag.Pause,v) 
-            |Monitor.ErrorTx  -> x.setValue(MemoryFlag.ErrorTx,v) 
-            |Monitor.ErrorRx  -> x.setValue(MemoryFlag.ErrorRx,v) 
+        member x.SetMonitorValue(tagFlag:TagFlag, v:bool)   = 
+            match tagFlag  with 
+            |TagFlag.Origin   -> x.setValue(MemoryFlag.Origin,v) 
+            |TagFlag.Pause    -> x.setValue(MemoryFlag.Pause,v) 
+            |TagFlag.ErrorTx  -> x.setValue(MemoryFlag.ErrorTx,v) 
+            |TagFlag.ErrorRx  -> x.setValue(MemoryFlag.ErrorRx,v) 
+            |TagFlag.R|TagFlag.G|TagFlag.F| TagFlag.H 
+                -> failwith $"Error {tagFlag} can't set value" 
+            |_  -> failwith $"Error {tagFlag} is not TagFlag type"

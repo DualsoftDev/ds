@@ -10,6 +10,7 @@
 
 	<ItemGroup>
 		<Compile Include="Constants.fs" />
+		<Compile Include="DsEvent.fs" />
 		<Compile Include="DsType.fs" />
 		<Compile Include="Interface.fs" />
 		<Compile Include="Prolog.fs" />

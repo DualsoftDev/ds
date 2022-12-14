@@ -18,31 +18,37 @@ module CpuConvertModule =
         let cv = graph.Vertices
 
         //R1.Real 초기시작 Statement 만들기
-        let r1 = realTag.CreateRungForInitStart()
+        let r1 = realTag.CreateInitStart()
         //R2.Real 작업완료 Statement 만들기
-        let r2 = realTag.CreateRungForRealEnd(cv.Select(fun v->dicM[v]))
+        let r2 = realTag.CreateRealEnd(cv.Select(fun v->dicM[v]))
 
         //C1 Call 시작조건 Statement 만들기
         let c1s = cv.Select(fun coin ->
                  let srcs = getSrcMemorys(coin, graph, StartEdge)
-                 dicM[coin].CreateRungForCallStart(srcs, realTag))
+                 dicM[coin].CreateCallStart(srcs, realTag))
         //C2 Call 작업완료 Statement 만들기
         let c2s = cv.Select(fun coin ->
                   let srcs = getSrcMemorys(coin, graph, StartEdge)
-                  dicM[coin].CreateRungForCallRelay(srcs, coin.GetCoinTags(dicM[coin], true), realTag)
-                  )
+                  dicM[coin].CreateCallRelay(srcs, coin.GetCoinTags(dicM[coin], true), realTag))
 
         //C3 Call 시작출력 Statement 만들기
         let c3s = cv.SelectMany(fun coin ->
-                  dicM[coin].CreateRungForOutputs(coin.GetCoinTags(dicM[coin], false))
-                  )
+                  dicM[coin].CreateOutputs(coin.GetCoinTags(dicM[coin], false)))
 
         //C4 Call Start to Api TX.Start Statement 만들기
-        let c4s = cv.Select(fun coin ->
-                 dicM[coin].CreateRungForLinkTx())  //구현필요
+        let c4s = cv.SelectMany(fun coin ->
+                  let txTags = coin.GetTxRxTags(true, dicM)
+                  dicM[coin].CreateLinkTxs(txTags))
+
         //C5 Call End from  Api RX.End  Statement 만들기
-        let c5s = cv.Select(fun coin ->
-                 dicM[coin].CreateRungForLinkRx())  //구현필요
+        let c5s = cv.SelectMany(fun coin ->
+                  let rxTags = coin.GetTxRxTags(false, dicM)
+                  dicM[coin].CreateLinkRx(rxTags) |> Option.toList |> List.toSeq
+                  )
+        //C6 Call Tx ~ Rx 내용없을시 Coin Start-End 직접연결
+        let c6s  = if c4s.IsEmpty() && c5s.IsEmpty()
+                   then cv.Select(fun coin ->dicM[coin].CreateDirectLink())
+                   else []
 
         //description, statement List 출력
         ["Real-r1",r1; "Real-r2",r2] 
@@ -51,6 +57,7 @@ module CpuConvertModule =
         @ c3s.Select(fun s-> "Real-c3", s)
         @ c4s.Select(fun s-> "Real-c4", s)
         @ c5s.Select(fun s-> "Real-c5", s)
+        @ c6s.Select(fun s-> "Real-c6", s)
 
 
     /// real 의 가상 부모 만들어서 가상 부모를 통한 제어 statement 생성
@@ -68,15 +75,15 @@ module CpuConvertModule =
             let srcs = getSrcMemorys(real, graph, ResetEdge)
             let goingRelays = srcs.Select(fun c -> c, DsMemory($"{c.Name}(gr)")) |> dict
             let f2s = srcs.Select(fun c ->
-                     c.CreateRungForResetGoing(dicM[real], goingRelays[c]))
+                     c.CreateResetGoing(dicM[real], goingRelays[c]))
 
             //F3. Real 자신의    Reset Statement 만들기
             let f3 = dicM[real].TryGetRealResetStatement(goingRelays.Values)
             //F4. Real 부모의 시작조건 Statement 만들기
             let srcs = getSrcMemorys(real, graph, StartEdge)
-            let f4 = parentTag.TryCreateRungForRealStart(srcs)
+            let f4 = parentTag.TryCreateRealStart(srcs)
             //F5. Real 부모의 셀프리셋 Statement 만들기
-            let f5 = parentTag.CreateRungForResetSelf()
+            let f5 = parentTag.CreateResetSelf()
 
             //description, statement List 출력
             f1s.Select(fun (s, f1)-> $"Root:{s}", f1)
@@ -91,7 +98,7 @@ module CpuConvertModule =
         dicM.Clear()
 
         let aliasSet = ConcurrentDictionary<Alias, Vertex>() //Alias, target
-        let vertices = sys.GetVertices()
+        let vertices = sys.GetVertices() @ sys.ReferenceSystems.SelectMany(fun s-> s.GetVertices())
 
         //모든 인과 대상 Node 메모리화
         vertices.ForEach(fun v ->
@@ -111,13 +118,15 @@ module CpuConvertModule =
             let vertex = vertices.First(fun f->f  =alias.Value)
             dicM.TryAdd(alias.Key, dicM.[vertex]) |> ignore
         )
-
-        sys.Flows.SelectMany(fun flow->
-        flow.Graph.Vertices
-            .Where(fun w->w :? Real).Cast<Real>()
-            .SelectMany(fun r->
-                createRungsForReal(dicM[r], r.Graph)
-                @ 
-                createRungsForRoot(r, flow.Graph)
+        let statements = 
+            sys.Flows.SelectMany(fun flow->
+            flow.Graph.Vertices
+                .Where(fun w->w :? Real).Cast<Real>()
+                .SelectMany(fun r->
+                    createRungsForReal(dicM[r], r.Graph)
+                    @ 
+                    createRungsForRoot(r, flow.Graph)
+                )
             )
-        )
+
+        statements, dicM

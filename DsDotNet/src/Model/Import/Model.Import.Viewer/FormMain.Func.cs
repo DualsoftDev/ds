@@ -1,3 +1,4 @@
+using DocumentFormat.OpenXml.Spreadsheet;
 using Engine.CodeGenCPU;
 using Engine.Common;
 using Engine.Common.FS;
@@ -15,48 +16,13 @@ using static Engine.Core.CoreModule;
 using static Engine.Core.DsTextProperty;
 using static Engine.Core.ExpressionPrologModule;
 using static Model.Import.Office.ViewModule;
+using Color = System.Drawing.Color;
 
 namespace Dual.Model.Import
 {
+    
     public partial class FormMain : Form
     {
-        internal void ExportTextModel(Color color, string dsText, bool bShowLine = false)
-        {
-
-            this.Do(() => richTextBox_ds.Clear());
-
-            var textLines = dsText.Split('\n');
-            Random r = new Random();
-            Color rndColor = Color.LightGoldenrodYellow;
-            int lineCnt = textLines.Count();
-            int lineCur = 0;
-            this.Do(() =>
-            {
-                textLines.ToList().ForEach(f =>
-                {
-                    int pro = 50 + Convert.ToInt32(Convert.ToSingle(lineCur++) / (lineCnt) * 50f);
-                    if (bShowLine) richTextBox_ds.AppendText(lineCur.ToString("000") + ";");
-
-                    if (color == Color.Transparent)
-                    {
-                        if (f.StartsWith($"[{TextSystem}") || (f.Contains($"[{TextFlow}]"))  //[flow] F = {} 한줄제외
-                        || f.Contains($"[{TextAddress}]") || f.Contains($"[{TextLayout}]"))
-                        {
-                            rndColor = Color.FromArgb(r.Next(130, 230), r.Next(130, 230), r.Next(130, 230));
-                            this.Do(() => richTextBox_ds.ScrollToCaret());
-                            ProcessEvent.DoWork(pro);
-                        }
-                        richTextBox_ds.AppendTextColor(f + "\n", rndColor);
-                    }
-                    else
-                        richTextBox_ds.AppendTextColor(f, color);
-                });
-            });
-
-            this.Do(() => richTextBox_ds.Select(0, 0));
-            this.Do(() => richTextBox_ds.ScrollToCaret());
-            ProcessEvent.DoWork(0);
-        }
         internal void ImportPPT()
         {
             try
@@ -66,24 +32,31 @@ namespace Dual.Model.Import
                 _mySystem = result.Item1;
                 _myViewNodes = result.Item2;
 
+                var resultData = CpuLoader.LoadStatements(_mySystem);
+                var rungs = resultData.Item1;
+                var dicM = resultData.Item2;
+
                 SimSeg.DicView.Clear();
                 _mySystem.GetVertices()
                            .ForEach(v =>
                            {
-                               var viewNodes = _myViewNodes.SelectMany(s=>s.UsedViewNodes)
+                               var viewNodes = _myViewNodes.SelectMany(s => s.UsedViewNodes)
                                                            .Where(w => w.CoreVertex != null);
 
                                var viewNode = viewNodes.First(w => w.CoreVertex.Value == v);
                                SimSeg.DicView.Add(v.QualifiedName, viewNode);
+                               comboBox_Segment.Items
+                               .Add(new SegmentHMI { Display = v.QualifiedName, Vertex = v, ViewNode = viewNode, Memory = dicM[v] });
                            });
+                comboBox_Segment.DisplayMember= "Display";
+                comboBox_Segment.SelectedIndex = 0;
 
-
-                var rungs = CpuLoader.LoadStatements(_mySystem);
+               
                 var text = rungs.Select(rung =>
                                 {
                                     var description = rung.Item1;
                                     var statement = rung.Item2;
-                                    return $"***{description}***\t{rung.Item2.ToText()}";
+                                    return $"***{description}***\t{rung.Item2.ToText().Replace("%"," ")}"; 
                                 });
 
                 WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"\r\n{text.JoinWith("\n")}");
@@ -124,7 +97,43 @@ namespace Dual.Model.Import
             }
         }
 
+        internal void ExportTextModel(Color color, string dsText, bool bShowLine = false)
+        {
 
+            this.Do(() => richTextBox_ds.Clear());
+
+            var textLines = dsText.Split('\n');
+            Random r = new Random();
+            Color rndColor = Color.LightGoldenrodYellow;
+            int lineCnt = textLines.Count();
+            int lineCur = 0;
+            this.Do(() =>
+            {
+                textLines.ToList().ForEach(f =>
+                {
+                    int pro = 50 + Convert.ToInt32(Convert.ToSingle(lineCur++) / (lineCnt) * 50f);
+                    if (bShowLine) richTextBox_ds.AppendText(lineCur.ToString("000") + ";");
+
+                    if (color == Color.Transparent)
+                    {
+                        if (f.StartsWith($"[{TextSystem}") || (f.Contains($"[{TextFlow}]"))  //[flow] F = {} 한줄제외
+                        || f.Contains($"[{TextAddress}]") || f.Contains($"[{TextLayout}]"))
+                        {
+                            rndColor = Color.FromArgb(r.Next(130, 230), r.Next(130, 230), r.Next(130, 230));
+                            this.Do(() => richTextBox_ds.ScrollToCaret());
+                            ProcessEvent.DoWork(pro);
+                        }
+                        richTextBox_ds.AppendTextColor(f + "\n", rndColor);
+                    }
+                    else
+                        richTextBox_ds.AppendTextColor(f, color);
+                });
+            });
+
+            this.Do(() => richTextBox_ds.Select(0, 0));
+            this.Do(() => richTextBox_ds.ScrollToCaret());
+            ProcessEvent.DoWork(0);
+        }
 
         internal void ImportExcel(string path)
         {

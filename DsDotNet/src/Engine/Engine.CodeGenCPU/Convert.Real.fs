@@ -11,7 +11,7 @@ open Engine.CodeGenCPU
 type StatementReal =
 
 
-    [<Extension>] static member CreateRungForRealEnd(realTag:DsMemory, calls:DsMemory seq) =
+    [<Extension>] static member CreateRealEnd(realTag:DsMemory, calls:DsMemory seq) =
                     let sets  =
                         if calls.Any()
                         then calls.Select(fun f->f.Relay)//.ToTags()  //자식이 있으면 자식완료 릴레이 조건
@@ -19,7 +19,7 @@ type StatementReal =
 
                     realTag.End <==  FuncExt.GetAnd(sets.Cast<Tag<bool>>())
 
-    [<Extension>] static member CreateRungForInitStart(realTag:DsMemory)  =
+    [<Extension>] static member CreateInitStart(realTag:DsMemory)  =
                     let sets  = [realTag.Going;realTag.Origin].ToTags()
                     let rsts  = [realTag.Homing].ToTags()
                     let relay = realTag.Relay

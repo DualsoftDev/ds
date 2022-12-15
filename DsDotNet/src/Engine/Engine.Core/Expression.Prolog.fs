@@ -248,7 +248,6 @@ module rec ExpressionPrologModule =
 
 
 
-    let StorageValueChangedSubject = new Subject<IStorage>()
 
     [<AbstractClass>]
     [<DebuggerDisplay("{Name}")>]
@@ -260,7 +259,7 @@ module rec ExpressionPrologModule =
             and set(v) =
                 if value <> v then
                     value <- v
-                    StorageValueChangedSubject.OnNext(x :> IStorage)
+                    ChangeValueEvent(x :> IStorage)
 
         interface IStorage with
             member x.DataType = typedefof<'T>

@@ -78,7 +78,7 @@ module rec TimerModule =
             tracefn "Timer subscribing to tick event"
             the20msTimer.Subscribe(fun _ -> accumulate()) |> disposables.Add
 
-            StorageValueChangedSubject
+            ValueSubject
                 .Where(fun storage -> storage = timerStruct.EN)
                 .Subscribe(fun storage ->
                     if ts.ACC.Value < 0us || ts.PRE.Value < 0us then failwith "ERROR"
@@ -112,7 +112,7 @@ module rec TimerModule =
                         ts.TT.Value <- false
                 ) |> disposables.Add
 
-            StorageValueChangedSubject
+            ValueSubject
                 .Where(fun storage -> storage = ts.RES)
                 .Subscribe(fun storage ->
                     let resetCondition = storage.Value :?> bool

@@ -11,14 +11,12 @@ module CpuEvent =
     type VertexStatusParam = 
                 |Event of vertex:IVertex * status:Status4
 
-    let ValueSubject = new Subject<IStorage>()
     let StatusSubject = new Subject<VertexStatusParam>()
+    let ValueSubject = new Subject<IStorage>()
     
-    let ChangeValueEvent(storage:IStorage) =
-        async {ValueSubject.OnNext(storage)}
-        |> Async.StartImmediate 
-
+    let ChangeValueEvent(x:IStorage) = 
+        ValueSubject.OnNext(x)
+    
     let ChangeStatusEvent(vertex:IVertex, status:Status4) =  
-        async {StatusSubject.OnNext(VertexStatusParam.Event (vertex, status))} 
-        |> Async.StartImmediate 
+        StatusSubject.OnNext(VertexStatusParam.Event (vertex, status))
         

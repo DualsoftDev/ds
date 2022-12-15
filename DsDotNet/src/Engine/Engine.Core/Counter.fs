@@ -66,7 +66,7 @@ module rec CounterModule =
         let cs = counterStruct
         let registerCTU() =
             let csu = box cs :?> ICTU
-            StorageValueChangedSubject
+            ValueSubject
                 .Where(fun storage -> storage = csu.CU && csu.CU.Value)
                 .Subscribe(fun storage ->
                     if cs.ACC.Value < 0us || cs.PRE.Value < 0us then failwith "ERROR"
@@ -77,7 +77,7 @@ module rec CounterModule =
             ) |> disposables.Add
         let registerCTD() =
             let csd = box cs :?> ICTD
-            StorageValueChangedSubject
+            ValueSubject
                 .Where(fun storage -> storage = csd.CD && csd.CD.Value)
                 .Subscribe(fun storage ->
                     if cs.ACC.Value < 0us || cs.PRE.Value < 0us then failwith "ERROR"
@@ -88,7 +88,7 @@ module rec CounterModule =
             ) |> disposables.Add
 
         let registerReset() =
-            StorageValueChangedSubject
+            ValueSubject
                 .Where(fun storage -> storage = cs.RES && cs.RES.Value)
                 .Subscribe(fun storage ->
                     tracefn "Counter reset requested"

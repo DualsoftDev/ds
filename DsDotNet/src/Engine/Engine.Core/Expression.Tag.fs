@@ -39,16 +39,14 @@ module  TagModule =
     /// DsBit tag (PlanTag) class
     type DsBit (name, initValue:bool, v:Vertex, tagFlag:TagFlag) =
         inherit Tag<bool>(name, initValue)
-       
-        //override x.NotifyValueChanged() = 
-        //     ChangeValueEvent x
-        //     if x.Value then
-        //         match tagFlag with
-        //         |R -> ChangeStatusEvent (v, Ready)
-        //         |G -> ChangeStatusEvent (v, Going)
-        //         |F -> ChangeStatusEvent (v, Finish)
-        //         |H -> ChangeStatusEvent (v, Homing)
-        //         |_->()
+        member x.NotifyStatus() = 
+             if x.Value then
+                 match tagFlag with
+                 |R -> ChangeStatusEvent (v, Ready)
+                 |G -> ChangeStatusEvent (v, Going)
+                 |F -> ChangeStatusEvent (v, Finish)
+                 |H -> ChangeStatusEvent (v, Homing)
+                 |_->()
 
 
 

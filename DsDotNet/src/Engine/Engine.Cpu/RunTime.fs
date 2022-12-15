@@ -16,13 +16,18 @@ module RunTime =
             let subscribe = 
                 ValueSubject
                  .Subscribe(fun evt ->
+                    //Step 1 상태보고 
+                    match evt with
+                    | :? DsBit as b -> b.NotifyStatus()
+                    | _ -> ()
+                    
+                    //Step 2 관련수식 연산 
                     if mapRungs.ContainsKey evt
                     then 
                         for statement in mapRungs[evt] do
-                        statement.Do()
+                        async {statement.Do()}|> Async.StartImmediate 
                     else 
-                        let mapRungs = mapRungs
-                        ()
+                        failwith "Error"
                     )
             subscribe
 
@@ -51,9 +56,8 @@ module RunTime =
                     else mapRungs.TryAdd(item, [s]|>HashSet) |> verifyM $"Duplicated [{item.ToText()}]"
               )
            
-           
 
-            //강제 전체 연산 임시 test용
+        //강제 전체 연산 임시 test용
         member x.Scan() = 
             for statement in statements do
             statement.Do()

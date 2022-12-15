@@ -25,7 +25,7 @@ namespace Dual.Model.Import
                {
                    while (!cts.IsCancellationRequested)
                    {
-                       cpu.Update();
+                       cpu.Scan();
                        await Task.Delay(100);
                    }
                });

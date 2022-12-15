@@ -1,3 +1,4 @@
+using DocumentFormat.OpenXml.Presentation;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Engine.CodeGenCPU;
 using Engine.Common;
@@ -8,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -30,54 +32,56 @@ namespace Dual.Model.Import
         {
             try
             {
-                _cts.Cancel();
-                _cts = new CancellationTokenSource();
-                button_TestStart.Enabled = true;
-                button_Stop.Enabled = false;
-
-                var result = ImportM.FromPPTX(PathPPT);
-                _mySystem = result.Item1;
-                _myViewNodes = result.Item2;
-
-                var resultData = CpuLoader.LoadStatements(_mySystem);
-                var rungs = resultData.Item1;
-                var dicM = resultData.Item2;
-
-                _myCPU = new DsCPU("", rungs.Select(s=>s.Item2));
-                comboBox_Segment.Items.Clear();
-                _DicVertex = new Dictionary<Vertex, ViewNode>();
-                _mySystem.GetVertices()
-                           .ForEach(v =>
-                           {
-                               var viewNodes = _myViewNodes.SelectMany(s => s.UsedViewNodes)
-                                                           .Where(w => w.CoreVertex != null);
-
-                               var viewNode = viewNodes.First(w => w.CoreVertex.Value == v);
-                               _DicVertex.Add(v, viewNode);
-
-                               if (v is Real)
-                               {
-                                   comboBox_Segment.Items
-                                   .Add(new SegmentHMI { Display = v.QualifiedName, Vertex = v, ViewNode = viewNode, Memory = dicM[v] });
-                               }
-                           });
-
-                comboBox_Segment.DisplayMember= "Display";
-                comboBox_Segment.SelectedIndex = 0;
-               
-                var text = rungs.Select(rung =>
-                                {
-                                    var description = rung.Item1;
-                                    var statement = rung.Item2;
-                                    return $"***{description}***\t{rung.Item2.ToText().Replace("%"," ")}"; 
-                                });
-
-                WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"\r\n{text.JoinWith("\n")}");
-
                 if (!_ConvertErr)
                 {
+                    _cts.Cancel();
+                    _cts = new CancellationTokenSource();
+                    button_TestStart.Enabled = true;
+                    button_Stop.Enabled = false;
+
+                    var result = ImportM.FromPPTX(PathPPT);
+                    _mySystem = result.Item1;
+                    _myViewNodes = result.Item2;
+
+                    var resultData = CpuLoader.LoadStatements(_mySystem);
+                    var rungs = resultData.Item1;
+                    var dicM = resultData.Item2;
+
+                    _myCPU = new DsCPU("", rungs.Select(s => s.Item2));
+                    comboBox_Segment.Items.Clear();
+                    _DicVertex = new Dictionary<Vertex, ViewNode>();
+                    _mySystem.GetVertices()
+                               .ForEach(v =>
+                               {
+                                   var viewNodes = _myViewNodes.SelectMany(s => s.UsedViewNodes)
+                                                               .Where(w => w.CoreVertex != null);
+
+                                   var viewNode = viewNodes.First(w => w.CoreVertex.Value == v);
+                                   _DicVertex.Add(v, viewNode);
+
+                                   if (v is Real)
+                                   {
+                                       comboBox_Segment.Items
+                                       .Add(new SegmentHMI { Display = v.QualifiedName, Vertex = v, ViewNode = viewNode, Memory = dicM[v] });
+                                   }
+                               });
+
+                    comboBox_Segment.DisplayMember = "Display";
+                    comboBox_Segment.SelectedIndex = 0;
+
+                    var text = rungs.Select(rung =>
+                                    {
+                                        var description = rung.Item1;
+                                        var statement = rung.Item2;
+                                        return $"***{description}***\t{rung.Item2.ToText().Replace("%", " ")}";
+                                    });
+
+                    WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"\r\n{text.JoinWith("\n")}");
+
+
                     _dsText = _mySystem.ToDsText();
                     ExportTextModel(Color.Transparent, _dsText);
+                    ExportTextExpr(_myCPU.ToTextStatement(), Color.WhiteSmoke);
                     this.Do(() => xtraTabControl_Ex.TabPages.Clear());
 
                     CreateNewTabViewer(_myViewNodes);
@@ -107,6 +111,23 @@ namespace Dual.Model.Import
             {
                 Busy = false;
             }
+        }
+
+        internal void ExportTextExpr(string dsExpr, Color color)
+        {
+            richTextBox_ds.AppendText("\n\n\n");
+
+            var textLines = dsExpr.Split('\n');
+            this.Do(() =>
+            {
+                textLines.ToList().ForEach(f =>
+                {
+                    richTextBox_ds.AppendTextColor(f, color);
+                });
+            });
+
+            this.Do(() => richTextBox_ds.Select(0, 0));
+            this.Do(() => richTextBox_ds.ScrollToCaret());
         }
 
         internal void ExportTextModel(Color color, string dsText, bool bShowLine = false)

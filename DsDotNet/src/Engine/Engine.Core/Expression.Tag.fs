@@ -14,7 +14,7 @@ module  TagModule =
         member val Address = "" with get, set
         override x.NotifyValueChanged() = ChangeValueEvent x
     
-    /// Ds 일반 plan tag : going relay에 사용중
+      /// Ds 일반 plan tag : going relay에 사용중
     type DsTag<'T> (name, initValue:'T)  =
         inherit Tag<'T>(name, initValue)
         override x.NotifyValueChanged() = ChangeValueEvent x
@@ -27,7 +27,11 @@ module  TagModule =
         //Segment 컨트롤 전용 bit 생성 (controlIndex(0 or 1 or 2 or 3))
         new (n, iv, vertex, memory, index) =   DsBit (n, iv, vertex, memory, getControlFlag index, index)
         
-        override x.NotifyValueChanged() = ChangeStatusEvent (v, m.Status)
+        override x.NotifyValueChanged() = 
+            ChangeValueEvent x
+            //if tagFlag.IsControl
+            //then ChangeStatusEvent (v, m.Status)
+
         member x.GetValue()  =
             if tagFlag.IsControl
                 then m.GetControlValue(controlIndex)

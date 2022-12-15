@@ -140,7 +140,7 @@ namespace Dual.Model.Import
                 splitContainer2.Panel2Collapsed = false;
                 button_OpenFolder.Visible = false;
 
-                this.Size = new Size(1600, 1000);
+                this.Size = new Size(1920, 1000);
                 ImportPPT();
             }
             catch
@@ -220,14 +220,17 @@ namespace Dual.Model.Import
         {
             button_TestStart.Enabled = false;
             button_Stop.Enabled = true;
-            await SimSeg.TestStart(_myCPU, _cts);
+            //await SimSeg.TestStart(_myCPU, _cts);
+            await Task.Delay(0);
+            _myCPU.Run();
         }
         private void button_Stop_Click(object sender, EventArgs e)
         {
             button_TestStart.Enabled = true;
             button_Stop.Enabled = false;
-            _cts.Cancel();
-            _cts = new CancellationTokenSource();
+            //_cts.Cancel();
+            //_cts = new CancellationTokenSource();
+            _myCPU.Stop();
         }
 
         private async void button_TestORG_Click(object sender, EventArgs e)

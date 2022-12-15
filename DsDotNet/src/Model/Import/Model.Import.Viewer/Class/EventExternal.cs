@@ -24,12 +24,12 @@ namespace Dual.Model.Import
 
         public static void CPUSubscribe()
         {
-            CpuEvent.TypedValueSubject.Subscribe(rx =>
+            CpuEvent.ValueSubject.Subscribe(rx =>
             {
                 FormMain.TheMain.WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{rx.Name}:{rx.Value}");
             });
 
-            CpuEvent.Status4Subject.Subscribe(rx =>
+            CpuEvent.StatusSubject.Subscribe(rx =>
             {
                 var v = rx.vertex as Vertex;
                 FormMain.TheMain.Do(() =>

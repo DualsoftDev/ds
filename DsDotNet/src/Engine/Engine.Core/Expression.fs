@@ -34,8 +34,8 @@ module ExpressionModule =
             member x.GetBoxedRawObject() = x.GetBoxedRawObject()
             member x.ToText(withParenthesys) = x.ToText(withParenthesys)
             member x.FunctionName = x.FunctionName
-
-
+            member x.StorageArguments = x.StorageArguments
+                    
         member x.DataType = typedefof<'T>
 
     /// literal 'T 로부터 terminal Expression<'T> 생성
@@ -72,6 +72,16 @@ module ExpressionModule =
             match x with
             | Assign (expr, target) -> $"{target.ToText()} := {expr.ToText(false)}"
             | VarDecl (expr, var) -> $"{var.DataType.Name} {var.Name} = {expr.ToText(false)}"
+        
+        member x.TargetStorage() =
+            match x with
+            | Assign (expr, target) -> target
+            | VarDecl (expr, var) -> var
+
+        member x.SourceStorages() =
+            match x with
+            | Assign (expr, target) -> expr.StorageArguments
+            | VarDecl (expr, var) -> expr.StorageArguments
 
     type Terminal<'T> with
         member x.GetBoxedRawObject(): obj =
@@ -114,5 +124,21 @@ module ExpressionModule =
             | Function fs ->
                 let text = fwdSerializeFunctionNameAndBoxedArguments fs.Name fs.Arguments withParenthesys
                 text
+
+        member x.StorageArguments = 
+            match x with
+            | Terminal b -> 
+                match b with
+                | Tag t -> [t :> IStorage]
+                | Variable v -> [v :> IStorage]
+                | Literal l -> []
+            | Function fs -> 
+                fs.Arguments
+                |> List.collect(fun arg -> arg.StorageArguments)
+                
+                   
+
+
+
 
 

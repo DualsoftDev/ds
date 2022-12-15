@@ -57,16 +57,14 @@ module MemoryModule =
 
     [<DebuggerDisplay("{Status}")>]
     type Memory(m:byte) =
-        let mutable value = m
         member internal x.getValue(flag:MemoryFlag) = 
-                        (value &&& (byte)flag) = (byte)flag
+                        (x.Value &&& (byte)flag) = (byte)flag
         member internal x.setValue(flag:MemoryFlag, v:bool) = 
                         if v 
-                        then value <- value ||| (byte)flag
-                        else value <- value &&& ~~~((byte)flag)
+                        then x.Value <- x.Value ||| (byte)flag
+                        else x.Value <- x.Value &&& ~~~((byte)flag)
 
-        member x.Value      with get() = value and set(v:Byte) = value <- v
-        member x.Change(flag:MemoryFlag, v:bool)  = x.setValue(flag, v) 
+        member val Value = m with get,set
         
         //-------------------------
         //  Status   ST  RT  ET  RE
@@ -80,7 +78,7 @@ module MemoryModule =
         //- 'o' : ON, 'x' : Off, '-' 는 don't care
         //status4 DS RGFH 상태
         member x.Status = 
-            let lowNibble = value &&& (LowNibble |> byte)
+            let lowNibble = x.Value &&& (LowNibble |> byte)
             //Start = 4 Reset = 2 End = 0
             match lowNibble with  
             |0uy|2uy|6uy|8uy|10uy|14uy -> Status4.Ready
@@ -99,10 +97,10 @@ module MemoryModule =
        
         member x.SetControlValue(index:int, v:bool)   = 
             match index with 
-            | EndIndex ->   x.Change(MemoryFlag.E, v)
-            | ResetIndex -> x.Change(MemoryFlag.R, v)
-            | StartIndex -> x.Change(MemoryFlag.S, v)
-            | RelayIndex -> x.Change(MemoryFlag.Relay, v)
+            | EndIndex ->   x.setValue(MemoryFlag.E, v)
+            | ResetIndex -> x.setValue(MemoryFlag.R, v)
+            | StartIndex -> x.setValue(MemoryFlag.S, v)
+            | RelayIndex -> x.setValue(MemoryFlag.Relay, v)
             |_ -> failwith "error"
 
         member x.GetMonitorValue(tagFlag:TagFlag)   = 

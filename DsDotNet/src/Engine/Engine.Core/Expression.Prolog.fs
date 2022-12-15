@@ -224,17 +224,19 @@ module rec ExpressionPrologModule =
         abstract GetBoxedRawObject: unit -> obj
         /// withParenthesys: terminal 일 경우는 무시되고, Function 일 경우에만 적용됨
         abstract ToText : withParenthesys:bool -> string
-        // Function expression 인 경우 function name 반환.  terminal 이면 none
+        /// Function expression 인 경우 function name 반환.  terminal 이면 none
         abstract FunctionName: string option
-
+        /// Function expression 에 사용된 IStorage 항목들을 반환
+        abstract StorageArguments: IStorage list
+        
 
     [<AbstractClass>]
     [<DebuggerDisplay("{Name}")>]
     type TypedValueStorage<'T>(name, initValue:'T) =
         let mutable value = initValue
-        let setValue(x, v) =
+        let setValue(x:IStorage, v) =
             if (value |> box) <> (v |> box) //value 변경시만 저장 및 이벤트
-            then value <- v; ChangeValueEvent(x)
+            then value <- v; x.NotifyValueChanged()
                  
         member x.Name: string = name
         member x.Value with get() = value and set(v) = setValue (x, v)

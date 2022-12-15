@@ -44,6 +44,7 @@ namespace Dual.Model.Import
             this.button_TestStart = new System.Windows.Forms.Button();
             this.button_TestORG = new System.Windows.Forms.Button();
             this.splitContainer4 = new System.Windows.Forms.SplitContainer();
+            this.button_Stop = new System.Windows.Forms.Button();
             this.button_Reset = new System.Windows.Forms.Button();
             this.button_start = new System.Windows.Forms.Button();
             this.comboBox_Segment = new System.Windows.Forms.ComboBox();
@@ -51,7 +52,6 @@ namespace Dual.Model.Import
             this.richTextBox_Debug = new System.Windows.Forms.RichTextBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.button_Stop = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -75,7 +75,6 @@ namespace Dual.Model.Import
             // splitContainer1
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.FixedPanel = System.Windows.Forms.FixedPanel.Panel2;
             this.splitContainer1.Location = new System.Drawing.Point(0, 0);
             this.splitContainer1.Name = "splitContainer1";
             // 
@@ -88,7 +87,7 @@ namespace Dual.Model.Import
             // 
             this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
             this.splitContainer1.Size = new System.Drawing.Size(1373, 346);
-            this.splitContainer1.SplitterDistance = 829;
+            this.splitContainer1.SplitterDistance = 672;
             this.splitContainer1.TabIndex = 18;
             // 
             // xtraTabControl_My
@@ -99,7 +98,7 @@ namespace Dual.Model.Import
             this.xtraTabControl_My.Location = new System.Drawing.Point(3, 0);
             this.xtraTabControl_My.Name = "xtraTabControl_My";
             this.xtraTabControl_My.SelectedIndex = 0;
-            this.xtraTabControl_My.Size = new System.Drawing.Size(826, 346);
+            this.xtraTabControl_My.Size = new System.Drawing.Size(669, 346);
             this.xtraTabControl_My.TabIndex = 8;
             // 
             // splitter2
@@ -130,7 +129,7 @@ namespace Dual.Model.Import
             // 
             this.splitContainer2.Panel2.Controls.Add(this.splitContainer5);
             this.splitContainer2.Panel2.Controls.Add(this.button_copy);
-            this.splitContainer2.Size = new System.Drawing.Size(540, 346);
+            this.splitContainer2.Size = new System.Drawing.Size(697, 346);
             this.splitContainer2.SplitterDistance = 220;
             this.splitContainer2.TabIndex = 4;
             // 
@@ -194,7 +193,7 @@ namespace Dual.Model.Import
             // 
             this.splitContainer5.Panel2.Controls.Add(this.xtraTabControl_Ex);
             this.splitContainer5.Panel2Collapsed = true;
-            this.splitContainer5.Size = new System.Drawing.Size(540, 122);
+            this.splitContainer5.Size = new System.Drawing.Size(697, 122);
             this.splitContainer5.SplitterDistance = 97;
             this.splitContainer5.TabIndex = 3;
             // 
@@ -205,7 +204,7 @@ namespace Dual.Model.Import
             this.richTextBox_ds.Location = new System.Drawing.Point(0, 0);
             this.richTextBox_ds.Name = "richTextBox_ds";
             this.richTextBox_ds.ReadOnly = true;
-            this.richTextBox_ds.Size = new System.Drawing.Size(540, 122);
+            this.richTextBox_ds.Size = new System.Drawing.Size(697, 122);
             this.richTextBox_ds.TabIndex = 2;
             this.richTextBox_ds.Text = "";
             // 
@@ -224,7 +223,7 @@ namespace Dual.Model.Import
             // button_copy
             // 
             this.button_copy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_copy.Location = new System.Drawing.Point(426, 13);
+            this.button_copy.Location = new System.Drawing.Point(583, 13);
             this.button_copy.Name = "button_copy";
             this.button_copy.Size = new System.Drawing.Size(85, 34);
             this.button_copy.TabIndex = 1;
@@ -280,6 +279,18 @@ namespace Dual.Model.Import
             this.splitContainer4.Size = new System.Drawing.Size(1373, 746);
             this.splitContainer4.SplitterDistance = 346;
             this.splitContainer4.TabIndex = 20;
+            // 
+            // button_Stop
+            // 
+            this.button_Stop.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_Stop.Location = new System.Drawing.Point(1259, 84);
+            this.button_Stop.Name = "button_Stop";
+            this.button_Stop.Size = new System.Drawing.Size(85, 23);
+            this.button_Stop.TabIndex = 9;
+            this.button_Stop.Text = "TEST 멈춤";
+            this.button_Stop.UseVisualStyleBackColor = true;
+            this.button_Stop.Visible = false;
+            this.button_Stop.Click += new System.EventHandler(this.button_Stop_Click);
             // 
             // button_Reset
             // 
@@ -352,17 +363,6 @@ namespace Dual.Model.Import
             this.splitter1.Size = new System.Drawing.Size(1373, 3);
             this.splitter1.TabIndex = 22;
             this.splitter1.TabStop = false;
-            // 
-            // button_Stop
-            // 
-            this.button_Stop.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_Stop.Location = new System.Drawing.Point(1259, 84);
-            this.button_Stop.Name = "button_Stop";
-            this.button_Stop.Size = new System.Drawing.Size(85, 23);
-            this.button_Stop.TabIndex = 9;
-            this.button_Stop.Text = "TEST 멈춤";
-            this.button_Stop.UseVisualStyleBackColor = true;
-            this.button_Stop.Click += new System.EventHandler(this.button_Stop_Click);
             // 
             // FormMain
             // 

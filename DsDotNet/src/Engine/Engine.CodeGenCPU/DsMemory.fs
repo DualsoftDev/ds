@@ -11,7 +11,7 @@ module DsMemoryModule =
     /// DsMemory DsBit/DsDotBit 를 관리하는 컨테이어
     type DsMemory (v:Vertex)  =
 
-        let mutable memory:Memory = Memory(0uy)
+        let memory:Memory = Memory(0uy)
         let name = v.QualifiedName
 
         let readyTag   = DsBit($"{name}(R)",  false ,v ,memory, TagFlag.R)    

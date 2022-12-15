@@ -23,19 +23,22 @@
 		<Compile Include="Core.Util.Origin.fs" />
 		<Compile Include="Core.Util.ToDsText.fs" />
 		<Compile Include="Expression.Prolog.fs" />
+		<Content Include="Timer.txt" />
+		<Compile Include="Timer.fs" />
+		<Compile Include="Counter.fs" />
 		<Compile Include="Expression.fs" />
 		<Compile Include="Expression.Serialize.fs" />
 		<Compile Include="Expression.Function.fs" />
 		<Compile Include="Expression.Memory.fs" />
 		<Compile Include="Expression.Tag.fs" />
+		<Compile Include="Statement.Timer.fs" />
+		<Compile Include="Statement.Counter.fs" />
 		<Compile Include="EntryPoint.fs" />
 		<Compile Include="AssemblyInfo.fs" />
 		<Content Include="ValidSyntax.txt" />
 		<Content Include="ProgramCodeSyntax.txt" />
 		<!--<Compile Include="Program.fs" />-->
 	</ItemGroup>
-
-	<ItemGroup />
 
 	<ItemGroup>
 		<ProjectReference Include="..\Engine.Common.FS\Engine.Common.FS.fsproj" />

@@ -46,7 +46,7 @@ terminal: storage | tag | literal;
 toplevels: toplevel (';' toplevel)* (';')?;
     toplevel: expr|statement;
 
-statement: assign | varDecl;
+statement: assign | varDecl | timerDecl;
     assign: '$' storageName ':=' expr;
     varDecl:   type storageName ('=' expr)? ;//';';
         storageName: IDENTIFIER;
@@ -65,6 +65,10 @@ statement: assign | varDecl;
         | 'string'
         | 'bool' | 'boolean'
     ;
+    // ton mytimer = ton(rungInCondition, 1000ms);
+    timerDecl: timerType timerName '=' expr;
+        timerType: 'ton' | 'tof' | 'rto';
+        timerName: IDENTIFIER;
 
 
 // https://stackoverflow.com/questions/41017948/antlr4-the-following-sets-of-rules-are-mutually-left-recursive

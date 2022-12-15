@@ -1,4 +1,8 @@
 /* grun expr toplevels -gui < g4test/expr/expr.expr */
+
+// on delay timer
+ton mytimer = ton(false, 1000ms);
+
 (bool)(0 && true) = false;
 
 (bool)0 && true = false;

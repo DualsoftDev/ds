@@ -5,8 +5,8 @@ open Newtonsoft.Json.Linq
 
 [<AutoOpen>]
 module PilotGenModule =
-    let GenPilotCode(model:Model) = 
-        let pilotCode = 
+    let GenPilotCode(model:Model) =
+        let pilotCode =
             """
             {
 				"reals": [

@@ -3,6 +3,8 @@ open System
 open System.Linq
 open Engine.Common.FS
 open System.Diagnostics
+open System.Reactive.Subjects
+open System.Collections.Generic
 
 [<AutoOpen>]
 module rec ExpressionPrologModule =
@@ -214,6 +216,17 @@ module rec ExpressionPrologModule =
                 false
 
 
+    type IValue<'T> =
+        abstract Value: 'T with get, set
+    type IStorage<'T> =
+        inherit IStorage
+        inherit IValue<'T>
+
+    type ITag = inherit IStorage
+    type ITag<'T> =
+        inherit ITag
+        inherit IStorage<'T>
+    type IVariable = inherit IStorage
 
     /// Expression<'T> 을 boxed 에서 접근하기 위한 최소의 interface
     type IExpression =
@@ -228,50 +241,57 @@ module rec ExpressionPrologModule =
         abstract FunctionName: string option
         /// Function expression 에 사용된 IStorage 항목들을 반환
         abstract StorageArguments: IStorage list
-        
+
+    type IExpression<'T> =
+        inherit IExpression
+        abstract EvaluatedValue : 'T
+
+
+
+    let StorageValueChangedSubject = new Subject<IStorage>()
 
     [<AbstractClass>]
     [<DebuggerDisplay("{Name}")>]
-    type TypedValueStorage<'T>(name, initValue:'T) =
+    type TypedValueStorage<'T when 'T:equality>(name, initValue:'T) =
         let mutable value = initValue
-        let setValue(x:IStorage, v) =
-            if (value |> box) <> (v |> box) //value 변경시만 저장 및 이벤트
-            then value <- v; x.NotifyValueChanged()
-                 
-        member x.Name: string = name
-        member x.Value with get() = value and set(v) = setValue (x, v)
-        
-        //ahn 삭제 해도 정상 동작 : 삭제 가능확인 필요
-        //interface IStorage<'T> with
-        //    member x.Value with get() = x.Value and set(v) = setValue (x, v)
+        member _.Name: string = name
+        member x.Value
+            with get() = value
+            and set(v) =
+                if value <> v then
+                    value <- v
+                    StorageValueChangedSubject.OnNext(x :> IStorage)
 
         interface IStorage with
             member x.DataType = typedefof<'T>
-            member x.Value with get() = x.Value and set(v) = setValue (x, v|> unbox) 
+            member x.Value with get() = x.Value and set(v) = x.Value <- (v :?> 'T)
             member x.ToText() = x.ToText()
-            member x.NotifyValueChanged() = x.NotifyValueChanged()
-       
+            //<ahn> member x.NotifyValueChanged() = x.NotifyValueChanged()
+
+        interface IStorage<'T> with
+            member x.Value with get() = x.Value and set(v) = x.Value <- v
+
         interface INamed with
             member x.Name with get() = x.Name and set(v) = failwith "ERROR: not supported"
 
         abstract ToText: unit -> string
-        abstract NotifyValueChanged: unit -> unit
+        //<ahn> abstract NotifyValueChanged: unit -> unit
 
 
     [<AbstractClass>]
-    type Tag<'T>(name, initValue:'T) =
+    type Tag<'T when 'T:equality>(name, initValue:'T) =
         inherit TypedValueStorage<'T>(name, initValue)
 
-        interface ITag
+        interface ITag<'T>
         override x.ToText() = "%" + name
 
-    type Variable<'T>(name, initValue:'T) =
+    type Variable<'T when 'T:equality>(name, initValue:'T) =
         inherit TypedValueStorage<'T>(name, initValue)
 
         interface IVariable
         override x.ToText() = "$" + name
-        override x.NotifyValueChanged() = ChangeValueEvent x
-       
+        //<ahn> override x.NotifyValueChanged() = ChangeValueEvent x
+
     type Arg       = IExpression
     type Arguments = IExpression list
     type Args      = Arguments

@@ -36,11 +36,11 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
     /// 하나의 main.ds 를 loading 할 때, 외부 system 을 copy/reference 로 loading 시, 해당 system 의 구분을 위해서 사용
     member val OptLoadedSystemName:string option = None with get, set
     /// parser rule context 가 어느 시스템에 속한 것인지를 판정하기 위함.  Loaded system 의 context 와 Main system 의 context 구분 용도.
-    member val internal RuleDictionary = Dictionary<ParserRuleContext, string>()
+    member val internal Rule2SystemNameDictionary = Dictionary<ParserRuleContext, string>()
 
     override x.EnterEveryRule(ctx:ParserRuleContext) =
         match x.OptLoadedSystemName with
-        | Some systemName -> x.RuleDictionary.Add(ctx, systemName)
+        | Some systemName -> x.Rule2SystemNameDictionary.Add(ctx, systemName)
         | None -> ()
 
 
@@ -48,7 +48,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
         match options.LoadedSystemName with
         | Some systemName ->
                 x.OptLoadedSystemName <- Some systemName
-                x.RuleDictionary.Add(ctx, systemName)
+                x.Rule2SystemNameDictionary.Add(ctx, systemName)
         | _ -> ()
 
         match ctx.TryFindFirstChild<SysBlockContext>() with
@@ -133,8 +133,8 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
     member x.GetContextInformation(parserRuleContext:ParserRuleContext) =      // collectUpwardContextInformation
         let ctx = parserRuleContext
         let system =
-            match x.RuleDictionary.TryFind(parserRuleContext) with
-            | Some ruleName -> Some ruleName
+            match x.Rule2SystemNameDictionary.TryFind(parserRuleContext) with
+            | Some systemName -> Some systemName
             | None -> parserRuleContext.TryGetSystemName()
 
         let flow      = ctx.TryFindFirstAscendant<FlowBlockContext>(true).Bind(fun b -> b.TryFindIdentifier1FromContext())
@@ -230,21 +230,21 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                 yield! sysctx.Descendants<CausalTokenContext>().Cast<ParserRuleContext>()
             ]
 
-            let isCallName (pw:ParentWrapper, Fqdn(vetexPath)) = 
+            let isCallName (pw:ParentWrapper, Fqdn(vetexPath)) =
                     let flow = pw.GetFlow()
                     tryFindCall flow.System vetexPath |> Option.isSome
-               
+
             let isAliasMnemonic (pw:ParentWrapper, mnemonic:string) =
                 let flow = pw.GetFlow()
                 tryFindAliasDefWithMnemonic flow mnemonic |> Option.isSome
 
-           
+
             let isJobName (pw, name) =
                 tryFindJob pw name |> Option.isSome
 
             let isJobOrAlias (pw:ParentWrapper, Fqdn(vetexPath)) =
                 isJobName (pw.GetFlow().System, vetexPath.Last()) || isAliasMnemonic (pw, vetexPath.JoinWith("."))
-                
+
             let tryCreateCallOrAlias (parentWrapper:ParentWrapper) name =
                 let flow = parentWrapper.GetFlow()
                 let tryJob = tryFindJob system name
@@ -279,18 +279,18 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                             let flow = parent.GetCore() :?> Flow
                             if not <| isCallName (parent, ctxInfo.Names)
                             then
-                                Real.Create(r, flow) |> ignore    
-                           
+                                Real.Create(r, flow) |> ignore
+
                         | 1, c::[] when not <| (isAliasMnemonic (parent, ctxInfo.Names.Combine())) ->
                             let flow = parent.GetFlow()
                             let job = tryFindJob system c |> Option.get
                             Call.Create(job, parent) |> ignore
-                        
+
                         | 1, realorFlow::cr::[] when not <| isAliasMnemonic (parent, ctxInfo.Names.Combine()) ->
                             let otherFlowReal = tryFindReal system realorFlow cr |> Option.get
                             RealOtherFlow.Create(otherFlowReal, parent) |> ignore
                             tracefn $"{realorFlow}.{cr} should already have been created."
-                           
+
                         | 2, q::[] when isAliasMnemonic (parent, ctxInfo.Names.Combine()) ->
                             let flow = parent.GetFlow()
                             let aliasDef = tryFindAliasDefWithMnemonic flow q |> Option.get
@@ -384,7 +384,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                             match flow.System.TryFindReal flow.System flow.Name rc  with
                             | Some r -> r |> AliasTargetReal
                             | None -> flow.System.TryFindCall ([flow.Name;rc].ToArray()) |> Option.get |>AliasTargetCall
-                      
+
                         | flowOrReal::rc::[] -> //FlowEx.R or Real.C
                             match tryFindFlow system flowOrReal with
                             | Some f -> f.Graph.TryFindVertex<Real>(rc)  |> Option.get |> AliasTargetReal

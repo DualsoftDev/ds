@@ -58,22 +58,22 @@ module CoreModule =
         member val Jobs    = ResizeArray<Job>()
 
         member _.AddLoadedSystem(dev) = loadedSystems.Add(dev) |> ignore; addApiItemsForDevice dev
-        member val ReferenceSystems = loadedSystems.Select(fun s->s.ReferenceSystem) 
-        member val LoadedSystems = loadedSystems |> seq
-        member val Devices       = loadedSystems.OfType<Device>() 
-        member val ExternalSystems = loadedSystems.OfType<ExternalSystem>() 
+        member _.ReferenceSystems     = loadedSystems.Select(fun s->s.ReferenceSystem)
+        member _.LoadedSystems        = loadedSystems |> seq
+        member _.Devices              = loadedSystems.OfType<Device>()
+        member _.ExternalSystems      = loadedSystems.OfType<ExternalSystem>()
+        member _.ApiUsages = apiUsages |> seq
+        member _.Host = host
 
         member val Variables = ResizeArray<VariableData>()
         member val Commands = ResizeArray<Command>()
         member val Observes = ResizeArray<Observe>()
 
         member val ApiItems = createNamedHashSet<ApiItem>()
-        member x.ApiUsages = apiUsages |> seq
-        member val ApiResetInfos = HashSet<ApiResetInfo>() with get, set
+        member val ApiResetInfos = HashSet<ApiResetInfo>()
         ///시스템 전체시작 버튼누름시 수행되야하는 Real목록
         member val StartPoints = createQualifiedNamedHashSet<Real>()
 
-        member _.Host = host
 
         ///시스템 버튼 소속 Flow 정보
         member val EmergencyButtons = ButtonDic()
@@ -115,7 +115,7 @@ module CoreModule =
     // Subclasses = {Call | Real | RealOtherFlow}
     type ISafetyConditoinHolder =
         abstract member SafetyConditions: HashSet<SafetyCondition>
-    
+
     /// Indirect to Call/Alias
     [<AbstractClass>]
     type Indirect (names:string seq, parent:ParentWrapper) =
@@ -129,32 +129,32 @@ module CoreModule =
 
         member val Graph = DsGraph()
         member val ModelingEdges = HashSet<ModelingEdgeInfo<Vertex>>()
-        member val Flow = flow
-        interface ISafetyConditoinHolder with 
+        member _.Flow = flow
+        interface ISafetyConditoinHolder with
             member val SafetyConditions = HashSet<SafetyCondition>()
 
     and RealOtherFlow private (names:Fqdn, target:Real, parent) =
         inherit Indirect(names, parent)
-        member val Real = target
+        member _.Real = target
         interface ISafetyConditoinHolder with
             member val SafetyConditions = HashSet<SafetyCondition>()
 
     and Call private (target:Job, parent) =
         inherit Indirect(target.Name, parent)
-        member val CallTarget = target
+        member _.CallTarget = target
         member val Xywh:Xywh = null with get, set
         interface ISafetyConditoinHolder with
             member val SafetyConditions = HashSet<SafetyCondition>()
 
     and Alias private (name:string, target:AliasTargetWrapper, parent) = // target : Real or Call or OtherFlowReal
         inherit Indirect(name, parent)
-        member val TargetVertex = target
+        member _.TargetVertex = target
 
     /// JobDefs 정의: Call 이 호출하는 Job 항목
     type Job (name:string, jobDefs:JobDef seq) =
         inherit Named(name)
         member val JobDefs = jobDefs.ToFSharpList()
-    
+
 
     type TagAddress = string
     /// Main system 에서 loading 된 다른 system 의 API 를 바라보는 관점.  [jobs] = { Ap = { A."+"(%Q1, %I1); } }
@@ -170,18 +170,18 @@ module CoreModule =
         inherit FqdnObject(name, createFqdnObject([|system.Name|]))
         interface INamedVertex
 
-        member val Name = name
+        member _.Name = name
+        member _.System = system
         member val TXs = createQualifiedNamedHashSet<Real>()
         member val RXs = createQualifiedNamedHashSet<Real>()
-        member _.System = system
 
 
     /// API 의 reset 정보:  "+" <||> "-";
     and ApiResetInfo private (system:DsSystem, operand1:string, operator:ModelingEdgeType, operand2:string) =
-        member val Operand1 = operand1  // "+"
-        member val Operand2 = operand2  // "-"
-        member val Operator = operator  // "<||>"
-        member x.ToDsText() = sprintf "%s %s %s" operand1 (operator.ToText()) operand2  //"+" <||> "-"
+        member _.Operand1 = operand1  // "+"
+        member _.Operand2 = operand2  // "-"
+        member _.Operator = operator  // "<||>"
+        member _.ToDsText() = sprintf "%s %s %s" operand1 (operator.ToText()) operand2  //"+" <||> "-"
         static member Create(system, operand1, operator, operand2) =
             let ri = ApiResetInfo(system, operand1, operator, operand2)
             system.ApiResetInfos.Add(ri) |> verifyM $"Duplicated interface ResetInfo [{ri.ToDsText()}]"
@@ -274,9 +274,9 @@ module CoreModule =
             | SafetyConditionReal real -> real
             | SafetyConditionCall call -> call
             | SafetyConditionRealEx  realOtherFlow -> realOtherFlow
-  
+
     and AliasTargetWrapper =
-        | AliasTargetReal of Real    
+        | AliasTargetReal of Real
         | AliasTargetCall of Call
         | AliasTargetRealEx of RealOtherFlow    // MyFlow or RealOtherFlow 의 Real 일 수 있다.
 

@@ -7,7 +7,26 @@ open System.Text.RegularExpressions
 [<AutoOpen>]
 module  TagModule =
     
-
+    type TagFlag =
+    | R        
+    | G        
+    | F        
+    | H        
+    | Origin   
+    | Pause    
+    | ErrorTx  
+    | ErrorRx  
+    | Relay    
+    | ET        //EndTag      
+    | RT        //ResetTag    
+    | ST        //StartTag    
+    | EP        //EndPort      
+    | RP        //ResetPort    
+    | SP        //StartPort   
+    | EF        //EndForce
+    | RF        //ResetForce   
+    | SF        //StartForce  
+    
     /// PLC action tag (PlcTag) class
     type PlcTag<'T> (name, initValue:'T)  =
         inherit Tag<'T>(name, initValue)
@@ -20,25 +39,34 @@ module  TagModule =
         override x.NotifyValueChanged() = ChangeValueEvent x
   
     /// DsBit tag (PlanTag) class
-    type DsBit (name, initValue:bool, v:Vertex, m:Memory, tagFlag:TagFlag, controlIndex:int) =
+    type DsBit (name, initValue:bool, v:Vertex, tagFlag:TagFlag) =
         inherit Tag<bool>(name, initValue)
-        //Segment 모니터 전용 bit 생성 (controlIndex(-1))
-        new (n, iv, vertex, memory, tagFlag) = DsBit (n, iv, vertex, memory, tagFlag, -1)
-        //Segment 컨트롤 전용 bit 생성 (controlIndex(0 or 1 or 2 or 3))
-        new (n, iv, vertex, memory, index) =   DsBit (n, iv, vertex, memory, getControlFlag index, index)
-        
+       
         override x.NotifyValueChanged() = 
-            ChangeValueEvent x
-            //if tagFlag.IsControl
-            //then ChangeStatusEvent (v, m.Status)
+             ChangeValueEvent x
+             if x.Value then
+                 match tagFlag with
+                 |R -> ChangeStatusEvent (v, Ready)
+                 |G -> ChangeStatusEvent (v, Going)
+                 |F -> ChangeStatusEvent (v, Finish)
+                 |H -> ChangeStatusEvent (v, Homing)
+                 |_->()
 
-        member x.GetValue()  =
-            if tagFlag.IsControl
-                then m.GetControlValue(controlIndex)
-                else m.GetMonitorValue(tagFlag)
 
-        member x.SetValue(v:bool) = 
-            if tagFlag.IsControl
-                then m.SetControlValue(controlIndex, v)
-                else m.SetMonitorValue(tagFlag, v)
-            x.Value  <- v  //memory와 동기화
+
+
+
+    //bitFlag
+    //[<Flags>] 
+    //type MemoryFlag =
+    //| E         = 1   //End
+    //| R         = 2   //Reset
+    //| S         = 4   //Start
+    //| Relay     = 8   //Init Start Relay    (Real) ; Child Done (Call)
+    //| Origin    = 16  //Children StartPoint 
+    //| Pause     = 32   
+    //| ErrorTx   = 64   //error bit1
+    //| ErrorRx   = 128  //error bit2
+    
+    //let LowNibble = 15    //xxxx0000
+    //let HiNibble  = 240   //0000xxxx

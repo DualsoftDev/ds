@@ -506,6 +506,18 @@ module ExpressionFunctionModule =
         let _castToFloat64 (args:Args) = args.Select(evalArg >> toFloat64) .Expect1()
 
     let private tagsToArguments (xs:Tag<'T> seq) = xs.Select(fun x -> Terminal (Tag x)) |> List.ofSeq
+    
+    [<AutoOpen>]
+    module ExpressionOperatorModule =
+        /// boolean AND operator
+        let (<&&>) (left: Expression<bool>) (right: Expression<bool>) = fLogicalAnd [ left; right ]
+        /// boolean OR operator
+        let (<||>) (left: Expression<bool>) (right: Expression<bool>) = fLogicalOr [ left; right ]
+        /// boolean NOT operator
+        let (!!)   (exp: Expression<bool>) = fLogicalNot [exp]
+        /// Assign statement
+        let (<==)  (storage: IStorage) (exp: IExpression) = Assign(exp, storage)
+
     [<Extension>]
     type FuncExt =
 
@@ -519,7 +531,11 @@ module ExpressionFunctionModule =
                                         if xs.length() = 1 
                                         then tag (xs.First())
                                         else xs |> tagsToArguments |> List.cast<IExpression> |> fLogicalOr
-                                          
+                                   
+        [<Extension>] 
+        static member GetRelayStatement(set:Expression<bool>, rst:Expression<bool>, relay:Tag<bool>) =
+                        relay <== ((set <||> relay.ToExpr()) <&&> (rst))
+
         //[sets and]--|----- ! [rsts or] ----- (relay)
         //|relay|-----|
         [<Extension>] static member GetRelayExpr(sets:Tag<bool> seq, rsts:Tag<bool> seq, relay:Tag<bool>) =
@@ -533,16 +549,4 @@ module ExpressionFunctionModule =
         //|relay|-----|
         [<Extension>] static member GetRelayExprReverseReset(sets:Tag<bool> seq, rsts:Tag<bool> seq, relay:Tag<bool>) =
                         (sets.GetAnd() <||> relay.ToExpr()) <&&> (rsts.GetOr())
-
-
-    [<AutoOpen>]
-    module ExpressionOperatorModule =
-        /// boolean AND operator
-        let (<&&>) (left: Expression<bool>) (right: Expression<bool>) = fLogicalAnd [ left; right ]
-        /// boolean OR operator
-        let (<||>) (left: Expression<bool>) (right: Expression<bool>) = fLogicalOr [ left; right ]
-        /// boolean NOT operator
-        let (!!)   (exp: Expression<bool>) = fLogicalNot [exp]
-        /// Assign statement
-        let (<==)  (storage: IStorage) (exp: IExpression) = Assign(exp, storage)
 

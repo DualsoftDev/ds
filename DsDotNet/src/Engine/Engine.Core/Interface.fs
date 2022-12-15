@@ -6,8 +6,8 @@ open System.Collections.Generic
 [<AutoOpen>]
 module Interface =
 
-    
-    type IVertex = interface end
+
+    type IVertex = interface end   
 
     type INamed  =
          abstract Name:string with get, set
@@ -38,4 +38,5 @@ module Interface =
     //    abstract Value: 'T with get, set
 
     type ITag = inherit IStorage
-    type IVariable = inherit IStorage
+    type IVariable = inherit IStorage  
+    

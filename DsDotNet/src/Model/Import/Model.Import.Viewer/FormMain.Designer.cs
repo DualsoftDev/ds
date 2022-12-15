@@ -46,7 +46,7 @@ namespace Dual.Model.Import
             this.splitContainer4 = new System.Windows.Forms.SplitContainer();
             this.button_Stop = new System.Windows.Forms.Button();
             this.button_Reset = new System.Windows.Forms.Button();
-            this.button_start = new System.Windows.Forms.Button();
+            this.button_Start = new System.Windows.Forms.Button();
             this.comboBox_Segment = new System.Windows.Forms.ComboBox();
             this.button_ClearLog = new System.Windows.Forms.Button();
             this.richTextBox_Debug = new System.Windows.Forms.RichTextBox();
@@ -240,7 +240,6 @@ namespace Dual.Model.Import
             this.button_TestStart.TabIndex = 1;
             this.button_TestStart.Text = "TEST 시작";
             this.button_TestStart.UseVisualStyleBackColor = true;
-            this.button_TestStart.Visible = false;
             this.button_TestStart.Click += new System.EventHandler(this.button_TestStart_Click);
             // 
             // button_TestORG
@@ -270,7 +269,7 @@ namespace Dual.Model.Import
             // 
             this.splitContainer4.Panel2.Controls.Add(this.button_Stop);
             this.splitContainer4.Panel2.Controls.Add(this.button_Reset);
-            this.splitContainer4.Panel2.Controls.Add(this.button_start);
+            this.splitContainer4.Panel2.Controls.Add(this.button_Start);
             this.splitContainer4.Panel2.Controls.Add(this.comboBox_Segment);
             this.splitContainer4.Panel2.Controls.Add(this.button_TestStart);
             this.splitContainer4.Panel2.Controls.Add(this.button_TestORG);
@@ -289,7 +288,6 @@ namespace Dual.Model.Import
             this.button_Stop.TabIndex = 9;
             this.button_Stop.Text = "TEST 멈춤";
             this.button_Stop.UseVisualStyleBackColor = true;
-            this.button_Stop.Visible = false;
             this.button_Stop.Click += new System.EventHandler(this.button_Stop_Click);
             // 
             // button_Reset
@@ -303,16 +301,16 @@ namespace Dual.Model.Import
             this.button_Reset.UseVisualStyleBackColor = true;
             this.button_Reset.Click += new System.EventHandler(this.button_reset_Click);
             // 
-            // button_start
+            // button_Start
             // 
-            this.button_start.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_start.Location = new System.Drawing.Point(1171, 172);
-            this.button_start.Name = "button_start";
-            this.button_start.Size = new System.Drawing.Size(85, 23);
-            this.button_start.TabIndex = 7;
-            this.button_start.Text = "Start";
-            this.button_start.UseVisualStyleBackColor = true;
-            this.button_start.Click += new System.EventHandler(this.button_start_Click);
+            this.button_Start.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_Start.Location = new System.Drawing.Point(1171, 172);
+            this.button_Start.Name = "button_Start";
+            this.button_Start.Size = new System.Drawing.Size(85, 23);
+            this.button_Start.TabIndex = 7;
+            this.button_Start.Text = "Start";
+            this.button_Start.UseVisualStyleBackColor = true;
+            this.button_Start.Click += new System.EventHandler(this.button_start_Click);
             // 
             // comboBox_Segment
             // 
@@ -424,7 +422,7 @@ namespace Dual.Model.Import
         private System.Windows.Forms.Splitter splitter2;
         private System.Windows.Forms.SplitContainer splitContainer5;
         private System.Windows.Forms.Button button_Reset;
-        private System.Windows.Forms.Button button_start;
+        private System.Windows.Forms.Button button_Start;
         private System.Windows.Forms.ComboBox comboBox_Segment;
         private System.Windows.Forms.Button button_Stop;
     }

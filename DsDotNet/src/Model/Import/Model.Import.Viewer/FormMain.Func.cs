@@ -36,8 +36,7 @@ namespace Dual.Model.Import
                 {
                     _cts.Cancel();
                     _cts = new CancellationTokenSource();
-                    button_TestStart.Enabled = true;
-                    button_Stop.Enabled = false;
+                    
 
                     var result = ImportM.FromPPTX(PathPPT);
                     _mySystem = result.Item1;
@@ -48,6 +47,9 @@ namespace Dual.Model.Import
                     var dicM = resultData.Item2;
 
                     _myCPU = new DsCPU("", rungs.Select(s => s.Item2));
+                    _myCPU.Run();
+                    StartResetBtnUpdate(true);
+
                     comboBox_Segment.Items.Clear();
                     _DicVertex = new Dictionary<Vertex, ViewNode>();
                     _mySystem.GetVertices()
@@ -62,7 +64,7 @@ namespace Dual.Model.Import
                                    if (v is Real)
                                    {
                                        comboBox_Segment.Items
-                                       .Add(new SegmentHMI { Display = v.QualifiedName, Vertex = v, ViewNode = viewNode, Memory = dicM[v] });
+                                       .Add(new SegmentHMI { Display = v.QualifiedName, Vertex = v, ViewNode = viewNode, VertexM = dicM[v] });
                                    }
                                });
 
@@ -92,7 +94,6 @@ namespace Dual.Model.Import
                         button_CreateExcel.Visible = true;
                         pictureBox_xls.Visible = true;
                         button_TestORG.Visible = true;
-                        button_TestStart.Visible = true;
                         button_copy.Visible = false;
                     });
 

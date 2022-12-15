@@ -46,7 +46,7 @@ terminal: storage | tag | literal;
 toplevels: toplevel (';' toplevel)* (';')?;
     toplevel: expr|statement;
 
-statement: assign | varDecl | timerDecl;
+statement: assign | varDecl | timerDecl | counterDecl;
     assign: '$' storageName ':=' expr;
     varDecl:   type storageName ('=' expr)? ;//';';
         storageName: IDENTIFIER;
@@ -66,10 +66,14 @@ statement: assign | varDecl | timerDecl;
         | 'bool' | 'boolean'
     ;
     // ton mytimer = ton(rungInCondition, 1000ms);
-    timerDecl: timerType timerName '=' expr;
+    timerDecl: timerType timerName '=' timerType '(' arguments? ')';
         timerType: 'ton' | 'tof' | 'rto';
         timerName: IDENTIFIER;
 
+    // ton mycounter = ton(rungInCondition, 1000ms);
+    counterDecl: counterType counterName '=' counterType '(' arguments? ')';
+        counterType: 'ctu' | 'ctd' | 'ctud';
+        counterName: IDENTIFIER;
 
 // https://stackoverflow.com/questions/41017948/antlr4-the-following-sets-of-rules-are-mutually-left-recursive
 // https://github.com/antlr/antlr4/blob/master/doc/parser-rules.md#alternative-labels

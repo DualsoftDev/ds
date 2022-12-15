@@ -93,20 +93,19 @@ module ExpressionParser =
                     | :? LiteralContext as exp ->
                         assert(exp.ChildCount = 1)
                         match exp.children[0] with
-                        | :? LiteralSbyteContext  as exp -> text.Replace("y", "")  |> System.SByte.Parse  |> literal |> iexpr
-                        | :? LiteralByteContext   as exp -> text.Replace("uy", "") |> System.Byte.Parse   |> literal |> iexpr
-                        | :? LiteralInt16Context  as exp -> text.Replace("s", "")  |> System.Int16.Parse  |> literal |> iexpr
-                        | :? LiteralUint16Context as exp -> text.Replace("us", "") |> System.UInt16.Parse |> literal |> iexpr
-                        | :? LiteralInt32Context  as exp -> text                   |> System.Int32.Parse  |> literal |> iexpr
-                        | :? LiteralUint32Context as exp -> text.Replace("u", "")  |> System.UInt32.Parse |> literal |> iexpr
-                        | :? LiteralInt64Context  as exp -> text.Replace("L", "")  |> System.Int64.Parse  |> literal |> iexpr
-                        | :? LiteralUint64Context as exp -> text.Replace("UL", "") |> System.UInt64.Parse |> literal |> iexpr
-                        | :? LiteralSingleContext as exp -> text.Replace("f", "")  |> System.Single.Parse |> literal |> iexpr
-                        | :? LiteralDoubleContext as exp -> text                   |> System.Double.Parse |> literal |> iexpr
-                        | :? LiteralStringContext as exp -> text |> deQuoteOnDemand|> literal |> iexpr
-                        | :? LiteralCharContext   as exp -> text                   |> System.Char.Parse   |> literal |> iexpr
-                        | :? LiteralBoolContext   as exp -> text                   |> System.Boolean.Parse|> literal |> iexpr
-
+                        | :? LiteralSbyteContext  -> text.Replace("y" , "")  |> System.SByte.Parse  |> literal |> iexpr
+                        | :? LiteralByteContext   -> text.Replace("uy", "")  |> System.Byte.Parse   |> literal |> iexpr
+                        | :? LiteralInt16Context  -> text.Replace("s" , "")  |> System.Int16.Parse  |> literal |> iexpr
+                        | :? LiteralUint16Context -> text.Replace("us", "")  |> System.UInt16.Parse |> literal |> iexpr
+                        | :? LiteralInt32Context  -> text                    |> System.Int32.Parse  |> literal |> iexpr
+                        | :? LiteralUint32Context -> text.Replace("u" , "")  |> System.UInt32.Parse |> literal |> iexpr
+                        | :? LiteralInt64Context  -> text.Replace("L" , "")  |> System.Int64.Parse  |> literal |> iexpr
+                        | :? LiteralUint64Context -> text.Replace("UL", "")  |> System.UInt64.Parse |> literal |> iexpr
+                        | :? LiteralSingleContext -> text.Replace("f" , "")  |> System.Single.Parse |> literal |> iexpr
+                        | :? LiteralDoubleContext -> text                    |> System.Double.Parse |> literal |> iexpr
+                        | :? LiteralStringContext -> text                    |> deQuoteOnDemand     |> literal |> iexpr
+                        | :? LiteralCharContext   -> text                    |> System.Char.Parse   |> literal |> iexpr
+                        | :? LiteralBoolContext   -> text                    |> System.Boolean.Parse|> literal |> iexpr
                         | _ -> failwith "ERROR"
                     | :? TagContext as texp ->
                         failwith "Not yet"
@@ -141,6 +140,9 @@ module ExpressionParser =
             createExpression null ctx
         with exn ->
             failwith $"Failed to parse Expression: {text}\r\n{exn}" // Just warning.  하나의 이름에 '.' 을 포함하는 경우.  e.g "#seg.testMe!!!"
+
+
+
 
 
     type System.Type with
@@ -203,6 +205,15 @@ module ExpressionParser =
 
         statement.Do()
         statement
+
+    let parseStatement(text:string) =
+        try
+            let parser = createParser (text)
+            let ctx = parser.statement()
+
+            createStatement null ctx
+        with exn ->
+            failwith $"Failed to parse Statement: {text}\r\n{exn}"
 
 
     let parseCode (storages:Storages) (text:string) : Statement list =

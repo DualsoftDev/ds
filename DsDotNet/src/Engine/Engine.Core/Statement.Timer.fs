@@ -42,13 +42,13 @@ module TimerStatementModule =
         timer
 
     type Timer =
-        static member CreateTON(name, rungConditionIn, preset) =
+        static member CreateTON(name, preset, rungConditionIn) =
             {   Type=TON; Name=name; Preset=preset;
                 RungConditionIn=Some rungConditionIn;
                 ResetCondition=None; }
             |> createTimer
 
-        static member CreateTOF(name, rungConditionIn, preset) =
+        static member CreateTOF(name, preset, rungConditionIn) =
             {   Type=TOF; Name=name; Preset=preset;
                 RungConditionIn=Some rungConditionIn;
                 ResetCondition=None; }
@@ -60,18 +60,18 @@ module TimerStatementModule =
                 ResetCondition=None; }
             |> createTimer
 
-        static member CreateTON(name, rungConditionIn, resetCondition, preset) =
+        static member CreateTON(name, preset, rungConditionIn, resetCondition) =
             {   Type=TON; Name=name; Preset=preset;
                 RungConditionIn=Some rungConditionIn;
                 ResetCondition=Some resetCondition; }
             |> createTimer
 
-        static member CreateTOF(name, rungConditionIn, resetCondition, preset) =
+        static member CreateTOF(name, preset, rungConditionIn, resetCondition) =
             {   Type=TOF; Name=name; Preset=preset;
                 RungConditionIn=Some rungConditionIn;
                 ResetCondition=Some resetCondition; }
             |> createTimer
-        static member CreateRTO(name, rungConditionIn, resetCondition, preset) =
+        static member CreateRTO(name, preset, rungConditionIn, resetCondition) =
             {   Type=RTO; Name=name; Preset=preset;
                 RungConditionIn=Some rungConditionIn;
                 ResetCondition=Some resetCondition; }

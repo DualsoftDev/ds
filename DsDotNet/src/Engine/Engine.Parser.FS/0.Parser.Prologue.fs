@@ -17,7 +17,6 @@ module ParserUtil =
     let mutable internal fwdLoadDevice = dummyDeviceLoader
     let mutable internal fwdLoadExternalSystem = dummyExternalSystemLoader
     let mutable internal fwdParseFqdn = dummyParserFqdn
-    //let mutable fwdParseExpression = dummyParserFqdn
 
     let getText (x:IParseTree) = x.GetText()
 

@@ -1,6 +1,7 @@
 namespace rec Engine.Core
 open System.Diagnostics
 open Engine.Common.FS.Prelude
+open System
 
 (*  expression: generic type <'T> 나 <_> 으로는 <obj> match 으로 간주됨
     Expression<'T> 객체에 대한 matching
@@ -55,14 +56,12 @@ module ExpressionModule =
 
     type Timer internal(typ:TimerType, name, condition:IExpression, preset20msCounter:uint16) =
         let timerStruct = TimerStruct(name, preset20msCounter)
-        let firer = Firere(typ, timerStruct)
+        let firer = new Firere(typ, timerStruct)
         member _.Struct = timerStruct
         member _.Condition = condition
         member val ConditionCheckStatement:Statement option = None with get, set
-        //member val CachedConditionValue = false with get, set
-        //member val Firere = Firere(typ, timerStruct)
-        //member val internal OptOnConditionChanged: (bool -> unit) option = None with get, set
-        //member internal x.OnConditionChanged newCondition = x.OptOnConditionChanged.Value(newCondition)
+        interface IDisposable with
+            member this.Dispose() = (firer :> IDisposable).Dispose()
 
     type Statement =
         | Assign of expression:IExpression * target:IStorage

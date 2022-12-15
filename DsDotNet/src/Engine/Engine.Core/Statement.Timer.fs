@@ -5,30 +5,15 @@ open System.Reactive.Linq
 [<AutoOpen>]
 module TimerStatementModule =
 
-    let CreateTON(name, condition, target20msCounter) =
-        let timer = new Timer(TON, name, condition, target20msCounter)
+    let private createTimer(typ:TimerType, name, condition, target20msCounter) =
+        let timer = new Timer(typ, name, condition, target20msCounter)
         let ts = timer.Struct
         let statement = Assign (condition, ts.EN)
-        //let fire() = ts.DN.Value <- true
-        //timer.Firere.Fire <- Some fire
-        //let onConditionChanged newCondition =
-        //    assert(timer.CachedConditionValue <> newCondition)
-        //    ts.EN.Value <- newCondition
-        //    ts.TT.Value <- newCondition
-        //    if newCondition then    // rising
-        //        assert(not ts.DN.Value)
-        //        timer.Firere.Start()
-        //    else
-        //        ()
-        //timer.OptOnConditionChanged <- Some onConditionChanged
+        statement.Do()
+        StorageValueChangedSubject.OnNext(ts.EN)
 
         timer.ConditionCheckStatement <- Some statement
-        statement, timer
+        timer
 
-    let CreateTOF(name, condition, target20msCounter) =
-        let timer = new Timer(TOF, name, condition, target20msCounter)
-        let ts = timer.Struct
-        let statement = Assign (fLogicalNot [condition], ts.EN) // The TOF instruction is a non-retentive timer that accumulates time when the instruction is enabled (rung-condition-in is false
-        timer.ConditionCheckStatement <- Some statement
-
-        statement, timer
+    let CreateTON(name, condition, target20msCounter) = createTimer(TON, name, condition, target20msCounter)
+    let CreateTOF(name, condition, target20msCounter) = createTimer(TOF, name, condition, target20msCounter)

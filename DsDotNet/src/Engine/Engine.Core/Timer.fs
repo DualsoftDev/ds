@@ -30,28 +30,24 @@ module rec TimerModule =
     type TimerType = TON | TOF | RTO
 
     type Fire = unit -> unit
-    type Firere(timerType:TimerType, timerStruct:TimerStruct) as this =
+    type Firere(timerType:TimerType, timerStruct:TimerStruct) =
         let ts = timerStruct
         let tt = timerType
 
-        let mutable clockSubscription:IDisposable = null
-        let unsubscribe() =
-            clockSubscription.Dispose()
-            clockSubscription <- null
 
-        let tonPreScan() =
-            ts.EN.Value <- false
-            ts.TT.Value <- false
-            ts.DN.Value <- false
-            ts.ACC.Value <- 0us
-        let tonRungConditionInFalse() = tonPreScan()
-        let tonPostScan() = tonPreScan()
+        //let tonPreScan() =
+        //    ts.EN.Value <- false
+        //    ts.TT.Value <- false
+        //    ts.DN.Value <- false
+        //    ts.ACC.Value <- 0us
+        //let tonRungConditionInFalse() = tonPreScan()
+        //let tonPostScan() = tonPreScan()
 
-        let tofPreScan() =
-            ts.EN.Value <- false
-            ts.TT.Value <- false
-            ts.DN.Value <- true
-            ts.ACC.Value <- ts.PRE.Value
+        //let tofPreScan() =
+        //    ts.EN.Value <- false
+        //    ts.TT.Value <- false
+        //    ts.DN.Value <- true
+        //    ts.ACC.Value <- ts.PRE.Value
         //let tofRungConditionInTrue() =
         //    ts.EN.Value <- true
         //    ts.TT.Value <- true     // https://edisciplinas.usp.br/pluginfile.php/184942/mod_resource/content/1/Logix5000%20-%20Manual%20de%20Referencias.pdf 와 https://edisciplinas.usp.br/pluginfile.php/184942/mod_resource/content/1/Logix5000%20-%20Manual%20de%20Referencias.pdf 설명이 다름
@@ -59,92 +55,101 @@ module rec TimerModule =
         //    ts.ACC.Value <- 0us
         //let tofPostScan() = tofPreScan()
 
-        let rtoPreScan() = failwith "ERROR"
-        let rtoConditionTrue() = failwith "ERROR"
-        let rtoPostScan() = failwith "ERROR"
+        //let rtoPreScan() = failwith "ERROR"
+        //let rtoConditionTrue() = failwith "ERROR"
+        //let rtoPostScan() = failwith "ERROR"
 
-        let preScan() =
+        //let preScan() =
+        //    match tt with
+        //    | TON -> tonPreScan()
+        //    | TOF -> tofPreScan()
+        //    | RTO -> rtoPreScan()
+
+        //let clear() =
+        //    unsubscribe()
+        //    preScan()
+
+        let accumulateTON() =
+            if ts.TT.Value && not ts.DN.Value && ts.ACC.Value < ts.PRE.Value then
+                ts.ACC.Value <- ts.ACC.Value + 1us
+                tracefn "Accumutated to %A" ts.ACC.Value
+                if ts.ACC.Value >= ts.PRE.Value then
+                    tracefn "Timer accumulator value reached"
+                    ts.TT.Value <- false
+                    ts.DN.Value <- true
+                    ts.EN.Value <- true
+
+        let accumulateTOF() =
+            if ts.TT.Value && ts.DN.Value && not ts.EN.Value && ts.ACC.Value < ts.PRE.Value then
+                ts.ACC.Value <- ts.ACC.Value + 1us
+                tracefn "Accumutated to %A" ts.ACC.Value
+                if ts.ACC.Value >= ts.PRE.Value then
+                    tracefn "Timer accumulator value reached"
+                    ts.TT.Value <- false
+                    ts.DN.Value <- false
+
+        let accumulateRTO() =
+            failwith "NOT yet"
+
+        let accumulate() =
             match tt with
-            | TON -> tonPreScan()
-            | TOF -> tofPreScan()
-            | RTO -> rtoPreScan()
+            | TON -> accumulateTON()
+            | TOF -> accumulateTOF()
+            | RTO -> accumulateRTO()
 
-        let clear() =
-            if clockSubscription <> null then
-                unsubscribe()
-            preScan()
+        let mutable clockSubscription:IDisposable = null
 
-        let resume() =
-            if clockSubscription <> null then
-                failwith "ERROR"
-
-            let accumulate() =
-                if ts.TT.Value && not ts.DN.Value then
-                    ts.ACC.Value <- ts.ACC.Value + 1us
-                    tracefn "Accumutated to %A" ts.ACC.Value
-                    if ts.ACC.Value >= ts.PRE.Value then
-                        //clear()
-                        tracefn "Timer accumulator value reached"
-                        ts.TT.Value <- false
-                        match tt with
-                        | TON ->
-                            ts.DN.Value <- true
-                            ts.EN.Value <- true
-                        | TOF ->
-                            ts.DN.Value <- false
-                            ts.EN.Value <- false
+        do
+            ts.Clear()
 
             tracefn "Timer subscribing to tick event"
             clockSubscription <-
                 the20msTimer.Subscribe(fun _ ->
-                    let xxx = ts
                     match tt, ts.TT.Value with
                     | (TON|TOF), true when not ts.DN.Value -> accumulate()        // When enabled, timing can be paused by setting the .DN bit to true and resumed by clearing the .DN
                     | _, true -> accumulate()
                     | _, _ -> ()
                 )
 
-        do
-            preScan()
             StorageValueChangedSubject
                 .Where(fun storage -> storage = timerStruct.EN)
                 .Subscribe(fun storage ->
+                    tracefn "%A enabled with DN=%b" tt ts.DN.Value
                     if ts.ACC.Value < 0us || ts.PRE.Value < 0us then failwith "ERROR"
-                    let enabled = storage.Value :?> bool
-                    match tt, enabled with
+                    let rungInCondition = storage.Value :?> bool
+                    match tt, rungInCondition with
                     | TON, true ->
-                        tracefn "TON enabled with DN=%b" ts.DN.Value
                         ts.TT.Value <- not ts.DN.Value
-                        if ts.TT.Value then
-                            resume()
-                    | TON, false -> preScan()
+                    | TON, false -> ts.Clear()
 
                     | TOF, false ->
-                        tracefn "TOF enabled with DN=%b" ts.DN.Value
                         ts.EN.Value <- false
                         ts.TT.Value <- true
-                        ts.ACC.Value <- 0us // When the TOF instruction is disabled, the ACC value is cleared       https://edisciplinas.usp.br/pluginfile.php/184942/mod_resource/content/1/Logix5000%20-%20Manual%20de%20Referencias.pdf  pp121
-                        if not ts.EN.Value then
-                            resume()
+                        if not ts.DN.Value then
+                            ts.ClearBits()
 
                     | TOF, true ->
                         ts.EN.Value <- true
-                        ts.TT.Value <- true     // spec 상충함 : // https://edisciplinas.usp.br/pluginfile.php/184942/mod_resource/content/1/Logix5000%20-%20Manual%20de%20Referencias.pdf 와 https://edisciplinas.usp.br/pluginfile.php/184942/mod_resource/content/1/Logix5000%20-%20Manual%20de%20Referencias.pdf 설명이 다름
+                        ts.TT.Value <- false     // spec 상충함 : // https://edisciplinas.usp.br/pluginfile.php/184942/mod_resource/content/1/Logix5000%20-%20Manual%20de%20Referencias.pdf 와 https://edisciplinas.usp.br/pluginfile.php/184942/mod_resource/content/1/Logix5000%20-%20Manual%20de%20Referencias.pdf 설명이 다름
                         ts.DN.Value <- true
                         ts.ACC.Value <- 0us
-                        //preScan()
                 ) |> ignore
 
-        member x.Pause() = unsubscribe()
-
+        interface IDisposable with
+            member this.Dispose() =
+                if clockSubscription <> null then
+                    clockSubscription.Dispose()
+                    clockSubscription <- null
 
         member val internal Fire:Fire option = None with get, set
 
 
 
     // 임시.  추후 수정 필요.  simualte Tag<bool>
+    [<Obsolete("임시 구현")>]
     type BoolTag(name) =
         inherit Tag<bool>(name, false)
+    [<Obsolete("임시 구현")>]
     type IntTag(name, init) =
         inherit Tag<uint16>(name, init)
 
@@ -158,5 +163,13 @@ module rec TimerModule =
         member val PRE:IntTag = IntTag( $"{name}.PRE", preset20msCounter)
         member val ACC:IntTag = IntTag( $"{name}.ACC", 0us)
 
-
+    type TimerStruct with
+        /// Clear EN, TT, DN bits
+        member x.ClearBits() =
+            x.EN.Value <- false
+            x.TT.Value <- false
+            x.DN.Value <- false
+        member x.Clear() =
+            x.ClearBits()
+            x.ACC.Value <- 0us
 

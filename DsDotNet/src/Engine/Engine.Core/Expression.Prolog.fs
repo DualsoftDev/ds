@@ -4,6 +4,7 @@ open System.Linq
 open Engine.Common.FS
 open System.Diagnostics
 open System.Reactive.Subjects
+open System.Collections.Generic
 
 [<AutoOpen>]
 module rec ExpressionPrologModule =

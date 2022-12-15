@@ -218,18 +218,15 @@ namespace Dual.Model.Import
         }
         private async void button_TestStart_Click(object sender, EventArgs e)
         {
-            button_TestStart.Enabled = false;
-            button_Stop.Enabled = true;
-            //await SimSeg.TestStart(_myCPU, _cts);
+            if (_myCPU == null) return;
+            StartResetBtnUpdate(true);
             await Task.Delay(0);
             _myCPU.Run();
         }
         private void button_Stop_Click(object sender, EventArgs e)
         {
-            button_TestStart.Enabled = true;
-            button_Stop.Enabled = false;
-            //_cts.Cancel();
-            //_cts = new CancellationTokenSource();
+            if (_myCPU == null) return;     
+            StartResetBtnUpdate(false);
             _myCPU.Stop();
         }
 
@@ -238,19 +235,22 @@ namespace Dual.Model.Import
             await Task.Run(async () =>
             {
                 await Task.Delay(100);
-
-
             });
         }
-
+        private void StartResetBtnUpdate(bool Start)
+        {
+            button_TestStart.Enabled = !Start;
+            button_Stop.Enabled = Start;
+        }
+      
         private void button_start_Click(object sender, EventArgs e)
         {
             var segHMI = comboBox_Segment.SelectedItem as SegmentHMI;
             if (segHMI == null) return;
 
             var ucView = SelectedView;
-            segHMI.Memory.Reset.SetValue(false);
-            segHMI.Memory.Start.SetValue(true);
+            segHMI.VertexM.ResetTag.Value = false;
+            segHMI.VertexM.StartTag.Value = true;
         }
 
         private void button_reset_Click(object sender, EventArgs e)
@@ -259,10 +259,8 @@ namespace Dual.Model.Import
             if (segHMI == null) return;
 
             var ucView = SelectedView;
-            segHMI.Memory.Start.SetValue(false);
-            segHMI.Memory.Reset.SetValue(true);
+            segHMI.VertexM.ResetTag.Value = true;
+            segHMI.VertexM.StartTag.Value = false;
         }
-
-      
     }
 }

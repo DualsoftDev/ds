@@ -9,11 +9,13 @@
 
   <ItemGroup>
     <Compile Include="CpuUtil.fs" />
-    <Compile Include="DsMemory.fs" />
+    <Compile Include="VertexM.fs" />
     <Compile Include="Convert.Util.fs" />
     <Compile Include="Convert.Root.fs" />
     <Compile Include="Convert.Real.fs" />
     <Compile Include="Convert.Call.fs" />
+    <Compile Include="Convert.Status.fs" />
+    <Compile Include="Convert.Port.fs" />
     <Compile Include="Convert.fs" />
     <Compile Include="Loader.fs" />
   </ItemGroup>

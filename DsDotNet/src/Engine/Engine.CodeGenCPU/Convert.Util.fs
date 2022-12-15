@@ -11,14 +11,14 @@ open System.Collections.Concurrent
 [<Extension>]
 type ConvertUtilExt =
 
-    [<Extension>] static member GetVertices(sys:DsSystem) =
-                    sys.Flows.SelectMany(fun flow->
-                        flow.Graph.Vertices
-                            |> Seq.collect(fun v ->
-                                match v with
-                                | :? Real as r -> r.Graph.Vertices.ToArray() @ [r]
-                                | _ -> [|v|])
-                           )
+    //[<Extension>] static member GetVertices(sys:DsSystem) =
+    //                sys.Flows.SelectMany(fun flow->
+    //                    flow.Graph.Vertices
+    //                        |> Seq.collect(fun v ->
+    //                            match v with
+    //                            | :? Real as r -> r.Graph.Vertices.ToArray() @ [r]
+    //                            | _ -> [|v|])
+    //                       )
 
 
     [<Extension>] static member FindEdgeSources(target:Vertex, graph:DsGraph, edgeType:ModelingEdgeType) =
@@ -36,7 +36,7 @@ type ConvertUtilExt =
                     findEdges.Select(fun e->e.Source)
 
                     
-    [<Extension>]  static member GetCoinTags(coin:Vertex, memory:DsMemory, isInTag:bool) =
+    [<Extension>]  static member GetCoinTags(coin:Vertex, memory:VertexM, isInTag:bool) =
                             match coin with
                             | :? Call as c -> c.CallTarget.JobDefs
                                                 .Select(fun j-> 
@@ -53,14 +53,14 @@ type ConvertUtilExt =
                             | _ -> failwith "Error"
 
 
-    [<Extension>]  static member GetTxRxTags(coin:Vertex, isTx:bool, dicM:ConcurrentDictionary<Vertex, DsMemory>) =
+    [<Extension>]  static member GetTxRxTags(coin:Vertex, isTx:bool, dicM:ConcurrentDictionary<Vertex, VertexM>) =
                             let memory = dicM[coin]
                             match coin with
                             | :? Call as c -> c.CallTarget.JobDefs
                                                 .SelectMany(fun j-> 
                                                             if isTx
-                                                            then j.ApiItem.TXs.Select(fun s-> dicM[s].Start)
-                                                            else j.ApiItem.RXs.Select(fun s-> dicM[s].End)
+                                                            then j.ApiItem.TXs.Select(fun s-> dicM[s].StartTag)
+                                                            else j.ApiItem.RXs.Select(fun s-> dicM[s].EndTag)
                                                 )
                                                 .Cast<Tag<bool>>()
                             | :? Alias as a -> 

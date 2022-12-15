@@ -28,7 +28,8 @@
 		<Compile Include="Expression.fs" />
 		<Compile Include="Expression.Serialize.fs" />
 		<Compile Include="Expression.Function.fs" />
-		<Compile Include="Statement.Timer,Counter.fs" />
+		<Compile Include="Statement.Timer.fs" />
+		<Compile Include="Statement.Counter.fs" />
 		<Compile Include="EntryPoint.fs" />
 		<Compile Include="AssemblyInfo.fs" />
 		<Content Include="ValidSyntax.txt" />

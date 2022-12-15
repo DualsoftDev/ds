@@ -65,9 +65,9 @@ statement: assign | varDecl | timerDecl;
         | 'string'
         | 'bool' | 'boolean'
     ;
-    // ton mytimer = condition
+    // ton mytimer = ton(rungInCondition, 1000ms);
     timerDecl: timerType timerName '=' expr;
-        timerType: 'ton' | 'toff' | 'tmr' | 'tmon' | 'trtg';
+        timerType: 'ton' | 'tof' | 'rto';
         timerName: IDENTIFIER;
 
 

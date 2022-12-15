@@ -31,5 +31,4 @@ module Interface =
         inherit IText
         abstract Value: obj with get, set
         abstract DataType : System.Type
-        //<ahn> abstract NotifyValueChanged : unit -> unit
 

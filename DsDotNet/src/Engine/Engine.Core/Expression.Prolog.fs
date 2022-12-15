@@ -266,7 +266,6 @@ module rec ExpressionPrologModule =
             member x.DataType = typedefof<'T>
             member x.Value with get() = x.Value and set(v) = x.Value <- (v :?> 'T)
             member x.ToText() = x.ToText()
-            //<ahn> member x.NotifyValueChanged() = x.NotifyValueChanged()
 
         interface IStorage<'T> with
             member x.Value with get() = x.Value and set(v) = x.Value <- v
@@ -275,7 +274,6 @@ module rec ExpressionPrologModule =
             member x.Name with get() = x.Name and set(v) = failwith "ERROR: not supported"
 
         abstract ToText: unit -> string
-        //<ahn> abstract NotifyValueChanged: unit -> unit
 
 
     [<AbstractClass>]
@@ -290,7 +288,6 @@ module rec ExpressionPrologModule =
 
         interface IVariable
         override x.ToText() = "$" + name
-        //<ahn> override x.NotifyValueChanged() = ChangeValueEvent x
 
     type Arg       = IExpression
     type Arguments = IExpression list

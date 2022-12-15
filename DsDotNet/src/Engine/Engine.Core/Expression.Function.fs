@@ -520,6 +520,10 @@ module ExpressionFunctionModule =
                                          if xs.length() = 1
                                          then tag (xs.First())
                                          else xs |> tagsToArguments |> List.cast<IExpression> |> fLogicalOr
+        
+        [<Extension>] 
+        static member GetRelayStatement(set:Expression<bool>, rst:Expression<bool>, relay:Tag<bool>) =
+                        relay <== ((set <||> relay.ToExpr()) <&&> (rst))
 
         //[sets and]--|----- ! [rsts or] ----- (relay)
         //|relay|-----|

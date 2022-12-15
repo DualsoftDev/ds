@@ -38,6 +38,7 @@
 		<Compile Include="Expression\CodeTest.fs" />
 		<Compile Include="Expression\CpuTest.fs" />
 		<Compile Include="Expression\TimerTest.fs" />
+		<Compile Include="Expression\CounterTest.fs" />
 		<Compile Include="Model\FqdnParseTest.fs" />
 		<Compile Include="Model\SystemBuilderTest.fs" />
 		<Compile Include="Model\LoadConfigTest.fs" />

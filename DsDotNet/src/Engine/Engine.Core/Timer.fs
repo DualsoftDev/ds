@@ -28,8 +28,7 @@ module rec TimerModule =
 
     type TimerType = TON | TOF | RTO
 
-    //type Fire = unit -> unit
-    type Firere(timerType:TimerType, timerStruct:TimerStruct) =
+    type internal TickAccumulator(timerType:TimerType, timerStruct:TimerStruct) =
         let ts = timerStruct
         let tt = timerType
 
@@ -135,14 +134,18 @@ module rec TimerModule =
     type IntTag(name, init) =
         inherit Tag<uint16>(name, init)
 
-    type TimerStruct internal(name, preset20msCounter:uint16) =
+    [<AbstractClass>]
+    type TimerCounterBaseStruct (name, preset) =
         member _.Name:string = name
+        member val DN:BoolTag = BoolTag($"{name}.DN")  // Done
+        member val PRE:IntTag = IntTag( $"{name}.PRE", preset)
+        member val ACC:IntTag = IntTag( $"{name}.ACC", 0us)
+
+    type TimerStruct internal(name, preset20msCounter:uint16) =
+        inherit TimerCounterBaseStruct(name, preset20msCounter)
 
         member val EN:BoolTag = BoolTag($"{name}.EN")  // Enable
         member val TT:BoolTag = BoolTag($"{name}.TT")  // Timing
-        member val DN:BoolTag = BoolTag($"{name}.DN")  // Done
-        member val PRE:IntTag = IntTag( $"{name}.PRE", preset20msCounter)
-        member val ACC:IntTag = IntTag( $"{name}.ACC", 0us)
 
     type TimerRTOStruct internal(name, preset20msCounter:uint16) =
         inherit TimerStruct(name, preset20msCounter)

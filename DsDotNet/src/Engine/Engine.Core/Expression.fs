@@ -56,7 +56,7 @@ module ExpressionModule =
 
     type Timer internal(typ:TimerType, timerStruct:TimerStruct) =
 
-        let firer = new Firere(typ, timerStruct)
+        let accumulator = new TickAccumulator(typ, timerStruct)
 
         member _.Name = timerStruct.Name
         member _.EN = timerStruct.EN
@@ -67,17 +67,29 @@ module ExpressionModule =
 
         member val InputEvaluateStatements:Statement list = [] with get, set
         interface IDisposable with
-            member this.Dispose() = (firer :> IDisposable).Dispose()
+            member this.Dispose() = (accumulator :> IDisposable).Dispose()
 
-    type TimerRTO internal(timerStruct:TimerRTOStruct) =
-        inherit Timer(RTO, timerStruct)
-        member _.RES = timerStruct.RES
+    type Counter internal(typ:CounterType, counterStruct:CounterBaseStruct) =
+
+        let accumulator = new CountAccumulator(typ, counterStruct)
+
+        member _.Name = counterStruct.Name
+        member _.UN = counterStruct.UN
+        member _.OV = counterStruct.OV
+        member _.DN = counterStruct.DN
+        member _.PRE = counterStruct.PRE
+        member _.ACC = counterStruct.ACC
+
+        member val InputEvaluateStatements:Statement list = [] with get, set
+        interface IDisposable with
+            member this.Dispose() = (accumulator :> IDisposable).Dispose()
 
 
     type Statement =
         | Assign of expression:IExpression * target:IStorage
         | VarDecl of expression:IExpression * variable:IStorage
         | Timer of condition:IExpression<bool> * timer:Timer
+        | Counter of countUpCondition:IExpression<bool> option * countDownCondition:IExpression<bool> option * counter:Counter
 
 
     type Statement with
@@ -91,8 +103,12 @@ module ExpressionModule =
                 assert(target.DataType = expr.DataType)
                 target.Value <- expr.BoxedEvaluatedValue
 
-            | Timer (condition, timer) ->
+            | Timer (condition_, timer) ->
                 for s in timer.InputEvaluateStatements do
+                    s.Do()
+
+            | Counter (upCondition_, downCondition_, counter) ->
+                for s in counter.InputEvaluateStatements do
                     s.Do()
 
         member x.ToText() =

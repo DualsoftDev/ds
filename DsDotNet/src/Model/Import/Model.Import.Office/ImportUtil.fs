@@ -73,7 +73,7 @@ module ImportU =
                     let jobDefs =
                         JobTargetSystems
                             .Select(fun tgt -> getApiItems(mySys, tgt, api.Name))
-                            .Select(fun api -> JobDef(api, "","", refSystem.Name))
+                            .Select(fun api -> JobDef(api, "","", api.System.Name))
                     
                     let job = Job(jobBase+"_"+api.Name, jobDefs)
                     mySys.Jobs.Add(job)

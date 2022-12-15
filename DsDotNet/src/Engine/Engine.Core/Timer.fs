@@ -21,6 +21,9 @@ module rec TimerModule =
 
     // https://stackoverflow.com/questions/8771937/f-rx-using-a-timer
 
+    /// Timer / Counter 의 number data type
+    type CountUnitType = uint16
+
     let [<Literal>] MinTickInterval = 20us    //<ms>
 
     /// 20ms timer: 최소 주기.  Windows 상에서의 더 짧은 주기는 시스템에 무리가 있음!!!!
@@ -132,18 +135,18 @@ module rec TimerModule =
         inherit Tag<bool>(name, false)
     [<Obsolete("임시 구현")>]
     type IntTag(name, init) =
-        inherit Tag<uint16>(name, init)
+        inherit Tag<CountUnitType>(name, init)
 
     [<AbstractClass>]
-    type TimerCounterBaseStruct (name, preset) =
+    type TimerCounterBaseStruct (name, preset, accum:CountUnitType) =
         member _.Name:string = name
         member val DN:BoolTag = BoolTag($"{name}.DN")  // Done
         member val PRE:IntTag = IntTag( $"{name}.PRE", preset)
-        member val ACC:IntTag = IntTag( $"{name}.ACC", 0us)
+        member val ACC:IntTag = IntTag( $"{name}.ACC", accum)
         /// Reset.
         member val RES:BoolTag = BoolTag($"{name}.RES")  // RESET.
-    type TimerStruct internal(name, preset20msCounter:uint16) =
-        inherit TimerCounterBaseStruct(name, preset20msCounter)
+    type TimerStruct internal(name, preset:CountUnitType, accum:CountUnitType) =
+        inherit TimerCounterBaseStruct(name, preset, accum)
 
         member val EN:BoolTag = BoolTag($"{name}.EN")  // Enable
         member val TT:BoolTag = BoolTag($"{name}.TT")  // Timing

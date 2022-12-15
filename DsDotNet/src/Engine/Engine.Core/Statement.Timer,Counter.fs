@@ -7,13 +7,13 @@ module TimerStatementModule =
     type internal TimerCreateParams = {
         Type: TimerType
         Name: string
-        Preset: uint16
+        Preset: CountUnitType
         RungConditionIn: IExpression option
         ResetCondition: IExpression option
     }
 
     let private createTimer { Type=typ; Name=name; Preset=preset; RungConditionIn=rungConditionIn; ResetCondition=resetCondition;} =
-        let ts = TimerStruct(name, preset)
+        let ts = TimerStruct(name, preset, 0us)
         let timer = new Timer(typ, ts)
 
         let statements = ResizeArray<Statement>()
@@ -85,18 +85,24 @@ module CounterStatementModule =
     type internal CounterCreateParams = {
         Type: CounterType
         Name: string
-        Preset: uint16
+        Preset: CountUnitType
+        Accumulator: CountUnitType option
         CountUpCondition: IExpression option
         CountDownCondition: IExpression option
         ResetCondition: IExpression option
     }
 
-    let private createCounter {Type=typ; Name=name; Preset=preset; CountUpCondition=countUpCondition; CountDownCondition=countDownCondition; ResetCondition=resetCondition} =
+    let private createCounter {
+        Type=typ; Name=name; Preset=preset;
+        CountUpCondition=countUpCondition; CountDownCondition=countDownCondition;
+        ResetCondition=resetCondition; Accumulator=accum
+    } =
+        let accum = accum |? 0us
         let cs =    // counter structure
             match typ with
-            | CTU -> new CTUStruct(name, preset) :> CounterBaseStruct
-            | CTD -> new CTDStruct(name, preset)
-            | CTUD -> new CTUDStruct(name, preset)
+            | CTU -> new CTUStruct(name, preset, accum) :> CounterBaseStruct
+            | CTD -> new CTDStruct(name, preset, accum)
+            | CTUD -> new CTUDStruct(name, preset, accum)
         let counter = new Counter(typ, cs)
 
         let statements = ResizeArray<Statement>()
@@ -128,21 +134,21 @@ module CounterStatementModule =
         static member CreateCTU(name, rungConditionIn, preset) =
             {   Type=CTU; Name=name; Preset=preset;
                 CountUpCondition=Some rungConditionIn;
-                CountDownCondition=None; ResetCondition=None; }
+                CountDownCondition=None; ResetCondition=None; Accumulator=None }
             |> createCounter
 
-        static member CreateCTD(name, rungConditionIn, preset) =
+        static member CreateCTD(name, rungConditionIn, preset, accum) =
             {   Type=CTD; Name=name; Preset=preset;
                 CountUpCondition=None;
                 CountDownCondition=Some rungConditionIn;
-                ResetCondition=None; }
+                ResetCondition=None; Accumulator=Some accum }
             |> createCounter
 
-        static member CreateCTUD(name, countUpCondition, countDownCondition, preset) =
+        static member CreateCTUD(name, countUpCondition, countDownCondition, preset, accum) =
             {   Type=CTUD; Name=name; Preset=preset;
                 CountUpCondition=Some countUpCondition;
                 CountDownCondition=Some countDownCondition;
-                ResetCondition=None; }
+                ResetCondition=None; Accumulator=Some accum }
             |> createCounter
 
 
@@ -150,19 +156,19 @@ module CounterStatementModule =
             {   Type=CTU; Name=name; Preset=preset;
                 CountUpCondition=Some rungConditionIn;
                 CountDownCondition=None;
-                ResetCondition=Some reset; }
+                ResetCondition=Some reset; Accumulator=None }
             |> createCounter
 
-        static member CreateCTD(name, rungConditionIn, reset, preset) =
+        static member CreateCTD(name, rungConditionIn, reset, preset, accum) =
             {   Type=CTD; Name=name; Preset=preset;
                 CountUpCondition=None;
                 CountDownCondition=Some rungConditionIn;
-                ResetCondition=Some reset; }
+                ResetCondition=Some reset; Accumulator=Some accum }
             |> createCounter
 
-        static member CreateCTUD(name, countUpCondition, countDownCondition, reset, preset) =
+        static member CreateCTUD(name, countUpCondition, countDownCondition, reset, preset, accum) =
             {   Type=CTUD; Name=name; Preset=preset;
                 CountUpCondition=Some countUpCondition;
                 CountDownCondition=Some countDownCondition;
-                ResetCondition=Some reset; }
+                ResetCondition=Some reset; Accumulator=Some accum }
             |> createCounter

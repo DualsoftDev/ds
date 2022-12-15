@@ -17,43 +17,43 @@ module rec CounterModule =
     type CounterType = CTU | CTD | CTUD
 
     [<AbstractClass>]
-    type CounterBaseStruct(name, preset:uint16) =
-        inherit TimerCounterBaseStruct(name, preset)
+    type CounterBaseStruct(name, preset:CountUnitType, accum:CountUnitType) =
+        inherit TimerCounterBaseStruct(name, preset, accum)
 
-        member val internal CU:BoolTag = BoolTag($"{name}.CU")  // Count up enable bit
-        member val internal CD:BoolTag = BoolTag($"{name}.CD")  // Count down enable bit
-        member val OV:BoolTag = BoolTag($"{name}.OV")  // Overflow
-        member val UN:BoolTag = BoolTag($"{name}.UN")  // Underflow
+        member val internal CU:Tag<bool> = BoolTag($"{name}.CU")  // Count up enable bit
+        member val internal CD:Tag<bool> = BoolTag($"{name}.CD")  // Count down enable bit
+        member val OV:Tag<bool> = BoolTag($"{name}.OV")  // Overflow
+        member val UN:Tag<bool> = BoolTag($"{name}.UN")  // Underflow
 
     type ICounter = interface end
 
     type ICTU =
         inherit ICounter
-        abstract CU:BoolTag
+        abstract CU:Tag<bool>
 
     type ICTD =
         inherit ICounter
-        abstract CD:BoolTag
+        abstract CD:Tag<bool>
 
     type ICTUD =
         inherit ICTU
         inherit ICTD
 
 
-    type CTUStruct(name, preset:uint16) =
-        inherit CounterBaseStruct(name, preset)
+    type CTUStruct(name, preset:CountUnitType, accum:CountUnitType) =
+        inherit CounterBaseStruct(name, preset, accum)
         member _.CU = base.CU
         interface ICTU with
             member x.CU = x.CU
 
-    type CTDStruct(name, preset:uint16) =
-        inherit CounterBaseStruct(name, preset)
+    type CTDStruct(name, preset:CountUnitType, accum:CountUnitType) =
+        inherit CounterBaseStruct(name, preset, accum)
         member _.CD = base.CD
         interface ICTD with
             member x.CD = x.CD
 
-    type CTUDStruct(name, preset:uint16) =
-        inherit CounterBaseStruct(name, preset)
+    type CTUDStruct(name, preset:CountUnitType, accum:CountUnitType) =
+        inherit CounterBaseStruct(name, preset, accum)
         member _.CU = base.CU
         member _.CD = base.CD
         interface ICTUD with

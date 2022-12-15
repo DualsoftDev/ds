@@ -64,6 +64,7 @@ module ExpressionModule =
         member _.DN = timerStruct.DN
         member _.PRE = timerStruct.PRE
         member _.ACC = timerStruct.ACC
+        member _.RES = timerStruct.RES
 
         member val InputEvaluateStatements:Statement list = [] with get, set
         interface IDisposable with

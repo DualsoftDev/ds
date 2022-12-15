@@ -106,17 +106,15 @@ module rec TimerModule =
                         ts.EN.Value <- false
                         ts.TT.Value <- false
                 ) |> disposables.Add
-            if tt = RTO then
-                let ts = ts :?> TimerRTOStruct
-                StorageValueChangedSubject
-                    .Where(fun storage -> storage = ts.RES)
-                    .Subscribe(fun storage ->
-                        let resetCondition = storage.Value :?> bool
-                        if resetCondition then
-                            ts.ACC.Value <- 0us
-                            ts.DN.Value <- false
+
+            StorageValueChangedSubject
+                .Where(fun storage -> storage = ts.RES)
+                .Subscribe(fun storage ->
+                    let resetCondition = storage.Value :?> bool
+                    if resetCondition then
+                        ts.ACC.Value <- 0us
+                        ts.DN.Value <- false
                 ) |> disposables.Add
-                ()
 
         interface IDisposable with
             member this.Dispose() =
@@ -140,17 +138,14 @@ module rec TimerModule =
         member val DN:BoolTag = BoolTag($"{name}.DN")  // Done
         member val PRE:IntTag = IntTag( $"{name}.PRE", preset)
         member val ACC:IntTag = IntTag( $"{name}.ACC", 0us)
-
+        /// Reset.
+        member val RES:BoolTag = BoolTag($"{name}.RES")  // RESET.
     type TimerStruct internal(name, preset20msCounter:uint16) =
         inherit TimerCounterBaseStruct(name, preset20msCounter)
 
         member val EN:BoolTag = BoolTag($"{name}.EN")  // Enable
         member val TT:BoolTag = BoolTag($"{name}.TT")  // Timing
 
-    type TimerRTOStruct internal(name, preset20msCounter:uint16) =
-        inherit TimerStruct(name, preset20msCounter)
-        /// Reset.
-        member val RES:BoolTag = BoolTag($"{name}.RES")  // RESET.
 
     type TimerStruct with
         /// Clear EN, TT, DN bits

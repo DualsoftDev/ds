@@ -1,4 +1,4 @@
-namespace UnitTest.Engine.Expression
+namespace UnitTest.Engine.Statement
 
 open NUnit.Framework
 
@@ -20,7 +20,7 @@ module TimerTestModule =
         member __.``TON creation test`` () =
             let t1 = PlcTag.Create("my_timer_control_tag", false)
             let condition = tag t1
-            let timer = CreateTON("myTon", condition, 100us)        // 20ms * 100 = 2sec
+            let timer = Timer.CreateTON("myTon", condition, 100us)        // 20ms * 100 = 2sec
             timer.TT.Value === false
             timer.EN.Value === false
             timer.DN.Value === false
@@ -57,7 +57,7 @@ module TimerTestModule =
         member __.``TOF creation with initial TRUE test`` () =
             let t1 = PlcTag.Create("my_timer_control_tag", true)
             let condition = tag t1
-            let timer = CreateTOF("myTof", condition, 100us)        // 20ms * 100 = 2sec
+            let timer = Timer.CreateTOF("myTof", condition, 100us)        // 20ms * 100 = 2sec
             timer.EN.Value === true
             timer.TT.Value === false
             timer.DN.Value === true
@@ -68,7 +68,7 @@ module TimerTestModule =
         member __.``TOF creation with initial FALSE test`` () =
             let t1 = PlcTag.Create("my_timer_control_tag", false)
             let condition = tag t1
-            let timer = CreateTOF("myTof", condition, 100us)        // 20ms * 100 = 2sec
+            let timer = Timer.CreateTOF("myTof", condition, 100us)        // 20ms * 100 = 2sec
             timer.TT.Value === false
             timer.EN.Value === false
             timer.DN.Value === false
@@ -79,7 +79,7 @@ module TimerTestModule =
         member __.``TOF creation with t -> f -> t -> F -> t test`` () =
             let t1 = PlcTag.Create("my_timer_control_tag", true)
             let condition = tag t1
-            let timer = CreateTOF("myTof", condition, 100us)        // 20ms * 100 = 2sec
+            let timer = Timer.CreateTOF("myTof", condition, 100us)        // 20ms * 100 = 2sec
             // rung 입력 조건이 false
             t1.Value <- false
             evaluateRungInputs timer
@@ -125,7 +125,7 @@ module TimerTestModule =
             let resetTag = PlcTag.Create("my_timer_reset_tag", false)
             let condition = tag rungConditionInTag
             let reset = tag resetTag
-            let timer = CreateRTO("myRto", condition, reset, 100us)        // 20ms * 100 = 2sec
+            let timer = Timer.CreateRTO("myRto", condition, reset, 100us)        // 20ms * 100 = 2sec
 
             timer.EN.Value === true
             timer.TT.Value === true

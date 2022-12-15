@@ -3,43 +3,48 @@ open System
 open System.Linq
 open System.Reactive.Linq
 open Engine.Common.FS
+open System.ComponentModel
 
 [<AutoOpen>]
 module TimerStatementModule =
-    type TimerRTO internal(timerStruct:TimerRTOStruct) =
-        inherit Timer(RTO, timerStruct)
-        member _.RES = timerStruct.RES
-
-    let private createTimer(typ:TimerType, name, rungConditionIn, preset20msCounter) =
+    let private createTimer(typ:TimerType, name, rungConditionIn:IExpression option, resetCondition:IExpression option, preset20msCounter) =
         let ts = TimerStruct(name, preset20msCounter)
         let timer = new Timer(typ, ts)
 
-        let statement = Assign (rungConditionIn, ts.EN)
-        statement.Do()
-        StorageValueChangedSubject.OnNext(ts.EN)
+        let statements = ResizeArray<Statement>()
+        match rungConditionIn with
+        | Some cond ->
+            let rungInStatement = Assign (cond, ts.EN)
+            rungInStatement.Do()
+            statements.Add rungInStatement
+            StorageValueChangedSubject.OnNext(ts.EN)
+        | None -> ()
 
-        timer.InputEvaluateStatements <- [ statement ]
+        match resetCondition with
+        | Some cond ->
+            let resetStatement = Assign (cond, ts.RES)
+            resetStatement.Do()
+            statements.Add resetStatement
+            StorageValueChangedSubject.OnNext(ts.RES)
+        | None -> ()
+
+        timer.InputEvaluateStatements <- statements.ToFSharpList()
         timer
 
-    let private createTimerRTO(name, rungConditionIn, resetCondition, preset20msCounter) =
-        let ts = TimerRTOStruct(name, preset20msCounter)
-        let timer = new TimerRTO(ts)
+    type Timer =
+        static member CreateTON(name, rungConditionIn, target20msCounter) =
+            createTimer(TON, name, Some rungConditionIn, None, target20msCounter)
+        static member CreateTOF(name, rungConditionIn, target20msCounter) =
+            createTimer(TOF, name, Some rungConditionIn, None, target20msCounter)
+        static member CreateRTO(name, rungConditionIn, target20msCounter) =
+            createTimer(RTO, name, Some rungConditionIn, None, target20msCounter)
 
-        let rungInStatement = Assign (rungConditionIn, ts.EN)
-        rungInStatement.Do()
-        StorageValueChangedSubject.OnNext(ts.EN)
-
-        let resetStatement = Assign (resetCondition, ts.RES)
-        resetStatement.Do()
-        StorageValueChangedSubject.OnNext(ts.RES)
-
-        timer.InputEvaluateStatements <- [ rungInStatement; resetStatement ]
-        timer
-
-
-    let CreateTON(name, rungConditionIn, target20msCounter) = createTimer(TON, name, rungConditionIn, target20msCounter)
-    let CreateTOF(name, rungConditionIn, target20msCounter) = createTimer(TOF, name, rungConditionIn, target20msCounter)
-    let CreateRTO(name, rungConditionIn, resetCondition, target20msCounter) = createTimerRTO(name, rungConditionIn, resetCondition, target20msCounter)
+        static member CreateTON(name, rungConditionIn, resetCondition, target20msCounter) =
+            createTimer(TON, name, Some rungConditionIn, Some resetCondition, target20msCounter)
+        static member CreateTOF(name, rungConditionIn, resetCondition, target20msCounter) =
+            createTimer(TOF, name, Some rungConditionIn, Some resetCondition, target20msCounter)
+        static member CreateRTO(name, rungConditionIn, resetCondition, target20msCounter) =
+            createTimer(RTO, name, Some rungConditionIn, Some resetCondition, target20msCounter)
 
 
 

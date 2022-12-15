@@ -27,7 +27,8 @@ module RunTime =
                         for statement in mapRungs[evt] do
                         async {statement.Do()}|> Async.StartImmediate 
                     else 
-                        failwith "Error"
+                        let mapRungs = mapRungs
+                        ()//failwith "Error"  //디버깅후 예외 처리
                     )
             subscribe
 

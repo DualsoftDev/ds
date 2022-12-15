@@ -5,15 +5,33 @@ open System.Reactive.Linq
 [<AutoOpen>]
 module TimerStatementModule =
 
-    let private createTimer(typ:TimerType, name, condition, target20msCounter) =
-        let timer = new Timer(typ, name, condition, target20msCounter)
-        let ts = timer.Struct
-        let statement = Assign (condition, ts.EN)
+    let private createTimer(typ:TimerType, name, rungConditionIn, preset20msCounter) =
+        let ts = TimerStruct(name, preset20msCounter)
+        let timer = new Timer(typ, ts)
+
+        let statement = Assign (rungConditionIn, ts.EN)
         statement.Do()
         StorageValueChangedSubject.OnNext(ts.EN)
 
-        timer.ConditionCheckStatement <- Some statement
+        timer.InputEvaluateStatements <- [ statement ]
         timer
 
-    let CreateTON(name, condition, target20msCounter) = createTimer(TON, name, condition, target20msCounter)
-    let CreateTOF(name, condition, target20msCounter) = createTimer(TOF, name, condition, target20msCounter)
+    let private createTimerRTO(name, rungConditionIn, resetCondition, preset20msCounter) =
+        let ts = TimerRTOStruct(name, preset20msCounter)
+        let timer = new TimerRTO(ts)
+
+        let rungInStatement = Assign (rungConditionIn, ts.EN)
+        rungInStatement.Do()
+        StorageValueChangedSubject.OnNext(ts.EN)
+
+        let resetStatement = Assign (resetCondition, ts.RES)
+        resetStatement.Do()
+        StorageValueChangedSubject.OnNext(ts.RES)
+
+        timer.InputEvaluateStatements <- [ rungInStatement; resetStatement ]
+        timer
+
+
+    let CreateTON(name, rungConditionIn, target20msCounter) = createTimer(TON, name, rungConditionIn, target20msCounter)
+    let CreateTOF(name, rungConditionIn, target20msCounter) = createTimer(TOF, name, rungConditionIn, target20msCounter)
+    let CreateRTO(name, rungConditionIn, resetCondition, target20msCounter) = createTimerRTO(name, rungConditionIn, resetCondition, target20msCounter)

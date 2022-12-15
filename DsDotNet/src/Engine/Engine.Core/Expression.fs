@@ -54,14 +54,25 @@ module ExpressionModule =
     /// Variable<'T> 로부터 Expression<'T> 생성
     let var (t: StorageVariable<'T>) = Terminal (Variable t)
 
-    type Timer internal(typ:TimerType, name, condition:IExpression, preset20msCounter:uint16) =
-        let timerStruct = TimerStruct(name, preset20msCounter)
+    type Timer internal(typ:TimerType, timerStruct:TimerStruct) =
+
         let firer = new Firere(typ, timerStruct)
-        member _.Struct = timerStruct
-        member _.Condition = condition
-        member val ConditionCheckStatement:Statement option = None with get, set
+
+        member _.Name = timerStruct.Name
+        member _.EN = timerStruct.EN
+        member _.TT = timerStruct.TT
+        member _.DN = timerStruct.DN
+        member _.PRE = timerStruct.PRE
+        member _.ACC = timerStruct.ACC
+
+        member val InputEvaluateStatements:Statement list = [] with get, set
         interface IDisposable with
             member this.Dispose() = (firer :> IDisposable).Dispose()
+
+    type TimerRTO internal(timerStruct:TimerRTOStruct) =
+        inherit Timer(RTO, timerStruct)
+        member _.RES = timerStruct.RES
+
 
     type Statement =
         | Assign of expression:IExpression * target:IStorage
@@ -81,7 +92,8 @@ module ExpressionModule =
                 target.Value <- expr.BoxedEvaluatedValue
 
             | Timer (condition, timer) ->
-                timer.ConditionCheckStatement.Value.Do()
+                for s in timer.InputEvaluateStatements do
+                    s.Do()
 
         member x.ToText() =
             match x with

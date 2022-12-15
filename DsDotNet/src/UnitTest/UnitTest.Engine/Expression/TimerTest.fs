@@ -10,68 +10,70 @@ open Engine.Obsolete.CpuUnit
 [<AutoOpen>]
 module TimerTestModule =
 
-    type CpuTest() =
+    type TimerTest() =
         do Fixtures.SetUpTest()
 
-        let applyRungConditinInChange (timer:Timer) = timer.ConditionCheckStatement.Value.Do()
+        let evaluateRungInputs (timer:Timer) =
+            for s in timer.InputEvaluateStatements do
+                s.Do()
         [<Test>]
         member __.``TON creation test`` () =
             let t1 = PlcTag.Create("my_timer_control_tag", false)
             let condition = tag t1
             let timer = CreateTON("myTon", condition, 100us)        // 20ms * 100 = 2sec
-            timer.Struct.TT.Value === false
-            timer.Struct.EN.Value === false
-            timer.Struct.DN.Value === false
-            timer.Struct.PRE.Value === 100us
-            timer.Struct.ACC.Value === 0us
+            timer.TT.Value === false
+            timer.EN.Value === false
+            timer.DN.Value === false
+            timer.PRE.Value === 100us
+            timer.ACC.Value === 0us
 
             // rung 입력 조건이 true
             t1.Value <- true
-            applyRungConditinInChange timer
+            evaluateRungInputs timer
 
-            timer.Struct.DN.Value === false
-            timer.Struct.EN.Value === true
-            timer.Struct.TT.Value === true
+            timer.DN.Value === false
+            timer.EN.Value === true
+            timer.TT.Value === true
 
             // 설정된 timer 시간 경과를 기다림
             System.Threading.Thread.Sleep(2100)
-            timer.Struct.TT.Value === false
-            timer.Struct.DN.Value === true
-            timer.Struct.EN.Value === true
-            timer.Struct.PRE.Value === 100us
-            timer.Struct.ACC.Value === 100us
+            timer.TT.Value === false
+            timer.DN.Value === true
+            timer.EN.Value === true
+            timer.PRE.Value === 100us
+            timer.ACC.Value === 100us
 
 
             // rung 입력 조건이 false
             t1.Value <- false
-            applyRungConditinInChange timer
-            timer.Struct.TT.Value === false
-            timer.Struct.DN.Value === false
-            timer.Struct.EN.Value === false
-            timer.Struct.PRE.Value === 100us
-            timer.Struct.ACC.Value === 0us
+            evaluateRungInputs timer
+            timer.TT.Value === false
+            timer.DN.Value === false
+            timer.EN.Value === false
+            timer.PRE.Value === 100us
+            timer.ACC.Value === 0us
 
         [<Test>]
         member __.``TOF creation with initial TRUE test`` () =
             let t1 = PlcTag.Create("my_timer_control_tag", true)
             let condition = tag t1
             let timer = CreateTOF("myTof", condition, 100us)        // 20ms * 100 = 2sec
-            timer.Struct.EN.Value === true
-            timer.Struct.TT.Value === false
-            timer.Struct.DN.Value === true
-            timer.Struct.PRE.Value === 100us
-            timer.Struct.ACC.Value === 0us
+            timer.EN.Value === true
+            timer.TT.Value === false
+            timer.DN.Value === true
+            timer.PRE.Value === 100us
+            timer.ACC.Value === 0us
 
         [<Test>]
         member __.``TOF creation with initial FALSE test`` () =
             let t1 = PlcTag.Create("my_timer_control_tag", false)
             let condition = tag t1
             let timer = CreateTOF("myTof", condition, 100us)        // 20ms * 100 = 2sec
-            timer.Struct.TT.Value === false
-            timer.Struct.EN.Value === false
-            timer.Struct.DN.Value === false
-            timer.Struct.PRE.Value === 100us
-            timer.Struct.ACC.Value === 0us
+            timer.TT.Value === false
+            timer.EN.Value === false
+            timer.DN.Value === false
+            timer.PRE.Value === 100us
+            timer.ACC.Value === 0us
 
         [<Test>]
         member __.``TOF creation with t -> f -> t -> F -> t test`` () =
@@ -80,39 +82,80 @@ module TimerTestModule =
             let timer = CreateTOF("myTof", condition, 100us)        // 20ms * 100 = 2sec
             // rung 입력 조건이 false
             t1.Value <- false
-            applyRungConditinInChange timer
+            evaluateRungInputs timer
 
-            timer.Struct.EN.Value === false
-            timer.Struct.TT.Value === true
-            timer.Struct.DN.Value === true
-            timer.Struct.PRE.Value === 100us
-            (0us <= timer.Struct.ACC.Value && timer.Struct.ACC.Value <= 50us) === true
+            timer.EN.Value === false
+            timer.TT.Value === true
+            timer.DN.Value === true
+            timer.PRE.Value === 100us
+            (0us <= timer.ACC.Value && timer.ACC.Value <= 50us) === true
 
             t1.Value <- true
-            applyRungConditinInChange timer
+            evaluateRungInputs timer
             System.Threading.Thread.Sleep(500)
-            timer.Struct.EN.Value === true
-            timer.Struct.TT.Value === false
-            timer.Struct.DN.Value === true
+            timer.EN.Value === true
+            timer.TT.Value === false
+            timer.DN.Value === true
 
             t1.Value <- false
-            applyRungConditinInChange timer
+            evaluateRungInputs timer
             System.Threading.Thread.Sleep(500)
-            timer.Struct.EN.Value === false
-            timer.Struct.TT.Value === true
-            timer.Struct.DN.Value === true
+            timer.EN.Value === false
+            timer.TT.Value === true
+            timer.DN.Value === true
 
             System.Threading.Thread.Sleep(2100)
-            timer.Struct.EN.Value === false
-            timer.Struct.TT.Value === false
-            timer.Struct.DN.Value === false
-            timer.Struct.ACC.Value === 100us
+            timer.EN.Value === false
+            timer.TT.Value === false
+            timer.DN.Value === false
+            timer.ACC.Value === 100us
 
             t1.Value <- true
-            applyRungConditinInChange timer
+            evaluateRungInputs timer
             System.Threading.Thread.Sleep(100)
-            timer.Struct.EN.Value === true
-            timer.Struct.TT.Value === false
-            timer.Struct.DN.Value === true
-            timer.Struct.ACC.Value <= 50us === true
+            timer.EN.Value === true
+            timer.TT.Value === false
+            timer.DN.Value === true
+            timer.ACC.Value <= 50us === true
 
+
+        [<Test>]
+        member __.``RTO creation test`` () =
+            let rungConditionInTag = PlcTag.Create("my_timer_control_tag", true)
+            let resetTag = PlcTag.Create("my_timer_reset_tag", false)
+            let condition = tag rungConditionInTag
+            let reset = tag resetTag
+            let timer = CreateRTO("myRto", condition, reset, 100us)        // 20ms * 100 = 2sec
+
+            timer.EN.Value === true
+            timer.TT.Value === true
+            timer.DN.Value === false
+            timer.PRE.Value === 100us
+            timer.ACC.Value <= 50us === true
+            timer.RES.Value === false
+
+            // rung 입력 조건이 false : Pause
+            rungConditionInTag.Value <- false
+            evaluateRungInputs timer
+            timer.EN.Value === false
+            timer.TT.Value === false
+            System.Threading.Thread.Sleep(2100)
+            timer.ACC.Value < 100us === true
+            timer.DN.Value === false
+
+            // rung 입력 조건이 false
+            rungConditionInTag.Value <- true
+            evaluateRungInputs timer
+            timer.EN.Value === true
+            timer.TT.Value === true
+            timer.DN.Value === false
+            System.Threading.Thread.Sleep(2100)
+            timer.DN.Value === true
+            timer.ACC.Value === 100us
+
+
+            // reset 입력 조건이 true
+            resetTag.Value <- true
+            evaluateRungInputs timer
+            timer.EN.Value === true
+            timer.ACC.Value === 0us

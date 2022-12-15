@@ -21,8 +21,10 @@ module rec TimerModule =
 
     // https://stackoverflow.com/questions/8771937/f-rx-using-a-timer
 
+    let [<Literal>] MinTickInterval = 20us    //<ms>
+
     /// 20ms timer: 최소 주기.  Windows 상에서의 더 짧은 주기는 시스템에 무리가 있음!!!!
-    let the20msTimer = Observable.Timer(TimeSpan.FromSeconds(0.0), TimeSpan.FromMilliseconds(20))//.Timestamp()
+    let the20msTimer = Observable.Timer(TimeSpan.FromSeconds(0.0), TimeSpan.FromMilliseconds(int MinTickInterval))//.Timestamp()
     let the100msTimer = the20msTimer.Where(fun x -> x % 5L = 0)
     let the1secTimer = the20msTimer.Where(fun x -> x % 50L = 0)
 
@@ -34,7 +36,7 @@ module rec TimerModule =
 
         let accumulateTON() =
             if ts.TT.Value && not ts.DN.Value && ts.ACC.Value < ts.PRE.Value then
-                ts.ACC.Value <- ts.ACC.Value + 1us
+                ts.ACC.Value <- ts.ACC.Value + MinTickInterval
                 if ts.ACC.Value >= ts.PRE.Value then
                     tracefn "Timer accumulator value reached"
                     ts.TT.Value <- false
@@ -43,7 +45,7 @@ module rec TimerModule =
 
         let accumulateTOF() =
             if ts.TT.Value && ts.DN.Value && not ts.EN.Value && ts.ACC.Value < ts.PRE.Value then
-                ts.ACC.Value <- ts.ACC.Value + 1us
+                ts.ACC.Value <- ts.ACC.Value + MinTickInterval
                 if ts.ACC.Value >= ts.PRE.Value then
                     tracefn "Timer accumulator value reached"
                     ts.TT.Value <- false
@@ -51,7 +53,7 @@ module rec TimerModule =
 
         let accumulateRTO() =
             if ts.TT.Value && not ts.DN.Value && ts.EN.Value && ts.ACC.Value < ts.PRE.Value then
-                ts.ACC.Value <- ts.ACC.Value + 1us
+                ts.ACC.Value <- ts.ACC.Value + MinTickInterval
                 if ts.ACC.Value >= ts.PRE.Value then
                     tracefn "Timer accumulator value reached"
                     ts.TT.Value <- false

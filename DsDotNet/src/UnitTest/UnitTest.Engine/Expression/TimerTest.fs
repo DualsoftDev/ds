@@ -20,11 +20,11 @@ module TimerTestModule =
         member __.``TON creation test`` () =
             let t1 = PlcTag.Create("my_timer_control_tag", false)
             let condition = tag t1
-            let timer = Timer.CreateTON("myTon", condition, 100us)        // 20ms * 100 = 2sec
+            let timer = Timer.CreateTON("myTon", condition, 2000us)        // 2000ms = 2sec
             timer.TT.Value === false
             timer.EN.Value === false
             timer.DN.Value === false
-            timer.PRE.Value === 100us
+            timer.PRE.Value === 2000us
             timer.ACC.Value === 0us
 
             // rung 입력 조건이 true
@@ -40,8 +40,8 @@ module TimerTestModule =
             timer.TT.Value === false
             timer.DN.Value === true
             timer.EN.Value === true
-            timer.PRE.Value === 100us
-            timer.ACC.Value === 100us
+            timer.PRE.Value === 2000us
+            timer.ACC.Value === 2000us
 
 
             // rung 입력 조건이 false
@@ -50,36 +50,36 @@ module TimerTestModule =
             timer.TT.Value === false
             timer.DN.Value === false
             timer.EN.Value === false
-            timer.PRE.Value === 100us
+            timer.PRE.Value === 2000us
             timer.ACC.Value === 0us
 
         [<Test>]
         member __.``TOF creation with initial TRUE test`` () =
             let t1 = PlcTag.Create("my_timer_control_tag", true)
             let condition = tag t1
-            let timer = Timer.CreateTOF("myTof", condition, 100us)        // 20ms * 100 = 2sec
+            let timer = Timer.CreateTOF("myTof", condition, 2000us)        // 2000ms = 2sec
             timer.EN.Value === true
             timer.TT.Value === false
             timer.DN.Value === true
-            timer.PRE.Value === 100us
+            timer.PRE.Value === 2000us
             timer.ACC.Value === 0us
 
         [<Test>]
         member __.``TOF creation with initial FALSE test`` () =
             let t1 = PlcTag.Create("my_timer_control_tag", false)
             let condition = tag t1
-            let timer = Timer.CreateTOF("myTof", condition, 100us)        // 20ms * 100 = 2sec
+            let timer = Timer.CreateTOF("myTof", condition, 2000us)        // 2000ms = 2sec
             timer.TT.Value === false
             timer.EN.Value === false
             timer.DN.Value === false
-            timer.PRE.Value === 100us
+            timer.PRE.Value === 2000us
             timer.ACC.Value === 0us
 
         [<Test>]
         member __.``TOF creation with t -> f -> t -> F -> t test`` () =
             let t1 = PlcTag.Create("my_timer_control_tag", true)
             let condition = tag t1
-            let timer = Timer.CreateTOF("myTof", condition, 100us)        // 20ms * 100 = 2sec
+            let timer = Timer.CreateTOF("myTof", condition, 2000us)        // 2000ms = 2sec
             // rung 입력 조건이 false
             t1.Value <- false
             evaluateRungInputs timer
@@ -87,8 +87,8 @@ module TimerTestModule =
             timer.EN.Value === false
             timer.TT.Value === true
             timer.DN.Value === true
-            timer.PRE.Value === 100us
-            (0us <= timer.ACC.Value && timer.ACC.Value <= 50us) === true
+            timer.PRE.Value === 2000us
+            (0us <= timer.ACC.Value && timer.ACC.Value <= 1000us) === true
 
             t1.Value <- true
             evaluateRungInputs timer
@@ -108,7 +108,7 @@ module TimerTestModule =
             timer.EN.Value === false
             timer.TT.Value === false
             timer.DN.Value === false
-            timer.ACC.Value === 100us
+            timer.ACC.Value === 2000us
 
             t1.Value <- true
             evaluateRungInputs timer
@@ -116,7 +116,7 @@ module TimerTestModule =
             timer.EN.Value === true
             timer.TT.Value === false
             timer.DN.Value === true
-            timer.ACC.Value <= 50us === true
+            timer.ACC.Value <= 1000us === true
 
 
         [<Test>]
@@ -125,13 +125,13 @@ module TimerTestModule =
             let resetTag = PlcTag.Create("my_timer_reset_tag", false)
             let condition = tag rungConditionInTag
             let reset = tag resetTag
-            let timer = Timer.CreateRTO("myRto", condition, reset, 100us)        // 20ms * 100 = 2sec
+            let timer = Timer.CreateRTO("myRto", condition, reset, 2000us)        // 2000ms = 2sec
 
             timer.EN.Value === true
             timer.TT.Value === true
             timer.DN.Value === false
-            timer.PRE.Value === 100us
-            timer.ACC.Value <= 50us === true
+            timer.PRE.Value === 2000us
+            timer.ACC.Value <= 1000us === true
             timer.RES.Value === false
 
             // rung 입력 조건이 false : Pause
@@ -140,7 +140,7 @@ module TimerTestModule =
             timer.EN.Value === false
             timer.TT.Value === false
             System.Threading.Thread.Sleep(2100)
-            timer.ACC.Value < 100us === true
+            timer.ACC.Value < 2000us === true
             timer.DN.Value === false
 
             // rung 입력 조건이 false
@@ -151,7 +151,7 @@ module TimerTestModule =
             timer.DN.Value === false
             System.Threading.Thread.Sleep(2100)
             timer.DN.Value === true
-            timer.ACC.Value === 100us
+            timer.ACC.Value === 2000us
 
 
             // reset 입력 조건이 true

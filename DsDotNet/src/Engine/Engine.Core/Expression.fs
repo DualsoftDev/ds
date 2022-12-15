@@ -80,6 +80,7 @@ module ExpressionModule =
         member _.DN = counterStruct.DN
         member _.PRE = counterStruct.PRE
         member _.ACC = counterStruct.ACC
+        member _.RES = counterStruct.RES
 
         member val InputEvaluateStatements:Statement list = [] with get, set
         interface IDisposable with

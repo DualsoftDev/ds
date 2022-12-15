@@ -67,19 +67,40 @@ module rec CounterModule =
         let registerCTU() =
             let csu = box cs :?> ICTU
             StorageValueChangedSubject
-                .Where(fun storage -> storage = csu.CU)
+                .Where(fun storage -> storage = csu.CU && csu.CU.Value)
                 .Subscribe(fun storage ->
                     if cs.ACC.Value < 0us || cs.PRE.Value < 0us then failwith "ERROR"
-                    // todo : fill up
+                    cs.ACC.Value <- cs.ACC.Value + 1us
+                    if cs.ACC.Value >= cs.PRE.Value then
+                        tracefn "Counter accumulator value reached"
+                        cs.DN.Value <- true
             ) |> disposables.Add
         let registerCTD() =
             let csd = box cs :?> ICTD
             StorageValueChangedSubject
-                .Where(fun storage -> storage = csd.CD)
+                .Where(fun storage -> storage = csd.CD && csd.CD.Value)
                 .Subscribe(fun storage ->
                     if cs.ACC.Value < 0us || cs.PRE.Value < 0us then failwith "ERROR"
-                    // todo : fill up
+                    cs.ACC.Value <- cs.ACC.Value - 1us
+                    if cs.ACC.Value <= cs.PRE.Value then
+                        tracefn "Counter accumulator value reached"
+                        cs.DN.Value <- true
             ) |> disposables.Add
+
+        let registerReset() =
+            StorageValueChangedSubject
+                .Where(fun storage -> storage = cs.RES && cs.RES.Value)
+                .Subscribe(fun storage ->
+                    tracefn "Counter reset requested"
+                    if cs.ACC.Value < 0us || cs.PRE.Value < 0us then failwith "ERROR"
+                    cs.ACC.Value <- 0us
+                    cs.DN.Value <- false
+                    cs.CU.Value <- false
+                    cs.CD.Value <- false
+                    cs.OV.Value <- false
+                    cs.UN.Value <- false
+            ) |> disposables.Add
+
 
         let clear() =
             cs.OV.Value <- false
@@ -91,6 +112,7 @@ module rec CounterModule =
 
         do
             clear()
+            registerReset()
             match cs, counterType with
             | :? CTUStruct, CTU -> registerCTU()
             | :? CTDStruct, CTD -> registerCTD()

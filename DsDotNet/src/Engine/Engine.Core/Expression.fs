@@ -2,6 +2,7 @@ namespace rec Engine.Core
 open System.Diagnostics
 open Engine.Common.FS.Prelude
 open System
+open System.Text
 
 (*  expression: generic type <'T> 나 <_> 으로는 <obj> match 으로 간주됨
     Expression<'T> 객체에 대한 matching
@@ -133,6 +134,29 @@ module ExpressionModule =
             match x with
             | Assign (expr, target) -> $"{target.ToText()} := {expr.ToText(false)}"
             | VarDecl (expr, var) -> $"{var.DataType.Name} {var.Name} = {expr.ToText(false)}"
+            | Timer timerStatement ->
+                let ts, t = timerStatement, timerStatement.Timer
+                let typ = t.Type.ToString()
+                let functionName = $"create{typ}"       // e.g "createTON"
+                let args = ResizeArray<string>()        // [preset; rung-in-condition; (reset-condition)]
+                sprintf "%A" t.PRE.Value |> args.Add
+                ts.RungInCondition |> Option.iter(fun c -> c.ToText(false) |> args.Add |> ignore)
+                ts.ResetCondition  |> Option.iter(fun c -> c.ToText(false) |> args.Add |> ignore)
+                let args = String.Join(", ", args)
+                $"{typ.ToLower()} {t.Name} = {functionName}({args})"
+            | Counter counterStatement ->
+                let cs, c = counterStatement, counterStatement.Counter
+                let typ = c.Type.ToString()
+                let functionName = $"create{typ}"       // e.g "createCTU"
+                let args = ResizeArray<string>()        // [preset; up-condition; (down-condition;) (reset-condition;) (accum;)]
+                sprintf "%A" c.PRE.Value |> args.Add
+                cs.UpCondition     |> Option.iter(fun c -> c.ToText(false) |> args.Add |> ignore)
+                cs.DownCondition   |> Option.iter(fun c -> c.ToText(false) |> args.Add |> ignore)
+                cs.ResetCondition  |> Option.iter(fun c -> c.ToText(false) |> args.Add |> ignore)
+                if c.ACC.Value <> 0us then
+                    sprintf "%A" c.ACC.Value|> args.Add |> ignore
+                let args = String.Join(", ", args)
+                $"{typ.ToLower()} {c.Name} = {functionName}({args})"
 
         member x.TargetStorage() =
             match x with

@@ -26,11 +26,20 @@ module StatementTestModule =
             ()
 
         [<Test>]
-        member __.``CTU/TON creation test`` () =
+        member __.``CTU/TON parsing test`` () =
             let t1 = PlcTag("my_counter_control_tag", false)
             let coutnerStatement:Statement = "ctu myCounter = createCTU(100us, false)" |> parseStatement
             let counter = counter coutnerStatement
             let timerStatement2:Statement = "ton myTimer = createTON(100us, false)" |> parseStatement
+            let xxx = timerStatement2.ToText()
+
+
+            let statements = [
+                "ctu myCounter = createCTU(100us, false)"
+                "ton myTimer = createTON(100us, false)"
+            ]
+            for s in statements do
+                (parseStatement s).ToText() === s
             ()
 
 

@@ -108,11 +108,18 @@ module rec ExpressionParser =
                         | :? LiteralBoolContext   -> text                    |> System.Boolean.Parse|> literal |> iexpr
                         | _ -> failwith "ERROR"
                     | :? TagContext as texp ->
-                        failwith "Not yet"
+                        failwith "Obsoleted.  Why not Storage???"   // todo : remove
                         //iexpr <| tag (storages[text])
-                    | :? StorageContext as vexp ->
-                        //var (varDic[text])
-                        failwith "Not yet"
+                    | :? StorageContext as sctx ->
+                        let storage =
+                            option {
+                                let! storageCtx = sctx.TryFindFirstChild<StorageNameContext>()
+                                let name = storageCtx.GetText()
+                                return! storages.TryFind(name)
+                            }
+                        match storage with
+                        | Some strg -> strg.ToBoxedExpression() :?> IExpression
+                        | None -> failwith $"Failed to find variable/tag name in {sctx.GetText()}"
                     | _ ->
                         failwith "ERROR"
 
@@ -156,7 +163,7 @@ module rec ExpressionParser =
             let exp = exp :?> Expression<Counter>
             let name = ctx.Descendants<StorageNameContext>().First().GetText()
             match exp  with
-            | Function { Name=functionName; Arguments=args } ->     // functionName = "createCTU"
+            | DuFunction { Name=functionName; Arguments=args } ->     // functionName = "createCTU"
                 match typ, functionName, args with
                 | CTU, "createCTU", (UnitValue preset)::(BoolExp rungInCondtion)::[] ->
                     CounterStatement.CreateCTU(name, preset, rungInCondtion)
@@ -184,7 +191,7 @@ module rec ExpressionParser =
             let exp = exp :?> Expression<Timer>
             let name = ctx.Descendants<StorageNameContext>().First().GetText()
             match exp  with
-            | Function { Name=functionName; Arguments=args } ->     // functionName = "createTON"
+            | DuFunction { Name=functionName; Arguments=args } ->     // functionName = "createTON"
                 match typ, functionName, args with
                 | TON, "createTON", (UnitValue preset)::(BoolExp rungInCondtion)::[] ->
                     TimerStatement.CreateTON(name, preset, rungInCondtion)
@@ -220,7 +227,7 @@ module rec ExpressionParser =
 
                 let storage = exp.DataType.CreateVariable(storageName)
                 storages.Add(storageName, storage)
-                VarDecl (exp, storage)
+                DuVarDecl (exp, storage)
 
             | :? AssignContext as assignCtx ->
                 let exp = createExpression storages (getFirstChildExpressionContext assignCtx)
@@ -228,7 +235,7 @@ module rec ExpressionParser =
                     failwith $"ERROR: Failed to assign into non existing storage {storageName}"
 
                 let storage = storages[storageName]
-                Assign (exp, storage)
+                DuAssign (exp, storage)
             | :? CounterDeclContext as counterDeclCtx -> parseCounterStatement storages counterDeclCtx
             | :? TimerDeclContext as timerDeclCtx -> parseTimerStatement storages timerDeclCtx
             | _ ->
@@ -277,16 +284,16 @@ module rec ExpressionParser =
     type System.Type with
         member x.CreateVariable(name:string) : IStorage =
             match x.Name with
-            | "Single" -> Variable<single>(name, 0.0f)
-            | "Double" -> Variable<double>(name, 0.0)
-            | "SByte"  -> Variable<int8>(name, 0y)
-            | "Byte"   -> Variable<uint8>(name, 0uy)
-            | "Int16"  -> Variable<int16>(name, 0s)
-            | "UInt16" -> Variable<uint16>(name, 0us)
-            | "Int32"  -> Variable<int32>(name, 0)
-            | "UInt32" -> Variable<uint32>(name, 0u)
-            | "Int64"  -> Variable<int64>(name, 0L)
-            | "UInt64" -> Variable<uint64>(name, 0UL)
+            | "Single" -> new Variable<single>(name, 0.0f)
+            | "Double" -> new Variable<double>(name, 0.0)
+            | "SByte"  -> new Variable<int8>(name, 0y)
+            | "Byte"   -> new Variable<uint8>(name, 0uy)
+            | "Int16"  -> new Variable<int16>(name, 0s)
+            | "UInt16" -> new Variable<uint16>(name, 0us)
+            | "Int32"  -> new Variable<int32>(name, 0)
+            | "UInt32" -> new Variable<uint32>(name, 0u)
+            | "Int64"  -> new Variable<int64>(name, 0L)
+            | "UInt64" -> new Variable<uint64>(name, 0UL)
             | _  -> failwith "ERROR"
 
         static member FromString(typeName:string) : System.Type =

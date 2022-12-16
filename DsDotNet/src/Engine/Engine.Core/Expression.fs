@@ -1,8 +1,5 @@
 namespace rec Engine.Core
-open System.Diagnostics
-open Engine.Common.FS.Prelude
 open System
-open System.Text
 
 (*  expression: generic type <'T> 나 <_> 으로는 <obj> match 으로 간주됨
     Expression<'T> 객체에 대한 matching
@@ -16,9 +13,9 @@ open System.Text
 module ExpressionModule =
 
     type Terminal<'T when 'T:equality> =
-        | Tag of Tag<'T>
-        | Variable of Variable<'T>
-        | Literal of 'T
+        | DuTag of Tag<'T>
+        | DuVariable of VariableBase<'T>
+        | DuLiteral of 'T
 
     type FunctionSpec<'T> = {
         FunctionBody: Arguments -> 'T
@@ -28,8 +25,8 @@ module ExpressionModule =
 
 
     type Expression<'T when 'T:equality> =
-        | Terminal of Terminal<'T>
-        | Function of FunctionSpec<'T>  //FunctionBody:(Arguments -> 'T) * Name * Arguments
+        | DuTerminal of Terminal<'T>
+        | DuFunction of FunctionSpec<'T>  //FunctionBody:(Arguments -> 'T) * Name * Arguments
         interface IExpression<'T> with
             member x.DataType = x.DataType
             member x.EvaluatedValue = x.Evaluate()
@@ -45,15 +42,15 @@ module ExpressionModule =
     let literal (x:'T) =
         let t = x.GetType()
         if t.IsValueType || t = typedefof<string> then
-            Terminal (Literal x)
+            DuTerminal (DuLiteral x)
         else
             failwith "ERROR: Value Type Error.  only allowed for primitive type"
 
     /// Tag<'T> 로부터 Expression<'T> 생성
-    let tag (t: Tag<'T>) = Terminal (Tag t)
+    let tag (t: Tag<'T>) = DuTerminal (DuTag t)
 
     /// Variable<'T> 로부터 Expression<'T> 생성
-    let var (t: Variable<'T>) = Terminal (Variable t)
+    let var (t: VariableBase<'T>) = DuTerminal (DuVariable t)
 
     type Timer internal(typ:TimerType, timerStruct:TimerStruct) =
 
@@ -70,7 +67,7 @@ module ExpressionModule =
 
         member val InputEvaluateStatements:Statement list = [] with get, set
         interface IDisposable with
-            member this.Dispose() = (accumulator :> IDisposable).Dispose()
+            member _.Dispose() = (accumulator :> IDisposable).Dispose()
 
     type Counter internal(typ:CounterType, counterStruct:CounterBaseStruct) =
 
@@ -105,36 +102,36 @@ module ExpressionModule =
     }
 
     type Statement =
-        | Assign of expression:IExpression * target:IStorage
-        | VarDecl of expression:IExpression * variable:IStorage
-        | Timer of TimerStatement
-        | Counter of CounterStatement
+        | DuAssign of expression:IExpression * target:IStorage
+        | DuVarDecl of expression:IExpression * variable:IStorage
+        | DuTimer of TimerStatement
+        | DuCounter of CounterStatement
 
 
     type Statement with
         member x.Do() =
             match x with
-            | Assign (expr, target) ->
+            | DuAssign (expr, target) ->
                 assert(target.DataType = expr.DataType)
                 target.Value <- expr.BoxedEvaluatedValue
 
-            | VarDecl (expr, target) ->
+            | DuVarDecl (expr, target) ->
                 assert(target.DataType = expr.DataType)
                 target.Value <- expr.BoxedEvaluatedValue
 
-            | Timer timerStatement ->
+            | DuTimer timerStatement ->
                 for s in timerStatement.Timer.InputEvaluateStatements do
                     s.Do()
 
-            | Counter counterStatement ->
+            | DuCounter counterStatement ->
                 for s in counterStatement.Counter.InputEvaluateStatements do
                     s.Do()
 
         member x.ToText() =
             match x with
-            | Assign (expr, target) -> $"{target.ToText()} := {expr.ToText(false)}"
-            | VarDecl (expr, var) -> $"{var.DataType.Name} {var.Name} = {expr.ToText(false)}"
-            | Timer timerStatement ->
+            | DuAssign (expr, target) -> $"{target.ToText()} := {expr.ToText(false)}"
+            | DuVarDecl (expr, var) -> $"{var.DataType.Name} {var.Name} = {expr.ToText(false)}"
+            | DuTimer timerStatement ->
                 let ts, t = timerStatement, timerStatement.Timer
                 let typ = t.Type.ToString()
                 let functionName = $"create{typ}"       // e.g "createTON"
@@ -145,7 +142,7 @@ module ExpressionModule =
                 let args = String.Join(", ", args)
                 $"{typ.ToLower()} {t.Name} = {functionName}({args})"
 
-            | Counter counterStatement ->
+            | DuCounter counterStatement ->
                 let cs, c = counterStatement, counterStatement.Counter
                 let typ = c.Type.ToString()
                 let functionName = $"create{typ}"       // e.g "createCTU"
@@ -161,64 +158,64 @@ module ExpressionModule =
 
         member x.TargetStorage() =
             match x with
-            | Assign (expr, target) -> target
-            | VarDecl (expr, var) -> var
+            | DuAssign (expr, target) -> target
+            | DuVarDecl (expr, var) -> var
 
         member x.SourceStorages() =
             match x with
-            | Assign (expr, target) -> expr.StorageArguments
-            | VarDecl (expr, var) -> expr.StorageArguments
+            | DuAssign (expr, target) -> expr.StorageArguments
+            | DuVarDecl (expr, var) -> expr.StorageArguments
 
     type Terminal<'T when 'T:equality> with
         member x.GetBoxedRawObject(): obj =
             match x with
-            | Tag t -> t |> box
-            | Variable v -> v
-            | Literal v -> v |> box
+            | DuTag t -> t |> box
+            | DuVariable v -> v
+            | DuLiteral v -> v |> box
 
         member x.Evaluate(): 'T =
             match x with
-            | Tag t -> t.Value
-            | Variable v -> v.Value
-            | Literal v -> v
+            | DuTag t -> t.Value
+            | DuVariable v -> v.Value
+            | DuLiteral v -> v
 
         member x.ToText() =
             match x with
-            | Tag t -> "%" + t.Name
-            | Variable t -> "$" + t.Name
-            | Literal v -> sprintf "%A" v
+            | DuTag t -> "%" + t.Name
+            | DuVariable t -> "$" + t.Name
+            | DuLiteral v -> sprintf "%A" v
 
     type Expression<'T when 'T:equality> with
         member x.GetBoxedRawObject() =  // return type:obj    return type 명시할 경우, 다음 compile error 발생:  error FS1198: 제네릭 멤버 'ToText'이(가) 이 프로그램 지점 전의 비균일 인스턴스화에 사용되었습니다. 이 멤버가 처음에 오도록 멤버들을 다시 정렬해 보세요. 또는, 인수 형식, 반환 형식 및 추가 제네릭 매개 변수와 제약 조건을 포함한 멤버의 전체 형식을 명시적으로 지정하세요.
             match x with
-            | Terminal b -> b.GetBoxedRawObject()
-            | Function fs -> fs |> box
+            | DuTerminal b -> b.GetBoxedRawObject()
+            | DuFunction fs -> fs |> box
 
         member x.Evaluate(): 'T =
             match x with
-            | Terminal b -> b.Evaluate()
-            | Function fs -> fs.FunctionBody fs.Arguments
+            | DuTerminal b -> b.Evaluate()
+            | DuFunction fs -> fs.FunctionBody fs.Arguments
 
         member x.FunctionName =
             match x with
-            | Terminal _ -> None
-            | Function fs -> Some fs.Name
+            | DuTerminal _ -> None
+            | DuFunction fs -> Some fs.Name
 
         member x.ToText(withParenthesys:bool) =
             match x with
-            | Terminal b -> b.ToText()
-            | Function fs ->
+            | DuTerminal b -> b.ToText()
+            | DuFunction fs ->
                 let text = fwdSerializeFunctionNameAndBoxedArguments fs.Name fs.Arguments withParenthesys
                 text
 
         member x.StorageArguments =
             match x with
-            | Terminal b ->
+            | DuTerminal b ->
                 match b with
-                | Tag t -> [t :> IStorage]
-                | Variable v -> [v :> IStorage]
-                | Literal l -> []
-            | Function fs ->
+                | DuTag t -> [t :> IStorage]
+                | DuVariable v -> [v :> IStorage]
+                | DuLiteral l -> []
+            | DuFunction fs ->
                 fs.Arguments
                 |> List.collect(fun arg -> arg.StorageArguments)
 

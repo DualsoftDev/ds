@@ -7,7 +7,43 @@ open System.Reactive.Subjects
 open System.Collections.Generic
 
 [<AutoOpen>]
+module ExpressionForwardDeclModule =
+    type IValue<'T> =
+        abstract Value: 'T with get, set
+    type IStorage<'T> =
+        inherit IStorage
+        inherit IValue<'T>
+
+    type ITag = inherit IStorage
+    type ITag<'T> =
+        inherit ITag
+        inherit IStorage<'T>
+    type IVariable = inherit IStorage
+    type IVariable<'T> =
+        inherit IVariable
+        inherit IStorage<'T>
+
+    /// Expression<'T> 을 boxed 에서 접근하기 위한 최소의 interface
+    type IExpression =
+        abstract DataType : System.Type
+        //abstract ExpressionType : ExpressionType
+        abstract BoxedEvaluatedValue : obj
+        /// Tag<'T> 나 Variable<'T> 객체 boxed 로 반환
+        abstract GetBoxedRawObject: unit -> obj
+        /// withParenthesys: terminal 일 경우는 무시되고, Function 일 경우에만 적용됨
+        abstract ToText : withParenthesys:bool -> string
+        /// Function expression 인 경우 function name 반환.  terminal 이면 none
+        abstract FunctionName: string option
+        /// Function expression 에 사용된 IStorage 항목들을 반환
+        abstract StorageArguments: IStorage list
+
+    type IExpression<'T> =
+        inherit IExpression
+        abstract EvaluatedValue : 'T
+
+[<AutoOpen>]
 module rec ExpressionPrologModule =
+
     module ExpressionPrologSubModule =
         let expectN (n:int) (xs:'a seq) = if xs.Count() <> n then failwith $"Wrong number of arguments: expect {n}"
         let expect1 xs = expectN 1 xs; xs.First()
@@ -215,40 +251,6 @@ module rec ExpressionPrologModule =
                 failwith "ERROR"
                 false
 
-
-    type IValue<'T> =
-        abstract Value: 'T with get, set
-    type IStorage<'T> =
-        inherit IStorage
-        inherit IValue<'T>
-
-    type ITag = inherit IStorage
-    type ITag<'T> =
-        inherit ITag
-        inherit IStorage<'T>
-    type IVariable = inherit IStorage
-
-    /// Expression<'T> 을 boxed 에서 접근하기 위한 최소의 interface
-    type IExpression =
-        abstract DataType : System.Type
-        //abstract ExpressionType : ExpressionType
-        abstract BoxedEvaluatedValue : obj
-        /// Tag<'T> 나 Variable<'T> 객체 boxed 로 반환
-        abstract GetBoxedRawObject: unit -> obj
-        /// withParenthesys: terminal 일 경우는 무시되고, Function 일 경우에만 적용됨
-        abstract ToText : withParenthesys:bool -> string
-        /// Function expression 인 경우 function name 반환.  terminal 이면 none
-        abstract FunctionName: string option
-        /// Function expression 에 사용된 IStorage 항목들을 반환
-        abstract StorageArguments: IStorage list
-
-    type IExpression<'T> =
-        inherit IExpression
-        abstract EvaluatedValue : 'T
-
-
-
-
     [<AbstractClass>]
     [<DebuggerDisplay("{Name}")>]
     type TypedValueStorage<'T when 'T:equality>(name, initValue:'T) =
@@ -265,6 +267,7 @@ module rec ExpressionPrologModule =
             member x.DataType = typedefof<'T>
             member x.Value with get() = x.Value and set(v) = x.Value <- (v :?> 'T)
             member x.ToText() = x.ToText()
+            member x.ToBoxedExpression() = x.ToBoxedExpression()
 
         interface IStorage<'T> with
             member x.Value with get() = x.Value and set(v) = x.Value <- v
@@ -273,7 +276,7 @@ module rec ExpressionPrologModule =
             member x.Name with get() = x.Name and set(v) = failwith "ERROR: not supported"
 
         abstract ToText: unit -> string
-
+        abstract ToBoxedExpression : unit -> obj    /// IExpression<'T> 의 boxed 형태의 expression 생성
 
     [<AbstractClass>]
     type Tag<'T when 'T:equality>(name, initValue:'T) =
@@ -282,10 +285,11 @@ module rec ExpressionPrologModule =
         interface ITag<'T>
         override x.ToText() = "%" + name
 
-    type Variable<'T when 'T:equality>(name, initValue:'T) =
+    [<AbstractClass>]
+    type VariableBase<'T when 'T:equality>(name, initValue:'T) =
         inherit TypedValueStorage<'T>(name, initValue)
 
-        interface IVariable
+        interface IVariable<'T>
         override x.ToText() = "$" + name
 
     type Arg       = IExpression

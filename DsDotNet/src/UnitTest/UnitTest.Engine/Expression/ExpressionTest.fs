@@ -23,12 +23,12 @@ module TestModule =
 
     let timer (timerStatement:Statement) :Timer =
         match timerStatement with
-        | Timer t -> t.Timer
+        | DuTimer t -> t.Timer
         | _ -> failwith "not a timer statement"
 
     let counter (counterStatement:Statement) :Counter =
         match counterStatement with
-        | Counter t -> t.Counter
+        | DuCounter t -> t.Counter
         | _ -> failwith "not a counter statement"
 
     type ExpressionTest() =
@@ -191,19 +191,19 @@ module TestModule =
             let target = PlcTag("target", 1)
             let targetExpr = tag target
 
-            let stmt = Assign (expr, target)
+            let stmt = DuAssign (expr, target)
             stmt.Do()
             targetExpr |> evaluate === 24
 
-            (Assign (v 9, target)).Do()
+            (DuAssign (v 9, target)).Do()
             targetExpr |> evaluate === 9
 
             let source = PlcTag("source", 33)
-            Assign(tag source, target).Do()
+            DuAssign(tag source, target).Do()
             targetExpr |> evaluate === 33
             source.Value <- 44
             targetExpr |> evaluate  === 33
-            Assign(tag source, target).Do()
+            DuAssign(tag source, target).Do()
             targetExpr |> evaluate === 44
 
         [<Test>]
@@ -270,7 +270,7 @@ module TestModule =
             let target = PlcTag("target", 1)
             target.ToText() === "%target"
 
-            let stmt = Assign (expr, target)
+            let stmt = DuAssign (expr, target)
             stmt.ToText() === "%target := *(2, 3, 4)"
 
 

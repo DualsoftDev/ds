@@ -15,6 +15,7 @@ module StatementTestModule =
         do Fixtures.SetUpTest()
 
         let toTimer = timer
+        let toCounter = counter
         [<Test>]
         member __.``CTU creation test`` () =
             let rungConditionInTag = PlcTag("my_timer_control_tag", true)
@@ -29,9 +30,12 @@ module StatementTestModule =
         member __.``CTU/TON parsing test`` () =
             let t1 = PlcTag("my_counter_control_tag", false)
             let coutnerStatement:Statement = "ctu myCounter = createCTU(100us, false)" |> parseStatement
-            let counter = counter coutnerStatement
+            let counter = toCounter coutnerStatement
             let timerStatement2:Statement = "ton myTimer = createTON(100us, false)" |> parseStatement
             let xxx = timerStatement2.ToText()
+
+            let cs2:Statement = "ton mytimer = createTON($tag1 || $tag2, 1000us)" |> parseStatement
+            let counter = toCounter cs2
 
 
             let statements = [

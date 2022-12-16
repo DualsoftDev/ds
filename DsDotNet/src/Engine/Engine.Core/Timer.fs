@@ -128,15 +128,6 @@ module rec TimerModule =
                 disposables.Clear()
 
 
-
-    // 임시.  추후 수정 필요.  simualte Tag<bool>
-    [<Obsolete("임시 구현")>]
-    type BoolTag(name) =
-        inherit Tag<bool>(name, false)
-    [<Obsolete("임시 구현")>]
-    type IntTag(name, init) =
-        inherit Tag<CountUnitType>(name, init)
-
     [<AbstractClass>]
     type TimerCounterBaseStruct (name, preset, accum:CountUnitType) =
         member _.Name:string = name

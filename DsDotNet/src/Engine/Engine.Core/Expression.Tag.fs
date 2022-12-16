@@ -6,40 +6,49 @@ open System.Text.RegularExpressions
 
 [<AutoOpen>]
 module  TagModule =
-    
+
     type TagFlag =
-    | R        
-    | G        
-    | F        
-    | H        
-    | Origin   
-    | Pause    
-    | ErrorTx  
-    | ErrorRx  
-    | Relay    
-    | ET        //EndTag      
-    | RT        //ResetTag    
-    | ST        //StartTag    
-    | EP        //EndPort      
-    | RP        //ResetPort    
-    | SP        //StartPort   
+    | R
+    | G
+    | F
+    | H
+    | Origin
+    | Pause
+    | ErrorTx
+    | ErrorRx
+    | Relay
+    | ET        //EndTag
+    | RT        //ResetTag
+    | ST        //StartTag
+    | EP        //EndPort
+    | RP        //ResetPort
+    | SP        //StartPort
     | EF        //EndForce
-    | RF        //ResetForce   
-    | SF        //StartForce  
-    
+    | RF        //ResetForce
+    | SF        //StartForce
+
+    [<AbstractClass>]
+    type ConcreteTag<'T when 'T:equality> (name, initValue:'T)  =
+        inherit Tag<'T>(name, initValue)
+        override x.ToBoxedExpression() = tag x
+
+    type Variable<'T when 'T:equality> (name, initValue:'T)  =
+        inherit VariableBase<'T>(name, initValue)
+        override x.ToBoxedExpression() = var x
+
     /// PLC action tag (PlcTag) class
     type PlcTag<'T when 'T:equality> (name, initValue:'T)  =
-        inherit Tag<'T>(name, initValue)
+        inherit ConcreteTag<'T>(name, initValue)
         member val Address = "" with get, set
-    
+
       /// Ds 일반 plan tag : going relay에 사용중
     type DsTag<'T when 'T:equality> (name, initValue:'T)  =
-        inherit Tag<'T>(name, initValue)
-  
+        inherit ConcreteTag<'T>(name, initValue)
+
     /// DsBit tag (PlanTag) class
     type DsBit (name, initValue:bool, v:Vertex, tagFlag:TagFlag) =
-        inherit Tag<bool>(name, initValue)
-        member x.NotifyStatus() = 
+        inherit ConcreteTag<bool>(name, initValue)
+        member x.NotifyStatus() =
              if x.Value then
                  match tagFlag with
                  |R -> ChangeStatusEvent (v, Ready)
@@ -51,18 +60,17 @@ module  TagModule =
 
 
 
-
     //bitFlag
-    //[<Flags>] 
+    //[<Flags>]
     //type MemoryFlag =
     //| E         = 1   //End
     //| R         = 2   //Reset
     //| S         = 4   //Start
     //| Relay     = 8   //Init Start Relay    (Real) ; Child Done (Call)
-    //| Origin    = 16  //Children StartPoint 
-    //| Pause     = 32   
+    //| Origin    = 16  //Children StartPoint
+    //| Pause     = 32
     //| ErrorTx   = 64   //error bit1
     //| ErrorRx   = 128  //error bit2
-    
+
     //let LowNibble = 15    //xxxx0000
     //let HiNibble  = 240   //0000xxxx

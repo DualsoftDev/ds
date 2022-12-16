@@ -22,27 +22,27 @@ module TimerStatementModule =
         let statements = ResizeArray<Statement>()
         match rungConditionIn with
         | Some cond ->
-            let rungInStatement = Assign (cond, ts.EN)
+            let rungInStatement = DuAssign (cond, ts.EN)
             rungInStatement.Do()
             statements.Add rungInStatement
         | None -> ()
 
         match resetCondition with
         | Some cond ->
-            let resetStatement = Assign (cond, ts.RES)
+            let resetStatement = DuAssign (cond, ts.RES)
             resetStatement.Do()
             statements.Add resetStatement
         | None -> ()
 
         match resetCondition with
         | Some reset ->
-            let statement = Assign (reset, ts.RES)
+            let statement = DuAssign (reset, ts.RES)
             statement.Do()
             statements.Add statement
         | None -> ()
 
         timer.InputEvaluateStatements <- statements.ToFSharpList()
-        Timer { Timer=timer; RungInCondition = rungConditionIn; ResetCondition = resetCondition}
+        DuTimer { Timer=timer; RungInCondition = rungConditionIn; ResetCondition = resetCondition}
 
     type TimerStatement =
         static member CreateTON(name, preset, rungConditionIn) =

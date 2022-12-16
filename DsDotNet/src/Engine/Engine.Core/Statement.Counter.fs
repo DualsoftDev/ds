@@ -31,19 +31,19 @@ module CounterStatementModule =
         let statements = ResizeArray<Statement>()
         match countUpCondition with
         | Some up->
-            let statement = Assign (up, cs.CU)
+            let statement = DuAssign (up, cs.CU)
             statement.Do()
             statements.Add statement
         | None -> ()
         match countDownCondition with
         | Some down ->
-            let statement = Assign (down, cs.CD)
+            let statement = DuAssign (down, cs.CD)
             statement.Do()
             statements.Add statement
         | None -> ()
         match resetCondition with
         | Some reset ->
-            let statement = Assign (reset, cs.RES)
+            let statement = DuAssign (reset, cs.RES)
             statement.Do()
             statements.Add statement
         | None -> ()
@@ -51,7 +51,7 @@ module CounterStatementModule =
 
 
         counter.InputEvaluateStatements <- statements.ToFSharpList()
-        Counter { Counter=counter; UpCondition=countUpCondition; DownCondition=countDownCondition; ResetCondition=resetCondition }
+        DuCounter { Counter=counter; UpCondition=countUpCondition; DownCondition=countDownCondition; ResetCondition=resetCondition }
 
     type CounterStatement =
         static member CreateCTU(name, preset, rungConditionIn) =

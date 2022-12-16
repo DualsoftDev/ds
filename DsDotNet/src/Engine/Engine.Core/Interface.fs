@@ -31,4 +31,5 @@ module Interface =
         inherit IText
         abstract Value: obj with get, set
         abstract DataType : System.Type
+        abstract ToBoxedExpression : unit -> obj    /// IExpression<'T> 의 boxed 형태의 expression 생성
 

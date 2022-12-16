@@ -121,16 +121,16 @@ module ExpressionFunctionModule =
         *)
         | ("createCTU" | "createCTD" | "createCTUD") ->
                 let psedoFunction (args:Args):Counter = failwith "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
-                Function { FunctionBody=psedoFunction; Name=funName; Arguments=args }
+                DuFunction { FunctionBody=psedoFunction; Name=funName; Arguments=args }
         | ("createTON" | "createTOF" | "createCRTO" ) ->
                 let psedoFunction (args:Args):Timer = failwith "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
-                Function { FunctionBody=psedoFunction; Name=funName; Arguments=args }
+                DuFunction { FunctionBody=psedoFunction; Name=funName; Arguments=args }
 
         | _ -> failwith $"NOT yet: {funName}"
 
     /// Create function expression
     let private cf (f:Args->'T) (name:string) (args:Args) =
-        Function { FunctionBody=f; Name=name; Arguments=args}
+        DuFunction { FunctionBody=f; Name=name; Arguments=args}
 
     [<AutoOpen>]
     module FunctionModule =
@@ -557,5 +557,5 @@ module ExpressionFunctionModule =
         /// boolean NOT operator
         let (!!)   (exp: Expression<bool>) = fLogicalNot [exp]
         /// Assign statement
-        let (<==)  (storage: IStorage) (exp: IExpression) = Assign(exp, storage)
+        let (<==)  (storage: IStorage) (exp: IExpression) = DuAssign(exp, storage)
 

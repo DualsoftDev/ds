@@ -1,5 +1,8 @@
 /* grun expr toplevels -gui < g4test/expr/expr.expr */
 
+ton mytimer = createTON($cond1 || $cond2, 1000us);
+
+
 // on delay timer
 ton mytimer = createTON(false, 1000us);
 

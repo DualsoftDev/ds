@@ -128,6 +128,12 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
         let loadedName = ctx.CollectNameComponents().Combine()
         x.TheSystem.LoadExternalSystemAs(loadedName, absoluteFilePath, simpleFilePath) |> ignore
 
+    override x.EnterCodeBlock(ctx:CodeBlockContext) =
+        let code = ctx.GetOriginalText()
+        let pureCode = code.Substring(3, code.Length-6)       // 처음과 끝의 "<@{" 와 "}@>" 제외
+        let statements = pureCode |> parseCode options.Storages
+        x.TheSystem.Statements.AddRange statements
+        ()
 
     /// parser rule context 에 대한 이름 기준의 정보를 얻는다.  system 이름, flow 이름, parenting 이름 등
     member x.GetContextInformation(parserRuleContext:ParserRuleContext) =      // collectUpwardContextInformation

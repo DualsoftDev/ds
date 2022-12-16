@@ -17,11 +17,6 @@
 		<Compile Include="Named.fs" />
 		<Compile Include="Graph.fs" />
 		<Compile Include="CodeElements.fs" />
-		<Compile Include="Core.fs" />
-		<Compile Include="Core.Util.Edge.fs" />
-		<Compile Include="Core.Util.Find.fs" />
-		<Compile Include="Core.Util.Origin.fs" />
-		<Compile Include="Core.Util.ToDsText.fs" />
 		<Compile Include="Expression.Prolog.fs" />
 		<Content Include="Timer.txt" />
 		<Content Include="Timer.pptx" />
@@ -30,9 +25,14 @@
 		<Compile Include="Expression.fs" />
 		<Compile Include="Expression.Serialize.fs" />
 		<Compile Include="Expression.Function.fs" />
-		<Compile Include="Expression.Tag.fs" />
 		<Compile Include="Statement.Timer.fs" />
 		<Compile Include="Statement.Counter.fs" />
+		<Compile Include="Core.fs" />
+		<Compile Include="Core.Util.Edge.fs" />
+		<Compile Include="Core.Util.Find.fs" />
+		<Compile Include="Core.Util.Origin.fs" />
+		<Compile Include="Core.Util.ToDsText.fs" />
+		<Compile Include="Expression.Tag.fs" />
 		<Compile Include="EntryPoint.fs" />
 		<Compile Include="AssemblyInfo.fs" />
 		<Content Include="ValidSyntax.txt" />

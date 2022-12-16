@@ -3,10 +3,10 @@ namespace UnitTest.Engine.Statement
 open NUnit.Framework
 
 open UnitTest.Engine
+open UnitTest.Engine.Expression
 open Engine.Core
 open Engine.Parser.FS.ExpressionParser
-open UnitTest.Engine.Expression
-
+open Engine.Parser.FS
 
 [<AutoOpen>]
 module StatementTestModule =

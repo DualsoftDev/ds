@@ -11,8 +11,6 @@ open Antlr4.Runtime.Tree
 
 [<AutoOpen>]
 module rec ExpressionParser =
-    type Storages = Dictionary<string, IStorage>
-
     let private createParser(text:string) =
         let inputStream = new AntlrInputStream(text)
         let lexer = exprLexer (inputStream)

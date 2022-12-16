@@ -65,6 +65,8 @@ module CoreModule =
         member _.ApiUsages = apiUsages |> seq
         member _.Host = host
 
+
+        member val Statements = ResizeArray<Statement>()
         member val Variables = ResizeArray<VariableData>()
         member val Commands = ResizeArray<Command>()
         member val Observes = ResizeArray<Observe>()

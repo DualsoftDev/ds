@@ -124,3 +124,26 @@ double myDouble = 3.14 + 3.14;
             for KeyValue(k, v) in storages do
                 Math.Abs(ExpressionPrologSubModule.toFloat64 v.Value - 3.14 * 2.0) <= 0.0001 |> ShouldBeTrue
 
+        [<Test>]
+        member __.``4 coode block test`` () =
+            let parseText text =
+                let helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation(".", "ActiveCpuName"))
+                helper.TheSystem
+
+            let storages = Storages()
+            let ds = """
+[sys] MySystem = {
+    <@{
+    // This is arbitary code block;
+    // }@> commented out---This is arbitary code block;
+    float32 myFloat32 = 3.14f + 3.14f;
+    single mySingle = 3.14f + 3.14f;
+    }@>
+}
+"""
+            let system = parseText ds
+            system.Statements.Count === 2
+            system.Statements[0].ToText() === "float32 myFloat32 = 3.14f + 3.14f"       // "Single myFloat32 = 3.140000105f + 3.140000105f"
+            system.Statements[1].ToText() === "single mySingle = 3.14f + 3.14f"
+            ()
+

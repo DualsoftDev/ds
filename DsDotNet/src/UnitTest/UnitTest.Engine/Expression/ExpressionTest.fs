@@ -21,6 +21,16 @@ module TestModule =
         expr.ToText(false)
     let toText (exp:IExpression) = exp.ToText(false)
 
+    let timer (timerStatement:Statement) :Timer =
+        match timerStatement with
+        | Timer t -> t.Timer
+        | _ -> failwith "not a timer statement"
+
+    let counter (counterStatement:Statement) :Counter =
+        match counterStatement with
+        | Counter t -> t.Counter
+        | _ -> failwith "not a counter statement"
+
     type ExpressionTest() =
         do Fixtures.SetUpTest()
 

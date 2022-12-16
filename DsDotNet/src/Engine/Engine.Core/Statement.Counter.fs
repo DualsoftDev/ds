@@ -19,7 +19,7 @@ module CounterStatementModule =
         Type=typ; Name=name; Preset=preset;
         CountUpCondition=countUpCondition; CountDownCondition=countDownCondition;
         ResetCondition=resetCondition; Accumulator=accum
-    } : CounterStatement =
+    } : Statement =
         let accum = accum |? 0us
         let cs =    // counter structure
             match typ with
@@ -51,7 +51,7 @@ module CounterStatementModule =
 
 
         counter.InputEvaluateStatements <- statements.ToFSharpList()
-        { Counter=counter; UpCondition=countUpCondition; DownCondition=countDownCondition; ResetCondition=resetCondition }
+        Counter { Counter=counter; UpCondition=countUpCondition; DownCondition=countDownCondition; ResetCondition=resetCondition }
 
     type CounterStatement =
         static member CreateCTU(name, preset, rungConditionIn) =

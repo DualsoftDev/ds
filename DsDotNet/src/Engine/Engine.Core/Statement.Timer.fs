@@ -15,7 +15,7 @@ module TimerStatementModule =
     let private createTimerStatement {
         Type=typ; Name=name; Preset=preset;
         RungConditionIn=rungConditionIn; ResetCondition=resetCondition;
-    } : TimerStatement =
+    } : Statement =
         let ts = TimerStruct(name, preset, 0us)
         let timer = new Timer(typ, ts)
 
@@ -42,7 +42,7 @@ module TimerStatementModule =
         | None -> ()
 
         timer.InputEvaluateStatements <- statements.ToFSharpList()
-        { Timer=timer; RungInCondition = rungConditionIn; ResetCondition = resetCondition}
+        Timer { Timer=timer; RungInCondition = rungConditionIn; ResetCondition = resetCondition}
 
     type TimerStatement =
         static member CreateTON(name, preset, rungConditionIn) =
@@ -57,7 +57,7 @@ module TimerStatementModule =
                 ResetCondition=None; }
             |> createTimerStatement
 
-        static member CreateRTO(name, rungConditionIn, preset) =
+        static member CreateRTO(name, preset, rungConditionIn) =
             {   Type=RTO; Name=name; Preset=preset;
                 RungConditionIn=Some rungConditionIn;
                 ResetCondition=None; }

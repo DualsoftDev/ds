@@ -58,6 +58,7 @@ module ExpressionModule =
 
         let accumulator = new TickAccumulator(typ, timerStruct)
 
+        member _.Type = typ
         member _.Name = timerStruct.Name
         member _.EN = timerStruct.EN
         member _.TT = timerStruct.TT
@@ -74,6 +75,7 @@ module ExpressionModule =
 
         let accumulator = new CountAccumulator(typ, counterStruct)
 
+        member _.Type = typ
         member _.Name = counterStruct.Name
         member _.UN = counterStruct.UN
         member _.OV = counterStruct.OV

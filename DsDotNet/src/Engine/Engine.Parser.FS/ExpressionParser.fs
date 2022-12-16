@@ -143,8 +143,13 @@ module rec ExpressionParser =
 
 
     let private getFirstChildExpressionContext (ctx:ParserRuleContext) : ExprContext = ctx.children.OfType<ExprContext>().First()
+
+    let private (|UnitValue|) (x:IExpression) = x.BoxedEvaluatedValue :?> CountUnitType
+    let private (|BoolExp|) (x:IExpression) = x :?> IExpression<bool>
+
     let private parseCounterStatement (storages:Storages) (ctx:CounterDeclContext) : Statement =
         let typ = ctx.Descendants<CounterTypeContext>().First().GetText().ToUpper() |> DU.fromString<CounterType>
+        let fail() = failwith $"Counter declaration error: {ctx.GetText()}"
         match typ with
         | Some typ ->
             let exp = createExpression storages (getFirstChildExpressionContext ctx)
@@ -153,50 +158,50 @@ module rec ExpressionParser =
             match exp  with
             | Function { Name=functionName; Arguments=args } ->     // functionName = "createCTU"
                 match typ, functionName, args with
-                | CTU, "createCTU", preset::rungInCondtion::[] ->
-                    let preset = preset.BoxedEvaluatedValue :?> CountUnitType
-                    let rungInCondtion = rungInCondtion :?> IExpression<bool>
+                | CTU, "createCTU", (UnitValue preset)::(BoolExp rungInCondtion)::[] ->
                     CounterStatement.CreateCTU(name, preset, rungInCondtion)
+                | CTU, "createCTU", (UnitValue preset)::(BoolExp rungInCondtion)::(BoolExp resetCondition)::[] ->
+                    CounterStatement.CreateCTU(name, preset, rungInCondtion, resetCondition)
+                | CTD, "createCTD", (UnitValue preset)::(BoolExp rungInCondtion)::(UnitValue accum)::[] ->
+                    CounterStatement.CreateCTD(name, preset, rungInCondtion, accum)
+                | CTD, "createCTD", (UnitValue preset)::(BoolExp rungInCondtion)::(BoolExp resetCondition)::(UnitValue accum)::[] ->
+                    CounterStatement.CreateCTD(name, preset, rungInCondtion, resetCondition, accum)
 
-                | CTU, "createCTU", preset::rungInCondtion::resetCondition::[] ->
-                    let preset = preset.BoxedEvaluatedValue :?> CountUnitType
-                    let rungInCondtion = rungInCondtion :?> IExpression<bool>
-                    CounterStatement.CreateCTU(name, preset, rungInCondtion)
-                | _ ->
-                    failwith "Not Yet"
-                |> Counter
-            | _ ->
-                    failwith "ERROR"
-
-            //{
-            //    Type=typ
-            //    Name=name
-            //    Preset: CountUnitType
-            //    Accumulator: CountUnitType option
-            //    CountUpCondition: IExpression<bool> option
-            //    CountDownCondition: IExpression<bool> option
-            //    ResetCondition: IExpression<bool> option
-            //}
-            //createCounterStatement()
-
-            //let counter = new Counter(typ, storageName, exp)
-            //let statement:CounterStatement = {Counter=}
-            //Counter
-
-        | None -> failwith $"ERROR: Failed to parse counter type {ctx.GetText()}"
+                | CTUD, "createCTUD", (UnitValue preset)::(BoolExp countUpCondition)::(BoolExp countDownCondition)::(UnitValue accum)::[] ->
+                    CounterStatement.CreateCTUD(name, preset, countUpCondition, countDownCondition, accum)
+                | CTUD, "createCTUD", (UnitValue preset)::(BoolExp countUpCondition)::(BoolExp countDownCondition)::(BoolExp resetCondition)::(UnitValue accum)::[] ->
+                    CounterStatement.CreateCTUD(name, preset, countUpCondition, countDownCondition, resetCondition, accum)
+                | _ -> fail()
+            | _ -> fail()
+        | None -> fail()
 
     let private parseTimerStatement (storages:Storages) (ctx:TimerDeclContext) : Statement =
         let typ = ctx.Descendants<TimerTypeContext>().First().GetText().ToUpper() |> DU.fromString<TimerType>
+        let fail() = failwith $"Timer declaration error: {ctx.GetText()}"
         match typ with
         | Some typ ->
-            //let exp = createExpression storages (getFirstChildExpressionContext TimerDeclCtx)
-            //let Timer = Timer(typ, storageName, exp)
-            //let statement:TimerStatement = {Timer=}
-            //Timer
-            ()
+            let exp = createExpression storages (getFirstChildExpressionContext ctx)
+            let exp = exp :?> Expression<Timer>
+            let name = ctx.Descendants<StorageNameContext>().First().GetText()
+            match exp  with
+            | Function { Name=functionName; Arguments=args } ->     // functionName = "createTON"
+                match typ, functionName, args with
+                | TON, "createTON", (UnitValue preset)::(BoolExp rungInCondtion)::[] ->
+                    TimerStatement.CreateTON(name, preset, rungInCondtion)
+                | TON, "createTON", (UnitValue preset)::(BoolExp rungInCondtion)::(BoolExp resetCondition)::[] ->
+                    TimerStatement.CreateTON(name, preset, rungInCondtion, resetCondition)
+                | TOF, "createTOF", (UnitValue preset)::(BoolExp rungInCondtion)::[] ->
+                    TimerStatement.CreateTOF(name, preset, rungInCondtion)
+                | TOF, "createTOF", (UnitValue preset)::(BoolExp rungInCondtion)::(BoolExp resetCondition)::[] ->
+                    TimerStatement.CreateTOF(name, preset, rungInCondtion, resetCondition)
 
-        | None -> failwith $"ERROR: Failed to parse Timer type {ctx.GetText()}"
-        failwith "ERROR: Not yet Timer statement"
+                | RTO, "createRTO", (UnitValue preset)::(BoolExp rungInCondtion)::[] ->
+                    TimerStatement.CreateRTO(name, preset, rungInCondtion)
+                | RTO, "createRTO", (UnitValue preset)::(BoolExp rungInCondtion)::(BoolExp resetCondition)::[] ->
+                    TimerStatement.CreateRTO(name, preset, rungInCondtion, resetCondition)
+                | _ -> fail()
+            | _ -> fail()
+        | None -> fail()
 
 
     let createStatement (storages:Storages) (ctx:StatementContext) : Statement =

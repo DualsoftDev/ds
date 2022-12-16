@@ -4,6 +4,7 @@ open NUnit.Framework
 
 open UnitTest.Engine
 open Engine.Core
+open UnitTest.Engine.Expression
 
 
 [<AutoOpen>]
@@ -16,12 +17,11 @@ module CounterTestModule =
             for s in counter.InputEvaluateStatements do
                 s.Do()
 
-
         [<Test>]
         member __.``CTU creation test`` () =
             let t1 = PlcTag("my_counter_control_tag", false)
             let condition = tag t1
-            let ctu = CounterStatement.CreateCTU("myCTU", 100us, condition).Counter
+            let ctu = CounterStatement.CreateCTU("myCTU", 100us, condition) |> counter
             ctu.OV.Value === false
             ctu.UN.Value === false
             ctu.DN.Value === false
@@ -54,7 +54,7 @@ module CounterTestModule =
             let resetTag = PlcTag("my_counter_reset_tag", false)
             let condition = tag t1
             let reset = tag resetTag
-            let ctu = CounterStatement.CreateCTU("myCTU", 100us, condition, reset).Counter
+            let ctu = CounterStatement.CreateCTU("myCTU", 100us, condition, reset) |> counter
             ctu.OV.Value === false
             ctu.UN.Value === false
             ctu.DN.Value === false

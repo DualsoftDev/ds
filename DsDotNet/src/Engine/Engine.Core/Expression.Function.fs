@@ -115,8 +115,16 @@ module ExpressionFunctionModule =
         | "cos" -> fCos args |> iexpr
         | "tan" -> fTan args |> iexpr
 
-        | "createCTU" -> fPseudoCTU args |> iexpr
-
+        (* Timer/Counter
+          - 실제로 function/expression 은 아니지만, parsing 편의를 고려해 function 처럼 취급.
+          - evaluate 등은 수행해서는 안된다.
+        *)
+        | ("createCTU" | "createCTD" | "createCTUD") ->
+                let psedoFunction (args:Args):Counter = failwith "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
+                Function { FunctionBody=psedoFunction; Name=funName; Arguments=args }
+        | ("createTON" | "createTOF" | "createCRTO" ) ->
+                let psedoFunction (args:Args):Timer = failwith "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
+                Function { FunctionBody=psedoFunction; Name=funName; Arguments=args }
 
         | _ -> failwith $"NOT yet: {funName}"
 
@@ -326,12 +334,6 @@ module ExpressionFunctionModule =
         let fCastFloat32    args = cf _castToFloat32  "toFloat32"  args
         let fCastFloat64    args = cf _castToFloat64  "toFloat64" args
 
-
-    /// 실제로 function/expression 은 아니지만, parsing 편의를 고려해 function 처럼 취급.  evaluate 등은 수행해서는 안된다.
-    [<AutoOpen>]
-    module TimerCounterPseudoFunctionModule =
-        let fPseudoCTU      args = cf _fPseudoCTU "createCTU" args
-
     [<AutoOpen>]
     module internal FunctionImpl =
         open ExpressionPrologSubModule
@@ -510,10 +512,6 @@ module ExpressionFunctionModule =
         let _castToBool    (args:Args) = args.Select(evalArg >> toBool)    .Expect1()
         let _castToFloat32 (args:Args) = args.Select(evalArg >> toFloat32) .Expect1()
         let _castToFloat64 (args:Args) = args.Select(evalArg >> toFloat64) .Expect1()
-
-        [<Obsolete("수정 필요")>]
-        let _fPseudoCTU (args:Args) = new Counter(CTU, CTUStruct("name", 0us, 0us))   // 임시
-
 
     let private tagsToArguments (xs:Tag<'T> seq) = xs.Select(tag) |> List.ofSeq
     [<Extension>]

@@ -11,22 +11,28 @@ open UnitTest.Engine
 
 [<AutoOpen>]
 module TestModule =
-    let evalExpr (text:string) = (parseExpression text).BoxedEvaluatedValue
+    let emptyStorages = Storages()
+    let evalExpr (text:string) = (parseExpression emptyStorages text).BoxedEvaluatedValue
+    let evalExpr2 (storages:Storages) (text:string) = (parseExpression storages text).BoxedEvaluatedValue
     let v = ExpressionModule.literal2expr
     let evaluate (exp:IExpression) = exp.BoxedEvaluatedValue
     let dq = "\""
     /// Parse And Serialize
     let pns (text:string) =
-        let expr = parseExpression text
+        let expr = parseExpression emptyStorages text
         expr.ToText(false)
+    let pns2 (storages:Storages) (text:string) =
+        let expr = parseExpression storages text
+        expr.ToText(false)
+
     let toText (exp:IExpression) = exp.ToText(false)
 
-    let timer (timerStatement:Statement) :Timer =
+    let toTimer (timerStatement:Statement) :Timer =
         match timerStatement with
         | DuTimer t -> t.Timer
         | _ -> failwith "not a timer statement"
 
-    let counter (counterStatement:Statement) :Counter =
+    let toCounter (counterStatement:Statement) :Counter =
         match counterStatement with
         | DuCounter t -> t.Counter
         | _ -> failwith "not a counter statement"
@@ -79,7 +85,7 @@ module TestModule =
             (t1 <== fAdd [v 3; v 4]).Do()
             t1.Value === 7
 
-            let exp = $"{dq}hello{dq} + {dq}world{dq}" |> parseExpression :?> Expression<string>
+            let exp = $"{dq}hello{dq} + {dq}world{dq}" |> parseExpression emptyStorages :?> Expression<string>
             // Invalid assignment: won't compile.  OK!
             // (t1 <== exp)
             let tString = PlcTag("1", "1")
@@ -258,20 +264,20 @@ module TestModule =
             let tt1 = t1 |> tag2expr
             let tt2 = t2 |> tag2expr
             let addTwoExpr = fAdd [ tt1; tt2 ]
-            addTwoExpr.ToText(false) === "%t1 + %t2"
+            addTwoExpr.ToText(false) === "$t1 + $t2"
 
             let sTag = PlcTag("address", "value")
-            sTag.ToText() === "%address"
+            sTag.ToText() === "$address"
             let exprTag = tag2expr sTag
-            exprTag.ToText(false) === "%address"
+            exprTag.ToText(false) === "$address"
 
 
             let expr = fMul [v 2; v 3; v 4]
             let target = PlcTag("target", 1)
-            target.ToText() === "%target"
+            target.ToText() === "$target"
 
             let stmt = DuAssign (expr, target)
-            stmt.ToText() === "%target := *(2, 3, 4)"
+            stmt.ToText() === "$target := *(2, 3, 4)"
 
 
             "toBool(0)" |> pns === "toBool(0)"
@@ -459,7 +465,7 @@ module TestModule =
             // Invalid assignment: won't compile.  OK!
             // t1.Value <- 2.0
 
-            let exp = $"{dq}hello{dq} + {dq}world{dq}" |> parseExpression :?> Expression<string>
+            let exp = $"{dq}hello{dq} + {dq}world{dq}" |> parseExpression emptyStorages :?> Expression<string>
             // Invalid assignment: won't compile.  OK!
             // (t1 <== exp)
 

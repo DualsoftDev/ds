@@ -181,7 +181,7 @@ module ExpressionModule =
 
         member x.ToText() =
             match x with
-            | DuTag t -> "%" + t.Name
+            | DuTag t -> "$" + t.Name
             | DuVariable t -> "$" + t.Name
             | DuLiteral v -> sprintf "%A" v
 

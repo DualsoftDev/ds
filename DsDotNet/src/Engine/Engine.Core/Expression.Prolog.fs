@@ -283,7 +283,7 @@ module rec ExpressionPrologModule =
         inherit TypedValueStorage<'T>(name, initValue)
 
         interface ITag<'T>
-        override x.ToText() = "%" + name
+        override x.ToText() = "$" + name
 
     [<AbstractClass>]
     type VariableBase<'T when 'T:equality>(name, initValue:'T) =

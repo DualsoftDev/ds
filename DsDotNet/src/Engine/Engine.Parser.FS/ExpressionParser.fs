@@ -139,12 +139,12 @@ module rec ExpressionParser =
 
         helper ctx
 
-    let parseExpression(text:string) =
+    let parseExpression (storages:Storages) (text:string) =
         try
             let parser = createParser (text)
             let ctx = parser.expr()
 
-            createExpression null ctx
+            createExpression storages ctx
         with exn ->
             failwith $"Failed to parse Expression: {text}\r\n{exn}" // Just warning.  하나의 이름에 '.' 을 포함하는 경우.  e.g "#seg.testMe!!!"
 
@@ -244,12 +244,12 @@ module rec ExpressionParser =
         statement.Do()
         statement
 
-    let parseStatement(text:string) =
+    let parseStatement (storages:Storages) (text:string) =
         try
             let parser = createParser (text)
             let ctx = parser.statement()
 
-            createStatement null ctx
+            createStatement storages ctx
         with exn ->
             failwith $"Failed to parse Statement: {text}\r\n{exn}"
 

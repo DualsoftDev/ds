@@ -76,7 +76,7 @@ module ComparisionTestModule =
                     "2.0 > 1"
                 ]
             for f in typeMismatches do
-                (fun () -> f |> parseExpression |> ignore) |> ShouldFailWithSubstringT "Type mismatch"
+                (fun () -> f |> parseExpression emptyStorages |> ignore) |> ShouldFailWithSubstringT "Type mismatch"
 
 
         [<Test>]
@@ -120,7 +120,7 @@ module ComparisionTestModule =
                     "1s >= 1"
                 ]
             for f in fails do
-                (fun () -> f |> parseExpression |> ignore) |> ShouldFailWithSubstringT "Type mismatch"
+                (fun () -> f |> parseExpression emptyStorages |> ignore) |> ShouldFailWithSubstringT "Type mismatch"
 
 
 
@@ -266,7 +266,7 @@ module ComparisionTestModule =
                     "0 = false"
                 ]
             for f in fails do
-                (fun () -> f |> parseExpression |> ignore) |> ShouldFailWithSubstringT "Type mismatch"
+                (fun () -> f |> parseExpression emptyStorages |> ignore) |> ShouldFailWithSubstringT "Type mismatch"
 
 
 
@@ -321,5 +321,5 @@ module ComparisionTestModule =
                     "(bool)(0 && true)"
                 ]
             for f in fails do
-                (fun () -> f |> parseExpression |> ignore) |> ShouldFailWithSubstringT "Type mismatch"
+                (fun () -> f |> parseExpression emptyStorages |> ignore) |> ShouldFailWithSubstringT "Type mismatch"
 

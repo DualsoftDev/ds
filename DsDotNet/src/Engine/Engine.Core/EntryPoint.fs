@@ -6,10 +6,10 @@ module ModuleInitializer =
         fwdSerializeFunctionNameAndBoxedArguments <- serializeFunctionNameAndBoxedArguments
 
         fwdCreateBoolTag <-
-            let createBoolTag name value = DsTag<bool>(name, value) :> Tag<bool>
+            let createBoolTag name value = DsTag<bool>(name, value) :> TagBase<bool>
             createBoolTag
 
 
         fwdCreateUShortTag <-
-            let createUShortTag name value = DsTag<uint16>(name, value) :> Tag<uint16>
+            let createUShortTag name value = DsTag<uint16>(name, value) :> TagBase<uint16>
             createUShortTag

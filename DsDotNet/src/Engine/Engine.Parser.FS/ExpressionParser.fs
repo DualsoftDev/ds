@@ -93,19 +93,19 @@ module rec ExpressionParser =
                     | :? LiteralContext as exp ->
                         assert(exp.ChildCount = 1)
                         match exp.children[0] with
-                        | :? LiteralSbyteContext  -> text.Replace("y" , "")  |> System.SByte.Parse  |> literal |> iexpr
-                        | :? LiteralByteContext   -> text.Replace("uy", "")  |> System.Byte.Parse   |> literal |> iexpr
-                        | :? LiteralInt16Context  -> text.Replace("s" , "")  |> System.Int16.Parse  |> literal |> iexpr
-                        | :? LiteralUint16Context -> text.Replace("us", "")  |> System.UInt16.Parse |> literal |> iexpr
-                        | :? LiteralInt32Context  -> text                    |> System.Int32.Parse  |> literal |> iexpr
-                        | :? LiteralUint32Context -> text.Replace("u" , "")  |> System.UInt32.Parse |> literal |> iexpr
-                        | :? LiteralInt64Context  -> text.Replace("L" , "")  |> System.Int64.Parse  |> literal |> iexpr
-                        | :? LiteralUint64Context -> text.Replace("UL", "")  |> System.UInt64.Parse |> literal |> iexpr
-                        | :? LiteralSingleContext -> text.Replace("f" , "")  |> System.Single.Parse |> literal |> iexpr
-                        | :? LiteralDoubleContext -> text                    |> System.Double.Parse |> literal |> iexpr
-                        | :? LiteralStringContext -> text                    |> deQuoteOnDemand     |> literal |> iexpr
-                        | :? LiteralCharContext   -> text                    |> System.Char.Parse   |> literal |> iexpr
-                        | :? LiteralBoolContext   -> text                    |> System.Boolean.Parse|> literal |> iexpr
+                        | :? LiteralSbyteContext  -> text.Replace("y" , "")  |> System.SByte.Parse  |> literal2expr |> iexpr
+                        | :? LiteralByteContext   -> text.Replace("uy", "")  |> System.Byte.Parse   |> literal2expr |> iexpr
+                        | :? LiteralInt16Context  -> text.Replace("s" , "")  |> System.Int16.Parse  |> literal2expr |> iexpr
+                        | :? LiteralUint16Context -> text.Replace("us", "")  |> System.UInt16.Parse |> literal2expr |> iexpr
+                        | :? LiteralInt32Context  -> text                    |> System.Int32.Parse  |> literal2expr |> iexpr
+                        | :? LiteralUint32Context -> text.Replace("u" , "")  |> System.UInt32.Parse |> literal2expr |> iexpr
+                        | :? LiteralInt64Context  -> text.Replace("L" , "")  |> System.Int64.Parse  |> literal2expr |> iexpr
+                        | :? LiteralUint64Context -> text.Replace("UL", "")  |> System.UInt64.Parse |> literal2expr |> iexpr
+                        | :? LiteralSingleContext -> text.Replace("f" , "")  |> System.Single.Parse |> literal2expr |> iexpr
+                        | :? LiteralDoubleContext -> text                    |> System.Double.Parse |> literal2expr |> iexpr
+                        | :? LiteralStringContext -> text                    |> deQuoteOnDemand     |> literal2expr |> iexpr
+                        | :? LiteralCharContext   -> text                    |> System.Char.Parse   |> literal2expr |> iexpr
+                        | :? LiteralBoolContext   -> text                    |> System.Boolean.Parse|> literal2expr |> iexpr
                         | _ -> failwith "ERROR"
                     | :? TagContext as texp ->
                         failwith "Obsoleted.  Why not Storage???"   // todo : remove

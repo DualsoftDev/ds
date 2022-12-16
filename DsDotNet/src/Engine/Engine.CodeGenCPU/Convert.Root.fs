@@ -16,7 +16,7 @@ type StatementRoot =
                     then
                         let sets  = srcs.Select(fun f->f.EndTag).ToTags()
                         let rsts  = [pReal.EndTag].ToTags()
-                        pReal.StartTag <== fLogicalAnd [FuncExt.GetRelayExpr(sets, rsts, pReal.StartTag); tag pReal.Pause] |> Some //pReal.Pause _Auto 로 변경 필요
+                        pReal.StartTag <== fLogicalAnd [FuncExt.GetRelayExpr(sets, rsts, pReal.StartTag); tag2expr pReal.Pause] |> Some //pReal.Pause _Auto 로 변경 필요
                     else None
         
         ///F2. Real 자신의 Reset going relay  Statement 만들기
@@ -32,5 +32,5 @@ type StatementRoot =
                         //going relay srcs
                         let sets  = goingSrcs.ToTags()
                         let rsts  = [real.EndTag].ToTags()
-                        real.ResetTag <== fLogicalAnd [FuncExt.GetRelayExprReverseReset(sets, rsts, real.ResetTag); tag real.Pause] |> Some//pReal.Pause _Auto 로 변경 필요
+                        real.ResetTag <== fLogicalAnd [FuncExt.GetRelayExprReverseReset(sets, rsts, real.ResetTag); tag2expr real.Pause] |> Some//pReal.Pause _Auto 로 변경 필요
                     else None

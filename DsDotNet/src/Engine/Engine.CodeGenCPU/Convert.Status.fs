@@ -14,9 +14,9 @@ type StatementStatus =
     [<Extension>] 
     static member CreateRGFH(vertex:VertexM) =
                  
-        let exprCS = tag <| vertex.StartPort
-        let exprCR = tag <| vertex.ResetPort
-        let exprCE = tag <| vertex.EndTag   // End는 Port와 Tag가 같음으로
+        let exprCS = tag2expr <| vertex.StartPort
+        let exprCR = tag2expr <| vertex.ResetPort
+        let exprCE = tag2expr <| vertex.EndTag   // End는 Port와 Tag가 같음으로
         //----------------------
         //  Status   SP  RP  ET 
         //----------------------

@@ -13,7 +13,7 @@ open System
 module ExpressionModule =
 
     type Terminal<'T when 'T:equality> =
-        | DuTag of Tag<'T>
+        | DuTag of TagBase<'T>
         | DuVariable of VariableBase<'T>
         | DuLiteral of 'T
 
@@ -39,7 +39,7 @@ module ExpressionModule =
         member x.DataType = typedefof<'T>
 
     /// literal 'T 로부터 terminal Expression<'T> 생성
-    let literal (x:'T) =
+    let literal2expr (x:'T) =
         let t = x.GetType()
         if t.IsValueType || t = typedefof<string> then
             DuTerminal (DuLiteral x)
@@ -47,10 +47,10 @@ module ExpressionModule =
             failwith "ERROR: Value Type Error.  only allowed for primitive type"
 
     /// Tag<'T> 로부터 Expression<'T> 생성
-    let tag (t: Tag<'T>) = DuTerminal (DuTag t)
+    let tag2expr (t: TagBase<'T>) = DuTerminal (DuTag t)
 
     /// Variable<'T> 로부터 Expression<'T> 생성
-    let var (t: VariableBase<'T>) = DuTerminal (DuVariable t)
+    let var2expr (t: VariableBase<'T>) = DuTerminal (DuVariable t)
 
     type Timer internal(typ:TimerType, timerStruct:TimerStruct) =
 

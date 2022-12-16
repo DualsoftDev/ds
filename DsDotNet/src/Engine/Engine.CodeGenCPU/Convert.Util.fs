@@ -44,7 +44,7 @@ type ConvertUtilExt =
                                                             then PlcTag(j.ApiName+"_I", false)
                                                             else PlcTag(j.ApiName+"_O", false)
                                                 )
-                                                .Cast<Tag<bool>>()
+                                                .Cast<TagBase<bool>>()
                             | :? Alias as a -> 
                                         match a.TargetVertex with
                                         | AliasTargetReal ar    -> ar.GetCoinTags(memory, isInTag)
@@ -62,7 +62,7 @@ type ConvertUtilExt =
                                                             then j.ApiItem.TXs.Select(fun s-> dicM[s].StartTag)
                                                             else j.ApiItem.RXs.Select(fun s-> dicM[s].EndTag)
                                                 )
-                                                .Cast<Tag<bool>>()
+                                                .Cast<TagBase<bool>>()
                             | :? Alias as a -> 
                                         match a.TargetVertex with
                                         | AliasTargetReal ar    -> ar.GetCoinTags(memory, isTx)

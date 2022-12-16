@@ -20,8 +20,8 @@ module StatementTestModule =
         member __.``CTU creation test`` () =
             let rungConditionInTag = PlcTag("my_timer_control_tag", true)
             let resetTag = PlcTag("my_timer_reset_tag", false)
-            let condition = tag rungConditionInTag
-            let reset = tag resetTag
+            let condition = tag2expr rungConditionInTag
+            let reset = tag2expr resetTag
             let timerStatement = TimerStatement.CreateRTO("myRto", 2000us, condition, reset)
             let timer = toTimer timerStatement
             ()

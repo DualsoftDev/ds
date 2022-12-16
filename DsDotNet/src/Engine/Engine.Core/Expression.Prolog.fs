@@ -279,7 +279,7 @@ module rec ExpressionPrologModule =
         abstract ToBoxedExpression : unit -> obj    /// IExpression<'T> 의 boxed 형태의 expression 생성
 
     [<AbstractClass>]
-    type Tag<'T when 'T:equality>(name, initValue:'T) =
+    type TagBase<'T when 'T:equality>(name, initValue:'T) =
         inherit TypedValueStorage<'T>(name, initValue)
 
         interface ITag<'T>
@@ -323,10 +323,10 @@ module ExpressionPrologModule2 =
     let mutable internal fwdSerializeFunctionNameAndBoxedArguments = dummySerializeFunctionNameAndBoxedArguments
 
 
-    let private dummyCreateBoolTag (tagName:string) (initValue:bool) : Tag<bool> =
+    let private dummyCreateBoolTag (tagName:string) (initValue:bool) : TagBase<bool> =
         failwith "Should be reimplemented."
     let mutable fwdCreateBoolTag = dummyCreateBoolTag
 
-    let private dummyCreateUShortTag (tagName:string) (initValue:uint16) : Tag<uint16> =
+    let private dummyCreateUShortTag (tagName:string) (initValue:uint16) : TagBase<uint16> =
         failwith "Should be reimplemented."
     let mutable fwdCreateUShortTag = dummyCreateUShortTag

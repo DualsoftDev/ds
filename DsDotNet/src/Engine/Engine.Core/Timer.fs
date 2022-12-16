@@ -132,17 +132,17 @@ module rec TimerModule =
     type TimerCounterBaseStruct (name, preset, accum:CountUnitType) =
         member _.Name:string = name
         /// Done bit
-        member val DN:Tag<bool> = fwdCreateBoolTag $"{name}.DN" false  // Done
-        member val PRE:Tag<CountUnitType> = fwdCreateUShortTag $"{name}.PRE" preset
-        member val ACC:Tag<CountUnitType> = fwdCreateUShortTag $"{name}.ACC" accum
+        member val DN:TagBase<bool> = fwdCreateBoolTag $"{name}.DN" false  // Done
+        member val PRE:TagBase<CountUnitType> = fwdCreateUShortTag $"{name}.PRE" preset
+        member val ACC:TagBase<CountUnitType> = fwdCreateUShortTag $"{name}.ACC" accum
         /// Reset bit.
-        member val RES:Tag<bool> = fwdCreateBoolTag $"{name}.RES" false
+        member val RES:TagBase<bool> = fwdCreateBoolTag $"{name}.RES" false
     type TimerStruct internal(name, preset:CountUnitType, accum:CountUnitType) =
         inherit TimerCounterBaseStruct(name, preset, accum)
         /// Enable
-        member val EN:Tag<bool> = fwdCreateBoolTag $"{name}.EN" false
+        member val EN:TagBase<bool> = fwdCreateBoolTag $"{name}.EN" false
         /// Timing
-        member val TT:Tag<bool> = fwdCreateBoolTag $"{name}.TT" false
+        member val TT:TagBase<bool> = fwdCreateBoolTag $"{name}.TT" false
 
 
     type TimerStruct with

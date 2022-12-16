@@ -513,38 +513,38 @@ module ExpressionFunctionModule =
         let _castToFloat32 (args:Args) = args.Select(evalArg >> toFloat32) .Expect1()
         let _castToFloat64 (args:Args) = args.Select(evalArg >> toFloat64) .Expect1()
 
-    let private tagsToArguments (xs:Tag<'T> seq) = xs.Select(tag) |> List.ofSeq
+    let private tagsToArguments (xs:TagBase<'T> seq) = xs.Select(tag2expr) |> List.ofSeq
     [<Extension>]
     type FuncExt =
 
-        [<Extension>] static member ToTags (xs:#Tag<'T> seq)    = xs.Cast<Tag<_>>()
+        [<Extension>] static member ToTags (xs:#TagBase<'T> seq)    = xs.Cast<TagBase<_>>()
 
-        [<Extension>] static member ToExpr (x:Tag<bool>) = tag x
-        [<Extension>] static member GetAnd (xs:Tag<bool> seq)  =
+        [<Extension>] static member ToExpr (x:TagBase<bool>) = tag2expr x
+        [<Extension>] static member GetAnd (xs:TagBase<bool> seq)  =
                                          if xs.length() = 1
-                                         then tag (xs.First())
+                                         then tag2expr (xs.First())
                                          else xs |> tagsToArguments |> List.cast<IExpression> |> fLogicalAnd
-        [<Extension>] static member GetOr  (xs:Tag<bool> seq)  =
+        [<Extension>] static member GetOr  (xs:TagBase<bool> seq)  =
                                          if xs.length() = 1
-                                         then tag (xs.First())
+                                         then tag2expr (xs.First())
                                          else xs |> tagsToArguments |> List.cast<IExpression> |> fLogicalOr
 
         [<Extension>]
-        static member GetRelayStatement(set:Expression<bool>, rst:Expression<bool>, relay:Tag<bool>) =
+        static member GetRelayStatement(set:Expression<bool>, rst:Expression<bool>, relay:TagBase<bool>) =
                         relay <== ((set <||> relay.ToExpr()) <&&> (rst))
 
         //[sets and]--|----- ! [rsts or] ----- (relay)
         //|relay|-----|
-        [<Extension>] static member GetRelayExpr(sets:Tag<bool> seq, rsts:Tag<bool> seq, relay:Tag<bool>) =
+        [<Extension>] static member GetRelayExpr(sets:TagBase<bool> seq, rsts:TagBase<bool> seq, relay:TagBase<bool>) =
                         (sets.GetAnd() <||> relay.ToExpr()) <&&> (!! rsts.GetOr())
 
         //[sets and]--|----- ! [rsts or] ----- (coil)
-        [<Extension>] static member GetNoRelayExpr(sets:Tag<bool> seq, rsts:Tag<bool> seq) =
+        [<Extension>] static member GetNoRelayExpr(sets:TagBase<bool> seq, rsts:TagBase<bool> seq) =
                         sets.GetAnd() <&&> (!! rsts.GetOr())
 
         //[sets and]--|-----  [rsts and] ----- (relay)
         //|relay|-----|
-        [<Extension>] static member GetRelayExprReverseReset(sets:Tag<bool> seq, rsts:Tag<bool> seq, relay:Tag<bool>) =
+        [<Extension>] static member GetRelayExprReverseReset(sets:TagBase<bool> seq, rsts:TagBase<bool> seq, relay:TagBase<bool>) =
                         (sets.GetAnd() <||> relay.ToExpr()) <&&> (rsts.GetOr())
 
 

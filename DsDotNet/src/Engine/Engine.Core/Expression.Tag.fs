@@ -28,26 +28,26 @@ module  TagModule =
     | SF        //StartForce
 
     [<AbstractClass>]
-    type ConcreteTag<'T when 'T:equality> (name, initValue:'T)  =
-        inherit Tag<'T>(name, initValue)
-        override x.ToBoxedExpression() = tag x
+    type Tag<'T when 'T:equality> (name, initValue:'T)  =
+        inherit TagBase<'T>(name, initValue)
+        override x.ToBoxedExpression() = tag2expr x
 
     type Variable<'T when 'T:equality> (name, initValue:'T)  =
         inherit VariableBase<'T>(name, initValue)
-        override x.ToBoxedExpression() = var x
+        override x.ToBoxedExpression() = var2expr x
 
     /// PLC action tag (PlcTag) class
     type PlcTag<'T when 'T:equality> (name, initValue:'T)  =
-        inherit ConcreteTag<'T>(name, initValue)
+        inherit Tag<'T>(name, initValue)
         member val Address = "" with get, set
 
       /// Ds 일반 plan tag : going relay에 사용중
     type DsTag<'T when 'T:equality> (name, initValue:'T)  =
-        inherit ConcreteTag<'T>(name, initValue)
+        inherit Tag<'T>(name, initValue)
 
     /// DsBit tag (PlanTag) class
     type DsBit (name, initValue:bool, v:Vertex, tagFlag:TagFlag) =
-        inherit ConcreteTag<bool>(name, initValue)
+        inherit Tag<bool>(name, initValue)
         member x.NotifyStatus() =
              if x.Value then
                  match tagFlag with

@@ -17,7 +17,7 @@ type StatementReal =
                         then calls.Select(fun f->f.Relay)//.ToTags()  //자식이 있으면 자식완료 릴레이 조건
                         else [realTag.Relay]//.ToTags()               //자식이 없으면 본인시작 릴레이 조건
 
-                    realTag.EndTag <==  FuncExt.GetAnd(sets.Cast<Tag<bool>>())
+                    realTag.EndTag <==  FuncExt.GetAnd(sets.Cast<TagBase<bool>>())
 
     [<Extension>] static member CreateInitStart(realTag:VertexM)  =
                     let sets  = [realTag.Going;realTag.Origin].ToTags()

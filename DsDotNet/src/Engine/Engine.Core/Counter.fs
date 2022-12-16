@@ -20,10 +20,10 @@ module rec CounterModule =
     type CounterBaseStruct(name, preset:CountUnitType, accum:CountUnitType) =
         inherit TimerCounterBaseStruct(name, preset, accum)
 
-        member val internal CU:Tag<bool> = BoolTag($"{name}.CU")  // Count up enable bit
-        member val internal CD:Tag<bool> = BoolTag($"{name}.CD")  // Count down enable bit
-        member val OV:Tag<bool> = BoolTag($"{name}.OV")  // Overflow
-        member val UN:Tag<bool> = BoolTag($"{name}.UN")  // Underflow
+        member val internal CU:Tag<bool> = fwdCreateBoolTag $"{name}.CU" false  // Count up enable bit
+        member val internal CD:Tag<bool> = fwdCreateBoolTag $"{name}.CD" false  // Count down enable bit
+        member val OV:Tag<bool> = fwdCreateBoolTag $"{name}.OV" false  // Overflow
+        member val UN:Tag<bool> = fwdCreateBoolTag $"{name}.UN" false  // Underflow
 
     type ICounter = interface end
 

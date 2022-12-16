@@ -65,12 +65,12 @@ statement: assign | varDecl | timerDecl | counterDecl;
         | 'string'
         | 'bool' | 'boolean'
     ;
-    // ton mytimer = ton(rungInCondition, 1000ms);
+    // ton mytimer = ton(1000ms, rungInCondition);
     timerDecl: timerType storageName '=' expr;  //timerType '(' arguments? ')';
         timerType: 'ton' | 'tof' | 'rto';
         timerName: IDENTIFIER;
 
-    // ton mycounter = ton(rungInCondition, 1000ms);
+    // ctu mycounter = createCTU(1000ms, rungInCondition);
     counterDecl: counterType storageName '=' expr;  //counterType '(' arguments? ')';
         counterType: 'ctu' | 'ctd' | 'ctud';
         counterName: IDENTIFIER;

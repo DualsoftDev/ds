@@ -317,3 +317,12 @@ module ExpressionPrologModule2 =
     let private dummySerializeFunctionNameAndBoxedArguments (functionName:string) (args:Args) (withParenthesys:bool): string =
         failwith "Should be reimplemented."
     let mutable internal fwdSerializeFunctionNameAndBoxedArguments = dummySerializeFunctionNameAndBoxedArguments
+
+
+    let private dummyCreateBoolTag (tagName:string) (initValue:bool) : Tag<bool> =
+        failwith "Should be reimplemented."
+    let mutable fwdCreateBoolTag = dummyCreateBoolTag
+
+    let private dummyCreateUShortTag (tagName:string) (initValue:uint16) : Tag<uint16> =
+        failwith "Should be reimplemented."
+    let mutable fwdCreateUShortTag = dummyCreateUShortTag

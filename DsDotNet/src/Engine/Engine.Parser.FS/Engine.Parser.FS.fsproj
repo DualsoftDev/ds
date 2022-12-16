@@ -26,6 +26,7 @@
 		<Compile Include="AssemblyInfo.fs" />
 		<Compile Include="Program.fs" />
 		<Compile Include="EntryPoint.fs" />
+		<Content Include="FodyWeavers.xml" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -138,23 +138,24 @@ module ExpressionModule =
                 let ts, t = timerStatement, timerStatement.Timer
                 let typ = t.Type.ToString()
                 let functionName = $"create{typ}"       // e.g "createTON"
-                let args = ResizeArray<string>()        // [preset; rung-in-condition; (reset-condition)]
-                sprintf "%A" t.PRE.Value |> args.Add
-                ts.RungInCondition |> Option.iter(fun c -> c.ToText(false) |> args.Add |> ignore)
-                ts.ResetCondition  |> Option.iter(fun c -> c.ToText(false) |> args.Add |> ignore)
+                let args = [    // [preset; rung-in-condition; (reset-condition)]
+                    sprintf "%A" t.PRE.Value
+                    match ts.RungInCondition with | Some c -> c.ToText(false) | None -> ()
+                    match ts.ResetCondition  with | Some c -> c.ToText(false) | None -> () ]
                 let args = String.Join(", ", args)
                 $"{typ.ToLower()} {t.Name} = {functionName}({args})"
+
             | Counter counterStatement ->
                 let cs, c = counterStatement, counterStatement.Counter
                 let typ = c.Type.ToString()
                 let functionName = $"create{typ}"       // e.g "createCTU"
-                let args = ResizeArray<string>()        // [preset; up-condition; (down-condition;) (reset-condition;) (accum;)]
-                sprintf "%A" c.PRE.Value |> args.Add
-                cs.UpCondition     |> Option.iter(fun c -> c.ToText(false) |> args.Add |> ignore)
-                cs.DownCondition   |> Option.iter(fun c -> c.ToText(false) |> args.Add |> ignore)
-                cs.ResetCondition  |> Option.iter(fun c -> c.ToText(false) |> args.Add |> ignore)
-                if c.ACC.Value <> 0us then
-                    sprintf "%A" c.ACC.Value|> args.Add |> ignore
+                let args = [    // [preset; up-condition; (down-condition;) (reset-condition;) (accum;)]
+                    sprintf "%A" c.PRE.Value
+                    match cs.UpCondition    with | Some c -> c.ToText(false) | None -> ()
+                    match cs.DownCondition  with | Some c -> c.ToText(false) | None -> ()
+                    match cs.ResetCondition with | Some c -> c.ToText(false) | None -> ()
+                    if c.ACC.Value <> 0us then
+                        sprintf "%A" c.ACC.Value ]
                 let args = String.Join(", ", args)
                 $"{typ.ToLower()} {c.Name} = {functionName}({args})"
 

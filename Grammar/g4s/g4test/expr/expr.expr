@@ -1,5 +1,7 @@
 /* grun expr toplevels -gui < g4test/expr/expr.expr */
 
+int8 myByte = createTag(0y);
+
 ton mytimer = createTON($cond1 || $cond2, 1000us);
 
 

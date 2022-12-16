@@ -1,15 +1,10 @@
 namespace UnitTest.Engine
 
+open NUnit.Framework
 
-open System.Linq
-open Engine
 open Engine.Core
 open Engine.Common.FS
-open NUnit.Framework
 open Engine.Parser.FS
-open System.Text.RegularExpressions
-
-
 
 [<AutoOpen>]
 module SystemBuilderTest =

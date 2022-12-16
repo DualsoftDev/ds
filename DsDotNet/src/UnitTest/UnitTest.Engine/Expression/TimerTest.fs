@@ -19,7 +19,7 @@ module TimerTestModule =
                 s.Do()
         [<Test>]
         member __.``TON creation test`` () =
-            let t1 = PlcTag("my_timer_control_tag", false)
+            let t1 = PlcTag("my_timer_control_tag", "%M1.1", false)
             let condition = tag2expr t1
             let timer = TimerStatement.CreateTON("myTon", 2000us, condition) |> toTimer       // 2000ms = 2sec
             timer.TT.Value === false
@@ -56,11 +56,11 @@ module TimerTestModule =
 
         [<Test>]
         member __.``TON creation with text test`` () =
-            let t1 = PlcTag("my_timer_control_tag", false)
+            let t1 = PlcTag("my_timer_control_tag", "%M1.1", false)
             let storages = Dictionary<string, IStorage>()
             storages.Add(t1.Name, t1)
 
-            let statement:Statement = "ton myTon = createTON(2000us, $my_timer_control_tag)" |> parseStatement storages
+            let statement:Statement = "ton myTon = createTON(2000us, $my_timer_control_tag)" |> parseStatement storages |> Option.get
             let timer = toTimer statement
 
             timer.TT.Value === false
@@ -97,7 +97,7 @@ module TimerTestModule =
 
         [<Test>]
         member __.``TOF creation with initial TRUE test`` () =
-            let t1 = PlcTag("my_timer_control_tag", true)
+            let t1 = PlcTag("my_timer_control_tag", "%M1.1", true)
             let condition = tag2expr t1
             let timer = TimerStatement.CreateTOF("myTof", 2000us, condition) |> toTimer        // 2000ms = 2sec
             timer.EN.Value === true
@@ -108,7 +108,7 @@ module TimerTestModule =
 
         [<Test>]
         member __.``TOF creation with initial FALSE test`` () =
-            let t1 = PlcTag("my_timer_control_tag", false)
+            let t1 = PlcTag("my_timer_control_tag", "%M1.1", false)
             let condition = tag2expr t1
             let timer = TimerStatement.CreateTOF("myTof", 2000us, condition) |> toTimer        // 2000ms = 2sec
             timer.TT.Value === false
@@ -119,7 +119,7 @@ module TimerTestModule =
 
         [<Test>]
         member __.``TOF creation with t -> f -> t -> F -> t test`` () =
-            let t1 = PlcTag("my_timer_control_tag", true)
+            let t1 = PlcTag("my_timer_control_tag", "%M1.1", true)
             let condition = tag2expr t1
             let timer = TimerStatement.CreateTOF("myTof", 2000us, condition) |> toTimer        // 2000ms = 2sec
             // rung 입력 조건이 false
@@ -163,8 +163,8 @@ module TimerTestModule =
 
         [<Test>]
         member __.``RTO creation test`` () =
-            let rungConditionInTag = PlcTag("my_timer_control_tag", true)
-            let resetTag = PlcTag("my_timer_reset_tag", false)
+            let rungConditionInTag = PlcTag("my_timer_control_tag", "%M1.1", true)
+            let resetTag = PlcTag("my_timer_reset_tag", "%M1.1", false)
             let condition = tag2expr rungConditionInTag
             let reset = tag2expr resetTag
             let timer = TimerStatement.CreateRTO("myRto", 2000us, condition, reset) |> toTimer        // 2000ms = 2sec

@@ -1,8 +1,6 @@
 namespace Engine.Core
 
-open System.Diagnostics
 open System
-open System.Text.RegularExpressions
 
 [<AutoOpen>]
 module  TagModule =
@@ -37,9 +35,11 @@ module  TagModule =
         override x.ToBoxedExpression() = var2expr x
 
     /// PLC action tag (PlcTag) class
-    type PlcTag<'T when 'T:equality> (name, initValue:'T)  =
+    type PlcTag<'T when 'T:equality> (name, address:string, initValue:'T)  =
         inherit Tag<'T>(name, initValue)
-        member val Address = "" with get, set
+        [<Obsolete("PlcTag 는 address 를 지정하는 생성자를 사용하세요.")>]
+        new (name, initValue:'T) = PlcTag<'T>(name, "", initValue)
+        member val Address = address with get, set
 
       /// Ds 일반 plan tag : going relay에 사용중
     type DsTag<'T when 'T:equality> (name, initValue:'T)  =
@@ -51,11 +51,11 @@ module  TagModule =
         member x.NotifyStatus() =
              if x.Value then
                  match tagFlag with
-                 |R -> ChangeStatusEvent (v, Ready)
-                 |G -> ChangeStatusEvent (v, Going)
-                 |F -> ChangeStatusEvent (v, Finish)
-                 |H -> ChangeStatusEvent (v, Homing)
-                 |_->()
+                 | R -> ChangeStatusEvent (v, Ready)
+                 | G -> ChangeStatusEvent (v, Going)
+                 | F -> ChangeStatusEvent (v, Finish)
+                 | H -> ChangeStatusEvent (v, Homing)
+                 | _->()
 
 
 

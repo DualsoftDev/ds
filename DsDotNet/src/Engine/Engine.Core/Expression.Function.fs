@@ -125,6 +125,9 @@ module ExpressionFunctionModule =
         | ("createTON" | "createTOF" | "createCRTO" ) ->
                 let psedoFunction (args:Args):Timer = failwith "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
                 DuFunction { FunctionBody=psedoFunction; Name=funName; Arguments=args }
+        | "createTag" ->
+                let psedoFunction (args:Args):ITag = failwith "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
+                DuFunction { FunctionBody=psedoFunction; Name=funName; Arguments=args }
 
         | _ -> failwith $"NOT yet: {funName}"
 
@@ -321,7 +324,6 @@ module ExpressionFunctionModule =
         let fCos            args = cf _cos            "cos"    args
         let fTan            args = cf _tan            "tan"    args
 
-
         let fCastBool       args = cf _castToBool     "toBool"   args
         let fCastUInt8      args = cf _castToUInt8    "toByte"   args
         let fCastInt8       args = cf _castToInt8     "toSByte"  args
@@ -333,6 +335,7 @@ module ExpressionFunctionModule =
         let fCastUInt64     args = cf _castToUInt64   "toUInt64" args
         let fCastFloat32    args = cf _castToFloat32  "toFloat32"  args
         let fCastFloat64    args = cf _castToFloat64  "toFloat64" args
+
 
     [<AutoOpen>]
     module internal FunctionImpl =

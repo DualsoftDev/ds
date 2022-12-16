@@ -15,19 +15,19 @@ module StatementTestModule =
         do Fixtures.SetUpTest()
 
         let storages = Storages()
-        let t1 = PlcTag("my_counter_control_tag", false)
-        let tag1 = PlcTag("tag1", false)
-        let tag2 = PlcTag("tag2", false)
-        let tag3 = PlcTag("tag3", false)
-        let tagDouble = PlcTag("tagDouble", 3.14)
+        let t1 = PlcTag("my_counter_control_tag", "%M1.1", false)
+        let tag1 = PlcTag("tag1", "%M1.1", false)
+        let tag2 = PlcTag("tag2", "%M1.1", false)
+        let tag3 = PlcTag("tag3", "%M1.1", false)
+        let tagDouble = PlcTag("tagDouble", "%M1.1", 3.14)
         do
             for t in [t1 :> IStorage; tag1; tag2; tag3; tagDouble] do
                 storages.Add(t.Name, t)
 
         [<Test>]
         member __.``CTU creation test`` () =
-            let rungConditionInTag = PlcTag("my_timer_control_tag", true)
-            let resetTag = PlcTag("my_timer_reset_tag", false)
+            let rungConditionInTag = PlcTag("my_timer_control_tag", "%M1.1", true)
+            let resetTag = PlcTag("my_timer_reset_tag", "%M1.1", false)
             let condition = tag2expr rungConditionInTag
             let reset = tag2expr resetTag
             let timerStatement = TimerStatement.CreateRTO("myRto", 2000us, condition, reset)
@@ -36,12 +36,12 @@ module StatementTestModule =
 
         [<Test>]
         member __.``CTU/TON parsing test`` () =
-            let coutnerStatement:Statement = "ctu myCounter = createCTU(100us, false)" |> parseStatement storages
+            let coutnerStatement:Statement = "ctu myCounter = createCTU(100us, false)" |> parseStatement storages |> Option.get
             let counter = toCounter coutnerStatement
-            let timerStatement2:Statement = "ton myTimer = createTON(100us, false)" |> parseStatement storages
+            let timerStatement2:Statement = "ton myTimer = createTON(100us, false)" |> parseStatement storages |> Option.get
             let xxx = timerStatement2.ToText()
 
-            let cs2:Statement = "ton mytimer = createTON(1000us, $tag1 || $tag2)" |> parseStatement storages
+            let cs2:Statement = "ton mytimer = createTON(1000us, $tag1 || $tag2)" |> parseStatement storages |> Option.get
             let timer = toTimer cs2
 
 
@@ -52,7 +52,7 @@ module StatementTestModule =
                 "ton mytimer = createTON(1000us, $tag1 || $tag2, $tag3)"
             ]
             for s in statements do
-                (parseStatement storages s).ToText() === s
+                (parseStatement storages s |> Option.get).ToText() === s
 
             let fails = [
                 "Counter declaration error"      , "ctu myCounter = createCTU(100us, $tag1, $tag1, $tag1, $tag1)"    // 'Counter declaration error: ctu myCounter = createCTU(100us, $tag1, $tag1, $tag1, $tag1)'

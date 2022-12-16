@@ -1,18 +1,16 @@
 namespace Engine.Parser.FS
 
-open System
-open System.Collections.Generic
 open System.Linq
-open System.Runtime.CompilerServices
-open System.Diagnostics
 open Engine.Common.FS
 open Engine.Core
 open System.IO
+open System
 
 [<AutoOpen>]
 module SystemBuilderModule =
     type CallSpec = { Api:string*string; Tx:string; Rx:string }
 
+    [<Obsolete("테스트 용입니다.")>]
     type SystemBuilder internal (system:DsSystem) =
         let paths = ResizeArray<string>()
         member __.Zero() = system

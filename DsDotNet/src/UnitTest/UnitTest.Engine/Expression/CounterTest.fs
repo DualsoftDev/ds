@@ -19,7 +19,7 @@ module CounterTestModule =
 
         [<Test>]
         member __.``CTU creation test`` () =
-            let t1 = PlcTag("my_counter_control_tag", false)
+            let t1 = PlcTag("my_counter_control_tag", "%M1.1", false)
             let condition = tag2expr t1
             let ctu = CounterStatement.CreateCTU("myCTU", 100us, condition) |> toCounter
             ctu.OV.Value === false
@@ -50,8 +50,8 @@ module CounterTestModule =
 
         [<Test>]
         member __.``CTU with reset creation test`` () =
-            let t1 = PlcTag("my_counter_control_tag", false)
-            let resetTag = PlcTag("my_counter_reset_tag", false)
+            let t1 = PlcTag("my_counter_control_tag", "%M1.1", false)
+            let resetTag = PlcTag("my_counter_reset_tag", "%M1.1", false)
             let condition = tag2expr t1
             let reset = tag2expr resetTag
             let ctu = CounterStatement.CreateCTU("myCTU", 100us, condition, reset) |> toCounter

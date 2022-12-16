@@ -34,6 +34,7 @@ module ExpressionModule =
             member x.GetBoxedRawObject() = x.GetBoxedRawObject()
             member x.ToText(withParenthesys) = x.ToText(withParenthesys)
             member x.FunctionName = x.FunctionName
+            member x.FunctionArguments = x.FunctionArguments
             member x.StorageArguments = x.StorageArguments
 
         member x.DataType = typedefof<'T>
@@ -130,7 +131,7 @@ module ExpressionModule =
         member x.ToText() =
             match x with
             | DuAssign (expr, target) -> $"{target.ToText()} := {expr.ToText(false)}"
-            | DuVarDecl (expr, var) -> $"{var.DataType.Name} {var.Name} = {expr.ToText(false)}"
+            | DuVarDecl (expr, var) -> $"{var.DataType.ToDsDataTypeString()} {var.Name} = {expr.ToText(false)}"
             | DuTimer timerStatement ->
                 let ts, t = timerStatement, timerStatement.Timer
                 let typ = t.Type.ToString()
@@ -201,6 +202,11 @@ module ExpressionModule =
             | DuTerminal _ -> None
             | DuFunction fs -> Some fs.Name
 
+        member x.FunctionArguments =
+            match x with
+            | DuFunction fs -> fs.Arguments
+            | DuTerminal _ -> []
+
         member x.ToText(withParenthesys:bool) =
             match x with
             | DuTerminal b -> b.ToText()
@@ -220,6 +226,20 @@ module ExpressionModule =
                 |> List.collect(fun arg -> arg.StorageArguments)
 
 
+    type System.Type with
+        member x.ToDsDataTypeString() =
+            match x.Name with
+            | "Single" -> "float32"
+            | "Double" -> "float64"
+            | "SByte"  -> "int8"
+            | "Byte"   -> "uint8"
+            | "Int16"  -> "int16"
+            | "UInt16" -> "uint16"
+            | "Int32"  -> "int32"
+            | "UInt32" -> "uint32"
+            | "Int64"  -> "int64"
+            | "UInt64" -> "uint64"
+            | _  -> failwith "ERROR"
 
 
 

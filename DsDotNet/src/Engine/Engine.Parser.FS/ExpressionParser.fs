@@ -209,7 +209,7 @@ module rec ExpressionParser =
         | None -> fail()
 
 
-    let createStatement (storages:Storages) (ctx:StatementContext) : Statement =
+    let createStatement (storages:Storages) (ctx:StatementContext) : Statement option =
         assert(ctx.ChildCount = 1)
         let storageName = ctx.Descendants<StorageNameContext>().First().GetText()
 
@@ -217,15 +217,26 @@ module rec ExpressionParser =
             match ctx.children[0] with
             | :? VarDeclContext as varDeclCtx ->
                 let exp = createExpression storages (getFirstChildExpressionContext varDeclCtx)
-                let typ = ctx.Descendants<TypeContext>().First().GetText() |> System.Type.FromString
-                if exp.DataType <> typ then
-                    failwith $"ERROR: Type mismatch in variable declaration {ctx.GetText()}"
+                let declType = ctx.Descendants<TypeContext>().First().GetText() |> System.Type.FromString
                 if storages.ContainsKey storageName then
                     failwith $"ERROR: Duplicated variable declaration {storageName}"
 
-                let storage = exp.DataType.CreateVariable(storageName)
-                storages.Add(storageName, storage)
-                DuVarDecl (exp, storage)
+                match exp.FunctionName with
+                | Some functionName when functionName = "createTag" ->
+                    match exp.FunctionArguments with
+                    | tagAddress::tagValue::[] ->
+                        if tagValue.DataType <> declType then failwith $"ERROR: Type mismatch in {varDeclCtx.GetOriginalText()}"
+                        let addr = tagAddress.BoxedEvaluatedValue :?> string
+                        let tag = declType.CreateTag(storageName, addr, tagValue.BoxedEvaluatedValue)
+                        storages.Add(storageName, tag)
+                    | _ -> failwith $"ERROR: Tag declaration error in {varDeclCtx.GetOriginalText()}"
+                    None
+                | _ ->
+                    if exp.DataType <> declType then
+                        failwith $"ERROR: Type mismatch in variable declaration {ctx.GetText()}"
+                    let variable = declType.CreateVariable(storageName)
+                    storages.Add(storageName, variable)
+                    Some <| DuVarDecl (exp, variable)
 
             | :? AssignContext as assignCtx ->
                 let exp = createExpression storages (getFirstChildExpressionContext assignCtx)
@@ -233,13 +244,13 @@ module rec ExpressionParser =
                     failwith $"ERROR: Failed to assign into non existing storage {storageName}"
 
                 let storage = storages[storageName]
-                DuAssign (exp, storage)
-            | :? CounterDeclContext as counterDeclCtx -> parseCounterStatement storages counterDeclCtx
-            | :? TimerDeclContext as timerDeclCtx -> parseTimerStatement storages timerDeclCtx
+                Some <| DuAssign (exp, storage)
+            | :? CounterDeclContext as counterDeclCtx -> Some <| parseCounterStatement storages counterDeclCtx
+            | :? TimerDeclContext as timerDeclCtx -> Some <| parseTimerStatement storages timerDeclCtx
             | _ ->
                 failwith "ERROR: Not yet statement"
 
-        statement.Do()
+        statement.Iter(fun st -> st.Do())
         statement
 
     let parseStatement (storages:Storages) (text:string) =
@@ -274,25 +285,70 @@ module rec ExpressionParser =
                     | :? StatementContext as stmt -> createStatement storages stmt
                     | _ ->
                         failwith $"ERROR: {text}: expect statements"
-            ]
+            ] |> List.choose id
         with exn ->
             failwith $"Failed to parse code: {text}\r\n{exn}"
 
 
     type System.Type with
+        member x.CreateVariable(name:string, boxedValue:obj) : IStorage =
+            let v = boxedValue
+            match x.Name with
+            | "Single" -> new Variable<single>(name, v :?> single)
+            | "Double" -> new Variable<double>(name, v :?> double)
+            | "SByte"  -> new Variable<int8>  (name, v :?> int8)
+            | "Byte"   -> new Variable<uint8> (name, v :?> uint8)
+            | "Int16"  -> new Variable<int16> (name, v :?> int16)
+            | "UInt16" -> new Variable<uint16>(name, v :?> uint16)
+            | "Int32"  -> new Variable<int32> (name, v :?> int32)
+            | "UInt32" -> new Variable<uint32>(name, v :?> uint32)
+            | "Int64"  -> new Variable<int64> (name, v :?> int64)
+            | "UInt64" -> new Variable<uint64>(name, v :?> uint64)
+            | _  -> failwith "ERROR"
+
         member x.CreateVariable(name:string) : IStorage =
             match x.Name with
             | "Single" -> new Variable<single>(name, 0.0f)
             | "Double" -> new Variable<double>(name, 0.0)
-            | "SByte"  -> new Variable<int8>(name, 0y)
-            | "Byte"   -> new Variable<uint8>(name, 0uy)
-            | "Int16"  -> new Variable<int16>(name, 0s)
+            | "SByte"  -> new Variable<int8>  (name, 0y)
+            | "Byte"   -> new Variable<uint8> (name, 0uy)
+            | "Int16"  -> new Variable<int16> (name, 0s)
             | "UInt16" -> new Variable<uint16>(name, 0us)
-            | "Int32"  -> new Variable<int32>(name, 0)
+            | "Int32"  -> new Variable<int32> (name, 0)
             | "UInt32" -> new Variable<uint32>(name, 0u)
-            | "Int64"  -> new Variable<int64>(name, 0L)
+            | "Int64"  -> new Variable<int64> (name, 0L)
             | "UInt64" -> new Variable<uint64>(name, 0UL)
             | _  -> failwith "ERROR"
+
+        member x.CreateTag(name:string, address:string, boxedValue:obj) : IStorage =
+            let v = boxedValue
+            match x.Name with
+            | "Single" -> new PlcTag<single>(name, address, v :?> single)
+            | "Double" -> new PlcTag<double>(name, address, v :?> double)
+            | "SByte"  -> new PlcTag<int8>  (name, address, v :?> int8)
+            | "Byte"   -> new PlcTag<uint8> (name, address, v :?> uint8)
+            | "Int16"  -> new PlcTag<int16> (name, address, v :?> int16)
+            | "UInt16" -> new PlcTag<uint16>(name, address, v :?> uint16)
+            | "Int32"  -> new PlcTag<int32> (name, address, v :?> int32)
+            | "UInt32" -> new PlcTag<uint32>(name, address, v :?> uint32)
+            | "Int64"  -> new PlcTag<int64> (name, address, v :?> int64)
+            | "UInt64" -> new PlcTag<uint64>(name, address, v :?> uint64)
+            | _  -> failwith "ERROR"
+
+        member x.CreateTag(name:string, address:string) : IStorage =
+            match x.Name with
+            | "Single" -> new PlcTag<single>(name, address, 0.0f)
+            | "Double" -> new PlcTag<double>(name, address, 0.0)
+            | "SByte"  -> new PlcTag<int8>  (name, address, 0y)
+            | "Byte"   -> new PlcTag<uint8> (name, address, 0uy)
+            | "Int16"  -> new PlcTag<int16> (name, address, 0s)
+            | "UInt16" -> new PlcTag<uint16>(name, address, 0us)
+            | "Int32"  -> new PlcTag<int32> (name, address, 0)
+            | "UInt32" -> new PlcTag<uint32>(name, address, 0u)
+            | "Int64"  -> new PlcTag<int64> (name, address, 0L)
+            | "UInt64" -> new PlcTag<uint64>(name, address, 0UL)
+            | _  -> failwith "ERROR"
+
 
         static member FromString(typeName:string) : System.Type =
             match typeName.ToLower() with

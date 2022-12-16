@@ -32,6 +32,7 @@ module RunTime =
                     )
             subscribe
 
+        let mutable running:IDisposable Option = None 
         let statements = 
             let storages = Storages()
             if text <> ""
@@ -63,16 +64,16 @@ module RunTime =
             for statement in statements do
             statement.Do()
 
-            ///Running 이 Some 이면 Expression 처리 동작 중 
-        member val Running:IDisposable Option = None with get,set
+            ///running 이 Some 이면 Expression 처리 동작 중 
+        member x.Running = running.IsSome
         member x.Run()  = 
             runSubscribe() 
-            |> fun f -> x.Running <- Some(f)
+            |> fun f -> running <- Some(f)
         member x.Stop() =  
-            if x.Running.IsSome
+            if running.IsSome
             then 
-                x.Running.Value.Dispose()
-                x.Running <- None
+                running.Value.Dispose()
+                running <- None
 
         member x.ToTextStatement() =  
             let statementTexts = statements.Select(fun statement -> statement.ToText())

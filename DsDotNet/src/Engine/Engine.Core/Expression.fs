@@ -87,16 +87,24 @@ module ExpressionModule =
             member this.Dispose() = (accumulator :> IDisposable).Dispose()
 
 
+    type TimerStatement = {
+        Timer:Timer
+        RungInCondition: IExpression<bool> option
+        ResetCondition:  IExpression<bool> option
+    }
+
+
     type CounterStatement = {
         Counter:Counter
         UpCondition: IExpression<bool> option
         DownCondition: IExpression<bool> option
+        ResetCondition:  IExpression<bool> option
     }
 
     type Statement =
         | Assign of expression:IExpression * target:IStorage
         | VarDecl of expression:IExpression * variable:IStorage
-        | Timer of condition:IExpression<bool> * timer:Timer
+        | Timer of TimerStatement
         | Counter of CounterStatement
 
 
@@ -111,8 +119,8 @@ module ExpressionModule =
                 assert(target.DataType = expr.DataType)
                 target.Value <- expr.BoxedEvaluatedValue
 
-            | Timer (condition_, timer) ->
-                for s in timer.InputEvaluateStatements do
+            | Timer timerStatement ->
+                for s in timerStatement.Timer.InputEvaluateStatements do
                     s.Do()
 
             | Counter counterStatement ->

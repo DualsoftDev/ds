@@ -19,7 +19,7 @@ module TimerTestModule =
         member __.``TON creation test`` () =
             let t1 = PlcTag("my_timer_control_tag", false)
             let condition = tag t1
-            let timer = Timer.CreateTON("myTon", 2000us, condition)        // 2000ms = 2sec
+            let timer = TimerStatement.CreateTON("myTon", 2000us, condition).Timer        // 2000ms = 2sec
             timer.TT.Value === false
             timer.EN.Value === false
             timer.DN.Value === false
@@ -56,7 +56,7 @@ module TimerTestModule =
         member __.``TOF creation with initial TRUE test`` () =
             let t1 = PlcTag("my_timer_control_tag", true)
             let condition = tag t1
-            let timer = Timer.CreateTOF("myTof", 2000us, condition)        // 2000ms = 2sec
+            let timer = TimerStatement.CreateTOF("myTof", 2000us, condition).Timer        // 2000ms = 2sec
             timer.EN.Value === true
             timer.TT.Value === false
             timer.DN.Value === true
@@ -67,7 +67,7 @@ module TimerTestModule =
         member __.``TOF creation with initial FALSE test`` () =
             let t1 = PlcTag("my_timer_control_tag", false)
             let condition = tag t1
-            let timer = Timer.CreateTOF("myTof", 2000us, condition)        // 2000ms = 2sec
+            let timer = TimerStatement.CreateTOF("myTof", 2000us, condition).Timer        // 2000ms = 2sec
             timer.TT.Value === false
             timer.EN.Value === false
             timer.DN.Value === false
@@ -78,7 +78,7 @@ module TimerTestModule =
         member __.``TOF creation with t -> f -> t -> F -> t test`` () =
             let t1 = PlcTag("my_timer_control_tag", true)
             let condition = tag t1
-            let timer = Timer.CreateTOF("myTof", 2000us, condition)        // 2000ms = 2sec
+            let timer = TimerStatement.CreateTOF("myTof", 2000us, condition).Timer        // 2000ms = 2sec
             // rung 입력 조건이 false
             t1.Value <- false
             evaluateRungInputs timer
@@ -124,7 +124,7 @@ module TimerTestModule =
             let resetTag = PlcTag("my_timer_reset_tag", false)
             let condition = tag rungConditionInTag
             let reset = tag resetTag
-            let timer = Timer.CreateRTO("myRto", 2000us, condition, reset)        // 2000ms = 2sec
+            let timer = TimerStatement.CreateRTO("myRto", 2000us, condition, reset).Timer        // 2000ms = 2sec
 
             timer.EN.Value === true
             timer.TT.Value === true

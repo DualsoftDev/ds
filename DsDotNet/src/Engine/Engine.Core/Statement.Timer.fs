@@ -8,11 +8,14 @@ module TimerStatementModule =
         Type: TimerType
         Name: string
         Preset: CountUnitType
-        RungConditionIn: IExpression option
-        ResetCondition: IExpression option
+        RungConditionIn: IExpression<bool> option
+        ResetCondition: IExpression<bool> option
     }
 
-    let private createTimer { Type=typ; Name=name; Preset=preset; RungConditionIn=rungConditionIn; ResetCondition=resetCondition;} =
+    let private createTimerStatement {
+        Type=typ; Name=name; Preset=preset;
+        RungConditionIn=rungConditionIn; ResetCondition=resetCondition;
+    } : TimerStatement =
         let ts = TimerStruct(name, preset, 0us)
         let timer = new Timer(typ, ts)
 
@@ -39,43 +42,43 @@ module TimerStatementModule =
         | None -> ()
 
         timer.InputEvaluateStatements <- statements.ToFSharpList()
-        timer
+        { Timer=timer; RungInCondition = rungConditionIn; ResetCondition = resetCondition}
 
-    type Timer =
+    type TimerStatement =
         static member CreateTON(name, preset, rungConditionIn) =
             {   Type=TON; Name=name; Preset=preset;
                 RungConditionIn=Some rungConditionIn;
                 ResetCondition=None; }
-            |> createTimer
+            |> createTimerStatement
 
         static member CreateTOF(name, preset, rungConditionIn) =
             {   Type=TOF; Name=name; Preset=preset;
                 RungConditionIn=Some rungConditionIn;
                 ResetCondition=None; }
-            |> createTimer
+            |> createTimerStatement
 
         static member CreateRTO(name, rungConditionIn, preset) =
             {   Type=RTO; Name=name; Preset=preset;
                 RungConditionIn=Some rungConditionIn;
                 ResetCondition=None; }
-            |> createTimer
+            |> createTimerStatement
 
         static member CreateTON(name, preset, rungConditionIn, resetCondition) =
             {   Type=TON; Name=name; Preset=preset;
                 RungConditionIn=Some rungConditionIn;
                 ResetCondition=Some resetCondition; }
-            |> createTimer
+            |> createTimerStatement
 
         static member CreateTOF(name, preset, rungConditionIn, resetCondition) =
             {   Type=TOF; Name=name; Preset=preset;
                 RungConditionIn=Some rungConditionIn;
                 ResetCondition=Some resetCondition; }
-            |> createTimer
+            |> createTimerStatement
         static member CreateRTO(name, preset, rungConditionIn, resetCondition) =
             {   Type=RTO; Name=name; Preset=preset;
                 RungConditionIn=Some rungConditionIn;
                 ResetCondition=Some resetCondition; }
-            |> createTimer
+            |> createTimerStatement
 
 
 

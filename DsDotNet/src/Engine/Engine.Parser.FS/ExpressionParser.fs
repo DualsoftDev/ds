@@ -143,20 +143,49 @@ module rec ExpressionParser =
 
 
     let private getFirstChildExpressionContext (ctx:ParserRuleContext) : ExprContext = ctx.children.OfType<ExprContext>().First()
-    let private createCounterStatement (storages:Storages) (ctx:CounterDeclContext) : Statement =
+    let private parseCounterStatement (storages:Storages) (ctx:CounterDeclContext) : Statement =
         let typ = ctx.Descendants<CounterTypeContext>().First().GetText().ToUpper() |> DU.fromString<CounterType>
         match typ with
         | Some typ ->
             let exp = createExpression storages (getFirstChildExpressionContext ctx)
+            let exp = exp :?> Expression<Counter>
+            let name = ctx.Descendants<StorageNameContext>().First().GetText()
+            match exp  with
+            | Function { Name=functionName; Arguments=args } ->     // functionName = "createCTU"
+                match typ, functionName, args with
+                | CTU, "createCTU", preset::rungInCondtion::[] ->
+                    let preset = preset.BoxedEvaluatedValue :?> CountUnitType
+                    let rungInCondtion = rungInCondtion :?> IExpression<bool>
+                    CounterStatement.CreateCTU(name, preset, rungInCondtion)
+
+                | CTU, "createCTU", preset::rungInCondtion::resetCondition::[] ->
+                    let preset = preset.BoxedEvaluatedValue :?> CountUnitType
+                    let rungInCondtion = rungInCondtion :?> IExpression<bool>
+                    CounterStatement.CreateCTU(name, preset, rungInCondtion)
+                | _ ->
+                    failwith "Not Yet"
+                |> Counter
+            | _ ->
+                    failwith "ERROR"
+
+            //{
+            //    Type=typ
+            //    Name=name
+            //    Preset: CountUnitType
+            //    Accumulator: CountUnitType option
+            //    CountUpCondition: IExpression<bool> option
+            //    CountDownCondition: IExpression<bool> option
+            //    ResetCondition: IExpression<bool> option
+            //}
+            //createCounterStatement()
+
             //let counter = new Counter(typ, storageName, exp)
             //let statement:CounterStatement = {Counter=}
             //Counter
-            ()
 
         | None -> failwith $"ERROR: Failed to parse counter type {ctx.GetText()}"
-        failwith "ERROR: Not yet counter statement"
 
-    let private createTimerStatement (storages:Storages) (ctx:TimerDeclContext) : Statement =
+    let private parseTimerStatement (storages:Storages) (ctx:TimerDeclContext) : Statement =
         let typ = ctx.Descendants<TimerTypeContext>().First().GetText().ToUpper() |> DU.fromString<TimerType>
         match typ with
         | Some typ ->
@@ -195,8 +224,8 @@ module rec ExpressionParser =
 
                 let storage = storages[storageName]
                 Assign (exp, storage)
-            | :? CounterDeclContext as counterDeclCtx -> createCounterStatement storages counterDeclCtx
-            | :? TimerDeclContext as timerDeclCtx -> createTimerStatement storages timerDeclCtx
+            | :? CounterDeclContext as counterDeclCtx -> parseCounterStatement storages counterDeclCtx
+            | :? TimerDeclContext as timerDeclCtx -> parseTimerStatement storages timerDeclCtx
             | _ ->
                 failwith "ERROR: Not yet statement"
 

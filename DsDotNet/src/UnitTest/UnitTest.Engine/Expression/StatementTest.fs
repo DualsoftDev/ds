@@ -23,7 +23,7 @@ module StatementTestModule =
             let timer = timerStatement.Timer
 
             let t1 = PlcTag("my_counter_control_tag", false)
-            let xxx = "ctu myCounter = createCTU(false, 100us)" |> parseStatement
+            let xxx = "ctu myCounter = createCTU(100us, false)" |> parseStatement
             ()
 
 

@@ -5,7 +5,7 @@ open Engine.Common.FS
 [<AutoOpen>]
 module CounterStatementModule =
 
-    type internal CounterCreateParams = {
+    type (*internal*) CounterCreateParams = {
         Type: CounterType
         Name: string
         Preset: CountUnitType
@@ -15,7 +15,7 @@ module CounterStatementModule =
         ResetCondition: IExpression<bool> option
     }
 
-    let private createCounterStatement {
+    let (*private*) createCounterStatement {
         Type=typ; Name=name; Preset=preset;
         CountUpCondition=countUpCondition; CountDownCondition=countDownCondition;
         ResetCondition=resetCondition; Accumulator=accum

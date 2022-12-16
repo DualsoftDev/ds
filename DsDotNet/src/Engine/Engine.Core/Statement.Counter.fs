@@ -15,7 +15,7 @@ module CounterStatementModule =
         ResetCondition: IExpression<bool> option
     }
 
-    let (*private*) createCounterStatement {
+    let (*private*) createCounterStatement (storages:Storages) {
         Type=typ; Name=name; Preset=preset;
         CountUpCondition=countUpCondition; CountDownCondition=countDownCondition;
         ResetCondition=resetCondition; Accumulator=accum
@@ -23,9 +23,9 @@ module CounterStatementModule =
         let accum = accum |? 0us
         let cs =    // counter structure
             match typ with
-            | CTU -> new CTUStruct(name, preset, accum) :> CounterBaseStruct
-            | CTD -> new CTDStruct(name, preset, accum)
-            | CTUD -> new CTUDStruct(name, preset, accum)
+            | CTU -> new CTUStruct(storages, name, preset, accum) :> CounterBaseStruct
+            | CTD -> new CTDStruct(storages, name, preset, accum)
+            | CTUD -> new CTUDStruct(storages, name, preset, accum)
         let counter = new Counter(typ, cs)
 
         let statements = ResizeArray<Statement>()
@@ -54,46 +54,46 @@ module CounterStatementModule =
         DuCounter { Counter=counter; UpCondition=countUpCondition; DownCondition=countDownCondition; ResetCondition=resetCondition }
 
     type CounterStatement =
-        static member CreateCTU(name, preset, rungConditionIn) =
+        static member CreateCTU(storages:Storages, name, preset, rungConditionIn) =
             {   Type=CTU; Name=name; Preset=preset;
                 CountUpCondition=Some rungConditionIn;
                 CountDownCondition=None; ResetCondition=None; Accumulator=None }
-            |> createCounterStatement
+            |> createCounterStatement storages
 
-        static member CreateCTD(name, preset, rungConditionIn, accum) =
+        static member CreateCTD(storages:Storages, name, preset, rungConditionIn, accum) =
             {   Type=CTD; Name=name; Preset=preset;
                 CountUpCondition=None;
                 CountDownCondition=Some rungConditionIn;
                 ResetCondition=None; Accumulator=Some accum }
-            |> createCounterStatement
+            |> createCounterStatement storages
 
-        static member CreateCTUD(name, preset, countUpCondition, countDownCondition, accum) =
+        static member CreateCTUD(storages:Storages, name, preset, countUpCondition, countDownCondition, accum) =
             {   Type=CTUD; Name=name; Preset=preset;
                 CountUpCondition=Some countUpCondition;
                 CountDownCondition=Some countDownCondition;
                 ResetCondition=None; Accumulator=Some accum }
-            |> createCounterStatement
+            |> createCounterStatement storages
 
 
-        static member CreateCTU(name, preset, rungConditionIn, reset) =
+        static member CreateCTU(storages:Storages, name, preset, rungConditionIn, reset) =
             {   Type=CTU; Name=name; Preset=preset;
                 CountUpCondition=Some rungConditionIn;
                 CountDownCondition=None;
                 ResetCondition=Some reset; Accumulator=None }
-            |> createCounterStatement
+            |> createCounterStatement storages
 
-        static member CreateCTD(name, preset, rungConditionIn, reset, accum) =
+        static member CreateCTD(storages:Storages, name, preset, rungConditionIn, reset, accum) =
             {   Type=CTD; Name=name; Preset=preset;
                 CountUpCondition=None;
                 CountDownCondition=Some rungConditionIn;
                 ResetCondition=Some reset; Accumulator=Some accum }
-            |> createCounterStatement
+            |> createCounterStatement storages
 
-        static member CreateCTUD(name, preset, countUpCondition, countDownCondition, reset, accum) =
+        static member CreateCTUD(storages:Storages, name, preset, countUpCondition, countDownCondition, reset, accum) =
             {   Type=CTUD; Name=name; Preset=preset;
                 CountUpCondition=Some countUpCondition;
                 CountDownCondition=Some countDownCondition;
                 ResetCondition=Some reset; Accumulator=Some accum }
-            |> createCounterStatement
+            |> createCounterStatement storages
 
 

@@ -12,11 +12,11 @@ module TimerStatementModule =
         ResetCondition: IExpression<bool> option
     }
 
-    let private createTimerStatement {
+    let private createTimerStatement (storages:Storages) {
         Type=typ; Name=name; Preset=preset;
         RungConditionIn=rungConditionIn; ResetCondition=resetCondition;
     } : Statement =
-        let ts = TimerStruct(name, preset, 0us)
+        let ts = TimerStruct(storages, name, preset, 0us)
         let timer = new Timer(typ, ts)
 
         let statements = ResizeArray<Statement>()
@@ -45,40 +45,40 @@ module TimerStatementModule =
         DuTimer { Timer=timer; RungInCondition = rungConditionIn; ResetCondition = resetCondition}
 
     type TimerStatement =
-        static member CreateTON(name, preset, rungConditionIn) =
+        static member CreateTON(storages:Storages, name, preset, rungConditionIn) =
             {   Type=TON; Name=name; Preset=preset;
                 RungConditionIn=Some rungConditionIn;
                 ResetCondition=None; }
-            |> createTimerStatement
+            |> createTimerStatement storages
 
-        static member CreateTOF(name, preset, rungConditionIn) =
+        static member CreateTOF(storages:Storages, name, preset, rungConditionIn) =
             {   Type=TOF; Name=name; Preset=preset;
                 RungConditionIn=Some rungConditionIn;
                 ResetCondition=None; }
-            |> createTimerStatement
+            |> createTimerStatement storages
 
-        static member CreateRTO(name, preset, rungConditionIn) =
+        static member CreateRTO(storages:Storages, name, preset, rungConditionIn) =
             {   Type=RTO; Name=name; Preset=preset;
                 RungConditionIn=Some rungConditionIn;
                 ResetCondition=None; }
-            |> createTimerStatement
+            |> createTimerStatement storages
 
-        static member CreateTON(name, preset, rungConditionIn, resetCondition) =
+        static member CreateTON(storages:Storages, name, preset, rungConditionIn, resetCondition) =
             {   Type=TON; Name=name; Preset=preset;
                 RungConditionIn=Some rungConditionIn;
                 ResetCondition=Some resetCondition; }
-            |> createTimerStatement
+            |> createTimerStatement storages
 
-        static member CreateTOF(name, preset, rungConditionIn, resetCondition) =
+        static member CreateTOF(storages:Storages, name, preset, rungConditionIn, resetCondition) =
             {   Type=TOF; Name=name; Preset=preset;
                 RungConditionIn=Some rungConditionIn;
                 ResetCondition=Some resetCondition; }
-            |> createTimerStatement
-        static member CreateRTO(name, preset, rungConditionIn, resetCondition) =
+            |> createTimerStatement storages
+        static member CreateRTO(storages:Storages, name, preset, rungConditionIn, resetCondition) =
             {   Type=RTO; Name=name; Preset=preset;
                 RungConditionIn=Some rungConditionIn;
                 ResetCondition=Some resetCondition; }
-            |> createTimerStatement
+            |> createTimerStatement storages
 
 
 

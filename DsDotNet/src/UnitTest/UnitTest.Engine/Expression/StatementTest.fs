@@ -25,21 +25,10 @@ module StatementTestModule =
                 storages.Add(t.Name, t)
 
         [<Test>]
-        member __.``CTU creation test`` () =
-            let rungConditionInTag = PlcTag("my_timer_control_tag", "%M1.1", true)
-            let resetTag = PlcTag("my_timer_reset_tag", "%M1.1", false)
-            let condition = tag2expr rungConditionInTag
-            let reset = tag2expr resetTag
-            let timerStatement = TimerStatement.CreateRTO("myRto", 2000us, condition, reset)
-            let timer = toTimer timerStatement
-            ()
-
-        [<Test>]
         member __.``CTU/TON parsing test`` () =
             let coutnerStatement:Statement = "ctu myCounter = createCTU(100us, false)" |> parseStatement storages |> Option.get
             let counter = toCounter coutnerStatement
             let timerStatement2:Statement = "ton myTimer = createTON(100us, false)" |> parseStatement storages |> Option.get
-            let xxx = timerStatement2.ToText()
 
             let cs2:Statement = "ton mytimer = createTON(1000us, $tag1 || $tag2)" |> parseStatement storages |> Option.get
             let timer = toTimer cs2

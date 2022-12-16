@@ -164,18 +164,18 @@ module rec ExpressionParser =
             | DuFunction { Name=functionName; Arguments=args } ->     // functionName = "createCTU"
                 match typ, functionName, args with
                 | CTU, "createCTU", (UnitValue preset)::(BoolExp rungInCondtion)::[] ->
-                    CounterStatement.CreateCTU(name, preset, rungInCondtion)
+                    CounterStatement.CreateCTU(storages, name, preset, rungInCondtion)
                 | CTU, "createCTU", (UnitValue preset)::(BoolExp rungInCondtion)::(BoolExp resetCondition)::[] ->
-                    CounterStatement.CreateCTU(name, preset, rungInCondtion, resetCondition)
+                    CounterStatement.CreateCTU(storages, name, preset, rungInCondtion, resetCondition)
                 | CTD, "createCTD", (UnitValue preset)::(BoolExp rungInCondtion)::(UnitValue accum)::[] ->
-                    CounterStatement.CreateCTD(name, preset, rungInCondtion, accum)
+                    CounterStatement.CreateCTD(storages, name, preset, rungInCondtion, accum)
                 | CTD, "createCTD", (UnitValue preset)::(BoolExp rungInCondtion)::(BoolExp resetCondition)::(UnitValue accum)::[] ->
-                    CounterStatement.CreateCTD(name, preset, rungInCondtion, resetCondition, accum)
+                    CounterStatement.CreateCTD(storages, name, preset, rungInCondtion, resetCondition, accum)
 
                 | CTUD, "createCTUD", (UnitValue preset)::(BoolExp countUpCondition)::(BoolExp countDownCondition)::(UnitValue accum)::[] ->
-                    CounterStatement.CreateCTUD(name, preset, countUpCondition, countDownCondition, accum)
+                    CounterStatement.CreateCTUD(storages, name, preset, countUpCondition, countDownCondition, accum)
                 | CTUD, "createCTUD", (UnitValue preset)::(BoolExp countUpCondition)::(BoolExp countDownCondition)::(BoolExp resetCondition)::(UnitValue accum)::[] ->
-                    CounterStatement.CreateCTUD(name, preset, countUpCondition, countDownCondition, resetCondition, accum)
+                    CounterStatement.CreateCTUD(storages, name, preset, countUpCondition, countDownCondition, resetCondition, accum)
                 | _ -> fail()
             | _ -> fail()
         | None -> fail()
@@ -192,18 +192,18 @@ module rec ExpressionParser =
             | DuFunction { Name=functionName; Arguments=args } ->     // functionName = "createTON"
                 match typ, functionName, args with
                 | TON, "createTON", (UnitValue preset)::(BoolExp rungInCondtion)::[] ->
-                    TimerStatement.CreateTON(name, preset, rungInCondtion)
+                    TimerStatement.CreateTON(storages, name, preset, rungInCondtion)
                 | TON, "createTON", (UnitValue preset)::(BoolExp rungInCondtion)::(BoolExp resetCondition)::[] ->
-                    TimerStatement.CreateTON(name, preset, rungInCondtion, resetCondition)
+                    TimerStatement.CreateTON(storages, name, preset, rungInCondtion, resetCondition)
                 | TOF, "createTOF", (UnitValue preset)::(BoolExp rungInCondtion)::[] ->
-                    TimerStatement.CreateTOF(name, preset, rungInCondtion)
+                    TimerStatement.CreateTOF(storages, name, preset, rungInCondtion)
                 | TOF, "createTOF", (UnitValue preset)::(BoolExp rungInCondtion)::(BoolExp resetCondition)::[] ->
-                    TimerStatement.CreateTOF(name, preset, rungInCondtion, resetCondition)
+                    TimerStatement.CreateTOF(storages, name, preset, rungInCondtion, resetCondition)
 
                 | RTO, "createRTO", (UnitValue preset)::(BoolExp rungInCondtion)::[] ->
-                    TimerStatement.CreateRTO(name, preset, rungInCondtion)
+                    TimerStatement.CreateRTO(storages, name, preset, rungInCondtion)
                 | RTO, "createRTO", (UnitValue preset)::(BoolExp rungInCondtion)::(BoolExp resetCondition)::[] ->
-                    TimerStatement.CreateRTO(name, preset, rungInCondtion, resetCondition)
+                    TimerStatement.CreateRTO(storages, name, preset, rungInCondtion, resetCondition)
                 | _ -> fail()
             | _ -> fail()
         | None -> fail()

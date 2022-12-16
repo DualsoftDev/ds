@@ -17,13 +17,23 @@ module rec CounterModule =
     type CounterType = CTU | CTD | CTUD
 
     [<AbstractClass>]
-    type CounterBaseStruct(name, preset:CountUnitType, accum:CountUnitType) =
-        inherit TimerCounterBaseStruct(name, preset, accum)
+    type CounterBaseStruct(storages:Storages, name, preset:CountUnitType, accum:CountUnitType) =
+        inherit TimerCounterBaseStruct(storages, name, preset, accum)
 
-        member val internal CU:TagBase<bool> = fwdCreateBoolTag $"{name}.CU" false  // Count up enable bit
-        member val internal CD:TagBase<bool> = fwdCreateBoolTag $"{name}.CD" false  // Count down enable bit
-        member val OV:TagBase<bool> = fwdCreateBoolTag $"{name}.OV" false  // Overflow
-        member val UN:TagBase<bool> = fwdCreateBoolTag $"{name}.UN" false  // Underflow
+        let cu = fwdCreateBoolTag $"{name}.CU" false  // Count up enable bit
+        let cd = fwdCreateBoolTag $"{name}.CD" false  // Count down enable bit
+        let ov = fwdCreateBoolTag $"{name}.OV" false  // Overflow
+        let un = fwdCreateBoolTag $"{name}.UN" false  // Underflow
+        do
+            storages.Add($"{name}.CU", cu)
+            storages.Add($"{name}.CD", cd)
+            storages.Add($"{name}.OV", ov)
+            storages.Add($"{name}.UN", un)
+
+        member _.CU:TagBase<bool> = cu  // Count up enable bit
+        member _.CD:TagBase<bool> = cd  // Count down enable bit
+        member _.OV:TagBase<bool> = ov  // Overflow
+        member _.UN:TagBase<bool> = un  // Underflow
 
     type ICounter = interface end
 
@@ -40,20 +50,20 @@ module rec CounterModule =
         inherit ICTD
 
 
-    type CTUStruct(name, preset:CountUnitType, accum:CountUnitType) =
-        inherit CounterBaseStruct(name, preset, accum)
+    type CTUStruct(storages, name, preset:CountUnitType, accum:CountUnitType) =
+        inherit CounterBaseStruct(storages, name, preset, accum)
         member _.CU = base.CU
         interface ICTU with
             member x.CU = x.CU
 
-    type CTDStruct(name, preset:CountUnitType, accum:CountUnitType) =
-        inherit CounterBaseStruct(name, preset, accum)
+    type CTDStruct(storages, name, preset:CountUnitType, accum:CountUnitType) =
+        inherit CounterBaseStruct(storages, name, preset, accum)
         member _.CD = base.CD
         interface ICTD with
             member x.CD = x.CD
 
-    type CTUDStruct(name, preset:CountUnitType, accum:CountUnitType) =
-        inherit CounterBaseStruct(name, preset, accum)
+    type CTUDStruct(storages, name, preset:CountUnitType, accum:CountUnitType) =
+        inherit CounterBaseStruct(storages, name, preset, accum)
         member _.CU = base.CU
         member _.CD = base.CD
         interface ICTUD with

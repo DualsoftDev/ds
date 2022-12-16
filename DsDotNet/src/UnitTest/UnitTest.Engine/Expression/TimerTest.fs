@@ -21,12 +21,30 @@ module TimerTestModule =
         member __.``TON creation test`` () =
             let t1 = PlcTag("my_timer_control_tag", "%M1.1", false)
             let condition = tag2expr t1
-            let timer = TimerStatement.CreateTON("myTon", 2000us, condition) |> toTimer       // 2000ms = 2sec
+            let timer = TimerStatement.CreateTON(emptyStorages, "myTon", 2000us, condition) |> toTimer       // 2000ms = 2sec
             timer.TT.Value === false
             timer.EN.Value === false
             timer.DN.Value === false
             timer.PRE.Value === 2000us
             timer.ACC.Value === 0us
+
+            (* Timer struct 의 내부 tag 들이 생성되고, 등록되었는지 확인 *)
+            let internalTags =
+                [
+                    timer.TT :> IStorage
+                    timer.RES
+                    timer.EN
+                    timer.DN
+                    timer.PRE
+                    timer.ACC
+                ]
+
+            emptyStorages.ContainsKey("myTon") === true
+            for t in internalTags do
+                emptyStorages.ContainsKey(t.Name) === true
+
+
+            let xxx = emptyStorages
 
             // rung 입력 조건이 true
             t1.Value <- true
@@ -99,7 +117,7 @@ module TimerTestModule =
         member __.``TOF creation with initial TRUE test`` () =
             let t1 = PlcTag("my_timer_control_tag", "%M1.1", true)
             let condition = tag2expr t1
-            let timer = TimerStatement.CreateTOF("myTof", 2000us, condition) |> toTimer        // 2000ms = 2sec
+            let timer = TimerStatement.CreateTOF(emptyStorages, "myTof", 2000us, condition) |> toTimer        // 2000ms = 2sec
             timer.EN.Value === true
             timer.TT.Value === false
             timer.DN.Value === true
@@ -110,7 +128,7 @@ module TimerTestModule =
         member __.``TOF creation with initial FALSE test`` () =
             let t1 = PlcTag("my_timer_control_tag", "%M1.1", false)
             let condition = tag2expr t1
-            let timer = TimerStatement.CreateTOF("myTof", 2000us, condition) |> toTimer        // 2000ms = 2sec
+            let timer = TimerStatement.CreateTOF(emptyStorages, "myTof", 2000us, condition) |> toTimer        // 2000ms = 2sec
             timer.TT.Value === false
             timer.EN.Value === false
             timer.DN.Value === false
@@ -121,7 +139,7 @@ module TimerTestModule =
         member __.``TOF creation with t -> f -> t -> F -> t test`` () =
             let t1 = PlcTag("my_timer_control_tag", "%M1.1", true)
             let condition = tag2expr t1
-            let timer = TimerStatement.CreateTOF("myTof", 2000us, condition) |> toTimer        // 2000ms = 2sec
+            let timer = TimerStatement.CreateTOF(emptyStorages, "myTof", 2000us, condition) |> toTimer        // 2000ms = 2sec
             // rung 입력 조건이 false
             t1.Value <- false
             evaluateRungInputs timer
@@ -167,7 +185,7 @@ module TimerTestModule =
             let resetTag = PlcTag("my_timer_reset_tag", "%M1.1", false)
             let condition = tag2expr rungConditionInTag
             let reset = tag2expr resetTag
-            let timer = TimerStatement.CreateRTO("myRto", 2000us, condition, reset) |> toTimer        // 2000ms = 2sec
+            let timer = TimerStatement.CreateRTO(emptyStorages, "myRto", 2000us, condition, reset) |> toTimer        // 2000ms = 2sec
 
             timer.EN.Value === true
             timer.TT.Value === true

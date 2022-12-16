@@ -13,6 +13,7 @@ module ExpressionForwardDeclModule =
     type IStorage<'T> =
         inherit IStorage
         inherit IValue<'T>
+    type Storages = Dictionary<string, IStorage>
 
     type ITag = inherit IStorage
     type ITag<'T> =

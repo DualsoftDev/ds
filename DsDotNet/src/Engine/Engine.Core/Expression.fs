@@ -76,6 +76,8 @@ module ExpressionModule =
 
         member _.Type = typ
         member _.Name = counterStruct.Name
+        member _.CU = counterStruct.CU
+        member _.CD = counterStruct.CD
         member _.UN = counterStruct.UN
         member _.OV = counterStruct.OV
         member _.DN = counterStruct.DN

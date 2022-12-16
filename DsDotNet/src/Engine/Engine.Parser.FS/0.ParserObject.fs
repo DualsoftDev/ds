@@ -6,8 +6,7 @@ open Engine.Core
 
 [<AutoOpen>]
 module rec ParserOptionModule =
-    type Storages = Dictionary<string, IStorage>
-    let emptyStorage = Storages()
+    let private emptyStorage = Storages()
 
     type ParserOptions(referencePath, activeCpuName, isSimulationMode, allowSkipExternalSegment, storages) =
         member _.ActiveCpuName:string = activeCpuName

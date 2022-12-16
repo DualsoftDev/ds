@@ -1,7 +1,6 @@
 namespace Engine.Core
 open System
 open System.Reactive.Linq
-open System.Reactive.Subjects
 open System.Reactive.Disposables
 open Engine.Common.FS
 
@@ -129,20 +128,44 @@ module rec TimerModule =
 
 
     [<AbstractClass>]
-    type TimerCounterBaseStruct (name, preset, accum:CountUnitType) =
+    type TimerCounterBaseStruct (storages:Storages, name, preset, accum:CountUnitType) as this =
+        let dn  = fwdCreateBoolTag $"{name}.DN" false  // Done
+        let pre = fwdCreateUShortTag $"{name}.PRE" preset
+        let acc = fwdCreateUShortTag $"{name}.ACC" accum
+        let res = fwdCreateBoolTag $"{name}.RES" false
+        do
+            storages.Add(name, this)
+            storages.Add($"{name}.DN", dn)
+            storages.Add($"{name}.PRE", pre)
+            storages.Add($"{name}.ACC", acc)
+            storages.Add($"{name}.RES", res)
+
+        interface IStorage with
+            member x.Name with get() = x.Name and set(v) = failwith "ERROR: not supported"
+            member x.DataType = typedefof<TimerCounterBaseStruct>
+            member x.Value with get() = this and set(v) = failwith "ERROR: not supported"
+            member x.ToText() = failwith "ERROR: not supported"
+            member _.ToBoxedExpression() = failwith "ERROR: not supported"
         member _.Name:string = name
         /// Done bit
-        member val DN:TagBase<bool> = fwdCreateBoolTag $"{name}.DN" false  // Done
-        member val PRE:TagBase<CountUnitType> = fwdCreateUShortTag $"{name}.PRE" preset
-        member val ACC:TagBase<CountUnitType> = fwdCreateUShortTag $"{name}.ACC" accum
+        member _.DN:TagBase<bool> = dn
+        member _.PRE:TagBase<CountUnitType> = pre
+        member _.ACC:TagBase<CountUnitType> = acc
         /// Reset bit.
-        member val RES:TagBase<bool> = fwdCreateBoolTag $"{name}.RES" false
-    type TimerStruct internal(name, preset:CountUnitType, accum:CountUnitType) =
-        inherit TimerCounterBaseStruct(name, preset, accum)
+        member _.RES:TagBase<bool> = res
+    type TimerStruct internal(storages:Storages, name, preset:CountUnitType, accum:CountUnitType) =
+        inherit TimerCounterBaseStruct(storages, name, preset, accum)
+
+        let en = fwdCreateBoolTag $"{name}.EN" false
+        let tt = fwdCreateBoolTag $"{name}.TT" false
+        do
+            storages.Add($"{name}.EN", en)
+            storages.Add($"{name}.TT", tt)
+
         /// Enable
-        member val EN:TagBase<bool> = fwdCreateBoolTag $"{name}.EN" false
+        member _.EN:TagBase<bool> = en
         /// Timing
-        member val TT:TagBase<bool> = fwdCreateBoolTag $"{name}.TT" false
+        member _.TT:TagBase<bool> = tt
 
 
     type TimerStruct with

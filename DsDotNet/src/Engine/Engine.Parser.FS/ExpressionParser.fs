@@ -10,7 +10,7 @@ open type exprParser
 open Antlr4.Runtime.Tree
 
 [<AutoOpen>]
-module ExpressionParser =
+module rec ExpressionParser =
     type Storages = Dictionary<string, IStorage>
 
     let private createParser(text:string) =
@@ -142,42 +142,37 @@ module ExpressionParser =
             failwith $"Failed to parse Expression: {text}\r\n{exn}" // Just warning.  하나의 이름에 '.' 을 포함하는 경우.  e.g "#seg.testMe!!!"
 
 
+    let private getFirstChildExpressionContext (ctx:ParserRuleContext) : ExprContext = ctx.children.OfType<ExprContext>().First()
+    let private createCounterStatement (storages:Storages) (ctx:CounterDeclContext) : Statement =
+        let typ = ctx.Descendants<CounterTypeContext>().First().GetText().ToUpper() |> DU.fromString<CounterType>
+        match typ with
+        | Some typ ->
+            let exp = createExpression storages (getFirstChildExpressionContext ctx)
+            //let counter = new Counter(typ, storageName, exp)
+            //let statement:CounterStatement = {Counter=}
+            //Counter
+            ()
 
+        | None -> failwith $"ERROR: Failed to parse counter type {ctx.GetText()}"
+        failwith "ERROR: Not yet counter statement"
 
+    let private createTimerStatement (storages:Storages) (ctx:TimerDeclContext) : Statement =
+        let typ = ctx.Descendants<TimerTypeContext>().First().GetText().ToUpper() |> DU.fromString<TimerType>
+        match typ with
+        | Some typ ->
+            //let exp = createExpression storages (getFirstChildExpressionContext TimerDeclCtx)
+            //let Timer = Timer(typ, storageName, exp)
+            //let statement:TimerStatement = {Timer=}
+            //Timer
+            ()
 
-    type System.Type with
-        member x.CreateVariable(name:string) : IStorage =
-            match x.Name with
-            | "Single" -> Variable<single>(name, 0.0f)
-            | "Double" -> Variable<double>(name, 0.0)
-            | "SByte"  -> Variable<int8>(name, 0y)
-            | "Byte"   -> Variable<uint8>(name, 0uy)
-            | "Int16"  -> Variable<int16>(name, 0s)
-            | "UInt16" -> Variable<uint16>(name, 0us)
-            | "Int32"  -> Variable<int32>(name, 0)
-            | "UInt32" -> Variable<uint32>(name, 0u)
-            | "Int64"  -> Variable<int64>(name, 0L)
-            | "UInt64" -> Variable<uint64>(name, 0UL)
-            | _  -> failwith "ERROR"
+        | None -> failwith $"ERROR: Failed to parse Timer type {ctx.GetText()}"
+        failwith "ERROR: Not yet Timer statement"
 
-        static member FromString(typeName:string) : System.Type =
-            match typeName.ToLower() with
-            | ("float32" | "single") -> typedefof<single>
-            | ("float64" | "double") -> typedefof<double>
-            | ("int8"    | "sbyte")  -> typedefof<int8>
-            | ("uint8"   | "byte")   -> typedefof<uint8>
-            | ("int16"   | "short")  -> typedefof<int16>
-            | ("uint16"  | "ushort") -> typedefof<uint16>
-            | ("int32"   | "int" )   -> typedefof<int32>
-            | ("uint32"  | "uint")   -> typedefof<uint32>
-            | ("int64"   | "long")   -> typedefof<int64>
-            | ("uint64"  | "ulong")  -> typedefof<uint64>
-            | _  -> failwith "ERROR"
 
     let createStatement (storages:Storages) (ctx:StatementContext) : Statement =
         assert(ctx.ChildCount = 1)
         let storageName = ctx.Descendants<StorageNameContext>().First().GetText()
-        let getFirstChildExpressionContext (ctx:ParserRuleContext) : ExprContext = ctx.children.OfType<ExprContext>().First()
 
         let statement =
             match ctx.children[0] with
@@ -200,6 +195,8 @@ module ExpressionParser =
 
                 let storage = storages[storageName]
                 Assign (exp, storage)
+            | :? CounterDeclContext as counterDeclCtx -> createCounterStatement storages counterDeclCtx
+            | :? TimerDeclContext as timerDeclCtx -> createTimerStatement storages timerDeclCtx
             | _ ->
                 failwith "ERROR: Not yet statement"
 
@@ -241,3 +238,33 @@ module ExpressionParser =
             ]
         with exn ->
             failwith $"Failed to parse code: {text}\r\n{exn}"
+
+
+    type System.Type with
+        member x.CreateVariable(name:string) : IStorage =
+            match x.Name with
+            | "Single" -> Variable<single>(name, 0.0f)
+            | "Double" -> Variable<double>(name, 0.0)
+            | "SByte"  -> Variable<int8>(name, 0y)
+            | "Byte"   -> Variable<uint8>(name, 0uy)
+            | "Int16"  -> Variable<int16>(name, 0s)
+            | "UInt16" -> Variable<uint16>(name, 0us)
+            | "Int32"  -> Variable<int32>(name, 0)
+            | "UInt32" -> Variable<uint32>(name, 0u)
+            | "Int64"  -> Variable<int64>(name, 0L)
+            | "UInt64" -> Variable<uint64>(name, 0UL)
+            | _  -> failwith "ERROR"
+
+        static member FromString(typeName:string) : System.Type =
+            match typeName.ToLower() with
+            | ("float32" | "single") -> typedefof<single>
+            | ("float64" | "double") -> typedefof<double>
+            | ("int8"    | "sbyte")  -> typedefof<int8>
+            | ("uint8"   | "byte")   -> typedefof<uint8>
+            | ("int16"   | "short")  -> typedefof<int16>
+            | ("uint16"  | "ushort") -> typedefof<uint16>
+            | ("int32"   | "int" )   -> typedefof<int32>
+            | ("uint32"  | "uint")   -> typedefof<uint32>
+            | ("int64"   | "long")   -> typedefof<int64>
+            | ("uint64"  | "ulong")  -> typedefof<uint64>
+            | _  -> failwith "ERROR"

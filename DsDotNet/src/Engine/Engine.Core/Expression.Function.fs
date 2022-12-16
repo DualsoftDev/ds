@@ -4,6 +4,7 @@ open System.Linq
 open System.Runtime.CompilerServices
 open Engine.Common.FS
 open ExpressionPrologModule.ExpressionPrologSubModule
+open System.Collections.Generic
 
 [<AutoOpen>]
 module ExpressionFunctionModule =
@@ -14,21 +15,16 @@ module ExpressionFunctionModule =
     let private castTo<'T> (x:obj) = x :?> 'T
     let private evalTo<'T> (x:IExpression) = x |> evalArg |> castTo<'T>
 
+
+
     let createBinaryExpression (opnd1:IExpression) (op:string) (opnd2:IExpression) : IExpression =
         let t1 = opnd1.DataType
         let t2 = opnd2.DataType
 
+        verifyArgumentsTypes op [opnd1; opnd2]
         match op with
-        | (   "+" | "+" | "-" | "*" | "/"
-            | ">" | ">=" | "<" | "<=" | "=" | "="
-            | "&&" | "||"
-            | "&" | "|" | "&&&" | "|||" ) ->
-            verifyAllExpressionSameType [opnd1; opnd2]
-            match op with
-            | "&&" | "||" -> if t1 <> typedefof<bool> then failwith $"{op} expects bool.  Type mismatch"
-            | _ -> ()
-        | _ ->
-            ()
+        | "&&" | "||" -> if t1 <> typedefof<bool> then failwith $"{op} expects bool.  Type mismatch"
+        | _ -> ()
 
         let t = t1.Name
         let args = [opnd1; opnd2]
@@ -71,7 +67,7 @@ module ExpressionFunctionModule =
             failwith $"NOT Yet {op}"
 
     let createCustomFunctionExpression (funName:string) (args:Args) : IExpression =
-        verifyAllExpressionSameType args
+        verifyArgumentsTypes funName args
         let t = args[0].DataType.Name
 
         match funName with
@@ -118,14 +114,18 @@ module ExpressionFunctionModule =
         | "sin" -> fSin args |> iexpr
         | "cos" -> fCos args |> iexpr
         | "tan" -> fTan args |> iexpr
+
+        | "createCTU" -> fPseudoCTU args |> iexpr
+
+
         | _ -> failwith $"NOT yet: {funName}"
+
+    /// Create function expression
+    let private cf (f:Args->'T) (name:string) (args:Args) =
+        Function { FunctionBody=f; Name=name; Arguments=args}
 
     [<AutoOpen>]
     module FunctionModule =
-        /// Create function expression
-        let private cf (f:Args->'T) (name:string) (args:Args) =
-            Function { FunctionBody=f; Name=name; Arguments=args}
-
         (*
              .f  | Single       | single
              .   | Double       | double    float (!! 헷갈림 주이)
@@ -326,6 +326,12 @@ module ExpressionFunctionModule =
         let fCastFloat32    args = cf _castToFloat32  "toFloat32"  args
         let fCastFloat64    args = cf _castToFloat64  "toFloat64" args
 
+
+    /// 실제로 function/expression 은 아니지만, parsing 편의를 고려해 function 처럼 취급.  evaluate 등은 수행해서는 안된다.
+    [<AutoOpen>]
+    module TimerCounterPseudoFunctionModule =
+        let fPseudoCTU      args = cf _fPseudoCTU "createCTU" args
+
     [<AutoOpen>]
     module internal FunctionImpl =
         open ExpressionPrologSubModule
@@ -505,6 +511,10 @@ module ExpressionFunctionModule =
         let _castToFloat32 (args:Args) = args.Select(evalArg >> toFloat32) .Expect1()
         let _castToFloat64 (args:Args) = args.Select(evalArg >> toFloat64) .Expect1()
 
+        [<Obsolete("수정 필요")>]
+        let _fPseudoCTU (args:Args) = new Counter(CTU, CTUStruct("name", 0us, 0us))   // 임시
+
+
     let private tagsToArguments (xs:Tag<'T> seq) = xs.Select(tag) |> List.ofSeq
     [<Extension>]
     type FuncExt =
@@ -520,8 +530,8 @@ module ExpressionFunctionModule =
                                          if xs.length() = 1
                                          then tag (xs.First())
                                          else xs |> tagsToArguments |> List.cast<IExpression> |> fLogicalOr
-        
-        [<Extension>] 
+
+        [<Extension>]
         static member GetRelayStatement(set:Expression<bool>, rst:Expression<bool>, relay:Tag<bool>) =
                         relay <== ((set <||> relay.ToExpr()) <&&> (rst))
 

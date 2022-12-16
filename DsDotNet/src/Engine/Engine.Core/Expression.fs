@@ -87,11 +87,17 @@ module ExpressionModule =
             member this.Dispose() = (accumulator :> IDisposable).Dispose()
 
 
+    type CounterStatement = {
+        Counter:Counter
+        UpCondition: IExpression<bool> option
+        DownCondition: IExpression<bool> option
+    }
+
     type Statement =
         | Assign of expression:IExpression * target:IStorage
         | VarDecl of expression:IExpression * variable:IStorage
         | Timer of condition:IExpression<bool> * timer:Timer
-        | Counter of countUpCondition:IExpression<bool> option * countDownCondition:IExpression<bool> option * counter:Counter
+        | Counter of CounterStatement
 
 
     type Statement with
@@ -109,8 +115,8 @@ module ExpressionModule =
                 for s in timer.InputEvaluateStatements do
                     s.Do()
 
-            | Counter (upCondition_, downCondition_, counter) ->
-                for s in counter.InputEvaluateStatements do
+            | Counter counterStatement ->
+                for s in counterStatement.Counter.InputEvaluateStatements do
                     s.Do()
 
         member x.ToText() =

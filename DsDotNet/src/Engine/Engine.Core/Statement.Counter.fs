@@ -19,7 +19,7 @@ module CounterStatementModule =
         Type=typ; Name=name; Preset=preset;
         CountUpCondition=countUpCondition; CountDownCondition=countDownCondition;
         ResetCondition=resetCondition; Accumulator=accum
-    } =
+    } : Counter =
         let accum = accum |? 0us
         let cs =    // counter structure
             match typ with

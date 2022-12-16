@@ -296,6 +296,21 @@ module rec ExpressionPrologModule =
     let isAllExpressionSameType(args:Args) =
         args |> Seq.distinctBy(fun a -> a.DataType) |> Seq.length = 1
     let verifyAllExpressionSameType = isAllExpressionSameType >> verifyM "Type mismatch"
+    let isThisOperatorRequireAllArgumentsSameType: (string -> bool)  =
+        let hash =
+            [   "+" ; "-" ; "*" ; "/" ; "%"
+                ">" ; ">=" ; "<" ; "<=" ; "=" ; "="
+                "&&" ; "||"
+                "&" ; "|" ; "&&&" ; "|||"
+                "add"; "sub"; "mul"; "div"
+                "gt"; "gte"; "lt"; "lte"
+                "equal"; "notEqual"; "and"; "or"
+            ] |> HashSet<string>
+        fun (name:string) -> hash.Contains (name)
+    let verifyArgumentsTypes operator args =
+        if isThisOperatorRequireAllArgumentsSameType operator && not <| isAllExpressionSameType args then
+            failwith $"Type mismatch for operator={operator}"
+
 
 [<AutoOpen>]
 module ExpressionPrologModule2 =

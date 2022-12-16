@@ -156,7 +156,7 @@ module rec ExpressionParser =
 
     let private parseCounterStatement (storages:Storages) (ctx:CounterDeclContext) : Statement =
         let typ = ctx.Descendants<CounterTypeContext>().First().GetText().ToUpper() |> DU.fromString<CounterType>
-        let fail() = failwith $"Counter declaration error: {ctx.GetText()}"
+        let fail() = failwith $"Counter declaration error: {ctx.GetOriginalText()}"
         match typ with
         | Some typ ->
             let exp = createExpression storages (getFirstChildExpressionContext ctx)

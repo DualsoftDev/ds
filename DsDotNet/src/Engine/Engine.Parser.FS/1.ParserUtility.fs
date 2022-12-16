@@ -120,6 +120,17 @@ module ParserUtilityModule =
                 return names.Combine()
             }
 
+    type ParserRuleContext with
+        member x.GetRange() =
+            let s = x.Start.StartIndex
+            let e = x.Stop.StopIndex
+            s, e
+
+        member x.GetOriginalText () =
+            // https://stackoverflow.com/questions/16343288/how-do-i-get-the-original-text-that-an-antlr4-rule-matched
+            x.Start.InputStream.GetText(x.GetRange() |> Antlr4.Runtime.Misc.Interval)
+
+
 type ParseTreePredicate = IParseTree->bool
 type RuleExtractor = dsParser -> RuleContext
 

@@ -55,7 +55,7 @@ module StatementTestModule =
                 (parseStatement storages s).ToText() === s
 
             let fails = [
-                "Counter declaration error"      , "ctu myCounter = createCTU(100us, $tag1, $tag1, $tag1, $tag1)"    // 'Counter declaration error: ctumyCounter=createCTU(100us,$tag1,$tag1,$tag1,$tag1)'
+                "Counter declaration error"      , "ctu myCounter = createCTU(100us, $tag1, $tag1, $tag1, $tag1)"    // 'Counter declaration error: ctu myCounter = createCTU(100us, $tag1, $tag1, $tag1, $tag1)'
                 "The index was outside the range", "ctu myCounter = createTON()"                                     // 'The index was outside the range of elements in the list. (Parameter 'n')'
                 "Unable to cast"                 , "ctu myCounter = createCTU(100us, $tagDouble)"                    // 'Unable to cast object of type 'DuTerminal[System.Double]' to type 'IExpression`1[System.Boolean]'.'
                 "Unable to cast"                 , "ctu myCounter = createTON(100us, $tag1)"                         // 'Unable to cast object of type 'DuFunction[Engine.Core.ExpressionModule+Timer]' to type 'Expression`1[Engine.Core.ExpressionModule+Counter]'.'

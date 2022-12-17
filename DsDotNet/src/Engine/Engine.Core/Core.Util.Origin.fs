@@ -4,8 +4,7 @@ open System.Runtime.CompilerServices
 open System.Linq
 open Engine.Common.FS
 open System.Collections.Generic
-open GraphModule
-#if false   // <shin>
+
 [<AutoOpen>]
 module OriginModule =
     //해당 Child Origin 기준
@@ -19,6 +18,9 @@ module OriginModule =
     let removeDuplicates (source:'T seq) =
         source |> Seq.collect id |> Seq.distinct
 
+    let compareIsIncludedWithOrder (now:'T seq) (compare:'T seq) = 
+        Enumerable.SequenceEqual(Enumerable.Intersect(compare, now), now)
+
     /// Remove inclusive relationship duplicates in list list
     let removeDuplicatesInList candidates:(seq<'T list>) =
         let result = new ResizeArray<'T list>(0)
@@ -26,8 +28,7 @@ module OriginModule =
             let mutable check = true
             for compare in candidates do
                 if now <> compare then
-                    if Enumerable.SequenceEqual(
-                            Enumerable.Intersect(now, compare), now) &&
+                    if (compareIsIncludedWithOrder now compare) &&
                             now.Count() < compare.Count() && check then
                         check <- false
             if check = true then
@@ -39,23 +40,10 @@ module OriginModule =
         match vertex with
         | :? Call as c -> c
         | :? Alias as a ->
-            match a.Target with
-            | CallTarget ct -> ct
+            match a.TargetVertex with
+            | AliasTargetCall ct -> ct
             | _ -> failwith $"type error of {vertex}"
         | _ -> failwith $"type error of {vertex}"
-
-    /// Get call maps
-    let getCallMap (graph:DsGraph) =
-        let callMap = new Dictionary<string, ResizeArray<Vertex>>()
-        graph.Vertices
-        |> Seq.iter(fun v ->
-            let apiName =
-                (getVertexTarget v).ApiItem.QualifiedName
-            if not (callMap.ContainsKey(apiName)) then
-                callMap.Add(apiName, new ResizeArray<Vertex>(0))
-            callMap.[apiName].Add(v)
-        )
-        callMap
 
     /// Get reset informations from graph
     let getAllResets (graph:DsGraph) =
@@ -64,33 +52,18 @@ module OriginModule =
             let tgt = info.Operand2
             $"{system}.{src}", info.Operator.ToText(), $"{system}.{tgt}"
 
-        let getResetInfo (node:Vertex) =
-            let vertexSystem = (getVertexTarget node).ApiItem.System
-            vertexSystem.ApiResetInfos
-            |> Seq.map(makeName (vertexSystem.QualifiedName))
+        let getJobDefs (call:Call) =
+            call.CallTarget.JobDefs
 
-        let generateResetRelationShips
-                (callMap:Dictionary<string, ResizeArray<Vertex>>)
-                (resets:string * string * string) =
-            let (source, operator, target) = resets
-            [
-                if callMap.ContainsKey(source) then
-                    for src in callMap.[source] do
-                        if callMap.ContainsKey(target) then
-                            for tgt in callMap.[target] do
-                                yield Some(src), operator, Some(tgt)
-                        else
-                            yield Some(src), operator, None
-                else
-                    if callMap.ContainsKey(target) then
-                        for tgt in callMap.[target] do
-                            yield None, operator, Some(tgt)
-            ]
+        let getResetInfo (jd:JobDef) =
+            let apiOwnSystem = jd.ApiItem.System
+            apiOwnSystem.ApiResetInfos
+            |> Seq.map(makeName (apiOwnSystem.QualifiedName))
 
-        let callMap = getCallMap graph
         graph.Vertices
+        |> Seq.map(getVertexTarget)
+        |> Seq.map(getJobDefs) |> removeDuplicates
         |> Seq.collect(getResetInfo) |> Seq.distinct
-        |> Seq.collect(generateResetRelationShips callMap)
 
     /// Get ordered graph nodes to calculate the node index
     let getTraverseOrder (graph:DsGraph) =
@@ -107,12 +80,10 @@ module OriginModule =
 
     /// Get ordered routes from start to end
     let visitFromSourceToTarget
-            (now:Vertex) (target:Vertex)
-            (graph:DsGraph) =
+            (now:Vertex) (target:Vertex) (graph:DsGraph) =
         let rec searchNodes
                 (now:Vertex) (target:Vertex)
-                (graph:DsGraph)
-                (path:Vertex list) =
+                (graph:DsGraph) (path:Vertex list) =
             [
                 let nowPath = path.Append(now) |> List.ofSeq
                 if now <> target then
@@ -123,38 +94,84 @@ module OriginModule =
             ]
         searchNodes now target graph []
 
+    /// Get ordered jobdef routes
+    let visitFromSourceToTargetInList
+            (now:int * int) (target:int * int) (route:JobDef list list) =
+        let rec searchList
+                (now:int * int) (target:int * int)
+                (route:JobDef list list) (path:JobDef list) =
+            [
+                let nv, nj = now
+                let nowPath = path.Append(route.[nv].[nj]) |> List.ofSeq
+                if now <> target && nv + 1 < route.Length then
+                    for jdn = 0 to route.[nv + 1].Length - 1 do
+                        yield! searchList (nv + 1, jdn) target route nowPath
+                else
+                    yield nowPath
+            ]
+        searchList now target route []
+
+    /// Get all ordered routes of child DAGs
+    let getAllVertexRoutes (graph:DsGraph) =
+        [
+            for head in graph.Inits do
+                for tail in graph.Lasts do
+                    visitFromSourceToTarget head tail graph
+        ]
+        |> removeDuplicates
+
+    /// Get all ordered routes of api
+    let getAllJobDefRoutes (allRoutes:seq<Vertex list>) =
+        let allRouteSet = 
+            allRoutes
+            |> Seq.map(fun route ->
+                route
+                |> Seq.map(fun v ->
+                    let c = v :?> Call
+                    c.CallTarget.JobDefs
+                )
+                |> List.ofSeq
+            )
+            |> List.ofSeq
+        [
+            for route in allRouteSet do
+                for sj = 0 to route[0].Length - 1 do
+                    for ej = 0 to route[route.Length - 1].Length - 1 do
+                        yield visitFromSourceToTargetInList 
+                            (0, sj) (route.Length - 1, ej) route
+        ]
+
     /// Get all resets
     let getOneWayResets
-            (mutualResets:Vertex seq seq)
-            (resets:seq<Vertex option * string * Vertex option>) =
+            (mutualResets:string seq seq)
+            (resets:seq<string * string * string>) =
         resets
         |> Seq.filter(fun e ->
-            let (head, r, tail) = e
-            r <> TextInterlock &&
-            head.IsSome && tail.IsSome
+            let (_, o, _) = e
+            o <> TextInterlock || o <> TextInterlockWeak
         )
         |> Seq.map(fun e ->
             let (head, r, tail) = e
-            if r = TextResetPush then
-                seq { head.Value; tail.Value; }
-            elif r = TextResetPushRev then
-                seq { tail.Value; head.Value; }
+            if r = TextResetEdge || r = TextResetPush then
+                seq { head; tail; }
+            elif r = TextResetEdgeRev || r = TextResetPushRev  then
+                seq { tail; head; }
             else
                 Seq.empty
         )
         |> Seq.except(mutualResets)
+        |> Seq.filter(fun r -> r.Count() > 0)
 
     /// Get mutual resets
-    let getMutualResets (resets:seq<Vertex option * string * Vertex option>) =
+    let getMutualResets (resets:seq<string * string * string>) =
         resets
         |> Seq.filter(fun e ->
-            let (source, r, target) = e
-            r = TextInterlock &&
-            source.IsSome && target.IsSome
+            let _, o, _ = e
+            o = TextInterlock || o = TextInterlockWeak
         )
         |> Seq.map(fun e ->
             let (source, _, target) = e
-            let edge = seq { source.Value; target.Value; }
+            let edge = seq { source; target; }
             seq { edge; edge.Reverse(); }
         )
         |> removeDuplicates
@@ -182,13 +199,13 @@ module OriginModule =
         |> Seq.map(fun e -> e.Last())
 
     /// Get mutual reset chains : All nodes are mutually resets themselves
-    let getMutualResetChains (sort:bool) (resets:Vertex seq seq) =
+    let getMutualResetChains (sort:bool) (resets:string seq seq) =
         let nodes = resets |> Seq.map(fun e -> e.First()) |> Seq.distinct
-        let globalChains = new ResizeArray<Vertex ResizeArray>(0)
-        let candidates = new ResizeArray<Vertex list>(0)
+        let globalChains = new ResizeArray<string ResizeArray>(0)
+        let candidates = new ResizeArray<string list>(0)
 
         let addToChain
-                (chain:ResizeArray<Vertex>) (addHead:bool) (target:Vertex) =
+                (chain:ResizeArray<string>) (addHead:bool) (target:string) =
             let targets =
                 match addHead with
                 | true -> getIncomingResets resets target
@@ -208,12 +225,12 @@ module OriginModule =
             added
 
         let addToResult
-                (result: ResizeArray<Vertex list>)
-                (sort:bool) (target:Vertex seq) =
+                (result: ResizeArray<string list>)
+                (sort:bool) (target:string seq) =
             let candidate =
                 let tgt = target |> Seq.distinct
                 match sort with
-                | true -> tgt |> Seq.sortBy(fun r -> r.Name) |> List.ofSeq
+                | true -> tgt |> Seq.sortBy(fun r -> r) |> List.ofSeq
                 | _ -> tgt |> List.ofSeq
             if not (result.Contains(candidate)) then
                 result.Add(candidate)
@@ -222,7 +239,7 @@ module OriginModule =
         for node in nodes do
             let mutable continued = true
             let checkInList = globalChains |> removeDuplicates
-            let localChains = new ResizeArray<Vertex>(0)
+            let localChains = new ResizeArray<string>(0)
             if not (checkInList.Contains(node)) then
                 localChains.Add(node)
                 while continued do
@@ -239,35 +256,37 @@ module OriginModule =
         | 1 -> globalChains |> Seq.collect id |> addToResult candidates sort
         | _ ->
             for now in globalChains do
-            for chain in globalChains do
-                if now <> chain then
-                    if Enumerable.Intersect(now, chain).Count() > 0 then
-                        now.Concat(chain) |> addToResult candidates sort
-                    else
-                        now |> addToResult candidates sort
+                for chain in globalChains do
+                    if now <> chain then
+                        if Enumerable.Intersect(now, chain).Count() > 0 then
+                            now.Concat(chain) |> addToResult candidates sort
+                        else
+                            now |> addToResult candidates sort
 
         // Remove duplicates
         removeDuplicatesInList candidates
 
     /// Get origin map
     let getOriginMaps
-            (graphNode:Vertex seq) (offByOneWayBackwardResets:Vertex seq)
-            (offByMutualResetChains:Vertex seq)
-            (structedChains:seq<Map<string, seq<Vertex>>>) =
-        let allNodes = new Dictionary<Vertex, InitialType>()
-        let oneWay = offByOneWayBackwardResets |> Seq.map(getVertexTarget)
-        let mutual = offByMutualResetChains |> Seq.map(getVertexTarget)
+            (allRoutes:seq<JobDef list>) 
+            (offByOneWayBackwardResets:string list)
+            (offByMutualResetChains:string list)
+            (structedChains:seq<Map<string, seq<string>>>) =
+        let allNodes = new Dictionary<string, InitialType>()
+        let oneWay = offByOneWayBackwardResets
+        let mutual = offByMutualResetChains
         let toBeZero = oneWay.Concat(mutual) |> Seq.distinct
-
-        for node in graphNode do
-            if toBeZero.Contains(getVertexTarget node) &&
-                    not (allNodes.ContainsKey(node)) then
-                allNodes.Add(node, Off)
+        let allJobs = allRoutes |> removeDuplicates
+        for job in allJobs do
+            let jobName = job.ApiName
+            if toBeZero.Contains(jobName) &&
+                    not (allNodes.ContainsKey(jobName)) then
+                allNodes.Add(jobName, Off)
             else
                 for resets in structedChains do
-                    let nowName = (getVertexTarget node).QualifiedName
+                    let nowName = jobName
                     if resets.ContainsKey(nowName) &&
-                            not (allNodes.ContainsKey(node)) then
+                            not (allNodes.ContainsKey(jobName)) then
                         if resets.Count = 2 then
                             let interlocks =
                                 resets.Remove(nowName)
@@ -277,38 +296,37 @@ module OriginModule =
                                 Enumerable.Intersect(
                                     interlocks, offByMutualResetChains
                                 )
-                            if not (allNodes.ContainsKey(node)) then
+                            if not (allNodes.ContainsKey(jobName)) then
                                 match isIn.Count() with
-                                | 0 -> allNodes.Add(node, NeedCheck)
-                                | _ -> allNodes.Add(node, On)
+                                | 0 -> allNodes.Add(jobName, NeedCheck)
+                                | _ -> allNodes.Add(jobName, On)
                         else
-                            allNodes.Add(node, NeedCheck)
-            if not (allNodes.ContainsKey(node)) then
-                allNodes.Add(node, NotCare)
+                            allNodes.Add(jobName, NeedCheck)
+            if not (allNodes.ContainsKey(jobName)) then
+                allNodes.Add(jobName, NotCare)
         allNodes
 
-    // Get aliases in front of graph
+    /// Get aliases in front of graph
     let getAliasHeads
-            (graph:DsGraph)
-            (callMap:Dictionary<string, ResizeArray<Vertex>>) =
+            (graph:DsGraph) (callMap:Dictionary<string, ResizeArray<Vertex>>) =
         [
-        for calls in callMap do
-            if calls.Value.Count > 1 then
-                for now in calls.Value do
-                for call in calls.Value do
-                    if now <> call then
-                        let fromTo =
-                            visitFromSourceToTarget now call graph
-                            |> removeDuplicates
-                        let intersected =
-                            Enumerable.Intersect(fromTo, calls.Value)
-                        if intersected.Count() = calls.Value.Count then
-                            yield intersected.First()
-            else
-                yield calls.Value.Item(0)
+            for calls in callMap do
+                if calls.Value.Count > 1 then
+                    for now in calls.Value do
+                        for call in calls.Value do
+                            if now <> call then
+                                let fromTo =
+                                    visitFromSourceToTarget now call graph
+                                    |> removeDuplicates
+                                let intersected =
+                                    Enumerable.Intersect(fromTo, calls.Value)
+                                if intersected.Count() = calls.Value.Count then
+                                    yield intersected.First()
+                else
+                    yield calls.Value.Item(0)
         ]
 
-     /// Get node index map(key:name, value:idx)
+    /// Get node index map(key:name, value:idx)
     let getIndexedMap (graph:DsGraph) =
         let traverseOrder = getTraverseOrder graph
         let mutable i = 1
@@ -318,7 +336,6 @@ module OriginModule =
                 i <- i + 1
         ]
         |> Map.ofList
-
 
     /// Get origin status of child nodes
     let getOrigins (graph:DsGraph) =
@@ -330,47 +347,49 @@ module OriginModule =
             resetChains
             |> Seq.map(fun resets ->
                 resets
-                |> Seq.map(getVertexTarget)
                 |> Seq.distinct
-                |> Seq.map(fun seg ->
-                    seg.QualifiedName,
-                    resetChains
-                    |> Seq.collect(Seq.filter(fun s -> getVertexTarget s = seg))
+                |> Seq.map(fun jd ->
+                    jd,
+                    resetChains 
+                    |> Seq.filter(fun s -> s.Contains(jd)) 
+                    |> Seq.collect id
                 )
                 |> Map.ofSeq
             )
-        let callMap = getCallMap graph
-        let aliasHeads = getAliasHeads graph callMap
+        let allRoutes = 
+            graph 
+            |> getAllVertexRoutes 
+            |> getAllJobDefRoutes 
+            |> removeDuplicates
+            |> Seq.map(fun r -> List.distinct r)
         let offByOneWayBackwardResets =
             [
-            for reset in oneWayResets do
-                let src = reset.First()
-                let tgt = reset.Last()
-                let backward = visitFromSourceToTarget tgt src graph
-                if backward.Count() > 0 then
-                    yield tgt
+                for reset in oneWayResets do
+                    let tgt = seq { reset.Last(); reset.First(); }
+                    let backward = 
+                        allRoutes
+                        |> Seq.filter(fun route -> route.Count() > 0)
+                        |> Seq.map(fun route -> 
+                            route |> Seq.map(fun j -> j.ApiName)
+                        )
+                        |> Seq.filter(compareIsIncludedWithOrder tgt)
+                    if backward.Count() > 0 then yield tgt.First()
             ]
         let offByMutualResetChains =
-            let detectedChain =
-                resetChains.Where(fun chain ->
-                    Enumerable.Intersect(chain, aliasHeads).Count() > 0
-                )
-            [
-            for chain in detectedChain do
-                for now in chain do
-                for node in chain do
-                    if now <> node then
-                        let fromTo =
-                            visitFromSourceToTarget now node graph
-                            |> removeDuplicates
-                        let intersected =
-                            Enumerable.Intersect(fromTo, chain)
-                        if intersected.Count() = chain.Count() then
-                            yield now
-            ]
+            allRoutes.Collect(fun route ->
+                let nameRoute = route |> Seq.map(fun j -> j.ApiName)
+                [
+                    for chain in resetChains do
+                        let collision = Enumerable.Intersect(chain, nameRoute)
+                        if collision.Count() = chain.Count() then
+                            yield collision.First()
+                ]
+            )
+            |> Seq.filter(fun c -> c.length() > 0)
+            |> List.ofSeq
 
         getOriginMaps
-            graph.Vertices
+            allRoutes
             offByOneWayBackwardResets offByMutualResetChains
             structedChains
 
@@ -383,12 +402,18 @@ module OriginModule =
 [<Extension>]
 type OriginHelper =
     /// Get origin status of child nodes
-    [<Extension>] static member GetOrigins(graph:DsGraph)    = graph |> getOrigins
-     /// Get node index map(key:name, value:idx)
-    [<Extension>] static member GetIndexedMap(graph:DsGraph) = graph |> getIndexedMap
-    /// Get reset informations from graph
-    [<Extension>] static member GetAllResets(graph:DsGraph)  = graph |> getAllResets
-    /// Get pre-calculated targets thatchild segments to be 'ON' in progress(Theta)
-    [<Extension>] static member GetThetaTargets(graph:DsGraph) = graph |> getThetaTargets
+    [<Extension>] 
+    static member GetOrigins(graph:DsGraph) = getOrigins graph
 
-#endif      // <shin>
+    /// Get node index map(key:name, value:idx)
+    [<Extension>] 
+    static member GetIndexedMap(graph:DsGraph) = getIndexedMap graph
+
+    /// Get reset informations from graph
+    [<Extension>] 
+    static member GetAllResets(graph:DsGraph) = getAllResets graph
+
+    /// Get pre-calculated targets that
+    /// child segments to be 'ON' in progress(Theta)
+    [<Extension>] 
+    static member GetThetaTargets(graph:DsGraph) = getThetaTargets graph

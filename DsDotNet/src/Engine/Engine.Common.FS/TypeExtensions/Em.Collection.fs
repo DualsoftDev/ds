@@ -118,3 +118,7 @@ module DotNetCollectionExt =
             else
                 xs.Add(key, value)
 
+    type HashSet<'k> with
+        member xs.AddRange(keys:'k seq) =
+            [ for k in keys do
+                xs.Add k ] |> List.forall id

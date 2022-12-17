@@ -11,15 +11,14 @@ open UnitTest.Engine
 
 [<AutoOpen>]
 module TestModule =
-    let emptyStorages = Storages()
-    let evalExpr (text:string) = (parseExpression emptyStorages text).BoxedEvaluatedValue
+    let evalExpr storages (text:string) = (parseExpression storages text).BoxedEvaluatedValue
     let evalExpr2 (storages:Storages) (text:string) = (parseExpression storages text).BoxedEvaluatedValue
     let v = ExpressionModule.literal2expr
     let evaluate (exp:IExpression) = exp.BoxedEvaluatedValue
     let dq = "\""
     /// Parse And Serialize
-    let pns (text:string) =
-        let expr = parseExpression emptyStorages text
+    let pns storages (text:string) =
+        let expr = parseExpression storages text
         expr.ToText(false)
     let pns2 (storages:Storages) (text:string) =
         let expr = parseExpression storages text
@@ -71,6 +70,7 @@ module TestModule =
 
         [<Test>]
         member __.``2 Tag test`` () =
+            let storages = Storages()
             let t1 = PlcTag("1", "%M1.1", 1)
             tag2expr t1 |> evaluate === 1
             t1.Value <- 2
@@ -85,7 +85,7 @@ module TestModule =
             (t1 <== fAdd [v 3; v 4]).Do()
             t1.Value === 7
 
-            let exp = $"{dq}hello{dq} + {dq}world{dq}" |> parseExpression emptyStorages :?> Expression<string>
+            let exp = $"{dq}hello{dq} + {dq}world{dq}" |> parseExpression storages :?> Expression<string>
             // Invalid assignment: won't compile.  OK!
             // (t1 <== exp)
             let tString = PlcTag("1", "%M1.1", "1")
@@ -280,11 +280,15 @@ module TestModule =
             stmt.ToText() === "$target := *(2, 3, 4)"
 
 
-            "toBool(0)" |> pns === "toBool(0)"
+            let storages = Storages()
+            "toBool(0)" |> pns storages === "toBool(0)"
 
 
         [<Test>]
         member __.``6 Operator Precedence test`` () =
+            let storages = Storages()
+            let evalExpr = evalExpr storages
+
             "2 + 3 + 4"         |> evalExpr === 9
             "2 + (3 + 4)"       |> evalExpr === 9
             "(2 + 3) + 4"       |> evalExpr === 9
@@ -303,6 +307,8 @@ module TestModule =
 
         [<Test>]
         member __.``6 Text Serialization test`` () =
+            let storages = Storages()
+            let pns = pns storages
             "2 + 3 + 4"         |> pns === "2 + 3 + 4"
             "2 + (3 + 4)"       |> pns === "2 + 3 + 4"
             "(2 + 3) + 4"       |> pns === "2 + 3 + 4"
@@ -323,6 +329,7 @@ module TestModule =
 
         [<Test>]
         member __.``7 Deserialize test`` () =
+            let storages = Storages()
             let exprs =
                 [
                     "1y + 2y"
@@ -339,7 +346,7 @@ module TestModule =
                 ]
 
             for exp in exprs do
-                pns exp === exp
+                pns storages exp === exp
 
 
 
@@ -429,6 +436,8 @@ module TestModule =
 
         [<Test>]
         member __.``10 Parse test`` () =
+            let storages = Storages()
+            let evalExpr = evalExpr storages
             """  "hello, " + "world" """ |> evalExpr === "hello, world"
 
             "1 + 2" |> evalExpr === 3
@@ -458,6 +467,7 @@ module TestModule =
 
         [<Test>]
         member __.``11 Uncompilable test`` () =
+            let storages = Storages()
             let t1 = PlcTag("1", "%M1.1", 1)
             tag2expr t1 |> evaluate === 1
             t1.Value <- 2
@@ -465,7 +475,7 @@ module TestModule =
             // Invalid assignment: won't compile.  OK!
             // t1.Value <- 2.0
 
-            let exp = $"{dq}hello{dq} + {dq}world{dq}" |> parseExpression emptyStorages :?> Expression<string>
+            let exp = $"{dq}hello{dq} + {dq}world{dq}" |> parseExpression storages :?> Expression<string>
             // Invalid assignment: won't compile.  OK!
             // (t1 <== exp)
 

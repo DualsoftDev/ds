@@ -19,9 +19,10 @@ module TimerTestModule =
                 s.Do()
         [<Test>]
         member __.``TON creation test`` () =
+            let storages = Storages()
             let t1 = PlcTag("my_timer_control_tag", "%M1.1", false)
             let condition = tag2expr t1
-            let timer = TimerStatement.CreateTON(emptyStorages, "myTon", 2000us, condition) |> toTimer       // 2000ms = 2sec
+            let timer = TimerStatement.CreateTON(storages, "myTon", 2000us, condition) |> toTimer       // 2000ms = 2sec
             timer.TT.Value === false
             timer.EN.Value === false
             timer.DN.Value === false
@@ -39,12 +40,12 @@ module TimerTestModule =
                     timer.ACC
                 ]
 
-            emptyStorages.ContainsKey("myTon") === true
+            storages.ContainsKey("myTon") === true
             for t in internalTags do
-                emptyStorages.ContainsKey(t.Name) === true
+                storages.ContainsKey(t.Name) === true
 
 
-            let xxx = emptyStorages
+            let xxx = storages
 
             // rung 입력 조건이 true
             t1.Value <- true
@@ -75,7 +76,7 @@ module TimerTestModule =
         [<Test>]
         member __.``TON creation with text test`` () =
             let t1 = PlcTag("my_timer_control_tag", "%M1.1", false)
-            let storages = Dictionary<string, IStorage>()
+            let storages = Storages()
             storages.Add(t1.Name, t1)
 
             let statement:Statement = "ton myTon = createTON(2000us, $my_timer_control_tag)" |> parseStatement storages |> Option.get
@@ -115,9 +116,10 @@ module TimerTestModule =
 
         [<Test>]
         member __.``TOF creation with initial TRUE test`` () =
+            let storages = Storages()
             let t1 = PlcTag("my_timer_control_tag", "%M1.1", true)
             let condition = tag2expr t1
-            let timer = TimerStatement.CreateTOF(emptyStorages, "myTof", 2000us, condition) |> toTimer        // 2000ms = 2sec
+            let timer = TimerStatement.CreateTOF(storages, "myTof", 2000us, condition) |> toTimer        // 2000ms = 2sec
             timer.EN.Value === true
             timer.TT.Value === false
             timer.DN.Value === true
@@ -126,9 +128,10 @@ module TimerTestModule =
 
         [<Test>]
         member __.``TOF creation with initial FALSE test`` () =
+            let storages = Storages()
             let t1 = PlcTag("my_timer_control_tag", "%M1.1", false)
             let condition = tag2expr t1
-            let timer = TimerStatement.CreateTOF(emptyStorages, "myTof", 2000us, condition) |> toTimer        // 2000ms = 2sec
+            let timer = TimerStatement.CreateTOF(storages, "myTof", 2000us, condition) |> toTimer        // 2000ms = 2sec
             timer.TT.Value === false
             timer.EN.Value === false
             timer.DN.Value === false
@@ -137,9 +140,10 @@ module TimerTestModule =
 
         [<Test>]
         member __.``TOF creation with t -> f -> t -> F -> t test`` () =
+            let storages = Storages()
             let t1 = PlcTag("my_timer_control_tag", "%M1.1", true)
             let condition = tag2expr t1
-            let timer = TimerStatement.CreateTOF(emptyStorages, "myTof", 2000us, condition) |> toTimer        // 2000ms = 2sec
+            let timer = TimerStatement.CreateTOF(storages, "myTof", 2000us, condition) |> toTimer        // 2000ms = 2sec
             // rung 입력 조건이 false
             t1.Value <- false
             evaluateRungInputs timer
@@ -181,11 +185,12 @@ module TimerTestModule =
 
         [<Test>]
         member __.``RTO creation test`` () =
+            let storages = Storages()
             let rungConditionInTag = PlcTag("my_timer_control_tag", "%M1.1", true)
             let resetTag = PlcTag("my_timer_reset_tag", "%M1.1", false)
             let condition = tag2expr rungConditionInTag
             let reset = tag2expr resetTag
-            let timer = TimerStatement.CreateRTO(emptyStorages, "myRto", 2000us, condition, reset) |> toTimer        // 2000ms = 2sec
+            let timer = TimerStatement.CreateRTO(storages, "myRto", 2000us, condition, reset) |> toTimer        // 2000ms = 2sec
 
             timer.EN.Value === true
             timer.TT.Value === true

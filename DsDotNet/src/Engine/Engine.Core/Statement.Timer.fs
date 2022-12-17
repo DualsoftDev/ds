@@ -16,6 +16,9 @@ module TimerStatementModule =
         Type=typ; Name=name; Preset=preset;
         RungConditionIn=rungConditionIn; ResetCondition=resetCondition;
     } : Statement =
+        if preset < MinTickInterval then
+            failwith <| sprintf "Timer Resolution Error: Preset value should be larger than %A" MinTickInterval
+
         let ts = TimerStruct(storages, name, preset, 0us)
         let timer = new Timer(typ, ts)
 

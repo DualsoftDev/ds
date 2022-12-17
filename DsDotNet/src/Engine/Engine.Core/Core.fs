@@ -113,8 +113,8 @@ module CoreModule =
         member _.PureNames = names
         member _.ParentNPureNames = ([parent.GetCore().Name] @ names).ToArray()
         override x.GetRelativeName(referencePath:Fqdn) = x.PureNames.Combine()
-        
-    
+
+
     // Subclasses = {Call | Real | RealOtherFlow}
     type ISafetyConditoinHolder =
         abstract member SafetyConditions: HashSet<SafetyCondition>

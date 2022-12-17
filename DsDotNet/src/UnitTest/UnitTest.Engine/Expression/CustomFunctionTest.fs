@@ -1,8 +1,9 @@
 namespace UnitTest.Engine.Expression
 
 open NUnit.Framework
-
 open UnitTest.Engine
+
+open Engine.Core
 
 [<AutoOpen>]
 module CustomFunctionTestModule =
@@ -12,6 +13,7 @@ module CustomFunctionTestModule =
 
         [<Test>]
         member __.``1 Trigonometry test`` () =
+            let storages = Storages()
             let trues =
                 [
                     "sin(0.0) = 0.0"            // todo: "sin(0) = 0.0f" Not yet!!
@@ -22,7 +24,7 @@ module CustomFunctionTestModule =
                     "sin(3.14 / 2.0) <= 1.0"
                 ]
             for t in trues do
-                t |> evalExpr === true
+                t |> evalExpr storages === true
 
 
 

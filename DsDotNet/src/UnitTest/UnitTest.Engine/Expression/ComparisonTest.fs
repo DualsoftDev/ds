@@ -4,8 +4,8 @@ open NUnit.Framework
 
 open Engine.Parser.FS
 open UnitTest.Engine
+open Engine.Core
 open Engine.Core.ExpressionPrologModule.ExpressionPrologSubModule
-open Engine.Core.ExpressionFunctionModule.FunctionModule
 
 [<AutoOpen>]
 module ComparisionTestModule =
@@ -15,6 +15,7 @@ module ComparisionTestModule =
 
         [<Test>]
         member __.``1 ">" test`` () =
+            let storages = Storages()
             let trues =
                 [
                     "2 > 1"
@@ -40,7 +41,7 @@ module ComparisionTestModule =
                     "(2 + 3) * 2 < 20"
                 ]
             for t in trues do
-                t |> evalExpr === true
+                t |> evalExpr storages === true
 
             let falses =
                 [
@@ -67,7 +68,7 @@ module ComparisionTestModule =
                     "(2 + 3) * 2 > 20"
                 ]
             for t in falses do
-                t |> evalExpr === false
+                t |> evalExpr storages === false
 
 
             let typeMismatches =
@@ -76,11 +77,12 @@ module ComparisionTestModule =
                     "2.0 > 1"
                 ]
             for f in typeMismatches do
-                (fun () -> f |> parseExpression emptyStorages |> ignore) |> ShouldFailWithSubstringT "Type mismatch"
+                (fun () -> f |> parseExpression storages |> ignore) |> ShouldFailWithSubstringT "Type mismatch"
 
 
         [<Test>]
         member __.``1 "=" test`` () =
+            let storages = Storages()
             let trues =
                 [
                     "1 = 1"
@@ -102,10 +104,11 @@ module ComparisionTestModule =
                     "equal(1, (2 / 2), (3 / 3), 1)"
                 ]
             for t in trues do
-                t |> evalExpr === true
+                t |> evalExpr storages === true
 
         [<Test>]
         member __.``1 "=" with different type test`` () =
+            let storages = Storages()
             (* 구현을 위한 내부 함수 isEqual, gte 등은 type 과 상관없이 대소 비교 가능해야 하지만,
                실제 사용자가 사용할 때에는 type 이 같아야 한다. *)
             isEqual 1 1s === true
@@ -120,7 +123,7 @@ module ComparisionTestModule =
                     "1s >= 1"
                 ]
             for f in fails do
-                (fun () -> f |> parseExpression emptyStorages |> ignore) |> ShouldFailWithSubstringT "Type mismatch"
+                (fun () -> f |> parseExpression storages |> ignore) |> ShouldFailWithSubstringT "Type mismatch"
 
 
 
@@ -129,6 +132,7 @@ module ComparisionTestModule =
 
         [<Test>]
         member __.``1 ">>>" test`` () =
+            let storages = Storages()
             let trues =
                 [
                     "8 >>> 1 = 4"
@@ -159,9 +163,10 @@ module ComparisionTestModule =
 
                 ]
             for t in trues do
-                t |> evalExpr === true
+                t |> evalExpr storages === true
         [<Test>]
         member __.``1 Math test`` () =
+            let storages = Storages()
             let trues =
                 [
                     "sin(0) = 0.0"
@@ -175,11 +180,12 @@ module ComparisionTestModule =
                 ]
 
             for t in trues do
-                t |> evalExpr === true
+                t |> evalExpr storages === true
 
 
         [<Test>]
         member __.``1 Bitwise operation test`` () =
+            let storages = Storages()
             let trues =
                 [
                     "8 &&& 255 = 8"
@@ -201,11 +207,12 @@ module ComparisionTestModule =
                 ]
 
             for t in trues do
-                t |> evalExpr === true
+                t |> evalExpr storages === true
 
 
         [<Test>]
         member __.``1 Logical And/Or/Not test`` () =
+            let storages = Storages()
             let trues =
                 [
                     "true != false"
@@ -251,7 +258,7 @@ module ComparisionTestModule =
                 ]
 
             for t in trues do
-                t |> evalExpr === true
+                t |> evalExpr storages === true
 
 
             let fails =
@@ -266,15 +273,13 @@ module ComparisionTestModule =
                     "0 = false"
                 ]
             for f in fails do
-                (fun () -> f |> parseExpression emptyStorages |> ignore) |> ShouldFailWithSubstringT "Type mismatch"
+                (fun () -> f |> parseExpression storages |> ignore) |> ShouldFailWithSubstringT "Type mismatch"
 
 
 
         [<Test>]
         member __.``1 TypeCast test`` () =
-            //let xxx = "toInt16(false) = 0s" |> evalExpr
-
-
+            let storages = Storages()
             let trues =
                 [
                     "(bool)0 = false"
@@ -314,12 +319,12 @@ module ComparisionTestModule =
                 ]
 
             for t in trues do
-                t |> evalExpr === true
+                t |> evalExpr storages === true
 
             let fails =
                 [
                     "(bool)(0 && true)"
                 ]
             for f in fails do
-                (fun () -> f |> parseExpression emptyStorages |> ignore) |> ShouldFailWithSubstringT "Type mismatch"
+                (fun () -> f |> parseExpression storages |> ignore) |> ShouldFailWithSubstringT "Type mismatch"
 

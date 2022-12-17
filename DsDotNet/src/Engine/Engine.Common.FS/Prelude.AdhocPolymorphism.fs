@@ -118,7 +118,7 @@ module PreludeAdhocPolymorphism =
     /// choice on option type
     let inline ( <|> )     x y = (?<-) FAdhoc_orElse x y
     /// append two lists / arrays / sequences
-    let inline ( @ ) x y = (?<-) FAdhoc_append x y // Haskell 의 ++ 연산자와 동일
+    let inline ( @ )       x y = (?<-) FAdhoc_append x y // Haskell 의 ++ 연산자와 동일
     /// append element to a list / array / sequence
     let inline ( +++ )     x y = (?<-) FAdhoc_Xpend  x y
 
@@ -137,9 +137,20 @@ module PreludeAdhocPolymorphism =
     let inline (<=<) uf tf = fun v -> tf v >>= uf
 
     let private testme() =
+        (*
+        #I @"bin\Debug\net48"
+        #r "Engine.Common.FS.dll"
+        open Engine.Common.FS
+        *)
         let verify c = if not c then failwith "ERROR"
         let some1, some2, some3 = Some 1, Some 2, Some 3
         verify ( [1..3] @ [4..5] = [1..5])
+        verify ( [|1..3|] @ [|4..5|] = [|1..5|])
+
+        // sequence 는 '=' 로 직접 비교하면 원하는 결과가 나오지 않는다.
+        let seq1 = seq{1..3} @ seq{4..5}
+        verify ( System.Linq.Enumerable.SequenceEqual (seq1, seq{1..5}))
+
         verify ( some1 <|> None = some1 )
 
         let lift (f: 'a -> 'b) (x: 'a) = f x

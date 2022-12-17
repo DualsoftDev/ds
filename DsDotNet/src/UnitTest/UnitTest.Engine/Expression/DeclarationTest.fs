@@ -25,10 +25,10 @@ module DeclarationTestModule =
 
             let percent = "%"
             let statementTexts = [
-                "ctu myCounter = createCTU(100us, false)"
+                "ctu myCtu1 = createCTU(100us, false)"
                 $"int8 myByte = createTag({dq}{percent}M9.9{dq}, 123y)"
-                "ton mytimer = createTON(1000us, $tag1 || $tag2)"
-                "ton mytimer = createTON(1000us, $tag1 || $tag2, $tag3)"
+                "ton myton1 = createTON(1000us, $tag1 || $tag2)"
+                "ton myton2 = createTON(1000us, $tag1 || $tag2, $tag3)"
             ]
             for s in statementTexts do
                 let statement = parseStatement storages s

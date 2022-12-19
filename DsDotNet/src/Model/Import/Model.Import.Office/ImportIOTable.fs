@@ -61,9 +61,9 @@ module ImportIOTable =
         //주소	S101	RBT2Left	IO	    bit	Q3	-	I16
         //주소	S101	RBT2Home	IO	    bit	Q2	-	I19
         
-        sys.Variables.Clear();
-        sys.Commands.Clear();
-        sys.Observes.Clear();
+        //sys.Variables.Clear();
+        //sys.Commands.Clear();
+        //sys.Observes.Clear();
         try
             let dicJob = sys.Jobs |> Seq.collect(fun f-> f.JobDefs) |> Seq.map(fun j->j.ApiName, j) |> dict
             for row in tableIO.Rows do
@@ -76,16 +76,17 @@ module ImportIOTable =
                         let outTag = $"{row.[(int)IOColumn.Output]}"
                         dicJob.[name].InTag  <- inTag
                         dicJob.[name].OutTag <-outTag
+                    |_ ->  failwith "ERROR"
 
-                    |TagCase.VariableData ->    //ahn 초기값 입력
-                        let item = CodeElements.VariableData($"{row.[(int)IOColumn.Name]}", $"{row.[(int)IOColumn.Size]}",  "")
-                        sys.Variables.Add(item) |>ignore
-                    |TagCase.Command  ->        //ahn 수식 입력
-                        let item = CodeElements.Command($"{row.[(int)IOColumn.Command]}", FunctionApplication("", [||]))
-                        sys.Commands.Add(item) |>ignore
-                    |TagCase.Observe  ->        //ahn 수식 입력
-                        let item = CodeElements.Observe($"{row.[(int)IOColumn.Observe]}", FunctionApplication("", [||]))
-                        sys.Observes.Add(item) |>ignore
+                    //|TagCase.VariableData ->    //ahn 초기값 입력
+                    //    let item = CodeElements.VariableData($"{row.[(int)IOColumn.Name]}", $"{row.[(int)IOColumn.Size]}",  "")
+                    //    sys.Variables.Add(item) |>ignore
+                    //|TagCase.Command  ->        //ahn 수식 입력
+                    //    let item = CodeElements.Command($"{row.[(int)IOColumn.Command]}", FunctionApplication("", [||]))
+                    //    sys.Commands.Add(item) |>ignore
+                    //|TagCase.Observe  ->        //ahn 수식 입력
+                    //    let item = CodeElements.Observe($"{row.[(int)IOColumn.Observe]}", FunctionApplication("", [||]))
+                    //    sys.Observes.Add(item) |>ignore
 
         with ex ->  failwithf  $"{ex.Message}"
         DoWork(0);

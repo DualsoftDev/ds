@@ -326,7 +326,7 @@ namespace Dual.Model.Import
         }
         internal void TestDebug()
         {
-            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\")) + "src\\UnitTest\\UnitTest.Engine\\ImportPPT\\FactoryIO\\Sys.pptx";
+            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\")) + "src\\UnitTest\\UnitTest.Engine\\ImportOffice\\PPT\\FactoryIO\\Sys.pptx";
             bool debug = File.Exists(path);
             if (debug)
             {
@@ -349,7 +349,7 @@ namespace Dual.Model.Import
             //T9_Group
             //T10_Button
             //T11_SubLoading
-            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\")) + "src\\UnitTest\\UnitTest.Engine\\ImportPPT\\S.pptx";
+            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\")) + "src\\UnitTest\\UnitTest.Engine\\ImportOffice\\PPT\\s.pptx";
             bool debug = File.Exists(path);
             if (debug)
             {

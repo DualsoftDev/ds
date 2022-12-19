@@ -40,7 +40,7 @@ module OriginModule =
         match vertex with
         | :? Call as c -> c
         | :? Alias as a ->
-            match a.TargetVertex with
+            match a.TargetWrapper with
             | DuAliasTargetCall ct -> ct
             | _ -> failwith $"type error of {vertex}"
         | _ -> failwith $"type error of {vertex}"

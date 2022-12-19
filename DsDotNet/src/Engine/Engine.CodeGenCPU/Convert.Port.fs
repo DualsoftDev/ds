@@ -12,21 +12,21 @@ type StatementPort =
 
     ///Port bit 수식 만들기
     [<Extension>] 
-    static member CreateStartPort(v:VertexM, autoTag:DsTag<bool>) =
+    static member CreateStartPort(v:VertexMemoryManager, autoTag:DsTag<bool>) =
         let startForce = tag2expr <| v.StartForce
         let startTag   = tag2expr <| v.StartTag
         let autoTag    = tag2expr <| autoTag
         v.StartPort <== ((startForce <&&> (!!)autoTag) <||> startTag)
     
     [<Extension>] 
-    static member CreateResetPort(v:VertexM, autoTag:DsTag<bool>) =
+    static member CreateResetPort(v:VertexMemoryManager, autoTag:DsTag<bool>) =
         let resetForce = tag2expr <| v.ResetForce
         let resetTag   = tag2expr <| v.ResetTag
         let autoTag    = tag2expr <| autoTag
         v.ResetPort <== ((resetForce <&&> (!!)autoTag) <||> resetTag)
     
     [<Extension>] 
-    static member CreateEndPort(v:VertexM, autoTag:DsTag<bool>, resetTag:DsTag<bool>) =
+    static member CreateEndPort(v:VertexMemoryManager, autoTag:DsTag<bool>, resetTag:DsTag<bool>) =
         let endForce = tag2expr <| v.EndForce
         let endTag   = tag2expr <| v.EndTag
         let resetTag = tag2expr <| resetTag

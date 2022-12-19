@@ -119,6 +119,7 @@ module PreludeAdhocPolymorphism =
     let inline ( <|> )     x y = (?<-) FAdhoc_orElse x y
     /// append two lists / arrays / sequences
     let inline ( @ )       x y = (?<-) FAdhoc_append x y // Haskell 의 ++ 연산자와 동일
+    let inline ( ++ )      x y = (?<-) FAdhoc_append x y // Haskell 의 ++ 연산자와 동일
     /// append element to a list / array / sequence
     let inline ( +++ )     x y = (?<-) FAdhoc_Xpend  x y
 

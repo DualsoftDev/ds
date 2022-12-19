@@ -35,37 +35,41 @@ type ConvertUtilExt =
 
                     findEdges.Select(fun e->e.Source)
 
-                    
-    [<Extension>]  static member GetCoinTags(coin:Vertex, memory:VertexM, isInTag:bool) =
+
+    [<Extension>]  static member GetCoinTags(coin:Vertex, memory:VertexMemoryManager, isInTag:bool) =
                             match coin with
                             | :? Call as c -> c.CallTarget.JobDefs
-                                                .Select(fun j-> 
+                                                .Select(fun j->
                                                             if isInTag
                                                             then PlcTag(j.ApiName+"_I", "", false)
                                                             else PlcTag(j.ApiName+"_O", "", false)
                                                 )
                                                 .Cast<TagBase<bool>>()
-                            | :? Alias as a -> 
-                                        match a.TargetVertex with
+                            | :? Alias as a ->
+                                        match a.TargetWrapper with
                                         | DuAliasTargetReal ar    -> ar.GetCoinTags(memory, isInTag)
                                         | DuAliasTargetCall ac    -> ac.GetCoinTags(memory, isInTag)
                                         | DuAliasTargetRealEx ao  -> ao.GetCoinTags(memory, isInTag)
                             | _ -> failwith "Error"
 
 
-    [<Extension>]  static member GetTxRxTags(coin:Vertex, isTx:bool, dicM:ConcurrentDictionary<Vertex, VertexM>) =
-                            let memory = dicM[coin]
-                            match coin with
-                            | :? Call as c -> c.CallTarget.JobDefs
-                                                .SelectMany(fun j-> 
-                                                            if isTx
-                                                            then j.ApiItem.TXs.Select(fun s-> dicM[s].StartTag)
-                                                            else j.ApiItem.RXs.Select(fun s-> dicM[s].EndTag)
-                                                )
-                                                .Cast<TagBase<bool>>()
-                            | :? Alias as a -> 
-                                        match a.TargetVertex with
-                                        | DuAliasTargetReal ar    -> ar.GetCoinTags(memory, isTx)
-                                        | DuAliasTargetCall ac    -> ac.GetCoinTags(memory, isTx)
-                                        | DuAliasTargetRealEx ao  -> ao.GetCoinTags(memory, isTx)
-                            | _ -> failwith "Error"
+    [<Extension>]
+    static member GetTxRxTags(coin:Vertex, isTx:bool, memory:VertexMemoryManager) =
+        let getVertexManager(v:Vertex) = v.VertexMemoryManager :?> VertexMemoryManager
+
+        match coin with
+        | :? Call as c ->
+            c.CallTarget.JobDefs
+                .SelectMany(fun j->
+                    if isTx then
+                        j.ApiItem.TXs.Select(fun s -> (getVertexManager s).StartTag)
+                    else
+                        j.ApiItem.RXs.Select(fun s -> (getVertexManager s).EndTag)
+                )
+                .Cast<TagBase<bool>>()
+        | :? Alias as a ->
+            match a.TargetWrapper with
+            | DuAliasTargetReal ar    -> ar.GetCoinTags(memory, isTx)
+            | DuAliasTargetCall ac    -> ac.GetCoinTags(memory, isTx)
+            | DuAliasTargetRealEx ao  -> ao.GetCoinTags(memory, isTx)
+        | _ -> failwith "Error"

@@ -14,6 +14,8 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
+
+using static Engine.CodeGenCPU.VertexMemoryManagerModule;
 using static Engine.Common.FS.MessageEvent;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsTextProperty;
@@ -25,7 +27,7 @@ using Color = System.Drawing.Color;
 
 namespace Dual.Model.Import
 {
-    
+
     public partial class FormMain : Form
     {
         internal void ImportPPT()
@@ -36,15 +38,13 @@ namespace Dual.Model.Import
                 {
                     _cts.Cancel();
                     _cts = new CancellationTokenSource();
-                    
+
 
                     var result = ImportM.FromPPTX(PathPPT);
                     _mySystem = result.Item1;
                     _myViewNodes = result.Item2;
 
-                    var resultData = CpuLoader.LoadStatements(_mySystem);
-                    var rungs = resultData.Item1;
-                    var dicM = resultData.Item2;
+                    var rungs = CpuLoader.LoadStatements(_mySystem);
 
                     _myCPU = new DsCPU("", rungs.Select(s => s.Item2));
                     _myCPU.Run();
@@ -64,7 +64,7 @@ namespace Dual.Model.Import
                                    if (v is Real)
                                    {
                                        comboBox_Segment.Items
-                                       .Add(new SegmentHMI { Display = v.QualifiedName, Vertex = v, ViewNode = viewNode, VertexM = dicM[v] });
+                                       .Add(new SegmentHMI { Display = v.QualifiedName, Vertex = v, ViewNode = viewNode, VertexM = v.VertexMemoryManager as VertexMemoryManager });
                                    }
                                });
 
@@ -280,7 +280,7 @@ namespace Dual.Model.Import
                 {
                     //int pageNum = 0;
                     //if(dicFlow != null)
-                    //    pageNum = dicFlow.First(flow => flow.Value.System.Name == sys.Name 
+                    //    pageNum = dicFlow.First(flow => flow.Value.System.Name == sys.Name
                     //                                 && flow.Value.Name == f.Name).Key;
 
                     //List<pptDummy> lstDummy = new List<pptDummy>();

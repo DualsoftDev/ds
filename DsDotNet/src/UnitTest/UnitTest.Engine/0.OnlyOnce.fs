@@ -36,6 +36,8 @@ module Fixtures =
                 failwith "config 파일 위치를 강제로 수정해 주세요."
             ()
 
+            Engine.CodeGenCPU.ModuleInitializer.Initialize()
+
         //interface IDisposable with
         //    member __.Dispose () =
         //        //CLEAN UP TEST DATA OR WHATEVER YOU NEED TO CLEANUP YOUR TESTS

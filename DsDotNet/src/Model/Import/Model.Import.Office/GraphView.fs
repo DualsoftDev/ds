@@ -21,7 +21,7 @@ module rec ViewModule =
         new (coreVertex:Vertex) = 
               let name = 
                   match coreVertex  with
-                    | :? Alias as a -> match a.TargetVertex with
+                    | :? Alias as a -> match a.TargetWrapper with
                                        | DuAliasTargetReal r -> r.Name
                                        | DuAliasTargetCall c -> c.Name
                                        | DuAliasTargetRealEx o -> o.Name

@@ -51,9 +51,6 @@ type SeqExt =
     [<Extension>] static member FoldRight(xs:'a seq, f, seed)  = Seq.foldBack f xs seed
 
 
-
-
-
     [<Extension>] static member AllPairs(xs:'x seq, ys:'y seq)    = Seq.allPairs xs ys
     [<Extension>] static member Cache(xs:'a seq)                  = Seq.cache xs
     [<Extension>] static member Choose(xs:'a seq, f)              = Seq.choose f xs
@@ -122,3 +119,8 @@ module DotNetCollectionExt =
         member xs.AddRange(keys:'k seq) =
             [ for k in keys do
                 xs.Add k ] |> List.forall id
+
+    type List<'T> with
+        member x.IsEmpty() = x |> Seq.isEmpty
+
+

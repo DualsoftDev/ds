@@ -119,7 +119,7 @@ module ExpressionFunctionModule =
           - 실제로 function/expression 은 아니지만, parsing 편의를 고려해 function 처럼 취급.
           - evaluate 등은 수행해서는 안된다.
         *)
-        | ("createCTU" | "createCTD" | "createCTUD") ->
+        | ("createCTU" | "createCTD" | "createCTUD" | "createCTR") ->
                 let psedoFunction (args:Args):Counter = failwith "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
                 DuFunction { FunctionBody=psedoFunction; Name=funName; Arguments=args }
         | ("createTON" | "createTOF" | "createCRTO" ) ->

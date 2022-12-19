@@ -23,9 +23,10 @@ module CounterStatementModule =
         let accum = accum |? 0us
         let cs =    // counter structure
             match typ with
-            | CTU -> new CTUStruct(storages, name, preset, accum) :> CounterBaseStruct
-            | CTD -> new CTDStruct(storages, name, preset, accum)
+            | CTU  -> new CTUStruct(storages, name, preset, accum) :> CounterBaseStruct
+            | CTD  -> new CTDStruct(storages, name, preset, accum)
             | CTUD -> new CTUDStruct(storages, name, preset, accum)
+            | CTR  -> new CTRStruct(storages, name, preset, accum)
         let counter = new Counter(typ, cs)
 
         let statements = ResizeArray<Statement>()
@@ -74,6 +75,12 @@ module CounterStatementModule =
                 ResetCondition=None; Accumulator=Some accum }
             |> createCounterStatement storages
 
+        static member CreateCTR(storages:Storages, name, preset, rungConditionIn) =
+            {   Type=CTR; Name=name; Preset=preset;
+                CountUpCondition=Some rungConditionIn;
+                CountDownCondition=None; ResetCondition=None; Accumulator=None }
+            |> createCounterStatement storages
+
 
         static member CreateCTU(storages:Storages, name, preset, rungConditionIn, reset) =
             {   Type=CTU; Name=name; Preset=preset;
@@ -96,4 +103,10 @@ module CounterStatementModule =
                 ResetCondition=Some reset; Accumulator=Some accum }
             |> createCounterStatement storages
 
+        static member CreateCTR(storages:Storages, name, preset, rungConditionIn, reset) =
+            {   Type=CTR; Name=name; Preset=preset;
+                CountUpCondition=Some rungConditionIn;
+                CountDownCondition=None;
+                ResetCondition=Some reset; Accumulator=None }
+            |> createCounterStatement storages
 

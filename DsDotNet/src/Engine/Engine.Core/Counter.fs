@@ -14,7 +14,15 @@ open Engine.Common.FS
 
 [<AutoOpen>]
 module rec CounterModule =
-    type CounterType = CTU | CTD | CTUD
+    type CounterType =
+        /// UP Counter
+        CTU
+        /// DOWN Counter
+        | CTD
+        /// UP/DOWN Counter
+        | CTUD
+        /// Ring Counter
+        | CTR
 
     [<AbstractClass>]
     type CounterBaseStruct(storages:Storages, name, preset:CountUnitType, accum:CountUnitType) =
@@ -49,6 +57,10 @@ module rec CounterModule =
         inherit ICTU
         inherit ICTD
 
+    type ICTR =
+        inherit ICounter
+        abstract CU:TagBase<bool>
+
 
     type CTUStruct(storages, name, preset:CountUnitType, accum:CountUnitType) =
         inherit CounterBaseStruct(storages, name, preset, accum)
@@ -69,6 +81,12 @@ module rec CounterModule =
         interface ICTUD with
             member x.CU = x.CU
             member x.CD = x.CD
+
+    type CTRStruct(storages, name, preset:CountUnitType, accum:CountUnitType) =
+        inherit CounterBaseStruct(storages, name, preset, accum)
+        member _.CU = base.CU
+        interface ICTR with
+            member x.CU = x.CU
 
     type internal CountAccumulator(counterType:CounterType, counterStruct:CounterBaseStruct) =
         let disposables = new CompositeDisposable()
@@ -95,6 +113,21 @@ module rec CounterModule =
                     if cs.ACC.Value <= cs.PRE.Value then
                         tracefn "Counter accumulator value reached"
                         cs.DN.Value <- true
+            ) |> disposables.Add
+
+        let registerCTR() =
+            let csr = box cs :?> ICTR
+            ValueSubject
+                .Where(fun storage -> storage = csr.CU && csr.CU.Value)
+                .Subscribe(fun storage ->
+                    if cs.ACC.Value < 0us || cs.PRE.Value < 0us then failwith "ERROR"
+                    cs.ACC.Value <- cs.ACC.Value + 1us
+                    if cs.ACC.Value = cs.PRE.Value then
+                        tracefn "Counter accumulator value reached"
+                        cs.DN.Value <- true
+                    if cs.ACC.Value > cs.PRE.Value then
+                        cs.ACC.Value <- 1us
+                        cs.DN.Value <- false
             ) |> disposables.Add
 
         let registerReset() =
@@ -125,6 +158,7 @@ module rec CounterModule =
             registerReset()
             match cs, counterType with
             | :? CTUStruct, CTU -> registerCTU()
+            | :? CTRStruct, CTR -> registerCTR()
             | :? CTDStruct, CTD -> registerCTD()
             | :? CTUDStruct, CTUD -> registerCTU(); registerCTD();
             | _ -> failwith "ERROR"

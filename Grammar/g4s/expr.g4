@@ -72,7 +72,7 @@ statement: assign | varDecl | timerDecl | counterDecl;
 
     // ctu mycounter = createCTU(1000ms, rungInCondition);
     counterDecl: counterType storageName '=' expr;  //counterType '(' arguments? ')';
-        counterType: 'ctu' | 'ctd' | 'ctud';
+        counterType: 'ctu' | 'ctd' | 'ctud' | 'ctr';
         counterName: IDENTIFIER;
 
 // https://stackoverflow.com/questions/41017948/antlr4-the-following-sets-of-rules-are-mutually-left-recursive

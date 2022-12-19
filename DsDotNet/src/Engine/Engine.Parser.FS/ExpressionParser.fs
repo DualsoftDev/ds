@@ -167,6 +167,7 @@ module rec ExpressionParser =
                     CounterStatement.CreateCTU(storages, name, preset, rungInCondtion)
                 | CTU, "createCTU", (UnitValue preset)::(BoolExp rungInCondtion)::(BoolExp resetCondition)::[] ->
                     CounterStatement.CreateCTU(storages, name, preset, rungInCondtion, resetCondition)
+
                 | CTD, "createCTD", (UnitValue preset)::(BoolExp rungInCondtion)::(UnitValue accum)::[] ->
                     CounterStatement.CreateCTD(storages, name, preset, rungInCondtion, accum)
                 | CTD, "createCTD", (UnitValue preset)::(BoolExp rungInCondtion)::(BoolExp resetCondition)::(UnitValue accum)::[] ->
@@ -176,7 +177,14 @@ module rec ExpressionParser =
                     CounterStatement.CreateCTUD(storages, name, preset, countUpCondition, countDownCondition, accum)
                 | CTUD, "createCTUD", (UnitValue preset)::(BoolExp countUpCondition)::(BoolExp countDownCondition)::(BoolExp resetCondition)::(UnitValue accum)::[] ->
                     CounterStatement.CreateCTUD(storages, name, preset, countUpCondition, countDownCondition, resetCondition, accum)
+
+                | CTR, "createCTR", (UnitValue preset)::(BoolExp rungInCondtion)::[] ->
+                    CounterStatement.CreateCTR(storages, name, preset, rungInCondtion)
+                | CTR, "createCTR", (UnitValue preset)::(BoolExp rungInCondtion)::(BoolExp resetCondition)::[] ->
+                    CounterStatement.CreateCTR(storages, name, preset, rungInCondtion, resetCondition)
+
                 | _ -> fail()
+
             | _ -> fail()
         | None -> fail()
 

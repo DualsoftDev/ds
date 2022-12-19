@@ -138,3 +138,67 @@ module CounterTestModule =
             ctu.RES.Value === true
             ctu.PRE.Value === 100us
             ctu.ACC.Value === 0us
+
+
+        [<Test>]
+        member __.``CTR with reset creation test`` () =
+            let storages = Storages()
+            let t1 = PlcTag("my_counter_control_tag", "%M1.1", false)
+            let resetTag = PlcTag("my_counter_reset_tag", "%M1.1", false)
+            let condition = tag2expr t1
+            let reset = tag2expr resetTag
+            let ctr = CounterStatement.CreateCTR(storages, "myCTR", 100us, condition, reset) |> toCounter
+            ctr.OV.Value === false
+            ctr.UN.Value === false
+            ctr.DN.Value === false
+            ctr.RES.Value === false
+            ctr.PRE.Value === 100us
+            ctr.ACC.Value === 0us
+
+
+            for i in [1..50] do
+                t1.Value <- true
+                evaluateRungInputs ctr
+                ctr.ACC.Value === uint16 i
+                t1.Value <- false
+                evaluateRungInputs ctr
+                ctr.DN.Value === false
+            ctr.ACC.Value === 50us
+            ctr.DN.Value === false
+
+            for i in [51..99] do
+                t1.Value <- true
+                evaluateRungInputs ctr
+                ctr.ACC.Value === uint16 i
+                t1.Value <- false
+                evaluateRungInputs ctr
+                ctr.DN.Value === false
+
+            ctr.ACC.Value === 99us
+            ctr.DN.Value === false
+
+            t1.Value <- true        // last straw that broken ...
+            evaluateRungInputs ctr
+            ctr.ACC.Value === 100us
+            ctr.DN.Value === true
+
+            // counter preset + 1 : ring counter : auto reset
+            t1.Value <- false
+            evaluateRungInputs ctr
+            t1.Value <- true
+            evaluateRungInputs ctr
+            ctr.ACC.Value === 1us
+            ctr.DN.Value === false
+
+
+
+
+            // force counter reset
+            resetTag.Value <- true
+            evaluateRungInputs ctr
+            ctr.OV.Value === false
+            ctr.UN.Value === false
+            ctr.DN.Value === false
+            ctr.RES.Value === true
+            ctr.PRE.Value === 100us
+            ctr.ACC.Value === 0us

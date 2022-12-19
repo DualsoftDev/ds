@@ -36,6 +36,7 @@ module StatementTestModule =
 
             let statements = [
                 "ctu myCounter1 = createCTU(100us, false)"
+                "ctr myCtr1 = createCTR(100us, $tag1)"
                 "ton myTimer2 = createTON(100us, false)"
                 "ton mytimer3 = createTON(1000us, $tag1 || $tag2)"
                 "ton mytimer4 = createTON(1000us, $tag1 || $tag2, $tag3)"

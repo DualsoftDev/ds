@@ -9,12 +9,12 @@ open Engine.Common.FS
 module CpuConvertModule =
 
     //Dictionary memory TAG 관리
-    let dicM = ConcurrentDictionary<Vertex, VertexM>()
+    let dicM = ConcurrentDictionary<Vertex, VertexMemeryManager>()
 
     let getSrcMemorys(v:Vertex, graph:DsGraph, edgeType:ModelingEdgeType) =
         v.FindEdgeSources(graph, edgeType).Select(fun v-> dicM[v])
 
-    let createRungsForReal(realTag:VertexM, graph:DsGraph) =
+    let createRungsForReal(realTag:VertexMemeryManager, graph:DsGraph) =
         let cv = graph.Vertices
         
         //R0. Real 행위의 Coin 상태수식 제공

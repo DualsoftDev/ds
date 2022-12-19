@@ -36,7 +36,7 @@ type ConvertUtilExt =
                     findEdges.Select(fun e->e.Source)
 
                     
-    [<Extension>]  static member GetCoinTags(coin:Vertex, memory:VertexM, isInTag:bool) =
+    [<Extension>]  static member GetCoinTags(coin:Vertex, memory:VertexMemeryManager, isInTag:bool) =
                             match coin with
                             | :? Call as c -> c.CallTarget.JobDefs
                                                 .Select(fun j-> 
@@ -53,7 +53,7 @@ type ConvertUtilExt =
                             | _ -> failwith "Error"
 
 
-    [<Extension>]  static member GetTxRxTags(coin:Vertex, isTx:bool, dicM:ConcurrentDictionary<Vertex, VertexM>) =
+    [<Extension>]  static member GetTxRxTags(coin:Vertex, isTx:bool, dicM:ConcurrentDictionary<Vertex, VertexMemeryManager>) =
                             let memory = dicM[coin]
                             match coin with
                             | :? Call as c -> c.CallTarget.JobDefs

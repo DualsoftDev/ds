@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <Compile Include="CpuUtil.fs" />
-    <Compile Include="VertexM.fs" />
+    <Compile Include="VertexMemoryManager.fs" />
     <Compile Include="Convert.Util.fs" />
     <Compile Include="Convert.Root.fs" />
     <Compile Include="Convert.Real.fs" />

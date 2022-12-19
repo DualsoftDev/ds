@@ -17,8 +17,8 @@ module CpuLoader =
         //모든 인과 대상 Node 메모리화
         vertices.ForEach(fun v ->
             match v with
-                | :? Real as r -> dicM.TryAdd(r, VertexM(v)) |> verifyM $"Duplicated name [{v.QualifiedName}]"
-                | :? Call as c -> dicM.TryAdd(c, VertexM(v)) |> verifyM $"Duplicated name [{v.QualifiedName}]"
+                | :? Real as r -> dicM.TryAdd(r, VertexMemeryManager(v)) |> verifyM $"Duplicated name [{v.QualifiedName}]"
+                | :? Call as c -> dicM.TryAdd(c, VertexMemeryManager(v)) |> verifyM $"Duplicated name [{v.QualifiedName}]"
                 | :? Alias as a ->
                     match a.TargetVertex with
                     | DuAliasTargetReal r -> aliasSet.TryAdd(a, r)        |> verifyM $"Duplicated name [{v.QualifiedName}]"
@@ -32,13 +32,13 @@ module CpuLoader =
             let vertex = vertices.First(fun f->f  =alias.Value)
             dicM.TryAdd(alias.Key, dicM.[vertex]) |> ignore
         )
-        let statements = 
+        let statements =
             sys.Flows.SelectMany(fun flow->
             flow.Graph.Vertices
                 .Where(fun w->w :? Real).Cast<Real>()
                 .SelectMany(fun r->
                     createRungsForReal(dicM[r], r.Graph)
-                    @ 
+                    @
                     createRungsForRoot(r, flow.Graph)
                 )
             )
@@ -46,13 +46,13 @@ module CpuLoader =
         statements, dicM
 
     ///DsSystem 규격으로 cpu code 불러 로딩하기
-    let LoadStatements(system:DsSystem) = 
+    let LoadStatements(system:DsSystem) =
         let statements, dicMemory =  ConvertSystem(system)
 
         statements, dicMemory
 
     ///DsSystem 규격으로 cpu code 불러 Text으로 리턴
-    let LoadStatementsForText(system:DsSystem) = 
+    let LoadStatementsForText(system:DsSystem) =
         let statements, dicMemory =  ConvertSystem(system)
 
         statements

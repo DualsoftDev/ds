@@ -37,8 +37,6 @@ module  TagModule =
     /// PLC action tag (PlcTag) class
     type PlcTag<'T when 'T:equality> (name, address:string, initValue:'T)  =
         inherit Tag<'T>(name, initValue)
-        [<Obsolete("PlcTag 는 address 를 지정하는 생성자를 사용하세요.")>]
-        new (name, initValue:'T) = PlcTag<'T>(name, "", initValue)
         member val Address = address with get, set
 
       /// Ds 일반 plan tag : going relay에 사용중

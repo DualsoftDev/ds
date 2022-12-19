@@ -27,6 +27,8 @@
 
 	<ItemGroup>
 		<Compile Include="0.OnlyOnce.fs" />
+		<Compile Include="ImportOffice\xlsTest.fs" />
+		<Compile Include="ImportOffice\pptTest.fs" />
 		<Compile Include="Miscs\MiscTests.fs" />
 		<Compile Include="Model\Answers.fs" />
 		<Compile Include="Model\Model.fs" />
@@ -44,7 +46,6 @@
 		<Compile Include="Model\FqdnParseTest.fs" />
 		<Compile Include="Model\SystemBuilderTest.fs" />
 		<Compile Include="Model\LoadConfigTest.fs" />
-		<Compile Include="ImportPPT\pptTest.fs" />
 		<None Include="Libraries\cylinder.ds" />
 		<None Include="Libraries\station.ds" />
 		<None Include="Libraries\strange.ds" />

@@ -12,10 +12,10 @@ open Engine.Core
 module ExportIOTable =
 
     let ToTable(sys:DsSystem) =
-        let sampleCommandName = "'CMD1"
-        let sampleCommand     = "'@Delay(0)"
-        let sampleConditionName = "'CON1"
-        let sampleCondition = "'@Delay(0)"
+        //let sampleCommandName = "'CMD1"
+        //let sampleCommand     = "'@Delay(0)"
+        //let sampleConditionName = "'CON1"
+        //let sampleCondition = "'@Delay(0)"
 
         let dt = new System.Data.DataTable($"{sys.Name}")
         dt.Columns.Add($"{IOColumn.Case}"       , typeof<string>) |>ignore
@@ -30,15 +30,13 @@ module ExportIOTable =
 
         let rowItems(jobDef:JobDef) =
             let MFlowName, name =  "_", jobDef.ApiName
-            ["주소"; MFlowName; name; "IO"; "bit"; jobDef.OutTag  ; jobDef.InTag; sampleCommandName; sampleConditionName]
+            ["주소"; MFlowName; name; "IO"; "bit"; jobDef.OutTag  ; jobDef.InTag; ""; ""]
 
         let rows =
             seq {
-                    //MFlow 출력
-                    for job in sys.Jobs do
-                        //Call Task 출력
-                        for jobDef in job.JobDefs do
-                            yield rowItems(jobDef)
+                for job in sys.Jobs do
+                    for jobDef in job.JobDefs do
+                        yield rowItems(jobDef)
             }
         rows
         |> Seq.iter(fun row -> 
@@ -61,8 +59,8 @@ module ExportIOTable =
         dt.Rows.Add("'-", "'-", "'-","'-", "'-", "'-","'-", "'-","'-") |> ignore
 
         dt.Rows.Add(TextVariable, "변수", ""  , "'-", ""  , "'-", "'-", "'-", "'-") |> ignore
-        dt.Rows.Add(TextCommand, "함수", sampleCommandName    , "'-", "'-", sampleCommand  , "'-") |> ignore
-        dt.Rows.Add(TextObserve, "함수", sampleConditionName  , "'-", "'-", sampleCondition, "'-") |> ignore
+        //dt.Rows.Add(TextCommand, "함수", sampleCommandName    , "'-", "'-", sampleCommand  , "'-") |> ignore
+        //dt.Rows.Add(TextObserve, "함수", sampleConditionName  , "'-", "'-", sampleCondition, "'-") |> ignore
 
         dt
 

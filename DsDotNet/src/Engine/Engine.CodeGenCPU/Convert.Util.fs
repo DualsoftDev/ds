@@ -41,8 +41,8 @@ type ConvertUtilExt =
                             | :? Call as c -> c.CallTarget.JobDefs
                                                 .Select(fun j-> 
                                                             if isInTag
-                                                            then PlcTag(j.ApiName+"_I", false)
-                                                            else PlcTag(j.ApiName+"_O", false)
+                                                            then PlcTag(j.ApiName+"_I", "", false)
+                                                            else PlcTag(j.ApiName+"_O", "", false)
                                                 )
                                                 .Cast<TagBase<bool>>()
                             | :? Alias as a -> 

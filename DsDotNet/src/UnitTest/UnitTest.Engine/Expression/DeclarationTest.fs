@@ -31,7 +31,7 @@ module DeclarationTestModule =
                 "ton myton2 = createTON(1000us, $tag1 || $tag2, $tag3)"
             ]
             for s in statementTexts do
-                let statement = parseStatement storages s
+                let statement = tryParseStatement storages s
                 match statement with
                 | Some stmt -> stmt.ToText() === s
                 | None -> ()

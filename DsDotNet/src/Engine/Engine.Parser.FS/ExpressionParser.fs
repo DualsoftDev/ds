@@ -209,11 +209,11 @@ module rec ExpressionParser =
         | None -> fail()
 
 
-    let createStatement (storages:Storages) (ctx:StatementContext) : Statement option =
+    let tryCreateStatement (storages:Storages) (ctx:StatementContext) : Statement option =
         assert(ctx.ChildCount = 1)
         let storageName = ctx.Descendants<StorageNameContext>().First().GetText()
 
-        let statement =
+        let optStatement =
             match ctx.children[0] with
             | :? VarDeclContext as varDeclCtx ->
                 let exp = createExpression storages (getFirstChildExpressionContext varDeclCtx)
@@ -250,15 +250,15 @@ module rec ExpressionParser =
             | _ ->
                 failwith "ERROR: Not yet statement"
 
-        statement.Iter(fun st -> st.Do())
-        statement
+        optStatement.Iter(fun st -> st.Do())
+        optStatement
 
-    let parseStatement (storages:Storages) (text:string) =
+    let tryParseStatement (storages:Storages) (text:string) : Statement option =
         try
             let parser = createParser (text)
             let ctx = parser.statement()
 
-            createStatement storages ctx
+            tryCreateStatement storages ctx
         with exn ->
             failwith $"Failed to parse Statement: {text}\r\n{exn}"
 
@@ -282,7 +282,7 @@ module rec ExpressionParser =
                     assert(t.ChildCount = 1)
 
                     match t.children[0] with
-                    | :? StatementContext as stmt -> createStatement storages stmt
+                    | :? StatementContext as stmt -> tryCreateStatement storages stmt
                     | _ ->
                         failwith $"ERROR: {text}: expect statements"
             ] |> List.choose id

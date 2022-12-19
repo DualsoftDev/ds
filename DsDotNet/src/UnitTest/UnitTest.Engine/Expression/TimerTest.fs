@@ -79,7 +79,7 @@ module TimerTestModule =
             let storages = Storages()
             storages.Add(t1.Name, t1)
 
-            let statement:Statement = "ton myTon = createTON(2000us, $my_timer_control_tag)" |> parseStatement storages |> Option.get
+            let statement:Statement = "ton myTon = createTON(2000us, $my_timer_control_tag)" |> tryParseStatement storages |> Option.get
             let timer = toTimer statement
 
             timer.TT.Value === false

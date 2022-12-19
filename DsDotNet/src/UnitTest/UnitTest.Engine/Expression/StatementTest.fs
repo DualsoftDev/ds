@@ -26,11 +26,11 @@ module StatementTestModule =
 
         [<Test>]
         member __.``CTU/TON parsing test`` () =
-            let coutnerStatement:Statement = "ctu myCounter = createCTU(100us, false)" |> parseStatement storages |> Option.get
+            let coutnerStatement:Statement = "ctu myCounter = createCTU(100us, false)" |> tryParseStatement storages |> Option.get
             let counter = toCounter coutnerStatement
-            let timerStatement2:Statement = "ton myTimer = createTON(100us, false)" |> parseStatement storages |> Option.get
+            let timerStatement2:Statement = "ton myTimer = createTON(100us, false)" |> tryParseStatement storages |> Option.get
 
-            let cs2:Statement = "ton mytimer = createTON(1000us, $tag1 || $tag2)" |> parseStatement storages |> Option.get
+            let cs2:Statement = "ton mytimer = createTON(1000us, $tag1 || $tag2)" |> tryParseStatement storages |> Option.get
             let timer = toTimer cs2
 
 
@@ -41,7 +41,7 @@ module StatementTestModule =
                 "ton mytimer4 = createTON(1000us, $tag1 || $tag2, $tag3)"
             ]
             for s in statements do
-                (parseStatement storages s |> Option.get).ToText() === s
+                (tryParseStatement storages s |> Option.get).ToText() === s
 
             let fails = [
                 "Counter declaration error"      , "ctu myCtu1 = createCTU(100us, $tag1, $tag1, $tag1, $tag1)"    // 'Counter declaration error: ctu myCounter = createCTU(100us, $tag1, $tag1, $tag1, $tag1)'
@@ -52,7 +52,7 @@ module StatementTestModule =
                 "Resolution Error"               , "ton myTon4 = createTON(1us, $tag1)"                           // 'Timer Resolution Error: Preset value should be larger than 20us'
             ]
             for (expectedFailMessage, failText) in fails do
-                (fun () -> failText |> parseStatement storages |> ignore) |> ShouldFailWithSubstringT expectedFailMessage
+                (fun () -> failText |> tryParseStatement storages |> ignore) |> ShouldFailWithSubstringT expectedFailMessage
 
 
 

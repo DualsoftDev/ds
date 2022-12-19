@@ -64,7 +64,7 @@ double myDouble = 0.0;
                 "Type mismatch", "int myInt2 = 0.0;"
             ]
             for (expectedFailMessage, failText) in fails do
-                (fun () -> failText |> parseStatement storages |> ignore) |> ShouldFailWithSubstringT expectedFailMessage
+                (fun () -> failText |> tryParseStatement storages |> ignore) |> ShouldFailWithSubstringT expectedFailMessage
 
             ()
 

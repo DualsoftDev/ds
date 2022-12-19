@@ -159,16 +159,6 @@ module ExpressionModule =
                 let args = String.Join(", ", args)
                 $"{typ.ToLower()} {c.Name} = {functionName}({args})"
 
-        member x.TargetStorage() =
-            match x with
-            | DuAssign (expr, target) -> target
-            | DuVarDecl (expr, var) -> var
-
-        member x.SourceStorages() =
-            match x with
-            | DuAssign (expr, target) -> expr.StorageArguments
-            | DuVarDecl (expr, var) -> expr.StorageArguments
-
     type Terminal<'T when 'T:equality> with
         member x.GetBoxedRawObject(): obj =
             match x with

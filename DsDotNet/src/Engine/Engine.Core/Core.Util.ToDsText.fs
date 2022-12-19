@@ -199,7 +199,7 @@ module internal ToDsTextModule =
             let safeties =
                 let getCallName (call:Call) =
                     match call.Parent with
-                    |DuParentReal r-> $"{r.Flow.Name}.{call.ParentNPureNames.Combine()}"       
+                    |DuParentReal r-> $"{r.Flow.Name}.{call.ParentNPureNames.Combine()}"
                     |DuParentFlow f-> call.ParentNPureNames.Combine()
 
                 let safetyConditionName (sc:SafetyCondition) =
@@ -257,7 +257,9 @@ module internal ToDsTextModule =
 
             yield codeBlockToDs system
 
-
+            // todo 복수개의 block 이 허용되면, serialize 할 때 해당 위치에 맞춰서 serialize 해야 하는데...
+            for code in system.OriginalCodeBlocks do
+                yield code
 
 
             yield rb
@@ -266,7 +268,7 @@ module internal ToDsTextModule =
     type DsSystem with
         member x.ToDsText() = systemToDs x 1
 
-           
+
 [<Extension>]
-type SystemExt =  
+type SystemExt =
     [<Extension>] static member ToDsText (system:DsSystem) = systemToDs system 1

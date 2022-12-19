@@ -59,10 +59,10 @@ module DsParserHelperModule =
                 match ci.Tuples with
                 | Some sys, Some flow, Some parenting, _ ->
                     let! real = tryFindReal x flow parenting
-                    return ParentReal real
+                    return DuParentReal real
                 | Some sys, Some flow, None, _ ->
                     let! f = tryFindFlow x flowName
-                    return ParentFlow f
+                    return DuParentFlow f
                 | _ -> failwith "ERROR"
             }
 

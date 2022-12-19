@@ -128,7 +128,7 @@ module CoreModule =
     /// Segment (DS Basic Unit)
     [<DebuggerDisplay("{QualifiedName}")>]
     type Real private (name:string, flow:Flow) =
-        inherit Vertex([|name|], ParentFlow flow)
+        inherit Vertex([|name|], DuParentFlow flow)
 
         member val Graph = DsGraph()
         member val ModelingEdges = HashSet<ModelingEdgeInfo<Vertex>>()
@@ -207,6 +207,21 @@ module CoreModule =
 
         override x.ToString() = $"{x.Source.QualifiedName} {x.EdgeType.ToText()} {x.Target.QualifiedName}"
 
+    and AliasTargetWrapper =
+        | DuAliasTargetReal of Real
+        | DuAliasTargetCall of Call
+        | DuAliasTargetRealEx of RealOtherFlow    // MyFlow or RealOtherFlow 의 Real 일 수 있다.
+
+    and SafetyCondition =
+        | DuSafetyConditionReal of Real
+        | DuSafetyConditionCall of Call
+        | DuSafetyConditionRealEx of RealOtherFlow    // MyFlow or RealOtherFlow 의 Real 일 수 있다.
+
+          ///Vertex의 부모의 타입을 구분한다.
+    type ParentWrapper =
+        | DuParentFlow of Flow //Real/Call/Alias 의 부모
+        | DuParentReal of Real //Call/Alias      의 부모
+
 
     (*
      * Extension methods
@@ -245,9 +260,9 @@ module CoreModule =
                 let flow:Flow = parent.GetFlow()
                 let aliasKey =
                     match target with
-                    | AliasTargetReal r -> r.GetAliasTargetToDs(flow)
-                    | AliasTargetCall c -> c.GetAliasTargetToDs()
-                    | AliasTargetRealEx o -> o.Real.GetAliasTargetToDs(flow)
+                    | DuAliasTargetReal r -> r.GetAliasTargetToDs(flow)
+                    | DuAliasTargetCall c -> c.GetAliasTargetToDs()
+                    | DuAliasTargetRealEx o -> o.Real.GetAliasTargetToDs(flow)
                 let ads = flow.AliasDefs
                 match ads.TryFind(aliasKey) with
                 | Some ad -> ad.Mnemonincs.AddIfNotContains(name) |> ignore
@@ -274,46 +289,31 @@ module CoreModule =
     type SafetyCondition with
         member x.Core:obj =
             match x with
-            | SafetyConditionReal real -> real
-            | SafetyConditionCall call -> call
-            | SafetyConditionRealEx  realOtherFlow -> realOtherFlow
-
-    and AliasTargetWrapper =
-        | AliasTargetReal of Real
-        | AliasTargetCall of Call
-        | AliasTargetRealEx of RealOtherFlow    // MyFlow or RealOtherFlow 의 Real 일 수 있다.
-
-    and SafetyCondition =
-        | SafetyConditionReal of Real
-        | SafetyConditionCall of Call
-        | SafetyConditionRealEx of RealOtherFlow    // MyFlow or RealOtherFlow 의 Real 일 수 있다.
-
-          ///Vertex의 부모의 타입을 구분한다.
-    type ParentWrapper =
-        | ParentFlow of Flow //Real/Call/Alias 의 부모
-        | ParentReal of Real //Call/Alias      의 부모
+            | DuSafetyConditionReal real -> real
+            | DuSafetyConditionCall call -> call
+            | DuSafetyConditionRealEx  realOtherFlow -> realOtherFlow
 
     type ParentWrapper with
         member x.GetCore() =
             match x with
-            | ParentFlow f -> f :> FqdnObject
-            | ParentReal r -> r
+            | DuParentFlow f -> f :> FqdnObject
+            | DuParentReal r -> r
         member x.GetFlow() =
             match x with
-            | ParentFlow f -> f
-            | ParentReal r -> r.Flow
+            | DuParentFlow f -> f
+            | DuParentReal r -> r.Flow
         member x.GetSystem() =
             match x with
-            | ParentFlow f -> f.System
-            | ParentReal r -> r.Flow.System
+            | DuParentFlow f -> f.System
+            | DuParentReal r -> r.Flow.System
         member x.GetGraph():DsGraph =
             match x with
-            | ParentFlow f -> f.Graph
-            | ParentReal r -> r.Graph
+            | DuParentFlow f -> f.Graph
+            | DuParentReal r -> r.Graph
         member x.GetModelingEdges() =
             match x with
-            | ParentFlow f -> f.ModelingEdges
-            | ParentReal r -> r.ModelingEdges
+            | DuParentFlow f -> f.ModelingEdges
+            | DuParentReal r -> r.ModelingEdges
 
     type Call with
         member x.GetAliasTargetToDs() =
@@ -338,10 +338,10 @@ module CoreModule =
             if x <> flow.System then failwithf $"button [{btnName}] in flow ({flow.System.Name} != {x.Name}) is not same system"
             let dicButton =
                 match btnType with
-                | StartBTN       -> x.StartButtons
-                | ResetBTN       -> x.ResetButtons
-                | EmergencyBTN   -> x.EmergencyButtons
-                | AutoBTN        -> x.AutoButtons
+                | DuStartBTN       -> x.StartButtons
+                | DuResetBTN       -> x.ResetButtons
+                | DuEmergencyBTN   -> x.EmergencyButtons
+                | DuAutoBTN        -> x.AutoButtons
 
             match dicButton.TryFind btnName with
             | Some btn -> btn.Add(flow) |> verifyM $"Duplicated flow [{flow.Name}]"

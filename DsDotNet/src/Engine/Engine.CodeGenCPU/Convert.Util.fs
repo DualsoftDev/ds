@@ -47,9 +47,9 @@ type ConvertUtilExt =
                                                 .Cast<TagBase<bool>>()
                             | :? Alias as a -> 
                                         match a.TargetVertex with
-                                        | AliasTargetReal ar    -> ar.GetCoinTags(memory, isInTag)
-                                        | AliasTargetCall ac    -> ac.GetCoinTags(memory, isInTag)
-                                        | AliasTargetRealEx ao  -> ao.GetCoinTags(memory, isInTag)
+                                        | DuAliasTargetReal ar    -> ar.GetCoinTags(memory, isInTag)
+                                        | DuAliasTargetCall ac    -> ac.GetCoinTags(memory, isInTag)
+                                        | DuAliasTargetRealEx ao  -> ao.GetCoinTags(memory, isInTag)
                             | _ -> failwith "Error"
 
 
@@ -65,7 +65,7 @@ type ConvertUtilExt =
                                                 .Cast<TagBase<bool>>()
                             | :? Alias as a -> 
                                         match a.TargetVertex with
-                                        | AliasTargetReal ar    -> ar.GetCoinTags(memory, isTx)
-                                        | AliasTargetCall ac    -> ac.GetCoinTags(memory, isTx)
-                                        | AliasTargetRealEx ao  -> ao.GetCoinTags(memory, isTx)
+                                        | DuAliasTargetReal ar    -> ar.GetCoinTags(memory, isTx)
+                                        | DuAliasTargetCall ac    -> ac.GetCoinTags(memory, isTx)
+                                        | DuAliasTargetRealEx ao  -> ao.GetCoinTags(memory, isTx)
                             | _ -> failwith "Error"

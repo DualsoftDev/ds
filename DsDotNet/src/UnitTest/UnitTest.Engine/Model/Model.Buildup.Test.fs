@@ -40,8 +40,8 @@ module ModelBuildupTests1 =
         member __.``Model creation test`` () =
             let system, flow, real, callAp, callAm = createSimpleSystem()
 
-            let vCallP = Call.Create( callAp, ParentReal real)
-            let vCallM = Call.Create( callAm, ParentReal real)
+            let vCallP = Call.Create( callAp, DuParentReal real)
+            let vCallM = Call.Create( callAm, DuParentReal real)
             real.CreateEdge(ModelingEdgeInfo<Vertex>(vCallP, ">", vCallM)) |> ignore
 
             let generated = system.ToDsText()
@@ -67,8 +67,8 @@ module ModelBuildupTests1 =
         member __.``Invalid Model creation test`` () =
             let system, flow, real, callAp, callAm = createSimpleSystem()
 
-            let vCallP = Call.Create( callAp, ParentReal real)
-            let vCallM = Call.Create( callAm, ParentReal real)
+            let vCallP = Call.Create( callAp, DuParentReal real)
+            let vCallM = Call.Create( callAm, DuParentReal real)
             ( fun () ->
                 // real 의 child 간 edge 를 flow 에서 생성하려 함.. should fail
                 flow.CreateEdge(ModelingEdgeInfo<Vertex>(vCallP, ">", vCallM)) |> ignore
@@ -78,8 +78,8 @@ module ModelBuildupTests1 =
         member __.``Model with alias test`` () =
             let system, flow, real, callAp, callAm = createSimpleSystem()
 
-            let vCallP = Alias.Create("Main2", AliasTargetReal real, ParentFlow flow)
-            let call2 = Call.Create(callAp, ParentFlow flow)
+            let vCallP = Alias.Create("Main2", DuAliasTargetReal real, DuParentFlow flow)
+            let call2 = Call.Create(callAp, DuParentFlow flow)
 
             flow.CreateEdge(ModelingEdgeInfo<Vertex>(vCallP, ">", call2)) |> ignore
             let generated = system.ToDsText()
@@ -109,7 +109,7 @@ module ModelBuildupTests1 =
 
             let flow2 = Flow.Create("F2", system)
 
-            let real2 = RealOtherFlow.Create(real, ParentFlow flow2)
+            let real2 = RealOtherFlow.Create(real, DuParentFlow flow2)
             let real3 = Real.Create("R3", flow2)
 
             flow2.CreateEdge(ModelingEdgeInfo<Vertex>(real2, ">", real3)) |> ignore
@@ -172,12 +172,12 @@ module ModelBuildupTests1 =
         member __.``Model with buttons test`` () =
             let system, flow, real, callAp, callAm = createSimpleSystem()
 
-            system.AddButton(BtnType.EmergencyBTN, "STOP", flow)
-            system.AddButton(BtnType.StartBTN, "START", flow)
+            system.AddButton(BtnType.DuEmergencyBTN, "STOP", flow)
+            system.AddButton(BtnType.DuStartBTN, "START", flow)
 
             let flow2 = Flow.Create("F2", system)
-            system.AddButton(BtnType.EmergencyBTN, "STOP2", flow2)
-            system.AddButton(BtnType.StartBTN, "START2", flow2)
+            system.AddButton(BtnType.DuEmergencyBTN, "STOP2", flow2)
+            system.AddButton(BtnType.DuStartBTN, "START2", flow2)
 
             let generated = system.ToDsText()
             let answer = """

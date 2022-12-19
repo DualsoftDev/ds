@@ -41,7 +41,7 @@ module OriginModule =
         | :? Call as c -> c
         | :? Alias as a ->
             match a.TargetVertex with
-            | AliasTargetCall ct -> ct
+            | DuAliasTargetCall ct -> ct
             | _ -> failwith $"type error of {vertex}"
         | _ -> failwith $"type error of {vertex}"
 

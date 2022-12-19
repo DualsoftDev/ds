@@ -79,10 +79,10 @@ module ImportViewModule =
 
         let newNode = ViewNode("Buttons", BUTTON)
 
-        system.AutoButtons.Where(fun w->w.Value.Contains(flow))     |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, AutoBTN)) |>ignore)
-        system.ResetButtons.Where(fun w->w.Value.Contains(flow))    |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, ResetBTN)) |>ignore)
-        system.StartButtons.Where(fun w->w.Value.Contains(flow))    |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, StartBTN)) |>ignore)
-        system.EmergencyButtons.Where(fun w->w.Value.Contains(flow))|> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, EmergencyBTN)) |>ignore)
+        system.AutoButtons.Where(fun w->w.Value.Contains(flow))     |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, DuAutoBTN)) |>ignore)
+        system.ResetButtons.Where(fun w->w.Value.Contains(flow))    |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, DuResetBTN)) |>ignore)
+        system.StartButtons.Where(fun w->w.Value.Contains(flow))    |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, DuStartBTN)) |>ignore)
+        system.EmergencyButtons.Where(fun w->w.Value.Contains(flow))|> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, DuEmergencyBTN)) |>ignore)
         
         if newNode.Singles.Count > 0
         then node.Singles.Add(newNode) |> ignore

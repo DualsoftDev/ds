@@ -21,9 +21,9 @@ module CpuLoader =
                 | :? Call as c -> dicM.TryAdd(c, VertexM(v)) |> verifyM $"Duplicated name [{v.QualifiedName}]"
                 | :? Alias as a ->
                     match a.TargetVertex with
-                    | AliasTargetReal r -> aliasSet.TryAdd(a, r)        |> verifyM $"Duplicated name [{v.QualifiedName}]"
-                    | AliasTargetRealEx rEx -> aliasSet.TryAdd(a, rEx)  |> verifyM $"Duplicated name [{v.QualifiedName}]"
-                    | AliasTargetCall c -> aliasSet.TryAdd(a, c)        |> verifyM $"Duplicated name [{v.QualifiedName}]"
+                    | DuAliasTargetReal r -> aliasSet.TryAdd(a, r)        |> verifyM $"Duplicated name [{v.QualifiedName}]"
+                    | DuAliasTargetRealEx rEx -> aliasSet.TryAdd(a, rEx)  |> verifyM $"Duplicated name [{v.QualifiedName}]"
+                    | DuAliasTargetCall c -> aliasSet.TryAdd(a, c)        |> verifyM $"Duplicated name [{v.QualifiedName}]"
                 | _-> ()
         )
 

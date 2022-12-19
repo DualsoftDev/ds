@@ -388,13 +388,13 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                         match ns with
                         | rc::[] -> //Flow.R or Flow.C
                             match flow.System.TryFindReal flow.System flow.Name rc  with
-                            | Some r -> r |> AliasTargetReal
-                            | None -> flow.System.TryFindCall ([flow.Name;rc].ToArray()) |> Option.get |>AliasTargetCall
+                            | Some r -> r |> DuAliasTargetReal
+                            | None -> flow.System.TryFindCall ([flow.Name;rc].ToArray()) |> Option.get |>DuAliasTargetCall
 
                         | flowOrReal::rc::[] -> //FlowEx.R or Real.C
                             match tryFindFlow system flowOrReal with
-                            | Some f -> f.Graph.TryFindVertex<Real>(rc)  |> Option.get |> AliasTargetReal
-                            | None ->  tryFindCall system ([flow.Name]@ns) |> Option.get |> AliasTargetCall
+                            | Some f -> f.Graph.TryFindVertex<Real>(rc)  |> Option.get |> DuAliasTargetReal
+                            | None ->  tryFindCall system ([flow.Name]@ns) |> Option.get |> DuAliasTargetCall
                         | _ ->
                             failwith "ERROR"
 

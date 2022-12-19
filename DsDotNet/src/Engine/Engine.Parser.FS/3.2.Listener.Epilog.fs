@@ -84,18 +84,18 @@ module EtcListenerModule =
                         |Some (flow) ->
                             let! vertex = flow.Graph.TryFindVertex(realOrCall)
                             match vertex with
-                            | :? Real as r -> return SafetyConditionReal (r)
-                            | :? Call as c -> return SafetyConditionCall (c)
-                            | :? RealOtherFlow as o -> return SafetyConditionRealEx (o)
+                            | :? Real as r -> return DuSafetyConditionReal (r)
+                            | :? Call as c -> return DuSafetyConditionCall (c)
+                            | :? RealOtherFlow as o -> return DuSafetyConditionRealEx (o)
                             | _-> failwith "Error"
 
                         |None ->        
                             let c = curSystem.TryFindCall(ns) |> Option.get
-                            return SafetyConditionCall (c)
+                            return DuSafetyConditionCall (c)
 
                     | f::r::c::[] ->
                          let! c = curSystem.TryFindCall(ns)
-                         return SafetyConditionCall c
+                         return DuSafetyConditionCall c
                 
                     | _ ->
                         failwith "ERROR"

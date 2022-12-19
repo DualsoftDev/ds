@@ -158,14 +158,14 @@ module HmiGenModule =
                 | :? Call as c -> getJobName c.CallTarget.Name
                 | :? Alias as a ->
                     match a.TargetVertex with
-                    | AliasTargetReal r -> r.QualifiedName
-                    | AliasTargetRealEx rex -> rex.QualifiedName
-                    | AliasTargetCall c -> getJobName c.CallTarget.Name
+                    | DuAliasTargetReal r -> r.QualifiedName
+                    | DuAliasTargetRealEx rex -> rex.QualifiedName
+                    | DuAliasTargetCall c -> getJobName c.CallTarget.Name
                 | _ -> null
             addToUsedIn vertName system.Name
             addToUsedIn vertName flow.QualifiedName
             match vertex.Parent with
-            | ParentReal pr -> addToUsedIn vertName pr.QualifiedName
+            | DuParentReal pr -> addToUsedIn vertName pr.QualifiedName
             | _ -> ()
 
         let addBasicComponents () =

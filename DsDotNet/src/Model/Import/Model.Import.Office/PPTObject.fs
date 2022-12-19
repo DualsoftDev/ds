@@ -236,9 +236,9 @@ module PPTObjectModule =
                             updateCopySys  (text ,(GetBracketsReplaceName(name) |> trimSpace), number)
             |_ -> ()
 
-            let btn =  if shape.CheckNoSmoking() then Some(BtnType.EmergencyBTN)
-                       elif shape.CheckDonutShape() then Some(BtnType.AutoBTN)
-                       elif shape.CheckBevelShape() then Some(BtnType.ResetBTN)
+            let btn =  if shape.CheckNoSmoking() then Some(BtnType.DuEmergencyBTN)
+                       elif shape.CheckDonutShape() then Some(BtnType.DuAutoBTN)
+                       elif shape.CheckBevelShape() then Some(BtnType.DuResetBTN)
                        else None
             btnType    <- btn
                

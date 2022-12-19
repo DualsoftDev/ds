@@ -66,7 +66,7 @@ module internal ToDsTextModule =
             let stems = graph.Vertices.OfType<Real>().Where(fun r -> r.Graph.Vertices.Any()).ToArray()
             for stem in stems do
                 yield $"{tab}{stem.Name.QuoteOnDemand()} = {lb}"
-                yield! graphToDs (ParentReal stem) (indent + 1)
+                yield! graphToDs (DuParentReal stem) (indent + 1)
                 yield $"{tab}{rb}"
 
             let notMentioned = graph.Islands.Except(stems.Cast<Vertex>()).ToArray()
@@ -78,7 +78,7 @@ module internal ToDsTextModule =
         let tab = getTab indent
         [
             yield $"{tab}[flow] {flow.Name.QuoteOnDemand()} = {lb}"
-            yield! graphToDs (ParentFlow flow) (indent+1)
+            yield! graphToDs (DuParentFlow flow) (indent+1)
 
             let aliasDefs = flow.AliasDefs.Values
             if aliasDefs.Any() then
@@ -89,9 +89,9 @@ module internal ToDsTextModule =
                     let tab = getTab (indent+2)
                     let aliasKey =
                         match a.AliasTarget with
-                        | Some(AliasTargetReal real) -> real.GetAliasTargetToDs(flow).Combine()
-                        | Some(AliasTargetCall call) -> call.GetAliasTargetToDs().Combine()
-                        | Some(AliasTargetRealEx o) -> o.Real.GetAliasTargetToDs(flow).Combine()
+                        | Some(DuAliasTargetReal real) -> real.GetAliasTargetToDs(flow).Combine()
+                        | Some(DuAliasTargetCall call) -> call.GetAliasTargetToDs().Combine()
+                        | Some(DuAliasTargetRealEx o) -> o.Real.GetAliasTargetToDs(flow).Combine()
                         | None -> failwith "ERROR"
 
                     yield $"{tab}{aliasKey} = {lb} {mnemonics} {rb}"
@@ -199,14 +199,14 @@ module internal ToDsTextModule =
             let safeties =
                 let getCallName (call:Call) =
                     match call.Parent with
-                    |ParentReal r-> $"{r.Flow.Name}.{call.ParentNPureNames.Combine()}"       
-                    |ParentFlow f-> call.ParentNPureNames.Combine()
+                    |DuParentReal r-> $"{r.Flow.Name}.{call.ParentNPureNames.Combine()}"       
+                    |DuParentFlow f-> call.ParentNPureNames.Combine()
 
                 let safetyConditionName (sc:SafetyCondition) =
                     match sc with
-                    | SafetyConditionReal real -> real.ParentNPureNames.Combine()
-                    | SafetyConditionCall call -> getCallName call
-                    | SafetyConditionRealEx  o -> o.ParentNPureNames.Combine()
+                    | DuSafetyConditionReal real -> real.ParentNPureNames.Combine()
+                    | DuSafetyConditionCall call -> getCallName call
+                    | DuSafetyConditionRealEx  o -> o.ParentNPureNames.Combine()
                 let safetyConditionHolderName(sch:ISafetyConditoinHolder) =
                     match sch with
                     | :? Real as real -> real.ParentNPureNames.Combine()

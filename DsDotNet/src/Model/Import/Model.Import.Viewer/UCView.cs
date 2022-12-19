@@ -217,10 +217,10 @@ namespace Dual.Model.Import
                     else
                     {
                         nNode.Attr.Shape = Shape.Ellipse;
-                        if (viewNode.BtnType.Value == BtnType.AutoBTN) nNode.Attr.FillColor = Color.DarkGoldenrod;
-                        if (viewNode.BtnType.Value == BtnType.ResetBTN) nNode.Attr.FillColor = Color.DarkOliveGreen;
-                        if (viewNode.BtnType.Value == BtnType.EmergencyBTN) nNode.Attr.FillColor = Color.MediumVioletRed;
-                        if (viewNode.BtnType.Value == BtnType.StartBTN) nNode.Attr.FillColor = Color.BlueViolet;
+                        if (viewNode.BtnType.Value == BtnType.DuAutoBTN) nNode.Attr.FillColor = Color.DarkGoldenrod;
+                        if (viewNode.BtnType.Value == BtnType.DuResetBTN) nNode.Attr.FillColor = Color.DarkOliveGreen;
+                        if (viewNode.BtnType.Value == BtnType.DuEmergencyBTN) nNode.Attr.FillColor = Color.MediumVioletRed;
+                        if (viewNode.BtnType.Value == BtnType.DuStartBTN) nNode.Attr.FillColor = Color.BlueViolet;
                     }
 
                 }

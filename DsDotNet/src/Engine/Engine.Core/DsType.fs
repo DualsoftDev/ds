@@ -68,18 +68,18 @@ module DsType =
 
     ///BtnType 인과의 노드 종류
     type BtnType =
-        | StartBTN            //시작 버튼
-        | ResetBTN            //리셋 버튼
-        | AutoBTN             //자동 버튼
-        | EmergencyBTN        //비상 버튼
+        | DuStartBTN            //시작 버튼
+        | DuResetBTN            //리셋 버튼
+        | DuAutoBTN             //자동 버튼
+        | DuEmergencyBTN        //비상 버튼
 
 
     let BtnToType(txt:string) =
         match txt with
-        | TextStartBtn -> StartBTN
-        | TextResetBtn -> ResetBTN
-        | TextAutoBtn -> AutoBTN
-        | TextEmgBtn -> EmergencyBTN
+        | TextStartBtn -> DuStartBTN
+        | TextResetBtn -> DuResetBTN
+        | TextAutoBtn -> DuAutoBTN
+        | TextEmgBtn -> DuEmergencyBTN
         |_-> failwithf $"'{txt}' BtnToType Error check type [
                 , {TextStartBtn}, {TextResetBtn}
                 , {TextAutoBtn}, {TextEmgBtn}]"

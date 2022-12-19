@@ -1,7 +1,6 @@
-namespace Engine.Parser.FS
+namespace Engine.CodeGenCPU
 
 open Engine.Core
-open Engine.CodeGenCPU
 
 module ModuleInitializer =
     let Initialize() =

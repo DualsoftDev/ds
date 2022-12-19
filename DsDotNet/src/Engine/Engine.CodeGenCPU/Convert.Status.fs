@@ -12,7 +12,7 @@ type StatementStatus =
 
     ///vertex status bit 만들기
     [<Extension>] 
-    static member CreateRGFH(vertex:VertexMemeryManager) =
+    static member CreateRGFH(vertex:VertexMemoryManager) =
                  
         let exprCS = tag2expr <| vertex.StartPort
         let exprCR = tag2expr <| vertex.ResetPort

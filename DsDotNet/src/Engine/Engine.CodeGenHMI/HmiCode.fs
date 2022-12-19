@@ -157,7 +157,7 @@ module HmiGenModule =
                 | :? Real as r -> r.QualifiedName
                 | :? Call as c -> getJobName c.CallTarget.Name
                 | :? Alias as a ->
-                    match a.TargetVertex with
+                    match a.TargetWrapper with
                     | DuAliasTargetReal r -> r.QualifiedName
                     | DuAliasTargetRealEx rex -> rex.QualifiedName
                     | DuAliasTargetCall c -> getJobName c.CallTarget.Name

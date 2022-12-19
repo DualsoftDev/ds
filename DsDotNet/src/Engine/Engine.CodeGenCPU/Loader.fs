@@ -17,10 +17,12 @@ module CpuLoader =
         //모든 인과 대상 Node 메모리화
         vertices.ForEach(fun v ->
             match v with
-                | :? Real as r -> dicM.TryAdd(r, VertexMemeryManager(v)) |> verifyM $"Duplicated name [{v.QualifiedName}]"
-                | :? Call as c -> dicM.TryAdd(c, VertexMemeryManager(v)) |> verifyM $"Duplicated name [{v.QualifiedName}]"
+                | :? Real as r ->
+                    dicM.TryAdd(r, VertexMemoryManager(v)) |> verifyM $"Duplicated name [{v.QualifiedName}]"
+                | :? Call as c ->
+                    dicM.TryAdd(c, VertexMemoryManager(v)) |> verifyM $"Duplicated name [{v.QualifiedName}]"
                 | :? Alias as a ->
-                    match a.TargetVertex with
+                    match a.TargetWrapper with
                     | DuAliasTargetReal r -> aliasSet.TryAdd(a, r)        |> verifyM $"Duplicated name [{v.QualifiedName}]"
                     | DuAliasTargetRealEx rEx -> aliasSet.TryAdd(a, rEx)  |> verifyM $"Duplicated name [{v.QualifiedName}]"
                     | DuAliasTargetCall c -> aliasSet.TryAdd(a, c)        |> verifyM $"Duplicated name [{v.QualifiedName}]"

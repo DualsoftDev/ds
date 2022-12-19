@@ -11,7 +11,7 @@ open Engine.Core
 type StatementRoot =
 
         ///F1. Real 자신의    Start Statement 만들기
-    [<Extension>] static member TryCreateRealStart(pReal:VertexMemeryManager, srcs:VertexMemeryManager seq) =
+    [<Extension>] static member TryCreateRealStart(pReal:VertexMemoryManager, srcs:VertexMemoryManager seq) =
                     if srcs.Any()
                     then
                         let sets  = srcs.Select(fun f->f.EndTag).ToTags()
@@ -20,13 +20,13 @@ type StatementRoot =
                     else None
         
         ///F2. Real 자신의 Reset going relay  Statement 만들기
-    [<Extension>] static member CreateResetGoing(realSrc:VertexMemeryManager, realTgt:VertexMemeryManager , going:DsTag<bool>) =
+    [<Extension>] static member CreateResetGoing(realSrc:VertexMemoryManager, realTgt:VertexMemoryManager , going:DsTag<bool>) =
                     let sets  = [realSrc.Going].ToTags()
                     let rsts  = [realTgt.Homing].ToTags()
                     going <== FuncExt.GetRelayExpr(sets, rsts, going) //pReal.Pause _Auto 로 변경 필요
 
        ///F3. Real 자신의    Reset Statement 만들기
-    [<Extension>] static member TryGetRealResetStatement(real:VertexMemeryManager, goingSrcs:DsTag<bool> seq) =
+    [<Extension>] static member TryGetRealResetStatement(real:VertexMemoryManager, goingSrcs:DsTag<bool> seq) =
                     if goingSrcs.Any()
                     then
                         //going relay srcs

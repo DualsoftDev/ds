@@ -118,6 +118,7 @@ module CoreModule =
         member _.ParentNPureNames = ([parent.GetCore().Name] @ names).ToArray()
         override x.GetRelativeName(referencePath:Fqdn) = x.PureNames.Combine()
 
+        member val VertexMemoryManager = getNull<IVertexMemoryManager>() with get, set
 
     // Subclasses = {Call | Real | RealOtherFlow}
     type ISafetyConditoinHolder =
@@ -155,7 +156,7 @@ module CoreModule =
 
     and Alias private (name:string, target:AliasTargetWrapper, parent) = // target : Real or Call or OtherFlowReal
         inherit Indirect(name, parent)
-        member _.TargetVertex = target
+        member _.TargetWrapper = target
 
     /// JobDefs 정의: Call 이 호출하는 Job 항목
     type Job (name:string, jobDefs:JobDef seq) =
@@ -237,6 +238,7 @@ module CoreModule =
                 logWarn $"Suspicious segment name [{name}]. Check it."
 
             let segment = Real(name, flow)
+            segment.VertexMemoryManager <- fwdCreateVertexMemoryManager(segment)
             flow.Graph.AddVertex(segment) |> verifyM $"Duplicated segment name [{name}]"
             segment
 
@@ -244,15 +246,17 @@ module CoreModule =
     type RealOtherFlow with
         static member Create(otherFlowReal:Real, parent:ParentWrapper) =
             let ofn, ofrn = otherFlowReal.Flow.Name, otherFlowReal.Name
-            let v = RealOtherFlow( [| ofn; ofrn |], otherFlowReal, parent)
-            parent.GetGraph().AddVertex(v) |> verifyM $"Duplicated other flow real call [{ofn}.{ofrn}]"
-            v
+            let ofr = RealOtherFlow( [| ofn; ofrn |], otherFlowReal, parent)
+            ofr.VertexMemoryManager <- otherFlowReal.VertexMemoryManager
+            parent.GetGraph().AddVertex(ofr) |> verifyM $"Duplicated other flow real call [{ofn}.{ofrn}]"
+            ofr
 
     type Call with
         static member Create(target:Job, parent:ParentWrapper) =
-            let v = Call(target, parent)
-            parent.GetGraph().AddVertex(v) |> verifyM $"Duplicated call name [{target.Name}]"
-            v
+            let call = Call(target, parent)
+            call.VertexMemoryManager <- fwdCreateVertexMemoryManager(call)
+            parent.GetGraph().AddVertex(call) |> verifyM $"Duplicated call name [{target.Name}]"
+            call
 
 
     type Alias with
@@ -273,9 +277,10 @@ module CoreModule =
                 | None -> ads.Add(aliasKey, AliasDef(aliasKey, Some target, [|name|]))
 
             createAliasDefOnDemand()
-            let v = Alias(name, target, parent)
-            parent.GetGraph().AddVertex(v) |> verifyM $"Duplicated alias name [{name}]"
-            v
+            let alias = Alias(name, target, parent)
+            alias.VertexMemoryManager <- target.GetTarget().VertexMemoryManager
+            parent.GetGraph().AddVertex(alias) |> verifyM $"Duplicated alias name [{name}]"
+            alias
 
     type ApiItem with
         member x.AddTXs(txs:Real seq) = txs |> Seq.forall(fun tx -> x.TXs.Add(tx))
@@ -318,6 +323,14 @@ module CoreModule =
             match x with
             | DuParentFlow f -> f.ModelingEdges
             | DuParentReal r -> r.ModelingEdges
+
+
+    type AliasTargetWrapper with
+        member x.GetTarget() : Vertex =
+            match x with
+            | DuAliasTargetReal real -> real
+            | DuAliasTargetCall call -> call
+            | DuAliasTargetRealEx otherFlowReal -> otherFlowReal
 
     type Call with
         member x.GetAliasTargetToDs() =

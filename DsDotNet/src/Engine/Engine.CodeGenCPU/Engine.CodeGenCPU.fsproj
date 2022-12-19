@@ -18,6 +18,8 @@
     <Compile Include="Convert.Port.fs" />
     <Compile Include="Convert.fs" />
     <Compile Include="Loader.fs" />
+	<Compile Include="EntryPoint.fs" />
+	<Content Include="FodyWeavers.xml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,5 +33,12 @@
 
   <ItemGroup>
     <PackageReference Update="FSharp.Core" Version="6.0.6" />
+	  <PackageReference Include="Fody" Version="6.6.4">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
+	  <PackageReference Include="ModuleInit.Fody" Version="2.1.1">
+		  <PrivateAssets>all</PrivateAssets>
+	  </PackageReference>
   </ItemGroup>
 </Project>

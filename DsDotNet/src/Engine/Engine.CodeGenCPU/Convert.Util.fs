@@ -36,7 +36,7 @@ type ConvertUtilExt =
                     findEdges.Select(fun e->e.Source)
 
                     
-    [<Extension>]  static member GetCoinTags(coin:Vertex, memory:VertexMemeryManager, isInTag:bool) =
+    [<Extension>]  static member GetCoinTags(coin:Vertex, memory:VertexMemoryManager, isInTag:bool) =
                             match coin with
                             | :? Call as c -> c.CallTarget.JobDefs
                                                 .Select(fun j-> 
@@ -46,14 +46,14 @@ type ConvertUtilExt =
                                                 )
                                                 .Cast<TagBase<bool>>()
                             | :? Alias as a -> 
-                                        match a.TargetVertex with
+                                        match a.TargetWrapper with
                                         | DuAliasTargetReal ar    -> ar.GetCoinTags(memory, isInTag)
                                         | DuAliasTargetCall ac    -> ac.GetCoinTags(memory, isInTag)
                                         | DuAliasTargetRealEx ao  -> ao.GetCoinTags(memory, isInTag)
                             | _ -> failwith "Error"
 
 
-    [<Extension>]  static member GetTxRxTags(coin:Vertex, isTx:bool, dicM:ConcurrentDictionary<Vertex, VertexMemeryManager>) =
+    [<Extension>]  static member GetTxRxTags(coin:Vertex, isTx:bool, dicM:ConcurrentDictionary<Vertex, VertexMemoryManager>) =
                             let memory = dicM[coin]
                             match coin with
                             | :? Call as c -> c.CallTarget.JobDefs
@@ -64,7 +64,7 @@ type ConvertUtilExt =
                                                 )
                                                 .Cast<TagBase<bool>>()
                             | :? Alias as a -> 
-                                        match a.TargetVertex with
+                                        match a.TargetWrapper with
                                         | DuAliasTargetReal ar    -> ar.GetCoinTags(memory, isTx)
                                         | DuAliasTargetCall ac    -> ac.GetCoinTags(memory, isTx)
                                         | DuAliasTargetRealEx ao  -> ao.GetCoinTags(memory, isTx)

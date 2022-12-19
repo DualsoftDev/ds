@@ -6,37 +6,41 @@ open System.Text.RegularExpressions
 open Engine.Core
 
 [<AutoOpen>]
-module VertexMemeryManagerModule =
+module VertexMemoryManagerModule =
 
     /// Vertex Manager : 소속되어 있는 DsBit 를 관리하는 컨테이어
-    type VertexMemeryManager (v:Vertex)  =
+    type VertexMemoryManager (v:Vertex)  =
         let name = v.QualifiedName
+        let bit name flag = DsBit(name, false, v, flag)
 
-        let readyTag   = DsBit($"{name}(R)",  false ,v ,TagFlag.R)
-        let goingTag   = DsBit($"{name}(G)",  false ,v ,TagFlag.G)
-        let finishTag  = DsBit($"{name}(F)",  false ,v ,TagFlag.F)
-        let homingTag  = DsBit($"{name}(H)",  false ,v ,TagFlag.H)
-        let originTag  = DsBit($"{name}(0G)", false ,v ,TagFlag.Origin)
-        let pauseTag   = DsBit($"{name}(PA)", false ,v ,TagFlag.Pause)
-        let errorTxTag = DsBit($"{name}(E1)", false ,v ,TagFlag.ErrorTx)
-        let errorRxTag = DsBit($"{name}(E2)", false ,v ,TagFlag.ErrorRx)
+        let readyTag   = bit $"{name}(R)"  TagFlag.R
+        let goingTag   = bit $"{name}(G)"  TagFlag.G
+        let finishTag  = bit $"{name}(F)"  TagFlag.F
+        let homingTag  = bit $"{name}(H)"  TagFlag.H
+        let originTag  = bit $"{name}(0G)" TagFlag.Origin
+        let pauseTag   = bit $"{name}(PA)" TagFlag.Pause
+        let errorTxTag = bit $"{name}(E1)" TagFlag.ErrorTx
+        let errorRxTag = bit $"{name}(E2)" TagFlag.ErrorRx
 
-        let relayTag   = DsBit($"{name}(RE)" ,false ,v ,TagFlag.Relay)
+        let relayTag   = bit $"{name}(RE)" TagFlag.Relay
 
             //port 값을 자동으로 변경
-        let endTag     = DsBit($"{name}(ET)" ,false ,v ,TagFlag.ET)
-        let resetTag   = DsBit($"{name}(RT)" ,false ,v ,TagFlag.RT)
-        let startTag   = DsBit($"{name}(ST)" ,false ,v ,TagFlag.ST)
+        let endTag     = bit $"{name}(ET)" TagFlag.ET
+        let resetTag   = bit $"{name}(RT)" TagFlag.RT
+        let startTag   = bit $"{name}(ST)" TagFlag.ST
 
             //자동일 경우 tag 값에 의해 수동일때 force 값에 의해 변경
-        let endPort    = DsBit($"{name}(EP)" ,false ,v ,TagFlag.EP)
-        let resetPort  = DsBit($"{name}(RP)" ,false ,v ,TagFlag.RP)
-        let startPort  = DsBit($"{name}(SP)" ,false ,v ,TagFlag.SP)
+        let endPort    = bit $"{name}(EP)" TagFlag.EP
+        let resetPort  = bit $"{name}(RP)" TagFlag.RP
+        let startPort  = bit $"{name}(SP)" TagFlag.SP
 
             //port 값을 수동으로 강제 변경
-        let endForce   = DsBit($"{name}(EP)" ,false ,v ,TagFlag.EF)
-        let resetForce = DsBit($"{name}(RP)" ,false ,v ,TagFlag.RF)
-        let startForce = DsBit($"{name}(SP)" ,false ,v ,TagFlag.SF)
+        let endForce   = bit $"{name}(EP)" TagFlag.EF
+        let resetForce = bit $"{name}(RP)" TagFlag.RF
+        let startForce = bit $"{name}(SP)" TagFlag.SF
+
+        interface IVertexMemoryManager with
+            member x.Vertex = v
 
         member x.Name  = name
 

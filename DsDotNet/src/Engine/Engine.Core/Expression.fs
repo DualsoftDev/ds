@@ -35,7 +35,7 @@ module ExpressionModule =
             member x.ToText(withParenthesys) = x.ToText(withParenthesys)
             member x.FunctionName = x.FunctionName
             member x.FunctionArguments = x.FunctionArguments
-            member x.StorageArguments = x.StorageArguments
+            member x.CollectStorages() = x.CollectStorages()
 
         member x.DataType = typedefof<'T>
 
@@ -160,6 +160,12 @@ module ExpressionModule =
                 $"{typ.ToLower()} {c.Name} = {functionName}({args})"
 
     type Terminal<'T when 'T:equality> with
+        member x.TryGetStorage(): IStorage option =
+            match x with
+            | DuTag t -> Some t
+            | DuVariable v -> Some v
+            | DuLiteral l -> None
+
         member x.GetBoxedRawObject(): obj =
             match x with
             | DuTag t -> t |> box
@@ -194,7 +200,7 @@ module ExpressionModule =
             | DuTerminal _ -> None
             | DuFunction fs -> Some fs.Name
 
-        member x.FunctionArguments =
+        member x.FunctionArguments:IExpression list =
             match x with
             | DuFunction fs -> fs.Arguments
             | DuTerminal _ -> []
@@ -206,16 +212,10 @@ module ExpressionModule =
                 let text = fwdSerializeFunctionNameAndBoxedArguments fs.Name fs.Arguments withParenthesys
                 text
 
-        member x.StorageArguments =
+        member x.CollectStorages() : IStorage list =
             match x with
-            | DuTerminal b ->
-                match b with
-                | DuTag t -> [t :> IStorage]
-                | DuVariable v -> [v :> IStorage]
-                | DuLiteral l -> []
-            | DuFunction fs ->
-                fs.Arguments
-                |> List.collect(fun arg -> arg.StorageArguments)
+            | DuTerminal b -> b.TryGetStorage() |> Option.toList
+            | DuFunction fs -> [ for arg in fs.Arguments do yield! arg.CollectStorages() ]
 
 
     type System.Type with

@@ -39,31 +39,32 @@ module RunTime =
             else statements |> Seq.toList
 
         do
-           let usedItems =
+            let usedItems =
                 [ for s in statements do
                     yield! s.GetSourceStorages()
                     yield! s.GetTargetStorages()
                 ] |> Seq.distinct
 
-           let dicSource = statements
-                            .Select(fun s -> s, s.GetSourceStorages())
-                            |> dict |> Dictionary
+            let dicSource =
+                statements
+                    .Select(fun s -> s, s.GetSourceStorages())
+                    |> dict |> Dictionary
 
-           for item in usedItems
-            do
-              statements
-              |> Seq.filter(fun s -> dicSource[s].Contains item)
-              |> Seq.iter(fun s ->
-                    if mapRungs.ContainsKey item
-                    then mapRungs[item].Add s |> verifyM $"Duplicated [{s.ToText()}]"
-                    else mapRungs.TryAdd(item, [s]|>HashSet) |> verifyM $"Duplicated [{item.ToText()}]"
-              )
+
+
+            for item in usedItems do
+            for s in statements do
+                if dicSource[s].Contains item then
+                    if mapRungs.ContainsKey item then
+                        mapRungs[item].Add s |> verifyM $"Duplicated [{s.ToText()}]"
+                    else
+                        mapRungs.TryAdd(item, [s]|>HashSet) |> verifyM $"Duplicated [{item.ToText()}]"
 
 
         //강제 전체 연산 임시 test용
         member x.Scan() =
             for statement in statements do
-            statement.Do()
+                statement.Do()
 
             ///running 이 Some 이면 Expression 처리 동작 중
         member x.Running = running.IsSome

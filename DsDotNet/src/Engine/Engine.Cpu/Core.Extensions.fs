@@ -1,11 +1,6 @@
 namespace Engine.Cpu
 
 open Engine.Core
-open System
-open System.Linq
-open Engine.Parser.FS
-open System.Collections.Generic
-open System.Collections.Concurrent
 
 [<AutoOpen>]
 module CoreExtensionsModule =
@@ -23,8 +18,8 @@ module CoreExtensionsModule =
 
         member x.GetSourceStorages() =
             match x with
-            | DuAssign (expr, target) -> expr.StorageArguments
-            | DuVarDecl (expr, var) -> expr.StorageArguments
+            | DuAssign (expr, target) -> expr.CollectStorages()
+            | DuVarDecl (expr, var) -> expr.CollectStorages()
             | DuTimer timerStatement ->
                 [ for s in timerStatement.Timer.InputEvaluateStatements do
                     yield! s.GetSourceStorages() ]

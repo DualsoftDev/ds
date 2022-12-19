@@ -38,7 +38,7 @@ module ExpressionForwardDeclModule =
         /// Function expression 인 경우 function args 반환.  terminal 이거나 argument 없으면 empty list 반환
         abstract FunctionArguments: IExpression list
         /// Function expression 에 사용된 IStorage 항목들을 반환
-        abstract StorageArguments: IStorage list
+        abstract CollectStorages: unit -> IStorage list
 
     type IExpression<'T> =
         inherit IExpression

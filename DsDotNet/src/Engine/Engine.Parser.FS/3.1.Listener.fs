@@ -130,6 +130,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
 
     override x.EnterCodeBlock(ctx:CodeBlockContext) =
         let code = ctx.GetOriginalText()
+        x.TheSystem.OriginalCodeBlocks.Add code
         let pureCode = code.Substring(3, code.Length-6)       // 처음과 끝의 "<@{" 와 "}@>" 제외
         let statements = pureCode |> parseCode options.Storages
         x.TheSystem.Statements.AddRange statements

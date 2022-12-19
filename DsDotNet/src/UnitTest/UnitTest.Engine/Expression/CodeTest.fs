@@ -129,7 +129,7 @@ double myDouble = 3.14 + 3.14;
                 Math.Abs(ExpressionPrologSubModule.toFloat64 v.Value - 3.14 * 2.0) <= 0.0001 |> ShouldBeTrue
 
         [<Test>]
-        member __.``X 4 coode block test`` () =
+        member __.``4 coode block test`` () =
             let parseText text =
                 let helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation(".", "ActiveCpuName"))
                 helper.TheSystem
@@ -149,5 +149,8 @@ double myDouble = 3.14 + 3.14;
             system.Statements.Count === 2
             system.Statements[0].ToText() === "float32 myFloat32 = 3.140000105f + 3.140000105f"
             system.Statements[1].ToText() === "float32 mySingle = 3.140000105f + 3.140000105f"
+
+            let text = system.ToDsText()
+            ds =~= text
             ()
 

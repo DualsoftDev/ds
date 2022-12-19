@@ -5,6 +5,7 @@ open System.Collections.Generic
 open System.Linq
 open System.Diagnostics
 open Engine.Common.FS
+open System
 
 [<AutoOpen>]
 module CoreModule =
@@ -66,10 +67,13 @@ module CoreModule =
         member _.Host = host
 
 
+        /// 사용자 입력 code block(s).  "<@{" 와 "}@>" 사이의 text(s) : todo 복수개의 block 이 허용되면, serialize 할 때 해당 위치에 맞춰서 serialize 해야 하는데...
+        member val OriginalCodeBlocks = ResizeArray<string>()
         member val Statements = ResizeArray<Statement>()
-        member val Variables = ResizeArray<VariableData>()
-        member val Commands = ResizeArray<Command>()
-        member val Observes = ResizeArray<Observe>()
+
+        [<Obsolete("삭제 대상")>] member val Variables = ResizeArray<VariableData>()
+        [<Obsolete("삭제 대상")>] member val Commands = ResizeArray<Command>()
+        [<Obsolete("삭제 대상")>] member val Observes = ResizeArray<Observe>()
 
         member val ApiItems = createNamedHashSet<ApiItem>()
         member val ApiResetInfos = HashSet<ApiResetInfo>()

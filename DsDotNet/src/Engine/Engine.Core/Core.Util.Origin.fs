@@ -380,7 +380,7 @@ module OriginModule =
                 let nameRoute = route |> Seq.map(fun j -> j.ApiName)
                 [
                     for chain in resetChains do
-                        let collision = Enumerable.Intersect(chain, nameRoute)
+                        let collision = Enumerable.Intersect(nameRoute, chain)
                         if collision.Count() = chain.Count() then
                             yield collision.First()
                 ]

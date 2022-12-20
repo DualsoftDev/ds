@@ -1,0 +1,19 @@
+[sys] Control = {
+    [flow] F = {
+		Main = { mv1up, mv2dn > mv1dn, mv2up; }
+		Main <||> Reset;
+    }
+    [interfaces] = {
+        "G"  = { F.Main ~ F.Main }
+        "R" = { F.Reset ~ F.Reset }
+        "G" <||> "R";
+    }
+	[jobs] = {
+		mv1up = { M1.FwUp(%Q300, %I300); }
+		mv1dn = { M1.BwDn(%Q301, %I301); }
+		mv2up = { M2.FwUp(%Q302, %I302); }
+		mv2dn = { M2.BwDn(%Q303, %I303); }
+	}
+    [external file="device/MovingLifter1.ds" ip="localhost"] M1;
+    [external file="device/MovingLifter2.ds" ip="localhost"] M2;
+}

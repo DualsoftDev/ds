@@ -50,6 +50,20 @@
 		<Compile Include="Model\FqdnParseTest.fs" />
 		<Compile Include="Model\SystemBuilderTest.fs" />
 		<Compile Include="Model\LoadConfigTest.fs" />
+		<None Include="Libraries\HmiCodeGenExample\FactoryIO\Assy.ds" />
+		<None Include="Libraries\HmiCodeGenExample\FactoryIO\FactoryIO.ds" />
+		<None Include="Libraries\HmiCodeGenExample\FactoryIO\Lib\Robot.ds" />
+		<None Include="Libraries\HmiCodeGenExample\FactoryIO\Lib\Sub.ds" />
+		<None Include="Libraries\HmiCodeGenExample\FactoryIO\Main.ds" />
+		<None Include="Libraries\HmiCodeGenExample\test_sample\Control.ds" />
+		<None Include="Libraries\HmiCodeGenExample\test_sample\device\cylinder.ds" />
+		<None Include="Libraries\HmiCodeGenExample\test_sample\device\motor.ds" />
+		<None Include="Libraries\HmiCodeGenExample\test_sample\device\MovingLifter1.ds" />
+		<None Include="Libraries\HmiCodeGenExample\test_sample\device\MovingLifter2.ds" />
+		<Content Include="Libraries\HmiCodeGenExample\answer_factoryIO.json" />
+		<Content Include="Libraries\HmiCodeGenExample\answer_test_sample.json" />
+		<Content Include="Libraries\HmiCodeGenExample\FactoryIO\FactoryIO.config.json" />
+		<Content Include="Libraries\HmiCodeGenExample\test_sample\Control_config.json" />
 		<None Include="Libraries\MultipleJobdefCallExample\lib\basic.ds" />
 		<None Include="Libraries\MultipleJobdefCallExample\test_case_0.ds" />
 		<None Include="Libraries\MultipleJobdefCallExample\test_case_1.ds" />
@@ -73,13 +87,17 @@
 		<None Include="Obsolete\Parser\Parse.OK.fsx" />
 		<None Include="Obsolete\test.ipynb" />
 		<Compile Include="Origins\OriginTester.fs" />
+		<Compile Include="HmiCodeGen\HmiCodeGenTester.fs" />
 		<None Include="ScratchPad.fsx" />
 		<None Include="App.config" />
 		<Compile Include="Main.fs" />
 	</ItemGroup>
 
+	<ItemGroup />
+
 	<ItemGroup>
 		<ProjectReference Include="..\..\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
+		<ProjectReference Include="..\..\Engine\Engine.CodeGenHMI\Engine.CodeGenHMI.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Cpu\Engine.Cpu.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Test\Engine.Sample.csproj" />

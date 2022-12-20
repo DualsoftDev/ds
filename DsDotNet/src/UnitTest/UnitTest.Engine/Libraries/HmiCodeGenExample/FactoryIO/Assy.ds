@@ -1,0 +1,18 @@
+[sys ip = localhost] Assy = {
+    [flow] Assy = {
+        "work end" |> "work end" |> PartOut;		// "work end"(Real)|> "work end"(Real) |> PartOut(Real);
+        "m+" <||> 중력 |> "us+";		// "m+"(Real)<||> 중력(Real) |> "us+"(Real);
+        "m+" |> "us-";		// "m+"(Real)|> "us-"(Real);
+        "DownCV+" => PartOut;		// "DownCV+"(Real)=> PartOut(Real);
+        중력 > "us-";		// 중력(Real)> "us-"(Real);
+        "m+" > "us+";		// "m+"(Real)> "us+"(Real);
+        "UpCV+" => PartIn => PartOut;		// "UpCV+"(Real)=> PartIn(Real) => PartOut(Real);
+    }
+    [interfaces] = {
+        "UpConv+" = { Assy."UpCV+" ~ Assy.PartIn }
+        "DownConv+" = { Assy."DownCV+" ~ Assy.PartOut }
+        "Upper+" = { Assy."m+" ~ Assy."us+" }
+        "Upper-" = { Assy.중력 ~ Assy."us-" }
+        JobClear = { Assy."work end" ~ _ }
+    }
+}

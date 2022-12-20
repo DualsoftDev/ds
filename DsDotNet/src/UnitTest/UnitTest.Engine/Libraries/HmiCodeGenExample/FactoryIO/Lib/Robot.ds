@@ -1,0 +1,24 @@
+[sys ip = localhost] Robot = {
+    [flow] Robot = {
+        "gm+" <||> "gm-" |> "gs+";		// "gm+"(Real)<||> "gm-"(Real) |> "gs+"(Real);
+        "gm+" |> "gs-";		// "gm+"(Real)|> "gs-"(Real);
+        "xm+" <||> "xm-" |> "xs+";		// "xm+"(Real)<||> "xm-"(Real) |> "xs+"(Real);
+        "xm+" |> "xs-";		// "xm+"(Real)|> "xs-"(Real);
+        "zm+" <||> "zm-" |> "zs+";		// "zm+"(Real)<||> "zm-"(Real) |> "zs+"(Real);
+        "zm+" |> "zs-";		// "zm+"(Real)|> "zs-"(Real);
+        "gm-" > "gs-";		// "gm-"(Real)> "gs-"(Real);
+        "gm+" > "gs+";		// "gm+"(Real)> "gs+"(Real);
+        "xm-" > "xs-";		// "xm-"(Real)> "xs-"(Real);
+        "xm+" > "xs+";		// "xm+"(Real)> "xs+"(Real);
+        "zm-" > "zs-";		// "zm-"(Real)> "zs-"(Real);
+        "zm+" > "zs+";		// "zm+"(Real)> "zs+"(Real);
+    }
+    [interfaces] = {
+        "Grab+" = { Robot."gm+" ~ Robot."gs+" }
+        "Grab-" = { Robot."gm-" ~ Robot."gs-" }
+        "X-" = { Robot."xm-" ~ Robot."xs-" }
+        "Z+" = { Robot."zm+" ~ Robot."zs+" }
+        "Z-" = { Robot."zm-" ~ Robot."zs-" }
+        "X+" = { Robot."xm+" ~ Robot."xs+" }
+    }
+}

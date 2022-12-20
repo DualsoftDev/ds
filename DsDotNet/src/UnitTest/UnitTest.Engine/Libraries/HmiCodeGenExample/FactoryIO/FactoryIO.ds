@@ -1,0 +1,64 @@
+[sys ip = localhost] FactoryIO = {
+    [flow] API = {
+    }
+    [flow] Line = {
+        Clear |> Clear |> Copy1_Assy반출 |> Green공급및고정;		// Clear(Real)|> Clear(Real) |> Copy1_Assy반출(Alias) |> Green공급및고정(Real);
+        "Line_Robot_X+" > 로봇조립Sub;		// "Line_Robot_X+"(Call)> 로봇조립Sub(Real);
+        "Line_Robot_X-" > 로봇조립Main;		// "Line_Robot_X-"(Call)> 로봇조립Main(Real);
+        Blue공급및고정 => 로봇조립Sub => Assy반출;		// Blue공급및고정(Real)=> 로봇조립Sub(Real) => Assy반출(Real);
+        GoSub => Blue공급및고정 => Assy반출;		// GoSub(Real)=> Blue공급및고정(Real) => Assy반출(Real);
+        GoMain => Green공급및고정 => 로봇조립Main => 로봇조립Sub;		// GoMain(Real)=> Green공급및고정(Real) => 로봇조립Main(Real) => 로봇조립Sub(Real);
+        로봇조립Sub = {
+            "Line_Robot_Grab-" > "Line_Robot_Z-";		// "Line_Robot_Grab-"(Call)> "Line_Robot_Z-"(Call);
+            "Line_Robot_Z+" > "Line_Robot_Grab-" > "Line_Robot_X-";		// "Line_Robot_Z+"(Call)> "Line_Robot_Grab-"(Call) > "Line_Robot_X-"(Call);
+        }
+        로봇조립Main = {
+            "Line_Robot_Grab+" > Line_Main_PartOff;		// "Line_Robot_Grab+"(Call)> Line_Main_PartOff(Call);
+            "Line_Robot_Grab+" > "Line_Robot_X+";		// "Line_Robot_Grab+"(Call)> "Line_Robot_X+"(Call);
+            "Line_Robot_Z+" > "Line_Robot_Grab+" > "Line_Robot_Z-";		// "Line_Robot_Z+"(Call)> "Line_Robot_Grab+"(Call) > "Line_Robot_Z-"(Call);
+        }
+        Assy반출 = {
+            "Line_Assy_Upper+" > Line_Sub_PartOff;		// "Line_Assy_Upper+"(Call)> Line_Sub_PartOff(Call);
+            "Line_Assy_Upper+" > "Line_Assy_UpConv+" > "Line_Assy_Upper-" > "Line_Assy_DownConv+";		// "Line_Assy_Upper+"(Call)> "Line_Assy_UpConv+"(Call) > "Line_Assy_Upper-"(Call) > "Line_Assy_DownConv+"(Call);
+        }
+        Blue공급및고정 = {
+            "Line_Sub_Conv+" > "Line_Sub_Clamp+" > "Line_Sub_Clamp-";		// "Line_Sub_Conv+"(Call)> "Line_Sub_Clamp+"(Call) > "Line_Sub_Clamp-"(Call);
+        }
+        Green공급및고정 = {
+            "Line_Main_Conv+" > "Line_Main_Clamp+" > "Line_Main_Clamp-";		// "Line_Main_Conv+"(Call)> "Line_Main_Clamp+"(Call) > "Line_Main_Clamp-"(Call);
+        }
+        [aliases] = {
+            Assy반출 = { Copy1_Assy반출; }
+        }
+    }
+    [jobs] = {
+        "Line_Main_Conv+" = { Line_Main."Conv+"(_, _); }
+        Line_Main_PartOff = { Line_Main.PartOff(_, _); }
+        "Line_Main_Clamp+" = { Line_Main."Clamp+"(_, _); }
+        "Line_Main_Clamp-" = { Line_Main."Clamp-"(_, _); }
+        "Line_Assy_UpConv+" = { Line_Assy."UpConv+"(_, _); }
+        "Line_Assy_DownConv+" = { Line_Assy."DownConv+"(_, _); }
+        "Line_Assy_Upper+" = { Line_Assy."Upper+"(_, _); }
+        "Line_Assy_Upper-" = { Line_Assy."Upper-"(_, _); }
+        Line_Assy_JobClear = { Line_Assy.JobClear(_, _); }
+        "Line_Sub_Conv+" = { Line_Sub."Conv+"(_, _); }
+        Line_Sub_PartOff = { Line_Sub.PartOff(_, _); }
+        "Line_Sub_Clamp+" = { Line_Sub."Clamp+"(_, _); }
+        "Line_Sub_Clamp-" = { Line_Sub."Clamp-"(_, _); }
+        "Line_Robot_Grab+" = { Line_Robot."Grab+"(_, _); }
+        "Line_Robot_Grab-" = { Line_Robot."Grab-"(_, _); }
+        "Line_Robot_X-" = { Line_Robot."X-"(_, _); }
+        "Line_Robot_Z+" = { Line_Robot."Z+"(_, _); }
+        "Line_Robot_Z-" = { Line_Robot."Z-"(_, _); }
+        "Line_Robot_X+" = { Line_Robot."X+"(_, _); }
+    }
+    [interfaces] = {
+        "JobClearClear~_" = { _ ~ _ }
+        "StartSubGoSub~_" = { _ ~ _ }
+        "StartMainGoMain~_" = { _ ~ _ }
+    }
+    [device file="Main.ds"] Line_Main; // E:\FactoryIO\Lib\Main.pptx
+    [device file="Assy.ds"] Line_Assy; // E:\FactoryIO\Lib\Assy.pptx
+    [device file="Lib/Sub.ds"] Line_Sub; // E:\FactoryIO\Lib\Sub.pptx
+    [device file="Lib/Robot.ds"] Line_Robot; // E:\FactoryIO\Lib\Robot.pptx
+}

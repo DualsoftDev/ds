@@ -1,0 +1,13 @@
+[sys] Motor = {
+    [flow] F = {
+        Forward;
+		Backward;
+        Forward <||> Backward;
+    }
+    [interfaces] = {
+        "fwd" = { F.Forward ~ F.Forward }
+        "bwd" = { F.Backward ~ F.Backward }
+        "fwd" <||> "bwd";
+		"bwd" <||> "std";
+    }
+}

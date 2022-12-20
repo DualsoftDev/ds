@@ -1,0 +1,29 @@
+[sys] MovingLifter2 = {
+    [flow] F = {
+		ForwardUp = { Fw > Up1, Up2, Up3, Up4; }
+		BackwardDown = { Dn1, Dn2, Dn3, Dn4 > Bw; }
+		ForwardUp <||> BackwardDown;
+    }
+    [interfaces] = {
+        "FwUp" = { F.ForwardUp ~ F.ForwardUp }
+        "BwDn" = { F.BackwardDown ~ F.BackwardDown }
+        "FwUp" <||> "BwDn";
+    }
+    [jobs] = {
+        Up1 = { A."+"(%Q200, %I200); }
+        Up2 = { B."+"(%Q201, %I201); }
+        Up3 = { C."+"(%Q202, %I202); }
+        Up4 = { D."+"(%Q203, %I203); }
+        Dn1 = { A."-"(%Q204, %I204); }
+        Dn2 = { B."-"(%Q205, %I205); }
+        Dn3 = { C."-"(%Q206, %I206); }
+        Dn4 = { D."-"(%Q207, %I207); }
+		Fw  = { M.fwd(%Q208, _    ); }
+		Bw  = { M.bwd(%Q209, _    ); }
+    }
+    [device file="cylinder.ds"] A;
+    [device file="cylinder.ds"] B;
+    [device file="cylinder.ds"] C;
+    [device file="cylinder.ds"] D;
+    [device file="motor.ds"] M;
+}

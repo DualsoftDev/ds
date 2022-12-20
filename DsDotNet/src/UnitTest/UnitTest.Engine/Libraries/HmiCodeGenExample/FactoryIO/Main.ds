@@ -1,0 +1,16 @@
+[sys ip = localhost] Main = {
+    [flow] Main = {
+        "Part Remove" |> "Part Remove" |> Part;		// "Part Remove"(Real)|> "Part Remove"(Real) |> Part(Real);
+        "v+" <||> "v-" |> "s+";		// "v+"(Real)<||> "v-"(Real) |> "s+"(Real);
+        "v+" |> "s-";		// "v+"(Real)|> "s-"(Real);
+        "v-" > "s-";		// "v-"(Real)> "s-"(Real);
+        "v+" > "s+";		// "v+"(Real)> "s+"(Real);
+        "CV+" => Part;		// "CV+"(Real)=> Part(Real);
+    }
+    [interfaces] = {
+        "Conv+" = { Main."CV+" ~ Main.Part }
+        PartOff = { Main."Part Remove" ~ _ }
+        "Clamp+" = { Main."v+" ~ Main."s+" }
+        "Clamp-" = { Main."v-" ~ Main."s-" }
+    }
+}

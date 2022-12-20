@@ -101,9 +101,13 @@ module rec ExpressionParser =
                         | :? LiteralUint64Context -> text.Replace("UL", "")  |> System.UInt64.Parse |> literal2expr |> iexpr
                         | :? LiteralSingleContext -> text.Replace("f" , "")  |> System.Single.Parse |> literal2expr |> iexpr
                         | :? LiteralDoubleContext -> text                    |> System.Double.Parse |> literal2expr |> iexpr
-                        | :? LiteralStringContext -> text                    |> deQuoteOnDemand     |> literal2expr |> iexpr
-                        | :? LiteralCharContext   -> text                    |> System.Char.Parse   |> literal2expr |> iexpr
                         | :? LiteralBoolContext   -> text                    |> System.Boolean.Parse|> literal2expr |> iexpr
+                        | :? LiteralStringContext -> text                    |> deQuoteOnDemand     |> literal2expr |> iexpr
+                        | :? LiteralCharContext   ->
+                            // text : "'a'" 의 형태
+                            let dq, sq = "\"", "'"
+                            let xxx = text |> unwrapString dq dq |> unwrapString sq sq
+                            text |> unwrapString dq dq |> unwrapString sq sq |> System.Char.Parse   |> literal2expr |> iexpr
                         | _ -> failwith "ERROR"
                     | :? TagContext as texp ->
                         failwith "Obsoleted.  Why not Storage???"   // todo : remove
@@ -312,6 +316,8 @@ module rec ExpressionParser =
             | "UInt32" -> new Variable<uint32>(name, v :?> uint32)
             | "Int64"  -> new Variable<int64> (name, v :?> int64)
             | "UInt64" -> new Variable<uint64>(name, v :?> uint64)
+            | "String" -> new Variable<string>(name, v :?> string)
+            | "Char"   -> new Variable<char>  (name, v :?> char)
             | _  -> failwith "ERROR"
 
         member x.CreateVariable(name:string) : IStorage =
@@ -326,6 +332,8 @@ module rec ExpressionParser =
             | "UInt32" -> new Variable<uint32>(name, 0u)
             | "Int64"  -> new Variable<int64> (name, 0L)
             | "UInt64" -> new Variable<uint64>(name, 0UL)
+            | "String" -> new Variable<string>(name, "")
+            | "Char"   -> new Variable<char>  (name, ' ')
             | _  -> failwith "ERROR"
 
         member x.CreateTag(name:string, address:string, boxedValue:obj) : IStorage =
@@ -341,6 +349,8 @@ module rec ExpressionParser =
             | "UInt32" -> new PlcTag<uint32>(name, address, v :?> uint32)
             | "Int64"  -> new PlcTag<int64> (name, address, v :?> int64)
             | "UInt64" -> new PlcTag<uint64>(name, address, v :?> uint64)
+            | "String" -> new PlcTag<string>(name, address, v :?> string)
+            | "Char"   -> new PlcTag<char>  (name, address, v :?> char)
             | _  -> failwith "ERROR"
 
         member x.CreateTag(name:string, address:string) : IStorage =
@@ -355,6 +365,8 @@ module rec ExpressionParser =
             | "UInt32" -> new PlcTag<uint32>(name, address, 0u)
             | "Int64"  -> new PlcTag<int64> (name, address, 0L)
             | "UInt64" -> new PlcTag<uint64>(name, address, 0UL)
+            | "String" -> new PlcTag<string>(name, address, "")
+            | "Char"   -> new PlcTag<char>  (name, address, ' ')
             | _  -> failwith "ERROR"
 
 
@@ -370,4 +382,6 @@ module rec ExpressionParser =
             | ("uint32"  | "uint")   -> typedefof<uint32>
             | ("int64"   | "long")   -> typedefof<int64>
             | ("uint64"  | "ulong")  -> typedefof<uint64>
+            | "string"               -> typedefof<string>
+            | "char"                 -> typedefof<char>
             | _  -> failwith "ERROR"

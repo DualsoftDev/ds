@@ -44,6 +44,15 @@ module TextUtil =
         | RegexPattern "^\"([^\"]*)\"$" [inner] -> inner
         | _ -> s
 
+    let unwrapString (s:string) (e:string) (str:string) =
+        if str.StartsWith(s) && str.EndsWith(e) then
+            let s, e = s.Length, str.Length - (s.Length + e.Length)
+            str[s..e]
+        else
+            str
+    /// doublequote(") 로 시작하고, doublequote 로 끝나면, 앞뒤의 double quote 제거한 string 을 반환.  그렇지 않으면 원본 string 반환
+    let deQuote = unwrapString dq dq
+
     let internal combine (separator:string) (nameComponents:string seq) =
         let nameComponents = nameComponents |> List.ofSeq
         match nameComponents with

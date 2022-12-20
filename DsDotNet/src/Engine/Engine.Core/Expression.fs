@@ -231,6 +231,8 @@ module ExpressionModule =
             | "UInt32" -> "uint32"
             | "Int64"  -> "int64"
             | "UInt64" -> "uint64"
+            | "String" -> "string"
+            | "Char"   -> "char"
             | _  -> failwith "ERROR"
 
 

@@ -16,7 +16,7 @@ module CodeTestModule =
         [<Test>]
         member __.``1 var declaration test`` () =
             let storages = Storages()
-            let code = """
+            let numericDeclarations = """
 int8 myInt8 = 0y;
 uint8 myUInt8 = 0uy;
 byte myByte = 0uy;
@@ -42,10 +42,9 @@ float32 myFloat32 = 0.0f;
 single mySingle = 0.0f;
 float64 myFloat64 = 0.0;
 double myDouble = 0.0;
-
 """
-            let statements = code |> parseCode storages;
-            let numAddedVariables = code.Split([|'\r'; '\n'|], StringSplitOptions.RemoveEmptyEntries).Length
+            let statements = numericDeclarations |> parseCode storages;
+            let numAddedVariables = numericDeclarations.Split([|'\r'; '\n'|], StringSplitOptions.RemoveEmptyEntries).Length
             storages.Count === numAddedVariables
 
             for KeyValue(k, v) in storages do
@@ -127,6 +126,35 @@ double myDouble = 3.14 + 3.14;
 
             for KeyValue(k, v) in storages do
                 Math.Abs(ExpressionPrologSubModule.toFloat64 v.Value - 3.14 * 2.0) <= 0.0001 |> ShouldBeTrue
+
+
+
+        [<Test>]
+        member __.``3 string/char initialization test`` () =
+            let storages = Storages()
+            let declarations = [
+                $"string myString = {dq}Hello, world{dq}"
+                "char myChar = 'x'"
+            ]
+
+            let statements =
+                [
+                    for s in declarations do
+                        let statement = tryParseStatement storages s |> Option.get
+                        statement.ToText() === s
+                        yield statement
+                ]
+
+            match statements[0] with
+            | DuVarDecl (expr, target) -> target.Value === "Hello, world"
+            | _ -> failwith "ERROR"
+
+            match statements[1] with
+            | DuVarDecl (expr, target) -> target.Value === 'x'
+            | _ -> failwith "ERROR"
+
+            storages.Count === declarations.Length
+
 
         [<Test>]
         member __.``4 coode block test`` () =

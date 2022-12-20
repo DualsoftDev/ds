@@ -41,13 +41,13 @@ module PPTDocModule =
             let settingAlias(nodes:pptNode seq) =
                 let nodes = nodes.OrderByDescending(fun o-> parents.ContainsKey(o))  //부모지정
                 let names  = nodes |> Seq.map(fun f->f.Name)
-                (nodes, GetAliasName(names))
+                (nodes, GetAliasNumber(names))
                 ||> Seq.map2(fun node  nameSet -> node,  nameSet)
-                |> Seq.iter(fun (node, (name, newName)) ->
-                                if(name  = newName |> not)
+                |> Seq.iter(fun (node, (name, aliasNumber)) ->
+                                if(aliasNumber > 0)
                                 then    let orgNode = nodes |> Seq.filter(fun f->f.Name = name) |> Seq.head
                                         node.Alias <- Some(orgNode)
-                                        node.Name  <- newName
+                                        node.AliasNumber  <- aliasNumber
                                         )
 
             let children = parents |> Seq.collect(fun parentSet -> parentSet.Value)
@@ -225,13 +225,13 @@ module PPTDocModule =
 type PPTDocExt =
         [<Extension>] static member GetCopyPathNName(doc:pptDoc) =
                          doc.Nodes 
-                         |> Seq.filter(fun node -> node.NodeType = COPY)
+                         |> Seq.filter(fun node -> node.NodeType = COPY_VALUE || node.NodeType = COPY_REF)
                          |> Seq.collect(fun node ->
                             node.CopySys.Select(fun copy -> 
                                 let path = Path.GetFullPath(Path.Combine(doc.DirectoryName, copy.Value))+".pptx"
                                 if File.Exists(path) |> not
                                 then node.Shape.ErrorPath(ErrID._29, node.PageNum, path)
                                 
-                                copy.Value , copy.Key)
+                                copy.Value , copy.Key, node)
                         )
      

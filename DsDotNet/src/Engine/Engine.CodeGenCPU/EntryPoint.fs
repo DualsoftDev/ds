@@ -8,7 +8,7 @@ module ModuleInitializer =
         let createVertexMemoryManager (vertex:IVertex) : IVertexMemoryManager =
             let v = vertex :?> Vertex
             match v with
-            | (:? Real | :? Call) -> new VertexMemoryManager(v)
+            | (:? Real | :? RealEx | :? Call) -> new VertexMemoryManager(v)
             //| :? Alias as a -> new VertexMemoryManager(a.TargetWrapper.GetTarget())
             | _ -> failwith "ERROR"
 

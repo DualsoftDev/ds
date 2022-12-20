@@ -110,14 +110,14 @@ module PPTObjectModule =
                             | false,true, true  ->  ResetPush, isChangeHead
                             | _ -> conn.ErrorConnect(ErrID._3, startName, endName, iPage)
 
-    let GetAliasName(names:string seq) =
+    let GetAliasNumber(names:string seq) =
         let usedNames = HashSet<string>()
         seq {
 
-                let newName(testName) =
+                let Number(testName) =
                     if  names |> Seq.filter (fun name -> name = testName) |> Seq.length = 1
                     then usedNames.Add(testName) |>ignore
-                         testName
+                         0
                     else
                         let mutable cnt = 0
                         let mutable copy = testName
@@ -127,26 +127,36 @@ module PPTObjectModule =
                             cnt <- cnt + 1
 
                         usedNames.Add(copy) |>ignore
-                        copy
+                        cnt
 
                 for name in names do
-                    yield name, newName(name)
+                    yield name, Number(name)-1
             }
 
     let nameCheck(shape:Shape, nodeType:NodeType, iPage:int) =
         let name = GetBracketsReplaceName(shape.InnerText) |> trimSpace
         if name.Contains(";") 
             then shape.ErrorName(ErrID._18, iPage)
-        if nodeType = COPY
-        then 
-            let name, number = GetTailNumber(shape.InnerText)
-            if GetSquareBrackets(name, false).length() = 0
-            then  shape.ErrorName(ErrID._7, iPage)
-        if nodeType = CALL && name.Contains("$")|>not 
-        then  shape.ErrorName(ErrID._12, iPage)
+        
         //REAL other flow 아니면 이름에 '.' 불가
-        if nodeType <> REALEx && name.Contains(".") 
-        then  shape.ErrorName(ErrID._19, iPage)
+        let checkDotErr() = 
+            if nodeType <> REALEx && name.Contains(".") 
+            then  shape.ErrorName(ErrID._19, iPage)
+
+        match nodeType with
+        | REALEx      -> ()
+        | CALL        -> if  name.Contains("$")|>not 
+                         then  shape.ErrorName(ErrID._12, iPage)
+
+        | COPY_REF    
+        | COPY_VALUE  -> let name, number = GetTailNumber(shape.InnerText)
+                         if GetSquareBrackets(name, false).length() = 0
+                         then  shape.ErrorName(ErrID._7, iPage)
+        | IF          
+        | REAL        
+        | DUMMY       
+        | BUTTON       
+        | ACTIVESYS       -> checkDotErr()
 
     let IsDummyShape(shape:Shape) = shape.IsDashShape() && (shape.CheckRectangle()||shape.CheckEllipse())
 
@@ -191,6 +201,9 @@ module PPTObjectModule =
                     |> trimStartEndSeq
                     |> Seq.map(fun sys -> $"{pageTitle}_{sys}")
 
+                if copys.Distinct().length() <> copys.length()
+                then Office.ErrorName(shape, ErrID._33, iPage)
+
                 copys
                 |> Seq.iter(fun copy -> 
                     copySystems.Add(copy, orgiSysName)
@@ -217,9 +230,11 @@ module PPTObjectModule =
                 if(shape.CheckRectangle())      
                 then if name.Contains(".") then REALEx else REAL
                 elif(shape.CheckHomePlate())    then IF
-                elif(shape.CheckFoldedCorner()) then COPY
+                elif(shape.CheckFoldedCornerRound()) then COPY_VALUE
+                elif(shape.CheckFoldedCornerPlate()) then COPY_REF
                 elif(shape.CheckEllipse())      then CALL
                 elif(shape.CheckButtonShape())  then  BUTTON
+                elif(shape.CheckCube())  then  ACTIVESYS
                 else  shape.ErrorName(ErrID._1, iPage)
 
             nameCheck (shape, nodeType, iPage)
@@ -229,7 +244,8 @@ module PPTObjectModule =
                      GetSquareBrackets(shape.InnerText, true )  
                      |> fun text -> if text = ""|>not then updateSafety text
             |IF ->   updateIF shape.InnerText
-            |COPY -> 
+            |COPY_REF
+            |COPY_VALUE -> 
                      let name, number = GetTailNumber(shape.InnerText)
                      GetSquareBrackets(name, false)
                         |> fun text -> 
@@ -254,13 +270,14 @@ module PPTObjectModule =
         member x.BtnType = btnType
         member x.NodeType = nodeType
         member x.PageTitle    = pageTitle
-        member x.IsAlias :bool   = x.Alias.IsSome
 
         member val Id =  shape.GetId()
         member val Key =  Objkey(iPage, shape.GetId())
         member val Name =   name with get, set
         member val NameOrg =   shape.InnerText
+        member x.IsAlias :bool   = x.Alias.IsSome
         member val Alias :pptNode  option = None with get, set
+        member val AliasNumber :int = 0 with get, set
         member x.GetRectangle (sildeSize:int*int) =  shape.GetPosition(sildeSize)
 
     and

@@ -16,6 +16,8 @@ module ImportU =
 
     let private createCallVertex(mySys:DsSystem, node:pptNode, parentReal:Real Option, parentFlow:Flow Option, dicSeg:Dictionary<string, Vertex>) =
         let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
+        if mySys.TryFindLoadedSystem(sysName).IsNone && mySys.Jobs.TryFind(fun job -> job.Name = sysName+"_"+apiName).IsNone
+        then node.Shape.ErrorName(ErrID._48, node.PageNum) 
 
         let call =
             match mySys.Jobs.TryFind(fun job -> job.Name = sysName+"_"+apiName) with
@@ -23,7 +25,7 @@ module ImportU =
                 if(parentReal.IsSome)
                 then  Call.Create(job, DuParentReal (parentReal.Value))
                 else  Call.Create(job, DuParentFlow (parentFlow.Value))
-            |None -> node.Shape.ErrorName(ErrID._32, node.PageNum)
+            |None -> node.Shape.ErrorName(ErrID._49, node.PageNum)
 
         dicSeg.Add(node.Key, call)
 
@@ -62,7 +64,7 @@ module ImportU =
         [<Extension>]
         static member MakeJobs  (doc:pptDoc, mySys:DsSystem) =
             doc.Nodes
-            |> Seq.filter(fun node -> node.NodeType = COPY)
+            |> Seq.filter(fun node -> node.NodeType = COPY_VALUE ||  node.NodeType = COPY_REF)
             |> Seq.collect(fun node -> node.JobInfos)
             |> Seq.iter(fun jobSet ->
                 let jobBase = jobSet.Key
@@ -158,8 +160,8 @@ module ImportU =
                     |> Seq.iter(fun node   ->
                             if node.NodeType = REALEx
                             then
-                                let real = getOtherFlowReal(dicFlow.Values, node)
-                                dicVertex.Add(node.Key, real)
+                                let real = getOtherFlowReal(dicFlow.Values, node) :?> Real
+                                dicVertex.Add(node.Key, RealEx.Create(real, DuParentFlow dicFlow.[node.PageNum]))
                             else
                                 let real = Real.Create(node.Name, dicFlow.[node.PageNum])
                                 dicVertex.Add(node.Key, real)
@@ -184,22 +186,24 @@ module ImportU =
 
                 let createAlias() =
                     pptNodes
-                    |> Seq.filter(fun node -> node.Alias.IsSome)
+                    |> Seq.filter(fun node -> node.IsAlias)
                     |> Seq.iter(fun node ->
                             let segOrg = dicVertex.[node.Alias.Value.Key]
-                            if dicChildParent.ContainsKey(node)
-                            then
-                                let real = dicVertex.[dicChildParent.[node].Key] :?> Real
-                                Alias.Create(node.Name, DuAliasTargetCall(segOrg:?>Call), DuParentReal(real)) |> ignore
-                            else
-                                let alias =
+                            let alias =
+                                if dicChildParent.ContainsKey(node)
+                                then
+                                    let real = dicVertex.[dicChildParent.[node].Key] :?> Real
+                                    let call = dicVertex.[node.Alias.Value.Key] :?> Call
+                                    Alias.Create($"{call.Name}_{node.AliasNumber}", DuAliasTargetCall(segOrg:?>Call), DuParentReal(real))
+                                else
                                     let flow = dicFlow.[node.PageNum]
                                     match segOrg with
-                                    | :? Real as rt -> Alias.Create(node.Name, DuAliasTargetReal(rt), DuParentFlow(flow))
-                                    | :? Call as ct -> Alias.Create(node.Name, DuAliasTargetCall(ct), DuParentFlow(flow))
+                                    | :? RealEx as ex -> Alias.Create($"{ex.Name}_{node.AliasNumber}", DuAliasTargetRealEx(ex), DuParentFlow(flow))
+                                    | :? Real as rt -> Alias.Create($"{rt.Name}_{node.AliasNumber}", DuAliasTargetReal(rt), DuParentFlow(flow))
+                                    | :? Call as ct -> Alias.Create($"{ct.Name}_{node.AliasNumber}", DuAliasTargetCall(ct), DuParentFlow(flow))
                                     |_ -> failwithf "Error type"
 
-                                dicVertex.Add(node.Key, alias )
+                            dicVertex.Add(node.Key, alias)
                         )
 
                 //Real 부터

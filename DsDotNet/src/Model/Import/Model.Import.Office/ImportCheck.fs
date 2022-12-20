@@ -78,25 +78,18 @@ module ImportCheck =
                         edge.ConnectionShape.ErrorConnect(ErrID._22, edge.Text, edge.PageNum)
             )
 
-        //page 타이틀 중복체크
-        let CheckMakeSystem(doc:pptDoc) =
-            let dicPage = ConcurrentDictionary<string, int>()
-            doc.Pages.Filter(fun page  ->  page.IsUsing && page.Title = ""|> not)
-                    .ForEach(fun page->
-                                if(dicPage.TryAdd(page.Title, page.PageNum)|>not)
-                                then Office.ErrorPPT(Page, ErrID._21, $"{page.Title},  Same Page({dicPage.[page.Title]})",  page.PageNum)
-                                )
-
-            let dicSys = ConcurrentDictionary<string, string>()
+        let CheckSameCopy(doc:pptDoc) =
+            let dicSame = Dictionary<string, pptNode>()
             doc.Nodes
-            |> Seq.filter(fun node -> node.NodeType = COPY)
+            |> Seq.filter(fun node -> node.NodeType = COPY_VALUE || node.NodeType = COPY_REF)
             |> Seq.iter(fun node ->
-                    node.CopySys.ForEach(fun copy ->
-                        if dicSys.TryAdd(copy.Key, copy.Value)|>not
-                        then Office.ErrorName(node.Shape, ErrID._34, node.PageNum)
-                        )
+                    node.CopySys.ForEach(fun loadsys -> 
+                        let key = $"{node.PageNum}_{loadsys.Key}"
+                        if dicSame.ContainsKey(key)
+                        then Office.ErrorName(node.Shape, ErrID._33, node.PageNum)
+                        else dicSame.Add(key, node)
                     )
-
+                    )
 
         //page 타이틀 중복체크
         let SameSysFlowName(systems:DsSystem seq, dicFlow: Dictionary<int, Flow>) =

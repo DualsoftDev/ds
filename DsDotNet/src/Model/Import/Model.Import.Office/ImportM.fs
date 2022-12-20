@@ -8,7 +8,7 @@ open Engine.Common.FS
 open Model.Import.Office
 open Engine.Core
 open System.IO
-
+open Engine.Core.ModelLoaderModule
 [<AutoOpen>]
 module ImportM =
 
@@ -29,22 +29,33 @@ module ImportM =
             pathStack.Push(path)
 
             let doc = pptDoc(path)
+            //시스템 로딩시 중복이름을 부를 수 없다.
+            CheckSameCopy(doc)
             let name, ip =  if active //active는 시스템이름으로 ppt 파일 이름을 사용
                             then doc.Name, "localhost" 
                             else name, ""
+
             let mySys = DsSystem(name, ip)
+            let reloadingSystem(paras, loadedName) = 
+                let sys, doc = loadSystem(paras.AbsoluteFilePath, loadedName, false)
+                sys
 
             doc.GetCopyPathNName()
-            |> Seq.iter(fun (path, loadedName) -> 
+            |> Seq.iter(fun (path, loadedName, node) ->
+                    
+                let paras = getParams(doc.DirectoryName, path, loadedName, mySys)
 
-                    let paras = getParams(doc.DirectoryName, path, loadedName, mySys)
-                    let sys, (doc: pptDoc) = loadSystem(paras.AbsoluteFilePath, loadedName, false)
+                if pathStack.Contains paras.AbsoluteFilePath
+                then Office.ErrorPath(node.Shape, ErrID._45, node.PageNum, paras.AbsoluteFilePath)
 
-                    if loadedName =  doc.Name //파일이름 그대로 부르면 ExSys, 다른이름이면 Device
-                    then mySys.AddLoadedSystem(ExternalSystem(sys, paras))
-                    else mySys.AddLoadedSystem(Device(sys, paras))
-                    )
+                let sys = reloadingSystem(paras, loadedName)    
+                  
+                if node.NodeType = COPY_REF
+                then mySys.AddLoadedSystem(ExternalSystem(sys, paras))
 
+                if node.NodeType = COPY_VALUE
+                then mySys.AddLoadedSystem(Device(sys, paras))
+                )
 
             doc.MakeJobs(mySys)
             doc.MakeInterfaces(mySys)
@@ -73,14 +84,13 @@ module ImportM =
                 //Dummy 및 UI Flow, Node, Edge 만들기
                 let viewNodes = doc.MakeGraphView(mySys)
 
-
                 //MSGInfo($"전체 장표   count [{doc.Pages.Count()}]")
                 //MSGInfo($"전체 도형   count [{doc.Nodes.Count()}]")
                 //MSGInfo($"전체 연결   count [{doc.Edges.Count()}]")
                 //MSGInfo($"전체 부모   count [{doc.Parents.Keys.Count}]")
                 mySys, viewNodes
 
-            with ex ->  failwithf  $"{pathStack.Last()}\r\n{ex.Message}"
+            with ex ->  failwithf  $"{ex.Message}\t [ErrPath:{pathStack.First()}]"
 
 
     let FromPPTX(path:string) =
@@ -89,5 +99,14 @@ module ImportM =
 
         mySys, viewNodes
 
+    let FromPPTXS(paths:string seq) =
+        let cfg = {DsFilePaths = paths |> Seq.toList} 
+      
+        let results =
+            [   for dsFile in cfg.DsFilePaths do
+                    FromPPTX dsFile |> fun (sys, view) -> sys, view ]
+        let systems =  results.Select(fun (sys, view) -> sys) |> Seq.toList
+        let views   =  results |> dict
+        { Config = cfg; Systems = systems}, views
 
 

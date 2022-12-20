@@ -19,19 +19,17 @@ namespace Dual.Model.Import
     {
         public static FormMain TheMain;
 
-        private DsSystem _mySystem;
+        private DsSystem _mySystem = null;
         private DsCPU _myCPU;
         private CancellationTokenSource _cts = new CancellationTokenSource();
 
-        private IEnumerable<ViewNode> _myViewNodes;
         private string _dsText;
-        private bool _ConvertErr = false;
         public Dictionary<Flow, TabPage> _DicMyUI;
         public Dictionary<Flow, TabPage> _DicExUI;
         public Dictionary<Vertex, ViewNode> _DicVertex;
-        public string PathPPT;
-        public string PathXLS;
-        public bool Busy = false;
+        public List<string> _PathPPTs = new List<string>();       
+        public string _PathXLS;
+        public bool Busy = false;   
 
         public FormMain()
         {
@@ -74,38 +72,36 @@ namespace Dual.Model.Import
         void Form1_DragDrop(object sender, DragEventArgs e)
         {
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-            string[] lstPPTXLS = new string[2];
+            string xlsx = "";
+            _PathPPTs.Clear();
+
             foreach (string file in files)
             {
                 var extension = Path.GetExtension(file);
                 if (extension == ".pptx")
-                    lstPPTXLS[0] = file;
+                    _PathPPTs.Add(file);
                 if (extension == ".xlsx")
-                    lstPPTXLS[1] = file;
+                    xlsx = file;
             }
-
-            if (lstPPTXLS[0] != null && lstPPTXLS[1] != null)
+            //ppt xls 동시 로딩시
+            if (_PathPPTs.Count > 0 && xlsx != "")
             {
-                PathPPT = lstPPTXLS[0];
-                InitModel(lstPPTXLS[0]);
-                PathXLS = lstPPTXLS[1];
-                ImportExcel(lstPPTXLS[1]);
+                InitModel(_PathPPTs);
+                _PathXLS = xlsx;
+                ImportExcel(xlsx);
             }
             else
             {
-                if (lstPPTXLS[0] != null)
+                //ppt 만 로딩시
+                if (_PathPPTs.Count > 0 && xlsx == "")
+                    InitModel(_PathPPTs);
+                //xls 만 로딩시
+                if (_PathPPTs.Count == 0 && xlsx != "")
                 {
-                    PathPPT = lstPPTXLS[0];
-                    InitModel(lstPPTXLS[0]);
-                }
-                if (lstPPTXLS[1] != null)
-                {
-                    if (PathXLS == lstPPTXLS[1])
-                        ImportExcel(lstPPTXLS[1]);
+                    if (_PathXLS == xlsx)
+                        ImportExcel(xlsx);
                     else
-                    {
-                        MSGError($"{PathPPT} 모델로 부터 자동생성된 {PathXLS} 파일을 로드 해야 합니다.");
-                    }
+                        MSGError($"모델로 부터 자동생성된 {_PathXLS} 파일을 로드 해야 합니다.");
                 }
             }
         }
@@ -115,7 +111,7 @@ namespace Dual.Model.Import
             progressBar1.Do(() => progressBar1.Value = percent);
         }
 
-        private void InitModel(string path)
+        private void InitModel(List<string> paths)
         {
 
             try
@@ -123,12 +119,10 @@ namespace Dual.Model.Import
                 if (UtilFile.BusyCheck()) return;
                 Busy = true;
 
-                PathPPT = path;
                 progressBar1.Maximum = 100;
                 progressBar1.Step = 1;
                 progressBar1.Value = 0;
 
-                _ConvertErr = false;
                 richTextBox_ds.Clear();
                 _DicMyUI.Clear();
                 _DicExUI.Clear();
@@ -141,11 +135,18 @@ namespace Dual.Model.Import
                 button_OpenFolder.Visible = false;
 
                 this.Size = new Size(1920, 1000);
-                ImportPPT();
+                _cts.Cancel();
+                _cts = new CancellationTokenSource();
+
+                ImportPPT(paths);
+
+                button_CreateExcel.Visible = true;
+                pictureBox_xls.Visible = true;
+                button_TestORG.Visible = true;
+                button_copy.Visible = false;
             }
             catch
             {
-                WriteDebugMsg(DateTime.Now, MSGLevel.MsgError, $"{PathPPT} 불러오기 실패!!");
                 Busy = false;
             }
 
@@ -155,8 +156,7 @@ namespace Dual.Model.Import
         {
             if ((Keys)e.KeyValue == Keys.F1) { HelpLoad(); }
             if ((Keys)e.KeyValue == Keys.F5) { ReloadPPT(); }
-            if ((Keys)e.KeyValue == Keys.F6) { TestDebug(); }
-            if ((Keys)e.KeyValue == Keys.F7) { TestUnitTest(); }
+            if ((Keys)e.KeyValue == Keys.F7) { TestDebug(); }
             if ((Keys)e.KeyValue == Keys.F8) { RefreshGraph(); }
         }
         private void button_copy_Click(object sender, EventArgs e)
@@ -172,7 +172,7 @@ namespace Dual.Model.Import
         }
         private void button_OpenFolder_Click(object sender, EventArgs e)
         {
-            Process.Start(Path.GetDirectoryName(PathXLS));
+            Process.Start(Path.GetDirectoryName(_PathXLS));
         }
 
         private void button_ClearLog_Click(object sender, EventArgs e)

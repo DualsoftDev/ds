@@ -183,12 +183,19 @@ module PPTUtil =
                     let round =  geometry.CheckRound()
                     (   geometry.Preset.Value = Drawing.ShapeTypeValues.Rectangle
                     || (geometry.Preset.Value = Drawing.ShapeTypeValues.RoundRectangle && round|>not)
-                    || (geometry.Preset.Value = Drawing.ShapeTypeValues.FoldedCorner && round|>not)
                     || (geometry.Preset.Value = Drawing.ShapeTypeValues.HomePlate && round|>not)
                     ||  geometry.Preset.Value = Drawing.ShapeTypeValues.FlowChartProcess)    
         
         [<Extension>] 
-        static member CheckFoldedCorner(shape:Shape) = 
+        static member CheckFoldedCornerPlate(shape:Shape) = 
+                if(Office.CheckShape(shape) |> not) then false
+                else
+                    let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
+                    let round =  geometry.CheckRound()
+                    (   geometry.Preset.Value = Drawing.ShapeTypeValues.FoldedCorner && not <| round )
+
+        [<Extension>] 
+        static member CheckFoldedCornerRound(shape:Shape) = 
                 if(Office.CheckShape(shape) |> not) then false
                 else
                     let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
@@ -221,6 +228,13 @@ module PPTUtil =
                     //let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
                     //geometry.Preset.Value = Drawing.ShapeTypeValues.BlockArc   
         
+        //Active system 정의 블록
+        [<Extension>] 
+        static member CheckCube(shape:Shape) = 
+                if(Office.CheckShape(shape) |> not) then false
+                 else
+                    let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
+                    geometry.Preset.Value = Drawing.ShapeTypeValues.Cube
         
         [<Extension>] 
         static member CheckButtonShape(shape:Shape) = 
@@ -311,11 +325,13 @@ module PPTUtil =
                     || shape.CheckDonutShape()      //auto/manual
                     || shape.CheckBevelShape()      //clear
                     || shape.CheckNoSmoking()       //emg
-                    || shape.CheckFoldedCorner()    //copy
-                    || shape.CheckHomePlate())      //interface
+                    || shape.CheckFoldedCornerRound()    //copy_value
+                    || shape.CheckFoldedCornerPlate()    //copy_ref
+                    || shape.CheckHomePlate()      //interface
+                    || shape.CheckCube())      //active system
                     then true
                     else false
-
+                    
         [<Extension>] 
         static member Shapes(page:int, commonSlideData:CommonSlideData) = 
                         let shapes = commonSlideData.ShapeTree.Descendants<Shape>()

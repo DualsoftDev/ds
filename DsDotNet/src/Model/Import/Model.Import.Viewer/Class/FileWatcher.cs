@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 
 namespace Dual.Model.Import
 {
@@ -12,7 +12,7 @@ namespace Dual.Model.Import
 
         public static void CreateFileWatcher()
         {
-            var watcher = new FileSystemWatcher(Path.GetDirectoryName(FormMain.TheMain.PathXLS));
+            var watcher = new FileSystemWatcher(Path.GetDirectoryName(FormMain.TheMain._PathXLS));
             watcher.NotifyFilter = NotifyFilters.LastWrite;
             watcher.Changed += watcher_Changed;
             watcher.EnableRaisingEvents = true;
@@ -25,10 +25,10 @@ namespace Dual.Model.Import
             //D:\DS_22_08_28(16-19-34)\C2129000 <- 파일 변경시 파일명 날라감
             if (e.ChangeType == WatcherChangeTypes.Changed
                 && Path.GetExtension(e.FullPath) != ".xlsx"
-                && Path.GetFileNameWithoutExtension(e.FullPath) != Path.GetFileNameWithoutExtension(FormMain.TheMain.PathXLS))
+                && Path.GetFileNameWithoutExtension(e.FullPath) != Path.GetFileNameWithoutExtension(FormMain.TheMain._PathXLS))
             {
                 ((FileSystemWatcher)sender).EnableRaisingEvents = false;
-                FormMain.TheMain.ImportExcel(FormMain.TheMain.PathXLS);
+                FormMain.TheMain.ImportExcel(FormMain.TheMain._PathXLS);
                 ((FileSystemWatcher)sender).EnableRaisingEvents = true;
             }
         }

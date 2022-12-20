@@ -247,8 +247,8 @@ namespace Dual.Model.Import
                     }
 
                 }
-                if (viewNode.NodeType == NodeType.COPY)
-                    nNode.Attr.Shape = Shape.Octagon;
+                //if (viewNode.NodeType == NodeType.COPY_VALUE)
+                //    nNode.Attr.Shape = Shape.Octagon;
             }
         }
 

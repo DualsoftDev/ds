@@ -13,9 +13,11 @@ module InterfaceClass =
         | REALEx        //다른 Flow real
         | CALL          //지시관찰 
         | IF            //인터페이스
-        | COPY          //시스템복사
+        | COPY_VALUE          //시스템복사
+        | COPY_REF           //시스템참조
         | DUMMY         //그룹더미
         | BUTTON        //버튼 emg,start, ...
+        | ACTIVESYS        //model ppt active  system
         with
             member x.IsReal = x = REAL || x = REALEx
             member x.IsCall = x = CALL

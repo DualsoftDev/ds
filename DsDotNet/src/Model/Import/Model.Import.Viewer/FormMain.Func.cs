@@ -4,6 +4,7 @@ using Engine.CodeGenCPU;
 using Engine.Common;
 using Engine.Common.FS;
 using Engine.Core;
+using Microsoft.FSharp.Collections;
 using Model.Import.Office;
 using System;
 using System.Collections.Generic;
@@ -31,80 +32,51 @@ namespace Dual.Model.Import
 
     public partial class FormMain : Form
     {
-        internal void ImportPPT()
+      
+
+        internal void ImportPPT(List<string> paths)
         {
             try
             {
-                if (!_ConvertErr)
-                {
-                    _cts.Cancel();
-                    _cts = new CancellationTokenSource();
+                var results = ImportM.FromPPTX(paths.First());
+                var system = results.Item1;
+                var views = results.Item2;
 
-
-                    var result = ImportM.FromPPTX(PathPPT);
-                    _mySystem = result.Item1;
-                    _myViewNodes = result.Item2;
-
-                    var rungs = CpuLoader.LoadStatements(_mySystem);
-
-                    var storages = new Dictionary<string, IStorage>();
-                    _myCPU = new DsCPU(storages, "", rungs.Select(s => s.Item2));
-                    _myCPU.Run();
-                    StartResetBtnUpdate(true);
-
-                    comboBox_Segment.Items.Clear();
-                    _DicVertex = new Dictionary<Vertex, ViewNode>();
-                    _mySystem.GetVertices()
-                               .ForEach(v =>
-                               {
-                                   var viewNodes = _myViewNodes.SelectMany(s => s.UsedViewNodes)
-                                                               .Where(w => w.CoreVertex != null);
-
-                                   var viewNode = viewNodes.First(w => w.CoreVertex.Value == v);
-                                   _DicVertex.Add(v, viewNode);
-
-                                   if (v is Real)
-                                   {
-                                       comboBox_Segment.Items
-                                       .Add(new SegmentHMI { Display = v.QualifiedName, Vertex = v, ViewNode = viewNode, VertexM = v.VertexMemoryManager as VertexMemoryManager });
-                                   }
-                               });
-
-                    comboBox_Segment.DisplayMember = "Display";
-                    comboBox_Segment.SelectedIndex = 0;
-
-                    var text = rungs.Select(rung =>
-                                    {
-                                        var description = rung.Item1;
-                                        var statement = rung.Item2;
-                                        return $"***{description}***\t{rung.Item2.ToText().Replace("%", " ")}";
-                                    });
-
-                    WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"\r\n{text.JoinWith("\n")}");
-
-
-                    _dsText = _mySystem.ToDsText();
-                    ExportTextModel(Color.Transparent, _dsText);
-                    ExportTextExpr(_myCPU.ToTextStatement(), Color.WhiteSmoke);
-                    this.Do(() => xtraTabControl_Ex.TabPages.Clear());
-
-                    CreateNewTabViewer(_myViewNodes);
-
-                    WriteDebugMsg(DateTime.Now, MSGLevel.MsgWarn, $"{PathPPT} 불러오기 성공!!");
-                    this.Do(() =>
+                var rungs = CpuLoader.LoadStatements(system);
+                var storages = new Dictionary<string, IStorage>();
+                _myCPU = new DsCPU(storages, "", rungs.Select(s => s.Item2));
+                _myCPU.Run();
+                _DicVertex = new Dictionary<Vertex, ViewNode>();
+                system.GetVertices()
+                    .ForEach(v =>
                     {
-                        button_CreateExcel.Visible = true;
-                        pictureBox_xls.Visible = true;
-                        button_TestORG.Visible = true;
-                        button_copy.Visible = false;
+                        var viewNode = views.SelectMany(s => s.UsedViewNodes)
+                                                    .Where(w => w.CoreVertex != null)
+                                                    .First(w => w.CoreVertex.Value == v);
+
+                        _DicVertex.Add(v, viewNode);
+                        if (v is Real)
+                        {
+                            comboBox_Segment.Items
+                            .Add(new SegmentHMI { Display = v.QualifiedName, Vertex = v, ViewNode = viewNode, VertexM = v.VertexMemoryManager as VertexMemoryManager });
+                        }
                     });
 
-                    ProcessEvent.DoWork(0);
-                }
-                else
-                    WriteDebugMsg(DateTime.Now, MSGLevel.MsgError, $"{PathPPT} 불러오기 실패!!");
+                var text = rungs.Select(rung =>
+                {
+                    var description = rung.Item1;
+                    var statement = rung.Item2;
+                    return $"***{description}***\t{rung.Item2.ToText().Replace("%", " ")}";
+                });
+
+                UpdateCpuUI(text);
+                UpdateGraphUI(views);
+
+                ExportTextModel(Color.Transparent, system.ToDsText());
+                ExportTextExpr(_myCPU.ToTextStatement(), Color.WhiteSmoke);
 
 
+                ProcessEvent.DoWork(0);
             }
             catch (Exception ex)
             {
@@ -115,7 +87,80 @@ namespace Dual.Model.Import
                 Busy = false;
             }
         }
+        //복수 Active system ppt 불러오기 
+        //internal void ImportPPT(List<string> paths)
+        //{
+        //    try
+        //    {
+        //        var results = ImportM.FromPPTXS(paths);
+        //        var model = results.Item1;
+        //        var views = results.Item2;
 
+        //        model.Systems.ForEach(system =>
+        //        {
+        //            var rungs = CpuLoader.LoadStatements(system);
+        //            var storages = new Dictionary<string, IStorage>();
+        //            var cpu = new DsCPU(storages, "", rungs.Select(s => s.Item2));
+        //            cpu.Run();
+        //            _DicVertex = new Dictionary<Vertex, ViewNode>();
+        //            system.GetVertices()
+        //                .ForEach(v =>
+        //                {
+        //                    var viewNode = views[system].SelectMany(s => s.UsedViewNodes)
+        //                                                .Where(w => w.CoreVertex != null)
+        //                                                .First(w => w.CoreVertex.Value == v);
+
+        //                    _DicVertex.Add(v, viewNode);
+        //                    if (v is Real)
+        //                    {
+        //                        comboBox_Segment.Items
+        //                        .Add(new SegmentHMI { Display = v.QualifiedName, Vertex = v, ViewNode = viewNode, VertexM = v.VertexMemoryManager as VertexMemoryManager });
+        //                    }
+        //                });
+
+        //            var text = rungs.Select(rung =>
+        //            {
+        //                var description = rung.Item1;
+        //                var statement = rung.Item2;
+        //                return $"***{description}***\t{rung.Item2.ToText().Replace("%", " ")}";
+        //            });
+
+        //            UpdateCpuUI(text);
+        //            UpdateGraphUI(views[system]);
+
+        //            ExportTextModel(Color.Transparent, system.ToDsText());
+        //            ExportTextExpr(cpu.ToTextStatement(), Color.WhiteSmoke);
+        //        });
+
+        //        model.Config.DsFilePaths.ForEach(f =>
+        //        {
+        //            WriteDebugMsg(DateTime.Now, MSGLevel.MsgWarn, $"{f} 불러오기 성공!!");
+        //        });
+
+        //        ProcessEvent.DoWork(0);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        WriteDebugMsg(DateTime.Now, MSGLevel.MsgError, ex.Message);
+        //    }
+        //    finally
+        //    {
+        //        Busy = false;
+        //    }
+        //}
+        private void UpdateCpuUI(IEnumerable<string> text)
+        {
+            StartResetBtnUpdate(true);
+            comboBox_Segment.Items.Clear();
+
+            comboBox_Segment.DisplayMember = "Display";
+
+            if (comboBox_Segment.Items.Count > 0)
+                comboBox_Segment.SelectedIndex = 0;
+
+
+            WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"\r\n{text.JoinWith("\n")}");
+        }
         internal void ExportTextExpr(string dsExpr, Color color)
         {
             richTextBox_ds.AppendText("\n\n\n");
@@ -136,7 +181,7 @@ namespace Dual.Model.Import
         internal void ExportTextModel(Color color, string dsText, bool bShowLine = false)
         {
 
-            this.Do(() => richTextBox_ds.Clear());
+            //this.Do(() => richTextBox_ds.Clear());
 
             var textLines = dsText.Split('\n');
             Random r = new Random();
@@ -178,7 +223,7 @@ namespace Dual.Model.Import
 
                 if (UtilFile.BusyCheck()) return;
                 Busy = true;
-                MSGInfo($"{PathXLS} 불러오는 중!!");
+                MSGInfo($"{_PathXLS} 불러오는 중!!");
                 ImportIOTable.ApplyExcel(path, _mySystem);
                 _dsText = _mySystem.ToDsText();
                 ExportTextModel(Color.FromArgb(0, 150, 0), _dsText);
@@ -187,7 +232,7 @@ namespace Dual.Model.Import
                     richTextBox_ds.ScrollToCaret();
                     button_copy.Visible = true;
 
-                    MSGInfo($"{PathXLS} 적용완료!!");
+                    MSGInfo($"{_PathXLS} 적용완료!!");
                     MSGWarn($"파워포인트와 엑셀을 동시에 가져오면 IO 매칭된 설정값을 가져올수 있습니다.!!");
 
                 });
@@ -212,19 +257,19 @@ namespace Dual.Model.Import
 
             button_copy.Visible = false;
             button_CreateExcel.Enabled = false;
-            PathXLS = UtilFile.GetNewPath(PathPPT);
-            WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{PathXLS} 생성시작!!");
+            _PathXLS = UtilFile.GetNewPath(_PathPPTs.First());
+            WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{_PathXLS} 생성시작!!");
 
-            Directory.CreateDirectory(Path.GetDirectoryName(PathXLS));
-            ExportIOTable.ToFiie(_mySystem, PathXLS);
+            Directory.CreateDirectory(Path.GetDirectoryName(_PathXLS));
+            ExportIOTable.ToFiie(_mySystem, _PathXLS);
 
-            WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{PathXLS} 생성완료!!");
+            WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{_PathXLS} 생성완료!!");
             this.Do(() =>
             {
                 button_CreateExcel.Enabled = true;
                 button_OpenFolder.Visible = true;
             });
-            Process.Start($"{PathXLS}");
+            Process.Start($"{_PathXLS}");
 
             FileWatcher.CreateFileWatcher();
             Busy = false;
@@ -238,7 +283,6 @@ namespace Dual.Model.Import
                 var color = Color.Black;
                 if (level.IsMsgError)
                 {
-                    _ConvertErr = true;
                     richTextBox_Debug.AppendTextColor($"\r\n{msg}", Color.Red);
                     ProcessEvent.DoWork(0);
                 }
@@ -266,29 +310,17 @@ namespace Dual.Model.Import
             //      );
         }
 
-        internal void CreateNewTabViewer(IEnumerable<ViewNode> lstViewNode)
+        internal void UpdateGraphUI(IEnumerable<ViewNode> lstViewNode)
         {
             lstViewNode.ForEach(f =>
             {
                 var flow = f.Flow.Value;
                 if (_DicMyUI.ContainsKey(flow) || _DicExUI.ContainsKey(flow))
                 {
-                    if (flow.System == _mySystem)
-                        xtraTabControl_My.SelectedTab = _DicMyUI[flow];
-                    else
-                        xtraTabControl_Ex.SelectedTab = _DicExUI[flow];
+                    xtraTabControl_My.SelectedTab = _DicMyUI[flow];
                 }
                 else
                 {
-                    //int pageNum = 0;
-                    //if(dicFlow != null)
-                    //    pageNum = dicFlow.First(flow => flow.Value.System.Name == sys.Name
-                    //                                 && flow.Value.Name == f.Name).Key;
-
-                    //List<pptDummy> lstDummy = new List<pptDummy>();
-                    //if (dummys != null)
-                    //    lstDummy = dummys.Where(w => w.Page == pageNum).ToList();
-
                     UCView viewer = new UCView { Dock = DockStyle.Fill };
                     viewer.SetGraph(f);
                     TabPage tab = new TabPage();
@@ -297,18 +329,10 @@ namespace Dual.Model.Import
                     tab.Text = $"{flow.System.Name}.{flow.Name}({f.Page})";
                     this.Do(() =>
                     {
-                        if (flow.System == _mySystem)
-                        {
                             xtraTabControl_My.TabPages.Add(tab);
                             xtraTabControl_My.SelectedTab = tab;
                             _DicMyUI.Add(flow, tab);
-                        }
-                        else
-                        {
-                            xtraTabControl_Ex.TabPages.Add(tab);
-                            xtraTabControl_Ex.SelectedTab = tab;
-                            _DicExUI.Add(flow, tab);
-                        }
+                        
                     });
                 }
             });
@@ -323,23 +347,12 @@ namespace Dual.Model.Import
 
         internal void ReloadPPT()
         {
-            if (File.Exists(PathPPT))
-                InitModel(PathPPT);
+            if(_PathPPTs.Where(w=> !File.Exists(w)).IsEmpty())
+                InitModel(_PathPPTs);
         }
         internal void TestDebug()
         {
-            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\")) + "src\\UnitTest\\UnitTest.Engine\\ImportOffice\\PPT\\FactoryIO\\Sys.pptx";
-            bool debug = File.Exists(path);
-            if (debug)
-            {
-                PathPPT = path;
-                InitModel(path);
-            }
-        }
-
-        internal void TestUnitTest()
-        {
-
+            //F7
             //T1_System
             //T2_Flow
             //T3_Real
@@ -351,14 +364,16 @@ namespace Dual.Model.Import
             //T9_Group
             //T10_Button
             //T11_SubLoading
-            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\")) + "src\\UnitTest\\UnitTest.Engine\\ImportOffice\\PPT\\s.pptx";
+            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\")) + "src\\UnitTest\\UnitTest.Engine\\ImportOffice\\Sample\\TEST.pptx";
             bool debug = File.Exists(path);
             if (debug)
             {
-                PathPPT = path;
-                InitModel(path);
+                _PathPPTs.Clear();
+                _PathPPTs.Add(path);
+                InitModel(_PathPPTs);
             }
         }
+
 
     }
 }

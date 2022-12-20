@@ -9,7 +9,7 @@ module CpuConvertModule =
     let private getVertexManager(v:Vertex) = v.VertexMemoryManager :?> VertexMemoryManager
 
     let getSrcMemorys(v:Vertex, graph:DsGraph, edgeType:ModelingEdgeType) =
-        v.FindEdgeSources(graph, edgeType). Select(getVertexManager)
+        graph.FindEdgeSources(v, edgeType). Select(getVertexManager)
 
     let createRungsForReal(real:Real, graph:DsGraph) =
         let realTag = real.VertexMemoryManager :?> VertexMemoryManager

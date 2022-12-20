@@ -19,7 +19,7 @@ module ConvertUtil =
 
 
         [<Extension>]
-        static member FindEdgeSources(graph:DsGraph, target:Vertex, edgeType:ModelingEdgeType) =
+        static member FindEdgeSources(graph:DsGraph, target:Vertex, edgeType:ModelingEdgeType): Vertex seq =
             let edges = graph.GetIncomingEdges(target)
             let foundEdges =
                 match edgeType with
@@ -33,7 +33,7 @@ module ConvertUtil =
             foundEdges.Select(fun e->e.Source)
 
 
-    // vertex ¸¦ coin ÀÔÀå¿¡¼­ ºÃÀ» ¶§ÀÇ extension methods
+    // vertex ë¥¼ coin ì…ì¥ì—ì„œ ë´¤ì„ ë•Œì˜ extension methods
     type Vertex with
         member coin.GetCoinTags(memory:VertexMemoryManager, isInTag:bool) : TagBase<bool> seq =
             match coin with
@@ -50,7 +50,7 @@ module ConvertUtil =
             | _ -> failwith "Error"
 
 
-        member coin.GetTxRxTags(isTx:bool, memory:VertexMemoryManager) =
+        member coin.GetTxRxTags(isTx:bool, memory:VertexMemoryManager) : TagBase<bool> seq =
             let getVertexManager(v:Vertex) = v.VertexMemoryManager :?> VertexMemoryManager
 
             match coin with

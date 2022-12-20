@@ -6,7 +6,7 @@ open Engine.Core
 open Engine.CodeGenCPU
 
 type VertexMemoryManager with
-    member realTag.CreateRealEnd(calls:VertexMemoryManager seq) =
+    member realTag.CreateRealEndRung(calls:VertexMemoryManager seq) : Statement =
         let sets  =
             if calls.Any()
             then calls.Select(fun f->f.Relay)//.ToTags()  //자식이 있으면 자식완료 릴레이 조건
@@ -14,7 +14,7 @@ type VertexMemoryManager with
 
         realTag.EndTag <==  tags2AndExpr (sets.Cast<TagBase<bool>>())
 
-    member realTag.CreateInitStart()  =
+    member realTag.CreateInitStartRung() : Statement =
         let sets  = [realTag.Going;realTag.Origin].ToTags()
         let rsts  = [realTag.Homing].ToTags()
         let relay = realTag.Relay

@@ -26,5 +26,5 @@ module CodeGenHandler =
         member x.SelectedResult(target) = SelectGet target
 
     //let res = ParseModel(@"E:\temp\ds-storage\ds-dev\FactoryIO\FactoryIO.config.json")
-    //let res = ParseModel(@"E:\temp\ds-storage\ds-dev\test_sample\Control_config.json")
-    //printfn "%A" (res.SelectedResult "ds-hmi")
+    //let res = ParseModel(@"E:\temp\ds-storage\ds-dev\test_sample\Control_config.json")  
+    //"ds-hmi" |> res.SelectedResult |> printfn "%A" 

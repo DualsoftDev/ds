@@ -9,8 +9,9 @@ open System.Collections.Concurrent
 
 [<AutoOpen>]
 module RunTime =
-    type DsCPU(text:string, statements:Statement seq) =
+    type DsCPU(storages:Storages, text:string, statements:Statement seq) =
         let mapRungs = ConcurrentDictionary<IStorage, HashSet<Statement>>()
+        let statements = statements |> List.ofSeq
         let runSubscribe() =
             let subscribe =
                 ValueSubject
@@ -31,12 +32,13 @@ module RunTime =
                     )
             subscribe
 
-        let mutable running:IDisposable Option = None
+        let mutable runningSubscription:IDisposable = null
+
         let statements =
-            let storages = Storages()
-            if text <> ""
-            then text |> parseCode storages
-            else statements |> Seq.toList
+            if String.IsNullOrEmpty text then
+                statements
+            else
+                (text |> parseCode storages) @ statements
 
         do
             let usedItems =
@@ -63,19 +65,18 @@ module RunTime =
 
         //강제 전체 연산 임시 test용
         member x.Scan() =
-            for statement in statements do
-                statement.Do()
+            for s in statements do
+                s.Do()
 
             ///running 이 Some 이면 Expression 처리 동작 중
-        member x.Running = running.IsSome
-        member x.Run()  =
-            runSubscribe()
-            |> fun f -> running <- Some(f)
+        member x.IsRunning = runningSubscription <> null
+        member x.Run() =
+            assert(runningSubscription = null)
+            runningSubscription <- runSubscribe()
         member x.Stop() =
-            if running.IsSome
-            then
-                running.Value.Dispose()
-                running <- None
+            assert(runningSubscription <> null)
+            runningSubscription.Dispose()
+            runningSubscription <- null
 
         member x.ToTextStatement() =
             let statementTexts = statements.Select(fun statement -> statement.ToText())

@@ -18,7 +18,7 @@ type StatementRoot =
                         let rsts  = [pReal.EndTag].ToTags()
                         pReal.StartTag <== fLogicalAnd [FuncExt.GetRelayExpr(sets, rsts, pReal.StartTag); tag2expr pReal.Pause] |> Some //pReal.Pause _Auto 로 변경 필요
                     else None
-        
+
         ///F2. Real 자신의 Reset going relay  Statement 만들기
     [<Extension>] static member CreateResetGoing(realSrc:VertexMemoryManager, realTgt:VertexMemoryManager , going:DsTag<bool>) =
                     let sets  = [realSrc.Going].ToTags()

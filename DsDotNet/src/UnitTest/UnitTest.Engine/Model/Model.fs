@@ -79,10 +79,10 @@ module ModelTests1 =
             logInfo "=== EveryScenarioText"
             compare Program.EveryScenarioText answerEveryScenarioText
 
-        [<Test>]
-        member __.``CodeElementsText test`` () =
-            logInfo "=== CodeElementsText"
-            compareExact Program.CodeElementsText
+        //[<Test>] //사용안함
+        //member __.``CodeElementsText test`` () =
+        //    logInfo "=== CodeElementsText"
+        //    compareExact Program.CodeElementsText
 
         [<Test>]
         member __.``CausalsText test`` () =

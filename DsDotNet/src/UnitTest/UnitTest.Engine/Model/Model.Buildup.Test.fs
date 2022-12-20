@@ -208,75 +208,75 @@ module ModelBuildupTests1 =
 
 
 
+//사용 안함
+//        [<Test>]
+//        member __.``Model with code element test`` () =
+//            let system, flow, real, callAp, callAm = createSimpleSystem()
 
-        [<Test>]
-        member __.``Model with code element test`` () =
-            let system, flow, real, callAp, callAm = createSimpleSystem()
+//            let v = CodeElements.VariableData
+//            let c = CodeElements.Command
+//            let o = CodeElements.Observe
+//            [
+//                v("R100", "word", "0")
+//                v("R101", "word", "1")
+//                v("R102", "int", "1")
+//            ] |> system.Variables.AddRange
 
-            let v = CodeElements.VariableData
-            let c = CodeElements.Command
-            let o = CodeElements.Observe
-            [
-                v("R100", "word", "0")
-                v("R101", "word", "1")
-                v("R102", "int", "1")
-            ] |> system.Variables.AddRange
+//            (*
+//                [commands] = {
+//                    CMD1 = (@Delay = 0)
+//                    CMD2 = (@Delay = 30)
+//                    CMD3 = (@add = 30, 50 ~ R103)  //30+R101 = R103
+//                }
+//            *)
+//            let fa = FunctionApplication
+//            [
+//                c("CMD1", fa("Delay", [| [|"0"|] |]))
+//                c("CMD2", fa("Delay", [| [|"30"|] |]))
+//                c("CMD2", fa("add",   [| [|"30"; "50"|]; [|"R103"|] |]))
+//            ] |> system.Commands.AddRange
 
-            (*
-                [commands] = {
-                    CMD1 = (@Delay = 0)
-                    CMD2 = (@Delay = 30)
-                    CMD3 = (@add = 30, 50 ~ R103)  //30+R101 = R103
-                }
-            *)
-            let fa = FunctionApplication
-            [
-                c("CMD1", fa("Delay", [| [|"0"|] |]))
-                c("CMD2", fa("Delay", [| [|"30"|] |]))
-                c("CMD2", fa("add",   [| [|"30"; "50"|]; [|"R103"|] |]))
-            ] |> system.Commands.AddRange
-
-            (*
-                [observes] = {
-                    CON1 = (@GT = R102, 5)
-                    CON2 = (@Delay = 30)
-                    CON3 = (@Not = Tag1)
-                }
-            *)
-            [
-                o ("CON1", fa ("GT",    [| [|"R102"; "5"|] |]))
-                o ("CON2", fa ("Delay", [| [|"30"|]; |]))
-                o ("CON3", fa ("Not",   [| [|"Tag1"|]; |]))
-            ] |> system.Observes.AddRange
+//            (*
+//                [observes] = {
+//                    CON1 = (@GT = R102, 5)
+//                    CON2 = (@Delay = 30)
+//                    CON3 = (@Not = Tag1)
+//                }
+//            *)
+//            [
+//                o ("CON1", fa ("GT",    [| [|"R102"; "5"|] |]))
+//                o ("CON2", fa ("Delay", [| [|"30"|]; |]))
+//                o ("CON3", fa ("Not",   [| [|"Tag1"|]; |]))
+//            ] |> system.Observes.AddRange
 
 
-            let generated = system.ToDsText()
-            let answer = """
-[sys ip = localhost] My = {
-    [flow] F = {
-            Main; // island
-    }
-    [jobs] = {
-        Ap = { A."+"(%Q1, %I1); }
-        Am = { A."-"(%Q2, %I2); }
-    }
-    [device file="cylinder.ds"] A;
-    [variables] = {
-        R100 = (word, 0)
-        R101 = (word, 1)
-        R102 = (int, 1)
-    }
-    [commands] = {
-        CMD1 = (@Delay = 0)
-        CMD2 = (@Delay = 30)
-        CMD2 = (@add = 30, 50 ~ R103)
-    }
-    [observes] = {
-        CON1 = (@GT = R102, 5)
-        CON2 = (@Delay = 30)
-        CON3 = (@Not = Tag1)
-    }
-}
-"""
-            logDebug $"{generated}"
-            compare generated answer
+//            let generated = system.ToDsText()
+//            let answer = """
+//[sys ip = localhost] My = {
+//    [flow] F = {
+//            Main; // island
+//    }
+//    [jobs] = {
+//        Ap = { A."+"(%Q1, %I1); }
+//        Am = { A."-"(%Q2, %I2); }
+//    }
+//    [device file="cylinder.ds"] A;
+//    [variables] = {
+//        R100 = (word, 0)
+//        R101 = (word, 1)
+//        R102 = (int, 1)
+//    }
+//    [commands] = {
+//        CMD1 = (@Delay = 0)
+//        CMD2 = (@Delay = 30)
+//        CMD2 = (@add = 30, 50 ~ R103)
+//    }
+//    [observes] = {
+//        CON1 = (@GT = R102, 5)
+//        CON2 = (@Delay = 30)
+//        CON3 = (@Not = Tag1)
+//    }
+//}
+//"""
+//            logDebug $"{generated}"
+//            compare generated answer

@@ -166,10 +166,15 @@ module CoreModule =
 
     type TagAddress = string
     /// Main system 에서 loading 된 다른 system 의 API 를 바라보는 관점.  [jobs] = { Ap = { A."+"(%Q1, %I1); } }
-    type JobDef (api:ApiItem, outTag:TagAddress, inTag:TagAddress, deviceName:string) =
+    type JobDef (api:ApiItem, outTag:TagAddress, inTag:TagAddress, observe:string, command:string, deviceName:string) =
         member _.ApiItem = api
         member val InTag   = inTag  with get,set
         member val OutTag  = outTag with get,set
+        //$ton 200      //ls xgk 명령어를 따른다.  
+        member val ObserveInTimming   = observe with get,set //todo ToDsText, parsing
+        //$mov 100 R200 //ls xgk 명령어를 따른다.
+        member val CommandOutTimming  = command with get,set //todo ToDsText, parsing
+        ///LoadedSystem은 이름을 재정의 하기 때문에 ApiName을 제공 함
         member val ApiName = getRawName [deviceName;api.Name] true
 
     /// 자신을 export 하는 관점에서 본 api's.  Interface 정의.   [interfaces] = { "+" = { F.Vp ~ F.Sp } }

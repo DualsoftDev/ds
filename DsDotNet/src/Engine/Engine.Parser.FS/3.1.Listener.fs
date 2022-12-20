@@ -366,7 +366,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                                 let rx = getAddress(rxAddressCtx)
 
                                 tracefn $"TX={tx} RX={rx}"
-                                return JobDef(apiPoint, tx, rx, device)
+                                return JobDef(apiPoint, tx, rx, "", "", device)
                             }
                         match apiItem with
                         | Some apiItem -> yield apiItem

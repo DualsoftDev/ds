@@ -71,22 +71,21 @@ module ImportIOTable =
                 then 
                     match TagToType($"{row.[0]}") with
                     |TagCase.Address  -> 
-                        let name   = $"{row.[(int)IOColumn.Name]}"
-                        let inTag  = $"{row.[(int)IOColumn.Input]}"
-                        let outTag = $"{row.[(int)IOColumn.Output]}"
-                        dicJob.[name].InTag  <- inTag
-                        dicJob.[name].OutTag <-outTag
-                    |_ ->  failwith "ERROR"
-
-                    //|TagCase.VariableData ->    //ahn 초기값 입력
-                    //    let item = CodeElements.VariableData($"{row.[(int)IOColumn.Name]}", $"{row.[(int)IOColumn.Size]}",  "")
-                    //    sys.Variables.Add(item) |>ignore
-                    //|TagCase.Command  ->        //ahn 수식 입력
-                    //    let item = CodeElements.Command($"{row.[(int)IOColumn.Command]}", FunctionApplication("", [||]))
-                    //    sys.Commands.Add(item) |>ignore
-                    //|TagCase.Observe  ->        //ahn 수식 입력
-                    //    let item = CodeElements.Observe($"{row.[(int)IOColumn.Observe]}", FunctionApplication("", [||]))
-                    //    sys.Observes.Add(item) |>ignore
+                        let jobDef = dicJob.[$"{row.[(int)IOColumn.Name]}"]
+                        jobDef.InTag  <- $"{row.[(int)IOColumn.Input]}"
+                        jobDef.OutTag <- $"{row.[(int)IOColumn.Output]}"
+                    |TagCase.VariableData -> 
+                        let name      = $"{row.[(int)IOColumn.Name]}"
+                        let datatype  = $"{row.[(int)IOColumn.Type]}"
+                        let initValue = $"{row.[(int)IOColumn.Output]}"
+                        let variableData =  $"{datatype} {name} = {initValue}"
+                        sys.OriginalCodeBlocks.Add(variableData)
+                    |TagCase.Command ->  
+                        let jobDef = dicJob.[$"{row.[(int)IOColumn.Name]}"]
+                        jobDef.CommandOutTimming  <- $"{row.[(int)IOColumn.Command]}"
+                    |TagCase.Observe ->  
+                        let jobDef = dicJob.[$"{row.[(int)IOColumn.Name]}"]
+                        jobDef.ObserveInTimming   <- $"{row.[(int)IOColumn.Observe]}"
 
         with ex ->  failwithf  $"{ex.Message}"
         DoWork(0);

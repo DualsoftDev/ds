@@ -46,7 +46,7 @@ terminal: storage | tag | literal;
 toplevels: toplevel (';' toplevel)* (';')?;
     toplevel: expr|statement;
 
-statement: assign | varDecl | timerDecl | counterDecl;
+statement: assign | varDecl | timerDecl | counterDecl | copyStatement;
     assign: '$' storageName ':=' expr;
     varDecl:   type storageName ('=' expr)? ;//';';
         storageName: IDENTIFIER;
@@ -74,6 +74,10 @@ statement: assign | varDecl | timerDecl | counterDecl;
     counterDecl: counterType storageName '=' expr;  //counterType '(' arguments? ')';
         counterType: 'ctu' | 'ctd' | 'ctud' | 'ctr';
         counterName: IDENTIFIER;
+    copyStatement: 'copyIf' '(' copyCondition ',' copySource ',' copyTarget ')';
+        copyCondition: expr;
+        copySource: expr;
+        copyTarget: storage | tag;
 
 // https://stackoverflow.com/questions/41017948/antlr4-the-following-sets-of-rules-are-mutually-left-recursive
 // https://github.com/antlr/antlr4/blob/master/doc/parser-rules.md#alternative-labels

@@ -15,6 +15,7 @@ module CoreExtensionsModule =
             | DuCounter counterStatement ->
                 [ for s in counterStatement.Counter.InputEvaluateStatements do
                     yield! s.GetTargetStorages() ]
+            | DuCopy (condition, source, target) -> [ target ]
 
         member x.GetSourceStorages() =
             match x with
@@ -26,3 +27,4 @@ module CoreExtensionsModule =
             | DuCounter counterStatement ->
                 [ for s in counterStatement.Counter.InputEvaluateStatements do
                     yield! s.GetSourceStorages() ]
+            | DuCopy (condition, source, target) -> condition.CollectStorages()

@@ -5,7 +5,6 @@ open NUnit.Framework
 open UnitTest.Engine
 open UnitTest.Engine.Expression
 open Engine.Core
-open Engine.Parser.FS.ExpressionParser
 open Engine.Parser.FS
 
 [<AutoOpen>]
@@ -56,5 +55,23 @@ module StatementTestModule =
                 (fun () -> failText |> tryParseStatement storages |> ignore) |> ShouldFailWithSubstringT expectedFailMessage
 
 
+        [<Test>]
+        member __.``COPY statement parsing test`` () =
+            let storages = Storages()
+            let tCond = PlcTag("tagCondition", "%M1.1", false)
+            let tTarget = PlcTag("tag1", "%M1.1", 99us)
+            storages.Add(tCond.Name, tCond)
+            storages.Add(tTarget.Name, tTarget)
+            let text = "copyIf($tagCondition, 100us, $tag1)"
+            let copyStatement:Statement = text |> tryParseStatement storages |> Option.get
+            copyStatement.ToText() === text
+
+            copyStatement.Do()
+            tTarget.Value === 99us
+
+            tCond.Value <- true
+            copyStatement.Do()
+            tTarget.Value === 100us
+            ()
 
 

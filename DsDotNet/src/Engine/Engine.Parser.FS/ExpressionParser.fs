@@ -259,6 +259,14 @@ module rec ExpressionParser =
                 Some <| DuAssign (exp, storage)
             | :? CounterDeclContext as counterDeclCtx -> Some <| parseCounterStatement storages counterDeclCtx
             | :? TimerDeclContext as timerDeclCtx -> Some <| parseTimerStatement storages timerDeclCtx
+            | :? CopyStatementContext as copyStatementCtx ->
+                let expr ctx = ctx |> getFirstChildExpressionContext |> createExpression storages
+                let condition = copyStatementCtx.Descendants<CopyConditionContext>().First() |> expr :?> IExpression<bool>
+                let source = copyStatementCtx.Descendants<CopySourceContext>().First() |> expr
+                let target = copyStatementCtx.Descendants<CopyTargetContext>().First().GetText()
+                assert(target.StartsWith("$"))
+                let target = storages[target.Replace("$", "")]
+                Some <| DuCopy(condition, source, target)
             | _ ->
                 failwith "ERROR: Not yet statement"
 

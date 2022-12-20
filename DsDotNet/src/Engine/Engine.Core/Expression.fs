@@ -1,5 +1,6 @@
 namespace rec Engine.Core
 open System
+open System.Net.NetworkInformation
 
 (*  expression: generic type <'T> 나 <_> 으로는 <obj> match 으로 간주됨
     Expression<'T> 객체에 대한 matching
@@ -109,6 +110,8 @@ module ExpressionModule =
         | DuVarDecl of expression:IExpression * variable:IStorage
         | DuTimer of TimerStatement
         | DuCounter of CounterStatement
+        /// 주어진 condition 이 충족하면, source 를 target 으로 copy 수행하는 rung 생성
+        | DuCopy of condition:IExpression<bool> * source:IExpression * target:IStorage
 
 
     type Statement with
@@ -129,6 +132,10 @@ module ExpressionModule =
             | DuCounter counterStatement ->
                 for s in counterStatement.Counter.InputEvaluateStatements do
                     s.Do()
+
+            | DuCopy (condition, source, target) ->
+                if condition.EvaluatedValue then
+                    target.Value <- source.BoxedEvaluatedValue
 
         member x.ToText() =
             match x with
@@ -158,6 +165,8 @@ module ExpressionModule =
                         sprintf "%A" c.ACC.Value ]
                 let args = String.Join(", ", args)
                 $"{typ.ToLower()} {c.Name} = {functionName}({args})"
+            | DuCopy (condition, source, target) ->
+                $"copyIf({condition.ToText(false)}, {source.ToText(false)}, {target.ToText()})"
 
     type Terminal<'T when 'T:equality> with
         member x.TryGetStorage(): IStorage option =

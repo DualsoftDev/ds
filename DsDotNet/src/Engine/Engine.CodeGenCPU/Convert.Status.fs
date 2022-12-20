@@ -6,8 +6,8 @@ open Engine.Core
 
 type VertexMemoryManager with
 
-    ///vertex status bit 만들기
-    member vertex.CreateRGFH() =
+    /// vertex 의 RGFH status 를 update 하는 rungs/statements 만들기
+    member vertex.CreateRGFHRungs(): Statement list =
 
         let exprCS = tag2expr vertex.StartPort
         let exprCR = tag2expr vertex.ResetPort
@@ -32,5 +32,5 @@ type VertexMemoryManager with
         let rungF = vertex.Finish <== condSF
         let rungH = vertex.Homing <== condSH
 
-        [rungR;rungG;rungF;rungH]
+        [ rungR; rungG; rungF; rungH ]
 

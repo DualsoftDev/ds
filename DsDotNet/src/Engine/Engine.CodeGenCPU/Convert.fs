@@ -17,17 +17,17 @@ module CpuConvertModule =
         let vms = vs.Select(getVertexManager).ToArray()
 
         //R0. Real 행위의 Coin 상태수식 제공
-        let r0s = [ for v in vs do yield! (getVertexManager v).CreateRGFH() ]
+        let r0s = [ for v in vs do yield! (getVertexManager v).CreateRGFHRungs() ]
 
         //R1.Real 초기시작 Statement 만들기
-        let r1 = realTag.CreateInitStart()
+        let r1 = realTag.CreateInitStartRung()
         //R2.Real 작업완료 Statement 만들기
-        let r2 = realTag.CreateRealEnd(vms)
+        let r2 = realTag.CreateRealEndRung(vms)
 
         //C1 Call 시작조건 Statement 만들기
         let c1s = vs.Select(fun coin ->
                  let srcs = getSrcMemorys(coin, graph, StartEdge)
-                 (getVertexManager coin).CreateCallStart(srcs, realTag))
+                 (getVertexManager coin).CreateCallStartRung(srcs, realTag))
 
 
         //C2 Call 작업완료 Statement 만들기
@@ -35,34 +35,34 @@ module CpuConvertModule =
             vs.Select(fun coin ->
                 let srcs = getSrcMemorys(coin, graph, StartEdge)
                 let vm = (getVertexManager coin)
-                vm.CreateCallRelay(srcs, coin.GetCoinTags(vm, true), realTag))
+                vm.CreateCallRelayRung(srcs, coin.GetCoinTags(vm, true), realTag))
 
         //C3 Call 시작출력 Statement 만들기
         let c3s =
             vs.SelectMany(fun coin ->
             let vm = (getVertexManager coin)
-            vm.CreateOutputs(coin.GetCoinTags(vm, false)))
+            vm.CreateOutputRungs(coin.GetCoinTags(vm, false)))
 
         //C4 Call Start to Api TX.Start Statement 만들기
         let c4s =
             vs.SelectMany(fun coin ->
                 let vm = (getVertexManager coin)
                 let txTags = coin.GetTxRxTags(true, vm)
-                vm.CreateLinkTxs(txTags))
+                vm.CreateLinkTxRungs(txTags))
 
         //C5 Call End from  Api RX.End  Statement 만들기
         let c5s =
             [   for coin in vs do
                     let vm = (getVertexManager coin)
                     let rxTags = coin.GetTxRxTags(false, vm)
-                    yield! vm.CreateLinkRx(rxTags) |> Option.toList
+                    yield! vm.TryCreateLinkRxStatement(rxTags) |> Option.toList
             ]
         //C6 Call Tx ~ Rx 내용없을시 Coin Start-End 직접연결
         let c6s =
             if c4s.IsEmpty() && c5s.isEmpty() then
                 vs.Select(fun coin ->
                     let vm = (getVertexManager coin)
-                    vm.CreateDirectLink())
+                    vm.CreateDirectLinkRung())
             else
                 []
 
@@ -82,20 +82,20 @@ module CpuConvertModule =
         let vm = (getVertexManager real)
 
             //F0. Real 행위의 상태수식 제공
-        let f0s = vm.CreateRGFH()
+        let f0s = vm.CreateRGFHRungs()
 
             //F1. Real 자신의    Start Statement 만들기
         let srcs = getSrcMemorys(real, graph, StartEdge)
-        let f1 = vm.TryCreateRealStart(srcs)
+        let f1 = vm.TryCreateRealStartRung(srcs)
 
             //F2. Real 자신의 Reset going relay  Statement 만들기
         let srcs = getSrcMemorys(real, graph, ResetEdge)
         let goingRelays = srcs.Select(fun c -> c, DsTag($"{c.Name}(gr)", false)) |> dict
         let f2s = srcs.Select(fun c ->
-                    c.CreateResetGoing(vm, goingRelays[c]))
+                    c.CreateResetGoingRung(vm, goingRelays[c]))
 
             //F3. Real 자신의    Reset Statement 만들기
-        let f3 = vm.TryGetRealResetStatement(goingRelays.Values)
+        let f3 = vm.TryCreateRealResetRung(goingRelays.Values)
 
            //description, statement List 출력
         f0s.Select(fun s -> "Flow-f0", s)

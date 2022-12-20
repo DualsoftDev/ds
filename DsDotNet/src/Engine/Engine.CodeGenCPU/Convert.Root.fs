@@ -8,7 +8,7 @@ open Engine.Core
 module ConvertRoot =
     type VertexMemoryManager with
             ///F1. Real 자신의    Start Statement 만들기
-        member pReal.TryCreateRealStart(srcs:VertexMemoryManager seq) =
+        member pReal.TryCreateRealStartRung(srcs:VertexMemoryManager seq): Statement option =
             if srcs.Any() then
                 let sets  = srcs.Select(fun f->f.EndTag).ToTags()
                 let rsts  = [pReal.EndTag].ToTags()
@@ -16,13 +16,13 @@ module ConvertRoot =
             else
                 None
             ///F2. Real 자신의 Reset going relay  Statement 만들기
-        member realSrc.CreateResetGoing(realTgt:VertexMemoryManager , going:DsTag<bool>) =
+        member realSrc.CreateResetGoingRung(realTgt:VertexMemoryManager , going:DsTag<bool>) : Statement =
             let sets  = [realSrc.Going].ToTags()
             let rsts  = [realTgt.Homing].ToTags()
             going <== FuncExt.GetRelayExpr(sets, rsts, going) //pReal.Pause _Auto 로 변경 필요
 
            ///F3. Real 자신의    Reset Statement 만들기
-        member real.TryGetRealResetStatement(goingSrcs:DsTag<bool> seq) =
+        member real.TryCreateRealResetRung(goingSrcs:DsTag<bool> seq): Statement option =
            if goingSrcs.Any() then
                //going relay srcs
                let sets  = goingSrcs.ToTags()

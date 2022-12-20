@@ -8,9 +8,10 @@ open Engine.Common.FS
 
 [<AutoOpen>]
 module CoreExtensionsForCodeGenCPU =
-    let private tagsToArguments (xs:TagBase<'T> seq) = xs.Select(tag2expr) |> List.ofSeq
+    let private tagsToArguments (xs:TagBase<'T> seq) : Expression<'T> list =
+        xs.Select(tag2expr) |> List.ofSeq
 
-    let private tags2LogicalAndOrExpr (fLogical: IExpression list -> Expression<bool>) (FList(ts:TagBase<bool> list)) =
+    let private tags2LogicalAndOrExpr (fLogical: IExpression list -> Expression<bool>) (FList(ts:TagBase<bool> list)) : Expression<bool> =
         match ts with
         | [] -> failwith "tags2AndExpr: Empty list"
         | t :: [] -> tag2expr t
@@ -39,21 +40,21 @@ module CoreExtensionsForCodeGenCPU =
 
     [<RequireQualifiedAccess>]
     module FuncExt =
-        let GetRelayStatement(set:Expression<bool>, rst:Expression<bool>, relay:TagBase<bool>) =
+        let GetRelayRung(set:Expression<bool>, rst:Expression<bool>, relay:TagBase<bool>): Statement =
             relay <== ((set <||> relay.ToExpr()) <&&> (rst))
 
         //[sets and]--|----- ! [rsts or] ----- (relay)
         //|relay|-----|
-        let GetRelayExpr(sets:TagBase<bool> seq, rsts:TagBase<bool> seq, relay:TagBase<bool>) =
+        let GetRelayExpr(sets:TagBase<bool> seq, rsts:TagBase<bool> seq, relay:TagBase<bool>): Expression<bool> =
             (sets.GetAnd() <||> relay.ToExpr()) <&&> (!! rsts.GetOr())
 
         //[sets and]--|----- ! [rsts or] ----- (coil)
-        let GetNoRelayExpr(sets:TagBase<bool> seq, rsts:TagBase<bool> seq) =
+        let GetNoRelayExpr(sets:TagBase<bool> seq, rsts:TagBase<bool> seq): Expression<bool> =
             sets.GetAnd() <&&> (!! rsts.GetOr())
 
         //[sets and]--|-----  [rsts and] ----- (relay)
         //|relay|-----|
-        let GetRelayExprReverseReset(sets:TagBase<bool> seq, rsts:TagBase<bool> seq, relay:TagBase<bool>) =
-            (sets.GetAnd() <||> relay.ToExpr()) <&&> (rsts.GetOr())
+        let GetRelayExprReverseReset(sets:TagBase<bool> seq, reversedResets:TagBase<bool> seq, relay:TagBase<bool>): Expression<bool> =
+            (sets.GetAnd() <||> relay.ToExpr()) <&&> (reversedResets.GetOr())
 
 

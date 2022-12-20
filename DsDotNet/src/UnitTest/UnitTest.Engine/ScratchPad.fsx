@@ -299,4 +299,10 @@ let rightTriangles = [
     let bar = "there!"
     in foo + bar)
 
-    
+type RecA = {
+    Name: string
+    Rs : ResizeArray<string>
+}
+
+let a = {Name="a"; Rs = ["a"] |> ResizeArray<string>}
+let b = {a with Name="b"}

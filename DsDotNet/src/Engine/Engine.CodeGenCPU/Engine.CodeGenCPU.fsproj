@@ -8,6 +8,7 @@
 	</PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Core.Extensions.fs" />
     <Compile Include="CpuUtil.fs" />
     <Compile Include="VertexMemoryManager.fs" />
     <Compile Include="Convert.Util.fs" />

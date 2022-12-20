@@ -1,20 +1,15 @@
 namespace Engine.CodeGenCPU
 
-open System.Collections.Concurrent
 open System.Linq
 open Engine.Core
 open Engine.Common.FS
 
 [<AutoOpen>]
 module CpuConvertModule =
-
-    ////Dictionary memory TAG 관리
-    //let dicM = ConcurrentDictionary<Vertex, VertexMemoryManager>()
-
     let private getVertexManager(v:Vertex) = v.VertexMemoryManager :?> VertexMemoryManager
 
     let getSrcMemorys(v:Vertex, graph:DsGraph, edgeType:ModelingEdgeType) =
-        v.FindEdgeSources(graph, edgeType). Select(getVertexManager)
+        graph.FindEdgeSources(v, edgeType). Select(getVertexManager)
 
     let createRungsForReal(real:Real, graph:DsGraph) =
         let realTag = real.VertexMemoryManager :?> VertexMemoryManager

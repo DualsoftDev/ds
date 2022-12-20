@@ -17,6 +17,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <EmbeddedResource Remove="Libraries\NewFolder\**" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0" />
 		<PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.0" />
 		<PackageReference Include="FsUnit" Version="5.0.4" />
@@ -46,6 +50,11 @@
 		<Compile Include="Model\FqdnParseTest.fs" />
 		<Compile Include="Model\SystemBuilderTest.fs" />
 		<Compile Include="Model\LoadConfigTest.fs" />
+		<None Include="Libraries\MultipleJobdefCallExample\lib\basic.ds" />
+		<None Include="Libraries\MultipleJobdefCallExample\test_case_0.ds" />
+		<None Include="Libraries\MultipleJobdefCallExample\test_case_1.ds" />
+		<None Include="Libraries\MultipleJobdefCallExample\test_case_2.ds" />
+		<None Include="Libraries\MultipleJobdefCallExample\test_case_3.ds" />
 		<None Include="Libraries\cylinder.ds" />
 		<None Include="Libraries\station.ds" />
 		<None Include="Libraries\strange.ds" />
@@ -63,6 +72,7 @@
 		<None Include="Obsolete\Parser\Parse.Duplicated.Test.fsx" />
 		<None Include="Obsolete\Parser\Parse.OK.fsx" />
 		<None Include="Obsolete\test.ipynb" />
+		<Compile Include="Origins\OriginTester.fs" />
 		<None Include="ScratchPad.fsx" />
 		<None Include="App.config" />
 		<Compile Include="Main.fs" />

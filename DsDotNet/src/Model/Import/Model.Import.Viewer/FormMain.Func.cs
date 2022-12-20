@@ -19,8 +19,9 @@ using static Engine.CodeGenCPU.VertexMemoryManagerModule;
 using static Engine.Common.FS.MessageEvent;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsTextProperty;
+using static Engine.Core.ExpressionForwardDeclModule;
 using static Engine.Core.ExpressionModule;
-using static Engine.Core.ExpressionPrologModule;
+using static Engine.Core.Interface;
 using static Engine.Cpu.RunTime;
 using static Model.Import.Office.ViewModule;
 using Color = System.Drawing.Color;
@@ -46,7 +47,8 @@ namespace Dual.Model.Import
 
                     var rungs = CpuLoader.LoadStatements(_mySystem);
 
-                    _myCPU = new DsCPU("", rungs.Select(s => s.Item2));
+                    var storages = new Dictionary<string, IStorage>();
+                    _myCPU = new DsCPU(storages, "", rungs.Select(s => s.Item2));
                     _myCPU.Run();
                     StartResetBtnUpdate(true);
 

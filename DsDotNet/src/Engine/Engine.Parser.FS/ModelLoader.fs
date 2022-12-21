@@ -39,20 +39,20 @@ module ModelLoader =
 
     let LoadFromConfig(config: FilePath) =
         DsSystem.ClearExternalSystemCaches()
-        let envVar = $"*{getEnvironmentVariableName()}*"
         let envPaths = collectEnvironmentVariablePaths()
         let cfg = LoadConfig config
+        let dirs = config.Replace('/', '\\').Split('\\') |> List.ofArray
+        let dir = StringExt.JoinWith(dirs.RemoveAt(dirs.Length - 1), "\\")
         let systems =
             [ 
                 for dsFile in cfg.DsFilePaths do 
-                    if dsFile.Contains(envVar) then
-                        [
-                            for replace in envPaths do
-                                dsFile.Replace(envVar, replace)
-                        ].Head
-                        |> loadSystemFromDsFile
-                    else
-                        loadSystemFromDsFile dsFile
+                    [
+                        $"{dir}\\{dsFile}";
+                        for path in envPaths do
+                            $"{path}\\{dsFile}"
+                    ] 
+                    |> fileExistChecker
+                    |> loadSystemFromDsFile
             ]
             |> List.distinct
         { Config = cfg; Systems = systems }

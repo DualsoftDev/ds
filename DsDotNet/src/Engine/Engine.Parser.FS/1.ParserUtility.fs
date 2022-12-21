@@ -1,6 +1,7 @@
 namespace rec Engine.Parser.FS
 
 open System
+open System.IO
 open System.Linq
 
 open Antlr4.Runtime
@@ -24,7 +25,8 @@ module ParserUtilityModule =
         |> Array.filter(fun path -> path <> "")
         |> Array.map(fun path -> path.Trim())
         |> List.ofArray
-
+    let fileExistChecker (paths:string list) =
+        paths.First(fun f -> File.Exists(f))
     type IParseTree with
         member x.Descendants<'T when 'T :> IParseTree >(
             ?includeMe:bool

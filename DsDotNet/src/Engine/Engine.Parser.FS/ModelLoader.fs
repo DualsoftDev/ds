@@ -39,10 +39,22 @@ module ModelLoader =
 
     let LoadFromConfig(config: FilePath) =
         DsSystem.ClearExternalSystemCaches()
+        let envVar = $"*{getEnvironmentVariableName()}*"
+        let envPaths = collectEnvironmentVariablePaths()
         let cfg = LoadConfig config
         let systems =
-            [   for dsFile in cfg.DsFilePaths do
-                    loadSystemFromDsFile dsFile ]
+            [ 
+                for dsFile in cfg.DsFilePaths do 
+                    if dsFile.Contains(envVar) then
+                        [
+                            for replace in envPaths do
+                                dsFile.Replace(envVar, replace)
+                        ].Head
+                        |> loadSystemFromDsFile
+                    else
+                        loadSystemFromDsFile dsFile
+            ]
+            |> List.distinct
         { Config = cfg; Systems = systems }
 
 module private TestLoadConfig =

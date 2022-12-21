@@ -110,9 +110,20 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
 
     member private x.GetFilePath(fileSpecCtx:FileSpecContext) =
         let simpleFilePath = fileSpecCtx.TryFindFirstChild<FilePathContext>().Value.GetText().DeQuoteOnDemand()
+        let envVar = $"*{getEnvironmentVariableName()}*"
+        let envPaths = collectEnvironmentVariablePaths()
+        let replacedFilePath =
+            if simpleFilePath.Contains(envVar) then
+                [
+                    for replace in envPaths do
+                        simpleFilePath.Replace(envVar, replace)
+                ].Head
+            else
+                simpleFilePath
         let absoluteFilePath =
             let dir = x.ParserOptions.ReferencePath
-            [simpleFilePath; $"{dir}\\{simpleFilePath}"].First(fun f -> File.Exists(f))
+            [replacedFilePath; $"{dir}\\{replacedFilePath}"].First(fun f -> File.Exists(f))
+        printfn "[%A]\n%A / %A\n" x.ParserOptions.ReferencePath absoluteFilePath replacedFilePath
         absoluteFilePath, simpleFilePath
 
 

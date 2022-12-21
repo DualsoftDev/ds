@@ -219,14 +219,12 @@ module PPTUtil =
                     let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
                     geometry.Preset.Value = Drawing.ShapeTypeValues.NoSmoking
 
-        ///Start Btn 별도 정의 필요 없음  DS에서 전체/Flow 별로 자동생성
         [<Extension>] 
         static member CheckBlockArc(shape:Shape) = 
                 if(Office.CheckShape(shape) |> not) then false
                 else
-                    false
-                    //let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
-                    //geometry.Preset.Value = Drawing.ShapeTypeValues.BlockArc   
+                    let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
+                    geometry.Preset.Value = Drawing.ShapeTypeValues.BlockArc   
         
         //Active system 정의 블록
         [<Extension>] 
@@ -324,6 +322,7 @@ module PPTUtil =
                     || shape.CheckEllipse()         //call
                     || shape.CheckDonutShape()      //auto/manual
                     || shape.CheckBevelShape()      //clear
+                    || shape.CheckBlockArc()      //start
                     || shape.CheckNoSmoking()       //emg
                     || shape.CheckFoldedCornerRound()    //copy_value
                     || shape.CheckFoldedCornerPlate()    //copy_ref

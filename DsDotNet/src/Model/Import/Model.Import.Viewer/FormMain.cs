@@ -236,7 +236,7 @@ namespace Dual.Model.Import
 
         private void UpdateCpuUI(IEnumerable<string> text)
         {
-            StartResetBtnUpdate(true);
+
             comboBox_Segment.Items.Clear();
 
             comboBox_Segment.DisplayMember = "Display";
@@ -310,12 +310,13 @@ namespace Dual.Model.Import
                 var statement = rung.Item2;
                 return $"***{description}***\t{rung.Item2.ToText().Replace("%", " ")}";
             });
+            StartResetBtnUpdate(true);
 
             UpdateCpuUI(text);
             UpdateGraphUI(sysView.ViewNodes);
             
             DisplayTextModel(Color.Transparent, sysView.System.ToDsText());
-            DisplayTextExpr(_myCPU.ToTextStatement(), Color.WhiteSmoke);
+            //DisplayTextExpr(_myCPU.ToTextStatement(), Color.WhiteSmoke);
         }
     }
 }

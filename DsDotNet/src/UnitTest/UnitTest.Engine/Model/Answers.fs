@@ -218,29 +218,29 @@ module ModelComponentAnswers =
             RunR > RunL;
         }
     }
-    
+
     [jobs] = {
         RunR = { sysR.RUN(%Q1, %I1); }
         RunL = { sysL.RUN(%Q2, %I2); }
     }
-    [external file=""systemRH.ds"" ip=""localhost""] sysR;
-    [external file=""systemLH.ds"" ip=""localhost""] sysL;
+    [external file="systemRH.ds" ip="localhost"] sysR;
+    [external file="systemLH.ds" ip="localhost"] sysL;
 }
 """
 
     let answerT6Aliases = """
 [sys ip = localhost] T6_Alias = {
     [flow] Page1 = {
-        C1 > C2;		
-        AndFlow.R2 > OrFlow.R1;		
+        C1 > C2;
+        AndFlow.R2 > OrFlow.R1;
     }
     [flow] AndFlow = {
-        R1 > R3;		
-        R2 > R3;		
+        R1 > R3;
+        R2 > R3;
     }
     [flow] OrFlow = {
-        R1 > R3;		
-        R2 > Copy1_R3;	
+        R1 > R3;
+        R2 > Copy1_R3;
         [aliases] = {
             R3 = { Copy1_R3; AliasToR3; }
             AndFlow.R3 = { AndFlowR3; OtherFlowR3; }
@@ -250,7 +250,7 @@ module ModelComponentAnswers =
         C1 = { B."+"(%Q1, %I1); A."+"(%Q1, %I1); }
         C2 = { A."-"(%Q3, _); B."-"(%Q3, _); }
     }
-    [device file="cylinder.ds"] B; 
+    [device file="cylinder.ds"] B;
     [external file="cylinder.ds"] A;
 }
 """

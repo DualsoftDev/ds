@@ -54,7 +54,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
         match ctx.TryFindFirstChild<SysBlockContext>() with
         | Some sysBlockCtx_ ->
             let name = options.LoadedSystemName |? (ctx.systemName().GetText().DeQuoteOnDemand())
-            let host =
+            let hostIp =
                 let hostSpec =
                     option {
                         let! sysHeader = ctx.TryFindFirstChild<SysHeaderContext>()
@@ -64,7 +64,18 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                 match hostSpec with
                 | Some name -> name
                 | None -> null
-            x.TheSystem <- DsSystem(name, host)
+
+            let repo = options.ShareableSystemRepository
+
+            match options.AbsoluteFilePath with
+            | Some fp when repo.ContainsKey(fp) -> x.TheSystem <- repo[fp]
+            | _ ->
+                let registerSystem (sys:DsSystem) =
+                    match options.AbsoluteFilePath with
+                    | Some fp -> repo.Add(fp, sys)
+                    | _ -> ()
+
+                x.TheSystem <- DsSystem(name, hostIp, registerSystem)
             tracefn($"System: {name}")
         | None ->
             failwith "ERROR"
@@ -120,13 +131,19 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
         let fileSpecCtx = ctx.TryFindFirstChild<FileSpecContext>().Value
         let absoluteFilePath, simpleFilePath = x.GetFilePath(fileSpecCtx)
         let loadedName = ctx.CollectNameComponents().Combine()
-        x.TheSystem.LoadDeviceAs(loadedName, absoluteFilePath, simpleFilePath) |> ignore
+        x.TheSystem.LoadDeviceAs(options.ShareableSystemRepository, loadedName, absoluteFilePath, simpleFilePath) |> ignore
 
     override x.EnterLoadExternalSystemBlock(ctx:LoadExternalSystemBlockContext) =
         let fileSpecCtx = ctx.TryFindFirstChild<FileSpecContext>().Value
         let absoluteFilePath, simpleFilePath = x.GetFilePath(fileSpecCtx)
         let loadedName = ctx.CollectNameComponents().Combine()
-        x.TheSystem.LoadExternalSystemAs(loadedName, absoluteFilePath, simpleFilePath) |> ignore
+        let optIpSpec =
+            option {
+                let! ipSpecCtx = ctx.TryFindFirstChild<IpSpecContext>()
+                let! host = ipSpecCtx.TryFindFirstChild<HostContext>()
+                return deQuote <| host.GetText()
+            }
+        x.TheSystem.LoadExternalSystemAs(options.ShareableSystemRepository, loadedName, absoluteFilePath, simpleFilePath, optIpSpec) |> ignore
 
     override x.EnterCodeBlock(ctx:CodeBlockContext) =
         let code = ctx.GetOriginalText()
@@ -441,37 +458,43 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
 
 [<AutoOpen>]
 module ParserLoadApiModule =
-    let sharableExternalSystemCaches = Dictionary<string, DsSystem>()
-
     (* 외부에서 구조적으로 system 을 build 할 때에 사용되는 API *)
     type DsSystem with
-        member x.LoadDeviceAs (loadedName:string, absoluteFilePath:string, userSpecifiedFilePath:string) =
+        member x.LoadDeviceAs (systemRepo:ShareableSystemRepository, loadedName:string, absoluteFilePath:string, userSpecifiedFilePath:string) =
             let device =
                 fwdLoadDevice <| {
                     ContainerSystem = x
                     AbsoluteFilePath = absoluteFilePath
                     UserSpecifiedFilePath = userSpecifiedFilePath
-                    LoadedName = loadedName }
+                    LoadedName = loadedName
+                    ShareableSystemRepository = systemRepo
+                    HostIp = None
+                }
             x.AddLoadedSystem(device) |> ignore
             device
 
-        member x.LoadExternalSystemAs (loadedName:string, absoluteFilePath:string, userSpecifiedFilePath:string) =
+        member x.LoadExternalSystemAs (
+            systemRepo:ShareableSystemRepository, loadedName:string
+            , absoluteFilePath:string, userSpecifiedFilePath:string
+            , ipSpec:string option
+        ) =
             let external =
                 let param = {
                     ContainerSystem = x
                     AbsoluteFilePath = absoluteFilePath
                     UserSpecifiedFilePath = userSpecifiedFilePath
                     LoadedName = loadedName
+                    ShareableSystemRepository = systemRepo
+                    HostIp = ipSpec
                 }
-                match sharableExternalSystemCaches.TryFind(absoluteFilePath) with
+                match systemRepo.TryFind(absoluteFilePath) with
                 | Some existing ->
                     ExternalSystem(existing, param) // 기존 loading 된 system share
                 | None ->
                     let exSystem = fwdLoadExternalSystem param
-                    sharableExternalSystemCaches.Add(absoluteFilePath, exSystem.ReferenceSystem) |> ignore
+                    assert( systemRepo.ContainsKey(absoluteFilePath) )
+                    assert( systemRepo[absoluteFilePath] = exSystem.ReferenceSystem)
                     exSystem
             x.AddLoadedSystem(external) |> ignore
             external
 
-        static member ClearExternalSystemCaches() = sharableExternalSystemCaches.Clear()
-        static member ExternalSystemCaches = sharableExternalSystemCaches |> seq

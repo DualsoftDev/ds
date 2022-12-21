@@ -35,7 +35,7 @@ module LoadConfigTestModule =
         [<Test>]
         member __.``LoadSharedDevices Singleton Test`` () =
 
-            DsSystem.ClearExternalSystemCaches()
+            let systemRepo = ShareableSystemRepository()
 
             let mySysText = """
 [sys] L = {
@@ -51,11 +51,10 @@ module LoadConfigTestModule =
     //    Vm > Pm > Sm;
     //} ....
 
-            let system = parseText libdir mySysText
+            let system = parseText systemRepo libdir mySysText
             validateGraphOfSystem system
 
-            let caches = DsSystem.ExternalSystemCaches
-            caches.Count() === 1
+            systemRepo.Count === 1
 
             let exs = system.LoadedSystems.Select(fun d -> d.ReferenceSystem).ToArray()
             exs.Length === 2
@@ -67,8 +66,8 @@ module LoadConfigTestModule =
 
             let findFromLoaded = tryFindLoadedSystem system  "A" |> Option.get
             let findReferenceSystem = tryFindReferenceSystem system  "Station" |> Option.get
-            findFromLoaded.Name =!= findReferenceSystem.Name 
+            findFromLoaded.Name =!= findReferenceSystem.Name
 
             let generated = system.ToDsText();
-            compare libdir mySysText generated
+            compare systemRepo libdir mySysText generated
             ()

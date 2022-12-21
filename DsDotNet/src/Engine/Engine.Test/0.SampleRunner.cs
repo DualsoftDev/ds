@@ -2,6 +2,8 @@ using Antlr4.Runtime;
 
 using Engine.Parser.FS;
 
+using Microsoft.FSharp.Core;
+
 using static Engine.Core.CoreModule;
 using static Engine.Parser.FS.ParserOptionModule;
 
@@ -11,7 +13,8 @@ internal class SampleRunner
 {
     public static void Run(string text)
     {
-        var helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation(".", "ActiveCpuName"));
+        var systemRepo = new Dictionary<string, DsSystem>();   // ShareableSystemRepository
+        var helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation(systemRepo, ".", "ActiveCpuName", FSharpOption<string>.None));
         var system = helper.TheSystem;
     }
 

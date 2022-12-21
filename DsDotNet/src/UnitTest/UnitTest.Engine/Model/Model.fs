@@ -31,12 +31,12 @@ module private ModelComparisonHelper =
         xs.Length === ys.Length
 
 
-    let parseText referenceDir text =
-        let helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation(referenceDir, "ActiveCpuName"))
+    let parseText (systemRepo:ShareableSystemRepository) referenceDir text =
+        let helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None))
         helper.TheSystem
 
-    let compare referenceDir originalText answer =
-        let system = parseText referenceDir originalText
+    let compare (systemRepo:ShareableSystemRepository) referenceDir originalText answer =
+        let system = parseText systemRepo referenceDir originalText
         validateGraphOfSystem system
 
         let generated = system.ToDsText();
@@ -49,7 +49,8 @@ module ModelTests1 =
         do
             Fixtures.SetUpTest()
 
-        let compare = compare @$"{__SOURCE_DIRECTORY__}\..\Libraries"
+        let systemRepo = ShareableSystemRepository()
+        let compare = compare systemRepo @$"{__SOURCE_DIRECTORY__}\..\Libraries"
         let compareExact x = compare x x
         [<Test>]
         member __.``0 Any temporary test`` () =
@@ -173,7 +174,8 @@ module ModelTests1 =
         do
             Fixtures.SetUpTest()
 
-        let compare = compare @$"{__SOURCE_DIRECTORY__}\..\Libraries"
+        let systemRepo = ShareableSystemRepository()
+        let compare = compare systemRepo @$"{__SOURCE_DIRECTORY__}\..\Libraries"
 
         [<Test>]
         member __.``RecursiveSystem test`` () =

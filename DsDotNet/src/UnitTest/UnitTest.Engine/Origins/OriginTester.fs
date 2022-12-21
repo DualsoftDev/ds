@@ -6,27 +6,27 @@ open NUnit.Framework
 open System.Collections.Generic
 
 [<AutoOpen>]
-module OriginTestModule = 
-    type OriginTester() = 
+module OriginTestModule =
+    type OriginTester() =
         do
             Fixtures.SetUpTest()
 
         let libdir = @$"{__SOURCE_DIRECTORY__}\..\Libraries"
         let configFile = @"test-origin-config.json"
         let genConfig (filePath:string) =
-            let cfg = { 
-                    DsFilePaths = [ 
-                        $@"{libdir}\MultipleJobdefCallExample\{filePath}" 
+            let cfg = {
+                    DsFilePaths = [
+                        $@"{libdir}\MultipleJobdefCallExample\{filePath}"
                     ]
                 }
             ModelLoader.SaveConfig configFile cfg
 
-        let answerChecker 
-                (filePath:string) 
+        let answerChecker
+                (filePath:string)
                 (answer:seq<KeyValuePair<string, InitialType>>) =
             genConfig(filePath)
             let model = ModelLoader.LoadFromConfig(configFile)
-            let originChecker = 
+            let originChecker =
                 [
                     for sys in model.Systems do
                         for f in sys.Flows do
@@ -35,20 +35,19 @@ module OriginTestModule =
                                 | :? Real as r -> OriginHelper.GetOrigins r.Graph
                                 | _ -> ()
                 ] |> removeDuplicates
-            
-            DsSystem.ClearExternalSystemCaches()
+
             for r in originChecker do
                 printfn "org %A" r
-                
+
             for a in answer do
                 printfn "asw %A" a
 
             SeqEq originChecker answer
-            
+
         [<Test>]
         member __.``OriginTestCase0`` () =
-            let answer:seq<KeyValuePair<string, InitialType>> = 
-                seq { 
+            let answer:seq<KeyValuePair<string, InitialType>> =
+                seq {
                     KeyValuePair("S101_Copy2.Func1", Off);
                     KeyValuePair("S101_Copy2.Func2", On);
                     KeyValuePair("S101_Copy1.Func1", Off);
@@ -72,8 +71,8 @@ module OriginTestModule =
 
         [<Test>]
         member __.``OriginTestCase1`` () =
-            let answer:seq<KeyValuePair<string, InitialType>> = 
-                seq { 
+            let answer:seq<KeyValuePair<string, InitialType>> =
+                seq {
                     KeyValuePair("S101_Copy2.Func1", Off);
                     KeyValuePair("S101_Copy2.Func2", On);
                     KeyValuePair("S101_Copy1.Func1", Off);
@@ -97,8 +96,8 @@ module OriginTestModule =
 
         [<Test>]
         member __.``OriginTestCase2`` () =
-            let answer:seq<KeyValuePair<string, InitialType>> = 
-                seq { 
+            let answer:seq<KeyValuePair<string, InitialType>> =
+                seq {
                     KeyValuePair("S101_Copy2.Func1", Off);
                     KeyValuePair("S101_Copy2.Func2", On);
                     KeyValuePair("S101_Copy1.Func1", NeedCheck);
@@ -122,8 +121,8 @@ module OriginTestModule =
 
         [<Test>]
         member __.``OriginTestCase3`` () =
-            let answer:seq<KeyValuePair<string, InitialType>> = 
-                seq { 
+            let answer:seq<KeyValuePair<string, InitialType>> =
+                seq {
                     KeyValuePair("S101_Copy2.Func2", Off);
                     KeyValuePair("S101_Copy2.Func1", On);
                     KeyValuePair("S101_Copy1.Func5", NeedCheck);

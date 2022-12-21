@@ -132,7 +132,7 @@ module internal ToDsTextModule =
     let rec systemToDs (system:DsSystem) (indent:int) =
         let tab = getTab indent
         [
-            let ip = if system.Host.IsNullOrEmpty() then "" else $" ip = {system.Host}"
+            let ip = if system.HostIp.IsNullOrEmpty() then "" else $" ip = {system.HostIp}"
             yield $"[sys{ip}] {system.Name.QuoteOnDemand()} = {lb}"
 
             for f in system.Flows do
@@ -251,8 +251,15 @@ module internal ToDsTextModule =
                 if layouts.Any()   then yield layouts
                 yield $"{tab}{rb}"
 
-            for d in system.Devices do          yield $"{tab}[device file={quote d.UserSpecifiedFilePath}] {d.Name}; // {d.AbsoluteFilePath}"
-            for es in system.ExternalSystems do  yield $"{tab}[external file={quote es.UserSpecifiedFilePath}] {es.Name}; // {es.AbsoluteFilePath}"
+            for d in system.Devices do
+                yield $"{tab}[device file={quote d.UserSpecifiedFilePath}] {d.Name}; // {d.AbsoluteFilePath}"
+
+            for es in system.ExternalSystems do
+                let ip =
+                    match es.HostIp with
+                    | Some host -> $" ip={quote host}"
+                    | _ -> ""
+                yield $"{tab}[external file={quote es.UserSpecifiedFilePath}{ip}] {es.Name}; // {es.AbsoluteFilePath}"
 
             //Commands/Observes는 JobDef에 저장 (Variables는 OriginalCodeBlocks으로)
             //yield codeBlockToDs system

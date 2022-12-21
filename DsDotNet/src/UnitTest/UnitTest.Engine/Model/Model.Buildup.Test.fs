@@ -14,15 +14,18 @@ module ModelBuildupTests1 =
         do
             Fixtures.SetUpTest()
 
+        let systemRepo = ShareableSystemRepository()
         let libdir = @$"{__SOURCE_DIRECTORY__}\..\Libraries"
-        let compare = compare libdir
+        let compare = compare systemRepo libdir
         let compareExact x = compare x x
+
+        let systemRepo = ShareableSystemRepository()
 
         let createSimpleSystem() =
             let system = DsSystem("My", "localhost")
             let flow = Flow.Create("F", system)
             let real = Real.Create("Main", flow)
-            let dev = system.LoadDeviceAs("A", @$"{libdir}\cylinder.ds", "cylinder.ds")
+            let dev = system.LoadDeviceAs(systemRepo, "A", @$"{libdir}\cylinder.ds", "cylinder.ds")
 
             let apis = system.ApiUsages
             let apiP = apis.First(fun ai -> ai.Name = "+")

@@ -16,6 +16,9 @@ module CoreModule =
             member _.NameComponents = nameComponents
             member x.QualifiedName = nameComponents.Combine() }
 
+    /// External system loading 시, 공유하기 위한 정보를 담을 곳
+    type ShareableSystemRepository = Dictionary<string, DsSystem>
+
     type DeviceLoadParameters = {
         /// Loading 된 system 입장에 자신을 포함하는 container system
         ContainerSystem        : DsSystem
@@ -24,6 +27,8 @@ module CoreModule =
         UserSpecifiedFilePath  : string
         /// *.ds 에 정의된 이름과 loading 할 때의 이름은 다를 수 있다.
         LoadedName             : string
+        ShareableSystemRepository: ShareableSystemRepository
+        HostIp : string option
     }
 
     [<AbstractClass>]
@@ -47,9 +52,14 @@ module CoreModule =
     /// shared instance.  *.ds file 의 절대 경로 기준으로 하나의 instance 만 생성하고 이를 참조하는 개념
     and ExternalSystem(loadedSystem:DsSystem, param:DeviceLoadParameters) =
         inherit LoadedSystem(loadedSystem, param)
+        member _.HostIp = param.HostIp
 
-    type DsSystem (name:string, host:string) =
+    type DsSystem (name:string, hostIp:string, ?onCreation:DsSystem -> unit) as this =
         inherit FqdnObject(name, createFqdnObject([||]))
+        do
+            // this system 객체가 생성되고 나서 수행해야 할 작업 수행.  external system loading 시, 공유하기 위한 정보를 marking
+            onCreation.Iter(fun f -> f this)
+
         let loadedSystems = createNamedHashSet<LoadedSystem>()
         let apiUsages = ResizeArray<ApiItem>()
         let addApiItemsForDevice (device: LoadedSystem) = device.ReferenceSystem.ApiItems |> apiUsages.AddRange
@@ -64,7 +74,7 @@ module CoreModule =
         member _.Devices              = loadedSystems.OfType<Device>()
         member _.ExternalSystems      = loadedSystems.OfType<ExternalSystem>()
         member _.ApiUsages = apiUsages |> seq
-        member _.Host = host
+        member _.HostIp = hostIp
 
 
         /// 사용자 입력 code block(s).  "<@{" 와 "}@>" 사이의 text(s) : todo 복수개의 block 이 허용되면, serialize 할 때 해당 위치에 맞춰서 serialize 해야 하는데...
@@ -170,7 +180,7 @@ module CoreModule =
         member _.ApiItem = api
         member val InTag   = inTag  with get,set
         member val OutTag  = outTag with get,set
-        //$ton 200      //ls xgk 명령어를 따른다.  
+        //$ton 200      //ls xgk 명령어를 따른다.
         member val ObserveInTimming   = observe with get,set //todo ToDsText, parsing
         //$mov 100 R200 //ls xgk 명령어를 따른다.
         member val CommandOutTimming  = command with get,set //todo ToDsText, parsing

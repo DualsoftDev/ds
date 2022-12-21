@@ -3,12 +3,13 @@ namespace Engine.Parser.FS
 open System
 open System.Collections.Generic
 open Engine.Core
+open Engine.Common.FS
 
 [<AutoOpen>]
 module rec ParserOptionModule =
     let private emptyStorage = Storages()
 
-    type ParserOptions(referencePath, activeCpuName, isSimulationMode, allowSkipExternalSegment, storages) =
+    type ParserOptions(systemRepo:ShareableSystemRepository, referencePath, activeCpuName, isSimulationMode, allowSkipExternalSegment, storages, absoluteFilePath) =
         member _.ActiveCpuName:string = activeCpuName
         member _.IsSimulationMode:bool = isSimulationMode           // { get; set; } = true
         member _.AllowSkipExternalSegment:bool = allowSkipExternalSegment // { get; set; } = true
@@ -19,8 +20,11 @@ module rec ParserOptionModule =
         /// [device or external system] 으로 새로 loading 된 system name.  외부 ds file 을 parsing 중일 때에만 Some 값을 가짐
         member val LoadedSystemName:string option = None with get, set
 
-        static member Create4Runtime(referencePath, activeCpuName) = ParserOptions(referencePath, activeCpuName, false, false, emptyStorage)
-        static member Create4Simulation(referencePath, activeCpuName) = ParserOptions(referencePath, activeCpuName, true, false, emptyStorage)
+        member _.ShareableSystemRepository = systemRepo
+        member val AbsoluteFilePath:string option = absoluteFilePath with get, set
+
+        static member Create4Runtime(systemRepo, referencePath, activeCpuName, absoluteFilePath) = ParserOptions(systemRepo, referencePath, activeCpuName, false, false, emptyStorage, absoluteFilePath)
+        static member Create4Simulation(systemRepo, referencePath, activeCpuName, absoluteFilePath) = ParserOptions(systemRepo, referencePath, activeCpuName, true, false, emptyStorage, absoluteFilePath)
         member x.Verify() = x.IsSimulationMode || (x.ActiveCpuName <> null && not x.AllowSkipExternalSegment)
 
 

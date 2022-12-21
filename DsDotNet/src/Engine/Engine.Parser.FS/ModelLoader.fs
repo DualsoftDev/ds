@@ -30,19 +30,20 @@ module ModelLoader =
         File.WriteAllText(path, json)
 
 
-    let private loadSystemFromDsFile (dsFilePath) =
+    let private loadSystemFromDsFile (systemRepo:ShareableSystemRepository) (dsFilePath) =
         let text = File.ReadAllText(dsFilePath)
         let dir = Path.GetDirectoryName(dsFilePath)
-        let option = ParserOptions.Create4Runtime(dir, "ActiveCpuName")
+        let option = ParserOptions.Create4Runtime(systemRepo, dir, "ActiveCpuName", Some dsFilePath)
         let system = ModelParser.ParseFromString(text, option)
         system
 
     let LoadFromConfig(config: FilePath) =
-        DsSystem.ClearExternalSystemCaches()
         let cfg = LoadConfig config
+        let systemRepo = ShareableSystemRepository()
+
         let systems =
             [   for dsFile in cfg.DsFilePaths do
-                    loadSystemFromDsFile dsFile ]
+                    loadSystemFromDsFile systemRepo dsFile ]
         { Config = cfg; Systems = systems }
 
 module private TestLoadConfig =

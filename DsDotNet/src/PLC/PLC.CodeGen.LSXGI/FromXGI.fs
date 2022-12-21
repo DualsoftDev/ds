@@ -1,12 +1,11 @@
 // https://codebeautify.org/xmlviewer : Online XML 구조 보기 (treeview)
 
-namespace Dual.ConvertPLC.FS.LsXGI
+namespace PLC.CodeGen.LSXGI
 
 open System.Linq
 open System.Xml
 open System.Xml.Linq
 open System.Runtime.CompilerServices
-open FSharpPlus
 open Engine.Common.FS
 
 module XGIXml =
@@ -24,7 +23,7 @@ module XGIXml =
         ( getGlobalSymbolXmlNodes xmlDoc
           |> XmlExt.ToEnumerables
           |> Seq.map (fun xn -> getAttribute xn "Address"))
-        @@
+        @
         ( getDirectVarXmlNodes xmlDoc
           |> XmlExt.ToEnumerables
           |> Seq.map (fun xn -> getAttribute xn "Device"))

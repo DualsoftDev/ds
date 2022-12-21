@@ -1,4 +1,4 @@
-﻿namespace Dual.ConvertPLC.FS.LsXGI
+﻿namespace PLC.CodeGen.LSXGI
 
 open System.Reflection
 open Engine.Common.FS

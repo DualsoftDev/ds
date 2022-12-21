@@ -1,4 +1,4 @@
-﻿namespace Dual.ConvertPLC.FS.LsXGI
+﻿namespace PLC.CodeGen.LSXGI
 
 open Engine.Common.FS
 open Dual.Core.QGraph

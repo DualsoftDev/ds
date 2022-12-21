@@ -1,8 +1,8 @@
-﻿namespace Dual.ConvertPLC.FS.LsXGI
+namespace PLC.CodeGen.LSXGI
 
 open Engine.Common.FS
-open Dual.ConvertPLC.FS.LsXGI.Config.POU.Program.LDRoutine
-open Dual.Core.Types
+open PLC.CodeGen.Common
+open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
 
 [<AutoOpen>]
 module internal Common =
@@ -21,20 +21,20 @@ module internal Common =
     /// 논리 좌표 x y 를 LS 산전 XGI 수치 좌표계로 반환
     let coord x y = x*3 + y*1024 + 1
     /// 산전 limit : 가로로 31개
-    let coilCellX = 31      
+    let coilCellX = 31
     /// 최소기본 FB 위치 : 가로로  9 포인트
-    let minFBCellX = 9     
+    let minFBCellX = 9
     /// 조건이 9 이상이면 뒤로 증가
     let getFBCellX x:int = if(minFBCellX <= x+3) then (x+4) else minFBCellX
     /// 좌표 c 에서 시작하는 양 방향 검출 line
-    let risingline c = elementFull (int ElementType.RisingContact) (c) "" "" 
+    let risingline c = elementFull (int ElementType.RisingContact) (c) "" ""
     /// 좌표 c 에서 시작하는 음 방향 검출 line
-    let fallingline c = elementFull (int ElementType.FallingContact) (c) "" "" 
+    let fallingline c = elementFull (int ElementType.FallingContact) (c) "" ""
 
 
     /// 마지막 수평으로 연결 정보
     let mutiEndLine startX endX y =
-        if endX > startX 
+        if endX > startX
         then
             let lengthParam = sprintf "Param=\"%d\"" (3 * (endX-startX))
             let c = coord startX y
@@ -47,7 +47,7 @@ module internal Common =
         let c = coord x y
         let fbBody = sprintf "Param=\"%s\"" ((FB.getFBXML( funcFind ,func ,instFB, FB.getFBIndex tag)))
         c, elementFull (int ElementType.VertFBMode) c fbBody inst
-    
+
     /// 함수 파라메터 그리기
     let createPA tag x y=
         let c = coord x y
@@ -81,4 +81,4 @@ module internal Common =
         results.Add((coord coilCellX newY, elementBody (int ElementType.CoilMode) (coord coilCellX newY) (tagCoil.ToText())))
         vlineDownTo (x-1) y funSize |> results.AddRange
         results
-  
+

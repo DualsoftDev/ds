@@ -1,10 +1,10 @@
-﻿namespace Dual.ConvertPLC.FS.LsXGI
+﻿namespace PLC.CodeGen.LSXGI
 
 open Engine.Common.FS
 open Dual.Core.Types
 open Dual.Core.Types.Command
 open Dual.Core.QGraph.Prelude
-open Dual.ConvertPLC.FS.LsXGI.Config.POU.Program.LDRoutine
+open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
 
 [<AutoOpen>]
 module internal Basic =

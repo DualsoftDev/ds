@@ -1,4 +1,4 @@
-﻿namespace Dual.ConvertPLC.FS.LsXGI
+﻿namespace PLC.CodeGen.LSXGI
 
 open System.IO
 open FSharpPlus
@@ -9,8 +9,8 @@ open Dual.Core.Prelude
 open Dual.Core.Types.Command
 open Dual.Core.Prelude.NewIEC61131
 open System.Reflection
-open Dual.ConvertPLC.FS
-open Dual.ConvertPLC.FS.LsXGI.Config.POU.Program.LDRoutine
+open PLC.CodeGen.LSXGI
+open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
 open Engine.Common.FS
 
 

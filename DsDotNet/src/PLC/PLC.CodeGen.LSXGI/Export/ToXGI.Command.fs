@@ -1,42 +1,40 @@
-﻿namespace Dual.ConvertPLC.FS.LsXGI
+namespace PLC.CodeGen.LSXGI
 
 open Engine.Common.FS
-open Dual.Core.Types
-open Dual.ConvertPLC.FS.LsXGI.Config.POU.Program.LDRoutine
+open PLC.CodeGen.Common
+open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
 open Config.POU.Program.LDRoutine
-open Dual.Core.Types.Command
-open Dual.Core.Prelude
 
 [<AutoOpen>]
 module internal Command =
     /// Rung 의 Command 정의를 위한 type.
     //Command = CoilCmd or FunctionCmd or FunctionBlockCmd
-    type XgiCommand(cmdType:CommandTypes) = 
+    type XgiCommand(cmdType:CommandTypes) =
         member x.CommandType with get() = cmdType
-        member x.CoilTerminalTag with get() = 
+        member x.CoilTerminalTag with get() =
             match cmdType with
             | CoilCmd (cc) -> cc :> IFunctionCommand |> fun f -> f.TerminalEndTag
             | FunctionCmd (fc) -> fc :> IFunctionCommand |> fun f -> f.TerminalEndTag
             | FunctionBlockCmd (fbc) -> fbc :> IFunctionCommand |> fun f -> f.TerminalEndTag
 
-        member x.UsedCommandTags with get() = 
+        member x.UsedCommandTags with get() =
             match cmdType with
             | CoilCmd (cc) -> seq{x.CoilTerminalTag}
             | FunctionCmd (fc) ->  fc.UsedCommandTags()
             | FunctionBlockCmd (fbc) -> fbc.UsedCommandTags()
-       
+
         member x.HasInstance with get() = match cmdType with | FunctionBlockCmd (fbc) ->  true |_-> false
-        member x.Instance with get() = 
+        member x.Instance with get() =
             match cmdType with
-            | FunctionBlockCmd (fbc) -> 
+            | FunctionBlockCmd (fbc) ->
                 match fbc with
                 | TimerMode(tag, time) -> fbc.GetInstanceText(), VarType.TON
                 | CounterMode(tag, resetTag, count) -> fbc.GetInstanceText(), VarType.CTU_INT
             |_-> failwithlog "do not make instanceTag"
 
-        member x.LDEnum with get() = 
+        member x.LDEnum with get() =
             match cmdType with
-                 | CoilCmd (cc) -> 
+                 | CoilCmd (cc) ->
                         match cc with
                         |CoilMode(_) -> ElementType.CoilMode
                         |ClosedCoilMode(_) -> ElementType.ClosedCoilMode
@@ -46,30 +44,30 @@ module internal Command =
                         |NPulseCoilMode(_) -> ElementType.NPulseCoilMode
                  | FunctionCmd (_) -> ElementType.VertFBMode
                  | FunctionBlockCmd (_) -> ElementType.VertFBMode
-                 
+
             /// Coil의 부정 Command를 반환한다.
-         member x.ReverseCmd () = 
+         member x.ReverseCmd () =
                     match cmdType with
-                    | CoilCmd (cc) -> 
+                    | CoilCmd (cc) ->
                            match cc with
                             | CoilMode(tag) -> XgiCommand(CoilCmd(CoilOutput.ClosedCoilMode(tag)))
                             | ClosedCoilMode(tag) -> XgiCommand(CoilCmd(CoilOutput.CoilMode(tag)))
                             | _ -> failwithlogf "This ReverseCmd is not support"
                     | _ -> failwithlogf "This ReverseCmd is not support"
-                       
+
     let createOutputCoil(tag)    = XgiCommand(CoilCmd(CoilOutput.CoilMode(tag)))
     let createOutputCoilNot(tag)    = XgiCommand(CoilCmd(CoilOutput.ClosedCoilMode(tag)))
-    let createOutputSet(tag)     = XgiCommand(CoilCmd(CoilOutput.SetCoilMode(tag)))  
+    let createOutputSet(tag)     = XgiCommand(CoilCmd(CoilOutput.SetCoilMode(tag)))
     let createOutputRst(tag)     = XgiCommand(CoilCmd(CoilOutput.ResetCoilMode(tag)))
     let createOutputPulse(tag)   = XgiCommand(CoilCmd(CoilOutput.PulseCoilMode(tag)))
     let createOutputNPulse(tag)  = XgiCommand(CoilCmd(CoilOutput.NPulseCoilMode(tag)))
 
-    let createOutputTime(tag, time)  = XgiCommand(FunctionBlockCmd(FunctionBlock.TimerMode(tag, time))) 
+    let createOutputTime(tag, time)  = XgiCommand(FunctionBlockCmd(FunctionBlock.TimerMode(tag, time)))
     let createOutputCount(tag, resetTag, cnt)  = XgiCommand(FunctionBlockCmd(FunctionBlock.CounterMode(tag, resetTag, cnt)))
     let createOutputCopy(tag, tagA, tagB) = XgiCommand(FunctionCmd(FunctionPure.CopyMode(tag, (tagA, tagB))))
     let createOutputAdd(tag, targetTag, addValue:int) = XgiCommand(FunctionCmd(FunctionPure.Add(tag, targetTag, addValue)))
     let createOutputCompare(tag, opComp:OpComp, tagA, tagB) =
-        match opComp with 
+        match opComp with
         | GT -> XgiCommand(FunctionCmd(FunctionPure.CompareGT(tag, (tagA, tagB))))
         | GE -> XgiCommand(FunctionCmd(FunctionPure.CompareGE(tag, (tagA, tagB))))
         | EQ -> XgiCommand(FunctionCmd(FunctionPure.CompareEQ(tag, (tagA, tagB))))
@@ -77,14 +75,14 @@ module internal Command =
         | LT -> XgiCommand(FunctionCmd(FunctionPure.CompareLT(tag, (tagA, tagB))))
         | NE -> XgiCommand(FunctionCmd(FunctionPure.CompareNE(tag, (tagA, tagB))))
 
-    let drawCmdTime(coil:IExpressionTerminal, time:int, x, y) = 
+    let drawCmdTime(coil:IExpressionTerminal, time:int, x, y) =
         let results = ResizeArray<int * string>()
         let funcSizeY = 3
         //Command 속성입력
         results.Add(createPA (sprintf "T#%dMS" time) (x-1) (y+1))
         funcSizeY-1, results
-    
-    let drawCmdCount(coil:IExpressionTerminal, reset:IExpressionTerminal, count:int, x, y) = 
+
+    let drawCmdCount(coil:IExpressionTerminal, reset:IExpressionTerminal, count:int, x, y) =
         let results = ResizeArray<int * string>()
         let funcSizeY = 4
         //Command 속성입력
@@ -93,11 +91,11 @@ module internal Command =
 
         funcSizeY-1, results
 
-    let drawCmdCompare(coil:IExpressionTerminal, opComp:OpComp, leftA:CommandTag, leftB:CommandTag, x, y) = 
+    let drawCmdCompare(coil:IExpressionTerminal, opComp:OpComp, leftA:CommandTag, leftB:CommandTag, x, y) =
         let results = ResizeArray<int * string>()
         let funcSizeY = 4
-        
-        if(leftA.Size() <> leftB.Size()) 
+
+        if(leftA.Size() <> leftB.Size())
         then failwithlog (sprintf "Tag Compare size error %s(%s),  %s(%s)" (leftA.ToText()) (leftA.SizeString) (leftB.ToText()) (leftB.SizeString))
 
         let opCompType = leftA.SizeString
@@ -114,24 +112,24 @@ module internal Command =
 
         funcSizeY-1, results
 
-    let drawCmdAdd(tagCoil:IExpressionTerminal, targetTag:CommandTag, addValue:int, xInit, y, (pulse:bool)) = 
+    let drawCmdAdd(tagCoil:IExpressionTerminal, targetTag:CommandTag, addValue:int, xInit, y, (pulse:bool)) =
         let results = ResizeArray<int * string>()
         let mutable x = xInit
         let funcSizeY = 4
 
-        if(pulse) 
-        then 
+        if(pulse)
+        then
             x <- xInit + 1
             results.AddRange(drawPulseCoil (xInit, y, tagCoil, funcSizeY))
-        else 
-            x <- xInit 
+        else
+            x <- xInit
             //Command 결과출력
             results.Add(createPA (tagCoil.ToText())  (x+1) (y))
 
         let func = "ADD"
         //test ahn : Rear UINT SINT 등등 타입 추가  필요
         //let funcFind = func + "2_" + targetTag.SizeString
-        let funcFind = "ADD2_INT" 
+        let funcFind = "ADD2_INT"
 
         //Pulse시 증감 처리
         //results.AddRange(drawRising(x, y))
@@ -140,21 +138,21 @@ module internal Command =
         results.Add(createPA (targetTag.ToText())    (x-1) (y+1))
         results.Add(createPA (targetTag.ToText())    (x+1) (y+1))
         results.Add(createPA (addValue.ToString())   (x-1) (y+2))
-       
+
 
         (if(pulse) then funcSizeY else funcSizeY-1), results
 
 
-    let drawCmdCopy(tagCoil:IExpressionTerminal, fromTag:CommandTag, toTag:CommandTag, xInit, y, (pulse:bool)) = 
+    let drawCmdCopy(tagCoil:IExpressionTerminal, fromTag:CommandTag, toTag:CommandTag, xInit, y, (pulse:bool)) =
         let results = ResizeArray<int * string>()
-        if(fromTag.Size() <> toTag.Size()) 
+        if(fromTag.Size() <> toTag.Size())
             then failwithlog (sprintf "Tag Compare size error %s(%s),  %s(%s)" (fromTag.ToText()) (fromTag.SizeString) (toTag.ToText()) (toTag.SizeString))
 
         let mutable x = xInit
         let funcSizeY = 3
 
-        if(pulse) 
-        then 
+        if(pulse)
+        then
             //Pulse Command 결과출력
             x <- xInit + 1
             results.AddRange(drawPulseCoil (xInit, y, tagCoil, funcSizeY))
@@ -172,28 +170,28 @@ module internal Command =
         results.Add(createPA (toTag.ToText())  (x+1) (y+1))
 
         (if(pulse) then funcSizeY else funcSizeY-1), results
-           
-            
-    let drawFunctionBlockInstance(cmd:XgiCommand, x, y) = 
+
+
+    let drawFunctionBlockInstance(cmd:XgiCommand, x, y) =
         let results = ResizeArray<int * string>()
         //Command instance 객체생성
         let inst, func = cmd.Instance |> fun (inst, varType) -> inst, varType.ToString()
         results.Add(createFB func func inst func x y)
         //Command 결과출력
         results.Add(createPA (cmd.CoilTerminalTag.ToText())  (x+1) (y))
-      
+
         results
 
 
-    let drawCommand(cmd:XgiCommand, x, y) = 
+    let drawCommand(cmd:XgiCommand, x, y) =
         let results = ResizeArray<int * string>()
-        
+
         //FunctionBlock, Function 까지 연장선 긋기
         let newX = getFBCellX x
         results.Add(((coord newX y), mutiEndLine (x + 1) (newX - 1) y))
 
         //FunctionBlock, Function 그리기
-        let newY, result = 
+        let newY, result =
             match cmd.CommandType with
             | FunctionCmd (fc) ->
                 match fc with
@@ -211,9 +209,9 @@ module internal Command =
                 | TimerMode(cmdCoil, time) -> drawCmdTime(cmdCoil,  time, newX, y)
                 | CounterMode(cmdCoil, resetTag, count) -> drawCmdCount(cmdCoil, resetTag, count, newX, y)
             |_-> failwithlog "Unknown CommandType"
-        
+
         results.AddRange(result)
 
-        newY, results 
-    
-    
+        newY, results
+
+

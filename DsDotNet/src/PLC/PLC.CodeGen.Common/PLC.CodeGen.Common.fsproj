@@ -10,7 +10,15 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<Compile Include="Prelude\Constants.fs" />
+		<Compile Include="Prelude\Prelude.fs" />
+		<Compile Include="TagType.fs" />
+		<Compile Include="Command.fs" />
 		<Compile Include="Library.fs" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
 	</ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-﻿namespace Dual.ConvertPLC.FS.LsXGI
+﻿namespace PLC.CodeGen.LSXGI
 
 open System.Collections.Generic
 open FSharpPlus
@@ -8,7 +8,7 @@ open Engine.Common.FS
 open Dual.Core.QGraph
 open Dual.Core.Types
 open Dual.Core.ModelPostProcessor
-open Dual.ConvertPLC.FS.LsXGI
+open PLC.CodeGen.LSXGI
 open SequenceValidator
 open TestFramework
 

@@ -1,6 +1,5 @@
-﻿namespace Dual.ConvertPLC.FS.LsXGI
+namespace PLC.CodeGen.LSXGI
 
-open FSharpPlus
 open Engine.Common.FS
 open System.Xml
 open System
@@ -24,7 +23,7 @@ module XGConfigReader  =
 
     let [<Literal>] xmlCnfPath =  "Project/Configurations/Configuration"
 
-    
+
     /// PLC ConfigCPU  설정 정보를 읽을때 하나의 CPU들 대한 정보
     type ConfigCPU = {
         strPLCType : string
@@ -33,34 +32,34 @@ module XGConfigReader  =
     /// PLC ModuleIO BASES 설정 정보를 읽을때 하나의 모듈에 대한 정보
     /// NRefreshIn Out Count가 0일 경우 입출력 디지털 모듈이 아님
     type ModuleIO = {
-        HwID : int     
+        HwID : int
         NRefreshIn:   int // in 카드 bit 수
         NRefreshOut:  int // out카드 bit 수
-        Comments:  string 
+        Comments:  string
     }
 
     /// CPU기종별 Device Max size를 XG5000 설정 파일로 부터 가져온다
     type DeviceMax = {
-        nPLCID : int     
-        strDevice :   string 
+        nPLCID : int
+        strDevice :   string
         nSize:  int //max word size
-    } 
+    }
 
     /// system Device flag 를 XG5000 설정 파일로 부터 가져온다
     type DeviceFlag = {
-        strFlagName :   string 
-        strType :   string 
-        strDevice :   string 
-        strComment :   string 
+        strFlagName :   string
+        strType :   string
+        strDevice :   string
+        strComment :   string
         nDevicePos :  int //max word size
         nCommentIndex : int
-    } 
+    }
 
-    
+
     /// Xml Symbol tag 가 가지는 속성
     type SymbolInfo = {
         Name:string
-        Comment:string 
+        Comment:string
         /// "M"
         Device:string
         /// "%MX1"
@@ -120,14 +119,14 @@ module XGConfigReader  =
         |> Seq.map (fun e  -> {
                         HwID =  Convert.ToInt32(e.SelectSingleNode("HwID").InnerText, 16)
                         Comments =  e.SelectSingleNode("Comments").InnerText
-                        NRefreshIn = match e.SelectSingleNode("nRefreshIn") with 
+                        NRefreshIn = match e.SelectSingleNode("nRefreshIn") with
                                         | null -> 0
                                         | v ->  (v.InnerText |> int) * 8 //기본 in 8접점 기준
-                        NRefreshOut = match e.SelectSingleNode("nRefreshOut") with 
+                        NRefreshOut = match e.SelectSingleNode("nRefreshOut") with
                                         | null -> 0
                                         | v ->  (v.InnerText |> int) * 8 //기본 out 8접점 기준
-                           }) 
-                                       
+                           })
+
 
     ///CPU기종별 Device Max size를 XG5000 설정 파일로 부터 가져온다
     ///원본 경로 C:\XG5000\l.kor\Symbol.mdb 에  DEVICE_INFO table을 Xml으로 Export해서 사용
@@ -140,24 +139,24 @@ module XGConfigReader  =
                         nPLCID =  Convert.ToInt32(e.SelectSingleNode("nPLCID").InnerText)
                         nSize =  Convert.ToInt32(e.SelectSingleNode("nSize").InnerText)
                         strDevice =  e.SelectSingleNode("strDevice").InnerText
-                            }) 
+                            })
 
     ///System Flag Comment를 XG5000 설정 파일로 부터 가져온다
     ///원본 경로 C:\XG5000\l.kor\Symbol.mdb 에  FLAG_COMMENT table을 Xml으로 Export해서 사용
-    let dicFlagComment ()  = 
+    let dicFlagComment ()  =
         let xdoc = ConfigXml.getFlagCommentText().Value |> DsXml.loadXml
-        
+
         xdoc.SelectNodes("dataroot/FLAG_COMMENT")
         |> XmlExt.ToEnumerables
         |> Seq.map (fun e  -> Convert.ToInt32(e.SelectSingleNode("nCommentIndex").InnerText), e.SelectSingleNode("strComment").InnerText)
-        |> dict 
+        |> dict
 
     ///System Flag Device를 XG5000 설정 파일로 부터 가져온다
     ///원본 경로 C:\XG5000\l.kor\Symbol.mdb 에  FLAG_INFO_0 table을 Xml으로 Export해서 사용
     let readConfigFlag () =
         let xdoc = ConfigXml.getFlagInfoText().Value |> DsXml.loadXml
-        
-        let dicComment = dicFlagComment()   
+
+        let dicComment = dicFlagComment()
 
         xdoc.SelectNodes("dataroot/FLAG_INFO_0")
         |> XmlExt.ToEnumerables
@@ -168,4 +167,4 @@ module XGConfigReader  =
                         strDevice =  e.SelectSingleNode("strDevice").InnerText
                         strType =  e.SelectSingleNode("strType").InnerText
                         strComment =  dicComment.[Convert.ToInt32(e.SelectSingleNode("nCommentIndex").InnerText)]
-                            }) 
+                            })

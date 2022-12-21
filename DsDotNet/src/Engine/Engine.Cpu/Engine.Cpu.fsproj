@@ -4,7 +4,7 @@
 		<OutputType>Library</OutputType>
 		<TargetFramework>net48</TargetFramework>
 		<RootNamespace>Engine.Cpu</RootNamespace>
-		<LangVersion>6.0</LangVersion>
+		<LangVersion>7.0</LangVersion>
 		<OutputPath>$(SolutionDir)\bin</OutputPath>
 	</PropertyGroup>
 
@@ -14,7 +14,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Update="FSharp.Core" Version="6.0.6" />
+		<PackageReference Update="FSharp.Core" Version="7.0.0" />
 		<ProjectReference Include="..\Engine.Core\Engine.Core.fsproj" />
 		<ProjectReference Include="..\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
 	</ItemGroup>

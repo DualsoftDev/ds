@@ -1,11 +1,11 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
 		<TargetFrameworks>net48;</TargetFrameworks>
 		<!--<TargetFrameworks>net48;netcoreapp3.1</TargetFrameworks>-->
 		<RootNamespace>Engine.Sample</RootNamespace>
-		<LangVersion>10.0</LangVersion>
+		<LangVersion>11.0</LangVersion>
 		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
 		<OutputPath>$(SolutionDir)\bin</OutputPath>
 		<PlatformTarget>AnyCPU</PlatformTarget>

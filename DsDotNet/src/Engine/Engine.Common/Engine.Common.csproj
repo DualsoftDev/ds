@@ -4,7 +4,7 @@
 		<TargetFrameworks>net48</TargetFrameworks>
 		<!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
 		<RootNamespace>Engine.Common</RootNamespace>
-		<LangVersion>10.0</LangVersion>
+		<LangVersion>11.0</LangVersion>
 	</PropertyGroup>
 
 	<ItemGroup>

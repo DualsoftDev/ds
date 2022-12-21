@@ -3,11 +3,11 @@
   <PropertyGroup>
     <TargetFrameworks>net48</TargetFrameworks>
     <!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
-	  <LangVersion>10.0</LangVersion>
+	  <LangVersion>11.0</LangVersion>
 	  <RootNamespace>Server.Control.Opc</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="FSharp.Core" Version="6.0.6" />
+    <PackageReference Include="FSharp.Core" Version="7.0.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />

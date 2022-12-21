@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFrameworks>net48</TargetFrameworks>
+		<LangVersion>7.0</LangVersion>
+		<RootNamespace>Model.Import.Viewer</RootNamespace>
+		<OutputPath>$(SolutionDir)\bin</OutputPath>
+		<OutputType>WinExe</OutputType>
+		<PlatformTarget>AnyCPU</PlatformTarget>
+
+
+	</PropertyGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\Import\Model.Import.Office\Model.Import.Office.fsproj" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Reference Include="System.Windows.Forms" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Compile Update="FormMain.cs">
+	    <SubType>Form</SubType>
+	  </Compile>
+	</ItemGroup>
+	
+
+	
+
+	
+</Project>

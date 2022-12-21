@@ -819,7 +819,7 @@ C4 > C5;
 
     let ParseNormal(text:string) =
         let systemRepo = ShareableSystemRepository()
-        let helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation(systemRepo, ".", "ActiveCpuName", None))
+        let helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation(systemRepo, ".", "ActiveCpuName", None, DuNone))
         let system = helper.TheSystem
         tracefn "Done"
 

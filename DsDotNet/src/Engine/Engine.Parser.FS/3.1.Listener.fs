@@ -67,15 +67,17 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
 
             let repo = options.ShareableSystemRepository
 
-            match options.AbsoluteFilePath with
-            | Some fp when repo.ContainsKey(fp) -> x.TheSystem <- repo[fp]
-            | _ ->
+            match options.LoadingType, options.AbsoluteFilePath with
+            | DuExternal, Some fp when repo.ContainsKey(fp) -> x.TheSystem <- repo[fp]
+            | DuExternal, _ ->
                 let registerSystem (sys:DsSystem) =
                     match options.AbsoluteFilePath with
                     | Some fp -> repo.Add(fp, sys)
                     | _ -> ()
 
                 x.TheSystem <- DsSystem(name, hostIp, registerSystem)
+            | _ ->
+                x.TheSystem <- DsSystem(name, hostIp)
             tracefn($"System: {name}")
         | None ->
             failwith "ERROR"
@@ -469,6 +471,7 @@ module ParserLoadApiModule =
                     LoadedName = loadedName
                     ShareableSystemRepository = systemRepo
                     HostIp = None
+                    LoadingType = DuDevice
                 }
             x.AddLoadedSystem(device) |> ignore
             device
@@ -486,6 +489,7 @@ module ParserLoadApiModule =
                     LoadedName = loadedName
                     ShareableSystemRepository = systemRepo
                     HostIp = ipSpec
+                    LoadingType = DuExternal
                 }
                 match systemRepo.TryFind(absoluteFilePath) with
                 | Some existing ->

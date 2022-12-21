@@ -33,7 +33,7 @@ module ModelLoader =
     let private loadSystemFromDsFile (systemRepo:ShareableSystemRepository) (dsFilePath) =
         let text = File.ReadAllText(dsFilePath)
         let dir = Path.GetDirectoryName(dsFilePath)
-        let option = ParserOptions.Create4Runtime(systemRepo, dir, "ActiveCpuName", Some dsFilePath)
+        let option = ParserOptions.Create4Runtime(systemRepo, dir, "ActiveCpuName", Some dsFilePath, DuNone)
         let system = ModelParser.ParseFromString(text, option)
         system
 

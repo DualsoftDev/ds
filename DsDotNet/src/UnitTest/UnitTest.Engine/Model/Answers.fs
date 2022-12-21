@@ -108,7 +108,7 @@ module ModelAnswers =
     }
     [device file="cylinder.ds"] A; // D:\Git\ds-Master\DsDotNet\src\UnitTest\UnitTest.Engine\Model\..\Libraries\cylinder.ds
     [device file="cylinder.ds"] B; // D:\Git\ds-Master\DsDotNet\src\UnitTest\UnitTest.Engine\Model\..\Libraries\cylinder.ds
-    [external file="station.ds"] C; // D:\Git\ds-Master\DsDotNet\src\UnitTest\UnitTest.Engine\Model\..\Libraries\station.ds
+    [external file="station.ds" ip="192.168.0.2"] C; // D:\Git\ds-Master\DsDotNet\src\UnitTest\UnitTest.Engine\Model\..\Libraries\station.ds
 }
 """
 
@@ -251,6 +251,6 @@ module ModelComponentAnswers =
         C2 = { A."-"(%Q3, _); B."-"(%Q3, _); }
     }
     [device file="cylinder.ds"] B;
-    [external file="cylinder.ds"] A;
+    [external file="cylinder.ds" ip="192.168.0.1"] A;
 }
 """

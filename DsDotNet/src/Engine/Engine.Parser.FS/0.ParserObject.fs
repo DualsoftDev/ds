@@ -9,7 +9,7 @@ open Engine.Common.FS
 module rec ParserOptionModule =
     let private emptyStorage = Storages()
 
-    type ParserOptions(systemRepo:ShareableSystemRepository, referencePath, activeCpuName, isSimulationMode, allowSkipExternalSegment, storages, absoluteFilePath) =
+    type ParserOptions(systemRepo:ShareableSystemRepository, referencePath, activeCpuName, isSimulationMode, allowSkipExternalSegment, storages, absoluteFilePath, loadingType:ParserLoadingType) =
         member _.ActiveCpuName:string = activeCpuName
         member _.IsSimulationMode:bool = isSimulationMode           // { get; set; } = true
         member _.AllowSkipExternalSegment:bool = allowSkipExternalSegment // { get; set; } = true
@@ -22,9 +22,10 @@ module rec ParserOptionModule =
 
         member _.ShareableSystemRepository = systemRepo
         member val AbsoluteFilePath:string option = absoluteFilePath with get, set
+        member _.LoadingType:ParserLoadingType = loadingType
 
-        static member Create4Runtime(systemRepo, referencePath, activeCpuName, absoluteFilePath) = ParserOptions(systemRepo, referencePath, activeCpuName, false, false, emptyStorage, absoluteFilePath)
-        static member Create4Simulation(systemRepo, referencePath, activeCpuName, absoluteFilePath) = ParserOptions(systemRepo, referencePath, activeCpuName, true, false, emptyStorage, absoluteFilePath)
+        static member Create4Runtime(systemRepo, referencePath, activeCpuName, absoluteFilePath, loadingType) = ParserOptions(systemRepo, referencePath, activeCpuName, false, false, emptyStorage, absoluteFilePath, loadingType)
+        static member Create4Simulation(systemRepo, referencePath, activeCpuName, absoluteFilePath, loadingType) = ParserOptions(systemRepo, referencePath, activeCpuName, true, false, emptyStorage, absoluteFilePath, loadingType)
         member x.Verify() = x.IsSimulationMode || (x.ActiveCpuName <> null && not x.AllowSkipExternalSegment)
 
 

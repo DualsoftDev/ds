@@ -160,7 +160,7 @@ double myDouble = 3.14 + 3.14;
         member __.``4 coode block test`` () =
             let systemRepo = ShareableSystemRepository()
             let parseText text =
-                let helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation(systemRepo, ".", "ActiveCpuName", None))
+                let helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation(systemRepo, ".", "ActiveCpuName", None, DuNone))
                 helper.TheSystem
 
             let storages = Storages()

@@ -16,6 +16,7 @@ module CoreModule =
             member _.NameComponents = nameComponents
             member x.QualifiedName = nameComponents.Combine() }
 
+    type ParserLoadingType = DuNone | DuDevice | DuExternal
     /// External system loading 시, 공유하기 위한 정보를 담을 곳
     type ShareableSystemRepository = Dictionary<string, DsSystem>
 
@@ -29,6 +30,7 @@ module CoreModule =
         LoadedName             : string
         ShareableSystemRepository: ShareableSystemRepository
         HostIp : string option
+        LoadingType:ParserLoadingType
     }
 
     [<AbstractClass>]

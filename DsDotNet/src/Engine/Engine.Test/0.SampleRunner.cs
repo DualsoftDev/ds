@@ -14,7 +14,7 @@ internal class SampleRunner
     public static void Run(string text)
     {
         var systemRepo = new Dictionary<string, DsSystem>();   // ShareableSystemRepository
-        var helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation(systemRepo, ".", "ActiveCpuName", FSharpOption<string>.None));
+        var helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation(systemRepo, ".", "ActiveCpuName", FSharpOption<string>.None, ParserLoadingType.DuNone));
         var system = helper.TheSystem;
     }
 

@@ -24,8 +24,11 @@ module ImportM =
                 UserSpecifiedFilePath = filePath + ".ds"
                 LoadedName = loadedName
                 ShareableSystemRepository = systemRepo
+
                 // <ahn> : External system loading 할 때의 ip 주소 설정 필요
                 HostIp = None
+                LoadingType = DuNone
+                // <ahn>
             }
 
         let rec loadSystem(systemRepo:ShareableSystemRepository, path:string, name:string, active:bool) =

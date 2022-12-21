@@ -1,5 +1,7 @@
 namespace rec Engine.Parser.FS
 
+open System
+open System.IO
 open System.Linq
 
 open Antlr4.Runtime
@@ -15,8 +17,16 @@ open Engine.Core
 
 [<AutoOpen>]
 module ParserUtilityModule =
+    let private environmentVariable = "DS_PROJECT"
     let collectNameComponents (parseTree:IParseTree) = parseTree.CollectNameComponents()
-
+    let getEnvironmentVariableName():string = environmentVariable
+    let collectEnvironmentVariablePaths():string list = 
+        Environment.GetEnvironmentVariable(environmentVariable).Split(';')
+        |> Array.filter(fun path -> path <> "")
+        |> Array.map(fun path -> path.Trim())
+        |> List.ofArray
+    let fileExistChecker (paths:string list) =
+        paths.First(fun f -> File.Exists(f))
     type IParseTree with
         member x.Descendants<'T when 'T :> IParseTree >(
             ?includeMe:bool

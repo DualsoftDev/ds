@@ -33,6 +33,8 @@ namespace Dual.Model.Import
             this.xtraTabControl_My = new System.Windows.Forms.TabControl();
             this.splitter2 = new System.Windows.Forms.Splitter();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+            this.label1 = new System.Windows.Forms.Label();
+            this.comboBox_System = new System.Windows.Forms.ComboBox();
             this.button_OpenFolder = new System.Windows.Forms.Button();
             this.button_CreateExcel = new System.Windows.Forms.Button();
             this.pictureBox_ppt = new System.Windows.Forms.PictureBox();
@@ -120,6 +122,8 @@ namespace Dual.Model.Import
             // splitContainer2.Panel1
             // 
             this.splitContainer2.Panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(33)))), ((int)(((byte)(33)))));
+            this.splitContainer2.Panel1.Controls.Add(this.label1);
+            this.splitContainer2.Panel1.Controls.Add(this.comboBox_System);
             this.splitContainer2.Panel1.Controls.Add(this.button_OpenFolder);
             this.splitContainer2.Panel1.Controls.Add(this.button_CreateExcel);
             this.splitContainer2.Panel1.Controls.Add(this.pictureBox_ppt);
@@ -130,13 +134,32 @@ namespace Dual.Model.Import
             this.splitContainer2.Panel2.Controls.Add(this.splitContainer5);
             this.splitContainer2.Panel2.Controls.Add(this.button_copy);
             this.splitContainer2.Size = new System.Drawing.Size(697, 346);
-            this.splitContainer2.SplitterDistance = 220;
+            this.splitContainer2.SplitterDistance = 253;
             this.splitContainer2.TabIndex = 4;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(28, 116);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(45, 12);
+            this.label1.TabIndex = 11;
+            this.label1.Text = "시스템:";
+            // 
+            // comboBox_System
+            // 
+            this.comboBox_System.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox_System.FormattingEnabled = true;
+            this.comboBox_System.Location = new System.Drawing.Point(82, 112);
+            this.comboBox_System.Name = "comboBox_System";
+            this.comboBox_System.Size = new System.Drawing.Size(362, 20);
+            this.comboBox_System.TabIndex = 10;
+            this.comboBox_System.SelectedIndexChanged += new System.EventHandler(this.comboBox_System_SelectedIndexChanged);
             // 
             // button_OpenFolder
             // 
             this.button_OpenFolder.BackColor = System.Drawing.Color.DarkSeaGreen;
-            this.button_OpenFolder.Location = new System.Drawing.Point(304, 165);
+            this.button_OpenFolder.Location = new System.Drawing.Point(304, 194);
             this.button_OpenFolder.Name = "button_OpenFolder";
             this.button_OpenFolder.Size = new System.Drawing.Size(72, 33);
             this.button_OpenFolder.TabIndex = 4;
@@ -148,7 +171,7 @@ namespace Dual.Model.Import
             // button_CreateExcel
             // 
             this.button_CreateExcel.BackColor = System.Drawing.Color.DarkSeaGreen;
-            this.button_CreateExcel.Location = new System.Drawing.Point(82, 165);
+            this.button_CreateExcel.Location = new System.Drawing.Point(82, 194);
             this.button_CreateExcel.Name = "button_CreateExcel";
             this.button_CreateExcel.Size = new System.Drawing.Size(72, 33);
             this.button_CreateExcel.TabIndex = 3;
@@ -170,7 +193,7 @@ namespace Dual.Model.Import
             // pictureBox_xls
             // 
             this.pictureBox_xls.Image = global::Model.Import.Viewer.Properties.Resources.IMPORT_XLS;
-            this.pictureBox_xls.Location = new System.Drawing.Point(26, 113);
+            this.pictureBox_xls.Location = new System.Drawing.Point(26, 140);
             this.pictureBox_xls.Name = "pictureBox_xls";
             this.pictureBox_xls.Size = new System.Drawing.Size(418, 98);
             this.pictureBox_xls.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -193,8 +216,8 @@ namespace Dual.Model.Import
             // 
             this.splitContainer5.Panel2.Controls.Add(this.xtraTabControl_Ex);
             this.splitContainer5.Panel2Collapsed = true;
-            this.splitContainer5.Size = new System.Drawing.Size(697, 122);
-            this.splitContainer5.SplitterDistance = 97;
+            this.splitContainer5.Size = new System.Drawing.Size(697, 89);
+            this.splitContainer5.SplitterDistance = 64;
             this.splitContainer5.TabIndex = 3;
             // 
             // richTextBox_ds
@@ -204,7 +227,7 @@ namespace Dual.Model.Import
             this.richTextBox_ds.Location = new System.Drawing.Point(0, 0);
             this.richTextBox_ds.Name = "richTextBox_ds";
             this.richTextBox_ds.ReadOnly = true;
-            this.richTextBox_ds.Size = new System.Drawing.Size(697, 122);
+            this.richTextBox_ds.Size = new System.Drawing.Size(697, 89);
             this.richTextBox_ds.TabIndex = 2;
             this.richTextBox_ds.Text = "";
             // 
@@ -383,6 +406,7 @@ namespace Dual.Model.Import
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
             this.splitContainer2.Panel1.ResumeLayout(false);
+            this.splitContainer2.Panel1.PerformLayout();
             this.splitContainer2.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
             this.splitContainer2.ResumeLayout(false);
@@ -425,6 +449,8 @@ namespace Dual.Model.Import
         private System.Windows.Forms.Button button_Start;
         private System.Windows.Forms.ComboBox comboBox_Segment;
         private System.Windows.Forms.Button button_Stop;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.ComboBox comboBox_System;
     }
 }
 

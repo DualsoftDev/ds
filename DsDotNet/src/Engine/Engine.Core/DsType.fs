@@ -53,20 +53,7 @@ module DsType =
             | Command      -> TextCommand
             | Observe      -> TextObserve
 
-
-    let TagToType(txt:string) =
-        match txt with
-        | TextAddressDev   -> Address
-        | TextVariable     -> VariableData
-        | TextCommand      -> Command
-        | TextObserve      -> Observe
-        |_-> failwithf $"'{txt}' TagCase Error check type [
-                , {TextAddressDev}, {TextVariable}
-                , {TextCommand}, {TextObserve}
-                ]"
-
-
-    ///BtnType 인과의 노드 종류
+    ///BtnType  종류
     type BtnType =
         | DuStartBTN            //시작 버튼
         | DuResetBTN            //리셋 버튼
@@ -74,15 +61,30 @@ module DsType =
         | DuEmergencyBTN        //비상 버튼
 
 
-    let BtnToType(txt:string) =
+    ///ExcelCase 입력 종류
+    type ExcelCase =
+        | ExcelStartBTN        
+        | ExcelResetBTN        
+        | ExcelAutoBTN         
+        | ExcelEmergencyBTN    
+        | ExcelAddress      
+        | ExcelVariable     
+        | ExcelCommand      
+        | ExcelObserve      
+
+    let ExcelCaseToType(txt:string) =
         match txt with
-        | TextStartBtn -> DuStartBTN
-        | TextResetBtn -> DuResetBTN
-        | TextAutoBtn -> DuAutoBTN
-        | TextEmgBtn -> DuEmergencyBTN
-        |_-> failwithf $"'{txt}' BtnToType Error check type [
-                , {TextStartBtn}, {TextResetBtn}
-                , {TextAutoBtn}, {TextEmgBtn}]"
-
-
-
+        | TextAddressDev   -> ExcelAddress
+        | TextVariable     -> ExcelVariable
+        | TextEmgBtn       -> ExcelEmergencyBTN
+        | TextStartBtn     -> ExcelStartBTN
+        | TextAutoBtn      -> ExcelResetBTN
+        | TextResetBtn     -> ExcelAutoBTN
+        | TextCommand      -> ExcelCommand
+        | TextObserve      -> ExcelObserve
+        |_-> failwithf $"'{txt}' TagCase Error check type [
+                , {TextAddressDev}, {TextVariable}
+                , {TextCommand}, {TextObserve}
+                , {TextAutoBtn}, {TextResetBtn}
+                , {TextEmgBtn}, {TextStartBtn}
+                ]"

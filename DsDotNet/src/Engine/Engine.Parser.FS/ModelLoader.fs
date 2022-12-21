@@ -38,12 +38,24 @@ module ModelLoader =
         system
 
     let LoadFromConfig(config: FilePath) =
-        let cfg = LoadConfig config
         let systemRepo = ShareableSystemRepository()
-
+        let envPaths = collectEnvironmentVariablePaths()
+        let cfg = LoadConfig config
+        let dirs = config.Replace('/', '\\').Split('\\') |> List.ofArray
+        let dir = StringExt.JoinWith(dirs.RemoveAt(dirs.Length - 1), "\\")
         let systems =
-            [   for dsFile in cfg.DsFilePaths do
-                    loadSystemFromDsFile systemRepo dsFile ]
+            let dirList = [dir; yield! envPaths]
+            [
+                [
+                    for d in dirList do
+                        for f in cfg.DsFilePaths do 
+                            let path = $"{d}\\{f}"
+                            if File.Exists path then
+                                path
+                ]
+                |> fileExistChecker
+                |> loadSystemFromDsFile systemRepo
+            ]
         { Config = cfg; Systems = systems }
 
 module private TestLoadConfig =

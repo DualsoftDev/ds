@@ -6,6 +6,7 @@ using Microsoft.Msagl.Layout.Layered;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
+using static Engine.Core.CoreModule;
 using static Engine.Core.DsText;
 using static Engine.Core.DsType;
 using static Model.Import.Office.InterfaceClass;
@@ -15,14 +16,14 @@ using Color = Microsoft.Msagl.Drawing.Color;
 using Edge = Microsoft.Msagl.Drawing.Edge;
 using Vertex = Engine.Core.CoreModule.Vertex;
 
+
 namespace Dual.Model.Import
 {
     public partial class UCView : UserControl
     {
         private readonly GViewer viewer = new Microsoft.Msagl.GraphViewerGdi.GViewer();
 
-
-
+        public Flow Flow { get; set; }
         public UCView()
         {
             InitializeComponent();
@@ -44,8 +45,9 @@ namespace Dual.Model.Import
             return lstDummy.Where(w => w.Members.Contains(vertex)).Count() > 0;
         }
 
-        public void SetGraph(ViewNode viewNode)
+        public void SetGraph(ViewNode viewNode, Flow flow)
         {
+            Flow = flow;
             //sub 그래프 불가
             //viewer.Graph.LayoutAlgorithmSettings = new Microsoft.Msagl.Layout.MDS.MdsLayoutSettings();
             //viewer.Graph.LayoutAlgorithmSettings = new RankingLayoutSettings();

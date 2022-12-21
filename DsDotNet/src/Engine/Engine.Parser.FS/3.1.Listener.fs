@@ -123,11 +123,13 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
 
     member private x.GetFilePath(fileSpecCtx:FileSpecContext) =
         let simpleFilePath = fileSpecCtx.TryFindFirstChild<FilePathContext>().Value.GetText().DeQuoteOnDemand()
+        let envPaths = collectEnvironmentVariablePaths()
+        let targetPath(directory:string) = 
+            [ $"{directory}\\{simpleFilePath}"; for path in envPaths do $"{path}\\{simpleFilePath}" ] |> fileExistChecker
         let absoluteFilePath =
             let dir = x.ParserOptions.ReferencePath
-            [simpleFilePath; $"{dir}\\{simpleFilePath}"].First(fun f -> File.Exists(f))
+            targetPath dir
         absoluteFilePath, simpleFilePath
-
 
     override x.EnterLoadDeviceBlock(ctx:LoadDeviceBlockContext) =
         let fileSpecCtx = ctx.TryFindFirstChild<FileSpecContext>().Value

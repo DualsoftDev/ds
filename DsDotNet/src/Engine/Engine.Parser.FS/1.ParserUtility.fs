@@ -21,10 +21,14 @@ module ParserUtilityModule =
     let collectNameComponents (parseTree:IParseTree) = parseTree.CollectNameComponents()
     let getEnvironmentVariableName():string = environmentVariable
     let collectEnvironmentVariablePaths():string list = 
-        Environment.GetEnvironmentVariable(environmentVariable).Split(';')
-        |> Array.filter(fun path -> path <> "")
-        |> Array.map(fun path -> path.Trim())
-        |> List.ofArray
+        let envVar = Environment.GetEnvironmentVariable(environmentVariable)
+        if envVar <> null then
+            Environment.GetEnvironmentVariable(environmentVariable).Split(';')
+            |> Array.filter(fun path -> path <> "")
+            |> Array.map(fun path -> path.Trim())
+            |> List.ofArray
+        else
+            []
     let fileExistChecker (paths:string list) =
         paths.First(fun f -> File.Exists(f))
     type IParseTree with

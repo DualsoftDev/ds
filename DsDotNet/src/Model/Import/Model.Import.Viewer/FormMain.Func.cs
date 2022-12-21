@@ -33,48 +33,55 @@ namespace Dual.Model.Import
     public partial class FormMain : Form
     {
       
-
+        //복수 Active system ppt 불러오기 
         internal void ImportPPT(List<string> paths)
         {
             try
             {
-                var results = ImportM.FromPPTX(paths.First());
-                var system = results.Item1;
+                var results = ImportM.FromPPTXS(paths);
+                var model = results.Item1;
                 var views = results.Item2;
 
-                var rungs = CpuLoader.LoadStatements(system);
-                var storages = new Dictionary<string, IStorage>();
-                _myCPU = new DsCPU(storages, "", rungs.Select(s => s.Item2));
-                _myCPU.Run();
-                _DicVertex = new Dictionary<Vertex, ViewNode>();
-                system.GetVertices()
-                    .ForEach(v =>
-                    {
-                        var viewNode = views.SelectMany(s => s.UsedViewNodes)
-                                                    .Where(w => w.CoreVertex != null)
-                                                    .First(w => w.CoreVertex.Value == v);
-
-                        _DicVertex.Add(v, viewNode);
-                        if (v is Real)
+                model.Systems.ForEach(system =>
+                {
+                    var rungs = CpuLoader.LoadStatements(system);
+                    var storages = new Dictionary<string, IStorage>();
+                    var cpu = new DsCPU(storages, "", rungs.Select(s => s.Item2));
+                    cpu.Run();
+                    _DicVertex = new Dictionary<Vertex, ViewNode>();
+                    system.GetVertices()
+                        .ForEach(v =>
                         {
-                            comboBox_Segment.Items
-                            .Add(new SegmentHMI { Display = v.QualifiedName, Vertex = v, ViewNode = viewNode, VertexM = v.VertexMemoryManager as VertexMemoryManager });
-                        }
+                            var viewNode = views[system].SelectMany(s => s.UsedViewNodes)
+                                                        .Where(w => w.CoreVertex != null)
+                                                        .First(w => w.CoreVertex.Value == v);
+
+                            _DicVertex.Add(v, viewNode);
+                            if (v is Real)
+                            {
+                                comboBox_Segment.Items
+                                .Add(new SegmentHMI { Display = v.QualifiedName, Vertex = v, ViewNode = viewNode, VertexM = v.VertexMemoryManager as VertexMemoryManager });
+                            }
+                        });
+
+                    var text = rungs.Select(rung =>
+                    {
+                        var description = rung.Item1;
+                        var statement = rung.Item2;
+                        return $"***{description}***\t{rung.Item2.ToText().Replace("%", " ")}";
                     });
 
-                var text = rungs.Select(rung =>
-                {
-                    var description = rung.Item1;
-                    var statement = rung.Item2;
-                    return $"***{description}***\t{rung.Item2.ToText().Replace("%", " ")}";
+                    UpdateCpuUI(text);
+                    UpdateGraphUI(views[system]);
+
+                    ExportTextModel(Color.Transparent, system.ToDsText());
+                    ExportTextExpr(cpu.ToTextStatement(), Color.WhiteSmoke);
                 });
 
-                UpdateCpuUI(text);
-                UpdateGraphUI(views);
-
-                ExportTextModel(Color.Transparent, system.ToDsText());
-                ExportTextExpr(_myCPU.ToTextStatement(), Color.WhiteSmoke);
-
+                model.Config.DsFilePaths.ForEach(f =>
+                {
+                    WriteDebugMsg(DateTime.Now, MSGLevel.MsgWarn, $"{f} 불러오기 성공!!");
+                });
 
                 ProcessEvent.DoWork(0);
             }
@@ -87,67 +94,6 @@ namespace Dual.Model.Import
                 Busy = false;
             }
         }
-        //복수 Active system ppt 불러오기 
-        //internal void ImportPPT(List<string> paths)
-        //{
-        //    try
-        //    {
-        //        var results = ImportM.FromPPTXS(paths);
-        //        var model = results.Item1;
-        //        var views = results.Item2;
-
-        //        model.Systems.ForEach(system =>
-        //        {
-        //            var rungs = CpuLoader.LoadStatements(system);
-        //            var storages = new Dictionary<string, IStorage>();
-        //            var cpu = new DsCPU(storages, "", rungs.Select(s => s.Item2));
-        //            cpu.Run();
-        //            _DicVertex = new Dictionary<Vertex, ViewNode>();
-        //            system.GetVertices()
-        //                .ForEach(v =>
-        //                {
-        //                    var viewNode = views[system].SelectMany(s => s.UsedViewNodes)
-        //                                                .Where(w => w.CoreVertex != null)
-        //                                                .First(w => w.CoreVertex.Value == v);
-
-        //                    _DicVertex.Add(v, viewNode);
-        //                    if (v is Real)
-        //                    {
-        //                        comboBox_Segment.Items
-        //                        .Add(new SegmentHMI { Display = v.QualifiedName, Vertex = v, ViewNode = viewNode, VertexM = v.VertexMemoryManager as VertexMemoryManager });
-        //                    }
-        //                });
-
-        //            var text = rungs.Select(rung =>
-        //            {
-        //                var description = rung.Item1;
-        //                var statement = rung.Item2;
-        //                return $"***{description}***\t{rung.Item2.ToText().Replace("%", " ")}";
-        //            });
-
-        //            UpdateCpuUI(text);
-        //            UpdateGraphUI(views[system]);
-
-        //            ExportTextModel(Color.Transparent, system.ToDsText());
-        //            ExportTextExpr(cpu.ToTextStatement(), Color.WhiteSmoke);
-        //        });
-
-        //        model.Config.DsFilePaths.ForEach(f =>
-        //        {
-        //            WriteDebugMsg(DateTime.Now, MSGLevel.MsgWarn, $"{f} 불러오기 성공!!");
-        //        });
-
-        //        ProcessEvent.DoWork(0);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        WriteDebugMsg(DateTime.Now, MSGLevel.MsgError, ex.Message);
-        //    }
-        //    finally
-        //    {
-        //        Busy = false;
-        //    }
-        //}
         private void UpdateCpuUI(IEnumerable<string> text)
         {
             StartResetBtnUpdate(true);

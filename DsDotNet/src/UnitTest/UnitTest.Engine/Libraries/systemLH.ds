@@ -1,0 +1,19 @@
+[sys] LH = {
+    [interfaces] = {
+        ADV = { F.Vp ~ F.Sp }
+        RET = { F.Vm ~ F.Sm }
+        ADV <||> RET
+    }
+    
+    [flow] F = {
+        Work > Done;
+        Work = { Ap > Am };
+    }
+
+    [jobs] = {
+        Ap = { RH.ADV(%Q1, %I1); }
+        Am = { RH.RET(%Q2, %I2); }
+    }
+  
+    [external file="systemRH.ds"] RH;
+}

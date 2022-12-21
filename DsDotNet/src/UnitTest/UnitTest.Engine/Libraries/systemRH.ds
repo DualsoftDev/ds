@@ -1,13 +1,18 @@
 [sys] RH = {
     [interfaces] = {
-        ADV = { F.Vp ~ F.Sp }
-        RET = { F.Vm ~ F.Sm }
-        ADV <||> RET
+        RUN = { F.Work ~ F.Done };
+        ADV = { F.Vp ~ F.Sp };
+        RET = { F.Vm ~ F.Sm };
+        ADV <||> RET;
     }
     
     [flow] F = {
         Work > Done;
-        Work = { Ap > Am };
+        Work = {
+            Ap > Am;
+        }
+        Vp > Sp;
+        Vm > Sm;
     }
 
     [jobs] = {
@@ -15,5 +20,5 @@
         Am = { LH.RET(%Q2, %I2); }
     }
   
-    [external file="systemLH.ds"] LH;
+    [external file="systemLH.ds" ip="localhost"] LH;
 }

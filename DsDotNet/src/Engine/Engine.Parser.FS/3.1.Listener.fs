@@ -125,7 +125,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
         let simpleFilePath = fileSpecCtx.TryFindFirstChild<FilePathContext>().Value.GetText().DeQuoteOnDemand()
         let envPaths = collectEnvironmentVariablePaths()
         let targetPath(directory:string) = 
-            [ $"{directory}\\{simpleFilePath}"; for path in envPaths do $"{path}\\{simpleFilePath}" ] |> fileExistChecker
+            [ simpleFilePath; $"{directory}\\{simpleFilePath}"; for path in envPaths do $"{path}\\{simpleFilePath}" ] |> fileExistChecker
         let absoluteFilePath =
             let dir = x.ParserOptions.ReferencePath
             targetPath dir

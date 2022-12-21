@@ -14,6 +14,10 @@ namespace Model.DsEditor
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+
+            Engine.CodeGenCPU.ModuleInitializer.Initialize();
+
+
             var form = new FormMain();
             Application.Run(form);
 

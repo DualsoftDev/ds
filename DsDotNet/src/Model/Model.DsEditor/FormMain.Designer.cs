@@ -33,10 +33,7 @@ namespace Model.DsEditor
             // 
             // FormMain
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.SystemColors.Control;
-            this.ClientSize = new System.Drawing.Size(1373, 775);
+            this.ClientSize = new System.Drawing.Size(284, 261);
             this.Name = "FormMain";
             this.Load += new System.EventHandler(this.FormMain_Load);
             this.ResumeLayout(false);

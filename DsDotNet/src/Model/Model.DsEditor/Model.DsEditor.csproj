@@ -11,6 +11,7 @@
 
 	</PropertyGroup>
 	<ItemGroup>
+	  <ProjectReference Include="..\..\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
 	  <ProjectReference Include="..\Import\Model.Import.Office\Model.Import.Office.fsproj" />
 	</ItemGroup>
 	<ItemGroup>

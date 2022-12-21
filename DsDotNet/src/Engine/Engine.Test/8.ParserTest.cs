@@ -299,6 +299,24 @@ namespace Engine
 	}
 }
 ";
+        public static string CircularDependency = @"
+[sys] My = {
+    [flow] F = {
+        Seg1 > Seg2;
+        Seg1 = {
+            RunR > RunL;
+        }
+    }
+    
+    [jobs] = {
+        RunR = { sysR.RUN(%Q1, %I1); }
+        RunL = { sysL.RUN(%Q2, %I2); }
+    }
+    [external file=""systemRH.ds"" ip=""localhost""] sysR;
+    [external file=""systemLH.ds"" ip=""localhost""] sysL;
+}
+";
+
         public static string T6Alias = @"
 [sys ip = localhost] T6_Alias = {
     [flow] Page1 = {

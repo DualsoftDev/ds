@@ -210,6 +210,23 @@ module ModelComponentAnswers =
 }
 }
 """
+    let answerCircularDependency = """
+[sys] My = {
+    [flow] F = {
+        Seg1 > Seg2;
+        Seg1 = {
+            RunR > RunL;
+        }
+    }
+    
+    [jobs] = {
+        RunR = { sysR.RUN(%Q1, %I1); }
+        RunL = { sysL.RUN(%Q2, %I2); }
+    }
+    [external file=""systemRH.ds"" ip=""localhost""] sysR;
+    [external file=""systemLH.ds"" ip=""localhost""] sysL;
+}
+"""
 
     let answerT6Aliases = """
 [sys ip = localhost] T6_Alias = {

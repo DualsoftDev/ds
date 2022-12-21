@@ -22,6 +22,9 @@ namespace Dual.Model.Import
             //Log4NetWrapper.SetLogger(logger);
             //Global.Logger = logger;
 
+            //cpu 로딩 사용시 초기화 필요
+            Engine.CodeGenCPU.ModuleInitializer.Initialize();
+
             var form = new FormMain();
             Application.Run(form);
 

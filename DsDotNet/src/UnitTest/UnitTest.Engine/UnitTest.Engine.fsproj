@@ -50,6 +50,8 @@
 		<Compile Include="Model\FqdnParseTest.fs" />
 		<Compile Include="Model\SystemBuilderTest.fs" />
 		<Compile Include="Model\LoadConfigTest.fs" />
+		<None Include="Libraries\systemLH.ds" />
+		<None Include="Libraries\systemRH.ds" />
 		<None Include="Libraries\HmiCodeGenExample\FactoryIO\Assy.ds" />
 		<None Include="Libraries\HmiCodeGenExample\FactoryIO\FactoryIO.ds" />
 		<None Include="Libraries\HmiCodeGenExample\FactoryIO\Lib\Robot.ds" />
@@ -92,8 +94,6 @@
 		<None Include="App.config" />
 		<Compile Include="Main.fs" />
 	</ItemGroup>
-
-	<ItemGroup />
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />

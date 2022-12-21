@@ -142,6 +142,10 @@ module ModelTests1 =
         member __.``Model component [T6 alias] test`` () =
             compare ParserTest.T6Alias answerT6Aliases
 
+        [<Test>]
+        member __.``Model component [external circular dependency] test`` () =
+            compare ParserTest.CircularDependency answerCircularDependency
+
         //[<Test>]
         //member __.``X Ppt20221213Text test`` () =
         //    // 현재 test 실패

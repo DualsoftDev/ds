@@ -12,14 +12,9 @@ open Engine.Core
 module ExportIOTable =
 
     let ToTable(sys:DsSystem) =
-        //let sampleCommandName = "'CMD1"
-        //let sampleCommand     = "'@Delay(0)"
-        //let sampleConditionName = "'CON1"
-        //let sampleCondition = "'@Delay(0)"
 
         let dt = new System.Data.DataTable($"{sys.Name}")
         dt.Columns.Add($"{IOColumn.Case}"       , typeof<string>) |>ignore
-        dt.Columns.Add($"{IOColumn.Flow}"       , typeof<string>) |>ignore
         dt.Columns.Add($"{IOColumn.Name}"       , typeof<string>) |>ignore
         dt.Columns.Add($"{IOColumn.Type}"       , typeof<string>) |>ignore
         dt.Columns.Add($"{IOColumn.Size}"       , typeof<string>) |>ignore
@@ -29,8 +24,7 @@ module ExportIOTable =
         dt.Columns.Add($"{IOColumn.Observe}"    , typeof<string>) |>ignore
 
         let rowItems(jobDef:JobDef) =
-            let MFlowName, name =  "_", jobDef.ApiName
-            ["주소"; MFlowName; name; "IO"; "bit"; jobDef.OutTag  ; jobDef.InTag; ""; ""]
+            ["주소";  jobDef.ApiName; "IO"; "bit"; jobDef.OutTag  ; jobDef.InTag; jobDef.CommandOutTimming; jobDef.ObserveInTimming]
 
         let rows =
             seq {
@@ -38,98 +32,102 @@ module ExportIOTable =
                     for jobDef in job.JobDefs do
                         yield rowItems(jobDef)
             }
+
         rows
         |> Seq.iter(fun row -> 
                     let rowTemp = dt.NewRow()
                     rowTemp.ItemArray <- (row|> Seq.cast<obj>|> Seq.toArray)
                     dt.Rows.Add(rowTemp) |> ignore)
-
        
         for btn in  sys.EmergencyButtons do
-            dt.Rows.Add(TextButton, TextEmgBtn, btn.Key  , "'-", "'-", "'-",  "" , "'-", "'-" ) |> ignore
+            dt.Rows.Add(TextEmgBtn,  btn.Key  , "'-", "'-", "'-",  "" , "'-", "'-" ) |> ignore
         for btn in  sys.AutoButtons do
-            dt.Rows.Add(TextButton, TextAutoBtn, btn.Key  , "'-", "'-", "'-",  "" , "'-", "'-" ) |> ignore
+            dt.Rows.Add(TextAutoBtn,  btn.Key  , "'-", "'-", "'-",  "" , "'-", "'-" ) |> ignore
         for btn in  sys.StartButtons do
-            dt.Rows.Add(TextButton, TextStartBtn, btn.Key  , "'-", "'-", "'-",  "" , "'-", "'-" ) |> ignore
+            dt.Rows.Add(TextStartBtn,  btn.Key  , "'-", "'-", "'-",  "" , "'-", "'-" ) |> ignore
         for btn in  sys.ResetButtons do
-            dt.Rows.Add(TextButton, TextResetBtn, btn.Key  , "'-", "'-", "'-",  "" , "'-", "'-" ) |> ignore
+            dt.Rows.Add(TextResetBtn,  btn.Key  , "'-", "'-", "'-",  "" , "'-", "'-" ) |> ignore
 
-        dt.Rows.Add("'-", "'-", "'-","'-", "'-", "'-","'-", "'-","'-") |> ignore
-        dt.Rows.Add("'-", "'-", "'-","'-", "'-", "'-","'-", "'-","'-") |> ignore
-        dt.Rows.Add("'-", "'-", "'-","'-", "'-", "'-","'-", "'-","'-") |> ignore
+        dt.Rows.Add("'-", "'-","'-", "'-", "'-","'-", "'-","'-") |> ignore
+        dt.Rows.Add("'-", "'-","'-", "'-", "'-","'-", "'-","'-") |> ignore
+        dt.Rows.Add("'-", "'-","'-", "'-", "'-","'-", "'-","'-") |> ignore
 
-        dt.Rows.Add(TextVariable, "변수", ""  , "'-", ""  , "'-", "'-", "'-", "'-") |> ignore
-        //dt.Rows.Add(TextCommand, "함수", sampleCommandName    , "'-", "'-", sampleCommand  , "'-") |> ignore
-        //dt.Rows.Add(TextObserve, "함수", sampleConditionName  , "'-", "'-", sampleCondition, "'-") |> ignore
-
+        dt.Rows.Add(TextVariable,  ""  , "'-", ""  , "'-", "'-", "'-", "'-") |> ignore
         dt
 
- 
-
-
-    let ToFiie(sys:DsSystem, excelFilePath:string) = 
-        let DisableCellStyle(range:Microsoft.Office.Interop.Excel.Range ) =
+    let ToFiie(systems:DsSystem seq, excelFilePath:string) = 
+        let disableCellStyle(range:Microsoft.Office.Interop.Excel.Range ) =
             range.Interior.Color <- Color.LightGray;
             range.Font.Bold <- true;
             range.Borders.LineStyle <- XlLineStyle.xlContinuous;
             range.Borders.Weight <- 2;
 
-        let CellMerge(range:Microsoft.Office.Interop.Excel.Range ) =
+        let cellMerge(range:Microsoft.Office.Interop.Excel.Range ) =
             range.Merge(true)
 
-        let EnableCellStyle(range:Microsoft.Office.Interop.Excel.Range ) =
+        let enableCellStyle(range:Microsoft.Office.Interop.Excel.Range ) =
                    range.Interior.Color <- Color.LightYellow;
                    range.Borders.LineStyle <- XlLineStyle.xlDash;
 
-        let AutoFitNFilterColumn(range:Microsoft.Office.Interop.Excel.Range ) =
+        let autoFitNFilterColumn(range:Microsoft.Office.Interop.Excel.Range ) =
                    range.AutoFilter(1, Type.Missing, XlAutoFilterOperator.xlAnd, Type.Missing, true) |> ignore
                    range.EntireColumn.AutoFit() |> ignore
-
-
-        let tbl = ToTable(sys)
-        if (tbl = null || tbl.Columns.Count = 0)
-        then failwithf "ExportToExcel: Null or empty input table!\n"
-        else 
-            // load excel, and create a new workbook
-            let excelApp = new ApplicationClass(Visible = false)
-            excelApp.ScreenUpdating = false |> ignore
-            let wb = excelApp.Workbooks.Add Missing.Value
-
+        
+        let mutable curRow = 0
+        let createWorkSheet(tbl:Data.DataTable, wb:Workbook, totalRows:int) = 
             let rowsCnt = tbl.Rows.Count
             let colsCnt = tbl.Columns.Count
+            //  create worksheet
+            let workSheet = wb.Worksheets.Add Missing.Value :?> Worksheet
+            workSheet.Name <- tbl.TableName
             
-            // single worksheet
-            let workSheet  = wb.ActiveSheet :?> Worksheet
-            
-            //Range excelCellrange;
             //// now we resize the columns  
             let excelCellrange = workSheet.Range(workSheet.Cells.[1, 1], workSheet.Cells.[rowsCnt+ 1, colsCnt]);
-            DisableCellStyle(excelCellrange) 
+            disableCellStyle(excelCellrange) 
         
             for colIndex in [|0..colsCnt-1|] do
                 workSheet.Cells.[1,colIndex+1] <- tbl.Columns.[colIndex].ColumnName
             //// rows
             for rowsIndex in [|0..rowsCnt-1|] do
-                DoWork((int)(Convert.ToSingle(rowsIndex + 1) / (rowsCnt|>float32) * 100f));
+                curRow<-curRow+1
+                DoWork(Convert.ToSingle(curRow) / Convert.ToSingle(totalRows) * 100f |> int);
                 for colIndex in [|0..colsCnt-1|] do
                     workSheet.Cells.[rowsIndex + 2, colIndex + 1] <- tbl.Rows.[rowsIndex].[colIndex]
                     let cellText =tbl.Rows.[rowsIndex].[colIndex].ToString()
                     if(cellText = "" || (cellText.StartsWith("'") && cellText.StartsWith("'-")|>not))
                     then 
                         let excelCellrange = workSheet.Range(workSheet.Cells.[rowsIndex + 2, colIndex + 1], workSheet.Cells.[rowsIndex + 2, colIndex + 1])
-                        EnableCellStyle(excelCellrange)
+                        enableCellStyle(excelCellrange)
 
                     if(colIndex = 0 && (cellText = TextCommand||cellText = TextObserve))
-                    then CellMerge(workSheet.Range(workSheet.Cells.[rowsIndex + 2, colIndex + 6], workSheet.Cells.[rowsIndex + 2, colIndex + 9]))
+                    then cellMerge(workSheet.Range(workSheet.Cells.[rowsIndex + 2, colIndex + 6], workSheet.Cells.[rowsIndex + 2, colIndex + 9]))
 
-            workSheet.Range(workSheet.Cells.[1, 1], workSheet.Cells.[rowsCnt + 1, colsCnt]) |> AutoFitNFilterColumn
-        
-            workSheet.SaveAs(excelFilePath)
-            excelApp.Quit()
-            DoWork(0)
-            Console.WriteLine("Excel file saved!")
+            workSheet.Range(workSheet.Cells.[1, 1], workSheet.Cells.[rowsCnt + 1, colsCnt]) |> autoFitNFilterColumn
 
-    
+
+        // load excel, and create a new workbook
+        let excelApp = new ApplicationClass(Visible = false)
+        let wb = excelApp.Workbooks.Add Missing.Value
+        let firstSheet = wb.ActiveSheet :?> Worksheet 
+        excelApp.ScreenUpdating <- false 
+
+        let tables =  systems 
+                        |> Seq.map(fun s ->  ToTable s) 
+                        |> Seq.sortBy(fun f->f.TableName)
+
+        let totalRows = tables 
+                        |> Seq.map(fun t -> t.Rows.Count)
+                        |> Seq.sum
+
+        tables 
+        |> Seq.iter(fun d -> createWorkSheet (d, wb, totalRows))
+
+            //처음 자동으로 생성된 빈 Sheet 삭제
+        firstSheet.Delete()
+        wb.SaveAs(excelFilePath)
+        excelApp.Quit()
+
+
     
 
 

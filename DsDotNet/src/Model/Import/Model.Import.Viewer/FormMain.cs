@@ -1,3 +1,4 @@
+using Engine.CodeGenCPU;
 using Engine.Common;
 using System;
 using System.Collections.Generic;
@@ -8,8 +9,15 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
+
+using static Engine.CodeGenCPU.VertexMemoryManagerModule;
 using static Engine.Common.FS.MessageEvent;
 using static Engine.Core.CoreModule;
+using static Engine.Core.EdgeExt;
+using static Engine.Core.SystemExt;
+using static Engine.Core.Interface;
+
 using static Engine.Cpu.RunTime;
 using static Model.Import.Office.ViewModule;
 
@@ -19,17 +27,16 @@ namespace Dual.Model.Import
     {
         public static FormMain TheMain;
 
-        private DsSystem _mySystem = null;
         private DsCPU _myCPU;
+
+        public Dictionary<Vertex, ViewNode> _DicVertex;
+        public List<string> _PathPPTs = new List<string>();
+        public string _PathXLS;
+        public bool Busy = false;
         private CancellationTokenSource _cts = new CancellationTokenSource();
 
-        private string _dsText;
-        public Dictionary<Flow, TabPage> _DicMyUI;
-        public Dictionary<Flow, TabPage> _DicExUI;
-        public Dictionary<Vertex, ViewNode> _DicVertex;
-        public List<string> _PathPPTs = new List<string>();       
-        public string _PathXLS;
-        public bool Busy = false;   
+        private DsSystem SelectedSystem => (comboBox_System.SelectedItem as SystemView).System;
+        
 
         public FormMain()
         {
@@ -47,7 +54,7 @@ namespace Dual.Model.Import
             richTextBox_Debug.AppendText($"{DateTime.Now} : *.pptx 를 드랍하면 시작됩니다");
 
         }
-        public UCView SelectedView =>  xtraTabControl_My.SelectedTab.Tag as UCView;
+        public UCView SelectedView => xtraTabControl_My.SelectedTab.Tag as UCView;
 
 
         private void Form1_Load(object sender, EventArgs e)
@@ -56,8 +63,6 @@ namespace Dual.Model.Import
             EventExternal.MSGSubscribe();
             EventExternal.CPUSubscribe();
 
-            _DicMyUI = new Dictionary<Flow, TabPage>();
-            _DicExUI = new Dictionary<Flow, TabPage>();
 
             //_Demo = ImportCheck.GetDemoModel("test");
 
@@ -124,11 +129,11 @@ namespace Dual.Model.Import
                 progressBar1.Value = 0;
 
                 richTextBox_ds.Clear();
-                _DicMyUI.Clear();
-                _DicExUI.Clear();
 
                 xtraTabControl_My.TabPages.Clear();
                 xtraTabControl_Ex.TabPages.Clear();
+                comboBox_Segment.Items.Clear();
+                comboBox_System.Items.Clear();
 
                 splitContainer1.Panel1Collapsed = false;
                 splitContainer2.Panel2Collapsed = false;
@@ -180,42 +185,7 @@ namespace Dual.Model.Import
             richTextBox_Debug.Clear();
             richTextBox_Debug.AppendText($"{DateTime.Now} : Log Clear");
         }
-
-        private void button_comfile_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                //var helper = ModelParser.ParseFromString2(_dsText, ParserOptions.Create4Simulation());
-
-                //if (CpuLoader.PreCheck())
-                //    MSGWarn("언어체크 성공 !!!!");
-
-                ExportTextModel(Color.Transparent, _dsText, true);
-            }
-
-            catch (Exception ex)
-            {
-                MSGWarn("언어체크 실패 !!!!");
-                MSGError(ex.Message);
-            }
-        }
-        private void RefreshText()
-        {
-            _dsText = "";
-            var textLines = richTextBox_ds.Text.Split('\n');
-            textLines.ForEach(f =>
-            {
-                var patternHead = "^\\d*;"; // 첫 ; 내용 제거
-                var replaceName = System.Text.RegularExpressions.Regex.Replace(f, patternHead, "");
-
-                _dsText += (replaceName + "\n");
-            });
-            ExportTextModel(Color.Transparent, _dsText, false);
-        }
-        private void button_HideLine_Click(object sender, EventArgs e)
-        {
-            RefreshText();
-        }
+   
         private async void button_TestStart_Click(object sender, EventArgs e)
         {
             if (_myCPU == null) return;
@@ -225,7 +195,7 @@ namespace Dual.Model.Import
         }
         private void button_Stop_Click(object sender, EventArgs e)
         {
-            if (_myCPU == null) return;     
+            if (_myCPU == null) return;
             StartResetBtnUpdate(false);
             _myCPU.Stop();
         }
@@ -242,7 +212,7 @@ namespace Dual.Model.Import
             button_TestStart.Enabled = !Start;
             button_Stop.Enabled = Start;
         }
-      
+
         private void button_start_Click(object sender, EventArgs e)
         {
             var segHMI = comboBox_Segment.SelectedItem as SegmentHMI;
@@ -261,6 +231,91 @@ namespace Dual.Model.Import
             var ucView = SelectedView;
             segHMI.VertexM.ResetTag.Value = true;
             segHMI.VertexM.StartTag.Value = false;
+        }
+
+
+        private void UpdateCpuUI(IEnumerable<string> text)
+        {
+            StartResetBtnUpdate(true);
+            comboBox_Segment.Items.Clear();
+
+            comboBox_Segment.DisplayMember = "Display";
+
+            if (comboBox_Segment.Items.Count > 0)
+                comboBox_Segment.SelectedIndex = 0;
+
+            WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"\r\n{string.Join("\r\n", text)}");
+        }
+
+
+        internal void UpdateGraphUI(IEnumerable<ViewNode> lstViewNode)
+        {
+            xtraTabControl_My.TabPages.Clear();
+            lstViewNode.ForEach(f =>
+            {
+                var flow = f.Flow.Value;
+                UCView viewer = new UCView { Dock = DockStyle.Fill };
+                viewer.SetGraph(f, f.Flow.Value);
+
+                TabPage tab = new TabPage();
+                tab.Controls.Add(viewer);
+                tab.Tag = viewer;
+                tab.Text = $"{flow.System.Name}.{flow.Name}({f.Page})";
+                this.Do(() =>
+                {
+                    xtraTabControl_My.TabPages.Add(tab);
+                    xtraTabControl_My.SelectedTab = tab;
+                });
+            });
+        }
+
+        private IEnumerable<DsSystem> GetSystems()
+        {
+            List<SystemView> sysViews = new List<SystemView>();
+            foreach (SystemView systemView in comboBox_System.Items)
+                sysViews.Add(systemView);
+            return sysViews.Select(s => s.System);
+        }
+
+        private void comboBox_System_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            SystemView sysView = comboBox_System.SelectedItem as SystemView;
+            
+            var rungs = CpuLoader.LoadStatements(sysView.System);
+            var storages = new Dictionary<string, IStorage>();
+            _myCPU = new DsCPU(storages, "", rungs.Select(s => s.Item2));
+            _myCPU.Run();
+
+            _DicVertex = new Dictionary<Vertex, ViewNode>();
+            comboBox_Segment.Items.Clear();
+
+            sysView.System.GetVertices()
+                .ForEach(v =>
+                {
+                    var viewNode = sysView.ViewNodes.SelectMany(s => s.UsedViewNodes)
+                                                .Where(w => w.CoreVertex != null)
+                                                .First(w => w.CoreVertex.Value == v);
+
+                    _DicVertex.Add(v, viewNode);
+                    if (v is Real)
+                    {
+                        comboBox_Segment.Items
+                        .Add(new SegmentHMI { Display = v.QualifiedName, Vertex = v, ViewNode = viewNode, VertexM = v.VertexMemoryManager as VertexMemoryManager });
+                    }
+                });
+
+            var text = rungs.Select(rung =>
+            {
+                var description = rung.Item1;
+                var statement = rung.Item2;
+                return $"***{description}***\t{rung.Item2.ToText().Replace("%", " ")}";
+            });
+
+            UpdateCpuUI(text);
+            UpdateGraphUI(sysView.ViewNodes);
+            
+            DisplayTextModel(Color.Transparent, sysView.System.ToDsText());
+            DisplayTextExpr(_myCPU.ToTextStatement(), Color.WhiteSmoke);
         }
     }
 }

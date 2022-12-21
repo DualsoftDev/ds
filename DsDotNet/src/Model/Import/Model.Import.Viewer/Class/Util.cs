@@ -1,6 +1,7 @@
 using Engine.Common;
 using Engine.Common.FS;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -11,11 +12,15 @@ namespace Dual.Model.Import
 {
     public static class UtilFile
     {
-        public static string GetNewPath(string pptPath)
+        public static string GetNewPath(List<string> pptPaths)
         {
-            var excelName = Path.GetFileNameWithoutExtension(pptPath) + $"_{DateTime.Now.ToString("yy_MM_dd(HH-mm-ss)")}.xlsx";
-            var excelDirectory = Path.Combine(Path.GetDirectoryName(pptPath), Path.GetFileNameWithoutExtension(excelName));
+            var newPath = Path.Combine(Path.GetDirectoryName(pptPaths.First()) 
+                        , string.Join("_", pptPaths.Select(s => Path.GetFileNameWithoutExtension(s))));   
+
+            var excelName = Path.GetFileNameWithoutExtension(newPath) + $"_{DateTime.Now.ToString("yy_MM_dd(HH-mm-ss)")}.xlsx";
+            var excelDirectory = Path.Combine(Path.GetDirectoryName(newPath), Path.GetFileNameWithoutExtension(excelName));
             Directory.CreateDirectory(excelDirectory);
+
             return Path.Combine(excelDirectory, excelName);
         }
 

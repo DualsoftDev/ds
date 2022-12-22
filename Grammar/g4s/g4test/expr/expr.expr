@@ -6,26 +6,10 @@
                 bool myBit03 = createTag("%IX0.0.3", false);
                 bool myBit04 = createTag("%IX0.0.4", false);
                 bool myBit05 = createTag("%IX0.0.5", false);
-                bool myBit06 = createTag("%IX0.0.6", false);
-                bool myBit07 = createTag("%IX0.0.7", false);
 
-                bool myBit10 = createTag("%IX0.0.8", false);
-                bool myBit11 = createTag("%IX0.0.9", false);
-                bool myBit12 = createTag("%IX0.0.10", false);
-                bool myBit13 = createTag("%IX0.0.11", false);
-                bool myBit14 = createTag("%IX0.0.12", false);
-                bool myBit15 = createTag("%IX0.0.13", false);
-                bool myBit16 = createTag("%IX0.0.14", false);
-                //bool myBit17 = createTag("%IX0.15", false);
+                $myBit02 := ! (! $myBit00 || $myBit01);
+                $myBit05 := ! ($myBit03 && ! $myBit04);
 
-                $myBit07 :=    (($myBit00 || $myBit01) && $myBit02))
-                            ||  $myBit03
-                            || ($myBit04 && $myBit05 && $myBit06)
-                            ;
-                $myBit16 :=    (($myBit10 && $myBit11) || $myBit12)
-                            && $myBit13
-                            && ($myBit14 || $myBit15)
-                            ;
 
 
 

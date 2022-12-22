@@ -87,10 +87,22 @@ module internal Basic =
                 vlineDownTo maxX y (vLineUpMaxY-y) |> xml.AddRange
 
                 {| Xml=xml.ToArray(); NextX=maxX; NextY=sy; VLineUpRightMaxY=y |}
+
+
+            // terminal case
+            | FlatNary(OpUnit, expr::[]) ->
+                expr |> rng x y
+
+            // negation 없애기
+            | FlatNary(Neg, expr::[]) ->
+                FlatNary(OpUnit, [expr.Negate()]) |> rng x y
+
             | FlatZero ->
                 let str = hlineEmpty c
                 {| Xml=[|c, str|]; NextX=x; NextY=y; VLineUpRightMaxY=y |}
-            | _ ->   failwithlog "Unknown FlatExpression case"
+
+            | _ ->
+                failwithlog "Unknown FlatExpression case"
 
 
         /// 최초 시작이 OR 로 시작하면 우측으로 1 column 들여쓰기 한다.

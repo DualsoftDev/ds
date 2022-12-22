@@ -112,7 +112,7 @@ open PLC.CodeGen.LSXGI
 
 
         [<Test>]
-        member __.``X Negation Input test`` () =
+        member __.``Negation1 test`` () =
             let storages = Storages()
             let code = """
                 bool myBit00 = createTag("%IX0.0.0", false);
@@ -123,7 +123,44 @@ open PLC.CodeGen.LSXGI
             let statements = parseCode storages code
             let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
             File.WriteAllText(outputFile, xml)
-            tracefn "%s" xml
+            ()
+
+        [<Test>]
+        member __.``Negation2 test`` () =
+            let storages = Storages()
+            let code = """
+                bool myBit00 = createTag("%IX0.0.0", false);
+                bool myBit01 = createTag("%IX0.0.1", false);
+                bool myBit02 = createTag("%IX0.0.2", false);
+                bool myBit03 = createTag("%IX0.0.3", false);
+                bool myBit04 = createTag("%IX0.0.4", false);
+                bool myBit05 = createTag("%IX0.0.5", false);
+
+                $myBit02 := ! ($myBit00 || $myBit01);
+                $myBit05 := ! ($myBit03 && $myBit04);
+"""
+            let statements = parseCode storages code
+            let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+            File.WriteAllText(outputFile, xml)
+            ()
+
+        [<Test>]
+        member __.``XX Negation3 test`` () =
+            let storages = Storages()
+            let code = """
+                bool myBit00 = createTag("%IX0.0.0", false);
+                bool myBit01 = createTag("%IX0.0.1", false);
+                bool myBit02 = createTag("%IX0.0.2", false);
+                bool myBit03 = createTag("%IX0.0.3", false);
+                bool myBit04 = createTag("%IX0.0.4", false);
+                bool myBit05 = createTag("%IX0.0.5", false);
+
+                $myBit02 := ! (! $myBit00 || $myBit01);
+                $myBit05 := ! ($myBit03 && ! $myBit04);
+"""
+            let statements = parseCode storages code
+            let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+            File.WriteAllText(outputFile, xml)
             ()
 
         [<Test>]

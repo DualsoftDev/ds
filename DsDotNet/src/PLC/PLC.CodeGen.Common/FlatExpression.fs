@@ -12,6 +12,12 @@ module FlatExpressionModule =
         | And | Or | Neg | OpUnit
     with
         member x.ToText() = ""
+        member x.Negate() =
+            match x with
+            | And -> Or
+            | Or -> And
+            | Neg -> OpUnit
+            | OpUnit -> Neg
 
     type TrueValue() =
         interface IExpressionTerminal with
@@ -39,6 +45,14 @@ module FlatExpressionModule =
                     |> String.concat ", "
                 sprintf "%s(%s)" (op.ToText()) termsStr
             | FlatZero -> ""
+        member x.Negate() =
+            match x with
+            | FlatTerminal(value, pulse, neg) -> FlatTerminal(value, pulse, not neg)
+            | FlatNary(op, terms) ->
+                let opNeg = op.Negate()
+                let termsNeg = terms |> map (fun t -> t.Negate())
+                FlatNary(opNeg, termsNeg)
+            | FlatZero -> FlatZero
 
     let rec flattenExpression (expression:IExpression) : IFlatExpression =
         let expr = expression :?> Expression<bool>

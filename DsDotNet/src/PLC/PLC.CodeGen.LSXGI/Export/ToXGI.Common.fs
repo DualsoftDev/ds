@@ -3,6 +3,7 @@ namespace PLC.CodeGen.LSXGI
 open Engine.Common.FS
 open PLC.CodeGen.Common
 open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
+open Engine.Core
 
 [<AutoOpen>]
 module internal Common =

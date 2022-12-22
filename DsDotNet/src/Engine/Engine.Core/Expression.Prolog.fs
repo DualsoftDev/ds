@@ -30,6 +30,11 @@ module ExpressionForwardDeclModule =
         inherit IVariable
         inherit IStorage<'T>
 
+    (* PLC generation module 용 *)
+    type IFlatExpression = interface end
+    type IExpressionTerminal =
+        inherit IText
+
     /// Expression<'T> 을 boxed 에서 접근하기 위한 최소의 interface
     type IExpression =
         abstract DataType : System.Type
@@ -45,6 +50,7 @@ module ExpressionForwardDeclModule =
         abstract FunctionArguments: IExpression list
         /// Function expression 에 사용된 IStorage 항목들을 반환
         abstract CollectStorages: unit -> IStorage list
+        abstract Flatten: unit -> IFlatExpression
 
     type IExpression<'T> =
         inherit IExpression
@@ -292,6 +298,7 @@ module rec ExpressionPrologModule =
         inherit TypedValueStorage<'T>(name, initValue)
 
         interface ITag<'T>
+        interface IExpressionTerminal
         override x.ToText() = "$" + name
 
     [<AbstractClass>]
@@ -335,3 +342,4 @@ module ExpressionPrologModule2 =
 
     let mutable fwdCreateBoolTag   = let dummy (tagName:string) (initValue:bool) : TagBase<bool>     = failwith "Should be reimplemented." in dummy
     let mutable fwdCreateUShortTag = let dummy (tagName:string) (initValue:uint16) : TagBase<uint16> = failwith "Should be reimplemented." in dummy
+    let mutable fwdFlattenExpression = let dummy (expr:IExpression) : IFlatExpression = failwith "Should be reimplemented." in dummy

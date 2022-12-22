@@ -36,14 +36,16 @@ module Command =
 
     type IFunctionCommand =
         abstract member TerminalEndTag: IExpressionTerminal with get
+
     ///CoilOutput은 단일 출력을 내보내는 형식
     and CoilOutput =
-        |CoilMode of IExpressionTerminal
-        |PulseCoilMode of IExpressionTerminal
-        |NPulseCoilMode of IExpressionTerminal
-        |ClosedCoilMode of IExpressionTerminal
-        |SetCoilMode of IExpressionTerminal
-        |ResetCoilMode of IExpressionTerminal
+        | CoilMode of IExpressionTerminal
+        | PulseCoilMode of IExpressionTerminal
+        | NPulseCoilMode of IExpressionTerminal
+        | ClosedCoilMode of IExpressionTerminal
+        | SetCoilMode of IExpressionTerminal
+        | ResetCoilMode of IExpressionTerminal
+    with
         interface IFunctionCommand with
             member this.TerminalEndTag: IExpressionTerminal =
                 match this with
@@ -64,7 +66,7 @@ module Command =
         | CompareEQ of IExpressionTerminal *  (CommandTag * CommandTag) //endTag * (leftA, rightB)  "=="
         | CompareNE of IExpressionTerminal *  (CommandTag * CommandTag) //endTag * (leftA, rightB)  "!="
         | Add of IExpressionTerminal *  CommandTag  * int //endTag * Tag + (-+int)
-        with
+    with
         interface IFunctionCommand with
             member this.TerminalEndTag: IExpressionTerminal =
                 match this with
@@ -96,6 +98,7 @@ module Command =
     and FunctionBlock =
         | TimerMode of IExpressionTerminal * int    //endTag, time
         | CounterMode of IExpressionTerminal *  CommandTag  * int  //endTag, countResetTag, count
+    with
         member x.GetInstanceText() =
             match x with
             | TimerMode(tag, time) -> sprintf "T_%s" (tag.ToText())

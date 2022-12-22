@@ -4,6 +4,7 @@ open Engine.Common.FS
 open PLC.CodeGen.Common
 open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
 open Config.POU.Program.LDRoutine
+open Engine.Core
 
 [<AutoOpen>]
 module internal Command =
@@ -56,7 +57,7 @@ module internal Command =
                     | _ -> failwithlogf "This ReverseCmd is not support"
 
     let createOutputCoil(tag)    = XgiCommand(CoilCmd(CoilOutput.CoilMode(tag)))
-    let createOutputCoilNot(tag)    = XgiCommand(CoilCmd(CoilOutput.ClosedCoilMode(tag)))
+    let createOutputCoilNot(tag) = XgiCommand(CoilCmd(CoilOutput.ClosedCoilMode(tag)))
     let createOutputSet(tag)     = XgiCommand(CoilCmd(CoilOutput.SetCoilMode(tag)))
     let createOutputRst(tag)     = XgiCommand(CoilCmd(CoilOutput.ResetCoilMode(tag)))
     let createOutputPulse(tag)   = XgiCommand(CoilCmd(CoilOutput.PulseCoilMode(tag)))

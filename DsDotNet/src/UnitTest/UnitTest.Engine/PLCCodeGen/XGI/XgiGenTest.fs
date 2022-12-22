@@ -10,7 +10,7 @@ open Engine.Parser.FS
 open Engine.Core
 open Engine.Common.FS
 open PLC.CodeGen.Common.QGraph
-//open PLC.CodeGen.LSXGI
+open PLC.CodeGen.LSXGI
 
 
 [<AutoOpen>]
@@ -87,14 +87,19 @@ module XgiGenerationTestModule =
             //generatePLCByModel
             let storages = Storages()
             let code = """
-                bool myBit1 = createTag("%IX0.0.0", false);
-                $myBit1 := true;
-"""
-            let statments = parseCode storages code
-            storages.Count === 1
-            statments.Length === 1      // createTag 는 statement 에 포함되지 않는다.   (한번 생성하고 끝나므로 storages 에 tag 만 추가 된다.)
+                bool myBit0 = createTag("%IX0.0.0", false);
+                bool myBit1 = createTag("%IX0.0.1", false);
+                bool myBit2 = createTag("%IX0.0.2", false);
 
-            //let xml = LsXGI.generateXml plcCodeGenerationOption storages statements
+                bool myBit7 = createTag("%IX0.0.7", false);
+
+                $myBit7 := ($myBit0 || $myBit1) && $myBit2;
+"""
+            let statements = parseCode storages code
+            storages.Count === 4
+            statements.Length === 1      // createTag 는 statement 에 포함되지 않는다.   (한번 생성하고 끝나므로 storages 에 tag 만 추가 된다.)
+
+            let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
             ()
 
 

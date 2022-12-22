@@ -17,7 +17,9 @@ module CpuConvertModule =
         let vms = vs.Select(getVertexManager).ToArray()
 
         //R0. Real 행위의 Coin 상태수식 제공
-        let r0s = [ for v in vs do yield! (getVertexManager v).CreateRGFHRungs() ]
+        let r0s =
+            [ for v in vs do
+                yield! (getVertexManager v).CreateRGFHRungs() ]
 
         //R1.Real 초기시작 Statement 만들기
         let r1 = realTag.CreateInitStartRung()
@@ -68,7 +70,7 @@ module CpuConvertModule =
 
         //description, statement List 출력
         r0s.Select(fun s-> "Real-r0", s)
-            @ ["Real-r1",r1; "Real-r2",r2]
+            @  ["Real-r1",r1; "Real-r2",r2]
             @  c1s.Select(fun s-> "Call-c1", s)
             @  c2s.Select(fun s-> "Call-c2", s)
             @  c3s.Select(fun s-> "Call-c3", s)

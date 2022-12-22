@@ -66,15 +66,31 @@ module PreludeAdhocPolymorphism =
         static member ($) (FAdhoc_mapi, x:seq<_>)    = fun f -> Seq.mapi   f x
         static member ($) (FAdhoc_mapi, x:array<_>)  = fun f -> Array.mapi f x
 
+    type FAdhoc_picki = FAdhoc_picki with
+        static member ($) (FAdhoc_picki, x:list<_>)  = fun f -> List.mapi  f x |> List.pick id
+        static member ($) (FAdhoc_picki, x:seq<_>)   = fun f -> Seq.mapi   f x |> Seq.pick id
+        static member ($) (FAdhoc_picki, x:array<_>) = fun f -> Array.mapi f x |> Array.pick id
+
+    type FAdhoc_filter = FAdhoc_filter with
+        static member ($) (FAdhoc_filter, x:list<_>)   = fun f -> List.filter  f x
+        static member ($) (FAdhoc_filter, x:seq<_>)    = fun f -> Seq.filter   f x
+        static member ($) (FAdhoc_filter, x:array<_>)  = fun f -> Array.filter f x
+
+
     type FAdhoc_pairwise = FAdhoc_pairwise with
         static member ($) (FAdhoc_pairwise, x:list<_>)  = List.pairwise  x
         static member ($) (FAdhoc_pairwise, x:seq<_>)   = Seq.pairwise   x
         static member ($) (FAdhoc_pairwise, x:array<_>) = Array.pairwise x
 
-    type FAdhoc_picki = FAdhoc_picki with
-        static member ($) (FAdhoc_picki, x:list<_>)  = fun f -> List.mapi  f x |> List.pick id
-        static member ($) (FAdhoc_picki, x:seq<_>)   = fun f -> Seq.mapi   f x |> Seq.pick id
-        static member ($) (FAdhoc_picki, x:array<_>) = fun f -> Array.mapi f x |> Array.pick id
+    type FAdhoc_sort = FAdhoc_sort with
+        static member ($) (FAdhoc_sort, x:list<_>)  = List.sort  x
+        static member ($) (FAdhoc_sort, x:seq<_>)   = Seq.sort   x
+        static member ($) (FAdhoc_sort, x:array<_>) = Array.sort x
+
+    type FAdhoc_distinct = FAdhoc_distinct with
+        static member ($) (FAdhoc_distinct, x:list<_>)  = List.distinct  x
+        static member ($) (FAdhoc_distinct, x:seq<_>)   = Seq.distinct   x
+        static member ($) (FAdhoc_distinct, x:array<_>) = Array.distinct x
 
     type FAdhoc_append = FAdhoc_append with
         static member (?<-) (FAdhoc_append, x:list<'a>,  y:list<'a>)  = List.append x y
@@ -104,12 +120,23 @@ module PreludeAdhocPolymorphism =
     let inline chunkBySize f x = FAdhoc_chunkBySize $ x <| f
     let inline groupBy     f x = FAdhoc_groupBy     $ x <| f
 
-    let inline indexed       x = FAdhoc_indexed     $ x
+    let inline indexed     x   = FAdhoc_indexed     $ x
+    let inline pairwise    x   = FAdhoc_pairwise    $ x
+    let inline sort        x   = FAdhoc_sort        $ x
+    let inline distinct    x   = FAdhoc_distinct    $ x
     let inline iter        f x = FAdhoc_iter        $ x <| f
+    let inline filter      f x = FAdhoc_filter      $ x <| f
     let inline map         f x = FAdhoc_map         $ x <| f
     let inline mapi        f x = FAdhoc_mapi        $ x <| f
-    let inline pairwise      x = FAdhoc_pairwise    $ x
     let inline picki       f x = FAdhoc_picki       $ x <| f
+
+
+    //type FAdhoc_scan = FAdhoc_scan with
+    //    static member ($) (FAdhoc_scan, x:list<'T>)   = fun (f:'s -> 'T -> 's) (state:'s) -> List.scan  f state x
+    //    static member ($) (FAdhoc_scan, x:seq<'T>)    = fun (f:'s -> 'T -> 's) (state:'s) -> Seq.scan   f state x
+    //    static member ($) (FAdhoc_scan, x:array<'T>)  = fun (f:'s -> 'T -> 's) (state:'s) -> Array.scan f state x
+
+    //let inline scan        (f:'s->'t->'s) (state:'s) x = FAdhoc_scan  $ x <|| (f, state)
 
     (* Operators *)
 

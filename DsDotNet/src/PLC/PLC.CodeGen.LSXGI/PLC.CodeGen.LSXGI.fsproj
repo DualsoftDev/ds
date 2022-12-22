@@ -9,32 +9,40 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Content Include="App.config" />
-		<Content Include="packages.config" />
-		<Compile Include="AssemblyInfo.fs" />
-		<Compile Include="XgiSpecs.fs" />
-		<Compile Include="XgiBaseXML.fs" />
-		<Compile Include="XgiDbReader.fs" />
-		<Compile Include="CSVParser.fs" />
-		<Compile Include="MappingTableCSVParser.fs" />
-		<Compile Include="IECFunctionReader.fs" />
-		<Compile Include="MetaStruct\OperationType.fs" />
-		<Compile Include="MetaStruct\AddressType.fs" />
-		<Compile Include="MetaStruct\SymbolType.fs" />
-		<Compile Include="XgiConvert\ToXGI.Basic.fs" />
-		<Compile Include="XgiConvert\ToXGI.FB.fs" />
-		<Compile Include="XgiConvert\ToXGI.Draw.fs" />
-		<!--<Compile Include="MetaStruct\Expression.fs" />-->
-		<!--<Compile Include="MetaStruct\FlatExpression.fs" />-->
-		<Compile Include="XgiConvert\ToXGI.Xml.fs" />
-		<Compile Include="XgiConvert\ToXGI.File.fs" />
+		<Compile Include="Address.Convert.fs" />
+		<Compile Include="FromXGI.fs" />
+		<Compile Include="ToXGI.Spec.fs" />
+		<Compile Include="ConfigXML\ConfigXml.fs" />
+		<EmbeddedResource Include="ConfigXml\DEVICE_INFO.xml" />
+		<EmbeddedResource Include="ConfigXml\FLAG_COMMENT.xml" />
+		<EmbeddedResource Include="ConfigXml\FLAG_INFO_0.xml" />
+		<EmbeddedResource Include="ConfigXml\PLC_TYPE_LIST.xml" />
+		<EmbeddedResource Include="ConfigXml\tblIOModule.xml" />
+		<EmbeddedResource Include="XgI-4.5.2.template.xml" />
+		<Compile Include="Import\XGConfigReader.fs" />
+		<Compile Include="Import\XGLDRoutineReader.fs" />
+		<Compile Include="Import\XGFileRead.fs" />
+		<Compile Include="Export\ToXGI.Common.fs" />
+		<Compile Include="Export\ToXGI.Command.fs" />
+		<Compile Include="Export\ToXGI.Basic.fs" />
+		<Compile Include="Export\ToXGI.Tag.fs" />
+		<Compile Include="Export\ToXGI.File.fs" />
+		<Compile Include="Export\ToXGI.Export.fs" />
+		<Compile Include="ToXGI.Validation.fs" />
+		<None Include="Scripts\Script1.fsx" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="EntityFramework" Version="6.4.4" />		<!--Version="6.4.4"-->
 		<PackageReference Include="FSharp.Data" Version="5.0.2" />
+		<!--<PackageReference Include="EntityFramework" Version="6.4.4" />		--><!--Version="6.4.4"--><!--
 		<PackageReference Include="SQLProvider" Version="1.3.5" />
-		<PackageReference Include="System.Data.SQLite" Version="1.0.117" />
+		<PackageReference Include="System.Data.SQLite" Version="1.0.117" />-->
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\Engine\Engine.Common.FS\Engine.Common.FS.fsproj" />
+	  <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
+	  <ProjectReference Include="..\PLC.CodeGen.Common\PLC.CodeGen.Common.fsproj" />
 	</ItemGroup>
 
 </Project>

@@ -286,18 +286,21 @@ module rec ExpressionParser =
     let parseCode (storages:Storages) (text:string) : Statement list =
         try
             let parser = createParser (text)
+
+            let children = parser.toplevels().children
             let topLevels =
                 [
-                    for t in parser.toplevels().children do
+                    for t in children do
                         match t with
                         | :? ToplevelContext as ctx -> ctx
                         | :? ITerminalNode as semicolon when semicolon.GetText() = ";" -> ()
                         | _ -> failwith "ERROR"
                 ]
 
+
             [
                 for t in topLevels do
-                    let text = t.GetText()
+                    let text = t.GetOriginalText()
                     tracefn $"Toplevel: {text}"
                     assert(t.ChildCount = 1)
 
@@ -324,6 +327,7 @@ module rec ExpressionParser =
             | "UInt32" -> new Variable<uint32>(name, v :?> uint32)
             | "Int64"  -> new Variable<int64> (name, v :?> int64)
             | "UInt64" -> new Variable<uint64>(name, v :?> uint64)
+            | "Boolean"-> new Variable<bool>  (name, v :?> bool)
             | "String" -> new Variable<string>(name, v :?> string)
             | "Char"   -> new Variable<char>  (name, v :?> char)
             | _  -> failwith "ERROR"
@@ -340,6 +344,7 @@ module rec ExpressionParser =
             | "UInt32" -> new Variable<uint32>(name, 0u)
             | "Int64"  -> new Variable<int64> (name, 0L)
             | "UInt64" -> new Variable<uint64>(name, 0UL)
+            | "Boolean"-> new Variable<bool>  (name, false)
             | "String" -> new Variable<string>(name, "")
             | "Char"   -> new Variable<char>  (name, ' ')
             | _  -> failwith "ERROR"
@@ -357,6 +362,7 @@ module rec ExpressionParser =
             | "UInt32" -> new PlcTag<uint32>(name, address, v :?> uint32)
             | "Int64"  -> new PlcTag<int64> (name, address, v :?> int64)
             | "UInt64" -> new PlcTag<uint64>(name, address, v :?> uint64)
+            | "Boolean"-> new PlcTag<bool>  (name, address, v :?> bool)
             | "String" -> new PlcTag<string>(name, address, v :?> string)
             | "Char"   -> new PlcTag<char>  (name, address, v :?> char)
             | _  -> failwith "ERROR"
@@ -373,6 +379,7 @@ module rec ExpressionParser =
             | "UInt32" -> new PlcTag<uint32>(name, address, 0u)
             | "Int64"  -> new PlcTag<int64> (name, address, 0L)
             | "UInt64" -> new PlcTag<uint64>(name, address, 0UL)
+            | "Boolean"-> new PlcTag<bool>  (name, address, false)
             | "String" -> new PlcTag<string>(name, address, "")
             | "Char"   -> new PlcTag<char>  (name, address, ' ')
             | _  -> failwith "ERROR"
@@ -390,6 +397,7 @@ module rec ExpressionParser =
             | ("uint32"  | "uint")   -> typedefof<uint32>
             | ("int64"   | "long")   -> typedefof<int64>
             | ("uint64"  | "ulong")  -> typedefof<uint64>
+            | ("bool"    | "boolean")-> typedefof<bool>
             | "string"               -> typedefof<string>
             | "char"                 -> typedefof<char>
             | _  -> failwith "ERROR"

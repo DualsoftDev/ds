@@ -35,6 +35,7 @@
 		<Compile Include="Module\Functions.fs" />
 		<Compile Include="Module\Collection.Algo.fs" />
 		<Compile Include="Module\ActivePattern.fs" />
+		<Compile Include="Module\String.fs" />
 		<Compile Include="Module\QualifiedAccess\Task.fs" />
 		<Compile Include="Module\QualifiedAccess\Async.fs" />
 		<Compile Include="Module\QualifiedAccess\Seq.fs" />
@@ -48,9 +49,9 @@
 		<Compile Include="Module\QualifiedAccess\ResizeArray.fs" />
 		<Compile Include="Module\QualifiedAccess\Map.fs" />
 		<Compile Include="Module\QualifiedAccess\Nullable.fs" />
+		<Compile Include="Module\QualifiedAccess\String.fs" />
 		<Compile Include="Module\Print.fs" />
 		<Compile Include="Module\TcpIp.fs" />
-		<Compile Include="Module\String.fs" />
 		<Compile Include="Prelude.AdhocPolymorphism.fs" />
 		<Compile Include="TypeExtensions\Xml.fs" />
 		<Compile Include="TypeExtensions\Em.Collection.fs" />

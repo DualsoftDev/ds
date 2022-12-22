@@ -10,6 +10,7 @@ open Engine.Common.FS
 module ExpressionForwardDeclModule =
     type IValue<'T> =
         abstract Value: 'T with get, set
+
     type IStorage<'T> =
         inherit IStorage
         inherit IValue<'T>
@@ -19,6 +20,11 @@ module ExpressionForwardDeclModule =
     type ITag<'T> =
         inherit ITag
         inherit IStorage<'T>
+
+    type ITagWithAddress =
+        inherit ITag
+        abstract Address:string
+
     type IVariable = inherit IStorage
     type IVariable<'T> =
         inherit IVariable

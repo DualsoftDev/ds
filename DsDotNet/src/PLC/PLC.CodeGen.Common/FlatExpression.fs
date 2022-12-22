@@ -15,10 +15,10 @@ module FlatExpressionModule =
 
     type TrueValue() =
         interface IExpressionTerminal with
-            member x.ToText() = "TRUE"
+            member x.PLCTagName = "TRUE"
     type FalseValue() =
         interface IExpressionTerminal with
-            member x.ToText() = "FALSE"
+            member x.PLCTagName = "FALSE"
 
     type FlatExpression =
         /// pulse identifier 및 negation 여부 (pulse coil 은 지원하지 않을 예정)
@@ -31,7 +31,7 @@ module FlatExpressionModule =
         interface IFlatExpression
         member x.ToText() =
             match x with
-            | FlatTerminal(value, pulse, neg) -> sprintf "%s%s" (if neg then "!" else "") (value.ToText())
+            | FlatTerminal(value, pulse, neg) -> sprintf "%s%s" (if neg then "!" else "") (value.PLCTagName)
             | FlatNary(op, terms) ->
                 let termsStr =
                     terms

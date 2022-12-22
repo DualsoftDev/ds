@@ -21,7 +21,7 @@ module Command =
     /// Command 를 위한 Tag
     type CommandTag(tag:string, size:Size, kind:VarKind) =
         interface IExpressionTerminal with
-            member x.ToText() = tag
+            member x.PLCTagName = tag
         member x.Size() = size
         member x.SizeString =
             match size with
@@ -101,8 +101,8 @@ module Command =
     with
         member x.GetInstanceText() =
             match x with
-            | TimerMode(tag, time) -> sprintf "T_%s" (tag.ToText())
-            | CounterMode(tag, resetTag, count) ->  sprintf "C_%s" (tag.ToText())
+            | TimerMode(tag, time) -> sprintf "T_%s" (tag.PLCTagName)
+            | CounterMode(tag, resetTag, count) ->  sprintf "C_%s" (tag.PLCTagName)
         member x.UsedCommandTags() =
             match x with
             | TimerMode(tag, time) -> seq{tag}

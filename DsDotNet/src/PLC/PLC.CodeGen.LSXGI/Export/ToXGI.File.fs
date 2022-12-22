@@ -424,7 +424,21 @@ module internal File =
         let symbolInfos =
             tags
             |> Seq.map (fun t ->
-                let name, comment, device, kind, addr, plcType = "FAKENAME", "FAKECOMMENT", "FAKEDEVICE", Variable.Kind.VAR, "FAKE_ADDR", "FAKE_PLC_TYPE"
+                let name, addr = t.Name, t.Address
+
+                let device, memSize =
+                    match t.Address with
+                    | RegexPattern @"%([IQM])([XBWL]).*$" [iqm; mem] -> iqm, mem
+                    | _ -> "????", "????"
+
+                let plcType =
+                    match memSize with
+                    | "X" -> "BOOL"
+                    | "B" -> "BYTE"
+                    | "W" -> "WORD"
+                    | "L" -> "DWORD"
+                    | _ -> failwith "ERROR"
+                let comment, kind = "FAKECOMMENT", Variable.Kind.VAR
 
                 //<kwak>
                 //let name, comment = t.FullName, t.Tag

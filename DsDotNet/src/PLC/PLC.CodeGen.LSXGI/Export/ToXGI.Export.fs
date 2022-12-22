@@ -35,12 +35,11 @@ module LsXGI =
     //    let plctags = statementToTag statements |> Seq.append tags |> Seq.distinct
     //    File.generateXGIXmlFromStatement ladderInfo.PrologComments statements plctags unusedTags existingLSISprj
 
-    let generateXml (opt:CodeGenerationOption) (storages:Storages) (commentedStatements:CommentedStatement list) =
+    let generateXml (opt:CodeGenerationOption) (storages:Storages) (commentedStatements:CommentedStatement list) : string =
         let prologComments = [""]
         let tags = storages.Values |> Seq.ofType<ITagWithAddress>
         let unusedTags:ITagWithAddress list = []
         let existingLSISprj = None
 
         let xml = generateXGIXmlFromStatement prologComments commentedStatements tags unusedTags existingLSISprj
-
-        ()
+        xml

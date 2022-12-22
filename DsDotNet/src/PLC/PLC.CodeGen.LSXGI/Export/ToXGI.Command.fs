@@ -88,7 +88,7 @@ module internal Command =
         let results = ResizeArray<int * string>()
         let funcSizeY = 4
         //Command 속성입력
-        results.Add(createPA (reset.ToText()) (x-1) (y+1))
+        results.Add(createPA (reset.PLCTagName) (x-1) (y+1))
         results.Add(createPA (sprintf "%d" count) (x-1) (y+2))
 
         funcSizeY-1, results
@@ -110,7 +110,7 @@ module internal Command =
         results.Add(createFB funcFind func "" opComp.ToText x y )
         results.Add(createPA (leftA.ToText()) (x-1) (y+1))
         results.Add(createPA (leftB.ToText()) (x-1) (y+2))
-        results.Add(createPA (coil.ToText())  (x+1) (y+1))
+        results.Add(createPA (coil.PLCTagName)  (x+1) (y+1))
 
         funcSizeY-1, results
 
@@ -126,7 +126,7 @@ module internal Command =
         else
             x <- xInit
             //Command 결과출력
-            results.Add(createPA (tagCoil.ToText())  (x+1) (y))
+            results.Add(createPA (tagCoil.PLCTagName)  (x+1) (y))
 
         let func = "ADD"
         //test ahn : Rear UINT SINT 등등 타입 추가  필요
@@ -161,7 +161,7 @@ module internal Command =
         else
             //Command 결과출력
             x <- xInit
-            results.Add(createPA (tagCoil.ToText())  (x+1) (y))
+            results.Add(createPA (tagCoil.PLCTagName)  (x+1) (y))
 
         let func = "MOVE"
         let funcFind = func + "_" + fromTag.SizeString
@@ -180,7 +180,7 @@ module internal Command =
         let inst, func = cmd.Instance |> fun (inst, varType) -> inst, varType.ToString()
         results.Add(createFB func func inst func x y)
         //Command 결과출력
-        results.Add(createPA (cmd.CoilTerminalTag.ToText())  (x+1) (y))
+        results.Add(createPA (cmd.CoilTerminalTag.PLCTagName)  (x+1) (y))
 
         results
 

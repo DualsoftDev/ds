@@ -39,7 +39,7 @@ module internal Basic =
                     | false, true   -> ElementType.ClosedContactMode
                     | false, false  -> ElementType.ContactMode
                     |> int
-                let str = elementBody mode c (id.ToText())
+                let str = elementBody mode c (id.PLCTagName)
                 {| Xml=[|c, str|]; NextX=x; NextY=y; VLineUpRightMaxY=y |}
 
             | FlatNary(And, exprs) ->
@@ -112,7 +112,7 @@ module internal Basic =
                     let c = coord (x+1) y
                     results.Add((c, elementFull (int ElementType.MultiHorzLineMode) c lengthParam ""))
                     let c = coord coilCellX y
-                    results.Add((c, elementBody (int cmdExp.LDEnum) c (cmdExp.CoilTerminalTag |> toText)))
+                    results.Add((c, elementBody (int cmdExp.LDEnum) c (cmdExp.CoilTerminalTag.PLCTagName)))
                     0, results
 
                 let nx = result.NextX

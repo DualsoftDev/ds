@@ -79,7 +79,7 @@ module internal Common =
         let newY = y + funSize
         results.Add((coord x y, risingline (coord x y)))
         results.Add(((coord newX newY), mutiEndLine (x) (newX - 1) newY))
-        results.Add((coord coilCellX newY, elementBody (int ElementType.CoilMode) (coord coilCellX newY) (tagCoil.ToText())))
+        results.Add((coord coilCellX newY, elementBody (int ElementType.CoilMode) (coord coilCellX newY) (tagCoil.PLCTagName)))
         vlineDownTo (x-1) y funSize |> results.AddRange
         results
 

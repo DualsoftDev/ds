@@ -100,6 +100,8 @@ module XgiGenerationTestModule =
             statements.Length === 1      // createTag 는 statement 에 포함되지 않는다.   (한번 생성하고 끝나므로 storages 에 tag 만 추가 된다.)
 
             let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+            let text = xml
+            tracefn "%s" xml
             ()
 
 

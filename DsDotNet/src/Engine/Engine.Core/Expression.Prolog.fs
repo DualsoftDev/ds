@@ -33,7 +33,8 @@ module ExpressionForwardDeclModule =
     (* PLC generation module 용 *)
     type IFlatExpression = interface end
     type IExpressionTerminal =
-        inherit IText
+        //inherit IText
+        abstract PLCTagName:string
 
     /// Expression<'T> 을 boxed 에서 접근하기 위한 최소의 interface
     type IExpression =
@@ -298,7 +299,8 @@ module rec ExpressionPrologModule =
         inherit TypedValueStorage<'T>(name, initValue)
 
         interface ITag<'T>
-        interface IExpressionTerminal
+        interface IExpressionTerminal with
+            member x.PLCTagName = name
         override x.ToText() = "$" + name
 
     [<AbstractClass>]

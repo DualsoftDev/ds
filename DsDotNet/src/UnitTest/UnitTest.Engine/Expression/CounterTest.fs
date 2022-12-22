@@ -1,14 +1,14 @@
-namespace UnitTest.Engine.Statement
+namespace T.Statement
 
 open NUnit.Framework
 
-open UnitTest.Engine
+open T
 open Engine.Core
-open UnitTest.Engine.Expression
+open T.Expression
 
 
-[<AutoOpen>]
-module CounterTestModule =
+//[<AutoOpen>]
+//module CounterTestModule =
 
     type CounterTest() =
         do Fixtures.SetUpTest()

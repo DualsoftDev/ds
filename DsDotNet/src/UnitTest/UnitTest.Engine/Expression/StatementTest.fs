@@ -1,14 +1,14 @@
-namespace UnitTest.Engine.Statement
+namespace T.Statement
 
 open NUnit.Framework
 
-open UnitTest.Engine
-open UnitTest.Engine.Expression
+open T
+open T.Expression
 open Engine.Core
 open Engine.Parser.FS
 
-[<AutoOpen>]
-module StatementTestModule =
+//[<AutoOpen>]
+//module StatementTestModule =
 
     type StatementTest() =
         do Fixtures.SetUpTest()

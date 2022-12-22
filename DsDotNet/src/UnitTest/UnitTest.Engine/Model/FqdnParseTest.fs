@@ -1,4 +1,4 @@
-namespace UnitTest.Engine
+namespace T
 
 open Engine.Core
 open NUnit.Framework

@@ -1,11 +1,11 @@
-namespace UnitTest.Engine.PLC
+namespace T.PLC
 
 open System.IO
 open System.Reflection
 
 open NUnit.Framework
 
-open UnitTest.Engine
+open T
 open Engine.Parser.FS
 open Engine.Core
 open Engine.Common.FS
@@ -14,7 +14,7 @@ open PLC.CodeGen.LSXGI
 
 
 [<AutoOpen>]
-module XgiGenerationTestModule =
+module XGI =
 
     type XgiGenerationTest() =
         do Fixtures.SetUpTest()

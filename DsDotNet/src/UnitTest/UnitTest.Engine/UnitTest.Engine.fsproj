@@ -4,6 +4,7 @@
 		<TargetFramework>net6.0</TargetFramework>
 		<!--<TargetFramework>net48</TargetFramework>-->
 
+		<RootNamespace>T</RootNamespace>
 		<IsPackable>false</IsPackable>
 		<GenerateProgramFile>false</GenerateProgramFile>
 	</PropertyGroup>

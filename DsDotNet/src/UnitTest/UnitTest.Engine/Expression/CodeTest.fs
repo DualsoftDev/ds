@@ -1,9 +1,9 @@
-namespace UnitTest.Engine.Expression
+namespace T.Expression
 
 open NUnit.Framework
 
 open Engine.Parser.FS
-open UnitTest.Engine
+open T
 open System
 open Engine.Core
 

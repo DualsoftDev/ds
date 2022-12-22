@@ -1,15 +1,15 @@
-namespace UnitTest.Engine.Statement
+namespace T.Statement
 
 open NUnit.Framework
 
-open UnitTest.Engine
+open T
 open Engine.Core
-open UnitTest.Engine.Expression
+open T.Expression
 open System.Collections.Generic
 open Engine.Parser.FS
 
-[<AutoOpen>]
-module TimerTestModule =
+//[<AutoOpen>]
+//module TimerTestModule =
 
     type TimerTest() =
         do Fixtures.SetUpTest()

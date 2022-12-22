@@ -1,9 +1,9 @@
-﻿namespace PLC.CodeGen.LSXGI
+namespace PLC.CodeGen.LSXGI
 
-open Engine.Common.FS
-open Dual.Core.Types
 open System.Collections.Generic
 open System.Diagnostics
+
+open Engine.Common.FS
 
 // IEC-61131 Addressing
 // http://www.microshadow.com/ladderdip/html/basic_iec_addressing.htm
@@ -42,13 +42,13 @@ module XGITag = //IEC61131Tag =
                 failwithlogf "Device generator for %s byte exceeds max limit!" memType
             if startWord >= nBaseWord + nMaxWord then
                 failwithlogf "Device generator for %s word exceeds max limit!" memType
-                       
+
             /// I,O 주소 생성은 임시적임
-            let address = 
+            let address =
                 match memType with
-                | "I" -> sprintf "%%%sX%d.%d.%d" memType (startBit/16/64) (startBit/16) (startBit%16) 
+                | "I" -> sprintf "%%%sX%d.%d.%d" memType (startBit/16/64) (startBit/16) (startBit%16)
                 | "O" -> sprintf "%%%sX%d.%d.%d" "Q" (startBit/16/64) (startBit/16) (startBit%16)
-                | "M" -> sprintf "%%%sX%d" memType startBit 
+                | "M" -> sprintf "%%%sX%d" memType startBit
                 | "IB" -> sprintf "%%%s%d.%d" memType (startByte/64) (startByte%64)
                 | "OB" -> sprintf "%%%s%d.%d" "QB" (startByte/64) (startByte%64)
                 | "MB" -> sprintf "%%%s%d" memType startByte
@@ -75,8 +75,8 @@ module XGITag = //IEC61131Tag =
                 address
 
         generate
-    
-    
+
+
 
     /// name, comment, device, address 를 받아서 SymbolInfo 를 생성한다.
     let createSymbol name comment device kind  address plctype devicePos addressIEC=

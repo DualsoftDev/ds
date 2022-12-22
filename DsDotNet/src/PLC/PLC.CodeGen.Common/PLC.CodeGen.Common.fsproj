@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
@@ -14,11 +14,28 @@
 		<Compile Include="Prelude\Prelude.fs" />
 		<Compile Include="TagType.fs" />
 		<Compile Include="Command.fs" />
+		<!--
+		<Compile Include="QGraph\QGraph.Prelude.fs" />
+		<Compile Include="QGraph\QGraph.Util.fs" />
+		<Compile Include="QGraph\QGraph.ModelValidation.fs" />
+		<Compile Include="QGraph\QGraph.Traverse.fs" />
+		<Compile Include="QGraph\QGraph.Relay.fs" />
+		-->
+		<Compile Include="QGraph\QGraph.CodeGenerationOption.fs" />
+		<!--
+		<Compile Include="QGraph\QGraph.Generator.fs" />
+		<Compile Include="QGraph\QGraph.Processing.fs" />
+		<Compile Include="QGraph\QGraph.Util2.fs" />
+		-->
 		<Compile Include="Library.fs" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="QGraph\" />
 	</ItemGroup>
 
 </Project>

@@ -1,17 +1,12 @@
-﻿namespace PLC.CodeGen.LSXGI
+namespace PLC.CodeGen.LSXGI
 
 open System.IO
-open FSharpPlus
-open Engine.Common.FS
-open Dual.Core.Types
-open Dual.Core.QGraph
-open Dual.Core.Prelude
-open Dual.Core.Types.Command
-open Dual.Core.Prelude.NewIEC61131
 open System.Reflection
 open PLC.CodeGen.LSXGI
 open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
+
 open Engine.Common.FS
+open Engine.Core.ExpressionForwardDeclModule
 
 
 [<AutoOpen>]
@@ -26,91 +21,93 @@ module internal File =
         let yy = y * 1024 + 1
         sprintf "\t<Rung BlockMask=\"0\"><Element ElementType=\"%d\" Coordinate=\"%d\">%s</Element></Rung>" (int ElementType.RungCommentMode) yy cmt
 
-    /// PLC ladder 상의 rung statement.  현재는 XGI 기준
-    type Statement(condition, cmd, comments:string seq) =
-        member x.Condition:Expression = condition
-        member x.Command:Command.XgiCommand = cmd
-        member x.Comments:string array = comments |> Array.ofSeq
-    
-    /// 추상적인 Rung info expression 으로부터 XGI ladder rung statement 를 생성한다.
-    let rungInfoToStatement (opt:CodeGenerationOption) (gri:(IExpressionTerminal * seq<RungInfo>)) = 
-        let z = snd gri |> map(rungInfoToExpr)
-        let condition = snd gri |> map(rungInfoToExpr) |> Seq.reduce mkOr
-        let coil = (snd gri |> Seq.head).CoilOrigin
-        let endCommand =
-            match coil with
-                | Coil(coil) ->
-                    match coil.Terminal with
-                    | Terminal(term) -> term |> createOutputCoil
-                    | _ -> failwithlogf "This Coil is not Terminal"
-                | Function(func) ->
-                    match func with
-                    | :? FunctionPure as fp -> 
-                        match fp with
-                        | CopyMode(tag, (tag1, tag2)) -> createOutputCopy(tag, tag1, tag2)
-                        | CompareGT(tag, (tag1, tag2)) -> createOutputCompare(tag, GT, tag1, tag2)
-                        | CompareLT(tag, (tag1, tag2)) -> createOutputCompare(tag, LT, tag1, tag2)
-                        | CompareGE(tag, (tag1, tag2)) -> createOutputCompare(tag, GE, tag1, tag2)
-                        | CompareLE(tag, (tag1, tag2)) -> createOutputCompare(tag, LE, tag1, tag2)
-                        | CompareEQ(tag, (tag1, tag2)) -> createOutputCompare(tag, EQ, tag1, tag2)
-                        | CompareNE(tag, (tag1, tag2)) -> createOutputCompare(tag, NE, tag1, tag2)
-                        | Add(tag, target, value) -> createOutputAdd(tag, target, value)
-                    | :? FunctionBlock as fb -> 
-                        match fb with
-                        | TimerMode(tag, time) -> createOutputTime(tag, time)
-                        | CounterMode(tag, resetTag, count) -> createOutputCount(tag, resetTag, count)
-                    | :? CoilOutput as co ->
-                        match co with
-                        | CoilMode(tag) -> createOutputCoil(tag)
-                        | PulseCoilMode(tag) -> createOutputPulse(tag)
-                        | NPulseCoilMode(tag) -> createOutputNPulse(tag)
-                        | ClosedCoilMode(tag) -> createOutputCoilNot(tag)
-                        | SetCoilMode(tag) -> createOutputSet(tag)
-                        | ResetCoilMode(tag) -> createOutputRst(tag)
-                    | _ -> failwithlogf "This Function is not support"
-                | _ -> coil.GetCoilTerminal() |> createOutputCoil
-            
-        let comments =
-            snd gri
-            |> List.ofSeq
-            |> List.collect(fun ri -> ri.Comments)
-            |> List.map (fun c -> System.Xml.Linq.XText(c).ToString())      // 특수 문자 XML 대응
+    // <kwak>
+    ///// PLC ladder 상의 rung statement.  현재는 XGI 기준
+    //type Statement(condition, cmd, comments:string seq) =
+    //    member x.Condition:Expression = condition
+    //    member x.Command:Command.XgiCommand = cmd
+    //    member x.Comments:string array = comments |> Array.ofSeq
 
-        Statement(condition, endCommand, comments)
-    
-    let statementToTag (statements:Statement seq) =
-        
-        let terminals = 
-            statements 
-            |> Seq.collect(fun stmt -> 
-                let command = stmt.Command.UsedCommandTags 
-                let coil = stmt.Command.CoilTerminalTag 
-                let cond = stmt.Condition |> collectTerminals
-                
-                cond @@ seq{coil} @@ command
-            )
+    ///// 추상적인 Rung info expression 으로부터 XGI ladder rung statement 를 생성한다.
+    //let rungInfoToStatement (opt:CodeGenerationOption) (gri:(IExpressionTerminal * seq<RungInfo>)) =
+    //    let z = snd gri |> map(rungInfoToExpr)
+    //    let condition = snd gri |> map(rungInfoToExpr) |> Seq.reduce mkOr
+    //    let coil = (snd gri |> Seq.head).CoilOrigin
+    //    let endCommand =
+    //        match coil with
+    //            | Coil(coil) ->
+    //                match coil.Terminal with
+    //                | Terminal(term) -> term |> createOutputCoil
+    //                | _ -> failwithlogf "This Coil is not Terminal"
+    //            | Function(func) ->
+    //                match func with
+    //                | :? FunctionPure as fp ->
+    //                    match fp with
+    //                    | CopyMode(tag, (tag1, tag2)) -> createOutputCopy(tag, tag1, tag2)
+    //                    | CompareGT(tag, (tag1, tag2)) -> createOutputCompare(tag, GT, tag1, tag2)
+    //                    | CompareLT(tag, (tag1, tag2)) -> createOutputCompare(tag, LT, tag1, tag2)
+    //                    | CompareGE(tag, (tag1, tag2)) -> createOutputCompare(tag, GE, tag1, tag2)
+    //                    | CompareLE(tag, (tag1, tag2)) -> createOutputCompare(tag, LE, tag1, tag2)
+    //                    | CompareEQ(tag, (tag1, tag2)) -> createOutputCompare(tag, EQ, tag1, tag2)
+    //                    | CompareNE(tag, (tag1, tag2)) -> createOutputCompare(tag, NE, tag1, tag2)
+    //                    | Add(tag, target, value) -> createOutputAdd(tag, target, value)
+    //                | :? FunctionBlock as fb ->
+    //                    match fb with
+    //                    | TimerMode(tag, time) -> createOutputTime(tag, time)
+    //                    | CounterMode(tag, resetTag, count) -> createOutputCount(tag, resetTag, count)
+    //                | :? CoilOutput as co ->
+    //                    match co with
+    //                    | CoilMode(tag) -> createOutputCoil(tag)
+    //                    | PulseCoilMode(tag) -> createOutputPulse(tag)
+    //                    | NPulseCoilMode(tag) -> createOutputNPulse(tag)
+    //                    | ClosedCoilMode(tag) -> createOutputCoilNot(tag)
+    //                    | SetCoilMode(tag) -> createOutputSet(tag)
+    //                    | ResetCoilMode(tag) -> createOutputRst(tag)
+    //                | _ -> failwithlogf "This Function is not support"
+    //            | _ -> coil.GetCoilTerminal() |> createOutputCoil
 
-        let plcTags = terminals |> Seq.where(fun t -> t :? PLCTag) |> Seq.distinct |> Seq.cast<PLCTag>
-        let newTags = terminals |> Seq.where(fun t -> t :? PLCTag |> not) 
-                                |> Seq.distinctBy(fun t -> t.ToText()) 
-                                |> Seq.map(fun t -> 
-                                    match t with
-                                    | :? Coil as tag -> PLCTag(tag.ToText(), TagType.Dummy |> Some)
-                                    | :? CommandTag as cmdTag -> 
-                                                    let newTag = PLCTag(cmdTag.ToText(), TagType.Dummy |> Some)
-                                                    newTag.Size <- cmdTag.Size()
-                                                    newTag
-                                    | _ -> PLCTag(t.ToText(), TagType.Dummy |> Some) )
-        
-        let instanceTags =
-                   statements 
-                   |> Seq.where(fun stmt ->  stmt.Command.HasInstance)
-                   |> Seq.map(fun stmt ->  stmt.Command.Instance 
-                                           |> fun (inst, instType) 
-                                               -> PLCTag(inst, TagType.Instance |> Some, "", [|K.FBInstance, box(instType.ToString())|]) )
-                   
-        plcTags @@ newTags @@ instanceTags
-       
+    //    let comments =
+    //        snd gri
+    //        |> List.ofSeq
+    //        |> List.collect(fun ri -> ri.Comments)
+    //        |> List.map (fun c -> System.Xml.Linq.XText(c).ToString())      // 특수 문자 XML 대응
+
+    //    Statement(condition, endCommand, comments)
+
+    // <kwak>
+    //let statementToTag (statements:Statement seq) =
+
+    //    let terminals =
+    //        statements
+    //        |> Seq.collect(fun stmt ->
+    //            let command = stmt.Command.UsedCommandTags
+    //            let coil = stmt.Command.CoilTerminalTag
+    //            let cond = stmt.Condition |> collectTerminals
+
+    //            cond @ seq{coil} @ command
+    //        )
+
+    //    let plcTags = terminals |> Seq.where(fun t -> t :? PLCTag) |> Seq.distinct |> Seq.cast<PLCTag>
+    //    let newTags = terminals |> Seq.where(fun t -> t :? PLCTag |> not)
+    //                            |> Seq.distinctBy(fun t -> t.ToText())
+    //                            |> Seq.map(fun t ->
+    //                                match t with
+    //                                | :? Coil as tag -> PLCTag(tag.ToText(), TagType.Dummy |> Some)
+    //                                | :? CommandTag as cmdTag ->
+    //                                                let newTag = PLCTag(cmdTag.ToText(), TagType.Dummy |> Some)
+    //                                                newTag.Size <- cmdTag.Size()
+    //                                                newTag
+    //                                | _ -> PLCTag(t.ToText(), TagType.Dummy |> Some) )
+
+    //    let instanceTags =
+    //               statements
+    //               |> Seq.where(fun stmt ->  stmt.Command.HasInstance)
+    //               |> Seq.map(fun stmt ->  stmt.Command.Instance
+    //                                       |> fun (inst, instType)
+    //                                           -> PLCTag(inst, TagType.Instance |> Some, "", [|K.FBInstance, box(instType.ToString())|]) )
+
+    //    plcTags @ newTags @ instanceTags
+
 
     /// Program 마지막 부분에 END 추가
     let generateEnd y =
@@ -123,7 +120,7 @@ module internal File =
 
 
     /// X 항목으로 Max 32개 넘는지 여부 체크
-    ///32개 기준 FB x 3개 +  Coil x 1개 사용기준 
+    ///32개 기준 FB x 3개 +  Coil x 1개 사용기준
     let rec getXGIMaxX (x:int) (expr:FlatExpression) =
         match expr with
         | FlatTerminal(id, pulse, neg) -> x
@@ -159,7 +156,7 @@ module internal File =
             // Rung 별로 생성
             for stmt in statements do
 
-                
+
                 // 다중 라인 설명문을 하나의 설명문 rung 에..
                 if stmt.Comments.any() then
                     let cmt = stmt.Comments |> String.concat "\r\n"
@@ -172,16 +169,16 @@ module internal File =
                 //    y <- y + 1
 
                 let expr = stmt.Condition |> FlatExpressionM.flatten
-                let xml, y' = 
-                    if(getXGIMaxX 0 expr > 28) 
+                let xml, y' =
+                    if(getXGIMaxX 0 expr > 28)
                     then
-                        let exprNew =  stmt.Condition |> ExpressionM.mkNeg |> FlatExpressionM.flatten 
-                        if(getXGIMaxX 0 exprNew > 28) 
+                        let exprNew =  stmt.Condition |> ExpressionM.mkNeg |> FlatExpressionM.flatten
+                        if(getXGIMaxX 0 exprNew > 28)
                         then failwithlogf "Or Expreesion Limit 28"
                         else
                             let commandNew = stmt.Command.ReverseCmd()
                             xmlRung exprNew commandNew y
-                    else 
+                    else
                         xmlRung expr stmt.Command y
 
                 y <- y' + 1
@@ -279,7 +276,7 @@ module internal File =
          *)
         let posiGlobalVar = xdoc.SelectSingleNode("//Configurations/Configuration/GlobalVariables/GlobalVariable")
         let countExistingGlobal = posiGlobalVar.Attributes.["Count"].Value |> System.Int32.Parse
-        let globalSymbolXmls = 
+        let globalSymbolXmls =
             // symbolsGlobal = "<GlobalVariable Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol>
             let neoGlobals = symbolsGlobal |> DsXml.xmlToXmlNode
             let numNewGlobals = neoGlobals.Attributes.["Count"].Value |> System.Int32.Parse
@@ -292,7 +289,7 @@ module internal File =
             //let xx2 = neoGlobals.SelectNodes("//Symbols/Symbol*") |> XmlExt.ToEnumerables |> toArray
             //let xx3 = neoGlobals.SelectNodes("//GlobalVariable/Symbols/Symbol") |> XmlExt.ToEnumerables |> toArray
             //let xx4 = neoGlobals.SelectNodes("//*Symbol") |> XmlExt.ToEnumerables |> toArray
-            
+
             neoGlobals.SelectNodes("//Symbols/Symbol")
             |> XmlExt.ToEnumerables
             //|> DsXml.getChildNodes
@@ -312,7 +309,7 @@ module internal File =
 
         //let templateFiles =
         //    emptyLSISprj
-        //    |> Option.defaultWith(fun () -> 
+        //    |> Option.defaultWith(fun () ->
         //        let entry = System.Reflection.Assembly.GetEntryAssembly()
         //        let dir = Path.GetDirectoryName(entry.Location)
         //        Path.Combine(dir, "EmptyLSISProject.xml")
@@ -332,11 +329,11 @@ module internal File =
         //    }
         //allLines
 
-    let generateXGIXmlFromStatement (prologComments:string seq) (statements:Statement seq) (tags:PLCTag seq) (unusedTags:PLCTag seq) (existingLSISprj:string option) =
+    let generateXGIXmlFromStatement (prologComments:string seq) (statements:Statement seq) (tags:ITagWithAddress seq) (unusedTags:ITagWithAddress seq) (existingLSISprj:string option) =
         // TODO : 하드 코딩...  PLC memory 설정을 어디선가 받아서 처리해야 함.
         /// PLC memory manager
         let manager =
-            /// PLC H/W memory configurations        
+            /// PLC H/W memory configurations
             let hwconfs =
                 let m (x:#MemoryConfigBase) = x :> MemoryConfigBase
                 [
@@ -389,15 +386,14 @@ module internal File =
                     |> Seq.bind (fun t -> toChunk t 10)
                 let tagsUsedInTags =
                     tags
-                    |> Seq.choose (fun t -> t.Address)
-                    |> Seq.map (fun addr -> addr.GetAddress())
+                    |> Seq.map (fun t -> t.Address.GetAddress())
                     |> Set.ofSeq
                 let tagsUnusedInTags =
                     unusedTags
                     |> Seq.choose (fun t -> t.Address)
                     |> Seq.map (fun addr -> addr.GetAddress())
                     |> Set.ofSeq
-                tagsUsedInFiles @@ tagsUsedInTags @@ tagsUnusedInTags
+                tagsUsedInFiles @ tagsUsedInTags @ tagsUnusedInTags
 
             alreadyAllocatedAddresses |> iter (fun t -> manager.MarkAllocated(t))
             manager
@@ -418,7 +414,7 @@ module internal File =
                 "MD", fun () -> manager.AllocateTag(Memory.M, Size.D) |> Option.get
             ] |> Tuple.toDictionary
 
-        let symbolInfos = 
+        let symbolInfos =
             tags
             |> Seq.map (fun t ->
                 let name, comment = t.FullName, t.Tag
@@ -426,10 +422,10 @@ module internal File =
                     match t.IOType with
                     | Some tt when tt.Equals TagType.Instance -> t.FBInstance  //instance 타입은  주소에 저장 활용 (내부사용으로 주소값이 없음)
                     | _ ->  match t.Size with
-                            | IEC61131.Size.Bit    ->  "BOOL" 
-                            | IEC61131.Size.Byte   ->  "BYTE" 
-                            | IEC61131.Size.Word   ->  "WORD" 
-                            | IEC61131.Size.DWord  ->  "DWORD" 
+                            | IEC61131.Size.Bit    ->  "BOOL"
+                            | IEC61131.Size.Byte   ->  "BYTE"
+                            | IEC61131.Size.Word   ->  "WORD"
+                            | IEC61131.Size.DWord  ->  "DWORD"
                             | _ -> failwithlog "tag Size Unknown"
 
                 /// one of {"I"; "O"; "M"}
@@ -444,9 +440,9 @@ module internal File =
                         | _ -> ""
                         //Trace.WriteLine("Unknown PLC device type: assume 'M'.")
                 let addr =
-                    if (t.StringAddress.isNullOrEmpty() && t.FBInstance.isNullOrEmpty())
+                    if (t.Address.IsNullOrEmpty() && t.FBInstance.isNullOrEmpty())
                     then
-                        let addr =  
+                        let addr =
                             match t.Size with
                             | IEC61131.Size.Bit    ->  generators.[device]()
                             | IEC61131.Size.Byte   ->  generators.[device+"B"]()
@@ -462,21 +458,21 @@ module internal File =
                     | Some tt when tt.Equals TagType.Instance -> Variable.Kind.VAR
                     | _->                                        Variable.Kind.VAR_EXTERNAL
 
-                XGITag.createSymbol name comment device ((int)kind) addr plcType -1 "" //Todo : XGK 일경우 DevicePos, IEC Address 정보 필요 
+                XGITag.createSymbol name comment device ((int)kind) addr plcType -1 "" //Todo : XGK 일경우 DevicePos, IEC Address 정보 필요
                 ) |> Seq.toList
-                
+
         /// Symbol table 정의 XML 문자열
         let symbolsLocalXml = XGITag.generateSymbolVars (symbolInfos, false)
 
         let globalSym = symbolInfos
-                        |> Seq.filter(fun w -> not (w.Device.isNullOrEmpty()))
+                        |> Seq.filter(fun w -> not (w.Device.IsNullOrEmpty()))
                         |> Seq.map (fun s -> XGITag.copyLocal2GlobalSymbol s)
-                                   
+
         let symbolsGlobalXml = XGITag.generateSymbolVars (globalSym, true)
-        
+
 
         let rungsXml = generateRungs prologComments statements
-        
+
         logInfo "Finished generating PLC code."
         wrapWithXml rungsXml symbolsLocalXml symbolsGlobalXml existingLSISprj
 

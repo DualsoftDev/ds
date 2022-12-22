@@ -424,7 +424,7 @@ module IEC61131 =
         member x.Item with get(prefix) = dicStr.[prefix]
 
         /// 주어진 tag 가 사용된 영역을 marking
-        member x.RegisterTags (tags: ITag seq) = x.RegisterTags(tags |> Seq.map(fun t -> t.Address))
+        member x.RegisterTags (tags: ITagWithAddress seq) = x.RegisterTags(tags |> Seq.map(fun t -> t.Address))
         /// 주어진 tag 가 사용된 영역을 marking
         /// marking 도중 이미 사용된 영역을 marking 하려고 할 때, Exception 발생.    // TODO : Exception 말고, 일반화된 처리 필요
         member x.RegisterTags (tags: string seq) =

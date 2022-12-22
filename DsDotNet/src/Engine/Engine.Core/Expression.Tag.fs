@@ -37,6 +37,9 @@ module  TagModule =
     /// PLC action tag (PlcTag) class
     type PlcTag<'T when 'T:equality> (name, address:string, initValue:'T)  =
         inherit Tag<'T>(name, initValue)
+        interface ITagWithAddress with
+            member x.Address = x.Address
+
         member val Address = address with get, set
 
       /// Ds 일반 plan tag : going relay에 사용중

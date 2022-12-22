@@ -1,4 +1,4 @@
-namespace T.PLC
+namespace T.PLC.XGI
 
 open System.IO
 open System.Reflection
@@ -13,8 +13,8 @@ open PLC.CodeGen.Common.QGraph
 open PLC.CodeGen.LSXGI
 
 
-[<AutoOpen>]
-module XGI =
+//[<AutoOpen>]
+//module XGI =
 
     type XgiGenerationTest() =
         do Fixtures.SetUpTest()
@@ -83,7 +83,7 @@ module XGI =
 
 
         [<Test>]
-        member __.``XGI Generation test`` () =
+        member __.``AndOr simple test`` () =
             //generatePLCByModel
             let storages = Storages()
             let code = """
@@ -98,6 +98,29 @@ module XGI =
             let statements = parseCode storages code
             storages.Count === 4
             statements.Length === 1      // createTag 는 statement 에 포함되지 않는다.   (한번 생성하고 끝나므로 storages 에 tag 만 추가 된다.)
+
+            let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+            let text = xml
+            tracefn "%s" xml
+            ()
+
+
+        [<Test>]
+        member __.``Timer test`` () =
+            //generatePLCByModel
+            let storages = Storages()
+            let code = """
+                bool myBit0 = createTag("%IX0.0.0", false);
+                bool myBit1 = createTag("%IX0.0.1", false);
+                bool myBit2 = createTag("%IX0.0.2", false);
+
+                bool myBit7 = createTag("%IX0.0.7", false);
+                ton myTon = createTON(2000us, $myBit7);
+                $myBit7 := ($myBit0 || $myBit1) && $myBit2;
+"""
+            let statements = parseCode storages code
+            storages.Count === 11
+            statements.Length === 2      // createTag 는 statement 에 포함되지 않는다.   (한번 생성하고 끝나므로 storages 에 tag 만 추가 된다.)
 
             let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
             let text = xml

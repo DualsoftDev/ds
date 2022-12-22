@@ -36,10 +36,11 @@ module LsXGI =
     //    File.generateXGIXmlFromStatement ladderInfo.PrologComments statements plctags unusedTags existingLSISprj
 
     let generateXml (opt:CodeGenerationOption) (storages:Storages) (commentedStatements:CommentedStatement list) : string =
-        let prologComments = [""]
+        let prologComments = ["DS Logic for XGI"]
         let tags = storages.Values |> Seq.ofType<ITagWithAddress>
         let unusedTags:ITagWithAddress list = []
         let existingLSISprj = None
 
         let xml = generateXGIXmlFromStatement prologComments commentedStatements tags unusedTags existingLSISprj
+        System.IO.File.WriteAllText("C:/a.xml", xml)
         xml

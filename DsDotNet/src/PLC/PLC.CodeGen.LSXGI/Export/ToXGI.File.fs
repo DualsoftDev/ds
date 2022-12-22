@@ -2,19 +2,18 @@ namespace PLC.CodeGen.LSXGI
 
 open System.IO
 open System.Reflection
-open PLC.CodeGen.LSXGI
-open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
-
 open Engine.Common.FS
-open Engine.Core.ExpressionForwardDeclModule
-
+open Engine.Core
+open PLC.CodeGen.LSXGI
+open PLC.CodeGen.Common
+open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
+open PLC.CodeGen.Common.NewIEC61131
 
 [<AutoOpen>]
 module internal File =
 
     /// Double quote
     let dq content = sprintf "\"%s\"" content
-
 
     /// text comment 를 xml wrapping 해서 반환
     let getCommentRung y cmt =

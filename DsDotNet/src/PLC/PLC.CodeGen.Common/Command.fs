@@ -18,10 +18,6 @@ module Command =
         | Constant          = 2
 
 
-    [<Obsolete("임시")>]
-    type IExpressionTerminal =
-        inherit IText
-
     /// Command 를 위한 Tag
     type CommandTag(tag:string, size:Size, kind:VarKind) =
         interface IExpressionTerminal with

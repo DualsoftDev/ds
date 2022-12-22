@@ -67,15 +67,14 @@ module internal Command =
     let createOutputCopy(tag, tagA, tagB) = XgiCommand(FunctionCmd(FunctionPure.CopyMode(tag, (tagA, tagB))))
     let createOutputAdd(tag, targetTag, addValue:int) = XgiCommand(FunctionCmd(FunctionPure.Add(tag, targetTag, addValue)))
 
-    // <kwak>
-    //let createOutputCompare(tag, opComp:OpComp, tagA, tagB) =
-    //    match opComp with
-    //    | GT -> XgiCommand(FunctionCmd(FunctionPure.CompareGT(tag, (tagA, tagB))))
-    //    | GE -> XgiCommand(FunctionCmd(FunctionPure.CompareGE(tag, (tagA, tagB))))
-    //    | EQ -> XgiCommand(FunctionCmd(FunctionPure.CompareEQ(tag, (tagA, tagB))))
-    //    | LE -> XgiCommand(FunctionCmd(FunctionPure.CompareLE(tag, (tagA, tagB))))
-    //    | LT -> XgiCommand(FunctionCmd(FunctionPure.CompareLT(tag, (tagA, tagB))))
-    //    | NE -> XgiCommand(FunctionCmd(FunctionPure.CompareNE(tag, (tagA, tagB))))
+    let createOutputCompare(tag, opComp:OpComp, tagA, tagB) =
+        match opComp with
+        | GT -> XgiCommand(FunctionCmd(FunctionPure.CompareGT(tag, (tagA, tagB))))
+        | GE -> XgiCommand(FunctionCmd(FunctionPure.CompareGE(tag, (tagA, tagB))))
+        | EQ -> XgiCommand(FunctionCmd(FunctionPure.CompareEQ(tag, (tagA, tagB))))
+        | LE -> XgiCommand(FunctionCmd(FunctionPure.CompareLE(tag, (tagA, tagB))))
+        | LT -> XgiCommand(FunctionCmd(FunctionPure.CompareLT(tag, (tagA, tagB))))
+        | NE -> XgiCommand(FunctionCmd(FunctionPure.CompareNE(tag, (tagA, tagB))))
 
     let drawCmdTime(coil:IExpressionTerminal, time:int, x, y) =
         let results = ResizeArray<int * string>()
@@ -93,27 +92,26 @@ module internal Command =
 
         funcSizeY-1, results
 
-    // <kwak>
-    //let drawCmdCompare(coil:IExpressionTerminal, opComp:OpComp, leftA:CommandTag, leftB:CommandTag, x, y) =
-    //    let results = ResizeArray<int * string>()
-    //    let funcSizeY = 4
+    let drawCmdCompare(coil:IExpressionTerminal, opComp:OpComp, leftA:CommandTag, leftB:CommandTag, x, y) =
+        let results = ResizeArray<int * string>()
+        let funcSizeY = 4
 
-    //    if(leftA.Size() <> leftB.Size())
-    //    then failwithlog (sprintf "Tag Compare size error %s(%s),  %s(%s)" (leftA.ToText()) (leftA.SizeString) (leftB.ToText()) (leftB.SizeString))
+        if(leftA.Size() <> leftB.Size())
+        then failwithlog (sprintf "Tag Compare size error %s(%s),  %s(%s)" (leftA.ToText()) (leftA.SizeString) (leftB.ToText()) (leftB.SizeString))
 
-    //    let opCompType = leftA.SizeString
-    //    let func = opComp.ToText
-    //    let funcFind =
-    //        if(opComp = OpComp.NE)
-    //        then sprintf "%s_%s" opComp.ToText opCompType
-    //        else sprintf "%s2_%s" opComp.ToText opCompType
+        let opCompType = leftA.SizeString
+        let func = opComp.ToText
+        let funcFind =
+            if(opComp = OpComp.NE)
+            then sprintf "%s_%s" opComp.ToText opCompType
+            else sprintf "%s2_%s" opComp.ToText opCompType
 
-    //    results.Add(createFB funcFind func "" opComp.ToText x y )
-    //    results.Add(createPA (leftA.ToText()) (x-1) (y+1))
-    //    results.Add(createPA (leftB.ToText()) (x-1) (y+2))
-    //    results.Add(createPA (coil.ToText())  (x+1) (y+1))
+        results.Add(createFB funcFind func "" opComp.ToText x y )
+        results.Add(createPA (leftA.ToText()) (x-1) (y+1))
+        results.Add(createPA (leftB.ToText()) (x-1) (y+2))
+        results.Add(createPA (coil.ToText())  (x+1) (y+1))
 
-    //    funcSizeY-1, results
+        funcSizeY-1, results
 
     let drawCmdAdd(tagCoil:IExpressionTerminal, targetTag:CommandTag, addValue:int, xInit, y, (pulse:bool)) =
         let results = ResizeArray<int * string>()
@@ -186,36 +184,35 @@ module internal Command =
         results
 
 
-    // <kwak>
-    //let drawCommand(cmd:XgiCommand, x, y) =
-    //    let results = ResizeArray<int * string>()
+    let drawCommand(cmd:XgiCommand, x, y) =
+        let results = ResizeArray<int * string>()
 
-    //    //FunctionBlock, Function 까지 연장선 긋기
-    //    let newX = getFBCellX x
-    //    results.Add(((coord newX y), mutiEndLine (x + 1) (newX - 1) y))
+        //FunctionBlock, Function 까지 연장선 긋기
+        let newX = getFBCellX x
+        results.Add(((coord newX y), mutiEndLine (x + 1) (newX - 1) y))
 
-    //    //FunctionBlock, Function 그리기
-    //    let newY, result =
-    //        match cmd.CommandType with
-    //        | FunctionCmd (fc) ->
-    //            match fc with
-    //            | CopyMode  (endTag, (tagA, tagB)) ->  drawCmdCopy(endTag, tagA, tagB, newX, y, true)
-    //            | CompareGT (endTag, (tagA, tagB)) ->  drawCmdCompare(endTag, OpComp.GT, tagA, tagB, newX, y)
-    //            | CompareLT (endTag, (tagA, tagB)) ->  drawCmdCompare(endTag, OpComp.LT, tagA, tagB, newX, y)
-    //            | CompareGE (endTag, (tagA, tagB)) ->  drawCmdCompare(endTag, OpComp.GE, tagA, tagB, newX, y)
-    //            | CompareLE (endTag, (tagA, tagB)) ->  drawCmdCompare(endTag, OpComp.LE, tagA, tagB, newX, y)
-    //            | CompareEQ (endTag, (tagA, tagB)) ->  drawCmdCompare(endTag, OpComp.EQ, tagA, tagB, newX, y)
-    //            | CompareNE (endTag, (tagA, tagB)) ->  drawCmdCompare(endTag, OpComp.NE, tagA, tagB, newX, y)
-    //            | Add       (endTag, tag, value)   ->  drawCmdAdd(endTag, tag, value, newX, y, true)
-    //        | FunctionBlockCmd (fbc) ->
-    //            results.AddRange(drawFunctionBlockInstance(cmd, newX, y)) //Command 객체생성
-    //            match fbc with
-    //            | TimerMode(cmdCoil, time) -> drawCmdTime(cmdCoil,  time, newX, y)
-    //            | CounterMode(cmdCoil, resetTag, count) -> drawCmdCount(cmdCoil, resetTag, count, newX, y)
-    //        |_-> failwithlog "Unknown CommandType"
+        //FunctionBlock, Function 그리기
+        let newY, result =
+            match cmd.CommandType with
+            | FunctionCmd (fc) ->
+                match fc with
+                | CopyMode  (endTag, (tagA, tagB)) ->  drawCmdCopy(endTag, tagA, tagB, newX, y, true)
+                | CompareGT (endTag, (tagA, tagB)) ->  drawCmdCompare(endTag, OpComp.GT, tagA, tagB, newX, y)
+                | CompareLT (endTag, (tagA, tagB)) ->  drawCmdCompare(endTag, OpComp.LT, tagA, tagB, newX, y)
+                | CompareGE (endTag, (tagA, tagB)) ->  drawCmdCompare(endTag, OpComp.GE, tagA, tagB, newX, y)
+                | CompareLE (endTag, (tagA, tagB)) ->  drawCmdCompare(endTag, OpComp.LE, tagA, tagB, newX, y)
+                | CompareEQ (endTag, (tagA, tagB)) ->  drawCmdCompare(endTag, OpComp.EQ, tagA, tagB, newX, y)
+                | CompareNE (endTag, (tagA, tagB)) ->  drawCmdCompare(endTag, OpComp.NE, tagA, tagB, newX, y)
+                | Add       (endTag, tag, value)   ->  drawCmdAdd(endTag, tag, value, newX, y, true)
+            | FunctionBlockCmd (fbc) ->
+                results.AddRange(drawFunctionBlockInstance(cmd, newX, y)) //Command 객체생성
+                match fbc with
+                | TimerMode(cmdCoil, time) -> drawCmdTime(cmdCoil,  time, newX, y)
+                | CounterMode(cmdCoil, resetTag, count) -> drawCmdCount(cmdCoil, resetTag, count, newX, y)
+            |_-> failwithlog "Unknown CommandType"
 
-    //    results.AddRange(result)
+        results.AddRange(result)
 
-    //    newY, results
+        newY, results
 
 

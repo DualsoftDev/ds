@@ -3,6 +3,7 @@ namespace PLC.CodeGen.LSXGI
 open Engine.Common.FS
 open PLC.CodeGen.Common.QGraph
 open System.Collections.Generic
+open Engine.Core
 
 module LsXGI =
 
@@ -32,3 +33,6 @@ module LsXGI =
 
         let plctags = statementToTag statements |> Seq.append tags |> Seq.distinct
         File.generateXGIXmlFromStatement ladderInfo.PrologComments statements plctags unusedTags existingLSISprj
+
+    let generateXml (opt:CodeGenerationOption) (storages:Storages) (statements:Statement list) =
+        ()

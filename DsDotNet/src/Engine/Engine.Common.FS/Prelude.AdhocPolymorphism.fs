@@ -130,6 +130,14 @@ module PreludeAdhocPolymorphism =
     let inline mapi        f x = FAdhoc_mapi        $ x <| f
     let inline picki       f x = FAdhoc_picki       $ x <| f
 
+
+    //type FAdhoc_scan = FAdhoc_scan with
+    //    static member ($) (FAdhoc_scan, x:list<'T>)   = fun (f:'s -> 'T -> 's) (state:'s) -> List.scan  f state x
+    //    static member ($) (FAdhoc_scan, x:seq<'T>)    = fun (f:'s -> 'T -> 's) (state:'s) -> Seq.scan   f state x
+    //    static member ($) (FAdhoc_scan, x:array<'T>)  = fun (f:'s -> 'T -> 's) (state:'s) -> Array.scan f state x
+
+    //let inline scan        (f:'s->'t->'s) (state:'s) x = FAdhoc_scan  $ x <|| (f, state)
+
     (* Operators *)
 
     /// map

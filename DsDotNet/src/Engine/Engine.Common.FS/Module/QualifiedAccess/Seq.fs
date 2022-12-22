@@ -4,6 +4,8 @@ open System.Linq
 open System.Collections.Generic
 open System
 open System.Runtime.CompilerServices
+open System.Collections
+
 #nowarn "0064"
 
 [<AutoOpen>]
@@ -286,7 +288,8 @@ module Seq =
         else
             xs |> Seq.reduce f |> Some
 
-    let ofType<'a>(xs:_ seq) = xs.OfType<'a>()
+    //let ofType<'a>(xs:_ seq) = xs.OfType<'a>()
+    let ofType<'a>(xs:IEnumerable) = xs.OfType<'a>()
     let ofNotType<'a>(xs:'b seq) =
         let ofs = xs.OfType<'a>().Cast<'b>()
         xs.Except(ofs)

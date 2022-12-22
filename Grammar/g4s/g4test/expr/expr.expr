@@ -1,6 +1,8 @@
 /* grun expr toplevels -gui < g4test/expr/expr.expr */
 copyIf(true, 10, $tag1);        // statement.  not expression
 
+bool myBit1 = createTag("%IX0.0.0", false);
+$myBit1 := true;
 int8 myByte = createTag(0y);
 
 ton mytimer = createTON($cond1 || $cond2, 1000us);

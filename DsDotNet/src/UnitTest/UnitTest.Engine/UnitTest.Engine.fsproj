@@ -90,6 +90,7 @@
 		<None Include="Obsolete\test.ipynb" />
 		<Compile Include="Origins\OriginTester.fs" />
 		<Compile Include="HmiCodeGen\HmiCodeGenTester.fs" />
+		<Compile Include="PLCCodeGen\XGI\XgiGenTest.fs" />
 		<None Include="ScratchPad.fsx" />
 		<None Include="App.config" />
 		<Compile Include="Main.fs" />
@@ -102,6 +103,11 @@
 		<ProjectReference Include="..\..\Engine\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Test\Engine.Sample.csproj" />
 		<ProjectReference Include="..\..\Model\Import\Model.Import.Office\Model.Import.Office.fsproj" />
+
+		<ProjectReference Include="..\..\PLC\PLC.CodeGen.Common\PLC.CodeGen.Common.fsproj" />
+		<!--
+		<ProjectReference Include="..\..\PLC\PLC.CodeGen.LSXGI\PLC.CodeGen.LSXGI.fsproj" />
+		-->
 		<!--<ProjectReference Include="..\..\Model\Import\Model.Import.Office\Model.Import.Office.fsproj" />-->
 	</ItemGroup>
 	<ItemGroup>

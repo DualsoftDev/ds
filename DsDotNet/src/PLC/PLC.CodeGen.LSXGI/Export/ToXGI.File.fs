@@ -13,22 +13,13 @@ open PLC.CodeGen.Common.NewIEC61131
 module internal File =
     let [<Literal>] XGIMaxX = 28
 
-    /// Double quote
-    let dq content = sprintf "\"%s\"" content
-
     /// text comment 를 xml wrapping 해서 반환
     let getCommentRung y cmt =
         let yy = y * 1024 + 1
         sprintf "\t<Rung BlockMask=\"0\"><Element ElementType=\"%d\" Coordinate=\"%d\">%s</Element></Rung>" (int ElementType.RungCommentMode) yy cmt
 
     // <kwak>
-    ///// PLC ladder 상의 rung statement.  현재는 XGI 기준
-    //type Statement(condition, cmd, comments:string seq) =
-    //    member x.Condition:Expression = condition
-    //    member x.Command:Command.XgiCommand = cmd
-    //    member x.Comments:string array = comments |> Array.ofSeq
-
-    ///// 추상적인 Rung info expression 으로부터 XGI ladder rung statement 를 생성한다.
+    /// 추상적인 Rung info expression 으로부터 XGI ladder rung statement 를 생성한다.
     //let rungInfoToStatement (opt:CodeGenerationOption) (gri:(IExpressionTerminal * seq<RungInfo>)) =
     //    let z = snd gri |> map(rungInfoToExpr)
     //    let condition = snd gri |> map(rungInfoToExpr) |> Seq.reduce mkOr
@@ -141,6 +132,11 @@ module internal File =
 
     /// (조건=coil) seq 로부터 rung xml 들의 string 을 생성
     let private generateRungs (prologComments:string seq) (commentedStatements:CommentedStatement seq) =
+        let xmlRung (expr:FlatExpression) xgiCommand y =
+            let dq = "\""
+            let xml, y' = rung 0 y expr xgiCommand
+            $"\t<Rung BlockMask={dq}0{dq}>\r\n{xml}\t</Rung>", y'
+
         let mutable y = 0
         seq {
             // Prolog 설명문
@@ -148,10 +144,6 @@ module internal File =
                 let cmt = prologComments |> String.concat "\r\n"
                 yield getCommentRung y cmt
                 y <- y + 1
-
-            let xmlRung (expr:FlatExpression) xgiCommand y =
-                let xml, y' = rung 0 y expr xgiCommand
-                "\t<Rung BlockMask=\"0\">" + "\r\n" + xml +  "\t</Rung>", y'
 
             // Rung 별로 생성
             for CommentAndStatement(cmt, stmt) in commentedStatements do

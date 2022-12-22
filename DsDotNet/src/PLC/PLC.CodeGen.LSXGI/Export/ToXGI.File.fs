@@ -10,7 +10,7 @@ open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
 open PLC.CodeGen.Common.NewIEC61131
 
 [<AutoOpen>]
-module internal File =
+module internal XgiFile =
     let [<Literal>] XGIMaxX = 28
 
     /// text comment 를 xml wrapping 해서 반환
@@ -130,61 +130,65 @@ module internal File =
         | _ ->   failwithlog "Unknown FlatExpression case"
 
 
+    type XmlOutput = string
+    type RungGenerationInfo = {
+        Xmls: XmlOutput list   // Rung 별 누적 xml.  역순으로 추가.  꺼낼 때 뒤집어야..
+        Y: int }
+    with
+        member x.Add(xml) = {Xmls = xml::x.Xmls; Y = x.Y + 1 }
     /// (조건=coil) seq 로부터 rung xml 들의 string 을 생성
-    let private generateRungs (prologComments:string seq) (commentedStatements:CommentedStatement seq) =
-        let xmlRung (expr:FlatExpression) xgiCommand y =
+    let private generateRungs (prologComments:string seq) (commentedStatements:CommentedStatement seq) : XmlOutput =
+        let xmlRung (expr:FlatExpression) xgiCommand y : RungGenerationInfo=
             let dq = "\""
             let xml, y' = rung 0 y expr xgiCommand
-            $"\t<Rung BlockMask={dq}0{dq}>\r\n{xml}\t</Rung>", y'
+            { Xmls = [$"\t<Rung BlockMask={dq}0{dq}>\r\n{xml}\t</Rung>"]; Y = y'}
 
-        let mutable y = 0
-        seq {
-            // Prolog 설명문
-            if prologComments.any() then
-                let cmt = prologComments |> String.concat "\r\n"
-                yield getCommentRung y cmt
-                y <- y + 1
+        let mutable rgi:RungGenerationInfo = {Xmls = []; Y = 0}
 
-            // Rung 별로 생성
-            for CommentAndStatement(cmt, stmt) in commentedStatements do
+        // Prolog 설명문
+        if prologComments.any() then
+            let cmt = prologComments |> String.concat "\r\n"
+            let xml = getCommentRung rgi.Y cmt
+            rgi <- rgi.Add(xml)
 
-                // 다중 라인 설명문을 하나의 설명문 rung 에..
-                if cmt.NonNullAny() then
-                    yield getCommentRung y cmt
-                    y <- y + 1
+        // Rung 별로 생성
+        for CommentAndStatement(cmt, stmt) in commentedStatements do
 
-
-                //<kwak> 대체 version
-                let xml, y' =
-                    match stmt with
-                    | DuAssign (expr, (:? IExpressionTerminal as target)) ->
-                        let flatExpr = expr.Flatten() :?> FlatExpression
-                        let command:XgiCommand = CoilCmd(CoilMode(target)) |> XgiCommand
-                        xmlRung flatExpr command y
-
-                    | DuVarDecl _ -> failwith "ERROR: Invalid"
-                    | (DuTimer _ | DuCounter _ | DuCopy _ ) -> failwith "Not yet"
-                    | _  -> failwith "ERROR"
+            // 다중 라인 설명문을 하나의 설명문 rung 에..
+            if cmt.NonNullAny() then
+                let xml =getCommentRung rgi.Y cmt
+                rgi <- rgi.Add(xml)
 
 
-                //<kwak> origina version
-                //let expr = stmt.Condition |> FlatExpressionM.flatten
-                //let xml, y' =
-                //    if(getXGIMaxX 0 expr > XGIMaxX) then
-                //        let exprNew =  stmt.Condition |> ExpressionM.mkNeg |> FlatExpressionM.flatten
-                //        if(getXGIMaxX 0 exprNew > XGIMaxX) then
-                //            failwithlog $"Or Expreesion Limit {XGIMaxX}"
-                //        else
-                //            let commandNew = stmt.Command.ReverseCmd()
-                //            xmlRung exprNew commandNew y
-                //    else
-                //        xmlRung expr stmt.Command y
+            //<kwak> 대체 version
+            match stmt with
+            | DuAssign (expr, (:? IExpressionTerminal as target)) ->
+                let flatExpr = expr.Flatten() :?> FlatExpression
+                let command:XgiCommand = CoilCmd(CoilMode(target)) |> XgiCommand
+                let rgiSub = xmlRung flatExpr command rgi.Y
+                rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
 
-                y <- y' + 1
-                yield xml
+            | DuVarDecl _ -> failwith "ERROR: Invalid"
+            | (DuTimer _ | DuCounter _ | DuCopy _ ) -> failwith "Not yet"
+            | _  -> failwith "ERROR"
 
-            yield generateEnd y }
-        |> String.concat "\r\n"
+
+            //<kwak> origina version
+            //let expr = stmt.Condition |> FlatExpressionM.flatten
+            //let xml, y' =
+            //    if(getXGIMaxX 0 expr > XGIMaxX) then
+            //        let exprNew =  stmt.Condition |> ExpressionM.mkNeg |> FlatExpressionM.flatten
+            //        if(getXGIMaxX 0 exprNew > XGIMaxX) then
+            //            failwithlog $"Or Expreesion Limit {XGIMaxX}"
+            //        else
+            //            let commandNew = stmt.Command.ReverseCmd()
+            //            xmlRung exprNew commandNew y
+            //    else
+            //        xmlRung expr stmt.Command y
+
+        let rungEnd = generateEnd rgi.Y
+        rgi <- rgi.Add(rungEnd)
+        rgi.Xmls |> List.rev |> String.concat "\r\n"
 
     /// Template XGI XML 문자열을 반환
     let getTemplateXgiXmlWithVersion version =

@@ -42,5 +42,4 @@ module LsXGI =
         let existingLSISprj = None
 
         let xml = generateXGIXmlFromStatement prologComments commentedStatements tags unusedTags existingLSISprj
-        System.IO.File.WriteAllText("C:/a.xml", xml)
         xml

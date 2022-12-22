@@ -15,9 +15,9 @@ module String =
 
     let surround prefix suffix s = sprintf "%s%s%s" prefix s suffix
     let escapeQuote(s:string) = s.Replace("'", @"\'")
-    let quote q = surround q q
-    let singleQuote = quote q
-    let doubleQuote = quote qq
+    //let quote q = surround q q
+    let singleQuote = surround q q
+    let doubleQuote = surround qq qq
     let roundParen = surround "(" ")"
     let squareParen = surround "[" "]"
     let xmlComment = surround "<!--" "-->"

@@ -7,7 +7,7 @@ open Engine.Core
 type VertexMemoryManager with
 
     /// vertex 의 RGFH status 를 update 하는 rungs/statements 만들기
-    member vertex.CreateRGFHRungs(): Statement list =
+    member vertex.CreateRGFHRungs(): CommentedStatement list =
 
         let exprCS = tag2expr vertex.StartPort
         let exprCR = tag2expr vertex.ResetPort
@@ -33,4 +33,5 @@ type VertexMemoryManager with
         let rungH = vertex.Homing <== condSH
 
         [ rungR; rungG; rungF; rungH ]
+        |> List.map(fun statement -> CommentedStatement("", statement))
 

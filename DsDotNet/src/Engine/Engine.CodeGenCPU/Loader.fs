@@ -59,7 +59,6 @@ module CpuLoader =
     ///DsSystem 규격으로 cpu code 불러 Text으로 리턴
     let LoadStatementsForText(system:DsSystem) =
         [
-            for (desc_, statement) in ConvertSystem(system) ->
+            for (desc_, CommentAndStatement(comment_, statement)) in ConvertSystem(system) ->
                 statement.ToText()
         ].JoinWith("\r\n")
-

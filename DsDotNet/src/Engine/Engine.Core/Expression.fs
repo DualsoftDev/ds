@@ -114,6 +114,10 @@ module ExpressionModule =
         | DuCopy of condition:IExpression<bool> * source:IExpression * target:IStorage
 
 
+    type CommentedStatement = CommentedStatement of comment:string * statement:Statement
+    let (|CommentAndStatement|) = function | CommentedStatement(x, y) -> x, y
+    let commentAndStatement = (|CommentAndStatement|)
+
     type Statement with
         member x.Do() =
             match x with

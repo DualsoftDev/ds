@@ -36,7 +36,7 @@ namespace Dual.Model.Import
         private CancellationTokenSource _cts = new CancellationTokenSource();
 
         private DsSystem SelectedSystem => (comboBox_System.SelectedItem as SystemView).System;
-        
+
 
         public FormMain()
         {
@@ -185,7 +185,7 @@ namespace Dual.Model.Import
             richTextBox_Debug.Clear();
             richTextBox_Debug.AppendText($"{DateTime.Now} : Log Clear");
         }
-   
+
         private async void button_TestStart_Click(object sender, EventArgs e)
         {
             if (_myCPU == null) return;
@@ -280,10 +280,10 @@ namespace Dual.Model.Import
         private void comboBox_System_SelectedIndexChanged(object sender, EventArgs e)
         {
             SystemView sysView = comboBox_System.SelectedItem as SystemView;
-            
+
             var rungs = CpuLoader.LoadStatements(sysView.System);
             var storages = new Dictionary<string, IStorage>();
-            _myCPU = new DsCPU(storages, "", rungs.Select(s => s.Item2));
+            _myCPU = new DsCPU(storages, "", rungs.Select(s => s.Item2.statement));
             _myCPU.Run();
 
             _DicVertex = new Dictionary<Vertex, ViewNode>();
@@ -308,13 +308,13 @@ namespace Dual.Model.Import
             {
                 var description = rung.Item1;
                 var statement = rung.Item2;
-                return $"***{description}***\t{rung.Item2.ToText().Replace("%", " ")}";
+                return $"***{description}***\t{rung.Item2.statement.ToText().Replace("%", " ")}";
             });
             StartResetBtnUpdate(true);
 
             UpdateCpuUI(text);
             UpdateGraphUI(sysView.ViewNodes);
-            
+
             DisplayTextModel(Color.Transparent, sysView.System.ToDsText());
             //DisplayTextExpr(_myCPU.ToTextStatement(), Color.WhiteSmoke);
         }

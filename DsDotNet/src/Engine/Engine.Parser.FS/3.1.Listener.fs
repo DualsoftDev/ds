@@ -75,7 +75,9 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                     | Some fp -> repo.Add(fp, sys)
                     | _ -> ()
 
-                x.TheSystem <- DsSystem(name, hostIp, registerSystem)
+                x.TheSystem <- let exSys = DsSystem(name, hostIp)
+                               registerSystem exSys
+                               exSys
             | _ ->
                 x.TheSystem <- DsSystem(name, hostIp)
             tracefn($"System: {name}")

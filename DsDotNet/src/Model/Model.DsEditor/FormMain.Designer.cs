@@ -29,20 +29,34 @@ namespace Model.DsEditor
         /// </summary>
         private void InitializeComponent()
         {
+            this.richTextBox_Debug = new System.Windows.Forms.RichTextBox();
             this.SuspendLayout();
+            // 
+            // richTextBox_Debug
+            // 
+            this.richTextBox_Debug.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.richTextBox_Debug.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.richTextBox_Debug.Location = new System.Drawing.Point(0, 0);
+            this.richTextBox_Debug.Name = "richTextBox_Debug";
+            this.richTextBox_Debug.ReadOnly = true;
+            this.richTextBox_Debug.Size = new System.Drawing.Size(1079, 771);
+            this.richTextBox_Debug.TabIndex = 1;
+            this.richTextBox_Debug.Text = "";
             // 
             // FormMain
             // 
-            this.ClientSize = new System.Drawing.Size(284, 261);
+            this.ClientSize = new System.Drawing.Size(1079, 771);
+            this.Controls.Add(this.richTextBox_Debug);
             this.Name = "FormMain";
             this.Load += new System.EventHandler(this.FormMain_Load);
             this.ResumeLayout(false);
 
         }
 
+
         #endregion
 
-        
+        private System.Windows.Forms.RichTextBox richTextBox_Debug;
     }
 }
 

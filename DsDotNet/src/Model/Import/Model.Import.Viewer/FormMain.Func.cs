@@ -13,6 +13,7 @@ using System.Windows.Forms;
 using static Engine.Common.FS.MessageEvent;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsTextProperty;
+using static Model.Import.Office.ImportM;
 using static Model.Import.Office.ViewModule;
 using Color = System.Drawing.Color;
 
@@ -23,11 +24,11 @@ namespace Dual.Model.Import
     {
 
         //복수 Active system ppt 불러오기 
-        internal void ImportPPT(List<string> paths)
+        internal void ImportPowerPoint(List<string> paths)
         {
             try
             {
-                var results = ImportM.FromPPTXS(paths);
+                var results = ImportPPT.GetModelNView(paths);
                 var model = results.Item1;
                 var views = results.Item2;
 

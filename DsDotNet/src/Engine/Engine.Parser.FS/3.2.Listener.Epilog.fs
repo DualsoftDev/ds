@@ -122,25 +122,28 @@ module EtcListenerModule =
 
             FunctionApplication(funName, argGroups)
 
-        member x.ProcessVariableDef(context:VariableDefContext) =
-            let varName = context.TryFindFirstChild<VarNameContext>().Value.GetText()
-            let varType = context.TryFindFirstChild<VarTypeContext>().Value.GetText()
-            let init    = context.TryFindFirstChild<ArgumentContext>().Value.GetText()
-            x.TheSystem.Variables.Add(new VariableData(varName, varType, init))
+        //DsSystem.OriginalCodeBlocks 여기에 저장 및 불러오기로 이동
+        //member x.ProcessVariableDef(context:VariableDefContext) =
+        //    let varName = context.TryFindFirstChild<VarNameContext>().Value.GetText()
+        //    let varType = context.TryFindFirstChild<VarTypeContext>().Value.GetText()
+        //    let init    = context.TryFindFirstChild<ArgumentContext>().Value.GetText()
+        //    x.TheSystem.Variables.Add(new VariableData(varName, varType, init))
 
-        member x.ProcessCommandDef(context:CommandDefContext) =
-            let cmdName    = context.TryFindFirstChild<CmdNameContext>().Value.GetText()
-            let funApplCtx = context.TryFindFirstChild<FunApplicationContext>().Value
-            let funAppl    = x.CreateFunctionApplication(funApplCtx)
-            let command    = new Command(cmdName, funAppl)
-            x.TheSystem.Commands.Add(command)
+        //JobDef 여기에 저장 및 불러오기로 이동
+        //member x.ProcessCommandDef(context:CommandDefContext) =
+        //    let cmdName    = context.TryFindFirstChild<CmdNameContext>().Value.GetText()
+        //    let funApplCtx = context.TryFindFirstChild<FunApplicationContext>().Value
+        //    let funAppl    = x.CreateFunctionApplication(funApplCtx)
+        //    let command    = new Command(cmdName, funAppl)
+        //    x.TheSystem.Commands.Add(command)
 
-        member x.ProcessObserveDef(context:ObserveDefContext) =
-            let obsName    = context.TryFindFirstChild<ObserveNameContext>().Value.GetText()
-            let funApplCtx = context.TryFindFirstChild<FunApplicationContext>().Value
-            let funAppl    = x.CreateFunctionApplication(funApplCtx)
-            let observes   = new Observe(obsName, funAppl)
-            x.TheSystem.Observes.Add(observes)
+        //JobDef 여기에 저장 및 불러오기로 이동
+        //member x.ProcessObserveDef(context:ObserveDefContext) =
+        //    let obsName    = context.TryFindFirstChild<ObserveNameContext>().Value.GetText()
+        //    let funApplCtx = context.TryFindFirstChild<FunApplicationContext>().Value
+        //    let funAppl    = x.CreateFunctionApplication(funApplCtx)
+        //    let observes   = new Observe(obsName, funAppl)
+        //    x.TheSystem.Observes.Add(observes)
 
 
         member x.ProcessLayouts(ctx:SystemContext) =

@@ -143,7 +143,7 @@ namespace Dual.Model.Import
                 _cts.Cancel();
                 _cts = new CancellationTokenSource();
 
-                ImportPPT(paths);
+                ImportPowerPoint(paths);
 
                 button_CreateExcel.Visible = true;
                 pictureBox_xls.Visible = true;

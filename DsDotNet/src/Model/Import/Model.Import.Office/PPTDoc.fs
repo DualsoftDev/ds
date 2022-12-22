@@ -20,6 +20,7 @@ open System.Runtime.CompilerServices
 [<AutoOpen>]
 module PPTDocModule =
 
+    let getSystemDirectoryName(path:string) = FileInfo(path).DirectoryName
     let getSystemName(name:string) =
         let fileName = Path.GetFileNameWithoutExtension(name)
         if fileName.IsQuotationRequired()
@@ -115,7 +116,7 @@ module PPTDocModule =
             SubGroup(page, childGroup, dicUsedSub)
             )
 
-    type pptDoc(path:string)  =
+    type pptDoc(path:string, parameter:DeviceLoadParameters)  =
         let doc = Office.Open(path)
         let name = getSystemName path
         let pages =  ConcurrentDictionary<SlidePart, pptPage>()
@@ -216,10 +217,12 @@ module PPTDocModule =
         member val Dummys  = dummys
 
         member val Name =  name
-        member val DirectoryName =  FileInfo(path).DirectoryName
+        member val DirectoryName =  getSystemDirectoryName path
 
         member val DicFlow = Dictionary<int, Flow>() // page , flow
         member val DicVertex = Dictionary<string, Vertex>() 
+        member val IsBuilded = false with get, set
+        member val Parameter:DeviceLoadParameters = parameter
     
 [<Extension>]
 type PPTDocExt =

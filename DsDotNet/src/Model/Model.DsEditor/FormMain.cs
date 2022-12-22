@@ -1,9 +1,11 @@
+using Engine.Common;
 using Model.Import.Office;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Windows.Forms;
+using static Model.Import.Office.ImportM;
 
 namespace Model.DsEditor
 {
@@ -21,9 +23,16 @@ namespace Model.DsEditor
             lstPath.Add(Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\")) + "src\\UnitTest\\UnitTest.Engine\\ImportOffice\\Sample\\SubAssy.pptx");
 
 
-            var results = ImportM.FromPPTXS(lstPath);
-            var model = results.Item1;
-            var views = results.Item2;
+            var results = ImportPPT.GetDsFilesWithLib(lstPath);
+
+            richTextBox_Debug.Clear();
+            results.ForEach(f => richTextBox_Debug.AppendText(f.Item2 + "\t" + f.Item3 + "\r\n"));
+
+
+            richTextBox_Debug.AppendText("\r\n\r\n\r\n");
+
+            results.ForEach(f => richTextBox_Debug.AppendText(f.Item1 + "\r\n"));
+
         }
     }
 }

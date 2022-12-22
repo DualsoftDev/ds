@@ -9,86 +9,103 @@ open Model.Import.Office
 open Engine.Core
 open System.IO
 open Engine.Core.ModelLoaderModule
+open System.Runtime.CompilerServices
+
 [<AutoOpen>]
 module ImportM =
 
     type internal ImportPowerPoint() =
-      //  let configFile = @"test-model-config.json"
-      //  let model = ModelLoader.LoadFromConfig configFile
         let pathStack = Stack<string>()
 
-        let getParams(systemRepo:ShareableSystemRepository, directoryName:string, filePath:string, loadedName:string, containerSystem:DsSystem) =
+        let getParams(systemRepo:ShareableSystemRepository, directoryName:string
+                    , userPath:string, loadedName:string, containerSystem:DsSystem
+                    , hostIp:string option, loadingType) =
             {
                 ContainerSystem = containerSystem
-                AbsoluteFilePath = Path.GetFullPath(Path.Combine(directoryName, filePath)) + ".pptx"
-                UserSpecifiedFilePath = filePath + ".ds"
+                AbsoluteFilePath = Path.GetFullPath(Path.Combine(directoryName, userPath))
+                UserSpecifiedFilePath = userPath + ".ds"
                 LoadedName = loadedName
                 ShareableSystemRepository = systemRepo
 
-                // <ahn> : External system loading 할 때의 ip 주소 설정 필요
-                HostIp = None
-                LoadingType = DuNone
-                // <ahn>
+                HostIp = hostIp
+                LoadingType = loadingType
             }
 
-        let rec loadSystem(systemRepo:ShareableSystemRepository, path:string, name:string, active:bool) =
-            pathStack.Push(path)
+        let getLoadingType(nodeType:NodeType) = 
+            if   nodeType = COPY_REF   then DuExternal 
+            elif nodeType = COPY_VALUE then DuDevice
+            else  failwith "error"
 
-            let doc = pptDoc(path)
+
+        let rec loadSystem(repo:ShareableSystemRepository, pptReop:Dictionary<DsSystem, pptDoc>, theSys:DsSystem, paras:DeviceLoadParameters) =
+            pathStack.Push(paras.AbsoluteFilePath)
+
+            let doc = pptDoc(paras.AbsoluteFilePath+".pptx" , paras)
             //시스템 로딩시 중복이름을 부를 수 없다.
             CheckSameCopy(doc)
-            let name, ip =  if active //active는 시스템이름으로 ppt 파일 이름을 사용
-                            then doc.Name, "localhost"
-                            else name, ""
 
-            let mySys = DsSystem(name, ip)
-            let reloadingSystem(paras, loadedName) =
-                let sys, doc = loadSystem(systemRepo, paras.AbsoluteFilePath, loadedName, false)
+            let reloading(newSys:DsSystem, paras) =
+                let (sys, newDoc:pptDoc) = loadSystem(repo, pptReop, newSys, paras)
                 sys
-
+        
             doc.GetCopyPathNName()
-            |> Seq.iter(fun (path, loadedName, node) ->
+            |> Seq.iter(fun (userPath, loadedName, node) ->
+                
+                let paras = getParams(repo, doc.DirectoryName, userPath
+                            , loadedName, theSys, None, getLoadingType node.NodeType)
+                let hostIp = if paras.HostIp.IsSome then paras.HostIp.Value else ""
 
-                let paras = getParams(systemRepo, doc.DirectoryName, path, loadedName, mySys)
+                match node.NodeType with
+                |COPY_REF ->
+                    let exLoaded =
+                        if repo.ContainsKey paras.AbsoluteFilePath
+                        then 
+                            ExternalSystem(repo[paras.AbsoluteFilePath], paras)
+                        else 
+                            let newExSys = DsSystem(paras.LoadedName, hostIp)
+                            repo.Add (paras.AbsoluteFilePath, newExSys)
 
-                if pathStack.Contains paras.AbsoluteFilePath
-                then Office.ErrorPath(node.Shape, ErrID._45, node.PageNum, paras.AbsoluteFilePath)
+                            let sys = reloading(newExSys, paras)
+                            let exNewLoad = ExternalSystem(sys, paras)
+                            exNewLoad
 
-                let sys = reloadingSystem(paras, loadedName)
+                    theSys.AddLoadedSystem(exLoaded)
 
-                if node.NodeType = COPY_REF
-                then mySys.AddLoadedSystem(ExternalSystem(sys, paras))
+                |COPY_VALUE ->
+                    let newDevSys = DsSystem(paras.LoadedName, hostIp)
+                    let sys = reloading(newDevSys, paras)
+                    theSys.AddLoadedSystem(Device(sys, paras))
 
-                if node.NodeType = COPY_VALUE
-                then mySys.AddLoadedSystem(Device(sys, paras))
-                )
+                |_ ->   failwith "error"
+            )
 
-            doc.MakeJobs(mySys)
-            doc.MakeInterfaces(mySys)
-            doc.MakeFlows(mySys) |> ignore
+            //ExternalSystem 위하여 인터페이스는 공통으로 시스템 생성시 만들어 줌
+            doc.MakeInterfaces(theSys)
 
-            //EMG & Start & Auto 리스트 만들기
-            doc.MakeButtons(mySys)
-            //segment 리스트 만들기
-            doc.MakeSegment(mySys)
-            //Edge  만들기
-            doc.MakeEdges (mySys)
-            //Safety 만들기
-            doc.MakeSafeties(mySys)
-            //ApiTxRx  만들기
-            doc.MakeApiTxRx()
+            if paras.LoadingType <> DuExternal   
+            then //External system 은 Interfaces만 만들고 나중에 buildSystem 수행
+                doc.BuildSystem(theSys)
 
             pathStack.Pop() |> ignore
+            pptReop.Add (theSys, doc)
+            theSys, doc
 
-            mySys, doc
-
-        member internal x.GetImportModel(systemRepo:ShareableSystemRepository, path:string) =
+        member internal x.GetImportModel(systemRepo:ShareableSystemRepository, pptReop:Dictionary<DsSystem, pptDoc>,  path:string, loadingType:ParserLoadingType) =
             try
+                //active는 시스템이름으로 ppt 파일 이름을 사용
+                let mySys = DsSystem(getSystemName path, "localhost")
+                let paras = getParams(systemRepo
+                            , getSystemDirectoryName path
+                            , getSystemName path
+                            , mySys.Name
+                            , mySys
+                            , Some mySys.HostIp
+                            , DuNone)
 
-
-                let mySys, doc = loadSystem(systemRepo, path, "", true)
+                let mySys, doc = loadSystem(systemRepo, pptReop, mySys, paras)
                 //Dummy 및 UI Flow, Node, Edge 만들기
                 let viewNodes = doc.MakeGraphView(mySys)
+
 
                 //MSGInfo($"전체 장표   count [{doc.Pages.Count()}]")
                 //MSGInfo($"전체 도형   count [{doc.Nodes.Count()}]")
@@ -97,23 +114,48 @@ module ImportM =
                 mySys, viewNodes
 
             with ex ->  failwithf  $"{ex.Message}\t [ErrPath:{pathStack.First()}]"
-
-
-    let FromPPTX (systemRepo:ShareableSystemRepository) (path:string) =
-        let ppt = ImportPowerPoint()
-        let mySys, viewNodes = ppt.GetImportModel(systemRepo, path)
-
-        mySys, viewNodes
-
-    let FromPPTXS(paths:string seq) =
+            
+    let private fromPPTs(paths:string seq) =
         let systemRepo = ShareableSystemRepository()
+        let pptRepo    = Dictionary<DsSystem, pptDoc>()
+
         let cfg = {DsFilePaths = paths |> Seq.toList}
 
         let results =
-            [   for dsFile in cfg.DsFilePaths do
-                    FromPPTX systemRepo dsFile |> fun (sys, view) -> sys, view ]
+            [  
+                for dsFile in cfg.DsFilePaths do
+                      let ppt = ImportPowerPoint()
+                      ppt.GetImportModel(systemRepo, pptRepo, dsFile, ParserLoadingType.DuNone)
+            ]
+
+        //ExternalSystem 순환참조때문에 완성못한 시스템 BuildSystem 마무리하기
+        pptRepo
+            .Where(fun dic -> not <| dic.Value.IsBuilded)
+            .ForEach(fun dic -> 
+                let dsSystem = dic.Key
+                let pptDoc = dic.Value
+                pptDoc.BuildSystem(dsSystem))
+
         let systems =  results.Select(fun (sys, view) -> sys) |> Seq.toList
         let views   =  results |> dict
-        { Config = cfg; Systems = systems}, views
+        { Config = cfg; Systems = systems}, views, pptRepo
 
+    [<Extension>]
+    type ImportPPT =
 
+        [<Extension>]
+        static member GetModel      (paths:string seq) = fromPPTs paths |> fun (model, views, pptRepo) -> model
+        static member GetModelNView (paths:string seq) = fromPPTs paths |> fun (model, views, pptRepo) -> model, views
+                                    
+        static member GetDsFilesWithLib (paths:string seq) = 
+                fromPPTs paths 
+                |> fun (model, views, pptRepo) 
+                    -> pptRepo
+                         .Select(fun dic -> 
+                            let system = dic.Key
+                            let param = dic.Value.Parameter
+                            let relative  = param.UserSpecifiedFilePath
+                            let absolute  = param.AbsoluteFilePath
+                            let rootDirectroy = absolute.Substring(0, absolute.length() - relative.length())
+                               
+                            system.ToDsText(), rootDirectroy, relative)

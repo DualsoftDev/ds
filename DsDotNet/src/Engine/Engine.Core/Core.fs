@@ -56,11 +56,11 @@ module CoreModule =
         inherit LoadedSystem(loadedSystem, param)
         member _.HostIp = param.HostIp
 
-    type DsSystem (name:string, hostIp:string, ?onCreation:DsSystem -> unit) as this =
+    type DsSystem (name:string, hostIp:string)(*, ?onCreation:DsSystem -> unit) as this*) =
         inherit FqdnObject(name, createFqdnObject([||]))
-        do
-            // this system 객체가 생성되고 나서 수행해야 할 작업 수행.  external system loading 시, 공유하기 위한 정보를 marking
-            onCreation.Iter(fun f -> f this)
+        //do
+        //    // this system 객체가 생성되고 나서 수행해야 할 작업 수행.  external system loading 시, 공유하기 위한 정보를 marking
+        //    onCreation.Iter(fun f -> f this)
 
         let loadedSystems = createNamedHashSet<LoadedSystem>()
         let apiUsages = ResizeArray<ApiItem>()
@@ -83,9 +83,12 @@ module CoreModule =
         member val OriginalCodeBlocks = ResizeArray<string>()
         member val Statements = ResizeArray<Statement>()
 
-        [<Obsolete("삭제 대상")>] member val Variables = ResizeArray<VariableData>()
-        [<Obsolete("삭제 대상")>] member val Commands = ResizeArray<Command>()
-        [<Obsolete("삭제 대상")>] member val Observes = ResizeArray<Observe>()
+        //DsSystem.OriginalCodeBlocks 여기에 저장 및 불러오기로 이동
+        //[<Obsolete("삭제 대상")>] member val Variables = ResizeArray<VariableData>()
+        //JobDef 여기에 저장 및 불러오기로 이동
+        //[<Obsolete("삭제 대상")>] member val Commands = ResizeArray<Command>()
+        //JobDef 여기에 저장 및 불러오기로 이동
+        //[<Obsolete("삭제 대상")>] member val Observes = ResizeArray<Observe>()
 
         member val ApiItems = createNamedHashSet<ApiItem>()
         member val ApiResetInfos = HashSet<ApiResetInfo>()
@@ -98,6 +101,7 @@ module CoreModule =
         member val AutoButtons      = ButtonDic()
         member val StartButtons     = ButtonDic()
         member val ResetButtons     = ButtonDic()
+
 
     type Flow private (name:string, system:DsSystem) =
         inherit FqdnObject(name, system)

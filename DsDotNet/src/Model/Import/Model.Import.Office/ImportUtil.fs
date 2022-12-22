@@ -43,7 +43,7 @@ module ImportU =
 
 
     let private getApiItems(sys:DsSystem, refSys:string, apiName:string) =
-                let refSystem = sys.TryFindReferenceSystem(refSys).Value
+                let refSystem = sys.TryFindLoadedSystem(refSys).Value.ReferenceSystem
                 refSystem.TryFindExportApiItem([|refSystem.Name;apiName|]).Value
 
     let private getOtherFlowReal(flows:Flow seq, nodeEx:pptNode) =
@@ -69,13 +69,14 @@ module ImportU =
             |> Seq.iter(fun jobSet ->
                 let jobBase = jobSet.Key
                 let JobTargetSystems = jobSet.Value
-                let refSystem = mySys.TryFindReferenceSystem(JobTargetSystems.First()).Value
+                        //ppt에서는 동일한 디바이스만 동시 Job구성 가능하여  아무시스템이나 찾아도 API는 같음
+                let refSystem = mySys.TryFindLoadedSystem(JobTargetSystems.First()).Value.ReferenceSystem
 
                 refSystem.ApiItems.ForEach(fun api->
                     let jobDefs =
                         JobTargetSystems
-                            .Select(fun tgt -> getApiItems(mySys, tgt, api.Name))
-                            .Select(fun api -> JobDef(api, "", "", "", "", api.System.Name))
+                            .Select(fun tgt -> getApiItems(mySys, tgt, api.Name), tgt)
+                            .Select(fun (api, tgt)-> JobDef(api, "", "", "", "", tgt))
 
                     let job = Job(jobBase+"_"+api.Name, jobDefs)
                     mySys.Jobs.Add(job)
@@ -352,3 +353,20 @@ module ImportU =
                             api.AddTXs(txs)|>ignore
                             api.AddRXs(rxs)|>ignore
                             )
+
+        [<Extension>]
+        static member BuildSystem (doc:pptDoc, sys:DsSystem) =
+            doc.MakeJobs(sys)
+            doc.MakeFlows(sys) |> ignore
+            //EMG & Start & Auto 리스트 만들기
+            doc.MakeButtons(sys)
+            //segment 리스트 만들기
+            doc.MakeSegment(sys)
+            //Edge  만들기
+            doc.MakeEdges (sys)
+            //Safety 만들기
+            doc.MakeSafeties(sys)
+            //ApiTxRx  만들기
+            doc.MakeApiTxRx()
+
+            doc.IsBuilded <- true

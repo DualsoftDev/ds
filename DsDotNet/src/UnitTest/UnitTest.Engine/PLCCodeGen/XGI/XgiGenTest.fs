@@ -281,7 +281,7 @@ open PLC.CodeGen.Common.FlatExpressionModule
             File.WriteAllText(outputFile, xml)
 
         [<Test>]
-        member __.``Many AND RungIn Condition Timer test`` () =
+        member __.``TIMER: Many AND RungIn Condition test`` () =
             let storages = Storages()
             let code = codeForBits + """
                 ton myTon = createTON(2000us,
@@ -307,7 +307,7 @@ open PLC.CodeGen.Common.FlatExpressionModule
 
 
         [<Test>]
-        member __.``Many OR RungIn Condition Timer test`` () =
+        member __.``TIMER: Many OR RungIn Condition test`` () =
             let storages = Storages()
             let code = codeForBits + """
                 ton myTon = createTON(2000us,

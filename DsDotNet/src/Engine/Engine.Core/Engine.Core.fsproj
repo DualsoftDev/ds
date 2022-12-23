@@ -21,6 +21,7 @@
 		<Compile Include="Named.fs" />
 		<Compile Include="Graph.fs" />
 		<Compile Include="CodeElements.fs" />
+		<Compile Include="RuntimeGenerator.fs" />
 		<Compile Include="Expression.Prolog.fs" />
 		<Content Include="Timer.txt" />
 		<Content Include="Timer.pptx" />

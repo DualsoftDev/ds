@@ -7,6 +7,8 @@ open Engine.Core
 open T.Expression
 open System.Collections.Generic
 open Engine.Parser.FS
+open FSharp.Data.HtmlAttribute
+open Engine.Common.FS
 
 //[<AutoOpen>]
 //module TimerTestModule =
@@ -224,3 +226,37 @@ open Engine.Parser.FS
             evaluateRungInputs timer
             timer.EN.Value === true
             timer.ACC.Value === 0us
+
+
+
+        [<Test>]
+        member __.``TIMER structure WINDOWS platform test`` () =
+            let storages = Storages()
+            let code = """
+                bool myBit0 = createTag("%MX0.0.0", false);
+                ton myTon = createTON(2000us, $myBit0);
+"""
+
+            let runtimeTargetBackup = RuntimeTarget
+            RuntimeTarget <- WINDOWS
+            disposable { RuntimeTarget <- runtimeTargetBackup } |> ignore
+
+            let statement = parseCode storages code
+            [ "EN"; "DN"; "PRE"; "ACC"; "TT" ] |> iter (fun n -> storages.ContainsKey($"myTon.{n}") === true)
+            [ "IN"; "Q"; "ET"; ] |> iter (fun n -> storages.ContainsKey($"myTon.{n}") === false)
+
+        [<Test>]
+        member __.``TIMER structure XGI platform test`` () =
+            let storages = Storages()
+            let code = """
+                bool myBit0 = createTag("%MX0.0.0", false);
+                ton myTon = createTON(2000us, $myBit0);
+"""
+
+            let runtimeTargetBackup = RuntimeTarget
+            RuntimeTarget <- XGI
+            disposable { RuntimeTarget <- runtimeTargetBackup } |> ignore
+
+            let statement = parseCode storages code
+            [ "IN"; "Q"; "ET"; ] |> iter (fun n -> storages.ContainsKey($"myTon.{n}") === true)
+            [ "EN"; "DN"; "PRE"; "ACC"; "TT" ] |> iter (fun n -> storages.ContainsKey($"myTon.{n}") === false)

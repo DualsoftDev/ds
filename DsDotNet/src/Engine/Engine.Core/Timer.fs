@@ -129,16 +129,17 @@ module rec TimerModule =
 
     [<AbstractClass>]
     type TimerCounterBaseStruct (storages:Storages, name, preset, accum:CountUnitType) as this =
-        let dn  = fwdCreateBoolTag $"{name}.DN" false  // Done
-        let pre = fwdCreateUShortTag $"{name}.PRE" preset
-        let acc = fwdCreateUShortTag $"{name}.ACC" accum
-        let res = fwdCreateBoolTag $"{name}.RES" false
+        let dn  = fwdCreateBoolTag   $"{name}.{nameDN() }" false  // Done
+        let pre = fwdCreateUShortTag $"{name}.{namePRE()}" preset
+        let acc = fwdCreateUShortTag $"{name}.{nameACC()}" accum
+        let res = fwdCreateBoolTag   $"{name}.{nameRES()}" false
         do
             storages.Add(name, this)
-            storages.Add($"{name}.DN", dn)
-            storages.Add($"{name}.PRE", pre)
-            storages.Add($"{name}.ACC", acc)
-            storages.Add($"{name}.RES", res)
+            storages.Add(dn.Name, dn)
+            storages.Add(pre.Name, pre)
+            storages.Add(acc.Name, acc)
+            storages.Add(res.Name, res)
+
 
         interface IStorage with
             member x.Name with get() = x.Name and set(v) = failwith "ERROR: not supported"
@@ -146,6 +147,7 @@ module rec TimerModule =
             member x.Value with get() = this and set(v) = failwith "ERROR: not supported"
             member x.ToText() = failwith "ERROR: not supported"
             member _.ToBoxedExpression() = failwith "ERROR: not supported"
+
         member _.Name:string = name
         /// Done bit
         member _.DN:TagBase<bool> = dn
@@ -153,14 +155,16 @@ module rec TimerModule =
         member _.ACC:TagBase<CountUnitType> = acc
         /// Reset bit.
         member _.RES:TagBase<bool> = res
+
+
     type TimerStruct internal(storages:Storages, name, preset:CountUnitType, accum:CountUnitType) =
         inherit TimerCounterBaseStruct(storages, name, preset, accum)
 
-        let en = fwdCreateBoolTag $"{name}.EN" false
-        let tt = fwdCreateBoolTag $"{name}.TT" false
+        let en = fwdCreateBoolTag $"{name}.{nameEN()}" false
+        let tt = fwdCreateBoolTag $"{name}.{nameTT()}" false
         do
-            storages.Add($"{name}.EN", en)
-            storages.Add($"{name}.TT", tt)
+            storages.Add(en.Name, en)
+            storages.Add(tt.Name, tt)
 
         /// Enable
         member _.EN:TagBase<bool> = en

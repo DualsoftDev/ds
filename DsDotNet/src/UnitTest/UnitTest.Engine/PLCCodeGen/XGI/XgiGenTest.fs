@@ -1,23 +1,29 @@
-namespace UnitTest.Engine.PLC
+namespace T.PLC.XGI
 
 open System.IO
 open System.Reflection
 
 open NUnit.Framework
 
-open UnitTest.Engine
+open T
 open Engine.Parser.FS
 open Engine.Core
 open Engine.Common.FS
 open PLC.CodeGen.Common.QGraph
-//open PLC.CodeGen.LSXGI
+open PLC.CodeGen.LSXGI
+open PLC.CodeGen.Common.FlatExpressionModule
 
 
-[<AutoOpen>]
-module XgiGenerationTestModule =
+//[<AutoOpen>]
+//module XGI =
 
     type XgiGenerationTest() =
         do Fixtures.SetUpTest()
+
+        (* 테스트 수행 후, XG5000 에서 Project > Open project 를 누르고, outputFile 을 지정하여 open 한다.
+            XG5000 의 project 탐색 창의 Scan Program / DsLogic / Program 을 double click 하여 생성된 rung 을 육안 검사한다.
+         *)
+        let outputFile = "C:/a.xml"
 
         let plcCodeGenerationOption =
             let n (v:IVertex) = v :?> INamed |> name
@@ -44,57 +50,183 @@ module XgiGenerationTestModule =
                 RelayGenerator              = relayGenerator "RR" 1// XGI 고려한 모델 : Relay 이름 R 대신 RR
                 //FinishStateNameGenerator  = Some finishGenerator
             }
-        let generatePLCByModel models =
-            //let delta =
-            //    let p = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
-            //    Path.Combine(p, @"..\..\..\..")
-            //tracefn "Delta location: %s" delta
-
-
-
-
-            //let procInfos =
-            //    models |> Seq.map(fun model ->
-            //        let procInfo, expr =
-            //            PreProcessor.PreProcessModel model
-            //            |> processModelWithOption  (Some opt) []
-
-            //        procInfo
-            //    )
-
-            //let ladderInfo =
-            //    let rungs = procInfos |> Seq.collect(fun (p) -> p.LadderInfo.Rungs) |> List.ofSeq
-            //    let comments = procInfos |> Seq.collect(fun (p) -> p.LadderInfo.PrologComments) |> List.ofSeq
-            //    { Rungs = rungs; PrologComments = comments}
-
-            //let status = []//processStatus model procInfos opt
-
-            //let xml = LsXGI.generateXGIXmlFromLadderInfoAndStatus opt ladderInfo status sempty sempty None
-            //// @"F:\Git\dual\soft\Delta\UnitTest\output.xml"
-            //let output = Path.Combine(delta, @"UnitTest\inner.xml")
-            //File.WriteAllText(output, xml)
-
-            //let tags = ladderInfo.Rungs |> List.collect(fun r -> rungInfoToExpr r |> collectTerminals |> List.ofSeq) |> List.where(fun t -> t :? PLCTag)
-            //let dtags = tags |> List.distinct
-
-            //dtags |> List.iter(fun t -> tracefn "%A" t)
-            ()
-
-
 
         [<Test>]
-        member __.``XGI Generation test`` () =
+        member __.``AndOr simple test`` () =
             //generatePLCByModel
             let storages = Storages()
             let code = """
-                bool myBit1 = createTag("%IX0.0.0", false);
-                $myBit1 := true;
-"""
-            let statments = parseCode storages code
-            storages.Count === 1
-            statments.Length === 1      // createTag 는 statement 에 포함되지 않는다.   (한번 생성하고 끝나므로 storages 에 tag 만 추가 된다.)
+                bool myBit0 = createTag("%IX0.0.0", false);
+                bool myBit1 = createTag("%IX0.0.1", false);
+                bool myBit2 = createTag("%IX0.0.2", false);
 
-            //let xml = LsXGI.generateXml plcCodeGenerationOption storages statements
+                bool myBit7 = createTag("%IX0.0.7", false);
+
+                $myBit7 := ($myBit0 || $myBit1) && $myBit2;
+"""
+            let statements = parseCode storages code
+            storages.Count === 4
+            statements.Length === 1      // createTag 는 statement 에 포함되지 않는다.   (한번 생성하고 끝나므로 storages 에 tag 만 추가 된다.)
+
+            let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+            File.WriteAllText(outputFile, xml)
+            tracefn "%s" xml
+            ()
+
+
+        [<Test>]
+        member __.``AndOr2 test`` () =
+            let storages = Storages()
+            let code = """
+                bool myBit00 = createTag("%IX0.0.0", false);
+                bool myBit01 = createTag("%IX0.0.1", false);
+                bool myBit02 = createTag("%IX0.0.2", false);
+                bool myBit03 = createTag("%IX0.0.3", false);
+                bool myBit04 = createTag("%IX0.0.4", false);
+                bool myBit05 = createTag("%IX0.0.5", false);
+                bool myBit06 = createTag("%IX0.0.6", false);
+                bool myBit07 = createTag("%IX0.0.7", false);
+
+                bool myBit10 = createTag("%IX0.0.8", false);
+                bool myBit11 = createTag("%IX0.0.9", false);
+                bool myBit12 = createTag("%IX0.0.10", false);
+                bool myBit13 = createTag("%IX0.0.11", false);
+                bool myBit14 = createTag("%IX0.0.12", false);
+                bool myBit15 = createTag("%IX0.0.13", false);
+                bool myBit16 = createTag("%IX0.0.14", false);
+                bool myBit17 = createTag("%IX0.0.15", false);
+
+                $myBit07 :=    (($myBit00 || $myBit01) && $myBit02)
+                            ||  $myBit03
+                            || ($myBit04 && $myBit05 && $myBit06)
+                            ;
+                $myBit17 :=    (($myBit10 && $myBit11) || $myBit12)
+                            && $myBit13
+                            && ($myBit14 || $myBit15 || $myBit16)
+                            ;
+"""
+            let statements = parseCode storages code
+            let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+            File.WriteAllText(outputFile, xml)
+            tracefn "%s" xml
+            ()
+
+
+        [<Test>]
+        member __.``Negation1 test`` () =
+            let storages = Storages()
+            let code = """
+                bool myBit00 = createTag("%IX0.0.0", false);
+                bool myBit01 = createTag("%IX0.0.1", false);
+
+                $myBit01 := ! $myBit00;
+"""
+            let statements = parseCode storages code
+            let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+            File.WriteAllText(outputFile, xml)
+            ()
+
+        [<Test>]
+        member __.``Negation2 test`` () =
+            let storages = Storages()
+            let code = """
+                bool myBit00 = createTag("%IX0.0.0", false);
+                bool myBit01 = createTag("%IX0.0.1", false);
+                bool myBit02 = createTag("%IX0.0.2", false);
+                bool myBit03 = createTag("%IX0.0.3", false);
+                bool myBit04 = createTag("%IX0.0.4", false);
+                bool myBit05 = createTag("%IX0.0.5", false);
+
+                $myBit02 := ! ($myBit00 || $myBit01);
+                $myBit05 := ! ($myBit03 && $myBit04);
+"""
+            let statements = parseCode storages code
+            let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+            File.WriteAllText(outputFile, xml)
+            ()
+
+        [<Test>]
+        member __.``Atomic Negation test`` () =
+            let myTagA = PlcTag("tag0", "%IX0.0.0", false)
+            let myTagB = PlcTag("tag1", "%IX0.0.1", false)
+            let pulse, negated = false, false
+            let flatTerminal = FlatTerminal(myTagA, pulse, negated)
+            let negatedFlatTerminal = flatTerminal.Negate()
+            match negatedFlatTerminal with
+            | FlatTerminal(t, p, n) -> n === true
+            | _ -> failwith "ERROR"
+
+            (* ! (A & B) === ! A || ! B) test *)
+            let expAnd = FlatNary(And, [FlatTerminal(myTagA, pulse, negated); FlatTerminal(myTagB, pulse, negated)])
+            let negatedAnd = expAnd.Negate()
+            match negatedAnd with
+            | FlatNary(Or, [FlatTerminal(_, _, negated1); FlatTerminal(_, _, negated2)]) ->
+                negated1 === true
+                negated2 === true
+            | _ -> failwith "ERROR"
+
+
+            (* ! (! A & B) === A || ! B) test *)
+            let expAnd = FlatNary(And, [FlatTerminal(myTagA, pulse, true); FlatTerminal(myTagB, pulse, negated)])
+            let negatedAnd = expAnd.Negate()
+            match negatedAnd with
+            | FlatNary(Or, [FlatTerminal(_, _, negated1); FlatTerminal(_, _, negated2)]) ->
+                negated1 === false
+                negated2 === true
+            | _ -> failwith "ERROR"
+
+
+            (* ! (! A & B) === A || ! B) test *)
+            let expAnd = FlatNary(And, [FlatNary(Neg, [FlatTerminal(myTagA, false, false)]); FlatTerminal(myTagB, false, false)])
+            let negatedAnd = expAnd.Negate()
+            match negatedAnd with
+            | FlatNary(Or, [FlatTerminal(_, _, negated1); FlatTerminal(_, _, negated2)]) ->
+                negated1 === false
+                negated2 === true
+            | _ -> failwith "ERROR"
+
+            ()
+
+        [<Test>]
+        member __.``Negation3 test`` () =
+            let storages = Storages()
+            let code = """
+                bool myBit00 = createTag("%IX0.0.0", false);
+                bool myBit01 = createTag("%IX0.0.1", false);
+                bool myBit02 = createTag("%IX0.0.2", false);
+                bool myBit03 = createTag("%IX0.0.3", false);
+                bool myBit04 = createTag("%IX0.0.4", false);
+                bool myBit05 = createTag("%IX0.0.5", false);
+
+                $myBit02 := ! (! $myBit00 || $myBit01);
+                $myBit05 := ! ($myBit03 && ! $myBit04);
+"""
+            let statements = parseCode storages code
+            let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+            File.WriteAllText(outputFile, xml)
+            ()
+
+        [<Test>]
+        member __.``Timer test`` () =
+            //generatePLCByModel
+            let storages = Storages()
+            let code = """
+                bool myQBit0 = createTag("%QX0.1.0", false);
+                bool myBit0 = createTag("%IX0.0.0", false);
+                bool myBit1 = createTag("%IX0.0.1", false);
+                bool myBit2 = createTag("%IX0.0.2", false);
+
+                bool myBit7 = createTag("%IX0.0.7", false);
+                ton myTon = createTON(2000us, $myQBit0);
+                $myBit7 := ($myBit0 || $myBit1) && $myBit2;
+"""
+            let statements = parseCode storages code
+            storages.Count === 12
+            statements.Length === 2      // createTag 는 statement 에 포함되지 않는다.   (한번 생성하고 끝나므로 storages 에 tag 만 추가 된다.)
+
+            let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+            File.WriteAllText(outputFile, xml)
+            tracefn "%s" xml
             ()
 
 

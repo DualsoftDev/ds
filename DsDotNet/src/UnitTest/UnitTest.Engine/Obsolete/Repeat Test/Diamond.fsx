@@ -1,4 +1,4 @@
-namespace UnitTest.Engine.RepeatTest
+namespace T.RepeatTest
 
 
 open Engine
@@ -6,7 +6,7 @@ open Engine.Core
 open System.Linq
 open Engine.Common.FS
 open Xunit.Abstractions
-open UnitTest.Engine
+open T
 open Engine.Common
 open System.Diagnostics
 open Engine.Base

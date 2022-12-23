@@ -8,12 +8,11 @@ open PLC.CodeGen.LSXGI
 open PLC.CodeGen.Common
 open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
 open PLC.CodeGen.Common.NewIEC61131
+open PLC.CodeGen.Common.QGraph
 
 [<AutoOpen>]
-module internal File =
-
-    /// Double quote
-    let dq content = sprintf "\"%s\"" content
+module internal XgiFile =
+    let [<Literal>] XGIMaxX = 28
 
     /// text comment 를 xml wrapping 해서 반환
     let getCommentRung y cmt =
@@ -21,14 +20,8 @@ module internal File =
         sprintf "\t<Rung BlockMask=\"0\"><Element ElementType=\"%d\" Coordinate=\"%d\">%s</Element></Rung>" (int ElementType.RungCommentMode) yy cmt
 
     // <kwak>
-    ///// PLC ladder 상의 rung statement.  현재는 XGI 기준
-    //type Statement(condition, cmd, comments:string seq) =
-    //    member x.Condition:Expression = condition
-    //    member x.Command:Command.XgiCommand = cmd
-    //    member x.Comments:string array = comments |> Array.ofSeq
-
-    ///// 추상적인 Rung info expression 으로부터 XGI ladder rung statement 를 생성한다.
-    //let rungInfoToStatement (opt:CodeGenerationOption) (gri:(IExpressionTerminal * seq<RungInfo>)) =
+    /// 추상적인 Rung info expression 으로부터 XGI ladder rung statement 를 생성한다.
+    //let rungInfoToStatement (opt:CodeGenerationOption) (gri:(IExpressionTerminal * seq<PositinedRungXml>)) =
     //    let z = snd gri |> map(rungInfoToExpr)
     //    let condition = snd gri |> map(rungInfoToExpr) |> Seq.reduce mkOr
     //    let coil = (snd gri |> Seq.head).CoilOrigin
@@ -138,53 +131,77 @@ module internal File =
         | _ ->   failwithlog "Unknown FlatExpression case"
 
 
+    type RungGenerationInfo = {
+        Xmls: XmlOutput list   // Rung 별 누적 xml.  역순으로 추가.  꺼낼 때 뒤집어야..
+        Y: int }
+    with
+        member x.Add(xml) = {Xmls = xml::x.Xmls; Y = x.Y + 1 }
     /// (조건=coil) seq 로부터 rung xml 들의 string 을 생성
-    let private generateRungs (prologComments:string seq) (statements:Statement seq) =
-        let mutable y = 0
-        seq {
-            // Prolog 설명문
-            if prologComments.any() then
-                let cmt = prologComments |> String.concat "\r\n"
-                yield getCommentRung y cmt
-                y <- y + 1
+    let private generateRungs (prologComments:string seq) (commentedStatements:CommentedStatement seq) : XmlOutput =
+        let xmlRung (expr:FlatExpression) xgiCommand y : RungGenerationInfo=
+            let xml, y' = rung 0 y expr xgiCommand
+            { Xmls = [$"\t<Rung BlockMask={dq}0{dq}>\r\n{xml}\t</Rung>"]; Y = y'}
 
-            let xmlRung (expr:FlatExpression) xgiCommand y =
-                let xml, y' = rung 0 y expr xgiCommand
-                "\t<Rung BlockMask=\"0\">" + "\r\n" + xml +  "\t</Rung>", y'
+        let mutable rgi:RungGenerationInfo = {Xmls = []; Y = 0}
 
-            // Rung 별로 생성
-            for stmt in statements do
+        // Prolog 설명문
+        if prologComments.any() then
+            let cmt = prologComments |> String.concat "\r\n"
+            let xml = getCommentRung rgi.Y cmt
+            rgi <- rgi.Add(xml)
+
+        // Rung 별로 생성
+        for CommentAndStatement(cmt, stmt) in commentedStatements do
+
+            // 다중 라인 설명문을 하나의 설명문 rung 에..
+            if cmt.NonNullAny() then
+                let xml =getCommentRung rgi.Y cmt
+                rgi <- rgi.Add(xml)
 
 
-                // 다중 라인 설명문을 하나의 설명문 rung 에..
-                if stmt.Comments.any() then
-                    let cmt = stmt.Comments |> String.concat "\r\n"
-                    yield getCommentRung y cmt
-                    y <- y + 1
+            //<kwak> 대체 version
+            match stmt with
+            | DuAssign (expr, (:? IExpressionTerminal as target)) ->
+                let flatExpr = expr.Flatten() :?> FlatExpression
+                let command:XgiCommand = CoilCmd(CoilMode(target)) |> XgiCommand
+                let rgiSub = xmlRung flatExpr command rgi.Y
+                rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
 
-                // 다중 라인 설명문을 개별 설명문 rung 에..
-                //for cmt in stmt.Comments do
-                //    yield getCommentRung y cmt
-                //    y <- y + 1
+            // <kwak>
+            | DuTimer timerStatement ->
+                let rungin = timerStatement.RungInCondition.Value :?> Expression<bool>
+                let xxxTag =
+                    match rungin with
+                    | DuTerminal(DuTag t) -> t
+                    | _ -> failwith "ERROR"
+                let command:XgiCommand = FunctionBlockCmd(TimerMode(xxxTag, 100)) |> XgiCommand
+                let flatExpr = FlatTerminal (xxxTag, false, false)
+                let rgiSub = xmlRung flatExpr command rgi.Y
+                rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
 
-                let expr = stmt.Condition |> FlatExpressionM.flatten
-                let xml, y' =
-                    if(getXGIMaxX 0 expr > 28)
-                    then
-                        let exprNew =  stmt.Condition |> ExpressionM.mkNeg |> FlatExpressionM.flatten
-                        if(getXGIMaxX 0 exprNew > 28)
-                        then failwithlogf "Or Expreesion Limit 28"
-                        else
-                            let commandNew = stmt.Command.ReverseCmd()
-                            xmlRung exprNew commandNew y
-                    else
-                        xmlRung expr stmt.Command y
+            | ( DuCounter _ | DuCopy _ ) ->
+                failwith "Not yet"
 
-                y <- y' + 1
-                yield xml
+            | DuVarDecl _ -> failwith "ERROR: Invalid"
+            | _  -> failwith "ERROR"
 
-            yield generateEnd y }
-        |> String.concat "\r\n"
+
+            //<kwak> origina version
+            //let expr = stmt.Condition |> FlatExpressionM.flatten
+            //let xml, y' =
+            //    if(getXGIMaxX 0 expr > XGIMaxX) then
+            //        let exprNew =  stmt.Condition |> ExpressionM.mkNeg |> FlatExpressionM.flatten
+            //        if(getXGIMaxX 0 exprNew > XGIMaxX) then
+            //            failwithlog $"Or Expreesion Limit {XGIMaxX}"
+            //        else
+            //            let commandNew = stmt.Command.ReverseCmd()
+            //            xmlRung exprNew commandNew y
+            //    else
+            //        xmlRung expr stmt.Command y
+
+        let rungEnd = generateEnd rgi.Y
+        rgi <- rgi.Add(rungEnd)
+        rgi.Xmls |> List.rev |> String.concat "\r\n"
 
     /// Template XGI XML 문자열을 반환
     let getTemplateXgiXmlWithVersion version =
@@ -328,7 +345,7 @@ module internal File =
         //    }
         //allLines
 
-    let generateXGIXmlFromStatement (prologComments:string seq) (statements:Statement seq) (tags:ITagWithAddress seq) (unusedTags:ITagWithAddress seq) (existingLSISprj:string option) =
+    let generateXGIXmlFromStatement (prologComments:string seq) (commentedStatements:CommentedStatement seq) (tags:ITagWithAddress seq) (unusedTags:ITagWithAddress seq) (existingLSISprj:string option) =
         // TODO : 하드 코딩...  PLC memory 설정을 어디선가 받아서 처리해야 함.
         /// PLC memory manager
         let manager =
@@ -343,6 +360,7 @@ module internal File =
                 ]
             let manager = MemoryManager(hwconfs)
 
+            //<kwak>
             /// 이미 할당된 주소 : 자동 할당시 이 주소를 피해야 한다.
             let alreadyAllocatedAddresses =
                 /// 이미 할당된 주소 앞뒤로 buffer word 만큼 회피하기 위한 word address 를 생성한다.
@@ -385,12 +403,11 @@ module internal File =
                     |> Seq.bind (fun t -> toChunk t 10)
                 let tagsUsedInTags =
                     tags
-                    |> Seq.map (fun t -> t.Address.GetAddress())
+                    |> Seq.map (fun t -> t.Address)
                     |> Set.ofSeq
                 let tagsUnusedInTags =
                     unusedTags
-                    |> Seq.choose (fun t -> t.Address)
-                    |> Seq.map (fun addr -> addr.GetAddress())
+                    |> Seq.map(fun t -> t.Address)
                     |> Set.ofSeq
                 tagsUsedInFiles @ tagsUsedInTags @ tagsUnusedInTags
 
@@ -416,46 +433,63 @@ module internal File =
         let symbolInfos =
             tags
             |> Seq.map (fun t ->
-                let name, comment = t.FullName, t.Tag
-                let plcType =
-                    match t.IOType with
-                    | Some tt when tt.Equals TagType.Instance -> t.FBInstance  //instance 타입은  주소에 저장 활용 (내부사용으로 주소값이 없음)
-                    | _ ->  match t.Size with
-                            | IEC61131.Size.Bit    ->  "BOOL"
-                            | IEC61131.Size.Byte   ->  "BYTE"
-                            | IEC61131.Size.Word   ->  "WORD"
-                            | IEC61131.Size.DWord  ->  "DWORD"
-                            | _ -> failwithlog "tag Size Unknown"
+                let name, addr = t.Name, t.Address
 
-                /// one of {"I"; "O"; "M"}
-                let device =
+                let device, memSize =
                     match t.Address with
-                    | Some(addr) -> AddressM.getDevice addr
-                    | _ ->
-                        match t.IOType with
-                        | Some tt when tt.Equals TagType.State -> "I"
-                        | Some tt when tt.Equals TagType.Action -> "O"
-                        | Some tt when tt.Equals TagType.Dummy -> "M"
-                        | _ -> ""
-                        //Trace.WriteLine("Unknown PLC device type: assume 'M'.")
-                let addr =
-                    if (t.Address.IsNullOrEmpty() && t.FBInstance.isNullOrEmpty())
-                    then
-                        let addr =
-                            match t.Size with
-                            | IEC61131.Size.Bit    ->  generators.[device]()
-                            | IEC61131.Size.Byte   ->  generators.[device+"B"]()
-                            | IEC61131.Size.Word   ->  generators.[device+"W"]()
-                            | IEC61131.Size.DWord  ->  generators.[device+"D"]()
-                            | _ -> failwithlog "tag gen Unknown"
-                        t.Address <- AddressM.tryParse(addr)
-                        t.AutoAddress <- true
-                        addr
-                    else t.StringAddress
-                let kind =
-                    match t.IOType with
-                    | Some tt when tt.Equals TagType.Instance -> Variable.Kind.VAR
-                    | _->                                        Variable.Kind.VAR_EXTERNAL
+                    | RegexPattern @"%([IQM])([XBWL]).*$" [iqm; mem] -> iqm, mem
+                    | _ -> "????", "????"
+
+                let plcType =
+                    match memSize with
+                    | "X" -> "BOOL"
+                    | "B" -> "BYTE"
+                    | "W" -> "WORD"
+                    | "L" -> "DWORD"
+                    | _ -> failwith "ERROR"
+                let comment, kind = "FAKECOMMENT", Variable.Kind.VAR
+
+                //<kwak>
+                //let name, comment = t.FullName, t.Tag
+                //let plcType =
+                //    match t.IOType with
+                //    | Some tt when tt.Equals TagType.Instance -> t.FBInstance  //instance 타입은  주소에 저장 활용 (내부사용으로 주소값이 없음)
+                //    | _ ->  match t.Size with
+                //            | IEC61131.Size.Bit    ->  "BOOL"
+                //            | IEC61131.Size.Byte   ->  "BYTE"
+                //            | IEC61131.Size.Word   ->  "WORD"
+                //            | IEC61131.Size.DWord  ->  "DWORD"
+                //            | _ -> failwithlog "tag Size Unknown"
+
+                ///// one of {"I"; "O"; "M"}
+                //let device =
+                //    match t.Address with
+                //    | Some(addr) -> AddressM.getDevice addr
+                //    | _ ->
+                //        match t.IOType with
+                //        | Some tt when tt.Equals TagType.State -> "I"
+                //        | Some tt when tt.Equals TagType.Action -> "O"
+                //        | Some tt when tt.Equals TagType.Dummy -> "M"
+                //        | _ -> ""
+                //        //Trace.WriteLine("Unknown PLC device type: assume 'M'.")
+                //let addr =
+                //    if (t.Address.IsNullOrEmpty() && t.FBInstance.isNullOrEmpty())
+                //    then
+                //        let addr =
+                //            match t.Size with
+                //            | IEC61131.Size.Bit    ->  generators.[device]()
+                //            | IEC61131.Size.Byte   ->  generators.[device+"B"]()
+                //            | IEC61131.Size.Word   ->  generators.[device+"W"]()
+                //            | IEC61131.Size.DWord  ->  generators.[device+"D"]()
+                //            | _ -> failwithlog "tag gen Unknown"
+                //        t.Address <- AddressM.tryParse(addr)
+                //        t.AutoAddress <- true
+                //        addr
+                //    else t.StringAddress
+                //let kind =
+                //    match t.IOType with
+                //    | Some tt when tt.Equals TagType.Instance -> Variable.Kind.VAR
+                //    | _-> Variable.Kind.VAR_EXTERNAL
 
                 XGITag.createSymbol name comment device ((int)kind) addr plcType -1 "" //Todo : XGK 일경우 DevicePos, IEC Address 정보 필요
                 ) |> Seq.toList
@@ -470,7 +504,7 @@ module internal File =
         let symbolsGlobalXml = XGITag.generateSymbolVars (globalSym, true)
 
 
-        let rungsXml = generateRungs prologComments statements
+        let rungsXml = generateRungs prologComments commentedStatements
 
         logInfo "Finished generating PLC code."
         wrapWithXml rungsXml symbolsLocalXml symbolsGlobalXml existingLSISprj

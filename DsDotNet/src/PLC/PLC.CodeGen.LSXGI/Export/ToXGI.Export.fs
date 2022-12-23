@@ -7,32 +7,39 @@ open Engine.Core
 
 module LsXGI =
 
-    let generateXGIXmlFromLadderInfo (opt:CodeGenerationOption) (ladderInfo:LadderInfo) (tags) (unusedTags) (existingLSISprj:string option) =
-        let existTagdict =
-            existingLSISprj
-            |> map (DsXml.load >> XGIXml.createUsedVariableMap)
-            |> Option.defaultValue (new Dictionary<string, string>())
+    //<kwak>
+    //let generateXGIXmlFromLadderInfo (opt:CodeGenerationOption) (ladderInfo:LadderInfo) (tags) (unusedTags) (existingLSISprj:string option) =
+    //    let existTagdict =
+    //        existingLSISprj
+    //        |> map (DsXml.load >> XGIXml.createUsedVariableMap)
+    //        |> Option.defaultValue (new Dictionary<string, string>())
 
-        let statements =
-            ladderInfo.Rungs
-            |> RungGenerator.replaceDuplicateTags tags existTagdict
-            |> Seq.groupBy(fun ri -> ri.GetCoilTerminal())
-            |> Seq.map (rungInfoToStatement opt)
+    //    let statements =
+    //        ladderInfo.Rungs
+    //        |> RungGenerator.replaceDuplicateTags tags existTagdict
+    //        |> Seq.groupBy(fun ri -> ri.GetCoilTerminal())
+    //        |> Seq.map (rungInfoToStatement opt)
 
-        let plctags = statementToTag statements |> Seq.append tags |> Seq.distinct
+    //    let plctags = statementToTag statements |> Seq.append tags |> Seq.distinct
 
-        File.generateXGIXmlFromStatement ladderInfo.PrologComments statements plctags unusedTags existingLSISprj
+    //    File.generateXGIXmlFromStatement ladderInfo.PrologComments statements plctags unusedTags existingLSISprj
 
-    let generateXGIXmlFromLadderInfoAndStatus (opt:CodeGenerationOption) (ladderInfo:LadderInfo) status (tags) (unusedTags) (existingLSISprj:string option) =
-        let existTagdict =
-            existingLSISprj
-            |> map (DsXml.load >> XGIXml.createUsedVariableMap)
-            |> Option.defaultValue (new Dictionary<string, string>())
+    //let generateXGIXmlFromLadderInfoAndStatus (opt:CodeGenerationOption) (ladderInfo:LadderInfo) status (tags) (unusedTags) (existingLSISprj:string option) =
+    //    let existTagdict =
+    //        existingLSISprj
+    //        |> map (DsXml.load >> XGIXml.createUsedVariableMap)
+    //        |> Option.defaultValue (new Dictionary<string, string>())
 
-        let statements = ladderInfo.Rungs @ status |> RungGenerator.replaceDuplicateTags tags existTagdict |> Seq.groupBy(fun ri -> ri.GetCoilTerminal()) |> Seq.map (rungInfoToStatement opt)
+    //    let statements = ladderInfo.Rungs @ status |> RungGenerator.replaceDuplicateTags tags existTagdict |> Seq.groupBy(fun ri -> ri.GetCoilTerminal()) |> Seq.map (rungInfoToStatement opt)
 
-        let plctags = statementToTag statements |> Seq.append tags |> Seq.distinct
-        File.generateXGIXmlFromStatement ladderInfo.PrologComments statements plctags unusedTags existingLSISprj
+    //    let plctags = statementToTag statements |> Seq.append tags |> Seq.distinct
+    //    File.generateXGIXmlFromStatement ladderInfo.PrologComments statements plctags unusedTags existingLSISprj
 
-    let generateXml (opt:CodeGenerationOption) (storages:Storages) (statements:Statement list) =
-        ()
+    let generateXml (opt:CodeGenerationOption) (storages:Storages) (commentedStatements:CommentedStatement list) : string =
+        let prologComments = ["DS Logic for XGI"]
+        let tags = storages.Values |> Seq.ofType<ITagWithAddress>
+        let unusedTags:ITagWithAddress list = []
+        let existingLSISprj = None
+
+        let xml = generateXGIXmlFromStatement prologComments commentedStatements tags unusedTags existingLSISprj
+        xml

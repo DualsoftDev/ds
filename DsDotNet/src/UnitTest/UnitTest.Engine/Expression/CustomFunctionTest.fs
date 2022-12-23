@@ -1,12 +1,12 @@
-namespace UnitTest.Engine.Expression
+namespace T.Expression
 
 open NUnit.Framework
-open UnitTest.Engine
+open T
 
 open Engine.Core
 
-[<AutoOpen>]
-module CustomFunctionTestModule =
+//[<AutoOpen>]
+//module CustomFunctionTestModule =
 
     type ExpressionTest() =
         do Fixtures.SetUpTest()

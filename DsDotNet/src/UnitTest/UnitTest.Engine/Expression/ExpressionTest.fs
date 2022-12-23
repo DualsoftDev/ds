@@ -1,4 +1,4 @@
-namespace UnitTest.Engine.Expression
+namespace T.Expression
 
 open System
 open NUnit.Framework
@@ -7,10 +7,10 @@ open Engine.Core
 open Engine.CodeGenCPU
 open Engine.Parser.FS
 open Engine.Common.FS
-open UnitTest.Engine
+open T
 
 [<AutoOpen>]
-module TestModule =
+module Exp =
     let evalExpr storages (text:string) = (parseExpression storages text).BoxedEvaluatedValue
     let evalExpr2 (storages:Storages) (text:string) = (parseExpression storages text).BoxedEvaluatedValue
     let v = ExpressionModule.literal2expr

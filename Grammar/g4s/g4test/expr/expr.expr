@@ -1,4 +1,18 @@
 /* grun expr toplevels -gui < g4test/expr/expr.expr */
+
+                bool myBit00 = createTag("%IX0.0.0", false);
+                bool myBit01 = createTag("%IX0.0.1", false);
+                bool myBit02 = createTag("%IX0.0.2", false);
+                bool myBit03 = createTag("%IX0.0.3", false);
+                bool myBit04 = createTag("%IX0.0.4", false);
+                bool myBit05 = createTag("%IX0.0.5", false);
+
+                $myBit02 := ! (! $myBit00 || $myBit01);
+                $myBit05 := ! ($myBit03 && ! $myBit04);
+
+
+
+
 copyIf(true, 10, $tag1);        // statement.  not expression
 
 bool myBit1 = createTag("%IX0.0.0", false);

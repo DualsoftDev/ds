@@ -38,7 +38,7 @@ module  TagModule =
     type PlcTag<'T when 'T:equality> (name, address:string, initValue:'T)  =
         inherit Tag<'T>(name, initValue)
         interface ITagWithAddress with
-            member x.Address = x.Address
+            member x.Address = x.Address        
 
         member val Address = address with get, set
 

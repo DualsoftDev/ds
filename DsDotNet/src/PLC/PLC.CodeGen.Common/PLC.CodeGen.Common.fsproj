@@ -14,6 +14,7 @@
 		<Compile Include="Prelude\Constants.fs" />
 		<Compile Include="Prelude\PLCStorageManager.fs" />
 		<Compile Include="TagType.fs" />
+		<Compile Include="FlatExpression.fs" />
 		<Compile Include="Command.fs" />
 		<!--
 		<Compile Include="QGraph\QGraph.Prelude.fs" />
@@ -23,13 +24,17 @@
 		<Compile Include="QGraph\QGraph.Relay.fs" />
 		-->
 		<Compile Include="QGraph\QGraph.CodeGenerationOption.fs" />
+		<Compile Include="EntryPoint.fs" />
 		<!--
 		<Compile Include="QGraph\QGraph.Generator.fs" />
 		<Compile Include="QGraph\QGraph.Processing.fs" />
 		<Compile Include="QGraph\QGraph.Util2.fs" />
 		-->
 		<Compile Include="Library.fs" />
+		<Content Include="FodyWeavers.xml" />
 	</ItemGroup>
+
+	<ItemGroup />
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
@@ -37,6 +42,17 @@
 
 	<ItemGroup>
 	  <Folder Include="QGraph\" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+		<PackageReference Include="Fody" Version="6.6.4">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="ModuleInit.Fody" Version="2.1.1">
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
 	</ItemGroup>
 
 </Project>

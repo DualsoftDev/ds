@@ -13,7 +13,7 @@ type VertexMemoryManager with
             else [realTag.Relay]//.ToTags()               //자식이 없으면 본인시작 릴레이 조건
 
         let statement = realTag.EndTag <==  tags2AndExpr (sets.Cast<TagBase<bool>>())
-        CommentedStatement ("", statement)
+        statement |> withNoComment
 
     member realTag.CreateInitStartRung() : CommentedStatement =
         let sets  = [realTag.Going;realTag.Origin].ToTags()
@@ -21,4 +21,4 @@ type VertexMemoryManager with
         let relay = realTag.Relay
 
         let statement = realTag.Relay <== FuncExt.GetRelayExpr(sets, rsts, relay)
-        CommentedStatement ("", statement)
+        statement |> withNoComment

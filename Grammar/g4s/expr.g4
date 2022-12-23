@@ -43,7 +43,7 @@ terminal: storage | tag | literal;
         literalString :STRING;
         literalBool   :'true' | 'false';
 
-toplevels: toplevel (';' toplevel)* (';')?;
+toplevels: toplevel (';' toplevel)* ';';
     toplevel: expr|statement;
 
 statement: assign | varDecl | timerDecl | counterDecl | copyStatement;

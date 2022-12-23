@@ -37,6 +37,7 @@ module ExpressionModule =
             member x.FunctionName = x.FunctionName
             member x.FunctionArguments = x.FunctionArguments
             member x.CollectStorages() = x.CollectStorages()
+            member x.Flatten() = fwdFlattenExpression x
 
         member x.DataType = typedefof<'T>
 
@@ -117,6 +118,7 @@ module ExpressionModule =
     type CommentedStatement = CommentedStatement of comment:string * statement:Statement
     let (|CommentAndStatement|) = function | CommentedStatement(x, y) -> x, y
     let commentAndStatement = (|CommentAndStatement|)
+    let withNoComment statement = CommentedStatement("", statement)
 
     type Statement with
         member x.Do() =

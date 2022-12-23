@@ -4,6 +4,7 @@
 		<TargetFramework>net6.0</TargetFramework>
 		<!--<TargetFramework>net48</TargetFramework>-->
 
+		<RootNamespace>T</RootNamespace>
 		<IsPackable>false</IsPackable>
 		<GenerateProgramFile>false</GenerateProgramFile>
 	</PropertyGroup>
@@ -105,8 +106,8 @@
 		<ProjectReference Include="..\..\Model\Import\Model.Import.Office\Model.Import.Office.fsproj" />
 
 		<ProjectReference Include="..\..\PLC\PLC.CodeGen.Common\PLC.CodeGen.Common.fsproj" />
-		<!--
 		<ProjectReference Include="..\..\PLC\PLC.CodeGen.LSXGI\PLC.CodeGen.LSXGI.fsproj" />
+		<!--
 		-->
 		<!--<ProjectReference Include="..\..\Model\Import\Model.Import.Office\Model.Import.Office.fsproj" />-->
 	</ItemGroup>

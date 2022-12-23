@@ -37,14 +37,14 @@ module internal Command =
             match cmdType with
                  | CoilCmd (cc) ->
                         match cc with
-                        |CoilMode(_) -> ElementType.CoilMode
-                        |ClosedCoilMode(_) -> ElementType.ClosedCoilMode
-                        |SetCoilMode(_) -> ElementType.SetCoilMode
-                        |ResetCoilMode(_) -> ElementType.ResetCoilMode
-                        |PulseCoilMode(_) -> ElementType.PulseCoilMode
-                        |NPulseCoilMode(_) -> ElementType.NPulseCoilMode
-                 | FunctionCmd (_) -> ElementType.VertFBMode
-                 | FunctionBlockCmd (_) -> ElementType.VertFBMode
+                        | CoilMode(_)       -> ElementType.CoilMode
+                        | ClosedCoilMode(_) -> ElementType.ClosedCoilMode
+                        | SetCoilMode(_)    -> ElementType.SetCoilMode
+                        | ResetCoilMode(_)  -> ElementType.ResetCoilMode
+                        | PulseCoilMode(_)  -> ElementType.PulseCoilMode
+                        | NPulseCoilMode(_) -> ElementType.NPulseCoilMode
+                 | (FunctionCmd (_) | FunctionBlockCmd (_))
+                    -> ElementType.VertFBMode
 
             /// Coil의 부정 Command를 반환한다.
          member x.ReverseCmd () =

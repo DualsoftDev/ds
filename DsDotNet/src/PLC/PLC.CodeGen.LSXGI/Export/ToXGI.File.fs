@@ -166,8 +166,16 @@ module internal XgiFile =
                 let rgiSub = xmlRung flatExpr command rgi.Y
                 rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
 
+            // <kwak>
+            | DuTimer timerStatement ->
+                let rungin = timerStatement.RungInCondition.Value
+                //let command:XgiCommand = FunctionBlockCmd(TimerMode(rungin, 100)) |> XgiCommand
+                ()
+
+            | ( DuCounter _ | DuCopy _ ) ->
+                failwith "Not yet"
+
             | DuVarDecl _ -> failwith "ERROR: Invalid"
-            | (DuTimer _ | DuCounter _ | DuCopy _ ) -> failwith "Not yet"
             | _  -> failwith "ERROR"
 
 

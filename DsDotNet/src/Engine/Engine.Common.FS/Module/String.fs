@@ -24,6 +24,9 @@ type StringExt =
     [<Extension>] static member SplitBy(x:string, separator:char
                     , [<Optional; DefaultParameterValue(StringSplitOptions.RemoveEmptyEntries)>] splitOption:StringSplitOptions) =
                         x.Split([|separator|], splitOption)
+
+    [<Extension>] static member Split(x:string, separator:string) = x.Split([|separator|], StringSplitOptions.None)
+
     [<Extension>] static member JoinLines xs = joinLines xs
     [<Extension>] static member JoinWith(xs:string seq, separator) = joinWith xs separator
     [<Extension>] static member IsNullOrEmpty(x:string) = isNullOrEmpty x
@@ -31,9 +34,4 @@ type StringExt =
     [<Extension>] static member OfNotNullAny(xs:string seq) = ofNotNullAny xs
     [<Extension>] static member EncloseWith(x:string, wrapper:string) = $"{wrapper}{x}{wrapper}"
     [<Extension>] static member EncloseWith2(x:string, start:string, end_:string) = $"{start}{x}{end_}"
-    
-
-
-
-
 

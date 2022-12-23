@@ -157,7 +157,7 @@ module rec TimerModule =
         member _.RES:TagBase<bool> = res
 
 
-    type TimerStruct internal(storages:Storages, name, preset:CountUnitType, accum:CountUnitType) =
+    type TimerStruct internal(typ:TimerType, storages:Storages, name, preset:CountUnitType, accum:CountUnitType) =
         inherit TimerCounterBaseStruct(storages, name, preset, accum)
 
         let en = fwdCreateBoolTag $"{name}.{nameEN()}" false
@@ -170,6 +170,7 @@ module rec TimerModule =
         member _.EN:TagBase<bool> = en
         /// Timing
         member _.TT:TagBase<bool> = tt
+        member _.Type = typ
 
 
     type TimerStruct with

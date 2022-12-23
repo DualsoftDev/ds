@@ -23,10 +23,10 @@ module CounterStatementModule =
         let accum = accum |? 0us
         let cs =    // counter structure
             match typ with
-            | CTU  -> new CTUStruct(storages, name, preset, accum) :> CounterBaseStruct
-            | CTD  -> new CTDStruct(storages, name, preset, accum)
-            | CTUD -> new CTUDStruct(storages, name, preset, accum)
-            | CTR  -> new CTRStruct(storages, name, preset, accum)
+            | CTU  -> new CTUStruct(typ, storages, name, preset, accum) :> CounterBaseStruct
+            | CTD  -> new CTDStruct(typ, storages, name, preset, accum)
+            | CTUD -> new CTUDStruct(typ, storages, name, preset, accum)
+            | CTR  -> new CTRStruct(typ, storages, name, preset, accum)
         let counter = new Counter(typ, cs)
 
         let statements = ResizeArray<Statement>()

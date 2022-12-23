@@ -1,5 +1,8 @@
 namespace PLC.CodeGen.LSXGI
 
+open System
+open System.Linq
+
 open Engine.Common.FS
 open PLC.CodeGen.Common.QGraph
 open System.Collections.Generic
@@ -35,15 +38,35 @@ module LsXGI =
     //    let plctags = statementToTag statements |> Seq.append tags |> Seq.distinct
     //    File.generateXGIXmlFromStatement ladderInfo.PrologComments statements plctags unusedTags existingLSISprj
 
+
     let generateXml (opt:CodeGenerationOption) (storages:Storages) (commentedStatements:CommentedStatement list) : string =
         let prologComments = ["DS Logic for XGI"]
 
         // todo : Timer 및 Counter 도 PLC XGI 에 변수로 등록하여야 한다.
         // <Symbol Name="T_myTon" Kind="1" Type="TON" State="0" Address="" Trigger="" InitValue="" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
 
-        let tags = storages.Values |> Seq.ofType<ITagWithAddress>
         let unusedTags:ITagWithAddress list = []
         let existingLSISprj = None
 
-        let xml = generateXGIXmlFromStatement prologComments commentedStatements tags unusedTags existingLSISprj
+        let timerOrCountersNames =
+            storages.Values.Filter(fun s -> s :? TimerCounterBaseStruct)
+                .Select(fun struc -> struc.Name)
+                |> HashSet
+                ;
+        let xgiSymbols =
+            [   for s in storages.Values do
+                    match s with
+                    | :? ITagWithAddress as t ->
+                        let name = (t :> INamed).Name
+                        if timerOrCountersNames.Contains(name.Split(".")[0]) then
+                            // skip timer/counter structure member : timer 나 counter 명 + "." + field name
+                            ()
+                        else
+                            XgiSymbol.DuTag t
+                    | :? TimerStruct as ts -> XgiSymbol.DuTimer ts
+                    | :? CounterBaseStruct as cs -> XgiSymbol.DuCounter cs
+                    | _ -> failwith "ERROR"
+            ]
+
+        let xml = generateXGIXmlFromStatement prologComments commentedStatements xgiSymbols unusedTags existingLSISprj
         xml

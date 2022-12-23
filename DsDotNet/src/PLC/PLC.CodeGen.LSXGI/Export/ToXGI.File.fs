@@ -341,8 +341,16 @@ module internal XgiFile =
         //    }
         //allLines
 
-    let generateXGIXmlFromStatement (prologComments:string seq) (commentedStatements:CommentedStatement seq) (tags:ITagWithAddress seq) (unusedTags:ITagWithAddress seq) (existingLSISprj:string option) =
+
+    type XgiSymbol =
+        | DuTag of ITagWithAddress
+        | DuTimer of TimerStruct
+        | DuCounter of CounterBaseStruct
+
+
+    let generateXGIXmlFromStatement (prologComments:string seq) (commentedStatements:CommentedStatement seq) (xgiSymbols:XgiSymbol seq) (unusedTags:ITagWithAddress seq) (existingLSISprj:string option) =
         // TODO : 하드 코딩...  PLC memory 설정을 어디선가 받아서 처리해야 함.
+
         /// PLC memory manager
         let manager =
             /// PLC H/W memory configurations
@@ -397,92 +405,112 @@ module internal XgiFile =
                     |? Seq.empty
                     |> Seq.filter (fun t -> t.StartsWith("%M"))
                     |> Seq.bind (fun t -> toChunk t 10)
-                let tagsUsedInTags = [ for t in tags -> t.Address ] |> Set
+
+                let tags =
+                    [ for s in xgiSymbols do
+                        match s with
+                        | DuTag t -> yield t.Address
+                        | _ -> ()
+                    ]
+
                 let tagsUnusedInTags = [ for t in unusedTags -> t.Address] |> Set
-                tagsUsedInFiles @ tagsUsedInTags @ tagsUnusedInTags
+                tagsUsedInFiles @ tags @ tagsUnusedInTags |> distinct
 
             alreadyAllocatedAddresses |> iter (fun t -> manager.MarkAllocated(t))
             manager
 
-        let generators =
-            [
-                "I",  fun () -> manager.AllocateTag(Memory.I, Size.X) |> Option.get
-                "O",  fun () -> manager.AllocateTag(Memory.Q, Size.X) |> Option.get
-                "M",  fun () -> manager.AllocateTag(Memory.R, Size.X) |> Option.get
-                "IB", fun () -> manager.AllocateTag(Memory.I, Size.B) |> Option.get
-                "OB", fun () -> manager.AllocateTag(Memory.Q, Size.B) |> Option.get
-                "MB", fun () -> manager.AllocateTag(Memory.M, Size.B) |> Option.get
-                "IW", fun () -> manager.AllocateTag(Memory.I, Size.W) |> Option.get
-                "OW", fun () -> manager.AllocateTag(Memory.Q, Size.W) |> Option.get
-                "MW", fun () -> manager.AllocateTag(Memory.M, Size.W) |> Option.get
-                "ID", fun () -> manager.AllocateTag(Memory.I, Size.D) |> Option.get
-                "OD", fun () -> manager.AllocateTag(Memory.Q, Size.D) |> Option.get
-                "MD", fun () -> manager.AllocateTag(Memory.M, Size.D) |> Option.get
-            ] |> Tuple.toDictionary
+        //let generators =
+        //    [
+        //        "I",  fun () -> manager.AllocateTag(Memory.I, Size.X) |> Option.get
+        //        "O",  fun () -> manager.AllocateTag(Memory.Q, Size.X) |> Option.get
+        //        "M",  fun () -> manager.AllocateTag(Memory.R, Size.X) |> Option.get
+        //        "IB", fun () -> manager.AllocateTag(Memory.I, Size.B) |> Option.get
+        //        "OB", fun () -> manager.AllocateTag(Memory.Q, Size.B) |> Option.get
+        //        "MB", fun () -> manager.AllocateTag(Memory.M, Size.B) |> Option.get
+        //        "IW", fun () -> manager.AllocateTag(Memory.I, Size.W) |> Option.get
+        //        "OW", fun () -> manager.AllocateTag(Memory.Q, Size.W) |> Option.get
+        //        "MW", fun () -> manager.AllocateTag(Memory.M, Size.W) |> Option.get
+        //        "ID", fun () -> manager.AllocateTag(Memory.I, Size.D) |> Option.get
+        //        "OD", fun () -> manager.AllocateTag(Memory.Q, Size.D) |> Option.get
+        //        "MD", fun () -> manager.AllocateTag(Memory.M, Size.D) |> Option.get
+        //    ] |> Tuple.toDictionary
 
         let symbolInfos =
-            tags
-            |> Seq.map (fun t ->
-                let name, addr = t.Name, t.Address
+            [
+                for s in xgiSymbols do
+                    match s with
+                    | DuTag t ->
+                        let name, addr = t.Name, t.Address
 
-                let device, memSize =
-                    match t.Address with
-                    | RegexPattern @"%([IQM])([XBWL]).*$" [iqm; mem] -> iqm, mem
-                    | _ -> "????", "????"
+                        let device, memSize =
+                            match t.Address with
+                            | RegexPattern @"%([IQM])([XBWL]).*$" [iqm; mem] -> iqm, mem
+                            | _ -> "????", "????"
 
-                let plcType =
-                    match memSize with
-                    | "X" -> "BOOL"
-                    | "B" -> "BYTE"
-                    | "W" -> "WORD"
-                    | "L" -> "DWORD"
-                    | _ -> failwith "ERROR"
-                let comment, kind = "FAKECOMMENT", Variable.Kind.VAR
+                        let plcType =
+                            match memSize with
+                            | "X" -> "BOOL"
+                            | "B" -> "BYTE"
+                            | "W" -> "WORD"
+                            | "L" -> "DWORD"
+                            | _ -> failwith "ERROR"
+                        let comment, kind = "FAKECOMMENT", Variable.Kind.VAR
 
-                //<kwak>
-                //let name, comment = t.FullName, t.Tag
-                //let plcType =
-                //    match t.IOType with
-                //    | Some tt when tt.Equals TagType.Instance -> t.FBInstance  //instance 타입은  주소에 저장 활용 (내부사용으로 주소값이 없음)
-                //    | _ ->  match t.Size with
-                //            | IEC61131.Size.Bit    ->  "BOOL"
-                //            | IEC61131.Size.Byte   ->  "BYTE"
-                //            | IEC61131.Size.Word   ->  "WORD"
-                //            | IEC61131.Size.DWord  ->  "DWORD"
-                //            | _ -> failwithlog "tag Size Unknown"
+                        //<kwak>
+                        //let name, comment = t.FullName, t.Tag
+                        //let plcType =
+                        //    match t.IOType with
+                        //    | Some tt when tt.Equals TagType.Instance -> t.FBInstance  //instance 타입은  주소에 저장 활용 (내부사용으로 주소값이 없음)
+                        //    | _ ->  match t.Size with
+                        //            | IEC61131.Size.Bit    ->  "BOOL"
+                        //            | IEC61131.Size.Byte   ->  "BYTE"
+                        //            | IEC61131.Size.Word   ->  "WORD"
+                        //            | IEC61131.Size.DWord  ->  "DWORD"
+                        //            | _ -> failwithlog "tag Size Unknown"
 
-                ///// one of {"I"; "O"; "M"}
-                //let device =
-                //    match t.Address with
-                //    | Some(addr) -> AddressM.getDevice addr
-                //    | _ ->
-                //        match t.IOType with
-                //        | Some tt when tt.Equals TagType.State -> "I"
-                //        | Some tt when tt.Equals TagType.Action -> "O"
-                //        | Some tt when tt.Equals TagType.Dummy -> "M"
-                //        | _ -> ""
-                //        //Trace.WriteLine("Unknown PLC device type: assume 'M'.")
-                //let addr =
-                //    if (t.Address.IsNullOrEmpty() && t.FBInstance.isNullOrEmpty())
-                //    then
-                //        let addr =
-                //            match t.Size with
-                //            | IEC61131.Size.Bit    ->  generators.[device]()
-                //            | IEC61131.Size.Byte   ->  generators.[device+"B"]()
-                //            | IEC61131.Size.Word   ->  generators.[device+"W"]()
-                //            | IEC61131.Size.DWord  ->  generators.[device+"D"]()
-                //            | _ -> failwithlog "tag gen Unknown"
-                //        t.Address <- AddressM.tryParse(addr)
-                //        t.AutoAddress <- true
-                //        addr
-                //    else t.StringAddress
-                //let kind =
-                //    match t.IOType with
-                //    | Some tt when tt.Equals TagType.Instance -> Variable.Kind.VAR
-                //    | _-> Variable.Kind.VAR_EXTERNAL
+                        ///// one of {"I"; "O"; "M"}
+                        //let device =
+                        //    match t.Address with
+                        //    | Some(addr) -> AddressM.getDevice addr
+                        //    | _ ->
+                        //        match t.IOType with
+                        //        | Some tt when tt.Equals TagType.State -> "I"
+                        //        | Some tt when tt.Equals TagType.Action -> "O"
+                        //        | Some tt when tt.Equals TagType.Dummy -> "M"
+                        //        | _ -> ""
+                        //        //Trace.WriteLine("Unknown PLC device type: assume 'M'.")
+                        //let addr =
+                        //    if (t.Address.IsNullOrEmpty() && t.FBInstance.isNullOrEmpty())
+                        //    then
+                        //        let addr =
+                        //            match t.Size with
+                        //            | IEC61131.Size.Bit    ->  generators.[device]()
+                        //            | IEC61131.Size.Byte   ->  generators.[device+"B"]()
+                        //            | IEC61131.Size.Word   ->  generators.[device+"W"]()
+                        //            | IEC61131.Size.DWord  ->  generators.[device+"D"]()
+                        //            | _ -> failwithlog "tag gen Unknown"
+                        //        t.Address <- AddressM.tryParse(addr)
+                        //        t.AutoAddress <- true
+                        //        addr
+                        //    else t.StringAddress
+                        //let kind =
+                        //    match t.IOType with
+                        //    | Some tt when tt.Equals TagType.Instance -> Variable.Kind.VAR
+                        //    | _-> Variable.Kind.VAR_EXTERNAL
 
-                XGITag.createSymbol name comment device ((int)kind) addr plcType -1 "" //Todo : XGK 일경우 DevicePos, IEC Address 정보 필요
-            ) |> Seq.toList
+                        XGITag.createSymbol name comment device ((int)kind) addr plcType -1 "" //Todo : XGK 일경우 DevicePos, IEC Address 정보 필요
+                    | DuTimer timer ->
+                        let device, addr = "", ""
+                        let kind = Variable.Kind.VAR
+                        let plcType =
+                            match timer.Type with
+                            | TON | TOF | RTO -> timer.Type.ToString()
+
+                        XGITag.createSymbol timer.Name $"TIMER {timer.Name}" device ((int)kind) addr plcType -1 "" //Todo : XGK 일경우 DevicePos, IEC Address 정보 필요
+                    | DuCounter counter ->
+                        failwith "Not Yet"
+                        ()
+            ]
 
         /// Symbol table 정의 XML 문자열
         let symbolsLocalXml = XGITag.generateSymbolVars (symbolInfos, false)

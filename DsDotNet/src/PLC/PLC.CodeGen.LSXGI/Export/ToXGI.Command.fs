@@ -190,8 +190,9 @@ module internal Command =
         let inst, func = cmd.Instance |> fun (inst, varType) -> inst, varType.ToString()
         [
             createFB func func inst func x y
+
             //Command 결과출력
-            createFBParameterXml (cmd.CoilTerminalTag.PLCTagName)  (x+1) (y)
+            //createFBParameterXml (cmd.CoilTerminalTag.PLCTagName)  (x+1) (y)
         ]
 
 

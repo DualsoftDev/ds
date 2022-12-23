@@ -101,8 +101,8 @@ module Command =
     with
         member x.GetInstanceText() =
             match x with
-            | TimerMode(timerStruct) -> $"T_{timerStruct.Timer.Name}"
-            | CounterMode(tag, resetTag, count) ->  $"C_{tag.PLCTagName}"
+            | TimerMode(timerStruct) -> timerStruct.Timer.Name
+            | CounterMode(tag, resetTag, count) ->  $"XXXXXXX_{tag.PLCTagName}"
         member x.UsedCommandTags() =
             match x with
             //| TimerMode(tag, time) -> [ tag ]

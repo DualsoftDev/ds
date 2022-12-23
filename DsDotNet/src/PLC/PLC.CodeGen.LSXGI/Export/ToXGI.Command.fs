@@ -82,19 +82,20 @@ module internal Command =
         | NE -> XgiCommand(FunctionCmd(FunctionPure.CompareNE(tag, (tagA, tagB))))
 
     // <timer>
-    let drawCmdTime(timerStatement:TimerStatement, x, y) : PositionedRungXmlsWithNewY =
+    let drawCmdTimer(timerStatement:TimerStatement, x, y) : PositionedRungXmlsWithNewY =
         let time:int = int timerStatement.Timer.PRE.Value
         //let coil:IExpressionTerminal =
         let funcSizeY = 3
         //Command 속성입력
-        { NewY = funcSizeY-1; PositionedRungXmls = [createPA $"T#{time}MS" (x-1) (y+1)]}
+        { NewY = funcSizeY-1; PositionedRungXmls = [createFBParameterXml $"T#{time}MS" (x-1) (y+1)]}
+        //{ NewY = funcSizeY-1; PositionedRungXmls = [createFBParameterXml $"T#{time}MS" x y]}
 
-    let drawCmdCount(coil:IExpressionTerminal, reset:IExpressionTerminal, count:int, x, y) : PositionedRungXmlsWithNewY =
+    let drawCmdCounter(coil:IExpressionTerminal, reset:IExpressionTerminal, count:int, x, y) : PositionedRungXmlsWithNewY =
         let funcSizeY = 4
         //Command 속성입력
         let results = [
-            createPA (reset.PLCTagName) (x-1) (y+1)
-            createPA (sprintf "%d" count) (x-1) (y+2)
+            createFBParameterXml reset.PLCTagName (x-1) (y+1)
+            createFBParameterXml $"{count}" (x-1) (y+2)
         ]
 
         { NewY = funcSizeY-1; PositionedRungXmls = results}
@@ -114,9 +115,9 @@ module internal Command =
 
         let results = [
             createFB funcFind func "" (opComp.ToText()) x y
-            createPA (leftA.ToText()) (x-1) (y+1)
-            createPA (leftB.ToText()) (x-1) (y+2)
-            createPA (coil.PLCTagName)  (x+1) (y+1)
+            createFBParameterXml (leftA.ToText()) (x-1) (y+1)
+            createFBParameterXml (leftB.ToText()) (x-1) (y+2)
+            createFBParameterXml (coil.PLCTagName)  (x+1) (y+1)
         ]
 
         { NewY = funcSizeY - 1; PositionedRungXmls = results}
@@ -137,16 +138,16 @@ module internal Command =
             else
                 x <- xInit
                 //Command 결과출력
-                createPA (tagCoil.PLCTagName)  (x+1) (y)
+                createFBParameterXml (tagCoil.PLCTagName)  (x+1) (y)
 
 
             //Pulse시 증감 처리
             //yield! drawRising(x, y)
             //함수 그리기
             createFB funcFind func "" func x y
-            createPA (targetTag.ToText())    (x-1) (y+1)
-            createPA (targetTag.ToText())    (x+1) (y+1)
-            createPA (addValue.ToString())   (x-1) (y+2)
+            createFBParameterXml (targetTag.ToText())    (x-1) (y+1)
+            createFBParameterXml (targetTag.ToText())    (x+1) (y+1)
+            createFBParameterXml (addValue.ToString())   (x-1) (y+2)
         ]
 
         let newY = if pulse then funcSizeY else funcSizeY-1
@@ -170,13 +171,13 @@ module internal Command =
             else
                 //Command 결과출력
                 x <- xInit
-                createPA (tagCoil.PLCTagName)  (x+1) (y)
+                createFBParameterXml (tagCoil.PLCTagName)  (x+1) (y)
 
 
             //함수 그리기
             createFB funcFind func "" func x y
-            createPA (fromTag.ToText())  (x-1) (y+1)
-            createPA (toTag.ToText())  (x+1) (y+1)
+            createFBParameterXml (fromTag.ToText())  (x-1) (y+1)
+            createFBParameterXml (toTag.ToText())  (x+1) (y+1)
         ]
 
         let newY = if pulse then funcSizeY else funcSizeY-1
@@ -190,7 +191,7 @@ module internal Command =
         [
             createFB func func inst func x y
             //Command 결과출력
-            createPA (cmd.CoilTerminalTag.PLCTagName)  (x+1) (y)
+            createFBParameterXml (cmd.CoilTerminalTag.PLCTagName)  (x+1) (y)
         ]
 
 
@@ -198,8 +199,14 @@ module internal Command =
         let results = ResizeArray<PositionedRungXml>()
 
         //FunctionBlock, Function 까지 연장선 긋기
-        let newX = getFBCellX x
-        results.Add( {Position = coord newX y; Xml=mutiEndLine (x + 1) (newX - 1) y})
+        let needNewLineFeed = (x % minFBCellX) >= 6
+        let numLineSpan = x / minFBCellX
+        let mutable newX = System.Math.Max( x + 1, (1 + numLineSpan) * minFBCellX  - 3)
+        if x  < newX - 1 then
+            //newX <- getFBCellX x
+            results.Add( {Position = coord newX y; Xml=mutiEndLine x  (newX - 1) y})
+        //else
+        //    results.Add( {Position = coord newX y; Xml=mutiEndLine (x + 1) (minFBCellX + newX - 1) y})
 
         //FunctionBlock, Function 그리기
         let { NewY = newY; PositionedRungXmls = result} =
@@ -217,9 +224,10 @@ module internal Command =
             | FunctionBlockCmd (fbc) ->
                 results.AddRange(drawFunctionBlockInstance(cmd, newX, y)) //Command 객체생성
                 match fbc with
-                | TimerMode(timerStatement) -> drawCmdTime(timerStatement, newX, y)     // <timer>
-                | CounterMode(cmdCoil, resetTag, count) -> drawCmdCount(cmdCoil, resetTag, count, newX, y)
-            |_-> failwithlog "Unknown CommandType"
+                | TimerMode(timerStatement) -> drawCmdTimer(timerStatement, newX, y)     // <timer>
+                | CounterMode(cmdCoil, resetTag, count) -> drawCmdCounter(cmdCoil, resetTag, count, newX, y)
+            | _ ->
+                failwithlog "Unknown CommandType"
 
         results.AddRange(result)
 

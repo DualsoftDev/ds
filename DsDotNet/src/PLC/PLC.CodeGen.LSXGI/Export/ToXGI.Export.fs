@@ -37,6 +37,10 @@ module LsXGI =
 
     let generateXml (opt:CodeGenerationOption) (storages:Storages) (commentedStatements:CommentedStatement list) : string =
         let prologComments = ["DS Logic for XGI"]
+
+        // todo : Timer 및 Counter 도 PLC XGI 에 변수로 등록하여야 한다.
+        // <Symbol Name="T_myTon" Kind="1" Type="TON" State="0" Address="" Trigger="" InitValue="" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
+
         let tags = storages.Values |> Seq.ofType<ITagWithAddress>
         let unusedTags:ITagWithAddress list = []
         let existingLSISprj = None

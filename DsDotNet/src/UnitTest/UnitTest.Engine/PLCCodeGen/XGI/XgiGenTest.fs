@@ -274,8 +274,8 @@ open PLC.CodeGen.Common.FlatExpressionModule
                 $myBit7 := ($myBit0 || $myBit1) && $myBit2;
 """
             let statements = parseCode storages code
-            storages.Count === 12
-            statements.Length === 2      // createTag 는 statement 에 포함되지 않는다.   (한번 생성하고 끝나므로 storages 에 tag 만 추가 된다.)
+            //storages.Count === 12
+            //statements.Length === 2      // createTag 는 statement 에 포함되지 않는다.   (한번 생성하고 끝나므로 storages 에 tag 만 추가 된다.)
 
             let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
             File.WriteAllText(outputFile, xml)

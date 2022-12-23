@@ -116,6 +116,11 @@ module internal Basic =
         let indent = 0  // if getDepthFirstLogical expr = Some(Op.Or) then 1 else 0
 
         let result = rng (x+indent) y expr
+        let result =
+            match expr with
+            | FlatTerminal _ -> { result with NextX = result.NextX + 1 }
+            | _ -> result
+
         /// 좌표 * xml 결과 문자열
         let positionedRungXmls, newY =
             let mutable newPositionY = 0

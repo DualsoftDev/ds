@@ -186,7 +186,7 @@ module internal Command =
 
 
     let drawCommand(cmd:XgiCommand, x, y) =
-        let results = ResizeArray<RungInfo>()
+        let results = ResizeArray<PositinedRungXml>()
 
         //FunctionBlock, Function 까지 연장선 긋기
         let newX = getFBCellX x

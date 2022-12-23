@@ -8,6 +8,7 @@ open PLC.CodeGen.LSXGI
 open PLC.CodeGen.Common
 open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
 open PLC.CodeGen.Common.NewIEC61131
+open PLC.CodeGen.Common.QGraph
 
 [<AutoOpen>]
 module internal XgiFile =
@@ -20,7 +21,7 @@ module internal XgiFile =
 
     // <kwak>
     /// 추상적인 Rung info expression 으로부터 XGI ladder rung statement 를 생성한다.
-    //let rungInfoToStatement (opt:CodeGenerationOption) (gri:(IExpressionTerminal * seq<RungInfo>)) =
+    //let rungInfoToStatement (opt:CodeGenerationOption) (gri:(IExpressionTerminal * seq<PositinedRungXml>)) =
     //    let z = snd gri |> map(rungInfoToExpr)
     //    let condition = snd gri |> map(rungInfoToExpr) |> Seq.reduce mkOr
     //    let coil = (snd gri |> Seq.head).CoilOrigin
@@ -168,9 +169,15 @@ module internal XgiFile =
 
             // <kwak>
             | DuTimer timerStatement ->
-                let rungin = timerStatement.RungInCondition.Value
-                //let command:XgiCommand = FunctionBlockCmd(TimerMode(rungin, 100)) |> XgiCommand
-                ()
+                let rungin = timerStatement.RungInCondition.Value :?> Expression<bool>
+                let xxxTag =
+                    match rungin with
+                    | DuTerminal(DuTag t) -> t
+                    | _ -> failwith "ERROR"
+                let command:XgiCommand = FunctionBlockCmd(TimerMode(xxxTag, 100)) |> XgiCommand
+                let flatExpr = FlatTerminal (xxxTag, false, false)
+                let rgiSub = xmlRung flatExpr command rgi.Y
+                rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
 
             | ( DuCounter _ | DuCopy _ ) ->
                 failwith "Not yet"

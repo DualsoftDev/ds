@@ -211,16 +211,17 @@ open PLC.CodeGen.Common.FlatExpressionModule
             //generatePLCByModel
             let storages = Storages()
             let code = """
+                bool myQBit0 = createTag("%QX0.1.0", false);
                 bool myBit0 = createTag("%IX0.0.0", false);
                 bool myBit1 = createTag("%IX0.0.1", false);
                 bool myBit2 = createTag("%IX0.0.2", false);
 
                 bool myBit7 = createTag("%IX0.0.7", false);
-                ton myTon = createTON(2000us, $myBit7);
+                ton myTon = createTON(2000us, $myQBit0);
                 $myBit7 := ($myBit0 || $myBit1) && $myBit2;
 """
             let statements = parseCode storages code
-            storages.Count === 11
+            storages.Count === 12
             statements.Length === 2      // createTag 는 statement 에 포함되지 않는다.   (한번 생성하고 끝나므로 storages 에 tag 만 추가 된다.)
 
             let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)

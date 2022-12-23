@@ -14,7 +14,7 @@ module internal Basic =
 
 
     type RungInfoWithNextPosition = {
-        RungInfos:RungInfo list
+        RungInfos:PositinedRungXml list
         NextX: int
         NextY: int
         VLineUpRightMaxY: int
@@ -34,7 +34,7 @@ module internal Basic =
 
             let c = coord x y
             /// 좌표 * 결과 xml 문자열 보관 장소
-            let rungInfos = ResizeArray<RungInfo>()
+            let rungInfos = ResizeArray<PositinedRungXml>()
             { Position = c; Xml = $"<!-- {x} {y} {expr.ToText()} -->" } |> rungInfos.Add
 
             match expr with

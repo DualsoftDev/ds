@@ -9,7 +9,7 @@ open Engine.Core
 module internal Common =
     type XmlOutput = string
     type EncodedXYCoordinate = int
-    type RungInfo = {
+    type PositinedRungXml = {
         Position: EncodedXYCoordinate   // int
         Xml: XmlOutput                  // string
     }
@@ -52,7 +52,7 @@ module internal Common =
             failwithlogf "endX startX [%d > %d]" endX startX
 
     /// 함수 그리기
-    let createFB funcFind func (inst:string) tag x y : RungInfo =
+    let createFB funcFind func (inst:string) tag x y : PositinedRungXml =
         let instFB = if(inst <> "") then (inst + ",VAR") else ","
         let c = coord x y
         let fbBody = sprintf "Param=\"%s\"" ((FB.getFBXML( funcFind ,func ,instFB, FB.getFBIndex tag)))

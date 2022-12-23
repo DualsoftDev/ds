@@ -261,8 +261,7 @@ open PLC.CodeGen.Common.FlatExpressionModule
             ()
 
         [<Test>]
-        member __.``Timer test`` () =
-            //generatePLCByModel
+        member __.``XX Timer test`` () =
             let storages = Storages()
             let code = """
                 bool myQBit0 = createTag("%QX0.1.0", false);
@@ -280,7 +279,54 @@ open PLC.CodeGen.Common.FlatExpressionModule
 
             let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
             File.WriteAllText(outputFile, xml)
-            tracefn "%s" xml
-            ()
+
+        [<Test>]
+        member __.``Many AND RungIn Condition Timer test`` () =
+            let storages = Storages()
+            let code = codeForBits + """
+                ton myTon = createTON(2000us,
+                    $myBit00 &&
+                    $myBit01 &&
+                    $myBit02 &&
+                    $myBit03 &&
+                    $myBit04 &&
+                    $myBit05 &&
+                    $myBit06 &&
+                    $myBit07 &&
+                    $myBit10 &&
+                    $myBit11 &&
+                    $myBit12 &&
+                    $myBit13 &&
+                    $myBit14 &&
+                    $myBit15 &&
+                    $myBit16    );
+"""
+            let statements = parseCode storages code
+            let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+            File.WriteAllText(outputFile, xml)
 
 
+        [<Test>]
+        member __.``Many OR RungIn Condition Timer test`` () =
+            let storages = Storages()
+            let code = codeForBits + """
+                ton myTon = createTON(2000us,
+                    $myBit00 ||
+                    $myBit01 ||
+                    $myBit02 ||
+                    $myBit03 ||
+                    $myBit04 ||
+                    $myBit05 ||
+                    $myBit06 ||
+                    $myBit07 ||
+                    $myBit10 ||
+                    $myBit11 ||
+                    $myBit12 ||
+                    $myBit13 ||
+                    $myBit14 ||
+                    $myBit15 ||
+                    $myBit16    );
+"""
+            let statements = parseCode storages code
+            let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+            File.WriteAllText(outputFile, xml)

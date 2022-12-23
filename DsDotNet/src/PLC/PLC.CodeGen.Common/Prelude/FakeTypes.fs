@@ -8,7 +8,7 @@ module FakeTypesModule =
     type OpComp =
         | GT | GE | EQ | LE | LT | NE
     with
-        member x.ToText =
+        member x.ToText() =
             match x with
             | GT -> "GT"  // <
             | GE -> "GE"  // <=

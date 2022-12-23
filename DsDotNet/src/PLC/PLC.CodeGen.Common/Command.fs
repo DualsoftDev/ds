@@ -70,17 +70,17 @@ module Command =
         interface IFunctionCommand with
             member this.TerminalEndTag: IExpressionTerminal =
                 match this with
-                | CopyMode  (endTag, (a, b)) -> endTag
-                | CompareGT (endTag, (a, b)) -> endTag
-                | CompareLT (endTag, (a, b)) -> endTag
-                | CompareGE (endTag, (a, b)) -> endTag
-                | CompareLE (endTag, (a, b)) -> endTag
-                | CompareEQ (endTag, (a, b)) -> endTag
-                | CompareNE (endTag, (a, b)) -> endTag
-                | Add       (endTag, a, b)   -> endTag
+                | CopyMode  (endTag, _) -> endTag
+                | CompareGT (endTag, _) -> endTag
+                | CompareLT (endTag, _) -> endTag
+                | CompareGE (endTag, _) -> endTag
+                | CompareLE (endTag, _) -> endTag
+                | CompareEQ (endTag, _) -> endTag
+                | CompareNE (endTag, _) -> endTag
+                | Add       (endTag, _, _) -> endTag
 
 
-        member private x.GetTerminal(tag:CommandTag) = if(tag.VarKind() =  VarKind.Variable) then seq {tag :> IExpressionTerminal} else Seq.empty
+        member private x.GetTerminal(tag:CommandTag) = if(tag.VarKind() =  VarKind.Variable) then [ tag :> IExpressionTerminal ] else List.empty
 
         member x.UsedCommandTags() =
             match x with
@@ -121,6 +121,7 @@ module Command =
     type CommandTypes =
         | CoilCmd          of CoilOutput
         | FunctionCmd      of FunctionPure
+        /// Timer, Counter 등
         | FunctionBlockCmd of FunctionBlock
 
     let createPLCCommandCopy(endTag, from, toTag) = FunctionPure.CopyMode(endTag, (from, toTag))

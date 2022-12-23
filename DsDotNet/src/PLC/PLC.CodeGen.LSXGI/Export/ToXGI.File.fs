@@ -17,11 +17,11 @@ module internal XgiFile =
     /// text comment 를 xml wrapping 해서 반환
     let getCommentRung y cmt =
         let yy = y * 1024 + 1
-        sprintf "\t<Rung BlockMask=\"0\"><Element ElementType=\"%d\" Coordinate=\"%d\">%s</Element></Rung>" (int ElementType.RungCommentMode) yy cmt
+        $"\t<Rung BlockMask=\"0\"><Element ElementType=\"{int ElementType.RungCommentMode}\" Coordinate=\"{yy}\">{cmt}</Element></Rung>"
 
     // <kwak>
     /// 추상적인 Rung info expression 으로부터 XGI ladder rung statement 를 생성한다.
-    //let rungInfoToStatement (opt:CodeGenerationOption) (gri:(IExpressionTerminal * seq<PositinedRungXml>)) =
+    //let rungInfoToStatement (opt:CodeGenerationOption) (gri:(IExpressionTerminal * seq<PositionedRungXml>)) =
     //    let z = snd gri |> map(rungInfoToExpr)
     //    let condition = snd gri |> map(rungInfoToExpr) |> Seq.reduce mkOr
     //    let coil = (snd gri |> Seq.head).CoilOrigin
@@ -128,7 +128,8 @@ module internal XgiFile =
                 let sub = getXGIMaxX x exp
                 maxX <- max maxX sub
             maxX
-        | _ ->   failwithlog "Unknown FlatExpression case"
+        | _ ->
+            failwithlog "Unknown FlatExpression case"
 
 
     type RungGenerationInfo = {
@@ -139,8 +140,8 @@ module internal XgiFile =
     /// (조건=coil) seq 로부터 rung xml 들의 string 을 생성
     let private generateRungs (prologComments:string seq) (commentedStatements:CommentedStatement seq) : XmlOutput =
         let xmlRung (expr:FlatExpression) xgiCommand y : RungGenerationInfo=
-            let xml, y' = rung 0 y expr xgiCommand
-            { Xmls = [$"\t<Rung BlockMask={dq}0{dq}>\r\n{xml}\t</Rung>"]; Y = y'}
+            let {Position=posi; Xml=xml} = rung 0 y expr xgiCommand
+            { Xmls = [$"\t<Rung BlockMask={dq}0{dq}>\r\n{xml}\t</Rung>"]; Y = posi}
 
         let mutable rgi:RungGenerationInfo = {Xmls = []; Y = 0}
 
@@ -169,16 +170,11 @@ module internal XgiFile =
 
             // <kwak> <timer>
             | DuTimer timerStatement ->
-                let rungin = timerStatement.RungInCondition.Value :?> Expression<bool>
-                let xxxTag =
-                    match rungin with
-                    | DuTerminal(DuTag t) -> t
-                    | _ -> failwith "ERROR"
-                // todo: TimerMode 에서 EN, Preset, option<DN> 을 받아야 한다.
-                // EN 은 단일 terminal 이 아니라, expression 을 받아야 한다.
+                let rungin = timerStatement.RungInCondition.Value :> IExpression
+                let rungin = rungin.Flatten() :?> FlatExpression
+
                 let command:XgiCommand = FunctionBlockCmd(TimerMode(timerStatement)) |> XgiCommand
-                let flatExpr = FlatTerminal (xxxTag, false, false)
-                let rgiSub = xmlRung flatExpr command rgi.Y
+                let rgiSub = xmlRung rungin command rgi.Y
                 rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
 
             | ( DuCounter _ | DuCopy _ ) ->
@@ -276,11 +272,9 @@ module internal XgiFile =
         (*
          * Rung 삽입
          *)
-        let rungsXml = sprintf "<Rungs>%s</Rungs>" rungs |> DsXml.xmlToXmlNode
-        rungsXml
-        |> DsXml.getChildNodes
-        |> iter (fun r -> DsXml.insertBeforeUnit r onlineUploadData)
-        //tracefn "%s" posiLdRoutine.OuterXml
+        let rungsXml = $"<Rungs>{rungs}</Rungs>" |> DsXml.xmlToXmlNode
+        for r in DsXml.getChildNodes rungsXml do
+            DsXml.insertBeforeUnit r onlineUploadData
 
         (*
          * Local variables 삽입
@@ -403,14 +397,8 @@ module internal XgiFile =
                     |? Seq.empty
                     |> Seq.filter (fun t -> t.StartsWith("%M"))
                     |> Seq.bind (fun t -> toChunk t 10)
-                let tagsUsedInTags =
-                    tags
-                    |> Seq.map (fun t -> t.Address)
-                    |> Set.ofSeq
-                let tagsUnusedInTags =
-                    unusedTags
-                    |> Seq.map(fun t -> t.Address)
-                    |> Set.ofSeq
+                let tagsUsedInTags = [ for t in tags -> t.Address ] |> Set
+                let tagsUnusedInTags = [ for t in unusedTags -> t.Address] |> Set
                 tagsUsedInFiles @ tagsUsedInTags @ tagsUnusedInTags
 
             alreadyAllocatedAddresses |> iter (fun t -> manager.MarkAllocated(t))
@@ -494,14 +482,17 @@ module internal XgiFile =
                 //    | _-> Variable.Kind.VAR_EXTERNAL
 
                 XGITag.createSymbol name comment device ((int)kind) addr plcType -1 "" //Todo : XGK 일경우 DevicePos, IEC Address 정보 필요
-                ) |> Seq.toList
+            ) |> Seq.toList
 
         /// Symbol table 정의 XML 문자열
         let symbolsLocalXml = XGITag.generateSymbolVars (symbolInfos, false)
 
-        let globalSym = symbolInfos
-                        |> Seq.filter(fun w -> not (w.Device.IsNullOrEmpty()))
-                        |> Seq.map (fun s -> XGITag.copyLocal2GlobalSymbol s)
+        let globalSym =
+            [
+                for s in symbolInfos do
+                    if not (s.Device.IsNullOrEmpty()) then
+                        XGITag.copyLocal2GlobalSymbol s
+            ]
 
         let symbolsGlobalXml = XGITag.generateSymbolVars (globalSym, true)
 

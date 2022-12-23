@@ -14,14 +14,14 @@ module internal Basic =
 
 
     type RungInfoWithNextPosition = {
-        RungInfos:PositinedRungXml list
+        RungInfos:PositionedRungXml list
         NextX: int
         NextY: int
         VLineUpRightMaxY: int
     }
     /// Flat expression 을 논리 Cell 좌표계 x y 에서 시작하는 rung 를 작성한다.
     /// xml 및 다음 y 좌표 반환
-    let rung x y expr (cmdExp:XgiCommand) : string * int =
+    let rung x y expr (cmdExp:XgiCommand) : PositionedRungXml =
 
 
         /// x y 위치에서 expression 표현하기 위한 정보 반환
@@ -29,12 +29,11 @@ module internal Basic =
         /// - Xml : 좌표 * 결과 xml 문자열
         /// - NextX : 다음 element 의 시작 x 위치
         /// - VLineUpRightMaxY : 수직 라인을 그을 때, 우측 최상단 종점의 y 좌표
-        let mutable addNextY = 0
         let rec rng x y (expr:FlatExpression) =
 
             let c = coord x y
             /// 좌표 * 결과 xml 문자열 보관 장소
-            let rungInfos = ResizeArray<PositinedRungXml>()
+            let rungInfos = ResizeArray<PositionedRungXml>()
             { Position = c; Xml = $"<!-- {x} {y} {expr.ToText()} -->" } |> rungInfos.Add
 
             match expr with
@@ -118,41 +117,48 @@ module internal Basic =
 
         let result = rng (x+indent) y expr
         /// 좌표 * xml 결과 문자열
-        let cXml =
-            seq {
-                yield! result.RungInfos
-                if indent = 1 then
-                    assert(false)   // indent 가 필요하면, 사용할 코드.  현재는 indent 0 으로 fix
-                    let c = coord x y
-                    { Position = c; Xml = elementFull (int ElementType.MultiHorzLineMode) c "Param=\"0\"" "" }
+        let positionedRungXmls, newY =
+            let mutable newPositionY = 0
+            let posiRunXmls =
+                [
+                    yield! result.RungInfos
 
-                let drawCoil(x, y) =
-                    let lengthParam =
-                        let param = 3 * (coilCellX-x-2)
-                        $"Param={dq}{param}{dq}"
-                    let results = [
-                        let c = coord (x+1) y
-                        { Position = c; Xml = elementFull (int ElementType.MultiHorzLineMode) c lengthParam "" }
-                        let c = coord coilCellX y
-                        { Position = c; Xml = elementBody (int cmdExp.LDEnum) c (cmdExp.CoilTerminalTag.PLCTagName) }
-                    ]
-                    0, results
+                    if indent = 1 then
+                        assert(false)   // indent 가 필요하면, 사용할 코드.  현재는 indent 0 으로 fix
+                        let c = coord x y
+                        { Position = c; Xml = elementFull (int ElementType.MultiHorzLineMode) c "Param=\"0\"" "" }
 
-                let nx = result.NextX
-                let newY, result =
-                    match cmdExp.CommandType with
-                    | CoilCmd (cc) -> drawCoil(nx, y)
-                    | FunctionCmd (fc) -> drawCommand(cmdExp, nx, y)
-                    | FunctionBlockCmd (fbc) -> drawCommand(cmdExp, nx, y)
+                    let drawCoil(x, y) =
+                        let lengthParam =
+                            let param = 3 * (coilCellX-x-2)
+                            $"Param={dq}{param}{dq}"
+                        let results = [
+                            let c = coord (x+1) y
+                            { Position = c; Xml = elementFull (int ElementType.MultiHorzLineMode) c lengthParam "" }
+                            let c = coord coilCellX y
+                            { Position = c; Xml = elementBody (int cmdExp.LDEnum) c (cmdExp.CoilTerminalTag.PLCTagName) }
+                        ]
+                        0, results
 
-                addNextY <- newY; yield! result
-            }
+                    let nx = result.NextX
+                    let newY, posiRungXmls =
+                        match cmdExp.CommandType with
+                        | CoilCmd (cc) ->
+                            drawCoil(nx, y)
+                        | ( FunctionCmd _ | FunctionBlockCmd _ )
+                            -> drawCommand(cmdExp, nx, y)
+
+                    yield! posiRungXmls
+                    newPositionY <- newY
+                ]
+            posiRunXmls, newPositionY
+
 
         let xml =
-            cXml
+            positionedRungXmls
                 |> Seq.sortBy (fun ri -> ri.Position)   // fst
                 |> Seq.map (fun ri -> ri.Xml)  //snd
                 |> String.concat "\r\n"
 
-        xml, result.NextY + addNextY
+        { Xml = xml; Position = result.NextY + newY }
 

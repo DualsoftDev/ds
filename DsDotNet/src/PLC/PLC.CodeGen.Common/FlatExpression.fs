@@ -73,12 +73,12 @@ module FlatExpressionModule =
     //type IExpression with
     //    member x.Flatten() =
     //        match x with
-    type Statement with
-        member x.Flatten() =
-            match x with
-            | DuAssign (expr, target) -> ()
-            | DuVarDecl (expr, target) -> ()
-            | DuTimer timerStatement -> ()
-            | DuCounter counterStatement -> ()
-            | DuCopy (condition, source, target) -> ()
+    //type Statement with
+    //    member x.Flatten() =
+    //        match x with
+    //        | DuAssign (expr, target) -> ()
+    //        | DuVarDecl (expr, target) -> ()
+    //        | DuTimer timerStatement -> ()
+    //        | DuCounter counterStatement -> ()
+    //        | DuCopy (condition, source, target) -> ()
 

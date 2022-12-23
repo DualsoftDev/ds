@@ -130,7 +130,6 @@ module internal XgiFile =
         | _ ->   failwithlog "Unknown FlatExpression case"
 
 
-    type XmlOutput = string
     type RungGenerationInfo = {
         Xmls: XmlOutput list   // Rung 별 누적 xml.  역순으로 추가.  꺼낼 때 뒤집어야..
         Y: int }
@@ -139,7 +138,6 @@ module internal XgiFile =
     /// (조건=coil) seq 로부터 rung xml 들의 string 을 생성
     let private generateRungs (prologComments:string seq) (commentedStatements:CommentedStatement seq) : XmlOutput =
         let xmlRung (expr:FlatExpression) xgiCommand y : RungGenerationInfo=
-            let dq = "\""
             let xml, y' = rung 0 y expr xgiCommand
             { Xmls = [$"\t<Rung BlockMask={dq}0{dq}>\r\n{xml}\t</Rung>"]; Y = y'}
 

@@ -167,14 +167,16 @@ module internal XgiFile =
                 let rgiSub = xmlRung flatExpr command rgi.Y
                 rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
 
-            // <kwak>
+            // <kwak> <timer>
             | DuTimer timerStatement ->
                 let rungin = timerStatement.RungInCondition.Value :?> Expression<bool>
                 let xxxTag =
                     match rungin with
                     | DuTerminal(DuTag t) -> t
                     | _ -> failwith "ERROR"
-                let command:XgiCommand = FunctionBlockCmd(TimerMode(xxxTag, 100)) |> XgiCommand
+                // todo: TimerMode 에서 EN, Preset, option<DN> 을 받아야 한다.
+                // EN 은 단일 terminal 이 아니라, expression 을 받아야 한다.
+                let command:XgiCommand = FunctionBlockCmd(TimerMode(timerStatement)) |> XgiCommand
                 let flatExpr = FlatTerminal (xxxTag, false, false)
                 let rgiSub = xmlRung flatExpr command rgi.Y
                 rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}

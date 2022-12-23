@@ -29,7 +29,7 @@ module internal Command =
             match cmdType with
             | FunctionBlockCmd (fbc) ->
                 match fbc with
-                | TimerMode(tag, time) -> fbc.GetInstanceText(), VarType.TON
+                | TimerMode(_) -> fbc.GetInstanceText(), VarType.TON
                 | CounterMode(tag, resetTag, count) -> fbc.GetInstanceText(), VarType.CTU_INT
             |_-> failwithlog "do not make instanceTag"
 
@@ -63,7 +63,7 @@ module internal Command =
     let createOutputPulse(tag)   = XgiCommand(CoilCmd(CoilOutput.PulseCoilMode(tag)))
     let createOutputNPulse(tag)  = XgiCommand(CoilCmd(CoilOutput.NPulseCoilMode(tag)))
 
-    let createOutputTime(tag, time)  = XgiCommand(FunctionBlockCmd(FunctionBlock.TimerMode(tag, time)))
+    //let createOutputTime(tag, time)  = XgiCommand(FunctionBlockCmd(FunctionBlock.TimerMode(tag, time)))
     let createOutputCount(tag, resetTag, cnt)  = XgiCommand(FunctionBlockCmd(FunctionBlock.CounterMode(tag, resetTag, cnt)))
     let createOutputCopy(tag, tagA, tagB) = XgiCommand(FunctionCmd(FunctionPure.CopyMode(tag, (tagA, tagB))))
     let createOutputAdd(tag, targetTag, addValue:int) = XgiCommand(FunctionCmd(FunctionPure.Add(tag, targetTag, addValue)))
@@ -77,7 +77,10 @@ module internal Command =
         | LT -> XgiCommand(FunctionCmd(FunctionPure.CompareLT(tag, (tagA, tagB))))
         | NE -> XgiCommand(FunctionCmd(FunctionPure.CompareNE(tag, (tagA, tagB))))
 
-    let drawCmdTime(coil:IExpressionTerminal, time:int, x, y) =
+    // <timer>
+    let drawCmdTime(timerStatement:TimerStatement, x, y) =
+        let time:int = int timerStatement.Timer.PRE.Value
+        //let coil:IExpressionTerminal =
         let funcSizeY = 3
         //Command 속성입력
         funcSizeY-1, [createPA (sprintf "T#%dMS" time) (x-1) (y+1)]
@@ -208,7 +211,7 @@ module internal Command =
             | FunctionBlockCmd (fbc) ->
                 results.AddRange(drawFunctionBlockInstance(cmd, newX, y)) //Command 객체생성
                 match fbc with
-                | TimerMode(cmdCoil, time) -> drawCmdTime(cmdCoil,  time, newX, y)
+                | TimerMode(timerStatement) -> drawCmdTime(timerStatement, newX, y)     // <timer>
                 | CounterMode(cmdCoil, resetTag, count) -> drawCmdCount(cmdCoil, resetTag, count, newX, y)
             |_-> failwithlog "Unknown CommandType"
 

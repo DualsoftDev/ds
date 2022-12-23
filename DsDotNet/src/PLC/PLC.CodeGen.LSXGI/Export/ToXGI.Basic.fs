@@ -14,7 +14,7 @@ module internal Basic =
 
 
     type RungInfoWithNextPosition = {
-        Xml:RungInfo list
+        RungInfos:RungInfo list
         NextX: int
         NextY: int
         VLineUpRightMaxY: int
@@ -34,8 +34,8 @@ module internal Basic =
 
             let c = coord x y
             /// 좌표 * 결과 xml 문자열 보관 장소
-            let xml = ResizeArray<RungInfo>()
-            { Position = c; Xml = $"<!-- {x} {y} {expr.ToText()} -->" } |> xml.Add
+            let rungInfos = ResizeArray<RungInfo>()
+            { Position = c; Xml = $"<!-- {x} {y} {expr.ToText()} -->" } |> rungInfos.Add
 
             match expr with
             | FlatTerminal(id, pulse, neg) ->
@@ -47,7 +47,7 @@ module internal Basic =
                     | false, false  -> ElementType.ContactMode
                     |> int
                 let str = elementBody mode c (id.PLCTagName)
-                { Xml= [{ Position = c; Xml = str}]; NextX=x; NextY=y; VLineUpRightMaxY=y }
+                { RungInfos = [{ Position = c; Xml = str}]; NextX=x; NextY=y; VLineUpRightMaxY=y }
 
             | FlatNary(And, exprs) ->
                 let mutable sx = x
@@ -56,9 +56,9 @@ module internal Basic =
                     let sub = rng sx y exp
                     sx <- sub.NextX + 1
                     maxY <- max maxY sub.NextY
-                    xml.AddRange(sub.Xml)
+                    rungInfos.AddRange(sub.RungInfos)
                 sx <- sx - 1    // for loop 에서 마지막 +1 된 것 revert
-                { Xml=xml.ToFSharpList(); NextX=sx; NextY=maxY; VLineUpRightMaxY=maxY }
+                { RungInfos=rungInfos.ToFSharpList(); NextX=sx; NextY=maxY; VLineUpRightMaxY=maxY }
 
             | FlatNary(Or, exprs) ->
                 let mutable sy = y
@@ -72,7 +72,7 @@ module internal Basic =
                     sy <- sub.NextY + 1
                     vLineUpMaxY <- max vLineUpMaxY sub.VLineUpRightMaxY
                     maxX <- max maxX sub.NextX
-                    xml.AddRange(sub.Xml)
+                    rungInfos.AddRange(sub.RungInfos)
 
                 sy <- sy - 1    // for loop 에서 마지막 +1 된 것 revert
 
@@ -85,29 +85,29 @@ module internal Basic =
                         let mode = int ElementType.MultiHorzLineMode
                         let c = coord x y
                         { Position = c; Xml = elementFull mode c param "" })
-                    |> xml.AddRange
+                    |> rungInfos.AddRange
 
                 // 좌측 vertical lines
-                vlineDownTo (x-1) y (sy-y) |> xml.AddRange
+                vlineDownTo (x-1) y (sy-y) |> rungInfos.AddRange
 
                 // 우측 vertical lines
-                vlineDownTo maxX y (vLineUpMaxY-y) |> xml.AddRange
+                vlineDownTo maxX y (vLineUpMaxY-y) |> rungInfos.AddRange
 
-                { Xml=xml.ToFSharpList(); NextX=maxX; NextY=sy; VLineUpRightMaxY=y }
+                { RungInfos=rungInfos.ToFSharpList(); NextX=maxX; NextY=sy; VLineUpRightMaxY=y }
 
 
             // terminal case
-            | FlatNary(OpUnit, expr::[]) ->
-                expr |> rng x y
+            | FlatNary(OpUnit, inner::[]) ->
+                inner |> rng x y
 
             // negation 없애기
-            | FlatNary(Neg, expr::[]) ->
-                FlatNary(OpUnit, [expr.Negate()]) |> rng x y
+            | FlatNary(Neg, inner::[]) ->
+                let xxx = inner.Negate()
+                FlatNary(OpUnit, [inner.Negate()]) |> rng x y
 
             | FlatZero ->
                 let str = hlineEmpty c
-                { Xml=[{ Position = c; Xml = str}]; NextX=x; NextY=y; VLineUpRightMaxY=y }
-                //{ Xml= [{ Position = c; Xml = str}]; NextX=x; NextY=y; VLineUpRightMaxY=y }
+                { RungInfos=[{ Position = c; Xml = str}]; NextX=x; NextY=y; VLineUpRightMaxY=y }
 
             | _ ->
                 failwithlog "Unknown FlatExpression case"
@@ -120,7 +120,7 @@ module internal Basic =
         /// 좌표 * xml 결과 문자열
         let cXml =
             seq {
-                yield! result.Xml
+                yield! result.RungInfos
                 if indent = 1 then
                     assert(false)   // indent 가 필요하면, 사용할 코드.  현재는 indent 0 으로 fix
                     let c = coord x y

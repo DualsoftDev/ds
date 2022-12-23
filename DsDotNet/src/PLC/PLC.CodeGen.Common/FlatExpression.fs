@@ -48,6 +48,12 @@ module FlatExpressionModule =
         member x.Negate() =
             match x with
             | FlatTerminal(value, pulse, neg) -> FlatTerminal(value, pulse, not neg)
+            | FlatNary(op, FlatTerminal(t, p, n)::[]) when op = Neg || op = OpUnit ->
+                let negated = if op = Neg then n else not n
+                FlatTerminal(t, p, negated)
+
+            | FlatNary(op, FlatTerminal(t, p, n)::[]) -> failwith "ERROR"
+
             | FlatNary(op, terms) ->
                 let opNeg = op.Negate()
                 let termsNeg = terms |> map (fun t -> t.Negate())

@@ -11,6 +11,7 @@ open Engine.Core
 open Engine.Common.FS
 open PLC.CodeGen.Common.QGraph
 open PLC.CodeGen.LSXGI
+open PLC.CodeGen.Common.FlatExpressionModule
 
 
 //[<AutoOpen>]
@@ -145,7 +146,49 @@ open PLC.CodeGen.LSXGI
             ()
 
         [<Test>]
-        member __.``XX Negation3 test`` () =
+        member __.``Atomic Negation test`` () =
+            let myTagA = PlcTag("tag0", "%IX0.0.0", false)
+            let myTagB = PlcTag("tag1", "%IX0.0.1", false)
+            let pulse, negated = false, false
+            let flatTerminal = FlatTerminal(myTagA, pulse, negated)
+            let negatedFlatTerminal = flatTerminal.Negate()
+            match negatedFlatTerminal with
+            | FlatTerminal(t, p, n) -> n === true
+            | _ -> failwith "ERROR"
+
+            (* ! (A & B) === ! A || ! B) test *)
+            let expAnd = FlatNary(And, [FlatTerminal(myTagA, pulse, negated); FlatTerminal(myTagB, pulse, negated)])
+            let negatedAnd = expAnd.Negate()
+            match negatedAnd with
+            | FlatNary(Or, [FlatTerminal(_, _, negated1); FlatTerminal(_, _, negated2)]) ->
+                negated1 === true
+                negated2 === true
+            | _ -> failwith "ERROR"
+
+
+            (* ! (! A & B) === A || ! B) test *)
+            let expAnd = FlatNary(And, [FlatTerminal(myTagA, pulse, true); FlatTerminal(myTagB, pulse, negated)])
+            let negatedAnd = expAnd.Negate()
+            match negatedAnd with
+            | FlatNary(Or, [FlatTerminal(_, _, negated1); FlatTerminal(_, _, negated2)]) ->
+                negated1 === false
+                negated2 === true
+            | _ -> failwith "ERROR"
+
+
+            (* ! (! A & B) === A || ! B) test *)
+            let expAnd = FlatNary(And, [FlatNary(Neg, [FlatTerminal(myTagA, false, false)]); FlatTerminal(myTagB, false, false)])
+            let negatedAnd = expAnd.Negate()
+            match negatedAnd with
+            | FlatNary(Or, [FlatTerminal(_, _, negated1); FlatTerminal(_, _, negated2)]) ->
+                negated1 === false
+                negated2 === true
+            | _ -> failwith "ERROR"
+
+            ()
+
+        [<Test>]
+        member __.``Negation3 test`` () =
             let storages = Storages()
             let code = """
                 bool myBit00 = createTag("%IX0.0.0", false);

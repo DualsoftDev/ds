@@ -11,6 +11,7 @@ open Engine.Common.FS
 open PLC.CodeGen.Common.QGraph
 open PLC.CodeGen.LSXGI
 open PLC.CodeGen.Common.FlatExpressionModule
+open System.Globalization
 
 //[<AutoOpen>]
 //module XGI =
@@ -34,7 +35,7 @@ open PLC.CodeGen.Common.FlatExpressionModule
         let saveTestResult testFunctionName xml =
             File.WriteAllText($@"{xmlDir}\{testFunctionName}.xml", xml)
             let answerXml = File.ReadAllText($@"{xmlAnswerDir}\{testFunctionName}.xml")
-            answerXml === xml
+            System.String.Compare(answerXml, xml, CultureInfo.CurrentCulture, CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols) === 0
 
         (* 테스트 수행 후, XG5000 에서 Project > Open project 를 누르고, outputFile 을 지정하여 open 한다.
             XG5000 의 project 탐색 창의 Scan Program / DsLogic / Program 을 double click 하여 생성된 rung 을 육안 검사한다.
